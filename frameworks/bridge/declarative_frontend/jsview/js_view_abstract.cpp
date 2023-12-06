@@ -2816,6 +2816,67 @@ void JSViewAbstract::ParseMarginOrPaddingCorner(JSRef<JSObject> obj, std::option
     }
 }
 
+void JSViewAbstract::JsOutline(const JSCallbackInfo& info)
+{
+    std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::OBJECT };
+    if (!CheckJSCallbackInfo("JsOutline", info, checkList)) {
+        CalcDimension borderWidth;
+        ViewAbstractModel::GetInstance()->SetOuterBorderWidth(borderWidth);
+        ViewAbstractModel::GetInstance()->SetOuterBorderColor(Color::BLACK);
+        ViewAbstractModel::GetInstance()->SetOuterBorderRadius(borderWidth);
+        ViewAbstractModel::GetInstance()->SetOuterBorderStyle(BorderStyle::SOLID);
+        return;
+    }
+    JSRef<JSObject> object = JSRef<JSObject>::Cast(info[0]);
+    auto valueOuterWidth = object->GetProperty("width");
+    if (!valueOuterWidth->IsUndefined()) {
+        ParseOuterBorderWidth(valueOuterWidth);
+    }
+
+    // use default value when undefined.
+    ParseOuterBorderColor(object->GetProperty("color"));
+
+    auto valueOuterRadius = object->GetProperty("radius");
+    if (!valueOuterRadius->IsUndefined()) {
+        ParseOuterBorderRadius(valueOuterRadius);
+    }
+    // use default value when undefined.
+    ParseOuterBorderStyle(object->GetProperty("style"));
+    info.ReturnSelf();
+}
+
+void JSViewAbstract::JsOutlineWidth(const JSCallbackInfo& info)
+{
+    std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::STRING, JSCallbackInfoType::NUMBER,
+        JSCallbackInfoType::OBJECT };
+    if (!CheckJSCallbackInfo("JsOutlineWidth", info, checkList)) {
+        ViewAbstractModel::GetInstance()->SetOuterBorderWidth({});
+        return;
+    }
+    ParseOuterBorderWidth(info[0]);
+}
+
+void JSViewAbstract::JsOutlineColor(const JSCallbackInfo& info)
+{
+    ParseOuterBorderColor(info[0]);
+}
+
+void JSViewAbstract::JsOutlineRadius(const JSCallbackInfo& info)
+{
+    std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::STRING, JSCallbackInfoType::NUMBER,
+        JSCallbackInfoType::OBJECT };
+    if (!CheckJSCallbackInfo("JsOutlineRadius", info, checkList)) {
+        ViewAbstractModel::GetInstance()->SetOuterBorderRadius({});
+        return;
+    }
+    ParseOuterBorderRadius(info[0]);
+}
+
+void JSViewAbstract::JsOutlineStyle(const JSCallbackInfo& info)
+{
+    ParseOuterBorderStyle(info[0]);
+}
+
 void JSViewAbstract::JsBorder(const JSCallbackInfo& info)
 {
     std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::OBJECT };
@@ -2827,34 +2888,8 @@ void JSViewAbstract::JsBorder(const JSCallbackInfo& info)
         ViewAbstractModel::GetInstance()->SetBorderStyle(BorderStyle::SOLID);
         return;
     }
-    JSRef<JSObject> object;
-    JSRef<JSObject> outerObject;
-    if (info[0]->IsArray()) {
-        JSRef<JSArray> infoArray = JSRef<JSArray>::Cast(info[0]);
-        if ((infoArray->Length()) > 0) {
-            object = JSRef<JSObject>::Cast(infoArray->GetValueAt(0));
-        }
-        if ((infoArray->Length()) > 1) {
-            outerObject = JSRef<JSObject>::Cast(infoArray->GetValueAt(1));
-            auto valueOuterWidth = outerObject->GetProperty("width");
-            if (!valueOuterWidth->IsUndefined()) {
-                ParseOuterBorderWidth(valueOuterWidth);
-            }
-
-            // use default value when undefined.
-            ParseOuterBorderColor(outerObject->GetProperty("color"));
-
-            auto valueOuterRadius = outerObject->GetProperty("radius");
-            if (!valueOuterRadius->IsUndefined()) {
-                ParseOuterBorderRadius(valueOuterRadius);
-            }
-            // use default value when undefined.
-            ParseOuterBorderStyle(outerObject->GetProperty("style"));
-        }
-    } else {
-        object = JSRef<JSObject>::Cast(info[0]);
-    }
-
+    JSRef<JSObject> object = JSRef<JSObject>::Cast(info[0]);
+    
     auto valueWidth = object->GetProperty("width");
     if (!valueWidth->IsUndefined()) {
         ParseBorderWidth(valueWidth);
@@ -6148,6 +6183,11 @@ void JSViewAbstract::JSBind(BindingTarget globalObj)
     JSClass<JSViewAbstract>::StaticMethod("lightUpEffect", &JSViewAbstract::JsLightUpEffect);
     JSClass<JSViewAbstract>::StaticMethod("sphericalEffect", &JSViewAbstract::JsSphericalEffect);
     JSClass<JSViewAbstract>::StaticMethod("pixelStretchEffect", &JSViewAbstract::JsPixelStretchEffect);
+    JSClass<JSViewAbstract>::StaticMethod("outline", &JSViewAbstract::JsOutline);
+    JSClass<JSViewAbstract>::StaticMethod("outlineWidth", &JSViewAbstract::JsOutlineWidth);
+    JSClass<JSViewAbstract>::StaticMethod("outlineStyle", &JSViewAbstract::JsOutlineStyle);
+    JSClass<JSViewAbstract>::StaticMethod("outlineColor", &JSViewAbstract::JsOutlineColor);
+    JSClass<JSViewAbstract>::StaticMethod("outlineRadius", &JSViewAbstract::JsOutlineRadius);
     JSClass<JSViewAbstract>::StaticMethod("border", &JSViewAbstract::JsBorder);
     JSClass<JSViewAbstract>::StaticMethod("borderWidth", &JSViewAbstract::JsBorderWidth);
     JSClass<JSViewAbstract>::StaticMethod("borderColor", &JSViewAbstract::JsBorderColor);

@@ -2098,3 +2098,10 @@ var DragPreviewMode;
   DragPreviewMode["AUTO"] = 1;
   DragPreviewMode["DISABLE_SCALE"] = 2;
 })(DragPreviewMode || (DragPreviewMode = {}));
+
+var OutlineStyle;
+(function (OutlineStyle) {
+  OutlineStyle[OutlineStyle["SOLID"] = 0] = "SOLID";
+  OutlineStyle[OutlineStyle["DASHED"] = 1] = "DASHED";
+  OutlineStyle[OutlineStyle["DOTTED"] = 2] = "DOTTED";
+})(OutlineStyle || (OutlineStyle = {}));

@@ -137,6 +137,11 @@ public:
     static void ParseMarginOrPadding(const JSCallbackInfo& info, bool isMargin);
     static void ParseMarginOrPaddingCorner(JSRef<JSObject> obj, std::optional<CalcDimension>& top,
         std::optional<CalcDimension>& bottom, std::optional<CalcDimension>& left, std::optional<CalcDimension>& right);
+    static void JsOutline(const JSCallbackInfo& info);
+    static void JsOutlineWidth(const JSCallbackInfo& info);
+    static void JsOutlineColor(const JSCallbackInfo& info);
+    static void JsOutlineStyle(const JSCallbackInfo& info);
+    static void JsOutlineRadius(const JSCallbackInfo& info);
     static void JsBorder(const JSCallbackInfo& info);
     static void JsBorderWidth(const JSCallbackInfo& info);
     static void ParseBorderWidth(const JSRef<JSVal>& args);
