@@ -408,21 +408,13 @@ HWTEST_F(AppBarTestNg, AtomicServicePattern001, TestSize.Level1)
      * @tc.expected: appBar is not null.
      */
     auto atomic = AceType::MakeRefPtr<AtomicServicePattern>();
-    CHECK_NULL_VOID(atomic);
     auto host = atomic->GetHost();
-    CHECK_NULL_VOID(host);
     auto rowChild = host->GetFirstChild();
-    CHECK_NULL_VOID(rowChild);
     auto labelChild = AccessibilityManager::DynamicCast<FrameNode>(rowChild->GetChildAtIndex(1));
-    CHECK_NULL_VOID(labelChild);
     auto textLayoutProperty = labelChild->GetLayoutProperty<TextLayoutProperty>();
-    CHECK_NULL_VOID(textLayoutProperty);
     auto pipelineContext = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipelineContext);
     auto themeManager = pipelineContext->GetThemeManager();
-    CHECK_NULL_VOID(themeManager);
     auto themeConstants = themeManager->GetThemeConstants();
-    CHECK_NULL_VOID(themeConstants);
     /**
      * @tc.steps: step1. Calling the OnLanguageConfiguration Update interface
      * @tc.expected:Judging equality
@@ -483,9 +475,7 @@ HWTEST_F(AppBarTestNg, BuildFaButton003, TestSize.Level1)
     auto appBarRow = FrameNode::CreateFrameNode(V2::APP_BAR_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         AceType::MakeRefPtr<LinearLayoutPattern>(false));
     auto layoutProperty = appBarRow->GetLayoutProperty<LinearLayoutProperty>();
-    CHECK_NULL_VOID(layoutProperty);
     auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
 
     auto stage = AceType::MakeRefPtr<FrameNode>(V2::NAVIGATION_VIEW_ETS_TAG, 1, AceType::MakeRefPtr<StagePattern>());
     auto atom = AppBarView::Create(stage);
