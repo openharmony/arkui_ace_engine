@@ -1312,26 +1312,108 @@ class ObscuredModifier extends Modifier<ArkObscured> {
   }
 }
 
-class MouseResponseRegionModifier extends Modifier<ArkResponseRegion> {
+class MouseResponseRegionModifier extends ModifierWithKey<Array<Rectangle> | Rectangle> {
   static identity = Symbol("mouseResponseRegion");
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
       GetUINativeModule().common.resetMouseResponseRegion(node);
     }
     else {
-      GetUINativeModule().common.setMouseResponseRegion(node, this.value.responseRegion);
+      let responseRegion: (number | string | Resource)[] = [];
+      if (Array.isArray(this.value)) {
+        for (let i = 0; i < this.value.length; i++) {
+          responseRegion.push(this.value[i].x ?? 'PLACEHOLDER');
+          responseRegion.push(this.value[i].y ?? 'PLACEHOLDER');
+          responseRegion.push(this.value[i].width ?? 'PLACEHOLDER');
+          responseRegion.push(this.value[i].height ?? 'PLACEHOLDER');
+        }
+      } else {
+        responseRegion.push(this.value.x ?? 'PLACEHOLDER');
+        responseRegion.push(this.value.y ?? 'PLACEHOLDER');
+        responseRegion.push(this.value.width ?? 'PLACEHOLDER');
+        responseRegion.push(this.value.height ?? 'PLACEHOLDER');
+      }
+      GetUINativeModule().common.setMouseResponseRegion(node, responseRegion, responseRegion.length);
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    if (Array.isArray(this.value) && Array.isArray(this.stageValue)) {
+      if (this.value.length !== this.stageValue.length) {
+        return true;
+      } else {
+        for (let i = 0; i < this.value.length; i++) {
+          if (!(isBaseOrResourceEqual(this.stageValue[i].x, this.value[i].x) &&
+            isBaseOrResourceEqual(this.stageValue[i].y, this.value[i].y) &&
+            isBaseOrResourceEqual(this.stageValue[i].width, this.value[i].width) &&
+            isBaseOrResourceEqual(this.stageValue[i].height, this.value[i].height)
+          )) {
+            return true;
+          }
+        }
+        return false;
+      }
+    } else if (!Array.isArray(this.value) && !Array.isArray(this.stageValue)) {
+      return (!(isBaseOrResourceEqual(this.stageValue.x, this.value.x) &&
+        isBaseOrResourceEqual(this.stageValue.y, this.value.y) &&
+        isBaseOrResourceEqual(this.stageValue.width, this.value.width) &&
+        isBaseOrResourceEqual(this.stageValue.height, this.value.height)
+      ));
+    } else {
+      return false;
     }
   }
 }
 
-class ResponseRegionModifier extends Modifier<ArkResponseRegion> {
+class ResponseRegionModifier extends ModifierWithKey<Array<Rectangle> | Rectangle> {
   static identity = Symbol("responseRegion");
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
       GetUINativeModule().common.resetResponseRegion(node);
     }
     else {
-      GetUINativeModule().common.setResponseRegion(node, this.value.responseRegion);
+      let responseRegion: (number | string | Resource)[] = [];
+      if (Array.isArray(this.value)) {
+        for (let i = 0; i < this.value.length; i++) {
+          responseRegion.push(this.value[i].x ?? 'PLACEHOLDER');
+          responseRegion.push(this.value[i].y ?? 'PLACEHOLDER');
+          responseRegion.push(this.value[i].width ?? 'PLACEHOLDER');
+          responseRegion.push(this.value[i].height ?? 'PLACEHOLDER');
+        }
+      } else {
+        responseRegion.push(this.value.x ?? 'PLACEHOLDER');
+        responseRegion.push(this.value.y ?? 'PLACEHOLDER');
+        responseRegion.push(this.value.width ?? 'PLACEHOLDER');
+        responseRegion.push(this.value.height ?? 'PLACEHOLDER');
+      }
+      GetUINativeModule().common.setResponseRegion(node, responseRegion, responseRegion.length);
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    if (Array.isArray(this.value) && Array.isArray(this.stageValue)) {
+      if (this.value.length !== this.stageValue.length) {
+        return true;
+      } else {
+        for (let i = 0; i < this.value.length; i++) {
+          if (!(isBaseOrResourceEqual(this.stageValue[i].x, this.value[i].x) &&
+            isBaseOrResourceEqual(this.stageValue[i].y, this.value[i].y) &&
+            isBaseOrResourceEqual(this.stageValue[i].width, this.value[i].width) &&
+            isBaseOrResourceEqual(this.stageValue[i].height, this.value[i].height)
+          )) {
+            return true;
+          }
+        }
+        return false;
+      }
+    } else if (!Array.isArray(this.value) && !Array.isArray(this.stageValue)) {
+      return (!(isBaseOrResourceEqual(this.stageValue.x, this.value.x) &&
+        isBaseOrResourceEqual(this.stageValue.y, this.value.y) &&
+        isBaseOrResourceEqual(this.stageValue.width, this.value.width) &&
+        isBaseOrResourceEqual(this.stageValue.height, this.value.height)
+      ));
+    } else {
+      return false;
     }
   }
 }
@@ -1348,7 +1430,6 @@ class FlexGrowModifier extends ModifierWithKey<number> {
     return this.stageValue !== this.value;
   }
 }
-
 
 class FlexShrinkModifier extends ModifierWithKey<number> {
   static identity: Symbol = Symbol('flexShrink');
@@ -1681,22 +1762,14 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
   }
 
   responseRegion(value: Array<Rectangle> | Rectangle): this {
-    let arkResponseRegion = new ArkResponseRegion();
-    if (arkResponseRegion.parseRegionValue(value)) {
-      modifier(this._modifiers, ResponseRegionModifier, arkResponseRegion);
-    } else {
-      modifier(this._modifiers, ResponseRegionModifier, undefined);
-    }
+    modifierWithKey(this._modifiersWithKeys, ResponseRegionModifier.identity,
+      ResponseRegionModifier, value)
     return this;
   }
 
   mouseResponseRegion(value: Array<Rectangle> | Rectangle): this {
-    let arkMouseResponseRegion = new ArkResponseRegion();
-    if (arkMouseResponseRegion.parseRegionValue(value)) {
-      modifier(this._modifiers, MouseResponseRegionModifier, arkMouseResponseRegion);
-    } else {
-      modifier(this._modifiers, MouseResponseRegionModifier, undefined);
-    }
+    modifierWithKey(this._modifiersWithKeys, MouseResponseRegionModifier.identity,
+      MouseResponseRegionModifier, value)
     return this;
   }
 
