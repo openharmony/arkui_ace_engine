@@ -1122,4 +1122,28 @@ HWTEST_F(SelectPropertyTestNg, GetFontSizeTest001, TestSize.Level1)
     auto textLayoutProps = selectPattern->text_->GetLayoutProperty<TextLayoutProperty>();
     EXPECT_EQ(textLayoutProps->GetFontSize().value_or(selectTheme->GetFontSize()), selectPattern->GetFontSize());
 }
+
+/**
+ * @tc.name: SelectPadding001
+ * @tc.desc: Test Select Default padding
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectPropertyTestNg, SelectPadding001, TestSize.Level1)
+{
+    SelectModelNG selectModelInstance;
+
+    std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE } };
+    ViewStackProcessor::GetInstance()->StartGetAccessRecordingFor(100);
+    selectModelInstance.Create(params);
+
+    auto select = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(select, nullptr);
+    auto layoutProps = select->GetLayoutProperty();
+    ASSERT_NE(layoutProps, nullptr);
+    const auto& padding = layoutProps->GetPaddingProperty();
+    ASSERT_NE(padding, nullptr);
+    
+    EXPECT_EQ(padding->left.value().GetDimension().ConvertToVp(), 4.0);
+    EXPECT_EQ(padding->right.value().GetDimension().ConvertToVp(), 4.0);
+}
 } // namespace OHOS::Ace::NG
