@@ -22,6 +22,7 @@
 
 #include "extractor.h"
 #include "wm/wm_common.h"
+#include "dm/dm_common.h"
 
 #include "adapter/ohos/entrance/file_asset_provider.h"
 #include "adapter/ohos/entrance/file_asset_provider_impl.h"
@@ -126,5 +127,11 @@ NG::SafeAreaInsets ConvertAvoidArea(const OHOS::Rosen::AvoidArea& avoidArea)
         { avoidArea.topRect_.posY_, avoidArea.topRect_.posY_ + avoidArea.topRect_.height_ },
         { avoidArea.rightRect_.posX_, avoidArea.rightRect_.posX_ + avoidArea.rightRect_.width_ },
         { avoidArea.bottomRect_.posY_, avoidArea.bottomRect_.posY_ + avoidArea.bottomRect_.height_ });
+}
+
+Rect ConvertDMRect2Rect(const OHOS::Rosen::DMRect& displayAvailableRect)
+{
+    return Rect(displayAvailableRect.posX_, displayAvailableRect.posY_, displayAvailableRect.width_,
+        displayAvailableRect.height_);
 }
 } // namespace OHOS::Ace
