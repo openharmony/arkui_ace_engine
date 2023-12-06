@@ -490,6 +490,18 @@ bool ArkTSUtils::ParseAllBorder(const EcmaVM* vm, const Local<JSValueRef>& args,
     }
 }
 
+bool ArkTSUtils::ParseAllRadius(const EcmaVM* vm, const Local<JSValueRef>& args, CalcDimension& result)
+{
+    if (ParseJsDimensionVp(vm, args, result)) {
+        if (result.IsNegative()) {
+            result.Reset();
+        }
+        return true;
+    } else {
+        return false;
+    }
+}
+
 bool ArkTSUtils::ParseJsDimensionNG(const EcmaVM *vm, const Local<JSValueRef> &jsValue, CalcDimension &result,
     DimensionUnit defaultUnit, bool isSupportPercent)
 {

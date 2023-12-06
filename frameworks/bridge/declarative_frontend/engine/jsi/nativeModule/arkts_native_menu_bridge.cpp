@@ -110,10 +110,10 @@ ArkUINativeModuleValue MenuBridge::SetRadius(ArkUIRuntimeCallInfo* runtimeCallIn
     CalcDimension bottomLeft;
     CalcDimension bottomRight;
 
-    ArkTSUtils::ParseJsDimensionVp(vm, topLeftArgs, topLeft);
-    ArkTSUtils::ParseJsDimensionVp(vm, topRightArgs, topRight);
-    ArkTSUtils::ParseJsDimensionVp(vm, bottomLeftArgs, bottomLeft);
-    ArkTSUtils::ParseJsDimensionVp(vm, bottomRightArgs, bottomRight);
+    ArkTSUtils::ParseAllRadius(vm, topLeftArgs, topLeft);
+    ArkTSUtils::ParseAllRadius(vm, topRightArgs, topRight);
+    ArkTSUtils::ParseAllRadius(vm, bottomLeftArgs, bottomLeft);
+    ArkTSUtils::ParseAllRadius(vm, bottomRightArgs, bottomRight);
 
     uint32_t size = SIZE_OF_FOUR;
     double values[size];
