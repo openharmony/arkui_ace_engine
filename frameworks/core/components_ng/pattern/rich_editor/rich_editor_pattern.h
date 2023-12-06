@@ -329,6 +329,8 @@ public:
 
     bool IsShowSelectMenuUsingMouse();
 
+    void HandleOnCameraInput() override;
+
 private:
     void UpdateSelectMenuInfo(bool hasData, SelectOverlayInfo& selectInfo, bool isCopyAll)
     {
@@ -341,6 +343,13 @@ private:
         selectInfo.menuInfo.showCopyAll = !isCopyAll && hasValue;
         selectInfo.menuInfo.showPaste = hasData;
         selectInfo.menuInfo.menuIsShow = hasValue || hasData;
+        bool isSupportCameraInput = false;
+#if defined(ENABLE_STANDARD_INPUT)
+        auto inputMethod = MiscServices::InputMethodController::GetInstance();
+        isSupportCameraInput =
+            inputMethod && inputMethod->IsInputTypeSupported(MiscServices::InputType::CAMERA_INPUT);
+#endif
+        selectInfo.menuInfo.showCameraInput = !IsSelected() && isSupportCameraInput;
         selectMenuInfo_ = selectInfo.menuInfo;
     }
     void UpdateSelectionType(RichEditorSelection& selection);

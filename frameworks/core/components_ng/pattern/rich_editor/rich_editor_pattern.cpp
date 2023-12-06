@@ -4599,4 +4599,9 @@ bool RichEditorPattern::IsShowSelectMenuUsingMouse()
     CHECK_NULL_RETURN(selectOverlayManager, false);
     return selectOverlayManager->GetSelectOverlayInfo().isUsingMouse;
 }
+
+void RichEditorPattern::HandleOnCameraInput()
+{
+
+}
 } // namespace OHOS::Ace::NG
