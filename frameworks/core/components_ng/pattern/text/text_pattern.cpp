@@ -318,11 +318,28 @@ std::wstring TextPattern::GetWideText() const
 
 std::string TextPattern::GetSelectedText(int32_t start, int32_t end) const
 {
-    auto wideText = GetWideText();
-    auto min = std::clamp(std::max(std::min(start, end), 0), 0, static_cast<int32_t>(wideText.length()));
-    auto max = std::clamp(std::min(std::max(start, end), static_cast<int32_t>(wideText.length())), 0,
-        static_cast<int32_t>(wideText.length()));
-    return StringUtils::ToString(wideText.substr(min, max - min));
+    if (spans_.empty()) {
+        auto wideText = GetWideText();
+        auto min = std::clamp(std::max(std::min(start, end), 0), 0, static_cast<int32_t>(wideText.length()));
+        auto max = std::clamp(std::min(std::max(start, end), static_cast<int32_t>(wideText.length())), 0,
+            static_cast<int32_t>(wideText.length()));
+        return StringUtils::ToString(wideText.substr(min, max - min));
+    }
+    std::string value;
+    int32_t tag = 0;
+    for (const auto& span : spans_) {
+        if (span->position - 1 >= start && span->placeholderIndex == -1 && span->position != -1) {
+            auto wideString = StringUtils::ToWstring(span->GetSpanContent());
+            auto max = std::min(span->position, end);
+            auto min = std::max(start, tag);
+            value += StringUtils::ToString(wideString.substr(min - tag, max - min));
+        }
+        tag = span->position == -1 ? tag + 1 : span->position;
+        if (span->position >= end) {
+            break;
+        }
+    }
+    return value;
 }
 
 void TextPattern::HandleOnCopy()
@@ -1578,6 +1595,13 @@ void TextPattern::PreCreateLayoutWrapper()
     // mark content dirty
     if (contentMod_) {
         contentMod_->ContentChange();
+    }
+
+    auto paintProperty = GetPaintProperty<PaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+    auto flag = paintProperty->GetPropertyChangeFlag();
+    if (!CheckNeedMeasure(flag)) {
+        return;
     }
 
     imageCount_ = 0;
