@@ -587,24 +587,97 @@ class OverlayModifier extends ModifierWithKey<ArkOverlay> {
   }
 }
 
-class BorderImageModifier extends Modifier<ArkBorderImage> {
+class BorderImageModifier extends ModifierWithKey<BorderImageOption> {
   static identity: Symbol = Symbol("borderImage");
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
       GetUINativeModule().common.resetBorderImage(node);
     } else {
+      let sliceTop: Length | undefined = undefined;
+      let sliceRight: Length | undefined = undefined;
+      let sliceBottom: Length | undefined = undefined;
+      let sliceLeft: Length | undefined = undefined;
+      let repeat: RepeatMode | undefined = undefined;
+      let source: string | Resource | LinearGradient | undefined = undefined;
+      let sourceAngle: number | string | undefined = undefined;
+      let sourceDirection: GradientDirection | undefined = undefined;
+      let sourceColors: Array<any> | undefined = undefined;
+      let sourceRepeating: boolean | undefined = undefined;
+      let widthTop: Length | undefined = undefined;
+      let widthRight: Length | undefined = undefined;
+      let widthBottom: Length | undefined = undefined;
+      let widthLeft: Length | undefined = undefined;
+      let outsetTop: Length | undefined = undefined;
+      let outsetRight: Length | undefined = undefined;
+      let outsetBottom: Length | undefined = undefined;
+      let outsetLeft: Length | undefined = undefined;
+      let fill: boolean | undefined = undefined;
+
+      if (!isUndefined(this.value.slice)) {
+        if (isLengthType(this.value.slice) || isResource(this.value.slice)) {
+          let tmpSlice = this.value.slice as Length;
+          sliceTop = tmpSlice;
+          sliceRight = tmpSlice;
+          sliceBottom = tmpSlice;
+          sliceLeft = tmpSlice;
+        } else {
+          let tmpSlice = this.value.slice as EdgeWidths;
+          sliceTop = tmpSlice.top;
+          sliceRight = tmpSlice.right;
+          sliceBottom = tmpSlice.bottom;
+          sliceLeft = tmpSlice.left;
+        }
+      }
+      repeat = this.value.repeat;
+      if (!isUndefined(this.value.source)) {
+        if (isString(this.value.source) || isResource(this.value.source)) {
+          source = this.value.source;
+        } else {
+          let tmpSource = this.value.source as LinearGradient;
+          sourceAngle = tmpSource.angle;
+          sourceDirection = tmpSource.direction;
+          sourceColors = tmpSource.colors;
+          sourceRepeating = tmpSource.repeating;
+        }
+      }
+      if (!isUndefined(this.value.width)) {
+        if (isLengthType(this.value.width) || isResource(this.value.width)) {
+          let tmpWidth = this.value.width as Length;
+          widthTop = tmpWidth;
+          widthRight = tmpWidth;
+          widthBottom = tmpWidth;
+          widthLeft = tmpWidth;
+        } else {
+          let tmpWidth = this.value.width as EdgeWidths;
+          widthTop = tmpWidth.top;
+          widthRight = tmpWidth.right;
+          widthBottom = tmpWidth.bottom;
+          widthLeft = tmpWidth.left;
+        }
+      }
+      if (!isUndefined(this.value.outset)) {
+        if (isLengthType(this.value.outset) || isResource(this.value.outset)) {
+          let tmpOutset = this.value.outset as Length;
+          outsetTop = tmpOutset;
+          outsetRight = tmpOutset;
+          outsetBottom = tmpOutset;
+          outsetLeft = tmpOutset;
+        } else {
+          let tmpOutset = this.value.outset as EdgeWidths;
+          outsetTop = tmpOutset.top;
+          outsetRight = tmpOutset.right;
+          outsetBottom = tmpOutset.bottom;
+          outsetLeft = tmpOutset.left;
+        }
+      }
+      fill = this.value.fill;
       GetUINativeModule().common.setBorderImage(node,
-        this.value.sliceTop, this.value.sliceRight,
-        this.value.sliceBottom, this.value.sliceLeft,
-        this.value.repeat,
-        this.value.source,
-        this.value.sourceAngle, this.value.sourceDirection,
-        this.value.sourceColors, this.value.sourceRepeating,
-        this.value.widthTop, this.value.widthRight,
-        this.value.widthBottom, this.value.widthLeft,
-        this.value.outsetTop, this.value.outsetRight,
-        this.value.outsetBottom, this.value.outsetLeft,
-        this.value.fill);
+        sliceTop, sliceRight, sliceBottom, sliceLeft,
+        repeat,
+        source, sourceAngle, sourceDirection, sourceColors, sourceRepeating,
+        widthTop, widthRight, widthBottom, widthLeft,
+        outsetTop, outsetRight, outsetBottom, outsetLeft,
+        fill);
     }
   }
 }
@@ -625,7 +698,7 @@ class BorderModifier extends Modifier<ArkBorder>{
   }
 }
 
-class ForegroundBlurStyleModifier extends Modifier<ArkForegroundBlurStyle> {
+class ForegroundBlurStyleModifier extends ModifierWithKey<ArkForegroundBlurStyle> {
   static identity: Symbol = Symbol("foregroundBlurStyle");
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -675,7 +748,7 @@ class BackgroundImageModifier extends Modifier<ArkBackgroundImage>{
   }
 }
 
-class BackgroundBlurStyleModifier extends Modifier<ArkBackgroundBlurStyle> {
+class BackgroundBlurStyleModifier extends ModifierWithKey<ArkBackgroundBlurStyle> {
   static identity: Symbol = Symbol("backgroundBlurStyle");
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -687,7 +760,6 @@ class BackgroundBlurStyleModifier extends Modifier<ArkBackgroundBlurStyle> {
     }
   }
 }
-
 
 class BackgroundImageSizeModifier extends Modifier<ArkBackgroundImageSize>{
   static identity: Symbol = Symbol("backgroundImageSize");
@@ -782,7 +854,7 @@ class MaskModifier extends ModifierWithKey<boolean | object> {
   }
 }
 
-class PixelStretchEffectModifier extends Modifier<ArkPixelStretchEffect> {
+class PixelStretchEffectModifier extends ModifierWithKey<PixelStretchEffectOptions> {
   static identity: Symbol = Symbol("pixelStretchEffect");
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -795,7 +867,7 @@ class PixelStretchEffectModifier extends Modifier<ArkPixelStretchEffect> {
   }
 }
 
-class LightUpEffectModifier extends Modifier<number> {
+class LightUpEffectModifier extends ModifierWithKey<number> {
   static identity: Symbol = Symbol("lightUpEffect");
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -1773,6 +1845,11 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
   }
 
   backgroundBlurStyle(value: BlurStyle, options?: BackgroundBlurStyleOptions): this {
+    if (isUndefined(value)) {
+      modifierWithKey(this._modifiersWithKeys, BackgroundBlurStyleModifier.identity,
+        BackgroundBlurStyleModifier, undefined);
+      return this;
+    }
     let arkBackgroundBlurStyle = new ArkBackgroundBlurStyle();
     arkBackgroundBlurStyle.blurStyle = value;
     if (typeof options === "object") {
@@ -1780,11 +1857,17 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
       arkBackgroundBlurStyle.adaptiveColor = options.adaptiveColor;
       arkBackgroundBlurStyle.scale = options.scale;
     }
-    modifier(this._modifiers, BackgroundBlurStyleModifier, arkBackgroundBlurStyle);
+    modifierWithKey(this._modifiersWithKeys, BackgroundBlurStyleModifier.identity,
+      BackgroundBlurStyleModifier, arkBackgroundBlurStyle);
     return this;
   }
 
   foregroundBlurStyle(value: BlurStyle, options?: ForegroundBlurStyleOptions): this {
+    if (isUndefined(value)) {
+      modifierWithKey(this._modifiersWithKeys, ForegroundBlurStyleModifier.identity,
+        ForegroundBlurStyleModifier, undefined);
+      return this;
+    }
     let arkForegroundBlurStyle = new ArkForegroundBlurStyle();
     arkForegroundBlurStyle.blurStyle = value;
     if (typeof options === "object") {
@@ -1792,7 +1875,8 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
       arkForegroundBlurStyle.adaptiveColor = options.adaptiveColor;
       arkForegroundBlurStyle.scale = options.scale;
     }
-    modifier(this._modifiers, ForegroundBlurStyleModifier, arkForegroundBlurStyle);
+    modifierWithKey(this._modifiersWithKeys, ForegroundBlurStyleModifier.identity,
+      ForegroundBlurStyleModifier, arkForegroundBlurStyle);
     return this;
   }
 
@@ -1937,18 +2021,12 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
 
 
   borderImage(value: BorderImageOption): this {
-    let arkBorderImage = new ArkBorderImage();
-    if (!arkBorderImage.parseOption(value)) {
-      modifier(this._modifiers, BorderImageModifier, undefined);
-      return this;
-    }
-    modifier(this._modifiers, BorderImageModifier, arkBorderImage);
+    modifierWithKey(this._modifiersWithKeys, BorderImageModifier.identity, BorderImageModifier, value);
     return this;
   }
 
   foregroundColor(value: ResourceColor | ColoringStrategy): this {
     modifierWithKey(this._modifiersWithKeys, ForegroundColorModifier.identity, ForegroundColorModifier, value);
-    let arkForegroundColor = new ArkForegroundColor
     return this;
   }
 
@@ -2063,6 +2141,10 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
   }
 
   linearGradientBlur(value: number, options: LinearGradientBlurOptions): this {
+    if (isUndefined(value) || isUndefined(options)) {
+      modifier(this._modifiers, LinearGradientBlurModifier, undefined);
+      return this;
+    }
     let arkLinearGradientBlur = new ArkLinearGradientBlur();
     arkLinearGradientBlur.blurRadius = value;
     arkLinearGradientBlur.fractionStops = options.fractionStops;
@@ -2506,6 +2588,10 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
   }
 
   overlay(value: string | CustomBuilder, options?: { align?: Alignment; offset?: { x?: number; y?: number } }): this {
+    if (typeof value === 'undefined') {
+      modifierWithKey(this._modifiersWithKeys, OverlayModifier.identity, OverlayModifier, undefined);
+      return this;
+    }
     var arkOverlay = new ArkOverlay();
     if (arkOverlay.splitOverlayValue(value, options)) {
       modifierWithKey(this._modifiersWithKeys, OverlayModifier.identity, OverlayModifier, arkOverlay);
@@ -2521,6 +2607,10 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
     colors: Array<any>;
     repeating?: boolean;
   }): this {
+    if (isUndefined(value)) {
+      modifier(this._modifiers, LinearGradientModifier, undefined);
+      return this;
+    }
     let arkLinearGradient = new ArkLinearGradient(value.angle, value.direction, value.colors, value.repeating);
     modifier(this._modifiers, LinearGradientModifier, arkLinearGradient);
     return this;
@@ -2534,6 +2624,10 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
     colors: Array<any>;
     repeating?: boolean;
   }): this {
+    if (isUndefined(value)) {
+      modifier(this._modifiers, SweepGradientModifier, undefined);
+      return this;
+    }
     let arkSweepGradient = new ArkSweepGradient(value.center, value.start, value.end, value.rotation,
       value.colors, value.repeating);
     modifier(this._modifiers, SweepGradientModifier, arkSweepGradient);
@@ -2541,6 +2635,10 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
   }
 
   radialGradient(value: { center: Array<any>; radius: number | string; colors: Array<any>; repeating?: boolean }): this {
+    if (isUndefined(value)) {
+      modifier(this._modifiers, RadialGradientModifier, undefined);
+      return this;
+    }
     let arkRadialGradient = new ArkRadialGradient(value.center, value.radius, value.colors, value.repeating);
     modifier(this._modifiers, RadialGradientModifier, arkRadialGradient);
     return this;
@@ -2656,22 +2754,12 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
   }
 
   lightUpEffect(value: number): this {
-    modifier(this._modifiers, LightUpEffectModifier, value);
+    modifierWithKey(this._modifiersWithKeys, LightUpEffectModifier.identity, LightUpEffectModifier, value);
     return this;
   }
 
   pixelStretchEffect(options: PixelStretchEffectOptions): this {
-    if (isResource(options.top) || isResource(options.right) ||
-      isResource(options.bottom) || isResource(options.left)) {
-      modifier(this._modifiers, PixelStretchEffectModifier, undefined);
-      return this;
-    }
-    let arkPixelStretchEffect = new ArkPixelStretchEffect
-    arkPixelStretchEffect.top = options.top;
-    arkPixelStretchEffect.right = options.right;
-    arkPixelStretchEffect.bottom = options.bottom;
-    arkPixelStretchEffect.left = options.left;
-    modifier(this._modifiers, PixelStretchEffectModifier, arkPixelStretchEffect);
+    modifierWithKey(this._modifiersWithKeys, PixelStretchEffectModifier.identity, PixelStretchEffectModifier, options);
     return this;
   }
 

@@ -305,8 +305,7 @@ void SetRadialGradientValues(NG::Gradient& gradient, const double* values, int32
 }
 
 bool SetCalcDimension(std::optional<CalcDimension>& optDimension,
-    const StringAndDouble* options, int32_t optionsLength, int32_t offset,
-    const CalcDimension* defDimension)
+    const StringAndDouble* options, int32_t optionsLength, int32_t offset)
 {
     if ((options == nullptr) || (offset < 0) || ((offset + NUM_3) >= optionsLength)) {
         return false;
@@ -317,15 +316,16 @@ bool SetCalcDimension(std::optional<CalcDimension>& optDimension,
     if (static_cast<bool>(hasValue.value)) {
         DimensionUnit unitValue = static_cast<DimensionUnit>(unit.value);
         if (unitValue == DimensionUnit::CALC) {
-            std::string str = value.valueStr;
+            std::string str;
+            if (value.valueStr != nullptr) {
+                str = value.valueStr;
+            }
             CalcDimension calcDimension(str, unitValue);
             optDimension = calcDimension;
         } else {
             CalcDimension calcDimension(value.value, unitValue);
             optDimension = calcDimension;
         }
-    } else if (defDimension != nullptr) {
-        optDimension = *defDimension;
     }
     return true;
 }
@@ -334,12 +334,11 @@ void SetBorderImageSlice(RefPtr<BorderImage>& borderImage,
     const std::vector<BorderImageDirection> directions,
     const StringAndDouble* options, int32_t optionsLength, int32_t& offset)
 {
-    std::unique_ptr<CalcDimension> defDimension = std::make_unique<CalcDimension>(0.0);
     for (unsigned int index = 0; index < NUM_12; index += NUM_3) {
         std::optional<CalcDimension> optDimension;
-        SetCalcDimension(optDimension, options, optionsLength, offset + index, defDimension.get());
-        auto direction = directions[index / NUM_3];
+        SetCalcDimension(optDimension, options, optionsLength, offset + index);
         if (optDimension.has_value()) {
+            auto direction = directions[index / NUM_3];
             borderImage->SetEdgeSlice(direction, optDimension.value());
         }
     }
@@ -365,12 +364,11 @@ void SetBorderImageWidth(RefPtr<BorderImage>& borderImage,
     const std::vector<BorderImageDirection> directions,
     const StringAndDouble* options, int32_t optionsLength, int32_t& offset)
 {
-    std::unique_ptr<CalcDimension> defDimension = std::make_unique<CalcDimension>(0.0);
     for (unsigned int index = 0; index < NUM_12; index += NUM_3) {
         std::optional<CalcDimension> optDimension;
-        SetCalcDimension(optDimension, options, optionsLength, offset + index, defDimension.get());
-        auto direction = directions[index / NUM_3];
+        SetCalcDimension(optDimension, options, optionsLength, offset + index);
         if (optDimension.has_value()) {
+            auto direction = directions[index / NUM_3];
             borderImage->SetEdgeWidth(direction, optDimension.value());
         }
     }
@@ -381,12 +379,11 @@ void SetBorderImageOutset(RefPtr<BorderImage>& borderImage,
     const std::vector<BorderImageDirection> directions,
     const StringAndDouble* options, int32_t optionsLength, int32_t& offset)
 {
-    std::unique_ptr<CalcDimension> defDimension = std::make_unique<CalcDimension>(0.0);
     for (unsigned int index = 0; index < NUM_12; index += NUM_3) {
         std::optional<CalcDimension> optDimension;
-        SetCalcDimension(optDimension, options, optionsLength, offset + index, defDimension.get());
-        auto direction = directions[index / NUM_3];
+        SetCalcDimension(optDimension, options, optionsLength, offset + index);
         if (optDimension.has_value()) {
+            auto direction = directions[index / NUM_3];
             borderImage->SetEdgeOutset(direction, optDimension.value());
         }
     }
@@ -405,6 +402,28 @@ void SetBorderImageFill(RefPtr<BorderImage>& borderImage,
         borderImage->SetNeedFillCenter(static_cast<bool>(value.value));
     }
     offset += NUM_2;
+}
+
+void SetBorderImage(FrameNode* frameNode, const RefPtr<BorderImage>& borderImage, uint8_t bitset)
+{
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(borderImage);
+    if (bitset | BorderImage::SOURCE_BIT) {
+        ViewAbstract::SetBorderImageSource(frameNode, borderImage->GetSrc());
+    }
+    if (bitset | BorderImage::OUTSET_BIT) {
+        ViewAbstract::SetHasBorderImageOutset(frameNode, true);
+    }
+    if (bitset | BorderImage::SLICE_BIT) {
+        ViewAbstract::SetHasBorderImageSlice(frameNode, true);
+    }
+    if (bitset | BorderImage::REPEAT_BIT) {
+        ViewAbstract::SetHasBorderImageRepeat(frameNode, true);
+    }
+    if (bitset | BorderImage::WIDTH_BIT) {
+        ViewAbstract::SetHasBorderImageWidth(frameNode, true);
+    }
+    ViewAbstract::SetBorderImage(frameNode, borderImage);
 }
 
 /**
@@ -1192,23 +1211,7 @@ void SetBorderImage(NodeHandle node, const char* src, const StringAndDouble* opt
     SetBorderImageOutset(borderImage, directions, options, optionsLength, loc); // read 12 double
     SetBorderImageFill(borderImage, options, optionsLength, loc); // read 2 double
     auto bitsetValue = options[loc].value;
-    uint8_t bitset = static_cast<uint8_t>(bitsetValue);
-    if (bitset | BorderImage::SOURCE_BIT) {
-        ViewAbstract::SetBorderImageSource(frameNode, borderImage->GetSrc());
-    }
-    if (bitset | BorderImage::OUTSET_BIT) {
-        ViewAbstract::SetHasBorderImageOutset(frameNode, true);
-    }
-    if (bitset | BorderImage::SLICE_BIT) {
-        ViewAbstract::SetHasBorderImageSlice(frameNode, true);
-    }
-    if (bitset | BorderImage::REPEAT_BIT) {
-        ViewAbstract::SetHasBorderImageRepeat(frameNode, true);
-    }
-    if (bitset | BorderImage::WIDTH_BIT) {
-        ViewAbstract::SetHasBorderImageWidth(frameNode, true);
-    }
-    ViewAbstract::SetBorderImage(frameNode, borderImage);
+    SetBorderImage(frameNode, borderImage, static_cast<uint8_t>(bitsetValue));
 }
 
 void ResetBorderImage(NodeHandle node)
@@ -1216,7 +1219,8 @@ void ResetBorderImage(NodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     RefPtr<BorderImage> borderImage = AceType::MakeRefPtr<BorderImage>();
-    ViewAbstract::SetBorderImage(frameNode, borderImage);
+    uint8_t imageBorderBitsets = 0;
+    SetBorderImage(frameNode, borderImage, imageBorderBitsets);
 }
 
 void SetBorderImageGradient(NodeHandle node, const double* values, int32_t valuesLength,
@@ -1224,7 +1228,7 @@ void SetBorderImageGradient(NodeHandle node, const double* values, int32_t value
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    if ((values == nullptr) || (valuesLength != NUM_4) || (colors == nullptr) || ((colorsLength % NUM_3) != 0)) {
+    if ((values == nullptr) || (valuesLength != NUM_4) || ((colorsLength % NUM_3) != 0)) {
         return;
     }
     NG::Gradient gradient;
@@ -1789,7 +1793,7 @@ void ResetSphericalEffect(NodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    ViewAbstract::SetSphericalEffect(frameNode, 1.0);
+    ViewAbstract::SetSphericalEffect(frameNode, 0.0);
 }
 
 void SetRenderGroup(NodeHandle node, bool isRenderGroup)
@@ -1855,7 +1859,6 @@ void ResetForegroundColor(NodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    ViewAbstract::SetForegroundColor(frameNode, Color());
 }
 
 
