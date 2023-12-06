@@ -18,8 +18,8 @@
 
 #include <unordered_set>
 #include <vector>
-
 #include "core/common/flutter/flutter_asset_manager.h"
+#include "core/common/asset_manager_impl.h"
 
 namespace OHOS::Ace {
 class FormModulePreloader {
