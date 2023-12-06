@@ -3513,7 +3513,6 @@ class TextTextShadowModifier extends ModifierWithKey {
 TextTextShadowModifier.identity = Symbol('textTextShadow');
 class TextDecorationModifier extends ModifierWithKey {
     applyPeer(node, reset) {
-        //console.log('TextDecorationModifier start')
         if (reset) {
             GetUINativeModule().text.resetDecoration(node);
         }
@@ -3539,17 +3538,11 @@ class TextDecorationModifier extends ModifierWithKey {
 TextDecorationModifier.identity = Symbol('textDecoration');
 class TextFontModifier extends ModifierWithKey {
     applyPeer(node, reset) {
-        //console.log('TextFontModifier start');
         if (reset) {
             GetUINativeModule().text.resetFont(node);
         }
-        else {
-            //console.log('TextFontModifier 1');
-            //console.log('TextFontModifier 2');
-            //console.log('TextFontModifier 2 parames is: ' + JSON.parse(this.value));
-            GetUINativeModule().text.setFont(node, this.value.size, this.value.weight, this.value.family, this.value.style);
+        else {GetUINativeModule().text.setFont(node, this.value.size, this.value.weight, this.value.family, this.value.style);
         }
-        //console.log('TextFontModifier end');
     }
     checkObjectDiff() {
         if (this.stageValue.weight !== this.value.weight || this.stageValue.style !== this.value.style) {
@@ -6142,7 +6135,11 @@ class GridColSpanModifier extends ModifierWithKey {
             GetUINativeModule().gridCol.resetSpan(node);
         }
         else {
-            GetUINativeModule().gridCol.setSpan(node, this.value.xs, this.value.sm, this.value.md, this.value.lg, this.value.xl, this.value.xxl);
+            if (isNumber(this.value)) {
+                GetUINativeModule().gridCol.setSpan(node, this.value, this.value, this.value, this.value, this.value, this.value);
+            } else {
+                GetUINativeModule().gridCol.setSpan(node, this.value.xs, this.value.sm, this.value.md, this.value.lg, this.value.xl, this.value.xxl);
+            }
         }
     }
     checkObjectDiff() {
@@ -6169,7 +6166,12 @@ class GridColOffsetModifier extends ModifierWithKey {
             GetUINativeModule().gridCol.resetGridColOffset(node);
         }
         else {
-            GetUINativeModule().gridCol.setGridColOffset(node, this.value.xs, this.value.sm, this.value.md, this.value.lg, this.value.xl, this.value.xxl);
+            if (isNumber(this.value)) {
+                GetUINativeModule().gridCol.setGridColOffset(node, this.value, this.value, this.value, this.value, this.value, this.value);
+            } else {
+                GetUINativeModule().gridCol.setGridColOffset(node, this.value.xs, this.value.sm, this.value.md, this.value.lg, this.value.xl, this.value.xxl);
+            }
+            
         }
     }
     checkObjectDiff() {
@@ -6196,7 +6198,11 @@ class GridColOrderModifier extends ModifierWithKey {
             GetUINativeModule().gridCol.resetOrder(node);
         }
         else {
-            GetUINativeModule().gridCol.setOrder(node, this.value.xs, this.value.sm, this.value.md, this.value.lg, this.value.xl, this.value.xxl);
+            if (this.value) {
+                GetUINativeModule().gridCol.setOrder(node, this.value, this.value, this.value, this.value, this.value, this.value);
+            } else {
+                GetUINativeModule().gridCol.setOrder(node, this.value.xs, this.value.sm, this.value.md, this.value.lg, this.value.xl, this.value.xxl);
+            }
         }
     }
     checkObjectDiff() {
