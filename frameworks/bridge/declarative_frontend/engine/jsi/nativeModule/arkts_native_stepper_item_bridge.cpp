@@ -24,6 +24,10 @@ ArkUINativeModuleValue StepperItemBridge::SetNextLabel(ArkUIRuntimeCallInfo* run
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+    if (secondArg->IsUndefined()) {
+        GetArkUIInternalNodeAPI()->GetStepperItemModifier().ResetNextLabel(nativeNode);
+        return panda::JSValueRef::Undefined(vm);
+    }
     std::string nextLabel = secondArg->ToString(vm)->ToString();
     GetArkUIInternalNodeAPI()->GetStepperItemModifier().SetNextLabel(nativeNode, nextLabel.c_str());
     return panda::JSValueRef::Undefined(vm);

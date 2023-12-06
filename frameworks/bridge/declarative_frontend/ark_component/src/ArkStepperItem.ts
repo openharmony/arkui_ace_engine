@@ -3,14 +3,27 @@ class ArkStepperItemComponent extends ArkComponent implements StepperItemAttribu
   prevLabel(value: string): this {
     throw new Error('Method not implemented.');
   }
-  nextLabel(value: string): this {
-    throw new Error('Method not implemented.');
+  nextLabel(value: string): StepperItemAttribute {
+    modifier(this._modifiers, NextLabelModifier, undefined);
+    return this;
+    }
+    status(value ?: ItemState | undefined): this {
+      throw new Error('Method not implemented.');
+    }
+    monopolizeEvents(monopolize: boolean): this {
+      throw new Error('Method not implemented.');
+    }
   }
-  status(value?: ItemState | undefined): this {
-    throw new Error('Method not implemented.');
-  }
-  monopolizeEvents(monopolize: boolean): this {
-    throw new Error('Method not implemented.');
+  
+class NextLabelModifier extends Modifier<ArkDivider> {
+  static identity: Symbol = Symbol('NextLabel');
+
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      GetUINativeModule().tabs.resetNextLabel(node);
+    } else {
+      GetUINativeModule().tabs.setNextLabel(node, this.value);
+    }
   }
 }
 

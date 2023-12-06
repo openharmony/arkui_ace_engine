@@ -46,6 +46,9 @@ ArkUINativeModuleValue NavigatorBridge::SetType(ArkUIRuntimeCallInfo* runtimeCal
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+    if (secondArg->IsUndefined()) {
+        GetArkUIInternalNodeAPI()->GetNavigatorModifier().ResetType(nativeNode);
+    }
     int32_t value = secondArg->Int32Value(vm);
     GetArkUIInternalNodeAPI()->GetNavigatorModifier().SetType(nativeNode, value);
     return panda::JSValueRef::Undefined(vm);
@@ -90,6 +93,9 @@ ArkUINativeModuleValue NavigatorBridge::SetParams(ArkUIRuntimeCallInfo* runtimeC
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+    if (secondArg->IsUndefined()) {
+        GetArkUIInternalNodeAPI()->GetNavigatorModifier().ResetParams(nativeNode);
+    }
     std::string params = secondArg->ToString(vm)->ToString();
     GetArkUIInternalNodeAPI()->GetNavigatorModifier().SetParams(nativeNode, params.c_str());
     return panda::JSValueRef::Undefined(vm);

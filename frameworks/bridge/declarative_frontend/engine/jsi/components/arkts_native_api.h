@@ -1023,13 +1023,13 @@ struct ArkUIMenuModifierAPI {
 
 struct ArkUIDatePickerModifierAPI {
     void (*SetSelectedTextStyle)(
-        NodeHandle node, const char* weightChar, const char* familiesChar, const int* values, double size);
+        NodeHandle node, const char* fontInfo, int32_t styleVal, uint32_t color);
     void (*ResetSelectedTextStyle)(NodeHandle node);
     void (*SetDatePickerTextStyle)(
-        NodeHandle node, const char* weightChar, const char* familiesChar, const int* values, double size);
+        NodeHandle node, const char* fontInfo, int32_t styleVal, uint32_t color);
     void (*ResetDatePickerTextStyle)(NodeHandle node);
     void (*SetDisappearTextStyle)(
-        NodeHandle node, const char* weightChar, const char* familiesChar, const int* values, double size);
+        NodeHandle node, const char* fontInfo, int32_t styleVal, uint32_t color);
     void (*ResetDisappearTextStyle)(NodeHandle node);
     void (*SetLunar)(NodeHandle node, bool isLunar);
     void (*ResetLunar)(NodeHandle node);
