@@ -319,8 +319,10 @@ void GridLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
                 ComputeItemPosition(layoutWrapper, rowIndex, colIndex, itemRowSpan, itemColSpan, childLayoutWrapper));
         }
 
-        childLayoutProperty->UpdateRealRowSpan(itemRowSpan);
-        childLayoutProperty->UpdateRealColumnSpan(itemColSpan);
+        if (childLayoutProperty) {
+            childLayoutProperty->UpdateRealRowSpan(itemRowSpan);
+            childLayoutProperty->UpdateRealColumnSpan(itemColSpan);
+        }
 
         ++itemIndex;
     }
