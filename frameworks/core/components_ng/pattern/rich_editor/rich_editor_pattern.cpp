@@ -3366,13 +3366,6 @@ void RichEditorPattern::ShowSelectOverlay(const RectF& firstHandle, const RectF&
             pattern->HandleOnSelectAll();
         };
 
-        selectInfo.onClose = [weak](bool closedByGlobalEvent) {
-            auto pattern = weak.Upgrade();
-            CHECK_NULL_VOID(pattern);
-            if (closedByGlobalEvent) {
-                pattern->ResetSelection();
-            }
-        };
         selectInfo.callerFrameNode = host;
         pattern->CopySelectionMenuParams(selectInfo, responseType);
         pattern->UpdateSelectOverlayOrCreate(selectInfo);
