@@ -38,6 +38,28 @@ void JSMatrix2d::Destructor(JSMatrix2d* matrix2d)
     }
 }
 
+TransformParam JSMatrix2d::GetTransformInfo(const JSRef<JSObject>& obj)
+{
+    auto scaleXVal = obj->GetProperty("scaleX");
+    auto rotateXVal = obj->GetProperty("rotateX");
+    auto rotateYVal = obj->GetProperty("rotateY");
+    auto scaleYVal = obj->GetProperty("scaleY");
+    auto translateXVal = obj->GetProperty("translateX");
+    auto translateYVal = obj->GetProperty("translateY");
+
+    TransformParam param = {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
+    JSViewAbstract::ParseJsDouble(scaleXVal, param.scaleX);
+    JSViewAbstract::ParseJsDouble(rotateXVal, param.skewX);
+    JSViewAbstract::ParseJsDouble(rotateYVal, param.skewY);
+    JSViewAbstract::ParseJsDouble(scaleYVal, param.scaleY);
+    JSViewAbstract::ParseJsDouble(translateXVal, param.translateX);
+    JSViewAbstract::ParseJsDouble(translateYVal, param.translateY);
+    param.translateX = PipelineBase::Vp2PxWithCurrentDensity(param.translateX);
+    param.translateY = PipelineBase::Vp2PxWithCurrentDensity(param.translateY);
+
+    return param;
+}
+
 void JSMatrix2d::JSBind(BindingTarget globalObj)
 {
     JSClass<JSMatrix2d>::Declare("Matrix2D");
