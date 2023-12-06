@@ -16,11 +16,14 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SCROLLABLE_SCROLLABLE_PATTERN_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SCROLLABLE_SCROLLABLE_PATTERN_H
 
+#include <cmath>
 #include <vector>
 
 #include "base/geometry/axis.h"
 #include "core/animation/select_motion.h"
+#include "core/animation/bezier_variable_velocity_motion.h"
 #include "core/components_ng/base/frame_scene_status.h"
+#include "core/components_ng/event/drag_event.h"
 #include "core/components_ng/pattern/navigation/nav_bar_pattern.h"
 #include "core/components_ng/pattern/overlay/sheet_presentation_pattern.h"
 #include "core/components_ng/pattern/pattern.h"
@@ -54,6 +57,11 @@ public:
     ScrollablePattern(EdgeEffect edgeEffect, bool alwaysEnabled)
         : edgeEffect_(edgeEffect), edgeEffectAlwaysEnabled_(alwaysEnabled)
     {}
+
+    ~ScrollablePattern()
+    {
+        UnRegister2DragDropManager();
+    }
 
     bool IsAtomicNode() const override
     {
@@ -261,6 +269,16 @@ public:
     {
         return !animator_ || animator_->IsStopped();
     }
+
+    bool HotzoneAnimateRunning() const
+    {
+        return hotzoneAnimator_ && hotzoneAnimator_->IsRunning();
+    }
+
+    bool HotzoneAnimateStoped() const
+    {
+        return !hotzoneAnimator_ || hotzoneAnimator_->IsStopped();
+    }
     void AbortScrollAnimator()
     {
         if (animator_ && !animator_->IsStopped()) {
@@ -458,6 +476,9 @@ protected:
     // for onReachStart of the first layout
     bool isInitialized_ = false;
 
+    void Register2DragDropManager();
+    void SetDragStatusListener(RefPtr<DragStatusListener> dragStatusListener);
+
 private:
     virtual void OnScrollEndCallback() {};
 
@@ -584,6 +605,20 @@ private:
 
     EdgeEffect edgeEffect_ = EdgeEffect::NONE;
     bool edgeEffectAlwaysEnabled_ = false;
+
+    RefPtr<Animator> hotzoneAnimator_;
+    float lastHonezoneOffset_ = 0.0f;
+    RefPtr<BezierVariableVelocityMotion> velocityMotion_;
+    std::optional<RefPtr<DragStatusListener>> dragStatusListener_;
+    void UnRegister2DragDropManager();
+    HotzoneMoveDirection IsInHotZone(const PointF& point, float& offset);
+    void HotZoneScroll(const float offset, const HotzoneMoveDirection& direction);
+    void StopHotzoneScroll();
+    void HandleHotZone(const DragEventType& dragEventType, const RefPtr<NotifyDragEvent>& notifyDragEvent);
+    void HandleOnDragStatusCallback(
+        const DragEventType& dragEventType, const RefPtr<NotifyDragEvent>& notifyDragEvent) override;
+    void HandleMoveEventInComp(const PointF& point);
+    void HandleLeaveHotzoneEvent();
 };
 } // namespace OHOS::Ace::NG
 

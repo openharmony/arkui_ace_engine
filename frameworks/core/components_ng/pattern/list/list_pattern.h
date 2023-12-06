@@ -173,10 +173,6 @@ public:
         multiSelectable_ = multiSelectable;
     }
 
-    // dragStatusCallback
-    void HandleOnDragStatusCallback(
-        const DragEventType& dragEventType, const RefPtr<NotifyDragEvent>& notifyDragEvent) override;
-
     void SetSwiperItem(WeakPtr<ListItemPattern> swiperItem);
     void SetSwiperItemEnd(WeakPtr<ListItemPattern> swiperItem)
     {

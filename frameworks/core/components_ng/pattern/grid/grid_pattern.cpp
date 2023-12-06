@@ -152,6 +152,8 @@ void GridPattern::OnModifyDone()
             return grid->GetMainContentSize();
         });
     }
+    
+    Register2DragDropManager();
 }
 
 void GridPattern::MultiSelectWithoutKeyboard(const RectF& selectedZone)

@@ -1729,4 +1729,274 @@ void ScrollablePattern::OnScrollStop(const OnScrollStopEvent& onScrollStop, bool
         SetScrollAbort(false);
     }
 }
+
+/**
+ * @description: Register with the drag drop manager
+ * @return None
+ */
+void ScrollablePattern::Register2DragDropManager()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto dragDropManager = pipeline->GetDragDropManager();
+    CHECK_NULL_VOID(dragDropManager);
+    dragDropManager->RegisterDragStatusListener(host->GetId(), AceType::WeakClaim(AceType::RawPtr(host)));
+}
+
+/**
+ * @description: Determine whether it is in the hot zone, then
+ * 1.Gives the rolling direction according to the location of the hot zone
+ * 2.Gives the distance from the edge of the hot zone from the drag point
+ * @param {PointF&} point The drag point
+ * @param {float&} offset The distance from the edge of the hot zone from the drag point
+ * @return 1.The rolling direction 2.The distance from the edge of the hot zone from the drag point
+ */
+HotzoneMoveDirection ScrollablePattern::IsInHotZone(const PointF& point, float& offset)
+{
+    auto host = GetHost();
+    auto geometryNode = host->GetGeometryNode();
+    if (!geometryNode) {
+        return HotzoneMoveDirection::NONE;
+    }
+    auto wholeRect = geometryNode->GetFrameRect();
+
+    auto hotZoneHeightPX = HOT_ZONE_HEIGHT_VP_DIM.ConvertToPx();
+
+    // create top hot zone,it is a rectangle
+    auto topHotzone = wholeRect;
+    topHotzone.SetHeight(hotZoneHeightPX);
+
+    // create bottom hot zone,it is a rectangle
+    auto bottomHotzone = wholeRect;
+    auto bottomZoneEdgeY = wholeRect.GetY() + wholeRect.Height();
+    bottomHotzone.SetTop(bottomZoneEdgeY - hotZoneHeightPX);
+    bottomHotzone.SetHeight(hotZoneHeightPX);
+
+    // Determines whether the drag point is within the hot zone,
+    // then gives the scroll component movement direction according to which hot zone the point is in
+    // top or bottom hot zone
+    if (topHotzone.IsInRegion(point)) {
+        offset = point.GetY() - topHotzone.GetY();
+        return HotzoneMoveDirection::DOWN;
+    } else if (bottomHotzone.IsInRegion(point)) {
+        offset = bottomZoneEdgeY - point.GetY();
+        return HotzoneMoveDirection::UP;
+    }
+
+    return HotzoneMoveDirection::NONE;
+}
+
+/**
+ * @description: scroll up or down
+ * @param {float} offset
+ * @param {HotzoneMoveDirection&} direction up or down
+ * @return None
+ */
+void ScrollablePattern::HotZoneScroll(const float offset, const HotzoneMoveDirection& direction)
+{
+    auto host = GetHost();
+    if (!IsScrollable()) {
+        return;
+    }
+
+    if (NearZero(offset)) {
+        return;
+    }
+
+    // There are three types of situations to consider.
+    // 1. Enter the hot zone for the first time.
+    // 2. When the drag point leaves the hot zone, it enters the hot zone again
+    // 3. When the drag point moves within the hot zone, the hot zone offset changes
+    if (NearEqual(lastHonezoneOffset_, offset)) {
+        return;
+    } else {
+        if (HotzoneAnimateRunning()) {
+            // Variable speed rolling
+            // When the drag point is in the hot zone, and the hot zone offset changes.
+            // Then need to modify the offset
+            velocityMotion_->Reset(offset);
+            return;
+        }
+    }
+
+    if (!hotzoneAnimator_) {
+        hotzoneAnimator_ = CREATE_ANIMATOR(PipelineBase::GetCurrentContext());
+        hotzoneAnimator_->AddStopListener([weak = AceType::WeakClaim(this)]() {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            pattern->OnAnimateStop();
+        });
+    }
+
+    if (!velocityMotion_) {
+        // Enter the hot zone for the first time.
+        velocityMotion_ = AceType::MakeRefPtr<BezierVariableVelocityMotion>(
+            offset, [weak = WeakClaim(this), offset](HotzoneMoveDirection direction) -> bool {
+                auto pattern = weak.Upgrade();
+                CHECK_NULL_RETURN(pattern, true);
+
+                if (direction == HotzoneMoveDirection::UP && pattern->IsAtBottom()) {
+                    // Stop scrolling when reach the bottom
+                    return true;
+                } else if (direction == HotzoneMoveDirection::DOWN && pattern->IsAtTop()) {
+                    // Stop scrolling when reach the top
+                    return true;
+                }
+                return false;
+            });
+        velocityMotion_->AddListener([weakScroll = AceType::WeakClaim(this)](double offset) {
+            // Get the distance component need to roll from BezierVariableVelocityMotion
+            // Roll up: negative value, Roll up: positive value
+            auto pattern = weakScroll.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            pattern->UpdateCurrentOffset(offset, SCROLL_FROM_AXIS);
+            pattern->UpdateMouseStart(offset);
+        });
+        velocityMotion_->ReInit(offset, direction);
+    } else {
+        // When the drag point leaves the hot zone, it enters the hot zone again.Then need to reset direction and
+        // offset.
+        velocityMotion_->ReInit(offset, direction);
+    }
+    // Save the last offset
+    lastHonezoneOffset_ = offset;
+    hotzoneAnimator_->PlayMotion(velocityMotion_);
+}
+
+/**
+ * @description: When the drag point leaves the hot zone, stop the animation.
+ * @return None
+ */
+void ScrollablePattern::StopHotzoneScroll()
+{
+    if (!HotzoneAnimateStoped()) {
+        hotzoneAnimator_->Stop();
+    }
+}
+
+/**
+ * @description: Handle drag and drop events
+ * When a drag point enters or moves over a component, determine whether it is within the hot zone.
+ * When leave the component, stop scrolling
+ * @param {DragEventType&} dragEventType Drag the event type
+ * @param {NotifyDragEvent&} notifyDragEvent Drag event
+ * @return None
+ */
+void ScrollablePattern::HandleHotZone(
+    const DragEventType& dragEventType, const RefPtr<NotifyDragEvent>& notifyDragEvent)
+{
+    // The starting version of the auto-scroll feature is 11
+    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+        return;
+    }
+    PointF point(static_cast<float>(notifyDragEvent->GetX()), static_cast<float>(notifyDragEvent->GetY()));
+    switch (dragEventType) {
+        case DragEventType::ENTER: {
+            HandleMoveEventInComp(point);
+            break;
+        }
+        case DragEventType::MOVE: {
+            HandleMoveEventInComp(point);
+            break;
+        }
+        case DragEventType::DROP:
+        case DragEventType::LEAVE: {
+            HandleLeaveHotzoneEvent();
+            break;
+        }
+        default:
+            break;
+    }
+}
+
+/**
+ * @description:When a drag point is inside the scroll component, it is necessary to handle the events of each moving
+ * point
+ * @param {PointF&} point the drag point
+ * @param {float&} offset the distance from the edge of the hot zone from the drag point
+ * @return None
+ */
+void ScrollablePattern::HandleMoveEventInComp(const PointF& point)
+{
+    float offset = 0.f;
+    auto direction = IsInHotZone(point, offset);
+    if (direction == HotzoneMoveDirection::NONE) {
+        // Although it entered the rolling component, it is not in the rolling component hot zone.Then stop scrolling
+        HandleLeaveHotzoneEvent();
+    } else {
+        // The drag point enters the hot zone
+        HotZoneScroll(offset, direction);
+    }
+}
+
+/**
+ * @description:When the drag point is not in the hot zone, need to stop scrolling, if it exists.
+ * This function is executed multiple times
+ * @return None
+ */
+void ScrollablePattern::HandleLeaveHotzoneEvent()
+{
+    // Stop scrolling up and down
+    StopHotzoneScroll();
+}
+
+/**
+ * @description: Set drag status listener
+ * @param {DragStatusListener} dragStatusListener  drag status listener
+ * @return None
+ */
+void ScrollablePattern::SetDragStatusListener(RefPtr<DragStatusListener> listener)
+{
+    dragStatusListener_ = listener;
+}
+
+/**
+ * @description: This is the entry point for handling drag events
+ * @return None
+ */
+void ScrollablePattern::HandleOnDragStatusCallback(
+    const DragEventType& dragEventType, const RefPtr<NotifyDragEvent>& notifyDragEvent)
+{
+    HandleHotZone(dragEventType, notifyDragEvent);
+    if (!dragStatusListener_.has_value()) {
+        return;
+    }
+
+    auto dragStatusListener = dragStatusListener_.value();
+    switch (dragEventType) {
+        case DragEventType::START:
+            dragStatusListener->OnDragStarted(notifyDragEvent);
+            break;
+        case DragEventType::ENTER:
+            dragStatusListener->OnDragEntered(notifyDragEvent);
+            break;
+        case DragEventType::MOVE:
+            dragStatusListener->OnDragMoved(notifyDragEvent);
+        case DragEventType::LEAVE:
+            dragStatusListener->OnDragLeaved(notifyDragEvent);
+            break;
+        case DragEventType::DROP:
+            dragStatusListener->OnDragEnded(notifyDragEvent);
+            break;
+        default:
+            break;
+    }
+}
+
+/**
+ * @description: Cancel registration with the drag drop manager
+ * @return None
+ */
+void ScrollablePattern::UnRegister2DragDropManager()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto dragDropManager = pipeline->GetDragDropManager();
+    CHECK_NULL_VOID(dragDropManager);
+    dragDropManager->UnRegisterDragStatusListener(host->GetId());
+}
 } // namespace OHOS::Ace::NG
