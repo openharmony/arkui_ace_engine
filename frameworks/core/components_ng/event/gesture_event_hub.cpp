@@ -583,7 +583,12 @@ float GestureEventHub::GetPixelMapScale(
                 static_cast<float>(minDeviceLength / PIXELMAP_DRAG_WGR_SCALE) / width);
         }
     }
-    return scale;
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, scale);
+    auto dragDropManager = pipeline->GetDragDropManager();
+    CHECK_NULL_RETURN(dragDropManager, scale);
+    auto windowScale = dragDropManager->GetSmallWindowScale();
+    return scale * windowScale;
 }
 
 std::function<void()> GestureEventHub::GetMousePixelMapCallback(const GestureEvent& info)
