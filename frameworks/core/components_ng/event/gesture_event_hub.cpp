@@ -704,10 +704,21 @@ void GestureEventHub::HandleOnDragStart(const GestureEvent& info)
     auto extraParams = eventHub->GetDragExtraParams(std::string(), info.GetGlobalPoint(), DragEventType::START);
     auto dragDropInfo = (eventHub->GetOnDragStart())(event, extraParams);
     auto dragPreviewInfo = frameNode->GetDragPreview();
-    if (dragPreviewInfo.pixelMap != nullptr) {
-        dragDropInfo.pixelMap = dragPreviewInfo.pixelMap;
-        OnDragStart(info, pipeline, frameNode, dragDropInfo, event);
-        return;
+    if (info.GetSourceDevice() != SourceType::MOUSE) {
+        if (dragPreviewInfo.pixelMap != nullptr || dragPreviewInfo.customNode != nullptr) {
+            dragDropInfo.pixelMap = pixelMap_;
+            OnDragStart(info, pipeline, frameNode, dragDropInfo, event);
+            return;
+        }
+    }
+    if (info.GetSourceDevice() == SourceType::MOUSE) {
+        if (dragPreviewInfo.pixelMap != nullptr) {
+            dragDropInfo.pixelMap = dragPreviewInfo.pixelMap;
+            OnDragStart(info, pipeline, frameNode, dragDropInfo, event);
+            return;
+        } else if (dragPreviewInfo.customNode != nullptr) {
+            dragDropInfo.customNode = dragPreviewInfo.customNode;
+        }
     }
 #if defined(ENABLE_DRAG_FRAMEWORK) && defined(ENABLE_ROSEN_BACKEND) && defined(PIXEL_MAP_SUPPORTED)
     g_getPixelMapSucc = false;
