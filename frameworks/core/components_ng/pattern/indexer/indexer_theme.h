@@ -47,6 +47,12 @@ inline constexpr int32_t INDEXER_SELECT_DURATION = 100;
 inline constexpr int32_t INDEXER_BUBBLE_WAIT_DURATION = 2000;
 inline constexpr int32_t INDEXER_BUBBLE_APPEAR_DURATION = 2600;
 inline constexpr uint32_t INDEXER_BUBBLE_MAXSIZE = 5;
+inline constexpr uint32_t INDEXER_BUBBLE_MAXSIZE_COLLAPSED = 4; // 3 items + 1 letter
+inline constexpr uint32_t INDEXER_POPUP_SHADOW_BG_COLOR = 0x4d182431;
+inline constexpr float INDEXER_POPUP_SHADOW_RADIUS = 50.0f;
+inline constexpr float INDEXER_POPUP_SHADOW_OFFSET_Y = 10.0f;
+inline constexpr int32_t INDEXER_NINE_CHARACTERS_CHECK = 9;
+inline constexpr int32_t INDEXER_THIRTEEN_CHARACTERS_CHECK = 13;
 // data for list mode
 inline constexpr double INDEXER_LIST_ITEM_TEXT_SIZE = 12.0; // list mode, font size (FP)
 inline constexpr uint32_t INDEXER_LIST_COLOR = 0x99000000;

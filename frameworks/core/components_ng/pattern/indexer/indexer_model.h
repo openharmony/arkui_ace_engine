@@ -62,6 +62,7 @@ public:
     virtual void SetOnPopupSelected(std::function<void(const int32_t selected)>&& onPopupSelected) = 0;
     virtual void SetChangeEvent(std::function<void(const int32_t selected)>&& changeEvent) {};
     virtual void SetCreatChangeEvent(std::function<void(const int32_t selected)>&& changeEvent) {};
+    virtual void SetAutoCollapse(bool state) = 0;
 
 private:
     static std::unique_ptr<IndexerModel> instance_;
