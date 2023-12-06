@@ -275,7 +275,7 @@ void NGGestureRecognizer::AddGestureProcedure(const TouchEvent& point,
 
 bool NGGestureRecognizer::SetGestureGroup(const WeakPtr<NGGestureRecognizer>& gestureGroup)
 {
-    if (!gestureGroup_.Invalid() && !gestureGroup.Invalid()) {
+    if (!gestureGroup_.Invalid()) {
         return false;
     }
 
