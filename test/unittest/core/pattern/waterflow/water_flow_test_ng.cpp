@@ -1476,4 +1476,46 @@ HWTEST_F(WaterFlowTestNg, WaterFlowGetItemRectTest001, TestSize.Level1)
     EXPECT_TRUE(IsEqual(pattern_->GetItemRect(5), Rect(WATERFLOW_WIDTH / 4, ITEM_HEIGHT, itemWidth, ITEM_HEIGHT)));
     EXPECT_TRUE(IsEqual(pattern_->GetItemRect(10), Rect(WATERFLOW_WIDTH / 2, ITEM_HEIGHT * 2, itemWidth, ITEM_HEIGHT)));
 }
+
+/**
+ * @tc.name: MeasureForAnimation001
+ * @tc.desc: Test WaterFlow MeasureForAnimation function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, MeasureForAnimation001, TestSize.Level1)
+{
+     /**
+     * @tc.steps: step1. Create WithItem to test MeaseForAnimation for node creation .
+     * @tc.expected: pattern_->layoutInfo_ There is corresponding index information in it.
+     */
+    Create([](WaterFlowModelNG model) {
+        model.SetColumnsTemplate("1fr 1fr");
+        CreateItem(TOTAL_LINE_NUMBER * 2);
+    });
+    pattern_->ScrollToIndex(15, true);
+    
+    /**
+     * @tc.steps: step2. Get value from  pattern_ -> LayoutInfo_ .
+     * @tc.expected: return value(crossIndex) is not -1.
+     */
+    auto crossIndex = pattern_->layoutInfo_.GetCrossIndex(10);
+    EXPECT_FALSE(IsEqual(crossIndex, -1));
+}
+
+/**
+ * @tc.name: ScrollToIndex001
+ * @tc.desc: Test WaterFlow ScrollToIndex function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, ScrollToIndex001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Calling the ScrollToIndex interface to set values to 20 and true.
+     * @tc.expected: pattern_->targetIndex_ is 20
+     */
+    CreateWithItem([](WaterFlowModelNG model) {});
+    pattern_->ScrollToIndex(20, true);
+    EXPECT_EQ(pattern_->targetIndex_, 20);
+}
+
 } // namespace OHOS::Ace::NG

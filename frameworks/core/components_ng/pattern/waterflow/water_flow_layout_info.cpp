@@ -187,6 +187,7 @@ void WaterFlowLayoutInfo::Reset()
 
     startIndex_ = 0;
     endIndex_ = 0;
+    targetIndex_.reset();
     waterFlowItems_.clear();
 }
 
