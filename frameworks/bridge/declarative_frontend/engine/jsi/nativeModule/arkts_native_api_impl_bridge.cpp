@@ -71,6 +71,7 @@
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_calendar_picker_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_water_flow_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_alphabet_indexer_bridge.h"
+#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_data_panel_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_scroll_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_common_shape_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_shape_bridge.h"
@@ -1101,6 +1102,7 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
     RegisterTextpickerAttributes(object, vm);
     RegisterWaterFlowAttributes(object, vm);
     RegisterCheckboxAttributes(object, vm);
+    RegisterDataPanelAttributes(object, vm);
     RegisterScrollAttributes(object, vm);
     RegisterGridItemAttributes(object, vm);
     RegisterCommonShapeAttributes(object, vm);
@@ -2116,6 +2118,24 @@ void ArkUINativeModule::RegisterAlphabetIndexerAttributes(Local<panda::ObjectRef
     alphabetIndexer->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetPopupPosition"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), AlphabetIndexerBridge::ResetPopupPosition));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "alphabetIndexer"), alphabetIndexer);
+}
+
+void ArkUINativeModule::RegisterDataPanelAttributes(Local<panda::ObjectRef> object, EcmaVM* vm)
+{
+    auto dataPanel = panda::ObjectRef::New(vm);
+    dataPanel->Set(vm, panda::StringRef::NewFromUtf8(vm, "setCloseEffect"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), DataPanelBridge::SetCloseEffect));
+    dataPanel->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetCloseEffect"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), DataPanelBridge::ResetCloseEffect));
+    dataPanel->Set(vm, panda::StringRef::NewFromUtf8(vm, "setDataPanelTrackBackgroundColor"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), DataPanelBridge::SetDataPanelTrackBackgroundColor));
+    dataPanel->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetDataPanelTrackBackgroundColor"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), DataPanelBridge::ResetDataPanelTrackBackgroundColor));
+    dataPanel->Set(vm, panda::StringRef::NewFromUtf8(vm, "setDataPanelStrokeWidth"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), DataPanelBridge::SetDataPanelStrokeWidth));
+    dataPanel->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetDataPanelStrokeWidth"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), DataPanelBridge::ResetDataPanelStrokeWidth));
+    object->Set(vm, panda::StringRef::NewFromUtf8(vm, "dataPanel"), dataPanel);
 }
 
 void ArkUINativeModule::RegisterScrollAttributes(Local<panda::ObjectRef> object, EcmaVM *vm)
