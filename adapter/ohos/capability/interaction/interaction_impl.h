@@ -39,10 +39,12 @@ public:
     int32_t GetShadowOffset(ShadowOffsetData& shadowOffsetData) override;
 
     int32_t GetDragState(DragState& dragState) const override;
-    
+
     int32_t GetDragSummary(std::map<std::string, int64_t>& summary) override;
 
     int32_t GetDragExtraInfo(std::string& extraInfo) override;
+
+    int32_t EnterTextEditorArea(bool enable) override;
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_ACE_ENGINE_ADAPTER_OHOS_CAPABILITY_INTERACTION_IMPL_H

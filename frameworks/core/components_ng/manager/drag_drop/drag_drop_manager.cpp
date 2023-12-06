@@ -491,6 +491,7 @@ void DragDropManager::OnDragEnd(const PointerEvent& pointerEvent, const std::str
     Point point  = pointerEvent.GetPoint();
     dragDropState_ = DragDropMgrState::IDLE;
     preTargetFrameNode_ = nullptr;
+    hasNotifiedTransformation_ = false;
 #ifdef ENABLE_DRAG_FRAMEWORK
     auto container = Container::Current();
     if (container && container->IsScenceBoardWindow()) {
@@ -703,6 +704,7 @@ void DragDropManager::FireOnDragEvent(
     event->SetPreviewRect(GetDragWindowRect(point));
 #endif // ENABLE_DRAG_FRAMEWORK
 
+    FireOnEditableTextComponent(frameNode, type);
     FireOnDragEventWithDragType(eventHub, type, event, extraParams);
 
 #ifdef ENABLE_DRAG_FRAMEWORK
@@ -1134,6 +1136,44 @@ void DragDropManager::UpdateVelocityTrackerPoint(const Point& point, bool isEnd)
     std::chrono::microseconds microseconds(GetMicroTickCount());
     TimeStamp curTime(microseconds);
     velocityTracker_.UpdateTrackerPoint(point.GetX(), point.GetY(), curTime, isEnd);
+}
+
+void DragDropManager::FireOnEditableTextComponent(const RefPtr<FrameNode>& frameNode,
+    DragEventType type)
+{
+    auto frameTag = frameNode->GetTag();
+    if (!IsEditableTextComponent(frameTag)) {
+        if (SystemProperties::GetDebugEnabled()) {
+            TAG_LOGI(AceLogTag::ACE_DRAG,
+                "This frame node is not editable text component %{public}s", frameTag.c_str());
+        }
+        return;
+    }
+
+    if (type != DragEventType::ENTER && type != DragEventType::LEAVE) {
+        if (SystemProperties::GetDebugEnabled()) {
+            TAG_LOGI(AceLogTag::ACE_DRAG, "It is an invalid drag type %{public}d", type);
+        }
+        return;
+    }
+
+    if (type == DragEventType::LEAVE) {
+        TAG_LOGI(AceLogTag::ACE_DRAG, "The current control has been dragged away.");
+        hasNotifiedTransformation_ = false;
+        return;
+    }
+
+    if (hasNotifiedTransformation_) {
+        TAG_LOGI(AceLogTag::ACE_DRAG, "Coordinates have been transformed.");
+        return;
+    }
+#ifdef ENABLE_DRAG_FRAMEWORK
+    auto ret = InteractionInterface::GetInstance()->EnterTextEditorArea(true);
+    if (ret != 0) {
+        TAG_LOGI(AceLogTag::ACE_DRAG, "Fail to notify entering text editor erea.");
+    }
+#endif // ENABLE_DRAG_FRAMEWORK
+    hasNotifiedTransformation_ = true;
 }
 
 } // namespace OHOS::Ace::NG
