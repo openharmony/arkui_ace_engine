@@ -177,11 +177,11 @@ void ResourceAdapterImplV2::Init(const ResourceInfo& resourceInfo)
     resConfig_ = resConfig;
 }
 
-void ResourceAdapterImplV2::UpdateConfig(const ResourceConfiguration& config)
+void ResourceAdapterImplV2::UpdateConfig(const ResourceConfiguration& config, bool themeFlag)
 {
     auto resConfig = ConvertConfigToGlobal(config);
     if (sysResourceManager_ && resConfig != nullptr) {
-        sysResourceManager_->UpdateResConfig(*resConfig);
+        sysResourceManager_->UpdateResConfig(*resConfig, themeFlag);
     }
     resConfig_ = resConfig;
 }
