@@ -6266,6 +6266,7 @@ void JSViewAbstract::JSBind(BindingTarget globalObj)
     JSClass<JSViewAbstract>::StaticMethod("keyboardShortcut", &JSViewAbstract::JsKeyboardShortcut);
     JSClass<JSViewAbstract>::StaticMethod("obscured", &JSViewAbstract::JsObscured);
     JSClass<JSViewAbstract>::StaticMethod("allowDrop", &JSViewAbstract::JsAllowDrop);
+    JSClass<JSViewAbstract>::StaticMethod("dragPreview", &JSViewAbstract::JsDragPreview);
 
     JSClass<JSViewAbstract>::StaticMethod("createAnimatableProperty", &JSViewAbstract::JSCreateAnimatableProperty);
     JSClass<JSViewAbstract>::StaticMethod("updateAnimatableProperty", &JSViewAbstract::JSUpdateAnimatableProperty);
@@ -6291,6 +6292,45 @@ void JSViewAbstract::JsAllowDrop(const JSCallbackInfo& info)
         allowDropSet.insert(allowDrop);
     }
     ViewAbstractModel::GetInstance()->SetAllowDrop(allowDropSet);
+}
+
+void JSViewAbstract::JsDragPreview(const JSCallbackInfo& info)
+{
+    if (!info[0]->IsObject()) {
+        return;
+    }
+    NG::DragDropInfo dragPreviewInfo;
+    JSRef<JSVal> builder;
+    JSRef<JSVal> pixelMap;
+    JSRef<JSVal> extraInfo;
+    if (info[0]->IsFunction()) {
+        builder = info[0];
+    } else if (info[0]->IsObject()) {
+        auto dragItemInfo = JSRef<JSObject>::Cast(info[0]);
+        builder = dragItemInfo->GetProperty("builder");
+#if defined(PIXEL_MAP_SUPPORTED)
+        pixelMap = dragItemInfo->GetProperty("pixelMap");
+        dragPreviewInfo.pixelMap = CreatePixelMapFromNapiValue(pixelMap);
+#endif
+        extraInfo = dragItemInfo->GetProperty("extraInfo");
+        ParseJsString(extraInfo, dragPreviewInfo.extraInfo);
+    } else {
+        return;
+    }
+
+    if (builder->IsFunction()) {
+        RefPtr<JsFunction> builderFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(builder));
+        if (builderFunc != nullptr) {
+            ViewStackModel::GetInstance()->NewScope();
+            {
+                ACE_SCORING_EVENT("dragPreview.builder");
+                builderFunc->Execute();
+            }
+            RefPtr<AceType> node = ViewStackModel::GetInstance()->Finish();
+            dragPreviewInfo.customNode = AceType::DynamicCast<NG::UINode>(node);
+        }
+    }
+    ViewAbstractModel::GetInstance()->SetDragPreview(dragPreviewInfo);
 }
 
 void JSViewAbstract::JsAlignRules(const JSCallbackInfo& info)

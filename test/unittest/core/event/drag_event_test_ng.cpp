@@ -325,4 +325,86 @@ HWTEST_F(DragEventTestNg, DragEventTestNg001, TestSize.Level1)
     dragEventActuator->StartLongPressActionForWeb();
     ASSERT_FALSE(dragEventActuator->isReceivedLongPress_);
 }
+
+/**
+ * @tc.name: DragEventTestNg002
+ * @tc.desc: Create DragEventActuator and invoke thumbnail callback.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragEventTestNg, DragEventTestNg002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create FrameNode and set dragPreview.
+     */
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::TEXT_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    frameNode->SetDraggable(true);
+    NG::DragDropInfo dragPreviewInfo;
+    void* voidPtr = static_cast<void*>(new char[0]);
+    RefPtr<PixelMap> pixelMap = PixelMap::CreatePixelMap(voidPtr);
+    dragPreviewInfo.pixelMap = pixelMap;
+    frameNode->SetDragPreview(dragPreviewInfo);
+
+    /**
+     * @tc.steps: step2. Get eventHub and set onDragStart.
+     * @tc.expected: eventHub is not nullptr.
+     */
+    auto eventHub = frameNode->GetEventHub<EventHub>();
+    EXPECT_NE(eventHub, nullptr);
+    eventHub->AttachHost(frameNode);
+    auto onDragStart = [](const RefPtr<OHOS::Ace::DragEvent>& event, const std::string& extraParams) -> DragDropInfo {
+        DragDropInfo info;
+        void* voidPtr = static_cast<void*>(new char[0]);
+        info.pixelMap = PixelMap::CreatePixelMap(voidPtr);
+        return info;
+    };
+    eventHub->SetOnDragStart(std::move(onDragStart));
+
+    /**
+     * @tc.steps: step3. Create gestureEventHub and dragEventActuator.
+     */
+    auto gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
+    auto dragEventActuator = AceType::MakeRefPtr<DragEventActuator>(
+        AceType::WeakClaim(AceType::RawPtr(gestureEventHub)), DRAG_DIRECTION, FINGERS_NUMBER, DISTANCE);
+    
+    /**
+     * @tc.steps: step4. Create DragEvent and set as DragEventActuator's DragEvent.
+     * @tc.expected: dragEventActuator's userCallback_ is not null.
+     */
+    TouchTestResult finalResult;
+    double unknownPropertyValue = GESTURE_EVENT_PROPERTY_DEFAULT_VALUE;
+    GestureEventFunc actionStart = [&unknownPropertyValue](GestureEvent& info) {
+        unknownPropertyValue = info.GetScale();
+    };
+    GestureEventFunc actionUpdate = [&unknownPropertyValue](GestureEvent& info) {
+        unknownPropertyValue = info.GetScale();
+    };
+    GestureEventFunc actionEnd = [&unknownPropertyValue](GestureEvent& info) {
+        unknownPropertyValue = info.GetScale();
+    };
+    GestureEventNoParameter actionCancel = [&unknownPropertyValue]() {
+        unknownPropertyValue = GESTURE_EVENT_PROPERTY_VALUE;
+    };
+    auto dragEvent = AceType::MakeRefPtr<DragEvent>(std::move(actionStart), std::move(actionUpdate),
+        std::move(actionEnd), std::move(actionCancel));
+    dragEventActuator->ReplaceDragEvent(dragEvent);
+    dragEventActuator->SetCustomDragEvent(dragEvent);
+    EXPECT_NE(dragEventActuator->userCallback_, nullptr);
+
+    /**
+     * @tc.steps: step5. Invoke OnCollectTouchTarget when userCallback_ is not null.
+     * @tc.expected: longPressRecognizer is not nullptr and longPressRecognizer's callback is not nullptr.
+     */
+    auto getEventTargetImpl = eventHub->CreateGetEventTargetImpl();
+    EXPECT_NE(getEventTargetImpl, nullptr);
+    dragEventActuator->OnCollectTouchTarget(COORDINATE_OFFSET, DRAG_TOUCH_RESTRICT, getEventTargetImpl, finalResult);
+    EXPECT_NE(dragEventActuator->longPressRecognizer_, nullptr);
+    EXPECT_NE(dragEventActuator->longPressRecognizer_->callback_, nullptr);
+
+    /**
+     * @tc.steps: step6. Invoke thumbnail callback.
+     * @tc.expected: GestureEventHub's pixelMap is not nullptr.
+     */
+    dragEventActuator->longPressRecognizer_->callback_(Offset(WIDTH, HEIGHT));
+    EXPECT_NE(gestureEventHub->pixelMap_, nullptr);
+}
 } // namespace OHOS::Ace::NG

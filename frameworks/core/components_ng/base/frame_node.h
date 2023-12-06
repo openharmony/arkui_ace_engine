@@ -449,6 +449,16 @@ public:
         return allowDrop_;
     }
 
+    void SetDragPreview(const NG::DragDropInfo& info)
+    {
+        dragPreviewInfo_ = info;
+    }
+
+    const DragDropInfo& GetDragPreview() const
+    {
+        return dragPreviewInfo_;
+    }
+
     void SetOverlayNode(const RefPtr<FrameNode>& overlayNode)
     {
         overlayNode_ = overlayNode;
@@ -714,6 +724,7 @@ private:
     std::unique_ptr<OffsetF> lastParentOffsetToWindow_;
     std::set<std::string> allowDrop_;
     std::optional<RectF> viewPort_;
+    NG::DragDropInfo dragPreviewInfo_;
 
     RefPtr<LayoutAlgorithmWrapper> layoutAlgorithm_;
     RefPtr<GeometryNode> oldGeometryNode_;
