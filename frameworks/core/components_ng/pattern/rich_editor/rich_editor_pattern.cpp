@@ -1172,6 +1172,8 @@ void RichEditorPattern::UpdateParagraphStyle(int32_t start, int32_t end, const s
     for (const auto& spanNode : spanNodes) {
         if (style.textAlign.has_value()) {
             spanNode->UpdateTextAlign(*style.textAlign);
+        } else {
+            spanNode->UpdateTextAlign(TextAlign::START);
         }
         if (style.leadingMargin.has_value()) {
             spanNode->GetSpanItem()->leadingMargin = *style.leadingMargin;
