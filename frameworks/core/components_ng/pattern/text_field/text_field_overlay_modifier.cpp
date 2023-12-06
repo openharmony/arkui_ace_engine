@@ -231,6 +231,8 @@ void TextFieldOverlayModifier::PaintMagnifier(DrawingContext& context)
 {
     auto pattern = DynamicCast<TextFieldPattern>(pattern_.Upgrade());
     CHECK_NULL_VOID(pattern);
+    auto pixelMap = pattern->GetPixelMap();
+    CHECK_NULL_VOID(pixelMap);
     if (!pattern->GetShowMagnifier()) {
         return;
     }
@@ -262,8 +264,6 @@ void TextFieldOverlayModifier::PaintMagnifier(DrawingContext& context)
     auto magnifierGain = MAGNIFIER_GAIN;
     auto pixelMapImageOffset = PIXEL_MAP_IMAGE_OFFSET.ConvertToPx();
 
-    auto pixelMap = pattern->GetPixelMap();
-    CHECK_NULL_VOID(pixelMap);
     PixelMapImage pixelMapImage(pixelMap);
     auto magnifierPaintConfig = pixelMapImage.GetPaintConfig();
     magnifierPaintConfig.scaleX_ = magnifierGain;

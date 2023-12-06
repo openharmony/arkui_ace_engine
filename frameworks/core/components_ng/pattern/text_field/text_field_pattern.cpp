@@ -890,6 +890,7 @@ void TextFieldPattern::HandleBlurEvent()
     }
     needToRequestKeyboardInner_ = false;
     isFocusedBeforeClick_ = false;
+    UpdateShowMagnifier();
     StopTwinkling();
     if (customKeyboardBuilder_ && isCustomKeyboardAttached_) {
         CloseKeyboard(true);
@@ -2422,6 +2423,7 @@ void TextFieldPattern::CloseSelectOverlay(bool animation)
     CHECK_NULL_VOID(host);
     auto gesture = host->GetOrCreateGestureEventHub();
     gesture->AddTouchEvent(GetTouchListener());
+    UpdateShowMagnifier();
 }
 
 void TextFieldPattern::OnHandleMove(const RectF& handleRect, bool isFirstHandle)
@@ -5840,8 +5842,14 @@ void TextFieldPattern::ScrollToSafeArea() const
 RefPtr<PixelMap> TextFieldPattern::GetPixelMap()
 {
     auto context = GetHost()->GetRenderContext();
+    if (!context) {
+        UpdateShowMagnifier();
+    }
     CHECK_NULL_RETURN(context, NULL);
     auto pixelMap = context->GetThumbnailPixelMap();
+    if (!pixelMap) {
+        UpdateShowMagnifier();
+    }
     CHECK_NULL_RETURN(pixelMap, NULL);
     return pixelMap;
 }
