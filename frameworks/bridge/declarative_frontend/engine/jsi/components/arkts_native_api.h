@@ -425,18 +425,18 @@ struct ArkUICounterModifierAPI {
 };
 
 struct ArkUICheckboxGroupModifierAPI {
-    void (*SetGroupSelectedColor)(NodeHandle node, uint32_t color);
-    void (*ResetGroupSelectedColor)(NodeHandle node);
-    void (*SetGroupUnSelectedColor)(NodeHandle node, uint32_t color);
-    void (*ResetGroupUnSelectedColor)(NodeHandle node);
-    void (*SetGroupSelectAll)(NodeHandle node, bool isSelected);
-    void (*ResetGroupSelectAll)(NodeHandle node);
+    void (*SetCheckboxGroupSelectedColor)(NodeHandle node, uint32_t color);
+    void (*ResetCheckboxGroupSelectedColor)(NodeHandle node);
+    void (*SetCheckboxGroupUnSelectedColor)(NodeHandle node, uint32_t color);
+    void (*ResetCheckboxGroupUnSelectedColor)(NodeHandle node);
+    void (*SetCheckboxGroupSelectAll)(NodeHandle node, bool isSelected);
+    void (*ResetCheckboxGroupSelectAll)(NodeHandle node);
     void (*SetCheckboxGroupWidth)(NodeHandle node, double value, int unit);
     void (*ResetCheckboxGroupWidth)(NodeHandle node);
     void (*SetCheckboxGroupHeight)(NodeHandle node, double value, int unit);
     void (*ResetCheckboxGroupHeight)(NodeHandle node);
-    void (*SetGroupMark)(NodeHandle node, uint32_t color, double sizeValue, double widthValue);
-    void (*ResetGroupMark)(NodeHandle node);
+    void (*SetCheckboxGroupMark)(NodeHandle node, uint32_t color, double sizeValue, double widthValue);
+    void (*ResetCheckboxGroupMark)(NodeHandle node);
 };
 
 struct ArkUIImageSpanModifierAPI {

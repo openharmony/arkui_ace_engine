@@ -25,7 +25,7 @@ constexpr int NUM_2 = 2;
 constexpr int NUM_3 = 3;
 constexpr float DEFAULT_SIZE_VALUE = -1.0f;
 }   // namespace
-ArkUINativeModuleValue CheckboxGroupBridge::SetGroupSelectedColor(ArkUIRuntimeCallInfo* runtimeCallInfo)
+ArkUINativeModuleValue CheckboxGroupBridge::SetCheckboxGroupSelectedColor(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
@@ -34,24 +34,25 @@ ArkUINativeModuleValue CheckboxGroupBridge::SetGroupSelectedColor(ArkUIRuntimeCa
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
     Color color;
     if (!ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color)) {
-        GetArkUIInternalNodeAPI()->GetCheckboxGroupModifier().ResetGroupSelectedColor(nativeNode);
+        GetArkUIInternalNodeAPI()->GetCheckboxGroupModifier().ResetCheckboxGroupSelectedColor(nativeNode);
     } else {
-        GetArkUIInternalNodeAPI()->GetCheckboxGroupModifier().SetGroupSelectedColor(nativeNode, color.GetValue());
+        GetArkUIInternalNodeAPI()->GetCheckboxGroupModifier().SetCheckboxGroupSelectedColor(
+            nativeNode, color.GetValue());
     }
 
     return panda::JSValueRef::Undefined(vm);
 }
-ArkUINativeModuleValue CheckboxGroupBridge::ResetGroupSelectedColor(ArkUIRuntimeCallInfo* runtimeCallInfo)
+ArkUINativeModuleValue CheckboxGroupBridge::ResetCheckboxGroupSelectedColor(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
 
-    GetArkUIInternalNodeAPI()->GetCheckboxGroupModifier().ResetGroupSelectedColor(nativeNode);
+    GetArkUIInternalNodeAPI()->GetCheckboxGroupModifier().ResetCheckboxGroupSelectedColor(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
-ArkUINativeModuleValue CheckboxGroupBridge::SetGroupUnSelectedColor(ArkUIRuntimeCallInfo* runtimeCallInfo)
+ArkUINativeModuleValue CheckboxGroupBridge::SetCheckboxGroupUnSelectedColor(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
@@ -60,23 +61,24 @@ ArkUINativeModuleValue CheckboxGroupBridge::SetGroupUnSelectedColor(ArkUIRuntime
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
     Color color;
     if (!ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color)) {
-        GetArkUIInternalNodeAPI()->GetCheckboxGroupModifier().ResetGroupUnSelectedColor(nativeNode);
+        GetArkUIInternalNodeAPI()->GetCheckboxGroupModifier().ResetCheckboxGroupUnSelectedColor(nativeNode);
     } else {
-        GetArkUIInternalNodeAPI()->GetCheckboxGroupModifier().SetGroupUnSelectedColor(nativeNode, color.GetValue());
+        GetArkUIInternalNodeAPI()->GetCheckboxGroupModifier().SetCheckboxGroupUnSelectedColor(
+            nativeNode, color.GetValue());
     }
     return panda::JSValueRef::Undefined(vm);
 }
-ArkUINativeModuleValue CheckboxGroupBridge::ResetGroupUnSelectedColor(ArkUIRuntimeCallInfo* runtimeCallInfo)
+ArkUINativeModuleValue CheckboxGroupBridge::ResetCheckboxGroupUnSelectedColor(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
 
-    GetArkUIInternalNodeAPI()->GetCheckboxGroupModifier().ResetGroupUnSelectedColor(nativeNode);
+    GetArkUIInternalNodeAPI()->GetCheckboxGroupModifier().ResetCheckboxGroupUnSelectedColor(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
-ArkUINativeModuleValue CheckboxGroupBridge::SetGroupSelectAll(ArkUIRuntimeCallInfo* runtimeCallInfo)
+ArkUINativeModuleValue CheckboxGroupBridge::SetCheckboxGroupSelectAll(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
@@ -85,17 +87,17 @@ ArkUINativeModuleValue CheckboxGroupBridge::SetGroupSelectAll(ArkUIRuntimeCallIn
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
     bool selectAll = secondArg->ToBoolean(vm)->Value();
 
-    GetArkUIInternalNodeAPI()->GetCheckboxGroupModifier().SetGroupSelectAll(nativeNode, selectAll);
+    GetArkUIInternalNodeAPI()->GetCheckboxGroupModifier().SetCheckboxGroupSelectAll(nativeNode, selectAll);
     return panda::JSValueRef::Undefined(vm);
 }
-ArkUINativeModuleValue CheckboxGroupBridge::ResetGroupSelectAll(ArkUIRuntimeCallInfo* runtimeCallInfo)
+ArkUINativeModuleValue CheckboxGroupBridge::ResetCheckboxGroupSelectAll(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
 
-    GetArkUIInternalNodeAPI()->GetCheckboxGroupModifier().ResetGroupSelectAll(nativeNode);
+    GetArkUIInternalNodeAPI()->GetCheckboxGroupModifier().ResetCheckboxGroupSelectAll(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 ArkUINativeModuleValue CheckboxGroupBridge::SetCheckboxGroupWidth(ArkUIRuntimeCallInfo* runtimeCallInfo)
@@ -157,7 +159,7 @@ ArkUINativeModuleValue CheckboxGroupBridge::ResetCheckboxGroupHeight(ArkUIRuntim
     GetArkUIInternalNodeAPI()->GetCheckboxGroupModifier().ResetCheckboxGroupHeight(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
-ArkUINativeModuleValue CheckboxGroupBridge::SetGroupMark(ArkUIRuntimeCallInfo* runtimeCallInfo)
+ArkUINativeModuleValue CheckboxGroupBridge::SetCheckboxGroupMark(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
@@ -189,18 +191,18 @@ ArkUINativeModuleValue CheckboxGroupBridge::SetGroupMark(ArkUIRuntimeCallInfo* r
         strokeWidth = theme->GetCheckStroke();
     }
 
-    GetArkUIInternalNodeAPI()->GetCheckboxGroupModifier().SetGroupMark(nativeNode,
+    GetArkUIInternalNodeAPI()->GetCheckboxGroupModifier().SetCheckboxGroupMark(nativeNode,
         strokeColor.GetValue(), strokeWidth.Value(), size.Value());
 
     return panda::JSValueRef::Undefined(vm);
 }
-ArkUINativeModuleValue CheckboxGroupBridge::ResetGroupMark(ArkUIRuntimeCallInfo* runtimeCallInfo)
+ArkUINativeModuleValue CheckboxGroupBridge::ResetCheckboxGroupMark(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    GetArkUIInternalNodeAPI()->GetCheckboxGroupModifier().ResetGroupMark(nativeNode);
+    GetArkUIInternalNodeAPI()->GetCheckboxGroupModifier().ResetCheckboxGroupMark(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 } // namespace OHOS::Ace::NG

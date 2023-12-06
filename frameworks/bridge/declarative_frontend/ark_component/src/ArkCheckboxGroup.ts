@@ -3,10 +3,10 @@ class CheckboxGroupSelectAllModifier extends Modifier<boolean> {
     static identity: Symbol = Symbol('checkboxgroupSelectAll');
     applyPeer(node: KNode, reset: boolean) {
         if (reset) {
-            GetUINativeModule().checkboxgroup.resetSelectAll(node);
+            GetUINativeModule().checkboxgroup.resetCheckboxGroupSelectAll(node);
         }
         else {
-            GetUINativeModule().checkboxgroup.setSelectAll(node, this.value);
+            GetUINativeModule().checkboxgroup.setCheckboxGroupSelectAll(node, this.value);
         }
     }
 }
@@ -15,10 +15,10 @@ class CheckboxGroupSelectedColorModifier extends ModifierWithKey<ResourceColor> 
     static identity: Symbol = Symbol('checkboxgroupSelectedColor');
     applyPeer(node: KNode, reset: boolean) {
         if (reset) {
-            GetUINativeModule().checkboxgroup.resetSelectedColor(node);
+            GetUINativeModule().checkboxgroup.resetCheckboxGroupSelectedColor(node);
         }
         else {
-            GetUINativeModule().checkboxgroup.setSelectedColor(node, this.value);
+            GetUINativeModule().checkboxgroup.setCheckboxGroupSelectedColor(node, this.value);
         }
     }
 
@@ -36,10 +36,10 @@ class CheckboxGroupUnselectedColorModifier extends ModifierWithKey<ResourceColor
     static identity: Symbol = Symbol('checkboxgroupUnselectedColor');
     applyPeer(node: KNode, reset: boolean) {
         if (reset) {
-            GetUINativeModule().checkboxgroup.resetUnSelectedColor(node);
+            GetUINativeModule().checkboxgroup.resetCheckboxGroupUnSelectedColor(node);
         }
         else {
-            GetUINativeModule().checkboxgroup.setUnSelectedColor(node, this.value);
+            GetUINativeModule().checkboxgroup.setCheckboxGroupUnSelectedColor(node, this.value);
         }
     }
 
@@ -56,10 +56,10 @@ class CheckboxGroupMarkModifier extends ModifierWithKey<MarkStyle> {
   static identity: Symbol = Symbol('checkboxgroupMark');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().checkboxgroup.resetMark(node);
+      GetUINativeModule().checkboxgroup.resetCheckboxGroupMark(node);
     }
     else {
-      GetUINativeModule().checkboxgroup.setMark(node, this.value?.strokeColor, this.value?.size, this.value?.strokeWidth);
+      GetUINativeModule().checkboxgroup.setCheckboxGroupMark(node, this.value?.strokeColor, this.value?.size, this.value?.strokeWidth);
     }
   }
 

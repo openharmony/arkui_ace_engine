@@ -23,14 +23,14 @@
 
 namespace OHOS::Ace::NG {
 const DimensionUnit DEFAULT_UNIT = DimensionUnit::VP;
-void SetGroupSelectedColor(NodeHandle node, uint32_t color)
+void SetCheckboxGroupSelectedColor(NodeHandle node, uint32_t color)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     CheckBoxGroupModelNG::SetSelectedColor(frameNode, Color(color));
 }
 
-void ResetGroupSelectedColor(NodeHandle node)
+void ResetCheckboxGroupSelectedColor(NodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -42,14 +42,14 @@ void ResetGroupSelectedColor(NodeHandle node)
     CheckBoxGroupModelNG::SetSelectedColor(frameNode, checkBoxTheme->GetActiveColor());
 }
 
-void SetGroupUnSelectedColor(NodeHandle node, uint32_t color)
+void SetCheckboxGroupUnSelectedColor(NodeHandle node, uint32_t color)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     CheckBoxGroupModelNG::SetUnSelectedColor(frameNode, Color(color));
 }
 
-void ResetGroupUnSelectedColor(NodeHandle node)
+void ResetCheckboxGroupUnSelectedColor(NodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -61,14 +61,14 @@ void ResetGroupUnSelectedColor(NodeHandle node)
     CheckBoxGroupModelNG::SetUnSelectedColor(frameNode, checkBoxTheme->GetInactiveColor());
 }
 
-void SetGroupSelectAll(NodeHandle node, bool isSelected)
+void SetCheckboxGroupSelectAll(NodeHandle node, bool isSelected)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     CheckBoxGroupModelNG::SetSelectAll(frameNode, isSelected);
 }
 
-void ResetGroupSelectAll(NodeHandle node)
+void ResetCheckboxGroupSelectAll(NodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -123,7 +123,7 @@ void ResetCheckboxGroupHeight(NodeHandle node)
     CheckBoxGroupModelNG::SetHeight(frameNode, height);
 }
 
-void SetGroupMark(NodeHandle node, uint32_t color, double sizeValue, double widthValue)
+void SetCheckboxGroupMark(NodeHandle node, uint32_t color, double sizeValue, double widthValue)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -136,7 +136,7 @@ void SetGroupMark(NodeHandle node, uint32_t color, double sizeValue, double widt
     CheckBoxGroupModelNG::SetCheckMarkWidth(frameNode, width);
 }
 
-void ResetGroupMark(NodeHandle node)
+void ResetCheckboxGroupMark(NodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -157,10 +157,10 @@ void ResetGroupMark(NodeHandle node)
 
 ArkUICheckboxGroupModifierAPI GetCheckboxGroupModifier()
 {
-    static const ArkUICheckboxGroupModifierAPI modifier = { SetGroupSelectedColor, ResetGroupSelectedColor,
-        SetGroupUnSelectedColor, ResetGroupUnSelectedColor, SetGroupSelectAll, ResetGroupSelectAll,
-        SetCheckboxGroupWidth, ResetCheckboxGroupWidth, SetCheckboxGroupHeight,
-        ResetCheckboxGroupHeight, SetGroupMark, ResetGroupMark };
+    static const ArkUICheckboxGroupModifierAPI modifier = { SetCheckboxGroupSelectedColor,
+        ResetCheckboxGroupSelectedColor, SetCheckboxGroupUnSelectedColor, ResetCheckboxGroupUnSelectedColor,
+        SetCheckboxGroupSelectAll, ResetCheckboxGroupSelectAll, SetCheckboxGroupWidth, ResetCheckboxGroupWidth,
+        SetCheckboxGroupHeight, ResetCheckboxGroupHeight, SetCheckboxGroupMark, ResetCheckboxGroupMark };
     return modifier;
 }
 }
