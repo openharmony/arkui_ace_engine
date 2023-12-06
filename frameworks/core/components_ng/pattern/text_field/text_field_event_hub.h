@@ -154,7 +154,7 @@ public:
         onPasteWithEvent_ = std::move(func);
     }
 
-    void FireOnPasteWithEvent(const std::string& value, , NG::TextCommonEvent& event)
+    void FireOnPasteWithEvent(const std::string& value, NG::TextCommonEvent& event)
     {
         if (onPasteWithEvent_) {
             onPasteWithEvent_(value, event);
