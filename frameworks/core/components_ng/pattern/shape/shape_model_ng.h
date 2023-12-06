@@ -18,6 +18,7 @@
 
 #include "base/geometry/dimension.h"
 #include "base/utils/macros.h"
+#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/shape/shape_model.h"
 
 namespace OHOS::Ace::NG {
@@ -42,6 +43,20 @@ public:
     void SetAntiAlias(bool antiAlias) override;
     void SetWidth() override {}
     void SetHeight() override {}
+    static void SetStrokeDashArray(FrameNode* frameNode, const std::vector<Ace::Dimension>& segments);
+    static void SetStrokeMiterLimit(FrameNode* frameNode, double miterLimit);
+    static void SetFillOpacity(FrameNode* frameNode, double fillOpacity);
+    static void SetStrokeOpacity(FrameNode* frameNode, double strokeOpacity);
+    static void SetStrokeWidth(FrameNode* frameNode, const Ace::Dimension& strokeWidth);
+    static void SetAntiAlias(FrameNode* frameNode, bool antiAlias);
+    static void SetStroke(FrameNode* frameNode, const Color& color);
+    static void SetFill(FrameNode* frameNode, const Color& color);
+    static void SetStrokeDashOffset(FrameNode* frameNode, const Ace::Dimension& dashOffset);
+    static void SetStrokeLineCap(FrameNode* frameNode, int lineCapStyle);
+    static void SetStrokeLineJoin(FrameNode* frameNode, int lineJoinStyle);
+    static void SetViewPort(FrameNode* frameNode, const Dimension& dimLeft, const Dimension& dimTop,
+        const Dimension& dimWidth, const Dimension& dimHeight);
+    static void SetBitmapMesh(FrameNode* frameNode, std::vector<double>& mesh, int32_t column, int32_t row);
 };
 
 } // namespace OHOS::Ace::NG
