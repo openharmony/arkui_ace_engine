@@ -854,11 +854,29 @@ void JSTextField::SetOnCut(const JSCallbackInfo& info)
     TextFieldModel::GetInstance()->SetOnCut(std::move(callback));
 }
 
+JSRef<JSVal> JSTextField::CreateJSTextCommonEvent(NG::TextCommonEvent& event)
+{
+    JSRef<JSObjTemplate> objectTemplate = JSRef<JSObjTemplate>::New();
+    objectTemplate->SetInternalFieldCount(1);
+    JSRef<JSObject> object = objectTemplate->NewInstance();
+    object->SetPropertyObject("preventDefault", JSRef<JSFunc>::New<FunctionCallback>(JsPreventDefault));
+    object->Wrap<NG::TextCommonEvent>(&event);
+    return JSRef<JSVal>::Cast(object);
+}
+
 void JSTextField::SetOnPaste(const JSCallbackInfo& info)
 {
     CHECK_NULL_VOID(info[0]->IsFunction());
-    JsEventCallback<void(const std::string&)> callback(info.GetExecutionContext(), JSRef<JSFunc>::Cast(info[0]));
-    TextFieldModel::GetInstance()->SetOnPaste(std::move(callback));
+    auto jsTextFunc = AceType::MakeRefPtr<JsCitedEventFunction<NG::TextCommonEvent, 2>>(
+        JSRef<JSFunc>::Cast(info[0]), CreateJSTextCommonEvent);
+
+    auto onPaste = [execCtx = info.GetExecutionContext(), func = std::move(jsTextFunc)](
+        const std::string& val, NG::TextCommonEvent& info) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        ACE_SCORING_EVENT("onPaste");
+        func->Execute(val, info);
+    };
+    TextFieldModel::GetInstance()->SetOnPasteWithEvent(std::move(onPaste));
 }
 
 void JSTextField::SetOnClick(const JSCallbackInfo& info)

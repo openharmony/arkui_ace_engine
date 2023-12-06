@@ -1042,6 +1042,16 @@ void TextFieldPattern::HandleOnPaste()
             return;
         }
         auto textfield = weak.Upgrade();
+        auto host = textfield->GetHost();
+        CHECK_NULL_VOID(host);
+        auto eventHub = host->GetEventHub<TextFieldEventHub>();
+        CHECK_NULL_VOID(eventHub);
+        TextCommonEvent event;
+        eventHub->FireOnPasteWithEvent(data, event);
+        if (event.IsPreventDefault()) {
+            return;
+        }
+
         CHECK_NULL_VOID(textfield);
         auto tmpHost = textfield->GetHost();
         CHECK_NULL_VOID(tmpHost);
@@ -1071,11 +1081,6 @@ void TextFieldPattern::HandleOnPaste()
             textfield->HandleCounterBorder();
         }
         textfield->CloseSelectOverlay(true);
-        auto host = textfield->GetHost();
-        CHECK_NULL_VOID(host);
-        auto eventHub = host->GetEventHub<TextFieldEventHub>();
-        CHECK_NULL_VOID(eventHub);
-        eventHub->FireOnPaste(StringUtils::ToString(pasteData));
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
         textfield->StartTwinkling();
     };
