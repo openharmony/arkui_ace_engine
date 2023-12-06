@@ -94,7 +94,7 @@ std::unique_ptr<JsonValue> MediaQueryInfo::GetMediaQueryJsonInfo()
     json->Put("round-screen", SystemProperties::GetIsScreenRound());
     json->Put("device-width", SystemProperties::GetDeviceWidth());
     json->Put("device-height", SystemProperties::GetDeviceHeight());
-    json->Put("resolution", SystemProperties::GetResolution());
+    json->Put("resolution", PipelineBase::GetCurrentDensity());
     json->Put("orientation", GetOrientation().c_str());
     json->Put("device-type", GetDeviceType().c_str());
     json->Put("dark-mode", SystemProperties::GetColorMode() == ColorMode::DARK);

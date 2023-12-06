@@ -41,6 +41,7 @@
 #include "core/common/ime/text_input_formatter.h"
 #include "core/common/ime/text_input_type.h"
 #include "core/common/ime/text_selection.h"
+#include "core/common/recorder/node_data_cache.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/text_field/textfield_theme.h"
 #include "core/components/theme/icon_theme.h"
@@ -123,6 +124,10 @@ constexpr char16_t OBSCURING_CHARACTER_FOR_AR = u'*';
 const std::string NEWLINE = "\n";
 const std::wstring WIDE_NEWLINE = StringUtils::ToWstring(NEWLINE);
 constexpr int32_t AUTO_FILL_FAILED = 1;
+
+#ifdef ENABLE_DRAG_FRAMEWORK
+constexpr Dimension INSERT_CURSOR_OFFSET = 8.0_vp;
+#endif // ENABLE_DRAG_FRAMEWORK
 
 // need to be moved to formatter
 const std::string DIGIT_WHITE_LIST = "[0-9]";
@@ -358,11 +363,11 @@ bool TextFieldPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
     paragraphWidth_ = paragraphWidth;
     textRect_ = textRect;
     parentGlobalOffset_ = textFieldLayoutAlgorithm->GetParentGlobalOffset();
-    FireOnTextChangeEvent();
+    bool isEditorValueChanged = FireOnTextChangeEvent();
     UpdateSelectController();
     UpdateTextFieldManager(Offset(parentGlobalOffset_.GetX(), parentGlobalOffset_.GetY()), frameRect_.Height());
     AdjustTextInReasonableArea();
-    UpdateCaretRect();
+    UpdateCaretRect(isEditorValueChanged);
     UpdateCaretInfoToController();
     auto hostLayoutProperty =
         dirty->GetHostNode() ? dirty->GetHostNode()->GetLayoutProperty<TextFieldLayoutProperty>() : nullptr;
@@ -439,7 +444,7 @@ void TextFieldPattern::UpdateCaretInfoToController() const // todo确定更新�
 }
 
 // return: true if text rect offset will NOT be further changed by caret position
-void TextFieldPattern::UpdateCaretRect()
+void TextFieldPattern::UpdateCaretRect(bool isEditorValueChanged)
 {
     auto focusHub = GetFocusHub();
     if (IsSelected()) {
@@ -452,7 +457,8 @@ void TextFieldPattern::UpdateCaretRect()
         return;
     }
 
-    selectController_->MoveCaretToContentRect(selectController_->GetCaretIndex(), TextAffinity::DOWNSTREAM);
+    selectController_->MoveCaretToContentRect(
+        selectController_->GetCaretIndex(), TextAffinity::DOWNSTREAM, isEditorValueChanged);
 }
 
 void TextFieldPattern::AdjustTextInReasonableArea()
@@ -646,8 +652,8 @@ void TextFieldPattern::HandleFocusEvent()
     }
     NotifyOnEditChanged(true);
     auto visible = layoutProperty->GetShowErrorTextValue(false);
-    if (!visible && layoutProperty->GetShowUnderlineValue(false) && IsUnspecifiedOrTextType()
-        && !IsNormalInlineState()) {
+    if (!visible && layoutProperty->GetShowUnderlineValue(false) && IsUnspecifiedOrTextType() &&
+        !IsNormalInlineState()) {
         auto renderContext = host->GetRenderContext();
         auto textFieldTheme = GetTheme();
         CHECK_NULL_VOID(textFieldTheme);
@@ -702,30 +708,106 @@ void TextFieldPattern::HandleExtendAction(int32_t action)
     }
 }
 
-void TextFieldPattern::HandleSelect(int32_t keyCode, int32_t cursorMoveSkip)
+void TextFieldPattern::CursorMove(CaretMoveIntent direction)
 {
-    TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "HandleSelect, current caret position %{public}d",
-        selectController_->GetCaretIndex());
-    KeyCode code = static_cast<KeyCode>(keyCode);
-    switch (code) {
-        case KeyCode::KEY_DPAD_LEFT: {
+    switch (direction) {
+        case CaretMoveIntent::Left: {
+            CursorMoveLeft();
+            break;
+        }
+        case CaretMoveIntent::Right: {
+            CursorMoveRight();
+            break;
+        }
+        case CaretMoveIntent::Up: {
+            CursorMoveUp();
+            break;
+        }
+        case CaretMoveIntent::Down: {
+            CursorMoveDown();
+            break;
+        }
+        case CaretMoveIntent::LineBegin: {
+            CursorMoveLineBegin();
+            break;
+        }
+        case CaretMoveIntent::LineEnd: {
+            CursorMoveLineEnd();
+            break;
+        }
+        case CaretMoveIntent::LeftWord: {
+            CursorMoveLeftWord();
+            break;
+        }
+        case CaretMoveIntent::RightWord: {
+            CursorMoveRightWord();
+            break;
+        }
+        case CaretMoveIntent::ParagraghBegin: {
+            CursorMoveToParagraphBegin();
+            break;
+        }
+        case CaretMoveIntent::ParagraghEnd: {
+            CursorMoveToParagraphEnd();
+            break;
+        }
+        case CaretMoveIntent::Home: {
+            CursorMoveHome();
+            break;
+        }
+        case CaretMoveIntent::End: {
+            CursorMoveEnd();
+            break;
+        }
+    }
+}
+
+void TextFieldPattern::HandleSelect(CaretMoveIntent direction)
+{
+    switch (direction) {
+        case CaretMoveIntent::Left: {
             HandleSelectionLeft();
             break;
         }
-        case KeyCode::KEY_DPAD_RIGHT: {
+        case CaretMoveIntent::Right: {
             HandleSelectionRight();
             break;
         }
-        case KeyCode::KEY_DPAD_UP: {
+        case CaretMoveIntent::Up: {
             HandleSelectionUp();
             break;
         }
-        case KeyCode::KEY_DPAD_DOWN: {
+        case CaretMoveIntent::Down: {
             HandleSelectionDown();
             break;
         }
-        default: {
+        case CaretMoveIntent::LineBegin: {
+            HandleSelectionLineBegin();
             break;
+        }
+        case CaretMoveIntent::LineEnd: {
+            HandleSelectionLineEnd();
+            break;
+        }
+        case CaretMoveIntent::LeftWord: {
+            HandleSelectionLeftWord();
+            break;
+        }
+        case CaretMoveIntent::RightWord: {
+            HandleSelectionRightWord();
+            break;
+        }
+        case CaretMoveIntent::Home: {
+            HandleSelectionHome();
+            break;
+        }
+        case CaretMoveIntent::End: {
+            HandleSelectionEnd();
+            break;
+        }
+        // SelectionParagraghBegin/SelectionParagraghEnd not supported yet
+        default: {
+            LOGW("Unsupported select operation for text field");
         }
     }
 }
@@ -808,6 +890,7 @@ void TextFieldPattern::HandleBlurEvent()
     }
     needToRequestKeyboardInner_ = false;
     isFocusedBeforeClick_ = false;
+    UpdateShowMagnifier();
     StopTwinkling();
     if (customKeyboardBuilder_ && isCustomKeyboardAttached_) {
         CloseKeyboard(true);
@@ -820,19 +903,22 @@ void TextFieldPattern::HandleBlurEvent()
 
 bool TextFieldPattern::OnKeyEvent(const KeyEvent& event)
 {
-    if (event.code == KeyCode::KEY_ESCAPE) {
-        CloseSelectOverlay(true);
-    }
-    if (event.code == KeyCode::KEY_TAB && isFocusedBeforeClick_ && !contentController_->IsEmpty()) {
+    return TextInputClient::HandleKeyEvent(event);
+}
+
+bool TextFieldPattern::HandleOnEscape()
+{
+    CloseSelectOverlay(true);
+    return false;
+}
+
+bool TextFieldPattern::HandleOnTab(bool backward)
+{
+    if (isFocusedBeforeClick_ && !contentController_->IsEmpty()) {
         isFocusedBeforeClick_ = false;
         HandleOnSelectAll(true);
     }
-    auto context = PipelineContext::GetCurrentContext();
-    auto textFieldManager = DynamicCast<TextFieldManagerNG>(context->GetTextFieldManager());
-    CHECK_NULL_RETURN(textFieldManager, false);
-    auto keyEventHandler = textFieldManager->GetKeyEventHandler();
-    keyEventHandler->UpdateWeakPattern(AceType::WeakClaim(this));
-    return keyEventHandler->HandleKeyEvent(event);
+    return backward ? UpdateFocusBackward() : UpdateFocusForward();
 }
 
 void TextFieldPattern::HandleOnUndoAction()
@@ -979,8 +1065,8 @@ void TextFieldPattern::HandleOnPaste()
         textfield->StripNextLine(pasteData);
         auto originLength = static_cast<int32_t>(textfield->contentController_->GetWideText().length());
         textfield->contentController_->ReplaceSelectedValue(start, end, StringUtils::ToString(pasteData));
-        auto caretMoveLength = static_cast<int32_t>(textfield->contentController_->GetWideText().length()) -
-                               originLength;
+        auto caretMoveLength =
+            static_cast<int32_t>(textfield->contentController_->GetWideText().length()) - originLength;
         auto newCaretPosition = std::clamp(std::max(start, end) + caretMoveLength, 0,
             static_cast<int32_t>(textfield->contentController_->GetWideText().length()));
         textfield->ResetObscureTickCountDown();
@@ -1024,8 +1110,8 @@ void TextFieldPattern::HandleOnCameraInput()
 #ifdef WINDOW_SCENE_SUPPORTED
         auto systemWindowId = GetSCBSystemWindowId();
         if (systemWindowId) {
-            TAG_LOGI(AceLogTag::ACE_TEXT_FIELD,
-                "windowId From %{public}u to %{public}u.", textConfig.windowId, systemWindowId);
+            TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "windowId From %{public}u to %{public}u.", textConfig.windowId,
+                systemWindowId);
             textConfig.windowId = systemWindowId;
         }
 #endif
@@ -1182,8 +1268,7 @@ void TextFieldPattern::HandleTouchDown(const Offset& offset)
         CHECK_NULL_VOID(textFieldTheme);
         auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
         CHECK_NULL_VOID(layoutProperty);
-        if (layoutProperty->GetShowUnderlineValue(false) && IsUnspecifiedOrTextType()
-            && !IsNormalInlineState()) {
+        if (layoutProperty->GetShowUnderlineValue(false) && IsUnspecifiedOrTextType() && !IsNormalInlineState()) {
             auto radius = textFieldTheme->GetBorderRadiusSize();
             renderContext->UpdateBorderRadius({ radius.GetX(), radius.GetY(), radius.GetY(), radius.GetX() });
         }
@@ -1211,8 +1296,8 @@ void TextFieldPattern::HandleTouchUp()
             if (layoutProperty->GetShowUnderlineValue(false) && IsUnspecifiedOrTextType()) {
                 renderContext->UpdateBorderRadius(borderRadius_);
             }
-            if (layoutProperty->GetShowUnderlineValue(false) && HasFocus() && IsUnspecifiedOrTextType()
-                && !IsNormalInlineState()) {
+            if (layoutProperty->GetShowUnderlineValue(false) && HasFocus() && IsUnspecifiedOrTextType() &&
+                !IsNormalInlineState()) {
                 auto textFieldTheme = GetTheme();
                 CHECK_NULL_VOID(textFieldTheme);
                 auto radius = textFieldTheme->GetBorderRadiusSize();
@@ -1421,7 +1506,8 @@ void TextFieldPattern::InitDragDropEvent()
         auto touchX = event->GetX();
         auto touchY = event->GetY();
         Offset offset = Offset(touchX, touchY) - Offset(pattern->textRect_.GetX(), pattern->textRect_.GetY()) -
-                        Offset(pattern->parentGlobalOffset_.GetX(), pattern->parentGlobalOffset_.GetY());
+                        Offset(pattern->parentGlobalOffset_.GetX(), pattern->parentGlobalOffset_.GetY()) -
+                        Offset(0, INSERT_CURSOR_OFFSET.ConvertToPx());
         auto position = pattern->ConvertTouchOffsetToCaretPosition(offset);
         auto host = pattern->GetHost();
         CHECK_NULL_VOID(host);
@@ -1564,7 +1650,8 @@ void TextFieldPattern::HandleSingleClickEvent(GestureEvent& info)
 
     if (RepeatClickCaret(info.GetLocalLocation(), lastCaretIndex) && info.GetSourceDevice() != SourceType::MOUSE) {
         ProcessOverlay(true, true, true, true);
-    } else if (!contentController_->IsEmpty() && info.GetSourceDevice() != SourceType::MOUSE) {
+    } else if (!contentController_->IsEmpty() && info.GetSourceDevice() != SourceType::MOUSE
+        && !IsNormalInlineState()) {
         if (GetNakedCharPosition() >= 0) {
             DelayProcessOverlay(true, true, false);
         } else {
@@ -1883,6 +1970,7 @@ void TextFieldPattern::OnModifyDone()
         inlineSelectAllFlag_ = false;
         inlineFocusState_ = false;
         RestorePreInlineStates();
+        UpdateSelection(0);
     }
     if (!IsTextArea() && layoutProperty->GetShowCounterValue(false) && !IsNormalInlineState() &&
         GetMarginBottom() == MARGIN_NONE) {
@@ -1906,6 +1994,22 @@ void TextFieldPattern::OnModifyDone()
     preInputStyle_ = inputStyle;
 }
 
+void TextFieldPattern::OnAfterModifyDone()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto inspectorId = host->GetInspectorId().value_or("");
+    if (!inspectorId.empty()) {
+        auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
+        bool isPwdType = layoutProperty ? layoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED) ==
+                                              TextInputType::VISIBLE_PASSWORD
+                                        : false;
+        if (!isPwdType) {
+            Recorder::NodeDataCache::Get().PutString(inspectorId, textEditingValue_.text);
+        }
+    }
+}
+
 void TextFieldPattern::CalculateDefaultCursor()
 {
     auto tmpHost = GetHost();
@@ -1926,26 +2030,26 @@ void TextFieldPattern::CalculateDefaultCursor()
     selectController_->UpdateCaretHeight(PreferredLineHeight());
 }
 
-void TextFieldPattern::FireOnTextChangeEvent()
+bool TextFieldPattern::FireOnTextChangeEvent()
 {
     auto host = GetHost();
-    CHECK_NULL_VOID(host);
+    CHECK_NULL_RETURN(host, false);
     auto eventHub = host->GetEventHub<TextFieldEventHub>();
-    CHECK_NULL_VOID(eventHub);
+    CHECK_NULL_RETURN(eventHub, false);
     auto layoutProperty = host->GetLayoutProperty<TextFieldLayoutProperty>();
-    CHECK_NULL_VOID(layoutProperty);
+    CHECK_NULL_RETURN(layoutProperty, false);
 
     auto textCache = layoutProperty->GetValueValue("");
     if (textCache == contentController_->GetTextValue()) {
-        return;
+        return false;
     }
     layoutProperty->UpdateValue(contentController_->GetTextValue());
     host->OnAccessibilityEvent(AccessibilityEventType::TEXT_CHANGE, textCache, contentController_->GetTextValue());
     eventHub->FireOnChange(contentController_->GetTextValue());
     auto context = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(context);
+    CHECK_NULL_RETURN(context, false);
     auto taskExecutor = context->GetTaskExecutor();
-    CHECK_NULL_VOID(taskExecutor);
+    CHECK_NULL_RETURN(taskExecutor, false);
     taskExecutor->PostTask(
         [weak = WeakClaim(this)] {
             auto pattern = weak.Upgrade();
@@ -1953,6 +2057,7 @@ void TextFieldPattern::FireOnTextChangeEvent()
             pattern->ScrollToSafeArea();
         },
         TaskExecutor::TaskType::UI);
+    return true;
 }
 
 void TextFieldPattern::FilterInitializeText()
@@ -2152,11 +2257,11 @@ void TextFieldPattern::ShowSelectOverlay(const ShowSelectOverlayParams& showOver
 
 void TextFieldPattern::ShowSelectOverlayAfterDrag()
 {
-    ShowSelectOverlayParams showOverlayParams = {
-        .animation = true, .isShowMenu = true, .isUpdateMenu = true,
+    ShowSelectOverlayParams showOverlayParams = { .animation = true,
+        .isShowMenu = true,
+        .isUpdateMenu = true,
         .firstHandle = selectController_->GetFirstHandleRect(),
-        .secondHandle = selectController_->GetSecondHandleRect()
-    };
+        .secondHandle = selectController_->GetSecondHandleRect() };
     ShowSelectOverlay(showOverlayParams);
 }
 
@@ -2318,6 +2423,7 @@ void TextFieldPattern::CloseSelectOverlay(bool animation)
     CHECK_NULL_VOID(host);
     auto gesture = host->GetOrCreateGestureEventHub();
     gesture->AddTouchEvent(GetTouchListener());
+    UpdateShowMagnifier();
 }
 
 void TextFieldPattern::OnHandleMove(const RectF& handleRect, bool isFirstHandle)
@@ -2651,6 +2757,10 @@ void TextFieldPattern::HandleLeftMouseMoveEvent(MouseInfo& info)
     if (!leftMouseCanMove_ || blockPress_) {
         return;
     }
+    auto focusHub = GetFocusHub();
+    if (!focusHub->IsCurrentFocus()) {
+        return;
+    }
     mouseStatus_ = MouseStatus::MOVE;
     selectController_->UpdateSecondHandleInfoByMouseOffset(info.GetLocalLocation()); // 更新时上报事件
     showSelect_ = true;
@@ -2746,14 +2856,15 @@ bool TextFieldPattern::RequestKeyboard(bool isFocusViewChanged, bool needStartTw
 #ifdef WINDOW_SCENE_SUPPORTED
         auto systemWindowId = GetSCBSystemWindowId();
         if (systemWindowId) {
-            TAG_LOGI(AceLogTag::ACE_TEXT_FIELD,
-                "windowId From %{public}u to %{public}u.", textConfig.windowId, systemWindowId);
+            TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "windowId From %{public}u to %{public}u.", textConfig.windowId,
+                systemWindowId);
             textConfig.windowId = systemWindowId;
         }
 #endif
-        TAG_LOGI(
-            AceLogTag::ACE_KEYBOARD, "RequestKeyboard set calling window id:%{public}u"
-            "inputType: %{public}d", textConfig.windowId, textConfig.inputAttribute.inputPattern);
+        TAG_LOGI(AceLogTag::ACE_KEYBOARD,
+            "RequestKeyboard set calling window id:%{public}u"
+            "inputType: %{public}d",
+            textConfig.windowId, textConfig.inputAttribute.inputPattern);
         inputMethod->Attach(textChangeListener_, needShowSoftKeyboard, textConfig);
 #else
         if (!HasConnection()) {
@@ -2922,8 +3033,8 @@ void TextFieldPattern::InsertValueOperation(const std::string& insertValue)
     selectController_->UpdateCaretIndex(caretStart + caretMoveLength);
     if (!IsTextArea() && IsInPasswordMode() && GetTextObscured()) {
         if (wideInsertValue.length() == 1 &&
-            (layoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED) != TextInputType::NUMBER_PASSWORD
-            || std::isdigit(insertValue[0]))) {
+            (layoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED) != TextInputType::NUMBER_PASSWORD ||
+                std::isdigit(insertValue[0]))) {
             obscureTickCountDown_ = OBSCURE_SHOW_TICKS;
             nakedCharPosition_ = selectController_->GetCaretIndex() - 1;
         } else {
@@ -3565,6 +3676,7 @@ void TextFieldPattern::PerformAction(TextInputAction action, bool forceCloseKeyb
         auto focusHub = host->GetOrCreateFocusHub();
         focusHub->LostFocus();
         eventHub->FireOnSubmit(static_cast<int32_t>(action));
+        RecordSubmitEvent();
         return;
     }
 
@@ -3575,8 +3687,29 @@ void TextFieldPattern::PerformAction(TextInputAction action, bool forceCloseKeyb
         return;
     }
     eventHub->FireOnSubmit(static_cast<int32_t>(action));
+    RecordSubmitEvent();
     CloseKeyboard(forceCloseKeyboard);
     FocusHub::LostFocusToViewRoot();
+}
+
+void TextFieldPattern::RecordSubmitEvent() const
+{
+    if (!Recorder::EventRecorder::Get().IsComponentRecordEnable()) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto inspectorId = host->GetInspectorId().value_or("");
+    auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
+    bool isPwdType = layoutProperty ? layoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED) ==
+                                          TextInputType::VISIBLE_PASSWORD
+                                    : false;
+    Recorder::EventParamsBuilder builder;
+    builder.SetId(inspectorId).SetType(host->GetTag()).SetEventType(Recorder::EventType::SEARCH_SUBMIT);
+    if (!isPwdType) {
+        builder.SetText(textEditingValue_.text);
+    }
+    Recorder::EventRecorder::Get().OnEvent(std::move(builder));
 }
 
 void TextFieldPattern::UpdateEditingValue(const std::shared_ptr<TextEditingValue>& value, bool needFireChangeEvent)
@@ -5446,10 +5579,10 @@ void TextFieldPattern::UpdateHandlesOffsetOnScroll(float offset)
             selectController_->UpdateCaretOffset();
             UpdateSelectOverlayDoubleHandle();
         } else {
-            UpdateSelectOverlaySecondHandle();
             auto carectOffset = selectController_->GetCaretRect().GetOffset() +
                                 (IsTextArea() ? OffsetF(0.0f, offset) : OffsetF(offset, 0.0f));
             selectController_->UpdateCaretOffset(carectOffset);
+            UpdateSelectOverlaySecondHandle();
         }
     } else {
         auto caretOffset = selectController_->GetCaretRect().GetOffset() +
@@ -5709,8 +5842,14 @@ void TextFieldPattern::ScrollToSafeArea() const
 RefPtr<PixelMap> TextFieldPattern::GetPixelMap()
 {
     auto context = GetHost()->GetRenderContext();
+    if (!context) {
+        UpdateShowMagnifier();
+    }
     CHECK_NULL_RETURN(context, NULL);
     auto pixelMap = context->GetThumbnailPixelMap();
+    if (!pixelMap) {
+        UpdateShowMagnifier();
+    }
     CHECK_NULL_RETURN(pixelMap, NULL);
     return pixelMap;
 }
@@ -5724,9 +5863,8 @@ void TextFieldPattern::ShowMenu()
     CloseSelectOverlay(true);
     if (IsSingleHandle()) {
         SetIsSingleHandle(true);
-    } else {
-        SetIsSingleHandle(false);
     }
+    SetIsSingleHandle(false);
     ProcessOverlay(true, true, true);
 }
 } // namespace OHOS::Ace::NG

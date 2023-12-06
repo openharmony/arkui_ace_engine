@@ -28,12 +28,12 @@ constexpr int64_t FOO_MAX_LEN = 20 * 1024 * 1024;
 bool FileAssetProviderImpl::Initialize(const std::string& packagePath, const std::vector<std::string>& assetBasePaths)
 {
     ACE_SCOPED_TRACE("Initialize");
-    if (packagePath.empty() || assetBasePaths.empty()) {
-        LOGE("the packagePath or assetBasePath is empty");
+    if (assetBasePaths.empty()) {
+        LOGE("the assetBasePath is empty");
         return false;
     }
 
-    if (packagePath.back() != '/') {
+    if (!packagePath.empty() && packagePath.back() != '/') {
         packagePath_ = packagePath + "/";
     } else {
         packagePath_ = packagePath;

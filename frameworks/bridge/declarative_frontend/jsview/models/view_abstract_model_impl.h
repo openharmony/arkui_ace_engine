@@ -238,6 +238,7 @@ public:
     void SetForegroundColor(const Color& color) override {}
     void SetForegroundColorStrategy(const ForegroundColorStrategy& strategy) override {}
     void SetAllowDrop(const std::set<std::string>& allowDrop) override {}
+    void SetDragPreview(const NG::DragDropInfo& info) override {}
 
     void CreateAnimatablePropertyFloat(const std::string& propertyName, float value,
         const std::function<void(float)>& onCallbackEvent) override {};
@@ -255,6 +256,7 @@ public:
         const CalcDimension& positionX, const CalcDimension& positionY, const CalcDimension& positionZ) override {};
     void SetLightIntensity(const float value) override {};
     void SetLightIlluminated(const uint32_t value) override {};
+    void SetIlluminatedBorderWidth(const Dimension& value) override {};
     void SetBloom(const float value) override {};
 };
 

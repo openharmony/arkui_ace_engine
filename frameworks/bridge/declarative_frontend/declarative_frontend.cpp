@@ -568,9 +568,7 @@ void DeclarativeFrontend::InitializeFrontendDelegate(const RefPtr<TaskExecutor>&
         auto container = Container::Current();
         if (container) {
             auto pageUrlChecker = container->GetPageUrlChecker();
-            if (pageUrlChecker != nullptr) {
-                pageUrlChecker->SetModuleNameCallback(std::move(moduleNamecallback));
-            }
+            pageUrlChecker->SetModuleNameCallback(std::move(moduleNamecallback));
         }
     }
 }

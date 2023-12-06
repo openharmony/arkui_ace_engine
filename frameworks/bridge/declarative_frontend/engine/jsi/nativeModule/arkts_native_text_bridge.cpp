@@ -130,7 +130,12 @@ ArkUINativeModuleValue TextBridge::SetFontStyle(ArkUIRuntimeCallInfo* runtimeCal
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
     if (secondArg->IsNumber()) {
-        GetArkUIInternalNodeAPI()->GetTextModifier().SetFontStyle(nativeNode, secondArg->ToNumber(vm)->Value());
+        uint32_t fontStyle = secondArg->Uint32Value(vm);
+        if (fontStyle < static_cast<uint32_t>(OHOS::Ace::FontStyle::NORMAL) ||
+            fontStyle > static_cast<uint32_t>(OHOS::Ace::FontStyle::ITALIC)) {
+            fontStyle = static_cast<uint32_t>(OHOS::Ace::FontStyle::NORMAL);
+        }
+        GetArkUIInternalNodeAPI()->GetTextModifier().SetFontStyle(nativeNode, fontStyle);
     } else {
         GetArkUIInternalNodeAPI()->GetTextModifier().ResetFontStyle(nativeNode);
     }
@@ -318,9 +323,9 @@ ArkUINativeModuleValue TextBridge::SetTextCase(ArkUIRuntimeCallInfo* runtimeCall
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    int32_t value = secondArg->Int32Value(vm);
-    if (value >= NUM_0 && value <= SIZE_OF_TEXT_CASES) {
-        GetArkUIInternalNodeAPI()->GetTextModifier().SetTextTextCase(nativeNode, value);
+    if (secondArg->IsNumber() && secondArg->Int32Value(vm) >= NUM_0 &&
+        secondArg->Int32Value(vm) <= SIZE_OF_TEXT_CASES) {
+        GetArkUIInternalNodeAPI()->GetTextModifier().SetTextTextCase(nativeNode, secondArg->Int32Value(vm));
     } else {
         GetArkUIInternalNodeAPI()->GetTextModifier().ResetTextTextCase(nativeNode);
     }
@@ -344,11 +349,11 @@ ArkUINativeModuleValue TextBridge::SetMaxLines(ArkUIRuntimeCallInfo* runtimeCall
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    if (secondArg->ToNumber(vm)->Value() < 0) {
-        GetArkUIInternalNodeAPI()->GetTextModifier().ResetTextMaxLines(nativeNode);
-    } else {
+    if (secondArg->IsNumber() && secondArg->ToNumber(vm)->Value() > NUM_0) {
         uint32_t maxLine = secondArg->Uint32Value(vm);
         GetArkUIInternalNodeAPI()->GetTextModifier().SetTextMaxLines(nativeNode, maxLine);
+    } else {
+        GetArkUIInternalNodeAPI()->GetTextModifier().ResetTextMaxLines(nativeNode);
     }
     return panda::JSValueRef::Undefined(vm);
 }
@@ -372,9 +377,12 @@ ArkUINativeModuleValue TextBridge::SetMinFontSize(ArkUIRuntimeCallInfo* runtimeC
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
 
     CalcDimension fontSize;
-    ArkTSUtils::ParseJsDimensionFp(vm, secondArg, fontSize);
-    GetArkUIInternalNodeAPI()->GetTextModifier().SetTextMinFontSize(
-        nativeNode, fontSize.Value(), static_cast<int8_t>(fontSize.Unit()));
+    if (ArkTSUtils::ParseJsDimensionFp(vm, secondArg, fontSize)) {
+        GetArkUIInternalNodeAPI()->GetTextModifier().SetTextMinFontSize(
+            nativeNode, fontSize.Value(), static_cast<int8_t>(fontSize.Unit()));
+    } else {
+        GetArkUIInternalNodeAPI()->GetTextModifier().ReSetTextMinFontSize(nativeNode);
+    }
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -421,9 +429,13 @@ ArkUINativeModuleValue TextBridge::SetMaxFontSize(ArkUIRuntimeCallInfo* runtimeC
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
     CalcDimension fontSize;
-    ArkTSUtils::ParseJsDimensionFp(vm, secondArg, fontSize);
-    GetArkUIInternalNodeAPI()->GetTextModifier().SetTextMaxFontSize(
-        nativeNode, fontSize.Value(), static_cast<int8_t>(fontSize.Unit()));
+    if (ArkTSUtils::ParseJsDimensionFp(vm, secondArg, fontSize)) {
+        GetArkUIInternalNodeAPI()->GetTextModifier().SetTextMaxFontSize(
+            nativeNode, fontSize.Value(), static_cast<int8_t>(fontSize.Unit()));
+    } else {
+        GetArkUIInternalNodeAPI()->GetTextModifier().ResetTextMaxFontSize(nativeNode);
+    }
+    
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -508,10 +520,11 @@ ArkUINativeModuleValue TextBridge::SetTextShadow(ArkUIRuntimeCallInfo* runtimeCa
     Local<JSValueRef> fillArg = runtimeCallInfo->GetCallArgRef(NUM_6);
     Local<JSValueRef> lengthArg = runtimeCallInfo->GetCallArgRef(NUM_7);
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    uint32_t length = lengthArg->Uint32Value(vm);
-    if (length == 0) {
+    uint32_t length;
+    if (!lengthArg->IsNumber() || lengthArg->Uint32Value(vm) == 0) {
         return panda::JSValueRef::Undefined(vm);
     }
+    length = lengthArg->Uint32Value(vm);
     auto radiusArray = std::make_unique<double[]>(length);
     auto typeArray = std::make_unique<uint32_t[]>(length);
     auto colorArray = std::make_unique<uint32_t[]>(length);
@@ -565,7 +578,9 @@ ArkUINativeModuleValue TextBridge::SetHeightAdaptivePolicy(ArkUIRuntimeCallInfo*
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    if (secondArg->IsNumber()) {
+    if (secondArg->IsNumber()
+        && secondArg->Int32Value(vm) >= static_cast<int32_t>(TextHeightAdaptivePolicy::MAX_LINES_FIRST)
+        && secondArg->Int32Value(vm) <= static_cast<int32_t>(TextHeightAdaptivePolicy::LAYOUT_CONSTRAINT_FIRST)) {
         uint32_t value = secondArg->Int32Value(vm);
         GetArkUIInternalNodeAPI()->GetTextModifier().SetTextHeightAdaptivePolicy(nativeNode, value);
     } else {
@@ -627,7 +642,6 @@ ArkUINativeModuleValue TextBridge::SetBaselineOffset(ArkUIRuntimeCallInfo* runti
     std::string str;
     if (secondArg->IsNumber()) {
         offset.value = secondArg->ToNumber(vm)->Value();
-        offset.value = offset.value < 0 ? 0 : offset.value;
         GetArkUIInternalNodeAPI()->GetTextModifier().SetTextBaselineOffset(nativeNode, &offset);
     } else if (secondArg->IsString()) {
         str = secondArg->ToString(vm)->ToString();

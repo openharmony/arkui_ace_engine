@@ -173,7 +173,7 @@ void TextFieldOverlayModifier::PaintSelection(DrawingContext& context) const
             textBox.Right() + (isTextArea ? contentOffset_->Get().GetX() : textRect.GetX()),
             defaultStyle
                 ? (textBox.Bottom() + (isTextArea ? textRect.GetY() : contentOffset_->Get().GetY()))
-                : textFieldPattern->GetFrameRect().Height()));
+                         : textFieldPattern->GetFrameRect().Height()));
     }
     canvas.DetachBrush();
     canvas.Restore();
@@ -205,19 +205,8 @@ void TextFieldOverlayModifier::PaintCursor(DrawingContext& context) const
         clipRectHeight);
     canvas.ClipRect(clipInnerRect, RSClipOp::INTERSECT);
     auto caretRect = textFieldPattern->GetCaretRect();
-    // Adjust the cursor to the viewable area.
-    auto textRectRightBoundary = textFieldPattern->IsTextArea()
-                                     ? contentOffset_->Get().GetX() + contentSize_->Get().Width()
-                                     : textRect_.GetX() + textRect_.Width();
-    if (GreatOrEqual(caretRect.GetX() + caretRect.Width(), textRectRightBoundary) &&
-        (textFieldPattern->IsTextArea() || GreatOrEqual(std::ceil(textRect_.Width()), contentSize_->Get().Width()) ||
-            textFieldPattern->GetTextAlign() == TextAlign::END) &&
-        GreatNotEqual(contentSize_->Get().Width(), 0.0) && !textFieldPattern->GetTextValue().empty()) {
-        caretRect.SetLeft(textRectRightBoundary - caretRect.Width());
-    }
-
-    canvas.DrawRect(RSRect(caretRect.GetX() - (static_cast<float>(cursorWidth_->Get()) / 2), caretRect.GetY(),
-        caretRect.GetX() + (static_cast<float>(cursorWidth_->Get()) / 2), caretRect.GetY() + caretRect.Height()));
+    canvas.DrawRect(RSRect(caretRect.GetX(), caretRect.GetY(),
+        caretRect.GetX() + (static_cast<float>(cursorWidth_->Get())), caretRect.GetY() + caretRect.Height()));
     canvas.DetachBrush();
     canvas.Restore();
 }
@@ -242,6 +231,8 @@ void TextFieldOverlayModifier::PaintMagnifier(DrawingContext& context)
 {
     auto pattern = DynamicCast<TextFieldPattern>(pattern_.Upgrade());
     CHECK_NULL_VOID(pattern);
+    auto pixelMap = pattern->GetPixelMap();
+    CHECK_NULL_VOID(pixelMap);
     if (!pattern->GetShowMagnifier()) {
         return;
     }
@@ -273,8 +264,6 @@ void TextFieldOverlayModifier::PaintMagnifier(DrawingContext& context)
     auto magnifierGain = MAGNIFIER_GAIN;
     auto pixelMapImageOffset = PIXEL_MAP_IMAGE_OFFSET.ConvertToPx();
 
-    auto pixelMap = pattern->GetPixelMap();
-    CHECK_NULL_VOID(pixelMap);
     PixelMapImage pixelMapImage(pixelMap);
     auto magnifierPaintConfig = pixelMapImage.GetPaintConfig();
     magnifierPaintConfig.scaleX_ = magnifierGain;

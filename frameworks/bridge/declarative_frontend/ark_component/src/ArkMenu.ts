@@ -70,7 +70,7 @@ class ArkMenuComponent extends ArkComponent implements MenuAttribute {
       radius.bottomRight = value;
     }
     else {
-      radius.topLeft = value?.topRight;
+      radius.topLeft = value?.topLeft;
       radius.topRight = value?.topRight;
       radius.bottomLeft = value?.bottomLeft;
       radius.bottomRight = value?.bottomRight;

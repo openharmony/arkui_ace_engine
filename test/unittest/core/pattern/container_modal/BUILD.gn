@@ -18,7 +18,6 @@ ace_unittest("container_modal_test_ng") {
   sources = [
     "$ace_root/test/mock/core/common/mock_theme_constants.cpp",
     "$ace_root/test/mock/core/common/mock_theme_utils.cpp",
-    "$ace_root/test/unittest/core/pattern/test_ng.cpp",
     "container_modal_test_ng.cpp",
     "mock_container_modal_utils.cpp",
   ]

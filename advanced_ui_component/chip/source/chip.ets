@@ -255,8 +255,7 @@ export struct ChipComponent {
         return value as number
       case 'object':
         try {
-          return getContext().resourceManager
-            .getNumber((value as Resource).id)
+          return px2vp(getContext(this).resourceManager.getNumber((value as Resource).id))
         } catch (error) {
           return Number.NEGATIVE_INFINITY
         }

@@ -33,7 +33,6 @@ struct DelayedTask {
     int64_t timeStamp = 0;
     int32_t time = 0;
     std::function<void()> task;
-    bool deleted = false;
 };
 
 enum class RefereeState { READY, DETECTING, PENDING, PENDING_BLOCKED, SUCCEED_BLOCKED, SUCCEED, FAIL };
@@ -59,7 +58,7 @@ public:
 
     static void ResetGlobalTransCfg();
 
-    static void Transform(PointF& localPointF, const WeakPtr<FrameNode>& node);
+    static void Transform(PointF& localPointF, const WeakPtr<FrameNode>& node, bool isRealTime = false);
 
     // Triggered when the gesture referee finishes collecting gestures and begin a gesture referee.
     void BeginReferee(int32_t touchId, bool needUpdateChild = false)
@@ -145,6 +144,10 @@ public:
     }
 
     bool SetGestureGroup(const WeakPtr<NGGestureRecognizer>& gestureGroup);
+    void ResetGestureGroup()
+    {
+        gestureGroup_.Reset();
+    }
 
     const WeakPtr<NGGestureRecognizer>& GetGestureGroup() const
     {
@@ -212,6 +215,7 @@ public:
         }
         refereeState_ = RefereeState::READY;
         disposal_ = GestureDisposal::NONE;
+        currentFingers_ = 0;
         OnResetStatus();
     }
 
@@ -252,6 +256,14 @@ public:
 
     RefPtr<GestureInfo> GetGestureInfo()
     {
+        return gestureInfo_;
+    }
+
+    RefPtr<GestureInfo> GetOrCreateGestureInfo()
+    {
+        if (!gestureInfo_) {
+            gestureInfo_ = MakeRefPtr<GestureInfo>();
+        }
         return gestureInfo_;
     }
 

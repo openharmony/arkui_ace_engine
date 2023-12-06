@@ -37,14 +37,11 @@ public:
     static ArkUINativeModuleValue ResetFontFamily(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetLabelStyle(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetLabelStyle(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue SetBackgroundColor(ArkUIRuntimeCallInfo *runtimeCallInfo);
+    static ArkUINativeModuleValue ResetBackgroundColor(ArkUIRuntimeCallInfo *runtimeCallInfo);
 
 private:
     static bool ButtonParseJsDimensionFp(const EcmaVM* vm, const Local<JSValueRef>& value, CalcDimension& result);
-    static bool ButtonParseJsDimensionVp(const EcmaVM* vm, const Local<JSValueRef>& value, CalcDimension& result);
-    static bool ButtonParseJsDimensionNG(const EcmaVM* vm, const Local<JSValueRef>& jsValue, CalcDimension& result,
-        DimensionUnit defaultUnit, bool isSupportPercent = true);
-    static bool ButtonParseJsDimensionVpNG(
-        const EcmaVM* vm, const Local<JSValueRef>& jsValue, CalcDimension& result, bool isSupportPercent = true);
     static void PutButtonDimensionParameters(
         ArkUIRuntimeCallInfo* runtimeCallInfo, EcmaVM* vm, double* dimensionValueArray, int* dimensionUnitArray);
 };

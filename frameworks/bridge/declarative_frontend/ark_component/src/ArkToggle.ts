@@ -1,32 +1,22 @@
-/// <reference path="./import.ts" />
+/// <reference path='./import.ts' />
 class ArkToggleComponent extends ArkComponent implements ToggleAttribute {
     onGestureJudgeBegin(callback: (gestureInfo: GestureInfo, event: BaseGestureEvent) => GestureJudgeResult): this {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
     onChange(callback: (isOn: boolean) => void): this {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
-    selectedColor(value: number | undefined): this {
-        let arkColor = new ArkColor();
-        if (arkColor.parseColorValue(value)) {
-            modifier(this._modifiers, ToggleSelectedColorModifier, arkColor.color);
-        } else {
-            modifier(this._modifiers, ToggleSelectedColorModifier, undefined);
-        }
+    selectedColor(value: ResourceColor): this {
+        modifierWithKey(this._modifiersWithKeys, ToggleSelectedColorModifier.identity, ToggleSelectedColorModifier, value);
         return this;
     }
-    switchPointColor(value: number | undefined): this {
-        let arkColor = new ArkColor();
-        if (arkColor.parseColorValue(value)) {
-            modifier(this._modifiers, ToggleSwitchPointColorModifier, arkColor.color);
-        } else {
-            modifier(this._modifiers, ToggleSwitchPointColorModifier, undefined);
-        }
+    switchPointColor(value: ResourceColor): this {
+        modifierWithKey(this._modifiersWithKeys, ToggleSwitchPointColorModifier.identity, ToggleSwitchPointColorModifier, value);
         return this;
     }
 }
-class ToggleSelectedColorModifier extends Modifier<number | undefined> {
-    static identity = Symbol("toggleSelectedColor");
+class ToggleSelectedColorModifier extends Modifier<ResourceColor> {
+    static identity = Symbol('toggleSelectedColor');
     applyPeer(node: KNode, reset: boolean): void {
         if (reset) {
             GetUINativeModule().toggle.resetSelectedColor(node);
@@ -34,9 +24,16 @@ class ToggleSelectedColorModifier extends Modifier<number | undefined> {
             GetUINativeModule().toggle.setSelectedColor(node, this.value);
         }
     }
+
+    checkObjectDiff(): boolean {
+        if (isResource(this.stageValue) && isResource(this.value)) {
+            return !isResourceEqual(this.stageValue, this.value);
+        }
+        return true;
+    }
 }
-class ToggleSwitchPointColorModifier extends Modifier<number | undefined> {
-    static identity = Symbol("toggleSwitchPointColor");
+class ToggleSwitchPointColorModifier extends Modifier<ResourceColor> {
+    static identity = Symbol('toggleSwitchPointColor');
     applyPeer(node: KNode, reset: boolean): void {
         if (reset) {
             GetUINativeModule().toggle.resetSwitchPointColor(node);
@@ -44,13 +41,19 @@ class ToggleSwitchPointColorModifier extends Modifier<number | undefined> {
             GetUINativeModule().toggle.setSwitchPointColor(node, this.value);
         }
     }
+
+    checkObjectDiff(): boolean {
+        if (isResource(this.stageValue) && isResource(this.value)) {
+            return !isResourceEqual(this.stageValue, this.value);
+        }
+        return true;
+    }
 }
 // @ts-ignore
-globalThis.Toggle.attributeModifier = function(modifier) {
+globalThis.Toggle.attributeModifier = function (modifier) {
     const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
     let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
-    let component = this.createOrGetNode(elmtId, () =>
-    {
+    let component = this.createOrGetNode(elmtId, () => {
         return new ArkToggleComponent(nativeNode);
     });
     modifier.applyNormalAttribute(component);

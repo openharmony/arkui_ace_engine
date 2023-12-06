@@ -128,6 +128,7 @@ public:
     static void SetBorderStyle(const BorderStyleProperty &value);
     static void SetOpacity(double opacity);
     static void SetAllowDrop(const std::set<std::string> &allowDrop);
+    static void SetDragPreview(const NG::DragDropInfo& info);
 
     static void SetBorderImage(const RefPtr<BorderImage> &borderImage);
     static void SetBorderImageSource(const std::string &bdImageSrc);
@@ -331,6 +332,7 @@ public:
         const CalcDimension& positionX, const CalcDimension& positionY, const CalcDimension& positionZ);
     static void SetLightIntensity(const float value);
     static void SetLightIlluminated(const uint32_t value);
+    static void SetIlluminatedBorderWidth(const Dimension& value);
     static void SetBloom(const float value);
 
     static void SetBackgroundColor(FrameNode* frameNode, const Color& color);

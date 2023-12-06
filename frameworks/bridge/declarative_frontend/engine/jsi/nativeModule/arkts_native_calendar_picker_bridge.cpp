@@ -15,30 +15,15 @@
 
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_calendar_picker_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_api.h"
-#include "frameworks/core/components/calendar/calendar_theme.h"
+#include "core/components/calendar/calendar_theme.h"
+#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 
 namespace OHOS::Ace::NG {
-namespace {
 constexpr int NUM_0 = 0;
 constexpr int NUM_1 = 1;
 constexpr int NUM_2 = 2;
 constexpr int NUM_3 = 3;
 constexpr int SIZE_OF_TWO = 2;
-
-bool ParseJsDimensionVp(const EcmaVM* vm, const Local<JSValueRef>& value, CalcDimension& result)
-{
-    if (value->IsNumber()) {
-        result = CalcDimension(value->ToNumber(vm)->Value(), DimensionUnit::VP);
-        return true;
-    }
-    if (value->IsString()) {
-        result = StringUtils::StringToCalcDimension(value->ToString(vm)->ToString(), false, DimensionUnit::VP);
-        return true;
-    }
-    // resouce ignore by design
-    return false;
-}
-} // namespace
 
 ArkUINativeModuleValue CalendarPickerBridge::SetTextStyle(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
@@ -95,10 +80,10 @@ ArkUINativeModuleValue CalendarPickerBridge::SetEdgeAlign(ArkUIRuntimeCallInfo* 
         CalcDimension dx;
         CalcDimension dy;
         if (dxArg->IsNumber() || dxArg->IsString()) {
-            ParseJsDimensionVp(vm, dxArg, dx);
+            ArkTSUtils::ParseJsDimensionVp(vm, dxArg, dx);
         }
         if (dyArg->IsNumber() || dyArg->IsString()) {
-            ParseJsDimensionVp(vm, dyArg, dy);
+            ArkTSUtils::ParseJsDimensionVp(vm, dyArg, dy);
         }
 
         double values[SIZE_OF_TWO];

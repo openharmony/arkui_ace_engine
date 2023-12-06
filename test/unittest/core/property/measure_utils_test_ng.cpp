@@ -13,21 +13,22 @@
  * limitations under the License.
  */
 
-#include "gtest/gtest.h"
-
 #include <memory>
 #include <optional>
+
+#include "gtest/gtest.h"
 
 #define protected public
 #define private public
 
-#include "core/components_ng/property/measure_utils.h"
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
+
 #include "base/geometry/ng/size_t.h"
 #include "base/geometry/size.h"
 #include "base/log/log.h"
 #include "base/utils/utils.h"
 #include "core/components_ng/property/measure_property.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "core/components_ng/property/measure_utils.h"
 
 #undef protected
 #undef private
@@ -39,56 +40,45 @@ namespace OHOS::Ace::NG {
 namespace {
 constexpr float PERCENT_REFERENCE = 1.0;
 constexpr float TEST_VALUE = 30.0;
-
 constexpr bool USING_MAX_SIZE_TRUE = true;
 constexpr bool USING_MAX_SIZE_FALSE = false;
-
-const Dimension WIDTH {50.0, DimensionUnit::PX};
-const Dimension HEIGHT {100.0, DimensionUnit::PX};
-const Dimension CALC_TEST {10.0, DimensionUnit::CALC};
-const Dimension BORDER_WIDTH_PX {10.0, DimensionUnit::PX};
-const Dimension BORDER_WIDTH_VP {10.0, DimensionUnit::VP};
-
-const CalcSize TEST_CALC_SIZE {NG::CalcLength(WIDTH), NG::CalcLength(HEIGHT)};
-
-const CalcLength CALC_LENGTH_WIDTH_PX {20.0, DimensionUnit::PX};
-const CalcLength CALC_LENGTH_CALC {10.0, DimensionUnit::CALC};
-const CalcLength PADDING_LENGTH_PX {10.0, DimensionUnit::PX};
-const CalcLength PADDING_LENGTH_VP {10.0, DimensionUnit::VP};
-
-const SizeF TEST_SIZE {50.0, 50.0};
-const SizeF TEST_MIN_SIZE {10.0, 10.0};
-const SizeF TEST_SELF_SIZE = {1.0, 1.0};
-SizeF TEST_MAX_SIZE {100.0, 100.0};
-SizeF ADD_SIZE = {10.0, 10.0};
-SizeF AXIS_SIZE = {20.0, 10.0};
-SizeF CHILDREN_SIZE = {10, 20};
-
-const OffsetF TEST_OFFSET = {10.0, 20.0};
-
-OptionalSizeF TEST_OPTIONAL_SIZE = {10.0, 10.0};
-
-const PaddingPropertyF TEST_PROPERTY {10.0, 10.0, 10.0, 10.0};
-PaddingPropertyF PADDING_PROPERTY = {0, 0, 0, 0};
-PaddingPropertyF TEST_PADDING_PROPERTY = {0, 0, 0, 0};
-
-const BorderWidthPropertyF BORDER_WIDTH_PROPERTY {10.0, 10.0, 10.0, 10.0};
-
+const Dimension WIDTH { 50.0, DimensionUnit::PX };
+const Dimension HEIGHT { 100.0, DimensionUnit::PX };
+const Dimension CALC_TEST { 10.0, DimensionUnit::CALC };
+const Dimension BORDER_WIDTH_PX { 10.0, DimensionUnit::PX };
+const Dimension BORDER_WIDTH_VP { 10.0, DimensionUnit::VP };
+const CalcSize TEST_CALC_SIZE { NG::CalcLength(WIDTH), NG::CalcLength(HEIGHT) };
+const CalcLength CALC_LENGTH_WIDTH_PX { 20.0, DimensionUnit::PX };
+const CalcLength CALC_LENGTH_CALC { 10.0, DimensionUnit::CALC };
+const CalcLength PADDING_LENGTH_PX { 10.0, DimensionUnit::PX };
+const CalcLength PADDING_LENGTH_VP { 10.0, DimensionUnit::VP };
+const SizeF TEST_SIZE { 50.0, 50.0 };
+const SizeF TEST_MIN_SIZE { 10.0, 10.0 };
+const SizeF TEST_SELF_SIZE = { 1.0, 1.0 };
+SizeF TEST_MAX_SIZE { 100.0, 100.0 };
+SizeF ADD_SIZE = { 10.0, 10.0 };
+SizeF AXIS_SIZE = { 20.0, 10.0 };
+SizeF CHILDREN_SIZE = { 10, 20 };
+const OffsetF TEST_OFFSET = { 10.0, 20.0 };
+OptionalSizeF TEST_OPTIONAL_SIZE = { 10.0, 10.0 };
+const PaddingPropertyF TEST_PROPERTY { 10.0, 10.0, 10.0, 10.0 };
+PaddingPropertyF PADDING_PROPERTY = { 0, 0, 0, 0 };
+PaddingPropertyF TEST_PADDING_PROPERTY = { 0, 0, 0, 0 };
+const BorderWidthPropertyF BORDER_WIDTH_PROPERTY { 10.0, 10.0, 10.0, 10.0 };
 const Axis AXIS_HORIZONTAL = Axis::HORIZONTAL;
 const Axis AXIS_VERTICAL = Axis::VERTICAL;
-
 const MeasureType MEASURE_TYPE_MATCH_PARENT = MeasureType::MATCH_PARENT;
 const MeasureType MEASURE_TYPE_MATCH_CONTENT = MeasureType::MATCH_CONTENT;
 const MeasureType MEASURE_TYPE_CROSS_AXIS = MeasureType::MATCH_PARENT_CROSS_AXIS;
 const MeasureType MEASURE_TYPE_MAIN_AXIS = MeasureType::MATCH_PARENT_MAIN_AXIS;
-}
+} // namespace
 class MeasureUtilsTestNg : public testing::Test {
 public:
     static void SetUpTestSuite()
     {
         MockPipelineContext::SetUp();
     }
-    static void TeardownTestSuite()
+    static void TearDownTestSuite()
     {
         MockPipelineContext::TearDown();
     }
@@ -237,7 +227,7 @@ HWTEST_F(MeasureUtilsTestNg, MeasureUtilsTestNg006, TestSize.Level1)
      * @tc.steps: step2. call ConstrainSize and set TEST_MIN_SIZE.width_ is 0.
      * @tc.expected: the return value is the same as TEST_SIZE.
      */
-    TEST_MAX_SIZE = {0, 0};
+    TEST_MAX_SIZE = { 0, 0 };
 
     retSize = ConstrainSize(TEST_SIZE, TEST_MIN_SIZE, TEST_MAX_SIZE);
     EXPECT_EQ(retSize, TEST_SIZE);
@@ -347,8 +337,7 @@ HWTEST_F(MeasureUtilsTestNg, MeasureUtilsTestNg009, TestSize.Level1)
      * @tc.steps: step4. call ConvertToMarginPropertyF.
      * @tc.expected: the return value is the same as BORDER_WIDTH_PROPERTY.
      */
-    retProperty =
-        ConvertToBorderWidthPropertyF(testBorderWidthProperty, std::move(scaleProperty), PERCENT_REFERENCE);
+    retProperty = ConvertToBorderWidthPropertyF(testBorderWidthProperty, std::move(scaleProperty), PERCENT_REFERENCE);
     EXPECT_EQ(retProperty, BORDER_WIDTH_PROPERTY);
 }
 
@@ -391,8 +380,7 @@ HWTEST_F(MeasureUtilsTestNg, MeasureUtilsTestNg010, TestSize.Level1)
      * @tc.steps: step4. call ConvertToBorderWidthPropertyF.
      * @tc.expected: the return value is the same as BORDER_WIDTH_PROPERTY.
      */
-    retProperty =
-        ConvertToBorderWidthPropertyF(testBorderWidthProperty, std::move(scaleProperty), PERCENT_REFERENCE);
+    retProperty = ConvertToBorderWidthPropertyF(testBorderWidthProperty, std::move(scaleProperty), PERCENT_REFERENCE);
     EXPECT_EQ(retProperty, BORDER_WIDTH_PROPERTY);
 
     /**
@@ -401,8 +389,7 @@ HWTEST_F(MeasureUtilsTestNg, MeasureUtilsTestNg010, TestSize.Level1)
      */
     testPropertyT.leftDimen = CALC_TEST;
     testBorderWidthProperty = std::make_unique<BorderWidthProperty>(std::move(testPropertyT));
-    retProperty =
-        ConvertToBorderWidthPropertyF(testBorderWidthProperty, std::move(scaleProperty), PERCENT_REFERENCE);
+    retProperty = ConvertToBorderWidthPropertyF(testBorderWidthProperty, std::move(scaleProperty), PERCENT_REFERENCE);
     EXPECT_EQ(retProperty.leftDimen, std::nullopt);
 }
 
@@ -433,7 +420,7 @@ HWTEST_F(MeasureUtilsTestNg, MeasureUtilsTestNg011, TestSize.Level1)
     testPadding.right = PADDING_LENGTH_PX;
     testPadding.top = PADDING_LENGTH_PX;
     testPadding.bottom = PADDING_LENGTH_PX;
-    TEST_PADDING_PROPERTY = {10.0, 10.0, 10.0, 10.0};
+    TEST_PADDING_PROPERTY = { 10.0, 10.0, 10.0, 10.0 };
 
     /**
      * @tc.steps: step2. call UpdatePaddingPropertyF and set input Padding is not null.
@@ -455,8 +442,8 @@ HWTEST_F(MeasureUtilsTestNg, MeasureUtilsTestNg012, TestSize.Level1)
      */
     ScaleProperty scaleProperty = ScaleProperty::CreateScaleProperty();
     PaddingProperty testPadding;
-    PADDING_PROPERTY = {0, 0, 0, 0};
-    TEST_PADDING_PROPERTY = {10.0, 10.0, 10.0, 10.0};
+    PADDING_PROPERTY = { 0, 0, 0, 0 };
+    TEST_PADDING_PROPERTY = { 10.0, 10.0, 10.0, 10.0 };
 
     /**
      * @tc.steps: step2. set testPadding.left is PADDING_LENGTH_VP.
@@ -485,7 +472,7 @@ HWTEST_F(MeasureUtilsTestNg, MeasureUtilsTestNg013, TestSize.Level1)
      * @tc.steps: step1. call AddPaddingToSize and set input Padding is zero.
      * @tc.expected: the testSize is not changed.
      */
-    PADDING_PROPERTY = {0, 0, 0, 0};
+    PADDING_PROPERTY = { 0, 0, 0, 0 };
 
     AddPaddingToSize(PADDING_PROPERTY, ADD_SIZE);
     EXPECT_EQ(ADD_SIZE.width_, 10.0);
@@ -495,7 +482,7 @@ HWTEST_F(MeasureUtilsTestNg, MeasureUtilsTestNg013, TestSize.Level1)
      * @tc.steps: step2. call AddPaddingToSize and set input Padding is not zero.
      * @tc.expected: the testSize is changed into expected values.
      */
-    PADDING_PROPERTY = {10.0, 20.0, 30.0, 40.0};
+    PADDING_PROPERTY = { 10.0, 20.0, 30.0, 40.0 };
 
     AddPaddingToSize(PADDING_PROPERTY, ADD_SIZE);
     EXPECT_EQ(ADD_SIZE.width_, 40.0);
@@ -513,8 +500,8 @@ HWTEST_F(MeasureUtilsTestNg, MeasureUtilsTestNg014, TestSize.Level1)
      * @tc.steps: step1. call MinusPaddingToSize and set input Padding is zero.
      * @tc.expected: the testSize is not changed.
      */
-    PADDING_PROPERTY = {0, 0, 0, 0};
-    ADD_SIZE = {100.0, 100.0};
+    PADDING_PROPERTY = { 0, 0, 0, 0 };
+    ADD_SIZE = { 100.0, 100.0 };
 
     MinusPaddingToSize(PADDING_PROPERTY, ADD_SIZE);
     EXPECT_EQ(ADD_SIZE.width_, 100.0);
@@ -524,7 +511,7 @@ HWTEST_F(MeasureUtilsTestNg, MeasureUtilsTestNg014, TestSize.Level1)
      * @tc.steps: step2. call MinusPaddingToSize and set input Padding is not zero.
      * @tc.expected: the testSize is changed into expected values.
      */
-    PADDING_PROPERTY = {10.0, 20.0, 30.0, 40.0};
+    PADDING_PROPERTY = { 10.0, 20.0, 30.0, 40.0 };
 
     MinusPaddingToSize(PADDING_PROPERTY, ADD_SIZE);
     EXPECT_EQ(ADD_SIZE.width_, 70.0);
@@ -542,7 +529,7 @@ HWTEST_F(MeasureUtilsTestNg, MeasureUtilsTestNg015, TestSize.Level1)
      * @tc.steps: step1. call AddPaddingToSize and set input Padding is zero.
      * @tc.expected: the testOptionalSize is not changed.
      */
-    PADDING_PROPERTY = {0, 0, 0, 0};
+    PADDING_PROPERTY = { 0, 0, 0, 0 };
 
     AddPaddingToSize(PADDING_PROPERTY, TEST_OPTIONAL_SIZE);
     EXPECT_EQ(TEST_OPTIONAL_SIZE.width_, 10.0);
@@ -552,7 +539,7 @@ HWTEST_F(MeasureUtilsTestNg, MeasureUtilsTestNg015, TestSize.Level1)
      * @tc.steps: step2. call AddPaddingToSize and set input Padding is not zero.
      * @tc.expected: the testOptionalSize is changed into expected values.
      */
-    PADDING_PROPERTY = {40.0, 30.0, 20.0, 10.0};
+    PADDING_PROPERTY = { 40.0, 30.0, 20.0, 10.0 };
 
     AddPaddingToSize(PADDING_PROPERTY, TEST_OPTIONAL_SIZE);
     EXPECT_EQ(TEST_OPTIONAL_SIZE.width_, 80.0);
@@ -570,8 +557,8 @@ HWTEST_F(MeasureUtilsTestNg, MeasureUtilsTestNg016, TestSize.Level1)
      * @tc.steps: step1. call MinusPaddingToSize and set input Padding is zero.
      * @tc.expected: the testOptionalSize is not changed.
      */
-    PADDING_PROPERTY = {0, 0, 0, 0};
-    TEST_OPTIONAL_SIZE = {100.0, 100.0};
+    PADDING_PROPERTY = { 0, 0, 0, 0 };
+    TEST_OPTIONAL_SIZE = { 100.0, 100.0 };
 
     MinusPaddingToSize(PADDING_PROPERTY, TEST_OPTIONAL_SIZE);
     EXPECT_EQ(TEST_OPTIONAL_SIZE.width_, 100.0);
@@ -581,7 +568,7 @@ HWTEST_F(MeasureUtilsTestNg, MeasureUtilsTestNg016, TestSize.Level1)
      * @tc.steps: step2. call MinusPaddingToSize and set input Padding is not zero.
      * @tc.expected: the testOptionalSize is changed into expected values.
      */
-    PADDING_PROPERTY = {40.0, 30.0, 20.0, 10.0};
+    PADDING_PROPERTY = { 40.0, 30.0, 20.0, 10.0 };
 
     MinusPaddingToSize(PADDING_PROPERTY, TEST_OPTIONAL_SIZE);
     EXPECT_EQ(TEST_OPTIONAL_SIZE.width_, 30.0);
@@ -672,7 +659,7 @@ HWTEST_F(MeasureUtilsTestNg, MeasureUtilsTestNg020, TestSize.Level1)
      * @tc.steps: step2. call SetCrossAxisSize and set input Axis is AXIS_VERTICAL.
      * @tc.expected: AXIS_SIZE.width_ is set to the TEST_VALUE.
      */
-    AXIS_SIZE = {10.0, 20.0};
+    AXIS_SIZE = { 10.0, 20.0 };
 
     SetCrossAxisSize(TEST_VALUE, AXIS_VERTICAL, AXIS_SIZE);
     EXPECT_EQ(AXIS_SIZE.width_, TEST_VALUE);
@@ -689,7 +676,7 @@ HWTEST_F(MeasureUtilsTestNg, MeasureUtilsTestNg021, TestSize.Level1)
      * @tc.steps: step1. call SetCrossAxisSize and set input Axis is AXIS_HORIZONTAL.
      * @tc.expected: TEST_OPTIONAL_SIZE.width_ is set to the TEST_VALUE.
      */
-    TEST_OPTIONAL_SIZE = {10.0, 20.0};
+    TEST_OPTIONAL_SIZE = { 10.0, 20.0 };
 
     SetMainAxisSize(TEST_VALUE, AXIS_HORIZONTAL, TEST_OPTIONAL_SIZE);
     EXPECT_EQ(TEST_OPTIONAL_SIZE.height_, 20.0);
@@ -699,7 +686,7 @@ HWTEST_F(MeasureUtilsTestNg, MeasureUtilsTestNg021, TestSize.Level1)
      * @tc.steps: step2. call SetCrossAxisSize and set input Axis is VERTICAL.
      * @tc.expected: TEST_OPTIONAL_SIZE.height_ is set to the TEST_VALUE.
      */
-    TEST_OPTIONAL_SIZE = {10.0, 20.0};
+    TEST_OPTIONAL_SIZE = { 10.0, 20.0 };
 
     SetMainAxisSize(TEST_VALUE, AXIS_VERTICAL, TEST_OPTIONAL_SIZE);
     EXPECT_EQ(TEST_OPTIONAL_SIZE.height_, 30.0);
@@ -717,7 +704,7 @@ HWTEST_F(MeasureUtilsTestNg, MeasureUtilsTestNg022, TestSize.Level1)
      * @tc.steps: step1. call GetMainAxisSize and set input Axis is AXIS_HORIZONTAL.
      * @tc.expected:  the return value is equal to TEST_OPTIONAL_SIZE.width_.
      */
-    TEST_OPTIONAL_SIZE = {10.0, 20.0};
+    TEST_OPTIONAL_SIZE = { 10.0, 20.0 };
 
     std::optional<float> retMainSize = GetMainAxisSize(TEST_OPTIONAL_SIZE, AXIS_HORIZONTAL);
     EXPECT_EQ(retMainSize, TEST_OPTIONAL_SIZE.width_);
@@ -771,7 +758,7 @@ HWTEST_F(MeasureUtilsTestNg, MeasureUtilsTestNg024, TestSize.Level1)
      * @tc.steps: step2. call SetCrossAxisSize and set input Axis is AXIS_VERTICAL.
      * @tc.expected: TEST_OPTIONAL_SIZE.width_ is set to the TEST_VALUE.
      */
-    TEST_OPTIONAL_SIZE = {10.0, 20.0};
+    TEST_OPTIONAL_SIZE = { 10.0, 20.0 };
 
     SetCrossAxisSize(TEST_VALUE, AXIS_VERTICAL, TEST_OPTIONAL_SIZE);
     EXPECT_EQ(TEST_OPTIONAL_SIZE.height_, 20.0);
@@ -799,8 +786,7 @@ HWTEST_F(MeasureUtilsTestNg, MeasureUtilsTestNg025, TestSize.Level1)
      * @tc.steps: step2. call CreateIdealSize and set input usingMaxSize is USING_MAX_SIZE_FALSE.
      * @tc.expected: the return retIdealSize.width_ and retIdealSize.height_ is not equal 0.
      */
-    retIdealSize =
-        CreateIdealSize(layoutConstraint, AXIS_VERTICAL, MEASURE_TYPE_MATCH_PARENT, USING_MAX_SIZE_FALSE);
+    retIdealSize = CreateIdealSize(layoutConstraint, AXIS_VERTICAL, MEASURE_TYPE_MATCH_PARENT, USING_MAX_SIZE_FALSE);
     EXPECT_NE(retIdealSize.width_, 0);
     EXPECT_NE(retIdealSize.height_, 0);
 }
@@ -821,7 +807,7 @@ HWTEST_F(MeasureUtilsTestNg, MeasureUtilsTestNg026, TestSize.Level1)
      * @tc.steps: step1. call CreateIdealSize and set layoutConstraint.maxSize.height_ is 100.
      * @tc.expected: the return retIdealSize.height_ is the same as layoutConstraint.maxSize.height_.
      */
-    layoutConstraint.maxSize = {100.0, 100.0};
+    layoutConstraint.maxSize = { 100.0, 100.0 };
     OptionalSizeF retIdealSize = CreateIdealSize(layoutConstraint, AXIS_HORIZONTAL, MEASURE_TYPE_CROSS_AXIS);
     EXPECT_EQ(retIdealSize.height_, layoutConstraint.maxSize.height_);
 
@@ -829,7 +815,7 @@ HWTEST_F(MeasureUtilsTestNg, MeasureUtilsTestNg026, TestSize.Level1)
      * @tc.steps: step2. call CreateIdealSize and set layoutConstraint.parentIdealSize.height_ is 20.
      * @tc.expected: the return retIdealSize.height_ is the same as layoutConstraint.parentIdealSize.height_.
      */
-    layoutConstraint.parentIdealSize = {10.0, 20.0};
+    layoutConstraint.parentIdealSize = { 10.0, 20.0 };
     retIdealSize = CreateIdealSize(layoutConstraint, AXIS_HORIZONTAL, MEASURE_TYPE_CROSS_AXIS);
     EXPECT_EQ(retIdealSize.height_, layoutConstraint.parentIdealSize.height_);
 }
@@ -850,7 +836,7 @@ HWTEST_F(MeasureUtilsTestNg, MeasureUtilsTestNg027, TestSize.Level1)
      * @tc.steps: step2. call CreateIdealSize and set layoutConstraint.maxSize.width_ is 100.
      * @tc.expected: the return retIdealSize.height_ is the same as layoutConstraint.maxSize.width_.
      */
-    layoutConstraint.maxSize = {100.0, 100.0};
+    layoutConstraint.maxSize = { 100.0, 100.0 };
     OptionalSizeF retIdealSize = CreateIdealSize(layoutConstraint, AXIS_HORIZONTAL, MEASURE_TYPE_MAIN_AXIS);
     EXPECT_EQ(retIdealSize.width_, layoutConstraint.maxSize.width_);
 
@@ -858,7 +844,7 @@ HWTEST_F(MeasureUtilsTestNg, MeasureUtilsTestNg027, TestSize.Level1)
      * @tc.steps: step3. call CreateIdealSize and set layoutConstraint.parentIdealSize.width_ is 20.
      * @tc.expected: the return retIdealSize.height_ is the same as layoutConstraint.parentIdealSize.width_.
      */
-    layoutConstraint.parentIdealSize = {20.0, 10.0};
+    layoutConstraint.parentIdealSize = { 20.0, 10.0 };
     retIdealSize = CreateIdealSize(layoutConstraint, AXIS_HORIZONTAL, MEASURE_TYPE_MAIN_AXIS);
     EXPECT_EQ(retIdealSize.width_, layoutConstraint.parentIdealSize.width_);
 

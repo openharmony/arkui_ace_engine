@@ -124,6 +124,7 @@ bool NGGestureRecognizer::HandleEvent(const TouchEvent& point)
             break;
         case TouchType::CANCEL:
             HandleTouchCancelEvent(point);
+            currentFingers_--;
             break;
         default:
             break;
@@ -171,7 +172,7 @@ void NGGestureRecognizer::BatchAdjudicate(const RefPtr<NGGestureRecognizer>& rec
     referee->Adjudicate(recognizer, disposal);
 }
 
-void NGGestureRecognizer::Transform(PointF& localPointF, const WeakPtr<FrameNode>& node)
+void NGGestureRecognizer::Transform(PointF& localPointF, const WeakPtr<FrameNode>& node, bool isRealTime)
 {
     if (node.Invalid()) {
         return;
@@ -179,8 +180,23 @@ void NGGestureRecognizer::Transform(PointF& localPointF, const WeakPtr<FrameNode
 
     std::vector<Matrix4> vTrans {};
     auto host = node.Upgrade();
+    CHECK_NULL_VOID(host);
+
+    std::function<Matrix4()> getLocalMatrix;
+    if (isRealTime) {
+        getLocalMatrix = [&host]()->Matrix4 {
+            auto context = host->GetRenderContext();
+            CHECK_NULL_RETURN(context, Matrix4::CreateIdentity());
+            return context->GetLocalTransformMatrix();
+        };
+    } else {
+        getLocalMatrix = [&host]()->Matrix4 {
+            return host->GetLocalMatrix();
+        };
+    }
+
     while (host) {
-        auto localMat = host->GetLocalMatrix();
+        auto localMat = getLocalMatrix();
         vTrans.emplace_back(localMat);
         host = host->GetAncestorNodeOfFrame();
     }
@@ -259,7 +275,7 @@ void NGGestureRecognizer::AddGestureProcedure(const TouchEvent& point,
 
 bool NGGestureRecognizer::SetGestureGroup(const WeakPtr<NGGestureRecognizer>& gestureGroup)
 {
-    if (!gestureGroup_.Invalid() && !gestureGroup.Invalid()) {
+    if (!gestureGroup_.Invalid()) {
         return false;
     }
 

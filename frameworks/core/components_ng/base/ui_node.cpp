@@ -830,7 +830,10 @@ void UINode::OnGenerateOneDepthVisibleFrameWithTransition(std::list<RefPtr<Frame
 bool UINode::RemoveImmediately() const
 {
     auto children = GetChildren();
-    return std::all_of(children.begin(), children.end(), [](const auto& child) { return child->RemoveImmediately(); });
+    return std::all_of(
+               children.begin(), children.end(), [](const auto& child) { return child->RemoveImmediately(); }) &&
+           std::all_of(disappearingChildren_.begin(), disappearingChildren_.end(),
+               [](const auto& pair) { return pair.first->RemoveImmediately(); });
 }
 
 void UINode::GetPerformanceCheckData(PerformanceCheckNodeMap& nodeMap)

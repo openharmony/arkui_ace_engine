@@ -228,6 +228,9 @@ uint32_t GetMaxGridCounts(const RefPtr<GridColumnInfo>& columnInfo)
         case GRID_COUNTS_12:
             maxGridCounts = GRID_COUNTS_8;
             break;
+        case MIN_GRID_COUNTS:
+            maxGridCounts = MIN_GRID_COUNTS;
+            break;
         default:
             break;
     }

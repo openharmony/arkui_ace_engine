@@ -41,8 +41,8 @@ public:
     RefPtr<NG::FrameNode> CreateUIExtensionMenu(
         const std::map<std::string, std::string>& paramaters, std::function<void(const std::string&)> onClickMenu);
     bool ShowUIExtensionMenu(const std::map<std::string, std::string>& paramaters, NG::RectF aiRect,
-        std::function<void(const std::string&)> onClickMenu, std::vector<std::string> aiMenuOptions,
-        const RefPtr<NG::FrameNode>& targetNode);
+        std::function<void(const std::string&)> onClickMenu,  const RefPtr<NG::FrameNode>& targetNode);
+    void ResponseBestMatchItem(const std::map<std::string, std::string>& paramaters, const AISpan& aiSpan);
 
     std::string GetBundleName()
     {

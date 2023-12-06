@@ -28,7 +28,7 @@
 
 namespace OHOS::Ace::NG {
 const uint32_t MAX_LINES = 3;
-constexpr uint32_t DEFAULT_CARET_COLOR = 0x007DFF;
+constexpr uint32_t DEFAULT_CARET_COLOR = 0xFF007DFF;
 constexpr uint32_t DEFAULT_CARE_POSITION = 0;
 constexpr CopyOptions DEFAULT_TEXT_INPUT_COPY_OPTION = CopyOptions::Local;
 constexpr bool DEFAULT_SHOW_PASSWORD_ICON_VALUE = true;

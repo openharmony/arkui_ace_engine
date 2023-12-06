@@ -23,7 +23,10 @@ ArkUINativeModuleValue RowSplitBridge::SetResizeable(ArkUIRuntimeCallInfo *runti
     Local<JSValueRef> nativeNodeArg = runtimeCallInfo->GetCallArgRef(0);
     Local<JSValueRef> resizeableArg = runtimeCallInfo->GetCallArgRef(1);
     void *nativeNode = nativeNodeArg->ToNativePointer(vm)->Value();
-    bool resizeable = resizeableArg->ToBoolean(vm)->BooleaValue();
+    bool resizeable = false;
+    if (resizeableArg->IsBoolean()) {
+        resizeable = resizeableArg->ToBoolean(vm)->BooleaValue();
+    }
     GetArkUIInternalNodeAPI()->GetRowSplitModifier().SetRowSplitResizeable(nativeNode, resizeable);
     return panda::JSValueRef::Undefined(vm);
 }

@@ -251,7 +251,7 @@ void ParseSwiperIndexObject(const JSCallbackInfo& args, const JSRef<JSVal>& chan
     CHECK_NULL_VOID(changeEventVal->IsFunction());
 
     auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(changeEventVal));
-    auto targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    WeakPtr<NG::FrameNode> targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
     auto onIndex = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), node = targetNode](
                        const BaseEventInfo* info) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
@@ -812,7 +812,7 @@ void JSSwiper::SetOnChange(const JSCallbackInfo& info)
 
     auto changeHandler = AceType::MakeRefPtr<JsEventFunction<SwiperChangeEvent, 1>>(
         JSRef<JSFunc>::Cast(info[0]), SwiperChangeEventToJSValue);
-    auto targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    WeakPtr<NG::FrameNode> targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
     auto onChange = [executionContext = info.GetExecutionContext(), func = std::move(changeHandler), node = targetNode](
                         const BaseEventInfo* info) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext);
@@ -837,7 +837,7 @@ void JSSwiper::SetOnAnimationStart(const JSCallbackInfo& info)
 
     if (Container::IsCurrentUseNewPipeline()) {
         auto animationStartHandler = AceType::MakeRefPtr<JsSwiperFunction>(JSRef<JSFunc>::Cast(info[0]));
-        auto targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+        WeakPtr<NG::FrameNode> targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
         auto onAnimationStart = [executionContext = info.GetExecutionContext(), func = std::move(animationStartHandler),
                                     node = targetNode](
                                     int32_t index, int32_t targetIndex, const AnimationCallbackInfo& info) {
@@ -853,7 +853,7 @@ void JSSwiper::SetOnAnimationStart(const JSCallbackInfo& info)
 
     auto animationStartHandler = AceType::MakeRefPtr<JsEventFunction<SwiperChangeEvent, 1>>(
         JSRef<JSFunc>::Cast(info[0]), SwiperChangeEventToJSValue);
-    auto targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    WeakPtr<NG::FrameNode> targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
     auto onAnimationStart = [executionContext = info.GetExecutionContext(), func = std::move(animationStartHandler),
                                 node = targetNode](const BaseEventInfo* info) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext);
@@ -878,7 +878,7 @@ void JSSwiper::SetOnAnimationEnd(const JSCallbackInfo& info)
 
     if (Container::IsCurrentUseNewPipeline()) {
         auto animationEndHandler = AceType::MakeRefPtr<JsSwiperFunction>(JSRef<JSFunc>::Cast(info[0]));
-        auto targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+        WeakPtr<NG::FrameNode> targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
         auto onAnimationEnd = [executionContext = info.GetExecutionContext(), func = std::move(animationEndHandler),
                                   node = targetNode](int32_t index, const AnimationCallbackInfo& info) {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext);
@@ -893,7 +893,7 @@ void JSSwiper::SetOnAnimationEnd(const JSCallbackInfo& info)
 
     auto animationEndHandler = AceType::MakeRefPtr<JsEventFunction<SwiperChangeEvent, 1>>(
         JSRef<JSFunc>::Cast(info[0]), SwiperChangeEventToJSValue);
-    auto targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    WeakPtr<NG::FrameNode> targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
     auto onAnimationEnd = [executionContext = info.GetExecutionContext(), func = std::move(animationEndHandler),
                               node = targetNode](const BaseEventInfo* info) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext);
@@ -917,7 +917,7 @@ void JSSwiper::SetOnGestureSwipe(const JSCallbackInfo& info)
     }
 
     auto gestureSwipeHandler = AceType::MakeRefPtr<JsSwiperFunction>(JSRef<JSFunc>::Cast(info[0]));
-    auto targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    WeakPtr<NG::FrameNode> targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
     auto onGestureSwipe = [executionContext = info.GetExecutionContext(), func = std::move(gestureSwipeHandler),
                               node = targetNode](int32_t index, const AnimationCallbackInfo& info) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext);
@@ -941,7 +941,7 @@ void JSSwiper::SetOnClick(const JSCallbackInfo& info)
     }
 
     RefPtr<JsClickFunction> jsOnClickFunc = AceType::MakeRefPtr<JsClickFunction>(JSRef<JSFunc>::Cast(info[0]));
-    auto targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    WeakPtr<NG::FrameNode> targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
     auto onClick = [execCtx = info.GetExecutionContext(), func = std::move(jsOnClickFunc), node = targetNode](
                        const BaseEventInfo* info, const RefPtr<V2::InspectorFunctionImpl>& impl) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
@@ -1045,7 +1045,7 @@ void JSSwiperController::FinishAnimation(const JSCallbackInfo& args)
 
     if (args.Length() > 0 && args[0]->IsFunction()) {
         RefPtr<JsFunction> jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(args[0]));
-        auto targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+        WeakPtr<NG::FrameNode> targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
         auto onFinish = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), node = targetNode]() {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             ACE_SCORING_EVENT("Swiper.finishAnimation");

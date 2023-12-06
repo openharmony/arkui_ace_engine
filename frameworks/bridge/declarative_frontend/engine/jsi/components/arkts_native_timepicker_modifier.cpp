@@ -19,7 +19,6 @@
 #include "core/components/common/properties/text_style.h"
 #include "core/pipeline/base/element_register.h"
 #include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/base/view_abstract.h"
 #include "core/components/common/layout/constants.h"
 
 namespace OHOS::Ace::NG {

@@ -21,6 +21,7 @@
 
 #include "base/thread/task_executor.h"
 #include "base/utils/noncopyable.h"
+#include "core/common/recorder/event_config.h"
 
 namespace OHOS::Ace::Recorder {
 enum EventType : int32_t {
@@ -121,7 +122,12 @@ public:
     ~EventRecorder() = default;
     static EventRecorder& Get();
 
+    bool IsPageRecordEnable() const;
+    bool IsExposureRecordEnable() const;
+    bool IsComponentRecordEnable() const;
+
     void SetContainerInfo(const std::string& windowName, int32_t id, bool foreground);
+    void SetFocusContainerInfo(const std::string& windowName, int32_t id);
     int32_t GetContainerId();
     const std::string& GetPageUrl() const;
     const std::string& GetNavDstName() const;
@@ -137,8 +143,14 @@ public:
 
 private:
     EventRecorder();
+    friend class EventConfig;
+
+    bool pageEnable_ = true;
+    bool componentEnable_ = true;
+    bool exposureEnable_ = true;
 
     int32_t containerId_ = -1;
+    int32_t focusContainerId_ = -1;
     int32_t containerCount_ = 0;
 
     std::string pageUrl_;

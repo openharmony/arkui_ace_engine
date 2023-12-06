@@ -201,6 +201,18 @@ const AnimationOption JSViewContext::CreateAnimation(
         }
     }
 
+    int32_t fRRmin = 0;
+    int32_t fRRmax = 0;
+    int32_t fRRExpected = 0;
+    JSRef<JSVal> rateRangeObjectArgs = animationArgs->GetProperty("expectedFrameRateRange");
+    if (rateRangeObjectArgs->IsObject()) {
+        JSRef<JSObject> rateRangeObj = JSRef<JSObject>::Cast(rateRangeObjectArgs);
+        fRRmin = rateRangeObj->GetPropertyValue<int32_t>("min", -1);
+        fRRmax = rateRangeObj->GetPropertyValue<int32_t>("max", -1);
+        fRRExpected = rateRangeObj->GetPropertyValue<int32_t>("expected", -1);
+    }
+    RefPtr<FrameRateRange> frameRateRange = AceType::MakeRefPtr<FrameRateRange>(fRRmin, fRRmax, fRRExpected);
+
     option.SetDuration(duration);
     option.SetDelay(delay);
     option.SetIteration(iterations);
@@ -208,6 +220,7 @@ const AnimationOption JSViewContext::CreateAnimation(
     option.SetAnimationDirection(direction);
     option.SetCurve(curve);
     option.SetFinishCallbackType(finishCallbackType);
+    option.SetFrameRateRange(frameRateRange);
     return option;
 }
 

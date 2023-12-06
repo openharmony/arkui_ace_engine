@@ -159,10 +159,11 @@ public:
     {
         FocusHub::LostFocusToViewRoot();
     }
-    bool CursorMoveLeft() override;
-    bool CursorMoveRight() override;
-    bool CursorMoveUp() override;
-    bool CursorMoveDown() override;
+    void CursorMove(CaretMoveIntent direction) override;
+    bool CursorMoveLeft();
+    bool CursorMoveRight();
+    bool CursorMoveUp();
+    bool CursorMoveDown();
     bool SetCaretPosition(int32_t pos);
     int32_t GetCaretPosition();
     int32_t GetTextContentLength();
@@ -342,8 +343,8 @@ private:
     }
     void UpdateSelectionType(RichEditorSelection& selection);
     std::shared_ptr<SelectionMenuParams> GetMenuParams(RichEditorResponseType responseType, RichEditorType type);
-    void HandleOnPaste();
-    void HandleOnCut();
+    void HandleOnPaste() override;
+    void HandleOnCut() override;
     void InitClickEvent(const RefPtr<GestureEventHub>& gestureHub) override;
     void InitFocusEvent(const RefPtr<FocusHub>& focusHub);
     void HandleBlurEvent();
@@ -424,9 +425,6 @@ private:
         RichEditorAbstractSpanResult& spanResult);
     void DeleteByDeleteValueInfo(const RichEditorDeleteValue& info);
     bool OnKeyEvent(const KeyEvent& keyEvent);
-    bool HandleShiftPressedEvent(const KeyEvent& event);
-    bool HandleDirectionalKey(const KeyEvent& keyEvent);
-    void ParseAppendValue(KeyCode keyCode, std::string& appendElement);
     void MoveCaretAfterTextChange();
     bool BeforeIMEInsertValue(const std::string& insertValue);
     void AfterIMEInsertValue(const RefPtr<SpanNode>& spanNode, int32_t moveLength, bool isCreate);

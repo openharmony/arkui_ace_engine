@@ -111,7 +111,7 @@ ArkUINativeModuleValue PatternLockBridge::SetRegularColor(ArkUIRuntimeCallInfo* 
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
     Color color;
-    if (!ArkTSUtils::ParseJsColor(vm, secondArg, color)) {
+    if (!ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color)) {
         GetArkUIInternalNodeAPI()->GetPatternLockModifier().ResetPatternLockRegularColor(nativeNode);
     } else {
         GetArkUIInternalNodeAPI()->GetPatternLockModifier().SetPatternLockRegularColor(nativeNode, color.GetValue());
@@ -137,7 +137,7 @@ ArkUINativeModuleValue PatternLockBridge::SetPathColor(ArkUIRuntimeCallInfo* run
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
     Color color;
-    if (!ArkTSUtils::ParseJsColor(vm, secondArg, color)) {
+    if (!ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color)) {
         GetArkUIInternalNodeAPI()->GetPatternLockModifier().ResetPatternLockPathColor(nativeNode);
     } else {
         GetArkUIInternalNodeAPI()->GetPatternLockModifier().SetPatternLockPathColor(nativeNode, color.GetValue());
@@ -163,7 +163,7 @@ ArkUINativeModuleValue PatternLockBridge::SetPatternLockActiveColor(ArkUIRuntime
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
     Color color;
-    if (!ArkTSUtils::ParseJsColor(vm, secondArg, color)) {
+    if (!ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color)) {
         GetArkUIInternalNodeAPI()->GetPatternLockModifier().ResetPatternLockActiveColor(nativeNode);
     } else {
         GetArkUIInternalNodeAPI()->GetPatternLockModifier().SetPatternLockActiveColor(nativeNode, color.GetValue());
@@ -216,7 +216,7 @@ ArkUINativeModuleValue PatternLockBridge::SetPatternLockSelectedColor(ArkUIRunti
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
     Color color;
-    if (!ArkTSUtils::ParseJsColor(vm, secondArg, color)) {
+    if (!ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color)) {
         GetArkUIInternalNodeAPI()->GetPatternLockModifier().ResetPatternLockSelectedColor(nativeNode);
     } else {
         GetArkUIInternalNodeAPI()->GetPatternLockModifier().SetPatternLockSelectedColor(nativeNode, color.GetValue());

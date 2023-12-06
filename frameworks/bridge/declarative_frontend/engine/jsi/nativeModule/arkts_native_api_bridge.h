@@ -52,6 +52,13 @@ private:
     static void RegisterMenuAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterDatePickerAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterAlphabetIndexerAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
+    static void RegisterSelectAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
+    static void RegisterRadioAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
+    static void RegisterSliderAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
+    static void RegisterRatingAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
+    static void RegisterTimepickerAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
+    static void RegisterTextpickerAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
+    static void RegisterCheckboxAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
 };
 } // namespace OHOS::Ace::NG
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_ENGINE_JSI_NATIVEMODULE_ARKTS_NATIVE_API_BRIDGE_H

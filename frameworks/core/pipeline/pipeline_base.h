@@ -54,6 +54,7 @@
 #include "core/gestures/gesture_info.h"
 #include "core/image/image_cache.h"
 #include "core/pipeline/container_window_manager.h"
+#include "core/components_ng/manager/display_sync/ui_display_sync_manager.h"
 
 namespace OHOS::Rosen {
 class RSTransaction;
@@ -109,6 +110,21 @@ public:
     static RefPtr<ThemeManager> CurrentThemeManager();
 
     static void SetCallBackNode(const WeakPtr<NG::FrameNode>& node);
+
+    /*
+     * Change px to vp with density of current pipeline
+     */
+    static double Px2VpWithCurrentDensity(double px);
+
+    /*
+     * Change vp to px with density of current pipeline
+     */
+    static double Vp2PxWithCurrentDensity(double vp);
+
+    /*
+     * Get density of current pipeline if valid, or return density of default display
+     */
+    static double GetCurrentDensity();
 
     virtual void SetupRootElement() = 0;
 
@@ -172,6 +188,8 @@ public:
     virtual void OnIdle(int64_t deadline) = 0;
 
     virtual void SetBuildAfterCallback(const std::function<void()>& callback) = 0;
+
+    virtual void DispatchDisplaySync(uint64_t nanoTimestamp) = 0;
 
     virtual void FlushAnimation(uint64_t nanoTimestamp) = 0;
 
@@ -447,6 +465,16 @@ public:
             sharedImageManager_ = MakeRefPtr<SharedImageManager>(taskExecutor_);
         }
         return sharedImageManager_;
+    }
+
+    const RefPtr<UIDisplaySyncManager>& GetOrCreateUIDisplaySyncManager()
+    {
+        std::call_once(displaySyncFlag_, [this]() {
+            if (!uiDisplaySyncManager_) {
+                uiDisplaySyncManager_ = MakeRefPtr<UIDisplaySyncManager>();
+            }
+        });
+        return uiDisplaySyncManager_;
     }
 
     Window* GetWindow()
@@ -1137,8 +1165,17 @@ protected:
     std::atomic<bool> onFocus_ = true;
     uint64_t lastTouchTime_ = 0;
     std::map<int32_t, std::string> formLinkInfoMap_;
+    struct FunctionHash {
+        std::size_t operator()(const std::shared_ptr<std::function<void()>>& functionPtr) const
+        {
+            return std::hash<std::function<void()>*>()(functionPtr.get());
+        }
+    };
     std::function<std::string()> onFormRecycle_;
     std::function<void(std::string)> onFormRecover_;
+
+    std::once_flag displaySyncFlag_;
+    RefPtr<UIDisplaySyncManager> uiDisplaySyncManager_;
 
 private:
     void DumpFrontend() const;
@@ -1157,6 +1194,7 @@ private:
     OnRouterChangeCallback onRouterChangeCallback_ = nullptr;
     PostRTTaskCallback postRTTaskCallback_;
     std::function<void(void)> gsVsyncCallback_;
+    std::unordered_set<std::shared_ptr<std::function<void()>>, FunctionHash> finishFunctions_;
     bool isFormAnimationFinishCallback_ = false;
     int64_t formAnimationStartTime_ = 0;
     bool isFormAnimation_ = false;

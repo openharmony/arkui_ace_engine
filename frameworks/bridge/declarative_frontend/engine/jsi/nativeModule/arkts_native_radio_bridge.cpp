@@ -15,6 +15,8 @@
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_radio_bridge.h"
 
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_api.h"
+#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
+#include "core/components/checkable/checkable_theme.h"
 
 namespace OHOS::Ace::NG {
 constexpr int NUM_0 = 0;
@@ -42,6 +44,7 @@ ArkUINativeModuleValue RadioBridge::ResetRadioChecked(ArkUIRuntimeCallInfo* runt
     GetArkUIInternalNodeAPI()->GetRadioModifier().ResetRadioChecked(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
+
 ArkUINativeModuleValue RadioBridge::SetRadioStyle(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
@@ -52,12 +55,26 @@ ArkUINativeModuleValue RadioBridge::SetRadioStyle(ArkUIRuntimeCallInfo* runtimeC
     Local<JSValueRef> indicatorColor = runtimeCallInfo->GetCallArgRef(NUM_3);
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
     
-    uint32_t checkedBackgroundColorVal = checkedBackgroundColor->Uint32Value(vm);
-    uint32_t uncheckedBorderColorVal = uncheckedBorderColor->Uint32Value(vm);
-    uint32_t indicatorColorVal = indicatorColor->Uint32Value(vm);
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, panda::NativePointerRef::New(vm, nullptr));
+    auto radioTheme = pipeline->GetTheme<RadioTheme>();
+    CHECK_NULL_RETURN(radioTheme, panda::NativePointerRef::New(vm, nullptr));
+
+    Color checkedBackgroundColorVal;
+    if (!ArkTSUtils::ParseJsColor(vm, checkedBackgroundColor, checkedBackgroundColorVal)) {
+        checkedBackgroundColorVal = radioTheme->GetActiveColor();
+    }
+    Color uncheckedBorderColorVal;
+    if (!ArkTSUtils::ParseJsColor(vm, uncheckedBorderColor, uncheckedBorderColorVal)) {
+        uncheckedBorderColorVal = radioTheme->GetInactiveColor();
+    }
+    Color indicatorColorVal;
+    if (!ArkTSUtils::ParseJsColor(vm, indicatorColor, indicatorColorVal)) {
+        indicatorColorVal = radioTheme->GetPointColor();
+    }
 
     GetArkUIInternalNodeAPI()->GetRadioModifier().SetRadioStyle(nativeNode,
-        checkedBackgroundColorVal, uncheckedBorderColorVal, indicatorColorVal);
+        checkedBackgroundColorVal.GetValue(), uncheckedBorderColorVal.GetValue(), indicatorColorVal.GetValue());
     return panda::JSValueRef::Undefined(vm);
 }
 

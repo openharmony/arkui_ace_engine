@@ -623,10 +623,10 @@ void StepperPattern::HandlingRightButtonClickEvent()
     auto labelStatus =
         stepperItemNode->GetLayoutProperty<StepperItemLayoutProperty>()->GetLabelStatus().value_or("normal");
     if (labelStatus == "skip") {
-        stepperHub->FireSkipEvent();
+        stepperHub->FireSkipEvent(index_);
     } else if (labelStatus == "normal") {
         if (index_ == maxIndex_) {
-            stepperHub->FireFinishEvent();
+            stepperHub->FireFinishEvent(index_);
         } else {
             stepperHub->FireChangeEvent(index_, std::clamp<int32_t>(index_ + 1, 0, maxIndex_));
             stepperHub->FireNextEvent(index_, std::clamp<int32_t>(index_ + 1, 0, maxIndex_));

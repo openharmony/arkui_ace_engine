@@ -203,7 +203,7 @@ JSRef<JSObject> JSRichEditor::CreateParagraphStyleResult(const ParagraphInfo& in
     lmObj->SetPropertyObject("size", size);
 #ifdef PIXEL_MAP_SUPPORTED
     if (info.leadingMarginPixmap) {
-        lmObj->SetPropertyObject("placeholder", ConvertPixmap(info.leadingMarginPixmap));
+        lmObj->SetPropertyObject("pixelMap", ConvertPixmap(info.leadingMarginPixmap));
     }
 #endif
     obj->SetPropertyObject("leadingMargin", lmObj);
@@ -600,7 +600,7 @@ void JSRichEditor::SetOnPaste(const JSCallbackInfo& info)
     CHECK_NULL_VOID(info[0]->IsFunction());
     auto jsTextFunc = AceType::MakeRefPtr<JsCitedEventFunction<NG::TextCommonEvent, 1>>(
         JSRef<JSFunc>::Cast(info[0]), CreateJSTextCommonEvent);
-    auto targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    WeakPtr<NG::FrameNode> targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
     auto onPaste = [execCtx = info.GetExecutionContext(), func = std::move(jsTextFunc), node = targetNode](
                        NG::TextCommonEvent& info) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);

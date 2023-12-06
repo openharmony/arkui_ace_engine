@@ -68,6 +68,7 @@ struct SearchButtonOptionsStruct {
 struct ArkUISizeType {
     double value;
     int8_t unit;
+    const char* string;
 };
 
 struct StringAndInt32 {
@@ -400,6 +401,8 @@ struct ArkUIButtonModifierAPI {
     void (*SetButtonLabelStyle)(NodeHandle node, const char *fontFamily, const double *valueArray,
         const double *dimensionValueArray, const int *dimensionUnitArray);
     void (*ResetButtonLabelStyle)(NodeHandle node);
+    void (*SetButtonBackgroundColor)(NodeHandle node, uint32_t color);
+    void (*ResetButtonBackgroundColor)(NodeHandle node);
 };
 
 struct ArkUIToggleModifierAPI {
@@ -1020,13 +1023,13 @@ struct ArkUIMenuModifierAPI {
 
 struct ArkUIDatePickerModifierAPI {
     void (*SetSelectedTextStyle)(
-        NodeHandle node, const char* weightChar, const char* familiesChar, const int* values, double size);
+        NodeHandle node, const char* fontInfo, int32_t styleVal, uint32_t color);
     void (*ResetSelectedTextStyle)(NodeHandle node);
     void (*SetDatePickerTextStyle)(
-        NodeHandle node, const char* weightChar, const char* familiesChar, const int* values, double size);
+        NodeHandle node, const char* fontInfo, int32_t styleVal, uint32_t color);
     void (*ResetDatePickerTextStyle)(NodeHandle node);
     void (*SetDisappearTextStyle)(
-        NodeHandle node, const char* weightChar, const char* familiesChar, const int* values, double size);
+        NodeHandle node, const char* fontInfo, int32_t styleVal, uint32_t color);
     void (*ResetDisappearTextStyle)(NodeHandle node);
     void (*SetLunar)(NodeHandle node, bool isLunar);
     void (*ResetLunar)(NodeHandle node);

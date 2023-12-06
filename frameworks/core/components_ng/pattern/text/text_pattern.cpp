@@ -19,8 +19,6 @@
 #include <stack>
 #include <string>
 
-#include "core/common/container.h"
-#include "core/common/container_scope.h"
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/rect_t.h"
 #include "base/geometry/offset.h"
@@ -30,13 +28,18 @@
 #include "base/utils/utils.h"
 #include "base/window/drag_window.h"
 #include "core/common/ai/data_detector_mgr.h"
+#include "core/common/container.h"
+#include "core/common/container_scope.h"
 #include "core/common/font_manager.h"
+#include "core/common/recorder/event_recorder.h"
+#include "core/common/recorder/node_data_cache.h"
 #include "core/components/text_overlay/text_overlay_theme.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_ng/event/long_press_event.h"
 #include "core/components_ng/manager/select_overlay/select_overlay_manager.h"
+#include "core/components_ng/pattern/rich_editor_drag/rich_editor_drag_pattern.h"
 #include "core/components_ng/pattern/select_overlay/select_overlay_property.h"
 #include "core/components_ng/pattern/text/text_event_hub.h"
 #include "core/components_ng/pattern/text/text_layout_algorithm.h"
@@ -62,8 +65,9 @@ constexpr float BOX_EPSILON = 0.5f;
 constexpr float DOUBLECLICK_INTERVAL_MS = 300.0f;
 constexpr uint32_t SECONDS_TO_MILLISECONDS = 1000;
 const std::unordered_map<TextDataDetectType, std::string> TEXT_DETECT_MAP = {
-    {TextDataDetectType::PHONE_NUMBER, "phoneNum"}, {TextDataDetectType::URL, "url"},
-    {TextDataDetectType::EMAIL, "email"}, {TextDataDetectType::ADDRESS, "location"} };
+    { TextDataDetectType::PHONE_NUMBER, "phoneNum" }, { TextDataDetectType::URL, "url" },
+    { TextDataDetectType::EMAIL, "email" }, { TextDataDetectType::ADDRESS, "location" }
+};
 }; // namespace
 
 void TextPattern::OnAttachToFrameNode()
@@ -331,7 +335,7 @@ void TextPattern::HandleOnCopy()
         textSelector_.Update(-1, -1);
         return;
     }
-    if (copyOption_ != CopyOptions::None || textDetectEnable_) {
+    if (copyOption_ != CopyOptions::None) {
         clipboard_->SetData(value, copyOption_);
     }
     ResetSelection();
@@ -535,9 +539,6 @@ void TextPattern::HandleSingleClickEvent(GestureEvent& info)
 {
     hasClicked_ = true;
     lastClickTimeStamp_ = info.GetTimeStamp();
-    if (textSelector_.IsValid()) {
-        CloseSelectOverlay(true);
-    }
 
     RectF textContentRect = contentRect_;
     textContentRect.SetTop(contentRect_.GetY() - std::min(baselineOffset_, 0.0f));
@@ -548,28 +549,44 @@ void TextPattern::HandleSingleClickEvent(GestureEvent& info)
         info.GetLocalLocation().GetY() - textContentRect.GetY() };
     HandleSpanSingleClickEvent(info, textContentRect, textOffset, isClickOnSpan, isClickOnAISpan);
     if (isClickOnSpan || isClickOnAISpan) {
+        if (isClickOnAISpan && selectOverlayProxy_ && !selectOverlayProxy_->IsClosed()) {
+            selectOverlayProxy_->DisableMenu(true);
+        }
         if (isClickOnSpan && textSelector_.IsValid()) {
             ResetSelection();
         }
         return;
     }
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    if (textDetectEnable_ && host->GetChildren().empty() && !aiSpanMap_.empty() && paragraph_) {
+
+    if (copyOption_ != CopyOptions::None && textDetectEnable_ && spans_.empty() && !aiSpanMap_.empty() && paragraph_) {
         for (const auto& kv : aiSpanMap_) {
             auto aiSpan = kv.second;
             isClickOnAISpan = ClickAISpan(textOffset, aiSpan);
             if (isClickOnAISpan) {
+                if (isClickOnAISpan && selectOverlayProxy_ && !selectOverlayProxy_->IsClosed()) {
+                    selectOverlayProxy_->DisableMenu(true);
+                }
                 return;
             }
         }
     }
     if (textSelector_.IsValid()) {
+        CloseSelectOverlay(true);
         ResetSelection();
     }
     if (onClick_) {
         auto onClick = onClick_;
         onClick(info);
+
+        if (Recorder::EventRecorder::Get().IsComponentRecordEnable()) {
+            auto host = GetHost();
+            CHECK_NULL_VOID(host);
+            auto inspectorId = host->GetInspectorIdValue("");
+            auto text = host->GetAccessibilityProperty<NG::AccessibilityProperty>()->GetText();
+            Recorder::EventParamsBuilder builder;
+            builder.SetId(inspectorId).SetType(host->GetTag()).SetText(text);
+            Recorder::EventRecorder::Get().OnClick(std::move(builder));
+        }
     }
 }
 
@@ -584,22 +601,9 @@ void TextPattern::HandleSpanSingleClickEvent(
             if (!item) {
                 continue;
             }
-            auto spanStart = item->position - static_cast<int32_t>(StringUtils::ToWstring(item->content).length());
-            while (textDetectEnable_ && aiSpanIterator != aiSpanMap_.end() &&
-                aiSpanIterator->second.start <= item->position) {
-                if (aiSpanIterator->second.end <= spanStart) {
-                    ++aiSpanIterator;
-                    continue;
-                }
-                isClickOnAISpan = ClickAISpan(textOffset, aiSpanIterator->second);
-                if (isClickOnAISpan) {
-                    return;
-                }
-                if (aiSpanIterator->second.end >= item->position) {
-                    break;
-                } else {
-                    ++aiSpanIterator;
-                }
+            ClickAISpanOfSpan(aiSpanIterator, item, textOffset, isClickOnAISpan);
+            if (isClickOnAISpan) {
+                return;
             }
             std::vector<RectF> selectedRects;
             paragraph_->GetRectsForRange(start, item->position, selectedRects);
@@ -615,6 +619,11 @@ void TextPattern::HandleSpanSingleClickEvent(
                     target.area.SetHeight(Dimension(0.0f));
                     spanClickinfo.SetTarget(target);
                     item->onClick(spanClickinfo);
+                    if (Recorder::EventRecorder::Get().IsComponentRecordEnable()) {
+                        Recorder::EventParamsBuilder builder;
+                        builder.SetId(item->inspectId).SetText(item->content);
+                        Recorder::EventRecorder::Get().OnClick(std::move(builder));
+                    }
                     isClickOnSpan = true;
                     return;
                 }
@@ -623,12 +632,48 @@ void TextPattern::HandleSpanSingleClickEvent(
     }
 }
 
+void TextPattern::ClickAISpanOfSpan(std::map<int, OHOS::Ace::AISpan>::iterator& aiSpanIterator,
+    const OHOS::Ace::RefPtr<OHOS::Ace::NG::SpanItem>& item, PointF textOffset, bool& isClickOnAISpan)
+{
+    if (copyOption_ == CopyOptions::None || !textDetectEnable_) {
+        return;
+    }
+    auto spanStart = item->position - static_cast<int32_t>(StringUtils::ToWstring(item->content).length());
+    while (aiSpanIterator != aiSpanMap_.end() && aiSpanIterator->second.start <= item->position) {
+        if (aiSpanIterator->second.end <= spanStart) {
+            ++aiSpanIterator;
+            continue;
+        }
+        isClickOnAISpan = ClickAISpan(textOffset, aiSpanIterator->second);
+        if (isClickOnAISpan) {
+            return;
+        }
+        if (aiSpanIterator->second.end >= item->position) {
+            break;
+        } else {
+            ++aiSpanIterator;
+        }
+    }
+}
+
 bool TextPattern::ClickAISpan(const PointF& textOffset, const AISpan& aiSpan)
 {
+    if (copyOption_ == CopyOptions::None || !textDetectEnable_) {
+        return false;
+    }
     std::vector<RectF> aiRects;
     paragraph_->GetRectsForRange(aiSpan.start, aiSpan.end, aiRects);
     for (auto&& rect : aiRects) {
         if (rect.IsInRegion(textOffset)) {
+            if (isMousePressed_) {
+                std::map<std::string, std::string> paramaters;
+                paramaters["entityType"] = TEXT_DETECT_MAP.at(aiSpan.type);
+                paramaters["entityText"] = aiSpan.content;
+                paramaters["copyOption"] = copyOption_ == CopyOptions::None ? "false" : "true";
+                paramaters["clickType"] = "leftMouse";
+                DataDetectorMgr::GetInstance().ResponseBestMatchItem(paramaters, aiSpan);
+                return true;
+            }
             return ShowUIExtensionMenu(aiSpan);
         }
     }
@@ -639,8 +684,8 @@ void TextPattern::SetOnClickMenu(const AISpan& aiSpan, const CalculateHandleFunc
     const ShowSelectOverlayFunc& showSelectOverlayFunc)
 
 {
-    onClickMenu_ = [aiSpan, weak = WeakClaim(this), calculateHandleFunc, showSelectOverlayFunc]
-        (const std::string& action) {
+    onClickMenu_ = [aiSpan, weak = WeakClaim(this), calculateHandleFunc, showSelectOverlayFunc](
+                       const std::string& action) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         if (pattern->copyOption_ == CopyOptions::None) {
@@ -657,8 +702,8 @@ void TextPattern::SetOnClickMenu(const AISpan& aiSpan, const CalculateHandleFunc
                 calculateHandleFunc();
             }
             if (showSelectOverlayFunc == nullptr) {
-                pattern->ShowSelectOverlay(pattern->textSelector_.firstHandle,
-                    pattern->textSelector_.secondHandle, true);
+                pattern->ShowSelectOverlay(
+                    pattern->textSelector_.firstHandle, pattern->textSelector_.secondHandle, true);
             } else {
                 showSelectOverlayFunc(pattern->textSelector_.firstHandle, pattern->textSelector_.secondHandle);
             }
@@ -709,7 +754,7 @@ bool TextPattern::ShowUIExtensionMenu(const AISpan& aiSpan, const CalculateHandl
         TAG_LOGI(AceLogTag::ACE_TEXT, "Menu option is empty");
         return false;
     }
-    return DataDetectorMgr::GetInstance().ShowUIExtensionMenu(paramaters, aiRect, onClickMenu_, menuOptions, host);
+    return DataDetectorMgr::GetInstance().ShowUIExtensionMenu(paramaters, aiRect, onClickMenu_, host);
 }
 
 void TextPattern::HandleDoubleClickEvent(GestureEvent& info)
@@ -768,14 +813,60 @@ void TextPattern::InitMouseEvent()
     mouseEventInitialized_ = true;
 }
 
+void TextPattern::HandleMouseEventOfAISpan(const MouseInfo& info, PointF textOffset, bool& isClickOnAISpan)
+{
+    if (copyOption_ == CopyOptions::None || !textDetectEnable_) {
+        return;
+    }
+    if (spans_.empty() && !aiSpanMap_.empty() && paragraph_) {
+        for (const auto& kv : aiSpanMap_) {
+            auto aiSpan = kv.second;
+            isClickOnAISpan = ClickAISpan(textOffset, aiSpan);
+            if (isClickOnAISpan) {
+                if (isClickOnAISpan && selectOverlayProxy_ && !selectOverlayProxy_->IsClosed()) {
+                    selectOverlayProxy_->DisableMenu(true);
+                }
+                return;
+            }
+        }
+    }
+    RectF textContentRect = contentRect_;
+    textContentRect.SetTop(contentRect_.GetY() - std::min(baselineOffset_, 0.0f));
+    textContentRect.SetHeight(contentRect_.Height() - std::max(baselineOffset_, 0.0f));
+    if (textContentRect.IsInRegion(PointF(info.GetLocalLocation().GetX(), info.GetLocalLocation().GetY())) &&
+        !spans_.empty() && paragraph_) {
+        auto aiSpanIterator = aiSpanMap_.begin();
+        for (const auto& item : spans_) {
+            if (!item) {
+                continue;
+            }
+            ClickAISpanOfSpan(aiSpanIterator, item, textOffset, isClickOnAISpan);
+            if (isClickOnAISpan) {
+                if (isClickOnAISpan && selectOverlayProxy_ && !selectOverlayProxy_->IsClosed()) {
+                    selectOverlayProxy_->DisableMenu(true);
+                }
+                return;
+            }
+        }
+    }
+}
+
 void TextPattern::HandleMouseEvent(const MouseInfo& info)
 {
     if (copyOption_ == CopyOptions::None) {
         return;
     }
+    auto textPaintOffset = contentRect_.GetOffset() - OffsetF(0.0, std::min(baselineOffset_, 0.0f));
+    Offset textOffset = { info.GetLocalLocation().GetX() - textPaintOffset.GetX(),
+        info.GetLocalLocation().GetY() - textPaintOffset.GetY() };
     if (info.GetButton() == MouseButton::RIGHT_BUTTON && info.GetAction() == OHOS::Ace::MouseAction::RELEASE) {
-        rightClickOffset_ = OffsetF(static_cast<float>(info.GetGlobalLocation().GetX()),
-            static_cast<float>(info.GetGlobalLocation().GetY()));
+        bool isClickOnAISpan = false;
+        HandleMouseEventOfAISpan(info, PointF(textOffset.GetX(), textOffset.GetY()), isClickOnAISpan);
+        if (isClickOnAISpan) {
+            return;
+        }
+        rightClickOffset_ = OffsetF(
+            static_cast<float>(info.GetGlobalLocation().GetX()), static_cast<float>(info.GetGlobalLocation().GetY()));
         CalculateHandleOffsetAndShowOverlay(true);
         if (SelectOverlayIsOn()) {
             CloseSelectOverlay(true);
@@ -824,9 +915,6 @@ void TextPattern::HandleMouseEvent(const MouseInfo& info)
             if (isDoubleClick_) {
                 isDoubleClick_ = false;
             } else {
-                auto textPaintOffset = contentRect_.GetOffset() - OffsetF(0.0, std::min(baselineOffset_, 0.0f));
-                Offset textOffset = { info.GetLocalLocation().GetX() - textPaintOffset.GetX(),
-                    info.GetLocalLocation().GetY() - textPaintOffset.GetY() };
                 CHECK_NULL_VOID(paragraph_);
                 auto end = paragraph_->GetGlyphIndexByCoordinate(textOffset);
                 textSelector_.Update(textSelector_.baseOffset, end);
@@ -991,14 +1079,14 @@ DragDropInfo TextPattern::OnDragStart(const RefPtr<Ace::DragEvent>& event, const
     auto beforeStr = GetSelectedText(0, start);
     auto selectedStr = GetSelectedText(textSelector_.GetTextStart(), textSelector_.GetTextEnd());
     auto afterStr = GetSelectedText(end, GetWideText().length());
-    pattern->dragContents_ = {beforeStr, selectedStr, afterStr};
+    pattern->dragContents_ = { beforeStr, selectedStr, afterStr };
 
     itemInfo.extraInfo = selectedStr;
     RefPtr<UnifiedData> unifiedData = UdmfClient::GetInstance()->CreateUnifiedData();
     UdmfClient::GetInstance()->AddPlainTextRecord(unifiedData, selectedStr);
     event->SetData(unifiedData);
     host->MarkDirtyNode(layoutProperty->GetMaxLinesValue(Infinity<float>()) <= 1 ? PROPERTY_UPDATE_MEASURE_SELF
-                                                                                        : PROPERTY_UPDATE_MEASURE);
+                                                                                 : PROPERTY_UPDATE_MEASURE);
 
     CloseSelectOverlay();
     ResetSelection();
@@ -1039,8 +1127,7 @@ void TextPattern::InitDragEvent()
     if (!eventHub->HasOnDragStart()) {
         eventHub->SetOnDragStart(std::move(onDragStart));
     }
-    auto onDragMove = [weakPtr = WeakClaim(this)](
-                           const RefPtr<Ace::DragEvent>& event, const std::string& extraParams)  {
+    auto onDragMove = [weakPtr = WeakClaim(this)](const RefPtr<Ace::DragEvent>& event, const std::string& extraParams) {
         auto pattern = weakPtr.Upgrade();
         CHECK_NULL_VOID(pattern);
         pattern->OnDragMove(event);
@@ -1075,7 +1162,20 @@ std::function<void(Offset)> TextPattern::GetThumbnailCallback()
         auto pattern = wk.Upgrade();
         CHECK_NULL_VOID(pattern);
         if (pattern->BetweenSelectedPosition(point)) {
-            pattern->dragNode_ = TextDragPattern::CreateDragNode(pattern->GetHost());
+            auto host = pattern->GetHost();
+            auto children = host->GetChildren();
+            std::list<RefPtr<FrameNode>> imageChildren;
+            for (const auto& child : children) {
+                auto node = DynamicCast<FrameNode>(child);
+                if (!node) {
+                    continue;
+                }
+                auto image = node->GetPattern<ImagePattern>();
+                if (image) {
+                    imageChildren.emplace_back(node);
+                }
+            }
+            pattern->dragNode_ = RichEditorDragPattern::CreateDragNode(host, imageChildren);
             FrameNode::ProcessOffscreenNode(pattern->dragNode_);
         }
     };
@@ -1125,6 +1225,13 @@ bool TextPattern::BetweenSelectedPosition(const Offset& globalOffset)
 
 void TextPattern::OnModifyDone()
 {
+    FrameNode::PostTask(
+        [weak = WeakClaim(this)]() {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            pattern->OnAfterModifyDone();
+        },
+        TaskExecutor::TaskType::UI);
     auto textLayoutProperty = GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textLayoutProperty);
     auto host = GetHost();
@@ -1144,12 +1251,20 @@ void TextPattern::OnModifyDone()
         host->GetRenderContext()->SetClipToFrame(shouldClipToContent);
     }
 
+    if (textLayoutProperty->GetTextOverflowValue(TextOverflow::CLIP) == TextOverflow::MARQUEE) {
+        CloseSelectOverlay();
+        ResetSelection();
+        copyOption_ = CopyOptions::None;
+    } else {
+        copyOption_ = textLayoutProperty->GetCopyOption().value_or(CopyOptions::None);
+    }
+
     if (host->GetChildren().empty()) {
         std::string textCache = textForDisplay_;
         textForDisplay_ = textLayoutProperty->GetContent().value_or("");
         if (textCache != textForDisplay_) {
             host->OnAccessibilityEvent(AccessibilityEventType::TEXT_CHANGE, textCache, textForDisplay_);
-            if (!textDetectEnable_) {
+            if (copyOption_ == CopyOptions::None || !textDetectEnable_) {
                 aiDetectInitialized_ = false;
             }
         }
@@ -1168,13 +1283,7 @@ void TextPattern::OnModifyDone()
             return;
         }
     }
-    if (textLayoutProperty->GetTextOverflowValue(TextOverflow::CLIP) == TextOverflow::MARQUEE) {
-        CloseSelectOverlay();
-        ResetSelection();
-        copyOption_ = CopyOptions::None;
-    } else {
-        copyOption_ = textLayoutProperty->GetCopyOption().value_or(CopyOptions::None);
-    }
+
     auto gestureEventHub = host->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureEventHub);
     if (copyOption_ != CopyOptions::None) {
@@ -1195,7 +1304,7 @@ void TextPattern::OnModifyDone()
         InitTouchEvent();
         SetAccessibilityAction();
     }
-    if (onClick_ || copyOption_ != CopyOptions::None || textDetectEnable_) {
+    if (onClick_ || copyOption_ != CopyOptions::None) {
         InitClickEvent(gestureEventHub);
     }
 }
@@ -1221,7 +1330,7 @@ void TextPattern::SetTextDetectTypes(const std::string& types)
 
 void TextPattern::InitTextDetect(int32_t startPos, std::string detectText)
 {
-    if (!textDetectEnable_) {
+    if (copyOption_ == CopyOptions::None || !textDetectEnable_) {
         return;
     }
 
@@ -1238,8 +1347,8 @@ void TextPattern::InitTextDetect(int32_t startPos, std::string detectText)
         CHECK_NULL_VOID(pattern);
         auto host = pattern->GetHost();
         CHECK_NULL_VOID(host);
-        auto uiTaskExecutor = SingleTaskExecutor::Make(
-            host->GetContext()->GetTaskExecutor(), TaskExecutor::TaskType::UI);
+        auto uiTaskExecutor =
+            SingleTaskExecutor::Make(host->GetContext()->GetTaskExecutor(), TaskExecutor::TaskType::UI);
         uiTaskExecutor.PostTask([result, weak, instanceID, startPos] {
             ContainerScope scope(instanceID);
             auto pattern = weak.Upgrade();
@@ -1281,15 +1390,14 @@ void TextPattern::ParseAIResult(const TextDataDetectResult& result, int32_t star
         }
     }
 
-    if (startPos + AI_TEXT_MAX_LENGTH >=
-        static_cast<int32_t>(StringUtils::ToWstring(textForAI_).length())) {
+    if (startPos + AI_TEXT_MAX_LENGTH >= static_cast<int32_t>(StringUtils::ToWstring(textForAI_).length())) {
         aiDetectInitialized_ = true;
         aiDetectTypesChanged_ = false;
     }
 }
 
-void TextPattern::ParseAIJson(const std::unique_ptr<JsonValue>& jsonValue,
-    TextDataDetectType type, int32_t startPos, bool isMenuOption)
+void TextPattern::ParseAIJson(
+    const std::unique_ptr<JsonValue>& jsonValue, TextDataDetectType type, int32_t startPos, bool isMenuOption)
 {
     if (!jsonValue || !jsonValue->IsArray()) {
         TAG_LOGI(AceLogTag::ACE_TEXT, "Error AI Result.");
@@ -1316,13 +1424,13 @@ void TextPattern::ParseAIJson(const std::unique_ptr<JsonValue>& jsonValue,
         auto wTextForAI = StringUtils::ToWstring(textForAI_);
         auto wOriText = StringUtils::ToWstring(oriText);
         int32_t end = startPos + charOffset + static_cast<int32_t>(wOriText.length());
-        if (charOffset < 0 || startPos + charOffset >= static_cast<int32_t>(wTextForAI.length())
-            || end >= startPos + AI_TEXT_MAX_LENGTH || oriText.empty()) {
+        if (charOffset < 0 || startPos + charOffset >= static_cast<int32_t>(wTextForAI.length()) ||
+            end >= startPos + AI_TEXT_MAX_LENGTH || oriText.empty()) {
             LOGW("The result of AI is error");
             continue;
         }
-        if (oriText != StringUtils::ToString(
-            wTextForAI.substr(startPos + charOffset, static_cast<int32_t>(wOriText.length())))) {
+        if (oriText !=
+            StringUtils::ToString(wTextForAI.substr(startPos + charOffset, static_cast<int32_t>(wOriText.length())))) {
             LOGW("The charOffset is error");
             continue;
         }
@@ -1337,6 +1445,9 @@ void TextPattern::ParseAIJson(const std::unique_ptr<JsonValue>& jsonValue,
 
 void TextPattern::StartAITask()
 {
+    if (copyOption_ == CopyOptions::None || !textDetectEnable_) {
+        return;
+    }
     aiSpanMap_.clear();
 
     auto context = PipelineContext::GetCurrentContext();
@@ -1354,13 +1465,23 @@ void TextPattern::StartAITask()
         auto wTextForAI = StringUtils::ToWstring(pattern->textForAI_);
         auto wTextForAILength = static_cast<int32_t>(wTextForAI.length());
         while (startPos < wTextForAILength) {
-            std::string detectText = StringUtils::ToString(
-                wTextForAI.substr(startPos, AI_TEXT_MAX_LENGTH));
+            std::string detectText = StringUtils::ToString(wTextForAI.substr(startPos, AI_TEXT_MAX_LENGTH));
             pattern->InitTextDetect(startPos, detectText);
             startPos += AI_TEXT_MAX_LENGTH - AI_TEXT_GAP;
         }
     });
     taskExecutor->PostDelayedTask(aiDetectDelayTask_, TaskExecutor::TaskType::UI, AI_DELAY_TIME);
+}
+
+void TextPattern::OnAfterModifyDone()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto inspectorId = host->GetInspectorId().value_or("");
+    if (!inspectorId.empty()) {
+        auto prop = host->GetAccessibilityProperty<NG::AccessibilityProperty>();
+        Recorder::NodeDataCache::Get().PutString(inspectorId, prop->GetText());
+    }
 }
 
 void TextPattern::ActSetSelection(int32_t start, int32_t end)
@@ -1490,8 +1611,15 @@ void TextPattern::PreCreateLayoutWrapper()
 
     if (textCache != textForDisplay_) {
         host->OnAccessibilityEvent(AccessibilityEventType::TEXT_CHANGE, textCache, textForDisplay_);
-        if (!textDetectEnable_) {
+        if (copyOption_ == CopyOptions::None || !textDetectEnable_) {
             aiDetectInitialized_ = false;
+        }
+        OnAfterModifyDone();
+        for (const auto& item : spans_) {
+            if (item->inspectId.empty()) {
+                continue;
+            }
+            Recorder::NodeDataCache::Get().PutString(item->inspectId, item->content);
         }
     }
     if (isSpanHasClick) {

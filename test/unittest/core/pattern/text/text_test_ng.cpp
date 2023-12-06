@@ -22,9 +22,14 @@
 #define private public
 #define protected public
 
-#include "test/mock/core/common/mock_container.h"
-#include "test/mock/core/render/mock_paragraph.h"
 #include "test/mock/base/mock_task_executor.h"
+#include "test/mock/core/common/mock_container.h"
+#include "test/mock/core/common/mock_theme_manager.h"
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/core/render/mock_paragraph.h"
+#include "test/mock/core/render/mock_render_context.h"
+#include "test/mock/core/rosen/mock_canvas.h"
+#include "test/mock/core/rosen/testing_typography_properties.h"
 
 #include "base/geometry/dimension.h"
 #include "base/geometry/ng/offset_t.h"
@@ -50,13 +55,8 @@
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/pattern/text_field/text_selector.h"
 #include "core/components_ng/render/paragraph.h"
-#include "test/mock/core/render/mock_render_context.h"
-#include "test/mock/core/rosen/mock_canvas.h"
-#include "test/mock/core/rosen/testing_typography_properties.h"
-#include "test/mock/core/common/mock_theme_manager.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/event/mouse_event.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "frameworks/base/window/drag_window.h"
 #include "frameworks/core/components_ng/pattern/root/root_pattern.h"
 #undef private
@@ -89,7 +89,7 @@ constexpr double BLURRADIUS_VALUE = 0.0;
 constexpr double SPREADRADIUS_VALUE = 0.0;
 constexpr double ADAPT_OFFSETY_VALUE = 5.0;
 constexpr double ADAPT_OFFSETX_VALUE = 5.0;
-constexpr bool   ADAPT_FILL_VALUE = true;
+constexpr bool ADAPT_FILL_VALUE = true;
 const std::string TEXT_CONTENT = "text";
 constexpr int32_t TEXT_ERROR = -1;
 constexpr int32_t TEXT_SIZE_INT = 10;
@@ -763,8 +763,8 @@ HWTEST_F(TextTestNg, OnDirtyLayoutWrapperSwap003, TestSize.Level1)
     auto rowLayoutAlgorithm = AceType::DynamicCast<TextLayoutAlgorithm>(pattern->CreateLayoutAlgorithm());
     TextStyle textStyle;
     LayoutConstraintF contentConstraint;
-    auto ret = rowLayoutAlgorithm->
-        CreateParagraphAndLayout(textStyle, "", contentConstraint, AceType::RawPtr(frameNode));
+    auto ret =
+        rowLayoutAlgorithm->CreateParagraphAndLayout(textStyle, "", contentConstraint, AceType::RawPtr(frameNode));
     EXPECT_TRUE(ret);
     layoutWrapper->SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(rowLayoutAlgorithm));
     ret = pattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
@@ -797,8 +797,8 @@ HWTEST_F(TextTestNg, BeforeCreateLayoutWrapper001, TestSize.Level1)
     auto rowLayoutAlgorithm = AceType::DynamicCast<TextLayoutAlgorithm>(pattern->CreateLayoutAlgorithm());
     TextStyle textStyle;
     LayoutConstraintF contentConstraint;
-    auto ret = rowLayoutAlgorithm->
-        CreateParagraphAndLayout(textStyle, "", contentConstraint, AceType::RawPtr(frameNode));
+    auto ret =
+        rowLayoutAlgorithm->CreateParagraphAndLayout(textStyle, "", contentConstraint, AceType::RawPtr(frameNode));
     EXPECT_TRUE(ret);
     auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
         frameNode, AceType::MakeRefPtr<GeometryNode>(), frameNode->GetLayoutProperty());
@@ -847,8 +847,8 @@ HWTEST_F(TextTestNg, BeforeCreateLayoutWrapper003, TestSize.Level1)
     auto rowLayoutAlgorithm = AceType::DynamicCast<TextLayoutAlgorithm>(pattern->CreateLayoutAlgorithm());
     TextStyle textStyle;
     LayoutConstraintF contentConstraint;
-    auto ret = rowLayoutAlgorithm->
-        CreateParagraphAndLayout(textStyle, "", contentConstraint, AceType::RawPtr(frameNode));
+    auto ret =
+        rowLayoutAlgorithm->CreateParagraphAndLayout(textStyle, "", contentConstraint, AceType::RawPtr(frameNode));
     EXPECT_TRUE(ret);
 
     DirtySwapConfig config;
@@ -1114,8 +1114,8 @@ HWTEST_F(TextTestNg, TextLayoutTest003, TestSize.Level1)
      */
 
     auto textLayoutAlgorithm = AceType::MakeRefPtr<TextLayoutAlgorithm>();
-    auto result = textLayoutAlgorithm->AdaptMinTextSize
-        (textStyle, CREATE_VALUE, parentLayoutConstraint, pipeline, AceType::RawPtr(textFrameNode));
+    auto result = textLayoutAlgorithm->AdaptMinTextSize(
+        textStyle, CREATE_VALUE, parentLayoutConstraint, pipeline, AceType::RawPtr(textFrameNode));
 
     /**
      * @tc.steps: step4. check the fontSize.
@@ -1170,8 +1170,8 @@ HWTEST_F(TextTestNg, TextLayoutTest004, TestSize.Level1)
      */
 
     auto textLayoutAlgorithm = AceType::MakeRefPtr<TextLayoutAlgorithm>();
-    auto result = textLayoutAlgorithm->AdaptMinTextSize
-        (textStyle, CREATE_VALUE, parentLayoutConstraint, pipeline, AceType::RawPtr(textFrameNode));
+    auto result = textLayoutAlgorithm->AdaptMinTextSize(
+        textStyle, CREATE_VALUE, parentLayoutConstraint, pipeline, AceType::RawPtr(textFrameNode));
 
     /**
      * @tc.steps: step4. check the fontSize.
@@ -1226,8 +1226,8 @@ HWTEST_F(TextTestNg, TextLayoutTest005, TestSize.Level1)
      */
 
     auto textLayoutAlgorithm = AceType::MakeRefPtr<TextLayoutAlgorithm>();
-    auto result = textLayoutAlgorithm->AdaptMinTextSize
-        (textStyle, CREATE_VALUE, parentLayoutConstraint, pipeline, AceType::RawPtr(textFrameNode));
+    auto result = textLayoutAlgorithm->AdaptMinTextSize(
+        textStyle, CREATE_VALUE, parentLayoutConstraint, pipeline, AceType::RawPtr(textFrameNode));
 
     /**
      * @tc.steps: step4. check the fontSize.
@@ -1281,8 +1281,8 @@ HWTEST_F(TextTestNg, TextLayoutTest006, TestSize.Level1)
     auto textLayoutAlgorithm = AceType::MakeRefPtr<TextLayoutAlgorithm>();
     TextStyle textStyle;
     LayoutConstraintF contentConstraint;
-    auto ret = textLayoutAlgorithm->
-        CreateParagraphAndLayout(textStyle, "", contentConstraint, AceType::RawPtr(textFrameNode));
+    auto ret =
+        textLayoutAlgorithm->CreateParagraphAndLayout(textStyle, "", contentConstraint, AceType::RawPtr(textFrameNode));
     EXPECT_TRUE(ret);
     auto sizeX =
         textLayoutAlgorithm->MeasureContent(parentLayoutConstraint, AccessibilityManager::RawPtr(layoutWrapper));
@@ -1335,8 +1335,8 @@ HWTEST_F(TextTestNg, TextLayoutTest007, TestSize.Level1)
     TextStyle textStyle;
     Dimension adaptMinFontSize(DIMENSION, DimensionUnit::PERCENT);
     textStyle.SetAdaptMinFontSize(adaptMinFontSize);
-    auto ret = textLayoutAlgorithm->
-        CreateParagraphAndLayout(textStyle, "", parentLayoutConstraint, AceType::RawPtr(textFrameNode));
+    auto ret = textLayoutAlgorithm->CreateParagraphAndLayout(
+        textStyle, "", parentLayoutConstraint, AceType::RawPtr(textFrameNode));
     EXPECT_TRUE(ret);
     auto sizeX =
         textLayoutAlgorithm->MeasureContent(parentLayoutConstraint, AccessibilityManager::RawPtr(layoutWrapper));
@@ -1392,8 +1392,8 @@ HWTEST_F(TextTestNg, TextLayoutTest008, TestSize.Level1)
     TextStyle textStyle;
     Dimension adaptMinFontSize(DIMENSION, DimensionUnit::PERCENT);
     textStyle.SetAdaptMinFontSize(adaptMinFontSize);
-    auto ret = textLayoutAlgorithm->
-        CreateParagraphAndLayout(textStyle, "", parentLayoutConstraint, AceType::RawPtr(textFrameNode));
+    auto ret = textLayoutAlgorithm->CreateParagraphAndLayout(
+        textStyle, "", parentLayoutConstraint, AceType::RawPtr(textFrameNode));
     EXPECT_TRUE(ret);
     auto sizeX =
         textLayoutAlgorithm->MeasureContent(parentLayoutConstraint, AccessibilityManager::RawPtr(layoutWrapper));
@@ -1640,8 +1640,8 @@ HWTEST_F(TextTestNg, DidExceedMaxLines001, TestSize.Level1)
     auto textLayoutAlgorithm = AceType::MakeRefPtr<TextLayoutAlgorithm>();
     TextStyle textStyle;
     LayoutConstraintF contentConstraint;
-    auto ret = textLayoutAlgorithm->
-        CreateParagraphAndLayout(textStyle, "", contentConstraint, AceType::RawPtr(textFrameNode));
+    auto ret =
+        textLayoutAlgorithm->CreateParagraphAndLayout(textStyle, "", contentConstraint, AceType::RawPtr(textFrameNode));
     EXPECT_TRUE(ret);
     SizeF maxSize;
     ret = textLayoutAlgorithm->DidExceedMaxLines(maxSize);
@@ -1695,8 +1695,8 @@ HWTEST_F(TextTestNg, DidExceedMaxLines002, TestSize.Level1)
     TextStyle textStyle;
     textStyle.SetMaxLines(MAX_LINES);
     LayoutConstraintF contentConstraint;
-    auto ret = textLayoutAlgorithm->
-        CreateParagraphAndLayout(textStyle, "", contentConstraint, AceType::RawPtr(textFrameNode));
+    auto ret =
+        textLayoutAlgorithm->CreateParagraphAndLayout(textStyle, "", contentConstraint, AceType::RawPtr(textFrameNode));
     EXPECT_TRUE(ret);
     SizeF maxSize;
     ret = textLayoutAlgorithm->DidExceedMaxLines(maxSize);
@@ -1994,8 +1994,7 @@ HWTEST_F(TextTestNg, TextPaintMethodTest001, TestSize.Level1)
     RefPtr<TextContentModifier> textContentModifier =
         AceType::MakeRefPtr<TextContentModifier>(std::optional<TextStyle>(TextStyle()));
     RefPtr<TextOverlayModifier> textOverlayModifier = AceType::MakeRefPtr<TextOverlayModifier>();
-    TextPaintMethod textPaintMethod(
-        pattern, BASE_LINE_OFFSET_VALUE, textContentModifier, textOverlayModifier);
+    TextPaintMethod textPaintMethod(pattern, BASE_LINE_OFFSET_VALUE, textContentModifier, textOverlayModifier);
     UpdateTextLayoutProperty(textLayoutProperty);
     RefPtr<RenderContext> renderContext = RenderContext::Create();
     auto paintProperty = textPattern->CreatePaintProperty();
@@ -2269,25 +2268,29 @@ HWTEST_F(TextTestNg, TextLayoutAlgorithmTest008, TestSize.Level1)
     // maxFontSize < minFontSize
     textStyle.SetAdaptMaxFontSize(ADAPT_MIN_FONT_SIZE_VALUE);
     textStyle.SetAdaptMinFontSize(ADAPT_MAX_FONT_SIZE_VALUE);
-    EXPECT_EQ(textLayoutAlgorithm->AdaptMaxTextSize
-        (textStyle, "abc", parentLayoutConstraint, pipeline, AceType::RawPtr(textFrameNode)), true);
+    EXPECT_EQ(textLayoutAlgorithm->AdaptMaxTextSize(
+                  textStyle, "abc", parentLayoutConstraint, pipeline, AceType::RawPtr(textFrameNode)),
+        true);
 
     // create paragraph failed
     MockParagraph::enabled_ = false;
     textStyle.SetAdaptMaxFontSize(ADAPT_MAX_FONT_SIZE_VALUE);
     textStyle.SetAdaptMinFontSize(ADAPT_MIN_FONT_SIZE_VALUE);
-    EXPECT_EQ(textLayoutAlgorithm->AdaptMaxTextSize
-        (textStyle, "abc", parentLayoutConstraint, pipeline, AceType::RawPtr(textFrameNode)), false);
+    EXPECT_EQ(textLayoutAlgorithm->AdaptMaxTextSize(
+                  textStyle, "abc", parentLayoutConstraint, pipeline, AceType::RawPtr(textFrameNode)),
+        false);
     MockParagraph::enabled_ = true;
 
     // increase font size
-    EXPECT_EQ(textLayoutAlgorithm->AdaptMaxTextSize
-        (textStyle, "abc", parentLayoutConstraint, pipeline, AceType::RawPtr(textFrameNode)), true);
+    EXPECT_EQ(textLayoutAlgorithm->AdaptMaxTextSize(
+                  textStyle, "abc", parentLayoutConstraint, pipeline, AceType::RawPtr(textFrameNode)),
+        true);
 
     // set NormalizeToPx false
     textStyle.adaptFontSizeStep_.SetUnit(DimensionUnit::CALC);
-    EXPECT_EQ(textLayoutAlgorithm->AdaptMaxTextSize
-        (textStyle, "abc", parentLayoutConstraint, pipeline, AceType::RawPtr(textFrameNode)), false);
+    EXPECT_EQ(textLayoutAlgorithm->AdaptMaxTextSize(
+                  textStyle, "abc", parentLayoutConstraint, pipeline, AceType::RawPtr(textFrameNode)),
+        false);
 }
 
 /**
@@ -2357,8 +2360,7 @@ HWTEST_F(TextTestNg, TextPaintMethodTest002, TestSize.Level1)
     RefPtr<TextContentModifier> textContentModifier =
         AceType::MakeRefPtr<TextContentModifier>(std::optional<TextStyle>(TextStyle()));
     RefPtr<TextOverlayModifier> textOverlayModifier = AceType::MakeRefPtr<TextOverlayModifier>();
-    TextPaintMethod textPaintMethod(
-        pattern, BASE_LINE_OFFSET_VALUE, textContentModifier, textOverlayModifier);
+    TextPaintMethod textPaintMethod(pattern, BASE_LINE_OFFSET_VALUE, textContentModifier, textOverlayModifier);
     textLayoutProperty->UpdateFontSize(ADAPT_FONT_SIZE_VALUE);
     textLayoutProperty->UpdateFontWeight(Ace::FontWeight::W200);
     textLayoutProperty->UpdateTextColor(TEXT_COLOR_VALUE);
@@ -3945,8 +3947,7 @@ HWTEST_F(TextTestNg, TextPaintMethodTest003, TestSize.Level1)
     RefPtr<TextContentModifier> textContentModifier =
         AceType::MakeRefPtr<TextContentModifier>(std::optional<TextStyle>(TextStyle()));
     RefPtr<TextOverlayModifier> textOverlayModifier = AceType::MakeRefPtr<TextOverlayModifier>();
-    TextPaintMethod textPaintMethod(
-        pattern, BASE_LINE_OFFSET_VALUE, textContentModifier, textOverlayModifier);
+    TextPaintMethod textPaintMethod(pattern, BASE_LINE_OFFSET_VALUE, textContentModifier, textOverlayModifier);
     auto paintWrapper = AceType::MakeRefPtr<PaintWrapper>(renderContext, geometryNode, paintProperty);
     textPaintMethod.UpdateContentModifier(AceType::RawPtr(paintWrapper));
     EXPECT_EQ(textContentModifier->drawObscuredRects_, std::vector<RectF>());
@@ -3963,8 +3964,7 @@ HWTEST_F(TextTestNg, TextPaintMethodTest003, TestSize.Level1)
     renderContext = host->GetRenderContext();
     paintProperty = pattern->CreatePaintProperty();
     paintWrapper = AceType::MakeRefPtr<PaintWrapper>(renderContext, geometryNode, paintProperty);
-    TextPaintMethod textPaintMethod1(
-        pattern, BASE_LINE_OFFSET_VALUE, textContentModifier, textOverlayModifier);
+    TextPaintMethod textPaintMethod1(pattern, BASE_LINE_OFFSET_VALUE, textContentModifier, textOverlayModifier);
     textPaintMethod1.UpdateContentModifier(AceType::RawPtr(paintWrapper));
     EXPECT_NE(textContentModifier->drawObscuredRects_, std::vector<RectF>());
 

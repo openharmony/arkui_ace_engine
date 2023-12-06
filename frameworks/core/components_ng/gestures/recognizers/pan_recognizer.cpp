@@ -228,7 +228,7 @@ void PanRecognizer::HandleTouchUpEvent(const TouchEvent& event)
     }
 
     if (refereeState_ == RefereeState::SUCCEED) {
-        if (static_cast<int32_t>(touchPoints_.size()) == fingers_) {
+        if (currentFingers_ == fingers_) {
             ResSchedReport::GetInstance().ResSchedDataReport("click");
             // last one to fire end.
             SendCallbackMsg(onActionEnd_);
@@ -386,8 +386,7 @@ bool PanRecognizer::HandlePanAccept()
             return true;
         }
     }
-    auto onGestureJudgeBeginResult = TriggerGestureJudgeCallback();
-    if (onGestureJudgeBeginResult == GestureJudgeResult::REJECT) {
+    if (TriggerGestureJudgeCallback() == GestureJudgeResult::REJECT) {
         Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
         if (gestureInfo_ && gestureInfo_->GetType() == GestureTypeName::DRAG) {
             auto dragEventActuator = GetDragEventActuator();
@@ -568,7 +567,10 @@ GestureJudgeResult PanRecognizer::TriggerGestureJudgeCallback()
     auto targetComponent = GetTargetComponent();
     CHECK_NULL_RETURN(targetComponent, GestureJudgeResult::CONTINUE);
     auto callback = targetComponent->GetOnGestureJudgeBeginCallback();
-    CHECK_NULL_RETURN(callback, GestureJudgeResult::CONTINUE);
+    auto callbackNative = targetComponent->GetOnGestureJudgeNativeBeginCallback();
+    if (!callback && !callbackNative) {
+        return GestureJudgeResult::CONTINUE;
+    }
     auto info = std::make_shared<PanGestureEvent>();
     info->SetTimeStamp(time_);
     UpdateFingerListInfo();
@@ -600,7 +602,15 @@ GestureJudgeResult PanRecognizer::TriggerGestureJudgeCallback()
     if (lastTouchEvent_.tiltY.has_value()) {
         info->SetTiltY(lastTouchEvent_.tiltY.value());
     }
-    return callback(gestureInfo_, info);
+    gestureInfo_->SetInputEventType(inputEventType_);
+    if (callback && callback(gestureInfo_, info) == GestureJudgeResult::REJECT) {
+        // If outer callback exits, prioritize checking outer callback. If outer reject, return reject.
+        return GestureJudgeResult::REJECT;
+    } else if (callbackNative && callbackNative(gestureInfo_, info) == GestureJudgeResult::REJECT) {
+        // If outer callback doesn't exit or accept, check inner callback. If inner reject, return reject.
+        return GestureJudgeResult::REJECT;
+    }
+    return GestureJudgeResult::CONTINUE;
 }
 
 bool PanRecognizer::ReconcileFrom(const RefPtr<NGGestureRecognizer>& recognizer)

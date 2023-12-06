@@ -180,6 +180,8 @@ void PipelineContext::FlushPipelineWithoutAnimation() {}
 
 void PipelineContext::FlushFocus() {}
 
+void PipelineContext::DispatchDisplaySync(uint64_t nanoTimestamp) {}
+
 void PipelineContext::FlushAnimation(uint64_t nanoTimestamp) {}
 
 void PipelineContext::OnVirtualKeyboardHeightChange(
@@ -197,6 +199,11 @@ void PipelineContext::OnSurfaceChanged(int32_t width, int32_t height, WindowSize
 {}
 
 void PipelineContext::OnLayoutCompleted(const std::string& componentId) {}
+
+bool PipelineContext::CheckPageFocus()
+{
+    return true;
+}
 
 void PipelineContext::OnDrawCompleted(const std::string& componentId) {}
 
@@ -422,6 +429,24 @@ void PipelineBase::SetRootSize(double density, int32_t width, int32_t height) {}
 RefPtr<PipelineBase> PipelineBase::GetCurrentContext()
 {
     return NG::MockPipelineContext::GetCurrent();
+}
+
+double PipelineBase::GetCurrentDensity()
+{
+    auto pipelineContext = NG::MockPipelineContext::GetCurrentContext();
+    return pipelineContext ? pipelineContext->GetDensity() : 1.0;
+}
+
+double PipelineBase::Px2VpWithCurrentDensity(double px)
+{
+    double density = GetCurrentDensity();
+    return px / density;
+}
+
+double PipelineBase::Vp2PxWithCurrentDensity(double vp)
+{
+    double density = GetCurrentDensity();
+    return vp * density;
 }
 
 double PipelineBase::NormalizeToPx(const Dimension& dimension) const

@@ -1,10 +1,10 @@
 /// <reference path="./import.ts" />
 
-class RowSplitResizeableModifier extends Modifier<boolean> {
+class RowSplitResizeableModifier extends ModifierWithKey<boolean> {
   static identity: Symbol = Symbol('rowSplitResizeable');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().rowSplit.ResetResizeable(node);
+      GetUINativeModule().rowSplit.resetResizeable(node);
     } else {
       GetUINativeModule().rowSplit.setResizeable(node, this.value);
     }
@@ -13,11 +13,7 @@ class RowSplitResizeableModifier extends Modifier<boolean> {
 
 class ArkRowSplitComponent extends ArkComponent implements RowSplitAttribute {
   resizeable(value: boolean): RowSplitAttribute {
-    if (isBoolean(value)) {
-      modifier(this._modifiers, PatternLockAutoResetModifier, value);
-    } else {
-      modifier(this._modifiers, PatternLockAutoResetModifier, undefined);
-    }
+    modifierWithKey(this._modifiersWithKeys, RowSplitResizeableModifier.identity, RowSplitResizeableModifier, value);
     return this;
   }
   monopolizeEvents(monopolize: boolean): this {

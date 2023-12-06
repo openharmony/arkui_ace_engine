@@ -1221,7 +1221,7 @@ HWTEST_F(NavigationTestNg, NavigationPatternTest_010, TestSize.Level1)
     navigationLayoutAlgorithm->navigationMode_ = NavigationMode::SPLIT;
     layout->propHideNavBar_ = true;
     pattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
-    EXPECT_EQ(navBarNode->GetLayoutProperty<NavBarLayoutProperty>()->propVisibility_.value(), VisibleType::INVISIBLE);
+    ASSERT_FALSE(navBarNode->GetLayoutProperty<NavBarLayoutProperty>()->propVisibility_.has_value());
 }
 
 /**
@@ -1424,19 +1424,19 @@ HWTEST_F(NavigationTestNg, NavigationModelNG002, TestSize.Level1)
      */
     NavigationModelNG model;
     model.SetTitle("title");
-    ASSERT_EQ(navBarNode->propTitleNodeOperation_.value(), ChildNodeOperation::REPLACE);
+    EXPECT_FALSE(navBarNode->propTitleNodeOperation_.has_value());
     auto textTitle = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 36, AceType::MakeRefPtr<TextPattern>());
     navBarNode->title_ = textTitle;
     textTitle->GetLayoutProperty<TextLayoutProperty>()->propContent_ = "title";
     model.SetTitle("title");
-    ASSERT_EQ(navBarNode->propTitleNodeOperation_.value(), ChildNodeOperation::NONE);
+    EXPECT_FALSE(navBarNode->propTitleNodeOperation_.has_value());
     navBarNode->title_ = nullptr;
     auto elementRegister = ElementRegister::GetInstance();
     elementRegister->nextUniqueElementId_ = 36;
     auto navBarLayoutProperty = navBarNode->GetLayoutProperty<NavBarLayoutProperty>();
     navBarLayoutProperty->propTitleMode_ = NavigationTitleMode::MINI;
     model.SetTitle("title");
-    ASSERT_EQ(navBarNode->propTitleNodeOperation_.value(), ChildNodeOperation::ADD);
+    EXPECT_FALSE(navBarNode->propTitleNodeOperation_.has_value());
 }
 
 /**

@@ -46,6 +46,7 @@ public:
     MOCK_METHOD2(OnDragEvent, void(const PointerEvent& pointerEvent, DragEventAction action));
     MOCK_METHOD1(OnIdle, void(int64_t deadline));
     MOCK_METHOD1(SetBuildAfterCallback, void(const std::function<void()>& callback));
+    MOCK_METHOD1(DispatchDisplaySync, void(uint64_t nanoTimestamp));
     MOCK_METHOD1(FlushAnimation, void(uint64_t nanoTimestamp));
     MOCK_METHOD1(SaveExplicitAnimationOption, void(const AnimationOption& option));
     MOCK_METHOD1(CreateExplicitAnimator, void(const std::function<void()>& onFinishEvent));
@@ -61,6 +62,7 @@ public:
     MOCK_METHOD4(OnSurfaceChanged, void(int32_t width, int32_t height, WindowSizeChangeReason type,
                                        const std::shared_ptr<Rosen::RSTransaction>& rsTransaction));
     MOCK_METHOD1(OnLayoutCompleted, void(const std::string& componentId));
+    MOCK_METHOD0(CheckPageFocus, bool());
     MOCK_METHOD1(OnDrawCompleted, void(const std::string& componentId));
     MOCK_METHOD1(SetNeedRenderNode, void(const RefPtr<FrameNode>& node));
     MOCK_METHOD2(OnSurfacePositionChanged, void(int32_t posX, int32_t posY));

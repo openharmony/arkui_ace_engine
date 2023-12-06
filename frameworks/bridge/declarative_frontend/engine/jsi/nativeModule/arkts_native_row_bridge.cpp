@@ -24,8 +24,19 @@ ArkUINativeModuleValue RowBridge::SetAlignItems(ArkUIRuntimeCallInfo* runtimeCal
     Local<JSValueRef> nativeNodeArg = runtimeCallInfo->GetCallArgRef(0);
     Local<JSValueRef> alignItemsArg = runtimeCallInfo->GetCallArgRef(1);
     void* nativeNode = nativeNodeArg->ToNativePointer(vm)->Value();
-    int32_t alignItems = alignItemsArg->Int32Value(vm);
-    GetArkUIInternalNodeAPI()->GetRowModifier().SetRowAlignItems(nativeNode, alignItems);
+    if (alignItemsArg->IsNumber()) {
+        int32_t alignItems = alignItemsArg->Int32Value(vm);
+        if ((alignItems == static_cast<int32_t>(FlexAlign::FLEX_START)) ||
+            (alignItems == static_cast<int32_t>(FlexAlign::FLEX_END)) ||
+            (alignItems == static_cast<int32_t>(FlexAlign::CENTER)) ||
+            (alignItems == static_cast<int32_t>(FlexAlign::STRETCH))) {
+            GetArkUIInternalNodeAPI()->GetRowModifier().SetRowAlignItems(nativeNode, alignItems);
+        } else if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)) {
+            GetArkUIInternalNodeAPI()->GetRowModifier().ResetRowAlignItems(nativeNode);
+        }
+    } else {
+        GetArkUIInternalNodeAPI()->GetRowModifier().ResetRowAlignItems(nativeNode);
+    }
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -46,8 +57,21 @@ ArkUINativeModuleValue RowBridge::SetJustifyContent(ArkUIRuntimeCallInfo* runtim
     Local<JSValueRef> nativeNodeArg = runtimeCallInfo->GetCallArgRef(0);
     Local<JSValueRef> justifyContentArg = runtimeCallInfo->GetCallArgRef(1);
     void* nativeNode = nativeNodeArg->ToNativePointer(vm)->Value();
-    int32_t justifyContent = justifyContentArg->Int32Value(vm);
-    GetArkUIInternalNodeAPI()->GetRowModifier().SetRowJustifyContent(nativeNode, justifyContent);
+    if (justifyContentArg->IsNumber()) {
+        int32_t justifyContent = justifyContentArg->Int32Value(vm);
+        if ((justifyContent == static_cast<int32_t>(FlexAlign::FLEX_START)) ||
+            (justifyContent == static_cast<int32_t>(FlexAlign::FLEX_END)) ||
+            (justifyContent == static_cast<int32_t>(FlexAlign::CENTER)) ||
+            (justifyContent == static_cast<int32_t>(FlexAlign::SPACE_BETWEEN)) ||
+            (justifyContent == static_cast<int32_t>(FlexAlign::SPACE_AROUND)) ||
+            (justifyContent == static_cast<int32_t>(FlexAlign::SPACE_EVENLY))) {
+            GetArkUIInternalNodeAPI()->GetRowModifier().SetRowJustifyContent(nativeNode, justifyContent);
+        } else if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)) {
+            GetArkUIInternalNodeAPI()->GetRowModifier().ResetRowJustifyContent(nativeNode);
+        }
+    } else {
+        GetArkUIInternalNodeAPI()->GetRowModifier().ResetRowJustifyContent(nativeNode);
+    }
     return panda::JSValueRef::Undefined(vm);
 }
 

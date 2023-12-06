@@ -1070,7 +1070,6 @@ void FrameNode::SetActive(bool active)
     }
     // inform the js side the active status
     SetJSViewActive(active);
-
 }
 
 void FrameNode::SetGeometryNode(const RefPtr<GeometryNode>& node)
@@ -1609,18 +1608,27 @@ bool FrameNode::IsOutOfTouchTestRegion(const PointF& parentRevertPoint, int32_t 
     return false;
 }
 
-HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& parentLocalPoint,
-    const PointF& parentRevertPoint, const TouchRestrict& touchRestrict, TouchTestResult& result, int32_t touchId)
+void FrameNode::AddJudgeToTargetComponent(RefPtr<TargetComponent>& targetComponent)
 {
-    auto targetComponent = MakeRefPtr<TargetComponent>();
-    targetComponent->SetNode(WeakClaim(this));
     auto gestureHub = eventHub_->GetGestureEventHub();
     if (gestureHub) {
         auto callback = gestureHub->GetOnGestureJudgeBeginCallback();
         if (callback) {
             targetComponent->SetOnGestureJudgeBegin(std::move(callback));
         }
+        auto callbackNative = gestureHub->GetOnGestureJudgeNativeBeginCallback();
+        if (callbackNative) {
+            targetComponent->SetOnGestureJudgeNativeBegin(std::move(callbackNative));
+        }
     }
+}
+
+HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& parentLocalPoint,
+    const PointF& parentRevertPoint, const TouchRestrict& touchRestrict, TouchTestResult& result, int32_t touchId)
+{
+    auto targetComponent = MakeRefPtr<TargetComponent>();
+    targetComponent->SetNode(WeakClaim(this));
+    AddJudgeToTargetComponent(targetComponent);
 
     if (!isActive_ || !eventHub_->IsEnabled() || bypass_) {
         if (SystemProperties::GetDebugEnabled()) {
@@ -2625,9 +2633,12 @@ void FrameNode::Layout()
         GetLayoutAlgorithm()->SetSkipLayout();
     }
 
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    bool isFocusOnPage = pipeline->CheckPageFocus();
     SaveGeoState();
-    AvoidKeyboard();
-    ExpandSafeArea();
+    AvoidKeyboard(isFocusOnPage);
+    ExpandSafeArea(isFocusOnPage);
 
     LOGD("On Layout Done: type: %{public}s, depth: %{public}d, Offset: %{public}s", GetTag().c_str(), GetDepth(),
         geometryNode_->GetFrameOffset().ToString().c_str());
@@ -2884,13 +2895,33 @@ void FrameNode::DoRemoveChildInRenderTree(uint32_t index, bool isAll)
     isActive_ = false;
 }
 
-void FrameNode::OnInspectorIdUpdate(const std::string& /*unused*/)
+void FrameNode::OnInspectorIdUpdate(const std::string& id)
 {
+    RecordExposureIfNeed(id);
     auto parent = GetAncestorNodeOfFrame();
     CHECK_NULL_VOID(parent);
     if (parent->GetTag() == V2::RELATIVE_CONTAINER_ETS_TAG) {
         parent->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     }
+}
+
+void FrameNode::RecordExposureIfNeed(const std::string& inspectorId)
+{
+    if (exposureProcessor_) {
+        return;
+    }
+    exposureProcessor_ = MakeRefPtr<Recorder::ExposureProcessor>(inspectorId);
+    if (!exposureProcessor_->IsNeedRecord()) {
+        return;
+    }
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto callback = [weak = WeakClaim(RawPtr(exposureProcessor_))](bool visible, double ratio) {
+        auto processor = weak.Upgrade();
+        CHECK_NULL_VOID(processor);
+        processor->OnVisibleChange(visible);
+    };
+    pipeline->AddVisibleAreaChangeNode(Claim(this), exposureProcessor_->GetRatio(), callback, false);
 }
 
 void FrameNode::AddFrameNodeSnapshot(bool isHit, int32_t parentId)

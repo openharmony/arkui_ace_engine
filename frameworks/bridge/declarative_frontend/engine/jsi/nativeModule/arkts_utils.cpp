@@ -25,10 +25,12 @@
 #include "frameworks/core/common/card_scope.h"
 
 namespace OHOS::Ace::NG {
+const std::regex RESOURCE_APP_STRING_PLACEHOLDER(R"(\%((\d+)(\$)){0,1}([dsf]))", std::regex::icase);
 const std::regex FLOAT_PATTERN(R"(-?(0|[1-9]\d*)(\.\d+))", std::regex::icase);
 constexpr uint32_t COLOR_ALPHA_OFFSET = 24;
 constexpr uint32_t COLOR_ALPHA_VALUE = 0xFF000000;
 const std::string DEFAULT_STR = "-1";
+constexpr  int32_t REPLACEHOLDER_INDEX = 2;
 enum class ResourceType : uint32_t {
     COLOR = 10001,
     FLOAT,
@@ -388,7 +390,7 @@ bool ArkTSUtils::ParseJsInteger(const EcmaVM *vm, const Local<JSValueRef> &value
         result = value->Int32Value(vm);
         return true;
     }
-    // resouce ignore by design
+    // resource ignore by design
     return false;
 }
 
@@ -480,6 +482,18 @@ bool ArkTSUtils::ParseAllBorder(const EcmaVM* vm, const Local<JSValueRef>& args,
         }
 
         if (result.Unit() == DimensionUnit::PERCENT) {
+            result.Reset();
+        }
+        return true;
+    } else {
+        return false;
+    }
+}
+
+bool ArkTSUtils::ParseAllRadius(const EcmaVM* vm, const Local<JSValueRef>& args, CalcDimension& result)
+{
+    if (ParseJsDimensionVp(vm, args, result)) {
+        if (result.IsNegative()) {
             result.Reset();
         }
         return true;
@@ -680,7 +694,171 @@ std::string ArkTSUtils::GetStringFromJS(const EcmaVM *vm, const Local<JSValueRef
     if (!value->IsNull() && value->IsString()) {
         result = value->ToString(vm)->ToString();
     }
+    if (value->IsObject()) {
+        ParseJsStringFromResource(vm, value, result);
+    }
     return result;
+}
+
+bool ArkTSUtils::ParseJsIntegerArray(const EcmaVM* vm, Local<JSValueRef> values, std::vector<uint32_t>& result)
+{
+    Local<panda::ArrayRef> valueArray = static_cast<Local<panda::ArrayRef>>(values);
+    for (size_t i = 0; i < valueArray->Length(vm); i++) {
+        Local<JSValueRef> value = valueArray->GetValueAt(vm, values, i);
+        if (value->IsNumber()) {
+            result.emplace_back(value->Uint32Value(vm));
+        } else {
+            return false;
+        }
+    }
+    return true;
+}
+
+bool ArkTSUtils::ParseJsString(const EcmaVM* vm, const Local<JSValueRef>& jsValue, std::string& result)
+{
+    if (!jsValue->IsString() && !jsValue->IsObject()) {
+        return false;
+    }
+    if (jsValue->IsString()) {
+        result = jsValue->ToString(vm)->ToString();
+        return true;
+    }
+    if (jsValue->IsObject()) {
+        return ArkTSUtils::ParseJsStringFromResource(vm, jsValue, result);
+    }
+    return false;
+}
+
+std::string GetReplaceContentStr(
+    const EcmaVM* vm, int pos, const std::string& type, Local<panda::ArrayRef> params, int32_t containCount)
+{
+    auto item = panda::ArrayRef::GetValueAt(vm, params, pos + containCount);
+    if (type == "d") {
+        if (item->IsNumber()) {
+            return std::to_string(item->ToNumber(vm)->Value());
+        }
+    } else if (type == "s") {
+        if (item->IsString()) {
+            return item->ToString(vm)->ToString();
+        }
+    } else if (type == "f") {
+        if (item->IsNumber()) {
+            return std::to_string(item->ToNumber(vm)->Value());
+        }
+    }
+    return std::string();
+}
+
+void ReplaceHolder(const EcmaVM* vm, std::string& originStr, const Local<panda::ArrayRef>& params, int32_t containCount)
+{
+    auto size = static_cast<int32_t>(params->Length(vm));
+    if (containCount == size) {
+        return;
+    }
+    std::string::const_iterator start = originStr.begin();
+    std::string::const_iterator end = originStr.end();
+    std::smatch matches;
+    bool shortHolderType = false;
+    bool firstMatch = true;
+    int searchTime = 0;
+    while (std::regex_search(start, end, matches, RESOURCE_APP_STRING_PLACEHOLDER)) {
+        std::string pos = matches[2];
+        std::string type = matches[4];
+        if (firstMatch) {
+            firstMatch = false;
+            shortHolderType = pos.length() == 0;
+        } else {
+            if (shortHolderType ^ (pos.length() == 0)) {
+                return;
+            }
+        }
+
+        std::string replaceContentStr;
+        if (shortHolderType) {
+            replaceContentStr = GetReplaceContentStr(vm, searchTime, type, params, containCount);
+        } else {
+            replaceContentStr = GetReplaceContentStr(vm, StringUtils::StringToInt(pos) - 1, type, params, containCount);
+        }
+
+        originStr.replace(matches[0].first - originStr.begin(), matches[0].length(), replaceContentStr);
+        start = originStr.begin() + matches.prefix().length() + replaceContentStr.length();
+        end = originStr.end();
+        searchTime++;
+    }
+}
+
+bool FillResultForResIdNumIsNegative(const EcmaVM* vm, const Local<JSValueRef>& type, const Local<JSValueRef>& params,
+    std::string& result, const RefPtr<ResourceWrapper>& resourceWrapper)
+{
+    auto param = panda::ArrayRef::GetValueAt(vm, params, 0);
+    if (type->Uint32Value(vm) == static_cast<uint32_t>(ResourceType::STRING)) {
+        auto originStr = resourceWrapper->GetStringByName(param->ToString(vm)->ToString());
+        ReplaceHolder(vm, originStr, params, 0);
+        result = originStr;
+    } else if (type->Uint32Value(vm) == static_cast<uint32_t>(ResourceType::PLURAL)) {
+        auto countJsVal = panda::ArrayRef::GetValueAt(vm, params, 1);
+        int count = 0;
+        if (!countJsVal->IsNumber()) {
+            return false;
+        }
+        count = countJsVal->ToNumber(vm)->Value();
+        auto pluralStr = resourceWrapper->GetPluralStringByName(param->ToString(vm)->ToString(), count);
+        ReplaceHolder(vm, pluralStr, params, REPLACEHOLDER_INDEX);
+        result = pluralStr;
+    } else {
+        return false;
+    }
+    return true;
+}
+
+bool ArkTSUtils::ParseJsStringFromResource(const EcmaVM* vm, const Local<JSValueRef>& jsValue, std::string& result)
+{
+    auto obj = jsValue->ToObject(vm);
+    auto type = obj->Get(vm, panda::StringRef::NewFromUtf8(vm, "type"));
+    auto resId = obj->Get(vm, panda::StringRef::NewFromUtf8(vm, "id"));
+    auto args = obj->Get(vm, panda::StringRef::NewFromUtf8(vm, "args"));
+    if (!type->IsNumber() || !resId->IsNumber() || !args->IsArray(vm)) {
+        return false;
+    }
+
+    auto resourceObject = GetResourceObject(vm, obj);
+    auto resourceWrapper = CreateResourceWrapper(vm, obj, resourceObject);
+    if (!resourceWrapper) {
+        return false;
+    }
+
+    Local<panda::ArrayRef> params = static_cast<Local<panda::ArrayRef>>(args);
+    auto resIdNum = resourceObject->GetId();
+    if (resIdNum == -1) {
+        if (!IsGetResourceByName(vm, obj)) {
+            return false;
+        }
+        return FillResultForResIdNumIsNegative(vm, type, params, result, resourceWrapper);
+    }
+    if (resourceObject->GetType() == static_cast<uint32_t>(ResourceType::STRING)) {
+        auto originStr = resourceWrapper->GetString(resId->Uint32Value(vm));
+        ReplaceHolder(vm, originStr, params, 0);
+        result = originStr;
+        LOGD("Get resource string %{public}s", result.c_str());
+    } else if (resourceObject->GetType() == static_cast<uint32_t>(ResourceType::PLURAL)) {
+        auto countJsVal = panda::ArrayRef::GetValueAt(vm, params, 0);
+        int count = 0;
+        if (!countJsVal->IsNumber()) {
+            return false;
+        }
+        count = countJsVal->ToNumber(vm)->Value();
+        auto pluralStr = resourceWrapper->GetPluralString(resId->ToNumber(vm)->Value(), count);
+        ReplaceHolder(vm, pluralStr, params, 1);
+        result = pluralStr;
+        LOGD("Get resource PLURAL %{public}s", result.c_str());
+    } else if (resourceObject->GetType() == static_cast<uint32_t>(ResourceType::FLOAT)) {
+        result = std::to_string(resourceWrapper->GetDouble(resId->Uint32Value(vm)));
+    } else if (resourceObject->GetType() == static_cast<uint32_t>(ResourceType::INTEGER)) {
+        result = std::to_string(resourceWrapper->GetInt(resId->Uint32Value(vm)));
+    } else {
+        return false;
+    }
+    return true;
 }
 
 bool ArkTSUtils::ParseJsResource(const EcmaVM *vm, const Local<JSValueRef> &jsValue, CalcDimension &result)

@@ -31,14 +31,14 @@ JSRef<JSObject> JsTouchFunction::CreateTouchInfo(const TouchLocationInfo& touchI
     const OHOS::Ace::Offset& screenLocation = touchInfo.GetScreenLocation();
     touchInfoObj->SetProperty<int32_t>("type", static_cast<int32_t>(touchInfo.GetTouchType()));
     touchInfoObj->SetProperty<int32_t>("id", touchInfo.GetFingerId());
-    touchInfoObj->SetProperty<double>("displayX", SystemProperties::Px2Vp(screenLocation.GetX()));
-    touchInfoObj->SetProperty<double>("displayY", SystemProperties::Px2Vp(screenLocation.GetY()));
-    touchInfoObj->SetProperty<double>("windowX", SystemProperties::Px2Vp(globalLocation.GetX()));
-    touchInfoObj->SetProperty<double>("windowY", SystemProperties::Px2Vp(globalLocation.GetY()));
-    touchInfoObj->SetProperty<double>("screenX", SystemProperties::Px2Vp(globalLocation.GetX()));
-    touchInfoObj->SetProperty<double>("screenY", SystemProperties::Px2Vp(globalLocation.GetY()));
-    touchInfoObj->SetProperty<double>("x", SystemProperties::Px2Vp(localLocation.GetX()));
-    touchInfoObj->SetProperty<double>("y", SystemProperties::Px2Vp(localLocation.GetY()));
+    touchInfoObj->SetProperty<double>("displayX", PipelineBase::Px2VpWithCurrentDensity(screenLocation.GetX()));
+    touchInfoObj->SetProperty<double>("displayY", PipelineBase::Px2VpWithCurrentDensity(screenLocation.GetY()));
+    touchInfoObj->SetProperty<double>("windowX", PipelineBase::Px2VpWithCurrentDensity(globalLocation.GetX()));
+    touchInfoObj->SetProperty<double>("windowY", PipelineBase::Px2VpWithCurrentDensity(globalLocation.GetY()));
+    touchInfoObj->SetProperty<double>("screenX", PipelineBase::Px2VpWithCurrentDensity(globalLocation.GetX()));
+    touchInfoObj->SetProperty<double>("screenY", PipelineBase::Px2VpWithCurrentDensity(globalLocation.GetY()));
+    touchInfoObj->SetProperty<double>("x", PipelineBase::Px2VpWithCurrentDensity(localLocation.GetX()));
+    touchInfoObj->SetProperty<double>("y", PipelineBase::Px2VpWithCurrentDensity(localLocation.GetY()));
     touchInfoObj->Wrap<TouchEventInfo>(&info);
     return touchInfoObj;
 }

@@ -57,8 +57,19 @@ public:
         return pageMap_;
     }
 
+    void SetShowTime(int64_t time)
+    {
+        showTime_ = time;
+    }
+
+    int64_t GetShowTime() const
+    {
+        return showTime_;
+    }
+
 private:
     std::string params_;
+    int64_t showTime_ = 0;
     RefPtr<Framework::RevSourceMap> pageMap_;
 
     ACE_DISALLOW_COPY_AND_MOVE(EntryPageInfo);

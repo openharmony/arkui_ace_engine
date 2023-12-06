@@ -233,7 +233,7 @@ void GridPattern::ClearMultiSelect()
     ClearSelectedZone();
 }
 
-bool GridPattern::IsItemSelected(const MouseInfo& info)
+bool GridPattern::IsItemSelected(const GestureEvent& info)
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
@@ -332,21 +332,15 @@ bool GridPattern::UpdateCurrentOffset(float offset, int32_t source)
     // When finger moves down, offset is positive.
     // When finger moves up, offset is negative.
     auto itemsHeight = gridLayoutInfo_.GetTotalHeightOfItemsInView(GetMainGap());
-    float overScroll = 0.0f;
     if (gridLayoutInfo_.offsetEnd_) {
-        overScroll = gridLayoutInfo_.currentOffset_ - (GetMainContentSize() - itemsHeight);
+        auto overScroll = gridLayoutInfo_.currentOffset_ - (GetMainContentSize() - itemsHeight);
         if (source == SCROLL_FROM_UPDATE) {
             auto friction = ScrollablePattern::CalculateFriction(std::abs(overScroll) / GetMainContentSize());
             gridLayoutInfo_.prevOffset_ = gridLayoutInfo_.currentOffset_;
             gridLayoutInfo_.currentOffset_ = gridLayoutInfo_.currentOffset_ + offset * friction;
-            overScroll += offset * friction;
         } else {
             gridLayoutInfo_.prevOffset_ = gridLayoutInfo_.currentOffset_;
             gridLayoutInfo_.currentOffset_ += offset;
-            overScroll += offset;
-        }
-        if (IsOutOfBoundary()) {
-            HandleScrollBarOutBoundary(overScroll);
         }
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 
@@ -366,10 +360,6 @@ bool GridPattern::UpdateCurrentOffset(float offset, int32_t source)
             gridLayoutInfo_.prevOffset_ = gridLayoutInfo_.currentOffset_;
             gridLayoutInfo_.currentOffset_ += offset;
         }
-        overScroll = gridLayoutInfo_.currentOffset_;
-        if (IsOutOfBoundary()) {
-            HandleScrollBarOutBoundary(overScroll);
-        }
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 
         if (LessNotEqual(gridLayoutInfo_.currentOffset_, 0.0)) {
@@ -383,7 +373,6 @@ bool GridPattern::UpdateCurrentOffset(float offset, int32_t source)
         gridLayoutInfo_.offsetUpdated_ = true;
     }
     gridLayoutInfo_.currentOffset_ += offset;
-    HandleScrollBarOutBoundary(overScroll);
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     return true;
 }
@@ -1220,6 +1209,9 @@ void GridPattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const
     ScrollablePattern::ToJsonValue(json);
     json->Put("multiSelectable", multiSelectable_ ? "true" : "false");
     json->Put("supportAnimation", supportAnimation_ ? "true" : "false");
+    auto JsonEdgeEffectOptions = JsonUtil::Create(true);
+    JsonEdgeEffectOptions->Put("alwaysEnabled", GetAlwaysEnabled());
+    json->Put("edgeEffectOptions", JsonEdgeEffectOptions);
 }
 
 void GridPattern::InitOnKeyEvent(const RefPtr<FocusHub>& focusHub)
@@ -1423,6 +1415,14 @@ void GridPattern::UpdateScrollBarOffset()
         }
     }
     auto viewSize = geometryNode->GetFrameSize();
+    auto overScroll = 0.0f;
+    if (Positive(gridLayoutInfo_.currentOffset_)) {
+        overScroll = gridLayoutInfo_.currentOffset_;
+    } else {
+        overScroll = gridLayoutInfo_.lastMainSize_ - estimatedHeight + offset;
+        overScroll = Positive(overScroll) ? overScroll : 0.0f;
+    }
+    HandleScrollBarOutBoundary(overScroll);
     UpdateScrollBarRegion(offset, estimatedHeight, Size(viewSize.Width(), viewSize.Height()), Offset(0.0f, 0.0f));
 }
 

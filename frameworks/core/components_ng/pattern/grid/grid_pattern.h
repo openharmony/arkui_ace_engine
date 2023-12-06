@@ -198,6 +198,11 @@ public:
     void OnRestoreInfo(const std::string& restoreInfo) override;
     Rect GetItemRect(int32_t index) const override;
 
+    bool IsNeedInitClickEventRecorder() const override
+    {
+        return true;
+    }
+
 private:
     float GetEndOffset();
     float GetMainGap() const;
@@ -226,7 +231,7 @@ private:
     bool HandleDirectionKey(KeyCode code);
 
     void ClearMultiSelect() override;
-    bool IsItemSelected(const MouseInfo& info) override;
+    bool IsItemSelected(const GestureEvent& info) override;
     void MultiSelectWithoutKeyboard(const RectF& selectedZone) override;
     void UpdateScrollBarOffset() override;
     void UpdateRectOfDraggedInItem(int32_t insertIndex);

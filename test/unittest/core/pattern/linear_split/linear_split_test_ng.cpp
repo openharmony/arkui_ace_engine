@@ -26,6 +26,7 @@
 #include "core/components_ng/pattern/linear_split/linear_split_model.h"
 #include "core/components_ng/pattern/linear_split/linear_split_pattern.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/core/render/mock_render_context.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -49,6 +50,7 @@ const SizeF CONTAINER_SIZE(RK356_WIDTH, RK356_HEIGHT);
 const OffsetF OFFSET_TOP_LEFT = OffsetF(ZERO, ZERO);
 constexpr int32_t PLATFORM_VERSION_10 = 10;
 constexpr int32_t PLATFORM_VERSION_9 = 9;
+constexpr int32_t CALL_FRC_TIMES = 1;
 } // namespace
 
 class LinearSplitTestNg : public testing::Test {
@@ -1144,5 +1146,34 @@ HWTEST_F(LinearSplitTestNg, LinearSplitPatternTest011, TestSize.Level1)
         linearSplitPattern->HandleMouseEvent(mouseInfo2);
         EXPECT_EQ(linearSplitPattern->mouseDragedSplitIndex_, 1);
     }
+}
+/**
+ * @tc.name: LinearSplitPatternTest012
+ * @tc.desc: Test FRC callback
+ * @tc.type: FUNC
+ */
+HWTEST_F(LinearSplitTestNg, LinearSplitPatternTest012, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create columnSplit and initialize related properties.
+     */
+    PipelineBase::GetCurrentContext()->SetMinPlatformVersion(PLATFORM_VERSION_9);
+    LinearSplitModelNG model;
+    model.Create(SplitType::COLUMN_SPLIT);
+    model.SetResizeable(SplitType::COLUMN_SPLIT, true);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    
+    /**
+     * @tc.steps: step2. Test FRC.
+     */
+    auto renderContext = AceType::DynamicCast<MockRenderContext>(frameNode->GetRenderContext());
+    EXPECT_TRUE(!!renderContext);
+    EXPECT_CALL(*renderContext, CalcExpectedFrameRate(_, _)).Times(CALL_FRC_TIMES);
+    RefPtr<LinearSplitPattern> linearSplitPattern = frameNode->GetPattern<LinearSplitPattern>();
+    ASSERT_NE(linearSplitPattern, nullptr);
+    linearSplitPattern->isDragedMoving_ = true;
+    auto info = GestureEvent();
+    linearSplitPattern->HandlePanEnd(info);
 }
 } // namespace OHOS::Ace::NG

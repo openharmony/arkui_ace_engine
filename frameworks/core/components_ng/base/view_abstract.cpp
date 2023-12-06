@@ -1083,6 +1083,13 @@ void ViewAbstract::SetAllowDrop(const std::set<std::string> &allowDrop)
     frameNode->SetAllowDrop(allowDrop);
 }
 
+void ViewAbstract::SetDragPreview(const NG::DragDropInfo& info)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    frameNode->SetDragPreview(info);
+}
+
 void ViewAbstract::SetPosition(const OffsetT<Dimension> &value)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
@@ -1211,9 +1218,6 @@ void ViewAbstract::BindPopup(const RefPtr<PopupParam> &param, const RefPtr<Frame
     if (popupInfo.isCurrentOnShow) {
         // Entering / Normal / Exiting
         bool popupShowing = popupPattern ? popupPattern->IsOnShow() : false;
-        if (popupShowing == isShow) {
-            return;
-        }
         if (!popupShowing && isShow) {
             popupInfo.markNeedUpdate = false;
         } else {
@@ -1295,7 +1299,9 @@ void ViewAbstract::BindPopup(const RefPtr<PopupParam> &param, const RefPtr<Frame
             WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_SUBTREE);
     }
     if (isShow) {
-        overlayManager->ShowPopup(targetId, popupInfo);
+        if (popupInfo.isCurrentOnShow != isShow) {
+            overlayManager->ShowPopup(targetId, popupInfo);
+        }
     } else {
         overlayManager->HidePopup(targetId, popupInfo);
     }
@@ -1585,7 +1591,8 @@ void ViewAbstract::SetClipEdge(bool isClip)
     auto target = frameNode->GetRenderContext();
     if (target) {
         if (target->GetClipShape().has_value()) {
-            target->UpdateClipShape(nullptr);
+            target->ResetClipShape();
+            target->OnClipShapeUpdate(nullptr);
         }
         target->UpdateClipEdge(isClip);
     }
@@ -1597,7 +1604,8 @@ void ViewAbstract::SetClipEdge(FrameNode *frameNode, bool isClip)
     auto target = frameNode->GetRenderContext();
     if (target) {
         if (target->GetClipShape().has_value()) {
-            target->UpdateClipShape(nullptr);
+            target->ResetClipShape();
+            target->OnClipShapeUpdate(nullptr);
         }
         target->UpdateClipEdge(isClip);
     }
@@ -1613,7 +1621,8 @@ void ViewAbstract::SetMask(const RefPtr<BasicShape> &basicShape)
     auto target = frameNode->GetRenderContext();
     if (target) {
         if (target->HasProgressMask()) {
-            target->UpdateProgressMask(nullptr);
+            target->ResetProgressMask();
+            target->OnProgressMaskUpdate(nullptr);
         }
         target->UpdateClipMask(basicShape);
     }
@@ -1629,7 +1638,8 @@ void ViewAbstract::SetProgressMask(const RefPtr<ProgressMaskProperty> &progress)
     auto target = frameNode->GetRenderContext();
     if (target) {
         if (target->HasClipMask()) {
-            target->UpdateClipMask(nullptr);
+            target->ResetClipMask();
+            target->OnClipMaskUpdate(nullptr);
         }
         target->UpdateProgressMask(progress);
     }
@@ -1830,7 +1840,8 @@ void ViewAbstract::SetMask(FrameNode* frameNode, const RefPtr<BasicShape>& basic
     auto target = frameNode->GetRenderContext();
     if (target) {
         if (target->HasProgressMask()) {
-            target->UpdateProgressMask(nullptr);
+            target->ResetProgressMask();
+            target->OnProgressMaskUpdate(nullptr);
         }
         target->UpdateClipMask(basicShape);
     }
@@ -1842,7 +1853,8 @@ void ViewAbstract::SetProgressMask(FrameNode* frameNode, const RefPtr<ProgressMa
     auto target = frameNode->GetRenderContext();
     if (target) {
         if (target->HasClipMask()) {
-            target->UpdateClipMask(nullptr);
+            target->ResetClipMask();
+            target->OnClipMaskUpdate(nullptr);
         }
         target->UpdateProgressMask(progress);
     }
@@ -2239,6 +2251,14 @@ void ViewAbstract::SetLightIlluminated(const uint32_t value)
     ACE_UPDATE_RENDER_CONTEXT(LightIlluminated, value);
 }
 
+void ViewAbstract::SetIlluminatedBorderWidth(const Dimension& value)
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        return;
+    }
+    ACE_UPDATE_RENDER_CONTEXT(IlluminatedBorderWidth, value);
+}
+
 void ViewAbstract::SetBloom(const float value)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
@@ -2510,6 +2530,7 @@ void ViewAbstract::SetTabIndex(FrameNode* frameNode, int32_t index)
 void ViewAbstract::SetObscured(FrameNode* frameNode, const std::vector< ObscuredReasons>& reasons)
 {
     CHECK_NULL_VOID(frameNode);
+    ACE_UPDATE_NODE_RENDER_CONTEXT(Obscured, reasons, frameNode);
     frameNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 

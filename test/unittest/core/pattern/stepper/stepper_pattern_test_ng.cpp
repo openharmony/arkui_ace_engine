@@ -126,9 +126,9 @@ HWTEST_F(StepperPatternTestNg, StepperFrameNodeCreator001, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
     auto eventHub = frameNode->GetEventHub<StepperEventHub>();
     ASSERT_NE(eventHub, nullptr);
-    eventHub->FireFinishEvent();
+    eventHub->FireFinishEvent(0);
     EXPECT_EQ(eventName, FINISH_EVENT_NAME);
-    eventHub->FireSkipEvent();
+    eventHub->FireSkipEvent(0);
     EXPECT_EQ(eventName, SKIP_EVENT_NAME);
     eventHub->FireChangeEvent(1, 2);
     EXPECT_EQ(eventName, CHANGE_EVENT_NAME);

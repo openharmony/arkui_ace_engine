@@ -105,7 +105,7 @@ bool NodeDataCache::PutString(const std::string& id, const std::string& value)
             if (iter->second.size() >= MAX_SIZE_PER_PAGE) {
                 return false;
             }
-            iter->second.emplace(id, value);
+            iter->second[id] = value;
         }
     }
     return true;
@@ -159,7 +159,7 @@ bool NodeDataCache::PutMultiple(const std::string& id, const std::string& name, 
     return PutString(id, json->ToString());
 }
 
-void NodeDataCache::GetNodeData(const std::string& pageUrl, std::unordered_map<std::string, std::string> nodes)
+void NodeDataCache::GetNodeData(const std::string& pageUrl, std::unordered_map<std::string, std::string>& nodes)
 {
     if (pageUrl.empty()) {
         return;
@@ -173,7 +173,7 @@ void NodeDataCache::GetNodeData(const std::string& pageUrl, std::unordered_map<s
     for (auto nodeIter = nodes.begin(); nodeIter != nodes.end(); nodeIter++) {
         auto it = iter->second.find(nodeIter->first);
         if (it != iter->second.end()) {
-            nodes.emplace(it->first, it->second);
+            nodes[it->first] = it->second;
         }
     }
 }

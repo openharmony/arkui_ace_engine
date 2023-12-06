@@ -12,9 +12,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "bridge/declarative_frontend/engine/jsi/components/arkts_native_api.h"
-#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_textpicker_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_timepicker_bridge.h"
+
+#include "bridge/declarative_frontend/engine/jsi/components/arkts_native_api.h"
+#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 
 namespace OHOS::Ace::NG {
 const std::string FORMAT_FONT = "%s|%s|%s";
@@ -46,6 +47,7 @@ ArkUINativeModuleValue TimepickerBridge::ResetTimepickerBackgroundColor(ArkUIRun
     GetArkUIInternalNodeAPI()->GetTimepickerModifier().ResetTimepickerBackgroundColor(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
+
 ArkUINativeModuleValue TimepickerBridge::SetTextStyle(ArkUIRuntimeCallInfo*runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
@@ -59,9 +61,9 @@ ArkUINativeModuleValue TimepickerBridge::SetTextStyle(ArkUIRuntimeCallInfo*runti
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
 
     uint32_t color = colorArg->Uint32Value(vm);
-    std::string fontSize = TextpickerBridge::GetStringFromJS(vm, fontSizeArg);
-    std::string weight = TextpickerBridge::GetStringFromJS(vm, fontWeightArg);
-    std::string fontFamily = TextpickerBridge::GetStringFromJS(vm, fontFamilyArg);
+    std::string fontSize = ArkTSUtils::GetStringFromJS(vm, fontSizeArg);
+    std::string weight = ArkTSUtils::GetStringFromJS(vm, fontWeightArg);
+    std::string fontFamily = ArkTSUtils::GetStringFromJS(vm, fontFamilyArg);
     int32_t styleVal = 0;
     if (!fontStyleArg->IsNull()) {
         styleVal = fontStyleArg->Int32Value(vm);
@@ -73,6 +75,7 @@ ArkUINativeModuleValue TimepickerBridge::SetTextStyle(ArkUIRuntimeCallInfo*runti
         nativeNode, color, fontInfo.c_str(), styleVal);
     return panda::JSValueRef::Undefined(vm);
 }
+
 ArkUINativeModuleValue TimepickerBridge::SetSelectedTextStyle(ArkUIRuntimeCallInfo*runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
@@ -86,9 +89,9 @@ ArkUINativeModuleValue TimepickerBridge::SetSelectedTextStyle(ArkUIRuntimeCallIn
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
 
     uint32_t color = colorArg->Uint32Value(vm);
-    std::string fontSize = TextpickerBridge::GetStringFromJS(vm, fontSizeArg);
-    std::string weight = TextpickerBridge::GetStringFromJS(vm, fontWeightArg);
-    std::string fontFamily = TextpickerBridge::GetStringFromJS(vm, fontFamilyArg);
+    std::string fontSize = ArkTSUtils::GetStringFromJS(vm, fontSizeArg);
+    std::string weight = ArkTSUtils::GetStringFromJS(vm, fontWeightArg);
+    std::string fontFamily = ArkTSUtils::GetStringFromJS(vm, fontFamilyArg);
     int32_t styleVal = 0;
     if (!fontStyleArg->IsNull()) {
         styleVal = fontStyleArg->Int32Value(vm);
@@ -100,6 +103,7 @@ ArkUINativeModuleValue TimepickerBridge::SetSelectedTextStyle(ArkUIRuntimeCallIn
         nativeNode, color, fontInfo.c_str(), styleVal);
     return panda::JSValueRef::Undefined(vm);
 }
+
 ArkUINativeModuleValue TimepickerBridge::SetDisappearTextStyle(ArkUIRuntimeCallInfo*runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
@@ -113,9 +117,9 @@ ArkUINativeModuleValue TimepickerBridge::SetDisappearTextStyle(ArkUIRuntimeCallI
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
 
     uint32_t color = colorArg->Uint32Value(vm);
-    std::string fontSize = TextpickerBridge::GetStringFromJS(vm, fontSizeArg);
-    std::string weight = TextpickerBridge::GetStringFromJS(vm, fontWeightArg);
-    std::string fontFamily = TextpickerBridge::GetStringFromJS(vm, fontFamilyArg);
+    std::string fontSize = ArkTSUtils::GetStringFromJS(vm, fontSizeArg);
+    std::string weight = ArkTSUtils::GetStringFromJS(vm, fontWeightArg);
+    std::string fontFamily = ArkTSUtils::GetStringFromJS(vm, fontFamilyArg);
     int32_t styleVal = 0;
     if (!fontStyleArg->IsNull()) {
         styleVal = fontStyleArg->Int32Value(vm);
@@ -127,6 +131,7 @@ ArkUINativeModuleValue TimepickerBridge::SetDisappearTextStyle(ArkUIRuntimeCallI
         nativeNode, color, fontInfo.c_str(), styleVal);
     return panda::JSValueRef::Undefined(vm);
 }
+
 ArkUINativeModuleValue TimepickerBridge::ResetTextStyle(ArkUIRuntimeCallInfo*runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
@@ -136,6 +141,7 @@ ArkUINativeModuleValue TimepickerBridge::ResetTextStyle(ArkUIRuntimeCallInfo*run
     GetArkUIInternalNodeAPI()->GetTimepickerModifier().ResetTimepickerTextStyle(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
+
 ArkUINativeModuleValue TimepickerBridge::ResetSelectedTextStyle(ArkUIRuntimeCallInfo*runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
@@ -145,6 +151,7 @@ ArkUINativeModuleValue TimepickerBridge::ResetSelectedTextStyle(ArkUIRuntimeCall
     GetArkUIInternalNodeAPI()->GetTimepickerModifier().ResetTimepickerSelectedTextStyle(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
+
 ArkUINativeModuleValue TimepickerBridge::ResetDisappearTextStyle(ArkUIRuntimeCallInfo*runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();

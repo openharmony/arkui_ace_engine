@@ -967,7 +967,7 @@ void RosenRenderPercentageDataPanel::PaintLinearProgress(RenderContext& context,
 {
     auto totalWidth = GetLayoutSize().Width();
     auto segment = GetSegments();
-    auto spaceWidth = SystemProperties::Vp2Px(FIXED_WIDTH);
+    auto spaceWidth = PipelineBase::Vp2PxWithCurrentDensity(FIXED_WIDTH);
     auto segmentWidthSum = 0.0;
     for (uint32_t i = 0; i < segment.size(); i++) {
         segmentWidthSum += segment[i].GetValue();

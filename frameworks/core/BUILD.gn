@@ -209,6 +209,7 @@ template("ace_core_source_set") {
       # textfield
       "common/ime/text_editing_value.cpp",
       "common/ime/text_input_action.cpp",
+      "common/ime/text_input_client.cpp",
       "common/ime/text_input_configuration.cpp",
       "common/ime/text_input_connection.cpp",
       "common/ime/text_input_formatter.cpp",
@@ -739,6 +740,7 @@ template("ace_core_ng_source_set") {
       # textfield
       "common/ime/text_editing_value.cpp",
       "common/ime/text_input_action.cpp",
+      "common/ime/text_input_client.cpp",
       "common/ime/text_input_configuration.cpp",
       "common/ime/text_input_connection.cpp",
       "common/ime/text_input_formatter.cpp",

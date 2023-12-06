@@ -107,6 +107,13 @@ class DragController {
         }
     }
 
+    createDragAction() {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        let dragAction = this.ohos_dragController.createDragAction();
+        __JSScopeUtil__.restoreInstanceId();
+        return dragAction;
+    }
+
     getDragPreview() {
         __JSScopeUtil__.syncInstanceId(this.instanceId_);
         let dragPreview = this.ohos_dragController.getDragPreview();

@@ -1,6 +1,6 @@
-/// <reference path="./ArkViewStackProcessor.ts" />
+/// <reference path='./ArkViewStackProcessor.ts' />
 class CheckboxGroupSelectAllModifier extends Modifier<boolean> {
-    static identity: Symbol = Symbol("checkboxgroupSelectAll");
+    static identity: Symbol = Symbol('checkboxgroupSelectAll');
     applyPeer(node: KNode, reset: boolean) {
         if (reset) {
             GetUINativeModule().checkboxgroup.resetSelectAll(node);
@@ -10,8 +10,9 @@ class CheckboxGroupSelectAllModifier extends Modifier<boolean> {
         }
     }
 }
-class CheckboxGroupSelectedColorModifier extends Modifier<number | undefined> {
-    static identity: Symbol = Symbol("checkboxgroupSelectedColor");
+
+class CheckboxGroupSelectedColorModifier extends ModifierWithKey<ResourceColor> {
+    static identity: Symbol = Symbol('checkboxgroupSelectedColor');
     applyPeer(node: KNode, reset: boolean) {
         if (reset) {
             GetUINativeModule().checkboxgroup.resetSelectedColor(node);
@@ -20,9 +21,19 @@ class CheckboxGroupSelectedColorModifier extends Modifier<number | undefined> {
             GetUINativeModule().checkboxgroup.setSelectedColor(node, this.value);
         }
     }
+
+    checkObjectDiff() {
+        if (isResource(this.stageValue) && isResource(this.value)) {
+            return !isResourceEqual(this.stageValue, this.value);
+        }
+        else {
+            return true;
+        }
+    }    
 }
-class CheckboxGroupUnselectedColorModifier extends Modifier<number | undefined> {
-    static identity: Symbol = Symbol("checkboxgroupUnselectedColor");
+
+class CheckboxGroupUnselectedColorModifier extends ModifierWithKey<ResourceColor> {
+    static identity: Symbol = Symbol('checkboxgroupUnselectedColor');
     applyPeer(node: KNode, reset: boolean) {
         if (reset) {
             GetUINativeModule().checkboxgroup.resetUnSelectedColor(node);
@@ -31,22 +42,37 @@ class CheckboxGroupUnselectedColorModifier extends Modifier<number | undefined> 
             GetUINativeModule().checkboxgroup.setUnSelectedColor(node, this.value);
         }
     }
-}
-class CheckboxGroupMarkModifier extends Modifier<ArkMarkStyle> {
-    static identity: Symbol = Symbol("checkboxgroupMark");
-    applyPeer(node: KNode, reset: boolean) {
-        if (reset) {
-            GetUINativeModule().checkboxgroup.resetMark(node);
+
+    checkObjectDiff() {
+        if (isResource(this.stageValue) && isResource(this.value)) {
+            return !isResourceEqual(this.stageValue, this.value);
         }
         else {
-            GetUINativeModule().checkboxgroup.setMark(node, this.value?.strokeColor, this.value?.size,
-                this.value?.strokeWidth);
+            return true;
         }
     }
 }
+class CheckboxGroupMarkModifier extends ModifierWithKey<MarkStyle> {
+  static identity: Symbol = Symbol('checkboxgroupMark');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      GetUINativeModule().checkboxgroup.resetMark(node);
+    }
+    else {
+      GetUINativeModule().checkboxgroup.setMark(node, this.value?.strokeColor, this.value?.size, this.value?.strokeWidth);
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    let colorEQ = isBaseOrResourceEqual(this.stageValue.strokeColor, this.value.strokeColor);
+    let sizeEQ = isBaseOrResourceEqual(this.stageValue.size, this.value.size);
+    let widthEQ = isBaseOrResourceEqual(this.stageValue.strokeWidth, this.value.strokeWidth);
+    return !colorEQ || !sizeEQ || !widthEQ;    
+  }
+}
 class ArkCheckboxGroupComponent extends ArkComponent implements CheckboxGroupAttribute {
     selectAll(value: boolean): this {
-        if (typeof value === "boolean") {
+        if (isBoolean(value)) {
             modifier(this._modifiers, CheckboxGroupSelectAllModifier, value);
         } else {
             modifier(this._modifiers, CheckboxGroupSelectAllModifier, undefined);
@@ -54,42 +80,27 @@ class ArkCheckboxGroupComponent extends ArkComponent implements CheckboxGroupAtt
         return this;
     }
     selectedColor(value: ResourceColor): this {
-        let arkColor = new ArkColor();
-        if (arkColor.parseColorValue(value)) {
-            modifier(this._modifiers, CheckboxGroupSelectedColorModifier, arkColor.color);
-        } else {
-            modifier(this._modifiers, CheckboxGroupSelectedColorModifier, undefined);
-        }
+        modifierWithKey(this._modifiersWithKeys, CheckboxGroupSelectedColorModifier.identity, CheckboxGroupSelectedColorModifier, value);
         return this;
     }
     unselectedColor(value: ResourceColor): this {
-        let arkColor = new ArkColor();
-        if (arkColor.parseColorValue(value)) {
-            modifier(this._modifiers, CheckboxGroupUnselectedColorModifier, arkColor.color);
-        } else {
-            modifier(this._modifiers, CheckboxGroupUnselectedColorModifier, undefined);
-        }
+        modifierWithKey(this._modifiersWithKeys, CheckboxGroupUnselectedColorModifier.identity, CheckboxGroupUnselectedColorModifier, value);
         return this;
     }
     mark(value: MarkStyle): this {
-        let arkMarkStyle = new ArkMarkStyle();
-        if (arkMarkStyle.parseMarkStyle(value)) {
-            modifier(this._modifiers, CheckboxGroupMarkModifier, arkMarkStyle);
-        } else {
-            modifier(this._modifiers, CheckboxGroupMarkModifier, undefined);
-        }
+        modifierWithKey(
+          this._modifiersWithKeys, CheckboxGroupMarkModifier.identity, CheckboxGroupMarkModifier, value);
         return this;
-      }
-      onChange(callback: (event: CheckboxGroupResult) => void): CheckboxGroupAttribute {
-        throw new Error("Method not implemented.");
+    }
+    onChange(callback: (event: CheckboxGroupResult) => void): CheckboxGroupAttribute {
+        throw new Error('Method not implemented.');
     }
 }
 // @ts-ignore
-globalThis.CheckboxGroup.attributeModifier = function(modifier) {
+globalThis.CheckboxGroup.attributeModifier = function (modifier) {
     const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
     let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
-    let component = this.createOrGetNode(elmtId, () =>
-    {
+    let component = this.createOrGetNode(elmtId, () => {
         return new ArkCheckboxGroupComponent(nativeNode);
     });
     modifier.applyNormalAttribute(component);

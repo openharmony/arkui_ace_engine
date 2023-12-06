@@ -61,6 +61,11 @@ public:
         return isVertical_;
     }
 
+    bool IsNeedInitClickEventRecorder() const override
+    {
+        return true;
+    }
+
 private:
     bool isVertical_ = false;
 

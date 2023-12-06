@@ -1913,15 +1913,7 @@ bool JsAccessibilityManager::TransferAccessibilityAsyncEvent(
 void JsAccessibilityManager::SendExtensionAccessibilityEvent(
     const AccessibilityEventInfo& eventInfo, const std::vector<int32_t>& uiExtensionIdLevelList)
 {
-    auto context = context_.Upgrade();
-    CHECK_NULL_VOID(context);
-    context->GetTaskExecutor()->PostTask(
-        [weak = WeakClaim(this), eventInfo, uiExtensionIdLevelList]() {
-                auto jsAccessibilityManager = weak.Upgrade();
-                CHECK_NULL_VOID(jsAccessibilityManager);
-                jsAccessibilityManager->TransferAccessibilityAsyncEvent(eventInfo, uiExtensionIdLevelList);
-        },
-        TaskExecutor::TaskType::BACKGROUND);
+    TransferAccessibilityAsyncEvent(eventInfo, uiExtensionIdLevelList);
 }
 
 void JsAccessibilityManager::SendAccessibilityAsyncEvent(const AccessibilityEvent& accessibilityEvent)

@@ -120,6 +120,7 @@ public:
     void TitleOpacityAnimationOut(const RefPtr<RenderContext>& transitionOutNodeContext);
     void TransitionWithReplace(const RefPtr<FrameNode>& preNode, const RefPtr<FrameNode>& curNode, bool isNavBar);
     void DealNavigationExit(const RefPtr<FrameNode>& preNode, bool isNavBar);
+    void NotifyPageHide();
 
 private:
     RefPtr<UINode> navBarNode_;

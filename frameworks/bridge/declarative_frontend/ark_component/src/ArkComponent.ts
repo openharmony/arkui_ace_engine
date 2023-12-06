@@ -88,7 +88,7 @@ class ModifierWithKey<T extends number | string | boolean | object> {
   }
 
   applyStage(node: KNode): boolean {
-    if (this.stageValue === undefined) {
+    if (this.stageValue === undefined || this.stageValue === null) {
       this.value = this.stageValue;
       this.applyPeer(node, true);
       return true;
@@ -250,8 +250,12 @@ class PositionModifier extends ModifierWithKey<Position> {
       GetUINativeModule().common.resetPosition(node);
     }
     else {
-      GetUINativeModule().common.setPosition(node, this.value?.x, this.value?.y);
+      GetUINativeModule().common.setPosition(node, this.value.x, this.value.y);
     }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue.x, this.value.x) ||
+    !isBaseOrResourceEqual(this.stageValue.y, this.value.y);
   }
 }
 
@@ -583,24 +587,97 @@ class OverlayModifier extends ModifierWithKey<ArkOverlay> {
   }
 }
 
-class BorderImageModifier extends Modifier<ArkBorderImage> {
+class BorderImageModifier extends ModifierWithKey<BorderImageOption> {
   static identity: Symbol = Symbol("borderImage");
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
       GetUINativeModule().common.resetBorderImage(node);
     } else {
+      let sliceTop: Length | undefined = undefined;
+      let sliceRight: Length | undefined = undefined;
+      let sliceBottom: Length | undefined = undefined;
+      let sliceLeft: Length | undefined = undefined;
+      let repeat: RepeatMode | undefined = undefined;
+      let source: string | Resource | LinearGradient | undefined = undefined;
+      let sourceAngle: number | string | undefined = undefined;
+      let sourceDirection: GradientDirection | undefined = undefined;
+      let sourceColors: Array<any> | undefined = undefined;
+      let sourceRepeating: boolean | undefined = undefined;
+      let widthTop: Length | undefined = undefined;
+      let widthRight: Length | undefined = undefined;
+      let widthBottom: Length | undefined = undefined;
+      let widthLeft: Length | undefined = undefined;
+      let outsetTop: Length | undefined = undefined;
+      let outsetRight: Length | undefined = undefined;
+      let outsetBottom: Length | undefined = undefined;
+      let outsetLeft: Length | undefined = undefined;
+      let fill: boolean | undefined = undefined;
+
+      if (!isUndefined(this.value.slice)) {
+        if (isLengthType(this.value.slice) || isResource(this.value.slice)) {
+          let tmpSlice = this.value.slice as Length;
+          sliceTop = tmpSlice;
+          sliceRight = tmpSlice;
+          sliceBottom = tmpSlice;
+          sliceLeft = tmpSlice;
+        } else {
+          let tmpSlice = this.value.slice as EdgeWidths;
+          sliceTop = tmpSlice.top;
+          sliceRight = tmpSlice.right;
+          sliceBottom = tmpSlice.bottom;
+          sliceLeft = tmpSlice.left;
+        }
+      }
+      repeat = this.value.repeat;
+      if (!isUndefined(this.value.source)) {
+        if (isString(this.value.source) || isResource(this.value.source)) {
+          source = this.value.source;
+        } else {
+          let tmpSource = this.value.source as LinearGradient;
+          sourceAngle = tmpSource.angle;
+          sourceDirection = tmpSource.direction;
+          sourceColors = tmpSource.colors;
+          sourceRepeating = tmpSource.repeating;
+        }
+      }
+      if (!isUndefined(this.value.width)) {
+        if (isLengthType(this.value.width) || isResource(this.value.width)) {
+          let tmpWidth = this.value.width as Length;
+          widthTop = tmpWidth;
+          widthRight = tmpWidth;
+          widthBottom = tmpWidth;
+          widthLeft = tmpWidth;
+        } else {
+          let tmpWidth = this.value.width as EdgeWidths;
+          widthTop = tmpWidth.top;
+          widthRight = tmpWidth.right;
+          widthBottom = tmpWidth.bottom;
+          widthLeft = tmpWidth.left;
+        }
+      }
+      if (!isUndefined(this.value.outset)) {
+        if (isLengthType(this.value.outset) || isResource(this.value.outset)) {
+          let tmpOutset = this.value.outset as Length;
+          outsetTop = tmpOutset;
+          outsetRight = tmpOutset;
+          outsetBottom = tmpOutset;
+          outsetLeft = tmpOutset;
+        } else {
+          let tmpOutset = this.value.outset as EdgeWidths;
+          outsetTop = tmpOutset.top;
+          outsetRight = tmpOutset.right;
+          outsetBottom = tmpOutset.bottom;
+          outsetLeft = tmpOutset.left;
+        }
+      }
+      fill = this.value.fill;
       GetUINativeModule().common.setBorderImage(node,
-        this.value.sliceTop, this.value.sliceRight,
-        this.value.sliceBottom, this.value.sliceLeft,
-        this.value.repeat,
-        this.value.source,
-        this.value.sourceAngle, this.value.sourceDirection,
-        this.value.sourceColors, this.value.sourceRepeating,
-        this.value.widthTop, this.value.widthRight,
-        this.value.widthBottom, this.value.widthLeft,
-        this.value.outsetTop, this.value.outsetRight,
-        this.value.outsetBottom, this.value.outsetLeft,
-        this.value.fill);
+        sliceTop, sliceRight, sliceBottom, sliceLeft,
+        repeat,
+        source, sourceAngle, sourceDirection, sourceColors, sourceRepeating,
+        widthTop, widthRight, widthBottom, widthLeft,
+        outsetTop, outsetRight, outsetBottom, outsetLeft,
+        fill);
     }
   }
 }
@@ -621,7 +698,7 @@ class BorderModifier extends Modifier<ArkBorder>{
   }
 }
 
-class ForegroundBlurStyleModifier extends Modifier<ArkForegroundBlurStyle> {
+class ForegroundBlurStyleModifier extends ModifierWithKey<ArkForegroundBlurStyle> {
   static identity: Symbol = Symbol("foregroundBlurStyle");
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -671,7 +748,7 @@ class BackgroundImageModifier extends Modifier<ArkBackgroundImage>{
   }
 }
 
-class BackgroundBlurStyleModifier extends Modifier<ArkBackgroundBlurStyle> {
+class BackgroundBlurStyleModifier extends ModifierWithKey<ArkBackgroundBlurStyle> {
   static identity: Symbol = Symbol("backgroundBlurStyle");
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -683,7 +760,6 @@ class BackgroundBlurStyleModifier extends Modifier<ArkBackgroundBlurStyle> {
     }
   }
 }
-
 
 class BackgroundImageSizeModifier extends Modifier<ArkBackgroundImageSize>{
   static identity: Symbol = Symbol("backgroundImageSize");
@@ -774,11 +850,11 @@ class MaskModifier extends ModifierWithKey<boolean | object> {
   }
 
   checkObjectDiff(): boolean {
-    return false;
+    return true;
   }
 }
 
-class PixelStretchEffectModifier extends Modifier<ArkPixelStretchEffect> {
+class PixelStretchEffectModifier extends ModifierWithKey<PixelStretchEffectOptions> {
   static identity: Symbol = Symbol("pixelStretchEffect");
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -791,7 +867,7 @@ class PixelStretchEffectModifier extends Modifier<ArkPixelStretchEffect> {
   }
 }
 
-class LightUpEffectModifier extends Modifier<number> {
+class LightUpEffectModifier extends ModifierWithKey<number> {
   static identity: Symbol = Symbol("lightUpEffect");
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -851,15 +927,22 @@ class UseEffectModifier extends Modifier<boolean> {
   }
 }
 
-class ForegroundColorModifier extends Modifier<ArkForegroundColor> {
+class ForegroundColorModifier extends ModifierWithKey<ResourceColor | ColoringStrategy> {
   static identity: Symbol = Symbol("foregroundColor");
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
       GetUINativeModule().common.resetForegroundColor(node);
     }
     else {
-      GetUINativeModule().common.setForegroundColor(node,
-        this.value.color, this.value.strategy);
+      GetUINativeModule().common.setForegroundColor(node, this.value);
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    if (isResource(this.stageValue) && isResource(this.value)) {
+      return !isResourceEqual(this.stageValue, this.value);
+    } else {
+      return true;
     }
   }
 }
@@ -900,7 +983,7 @@ class FocusOnTouchModifier extends Modifier<boolean> {
     }
   }
 }
-class OffsetModifier extends ModifierWithKey<ArkPosition>  {
+class OffsetModifier extends ModifierWithKey<Position> {
   static identity: Symbol = Symbol('offset');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -916,7 +999,7 @@ class OffsetModifier extends ModifierWithKey<ArkPosition>  {
   }
 }
 
-class MarkAnchorModifier extends ModifierWithKey<ArkPosition>  {
+class MarkAnchorModifier extends ModifierWithKey<Position> {
   static identity: Symbol = Symbol('markAnchor');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -1005,7 +1088,7 @@ class PaddingModifier extends ModifierWithKey<ArkPadding> {
   }
 }
 
-class VisibilityModifier extends Modifier<number> {
+class VisibilityModifier extends ModifierWithKey<number> {
   static identity: Symbol = Symbol('visibility');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -1013,6 +1096,9 @@ class VisibilityModifier extends Modifier<number> {
     } else {
       GetUINativeModule().common.setVisibility(node, this.value!);
     }
+  }
+  checkObjectDiff(): boolean {
+    return this.stageValue !== this.value;
   }
 }
 
@@ -1064,8 +1150,7 @@ class AccessibilityDescriptionModifier extends Modifier<string> {
   }
 }
 
-
-class DirectionModifier extends Modifier<string> {
+class DirectionModifier extends ModifierWithKey<number> {
   static identity: Symbol = Symbol('direction');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -1073,6 +1158,9 @@ class DirectionModifier extends Modifier<string> {
     } else {
       GetUINativeModule().common.setDirection(node, this.value!);
     }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
 class AlignRulesModifier extends Modifier<ArkAlignRules> {
@@ -1120,7 +1208,7 @@ class GridOffsetModifier extends Modifier<number> {
   }
 }
 
-class AlignSelfModifier extends Modifier<number> {
+class AlignSelfModifier extends ModifierWithKey<number> {
   static identity: Symbol = Symbol('alignSelf');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -1129,9 +1217,12 @@ class AlignSelfModifier extends Modifier<number> {
       GetUINativeModule().common.setAlignSelf(node, this.value!);
     }
   }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
 }
 
-class SizeModifier extends ModifierWithKey<ArkSize> {
+class SizeModifier extends ModifierWithKey<SizeOptions> {
   static identity: Symbol = Symbol('size');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -1147,7 +1238,7 @@ class SizeModifier extends ModifierWithKey<ArkSize> {
   }
 }
 
-class DisplayPriorityModifier extends Modifier<number> {
+class DisplayPriorityModifier extends ModifierWithKey<number> {
   static identity: Symbol = Symbol('displayPriority');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -1156,16 +1247,19 @@ class DisplayPriorityModifier extends Modifier<number> {
       GetUINativeModule().common.setDisplayPriority(node, this.value!);
     }
   }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
 }
 
 class IDModifier extends Modifier<string> {
   static identity: Symbol = Symbol("id");
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().common.resetID(node);
+      GetUINativeModule().common.resetId(node);
     }
     else {
-      GetUINativeModule().common.setID(node, this.value);
+      GetUINativeModule().common.setId(node, this.value);
     }
   }
 }
@@ -1241,7 +1335,7 @@ class ResponseRegionModifier extends Modifier<ArkResponseRegion> {
     }
   }
 }
-class FlexGrowModifier extends Modifier<number> {
+class FlexGrowModifier extends ModifierWithKey<number> {
   static identity: Symbol = Symbol('flexGrow');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -1250,9 +1344,13 @@ class FlexGrowModifier extends Modifier<number> {
       GetUINativeModule().common.setFlexGrow(node, this.value!);
     }
   }
+  checkObjectDiff(): boolean {
+    return this.stageValue !== this.value;
+  }
 }
 
-class FlexShrinkModifier extends Modifier<number> {
+
+class FlexShrinkModifier extends ModifierWithKey<number> {
   static identity: Symbol = Symbol('flexShrink');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -1261,9 +1359,12 @@ class FlexShrinkModifier extends Modifier<number> {
       GetUINativeModule().common.setFlexShrink(node, this.value!);
     }
   }
+  checkObjectDiff(): boolean {
+    return this.stageValue !== this.value;
+  }
 }
 
-class AspectRatioModifier extends Modifier<number> {
+class AspectRatioModifier extends ModifierWithKey<number> {
   static identity: Symbol = Symbol('aspectRatio');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -1272,9 +1373,12 @@ class AspectRatioModifier extends Modifier<number> {
       GetUINativeModule().common.setAspectRatio(node, this.value!);
     }
   }
+  checkObjectDiff(): boolean {
+    return this.stageValue !== this.value;
+  }
 }
 
-class ConstraintSizeModifier extends ModifierWithKey<ArkConstraintSizeOptions> {
+class ConstraintSizeModifier extends ModifierWithKey<ConstraintSizeOptions> {
   static identity: Symbol = Symbol('constraintSize');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -1293,7 +1397,7 @@ class ConstraintSizeModifier extends ModifierWithKey<ArkConstraintSizeOptions> {
   }
 }
 
-class FlexBasisModifier extends Modifier<number | string> {
+class FlexBasisModifier extends ModifierWithKey<number | string> {
   static identity: Symbol = Symbol('flexBasis');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -1301,6 +1405,9 @@ class FlexBasisModifier extends Modifier<number | string> {
     } else {
       GetUINativeModule().common.setFlexBasis(node, this.value!);
     }
+  }
+  checkObjectDiff(): boolean {
+    return this.stageValue !== this.value;
   }
 }
 
@@ -1594,30 +1701,13 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
   }
 
   size(value: SizeOptions): this {
-    if (!value) {
-      modifierWithKey(this._modifiersWithKeys, SizeModifier.identity, SizeModifier, undefined);
-    } else {
-      let arkValue: ArkSize = new ArkSize();
-      arkValue.width = value.width;
-      arkValue.height = value.height;
-      modifierWithKey(this._modifiersWithKeys, SizeModifier.identity, SizeModifier, arkValue);
-    }
+    modifierWithKey(this._modifiersWithKeys, SizeModifier.identity, SizeModifier, value);
     return this;
   }
 
   constraintSize(value: ConstraintSizeOptions): this {
-    if (!value) {
-      modifierWithKey(this._modifiersWithKeys, ConstraintSizeModifier.identity,
-        ConstraintSizeModifier, undefined);
-    } else {
-      let arkValue: ArkConstraintSizeOptions = new ArkConstraintSizeOptions();
-      arkValue.minWidth = value.minWidth;
-      arkValue.maxWidth = value.maxWidth;
-      arkValue.minHeight = value.minHeight;
-      arkValue.maxHeight = value.maxHeight;
-      modifierWithKey(this._modifiersWithKeys, ConstraintSizeModifier.identity,
-        ConstraintSizeModifier, arkValue);
-    }
+    modifierWithKey(this._modifiersWithKeys, ConstraintSizeModifier.identity,
+      ConstraintSizeModifier, value);
     return this;
   }
 
@@ -1755,6 +1845,11 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
   }
 
   backgroundBlurStyle(value: BlurStyle, options?: BackgroundBlurStyleOptions): this {
+    if (isUndefined(value)) {
+      modifierWithKey(this._modifiersWithKeys, BackgroundBlurStyleModifier.identity,
+        BackgroundBlurStyleModifier, undefined);
+      return this;
+    }
     let arkBackgroundBlurStyle = new ArkBackgroundBlurStyle();
     arkBackgroundBlurStyle.blurStyle = value;
     if (typeof options === "object") {
@@ -1762,11 +1857,17 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
       arkBackgroundBlurStyle.adaptiveColor = options.adaptiveColor;
       arkBackgroundBlurStyle.scale = options.scale;
     }
-    modifier(this._modifiers, BackgroundBlurStyleModifier, arkBackgroundBlurStyle);
+    modifierWithKey(this._modifiersWithKeys, BackgroundBlurStyleModifier.identity,
+      BackgroundBlurStyleModifier, arkBackgroundBlurStyle);
     return this;
   }
 
   foregroundBlurStyle(value: BlurStyle, options?: ForegroundBlurStyleOptions): this {
+    if (isUndefined(value)) {
+      modifierWithKey(this._modifiersWithKeys, ForegroundBlurStyleModifier.identity,
+        ForegroundBlurStyleModifier, undefined);
+      return this;
+    }
     let arkForegroundBlurStyle = new ArkForegroundBlurStyle();
     arkForegroundBlurStyle.blurStyle = value;
     if (typeof options === "object") {
@@ -1774,7 +1875,8 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
       arkForegroundBlurStyle.adaptiveColor = options.adaptiveColor;
       arkForegroundBlurStyle.scale = options.scale;
     }
-    modifier(this._modifiers, ForegroundBlurStyleModifier, arkForegroundBlurStyle);
+    modifierWithKey(this._modifiersWithKeys, ForegroundBlurStyleModifier.identity,
+      ForegroundBlurStyleModifier, arkForegroundBlurStyle);
     return this;
   }
 
@@ -1919,32 +2021,12 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
 
 
   borderImage(value: BorderImageOption): this {
-    let arkBorderImage = new ArkBorderImage();
-    if (!arkBorderImage.parseOption(value)) {
-      modifier(this._modifiers, BorderImageModifier, undefined);
-      return this;
-    }
-    modifier(this._modifiers, BorderImageModifier, arkBorderImage);
+    modifierWithKey(this._modifiersWithKeys, BorderImageModifier.identity, BorderImageModifier, value);
     return this;
   }
 
   foregroundColor(value: ResourceColor | ColoringStrategy): this {
-    let arkForegroundColor = new ArkForegroundColor
-    if (typeof value === "string") {
-      let lowerValue = value.toLowerCase().trim();
-      if (lowerValue === "invert") {
-        arkForegroundColor.strategy = lowerValue;
-        modifier(this._modifiers, ForegroundColorModifier, arkForegroundColor);
-        return this;
-      }
-    }
-    let arkColor = new ArkColor();
-    if (arkColor.parseColorValue(value)) {
-      arkForegroundColor.color = arkColor.getColor();
-      modifier(this._modifiers, ForegroundColorModifier, arkForegroundColor);
-    } else {
-      modifier(this._modifiers, ForegroundColorModifier, undefined);
-    }
+    modifierWithKey(this._modifiersWithKeys, ForegroundColorModifier.identity, ForegroundColorModifier, value);
     return this;
   }
 
@@ -2059,6 +2141,10 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
   }
 
   linearGradientBlur(value: number, options: LinearGradientBlurOptions): this {
+    if (isUndefined(value) || isUndefined(options)) {
+      modifier(this._modifiers, LinearGradientBlurModifier, undefined);
+      return this;
+    }
     let arkLinearGradientBlur = new ArkLinearGradientBlur();
     arkLinearGradientBlur.blurRadius = value;
     arkLinearGradientBlur.fractionStops = options.fractionStops;
@@ -2273,56 +2359,32 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
   }
 
   visibility(value: Visibility): this {
-    if (value in Visibility) {
-      modifier(this._modifiers, VisibilityModifier, value);
-    } else {
-      modifier(this._modifiers, VisibilityModifier, undefined);
-    }
+    modifierWithKey(this._modifiersWithKeys, VisibilityModifier.identity, VisibilityModifier, value);
     return this;
   }
 
   flexGrow(value: number): this {
-    if (isNumber(value)) {
-      modifier(this._modifiers, FlexGrowModifier, value);
-    } else {
-      modifier(this._modifiers, FlexGrowModifier, undefined);
-    }
+    modifierWithKey(this._modifiersWithKeys, FlexGrowModifier.identity, FlexGrowModifier, value);
     return this;
   }
 
   flexShrink(value: number): this {
-    if (isNumber(value)) {
-      modifier(this._modifiers, FlexShrinkModifier, value);
-    } else {
-      modifier(this._modifiers, FlexShrinkModifier, undefined);
-    }
+    modifierWithKey(this._modifiersWithKeys, FlexShrinkModifier.identity, FlexShrinkModifier, value);
     return this;
   }
 
   flexBasis(value: number | string): this {
-    if (isLengthType(value)) {
-      modifier(this._modifiers, FlexBasisModifier, value);
-    } else {
-      modifier(this._modifiers, FlexBasisModifier, undefined);
-    }
+    modifierWithKey(this._modifiersWithKeys, FlexBasisModifier.identity, FlexBasisModifier, value);
     return this;
   }
 
   alignSelf(value: ItemAlign): this {
-    if (value in ItemAlign) {
-      modifier(this._modifiers, AlignSelfModifier, value);
-    } else {
-      modifier(this._modifiers, AlignSelfModifier, undefined);
-    }
+    modifierWithKey(this._modifiersWithKeys, AlignSelfModifier.identity, AlignSelfModifier, value);
     return this;
   }
 
   displayPriority(value: number): this {
-    if (isNumber(value)) {
-      modifier(this._modifiers, DisplayPriorityModifier, value);
-    } else {
-      modifier(this._modifiers, DisplayPriorityModifier, undefined);
-    }
+    modifierWithKey(this._modifiersWithKeys, DisplayPriorityModifier.identity, DisplayPriorityModifier, value);
     return this;
   }
 
@@ -2351,18 +2413,7 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
   }
 
   direction(value: Direction): this {
-    let direction: string = undefined;
-    if (value in Direction) {
-      modifier(this._modifiers, DirectionModifier, value.toString());
-    } else {
-      switch (value) {
-        case 0: direction = 'Ltr'; break;
-        case 1: direction = 'Rtl'; break;
-        case 2:
-        default: direction = 'Auto'; break;
-      }
-      modifier(this._modifiers, DirectionModifier, direction);
-    }
+    modifierWithKey(this._modifiersWithKeys, DirectionModifier.identity, DirectionModifier, value);
     return this;
   }
 
@@ -2381,26 +2432,12 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
   }
 
   markAnchor(value: Position): this {
-    if (!value) {
-      modifierWithKey(this._modifiersWithKeys, MarkAnchorModifier.identity, MarkAnchorModifier, undefined);
-    } else {
-      let arkValue = new ArkPosition();
-      arkValue.x = value?.x;
-      arkValue.y = value?.y;
-      modifierWithKey(this._modifiersWithKeys, MarkAnchorModifier.identity, MarkAnchorModifier, arkValue);
-    }
+    modifierWithKey(this._modifiersWithKeys, MarkAnchorModifier.identity, MarkAnchorModifier, value);
     return this;
   }
 
   offset(value: Position): this {
-    if (!value) {
-      modifierWithKey(this._modifiersWithKeys, OffsetModifier.identity, OffsetModifier, undefined);
-    } else {
-      let arkValue = new ArkPosition();
-      arkValue.x = value?.x;
-      arkValue.y = value?.y;
-      modifierWithKey(this._modifiersWithKeys, OffsetModifier.identity, OffsetModifier, value);
-    }
+    modifierWithKey(this._modifiersWithKeys, OffsetModifier.identity, OffsetModifier, value);
     return this;
   }
 
@@ -2493,11 +2530,7 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
   }
 
   aspectRatio(value: number): this {
-    if (isNumber(value)) {
-      modifier(this._modifiers, AspectRatioModifier, value);
-    } else {
-      modifier(this._modifiers, AspectRatioModifier, undefined);
-    }
+    modifierWithKey(this._modifiersWithKeys, AspectRatioModifier.identity, AspectRatioModifier, value);
     return this;
   }
 
@@ -2555,6 +2588,10 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
   }
 
   overlay(value: string | CustomBuilder, options?: { align?: Alignment; offset?: { x?: number; y?: number } }): this {
+    if (typeof value === 'undefined') {
+      modifierWithKey(this._modifiersWithKeys, OverlayModifier.identity, OverlayModifier, undefined);
+      return this;
+    }
     var arkOverlay = new ArkOverlay();
     if (arkOverlay.splitOverlayValue(value, options)) {
       modifierWithKey(this._modifiersWithKeys, OverlayModifier.identity, OverlayModifier, arkOverlay);
@@ -2570,6 +2607,10 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
     colors: Array<any>;
     repeating?: boolean;
   }): this {
+    if (isUndefined(value)) {
+      modifier(this._modifiers, LinearGradientModifier, undefined);
+      return this;
+    }
     let arkLinearGradient = new ArkLinearGradient(value.angle, value.direction, value.colors, value.repeating);
     modifier(this._modifiers, LinearGradientModifier, arkLinearGradient);
     return this;
@@ -2583,6 +2624,10 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
     colors: Array<any>;
     repeating?: boolean;
   }): this {
+    if (isUndefined(value)) {
+      modifier(this._modifiers, SweepGradientModifier, undefined);
+      return this;
+    }
     let arkSweepGradient = new ArkSweepGradient(value.center, value.start, value.end, value.rotation,
       value.colors, value.repeating);
     modifier(this._modifiers, SweepGradientModifier, arkSweepGradient);
@@ -2590,6 +2635,10 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
   }
 
   radialGradient(value: { center: Array<any>; radius: number | string; colors: Array<any>; repeating?: boolean }): this {
+    if (isUndefined(value)) {
+      modifier(this._modifiers, RadialGradientModifier, undefined);
+      return this;
+    }
     let arkRadialGradient = new ArkRadialGradient(value.center, value.radius, value.colors, value.repeating);
     modifier(this._modifiers, RadialGradientModifier, arkRadialGradient);
     return this;
@@ -2629,18 +2678,18 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
 
   key(value: string): this {
     if (typeof value === "string") {
-      modifier(this._modifiers, IDModifier, value);
+      modifier(this._modifiers, KeyModifier, value);
     } else {
-      modifier(this._modifiers, IDModifier, undefined);
+      modifier(this._modifiers, KeyModifier, undefined);
     }
     return this;
   }
 
   id(value: string): this {
     if (typeof value === "string") {
-      modifier(this._modifiers, KeyModifier, value);
+      modifier(this._modifiers, IDModifier, value);
     } else {
-      modifier(this._modifiers, KeyModifier, undefined);
+      modifier(this._modifiers, IDModifier, undefined);
     }
     return this;
   }
@@ -2705,22 +2754,12 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
   }
 
   lightUpEffect(value: number): this {
-    modifier(this._modifiers, LightUpEffectModifier, value);
+    modifierWithKey(this._modifiersWithKeys, LightUpEffectModifier.identity, LightUpEffectModifier, value);
     return this;
   }
 
   pixelStretchEffect(options: PixelStretchEffectOptions): this {
-    if (isResource(options.top) || isResource(options.right) ||
-      isResource(options.bottom) || isResource(options.left)) {
-      modifier(this._modifiers, PixelStretchEffectModifier, undefined);
-      return this;
-    }
-    let arkPixelStretchEffect = new ArkPixelStretchEffect
-    arkPixelStretchEffect.top = options.top;
-    arkPixelStretchEffect.right = options.right;
-    arkPixelStretchEffect.bottom = options.bottom;
-    arkPixelStretchEffect.left = options.left;
-    modifier(this._modifiers, PixelStretchEffectModifier, arkPixelStretchEffect);
+    modifierWithKey(this._modifiersWithKeys, PixelStretchEffectModifier.identity, PixelStretchEffectModifier, options);
     return this;
   }
 

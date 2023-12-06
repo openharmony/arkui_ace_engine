@@ -19,6 +19,7 @@
 
 #include "base/mousestyle/mouse_style.h"
 #include "base/resource/internal_resource.h"
+#include "core/common/recorder/event_recorder.h"
 #include "core/components/common/properties/shadow_config.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/button/button_layout_property.h"
@@ -824,6 +825,15 @@ void SideBarContainerPattern::FireChangeEvent(bool isShow)
     CHECK_NULL_VOID(sideBarContainerEventHub);
 
     sideBarContainerEventHub->FireChangeEvent(isShow);
+
+    if (Recorder::EventRecorder::Get().IsComponentRecordEnable()) {
+        Recorder::EventParamsBuilder builder;
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto inspectorId = host->GetInspectorId().value_or("");
+        builder.SetId(inspectorId).SetType(host->GetTag()).SetChecked(isShow);
+        Recorder::EventRecorder::Get().OnChange(std::move(builder));
+    }
 }
 
 void SideBarContainerPattern::UpdateControlButtonIcon()

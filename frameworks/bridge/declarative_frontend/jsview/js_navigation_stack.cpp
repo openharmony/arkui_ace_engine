@@ -23,6 +23,7 @@
 #include "core/components_ng/pattern/custom/custom_node.h"
 #include "core/components_ng/pattern/navrouter/navdestination_model.h"
 #include "core/components_v2/inspector/inspector_constants.h"
+#include "frameworks/base/json/json_util.h"
 
 namespace OHOS::Ace::Framework {
 
@@ -267,5 +268,84 @@ void JSNavigationStack::UpdateReplaceValue(int32_t replaceValue) const
     JSRef<JSVal> params[1];
     params[0] = JSRef<JSVal>::Make(ToJSValue(replaceValue));
     replaceFunc->Call(dataSourceObj_, 1, params);
+}
+
+std::string JSNavigationStack::GetRouteParam() const
+{
+    auto size = GetSize();
+    if (size > 0) {
+        auto param = GetParamByIndex(size - 1);
+        return ConvertParamToString(param);
+    }
+    return "";
+}
+
+int32_t JSNavigationStack::GetSize() const
+{
+    if (dataSourceObj_->IsEmpty()) {
+        return 0;
+    }
+    auto func = JSRef<JSFunc>::Cast(dataSourceObj_->GetProperty("size"));
+    auto jsValue = JSRef<JSVal>::Cast(func->Call(dataSourceObj_));
+    if (jsValue->IsNumber()) {
+        return jsValue->ToNumber<int32_t>();
+    }
+    return 0;
+}
+
+std::string JSNavigationStack::ConvertParamToString(const JSRef<JSVal>& param)
+{
+    if (param->IsBoolean()) {
+        bool ret = param->ToBoolean();
+        return ret ? "true" : "false";
+    } else if (param->IsNumber()) {
+        double ret = param->ToNumber<double>();
+        std::ostringstream oss;
+        oss<< ret;
+        return oss.str();
+    } else if (param->IsString()) {
+        std::string ret = param->ToString();
+        return ret;
+    } else if (param->IsObject()) {
+        JSRef<JSObject> obj = JSRef<JSObject>::Cast(param);
+        auto jsonObj = JsonUtil::Create(true);
+        ParseJsObject(jsonObj, obj);
+        return jsonObj->ToString();
+    }
+    return "";
+}
+
+void JSNavigationStack::ParseJsObject(std::unique_ptr<JsonValue>& json, const JSRef<JSObject>& obj)
+{
+    auto propertyNames = obj->GetPropertyNames();
+    if (!propertyNames->IsArray()) {
+        return;
+    }
+    for (size_t i = 0; i < propertyNames->Length(); i++) {
+        JSRef<JSVal> name = propertyNames->GetValueAt(i);
+        if (!name->IsString()) {
+            continue;
+        }
+        auto propertyName = name->ToString();
+        auto key = propertyName.c_str();
+        JSRef<JSVal> value = obj->GetProperty(key);
+        if (value->IsBoolean()) {
+            bool ret = value->ToBoolean();
+            json->Put(key, ret ? "true" : "false");
+        } else if (value->IsNumber()) {
+            double ret = value->ToNumber<double>();
+            std::ostringstream oss;
+            oss<< ret;
+            json->Put(key, oss.str().c_str());
+        } else if (value->IsString()) {
+            std::string ret = value->ToString();
+            json->Put(key, ret.c_str());
+        } else if (value->IsObject()) {
+            JSRef<JSObject> childObj = JSRef<JSObject>::Cast(value);
+            auto childJson = JsonUtil::Create(true);
+            ParseJsObject(childJson, childObj);
+            json->Put(key, childJson);
+        }
+    }
 }
 } // namespace OHOS::Ace::Framework

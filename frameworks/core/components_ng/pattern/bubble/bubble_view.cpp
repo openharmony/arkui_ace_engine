@@ -316,9 +316,6 @@ void BubbleView::UpdatePopupParam(int32_t popupId, const RefPtr<PopupParam>& par
     popupPaintProp->UpdatePlacement(param->GetPlacement());
     popupPaintProp->UpdateUseCustom(param->IsUseCustom());
     popupPaintProp->UpdateEnableArrow(param->EnableArrow());
-    if (param->IsBackgroundColorSetted()) {
-        popupPaintProp->UpdateBackgroundColor(param->GetBackgroundColor());
-    }
 }
 
 void BubbleView::UpdateCustomPopupParam(int32_t popupId, const RefPtr<PopupParam>& param)
@@ -332,9 +329,6 @@ void BubbleView::UpdateCustomPopupParam(int32_t popupId, const RefPtr<PopupParam
     CHECK_NULL_VOID(popupPaintProp);
     popupLayoutProp->UpdatePlacement(param->GetPlacement());
     popupPaintProp->UpdatePlacement(param->GetPlacement());
-    if (param->IsBackgroundColorSetted()) {
-        popupPaintProp->UpdateBackgroundColor(param->GetBackgroundColor());
-    }
     popupLayoutProp->UpdateEnableArrow(param->EnableArrow());
     popupPaintProp->UpdateAutoCancel(!param->HasAction());
     popupPaintProp->UpdateEnableArrow(param->EnableArrow());
@@ -364,6 +358,24 @@ void BubbleView::UpdateCommonParam(int32_t popupId, const RefPtr<PopupParam>& pa
     }
     if (param->GetTargetSpace().has_value()) {
         popupLayoutProp->UpdateTargetSpace(param->GetTargetSpace().value());
+    }
+    if (param->IsBackgroundColorSetted()) {
+        popupPaintProp->UpdateBackgroundColor(param->GetBackgroundColor());
+    }
+    auto childNode = AceType::DynamicCast<FrameNode>(popupNode->GetFirstChild());
+    auto childLayoutProperty = childNode->GetLayoutProperty();
+    CHECK_NULL_VOID(childLayoutProperty);
+    if (param->GetChildWidth().has_value()) {
+        childLayoutProperty->UpdateUserDefinedIdealSize(
+            CalcSize(CalcLength(param->GetChildWidth().value()), std::nullopt));
+    }
+    auto renderContext = childNode->GetRenderContext();
+    if (renderContext) {
+        BlurStyleOption styleOption;
+        styleOption.blurStyle = BlurStyle::THICK;
+        renderContext->UpdateBackBlurStyle(styleOption);
+        auto backgroundColor = popupPaintProp->GetBackgroundColor().value_or(GetPopupTheme()->GetBackgroundColor());
+        renderContext->UpdateBackgroundColor(backgroundColor);
     }
 }
 

@@ -33,6 +33,7 @@
 #include "core/common/container.h"
 #include "core/common/interaction/interaction_interface.h"
 #include "core/common/modal_ui_extension.h"
+#include "core/common/recorder/event_recorder.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/select/select_theme.h"
 #include "core/components/text_overlay/text_overlay_theme.h"
@@ -1317,6 +1318,15 @@ RefPtr<FrameNode> OverlayManager::ShowDialog(
     dialogCount_++;
     // set close button disable
     SetContainerButtonEnable(false);
+    if (Recorder::EventRecorder::Get().IsComponentRecordEnable()) {
+        Recorder::EventParamsBuilder builder;
+        builder
+            .SetType("Dialog")
+            .SetEventType(Recorder::EventType::DIALOG_SHOW)
+            .SetExtra(Recorder::KEY_TITLE, dialogProps.title)
+            .SetExtra(Recorder::KEY_SUB_TITLE, dialogProps.subtitle);
+        Recorder::EventRecorder::Get().OnEvent(std::move(builder));
+    }
     return dialog;
 }
 
@@ -1353,6 +1363,11 @@ void OverlayManager::ShowTextDialog(const DialogProperties& dialogProps, const T
         TextPickerDialogView::Show(dialogProps, settingData, std::move(dialogEvent), std::move(dialogCancelEvent));
     BeforeShowDialog(dialogNode);
     OpenDialogAnimation(dialogNode);
+    if (Recorder::EventRecorder::Get().IsComponentRecordEnable()) {
+        Recorder::EventParamsBuilder builder;
+        builder.SetType("TextPickerDialog").SetEventType(Recorder::EventType::DIALOG_SHOW);
+        Recorder::EventRecorder::Get().OnEvent(std::move(builder));
+    }
 }
 
 void OverlayManager::ShowCalendarDialog(const DialogProperties& dialogProps, const CalendarSettingData& settingData,
@@ -3126,7 +3141,7 @@ void OverlayManager::CloseModalUIExtension(int32_t sessionId)
 }
 
 RefPtr<FrameNode> OverlayManager::BindUIExtensionToMenu(const RefPtr<FrameNode>& uiExtNode,
-    const RefPtr<NG::FrameNode>& targetNode, const std::vector<std::string>& aiMenuOptions)
+    const RefPtr<NG::FrameNode>& targetNode, std::string longestContent, int32_t menuSize)
 {
     CHECK_NULL_RETURN(uiExtNode, nullptr);
     CHECK_NULL_RETURN(targetNode, nullptr);
@@ -3140,7 +3155,7 @@ RefPtr<FrameNode> OverlayManager::BindUIExtensionToMenu(const RefPtr<FrameNode>&
     CHECK_NULL_RETURN(menuWrapperNode, nullptr);
     auto menuNode = DynamicCast<FrameNode>(menuWrapperNode->GetFirstChild());
     CHECK_NULL_RETURN(menuNode, nullptr);
-    auto idealSize = CaculateMenuSize(menuNode, aiMenuOptions);
+    auto idealSize = CaculateMenuSize(menuNode, longestContent, menuSize);
     auto uiExtLayoutProperty = uiExtNode->GetLayoutProperty();
     CHECK_NULL_RETURN(uiExtLayoutProperty, nullptr);
     uiExtLayoutProperty->UpdateUserDefinedIdealSize(
@@ -3159,21 +3174,15 @@ RefPtr<FrameNode> OverlayManager::BindUIExtensionToMenu(const RefPtr<FrameNode>&
 }
 
 SizeF OverlayManager::CaculateMenuSize(
-    const RefPtr<FrameNode>& menuNode, const std::vector<std::string>& aiMenuOptions)
+    const RefPtr<FrameNode>& menuNode, std::string longestContent, int32_t menuSize)
 {
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, SizeF());
     auto textTheme = pipeline->GetTheme<TextTheme>();
     CHECK_NULL_RETURN(textTheme, SizeF());
     TextStyle textStyle = textTheme ? textTheme->GetTextStyle() : TextStyle();
-    std::string textContent = "";
-    for (const auto& option : aiMenuOptions) {
-        if (option.length() > textContent.length()) {
-            textContent = option;
-        }
-    }
     MeasureContext measureContext;
-    measureContext.textContent = textContent;
+    measureContext.textContent = longestContent;
     measureContext.fontSize = textStyle.GetFontSize();
     auto fontweight = StringUtils::FontWeightToString(textStyle.GetFontWeight());
     measureContext.fontWeight = fontweight;
@@ -3202,16 +3211,16 @@ SizeF OverlayManager::CaculateMenuSize(
     auto minWidth = static_cast<float>(columnInfo->GetWidth()) - padding.Width();
     childConstraint.minSize.SetWidth(minWidth);
     auto idealWidth = std::max(contentWidth, childConstraint.minSize.Width());
-    auto idealHeight = groupHeight * (aiMenuOptions.size() - 1) +
+    auto idealHeight = groupHeight * (menuSize - 1) +
         menuItemHeight + static_cast<float>(selectTheme->GetOutPadding().ConvertToPx()) * 2;
     return SizeF(idealWidth, idealHeight);
 }
 
 bool OverlayManager::ShowUIExtensionMenu(const RefPtr<NG::FrameNode>& uiExtNode, NG::RectF aiRect,
-    const std::vector<std::string>& aiMenuOptions, const RefPtr<NG::FrameNode>& targetNode)
+    std::string longestContent, int32_t menuSize, const RefPtr<NG::FrameNode>& targetNode)
 {
     CHECK_NULL_RETURN(uiExtNode, false);
-    auto menuNode = BindUIExtensionToMenu(uiExtNode, targetNode, aiMenuOptions);
+    auto menuNode = BindUIExtensionToMenu(uiExtNode, targetNode, longestContent, menuSize);
     CHECK_NULL_RETURN(menuNode, false);
     auto menuLayoutProperty = menuNode->GetLayoutProperty<MenuLayoutProperty>();
     CHECK_NULL_RETURN(menuLayoutProperty, false);

@@ -18,9 +18,11 @@
 #include "base/log/jank_frame_report.h"
 #include "base/log/log_wrapper.h"
 #include "base/perfmonitor/perf_monitor.h"
+#include "base/utils/time_util.h"
 #include "base/utils/utils.h"
 #include "core/animation/animator.h"
 #include "core/common/container.h"
+#include "core/common/recorder/event_recorder.h"
 #include "core/components/common/properties/alignment.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
@@ -167,11 +169,18 @@ void PagePattern::OnShow()
     JankFrameReport::StartRecord(pageInfo_->GetPageUrl());
     PerfMonitor::GetPerfMonitor()->SetPageUrl(pageInfo_->GetPageUrl());
     auto pageUrlChecker = container->GetPageUrlChecker();
-    if (pageUrlChecker != nullptr) {
-        pageUrlChecker->NotifyPageShow(pageInfo_->GetPageUrl());
-    }
+    pageUrlChecker->NotifyPageShow(pageInfo_->GetPageUrl());
     if (onPageShow_) {
         onPageShow_();
+    }
+    if (Recorder::EventRecorder::Get().IsPageRecordEnable()) {
+        std::string param;
+        auto entryPageInfo = DynamicCast<EntryPageInfo>(pageInfo_);
+        if (entryPageInfo) {
+            param = entryPageInfo->GetPageParams();
+            entryPageInfo->SetShowTime(GetCurrentTimestamp());
+        }
+        Recorder::EventRecorder::Get().OnPageShow(pageInfo_->GetPageUrl(), param);
     }
 }
 
@@ -186,13 +195,19 @@ void PagePattern::OnHide()
     auto container = Container::Current();
     if (container) {
         auto pageUrlChecker = container->GetPageUrlChecker();
-        if (pageUrlChecker != nullptr) {
-            pageUrlChecker->NotifyPageHide(pageInfo_->GetPageUrl());
-        }
+        pageUrlChecker->NotifyPageHide(pageInfo_->GetPageUrl());
     }
     
     if (onPageHide_) {
         onPageHide_();
+    }
+    if (Recorder::EventRecorder::Get().IsPageRecordEnable()) {
+        auto entryPageInfo = DynamicCast<EntryPageInfo>(pageInfo_);
+        int64_t duration = 0;
+        if (entryPageInfo) {
+            duration = GetCurrentTimestamp() - entryPageInfo->GetShowTime();
+        }
+        Recorder::EventRecorder::Get().OnPageHide(pageInfo_->GetPageUrl(), duration);
     }
 }
 

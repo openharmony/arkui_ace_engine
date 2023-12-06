@@ -38,7 +38,9 @@ EventParamsBuilder& EventParamsBuilder::SetEventType(EventType eventType)
 
 EventParamsBuilder& EventParamsBuilder::SetId(const std::string& id)
 {
-    params_->emplace(KEY_ID, id);
+    if (!id.empty()) {
+        params_->emplace(KEY_ID, id);
+    }
     return *this;
 }
 
@@ -50,19 +52,25 @@ EventParamsBuilder& EventParamsBuilder::SetType(const std::string& type)
 
 EventParamsBuilder& EventParamsBuilder::SetNavDst(const std::string& dstName)
 {
-    params_->emplace(KEY_NAV_DST, dstName);
+    if (!dstName.empty()) {
+        params_->emplace(KEY_NAV_DST, dstName);
+    }
     return *this;
 }
 
 EventParamsBuilder& EventParamsBuilder::SetPageUrl(const std::string& pageUrl)
 {
-    params_->emplace(KEY_PAGE, pageUrl);
+    if (!pageUrl.empty()) {
+        params_->emplace(KEY_PAGE, pageUrl);
+    }
     return *this;
 }
 
 EventParamsBuilder& EventParamsBuilder::SetText(const std::string& value)
 {
-    params_->emplace(KEY_TEXT, value);
+    if (!value.empty()) {
+        params_->emplace(KEY_TEXT, value);
+    }
     return *this;
 }
 
@@ -91,7 +99,7 @@ EventParamsBuilder& EventParamsBuilder::SetTextArray(const std::vector<std::stri
 
 EventParamsBuilder& EventParamsBuilder::SetExtra(const std::string& key, const std::string& value)
 {
-    if (!key.empty()) {
+    if (!key.empty() && !value.empty()) {
         params_->emplace(key, value);
     }
     return *this;
@@ -152,6 +160,20 @@ EventRecorder& EventRecorder::Get()
 
 EventRecorder::EventRecorder() {}
 
+bool EventRecorder::IsPageRecordEnable() const
+{
+    return pageEnable_;
+}
+
+bool EventRecorder::IsExposureRecordEnable() const
+{
+    return exposureEnable_;
+}
+
+bool EventRecorder::IsComponentRecordEnable() const
+{
+    return componentEnable_;
+}
 
 void EventRecorder::SetContainerInfo(const std::string& windowName, int32_t id, bool foreground)
 {
@@ -170,9 +192,20 @@ void EventRecorder::SetContainerInfo(const std::string& windowName, int32_t id, 
     }
 }
 
+void EventRecorder::SetFocusContainerInfo(const std::string& windowName, int32_t id)
+{
+    if (windowName == IGNORE_WINDOW_NAME) {
+        return;
+    }
+    focusContainerId_ = id;
+}
+
 int32_t EventRecorder::GetContainerId()
 {
-    return containerId_;
+    if (containerId_ == -1) {
+        return -1;
+    }
+    return focusContainerId_;
 }
 
 const std::string& EventRecorder::GetPageUrl() const

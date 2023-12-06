@@ -26,6 +26,8 @@ constexpr int NUM_2 = 2;
 constexpr int NUM_3 = 3;
 constexpr int NUM_4 = 4;
 const std::string FORMAT_FONT = "%s|%s|%s";
+constexpr Dimension DEFAULT_POPUP_POSITION_X = 60.0_vp;
+constexpr Dimension DEFAULT_POPUP_POSITION_Y = 48.0_vp;
 bool ParseJsDimensionFp(const EcmaVM* vm, const Local<JSValueRef>& value, CalcDimension& result)
 {
     if (value->IsNumber()) {
@@ -537,14 +539,14 @@ ArkUINativeModuleValue AlphabetIndexerBridge::SetPopupPosition(ArkUIRuntimeCallI
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
     Local<JSValueRef> sizeX = runtimeCallInfo->GetCallArgRef(NUM_1);
     Local<JSValueRef> sizeY = runtimeCallInfo->GetCallArgRef(NUM_2);
-
     CalcDimension x;
     CalcDimension y;
-    // param is x and y,parse CalcDimension by utility
-    if (!ParseJsDimensionVp(vm, sizeX, x) && !ParseJsDimensionVp(vm, sizeY, y)) {
-        GetArkUIInternalNodeAPI()->GetAlphabetIndexerModifier().ResetPopupPosition(nativeNode);
+    if (!ParseJsDimensionVp(vm, sizeX, x)) {
+        x = DEFAULT_POPUP_POSITION_X;
     }
-
+    if (!ParseJsDimensionVp(vm, sizeY, y)) {
+        y = DEFAULT_POPUP_POSITION_Y;
+    }
     GetArkUIInternalNodeAPI()->GetAlphabetIndexerModifier().SetPopupPosition(
         nativeNode, x.Value(), static_cast<int>(x.Unit()), y.Value(), static_cast<int>(y.Unit()));
     return panda::JSValueRef::Undefined(vm);

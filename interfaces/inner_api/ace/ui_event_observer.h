@@ -19,7 +19,7 @@
 #include <string>
 #include <unordered_map>
 
-#include "base/utils/macros.h"
+#include "macros.h"
 
 namespace OHOS::Ace {
 class ACE_FORCE_EXPORT UIEventObserver {

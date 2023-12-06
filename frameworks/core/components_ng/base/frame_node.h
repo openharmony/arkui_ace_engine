@@ -30,6 +30,7 @@
 #include "base/utils/macros.h"
 #include "base/utils/utils.h"
 #include "core/accessibility/accessibility_utils.h"
+#include "core/common/recorder/exposure_processor.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/frame_scene_status.h"
 #include "core/components_ng/base/geometry_node.h"
@@ -100,7 +101,7 @@ public:
     {
         return checkboxFlag_;
     }
-    void OnInspectorIdUpdate(const std::string& /*unused*/) override;
+    void OnInspectorIdUpdate(const std::string& id) override;
 
     struct ZIndexComparator {
         bool operator()(const WeakPtr<FrameNode>& weakLeft, const WeakPtr<FrameNode>& weakRight) const
@@ -243,6 +244,8 @@ public:
     }
 
     static void PostTask(std::function<void()>&& task, TaskExecutor::TaskType taskType = TaskExecutor::TaskType::UI);
+
+    void AddJudgeToTargetComponent(RefPtr<TargetComponent>& targetComponent);
 
     // If return true, will prevent TouchTest Bubbling to parent and brother nodes.
     HitTestResult TouchTest(const PointF& globalPoint, const PointF& parentLocalPoint, const PointF& parentRevertPoint,
@@ -444,6 +447,16 @@ public:
     const std::set<std::string>& GetAllowDrop() const
     {
         return allowDrop_;
+    }
+
+    void SetDragPreview(const NG::DragDropInfo& info)
+    {
+        dragPreviewInfo_ = info;
+    }
+
+    const DragDropInfo& GetDragPreview() const
+    {
+        return dragPreviewInfo_;
     }
 
     void SetOverlayNode(const RefPtr<FrameNode>& overlayNode)
@@ -688,6 +701,8 @@ private:
 
     int32_t GetNodeExpectedRate();
 
+    void RecordExposureIfNeed(const std::string& inspectorId);
+
     // sort in ZIndex.
     std::multiset<WeakPtr<FrameNode>, ZIndexComparator> frameChildren_;
     RefPtr<GeometryNode> geometryNode_ = MakeRefPtr<GeometryNode>();
@@ -709,6 +724,7 @@ private:
     std::unique_ptr<OffsetF> lastParentOffsetToWindow_;
     std::set<std::string> allowDrop_;
     std::optional<RectF> viewPort_;
+    NG::DragDropInfo dragPreviewInfo_;
 
     RefPtr<LayoutAlgorithmWrapper> layoutAlgorithm_;
     RefPtr<GeometryNode> oldGeometryNode_;
@@ -753,6 +769,8 @@ private:
     std::unordered_map<std::string, int32_t> sceneRateMap_;
 
     DragPreviewOption previewOption_ { DragPreviewMode::AUTO };
+
+    RefPtr<Recorder::ExposureProcessor> exposureProcessor_;
 
     friend class RosenRenderContext;
     friend class RenderContext;

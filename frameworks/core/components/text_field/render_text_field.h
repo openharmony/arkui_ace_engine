@@ -163,20 +163,20 @@ public:
     double GetEditingBoxTopY() const override;
     bool GetEditingBoxModel() const override;
     void Delete(int32_t start, int32_t end);
-    bool CursorMoveLeft() override
+    bool CursorMoveLeft()
     {
         CursorMoveLeft(CursorMoveSkip::CHARACTER);
         return true;
     }
     void CursorMoveLeft(CursorMoveSkip skip);
-    bool CursorMoveRight() override
+    bool CursorMoveRight()
     {
         CursorMoveRight(CursorMoveSkip::CHARACTER);
         return true;
     }
     void CursorMoveRight(CursorMoveSkip skip);
-    bool CursorMoveUp() override;
-    bool CursorMoveDown() override;
+    bool CursorMoveUp();
+    bool CursorMoveDown();
     void Insert(const std::string& text);
     void StartTwinkling();
     void StopTwinkling();
@@ -200,7 +200,7 @@ public:
 
     void HandleSetSelection(int32_t start, int32_t end, bool showHandle = true) override;
     void HandleExtendAction(int32_t action) override;
-    void HandleSelect(int32_t keyCode, int32_t cursorMoveSkip) override;
+    void HandleOnSelect(KeyCode keyCode, CursorMoveSkip skip = CursorMoveSkip::CHARACTER);
     std::u16string GetLeftTextOfCursor(int32_t number) override;
     std::u16string GetRightTextOfCursor(int32_t number) override;
     int32_t GetTextIndexAtCursor() override;
@@ -729,12 +729,11 @@ private:
     void UpdatePasswordIcon(const RefPtr<TextFieldComponent>& textField);
     void UpdateOverlay();
     void RegisterFontCallbacks();
-    void HandleOnSelect(KeyCode keyCode, CursorMoveSkip skip = CursorMoveSkip::CHARACTER);
     void HandleOnRevoke();
     void HandleOnInverseRevoke();
-    void HandleOnCut();
-    void HandleOnCopy();
-    void HandleOnPaste();
+    void HandleOnCut() override;
+    void HandleOnCopy() override;
+    void HandleOnPaste() override;
     void HandleOnCopyAll(const std::function<void(const Offset&, const Offset&)>& callback);
     void HandleOnStartHandleMove(int32_t end, const Offset& startHandleOffset,
         const std::function<void(const Offset&)>& startCallback, bool isSingleHandle = false);

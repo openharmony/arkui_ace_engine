@@ -41,12 +41,12 @@
 #include "core/components_ng/pattern/swiper_indicator/indicator_common/swiper_indicator_pattern.h"
 #include "core/components_ng/pattern/swiper/swiper_utils.h"
 #include "core/components_ng/pattern/text/text_model_ng.h"
+#include "core/components_v2/inspector/inspector_constants.h"
 #include "test/mock/core/pattern/mock_nestable_scroll_container.h"
 #include "test/mock/core/render/mock_render_context.h"
 #include "test/mock/core/rosen/mock_canvas.h"
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "test/unittest/core/pattern/test_ng.h"
-#include "core/components_v2/inspector/inspector_constants.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "test/mock/base/mock_task_executor.h"
 #include "test/mock/core/common/mock_container.h"
@@ -56,6 +56,8 @@ using namespace testing::ext;
 
 namespace OHOS::Ace::NG {
 namespace {
+constexpr float SWIPER_WIDTH = 480.f;
+constexpr float SWIPER_HEIGHT = 800.f;
 constexpr int32_t ITEM_NUMBER = 4;
 constexpr int32_t DEFAULT_INTERVAL = 3000;
 constexpr int32_t DEFAULT_DURATION = 400;
@@ -64,7 +66,7 @@ constexpr float DRAG_SPEED = 500.0f;
 constexpr float DRAG_OFFSET_X = 50.0f;
 } // namespace
 
-class SwiperTestNg : public testing::Test, public TestNG {
+class SwiperTestNg : public TestNG {
 public:
     static void SetUpTestSuite();
     static void TearDownTestSuite();
@@ -95,7 +97,7 @@ public:
 
 void SwiperTestNg::SetUpTestSuite()
 {
-    MockPipelineContext::SetUp();
+    TestNG::SetUpTestSuite();
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     auto pipeline = MockPipelineContext::GetCurrent();
     pipeline->SetThemeManager(themeManager);
@@ -105,7 +107,7 @@ void SwiperTestNg::SetUpTestSuite()
 
 void SwiperTestNg::TearDownTestSuite()
 {
-    MockPipelineContext::TearDown();
+    TestNG::TearDownTestSuite();
 }
 
 void SwiperTestNg::SetUp() {}
@@ -135,12 +137,14 @@ void SwiperTestNg::CreateWithItem(const std::function<void(SwiperModelNG)>& call
 {
     SwiperModelNG model;
     model.Create();
+    ViewAbstract::SetWidth(CalcLength(SWIPER_WIDTH));
+    ViewAbstract::SetHeight(CalcLength(SWIPER_HEIGHT));
     if (callback) {
         callback(model);
     }
     CreateItem();
     GetInstance();
-    RunMeasureAndLayout(frameNode_);
+    FlushLayoutTask(frameNode_);
 }
 
 void SwiperTestNg::CreateItem(int32_t itemNumber)
@@ -622,7 +626,7 @@ HWTEST_F(SwiperTestNg, AttrMargin001, TestSize.Level1)
      * @tc.steps: step2. Set illegal value
      */
     CreateWithItem([](SwiperModelNG model) {
-        model.SetNextMargin(Dimension(DEVICE_WIDTH + 1));
+        model.SetNextMargin(Dimension(SWIPER_WIDTH + 1));
         model.SetPreviousMargin(Dimension(5));
     });
     EXPECT_EQ(pattern_->GetNextMargin(), 0);
@@ -633,7 +637,7 @@ HWTEST_F(SwiperTestNg, AttrMargin001, TestSize.Level1)
      */
     CreateWithItem([](SwiperModelNG model) {
         model.SetNextMargin(Dimension(10));
-        model.SetPreviousMargin(Dimension(DEVICE_WIDTH + 1));
+        model.SetPreviousMargin(Dimension(SWIPER_WIDTH + 1));
     });
     EXPECT_EQ(pattern_->GetNextMargin(), 0);
     EXPECT_EQ(pattern_->GetPrevMargin(), 0);
@@ -658,15 +662,12 @@ HWTEST_F(SwiperTestNg, SwiperEvent001, TestSize.Level1)
     const char* name = "HandleTouchDown";
     pattern_->controller_ = CREATE_ANIMATOR(name);
     pattern_->controller_->status_ = Animator::Status::RUNNING;
-    pattern_->springController_ = CREATE_ANIMATOR(name);
-    pattern_->springController_->status_ = Animator::Status::RUNNING;
     pattern_->HandleTouchEvent(touchEventInfo);
     EXPECT_FALSE(pattern_->indicatorDoingAnimation_);
 
     touchEventInfo.touches_.begin()->SetTouchType(TouchType::UP);
     pattern_->HandleTouchEvent(touchEventInfo);
     pattern_->controller_ = nullptr;
-    pattern_->springController_ = nullptr;
     touchEventInfo.touches_.begin()->SetTouchType(TouchType::CANCEL);
     pattern_->HandleTouchEvent(touchEventInfo);
     touchEventInfo.touches_.begin()->SetTouchType(TouchType::MOVE);
@@ -713,6 +714,116 @@ HWTEST_F(SwiperTestNg, SwiperEvent002, TestSize.Level1)
     pattern_->panEvent_->actionCancel_();
     EXPECT_TRUE(pattern_->swiperController_->tabBarFinishCallback_);
     EXPECT_TRUE(pattern_->swiperController_->removeSwiperEventCallback_);
+}
+
+/**
+ * @tc.name: SwiperPatternSpringAnimation001
+ * @tc.desc: Swiper spring animation is playing
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, SwiperPatternSpringAnimation001, TestSize.Level1)
+{
+    CreateWithItem([](SwiperModelNG model) {});
+    double dragVelocity = 2000.0;
+    pattern_->springAnimation_ = nullptr;
+    pattern_->currentOffset_ = 1;
+    pattern_->contentMainSize_ = 1.0f;
+    struct SwiperItemInfo swiperItemInfo;
+    swiperItemInfo.startPos = -1.0f;
+    swiperItemInfo.endPos = -1.0f;
+    pattern_->itemPosition_.emplace(std::make_pair(1, swiperItemInfo));
+    pattern_->PlaySpringAnimation(dragVelocity);
+    EXPECT_FALSE(pattern_->springAnimationIsRunning_);
+}
+
+/**
+ * @tc.name: SwiperPatternSpringAnimation002
+ * @tc.desc: StopAndResetSpringAnimation
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, SwiperPatternSpringAnimation002, TestSize.Level1)
+{
+    CreateWithItem([](SwiperModelNG model) {});
+    double dragVelocity = 2000.0;
+    pattern_->springAnimation_ = nullptr;
+    pattern_->currentOffset_ = 1;
+    pattern_->contentMainSize_ = 1.0f;
+    struct SwiperItemInfo swiperItemInfo;
+    swiperItemInfo.startPos = -1.0f;
+    swiperItemInfo.endPos = -1.0f;
+    pattern_->itemPosition_.emplace(std::make_pair(1, swiperItemInfo));
+    pattern_->PlaySpringAnimation(dragVelocity);
+    pattern_->StopAndResetSpringAnimation();
+    EXPECT_FALSE(pattern_->springAnimationIsRunning_);
+}
+
+/**
+ * @tc.name: SwiperPatternSpringAnimation003
+ * @tc.desc: StopSpringAnimationAndFlushImmediately
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, SwiperPatternSpringAnimation003, TestSize.Level1)
+{
+    CreateWithItem([](SwiperModelNG model) {});
+    double dragVelocity = 2000.0;
+    pattern_->springAnimation_ = nullptr;
+    pattern_->currentOffset_ = 1;
+    pattern_->contentMainSize_ = 1.0f;
+    struct SwiperItemInfo swiperItemInfo;
+    swiperItemInfo.startPos = -1.0f;
+    swiperItemInfo.endPos = -1.0f;
+    pattern_->itemPosition_.emplace(std::make_pair(1, swiperItemInfo));
+    pattern_->PlaySpringAnimation(dragVelocity);
+    pattern_->StopSpringAnimationAndFlushImmediately();
+    EXPECT_FALSE(pattern_->springAnimationIsRunning_);
+}
+
+/**
+ * @tc.name: SwiperPatternSpringAnimation004
+ * @tc.desc: StopSpringAnimation
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, SwiperPatternSpringAnimation004, TestSize.Level1)
+{
+    CreateWithItem([](SwiperModelNG model) {});
+    double dragVelocity = 2000.0;
+    pattern_->springAnimation_ = nullptr;
+    pattern_->currentOffset_ = 1;
+    pattern_->contentMainSize_ = 1.0f;
+    struct SwiperItemInfo swiperItemInfo;
+    swiperItemInfo.startPos = -1.0f;
+    swiperItemInfo.endPos = -1.0f;
+    pattern_->itemPosition_.emplace(std::make_pair(1, swiperItemInfo));
+    pattern_->PlaySpringAnimation(dragVelocity);
+    pattern_->StopSpringAnimation();
+    EXPECT_FALSE(pattern_->springAnimationIsRunning_);
+}
+
+/**
+ * @tc.name: SwiperPatternSpringAnimation005
+ * @tc.desc: Swiper spring animation is playing, handle touch down to break playing animation,
+ *           and handle touch up to continue playing animation
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, SwiperPatternSpringAnimation005, TestSize.Level1)
+{
+    CreateWithItem([](SwiperModelNG model) {});
+    double dragVelocity = 2000.0;
+    pattern_->springAnimation_ = nullptr;
+    pattern_->currentOffset_ = 1;
+    pattern_->contentMainSize_ = 1.0f;
+    struct SwiperItemInfo swiperItemInfo;
+    swiperItemInfo.startPos = -1.0f;
+    swiperItemInfo.endPos = -1.0f;
+    pattern_->itemPosition_.emplace(std::make_pair(1, swiperItemInfo));
+    pattern_->PlaySpringAnimation(dragVelocity);
+
+    TouchLocationInfo touchLocationInfo("down", 0);
+    touchLocationInfo.SetTouchType(TouchType::DOWN);
+    pattern_->HandleTouchDown(touchLocationInfo);
+    EXPECT_FALSE(pattern_->springAnimationIsRunning_);
+    pattern_->HandleTouchUp();
+    EXPECT_TRUE(pattern_->springAnimationIsRunning_);
 }
 
 /**
@@ -1066,6 +1177,8 @@ HWTEST_F(SwiperTestNg, SwiperModelNg001, TestSize.Level1)
 {
     SwiperModelNG model;
     model.Create();
+    ViewAbstract::SetWidth(CalcLength(SWIPER_WIDTH));
+    ViewAbstract::SetHeight(CalcLength(SWIPER_HEIGHT));
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     auto pattern = frameNode->GetPattern<SwiperPattern>();
     auto layoutProperty = frameNode->GetLayoutProperty<SwiperLayoutProperty>();
@@ -1147,6 +1260,8 @@ HWTEST_F(SwiperTestNg, SwiperModelNg002, TestSize.Level1)
 {
     SwiperModelNG model;
     model.Create();
+    ViewAbstract::SetWidth(CalcLength(SWIPER_WIDTH));
+    ViewAbstract::SetHeight(CalcLength(SWIPER_HEIGHT));
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     auto pattern = frameNode->GetPattern<SwiperPattern>();
     auto layoutProperty = frameNode->GetLayoutProperty<SwiperLayoutProperty>();
@@ -1215,6 +1330,8 @@ HWTEST_F(SwiperTestNg, SwiperModelNg003, TestSize.Level1)
 {
     SwiperModelNG model;
     model.Create();
+    ViewAbstract::SetWidth(CalcLength(SWIPER_WIDTH));
+    ViewAbstract::SetHeight(CalcLength(SWIPER_HEIGHT));
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     auto pattern = frameNode->GetPattern<SwiperPattern>();
     auto layoutProperty = frameNode->GetLayoutProperty<SwiperLayoutProperty>();
@@ -4963,11 +5080,6 @@ HWTEST_F(SwiperTestNg, SwiperPatternSwipeTo001, TestSize.Level1)
         pattern_->currentIndex_ = 1;
     }
 
-    pattern_->springController_ = AceType::MakeRefPtr<Animator>();
-    for (int i = 0; i <= 1; i++) {
-        pattern_->SwipeTo(index);
-        pattern_->springController_->status_ = Animator::Status::STOPPED;
-    }
     pattern_->indicatorController_ = AceType::MakeRefPtr<Animator>();
     pattern_->usePropertyAnimation_ = true;
     pattern_->SwipeTo(index);
@@ -5177,27 +5289,6 @@ HWTEST_F(SwiperTestNg, SwiperPatternFinishAnimation001, TestSize.Level1)
 }
 
 /**
- * @tc.name: SwiperPatternStopSpringAnimation001
- * @tc.desc: StopSpringAnimation
- * @tc.type: FUNC
- */
-HWTEST_F(SwiperTestNg, SwiperPatternStopSpringAnimation001, TestSize.Level1)
-{
-    CreateWithItem([](SwiperModelNG model) {});
-    pattern_->springController_ = AceType::MakeRefPtr<Animator>();
-    pattern_->springController_->status_ = Animator::Status::RUNNING;
-
-    /**
-     * @tc.steps: step2. call StopSpringAnimation.
-     * @tc.expected: Related function runs ok.
-     */
-    for (int i = 0; i <= 1; i++) {
-        pattern_->StopSpringAnimation();
-        pattern_->springController_->status_ = Animator::Status::STOPPED;
-    }
-}
-
-/**
  * @tc.name: SwiperPatternInitSwiperController001
  * @tc.desc: InitSwiperController
  * @tc.type: FUNC
@@ -5250,8 +5341,6 @@ HWTEST_F(SwiperTestNg, SwiperPatternHandleTouchUp001, TestSize.Level1)
     pattern_->controller_ = AceType::MakeRefPtr<Animator>();
     ASSERT_NE(pattern_->controller_, nullptr);
     pattern_->controller_->status_ = Animator::Status::PAUSED;
-    pattern_->springController_ = AceType::MakeRefPtr<Animator>();
-    pattern_->springController_->status_ = Animator::Status::PAUSED;
 
     /**
      * @tc.steps: step2. call HandleTouchUp.
@@ -5321,49 +5410,6 @@ HWTEST_F(SwiperTestNg, SwiperPatternStopFadeAnimation001, TestSize.Level1)
     pattern_->fadeAnimationIsRunning_ = true;
     pattern_->StopFadeAnimation();
     EXPECT_FALSE(pattern_->fadeAnimationIsRunning_);
-}
-
-/**
- * @tc.name: SwiperPatternPlaySpringAnimation001
- * @tc.desc: PlaySpringAnimation
- * @tc.type: FUNC
- */
-HWTEST_F(SwiperTestNg, SwiperPatternPlaySpringAnimation001, TestSize.Level1)
-{
-    CreateWithItem([](SwiperModelNG model) {});
-    double dragVelocity = 1.0;
-    pattern_->springController_ = nullptr;
-    pattern_->currentOffset_ = 1;
-    pattern_->contentMainSize_ = 1.0f;
-    struct SwiperItemInfo swiperItemInfo1;
-    swiperItemInfo1.startPos = -1.0f;
-    swiperItemInfo1.endPos = -1.0f;
-    pattern_->itemPosition_.emplace(std::make_pair(1, swiperItemInfo1));
-
-    /**
-     * @tc.steps: step2. call PlaySpringAnimation.
-     * @tc.expected: Related function runs ok.
-     */
-    for (int i = 0; i <= 1; i++) {
-        for (int j = 0; j <= 1; j++) {
-            pattern_->PlaySpringAnimation(dragVelocity);
-            if (i == 1) {
-                break;
-            }
-            pattern_->springController_ = AceType::MakeRefPtr<Animator>();
-                    pattern_->currentOffset_ = 0;
-        }
-        pattern_->contentMainSize_ = -1.0f;
-    }
-    double position = 1.0;
-    pattern_->contentMainSize_ = 1.0f;
-    pattern_->PlaySpringAnimation(dragVelocity);
-    ScrollMotion::ValueCallback valueCallback = pattern_->springController_->motion_->callbacks_.begin()->second;
-    valueCallback.callback_(position);
-    Animator::StatusCallback statusCallback1 = pattern_->springController_->startCallbacks_.begin()->second;
-    statusCallback1.callback_();
-    Animator::StatusCallback statusCallback2 = pattern_->springController_->stopCallbacks_.begin()->second;
-    statusCallback2.callback_();
 }
 
 /**
@@ -7277,26 +7323,6 @@ HWTEST_F(SwiperTestNg, SwiperPatternIsVisibleChildrenSizeLessThanSwiper001, Test
 }
 
 /**
- * @tc.name: SwiperPatternStopAndResetSpringAnimation001
- * @tc.desc: StopAndResetSpringAnimation
- * @tc.type: FUNC
- */
-HWTEST_F(SwiperTestNg, SwiperPatternStopAndResetSpringAnimation001, TestSize.Level1)
-{
-    CreateWithItem([](SwiperModelNG model) {});
-    pattern_->springController_ = AceType::MakeRefPtr<Animator>();
-
-    /**
-     * @tc.steps: step2. call StopAndResetSpringAnimation.
-     * @tc.expected: Related function runs ok.
-     */
-    for (int i = 0; i <= 1; i++) {
-        pattern_->StopAndResetSpringAnimation();
-        pattern_->springController_->status_ = Animator::Status::STOPPED;
-    }
-}
-
-/**
  * @tc.name: SwiperPatternSwipeToWithoutAnimation001
  * @tc.desc: SwipeToWithoutAnimation
  * @tc.type: FUNC
@@ -8148,6 +8174,8 @@ HWTEST_F(SwiperTestNg, SwiperModelNGSetDisplayCount001, TestSize.Level1)
 {
     SwiperModelNG mode;
     auto controller = mode.Create();
+    ViewAbstract::SetWidth(CalcLength(SWIPER_WIDTH));
+    ViewAbstract::SetHeight(CalcLength(SWIPER_HEIGHT));
     ASSERT_NE(controller, nullptr);
     int32_t displayCount = 0;
 
@@ -8841,7 +8869,6 @@ HWTEST_F(SwiperTestNg, SwiperIndicatorPatternCheckIsTouchBottom001, TestSize.Lev
 HWTEST_F(SwiperTestNg, SwiperPatternHandleTouchUp002, TestSize.Level1)
 {
     CreateWithItem([](SwiperModelNG model) {});
-    pattern_->springController_ = AceType::MakeRefPtr<Animator>();
     pattern_->isDragging_ = false;
     pattern_->itemPosition_.emplace(std::make_pair(0, SwiperItemInfo { 1.0f, 2.0f }));
     pattern_->velocity_ = 1.0f;
@@ -8891,11 +8918,11 @@ HWTEST_F(SwiperTestNg, SwiperPatternPlayIndicatorTranslateAnimation003, TestSize
 }
 
 /**
- * @tc.name: SwiperPatternPlaySpringAnimation002
+ * @tc.name: SwiperPatternPlaySpringAnimation001
  * @tc.desc: PlaySpringAnimation
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperTestNg, SwiperPatternPlaySpringAnimation002, TestSize.Level1)
+HWTEST_F(SwiperTestNg, SwiperPatternPlaySpringAnimation001, TestSize.Level1)
 {
     CreateWithItem([](SwiperModelNG model) {});
     pattern_->contentMainSize_ = 1.0f;
@@ -9687,25 +9714,6 @@ HWTEST_F(SwiperTestNg, SwiperLayoutAlgorithmLayoutForward007, TestSize.Level1)
      */
     swiperLayoutAlgorithm->LayoutForward(&layoutWrapper, layoutConstraint, axis, startIndex, startPos);
     EXPECT_FALSE(swiperLayoutAlgorithm->itemPosition_.empty());
-}
-
-/**
- * @tc.name: SwiperPatternStopSpringAnimationAndFlushImmediately001
- * @tc.desc: StopSpringAnimationAndFlushImmediately
- * @tc.type: FUNC
- */
-HWTEST_F(SwiperTestNg, SwiperPatternStopSpringAnimationAndFlushImmediately001, TestSize.Level1)
-{
-    CreateWithItem([](SwiperModelNG model) {});
-    pattern_->springController_ = AceType::MakeRefPtr<Animator>();
-    pattern_->springController_->status_ = Animator::Status::IDLE;
-
-    /**
-     * @tc.steps: step2. call PlaySpringAnimation.
-     * @tc.expected: Related function runs ok.
-     */
-    pattern_->StopSpringAnimationAndFlushImmediately();
-    EXPECT_TRUE(pattern_->isVoluntarilyClear_);
 }
 
 /**

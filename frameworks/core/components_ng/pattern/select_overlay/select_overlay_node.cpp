@@ -545,6 +545,8 @@ RefPtr<FrameNode> SelectOverlayNode::CreateSelectOverlayNode(const std::shared_p
     ElementRegister::GetInstance()->AddUINode(selectOverlayNode);
     selectOverlayNode->CreateToolBar();
     selectOverlayNode->UpdateToolBar(true);
+    auto selectContext = selectOverlayNode->GetRenderContext();
+    selectContext->UpdateUseShadowBatching(true);
     return selectOverlayNode;
 }
 
@@ -603,6 +605,7 @@ void SelectOverlayNode::MoreAnimation()
     AnimationUtils::Animate(extensionOption, [extensionContext, selectMenuInnerContext]() {
         extensionContext->UpdateOpacity(1.0);
         extensionContext->UpdateTransformTranslate({ 0.0f, 0.0f, 0.0f });
+        extensionContext->UpdateBackShadow(ShadowConfig::DefaultShadowM);
         selectMenuInnerContext->UpdateOpacity(0.0);
     });
     modifier->SetOtherPointRadius(MIN_DIAMETER / 2.0f);

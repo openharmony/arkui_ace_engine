@@ -93,7 +93,7 @@ HWTEST_F(SelectOverlayManagerTestNg, SelectOverlayManagerTest001, TestSize.Level
      */
     Init();
     auto id = proxy_->GetSelectOverlayId();
-    EXPECT_EQ(id, 0);
+    EXPECT_EQ(id, 2);
 
     /**
      * @tc.expected: root's children_list contains the selectOverlayNode we created

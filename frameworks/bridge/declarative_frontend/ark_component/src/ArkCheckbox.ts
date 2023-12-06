@@ -1,7 +1,26 @@
 /// <reference path='./import.ts' />
+/// <reference path='./import.ts' />
 class ArkCheckboxComponent extends ArkComponent implements CheckboxAttribute {
   shape(value: CheckBoxShape): this {
     throw new Error('Method not implemented.');
+  }
+  width(value: Length): this {
+    if (typeof value !== 'number' && typeof value !== 'string') {
+      modifier(this._modifiers, CheckboxWidthModifier, undefined);
+    }
+    else {
+      modifier(this._modifiers, CheckboxWidthModifier, value);
+    }
+    return this;
+  }
+  height(value: Length): this {
+    if (typeof value !== 'number' && typeof value !== 'string') {
+      modifier(this._modifiers, CheckboxHeightModifier, undefined);
+    }
+    else {
+      modifier(this._modifiers, CheckboxHeightModifier, value);
+    }
+    return this;
   }
   select(value: boolean): this {
     if (!isUndefined(value)) {
@@ -51,17 +70,6 @@ class ArkCheckboxComponent extends ArkComponent implements CheckboxAttribute {
   }
 }
 
-// @ts-ignore
-globalThis.Checkbox.attributeModifier = function (modifier) {
-  const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
-  let component = this.createOrGetNode(elmtId, () => {
-    return new ArkCheckboxComponent(nativeNode);
-  });
-  modifier.applyNormalAttribute(component);
-  component.applyModifierPatch();
-}
-
 class CheckboxMarkModifier extends Modifier<ArkMarkStyle> {
   static identity: Symbol = Symbol('checkboxMark');
   applyPeer(node: KNode, reset: boolean) {
@@ -107,4 +115,39 @@ class CheckboxUnselectedColorModifier extends Modifier<number> {
       GetUINativeModule().checkbox.setUnSelectedColor(node, this.value);
     }
   }
+}
+
+class CheckboxWidthModifier extends Modifier<number | string> {
+  static identity: Symbol = Symbol('checkboxWidth');
+  applyPeer(node: KNode, reset: boolean): void {
+      if (reset) {
+          GetUINativeModule().checkbox.resetWidth(node);
+      }
+      else {
+          GetUINativeModule().checkbox.setWidth(node, this.value);
+      }
+  }
+}
+
+class CheckboxHeightModifier extends Modifier<number | string> {
+  static identity: Symbol = Symbol('checkboxHeight');
+  applyPeer(node: KNode, reset: boolean): void {
+      if (reset) {
+          GetUINativeModule().checkbox.resetHeight(node);
+      }
+      else {
+          GetUINativeModule().checkbox.setHeight(node, this.value);
+      }
+  }
+}
+
+// @ts-ignore
+globalThis.Checkbox.attributeModifier = function (modifier) {
+  const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
+  let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+  let component = this.createOrGetNode(elmtId, () => {
+    return new ArkCheckboxComponent(nativeNode);
+  });
+  modifier.applyNormalAttribute(component);
+  component.applyModifierPatch();
 }

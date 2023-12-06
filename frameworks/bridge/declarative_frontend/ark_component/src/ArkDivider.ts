@@ -1,5 +1,5 @@
 /// <reference path="./import.ts" />
-class DividerVerticalModifier extends Modifier<boolean> {
+class DividerVerticalModifier extends ModifierWithKey<boolean> {
   static identity: Symbol = Symbol('dividerVertical');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -8,8 +8,11 @@ class DividerVerticalModifier extends Modifier<boolean> {
       GetUINativeModule().divider.setVertical(node, this.value!);
     }
   }
+  checkObjectDiff(): boolean {
+    return this.stageValue !== this.value;
+  }
 }
-class DividerLineCapModifier extends Modifier<LineCapStyle> {
+class DividerLineCapModifier extends ModifierWithKey<LineCapStyle> {
   static identity: Symbol = Symbol('dividerLineCap');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -17,6 +20,9 @@ class DividerLineCapModifier extends Modifier<LineCapStyle> {
     } else {
       GetUINativeModule().divider.setLineCap(node, this.value!);
     }
+  }
+  checkObjectDiff(): boolean {
+    return this.stageValue !== this.value;
   }
 }
 class DividerColorModifier extends ModifierWithKey<ResourceColor> {
@@ -29,14 +35,10 @@ class DividerColorModifier extends ModifierWithKey<ResourceColor> {
     }
   }
   checkObjectDiff(): boolean {
-    if (isResource(this.stageValue) && isResource(this.value)) {
-      return !isResourceEqual(this.stageValue, this.value);
-    } else {
-      return true;
-    }
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
-class DividerStrokeWidthModifier extends Modifier<number | string> {
+class DividerStrokeWidthModifier extends ModifierWithKey<number | string> {
   static identity: Symbol = Symbol('dividerStrokeWidth');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -45,14 +47,13 @@ class DividerStrokeWidthModifier extends Modifier<number | string> {
       GetUINativeModule().divider.setStrokeWidth(node, this.value!);
     }
   }
+  checkObjectDiff(): boolean {
+    return this.stageValue !== this.value;
+  }
 }
 class ArkDividerComponent extends ArkComponent implements DividerAttribute {
   vertical(value: boolean): DividerAttribute {
-    if (value) {
-      modifier(this._modifiers, DividerVerticalModifier, value);
-    } else {
-      modifier(this._modifiers, DividerVerticalModifier, undefined);
-    }
+    modifierWithKey(this._modifiersWithKeys, DividerVerticalModifier.identity, DividerVerticalModifier, value);
     return this;
   }
   color(value: ResourceColor): DividerAttribute {
@@ -60,19 +61,11 @@ class ArkDividerComponent extends ArkComponent implements DividerAttribute {
     return this;
   }
   strokeWidth(value: number | string): DividerAttribute {
-    if (isNumber(value) || isString(value)) {
-      modifier(this._modifiers, DividerStrokeWidthModifier, value);
-    } else {
-      modifier(this._modifiers, DividerStrokeWidthModifier, undefined);
-    }
+    modifierWithKey(this._modifiersWithKeys, DividerStrokeWidthModifier.identity, DividerStrokeWidthModifier, value);
     return this;
   }
   lineCap(value: LineCapStyle): DividerAttribute {
-    if (value) {
-      modifier(this._modifiers, DividerLineCapModifier, value);
-    } else {
-      modifier(this._modifiers, DividerLineCapModifier, undefined);
-    }
+    modifierWithKey(this._modifiersWithKeys, DividerLineCapModifier.identity, DividerLineCapModifier, value);
     return this;
   }
 }

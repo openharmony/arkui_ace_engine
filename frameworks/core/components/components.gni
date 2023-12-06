@@ -74,6 +74,10 @@ template("build_component") {
         deps += [ "$ace_flutter_engine_root:flutter_engine_fml_$platform" ]
       }
 
+      if (defined(use_rosen_drawing) && use_rosen_drawing) {
+        deps += [ "$ace_flutter_engine_root/icu:ace_libicu_$platform" ]
+      }
+
       if (defined(invoker.public_configs)) {
         public_configs = []
         public_configs += invoker.public_configs

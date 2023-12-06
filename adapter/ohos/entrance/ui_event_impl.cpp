@@ -24,9 +24,11 @@
 
 #include "base/log/log.h"
 #include "base/thread/background_task_executor.h"
+#include "core/common/container.h"
 #include "core/common/recorder/event_controller.h"
 #include "core/common/recorder/event_recorder.h"
 #include "core/common/recorder/node_data_cache.h"
+#include "core/components_ng/base/inspector.h"
 
 namespace OHOS::Ace {
 extern "C" ACE_FORCE_EXPORT void OHOS_ACE_RegisterUIEventObserver(
@@ -43,7 +45,7 @@ extern "C" ACE_FORCE_EXPORT void OHOS_ACE_UnregisterUIEventObserver(const std::s
 }
 
 extern "C" ACE_FORCE_EXPORT void OHOS_ACE_GetNodeProperty(
-    const std::string& pageUrl, const std::unordered_map<std::string, std::string>& nodeProperties)
+    const std::string& pageUrl, std::unordered_map<std::string, std::string>& nodeProperties)
 {
     TAG_LOGD(AceLogTag::ACE_UIEVENT, "GetNodeProperty.");
     Recorder::NodeDataCache::Get().GetNodeData(pageUrl, nodeProperties);
@@ -52,6 +54,14 @@ extern "C" ACE_FORCE_EXPORT void OHOS_ACE_GetNodeProperty(
 extern "C" ACE_FORCE_EXPORT void OHOS_ACE_GetSimplifiedInspectorTree(std::string& tree)
 {
     TAG_LOGD(AceLogTag::ACE_UIEVENT, "GetSimplifiedInspectorTree.");
+    auto containerId = Recorder::EventRecorder::Get().GetContainerId();
+    auto container = Container::GetContainer(containerId);
+    if (!container) {
+        return;
+    }
+    if (container->IsUseNewPipeline()) {
+        tree = NG::Inspector::GetSimplifiedInspector(containerId);
+    }
 }
 
 namespace Recorder {

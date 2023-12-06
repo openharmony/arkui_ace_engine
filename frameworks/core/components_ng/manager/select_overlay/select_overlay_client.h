@@ -137,6 +137,8 @@ public:
         return proxy->IsSingleHandle();
     }
 
+    RectF GetVisibleContentRect(WeakPtr<FrameNode> parent, RectF visibleRect);
+
 protected:
     const RefPtr<SelectOverlayProxy>& GetSelectOverlayProxy()
     {

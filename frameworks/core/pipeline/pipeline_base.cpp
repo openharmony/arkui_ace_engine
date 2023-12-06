@@ -116,6 +116,24 @@ RefPtr<PipelineBase> PipelineBase::GetCurrentContext()
     return currentContainer->GetPipelineContext();
 }
 
+double PipelineBase::GetCurrentDensity()
+{
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    return pipelineContext ? pipelineContext->GetDensity() : SystemProperties::GetResolution();
+}
+
+double PipelineBase::Px2VpWithCurrentDensity(double px)
+{
+    double density = PipelineBase::GetCurrentDensity();
+    return px / density;
+}
+
+double PipelineBase::Vp2PxWithCurrentDensity(double vp)
+{
+    double density = PipelineBase::GetCurrentDensity();
+    return vp * density;
+}
+
 RefPtr<PipelineBase> PipelineBase::GetMainPipelineContext()
 {
     auto containerId = Container::CurrentId();
@@ -502,16 +520,21 @@ bool PipelineBase::Animate(const AnimationOption& option, const RefPtr<Curve>& c
 
 std::function<void()> PipelineBase::GetWrappedAnimationCallback(const std::function<void()>& finishCallback)
 {
+    auto finishPtr = std::make_shared<std::function<void()>>(finishCallback);
+    finishFunctions_.emplace(finishPtr);
     auto wrapFinishCallback = [weak = AceType::WeakClaim(this),
-                                  finishPtr = std::make_shared<std::function<void()>>(finishCallback)]() mutable {
+                                  finishWeak = std::weak_ptr<std::function<void()>>(finishPtr)]() {
         auto context = weak.Upgrade();
         if (!context) {
             return;
         }
         context->GetTaskExecutor()->PostTask(
-            [finishPtr = std::move(finishPtr), weak]() mutable {
+            [weak, finishWeak]() {
                 auto context = weak.Upgrade();
                 CHECK_NULL_VOID(context);
+                auto finishPtr = finishWeak.lock();
+                CHECK_NULL_VOID(finishPtr);
+                context->finishFunctions_.erase(finishPtr);
                 if (!(*finishPtr)) {
                     if (context->IsFormRender()) {
                         TAG_LOGI(AceLogTag::ACE_FORM, "[Form animation] Form animation is finish.");
@@ -835,6 +858,7 @@ void PipelineBase::Destroy()
     virtualKeyBoardCallback_.clear();
     etsCardTouchEventCallback_.clear();
     formLinkInfoMap_.clear();
+    finishFunctions_.clear();
 }
 
 std::string PipelineBase::OnFormRecycle()

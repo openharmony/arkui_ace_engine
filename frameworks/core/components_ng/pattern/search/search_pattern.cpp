@@ -20,6 +20,7 @@
 #include "base/geometry/rect.h"
 #include "base/utils/system_properties.h"
 #include "base/utils/utils.h"
+#include "core/common/recorder/node_data_cache.h"
 #include "core/components/search/search_theme.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
@@ -202,6 +203,21 @@ void SearchPattern::InitTextFieldValueChangeEvent()
             searchPattern->UpdateChangeEvent(value);
         };
         eventHub->SetOnChange(std::move(searchChangeFunc));
+    }
+}
+
+void SearchPattern::OnAfterModifyDone()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto inspectorId = host->GetInspectorId().value_or("");
+    if (!inspectorId.empty()) {
+        auto textFieldFrameNode = DynamicCast<FrameNode>(host->GetChildAtIndex(TEXTFIELD_INDEX));
+        CHECK_NULL_VOID(textFieldFrameNode);
+        auto textFieldPattern = textFieldFrameNode->GetPattern<TextFieldPattern>();
+        CHECK_NULL_VOID(textFieldPattern);
+        auto text = textFieldPattern->GetTextValue();
+        Recorder::NodeDataCache::Get().PutString(inspectorId, text);
     }
 }
 

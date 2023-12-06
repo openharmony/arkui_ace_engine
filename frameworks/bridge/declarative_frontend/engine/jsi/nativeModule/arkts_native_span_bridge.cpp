@@ -37,6 +37,7 @@ constexpr int NUM_1 = 1;
 constexpr int NUM_2 = 2;
 constexpr int NUM_3 = 3;
 constexpr int NUM_4 = 4;
+const std::vector<OHOS::Ace::FontStyle> FONT_STYLES = { OHOS::Ace::FontStyle::NORMAL, OHOS::Ace::FontStyle::ITALIC };
 
 ArkUINativeModuleValue SpanBridge::SetTextCase(ArkUIRuntimeCallInfo *runtimeCallInfo)
 {
@@ -45,9 +46,9 @@ ArkUINativeModuleValue SpanBridge::SetTextCase(ArkUIRuntimeCallInfo *runtimeCall
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
     void *nativeNode = firstArg->ToNativePointer(vm)->Value();
-    int32_t value = secondArg->Int32Value(vm);
-    if (value >= NUM_0 && value <= SIZE_OF_TEXT_CASES) {
-        GetArkUIInternalNodeAPI()->GetSpanModifier().SetSpanTextCase(nativeNode, value);
+    if (secondArg->IsNumber() && secondArg->Int32Value(vm) >= NUM_0 &&
+        secondArg->Int32Value(vm) <= SIZE_OF_TEXT_CASES) {
+        GetArkUIInternalNodeAPI()->GetSpanModifier().SetSpanTextCase(nativeNode, secondArg->Int32Value(vm));
     } else {
         GetArkUIInternalNodeAPI()->GetSpanModifier().ResetSpanTextCase(nativeNode);
     }
@@ -127,10 +128,13 @@ ArkUINativeModuleValue SpanBridge::SetFontStyle(ArkUIRuntimeCallInfo *runtimeCal
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
     void *nativeNode = firstArg->ToNativePointer(vm)->Value();
-
     if (secondArg->IsNumber()) {
-        int32_t value = secondArg->Int32Value(vm);
-        GetArkUIInternalNodeAPI()->GetSpanModifier().SetSpanFontStyle(nativeNode, value);
+        int32_t value = secondArg->Uint32Value(vm);
+        if (value >= 0 && value < static_cast<int32_t>(FONT_STYLES.size())) {
+            GetArkUIInternalNodeAPI()->GetSpanModifier().SetSpanFontStyle(nativeNode, value);
+        } else {
+            return panda::JSValueRef::Undefined(vm);
+        }
     } else {
         GetArkUIInternalNodeAPI()->GetSpanModifier().ReSetSpanFontStyle(nativeNode);
     }
@@ -335,7 +339,6 @@ ArkUINativeModuleValue SpanBridge::SetFont(ArkUIRuntimeCallInfo *runtimeCallInfo
         fontInfo.fontSizeNumber = fontSize.Value();
         fontInfo.fontSizeUnit = static_cast<int8_t>(fontSize.Unit());
     }
-
     std::string weight = DEFAULT_FONT_WEIGHT;
     if (!weightArg->IsNull()) {
         if (weightArg->IsNumber()) {
@@ -345,13 +348,14 @@ ArkUINativeModuleValue SpanBridge::SetFont(ArkUIRuntimeCallInfo *runtimeCallInfo
         }
     }
     fontInfo.fontWeight = static_cast<uint8_t>(Framework::ConvertStrToFontWeight(weight));
-    
     int32_t style = static_cast<int32_t>(DEFAULT_FONT_STYLE);
     if (styleArg->IsInt()) {
         style = styleArg->Int32Value(vm);
+        if (style <= 0 || style > static_cast<int32_t>(FONT_STYLES.size())) {
+            style = static_cast<int32_t>(DEFAULT_FONT_STYLE);
+        }
     }
     fontInfo.fontStyle = static_cast<uint8_t>(style);
-
     std::vector<std::string> fontFamilies;
     fontInfo.fontFamilies = nullptr;
     if (!familyArg->IsNull() && ArkTSUtils::ParseJsFontFamilies(vm, familyArg, fontFamilies)) {

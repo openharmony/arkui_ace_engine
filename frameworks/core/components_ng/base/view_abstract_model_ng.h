@@ -835,6 +835,11 @@ public:
         ViewAbstract::SetAllowDrop(allowDrop);
     }
 
+    void SetDragPreview(const NG::DragDropInfo& info) override
+    {
+        ViewAbstract::SetDragPreview(info);
+    }
+
     void SetOnVisibleChange(
         std::function<void(bool, double)>&& onVisibleChange, const std::vector<double>& ratios) override
     {
@@ -1051,6 +1056,11 @@ public:
     void SetLightIlluminated(const uint32_t value) override
     {
         ViewAbstract::SetLightIlluminated(value);
+    }
+
+    void SetIlluminatedBorderWidth(const Dimension& value) override
+    {
+        ViewAbstract::SetIlluminatedBorderWidth(value);
     }
 
     void SetBloom(const float value) override

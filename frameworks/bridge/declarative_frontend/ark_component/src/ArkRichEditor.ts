@@ -1,6 +1,6 @@
 /// <reference path="./import.ts" />
 
-class RichEditorCopyOptionsModifier extends Modifier<CopyOptions> {
+class RichEditorCopyOptionsModifier extends ModifierWithKey<CopyOptions> {
   static identity: Symbol = Symbol('richEditorCopyOptions');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -8,6 +8,9 @@ class RichEditorCopyOptionsModifier extends Modifier<CopyOptions> {
     } else {
       GetUINativeModule().richEditor.setCopyOptions(node, this.value!);
     }
+  }
+  checkObjectDiff(): boolean {
+    return this.stageValue !== this.value;
   }
 }
 
@@ -21,11 +24,7 @@ class ArkRichEditorComponent extends ArkComponent implements CommonMethod<RichEd
   }
 
   copyOptions(value: CopyOptions): RichEditorAttribute {
-    if (value in CopyOptions) {
-      modifier(this._modifiers, RichEditorCopyOptionsModifier, value);
-    } else {
-      modifier(this._modifiers, RichEditorCopyOptionsModifier, undefined);
-    }
+    modifierWithKey(this._modifiersWithKeys, RichEditorCopyOptionsModifier.identity, RichEditorCopyOptionsModifier, value);
     return this;
   }
   onPaste(callback: (event?: PasteEvent) => void): RichEditorAttribute {

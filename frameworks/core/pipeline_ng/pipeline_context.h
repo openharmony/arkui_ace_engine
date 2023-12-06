@@ -70,6 +70,8 @@ public:
 
     static RefPtr<PipelineContext> GetMainPipelineContext();
 
+    static RefPtr<PipelineContext> GetContextByContainerId(int32_t containerId);
+
     static float GetCurrentRootWidth();
 
     static float GetCurrentRootHeight();
@@ -457,6 +459,7 @@ public:
 
     bool DumpPageViewData(const RefPtr<FrameNode>& node, RefPtr<ViewDataWrap> viewDataWrap);
     bool CheckNeedAutoSave();
+    bool CheckPageFocus();
     void NotifyFillRequestSuccess(AceAutoFillType autoFillType, RefPtr<ViewDataWrap> viewDataWrap);
     void NotifyFillRequestFailed(RefPtr<FrameNode> node, int32_t errCode);
 
@@ -472,9 +475,11 @@ public:
 
     void RemoveGestureTask(const DelayedTask& task)
     {
-        for (auto& delayedTask : delayedTasks_) {
-            if (delayedTask.recognizer == task.recognizer) {
-                delayedTask.deleted = true;
+        for (auto iter = delayedTasks_.begin(); iter != delayedTasks_.end();) {
+            if (iter->recognizer == task.recognizer) {
+                delayedTasks_.erase(iter++);
+            } else {
+                ++iter;
             }
         }
     }
@@ -525,6 +530,7 @@ protected:
     void FlushPipelineWithoutAnimation() override;
     void FlushFocus();
     void FlushFrameTrace();
+    void DispatchDisplaySync(uint64_t nanoTimestamp) override;
     void FlushAnimation(uint64_t nanoTimestamp) override;
     bool OnDumpInfo(const std::vector<std::string>& params) const override;
 

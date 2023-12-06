@@ -47,6 +47,7 @@ public:
     void ForceCleanRecognizer() override
     {
         touchPoints_.clear();
+        fingersId_.clear();
         fingerList_.clear();
         activeFingers_.clear();
         currentFingers_ = 0;
@@ -64,6 +65,7 @@ protected:
     void OnResetStatus() override
     {
         touchPoints_.clear();
+        fingersId_.clear();
         fingerList_.clear();
         activeFingers_.clear();
     }
@@ -78,6 +80,7 @@ protected:
     std::map<int32_t, TouchEvent> touchPoints_;
     std::list<FingerInfo> fingerList_;
     std::list<int32_t> activeFingers_;
+    std::set<int32_t> fingersId_;
 
     int32_t fingers_ = 1;
 };

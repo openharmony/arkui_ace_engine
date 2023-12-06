@@ -87,7 +87,7 @@ void JSRenderImage::JsGetWidth(const JSCallbackInfo& info)
 {
     double width = 0.0;
     width = width_;
-    width = SystemProperties::Px2Vp(width);
+    width = PipelineBase::Px2VpWithCurrentDensity(width);
     auto returnValue = JSVal(ToJSValue(width));
     auto returnPtr = JSRef<JSVal>::Make(returnValue);
     info.SetReturnValue(returnPtr);
@@ -98,7 +98,7 @@ void JSRenderImage::JsGetHeight(const JSCallbackInfo& info)
     double height = 0.0;
     height = height_;
 
-    height = SystemProperties::Px2Vp(height);
+    height = PipelineBase::Px2VpWithCurrentDensity(height);
     auto returnValue = JSVal(ToJSValue(height));
     auto returnPtr = JSRef<JSVal>::Make(returnValue);
     info.SetReturnValue(returnPtr);

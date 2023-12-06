@@ -94,7 +94,7 @@ void JSNavigation::ParseToolBarItems(const JSRef<JSArray>& jsArray, std::list<Re
         auto itemActionValue = itemObject->GetProperty("action");
         if (itemActionValue->IsFunction()) {
             auto onClickFunc = AceType::MakeRefPtr<JsClickFunction>(JSRef<JSFunc>::Cast(itemActionValue));
-            auto targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+            WeakPtr<NG::FrameNode> targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
             toolBarItem->action = EventMarker([func = std::move(onClickFunc), node = targetNode]() {
                 ACE_SCORING_EVENT("Navigation.toolBarItemClick");
                 PipelineContext::SetCallBackNode(node);
@@ -136,7 +136,7 @@ void JSNavigation::ParseBarItems(
         auto itemActionValue = itemObject->GetProperty("action");
         if (itemActionValue->IsFunction()) {
             RefPtr<JsFunction> onClickFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(itemActionValue));
-            auto targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+            WeakPtr<NG::FrameNode> targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
             auto onItemClick = [execCtx = info.GetExecutionContext(), func = std::move(onClickFunc),
                                    node = targetNode]() {
                 JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
@@ -179,7 +179,7 @@ void JSNavigation::ParseToolbarItemsConfiguration(
         auto itemActionValue = itemObject->GetProperty("action");
         if (itemActionValue->IsFunction()) {
             RefPtr<JsFunction> onClickFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(itemActionValue));
-            auto targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+            WeakPtr<NG::FrameNode> targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
             auto onItemClick = [execCtx = info.GetExecutionContext(), func = std::move(onClickFunc),
                                    node = targetNode]() {
                 JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
@@ -492,7 +492,7 @@ void JSNavigation::SetOnTitleModeChanged(const JSCallbackInfo& info)
     if (info[0]->IsFunction()) {
         auto onTitleModeChangeCallback =
             AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
-        auto targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+        WeakPtr<NG::FrameNode> targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
         auto onTitleModeChange = [execCtx = info.GetExecutionContext(), func = std::move(onTitleModeChangeCallback),
                                      node = targetNode](NG::NavigationTitleMode mode) {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
@@ -613,7 +613,7 @@ void JSNavigation::SetOnNavBarStateChange(const JSCallbackInfo& info)
     if (info[0]->IsFunction()) {
         auto onNavBarStateChangeCallback =
             AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
-        auto targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+        WeakPtr<NG::FrameNode> targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
         auto onNavBarStateChange = [execCtx = info.GetExecutionContext(), func = std::move(onNavBarStateChangeCallback),
                                        node = targetNode](bool isVisible) {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
@@ -657,7 +657,7 @@ void JSNavigation::SetOnNavigationModeChange(const JSCallbackInfo& info)
         return;
     }
     auto onModeChangeCallback = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
-    auto targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    WeakPtr<NG::FrameNode> targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
     auto onModeChange = [execCtx = info.GetExecutionContext(), func = std::move(onModeChangeCallback),
                             node = targetNode](NG::NavigationMode mode) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);

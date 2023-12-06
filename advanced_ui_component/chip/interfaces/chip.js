@@ -458,7 +458,7 @@ export class ChipComponent extends ViewPU {
                 return e;
             case "object":
                 try {
-                    return getContext().resourceManager.getNumber(e.id)
+                    return px2vp(getContext(this).resourceManager.getNumber(e.id))
                 } catch (e) {
                     return Number.NEGATIVE_INFINITY
                 }

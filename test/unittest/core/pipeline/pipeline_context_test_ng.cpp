@@ -61,7 +61,6 @@
 #include "core/components_ng/pattern/navigation/title_bar_node.h"
 #include "core/components_ng/pattern/navrouter/navdestination_group_node.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
-#include "core/components_ng/pattern/text_field/key_event_handler.h"
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
 #include "core/components_ng/property/safe_area_insets.h"
@@ -2900,6 +2899,238 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg063, TestSize.Level1)
      */
     context_->CloseFrontendAnimation();
     EXPECT_EQ(context_->pendingFrontendAnimation_.size(), 0);
+}
+
+/**
+ * @tc.name: PipelineContextTestNg064
+ * @tc.desc: Test history and current.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg064, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: history and current timestamps are equal to nanoTimeStamp
+     * @tc.expected: Expect the result to be (0.0, 0.0)
+     */
+    std::tuple<float, float, uint64_t> history_fs = std::make_tuple(1.0f, 1.0f, 1000);
+    std::tuple<float, float, uint64_t> current_fs = std::make_tuple(2.0f, 2.0f, 2000);
+    uint64_t nanoTimeStampFs = 1000;
+    auto result_fs = context_->LinearInterpolation(history_fs, current_fs, nanoTimeStampFs);
+    EXPECT_EQ(result_fs, std::make_pair(0.0f, 0.0f));
+
+    /**
+     * @tc.steps2: history and current timestamps are equal to nanoTimeStamp
+     * @tc.expected: Expect the result to be (0.0, 0.0)
+     */
+    std::tuple<float, float, uint64_t> history_se = std::make_tuple(1.0f, 1.0f, 2000);
+    std::tuple<float, float, uint64_t> current_se = std::make_tuple(2.0f, 2.0f, 1000);
+    uint64_t nanoTimeStampSe = 1500;
+    auto result_se = context_->LinearInterpolation(history_se, current_se, nanoTimeStampSe);
+    EXPECT_EQ(result_se, std::make_pair(0.0f, 0.0f));
+
+    /**
+     * @tc.steps3: history and current timestamps are equal to nanoTimeStamp
+     * @tc.expected: Expect the result to be (1.75, 1.75)
+     */
+    std::tuple<float, float, uint64_t> history_th = std::make_tuple(1.0f, 1.0f, 1000);
+    std::tuple<float, float, uint64_t> current_th = std::make_tuple(2.0f, 2.0f, 3000);
+    uint64_t nanoTimeStampTh = 2500;
+    auto result_th = context_->LinearInterpolation(history_th, current_th, nanoTimeStampTh);
+    EXPECT_EQ(result_th, std::make_pair(1.75f, 1.75f));
+
+    /**
+     * @tc.steps4: nanoTimeStamp is less than history timestamp
+     * @tc.expected: Expect the result to be (0.0, 0.0)
+     */
+    std::tuple<float, float, uint64_t> history_for = std::make_tuple(1.0f, 1.0f, 1000);
+    std::tuple<float, float, uint64_t> current_for = std::make_tuple(2.0f, 2.0f, 2000);
+    uint64_t nanoTimeStampFor = 500;
+    auto result_for = context_->LinearInterpolation(history_for, current_for, nanoTimeStampFor);
+    EXPECT_EQ(result_for, std::make_pair(0.0f, 0.0f));
+
+    /**
+     * @tc.steps5: nanoTimeStamp is less than current timestamp
+     * @tc.expected: Expect non-zero value
+     */
+    std::tuple<float, float, uint64_t> history_fie = std::make_tuple(1.0f, 1.0f, 1000);
+    std::tuple<float, float, uint64_t> current_fie = std::make_tuple(2.0f, 2.0f, 2000);
+    uint64_t nanoTimeStampFie = 1500;
+    auto result_fie = context_->LinearInterpolation(history_fie, current_fie, nanoTimeStampFie);
+    EXPECT_NE(result_fie, std::make_pair(0.0f, 0.0f));
+
+    /**
+     * @tc.steps6: nanoTimeStamp is greater than current timestamp
+     * @tc.expected: Expect non-zero value
+     */
+    std::tuple<float, float, uint64_t> history_six = std::make_tuple(1.0f, 1.0f, 1000);
+    std::tuple<float, float, uint64_t> current_six = std::make_tuple(2.0f, 2.0f, 2000);
+    uint64_t nanoTimeStampSix = 2500;
+    auto result_six = context_->LinearInterpolation(history_six, current_six, nanoTimeStampSix);
+    EXPECT_NE(result_six, std::make_pair(0.0f, 0.0f));
+}
+
+/**
+ * @tc.name: PipelineContextTestNg065
+ * @tc.desc: Test history and current.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg065, TestSize.Level1)
+{
+    std::vector<TouchEvent> emptyHistory;
+    std::vector<TouchEvent> emptyCurrent;
+    uint64_t nanoTimeStamp = 1234567890;
+    bool isScreen = true;
+    std::pair<float, float> result = context_->GetResampleCoord(emptyHistory, emptyCurrent, nanoTimeStamp, isScreen);
+    EXPECT_FLOAT_EQ(0.0f, result.first);
+    EXPECT_FLOAT_EQ(0.0f, result.second);
+}
+
+/**
+ * @tc.name: PipelineContextTestNg066
+ * @tc.desc: Test history and current.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg066, TestSize.Level1)
+{
+    auto timeStampAce = TimeStamp(std::chrono::nanoseconds(1000));
+    auto timeStampTwo = TimeStamp(std::chrono::nanoseconds(2000));
+    auto timeStampThree = TimeStamp(std::chrono::nanoseconds(3000));
+    auto timeStampFour = TimeStamp(std::chrono::nanoseconds(4000));
+    std::vector<TouchEvent> history;
+    history.push_back(TouchEvent{.x = 100.0f, .y = 200.0f, .time = timeStampAce});
+    history.push_back(TouchEvent{.x = 150.0f, .y = 250.0f, .time = timeStampTwo});
+    std::vector<TouchEvent> current;
+    current.push_back(TouchEvent{.x = 200.0f, .y = 300.0f, .time = timeStampThree});
+    current.push_back(TouchEvent{.x = 250.0f, .y = 350.0f, .time = timeStampFour});
+    
+    auto resampledCoord = context_->GetResampleCoord(history, current, 2500, true);
+    
+    ASSERT_FLOAT_EQ(0.0f, std::get<0>(resampledCoord));
+    ASSERT_FLOAT_EQ(0.0f, std::get<1>(resampledCoord));
+}
+
+/**
+ * @tc.name: PipelineContextTestNg067
+ * @tc.desc: Test history and current.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg067, TestSize.Level1)
+{
+    std::vector<TouchEvent> history;
+    std::vector<TouchEvent> current;
+    
+    auto resampledCoord = context_->GetResampleCoord(history, current, 2500, true);
+    
+    ASSERT_FLOAT_EQ(0.0f, std::get<0>(resampledCoord));
+    ASSERT_FLOAT_EQ(0.0f, std::get<1>(resampledCoord));
+}
+
+/**
+ * @tc.name: PipelineContextTestNg068
+ * @tc.desc: Test history and current.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg068, TestSize.Level1)
+{
+    auto timeStampAce = TimeStamp(std::chrono::nanoseconds(1000));
+    auto timeStampTwo = TimeStamp(std::chrono::nanoseconds(2000));
+    std::vector<TouchEvent> current;
+    current.push_back(TouchEvent{.x = 100.0f, .y = 200.0f, .time = timeStampAce});
+    current.push_back(TouchEvent{.x = 150.0f, .y = 250.0f, .time = timeStampTwo});
+    uint64_t nanoTimeStamp = 1500;
+
+    TouchEvent latestPoint = context_->GetLatestPoint(current, nanoTimeStamp);
+
+    ASSERT_FLOAT_EQ(100.0f, latestPoint.x);
+    ASSERT_FLOAT_EQ(200.0f, latestPoint.y);
+}
+
+/**
+ * @tc.name: PipelineContextTestNg069
+ * @tc.desc: Test history and current.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg069, TestSize.Level1)
+{
+    auto timeStampAce = TimeStamp(std::chrono::nanoseconds(1000));
+    auto timeStampTwo = TimeStamp(std::chrono::nanoseconds(2000));
+    auto timeStampThree = TimeStamp(std::chrono::nanoseconds(3000));
+    auto timeStampFour = TimeStamp(std::chrono::nanoseconds(4000));
+    std::vector<TouchEvent> history;
+    history.push_back(TouchEvent{.x = 100.0f, .y = 200.0f, .time = timeStampAce});
+    history.push_back(TouchEvent{.x = 150.0f, .y = 250.0f, .time = timeStampTwo});
+    std::vector<TouchEvent> current;
+    current.push_back(TouchEvent{.x = 200.0f, .y = 300.0f, .time = timeStampThree});
+    current.push_back(TouchEvent{.x = 250.0f, .y = 350.0f, .time = timeStampFour});
+    uint64_t nanoTimeStamp = 2500;
+
+    TouchEvent resampledTouchEvent = context_->GetResampleTouchEvent(history, current, nanoTimeStamp);
+
+    ASSERT_FLOAT_EQ(175.0f, resampledTouchEvent.x);
+    ASSERT_FLOAT_EQ(275.0f, resampledTouchEvent.y);
+}
+
+/**
+ * @tc.name: PipelineContextTestNg070
+ * @tc.desc: Test GetLatestPoint.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg070, TestSize.Level1)
+{
+    std::vector<TouchEvent> events;
+
+    TouchEvent event;
+    event.time = TimeStamp(std::chrono::nanoseconds(1000));
+    events.push_back(event);
+
+    TouchEvent result = context_->GetLatestPoint(events, 1000);
+    ASSERT_EQ(static_cast<uint64_t>(result.time.time_since_epoch().count()), 1000);
+}
+
+/**
+ * @tc.name: PipelineContextTestNg071
+ * @tc.desc: Test GetLatestPoint.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg071, TestSize.Level1)
+{
+    std::vector<TouchEvent> events;
+
+    TouchEvent eventAce;
+    eventAce.time = TimeStamp(std::chrono::nanoseconds(2000));
+    events.push_back(eventAce);
+
+    TouchEvent eventTwo;
+    eventTwo.time = TimeStamp(std::chrono::nanoseconds(3000));
+    events.push_back(eventTwo);
+
+    uint64_t nanoTimeStamp = 1500;
+
+    TouchEvent result = context_->GetLatestPoint(events, nanoTimeStamp);
+    ASSERT_GT(static_cast<uint64_t>(result.time.time_since_epoch().count()), nanoTimeStamp);
+}
+
+/**
+ * @tc.name: PipelineContextTestNg072
+ * @tc.desc: Test GetLatestPoint.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg072, TestSize.Level1)
+{
+    std::vector<TouchEvent> events;
+
+    TouchEvent eventAce;
+    eventAce.time = TimeStamp(std::chrono::nanoseconds(500));
+    events.push_back(eventAce);
+
+    TouchEvent eventTwo;
+    eventTwo.time = TimeStamp(std::chrono::nanoseconds(1000));
+    events.push_back(eventTwo);
+
+    uint64_t nanoTimeStamp = 1500;
+
+    TouchEvent result = context_->GetLatestPoint(events, nanoTimeStamp);
+    ASSERT_LT(static_cast<uint64_t>(result.time.time_since_epoch().count()), nanoTimeStamp);
 }
 } // namespace NG
 } // namespace OHOS::Ace

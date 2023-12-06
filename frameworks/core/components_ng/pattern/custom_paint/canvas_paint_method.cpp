@@ -230,13 +230,13 @@ void CanvasPaintMethod::DrawImage(
 #else
     InitImagePaint(nullptr, &imageBrush_, sampleOptions_);
     if (globalState_.HasGlobalAlpha()) {
-        imageBrush_.setAlphaF(globalState_.GetAlpha());
+        imageBrush_.SetAlphaF(globalState_.GetAlpha());
     }
 
     const auto rsCanvas = rsCanvas_.get();
     if (HasShadow()) {
-        double shadowWidth = (canvasImage.flag == 0) ? static_cast<double>(image->width()) : canvasImage.dWidth;
-        double shadowHeight = (canvasImage.flag == 0) ? static_cast<double>(image->height()) : canvasImage.dHeight;
+        double shadowWidth = (canvasImage.flag == 0) ? static_cast<double>(image->GetWidth()) : canvasImage.dWidth;
+        double shadowHeight = (canvasImage.flag == 0) ? static_cast<double>(image->GetHeight()) : canvasImage.dHeight;
         RSRect rsRect = RSRect(canvasImage.dx, canvasImage.dy,
             shadowWidth + canvasImage.dx, shadowHeight + canvasImage.dy);
         RSPath path;
@@ -254,7 +254,7 @@ void CanvasPaintMethod::DrawImage(
             } else {
                 RSBrush compositeOperationpBrush;
                 InitPaintBlend(compositeOperationpBrush);
-                rosen::SaveLayerOps layerOps(&bounds, &compositeOperationpBrush);
+                RSSaveLayerOps layerOps(&bounds, &compositeOperationpBrush);
                 rsCanvas_->SaveLayer(layerOps);
                 rsCanvas_->AttachBrush(imageBrush_);
                 rsCanvas_->DrawImage(*image, canvasImage.dx, canvasImage.dy, sampleOptions_);
@@ -273,7 +273,7 @@ void CanvasPaintMethod::DrawImage(
             } else {
                 RSBrush compositeOperationpBrush;
                 InitPaintBlend(compositeOperationpBrush);
-                rosen::SaveLayerOps layerOps(&bounds, &compositeOperationpBrush);
+                RSSaveLayerOps layerOps(&bounds, &compositeOperationpBrush);
                 rsCanvas_->SaveLayer(layerOps);
                 rsCanvas_->AttachBrush(imageBrush_);
                 rsCanvas_->DrawImageRect(*image, rect, sampleOptions_);
@@ -296,7 +296,7 @@ void CanvasPaintMethod::DrawImage(
             } else {
                 RSBrush compositeOperationpBrush;
                 InitPaintBlend(compositeOperationpBrush);
-                rosen::SaveLayerOps layerOps(&bounds, &compositeOperationpBrush);
+                RSSaveLayerOps layerOps(&bounds, &compositeOperationpBrush);
                 rsCanvas_->SaveLayer(layerOps);
                 rsCanvas_->AttachBrush(imageBrush_);
                 rsCanvas_->DrawImageRect(*image, srcRect, dstRect, sampleOptions_);
@@ -386,10 +386,10 @@ void CanvasPaintMethod::DrawPixelMap(RefPtr<PixelMap> pixelMap, const Ace::Canva
         RSRect rec = RSRect(canvasImage.dx, canvasImage.dy,
             canvasImage.dx + canvasImage.dWidth, canvasImage.dy + canvasImage.dHeight);
         RSPath path;
-        path.AddRect(rsRect);
+        path.AddRect(rec);
         PaintShadow(path, shadow_, rsCanvas, &imageBrush_, nullptr);
     }
-    auto recordingCanvas = static_cast<RSRecordingCanvas*>(rsCanvas.get());
+    auto recordingCanvas = static_cast<RSRecordingCanvas*>(rsCanvas);
     CHECK_NULL_VOID(recordingCanvas);
     const std::shared_ptr<Media::PixelMap> tempPixelMap = pixelMap->GetPixelMapSharedPtr();
     CHECK_NULL_VOID(tempPixelMap);
@@ -1228,7 +1228,7 @@ void CanvasPaintMethod::PaintShadow(const SkPath& path, const Shadow& shadow, Sk
 }
 #else
 void CanvasPaintMethod::PaintShadow(const RSPath& path, const Shadow& shadow, RSCanvas* canvas,
-    const RSBrush* brush, const RSPen* pen);
+    const RSBrush* brush, const RSPen* pen)
 {
 #ifdef ENABLE_ROSEN_BACKEND
     RosenDecorationPainter::PaintShadow(path, shadow, canvas, brush, pen);

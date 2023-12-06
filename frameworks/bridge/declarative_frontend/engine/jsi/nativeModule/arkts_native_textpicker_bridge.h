@@ -21,8 +21,6 @@
 namespace OHOS::Ace::NG {
 class TextpickerBridge {
 public:
-    static bool ParseJsIntegerArray(Local<JSValueRef> values, EcmaVM* vm, std::vector<uint32_t>& result);
-    static std::string GetStringFromJS(const EcmaVM* vm, const Local<JSValueRef>& value);
     static ArkUINativeModuleValue SetCanLoop(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetSelectedIndex(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetTextStyle(ArkUIRuntimeCallInfo* runtimeCallInfo);
@@ -37,12 +35,6 @@ public:
     static ArkUINativeModuleValue ResetDisappearTextStyle(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetDefaultPickerItemHeight(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetBackgroundColor(ArkUIRuntimeCallInfo* runtimeCallInfo);
-
-private:
-    static bool ParseDimensionVpNG(
-        const EcmaVM* vm, const Local<JSValueRef>& jsValue, CalcDimension& result, bool isSupportPercent);
-    static bool ParseDimensionNG(const EcmaVM* vm, const Local<JSValueRef>& jsValue, CalcDimension& result,
-        DimensionUnit defaultUnit, bool isSupportPercent);
 };
 }
 #endif  // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_ENGINE_JSI_NATIVEMODULE_ARKTS_NATIVE_TEXT_PICKER_BRIDGE_H

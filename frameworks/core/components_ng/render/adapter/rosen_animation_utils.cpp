@@ -45,6 +45,10 @@ Rosen::RSAnimationTimingProtocol OptionToTimingProtocol(const AnimationOption& o
                                   option.GetAnimationDirection() == AnimationDirection::ALTERNATE_REVERSE);
     timingProtocol.SetFillMode(static_cast<Rosen::FillMode>(option.GetFillMode()));
     timingProtocol.SetFinishCallbackType(ToAnimationFinishCallbackType(option.GetFinishCallbackType()));
+    auto rateRange = option.GetFrameRateRange();
+    if (rateRange) {
+        timingProtocol.SetFrameRateRange({ rateRange->min_, rateRange->max_, rateRange->preferred_ });
+    }
     return timingProtocol;
 }
 } // namespace
@@ -153,5 +157,16 @@ void AnimationUtils::ResumeAnimation(const std::shared_ptr<AnimationUtils::Anima
     for (auto& ani : animation->animations_) {
         ani->Resume();
     }
+}
+
+bool AnimationUtils::AnimationIsRunning(const std::shared_ptr<AnimationUtils::Animation>& animation)
+{
+    CHECK_NULL_RETURN(animation, false);
+    for (auto& ani : animation->animations_) {
+        if (ani->IsRunning() == true) {
+            return true;
+        }
+    }
+    return false;
 }
 } // namespace OHOS::Ace

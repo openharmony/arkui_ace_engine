@@ -136,6 +136,13 @@ bool PipelineContext::NeedSoftKeyboard()
     return isNeed;
 }
 
+RefPtr<PipelineContext> PipelineContext::GetContextByContainerId(int32_t containerId)
+{
+    auto preContainer = Container::GetContainer(containerId);
+    CHECK_NULL_RETURN(preContainer, nullptr);
+    return DynamicCast<PipelineContext>(preContainer->GetPipelineContext());
+}
+
 float PipelineContext::GetCurrentRootWidth()
 {
     auto context = GetCurrentContext();
@@ -398,6 +405,7 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
     } while (false);
 #endif
     ProcessDelayTasks();
+    DispatchDisplaySync(nanoTimestamp);
     FlushAnimation(nanoTimestamp);
     bool hasRunningAnimation = window_->FlushAnimation(nanoTimestamp);
     LOGD("FlushAnimation hasRunningAnimation = %{public}d", hasRunningAnimation);
@@ -480,28 +488,44 @@ void PipelineContext::ProcessDelayTasks()
         return;
     }
     auto currentTimeStamp = GetSysTimestamp();
-    for (auto iter = delayedTasks_.begin(); iter != delayedTasks_.end(); ++iter) {
-        if (iter->timeStamp + static_cast<int64_t>(iter->time) * MILLISECONDS_TO_NANOSECONDS <= currentTimeStamp) {
-            if (!iter->deleted && iter->task) {
-                iter->task();
-            }
-            iter->deleted = true;
+    auto delayedTasks = std::move(delayedTasks_);
+    auto result = std::remove_if(delayedTasks.begin(), delayedTasks.end(), [this, currentTimeStamp](const auto &task) {
+        if (task.timeStamp + static_cast<int64_t>(task.time) * MILLISECONDS_TO_NANOSECONDS > currentTimeStamp) {
+            delayedTasks_.emplace_back(task);
+            return true;
         }
-    }
-
-    for (auto iter = delayedTasks_.begin(); iter != delayedTasks_.end();) {
-        if (iter->deleted) {
-            delayedTasks_.erase(iter++);
-        } else {
-            ++iter;
+        return false;
+    });
+    delayedTasks.erase(result, delayedTasks.end());
+    std::for_each(delayedTasks.begin(), delayedTasks.end(), [this](auto &delayedTask) {
+        if (delayedTask.task) {
+            delayedTask.task();
         }
-    }
+    });
 }
 
 void PipelineContext::FlushFrameTrace()
 {
     if (FrameReport::GetInstance().GetEnable()) {
         FrameReport::GetInstance().FlushBegin();
+    }
+}
+
+void PipelineContext::DispatchDisplaySync(uint64_t nanoTimestamp)
+{
+    CHECK_RUN_ON(UI);
+    ACE_FUNCTION_TRACE();
+
+    GetOrCreateUIDisplaySyncManager()->SetVsyncPeriod(window_->GetVSyncPeriod());
+
+    if (FrameReport::GetInstance().GetEnable()) {
+        FrameReport::GetInstance().BeginFlushAnimation();
+    }
+
+    GetOrCreateUIDisplaySyncManager()->DispatchFunc(nanoTimestamp);
+
+    if (FrameReport::GetInstance().GetEnable()) {
+        FrameReport::GetInstance().EndFlushAnimation();
     }
 }
 
@@ -515,14 +539,6 @@ void PipelineContext::FlushAnimation(uint64_t nanoTimestamp)
 
     if (FrameReport::GetInstance().GetEnable()) {
         FrameReport::GetInstance().BeginFlushAnimation();
-    }
-
-    decltype(scheduleTasks_) temp(std::move(scheduleTasks_));
-    for (const auto& [id, weakTask] : temp) {
-        auto task = weakTask.Upgrade();
-        if (task) {
-            task->OnFrame(nanoTimestamp);
-        }
     }
 
     if (FrameReport::GetInstance().GetEnable()) {
@@ -1260,6 +1276,17 @@ bool PipelineContext::OnBackPressed()
         return true;
     }
 
+    auto textfieldManager = DynamicCast<TextFieldManagerNG>(PipelineBase::GetTextFieldManager());
+    if (textfieldManager && textfieldManager->OnBackPressed()) {
+        return true;
+    }
+
+#ifdef WINDOW_SCENE_SUPPORTED
+    if (uiExtensionManager_->OnBackPressed()) {
+        return true;
+    }
+#endif
+
     // if has popup, back press would hide popup and not trigger page back
     auto hasOverlay = false;
     taskExecutor_->PostSyncTask(
@@ -1277,17 +1304,6 @@ bool PipelineContext::OnBackPressed()
     if (hasOverlay) {
         return true;
     }
-
-    auto textfieldManager = DynamicCast<TextFieldManagerNG>(PipelineBase::GetTextFieldManager());
-    if (textfieldManager && textfieldManager->OnBackPressed()) {
-        return true;
-    }
-
-#ifdef WINDOW_SCENE_SUPPORTED
-    if (uiExtensionManager_->OnBackPressed()) {
-        return true;
-    }
-#endif
 
     auto result = false;
     taskExecutor_->PostSyncTask(
@@ -1539,6 +1555,14 @@ bool PipelineContext::CheckNeedAutoSave()
     auto pageNode = stageManager_->GetLastPage();
     CHECK_NULL_RETURN(pageNode, false);
     return pageNode->NeedRequestAutoSave();
+}
+
+bool PipelineContext::CheckPageFocus()
+{
+    CHECK_NULL_RETURN(stageManager_, true);
+    auto pageNode = stageManager_->GetLastPage();
+    CHECK_NULL_RETURN(pageNode, true);
+    return pageNode->GetFocusHub() && pageNode->GetFocusHub()->IsCurrentFocus();
 }
 
 void PipelineContext::NotifyFillRequestSuccess(AceAutoFillType autoFillType, RefPtr<ViewDataWrap> viewDataWrap)
@@ -2150,7 +2174,7 @@ void PipelineContext::ShowContainerTitle(bool isShow, bool hasDeco, bool needUpd
     CHECK_NULL_VOID(containerNode);
     auto containerPattern = containerNode->GetPattern<ContainerModalPattern>();
     CHECK_NULL_VOID(containerPattern);
-    containerPattern->ShowTitle(isShow, hasDeco);
+    containerPattern->ShowTitle(isShow, hasDeco, needUpdate);
 }
 
 void PipelineContext::UpdateTitleInTargetPos(bool isShow, int32_t height)

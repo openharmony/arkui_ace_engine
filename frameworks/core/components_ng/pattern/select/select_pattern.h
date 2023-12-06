@@ -191,6 +191,7 @@ public:
 private:
     void OnAttachToFrameNode() override;
     void OnModifyDone() override;
+    void OnAfterModifyDone() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
 
     bool HasRowNode() const

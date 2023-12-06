@@ -27,7 +27,16 @@ ArkUINativeModuleValue GridRowBridge::SetAlignItems(ArkUIRuntimeCallInfo* runtim
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
     if (secondArg->IsNumber()) {
-        GetArkUIInternalNodeAPI()->GetGridRowModifier().SetAlignItems(nativeNode, secondArg->Int32Value(vm));
+        int32_t alignItem = secondArg->Int32Value(vm);
+        if (alignItem == static_cast<int32_t>(OHOS::Ace::FlexAlign::FLEX_START) ||
+            alignItem == static_cast<int32_t>(OHOS::Ace::FlexAlign::FLEX_END) ||
+            alignItem == static_cast<int32_t>(OHOS::Ace::FlexAlign::CENTER) ||
+            alignItem == static_cast<int32_t>(OHOS::Ace::FlexAlign::STRETCH)) {
+            GetArkUIInternalNodeAPI()->GetGridRowModifier().SetAlignItems(nativeNode, alignItem);
+        } else if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)) {
+            GetArkUIInternalNodeAPI()->GetGridRowModifier().SetAlignItems(nativeNode,
+                static_cast<int32_t>(OHOS::Ace::FlexAlign::FLEX_START));
+        }
     } else {
         GetArkUIInternalNodeAPI()->GetGridRowModifier().ResetAlignItems(nativeNode);
     }

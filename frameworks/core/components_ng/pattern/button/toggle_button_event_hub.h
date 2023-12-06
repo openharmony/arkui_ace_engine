@@ -18,6 +18,9 @@
 
 #include "base/memory/ace_type.h"
 #include "base/utils/noncopyable.h"
+#include "core/common/recorder/event_recorder.h"
+#include "core/common/recorder/node_data_cache.h"
+#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/pattern/button/button_event_hub.h"
 
@@ -44,6 +47,19 @@ public:
         }
         if (changeEvent_) {
             changeEvent_(select);
+        }
+        if (Recorder::EventRecorder::Get().IsComponentRecordEnable()) {
+            Recorder::EventParamsBuilder builder;
+            auto host = GetFrameNode();
+            if (host) {
+                auto id = host->GetInspectorIdValue("");
+                builder.SetId(id).SetType(host->GetHostTag());
+                if (!id.empty()) {
+                    Recorder::NodeDataCache::Get().PutBool(id, select);
+                }
+            }
+            builder.SetChecked(select);
+            Recorder::EventRecorder::Get().OnChange(std::move(builder));
         }
     }
 

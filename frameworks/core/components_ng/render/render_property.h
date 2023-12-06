@@ -149,6 +149,7 @@ struct PointLightProperty {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(LightPosition, TranslateOptions);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(LightIntensity, float);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(LightIlluminated, uint32_t);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(IlluminatedBorderWidth, Dimension);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(Bloom, float);
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const;

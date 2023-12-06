@@ -135,10 +135,11 @@ ArkUINativeModuleValue TextInputBridge::SetCaretPosition(ArkUIRuntimeCallInfo *r
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
     void *nativeNode = firstArg->ToNativePointer(vm)->Value();
-    int32_t caretPosition = 0;
-    if (secondArg->IsInt()) {
-        caretPosition = secondArg->Int32Value(vm);
+    if (secondArg->IsInt() && secondArg->Int32Value(vm) >= 0) {
+        int32_t caretPosition = secondArg->Int32Value(vm);
         GetArkUIInternalNodeAPI()->GetTextInputModifier().SetTextInputCaretPosition(nativeNode, caretPosition);
+    } else {
+        GetArkUIInternalNodeAPI()->GetTextInputModifier().ResetTextInputCaretPosition(nativeNode);
     }
     return panda::JSValueRef::Undefined(vm);
 }
@@ -276,13 +277,11 @@ ArkUINativeModuleValue TextInputBridge::SetStyle(ArkUIRuntimeCallInfo *runtimeCa
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
     void *nativeNode = firstArg->ToNativePointer(vm)->Value();
-    auto str = secondArg->ToString(vm)->ToString();
-    if (str == "Inline") {
+    if (secondArg->IsString() && secondArg->ToString(vm)->ToString() == "Inline") {
         GetArkUIInternalNodeAPI()->GetTextInputModifier().SetTextInputStyle(nativeNode,
             static_cast<int32_t>(InputStyle::INLINE));
     } else {
-        GetArkUIInternalNodeAPI()->GetTextInputModifier().SetTextInputStyle(nativeNode,
-            static_cast<int32_t>(InputStyle::DEFAULT));
+        GetArkUIInternalNodeAPI()->GetTextInputModifier().ResetTextInputStyle(nativeNode);
     }
     return panda::JSValueRef::Undefined(vm);
 }
@@ -360,9 +359,8 @@ ArkUINativeModuleValue TextInputBridge::SetCaretStyle(ArkUIRuntimeCallInfo *runt
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
     void *nativeNode = firstArg->ToNativePointer(vm)->Value();
-
     CalcDimension width;
-    ArkUILengthType length = {nullptr, 0.0, static_cast<int8_t>(DimensionUnit::VP)};
+    struct ArkUILengthType length = { nullptr, 0.0, static_cast<int8_t>(DimensionUnit::VP) };
     if (!ArkTSUtils::ParseJsDimensionVpNG(vm, secondArg, width, false) || LessNotEqual(width.Value(), 0.0)) {
         GetArkUIInternalNodeAPI()->GetTextInputModifier().ResetTextInputCaretStyle(nativeNode);
     } else {
@@ -511,7 +509,7 @@ ArkUINativeModuleValue TextInputBridge::SetFontSize(ArkUIRuntimeCallInfo *runtim
     void *nativeNode = firstArg->ToNativePointer(vm)->Value();
 
     CalcDimension fontSize;
-    ArkUILengthType value;
+    ArkUILengthType value{ nullptr, 0.0, static_cast<int8_t>(DimensionUnit::FP) };
     if (!ArkTSUtils::ParseJsDimensionNG(vm, secondArg, fontSize, DimensionUnit::FP, false)) {
         GetArkUIInternalNodeAPI()->GetTextInputModifier().ResetTextInputFontSize(nativeNode);
     } else {
@@ -638,8 +636,7 @@ ArkUINativeModuleValue TextInputBridge::SetPlaceholderFont(ArkUIRuntimeCallInfo 
     Local<JSValueRef> jsFamily = runtimeCallInfo->GetCallArgRef(3);
     Local<JSValueRef> jsStyle = runtimeCallInfo->GetCallArgRef(4);
     void *nativeNode = firstArg->ToNativePointer(vm)->Value();
-
-    struct ArkUILengthType length = {nullptr, 0.0, static_cast<int8_t>(DimensionUnit::VP)};
+    ArkUILengthType length{ nullptr, 0.0, static_cast<int8_t>(DimensionUnit::VP) };
     CalcDimension size;
     if (!ArkTSUtils::ParseJsDimensionFp(vm, jsSize, size) || size.Unit() == DimensionUnit::PERCENT) {
         auto theme = Framework::JSViewAbstract::GetTheme<TextFieldTheme>();
@@ -665,33 +662,29 @@ ArkUINativeModuleValue TextInputBridge::SetPlaceholderFont(ArkUIRuntimeCallInfo 
     }
 
     int32_t style = -1;
-    if (!jsStyle->IsNull() && !jsStyle->IsUndefined()) {
+    if (jsStyle->IsNumber()) {
         style = jsStyle->ToNumber(vm)->Value();
     }
 
     struct ArkUIPlaceholderFontType placeholderFont;
+    placeholderFont.size = &length;
+    placeholderFont.weight = weight.c_str();
+    placeholderFont.style = style;
     std::vector<std::string> fontFamilies;
     if (!ArkTSUtils::ParseJsFontFamilies(vm, jsFamily, fontFamilies)) {
-        placeholderFont.size = &length;
-        placeholderFont.weight = weight.c_str();
         placeholderFont.fontFamilies = nullptr;
         placeholderFont.length = 0;
-        placeholderFont.style = style;
-        GetArkUIInternalNodeAPI()->GetTextInputModifier().SetTextInputPlaceholderFont(
-            nativeNode, &placeholderFont);
     } else {
         auto families = std::make_unique<char* []>(fontFamilies.size());
         for (uint32_t i = 0; i < fontFamilies.size(); i++) {
             families[i] = const_cast<char*>(fontFamilies.at(i).c_str());
         }
-        placeholderFont.size = &length;
-        placeholderFont.weight = weight.c_str();
         placeholderFont.fontFamilies = const_cast<const char**>(families.get());
         placeholderFont.length = fontFamilies.size();
-        placeholderFont.style = style;
-        GetArkUIInternalNodeAPI()->GetTextInputModifier().SetTextInputPlaceholderFont(nativeNode,
-            &placeholderFont);
     }
+    
+    GetArkUIInternalNodeAPI()->GetTextInputModifier().SetTextInputPlaceholderFont(
+        nativeNode, &placeholderFont);
     return panda::JSValueRef::Undefined(vm);
 }
 
