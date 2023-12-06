@@ -68,6 +68,8 @@ public:
 
     bool OnBackPressed();
 
+    void UpdateScrollableParentViewPort(const RefPtr<FrameNode>& node);
+
 private:
     void ScrollToSafeAreaHelper(const SafeAreaInsets::Inset& bottomInset);
     RefPtr<FrameNode> FindScrollableOfFocusedTextField(const RefPtr<FrameNode>& textField);

@@ -105,4 +105,18 @@ void TextFieldManagerNG::SetHeight(float height)
 {
     height_ = height + RESERVE_BOTTOM_HEIGHT.ConvertToPx();
 }
+
+void TextFieldManagerNG::UpdateScrollableParentViewPort(const RefPtr<FrameNode>& node)
+{
+    CHECK_NULL_VOID(node);
+    auto scrollableNode = FindScrollableOfFocusedTextField(node);
+    CHECK_NULL_VOID(scrollableNode);
+    auto scrollPattern = scrollableNode->GetPattern<ScrollablePattern>();
+    CHECK_NULL_VOID(scrollPattern);
+    if (scrollPattern->GetAxis() == Axis::HORIZONTAL) {
+        return;
+    }
+    auto scrollableRect = scrollableNode->GetTransformRectRelativeToWindow();
+    scrollableNode->SetViewPort(scrollableRect);
+}
 } // namespace OHOS::Ace::NG
