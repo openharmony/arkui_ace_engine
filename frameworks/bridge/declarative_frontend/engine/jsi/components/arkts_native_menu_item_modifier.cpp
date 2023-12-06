@@ -30,6 +30,7 @@ const int SIZE_OF_FONT_INFO = 3;
 const int POS_0 = 0;
 const int POS_1 = 1;
 const int POS_2 = 2;
+const int POS_3 = 3;
 static const char* ERR_CODE = "-1";
 const std::string DEFAULT_SIZE = "24.0vp";
 const std::string DEFAULT_FONT_WEIGHT = "normal";
@@ -41,7 +42,6 @@ void SetMenuItemSelected(NodeHandle node, bool value)
     CHECK_NULL_VOID(frameNode);
     MenuItemModelNG::SetSelected(frameNode, value);
 }
-
 void ResetMenuItemSelected(NodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -72,8 +72,7 @@ void ResetContentFontColor(NodeHandle node)
     CHECK_NULL_VOID(frameNode);
     MenuItemModelNG::SetFontColor(frameNode, Color(DEFAULT_MENUITEM_FONTCOLOR_COLOR));
 }
-
-void SetLabelFont(NodeHandle node, const char* fontInfo, int32_t styleVal)
+void SetLabelFont(NodeHandle node, const char* fontInfo, int32_t unit)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -86,21 +85,21 @@ void SetLabelFont(NodeHandle node, const char* fontInfo, int32_t styleVal)
     }
 
     if (res[POS_0] != ERR_CODE) {
-        CalcDimension fontSize = StringUtils::StringToCalcDimension(res[POS_0], false);      
+        CalcDimension fontSize = CalcDimension(res[POS_0], static_cast<OHOS::Ace::DimensionUnit>(unit));
         MenuItemModelNG::SetLabelFontSize(frameNode, fontSize);
     }
 
     if (res[POS_1] != ERR_CODE) {
-        MenuItemModelNG::SetLabelFontWeight(
-            frameNode, StringUtils::StringToFontWeight(res[POS_1], FontWeight::NORMAL));
+        MenuItemModelNG::SetLabelFontWeight(frameNode, Framework::ConvertStrToFontWeight(res[POS_1]));
     }
 
     if (res[POS_2] != ERR_CODE) {
-        MenuItemModelNG::SetLabelFontFamily(frameNode, Framework::ConvertStrToFontFamilies(res[POS_2]));
+        MenuItemModelNG::SetLabelFontStyle(frameNode, Framework::ConvertStrToFontStyle(res[POS_2]));
     }
 
-    auto style = static_cast<Ace::FontStyle>(styleVal);
-    MenuItemModelNG::SetLabelFontStyle(frameNode, style);
+    if (res[POS_3] != ERR_CODE) {
+        MenuItemModelNG::SetLabelFontFamily(frameNode, Framework::ConvertStrToFontFamilies(res[POS_3]));
+    }
 }
 void ResetLabelFont(NodeHandle node)
 {
@@ -118,7 +117,7 @@ void ResetLabelFont(NodeHandle node)
     MenuItemModelNG::SetLabelFontFamily(frameNode, fontFamily);
     MenuItemModelNG::SetLabelFontStyle(frameNode, fontStyle);
 }
-void SetContentFont(NodeHandle node, const char* fontInfo, int32_t styleVal)
+void SetContentFont(NodeHandle node, const char* fontInfo, int32_t unit)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -126,28 +125,26 @@ void SetContentFont(NodeHandle node, const char* fontInfo, int32_t styleVal)
     std::vector<std::string> res;
     std::string fontValues = std::string(fontInfo);
     StringUtils::StringSplitter(fontValues, DELIMITER, res);
-    if (res.size() == 0 || res.size() != SIZE_OF_FONT_INFO) {
+    if (res.empty() || res.size() != SIZE_OF_FONT_INFO) {
         return;
     }
 
     if (res[POS_0] != ERR_CODE) {
-        CalcDimension fontSize;
-        fontSize = StringUtils::StringToCalcDimension(res[POS_0], false);        
+        CalcDimension fontSize = CalcDimension(res[POS_0], static_cast<OHOS::Ace::DimensionUnit>(unit));
         MenuItemModelNG::SetFontSize(frameNode, fontSize);
     }
 
     if (res[POS_1] != ERR_CODE) {
-        std::string weight;
-        MenuItemModelNG::SetFontWeight(
-            frameNode, StringUtils::StringToFontWeight(res[POS_1], FontWeight::NORMAL));
+        MenuItemModelNG::SetFontWeight(frameNode, Framework::ConvertStrToFontWeight(res[POS_1]));
     }
 
     if (res[POS_2] != ERR_CODE) {
-        MenuItemModelNG::SetFontFamily(frameNode, Framework::ConvertStrToFontFamilies(res[POS_2]));
+        MenuItemModelNG::SetFontStyle(frameNode, Framework::ConvertStrToFontStyle(res[POS_2]));
     }
 
-    auto style = static_cast<Ace::FontStyle>(styleVal);
-    MenuItemModelNG::SetFontStyle(frameNode, style);
+    if (res[POS_3] != ERR_CODE) {
+        MenuItemModelNG::SetFontFamily(frameNode, Framework::ConvertStrToFontFamilies(res[POS_3]));
+    }
 }
 void ResetContentFont(NodeHandle node)
 {

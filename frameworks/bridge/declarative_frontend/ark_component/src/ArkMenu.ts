@@ -30,14 +30,35 @@ class MenuFontModifier extends Modifier<ArkFont> {
   }
 }
 
-class RadiusModifier extends Modifier<ArkBorderRadius> {
+class RadiusModifier extends ModifierWithKey<Dimension | BorderRadiuses> {
   static identity: Symbol = Symbol('radius');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
       GetUINativeModule().menu.resetRadius(node);
     }
     else {
-      GetUINativeModule().menu.setRadius(node, this.value.topLeft, this.value.topRight, this.value.bottomLeft, this.value.bottomRight);
+      if (isNumber(this.value) || isString(this.value) || isResource(this.value)) {
+        GetUINativeModule().menu.setRadius(node, this.value, this.value, this.value, this.value);
+      } else {
+        GetUINativeModule().menu.setRadius(node,
+          (this.value as BorderRadiuses).topLeft,
+          (this.value as BorderRadiuses).topRight,
+          (this.value as BorderRadiuses).bottomLeft,
+          (this.value as BorderRadiuses).bottomRight);
+      }
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    if (isResource(this.stageValue) && isResource(this.value)) {
+      return !isResourceEqual(this.stageValue, this.value);
+    } else if (!isResource(this.stageValue) && !isResource(this.value)) {
+      return !((this.stageValue as BorderRadiuses).topLeft === (this.value as BorderRadiuses).topLeft &&
+        (this.stageValue as BorderRadiuses).topRight === (this.value as BorderRadiuses).topRight &&
+        (this.stageValue as BorderRadiuses).bottomLeft === (this.value as BorderRadiuses).bottomLeft &&
+        (this.stageValue as BorderRadiuses).bottomRight === (this.value as BorderRadiuses).bottomRight);
+    } else {
+      return true;
     }
   }
 }
@@ -61,21 +82,8 @@ class ArkMenuComponent extends ArkComponent implements MenuAttribute {
     modifierWithKey(this._modifiersWithKeys, MenuFontColorModifier.identity, MenuFontColorModifier, value);
     return this;
   }
-  radius(value: any): MenuAttribute {
-    let radius = new ArkBorderRadius();
-    if (typeof value === 'number' || typeof value === 'string') {
-      radius.topLeft = value;
-      radius.topRight = value;
-      radius.bottomLeft = value;
-      radius.bottomRight = value;
-    }
-    else {
-      radius.topLeft = value?.topLeft;
-      radius.topRight = value?.topRight;
-      radius.bottomLeft = value?.bottomLeft;
-      radius.bottomRight = value?.bottomRight;
-    }
-    modifier(this._modifiers, RadiusModifier, radius);
+  radius(value: any): this {
+    modifierWithKey(this._modifiersWithKeys, RadiusModifier.identity, RadiusModifier, value);
     return this;
   }
   monopolizeEvents(monopolize: boolean): this {

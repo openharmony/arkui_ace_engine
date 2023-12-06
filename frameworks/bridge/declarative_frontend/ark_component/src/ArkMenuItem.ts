@@ -10,49 +10,105 @@ class MenuItemSelectedModifier extends Modifier<boolean> {
     }
   }
 }
-class LabelFontColorModifier extends Modifier<number | undefined> {
-  static identity: Symbol = Symbol('labelfontColor');
-  applyPeer(node: KNode, reset: boolean) {
+
+class LabelFontColorModifier extends ModifierWithKey<ResourceColor> {
+  static identity: Symbol = Symbol("labelfontColor");
+  applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
       GetUINativeModule().menuitem.resetLabelFontColor(node);
-    }
-    else {
+    } else {
       GetUINativeModule().menuitem.setLabelFontColor(node, this.value);
     }
   }
-}
-class ContentFontColorModifier extends Modifier<number | undefined> {
-  static identity: Symbol = Symbol('contentfontColor');
-  applyPeer(node: KNode, reset: boolean) {
-    if (reset) {
-      GetUINativeModule().menuitem.resetContentFontColor(node);
-    }
-    else {
-      GetUINativeModule().menuitem.setContentFontColor(node, this.value);
+
+  checkObjectDiff(): boolean {
+    if (isResource(this.stageValue) && isResource(this.value)) {
+      return !isResourceEqual(this.stageValue, this.value);
+    } else {
+      return true;
     }
   }
 }
 
-class LabelFontModifier extends Modifier<ArkFont> {
-  static identity: Symbol = Symbol('labelFont');
+class ContentFontColorModifier extends ModifierWithKey<ResourceColor> {
+  static identity: Symbol = Symbol("contentfontColor");
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      GetUINativeModule().menuitem.resetContentFontColor(node);
+    } else {
+      GetUINativeModule().menuitem.setContentFontColor(node, this.value);
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    if (isResource(this.stageValue) && isResource(this.value)) {
+      return !isResourceEqual(this.stageValue, this.value);
+    } else {
+      return true;
+    }
+  }
+}
+
+class LabelFontModifier extends ModifierWithKey<Font> {
+  static identity: Symbol = Symbol("labelFont");
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
       GetUINativeModule().menuitem.resetLabelFont(node);
     }
     else {
-      GetUINativeModule().menuitem.setLabelFont(node, this.value.size, this.value.weight, this.value.family, this.value.style);
+      const valueType: string = typeof this.value;
+      if (valueType === "number" || valueType === "string" || isResource(this.value)) {
+        GetUINativeModule().menuitem.setLabelFont(node, this.value, this.value, this.value, this.value);
+      } else {
+        GetUINativeModule().menuitem.setLabelFont(node, (this.value as Font).size,
+          (this.value as Font).weight, (this.value as Font).family,
+          (this.value as Font).style);
+      }
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    if (isResource(this.stageValue) && isResource(this.value)) {
+      return !isResourceEqual(this.stageValue, this.value);
+    } else if (!isResource(this.stageValue) && !isResource(this.value)) {
+      return !((this.stageValue as Font).size === (this.value as Font).size &&
+        (this.stageValue as Font).weight === (this.value as Font).weight &&
+        (this.stageValue as Font).family === (this.value as Font).family &&
+        (this.stageValue as Font).style === (this.value as Font).style);
+    } else {
+      return true;
     }
   }
 }
 
-class ContentFontModifier extends Modifier<ArkFont> {
-  static identity: Symbol = Symbol('contentFont');
+class ContentFontModifier extends ModifierWithKey<Font> {
+  static identity: Symbol = Symbol("contentFont");
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
       GetUINativeModule().menuitem.resetContentFont(node);
     }
     else {
-      GetUINativeModule().menuitem.setContentFont(node, this.value.size, this.value.weight, this.value.family, this.value.style);
+      const valueType: string = typeof this.value;
+      if (valueType === "number" || valueType === "string" || isResource(this.value)) {
+        GetUINativeModule().menuitem.setContentFont(node, this.value, this.value, this.value, this.value);
+      } else {
+        GetUINativeModule().menuitem.setContentFont(node, (this.value as Font).size,
+          (this.value as Font).weight, (this.value as Font).family,
+          (this.value as Font).style);
+      }
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    if (isResource(this.stageValue) && isResource(this.value)) {
+      return !isResourceEqual(this.stageValue, this.value);
+    } else if (!isResource(this.stageValue) && !isResource(this.value)) {
+      return !((this.stageValue as Font).size === (this.value as Font).size &&
+        (this.stageValue as Font).weight === (this.value as Font).weight &&
+        (this.stageValue as Font).family === (this.value as Font).family &&
+        (this.stageValue as Font).style === (this.value as Font).style);
+    } else {
+      return true;
     }
   }
 }
@@ -72,44 +128,20 @@ class ArkMenuItemComponent extends ArkComponent implements MenuItemAttribute {
   onChange(callback: (selected: boolean) => void): MenuItemAttribute {
     throw new Error('Method not implemented.');
   }
-  contentFont(value: Font): MenuItemAttribute {
-    let font = new ArkFont();
-    if (isObject(value)) {
-      font.setSize(value.size);
-      font.parseFontWeight(value.weight);
-      font.setFamily(value.family);
-      font.setStyle(value.style);
-    }
-    modifier(this._modifiers, ContentFontModifier, font);
+  contentFont(value: Font): this {
+    modifierWithKey(this._modifiersWithKeys, ContentFontModifier.identity, ContentFontModifier, value);
     return this;
   }
   contentFontColor(value: ResourceColor): this {
-    let arkColor = new ArkColor();
-    if (arkColor.parseColorValue(value)) {
-      modifier(this._modifiers, ContentFontColorModifier, arkColor.color);
-    } else {
-      modifier(this._modifiers, ContentFontColorModifier, undefined);
-    }
+    modifierWithKey(this._modifiersWithKeys, ContentFontColorModifier.identity, ContentFontColorModifier, value);
     return this;
   }
-  labelFont(value: Font): MenuItemAttribute {
-    let font = new ArkFont();
-    if (isObject(value)) {
-      font.setSize(value.size);
-      font.parseFontWeight(value.weight);
-      font.setFamily(value.family);
-      font.setStyle(value.style);
-    }
-    modifier(this._modifiers, LabelFontModifier, font);
+  labelFont(value: Font): this {
+    modifierWithKey(this._modifiersWithKeys, LabelFontModifier.identity, LabelFontModifier, value);
     return this;
   }
   labelFontColor(value: ResourceColor): this {
-    let arkColor = new ArkColor();
-    if (arkColor.parseColorValue(value)) {
-      modifier(this._modifiers, LabelFontColorModifier, arkColor.color);
-    } else {
-      modifier(this._modifiers, LabelFontColorModifier, undefined);
-    }
+    modifierWithKey(this._modifiersWithKeys, LabelFontColorModifier.identity, LabelFontColorModifier, value);
     return this;
   }
 }
