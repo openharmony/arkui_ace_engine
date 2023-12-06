@@ -1209,9 +1209,6 @@ void GridPattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const
     ScrollablePattern::ToJsonValue(json);
     json->Put("multiSelectable", multiSelectable_ ? "true" : "false");
     json->Put("supportAnimation", supportAnimation_ ? "true" : "false");
-    auto JsonEdgeEffectOptions = JsonUtil::Create(true);
-    JsonEdgeEffectOptions->Put("alwaysEnabled", GetAlwaysEnabled());
-    json->Put("edgeEffectOptions", JsonEdgeEffectOptions);
 }
 
 void GridPattern::InitOnKeyEvent(const RefPtr<FocusHub>& focusHub)
