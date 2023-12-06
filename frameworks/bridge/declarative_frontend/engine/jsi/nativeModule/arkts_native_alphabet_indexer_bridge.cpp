@@ -26,21 +26,14 @@ constexpr int NUM_2 = 2;
 constexpr int NUM_3 = 3;
 constexpr int NUM_4 = 4;
 const std::string FORMAT_FONT = "%s|%s|%s";
+const std::string DEFAULT_FONT_SIZE = "12fp";
+const std::string DEFAULT_FONT_WEIGHT = "400";
+const std::string DEFAULT_FAMILY = "HarmonyOS Sans";
+constexpr double DEFAULT_POPUPITEMFONT_SIZE = 24.0;
+constexpr Dimension DEFAULT_FONT_SIZE_VAL = 12.0_fp;
+const std::string DEFAULT_POPUP_ITEM_FONT_WEIGHT = "medium";
 constexpr Dimension DEFAULT_POPUP_POSITION_X = 60.0_vp;
 constexpr Dimension DEFAULT_POPUP_POSITION_Y = 48.0_vp;
-bool ParseJsDimensionFp(const EcmaVM* vm, const Local<JSValueRef>& value, CalcDimension& result)
-{
-    if (value->IsNumber()) {
-        result = CalcDimension(value->ToNumber(vm)->Value(), DimensionUnit::FP);
-        return true;
-    }
-    if (value->IsString()) {
-        result = StringUtils::StringToCalcDimension(value->ToString(vm)->ToString(), false, DimensionUnit::FP);
-        return true;
-    }
-    // resource ignore by design
-    return false;
-}
 
 bool ParseJsInteger(const EcmaVM* vm, const Local<JSValueRef>& value, int32_t& result)
 {
@@ -75,13 +68,21 @@ ArkUINativeModuleValue AlphabetIndexerBridge::SetPopupItemFont(ArkUIRuntimeCallI
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
     Local<JSValueRef> thirdArg = runtimeCallInfo->GetCallArgRef(NUM_2);
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+    CalcDimension fontSizeData;
     CalcDimension fontSize;
-    if (!ParseJsDimensionFp(vm, secondArg, fontSize) || thirdArg->IsNull()) {
-        GetArkUIInternalNodeAPI()->GetAlphabetIndexerModifier().ResetPopupItemFont(nativeNode);
+    if (ArkTSUtils::ParseJsDimensionFp(vm, secondArg, fontSizeData, false) && !fontSizeData.IsNegative()) {
+        fontSize = fontSizeData;
     } else {
-        GetArkUIInternalNodeAPI()->GetAlphabetIndexerModifier().SetPopupItemFont(nativeNode, fontSize.Value(),
-            static_cast<int>(fontSize.Unit()), thirdArg->ToString(vm)->ToString().c_str());
+        fontSize.SetValue(DEFAULT_POPUPITEMFONT_SIZE);
+        fontSize.SetUnit(DimensionUnit::FP);
     }
+    std::string weight = DEFAULT_POPUP_ITEM_FONT_WEIGHT;
+    if (thirdArg->IsNumber() && thirdArg->Int32Value(vm) >= 0) {
+        weight = std::to_string(thirdArg->Int32Value(vm));
+    }
+    ArkTSUtils::ParseJsString(vm, thirdArg, weight);
+    GetArkUIInternalNodeAPI()->GetAlphabetIndexerModifier().SetPopupItemFont(
+        nativeNode, fontSize.Value(), static_cast<int>(fontSize.Unit()), weight.c_str());
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -108,16 +109,27 @@ ArkUINativeModuleValue AlphabetIndexerBridge::SetSelectedFont(ArkUIRuntimeCallIn
     if (secondArg->IsUndefined() && thirdArg->IsUndefined() && fourthArg->IsUndefined() && fifthArg->IsUndefined()) {
         GetArkUIInternalNodeAPI()->GetAlphabetIndexerModifier().ResetSelectedFont(nativeNode);
     }
-    std::string fontSize = "-1";
-    std::string weight = "-1";
-    std::string fontFamily = "-1";
+    CalcDimension fontSizeData(DEFAULT_FONT_SIZE_VAL);
+    std::string fontSize = fontSizeData.ToString();
+    if (ArkTSUtils::ParseJsDimensionFp(vm, secondArg, fontSizeData) && !fontSizeData.IsNegative() &&
+        fontSizeData.Unit() != DimensionUnit::PERCENT) {
+        fontSize = fontSizeData.ToString();
+    }
+    std::string weight = "normal";
+    if (thirdArg->IsString() || thirdArg->IsNumber()) {
+        weight = thirdArg->ToString(vm)->ToString();
+    }
+    std::string fontFamily = DEFAULT_FAMILY;
+    std::vector<std::string> fontFamilies;
+    if (ArkTSUtils::ParseJsFontFamilies(vm, fourthArg, fontFamilies)) {
+        fontFamily = fourthArg->ToString(vm)->ToString();
+    }
     int32_t styleVal = 0;
-    fontSize = secondArg->ToString(vm)->ToString();
-    weight = thirdArg->ToString(vm)->ToString();
-    fontFamily = fourthArg->ToString(vm)->ToString();
+    if (fifthArg->IsNumber()) {
+        styleVal = fifthArg->Int32Value(vm);
+    }
     std::string fontInfo =
         StringUtils::FormatString(FORMAT_FONT.c_str(), fontSize.c_str(), weight.c_str(), fontFamily.c_str());
-    styleVal = fifthArg->Int32Value(vm);
     GetArkUIInternalNodeAPI()->GetAlphabetIndexerModifier().SetSelectedFont(nativeNode, fontInfo.c_str(), styleVal);
     return panda::JSValueRef::Undefined(vm);
 }
@@ -182,16 +194,27 @@ ArkUINativeModuleValue AlphabetIndexerBridge::SetFont(ArkUIRuntimeCallInfo* runt
     if (secondArg->IsUndefined() && thirdArg->IsUndefined() && fourthArg->IsUndefined() && fifthArg->IsUndefined()) {
         GetArkUIInternalNodeAPI()->GetAlphabetIndexerModifier().ResetAlphabetIndexerFont(nativeNode);
     }
-    std::string fontSize = "-1";
-    std::string weight = "-1";
-    std::string fontFamily = "-1";
+    CalcDimension fontSizeData(DEFAULT_FONT_SIZE_VAL);
+    std::string fontSize = fontSizeData.ToString();
+    if (ArkTSUtils::ParseJsDimensionFp(vm, secondArg, fontSizeData) && !fontSizeData.IsNegative() &&
+        fontSizeData.Unit() != DimensionUnit::PERCENT) {
+        fontSize = fontSizeData.ToString();
+    }
+    std::string weight = "normal";
+    if (thirdArg->IsString() || thirdArg->IsNumber()) {
+        weight = thirdArg->ToString(vm)->ToString();
+    }
+    std::string fontFamily = DEFAULT_FAMILY;
+    std::vector<std::string> fontFamilies;
+    if (ArkTSUtils::ParseJsFontFamilies(vm, fourthArg, fontFamilies)) {
+        fontFamily = fourthArg->ToString(vm)->ToString();
+    }
     int32_t styleVal = 0;
-    fontSize = secondArg->ToString(vm)->ToString();
-    weight = thirdArg->ToString(vm)->ToString();
-    fontFamily = fourthArg->ToString(vm)->ToString();
+    if (fifthArg->IsNumber()) {
+        styleVal = fifthArg->Int32Value(vm);
+    }
     std::string fontInfo =
         StringUtils::FormatString(FORMAT_FONT.c_str(), fontSize.c_str(), weight.c_str(), fontFamily.c_str());
-    styleVal = fifthArg->Int32Value(vm);
     GetArkUIInternalNodeAPI()->GetAlphabetIndexerModifier().SetAlphabetIndexerFont(
         nativeNode, fontInfo.c_str(), styleVal);
     return panda::JSValueRef::Undefined(vm);
