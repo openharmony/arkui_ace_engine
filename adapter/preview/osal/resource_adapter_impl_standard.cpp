@@ -156,7 +156,7 @@ RefPtr<ResourceAdapter> ResourceAdapter::CreateNewResourceAdapter(
     return nullptr;
 }
 
-void ResourceAdapterImpl::UpdateConfig(const ResourceConfiguration& config)
+void ResourceAdapterImpl::UpdateConfig(const ResourceConfiguration& config, bool themeFlag)
 {
     auto resConfig = ConvertConfigToGlobal(config);
     LOGI("UpdateConfig ori=%{public}d, dpi=%{public}f, device=%{public}d", resConfig->GetDirection(),
