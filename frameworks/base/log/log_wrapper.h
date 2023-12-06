@@ -146,6 +146,7 @@ enum class AceLogTag : uint8_t {
     ACE_KEYBOARD,
     ACE_UIEVENT,
     ACE_DISPLAY_SYNC,
+    ACE_RESOURCE
 };
 
 enum class LogDomain : uint32_t {
