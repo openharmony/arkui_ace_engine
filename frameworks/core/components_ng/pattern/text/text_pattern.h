@@ -371,7 +371,7 @@ public:
                 return;
             case SelectOverlayMenuId::CAMERA_INPUT:
                 HandleOnCameraInput();
-                return;                
+                return;
             default:
                 return;
         }

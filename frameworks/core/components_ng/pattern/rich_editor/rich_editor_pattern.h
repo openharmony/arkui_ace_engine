@@ -332,26 +332,7 @@ public:
     void HandleOnCameraInput() override;
 
 private:
-    void UpdateSelectMenuInfo(bool hasData, SelectOverlayInfo& selectInfo, bool isCopyAll)
-    {
-        auto hasValue = (static_cast<int32_t>(GetWideText().length()) + imageCount_) > 0;
-        bool isShowItem = copyOption_ != CopyOptions::None;
-        selectInfo.menuInfo.showCopy = isShowItem && hasValue && textSelector_.IsValid() &&
-                                       !textSelector_.StartEqualToDest();
-        selectInfo.menuInfo.showCut = isShowItem && hasValue && textSelector_.IsValid() &&
-                                      !textSelector_.StartEqualToDest();
-        selectInfo.menuInfo.showCopyAll = !isCopyAll && hasValue;
-        selectInfo.menuInfo.showPaste = hasData;
-        selectInfo.menuInfo.menuIsShow = hasValue || hasData;
-        bool isSupportCameraInput = false;
-#if defined(ENABLE_STANDARD_INPUT)
-        auto inputMethod = MiscServices::InputMethodController::GetInstance();
-        isSupportCameraInput =
-            inputMethod && inputMethod->IsInputTypeSupported(MiscServices::InputType::CAMERA_INPUT);
-#endif
-        selectInfo.menuInfo.showCameraInput = !IsSelected() && isSupportCameraInput;
-        selectMenuInfo_ = selectInfo.menuInfo;
-    }
+    void UpdateSelectMenuInfo(bool hasData, SelectOverlayInfo& selectInfo, bool isCopyAll);
     void UpdateSelectionType(RichEditorSelection& selection);
     std::shared_ptr<SelectionMenuParams> GetMenuParams(RichEditorResponseType responseType, RichEditorType type);
     void HandleOnPaste() override;
