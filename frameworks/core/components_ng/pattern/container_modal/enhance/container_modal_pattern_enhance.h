@@ -26,21 +26,22 @@ public:
     ~ContainerModalPatternEnhance() override = default;
     void OnWindowFocused() override;
     void OnWindowUnfocused() override;
-    virtual void SetContainerButtonHide(bool hideSplit, bool hideMaximize, bool hideMinimize) override;
+    void OnWindowForceUnfocused() override;
+    void UpdateTitleInTargetPos(bool isShow, int32_t height);
+    void SetContainerButtonHide(bool hideSplit, bool hideMaximize, bool hideMinimize) override;
 
 protected:
-    virtual RefPtr<UINode> GetTitleItemByIndex(const RefPtr<FrameNode>& titleNode, int32_t originIndex) override;
-    virtual void ChangeFloatingTitle(const RefPtr<FrameNode>& floatingNode, bool isFocus) override;
+    RefPtr<UINode> GetTitleItemByIndex(const RefPtr<FrameNode>& controlButtonsNode, int32_t originIndex) override;
+    void ChangeFloatingTitle(bool isFocus) override;
 
-    virtual void ChangeTitle(const RefPtr<FrameNode>& titleNode, bool isFocus) override;
+    void ChangeCustomTitle(bool isFocus) override;
 
-    virtual void ChangeTitleButtonIcon(
+    void ChangeControlButtons(bool isFocus) override;
+
+    void ChangeTitleButtonIcon(
         const RefPtr<FrameNode>& buttonNode, InternalResource::ResourceId icon, bool isFocus) override;
 
-    virtual bool CanHideFloatingTitle() override;
-
-private:
-    static OffsetF RecalculateMenuOffset(OffsetF menuPosition);
+    bool CanHideFloatingTitle() override;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_CONTAINER_MODAL_CONTAINER_MODAL_PATTERN_ENHANCE_H

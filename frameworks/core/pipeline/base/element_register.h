@@ -113,9 +113,8 @@ public:
         return nextUniqueElementId_++;
     }
 
-    RefPtr<NG::GeometryTransition> GetOrCreateGeometryTransition(const std::string& id,
-                                                                 const WeakPtr<NG::FrameNode>& frameNode,
-                                                                 bool followWithoutTransition = false);
+    RefPtr<NG::GeometryTransition> GetOrCreateGeometryTransition(
+        const std::string& id, bool followWithoutTransition = false);
     void DumpGeometryTransition();
 
     void ReSyncGeometryTransition(const WeakPtr<NG::FrameNode>& trigger = nullptr,
@@ -124,27 +123,14 @@ public:
     void AddPendingRemoveNode(const RefPtr<NG::UINode>& node);
     void ClearPendingRemoveNodes();
 
-    void RegisterJSUINodeRegisterCallbackFunc(const std::function<void(void)>& jsCallback) {
-        LOGD("RegisterJSUINodeRegisterCallbackFunc registered");
-        jsUnregisterCallback_ = std::move(jsCallback);
+    void RegisterJSCleanUpIdleTaskFunc(const std::function<void(void)>& jsCallback) {
+        LOGD("RegisterJSCleanUpIdleTaskFunc registered");
+        jsCleanUpIdleTaskCallback_ = std::move(jsCallback);
     }
 
-    void RegisterJSUINodeRegisterGlobalFunc(const std::function<void(void)>& jsCallback) {
-        LOGD("RegisterJSUINodeRegisterGlobalFunc registered");
-        jsUnregisterElmtIDCallback_ = std::move(jsCallback);
-    }
-
-    void CallJSUINodeRegisterCallbackFunc() {
-        if (jsUnregisterCallback_) {
-            LOGD("jsUnregisterCallback_ is valid");
-            jsUnregisterCallback_();
-        }
-    }
-
-    void CallJSUINodeRegisterGlobalFunc() {
-        if (jsUnregisterElmtIDCallback_) {
-            LOGD("jsUnregisterElmtIDCallback_ is valid");
-            jsUnregisterElmtIDCallback_();
+    void CallJSCleanUpIdleTaskFunc() {
+        if (jsCleanUpIdleTaskCallback_) {
+            jsCleanUpIdleTaskCallback_();
         }
     }
 
@@ -167,16 +153,11 @@ private:
 
     RemovedElementsType removedItems_;
 
-    // Cache IDs that are referenced by other object
-    // which causes delayed destruction  when custom node is destroyed.
-    std::unordered_set<ElementIdType> deletedCachedItems_;
-
     std::unordered_map<std::string, RefPtr<NG::GeometryTransition>> geometryTransitionMap_;
 
     std::list<RefPtr<NG::UINode>> pendingRemoveNodes_;
 
-    std::function<void(void)> jsUnregisterCallback_;
-    std::function<void(void)> jsUnregisterElmtIDCallback_;
+    std::function<void(void)> jsCleanUpIdleTaskCallback_;
 
     ACE_DISALLOW_COPY_AND_MOVE(ElementRegister);
 };

@@ -86,6 +86,8 @@ public:
     void OnWindowHide() override;
     void OnWindowShow() override;
     void OnVisibleChange(bool isVisible) override;
+    void OnRecycle() override;
+    void OnReuse() override;
 
     void EnableDrag();
     bool BetweenSelectedPosition(const Offset& globalOffset) override;
@@ -106,7 +108,7 @@ public:
     }
 
     void BeforeCreatePaintWrapper() override;
-    void DumpInfo() override;
+    void DumpAdvanceInfo() override;
 
 private:
     class ObscuredImage : public CanvasImage {
@@ -127,6 +129,11 @@ private:
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
 
     void OnModifyDone() override;
+
+    bool IsNeedInitClickEventRecorder() const override
+    {
+        return true;
+    }
 
     void OnLanguageConfigurationUpdate() override;
 
@@ -160,6 +167,10 @@ private:
     DataReadyNotifyTask CreateDataReadyCallbackForAlt();
     LoadSuccessNotifyTask CreateLoadSuccessCallbackForAlt();
     LoadFailNotifyTask CreateLoadFailCallbackForAlt();
+
+    void OnColorConfigurationUpdate() override;
+    void LoadImage(const ImageSourceInfo& src);
+    void LoadAltImage(const RefPtr<ImageLayoutProperty>& imageLayoutProperty);
 
     CopyOptions copyOption_ = CopyOptions::None;
 

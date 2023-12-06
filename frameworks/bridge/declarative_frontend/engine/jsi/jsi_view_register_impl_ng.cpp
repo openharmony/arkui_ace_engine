@@ -20,8 +20,9 @@
 #include "bridge/declarative_frontend/jsview/js_shape_abstract.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
-#include "core/components_ng/pattern/custom/custom_node.h"
+#include "core/components_ng/pattern/custom/custom_title_node.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
+#include "core/pipeline_ng/pipeline_context.h"
 #include "frameworks/bridge/common/utils/engine_helper.h"
 #include "frameworks/bridge/declarative_frontend/engine/functions/js_drag_function.h"
 #include "frameworks/bridge/declarative_frontend/engine/js_object_template.h"
@@ -52,6 +53,7 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_data_panel.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_datepicker.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_divider.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_dump_log.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_ellipse.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_environment.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_flex_impl.h"
@@ -70,6 +72,7 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_image_animator.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_image_span.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_indexer.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_keyboard_avoid.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_lazy_foreach.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_line.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_linear_gradient.h"
@@ -117,6 +120,7 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_sliding_panel.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_span.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_stack.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_state_mgmt_profiler.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_stepper.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_stepper_item.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_swiper.h"
@@ -125,7 +129,6 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_tabs_controller.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_text.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_text_clock.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_text_editable_controller.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_textarea.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_textfield.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_textinput.h"
@@ -167,9 +170,9 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_plugin.h"
 #endif
 #ifdef WEB_SUPPORTED
-#include "frameworks/bridge/declarative_frontend/jsview/js_richtext.h"
 #include "bridge/declarative_frontend/jsview/js_web.h"
 #include "bridge/declarative_frontend/jsview/js_web_controller.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_richtext.h"
 #endif
 #ifdef REMOTE_WINDOW_SUPPORTED
 #include "frameworks/bridge/declarative_frontend/jsview/js_remote_window.h"
@@ -186,12 +189,12 @@
 #include "frameworks/bridge/declarative_frontend/jsview/window_scene/js_screen.h"
 #include "frameworks/bridge/declarative_frontend/jsview/window_scene/js_window_scene.h"
 #endif
-#include "bridge/declarative_frontend/jsview/menu/js_context_menu.h"
+#include "bridge/declarative_frontend/interfaces/profiler/js_profiler.h"
 #include "bridge/declarative_frontend/jsview/js_location_button.h"
 #include "bridge/declarative_frontend/jsview/js_paste_button.h"
-#include "bridge/declarative_frontend/interfaces/profiler/js_profiler.h"
 #include "bridge/declarative_frontend/jsview/js_richeditor.h"
 #include "bridge/declarative_frontend/jsview/js_save_button.h"
+#include "bridge/declarative_frontend/jsview/menu/js_context_menu.h"
 #include "bridge/declarative_frontend/sharedata/js_share_data.h"
 #ifdef EFFECT_COMPONENT_SUPPORTED
 #include "bridge/declarative_frontend/jsview/js_effect_component.h"
@@ -199,17 +202,74 @@
 
 namespace OHOS::Ace::Framework {
 
+void AddCustomTitleBarComponent(const panda::Local<panda::ObjectRef>& obj)
+{
+    auto* view = static_cast<JSView*>(obj->GetNativePointerField(0));
+    if (!view && !static_cast<JSViewPartialUpdate*>(view) && !static_cast<JSViewFullUpdate*>(view)) {
+        return;
+    }
+    auto uiNode = AceType::DynamicCast<NG::UINode>(view->CreateViewNode(true));
+    CHECK_NULL_VOID(uiNode);
+    auto customNode = AceType::DynamicCast<NG::CustomTitleNode>(uiNode);
+    CHECK_NULL_VOID(customNode);
+
+    const auto object = JSRef<JSObject>::Make(obj);
+    auto id = ContainerScope::CurrentId();
+    const JSRef<JSVal> setAppTitle = object->GetProperty("setAppTitle");
+    if (setAppTitle->IsFunction()) {
+        JSRef<JSFunc> jsSetAppTitleFunc = JSRef<JSFunc>::Cast(setAppTitle);
+        auto callback = [obj = object, jsFunc = jsSetAppTitleFunc, id](const std::string& title) {
+            ContainerScope scope(id);
+            const EcmaVM* vm = obj->GetEcmaVM();
+            CHECK_NULL_VOID(vm);
+            JSRef<JSVal> param = JSRef<JSVal>::Make(JsiValueConvertor::toJsiValueWithVM(vm, title));
+            jsFunc->Call(obj, 1, &param);
+        };
+        customNode->SetAppTitleCallback(callback);
+    }
+#ifdef PIXEL_MAP_SUPPORTED
+    const JSRef<JSVal> setAppIcon = object->GetProperty("setAppIcon");
+    if (setAppIcon->IsFunction()) {
+        JSRef<JSFunc> jsSetAppIconFunc = JSRef<JSFunc>::Cast(setAppIcon);
+        auto callback = [obj = object, jsFunc = jsSetAppIconFunc, id](const RefPtr<PixelMap>& icon) {
+            ContainerScope scope(id);
+            JSRef<JSVal> param = ConvertPixmap(icon);
+            jsFunc->Call(obj, 1, &param);
+        };
+        customNode->SetAppIconCallback(callback);
+    }
+#endif
+    const JSRef<JSVal> onWindowFocused = object->GetProperty("onWindowFocused");
+    if (onWindowFocused->IsFunction()) {
+        JSRef<JSFunc> jsOnWindowFocusedFunc = JSRef<JSFunc>::Cast(onWindowFocused);
+        auto callback = [obj = object, jsFunc = jsOnWindowFocusedFunc, id]() {
+            ContainerScope scope(id);
+            jsFunc->Call(obj);
+        };
+        customNode->SetOnWindowFocusedCallback(callback);
+    }
+
+    const JSRef<JSVal> onWindowUnfocused = object->GetProperty("onWindowUnfocused");
+    if (onWindowUnfocused->IsFunction()) {
+        JSRef<JSFunc> jsOnWindowUnfocusedFunc = JSRef<JSFunc>::Cast(onWindowUnfocused);
+        auto callback = [obj = object, jsFunc = jsOnWindowUnfocusedFunc, id]() {
+            ContainerScope scope(id);
+            jsFunc->Call(obj);
+        };
+        customNode->SetOnWindowUnfocusedCallback(callback);
+    }
+    NG::ViewStackProcessor::GetInstance()->SetCustomTitleNode(customNode);
+}
+
 void UpdateRootComponent(const panda::Local<panda::ObjectRef>& obj)
 {
     auto* view = static_cast<JSView*>(obj->GetNativePointerField(0));
     if (!view && !static_cast<JSViewPartialUpdate*>(view) && !static_cast<JSViewFullUpdate*>(view)) {
-        LOGE("loadDocument: argument provided is not a View!");
         return;
     }
 
     auto container = Container::Current();
     if (!container) {
-        LOGE("loadDocument: Container is null");
         return;
     }
 
@@ -232,7 +292,6 @@ void UpdateRootComponent(const panda::Local<panda::ObjectRef>& obj)
     }
     Container::SetCurrentUsePartialUpdate(!view->isFullUpdate());
     if (!pageNode->GetChildren().empty()) {
-        LOGW("the page has already add node, clean");
         auto oldChild = AceType::DynamicCast<NG::CustomNode>(pageNode->GetChildren().front());
         if (oldChild) {
             oldChild->Reset();
@@ -291,9 +350,6 @@ void JSBindLibs(const std::string moduleName, const std::string exportModuleName
     auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetCurrentRuntime());
     std::shared_ptr<JsValue> global = runtime->GetGlobal();
     std::shared_ptr<JsValue> requireNapiFunc = global->GetProperty(runtime, "requireNapi");
-    if (!requireNapiFunc || !requireNapiFunc->IsFunction(runtime)) {
-        LOGW("requireNapi func not found");
-    }
     std::vector<std::shared_ptr<JsValue>> argv = { runtime->NewString(moduleName) };
     std::shared_ptr<JsValue> napiObj = requireNapiFunc->Call(runtime, global, argv, argv.size());
     if (napiObj && !napiObj->IsUndefined(runtime)) {
@@ -310,31 +366,15 @@ void JsUINodeRegisterCleanUp(BindingTarget globalObj)
 {
     // globalObj is panda::Local<panda::ObjectRef>
     const auto globalObject = JSRef<JSObject>::Make(globalObj);
-    const JSRef<JSVal> globalFuncVal = globalObject->GetProperty("UINodeRegisterCleanUpFunction");
 
-    if (globalFuncVal->IsFunction()) {
-        LOGD("UINodeRegisterCleanUpFunction is a valid function");
-        const auto globalFunc = JSRef<JSFunc>::Cast(globalFuncVal);
+    const JSRef<JSVal> cleanUpIdleTask = globalObject->GetProperty("uiNodeCleanUpIdleTask");
+    if (cleanUpIdleTask->IsFunction()) {
+        LOGD("CleanUpIdleTask NG is a valid function");
+        const auto globalFunc = JSRef<JSFunc>::Cast(cleanUpIdleTask);
         const std::function<void(void)> callback = [jsFunc = globalFunc, globalObject = globalObject]() {
             jsFunc->Call(globalObject);
         };
-        ElementRegister::GetInstance()->RegisterJSUINodeRegisterCallbackFunc(callback);
-    } else {
-        LOGE("Could not find UINodeRegisterCleanUpFunction JS function.ElmtId unregistration Internal error!");
-    }
-
-    // Added below implementation for element unregister during a diff flow of App execution
-    const JSRef<JSVal> globalCleanUpFunc = globalObject->GetProperty("globalRegisterCleanUpFunction");
-
-    if (globalCleanUpFunc->IsFunction()) {
-        LOGD("globalRegisterCleanUpFunction is a valid function");
-        const auto globalFunc = JSRef<JSFunc>::Cast(globalCleanUpFunc);
-        const std::function<void(void)> callback = [jsFunc = globalFunc, globalObject = globalObject]() {
-            jsFunc->Call(globalObject);
-        };
-        ElementRegister::GetInstance()->RegisterJSUINodeRegisterGlobalFunc(callback);
-    } else {
-        LOGE("Could not find globalRegisterCleanUpFunction JS function.ElmtId unregistration Internal error!");
+        ElementRegister::GetInstance()->RegisterJSCleanUpIdleTaskFunc(callback);
     }
 }
 
@@ -354,6 +394,7 @@ void JsBindViews(BindingTarget globalObj)
     JSList::JSBind(globalObj);
     JSListItem::JSBind(globalObj);
     JSLocalStorage::JSBind(globalObj);
+    JSStateMgmtProfiler::JSBind(globalObj);
     JSPersistent::JSBind(globalObj);
     JSEnvironment::JSBind(globalObj);
     JSFlexImpl::JSBind(globalObj);
@@ -413,6 +454,7 @@ void JsBindViews(BindingTarget globalObj)
     JSSwiper::JSBind(globalObj);
     JSImageSpan::JSBind(globalObj);
     JSScroller::JSBind(globalObj);
+    JSListScroller::JSBind(globalObj);
     JSScrollBar::JSBind(globalObj);
     JSButton::JSBind(globalObj);
     JSRadio::JSBind(globalObj);
@@ -474,10 +516,12 @@ void JsBindViews(BindingTarget globalObj)
     JSMatrix2d::JSBind(globalObj);
     JSSearch::JSBind(globalObj);
     JSSelect::JSBind(globalObj);
+    JSSearchController::JSBind(globalObj);
     JSTextClockController::JSBind(globalObj);
     JSClipboard::JSBind(globalObj);
     JSTextTimer::JSBind(globalObj);
-    JSTextEditableController::JSBind(globalObj);
+    JSTextAreaController::JSBind(globalObj);
+    JSTextInputController::JSBind(globalObj);
     JSTextTimerController::JSBind(globalObj);
     JSCheckbox::JSBind(globalObj);
     JSCheckboxGroup::JSBind(globalObj);
@@ -498,6 +542,9 @@ void JsBindViews(BindingTarget globalObj)
     JSRenderingContext::JSBind(globalObj);
     JSOffscreenRenderingContext::JSBind(globalObj);
     JSPath2D::JSBind(globalObj);
+    JSDumpLog::JSBind(globalObj);
+    JSDumpRegister::JSBind(globalObj);
+    JSKeyboardAvoid::JSBind(globalObj);
 #ifdef USE_COMPONENTS_LIB
     JSBindLibs("arkui.qrcode", "QRCode");
     JSBindLibs("arkui.relativeContainer", "RelativeContainer");

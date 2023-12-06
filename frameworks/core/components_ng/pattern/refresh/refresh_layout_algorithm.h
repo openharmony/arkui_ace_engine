@@ -55,7 +55,8 @@ public:
     }
 
 private:
-    OptionalSizeF CalculateBuilderSize(RefPtr<LayoutWrapper> childLayoutWrapper, LayoutConstraintF& constraint);
+    OptionalSizeF CalculateBuilderSize(
+        RefPtr<LayoutWrapper> childLayoutWrapper, LayoutConstraintF& constraint, float customBaseHeight);
     void PerformLayout(LayoutWrapper* layoutWrapper);
     float customBuilderOffset_ = 0.0f;
     float scrollOffset_ = 0.0f;

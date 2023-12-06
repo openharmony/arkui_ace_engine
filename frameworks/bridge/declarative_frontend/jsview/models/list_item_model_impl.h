@@ -36,12 +36,12 @@ public:
     void SetSelected(bool selected) override {};
     void SetSelectChangeEvent(std::function<void(bool)>&& changeEvent) override {};
     void SetSwiperAction(std::function<void()>&& startAction, std::function<void()>&& endAction,
-        V2::SwipeEdgeEffect edgeEffect) override;
+        [[maybe_unused]] OnOffsetChangeFunc&& onOffsetChangeFunc, V2::SwipeEdgeEffect edgeEffect) override;
     void SetSelectCallback(OnSelectFunc&& selectCallback) override;
     void SetOnDragStart(NG::OnDragStartFunc&& onDragStart) override;
-    void SetDeleteArea(std::function<void()>&& builderAction, bool useDefaultDeleteAnimation, OnDeleteEvent&& onDelete,
-        OnEnterDeleteAreaEvent&& onEnterDeleteArea, OnExitDeleteAreaEvent&& onExitDeleteArea, const Dimension& length,
-        bool isStartArea) override;
+    void SetDeleteArea(std::function<void()>&& builderAction, OnDeleteEvent&& onDelete,
+        OnEnterDeleteAreaEvent&& onEnterDeleteArea, OnExitDeleteAreaEvent&& onExitDeleteArea,
+        OnStateChangedEvent&& onStateChange, const Dimension& length, bool isStartArea) override;
 
 private:
     static std::unique_ptr<ListItemModel> instance_;

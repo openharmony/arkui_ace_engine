@@ -15,7 +15,8 @@
 
 #include "core/components_ng/pattern/window_scene/screen/screen_pattren.h"
 
-#include "input_manager.h"
+#include <mutex>
+
 #include "ipc_skeleton.h"
 #include "root_scene.h"
 #include "ui/rs_display_node.h"
@@ -24,6 +25,7 @@
 #include "core/common/container.h"
 #include "core/components_ng/render/adapter/rosen_render_context.h"
 #include "core/components_ng/render/adapter/rosen_window.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -32,6 +34,10 @@ constexpr float DIRECTION90 = 90;
 constexpr float DIRECTION180 = 180;
 constexpr float DIRECTION270 = 270;
 constexpr uint32_t DOT_PER_INCH = 160;
+
+std::vector<MMI::DisplayInfo> g_displayInfoVector;
+
+std::mutex g_vecLock;
 
 MMI::Direction ConvertDegreeToMMIRotation(float degree)
 {
@@ -51,6 +57,16 @@ MMI::Direction ConvertDegreeToMMIRotation(float degree)
 }
 } // namespace
 
+
+ScreenPattern::ScreenPattern(const sptr<Rosen::ScreenSession>& screenSession)
+{
+    screenSession_ = screenSession;
+    if (screenSession_ != nullptr) {
+        screenSession_->SetUpdateToInputManagerCallback(std::bind(&ScreenPattern::UpdateToInputManager,
+            this, std::placeholders::_1));
+    }
+}
+
 void ScreenPattern::OnAttachToFrameNode()
 {
     CHECK_NULL_VOID(screenSession_);
@@ -60,46 +76,56 @@ void ScreenPattern::OnAttachToFrameNode()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
 
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->SetScreenNode(host);
+
     auto context = AceType::DynamicCast<NG::RosenRenderContext>(host->GetRenderContext());
     CHECK_NULL_VOID(context);
     context->SetRSNode(displayNode);
-
-    UpdateDisplayInfo();
-
-    auto container = Container::Current();
-    CHECK_NULL_VOID(container);
-    auto window = static_cast<RosenWindow*>(container->GetWindow());
-    CHECK_NULL_VOID(window);
-    auto rootScene = static_cast<Rosen::RootScene*>(window->GetRSWindow().GetRefPtr());
-    CHECK_NULL_VOID(rootScene);
-    auto screenBounds = screenSession_->GetScreenProperty().GetBounds();
-    Rosen::Rect rect = { screenBounds.rect_.left_, screenBounds.rect_.top_,
-        screenBounds.rect_.width_, screenBounds.rect_.height_ };
-    float density = screenSession_->GetScreenProperty().GetDensity();
-    rootScene->SetDisplayDensity(density);
-    rootScene->UpdateViewportConfig(rect, Rosen::WindowSizeChangeReason::UNDEFINED);
 }
 
 void ScreenPattern::UpdateDisplayInfo()
 {
     CHECK_NULL_VOID(screenSession_);
+    auto displayNode = screenSession_->GetDisplayNode();
+    CHECK_NULL_VOID(displayNode);
+    auto displayNodeRotation = displayNode->GetStagingProperties().GetRotation();
+    if (displayNodeRotation < DIRECTION0) {
+        displayNodeRotation = -displayNodeRotation;
+    }
 
-    auto pid = IPCSkeleton::GetCallingPid();
+    UpdateToInputManager(displayNodeRotation);
+}
+
+void ScreenPattern::UpdateToInputManager(float rotation)
+{
+    CHECK_NULL_VOID(screenSession_);
+    auto pid = getprocpid();
     auto uid = IPCSkeleton::GetCallingUid();
     auto screenId = screenSession_->GetScreenId();
     auto screenProperty = screenSession_->GetScreenProperty();
-    auto dpi = screenProperty.GetDensity() * DOT_PER_INCH;
+    auto dpi = screenProperty.GetDefaultDensity() * DOT_PER_INCH;
 
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto paintRect = host->GetPaintRectWithTransform();
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto paintRect = renderContext->GetPaintRectWithTransform();
+    auto tempHeight = paintRect.Height();
+    auto tempWidth = paintRect.Width();
+    if (rotation != DIRECTION0 && rotation != DIRECTION180) {
+        auto temp = tempWidth;
+        tempWidth = tempHeight;
+        tempHeight = temp;
+    }
+
     MMI::Rect screenRect = {
         paintRect.Left(),
         paintRect.Top(),
-        paintRect.Width(),
-        paintRect.Height()
+        tempWidth,
+        tempHeight,
     };
-
     MMI::WindowInfo windowInfo = {
         .id = 0,    // root scene id 0
         .pid = pid,
@@ -110,7 +136,6 @@ void ScreenPattern::UpdateDisplayInfo()
         .agentWindowId = 0, // root scene id 0
         .flags = 0  // touchable
     };
-
     MMI::DisplayInfo displayInfo = {
         .id = screenId,
         .x = paintRect.Left(),
@@ -120,22 +145,56 @@ void ScreenPattern::UpdateDisplayInfo()
         .dpi = dpi,
         .name = "display" + std::to_string(screenId),
         .uniq = "default" + std::to_string(screenId),
-        .direction = ConvertDegreeToMMIRotation(DIRECTION0)
+        .direction = ConvertDegreeToMMIRotation(rotation)
     };
+    InputManagerUpdateDisplayInfo(paintRect, displayInfo, windowInfo);
+}
+
+void ScreenPattern::InputManagerUpdateDisplayInfo(RectF paintRect,
+    MMI::DisplayInfo displayInfo, MMI::WindowInfo windowInfo)
+{
+    std::lock_guard<std::mutex> lock(g_vecLock);
+    DeduplicateDisplayInfo();
+    g_displayInfoVector.insert(g_displayInfoVector.begin(), displayInfo);
 
     MMI::DisplayGroupInfo displayGroupInfo = {
         .width = paintRect.Width(),
         .height = paintRect.Height(),
         .focusWindowId = 0, // root scene id 0
         .windowsInfo = { windowInfo },
-        .displaysInfo = { displayInfo }
+        .displaysInfo = g_displayInfoVector
     };
     MMI::InputManager::GetInstance()->UpdateDisplayInfo(displayGroupInfo);
+}
+
+void ScreenPattern::DeduplicateDisplayInfo()
+{
+    auto screenId = screenSession_->GetScreenId();
+    auto it = std::remove_if(g_displayInfoVector.begin(), g_displayInfoVector.end(),
+        [screenId](MMI::DisplayInfo displayInfo) {
+            return displayInfo.id == static_cast<int32_t>(screenId);
+        });
+    g_displayInfoVector.erase(it, g_displayInfoVector.end());
 }
 
 bool ScreenPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& changeConfig)
 {
     UpdateDisplayInfo();
+    if (screenSession_->GetScreenProperty().GetScreenType() == Rosen::ScreenType::VIRTUAL) {
+        return false;
+    }
+    auto container = Container::Current();
+    CHECK_NULL_RETURN(container, false);
+    auto window = static_cast<RosenWindow*>(container->GetWindow());
+    CHECK_NULL_RETURN(window, false);
+    auto rootScene = static_cast<Rosen::RootScene*>(window->GetRSWindow().GetRefPtr());
+    CHECK_NULL_RETURN(rootScene, false);
+    auto screenBounds = screenSession_->GetScreenProperty().GetPhyBounds();
+    Rosen::Rect rect = { screenBounds.rect_.left_, screenBounds.rect_.top_,
+        screenBounds.rect_.width_, screenBounds.rect_.height_ };
+    float density = screenSession_->GetScreenProperty().GetDefaultDensity();
+    rootScene->SetDisplayDensity(density);
+    rootScene->UpdateViewportConfig(rect, Rosen::WindowSizeChangeReason::UNDEFINED);
     return true;
 }
 } // namespace OHOS::Ace::NG

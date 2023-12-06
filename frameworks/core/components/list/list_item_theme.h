@@ -50,22 +50,6 @@ public:
             if (!themeConstants) {
                 return theme;
             }
-            theme->clickColor_ = themeConstants->GetColor(THEME_ITEM_CLICK_COLOR);
-            theme->clickAlphaBegin_ = themeConstants->GetDouble(THEME_ITEM_CLICK_ALPHA_BEGIN);
-            theme->clickAlphaEnd_ = themeConstants->GetDouble(THEME_ITEM_CLICK_ALPHA_END);
-            theme->clickScale_ = themeConstants->GetDouble(THEME_ITEM_CLICK_SCALE);
-            theme->focusScale_ = themeConstants->GetDouble(THEME_ITEM_FOCUS_SCALE);
-            theme->focusScaleLarge_ = themeConstants->GetDouble(THEME_ITEM_FOCUS_SCALE_LARGE);
-            theme->focusScaleMiddle_ = themeConstants->GetDouble(THEME_ITEM_FOCUS_SCALE_MIDDLE);
-            theme->focusScaleLittle_ = themeConstants->GetDouble(THEME_ITEM_FOCUS_SCALE_LITTLE);
-            theme->focusOpacityLarge_ = themeConstants->GetDouble(THEME_ITEM_FOCUS_OPACITY_LARGE);
-            theme->focusOpacityMiddle_ = themeConstants->GetDouble(THEME_ITEM_FOCUS_OPACITY_MIDDLE);
-            theme->focusOpacityLittle_ = themeConstants->GetDouble(THEME_ITEM_FOCUS_OPACITY_LITTLE);
-            theme->focusAnimationDuration_ = themeConstants->GetDouble(THEME_ITEM_FOCUS_ANIMATION_DURATION);
-            theme->clickAnimationDuration_ = themeConstants->GetDouble(THEME_ITEM_CLICK_ANIMATION_DURATION);
-            theme->itemSize_ = themeConstants->GetDimension(THEME_ITEM_SIZE);
-            theme->paddingInPercent_ = themeConstants->GetDouble(THEME_ITEM_PADDING_IN_PERCENT);
-            theme->groupImageSize_ = themeConstants->GetDimension(THEME_ITEM_GROUP_IMAGE_SIZE);
             ParsePattern(themeConstants->GetThemeStyle(), theme);
             return theme;
         }
@@ -92,6 +76,7 @@ public:
             theme->itemLeftPadding_ = LISTITEM_PADDING;
             theme->itemRightPadding_ = LISTITEM_PADDING;
             theme->focusBorderColor_ = pattern->GetAttr<Color>("item_focus_color", Color::WHITE);
+            theme->clickColor_ = pattern->GetAttr<Color>("item_press_color", Color::WHITE);
             theme->hoverColor_ = pattern->GetAttr<Color>("item_hover_color", Color::WHITE);
             theme->pressColor_ = pattern->GetAttr<Color>("item_press_color", Color::WHITE);
             theme->disabledAlpha_ = pattern->GetAttr<double>("item_disabled_alpha", 0.0);
@@ -100,6 +85,21 @@ public:
                 theme->selectedColor_.BlendOpacity(pattern->GetAttr<double>("item_selected_alpha", SELECTED_ALPHA));
             theme->hoverAnimationDuration_ = 250;
             theme->hoverToPressAnimationDuration_ = 100;
+            theme->clickAlphaBegin_ = pattern->GetAttr<double>("click_alpha_begin", 0.0f);
+            theme->clickAlphaEnd_ = pattern->GetAttr<double>("click_alpha_end", 0.05f);
+            theme->clickScale_ = pattern->GetAttr<double>("click_scale", 0.95f);
+            theme->focusScale_ = pattern->GetAttr<double>("focus_scale", 1.12f);
+            theme->focusScaleLarge_ = pattern->GetAttr<double>("focus_scale_large", 0.94f);
+            theme->focusScaleMiddle_ = pattern->GetAttr<double>("focus_scale_middle", 0.8f);
+            theme->focusScaleLittle_ = pattern->GetAttr<double>("focus_scale_little", 0.6f);
+            theme->focusOpacityLarge_ = pattern->GetAttr<double>("focus_opacity_large", 1.0f);
+            theme->focusOpacityMiddle_ = pattern->GetAttr<double>("focus_opacity_middle", 0.66f);
+            theme->focusOpacityLittle_ = pattern->GetAttr<double>("focus_opacity_little", 0.38f);
+            theme->focusAnimationDuration_ = pattern->GetAttr<double>("focus_animation_duration", 100.0f);
+            theme->clickAnimationDuration_ = pattern->GetAttr<double>("click_animation_duration", 200.0f);
+            theme->itemSize_ = pattern->GetAttr<Dimension>("item_size", 76.0_vp);
+            theme->paddingInPercent_ = pattern->GetAttr<double>("padding_in_percent", 0.0f);
+            theme->groupImageSize_ = pattern->GetAttr<Dimension>("group_image_size", 24.0_vp);
         }
     };
 

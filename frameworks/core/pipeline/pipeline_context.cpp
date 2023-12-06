@@ -355,7 +355,7 @@ void PipelineContext::RefreshStageFocus()
     stageElement->RefreshFocus();
 }
 
-void PipelineContext::ShowContainerTitle(bool isShow, bool hasDeco)
+void PipelineContext::ShowContainerTitle(bool isShow, bool hasDeco, bool needUpdate)
 {
     if (windowModal_ != WindowModal::CONTAINER_MODAL) {
         LOGW("ShowContainerTitle failed, Window modal is not container.");
@@ -683,6 +683,8 @@ void PipelineContext::FlushRenderFinish()
         FrameReport::GetInstance().EndFlushRenderFinish();
     }
 }
+
+void PipelineContext::DispatchDisplaySync(uint64_t nanoTimestamp) {}
 
 void PipelineContext::FlushAnimation(uint64_t nanoTimestamp)
 {
@@ -2826,7 +2828,7 @@ void PipelineContext::RemoveFontNode(const WeakPtr<RenderNode>& node)
 
 void PipelineContext::SetClickPosition(const Offset& position) const
 {
-    LOGI("SetClickPosition position:%{public}s rootOffest:%{public}s", position.ToString().c_str(),
+    LOGI("SetClickPosition position:%{public}s rootOffset:%{public}s", position.ToString().c_str(),
         rootOffset_.ToString().c_str());
     if (textFieldManager_) {
         textFieldManager_->SetClickPosition(position - rootOffset_);
@@ -2898,6 +2900,8 @@ void PipelineContext::WindowFocus(bool isFocus)
         containerModal->WindowFocus(isFocus);
     }
 }
+
+void PipelineContext::ContainerModalUnFocus() {}
 
 void PipelineContext::AddPageUpdateTask(std::function<void()>&& task, bool directExecute)
 {
@@ -3125,7 +3129,7 @@ void PipelineContext::ProcessDragEventEnd(
     SetInitRenderNode(nullptr);
 }
 
-void PipelineContext::OnDragEvent(int32_t x, int32_t y, DragEventAction action)
+void PipelineContext::OnDragEvent(const PointerEvent& pointerEvent, DragEventAction action)
 {
     if (!clipboard_) {
         clipboard_ = ClipboardProxy::GetInstance()->GetClipboard(GetTaskExecutor());
@@ -3159,10 +3163,10 @@ void PipelineContext::OnDragEvent(int32_t x, int32_t y, DragEventAction action)
     }
 
     RefPtr<DragEvent> event = AceType::MakeRefPtr<DragEvent>();
-    event->SetX(ConvertPxToVp(Dimension(x, DimensionUnit::PX)));
-    event->SetY(ConvertPxToVp(Dimension(y, DimensionUnit::PX)));
+    event->SetX(ConvertPxToVp(Dimension(pointerEvent.x, DimensionUnit::PX)));
+    event->SetY(ConvertPxToVp(Dimension(pointerEvent.y, DimensionUnit::PX)));
 
-    Point globalPoint(x, y);
+    Point globalPoint(pointerEvent.x, pointerEvent.y);
 
     if (action == DragEventAction::DRAG_EVENT_START) {
         pageOffset_ = GetPageRect().GetOffset();
@@ -3581,7 +3585,7 @@ void PipelineContext::StoreNode(int32_t restoreId, const WeakPtr<RenderElement>&
 
 std::unique_ptr<JsonValue> PipelineContext::GetStoredNodeInfo()
 {
-    auto jsonNodeInfo = JsonUtil::Create(false);
+    auto jsonNodeInfo = JsonUtil::Create(true);
     auto iter = storeNode_.begin();
     while (iter != storeNode_.end()) {
         auto RenderElement = (iter->second).Upgrade();

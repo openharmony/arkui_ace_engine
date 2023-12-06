@@ -102,6 +102,12 @@ std::vector<RectF> WindowNode::ConvertHotRects(const std::vector<Rosen::Rect>& h
 
 RectF WindowNode::ConvertHotRect(const RectF& rect, int32_t sourceType)
 {
+    auto pattern = GetPattern<WindowPattern>();
+    if (pattern != nullptr && pattern->GetSession() != nullptr &&
+        (pattern->GetSession()->GetWindowType() != Rosen::WindowType::WINDOW_TYPE_APP_MAIN_WINDOW &&
+        pattern->GetSession()->GetWindowType() != Rosen::WindowType::WINDOW_TYPE_APP_SUB_WINDOW)) {
+        return rect;
+    }
     float hotOffsetVp = (sourceType == static_cast<int32_t>(Ace::SourceType::MOUSE)) ?
         MOUSE_RECT_HOT_VP : TOUCH_RECT_HOT_VP;
     auto context = PipelineContext::GetCurrentContext();

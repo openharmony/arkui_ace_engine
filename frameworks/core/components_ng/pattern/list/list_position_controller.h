@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,12 +16,9 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_LIST_LIST_POSITION_CONTROLLER_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_LIST_LIST_POSITION_CONTROLLER_H
 
-#include <functional>
-
 #include "core/components_ng/pattern/scrollable/scrollable_controller.h"
 
 namespace OHOS::Ace::NG {
-
 class ACE_EXPORT ListPositionController : public ScrollableController {
     DECLARE_ACE_TYPE(ListPositionController, ScrollableController);
 
@@ -29,13 +26,13 @@ public:
     ListPositionController() = default;
     ~ListPositionController() override = default;
 
-    void ScrollBy(double pixelX, double pixelY, bool smooth) override;
-    void ScrollToEdge(ScrollEdgeType scrollEdgeType, bool smooth) override;
-    void ScrollPage(bool reverse, bool smooth) override;
-    void JumpTo(int32_t index, bool smooth, ScrollAlign align, int32_t source) override;
-    bool IsAtEnd() const override;
-};
+    Rect GetItemRectInGroup(int32_t index, int32_t indexInGroup) const override;
 
+    void JumpToItemInGroup(int32_t index, int32_t indexInGroup, bool smooth,
+        ScrollAlign align, int32_t source) override;
+
+    void CloseAllSwipeActions(OnFinishFunc&& onFinishCallback) override;
+};
 } // namespace OHOS::Ace::NG
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SCROLL_SCROLL_POSITION_CONTROLLER_H

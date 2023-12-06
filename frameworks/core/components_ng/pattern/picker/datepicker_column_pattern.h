@@ -164,8 +164,6 @@ public:
     {
         if (changeCallback_) {
             changeCallback_(GetHost(), isAdd, GetCurrentIndex(), needNotify);
-        } else {
-            LOGE("change callback is null.");
         }
     }
 
@@ -183,8 +181,6 @@ public:
     {
         if (EventCallback_) {
             EventCallback_(refresh);
-        } else {
-            LOGE("event callback is null.");
         }
     }
 
@@ -307,9 +303,7 @@ private:
     void HandleDragMove(const GestureEvent& event);
     void HandleDragEnd();
     void CreateAnimation();
-    RefPtr<CurveAnimation<double>> CreateAnimation(double from, double to);
-    RefPtr<CurveAnimation<double>> CreateClickAnimation(double from, double to);
-    void HandleCurveStopped();
+    void CreateAnimation(double from, double to);
     void ScrollOption(double delta, bool isJump = false);
     void UpdatePickerTextProperties(uint32_t index, uint32_t showOptionCount,
         const RefPtr<TextLayoutProperty>& textLayoutProperty,
@@ -366,12 +360,12 @@ private:
     bool animationCreated_ = false;
     OffsetF offset_;
     SizeF size_;
-    RefPtr<Animator> toController_;
-    RefPtr<Animator> fromController_;
-    RefPtr<CurveAnimation<double>> fromBottomCurve_;
-    RefPtr<CurveAnimation<double>> fromTopCurve_;
     RefPtr<TossAnimationController> tossAnimationController_ = AceType::MakeRefPtr<TossAnimationController>();
     std::vector<DateTextProperties> animationProperties_;
+
+    RefPtr<NodeAnimatablePropertyFloat> scrollProperty_;
+    RefPtr<NodeAnimatablePropertyFloat> aroundClickProperty_;
+    std::shared_ptr<AnimationUtils::Animation> animation_;
 
     ACE_DISALLOW_COPY_AND_MOVE(DatePickerColumnPattern);
 };

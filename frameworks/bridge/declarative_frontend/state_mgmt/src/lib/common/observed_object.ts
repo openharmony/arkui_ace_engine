@@ -133,21 +133,24 @@ class SubscribableHandler {
     stateMgmtConsole.debug(`SubscribableHandler: notifyObjectPropertyHasChanged '${propName}'.`)
     this.owningProperties_.forEach((subscribedId) => {
       var owningProperty: IPropertySubscriber = SubscriberManager.Find(subscribedId)
-      if (owningProperty) {
-        if ('objectPropertyHasChangedPU' in owningProperty) {
-          // PU code path
-          (owningProperty as unknown as ObservedObjectEventsPUReceiver<any>).objectPropertyHasChangedPU(this, propName);
-        }
 
-        // FU code path
-        if ('hasChanged' in owningProperty) {
-          (owningProperty as ISinglePropertyChangeSubscriber<any>).hasChanged(newValue);
-        }
-        if ('propertyHasChanged' in owningProperty) {
-          (owningProperty as IMultiPropertiesChangeSubscriber).propertyHasChanged(propName);
-        }
-      } else {
+      if (!owningProperty) {
         stateMgmtConsole.warn(`SubscribableHandler: notifyObjectPropertyHasChanged: unknown subscriber.'${subscribedId}' error!.`);
+        return;
+      }
+
+      // PU code path
+      if ('objectPropertyHasChangedPU' in owningProperty) {
+        (owningProperty as unknown as ObservedObjectEventsPUReceiver<any>).objectPropertyHasChangedPU(this, propName);
+        return;
+      }
+
+      // FU code path
+      if ('hasChanged' in owningProperty) {
+        (owningProperty as ISinglePropertyChangeSubscriber<any>).hasChanged(newValue);
+      }
+      if ('propertyHasChanged' in owningProperty) {
+        (owningProperty as IMultiPropertiesChangeSubscriber).propertyHasChanged(propName);
       }
     });
   }
@@ -298,7 +301,7 @@ class ObservedObject<T extends Object> extends ExtendableProxy {
             const self = this;
             const prop = property.toString();
             // prop is the function name here
-            if (prop == "splice") {
+            if (prop == "splice" || prop == "pop") {
               // 'splice' self modifies the array, returns deleted array items
               // means, alike other self-modifying functions, splice does not return the array itself.
               return function () {

@@ -17,6 +17,7 @@
 #define FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_MODELS_GESTURE_MODEL_IMPL_H
 
 #include "core/components_ng/pattern/gesture/gesture_model.h"
+#include "core/components_ng/gestures/gesture_info.h"
 
 namespace OHOS::Ace::Framework {
 class GestureModelImpl : public OHOS::Ace::GestureModel {
@@ -26,6 +27,7 @@ public:
     void Pop() override;
     void SetOnGestureEvent(const GestureEventNoParameter& gestureEventNoParameter) override;
     void SetOnActionFunc(const GestureEventFunc& gestureEventFunc, const Ace::GestureEventAction& action) override;
+    void SetTag(const std::string& tag) override {}
 };
 
 class TapGestureModelImpl : public OHOS::Ace::TapGestureModel {

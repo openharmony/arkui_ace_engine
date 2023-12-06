@@ -91,6 +91,11 @@ void JSSpan::SetFontSize(const JSCallbackInfo& info)
     if (!ParseJsDimensionFp(info[0], fontSize)) {
         return;
     }
+    if (fontSize.IsNegative()) {
+        auto theme = GetTheme<TextTheme>();
+        CHECK_NULL_VOID(theme);
+        fontSize = theme->GetTextStyle().GetFontSize();
+    }
 
     SpanModel::GetInstance()->SetFontSize(fontSize);
 }
@@ -215,10 +220,13 @@ void JSSpan::JsOnClick(const JSCallbackInfo& info)
             return;
         }
         auto jsOnClickFunc = AceType::MakeRefPtr<JsClickFunction>(JSRef<JSFunc>::Cast(info[0]));
-        auto onClick = [execCtx = info.GetExecutionContext(), func = jsOnClickFunc](const BaseEventInfo* info) {
+        WeakPtr<NG::FrameNode> targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+        auto onClick = [execCtx = info.GetExecutionContext(), func = jsOnClickFunc, node = targetNode](
+                           const BaseEventInfo* info) {
             const auto* clickInfo = TypeInfoHelper::DynamicCast<GestureEvent>(info);
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             ACE_SCORING_EVENT("onClick");
+            PipelineContext::SetCallBackNode(node);
             func->Execute(*clickInfo);
         };
         SpanModel::GetInstance()->SetOnClick(std::move(onClick));
@@ -230,8 +238,9 @@ void JSSpan::JsOnClick(const JSCallbackInfo& info)
         CHECK_NULL_VOID(inspector);
         auto impl = inspector->GetInspectorFunctionImpl();
         RefPtr<JsClickFunction> jsOnClickFunc = AceType::MakeRefPtr<JsClickFunction>(JSRef<JSFunc>::Cast(info[0]));
-        auto clickFunc = [execCtx = info.GetExecutionContext(), func = std::move(jsOnClickFunc), impl](
-                             const BaseEventInfo* info) {
+        WeakPtr<NG::FrameNode> targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+        auto clickFunc = [execCtx = info.GetExecutionContext(), func = std::move(jsOnClickFunc), impl,
+                             node = targetNode](const BaseEventInfo* info) {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             LOGD("About to call onclick method on js");
             const auto* clickInfo = TypeInfoHelper::DynamicCast<ClickInfo>(info);
@@ -240,6 +249,7 @@ void JSSpan::JsOnClick(const JSCallbackInfo& info)
                 impl->UpdateEventInfo(newInfo);
             }
             ACE_SCORING_EVENT("Span.onClick");
+            PipelineContext::SetCallBackNode(node);
             func->Execute(newInfo);
         };
         SpanModel::GetInstance()->SetOnClick(std::move(clickFunc));
@@ -272,6 +282,18 @@ void JSSpan::SetLineHeight(const JSCallbackInfo& info)
     SpanModel::GetInstance()->SetLineHeight(value);
 }
 
+void JSSpan::SetTextShadow(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        return;
+    }
+    std::vector<Shadow> shadows;
+    ParseTextShadowFromShadowObject(info[0], shadows);
+    if (!shadows.empty()) {
+        SpanModel::GetInstance()->SetTextShadow(shadows);
+    }
+}
+
 void JSSpan::JSBind(BindingTarget globalObj)
 {
     JSClass<JSSpan>::Declare("Span");
@@ -285,6 +307,7 @@ void JSSpan::JSBind(BindingTarget globalObj)
     JSClass<JSSpan>::StaticMethod("fontFamily", &JSSpan::SetFontFamily, opt);
     JSClass<JSSpan>::StaticMethod("letterSpacing", &JSSpan::SetLetterSpacing, opt);
     JSClass<JSSpan>::StaticMethod("textCase", &JSSpan::SetTextCase, opt);
+    JSClass<JSSpan>::StaticMethod("textShadow", &JSSpan::SetTextShadow, opt);
     JSClass<JSSpan>::StaticMethod("decoration", &JSSpan::SetDecoration);
     JSClass<JSSpan>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
     JSClass<JSSpan>::StaticMethod("onHover", &JSInteractableView::JsOnHover);

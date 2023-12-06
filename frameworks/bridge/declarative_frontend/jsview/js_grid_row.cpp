@@ -21,6 +21,7 @@
 #include "base/memory/referenced.h"
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "bridge/declarative_frontend/jsview/models/grid_row_model_impl.h"
+#include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/grid_row/grid_row_model_ng.h"
 #include "core/components_v2/grid_layout/grid_container_util_class.h"
 
@@ -200,7 +201,6 @@ RefPtr<V2::GridContainerSize> ParserColumns(const JSRef<JSVal>& jsValue)
         InheritGridRowOption(gridContainerSize, containerSizeArray);
         return gridContainerSize;
     } else {
-        LOGI("parse column error");
         return AceType::MakeRefPtr<V2::GridContainerSize>();
     }
 }
@@ -221,7 +221,6 @@ RefPtr<V2::BreakPoints> ParserBreakpoints(const JSRef<JSVal>& jsValue)
         JSRef<JSArray> array = JSRef<JSArray>::Cast(value);
         breakpoint->breakpoints.clear();
         if (array->Length() > MAX_NUMBER_BREAKPOINT - 1) {
-            LOGI("The maximum number of breakpoints is %{public}zu", MAX_NUMBER_BREAKPOINT);
             return breakpoint;
         }
         double width = -1.0;
@@ -231,7 +230,7 @@ RefPtr<V2::BreakPoints> ParserBreakpoints(const JSRef<JSVal>& jsValue)
                 CalcDimension valueDimension;
                 JSContainerBase::ParseJsDimensionVp(threshold, valueDimension);
                 if (GreatNotEqual(width, valueDimension.Value())) {
-                    LOGI("Array data must be sorted in ascending order");
+                    TAG_LOGD(AceLogTag::ACE_GRIDROW, "Array data must be sorted in ascending order");
                     return breakpoint;
                 }
                 width = valueDimension.Value();
@@ -278,11 +277,13 @@ void JSGridRow::JsBreakpointEvent(const JSCallbackInfo& info)
         return;
     }
     auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
-    auto onBreakpointChange = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](
+    WeakPtr<NG::FrameNode> targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto onBreakpointChange = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = targetNode](
                                   const std::string& value) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("GridRow.onBreakpointChange");
         auto newJSVal = JSRef<JSVal>::Make(ToJSValue(value));
+        PipelineContext::SetCallBackNode(node);
         func->ExecuteJS(1, &newJSVal);
     };
     GridRowModel::GetInstance()->SetOnBreakPointChange(onBreakpointChange);

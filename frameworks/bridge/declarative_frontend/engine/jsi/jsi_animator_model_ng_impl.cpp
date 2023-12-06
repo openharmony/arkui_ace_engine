@@ -64,7 +64,10 @@ void AnimatorModelNG::Create(const std::string& animatorId)
     auto animatorInfo = page->GetJsAnimator(animatorId);
     if (!animatorInfo) {
         animatorInfo = AceType::MakeRefPtr<AnimatorInfo>();
-        auto animator = CREATE_ANIMATOR();
+        TAG_LOGI(AceLogTag::ACE_ANIMATION,
+            "create animator component, id:%{public}s, pageUrl:%{public}s, pagePattern:%{public}p", animatorId.c_str(),
+            page->GetPageUrl().c_str(), AceType::RawPtr(page));
+        auto animator = CREATE_ANIMATOR(animatorId.c_str());
         animatorInfo->SetAnimator(animator);
         page->AddJsAnimator(animatorId, animatorInfo);
     }
@@ -73,8 +76,17 @@ void AnimatorModelNG::Create(const std::string& animatorId)
 RefPtr<AnimatorInfo> AnimatorModelNG::GetAnimatorInfo(const std::string& animatorId)
 {
     auto page = GetCurrentPage();
-    CHECK_NULL_RETURN(page, nullptr);
+    if (!page) {
+        TAG_LOGW(AceLogTag::ACE_ANIMATION, "look for animator component, but current page is null, id:%{public}s",
+            animatorId.c_str());
+        return nullptr;
+    }
     auto animatorInfo = page->GetJsAnimator(animatorId);
+    if (!animatorInfo) {
+        TAG_LOGW(AceLogTag::ACE_ANIMATION,
+            "cannot find animator component in current page, id:%{public}s, pageUrl:%{public}s, pagePattern:%{public}p",
+            animatorId.c_str(), page->GetPageUrl().c_str(), AceType::RawPtr(page));
+    }
     return animatorInfo;
 }
 } // namespace OHOS::Ace::Framework

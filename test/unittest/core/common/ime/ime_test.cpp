@@ -70,7 +70,7 @@ HWTEST_F(ImeTest, CastToTextInputTypeTest001, TestSize.Level1)
      * @tc.steps: step3. Value is greater than END.
      * @tc.expected: step3. The return value is set to TEXT.
      */
-    EXPECT_EQ(CastToTextInputType(10), TextInputType::TEXT);
+    EXPECT_EQ(CastToTextInputType(static_cast<int32_t>(TextInputType::END) + 1), TextInputType::TEXT);
     /**
      * @tc.steps: step4. Value is set to zero.
      * @tc.expected: step4. The return value is set to TEXT.
@@ -774,6 +774,91 @@ HWTEST_F(ImeTest, FormatTest005, TestSize.Level1)
 
     lengthLimitingFormatter.Format(oldValue, newValue);
     EXPECT_EQ(newValue.text, "text_test_valu");
+    EXPECT_EQ(newValue.selection.baseOffset, -1);
+}
+
+/**
+ * @tc.name: FormatTest006
+ * @tc.desc: Test blackListCharsFormatter.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImeTest, FormatTest006, TestSize.Level1)
+{
+    TextEditingValue newValue;
+    TextEditingValue oldValue;
+    std::wregex regex(L"[^\\d]");
+    BlackListCharsFormatter blackListCharsFormatter(std::move(regex));
+
+    newValue.text = "abc123";
+    newValue.selection.extentOffset = 0;
+
+    blackListCharsFormatter.Format(oldValue, newValue);
+
+    EXPECT_EQ(newValue.text, "123");
+    EXPECT_EQ(newValue.selection.baseOffset, -1);
+}
+
+/**
+ * @tc.name: FormatTest007
+ * @tc.desc: Test numberFormatter.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImeTest, FormatTest007, TestSize.Level1)
+{
+    TextEditingValue newValue;
+    TextEditingValue oldValue;
+    NumberFormatter numberFormatter;
+
+    newValue.text = "123abc456def";
+    newValue.selection.extentOffset = 0;
+
+    numberFormatter.Format(oldValue, newValue);
+
+    EXPECT_EQ(newValue.text, "123456e");
+    EXPECT_EQ(newValue.selection.baseOffset, -1);
+}
+
+/**
+ * @tc.name: FormatTest008
+ * @tc.desc: Test phoneNumberFormatter.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImeTest, FormatTest008, TestSize.Level1)
+{
+    TextEditingValue newValue;
+    TextEditingValue oldValue;
+    PhoneNumberFormatter phoneNumberFormatter;
+
+    newValue.text = "123-456-7890";
+    newValue.selection.extentOffset = 0;
+
+    phoneNumberFormatter.Format(oldValue, newValue);
+
+    EXPECT_EQ(newValue.text, "123-456-7890");
+    EXPECT_EQ(newValue.selection.baseOffset, -1);
+
+    newValue.text = "abc123";
+    phoneNumberFormatter.Format(oldValue, newValue);
+
+    EXPECT_EQ(newValue.text, "123");
+    EXPECT_EQ(newValue.selection.baseOffset, -1);
+}
+
+/**
+ * @tc.name: FormatTest009
+ * @tc.desc: Test emailFormatter.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImeTest, FormatTest009, TestSize.Level1)
+{
+    TextEditingValue newValue;
+    TextEditingValue oldValue;
+    EmailFormatter emailFormatter;
+
+    newValue.text = "test@example";
+    emailFormatter.Format(oldValue, newValue);
+
+    EXPECT_EQ(newValue.text, "test@example");
     EXPECT_EQ(newValue.selection.baseOffset, -1);
 }
 } // namespace OHOS::Ace

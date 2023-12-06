@@ -22,6 +22,7 @@
 #include "base/memory/referenced.h"
 #include "core/components_ng/event/gesture_event_actuator.h"
 #include "core/components_ng/gestures/gesture_info.h"
+#include "core/components_ng/gestures/recognizers/pan_recognizer.h"
 
 namespace OHOS::Ace::NG {
 
@@ -96,12 +97,20 @@ public:
         panEvents_.remove(panEvent);
     }
 
+    void SetPanEventType(GestureTypeName typeName);
+
     void OnCollectTouchTarget(const OffsetF& coordinateOffset, const TouchRestrict& touchRestrict,
         const GetEventTargetImpl& getEventTargetImpl, TouchTestResult& result) override;
 
     PanDirection GetDirection() const
     {
         return direction_;
+    }
+
+    void SetIsAllowMouse(bool isAllowMouse) const
+    {
+        CHECK_NULL_VOID(panRecognizer_);
+        panRecognizer_->SetIsAllowMouse(isAllowMouse);
     }
 
 private:

@@ -21,19 +21,22 @@
 #include <utility>
 
 #include "base/geometry/dimension.h"
+#include "base/geometry/ng/offset_t.h"
+#include "base/geometry/ng/size_t.h"
 #include "base/geometry/size.h"
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
 #include "core/common/thread_checker.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/xcomponent/native_interface_xcomponent_impl.h"
-#include "core/components/xcomponent/xcomponent_controller.h"
 #include "core/components_ng/event/focus_hub.h"
 #include "core/components_ng/event/input_event.h"
 #include "core/components_ng/pattern/pattern.h"
+#include "core/components_ng/pattern/xcomponent/inner_xcomponent_controller.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_event_hub.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_layout_algorithm.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_layout_property.h"
+#include "core/components_ng/pattern/xcomponent/xcomponent_paint_method.h"
 #include "core/components_ng/property/property.h"
 #include "core/components_ng/render/render_surface.h"
 #include "core/pipeline_ng/pipeline_context.h"
@@ -46,7 +49,7 @@ class XComponentPattern : public Pattern {
 public:
     XComponentPattern() = default;
     XComponentPattern(const std::string& id, XComponentType type, const std::string& libraryname,
-        const RefPtr<XComponentController>& xcomponentController);
+        const std::shared_ptr<InnerXComponentController>& xcomponentController);
     ~XComponentPattern() override = default;
 
     bool IsAtomicNode() const override
@@ -67,6 +70,15 @@ public:
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
     {
         return MakeRefPtr<XComponentLayoutAlgorithm>();
+    }
+
+    RefPtr<NodePaintMethod> CreateNodePaintMethod() override
+    {
+        if (type_ == XComponentType::TEXTURE) {
+            auto paint = MakeRefPtr<XComponentPaintMethod>(renderSurface_);
+            return paint;
+        }
+        return nullptr;
     }
 
     FocusPattern GetFocusPattern() const override
@@ -138,6 +150,33 @@ public:
         soPath_ = soPath;
     }
 
+    XComponentType GetType()
+    {
+        return type_;
+    }
+
+    SizeF GetDrawSize()
+    {
+        return drawSize_;
+    }
+
+    OffsetF GetGlobalPosition()
+    {
+        return globalPosition_;
+    }
+
+    const RefPtr<RenderContext>& GetRenderContextForSurface()
+    {
+        return renderContextForSurface_;
+    }
+
+    void SetHandlingRenderContextForSurface(const RefPtr<RenderContext>& otherRenderContext);
+
+    void RestoreHandlingRenderContextForSurface();
+
+    XComponentControllerErrorCode SetExtController(const RefPtr<XComponentPattern>& extPattern);
+    XComponentControllerErrorCode ResetExtController(const RefPtr<XComponentPattern>& extPattern);
+
 private:
     void OnAttachToFrameNode() override;
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
@@ -167,11 +206,13 @@ private:
     std::string id_;
     XComponentType type_;
     std::string libraryname_;
-    RefPtr<XComponentController> xcomponentController_;
+    std::shared_ptr<InnerXComponentController> xcomponentController_;
     std::optional<std::string> soPath_;
 
     RefPtr<RenderSurface> renderSurface_;
     RefPtr<RenderContext> renderContextForSurface_;
+    RefPtr<RenderContext> handlingSurfaceRenderContext_;
+    WeakPtr<XComponentPattern> extPattern_;
 
     std::shared_ptr<OH_NativeXComponent> nativeXComponent_;
     RefPtr<NativeXComponentImpl> nativeXComponentImpl_;
@@ -187,6 +228,9 @@ private:
     WeakPtr<NG::PipelineContext> context_;
     int32_t instanceId_;
     SizeF initSize_;
+    OffsetF localposition_;
+    OffsetF globalPosition_;
+    SizeF drawSize_;
 #ifdef OHOS_PLATFORM
     int64_t startIncreaseTime_ = 0;
 #endif

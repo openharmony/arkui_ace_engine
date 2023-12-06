@@ -28,6 +28,7 @@
 #include "bridge/declarative_frontend/declarative_frontend.h"
 #include "bridge/declarative_frontend/engine/functions/js_drag_function.h"
 #include "bridge/declarative_frontend/engine/js_object_template.h"
+#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_api_bridge.h"
 #include "bridge/declarative_frontend/frontend_delegate_declarative.h"
 #include "bridge/declarative_frontend/interfaces/profiler/js_profiler.h"
 #include "bridge/declarative_frontend/jsview/js_canvas_image_data.h"
@@ -79,14 +80,12 @@ void RegisterCardUpdateCallback(int64_t cardId, const panda::Local<panda::Object
     JSRef<JSObject> object = JSRef<JSObject>::Make(obj);
     JSRef<JSVal> storageValue = object->GetProperty("localStorage_");
     if (!storageValue->IsObject()) {
-        LOGE("RegisterCardUpdateCallback: can not get property 'localStorage_'!");
         return;
     }
 
     JSRef<JSObject> storage = JSRef<JSObject>::Cast(storageValue);
     JSRef<JSVal> setOrCreateVal = storage->GetProperty("setOrCreate");
     if (!setOrCreateVal->IsFunction()) {
-        LOGE("RegisterCardUpdateCallback: can not get property 'setOrCreate'!");
         return;
     }
 
@@ -100,7 +99,6 @@ void RegisterCardUpdateCallback(int64_t cardId, const panda::Local<panda::Object
         CHECK_NULL_VOID(jsonRoot);
         auto child = jsonRoot->GetChild();
         if (!child || !child->IsValid()) {
-            LOGE("update card data error");
             return;
         }
 
@@ -117,7 +115,6 @@ void RegisterCardUpdateCallback(int64_t cardId, const panda::Local<panda::Object
 
     auto container = Container::Current();
     if (container->IsFRSCardContainer()) {
-        LOGI("RegisterCardUpdateCallback:Run Card In FRS");
         auto frontEnd = AceType::DynamicCast<FormFrontendDeclarative>(container->GetCardFrontend(cardId).Upgrade());
         CHECK_NULL_VOID(frontEnd);
         auto delegate = frontEnd->GetDelegate();
@@ -125,7 +122,6 @@ void RegisterCardUpdateCallback(int64_t cardId, const panda::Local<panda::Object
         delegate->SetUpdateCardDataCallback(callback);
         delegate->UpdatePageDataImmediately();
     } else {
-        LOGI("RegisterCardUpdateCallback:Run Card In Host");
         auto frontEnd = AceType::DynamicCast<CardFrontendDeclarative>(container->GetCardFrontend(cardId).Upgrade());
         CHECK_NULL_VOID(frontEnd);
         auto delegate = frontEnd->GetDelegate();
@@ -135,11 +131,63 @@ void RegisterCardUpdateCallback(int64_t cardId, const panda::Local<panda::Object
     }
 }
 
+void SetFormCallbacks(RefPtr<Container> container, JSView* view)
+{
+    auto pipeline = container->GetPipelineContext();
+    if (pipeline != nullptr) {
+        pipeline->SetOnFormRecycleCallback([weak = Referenced::WeakClaim(view)]() {
+            auto view = weak.Upgrade();
+            std::string statusData;
+            if (view) {
+                statusData = view->FireOnFormRecycle();
+            } else {
+                LOGE("view is null");
+            }
+            return statusData;
+        });
+
+        pipeline->SetOnFormRecoverCallback([weak = Referenced::WeakClaim(view)](const std::string& statusData) {
+            auto view = weak.Upgrade();
+            if (view) {
+                view->FireOnFormRecover(statusData);
+            } else {
+                LOGE("view is null");
+            }
+        });
+    } else {
+        LOGE("execute SetOnFormRecycleCallback and SetOnFormRecoverCallback failed due to pipeline is null");
+    }
+}
+
+void UpdatePageLifeCycleFunctions(RefPtr<NG::FrameNode> pageNode, JSView* view)
+{
+    auto pagePattern = pageNode->GetPattern<NG::PagePattern>();
+    CHECK_NULL_VOID(pagePattern);
+    pagePattern->SetOnPageShow([weak = Referenced::WeakClaim(view)]() {
+        auto view = weak.Upgrade();
+        if (view) {
+            view->FireOnShow();
+        }
+    });
+    pagePattern->SetOnPageHide([weak = Referenced::WeakClaim(view)]() {
+        auto view = weak.Upgrade();
+        if (view) {
+            view->FireOnHide();
+        }
+    });
+    pagePattern->SetOnBackPressed([weak = Referenced::WeakClaim(view)]() {
+        auto view = weak.Upgrade();
+        if (view) {
+            return view->FireOnBackPress();
+        }
+        return false;
+    });
+}
+
 void UpdateCardRootComponent(const panda::Local<panda::ObjectRef>& obj)
 {
     auto* view = static_cast<JSView*>(obj->GetNativePointerField(0));
     if (!view && !static_cast<JSViewPartialUpdate*>(view) && !static_cast<JSViewFullUpdate*>(view)) {
-        LOGE("UpdateCardRootComponent: argument provided is not a View!");
         return;
     }
 
@@ -156,14 +204,12 @@ void UpdateCardRootComponent(const panda::Local<panda::ObjectRef>& obj)
         RefPtr<NG::PageRouterManager> pageRouterManager;
 
         if (container->IsFRSCardContainer()) {
-            LOGI("Run Card In FRS");
             auto frontEnd = AceType::DynamicCast<FormFrontendDeclarative>(container->GetCardFrontend(cardId).Upgrade());
             CHECK_NULL_VOID(frontEnd);
             auto delegate = frontEnd->GetDelegate();
             CHECK_NULL_VOID(delegate);
             pageRouterManager = delegate->GetPageRouterManager();
         } else {
-            LOGI("Run Card In Host");
             auto frontEnd = AceType::DynamicCast<CardFrontendDeclarative>(container->GetCardFrontend(cardId).Upgrade());
             CHECK_NULL_VOID(frontEnd);
             auto delegate = frontEnd->GetDelegate();
@@ -178,84 +224,71 @@ void UpdateCardRootComponent(const panda::Local<panda::ObjectRef>& obj)
         CHECK_NULL_VOID(pageRootNode);
         pageRootNode->MountToParent(pageNode);
 
-        // update page life cycle function.
-        auto pagePattern = pageNode->GetPattern<NG::PagePattern>();
-        CHECK_NULL_VOID(pagePattern);
-        pagePattern->SetOnPageShow([weak = Referenced::WeakClaim(view)]() {
-            auto view = weak.Upgrade();
-            if (view) {
-                view->FireOnShow();
-            }
-        });
-        pagePattern->SetOnPageHide([weak = Referenced::WeakClaim(view)]() {
-            auto view = weak.Upgrade();
-            if (view) {
-                view->FireOnHide();
-            }
-        });
-        pagePattern->SetOnBackPressed([weak = Referenced::WeakClaim(view)]() {
-            auto view = weak.Upgrade();
-            if (view) {
-                return view->FireOnBackPress();
-            }
-            return false;
-        });
-        return;
-    } else {
-        LOGE("eTSCard only support NG structure");
+        SetFormCallbacks(container, view);
+        UpdatePageLifeCycleFunctions(pageNode, view);
     }
 }
 
 panda::Local<panda::JSValueRef> JsLoadDocument(panda::JsiRuntimeCallInfo* runtimeCallInfo)
 {
-    LOGD("Load Document start");
     EcmaVM* vm = runtimeCallInfo->GetVM();
     int32_t argc = runtimeCallInfo->GetArgsNumber();
     if (argc != 1) {
-        LOGE("The arg is wrong, must have one argument");
         return panda::JSValueRef::Undefined(vm);
     }
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     if (!firstArg->IsObject()) {
-        LOGE("The arg is wrong, value must be object");
         return panda::JSValueRef::Undefined(vm);
     }
 
-    panda::Local<panda::ObjectRef> obj = firstArg->ToObject(vm);
+    panda::Global<panda::ObjectRef> obj(vm, Local<panda::ObjectRef>(firstArg));
+    JsiDeclarativeEngine::SetEntryObject(obj);
 #if defined(PREVIEW)
     panda::Global<panda::ObjectRef> rootView(vm, obj->ToObject(vm));
     auto runtime = JsiDeclarativeEngineInstance::GetCurrentRuntime();
     shared_ptr<ArkJSRuntime> arkRuntime = std::static_pointer_cast<ArkJSRuntime>(runtime);
     arkRuntime->AddRootView(rootView);
 #endif
-    UpdateRootComponent(obj);
+
+    return panda::JSValueRef::Undefined(vm);
+}
+
+panda::Local<panda::JSValueRef> JsLoadCustomTitleBar(panda::JsiRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    int32_t argc = runtimeCallInfo->GetArgsNumber();
+    if (argc != 1) {
+        return panda::JSValueRef::Undefined(vm);
+    }
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    if (!firstArg->IsObject()) {
+        return panda::JSValueRef::Undefined(vm);
+    }
+
+    panda::Local<panda::ObjectRef> obj = firstArg->ToObject(vm);
+    AddCustomTitleBarComponent(obj);
 
     return panda::JSValueRef::Undefined(vm);
 }
 
 panda::Local<panda::JSValueRef> JsRegisterNamedRoute(panda::JsiRuntimeCallInfo* runtimeCallInfo)
 {
-    LOGD("Register NamedRoute start");
     EcmaVM* vm = runtimeCallInfo->GetVM();
     int32_t argc = runtimeCallInfo->GetArgsNumber();
     // will need three arguments
     if (argc != 3) {
-        LOGE("The arg is wrong, must have three arguments");
         return panda::JSValueRef::Undefined(vm);
     }
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     if (!firstArg->IsFunction()) {
-        LOGE("The arg is wrong, value must be function");
         return panda::JSValueRef::Undefined(vm);
     }
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
     if (!secondArg->IsString()) {
-        LOGE("The arg is wrong, value must be string");
         return panda::JSValueRef::Undefined(vm);
     }
     Local<JSValueRef> thirdArg = runtimeCallInfo->GetCallArgRef(2);
     if (!thirdArg->IsObject()) {
-        LOGE("The arg is wrong, value must be object");
         return panda::JSValueRef::Undefined(vm);
     }
 
@@ -269,38 +302,33 @@ panda::Local<panda::JSValueRef> JsRegisterNamedRoute(panda::JsiRuntimeCallInfo* 
 panda::Local<panda::JSValueRef> JSPostCardAction(panda::JsiRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
-#if defined(PREViEW)
+#if defined(PREVIEW)
     LOGW("[Engine Log] The postCardAction interface in the Previewer is a mocked implementation and"
 "may behave differently than an real device.");
     return panda::JSValueRef::Undefined(vm);
 #endif
     int32_t argc = runtimeCallInfo->GetArgsNumber();
     if (argc > 2) {
-        LOGE("The arg is wrong, must have no more than two argument");
         return panda::JSValueRef::Undefined(vm);
     }
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     if (!firstArg->IsObject()) {
-        LOGE("The arg is wrong, value must be IsObject");
         return panda::JSValueRef::Undefined(vm);
     }
 
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
     if (!secondArg->IsObject()) {
-        LOGE("The arg is wrong, value must be object");
         return panda::JSValueRef::Undefined(vm);
     }
 
     panda::Local<panda::ObjectRef> obj = firstArg->ToObject(vm);
     auto* view = static_cast<JSView*>(obj->GetNativePointerField(0));
     if (!view && !static_cast<JSViewPartialUpdate*>(view) && !static_cast<JSViewFullUpdate*>(view)) {
-        LOGE("JSPostCardAction: argument provided is not a View!");
         return panda::JSValueRef::Undefined(vm);
     }
 
     auto value = panda::JSON::Stringify(vm, secondArg);
     if (!value->IsString()) {
-        LOGE("The second arg is wrong");
         return panda::JSValueRef::Undefined(vm);
     }
     auto valueStr = panda::Local<panda::StringRef>(value);
@@ -311,14 +339,12 @@ panda::Local<panda::JSValueRef> JSPostCardAction(panda::JsiRuntimeCallInfo* runt
     auto container = Container::Current();
     if (container && container->IsUseNewPipeline()) {
         if (container->IsFRSCardContainer()) {
-            LOGE("Form PostCardAction in FRS");
             auto frontEnd = AceType::DynamicCast<FormFrontendDeclarative>(container->GetCardFrontend(cardId).Upgrade());
             CHECK_NULL_RETURN(frontEnd, panda::JSValueRef::Undefined(vm));
             auto delegate = frontEnd->GetDelegate();
             CHECK_NULL_RETURN(delegate, panda::JSValueRef::Undefined(vm));
             delegate->FireCardAction(action);
         } else {
-            LOGE("Form PostCardAction in HOST");
             auto frontEnd = AceType::DynamicCast<CardFrontendDeclarative>(container->GetCardFrontend(cardId).Upgrade());
             CHECK_NULL_RETURN(frontEnd, panda::JSValueRef::Undefined(vm));
             auto delegate = frontEnd->GetDelegate();
@@ -332,16 +358,13 @@ panda::Local<panda::JSValueRef> JSPostCardAction(panda::JsiRuntimeCallInfo* runt
 
 panda::Local<panda::JSValueRef> JsLoadEtsCard(panda::JsiRuntimeCallInfo* runtimeCallInfo)
 {
-    LOGI("Load eTS Card start");
     EcmaVM* vm = runtimeCallInfo->GetVM();
     int32_t argc = runtimeCallInfo->GetArgsNumber();
     if (argc > 2) {
-        LOGE("The arg is wrong, must have no more than two argument");
         return panda::JSValueRef::Undefined(vm);
     }
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     if (!firstArg->IsObject()) {
-        LOGE("The arg is wrong, value must be object");
         return panda::JSValueRef::Undefined(vm);
     }
 
@@ -354,7 +377,6 @@ panda::Local<panda::JSValueRef> JsLoadEtsCard(panda::JsiRuntimeCallInfo* runtime
 #if defined(PREVIEW)
 panda::Local<panda::JSValueRef> JsPreviewerComponent(panda::JsiRuntimeCallInfo* runtimeCallInfo)
 {
-    LOGD("PreviewerComponent start");
     EcmaVM* vm = runtimeCallInfo->GetVM();
 
     auto runtime = JsiDeclarativeEngineInstance::GetCurrentRuntime();
@@ -362,7 +384,6 @@ panda::Local<panda::JSValueRef> JsPreviewerComponent(panda::JsiRuntimeCallInfo* 
     std::string requiredComponentName = arkRuntime->GetRequiredComponent();
     panda::Global<panda::ObjectRef> obj = arkRuntime->GetPreviewComponent(vm, requiredComponentName);
     if (obj->IsUndefined()) {
-        LOGE("Get PreviewComponent object from map failed");
         return panda::JSValueRef::Undefined(vm);
     }
     UpdateRootComponent(obj.ToLocal());
@@ -372,7 +393,6 @@ panda::Local<panda::JSValueRef> JsPreviewerComponent(panda::JsiRuntimeCallInfo* 
 
 panda::Local<panda::JSValueRef> JsGetPreviewComponentFlag(panda::JsiRuntimeCallInfo* runtimeCallInfo)
 {
-    LOGD("Get PreviewComponentFlag start");
     EcmaVM* vm = runtimeCallInfo->GetVM();
 
     auto runtime = JsiDeclarativeEngineInstance::GetCurrentRuntime();
@@ -386,14 +406,12 @@ panda::Local<panda::JSValueRef> JsGetPreviewComponentFlag(panda::JsiRuntimeCallI
 
 panda::Local<panda::JSValueRef> JsStorePreviewComponents(panda::JsiRuntimeCallInfo* runtimeCallInfo)
 {
-    LOGD("Store PreviewerComponents start");
     EcmaVM* vm = runtimeCallInfo->GetVM();
 
     auto runtime = JsiDeclarativeEngineInstance::GetCurrentRuntime();
     shared_ptr<ArkJSRuntime> arkRuntime = std::static_pointer_cast<ArkJSRuntime>(runtime);
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     if (!firstArg->IsNumber()) {
-        LOGE("The first value must be a number when calling JsStorePreviewComponents");
         return panda::JSValueRef::Undefined(vm);
     }
     panda::Local<NumberRef> componentNum = firstArg->ToNumber(vm);
@@ -401,13 +419,11 @@ panda::Local<panda::JSValueRef> JsStorePreviewComponents(panda::JsiRuntimeCallIn
     for (uint32_t index = 1; index <= numOfComponent * 2; index++) { // 2: each component pass two args, name and itself
         Local<JSValueRef> componentName = runtimeCallInfo->GetCallArgRef(index);
         if (!componentName->IsString()) {
-            LOGE("The %{private}d componentName passed by StorePreviewComponents is not a string", index);
             return panda::JSValueRef::Undefined(vm);
         }
         std::string name = componentName->ToString(vm)->ToString();
         Local<JSValueRef> componentObj = runtimeCallInfo->GetCallArgRef(++index);
         if (componentObj->IsUndefined()) {
-            LOGE("The %{private}d component passed by StorePreviewComponents is undefined", index);
             return panda::JSValueRef::Undefined(vm);
         }
         panda::Global<panda::ObjectRef> obj(vm, componentObj->ToObject(vm));
@@ -419,7 +435,6 @@ panda::Local<panda::JSValueRef> JsStorePreviewComponents(panda::JsiRuntimeCallIn
 
 panda::Local<panda::JSValueRef> JsGetRootView(panda::JsiRuntimeCallInfo* runtimeCallInfo)
 {
-    LOGD("JsGetRootView");
     auto runtime = JsiDeclarativeEngineInstance::GetCurrentRuntime();
     shared_ptr<ArkJSRuntime> arkRuntime = std::static_pointer_cast<ArkJSRuntime>(runtime);
     return arkRuntime->GetRootView().ToLocal();
@@ -428,27 +443,22 @@ panda::Local<panda::JSValueRef> JsGetRootView(panda::JsiRuntimeCallInfo* runtime
 
 panda::Local<panda::JSValueRef> JsDumpMemoryStats(panda::JsiRuntimeCallInfo* runtimeCallInfo)
 {
-    LOGD("dumpMemoryStats: Not Implemented for ARK. UnSupported");
     EcmaVM* vm = runtimeCallInfo->GetVM();
     return panda::JSValueRef::Undefined(vm);
 }
 
 panda::Local<panda::JSValueRef> JsGetI18nResource(panda::JsiRuntimeCallInfo* runtimeCallInfo)
 {
-    LOGD("JsGetI18nResource");
     EcmaVM* vm = runtimeCallInfo->GetVM();
     int32_t argc = runtimeCallInfo->GetArgsNumber();
     if (vm == nullptr) {
-        LOGE("The EcmaVM is null");
         return panda::JSValueRef::Undefined(vm);
     }
     if (argc != 2 && argc != 1) {
-        LOGE("The arg is wrong, it is supposed to have one or two arguments");
         return panda::JSValueRef::Undefined(vm);
     }
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     if (!firstArg->IsString()) {
-        LOGE("The arg is wrong, value must be string");
         return panda::JSValueRef::Undefined(vm);
     }
 
@@ -456,7 +466,6 @@ panda::Local<panda::JSValueRef> JsGetI18nResource(panda::JsiRuntimeCallInfo* run
     std::string str = firstArg->ToString(vm)->ToString();
     StringUtils::SplitStr(str, ".", splitStr);
     if (splitStr.size() != 2) {
-        LOGE("input string res value must can be split by dot");
         return panda::JSValueRef::Undefined(vm);
     }
 
@@ -502,16 +511,13 @@ panda::Local<panda::JSValueRef> JsGetI18nResource(panda::JsiRuntimeCallInfo* run
 
 panda::Local<panda::JSValueRef> JsGetMediaResource(panda::JsiRuntimeCallInfo* runtimeCallInfo)
 {
-    LOGD("JsGetMediaResource");
     EcmaVM* vm = runtimeCallInfo->GetVM();
     int32_t argc = runtimeCallInfo->GetArgsNumber();
     if (argc != 1) {
-        LOGE("The arg is wrong, must have one argument");
         return panda::JSValueRef::Undefined(vm);
     }
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     if (!firstArg->IsString()) {
-        LOGE("The arg is wrong, value must be string");
         return panda::JSValueRef::Undefined(vm);
     }
 
@@ -525,12 +531,10 @@ RefPtr<FrontendDelegate> JsGetFrontendDelegate()
     auto engine = EngineHelper::GetEngine(Container::CurrentId());
     auto jsiEngine = AceType::DynamicCast<JsiDeclarativeEngine>(engine);
     if (!jsiEngine) {
-        LOGE("jsiEngine is null");
         return nullptr;
     }
     auto engineInstance = jsiEngine->GetEngineInstance();
     if (engineInstance == nullptr) {
-        LOGE("engineInstance is null!");
         return nullptr;
     }
     return engineInstance->GetDelegate();
@@ -540,12 +544,10 @@ panda::Local<panda::JSValueRef> JsGetInspectorNodes(panda::JsiRuntimeCallInfo* r
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     if (vm == nullptr) {
-        LOGE("The EcmaVM is null");
         return panda::JSValueRef::Undefined(vm);
     }
     auto declarativeDelegate = AceType::DynamicCast<FrontendDelegateDeclarative>(JsGetFrontendDelegate());
     if (!declarativeDelegate) {
-        LOGE("declarativeDelegate is null!");
         return panda::JSValueRef::Undefined(vm);
     }
     auto accessibilityManager = declarativeDelegate->GetJSAccessibilityManager();
@@ -558,22 +560,18 @@ panda::Local<panda::JSValueRef> JsGetInspectorNodeById(panda::JsiRuntimeCallInfo
     EcmaVM* vm = runtimeCallInfo->GetVM();
     int32_t argc = runtimeCallInfo->GetArgsNumber();
     if (vm == nullptr) {
-        LOGE("The EcmaVM is null");
         return panda::JSValueRef::Undefined(vm);
     }
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     if (argc < 1 || !firstArg->IsNumber()) {
-        LOGE("The arg is wrong, must have one argument");
         return panda::JSValueRef::Undefined(vm);
     }
     auto declarativeDelegate = OHOS::Ace::AceType::DynamicCast<FrontendDelegateDeclarative>(JsGetFrontendDelegate());
     if (!declarativeDelegate) {
-        LOGE("declarativeDelegate is null!");
         return panda::JSValueRef::Undefined(vm);
     }
     auto accessibilityManager = declarativeDelegate->GetJSAccessibilityManager();
     if (!accessibilityManager) {
-        LOGE("accessibilityManager is null!");
         return panda::JSValueRef::Undefined(vm);
     }
     int32_t intValue = firstArg->Int32Value(vm);
@@ -585,12 +583,10 @@ panda::Local<panda::JSValueRef> JsGetInspectorTree(panda::JsiRuntimeCallInfo* ru
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     if (vm == nullptr) {
-        LOGE("The EcmaVM is null");
         return panda::JSValueRef::Undefined(vm);
     }
     auto container = Container::Current();
     if (!container) {
-        LOGW("container is null");
         return panda::JSValueRef::Undefined(vm);
     }
 
@@ -601,7 +597,6 @@ panda::Local<panda::JSValueRef> JsGetInspectorTree(panda::JsiRuntimeCallInfo* ru
 #if !defined(NG_BUILD)
     auto pipelineContext = AceType::DynamicCast<PipelineContext>(container->GetPipelineContext());
     if (pipelineContext == nullptr) {
-        LOGE("pipeline is null");
         return panda::JSValueRef::Undefined(vm);
     }
     auto nodeInfos = V2::Inspector::GetInspectorTree(pipelineContext);
@@ -616,17 +611,14 @@ panda::Local<panda::JSValueRef> JsGetInspectorByKey(panda::JsiRuntimeCallInfo* r
     EcmaVM* vm = runtimeCallInfo->GetVM();
     auto argc = runtimeCallInfo->GetArgsNumber();
     if (vm == nullptr) {
-        LOGE("The EcmaVM is null");
         return panda::JSValueRef::Undefined(vm);
     }
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     if (argc < 1 || !firstArg->IsString()) {
-        LOGE("The arg is wrong, must have one string argument");
         return panda::JSValueRef::Undefined(vm);
     }
     auto container = Container::Current();
     if (!container) {
-        LOGW("container is null");
         return panda::JSValueRef::Undefined(vm);
     }
     std::string key = firstArg->ToString(vm)->ToString();
@@ -637,7 +629,6 @@ panda::Local<panda::JSValueRef> JsGetInspectorByKey(panda::JsiRuntimeCallInfo* r
 #if !defined(NG_BUILD)
     auto pipelineContext = AceType::DynamicCast<PipelineContext>(container->GetPipelineContext());
     if (pipelineContext == nullptr) {
-        LOGE("pipelineContext==nullptr");
         return panda::JSValueRef::Undefined(vm);
     }
     auto resultStr = V2::Inspector::GetInspectorNodeByKey(pipelineContext, key);
@@ -652,17 +643,14 @@ panda::Local<panda::JSValueRef> JsSendEventByKey(panda::JsiRuntimeCallInfo* runt
     EcmaVM* vm = runtimeCallInfo->GetVM();
     auto argc = runtimeCallInfo->GetArgsNumber();
     if (vm == nullptr) {
-        LOGE("The EcmaVM is null");
         return panda::JSValueRef::Undefined(vm);
     }
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     if (argc < 3 || !firstArg->IsString()) { // 3: arg numbers
-        LOGE("The arg is wrong, must have one string argument");
         return panda::JSValueRef::Undefined(vm);
     }
     auto container = Container::Current();
     if (!container) {
-        LOGW("container is null");
         return panda::JSValueRef::Undefined(vm);
     }
 
@@ -676,7 +664,6 @@ panda::Local<panda::JSValueRef> JsSendEventByKey(panda::JsiRuntimeCallInfo* runt
 #if !defined(NG_BUILD)
     auto pipelineContext = AceType::DynamicCast<PipelineContext>(container->GetPipelineContext());
     if (pipelineContext == nullptr) {
-        LOGE("pipelineContext==nullptr");
         return panda::JSValueRef::Undefined(vm);
     }
     auto result = V2::Inspector::SendEventByKey(pipelineContext, key, action, params);
@@ -712,23 +699,19 @@ panda::Local<panda::JSValueRef> JsSendTouchEvent(panda::JsiRuntimeCallInfo* runt
     EcmaVM* vm = runtimeCallInfo->GetVM();
     auto argc = runtimeCallInfo->GetArgsNumber();
     if (vm == nullptr) {
-        LOGE("The EcmaVM is null");
         return panda::JSValueRef::Undefined(vm);
     }
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     if (argc < 1 || !firstArg->IsObject()) {
-        LOGE("The arg is wrong, must have one object argument");
         return panda::JSValueRef::Undefined(vm);
     }
 
     auto container = Container::Current();
     if (!container) {
-        LOGW("container is null");
         return panda::JSValueRef::Undefined(vm);
     }
     auto pipelineContext = container->GetPipelineContext();
     if (pipelineContext == nullptr) {
-        LOGE("pipelineContext==nullptr");
         return panda::JSValueRef::Undefined(vm);
     }
     JsiObject obj(firstArg);
@@ -769,23 +752,19 @@ panda::Local<panda::JSValueRef> JsSendKeyEvent(panda::JsiRuntimeCallInfo* runtim
     EcmaVM* vm = runtimeCallInfo->GetVM();
     auto argc = runtimeCallInfo->GetArgsNumber();
     if (vm == nullptr) {
-        LOGE("The EcmaVM is null");
         return panda::JSValueRef::Undefined(vm);
     }
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     if (argc < 1 || !firstArg->IsObject()) {
-        LOGE("The arg is wrong, must have one object argument");
         return panda::JSValueRef::Undefined(vm);
     }
 
     auto container = Container::Current();
     if (!container) {
-        LOGW("container is null");
         return panda::JSValueRef::Undefined(vm);
     }
     auto pipelineContext = container->GetPipelineContext();
     if (pipelineContext == nullptr) {
-        LOGE("pipelineContext==nullptr");
         return panda::JSValueRef::Undefined(vm);
     }
     JsiObject obj(firstArg);
@@ -823,23 +802,19 @@ panda::Local<panda::JSValueRef> JsSendMouseEvent(panda::JsiRuntimeCallInfo* runt
     EcmaVM* vm = runtimeCallInfo->GetVM();
     auto argc = runtimeCallInfo->GetArgsNumber();
     if (vm == nullptr) {
-        LOGE("The EcmaVM is null");
         return panda::JSValueRef::Undefined(vm);
     }
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     if (argc < 1 || !firstArg->IsObject()) {
-        LOGE("The arg is wrong, must have one object argument");
         return panda::JSValueRef::Undefined(vm);
     }
 
     auto container = Container::Current();
     if (!container) {
-        LOGW("container is null");
         return panda::JSValueRef::Undefined(vm);
     }
     auto pipelineContext = container->GetPipelineContext();
     if (pipelineContext == nullptr) {
-        LOGE("pipelineContext==nullptr");
         return panda::JSValueRef::Undefined(vm);
     }
     JsiObject obj(firstArg);
@@ -854,17 +829,15 @@ panda::Local<panda::JSValueRef> Vp2Px(panda::JsiRuntimeCallInfo* runtimeCallInfo
     EcmaVM* vm = runtimeCallInfo->GetVM();
     int32_t argc = runtimeCallInfo->GetArgsNumber();
     if (argc != 1) {
-        LOGE("The arg is wrong, must have one argument");
         return panda::JSValueRef::Undefined(vm);
     }
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     if (!firstArg->IsNumber()) {
-        LOGE("The arg is wrong, value must be number");
         return panda::JSValueRef::Undefined(vm);
     }
 
     double vpValue = firstArg->ToNumber(vm)->Value();
-    double density = SystemProperties::GetResolution();
+    double density = PipelineBase::GetCurrentDensity();
     double pxValue = vpValue * density;
     return panda::NumberRef::New(vm, pxValue);
 }
@@ -874,17 +847,14 @@ panda::Local<panda::JSValueRef> Px2Vp(panda::JsiRuntimeCallInfo* runtimeCallInfo
     EcmaVM* vm = runtimeCallInfo->GetVM();
     int32_t argc = runtimeCallInfo->GetArgsNumber();
     if (argc != 1) {
-        LOGE("The arg is wrong, must have one argument");
         return panda::JSValueRef::Undefined(vm);
     }
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     if (!firstArg->IsNumber()) {
-        LOGE("The arg is wrong, value must be number");
         return panda::JSValueRef::Undefined(vm);
     }
-    double density = SystemProperties::GetResolution();
+    double density = PipelineBase::GetCurrentDensity();
     if (NearZero(density)) {
-        LOGE("The density cannot be zero");
         return panda::JSValueRef::Undefined(vm);
     }
 
@@ -899,21 +869,18 @@ panda::Local<panda::JSValueRef> Fp2Px(panda::JsiRuntimeCallInfo* runtimeCallInfo
     EcmaVM* vm = runtimeCallInfo->GetVM();
     int32_t argc = runtimeCallInfo->GetArgsNumber();
     if (argc != 1) {
-        LOGE("The arg is wrong, must have one argument");
         return panda::JSValueRef::Undefined(vm);
     }
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     if (!firstArg->IsNumber()) {
-        LOGE("The arg is wrong, value must be number");
         return panda::JSValueRef::Undefined(vm);
     }
 
-    double density = SystemProperties::GetResolution();
+    double density = PipelineBase::GetCurrentDensity();
     double fpValue = firstArg->ToNumber(vm)->Value();
 
     auto container = Container::Current();
     if (!container) {
-        LOGW("container is null");
         return panda::JSValueRef::Undefined(vm);
     }
     auto pipelineContext = container->GetPipelineContext();
@@ -930,24 +897,20 @@ panda::Local<panda::JSValueRef> Px2Fp(panda::JsiRuntimeCallInfo* runtimeCallInfo
     EcmaVM* vm = runtimeCallInfo->GetVM();
     int32_t argc = runtimeCallInfo->GetArgsNumber();
     if (argc != 1) {
-        LOGE("The arg is wrong, must have one argument");
         return panda::JSValueRef::Undefined(vm);
     }
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     if (!firstArg->IsNumber()) {
-        LOGE("The arg is wrong, value must be number");
         return panda::JSValueRef::Undefined(vm);
     }
-    double density = SystemProperties::GetResolution();
+    double density = PipelineBase::GetCurrentDensity();
     if (NearZero(density)) {
-        LOGE("The density cannot be zero");
         return panda::JSValueRef::Undefined(vm);
     }
 
     double pxValue = firstArg->ToNumber(vm)->Value();
     auto container = Container::Current();
     if (!container) {
-        LOGW("container is null");
         return panda::JSValueRef::Undefined(vm);
     }
     auto pipelineContext = container->GetPipelineContext();
@@ -965,12 +928,10 @@ panda::Local<panda::JSValueRef> Lpx2Px(panda::JsiRuntimeCallInfo* runtimeCallInf
     EcmaVM* vm = runtimeCallInfo->GetVM();
     int32_t argc = runtimeCallInfo->GetArgsNumber();
     if (argc != 1) {
-        LOGE("The arg is wrong, must have one argument");
         return panda::JSValueRef::Undefined(vm);
     }
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     if (!firstArg->IsNumber()) {
-        LOGE("The arg is wrong, value must be number");
         return panda::JSValueRef::Undefined(vm);
     }
     auto container = Container::Current();
@@ -988,12 +949,10 @@ panda::Local<panda::JSValueRef> Px2Lpx(panda::JsiRuntimeCallInfo* runtimeCallInf
     EcmaVM* vm = runtimeCallInfo->GetVM();
     int32_t argc = runtimeCallInfo->GetArgsNumber();
     if (argc != 1) {
-        LOGE("The arg is wrong, must have one argument");
         return panda::JSValueRef::Undefined(vm);
     }
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     if (!firstArg->IsNumber()) {
-        LOGE("The arg is wrong, value must be number");
         return panda::JSValueRef::Undefined(vm);
     }
     auto container = Container::Current();
@@ -1011,18 +970,15 @@ panda::Local<panda::JSValueRef> SetAppBackgroundColor(panda::JsiRuntimeCallInfo*
     EcmaVM* vm = runtimeCallInfo->GetVM();
     int32_t argc = runtimeCallInfo->GetArgsNumber();
     if (argc != 1) {
-        LOGE("The arg is wrong, must have one argument");
         return panda::JSValueRef::Undefined(vm);
     }
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     if (!firstArg->IsString()) {
-        LOGE("The arg is wrong, value must be number");
         return panda::JSValueRef::Undefined(vm);
     }
     std::string backgroundColorStr = firstArg->ToString(vm)->ToString();
     auto container = Container::Current();
     if (!container) {
-        LOGW("container is null");
         return panda::JSValueRef::Undefined(vm);
     }
     auto pipelineContext = container->GetPipelineContext();
@@ -1037,12 +993,10 @@ panda::Local<panda::JSValueRef> RequestFocus(panda::JsiRuntimeCallInfo* runtimeC
     EcmaVM* vm = runtimeCallInfo->GetVM();
     int32_t argc = runtimeCallInfo->GetArgsNumber();
     if (vm == nullptr) {
-        LOGE("The EcmaVM is null");
         return panda::JSValueRef::Undefined(vm);
     }
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     if (argc < 1 || !firstArg->IsString()) {
-        LOGE("The arg is wrong, must have one object argument");
         return panda::JSValueRef::Undefined(vm);
     }
     std::string inspectorKey = firstArg->ToString(vm)->ToString();
@@ -1051,7 +1005,6 @@ panda::Local<panda::JSValueRef> RequestFocus(panda::JsiRuntimeCallInfo* runtimeC
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipelineContext, panda::BooleanRef::New(vm, result));
     if (!pipelineContext->GetTaskExecutor()) {
-        LOGE("pipelineContext's task excutor is null");
         return panda::BooleanRef::New(vm, result);
     }
     pipelineContext->GetTaskExecutor()->PostSyncTask(
@@ -1060,12 +1013,53 @@ panda::Local<panda::JSValueRef> RequestFocus(panda::JsiRuntimeCallInfo* runtimeC
     return panda::BooleanRef::New(vm, result);
 }
 
+panda::Local<panda::JSValueRef> SetCursor(panda::JsiRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    int32_t argc = runtimeCallInfo->GetArgsNumber();
+    if (vm == nullptr) {
+        return panda::JSValueRef::Undefined(vm);
+    }
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    if (argc < 1 || !firstArg->IsNumber()) {
+        return panda::JSValueRef::Undefined(vm);
+    }
+    int32_t intValue = firstArg->Int32Value(vm);
+
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipelineContext, panda::JSValueRef::Undefined(vm));
+    if (!pipelineContext->GetTaskExecutor()) {
+        return panda::JSValueRef::Undefined(vm);
+    }
+    pipelineContext->GetTaskExecutor()->PostSyncTask(
+        [pipelineContext, intValue]() { pipelineContext->SetCursor(intValue); },
+        TaskExecutor::TaskType::UI);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+panda::Local<panda::JSValueRef> RestoreDefault(panda::JsiRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    if (vm == nullptr) {
+        return panda::JSValueRef::Undefined(vm);
+    }
+
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipelineContext, panda::JSValueRef::Undefined(vm));
+    if (!pipelineContext->GetTaskExecutor()) {
+        return panda::JSValueRef::Undefined(vm);
+    }
+    pipelineContext->GetTaskExecutor()->PostSyncTask(
+        [pipelineContext]() { pipelineContext->RestoreDefault(); },
+        TaskExecutor::TaskType::UI);
+    return panda::JSValueRef::Undefined(vm);
+}
+
 #ifdef FORM_SUPPORTED
 void JsRegisterFormViews(BindingTarget globalObj, const std::unordered_set<std::string>& formModuleList, bool isReload)
 {
     auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetCurrentRuntime());
     if (!runtime) {
-        LOGE("JsRegisterViews can't find runtime");
         return;
     }
     if (isReload) {
@@ -1234,7 +1228,6 @@ void JsRegisterFormViews(BindingTarget globalObj, const std::unordered_set<std::
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "IconPosition"), *iconPosition);
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "PickerStyle"), *pickerStyle);
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "BadgePosition"), *badgePosition);
-    LOGD("View classes and jsCreateDocument, registerObservableObject functions registered.");
 }
 #endif
 
@@ -1242,7 +1235,6 @@ void JsRegisterViews(BindingTarget globalObj)
 {
     auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetCurrentRuntime());
     if (!runtime) {
-        LOGE("JsRegisterViews can't find runtime");
         return;
     }
     auto vm = runtime->GetEcmaVm();
@@ -1305,7 +1297,17 @@ void JsRegisterViews(BindingTarget globalObj)
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "focusControl"), focusControlObj);
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "registerNamedRoute"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), JsRegisterNamedRoute));
+    globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "getArkUINativeModule"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NG::ArkUINativeModule::GetArkUINativeModule));
+    globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "loadCustomTitleBar"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), JsLoadCustomTitleBar));
 
+    BindingTarget cursorControlObj = panda::ObjectRef::New(const_cast<panda::EcmaVM*>(vm));
+    cursorControlObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "setCursor"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SetCursor));
+    cursorControlObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "restoreDefault"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RestoreDefault));
+    globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "cursorControl"), cursorControlObj);
     JsBindViews(globalObj);
 
     JSObjectTemplate toggleType;
@@ -1417,7 +1419,6 @@ void JsRegisterViews(BindingTarget globalObj)
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "IconPosition"), *iconPosition);
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "PickerStyle"), *pickerStyle);
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "BadgePosition"), *badgePosition);
-    LOGD("View classes and jsCreateDocument, registerObservableObject functions registered.");
 }
 
 } // namespace OHOS::Ace::Framework

@@ -170,6 +170,7 @@ private:
     void PaintOverlayForHoverAndPress(const Offset& offset, SkCanvas* canvas) const;
     void PaintTextField(const Offset& offset, RenderContext& context, SkCanvas* canvas, bool isMagnifier = false);
     SkVector GetSkRadii(const Radius& radius) const;
+    void PaintScrollBar(const Offset& offset, RenderContext& context, SkCanvas* canvas);
 #else
     void PaintCaret(RSCanvas& canvas, const Rect& caretRect);
     void PaintDecoration(const Offset& offset, RSCanvas* canvas, const Size& size, RenderContext& context);
@@ -182,9 +183,9 @@ private:
     void PaintOverlayForHoverAndPress(const Offset& offset, RSCanvas* canvas) const;
     void PaintTextField(const Offset& offset, RenderContext& context, RSCanvas* canvas, bool isMagnifier = false);
     RSPoint GetRSRadii(const Radius& radius) const;
+    void PaintScrollBar(const Offset& offset, RenderContext& context, RSCanvas* canvas);
 #endif
     void PaintFocus(const Offset& offset, const Size& widthHeight, RenderContext& context);
-    void PaintScrollBar(const Offset& offset, RenderContext& context, SkCanvas* canvas);
 
 #ifndef USE_GRAPHIC_TEXT_GINE
     std::unique_ptr<txt::Paragraph> paragraph_;

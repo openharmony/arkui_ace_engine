@@ -235,6 +235,36 @@ public:
         parentGlobalOffset_ = parentGlobalOffset;
     }
 
+    const OffsetF& GetPixelGridRoundOffset() const
+    {
+        return pixelGridRoundOffset_;
+    }
+
+    void SetPixelGridRoundOffset(const OffsetF& pixelGridRoundOffset)
+    {
+        pixelGridRoundOffset_ = pixelGridRoundOffset;
+    }
+
+    const SizeF& GetPixelGridRoundSize() const
+    {
+        return pixelGridRoundSize_;
+    }
+
+    void SetPixelGridRoundSize(const SizeF& pixelGridRoundSize)
+    {
+        pixelGridRoundSize_ = pixelGridRoundSize;
+    }
+
+    const OffsetF& GetParentAbsoluteOffset() const
+    {
+        return parentAbsoluteOffset_;
+    }
+
+    void SetParentAbsoluteOffset(const OffsetF& parentAbsoluteOffset)
+    {
+        parentAbsoluteOffset_ = parentAbsoluteOffset;
+    }
+
     void ResetParentLayoutConstraint()
     {
         parentLayoutConstraint_ = std::nullopt;
@@ -288,6 +318,9 @@ private:
     std::unique_ptr<RectF> previousState_;
 
     OffsetF parentGlobalOffset_;
+    OffsetF parentAbsoluteOffset_;
+    OffsetF pixelGridRoundOffset_;
+    SizeF pixelGridRoundSize_;
 };
 } // namespace OHOS::Ace::NG
 

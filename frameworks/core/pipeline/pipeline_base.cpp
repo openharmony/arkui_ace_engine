@@ -22,10 +22,13 @@
 #include "base/log/event_report.h"
 #include "base/subwindow/subwindow_manager.h"
 #include "base/utils/system_properties.h"
+#include "base/utils/time_util.h"
 #include "base/utils/utils.h"
 #include "core/common/ace_application_info.h"
+#include "core/common/ace_engine.h"
 #include "core/common/container.h"
 #include "core/common/container_scope.h"
+#include "core/common/display_info.h"
 #include "core/common/font_manager.h"
 #include "core/common/frontend.h"
 #include "core/common/manager_interface.h"
@@ -95,7 +98,15 @@ PipelineBase::PipelineBase(std::shared_ptr<Window> window, RefPtr<TaskExecutor> 
 
 PipelineBase::~PipelineBase()
 {
+    std::lock_guard lock(destructMutex_);
     LOG_DESTROY();
+}
+
+void PipelineBase::SetCallBackNode(const WeakPtr<NG::FrameNode>& node)
+{
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    pipelineContext->UpdateCurrentActiveNode(node);
 }
 
 RefPtr<PipelineBase> PipelineBase::GetCurrentContext()
@@ -103,6 +114,39 @@ RefPtr<PipelineBase> PipelineBase::GetCurrentContext()
     auto currentContainer = Container::Current();
     CHECK_NULL_RETURN(currentContainer, nullptr);
     return currentContainer->GetPipelineContext();
+}
+
+double PipelineBase::GetCurrentDensity()
+{
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    return pipelineContext ? pipelineContext->GetDensity() : SystemProperties::GetResolution();
+}
+
+double PipelineBase::Px2VpWithCurrentDensity(double px)
+{
+    double density = PipelineBase::GetCurrentDensity();
+    return px / density;
+}
+
+double PipelineBase::Vp2PxWithCurrentDensity(double vp)
+{
+    double density = PipelineBase::GetCurrentDensity();
+    return vp * density;
+}
+
+RefPtr<PipelineBase> PipelineBase::GetMainPipelineContext()
+{
+    auto containerId = Container::CurrentId();
+    RefPtr<PipelineBase> context;
+    if (containerId >= MIN_SUBCONTAINER_ID) {
+        auto parentContainerId = SubwindowManager::GetInstance()->GetParentContainerId(containerId);
+        auto parentContainer = AceEngine::Get().GetContainer(parentContainerId);
+        CHECK_NULL_RETURN(parentContainer, nullptr);
+        context = parentContainer->GetPipelineContext();
+    } else {
+        context = PipelineBase::GetCurrentContext();
+    }
+    return context;
 }
 
 RefPtr<ThemeManager> PipelineBase::CurrentThemeManager()
@@ -250,8 +294,6 @@ void PipelineBase::HyperlinkStartAbility(const std::string& address) const
     CHECK_RUN_ON(UI);
     if (startAbilityHandler_) {
         startAbilityHandler_(address);
-    } else {
-        LOGE("Hyperlink fail to start ability due to handler is nullptr");
     }
 }
 
@@ -261,8 +303,6 @@ void PipelineBase::NotifyStatusBarBgColor(const Color& color) const
     LOGD("Notify StatusBar BgColor, color: %{public}x", color.GetValue());
     if (statusBarBgColorEventHandler_) {
         statusBarBgColorEventHandler_(color);
-    } else {
-        LOGE("fail to finish current context due to handler is nullptr");
     }
 }
 
@@ -343,8 +383,6 @@ void PipelineBase::OnActionEvent(const std::string& action)
     CHECK_RUN_ON(UI);
     if (actionEventHandler_) {
         actionEventHandler_(action);
-    } else {
-        LOGE("the action event handler is null");
     }
 }
 
@@ -369,8 +407,6 @@ void PipelineBase::PostAsyncEvent(TaskExecutor::Task&& task, TaskExecutor::TaskT
 {
     if (taskExecutor_) {
         taskExecutor_->PostTask(std::move(task), type);
-    } else {
-        LOGE("the task executor is nullptr");
     }
 }
 
@@ -378,8 +414,6 @@ void PipelineBase::PostAsyncEvent(const TaskExecutor::Task& task, TaskExecutor::
 {
     if (taskExecutor_) {
         taskExecutor_->PostTask(task, type);
-    } else {
-        LOGE("the task executor is nullptr");
     }
 }
 
@@ -387,8 +421,6 @@ void PipelineBase::PostSyncEvent(const TaskExecutor::Task& task, TaskExecutor::T
 {
     if (taskExecutor_) {
         taskExecutor_->PostSyncTask(task, type);
-    } else {
-        LOGE("the task executor is nullptr");
     }
 }
 
@@ -399,7 +431,6 @@ void PipelineBase::UpdateRootSizeAndScale(int32_t width, int32_t height)
     auto lock = frontend->GetLock();
     auto& windowConfig = frontend->GetWindowConfig();
     if (windowConfig.designWidth <= 0) {
-        LOGE("the frontend design width <= 0");
         return;
     }
     if (GetIsDeclarative()) {
@@ -410,7 +441,6 @@ void PipelineBase::UpdateRootSizeAndScale(int32_t width, int32_t height)
         viewScale_ = windowConfig.autoDesignWidth ? density_ : static_cast<double>(width) / windowConfig.designWidth;
     }
     if (NearZero(viewScale_)) {
-        LOGW("the view scale is zero");
         return;
     }
     dipScale_ = density_ / viewScale_;
@@ -429,7 +459,6 @@ void PipelineBase::DumpFrontend() const
 bool PipelineBase::Dump(const std::vector<std::string>& params) const
 {
     if (params.empty()) {
-        LOGW("the params is empty");
         return false;
     }
     // the first param is the key word of dump.
@@ -462,6 +491,9 @@ void PipelineBase::ForceLayoutForImplicitAnimation()
     if (!pendingImplicitLayout_.empty()) {
         pendingImplicitLayout_.top() = true;
     }
+    if (!pendingFrontendAnimation_.empty()) {
+        pendingFrontendAnimation_.top() = true;
+    }
 }
 
 void PipelineBase::ForceRenderForImplicitAnimation()
@@ -469,19 +501,61 @@ void PipelineBase::ForceRenderForImplicitAnimation()
     if (!pendingImplicitRender_.empty()) {
         pendingImplicitRender_.top() = true;
     }
+    if (!pendingFrontendAnimation_.empty()) {
+        pendingFrontendAnimation_.top() = true;
+    }
 }
 
 bool PipelineBase::Animate(const AnimationOption& option, const RefPtr<Curve>& curve,
     const std::function<void()>& propertyCallback, const std::function<void()>& finishCallback)
 {
     if (!propertyCallback) {
-        LOGE("failed to create animation, property callback is null!");
         return false;
     }
 
     OpenImplicitAnimation(option, curve, finishCallback);
     propertyCallback();
     return CloseImplicitAnimation();
+}
+
+std::function<void()> PipelineBase::GetWrappedAnimationCallback(const std::function<void()>& finishCallback)
+{
+    auto finishPtr = std::make_shared<std::function<void()>>(finishCallback);
+    finishFunctions_.emplace(finishPtr);
+    auto wrapFinishCallback = [weak = AceType::WeakClaim(this),
+                                  finishWeak = std::weak_ptr<std::function<void()>>(finishPtr)]() {
+        auto context = weak.Upgrade();
+        if (!context) {
+            return;
+        }
+        context->GetTaskExecutor()->PostTask(
+            [weak, finishWeak]() {
+                auto context = weak.Upgrade();
+                CHECK_NULL_VOID(context);
+                auto finishPtr = finishWeak.lock();
+                CHECK_NULL_VOID(finishPtr);
+                context->finishFunctions_.erase(finishPtr);
+                if (!(*finishPtr)) {
+                    if (context->IsFormRender()) {
+                        TAG_LOGI(AceLogTag::ACE_FORM, "[Form animation] Form animation is finish.");
+                        context->SetIsFormAnimation(false);
+                    }
+                    return;
+                }
+                if (context->IsFormRender()) {
+                    TAG_LOGI(AceLogTag::ACE_FORM, "[Form animation] Form animation is finish.");
+                    context->SetFormAnimationFinishCallback(true);
+                    (*finishPtr)();
+                    context->FlushBuild();
+                    context->SetFormAnimationFinishCallback(false);
+                    context->SetIsFormAnimation(false);
+                    return;
+                }
+                (*finishPtr)();
+            },
+            TaskExecutor::TaskType::UI);
+    };
+    return wrapFinishCallback;
 }
 
 void PipelineBase::PrepareOpenImplicitAnimation()
@@ -492,7 +566,7 @@ void PipelineBase::PrepareOpenImplicitAnimation()
     pendingImplicitRender_.push(false);
 
     // flush ui tasks before open implicit animation
-    if (!isReloading_ && !IsLayouting()) {
+    if (!IsLayouting()) {
         FlushUITasks();
     }
 #endif
@@ -502,14 +576,13 @@ void PipelineBase::PrepareCloseImplicitAnimation()
 {
 #ifdef ENABLE_ROSEN_BACKEND
     if (pendingImplicitLayout_.empty() && pendingImplicitRender_.empty()) {
-        LOGE("close implicit animation failed, need to open implicit animation first!");
         return;
     }
 
     // layout or render the views immediately to animate all related views, if layout or render updates are pending in
     // the animation closure
     if (pendingImplicitLayout_.top() || pendingImplicitRender_.top()) {
-        if (!isReloading_ && !IsLayouting()) {
+        if (!IsLayouting()) {
             FlushUITasks();
         } else if (IsLayouting()) {
             LOGW("IsLayouting, prepareCloseImplicitAnimation has tasks not flushed");
@@ -529,28 +602,13 @@ void PipelineBase::OpenImplicitAnimation(
 {
 #ifdef ENABLE_ROSEN_BACKEND
     PrepareOpenImplicitAnimation();
-
-    auto wrapFinishCallback = [weak = AceType::WeakClaim(this), finishCallback]() {
-        auto context = weak.Upgrade();
-        if (!context) {
-            return;
+    auto wrapFinishCallback = GetWrappedAnimationCallback(finishCallback);
+    if (IsFormRender()) {
+        SetIsFormAnimation(true);
+        if (!IsFormAnimationFinishCallback()) {
+            SetFormAnimationStartTime(GetMicroTickCount());
         }
-        context->GetTaskExecutor()->PostTask(
-            [finishCallback, weak]() {
-                auto context = weak.Upgrade();
-                CHECK_NULL_VOID(context);
-                CHECK_NULL_VOID(finishCallback);
-                if (context->IsFormRender()) {
-                    context->SetEnableImplicitAnimation(false);
-                    finishCallback();
-                    context->FlushBuild();
-                    context->SetEnableImplicitAnimation(true);
-                    return;
-                }
-                finishCallback();
-            },
-            TaskExecutor::TaskType::UI);
-    };
+    }
     AnimationUtils::OpenImplicitAnimation(option, curve, wrapFinishCallback);
 #endif
 }
@@ -627,6 +685,29 @@ void PipelineBase::OnVirtualKeyboardAreaChange(
     OnVirtualKeyboardHeightChange(keyboardHeight, rsTransaction);
 }
 
+void PipelineBase::OnVirtualKeyboardAreaChange(
+    Rect keyboardArea, double positionY, double height, const std::shared_ptr<Rosen::RSTransaction>& rsTransaction)
+{
+    auto currentContainer = Container::Current();
+    if (currentContainer && !currentContainer->IsSubContainer()) {
+        auto subwindow = SubwindowManager::GetInstance()->GetSubwindow(currentContainer->GetInstanceId());
+        if (subwindow && subwindow->GetShown()) {
+            // subwindow is shown, main window no need to handle the keyboard event
+            return;
+        }
+    }
+    double keyboardHeight = keyboardArea.Height();
+    if (NotifyVirtualKeyBoard(rootWidth_, rootHeight_, keyboardHeight)) {
+        return;
+    }
+    OnVirtualKeyboardHeightChange(keyboardHeight, positionY, height, rsTransaction);
+}
+
+void PipelineBase::OnFoldStatusChanged(FoldStatus foldStatus)
+{
+    OnFoldStatusChange(foldStatus);
+}
+
 double PipelineBase::ModifyKeyboardHeight(double keyboardHeight) const
 {
     auto windowRect = GetCurrentWindowRect();
@@ -642,6 +723,8 @@ void PipelineBase::SetGetWindowRectImpl(std::function<Rect()>&& callback)
         window_->SetGetWindowRectImpl(std::move(callback));
     }
 }
+
+void PipelineBase::ContainerModalUnFocus() {}
 
 Rect PipelineBase::GetCurrentWindowRect() const
 {
@@ -662,7 +745,6 @@ RefPtr<AccessibilityManager> PipelineBase::GetAccessibilityManager() const
 {
     auto frontend = weakFrontend_.Upgrade();
     if (!frontend) {
-        LOGE("frontend is nullptr");
         EventReport::SendAppStartException(AppStartExcepType::PIPELINE_CONTEXT_ERR);
         return nullptr;
     }
@@ -744,12 +826,12 @@ void PipelineBase::RemoveJsFormVsyncCallback(int32_t subWindowId)
 
 bool PipelineBase::MaybeRelease()
 {
-    CHECK_RUN_ON(UI);
     CHECK_NULL_RETURN(taskExecutor_, true);
     if (taskExecutor_->WillRunOnCurrentThread(TaskExecutor::TaskType::UI)) {
         LOGI("Destroy Pipeline on UI thread.");
         return true;
     } else {
+        std::lock_guard lock(destructMutex_);
         LOGI("Post Destroy Pipeline Task to UI thread.");
         return !taskExecutor_->PostTask([this] { delete this; }, TaskExecutor::TaskType::UI);
     }
@@ -758,7 +840,6 @@ bool PipelineBase::MaybeRelease()
 void PipelineBase::Destroy()
 {
     CHECK_RUN_ON(UI);
-    LOGI("PipelineBase::Destroy begin.");
     ClearImageCache();
     platformResRegister_.Reset();
     drawDelegate_.reset();
@@ -777,6 +858,23 @@ void PipelineBase::Destroy()
     virtualKeyBoardCallback_.clear();
     etsCardTouchEventCallback_.clear();
     formLinkInfoMap_.clear();
-    LOGI("PipelineBase::Destroy end.");
+    finishFunctions_.clear();
+}
+
+std::string PipelineBase::OnFormRecycle()
+{
+    if (onFormRecycle_) {
+        return onFormRecycle_();
+    }
+    LOGE("onFormRecycle_ is null.");
+    return "";
+}
+
+void PipelineBase::OnFormRecover(const std::string& statusData)
+{
+    if (onFormRecover_) {
+        return onFormRecover_(statusData);
+    }
+    LOGE("onFormRecover_ is null.");
 }
 } // namespace OHOS::Ace

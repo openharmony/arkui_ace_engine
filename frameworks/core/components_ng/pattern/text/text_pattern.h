@@ -18,6 +18,9 @@
 
 #include <optional>
 #include <string>
+#include <unordered_map>
+
+#include "interfaces/inner_api/ace/ai/data_detector_interface.h"
 
 #include "base/geometry/dimension.h"
 #include "base/geometry/ng/offset_t.h"
@@ -26,10 +29,12 @@
 #include "base/utils/utils.h"
 #include "core/components_ng/event/long_press_event.h"
 #include "core/components_ng/pattern/pattern.h"
+#include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
 #include "core/components_ng/pattern/text/span_node.h"
 #include "core/components_ng/pattern/text/text_accessibility_property.h"
 #include "core/components_ng/pattern/text/text_base.h"
 #include "core/components_ng/pattern/text/text_content_modifier.h"
+#include "core/components_ng/pattern/text/text_event_hub.h"
 #include "core/components_ng/pattern/text/text_layout_algorithm.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text/text_overlay_modifier.h"
@@ -40,9 +45,12 @@
 #include "core/pipeline_ng/ui_task_scheduler.h"
 
 namespace OHOS::Ace::NG {
+enum class Status {DRAGGING, ON_DROP, NONE };
+using CalculateHandleFunc = std::function<void()>;
+using ShowSelectOverlayFunc = std::function<void(const RectF&, const RectF&)>;
 // TextPattern is the base class for text render node to perform paint text.
-class TextPattern : public Pattern, public TextDragBase, public TextBase {
-    DECLARE_ACE_TYPE(TextPattern, Pattern, TextDragBase, TextBase);
+class TextPattern : public ScrollablePattern, public TextDragBase, public TextBase {
+    DECLARE_ACE_TYPE(TextPattern, ScrollablePattern, TextDragBase, TextBase);
 
 public:
     TextPattern() = default;
@@ -65,6 +73,16 @@ public:
         return MakeRefPtr<TextAccessibilityProperty>();
     }
 
+    RefPtr<EventHub> CreateEventHub() override
+    {
+        return MakeRefPtr<TextEventHub>();
+    }
+
+    bool IsDragging() const
+    {
+        return status_ == Status::DRAGGING;
+    }
+
     bool IsAtomicNode() const override
     {
         return false;
@@ -77,6 +95,8 @@ public:
 
     void OnModifyDone() override;
 
+    void PreCreateLayoutWrapper();
+
     void BeforeCreateLayoutWrapper() override;
 
     void AddChildSpanItem(const RefPtr<UINode>& child);
@@ -86,6 +106,7 @@ public:
         return { FocusType::NODE, false };
     }
 
+    void DumpAdvanceInfo() override;
     void DumpInfo() override;
 
     TextSelector GetTextSelector() const
@@ -135,6 +156,51 @@ public:
         menuOptionItems_ = std::move(menuOptionItems);
     }
 
+    void SetTextDetectEnable(bool enable)
+    {
+        bool cache = textDetectEnable_;
+        textDetectEnable_ = enable;
+        if (cache != textDetectEnable_) {
+            auto host = GetHost();
+            CHECK_NULL_VOID(host);
+            host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        }
+    }
+
+    bool GetTextDetectEnable()
+    {
+        return textDetectEnable_;
+    }
+
+    void SetTextDetectTypes(const std::string& types);
+
+    std::string GetTextDetectTypes()
+    {
+        return textDetectTypes_;
+    }
+
+    void SetOnResult(std::function<void(const std::string&)>&& onResult)
+    {
+        onResult_ = std::move(onResult);
+    }
+
+    void FireOnResult(const std::string& value)
+    {
+        if (onResult_) {
+            onResult_(value);
+        }
+    }
+
+    void SetTextDetectResult(const TextDataDetectResult result)
+    {
+        textDetectResult_ = result;
+    }
+
+    std::optional<TextDataDetectResult> GetTextDetectResult()
+    {
+        return textDetectResult_;
+    }
+
     const std::vector<MenuOptionsParam>&& GetMenuOptionItems() const
     {
         return std::move(menuOptionItems_);
@@ -166,16 +232,14 @@ public:
     }
     float GetLineHeight() const override;
 
-#ifndef USE_GRAPHIC_TEXT_GINE
-    std::vector<RSTypographyProperties::TextBox> GetTextBoxes() override;
-#else
-    std::vector<RSTextRect> GetTextBoxes() override;
-#endif
+    std::vector<RectF> GetTextBoxes() override;
     OffsetF GetParentGlobalOffset() const override;
 
-    RefPtr<FrameNode> MoveDragNode() override
+    OffsetF GetTextPaintOffset() const;
+
+    const RefPtr<FrameNode>& MoveDragNode() override
     {
-        return std::move(dragNode_);
+        return dragNode_;
     }
 
     ParagraphT GetDragParagraph() const override
@@ -226,24 +290,30 @@ public:
 
 #ifdef ENABLE_DRAG_FRAMEWORK
     DragDropInfo OnDragStart(const RefPtr<Ace::DragEvent>& event, const std::string& extraParams);
+    void OnDragMove(const RefPtr<Ace::DragEvent>& event);
     void InitDragEvent();
     virtual std::function<void(Offset)> GetThumbnailCallback();
 #endif
 
-    void InitSpanImageLayout(const std::vector<int32_t>& placeHolderIndex,
-        const std::vector<Rect>& rectsForPlaceholders, OffsetF contentOffset) override
+    const std::vector<std::string>& GetDragContents() const
     {
-        placeHolderIndex_ = placeHolderIndex;
+        return dragContents_;
+    }
+
+    void InitSpanImageLayout(const std::vector<int32_t>& placeholderIndex,
+        const std::vector<RectF>& rectsForPlaceholders, OffsetF contentOffset) override
+    {
+        placeholderIndex_ = placeholderIndex;
         imageOffset_ = contentOffset;
         rectsForPlaceholders_ = rectsForPlaceholders;
     }
 
     const std::vector<int32_t>& GetPlaceHolderIndex()
     {
-        return placeHolderIndex_;
+        return placeholderIndex_;
     }
 
-    const std::vector<Rect>& GetRectsForPlaceholders()
+    const std::vector<RectF>& GetRectsForPlaceholders()
     {
         return rectsForPlaceholders_;
     }
@@ -251,6 +321,11 @@ public:
     OffsetF GetContentOffset() override
     {
         return imageOffset_;
+    }
+
+    const OffsetF& GetRightClickOffset() const
+    {
+        return rightClickOffset_;
     }
 
     bool IsMeasureBoundary() const override
@@ -273,40 +348,152 @@ public:
         return isCustomFont_;
     }
     void UpdateSelectOverlayOrCreate(SelectOverlayInfo selectInfo, bool animation = false);
-    void CheckHandles(SelectHandleInfo& handleInfo);
+    virtual void CheckHandles(SelectHandleInfo& handleInfo);
     OffsetF GetDragUpperLeftCoordinates() override;
+    void SetTextSelection(int32_t selectionStart, int32_t selectionEnd);
 
 #ifndef USE_GRAPHIC_TEXT_GINE
     static RSTypographyProperties::TextBox ConvertRect(const Rect& rect);
 #else
     static RSTextRect ConvertRect(const Rect& rect);
 #endif
+    // override SelectOverlayClient methods
+    void OnHandleMoveDone(const RectF& handleRect, bool isFirstHandle) override;
+    void OnHandleMove(const RectF& handleRect, bool isFirstHandle) override;
+    void OnSelectOverlayMenuClicked(SelectOverlayMenuId menuId) override
+    {
+        switch (menuId) {
+            case SelectOverlayMenuId::COPY:
+                HandleOnCopy();
+                return;
+            case SelectOverlayMenuId::SELECT_ALL:
+                HandleOnSelectAll();
+                return;
+            default:
+                return;
+        }
+    }
+
+    RefPtr<FrameNode> GetClientHost() const override
+    {
+        return GetHost();
+    }
+
+    RefPtr<Paragraph> GetParagraph()
+    {
+        return paragraph_;
+    }
+
+    void MarkContentChange()
+    {
+        contChange_ = true;
+    }
+
+    void ResetContChange()
+    {
+        contChange_ = false;
+    }
+
+    bool GetContChange() const
+    {
+        return contChange_;
+    }
+
+    bool GetShowSelect() const
+    {
+        return showSelect_;
+    }
+
+    int32_t GetRecoverStart() const
+    {
+        return recoverStart_;
+    }
+
+    int32_t GetRecoverEnd() const
+    {
+        return recoverEnd_;
+    }
+
+    void OnAreaChangedInner() override;
+    void RemoveAreaChangeInner();
+    bool IsAtBottom() const override
+    {
+        return true;
+    }
+
+    bool IsAtTop() const override
+    {
+        return true;
+    }
+
+    bool UpdateCurrentOffset(float offset, int32_t source) override
+    {
+        return true;
+    }
+
+    virtual void UpdateScrollBarOffset() override {}
+
+    const std::map<int32_t, AISpan>& GetAISpanMap()
+    {
+        return aiSpanMap_;
+    }
+
+    const std::string& GetTextForAI()
+    {
+        return textForAI_;
+    }
+
+    void ResetDragOption() override
+    {
+        CloseSelectOverlay();
+        ResetSelection();
+    }
 
 protected:
+    void OnAfterModifyDone() override;
     virtual void HandleOnCopy();
+    void ClickAISpanOfSpan(std::map<int, OHOS::Ace::AISpan>::iterator& aiSpanIterator,
+        const OHOS::Ace::RefPtr<OHOS::Ace::NG::SpanItem>& item, PointF textOffset, bool& isClickOnAISpan);
+    virtual bool ClickAISpan(const PointF& textOffset, const AISpan& aiSpan);
     void InitMouseEvent();
     void ResetSelection();
+    void RecoverSelection();
     virtual void HandleOnSelectAll();
     void InitSelection(const Offset& pos);
     void HandleLongPress(GestureEvent& info);
+    void HandleMouseEventOfAISpan(const MouseInfo& info, PointF textOffset, bool& isClickOnAISpan);
     void HandleClickEvent(GestureEvent& info);
     void HandleSingleClickEvent(GestureEvent& info);
+    void HandleSpanSingleClickEvent(
+        GestureEvent& info, RectF textContentRect, PointF textOffset, bool& isClickOnSpan, bool& isClickOnAISpan);
     void HandleDoubleClickEvent(GestureEvent& info);
+    void InitTextDetect(int32_t startPos, std::string detectText);
+    bool ShowUIExtensionMenu(const AISpan& aiSpan, const CalculateHandleFunc& calculateHandleFunc = nullptr,
+        const ShowSelectOverlayFunc& showSelectOverlayFunc = nullptr);
+    void SetOnClickMenu(const AISpan& aiSpan, const CalculateHandleFunc& calculateHandleFunc,
+        const ShowSelectOverlayFunc& showSelectOverlayFunc);
+    void ParseAIResult(const TextDataDetectResult& result, int32_t startPos);
+    void ParseAIJson(const std::unique_ptr<JsonValue>& jsonValue, TextDataDetectType type, int32_t startPos,
+        bool isMenuOption = false);
+    void StartAITask();
     bool IsDraggable(const Offset& localOffset);
-    void InitClickEvent(const RefPtr<GestureEventHub>& gestureHub);
+    virtual void InitClickEvent(const RefPtr<GestureEventHub>& gestureHub);
     void CalculateHandleOffsetAndShowOverlay(bool isUsingMouse = false);
     void ShowSelectOverlay(const RectF& firstHandle, const RectF& secondHandle);
-    void ShowSelectOverlay(const RectF& firstHandle, const RectF& secondHandle, bool animation);
-    int32_t GetGraphemeClusterLength(int32_t extend) const;
+    void ShowSelectOverlay(
+        const RectF& firstHandle, const RectF& secondHandle, bool animation, bool isUsingMouse = false);
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
     bool IsSelectAll();
-    virtual void OnHandleMoveDone(const RectF& handleRect, bool isFirstHandle);
-    virtual void OnHandleMove(const RectF& handleRect, bool isFirstHandle);
     virtual int32_t GetHandleIndex(const Offset& offset) const;
     std::wstring GetWideText() const;
     std::string GetSelectedText(int32_t start, int32_t end) const;
-    OffsetF CalcCursorOffsetByPosition(int32_t position, float& selectLineHeight);
+    void CalcCaretMetricsByPosition(
+        int32_t extent, CaretMetricsF& caretCaretMetric, TextAffinity textAffinity = TextAffinity::DOWNSTREAM);
 
+    Status status_ = Status::NONE;
+    bool contChange_ = false;
+    int32_t recoverStart_ = 0;
+    int32_t recoverEnd_ = 0;
     bool showSelectOverlay_ = false;
     bool mouseEventInitialized_ = false;
     bool panEventInitialized_ = false;
@@ -328,11 +515,21 @@ protected:
     float baselineOffset_ = 0.0f;
     int32_t imageCount_ = 0;
     SelectMenuInfo selectMenuInfo_;
-#ifndef USE_GRAPHIC_TEXT_GINE
-    std::vector<RSTypographyProperties::TextBox> dragBoxes_;
-#else
-    std::vector<RSTextRect> dragBoxes_;
-#endif
+    std::vector<RectF> dragBoxes_;
+
+    // properties for AI
+    bool textDetectEnable_ = false;
+    bool aiDetectInitialized_ = false;
+    bool aiDetectTypesChanged_ = false;
+    std::string textDetectTypes_;
+    std::set<std::string> textDetectTypesSet_;
+    std::string textForAI_;
+    std::optional<TextDataDetectResult> textDetectResult_;
+    std::unordered_map<std::string, std::vector<std::string>> aiMenuOptionsMap_;
+    std::function<void(const std::string&)> onResult_;
+    std::function<void(const std::string&)> onClickMenu_;
+    std::map<int32_t, AISpan> aiSpanMap_;
+    CancelableCallback<void()> aiDetectDelayTask_;
 
 private:
     void OnDetachFromFrameNode(FrameNode* node) override;
@@ -350,6 +547,8 @@ private:
     void ActSetSelection(int32_t start, int32_t end);
     void SetAccessibilityAction();
     void CollectSpanNodes(std::stack<RefPtr<UINode>> nodes, bool& isSpanHasClick);
+    RefPtr<RenderContext> GetRenderContext();
+    void ProcessBoundRectByTextShadow(RectF& rect);
     // to check if drag is in progress
 
     bool isMeasureBoundary_ = false;
@@ -362,11 +561,13 @@ private:
 
     RefPtr<Paragraph> paragraph_;
     std::vector<MenuOptionsParam> menuOptionItems_;
-    std::vector<int32_t> placeHolderIndex_;
-    std::vector<Rect> rectsForPlaceholders_;
+    std::vector<int32_t> placeholderIndex_;
+    std::vector<RectF> rectsForPlaceholders_;
     OffsetF imageOffset_;
 
+    OffsetF rightClickOffset_;
     OffsetF contentOffset_;
+    OffsetF parentGlobalOffset_;
     GestureEventFunc onClick_;
     RefPtr<DragWindow> dragWindow_;
     RefPtr<DragDropProxy> dragDropProxy_;

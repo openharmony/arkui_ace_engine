@@ -44,6 +44,7 @@ void NavDestinationGroupNode::AddChildToGroup(const RefPtr<UINode>& child, int32
     auto contentNode = GetContentNode();
     if (!contentNode) {
         auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
+        ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::NAVDESTINATION_CONTENT_ETS_TAG, nodeId);
         contentNode = FrameNode::GetOrCreateFrameNode(V2::NAVDESTINATION_CONTENT_ETS_TAG, nodeId,
             []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
         SetContentNode(contentNode);
@@ -111,4 +112,27 @@ void NavDestinationGroupNode::UpdateTitleFontSize(bool showBackButton)
     titleNode->MarkModifyDone();
     titleNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 }
+
+RefPtr<CustomNodeBase> NavDestinationGroupNode::GetNavDestinationCustomNode()
+{
+    auto pattern = GetPattern<NavDestinationPattern>();
+    CHECK_NULL_RETURN(pattern, nullptr);
+    auto navDestinationNode = pattern->GetNavDestinationNode();
+    CHECK_NULL_RETURN(navDestinationNode, nullptr);
+
+    auto child = navDestinationNode->GetFirstChild();
+    while (child) {
+        if (AceType::InstanceOf<NavDestinationGroupNode>(child)) {
+            break;
+        }
+
+        if (AceType::InstanceOf<CustomNodeBase>(child)) {
+            auto customNode = DynamicCast<CustomNodeBase>(child);
+            return customNode;
+        }
+        child = child->GetFirstChild();
+    }
+    return nullptr;
+}
+
 } // namespace OHOS::Ace::NG

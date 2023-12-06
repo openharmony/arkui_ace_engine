@@ -16,14 +16,11 @@ import(
 
 build_component("search") {
   sources = [
-    "flutter_render_search.cpp",
     "render_search.cpp",
     "render_search_creator.cpp",
     "search_component.cpp",
     "search_element.cpp",
   ]
-  if (ace_use_new_skia) {
-    sources -= [ "flutter_render_search.cpp" ]
-  }
+
   rosen_sources = [ "rosen_render_search.cpp" ]
 }

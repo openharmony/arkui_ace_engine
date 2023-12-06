@@ -14,7 +14,7 @@
  */
 
 #include "core/components_ng/pattern/texttimer/text_timer_layout_property.h"
-
+#include "core/components_ng/pattern/texttimer/text_timer_pattern.h"
 #include "core/components_v2/inspector/utils.h"
 
 namespace OHOS::Ace::NG {
@@ -33,6 +33,35 @@ std::string ConvertFontFamily(const std::vector<std::string>& fontFamily)
 }
 } // namespace
 
+void TextTimerLayoutProperty::ResetCount()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pattern = host->GetPattern<TextTimerPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->ResetCount();
+}
+
+inline std::unique_ptr<JsonValue> ConvertShadowToJson(const Shadow& shadow)
+{
+    auto jsonShadow = JsonUtil::Create(true);
+    jsonShadow->Put("radius", std::to_string(shadow.GetBlurRadius()).c_str());
+    jsonShadow->Put("color", shadow.GetColor().ColorToString().c_str());
+    jsonShadow->Put("offsetX", std::to_string(shadow.GetOffset().GetX()).c_str());
+    jsonShadow->Put("offsetY", std::to_string(shadow.GetOffset().GetY()).c_str());
+    jsonShadow->Put("type", std::to_string(static_cast<int32_t>(shadow.GetShadowType())).c_str());
+    return jsonShadow;
+}
+
+std::unique_ptr<JsonValue> ConvertShadowsToJson(const std::vector<Shadow>& shadows)
+{
+    auto jsonShadows = JsonUtil::CreateArray(true);
+    for (const auto& shadow : shadows) {
+        jsonShadows->Put(ConvertShadowToJson(shadow));
+    }
+    return jsonShadows;
+}
+
 void TextTimerLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
 {
     LayoutProperty::ToJsonValue(json);
@@ -45,5 +74,10 @@ void TextTimerLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) cons
     json->Put(
         "fontStyle", V2::ConvertWrapFontStyleToStirng(GetItalicFontStyle().value_or(Ace::FontStyle::NORMAL)).c_str());
     json->Put("fontFamily", ConvertFontFamily(GetFontFamily().value_or(std::vector<std::string>())).c_str());
+
+    auto shadow = GetTextShadow().value_or(std::vector<Shadow> { Shadow() });
+    // Determines if there are multiple textShadows
+    auto jsonShadow = (shadow.size() == 1) ? ConvertShadowToJson(shadow.front()) : ConvertShadowsToJson(shadow);
+    json->Put("textShadow", jsonShadow);
 }
 } // namespace OHOS::Ace::NG

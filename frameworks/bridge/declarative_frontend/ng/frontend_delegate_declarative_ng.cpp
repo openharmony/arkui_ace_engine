@@ -19,6 +19,7 @@
 #include "base/log/ace_trace.h"
 #include "base/log/event_report.h"
 #include "base/resource/ace_res_config.h"
+#include "base/subwindow/subwindow_manager.h"
 #include "base/thread/background_task_executor.h"
 #include "base/utils/measure_util.h"
 #include "base/utils/utils.h"
@@ -65,9 +66,7 @@ FrontendDelegateDeclarativeNG::FrontendDelegateDeclarativeNG(const RefPtr<TaskEx
     : taskExecutor_(taskExecutor), manifestParser_(AceType::MakeRefPtr<Framework::ManifestParser>()),
       mediaQueryInfo_(AceType::MakeRefPtr<MediaQueryInfo>()),
       jsAccessibilityManager_(AccessibilityNodeManager::Create())
-{
-    LOGD("FrontendDelegateDeclarativeNG create");
-}
+{}
 
 void FrontendDelegateDeclarativeNG::SetMediaQueryCallback(MediaQueryCallback&& mediaQueryCallback)
 {
@@ -170,19 +169,17 @@ void FrontendDelegateDeclarativeNG::RunPage(
 {
     ACE_SCOPED_TRACE("FrontendDelegateDeclarativeNG::RunPage");
 
-    LOGI("FrontendDelegateDeclarativeNG RunPage url=%{public}s", url.c_str());
+    LOGI("Frontend delegate declarative run page, url=%{public}s", url.c_str());
     std::string jsonContent;
     if (GetAssetContent(MANIFEST_JSON, jsonContent)) {
         manifestParser_->Parse(jsonContent);
         manifestParser_->Printer();
     } else if (!profile.empty() && GetAssetContent(profile, jsonContent)) {
-        LOGI("Parse profile %{public}s", profile.c_str());
+        LOGD("Parse profile %{public}s", profile.c_str());
         manifestParser_->Parse(jsonContent);
     } else if (GetAssetContent(PAGES_JSON, jsonContent)) {
-        LOGI("Parse main_pages.json");
+        LOGD("Parse main_pages.json");
         manifestParser_->Parse(jsonContent);
-    } else {
-        LOGE("RunPage parse manifest.json failed");
     }
     std::string mainPagePath;
     if (!url.empty()) {
@@ -202,6 +199,21 @@ void FrontendDelegateDeclarativeNG::RunPage(
             if (manifestParser->GetMinPlatformVersion() > 0) {
                 pipeline->SetMinPlatformVersion(manifestParser->GetMinPlatformVersion());
             }
+        },
+        TaskExecutor::TaskType::JS);
+}
+
+void FrontendDelegateDeclarativeNG::RunPage(
+    const std::shared_ptr<std::vector<uint8_t>>& content,  const std::string& params, const std::string& profile)
+{
+    ACE_SCOPED_TRACE("FrontendDelegateDeclarativeNG::RunPage %zu", content->size());
+    taskExecutor_->PostTask(
+        [delegate = Claim(this), weakPtr = WeakPtr<NG::PageRouterManager>(pageRouterManager_), content,
+            params]() {
+            auto pageRouterManager = weakPtr.Upgrade();
+            CHECK_NULL_VOID(pageRouterManager);
+            pageRouterManager->RunPage(content, params);
+            auto pipeline = delegate->GetPipelineContext();
         },
         TaskExecutor::TaskType::JS);
 }
@@ -366,8 +378,6 @@ void FrontendDelegateDeclarativeNG::ClearTimer(const std::string& callbackId)
     if (timeoutTaskIter != timeoutTaskMap_.end()) {
         timeoutTaskIter->second.Cancel();
         timeoutTaskMap_.erase(timeoutTaskIter);
-    } else {
-        LOGW("ClearTimer callbackId not found");
     }
 }
 
@@ -478,7 +488,6 @@ void FrontendDelegateDeclarativeNG::NavigatePage(uint8_t type, const PageTarget&
             Back(target.url, params);
             break;
         default:
-            LOGE("Navigator type is invalid!");
             Back(target.url, params);
     }
 }
@@ -531,7 +540,6 @@ std::string FrontendDelegateDeclarativeNG::GetAssetPath(const std::string& url)
 
 void FrontendDelegateDeclarativeNG::ChangeLocale(const std::string& language, const std::string& countryOrRegion)
 {
-    LOGD("JSFrontend ChangeLocale");
     taskExecutor_->PostTask(
         [language, countryOrRegion]() { AceApplicationInfo::GetInstance().ChangeLocale(language, countryOrRegion); },
         TaskExecutor::TaskType::PLATFORM);
@@ -634,6 +642,8 @@ void FrontendDelegateDeclarativeNG::ShowDialog(const PromptDialogAttr& dialogAtt
         .title = dialogAttr.title,
         .content = dialogAttr.message,
         .autoCancel = dialogAttr.autoCancel,
+        .isShowInSubWindow = dialogAttr.showInSubWindow,
+        .isModal = dialogAttr.isModal,
         .buttons = buttons,
         .maskRect = dialogAttr.maskRect,
     };
@@ -654,6 +664,8 @@ void FrontendDelegateDeclarativeNG::ShowDialog(const PromptDialogAttr& dialogAtt
         .title = dialogAttr.title,
         .content = dialogAttr.message,
         .autoCancel = dialogAttr.autoCancel,
+        .isShowInSubWindow = dialogAttr.showInSubWindow,
+        .isModal = dialogAttr.isModal,
         .buttons = buttons,
         .onStatusChanged = std::move(onStatusChanged),
         .maskRect = dialogAttr.maskRect,
@@ -787,8 +799,6 @@ RefPtr<RevSourceMap> FrontendDelegateDeclarativeNG::GetFaAppSourceMap()
     if (GetAssetContent("app.js.map", appMap)) {
         appSourceMap_ = AceType::MakeRefPtr<RevSourceMap>();
         appSourceMap_->Init(appMap);
-    } else {
-        LOGW("app map load failed!");
     }
     return appSourceMap_;
 }
@@ -800,14 +810,11 @@ void FrontendDelegateDeclarativeNG::GetStageSourceMap(
     if (GetAssetContent(MERGE_SOURCEMAPS_PATH, maps)) {
         auto SourceMap = AceType::MakeRefPtr<RevSourceMap>();
         SourceMap->StageModeSourceMapSplit(maps, sourceMaps);
-    } else {
-        LOGW("app map load failed!");
     }
 }
 
 void FrontendDelegateDeclarativeNG::CallPopPage()
 {
-    LOGI("CallPopPage begin");
     Back("", "");
 }
 
@@ -847,21 +854,20 @@ size_t FrontendDelegateDeclarativeNG::GetComponentsCount()
     return pageNode->GetAllDepthChildrenCount();
 }
 
-void FrontendDelegateDeclarativeNG::ShowToast(const std::string& message, int32_t duration, const std::string& bottom)
+void FrontendDelegateDeclarativeNG::ShowToast(
+    const std::string& message, int32_t duration, const std::string& bottom, const NG::ToastShowMode& showMode)
 {
-    LOGD("FrontendDelegateDeclarativeNG ShowToast.");
-
     int32_t durationTime = std::clamp(duration, TOAST_TIME_DEFAULT, TOAST_TIME_MAX);
     bool isRightToLeft = AceApplicationInfo::GetInstance().IsRightToLeft();
-    auto task = [durationTime, message, bottom, isRightToLeft, containerId = Container::CurrentId()](
+    auto task = [durationTime, message, bottom, isRightToLeft, showMode, containerId = Container::CurrentId()](
                     const RefPtr<NG::OverlayManager>& overlayManager) {
         CHECK_NULL_VOID(overlayManager);
         ContainerScope scope(containerId);
-        LOGI("Begin to show toast message %{public}s, duration is %{public}d", message.c_str(), durationTime);
-        overlayManager->ShowToast(message, durationTime, bottom, isRightToLeft);
+        TAG_LOGD(AceLogTag::ACE_OVERLAY, "Begin to show toast message %{public}s, duration is %{public}d",
+            message.c_str(), durationTime);
+        overlayManager->ShowToast(message, durationTime, bottom, isRightToLeft, showMode);
     };
     MainWindowOverlay(std::move(task));
-    return;
 }
 
 void FrontendDelegateDeclarativeNG::ShowDialogInner(DialogProperties& dialogProperties,
@@ -873,9 +879,24 @@ void FrontendDelegateDeclarativeNG::ShowDialogInner(DialogProperties& dialogProp
             [callback]() { callback(CALLBACK_ERRORCODE_CANCEL, CALLBACK_DATACODE_ZERO); }, TaskExecutor::TaskType::JS);
     };
     auto task = [dialogProperties](const RefPtr<NG::OverlayManager>& overlayManager) {
+        RefPtr<NG::FrameNode> dialog;
         CHECK_NULL_VOID(overlayManager);
         LOGI("Begin to show dialog ");
-        overlayManager->ShowDialog(dialogProperties, nullptr, AceApplicationInfo::GetInstance().IsRightToLeft());
+        if (dialogProperties.isShowInSubWindow) {
+            dialog = SubwindowManager::GetInstance()->ShowDialogNG(dialogProperties, nullptr);
+            CHECK_NULL_VOID(dialog);
+            if (dialogProperties.isModal) {
+                DialogProperties Maskarg;
+                Maskarg.isMask = true;
+                Maskarg.autoCancel = dialogProperties.autoCancel;
+                auto mask = overlayManager->ShowDialog(Maskarg, nullptr, false);
+                CHECK_NULL_VOID(mask);
+            }
+        } else {
+            dialog = overlayManager->ShowDialog(
+                dialogProperties, nullptr, AceApplicationInfo::GetInstance().IsRightToLeft());
+            CHECK_NULL_VOID(dialog);
+        }
     };
     MainWindowOverlay(std::move(task));
     return;
@@ -958,6 +979,10 @@ void FrontendDelegateDeclarativeNG::GetSnapshot(
 std::string FrontendDelegateDeclarativeNG::GetContentInfo()
 {
     auto jsonContentInfo = JsonUtil::Create(true);
+
+    CHECK_NULL_RETURN(pageRouterManager_, "");
+    jsonContentInfo->Put("stackInfo", pageRouterManager_->GetStackInfo());
+
     auto pipelineContext = pipelineContextHolder_.Get();
     CHECK_NULL_RETURN(pipelineContext, jsonContentInfo->ToString());
     jsonContentInfo->Put("nodeInfo", pipelineContext->GetStoredNodeInfo());

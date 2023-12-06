@@ -24,6 +24,7 @@
 
 namespace OHOS::Ace::NG {
 
+using PendingMakeCanvasImageTask = std::function<void()>;
 // [ImageLoadingContext] do two things:
 // 1. Provide interfaces for who owns it, notify it's owner when loading events come.
 // 2. Drive [ImageObject] to load and make [CanvasImage].
@@ -69,6 +70,7 @@ public:
     void DataReadyCallback(const RefPtr<ImageObject>& imageObj);
     void SuccessCallback(const RefPtr<CanvasImage>& canvasImage);
     void FailCallback(const std::string& errorMsg);
+    const std::string GetCurrentLoadingState();
 
 private:
 #define DEFINE_SET_NOTIFY_TASK(loadResult)                                            \
@@ -89,6 +91,8 @@ private:
     void OnMakeCanvasImage();
     void OnLoadSuccess();
     void OnLoadFail();
+    void DownloadImage();
+    bool NotifyReadyIfCacheHit();
 
     // round up int to the nearest 2-fold proportion of image width
     // REQUIRE: value > 0, image width > 0
@@ -99,7 +103,7 @@ private:
     {
         return dstSize_.IsPositive() && dstSize != dstSize_;
     }
-    
+
     const ImageSourceInfo src_;
     RefPtr<ImageStateManager> stateManager_;
     RefPtr<ImageObject> imageObj_;
@@ -124,6 +128,11 @@ private:
     std::string errorMsg_;
     // to cancel MakeCanvasImage task
     std::string canvasKey_;
+
+    // if another makeCanvasImage task arrives and current state cannot handle makeCanvasImage command,
+    // save the least recent makeCanvasImage task and trigger it when the previous makeCanvasImage task end
+    // and state becomes MAKE_CANVAS_IMAGE_SUCCESS
+    PendingMakeCanvasImageTask pendingMakeCanvasImageTask_ = nullptr;
 
     friend class ImageStateManager;
     ACE_DISALLOW_COPY_AND_MOVE(ImageLoadingContext);

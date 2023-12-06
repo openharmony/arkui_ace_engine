@@ -37,48 +37,51 @@ ModelViewNG::ModelViewNG()
     }
 }
 
-void ModelViewNG::Create(const std::string& src)
+void ModelViewNG::Create(const std::string& src, const std::string& bundleName,
+    const std::string& moduleName, Render3D::SurfaceType surfaceType)
 {
-    LOGD("MODEL_NG: Create-> src: %s", src.c_str());
+    LOGD("MODEL_NG: Create-> src: %s %hhu", src.c_str(), surfaceType);
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
-    auto frameNode = FrameNode::GetOrCreateFrameNode(
-        V2::MODEL_ETS_TAG, nodeId, [&nodeId]() { return AceType::MakeRefPtr<ModelPattern>(nodeId); });
-    stack->Push(frameNode);
-    frameNode_ = AceType::WeakClaim(AceType::RawPtr(frameNode));
-    ACE_UPDATE_LAYOUT_PROPERTY(ModelLayoutProperty, NeedsSceneSetup, false);
-    ACE_UPDATE_LAYOUT_PROPERTY(ModelLayoutProperty, ModelSource, src);
-    ACE_UPDATE_PAINT_PROPERTY(ModelPaintProperty, ModelLights, {});
-    ACE_UPDATE_PAINT_PROPERTY(ModelPaintProperty, ModelAnimations, {});
-    ACE_UPDATE_PAINT_PROPERTY(ModelPaintProperty, ModelGeometries, {});
-    ACE_UPDATE_PAINT_PROPERTY(ModelPaintProperty, ModelCustomRenders, {});
-    ACE_UPDATE_PAINT_PROPERTY(ModelPaintProperty, ModelImageTexturePaths, {});
-    ACE_UPDATE_PAINT_PROPERTY(ModelPaintProperty, ModelShaderInputBuffers, {});
+    static int staticKey = 0;
 
-    lightsIdx_ = 0;
-    if (lights_.empty()) {
-        isFirstLightsUpdate_ = true;
-    } else {
-        isFirstLightsUpdate_ = false;
+    ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::MODEL_ETS_TAG, nodeId);
+    auto frameNode = FrameNode::GetOrCreateFrameNode(
+        V2::MODEL_ETS_TAG, nodeId, [&nodeId, surfaceType, &bundleName, &moduleName]() {
+            return AceType::MakeRefPtr<ModelPattern>(staticKey++, surfaceType,
+                bundleName, moduleName);
+        });
+
+    stack->Push(frameNode);
+    if (frameNode_.Invalid()) {
+        ACE_UPDATE_PAINT_PROPERTY(ModelPaintProperty, ModelSource, src);
+        ACE_UPDATE_PAINT_PROPERTY(ModelPaintProperty, ModelLights, {});
+        ACE_UPDATE_PAINT_PROPERTY(ModelPaintProperty, ModelAnimations, {});
+        ACE_UPDATE_PAINT_PROPERTY(ModelPaintProperty, ModelGeometries, {});
+        ACE_UPDATE_PAINT_PROPERTY(ModelPaintProperty, ModelCustomRender, {});
+        ACE_UPDATE_PAINT_PROPERTY(ModelPaintProperty, ModelImageTexturePaths, {});
+        ACE_UPDATE_PAINT_PROPERTY(ModelPaintProperty, ModelShaderInputBuffer,
+            std::make_shared<Render3D::ShaderInputBuffer>());
     }
+    frameNode_ = AceType::WeakClaim(AceType::RawPtr(frameNode));
 }
 
 void ModelViewNG::SetBackground(const std::string& value)
 {
     LOGD("MODEL_NG: background: %s", value.c_str());
-    ACE_UPDATE_LAYOUT_PROPERTY(ModelLayoutProperty, ModelBackground, value);
+    ACE_UPDATE_PAINT_PROPERTY(ModelPaintProperty, ModelBackground, value);
 }
 
 void ModelViewNG::SetHandleCameraMove(bool value)
 {
     LOGD("MODEL_NG: cameraMode: %s", value ? "true" : "false");
-    ACE_UPDATE_LAYOUT_PROPERTY(ModelLayoutProperty, ModelCameraMove, value);
+    ACE_UPDATE_PAINT_PROPERTY(ModelPaintProperty, ModelCameraMove, value);
 }
 
 void ModelViewNG::SetTransparent(bool value)
 {
     LOGD("MODEL_NG: transparent: %s", value ? "true" : "false");
-    ACE_UPDATE_LAYOUT_PROPERTY(ModelLayoutProperty, ModelTransparent, value);
+    ACE_UPDATE_PAINT_PROPERTY(ModelPaintProperty, ModelTransparent, value);
 }
 
 void ModelViewNG::SetCameraPosition(AnimatableFloat x, AnimatableFloat y, AnimatableFloat z,
@@ -89,12 +92,12 @@ void ModelViewNG::SetCameraPosition(AnimatableFloat x, AnimatableFloat y, Animat
     if (NearEqual(cameraPosition_.GetDistance().GetValue(), std::numeric_limits<float>::max())) {
         // Initial update. Set the values directly without the animation if any.
         cameraPosition_.SetDistance(AnimatableFloat(distance.GetValue()));
-        cameraPosition_.SetVec(OHOS::Ace::Vec3(x.GetValue(), y.GetValue(), z.GetValue()));
+        cameraPosition_.SetPosition(Vec3(x.GetValue(), y.GetValue(), z.GetValue()));
         ACE_UPDATE_PAINT_PROPERTY(ModelPaintProperty, CameraDistance, distance);
-        ACE_UPDATE_PAINT_PROPERTY(ModelPaintProperty, CameraPosition, OHOS::Ace::Vec3(x, y, z));
+        ACE_UPDATE_PAINT_PROPERTY(ModelPaintProperty, CameraPosition, Vec3(x, y, z));
     } else {
         cameraPosition_.SetDistance(distance);
-        cameraPosition_.SetVec(OHOS::Ace::Vec3(x, y, z));
+        cameraPosition_.SetPosition(Vec3(x, y, z));
     }
     LOGD("MODEL_NG: cameraIsAngular: %s", isAngular ? "true" : "false");
     ACE_UPDATE_PAINT_PROPERTY(ModelPaintProperty, CameraIsAngular, isAngular);
@@ -126,10 +129,15 @@ void ModelViewNG::SetCameraUp(Vec3 upVec)
     ACE_UPDATE_PAINT_PROPERTY(ModelPaintProperty, CameraUp, upVec);
 }
 
-void ModelViewNG::AddLight(const RefPtr<OHOS::Render3D::SVLight>& light)
+void ModelViewNG::AddLight(const RefPtr<ModelLight>& light)
 {
     LOGD("MODEL_NG: light: @light");
-    if (isFirstLightsUpdate_) {
+    if (!light) {
+        LOGE("Add light invalid light");
+        return;
+    }
+
+    if (lights_.empty()) {
         // Set the animation callback.
         RefPtr<PipelineBase> pipeline = PipelineBase::GetCurrentContext();
         CHECK_NULL_VOID(pipeline);
@@ -139,38 +147,46 @@ void ModelViewNG::AddLight(const RefPtr<OHOS::Render3D::SVLight>& light)
         } else {
             LOGE("ModelViewNG() pipeline context is null");
         }
-        lights_.push_back(light);
-        ACE_UPDATE_PAINT_PROPERTY(ModelPaintProperty, ModelSingleLight, light);
-    } else {
-        lightsIdx_++;
-        // Update the corresponding light proepties.
-        auto currentLight = lights_.at(lightsIdx_-1);
-        currentLight->SetLightType(light->GetLightType());
-        currentLight->SetIntensity(light->GetLightIntensity());
-        currentLight->SetColor(light->GetLightColor());
-        currentLight->SetLightShadow(light->GetLightShadow());
-        currentLight->SetPosition(light->GetPosition());
-        currentLight->SetRotation(light->GetRotation());
-        ACE_UPDATE_PAINT_PROPERTY(ModelPaintProperty, ModelSingleLight, currentLight);
     }
+
+    lights_.push_back(light);
+    ACE_UPDATE_PAINT_PROPERTY(ModelPaintProperty, ModelSingleLight, light);
 }
 
-void ModelViewNG::AddGeometry(const RefPtr<OHOS::Render3D::SVGeometry>& shape)
+void ModelViewNG::AddGeometry(const std::shared_ptr<Render3D::Geometry>& shape)
 {
     LOGD("MODEL_NG: AddGeometry @shape %s", shape->GetName().c_str());
     ACE_UPDATE_PAINT_PROPERTY(ModelPaintProperty, ModelSingleGeometry, shape);
 }
 
-void ModelViewNG::AddGLTFAnimation(const RefPtr<OHOS::Render3D::GLTFAnimation>& animation)
+void ModelViewNG::AddGLTFAnimation(const std::shared_ptr<Render3D::GLTFAnimation>& animation)
 {
     LOGD("MODEL_NG: AddGLTFAnimation @animation");
     ACE_UPDATE_PAINT_PROPERTY(ModelPaintProperty, ModelSingleAnimation, animation);
 }
 
-void ModelViewNG::AddCustomRender(const RefPtr<OHOS::Render3D::SVCustomRenderDescriptor>& customRender)
+void ModelViewNG::AddCustomRender(const std::shared_ptr<Render3D::CustomRenderDescriptor>& customRender)
 {
     LOGD("MODEL_NG: AddCustomRender");
-    ACE_UPDATE_PAINT_PROPERTY(ModelPaintProperty, ModelSingleCustomRender, customRender);
+    if (!customRender) {
+        return;
+    }
+    auto frameNode = frameNode_.Upgrade();
+    if (!frameNode) {
+        LOGE("frameNode is null!");
+        return;
+    }
+
+    auto paintProperty = frameNode->GetPaintProperty<ModelPaintProperty>();
+    if (!paintProperty) {
+        LOGE("model paint property is null!");
+        return;
+    }
+
+    const auto& curCustomRender = paintProperty->GetModelCustomRenderValue({ });
+    if (!curCustomRender || (curCustomRender->GetUri() != customRender->GetUri())) {
+        ACE_UPDATE_PAINT_PROPERTY(ModelPaintProperty, ModelCustomRender, customRender);
+    }
 }
 
 void ModelViewNG::SetWidth(Dimension& width)
@@ -191,6 +207,32 @@ void ModelViewNG::SetHeight(Dimension& height)
     ViewAbstract::SetHeight(CalcLength(height));
 }
 
+void ModelViewNG::SetRenderHeight(Dimension& height)
+{
+    LOGD("MODEL_NG: ModelViewNG::SetRenderHeight() %f", height.Value());
+    if (LessNotEqual(height.Value(), 0.0)) {
+        height.SetValue(1.0);
+        LOGE("MODEL_NG: ModelViewNG::SetRenderHeight() heigtScale set default 1.0");
+    }
+    ACE_UPDATE_PAINT_PROPERTY(ModelPaintProperty, RenderHeight, height.Value());
+}
+
+void ModelViewNG::SetRenderWidth(Dimension& width)
+{
+    LOGD("MODEL_NG: ModelViewNG::SetRenderWidth() %f", width.Value());
+    if (LessNotEqual(width.Value(), 0.0)) {
+        width.SetValue(1.0);
+        LOGE("MODEL_NG: ModelViewNG::SetRenderHeight() heigtScale set default 1.0");
+    }
+    ACE_UPDATE_PAINT_PROPERTY(ModelPaintProperty, RenderWidth, width.Value());
+}
+
+void ModelViewNG::SetRenderFrameRate(float rate)
+{
+    LOGD("MODEL_NG: ModelViewGN::SetRenderFrameRate() %f", rate);
+    ACE_UPDATE_PAINT_PROPERTY(ModelPaintProperty, RenderFrameRate, rate);
+}
+
 void ModelViewNG::SetShader(const std::string& path)
 {
     LOGD("ModelViewNG::SetShader() path: %s", path.c_str());
@@ -200,13 +242,32 @@ void ModelViewNG::SetShader(const std::string& path)
 void ModelViewNG::AddShaderImageTexture(const std::string& path)
 {
     LOGD("ModelViewNG::AddShaderImageTexture() path: %s", path.c_str());
+    auto frameNode = frameNode_.Upgrade();
+    if (!frameNode) {
+        LOGE("frameNode is null!");
+        return;
+    }
+
+    auto paintProperty = frameNode->GetPaintProperty<ModelPaintProperty>();
+    if (!paintProperty) {
+        LOGE("model paint property is null!");
+        return;
+    }
+    
+    const auto& images = paintProperty->GetModelImageTexturePathsValue({ });
+    for (auto& image : images) {
+        if (image == path) {
+            return;
+        }
+    }
+
     ACE_UPDATE_PAINT_PROPERTY(ModelPaintProperty, ModelSingleImageTexturePath, path);
 }
 
-void ModelViewNG::AddShaderInputBuffer(const RefPtr<OHOS::Render3D::ShaderInputBuffer>& buffer)
+void ModelViewNG::AddShaderInputBuffer(const std::shared_ptr<Render3D::ShaderInputBuffer>& buffer)
 {
     LOGD("ModelViewNG::AddShaderInputBuffer() size: %d", buffer->GetSize());
-    ACE_UPDATE_PAINT_PROPERTY(ModelPaintProperty, ModelSingleShaderInputBuffer, buffer);
+    ACE_UPDATE_PAINT_PROPERTY(ModelPaintProperty, ModelShaderInputBuffer, buffer);
 }
 
 void ModelViewNG::PerformCameraUpdate()
@@ -222,7 +283,7 @@ void ModelViewNG::PerformCameraUpdate()
     auto paintProperty = frameNode->GetPaintProperty<ModelPaintProperty>();
     if (paintProperty) {
         paintProperty->UpdateCameraDistance(cameraPosition_.GetDistance());
-        paintProperty->UpdateCameraPosition(cameraPosition_.GetVec());
+        paintProperty->UpdateCameraPosition(cameraPosition_.GetPosition());
         frameNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     } else {
         LOGE("ModelPaintProperty is null");
@@ -244,6 +305,23 @@ void ModelViewNG::PerformLightUpdate()
     }
     paintProperty->ModelLightsAnimationUpdate(lights_);
     frameNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
+std::optional<std::shared_ptr<Render3D::ShaderInputBuffer>> ModelViewNG::GetShaderInputBuffer()
+{
+    auto frameNode = frameNode_.Upgrade();
+    if (!frameNode) {
+        LOGE("frameNode is null!");
+        return {};
+    }
+
+    auto paintProperty = frameNode->GetPaintProperty<ModelPaintProperty>();
+    if (!paintProperty) {
+        LOGE("ModelPaintProperty is null");
+        return {};
+    }
+
+    return paintProperty->CloneModelShaderInputBuffer();
 }
 
 } // namespace OHOS::Ace::NG

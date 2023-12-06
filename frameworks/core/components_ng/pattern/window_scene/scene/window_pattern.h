@@ -35,6 +35,8 @@ public:
     std::vector<Rosen::Rect> GetHotAreas();
     sptr<Rosen::Session> GetSession();
 
+    static int32_t CalculateTranslateDegree(int32_t hostId);
+
 protected:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
@@ -52,6 +54,7 @@ protected:
     void UnregisterLifecycleListener();
 
     void CreateStartingNode();
+    void CreateContentNode();
     void CreateSnapshotNode(std::optional<std::shared_ptr<Media::PixelMap>> snapshot = std::nullopt);
 
     virtual void OnActivation() {}
@@ -59,8 +62,6 @@ protected:
     virtual void OnForeground() {}
     virtual void OnBackground() {}
     virtual void OnDisconnect() {}
-
-    static int32_t CalculateTranslateDegree(int32_t hostId);
 
     RefPtr<FrameNode> startingNode_;
     RefPtr<FrameNode> contentNode_;

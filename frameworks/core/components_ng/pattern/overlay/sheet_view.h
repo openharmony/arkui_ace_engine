@@ -24,8 +24,19 @@
 namespace OHOS::Ace::NG {
 class ACE_EXPORT SheetView {
 public:
-    static RefPtr<FrameNode> CreateSheetPage(int32_t targetId, RefPtr<FrameNode> builder,
-        std::function<void(const std::string&)>&& callback, NG::SheetStyle& sheetStyle);
+    static RefPtr<FrameNode> CreateSheetPage(int32_t targetId, std::string targetTag, RefPtr<FrameNode> builder,
+        RefPtr<FrameNode> titleBuilder, std::function<void(const std::string&)>&& callback, NG::SheetStyle& sheetStyle);
+    static RefPtr<FrameNode> CreateScrollNode();
+
+private:
+    static RefPtr<FrameNode> CreateOperationColumnNode(
+        RefPtr<FrameNode> titleBuilder, NG::SheetStyle& sheetStyle, RefPtr<FrameNode> sheetNode);
+    static void CreateCloseIconButtonNode(RefPtr<FrameNode> sheetNode, NG::SheetStyle& sheetStyle);
+    static void SetSheetOffset(RefPtr<FrameNode> sheetNode);
+    static RefPtr<FrameNode> BuildMainTitle(RefPtr<FrameNode> sheetNode, NG::SheetStyle& sheetStyle);
+    static RefPtr<FrameNode> BuildSubTitle(RefPtr<FrameNode> sheetNode, NG::SheetStyle& sheetStyle);
+    static RefPtr<FrameNode> BuildTitle(RefPtr<FrameNode> sheetNode, NG::SheetStyle& sheetStyle);
+    static RefPtr<FrameNode> BuildTitleColumn(RefPtr<FrameNode> sheetNode, NG::SheetStyle& sheetStyle);
 };
 } // namespace OHOS::Ace::NG
 

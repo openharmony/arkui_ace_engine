@@ -19,6 +19,9 @@
 #include <functional>
 #include <mutex>
 #include <unordered_map>
+#include <atomic>
+
+#include "interfaces/inner_api/ace/ace_forward_compatibility.h"
 
 #include "base/memory/ace_type.h"
 #include "base/resource/asset_manager.h"
@@ -26,15 +29,21 @@
 #include "base/thread/task_executor.h"
 #include "base/utils/macros.h"
 #include "base/utils/noncopyable.h"
+#include "base/utils/system_properties.h"
 #include "core/common/ace_application_info.h"
+#include "core/common/display_info.h"
 #include "core/common/frontend.h"
 #include "core/common/page_url_checker.h"
 #include "core/common/platform_res_register.h"
 #include "core/common/settings.h"
 #include "core/common/window.h"
+#include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/distributed_ui.h"
+#include "core/components_ng/pattern/app_bar/app_bar_view.h"
 #include "core/components_ng/pattern/navigator/navigator_event_hub.h"
+#include "core/event/pointer_event.h"
 #include "core/pipeline/pipeline_base.h"
+#include "core/common/container_consts.h"
 
 namespace OHOS::Ace {
 
@@ -45,12 +54,8 @@ using MouseEventCallback = std::function<void(const MouseEvent&, const std::func
 using AxisEventCallback = std::function<void(const AxisEvent&, const std::function<void()>&)>;
 using RotationEventCallBack = std::function<bool(const RotationEvent&)>;
 using CardViewPositionCallBack = std::function<void(int id, float offsetX, float offsetY)>;
-using DragEventCallBack = std::function<void(int32_t x, int32_t y, const DragEventAction& action)>;
+using DragEventCallBack = std::function<void(const PointerEvent& pointerEvent, const DragEventAction& action)>;
 using StopDragCallback = std::function<void()>;
-
-constexpr int32_t INSTANCE_ID_UNDEFINED = -1;
-constexpr int32_t INSTANCE_ID_PLATFORM = -2;
-constexpr int32_t MIN_PLUGIN_SUBCONTAINER_ID = 2000000;
 
 class ACE_FORCE_EXPORT Container : public virtual AceType {
     DECLARE_ACE_TYPE(Container, AceType);
@@ -137,6 +142,18 @@ public:
 
     virtual void ProcessScreenOffEvents() {}
 
+    virtual void SetOrientation(Orientation orientation) {}
+
+    virtual Orientation GetOrientation()
+    {
+        return Orientation::UNSPECIFIED;
+    }
+
+    virtual RefPtr<DisplayInfo> GetDisplayInfo()
+    {
+        return {};
+    }
+
     virtual std::string GetHapPath() const
     {
         return {};
@@ -214,13 +231,26 @@ public:
         return filesDataPath_;
     }
 
+    void SetTempDir(const std::string& path)
+    {
+        tempDir_ = path;
+    }
+
+    const std::string& GetTempDir() const
+    {
+        return tempDir_;
+    }
+
     virtual void SetViewFirstUpdating(std::chrono::time_point<std::chrono::high_resolution_clock> time) {}
 
     virtual void UpdateResourceConfiguration(const std::string& jsonStr) {}
 
     static int32_t CurrentId();
     static RefPtr<Container> Current();
+    static RefPtr<Container> GetContainer(int32_t containerId);
     static RefPtr<Container> GetActive();
+    static RefPtr<Container> GetDefault();
+    static RefPtr<Container> GetFoucsed();
     static RefPtr<TaskExecutor> CurrentTaskExecutor();
     static void UpdateCurrent(int32_t id);
 
@@ -237,7 +267,7 @@ public:
     static bool IsCurrentUseNewPipeline()
     {
         auto container = Current();
-        return container ? container->useNewPipeline_ : false;
+        return container ? container->useNewPipeline_ : AceForwardCompatibility::IsUseNG();
     }
 
     // SetCurrentUsePartialUpdate is called when initial render on a page
@@ -300,7 +330,7 @@ public:
         return false;
     }
 
-    virtual void NotifyConfigurationChange(bool, const OnConfigurationChange& configurationChange = {false, false}) {}
+    virtual void NotifyConfigurationChange(bool, const OnConfigurationChange& configurationChange = { false, false }) {}
     virtual void HotReload() {}
 
     void SetIsModule(bool isModule)
@@ -344,23 +374,43 @@ public:
         return false;
     }
 
+    virtual bool RequestAutoFill(const RefPtr<NG::FrameNode>& node, AceAutoFillType autoFillType)
+    {
+        return false;
+    }
+
+    virtual bool RequestAutoSave(const RefPtr<NG::FrameNode>& node)
+    {
+        return false;
+    }
+
     static bool LessThanAPIVersion(PlatformVersion version)
     {
-        if (PipelineBase::GetCurrentContext() &&
-            PipelineBase::GetCurrentContext()->GetMinPlatformVersion() < static_cast<int32_t>(version)) {
-            return true;
-        }
-        return false;
+        return PipelineBase::GetCurrentContext() &&
+               PipelineBase::GetCurrentContext()->GetMinPlatformVersion() < static_cast<int32_t>(version);
     }
 
     static bool GreatOrEqualAPIVersion(PlatformVersion version)
     {
-        if (PipelineBase::GetCurrentContext() &&
-            PipelineBase::GetCurrentContext()->GetMinPlatformVersion() >= static_cast<int32_t>(version)) {
-            return true;
-        }
-        return false;
+        return PipelineBase::GetCurrentContext() &&
+               PipelineBase::GetCurrentContext()->GetMinPlatformVersion() >= static_cast<int32_t>(version);
     }
+
+    void SetAppBar(const RefPtr<NG::AppBarView>& appBar)
+    {
+        appBar_ = appBar;
+    }
+
+    RefPtr<NG::AppBarView> GetAppBar() const
+    {
+        return appBar_;
+    }
+
+    template<ContainerType type>
+    static int32_t GenerateId();
+
+private:
+    static bool IsIdAvailable(int32_t id);
 
 protected:
     std::chrono::time_point<std::chrono::high_resolution_clock> createTime_;
@@ -375,13 +425,29 @@ private:
     std::string moduleName_;
     std::string bundlePath_;
     std::string filesDataPath_;
+    std::string tempDir_;
     bool usePartialUpdate_ = false;
     Settings settings_;
     RefPtr<PageUrlChecker> pageUrlChecker_;
     bool isModule_ = false;
     std::shared_ptr<NG::DistributedUI> distributedUI_;
+    RefPtr<NG::AppBarView> appBar_;
     ACE_DISALLOW_COPY_AND_MOVE(Container);
 };
+
+template<ContainerType type>
+int32_t Container::GenerateId()
+{
+    static std::atomic<int32_t> gInstanceId;
+    int32_t id;
+    do {
+        id = type * CONTAINER_ID_DIVIDE_SIZE + gInstanceId.fetch_add(1) % CONTAINER_ID_DIVIDE_SIZE;
+    } while (!IsIdAvailable(id));
+    return id;
+}
+
+template<>
+int32_t Container::GenerateId<PLUGIN_SUBCONTAINER>();
 
 } // namespace OHOS::Ace
 

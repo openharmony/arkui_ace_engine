@@ -39,8 +39,10 @@ RefPtr<SwiperController> SwiperModelNG::Create()
 {
     auto* stack = ViewStackProcessor::GetInstance();
     CHECK_NULL_RETURN(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::SWIPER_ETS_TAG, nodeId);
     auto swiperNode = FrameNode::GetOrCreateFrameNode(
-        V2::SWIPER_ETS_TAG, stack->ClaimNodeId(), []() { return AceType::MakeRefPtr<SwiperPattern>(); });
+        V2::SWIPER_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<SwiperPattern>(); });
 
     stack->Push(swiperNode);
     auto pattern = swiperNode->GetPattern<SwiperPattern>();
@@ -66,7 +68,6 @@ void SwiperModelNG::SetDisplayMode(SwiperDisplayMode displayMode)
 void SwiperModelNG::SetDisplayCount(int32_t displayCount)
 {
     if (displayCount <= 0) {
-        LOGE("SwiperModelNG::SetDisplayCount displayCount is invalid, return.");
         return;
     }
 
@@ -107,10 +108,11 @@ void SwiperModelNG::SetItemSpace(const Dimension& itemSpace)
 
 void SwiperModelNG::SetCachedCount(int32_t cachedCount)
 {
-    if (cachedCount < 0) {
-        LOGE("SwiperModelNG::SetCachedCount cachedCount is invalid, return.");
-        return;
-    }
+    auto swiperNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(swiperNode);
+    auto pattern = swiperNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetCachedCount(cachedCount);
 
     ACE_UPDATE_LAYOUT_PROPERTY(SwiperLayoutProperty, CachedCount, cachedCount);
 }
@@ -192,10 +194,10 @@ void SwiperModelNG::SetOnAnimationEnd(AnimationEndEvent&& onAnimationEnd)
 {
     auto swiperNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(swiperNode);
-    auto eventHub = swiperNode->GetEventHub<SwiperEventHub>();
-    CHECK_NULL_VOID(eventHub);
+    auto pattern = swiperNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_VOID(pattern);
 
-    eventHub->SetAnimationEndEvent(
+    pattern->UpdateAnimationEndEvent(
         [event = std::move(onAnimationEnd)](int32_t index, const AnimationCallbackInfo& info) { event(index, info); });
 }
 
@@ -315,4 +317,12 @@ void SwiperModelNG::SetHoverShow(bool hoverShow)
     ACE_UPDATE_LAYOUT_PROPERTY(SwiperLayoutProperty, HoverShow, hoverShow);
 }
 
+void SwiperModelNG::SetNestedScroll(const NestedScrollOptions& nestedOpt)
+{
+    auto swiperNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(swiperNode);
+    auto pattern = swiperNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetNestedScroll(nestedOpt);
+}
 } // namespace OHOS::Ace::NG

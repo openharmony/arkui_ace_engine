@@ -702,8 +702,9 @@ RSCanvas *APngImagePlayer::CreateBlendCanvas()
 {
     if (!blendCanvas_) {
         blendFrameIndex_ = -1;
-        // TODO Drawing : There may be a problem here
-        blendCanvas_ = new RSCanvas(width_, height_);
+        ImageInfo imageInfo(width_, height_, COLORTYPE_N32, ALPHATYPE_PREMUL);
+        bitmap_.Build(imageInfo);
+        blendCanvas_.Bind(bitmap_);
     }
 
     return blendCanvas_;
@@ -772,7 +773,11 @@ APngAnimatedFrameInfo *APngImagePlayer::DecodeFrameImage(const int32_t& index)
         blendFrameIndex_ = index;
     } else {
         blendFrameIndex_ = -1;
+#ifndef USE_ROSEN_DRAWING
         blendCanvas_->clear(SK_ColorTRANSPARENT);
+#else
+        blendCanvas_->clear(RSColor::COLOR_TRANSPARENT);
+#endif
 
         if (frameInfo->blendFromIndex == frameInfo->index) {
 #ifndef USE_ROSEN_DRAWING
@@ -896,7 +901,13 @@ bool APngImagePlayer::CopyTo(SkBitmap *dst, const SkBitmap& src)
     return true;
 }
 #else
-    // TODO Drawing : SkPixmap
+bool APngImagePlayer::CopyTo(RSBitmap *dst, const RSBitmap &src)
+{
+    auto info = src.GetImageInfo();
+    dst->Build(info);
+    src.CopyPixels(*dst, 0, 0);
+    return true;
+}
 #endif
 
 /**

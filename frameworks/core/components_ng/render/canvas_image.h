@@ -70,6 +70,11 @@ public:
         return Claim(this);
     }
 
+    virtual bool HasData() const
+    {
+        return false;
+    }
+
     // cache this CanvasImage
     virtual void Cache(const std::string& key) {}
 
@@ -86,7 +91,6 @@ public:
     inline ImagePaintConfig& GetPaintConfig()
     {
         if (!paintConfig_) {
-            LOGW("image paint config is null");
             paintConfig_ = std::make_unique<ImagePaintConfig>();
         }
         return *paintConfig_;

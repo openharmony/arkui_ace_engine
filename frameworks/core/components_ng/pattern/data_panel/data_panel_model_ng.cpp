@@ -26,6 +26,7 @@ void DataPanelModelNG::Create(const std::vector<double>& values, double max, int
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
+    ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::DATA_PANEL_ETS_TAG, nodeId);
     auto frameNode = FrameNode::GetOrCreateFrameNode(
         V2::DATA_PANEL_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<DataPanelPattern>(); });
     stack->Push(frameNode);
@@ -61,4 +62,3 @@ void DataPanelModelNG::SetShadowOption(const DataPanelShadow& shadowOption)
 }
 
 } // namespace OHOS::Ace::NG
-

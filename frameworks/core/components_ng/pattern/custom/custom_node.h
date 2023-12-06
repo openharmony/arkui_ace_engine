@@ -49,7 +49,7 @@ public:
         renderFunction_ = renderFunction;
     }
 
-    void Build() override;
+    void Build(std::shared_ptr<std::list<ExtraInfo>> extraInfos) override;
 
     int32_t FrameCount() const override
     {
@@ -80,11 +80,33 @@ public:
     RefPtr<UINode> GetFrameChildByIndex(uint32_t index, bool needBuild) override;
     void SetJSViewActive(bool active) override;
 
+    bool GetJsActive()
+    {
+        return prevJsActive_;
+    }
+
+    void SetJsActive(bool active)
+    {
+        prevJsActive_ = active;
+    }
+
+    void SetExtraInfos(const std::list<ExtraInfo> extraInfos)
+    {
+        extraInfos_ = std::move(extraInfos);
+    }
+
+    const std::list<ExtraInfo> GetExtraInfos() const
+    {
+        return extraInfos_;
+    }
+
 private:
     std::string viewKey_;
     RenderFunction renderFunction_;
     RenderFunction completeReloadFunc_;
     bool needMarkParent_ = true;
+    bool prevJsActive_ = true;
+    std::list<ExtraInfo> extraInfos_;
 };
 } // namespace OHOS::Ace::NG
 

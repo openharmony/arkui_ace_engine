@@ -43,6 +43,12 @@ public:
         return false;
     }
 
+    // search pattern needs softkeyboard, override function.
+    bool NeedSoftKeyboard() const override
+    {
+        return true;
+    }
+
     RefPtr<LayoutProperty> CreateLayoutProperty() override
     {
         return MakeRefPtr<SearchLayoutProperty>();
@@ -104,7 +110,7 @@ public:
                 result = "CopyOptions.Distributed";
                 break;
             default:
-                LOGD("The input does not match any CopyOptions");
+                break;
         }
         return result;
     }
@@ -128,17 +134,21 @@ public:
         textField_ = textField;
     }
 
+    void ResetDragOption() override;
     void OnColorConfigurationUpdate() override;
 
 private:
     void OnModifyDone() override;
+    void OnAfterModifyDone() override;
     void InitButtonAndImageClickEvent();
     void InitCancelButtonClickEvent();
     void InitSearchController();
     void OnClickButtonAndImage();
     void OnClickCancelButton();
     void HandleCaretPosition(int32_t caretPosition);
-    Rect HandleTextContentRect();
+    int32_t HandleGetCaretIndex();
+    NG::OffsetF HandleGetCaretPosition();
+    void HandleTextContentRect(Rect& rect);
     int32_t HandleTextContentLines();
     void StopEditing();
     // Init key event
@@ -148,13 +158,14 @@ private:
     void GetInnerFocusPaintRect(RoundRect& paintRect);
     void RequestKeyboard();
     // Init touch and hover event
-    void InitTextFieldMouseEvent();
+    void InitTextFieldValueChangeEvent();
     void InitButtonTouchEvent(RefPtr<TouchEventImpl>& touchEvent, int32_t childId);
     void InitButtonMouseEvent(RefPtr<InputEvent>& inputEvent, int32_t childId);
     void SetMouseStyle(MouseFormat format);
     void OnButtonTouchDown(int32_t childId);
     void OnButtonTouchUp(int32_t childId);
     void HandleButtonMouseEvent(bool isHover, int32_t childId);
+    void ClearButtonStyle(int32_t childId);
 
     void ToJsonValueForTextField(std::unique_ptr<JsonValue>& json) const;
     void ToJsonValueForSearchIcon(std::unique_ptr<JsonValue>& json) const;
@@ -169,6 +180,7 @@ private:
     void HandleBlurEvent();
     void InitClickEvent();
     void HandleClickEvent(GestureEvent& info);
+    uint32_t GetMaxLength() const;
     std::string searchButton_;
     SizeF searchSize_;
     OffsetF searchOffset_;

@@ -86,7 +86,6 @@ void JSRow::SetAlignItems(int32_t value)
     } else if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)) {
         RowModel::GetInstance()->SetAlignItems(FlexAlign::CENTER);
         // FIXME: we have a design issue here, setters return void, can not signal error to JS
-        LOGE("invalid value for justifyContent");
     }
 }
 
@@ -100,7 +99,6 @@ void JSRow::SetJustifyContent(int32_t value)
         RowModel::GetInstance()->SetJustifyContent(static_cast<FlexAlign>(value));
     } else if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)) {
         RowModel::GetInstance()->SetJustifyContent(FlexAlign::FLEX_START);
-        LOGE("invalid value for justifyContent");
     }
 }
 
@@ -126,6 +124,7 @@ void JSRow::JSBind(BindingTarget globalObj)
     JSClass<JSRow>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
     JSClass<JSRow>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSRow>::StaticMethod("remoteMessage", &JSInteractableView::JsCommonRemoteMessage);
+    JSClass<JSRow>::StaticMethod("pointLight", &JSViewAbstract::JsPointLight, opt);
     JSClass<JSRow>::InheritAndBind<JSContainerBase>(globalObj);
 
     JSClass<VerticalAlignDeclaration>::Declare("VerticalAlignDeclaration");

@@ -68,9 +68,9 @@ public:
         auto indexerTheme = pipeline->GetTheme<IndexerTheme>();
         CHECK_NULL_VOID(indexerTheme);
         json->Put("popupSelectedColor",
-            propPopupSelectedColor_.value_or(indexerTheme->GetPopupDefaultColor()).ColorToString().c_str());
+            propPopupSelectedColor_.value_or(indexerTheme->GetPopupSelectedTextColor()).ColorToString().c_str());
         json->Put("popupUnselectedColor",
-            propPopupUnselectedColor_.value_or(indexerTheme->GetPopupDefaultColor()).ColorToString().c_str());
+            propPopupUnselectedColor_.value_or(indexerTheme->GetPopupUnselectedTextColor()).ColorToString().c_str());
         json->Put("popupItemBackground",
             propPopupItemBackground_.value_or(indexerTheme->GetPopupBackgroundColor()).ColorToString().c_str());
         json->Put("popupHorizontalSpace", propPopupHorizontalSpace_.value_or(

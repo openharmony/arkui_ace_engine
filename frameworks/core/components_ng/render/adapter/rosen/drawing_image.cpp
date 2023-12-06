@@ -17,6 +17,8 @@
 
 #include <utility>
 
+#include "include/core/SkGraphics.h"
+
 #include "base/image/pixel_map.h"
 #include "frameworks/core/components_ng/render/adapter/image_painter_utils.h"
 #include "frameworks/core/image/sk_image_cache.h"
@@ -78,6 +80,7 @@ RSColorType DrawingImage::PixelFormatToRSColorType(const RefPtr<PixelMap>& pixma
         case PixelFormat::ALPHA_8:
             return RSColorType::COLORTYPE_ALPHA_8;
         case PixelFormat::RGBA_F16:
+            return RSColorType::COLORTYPE_RGBA_F16;
         case PixelFormat::UNKNOWN:
         case PixelFormat::ARGB_8888:
         case PixelFormat::RGB_888:
@@ -179,7 +182,7 @@ bool DrawingImage::DrawWithRecordingCanvas(RSCanvas& canvas, const BorderRadiusA
     RSSamplingOptions options;
     ImagePainterUtils::AddFilter(brush, options, config);
     auto radii = ImagePainterUtils::ToRSRadius(radiusXY);
-    auto recordingCanvas = static_cast<RSRecordingCanvas&>(canvas);
+    auto& recordingCanvas = static_cast<Rosen::ExtendRecordingCanvas&>(canvas);
     std::vector<RSPoint> radius;
     for (int ii = 0; ii < 4; ii++) {
         RSPoint point(radiusXY[ii].GetX(), radiusXY[ii].GetY());
@@ -198,11 +201,18 @@ bool DrawingImage::DrawWithRecordingCanvas(RSCanvas& canvas, const BorderRadiusA
         GetCompressWidth(), GetCompressHeight()};
     auto data = GetCompressData();
     recordingCanvas.AttachBrush(brush);
-    recordingCanvas.DrawImage(GetImage(), std::move(data), rsImageInfo, options);
+    recordingCanvas.DrawImageWithParm(GetImage(), std::move(data), rsImageInfo, options);
     recordingCanvas.DetachBrush();
     return true;
 #else // !ENABLE_ROSEN_BACKEND
     return false;
 #endif
+}
+} // namespace OHOS::Ace::NG
+
+namespace OHOS::Ace {
+void ImageCache::Purge()
+{
+    SkGraphics::PurgeResourceCache();
 }
 } // namespace OHOS::Ace::NG

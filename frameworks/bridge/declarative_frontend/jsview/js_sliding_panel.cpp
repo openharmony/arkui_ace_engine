@@ -293,10 +293,12 @@ void JSSlidingPanel::SetOnHeightChange(const JSCallbackInfo& args)
     }
 
     auto onHeightChangeCallback = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(args[0]));
-    auto onHeightChange = [execCtx = args.GetExecutionContext(), func = std::move(onHeightChangeCallback)](
-                              int32_t height) {
+    WeakPtr<NG::FrameNode> targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto onHeightChange = [execCtx = args.GetExecutionContext(), func = std::move(onHeightChangeCallback),
+                              node = targetNode](int32_t height) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("OnHeightChange");
+        PipelineContext::SetCallBackNode(node);
         JSRef<JSVal> param = JSRef<JSVal>::Make(ToJSValue(height));
         func->ExecuteJS(1, &param);
     };
@@ -347,13 +349,16 @@ void ParseModeObject(const JSCallbackInfo& info, const JSRef<JSVal>& changeEvent
     CHECK_NULL_VOID(changeEventVal->IsFunction());
 
     auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(changeEventVal));
-    auto onMode = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](const BaseEventInfo* baseEventInfo) {
+    WeakPtr<NG::FrameNode> targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto onMode = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = targetNode](
+                      const BaseEventInfo* baseEventInfo) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("SlidingPanel.ModeChangeEvent");
         auto eventInfo = TypeInfoHelper::DynamicCast<SlidingPanelSizeChangeEvent>(baseEventInfo);
         if (!eventInfo) {
             return;
         }
+        PipelineContext::SetCallBackNode(node);
         auto newJSVal = JSRef<JSVal>::Make(ToJSValue(static_cast<int32_t>(eventInfo->GetMode())));
         func->ExecuteJS(1, &newJSVal);
     };

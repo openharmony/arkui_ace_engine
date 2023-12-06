@@ -13,9 +13,6 @@
  * limitations under the License.
  */
 
-#ifndef NEW_SKIA
-#include "flutter_render_grid_scroll.h"
-#endif
 #include "rosen_render_grid_scroll.h"
 
 namespace OHOS::Ace::V2 {
@@ -28,11 +25,7 @@ RefPtr<RenderNode> RenderGridScroll::Create()
         return nullptr;
 #endif
     } else {
-#ifndef NEW_SKIA
-        return AceType::MakeRefPtr<FlutterRenderGridScroll>();
-#else
         return nullptr;
-#endif
     }
 }
 } // namespace OHOS::Ace::V2

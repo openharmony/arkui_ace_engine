@@ -43,36 +43,6 @@ public:
             if (!themeConstants) {
                 return theme;
             }
-            theme->trackThickness_ = themeConstants->GetDimension(THEME_PROGRERSS_THICKNESS);
-            theme->trackWidth_ = themeConstants->GetDimension(THEME_PROGRESS_DEFAULT_WIDTH);
-            theme->ringThickness_ = themeConstants->GetDimension(THEME_PROGRESS_RING_THICKNESS);
-            theme->ringDiameter_ = themeConstants->GetDimension(THEME_PROGRESS_DEFAULT_DIAMETER);
-            theme->trackBgColor_ = themeConstants->GetColor(THEME_PROGRESS_BG_COLOR);
-            theme->trackSelectedColor_ = themeConstants->GetColor(THEME_PROGRESS_COLOR);
-            theme->trackCachedColor_ = themeConstants->GetColor(THEME_PROGRESS_CACHED_COLOR);
-            theme->loadingColor_ = themeConstants->GetColor(THEME_LOADING_COLOR);
-            theme->loadingDiameter_ = themeConstants->GetDimension(THEME_PROGRESS_DEFAULT_DIAMETER);
-            theme->scaleNumber_ = themeConstants->GetInt(THEME_PROGRESS_SCALE_NUMBER);
-            theme->scaleWidth_ = themeConstants->GetDimension(THEME_PROGRESS_SCALE_WIDTH);
-            theme->scaleLength_ = themeConstants->GetDimension(THEME_PROGRESS_STROKE_WIDTH);
-            theme->scaleRingDiameter_ = themeConstants->GetDimension(THEME_SCALE_PROGRESS_DEFAULT_DIAMETER);
-
-            // For moon progress
-            theme->moonDiameter_ = themeConstants->GetDimension(THEME_MOON_PROGRESS_DIAMETER);
-            theme->moonTrackBackgroundColor_ = themeConstants->GetColor(THEME_MOON_BACKGROUDN_COLOR);
-            theme->moonFrontColor_ = themeConstants->GetColor(THEME_MOON_FRONT_COLOR);
-
-            // For loading progress in cycle type.
-            theme->progressColor_ = themeConstants->GetColor(THEME_LOADING_PROGRESS_COLOR);
-            theme->moveRatio_ = themeConstants->GetDouble(THEME_LOADING_PROGRESS_MOVE_RATIO);
-            theme->ringRadius_ = themeConstants->GetDimension(THEME_LOADING_PROGRESS_RING_RADIUS);
-            theme->orbitRadius_ = themeConstants->GetDimension(THEME_LOADING_PROGRESS_ORBIT_RADIUS);
-            theme->cometTailLen_ = themeConstants->GetDouble(THEME_LOADING_PROGRESS_COMET_TAIL_LEN);
-
-            theme->bubbleRadius_ = themeConstants->GetDimension(THEME_BUBBLE_PROGRESS_RADIUS);
-            theme->bubbleDiameter_ = themeConstants->GetDimension(THEME_BUBBLE_PROGRESS_DIAMETER);
-            theme->progressHeight_ = themeConstants->GetDimension(THEME_BUTTON_DOWNLOAD_HEIGHT);
-
             // Read style from system.
             ParsePattern(themeConstants->GetThemeStyle(), theme);
             return theme;
@@ -81,18 +51,33 @@ public:
         void ParsePattern(const RefPtr<ThemeStyle>& themeStyle, const RefPtr<ProgressTheme>& theme) const
         {
             if (!themeStyle) {
-                LOGI("progress theme style is null");
                 return;
             }
             auto pattern = themeStyle->GetAttr<RefPtr<ThemeStyle>>("progress_pattern", nullptr);
             if (!pattern) {
-                LOGE("Pattern of progress is null, please check!");
                 return;
             }
             const double defaultCachedAlpha = 0.4;
             const double defaultLoadBGAlpha = 0.6;
             const double defaultRingBackgroundOpacity = 0.03;
             Color defaultColor = Color::FromRGBO(18, 24, 31, 1.0);
+            theme->trackThickness_ = pattern->GetAttr<Dimension>("progress_thickness", 0.0_vp);
+            theme->trackWidth_ = pattern->GetAttr<Dimension>("progress_default_width", 0.0_vp);
+            theme->ringThickness_ = pattern->GetAttr<Dimension>("progress_ring_thickness", 0.0_vp);
+            theme->ringDiameter_ = pattern->GetAttr<Dimension>("progress_default_diameter", 0.0_vp);
+            theme->loadingDiameter_ = pattern->GetAttr<Dimension>("progress_default_diameter", 0.0_vp);
+            theme->scaleNumber_ = static_cast<int32_t>(pattern->GetAttr<double>("progress_scale_number", 0.0));
+            theme->scaleWidth_ = pattern->GetAttr<Dimension>("progress_scale_width", 0.0_vp);
+            theme->scaleLength_ = pattern->GetAttr<Dimension>("progress_stroke_width", 0.0_vp);
+            theme->scaleRingDiameter_ = pattern->GetAttr<Dimension>("progress_scale_default_diameter", 0.0_vp);
+            theme->moonDiameter_ = pattern->GetAttr<Dimension>("progress_moon_diameter", 0.0_vp);
+            theme->moveRatio_ = pattern->GetAttr<double>("progress_loading_move_ratio", 0.0);
+            theme->ringRadius_ = pattern->GetAttr<Dimension>("progress_loading_ring_radius", 0.0_vp);
+            theme->orbitRadius_ = pattern->GetAttr<Dimension>("progress_loading_orbit_radius", 0.0_vp);
+            theme->cometTailLen_ = pattern->GetAttr<double>("progress_loading_comet_tail_len", 0.0);
+            theme->bubbleRadius_ = pattern->GetAttr<Dimension>("progress_bubble_radius", 0.0_vp);
+            theme->bubbleDiameter_ = pattern->GetAttr<Dimension>("progress_bubble_diameter", 0.0_vp);
+            theme->progressHeight_ = pattern->GetAttr<Dimension>("progress_button_download_height", 0.0_vp);
             theme->trackBgColor_ = pattern->GetAttr<Color>(PATTERN_BG_COLOR, Color::RED);
             theme->trackSelectedColor_ = pattern->GetAttr<Color>(PATTERN_FG_COLOR, Color::RED);
             theme->trackCachedColor_ = theme->trackSelectedColor_

@@ -19,46 +19,95 @@
 #include "base/memory/ace_type.h"
 #include "base/utils/utils.h"
 #include "core/common/container.h"
+#include "core/components_ng/event/response_ctrl.h"
 #include "core/components_ng/gestures/gesture_referee.h"
 #include "core/event/axis_event.h"
+#include "core/event/touch_event.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 namespace {
-
-RefPtr<GestureReferee> GetCurrentGestureReferee()
+RefPtr<EventManager> GetCurrentEventManager()
 {
     auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(context, nullptr);
 
-    auto eventManager = context->GetEventManager();
+    return context->GetEventManager();
+}
+
+RefPtr<GestureReferee> GetCurrentGestureReferee()
+{
+    auto eventManager = GetCurrentEventManager();
     CHECK_NULL_RETURN(eventManager, nullptr);
     return eventManager->GetGestureRefereeNG();
 }
 
 } // namespace
 
-std::unordered_map<int, TransformConfig> globalTransFormConfig;
-std::unordered_map<int, AncestorNodeInfo> globalTransFormIds;
+struct TransformInstance {
+    std::unordered_map<int, TransformConfig> transFormConfig;
+    std::unordered_map<int, AncestorNodeInfo> transFormIds;
+};
+
+TransformInstance g_emptyInstance;
+std::unordered_map<int, TransformInstance> globalTransFormInstance;
 
 std::unordered_map<int, TransformConfig>& NGGestureRecognizer::GetGlobalTransCfg()
 {
-    return globalTransFormConfig;
+    auto id = Container::CurrentId();
+    auto iter = globalTransFormInstance.find(id);
+    if (iter == globalTransFormInstance.end()) {
+        return g_emptyInstance.transFormConfig;
+    }
+    return iter->second.transFormConfig;
 }
 
 std::unordered_map<int, AncestorNodeInfo>& NGGestureRecognizer::GetGlobalTransIds()
 {
-    return globalTransFormIds;
+    auto id = Container::CurrentId();
+    auto iter = globalTransFormInstance.find(id);
+    if (iter == globalTransFormInstance.end()) {
+        return g_emptyInstance.transFormIds;
+    }
+    return iter->second.transFormIds;
 }
 
 void NGGestureRecognizer::ResetGlobalTransCfg()
 {
-    globalTransFormConfig.clear();
-    globalTransFormIds.clear();
+    auto id = Container::CurrentId();
+    globalTransFormInstance[id].transFormConfig.clear();
+    globalTransFormInstance[id].transFormIds.clear();
+}
+
+bool NGGestureRecognizer::ShouldResponse()
+{
+    if (AceType::InstanceOf<RecognizerGroup>(this)) {
+        return true;
+    }
+    auto eventManager = GetCurrentEventManager();
+    CHECK_NULL_RETURN(eventManager, true);
+
+    auto frameNode = GetAttachedNode();
+    auto ctrl = eventManager->GetResponseCtrl();
+    CHECK_NULL_RETURN(ctrl, true);
+    if (!ctrl->ShouldResponse(frameNode)) {
+        if (refereeState_ != RefereeState::FAIL) {
+            Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
+        }
+        return false;
+    }
+    return true;
 }
 
 bool NGGestureRecognizer::HandleEvent(const TouchEvent& point)
 {
+    auto attachedNode = GetAttachedNode();
+    if (attachedNode.Invalid()) {
+        return true;
+    }
+    if (!ShouldResponse()) {
+        return true;
+    }
     switch (point.type) {
         case TouchType::MOVE:
             HandleTouchMoveEvent(point);
@@ -75,9 +124,9 @@ bool NGGestureRecognizer::HandleEvent(const TouchEvent& point)
             break;
         case TouchType::CANCEL:
             HandleTouchCancelEvent(point);
+            currentFingers_--;
             break;
         default:
-            LOGW("unknown touch type");
             break;
     }
     return true;
@@ -85,6 +134,9 @@ bool NGGestureRecognizer::HandleEvent(const TouchEvent& point)
 
 bool NGGestureRecognizer::HandleEvent(const AxisEvent& event)
 {
+    if (!ShouldResponse()) {
+        return true;
+    }
     switch (event.action) {
         case AxisAction::BEGIN:
             deviceId_ = event.deviceId;
@@ -95,13 +147,10 @@ bool NGGestureRecognizer::HandleEvent(const AxisEvent& event)
             HandleTouchMoveEvent(event);
             break;
         case AxisAction::END:
-            // When scroll one step. Axis events are 'BEGIN' and 'END'. So it's need to do 'UPDATE' before 'END'.
-            HandleTouchMoveEvent(event);
             HandleTouchUpEvent(event);
             break;
         default:
             HandleTouchCancelEvent(event);
-            LOGW("unknown touch type");
             break;
     }
     return true;
@@ -117,63 +166,121 @@ void NGGestureRecognizer::BatchAdjudicate(const RefPtr<NGGestureRecognizer>& rec
 
     auto referee = GetCurrentGestureReferee();
     if (!referee) {
-        LOGW("the referee is nullptr");
         recognizer->OnRejected();
         return;
     }
     referee->Adjudicate(recognizer, disposal);
 }
 
-void NGGestureRecognizer::Transform(PointF& windowPointF, PointF& originPointF)
+void NGGestureRecognizer::Transform(PointF& localPointF, const WeakPtr<FrameNode>& node, bool isRealTime)
 {
-    auto& translateCfg = NGGestureRecognizer::GetGlobalTransCfg();
-    auto& translateIds = NGGestureRecognizer::GetGlobalTransIds();
-
-    float offsetX = 0.0f;
-    float offsetY = 0.0f;
-    const float pi = 3.14159265f;
-
-    auto translateIter = translateIds.find(transId_);
-    if (translateIter == translateIds.end()) {
+    if (node.Invalid()) {
         return;
     }
-    std::vector<int32_t> vTrans {};
-    while (translateIter != translateIds.end()) {
-        int32_t translateId = translateIter->second.parentId;
-        if (translateCfg.find(translateId) != translateCfg.end()) {
-            vTrans.emplace_back(translateId);
-        }
-        translateIter = translateIds.find(translateId);
+
+    std::vector<Matrix4> vTrans {};
+    auto host = node.Upgrade();
+    CHECK_NULL_VOID(host);
+
+    std::function<Matrix4()> getLocalMatrix;
+    if (isRealTime) {
+        getLocalMatrix = [&host]()->Matrix4 {
+            auto context = host->GetRenderContext();
+            CHECK_NULL_RETURN(context, Matrix4::CreateIdentity());
+            return context->GetLocalTransformMatrix();
+        };
+    } else {
+        getLocalMatrix = [&host]()->Matrix4 {
+            return host->GetLocalMatrix();
+        };
     }
+
+    while (host) {
+        auto localMat = getLocalMatrix();
+        vTrans.emplace_back(localMat);
+        host = host->GetAncestorNodeOfFrame();
+    }
+
+    Point temp(localPointF.GetX(), localPointF.GetY());
     for (auto iter = vTrans.rbegin(); iter != vTrans.rend(); iter++) {
-        auto& trans = translateCfg[*iter];
-        offsetX += trans.offsetX;
-        offsetY += trans.offsetY;
-        int32_t degree = static_cast<int32_t>(trans.degree) % 360;
-        if (degree < 0) {
-            degree += 360;
-        }
-        auto radian = degree * pi / 180;
-        if (NearZero(trans.degree)) {
-            originPointF.SetX(originPointF.GetX() - trans.offsetX);
-            originPointF.SetY(originPointF.GetY() - trans.offsetY);
-        } else {
-            float windowX = (originPointF.GetX() - trans.centerX) * cos(radian) +
-                     (originPointF.GetY() - trans.centerX) * sin(radian);
-            float windowY = -1 * (originPointF.GetX() - trans.centerY) * sin(radian) +
-                     (originPointF.GetY() - trans.centerY) * cos(radian);
-            windowX += trans.centerX;
-            windowY += trans.centerY;
-            originPointF.SetX(windowX - trans.offsetX - trans.translateX);
-            originPointF.SetY(windowY - trans.offsetY - trans.translateY);
-        }
+        temp = *iter * temp;
     }
-    windowPointF.SetX(originPointF.GetX() + offsetX);
-    windowPointF.SetY(originPointF.GetY() + offsetY);
+    localPointF.SetX(temp.GetX());
+    localPointF.SetY(temp.GetY());
 }
 
 void NGGestureRecognizer::SetTransInfo(int transId)
 {
     transId_ = transId;
 }
+
+void NGGestureRecognizer::AboutToAccept()
+{
+    if (AceType::InstanceOf<RecognizerGroup>(this)) {
+        OnAccepted();
+        return;
+    }
+    auto eventManager = GetCurrentEventManager();
+    CHECK_NULL_VOID(eventManager);
+
+    auto frameNode = GetAttachedNode();
+    auto ctrl = eventManager->GetResponseCtrl();
+    CHECK_NULL_VOID(ctrl);
+    if (!ctrl->ShouldResponse(frameNode)) {
+        return;
+    }
+    ctrl->TrySetFirstResponse(frameNode);
+    OnAccepted();
+}
+
+RefPtr<GestureSnapshot> NGGestureRecognizer::Dump() const
+{
+    RefPtr<GestureSnapshot> info = TouchEventTarget::Dump();
+    auto group = gestureGroup_.Upgrade();
+    if (group) {
+        info->parentId = reinterpret_cast<uintptr_t>(AceType::RawPtr(group));
+    }
+    return info;
+}
+
+void NGGestureRecognizer::AddGestureProcedure(const std::string& procedure) const
+{
+    auto context = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    auto eventMgr = context->GetEventManager();
+    CHECK_NULL_VOID(eventMgr);
+    eventMgr->GetEventTreeRecord().AddGestureProcedure(
+        reinterpret_cast<uintptr_t>(this),
+        procedure,
+        TransRefereeState(this->GetRefereeState()),
+        TransGestureDisposal(this->GetGestureDisposal()));
+}
+
+void NGGestureRecognizer::AddGestureProcedure(const TouchEvent& point,
+    const RefPtr<NGGestureRecognizer>& recognizer) const
+{
+    if (!recognizer) {
+        return;
+    }
+    auto context = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    auto eventMgr = context->GetEventManager();
+    CHECK_NULL_VOID(eventMgr);
+    eventMgr->GetEventTreeRecord().AddGestureProcedure(
+        reinterpret_cast<uintptr_t>(AceType::RawPtr(recognizer)),
+        point,
+        TransRefereeState(recognizer->GetRefereeState()),
+        TransGestureDisposal(recognizer->GetGestureDisposal()));
+}
+
+bool NGGestureRecognizer::SetGestureGroup(const WeakPtr<NGGestureRecognizer>& gestureGroup)
+{
+    if (!gestureGroup_.Invalid()) {
+        return false;
+    }
+
+    gestureGroup_ = gestureGroup;
+    return true;
+}
+
 } // namespace OHOS::Ace::NG

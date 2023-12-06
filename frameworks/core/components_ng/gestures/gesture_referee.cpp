@@ -27,7 +27,6 @@ void GestureScope::AddMember(const RefPtr<NGGestureRecognizer>& recognizer)
     CHECK_NULL_VOID(recognizer);
 
     if (Existed(recognizer)) {
-        LOGW("gesture recognizer has already been added.");
         return;
     }
 
@@ -50,13 +49,20 @@ bool GestureScope::CheckNeedBlocked(const RefPtr<NGGestureRecognizer>& recognize
 {
     for (const auto& weak : recognizers_) {
         auto member = weak.Upgrade();
+        if (!member || member->GetRefereeState() != RefereeState::PENDING) {
+            continue;
+        }
         if (member == recognizer) {
             return false;
         }
-
-        if (member && member->GetRefereeState() == RefereeState::PENDING) {
-            return true;
+        RefPtr<NGGestureRecognizer> group = member->GetGestureGroup().Upgrade();
+        while (group) {
+            if (group == recognizer) {
+                return false;
+            }
+            group = group->GetGestureGroup().Upgrade();
         }
+        return true;
     }
     return false;
 }
@@ -87,7 +93,6 @@ RefPtr<NGGestureRecognizer> GestureScope::UnBlockGesture()
                                      (recognizer->GetRefereeState() == RefereeState::SUCCEED_BLOCKED));
         });
     if (iter == recognizers_.end()) {
-        LOGD("no blocked gesture in recognizers");
         return nullptr;
     }
     return (*iter).Upgrade();
@@ -148,11 +153,49 @@ bool GestureScope::QueryAllDone(size_t touchId)
 
 void GestureScope::Close(bool isBlocked)
 {
-    LOGD("force close gesture scope of id %{public}d", static_cast<int32_t>(touchId_));
     for (const auto& weak : recognizers_) {
         auto recognizer = weak.Upgrade();
         if (recognizer) {
             recognizer->FinishReferee(static_cast<int32_t>(touchId_), isBlocked);
+        }
+    }
+}
+
+static bool CheckRecognizer(const RefPtr<NGGestureRecognizer>& recognizer)
+{
+    if (!recognizer) {
+        return false;
+    }
+    auto group = AceType::DynamicCast<RecognizerGroup>(recognizer);
+    if (!group) {
+        return recognizer->GetRefereeState() == RefereeState::PENDING;
+    }
+    auto children = group->GetGroupRecognizer();
+    for (auto iter = children.begin(); iter != children.end(); ++iter) {
+        if (CheckRecognizer(*iter)) {
+            return true;
+        }
+    }
+    return false;
+}
+
+bool GestureScope::CheckRecognizerState()
+{
+    for (auto& weak : recognizers_) {
+        auto recognizer = weak.Upgrade();
+        if (CheckRecognizer(recognizer)) {
+            return true;
+        }
+    }
+    return false;
+}
+
+void GestureScope::ForceCleanGestureScope()
+{
+    for (const auto& weak : recognizers_) {
+        auto recognizer = weak.Upgrade();
+        if (recognizer) {
+            recognizer->ForceCleanRecognizer();
         }
     }
 }
@@ -162,7 +205,6 @@ void GestureReferee::AddGestureToScope(size_t touchId, const TouchTestResult& re
     RefPtr<GestureScope> scope;
     const auto iter = gestureScopes_.find(touchId);
     if (iter != gestureScopes_.end()) {
-        LOGI("gesture scope of touch id %{public}d already exists.", static_cast<int32_t>(touchId));
         scope = iter->second;
     } else {
         scope = MakeRefPtr<GestureScope>(touchId);
@@ -192,13 +234,23 @@ void GestureReferee::CleanGestureScope(size_t touchId)
 
 bool GestureReferee::QueryAllDone(size_t touchId)
 {
-    bool ret = false;
+    bool ret = true;
     const auto iter = gestureScopes_.find(touchId);
     if (iter != gestureScopes_.end()) {
         const auto& scope = iter->second;
         ret = scope->QueryAllDone(touchId);
     }
     return ret;
+}
+
+bool GestureReferee::QueryAllDone()
+{
+    for (auto iter = gestureScopes_.begin(); iter != gestureScopes_.end(); ++iter) {
+        if (!iter->second->QueryAllDone(iter->first)) {
+            return false;
+        }
+    }
+    return true;
 }
 
 bool GestureReferee::CheckSourceTypeChange(SourceType type, bool isAxis_)
@@ -223,6 +275,24 @@ void GestureReferee::CleanAll(bool isBlocked)
     gestureScopes_.clear();
 }
 
+void GestureReferee::CleanRedundanceScope()
+{
+    for (auto iter = gestureScopes_.begin(); iter != gestureScopes_.end(); iter++) {
+        if (iter->second->CheckRecognizerState()) {
+            continue;
+        }
+        iter->second->Close();
+    }
+}
+
+void GestureReferee::ForceCleanGestureReferee()
+{
+    for (auto iter = gestureScopes_.begin(); iter != gestureScopes_.end(); iter++) {
+        iter->second->ForceCleanGestureScope();
+    }
+    gestureScopes_.clear();
+}
+
 void GestureReferee::Adjudicate(const RefPtr<NGGestureRecognizer>& recognizer, GestureDisposal disposal)
 {
     CHECK_NULL_VOID(recognizer);
@@ -238,7 +308,6 @@ void GestureReferee::Adjudicate(const RefPtr<NGGestureRecognizer>& recognizer, G
             HandleRejectDisposal(recognizer);
             break;
         default:
-            LOGW("handle known gesture disposal %{public}d", disposal);
             break;
     }
 }
@@ -263,7 +332,7 @@ void GestureReferee::HandleAcceptDisposal(const RefPtr<NGGestureRecognizer>& rec
         return;
     }
     auto prevState = recognizer->GetRefereeState();
-    recognizer->OnAccepted();
+    recognizer->AboutToAccept();
     std::list<size_t> delayIds;
     for (const auto& scope : gestureScopes_) {
         scope.second->OnAcceptGesture(recognizer);
@@ -328,7 +397,7 @@ void GestureReferee::HandleRejectDisposal(const RefPtr<NGGestureRecognizer>& rec
         if (newBlockRecognizer->GetRefereeState() == RefereeState::PENDING_BLOCKED) {
             newBlockRecognizer->OnPending();
         } else if (newBlockRecognizer->GetRefereeState() == RefereeState::SUCCEED_BLOCKED) {
-            newBlockRecognizer->OnAccepted();
+            newBlockRecognizer->AboutToAccept();
             for (const auto& scope : gestureScopes_) {
                 scope.second->OnAcceptGesture(newBlockRecognizer);
             }
@@ -351,7 +420,6 @@ bool GestureReferee::HasGestureAccepted(size_t touchId) const
 {
     const auto& iter = gestureScopes_.find(touchId);
     if (iter == gestureScopes_.end()) {
-        LOGI("gesture scope is not exist");
         return false;
     }
 

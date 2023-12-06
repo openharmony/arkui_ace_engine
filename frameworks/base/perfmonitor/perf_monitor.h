@@ -63,14 +63,14 @@ struct BaseInfo {
 
 struct DataBase {
     std::string sceneId {""};
-    int32_t maxFrameTime {0};
     int32_t maxSuccessiveFrames {0};
     int32_t totalMissed {0};
     int32_t totalFrames {0};
     int64_t inputTime {0};
     int64_t beginVsyncTime {0};
     int64_t endVsyncTime {0};
-    bool needReportToRS {false};
+    int64_t maxFrameTime {0};
+    bool isDisplayAnimator {false};
     PerfSourceType sourceType {UNKNOWN_SOURCE};
     PerfActionType actionType {UNKNOWN_ACTION};
     PerfEventType eventType {UNKNOWN_EVENT};
@@ -98,13 +98,14 @@ public:
     int64_t inputTime {0};
     int64_t beginVsyncTime {0};
     int64_t endVsyncTime {0};
-    int32_t maxFrameTime {0};
+    int64_t  maxFrameTime {0};
     int32_t maxSuccessiveFrames {0};
     int32_t totalMissed {0};
     int32_t totalFrames {0};
     int32_t seqMissFrames {0};
     bool isSuccessive {false};
     bool isFirstFrame {false};
+    bool isDisplayAnimator {false};
     std::string sceneId {""};
     PerfActionType actionType {UNKNOWN_ACTION};
     PerfSourceType sourceType {UNKNOWN_SOURCE};
@@ -114,9 +115,9 @@ public:
 class ACE_FORCE_EXPORT PerfMonitor {
 public:
     void Start(const std::string& sceneId, PerfActionType type, const std::string& note);
-    void End(const std::string& sceneId, bool isJsApi);
+    void End(const std::string& sceneId, bool isRsRender);
     void RecordInputEvent(PerfActionType type, PerfSourceType sourceType, int64_t time);
-    int64_t GetInputTime(PerfActionType type);
+    int64_t GetInputTime(const std::string& sceneId, PerfActionType type, const std::string& note);
     void SetFrameTime(int64_t vsyncTime, int64_t duration, double jank);
     void ReportJankFrameApp(double jank);
     void SetPageUrl(const std::string& pageUrl);
@@ -128,10 +129,11 @@ private:
     SceneRecord* GetRecord(const std::string& sceneId);
     void RemoveRecord(const std::string& sceneId);
     void ReportAnimateStart(const std::string& sceneId, SceneRecord* record);
-    void ReportAnimateEnd(const std::string& sceneId, SceneRecord* record, bool needCompleteTime);
-    void FlushDataBase(SceneRecord* record, DataBase& data, bool needCompleteTime);
+    void ReportAnimateEnd(const std::string& sceneId, SceneRecord* record);
+    void FlushDataBase(SceneRecord* record, DataBase& data);
     void ReportPerfEvent(PerfEventType type, DataBase& data);
     void RecordBaseInfo(SceneRecord* record);
+    bool IsExceptResponseTime(int64_t time, const std::string& sceneId);
 private:
     std::map<PerfActionType, int64_t> mInputTime;
     int64_t mVsyncTime {0};

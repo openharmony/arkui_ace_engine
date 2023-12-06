@@ -40,7 +40,7 @@ public:
     virtual void ShowMenu(const RefPtr<Component>& newComponent) = 0;
     virtual void ShowMenuNG(const RefPtr<NG::FrameNode> menuNode, int32_t targetId, const NG::OffsetF& offset) = 0;
     virtual void HideMenuNG(const RefPtr<NG::FrameNode>& menu, int32_t targetId) = 0;
-    virtual void HideMenuNG(bool showPreviewAnimation = true) = 0;
+    virtual void HideMenuNG(bool showPreviewAnimation = true, bool startDrag = false) = 0;
     virtual void ShowPopup(const RefPtr<Component>& newComponent, bool disableTouchEvent = true) = 0;
     virtual void ShowPopupNG(int32_t targetId, const NG::PopupInfo& popupInfo) = 0;
     virtual void HidePopupNG(int32_t targetId) = 0;
@@ -49,15 +49,19 @@ public:
     virtual void CloseMenu() = 0;
     virtual void ClearMenu() {};
     virtual void ClearMenuNG(bool inWindow = true, bool showAnimation = false) = 0;
+    virtual void ClearPopupNG() = 0;
     virtual RefPtr<NG::FrameNode> ShowDialogNG(
         const DialogProperties& dialogProps, std::function<void()>&& buildFunc) = 0;
+    virtual void CloseDialogNG(const RefPtr<NG::FrameNode>& dialogNode) = 0;
     virtual void HideSubWindowNG() = 0;
     virtual int32_t GetChildContainerId() const = 0;
     virtual bool GetShown() = 0;
 
     // Add interface for hot regions
     virtual void SetHotAreas(const std::vector<Rect>& rects, int32_t overlayId) {};
-
+    virtual void SetDialogHotAreas(const std::vector<Rect>& rects, int32_t overlayId) {};
+    virtual void DeleteHotAreas(int32_t overlayId) {};
+	
     // Add interface to provide the size and offset of the parent window
     virtual Rect GetParentWindowRect() const = 0;
 
@@ -81,7 +85,9 @@ public:
         return isAboveApps_;
     }
 
-    virtual void ShowToast(const std::string& message, int32_t duration, const std::string& bottom) = 0;
+    virtual void ClearToast() = 0;
+    virtual void ShowToast(
+        const std::string& message, int32_t duration, const std::string& bottom, const NG::ToastShowMode& showMode) = 0;
     virtual void ShowDialog(const std::string& title, const std::string& message,
         const std::vector<ButtonInfo>& buttons, bool autoCancel, std::function<void(int32_t, int32_t)>&& callback,
         const std::set<std::string>& callbacks) = 0;

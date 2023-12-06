@@ -479,17 +479,18 @@ ACE_FORCE_EXPORT const char* KeyToString(int32_t code);
 struct KeyEvent final {
     KeyEvent() = default;
     KeyEvent(KeyCode code, KeyAction action, std::vector<KeyCode> pressedCodes, int32_t repeatTime, TimeStamp timeStamp,
-        int32_t metaKey, int64_t deviceId, SourceType sourceType)
+        int32_t metaKey, int64_t deviceId, SourceType sourceType, std::vector<uint8_t> enhanceData)
         : code(code), action(action), pressedCodes(std::move(pressedCodes)), repeatTime(repeatTime),
-          timeStamp(timeStamp), metaKey(metaKey), deviceId(deviceId), sourceType(sourceType)
+          timeStamp(timeStamp), metaKey(metaKey), deviceId(deviceId), sourceType(sourceType), enhanceData(enhanceData)
     {}
     KeyEvent(KeyCode code, KeyAction action, int32_t repeatTime = 0, int64_t timeStamp = 0, int64_t deviceId = 0,
         SourceType sourceType = SourceType::KEYBOARD)
     {
         std::vector<KeyCode> pCodes;
+        std::vector<uint8_t> enhanceData;
         std::chrono::milliseconds milliseconds(timeStamp);
         TimeStamp time(milliseconds);
-        new (this) KeyEvent(code, action, pCodes, repeatTime, time, 0, deviceId, sourceType);
+        new (this) KeyEvent(code, action, pCodes, repeatTime, time, 0, deviceId, sourceType, enhanceData);
     }
     ~KeyEvent() = default;
 
@@ -498,6 +499,18 @@ struct KeyEvent final {
         std::chrono::milliseconds milliseconds(timeInt);
         TimeStamp time(milliseconds);
         timeStamp = time;
+    }
+
+    bool HasKey(KeyCode expectCode) const
+    {
+        auto curPressedCode = pressedCodes.rbegin();
+        while (curPressedCode != pressedCodes.rend()) {
+            if (expectCode == *curPressedCode) {
+                return true;
+            }
+            ++curPressedCode;
+        }
+        return false;
     }
 
     bool IsKey(std::vector<KeyCode> expectCodes) const
@@ -585,6 +598,7 @@ struct KeyEvent final {
     SourceType sourceType { SourceType::NONE };
     KeyIntention keyIntention { KeyIntention::INTENTION_UNKNOWN };
     bool enableCapsLock = false;
+    std::vector<uint8_t> enhanceData;
     std::shared_ptr<MMI::KeyEvent> rawKeyEvent;
 };
 

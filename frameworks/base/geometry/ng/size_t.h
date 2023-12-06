@@ -122,6 +122,19 @@ public:
         }
     }
 
+    void MinusPaddingToNonNegative(const std::optional<T>& left, const std::optional<T>& right,
+        const std::optional<T>& top, const std::optional<T>& bottom)
+    {
+        if (width_) {
+            T tempWidth = width_ - left.value_or(0) - right.value_or(0);
+            width_ = NonNegative(tempWidth) ? tempWidth : 0;
+        }
+        if (height_) {
+            T tempHeight = height_ - top.value_or(0) - bottom.value_or(0);
+            height_ = NonNegative(tempHeight) ? tempHeight : 0;
+        }
+    }
+
     void AddPadding(const std::optional<T>& left, const std::optional<T>& right, const std::optional<T>& top,
         const std::optional<T>& bottom)
     {

@@ -15,9 +15,9 @@
 
 #include "bridge/declarative_frontend/jsview/js_pattern_lock.h"
 
-#include "base/log/ace_trace.h"
 #include "bridge/declarative_frontend/jsview/models/patternlock_model_impl.h"
 #include "bridge/declarative_frontend/view_stack_processor.h"
+#include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/patternlock/patternlock_model_ng.h"
 #include "core/components_v2/pattern_lock/pattern_lock_component.h"
 
@@ -93,7 +93,6 @@ void JSPatternLock::SetDefaultTheme(OHOS::Ace::RefPtr<OHOS::Ace::V2::PatternLock
 {
     auto lockTheme = GetTheme<V2::PatternLockTheme>();
     if (!lockTheme) {
-        LOGE("Get PatternLock theme error");
         return;
     }
     patternLock->SetRegularColor(lockTheme->GetRegularColor());
@@ -122,7 +121,6 @@ void JSPatternLock::SetPatternComplete(const JSCallbackInfo& args)
 void JSPatternLock::SetSelectedColor(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The argv is wrong, it is supposed to have at least 1 argument");
         return;
     }
     Color selectedColor;
@@ -137,11 +135,9 @@ void JSPatternLock::SetSelectedColor(const JSCallbackInfo& info)
 void JSPatternLock::SetAutoReset(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The argv is wrong, it is supposed to have at least 1 argument");
         return;
     }
     if (!info[0]->IsBoolean()) {
-        LOGE("arg is not bool.");
         PatternLockModel::GetInstance()->SetAutoReset(true);
         return;
     }
@@ -151,7 +147,6 @@ void JSPatternLock::SetAutoReset(const JSCallbackInfo& info)
 void JSPatternLock::SetPathColor(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The argv is wrong, it is supposed to have at least 1 argument");
         return;
     }
     Color pathColor;
@@ -166,7 +161,6 @@ void JSPatternLock::SetPathColor(const JSCallbackInfo& info)
 void JSPatternLock::SetActiveColor(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The argv is wrong, it is supposed to have at least 1 argument");
         return;
     }
     Color activeColor;
@@ -181,7 +175,6 @@ void JSPatternLock::SetActiveColor(const JSCallbackInfo& info)
 void JSPatternLock::SetRegularColor(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The argv is wrong, it is supposed to have at least 1 argument");
         return;
     }
     Color regularColor;
@@ -196,7 +189,6 @@ void JSPatternLock::SetRegularColor(const JSCallbackInfo& info)
 void JSPatternLock::SetCircleRadius(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The argv is wrong, it is supposed to have at least 1 argument");
         return;
     }
     CalcDimension radius;
@@ -219,7 +211,6 @@ void JSPatternLock::SetCircleRadius(const JSCallbackInfo& info)
 void JSPatternLock::SetSideLength(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The argv is wrong, it is supposed to have at least 1 argument");
         return;
     }
     CalcDimension sideLength;
@@ -234,7 +225,6 @@ void JSPatternLock::SetSideLength(const JSCallbackInfo& info)
 void JSPatternLock::SetPathStrokeWidth(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have at least 1 argument");
         return;
     }
     CalcDimension lineWidth;
@@ -253,9 +243,11 @@ void JSPatternLock::SetDotConnect(const JSCallbackInfo& args)
     }
 
     auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(args[0]));
-    auto onDotConnect = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc)](int32_t code) {
+    WeakPtr<NG::FrameNode> targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto onDotConnect = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), node = targetNode](
+                            int32_t code) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-
+        PipelineContext::SetCallBackNode(node);
         JSRef<JSVal> newJSVal = JSRef<JSVal>::Make(ToJSValue(code));
         func->ExecuteJS(1, &newJSVal);
     };

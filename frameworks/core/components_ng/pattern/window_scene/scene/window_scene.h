@@ -26,8 +26,6 @@ public:
     explicit WindowScene(const sptr<Rosen::Session>& session);
     ~WindowScene() override;
 
-    void UpdateSession(const sptr<Rosen::Session>& session);
-
 protected:
     std::optional<RenderContext::ContextParam> GetContextParam() const override
     {
@@ -49,6 +47,7 @@ protected:
 private:
     void BufferAvailableCallback();
     void OnBoundsChanged(const Rosen::Vector4f& bounds);
+    void RegisterFocusCallback();
 
     bool destroyed_ = false;
 

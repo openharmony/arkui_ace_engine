@@ -38,7 +38,7 @@ public:
     void SetColumnsGap(const Dimension& value) override;
     void SetRowsGap(const Dimension& value) override;
     void SetGridHeight(const Dimension& value) override;
-    void SetScrollBarMode(int32_t value) override;
+    void SetScrollBarMode(DisplayMode value) override;
     void SetScrollBarColor(const std::string& value) override;
     void SetScrollBarWidth(const std::string& value) override;
     void SetCachedCount(int32_t value) override;
@@ -51,7 +51,7 @@ public:
     void SetMultiSelectable(bool value) override;
     void SetSupportAnimation(bool value) override;
     void SetSupportDragAnimation(bool value) override;
-    void SetEdgeEffect(EdgeEffect edgeEffect) override;
+    void SetEdgeEffect(EdgeEffect edgeEffect, bool alwaysEnabled) override;
     void SetNestedScroll(const NestedScrollOptions& nestedOpt) override;
     void SetScrollEnabled(bool scrollEnabled) override;
     void SetFriction(double friction) override;
@@ -71,6 +71,8 @@ public:
     void SetOnReachEnd(OnReachEvent&& onReachEnd) override;
     RefPtr<ScrollControllerBase> CreatePositionController() override;
     RefPtr<ScrollProxy> CreateScrollBarProxy() override;
+
+    DisplayMode GetDisplayMode() const override;
 
 private:
     void AddDragFrameNodeToManager() const;

@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_BASE_CUSTOM_NODE_BASE_H
 
 #include <functional>
+#include <list>
 #include <string>
 
 #include "base/memory/ace_type.h"
@@ -34,11 +35,12 @@ public:
     CustomNodeBase() = default;
     ~CustomNodeBase() override;
 
-    void FireOnAppear() const
+    void FireOnAppear()
     {
         if (appearFunc_) {
             appearFunc_();
         }
+        executeFireOnAppear_ = true;
     }
 
     virtual void SetRenderFunction(const RenderFunction& renderFunction) {}
@@ -115,6 +117,12 @@ public:
         if (recycleRenderFunc_) {
             ACE_SCOPED_TRACE("CustomNode:BuildRecycle %s", GetJSViewName().c_str());
             recycleRenderFunc_();
+            for (const auto& weak : recyclePatterns_) {
+                auto pattern = weak.Upgrade();
+                if (pattern) {
+                    pattern->OnReuse();
+                }
+            }
             recycleRenderFunc_ = nullptr;
         }
     }
@@ -134,10 +142,19 @@ public:
         setActiveFunc_ = std::move(func);
     }
 
+    void SetOnDumpInfoFunc(std::function<void(const std::vector<std::string>&)>&& func);
+
     void FireSetActiveFunc(bool active)
     {
         if (setActiveFunc_) {
             setActiveFunc_(active);
+        }
+    }
+
+    void FireOnDumpInfoFunc(const std::vector<std::string>& params)
+    {
+        if (onDumpInfoFunc_) {
+            onDumpInfoFunc_(params);
         }
     }
 
@@ -164,8 +181,26 @@ public:
         return jsViewName_;
     }
 
+    void SetExtraInfo(const ExtraInfo extraInfo)
+    {
+        extraInfo_ = std::move(extraInfo);
+    }
+
+    const ExtraInfo& GetExtraInfo() const
+    {
+        return extraInfo_;
+    }
+
+    bool HasExtraInfo() {
+        if (!extraInfo_.page.empty()) {
+            return true;
+        }
+        return false;
+    }
+
 protected:
     std::string jsViewName_;
+    ExtraInfo extraInfo_;
 
 private:
     std::function<void()> updateFunc_;
@@ -178,7 +213,10 @@ private:
     std::function<void(RefPtr<CustomNodeBase>)> recycleCustomNodeFunc_;
     std::function<void()> recycleRenderFunc_;
     std::function<void(bool)> setActiveFunc_;
+    std::function<void(const std::vector<std::string>&)> onDumpInfoFunc_;
     bool needRebuild_ = false;
+    bool executeFireOnAppear_ = false;
+    std::list<WeakPtr<Pattern>> recyclePatterns_;
 };
 } // namespace OHOS::Ace::NG
 

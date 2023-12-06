@@ -16,31 +16,37 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_DRAWING_MOCK_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_DRAWING_MOCK_H
 
-#include "core/components_ng/test/mock/rosen/testing_bitmap.h"
-#include "core/components_ng/test/mock/rosen/testing_brush.h"
-#include "core/components_ng/test/mock/rosen/testing_camera.h"
-#include "core/components_ng/test/mock/rosen/testing_canvas.h"
-#include "core/components_ng/test/mock/rosen/testing_color.h"
-#include "core/components_ng/test/mock/rosen/testing_color_filter.h"
-#include "core/components_ng/test/mock/rosen/testing_color_matrix.h"
-#include "core/components_ng/test/mock/rosen/testing_filter.h"
-#include "core/components_ng/test/mock/rosen/testing_font_collection.h"
-#include "core/components_ng/test/mock/rosen/testing_image.h"
-#include "core/components_ng/test/mock/rosen/testing_image_filter.h"
-#include "core/components_ng/test/mock/rosen/testing_mask_filter.h"
-#include "core/components_ng/test/mock/rosen/testing_path.h"
-#include "core/components_ng/test/mock/rosen/testing_path_effect.h"
-#include "core/components_ng/test/mock/rosen/testing_pen.h"
-#include "core/components_ng/test/mock/rosen/testing_point.h"
-#include "core/components_ng/test/mock/rosen/testing_point3.h"
-#include "core/components_ng/test/mock/rosen/testing_sampling_options.h"
-#include "core/components_ng/test/mock/rosen/testing_scalar.h"
-#include "core/components_ng/test/mock/rosen/testing_shader_effect.h"
-#include "core/components_ng/test/mock/rosen/testing_shadowflags.h"
-#include "core/components_ng/test/mock/rosen/testing_text_style.h"
-#include "core/components_ng/test/mock/rosen/testing_typography.h"
-#include "core/components_ng/test/mock/rosen/testing_typography_create.h"
-#include "core/components_ng/test/mock/rosen/testing_typography_style.h"
+#include "test/mock/core/rosen/testing_bitmap.h"
+#include "test/mock/core/rosen/testing_brush.h"
+#include "test/mock/core/rosen/testing_camera.h"
+#include "test/mock/core/rosen/testing_canvas.h"
+#include "test/mock/core/rosen/testing_color.h"
+#include "test/mock/core/rosen/testing_color_filter.h"
+#include "test/mock/core/rosen/testing_color_matrix.h"
+#include "test/mock/core/rosen/testing_color_space.h"
+#include "test/mock/core/rosen/testing_data.h"
+#include "test/mock/core/rosen/testing_draw_cmd_list.h"
+#include "test/mock/core/rosen/testing_filter.h"
+#include "test/mock/core/rosen/testing_font_collection.h"
+#include "test/mock/core/rosen/testing_image.h"
+#include "test/mock/core/rosen/testing_image_info.h"
+#include "test/mock/core/rosen/testing_image_filter.h"
+#include "test/mock/core/rosen/testing_mask_filter.h"
+#include "test/mock/core/rosen/testing_path.h"
+#include "test/mock/core/rosen/testing_path_effect.h"
+#include "test/mock/core/rosen/testing_pen.h"
+#include "test/mock/core/rosen/testing_point.h"
+#include "test/mock/core/rosen/testing_point3.h"
+#include "test/mock/core/rosen/testing_recording_canvas.h"
+#include "test/mock/core/rosen/testing_recording_path_effect.h"
+#include "test/mock/core/rosen/testing_sampling_options.h"
+#include "test/mock/core/rosen/testing_scalar.h"
+#include "test/mock/core/rosen/testing_shader_effect.h"
+#include "test/mock/core/rosen/testing_shadowflags.h"
+#include "test/mock/core/rosen/testing_text_style.h"
+#include "test/mock/core/rosen/testing_typography.h"
+#include "test/mock/core/rosen/testing_typography_create.h"
+#include "test/mock/core/rosen/testing_typography_style.h"
 
 namespace OHOS::Ace {
 namespace RSDrawing = Testing;
@@ -60,7 +66,6 @@ using RSMaskFilter = Testing::TestingMaskFilter;
 using RSImageFilter = Testing::TestingImageFilter;
 using RSBlurType = Testing::BlurType;
 using RSTileMode = Testing::TileMode;
-using RSRRect = Testing::TestingRect;
 using RSBitmap = Testing::TestingBitmap;
 using RSBitmapFormat = Testing::BitmapFormat;
 using RSColorType = Testing::ColorType;
@@ -70,7 +75,6 @@ using RSCamera3D = Testing::TestingCamera;
 using RSMatrix = Testing::TestingMatrix;
 using RSClipOp = Testing::ClipOp;
 using RSPoint = Testing::TestingPoint;
-using RSRPoint = Testing::TestingPoint;
 using RSPoint3 = Testing::TestingPoint3;
 using RSShadowFlags = Testing::TestingShadowFlags;
 using RSRect = Testing::TestingRect;
@@ -78,6 +82,7 @@ using RSRoundRect = Testing::TestingRoundRect;
 using RSTextDirection = Testing::TextDirection;
 using RSTextAlign = Testing::TextAlign;
 using RSWordBreakType = Testing::WordBreakType;
+using RSEllipsisMode = Testing::EllipsisMode;
 using RSTextStyle = Testing::TestingTextStyle;
 using RSColorQuad = uint32_t;
 using RSScalar = float;
@@ -95,6 +100,13 @@ using RSFontStyle = Testing::TestingFontStyle;
 using RSTextBaseline = Testing::TestingTextBaseline;
 using RSColorFilter = Testing::TestingColorFilter;
 using RSColorMatrix = Testing::TestingColorMatrix;
+using RSColorSpace = Testing::TestingColorSpace;
+using RSData = Testing::TestingData;
+using RSRecordingCanvas = Testing::TestingRecordingCanvas;
+using RSDrawCmdList = Testing::TestingDrawCmdList;
+using RSRecordingPath = Testing::TestingPath;
+using RSImageInfo = Testing::TestingImageInfo;
+using RSRecordingPathEffect = Testing::TestingRecordingPathEffect;
 #ifdef USE_GRAPHIC_TEXT_GINE
 using RSTextRectHeightStyle = Testing::TestingTypographyProperties::TextRectHeightStyle;
 using RSTextRectWidthStyle = Testing::TestingTypographyProperties::TextRectWidthStyle;

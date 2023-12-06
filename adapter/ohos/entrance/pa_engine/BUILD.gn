@@ -31,26 +31,23 @@ template("pa_backend") {
       "$ability_runtime_services_path/abilitymgr/include",
       "$ability_runtime_services_path/common/include",
       "$ability_runtime_napi_path/context",
-      "$ability_runtime_napi_path/inner/napi_common",
     ]
     external_deps = [
       "ability_base:want",
       "ability_base:zuri",
       "ability_runtime:abilitykit_native",
       "ability_runtime:appkit_native",
-      "ability_runtime:napi_common",
-      "bundle_framework:appexecfwk_base",
       "bundle_framework:appexecfwk_core",
       "c_utils:utils",
       "eventhandler:libeventhandler",
       "hilog:libhilog",
+      "i18n:intl_util",
       "ipc:ipc_core",
       "ipc:ipc_napi_common",
       "napi:ace_napi",
       "relational_store:native_dataability",
       "relational_store:native_rdb",
       "safwk:system_ability_fwk",
-      "samgr:samgr_proxy",
     ]
 
     sources = [ "pa_backend.cpp" ]

@@ -20,11 +20,19 @@
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
+void ModelPattern::OnRebuildFrame()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto context = host->GetRenderContext();
+    modelAdapter_->OnRebuildFrame(context);
+}
 
-ModelPattern::ModelPattern(uint32_t key) : key_(key)
+ModelPattern::ModelPattern(uint32_t key, Render3D::SurfaceType surfaceType, const std::string& bundleName,
+    const std::string& moduleName) : key_(key)
 {
     LOGD("MODEL_NG: ModelPattern::ModelPattern(%d)", key);
-    modelAdapter_ = MakeRefPtr<ModelAdapterWrapper>(key_);
+    modelAdapter_ = MakeRefPtr<ModelAdapterWrapper>(key_, surfaceType, bundleName, moduleName);
     modelAdapter_->SetPaintFinishCallback([weak = WeakClaim(this)]() {
             auto model = weak.Upgrade();
             if (model) {
@@ -66,28 +74,43 @@ void ModelPattern::OnModifyDone()
 
 bool ModelPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
 {
-    bool measure = (config.skipMeasure || dirty->SkipMeasureContent()) ? false : true;
+    CHECK_NULL_RETURN(modelAdapter_, false);
+    auto host = GetHost();
+    CHECK_NULL_RETURN(dirty, false);
+    CHECK_NULL_RETURN(host, false);
+    auto geometryNode = dirty->GetGeometryNode();
+    CHECK_NULL_RETURN(geometryNode, false);
 
-    CHECK_NULL_RETURN(modelAdapter_, measure);
-    if (!modelAdapter_->IsInitialized()) {
-        MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-    }
+    auto mainProperty = DynamicCast<ModelPaintProperty>(host->GetPaintProperty<ModelPaintProperty>());
+    auto widthScale = mainProperty->GetRenderWidth().value_or(1.0);
+    auto heightScale = mainProperty->GetRenderHeight().value_or(1.0);
+
+    auto contentSize = geometryNode->GetContentSize();
+    auto contentOffset = geometryNode->GetContentOffset();
+
+    bool measure = (config.skipMeasure || dirty->SkipMeasureContent()) ? false : true;
+    float width = contentSize.Width();
+    float height = contentSize.Height();
+    float scale = PipelineContext::GetCurrentContext()->GetViewScale();
+    Render3D::WindowChangeInfo windowChangeInfo {
+        contentOffset.GetX(), contentOffset.GetY(),
+        width, height,
+        scale, widthScale, heightScale,
+        config.contentSizeChange, modelAdapter_->GetSurfaceType()
+    };
+    LOGD("MODEL_NG: ModelPattern::OnDirtyLayoutWrapperSwap: %f, %f", widthScale, heightScale);
+    modelAdapter_->OnDirtyLayoutWrapperSwap(windowChangeInfo);
+    host->MarkNeedSyncRenderTree();
 
     return measure;
 }
 
 void ModelPattern::OnAttachToFrameNode()
 {
-    LOGD("MODEL_NG: ModelPattern::OnAttachToFrameNode()");
-#ifdef ENABLE_ROSEN_BACKEND
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto context = DynamicCast<NG::RosenRenderContext>(host->GetRenderContext());
-    CHECK_NULL_VOID(context);
-    auto rsNode = context->GetRSNode();
-    CHECK_NULL_VOID(rsNode);
-    rsNode->SetFrameGravity(OHOS::Rosen::Gravity::RESIZE);
-#endif
+    CHECK_NULL_VOID(modelAdapter_);
+    modelAdapter_->OnAttachToFrameNode(host->GetRenderContext());
 }
 
 void ModelPattern::OnDetachFromFrameNode(FrameNode* node)
@@ -98,7 +121,8 @@ void ModelPattern::OnDetachFromFrameNode(FrameNode* node)
 void ModelPattern::HandleTouchEvent(const TouchEventInfo& info)
 {
     CHECK_NULL_VOID(modelAdapter_);
-    bool repaint = modelAdapter_->HandleTouchEvent(info);
+    auto mainProperty = DynamicCast<ModelPaintProperty>(GetHost()->GetPaintProperty<ModelPaintProperty>());
+    bool repaint = modelAdapter_->HandleTouchEvent(info, mainProperty);
     if (repaint) {
         MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     }
@@ -117,4 +141,9 @@ void ModelPattern::MarkDirtyNode(const PropertyChangeFlag flag)
     host->MarkDirtyNode(flag);
 }
 
+ModelPattern::~ModelPattern()
+{
+    CHECK_NULL_VOID(modelAdapter_);
+    modelAdapter_->Deinit();
+}
 } // namespace OHOS::Ace::NG

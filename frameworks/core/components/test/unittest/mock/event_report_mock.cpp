@@ -57,4 +57,8 @@ void EventReport::JankFrameReport(int64_t startTime, int64_t duration, const std
 
 void EventReport::SendEventInner(const EventInfo& eventInfo) {}
 
+void EventReport::ReportDoubleClickTitle(int32_t stateChange) {}
+
+void EventReport::ReportClickTitleMaximizeMenu(int32_t maxMenuItem, int32_t stateChange) {}
+
 } // namespace OHOS::Ace

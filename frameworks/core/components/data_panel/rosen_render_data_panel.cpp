@@ -134,9 +134,9 @@ std::shared_ptr<RSShaderEffect> BlendShader(RSScalar cx, RSScalar cy, const std:
     }
 #else
     backgroundShader =
-        RSShaderEffect::CreateSweepGradient(RSPoint(cx, cy), colors, pos, RSTileMode::DECAL, 0.0, drawAngle);
+        RSShaderEffect::CreateSweepGradient(RSPoint(cx, cy), colors, pos, RSTileMode::DECAL, 0.0, drawAngle, nullptr);
     scanShader = RSShaderEffect::CreateSweepGradient(
-        RSPoint(cx, cy), scanColors, scanPos, RSTileMode::DECAL, scanStartDegree, scanEndDegree);
+        RSPoint(cx, cy), scanColors, scanPos, RSTileMode::DECAL, scanStartDegree, scanEndDegree, nullptr);
     if (useAnimator) {
         blendShader = RSShaderEffect::CreateBlendShader(*backgroundShader, *scanShader, RSBlendMode::SRC_OVER);
     } else {
@@ -324,7 +324,7 @@ void PaintProgress(
         canvas->Rotate(startAngle - QUARTER_CIRCLE, center.GetX(), center.GetY());
         canvas->AttachPen(gradientPen);
         canvas->DrawPath(botPath);
-        canvas->DetachBrush();
+        canvas->DetachPen();
         canvas->Restore();
 
         canvas->Save();
@@ -376,7 +376,7 @@ void PaintProgress(
         }
         canvas->AttachPen(gradientPen);
         canvas->DrawPath(botPath);
-        canvas->DetachBrush();
+        canvas->DetachPen();
         canvas->Restore();
     }
     canvas->Restore();
@@ -501,7 +501,8 @@ void PaintProgressFilterMask(RSCanvas* canvas, ArcData arcData)
         arcData.endColor.ChangeAlpha(101).GetValue() };
     std::vector<RSScalar> pos = { 0.0, 1.0 };
     filterPen.SetShaderEffect(RSShaderEffect::CreateSweepGradient(
-        RSPoint(center.GetX(), center.GetY()), colors, pos, RSTileMode::DECAL, startAngle, startAngle + sweepAngle));
+        RSPoint(center.GetX(), center.GetY()), colors, pos, RSTileMode::DECAL,
+        startAngle, startAngle + sweepAngle, nullptr));
     canvas->AttachPen(filterPen);
     canvas->DrawPath(rainbowFilterPath);
     canvas->DetachPen();
@@ -667,7 +668,7 @@ void PaintRainbowFilterMask(RSCanvas* canvas, double factor, const std::vector<S
             segment.GetEndColor().ChangeAlpha(101).GetValue() };
         std::vector<RSScalar> pos = { 0.0, 1.0 };
         filterPen.SetShaderEffect(RSShaderEffect::CreateSweepGradient(RSPoint(center.GetX(), center.GetY()), colors,
-            pos, RSTileMode::CLAMP, startAngle, startAngle + sweepAngle));
+            pos, RSTileMode::CLAMP, startAngle, startAngle + sweepAngle, nullptr));
         canvas->AttachPen(filterPen);
         canvas->DrawPath(rainbowFilterPath);
         canvas->DetachPen();
@@ -831,7 +832,7 @@ void RosenRenderProgressDataPanel::PaintLoadingProgress(RenderContext& context, 
 
     botPen.SetShaderEffect(
         RSShaderEffect::CreateSweepGradient(RSPoint(center.GetX(), center.GetY()), colors, pos, RSTileMode::DECAL, 0.0,
-            sweepDegree_ + 2 * PRECISION_CORRECTION + 180.0 / M_PI * std::asin(thickness / ((diameter) / 2))));
+            sweepDegree_ + 2 * PRECISION_CORRECTION + 180.0 / M_PI * std::asin(thickness / ((diameter) / 2)), nullptr));
     canvas->Save();
     PaintTrackBackground(canvas, center, thickness, backgroundTrack_, diameter);
     canvas->Rotate(animateAngle, center.GetX(), center.GetY()); // animate
@@ -966,7 +967,7 @@ void RosenRenderPercentageDataPanel::PaintLinearProgress(RenderContext& context,
 {
     auto totalWidth = GetLayoutSize().Width();
     auto segment = GetSegments();
-    auto spaceWidth = SystemProperties::Vp2Px(FIXED_WIDTH);
+    auto spaceWidth = PipelineBase::Vp2PxWithCurrentDensity(FIXED_WIDTH);
     auto segmentWidthSum = 0.0;
     for (uint32_t i = 0; i < segment.size(); i++) {
         segmentWidthSum += segment[i].GetValue();

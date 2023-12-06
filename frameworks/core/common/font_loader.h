@@ -30,6 +30,11 @@ public:
 
     virtual void AddFont(const RefPtr<PipelineBase>& context) = 0;
 
+    virtual void SetDefaultFontFamily(const char* fontFamily, const char* familySrc)
+    {
+        return;
+    }
+
     static RefPtr<FontLoader> Create(const std::string& familyName, const std::string& familySrc);
 
     const std::string& GetFamilyName() const;

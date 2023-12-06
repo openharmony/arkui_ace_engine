@@ -28,6 +28,8 @@
 #include "base/log/log.h"
 #include "bridge/common/utils/utils.h"
 #include "core/common/container.h"
+#include "core/components/common/properties/color.h"
+#include "securec.h"
 
 namespace OHOS::Ace::Napi {
 
@@ -44,12 +46,19 @@ bool GetNapiString(napi_env env, napi_value value, std::string& retStr, napi_val
 
 void NapiThrow(napi_env env, const std::string& message, int32_t errCode);
 
+napi_value ParseCurve(napi_env env, napi_value value, std::string& curveTypeString, std::vector<float>& curveValue);
+
+bool ParseColor(napi_env env, napi_value value, Color& info);
+
 bool ParseResourceParam(napi_env env, napi_value value, ResourceInfo& info);
 
 bool ParseString(const ResourceInfo& info, std::string& result);
 
 std::string ErrorToMessage(int32_t code);
 
+bool GetSingleParam(napi_env env, napi_callback_info info, napi_value* argv, napi_valuetype& valueType);
+
+std::optional<Color> GetOptionalColor(napi_env env, napi_value argv, napi_valuetype& valueType);
 } // namespace OHOS::Ace::Napi
 
 #endif // FOUNDATION_ACE_INTERFACES_NAPI_KITS_UTILS_H

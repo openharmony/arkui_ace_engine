@@ -18,6 +18,7 @@
 
 #ifdef ENABLE_ROSEN_BACKEND
 #include "pipeline/rs_recording_canvas.h"
+#include "pipeline/rs_paint_filter_canvas.h"
 #endif
 
 namespace OHOS::Ace::NG {
@@ -45,24 +46,50 @@ void RenderingContext2DModifier::onDraw(DrawingContext& drawingContext)
     if (drawCmdList->GetSize() == 0) {
         return;
     }
+    recordingCanvasDrawSize_.SetWidth(recordingCanvas->GetDrawCmdList()->GetWidth());
+    recordingCanvasDrawSize_.SetHeight(recordingCanvas->GetDrawCmdList()->GetHeight());
+    drawCmdSize_.SetWidth(drawCmdList->GetWidth());
+    drawCmdSize_.SetHeight(drawCmdList->GetHeight());
     recordingCanvas->GetDrawCmdList()->SetWidth(drawCmdList->GetWidth());
     recordingCanvas->GetDrawCmdList()->SetHeight(drawCmdList->GetHeight());
-    drawCmdList->Playback(*skCanvas);
+    auto canvas = std::make_shared<OHOS::Rosen::RSPaintFilterCanvas>(recordingCanvas);
+    CHECK_NULL_VOID(canvas);
+    canvas->SetRecordingState(true);
+    drawCmdList->Playback(*canvas);
     rsRecordingCanvas_->Clear();
 #else
     if (!rsRecordingCanvas_) {
         return;
     }
 
-    auto recordingCanvas = drawingContext.canvas;
+    auto& recordingCanvas = drawingContext.canvas;
     auto drawCmdList = rsRecordingCanvas_->GetDrawCmdList();
     if (!drawCmdList) {
         return;
     }
-    if (drawCmdList->GetData().second == 0) {
+    if (drawCmdList->IsEmpty()) {
         return;
     }
+    if (recordingCanvas.GetDrawingType() == Rosen::Drawing::DrawingType::RECORDING) {
+        recordingCanvasDrawSize_.SetWidth(
+            static_cast<RSRecordingCanvas&>(recordingCanvas).GetDrawCmdList()->GetWidth());
+        recordingCanvasDrawSize_.SetHeight(
+            static_cast<RSRecordingCanvas&>(recordingCanvas).GetDrawCmdList()->GetHeight());
+        drawCmdSize_.SetWidth(drawCmdList->GetWidth());
+        drawCmdSize_.SetHeight(drawCmdList->GetHeight());
+        static_cast<RSRecordingCanvas&>(recordingCanvas).GetDrawCmdList()->SetWidth(drawCmdList->GetWidth());
+        static_cast<RSRecordingCanvas&>(recordingCanvas).GetDrawCmdList()->SetHeight(drawCmdList->GetHeight());
+    }
     drawCmdList->Playback(recordingCanvas);
+    rsRecordingCanvas_->Clear();
 #endif
+}
+
+std::string RenderingContext2DModifier::GetDumpInfo()
+{
+    return std::string("recordingCanvas size: ")
+        .append(recordingCanvasDrawSize_.ToString())
+        .append(", rsRecordingCanvas size: ")
+        .append(drawCmdSize_.ToString());
 }
 } // namespace OHOS::Ace::NG

@@ -42,17 +42,6 @@ public:
             if (!themeConstants) {
                 return theme;
             }
-            theme->shapeMode_ = static_cast<ShapeMode>(themeConstants->GetInt(THEME_SCROLL_BAR_SHAPE_MODE));
-            theme->normalWidth_ = themeConstants->GetDimension(THEME_SCROLL_BAR_NORMAL_WIDTH);
-            theme->activeWidth_ = themeConstants->GetDimension(THEME_SCROLL_BAR_ACTIVE_WIDTH);
-            theme->minHeight_ = themeConstants->GetDimension(THEME_SCROLL_BAR_MIN_HEIGHT);
-            theme->minDynamicHeight_ = themeConstants->GetDimension(THEME_SCROLL_BAR_MIN_DYNAMIC_HEIGHT);
-            theme->reservedHeight_ = themeConstants->GetDimension(THEME_SCROLL_BAR_RESERVED_HEIGHT);
-            theme->touchWidth_ = themeConstants->GetDimension(THEME_SCROLL_BAR_TOUCH_WIDTH);
-            theme->backgroundColor_ = themeConstants->GetColor(THEME_SCROLL_BAR_BACKGROUND_COLOR);
-            theme->foregroundColor_ = themeConstants->GetColor(THEME_SCROLL_BAR_FOREGROUND_COLOR);
-            Dimension paddingRight = themeConstants->GetDimension(THEME_SCROLL_BAR_PADDING_RIGHT);
-            theme->padding_ = Edge(0.0, 0.0, paddingRight.Value(), paddingRight.Value(), paddingRight.Unit());
             ParsePattern(themeConstants->GetThemeStyle(), theme);
             return theme;
         }
@@ -69,6 +58,14 @@ public:
                 LOGW("find pattern of scroll_bar fail");
                 return;
             }
+            theme->shapeMode_ = static_cast<ShapeMode>(pattern->GetAttr<double>("scroll_bar_shape_mode", 0.0));
+            theme->normalWidth_ = pattern->GetAttr<Dimension>("scroll_bar_normal_width", 0.0_vp);
+            theme->activeWidth_ = pattern->GetAttr<Dimension>("scroll_bar_active_width", 0.0_vp);
+            theme->minHeight_ = pattern->GetAttr<Dimension>("scroll_bar_min_height", 0.0_vp);
+            theme->minDynamicHeight_ = pattern->GetAttr<Dimension>("scroll_bar_min_dynamic_height", 0.0_vp);
+            theme->reservedHeight_ = pattern->GetAttr<Dimension>("scroll_bar_reserved_height", 0.0_vp);
+            theme->touchWidth_ = pattern->GetAttr<Dimension>("scroll_bar_touch_width", 0.0_vp);
+            theme->backgroundColor_ = pattern->GetAttr<Color>("scroll_bar_background_color", Color());
             theme->foregroundColor_ = pattern->GetAttr<Color>(PATTERN_FG_COLOR,
                 Color::TRANSPARENT).BlendOpacity(0.4);
             auto padding = pattern->GetAttr<Dimension>("scroll_bar_margin", Dimension(4.0, DimensionUnit::VP));

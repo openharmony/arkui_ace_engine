@@ -45,6 +45,8 @@ WindowScene::WindowScene(const sptr<Rosen::Session>& session)
         self->OnBoundsChanged(bounds);
     };
     CHECK_NULL_VOID(IsMainWindow());
+    CHECK_NULL_VOID(session_);
+    session_->SetNeedSnapshot(true);
     RegisterLifecycleListener();
     callback_ = [weakThis = WeakClaim(this), weakSession = wptr(session_)]() {
         LOGI("RSSurfaceNode buffer available callback");
@@ -91,24 +93,49 @@ void WindowScene::OnAttachToFrameNode()
     context->SetRSNode(surfaceNode);
     surfaceNode->SetBoundsChangedCallback(boundsChangedCallback_);
 
+    RegisterFocusCallback();
+
     WindowPattern::OnAttachToFrameNode();
 }
 
-void WindowScene::UpdateSession(const sptr<Rosen::Session>& session)
+void WindowScene::RegisterFocusCallback()
 {
     CHECK_NULL_VOID(session_);
-    CHECK_NULL_VOID(session);
-    CHECK_NULL_VOID(session_ != session);
 
-    LOGI("session %{public}d changes to %{public}d", session_->GetPersistentId(), session->GetPersistentId());
-    session_ = session;
-    auto surfaceNode = session_->GetSurfaceNode();
-    CHECK_NULL_VOID(surfaceNode);
+    auto requestFocusCallback = [weakThis = WeakClaim(this), instanceId = instanceId_]() {
+        ContainerScope scope(instanceId);
+        auto pipelineContext = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipelineContext);
+        pipelineContext->PostAsyncEvent([weakThis]() {
+            auto self = weakThis.Upgrade();
+            CHECK_NULL_VOID(self);
+            auto host = self->GetHost();
+            CHECK_NULL_VOID(host);
+            auto focusHub = host->GetFocusHub();
+            CHECK_NULL_VOID(focusHub);
+            focusHub->SetParentFocusable(true);
+            focusHub->RequestFocusWithDefaultFocusFirstly();
+        },
+            TaskExecutor::TaskType::UI);
+    };
+    session_->SetNotifyUIRequestFocusFunc(requestFocusCallback);
 
-    CHECK_NULL_VOID(contentNode_);
-    auto context = AceType::DynamicCast<NG::RosenRenderContext>(contentNode_->GetRenderContext());
-    CHECK_NULL_VOID(context);
-    context->SetRSNode(surfaceNode);
+    auto lostFocusCallback = [weakThis = WeakClaim(this), instanceId = instanceId_]() {
+        ContainerScope scope(instanceId);
+        auto pipelineContext = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipelineContext);
+        pipelineContext->PostAsyncEvent([weakThis]() {
+            auto self = weakThis.Upgrade();
+            CHECK_NULL_VOID(self);
+            auto host = self->GetHost();
+            CHECK_NULL_VOID(host);
+            auto focusHub = host->GetFocusHub();
+            CHECK_NULL_VOID(focusHub);
+            focusHub->SetParentFocusable(false);
+        },
+            TaskExecutor::TaskType::UI);
+    };
+    session_->SetNotifyUILostFocusFunc(lostFocusCallback);
 }
 
 void WindowScene::OnBoundsChanged(const Rosen::Vector4f& bounds)
@@ -147,6 +174,7 @@ void WindowScene::BufferAvailableCallback()
             CHECK_NULL_VOID(context);
             auto rsNode = context->GetRSNode();
             CHECK_NULL_VOID(rsNode);
+            rsNode->MarkNodeGroup(true);
             auto effect = Rosen::RSTransitionEffect::Create()->Opacity(config.opacityEnd_);
             rsNode->SetTransitionEffect(effect);
             Rosen::RSAnimationTimingProtocol protocol;
@@ -187,6 +215,7 @@ void WindowScene::OnActivation()
             self->startingNode_.Reset();
             self->contentNode_.Reset();
             self->snapshotNode_.Reset();
+            self->session_->SetNeedSnapshot(true);
             self->OnAttachToFrameNode();
             host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
             return;
@@ -198,9 +227,21 @@ void WindowScene::OnActivation()
             CHECK_NULL_VOID(host);
             host->RemoveChild(self->snapshotNode_);
             self->snapshotNode_.Reset();
+            self->session_->SetNeedSnapshot(true);
             self->CreateStartingNode();
             host->AddChild(self->startingNode_);
             host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+            return;
+        }
+
+        if (self->session_ && self->session_->GetShowRecent() && self->startingNode_) {
+            auto surfaceNode = self->session_->GetSurfaceNode();
+            CHECK_NULL_VOID(surfaceNode);
+            auto host = self->GetHost();
+            CHECK_NULL_VOID(host);
+            host->AddChild(self->contentNode_, 0);
+            host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+            surfaceNode->SetBufferAvailableCallback(self->callback_);
         }
     };
 
@@ -250,11 +291,8 @@ void WindowScene::OnForeground()
         CHECK_NULL_VOID(host);
         host->RemoveChild(self->snapshotNode_);
         self->snapshotNode_.Reset();
+        self->session_->SetNeedSnapshot(true);
         host->AddChild(self->contentNode_);
-        if (!self->session_->GetBufferAvailable() && !self->startingNode_) {
-            self->CreateStartingNode();
-            host->AddChild(self->startingNode_);
-        }
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     };
 

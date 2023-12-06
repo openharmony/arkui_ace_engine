@@ -31,6 +31,8 @@
 #include "wm_common.h"
 
 #include "base/log/log_wrapper.h"
+#include "core/components/common/layout/constants.h"
+#include "core/components_ng/property/safe_area_insets.h"
 
 #ifdef ENABLE_ROSEN_BACKEND
 #include "render_service_client/core/transaction/rs_transaction.h"
@@ -44,12 +46,16 @@
 #include "adapter/ohos/entrance/capability_registry.h"
 #include "adapter/ohos/entrance/dialog_container.h"
 #include "adapter/ohos/entrance/file_asset_provider.h"
+#include "adapter/ohos/entrance/file_asset_provider_impl.h"
 #include "adapter/ohos/entrance/form_utils_impl.h"
 #include "adapter/ohos/entrance/hap_asset_provider.h"
+#include "adapter/ohos/entrance/hap_asset_provider_impl.h"
 #include "adapter/ohos/entrance/plugin_utils_impl.h"
+#include "adapter/ohos/entrance/ui_event_impl.h"
 #include "adapter/ohos/entrance/utils.h"
 #include "adapter/ohos/osal/page_url_checker_ohos.h"
 #include "adapter/ohos/osal/pixel_map_ohos.h"
+#include "adapter/ohos/osal/view_data_wrap_ohos.h"
 #include "base/geometry/rect.h"
 #include "base/i18n/localization.h"
 #include "base/log/ace_checker.h"
@@ -61,9 +67,12 @@
 #include "base/utils/system_properties.h"
 #include "bridge/card_frontend/form_frontend_declarative.h"
 #include "core/common/ace_engine.h"
+#include "core/common/asset_manager_impl.h"
 #include "core/common/container.h"
 #include "core/common/container_scope.h"
 #include "core/common/flutter/flutter_asset_manager.h"
+#include "core/common/recorder/event_recorder.h"
+#include "core/common/resource/resource_manager.h"
 #include "core/image/image_file_cache.h"
 #ifdef FORM_SUPPORTED
 #include "core/common/form_manager.h"
@@ -88,9 +97,6 @@ const std::string ACTION_VIEWDATA = "ohos.want.action.viewData";
 
 } // namespace
 
-static std::atomic<int32_t> gInstanceId = 0;
-static std::atomic<int32_t> gSubWindowInstanceId = 100000;
-static std::atomic<int32_t> gSubInstanceId = 1000000;
 const std::string SUBWINDOW_PREFIX = "ARK_APP_SUBWINDOW_";
 const std::string SUBWINDOW_TOAST_DIALOG_PREFIX = "ARK_APP_SUBWINDOW_TOAST_DIALOG_";
 const int32_t REQUEST_CODE = -1;
@@ -107,21 +113,19 @@ public:
 
     void OnFinish() const override
     {
-        LOGI("UIContent OnFinish");
         CHECK_NULL_VOID(onFinish_);
         onFinish_();
     }
 
     void OnStartAbility(const std::string& address) override
     {
-        LOGI("UIContent OnStartAbility");
         CHECK_NULL_VOID(onStartAbility_);
         onStartAbility_(address);
     }
 
     void OnStatusBarBgColorChanged(uint32_t color) override
     {
-        LOGI("UIContent OnStatusBarBgColorChanged");
+        LOGI("StartsBar background color changed.");
     }
 
 private:
@@ -132,19 +136,42 @@ private:
 extern "C" ACE_FORCE_EXPORT void* OHOS_ACE_CreateUIContent(void* context, void* runtime)
 {
     LOGI("Ace lib loaded, CreateUIContent.");
+    Recorder::Init();
     return new UIContentImpl(reinterpret_cast<OHOS::AbilityRuntime::Context*>(context), runtime);
 }
 
 extern "C" ACE_FORCE_EXPORT void* OHOS_ACE_CreateFormContent(void* context, void* runtime, bool isCard)
 {
     TAG_LOGI(AceLogTag::ACE_FORM, "Ace lib loaded, CreateFormUIContent.");
+    Recorder::Init();
     return new UIContentImpl(reinterpret_cast<OHOS::AbilityRuntime::Context*>(context), runtime, isCard);
 }
 
 extern "C" ACE_FORCE_EXPORT void* OHOS_ACE_CreateSubWindowUIContent(void* ability)
 {
     TAG_LOGI(AceLogTag::ACE_SUB_WINDOW, "Ace lib loaded, Create SubWindowUIContent.");
+    Recorder::Init();
     return new UIContentImpl(reinterpret_cast<OHOS::AppExecFwk::Ability*>(ability));
+}
+
+extern "C" ACE_FORCE_EXPORT void* OHOS_ACE_GetUIContent(int32_t instanceId)
+{
+    LOGI("Ace lib loaded, GetUIContent.");
+    auto uiWindow = Platform::AceContainer::GetUIWindow(instanceId);
+    CHECK_NULL_RETURN(uiWindow, nullptr);
+    return uiWindow->GetUIContent();
+}
+
+extern "C" ACE_FORCE_EXPORT char* OHOS_ACE_GetCurrentUIStackInfo()
+{
+    auto container = Container::Current();
+    CHECK_NULL_RETURN(container, nullptr);
+    auto pipeline = container->GetPipelineContext();
+    CHECK_NULL_RETURN(pipeline, nullptr);
+    static auto tmp = pipeline->GetCurrentExtraInfo();
+    std::replace(tmp.begin(), tmp.end(), '\\', '/');
+    LOGI("UIContentImpl::GetCurrentExtraInfo:%{public}s", tmp.c_str());
+    return tmp.data();
 }
 
 class OccupiedAreaChangeListener : public OHOS::Rosen::IOccupiedAreaChangeListener {
@@ -157,6 +184,8 @@ public:
     {
         auto rect = info->rect_;
         auto type = info->type_;
+        double positionY = info->textFieldPositionY_;
+        double height = info->textFieldHeight_;
         Rect keyboardRect = Rect(rect.posX_, rect.posY_, rect.width_, rect.height_);
         LOGI("UIContent OccupiedAreaChange rect:%{public}s type: %{public}d", keyboardRect.ToString().c_str(), type);
         if (type == OHOS::Rosen::OccupiedAreaType::TYPE_INPUT) {
@@ -166,10 +195,10 @@ public:
             CHECK_NULL_VOID(taskExecutor);
             ContainerScope scope(instanceId_);
             taskExecutor->PostTask(
-                [container, keyboardRect, rsTransaction] {
+                [container, keyboardRect, rsTransaction, positionY, height] {
                     auto context = container->GetPipelineContext();
                     CHECK_NULL_VOID(context);
-                    context->OnVirtualKeyboardAreaChange(keyboardRect, rsTransaction);
+                    context->OnVirtualKeyboardAreaChange(keyboardRect, positionY, height, rsTransaction);
                 },
                 TaskExecutor::TaskType::UI);
         }
@@ -198,20 +227,31 @@ public:
         CHECK_NULL_VOID(pipeline);
         auto taskExecutor = container->GetTaskExecutor();
         CHECK_NULL_VOID(taskExecutor);
-        auto safeArea = ConvertAvoidArea(avoidArea);
+        switch (type) {
+            case Rosen::AvoidAreaType::TYPE_SYSTEM:
+                systemSafeArea_ = ConvertAvoidArea(avoidArea);
+                break;
+            case Rosen::AvoidAreaType::TYPE_NAVIGATION_INDICATOR:
+                navigationBar_ = NG::SafeAreaInsets::Inset { .start = avoidArea.bottomRect_.posY_,
+                    .end = avoidArea.bottomRect_.posY_ + avoidArea.bottomRect_.height_ };
+                break;
+            default:
+                // cutout doesn't affect layout
+                return;
+        }
+        auto safeArea = systemSafeArea_;
+        safeArea.bottom_ = safeArea.bottom_.Combine(navigationBar_);
         ContainerScope scope(instanceId_);
         taskExecutor->PostTask(
-            [pipeline, safeArea, type] {
-                if (type == OHOS::Rosen::AvoidAreaType::TYPE_SYSTEM) {
-                    pipeline->UpdateSystemSafeArea(safeArea);
-                } else if (type == OHOS::Rosen::AvoidAreaType::TYPE_CUTOUT) {
-                    pipeline->UpdateCutoutSafeArea(safeArea);
-                }
+            [pipeline, safeArea] {
+                pipeline->UpdateSystemSafeArea(safeArea);
             },
             TaskExecutor::TaskType::UI);
     }
 
 private:
+    NG::SafeAreaInsets systemSafeArea_;
+    NG::SafeAreaInsets::Inset navigationBar_;
     int32_t instanceId_ = -1;
 };
 
@@ -221,7 +261,6 @@ public:
     ~DragWindowListener() = default;
     void OnDrag(int32_t x, int32_t y, OHOS::Rosen::DragEvent event)
     {
-        TAG_LOGI(AceLogTag::ACE_DRAG, "DragWindowListener::OnDrag called.");
         auto container = Platform::AceContainer::GetContainer(instanceId_);
         CHECK_NULL_VOID(container);
         int32_t instanceId = instanceId_;
@@ -255,6 +294,31 @@ private:
     int32_t instanceId_ = -1;
 };
 
+class FoldScreenListener : public OHOS::Rosen::DisplayManager::IFoldStatusListener {
+public:
+    explicit FoldScreenListener(int32_t instanceId) : instanceId_(instanceId) {}
+    ~FoldScreenListener() = default;
+    void OnFoldStatusChanged(OHOS::Rosen::FoldStatus foldStatus) override
+    {
+        auto container = Platform::AceContainer::GetContainer(instanceId_);
+        CHECK_NULL_VOID(container);
+        auto taskExecutor = container->GetTaskExecutor();
+        CHECK_NULL_VOID(taskExecutor);
+        ContainerScope scope(instanceId_);
+        taskExecutor->PostTask(
+            [container, foldStatus] {
+                auto context = container->GetPipelineContext();
+                CHECK_NULL_VOID(context);
+                auto aceFoldStatus = static_cast<FoldStatus>(static_cast<uint32_t>(foldStatus));
+                context->OnFoldStatusChanged(aceFoldStatus);
+            },
+            TaskExecutor::TaskType::UI);
+    }
+
+private:
+    int32_t instanceId_ = -1;
+};
+
 class TouchOutsideListener : public OHOS::Rosen::ITouchOutsideListener {
 public:
     explicit TouchOutsideListener(int32_t instanceId) : instanceId_(instanceId) {}
@@ -272,7 +336,7 @@ public:
             [instanceId = instanceId_] {
                 SubwindowManager::GetInstance()->ClearMenu();
                 SubwindowManager::GetInstance()->ClearMenuNG(instanceId, false, true);
-                SubwindowManager::GetInstance()->HidePopupNG(-1, instanceId);
+                SubwindowManager::GetInstance()->ClearPopupInSubwindow(instanceId);
             },
             TaskExecutor::TaskType::UI);
     }
@@ -285,7 +349,6 @@ UIContentImpl::UIContentImpl(OHOS::AbilityRuntime::Context* context, void* runti
 {
     CHECK_NULL_VOID(context);
     context_ = context->weak_from_this();
-    LOGI("Create UIContentImpl successfully.");
 }
 
 UIContentImpl::UIContentImpl(OHOS::AbilityRuntime::Context* context, void* runtime, bool isCard)
@@ -300,14 +363,12 @@ UIContentImpl::UIContentImpl(OHOS::AbilityRuntime::Context* context, void* runti
     isBundle_ = (hapModuleInfo->compileMode == AppExecFwk::CompileMode::JS_BUNDLE);
     SetConfiguration(context->GetConfiguration());
     context_ = context->weak_from_this();
-    TAG_LOGI(AceLogTag::ACE_FORM, "Create form UIContentImpl successfully.");
 }
 
 UIContentImpl::UIContentImpl(OHOS::AppExecFwk::Ability* ability)
 {
     CHECK_NULL_VOID(ability);
     context_ = ability->GetAbilityContext();
-    LOGI("Create UIContentImpl successfully.");
 }
 
 void UIContentImpl::DestroyUIDirector()
@@ -351,24 +412,12 @@ void UIContentImpl::InitializeInner(
         LOGI("CommonInitializeForm url = %{public}s", contentInfo.c_str());
         CommonInitializeForm(window, contentInfo, storage);
     }
-
     LOGI("Initialize startUrl = %{public}s", startUrl_.c_str());
     // run page.
     Platform::AceContainer::RunPage(instanceId_, startUrl_, "", isNamedRouter);
-    LOGD("Initialize UIContentImpl done.");
     auto distributedUI = std::make_shared<NG::DistributedUI>();
     uiManager_ = std::make_unique<DistributedUIManager>(instanceId_, distributedUI);
     Platform::AceContainer::GetContainer(instanceId_)->SetDistributedUI(distributedUI);
-}
-
-void UIContentImpl::Initialize(OHOS::Rosen::Window* window, const std::string& url, NativeValue* storage)
-{
-    InitializeInner(window, url, reinterpret_cast<napi_value>(storage), false);
-}
-
-void UIContentImpl::InitializeByName(OHOS::Rosen::Window* window, const std::string& name, NativeValue* storage)
-{
-    InitializeInner(window, name, reinterpret_cast<napi_value>(storage), true);
 }
 
 void UIContentImpl::Initialize(OHOS::Rosen::Window* window, const std::string& url, napi_value storage)
@@ -376,15 +425,25 @@ void UIContentImpl::Initialize(OHOS::Rosen::Window* window, const std::string& u
     InitializeInner(window, url, storage, false);
 }
 
+void UIContentImpl::Initialize(
+    OHOS::Rosen::Window* window, const std::shared_ptr<std::vector<uint8_t>>& content, napi_value storage)
+{
+    CommonInitialize(window, "", storage);
+    if (content) {
+        LOGI("Initialize by buffer, size:%{public}zu", content->size());
+        // run page.
+        Platform::AceContainer::RunPage(instanceId_, content, "");
+    } else {
+        LOGE("Initialize failed, buffer is null");
+    }
+    auto distributedUI = std::make_shared<NG::DistributedUI>();
+    uiManager_ = std::make_unique<DistributedUIManager>(instanceId_, distributedUI);
+    Platform::AceContainer::GetContainer(instanceId_)->SetDistributedUI(distributedUI);
+}
+
 void UIContentImpl::InitializeByName(OHOS::Rosen::Window* window, const std::string& name, napi_value storage)
 {
     InitializeInner(window, name, storage, true);
-}
-
-void UIContentImpl::Initialize(
-    OHOS::Rosen::Window* window, const std::string& url, NativeValue* storage, uint32_t focusWindowId)
-{
-    Initialize(window, url, reinterpret_cast<napi_value>(storage), focusWindowId);
 }
 
 void UIContentImpl::Initialize(
@@ -406,11 +465,6 @@ void UIContentImpl::Initialize(
     Platform::AceContainer::GetContainer(instanceId_)->SetDistributedUI(distributedUI);
 }
 
-NativeValue* UIContentImpl::GetUIContext()
-{
-    return reinterpret_cast<NativeValue*>(GetUINapiContext());
-}
-
 napi_value UIContentImpl::GetUINapiContext()
 {
     auto container = Platform::AceContainer::GetContainer(instanceId_);
@@ -429,11 +483,6 @@ napi_value UIContentImpl::GetUINapiContext()
     }
 
     return result;
-}
-
-void UIContentImpl::Restore(OHOS::Rosen::Window* window, const std::string& contentInfo, NativeValue* storage)
-{
-    Restore(window, contentInfo, reinterpret_cast<napi_value>(storage));
 }
 
 void UIContentImpl::Restore(OHOS::Rosen::Window* window, const std::string& contentInfo, napi_value storage)
@@ -457,7 +506,6 @@ std::string UIContentImpl::GetContentInfo() const
 void UIContentImpl::CommonInitializeForm(
     OHOS::Rosen::Window* window, const std::string& contentInfo, napi_value storage)
 {
-    TAG_LOGI(AceLogTag::ACE_FORM, "Initialize CommonInitializeForm start.");
     ACE_FUNCTION_TRACE();
     window_ = window;
     startUrl_ = contentInfo;
@@ -477,7 +525,6 @@ void UIContentImpl::CommonInitializeForm(
     static std::once_flag onceFlag;
     if (!isFormRender_) {
         std::call_once(onceFlag, [&context]() {
-            LOGD("Initialize for current process.");
             SetHwIcuDirectory();
             Container::UpdateCurrent(INSTANCE_ID_PLATFORM);
             AceApplicationInfo::GetInstance().SetProcessName(context->GetBundleName());
@@ -500,7 +547,8 @@ void UIContentImpl::CommonInitializeForm(
         density = defaultDisplay->GetVirtualPixelRatio();
         deviceWidth = defaultDisplay->GetWidth();
         deviceHeight = defaultDisplay->GetHeight();
-        LOGD("UIContent: deviceWidth: %{public}d, deviceHeight: %{public}d, default density: %{public}f", deviceWidth,
+        TAG_LOGD(AceLogTag::ACE_FORM,
+            "UIContent: deviceWidth: %{public}d, deviceHeight: %{public}d, default density: %{public}f", deviceWidth,
             deviceHeight, density);
     }
 
@@ -540,15 +588,19 @@ void UIContentImpl::CommonInitializeForm(
             OHOS::AbilityRuntime::Context::ConvertTo<OHOS::AbilityRuntime::ExtensionContext>(context);
         if (extensionContext) {
             info = extensionContext->GetAbilityInfo();
-        } else {
-            LOGE("context is not AbilityContext or ExtensionContext.");
         }
     }
     if (info) {
         AceApplicationInfo::GetInstance().SetAbilityName(info->name);
     }
 
-    RefPtr<FlutterAssetManager> flutterAssetManager = Referenced::MakeRefPtr<FlutterAssetManager>();
+    RefPtr<FlutterAssetManager> flutterAssetManager;
+    RefPtr<AssetManagerImpl> assetManagerImpl;
+    if (SystemProperties::GetFlutterDecouplingEnabled()) {
+        assetManagerImpl = Referenced::MakeRefPtr<AssetManagerImpl>();
+    } else {
+        flutterAssetManager = Referenced::MakeRefPtr<FlutterAssetManager>();
+    }
     bool isModelJson = info != nullptr ? info->isModuleJson : false;
     std::string moduleName = info != nullptr ? info->moduleName : "";
     auto appInfo = context != nullptr ? context->GetApplicationInfo() : nullptr;
@@ -557,7 +609,6 @@ void UIContentImpl::CommonInitializeForm(
     std::string moduleHapPath = info != nullptr ? info->hapPath : "";
     std::string resPath;
     std::string pageProfile;
-    LOGI("Initialize UIContent isModelJson:%{public}s", isModelJson ? "true" : "false");
     if (isFormRender_) {
         TAG_LOGD(AceLogTag::ACE_FORM, "Initialize UIContent form assetProvider");
         std::vector<std::string> basePaths;
@@ -566,21 +617,34 @@ void UIContentImpl::CommonInitializeForm(
         basePaths.emplace_back("");
         basePaths.emplace_back("js/");
         basePaths.emplace_back("ets/");
-        auto assetProvider = CreateAssetProvider(hapPath_, basePaths, false);
-        if (assetProvider) {
-            LOGE("push card asset provider to queue.");
-            flutterAssetManager->PushBack(std::move(assetProvider));
+        if (SystemProperties::GetFlutterDecouplingEnabled()) {
+            auto assetProvider = CreateAssetProviderImpl(hapPath_, basePaths, false);
+            if (assetProvider) {
+                assetManagerImpl->PushBack(std::move(assetProvider));
+            }
+        } else {
+            auto assetProvider = CreateAssetProvider(hapPath_, basePaths, false);
+            if (assetProvider) {
+                flutterAssetManager->PushBack(std::move(assetProvider));
+            }
         }
     } else {
         if (isModelJson) {
             std::string hapPath = info != nullptr ? info->hapPath : "";
-            LOGD("hapPath:%{public}s", hapPath.c_str());
             // first use hap provider
-            if (flutterAssetManager && !hapPath.empty()) {
-                auto assetProvider = AceType::MakeRefPtr<HapAssetProvider>();
-                if (assetProvider->Initialize(hapPath, { "", "ets/", "resources/base/profile/" })) {
-                    LOGD("Push HapAssetProvider to queue.");
-                    flutterAssetManager->PushBack(std::move(assetProvider));
+            if (SystemProperties::GetFlutterDecouplingEnabled()) {
+                if (assetManagerImpl && !hapPath.empty()) {
+                    auto hapAssetProviderImpl = AceType::MakeRefPtr<HapAssetProviderImpl>();
+                    if (hapAssetProviderImpl->Initialize(hapPath, { "", "ets/", "resources/base/profile/" })) {
+                        assetManagerImpl->PushBack(std::move(hapAssetProviderImpl));
+                    }
+                }
+            } else {
+                if (flutterAssetManager && !hapPath.empty()) {
+                    auto hapAssetProvider = AceType::MakeRefPtr<HapAssetProvider>();
+                    if (hapAssetProvider->Initialize(hapPath, { "", "ets/", "resources/base/profile/" })) {
+                        flutterAssetManager->PushBack(std::move(hapAssetProvider));
+                    }
                 }
             }
 
@@ -598,13 +662,20 @@ void UIContentImpl::CommonInitializeForm(
             }
 
             // second use file provider, will remove later
-            LOGD("In stage mode, resPath:%{private}s", resPath.c_str());
             auto assetBasePathStr = { std::string("ets/"), std::string("resources/base/profile/") };
-            if (flutterAssetManager && !resPath.empty()) {
-                auto assetProvider = AceType::MakeRefPtr<FileAssetProvider>();
-                if (assetProvider->Initialize(resPath, assetBasePathStr)) {
-                    LOGD("Push AssetProvider to queue.");
-                    flutterAssetManager->PushBack(std::move(assetProvider));
+            if (SystemProperties::GetFlutterDecouplingEnabled()) {
+                if (assetManagerImpl && !resPath.empty()) {
+                    auto assetProvider = AceType::MakeRefPtr<FileAssetProviderImpl>();
+                    if (assetProvider->Initialize(resPath, assetBasePathStr)) {
+                        assetManagerImpl->PushBack(std::move(assetProvider));
+                    }
+                }
+            } else {
+                if (flutterAssetManager && !resPath.empty()) {
+                    auto assetProvider = AceType::MakeRefPtr<FileAssetProvider>();
+                    if (assetProvider->Initialize(resPath, assetBasePathStr)) {
+                        flutterAssetManager->PushBack(std::move(assetProvider));
+                    }
                 }
             }
 
@@ -614,9 +685,6 @@ void UIContentImpl::CommonInitializeForm(
                 if (pageProfile.compare(0, profilePrefix.size(), profilePrefix) == 0) {
                     pageProfile = pageProfile.substr(profilePrefix.length()).append(".json");
                 }
-                LOGD("In stage mode, pageProfile:%{public}s", pageProfile.c_str());
-            } else {
-                LOGE("In stage mode, can't get hap info.");
             }
         } else {
             auto packagePathStr = context->GetBundleCodeDir();
@@ -630,12 +698,19 @@ void UIContentImpl::CommonInitializeForm(
 
             auto assetBasePathStr = { "assets/js/" + (srcPath.empty() ? "default" : srcPath) + "/",
                 std::string("assets/js/share/") };
-
-            if (flutterAssetManager && !packagePathStr.empty()) {
-                auto assetProvider = AceType::MakeRefPtr<FileAssetProvider>();
-                if (assetProvider->Initialize(packagePathStr, assetBasePathStr)) {
-                    LOGD("Push AssetProvider to queue.");
-                    flutterAssetManager->PushBack(std::move(assetProvider));
+            if (SystemProperties::GetFlutterDecouplingEnabled()) {
+                if (assetManagerImpl && !packagePathStr.empty()) {
+                    auto fileAssetProvider = AceType::MakeRefPtr<FileAssetProviderImpl>();
+                    if (fileAssetProvider->Initialize(packagePathStr, assetBasePathStr)) {
+                        assetManagerImpl->PushBack(std::move(fileAssetProvider));
+                    }
+                }
+            } else {
+                if (flutterAssetManager && !packagePathStr.empty()) {
+                    auto assetProvider = AceType::MakeRefPtr<FileAssetProvider>();
+                    if (assetProvider->Initialize(packagePathStr, assetBasePathStr)) {
+                        flutterAssetManager->PushBack(std::move(assetProvider));
+                    }
                 }
             }
 
@@ -673,9 +748,9 @@ void UIContentImpl::CommonInitializeForm(
 #endif
     // create container
     if (runtime_) {
-        instanceId_ = gInstanceId.fetch_add(1, std::memory_order_relaxed);
+        instanceId_ = Container::GenerateId<STAGE_CONTAINER>();
     } else {
-        instanceId_ = gSubWindowInstanceId.fetch_add(1, std::memory_order_relaxed);
+        instanceId_ = Container::GenerateId<FA_SUBWINDOW_CONTAINER>();
     }
 #ifdef FORM_SUPPORTED
     auto formUtils = std::make_shared<FormUtilsImpl>();
@@ -750,7 +825,12 @@ void UIContentImpl::CommonInitializeForm(
     container->SetResourceConfiguration(aceResCfg);
     container->SetPackagePathStr(resPath);
     container->SetHapPath(hapPath);
-    container->SetAssetManager(flutterAssetManager);
+    if (SystemProperties::GetFlutterDecouplingEnabled()) {
+        container->SetAssetManager(assetManagerImpl);
+    } else {
+        container->SetAssetManager(flutterAssetManager);
+    }
+
     if (!isFormRender_) {
         container->SetBundlePath(context->GetBundleCodeDir());
         container->SetFilesDataPath(context->GetFilesDir());
@@ -840,7 +920,6 @@ void UIContentImpl::CommonInitializeForm(
 void UIContentImpl::SetConfiguration(const std::shared_ptr<OHOS::AppExecFwk::Configuration>& config)
 {
     if (config == nullptr) {
-        LOGW("config is nullptr, set localeInfo to default");
         UErrorCode status = U_ZERO_ERROR;
         icu::Locale locale = icu::Locale::forLanguageTag(Global::I18n::LocaleConfig::GetSystemLanguage(), status);
         AceApplicationInfo::GetInstance().SetLocale(locale.getLanguage(), locale.getCountry(), locale.getScript(), "");
@@ -848,7 +927,6 @@ void UIContentImpl::SetConfiguration(const std::shared_ptr<OHOS::AppExecFwk::Con
         return;
     }
 
-    LOGI("SetConfiguration");
     auto colorMode = config->GetItem(OHOS::AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE);
     auto deviceAccess = config->GetItem(OHOS::AAFwk::GlobalConfigurationKey::INPUT_POINTER_DEVICE);
     auto languageTag = config->GetItem(OHOS::AAFwk::GlobalConfigurationKey::SYSTEM_LANGUAGE);
@@ -937,17 +1015,12 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
         return metaDataItem.name == "ArkTSPartialUpdate" && metaDataItem.value == "false";
     });
 
-    bool isDelayedUpdateOnInactive = std::any_of(metaData.begin(), metaData.end(), [](const auto& metaDataItem) {
-        return metaDataItem.name == "delayedUpdateOnInactive" && metaDataItem.value == "true";
-    });
-    AceApplicationInfo::GetInstance().SetDelayedUpdateOnInactive(isDelayedUpdateOnInactive);
-
     auto useNewPipe =
         AceNewPipeJudgement::QueryAceNewPipeEnabledStage(AceApplicationInfo::GetInstance().GetPackageName(),
             apiCompatibleVersion, apiTargetVersion, apiReleaseType, closeArkTSPartialUpdate);
     LOGI("UIContent: apiCompatibleVersion: %{public}d, apiTargetVersion: %{public}d, and apiReleaseType: %{public}s, "
-         "useNewPipe: %{public}d, isDelayedUpdateOnInactive: %{public}d",
-        apiCompatibleVersion, apiTargetVersion, apiReleaseType.c_str(), useNewPipe, isDelayedUpdateOnInactive);
+         "useNewPipe: %{public}d",
+        apiCompatibleVersion, apiTargetVersion, apiReleaseType.c_str(), useNewPipe);
 #ifndef NG_BUILD
 #ifdef ENABLE_ROSEN_BACKEND
     std::shared_ptr<OHOS::Rosen::RSUIDirector> rsUiDirector;
@@ -1017,7 +1090,6 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
         auto extensionContext =
             OHOS::AbilityRuntime::Context::ConvertTo<OHOS::AbilityRuntime::ExtensionContext>(context);
         if (!extensionContext) {
-            LOGE("context is not AbilityContext or ExtensionContext.");
             return;
         }
         info = extensionContext->GetAbilityInfo();
@@ -1025,8 +1097,13 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
     if (info) {
         AceApplicationInfo::GetInstance().SetAbilityName(info->name);
     }
-
-    RefPtr<FlutterAssetManager> flutterAssetManager = Referenced::MakeRefPtr<FlutterAssetManager>();
+    RefPtr<FlutterAssetManager> flutterAssetManager;
+    RefPtr<AssetManagerImpl> assetManagerImpl;
+    if (SystemProperties::GetFlutterDecouplingEnabled()) {
+        assetManagerImpl = Referenced::MakeRefPtr<AssetManagerImpl>();
+    } else {
+        flutterAssetManager = Referenced::MakeRefPtr<FlutterAssetManager>();
+    }
     bool isModelJson = info != nullptr ? info->isModuleJson : false;
     std::string moduleName = info != nullptr ? info->moduleName : "";
     auto appInfo = context->GetApplicationInfo();
@@ -1039,11 +1116,21 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
         std::string hapPath = info != nullptr ? info->hapPath : "";
         LOGD("hapPath:%{public}s", hapPath.c_str());
         // first use hap provider
-        if (flutterAssetManager && !hapPath.empty()) {
-            auto assetProvider = AceType::MakeRefPtr<HapAssetProvider>();
-            if (assetProvider->Initialize(hapPath, { "", "ets/", "resources/base/profile/" })) {
-                LOGD("Push HapAssetProvider to queue.");
-                flutterAssetManager->PushBack(std::move(assetProvider));
+        if (SystemProperties::GetFlutterDecouplingEnabled()) {
+            if (assetManagerImpl && !hapPath.empty()) {
+                auto hapAssetProvider = AceType::MakeRefPtr<HapAssetProviderImpl>();
+                if (hapAssetProvider->Initialize(hapPath, { "", "ets/", "resources/base/profile/" })) {
+                    LOGD("Push HapAssetProvider to queue.");
+                    assetManagerImpl->PushBack(std::move(hapAssetProvider));
+                }
+            }
+        } else {
+            if (flutterAssetManager && !hapPath.empty()) {
+                auto assetProvider = AceType::MakeRefPtr<HapAssetProvider>();
+                if (assetProvider->Initialize(hapPath, { "", "ets/", "resources/base/profile/" })) {
+                    LOGD("Push HapAssetProvider to queue.");
+                    flutterAssetManager->PushBack(std::move(assetProvider));
+                }
             }
         }
 
@@ -1062,11 +1149,21 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
         // second use file provider, will remove later
         LOGD("In stage mode, resPath:%{private}s", resPath.c_str());
         auto assetBasePathStr = { std::string("ets/"), std::string("resources/base/profile/") };
-        if (flutterAssetManager && !resPath.empty()) {
-            auto assetProvider = AceType::MakeRefPtr<FileAssetProvider>();
-            if (assetProvider->Initialize(resPath, assetBasePathStr)) {
-                LOGD("Push AssetProvider to queue.");
-                flutterAssetManager->PushBack(std::move(assetProvider));
+        if (SystemProperties::GetFlutterDecouplingEnabled()) {
+            if (assetManagerImpl && !resPath.empty()) {
+                auto fileAssetProvider = AceType::MakeRefPtr<FileAssetProviderImpl>();
+                if (fileAssetProvider->Initialize(resPath, assetBasePathStr)) {
+                    LOGD("Push fileAssetProvider to queue.");
+                    assetManagerImpl->PushBack(std::move(fileAssetProvider));
+                }
+            }
+        } else {
+            if (flutterAssetManager && !resPath.empty()) {
+                auto assetProvider = AceType::MakeRefPtr<FileAssetProvider>();
+                if (assetProvider->Initialize(resPath, assetBasePathStr)) {
+                    LOGD("Push AssetProvider to queue.");
+                    flutterAssetManager->PushBack(std::move(assetProvider));
+                }
             }
         }
 
@@ -1077,8 +1174,6 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
                 pageProfile = pageProfile.substr(profilePrefix.length()).append(".json");
             }
             LOGD("In stage mode, pageProfile:%{public}s", pageProfile.c_str());
-        } else {
-            LOGE("In stage mode, can't get hap info.");
         }
     } else {
         auto packagePathStr = context->GetBundleCodeDir();
@@ -1093,14 +1188,23 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
         auto assetBasePathStr = { "assets/js/" + (srcPath.empty() ? "default" : srcPath) + "/",
             std::string("assets/js/share/") };
 
-        if (flutterAssetManager && !packagePathStr.empty()) {
-            auto assetProvider = AceType::MakeRefPtr<FileAssetProvider>();
-            if (assetProvider->Initialize(packagePathStr, assetBasePathStr)) {
-                LOGD("Push AssetProvider to queue.");
-                flutterAssetManager->PushBack(std::move(assetProvider));
+        if (SystemProperties::GetFlutterDecouplingEnabled()) {
+            if (assetManagerImpl && !packagePathStr.empty()) {
+                auto fileAssetProvider = AceType::MakeRefPtr<FileAssetProviderImpl>();
+                if (fileAssetProvider->Initialize(packagePathStr, assetBasePathStr)) {
+                    LOGD("Push AssetProvider to queue.");
+                    assetManagerImpl->PushBack(std::move(fileAssetProvider));
+                }
+            }
+        } else {
+            if (flutterAssetManager && !packagePathStr.empty()) {
+                auto assetProvider = AceType::MakeRefPtr<FileAssetProvider>();
+                if (assetProvider->Initialize(packagePathStr, assetBasePathStr)) {
+                    LOGD("Push AssetProvider to queue.");
+                    flutterAssetManager->PushBack(std::move(assetProvider));
+                }
             }
         }
-
         if (appInfo) {
             std::vector<OHOS::AppExecFwk::ModuleInfo> moduleList = appInfo->moduleInfos;
             for (const auto& module : moduleList) {
@@ -1133,9 +1237,9 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
 #endif
     // create container
     if (runtime_) {
-        instanceId_ = gInstanceId.fetch_add(1, std::memory_order_relaxed);
+        instanceId_ = Container::GenerateId<STAGE_CONTAINER>();
     } else {
-        instanceId_ = gSubWindowInstanceId.fetch_add(1, std::memory_order_relaxed);
+        instanceId_ = Container::GenerateId<FA_SUBWINDOW_CONTAINER>();
     }
 #ifdef FORM_SUPPORTED
     auto formUtils = std::make_shared<FormUtilsImpl>();
@@ -1167,6 +1271,7 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
     container->SetWindowId(window_->GetWindowId());
     auto token = context->GetToken();
     container->SetToken(token);
+    container->SetParentToken(parentToken_);
     container->SetPageUrlChecker(AceType::MakeRefPtr<PageUrlCheckerOhos>(context, info));
     // Mark the relationship between windowId and containerId, it is 1:1
     SubwindowManager::GetInstance()->AddContainerId(window->GetWindowId(), instanceId_);
@@ -1194,7 +1299,12 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
     container->SetResourceConfiguration(aceResCfg);
     container->SetPackagePathStr(resPath);
     container->SetHapPath(hapPath);
-    container->SetAssetManager(flutterAssetManager);
+    if (SystemProperties::GetFlutterDecouplingEnabled()) {
+        container->SetAssetManager(assetManagerImpl);
+    } else {
+        container->SetAssetManager(flutterAssetManager);
+    }
+
     container->SetBundlePath(context->GetBundleCodeDir());
     container->SetFilesDataPath(context->GetFilesDir());
     container->SetModuleName(hapModuleInfo->moduleName);
@@ -1228,6 +1338,8 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
     window_->RegisterDragListener(dragWindowListener_);
     occupiedAreaChangeListener_ = new OccupiedAreaChangeListener(instanceId_);
     window_->RegisterOccupiedAreaChangeListener(occupiedAreaChangeListener_);
+    foldStatusListener_ = new FoldScreenListener(instanceId_);
+    OHOS::Rosen::DisplayManager::GetInstance().RegisterFoldStatusListener(foldStatusListener_);
 
     // create ace_view
     auto aceView =
@@ -1271,6 +1383,11 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
 
     Platform::AceViewOhos::SurfaceChanged(aceView, 0, 0, deviceHeight >= deviceWidth ? 0 : 1);
     auto pipeline = container->GetPipelineContext();
+    // Use metadata to control the center-alignment of text at line height.
+    bool halfLeading = std::any_of(metaData.begin(), metaData.end(),
+        [](const auto& metaDataItem) { return metaDataItem.name == "half_leading" && metaDataItem.value == "true"; });
+    pipeline->SetHalfLeading(halfLeading);
+    container->CheckAndSetFontFamily();
     if (pipeline) {
         auto rsConfig = window_->GetKeyboardAnimationConfig();
         KeyboardAnimationConfig config = { rsConfig.curveType_, rsConfig.curveParams_, rsConfig.durationIn_,
@@ -1299,6 +1416,15 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
 
     InitializeSafeArea(container);
 
+    // set container temp dir
+    if (abilityContext) {
+        if (!abilityContext->GetTempDir().empty()) {
+            container->SetTempDir(abilityContext->GetTempDir());
+        }
+    } else {
+        LOGI("UIContentImpl::OnStart abilityContext is null");
+    }
+
     LayoutInspector::SetCallback(instanceId_);
 }
 
@@ -1324,12 +1450,20 @@ void UIContentImpl::Foreground()
     auto pipelineContext = container->GetPipelineContext();
     CHECK_NULL_VOID(pipelineContext);
     pipelineContext->SetForegroundCalled(true);
+
+    CHECK_NULL_VOID(window_);
+    std::string windowName = window_->GetWindowName();
+    Recorder::EventRecorder::Get().SetContainerInfo(windowName, instanceId_, true);
 }
 
 void UIContentImpl::Background()
 {
     LOGI("UIContentImpl: window background");
     Platform::AceContainer::OnHide(instanceId_);
+
+    CHECK_NULL_VOID(window_);
+    std::string windowName = window_->GetWindowName();
+    Recorder::EventRecorder::Get().SetContainerInfo(windowName, instanceId_, false);
 }
 
 void UIContentImpl::ReloadForm(const std::string& url)
@@ -1338,8 +1472,13 @@ void UIContentImpl::ReloadForm(const std::string& url)
     LOGI("ReloadForm startUrl = %{public}s", startUrl_.c_str());
     auto container = Platform::AceContainer::GetContainer(instanceId_);
     CHECK_NULL_VOID(container);
-    auto flutterAssetManager = AceType::DynamicCast<FlutterAssetManager>(container->GetAssetManager());
-    flutterAssetManager->ReloadProvider();
+    if (SystemProperties::GetFlutterDecouplingEnabled()) {
+        auto assetManager = AceType::DynamicCast<AssetManagerImpl>(container->GetAssetManager());
+        assetManager->ReloadProvider();
+    } else {
+        auto flutterAssetManager = AceType::DynamicCast<FlutterAssetManager>(container->GetAssetManager());
+        flutterAssetManager->ReloadProvider();
+    }
     container->UpdateResource();
     Platform::AceContainer::RunPage(instanceId_, startUrl_, "");
 }
@@ -1348,6 +1487,10 @@ void UIContentImpl::Focus()
 {
     LOGI("UIContentImpl: window focus");
     Platform::AceContainer::OnActive(instanceId_);
+
+    CHECK_NULL_VOID(window_);
+    std::string windowName = window_->GetWindowName();
+    Recorder::EventRecorder::Get().SetFocusContainerInfo(windowName, instanceId_);
 }
 
 void UIContentImpl::UnFocus()
@@ -1359,6 +1502,7 @@ void UIContentImpl::UnFocus()
 void UIContentImpl::Destroy()
 {
     LOGI("UIContentImpl: window destroy");
+
     auto container = AceEngine::Get().GetContainer(instanceId_);
     CHECK_NULL_VOID(container);
     // stop performance check and output json file
@@ -1415,9 +1559,30 @@ void UIContentImpl::SetBackgroundColor(uint32_t color)
         TaskExecutor::TaskType::UI);
 }
 
+void UIContentImpl::GetAppPaintSize(OHOS::Rosen::Rect& paintrect)
+{
+    auto container = AceEngine::Get().GetContainer(instanceId_);
+    CHECK_NULL_VOID(container);
+    ContainerScope scope(instanceId_);
+    auto pipelineContext = AceType::DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
+    CHECK_NULL_VOID(pipelineContext);
+    auto stageManager = pipelineContext->GetStageManager();
+    CHECK_NULL_VOID(stageManager);
+    auto stageNode = stageManager->GetStageNode();
+    CHECK_NULL_VOID(stageNode);
+    auto renderContext = stageNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto paintRectf = renderContext->GetPaintRectWithoutTransform();
+    auto offset = stageNode->GetPaintRectOffset(false);
+    paintrect.posX_ = static_cast<int>(offset.GetX());
+    paintrect.posY_ = static_cast<int>(offset.GetY());
+    paintrect.width_ = static_cast<uint32_t>(paintRectf.Width());
+    paintrect.height_ = static_cast<uint32_t>(paintRectf.Height());
+}
+
 bool UIContentImpl::ProcessBackPressed()
 {
-    LOGI("UIContentImpl: ProcessBackPressed: Platform::AceContainer::OnBackPressed called");
+    LOGI("OnBackPressed called");
     auto container = AceEngine::Get().GetContainer(instanceId_);
     CHECK_NULL_RETURN(container, false);
     auto taskExecutor = container->GetTaskExecutor();
@@ -1445,10 +1610,19 @@ bool UIContentImpl::ProcessBackPressed()
 
 bool UIContentImpl::ProcessPointerEvent(const std::shared_ptr<OHOS::MMI::PointerEvent>& pointerEvent)
 {
-    LOGD("UIContentImpl ProcessPointerEvent begin");
     auto container = AceType::DynamicCast<Platform::AceContainer>(AceEngine::Get().GetContainer(instanceId_));
     CHECK_NULL_RETURN(container, false);
     container->SetCurPointerEvent(pointerEvent);
+    if (pointerEvent->GetPointerAction() != MMI::PointerEvent::POINTER_ACTION_MOVE) {
+        auto info = Platform::AceContainer::GetContentInfo(instanceId_);
+        TAG_LOGI(AceLogTag::ACE_INPUTTRACKING,
+            "PointerEvent Process to ui_content, eventInfo: id:%{public}d, "
+            "WindowName = %{public}s, WindowId = %{public}d, ViewWidth = %{public}d, ViewHeight = %{public}d, "
+            "ViewPosX = %{public}d, ViewPosY = %{public}d, ContentInfo = %{public}s",
+            pointerEvent->GetId(), container->GetWindowName().c_str(), container->GetWindowId(),
+            container->GetViewWidth(), container->GetViewHeight(), container->GetViewPosX(), container->GetViewPosY(),
+            info.c_str());
+    }
     auto aceView = static_cast<Platform::AceViewOhos*>(container->GetView());
     Platform::AceViewOhos::DispatchTouchEvent(aceView, pointerEvent);
     return true;
@@ -1456,9 +1630,11 @@ bool UIContentImpl::ProcessPointerEvent(const std::shared_ptr<OHOS::MMI::Pointer
 
 bool UIContentImpl::ProcessKeyEvent(const std::shared_ptr<OHOS::MMI::KeyEvent>& touchEvent)
 {
-    LOGD("UIContentImpl: OnKeyUp called, keyEvent info: keyCode is %{public}d,"
-         "keyAction is %{public}d, keyActionTime is %{public}" PRId64,
-        touchEvent->GetKeyCode(), touchEvent->GetKeyAction(), touchEvent->GetActionTime());
+    TAG_LOGI(AceLogTag::ACE_INPUTTRACKING,
+        "KeyEvent Process to ui_content, eventInfo: id:%{public}d, "
+        "keyEvent info: keyCode is %{public}d, "
+        "keyAction is %{public}d, keyActionTime is %{public}" PRId64,
+        touchEvent->GetId(), touchEvent->GetKeyCode(), touchEvent->GetKeyAction(), touchEvent->GetActionTime());
     auto container = AceEngine::Get().GetContainer(instanceId_);
     CHECK_NULL_RETURN(container, false);
     auto aceView = static_cast<Platform::AceViewOhos*>(container->GetView());
@@ -1495,6 +1671,7 @@ void UIContentImpl::UpdateConfiguration(const std::shared_ptr<OHOS::AppExecFwk::
             parsedConfig.languageTag = config->GetItem(OHOS::AppExecFwk::GlobalConfigurationKey::SYSTEM_LANGUAGE);
             parsedConfig.direction = config->GetItem(OHOS::AppExecFwk::ConfigurationInner::APPLICATION_DIRECTION);
             parsedConfig.densitydpi = config->GetItem(OHOS::AppExecFwk::ConfigurationInner::APPLICATION_DENSITYDPI);
+            parsedConfig.themeTag = config->GetItem("ohos.application.theme");
             container->UpdateConfiguration(parsedConfig, config->GetName());
             LOGI("UIContentImpl: UpdateConfiguration called End, name:%{public}s", config->GetName().c_str());
         },
@@ -1505,7 +1682,6 @@ void UIContentImpl::UpdateViewportConfig(const ViewportConfig& config, OHOS::Ros
     const std::shared_ptr<OHOS::Rosen::RSTransaction>& rsTransaction)
 {
     LOGI("UIContentImpl: UpdateViewportConfig %{public}s", config.ToString().c_str());
-    SystemProperties::SetResolution(config.Density());
     SystemProperties::SetDeviceOrientation(config.Orientation());
     ContainerScope scope(instanceId_);
     auto container = Platform::AceContainer::GetContainer(instanceId_);
@@ -1521,6 +1697,12 @@ void UIContentImpl::UpdateViewportConfig(const ViewportConfig& config, OHOS::Ros
             if (rsWindow) {
                 pipelineContext->SetIsLayoutFullScreen(
                     rsWindow->GetMode() == Rosen::WindowMode::WINDOW_MODE_FULLSCREEN);
+                auto isNeedAvoidWindowMode = (rsWindow->GetMode() == Rosen::WindowMode::WINDOW_MODE_FLOATING ||
+                                              rsWindow->GetMode() == Rosen::WindowMode::WINDOW_MODE_SPLIT_PRIMARY ||
+                                              rsWindow->GetMode() == Rosen::WindowMode::WINDOW_MODE_SPLIT_SECONDARY) &&
+                                             (SystemProperties::GetDeviceType() == DeviceType::PHONE ||
+                                              SystemProperties::GetDeviceType() == DeviceType::TABLET);
+                pipelineContext->SetIsNeedAvoidWindow(isNeedAvoidWindowMode);
             }
             if (reason == OHOS::Rosen::WindowSizeChangeReason::ROTATION) {
                 pipelineContext->FlushBuild();
@@ -1528,10 +1710,11 @@ void UIContentImpl::UpdateViewportConfig(const ViewportConfig& config, OHOS::Ros
         }
         auto aceView = static_cast<Platform::AceViewOhos*>(container->GetAceView());
         CHECK_NULL_VOID(aceView);
-        Platform::AceViewOhos::SetViewportMetrics(aceView, config);
+        Platform::AceViewOhos::SetViewportMetrics(aceView, config); // update density into pipeline
         Platform::AceViewOhos::SurfaceChanged(aceView, config.Width(), config.Height(), config.Orientation(),
             static_cast<WindowSizeChangeReason>(reason), rsTransaction);
         Platform::AceViewOhos::SurfacePositionChanged(aceView, config.Left(), config.Top());
+        SubwindowManager::GetInstance()->ClearToastInSubwindow();
     };
     if (container->IsUseStageModel() && reason == OHOS::Rosen::WindowSizeChangeReason::ROTATION) {
         task();
@@ -1578,6 +1761,44 @@ void UIContentImpl::UpdateWindowMode(OHOS::Rosen::WindowMode mode, bool hasDeco)
         TaskExecutor::TaskType::UI);
 }
 
+void UIContentImpl::UpdateMaximizeMode(OHOS::Rosen::MaximizeMode mode)
+{
+    LOGI("UIContentImpl: UpdateMaximizeMode, maximize mode is %{public}d", mode);
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    CHECK_NULL_VOID(container);
+    ContainerScope scope(instanceId_);
+    auto taskExecutor = container->GetTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    taskExecutor->PostTask(
+        [container, mode]() {
+            auto pipelineContext = container->GetPipelineContext();
+            CHECK_NULL_VOID(pipelineContext);
+            auto windowManager = pipelineContext->GetWindowManager();
+            CHECK_NULL_VOID(windowManager);
+            windowManager->SetCurrentWindowMaximizeMode(static_cast<OHOS::Ace::MaximizeMode>(mode));
+            pipelineContext->ShowContainerTitle(true, true, true);
+        },
+        TaskExecutor::TaskType::UI);
+}
+
+bool UIContentImpl::NeedSoftKeyboard()
+{
+    auto container = AceEngine::Get().GetContainer(instanceId_);
+    CHECK_NULL_RETURN(container, false);
+    auto pipeline = container->GetPipelineContext();
+    CHECK_NULL_RETURN(pipeline, false);
+    return pipeline->NeedSoftKeyboard();
+}
+
+void UIContentImpl::SetOnWindowFocused(const std::function<void()>& callback)
+{
+    auto container = AceEngine::Get().GetContainer(instanceId_);
+    CHECK_NULL_VOID(container);
+    auto pipeline = container->GetPipelineContext();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->SetOnWindowFocused(callback);
+}
+
 void UIContentImpl::HideWindowTitleButton(bool hideSplit, bool hideMaximize, bool hideMinimize)
 {
     LOGI("HideWindowTitleButton hideSplit: %{public}d, hideMaximize: %{public}d, hideMinimize: %{public}d", hideSplit,
@@ -1592,6 +1813,23 @@ void UIContentImpl::HideWindowTitleButton(bool hideSplit, bool hideMaximize, boo
             auto pipelineContext = container->GetPipelineContext();
             CHECK_NULL_VOID(pipelineContext);
             pipelineContext->SetContainerButtonHide(hideSplit, hideMaximize, hideMinimize);
+        },
+        TaskExecutor::TaskType::UI);
+}
+
+void UIContentImpl::UpdateTitleInTargetPos(bool isShow, int32_t height)
+{
+    LOGI("UIContentImpl: UpdateTitleInTargetPos, isShow %{public}d, height is %{public}d", isShow, height);
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    CHECK_NULL_VOID(container);
+    ContainerScope scope(instanceId_);
+    auto taskExecutor = Container::CurrentTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    taskExecutor->PostTask(
+        [container, isShow, height]() {
+            auto pipelineContext = container->GetPipelineContext();
+            CHECK_NULL_VOID(pipelineContext);
+            pipelineContext->UpdateTitleInTargetPos(isShow, height);
         },
         TaskExecutor::TaskType::UI);
 }
@@ -1615,11 +1853,14 @@ void UIContentImpl::InitializeSubWindow(OHOS::Rosen::Window* window, bool isDial
     LOGI("The window name is %{public}s", window->GetWindowName().c_str());
     CHECK_NULL_VOID(window_);
     RefPtr<Container> container;
-    instanceId_ = gSubInstanceId.fetch_add(1, std::memory_order_relaxed);
+    instanceId_ = Container::GenerateId<COMPONENT_SUBWINDOW_CONTAINER>();
 
     std::weak_ptr<OHOS::AppExecFwk::AbilityInfo> abilityInfo;
     std::weak_ptr<OHOS::AbilityRuntime::Context> runtimeContext;
     if (isDialog) {
+        UErrorCode status = U_ZERO_ERROR;
+        icu::Locale locale = icu::Locale::forLanguageTag(Global::I18n::LocaleConfig::GetSystemLanguage(), status);
+        AceApplicationInfo::GetInstance().SetLocale(locale.getLanguage(), locale.getCountry(), locale.getScript(), "");
         container = AceType::MakeRefPtr<Platform::DialogContainer>(instanceId_, FrontendType::DECLARATIVE_JS);
     } else {
 #ifdef NG_BUILD
@@ -1655,6 +1896,8 @@ void UIContentImpl::InitializeSubWindow(OHOS::Rosen::Window* window, bool isDial
     window_->RegisterDragListener(dragWindowListener_);
     occupiedAreaChangeListener_ = new OccupiedAreaChangeListener(instanceId_);
     window_->RegisterOccupiedAreaChangeListener(occupiedAreaChangeListener_);
+    foldStatusListener_ = new FoldScreenListener(instanceId_);
+    OHOS::Rosen::DisplayManager::GetInstance().RegisterFoldStatusListener(foldStatusListener_);
 }
 
 void UIContentImpl::SetNextFrameLayoutCallback(std::function<void()>&& callback)
@@ -1665,6 +1908,17 @@ void UIContentImpl::SetNextFrameLayoutCallback(std::function<void()>&& callback)
     auto pipelineContext = container->GetPipelineContext();
     CHECK_NULL_VOID(pipelineContext);
     pipelineContext->SetNextFrameLayoutCallback(std::move(callback));
+}
+
+void UIContentImpl::SetFrameLayoutFinishCallback(std::function<void()>&& callback)
+{
+    CHECK_NULL_VOID(callback);
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    CHECK_NULL_VOID(container);
+    auto pipelineContext = AceType::DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
+    CHECK_NULL_VOID(pipelineContext);
+    pipelineContext->AddPersistAfterLayoutTask(std::move(callback));
+    LOGI("SetFrameLayoutFinishCallback SUCCESS");
 }
 
 void UIContentImpl::NotifyMemoryLevel(int32_t level)
@@ -1764,6 +2018,31 @@ void UIContentImpl::OnFormSurfaceChange(float width, float height)
     pipelineContext->OnSurfaceChanged(width, height);
 }
 
+void UIContentImpl::SetFormBackgroundColor(const std::string& color)
+{
+    LOGI("UIContentImpl: SetFormBackgroundColor color is %{public}s", color.c_str());
+    if (!Rosen::RSSystemProperties::GetUniRenderEnabled()) {
+        // cannot set transparent background effects in not-uniform-render mode
+        return;
+    }
+    Color bgColor;
+    if (!Color::ParseColorString(color, bgColor)) {
+        return;
+    }
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    CHECK_NULL_VOID(container);
+    ContainerScope scope(instanceId_);
+    auto taskExecutor = container->GetTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    taskExecutor->PostSyncTask(
+        [container, bgColor]() {
+            auto pipelineContext = container->GetPipelineContext();
+            CHECK_NULL_VOID(pipelineContext);
+            pipelineContext->SetAppBgColor(bgColor);
+        },
+        TaskExecutor::TaskType::UI);
+}
+
 void UIContentImpl::GetResourcePaths(std::vector<std::string>& resourcesPaths, std::string& assetRootPath,
     std::vector<std::string>& assetBasePaths, std::string& resFolderName)
 {
@@ -1792,30 +2071,42 @@ void UIContentImpl::SetResourcePaths(const std::vector<std::string>& resourcesPa
         [container, resourcesPaths, assetRootPath, assetBasePaths]() {
             auto pipelineContext = container->GetPipelineContext();
             CHECK_NULL_VOID(pipelineContext);
-            auto flutterAssetManager = pipelineContext->GetAssetManager();
-            CHECK_NULL_VOID(flutterAssetManager);
+            auto assetManager = pipelineContext->GetAssetManager();
+            CHECK_NULL_VOID(assetManager);
             auto themeManager = pipelineContext->GetThemeManager();
             CHECK_NULL_VOID(themeManager);
 
             if (resourcesPaths.empty() && assetRootPath.empty()) {
-                LOGE("Reload old resource");
                 return;
             }
 
             if (!assetRootPath.empty()) {
                 LOGD("new FileAssetProvider, assetRootPath: %{private}s", assetRootPath.c_str());
-                auto assetProvider = AceType::MakeRefPtr<FileAssetProvider>();
-                if (assetProvider->Initialize(assetRootPath, assetBasePaths)) {
-                    flutterAssetManager->PushBack(std::move(assetProvider));
+                if (SystemProperties::GetFlutterDecouplingEnabled()) {
+                    auto fileAssetProviderImpl = AceType::MakeRefPtr<FileAssetProviderImpl>();
+                    if (fileAssetProviderImpl->Initialize(assetRootPath, assetBasePaths)) {
+                        assetManager->PushBack(std::move(fileAssetProviderImpl));
+                    }
+                } else {
+                    auto fileAssetProvider = AceType::MakeRefPtr<FileAssetProvider>();
+                    if (fileAssetProvider->Initialize(assetRootPath, assetBasePaths)) {
+                        assetManager->PushBack(std::move(fileAssetProvider));
+                    }
                 }
                 return;
             }
-
             for (auto iter = resourcesPaths.begin(); iter != resourcesPaths.end(); iter++) {
                 LOGD("new HapAssetProvider, iter: %{private}s", iter->c_str());
-                auto assetProvider = AceType::MakeRefPtr<HapAssetProvider>();
-                if (assetProvider->Initialize(*iter, assetBasePaths)) {
-                    flutterAssetManager->PushBack(std::move(assetProvider));
+                if (SystemProperties::GetFlutterDecouplingEnabled()) {
+                    auto hapAssetProviderImpl = AceType::MakeRefPtr<HapAssetProviderImpl>();
+                    if (hapAssetProviderImpl->Initialize(*iter, assetBasePaths)) {
+                        assetManager->PushBack(std::move(hapAssetProviderImpl));
+                    }
+                } else {
+                    auto hapAssetProvider = AceType::MakeRefPtr<HapAssetProvider>();
+                    if (hapAssetProvider->Initialize(*iter, assetBasePaths)) {
+                        assetManager->PushBack(std::move(hapAssetProvider));
+                    }
                 }
             }
         },
@@ -1890,5 +2181,171 @@ void UIContentImpl::CloseModalUIExtension(int32_t sessionId)
             overlay->CloseModalUIExtension(sessionId);
         },
         TaskExecutor::TaskType::UI);
+}
+
+void UIContentImpl::SetParentToken(sptr<IRemoteObject> token)
+{
+    parentToken_ = token;
+}
+
+sptr<IRemoteObject> UIContentImpl::GetParentToken()
+{
+    return parentToken_;
+}
+
+bool UIContentImpl::CheckNeedAutoSave()
+{
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    CHECK_NULL_RETURN(container, false);
+    auto taskExecutor = container->GetTaskExecutor();
+    CHECK_NULL_RETURN(taskExecutor, false);
+    ContainerScope scope(instanceId_);
+    bool needAutoSave = false;
+    taskExecutor->PostSyncTask(
+        [&needAutoSave, container]() {
+            CHECK_NULL_VOID(container);
+            auto pipelineContext = AceType::DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
+            CHECK_NULL_VOID(pipelineContext);
+            needAutoSave = pipelineContext->CheckNeedAutoSave();
+        },
+        TaskExecutor::TaskType::UI);
+
+    TAG_LOGI(AceLogTag::ACE_AUTO_FILL, "UIContentImpl CheckNeedAutoSave, value is %{public}d", needAutoSave);
+    return needAutoSave;
+}
+
+bool UIContentImpl::DumpViewData(AbilityBase::ViewData& viewData)
+{
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    CHECK_NULL_RETURN(container, false);
+    auto taskExecutor = container->GetTaskExecutor();
+    CHECK_NULL_RETURN(taskExecutor, false);
+    ContainerScope scope(instanceId_);
+    bool ret = false;
+    taskExecutor->PostSyncTask(
+        [this, &ret, &viewData]() {
+            auto viewDataWrap = ViewDataWrap::CreateViewDataWrap();
+            CHECK_NULL_VOID(viewDataWrap);
+            ret = DumpViewData(nullptr, viewDataWrap);
+            auto viewDataWrapOhos = AceType::DynamicCast<ViewDataWrapOhos>(viewDataWrap);
+            CHECK_NULL_VOID(viewDataWrapOhos);
+            viewData = viewDataWrapOhos->GetViewData();
+        },
+        TaskExecutor::TaskType::UI);
+
+    TAG_LOGI(AceLogTag::ACE_AUTO_FILL, "UIContentImpl DumpViewData, ret is %{public}d", ret);
+    return ret;
+}
+
+bool UIContentImpl::DumpViewData(const RefPtr<NG::FrameNode>& node, RefPtr<ViewDataWrap> viewDataWrap)
+{
+    CHECK_NULL_RETURN(viewDataWrap, false);
+    auto context = context_.lock();
+    auto abilityContext = OHOS::AbilityRuntime::Context::ConvertTo<OHOS::AbilityRuntime::AbilityContext>(context);
+    std::shared_ptr<OHOS::AppExecFwk::AbilityInfo> info;
+    if (abilityContext) {
+        info = abilityContext->GetAbilityInfo();
+    } else {
+        auto extensionContext =
+            OHOS::AbilityRuntime::Context::ConvertTo<OHOS::AbilityRuntime::ExtensionContext>(context);
+        if (extensionContext) {
+            info = extensionContext->GetAbilityInfo();
+        } else {
+            TAG_LOGE(AceLogTag::ACE_AUTO_FILL, "context is not AbilityContext or ExtensionContext.");
+            return false;
+        }
+    }
+    CHECK_NULL_RETURN(info, false);
+    viewDataWrap->SetAbilityName(info->name);
+    viewDataWrap->SetModuleName(info->moduleName);
+    viewDataWrap->SetBundleName(info->bundleName);
+    TAG_LOGI(AceLogTag::ACE_AUTO_FILL, "bundleName=[%{private}s], moduleName=[%{private}s], abilityName=[%{private}s]",
+        info->bundleName.c_str(), info->moduleName.c_str(), info->name.c_str());
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    CHECK_NULL_RETURN(container, false);
+    auto pipelineContext = AceType::DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
+    CHECK_NULL_RETURN(pipelineContext, false);
+    return pipelineContext->DumpPageViewData(node, viewDataWrap);
+}
+
+void UIContentImpl::ProcessFormVisibleChange(bool isVisible)
+{
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    CHECK_NULL_VOID(container);
+    ContainerScope scope(instanceId_);
+    auto taskExecutor = Container::CurrentTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    taskExecutor->PostTask(
+        [container, isVisible]() {
+            auto pipeline = AceType::DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
+            CHECK_NULL_VOID(pipeline);
+            pipeline->HandleFormVisibleChangeEvent(isVisible);
+        },
+        TaskExecutor::TaskType::UI);
+}
+
+void UIContentImpl::SearchElementInfoByAccessibilityId(
+    int32_t elementId, int32_t mode,
+    int32_t baseParent, std::list<Accessibility::AccessibilityElementInfo>& output)
+{
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    CHECK_NULL_VOID(container);
+    container->SearchElementInfoByAccessibilityIdNG(elementId, mode, baseParent, output);
+}
+
+void UIContentImpl::SearchElementInfosByText(
+    int32_t elementId, const std::string& text, int32_t baseParent,
+    std::list<Accessibility::AccessibilityElementInfo>& output)
+{
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    CHECK_NULL_VOID(container);
+    container->SearchElementInfosByTextNG(elementId, text, baseParent, output);
+}
+
+void UIContentImpl::FindFocusedElementInfo(
+    int32_t elementId, int32_t focusType,
+    int32_t baseParent, Accessibility::AccessibilityElementInfo& output)
+{
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    CHECK_NULL_VOID(container);
+    container->FindFocusedElementInfoNG(elementId, focusType, baseParent, output);
+}
+
+void UIContentImpl::FocusMoveSearch(
+    int32_t elementId, int32_t direction,
+    int32_t baseParent, Accessibility::AccessibilityElementInfo& output)
+{
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    CHECK_NULL_VOID(container);
+    container->FocusMoveSearchNG(elementId, direction, baseParent, output);
+}
+
+bool UIContentImpl::NotifyExecuteAction(
+    int32_t elementId, const std::map<std::string, std::string>& actionArguments, int32_t action, int32_t offset)
+{
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    CHECK_NULL_RETURN(container, false);
+    return container->NotifyExecuteAction(elementId, actionArguments, action, offset);
+}
+
+std::string UIContentImpl::RecycleForm()
+{
+    LOGD("UIContentImpl: RecycleForm");
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    std::string statusData;
+    CHECK_NULL_RETURN(container, statusData);
+    auto pipeline = container->GetPipelineContext();
+    CHECK_NULL_RETURN(pipeline, statusData);
+    return pipeline->OnFormRecycle();
+}
+
+void UIContentImpl::RecoverForm(const std::string& statusData)
+{
+    LOGD("UIContentImpl: RecoverForm");
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    CHECK_NULL_VOID(container);
+    auto pipeline = container->GetPipelineContext();
+    CHECK_NULL_VOID(pipeline);
+    return pipeline->OnFormRecover(statusData);
 }
 } // namespace OHOS::Ace

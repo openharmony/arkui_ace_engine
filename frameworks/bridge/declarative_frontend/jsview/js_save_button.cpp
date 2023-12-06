@@ -95,10 +95,10 @@ void JsSaveButtonClickFunction::Execute(GestureEvent& info)
     JSRef<JSObject> clickEventParam = JSRef<JSObject>::New();
     Offset globalOffset = info.GetGlobalLocation();
     Offset localOffset = info.GetLocalLocation();
-    clickEventParam->SetProperty<double>("screenX", SystemProperties::Px2Vp(globalOffset.GetX()));
-    clickEventParam->SetProperty<double>("screenY", SystemProperties::Px2Vp(globalOffset.GetY()));
-    clickEventParam->SetProperty<double>("x", SystemProperties::Px2Vp(localOffset.GetX()));
-    clickEventParam->SetProperty<double>("y", SystemProperties::Px2Vp(localOffset.GetY()));
+    clickEventParam->SetProperty<double>("screenX", PipelineBase::Px2VpWithCurrentDensity(globalOffset.GetX()));
+    clickEventParam->SetProperty<double>("screenY", PipelineBase::Px2VpWithCurrentDensity(globalOffset.GetY()));
+    clickEventParam->SetProperty<double>("x", PipelineBase::Px2VpWithCurrentDensity(localOffset.GetX()));
+    clickEventParam->SetProperty<double>("y", PipelineBase::Px2VpWithCurrentDensity(localOffset.GetY()));
     clickEventParam->SetProperty<double>("timestamp",
         static_cast<double>(info.GetTimeStamp().time_since_epoch().count()));
     clickEventParam->SetProperty<double>("source", static_cast<int32_t>(info.GetSourceDevice()));
@@ -166,9 +166,11 @@ void JSSaveButton::JSBind(BindingTarget globalObj)
     JSClass<JSSaveButton>::StaticMethod("markAnchor", &JSViewAbstract::JsMarkAnchor);
     JSClass<JSSaveButton>::StaticMethod("offset", &JSViewAbstract::JsOffset);
     JSClass<JSSaveButton>::StaticMethod("pop", &JSViewAbstract::Pop, opt);
-#if defined(PREVIEW)
+    JSClass<JSSaveButton>::StaticMethod("width", &JSViewAbstract::JsWidth);
+    JSClass<JSSaveButton>::StaticMethod("height", &JSViewAbstract::JsHeight);
+    JSClass<JSSaveButton>::StaticMethod("size", &JSViewAbstract::JsSize);
+    JSClass<JSSaveButton>::StaticMethod("constraintSize", &JSViewAbstract::JsConstraintSize);
     JSClass<JSSaveButton>::StaticMethod("debugLine", &JSViewAbstract::JsDebugLine);
-#endif
     JSClass<JSSaveButton>::Bind<>(globalObj);
 }
 } // namespace OHOS::Ace::Framework

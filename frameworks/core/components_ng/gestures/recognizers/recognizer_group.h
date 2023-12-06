@@ -32,18 +32,18 @@ public:
     explicit RecognizerGroup(const std::vector<RefPtr<NGGestureRecognizer>>& recognizers)
     {
         for (const auto& recognizer : recognizers) {
-            if (recognizer) {
-                recognizer->SetGestureGroup(AceType::WeakClaim(this));
+            if (recognizer && recognizer->SetGestureGroup(AceType::WeakClaim(this))) {
                 recognizers_.emplace_back(recognizer);
             }
         }
     }
 
-    explicit RecognizerGroup(std::list<RefPtr<NGGestureRecognizer>>&& recognizers) : recognizers_(std::move(recognizers))
+    explicit RecognizerGroup(std::list<RefPtr<NGGestureRecognizer>>&& recognizers)
     {
-        for (const auto& recognizer : recognizers_) {
-            if (recognizer) {
-                recognizer->SetGestureGroup(AceType::WeakClaim(this));
+        recognizers_.clear();
+        for (const auto& recognizer : recognizers) {
+            if (recognizer && recognizer->SetGestureGroup(AceType::WeakClaim(this))) {
+                recognizers_.emplace_back(recognizer);
             }
         }
     }
@@ -61,7 +61,77 @@ public:
     {
         remainChildOnResetStatus_ = true;
     }
+
+    void AssignNodeId(int id) override
+    {
+        if (nodeId_ != -1) {
+            return;
+        }
+
+        TouchEventTarget::AssignNodeId(id);
+        auto recognizers = GetGroupRecognizer();
+        for (const auto& recognizer : recognizers) {
+            recognizer->AssignNodeId(id);
+        }
+    }
+
+    void AttachFrameNode(const WeakPtr<NG::FrameNode>& node) override
+    {
+        TouchEventTarget::AttachFrameNode(node);
+        auto recognizers = GetGroupRecognizer();
+        for (const auto& recognizer : recognizers) {
+            recognizer->AttachFrameNode(node);
+        }
+    }
+
     const std::list<RefPtr<NGGestureRecognizer>>& GetGroupRecognizer();
+
+    Axis GetAxisDirection() override
+    {
+        uint8_t horizontalFlag = 0;
+        uint8_t verticalFlag = 0;
+        uint8_t freeFlag = 0;
+        for (const auto& recognizer : recognizers_) {
+            if (!recognizer) {
+                continue;
+            }
+            auto direction = recognizer->GetAxisDirection();
+            switch (direction) {
+                case Axis::HORIZONTAL:
+                    horizontalFlag = 0x1;
+                    break;
+                case Axis::VERTICAL:
+                    verticalFlag = 0x2;
+                    break;
+                case Axis::FREE:
+                    freeFlag = 0x3;
+                    break;
+                default:
+                    break;
+            }
+        }
+        uint8_t directionFlag = horizontalFlag | verticalFlag | freeFlag;
+        switch (directionFlag) {
+            case 0x1:
+                return Axis::HORIZONTAL;
+            case 0x2:
+                return Axis::VERTICAL;
+            case 0x3:
+                return Axis::FREE;
+            default:
+                return Axis::NONE;
+        }
+    }
+
+    void SetChildrenTargetComponent(const RefPtr<TargetComponent>& targetComponent)
+    {
+        for (const auto& child : recognizers_) {
+            if (child) {
+                child->SetTargetComponent(targetComponent);
+            }
+        }
+    }
+
 protected:
     void OnBeginGestureReferee(int32_t touchId, bool needUpdateChild = false) override;
     void OnFinishGestureReferee(int32_t touchId, bool isBlocked = false) override;

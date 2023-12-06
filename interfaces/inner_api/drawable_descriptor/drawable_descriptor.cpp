@@ -19,12 +19,10 @@
 #include <memory>
 #include <string>
 
-#include "base/utils/string_utils.h"
-
-#ifdef NEW_SKIA
+#include "third_party/cJSON/cJSON.h"
 #include "include/core/SkSamplingOptions.h"
-#endif
-#include "cJSON.h"
+
+#include "base/utils/string_utils.h"
 #ifndef PREVIEW
 #include "image_source.h"
 #endif
@@ -34,8 +32,8 @@
 // 区分此函数是在Windows环境调用还是Linux/mac环境调用
 #ifdef PREVIEW
 #ifdef WINDOWS_PLATFORM
-#include <windows.h>
 #include <direct.h>
+#include <windows.h>
 #elif defined(MAC_PLATFORM)
 #include <mach-o/dyld.h>
 #else
@@ -110,11 +108,13 @@ std::unique_ptr<Media::ImageSource> LayeredDrawableDescriptor::CreateImageSource
         return nullptr;
     }
 
-    size_t len = 0;
     std::unique_ptr<uint8_t[]> data;
-    auto state = resourceMgr_->GetMediaDataById(static_cast<uint32_t>(std::stoul(idStr)), len, data);
+    std::tuple<std::string, size_t, std::string> info;
+    auto state = resourceMgr_->GetDrawableInfoById(static_cast<uint32_t>(std::stoul(idStr)), info, data, iconType_,
+        density_);
+    size_t len = std::get<1>(info);
     if (state != Global::Resource::SUCCESS) {
-        HILOG_ERROR("GetMediaDataById failed");
+        HILOG_ERROR("GetDrawableInfoById failed");
         return nullptr;
     }
 
@@ -139,6 +139,7 @@ bool LayeredDrawableDescriptor::GetPixelMapFromJsonBuf(bool isBackground)
         item = cJSON_GetObjectItem(roots->child, DRAWABLEDESCRIPTOR_JSON_KEY_FOREGROUND);
     }
     if (item == nullptr) {
+        cJSON_Delete(roots);
         HILOG_ERROR("GetObjectItem from json buffer failed");
         return false;
     }
@@ -147,6 +148,7 @@ bool LayeredDrawableDescriptor::GetPixelMapFromJsonBuf(bool isBackground)
         std::unique_ptr<Media::ImageSource> imageSource =
             LayeredDrawableDescriptor::CreateImageSource(item->valuestring, errorCode);
         if (errorCode != 0) {
+            cJSON_Delete(roots);
             HILOG_ERROR("CreateImageSource from json buffer failed");
             return false;
         }
@@ -155,6 +157,7 @@ bool LayeredDrawableDescriptor::GetPixelMapFromJsonBuf(bool isBackground)
         if (imageSource) {
             auto pixelMapPtr = imageSource->CreatePixelMap(decodeOpts, errorCode);
             if (errorCode != 0) {
+                cJSON_Delete(roots);
                 HILOG_ERROR("Get PixelMap from json buffer failed");
                 return false;
             }
@@ -166,9 +169,11 @@ bool LayeredDrawableDescriptor::GetPixelMapFromJsonBuf(bool isBackground)
             }
         }
     } else {
+        cJSON_Delete(roots);
         HILOG_ERROR("Get background from json buffer failed");
         return false;
     }
+    cJSON_Delete(roots);
     return true;
 #else
     return false;
@@ -185,6 +190,47 @@ bool LayeredDrawableDescriptor::GetDefaultMask()
     uint32_t errorCode = 0;
     std::unique_ptr<Media::ImageSource> imageSource =
         Media::ImageSource::CreateImageSource(data.get(), len, opts, errorCode);
+    Media::DecodeOptions decodeOpts;
+    decodeOpts.desiredPixelFormat = Media::PixelFormat::BGRA_8888;
+    if (imageSource) {
+        auto pixelMapPtr = imageSource->CreatePixelMap(decodeOpts, errorCode);
+        mask_ = std::shared_ptr<Media::PixelMap>(pixelMapPtr.release());
+    }
+    if (errorCode != 0 || !mask_) {
+        HILOG_ERROR("Get mask failed");
+        return false;
+    }
+    return true;
+}
+
+void LayeredDrawableDescriptor::SetMaskPath(std::string& path)
+{
+    HILOG_DEBUG("SetMaskPath:%{public}s", path.c_str());
+    maskPath_ = path;
+}
+
+void LayeredDrawableDescriptor::SetIconType(uint32_t iconType)
+{
+    HILOG_DEBUG("SetIconType");
+    iconType_ = iconType;
+}
+
+void LayeredDrawableDescriptor::SetDensity(uint32_t density)
+{
+    HILOG_DEBUG("SetDensity");
+    density_ = density;
+}
+
+bool LayeredDrawableDescriptor::GetMaskByPath()
+{
+    if (maskPath_.empty()) {
+        HILOG_DEBUG("maskPath is null");
+        return false;
+    }
+    Media::SourceOptions opts;
+    uint32_t errorCode = 0;
+    std::unique_ptr<Media::ImageSource> imageSource =
+        Media::ImageSource::CreateImageSource(maskPath_, opts, errorCode);
     Media::DecodeOptions decodeOpts;
     decodeOpts.desiredPixelFormat = Media::PixelFormat::BGRA_8888;
     if (imageSource) {
@@ -253,6 +299,10 @@ std::unique_ptr<DrawableDescriptor> LayeredDrawableDescriptor::GetMask()
         return std::make_unique<DrawableDescriptor>(mask_.value());
     }
 
+    if (GetMaskByPath()) {
+        return std::make_unique<DrawableDescriptor>(mask_.value());
+    }
+
     if (GetDefaultMask()) {
         return std::make_unique<DrawableDescriptor>(mask_.value());
     }
@@ -261,6 +311,7 @@ std::unique_ptr<DrawableDescriptor> LayeredDrawableDescriptor::GetMask()
     return nullptr;
 }
 
+#ifndef USE_ROSEN_DRAWING
 void LayeredDrawableDescriptor::DrawOntoCanvas(
     const std::shared_ptr<SkBitmap>& bitMap, float width, float height, SkCanvas& canvas, const SkPaint& paint)
 {
@@ -268,14 +319,26 @@ void LayeredDrawableDescriptor::DrawOntoCanvas(
     auto y = static_cast<float>((bitMap->height() - static_cast<float>(height)) / 2);
     auto rect1 = SkRect::MakeXYWH(x, y, static_cast<float>(width), static_cast<float>(width));
     auto rect2 = SkRect::MakeWH(static_cast<float>(width), static_cast<float>(width));
-#ifndef NEW_SKIA
-    canvas.drawImageRect(SkImage::MakeFromBitmap(*bitMap), rect1, rect2, &paint);
-#else
+
     canvas.drawImageRect(
         SkImage::MakeFromBitmap(*bitMap), rect1, rect2, SkSamplingOptions(), &paint, SkCanvas::kFast_SrcRectConstraint);
-#endif
 }
+#else
+void LayeredDrawableDescriptor::DrawOntoCanvas(
+    const std::shared_ptr<Rosen::Drawing::Bitmap>& bitMap, float width, float height, Rosen::Drawing::Canvas& canvas)
+{
+    auto x = static_cast<float>((bitMap->GetWidth() - static_cast<float>(width)) / 2);
+    auto y = static_cast<float>((bitMap->GetHeight() - static_cast<float>(height)) / 2);
+    Rosen::Drawing::Rect rect1(x, y, static_cast<float>(width) + x, static_cast<float>(width) + y);
+    Rosen::Drawing::Rect rect2(0, 0, static_cast<float>(width), static_cast<float>(width));
+    Rosen::Drawing::Image image;
+    image.BuildFromBitmap(*bitMap);
+    canvas.DrawImageRect(image, rect1, rect2, Rosen::Drawing::SamplingOptions(),
+        Rosen::Drawing::SrcRectConstraint::FAST_SRC_RECT_CONSTRAINT);
+}
+#endif
 
+#ifndef USE_ROSEN_DRAWING
 bool LayeredDrawableDescriptor::CreatePixelMap()
 {
     std::shared_ptr<SkBitmap> foreground;
@@ -300,6 +363,8 @@ bool LayeredDrawableDescriptor::CreatePixelMap()
 
     std::shared_ptr<SkBitmap> mask;
     if (mask_.has_value()) {
+        mask = ImageConverter::PixelMapToBitmap(mask_.value());
+    } else if (GetMaskByPath()) {
         mask = ImageConverter::PixelMapToBitmap(mask_.value());
     } else if (GetDefaultMask()) {
         mask = ImageConverter::PixelMapToBitmap(mask_.value());
@@ -332,6 +397,65 @@ bool LayeredDrawableDescriptor::CreatePixelMap()
     layeredPixelMap_ = ImageConverter::BitmapToPixelMap(std::make_shared<SkBitmap>(tempCache), opts);
     return true;
 }
+#else
+bool LayeredDrawableDescriptor::CreatePixelMap()
+{
+    std::shared_ptr<Rosen::Drawing::Bitmap> foreground;
+    if (foreground_.has_value() || GetPixelMapFromJsonBuf(false)) {
+        foreground = ImageConverter::PixelMapToBitmap(foreground_.value());
+    } else {
+        HILOG_INFO("Get pixelMap of foreground failed.");
+        return false;
+    }
+
+    std::shared_ptr<Rosen::Drawing::Bitmap> background;
+    if (background_.has_value() || GetPixelMapFromJsonBuf(true)) {
+        background = ImageConverter::PixelMapToBitmap(background_.value());
+    } else {
+        HILOG_ERROR("Get pixelMap of background failed.");
+        return false;
+    }
+
+    std::shared_ptr<Rosen::Drawing::Bitmap> mask;
+    if (mask_.has_value() || GetMaskByPath() || GetDefaultMask()) {
+        mask = ImageConverter::PixelMapToBitmap(mask_.value());
+    } else {
+        HILOG_ERROR("Get pixelMap of mask failed.");
+        return false;
+    }
+
+    Rosen::Drawing::Brush brush;
+    brush.SetAntiAlias(true);
+    auto colorType = ImageConverter::PixelFormatToColorType(background_.value()->GetPixelFormat());
+    auto alphaType = ImageConverter::AlphaTypeToAlphaType(background_.value()->GetAlphaType());
+    Rosen::Drawing::ImageInfo imageInfo(SIDE, SIDE, colorType, alphaType);
+    Rosen::Drawing::Bitmap tempCache;
+    tempCache.Build(imageInfo);
+    Rosen::Drawing::Canvas bitmapCanvas;
+    bitmapCanvas.Bind(tempCache);
+
+    brush.SetBlendMode(Rosen::Drawing::BlendMode::SRC);
+    bitmapCanvas.AttachBrush(brush);
+    DrawOntoCanvas(background, SIDE, SIDE, bitmapCanvas);
+    bitmapCanvas.DetachBrush();
+    brush.SetBlendMode(Rosen::Drawing::BlendMode::DST_ATOP);
+    bitmapCanvas.AttachBrush(brush);
+    DrawOntoCanvas(mask, SIDE, SIDE, bitmapCanvas);
+    bitmapCanvas.DetachBrush();
+    brush.SetBlendMode(Rosen::Drawing::BlendMode::SRC_ATOP);
+    bitmapCanvas.AttachBrush(brush);
+    DrawOntoCanvas(foreground, SIDE, SIDE, bitmapCanvas);
+    bitmapCanvas.DetachBrush();
+    bitmapCanvas.ReadPixels(imageInfo, tempCache.GetPixels(), tempCache.GetRowBytes(), 0, 0);
+
+    // convert bitmap back to pixelMap
+    Media::InitializationOptions opts;
+    opts.alphaType = background_.value()->GetAlphaType();
+    opts.pixelFormat = Media::PixelFormat::BGRA_8888;
+    layeredPixelMap_ = ImageConverter::BitmapToPixelMap(std::make_shared<Rosen::Drawing::Bitmap>(tempCache), opts);
+    return true;
+}
+#endif
 
 std::shared_ptr<Media::PixelMap> LayeredDrawableDescriptor::GetPixelMap()
 {
@@ -355,14 +479,14 @@ std::string LayeredDrawableDescriptor::GetStaticMaskClipPath()
 #ifdef PREVIEW
     std::string pathTmp = "";
 #ifdef WINDOWS_PLATFORM
-    char pathBuf [MAX_PATH];
+    char pathBuf[MAX_PATH];
     _getcwd(pathBuf, MAX_PATH);
     pathTmp = pathBuf;
 #elif defined(MAC_PLATFORM)
     uint32_t size = 0;
     _NSGetExecutablePath(nullptr, &size);
 
-    char pathBuf [size + 1];
+    char pathBuf[size + 1];
     if (_NSGetExecutablePath(pathBuf, &size) != 0) {
         pathBuf[0] = '\0';
         HILOG_ERROR("Failed, buffer too small!");
@@ -373,7 +497,7 @@ std::string LayeredDrawableDescriptor::GetStaticMaskClipPath()
     size_t lastPathIdx = previewFullPath.find_last_of("\\/");
     pathTmp = (lastPathIdx != std::string::npos) ? previewFullPath.substr(0, lastPathIdx) : "";
 #else
-    char pathBuf [MAX_PATH_LEN];
+    char pathBuf[MAX_PATH_LEN];
     readlink("/proc/self/exe", pathBuf, MAX_PATH_LEN);
     pathTmp = pathBuf;
 #endif

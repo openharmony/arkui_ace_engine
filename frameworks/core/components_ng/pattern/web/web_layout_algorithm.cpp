@@ -25,6 +25,9 @@
 #include "core/components_ng/property/measure_utils.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
+constexpr int32_t MAX_TEXTURE_SIZE = 16000;
+constexpr int32_t MAX_SURFACE_SIZE = 8000;
+
 namespace OHOS::Ace::NG {
 WebLayoutAlgorithm::WebLayoutAlgorithm() = default;
 
@@ -34,5 +37,36 @@ std::optional<SizeF> WebLayoutAlgorithm::MeasureContent(
     auto layoutSize = contentConstraint.selfIdealSize.IsValid() ? contentConstraint.selfIdealSize.ConvertToSizeT()
                                                                 : contentConstraint.maxSize;
     return layoutSize;
+}
+
+void WebLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
+{
+    CHECK_NULL_VOID(layoutWrapper);
+    auto host = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(host);
+    auto pattern = DynamicCast<WebPattern>(host->GetPattern());
+    CHECK_NULL_VOID(pattern);
+    int rootLayerWidth = pattern->GetRootLayerWidth();
+    int rootLayerHeight = pattern->GetRootLayerHeight();
+    auto type = pattern->GetWebType();
+    if (pattern->GetLayoutMode() == WebLayoutMode::FIT_CONTENT && IsValidRootLayer(rootLayerWidth, type) &&
+        IsValidRootLayer(rootLayerHeight, type)) {
+        TAG_LOGD(AceLogTag::ACE_WEB, "RootLayerWidth = %{public}d, RootLayerHeight = %{public}d", rootLayerWidth,
+            rootLayerHeight);
+        layoutWrapper->GetGeometryNode()->SetFrameSize(SizeF(rootLayerWidth, rootLayerHeight));
+    } else {
+        BoxLayoutAlgorithm::Measure(layoutWrapper);
+    }
+}
+
+bool WebLayoutAlgorithm::IsValidRootLayer(int32_t x, WebType type)
+{
+    int32_t maxSize = 0;
+    if (type == WebType::TEXTURE) {
+        maxSize = MAX_TEXTURE_SIZE;
+    } else {
+        maxSize = MAX_SURFACE_SIZE;
+    }
+    return x > 0 && x <= maxSize;
 }
 } // namespace OHOS::Ace::NG

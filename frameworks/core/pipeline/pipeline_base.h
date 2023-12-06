@@ -34,12 +34,14 @@
 #include "core/accessibility/accessibility_manager.h"
 #include "core/animation/schedule_task.h"
 #include "core/common/clipboard/clipboard_proxy.h"
+#include "core/common/display_info.h"
 #include "core/common/draw_delegate.h"
 #include "core/common/event_manager.h"
 #include "core/common/platform_bridge.h"
 #include "core/common/platform_res_register.h"
 #include "core/common/thread_checker.h"
 #include "core/common/window_animation_config.h"
+#include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/animation_option.h"
 #include "core/components/theme/theme_manager.h"
 #include "core/components_ng/property/safe_area_insets.h"
@@ -48,9 +50,11 @@
 #include "core/event/mouse_event.h"
 #include "core/event/rotation_event.h"
 #include "core/event/touch_event.h"
+#include "core/event/pointer_event.h"
 #include "core/gestures/gesture_info.h"
 #include "core/image/image_cache.h"
 #include "core/pipeline/container_window_manager.h"
+#include "core/components_ng/manager/display_sync/ui_display_sync_manager.h"
 
 namespace OHOS::Rosen {
 class RSTransaction;
@@ -101,11 +105,34 @@ public:
 
     static RefPtr<PipelineBase> GetCurrentContext();
 
+    static RefPtr<PipelineBase> GetMainPipelineContext();
+
     static RefPtr<ThemeManager> CurrentThemeManager();
+
+    static void SetCallBackNode(const WeakPtr<NG::FrameNode>& node);
+
+    /*
+     * Change px to vp with density of current pipeline
+     */
+    static double Px2VpWithCurrentDensity(double px);
+
+    /*
+     * Change vp to px with density of current pipeline
+     */
+    static double Vp2PxWithCurrentDensity(double vp);
+
+    /*
+     * Get density of current pipeline if valid, or return density of default display
+     */
+    static double GetCurrentDensity();
 
     virtual void SetupRootElement() = 0;
 
     virtual uint64_t GetTimeFromExternalTimer();
+
+    virtual bool NeedSoftKeyboard() = 0;
+
+    virtual void SetOnWindowFocused(const std::function<void()>& callback) = 0;
 
     bool Animate(const AnimationOption& option, const RefPtr<Curve>& curve,
         const std::function<void()>& propertyCallback, const std::function<void()>& finishCallBack = nullptr);
@@ -118,7 +145,7 @@ public:
     void PrepareOpenImplicitAnimation();
 
     void OpenImplicitAnimation(const AnimationOption& option, const RefPtr<Curve>& curve,
-        const std::function<void()>& finishCallBack = nullptr);
+        const std::function<void()>& finishCallback = nullptr);
 
     void PrepareCloseImplicitAnimation();
 
@@ -155,12 +182,14 @@ public:
     virtual void OnVsyncEvent(uint64_t nanoTimestamp, uint32_t frameCount);
 
     // Called by view
-    virtual void OnDragEvent(int32_t x, int32_t y, DragEventAction action) = 0;
+    virtual void OnDragEvent(const PointerEvent& pointerEvent, DragEventAction action) = 0;
 
     // Called by view when idle event.
     virtual void OnIdle(int64_t deadline) = 0;
 
     virtual void SetBuildAfterCallback(const std::function<void()>& callback) = 0;
+
+    virtual void DispatchDisplaySync(uint64_t nanoTimestamp) = 0;
 
     virtual void FlushAnimation(uint64_t nanoTimestamp) = 0;
 
@@ -182,7 +211,9 @@ public:
 
     virtual void WindowFocus(bool isFocus) = 0;
 
-    virtual void ShowContainerTitle(bool isShow, bool hasDeco = true) = 0;
+    virtual void ContainerModalUnFocus() = 0;
+
+    virtual void ShowContainerTitle(bool isShow, bool hasDeco = true, bool needUpdate = false) = 0;
 
     virtual void OnSurfaceChanged(int32_t width, int32_t height,
         WindowSizeChangeReason type = WindowSizeChangeReason::UNDEFINED,
@@ -436,6 +467,16 @@ public:
         return sharedImageManager_;
     }
 
+    const RefPtr<UIDisplaySyncManager>& GetOrCreateUIDisplaySyncManager()
+    {
+        std::call_once(displaySyncFlag_, [this]() {
+            if (!uiDisplaySyncManager_) {
+                uiDisplaySyncManager_ = MakeRefPtr<UIDisplaySyncManager>();
+            }
+        });
+        return uiDisplaySyncManager_;
+    }
+
     Window* GetWindow()
     {
         return window_.get();
@@ -503,6 +544,17 @@ public:
         return {};
     }
 
+    template<typename T>
+    bool GetDraggable()
+    {
+        if (IsJsCard()) {
+            return false;
+        }
+        auto theme = GetTheme<T>();
+        CHECK_NULL_RETURN(theme, false);
+        return theme->GetDraggable();
+    }
+
     const RefPtr<ManagerInterface>& GetTextFieldManager()
     {
         return textFieldManager_;
@@ -550,6 +602,11 @@ public:
     bool IsJsCard() const
     {
         return isJsCard_;
+    }
+
+    bool IsJsPlugin() const
+    {
+        return isJsPlugin_;
     }
 
     void SetIsFormRender(bool isEtsCard)
@@ -710,6 +767,17 @@ public:
 
     void OnVirtualKeyboardAreaChange(
         Rect keyboardArea, const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr);
+    void OnVirtualKeyboardAreaChange(
+        Rect keyboardArea, double positionY, double height,
+        const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr);
+
+    void OnFoldStatusChanged(FoldStatus foldStatus);
+
+    using foldStatusChangedCallback = std::function<bool(FoldStatus)>;
+    void SetFoldStatusChangeCallback(foldStatusChangedCallback&& listener)
+    {
+        foldStatusChangedCallback_.emplace_back(std::move(listener));
+    }
 
     using virtualKeyBoardCallback = std::function<bool(int32_t, int32_t, double)>;
     void SetVirtualKeyBoardCallback(virtualKeyBoardCallback&& listener)
@@ -763,6 +831,12 @@ public:
     virtual void UpdateSystemSafeArea(const SafeAreaInsets& systemSafeArea) {}
 
     virtual void UpdateCutoutSafeArea(const SafeAreaInsets& cutoutSafeArea) {}
+
+    virtual void SetEnableKeyBoardAvoidMode(bool value) {}
+
+    virtual bool IsEnableKeyBoardAvoidMode() {
+        return false;
+    }
 
     void SetPluginOffset(const Offset& offset)
     {
@@ -864,7 +938,9 @@ public:
     void RemoveJsFormVsyncCallback(int32_t subWindowId);
 
     virtual void SetIsLayoutFullScreen(bool isLayoutFullScreen) {}
+    virtual void SetIsNeedAvoidWindow(bool isLayoutFullScreen) {}
     virtual void SetIgnoreViewSafeArea(bool ignoreViewSafeArea) {}
+    virtual void OnFoldStatusChange(FoldStatus foldStatus) {}
 
     void SetIsAppWindow(bool isAppWindow)
     {
@@ -876,14 +952,34 @@ public:
         return isAppWindow_;
     }
 
-    void SetEnableImplicitAnimation(bool enableImplicitAnimation)
+    void SetFormAnimationStartTime(int64_t time)
     {
-        enableImplicitAnimation_ = enableImplicitAnimation;
+        formAnimationStartTime_ = time;
     }
 
-    bool GetEnableImplicitAnimation() const
+    int64_t GetFormAnimationStartTime() const
     {
-        return enableImplicitAnimation_;
+        return formAnimationStartTime_;
+    }
+
+    void SetIsFormAnimation(bool isFormAnimation)
+    {
+        isFormAnimation_ = isFormAnimation;
+    }
+
+    bool IsFormAnimation() const
+    {
+        return isFormAnimation_;
+    }
+
+    void SetFormAnimationFinishCallback(bool isFormAnimationFinishCallback)
+    {
+        isFormAnimationFinishCallback_ = isFormAnimationFinishCallback;
+    }
+
+    bool IsFormAnimationFinishCallback() const
+    {
+        return isFormAnimationFinishCallback_;
     }
 
     // restore
@@ -910,6 +1006,44 @@ public:
         return false;
     }
 
+    void SetHalfLeading(bool halfLeading)
+    {
+        halfLeading_ = halfLeading;
+    }
+
+    bool GetHalfLeading() const
+    {
+        return halfLeading_;
+    }
+
+    bool GetOnFoucs() const
+    {
+        return onFocus_;
+    }
+
+    virtual void UpdateCurrentActiveNode(const WeakPtr<NG::FrameNode>& node) {}
+
+    virtual std::string GetCurrentExtraInfo() { return ""; }
+    virtual void UpdateTitleInTargetPos(bool isShow = true, int32_t height = 0) {}
+
+    virtual void SetCursor(int32_t cursorValue) {}
+
+    virtual void RestoreDefault() {}
+
+    void SetOnFormRecycleCallback(std::function<std::string()>&& onFormRecycle)
+    {
+        onFormRecycle_ = std::move(onFormRecycle);
+    }
+
+    std::string OnFormRecycle();
+
+    void SetOnFormRecoverCallback(std::function<void(std::string)>&& onFormRecover)
+    {
+        onFormRecover_ = std::move(onFormRecover);
+    }
+
+    void OnFormRecover(const std::string& statusData);
+
 protected:
     virtual bool MaybeRelease() override;
     void TryCallNextFrameLayoutCallback()
@@ -932,6 +1066,10 @@ protected:
     virtual void OnVirtualKeyboardHeightChange(
         float keyboardHeight, const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr)
     {}
+    virtual void OnVirtualKeyboardHeightChange(
+        float keyboardHeight, double positionY, double height,
+        const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr)
+    {}
 
     void UpdateRootSizeAndScale(int32_t width, int32_t height);
 
@@ -940,8 +1078,11 @@ protected:
         isReloading_ = isReloading;
     }
 
+    std::function<void()> GetWrappedAnimationCallback(const std::function<void()>& finishCallback);
+
     std::list<configChangedCallback> configChangedCallback_;
     std::list<virtualKeyBoardCallback> virtualKeyBoardCallback_;
+    std::list<foldStatusChangedCallback> foldStatusChangedCallback_;
 
     bool isRebuildFinished_ = false;
     bool isJsCard_ = false;
@@ -951,6 +1092,7 @@ protected:
     bool isAppWindow_ = true;
     bool installationFree_ = false;
     bool isSubPipeline_ = false;
+    bool isReloading_ = false;
 
     bool isJsPlugin_ = false;
 
@@ -979,6 +1121,7 @@ protected:
     std::unique_ptr<DrawDelegate> drawDelegate_;
     std::stack<bool> pendingImplicitLayout_;
     std::stack<bool> pendingImplicitRender_;
+    std::stack<bool> pendingFrontendAnimation_;
     std::shared_ptr<Window> window_;
     RefPtr<TaskExecutor> taskExecutor_;
     RefPtr<AssetManager> assetManager_;
@@ -989,6 +1132,7 @@ protected:
     RefPtr<SharedImageManager> sharedImageManager_;
     mutable std::shared_mutex imageMtx_;
     mutable std::shared_mutex themeMtx_;
+    mutable std::mutex destructMutex_;
     RefPtr<ThemeManager> themeManager_;
     RefPtr<DataProviderManagerInterface> dataProviderManager_;
     RefPtr<FontManager> fontManager_;
@@ -1018,8 +1162,20 @@ protected:
     std::function<void()> nextFrameLayoutCallback_ = nullptr;
     SharePanelCallback sharePanelCallback_ = nullptr;
     std::atomic<bool> isForegroundCalled_ = false;
+    std::atomic<bool> onFocus_ = true;
     uint64_t lastTouchTime_ = 0;
     std::map<int32_t, std::string> formLinkInfoMap_;
+    struct FunctionHash {
+        std::size_t operator()(const std::shared_ptr<std::function<void()>>& functionPtr) const
+        {
+            return std::hash<std::function<void()>*>()(functionPtr.get());
+        }
+    };
+    std::function<std::string()> onFormRecycle_;
+    std::function<void(std::string)> onFormRecover_;
+
+    std::once_flag displaySyncFlag_;
+    RefPtr<UIDisplaySyncManager> uiDisplaySyncManager_;
 
 private:
     void DumpFrontend() const;
@@ -1038,8 +1194,11 @@ private:
     OnRouterChangeCallback onRouterChangeCallback_ = nullptr;
     PostRTTaskCallback postRTTaskCallback_;
     std::function<void(void)> gsVsyncCallback_;
-    bool enableImplicitAnimation_ = true;
-    bool isReloading_ = false;
+    std::unordered_set<std::shared_ptr<std::function<void()>>, FunctionHash> finishFunctions_;
+    bool isFormAnimationFinishCallback_ = false;
+    int64_t formAnimationStartTime_ = 0;
+    bool isFormAnimation_ = false;
+    bool halfLeading_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(PipelineBase);
 };

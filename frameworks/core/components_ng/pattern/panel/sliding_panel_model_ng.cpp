@@ -34,12 +34,15 @@ namespace OHOS::Ace::NG {
 
 namespace {
 const Dimension PANEL_RADIUS = 32.0_vp;
+constexpr Dimension BLANK_MIN_HEIGHT = 8.0_vp;
+constexpr double HALF_VALUS = 2.0;
 } // namespace
 
 void SlidingPanelModelNG::Create(bool isShow)
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
+    ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::PANEL_ETS_TAG, nodeId);
     auto panelNode = GetOrCreateSlidingPanelNode(
         V2::PANEL_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<SlidingPanelPattern>(); });
 
@@ -63,16 +66,22 @@ void SlidingPanelModelNG::Create(bool isShow)
     ACE_UPDATE_LAYOUT_PROPERTY(SlidingPanelLayoutProperty, IsShow, isShow);
 
     auto renderContext = columnNode->GetRenderContext();
+    auto panelRenderContext = panelNode->GetRenderContext();
+    CHECK_NULL_VOID(panelRenderContext);
     if (renderContext) {
         auto pipeline = PipelineContext::GetCurrentContext();
         CHECK_NULL_VOID(pipeline);
         auto dragBarTheme = pipeline->GetTheme<DragBarTheme>();
         CHECK_NULL_VOID(dragBarTheme);
         renderContext->UpdateBackgroundColor(dragBarTheme->GetPanelBgColor());
-        BorderRadiusProperty radius;
-        radius.radiusTopLeft = PANEL_RADIUS;
-        radius.radiusTopRight = PANEL_RADIUS;
-        renderContext->UpdateBorderRadius(radius);
+        if (!panelRenderContext->HasBorderRadius()) {
+            BorderRadiusProperty radius;
+            radius.radiusTopLeft = PANEL_RADIUS;
+            radius.radiusTopRight = PANEL_RADIUS;
+            renderContext->UpdateBorderRadius(radius);
+        } else {
+            renderContext->UpdateBorderRadius(panelRenderContext->GetBorderRadius().value());
+        }
         renderContext->UpdateClipEdge(true);
     }
 }
@@ -219,5 +228,81 @@ void SlidingPanelModelNG::SetModeChangeEvent(ChangeEvent&& modeChangeEvent)
     auto eventHub = frameNode->GetEventHub<SlidingPanelEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetModeChangeEvent(std::move(modeChangeEvent));
+}
+
+void SlidingPanelModelNG::SetPanelMode(FrameNode* frameNode, PanelMode mode)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(SlidingPanelLayoutProperty, PanelMode, mode, frameNode);
+}
+
+void SlidingPanelModelNG::SetPanelFullHeight(FrameNode* frameNode, const Dimension& fullHeight)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(SlidingPanelLayoutProperty, FullHeight, fullHeight, frameNode);
+}
+
+void SlidingPanelModelNG::SetPanelHalfHeight(FrameNode* frameNode, const Dimension& halfHeight)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(SlidingPanelLayoutProperty, HalfHeight, halfHeight, frameNode);
+}
+
+void SlidingPanelModelNG::SetPanelMiniHeight(FrameNode* frameNode, const Dimension& miniHeight)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(SlidingPanelLayoutProperty, MiniHeight, miniHeight, frameNode);
+}
+
+void SlidingPanelModelNG::SetPanelBackgroundMask(FrameNode* frameNode, const Color& backgroundMask)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(SlidingPanelLayoutProperty, BackgroundMask, backgroundMask, frameNode);
+}
+
+void SlidingPanelModelNG::SetPanelType(FrameNode* frameNode, PanelType type)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(SlidingPanelLayoutProperty, PanelType, type, frameNode);
+}
+
+void SlidingPanelModelNG::SetPanelCustomHeight(FrameNode* frameNode, const CalcDimension& customHeight)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(SlidingPanelLayoutProperty, CustomHeight, customHeight, frameNode);
+}
+
+void SlidingPanelModelNG::SetShowCloseIcon(FrameNode* frameNode, bool showCloseIcon)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(SlidingPanelLayoutProperty, ShowCloseIcon, showCloseIcon, frameNode);
+}
+
+void SlidingPanelModelNG::SetHasDragBar(FrameNode* frameNode, bool hasDragBar)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(SlidingPanelLayoutProperty, HasDragBar, hasDragBar, frameNode);
+}
+
+void SlidingPanelModelNG::SetIsShow(FrameNode* frameNode, bool isShow)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(SlidingPanelLayoutProperty, IsShow, isShow, frameNode);
+}
+
+void SlidingPanelModelNG::ResetPanelHalfHeight(FrameNode* frameNode)
+{
+    auto layoutProperty = frameNode->GetLayoutProperty<SlidingPanelLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    auto geometryNode = frameNode->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    auto frameSize = geometryNode->GetFrameSize();
+
+    auto halfHeight = layoutProperty->GetHalfHeight().value_or(
+        Dimension((frameSize.Height() - BLANK_MIN_HEIGHT.ConvertToPx()) / HALF_VALUS));
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(SlidingPanelLayoutProperty, HalfHeight, halfHeight, frameNode);
+}
+
+void SlidingPanelModelNG::ResetPanelFullHeight(FrameNode* frameNode)
+{
+    auto layoutProperty = frameNode->GetLayoutProperty<SlidingPanelLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    auto geometryNode = frameNode->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    auto frameSize = geometryNode->GetFrameSize();
+
+    auto fullHeight =
+        layoutProperty->GetFullHeight().value_or(Dimension(frameSize.Height() - BLANK_MIN_HEIGHT.ConvertToPx()));
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(SlidingPanelLayoutProperty, FullHeight, fullHeight, frameNode);
 }
 } // namespace OHOS::Ace::NG

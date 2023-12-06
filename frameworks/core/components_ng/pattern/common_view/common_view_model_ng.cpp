@@ -24,6 +24,7 @@ void CommonViewModelNG::Create()
 {
     auto* stack = ViewStackProcessor::GetInstance();
     int32_t nodeId = stack->ClaimNodeId();
+    ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::COMMON_VIEW_ETS_TAG, nodeId);
     auto blankNode = FrameNode::GetOrCreateFrameNode(
         V2::COMMON_VIEW_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<CommonViewPattern>(); });
     blankNode->GetLayoutProperty()->UpdateAlignment(Alignment::TOP_LEFT);

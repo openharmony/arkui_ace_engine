@@ -16,6 +16,7 @@
 #include "core/components_ng/gestures/recognizers/multi_fingers_recognizer.h"
 
 #include "base/memory/ace_type.h"
+#include "core/components_ng/gestures/recognizers/recognizer_group.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -31,15 +32,51 @@ MultiFingersRecognizer::MultiFingersRecognizer(int32_t fingers)
     }
 }
 
-void MultiFingersRecognizer::UpdateFingerListInfo(const Offset& coordinateOffset)
+void MultiFingersRecognizer::UpdateFingerListInfo()
 {
     fingerList_.clear();
     for (const auto& point : touchPoints_) {
-        Offset localLocation = point.second.GetOffset() - coordinateOffset;
-        FingerInfo fingerInfo = { point.first, point.second.GetOffset(), localLocation, point.second.sourceType,
-            point.second.sourceTool };
+        PointF localPoint(point.second.x, point.second.y);
+        NGGestureRecognizer::Transform(localPoint, GetAttachedNode());
+        FingerInfo fingerInfo = { point.first, point.second.GetOffset(),
+            Offset(localPoint.GetX(), localPoint.GetY()), point.second.sourceType, point.second.sourceTool };
         fingerList_.emplace_back(fingerInfo);
     }
 }
 
+bool MultiFingersRecognizer::IsNeedResetStatus()
+{
+    if (!touchPoints_.empty()) {
+        return false;
+    }
+
+    auto ref = AceType::Claim(this);
+    auto group = AceType::DynamicCast<RecognizerGroup>(ref);
+    if (!group) {
+        return true;
+    }
+
+    auto groupList = group->GetGroupRecognizer();
+    for (auto &recognizer : groupList) {
+        auto multiFingersRecognizer = AceType::DynamicCast<MultiFingersRecognizer>(recognizer);
+        if (!multiFingersRecognizer) {
+            continue;
+        }
+
+        if (!multiFingersRecognizer->IsNeedResetStatus()) {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+void MultiFingersRecognizer::OnFinishGestureReferee(int32_t touchId, bool isBlocked)
+{
+    touchPoints_.erase(touchId);
+    activeFingers_.remove(touchId);
+    if (IsNeedResetStatus()) {
+        ResetStatusOnFinish(isBlocked);
+    }
+}
 } // namespace OHOS::Ace::NG

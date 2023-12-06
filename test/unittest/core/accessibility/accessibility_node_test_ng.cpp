@@ -22,7 +22,7 @@
 #include "frameworks/core/accessibility/accessibility_utils.h"
 #include "core/common/container.h"
 #include "test/mock/core/common/mock_container.h"
-#include "core/pipeline_ng/test/mock/mock_pipeline_base.h"
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
 using namespace testing;
 using namespace testing::ext;
 
@@ -53,7 +53,7 @@ class AccessibilityNodeTestNg : public testing::Test {
 public:
     static void SetUpTestCase()
     {
-        MockPipelineBase::SetUp();
+        MockPipelineContext::SetUp();
         MockContainer::SetUp();
     };
     static void TearDownTestCase() {};
@@ -335,7 +335,7 @@ HWTEST_F(AccessibilityNodeTestNg, accessibilityNodeTest007, TestSize.Level1)
      * @tc.expected: the param focusChangeEventId_ in accessibilityNode is null.
      */
     marker.data_->eventId = std::to_string(id);
-    MockContainer::Current()->pipelineContext_ = MockPipelineBase::GetCurrent();
+    MockContainer::Current()->pipelineContext_ = MockPipelineContext::GetCurrent();
     accessibilityNode.SetFocusChangeEventMarker(marker);
     EXPECT_FALSE(accessibilityNode.focusChangeEventId_);
 }

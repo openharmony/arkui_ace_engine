@@ -15,8 +15,6 @@
 
 #include "frameworks/bridge/declarative_frontend/engine/functions/js_key_function.h"
 
-#include "base/log/log.h"
-
 namespace OHOS::Ace::Framework {
 
 JSRef<JSObject> JsKeyFunction::createKeyEvent(KeyEventInfo& event)

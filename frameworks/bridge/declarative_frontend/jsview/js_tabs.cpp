@@ -16,9 +16,11 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_tabs.h"
 
 #include "base/log/ace_scoring_log.h"
+#include "bridge/declarative_frontend/engine/functions/js_swiper_function.h"
 #include "bridge/declarative_frontend/jsview/js_tabs_controller.h"
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "bridge/declarative_frontend/jsview/models/tabs_model_impl.h"
+#include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/tabs/tabs_model_ng.h"
 
 namespace OHOS::Ace {
@@ -69,15 +71,17 @@ void JSTabs::SetOnChange(const JSCallbackInfo& info)
 
     auto changeHandler = AceType::MakeRefPtr<JsEventFunction<TabContentChangeEvent, 1>>(
         JSRef<JSFunc>::Cast(info[0]), TabContentChangeEventToJSValue);
-    auto onChange = [executionContext = info.GetExecutionContext(), func = std::move(changeHandler)](
+    WeakPtr<NG::FrameNode> targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto onChange = [executionContext = info.GetExecutionContext(), func = std::move(changeHandler), node = targetNode](
                         const BaseEventInfo* info) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext);
         const auto* tabsInfo = TypeInfoHelper::DynamicCast<TabContentChangeEvent>(info);
         if (!tabsInfo) {
-            LOGE("SetOnChange tabsInfo is nullptr");
+            TAG_LOGW(AceLogTag::ACE_TABS, "Tabs onChange callback execute failed.");
             return;
         }
         ACE_SCORING_EVENT("Tabs.onChange");
+        PipelineContext::SetCallBackNode(node);
         func->Execute(*tabsInfo);
     };
     TabsModel::GetInstance()->SetOnChange(std::move(onChange));
@@ -91,18 +95,69 @@ void JSTabs::SetOnTabBarClick(const JSCallbackInfo& info)
 
     auto changeHandler = AceType::MakeRefPtr<JsEventFunction<TabContentChangeEvent, 1>>(
         JSRef<JSFunc>::Cast(info[0]), TabContentChangeEventToJSValue);
-    auto onTabBarClick = [executionContext = info.GetExecutionContext(), func = std::move(changeHandler)](
-                             const BaseEventInfo* info) {
+    WeakPtr<NG::FrameNode> targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto onTabBarClick = [executionContext = info.GetExecutionContext(), func = std::move(changeHandler),
+                             node = targetNode](const BaseEventInfo* info) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext);
         const auto* tabsInfo = TypeInfoHelper::DynamicCast<TabContentChangeEvent>(info);
         if (!tabsInfo) {
-            LOGE("SetTabBarClick tabsInfo is nullptr");
+            TAG_LOGW(AceLogTag::ACE_TABS, "Tabs onTabBarClick callback execute failed.");
             return;
         }
         ACE_SCORING_EVENT("Tabs.onTabBarClick");
+        PipelineContext::SetCallBackNode(node);
         func->Execute(*tabsInfo);
     };
     TabsModel::GetInstance()->SetOnTabBarClick(std::move(onTabBarClick));
+}
+
+void JSTabs::SetOnAnimationStart(const JSCallbackInfo& info)
+{
+    if (!info[0]->IsFunction()) {
+        return;
+    }
+
+    auto animationStartHandler = AceType::MakeRefPtr<JsSwiperFunction>(JSRef<JSFunc>::Cast(info[0]));
+    auto onAnimationStart = [executionContext = info.GetExecutionContext(),
+                                func = std::move(animationStartHandler)](
+                                int32_t index, int32_t targetIndex, const AnimationCallbackInfo& info) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext);
+        ACE_SCORING_EVENT("Tabs.onAnimationStart");
+        func->Execute(index, targetIndex, info);
+    };
+    TabsModel::GetInstance()->SetOnAnimationStart(std::move(onAnimationStart));
+}
+
+void JSTabs::SetOnAnimationEnd(const JSCallbackInfo& info)
+{
+    if (!info[0]->IsFunction()) {
+        return;
+    }
+
+    auto animationEndHandler = AceType::MakeRefPtr<JsSwiperFunction>(JSRef<JSFunc>::Cast(info[0]));
+    auto onAnimationEnd = [executionContext = info.GetExecutionContext(), func = std::move(animationEndHandler)](
+                              int32_t index, const AnimationCallbackInfo& info) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext);
+        ACE_SCORING_EVENT("Tabs.onAnimationEnd");
+        func->Execute(index, info);
+    };
+    TabsModel::GetInstance()->SetOnAnimationEnd(std::move(onAnimationEnd));
+}
+
+void JSTabs::SetOnGestureSwipe(const JSCallbackInfo& info)
+{
+    if (!info[0]->IsFunction()) {
+        return;
+    }
+
+    auto gestureSwipeHandler = AceType::MakeRefPtr<JsSwiperFunction>(JSRef<JSFunc>::Cast(info[0]));
+    auto onGestureSwipe = [executionContext = info.GetExecutionContext(), func = std::move(gestureSwipeHandler)](
+                              int32_t index, const AnimationCallbackInfo& info) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext);
+        ACE_SCORING_EVENT("Tabs.onGestureSwipe");
+        func->Execute(index, info);
+    };
+    TabsModel::GetInstance()->SetOnGestureSwipe(std::move(onGestureSwipe));
 }
 
 void ParseTabsIndexObject(const JSCallbackInfo& info, const JSRef<JSVal>& changeEventVal)
@@ -110,15 +165,17 @@ void ParseTabsIndexObject(const JSCallbackInfo& info, const JSRef<JSVal>& change
     CHECK_NULL_VOID(changeEventVal->IsFunction());
 
     auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(changeEventVal));
-    auto onChangeEvent = [executionContext = info.GetExecutionContext(), func = std::move(jsFunc)](
+    WeakPtr<NG::FrameNode> targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto onChangeEvent = [executionContext = info.GetExecutionContext(), func = std::move(jsFunc), node = targetNode](
                              const BaseEventInfo* info) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext);
         const auto* tabsInfo = TypeInfoHelper::DynamicCast<TabContentChangeEvent>(info);
         if (!tabsInfo) {
-            LOGE("ParseTabsIndexObject tabsInfo is nullptr");
+            TAG_LOGW(AceLogTag::ACE_TABS, "ParseTabsIndexObject execute onChange event failed.");
             return;
         }
         ACE_SCORING_EVENT("Tabs.onChangeEvent");
+        PipelineContext::SetCallBackNode(node);
         auto newJSVal = JSRef<JSVal>::Make(ToJSValue(tabsInfo->GetIndex()));
         func->ExecuteJS(1, &newJSVal);
     };
@@ -232,7 +289,6 @@ void JSTabs::SetBarMode(const JSCallbackInfo& info)
 void JSTabs::SetBarWidth(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have atleast 1 arguments");
         return;
     }
 
@@ -243,8 +299,8 @@ void JSTabs::SetBarWidth(const JSCallbackInfo& info)
             TabsModel::GetInstance()->SetTabBarWidth(width);
             return;
         }
-    } else if (!ParseJsDimensionVp(info[0], width)) {
-        LOGE("The arg is wrong, fail to parse dimension");
+    } else {
+        ParseJsDimensionVp(info[0], width);
     }
 
     TabsModel::GetInstance()->SetTabBarWidth(width);
@@ -253,7 +309,6 @@ void JSTabs::SetBarWidth(const JSCallbackInfo& info)
 void JSTabs::SetBarHeight(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have atleast 1 arguments");
         return;
     }
     CalcDimension height = Dimension(-1.0, DimensionUnit::VP);
@@ -264,10 +319,9 @@ void JSTabs::SetBarHeight(const JSCallbackInfo& info)
         if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)) {
             if (!ParseJsDimensionVpNG(info[0], height)) {
                 height = Dimension(-1.0, DimensionUnit::VP);
-                LOGD("The arg is wrong, fail to parse dimension");
             }
-        } else if (!ParseJsDimensionVp(info[0], height)) {
-            LOGD("The arg is wrong, fail to parse dimension");
+        } else {
+            ParseJsDimensionVp(info[0], height);
         }
     }
     TabsModel::GetInstance()->SetBarAdaptiveHeight(adaptiveHeight);
@@ -282,7 +336,6 @@ void JSTabs::SetIndex(int32_t index)
 void JSTabs::SetAnimationDuration(float value)
 {
     if (std::isnan(value)) {
-        LOGI("The arg is nan, use default value");
         auto pipelineContext = PipelineContext::GetCurrentContext();
         CHECK_NULL_VOID(pipelineContext);
         auto tabTheme = pipelineContext->GetTheme<TabTheme>();
@@ -296,10 +349,8 @@ void JSTabs::SetAnimationDuration(float value)
 void JSTabs::SetFadingEdge(const JSCallbackInfo& info)
 {
     bool fadingEdge = true;
-    if (info.Length() < 1) {
-        LOGW("The arg is wrong, it is supposed to have at least 1 arguments");
-    } else if (!ParseJsBool(info[0], fadingEdge)) {
-        LOGW("The arg is wrong, fail to parse bool");
+    if (info.Length() > 0) {
+        ParseJsBool(info[0], fadingEdge);
     }
     TabsModel::GetInstance()->SetFadingEdge(fadingEdge);
 }
@@ -307,10 +358,8 @@ void JSTabs::SetFadingEdge(const JSCallbackInfo& info)
 void JSTabs::SetBarOverlap(const JSCallbackInfo& info)
 {
     bool barOverlap = false;
-    if (info.Length() < 1) {
-        LOGW("The arg is wrong, it is supposed to have at least 1 arguments");
-    } else if (!ParseJsBool(info[0], barOverlap)) {
-        LOGW("The arg is wrong, fail to parse bool");
+    if (info.Length() > 0) {
+        ParseJsBool(info[0], barOverlap);
     }
     TabsModel::GetInstance()->SetBarOverlap(barOverlap);
 }
@@ -318,10 +367,8 @@ void JSTabs::SetBarOverlap(const JSCallbackInfo& info)
 void JSTabs::SetBarBackgroundColor(const JSCallbackInfo& info)
 {
     Color backgroundColor = Color::BLACK.BlendOpacity(0.0f);
-    if (info.Length() < 1) {
-        LOGD("Invalid parameters. Use default parameters instead.");
-    } else if (!ConvertFromJSValue(info[0], backgroundColor)) {
-        LOGD("Invalid parameters. Use default parameters instead.");
+    if (info.Length() > 0) {
+        ConvertFromJSValue(info[0], backgroundColor);
     }
     TabsModel::GetInstance()->SetBarBackgroundColor(backgroundColor);
 }
@@ -335,9 +382,7 @@ void JSTabs::SetDivider(const JSCallbackInfo& info)
     RefPtr<TabTheme> tabTheme = GetTheme<TabTheme>();
     CHECK_NULL_VOID(tabTheme);
 
-    if (info.Length() < 1) {
-        LOGW("Invalid params");
-    } else {
+    if (info.Length() > 0) {
         JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
         if (info[0]->IsNull()) {
             divider.isNull = true;
@@ -404,9 +449,7 @@ void JSTabs::SetScrollableBarModeOptions(const JSRef<JSVal>& info)
 void JSTabs::SetBarGridAlign(const JSCallbackInfo& info)
 {
     BarGridColumnOptions columnOption;
-    if (info.Length() < 1) {
-        LOGD("Invalid parameters. Use default parameters instead.");
-    } else if (info[0]->IsObject()) {
+    if (info.Length() > 0 && info[0]->IsObject()) {
         auto gridParam = JSRef<JSObject>::Cast(info[0]);
         auto sm = gridParam->GetProperty("sm");
         if (sm->IsNumber() && sm->ToNumber<int32_t>() >= 0 && sm->ToNumber<int32_t>() <= SM_COLUMN_NUM &&
@@ -453,6 +496,9 @@ void JSTabs::JSBind(BindingTarget globalObj)
     JSClass<JSTabs>::StaticMethod("divider", &JSTabs::SetDivider);
     JSClass<JSTabs>::StaticMethod("onChange", &JSTabs::SetOnChange);
     JSClass<JSTabs>::StaticMethod("onTabBarClick", &JSTabs::SetOnTabBarClick);
+    JSClass<JSTabs>::StaticMethod("onAnimationStart", &JSTabs::SetOnAnimationStart);
+    JSClass<JSTabs>::StaticMethod("onAnimationEnd", &JSTabs::SetOnAnimationEnd);
+    JSClass<JSTabs>::StaticMethod("onGestureSwipe", &JSTabs::SetOnGestureSwipe);
     JSClass<JSTabs>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
     JSClass<JSTabs>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSTabs>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);

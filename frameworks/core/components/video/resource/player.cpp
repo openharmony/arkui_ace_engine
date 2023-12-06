@@ -34,6 +34,7 @@ const char PLAYER_PARAM_TEXTURE[] = "texture";
 const char PLAYER_PARAM_NEEDFRESHFORCE[] = "needRefreshForce";
 const char PLAYER_PARAM_LOOP[] = "loop";
 const char PLAYER_PARAM_SEEKMODE[] = "seekMode";
+const char PLAYER_PARAM_ISTEXTURE[] = "isTexture";
 
 const char PLAYER_METHOD_INIT[] = "init";
 const char PLAYER_METHOD_GETPOSITION[] = "getposition";
@@ -187,11 +188,12 @@ void Player::SetSource(const std::string& src)
     }
 }
 
-void Player::SetSurfaceId(int64_t id)
+void Player::SetSurfaceId(int64_t id, bool isTexture)
 {
     textureId_ = id;
     std::stringstream paramStream;
-    paramStream << PARAM_VALUE << PARAM_EQUALS << textureId_;
+    paramStream << PARAM_VALUE << PARAM_EQUALS << textureId_ << PARAM_AND
+        << PLAYER_PARAM_ISTEXTURE << PARAM_EQUALS << (isTexture ? "1" : "0");
     std::string param = paramStream.str();
     CallResRegisterMethod(MakeMethodHash(PLAYER_METHOD_SETSURFACE), param);
 }

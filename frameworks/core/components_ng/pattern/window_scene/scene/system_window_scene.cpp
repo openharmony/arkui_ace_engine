@@ -19,6 +19,7 @@
 
 #include "core/components_ng/pattern/window_scene/scene/window_event_process.h"
 #include "core/components_ng/render/adapter/rosen_render_context.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 SystemWindowScene::SystemWindowScene(const sptr<Rosen::Session>& session) : session_(session)
@@ -28,6 +29,11 @@ SystemWindowScene::SystemWindowScene(const sptr<Rosen::Session>& session) : sess
         CHECK_NULL_VOID(self);
         self->OnBoundsChanged(bounds);
     };
+}
+
+sptr<Rosen::Session> SystemWindowScene::GetSession()
+{
+    return session_;
 }
 
 void SystemWindowScene::OnBoundsChanged(const Rosen::Vector4f& bounds)
@@ -85,5 +91,47 @@ void SystemWindowScene::OnAttachToFrameNode()
         session->TransferPointerEvent(pointerEvent);
     };
     mouseEventHub->SetMouseEvent(std::move(mouseCallback));
+
+    RegisterFocusCallback();
+}
+
+void SystemWindowScene::RegisterFocusCallback()
+{
+    CHECK_NULL_VOID(session_);
+
+    auto requestFocusCallback = [weakThis = WeakClaim(this), instanceId = instanceId_]() {
+        ContainerScope scope(instanceId);
+        auto pipelineContext = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipelineContext);
+        pipelineContext->PostAsyncEvent([weakThis]() {
+            auto self = weakThis.Upgrade();
+            CHECK_NULL_VOID(self);
+            auto host = self->GetHost();
+            CHECK_NULL_VOID(host);
+            auto focusHub = host->GetFocusHub();
+            CHECK_NULL_VOID(focusHub);
+            focusHub->SetParentFocusable(true);
+            focusHub->RequestFocusWithDefaultFocusFirstly();
+        },
+            TaskExecutor::TaskType::UI);
+    };
+    session_->SetNotifyUIRequestFocusFunc(requestFocusCallback);
+
+    auto lostFocusCallback = [weakThis = WeakClaim(this), instanceId = instanceId_]() {
+        ContainerScope scope(instanceId);
+        auto pipelineContext = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipelineContext);
+        pipelineContext->PostAsyncEvent([weakThis]() {
+            auto self = weakThis.Upgrade();
+            CHECK_NULL_VOID(self);
+            auto host = self->GetHost();
+            CHECK_NULL_VOID(host);
+            auto focusHub = host->GetFocusHub();
+            CHECK_NULL_VOID(focusHub);
+            focusHub->SetParentFocusable(false);
+        },
+            TaskExecutor::TaskType::UI);
+    };
+    session_->SetNotifyUILostFocusFunc(lostFocusCallback);
 }
 } // namespace OHOS::Ace::NG

@@ -46,7 +46,6 @@
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/components_v2/list/list_properties.h"
 #include "core/event/mouse_event.h"
-#include "core/gestures/gesture_info.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
@@ -81,6 +80,7 @@ void IndexerPattern::OnModifyDone()
     if (propSelect != lastSelectProp_) {
         selected_ = propSelect;
         lastSelectProp_ = propSelect;
+        selectChanged_ = true;
         ResetStatus();
     }
     auto itemSize =
@@ -88,7 +88,8 @@ void IndexerPattern::OnModifyDone()
     auto indexerSizeChanged = (itemCountChanged || !NearEqual(itemSize, lastItemSize_));
     lastItemSize_ = itemSize;
     auto needMarkDirty = (layoutProperty->GetPropertyChangeFlag() == PROPERTY_UPDATE_NORMAL);
-    ApplyIndexChanged(needMarkDirty, false, false, indexerSizeChanged);
+    ApplyIndexChanged(needMarkDirty,
+        initialized_ && selectChanged_, false, indexerSizeChanged);
     auto gesture = host->GetOrCreateGestureEventHub();
     if (gesture) {
         InitPanEvent(gesture);
@@ -168,7 +169,7 @@ void IndexerPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
 void IndexerPattern::OnHover(bool isHover)
 {
     if (itemCount_ <= 0) {
-        LOGE("AlphabetIndexer arrayValue size is less than 0");
+        TAG_LOGD(AceLogTag::ACE_ALPHABET_INDEXER, "AlphabetIndexer arrayValue size is less than 0");
         return;
     }
     if (isHover_ == isHover) {
@@ -235,7 +236,7 @@ void IndexerPattern::InitChildInputEvent()
 void IndexerPattern::OnTouchDown(const TouchEventInfo& info)
 {
     if (itemCount_ <= 0) {
-        LOGE("AlphabetIndexer arrayValue size is less than 0");
+        TAG_LOGD(AceLogTag::ACE_ALPHABET_INDEXER, "AlphabetIndexer arrayValue size is less than 0");
         return;
     }
     MoveIndexByOffset(info.GetTouches().front().GetLocalLocation());
@@ -244,7 +245,6 @@ void IndexerPattern::OnTouchDown(const TouchEventInfo& info)
 void IndexerPattern::OnTouchUp(const TouchEventInfo& info)
 {
     if (itemCount_ <= 0) {
-        LOGE("AlphabetIndexer arrayValue size is less than 0");
         return;
     }
     childPressIndex_ = -1;
@@ -266,7 +266,6 @@ void IndexerPattern::MoveIndexByOffset(const Offset& offset)
         return;
     }
     if (itemCount_ <= 0) {
-        LOGE("AlphabetIndexer arrayValue size is less than 0");
         return;
     }
     auto nextSelectIndex = GetSelectChildIndex(offset);
@@ -425,6 +424,8 @@ void IndexerPattern::OnSelect(bool changed)
 void IndexerPattern::ApplyIndexChanged(
     bool isTextNodeInTree, bool selectChanged, bool fromTouchUp, bool indexerSizeChanged)
 {
+    initialized_ = true;
+    selectChanged_ = false;
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto layoutProperty = host->GetLayoutProperty<IndexerLayoutProperty>();
@@ -722,9 +723,9 @@ void IndexerPattern::UpdateBubbleListView(std::vector<std::string>& currentListD
     divider.color = indexerTheme->GetPopupSeparateColor();
     listLayoutProperty->UpdateDivider(divider);
     listLayoutProperty->UpdateListDirection(Axis::VERTICAL);
-    auto listPaintProperty = listNode->GetPaintProperty<ListPaintProperty>();
+    auto listPaintProperty = listNode->GetPaintProperty<ScrollablePaintProperty>();
     CHECK_NULL_VOID(listPaintProperty);
-    listPaintProperty->UpdateBarDisplayMode(DisplayMode::OFF);
+    listPaintProperty->UpdateScrollBarMode(DisplayMode::OFF);
     auto listRenderContext = listNode->GetRenderContext();
     CHECK_NULL_VOID(listRenderContext);
     listRenderContext->SetClipToBounds(true);
@@ -759,9 +760,10 @@ void IndexerPattern::UpdateBubbleListItem(
     CHECK_NULL_VOID(layoutProperty);
     auto paintProperty = GetPaintProperty<IndexerPaintProperty>();
     CHECK_NULL_VOID(paintProperty);
-    auto popupSelectedTextColor = paintProperty->GetPopupSelectedColor().value_or(indexerTheme->GetPopupDefaultColor());
+    auto popupSelectedTextColor =
+        paintProperty->GetPopupSelectedColor().value_or(indexerTheme->GetPopupSelectedTextColor());
     auto popupUnselectedTextColor =
-        paintProperty->GetPopupUnselectedColor().value_or(indexerTheme->GetDefaultTextColor());
+        paintProperty->GetPopupUnselectedColor().value_or(indexerTheme->GetPopupUnselectedTextColor());
     auto popupItemTextFontSize =
         layoutProperty->GetFontSize().value_or(indexerTheme->GetPopupTextStyle().GetFontSize());
     auto popupItemTextFontWeight =
@@ -814,9 +816,10 @@ void IndexerPattern::ChangeListItemsSelectedStyle(int32_t clickIndex)
     CHECK_NULL_VOID(layoutProperty);
     auto paintProperty = host->GetPaintProperty<IndexerPaintProperty>();
     CHECK_NULL_VOID(paintProperty);
-    auto popupSelectedTextColor = paintProperty->GetPopupSelectedColor().value_or(indexerTheme->GetPopupDefaultColor());
+    auto popupSelectedTextColor =
+        paintProperty->GetPopupSelectedColor().value_or(indexerTheme->GetPopupSelectedTextColor());
     auto popupUnselectedTextColor =
-        paintProperty->GetPopupUnselectedColor().value_or(indexerTheme->GetDefaultTextColor());
+        paintProperty->GetPopupUnselectedColor().value_or(indexerTheme->GetPopupUnselectedTextColor());
     auto popupItemBackground =
         paintProperty->GetPopupItemBackground().value_or(indexerTheme->GetPopupBackgroundColor());
     auto listNode = popupNode_->GetLastChild();
@@ -1247,6 +1250,7 @@ void IndexerPattern::RemoveBubble()
     CHECK_NULL_VOID(overlayManager);
     overlayManager->RemoveIndexerPopupById(host->GetId());
     popupNode_ = nullptr;
+    lastPopupIndex_ = -1;
 }
 
 bool IndexerPattern::IsMeasureBoundary() const

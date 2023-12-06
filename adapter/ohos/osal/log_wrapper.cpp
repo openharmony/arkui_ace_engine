@@ -22,7 +22,7 @@
 #include "hilog/log.h"
 
 #ifdef ACE_INSTANCE_LOG
-#include "core/common/container.h"
+#include "core/common/container_scope.h"
 #endif
 
 extern "C" {
@@ -43,10 +43,77 @@ const ::LogLevel LOG_LEVELS[] = {
 
 const std::map<AceLogTag, const char*> DOMAIN_CONTENTS_MAP = {
     { AceLogTag::DEFAULT, "Ace" },
+    { AceLogTag::ACE_ALPHABET_INDEXER, "AceAlphabetIndexer" },
+    { AceLogTag::ACE_COUNTER, "AceCounter" },
     { AceLogTag::ACE_SUB_WINDOW, "AceSubWindow" },
     { AceLogTag::ACE_FORM, "AceForm" },
     { AceLogTag::ACE_DRAG, "AceDrag" },
     { AceLogTag::ACE_VIDEO, "AceVideo" },
+    { AceLogTag::ACE_COMPONENT_SNAPSHOT, "AceComponentSnapshot" },
+    { AceLogTag::ACE_CANVAS, "AceCanvas" },
+    { AceLogTag::ACE_INPUTTRACKING, "AceInputTracking" },
+    { AceLogTag::ACE_REFRESH, "AceRefresh" },
+    { AceLogTag::ACE_SCROLL, "AceScroll" },
+    { AceLogTag::ACE_SCROLLABLE, "AceScrollable" },
+    { AceLogTag::ACE_INNER_SCROLL_BAR, "AceInnerScrollBar" },
+    { AceLogTag::ACE_OUTER_SCROLL_BAR, "AceOuterScrollBar" },
+    { AceLogTag::ACE_FONT, "AceFont" },
+    { AceLogTag::ACE_OVERLAY, "AceOverlay" },
+    { AceLogTag::ACE_PROMPT_ACTION_TOAST, "AcePromptActionToast" },
+    { AceLogTag::ACE_PROMPT_ACTION_MENU, "AcePromptActionMenu" },
+    { AceLogTag::ACE_DIALOG_ALERT, "AceDialogAlert" },
+    { AceLogTag::ACE_DIALOG_TEXTPICKER, "AceDialogTextPicker" },
+    { AceLogTag::ACE_DIALOG_TIMEPICKER, "AceDialogTimePicker" },
+    { AceLogTag::ACE_DIALOG_DATEPICKER, "AceDialogDatePicker" },
+    { AceLogTag::ACE_DIALOG, "AceDialog" },
+    { AceLogTag::ACE_PANEL, "AcePanel" },
+    { AceLogTag::ACE_MENU, "AceMenu" },
+    { AceLogTag::ACE_TEXTINPUT, "AceTextInput" },
+    { AceLogTag::ACE_TEXT, "AceText" },
+    { AceLogTag::ACE_TEXTAREA, "AceTextArea" },
+    { AceLogTag::ACE_TEXT_FIELD, "AceTextField" },
+    { AceLogTag::ACE_TEXT_CLOCK, "AceTextClock" },
+    { AceLogTag::ACE_TEXT_TIMER, "AceTextTimer" },
+    { AceLogTag::ACE_SWIPER, "AceSwiper" },
+    { AceLogTag::ACE_TABS, "AceTabs" },
+    { AceLogTag::ACE_DIVIDER, "AceDivider" },
+    { AceLogTag::ACE_BLANK, "AceBlank" },
+    { AceLogTag::ACE_GRIDROW, "AceGridRow" },
+    { AceLogTag::ACE_RICH_TEXT, "AceRichText" },
+    { AceLogTag::ACE_WEB, "AceWeb" },
+    { AceLogTag::ACE_FOCUS, "AceFocus" },
+    { AceLogTag::ACE_MOUSE, "AceMouse" },
+    { AceLogTag::ACE_GESTURE, "AceGesture" },
+    { AceLogTag::ACE_IMAGE, "AceImage" },
+    { AceLogTag::ACE_RATING, "AceRating" },
+    { AceLogTag::ACE_LIST, "AceList" },
+    { AceLogTag::ACE_NAVIGATION, "AceNavigation" },
+    { AceLogTag::ACE_WATERFLOW, "AceWaterFlow" },
+    { AceLogTag::ACE_LOADINGPROGRESS, "AceLoadingProgress" },
+    { AceLogTag::ACE_PATTERNLOCK, "AcePatternLock" },
+    { AceLogTag::ACE_PROGRESS, "AceProgress" },
+    { AceLogTag::ACE_QRCODE, "AceQRCode" },
+    { AceLogTag::ACE_ACCESSIBILITY, "AceAccessibility" },
+    { AceLogTag::ACE_ROUTER, "AceRouter" },
+    { AceLogTag::ACE_THEME, "AceTheme" },
+    { AceLogTag::ACE_BORDER, "AceBorder" },
+    { AceLogTag::ACE_BORDER_IMAGE, "AceBorderImage" },
+    { AceLogTag::ACE_LINEAR_SPLIT, "AceLinearSplit" },
+    { AceLogTag::ACE_GRID, "AceGrid" },
+    { AceLogTag::ACE_PLUGIN_COMPONENT, "AcePluginComponent" },
+    { AceLogTag::ACE_UIEXTENSIONCOMPONENT, "AceUiExtensionComponent" },
+    { AceLogTag::ACE_IF, "AceIf" },
+    { AceLogTag::ACE_FOREACH, "AceForEach" },
+    { AceLogTag::ACE_LAZYFOREACH, "AceLazyForEach" },
+    { AceLogTag::ACE_GAUGE, "AceGauge" },
+    { AceLogTag::ACE_HYPERLINK, "AceHyperLink" },
+    { AceLogTag::ACE_ANIMATION, "AceAnimation" },
+    { AceLogTag::ACE_DATE_PICKER, "AceDatePicker" },
+    { AceLogTag::ACE_TEXT_PICKER, "AceTextPicker" },
+    { AceLogTag::ACE_AUTO_FILL, "AceAutoFill" },
+    { AceLogTag::ACE_KEYBOARD, "AceKeyboard" },
+    { AceLogTag::ACE_UIEVENT, "UIEvent" },
+    { AceLogTag::ACE_DISPLAY_SYNC, "AceDisplaySync" },
 };
 
 const char* APP_DOMAIN_CONTENT = "JSApp";
@@ -86,13 +153,11 @@ void LogWrapper::PrintLog(LogDomain domain, LogLevel level, AceLogTag tag, const
 #endif
 }
 
+#ifdef ACE_INSTANCE_LOG
 int32_t LogWrapper::GetId()
 {
-#ifdef ACE_INSTANCE_LOG
-    return Container::CurrentId();
-#else
-    return 0;
-#endif
+    return ContainerScope::CurrentId();
 }
+#endif
 
 } // namespace OHOS::Ace

@@ -25,6 +25,7 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components/declaration/swiper/swiper_declaration.h"
 #include "core/components_ng/base/view_abstract_model.h"
+#include "core/components_ng/pattern/scrollable/scrollable_properties.h"
 #include "core/components_v2/inspector/inspector_composed_component.h"
 
 namespace OHOS::Ace {
@@ -73,6 +74,7 @@ struct AnimationCallbackInfo {
 
 using AnimationStartEvent = std::function<void(int32_t index, int32_t targetIndex, const AnimationCallbackInfo& info)>;
 using AnimationEndEvent = std::function<void(int32_t index, const AnimationCallbackInfo& info)>;
+using AnimationEndEventPtr = std::shared_ptr<AnimationEndEvent>;
 using GestureSwipeEvent = std::function<void(int32_t index, const AnimationCallbackInfo& info)>;
 
 class ACE_EXPORT SwiperModel {
@@ -123,6 +125,7 @@ public:
     virtual void SetArrowStyle(const SwiperArrowParameters& swiperArrowParameters) {}
     virtual void SetDisplayArrow(bool displayArrow) {}
     virtual void SetHoverShow(bool hoverShow) {}
+    virtual void SetNestedScroll(const NestedScrollOptions& nestedOpt) {}
 private:
     static std::unique_ptr<SwiperModel> instance_;
     static std::mutex mutex_;

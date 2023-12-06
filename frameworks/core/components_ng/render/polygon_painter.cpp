@@ -49,9 +49,7 @@ void PolygonPainter::DrawPolygon(RSCanvas& canvas, const PolygonPaintProperty& p
     }
     path.AddPoly(points, static_cast<int>(points.size()), isClose);
     canvas.DrawPath(path);
-#ifdef USE_ROSEN_DRAWING
     canvas.DetachBrush();
     canvas.DetachPen();
-#endif
 }
 } // namespace OHOS::Ace::NG

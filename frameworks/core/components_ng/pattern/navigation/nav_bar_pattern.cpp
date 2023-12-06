@@ -38,6 +38,7 @@
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/list/list_pattern.h"
 #include "core/components_ng/pattern/menu/menu_view.h"
+#include "core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h"
 #include "core/components_ng/pattern/navigation/bar_item_event_hub.h"
 #include "core/components_ng/pattern/navigation/bar_item_node.h"
 #include "core/components_ng/pattern/navigation/bar_item_pattern.h"
@@ -244,7 +245,9 @@ void BuildMoreItemNodeAction(const RefPtr<FrameNode>& buttonNode, const RefPtr<B
             CHECK_NULL_VOID(navBarNode);
             navBarNode->SetIsTitleMenuNodeShowing(false);
         };
-        overlayManager->RegisterOnHideMenu(hidMenuCallback);
+        auto menuWrapperPattern = menuNode->GetPattern<MenuWrapperPattern>();
+        CHECK_NULL_VOID(menuWrapperPattern);
+        menuWrapperPattern->RegisterMenuDisappearCallback(hidMenuCallback);
     };
     eventHub->SetItemAction(clickCallback);
 
@@ -301,7 +304,7 @@ RefPtr<FrameNode> CreateMenuItems(const int32_t menuNodeId, const std::vector<NG
             menuItemLayoutProperty->UpdateUserDefinedIdealSize(
                 CalcSize(CalcLength(BACK_BUTTON_SIZE.ConvertToPx()), CalcLength(BACK_BUTTON_SIZE.ConvertToPx())));
             menuItemLayoutProperty->UpdateType(ButtonType::NORMAL);
-            menuItemLayoutProperty->UpdateBorderRadius(BorderRadiusProperty(BUTTON_RADIUS));
+            menuItemLayoutProperty->UpdateBorderRadius(BorderRadiusProperty(BUTTON_RADIUS_SIZE));
             auto renderContext = menuItemNode->GetRenderContext();
             CHECK_NULL_RETURN(renderContext, nullptr);
             renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
@@ -353,7 +356,7 @@ RefPtr<FrameNode> CreateMenuItems(const int32_t menuNodeId, const std::vector<NG
         menuItemLayoutProperty->UpdateUserDefinedIdealSize(
             CalcSize(CalcLength(BACK_BUTTON_SIZE.ConvertToPx()), CalcLength(BACK_BUTTON_SIZE.ConvertToPx())));
         menuItemLayoutProperty->UpdateType(ButtonType::NORMAL);
-        menuItemLayoutProperty->UpdateBorderRadius(BorderRadiusProperty(BUTTON_RADIUS));
+        menuItemLayoutProperty->UpdateBorderRadius(BorderRadiusProperty(BUTTON_RADIUS_SIZE));
         auto renderContext = menuItemNode->GetRenderContext();
         CHECK_NULL_RETURN(renderContext, nullptr);
         renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
@@ -383,10 +386,12 @@ void BuildTitle(const RefPtr<NavBarNode>& navBarNode, const RefPtr<TitleBarNode>
     CHECK_NULL_VOID(navBarLayoutProperty);
     auto theme = NavigationGetTheme();
     CHECK_NULL_VOID(theme);
-    if (navBarLayoutProperty->GetTitleModeValue(NavigationTitleMode::FREE) == NavigationTitleMode::MINI) {
-        UpdateTitleFontSize(navBarNode, theme->GetTitleFontSize());
-    } else {
-        UpdateTitleFontSize(navBarNode, theme->GetTitleFontSizeBig());
+    if (!navBarNode->GetPrevTitleIsCustomValue(false)) {
+        if (navBarLayoutProperty->GetTitleModeValue(NavigationTitleMode::FREE) == NavigationTitleMode::MINI) {
+            UpdateTitleFontSize(navBarNode, theme->GetTitleFontSize());
+        } else {
+            UpdateTitleFontSize(navBarNode, theme->GetTitleFontSizeBig());
+        }
     }
 
     if (navBarNode->GetTitleNodeOperationValue(ChildNodeOperation::NONE) == ChildNodeOperation::NONE) {
@@ -526,6 +531,21 @@ void MountToolBar(const RefPtr<NavBarNode>& hostNode)
 }
 } // namespace
 
+void NavBarPattern::OnAttachToFrameNode()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto theme = NavigationGetTheme();
+    CHECK_NULL_VOID(theme);
+    if (theme && theme->GetNavBarUnfocusEffectEnable()) {
+        pipelineContext->AddWindowFocusChangedCallback(host->GetId());
+    }
+    SafeAreaExpandOpts opts = {.edges = SAFE_AREA_EDGE_BOTTOM, .type = SAFE_AREA_TYPE_SYSTEM };
+    host->GetLayoutProperty()->UpdateSafeAreaExpandOpts(opts);
+}
+
 void NavBarPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
 {
     CHECK_NULL_VOID(!panEvent_);
@@ -597,6 +617,17 @@ void NavBarPattern::HandleOnDragEnd()
     auto titlePattern = titleNode->GetPattern<TitleBarPattern>();
     CHECK_NULL_VOID(titlePattern);
     titlePattern->ProcessTitleDragEnd();
+}
+
+bool NavBarPattern::GetCurrentNavBarStatus() const
+{
+    auto hostNode = AceType::DynamicCast<NavBarNode>(GetHost());
+    CHECK_NULL_RETURN(hostNode, false);
+    auto titleNode = AceType::DynamicCast<TitleBarNode>(hostNode->GetTitleBarNode());
+    CHECK_NULL_RETURN(titleNode, false);
+    auto titlePattern = titleNode->GetPattern<TitleBarPattern>();
+    CHECK_NULL_RETURN(titlePattern, false);
+    return titlePattern->GetCurrentNavBarStatus();
 }
 
 void NavBarPattern::OnCoordScrollStart()
@@ -695,6 +726,9 @@ void NavBarPattern::OnWindowSizeChanged(int32_t width, int32_t height, WindowSiz
 {
     auto navBarNode = AceType::DynamicCast<NavBarNode>(GetHost());
     CHECK_NULL_VOID(navBarNode);
+    if (isTitleMenuNodeShowing_ == navBarNode->IsTitleMenuNodeShowing()) {
+        return;
+    }
     if (type == WindowSizeChangeReason::ROTATION || type == WindowSizeChangeReason::RESIZE) {
         isTitleMenuNodeShowing_ = navBarNode->IsTitleMenuNodeShowing();
     }
@@ -748,15 +782,15 @@ void NavBarPattern::ResetAssociatedScroll()
     titlePattern->ResetAssociatedScroll();
 }
 
-void NavBarPattern::UpdateAssociatedScrollOffset(float offset)
+bool NavBarPattern::UpdateAssociatedScrollOffset(float offset)
 {
     auto hostNode = AceType::DynamicCast<NavBarNode>(GetHost());
-    CHECK_NULL_VOID(hostNode);
+    CHECK_NULL_RETURN(hostNode, true);
     auto titleNode = AceType::DynamicCast<TitleBarNode>(hostNode->GetTitleBarNode());
-    CHECK_NULL_VOID(titleNode);
+    CHECK_NULL_RETURN(titleNode, true);
     auto titlePattern = titleNode->GetPattern<TitleBarPattern>();
-    CHECK_NULL_VOID(titlePattern);
-    titlePattern->UpdateAssociatedScrollOffset(offset);
+    CHECK_NULL_RETURN(titlePattern, true);
+    return titlePattern->UpdateAssociatedScrollOffset(offset);
 }
 
 bool NavBarPattern::IsTitleModeFree()
@@ -766,5 +800,37 @@ bool NavBarPattern::IsTitleModeFree()
     auto navBarLayoutProperty = frameNode->GetLayoutProperty<NavBarLayoutProperty>();
     CHECK_NULL_RETURN(navBarLayoutProperty, false);
     return navBarLayoutProperty->GetTitleModeValue(NavigationTitleMode::FREE) == NavigationTitleMode::FREE;
+}
+
+bool NavBarPattern::IsTitleBarHide()
+{
+    auto frameNode = GetHost();
+    CHECK_NULL_RETURN(frameNode, false);
+    auto navBarLayoutProperty = frameNode->GetLayoutProperty<NavBarLayoutProperty>();
+    CHECK_NULL_RETURN(navBarLayoutProperty, false);
+    return navBarLayoutProperty->GetHideTitleBar().value_or(false);
+}
+
+void NavBarPattern::WindowFocus(bool isFocus)
+{
+    auto theme = NavigationGetTheme();
+    CHECK_NULL_VOID(theme);
+    auto navBarNode = GetHost();
+    CHECK_NULL_VOID(navBarNode);
+    auto parent = navBarNode->GetParent();
+    CHECK_NULL_VOID(parent);
+    auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(parent);
+    CHECK_NULL_VOID(navigationGroupNode);
+    auto pattern = navigationGroupNode->GetPattern();
+    CHECK_NULL_VOID(pattern);
+    auto navigationPattern = AceType::DynamicCast<NavigationPattern>(pattern);
+    if (navigationPattern && navigationPattern->GetNavigationMode() == NavigationMode::SPLIT) {
+        auto renderContext = navBarNode->GetRenderContext();
+        CHECK_NULL_VOID(renderContext);
+        Color maskColor = theme->GetNavBarUnfocusColor();
+        auto maskProperty = AceType::MakeRefPtr<ProgressMaskProperty>();
+        maskProperty->SetColor(isFocus?Color::TRANSPARENT:maskColor);
+        renderContext->UpdateProgressMask(maskProperty);
+    }
 }
 } // namespace OHOS::Ace::NG

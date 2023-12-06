@@ -18,6 +18,7 @@
 #include "base/geometry/dimension.h"
 #include "base/json/json_util.h"
 #include "base/log/dump_log.h"
+#include "base/log/log_wrapper.h"
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
@@ -55,10 +56,9 @@ FlexDirection GetFlexDirection(const RefPtr<UINode>& node)
 
 std::string BlankPattern::GetColorString() const
 {
-    std::string color;
-    auto renderContext = GetHost()->GetRenderContext();
-    CHECK_NULL_RETURN(renderContext, "NA");
-    return renderContext->GetBackgroundColor().value_or(Color::WHITE).ColorToString();
+    auto paintProperty = GetPaintProperty<BlankPaintProperty>();
+    CHECK_NULL_RETURN(paintProperty, "NA");
+    return paintProperty->GetColorValue(Color::TRANSPARENT).ColorToString();
 }
 
 void BlankPattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const
@@ -85,7 +85,7 @@ void BlankPattern::BeforeCreateLayoutWrapper()
     if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
         return;
     }
-    auto& calcConstraint = layoutProp->GetCalcLayoutConstraint();
+    const auto& calcConstraint = layoutProp->GetCalcLayoutConstraint();
     auto isParentRow = GetFlexDirection(parent) == FlexDirection::ROW;
     layoutProp->ResetAlignSelf();
     layoutProp->ResetFlexGrow();
@@ -98,7 +98,8 @@ void BlankPattern::BeforeCreateLayoutWrapper()
         crossAxisHasSize = (isParentRow && calcConstraint->selfIdealSize.value().Height().has_value()) ||
                            (!isParentRow && calcConstraint->selfIdealSize.value().Width().has_value());
     }
-    LOGD("Main axis has size %{public}d, cross has size %{public}d", mainAxisHasSize, crossAxisHasSize);
+    TAG_LOGD(AceLogTag::ACE_BLANK, "Main axis has size %{public}d, cross has size %{public}d", mainAxisHasSize,
+        crossAxisHasSize);
     if (!crossAxisHasSize) {
         layoutProp->UpdateAlignSelf(FlexAlign::STRETCH);
     }
@@ -107,7 +108,7 @@ void BlankPattern::BeforeCreateLayoutWrapper()
         layoutProp->UpdateFlexShrink(1.0f);
     }
     CHECK_NULL_VOID(layoutProp->GetMinSize().has_value());
-    auto blankMin = layoutProp->GetMinSize().value_or(Dimension());
+    auto blankMin = layoutProp->GetMinSize().value_or(Dimension(0.0, DimensionUnit::VP));
     if (isParentRow) {
         if (!(calcConstraint && calcConstraint->minSize.has_value() &&
                 calcConstraint->minSize.value().Width().has_value())) {

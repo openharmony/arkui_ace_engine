@@ -19,6 +19,7 @@
 #include "common/rs_vector4.h"
 #include "session/host/include/session.h"
 
+#include "core/common/container.h"
 #include "core/components_ng/pattern/stack/stack_pattern.h"
 
 namespace OHOS::Ace::NG {
@@ -34,10 +35,14 @@ public:
         return RenderContext::ContextParam { RenderContext::ContextType::EXTERNAL };
     }
 
+    sptr<Rosen::Session> GetSession();
+
 private:
     void OnAttachToFrameNode() override;
     void OnBoundsChanged(const Rosen::Vector4f& bounds);
+    void RegisterFocusCallback();
 
+    int32_t instanceId_ = Container::CurrentId();
     sptr<Rosen::Session> session_;
     std::function<void(const Rosen::Vector4f&)> boundsChangedCallback_;
 

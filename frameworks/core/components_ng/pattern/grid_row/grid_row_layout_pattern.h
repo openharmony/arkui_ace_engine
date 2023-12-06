@@ -16,11 +16,14 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_GRID_ROW_PATTER_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_GRID_ROW_PATTER_H
 
+#include <optional>
+
 #include "base/utils/macros.h"
+#include "core/components_ng/pattern/grid_row/grid_row_event_hub.h"
+#include "core/components_ng/pattern/grid_row/grid_row_layout_algorithm.h"
+#include "core/components_ng/pattern/grid_row/grid_row_layout_property.h"
 #include "core/components_ng/pattern/pattern.h"
-#include "grid_row_layout_property.h"
-#include "grid_row_layout_algorithm.h"
-#include "grid_row_event_hub.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 class GridRowLayoutPattern : public Pattern {
@@ -31,7 +34,7 @@ public:
     {
         return false;
     }
-    
+
     RefPtr<LayoutProperty> CreateLayoutProperty() override
     {
         return MakeRefPtr<GridRowLayoutProperty>();
@@ -46,6 +49,15 @@ public:
     {
         return MakeRefPtr<GridRowEventHub>();
     }
+
+    void OnAttachToFrameNode() override;
+
+    void OnDetachFromFrameNode(FrameNode* node) override;
+
+private:
+    std::optional<int32_t> callbackId_;
+
+    void MarkDirty();
 };
 } // namespace OHOS::Ace::NG
 

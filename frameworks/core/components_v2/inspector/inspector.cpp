@@ -143,7 +143,6 @@ std::string Inspector::GetInspectorNodeByKey(const RefPtr<PipelineContext>& cont
 {
     auto inspectorElement = GetInspectorByKey(context->GetRootElement(), key);
     if (inspectorElement == nullptr) {
-        LOGE("no inspector with key:%{public}s is found", key.c_str());
         return "";
     }
 
@@ -161,7 +160,6 @@ std::string Inspector::GetInspectorNodeByKey(const RefPtr<PipelineContext>& cont
 
 std::string Inspector::GetInspectorTree(const RefPtr<PipelineContext>& context, bool isLayoutInspector)
 {
-    LOGI("GetInspectorTree start");
     auto jsonRoot = JsonUtil::Create(true);
     jsonRoot->Put(INSPECTOR_TYPE, INSPECTOR_ROOT);
 
@@ -170,7 +168,7 @@ std::string Inspector::GetInspectorTree(const RefPtr<PipelineContext>& context, 
     double rootWidth = context->GetRootWidth();
     jsonRoot->Put(INSPECTOR_WIDTH, std::to_string(rootWidth * scale).c_str());
     jsonRoot->Put(INSPECTOR_HEIGHT, std::to_string(rootHeight * scale).c_str());
-    jsonRoot->Put(INSPECTOR_RESOLUTION, std::to_string(SystemProperties::GetResolution()).c_str());
+    jsonRoot->Put(INSPECTOR_RESOLUTION, std::to_string(PipelineBase::GetCurrentDensity()).c_str());
 
     auto root = AceType::DynamicCast<Element>(context->GetRootElement());
     if (root == nullptr) {
@@ -208,7 +206,6 @@ bool Inspector::SendEventByKey(
 {
     auto inspectorElement = GetInspectorByKey(context->GetRootElement(), key);
     if (inspectorElement == nullptr) {
-        LOGE("no inspector with key:%s is found", key.c_str());
         return false;
     }
 

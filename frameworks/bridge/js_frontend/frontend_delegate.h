@@ -23,6 +23,7 @@
 #include "base/memory/ace_type.h"
 #include "base/utils/measure_util.h"
 #include "base/utils/noncopyable.h"
+#include "core/components_ng/pattern/overlay/overlay_manager.h"
 #include "core/event/ace_event_helper.h"
 #include "core/pipeline/pipeline_base.h"
 #include "frameworks/bridge/common/media_query/media_query_info.h"
@@ -111,8 +112,6 @@ public:
     virtual void PostJsTask(std::function<void()>&& task) = 0;
     virtual void PostUITask(std::function<void()>&& task) {}
 
-    virtual void RemoveVisibleChangeNode(NodeId id) = 0;
-
     // ----------------
     // system.app
     // ----------------
@@ -130,7 +129,8 @@ public:
     // ----------------
     // system.prompt
     // ----------------
-    virtual void ShowToast(const std::string& message, int32_t duration, const std::string& bottom) = 0;
+    virtual void ShowToast(
+        const std::string& message, int32_t duration, const std::string& bottom, const NG::ToastShowMode& showMode) = 0;
     virtual void SetToastStopListenerCallback(std::function<void()>&& stopCallback) {};
     virtual void ShowDialog(const std::string& title, const std::string& message,
         const std::vector<ButtonInfo>& buttons, bool autoCancel, std::function<void(int32_t, int32_t)>&& callback,
@@ -151,7 +151,8 @@ public:
         std::function<void(int32_t, int32_t)>&& callback) = 0;
     virtual void ShowActionMenu(const std::string& title, const std::vector<ButtonInfo>& button,
         std::function<void(int32_t, int32_t)>&& callback, std::function<void(bool)>&& onStatusChanged) {};
-
+    virtual void ShowActionMenu(const PromptDialogAttr& dialogAttr, const std::vector<ButtonInfo>& buttons,
+        std::function<void(int32_t, int32_t)>&& callback) {};
     virtual Rect GetBoundingRectData(NodeId nodeId) = 0;
 
     virtual std::string GetInspector(NodeId nodeId) = 0;

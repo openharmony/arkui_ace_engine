@@ -21,6 +21,7 @@
 #include "core/components_ng/pattern/grid/grid_layout_base_algorithm.h"
 #include "core/components_ng/pattern/grid/grid_layout_info.h"
 #include "core/components_ng/pattern/grid/grid_layout_property.h"
+#include "core/components_ng/pattern/scrollable/scrollable_properties.h"
 
 namespace OHOS::Ace::NG {
 
@@ -43,12 +44,18 @@ public:
         canOverScroll_ = canOverScroll;
     }
 
+    void SetScrollSource(int32_t scrollSource)
+    {
+        scrollSource_ = scrollSource;
+    }
+
 protected:
     void SkipForwardLines(float mainSize, LayoutWrapper* layoutWrapper);
     void SkipBackwardLines(float mainSize, LayoutWrapper* layoutWrapper);
 
 private:
     void FillGridViewportAndMeasureChildren(float mainSize, float crossSize, LayoutWrapper* layoutWrapper);
+    void ReloadToStartIndex(float mainSize, float crossSize, LayoutWrapper* layoutWrapper);
     float MeasureRecordedItems(float mainSize, float crossSize, LayoutWrapper* layoutWrapper);
     bool UseCurrentLines(float mainSize, float crossSize, LayoutWrapper* layoutWrapper, float& mainLength);
     virtual void SkipLargeOffset(float mainSize, LayoutWrapper* layoutWrapper);
@@ -109,6 +116,7 @@ private:
     void ScrollToIndexStart(LayoutWrapper* layoutWrapper, int32_t targetIndex);
     void ScrollToIndexAuto(LayoutWrapper* layoutWrapper, float mainSize, int32_t targetIndex);
     void UpdateCurrentOffsetForJumpTo(LayoutWrapper* layoutWrapper, float mainSize);
+    void SkipRegularLines(bool forward);
 
 protected:
     uint32_t crossCount_ = 0;
@@ -136,6 +144,7 @@ private:
     // Map structure: [index, crossPosition], store cross position of each item.
     std::map<int32_t, float> itemsCrossPosition_;
     bool canOverScroll_ = false;
+    int32_t scrollSource_ = SCROLL_FROM_NONE;
 
     ACE_DISALLOW_COPY_AND_MOVE(GridScrollLayoutAlgorithm);
 };

@@ -35,7 +35,7 @@ RefPtr<LazyForEachNode> LazyForEachNode::GetOrCreateLazyForEachNode(
     auto node = ElementRegister::GetInstance()->GetSpecificItemById<LazyForEachNode>(nodeId);
     if (node) {
         if (node->builder_ != forEachBuilder) {
-            LOGW("replace old lazy for each builder");
+            TAG_LOGI(AceLogTag::ACE_LAZYFOREACH, "replace old lazy for each builder");
             node->builder_ = forEachBuilder;
         }
         return node;
@@ -80,11 +80,13 @@ void LazyForEachNode::PostIdleTask()
     auto context = GetContext();
     CHECK_NULL_VOID(context);
     context->AddPredictTask([weak = AceType::WeakClaim(this)](int64_t deadline, bool canUseLongPredictTask) {
+        ACE_SCOPED_TRACE("LazyForEach predict");
         auto node = weak.Upgrade();
         CHECK_NULL_VOID(node);
         node->needPredict_ = false;
         auto canRunLongPredictTask = node->requestLongPredict_ && canUseLongPredictTask;
         if (node->builder_) {
+            node->GetChildren();
             auto preBuildResult = node->builder_->PreBuild(deadline, node->itemConstraint_, canRunLongPredictTask);
             if (!preBuildResult) {
                 node->PostIdleTask();

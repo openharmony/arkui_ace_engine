@@ -32,9 +32,6 @@ declare_args() {
   # Disable glfw window to build for PC preview scenario.
   enable_glfw_window = false
 
-  # Enable when build for cross platform
-  is_cross_platform_build = false
-
   # Enable metal in iOS or MacOS
   shell_enable_metal = false
 
@@ -52,7 +49,7 @@ declare_args() {
 }
 
 enable_dump_drawcmd = false
-is_ohos_standard_system = is_standard_system && !build_cross_platform_version
+is_ohos_standard_system = is_standard_system && !is_arkui_x
 use_mingw_win = "${current_os}_${current_cpu}" == "mingw_x86_64"
 use_mac = "${current_os}_${current_cpu}" == "mac_x64" ||
           "${current_os}_${current_cpu}" == "mac_arm64"
@@ -79,6 +76,7 @@ ability_runtime_inner_kits_path = "${ability_runtime_path}/interfaces/kits"
 ability_runtime_kits_path = "${ability_runtime_path}/frameworks/kits"
 ability_runtime_napi_path = "${ability_runtime_path}/frameworks/js/napi"
 ability_runtime_services_path = "${ability_runtime_path}/services"
+accessibility_path = "//foundation/barrierfree/accessibility"
 flutter_root = "//third_party/flutter"
 ace_flutter_engine_root = "$flutter_root/build"
 expat_root = "//third_party/expat"
@@ -113,7 +111,7 @@ objcopy_clang = "$clang_base_path/bin/llvm-objcopy"
 if (is_ohos_standard_system) {
   objcopy_default = "//prebuilts/clang/ohos/linux-x86_64/llvm/bin/llvm-objcopy"
   node_js_path = "//prebuilts/build-tools/common/nodejs/current/bin/"
-} else if (is_cross_platform_build) {
+} else if (is_arkui_x) {
   if (host_os == "mac") {
     objcopy_default = objcopy_clang
   } else if (defined(aosp_objcopy)) {
@@ -130,7 +128,7 @@ if (is_ohos_standard_system) {
   hilog_deps = [ "hilog:libhilog" ]
   ark_runtime_path = "//arkcompiler/runtime_core"
 } else {
-  if (is_cross_platform_build) {
+  if (is_arkui_x) {
     ace_engine_part = "ace_engine_cross"
   } else {
     ace_engine_part = "ace_engine_full"
@@ -171,11 +169,7 @@ if (enable_dump_drawcmd) {
   ace_common_defines += [ "DUMP_DRAW_CMD" ]
 }
 
-ace_use_new_skia = false
-if (defined(use_new_skia) && use_new_skia) {
-  ace_use_new_skia = true
-  ace_common_defines += [ "NEW_SKIA" ]
-}
+ace_use_new_skia = true
 
 ace_use_rosen_drawing = false
 if (defined(use_rosen_drawing) && use_rosen_drawing) {
@@ -209,6 +203,20 @@ if (defined(global_parts_info)) {
   }
 }
 
+if (defined(global_parts_info.multimedia_camera_framework)) {
+  enable_camera_framework = true
+  ace_common_defines += [ "CAMERA_FRAMEWORK_EXISTS" ]
+} else {
+  enable_camera_framework = false
+}
+
+if (defined(global_parts_info.multimedia_player_framework)) {
+  enable_player_framework = true
+  ace_common_defines += [ "PLAYER_FRAMEWORK_EXISTS" ]
+} else {
+  enable_player_framework = false
+}
+
 if (!defined(global_parts_info) ||
     defined(global_parts_info.security_security_component_manager)) {
   security_component_enable = true
@@ -230,9 +238,9 @@ foreach(item, _adapters) {
 
   if (defined(import_var.platforms)) {
     foreach(platform, import_var.platforms) {
-      if (!is_cross_platform_build || (is_cross_platform_build && defined(
-                                           platform.cross_platform_support) &&
-                                       platform.cross_platform_support)) {
+      if (!is_arkui_x ||
+          (is_arkui_x && defined(platform.cross_platform_support) &&
+           platform.cross_platform_support)) {
         if (defined(platform.name)) {
           ace_platforms += [ platform ]
         }

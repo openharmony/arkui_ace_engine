@@ -39,8 +39,16 @@ public:
 
     void Measure(LayoutWrapper* layoutWrapper) override;
 
+    const RectF& GetTextRect()
+    {
+        return richTextRect_;
+    }
+
+protected:
+    OffsetF GetContentOffset(LayoutWrapper* layoutWrapper) override;
+
 private:
-    void GetPlaceholderRects(std::vector<Rect>& rects) override;
+    void GetPlaceholderRects(std::vector<RectF>& rectF) override;
     int32_t GetPreviousLength() const override;
     ParagraphStyle GetParagraphStyle(const TextStyle& textStyle, const std::string& content) const override;
 
@@ -51,7 +59,7 @@ private:
     std::vector<std::list<RefPtr<SpanItem>>> spans_;
     ParagraphManager* pManager_;
     OffsetF parentGlobalOffset_;
-
+    RectF richTextRect_;
     ACE_DISALLOW_COPY_AND_MOVE(RichEditorLayoutAlgorithm);
 };
 } // namespace OHOS::Ace::NG

@@ -65,6 +65,8 @@ public:
 
     static ScopedDelegate GetCurrentDelegate();
 
+    static ScopedDelegate GetDefaultDelegate();
+
     static std::pair<int32_t, int32_t> GetPositionOnJsCode();
 
 private:

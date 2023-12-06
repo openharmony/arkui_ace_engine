@@ -19,6 +19,7 @@
 #include "base/geometry/axis.h"
 #include "base/geometry/dimension.h"
 #include "base/geometry/offset.h"
+#include "base/geometry/rect.h"
 #include "base/memory/ace_type.h"
 #include "core/animation/curve.h"
 #include "core/components/common/layout/constants.h"
@@ -58,6 +59,7 @@ enum class ScrollAlign {
     NONE,
 };
 
+using OnFinishFunc = std::function<void()>;
 class ACE_EXPORT ScrollControllerBase : public AceType {
     DECLARE_ACE_TYPE(ScrollControllerBase, AceType);
 
@@ -67,6 +69,9 @@ public:
 
     virtual void JumpTo(int32_t index, bool smooth = false, ScrollAlign align = ScrollAlign::NONE,
         int32_t source = 3) {}
+
+    virtual void JumpToItemInGroup(int32_t index, int32_t indexInGroup, bool smooth = false,
+        ScrollAlign align = ScrollAlign::NONE, int32_t source = 3) {} // 3 is SCROLL_FROM_JUMP
 
     virtual Axis GetScrollDirection() const
     {
@@ -88,6 +93,15 @@ public:
     {
         return true;
     }
+    virtual Rect GetItemRect(int32_t index) const
+    {
+        return Rect();
+    }
+    virtual Rect GetItemRectInGroup(int32_t index, int32_t indexInGroup) const
+    {
+        return Rect();
+    }
+    virtual void CloseAllSwipeActions(OnFinishFunc&& onFinishCallback) {}
 };
 } // namespace OHOS::Ace
 

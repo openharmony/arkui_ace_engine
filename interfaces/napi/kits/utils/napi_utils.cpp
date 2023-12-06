@@ -14,9 +14,20 @@
  */
 
 #include "napi_utils.h"
+
+#include <cstddef>
+
 #include "js_native_api_types.h"
 
+#include "base/utils/string_utils.h"
+#include "core/animation/curve.h"
+#include "core/common/resource/resource_manager.h"
+#include "core/common/resource/resource_object.h"
+#include "core/common/resource/resource_wrapper.h"
+#include "frameworks/bridge/common/utils/utils.h"
+
 namespace OHOS::Ace::Napi {
+using namespace OHOS::Ace;
 namespace {
 
 enum class ResourceType : uint32_t {
@@ -34,8 +45,7 @@ enum class ResourceType : uint32_t {
 };
 
 const std::regex RESOURCE_APP_STRING_PLACEHOLDER(R"(\%((\d+)(\$)){0,1}([dsf]))", std::regex::icase);
-constexpr size_t MAX_STRING_BUFF_SIZE = 1024;
-
+constexpr int32_t NAPI_BUF_LENGTH = 256;
 } // namespace
 
 static const std::unordered_map<int32_t, std::string> ERROR_CODE_TO_MSG {
@@ -110,7 +120,7 @@ size_t GetParamLen(napi_env env, napi_value param)
 {
     size_t buffSize = 0;
     napi_status status = napi_get_value_string_utf8(env, param, nullptr, 0, &buffSize);
-    if (status != napi_ok || buffSize == 0 || buffSize >= MAX_STRING_BUFF_SIZE) {
+    if (status != napi_ok || buffSize == 0) {
         return 0;
     }
     return buffSize;
@@ -162,6 +172,202 @@ RefPtr<ThemeConstants> GetThemeConstants(const std::optional<std::string>& bundl
         return themeManager->GetThemeConstants(bundleName.value_or(""), moduleName.value_or(""));
     }
     return themeManager->GetThemeConstants();
+}
+
+RefPtr<ResourceWrapper> CreateResourceWrapper(const ResourceInfo& info)
+{
+    auto bundleName = info.bundleName;
+    auto moduleName = info.moduleName;
+
+    RefPtr<ResourceAdapter> resourceAdapter = nullptr;
+    RefPtr<ThemeConstants> themeConstants = nullptr;
+    if (SystemProperties::GetResourceDecoupling()) {
+        if (bundleName.has_value() && moduleName.has_value()) {
+            auto resourceObject = AceType::MakeRefPtr<ResourceObject>(bundleName.value_or(""), moduleName.value_or(""));
+            resourceAdapter = ResourceManager::GetInstance().GetOrCreateResourceAdapter(resourceObject);
+        } else {
+            resourceAdapter = ResourceManager::GetInstance().GetResourceAdapter();
+        }
+        if (!resourceAdapter) {
+            return nullptr;
+        }
+    } else {
+        themeConstants = GetThemeConstants(info.bundleName, info.moduleName);
+        if (!themeConstants) {
+            return nullptr;
+        }
+    }
+    auto resourceWrapper = AceType::MakeRefPtr<ResourceWrapper>(themeConstants, resourceAdapter);
+    return resourceWrapper;
+}
+
+void ParseCurveInfo(const std::string& curveString, std::string& curveTypeString, std::vector<float>& curveValue)
+{
+    if (curveString.back() != ')') {
+        return;
+    }
+    std::string::size_type leftEmbracePosition = curveString.find_last_of('(');
+    if (leftEmbracePosition == std::string::npos) {
+        return;
+    }
+    curveTypeString = curveString.substr(0, leftEmbracePosition);
+    auto params = curveString.substr(leftEmbracePosition + 1, curveString.length() - leftEmbracePosition - 2);
+    if (curveTypeString.empty() || params.empty()) {
+        return;
+    }
+    std::vector<std::string> paramsVector;
+    StringUtils::StringSplitter(params, ',', paramsVector);
+    for (auto& param : paramsVector) {
+        Framework::RemoveHeadTailSpace(param);
+        if (param == "true" || param == "start") {
+            param = "1.000000";
+        }
+        if (param == "false" || param == "end") {
+            param = "0.000000";
+        }
+        curveValue.emplace_back(std::stof(param));
+    }
+}
+
+napi_value ParseCurve(napi_env env, napi_value value, std::string& curveTypeString, std::vector<float>& curveValue)
+{
+    CHECK_NULL_RETURN(value, nullptr);
+    napi_valuetype valueType = napi_undefined;
+    napi_typeof(env, value, &valueType);
+    if (valueType == napi_object) {
+        napi_value curveObjectNApi = nullptr;
+        napi_get_named_property(env, value, "__curveString", &curveObjectNApi);
+        value = curveObjectNApi;
+    }
+
+    size_t paramLen = 0;
+    napi_status status = napi_get_value_string_utf8(env, value, nullptr, 0, &paramLen);
+    NAPI_ASSERT(env, paramLen > 0 && paramLen < NAPI_BUF_LENGTH && status == napi_ok, "paramLen error");
+    char params[NAPI_BUF_LENGTH] = { 0 };
+    status = napi_get_value_string_utf8(env, value, params, paramLen + 1, &paramLen);
+    NAPI_ASSERT(env, status == napi_ok, "Parse curve failed");
+
+    RefPtr<Curve> curve;
+    const std::string domAnimationDefaultCurveString = "ease-in-out";
+    if (params[0] == '\0') {
+        curve = Framework::CreateCurve(domAnimationDefaultCurveString);
+    } else {
+        curve = Framework::CreateCurve(params);
+    }
+    std::string curveString = curve->ToString();
+    LOGI("curveString %{public}s", curveString.c_str());
+    ParseCurveInfo(curveString, curveTypeString, curveValue);
+    LOGI("curveTypeString %{public}s", curveTypeString.c_str());
+    return nullptr;
+}
+
+napi_valuetype GetValueType(napi_env env, napi_value value)
+{
+    if (value == nullptr) {
+        return napi_undefined;
+    }
+
+    napi_valuetype valueType = napi_undefined;
+    NAPI_CALL_BASE(env, napi_typeof(env, value, &valueType), napi_undefined);
+    return valueType;
+}
+
+std::optional<std::string> GetStringFromValueUtf8(napi_env env, napi_value value)
+{
+    static constexpr size_t maxLength = 2048;
+    if (GetValueType(env, value) != napi_string) {
+        return std::nullopt;
+    }
+
+    size_t paramLen = 0;
+    napi_status status = napi_get_value_string_utf8(env, value, nullptr, 0, &paramLen);
+    if (paramLen == 0 || paramLen > maxLength || status != napi_ok) {
+        return std::nullopt;
+    }
+    char params[maxLength] = { 0 };
+    status = napi_get_value_string_utf8(env, value, params, paramLen + 1, &paramLen);
+    if (status != napi_ok) {
+        return std::nullopt;
+    }
+    return params;
+}
+
+bool GetIntProperty(napi_env env, napi_value value, const std::string& key, int32_t& result)
+{
+    CHECK_NULL_RETURN(value, false);
+    napi_valuetype valueType = napi_undefined;
+    napi_value propertyNApi = nullptr;
+    napi_get_named_property(env, value, key.c_str(), &propertyNApi);
+    if (valueType != napi_number) {
+        LOGE("The type of property is incorrect");
+        return false;
+    }
+    int32_t property = 0;
+    napi_status status = napi_get_value_int32(env, propertyNApi, &property);
+    if (status != napi_ok) {
+        LOGE("Get property failed");
+        return false;
+    }
+    return true;
+}
+
+static uint32_t CompleteColorAlphaIfIncomplete(uint32_t origin)
+{
+    constexpr uint32_t colorAlphaOffset = 24;
+    constexpr uint32_t colorAlphaDefaultValue = 0xFF000000;
+    uint32_t result = origin;
+    if ((origin >> colorAlphaOffset) == 0) {
+        result = origin | colorAlphaDefaultValue;
+    }
+    return result;
+}
+
+bool ParseColorFromResourceObject(napi_env env, napi_value value, Color& colorResult)
+{
+    ResourceInfo resourceInfo;
+    if (!ParseResourceParam(env, value, resourceInfo)) {
+        LOGE("Parse color from resource failed");
+        return false;
+    }
+    auto themeConstants = GetThemeConstants(resourceInfo.bundleName, resourceInfo.moduleName);
+    if (themeConstants == nullptr) {
+        LOGE("themeConstants is nullptr");
+        return false;
+    }
+    if (resourceInfo.type == static_cast<int32_t>(ResourceType::STRING)) {
+        auto colorString = themeConstants->GetString(resourceInfo.type);
+        return Color::ParseColorString(colorString, colorResult);
+    }
+    if (resourceInfo.type == static_cast<int32_t>(ResourceType::INTEGER)) {
+        auto colorInt = themeConstants->GetInt(resourceInfo.type);
+        colorResult = Color(CompleteColorAlphaIfIncomplete(colorInt));
+        return true;
+    }
+    colorResult = themeConstants->GetColor(resourceInfo.resId);
+    return true;
+}
+
+bool ParseColor(napi_env env, napi_value value, Color& result)
+{
+    napi_valuetype valueType = GetValueType(env, value);
+    if (valueType != napi_number && valueType != napi_string && valueType != napi_object) {
+        return false;
+    }
+    if (valueType == napi_number) {
+        int32_t colorId = 0;
+        napi_get_value_int32(env, value, &colorId);
+        result = Color(CompleteColorAlphaIfIncomplete(static_cast<uint32_t>(colorId)));
+        return true;
+    }
+    if (valueType == napi_string) {
+        std::optional<std::string> colorString = GetStringFromValueUtf8(env, value);
+        if (!colorString.has_value()) {
+            LOGE("Parse color from string failed");
+        }
+        return Color::ParseColorString(colorString.value(), result);
+    }
+
+    return ParseColorFromResourceObject(env, value, result);
 }
 
 bool ParseResourceParam(napi_env env, napi_value value, ResourceInfo& info)
@@ -262,15 +468,11 @@ std::string DimensionToString(Dimension dimension)
 
 bool ParseString(const ResourceInfo& info, std::string& result)
 {
-    auto themeConstants = GetThemeConstants(info.bundleName, info.moduleName);
-    if (!themeConstants) {
-        LOGE("themeConstants is nullptr");
-        return false;
-    }
+    auto resourceWrapper = CreateResourceWrapper(info);
 
     if (info.type == static_cast<int>(ResourceType::PLURAL)) {
         auto count = StringUtils::StringToDouble(info.params[0]);
-        auto pluralResults = themeConstants->GetStringArray(info.resId);
+        auto pluralResults = resourceWrapper->GetStringArray(info.resId);
         auto pluralChoice = Localization::GetInstance()->PluralRulesFormat(count);
         auto iter = std::find(pluralResults.begin(), pluralResults.end(), pluralChoice);
         std::string originStr;
@@ -281,11 +483,11 @@ bool ParseString(const ResourceInfo& info, std::string& result)
         result = originStr;
     } else if (info.type == static_cast<int>(ResourceType::RAWFILE)) {
         auto fileName = info.params[0];
-        result = themeConstants->GetRawfile(fileName);
+        result = resourceWrapper->GetRawfile(fileName);
     } else if (info.type == static_cast<int>(ResourceType::FLOAT)) {
-        result = DimensionToString(themeConstants->GetDimension(info.resId));
+        result = DimensionToString(resourceWrapper->GetDimension(info.resId));
     } else {
-        auto originStr = themeConstants->GetString(info.resId);
+        auto originStr = resourceWrapper->GetString(info.resId);
         ReplaceHolder(originStr, info.params, 0);
         result = originStr;
     }
@@ -296,6 +498,41 @@ std::string ErrorToMessage(int32_t code)
 {
     auto iter = ERROR_CODE_TO_MSG.find(code);
     return (iter != ERROR_CODE_TO_MSG.end()) ? iter->second : "";
+}
+
+bool GetSingleParam(napi_env env, napi_callback_info info, napi_value* argv, napi_valuetype& valueType)
+{
+    size_t argc = 1;
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc != 1) {
+        return false;
+    }
+    napi_typeof(env, argv[0], &valueType);
+    return true;
+}
+
+// (Color | number | string | undifened)
+std::optional<Color> GetOptionalColor(napi_env env, napi_value argv, napi_valuetype& valueType)
+{
+    if (valueType == napi_number) {
+        uint32_t num;
+        uint32_t alpha = 0xff000000;
+        napi_get_value_uint32(env, argv, &num);
+        if ((num & alpha) == 0) {
+            num |= alpha;
+        }
+        return Color(num);
+    } else if (valueType == napi_string) {
+        std::string str;
+        bool result = GetNapiString(env, argv, str, valueType);
+        Color color;
+        if (!result || !Color::ParseColorString(str, color)) {
+            return std::nullopt;
+        }
+        return color;
+    } else {
+        return std::nullopt;
+    }
 }
 
 } // namespace OHOS::Ace::Napi

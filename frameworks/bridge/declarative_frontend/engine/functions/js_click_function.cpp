@@ -15,7 +15,6 @@
 
 #include "frameworks/bridge/declarative_frontend/engine/functions/js_click_function.h"
 
-#include "base/log/log.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_register.h"
 
 namespace OHOS::Ace::Framework {
@@ -37,14 +36,14 @@ void JsClickFunction::Execute(const ClickInfo& info)
     Offset globalOffset = info.GetGlobalLocation();
     Offset localOffset = info.GetLocalLocation();
     Offset screenOffset = info.GetScreenLocation();
-    obj->SetProperty<double>("displayX", SystemProperties::Px2Vp(screenOffset.GetX()));
-    obj->SetProperty<double>("displayY", SystemProperties::Px2Vp(screenOffset.GetY()));
-    obj->SetProperty<double>("windowX", SystemProperties::Px2Vp(globalOffset.GetX()));
-    obj->SetProperty<double>("windowY", SystemProperties::Px2Vp(globalOffset.GetY()));
-    obj->SetProperty<double>("screenX", SystemProperties::Px2Vp(globalOffset.GetX()));
-    obj->SetProperty<double>("screenY", SystemProperties::Px2Vp(globalOffset.GetY()));
-    obj->SetProperty<double>("x", SystemProperties::Px2Vp(localOffset.GetX()));
-    obj->SetProperty<double>("y", SystemProperties::Px2Vp(localOffset.GetY()));
+    obj->SetProperty<double>("displayX", PipelineBase::Px2VpWithCurrentDensity(screenOffset.GetX()));
+    obj->SetProperty<double>("displayY", PipelineBase::Px2VpWithCurrentDensity(screenOffset.GetY()));
+    obj->SetProperty<double>("windowX", PipelineBase::Px2VpWithCurrentDensity(globalOffset.GetX()));
+    obj->SetProperty<double>("windowY", PipelineBase::Px2VpWithCurrentDensity(globalOffset.GetY()));
+    obj->SetProperty<double>("screenX", PipelineBase::Px2VpWithCurrentDensity(globalOffset.GetX()));
+    obj->SetProperty<double>("screenY", PipelineBase::Px2VpWithCurrentDensity(globalOffset.GetY()));
+    obj->SetProperty<double>("x", PipelineBase::Px2VpWithCurrentDensity(localOffset.GetX()));
+    obj->SetProperty<double>("y", PipelineBase::Px2VpWithCurrentDensity(localOffset.GetY()));
     obj->SetProperty<double>("timestamp", static_cast<double>(info.GetTimeStamp().time_since_epoch().count()));
     obj->SetProperty<double>("source", static_cast<int32_t>(info.GetSourceDevice()));
     auto target = CreateEventTargetObject(info);
@@ -57,9 +56,6 @@ void JsClickFunction::Execute(const ClickInfo& info)
         obj->SetProperty<double>("tiltY", info.GetTiltY().value());
     }
     obj->SetProperty<double>("sourceTool", static_cast<int32_t>(info.GetSourceTool()));
-
-    LOGD("globalOffset.GetX() = %lf, globalOffset.GetY() = %lf, localOffset.GetX() = %lf, localOffset.GetY() = %lf",
-        globalOffset.GetX(), globalOffset.GetY(), localOffset.GetX(), localOffset.GetY());
 
     JSRef<JSVal> param = obj;
     JsFunction::ExecuteJS(1, &param);
@@ -71,14 +67,14 @@ void JsClickFunction::Execute(const GestureEvent& info)
     Offset globalOffset = info.GetGlobalLocation();
     Offset localOffset = info.GetLocalLocation();
     Offset screenOffset = info.GetScreenLocation();
-    obj->SetProperty<double>("displayX", SystemProperties::Px2Vp(screenOffset.GetX()));
-    obj->SetProperty<double>("displayY", SystemProperties::Px2Vp(screenOffset.GetY()));
-    obj->SetProperty<double>("windowX", SystemProperties::Px2Vp(globalOffset.GetX()));
-    obj->SetProperty<double>("windowY", SystemProperties::Px2Vp(globalOffset.GetY()));
-    obj->SetProperty<double>("screenX", SystemProperties::Px2Vp(globalOffset.GetX()));
-    obj->SetProperty<double>("screenY", SystemProperties::Px2Vp(globalOffset.GetY()));
-    obj->SetProperty<double>("x", SystemProperties::Px2Vp(localOffset.GetX()));
-    obj->SetProperty<double>("y", SystemProperties::Px2Vp(localOffset.GetY()));
+    obj->SetProperty<double>("displayX", PipelineBase::Px2VpWithCurrentDensity(screenOffset.GetX()));
+    obj->SetProperty<double>("displayY", PipelineBase::Px2VpWithCurrentDensity(screenOffset.GetY()));
+    obj->SetProperty<double>("windowX", PipelineBase::Px2VpWithCurrentDensity(globalOffset.GetX()));
+    obj->SetProperty<double>("windowY", PipelineBase::Px2VpWithCurrentDensity(globalOffset.GetY()));
+    obj->SetProperty<double>("screenX", PipelineBase::Px2VpWithCurrentDensity(globalOffset.GetX()));
+    obj->SetProperty<double>("screenY", PipelineBase::Px2VpWithCurrentDensity(globalOffset.GetY()));
+    obj->SetProperty<double>("x", PipelineBase::Px2VpWithCurrentDensity(localOffset.GetX()));
+    obj->SetProperty<double>("y", PipelineBase::Px2VpWithCurrentDensity(localOffset.GetY()));
     obj->SetProperty<double>("timestamp", static_cast<double>(info.GetTimeStamp().time_since_epoch().count()));
     obj->SetProperty<double>("source", static_cast<int32_t>(info.GetSourceDevice()));
     obj->SetProperty<double>("pressure", info.GetForce());
@@ -91,9 +87,6 @@ void JsClickFunction::Execute(const GestureEvent& info)
     obj->SetProperty<double>("sourceTool", static_cast<int32_t>(info.GetSourceTool()));
     auto target = CreateEventTargetObject(info);
     obj->SetPropertyObject("target", target);
-
-    LOGD("globalOffset.GetX() = %lf, globalOffset.GetY() = %lf, localOffset.GetX() = %lf, localOffset.GetY() = %lf",
-        globalOffset.GetX(), globalOffset.GetY(), localOffset.GetX(), localOffset.GetY());
 
     JSRef<JSVal> param = obj;
     JsFunction::ExecuteJS(1, &param);
@@ -109,14 +102,14 @@ void JsClickFunction::Execute(MouseInfo& info)
     Offset globalOffset = info.GetGlobalLocation();
     Offset localOffset = info.GetLocalLocation();
     Offset screenOffset = info.GetScreenLocation();
-    obj->SetProperty<double>("displayX", SystemProperties::Px2Vp(screenOffset.GetX()));
-    obj->SetProperty<double>("displayY", SystemProperties::Px2Vp(screenOffset.GetY()));
-    obj->SetProperty<double>("windowX", SystemProperties::Px2Vp(globalOffset.GetX()));
-    obj->SetProperty<double>("windowY", SystemProperties::Px2Vp(globalOffset.GetY()));
-    obj->SetProperty<double>("screenX", SystemProperties::Px2Vp(globalOffset.GetX()));
-    obj->SetProperty<double>("screenY", SystemProperties::Px2Vp(globalOffset.GetY()));
-    obj->SetProperty<double>("x", SystemProperties::Px2Vp(localOffset.GetX()));
-    obj->SetProperty<double>("y", SystemProperties::Px2Vp(localOffset.GetY()));
+    obj->SetProperty<double>("displayX", PipelineBase::Px2VpWithCurrentDensity(screenOffset.GetX()));
+    obj->SetProperty<double>("displayY", PipelineBase::Px2VpWithCurrentDensity(screenOffset.GetY()));
+    obj->SetProperty<double>("windowX", PipelineBase::Px2VpWithCurrentDensity(globalOffset.GetX()));
+    obj->SetProperty<double>("windowY", PipelineBase::Px2VpWithCurrentDensity(globalOffset.GetY()));
+    obj->SetProperty<double>("screenX", PipelineBase::Px2VpWithCurrentDensity(globalOffset.GetX()));
+    obj->SetProperty<double>("screenY", PipelineBase::Px2VpWithCurrentDensity(globalOffset.GetY()));
+    obj->SetProperty<double>("x", PipelineBase::Px2VpWithCurrentDensity(localOffset.GetX()));
+    obj->SetProperty<double>("y", PipelineBase::Px2VpWithCurrentDensity(localOffset.GetY()));
     obj->SetProperty<double>("timestamp", static_cast<double>(info.GetTimeStamp().time_since_epoch().count()));
     obj->SetPropertyObject(
         "stopPropagation", JSRef<JSFunc>::New<FunctionCallback>(JsStopPropagation));
@@ -132,9 +125,6 @@ void JsClickFunction::Execute(MouseInfo& info)
     auto target = CreateEventTargetObject(info);
     obj->SetPropertyObject("target", target);
     obj->Wrap<MouseInfo>(&info);
-
-    LOGD("button = %d, action = %d, globalOffset = (%lf, %lf), localOffset = (%lf, %lf),", info.GetButton(),
-        info.GetAction(), globalOffset.GetX(), globalOffset.GetY(), localOffset.GetX(), localOffset.GetY());
 
     JSRef<JSVal> param = JSRef<JSObject>::Cast(obj);
     JsFunction::ExecuteJS(1, &param);

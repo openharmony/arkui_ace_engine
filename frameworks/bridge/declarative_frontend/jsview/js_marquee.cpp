@@ -25,6 +25,7 @@
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "bridge/declarative_frontend/jsview/models/marquee_model_impl.h"
 #include "core/components/text/text_theme.h"
+#include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/marquee/marquee_model.h"
 #include "core/components_ng/pattern/marquee/marquee_model_ng.h"
 
@@ -202,9 +203,11 @@ void JSMarquee::OnStart(const JSCallbackInfo& info)
     }
 
     auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
-    auto onChange = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)]() {
+    WeakPtr<NG::FrameNode> targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto onChange = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = targetNode]() {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("Marquee.onStart");
+        PipelineContext::SetCallBackNode(node);
         func->ExecuteJS();
     };
     MarqueeModel::GetInstance()->SetOnStart(std::move(onChange));
@@ -217,9 +220,11 @@ void JSMarquee::OnBounce(const JSCallbackInfo& info)
     }
 
     auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
-    auto onChange = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)]() {
+    WeakPtr<NG::FrameNode> targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto onChange = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = targetNode]() {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("Marquee.onBounce");
+        PipelineContext::SetCallBackNode(node);
         func->ExecuteJS();
     };
     MarqueeModel::GetInstance()->SetOnBounce(std::move(onChange));
@@ -232,9 +237,11 @@ void JSMarquee::OnFinish(const JSCallbackInfo& info)
     }
 
     auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
-    auto onChange = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)]() {
+    WeakPtr<NG::FrameNode> targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto onChange = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = targetNode]() {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("Marquee.onFinish");
+        PipelineContext::SetCallBackNode(node);
         func->ExecuteJS();
     };
     MarqueeModel::GetInstance()->SetOnFinish(std::move(onChange));

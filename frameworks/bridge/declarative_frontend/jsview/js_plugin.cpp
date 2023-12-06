@@ -20,6 +20,7 @@
 #include "base/log/log_wrapper.h"
 #include "bridge/declarative_frontend/jsview/models/plugin_model_impl.h"
 #include "core/components/common/properties/clip_path.h"
+#include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/plugin/plugin_model.h"
 #include "core/components_ng/pattern/plugin/plugin_model_ng.h"
 #include "core/components_ng/pattern/plugin/plugin_pattern.h"
@@ -47,8 +48,7 @@ PluginModel* PluginModel::GetInstance()
 namespace OHOS::Ace::Framework {
 void JSPlugin::Create(const JSCallbackInfo& info)
 {
-    if (info.Length() == 0 || !info[0]->IsObject()) {
-        LOGE("plugin create fail due to PluginComponent construct param is empty or type is not Object");
+    if (!info[0]->IsObject()) {
         return;
     }
 
@@ -71,11 +71,10 @@ void JSPlugin::Create(const JSCallbackInfo& info)
         if (!bundleValue->IsEmpty() && bundleValue->IsString()) {
             pluginInfo.bundleName = bundleValue->ToString();
         }
-        LOGD("JSPlugin::Create: source=%{public}s bundleName=%{public}s", pluginInfo.pluginName.c_str(),
-            pluginInfo.bundleName.c_str());
+        TAG_LOGD(AceLogTag::ACE_PLUGIN_COMPONENT, "Create plugin source=%{public}s bundleName=%{public}s",
+            pluginInfo.pluginName.c_str(), pluginInfo.bundleName.c_str());
     }
     if (pluginInfo.bundleName.size() > PATH_MAX || pluginInfo.pluginName.size() > PATH_MAX) {
-        LOGE("the source path or the bundleName is too long");
         return;
     }
     // Parse data
@@ -89,13 +88,7 @@ void JSPlugin::Create(const JSCallbackInfo& info)
 
 void JSPlugin::JsSize(const JSCallbackInfo& info)
 {
-    if (info.Length() == 0) {
-        LOGE("The arg is wrong, it is supposed to have atleast 1 arguments");
-        return;
-    }
-
     if (!info[0]->IsObject()) {
-        LOGE("The arg is not Object or String.");
         return;
     }
 
@@ -103,13 +96,11 @@ void JSPlugin::JsSize(const JSCallbackInfo& info)
     JSRef<JSVal> widthValue = sizeObj->GetProperty("width");
     CalcDimension width = 0.0_vp;
     if (!ParseJsDimensionVp(widthValue, width)) {
-        LOGE("ParseJsDimensionVp width is error.");
         return;
     }
     JSRef<JSVal> heightValue = sizeObj->GetProperty("height");
     CalcDimension height = 0.0_vp;
     if (!ParseJsDimensionVp(heightValue, height)) {
-        LOGE("ParseJsDimensionVp height is error.");
         return;
     }
     PluginModel::GetInstance()->SetPluginSize(width.IsValid() ? width : 0.0_vp, height.IsValid() ? height : 0.0_vp);
@@ -117,11 +108,6 @@ void JSPlugin::JsSize(const JSCallbackInfo& info)
 
 void JSPlugin::JsWidth(const JSCallbackInfo& info)
 {
-    if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have atleast 1 arguments");
-        return;
-    }
-
     CalcDimension value;
     if (!ParseJsDimensionVp(info[0], value)) {
         return;
@@ -136,11 +122,6 @@ void JSPlugin::JsWidth(const JSCallbackInfo& info)
 
 void JSPlugin::JsHeight(const JSCallbackInfo& info)
 {
-    if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have atleast 1 arguments");
-        return;
-    }
-
     CalcDimension value;
     if (!ParseJsDimensionVp(info[0], value)) {
         return;
@@ -157,11 +138,14 @@ void JSPlugin::JsOnComplete(const JSCallbackInfo& info)
 {
 #if defined(PLUGIN_COMPONENT_SUPPORTED)
     if (info[0]->IsFunction()) {
+        WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
         auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
-        auto OnComplete = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](const std::string& param) {
+        auto OnComplete = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = frameNode](
+                              const std::string& param) {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-            LOGD("onComplete send");
+            TAG_LOGD(AceLogTag::ACE_PLUGIN_COMPONENT, "plugin send onComplete event.");
             ACE_SCORING_EVENT("Plugin.OnComplete");
+            PipelineContext::SetCallBackNode(node);
             func->Execute();
         };
         PluginModel::GetInstance()->SetOnComplete(std::move(OnComplete));
@@ -173,12 +157,15 @@ void JSPlugin::JsOnError(const JSCallbackInfo& info)
 {
 #if defined(PLUGIN_COMPONENT_SUPPORTED)
     if (info[0]->IsFunction()) {
+        WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
         auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
-        auto onError = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](const std::string& param) {
+        auto onError = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = frameNode](
+                           const std::string& param) {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-            LOGD("onError send");
+            TAG_LOGD(AceLogTag::ACE_PLUGIN_COMPONENT, "plugin send onError event.");
             ACE_SCORING_EVENT("Plugin.OnComplete");
             std::vector<std::string> keys = { "errcode", "msg" };
+            PipelineContext::SetCallBackNode(node);
             func->Execute(keys, param);
         };
         PluginModel::GetInstance()->SetOnError(std::move(onError));

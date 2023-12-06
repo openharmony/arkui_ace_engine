@@ -398,7 +398,7 @@ public:
         radius0_ = std::max(radius0_, 0.0f);
         radius1_ = std::max(radius1_, 0.0f);
         return RSRecordingShaderEffect::CreateTwoPointConical(
-            center_, radius0_, center_, radius1_, colors, pos, tileMode);
+            center_, radius0_, center_, radius1_, colors, pos, tileMode, &matrix);
     }
 
     static std::unique_ptr<GradientShader> CreateRadialGradient(const NG::Gradient& gradient, const RSSize& size)
@@ -613,7 +613,8 @@ public:
         if (isRepeat_) {
             tileMode = RSTileMode::REPEAT;
         }
-        return RSRecordingShaderEffect::CreateSweepGradient(center_, colors, pos, tileMode, startAngle_, endAngle_);
+        return RSRecordingShaderEffect::CreateSweepGradient(
+            center_, colors, pos, tileMode, startAngle_, endAngle_, &matrix);
     }
 
     static std::unique_ptr<GradientShader> CreateSweepGradient(const NG::Gradient& gradient, const RSSize& size)
@@ -989,7 +990,7 @@ void DrawingDecorationPainter::PaintColorBlend(const RSRoundRect& rRect, RSCanva
             brush.SetAntiAlias(true);
             RSFilter filter;
             filter.SetColorFilter(RSRecordingColorFilter::CreateBlendModeColorFilter(RSColor::ColorQuadSetARGB(
-                colorBlend.GetRed(), colorBlend.GetGreen(), colorBlend.GetBlue(), colorBlend.GetAlpha()),
+                colorBlend.GetAlpha(), colorBlend.GetRed(), colorBlend.GetGreen(), colorBlend.GetBlue()),
                 RSBlendMode::PLUS));
             brush.SetFilter(filter);
             RSSaveLayerOps slr(nullptr, &brush, RSSaveLayerOps::Flags::INIT_WITH_PREVIOUS);
@@ -1146,11 +1147,7 @@ RSBrush DrawingDecorationPainter::CreateMaskDrawingBrush(const RefPtr<BasicShape
 
 RSImage DrawingDecorationPainter::CreateBorderImageGradient(const NG::Gradient& gradient, const SizeF& paintSize)
 {
-    auto recordingShader = DrawingDecorationPainter::CreateGradientShader(gradient, paintSize);
-    std::shared_ptr<RSShaderEffect> shader = nullptr;
-    if (recordingShader != nullptr) {
-        shader = std::static_pointer_cast<RSRecordingShaderEffect>(recordingShader)->GetCmdList()->Playback();
-    }
+    auto shader = DrawingDecorationPainter::CreateGradientShader(gradient, paintSize);
     RSBrush brush;
     brush.SetAntiAlias(true);
     brush.SetShaderEffect(std::move(shader));

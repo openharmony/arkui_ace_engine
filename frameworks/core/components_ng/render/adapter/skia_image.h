@@ -41,6 +41,11 @@ public:
         return compressData_;
     }
 
+    bool HasData() const override
+    {
+        return GetCompressData() || GetImage();
+    }
+
     void SetCompressData(sk_sp<SkData> data, int32_t w, int32_t h)
     {
         compressData_ = data;

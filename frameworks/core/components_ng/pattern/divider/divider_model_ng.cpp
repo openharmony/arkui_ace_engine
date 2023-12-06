@@ -27,6 +27,7 @@ void DividerModelNG::Create()
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
+    ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::DIVIDER_ETS_TAG, nodeId);
     auto frameNode = FrameNode::GetOrCreateFrameNode(
         V2::DIVIDER_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<DividerPattern>(); });
     stack->Push(frameNode);
@@ -52,4 +53,23 @@ void DividerModelNG::LineCap(const Ace::LineCap& value)
     ACE_UPDATE_PAINT_PROPERTY(DividerRenderProperty, LineCap, value);
 }
 
+void DividerModelNG::StrokeWidth(FrameNode* frameNode, const Dimension& value)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(DividerLayoutProperty, StrokeWidth, value, frameNode);
+}
+
+void DividerModelNG::LineCap(FrameNode* frameNode, const Ace::LineCap& value)
+{
+    ACE_UPDATE_NODE_PAINT_PROPERTY(DividerRenderProperty, LineCap, value, frameNode);
+}
+
+void DividerModelNG::SetDividerColor(FrameNode* frameNode, const Color& color)
+{
+    ACE_UPDATE_NODE_PAINT_PROPERTY(DividerRenderProperty, DividerColor, color, frameNode);
+}
+
+void DividerModelNG::SetVertical(FrameNode* frameNode, const bool& value)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(DividerLayoutProperty, Vertical, value, frameNode);
+}
 } // namespace OHOS::Ace::NG

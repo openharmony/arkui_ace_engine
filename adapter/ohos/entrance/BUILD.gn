@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2023 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -37,16 +37,21 @@ template("ace_ohos_standard_source_set") {
       "$ace_root/adapter/ohos/entrance/data_ability_helper_standard.cpp",
       "$ace_root/adapter/ohos/entrance/dialog_container.cpp",
       "$ace_root/adapter/ohos/entrance/file_asset_provider.cpp",
+      "$ace_root/adapter/ohos/entrance/file_asset_provider_impl.cpp",
       "$ace_root/adapter/ohos/entrance/form_utils_impl.cpp",
       "$ace_root/adapter/ohos/entrance/hap_asset_provider.cpp",
+      "$ace_root/adapter/ohos/entrance/hap_asset_provider_impl.cpp",
       "$ace_root/adapter/ohos/entrance/mmi_event_convertor.cpp",
       "$ace_root/adapter/ohos/entrance/pa_container.cpp",
       "$ace_root/adapter/ohos/entrance/plugin_utils_impl.cpp",
       "$ace_root/adapter/ohos/entrance/subwindow/subwindow_ohos.cpp",
-      "$ace_root/adapter/ohos/entrance/utils.cpp",
+      "$ace_root/adapter/ohos/entrance/window/foldable_window_ohos.cpp",
 
       # innerkits impl
       "$ace_root/adapter/ohos/entrance/ui_content_impl.cpp",
+      "$ace_root/adapter/ohos/entrance/ui_event_impl.cpp",
+      "$ace_root/adapter/ohos/entrance/utils.cpp",
+      "$flutter_root/engine/flutter/shell/common/thread_host.cc",
 
       # drag window
       "$ace_root/adapter/ohos/entrance/window/drag_window_ohos.cpp",
@@ -62,7 +67,11 @@ template("ace_ohos_standard_source_set") {
       defines += [ "SIMULATOR_64" ]
     }
 
-    configs = [ "$ace_root:ace_config" ]
+    configs = [
+      "$ace_root:ace_config",
+      "$ace_flutter_engine_root:flutter_config",
+      "$ace_flutter_engine_root/icu:icu_config_$platform",
+    ]
 
     if (defined(config.enable_rosen_backend) && config.enable_rosen_backend) {
       configs += [
@@ -80,26 +89,13 @@ template("ace_ohos_standard_source_set") {
       "//foundation/window/window_manager/interfaces/innerkits",
       "//foundation/graphic/graphic_2d/rosen/modules/2d_engine",
       "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics/src/drawing/engine_adapter",
-      "//foundation/multimedia/media_library/interfaces/inner_api/media_library_helper/include",
       "//third_party/node/src",
     ]
 
-    if (ace_use_new_skia) {
-      sources += [ "$flutter_root/engine/flutter/shell/common/thread_host.cc" ]
-      deps = [
-        "$ace_flutter_engine_root:flutter_engine_common_$platform",
-        "$skia_root_new:skia_$platform",
-      ]
-      configs += [
-        "$ace_flutter_engine_root:flutter_config",
-        "$ace_flutter_engine_root/icu:icu_config_$platform",
-      ]
-    } else {
-      deps = [
-        "$ace_flutter_engine_root:third_party_flutter_engine_$platform",
-        "$ace_flutter_engine_root/skia:ace_skia_$platform",
-      ]
-    }
+    deps = [
+      "$ace_flutter_engine_root:flutter_engine_common_$platform",
+      "$skia_root_new:skia_$platform",
+    ]
 
     deps += [
       "$ace_root/adapter/ohos/capability:ace_capability_ohos",
@@ -111,10 +107,12 @@ template("ace_ohos_standard_source_set") {
       "ability_base:base",
       "ability_base:configuration",
       "ability_base:extractortool",
+      "ability_base:view_data",
       "ability_base:want",
       "ability_runtime:ability_context_native",
       "ability_runtime:ability_manager",
       "ability_runtime:abilitykit_native",
+      "ability_runtime:auto_fill_manager",
       "ability_runtime:data_ability_helper",
       "common_event_service:cesfwk_innerkits",
       "data_share:datashare_consumer",
@@ -128,7 +126,6 @@ template("ace_ohos_standard_source_set") {
       "input:libmmi-client",
       "ipc:ipc_core",
       "ipc:ipc_napi_common",
-      "media_library:media_library_manager",
       "napi:ace_napi",
       "preferences:native_preferences",
       "relational_store:native_dataability",
@@ -138,6 +135,11 @@ template("ace_ohos_standard_source_set") {
       "window_manager:libwm",
       "window_manager:libwsutils",
     ]
+
+    if (defined(config.media_library_exists) && config.media_library_exists) {
+      include_dirs += [ "//foundation/multimedia/media_library/interfaces/inner_api/media_library_helper/include" ]
+      external_deps += [ "media_library:media_library_manager" ]
+    }
 
     if (enable_graphic_text_gine) {
       external_deps += [ "graphic_2d:rosen_text" ]

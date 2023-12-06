@@ -85,6 +85,11 @@ public:
         formLinkInfos_ = infos;
     }
 
+    bool IsJsCard() const
+    {
+        return isJsCard_;
+    }
+
 private:
     void OnAttachToFrameNode() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
@@ -108,16 +113,21 @@ private:
     bool ISAllowUpdate() const;
     void EnableDrag();
     void UpdateConfiguration();
+    void HandleFormComponent(const RequestFormInfo& info);
+    void AddFormComponent(const RequestFormInfo& info);
+    void UpdateFormComponent(const RequestFormInfo& info);
 
-    void HandleSnapshot();
+    void HandleSnapshot(uint32_t delayTime);
     void TakeSurfaceCaptureForUI();
     void UpdateStaticCard();
-    RefPtr<FrameNode> GetOrCreateImageNode();
+    RefPtr<FrameNode> CreateImageNode();
     void UpdateImageNode();
     void RemoveFrsNode();
     void ReleaseRenderer();
-    void HideImageNode();
+    void DeleteImageNode();
     void HandleStaticFormEvent(const PointF& touchPoint);
+    void RegistVisibleAreaChangeCallback();
+    void OnVisibleAreaChange(bool visible);
 
     // used by ArkTS Card, for RSSurfaceNode from FRS,
     RefPtr<RenderContext> externalRenderContext_;
@@ -128,13 +138,18 @@ private:
     RequestFormInfo cardInfo_;
     bool isLoaded_ = false;
     bool isVisible_ = true;
+    bool isBeenLayout_ = false;
     bool isUnTrust_ = false;
     bool isDynamic_ = true;
+    bool needSnapshotAgain_ = false;
     bool isSnapshot_ = false;
+    bool isRegistedAreaCallback_ = false;
     RefPtr<PixelMap> pixelMap_ = nullptr;
     int32_t scopeId_;
     std::string localeTag_ = AceApplicationInfo::GetInstance().GetLocaleTag();
     std::vector<std::string> formLinkInfos_;
+
+    bool isJsCard_ = true;
 };
 
 } // namespace NG

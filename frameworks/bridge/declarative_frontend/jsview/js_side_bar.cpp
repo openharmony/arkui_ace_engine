@@ -177,9 +177,11 @@ void JSSideBar::OnChange(const JSCallbackInfo& info)
     }
 
     auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
-    auto onChange = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](bool isShow) {
+    WeakPtr<NG::FrameNode> targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto onChange = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = targetNode](bool isShow) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("SideBarContainer.onChange");
+        PipelineContext::SetCallBackNode(node);
         auto newJSVal = JSRef<JSVal>::Make(ToJSValue(isShow));
         func->ExecuteJS(1, &newJSVal);
     };
@@ -207,9 +209,12 @@ void ParseShowSideBarObject(const JSCallbackInfo& args, const JSRef<JSVal>& chan
     CHECK_NULL_VOID(changeEventVal->IsFunction());
 
     auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(changeEventVal));
-    auto onChangeEvent = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc)](bool isShow) {
+    WeakPtr<NG::FrameNode> targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto onChangeEvent = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), node = targetNode](
+                             bool isShow) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("SideBarContainer.onChangeEvent");
+        PipelineContext::SetCallBackNode(node);
         auto newJSVal = JSRef<JSVal>::Make(ToJSValue(isShow));
         func->ExecuteJS(1, &newJSVal);
     };

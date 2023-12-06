@@ -890,11 +890,6 @@ void PluginFrontendDelegate::PostJsTask(std::function<void()>&& task)
     taskExecutor_->PostTask(task, TaskExecutor::TaskType::JS);
 }
 
-void PluginFrontendDelegate::RemoveVisibleChangeNode(NodeId id)
-{
-    LOGW("RemoveVisibleChangeNode: Not implemented yet.");
-}
-
 const std::string& PluginFrontendDelegate::GetAppID() const
 {
     return manifestParser_->GetAppInfo()->GetAppID();
@@ -925,7 +920,8 @@ Size PluginFrontendDelegate::MeasureTextSize(const MeasureContext& context)
     return MeasureUtil::MeasureTextSize(context);
 }
 
-void PluginFrontendDelegate::ShowToast(const std::string& message, int32_t duration, const std::string& bottom)
+void PluginFrontendDelegate::ShowToast(
+    const std::string& message, int32_t duration, const std::string& bottom, const NG::ToastShowMode& showMode)
 {
     int32_t durationTime = std::clamp(duration, TOAST_TIME_DEFAULT, TOAST_TIME_MAX);
     auto pipelineContext = AceType::DynamicCast<PipelineContext>(pipelineContextHolder_.Get());

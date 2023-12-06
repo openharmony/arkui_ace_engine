@@ -57,7 +57,7 @@ bool ImageSourceInfo::IsValidBase64Head(const std::string& uri, const std::strin
 {
     auto iter = uri.find_first_of(',');
     if (iter == std::string::npos) {
-        LOGE("wrong base64 head format.");
+        TAG_LOGW(AceLogTag::ACE_IMAGE, "ImageSourceInfo: wrong base64 head format.");
         return false;
     }
     std::string base64Head = uri.substr(0, iter);
@@ -87,6 +87,8 @@ SrcType ImageSourceInfo::ResolveURIType(const std::string& uri)
     } else if (head == "file") {
         if (IsUriOfDataAbilityEncoded(uri, "^file://media/.*thumbnail.*$")) {
             return SrcType::DATA_ABILITY_DECODED;
+        } else if (IsUriOfDataAbilityEncoded(uri, "^file://media/.*astc.*$")) {
+            return SrcType::ASTC;
         } else if (IsUriOfDataAbilityEncoded(uri, "^file://media/.*")) {
             return SrcType::DATA_ABILITY;
         }
@@ -134,7 +136,7 @@ ImageSourceInfo::ImageSourceInfo(std::string imageSrc, std::string bundleName, s
         ++count;
     }
     if (count > 1) {
-        LOGW("multi image source set, only one will be load.");
+        TAG_LOGW(AceLogTag::ACE_IMAGE, "ImageSourceInfo: multi image source set, only one will be load.");
     }
     GenerateCacheKey();
 }
@@ -254,7 +256,7 @@ bool ImageSourceInfo::IsSvg() const
 
 bool ImageSourceInfo::IsPixmap() const
 {
-    return pixmap_ != nullptr || SrcType::DATA_ABILITY_DECODED == srcType_;
+    return pixmap_ != nullptr || SrcType::DATA_ABILITY_DECODED == srcType_ || SrcType::ASTC == srcType_;
 }
 
 const std::string& ImageSourceInfo::GetBundleName() const

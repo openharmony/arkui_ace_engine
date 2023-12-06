@@ -60,7 +60,6 @@ const std::string LOCAL_BUNDLE_CODE_PATH = "/data/storage/el1/bundle/";
 const std::string FILE_SEPARATOR = "/";
 const std::string ACTION_VIEWDATA = "ohos.want.action.viewData";
 constexpr int32_t PLATFORM_VERSION_TEN = 10;
-static int32_t g_instanceId = 0;
 
 FrontendType GetFrontendType(const std::string& frontendType)
 {
@@ -212,7 +211,7 @@ AceAbility::AceAbility() = default;
 void AceAbility::OnStart(const Want& want, sptr<AAFwk::SessionInfo> sessionInfo)
 {
     Ability::OnStart(want, sessionInfo);
-    abilityId_ = g_instanceId++;
+    abilityId_ = Container::GenerateId<FA_CONTAINER>();
     static std::once_flag onceFlag;
     auto abilityContext = GetAbilityContext();
     auto cacheDir = abilityContext->GetCacheDir();
@@ -452,7 +451,7 @@ void AceAbility::OnStart(const Want& want, sptr<AAFwk::SessionInfo> sessionInfo)
         auto params = eventAction->GetValue("params");
         auto bundle = bundleName->GetString();
         auto ability = abilityName->GetString();
-        LOGI("on Action called to event handler， bundle:%{public}s ability:%{public}s, params:%{public}s",
+        LOGI("on Action called to event handler, bundle:%{public}s ability:%{public}s, params:%{public}s",
             bundle.c_str(), ability.c_str(), params->GetString().c_str());
         if (bundle.empty() || ability.empty()) {
             LOGE("action ability or bundle is empty");
@@ -693,6 +692,14 @@ void AceAbility::OnSizeChange(const OHOS::Rosen::Rect& rect, OHOS::Rosen::Window
             Rect(Offset(rect.posX_, rect.posY_), Size(rect.width_, rect.height_)));
         pipelineContext->SetIsLayoutFullScreen(
             Ability::GetWindow()->GetMode() == Rosen::WindowMode::WINDOW_MODE_FULLSCREEN);
+                auto isNeedAvoidWindowMode =
+                        (Ability::GetWindow()->GetMode() == Rosen::WindowMode::WINDOW_MODE_FLOATING ||
+                         Ability::GetWindow()->GetMode() == Rosen::WindowMode::WINDOW_MODE_SPLIT_PRIMARY ||
+                         Ability::GetWindow()->GetMode()
+                         == Rosen::WindowMode::WINDOW_MODE_SPLIT_SECONDARY) &&
+                        (SystemProperties::GetDeviceType() == DeviceType::PHONE ||
+                         SystemProperties::GetDeviceType() == DeviceType::TABLET);
+        pipelineContext->SetIsNeedAvoidWindow(isNeedAvoidWindowMode);
     }
     auto taskExecutor = container->GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);

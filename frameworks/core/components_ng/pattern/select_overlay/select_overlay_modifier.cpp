@@ -65,6 +65,12 @@ SelectOverlayModifier::SelectOverlayModifier(const OffsetF& menuOptionOffset)
     circlesAndBackArrowOpacity_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(0.0);
     AttachProperty(circlesAndBackArrowOpacity_);
 
+    firstHandleIsShow_ = AceType::MakeRefPtr<PropertyBool>(false);
+    AttachProperty(firstHandleIsShow_);
+
+    secondHandleIsShow_ = AceType::MakeRefPtr<PropertyBool>(false);
+    AttachProperty(secondHandleIsShow_);
+
     SetDefaultCircleAndLineEndOffset();
 }
 
@@ -175,6 +181,13 @@ void SelectOverlayModifier::onDraw(DrawingContext& drawingContext)
     CHECK_NULL_VOID(menuOptionOffset_);
     CHECK_NULL_VOID(pointRadius_);
     CHECK_NULL_VOID(headPointRadius_);
+    CHECK_NULL_VOID(firstHandleIsShow_);
+    CHECK_NULL_VOID(secondHandleIsShow_);
+
+    if (!firstHandleIsShow_->Get() && !secondHandleIsShow_->Get()) {
+        return;
+    }
+
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto textOverlayTheme = pipeline->GetTheme<TextOverlayTheme>();

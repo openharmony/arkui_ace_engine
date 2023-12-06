@@ -11,7 +11,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import("//build/test.gni")
 import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
 ohos_unittest("canvas_renderer_test_ng") {
@@ -40,25 +39,30 @@ ohos_unittest("canvas_renderer_test_ng") {
   defines = [ "ENABLE_DRAG_FRAMEWORK" ]
 
   sources += [
-    "$ace_root/frameworks/base/test/mock/mock_download_manager.cpp",
-    "$ace_root/frameworks/base/test/mock/mock_drag_window_old.cpp",
+    "$ace_root/frameworks/core/common/container_scope.cpp",
     "$ace_root/frameworks/core/components/test/mock/mock_resource_adapter.cpp",
-    "$ace_root/frameworks/core/components/test/unittest/mock/subwindow_mock.cpp",
     "$ace_root/test/mock/adapter/mock_ace_application_info.cpp",
     "$ace_root/test/mock/adapter/mock_ace_container.cpp",
     "$ace_root/test/mock/adapter/mock_mmi_event_convertor.cpp",
+    "$ace_root/test/mock/base/mock_download_manager.cpp",
+    "$ace_root/test/mock/base/mock_drag_window.cpp",
+    "$ace_root/test/mock/base/mock_foldable_window.cpp",
+    "$ace_root/test/mock/base/mock_subwindow.cpp",
+    "$ace_root/test/mock/core/common/mock_interaction.cpp",
     "$ace_root/test/mock/core/common/mock_udmf.cpp",
+    "$ace_root/test/mock/interfaces/mock_ace_forward_compatibility.cpp",
   ]
 
   if (is_ohos_standard_system) {
     sources -= [
-      "$ace_root/frameworks/base/test/mock/mock_download_manager.cpp",
       "$ace_root/frameworks/core/components/test/mock/mock_resource_adapter.cpp",
+      "$ace_root/test/mock/base/mock_download_manager.cpp",
     ]
   }
 
   external_deps = [
     "ability_runtime:abilitykit_native",
+    "ability_runtime:runtime",
     "c_utils:utils",
     "input:libmmi-client",
     "ipc:ipc_single",
@@ -68,6 +72,10 @@ ohos_unittest("canvas_renderer_test_ng") {
     "window_manager:scene_session",
     "window_manager:scene_session_manager",
   ]
+
+  if (ace_use_rosen_drawing) {
+    external_deps += [ "graphic_2d:2d_graphics" ]
+  }
 
   if (enable_graphic_text_gine) {
     external_deps += [ "graphic_2d:rosen_text" ]

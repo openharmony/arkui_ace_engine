@@ -110,14 +110,11 @@ template("build_component_plugin") {
         "//foundation/graphic/graphic_2d/rosen/modules/render_service_base/include",
       ]
 
-      if (ace_use_new_skia) {
-        configs += [ "$ace_flutter_engine_root:flutter_config" ]
-        # TODO: new skia configs
-      } else {
-        configs += [ "$ace_flutter_engine_root/skia:skia_config" ]
-      }
+      configs += [ "$ace_flutter_engine_root:flutter_config" ]
 
-      if (is_cross_platform_build) {
+      # TODO: new skia configs
+
+      if (is_arkui_x) {
         deps += [ "//plugins/libs/napi:napi_$platform" ]
       } else {
         deps += [ "//foundation/arkui/napi/:ace_napi" ]

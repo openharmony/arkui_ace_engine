@@ -39,11 +39,14 @@ public:
         const RefPtr<UINode>& previewCustomNode = nullptr);
 
     // create select's popup menu
-    static RefPtr<FrameNode> Create(const std::vector<SelectParam>& params, int32_t targetId);
+    static RefPtr<FrameNode> Create(
+        const std::vector<SelectParam>& params, int32_t targetId, const std::string& targetTag);
 
 private:
     static void UpdateMenuPaintProperty(
         const RefPtr<FrameNode>& menuNode, const MenuParam& menuParam, const MenuType& isContextMenu);
+    static void UpdateMenuBackgroundEffect(const RefPtr<FrameNode>& menuNode);
+    static void UpdateMenuBorderEffect(const RefPtr<FrameNode>& menuNode);
 };
 } // namespace OHOS::Ace::NG
 

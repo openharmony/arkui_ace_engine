@@ -36,7 +36,6 @@ constexpr int32_t INDICATOR_FOCUS_PADDING_START_SIZE = 2;
 
 using namespace Flutter;
 
-
 RenderLayer FlutterRenderSwiper::GetRenderLayer()
 {
     if (!layer_) {
@@ -343,12 +342,7 @@ void FlutterRenderSwiper::PaintMask(RenderContext& context, const Offset& offset
     }
     const float pos[] = { 0.0f, 0.75f, 1.0f };
 
-#ifdef USE_SYSTEM_SKIA
-    skPaint->setShader(
-        SkGradientShader::MakeLinear(pts, colors, pos, gradientColors.size(), SkShader::kClamp_TileMode));
-#else
     skPaint->setShader(SkGradientShader::MakeLinear(pts, colors, pos, gradientColors.size(), SkTileMode::kClamp));
-#endif
     if (axis_ == Axis::HORIZONTAL) {
         canvas->drawRect(offset.GetX(), offset.GetY() + indicatorPosition_.GetY() - NormalizeToPx(9.0_vp),
             offset.GetX() + GetLayoutSize().Width(), offset.GetY() + indicatorPosition_.GetY() + NormalizeToPx(15.0_vp),
@@ -396,8 +390,9 @@ void FlutterRenderSwiper::DrawIndicatorBackground(RenderContext& context, const 
     flutter::RRect rRect;
     Offset position = swiperIndicatorData_.indicatorPaintData.position;
     double radius = swiperIndicatorData_.indicatorPaintData.radius;
-    rRect.sk_rrect.setRectXY(SkRect::MakeIWH(swiperIndicatorData_.indicatorPaintData.width,
-        swiperIndicatorData_.indicatorPaintData.height), radius, radius);
+    rRect.sk_rrect.setRectXY(
+        SkRect::MakeIWH(swiperIndicatorData_.indicatorPaintData.width, swiperIndicatorData_.indicatorPaintData.height),
+        radius, radius);
     rRect.sk_rrect.offset(position.GetX() + offset.GetX(), position.GetY() + offset.GetY());
     canvas->drawRRect(rRect, paint, paintData);
 }
@@ -468,28 +463,26 @@ void FlutterRenderSwiper::GetIndicatorPointMoveOffset(int32_t index, Offset& ani
 void FlutterRenderSwiper::GetRRect(flutter::RRect& rRect, double& startOffset, double& endOffset, const Offset& offset)
 {
     // calculate focus move distance
-    double tailOffset = (GetIndicatorSpringStatus() == SpringStatus::FOCUS_SWITCH) ?
-        indicatorSwitchTailOffset_ : indicatorTailOffset_;
+    double tailOffset =
+        (GetIndicatorSpringStatus() == SpringStatus::FOCUS_SWITCH) ? indicatorSwitchTailOffset_ : indicatorTailOffset_;
     Offset focusMove;
     Offset focusStretch;
     double focusStartPadding =
         INDICATOR_FOCUS_PADDING_START_SIZE * swiperIndicatorData_.indicatorItemData[moveStartIndex_].radius;
     double focusMoveLength = swiperIndicatorData_.pointPadding + focusStartPadding;
-    double focusMoveDistance =
-        focusMoveLength * (animationDirect_ > 0 ? tailOffset : indicatorHeadOffset_);
-    double recStretch = focusMoveLength *  (indicatorHeadOffset_ - tailOffset) * animationDirect_;
+    double focusMoveDistance = focusMoveLength * (animationDirect_ > 0 ? tailOffset : indicatorHeadOffset_);
+    double recStretch = focusMoveLength * (indicatorHeadOffset_ - tailOffset) * animationDirect_;
     (axis_ == Axis::HORIZONTAL) ? focusMove.SetX(focusMoveDistance) : focusMove.SetY(focusMoveDistance);
     (axis_ == Axis::HORIZONTAL) ? focusStretch.SetX(recStretch) : focusStretch.SetY(recStretch);
 
     // paint focus of indicator
     Offset position = swiperIndicatorData_.indicatorItemData[moveStartIndex_].position + indicatorPosition_;
     double radius = swiperIndicatorData_.indicatorItemData[moveStartIndex_].radius;
-    auto rectWH = SkRect::MakeWH(
-        swiperIndicatorData_.indicatorItemData[moveStartIndex_].width + focusStretch.GetX(),
+    auto rectWH = SkRect::MakeWH(swiperIndicatorData_.indicatorItemData[moveStartIndex_].width + focusStretch.GetX(),
         swiperIndicatorData_.indicatorItemData[moveStartIndex_].height + focusStretch.GetY());
     rRect.sk_rrect.setRectXY(rectWH, radius, radius);
-    rRect.sk_rrect.offset(position.GetX() + offset.GetX() + focusMove.GetX(),
-        position.GetY() + offset.GetY() + focusMove.GetY());
+    rRect.sk_rrect.offset(
+        position.GetX() + offset.GetX() + focusMove.GetX(), position.GetY() + offset.GetY() + focusMove.GetY());
 
     // rrect range
     if (axis_ == Axis::HORIZONTAL) {
@@ -520,7 +513,7 @@ bool FlutterRenderSwiper::HideIndicatorPoint(int32_t index, const IndicatorOffse
         }
         if (index == moveEndIndex_ && indicatorHeadOffset_ >= focusStretchMaxTime_ &&
             ((animationDirect_ > 0 && pointInfo.focusEnd >= pointEnd) ||
-            (animationDirect_ < 0 && pointInfo.focusStart <= pointStart))) {
+                (animationDirect_ < 0 && pointInfo.focusStart <= pointStart))) {
             return true;
         }
     }

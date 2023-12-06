@@ -24,7 +24,7 @@
 
 namespace OHOS::Ace {
 
-class ACE_EXPORT SpringMotion : public Motion {
+class ACE_FORCE_EXPORT SpringMotion : public Motion {
     DECLARE_ACE_TYPE(SpringMotion, Motion);
 
 public:
@@ -72,11 +72,7 @@ public:
 
     ~ScrollSpringMotion() override = default;
 
-    void Move(float offsetTime) override;
-
     bool IsCompleted() override;
-
-    double GetCurrentPosition() override;
 };
 
 } // namespace OHOS::Ace

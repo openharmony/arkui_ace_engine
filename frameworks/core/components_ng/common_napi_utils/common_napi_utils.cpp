@@ -24,7 +24,6 @@
 #include "base/json/json_util.h"
 #include "core/common/card_scope.h"
 #include "core/common/container.h"
-#include "core/gestures/gesture_info.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -358,7 +357,7 @@ RefPtr<ThemeConstants> CommonNapiUtils::GetThemeConstants(napi_env env, napi_val
 
 std::unique_ptr<JsonValue> CommonNapiUtils::PutJsonValue(napi_env env, napi_value value, std::string& key)
 {
-    auto result = JsonUtil::Create(false);
+    auto result = JsonUtil::Create(true);
     napi_valuetype valueType = CommonNapiUtils::GetValueType(env, value);
     switch (valueType) {
         case napi_boolean: {
@@ -396,7 +395,7 @@ bool CommonNapiUtils::ParseColorFromResource(napi_env env, napi_value value, Col
     if (colorId == ERROR_COLOR_ID) {
         uint32_t length;
         napi_get_array_length(env, jsParams, &length);
-        auto jsonArray = JsonUtil::CreateArray(false);
+        auto jsonArray = JsonUtil::CreateArray(true);
         for (uint32_t i = 0; i < length; i++) {
             napi_value elementValue;
             napi_get_element(env, jsParams, i, &elementValue);
@@ -468,7 +467,7 @@ bool CommonNapiUtils::GetDimensionResult(napi_env env, napi_value value, CalcDim
     if (dimensionId == ERROR_COLOR_ID) {
         uint32_t length;
         napi_get_array_length(env, jsParams, &length);
-        auto jsonArray = JsonUtil::CreateArray(false);
+        auto jsonArray = JsonUtil::CreateArray(true);
         for (uint32_t i = 0; i < length; i++) {
             napi_value elementValue;
             napi_get_element(env, jsParams, i, &elementValue);

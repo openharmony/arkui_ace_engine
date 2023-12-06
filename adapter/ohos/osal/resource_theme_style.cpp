@@ -60,6 +60,18 @@ static const std::set<std::string> stringAttrs = {
     "description_receive",
     "description_continue_to_receive",
     "draggable",
+    "divider_shadow_enable",
+    "camera_input",
+    "menu_bg_blur_effect_enable",
+    "menu_double_border_enable"
+    "section_unfocus_effect_enable",
+    "section_unfocus_color",
+    "sheet_type",
+    "multiple_dialog_display",
+    "menu_expand_display",
+    "popup_double_border_enable",
+    "popup_outer_border_color",
+    "popup_inner_border_color"
 };
 
 double ParseDoubleUnit(const std::string& value, std::string& unit)

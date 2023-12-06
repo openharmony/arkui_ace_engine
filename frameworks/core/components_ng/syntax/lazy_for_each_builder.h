@@ -33,6 +33,7 @@
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_v2/foreach/lazy_foreach_component.h"
+#include "core/components_ng/pattern/list/list_item_pattern.h"
 
 namespace OHOS::Ace::NG {
 
@@ -191,6 +192,8 @@ public:
     {
         startIndex_ = -1;
         endIndex_ = -1;
+        int32_t lastIndex = -1;
+        bool isCertained = false;
 
         decltype(cachedItems_) items(std::move(cachedItems_));
 
@@ -210,7 +213,21 @@ public:
             if (startIndex_ == -1) {
                 startIndex_ = index;
             }
-            endIndex_ = std::max(endIndex_, index);
+            if (isLoop_) {
+                if (isCertained) {
+                    continue;
+                }
+                if (lastIndex > -1 && index - lastIndex > 1) {
+                    startIndex_ = index;
+                    endIndex_ = lastIndex;
+                    isCertained = true;
+                } else {
+                    endIndex_ = std::max(endIndex_, index);
+                }
+            } else {
+                endIndex_ = std::max(endIndex_, index);
+            }
+            lastIndex = index;
         }
 
         if (needTransition) {
@@ -262,12 +279,47 @@ public:
         CHECK_NULL_RETURN(itemInfo.second, nullptr);
         cache.try_emplace(itemInfo.first, LazyForEachCacheChild(index, itemInfo.second));
         ViewStackProcessor::GetInstance()->SetPredict(itemInfo.second);
-        itemInfo.second->Build();
+        itemInfo.second->Build(nullptr);
+        auto frameNode = AceType::DynamicCast<FrameNode>(itemInfo.second->GetFrameChildByIndex(0, false));
+        if (frameNode && frameNode->GetTag() == V2::LIST_ITEM_ETS_TAG) {
+            frameNode->GetPattern<ListItemPattern>()->BeforeCreateLayoutWrapper();
+        }
         ViewStackProcessor::GetInstance()->ResetPredict();
         itemInfo.second->SetJSViewActive(false);
         cachedItems_[index] = LazyForEachChild(itemInfo.first, nullptr);
 
         return itemInfo.second;
+    }
+
+    void CheckCacheIndex(std::unordered_set<int32_t>& idleIndexes, int32_t count) {
+        for (int32_t i = 1; i <= cacheCount_; i++) {
+            if (isLoop_) {
+                if ((startIndex_ <= endIndex_ && endIndex_ + i < count) ||
+                    startIndex_ > endIndex_ + i) {
+                    idleIndexes.emplace(endIndex_ + i);
+                } else if ((endIndex_ + i) % count < startIndex_) {
+                    idleIndexes.emplace((endIndex_ + i) % count);
+                }
+            } else {
+                if (endIndex_ + i < count) {
+                    idleIndexes.emplace(endIndex_ + i);
+                }
+            }
+        }
+        for (int32_t i = 1; i <= cacheCount_; i++) {
+            if (isLoop_) {
+                if ((startIndex_ <= endIndex_ && startIndex_ >= i) ||
+                    startIndex_ > endIndex_ + i) {
+                    idleIndexes.emplace(startIndex_ - i);
+                } else if ((startIndex_ - i + count) % count > endIndex_) {
+                    idleIndexes.emplace((startIndex_ - i + count) % count);
+                }
+            } else {
+                if (startIndex_ >= i) {
+                    idleIndexes.emplace(startIndex_ - i);
+                }
+            }
+        }
     }
 
     bool PreBuild(int64_t deadline, const std::optional<LayoutConstraintF>& itemConstraint, bool canRunLongPredictTask)
@@ -280,16 +332,7 @@ public:
         std::unordered_map<std::string, LazyForEachCacheChild> cache;
         std::unordered_set<int32_t> idleIndexes;
         if (startIndex_ != -1 && endIndex_ != -1) {
-            for (int32_t i = 1; i <= cacheCount_; i++) {
-                if (endIndex_ + i < count) {
-                    idleIndexes.emplace(endIndex_ + i);
-                }
-            }
-            for (int32_t i = 1; i <= cacheCount_; i++) {
-                if (startIndex_ >= i) {
-                    idleIndexes.emplace(startIndex_ - i);
-                }
-            }
+            CheckCacheIndex(idleIndexes, count);
         }
 
         for (auto& [key, node] : expiringItem_) {
@@ -304,9 +347,8 @@ public:
         bool result = true;
         for (auto index : idleIndexes) {
             if (GetSysTimestamp() > deadline) {
-                cache.merge(expiringItem_);
-                expiringItem_.swap(cache);
-                return false;
+                result = false;
+                continue;
             }
             auto uiNode = CacheItem(index, cache, itemConstraint);
             if (!canRunLongPredictTask && itemConstraint) {
@@ -337,11 +379,16 @@ public:
 
     virtual void RegisterDataChangeListener(const RefPtr<V2::DataChangeListener>& listener) = 0;
 
-    virtual void UnregisterDataChangeListener(const RefPtr<V2::DataChangeListener>& listener) = 0;
+    virtual void UnregisterDataChangeListener(V2::DataChangeListener* listener) = 0;
 
     void SetCacheCount(int32_t cacheCount)
     {
         cacheCount_ = cacheCount;
+    }
+
+    void SetIsLoop(bool isLoop)
+    {
+        isLoop_ = isLoop;
     }
 
     const std::map<int32_t, LazyForEachChild>& GetAllChildren()
@@ -349,6 +396,16 @@ public:
         if (!cachedItems_.empty()) {
             startIndex_ = cachedItems_.begin()->first;
             endIndex_ = cachedItems_.rbegin()->first;
+        }
+        if (isLoop_ && !cachedItems_.empty()) {
+            int32_t lastIndex = -1;
+            for (auto& [index, node] : cachedItems_) {
+                if (lastIndex > -1 && index - lastIndex > 1) {
+                    startIndex_ = index;
+                    endIndex_ = lastIndex;
+                    break;
+                }
+            }
         }
         return cachedItems_;
     }
@@ -369,6 +426,7 @@ private:
     int32_t endIndex_ = -1;
     int32_t cacheCount_ = 0;
     bool needTransition = false;
+    bool isLoop_ = false;
     ACE_DISALLOW_COPY_AND_MOVE(LazyForEachBuilder);
 };
 } // namespace OHOS::Ace::NG

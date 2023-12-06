@@ -27,6 +27,7 @@ void GaugeModelNG::Create(float value, float min, float max)
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
+    ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::GAUGE_ETS_TAG, nodeId);
     auto frameNode = FrameNode::GetOrCreateFrameNode(
         V2::GAUGE_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<GaugePattern>(); });
     stack->Push(frameNode);
@@ -44,11 +45,13 @@ void GaugeModelNG::SetValue(float value)
 void GaugeModelNG::SetStartAngle(float startAngle)
 {
     ACE_UPDATE_PAINT_PROPERTY(GaugePaintProperty, StartAngle, startAngle);
+    ACE_UPDATE_LAYOUT_PROPERTY(GaugeLayoutProperty, StartAngle, startAngle);
 }
 
 void GaugeModelNG::SetEndAngle(float endAngle)
 {
     ACE_UPDATE_PAINT_PROPERTY(GaugePaintProperty, EndAngle, endAngle);
+    ACE_UPDATE_LAYOUT_PROPERTY(GaugeLayoutProperty, EndAngle, endAngle);
 }
 
 void GaugeModelNG::SetColors(const std::vector<Color>& colors, const std::vector<float>& values)
@@ -68,6 +71,7 @@ void GaugeModelNG::SetGradientColors(
 void GaugeModelNG::SetStrokeWidth(const Dimension& strokeWidth)
 {
     ACE_UPDATE_PAINT_PROPERTY(GaugePaintProperty, StrokeWidth, strokeWidth);
+    ACE_UPDATE_LAYOUT_PROPERTY(GaugeLayoutProperty, StrokeWidth, strokeWidth);
 }
 
 void GaugeModelNG::SetDescription(const RefPtr<AceType>& customNode)
@@ -114,5 +118,27 @@ void GaugeModelNG::SetIndicatorIconPath(
 void GaugeModelNG::SetIndicatorSpace(const Dimension& space)
 {
     ACE_UPDATE_PAINT_PROPERTY(GaugePaintProperty, IndicatorSpace, space);
+}
+
+void GaugeModelNG::ResetGradientColors()
+{
+    ACE_RESET_PAINT_PROPERTY_WITH_FLAG(GaugePaintProperty, GradientColors, PROPERTY_UPDATE_RENDER);
+    ACE_RESET_PAINT_PROPERTY_WITH_FLAG(GaugePaintProperty, Values, PROPERTY_UPDATE_RENDER);
+    ACE_RESET_PAINT_PROPERTY_WITH_FLAG(GaugePaintProperty, GaugeType, PROPERTY_UPDATE_RENDER);
+}
+
+void GaugeModelNG::ResetShadowOptions()
+{
+    ACE_RESET_PAINT_PROPERTY_WITH_FLAG(GaugePaintProperty, ShadowOptions, PROPERTY_UPDATE_RENDER);
+}
+
+void GaugeModelNG::ResetIndicatorIconPath()
+{
+    ACE_RESET_PAINT_PROPERTY_WITH_FLAG(GaugePaintProperty, IndicatorIconSourceInfo, PROPERTY_UPDATE_RENDER);
+}
+
+void GaugeModelNG::ResetIndicatorSpace()
+{
+    ACE_RESET_PAINT_PROPERTY_WITH_FLAG(GaugePaintProperty, IndicatorSpace, PROPERTY_UPDATE_RENDER);
 }
 } // namespace OHOS::Ace::NG

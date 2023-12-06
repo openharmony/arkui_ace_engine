@@ -37,7 +37,7 @@ using OHOS::Ace::V2::Gutter;
 using LayoutPair = std::pair<RefPtr<LayoutWrapper>, NewLineOffset>;
 
 namespace {
-
+constexpr int32_t DEFAULT_COLUMN_NUMBER = 12;
 std::string ConvertSizeTypeToString(GridSizeType sizeType)
 {
     auto index = static_cast<int32_t>(sizeType);
@@ -128,7 +128,6 @@ float GridRowLayoutAlgorithm::MeasureChildren(LayoutWrapper* layoutWrapper, doub
     /* GridRow's child must be a GridCol */
     for (auto& child : children) {
         if (child->GetHostTag() != V2::GRID_COL_ETS_TAG) {
-            LOGE("Not a grid_col component");
             continue;
         }
         auto gridCol = AceType::DynamicCast<GridColLayoutProperty>(child->GetLayoutProperty());
@@ -170,10 +169,6 @@ float GridRowLayoutAlgorithm::MeasureChildren(LayoutWrapper* layoutWrapper, doub
 
         offset = newLineOffset.offset + newLineOffset.span;
         newLineOffset.offsetY = totalHeight;
-        LOGD("GridRowLayoutAlgorithm::MeasureChildren(), height=%{public}f, span=%{public}d, newline=%{public}d, "
-             "offsetY=%{public}f, offset=%{public}d",
-            currentRowHeight, newLineOffset.span, newLineOffset.newLineCount, newLineOffset.offsetY,
-            newLineOffset.offset);
 
         gridColChildrenOfOneRow_.emplace_back(std::make_pair(child, newLineOffset));
     }
@@ -196,8 +191,6 @@ void GridRowLayoutAlgorithm::CalcCrossAxisAlignment(LayoutWrapper* layoutWrapper
         const auto& childMargin = child.first->GetGeometryNode()->GetMargin();
         auto childLayoutProperty = child.first->GetLayoutProperty();
         if (!childLayoutProperty) {
-            LOGD("Child %{public}d, tag %{public}s, has no layout property, continue", childNode->GetId(),
-                childNode->GetTag().c_str());
             continue;
         }
         auto alignSelf = FlexAlign::FLEX_START;
@@ -262,12 +255,12 @@ void GridRowLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     gutterInDouble_ =
         std::make_pair<double, double>(context->NormalizeToPx(gutter.first), context->NormalizeToPx(gutter.second));
     int32_t columnNum = GridContainerUtils::ProcessColumn(sizeType, layoutProperty->GetColumnsValue());
+    if (columnNum <= 0) {
+        columnNum = DEFAULT_COLUMN_NUMBER;
+    }
     columnUnitWidth_ = GridContainerUtils::ProcessColumnWidth(gutterInDouble_, columnNum, maxSize.Width());
     float childrenHeight =
         MeasureChildren(layoutWrapper, columnUnitWidth_, maxSize.Height(), gutterInDouble_, sizeType, columnNum);
-    LOGD("GridRowLayoutAlgorithm::Measure() columnNum=%{public}d, columnUnitWidth_=%{public}f, "
-         "childrenHeight=%{public}f, sizeType=%{public}d",
-        columnNum, columnUnitWidth_, childrenHeight, static_cast<int>(sizeType));
 
     MeasureSelf(layoutWrapper, childrenHeight);
 }

@@ -20,6 +20,7 @@
 #ifdef USE_ROSEN_DRAWING
 #include "drawing/engine_adapter/skia_adapter/skia_bitmap.h"
 #include "drawing/engine_adapter/skia_adapter/skia_data.h"
+#include "drawing/engine_adapter/skia_adapter/skia_image_info.h"
 #endif
 
 #include "core/animation/animator.h"
@@ -62,7 +63,7 @@ RefPtr<CanvasImage> AnimatedImage::Create(
     CHECK_NULL_RETURN(data, nullptr);
     auto rsData = data->GetRSData();
     CHECK_NULL_RETURN(rsData, nullptr);
-    auto skData = rsData->GetImpl<Rosen::Drawing::SkiaData>()->GetSkData();
+    auto skData = SkData::MakeWithoutCopy(rsData->GetData(), rsData->GetSize());
     auto codec = SkCodec::MakeFromData(skData);
     CHECK_NULL_RETURN(codec, nullptr);
     if (SystemProperties::GetImageFrameworkEnabled()) {
@@ -79,6 +80,7 @@ AnimatedImage::AnimatedImage(const std::unique_ptr<SkCodec>& codec, std::string 
     auto pipelineContext = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
     animator_ = CREATE_ANIMATOR(pipelineContext);
+    animator_->PreventFrameJank();
 
     // set up animator
     int32_t totalDuration = 0;
@@ -225,8 +227,8 @@ void AnimatedRSImage::DecodeImpl(uint32_t idx)
 #ifndef USE_ROSEN_DRAWING
         bitmap.allocPixels(imageInfo);
 #else
-        auto& skBitmap = const_cast<SkBitmap&>(bitmap.GetImpl<Rosen::Drawing::SkiaBitmap>()->ExportSkiaBitmap());
-        skBitmap.allocPixels(imageInfo);
+        auto info = Rosen::Drawing::SkiaImageInfo::ConvertToRSImageInfo(imageInfo);
+        bitmap.Build(info);
 #endif
     }
 
@@ -234,8 +236,7 @@ void AnimatedRSImage::DecodeImpl(uint32_t idx)
 #ifndef USE_ROSEN_DRAWING
     auto res = codec_->getPixels(imageInfo, bitmap.getPixels(), bitmap.rowBytes(), &options);
 #else
-    auto& skBitmap = bitmap.GetImpl<Rosen::Drawing::SkiaBitmap>()->ExportSkiaBitmap();
-    auto res = codec_->getPixels(imageInfo, skBitmap.getPixels(), skBitmap.rowBytes(), &options);
+    auto res = codec_->getPixels(imageInfo, bitmap.GetPixels(), bitmap.GetRowBytes(), &options);
 #endif
     CHECK_NULL_VOID(res == SkCodec::kSuccess);
 

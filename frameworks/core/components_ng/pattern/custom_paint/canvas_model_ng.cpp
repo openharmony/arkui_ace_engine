@@ -25,6 +25,7 @@ RefPtr<AceType> CanvasModelNG::Create()
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
+    ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::CANVAS_ETS_TAG, nodeId);
     auto frameNode = FrameNode::GetOrCreateFrameNode(
         V2::CANVAS_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<CustomPaintPattern>(); });
     stack->Push(frameNode);
@@ -36,7 +37,7 @@ RefPtr<AceType> CanvasModelNG::GetTaskPool(RefPtr<AceType>& pattern)
     return pattern;
 }
 
-void CanvasModelNG::SetOnReady(std::function<void(uint32_t)>&& onReady)
+void CanvasModelNG::SetOnReady(std::function<void()>&& onReady)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
@@ -44,7 +45,7 @@ void CanvasModelNG::SetOnReady(std::function<void(uint32_t)>&& onReady)
     CHECK_NULL_VOID(eventHub);
 
     auto func = onReady;
-    auto onReadyEvent = [func]() { func(0); };
+    auto onReadyEvent = [func]() { func(); };
     eventHub->SetOnReady(std::move(onReadyEvent));
 }
 } // namespace OHOS::Ace::NG

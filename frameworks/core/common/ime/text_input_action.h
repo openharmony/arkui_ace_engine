@@ -34,7 +34,8 @@ enum class TextInputAction {
     NEXT = 5,
     DONE = 6,
     PREVIOUS = 7,
-    END = PREVIOUS,
+    NEW_LINE = 8,
+    END = NEW_LINE,
 };
 
 // For convenience of convert int value from Java

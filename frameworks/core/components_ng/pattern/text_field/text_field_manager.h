@@ -21,7 +21,6 @@
 #include "base/utils/macros.h"
 #include "core/common/manager_interface.h"
 #include "core/components_ng/pattern/pattern.h"
-#include "core/components_ng/pattern/text_field/key_event_handler.h"
 #include "core/components_ng/property/safe_area_insets.h"
 
 namespace OHOS::Ace::NG {
@@ -60,10 +59,7 @@ public:
     bool ResetSlidingPanelParentHeight();
 
     bool UpdatePanelForVirtualKeyboard(double offsetY, double fullHeight);
-    void SetHeight(float height)
-    {
-        height_ = height;
-    }
+    void SetHeight(float height);
 
     float GetHeight() const
     {
@@ -72,8 +68,6 @@ public:
 
     bool OnBackPressed();
 
-    const RefPtr<KeyEventHandler>& GetKeyEventHandler();
-
 private:
     void ScrollToSafeAreaHelper(const SafeAreaInsets::Inset& bottomInset);
     RefPtr<FrameNode> FindScrollableOfFocusedTextField(const RefPtr<FrameNode>& textField);
@@ -81,7 +75,6 @@ private:
     bool hasMove_ = false;
     Offset position_;
     float height_ = 0.0f;
-    RefPtr<KeyEventHandler> keyEventHandler_;
     WeakPtr<Pattern> onFocusTextField_;
 };
 

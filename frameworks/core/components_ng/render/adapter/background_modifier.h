@@ -29,10 +29,9 @@ public:
     BackgroundModifier() = default;
     ~BackgroundModifier() override = default;
 
+#ifndef USE_ROSEN_DRAWING
     void Draw(Rosen::RSDrawingContext& context) const override
     {
-#ifndef USE_ROSEN_DRAWING
-#ifdef NEW_SKIA
         CHECK_NULL_VOID(pixelMap_);
         std::shared_ptr<Media::PixelMap> mediaPixelMap = pixelMap_->GetPixelMapSharedPtr();
         std::shared_ptr<SkCanvas> skCanvas { context.canvas, [](SkCanvas* /* unused */) {} };
@@ -57,9 +56,40 @@ public:
             desSKRect.fBottom = context.height;
         }
         recordingCanvas->DrawPixelMapRect(mediaPixelMap, srcSKRect, desSKRect, samplingOptions, &paint);
-#endif
-#endif
     }
+#else
+    void Draw(Rosen::RSDrawingContext& context) const override
+    {
+        CHECK_NULL_VOID(pixelMap_);
+        std::shared_ptr<Media::PixelMap> mediaPixelMap = pixelMap_->GetPixelMapSharedPtr();
+        auto& recordingCanvas = static_cast<Rosen::ExtendRecordingCanvas&>(*context.canvas);
+        RSSamplingOptions samplingOptions;
+        RSBrush brush;
+
+        SizeF desSize(initialNodeWidth_, initialNodeHeight_);
+        SizeF srcSize(mediaPixelMap->GetWidth(), mediaPixelMap->GetHeight());
+        NG::OffsetF offset1 = Alignment::GetAlignPosition(srcSize, desSize, align_);
+        NG::OffsetF offset2 = Alignment::GetAlignPosition(desSize, srcSize, align_);
+        RSRect srcRSRect = RSRect(offset1.GetX(), offset1.GetY(), srcSize.Width() + offset1.GetX(),
+            srcSize.Height() + offset1.GetY());
+        RSRect desRSRect = RSRect(offset2.GetX() * context.width / initialNodeWidth_,
+            offset2.GetY() * context.height / initialNodeHeight_,
+            srcSize.Width() * context.width / initialNodeWidth_ + offset2.GetX() * context.width / initialNodeWidth_,
+            srcSize.Height() * context.height / initialNodeHeight_ +
+            offset2.GetY() * context.height / initialNodeHeight_);
+        if (srcSize.Width() > desSize.Width()) {
+            srcRSRect.SetRight(offset1.GetX() + desSize.Width());
+            desRSRect.SetRight(context.width);
+        }
+        if (srcSize.Height() > desSize.Height()) {
+            srcRSRect.SetBottom(offset1.GetY() + desSize.Height());
+            desRSRect.SetBottom(context.height);
+        }
+        recordingCanvas.AttachBrush(brush);
+        recordingCanvas.DrawPixelMapRect(mediaPixelMap, srcRSRect, desRSRect, samplingOptions);
+        recordingCanvas.DetachBrush();
+    }
+#endif
 
     void SetPixelMap(const RefPtr<PixelMap>& pixelMap)
     {

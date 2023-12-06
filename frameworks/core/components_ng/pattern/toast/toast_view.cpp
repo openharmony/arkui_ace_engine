@@ -29,7 +29,8 @@
 #include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace::NG {
-RefPtr<FrameNode> ToastView::CreateToastNode(const std::string& message, const std::string& bottom, bool isRightToLeft)
+RefPtr<FrameNode> ToastView::CreateToastNode(
+    const std::string& message, const std::string& bottom, bool isRightToLeft, const ToastShowMode& showMode)
 {
     auto context = PipelineBase::GetCurrentContext();
     CHECK_NULL_RETURN(context, nullptr);
@@ -39,6 +40,7 @@ RefPtr<FrameNode> ToastView::CreateToastNode(const std::string& message, const s
     auto textId = ElementRegister::GetInstance()->MakeUniqueId();
     auto toastId = ElementRegister::GetInstance()->MakeUniqueId();
     // make toast node
+    ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::TOAST_ETS_TAG, toastId);
     auto toastNode = FrameNode::CreateFrameNode(V2::TOAST_ETS_TAG, toastId, AceType::MakeRefPtr<ToastPattern>());
     CHECK_NULL_RETURN(toastNode, nullptr);
     auto toastProperty = toastNode->GetLayoutProperty<ToastLayoutProperty>();
@@ -61,6 +63,7 @@ RefPtr<FrameNode> ToastView::CreateToastNode(const std::string& message, const s
     textNode->MountToParent(toastNode);
 
     toastProperty->UpdateBottom(StringUtils::StringToDimensionWithThemeValue(bottom, true, toastTheme->GetBottom()));
+    toastProperty->UpdateShowMode(showMode);
     toastNode->GetEventHub<EventHub>()->GetOrCreateGestureEventHub()->SetHitTestMode(HitTestMode::HTMTRANSPARENT);
     toastNode->MarkModifyDone();
     return toastNode;

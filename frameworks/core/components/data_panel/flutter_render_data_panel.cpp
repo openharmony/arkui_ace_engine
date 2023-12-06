@@ -512,7 +512,7 @@ void FlutterRenderPercentageDataPanel::PaintLinearProgress(RenderContext& contex
 {
     auto totalWidth = GetLayoutSize().Width();
     auto segment = GetSegments();
-    auto spaceWidth = SystemProperties::Vp2Px(FIXED_WIDTH);
+    auto spaceWidth = PipelineBase::Vp2PxWithCurrentDensity(FIXED_WIDTH);
     auto segmentWidthSum = 0.0;
     auto canvas = ScopedCanvas::Create(context);
     if (!canvas) {

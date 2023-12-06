@@ -21,7 +21,7 @@
 
 namespace OHOS::Ace {
 
-void RenderSvgFeColorMatrix::Update(const RefPtr<Component> &component)
+void RenderSvgFeColorMatrix::Update(const RefPtr<Component>& component)
 {
     const RefPtr<SvgFeColorMatrixComponent> feComponent = AceType::DynamicCast<SvgFeColorMatrixComponent>(component);
     if (!feComponent) {
@@ -42,13 +42,8 @@ void RenderSvgFeColorMatrix::Update(const RefPtr<Component> &component)
             StringUtils::StringSplitter(values_, ',', matrix);
         }
         for (int i = 0; i < int(sizeof(matrix_) / sizeof(float)) && i < (int)matrix.size(); i++) {
-#ifdef USE_SYSTEM_SKIA
-            // phone skia is range 0.0 and 255.0
-            matrix_[i] = matrix[i] * 255;
-#else
             // tv skia is range 0.0 and 1.0
             matrix_[i] = matrix[i];
-#endif
         }
         SetFeCommonAttrs(declaration);
     }

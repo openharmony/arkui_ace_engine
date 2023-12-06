@@ -29,7 +29,6 @@
 class LocalStorage extends NativeLocalStorage {
 
   protected storage_: Map<string, ObservedPropertyAbstract<any>>;
-
   /*
     get access to provded LocalStorage instance thru Stake model
     @StageModelOnly
@@ -148,16 +147,20 @@ class LocalStorage extends NativeLocalStorage {
    * @since 9
    */
   public set<T>(propName: string, newValue: T): boolean {
+    stateMgmtProfiler.begin("LocalStorage.set");
     if (newValue == undefined) {
       stateMgmtConsole.warn(`${this.constructor.name}: set('${propName}') with newValue == undefined not allowed.`);
+      stateMgmtProfiler.end();
       return false;
     }
     var p: ObservedPropertyAbstract<T> | undefined = this.storage_.get(propName);
     if (p == undefined) {
       stateMgmtConsole.warn(`${this.constructor.name}: set: no property ${propName} error.`);
+      stateMgmtProfiler.end();
       return false;
     }
     p.set(newValue);
+    stateMgmtProfiler.end();
     return true;
   }
 
@@ -174,8 +177,10 @@ class LocalStorage extends NativeLocalStorage {
    * @since 9
    */
   public setOrCreate<T>(propName: string, newValue: T): boolean {
+    stateMgmtProfiler.begin("LocalStorage.setOrCreate");
     if (newValue == undefined) {
       stateMgmtConsole.warn(`${this.constructor.name}: setOrCreate('${propName}') with newValue == undefined not allowed.`);
+      stateMgmtProfiler.end();
       return false;
     }
 
@@ -187,6 +192,7 @@ class LocalStorage extends NativeLocalStorage {
       stateMgmtConsole.debug(`${this.constructor.name}.setOrCreate(${propName}, ${newValue}) create new entry and set value`);
       this.addNewPropertyInternal<T>(propName, newValue);
     }
+    stateMgmtProfiler.end();
     return true;
   }
 
@@ -200,9 +206,14 @@ class LocalStorage extends NativeLocalStorage {
    * Not a public / sdk method.
    */
   private addNewPropertyInternal<T>(propName: string, value: T): ObservedPropertyAbstract<T> {
-    const newProp = (typeof value === "object") ?
-      new ObservedPropertyObject<T>(value, undefined, propName)
-      : new ObservedPropertySimple<T>(value, undefined, propName);
+    let newProp;
+    if (ViewStackProcessor.UsesNewPipeline()) {
+      newProp = new ObservedPropertyPU<T>(value, undefined, propName);
+    } else {
+      newProp = (typeof value === "object") ?
+        new ObservedPropertyObject<T>(value, undefined, propName)
+        : new ObservedPropertySimple<T>(value, undefined, propName);
+    }
     this.storage_.set(propName, newProp);
     return newProp;
   }
@@ -222,20 +233,21 @@ class LocalStorage extends NativeLocalStorage {
    * @since 9
    */
   public link<T>(propName: string, linkUser?: IPropertySubscriber, subscribersName?: string): SubscribedAbstractProperty<T> | undefined {
+    stateMgmtProfiler.begin("LocalStorage.link");
     var p: ObservedPropertyAbstract<T> | undefined = this.storage_.get(propName);
     if (p == undefined) {
       stateMgmtConsole.warn(`${this.constructor.name}: link: no property ${propName} error.`);
+      stateMgmtProfiler.end();
       return undefined;
     }
     let linkResult;
     if (ViewStackProcessor.UsesNewPipeline()) {
-        linkResult = (p instanceof ObservedPropertySimple)
-                ? new SynchedPropertySimpleTwoWayPU<T>(p, linkUser, propName)
-                : new SynchedPropertyObjectTwoWayPU<T>(p, linkUser, propName);
+        linkResult = new SynchedPropertyTwoWayPU(p, linkUser, propName);
     } else {
         linkResult = p.createLink(linkUser, propName);
     }
     linkResult.setInfo(subscribersName);
+    stateMgmtProfiler.end();
     return linkResult;
   }
 
@@ -254,11 +266,14 @@ class LocalStorage extends NativeLocalStorage {
    * @since 9
    */
   public setAndLink<T>(propName: string, defaultValue: T, linkUser?: IPropertySubscriber, subscribersName?: string): SubscribedAbstractProperty<T> {
+    stateMgmtProfiler.begin("LocalStorage.setAndLink");
     var p: ObservedPropertyAbstract<T> | undefined = this.storage_.get(propName);
     if (!p) {
       this.setOrCreate(propName, defaultValue);
     }
-    return this.link(propName, linkUser, subscribersName);
+    const link: SubscribedAbstractProperty<T> = this.link(propName, linkUser, subscribersName);
+    stateMgmtProfiler.end();
+    return link;
   }
 
 
@@ -276,21 +291,22 @@ class LocalStorage extends NativeLocalStorage {
    * @since 9
    */
   public prop<T>(propName: string, propUser?: IPropertySubscriber, subscribersName?: string): SubscribedAbstractProperty<T> | undefined {
+    stateMgmtProfiler.begin("LocalStorage.prop");
     var p: ObservedPropertyAbstract<T> | undefined = this.storage_.get(propName);
     if (p == undefined) {
       stateMgmtConsole.warn(`${this.constructor.name}: prop: no property ${propName} error.`);
+      stateMgmtProfiler.end();
       return undefined;
     }
 
     let propResult;
     if (ViewStackProcessor.UsesNewPipeline()) {
-        propResult = (p instanceof ObservedPropertySimple)
-                ? new SynchedPropertySimpleOneWayPU<T>(p, propUser, propName)
-                : new SynchedPropertyObjectOneWayPU<T>(p, propUser, propName);
+        propResult = new SynchedPropertyOneWayPU<T>(p, propUser, propName);
     } else {
         propResult = p.createProp(propUser, propName);
     }
     propResult.setInfo(subscribersName);
+    stateMgmtProfiler.end();
     return propResult;
   }
 
@@ -307,11 +323,14 @@ class LocalStorage extends NativeLocalStorage {
    * @since 9
    */
   public setAndProp<T>(propName: string, defaultValue: T, propUser?: IPropertySubscriber, subscribersName?: string): SubscribedAbstractProperty<T> {
+    stateMgmtProfiler.begin("LocalStorage.setAndProp");
     var p: ObservedPropertyAbstract<T> | undefined = this.storage_.get(propName);
     if (!p) {
         this.setOrCreate(propName, defaultValue);
     }
-    return this.prop(propName, propUser, subscribersName);
+    const prop: SubscribedAbstractProperty<T> = this.prop(propName, propUser, subscribersName);
+    stateMgmtProfiler.end();
+    return prop;
   }
 
   /**
@@ -335,18 +354,22 @@ class LocalStorage extends NativeLocalStorage {
    * @since 9
   */
   public delete(propName: string): boolean {
+    stateMgmtProfiler.begin("LocalStorage.delete");
     var p: ObservedPropertyAbstract<any> | undefined = this.storage_.get(propName);
     if (p) {
       if (p.numberOfSubscrbers()) {
         stateMgmtConsole.error(`${this.constructor.name}: Attempt to delete property ${propName} that has \
           ${p.numberOfSubscrbers()} subscribers. Subscribers need to unsubscribe before prop deletion.`);
+        stateMgmtProfiler.end();
         return false;
       }
       p.aboutToBeDeleted();
       this.storage_.delete(propName);
+      stateMgmtProfiler.end();
       return true;
     } else {
       stateMgmtConsole.warn(`${this.constructor.name}: Attempt to delete unknown property ${propName}.`);
+      stateMgmtProfiler.end();
       return false;
     }
   }
@@ -361,12 +384,14 @@ class LocalStorage extends NativeLocalStorage {
    * @since 9
    */
   protected clear(): boolean {
+    stateMgmtProfiler.begin("LocalStorage.clean");
     for (let propName of this.keys()) {
       var p: ObservedPropertyAbstract<any> = this.storage_.get(propName);
       if (p.numberOfSubscrbers()) {
         stateMgmtConsole.error(`${this.constructor.name}.deleteAll: Attempt to delete property ${propName} that \
           has ${p.numberOfSubscrbers()} subscribers. Subscribers need to unsubscribe before prop deletion.
           Any @Component instance with a @StorageLink/Prop or @LocalStorageLink/Prop is a subscriber.`);
+        stateMgmtProfiler.end();
         return false;
       }
     }
@@ -376,6 +401,7 @@ class LocalStorage extends NativeLocalStorage {
     }
     this.storage_.clear();
     stateMgmtConsole.debug(`${this.constructor.name}.deleteAll: success`);
+    stateMgmtProfiler.end();
     return true;
   }
 
@@ -418,20 +444,6 @@ class LocalStorage extends NativeLocalStorage {
     return false;
   }
 
-  /** 
-   * return number of subscribers to named property
-   *  useful for debug purposes
-   * 
-   * Not a public / sdk function
-  */
-  public numberOfSubscrbersTo(propName: string): number | undefined {
-    var p: ObservedPropertyAbstract<any> | undefined = this.storage_.get(propName);
-    if (p) {
-      return p.numberOfSubscrbers();
-    }
-    return undefined;
-  }
-
   public __createSync<T>(storagePropName: string, defaultValue: T,
     factoryFunc: SynchedPropertyFactoryFunc): ObservedPropertyAbstract<T> {
 
@@ -446,7 +458,6 @@ class LocalStorage extends NativeLocalStorage {
 
       p = this.addNewPropertyInternal<T>(storagePropName, defaultValue);
     }
-
     return factoryFunc(p);
   }
 }

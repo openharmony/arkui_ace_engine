@@ -20,7 +20,7 @@
 #include "core/components_ng/base/geometry_node.h"
 #include "core/components_ng/event/touch_event.h"
 #include "core/event/key_event.h"
-#include "core/gestures/gesture_info.h"
+#include "core/gestures/gesture_event.h"
 
 namespace OHOS::Ace::NG {
 
@@ -33,6 +33,11 @@ constexpr int32_t DEFAULT_TAB_FOCUSED_INDEX = -2;
 constexpr int32_t NONE_TAB_FOCUSED_INDEX = -1;
 constexpr int32_t MASK_FOCUS_STEP_FORWARD = 0x10;
 constexpr int32_t MASK_FOCUS_STEP_TAB = 0x5;
+constexpr int32_t DEEPTH_OF_MENU_WRAPPER = 3;
+constexpr int32_t DEEPTH_OF_MENU = 2;
+constexpr int32_t DEEPTH_OF_DIALOG = 2;
+constexpr int32_t DEEPTH_OF_PAGE = 1;
+constexpr int32_t DEEPTH_OF_POPUP = 2;
 
 enum class FocusType : int32_t {
     DISABLE = 0,
@@ -75,6 +80,12 @@ enum class FocusStyleType : int32_t {
 enum class OnKeyEventType : int32_t {
     DEFAULT = 0,
     CONTEXT_MENU = 1,
+};
+
+enum class FocusDependence : int32_t {
+    CHILD = 0,
+    SELF = 1,
+    AUTO = 2,
 };
 
 class ACE_EXPORT FocusPaintParam : public virtual AceType {
@@ -406,15 +417,18 @@ class ACE_EXPORT FocusHub : public virtual AceType {
 public:
     explicit FocusHub(const WeakPtr<EventHub>& eventHub, FocusType type = FocusType::DISABLE, bool focusable = false)
         : eventHub_(eventHub), focusable_(focusable), focusType_(type)
-    {
-        MarkRootFocusNeedUpdate();
-    }
+    {}
     ~FocusHub() override = default;
 
     void SetFocusStyleType(FocusStyleType type)
     {
         focusStyleType_ = type;
     }
+    FocusStyleType GetFocusStyleType() const
+    {
+        return focusStyleType_;
+    }
+
     void SetFocusPaintParamsPtr(const std::unique_ptr<FocusPaintParam>& paramsPtr)
     {
         CHECK_NULL_VOID(paramsPtr);
@@ -510,26 +524,33 @@ public:
     int32_t GetFrameId() const;
 
     bool HandleKeyEvent(const KeyEvent& keyEvent);
-    bool RequestFocusImmediately(bool isWholePathFocusable = false);
+    bool RequestFocusImmediately(bool isJudgeRootTree = false);
     void RequestFocus() const;
-    void RequestFocusWithDefaultFocusFirstly() const;
+    void RequestFocusWithDefaultFocusFirstly();
     void UpdateAccessibilityFocusInfo();
     void SwitchFocus(const RefPtr<FocusHub>& focusNode);
 
+    RefPtr<FocusHub> GetChildMainView();
+    RefPtr<FocusHub> GetMainViewRootScope();
+
+    static RefPtr<FocusHub> GetCurrentMainView();
+    static void LostFocusToViewRoot();
+
+    bool HandleFocusOnMainView();
     void LostFocus(BlurReason reason = BlurReason::FOCUS_SWITCH);
     void LostSelfFocus();
-    void RemoveSelf();
-    void RemoveChild(const RefPtr<FocusHub>& focusNode);
+    void RemoveSelf(BlurReason reason = BlurReason::FRAME_DESTROY);
+    void RemoveChild(const RefPtr<FocusHub>& focusNode, BlurReason reason = BlurReason::FRAME_DESTROY);
     bool GoToNextFocusLinear(FocusStep step, const RectF& rect = RectF());
     bool TryRequestFocus(const RefPtr<FocusHub>& focusNode, const RectF& rect, FocusStep step = FocusStep::NONE);
 
     void CollectTabIndexNodes(TabIndexNodeList& tabIndexNodes);
     bool GoToFocusByTabNodeIdx(TabIndexNodeList& tabIndexNodes, int32_t tabNodeIdx);
-    bool HandleFocusByTabIndex(const KeyEvent& event, const RefPtr<FocusHub>& mainFocusHub);
+    bool HandleFocusByTabIndex(const KeyEvent& event);
     RefPtr<FocusHub> GetChildFocusNodeByType(FocusNodeType nodeType = FocusNodeType::DEFAULT);
     RefPtr<FocusHub> GetChildFocusNodeById(const std::string& id);
     void HandleParentScroll() const;
-    int32_t GetFocusingTabNodeIdx(TabIndexNodeList& tabIndexNodes);
+    int32_t GetFocusingTabNodeIdx(TabIndexNodeList& tabIndexNodes) const;
     bool RequestFocusImmediatelyById(const std::string& id);
 
     bool IsFocusableByTab();
@@ -537,6 +558,7 @@ public:
     bool IsFocusableScopeByTab();
 
     bool IsFocusableWholePath();
+    bool IsOnRootTree() const;
 
     bool IsFocusable();
     bool IsFocusableNode();
@@ -548,8 +570,9 @@ public:
     }
     void SetParentFocusable(bool parentFocusable)
     {
-        LOGD("Set node: %{public}s/%{public}d parentFocusable from %{public}d to %{public}d", GetFrameName().c_str(),
-            GetFrameId(), parentFocusable_, parentFocusable);
+        TAG_LOGD(AceLogTag::ACE_FOCUS,
+            "Set node: %{public}s/%{public}d parentFocusable from %{public}d to %{public}d",
+             GetFrameName().c_str(), GetFrameId(), parentFocusable_, parentFocusable);
         parentFocusable_ = parentFocusable;
     }
 
@@ -574,8 +597,6 @@ public:
         return currentFocus_;
     }
     bool IsCurrentFocusWholePath();
-
-    void MarkRootFocusNeedUpdate();
 
     void ClearUserOnFocus()
     {
@@ -679,6 +700,12 @@ public:
     {
         onKeyEventsInternal_[type] = std::move(onKeyEvent);
     }
+
+    bool FindContextMenuOnKeyEvent(OnKeyEventType type)
+    {
+        return (onKeyEventsInternal_.find(type) != onKeyEventsInternal_.end());
+    }
+
     bool ProcessOnKeyEventInternal(const KeyEvent& event)
     {
         bool result = false;
@@ -795,6 +822,18 @@ public:
         return focusCallbackEvents_ ? focusCallbackEvents_->IsDefaultGroupHasFocused() : false;
     }
 
+    void SetIsViewRootScopeFocused(const RefPtr<FocusHub>& viewRootScope, bool isViewRootScopeFocused)
+    {
+        isViewRootScopeFocused_ = isViewRootScopeFocused;
+        if (viewRootScope) {
+            viewRootScope->SetFocusDependence(isViewRootScopeFocused ? FocusDependence::SELF : FocusDependence::AUTO);
+        }
+    }
+    bool GetIsViewRootScopeFocused() const
+    {
+        return isViewRootScopeFocused_;
+    }
+
     std::optional<std::string> GetInspectorKey() const;
 
     bool PaintFocusState(bool isNeedStateStyles = true);
@@ -820,6 +859,24 @@ public:
     void SetIsFocusUnit(bool isFocusUnit)
     {
         isFocusUnit_ = isFocusUnit;
+    }
+
+    FocusDependence GetFocusDependence() const
+    {
+        return focusDepend_;
+    }
+    void SetFocusDependence(FocusDependence focusDepend)
+    {
+        focusDepend_ = focusDepend;
+    }
+
+    void SetIsViewHasFocused(bool isViewHasFocused)
+    {
+        isViewHasFocused_ = isViewHasFocused;
+    }
+    bool GetIsViewHasFocused() const
+    {
+        return isViewHasFocused_;
     }
 
     static inline bool IsFocusStepVertical(FocusStep step)
@@ -857,7 +914,7 @@ protected:
 
     void OnFocus();
     void OnFocusNode();
-    void OnFocusScope();
+    void OnFocusScope(bool currentHasFocused = false);
     void OnBlur();
     void OnBlurNode();
     void OnBlurScope();
@@ -900,12 +957,14 @@ private:
 
     WeakPtr<FocusHub> lastWeakFocusNode_ { nullptr };
     int32_t lastFocusNodeIndex_ { -1 };
+    int32_t lastTabIndexNodeId_ { DEFAULT_TAB_FOCUSED_INDEX };
 
     bool focusable_ { true };
     bool parentFocusable_ { true };
     bool currentFocus_ { false };
-    bool isFirstFocusInPage_ { true };
     bool isFocusUnit_ { false };
+    bool isViewRootScopeFocused_ { true };
+    bool isViewHasFocused_ { false };
 
     FocusType focusType_ = FocusType::DISABLE;
     FocusStyleType focusStyleType_ = FocusStyleType::NONE;
@@ -915,6 +974,7 @@ private:
     RectF rectFromOrigin_;
     ScopeFocusAlgorithm focusAlgorithm_;
     BlurReason blurReason_ = BlurReason::FOCUS_SWITCH;
+    FocusDependence focusDepend_ = FocusDependence::CHILD;
 };
 } // namespace OHOS::Ace::NG
 

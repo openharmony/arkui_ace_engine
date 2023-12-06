@@ -104,6 +104,11 @@ void SpanModelNG::SetTextCase(Ace::TextCase value)
     ACE_UPDATE_SPAN_PROPERTY(TextCase, value, PropertyInfo::TEXTCASE);
 }
 
+void SpanModelNG::SetTextShadow(const std::vector<Shadow>& value)
+{
+    ACE_UPDATE_SPAN_PROPERTY(TextShadow, value, PropertyInfo::TEXTSHADOW);
+}
+
 void SpanModelNG::SetLetterSpacing(const Dimension& value)
 {
     ACE_UPDATE_SPAN_PROPERTY(LetterSpacing, value, PropertyInfo::LETTERSPACE);
@@ -123,6 +128,110 @@ void SpanModelNG::SetOnClick(std::function<void(const BaseEventInfo* info)>&& cl
 void SpanModelNG::ClearOnClick()
 {
     ACE_UPDATE_SPAN_PROPERTY(OnClickEvent, nullptr, PropertyInfo::NONE);
+}
+
+void SpanModelNG::SetFontWeight(FrameNode* frameNode, FontWeight value)
+{
+    auto spanNode = AceType::DynamicCast<SpanNode>(frameNode);
+    CHECK_NULL_VOID(spanNode);
+    spanNode->UpdateFontWeight(value);
+    spanNode->AddPropertyInfo(PropertyInfo::FONTWEIGHT);
+}
+
+void SpanModelNG::SetTextCase(FrameNode* frameNode, TextCase value)
+{
+    auto spanNode = AceType::DynamicCast<SpanNode>(frameNode);
+    CHECK_NULL_VOID(spanNode);
+    spanNode->UpdateTextCase(value);
+    spanNode->AddPropertyInfo(PropertyInfo::TEXTCASE);
+}
+
+void SpanModelNG::SetItalicFontStyle(FrameNode* frameNode, Ace::FontStyle value)
+{
+    auto spanNode = AceType::DynamicCast<SpanNode>(frameNode);
+    CHECK_NULL_VOID(spanNode);
+    spanNode->UpdateItalicFontStyle(value);
+    spanNode->AddPropertyInfo(PropertyInfo::FONTSTYLE);
+}
+
+void SpanModelNG::SetLineHeight(FrameNode* frameNode, const Dimension& value)
+{
+    auto spanNode = AceType::DynamicCast<SpanNode>(frameNode);
+    CHECK_NULL_VOID(spanNode);
+    spanNode->UpdateLineHeight(value);
+    spanNode->AddPropertyInfo(PropertyInfo::LINEHEIGHT);
+}
+
+void SpanModelNG::SetFontSize(FrameNode* frameNode, const Dimension& value)
+{
+    auto spanNode = AceType::DynamicCast<SpanNode>(frameNode);
+    CHECK_NULL_VOID(spanNode);
+    spanNode->UpdateFontSize(value);
+    spanNode->AddPropertyInfo(PropertyInfo::FONTSIZE);
+}
+
+void SpanModelNG::SetFontFamily(FrameNode* frameNode, const std::vector<std::string>& value)
+{
+    auto spanNode = AceType::DynamicCast<SpanNode>(frameNode);
+    CHECK_NULL_VOID(spanNode);
+    spanNode->UpdateFontFamily(value);
+    spanNode->AddPropertyInfo(PropertyInfo::FONTFAMILY);
+}
+
+void SpanModelNG::SetTextDecoration(FrameNode* frameNode, TextDecoration value)
+{
+    auto spanNode = AceType::DynamicCast<SpanNode>(frameNode);
+    CHECK_NULL_VOID(spanNode);
+    spanNode->UpdateTextDecoration(value);
+    spanNode->AddPropertyInfo(PropertyInfo::TEXTDECORATION);
+}
+
+void SpanModelNG::SetTextDecorationStyle(FrameNode* frameNode, TextDecorationStyle value)
+{
+    auto spanNode = AceType::DynamicCast<SpanNode>(frameNode);
+    CHECK_NULL_VOID(spanNode);
+    spanNode->UpdateTextDecorationStyle(value);
+    spanNode->AddPropertyInfo(PropertyInfo::NONE);
+}
+
+void SpanModelNG::SetTextDecorationColor(FrameNode* frameNode, const Color& value)
+{
+    auto spanNode = AceType::DynamicCast<SpanNode>(frameNode);
+    CHECK_NULL_VOID(spanNode);
+    spanNode->UpdateTextDecorationColor(value);
+    spanNode->AddPropertyInfo(PropertyInfo::NONE);
+}
+
+void SpanModelNG::SetTextColor(FrameNode* frameNode, const Color& value)
+{
+    auto spanNode = AceType::DynamicCast<SpanNode>(frameNode);
+    CHECK_NULL_VOID(spanNode);
+    spanNode->UpdateTextColor(value);
+    spanNode->AddPropertyInfo(PropertyInfo::FONTCOLOR);
+}
+
+void SpanModelNG::SetLetterSpacing(FrameNode* frameNode, const Dimension& value)
+{
+    auto spanNode = AceType::DynamicCast<SpanNode>(frameNode);
+    CHECK_NULL_VOID(spanNode);
+    spanNode->UpdateLetterSpacing(value);
+    spanNode->AddPropertyInfo(PropertyInfo::LETTERSPACE);
+}
+
+void SpanModelNG::SetFont(FrameNode* frameNode, const Font& value)
+{
+    if (value.fontSize.has_value()) {
+        SetFontSize(frameNode, value.fontSize.value());
+    }
+    if (value.fontWeight.has_value()) {
+        SetFontWeight(frameNode, value.fontWeight.value());
+    }
+    if (!value.fontFamilies.empty()) {
+        SetFontFamily(frameNode, value.fontFamilies);
+    }
+    if (value.fontStyle.has_value()) {
+        SetItalicFontStyle(frameNode, value.fontStyle.value());
+    }
 }
 
 } // namespace OHOS::Ace::NG

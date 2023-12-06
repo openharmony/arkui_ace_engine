@@ -96,15 +96,36 @@ public:
 
     virtual void MoveFrame(FrameNode* self, const RefPtr<FrameNode>& child, int32_t index) {}
 
-    virtual void SyncGeometryProperties(GeometryNode* geometryNode) {}
+    virtual void SyncGeometryProperties(GeometryNode* geometryNode, bool needRoundToPixelGrid = false) {}
 
     virtual void SyncGeometryProperties(const RectF& rectF) {}
 
     virtual void SetBorderRadius(const BorderRadiusProperty& value) {}
 
+    virtual void SetBorderStyle(const BorderStyleProperty& value) {};
+
+    virtual void SetBorderColor(const BorderColorProperty& value) {};
+
+    virtual void SetBorderWidth(const BorderWidthProperty& value) {};
+
+    virtual void SetOuterBorderRadius(const BorderRadiusProperty& value) {};
+
+    virtual void SetOuterBorderStyle(const BorderStyleProperty& value) {};
+
+    virtual void SetOuterBorderColor(const BorderColorProperty& value) {};
+
+    virtual void SetOuterBorderWidth(const BorderWidthProperty& value) {};
+
     // draw self and children in sandbox origin at parent's absolute position in root, drawing in sandbox
     // will be unaffected by parent's transition.
     virtual void SetSandBox(const std::optional<OffsetF>& parentPosition, bool force = false) {};
+
+    virtual bool HasSandBox() const
+    {
+        return false;
+    }
+
+    virtual void SetFrameWithoutAnimation(const RectF& paintRect) {};
 
     virtual void RegisterSharedTransition(const RefPtr<RenderContext>& other) {}
     virtual void UnregisterSharedTransition(const RefPtr<RenderContext>& other) {}
@@ -122,6 +143,10 @@ public:
     virtual void SetSurfaceChangedCallBack(
         const std::function<void(float, float, float, float)>& callback) {}
     virtual void RemoveSurfaceChangedCallBack() {}
+
+    virtual void MarkNewFrameAvailable(void* nativeWindow) {}
+    virtual void AddAttachCallBack(const std::function<void(int64_t, bool)>& attachCallback) {}
+    virtual void AddUpdateCallBack(const std::function<void(std::vector<float>&)>& updateCallback) {}
 
     virtual void StartRecording() {}
     virtual void StopRecordingIfNeeded() {}
@@ -207,6 +232,8 @@ public:
     virtual void UpdateBackBlurRadius(const Dimension& radius) {}
     virtual void UpdateBackBlurStyle(const std::optional<BlurStyleOption>& bgBlurStyle) {}
     virtual void UpdateBackgroundEffect(const std::optional<EffectOption>& effectOption) {}
+    virtual void UpdateBackBlur(const Dimension& radius, const BlurOption& blurOption) {}
+    virtual void UpdateFrontBlur(const Dimension& radius, const BlurOption& blurOption) {}
     virtual void UpdateFrontBlurStyle(const std::optional<BlurStyleOption>& fgBlurStyle) {}
     virtual void UpdateFrontBlurRadius(const Dimension& radius) {}
     virtual void ResetBackBlurStyle() {}
@@ -229,6 +256,11 @@ public:
     virtual RectF GetPaintRectWithTranslate()
     {
         return {};
+    }
+
+    virtual Matrix4 GetLocalTransformMatrix()
+    {
+        return Matrix4();
     }
 
     virtual void GetPointWithRevert(PointF& point) {}
@@ -317,6 +349,8 @@ public:
 
     virtual void AttachNodeAnimatableProperty(RefPtr<NodeAnimatablePropertyBase> modifier) {};
 
+    virtual void DetachNodeAnimatableProperty(const RefPtr<NodeAnimatablePropertyBase>& modifier) {};
+
     virtual void PaintAccessibilityFocus() {};
 
     virtual void ClearAccessibilityFocus() {};
@@ -331,11 +365,13 @@ public:
 
     virtual void OnBackgroundColorUpdate(const Color& value) {}
     virtual void OnOpacityUpdate(double opacity) {}
+    virtual void SetAlphaOffscreen(bool isOffScreen) {}
     virtual void OnSphericalEffectUpdate(double radio) {}
     virtual void OnPixelStretchEffectUpdate(const PixStretchEffectOption& option) {}
     virtual void OnLightUpEffectUpdate(double radio) {}
     virtual void OnClickEffectLevelUpdate(const ClickEffectInfo& info) {}
     virtual void OnRenderGroupUpdate(bool isRenderGroup) {}
+    virtual void OnSuggestedRenderGroupUpdate(bool isRenderGroup) {}
     virtual void OnRenderFitUpdate(RenderFit renderFit) {}
     virtual void OnParticleOptionArrayUpdate(const std::list<ParticleOption>& optionArray) {}
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(SphericalEffect, double);
@@ -382,6 +418,7 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(BackgroundColor, Color);
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(Opacity, double);
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(RenderGroup, bool);
+    ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(SuggestedRenderGroup, bool);
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(ForegroundColor, Color);
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(ForegroundColorStrategy, ForegroundColorStrategy);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(ForegroundColorFlag, bool);
@@ -398,13 +435,14 @@ public:
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Graphics, FrontContrast, Dimension);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Graphics, FrontSaturate, Dimension);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Graphics, FrontSepia, Dimension);
-    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Graphics, FrontInvert, Dimension);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Graphics, FrontInvert, InvertVariant);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Graphics, FrontHueRotate, float);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Graphics, FrontColorBlend, Color);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Graphics, LinearGradientBlur, NG::LinearGradientBlurPara);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Graphics, DynamicLightUpRate, float);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Graphics, DynamicLightUpDegree, float);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Graphics, BackShadow, Shadow);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Graphics, BackBlendMode, BlendMode);
 
     // BorderRadius.
     ACE_DEFINE_PROPERTY_GROUP(Border, BorderProperty);
@@ -412,6 +450,21 @@ public:
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Border, BorderWidth, BorderWidthProperty);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Border, BorderColor, BorderColorProperty);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Border, BorderStyle, BorderStyleProperty);
+
+    // Outer Border
+    ACE_DEFINE_PROPERTY_GROUP(OuterBorder, OuterBorderProperty);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(OuterBorder, OuterBorderRadius, BorderRadiusProperty);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(OuterBorder, OuterBorderWidth, BorderWidthProperty);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(OuterBorder, OuterBorderColor, BorderColorProperty);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(OuterBorder, OuterBorderStyle, BorderStyleProperty);
+
+    // PointLight
+    ACE_DEFINE_PROPERTY_GROUP(PointLight, PointLightProperty);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(PointLight, LightPosition, TranslateOptions);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(PointLight, LightIntensity, float);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(PointLight, LightIlluminated, uint32_t);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(PointLight, IlluminatedBorderWidth, Dimension);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(PointLight, Bloom, float);
 
     // Transition Options
     ACE_DEFINE_PROPERTY_GROUP(TransitionAppearing, TransitionOptions);
@@ -455,6 +508,9 @@ public:
     // useEffect
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(UseEffect, bool);
 
+    // useShadowBatching
+    ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(UseShadowBatching, bool);
+
     // freeze
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(Freeze, bool);
 
@@ -471,7 +527,15 @@ public:
     }
     virtual void SetFrameGravity(OHOS::Rosen::Gravity gravity) {}
 
-    virtual void AddFRCSceneInfo(const std::string& scene, float speed) {}
+    virtual int32_t CalcExpectedFrameRate(const std::string& scene, float speed)
+    {
+        return 0;
+    }
+
+    virtual bool IsUniRenderEnabled()
+    {
+        return true;
+    }
 
 protected:
     RenderContext() = default;
@@ -504,6 +568,17 @@ protected:
     virtual void OnBorderColorUpdate(const BorderColorProperty& value) {}
     virtual void OnBorderStyleUpdate(const BorderStyleProperty& value) {}
 
+    virtual void OnOuterBorderWidthUpdate(const BorderWidthProperty& value) {}
+    virtual void OnOuterBorderRadiusUpdate(const BorderRadiusProperty& value) {}
+    virtual void OnOuterBorderColorUpdate(const BorderColorProperty& value) {}
+    virtual void OnOuterBorderStyleUpdate(const BorderStyleProperty& value) {}
+
+    virtual void OnLightPositionUpdate(const TranslateOptions& value) {}
+    virtual void OnLightIntensityUpdate(const float value) {}
+    virtual void OnLightIlluminatedUpdate(const uint32_t value) {}
+    virtual void OnIlluminatedBorderWidthUpdate(const Dimension& value) {}
+    virtual void OnBloomUpdate(const float value) {}
+
     virtual void OnTransformRotateUpdate(const Vector5F& value) {}
     virtual void OnTransformMatrixUpdate(const Matrix4& matrix) {}
 
@@ -524,21 +599,24 @@ protected:
     virtual void OnFrontContrastUpdate(const Dimension& value) {}
     virtual void OnFrontSaturateUpdate(const Dimension& value) {}
     virtual void OnFrontSepiaUpdate(const Dimension& value) {}
-    virtual void OnFrontInvertUpdate(const Dimension& value) {}
+    virtual void OnFrontInvertUpdate(const InvertVariant& value) {}
     virtual void OnFrontHueRotateUpdate(float value) {}
     virtual void OnFrontColorBlendUpdate(const Color& value) {}
     virtual void OnLinearGradientBlurUpdate(const NG::LinearGradientBlurPara& blurPara) {}
     virtual void OnDynamicLightUpRateUpdate(const float rate) {}
     virtual void OnDynamicLightUpDegreeUpdate(const float degree) {}
     virtual void OnBackShadowUpdate(const Shadow& shadow) {}
+    virtual void OnBackBlendModeUpdate(BlendMode blendMode) {}
 
     virtual void OnOverlayTextUpdate(const OverlayOptions& overlay) {}
     virtual void OnMotionPathUpdate(const MotionPathOption& motionPath) {}
     virtual void OnUseEffectUpdate(bool useEffect) {}
+    virtual void OnUseShadowBatchingUpdate(bool useShadowBatching) {}
     virtual void OnFreezeUpdate(bool isFreezed) {}
     virtual void OnObscuredUpdate(const std::vector<ObscuredReasons>& reasons) {}
 
 private:
+    friend class ViewAbstract;
     std::function<void()> requestFrame_;
     WeakPtr<FrameNode> host_;
 

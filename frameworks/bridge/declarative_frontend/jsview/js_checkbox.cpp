@@ -81,6 +81,7 @@ void JSCheckbox::JSBind(BindingTarget globalObj)
 
     JSClass<JSCheckbox>::StaticMethod("create", &JSCheckbox::Create);
     JSClass<JSCheckbox>::StaticMethod("select", &JSCheckbox::SetSelect);
+    JSClass<JSCheckbox>::StaticMethod("shape", &JSCheckbox::SetCheckboxStyle);
     JSClass<JSCheckbox>::StaticMethod("onChange", &JSCheckbox::SetOnChange);
     JSClass<JSCheckbox>::StaticMethod("selectedColor", &JSCheckbox::SelectedColor);
     JSClass<JSCheckbox>::StaticMethod("unselectedColor", &JSCheckbox::UnSelectedColor);
@@ -104,9 +105,11 @@ void ParseSelectObject(const JSCallbackInfo& info, const JSRef<JSVal>& changeEve
     CHECK_NULL_VOID(changeEventVal->IsFunction());
 
     auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(changeEventVal));
-    auto changeEvent = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](bool param) {
+    WeakPtr<NG::FrameNode> targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto changeEvent = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = targetNode](bool param) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("CheckBox.ChangeEvent");
+        PipelineContext::SetCallBackNode(node);
         auto newJSVal = JSRef<JSVal>::Make(ToJSValue(param));
         func->ExecuteJS(1, &newJSVal);
     };
@@ -116,7 +119,6 @@ void ParseSelectObject(const JSCallbackInfo& info, const JSRef<JSVal>& changeEve
 void JSCheckbox::SetSelect(const JSCallbackInfo& info)
 {
     if (info.Length() < 1 || info.Length() > 2) {
-        LOGE("The arg is wrong, it is supposed to have 1 or 2 arguments");
         return;
     }
     bool select = false;
@@ -135,9 +137,11 @@ void JSCheckbox::SetOnChange(const JSCallbackInfo& args)
         return;
     }
     auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(args[0]));
-    auto onChange = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc)](bool select) {
+    WeakPtr<NG::FrameNode> targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto onChange = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), node = targetNode](bool select) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("CheckBox.onChange");
+        PipelineContext::SetCallBackNode(node);
         auto newJSVal = JSRef<JSVal>::Make(ToJSValue(select));
         func->ExecuteJS(1, &newJSVal);
     };
@@ -152,7 +156,6 @@ void JSCheckbox::JsResponseRegion(const JSCallbackInfo& info)
         return;
     }
     if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have at least 1 arguments");
         return;
     }
     std::vector<DimensionRect> result;
@@ -165,7 +168,6 @@ void JSCheckbox::JsResponseRegion(const JSCallbackInfo& info)
 void JSCheckbox::JsWidth(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have atleast 1 arguments");
         return;
     }
 
@@ -192,7 +194,6 @@ void JSCheckbox::JsWidth(const JSRef<JSVal>& jsValue)
 void JSCheckbox::JsHeight(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have atleast 1 arguments");
         return;
     }
 
@@ -219,12 +220,10 @@ void JSCheckbox::JsHeight(const JSRef<JSVal>& jsValue)
 void JSCheckbox::JsSize(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have atleast 1 arguments");
         return;
     }
 
     if (!info[0]->IsObject()) {
-        LOGE("arg is not Object or String.");
         return;
     }
 
@@ -236,7 +235,6 @@ void JSCheckbox::JsSize(const JSCallbackInfo& info)
 void JSCheckbox::SelectedColor(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have atleast 1 arguments");
         return;
     }
     Color selectedColor;
@@ -250,7 +248,6 @@ void JSCheckbox::SelectedColor(const JSCallbackInfo& info)
 void JSCheckbox::UnSelectedColor(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have at least 1 arguments");
         return;
     }
     Color unSelectedColor;
@@ -262,15 +259,18 @@ void JSCheckbox::UnSelectedColor(const JSCallbackInfo& info)
     CheckBoxModel::GetInstance()->SetUnSelectedColor(unSelectedColor);
 }
 
+void JSCheckbox::SetCheckboxStyle(int32_t checkBoxStyle)
+{
+    CheckBoxStyle curCheckBoxStyle = static_cast<CheckBoxStyle>(checkBoxStyle);
+    CheckBoxModel::GetInstance()->SetCheckboxStyle(curCheckBoxStyle);
+}
 void JSCheckbox::Mark(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have atleast 1 arguments");
         return;
     }
 
     if (!info[0]->IsObject()) {
-        LOGE("arg is not Object.");
         return;
     }
 
@@ -304,7 +304,6 @@ void JSCheckbox::Mark(const JSCallbackInfo& info)
 void JSCheckbox::JsPadding(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have atleast 1 arguments");
         return;
     }
     NG::PaddingPropertyF oldPadding({ 0.0f, 0.0f, 0.0f, 0.0f });
@@ -316,21 +315,17 @@ void JSCheckbox::JsPadding(const JSCallbackInfo& info)
 bool JSCheckbox::GetOldPadding(const JSCallbackInfo& info, NG::PaddingPropertyF& padding)
 {
     if (info[0]->IsObject()) {
-        auto argsPtrItem = JsonUtil::ParseJsonString(info[0]->ToString());
-        if (!argsPtrItem || argsPtrItem->IsNull()) {
-            LOGE("Js Parse object failed. argsPtr is null. %s", info[0]->ToString().c_str());
-            return false;
-        }
-        if (argsPtrItem->Contains("top") || argsPtrItem->Contains("bottom") || argsPtrItem->Contains("left") ||
-            argsPtrItem->Contains("right")) {
+        JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(info[0]);
+        if (jsObj->HasProperty("top") || jsObj->HasProperty("bottom")
+            || jsObj->HasProperty("left") || jsObj->HasProperty("right")) {
             CalcDimension topDimen = CalcDimension(0.0, DimensionUnit::VP);
             CalcDimension leftDimen = CalcDimension(0.0, DimensionUnit::VP);
             CalcDimension rightDimen = CalcDimension(0.0, DimensionUnit::VP);
             CalcDimension bottomDimen = CalcDimension(0.0, DimensionUnit::VP);
-            ParseJsonDimensionVp(argsPtrItem->GetValue("top"), topDimen);
-            ParseJsonDimensionVp(argsPtrItem->GetValue("left"), leftDimen);
-            ParseJsonDimensionVp(argsPtrItem->GetValue("right"), rightDimen);
-            ParseJsonDimensionVp(argsPtrItem->GetValue("bottom"), bottomDimen);
+            ParseJsDimensionVp(jsObj->GetProperty("top"), topDimen);
+            ParseJsDimensionVp(jsObj->GetProperty("left"), leftDimen);
+            ParseJsDimensionVp(jsObj->GetProperty("right"), rightDimen);
+            ParseJsDimensionVp(jsObj->GetProperty("bottom"), bottomDimen);
             if (leftDimen == 0.0_vp) {
                 leftDimen = rightDimen;
             }

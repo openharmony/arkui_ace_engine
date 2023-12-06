@@ -95,8 +95,8 @@ common_bin = [
   },
   {
     label = "//third_party/flutter/glfw:glfw"
-    subsystem_name = "graphic"
-    part_name = "graphic_2d"
+    subsystem_name = "thirdparty"
+    part_name = "flutter"
   },
   {
     label = "//foundation/graphic/graphic_2d/rosen/modules/texgine:libtexgine"
@@ -203,6 +203,24 @@ if (defined(use_new_skia) && use_new_skia) {
   ]
 }
 
+if (defined(use_rosen_drawing) && use_rosen_drawing) {
+  common_bin += [
+    {
+      label = "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics:2d_graphics"
+      subsystem_name = "graphic"
+      part_name = "graphic_2d"
+    },
+  ]
+
+  common_bin -= [
+    {
+      label = "//foundation/graphic/graphic_2d/rosen/modules/texgine/texgine_drawing:libtexgine_drawing"
+      subsystem_name = "graphic"
+      part_name = "graphic_2d"
+    },
+  ]
+}
+
 napi_modules = [
   {
     prefix = "arkui"
@@ -284,6 +302,47 @@ napi_modules = [
           "lightweightset",
           "plainarray",
         ]
+      },
+    ]
+  },
+  {
+    prefix = "arkui/advanced"
+    shard_libs = [
+      {
+        label = "//foundation/arkui/ace_engine/advanced_ui_component/chip/interfaces:chip"
+        subsystem_name = "arkui"
+        part_name = "ace_engine"
+        lib_names = [ "chip" ]
+      },
+      {
+        label = "//foundation/arkui/ace_engine/advanced_ui_component/counter/interfaces:counter"
+        subsystem_name = "arkui"
+        part_name = "ace_engine"
+        lib_names = [ "counter" ]
+      },
+      {
+        label = "//foundation/arkui/ace_engine/advanced_ui_component/segmentbutton/interfaces:segmentbutton"
+        subsystem_name = "arkui"
+        part_name = "ace_engine"
+        lib_names = [ "segmentbutton" ]
+      },
+      {
+        label = "//foundation/arkui/ace_engine/advanced_ui_component/breadcrumb/interfaces:breadcrumb"
+        subsystem_name = "arkui"
+        part_name = "ace_engine"
+        lib_names = [ "breadcrumb" ]
+      },
+      {
+        label = "//foundation/arkui/ace_engine/advanced_ui_component/selectionmenu/interfaces:selectionmenu"
+        subsystem_name = "arkui"
+        part_name = "ace_engine"
+        lib_names = [ "selectionmenu" ]
+      },
+      {
+        label = "//foundation/arkui/ace_engine/advanced_ui_component/popup/interfaces:popup"
+        subsystem_name = "arkui"
+        part_name = "ace_engine"
+        lib_names = [ "popup" ]
       },
     ]
   },

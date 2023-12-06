@@ -75,6 +75,8 @@ public:
     std::string ToDataURL(RefPtr<RosenRenderContext> renderContext, const std::string& args);
 #ifndef USE_ROSEN_DRAWING
     bool DrawBitmap(RefPtr<RosenRenderContext> renderContext, SkBitmap& currentBitmap);
+#else
+    bool DrawBitmap(RefPtr<RosenRenderContext> renderContext, RSBitmap& currentBitmap);
 #endif
     std::string GetJsonData(const std::string& path);
 
@@ -107,7 +109,8 @@ private:
     void PaintShadow(
         const SkPath& path, const Shadow& shadow, SkCanvas* canvas, const SkPaint* paint = nullptr) override;
 #else
-    void PaintShadow(const RSPath& path, const Shadow& shadow, RSCanvas* canvas) override;
+    void PaintShadow(const RSPath& path, const Shadow& shadow, RSCanvas* canvas,
+        const RSBrush* brush = nullptr, const RSPen* pen = nullptr) override;
 #endif
     OffsetF GetContentOffset(PaintWrapper* paintWrapper) const override
     {

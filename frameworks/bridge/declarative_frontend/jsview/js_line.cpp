@@ -76,7 +76,6 @@ void JSLine::Create(const JSCallbackInfo& info)
 void JSLine::SetStart(const JSCallbackInfo& info)
 {
     if (info.Length() < 1 || !info[0]->IsArray()) {
-        LOGE("The arg is wrong, it is supposed to have at least 1 arguments");
         return;
     }
     JSRef<JSArray> pointArray = JSRef<JSArray>::Cast(info[0]);
@@ -88,7 +87,6 @@ void JSLine::SetStart(const JSCallbackInfo& info)
 void JSLine::SetEnd(const JSCallbackInfo& info)
 {
     if (info.Length() < 1 || !info[0]->IsArray()) {
-        LOGE("The arg is wrong, it is supposed to have at least 1 arguments");
         return;
     }
     JSRef<JSArray> pointArray = JSRef<JSArray>::Cast(info[0]);
@@ -100,7 +98,6 @@ void JSLine::SetEnd(const JSCallbackInfo& info)
 void JSLine::SetPoint(const JSRef<JSArray>& array, ShapePoint& point)
 {
     if (array->Length() < 1) {
-        LOGE("The starting point is one");
         return;
     }
     if (array->GetValueAt(0)->IsNumber()) {
@@ -115,9 +112,8 @@ void JSLine::SetPoint(const JSRef<JSArray>& array, ShapePoint& point)
                 point.first = 0.0_vp;
             }
         }
-    } else {
-        LOGE("Line point should be Number or String");
     }
+
     if (array->GetValueAt(1)->IsNumber()) {
         point.second = Dimension(array->GetValueAt(1)->ToNumber<double>(), DimensionUnit::VP);
     } else if (array->GetValueAt(1)->IsString()) {
@@ -130,8 +126,6 @@ void JSLine::SetPoint(const JSRef<JSArray>& array, ShapePoint& point)
                 point.second = 0.0_vp;
             }
         }
-    } else {
-        LOGE("Line point should be Number or String");
     }
 }
 

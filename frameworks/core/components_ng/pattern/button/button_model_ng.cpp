@@ -160,6 +160,7 @@ void ButtonModelNG::Create(const std::string& tagName)
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
+    ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", tagName.c_str(), nodeId);
     auto frameNode =
         FrameNode::GetOrCreateFrameNode(tagName, nodeId, []() { return AceType::MakeRefPtr<ButtonPattern>(); });
     stack->Push(frameNode);
@@ -178,6 +179,11 @@ void ButtonModelNG::OnClick(GestureEventFunc&& tapEventFunc, ClickEventFunc&& cl
 void ButtonModelNG::BackgroundColor(const Color& color, const bool& colorFlag)
 {
     ViewAbstract::SetBackgroundColor(color);
+}
+
+void ButtonModelNG::BackgroundColor(FrameNode* frameNode, const Color& color, const bool& colorFlag)
+{
+    ViewAbstract::SetBackgroundColor(frameNode, color);
 }
 
 void ButtonModelNG::SetSize(const std::optional<Dimension>& width, const std::optional<Dimension>& height)
@@ -229,13 +235,11 @@ void ButtonModelNG::SetTypeAndStateEffect(const std::optional<ButtonType>& type,
         ACE_UPDATE_LAYOUT_PROPERTY(ButtonLayoutProperty, Type, ButtonType::CAPSULE);
     }
 
-    if (stateEffect.has_value()) {
-        auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-        CHECK_NULL_VOID(frameNode);
-        auto buttonEventHub = frameNode->GetEventHub<ButtonEventHub>();
-        CHECK_NULL_VOID(buttonEventHub);
-        buttonEventHub->SetStateEffect(stateEffect.value());
-    }
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto buttonEventHub = frameNode->GetEventHub<ButtonEventHub>();
+    CHECK_NULL_VOID(buttonEventHub);
+    buttonEventHub->SetStateEffect(stateEffect.value_or(true));
 }
 
 void ButtonModelNG::SetTextDefaultStyle(const RefPtr<FrameNode>& textNode, const std::string& label)
@@ -251,5 +255,81 @@ void ButtonModelNG::SetTextDefaultStyle(const RefPtr<FrameNode>& textNode, const
     textLayoutProperty->UpdateFontSize(textStyle.GetFontSize());
     textLayoutProperty->UpdateTextColor(textStyle.GetTextColor());
     textLayoutProperty->UpdateFontWeight(textStyle.GetFontWeight());
+}
+
+void ButtonModelNG::SetFontSize(FrameNode* frameNode, const Dimension& fontSize)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(ButtonLayoutProperty, FontSize, fontSize, frameNode);
+}
+
+void ButtonModelNG::SetFontWeight(FrameNode* frameNode, const Ace::FontWeight& fontWeight)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(ButtonLayoutProperty, FontWeight, fontWeight, frameNode);
+}
+
+void ButtonModelNG::SetFontStyle(FrameNode* frameNode, const Ace::FontStyle& fontStyle)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(ButtonLayoutProperty, FontStyle, fontStyle, frameNode);
+}
+
+void ButtonModelNG::SetFontFamily(FrameNode* frameNode, const std::vector<std::string>& fontFamily)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(ButtonLayoutProperty, FontFamily, fontFamily, frameNode);
+}
+
+void ButtonModelNG::SetFontColor(FrameNode* frameNode, const Color& textColor)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(ButtonLayoutProperty, FontColor, textColor, frameNode);
+    ACE_UPDATE_NODE_RENDER_CONTEXT(ForegroundColor, textColor, frameNode);
+}
+
+void ButtonModelNG::SetType(FrameNode* frameNode, const int value)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(ButtonLayoutProperty, Type, static_cast<ButtonType>(value), frameNode);
+}
+
+void ButtonModelNG::SetStateEffect(FrameNode* frameNode, const bool stateEffect)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto buttonEventHub = frameNode->GetEventHub<ButtonEventHub>();
+    CHECK_NULL_VOID(buttonEventHub);
+    buttonEventHub->SetStateEffect(stateEffect);
+}
+
+void ButtonModelNG::SetLableStyle(FrameNode* frameNode, const ButtonParameters& buttonParameters)
+{
+    if (buttonParameters.textOverflow.has_value()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(
+            ButtonLayoutProperty, TextOverflow, buttonParameters.textOverflow.value(), frameNode);
+    }
+    if (buttonParameters.maxLines.has_value()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(ButtonLayoutProperty, MaxLines, buttonParameters.maxLines.value(), frameNode);
+    }
+    if (buttonParameters.minFontSize.has_value()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(
+            ButtonLayoutProperty, MinFontSize, buttonParameters.minFontSize.value(), frameNode);
+    }
+    if (buttonParameters.maxFontSize.has_value()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(
+            ButtonLayoutProperty, MaxFontSize, buttonParameters.maxFontSize.value(), frameNode);
+    }
+    if (buttonParameters.heightAdaptivePolicy.has_value()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(
+            ButtonLayoutProperty, HeightAdaptivePolicy, buttonParameters.heightAdaptivePolicy.value(), frameNode);
+    }
+    if (buttonParameters.fontSize.has_value()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(ButtonLayoutProperty, FontSize, buttonParameters.fontSize.value(), frameNode);
+    }
+    if (buttonParameters.fontWeight.has_value()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(
+            ButtonLayoutProperty, FontWeight, buttonParameters.fontWeight.value(), frameNode);
+    }
+    if (buttonParameters.fontFamily.has_value()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(
+            ButtonLayoutProperty, FontFamily, buttonParameters.fontFamily.value(), frameNode);
+    }
+    if (buttonParameters.fontStyle.has_value()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(ButtonLayoutProperty, FontStyle, buttonParameters.fontStyle.value(), frameNode);
+    }
 }
 } // namespace OHOS::Ace::NG

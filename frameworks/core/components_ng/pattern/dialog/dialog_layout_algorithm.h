@@ -27,8 +27,14 @@
 #include "core/components/common/properties/placement.h"
 #include "core/components_ng/layout/layout_algorithm.h"
 #include "core/components_ng/pattern/dialog/dialog_layout_property.h"
+#include "core/components_ng/pattern/overlay/overlay_manager.h"
 
 namespace OHOS::Ace::NG {
+enum class TouchingBoundaryType {
+    NotTouchBoundary = 0,
+    TouchBottomBoundary,
+    TouchRightBoundary,
+};
 // DialogLayoutAlgorithm uses for Dialog Node.
 class ACE_EXPORT DialogLayoutAlgorithm : public LayoutAlgorithm {
     DECLARE_ACE_TYPE(DialogLayoutAlgorithm, LayoutAlgorithm);
@@ -58,7 +64,11 @@ private:
     OffsetF ComputeChildPosition(
         const SizeF& childSize, const RefPtr<DialogLayoutProperty>& prop, const SizeF& slefSize);
     bool SetAlignmentSwitch(const SizeF& maxSize, const SizeF& childSize, OffsetF& topLeftPoint);
-
+    bool IsDialogTouchingBoundary(OffsetF topLeftPoint, SizeF childSize, SizeF selfSize);
+    void MultipleDialog(const RefPtr<DialogLayoutProperty>& dialogProp, const SizeF& childSize, const SizeF& selfSize,
+        const RefPtr<OverlayManager> subOverlayManager);
+    void ProcessMaskRect(std::optional<DimensionRect> maskRect, const RefPtr<FrameNode>& dialog);
+	
     void UpdateTouchRegion();
 
     double GetPaddingBottom() const;
@@ -71,8 +81,10 @@ private:
     bool customSize_ = false;
 
     int32_t gridCount_ = -1;
+    int32_t subWindowId_ = -1;
     DimensionOffset dialogOffset_;
     DialogAlignment alignment_ = DialogAlignment::DEFAULT;
+    TouchingBoundaryType touchingBoundaryFlag_ = TouchingBoundaryType::NotTouchBoundary;
 
     ACE_DISALLOW_COPY_AND_MOVE(DialogLayoutAlgorithm);
 };

@@ -19,6 +19,7 @@
 #include <functional>
 
 #include "base/utils/macros.h"
+#include "core/components_ng/pattern/list/list_item_event_hub.h"
 #include "core/components_ng/pattern/list/list_item_model.h"
 
 namespace OHOS::Ace::NG {
@@ -35,12 +36,20 @@ public:
     void SetSelected(bool selected) override;
     void SetSelectChangeEvent(std::function<void(bool)>&& changeEvent) override;
     void SetSwiperAction(std::function<void()>&& startAction, std::function<void()>&& endAction,
-        V2::SwipeEdgeEffect edgeEffect) override;
+        OnOffsetChangeFunc&& onOffsetChangeFunc, V2::SwipeEdgeEffect edgeEffect) override;
     void SetSelectCallback(OnSelectFunc&& selectCallback) override;
     void SetOnDragStart(NG::OnDragStartFunc&& onDragStart) override {}
-    void SetDeleteArea(std::function<void()>&& builderAction, bool useDefaultDeleteAnimation, OnDeleteEvent&& onDelete,
-        OnEnterDeleteAreaEvent&& onEnterDeleteArea, OnExitDeleteAreaEvent&& onExitDeleteArea, const Dimension& length,
-        bool isStartArea) override;
+    void SetDeleteArea(std::function<void()>&& builderAction, OnDeleteEvent&& onDelete,
+        OnEnterDeleteAreaEvent&& onEnterDeleteArea, OnExitDeleteAreaEvent&& onExitDeleteArea,
+        OnStateChangedEvent&& onStateChangeEvent, const Dimension& length, bool isStartArea) override;
+
+private:
+    void InstallSwiperCallBack(RefPtr<ListItemEventHub> eventHub,
+                               OnDeleteEvent&& onDelete,
+                               OnEnterDeleteAreaEvent&& onEnterDeleteArea,
+                               OnExitDeleteAreaEvent&& onExitDeleteArea,
+                               OnStateChangedEvent&& onStateChangeEvent,
+                               bool isStartArea);
 };
 } // namespace OHOS::Ace::NG
 

@@ -16,8 +16,10 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_WATERFLOW_WATER_FLOW_MODEL_NG_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_WATERFLOW_WATER_FLOW_MODEL_NG_H
 
-#include "core/components_ng/pattern/waterflow/water_flow_model.h"
 #include "base/utils/macros.h"
+#include "core/components_ng/pattern/waterflow/water_flow_event_hub.h"
+#include "core/components_ng/pattern/waterflow/water_flow_model.h"
+
 namespace OHOS::Ace::NG {
 class ACE_EXPORT WaterFlowModelNG : public WaterFlowModel {
 public:
@@ -45,7 +47,18 @@ public:
     void SetOnReachStart(OnReachEvent&& onReachStart) override;
     void SetOnReachEnd(OnReachEvent&& onReachEnd) override;
     void SetOnScrollFrameBegin(OnScrollFrameBeginEvent&& ScrollFrameBegin) override;
+    void SetOnScroll(std::function<void(Dimension, ScrollState)>&& onScroll) override;
+    void SetOnScrollStart(OnScrollStartEvent&& onScrollStart) override;
+    void SetOnScrollStop(OnScrollStopEvent&& onScrollStop) override;
+    void SetOnScrollIndex(ScrollIndexFunc&& onScrollIndex) override;
+
     void SetFriction(double friction) override;
+    void SetCachedCount(int32_t value) override;
+    void SetEdgeEffect(EdgeEffect edgeEffect, bool alwaysEnabled) override;
+
+    void SetScrollBarMode(DisplayMode value) override;
+    void SetScrollBarColor(const std::string& value) override;
+    void SetScrollBarWidth(const std::string& value) override;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_WATERFLOW_WATER_FLOW_MODEL_NG_H

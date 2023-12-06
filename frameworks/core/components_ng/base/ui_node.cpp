@@ -84,7 +84,7 @@ void UINode::AddChild(const RefPtr<UINode>& child, int32_t slot, bool silently)
     CHECK_NULL_VOID(child);
     auto it = std::find(children_.begin(), children_.end(), child);
     if (it != children_.end()) {
-        LOGW("Child node already exists. Existing child nodeId %{public}d, add %{public}s child nodeId nodeId "
+        LOGD("Child node already exists. Existing child nodeId %{public}d, add %{public}s child nodeId nodeId "
              "%{public}d",
             (*it)->GetId(), child->GetTag().c_str(), child->GetId());
         return;
@@ -103,7 +103,6 @@ std::list<RefPtr<UINode>>::iterator UINode::RemoveChild(const RefPtr<UINode>& ch
 
     auto iter = std::find(children_.begin(), children_.end(), child);
     if (iter == children_.end()) {
-        LOGE("child is not exist.");
         return children_.end();
     }
     // If the child is undergoing a disappearing transition, rather than simply removing it, we should move it to the
@@ -370,7 +369,6 @@ void UINode::MovePosition(int32_t slot)
         std::advance(it, slot);
         if ((it != children.end()) && (*it == this)) {
             // Already at the right place
-            LOGD("Already at the right place");
             return;
         }
 
@@ -445,14 +443,38 @@ void UINode::OnAttachToMainTree(bool)
     }
 }
 
+void UINode::DumpViewDataPageNodes(RefPtr<ViewDataWrap> viewDataWrap)
+{
+    DumpViewDataPageNode(viewDataWrap);
+    for (const auto& item : GetChildren()) {
+        item->DumpViewDataPageNodes(viewDataWrap);
+    }
+}
+
+bool UINode::NeedRequestAutoSave()
+{
+    if (CheckAutoSave()) {
+        return true;
+    }
+    for (const auto& item : GetChildren()) {
+        if (item->NeedRequestAutoSave()) {
+            return true;
+        }
+    }
+    return false;
+}
+
 void UINode::DumpTree(int32_t depth)
 {
     if (DumpLog::GetInstance().GetDumpFile()) {
         DumpLog::GetInstance().AddDesc("ID: " + std::to_string(nodeId_));
         DumpLog::GetInstance().AddDesc(std::string("Depth: ").append(std::to_string(GetDepth())));
-        DumpLog::GetInstance().AddDesc(std::string("IsDisappearing: ").append(std::to_string(IsDisappearing())));
+        DumpLog::GetInstance().AddDesc("AccessibilityId: " + std::to_string(accessibilityId_));
+        if (IsDisappearing()) {
+            DumpLog::GetInstance().AddDesc(std::string("IsDisappearing: ").append(std::to_string(IsDisappearing())));
+        }
         DumpInfo();
-        DumpLog::GetInstance().Print(depth, tag_, static_cast<int32_t>(GetChildren().size()));
+        DumpLog::GetInstance().Append(depth, tag_, static_cast<int32_t>(GetChildren().size()));
     }
     for (const auto& item : GetChildren()) {
         item->DumpTree(depth + 1);
@@ -643,10 +665,24 @@ RefPtr<LayoutWrapperNode> UINode::CreateLayoutWrapper(bool forceMeasure, bool fo
     return frameChild ? frameChild->CreateLayoutWrapper(forceMeasure, forceLayout) : nullptr;
 }
 
-void UINode::Build()
+void UINode::Build(std::shared_ptr<std::list<ExtraInfo>> extraInfos)
 {
     for (const auto& child : GetChildren()) {
-        child->Build();
+        if (InstanceOf<CustomNode>(child)) {
+            auto custom = DynamicCast<CustomNode>(child);
+            if (custom->HasExtraInfo()) {
+                if (!extraInfos) {
+                    extraInfos = std::make_shared<std::list<ExtraInfo>>();
+                }
+                extraInfos->emplace_front(custom->GetExtraInfo());
+                custom->Build(extraInfos);
+                extraInfos->pop_front();
+            } else {
+                custom->Build(extraInfos);
+            }
+        } else {
+            child->Build(extraInfos);
+        }
     }
 }
 
@@ -660,6 +696,17 @@ void UINode::SetActive(bool active)
 void UINode::SetJSViewActive(bool active)
 {
     for (const auto& child : GetChildren()) {
+        auto frameNodeChild = AceType::DynamicCast<FrameNode>(child);
+        // if child is framenode and its state is inactive, and the new state is active, then
+        // do not inform the state recursively
+        // List (active)
+        //   |--ListItem(inActive)
+        //     |--CustomComponent(fellow ListItem)
+        // if the List setActive(true) when doing some measuring or layout, ListItem is inActive, then
+        // the customComponent only follow the ListItem state changes
+        if (frameNodeChild && !frameNodeChild->IsActive() && active) {
+            return;
+        }
         child->SetJSViewActive(active);
     }
 }
@@ -783,7 +830,10 @@ void UINode::OnGenerateOneDepthVisibleFrameWithTransition(std::list<RefPtr<Frame
 bool UINode::RemoveImmediately() const
 {
     auto children = GetChildren();
-    return std::all_of(children.begin(), children.end(), [](const auto& child) { return child->RemoveImmediately(); });
+    return std::all_of(
+               children.begin(), children.end(), [](const auto& child) { return child->RemoveImmediately(); }) &&
+           std::all_of(disappearingChildren_.begin(), disappearingChildren_.end(),
+               [](const auto& pair) { return pair.first->RemoveImmediately(); });
 }
 
 void UINode::GetPerformanceCheckData(PerformanceCheckNodeMap& nodeMap)
@@ -875,4 +925,28 @@ void UINode::OnSetCacheCount(int32_t cacheCount, const std::optional<LayoutConst
     }
 }
 
+std::string UINode::GetCurrentCustomNodeInfo()
+{
+    auto parent = AceType::Claim(this);
+    std::string extraInfo;
+    while (parent) {
+        if (InstanceOf<CustomNode>(parent)) {
+            auto custom = DynamicCast<CustomNode>(parent);
+            auto list = custom->GetExtraInfos();
+            for (const auto& child : list) {
+                extraInfo.append("    ").append(child.page).append(":")
+                    .append(std::to_string(child.line)).append("\n");
+            }
+            break;
+        }
+        parent = parent->GetParent();
+       
+    }
+    return extraInfo;
+}
+
+int32_t UINode::GenerateAccessibilityId()
+{
+    return currentAccessibilityId_++;
+}
 } // namespace OHOS::Ace::NG

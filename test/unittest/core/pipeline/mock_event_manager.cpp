@@ -16,6 +16,7 @@
 #include "test/unittest/core/pipeline/common_constants.h"
 
 #include "core/common/event_manager.h"
+#include "core/components_ng/event/response_ctrl.h"
 
 namespace OHOS::Ace {
 void EventManager::TouchTest(const TouchEvent& touchPoint, const RefPtr<RenderNode>& renderNode,
@@ -73,7 +74,7 @@ bool EventManager::DispatchKeyEvent(const KeyEvent& event, const RefPtr<FocusNod
 }
 
 bool EventManager::DispatchTabIndexEventNG(
-    const KeyEvent& event, const RefPtr<NG::FrameNode>& focusNode, const RefPtr<NG::FrameNode>& curPage)
+    const KeyEvent& event, const RefPtr<NG::FrameNode>& mainView)
 {
     return !instanceId_;
 }
@@ -149,5 +150,14 @@ void EventManager::DispatchKeyboardShortcut(const KeyEvent& event) {}
 
 void EventManager::ClearResults() {}
 
+bool EventManager::HasDifferentDirectionGesture()
+{
+    return false;
+}
+
 EventManager::EventManager() {}
+
+void EventManager::DumpEvent() const {}
+
+void AddGestureSnapshot(int32_t finger, int32_t depth,  const RefPtr<TouchEventTarget>& target) {}
 } // namespace OHOS::Ace

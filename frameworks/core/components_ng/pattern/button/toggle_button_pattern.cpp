@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,6 +17,7 @@
 
 #include "base/memory/ace_type.h"
 #include "base/utils/utils.h"
+#include "core/common/recorder/node_data_cache.h"
 #include "core/components/button/button_theme.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/toggle/toggle_theme.h"
@@ -27,6 +28,9 @@
 #include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+const Color ITEM_FILL_COLOR = Color::TRANSPARENT;
+}
 
 void ToggleButtonPattern::OnAttachToFrameNode()
 {
@@ -99,6 +103,66 @@ void ToggleButtonPattern::OnModifyDone()
     InitTouchEvent();
     InitHoverEvent();
     InitOnKeyEvent();
+    SetAccessibilityAction();
+}
+
+void ToggleButtonPattern::SetAccessibilityAction()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto accessibilityProperty = host->GetAccessibilityProperty<AccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
+    accessibilityProperty->SetActionSelect([weakPtr = WeakClaim(this)]() {
+        const auto& pattern = weakPtr.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->UpdateSelectStatus(true);
+    });
+
+    accessibilityProperty->SetActionClearSelection([weakPtr = WeakClaim(this)]() {
+        const auto& pattern = weakPtr.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->UpdateSelectStatus(false);
+    });
+}
+
+void ToggleButtonPattern::UpdateSelectStatus(bool isSelected)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto context = host->GetRenderContext();
+    CHECK_NULL_VOID(context);
+    MarkIsSelected(isSelected);
+    context->OnMouseSelectUpdate(isSelected, ITEM_FILL_COLOR, ITEM_FILL_COLOR);
+}
+
+void ToggleButtonPattern::MarkIsSelected(bool isSelected)
+{
+    if (isOn_ == isSelected) {
+        return;
+    }
+    isOn_ = isSelected;
+    auto eventHub = GetEventHub<ToggleButtonEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->UpdateChangeEvent(isSelected);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    if (isSelected) {
+        eventHub->SetCurrentUIState(UI_STATE_SELECTED, isSelected);
+        host->OnAccessibilityEvent(AccessibilityEventType::SELECTED);
+    } else {
+        eventHub->SetCurrentUIState(UI_STATE_SELECTED, isSelected);
+        host->OnAccessibilityEvent(AccessibilityEventType::CHANGE);
+    }
+}
+
+void ToggleButtonPattern::OnAfterModifyDone()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto inspectorId = host->GetInspectorId().value_or("");
+    if (!inspectorId.empty()) {
+        Recorder::NodeDataCache::Get().PutBool(inspectorId, isOn_.value_or(false));
+    }
 }
 
 void ToggleButtonPattern::HandleEnabled()
@@ -204,7 +268,9 @@ void ToggleButtonPattern::InitButtonAndText()
         layoutProperty->UpdateFontSize(textLayoutProperty->GetFontSizeValue(textFontSize_));
     }
     layoutProperty->UpdateLabel(textLayoutProperty->GetContentValue(""));
-    textLayoutProperty->UpdateTextColor(textColor_);
+    if (!textLayoutProperty->GetTextColor().has_value()) {
+        textLayoutProperty->UpdateTextColor(textColor_);
+    }
 
     if (!textLayoutProperty->GetMarginProperty()) {
         MarginProperty margin;
@@ -260,6 +326,19 @@ void ToggleButtonPattern::OnRestoreInfo(const std::string& restoreInfo)
     }
     auto jsonIsOn = info->GetValue("IsOn");
     toggleButtonPaintProperty->UpdateIsOn(jsonIsOn->GetBool());
+    OnModifyDone();
+}
+
+void ToggleButtonPattern::OnColorConfigurationUpdate()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto toggleTheme = pipeline->GetTheme<ToggleTheme>();
+    CHECK_NULL_VOID(toggleTheme);
+    checkedColor_ = toggleTheme->GetCheckedColor();
+    unCheckedColor_ = toggleTheme->GetBackgroundColor();
     OnModifyDone();
 }
 } // namespace OHOS::Ace::NG

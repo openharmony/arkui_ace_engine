@@ -32,15 +32,14 @@ class JSDataChangeListener : public Referenced {
 public:
     static void JSBind(BindingTarget globalObj);
 
-    void AddListener(const RefPtr<V2::DataChangeListener>& listener)
+    void AddListener(const WeakPtr<V2::DataChangeListener>& listener)
     {
         listeners_.emplace(listener);
     }
 
-    void RemoveListener(const RefPtr<V2::DataChangeListener>& listener)
+    void RemoveListener(const WeakPtr<V2::DataChangeListener>& listener)
     {
-        WeakPtr<V2::DataChangeListener> weak = listener;
-        listeners_.erase(weak);
+        listeners_.erase(listener);
     }
 
 private:

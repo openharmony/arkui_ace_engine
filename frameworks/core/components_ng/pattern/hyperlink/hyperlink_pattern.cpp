@@ -14,9 +14,9 @@
  */
 
 #include "core/components_ng/pattern/hyperlink/hyperlink_pattern.h"
-#include "core/components/hyperlink/hyperlink_theme.h"
 
 #include "base/json/json_util.h"
+#include "core/components/hyperlink/hyperlink_theme.h"
 #ifdef ENABLE_DRAG_FRAMEWORK
 #include "core/common/udmf/udmf_client.h"
 #endif
@@ -27,11 +27,15 @@ void HyperlinkPattern::OnAttachToFrameNode() {}
 void HyperlinkPattern::EnableDrag()
 {
     auto dragStart = [weak = WeakClaim(this)](const RefPtr<OHOS::Ace::DragEvent>& event,
-                        const std::string& /* extraParams */) -> DragDropInfo {
+                         const std::string& /* extraParams */) -> DragDropInfo {
         DragDropInfo info;
         auto hyperlinkPattern = weak.Upgrade();
         CHECK_NULL_RETURN(hyperlinkPattern, info);
-        std::string address = hyperlinkPattern->GetAddress();
+        auto host = hyperlinkPattern->GetHost();
+        CHECK_NULL_RETURN(host, info);
+        auto hyperlinkLayoutProperty = host->GetLayoutProperty<HyperlinkLayoutProperty>();
+        CHECK_NULL_RETURN(hyperlinkLayoutProperty, info);
+        std::string address = hyperlinkLayoutProperty->GetAddress().value_or("");
         std::string content = hyperlinkPattern->GetTextForDisplay();
         auto json = JsonUtil::Create(true);
         json->Put("url", address.c_str());
@@ -66,7 +70,6 @@ void HyperlinkPattern::OnModifyDone()
     CHECK_NULL_VOID(gestureHub);
     InitClickEvent(gestureHub);
     InitTouchEvent(gestureHub);
-    InitLongPressEvent(gestureHub);
 
     auto inputHub = hub->GetOrCreateInputEventHub();
     CHECK_NULL_VOID(inputHub);
@@ -84,8 +87,15 @@ void HyperlinkPattern::OnModifyDone()
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<HyperlinkTheme>();
     CHECK_NULL_VOID(theme);
+    auto renderContext = host->GetRenderContext();
     if (!enabled) {
-        hyperlinkLayoutProperty->UpdateTextColor(theme->GetTextDisabledColor());
+        hyperlinkLayoutProperty->UpdateTextColor(
+            hyperlinkLayoutProperty->GetColor().value_or(theme->GetTextColor()).BlendOpacity(theme->GetOpacity()));
+        renderContext->UpdateForegroundColor(
+            hyperlinkLayoutProperty->GetColor().value_or(theme->GetTextColor()).BlendOpacity(theme->GetOpacity()));
+    } else {
+        hyperlinkLayoutProperty->UpdateTextColor(hyperlinkLayoutProperty->GetColor().value_or(theme->GetTextColor()));
+        renderContext->UpdateForegroundColor(hyperlinkLayoutProperty->GetColor().value_or(theme->GetTextColor()));
     }
     if (host->IsDraggable()) {
         EnableDrag();
@@ -95,7 +105,6 @@ void HyperlinkPattern::OnModifyDone()
 void HyperlinkPattern::LinkToAddress()
 {
 #if defined(PREVIEW)
-    LOGW("Unable to jump in preview.");
     return;
 #else
     isLinked_ = true;
@@ -107,10 +116,19 @@ void HyperlinkPattern::LinkToAddress()
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<HyperlinkTheme>();
     CHECK_NULL_VOID(theme);
-    hyperlinkLayoutProperty->UpdateTextColor(theme->GetTextColor().BlendColor(theme->GetTextLinkedColor()));
+    auto color = theme->GetTextColor();
+    hyperlinkLayoutProperty->UpdateTextColor(
+        hyperlinkLayoutProperty->GetColor().value_or(color).BlendColor(theme->GetTextLinkedColor()));
+    hyperlinkLayoutProperty->UpdateForegroundColor(
+        hyperlinkLayoutProperty->GetColor().value_or(color).BlendColor(theme->GetTextLinkedColor()));
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    renderContext->UpdateForegroundColor(
+        hyperlinkLayoutProperty->GetColor().value_or(color).BlendColor(theme->GetTextLinkedColor()));
     hyperlinkLayoutProperty->UpdateTextDecoration(theme->GetTextUnSelectedDecoration());
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
-    pipeline->HyperlinkStartAbility(address_);
+    auto address = hyperlinkLayoutProperty->GetAddress().value_or("");
+    pipeline->HyperlinkStartAbility(address);
 #endif
 }
 
@@ -161,43 +179,40 @@ void HyperlinkPattern::OnTouchEvent(const TouchEventInfo& info)
     CHECK_NULL_VOID(theme);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
     auto hyperlinkLayoutProperty = host->GetLayoutProperty<HyperlinkLayoutProperty>();
     CHECK_NULL_VOID(hyperlinkLayoutProperty);
     auto touchList = info.GetChangedTouches();
     CHECK_NULL_VOID(!touchList.empty());
     auto touchInfo = touchList.front();
     auto touchType = touchInfo.GetTouchType();
+    auto color = theme->GetTextColor();
     if (touchType == TouchType::DOWN) {
         hyperlinkLayoutProperty->UpdateTextDecoration(theme->GetTextSelectedDecoration());
         if (isLinked_) {
-            hyperlinkLayoutProperty->UpdateTextDecorationColor(theme->GetTextColor().BlendColor(
-                theme->GetTextLinkedColor()));
+            hyperlinkLayoutProperty->UpdateTextDecorationColor(
+                hyperlinkLayoutProperty->GetColor().value_or(color).BlendColor(theme->GetTextLinkedColor()));
         } else {
-            hyperlinkLayoutProperty->UpdateTextColor(theme->GetTextColor().BlendColor(
+            hyperlinkLayoutProperty->UpdateTextColor(hyperlinkLayoutProperty->GetColor().value_or(color).BlendColor(
                 theme->GetTextTouchedColor()));
-            hyperlinkLayoutProperty->UpdateTextDecorationColor(theme->GetTextColor().BlendColor(
-                theme->GetTextTouchedColor()));
+            hyperlinkLayoutProperty->UpdateTextDecorationColor(
+                hyperlinkLayoutProperty->GetColor().value_or(color).BlendColor(theme->GetTextTouchedColor()));
+            hyperlinkLayoutProperty->UpdateForegroundColor(
+                hyperlinkLayoutProperty->GetColor().value_or(color).BlendColor(theme->GetTextTouchedColor()));
+            renderContext->UpdateForegroundColor(
+                hyperlinkLayoutProperty->GetColor().value_or(color).BlendColor(theme->GetTextTouchedColor()));
         }
         host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     } else if (touchType == TouchType::UP) {
         hyperlinkLayoutProperty->UpdateTextDecoration(theme->GetTextUnSelectedDecoration());
         if (!isLinked_) {
-            hyperlinkLayoutProperty->UpdateTextColor(theme->GetTextColor());
+            hyperlinkLayoutProperty->UpdateTextColor(hyperlinkLayoutProperty->GetColor().value_or(color));
+            hyperlinkLayoutProperty->UpdateForegroundColor(hyperlinkLayoutProperty->GetColor().value_or(color));
+            renderContext->UpdateForegroundColor(hyperlinkLayoutProperty->GetColor().value_or(color));
         }
         host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     }
-}
-
-void HyperlinkPattern::InitLongPressEvent(const RefPtr<GestureEventHub>& gestureHub)
-{
-    CHECK_NULL_VOID(!longPressEvent_);
-    auto longPressCallback = [weak = WeakClaim(this)](GestureEvent& info) {
-        auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID(pattern);
-        pattern->LinkToAddress();
-    };
-    longPressEvent_ = MakeRefPtr<LongPressEvent>(std::move(longPressCallback));
-    gestureHub->SetLongPressEvent(longPressEvent_);
 }
 
 void HyperlinkPattern::InitClickEvent(const RefPtr<GestureEventHub>& gestureHub)
@@ -238,7 +253,6 @@ bool HyperlinkPattern::OnKeyEvent(const KeyEvent& event)
 
 void HyperlinkPattern::OnHoverEvent(bool isHovered)
 {
-    LOGD("Hyperlink OnHoverEvent in. isHovered: %{public}d", isHovered);
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<HyperlinkTheme>();
@@ -248,15 +262,16 @@ void HyperlinkPattern::OnHoverEvent(bool isHovered)
     auto frameId = host->GetId();
     auto hyperlinkLayoutProperty = host->GetLayoutProperty<HyperlinkLayoutProperty>();
     CHECK_NULL_VOID(hyperlinkLayoutProperty);
+    auto color = theme->GetTextColor();
     if (isHovered) {
         pipeline->SetMouseStyleHoldNode(frameId);
         pipeline->ChangeMouseStyle(frameId, MouseFormat::HAND_POINTING);
         hyperlinkLayoutProperty->UpdateTextDecoration(theme->GetTextSelectedDecoration());
         if (isLinked_) {
-            hyperlinkLayoutProperty->UpdateTextDecorationColor(theme->GetTextColor().BlendColor(
-                theme->GetTextLinkedColor()));
+            hyperlinkLayoutProperty->UpdateTextDecorationColor(
+                hyperlinkLayoutProperty->GetColor().value_or(color).BlendColor(theme->GetTextLinkedColor()));
         } else {
-            hyperlinkLayoutProperty->UpdateTextDecorationColor(theme->GetTextColor());
+            hyperlinkLayoutProperty->UpdateTextDecorationColor(hyperlinkLayoutProperty->GetColor().value_or(color));
         }
         host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     } else {
@@ -269,25 +284,23 @@ void HyperlinkPattern::OnHoverEvent(bool isHovered)
 
 void HyperlinkPattern::OnMouseEvent(MouseInfo& info)
 {
-    LOGD("Hyperlink OnMouseEvent in. Button: %{public}d, Action: %{public}d", info.GetButton(), info.GetAction());
+    TAG_LOGD(AceLogTag::ACE_HYPERLINK, "Hyperlink OnMouseEvent in. Button: %{public}d, Action: %{public}d",
+        info.GetButton(), info.GetAction());
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto frame = GetHost();
     CHECK_NULL_VOID(frame);
     auto frameId = frame->GetId();
 
-    if (frame->IsOutOfTouchTestRegion({ static_cast<float>(info.GetGlobalLocation().GetX()),
-        static_cast<float>(info.GetGlobalLocation().GetY()) }, 0)) {
+    if (frame->IsOutOfTouchTestRegion(
+        { static_cast<float>(info.GetLocalLocation().GetX()) + GetHostFrameOffset()->GetX(),
+            static_cast<float>(info.GetLocalLocation().GetY()) + GetHostFrameOffset()->GetY() },
+        0)) {
         pipeline->ChangeMouseStyle(frameId, MouseFormat::DEFAULT);
         pipeline->FreeMouseStyleHoldNode(frameId);
     } else {
         pipeline->SetMouseStyleHoldNode(frameId);
         pipeline->ChangeMouseStyle(frameId, MouseFormat::HAND_POINTING);
     }
-}
-
-void HyperlinkPattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const
-{
-    json->Put("address", address_.c_str());
 }
 } // namespace OHOS::Ace::NG

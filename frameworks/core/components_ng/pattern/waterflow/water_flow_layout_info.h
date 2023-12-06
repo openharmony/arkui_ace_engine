@@ -39,6 +39,7 @@ public:
     void UpdateStartIndex();
     int32_t GetEndIndexByOffset(float offset) const;
     float GetMaxMainHeight() const;
+    float GetContentHeight() const;
     bool IsAllCrossReachend(float mainSize) const;
     FlowItemIndex GetCrossIndexForNextItem() const;
     float GetMainHeight(int32_t crossIndex, int32_t itemIndex);
@@ -49,9 +50,13 @@ public:
     int32_t GetMainCount() const;
     void ClearCacheAfterIndex(int32_t currentIndex);
 
+    bool ReachStart(float prevOffset, bool firstLayout) const;
+    bool ReachEnd(float prevOffset) const;
+
     float currentOffset_ = 0.0f;
     float prevOffset_ = 0.0f;
     float lastMainSize_ = 0.0f;
+    // 0.0f until itemEnd_ is true
     float maxHeight_ = 0.0f;
     // store offset for distributed migration
     float storedOffset_ = 0.0f;
@@ -67,6 +72,10 @@ public:
     int32_t endIndex_ = 0;
     int32_t footerIndex_ = -1;
     int32_t childrenCount_ = 0;
+
+    // first index for onScrollIndex
+    int32_t firstIndex_ = 0;
+
     // Map structure: [crossIndex, [index, (mainOffset, itemMainSize)]],
     std::map<int32_t, std::map<int32_t, std::pair<float, float>>> waterFlowItems_;
 

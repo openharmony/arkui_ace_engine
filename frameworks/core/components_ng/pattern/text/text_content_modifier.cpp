@@ -62,7 +62,8 @@ TextContentModifier::TextContentModifier(const std::optional<TextStyle>& textSty
     contentSize_ = MakeRefPtr<PropertySizeF>(SizeF());
     AttachProperty(contentOffset_);
     AttachProperty(contentSize_);
-
+    dragStatus_ = MakeRefPtr<PropertyBool>(false);
+    AttachProperty(dragStatus_);
     if (textStyle.has_value()) {
         SetDefaultAnimatablePropertyValue(textStyle.value());
     }
@@ -75,6 +76,11 @@ TextContentModifier::TextContentModifier(const std::optional<TextStyle>& textSty
     AttachProperty(fontFamilyString_);
     fontReady_ = MakeRefPtr<PropertyBool>(false);
     AttachProperty(fontReady_);
+}
+
+void TextContentModifier::ChangeDragStatus()
+{
+    dragStatus_->Set(!dragStatus_->Get());
 }
 
 void TextContentModifier::SetDefaultAnimatablePropertyValue(const TextStyle& textStyle)
@@ -135,15 +141,18 @@ void TextContentModifier::AddShadow(const Shadow& shadow)
     auto shadowOffsetXFloat = MakeRefPtr<AnimatablePropertyFloat>(shadow.GetOffset().GetX());
     auto shadowOffsetYFloat = MakeRefPtr<AnimatablePropertyFloat>(shadow.GetOffset().GetY());
     auto shadowColor = MakeRefPtr<AnimatablePropertyColor>(LinearColor(shadow.GetColor()));
+    auto isFilled = MakeRefPtr<PropertyBool>(shadow.GetIsFilled());
     shadows_.emplace_back(ShadowProp { .shadow = shadow,
         .blurRadius = shadowBlurRadiusFloat,
         .offsetX = shadowOffsetXFloat,
         .offsetY = shadowOffsetYFloat,
-        .color = shadowColor });
+        .color = shadowColor,
+        .isFilled = isFilled });
     AttachProperty(shadowBlurRadiusFloat);
     AttachProperty(shadowOffsetXFloat);
     AttachProperty(shadowOffsetYFloat);
     AttachProperty(shadowColor);
+    AttachProperty(isFilled);
 }
 
 void TextContentModifier::SetDefaultTextDecoration(const TextStyle& textStyle)
@@ -274,6 +283,7 @@ void TextContentModifier::DrawObscuration(DrawingContext& drawingContext)
             radiusXY);
         canvas.DrawRoundRect(rSRoundRect);
     }
+    canvas.DetachBrush();
 }
 
 void TextContentModifier::ModifyFontSizeInTextStyle(TextStyle& textStyle)
@@ -471,6 +481,7 @@ void TextContentModifier::SetTextShadow(const std::vector<Shadow>& value)
         shadows_[i].offsetX->Set(newShadow.GetOffset().GetX());
         shadows_[i].offsetY->Set(newShadow.GetOffset().GetY());
         shadows_[i].color->Set(LinearColor(newShadow.GetColor()));
+        shadows_[i].isFilled->Set(newShadow.GetIsFilled());
     }
 }
 
@@ -591,11 +602,13 @@ void TextContentModifier::AddDefaultShadow()
     auto offsetX = MakeRefPtr<AnimatablePropertyFloat>(emptyShadow.GetOffset().GetX());
     auto offsetY = MakeRefPtr<AnimatablePropertyFloat>(emptyShadow.GetOffset().GetY());
     auto color = MakeRefPtr<AnimatablePropertyColor>(LinearColor(emptyShadow.GetColor()));
-    shadows_.emplace_back(
-        ShadowProp { .blurRadius = blurRadius, .offsetX = offsetX, .offsetY = offsetY, .color = color });
+    auto isFilled = MakeRefPtr<PropertyBool>(emptyShadow.GetIsFilled());
+    shadows_.emplace_back(ShadowProp {
+        .blurRadius = blurRadius, .offsetX = offsetX, .offsetY = offsetY, .color = color, .isFilled = isFilled });
     AttachProperty(blurRadius);
     AttachProperty(offsetX);
     AttachProperty(offsetY);
     AttachProperty(color);
+    AttachProperty(isFilled);
 }
 } // namespace OHOS::Ace::NG

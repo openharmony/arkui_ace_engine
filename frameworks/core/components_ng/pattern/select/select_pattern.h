@@ -179,10 +179,19 @@ public:
     std::string ProvideRestoreInfo() override;
     void OnRestoreInfo(const std::string& restoreInfo) override;
     void OnColorConfigurationUpdate() override;
+    void OnLanguageConfigurationUpdate() override;
+    void ShowSelectMenu();
+    
+    Dimension GetFontSize();
+    void SetSelectDefaultTheme();
+    void SetOptionWidth(const Dimension& value);
+    void SetOptionHeight(const Dimension& value);
+    void SetOptionWidthFitTrigger(bool isFitTrigger);
 
 private:
     void OnAttachToFrameNode() override;
     void OnModifyDone() override;
+    void OnAfterModifyDone() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
 
     bool HasRowNode() const
@@ -239,8 +248,6 @@ private:
     // change text and spinner color if disabled
     void SetDisabledStyle();
 
-    void ShowSelectMenu();
-
     // update text to selected option's text
     void UpdateText(int32_t index);
 
@@ -286,6 +293,8 @@ private:
     MenuAlign menuAlign_;
     std::string selectValue_;
     bool isColorConfigurationUpdate_ = false;
+    bool isFitTrigger_ = false;
+    Color selectDefaultBgColor_ = Color::TRANSPARENT;
     ACE_DISALLOW_COPY_AND_MOVE(SelectPattern);
 };
 

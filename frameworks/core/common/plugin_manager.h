@@ -39,7 +39,7 @@ public:
     RefPtr<PluginSubContainer> GetPluginSubContainer(int64_t pluginId);
     RefPtr<PluginSubContainer> MatchPluginSubContainerWithPluginId(int64_t pluginId, const std::string& pluginKey);
     int64_t GetPluginSubContainerId();
-    int64_t GetPluginParentContainerId(int64_t pluginId);
+    int32_t GetPluginParentContainerId(int64_t pluginId);
     void SetJsEngineLoader(Framework::JsEngineLoader* jsEngineLoader)
     {
         jsEngineLoader_ = jsEngineLoader;
@@ -65,14 +65,14 @@ public:
 
 private:
     std::mutex mutex_;
-    static std::map<int64_t, RefPtr<PluginSubContainer>> pluginSubContainerMap_;
+    std::map<int64_t, RefPtr<PluginSubContainer>> pluginSubContainerMap_;
     std::mutex nonmatchedContainerMutex_;
     std::unordered_map<std::string, RefPtr<PluginSubContainer>> nonmatchedContainerMap_;
     std::mutex parentContainerMutex_;
     std::unordered_map<int64_t, int32_t> parentContainerMap_;
     Framework::JsEngineLoader* jsEngineLoader_ = nullptr;
     void* aceAbility_ = nullptr;
-    static std::shared_ptr<PluginUtils> pluginUtils_;
+    std::shared_ptr<PluginUtils> pluginUtils_;
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_PLUGIN_MANAGER_H

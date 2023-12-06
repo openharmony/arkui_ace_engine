@@ -39,6 +39,7 @@ public:
     static void OpenImplicitAnimation(
         const AnimationOption& option, const RefPtr<Curve>& curve, const std::function<void()>& finishCallback);
     static bool CloseImplicitAnimation();
+    static bool IsImplicitAnimationOpen();
     static void Animate(const AnimationOption& option, const PropertyCallback& callback,
         const FinishCallback& finishCallback = nullptr, const RepeatCallback& repeatCallback = nullptr);
     static void AddKeyFrame(float fraction, const RefPtr<Curve>& curve, const PropertyCallback& callback);
@@ -58,6 +59,7 @@ public:
         RefPtr<NG::RenderContext>& renderContext, const Color& endColor, int32_t duration, const RefPtr<Curve>& curve);
     static void PauseAnimation(const std::shared_ptr<AnimationUtils::Animation>& animation);
     static void ResumeAnimation(const std::shared_ptr<AnimationUtils::Animation>& animation);
+    static bool AnimationIsRunning(const std::shared_ptr<AnimationUtils::Animation>& animation);
 };
 } // namespace OHOS::Ace
 

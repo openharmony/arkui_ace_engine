@@ -16,16 +16,18 @@
 #include "core/components_ng/pattern/waterflow/water_flow_model_ng.h"
 
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/pattern/scroll_bar/proxy/scroll_bar_proxy.h"
+#include "core/components_ng/pattern/scrollable/scrollable_controller.h"
+#include "core/components_ng/pattern/scrollable/scrollable_model_ng.h"
 #include "core/components_ng/pattern/waterflow/water_flow_pattern.h"
-#include "core/components_ng/pattern/waterflow/water_flow_position_controller.h"
 #include "core/components_v2/inspector/inspector_constants.h"
-#include "frameworks/core/components_ng/pattern/scroll_bar/proxy/scroll_bar_proxy.h"
 
 namespace OHOS::Ace::NG {
 void WaterFlowModelNG::Create()
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
+    ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::WATERFLOW_ETS_TAG, nodeId);
     auto frameNode = FrameNode::GetOrCreateFrameNode(
         V2::WATERFLOW_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WaterFlowPattern>(); });
     stack->Push(frameNode);
@@ -49,7 +51,7 @@ void WaterFlowModelNG::SetFooter(std::function<void()>&& footer)
 
 RefPtr<ScrollControllerBase> WaterFlowModelNG::CreateScrollController()
 {
-    return AceType::MakeRefPtr<WaterFlowPositionController>();
+    return AceType::MakeRefPtr<ScrollableController>();
 }
 
 RefPtr<ScrollProxy> WaterFlowModelNG::CreateScrollBarProxy()
@@ -61,14 +63,14 @@ void WaterFlowModelNG::SetScroller(RefPtr<ScrollControllerBase> scroller, RefPtr
 {
     auto waterFlow = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WaterFlowPattern>();
     CHECK_NULL_VOID(waterFlow);
-    waterFlow->SetPositionController(AceType::DynamicCast<WaterFlowPositionController>(scroller));
+    waterFlow->SetPositionController(AceType::DynamicCast<ScrollableController>(scroller));
     waterFlow->SetScrollBarProxy(AceType::DynamicCast<ScrollBarProxy>(proxy));
 }
 
 void WaterFlowModelNG::SetColumnsTemplate(const std::string& value)
 {
     if (value.empty()) {
-        LOGE("Columns Template [%{public}s] is not valid.", value.c_str());
+        TAG_LOGW(AceLogTag::ACE_WATERFLOW, "Columns Template [%{public}s] is not valid.", value.c_str());
         ACE_UPDATE_LAYOUT_PROPERTY(WaterFlowLayoutProperty, ColumnsTemplate, "1fr");
         return;
     }
@@ -78,7 +80,7 @@ void WaterFlowModelNG::SetColumnsTemplate(const std::string& value)
 void WaterFlowModelNG::SetRowsTemplate(const std::string& value)
 {
     if (value.empty()) {
-        LOGE("Rows Template [%{public}s] is not valid.", value.c_str());
+        TAG_LOGW(AceLogTag::ACE_WATERFLOW, "Rows Template [%{public}s] is not valid.", value.c_str());
         ACE_UPDATE_LAYOUT_PROPERTY(WaterFlowLayoutProperty, RowsTemplate, "1fr");
         return;
     }
@@ -88,7 +90,7 @@ void WaterFlowModelNG::SetRowsTemplate(const std::string& value)
 void WaterFlowModelNG::SetItemMinWidth(const Dimension& minWidth)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
-        LOGD("current state is not processed, return");
+        TAG_LOGD(AceLogTag::ACE_WATERFLOW, "current state is not processed, return");
         return;
     }
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -101,7 +103,7 @@ void WaterFlowModelNG::SetItemMinWidth(const Dimension& minWidth)
 void WaterFlowModelNG::SetItemMinHeight(const Dimension& minHeight)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
-        LOGD("current state is not processed, return");
+        TAG_LOGD(AceLogTag::ACE_WATERFLOW, "current state is not processed, return");
         return;
     }
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -114,7 +116,7 @@ void WaterFlowModelNG::SetItemMinHeight(const Dimension& minHeight)
 void WaterFlowModelNG::SetItemMaxWidth(const Dimension& maxWidth)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
-        LOGD("current state is not processed, return");
+        TAG_LOGD(AceLogTag::ACE_WATERFLOW, "current state is not processed, return");
         return;
     }
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -127,7 +129,7 @@ void WaterFlowModelNG::SetItemMaxWidth(const Dimension& maxWidth)
 void WaterFlowModelNG::SetItemMaxHeight(const Dimension& maxHeight)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
-        LOGD("current state is not processed, return");
+        TAG_LOGD(AceLogTag::ACE_WATERFLOW, "current state is not processed, return");
         return;
     }
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -172,29 +174,41 @@ void WaterFlowModelNG::SetScrollEnabled(bool scrollEnabled)
 
 void WaterFlowModelNG::SetOnReachStart(OnReachEvent&& onReachStart)
 {
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<WaterFlowEventHub>();
-    CHECK_NULL_VOID(eventHub);
-    eventHub->SetOnReachStart(std::move(onReachStart));
+    ScrollableModelNG::SetOnReachStart(std::move(onReachStart));
 }
 
 void WaterFlowModelNG::SetOnReachEnd(OnReachEvent&& onReachEnd)
 {
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<WaterFlowEventHub>();
-    CHECK_NULL_VOID(eventHub);
-    eventHub->SetOnReachEnd(std::move(onReachEnd));
+    ScrollableModelNG::SetOnReachEnd(std::move(onReachEnd));
 }
 
 void WaterFlowModelNG::SetOnScrollFrameBegin(OnScrollFrameBeginEvent&& ScrollFrameBegin)
+{
+    ScrollableModelNG::SetOnScrollFrameBegin(std::move(ScrollFrameBegin));
+}
+
+void WaterFlowModelNG::SetOnScroll(std::function<void(Dimension, ScrollState)>&& onScroll)
+{
+    ScrollableModelNG::SetOnScroll(std::move(onScroll));
+}
+
+void WaterFlowModelNG::SetOnScrollStart(OnScrollStartEvent&& onScrollStart)
+{
+    ScrollableModelNG::SetOnScrollStart(std::move(onScrollStart));
+}
+
+void WaterFlowModelNG::SetOnScrollStop(OnScrollStopEvent&& onScrollStop)
+{
+    ScrollableModelNG::SetOnScrollStop(std::move(onScrollStop));
+}
+
+void WaterFlowModelNG::SetOnScrollIndex(ScrollIndexFunc&& onScrollIndex)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto eventHub = frameNode->GetEventHub<WaterFlowEventHub>();
     CHECK_NULL_VOID(eventHub);
-    eventHub->SetOnScrollFrameBegin(std::move(ScrollFrameBegin));
+    eventHub->SetOnScrollIndex(std::move(onScrollIndex));
 }
 
 void WaterFlowModelNG::SetFriction(double friction)
@@ -204,5 +218,28 @@ void WaterFlowModelNG::SetFriction(double friction)
     auto pattern = frameNode->GetPattern<WaterFlowPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetFriction(friction);
+}
+
+void WaterFlowModelNG::SetCachedCount(int32_t value)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(WaterFlowLayoutProperty, CachedCount, value);
+}
+
+void WaterFlowModelNG::SetEdgeEffect(EdgeEffect edgeEffect, bool alwaysEnabled)
+{
+    ScrollableModelNG::SetEdgeEffect(edgeEffect, alwaysEnabled);
+}
+
+void WaterFlowModelNG::SetScrollBarMode(DisplayMode value)
+{
+    ScrollableModelNG::SetScrollBarMode(value);
+}
+void WaterFlowModelNG::SetScrollBarColor(const std::string& value)
+{
+    ScrollableModelNG::SetScrollBarColor(value);
+}
+void WaterFlowModelNG::SetScrollBarWidth(const std::string& value)
+{
+    ScrollableModelNG::SetScrollBarWidth(value);
 }
 } // namespace OHOS::Ace::NG

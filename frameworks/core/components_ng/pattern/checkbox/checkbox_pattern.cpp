@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/checkbox/checkbox_pattern.h"
 
+#include "core/common/recorder/node_data_cache.h"
 #include "core/components/checkable/checkable_component.h"
 #include "core/components/checkable/checkable_theme.h"
 #include "core/components_ng/pattern/checkbox/checkbox_layout_algorithm.h"
@@ -30,6 +31,9 @@
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+const Color ITEM_FILL_COLOR = Color::TRANSPARENT;
+}
 
 void CheckBoxPattern::OnAttachToFrameNode()
 {
@@ -79,6 +83,69 @@ void CheckBoxPattern::OnModifyDone()
     auto focusHub = host->GetFocusHub();
     CHECK_NULL_VOID(focusHub);
     InitOnKeyEvent(focusHub);
+    SetAccessibilityAction();
+}
+
+void CheckBoxPattern::SetAccessibilityAction()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto accessibilityProperty = host->GetAccessibilityProperty<AccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
+    accessibilityProperty->SetActionSelect([weakPtr = WeakClaim(this)]() {
+        const auto& pattern = weakPtr.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->UpdateSelectStatus(true);
+    });
+
+    accessibilityProperty->SetActionClearSelection([weakPtr = WeakClaim(this)]() {
+        const auto& pattern = weakPtr.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->UpdateSelectStatus(false);
+    });
+}
+
+void CheckBoxPattern::UpdateSelectStatus(bool isSelected)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto context = host->GetRenderContext();
+    CHECK_NULL_VOID(context);
+    MarkIsSelected(isSelected);
+    context->OnMouseSelectUpdate(isSelected, ITEM_FILL_COLOR, ITEM_FILL_COLOR);
+}
+
+void CheckBoxPattern::MarkIsSelected(bool isSelected)
+{
+    if (lastSelect_ == isSelected) {
+        return;
+    }
+    lastSelect_ = isSelected;
+    auto eventHub = GetEventHub<CheckBoxEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->UpdateChangeEvent(isSelected);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    if (isSelected) {
+        eventHub->UpdateCurrentUIState(UI_STATE_SELECTED);
+        host->OnAccessibilityEvent(AccessibilityEventType::SELECTED);
+    } else {
+        eventHub->ResetCurrentUIState(UI_STATE_SELECTED);
+        host->OnAccessibilityEvent(AccessibilityEventType::CHANGE);
+    }
+}
+
+void CheckBoxPattern::OnAfterModifyDone()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto inspectorId = host->GetInspectorId().value_or("");
+    if (inspectorId.empty()) {
+        return;
+    }
+    auto eventHub = host->GetEventHub<CheckBoxEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    Recorder::NodeDataCache::Get().PutMultiple(inspectorId, eventHub->GetName(), lastSelect_);
 }
 
 void CheckBoxPattern::InitClickEvent()
@@ -368,6 +435,7 @@ void CheckBoxPattern::UpdateCheckBoxGroupStatus(const RefPtr<FrameNode>& checkBo
     CHECK_NULL_VOID(groupPaintProperty);
     auto pattern = checkBoxGroupNode->GetPattern<CheckBoxGroupPattern>();
     CHECK_NULL_VOID(pattern);
+    auto preStatus = groupPaintProperty->GetSelectStatus();
     if (isSameAsSelf) {
         if (select) {
             groupPaintProperty->SetSelectStatus(CheckBoxGroupPaintProperty::SelectStatus::ALL);
@@ -387,6 +455,10 @@ void CheckBoxPattern::UpdateCheckBoxGroupStatus(const RefPtr<FrameNode>& checkBo
     }
 
     auto status = groupPaintProperty->GetSelectStatus();
+    if (preStatus != status && (preStatus == CheckBoxGroupPaintProperty::SelectStatus::ALL ||
+                                   status == CheckBoxGroupPaintProperty::SelectStatus::ALL)) {
+        pattern->SetSkipFlag(true);
+    }
     CheckboxGroupResult groupResult(vec, int(status));
     auto eventHub = checkBoxGroupNode->GetEventHub<CheckBoxGroupEventHub>();
     CHECK_NULL_VOID(eventHub);
@@ -429,6 +501,7 @@ void CheckBoxPattern::UpdateCheckBoxGroupStatusWhenDetach(const FrameNode* check
     CHECK_NULL_VOID(groupPaintProperty);
     auto pattern = checkBoxGroupNode->GetPattern<CheckBoxGroupPattern>();
     CHECK_NULL_VOID(pattern);
+    auto preStatus = groupPaintProperty->GetSelectStatus();
     if (haveCheckBoxSelected) {
         if (isAllCheckBoxSelected) {
             groupPaintProperty->SetSelectStatus(CheckBoxGroupPaintProperty::SelectStatus::ALL);
@@ -443,6 +516,10 @@ void CheckBoxPattern::UpdateCheckBoxGroupStatusWhenDetach(const FrameNode* check
     }
     checkBoxGroupNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     auto status = groupPaintProperty->GetSelectStatus();
+    if (preStatus != status && (preStatus == CheckBoxGroupPaintProperty::SelectStatus::ALL ||
+                                   status == CheckBoxGroupPaintProperty::SelectStatus::ALL)) {
+        pattern->SetSkipFlag(true);
+    }
     CheckboxGroupResult groupResult(vec, int(status));
     auto eventHub = checkBoxGroupNode->GetEventHub<CheckBoxGroupEventHub>();
     CHECK_NULL_VOID(eventHub);

@@ -125,7 +125,11 @@ public:
     void ToJsonColor(std::unique_ptr<JsonValue>& json) const
     {
         if (!propGaugeType_.has_value()) {
-            json->Put("colors", "");
+            auto jsonColor = JsonUtil::CreateArray(true);
+            for (size_t j = 0; j < GAUGE_DEFAULT_COLOR.size(); j++) {
+                jsonColor->Put(std::to_string(j).c_str(), GAUGE_DEFAULT_COLOR[j].ColorToString().c_str());
+            }
+            json->Put("colors", jsonColor->ToString().c_str());
             return;
         }
 
@@ -184,7 +188,7 @@ public:
         if (propIndicatorIconSourceInfo_.has_value()) {
             indicatorJsonValue->Put("icon", propIndicatorIconSourceInfo_.value().GetSrc().c_str());
         } else {
-            indicatorJsonValue->Put("icon", "");
+            indicatorJsonValue->Put("icon", "SystemStyle");
         }
 
         if (propIndicatorSpace_.has_value()) {

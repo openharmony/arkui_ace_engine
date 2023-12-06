@@ -38,7 +38,6 @@ void* DataProviderManagerStandard::GetDataProviderThumbnailResFromUri(const std:
     InitHelper();
     std::shared_lock lock(helperMutex_);
     if (!helper_) {
-        LOGE("data ability helper is null when try query thumbnail resource, uri: %{private}s", uriStr.c_str());
         return nullptr;
     }
     return helper_->QueryThumbnailResFromDataAbility(uriStr);
@@ -50,12 +49,10 @@ std::unique_ptr<DataProviderRes> DataProviderManagerStandard::GetDataProviderRes
     InitHelper();
     std::shared_lock lock(helperMutex_);
     if (!helper_) {
-        LOGE("data ability helper is null");
         return nullptr;
     }
     auto fd = helper_->OpenFile(uriStr, "r");
     if (fd == -1) {
-        LOGE("file descriptor is not valid");
         return nullptr;
     }
 
@@ -63,7 +60,7 @@ std::unique_ptr<DataProviderRes> DataProviderManagerStandard::GetDataProviderRes
     struct stat statBuf;
     auto statRes = fstat(fd, &statBuf);
     if (statRes != 0) {
-        LOGE("get stat fail");
+        LOGW("Get stat fail");
         close(fd);
         return nullptr;
     }
@@ -74,7 +71,7 @@ std::unique_ptr<DataProviderRes> DataProviderManagerStandard::GetDataProviderRes
     auto readRes = read(fd, buffer.get(), size);
     close(fd);
     if (readRes == -1) {
-        LOGE("read file fail");
+        LOGW("Read file fail");
         return nullptr;
     }
 

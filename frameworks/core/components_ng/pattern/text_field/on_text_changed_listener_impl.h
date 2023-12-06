@@ -41,6 +41,7 @@ public:
     std::u16string GetLeftTextOfCursor(int32_t number) override;
     std::u16string GetRightTextOfCursor(int32_t number) override;
     int32_t GetTextIndexAtCursor() override;
+    void NotifyPanelStatusInfo(const MiscServices::PanelStatusInfo& info) override;
 
 private:
     void PostTaskToUI(const std::function<void()>& task);
@@ -53,4 +54,4 @@ private:
 
 } // namespace OHOS::Ace::NG
 
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_TEXT_FIELD_ON_TEXT_CHANGED_LISTENER_IMPL_H
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_TEXT_FIELD_ON_TEXT_CHANGED_LISTNER_IMPL_H

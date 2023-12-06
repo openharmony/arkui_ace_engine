@@ -14,7 +14,6 @@
  */
 #include "core/components_ng/pattern/bubble/bubble_pattern.h"
 
-#include "base/geometry/ng/offset_t.h"
 #include "base/memory/ace_type.h"
 #include "base/subwindow/subwindow.h"
 #include "base/subwindow/subwindow_manager.h"
@@ -59,14 +58,6 @@ bool BubblePattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     auto bubbleLayoutAlgorithm = DynamicCast<BubbleLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
     CHECK_NULL_RETURN(bubbleLayoutAlgorithm, false);
 
-    // Calculating bubble offset and set.
-    auto childRenderOffset = bubbleLayoutAlgorithm->GetChildOffsetAfterLayout(dirty);
-    auto childNode = DynamicCast<FrameNode>(host->GetFirstChild());
-    CHECK_NULL_RETURN(childNode, false);
-    auto childContext = childNode->GetRenderContext();
-    CHECK_NULL_RETURN(childContext, false);
-    childContext->UpdateOffset(childRenderOffset);
-
     showArrow_ = bubbleLayoutAlgorithm->ShowArrow();
     arrowPosition_ = bubbleLayoutAlgorithm->GetArrowPosition();
     childOffset_ = bubbleLayoutAlgorithm->GetChildOffset();
@@ -75,6 +66,8 @@ bool BubblePattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     targetOffset_ = bubbleLayoutAlgorithm->GetTargetOffset();
     targetSize_ = bubbleLayoutAlgorithm->GetTargetSize();
     arrowPlacement_ = bubbleLayoutAlgorithm->GetArrowPlacement();
+    clipPath_ = bubbleLayoutAlgorithm->GetClipPath();
+    clipFrameNode_ = bubbleLayoutAlgorithm->GetClipFrameNode();
     paintProperty->UpdatePlacement(bubbleLayoutAlgorithm->GetArrowPlacement());
     if (delayShow_) {
         delayShow_ = false;
@@ -131,6 +124,13 @@ void BubblePattern::InitTouchEvent()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    auto bubbleRenderProp = host->GetPaintProperty<BubbleRenderProperty>();
+    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+        CHECK_NULL_VOID(bubbleRenderProp);
+        if (!bubbleRenderProp->GetAutoCancel().value_or(true)) {
+            return;
+        }
+    }
     auto hub = host->GetEventHub<EventHub>();
     CHECK_NULL_VOID(hub);
     auto gestureHub = hub->GetOrCreateGestureEventHub();
@@ -156,7 +156,11 @@ void BubblePattern::HandleTouchEvent(const TouchEventInfo& info)
     auto touchType = info.GetTouches().front().GetTouchType();
     auto clickPos = info.GetTouches().front().GetLocalLocation();
     if (touchType == TouchType::DOWN) {
-        HandleTouchDown(clickPos);
+        if (Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+            HandleTouchDown(clickPos);
+        } else {
+            PopBubble();
+        }
     }
 }
 
@@ -308,7 +312,7 @@ RefPtr<FrameNode> BubblePattern::GetButtonRowNode()
     CHECK_NULL_RETURN(columnNode, nullptr);
     auto buttonRowNode = AceType::DynamicCast<FrameNode>(columnNode->GetLastChild());
     CHECK_NULL_RETURN(buttonRowNode, nullptr);
-    if (buttonRowNode->GetTag() != V2::ROW_ETS_TAG) {
+    if (buttonRowNode->GetTag() != V2::FLEX_ETS_TAG) {
         return nullptr;
     }
     if (buttonRowNode->GetChildren().empty()) {
@@ -334,16 +338,11 @@ void BubblePattern::PopBubble()
     auto layoutProp = host->GetLayoutProperty<BubbleLayoutProperty>();
     CHECK_NULL_VOID(layoutProp);
     auto showInSubWindow = layoutProp->GetShowInSubWindow().value_or(false);
-    StartExitingAnimation([showInSubWindow, targetId = targetNodeId_, popupInfo,
-                              weakOverlayManger = AceType::WeakClaim(AceType::RawPtr(overlayManager))]() {
-        if (showInSubWindow) {
-            SubwindowManager::GetInstance()->HidePopupNG(targetId);
-        } else {
-            auto overlay = weakOverlayManger.Upgrade();
-            CHECK_NULL_VOID(overlay);
-            overlay->UpdatePopupNode(targetId, popupInfo);
-        }
-    });
+    if (showInSubWindow) {
+        SubwindowManager::GetInstance()->HidePopupNG(targetNodeId_);
+    } else {
+        overlayManager->HidePopup(targetNodeId_, popupInfo);
+    }
 }
 
 RefPtr<PopupTheme> BubblePattern::GetPopupTheme()
@@ -445,10 +444,6 @@ void BubblePattern::StartAlphaEnteringAnimation(std::function<void()> finish)
 
 void BubblePattern::StartExitingAnimation(std::function<void()> finish)
 {
-    if (!IsOnShow()) {
-        return;
-    }
-
     StartOffsetExitingAnimation();
     StartAlphaExitingAnimation(finish);
 }

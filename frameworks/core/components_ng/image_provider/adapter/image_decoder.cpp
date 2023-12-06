@@ -78,7 +78,8 @@ RefPtr<CanvasImage> ImageDecoder::MakeDrawingImage()
     {
         auto image = QueryCompressedCache();
         if (image) {
-            LOGD("QueryCompressedCache hit: %{public}s", obj_->GetSourceInfo().ToString().c_str());
+            TAG_LOGD(
+                AceLogTag::ACE_IMAGE, "QueryCompressedCache hit: %{public}s", obj_->GetSourceInfo().ToString().c_str());
             return image;
         }
     }
@@ -123,8 +124,11 @@ RefPtr<CanvasImage> ImageDecoder::MakePixmapImage()
     auto pixmap = source->CreatePixelMap({ width, height });
     CHECK_NULL_RETURN(pixmap, nullptr);
     auto image = PixelMapImage::Create(pixmap);
-    LOGD("decode to pixmap, desiredSize = %{public}s, pixmap size = %{public}d x %{public}d",
-        desiredSize_.ToString().c_str(), image->GetWidth(), image->GetHeight());
+    if (SystemProperties::GetDebugEnabled()) {
+        TAG_LOGI(AceLogTag::ACE_IMAGE,
+            "decode to pixmap, desiredSize = %{public}s, pixmap size = %{public}d x %{public}d",
+            desiredSize_.ToString().c_str(), image->GetWidth(), image->GetHeight());
+    }
 
     return image;
 }
@@ -135,12 +139,9 @@ sk_sp<SkImage> ImageDecoder::ForceResizeImage(const sk_sp<SkImage>& image, const
     SkBitmap bitmap;
     bitmap.allocPixels(info);
 
-#ifdef NEW_SKIA
     auto res = image->scalePixels(
         bitmap.pixmap(), SkSamplingOptions(SkFilterMode::kLinear, SkMipmapMode::kNone), SkImage::kDisallow_CachingHint);
-#else
-    auto res = image->scalePixels(bitmap.pixmap(), kLow_SkFilterQuality, SkImage::kDisallow_CachingHint);
-#endif
+
     CHECK_NULL_RETURN(res, image);
 
     bitmap.setImmutable();
@@ -153,7 +154,7 @@ sk_sp<SkImage> ImageDecoder::ResizeSkImage()
     auto encodedImage = SkImage::MakeFromEncoded(data_);
 #else
     CHECK_NULL_RETURN(data_, nullptr);
-    auto skData = data_->GetImpl<Rosen::Drawing::SkiaData>()->GetSkData();
+    auto skData = SkData::MakeWithoutCopy(data_->GetData(), data_->GetSize());
     auto encodedImage = SkImage::MakeFromEncoded(skData);
 #endif
     CHECK_NULL_RETURN(desiredSize_.IsPositive(), encodedImage);
@@ -185,8 +186,10 @@ sk_sp<SkImage> ImageDecoder::ResizeSkImage()
         // DesiredSize might not be compatible with the codec, so we find the closest size supported by the codec
         auto scale = std::max(static_cast<float>(width) / info.width(), static_cast<float>(height) / info.height());
         auto idealSize = codec->getScaledDimensions(scale);
-        LOGD("desiredSize = %{public}s, codec idealSize: %{public}dx%{public}d", desiredSize_.ToString().c_str(),
-            idealSize.width(), idealSize.height());
+        if (SystemProperties::GetDebugEnabled()) {
+            TAG_LOGI(AceLogTag::ACE_IMAGE, "desiredSize = %{public}s, codec idealSize: %{public}dx%{public}d",
+                desiredSize_.ToString().c_str(), idealSize.width(), idealSize.height());
+        }
 
         info = info.makeWH(idealSize.width(), idealSize.height());
         SkBitmap bitmap;
@@ -208,7 +211,7 @@ RefPtr<CanvasImage> ImageDecoder::QueryCompressedCache()
     auto skiaImageData = AceType::DynamicCast<SkiaImageData>(cachedData);
     CHECK_NULL_RETURN(skiaImageData, {});
     auto stripped = ImageCompressor::StripFileHeader(skiaImageData->GetSkData());
-    LOGI("use astc cache %{public}s", key.c_str());
+    TAG_LOGI(AceLogTag::ACE_IMAGE, "use astc cache %{public}s", key.c_str());
 
     // create encoded SkImage to use its uniqueId
     auto image = SkImage::MakeFromEncoded(data_);
@@ -217,11 +220,11 @@ RefPtr<CanvasImage> ImageDecoder::QueryCompressedCache()
     auto rosenImageData = AceType::DynamicCast<DrawingImageData>(cachedData);
     CHECK_NULL_RETURN(rosenImageData, {});
     auto stripped = ImageCompressor::StripFileHeader(rosenImageData->GetRSData());
-    LOGI("use astc cache %{public}s", key.c_str());
+    TAG_LOGI(AceLogTag::ACE_IMAGE, "use astc cache %{public}s", key.c_str());
 
     // create encoded SkImage to use its uniqueId
     CHECK_NULL_RETURN(data_, {});
-    auto skData = data_->GetImpl<Rosen::Drawing::SkiaData>()->GetSkData();
+    auto skData = SkData::MakeWithoutCopy(data_->GetData(), data_->GetSize());
     auto skImage = SkImage::MakeFromEncoded(skData);
     std::shared_ptr<RSImage> image = nullptr;
     if (skImage) {

@@ -20,6 +20,7 @@
 
 #include "core/animation/schedule_task.h"
 #include "core/components/common/properties/animation_option.h"
+#include "core/components_ng/manager/display_sync/ui_display_sync.h"
 
 namespace OHOS::Ace {
 
@@ -79,6 +80,7 @@ private:
     uint64_t startupTimestamp_ = 0;
     OnFrameCallback callback_ = nullptr;
     WeakPtr<PipelineBase> context_;
+    RefPtr<UIDisplaySync> displaySync_;
 };
 
 class SchedulerBuilder {

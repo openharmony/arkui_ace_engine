@@ -64,8 +64,9 @@ public:
             theme->textColor_ = pattern->GetAttr<Color>("text_color", Color(0xff007dff));
             theme->textTouchedColor_ = pattern->GetAttr<Color>("text_touched_color", Color(0x19182431));
             theme->textLinkedColor_ = pattern->GetAttr<Color>("text_linked_color", Color(0x66182431));
+            theme->opacity_ = pattern->GetAttr<double>("text_disabled_opacity", 0.0);
             theme->textDisabledColor_ = pattern->GetAttr<Color>("text_color", Color(0xff007dff))
-                .BlendOpacity(pattern->GetAttr<double>("text_disabled_opacity", 0.0));
+                .BlendOpacity(theme->opacity_);
             theme->textFocusedColor_ = pattern->GetAttr<Color>("text_focused_color", Color(0xff007dff));
             auto draggable = pattern->GetAttr<std::string>("draggable", "0");
             theme->draggable_ = StringUtils::StringToInt(draggable);
@@ -73,6 +74,11 @@ public:
     };
 
     ~HyperlinkTheme() override = default;
+
+    double GetOpacity() const
+    {
+        return opacity_;
+    }
 
     bool GetDraggable() const
     {
@@ -118,6 +124,7 @@ protected:
 
 private:
     bool draggable_ = false;
+    double opacity_;
     Color textColor_;
     Color textTouchedColor_;
     Color textLinkedColor_;

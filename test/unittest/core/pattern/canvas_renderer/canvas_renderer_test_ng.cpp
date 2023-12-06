@@ -31,7 +31,7 @@
 #include "core/components_ng/pattern/custom_paint/custom_paint_paint_method.h"
 #include "core/components_ng/pattern/custom_paint/offscreen_canvas_paint_method.h"
 #include "core/components_ng/pattern/custom_paint/offscreen_canvas_pattern.h"
-#include "core/pipeline_ng/test/mock/mock_pipeline_base.h"
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -79,7 +79,7 @@ void CanvasRendererTestNg::SetUpTestSuite()
 RefPtr<CustomPaintPattern> CanvasRendererTestNg::CreateCustomPaintView()
 {
     ContainerScope scope(DEFAULT_INSTANCE_ID);
-    RefPtr<PipelineBase> pipelineContext = AceType::MakeRefPtr<MockPipelineBase>();
+    RefPtr<PipelineBase> pipelineContext = AceType::MakeRefPtr<MockPipelineContext>();
     RefPtr<Container> container = AceType::MakeRefPtr<MockContainer>(pipelineContext);
     AceEngine::Get().AddContainer(DEFAULT_INSTANCE_ID, container);
     CanvasModelNG canvasModelNG;
@@ -89,7 +89,7 @@ RefPtr<CustomPaintPattern> CanvasRendererTestNg::CreateCustomPaintView()
 RefPtr<OffscreenCanvasPattern> CanvasRendererTestNg::CreateOffscreenCanvasPattern()
 {
     ContainerScope scope(DEFAULT_INSTANCE_ID);
-    RefPtr<PipelineBase> pipelineContext = AceType::MakeRefPtr<MockPipelineBase>();
+    RefPtr<PipelineBase> pipelineContext = AceType::MakeRefPtr<MockPipelineContext>();
     RefPtr<Container> container = AceType::MakeRefPtr<MockContainer>(pipelineContext);
     AceEngine::Get().AddContainer(DEFAULT_INSTANCE_ID, container);
     return AceType::MakeRefPtr<OffscreenCanvasPattern>(CANVAS_WIDTH, CANVAS_HEIGHT);

@@ -15,6 +15,7 @@
 
 #include "core/components_ng/image_provider/image_loading_context.h"
 
+#include "base/thread/background_task_executor.h"
 #include "base/utils/utils.h"
 #include "core/common/container.h"
 #include "core/components_ng/image_provider/image_state_manager.h"
@@ -22,9 +23,49 @@
 #include "core/components_ng/image_provider/pixel_map_image_object.h"
 #include "core/components_ng/image_provider/static_image_object.h"
 #include "core/components_ng/render/image_painter.h"
+#include "core/image/image_file_cache.h"
+#include "core/image/image_loader.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#ifdef USE_ROSEN_DRAWING
+#include "core/components_ng/image_provider/adapter/rosen/drawing_image_data.h"
+#endif
 
 namespace OHOS::Ace::NG {
+
+namespace {
+RefPtr<ImageData> QueryDataFromCache(const ImageSourceInfo& src, bool& dataHit)
+{
+    ACE_FUNCTION_TRACE();
+#ifndef USE_ROSEN_DRAWING
+    auto cachedData = ImageLoader::QueryImageDataFromImageCache(src);
+    if (cachedData) {
+        dataHit = true;
+        return NG::ImageData::MakeFromDataWrapper(&cachedData);
+    }
+    auto skData = ImageLoader::LoadDataFromCachedFile(src.GetSrc());
+    if (skData) {
+        sk_sp<SkData> data = SkData::MakeWithCopy(skData->data(), skData->size());
+
+        return NG::ImageData::MakeFromDataWrapper(&data);
+    }
+#else
+    std::shared_ptr<RSData> rsData = nullptr;
+    rsData = ImageLoader::QueryImageDataFromImageCache(src);
+    if (rsData) {
+        dataHit = true;
+        return AceType::MakeRefPtr<NG::DrawingImageData>(rsData);
+    }
+    auto drawingData = ImageLoader::LoadDataFromCachedFile(src.GetSrc());
+    if (drawingData) {
+        auto data = std::make_shared<RSData>();
+        data->BuildWithCopy(drawingData->GetData(), drawingData->GetSize());
+        return AceType::MakeRefPtr<NG::DrawingImageData>(data);
+    }
+#endif
+    return nullptr;
+}
+} // namespace
+
 ImageLoadingContext::ImageLoadingContext(const ImageSourceInfo& src, LoadNotifier&& loadNotifier, bool syncLoad)
     : src_(src), notifiers_(std::move(loadNotifier)), syncLoad_(syncLoad)
 {
@@ -71,7 +112,7 @@ SizeF ImageLoadingContext::CalculateTargetSize(const SizeF& srcSize, const SizeF
 
 void ImageLoadingContext::OnUnloaded()
 {
-    LOGD("ImageLoadingContext: OnUnloaded, reset params");
+    TAG_LOGD(AceLogTag::ACE_IMAGE, "ImageLoadingContext: OnUnloaded, reset params");
     imageObj_ = nullptr;
     canvasImage_ = nullptr;
     srcRect_ = RectF();
@@ -87,6 +128,7 @@ void ImageLoadingContext::OnLoadSuccess()
     if (notifiers_.onLoadSuccess_) {
         notifiers_.onLoadSuccess_(src_);
     }
+    ImageUtils::PostToUI(std::move(pendingMakeCanvasImageTask_));
 }
 
 void ImageLoadingContext::OnLoadFail()
@@ -109,7 +151,68 @@ void ImageLoadingContext::OnDataLoading()
         DataReadyCallback(obj);
         return;
     }
+    if (src_.GetSrcType() == SrcType::NETWORK && SystemProperties::GetDownloadByNetworkEnabled()) {
+        DownloadImage();
+        return;
+    }
     ImageProvider::CreateImageObject(src_, WeakClaim(this), syncLoad_);
+}
+
+bool ImageLoadingContext::NotifyReadyIfCacheHit()
+{
+    bool dataHit = false;
+    auto cachedImageData = QueryDataFromCache(src_, dataHit);
+    CHECK_NULL_RETURN(cachedImageData, false);
+    auto notifyDataReadyTask = [weak = AceType::WeakClaim(this), data = std::move(cachedImageData), dataHit] {
+        auto ctx = weak.Upgrade();
+        CHECK_NULL_VOID(ctx);
+        auto src = ctx->GetSourceInfo();
+        // if find data or file cache only, build and cache object, cache data if file cache hit
+        RefPtr<ImageObject> imageObj = ImageProvider::BuildImageObject(src, data);
+        ImageProvider::CacheImageObject(imageObj);
+        if (!dataHit) {
+            ImageLoader::CacheImageData(ctx->GetSourceInfo().GetKey(), data);
+        }
+        ctx->DataReadyCallback(imageObj);
+    };
+    if (syncLoad_) {
+        notifyDataReadyTask();
+    } else {
+        ImageUtils::PostToUI(std::move(notifyDataReadyTask));
+    }
+    return true;
+}
+
+void ImageLoadingContext::DownloadImage()
+{
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    DownloadCallback downloadCallback;
+    if (NotifyReadyIfCacheHit()) {
+        return;
+    }
+    downloadCallback.successCallback = [weak = AceType::WeakClaim(this)](const std::string&& imageData) {
+        auto ctx = weak.Upgrade();
+        CHECK_NULL_VOID(ctx);
+        auto data = ImageData::MakeFromDataWithCopy(imageData.data(), imageData.size());
+        // if downloading is necessary, cache object, data to file
+        RefPtr<ImageObject> imageObj = ImageProvider::BuildImageObject(ctx->GetSourceInfo(), data);
+        if (!imageObj) {
+            ctx->FailCallback("ImageObject null");
+            return;
+        }
+        ImageProvider::CacheImageObject(imageObj);
+        ImageLoader::CacheImageData(ctx->GetSourceInfo().GetKey(), data);
+        ImageLoader::WriteCacheToFile(ctx->GetSourceInfo().GetSrc(), imageData);
+        ctx->DataReadyCallback(imageObj);
+    };
+    downloadCallback.failCallback = [weak = AceType::WeakClaim(this)](std::string errorMsg) {
+        auto ctx = weak.Upgrade();
+        CHECK_NULL_VOID(ctx);
+        ctx->FailCallback(errorMsg);
+    };
+    downloadCallback.cancelCallback = downloadCallback.failCallback;
+    NetworkImageLoader::DownloadImage(std::move(downloadCallback), src_.GetSrc(), syncLoad_);
 }
 
 void ImageLoadingContext::OnMakeCanvasImage()
@@ -144,8 +247,8 @@ void ImageLoadingContext::OnMakeCanvasImage()
         }
     }
 
-    LOGD("start MakeCanvasImage: %{public}s, size = %{public}s", imageObj_->GetSourceInfo().ToString().c_str(),
-        targetSize.ToString().c_str());
+    TAG_LOGD(AceLogTag::ACE_IMAGE, "start MakeCanvasImage: %{public}s, size = %{public}s",
+        imageObj_->GetSourceInfo().ToString().c_str(), targetSize.ToString().c_str());
     // step4: [MakeCanvasImage] according to [targetSize]
     canvasKey_ = ImageUtils::GenerateImageKey(src_, targetSize);
     imageObj_->MakeCanvasImage(Claim(this), targetSize, userDefinedSize.has_value(), syncLoad_);
@@ -167,7 +270,8 @@ void ImageLoadingContext::SuccessCallback(const RefPtr<CanvasImage>& canvasImage
 void ImageLoadingContext::FailCallback(const std::string& errorMsg)
 {
     errorMsg_ = errorMsg;
-    LOGW("Image LoadFail, source = %{private}s, reason: %{public}s", src_.ToString().c_str(), errorMsg.c_str());
+    TAG_LOGW(AceLogTag::ACE_IMAGE, "Image LoadFail, source = %{public}s, reason: %{public}s", src_.ToString().c_str(),
+        errorMsg.c_str());
     stateManager_->HandleCommand(ImageLoadingCommand::LOAD_FAIL);
 }
 
@@ -215,8 +319,15 @@ bool ImageLoadingContext::MakeCanvasImageIfNeed(
     } else if (dstSize_ == SizeF()) {
         res |= dstSize.IsPositive();
     }
-
-    if (res) {
+    CHECK_NULL_RETURN(res, res);
+    if (stateManager_->GetCurrentState() == ImageLoadingState::MAKE_CANVAS_IMAGE) {
+        pendingMakeCanvasImageTask_ = [weak = AceType::WeakClaim(this), dstSize, autoResize, imageFit, sourceSize]() {
+            auto ctx = weak.Upgrade();
+            CHECK_NULL_VOID(ctx);
+            CHECK_NULL_VOID(ctx->SizeChanging(dstSize));
+            ctx->MakeCanvasImage(dstSize, autoResize, imageFit, sourceSize);
+        };
+    } else {
         MakeCanvasImage(dstSize, autoResize, imageFit, sourceSize);
     }
     return res;
@@ -289,7 +400,8 @@ std::optional<SizeF> ImageLoadingContext::GetSourceSize() const
 {
     CHECK_NULL_RETURN(sourceSizePtr_, std::nullopt);
     if (sourceSizePtr_->Width() <= 0.0 || sourceSizePtr_->Height() <= 0.0) {
-        LOGW("Property SourceSize is at least One invalid! Use the Image Size to calculate resize target");
+        TAG_LOGW(AceLogTag::ACE_IMAGE,
+            "Property SourceSize is at least One invalid! Use the Image Size to calculate resize target");
         return std::nullopt;
     }
     return { *sourceSizePtr_ };
@@ -309,6 +421,29 @@ void ImageLoadingContext::ResetLoading()
 void ImageLoadingContext::ResumeLoading()
 {
     stateManager_->HandleCommand(ImageLoadingCommand::LOAD_DATA);
+}
+
+const std::string ImageLoadingContext::GetCurrentLoadingState()
+{
+    ImageLoadingState state = ImageLoadingState::UNLOADED;
+    if (stateManager_) {
+        state = stateManager_->GetCurrentState();
+    }
+    switch (state) {
+        case ImageLoadingState::DATA_LOADING:
+            return "DATA_LOADING";
+        case ImageLoadingState::DATA_READY:
+            return "DATA_READY";
+        case ImageLoadingState::MAKE_CANVAS_IMAGE:
+            return "MAKE_CANVAS_IMAGE";
+        case ImageLoadingState::LOAD_SUCCESS:
+            return "LOAD_SUCCESS";
+        case ImageLoadingState::LOAD_FAIL:
+            return "LOAD_FAIL";
+
+        default:
+            return "UNLOADED";
+    }
 }
 
 } // namespace OHOS::Ace::NG

@@ -11,17 +11,91 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
+
+ace_unittest("view_stack_processor_test_ng") {
+  type = "new"
+  module_output = "basic"
+  sources = [ "view_stack_processor_test_ng.cpp" ]
+}
+
+ace_unittest("distributed_ui_test_ng") {
+  type = "new"
+  module_output = "basic"
+  sources = [
+    "$ace_root/frameworks/base/json/node_object.cpp",
+    "$ace_root/frameworks/base/json/uobject.cpp",
+    "distributed_ui_test_ng.cpp",
+  ]
+}
+
+ace_unittest("frame_node_test_ng") {
+  type = "new"
+  module_output = "basic"
+  sources = [ "frame_node_test_ng.cpp" ]
+}
+
+ace_unittest("geometry_node_test_ng") {
+  type = "new"
+  module_output = "basic"
+  sources = [ "geometry_node_test_ng.cpp" ]
+}
+
+ace_unittest("inspector_test_ng") {
+  type = "new"
+  module_output = "basic"
+  sources = [ "inspector_test_ng.cpp" ]
+}
+
+ace_unittest("ui_node_test_ng") {
+  type = "new"
+  module_output = "basic"
+  sources = [ "ui_node_test_ng.cpp" ]
+}
+
+ace_unittest("view_abstract_test_ng") {
+  type = "new"
+  module_output = "basic"
+  sources = [
+    "$ace_root/frameworks/core/common/event_manager.cpp",
+    "$ace_root/frameworks/core/pipeline/base/element.cpp",
+    "view_abstract_test_ng.cpp",
+  ]
+}
+
+ace_unittest("view_full_update_model_ng_test") {
+  type = "new"
+  module_output = "basic"
+  sources = [ "view_full_update_model_ng_test.cpp" ]
+}
+
+ace_unittest("view_partial_update_model_test_ng") {
+  type = "new"
+  module_output = "basic"
+  sources = [ "view_partial_update_model_test_ng.cpp" ]
+}
+
+ace_unittest("observer_test_ng") {
+  type = "new"
+  module_output = "basic"
+  sources = [
+    "$ace_root/test/mock/base/mock_mouse_style.cpp",
+    "observer_test_ng.cpp",
+  ]
+}
+
 group("core_base_unittest") {
   testonly = true
   deps = [
-    "distributed_ui:distributed_ui_test_ng",
-    "frame_node:frame_node_test_ng",
-    "geometry_node:geometry_node_test_ng",
-    "inspector:inspector_test_ng",
-    "ui_node:ui_node_test_ng",
-    "view_abstract:view_abstract_test_ng",
-    "view_full_update_model_ng:view_full_update_model_ng_test",
-    "view_partial_update_model_ng:view_partial_update_model_test_ng",
-    "view_stack_processor:view_stack_processor_test_ng",
+    ":distributed_ui_test_ng",
+    ":frame_node_test_ng",
+    ":geometry_node_test_ng",
+    ":inspector_test_ng",
+    ":observer_test_ng",
+    ":ui_node_test_ng",
+    ":view_abstract_test_ng",
+    ":view_full_update_model_ng_test",
+    ":view_partial_update_model_test_ng",
+    ":view_stack_processor_test_ng",
   ]
 }

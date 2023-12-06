@@ -19,6 +19,7 @@
 
 #include "base/log/ace_checker.h"
 #include "base/utils/utils.h"
+#include "core/common/container.h"
 #include "core/components/common/properties/alignment.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/layout/layout_property.h"
@@ -82,13 +83,16 @@ void LayoutWrapper::RestoreGeoState()
     }
 }
 
-void LayoutWrapper::AvoidKeyboard()
+void LayoutWrapper::AvoidKeyboard(bool isFocusOnPage)
 {
     // apply keyboard avoidance on Page
     if (GetHostTag() == V2::PAGE_ETS_TAG) {
         auto pipeline = PipelineContext::GetCurrentContext();
         CHECK_NULL_VOID(pipeline);
         auto manager = pipeline->GetSafeAreaManager();
+        if (!isFocusOnPage && LessNotEqual(manager->GetKeyboardOffset(), 0.0)) {
+            return;
+        }
         GetGeometryNode()->SetFrameOffset(
             GetGeometryNode()->GetFrameOffset() + OffsetF(0, manager->GetKeyboardOffset()));
     }
@@ -108,7 +112,7 @@ void LayoutWrapper::SaveGeoState()
     }
 }
 
-void LayoutWrapper::ExpandSafeArea()
+void LayoutWrapper::ExpandSafeArea(bool isFocusOnPage)
 {
     auto&& opts = GetLayoutProperty()->GetSafeAreaExpandOpts();
     CHECK_NULL_VOID(opts && opts->Expansive());
@@ -121,7 +125,7 @@ void LayoutWrapper::ExpandSafeArea()
         return;
     }
 
-    if ((opts->edges & SAFE_AREA_EDGE_BOTTOM) && (opts->type & SAFE_AREA_TYPE_KEYBOARD)) {
+    if ((opts->edges & SAFE_AREA_EDGE_BOTTOM) && (opts->type & SAFE_AREA_TYPE_KEYBOARD) && isFocusOnPage) {
         ExpandIntoKeyboard();
     }
 
@@ -161,8 +165,26 @@ void LayoutWrapper::ExpandSafeArea()
     }
     // restore to local offset
     frame -= parentGlobalOffset;
+    auto diff = geometryNode->GetFrameOffset() - frame.GetOffset();
+    if (!diff.NonOffset()) {
+        // children's position should remain the same.
+        AdjustChildren(diff);
+    }
     geometryNode->SetFrameOffset(frame.GetOffset());
     geometryNode->SetFrameSize(frame.GetSize());
+}
+
+void LayoutWrapper::AdjustChildren(const OffsetF& offset)
+{
+    for (const auto& childUI : GetHostNode()->GetChildren()) {
+        auto child = DynamicCast<FrameNode>(childUI);
+        if (!child) {
+            continue;
+        }
+        auto childGeo = child->GetGeometryNode();
+        childGeo->SetFrameOffset(childGeo->GetFrameOffset() + offset);
+        child->ForceSyncGeometryNode();
+    }
 }
 
 void LayoutWrapper::ExpandIntoKeyboard()
@@ -195,7 +217,8 @@ void LayoutWrapper::ApplyConstraint(LayoutConstraintF constraint)
         if (layoutProperty->GetCalcLayoutConstraint()) {
             idealSize = layoutProperty->GetCalcLayoutConstraint()->selfIdealSize;
         }
-        constraint.ApplyAspectRatio(magicItemProperty->GetAspectRatioValue(), idealSize);
+        auto greaterThanApiTen = Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN);
+        constraint.ApplyAspectRatio(magicItemProperty->GetAspectRatioValue(), idealSize, greaterThanApiTen);
     }
 
     auto&& insets = layoutProperty->GetSafeAreaInsets();

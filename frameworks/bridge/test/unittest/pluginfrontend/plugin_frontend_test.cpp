@@ -15,7 +15,9 @@
 
 #include "gtest/gtest.h"
 
-#include "core/common/flutter/flutter_task_executor.h"
+#include "core/common/task_executor_impl.h"
+#include "core/common/task_runner_adapter_factory.h"
+#include "core/common/task_runner_adapter.h"
 #define private public
 #define protected public
 #include "bridge/plugin_frontend/plugin_frontend.h"
@@ -54,7 +56,7 @@ RefPtr<PipelineContext> PluginFrontendTest::GetPipelineContext(const RefPtr<Plug
     auto platformWindow = PlatformWindow::Create(nullptr);
     auto window = std::make_unique<Window>(std::move(platformWindow));
 
-    auto taskExecutor = Referenced::MakeRefPtr<FlutterTaskExecutor>();
+    auto taskExecutor = Referenced::MakeRefPtr<TaskExecutorImpl>();
 
     auto assetManager = Referenced::MakeRefPtr<MockAssetManager>();
     auto resRegister = Referenced::MakeRefPtr<MockResourceRegister>();
@@ -97,17 +99,13 @@ HWTEST_F(PluginFrontendTest, OnShowTest001, TestSize.Level1)
      * @tc.steps: step2. On Show.
      * @tc.expected: step2. On Show success.
      */
-    auto taskExecutor = Referenced::MakeRefPtr<FlutterTaskExecutor>();
+    auto taskExecutor = Referenced::MakeRefPtr<TaskExecutorImpl>();
     std::string label = LABEL;
-    std::unique_ptr<fml::Thread> ThreadFirst = std::make_unique<fml::Thread>(THREADFIRST);
-    std::unique_ptr<fml::Thread> ThreadSecond = std::make_unique<fml::Thread>(THREADSECOND);
-    std::unique_ptr<fml::Thread> ThreadThird = std::make_unique<fml::Thread>(THREADTHIRD);
-    std::unique_ptr<fml::Thread> ThreadFourth = std::make_unique<fml::Thread>(THREADFOURTH);
-    fml::RefPtr<fml::TaskRunner> platform = ThreadFirst->GetTaskRunner();
-    fml::RefPtr<fml::TaskRunner> gpu = ThreadSecond->GetTaskRunner();
-    fml::RefPtr<fml::TaskRunner> ui = ThreadThird->GetTaskRunner();
-    fml::RefPtr<fml::TaskRunner> io = ThreadFourth->GetTaskRunner();
-    flutter::TaskRunners taskRunner(label, platform, gpu, ui, io);
+    RefPtr<TaskRunnerAdapter> platform = TaskRunnerAdapterFactory::Create(false, THREADFIRST);
+    RefPtr<TaskRunnerAdapter> gpu = TaskRunnerAdapterFactory::Create(false, THREADSECOND);
+    RefPtr<TaskRunnerAdapter> ui = TaskRunnerAdapterFactory::Create(false, THREADTHIRD);
+    RefPtr<TaskRunnerAdapter> io = TaskRunnerAdapterFactory::Create(false, THREADFOURTH);
+    TaskRunners taskRunner(label, platform, gpu, ui, io);
     taskExecutor->InitJsThread(true);
     taskExecutor->InitOtherThreads(taskRunner);
     pluginFrontend.Initialize(FrontendType::JS_PLUGIN, taskExecutor);
@@ -151,17 +149,13 @@ HWTEST_F(PluginFrontendTest, OnHideTest001, TestSize.Level1)
      * @tc.steps: step2. On Hide.
      * @tc.expected: step2. On Hide success.
      */
-    auto taskExecutor = Referenced::MakeRefPtr<FlutterTaskExecutor>();
+    auto taskExecutor = Referenced::MakeRefPtr<TaskExecutorImpl>();
     std::string label = LABEL;
-    std::unique_ptr<fml::Thread> ThreadFirst = std::make_unique<fml::Thread>(THREADFIRST);
-    std::unique_ptr<fml::Thread> ThreadSecond = std::make_unique<fml::Thread>(THREADSECOND);
-    std::unique_ptr<fml::Thread> ThreadThird = std::make_unique<fml::Thread>(THREADTHIRD);
-    std::unique_ptr<fml::Thread> ThreadFourth = std::make_unique<fml::Thread>(THREADFOURTH);
-    fml::RefPtr<fml::TaskRunner> platform = ThreadFirst->GetTaskRunner();
-    fml::RefPtr<fml::TaskRunner> gpu = ThreadSecond->GetTaskRunner();
-    fml::RefPtr<fml::TaskRunner> ui = ThreadThird->GetTaskRunner();
-    fml::RefPtr<fml::TaskRunner> io = ThreadFourth->GetTaskRunner();
-    flutter::TaskRunners taskRunner(label, platform, gpu, ui, io);
+    RefPtr<TaskRunnerAdapter> platform = TaskRunnerAdapterFactory::Create(false, THREADFIRST);
+    RefPtr<TaskRunnerAdapter> gpu = TaskRunnerAdapterFactory::Create(false, THREADSECOND);
+    RefPtr<TaskRunnerAdapter> ui = TaskRunnerAdapterFactory::Create(false, THREADTHIRD);
+    RefPtr<TaskRunnerAdapter> io = TaskRunnerAdapterFactory::Create(false, THREADFOURTH);
+    TaskRunners taskRunner(label, platform, gpu, ui, io);
     taskExecutor->InitJsThread(true);
     taskExecutor->InitOtherThreads(taskRunner);
     pluginFrontend.Initialize(FrontendType::JS_PLUGIN, taskExecutor);
@@ -205,7 +199,7 @@ HWTEST_F(PluginFrontendTest, OnConfigurationUpdatedTest001, TestSize.Level1)
      * @tc.steps: step2. On Configuration Updated.
      * @tc.expected: step2. On Configuration Updated success.
      */
-    RefPtr<TaskExecutor> taskExecutor = Referenced::MakeRefPtr<FlutterTaskExecutor>();
+    RefPtr<TaskExecutor> taskExecutor = Referenced::MakeRefPtr<TaskExecutorImpl>();
     pluginFrontend.Initialize(FrontendType::JS_PLUGIN, taskExecutor);
     EXPECT_TRUE(pluginFrontend.delegate_ != nullptr);
     pluginFrontend.OnConfigurationUpdated("data");
@@ -247,17 +241,13 @@ HWTEST_F(PluginFrontendTest, OnActiveTest001, TestSize.Level1)
      * @tc.steps: step2. On Active.
      * @tc.expected: step2. On Configuration Updated success.
      */
-    auto taskExecutor = Referenced::MakeRefPtr<FlutterTaskExecutor>();
+    auto taskExecutor = Referenced::MakeRefPtr<TaskExecutorImpl>();
     std::string label = LABEL;
-    std::unique_ptr<fml::Thread> ThreadFirst = std::make_unique<fml::Thread>(THREADFIRST);
-    std::unique_ptr<fml::Thread> ThreadSecond = std::make_unique<fml::Thread>(THREADSECOND);
-    std::unique_ptr<fml::Thread> ThreadThird = std::make_unique<fml::Thread>(THREADTHIRD);
-    std::unique_ptr<fml::Thread> ThreadFourth = std::make_unique<fml::Thread>(THREADFOURTH);
-    fml::RefPtr<fml::TaskRunner> platform = ThreadFirst->GetTaskRunner();
-    fml::RefPtr<fml::TaskRunner> gpu = ThreadSecond->GetTaskRunner();
-    fml::RefPtr<fml::TaskRunner> ui = ThreadThird->GetTaskRunner();
-    fml::RefPtr<fml::TaskRunner> io = ThreadFourth->GetTaskRunner();
-    flutter::TaskRunners taskRunner(label, platform, gpu, ui, io);
+    RefPtr<TaskRunnerAdapter> platform = TaskRunnerAdapterFactory::Create(false, THREADFIRST);
+    RefPtr<TaskRunnerAdapter> gpu = TaskRunnerAdapterFactory::Create(false, THREADSECOND);
+    RefPtr<TaskRunnerAdapter> ui = TaskRunnerAdapterFactory::Create(false, THREADTHIRD);
+    RefPtr<TaskRunnerAdapter> io = TaskRunnerAdapterFactory::Create(false, THREADFOURTH);
+    TaskRunners taskRunner(label, platform, gpu, ui, io);
     taskExecutor->InitJsThread(true);
     taskExecutor->InitOtherThreads(taskRunner);
     pluginFrontend.Initialize(FrontendType::JS_PLUGIN, taskExecutor);
@@ -303,17 +293,13 @@ HWTEST_F(PluginFrontendTest, OnInactiveTest001, TestSize.Level1)
      * @tc.steps: step2. On Inactive.
      * @tc.expected: step2. On Inactive success.
      */
-    auto taskExecutor = Referenced::MakeRefPtr<FlutterTaskExecutor>();
+    auto taskExecutor = Referenced::MakeRefPtr<TaskExecutorImpl>();
     std::string label = LABEL;
-    std::unique_ptr<fml::Thread> ThreadFirst = std::make_unique<fml::Thread>(THREADFIRST);
-    std::unique_ptr<fml::Thread> ThreadSecond = std::make_unique<fml::Thread>(THREADSECOND);
-    std::unique_ptr<fml::Thread> ThreadThird = std::make_unique<fml::Thread>(THREADTHIRD);
-    std::unique_ptr<fml::Thread> ThreadFourth = std::make_unique<fml::Thread>(THREADFOURTH);
-    fml::RefPtr<fml::TaskRunner> platform = ThreadFirst->GetTaskRunner();
-    fml::RefPtr<fml::TaskRunner> gpu = ThreadSecond->GetTaskRunner();
-    fml::RefPtr<fml::TaskRunner> ui = ThreadThird->GetTaskRunner();
-    fml::RefPtr<fml::TaskRunner> io = ThreadFourth->GetTaskRunner();
-    flutter::TaskRunners taskRunner(label, platform, gpu, ui, io);
+    RefPtr<TaskRunnerAdapter> platform = TaskRunnerAdapterFactory::Create(false, THREADFIRST);
+    RefPtr<TaskRunnerAdapter> gpu = TaskRunnerAdapterFactory::Create(false, THREADSECOND);
+    RefPtr<TaskRunnerAdapter> ui = TaskRunnerAdapterFactory::Create(false, THREADTHIRD);
+    RefPtr<TaskRunnerAdapter> io = TaskRunnerAdapterFactory::Create(false, THREADFOURTH);
+    TaskRunners taskRunner(label, platform, gpu, ui, io);
     taskExecutor->InitJsThread(true);
     taskExecutor->InitOtherThreads(taskRunner);
     pluginFrontend.Initialize(FrontendType::JS_PLUGIN, taskExecutor);
@@ -357,7 +343,7 @@ HWTEST_F(PluginFrontendTest, OnStartContinuationTest001, TestSize.Level1)
      * @tc.steps: step2. On Start Continuation.
      * @tc.expected: step2. On Start Continuation fail.
      */
-    RefPtr<TaskExecutor> taskExecutor = Referenced::MakeRefPtr<FlutterTaskExecutor>();
+    RefPtr<TaskExecutor> taskExecutor = Referenced::MakeRefPtr<TaskExecutorImpl>();
     EXPECT_TRUE(pluginFrontend.delegate_ == nullptr);
     EXPECT_EQ(pluginFrontend.OnStartContinuation(), false);
 }
@@ -378,7 +364,7 @@ HWTEST_F(PluginFrontendTest, OnCompleteContinuationTest001, TestSize.Level1)
      * @tc.steps: step2.On Complete Continuation.
      * @tc.expected: step2. On Complete Continuation success.
      */
-    RefPtr<TaskExecutor> taskExecutor = Referenced::MakeRefPtr<FlutterTaskExecutor>();
+    RefPtr<TaskExecutor> taskExecutor = Referenced::MakeRefPtr<TaskExecutorImpl>();
     pluginFrontend.Initialize(FrontendType::JS_PLUGIN, taskExecutor);
     EXPECT_TRUE(pluginFrontend.delegate_ != nullptr);
     pluginFrontend.OnCompleteContinuation(0);
@@ -420,17 +406,13 @@ HWTEST_F(PluginFrontendTest, OnMemoryLevelTest001, TestSize.Level1)
      * @tc.steps: step2. On Memory Level.
      * @tc.expected: step2. On Memory Level success.
      */
-    auto taskExecutor = Referenced::MakeRefPtr<FlutterTaskExecutor>();
+    auto taskExecutor = Referenced::MakeRefPtr<TaskExecutorImpl>();
     std::string label = LABEL;
-    std::unique_ptr<fml::Thread> ThreadFirst = std::make_unique<fml::Thread>(THREADFIRST);
-    std::unique_ptr<fml::Thread> ThreadSecond = std::make_unique<fml::Thread>(THREADSECOND);
-    std::unique_ptr<fml::Thread> ThreadThird = std::make_unique<fml::Thread>(THREADTHIRD);
-    std::unique_ptr<fml::Thread> ThreadFourth = std::make_unique<fml::Thread>(THREADFOURTH);
-    fml::RefPtr<fml::TaskRunner> platform = ThreadFirst->GetTaskRunner();
-    fml::RefPtr<fml::TaskRunner> gpu = ThreadSecond->GetTaskRunner();
-    fml::RefPtr<fml::TaskRunner> ui = ThreadThird->GetTaskRunner();
-    fml::RefPtr<fml::TaskRunner> io = ThreadFourth->GetTaskRunner();
-    flutter::TaskRunners taskRunner(label, platform, gpu, ui, io);
+    RefPtr<TaskRunnerAdapter> platform = TaskRunnerAdapterFactory::Create(false, THREADFIRST);
+    RefPtr<TaskRunnerAdapter> gpu = TaskRunnerAdapterFactory::Create(false, THREADSECOND);
+    RefPtr<TaskRunnerAdapter> ui = TaskRunnerAdapterFactory::Create(false, THREADTHIRD);
+    RefPtr<TaskRunnerAdapter> io = TaskRunnerAdapterFactory::Create(false, THREADFOURTH);
+    TaskRunners taskRunner(label, platform, gpu, ui, io);
     taskExecutor->InitJsThread(true);
     taskExecutor->InitOtherThreads(taskRunner);
     pluginFrontend.Initialize(FrontendType::JS_PLUGIN, taskExecutor);
@@ -474,7 +456,7 @@ HWTEST_F(PluginFrontendTest, OnSaveDataTest001, TestSize.Level1)
      * @tc.steps: step2. On Save Data.
      * @tc.expected: step2. On Save Data success.
      */
-    RefPtr<TaskExecutor> taskExecutor = Referenced::MakeRefPtr<FlutterTaskExecutor>();
+    RefPtr<TaskExecutor> taskExecutor = Referenced::MakeRefPtr<TaskExecutorImpl>();
     pluginFrontend.Initialize(FrontendType::JS_PLUGIN, taskExecutor);
     EXPECT_TRUE(pluginFrontend.delegate_ != nullptr);
     std::string data = "data";
@@ -518,7 +500,7 @@ HWTEST_F(PluginFrontendTest, GetPluginsUsedTest001, TestSize.Level1)
      * @tc.steps: step2. Get Plugins Used.
      * @tc.expected: step2. Get Plugins Used success.
      */
-    RefPtr<TaskExecutor> taskExecutor = Referenced::MakeRefPtr<FlutterTaskExecutor>();
+    RefPtr<TaskExecutor> taskExecutor = Referenced::MakeRefPtr<TaskExecutorImpl>();
     pluginFrontend.Initialize(FrontendType::JS_PLUGIN, taskExecutor);
     EXPECT_TRUE(pluginFrontend.delegate_ != nullptr);
     std::string data = "data";
@@ -583,7 +565,7 @@ HWTEST_F(PluginFrontendTest, OnRemoteTerminatedTest001, TestSize.Level1)
      * @tc.steps: step2. On Remote Terminated.
      * @tc.expected: step2. On Remote Terminated success.
      */
-    RefPtr<TaskExecutor> taskExecutor = Referenced::MakeRefPtr<FlutterTaskExecutor>();
+    RefPtr<TaskExecutor> taskExecutor = Referenced::MakeRefPtr<TaskExecutorImpl>();
     pluginFrontend.Initialize(FrontendType::JS_PLUGIN, taskExecutor);
     EXPECT_TRUE(pluginFrontend.delegate_ != nullptr);
     pluginFrontend.OnRemoteTerminated();
@@ -625,7 +607,7 @@ HWTEST_F(PluginFrontendTest, OnNewRequestTest001, TestSize.Level1)
      * @tc.steps: step2. On Remote Terminated.
      * @tc.expected: step2. On Remote Terminated success.
      */
-    RefPtr<TaskExecutor> taskExecutor = Referenced::MakeRefPtr<FlutterTaskExecutor>();
+    RefPtr<TaskExecutor> taskExecutor = Referenced::MakeRefPtr<TaskExecutorImpl>();
     pluginFrontend.Initialize(FrontendType::JS_PLUGIN, taskExecutor);
     EXPECT_TRUE(pluginFrontend.delegate_ != nullptr);
     std::string data = "data";
@@ -669,7 +651,7 @@ HWTEST_F(PluginFrontendTest, CallRouterBackTest001, TestSize.Level1)
      * @tc.steps: step2. Call Router Back.
      * @tc.expected: step2. Call Router Back success.
      */
-    RefPtr<TaskExecutor> taskExecutor = Referenced::MakeRefPtr<FlutterTaskExecutor>();
+    RefPtr<TaskExecutor> taskExecutor = Referenced::MakeRefPtr<TaskExecutorImpl>();
     pluginFrontend.Initialize(FrontendType::JS_PLUGIN, taskExecutor);
     EXPECT_TRUE(pluginFrontend.delegate_ != nullptr);
     pluginFrontend.CallRouterBack();
@@ -712,7 +694,7 @@ HWTEST_F(PluginFrontendTest, CallRouterBackTest003, TestSize.Level1)
      * @tc.steps: step2. Call Router Back.
      * @tc.expected: step2. Call Router Back fail.
      */
-    RefPtr<TaskExecutor> taskExecutor = Referenced::MakeRefPtr<FlutterTaskExecutor>();
+    RefPtr<TaskExecutor> taskExecutor = Referenced::MakeRefPtr<TaskExecutorImpl>();
     pluginFrontend.Initialize(FrontendType::JS_PLUGIN, taskExecutor);
     EXPECT_TRUE(pluginFrontend.delegate_ != nullptr);
     pluginFrontend.isSubWindow_ = true;
@@ -735,7 +717,7 @@ HWTEST_F(PluginFrontendTest, OnSurfaceChangedTest001, TestSize.Level1)
      * @tc.steps: step2. On Surface Changed.
      * @tc.expected: step2. On Surface Changed success.
      */
-    RefPtr<TaskExecutor> taskExecutor = Referenced::MakeRefPtr<FlutterTaskExecutor>();
+    RefPtr<TaskExecutor> taskExecutor = Referenced::MakeRefPtr<TaskExecutorImpl>();
     pluginFrontend.Initialize(FrontendType::JS_PLUGIN, taskExecutor);
     EXPECT_TRUE(pluginFrontend.delegate_ != nullptr);
     pluginFrontend.OnSurfaceChanged(0, 0);
@@ -777,7 +759,7 @@ HWTEST_F(PluginFrontendTest, DumpFrontendTest001, TestSize.Level1)
      * @tc.steps: step2. Dump Frontend.
      * @tc.expected: step2. Dump Frontend success.
      */
-    RefPtr<TaskExecutor> taskExecutor = Referenced::MakeRefPtr<FlutterTaskExecutor>();
+    RefPtr<TaskExecutor> taskExecutor = Referenced::MakeRefPtr<TaskExecutorImpl>();
     pluginFrontend.Initialize(FrontendType::JS_PLUGIN, taskExecutor);
     EXPECT_TRUE(pluginFrontend.delegate_ != nullptr);
     pluginFrontend.DumpFrontend();
@@ -839,7 +821,7 @@ HWTEST_F(PluginFrontendTest, RebuildAllPagesTest001, TestSize.Level1)
      * @tc.steps: step2. Rebuild AllPagese.
      * @tc.expected: step2. Rebuild AllPages success.
      */
-    RefPtr<TaskExecutor> taskExecutor = Referenced::MakeRefPtr<FlutterTaskExecutor>();
+    RefPtr<TaskExecutor> taskExecutor = Referenced::MakeRefPtr<TaskExecutorImpl>();
     pluginFrontend.Initialize(FrontendType::JS_PLUGIN, taskExecutor);
     EXPECT_TRUE(pluginFrontend.delegate_ != nullptr);
     pluginFrontend.RebuildAllPages();
@@ -881,17 +863,13 @@ HWTEST_F(PluginFrontendTest, NotifyAppStorageTest001, TestSize.Level1)
      * @tc.steps: step2. Notify App Storage.
      * @tc.expected: step2. Notify App Storage success.
      */
-    auto taskExecutor = Referenced::MakeRefPtr<FlutterTaskExecutor>();
+    auto taskExecutor = Referenced::MakeRefPtr<TaskExecutorImpl>();
     std::string label = LABEL;
-    std::unique_ptr<fml::Thread> ThreadFirst = std::make_unique<fml::Thread>(THREADFIRST);
-    std::unique_ptr<fml::Thread> ThreadSecond = std::make_unique<fml::Thread>(THREADSECOND);
-    std::unique_ptr<fml::Thread> ThreadThird = std::make_unique<fml::Thread>(THREADTHIRD);
-    std::unique_ptr<fml::Thread> ThreadFourth = std::make_unique<fml::Thread>(THREADFOURTH);
-    fml::RefPtr<fml::TaskRunner> platform = ThreadFirst->GetTaskRunner();
-    fml::RefPtr<fml::TaskRunner> gpu = ThreadSecond->GetTaskRunner();
-    fml::RefPtr<fml::TaskRunner> ui = ThreadThird->GetTaskRunner();
-    fml::RefPtr<fml::TaskRunner> io = ThreadFourth->GetTaskRunner();
-    flutter::TaskRunners taskRunner(label, platform, gpu, ui, io);
+    RefPtr<TaskRunnerAdapter> platform = TaskRunnerAdapterFactory::Create(false, THREADFIRST);
+    RefPtr<TaskRunnerAdapter> gpu = TaskRunnerAdapterFactory::Create(false, THREADSECOND);
+    RefPtr<TaskRunnerAdapter> ui = TaskRunnerAdapterFactory::Create(false, THREADTHIRD);
+    RefPtr<TaskRunnerAdapter> io = TaskRunnerAdapterFactory::Create(false, THREADFOURTH);
+    TaskRunners taskRunner(label, platform, gpu, ui, io);
     taskExecutor->InitJsThread(true);
     taskExecutor->InitOtherThreads(taskRunner);
     pluginFrontend.Initialize(FrontendType::JS_PLUGIN, taskExecutor);
@@ -935,7 +913,7 @@ HWTEST_F(PluginFrontendTest, RunPageTest001, TestSize.Level1)
      * @tc.steps: step2. Run Page.
      * @tc.expected: step2. Run Page success.
      */
-    RefPtr<TaskExecutor> taskExecutor = Referenced::MakeRefPtr<FlutterTaskExecutor>();
+    RefPtr<TaskExecutor> taskExecutor = Referenced::MakeRefPtr<TaskExecutorImpl>();
     pluginFrontend.Initialize(FrontendType::JS_PLUGIN, taskExecutor);
     EXPECT_TRUE(pluginFrontend.delegate_ != nullptr);
     pluginFrontend.RunPage("url", "params");
@@ -977,7 +955,7 @@ HWTEST_F(PluginFrontendTest, ReplacePageTest001, TestSize.Level1)
      * @tc.steps: step2. Replace Page.
      * @tc.expected: step2. Replace Page success.
      */
-    RefPtr<TaskExecutor> taskExecutor = Referenced::MakeRefPtr<FlutterTaskExecutor>();
+    RefPtr<TaskExecutor> taskExecutor = Referenced::MakeRefPtr<TaskExecutorImpl>();
     pluginFrontend.Initialize(FrontendType::JS_PLUGIN, taskExecutor);
     EXPECT_TRUE(pluginFrontend.delegate_ != nullptr);
     pluginFrontend.ReplacePage("url", "params");
@@ -1019,7 +997,7 @@ HWTEST_F(PluginFrontendTest, PushPageTest001, TestSize.Level1)
      * @tc.steps: step2. Push Page.
      * @tc.expected: step2. Push Page success.
      */
-    RefPtr<TaskExecutor> taskExecutor = Referenced::MakeRefPtr<FlutterTaskExecutor>();
+    RefPtr<TaskExecutor> taskExecutor = Referenced::MakeRefPtr<TaskExecutorImpl>();
     pluginFrontend.Initialize(FrontendType::JS_PLUGIN, taskExecutor);
     EXPECT_TRUE(pluginFrontend.delegate_ != nullptr);
     pluginFrontend.ReplacePage("url", "params");
@@ -1061,7 +1039,7 @@ HWTEST_F(PluginFrontendTest, NavigatePageTest001, TestSize.Level1)
      * @tc.steps: step2. Navigate Page.
      * @tc.expected: step2. Navigate Page success.
      */
-    RefPtr<TaskExecutor> taskExecutor = Referenced::MakeRefPtr<FlutterTaskExecutor>();
+    RefPtr<TaskExecutor> taskExecutor = Referenced::MakeRefPtr<TaskExecutorImpl>();
     pluginFrontend.Initialize(FrontendType::JS_PLUGIN, taskExecutor);
     EXPECT_TRUE(pluginFrontend.delegate_ != nullptr);
     pluginFrontend.NavigatePage(PUSH, PageTarget("uri"), "params");
@@ -1083,7 +1061,7 @@ HWTEST_F(PluginFrontendTest, NavigatePageTest002, TestSize.Level1)
      * @tc.steps: step2. Navigate Page.
      * @tc.expected: step2. Navigate Page success.
      */
-    RefPtr<TaskExecutor> taskExecutor = Referenced::MakeRefPtr<FlutterTaskExecutor>();
+    RefPtr<TaskExecutor> taskExecutor = Referenced::MakeRefPtr<TaskExecutorImpl>();
     pluginFrontend.Initialize(FrontendType::JS_PLUGIN, taskExecutor);
     EXPECT_TRUE(pluginFrontend.delegate_ != nullptr);
     pluginFrontend.NavigatePage(REPLACE, PageTarget("uri"), "params");
@@ -1105,7 +1083,7 @@ HWTEST_F(PluginFrontendTest, NavigatePageTest003, TestSize.Level1)
      * @tc.steps: step2. Navigate Page.
      * @tc.expected: step2. Navigate Page success.
      */
-    RefPtr<TaskExecutor> taskExecutor = Referenced::MakeRefPtr<FlutterTaskExecutor>();
+    RefPtr<TaskExecutor> taskExecutor = Referenced::MakeRefPtr<TaskExecutorImpl>();
     pluginFrontend.Initialize(FrontendType::JS_PLUGIN, taskExecutor);
     EXPECT_TRUE(pluginFrontend.delegate_ != nullptr);
     pluginFrontend.NavigatePage(BACK, PageTarget("uri"), "params");
@@ -1127,7 +1105,7 @@ HWTEST_F(PluginFrontendTest, NavigatePageTest004, TestSize.Level1)
      * @tc.steps: step2. Navigate Page.
      * @tc.expected: step2. Navigate Page success.
      */
-    RefPtr<TaskExecutor> taskExecutor = Referenced::MakeRefPtr<FlutterTaskExecutor>();
+    RefPtr<TaskExecutor> taskExecutor = Referenced::MakeRefPtr<TaskExecutorImpl>();
     pluginFrontend.Initialize(FrontendType::JS_PLUGIN, taskExecutor);
     EXPECT_TRUE(pluginFrontend.delegate_ != nullptr);
     pluginFrontend.NavigatePage(DEFAULT, PageTarget("uri"), "params");
@@ -1169,17 +1147,13 @@ HWTEST_F(PluginFrontendTest, SendCallbackMessageTest001, TestSize.Level1)
      * @tc.steps: step2. Send Callback Message.
      * @tc.expected: step2. Send Callback Message success.
      */
-    auto taskExecutor = Referenced::MakeRefPtr<FlutterTaskExecutor>();
+    auto taskExecutor = Referenced::MakeRefPtr<TaskExecutorImpl>();
     std::string label = LABEL;
-    std::unique_ptr<fml::Thread> ThreadFirst = std::make_unique<fml::Thread>(THREADFIRST);
-    std::unique_ptr<fml::Thread> ThreadSecond = std::make_unique<fml::Thread>(THREADSECOND);
-    std::unique_ptr<fml::Thread> ThreadThird = std::make_unique<fml::Thread>(THREADTHIRD);
-    std::unique_ptr<fml::Thread> ThreadFourth = std::make_unique<fml::Thread>(THREADFOURTH);
-    fml::RefPtr<fml::TaskRunner> platform = ThreadFirst->GetTaskRunner();
-    fml::RefPtr<fml::TaskRunner> gpu = ThreadSecond->GetTaskRunner();
-    fml::RefPtr<fml::TaskRunner> ui = ThreadThird->GetTaskRunner();
-    fml::RefPtr<fml::TaskRunner> io = ThreadFourth->GetTaskRunner();
-    flutter::TaskRunners taskRunner(label, platform, gpu, ui, io);
+    RefPtr<TaskRunnerAdapter> platform = TaskRunnerAdapterFactory::Create(false, THREADFIRST);
+    RefPtr<TaskRunnerAdapter> gpu = TaskRunnerAdapterFactory::Create(false, THREADSECOND);
+    RefPtr<TaskRunnerAdapter> ui = TaskRunnerAdapterFactory::Create(false, THREADTHIRD);
+    RefPtr<TaskRunnerAdapter> io = TaskRunnerAdapterFactory::Create(false, THREADFOURTH);
+    TaskRunners taskRunner(label, platform, gpu, ui, io);
     taskExecutor->InitJsThread(true);
     taskExecutor->InitOtherThreads(taskRunner);
     pluginFrontend.Initialize(FrontendType::JS_PLUGIN, taskExecutor);
@@ -1223,17 +1197,13 @@ HWTEST_F(PluginFrontendTest, TransferComponentResponseDataTest001, TestSize.Leve
      * @tc.steps: step2. Transfer Component Response Data.
      * @tc.expected: step2. Transfer Component Response Data success.
      */
-    auto taskExecutor = Referenced::MakeRefPtr<FlutterTaskExecutor>();
+    auto taskExecutor = Referenced::MakeRefPtr<TaskExecutorImpl>();
     std::string label = LABEL;
-    std::unique_ptr<fml::Thread> ThreadFirst = std::make_unique<fml::Thread>(THREADFIRST);
-    std::unique_ptr<fml::Thread> ThreadSecond = std::make_unique<fml::Thread>(THREADSECOND);
-    std::unique_ptr<fml::Thread> ThreadThird = std::make_unique<fml::Thread>(THREADTHIRD);
-    std::unique_ptr<fml::Thread> ThreadFourth = std::make_unique<fml::Thread>(THREADFOURTH);
-    fml::RefPtr<fml::TaskRunner> platform = ThreadFirst->GetTaskRunner();
-    fml::RefPtr<fml::TaskRunner> gpu = ThreadSecond->GetTaskRunner();
-    fml::RefPtr<fml::TaskRunner> ui = ThreadThird->GetTaskRunner();
-    fml::RefPtr<fml::TaskRunner> io = ThreadFourth->GetTaskRunner();
-    flutter::TaskRunners taskRunner(label, platform, gpu, ui, io);
+    RefPtr<TaskRunnerAdapter> platform = TaskRunnerAdapterFactory::Create(false, THREADFIRST);
+    RefPtr<TaskRunnerAdapter> gpu = TaskRunnerAdapterFactory::Create(false, THREADSECOND);
+    RefPtr<TaskRunnerAdapter> ui = TaskRunnerAdapterFactory::Create(false, THREADTHIRD);
+    RefPtr<TaskRunnerAdapter> io = TaskRunnerAdapterFactory::Create(false, THREADFOURTH);
+    TaskRunners taskRunner(label, platform, gpu, ui, io);
     taskExecutor->InitJsThread(true);
     taskExecutor->InitOtherThreads(taskRunner);
     pluginFrontend->Initialize(FrontendType::JS_PLUGIN, taskExecutor);
@@ -1280,17 +1250,13 @@ HWTEST_F(PluginFrontendTest, TransferJsResponseDataTest001, TestSize.Level1)
      * @tc.steps: step2. Transfer Js Response Data.
      * @tc.expected: step2. Transfer Js ResponseData success.
      */
-    auto taskExecutor = Referenced::MakeRefPtr<FlutterTaskExecutor>();
+    auto taskExecutor = Referenced::MakeRefPtr<TaskExecutorImpl>();
     std::string label = LABEL;
-    std::unique_ptr<fml::Thread> ThreadFirst = std::make_unique<fml::Thread>(THREADFIRST);
-    std::unique_ptr<fml::Thread> ThreadSecond = std::make_unique<fml::Thread>(THREADSECOND);
-    std::unique_ptr<fml::Thread> ThreadThird = std::make_unique<fml::Thread>(THREADTHIRD);
-    std::unique_ptr<fml::Thread> ThreadFourth = std::make_unique<fml::Thread>(THREADFOURTH);
-    fml::RefPtr<fml::TaskRunner> platform = ThreadFirst->GetTaskRunner();
-    fml::RefPtr<fml::TaskRunner> gpu = ThreadSecond->GetTaskRunner();
-    fml::RefPtr<fml::TaskRunner> ui = ThreadThird->GetTaskRunner();
-    fml::RefPtr<fml::TaskRunner> io = ThreadFourth->GetTaskRunner();
-    flutter::TaskRunners taskRunner(label, platform, gpu, ui, io);
+    RefPtr<TaskRunnerAdapter> platform = TaskRunnerAdapterFactory::Create(false, THREADFIRST);
+    RefPtr<TaskRunnerAdapter> gpu = TaskRunnerAdapterFactory::Create(false, THREADSECOND);
+    RefPtr<TaskRunnerAdapter> ui = TaskRunnerAdapterFactory::Create(false, THREADTHIRD);
+    RefPtr<TaskRunnerAdapter> io = TaskRunnerAdapterFactory::Create(false, THREADFOURTH);
+    TaskRunners taskRunner(label, platform, gpu, ui, io);
     taskExecutor->InitJsThread(true);
     taskExecutor->InitOtherThreads(taskRunner);
     pluginFrontend.Initialize(FrontendType::JS_PLUGIN, taskExecutor);
@@ -1336,17 +1302,13 @@ HWTEST_F(PluginFrontendTest, TransferJsPluginGetErrorTest001, TestSize.Level1)
      * @tc.steps: step2. Transfer Js Response Data.
      * @tc.expected: step2. Transfer Js ResponseData success.
      */
-    auto taskExecutor = Referenced::MakeRefPtr<FlutterTaskExecutor>();
+    auto taskExecutor = Referenced::MakeRefPtr<TaskExecutorImpl>();
     std::string label = LABEL;
-    std::unique_ptr<fml::Thread> ThreadFirst = std::make_unique<fml::Thread>(THREADFIRST);
-    std::unique_ptr<fml::Thread> ThreadSecond = std::make_unique<fml::Thread>(THREADSECOND);
-    std::unique_ptr<fml::Thread> ThreadThird = std::make_unique<fml::Thread>(THREADTHIRD);
-    std::unique_ptr<fml::Thread> ThreadFourth = std::make_unique<fml::Thread>(THREADFOURTH);
-    fml::RefPtr<fml::TaskRunner> platform = ThreadFirst->GetTaskRunner();
-    fml::RefPtr<fml::TaskRunner> gpu = ThreadSecond->GetTaskRunner();
-    fml::RefPtr<fml::TaskRunner> ui = ThreadThird->GetTaskRunner();
-    fml::RefPtr<fml::TaskRunner> io = ThreadFourth->GetTaskRunner();
-    flutter::TaskRunners taskRunner(label, platform, gpu, ui, io);
+    RefPtr<TaskRunnerAdapter> platform = TaskRunnerAdapterFactory::Create(false, THREADFIRST);
+    RefPtr<TaskRunnerAdapter> gpu = TaskRunnerAdapterFactory::Create(false, THREADSECOND);
+    RefPtr<TaskRunnerAdapter> ui = TaskRunnerAdapterFactory::Create(false, THREADTHIRD);
+    RefPtr<TaskRunnerAdapter> io = TaskRunnerAdapterFactory::Create(false, THREADFOURTH);
+    TaskRunners taskRunner(label, platform, gpu, ui, io);
     taskExecutor->InitJsThread(true);
     taskExecutor->InitOtherThreads(taskRunner);
     pluginFrontend.Initialize(FrontendType::JS_PLUGIN, taskExecutor);
@@ -1392,17 +1354,13 @@ HWTEST_F(PluginFrontendTest, TransferJsEventDataTest001, TestSize.Level1)
      * @tc.steps: step2. Transfer Js Event Data.
      * @tc.expected: step2. Transfer Js EventData success.
      */
-    auto taskExecutor = Referenced::MakeRefPtr<FlutterTaskExecutor>();
+    auto taskExecutor = Referenced::MakeRefPtr<TaskExecutorImpl>();
     std::string label = LABEL;
-    std::unique_ptr<fml::Thread> ThreadFirst = std::make_unique<fml::Thread>(THREADFIRST);
-    std::unique_ptr<fml::Thread> ThreadSecond = std::make_unique<fml::Thread>(THREADSECOND);
-    std::unique_ptr<fml::Thread> ThreadThird = std::make_unique<fml::Thread>(THREADTHIRD);
-    std::unique_ptr<fml::Thread> ThreadFourth = std::make_unique<fml::Thread>(THREADFOURTH);
-    fml::RefPtr<fml::TaskRunner> platform = ThreadFirst->GetTaskRunner();
-    fml::RefPtr<fml::TaskRunner> gpu = ThreadSecond->GetTaskRunner();
-    fml::RefPtr<fml::TaskRunner> ui = ThreadThird->GetTaskRunner();
-    fml::RefPtr<fml::TaskRunner> io = ThreadFourth->GetTaskRunner();
-    flutter::TaskRunners taskRunner(label, platform, gpu, ui, io);
+    RefPtr<TaskRunnerAdapter> platform = TaskRunnerAdapterFactory::Create(false, THREADFIRST);
+    RefPtr<TaskRunnerAdapter> gpu = TaskRunnerAdapterFactory::Create(false, THREADSECOND);
+    RefPtr<TaskRunnerAdapter> ui = TaskRunnerAdapterFactory::Create(false, THREADTHIRD);
+    RefPtr<TaskRunnerAdapter> io = TaskRunnerAdapterFactory::Create(false, THREADFOURTH);
+    TaskRunners taskRunner(label, platform, gpu, ui, io);
     taskExecutor->InitJsThread(true);
     taskExecutor->InitOtherThreads(taskRunner);
     pluginFrontend.Initialize(FrontendType::JS_PLUGIN, taskExecutor);
@@ -1448,17 +1406,13 @@ HWTEST_F(PluginFrontendTest, LoadPluginJsCodeTest001, TestSize.Level1)
      * @tc.steps: step2. Transfer Js Event Data.
      * @tc.expected: step2. Transfer Js EventData success.
      */
-    auto taskExecutor = Referenced::MakeRefPtr<FlutterTaskExecutor>();
+    auto taskExecutor = Referenced::MakeRefPtr<TaskExecutorImpl>();
     std::string label = LABEL;
-    std::unique_ptr<fml::Thread> ThreadFirst = std::make_unique<fml::Thread>(THREADFIRST);
-    std::unique_ptr<fml::Thread> ThreadSecond = std::make_unique<fml::Thread>(THREADSECOND);
-    std::unique_ptr<fml::Thread> ThreadThird = std::make_unique<fml::Thread>(THREADTHIRD);
-    std::unique_ptr<fml::Thread> ThreadFourth = std::make_unique<fml::Thread>(THREADFOURTH);
-    fml::RefPtr<fml::TaskRunner> platform = ThreadFirst->GetTaskRunner();
-    fml::RefPtr<fml::TaskRunner> gpu = ThreadSecond->GetTaskRunner();
-    fml::RefPtr<fml::TaskRunner> ui = ThreadThird->GetTaskRunner();
-    fml::RefPtr<fml::TaskRunner> io = ThreadFourth->GetTaskRunner();
-    flutter::TaskRunners taskRunner(label, platform, gpu, ui, io);
+    RefPtr<TaskRunnerAdapter> platform = TaskRunnerAdapterFactory::Create(false, THREADFIRST);
+    RefPtr<TaskRunnerAdapter> gpu = TaskRunnerAdapterFactory::Create(false, THREADSECOND);
+    RefPtr<TaskRunnerAdapter> ui = TaskRunnerAdapterFactory::Create(false, THREADTHIRD);
+    RefPtr<TaskRunnerAdapter> io = TaskRunnerAdapterFactory::Create(false, THREADFOURTH);
+    TaskRunners taskRunner(label, platform, gpu, ui, io);
     taskExecutor->InitJsThread(true);
     taskExecutor->InitOtherThreads(taskRunner);
     pluginFrontend.Initialize(FrontendType::JS_PLUGIN, taskExecutor);
@@ -1504,17 +1458,13 @@ HWTEST_F(PluginFrontendTest, UpdateStateTest001, TestSize.Level1)
      * @tc.steps: step2. Transfer Js Event Data.
      * @tc.expected: step2. Transfer Js EventData success.
      */
-    auto taskExecutor = Referenced::MakeRefPtr<FlutterTaskExecutor>();
+    auto taskExecutor = Referenced::MakeRefPtr<TaskExecutorImpl>();
     std::string label = LABEL;
-    std::unique_ptr<fml::Thread> ThreadFirst = std::make_unique<fml::Thread>(THREADFIRST);
-    std::unique_ptr<fml::Thread> ThreadSecond = std::make_unique<fml::Thread>(THREADSECOND);
-    std::unique_ptr<fml::Thread> ThreadThird = std::make_unique<fml::Thread>(THREADTHIRD);
-    std::unique_ptr<fml::Thread> ThreadFourth = std::make_unique<fml::Thread>(THREADFOURTH);
-    fml::RefPtr<fml::TaskRunner> platform = ThreadFirst->GetTaskRunner();
-    fml::RefPtr<fml::TaskRunner> gpu = ThreadSecond->GetTaskRunner();
-    fml::RefPtr<fml::TaskRunner> ui = ThreadThird->GetTaskRunner();
-    fml::RefPtr<fml::TaskRunner> io = ThreadFourth->GetTaskRunner();
-    flutter::TaskRunners taskRunner(label, platform, gpu, ui, io);
+    RefPtr<TaskRunnerAdapter> platform = TaskRunnerAdapterFactory::Create(false, THREADFIRST);
+    RefPtr<TaskRunnerAdapter> gpu = TaskRunnerAdapterFactory::Create(false, THREADSECOND);
+    RefPtr<TaskRunnerAdapter> ui = TaskRunnerAdapterFactory::Create(false, THREADTHIRD);
+    RefPtr<TaskRunnerAdapter> io = TaskRunnerAdapterFactory::Create(false, THREADFOURTH);
+    TaskRunners taskRunner(label, platform, gpu, ui, io);
     taskExecutor->InitJsThread(true);
     taskExecutor->InitOtherThreads(taskRunner);
     pluginFrontend.Initialize(FrontendType::JS_PLUGIN, taskExecutor);
@@ -1538,17 +1488,13 @@ HWTEST_F(PluginFrontendTest, UpdateStateTest002, TestSize.Level1)
      * @tc.steps: step2. Transfer Js Event Data.
      * @tc.expected: step2. Transfer Js EventData success.
      */
-    auto taskExecutor = Referenced::MakeRefPtr<FlutterTaskExecutor>();
+    auto taskExecutor = Referenced::MakeRefPtr<TaskExecutorImpl>();
     std::string label = LABEL;
-    std::unique_ptr<fml::Thread> ThreadFirst = std::make_unique<fml::Thread>(THREADFIRST);
-    std::unique_ptr<fml::Thread> ThreadSecond = std::make_unique<fml::Thread>(THREADSECOND);
-    std::unique_ptr<fml::Thread> ThreadThird = std::make_unique<fml::Thread>(THREADTHIRD);
-    std::unique_ptr<fml::Thread> ThreadFourth = std::make_unique<fml::Thread>(THREADFOURTH);
-    fml::RefPtr<fml::TaskRunner> platform = ThreadFirst->GetTaskRunner();
-    fml::RefPtr<fml::TaskRunner> gpu = ThreadSecond->GetTaskRunner();
-    fml::RefPtr<fml::TaskRunner> ui = ThreadThird->GetTaskRunner();
-    fml::RefPtr<fml::TaskRunner> io = ThreadFourth->GetTaskRunner();
-    flutter::TaskRunners taskRunner(label, platform, gpu, ui, io);
+    RefPtr<TaskRunnerAdapter> platform = TaskRunnerAdapterFactory::Create(false, THREADFIRST);
+    RefPtr<TaskRunnerAdapter> gpu = TaskRunnerAdapterFactory::Create(false, THREADSECOND);
+    RefPtr<TaskRunnerAdapter> ui = TaskRunnerAdapterFactory::Create(false, THREADTHIRD);
+    RefPtr<TaskRunnerAdapter> io = TaskRunnerAdapterFactory::Create(false, THREADFOURTH);
+    TaskRunners taskRunner(label, platform, gpu, ui, io);
     taskExecutor->InitJsThread(true);
     taskExecutor->InitOtherThreads(taskRunner);
     pluginFrontend.Initialize(FrontendType::JS_PLUGIN, taskExecutor);
@@ -1572,17 +1518,13 @@ HWTEST_F(PluginFrontendTest, LoadPluginJsCodeTest003, TestSize.Level1)
      * @tc.steps: step2. Transfer Js Event Data.
      * @tc.expected: step2. Transfer Js EventData success.
      */
-    auto taskExecutor = Referenced::MakeRefPtr<FlutterTaskExecutor>();
+    auto taskExecutor = Referenced::MakeRefPtr<TaskExecutorImpl>();
     std::string label = LABEL;
-    std::unique_ptr<fml::Thread> ThreadFirst = std::make_unique<fml::Thread>(THREADFIRST);
-    std::unique_ptr<fml::Thread> ThreadSecond = std::make_unique<fml::Thread>(THREADSECOND);
-    std::unique_ptr<fml::Thread> ThreadThird = std::make_unique<fml::Thread>(THREADTHIRD);
-    std::unique_ptr<fml::Thread> ThreadFourth = std::make_unique<fml::Thread>(THREADFOURTH);
-    fml::RefPtr<fml::TaskRunner> platform = ThreadFirst->GetTaskRunner();
-    fml::RefPtr<fml::TaskRunner> gpu = ThreadSecond->GetTaskRunner();
-    fml::RefPtr<fml::TaskRunner> ui = ThreadThird->GetTaskRunner();
-    fml::RefPtr<fml::TaskRunner> io = ThreadFourth->GetTaskRunner();
-    flutter::TaskRunners taskRunner(label, platform, gpu, ui, io);
+    RefPtr<TaskRunnerAdapter> platform = TaskRunnerAdapterFactory::Create(false, THREADFIRST);
+    RefPtr<TaskRunnerAdapter> gpu = TaskRunnerAdapterFactory::Create(false, THREADSECOND);
+    RefPtr<TaskRunnerAdapter> ui = TaskRunnerAdapterFactory::Create(false, THREADTHIRD);
+    RefPtr<TaskRunnerAdapter> io = TaskRunnerAdapterFactory::Create(false, THREADFOURTH);
+    TaskRunners taskRunner(label, platform, gpu, ui, io);
     taskExecutor->InitJsThread(true);
     taskExecutor->InitOtherThreads(taskRunner);
     pluginFrontend.Initialize(FrontendType::JS_PLUGIN, taskExecutor);
@@ -1606,17 +1548,13 @@ HWTEST_F(PluginFrontendTest, UpdateStateTest004, TestSize.Level1)
      * @tc.steps: step2. Transfer Js Event Data.
      * @tc.expected: step2. Transfer Js EventData success.
      */
-    auto taskExecutor = Referenced::MakeRefPtr<FlutterTaskExecutor>();
+    auto taskExecutor = Referenced::MakeRefPtr<TaskExecutorImpl>();
     std::string label = LABEL;
-    std::unique_ptr<fml::Thread> ThreadFirst = std::make_unique<fml::Thread>(THREADFIRST);
-    std::unique_ptr<fml::Thread> ThreadSecond = std::make_unique<fml::Thread>(THREADSECOND);
-    std::unique_ptr<fml::Thread> ThreadThird = std::make_unique<fml::Thread>(THREADTHIRD);
-    std::unique_ptr<fml::Thread> ThreadFourth = std::make_unique<fml::Thread>(THREADFOURTH);
-    fml::RefPtr<fml::TaskRunner> platform = ThreadFirst->GetTaskRunner();
-    fml::RefPtr<fml::TaskRunner> gpu = ThreadSecond->GetTaskRunner();
-    fml::RefPtr<fml::TaskRunner> ui = ThreadThird->GetTaskRunner();
-    fml::RefPtr<fml::TaskRunner> io = ThreadFourth->GetTaskRunner();
-    flutter::TaskRunners taskRunner(label, platform, gpu, ui, io);
+    RefPtr<TaskRunnerAdapter> platform = TaskRunnerAdapterFactory::Create(false, THREADFIRST);
+    RefPtr<TaskRunnerAdapter> gpu = TaskRunnerAdapterFactory::Create(false, THREADSECOND);
+    RefPtr<TaskRunnerAdapter> ui = TaskRunnerAdapterFactory::Create(false, THREADTHIRD);
+    RefPtr<TaskRunnerAdapter> io = TaskRunnerAdapterFactory::Create(false, THREADFOURTH);
+    TaskRunners taskRunner(label, platform, gpu, ui, io);
     taskExecutor->InitJsThread(true);
     taskExecutor->InitOtherThreads(taskRunner);
     pluginFrontend.Initialize(FrontendType::JS_PLUGIN, taskExecutor);
@@ -1640,7 +1578,7 @@ HWTEST_F(PluginFrontendTest, UpdateStateTest005, TestSize.Level1)
      * @tc.steps: step2. Transfer Js Event Data.
      * @tc.expected: step2. Transfer Js EventData success.
      */
-    auto taskExecutor = Referenced::MakeRefPtr<FlutterTaskExecutor>();
+    auto taskExecutor = Referenced::MakeRefPtr<TaskExecutorImpl>();
     pluginFrontend.Initialize(FrontendType::JS_PLUGIN, taskExecutor);
     EXPECT_TRUE(pluginFrontend.delegate_ != nullptr);
     pluginFrontend.UpdateState(static_cast<Frontend::State>(ERROR));
@@ -1682,17 +1620,13 @@ HWTEST_F(PluginFrontendTest, LoadPluginJsByteCodeTest001, TestSize.Level1)
      * @tc.steps: step2. Load Plugin Js Byte Code.
      * @tc.expected: step2. Load Plugin Js Byte Code success.
      */
-    auto taskExecutor = Referenced::MakeRefPtr<FlutterTaskExecutor>();
+    auto taskExecutor = Referenced::MakeRefPtr<TaskExecutorImpl>();
     std::string label = LABEL;
-    std::unique_ptr<fml::Thread> ThreadFirst = std::make_unique<fml::Thread>(THREADFIRST);
-    std::unique_ptr<fml::Thread> ThreadSecond = std::make_unique<fml::Thread>(THREADSECOND);
-    std::unique_ptr<fml::Thread> ThreadThird = std::make_unique<fml::Thread>(THREADTHIRD);
-    std::unique_ptr<fml::Thread> ThreadFourth = std::make_unique<fml::Thread>(THREADFOURTH);
-    fml::RefPtr<fml::TaskRunner> platform = ThreadFirst->GetTaskRunner();
-    fml::RefPtr<fml::TaskRunner> gpu = ThreadSecond->GetTaskRunner();
-    fml::RefPtr<fml::TaskRunner> ui = ThreadThird->GetTaskRunner();
-    fml::RefPtr<fml::TaskRunner> io = ThreadFourth->GetTaskRunner();
-    flutter::TaskRunners taskRunner(label, platform, gpu, ui, io);
+    RefPtr<TaskRunnerAdapter> platform = TaskRunnerAdapterFactory::Create(false, THREADFIRST);
+    RefPtr<TaskRunnerAdapter> gpu = TaskRunnerAdapterFactory::Create(false, THREADSECOND);
+    RefPtr<TaskRunnerAdapter> ui = TaskRunnerAdapterFactory::Create(false, THREADTHIRD);
+    RefPtr<TaskRunnerAdapter> io = TaskRunnerAdapterFactory::Create(false, THREADFOURTH);
+    TaskRunners taskRunner(label, platform, gpu, ui, io);
     taskExecutor->InitJsThread(true);
     taskExecutor->InitOtherThreads(taskRunner);
     pluginFrontend.Initialize(FrontendType::JS_PLUGIN, taskExecutor);
@@ -1740,17 +1674,13 @@ HWTEST_F(PluginFrontendTest, OnWindowDisplayModeChangedTest001, TestSize.Level1)
      * @tc.steps: step2. On Window Display ModeChanged.
      * @tc.expected: step2. On Window Display Mode Changed success.
      */
-    auto taskExecutor = Referenced::MakeRefPtr<FlutterTaskExecutor>();
+    auto taskExecutor = Referenced::MakeRefPtr<TaskExecutorImpl>();
     std::string label = LABEL;
-    std::unique_ptr<fml::Thread> ThreadFirst = std::make_unique<fml::Thread>(THREADFIRST);
-    std::unique_ptr<fml::Thread> ThreadSecond = std::make_unique<fml::Thread>(THREADSECOND);
-    std::unique_ptr<fml::Thread> ThreadThird = std::make_unique<fml::Thread>(THREADTHIRD);
-    std::unique_ptr<fml::Thread> ThreadFourth = std::make_unique<fml::Thread>(THREADFOURTH);
-    fml::RefPtr<fml::TaskRunner> platform = ThreadFirst->GetTaskRunner();
-    fml::RefPtr<fml::TaskRunner> gpu = ThreadSecond->GetTaskRunner();
-    fml::RefPtr<fml::TaskRunner> ui = ThreadThird->GetTaskRunner();
-    fml::RefPtr<fml::TaskRunner> io = ThreadFourth->GetTaskRunner();
-    flutter::TaskRunners taskRunner(label, platform, gpu, ui, io);
+    RefPtr<TaskRunnerAdapter> platform = TaskRunnerAdapterFactory::Create(false, THREADFIRST);
+    RefPtr<TaskRunnerAdapter> gpu = TaskRunnerAdapterFactory::Create(false, THREADSECOND);
+    RefPtr<TaskRunnerAdapter> ui = TaskRunnerAdapterFactory::Create(false, THREADTHIRD);
+    RefPtr<TaskRunnerAdapter> io = TaskRunnerAdapterFactory::Create(false, THREADFOURTH);
+    TaskRunners taskRunner(label, platform, gpu, ui, io);
     taskExecutor->InitJsThread(true);
     taskExecutor->InitOtherThreads(taskRunner);
     pluginFrontend.Initialize(FrontendType::JS_PLUGIN, taskExecutor);
@@ -1794,7 +1724,7 @@ HWTEST_F(PluginFrontendTest, OnSaveAbilityStateTest001, TestSize.Level1)
      * @tc.steps: step2. On Save Ability State.
      * @tc.expected: step2.On Save Ability State success.
      */
-    RefPtr<TaskExecutor> taskExecutor = Referenced::MakeRefPtr<FlutterTaskExecutor>();
+    RefPtr<TaskExecutor> taskExecutor = Referenced::MakeRefPtr<TaskExecutorImpl>();
     pluginFrontend.Initialize(FrontendType::JS_PLUGIN, taskExecutor);
     EXPECT_TRUE(pluginFrontend.delegate_ != nullptr);
     std::string data = "data";
@@ -1838,17 +1768,13 @@ HWTEST_F(PluginFrontendTest, OnRestoreAbilityStateTest001, TestSize.Level1)
      * @tc.steps: step2. On Restore Ability State.
      * @tc.expected: step2. On Restore Ability State success.
      */
-    auto taskExecutor = Referenced::MakeRefPtr<FlutterTaskExecutor>();
+    auto taskExecutor = Referenced::MakeRefPtr<TaskExecutorImpl>();
     std::string label = LABEL;
-    std::unique_ptr<fml::Thread> ThreadFirst = std::make_unique<fml::Thread>(THREADFIRST);
-    std::unique_ptr<fml::Thread> ThreadSecond = std::make_unique<fml::Thread>(THREADSECOND);
-    std::unique_ptr<fml::Thread> ThreadThird = std::make_unique<fml::Thread>(THREADTHIRD);
-    std::unique_ptr<fml::Thread> ThreadFourth = std::make_unique<fml::Thread>(THREADFOURTH);
-    fml::RefPtr<fml::TaskRunner> platform = ThreadFirst->GetTaskRunner();
-    fml::RefPtr<fml::TaskRunner> gpu = ThreadSecond->GetTaskRunner();
-    fml::RefPtr<fml::TaskRunner> ui = ThreadThird->GetTaskRunner();
-    fml::RefPtr<fml::TaskRunner> io = ThreadFourth->GetTaskRunner();
-    flutter::TaskRunners taskRunner(label, platform, gpu, ui, io);
+    RefPtr<TaskRunnerAdapter> platform = TaskRunnerAdapterFactory::Create(false, THREADFIRST);
+    RefPtr<TaskRunnerAdapter> gpu = TaskRunnerAdapterFactory::Create(false, THREADSECOND);
+    RefPtr<TaskRunnerAdapter> ui = TaskRunnerAdapterFactory::Create(false, THREADTHIRD);
+    RefPtr<TaskRunnerAdapter> io = TaskRunnerAdapterFactory::Create(false, THREADFOURTH);
+    TaskRunners taskRunner(label, platform, gpu, ui, io);
     taskExecutor->InitJsThread(true);
     taskExecutor->InitOtherThreads(taskRunner);
     pluginFrontend.Initialize(FrontendType::JS_PLUGIN, taskExecutor);
@@ -1892,17 +1818,13 @@ HWTEST_F(PluginFrontendTest, OnNewWantTest001, TestSize.Level1)
      * @tc.steps: step2. On New Want Message.
      * @tc.expected: step2. On New Want success.
      */
-    auto taskExecutor = Referenced::MakeRefPtr<FlutterTaskExecutor>();
+    auto taskExecutor = Referenced::MakeRefPtr<TaskExecutorImpl>();
     std::string label = LABEL;
-    std::unique_ptr<fml::Thread> ThreadFirst = std::make_unique<fml::Thread>(THREADFIRST);
-    std::unique_ptr<fml::Thread> ThreadSecond = std::make_unique<fml::Thread>(THREADSECOND);
-    std::unique_ptr<fml::Thread> ThreadThird = std::make_unique<fml::Thread>(THREADTHIRD);
-    std::unique_ptr<fml::Thread> ThreadFourth = std::make_unique<fml::Thread>(THREADFOURTH);
-    fml::RefPtr<fml::TaskRunner> platform = ThreadFirst->GetTaskRunner();
-    fml::RefPtr<fml::TaskRunner> gpu = ThreadSecond->GetTaskRunner();
-    fml::RefPtr<fml::TaskRunner> ui = ThreadThird->GetTaskRunner();
-    fml::RefPtr<fml::TaskRunner> io = ThreadFourth->GetTaskRunner();
-    flutter::TaskRunners taskRunner(label, platform, gpu, ui, io);
+    RefPtr<TaskRunnerAdapter> platform = TaskRunnerAdapterFactory::Create(false, THREADFIRST);
+    RefPtr<TaskRunnerAdapter> gpu = TaskRunnerAdapterFactory::Create(false, THREADSECOND);
+    RefPtr<TaskRunnerAdapter> ui = TaskRunnerAdapterFactory::Create(false, THREADTHIRD);
+    RefPtr<TaskRunnerAdapter> io = TaskRunnerAdapterFactory::Create(false, THREADFOURTH);
+    TaskRunners taskRunner(label, platform, gpu, ui, io);
     taskExecutor->InitJsThread(true);
     taskExecutor->InitOtherThreads(taskRunner);
     pluginFrontend.Initialize(FrontendType::JS_PLUGIN, taskExecutor);

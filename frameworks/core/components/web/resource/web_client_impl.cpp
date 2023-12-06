@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -104,7 +104,6 @@ bool OnJsCommonDialog(
         AceType::MakeRefPtr<ResultOhos>(result));
     auto task = Container::CurrentTaskExecutor();
     if (task == nullptr) {
-        LOGW("can't get task executor");
         return false;
     }
     task->PostSyncTask([&webClientImpl, dialogEventType, &param, &jsResult] {
@@ -117,7 +116,7 @@ bool OnJsCommonDialog(
         }
         },
         OHOS::Ace::TaskExecutor::TaskType::JS);
-    LOGI("OnJsCommonDialog result:%{public}d", jsResult);
+    TAG_LOGD(AceLogTag::ACE_WEB, "Web Common Dialogs, result:%{public}d", jsResult);
     return jsResult;
 }
 
@@ -125,12 +124,18 @@ void DownloadListenerImpl::OnDownloadStart(const std::string& url, const std::st
     const std::string& contentDisposition, const std::string& mimetype, long contentLength)
 {
     ContainerScope scope(instanceId_);
-    LOGI("OnDownloadStart.");
     auto delegate = webDelegate_.Upgrade();
     if (!delegate) {
         return;
     }
     delegate->OnDownloadStart(url, userAgent, contentDisposition, mimetype, contentLength);
+}
+
+void AccessibilityEventListenerImpl::OnAccessibilityEvent(int32_t nodeId, uint32_t eventType)
+{
+    ContainerScope scope(instanceId_);
+    CHECK_NULL_VOID(webDelegate_);
+    webDelegate_->OnAccessibilityEvent(nodeId, static_cast<AccessibilityEventType>(eventType));
 }
 
 void FindListenerImpl::OnFindResultReceived(
@@ -331,7 +336,6 @@ std::shared_ptr<OHOS::NWeb::NWebUrlResourceResponse> WebClientImpl::OnHandleInte
     ContainerScope scope(instanceId_);
     auto delegate = webDelegate_.Upgrade();
     if (!delegate || (delegate->IsEmptyOnInterceptRequest())) {
-        LOGI("OnHandleInterceptRequest is empty");
         return nullptr;
     }
 
@@ -341,18 +345,17 @@ std::shared_ptr<OHOS::NWeb::NWebUrlResourceResponse> WebClientImpl::OnHandleInte
     RefPtr<WebResponse> webResponse = nullptr;
     auto task = Container::CurrentTaskExecutor();
     if (task == nullptr) {
-        LOGE("can't get task executor");
         return nullptr;
     }
     task->PostSyncTask([&delegate, &webResponse, &param] {
             webResponse = delegate->OnInterceptRequest(param);
         }, OHOS::Ace::TaskExecutor::TaskType::JS);
     if (webResponse == nullptr) {
-        LOGI("webResponse is null");
         return nullptr;
     }
     std::string data = webResponse->GetData();
-    LOGI("intercept Encoding %{public}s, StatusCode %{public}d, DataType %{public}d",
+    TAG_LOGD(AceLogTag::ACE_WEB,
+        "Web intercept request, Encoding %{public}s, StatusCode %{public}d, DataType %{public}d",
         webResponse->GetMimeType().c_str(), webResponse->GetStatusCode(), webResponse->GetDataType());
     std::shared_ptr<OHOS::NWeb::NWebUrlResourceResponse> nwebResponse =
         std::make_shared<OHOS::NWeb::NWebUrlResourceResponse>(webResponse->GetMimeType(), webResponse->GetEncoding(),
@@ -369,7 +372,6 @@ std::shared_ptr<OHOS::NWeb::NWebUrlResourceResponse> WebClientImpl::OnHandleInte
             break;
     }
     if (webResponse->GetResponseStatus() == false) {
-        LOGI("intercept response async Handle");
         std::shared_ptr<NWebResponseAsyncHandle> asyncHandle = std::make_shared<NWebResponseAsyncHandle>(nwebResponse);
         webResponse->SetAsyncHandle(asyncHandle);
         nwebResponse->PutResponseDataStatus(false);
@@ -380,7 +382,6 @@ std::shared_ptr<OHOS::NWeb::NWebUrlResourceResponse> WebClientImpl::OnHandleInte
 bool WebClientImpl::OnAlertDialogByJS(
     const std::string &url, const std::string &message, std::shared_ptr<NWeb::NWebJSDialogResult> result)
 {
-    LOGI("OnAlertDialogByJS");
     ContainerScope scope(instanceId_);
     return OnJsCommonDialog(this, DialogEventType::DIALOG_EVENT_ALERT, result, url, message);
 }
@@ -388,7 +389,6 @@ bool WebClientImpl::OnAlertDialogByJS(
 bool WebClientImpl::OnBeforeUnloadByJS(
     const std::string &url, const std::string &message, std::shared_ptr<NWeb::NWebJSDialogResult> result)
 {
-    LOGI("OnBeforeUnloadByJS");
     ContainerScope scope(instanceId_);
     return OnJsCommonDialog(this, DialogEventType::DIALOG_EVENT_BEFORE_UNLOAD, result, url, message);
 }
@@ -396,7 +396,6 @@ bool WebClientImpl::OnBeforeUnloadByJS(
 bool WebClientImpl::OnConfirmDialogByJS(
     const std::string &url, const std::string &message, std::shared_ptr<NWeb::NWebJSDialogResult> result)
 {
-    LOGI("OnConfirmDialogByJS");
     ContainerScope scope(instanceId_);
     return OnJsCommonDialog(this, DialogEventType::DIALOG_EVENT_CONFIRM, result, url, message);
 }
@@ -404,7 +403,6 @@ bool WebClientImpl::OnConfirmDialogByJS(
 bool WebClientImpl::OnPromptDialogByJS(const std::string &url, const std::string &message,
     const std::string &defaultValue, std::shared_ptr<NWeb::NWebJSDialogResult> result)
 {
-    LOGI("OnPromptDialogByJS: %{public}s", defaultValue.c_str());
     ContainerScope scope(instanceId_);
     return OnJsCommonDialog(this, DialogEventType::DIALOG_EVENT_PROMPT, result, url, message, defaultValue);
 }
@@ -439,7 +437,6 @@ bool WebClientImpl::OnFileSelectorShow(
         AceType::MakeRefPtr<FileSelectorResultOhos>(callback));
     auto task = Container::CurrentTaskExecutor();
     if (task == nullptr) {
-        LOGW("can't get task executor");
         return false;
     }
     task->PostSyncTask([webClient = this, &param, &jsResult] {
@@ -452,7 +449,6 @@ bool WebClientImpl::OnFileSelectorShow(
         }
         },
         OHOS::Ace::TaskExecutor::TaskType::JS);
-    LOGI("OnFileSelectorShow result:%{public}d", jsResult);
     return jsResult;
 }
 
@@ -489,14 +485,12 @@ void WebClientImpl::OnScroll(double xOffset, double yOffset)
 bool WebClientImpl::OnHttpAuthRequestByJS(std::shared_ptr<NWeb::NWebJSHttpAuthResult> result, const std::string &host,
     const std::string &realm)
 {
-    LOGI("OnHttpAuthRequestByJS");
     ContainerScope scope(instanceId_);
 
     bool jsResult = false;
     auto param = std::make_shared<WebHttpAuthEvent>(AceType::MakeRefPtr<AuthResultOhos>(result), host, realm);
     auto task = Container::CurrentTaskExecutor();
     if (task == nullptr) {
-        LOGW("can't get task executor");
         return false;
     }
     task->PostSyncTask([webClient = this, &param, &jsResult] {
@@ -508,22 +502,18 @@ bool WebClientImpl::OnHttpAuthRequestByJS(std::shared_ptr<NWeb::NWebJSHttpAuthRe
                 jsResult = delegate->OnHttpAuthRequest(param);
             }
         }, OHOS::Ace::TaskExecutor::TaskType::JS);
-
-    LOGI("OnHttpAuthRequestByJS result:%{public}d", jsResult);
     return jsResult;
 }
 
 bool WebClientImpl::OnSslErrorRequestByJS(std::shared_ptr<NWeb::NWebJSSslErrorResult> result,
     OHOS::NWeb::SslError error)
 {
-    LOGI("OnSslErrorRequestByJS");
     ContainerScope scope(instanceId_);
 
     bool jsResult = false;
     auto param = std::make_shared<WebSslErrorEvent>(AceType::MakeRefPtr<SslErrorResultOhos>(result), static_cast<int32_t>(error));
     auto task = Container::CurrentTaskExecutor();
     if (task == nullptr) {
-        LOGW("can't get task executor");
         return false;
     }
     task->PostSyncTask([webClient = this, &param, &jsResult] {
@@ -535,8 +525,6 @@ bool WebClientImpl::OnSslErrorRequestByJS(std::shared_ptr<NWeb::NWebJSSslErrorRe
                 jsResult = delegate->OnSslErrorRequest(param);
             }
         }, OHOS::Ace::TaskExecutor::TaskType::JS);
-
-    LOGI("OnSslErrorRequestByJS result:%{public}d", jsResult);
     return jsResult;
 }
 
@@ -554,7 +542,6 @@ bool WebClientImpl::OnSslSelectCertRequestByJS(
         host, port, keyTypes, issuers);
     auto task = Container::CurrentTaskExecutor();
     if (task == nullptr) {
-        LOGW("can't get task executor");
         return false;
     }
 
@@ -573,7 +560,6 @@ bool WebClientImpl::OnSslSelectCertRequestByJS(
 
 void WebClientImpl::OnPermissionRequest(std::shared_ptr<NWeb::NWebAccessRequest> request)
 {
-    LOGI("OnPermissionRequest");
     ContainerScope scope(instanceId_);
     auto delegate = webDelegate_.Upgrade();
     CHECK_NULL_VOID(delegate);
@@ -582,7 +568,6 @@ void WebClientImpl::OnPermissionRequest(std::shared_ptr<NWeb::NWebAccessRequest>
 
 void WebClientImpl::OnScreenCaptureRequest(std::shared_ptr<NWeb::NWebScreenCaptureAccessRequest> request)
 {
-    LOGI("OnScreenCaptureRequest");
     ContainerScope scope(instanceId_);
     auto delegate = webDelegate_.Upgrade();
     CHECK_NULL_VOID(delegate);
@@ -599,7 +584,6 @@ bool WebClientImpl::RunContextMenu(
         AceType::MakeRefPtr<ContextMenuResultOhos>(callback));
     auto task = Container::CurrentTaskExecutor();
     if (task == nullptr) {
-        LOGW("can't get task executor");
         return false;
     }
     task->PostSyncTask([webClient = this, &param, &jsResult] {
@@ -612,7 +596,6 @@ bool WebClientImpl::RunContextMenu(
         }
         },
         OHOS::Ace::TaskExecutor::TaskType::JS);
-    LOGI("OnContextMenuEventShow result:%{public}d", jsResult);
     return jsResult;
 }
 
@@ -625,7 +608,6 @@ bool WebClientImpl::RunQuickMenu(std::shared_ptr<NWeb::NWebQuickMenuParams> para
     ContainerScope scope(instanceId_);
     auto task = Container::CurrentTaskExecutor();
     if (task == nullptr) {
-        LOGW("can't get task executor");
         return false;
     }
     auto delegate = webDelegate_.Upgrade();
@@ -640,7 +622,6 @@ void WebClientImpl::OnQuickMenuDismissed()
     ContainerScope scope(instanceId_);
     auto task = Container::CurrentTaskExecutor();
     if (task == nullptr) {
-        LOGW("can't get task executor");
         return;
     }
     auto delegate = webDelegate_.Upgrade();
@@ -658,7 +639,6 @@ void WebClientImpl::OnTouchSelectionChanged(
     ContainerScope scope(instanceId_);
     auto task = Container::CurrentTaskExecutor();
     if (task == nullptr) {
-        LOGW("can't get task executor");
         return;
     }
     auto delegate = webDelegate_.Upgrade();
@@ -703,7 +683,6 @@ void WebClientImpl::OnWindowNewByJS(
     bool isUserTrigger,
     std::shared_ptr<NWeb::NWebControllerHandler> handler)
 {
-    LOGI("OnWindowNewByJS");
     ContainerScope scope(instanceId_);
     auto delegate = webDelegate_.Upgrade();
     CHECK_NULL_VOID(delegate);
@@ -712,7 +691,6 @@ void WebClientImpl::OnWindowNewByJS(
 
 void WebClientImpl::OnWindowExitByJS()
 {
-    LOGI("OnWindowExitByJS");
     ContainerScope scope(instanceId_);
     auto delegate = webDelegate_.Upgrade();
     CHECK_NULL_VOID(delegate);
@@ -721,7 +699,6 @@ void WebClientImpl::OnWindowExitByJS()
 
 void WebClientImpl::OnPageVisible(const std::string& url)
 {
-    LOGI("OnPageVisible");
     ContainerScope scope(instanceId_);
     auto delegate = webDelegate_.Upgrade();
     CHECK_NULL_VOID(delegate);
@@ -730,7 +707,6 @@ void WebClientImpl::OnPageVisible(const std::string& url)
 
 void WebClientImpl::OnDataResubmission(std::shared_ptr<NWeb::NWebDataResubmissionCallback> handler)
 {
-    LOGI("OnDataResubmission");
     ContainerScope scope(instanceId_);
     auto delegate = webDelegate_.Upgrade();
     CHECK_NULL_VOID(delegate);
@@ -744,7 +720,6 @@ void WebClientImpl::OnPageIcon(const void* data,
                                NWeb::ImageColorType colorType,
                                NWeb::ImageAlphaType alphaType)
 {
-    LOGI("OnPageIcon");
     ContainerScope scope(instanceId_);
     auto delegate = webDelegate_.Upgrade();
     CHECK_NULL_VOID(delegate);
@@ -753,7 +728,6 @@ void WebClientImpl::OnPageIcon(const void* data,
 
 void WebClientImpl::OnDesktopIconUrl(const std::string& icon_url, bool precomposed)
 {
-    LOGI("OnDesktopIconUrl");
     ContainerScope scope(instanceId_);
     auto delegate = webDelegate_.Upgrade();
     CHECK_NULL_VOID(delegate);
@@ -762,7 +736,7 @@ void WebClientImpl::OnDesktopIconUrl(const std::string& icon_url, bool precompos
 
 bool WebClientImpl::OnCursorChange(const NWeb::CursorType& type, const NWeb::NWebCursorInfo& info)
 {
-    LOGI("OnCursorChange");
+    TAG_LOGD(AceLogTag::ACE_WEB, "web cursor change");
     ContainerScope scope(instanceId_);
     auto delegate = webDelegate_.Upgrade();
     CHECK_NULL_RETURN(delegate, false);
@@ -773,7 +747,6 @@ void WebClientImpl::OnSelectPopupMenu(
     std::shared_ptr<OHOS::NWeb::NWebSelectPopupMenuParam> params,
     std::shared_ptr<OHOS::NWeb::NWebSelectPopupMenuCallback> callback)
 {
-    LOGI("OnSelectPopupMenu");
     ContainerScope scope(instanceId_);
     auto delegate = webDelegate_.Upgrade();
     CHECK_NULL_VOID(delegate);
@@ -791,8 +764,7 @@ void ReleaseSurfaceImpl::ReleaseSurface()
 
 void WebClientImpl::OnAudioStateChanged(bool playing)
 {
-    LOGI("OnAudioStateChanged playing: %{public}s", (playing ? "true" : "false"));
-
+    TAG_LOGD(AceLogTag::ACE_WEB, "web audio state changed, playing: %{public}s", (playing ? "true" : "false"));
     ContainerScope scope(instanceId_);
     auto delegate = webDelegate_.Upgrade();
     CHECK_NULL_VOID(delegate);
@@ -801,7 +773,6 @@ void WebClientImpl::OnAudioStateChanged(bool playing)
 
 void WebClientImpl::OnFirstContentfulPaint(int64_t navigationStartTick, int64_t firstContentfulPaintMs)
 {
-    LOGI("OnFirstContentfulPaint");
     ContainerScope scope(instanceId_);
     auto delegate = webDelegate_.Upgrade();
     CHECK_NULL_VOID(delegate);
@@ -857,5 +828,39 @@ void WebClientImpl::OnOverScroll(float xOffset, float yOffset)
     auto delegate = webDelegate_.Upgrade();
     CHECK_NULL_VOID(delegate);
     delegate->OnOverScroll(xOffset, yOffset);
+}
+
+void WebClientImpl::OnOverScrollFlingVelocity(float xVelocity, float yVelocity, bool isFling)
+{
+    ContainerScope scope(instanceId_);
+    auto delegate = webDelegate_.Upgrade();
+    CHECK_NULL_VOID(delegate);
+    delegate->OnOverScrollFlingVelocity(xVelocity, yVelocity, isFling);
+}
+
+void WebClientImpl::OnOverScrollFlingEnd() {}
+
+void WebClientImpl::OnScrollState(bool scrollState)
+{
+    ContainerScope scope(instanceId_);
+    auto delegate = webDelegate_.Upgrade();
+    CHECK_NULL_VOID(delegate);
+    delegate->OnScrollState(scrollState);
+}
+
+void WebClientImpl::OnRootLayerChanged(int width, int height)
+{
+    ContainerScope scope(instanceId_);
+    auto delegate = webDelegate_.Upgrade();
+    CHECK_NULL_VOID(delegate);
+    delegate->OnRootLayerChanged(width, height);
+}
+
+bool WebClientImpl::FilterScrollEvent(const float x, const float y, const float xVelocity, const float yVelocity)
+{
+    ContainerScope scope(instanceId_);
+    auto delegate = webDelegate_.Upgrade();
+    CHECK_NULL_RETURN(delegate, false);
+    return delegate->FilterScrollEvent(x, y, xVelocity, yVelocity);
 }
 } // namespace OHOS::Ace

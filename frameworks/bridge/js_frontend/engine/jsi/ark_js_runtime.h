@@ -23,7 +23,9 @@
 #include <memory>
 
 #include "ecmascript/napi/include/jsnapi.h"
+#include "native_engine/native_engine.h"
 
+#include "base/log/log.h"
 #include "frameworks/bridge/js_frontend/engine/jsi/js_runtime.h"
 
 namespace panda::ecmascript {
@@ -58,8 +60,8 @@ using DebuggerPostTask = std::function<void(std::function<void()>&&)>;
 class ArkJSRuntime final : public JsRuntime, public std::enable_shared_from_this<ArkJSRuntime> {
 public:
     using ErrorEventHandler = std::function<void(const std::string&, const std::string&)>;
-#if !defined(WINDOWS_PLATFORM)
-    bool StartDebugger(const char* libraryPath, EcmaVM* vm) const;
+#if !defined(PREVIEW)
+    void StartDebuggerForSocketPair(std::string& option, uint32_t socketFd);
 #endif
     bool Initialize(const std::string& libraryPath, bool isDebugMode, int32_t instanceId) override;
     bool InitializeFromExistVM(EcmaVM* vm);
@@ -97,7 +99,18 @@ public:
 
     const EcmaVM* GetEcmaVm() const
     {
-        return vm_;
+        return vm_ != nullptr ? vm_ : GetThreadVm();
+    }
+
+    const EcmaVM* GetThreadVm() const
+    {
+        LOGI("vm_ is nullptr, use threadVm_");
+        return threadVm_;
+    }
+
+    void SetThreadVm(EcmaVM* vm)
+    {
+        threadVm_ = vm;
     }
 
     void SetAssetPath(const std::string& assetPath)
@@ -148,6 +161,11 @@ public:
     void SetLanguage(const std::string& language)
     {
         language_ = language;
+    }
+
+    void SetNativeEngine(NativeEngine* nativeEngine)
+    {
+        nativeEngine_ = nativeEngine;
     }
 
 #if defined(PREVIEW)
@@ -210,12 +228,14 @@ private:
     bool isDebugMode_ = false;
     DebuggerPostTask debuggerPostTask_;
     ErrorEventHandler errorCallback_;
+    NativeEngine* nativeEngine_;
 #if defined(PREVIEW)
     bool isComponentPreview_ = false;
     std::string requiredComponent_ {};
     std::multimap<std::string, panda::Global<panda::ObjectRef>> previewComponents_;
     panda::Global<panda::ObjectRef> RootView_;
 #endif
+    static thread_local EcmaVM* threadVm_;
 };
 
 class PandaFunctionData {
@@ -226,8 +246,10 @@ public:
 
     ~PandaFunctionData() = default;
 
-    NO_COPY_SEMANTIC(PandaFunctionData);
-    NO_MOVE_SEMANTIC(PandaFunctionData);
+    PandaFunctionData(const PandaFunctionData&) = delete;
+    void operator=(const PandaFunctionData&) = delete;
+    PandaFunctionData(PandaFunctionData&&) = delete;
+    PandaFunctionData& operator=(PandaFunctionData&&) = delete;
 
 private:
     Local<JSValueRef> Callback(panda::JsiRuntimeCallInfo* info) const;

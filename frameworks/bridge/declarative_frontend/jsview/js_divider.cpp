@@ -76,7 +76,6 @@ void JSDivider::SetLineCap(int lineCap)
 void JSDivider::SetDividerColor(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The argv is wrong, it is supposed to have at least 1 argument");
         return;
     }
     auto theme = GetTheme<DividerTheme>();
@@ -89,7 +88,6 @@ void JSDivider::SetDividerColor(const JSCallbackInfo& info)
 void JSDivider::SetStrokeWidth(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have at least 1 argument");
         return;
     }
     auto theme = GetTheme<DividerTheme>();
@@ -98,7 +96,9 @@ void JSDivider::SetStrokeWidth(const JSCallbackInfo& info)
     if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)) {
         strokeWidth = 1.0_px;
     }
-    ParseJsDimensionVp(info[0], strokeWidth);
+    if (!ParseJsDimensionVpNG(info[0], strokeWidth, false)) {
+        strokeWidth = 1.0_px;
+    }
     DividerModel::GetInstance()->StrokeWidth(strokeWidth);
 }
 

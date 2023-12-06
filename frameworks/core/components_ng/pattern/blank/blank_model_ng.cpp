@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/blank/blank_model_ng.h"
 
+#include "base/geometry/dimension.h"
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "core/common/container.h"
@@ -32,6 +33,7 @@ void BlankModelNG::Create()
 {
     auto* stack = ViewStackProcessor::GetInstance();
     int32_t nodeId = stack->ClaimNodeId();
+    ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::BLANK_ETS_TAG, nodeId);
     auto blankNode = FrameNode::GetOrCreateFrameNode(
         V2::BLANK_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<BlankPattern>(); });
     stack->Push(blankNode);
@@ -54,7 +56,7 @@ void BlankModelNG::SetBlankMin(const Dimension& blankMin)
     CHECK_NULL_VOID(layoutProperty);
     auto result = blankMin;
     if (blankMin.IsNegative()) {
-        result = Dimension();
+        result = Dimension(0.0, DimensionUnit::VP);
     }
     ACE_UPDATE_LAYOUT_PROPERTY(BlankLayoutProperty, MinSize, result);
     if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
@@ -73,10 +75,11 @@ void BlankModelNG::SetHeight(const Dimension& height)
 
 void BlankModelNG::SetColor(const Color& color)
 {
-    auto blankNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    CHECK_NULL_VOID(blankNode);
-    auto paintProperty = blankNode->GetPaintProperty<BlankPaintProperty>();
-    CHECK_NULL_VOID(paintProperty);
-    paintProperty->UpdateColor(color);
+    ACE_UPDATE_PAINT_PROPERTY(BlankPaintProperty, Color, color);
+}
+
+void BlankModelNG::SetColor(FrameNode* frameNode, const Color& color)
+{
+    ACE_UPDATE_NODE_PAINT_PROPERTY(BlankPaintProperty, Color, color, frameNode);
 }
 } // namespace OHOS::Ace::NG

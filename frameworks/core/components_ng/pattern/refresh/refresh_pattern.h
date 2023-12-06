@@ -22,6 +22,7 @@
 #include "frameworks/base/geometry/ng/offset_t.h"
 #include "frameworks/base/memory/referenced.h"
 #include "frameworks/base/utils/noncopyable.h"
+#include "frameworks/core/components_ng/base/frame_scene_status.h"
 #include "frameworks/core/components_ng/pattern/pattern.h"
 #include "frameworks/core/components_ng/pattern/refresh/refresh_animation_state.h"
 #include "frameworks/core/components_ng/pattern/refresh/refresh_accessibility_property.h"
@@ -89,7 +90,7 @@ public:
     void UpdateInternalPlacement();
     FocusPattern GetFocusPattern() const override
     {
-        return { FocusType::NODE, true };
+        return { FocusType::SCOPE, true };
     }
 
     float GetLoadingDistance() const
@@ -114,8 +115,8 @@ public:
 
 private:
     void InitPanEvent(const RefPtr<GestureEventHub>& gestureHub);
-    void HandleDragStart();
-    void HandleDragUpdate(float delta);
+    void HandleDragStart(bool isDrag = true, float mainSpeed = 0.0f);
+    void HandleDragUpdate(float delta, float mainSpeed = 0.0f);
     void HandleDragEnd(float speed);
     void HandleDragCancel();
     void TriggerFinish();
@@ -129,8 +130,7 @@ private:
     void OnAttachToFrameNode() override;
     void OnExitAnimationFinish();
     void ResetLoadingProgressColor();
-    float GetFollowRatio();
-    float GetFadeAwayRatio();
+    float GetFollowRatio(float scrollOffset);
     float GetCustomBuilderOpacityRatio();
     float GetScrollOffset(float delta);
     bool ScrollComponentReactInMove();
@@ -153,7 +153,7 @@ private:
     void UpdateRefreshStatus(RefreshStatus newStatus);
     void UpdateRefreshDraw();
     void UpdateFirstChildPlacement(float deltaOffset);
-    void UpdateFirstChildDragStart();
+    void UpdateFirstChildDragStart(bool isDrag);
     void UpdateLoadingProgressTranslate(float loadingOffset);
     void UpdateLoadingProgressStatus(RefreshAnimationState state, float followToRecycleRatio = 0.0f);
     void UpdateBuilderHeight(float builderHeight);
@@ -166,10 +166,16 @@ private:
     void InitChildNode();
     void QuickFirstChildAppear();
     void QuickFirstChildDisappear();
+    float GetLoadingVisibleHeight();
+    void UpdateScrollTransition(float scrollOffset);
+    RefreshAnimationState GetLoadingProgressStatus();
+    void RefreshStatusChangeEffect();
+    float GetTargetOffset();
+    void UpdateDragFRCSceneInfo(const std::string& scene, float speed, SceneStatus sceneStatus);
     RefreshStatus refreshStatus_ = RefreshStatus::INACTIVE;
     RefPtr<PanEvent> panEvent_;
     OffsetF scrollOffset_;
-
+    bool isSourceFromAnimation_ = false;
     bool isRefreshing_ = false;
     bool isKeyEventRegisted_ = false;
     float triggerLoadingDistance_ = 0.0f;

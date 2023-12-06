@@ -538,6 +538,7 @@ RSColorType ConvertToColorType(PixelFormat pixelFormat)
         case PixelFormat::ALPHA_8:
             return RSColorType::COLORTYPE_ALPHA_8;
         case PixelFormat::RGBA_F16:
+            return RSColorType::COLORTYPE_RGBA_F16;
         case PixelFormat::UNKNOWN:
         case PixelFormat::ARGB_8888:
         case PixelFormat::RGB_888:
@@ -708,7 +709,7 @@ void RosenRenderBox::DrawOnPixelMap()
     RSBitmap tempBitmap;
     tempBitmap.Build(pixelMap_->GetWidth(), pixelMap_->GetHeight(), tempFormat);
     tempBitmap.SetPixels(dstPixels);
-    tempCache.CopyPixels(tempBitmap, 0, 0, pixelMap_->GetWidth(), pixelMap_->GetHeight());
+    tempCache.CopyPixels(tempBitmap, 0, 0);
 }
 #endif
 

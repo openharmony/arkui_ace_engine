@@ -1,4 +1,40 @@
 /*
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+class stateMgmtProfiler {
+    static begin(blockName) {
+        var _a;
+        (_a = stateMgmtProfiler.instance) === null || _a === void 0 ? void 0 : _a.begin(blockName);
+    }
+    static end() {
+        var _a;
+        (_a = stateMgmtProfiler.instance) === null || _a === void 0 ? void 0 : _a.end();
+    }
+    static report() {
+        var _a;
+        (_a = stateMgmtProfiler.instance) === null || _a === void 0 ? void 0 : _a.report();
+    }
+    static clear() {
+        var _a;
+        (_a = stateMgmtProfiler.instance) === null || _a === void 0 ? void 0 : _a.clear();
+    }
+    static init(instance) {
+        stateMgmtProfiler.instance = instance;
+    }
+}
+stateMgmtProfiler.instance = undefined;
+/*
  * Copyright (c) 2021 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -185,16 +221,20 @@ class LocalStorage extends NativeLocalStorage {
      * @since 9
      */
     set(propName, newValue) {
+        
         if (newValue == undefined) {
             stateMgmtConsole.warn(`${this.constructor.name}: set('${propName}') with newValue == undefined not allowed.`);
+            
             return false;
         }
         var p = this.storage_.get(propName);
         if (p == undefined) {
             stateMgmtConsole.warn(`${this.constructor.name}: set: no property ${propName} error.`);
+            
             return false;
         }
         p.set(newValue);
+        
         return true;
     }
     /**
@@ -209,8 +249,10 @@ class LocalStorage extends NativeLocalStorage {
      * @since 9
      */
     setOrCreate(propName, newValue) {
+        
         if (newValue == undefined) {
             stateMgmtConsole.warn(`${this.constructor.name}: setOrCreate('${propName}') with newValue == undefined not allowed.`);
+            
             return false;
         }
         var p = this.storage_.get(propName);
@@ -222,6 +264,7 @@ class LocalStorage extends NativeLocalStorage {
             
             this.addNewPropertyInternal(propName, newValue);
         }
+        
         return true;
     }
     /**
@@ -233,9 +276,15 @@ class LocalStorage extends NativeLocalStorage {
      * Not a public / sdk method.
      */
     addNewPropertyInternal(propName, value) {
-        const newProp = (typeof value === "object") ?
-            new ObservedPropertyObject(value, undefined, propName)
-            : new ObservedPropertySimple(value, undefined, propName);
+        let newProp;
+        if (ViewStackProcessor.UsesNewPipeline()) {
+            newProp = new ObservedPropertyPU(value, undefined, propName);
+        }
+        else {
+            newProp = (typeof value === "object") ?
+                new ObservedPropertyObject(value, undefined, propName)
+                : new ObservedPropertySimple(value, undefined, propName);
+        }
         this.storage_.set(propName, newProp);
         return newProp;
     }
@@ -254,21 +303,22 @@ class LocalStorage extends NativeLocalStorage {
      * @since 9
      */
     link(propName, linkUser, subscribersName) {
+        
         var p = this.storage_.get(propName);
         if (p == undefined) {
             stateMgmtConsole.warn(`${this.constructor.name}: link: no property ${propName} error.`);
+            
             return undefined;
         }
         let linkResult;
         if (ViewStackProcessor.UsesNewPipeline()) {
-            linkResult = (p instanceof ObservedPropertySimple)
-                ? new SynchedPropertySimpleTwoWayPU(p, linkUser, propName)
-                : new SynchedPropertyObjectTwoWayPU(p, linkUser, propName);
+            linkResult = new SynchedPropertyTwoWayPU(p, linkUser, propName);
         }
         else {
             linkResult = p.createLink(linkUser, propName);
         }
         linkResult.setInfo(subscribersName);
+        
         return linkResult;
     }
     /**
@@ -285,11 +335,14 @@ class LocalStorage extends NativeLocalStorage {
      * @since 9
      */
     setAndLink(propName, defaultValue, linkUser, subscribersName) {
+        
         var p = this.storage_.get(propName);
         if (!p) {
             this.setOrCreate(propName, defaultValue);
         }
-        return this.link(propName, linkUser, subscribersName);
+        const link = this.link(propName, linkUser, subscribersName);
+        
+        return link;
     }
     /**
      * create and return a one-way sync ('prop') to named property
@@ -305,21 +358,22 @@ class LocalStorage extends NativeLocalStorage {
      * @since 9
      */
     prop(propName, propUser, subscribersName) {
+        
         var p = this.storage_.get(propName);
         if (p == undefined) {
             stateMgmtConsole.warn(`${this.constructor.name}: prop: no property ${propName} error.`);
+            
             return undefined;
         }
         let propResult;
         if (ViewStackProcessor.UsesNewPipeline()) {
-            propResult = (p instanceof ObservedPropertySimple)
-                ? new SynchedPropertySimpleOneWayPU(p, propUser, propName)
-                : new SynchedPropertyObjectOneWayPU(p, propUser, propName);
+            propResult = new SynchedPropertyOneWayPU(p, propUser, propName);
         }
         else {
             propResult = p.createProp(propUser, propName);
         }
         propResult.setInfo(subscribersName);
+        
         return propResult;
     }
     /**
@@ -335,11 +389,14 @@ class LocalStorage extends NativeLocalStorage {
      * @since 9
      */
     setAndProp(propName, defaultValue, propUser, subscribersName) {
+        
         var p = this.storage_.get(propName);
         if (!p) {
             this.setOrCreate(propName, defaultValue);
         }
-        return this.prop(propName, propUser, subscribersName);
+        const prop = this.prop(propName, propUser, subscribersName);
+        
+        return prop;
     }
     /**
      * Delete property from StorageBase
@@ -362,19 +419,23 @@ class LocalStorage extends NativeLocalStorage {
      * @since 9
     */
     delete(propName) {
+        
         var p = this.storage_.get(propName);
         if (p) {
             if (p.numberOfSubscrbers()) {
                 stateMgmtConsole.error(`${this.constructor.name}: Attempt to delete property ${propName} that has \
           ${p.numberOfSubscrbers()} subscribers. Subscribers need to unsubscribe before prop deletion.`);
+                
                 return false;
             }
             p.aboutToBeDeleted();
             this.storage_.delete(propName);
+            
             return true;
         }
         else {
             stateMgmtConsole.warn(`${this.constructor.name}: Attempt to delete unknown property ${propName}.`);
+            
             return false;
         }
     }
@@ -388,12 +449,14 @@ class LocalStorage extends NativeLocalStorage {
      * @since 9
      */
     clear() {
+        
         for (let propName of this.keys()) {
             var p = this.storage_.get(propName);
             if (p.numberOfSubscrbers()) {
                 stateMgmtConsole.error(`${this.constructor.name}.deleteAll: Attempt to delete property ${propName} that \
           has ${p.numberOfSubscrbers()} subscribers. Subscribers need to unsubscribe before prop deletion.
           Any @Component instance with a @StorageLink/Prop or @LocalStorageLink/Prop is a subscriber.`);
+                
                 return false;
             }
         }
@@ -402,6 +465,7 @@ class LocalStorage extends NativeLocalStorage {
             p.aboutToBeDeleted();
         }
         this.storage_.clear();
+        
         
         return true;
     }
@@ -441,19 +505,6 @@ class LocalStorage extends NativeLocalStorage {
             return true;
         }
         return false;
-    }
-    /**
-     * return number of subscribers to named property
-     *  useful for debug purposes
-     *
-     * Not a public / sdk function
-    */
-    numberOfSubscrbersTo(propName) {
-        var p = this.storage_.get(propName);
-        if (p) {
-            return p.numberOfSubscrbers();
-        }
-        return undefined;
     }
     __createSync(storagePropName, defaultValue, factoryFunc) {
         let p = this.storage_.get(storagePropName);
@@ -823,15 +874,6 @@ class AppStorage extends LocalStorage {
     */
     static aboutToBeDeleted() {
         AppStorage.getOrCreate().aboutToBeDeleted();
-    }
-    /**
-     * return number of subscribers to named property
-     * useful for debug purposes
-     *
-     * not a public / sdk function
-    */
-    static numberOfSubscribersTo(propName) {
-        return AppStorage.getOrCreate().numberOfSubscrbersTo(propName);
     }
     /**
     * Subscribe to value change notifications of named property
@@ -1244,21 +1286,22 @@ class SubscribableAbstract {
         
         this.owningProperties_.forEach((subscribedId) => {
             var owningProperty = SubscriberManager.Find(subscribedId);
-            if (owningProperty) {
-                if ('objectPropertyHasChangedPU' in owningProperty) {
-                    // PU code path
-                    owningProperty.objectPropertyHasChangedPU(this, propName);
-                }
-                // FU code path
-                if ('hasChanged' in owningProperty) {
-                    owningProperty.hasChanged(newValue);
-                }
-                if ('propertyHasChanged' in owningProperty) {
-                    owningProperty.propertyHasChanged(propName);
-                }
-            }
-            else {
+            if (!owningProperty) {
                 stateMgmtConsole.error(`SubscribableAbstract: notifyHasChanged: unknown subscriber.'${subscribedId}' error!.`);
+                return;
+            }
+            // PU Code path
+            if ('objectPropertyHasChangedPU' in owningProperty) {
+                // PU code path
+                owningProperty.objectPropertyHasChangedPU(this, propName);
+                return;
+            }
+            // FU code path
+            if ('hasChanged' in owningProperty) {
+                owningProperty.hasChanged(newValue);
+            }
+            if ('propertyHasChanged' in owningProperty) {
+                owningProperty.propertyHasChanged(propName);
             }
         });
     }
@@ -1559,10 +1602,12 @@ class PersistentStorage {
             PersistentStorage.storage_.set(propName, link.get());
         });
     }
+    // FU code path method
     propertyHasChanged(info) {
         
         this.write();
     }
+    // PU code path method
     syncPeerHasChanged(eventSource) {
         
         this.write();
@@ -1746,7 +1791,7 @@ class Environment {
 }
 Environment.instance_ = undefined;
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -1952,21 +1997,21 @@ class SubscribableHandler {
         
         this.owningProperties_.forEach((subscribedId) => {
             var owningProperty = SubscriberManager.Find(subscribedId);
-            if (owningProperty) {
-                if ('objectPropertyHasChangedPU' in owningProperty) {
-                    // PU code path
-                    owningProperty.objectPropertyHasChangedPU(this, propName);
-                }
-                // FU code path
-                if ('hasChanged' in owningProperty) {
-                    owningProperty.hasChanged(newValue);
-                }
-                if ('propertyHasChanged' in owningProperty) {
-                    owningProperty.propertyHasChanged(propName);
-                }
-            }
-            else {
+            if (!owningProperty) {
                 stateMgmtConsole.warn(`SubscribableHandler: notifyObjectPropertyHasChanged: unknown subscriber.'${subscribedId}' error!.`);
+                return;
+            }
+            // PU code path
+            if ('objectPropertyHasChangedPU' in owningProperty) {
+                owningProperty.objectPropertyHasChangedPU(this, propName);
+                return;
+            }
+            // FU code path
+            if ('hasChanged' in owningProperty) {
+                owningProperty.hasChanged(newValue);
+            }
+            if ('propertyHasChanged' in owningProperty) {
+                owningProperty.propertyHasChanged(propName);
             }
         });
     }
@@ -2095,7 +2140,7 @@ class ObservedObject extends ExtendableProxy {
                     const self = this;
                     const prop = property.toString();
                     // prop is the function name here
-                    if (prop == "splice") {
+                    if (prop == "splice" || prop == "pop") {
                         // 'splice' self modifies the array, returns deleted array items
                         // means, alike other self-modifying functions, splice does not return the array itself.
                         return function () {
@@ -2336,7 +2381,9 @@ class ObservedPropertyAbstract extends SubscribedAbstractProperty {
             this.unlinkSuscriber(subscriber.id__());
         }
     }
+    // FU code path callback
     notifyHasChanged(newValue) {
+        
         
         this.subscribers_.forEach((subscribedId) => {
             var subscriber = SubscriberManager.Find(subscribedId);
@@ -2348,18 +2395,15 @@ class ObservedPropertyAbstract extends SubscribedAbstractProperty {
                 if ('propertyHasChanged' in subscriber) {
                     subscriber.propertyHasChanged(this.info_);
                 }
-                // PU code path, only used for ObservedPropertySimple/Object stored inside App/LocalStorage
-                // ObservedPropertySimplePU/ObjectPU  used in all other PU cases, has its own notifyPropertyHasChangedPU()
-                if ('syncPeerHasChanged' in subscriber) {
-                    subscriber.syncPeerHasChanged(this);
-                }
             }
             else {
                 stateMgmtConsole.warn(`ObservedPropertyAbstract[${this.id__()}, '${this.info() || "unknown"}']: notifyHasChanged: unknown subscriber ID '${subscribedId}' error!`);
             }
         });
+        
     }
     notifyPropertyRead() {
+        
         
         this.subscribers_.forEach((subscribedId) => {
             var subscriber = SubscriberManager.Find(subscribedId);
@@ -2369,6 +2413,7 @@ class ObservedPropertyAbstract extends SubscribedAbstractProperty {
                 }
             }
         });
+        
     }
     /*
     return numebr of subscribers to this property
@@ -2643,9 +2688,7 @@ class ObservedPropertySimple extends ObservedPropertySimpleAbstract {
    * changes.
    */
     createLink(subscribeOwner, linkPropName) {
-        return ((subscribeOwner !== undefined) && ("rerender" in subscribeOwner)) ?
-            new SynchedPropertySimpleTwoWayPU(this, subscribeOwner, linkPropName) :
-            new SynchedPropertySimpleTwoWay(this, subscribeOwner, linkPropName);
+        return new SynchedPropertySimpleTwoWay(this, subscribeOwner, linkPropName);
     }
     createProp(subscribeOwner, linkPropName) {
         return new SynchedPropertySimpleOneWaySubscribing(this, subscribeOwner, linkPropName);
@@ -3257,30 +3300,31 @@ class ObservedPropertyAbstractPU extends ObservedPropertyAbstract {
     // use function only for debug output and DFX.
     debugInfoSubscribers() {
         return (this.owningView_)
-            ? `owned by ${this.debugInfoOwningView()} `
-            : `owned by: owning view not known`;
+            ? `|--Owned by ${this.debugInfoOwningView()} `
+            : `|--Owned by: owning view not known`;
     }
     debugInfoSyncPeers() {
         if (!this.subscriberRefs_.size) {
-            return "sync peers: none";
+            return "|--Sync peers: none";
         }
-        let result = `sync peers:\n`;
+        let result = `|--Sync peers: {`;
         let sepa = "";
         this.subscriberRefs_.forEach((subscriber) => {
             if ("debugInfo" in subscriber) {
-                result += `    ${sepa}${subscriber.debugInfo()}`;
+                result += `\n    ${sepa}${subscriber.debugInfo()}`;
                 sepa = ", ";
             }
         });
+        result += "\n  }";
         return result;
     }
     debugInfoDependentElmtIds() {
         if (!this.dependentElementIds_.size) {
-            return `dependent components: no dependent elmtIds`;
+            return `|--Dependent components: no dependent elmtIds`;
         }
         let result = this.dependentElementIds_.size < 25
-            ? `dependent components: ${this.dependentElementIds_.size} elmtIds: `
-            : `WARNING: high number of dependent components (consider app redesign): ${this.dependentElementIds_.size} elmtIds: `;
+            ? `|--Dependent components: ${this.dependentElementIds_.size} elmtIds: `
+            : `|--WARNING: high number of dependent components (consider app redesign): ${this.dependentElementIds_.size} elmtIds: `;
         let sepa = "";
         if (this.owningView_) {
             this.dependentElementIds_.forEach((elmtId) => {
@@ -3365,20 +3409,12 @@ class ObservedPropertyAbstractPU extends ObservedPropertyAbstract {
     }
     notifyPropertyHasBeenReadPU() {
         
-        this.subscriberRefs_.forEach((subscriber) => {
-            if (subscriber) {
-                // TODO
-                // propertyHasBeenReadPU is not use in the code
-                // defined by interface that is not used either: PropertyReadEventListener
-                // Maybe compiler generated code has it?
-                if ('propertyHasBeenReadPU' in subscriber) {
-                    subscriber.propertyHasBeenReadPU(this);
-                }
-            }
-        });
+        
         this.recordDependentUpdate();
+        
     }
     notifyPropertyHasChangedPU() {
+        
         
         if (this.owningView_) {
             if (this.delayedNotification_ == ObservedPropertyAbstractPU.DelayedNotifyChangesEnum.do_not_delay) {
@@ -3400,6 +3436,7 @@ class ObservedPropertyAbstractPU extends ObservedPropertyAbstract {
                 }
             }
         });
+        
     }
     markDependentElementsDirty(view) {
         // TODO ace-ets2bundle, framework, complicated apps need to update together
@@ -3451,7 +3488,7 @@ class ObservedPropertyAbstractPU extends ObservedPropertyAbstract {
             value: newValue
         });
         // never gets here if errorReport.varValueCheckFailed throws an exception
-        // but should nto depend on its implementation
+        // but should not depend on its implementation
         return false;
     }
     /**
@@ -3489,7 +3526,6 @@ class ObservedPropertyAbstractPU extends ObservedPropertyAbstract {
         // function to be removed
         // keep it here until transpiler is updated.
     }
-    // FIXME check, is this used from AppStorage.
     // unified Appstorage, what classes to use, and the API
     createLink(subscribeOwner, linkPropName) {
         throw new Error(`${this.debugInfo()}: createLink: Can not create a AppStorage 'Link' from this property.`);
@@ -3598,11 +3634,14 @@ class ObservedPropertyPU extends ObservedPropertyAbstractPU {
       and also notify with this.aboutToChange();
     */
     setValueInternal(newValue) {
+        
         if (newValue === this.wrappedValue_) {
+            
             
             return false;
         }
         if (!this.checkIsSupportedValue(newValue)) {
+            
             return false;
         }
         this.unsubscribeWrappedObject();
@@ -3625,6 +3664,7 @@ class ObservedPropertyPU extends ObservedPropertyAbstractPU {
             
             this.wrappedValue_ = ObservedObject.createNew(newValue, this);
         }
+        
         return true;
     }
     get() {
@@ -3762,8 +3802,10 @@ class SynchedPropertyOneWayPU extends ObservedPropertyAbstractPU {
         return `@Prop (class SynchedPropertyOneWayPU)`;
     }
     syncPeerHasChanged(eventSource) {
+        
         if (this.source_ == undefined) {
             stateMgmtConsole.error(`${this.debugInfo()}: syncPeerHasChanged from peer ${eventSource && eventSource.debugInfo && eventSource.debugInfo()}. source_ undefined. Internal error.`);
+            
             return;
         }
         if (eventSource && this.source_ == eventSource) {
@@ -3779,6 +3821,7 @@ class SynchedPropertyOneWayPU extends ObservedPropertyAbstractPU {
         else {
             stateMgmtConsole.warn(`${this.debugInfo()}: syncPeerHasChanged: from peer '${eventSource === null || eventSource === void 0 ? void 0 : eventSource.debugInfo()}', Unexpected situation. syncPeerHasChanged from different sender than source_. Ignoring event.`);
         }
+        
     }
     /**
      * event emited by wrapped ObservedObject, when one of its property values changes
@@ -4071,10 +4114,12 @@ class SynchedPropertyTwoWayPU extends ObservedPropertyAbstractPU {
      * @param eventSource
      */
     syncPeerHasChanged(eventSource) {
+        
         if (!this.changeNotificationIsOngoing_) {
             
             this.notifyPropertyHasChangedPU();
         }
+        
     }
     /**
      * called when wrapped ObservedObject has changed poperty
@@ -4097,12 +4142,17 @@ class SynchedPropertyTwoWayPU extends ObservedPropertyAbstractPU {
     // get 'read through` from the ObservedProperty
     get() {
         
+        
         this.notifyPropertyHasBeenReadPU();
-        return this.getUnmonitored();
+        const result = this.getUnmonitored();
+        
+        return result;
     }
     // set 'writes through` to the ObservedProperty
     set(newValue) {
+        
         if (this.getUnmonitored() === newValue) {
+            
             
             return;
         }
@@ -4112,6 +4162,7 @@ class SynchedPropertyTwoWayPU extends ObservedPropertyAbstractPU {
         this.setObject(newValue);
         this.notifyPropertyHasChangedPU();
         this.changeNotificationIsOngoing_ = false;
+        
     }
 }
 // class definitions for backward compatibility
@@ -4247,123 +4298,64 @@ class SynchedPropertyNesedObjectPU extends SynchedPropertyNestedObjectPU {
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-// Define a global function
-function globalRegisterCleanUpFunction() {
+// defined a globle function to clean up the removeItems when idle
+function uiNodeCleanUpIdleTask() {
     
     UINodeRegisterProxy.obtainDeletedElmtIds();
+    UINodeRegisterProxy.unregisterElmtIdsFromViewPUs();
 }
 class UINodeRegisterProxy {
     constructor() {
-        this.elmtIdsToUnregister_ = new Set();
-        this.tagByElmtId_ = new Map();
-        this.elmtIdsUnregisteredAheadOfTime_ = new Set();
-    }
-    static UINodeRegisterCleanUpFunction() {
-        
-        UINodeRegisterProxy.instance_.obtainDeletedElmtIds();
+        this.removeElementsInfo_ = new Array();
     }
     static obtainDeletedElmtIds() {
         
-        UINodeRegisterProxy.instance_.obtainDeletedElmtIds();
+        if ((!UINodeRegisterProxy.instance_.obtainDeletedElmtIds) || typeof UINodeRegisterProxy.instance_.obtainDeletedElmtIds != "function") {
+            stateMgmtConsole.error(`UINodeRegisterProxy obtainDeletedElmtIds is not a function: ${UINodeRegisterProxy.instance_.obtainDeletedElmtIds}.` );
+        } else {
+            UINodeRegisterProxy.instance_.obtainDeletedElmtIds();
+        }
     }
-    static accountElmtIdsAsUnregistered(elmtIds) {
+    static unregisterElmtIdsFromViewPUs() {
         
-        UINodeRegisterProxy.instance_.accountElmtIdsAsUnregistered(elmtIds);
+        UINodeRegisterProxy.instance_.unregisterElmtIdsFromViewPUs();
     }
-    static consume(elmtId) {
-        return UINodeRegisterProxy.instance_.consume(elmtId);
-    }
-    /*
-    a function to enable an optimization, returns true if UINodeRegisterProxy
-    has any elmtIds that need to be unregistered
-    */
-    static hasElmtIdsPendingUnregister() {
-        return UINodeRegisterProxy.instance_.elmtIdsToUnregister_.size > 0;
-    }
-    static dump() {
-        UINodeRegisterProxy.instance_.dump();
-    }
-    // private properties & functions:
-    /* move elmtIds from C++ ElementRegister, elmtIds of UINodes that have been deleted
-     two processing steps for each moved elmtId:
-     1. check if elmtId has been unregistered ahead of time (when a ViewPU gets deleted)
-     2. if not, memorize elmtId to still need un-registration
+    /* just get the remove items from the native side
     */
     obtainDeletedElmtIds() {
         
         let removedElementsInfo = new Array();
         ViewStackProcessor.moveDeletedElmtIds(removedElementsInfo);
         
-        removedElementsInfo.forEach(rmElmtInfo => {
-            if (this.elmtIdsUnregisteredAheadOfTime_.has(rmElmtInfo.elmtId)) {
-                
-                this.elmtIdsUnregisteredAheadOfTime_.delete(rmElmtInfo.elmtId);
+        this.removeElementsInfo_ = removedElementsInfo;
+    }
+    unregisterElmtIdsFromViewPUs() {
+        
+        if (this.removeElementsInfo_.length == 0) {
+            
+            return;
+        }
+        let owningView;
+        this.removeElementsInfo_.forEach((rmElmtInfo) => {
+            const owningViewPUWeak = UINodeRegisterProxy.ElementIdToOwningViewPU_.get(rmElmtInfo.elmtId);
+            if (owningViewPUWeak != undefined) {
+                owningView = owningViewPUWeak.deref();
+                if (owningView) {
+                    owningView.purgeDeleteElmtId(rmElmtInfo.elmtId);
+                }
+                else {
+                    
+                }
             }
             else {
                 
-                this.elmtIdsToUnregister_.add(rmElmtInfo.elmtId);
-                this.tagByElmtId_.set(rmElmtInfo.elmtId, rmElmtInfo.tag);
             }
         });
-        this.dump();
-    }
-    /*
-        called from ViewPU with all its child elmtIds
-        memorize these elmtIds until obtainDeletedElmtIds finds them in ElementRegister later (see its step 1)
-    */
-    accountElmtIdsAsUnregistered(elmtIds) {
-        
-        // get info about latest deleted elmtIds from C++ to UINodeRegisterProxy
-        this.obtainDeletedElmtIds();
-        elmtIds.filter((elmtId) => {
-            return /* can not unregister elmtId */ !this.consume(elmtId);
-        }).forEach((elmtIdUnregisteredAheadOfTime) => {
-            // add to Set of elmtIds that have been unregistered already
-            // when the elmtId arrives with later ObtainDeletedElementIds, we know it is unregistered already
-            this.elmtIdsUnregisteredAheadOfTime_.add(elmtIdUnregisteredAheadOfTime);
-        });
-        this.dump();
-    }
-    /* called view View to query if given elmtId needs to be unregistered
-      (these are the elmtIds added in step 2 of obtainDeletedElmtIds)
-      if true, forget about the elmtId because called ViewPU will unregistered it next, tell it
-      to do so by returning true.
-    */
-    consume(elmtId) {
-        if (this.elmtIdsToUnregister_.delete(elmtId)) {
-            
-            this.tagByElmtId_.delete(elmtId);
-            return true;
-        }
-        return false;
-    }
-    /*
-  dump the state  of UINodeRegisterProxy to log
-  does nothing in release build
-*/
-    dump() {
-        const formatElementInfo = () => {
-            let result = '[ ';
-            let sepa = "";
-            Array.from(this.elmtIdsToUnregister_).forEach((elmtId) => {
-                result += `${sepa}${elmtId}[${this.tagByElmtId_.get(elmtId)}]`;
-                sepa = ", ";
-            });
-            result += ' ]';
-            return result;
-        };
-        
-        if (this.elmtIdsToUnregister_.size < 50) {
-            
-        }
-        else {
-            
-        }
-        
+        this.removeElementsInfo_.length = 0;
     }
 }
 UINodeRegisterProxy.instance_ = new UINodeRegisterProxy();
-const UINodeRegisterCleanUpFunction = UINodeRegisterProxy.UINodeRegisterCleanUpFunction;
+UINodeRegisterProxy.ElementIdToOwningViewPU_ = new Map();
 /*
  * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -4388,6 +4380,27 @@ const UndefinedElmtId = -1;
 // implemented in C++  for release
 // and in utest/view_native_mock.ts for testing
 class ViewPU extends NativeViewPartialUpdate {
+    get ownObservedPropertiesStore_() {
+        if (!this.ownObservedPropertiesStore__) {
+            // lazy init
+            this.ownObservedPropertiesStore__ = new Set();
+            this.obtainOwnObservedProperties();
+        }
+        return this.ownObservedPropertiesStore__;
+    }
+    obtainOwnObservedProperties() {
+        Object.getOwnPropertyNames(this)
+            .filter((propName) => {
+            return propName.startsWith("__");
+        })
+            .forEach((propName) => {
+            const stateVar = Reflect.get(this, propName);
+            if ("notifyPropertyHasChangedPU" in stateVar) {
+                
+                this.ownObservedPropertiesStore_.add(stateVar);
+            }
+        });
+    }
     get localStorage_() {
         if (!this.localStoragebackStore_ && this.parent_) {
             
@@ -4424,7 +4437,7 @@ class ViewPU extends NativeViewPartialUpdate {
      *    - localStorage do not specify, will inherit from parent View.
      *
     */
-    constructor(parent, localStorage, elmtId = -1) {
+    constructor(parent, localStorage, elmtId = -1, extraInfo = undefined) {
         super();
         this.parent_ = undefined;
         this.childrenWeakrefMap_ = new Map();
@@ -4438,14 +4451,14 @@ class ViewPU extends NativeViewPartialUpdate {
         this.isDeleting_ = false;
         this.watchedProps = new Map();
         this.recycleManager = undefined;
+        this.isCompFreezeAllowed = false;
+        this.extraInfo_ = undefined;
         // Set of dependent elmtIds that need partial update
         // during next re-render
         this.dirtDescendantElementIds_ = new Set();
         // registry of update functions
         // the key is the elementId of the Component/Element that's the result of this function
         this.updateFuncByElmtId = new Map();
-        // set of all @Local/StorageLink/Prop variables owned by this ViwPU
-        this.ownStorageLinksProps_ = new Set();
         // my LocalStorage instance, shared with ancestor Views.
         // create a default instance on demand if none is initialized
         this.localStoragebackStore_ = undefined;
@@ -4457,6 +4470,9 @@ class ViewPU extends NativeViewPartialUpdate {
             : new Map();
         this.localStoragebackStore_ = undefined;
         
+        if (extraInfo) {
+            this.extraInfo_ = extraInfo;
+        }
         if (parent) {
             // this View is not a top-level View
             this.setCardId(parent.getCardId());
@@ -4486,28 +4502,41 @@ class ViewPU extends NativeViewPartialUpdate {
         // tell UINodeRegisterProxy that all elmtIds under
         // this ViewPU should be treated as already unregistered
         
-        UINodeRegisterProxy.accountElmtIdsAsUnregistered(Array.from(this.updateFuncByElmtId.keys()));
+        // purge the elementids owning by this viewpu from the updateFuncByElmtId and also the state variable dependent elementids
+        Array.from(this.updateFuncByElmtId.keys()).forEach((elemId) => {
+            this.purgeDeleteElmtId(elemId);
+        });
         if (this.hasRecycleManager()) {
             this.getRecycleManager().purgeAllCachedRecycleNode();
         }
-        // unregister the elmtId of this ViewPU / its CustomNode object
-        UINodeRegisterProxy.consume(this.id__());
         // unregistration of ElementIDs
         
-        // request list of all (global) elmtIds of deleted UINodes that need to be unregistered
-        UINodeRegisterProxy.obtainDeletedElmtIds();
-        this.purgeDeletedElmtIdsRecursively();
-        UINodeRegisterProxy.dump();
+        // it will unregister removed elementids from all the viewpu, equals purgeDeletedElmtIdsRecursively
+        this.purgeDeletedElmtIds();
         
+        // in case ViewPU is currently frozen
+        ViewPU.inactiveComponents_.delete(`${this.constructor.name}[${this.id__()}]`);
         this.updateFuncByElmtId.clear();
         this.watchedProps.clear();
         this.providedVars_.clear();
-        this.ownStorageLinksProps_.clear();
+        if (this.ownObservedPropertiesStore__) {
+            this.ownObservedPropertiesStore__.clear();
+        }
         if (this.parent_) {
             this.parent_.removeChild(this);
         }
         this.localStoragebackStore_ = undefined;
         this.isDeleting_ = true;
+    }
+    purgeDeleteElmtId(rmElmtId) {
+        
+        const result = this.updateFuncByElmtId.delete(rmElmtId);
+        if (result) {
+            this.purgeVariableDependenciesOnElmtIdOwnFunc(rmElmtId);
+            // it means rmElmtId has finished all the unregistration from the js side, ElementIdToOwningViewPU_  does not need to keep it
+            UINodeRegisterProxy.ElementIdToOwningViewPU_.delete(rmElmtId);
+        }
+        return result;
     }
     debugInfo() {
         return `@Component '${this.constructor.name}'[${this.id__()}]`;
@@ -4541,24 +4570,31 @@ class ViewPU extends NativeViewPartialUpdate {
     }
     dumpStateVars() {
         
+    }
+    debugInfoStateVars() {
+        let result = `|--${this.constructor.name}[${this.id__()}]`;
         Object.getOwnPropertyNames(this)
             .filter((varName) => varName.startsWith("__"))
             .forEach((varName) => {
             const prop = Reflect.get(this, varName);
-            const observedProp = prop;
             if ("debugInfoDecorator" in prop) {
-                
-                
-                
+                const observedProp = prop;
+                result += `\n  ${observedProp.debugInfoDecorator()} '${observedProp.info()}'[${observedProp.id__()}]`;
+                result += `\n  ${observedProp.debugInfoSubscribers()}`;
+                result += `\n  ${observedProp.debugInfoSyncPeers()}`;
+                result += `\n  ${observedProp.debugInfoDependentElmtIds()}`;
             }
         });
+        return result;
     }
     /**
    * ArkUI engine will call this function when the corresponding CustomNode's active status change.
    * @param active true for active, false for inactive
    */
     setActiveInternal(active) {
-        if (this.isActive_ == active) {
+        
+        if (!this.isCompFreezeAllowed) {
+            
             
             return;
         }
@@ -4570,6 +4606,7 @@ class ViewPU extends NativeViewPartialUpdate {
         else {
             this.onInactiveInternal();
         }
+        
     }
     onActiveInternal() {
         if (!this.isActive_) {
@@ -4577,6 +4614,8 @@ class ViewPU extends NativeViewPartialUpdate {
         }
         
         this.performDelayedUpdate();
+        // Remove the active component from the Map for Dfx
+        ViewPU.inactiveComponents_.delete(`${this.constructor.name}[${this.id__()}]`);
         for (const child of this.childrenWeakrefMap_.values()) {
             const childViewPU = child.deref();
             if (childViewPU) {
@@ -4589,9 +4628,11 @@ class ViewPU extends NativeViewPartialUpdate {
             return;
         }
         
-        for (const storageProp of this.ownStorageLinksProps_) {
-            storageProp.enableDelayedNotification();
+        for (const stateLinkProp of this.ownObservedPropertiesStore__) {
+            stateLinkProp.enableDelayedNotification();
         }
+        // Add the inactive Components to Map for Dfx listing
+        ViewPU.inactiveComponents_.add(`${this.constructor.name}[${this.id__()}]`);
         for (const child of this.childrenWeakrefMap_.values()) {
             const childViewPU = child.deref();
             if (childViewPU) {
@@ -4604,6 +4645,19 @@ class ViewPU extends NativeViewPartialUpdate {
             stateMgmtConsole.warn(`${this.debugInfo()}: setChild: changing parent to '${parent === null || parent === void 0 ? void 0 : parent.debugInfo()} (unsafe operation)`);
         }
         this.parent_ = parent;
+    }
+    /**
+     * Indicate if this @Component is allowed to freeze by calling with freezeState=true
+     * Called with value of the @Component decorator 'freezeWhenInactive' parameter
+     * or depending how UI compiler works also with 'undefined'
+     * @param freezeState only value 'true' will be used, otherwise inherits from parent
+     *      if not parent, set to false.
+     */
+    initAllowComponentFreeze(freezeState) {
+        // set to true if freeze parameter set for this @Component to true
+        // otherwise inherit from parent @Component (if it exists).
+        this.isCompFreezeAllowed = freezeState || (this.parent_ && this.parent_.isCompFreezeAllowed);
+        
     }
     /**
      * add given child and set 'this' as its parent
@@ -4651,35 +4705,45 @@ class ViewPU extends NativeViewPartialUpdate {
         stateMgmtConsole.error(`${this.debugInfo()}: updateStateVars unimplemented. Pls upgrade to latest eDSL transpiler version. Application error.`);
     }
     initialRenderView() {
+        
+        this.obtainOwnObservedProperties();
         this.isRenderInProgress = true;
         this.initialRender();
         this.isRenderInProgress = false;
+        
     }
     UpdateElement(elmtId) {
+        
         if (elmtId == this.id__()) {
             // do not attempt to update itself.
             // a @Prop can add a dependency of the ViewPU onto itself. Ignore it.
+            
             return;
         }
-        
         // do not process an Element that has been marked to be deleted
         const updateFunc1 = this.updateFuncByElmtId.get(elmtId);
         const updateFunc = ((typeof updateFunc1 == "object") ? (updateFunc1.updateFunc) : updateFunc1);
         const componentName = (typeof updateFunc1 == "object") ? updateFunc1.componentName : "unknown component type";
         if (typeof updateFunc !== "function") {
-            stateMgmtConsole.error(`${this.debugInfo()}: update function of elmtId ${elmtId} not found, internal error!`);
+            
         }
         else {
             
             this.isRenderInProgress = true;
+            
             updateFunc(elmtId, /* isFirstRender */ false);
-            // continue in native JSView
-            // Finish the Update in JSView::JsFinishUpdateFunc
-            // this function appends no longer used elmtIds (as receded by VSP) to the given allRmElmtIds array
+            
+            
             this.finishUpdateFunc(elmtId);
+            
             this.isRenderInProgress = false;
             
         }
+        
+    }
+    dumpReport() {
+        stateMgmtConsole.warn(`Printing profiler information`);
+        stateMgmtProfiler.report();
     }
     /**
      * force a complete rerender / update by executing all update functions
@@ -4690,6 +4754,7 @@ class ViewPU extends NativeViewPartialUpdate {
      * framework internal functions, apps must not call
      */
     forceCompleteRerender(deep = false) {
+        
         stateMgmtConsole.warn(`${this.debugInfo()}: forceCompleteRerender - start.`);
         // see which elmtIds are managed by this View
         // and clean up all book keeping for them
@@ -4704,6 +4769,7 @@ class ViewPU extends NativeViewPartialUpdate {
             });
         }
         stateMgmtConsole.warn(`${this.debugInfo()}: forceCompleteRerender - end`);
+        
     }
     /**
      * force a complete rerender / update on specific node by executing update function.
@@ -4713,29 +4779,36 @@ class ViewPU extends NativeViewPartialUpdate {
      * framework internal functions, apps must not call
      */
     forceRerenderNode(elmtId) {
+        
         // see which elmtIds are managed by this View
         // and clean up all book keeping for them
         this.purgeDeletedElmtIds();
         this.UpdateElement(elmtId);
         // remove elemtId from dirtDescendantElementIds.
         this.dirtDescendantElementIds_.delete(elmtId);
+        
     }
     updateStateVarsOfChildByElmtId(elmtId, params) {
         
+        
         if (elmtId < 0) {
             stateMgmtConsole.warn(`${this.debugInfo()}: updateChildViewById(${elmtId}) - invalid elmtId - internal error!`);
+            
             return;
         }
         let child = this.getChildById(elmtId);
         if (!child) {
             stateMgmtConsole.warn(`${this.debugInfo()}: updateChildViewById(${elmtId}) - no child with this elmtId - internal error!`);
+            
             return;
         }
         child.updateStateVars(params);
         
+        
     }
     // implements IMultiPropertiesChangeSubscriber
     viewPropertyHasChanged(varName, dependentElmtIds) {
+        
         stateMgmtTrace.scopedTrace(() => {
             if (this.isRenderInProgress) {
                 stateMgmtConsole.applicationError(`${this.debugInfo()}: State variable '${varName}' has changed during render! It's illegal to change @Component state while build (initial render or re-render) is on-going. Application error!`);
@@ -4764,18 +4837,20 @@ class ViewPU extends NativeViewPartialUpdate {
             }
             this.restoreInstanceId();
         }, "ViewPU.viewPropertyHasChanged", this.constructor.name, varName, dependentElmtIds.size);
+        
     }
     performDelayedUpdate() {
-        if (!this.ownStorageLinksProps_.size) {
+        if (!this.ownObservedPropertiesStore__.size) {
             return;
         }
+        
         stateMgmtTrace.scopedTrace(() => {
             
             this.syncInstanceId();
-            for (const storageProp of this.ownStorageLinksProps_) {
-                const changedElmtIds = storageProp.moveElmtIdsForDelayedUpdate();
+            for (const stateLinkPropVar of this.ownObservedPropertiesStore__) {
+                const changedElmtIds = stateLinkPropVar.moveElmtIdsForDelayedUpdate();
                 if (changedElmtIds) {
-                    const varName = storageProp.info();
+                    const varName = stateLinkPropVar.info();
                     if (changedElmtIds.size && !this.isFirstRender()) {
                         for (const elmtId of changedElmtIds) {
                             this.dirtDescendantElementIds_.add(elmtId);
@@ -4788,12 +4863,13 @@ class ViewPU extends NativeViewPartialUpdate {
                         cb.call(this, varName);
                     }
                 }
-            } // for all ownStorageLinksProps_
+            } // for all ownStateLinkProps_
             this.restoreInstanceId();
             if (this.dirtDescendantElementIds_.size) {
                 this.markNeedUpdate();
             }
         }, "ViewPU.performDelayedUpdate", this.constructor.name);
+        
     }
     /**
      * Function to be called from the constructor of the sub component
@@ -4837,9 +4913,8 @@ class ViewPU extends NativeViewPartialUpdate {
           Fail to resolve @Consume(${providedPropName}).`);
         }
         const factory = (source) => {
-            const result = ((source instanceof ObservedPropertySimple) || (source instanceof ObservedPropertySimplePU))
-                ? new SynchedPropertyObjectTwoWayPU(source, this, consumeVarName)
-                : new SynchedPropertyObjectTwoWayPU(source, this, consumeVarName);
+            const result = new SynchedPropertyTwoWayPU(source, this, consumeVarName);
+            
             return result;
         };
         return providedVarStore.createSync(factory);
@@ -4861,6 +4936,7 @@ class ViewPU extends NativeViewPartialUpdate {
      *
      */
     updateDirtyElements() {
+        
         do {
             
             // see which elmtIds are managed by this View
@@ -4879,73 +4955,22 @@ class ViewPU extends NativeViewPartialUpdate {
         } while (this.dirtDescendantElementIds_.size);
         
         this.dumpStateVars();
+        
     }
-    //  given a list elementIds removes these from state variables dependency list and from elmtId -> updateFunc map
+    // request list of all (global) elmtIds of deleted UINodes and unregister from the all viewpus
+    // this function equals purgeDeletedElmtIdsRecursively because it does unregistration for all viewpus
     purgeDeletedElmtIds() {
         
         // request list of all (global) elmtIds of deleted UINodes that need to be unregistered
         UINodeRegisterProxy.obtainDeletedElmtIds();
-        UINodeRegisterProxy.dump();
-        if (!UINodeRegisterProxy.hasElmtIdsPendingUnregister()) {
-            
-            return;
-        }
-        this.purgeDeletedElmtIdsInternal();
-        UINodeRegisterProxy.dump();
-    }
-    // function called from elementRegister to the root ViewPU of the page
-    purgeDeletedElmtIdsRecursively() {
-        
-        // request list of all (global) elmtIds of deleted UINodes that need to be unregistered
-        UINodeRegisterProxy.obtainDeletedElmtIds();
-        this.purgeDeletedElmtIdsRecursivelyInternal();
-        UINodeRegisterProxy.dump();
-        
-        this.dumpStateVars();
-    }
-    purgeDeletedElmtIdsRecursivelyInternal() {
-        if (!UINodeRegisterProxy.hasElmtIdsPendingUnregister()) {
-            
-            return;
-        }
-        this.purgeDeletedElmtIdsInternal();
-        this.childrenWeakrefMap_.forEach((weakRefChild) => {
-            const child = weakRefChild.deref();
-            if (child) {
-                if (!UINodeRegisterProxy.hasElmtIdsPendingUnregister()) {
-                    
-                    return;
-                }
-                child.purgeDeletedElmtIdsRecursively();
-            }
-        });
-    }
-    purgeDeletedElmtIdsInternal() {
-        
-        const elmtIdsOfThisView = this.updateFuncByElmtId.keys();
-        for (const rmElmtId of elmtIdsOfThisView) {
-            if (UINodeRegisterProxy.consume(rmElmtId)) {
-                
-                // remove entry from Map elmtId -> update function
-                this.updateFuncByElmtId.delete(rmElmtId);
-                // for each state var, remove dependent elmtId (if present)
-                // purgeVariableDependenciesOnElmtId needs to be generated by the compiler
-                this.purgeVariableDependenciesOnElmtIdOwnFunc(rmElmtId);
-                if (!UINodeRegisterProxy.hasElmtIdsPendingUnregister()) {
-                    
-                    return;
-                }
-            } // for all elmtIds that need to unregister
-        }
-        
+        // unregister the removed elementids requested from the cpp side for all viewpus, it will make the first viewpu slower
+        // than before, but the rest viewpu will be faster
+        UINodeRegisterProxy.unregisterElmtIdsFromViewPUs();
         
     }
     purgeVariableDependenciesOnElmtIdOwnFunc(elmtId) {
-        Object.getOwnPropertyNames(this).filter((varName => varName.startsWith("__"))).forEach((stateVarName) => {
-            let variable = Reflect.get(this, stateVarName);
-            if ("purgeDependencyOnElmtId" in variable) {
-                variable.purgeDependencyOnElmtId(elmtId);
-            }
+        this.ownObservedPropertiesStore_.forEach((stateVar) => {
+            stateVar.purgeDependencyOnElmtId(elmtId);
         });
     }
     // executed on first render only
@@ -4961,6 +4986,8 @@ class ViewPU extends NativeViewPartialUpdate {
         // in observeComponentCreation function we do not get info about the component name, in 
         // observeComponentCreation2 we do.
         this.updateFuncByElmtId.set(elmtId, { updateFunc: compilerAssignedUpdateFunc, componentName: "unknown" });
+        // add element id -> owningviewpu
+        UINodeRegisterProxy.ElementIdToOwningViewPU_.set(elmtId, new WeakRef(this));
         
     }
     // executed on first render only
@@ -4976,6 +5003,7 @@ class ViewPU extends NativeViewPartialUpdate {
         const _componentName = (classObject && ("name" in classObject)) ? Reflect.get(classObject, "name") : "unspecified UINode";
         const _popFunc = (classObject && "pop" in classObject) ? classObject.pop : () => { };
         const updateFunc = (elmtId, isFirstRender) => {
+            this.syncInstanceId();
             
             ViewStackProcessor.StartGetAccessRecordingFor(elmtId);
             compilerAssignedUpdateFunc(elmtId, isFirstRender);
@@ -4984,10 +5012,25 @@ class ViewPU extends NativeViewPartialUpdate {
             }
             ViewStackProcessor.StopGetAccessRecording();
             
+            this.restoreInstanceId();
         };
         const elmtId = ViewStackProcessor.AllocateNewElmetIdForNextComponent();
-        updateFunc(elmtId, /* is first render */ true);
+        // needs to move set before updateFunc.
+        // make sure the key and object value exist since it will add node in attributeModifier during updateFunc.
         this.updateFuncByElmtId.set(elmtId, { updateFunc: updateFunc, componentName: _componentName });
+        // add element id -> owningviewpu
+        UINodeRegisterProxy.ElementIdToOwningViewPU_.set(elmtId, new WeakRef(this));
+        try {
+            updateFunc(elmtId, /* is first render */ true);
+        }
+        catch (error) {
+            // avoid the incompatible change that move set function before updateFunc.
+            this.updateFuncByElmtId.delete(elmtId);
+            UINodeRegisterProxy.ElementIdToOwningViewPU_.delete(elmtId);
+            stateMgmtConsole.applicationError(`${this.debugInfo()} has error in update func: ${error.message}`);
+            throw error;
+        }
+        
     }
     getOrCreateRecycleManager() {
         if (!this.recycleManager) {
@@ -5036,7 +5079,8 @@ class ViewPU extends NativeViewPartialUpdate {
         this.updateFuncByElmtId.delete(oldElmtId);
         this.updateFuncByElmtId.set(newElmtId, {
             updateFunc: compilerAssignedUpdateFunc,
-            componentName: (typeof oldEntry == "object") ? oldEntry.componentName : "unknown"
+            componentName: (typeof oldEntry == "object") ? oldEntry.componentName : "unknown",
+            node: (typeof oldEntry == "object") ? oldEntry.node : undefined,
         });
         node.updateId(newElmtId);
         node.updateRecycleElmtId(oldElmtId, newElmtId);
@@ -5111,12 +5155,15 @@ class ViewPU extends NativeViewPartialUpdate {
      */
     forEachUpdateFunction(elmtId, itemArray, itemGenFunc, idGenFunc, itemGenFuncUsesIndex = false, idGenFuncUsesIndex = false) {
         
+        
         if (itemArray === null || itemArray === undefined) {
             stateMgmtConsole.applicationError(`${this.debugInfo()}: forEachUpdateFunction (ForEach re-render): input array is null or undefined error. Application error!`);
+            
             return;
         }
         if (itemGenFunc === null || itemGenFunc === undefined) {
             stateMgmtConsole.applicationError(`${this.debugInfo()}: forEachUpdateFunction (ForEach re-render): Item generation function missing. Application error!`);
+            
             return;
         }
         if (idGenFunc === undefined) {
@@ -5164,6 +5211,7 @@ class ViewPU extends NativeViewPartialUpdate {
         // Item gen is with index.
         
         // Create new elements if any.
+        
         diffIndexArray.forEach((indx) => {
             ForEach.createNewChildStart(newIdArray[indx], this);
             if (itemGenFuncUsesIndex) {
@@ -5174,6 +5222,8 @@ class ViewPU extends NativeViewPartialUpdate {
             }
             ForEach.createNewChildFinish(newIdArray[indx], this);
         });
+        
+        
         
     }
     /**
@@ -5189,44 +5239,230 @@ class ViewPU extends NativeViewPartialUpdate {
     createStorageLink(storagePropName, defaultValue, viewVariableName) {
         const appStorageLink = AppStorage.__createSync(storagePropName, defaultValue, (source) => (source === undefined)
             ? undefined
-            : (source instanceof ObservedPropertySimple)
-                ? new SynchedPropertyObjectTwoWayPU(source, this, viewVariableName)
-                : new SynchedPropertyObjectTwoWayPU(source, this, viewVariableName));
-        this.ownStorageLinksProps_.add(appStorageLink);
+            : new SynchedPropertyTwoWayPU(source, this, viewVariableName));
         return appStorageLink;
     }
     createStorageProp(storagePropName, defaultValue, viewVariableName) {
         const appStorageProp = AppStorage.__createSync(storagePropName, defaultValue, (source) => (source === undefined)
             ? undefined
-            : (source instanceof ObservedPropertySimple)
-                ? new SynchedPropertyObjectOneWayPU(source, this, viewVariableName)
-                : new SynchedPropertyObjectOneWayPU(source, this, viewVariableName));
-        this.ownStorageLinksProps_.add(appStorageProp);
+            : new SynchedPropertyOneWayPU(source, this, viewVariableName));
         return appStorageProp;
     }
     createLocalStorageLink(storagePropName, defaultValue, viewVariableName) {
         const localStorageLink = this.localStorage_.__createSync(storagePropName, defaultValue, (source) => (source === undefined)
             ? undefined
-            : (source instanceof ObservedPropertySimple)
-                ? new SynchedPropertyObjectTwoWayPU(source, this, viewVariableName)
-                : new SynchedPropertyObjectTwoWayPU(source, this, viewVariableName));
-        this.ownStorageLinksProps_.add(localStorageLink);
+            : new SynchedPropertyTwoWayPU(source, this, viewVariableName));
         return localStorageLink;
     }
     createLocalStorageProp(storagePropName, defaultValue, viewVariableName) {
         const localStorageProp = this.localStorage_.__createSync(storagePropName, defaultValue, (source) => (source === undefined)
             ? undefined
-            : (source instanceof ObservedPropertySimple)
-                ? new SynchedPropertyObjectOneWayPU(source, this, viewVariableName)
-                : new SynchedPropertyObjectOneWayPU(source, this, viewVariableName));
-        this.ownStorageLinksProps_.add(localStorageProp);
+            : new SynchedPropertyObjectOneWayPU(source, this, viewVariableName));
         return localStorageProp;
     }
+    createOrGetNode(elmtId, builder) {
+        const entry = this.updateFuncByElmtId.get(elmtId);
+        if (entry === undefined) {
+            throw new Error(`${this.debugInfo()} fail to create node, elemtId is illegal`);
+        }
+        if (typeof entry !== 'object') {
+            throw new Error('need update toolchain version');
+        }
+        let nodeInfo = entry.node;
+        if (nodeInfo === undefined) {
+            nodeInfo = builder();
+            entry.node = nodeInfo;
+        }
+        return nodeInfo;
+    }
+    /**
+     * onDumpInfo is used to process commands delivered by the hidumper process
+     * @param commands -  list of commands provided in the shell
+     * @returns void
+     */
+    onDumpInfo(commands) {
+        let dfxCommands = this.processOnDumpCommands(commands);
+        dfxCommands.forEach((command) => {
+            let view = undefined;
+            if (command.viewId) {
+                view = this.findViewInHierarchy(command.viewId);
+                if (!view) {
+                    DumpLog.print(0, `\nTarget view: ${command.viewId} not found for command: ${command.what}\n`);
+                    return;
+                }
+            }
+            else {
+                view = this;
+                command.viewId = view.id__();
+            }
+            switch (command.what) {
+                case "-dumpAll":
+                    view.printDFXHeader("ViewPU Info", command);
+                    DumpLog.print(0, view.debugInfoView(command.isRecursive));
+                    break;
+                case "-viewHierarchy":
+                    view.printDFXHeader("ViewPU Hierarchy", command);
+                    DumpLog.print(0, view.debugInfoViewHierarchy(command.isRecursive));
+                    break;
+                case "-stateVariables":
+                    view.printDFXHeader("ViewPU State Variables", command);
+                    DumpLog.print(0, view.debugInfoStateVars());
+                    break;
+                case "-registeredElementIds":
+                    view.printDFXHeader("ViewPU Registered Element IDs", command);
+                    DumpLog.print(0, view.debugInfoUpdateFuncByElmtId(command.isRecursive));
+                    break;
+                case "-dirtyElementIds":
+                    view.printDFXHeader("ViewPU Dirty Registered Element IDs", command);
+                    DumpLog.print(0, view.debugInfoDirtDescendantElementIds(command.isRecursive));
+                    break;
+                case "-inactiveComponents":
+                    view.printDFXHeader("List of Inactive Components", command);
+                    DumpLog.print(0, view.debugInfoInactiveComponents());
+                    break;
+                case "-profiler":
+                    view.printDFXHeader("Profiler Info", command);
+                    view.dumpReport();
+                    break;
+                default:
+                    DumpLog.print(0, `\nUnsupported JS DFX dump command: [${command.what}, viewId=${command.viewId}, isRecursive=${command.isRecursive}]\n`);
+            }
+        });
+    }
+    printDFXHeader(header, command) {
+        let length = 50;
+        let remainder = length - header.length < 0 ? 0 : length - header.length;
+        DumpLog.print(0, `\n${'-'.repeat(remainder / 2)}${header}${'-'.repeat(remainder / 2)}`);
+        DumpLog.print(0, `[${command.what}, viewId=${command.viewId}, isRecursive=${command.isRecursive}]\n`);
+    }
+    processOnDumpCommands(commands) {
+        let isFlag = (param) => {
+            return "-r".match(param) != null || param.startsWith("-viewId=");
+        };
+        let dfxCommands = [];
+        for (var i = 0; i < commands.length; i++) {
+            let command = commands[i];
+            if (isFlag(command)) {
+                if (command.startsWith("-viewId=")) {
+                    let dfxCommand = dfxCommands[dfxCommands.length - 1];
+                    if (dfxCommand) {
+                        let input = command.split('=');
+                        if (input[1]) {
+                            let viewId = Number.parseInt(input[1]);
+                            dfxCommand.viewId = Number.isNaN(viewId) ? -1 : viewId;
+                        }
+                    }
+                }
+                else if (command.match("-r")) {
+                    let dfxCommand = dfxCommands[dfxCommands.length - 1];
+                    if (dfxCommand) {
+                        dfxCommand.isRecursive = true;
+                    }
+                }
+            }
+            else {
+                dfxCommands.push({
+                    what: command,
+                    viewId: undefined,
+                    isRecursive: false,
+                });
+            }
+        }
+        return dfxCommands;
+    }
+    findViewInHierarchy(id) {
+        let weak = this.childrenWeakrefMap_.get(id);
+        if (weak) {
+            return weak.deref();
+        }
+        let retVal = undefined;
+        for (const [key, value] of this.childrenWeakrefMap_.entries()) {
+            retVal = value.deref().findViewInHierarchy(id);
+            if (retVal)
+                break;
+        }
+        return retVal;
+    }
+    debugInfoView(recursive = false) {
+        return this.debugInfoViewInternal(recursive);
+    }
+    debugInfoViewInternal(recursive = false) {
+        let retVal = `@Component\n${this.constructor.name}[${this.id__()}]`;
+        retVal += `\n\nView Hierarchy:\n${this.debugInfoViewHierarchy(recursive)}`;
+        retVal += `\n\nState variables:\n${this.debugInfoStateVars()}`;
+        retVal += `\n\nRegistered Element IDs:\n${this.debugInfoUpdateFuncByElmtId(recursive)}`;
+        retVal += `\n\nDirty Registered Element IDs:\n${this.debugInfoDirtDescendantElementIds(recursive)}`;
+        return retVal;
+    }
+    debugInfoViewHierarchy(recursive = false) {
+        return this.debugInfoViewHierarchyInternal(0, recursive);
+    }
+    debugInfoViewHierarchyInternal(depth = 0, recursive = false) {
+        let retVaL = `\n${"  ".repeat(depth)}|--${this.constructor.name}[${this.id__()}]`;
+        if (this.isCompFreezeAllowed) {
+            retVaL += ` {freezewhenInactive : ${this.isCompFreezeAllowed}}`;
+        }
+        if (depth < 1 || recursive) {
+            this.childrenWeakrefMap_.forEach((value, key, map) => {
+                var _a;
+                retVaL += (_a = value.deref()) === null || _a === void 0 ? void 0 : _a.debugInfoViewHierarchyInternal(depth + 1, recursive);
+            });
+        }
+        return retVaL;
+    }
+    debugInfoUpdateFuncByElmtId(recursive = false) {
+        return this.debugInfoUpdateFuncByElmtIdInternal({ total: 0 }, 0, recursive);
+    }
+    debugInfoUpdateFuncByElmtIdInternal(counter, depth = 0, recursive = false) {
+        let retVaL = `\n${"  ".repeat(depth)}|--${this.constructor.name}[${this.id__()}]: {`;
+        this.updateFuncByElmtId.forEach((value, key, map) => {
+            retVaL += `\n${"  ".repeat(depth + 2)}${(typeof value == "object") ? value.componentName : "unknown component"}[${key}]`;
+        });
+        counter.total += this.updateFuncByElmtId.size;
+        retVaL += `\n${"  ".repeat(depth + 1)}}[${this.updateFuncByElmtId.size}]`;
+        if (recursive) {
+            this.childrenWeakrefMap_.forEach((value, key, map) => {
+                var _a;
+                retVaL += (_a = value.deref()) === null || _a === void 0 ? void 0 : _a.debugInfoUpdateFuncByElmtIdInternal(counter, depth + 1, recursive);
+            });
+        }
+        if (recursive && depth == 0) {
+            retVaL += `\nTotal: ${counter.total}`;
+        }
+        return retVaL;
+    }
+    debugInfoDirtDescendantElementIds(recursive = false) {
+        return this.debugInfoDirtDescendantElementIdsInternal(0, recursive, { total: 0 });
+    }
+    debugInfoDirtDescendantElementIdsInternal(depth = 0, recursive = false, counter) {
+        let retVaL = `\n${"  ".repeat(depth)}|--${this.constructor.name}[${this.id__()}]: {`;
+        this.dirtDescendantElementIds_.forEach((value) => {
+            retVaL += `${value}, `;
+        });
+        counter.total += this.dirtDescendantElementIds_.size;
+        retVaL += `\n${"  ".repeat(depth + 1)}}[${this.dirtDescendantElementIds_.size}]`;
+        if (recursive) {
+            this.childrenWeakrefMap_.forEach((value, key, map) => {
+                var _a;
+                retVaL += (_a = value.deref()) === null || _a === void 0 ? void 0 : _a.debugInfoDirtDescendantElementIdsInternal(depth + 1, recursive, counter);
+            });
+        }
+        if (recursive && depth == 0) {
+            retVaL += `\nTotal: ${counter.total}`;
+        }
+        return retVaL;
+    }
+    debugInfoInactiveComponents() {
+        return Array.from(ViewPU.inactiveComponents_)
+            .map((component) => `- ${component}`).join('\n');
+    }
 }
-// Array.sort() converts array items to string to compare them, sigh!
+// Array.sort() converts array items to string to compare them!
 ViewPU.compareNumber = (a, b) => {
     return (a < b) ? -1 : (a > b) ? 1 : 0;
 };
+// List of inactive components used for Dfx
+ViewPU.inactiveComponents_ = new Set();
 /*
  * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -5370,4 +5606,5 @@ function makeBuilderParameterProxy(builderName, source) {
 
 PersistentStorage.configureBackend(new Storage());
 Environment.configureBackend(new EnvironmentSetting());
+
 

@@ -15,6 +15,10 @@
 
 #include "core/components_ng/event/touch_event.h"
 
+#include "core/components_ng/event/response_ctrl.h"
+#include "core/components_ng/gestures/recognizers/gesture_recognizer.h"
+#include "core/pipeline_ng/pipeline_context.h"
+
 namespace OHOS::Ace::NG {
 
 bool TouchEventActuator::DispatchEvent(const TouchEvent& point)
@@ -24,6 +28,14 @@ bool TouchEventActuator::DispatchEvent(const TouchEvent& point)
 
 bool TouchEventActuator::HandleEvent(const TouchEvent& point)
 {
+    auto attachedNode = GetAttachedNode();
+    if (attachedNode.Invalid()) {
+        return true;
+    }
+    // if current node is forbidden by monopolize, upper nodes should not response either
+    if (!ShouldResponse()) {
+        return false;
+    }
     return TriggerTouchCallBack(point);
 }
 
@@ -32,13 +44,20 @@ bool TouchEventActuator::TriggerTouchCallBack(const TouchEvent& point)
     if (touchEvents_.empty() && !userCallback_) {
         return true;
     }
-    auto lastPoint = point.history.size() > 0 ? point.history.back() : point;
+    TouchEvent lastPoint;
+    if (point.isInterpolated) {
+        lastPoint = point;
+    } else {
+        lastPoint = !point.history.empty() ? point.history.back() : point;
+    }
     TouchEventInfo event("touchEvent");
     event.SetTimeStamp(lastPoint.time);
     event.SetPointerEvent(lastPoint.pointerEvent);
     TouchLocationInfo changedInfo("onTouch", lastPoint.id);
-    auto localX = static_cast<float>(lastPoint.x - coordinateOffset_.GetX());
-    auto localY = static_cast<float>(lastPoint.y - coordinateOffset_.GetY());
+    PointF lastLocalPoint(lastPoint.x, lastPoint.y);
+    NGGestureRecognizer::Transform(lastLocalPoint, GetAttachedNode());
+    auto localX = static_cast<float>(lastLocalPoint.GetX());
+    auto localY = static_cast<float>(lastLocalPoint.GetY());
     changedInfo.SetLocalLocation(Offset(localX, localY));
     changedInfo.SetGlobalLocation(Offset(lastPoint.x, lastPoint.y));
     changedInfo.SetScreenLocation(Offset(lastPoint.screenX, lastPoint.screenY));
@@ -60,8 +79,10 @@ bool TouchEventActuator::TriggerTouchCallBack(const TouchEvent& point)
         float globalY = item.y;
         float screenX = item.screenX;
         float screenY = item.screenY;
-        auto localX = static_cast<float>(item.x - coordinateOffset_.GetX());
-        auto localY = static_cast<float>(item.y - coordinateOffset_.GetY());
+        PointF localPoint(globalX, globalY);
+        NGGestureRecognizer::Transform(localPoint, GetAttachedNode());
+        auto localX = static_cast<float>(localPoint.GetX());
+        auto localY = static_cast<float>(localPoint.GetY());
         TouchLocationInfo info("onTouch", item.id);
         info.SetGlobalLocation(Offset(globalX, globalY));
         info.SetLocalLocation(Offset(localX, localY));
@@ -84,8 +105,10 @@ bool TouchEventActuator::TriggerTouchCallBack(const TouchEvent& point)
         float globalY = item.y;
         float screenX = item.screenX;
         float screenY = item.screenY;
-        auto localX = static_cast<float>(item.x - coordinateOffset_.GetX());
-        auto localY = static_cast<float>(item.y - coordinateOffset_.GetY());
+        PointF localPoint(globalX, globalY);
+        NGGestureRecognizer::Transform(localPoint, GetAttachedNode());
+        auto localX = static_cast<float>(localPoint.GetX());
+        auto localY = static_cast<float>(localPoint.GetY());
         TouchLocationInfo historyInfo("onTouch", item.id);
         historyInfo.SetTimeStamp(item.time);
         historyInfo.SetGlobalLocation(Offset(globalX, globalY));
@@ -122,6 +145,24 @@ bool TouchEventActuator::TriggerTouchCallBack(const TouchEvent& point)
             return false;
         }
     }
+    return true;
+}
+
+bool TouchEventActuator::ShouldResponse()
+{
+    auto context = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(context, true);
+
+    auto eventManager = context->GetEventManager();
+    CHECK_NULL_RETURN(eventManager, true);
+
+    auto frameNode = GetAttachedNode();
+    auto ctrl = eventManager->GetResponseCtrl();
+    CHECK_NULL_RETURN(ctrl, true);
+    if (!ctrl->ShouldResponse(frameNode)) {
+        return false;
+    }
+    ctrl->TrySetFirstResponse(frameNode);
     return true;
 }
 

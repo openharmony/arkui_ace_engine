@@ -34,6 +34,14 @@ void Scheduler::Start()
     isRunning_ = true;
     startupTimestamp_ = context->GetTimeFromExternalTimer();
     scheduleId_ = static_cast<int32_t>(context->AddScheduleTask(AceType::Claim(this)));
+
+    displaySync_ = AceType::MakeRefPtr<UIDisplaySync>();
+    displaySync_->RegisterOnFrameWithTimestamp([weak = WeakClaim(this)] (uint64_t nanoTimestamp) {
+        auto scheduler = weak.Upgrade();
+        CHECK_NULL_VOID(scheduler);
+        scheduler->OnFrame(nanoTimestamp);
+    });
+    displaySync_->AddToPipeline(context_);
 }
 
 void Scheduler::Stop()
@@ -49,6 +57,7 @@ void Scheduler::Stop()
     }
     isRunning_ = false;
     context->RemoveScheduleTask(scheduleId_);
+    displaySync_->DelFromPipeline(context_);
     scheduleId_ = 0;
 }
 

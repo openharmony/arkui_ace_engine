@@ -19,6 +19,7 @@
 #include <list>
 #include <optional>
 #include <string>
+#include <unordered_map>
 #include <utility>
 
 #include "core/components_ng/layout/box_layout_algorithm.h"
@@ -84,14 +85,20 @@ protected:
         return 0;
     }
 
-    virtual void GetPlaceholderRects(std::vector<Rect>& rects);
+    virtual void GetPlaceholderRects(std::vector<RectF>& rects);
 
     virtual ParagraphStyle GetParagraphStyle(const TextStyle& textStyle, const std::string& content) const;
+
+    virtual void UpdateParagraphForAISpan(const TextStyle& textStyle, LayoutWrapper* layoutWrapper);
+
+    virtual OffsetF GetContentOffset(LayoutWrapper* layoutWrapper);
 
 private:
     virtual void ApplyIndent(const TextStyle& textStyle, double width);
     void FontRegisterCallback(const RefPtr<FrameNode>& frameNode, const TextStyle& textStyle);
     bool CreateParagraph(const TextStyle& textStyle, std::string content, LayoutWrapper* layoutWrapper);
+    void CreateParagraphDrag(const TextStyle& textStyle, const std::vector<std::string>& contents,
+        const std::string content);
     bool CreateParagraphAndLayout(const TextStyle& textStyle, const std::string& content,
         const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper);
     bool AdaptMinTextSize(TextStyle& textStyle, const std::string& content, const LayoutConstraintF& contentConstraint,
@@ -120,24 +127,23 @@ private:
         const RefPtr<PipelineContext>& pipeline, LayoutWrapper* layoutWrapper);
     void UpdateTextColorIfForeground(const RefPtr<FrameNode>& frameNode, TextStyle& textStyle);
     void UpdateParagraph(LayoutWrapper* layoutWrapper);
-    OffsetF GetContentOffset(LayoutWrapper* layoutWrapper) const;
     bool CreateImageSpanAndLayout(const TextStyle& textStyle, const std::string& content,
         const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper);
     bool IncludeImageSpan(LayoutWrapper* layoutWrapper);
     void SetImageSpanTextStyle(const TextStyle& textStyle);
     void GetSpanAndImageSpanList(std::list<RefPtr<SpanItem>>& spanList,
-        std::map<int32_t, std::pair<Rect, RefPtr<ImageSpanItem>>>& imageSpanList);
+        std::map<int32_t, std::pair<RectF, RefPtr<PlaceholderSpanItem>>>& placeholderSpanList);
     void SplitSpanContentByLines(const TextStyle& textStyle, const std::list<RefPtr<SpanItem>>& spanList,
-        std::map<int32_t, std::pair<Rect, std::list<RefPtr<SpanItem>>>>& spanContentLines);
+        std::map<int32_t, std::pair<RectF, std::list<RefPtr<SpanItem>>>>& spanContentLines);
     void SetImageSpanTextStyleByLines(const TextStyle& textStyle,
-        std::map<int32_t, std::pair<Rect, RefPtr<ImageSpanItem>>>& imageSpanList,
-        std::map<int32_t, std::pair<Rect, std::list<RefPtr<SpanItem>>>>& spanContentLines);
+        std::map<int32_t, std::pair<RectF, RefPtr<PlaceholderSpanItem>>>& placeholderSpanList,
+        std::map<int32_t, std::pair<RectF, std::list<RefPtr<SpanItem>>>>& spanContentLines);
 
     std::list<RefPtr<SpanItem>> spanItemChildren_;
     RefPtr<Paragraph> paragraph_;
     float baselineOffset_ = 0.0f;
     std::optional<TextStyle> textStyle_;
-
+    RefPtr<PropertyBool> showSelect_;
     ACE_DISALLOW_COPY_AND_MOVE(TextLayoutAlgorithm);
 };
 } // namespace OHOS::Ace::NG

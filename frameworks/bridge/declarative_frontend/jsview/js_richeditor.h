@@ -35,10 +35,13 @@ public:
     static JSRef<JSVal> CreateJsAboutToIMEInputObj(const NG::RichEditorInsertValue& insertValue);
     static JSRef<JSVal> CreateJsOnIMEInputComplete(const NG::RichEditorAbstractSpanResult& textSpanResult);
     static JSRef<JSVal> CreateJsAboutToDelet(const NG::RichEditorDeleteValue& deleteValue);
+    static void JsClip(const JSCallbackInfo& info);
     static void JsFocusable(const JSCallbackInfo& info);
     static void SetCopyOptions(const JSCallbackInfo& info);
     static void BindSelectionMenu(const JSCallbackInfo& info);
     static void SetOnPaste(const JSCallbackInfo& info);
+    static void JsEnableDataDetector(const JSCallbackInfo& info);
+    static void JsDataDetectorConfig(const JSCallbackInfo& info);
     static JSRef<JSVal> CreateJSTextCommonEvent(NG::TextCommonEvent& event);
     static JSRef<JSObject> CreateJSSpanResultObject(const ResultObject& resultObject);
     static JSRef<JSVal> CreateJSSelection(const RichEditorSelection& selectInfo);
@@ -52,6 +55,8 @@ private:
         const NG::RichEditorAbstractSpanResult& spanResult);
     static void ParseMenuParam(
         const JSCallbackInfo& info, const JSRef<JSObject>& menuOptions, SelectMenuParam& menuParam);
+    static void ParseUserGesture(
+        const JSCallbackInfo& args, UserGestureOptions& gestureOption, const std::string& spanType);
 };
 
 class JSRichEditorController final : public Referenced {
@@ -81,9 +86,12 @@ public:
     }
     void AddImageSpan(const JSCallbackInfo& args);
     void AddTextSpan(const JSCallbackInfo& args);
+    void AddPlaceholderSpan(const JSCallbackInfo& args);
+    void ParseOptions(const JSCallbackInfo& args, SpanOptionBase& placeholderSpan);
     void DeleteSpans(const JSCallbackInfo& args);
     ImageSpanAttribute ParseJsImageSpanAttribute(JSRef<JSObject> imageAttribute);
-    TextStyle ParseJsTextStyle(JSRef<JSObject> styleObject, struct UpdateSpanStyle& updateSpanStyle);
+    void ParseJsTextStyle(
+        const JSRef<JSObject>& styleObject, TextStyle& style, struct UpdateSpanStyle& updateSpanStyle);
     ImageSpanOptions CreateJsImageOptions(const JSCallbackInfo& args);
     void SetCaretOffset(const JSCallbackInfo& args);
     void GetCaretOffset(const JSCallbackInfo& args);
@@ -91,8 +99,11 @@ public:
     void UpdateParagraphStyle(const JSCallbackInfo& info);
     void GetSpansInfo(const JSCallbackInfo& args);
     void GetParagraphsInfo(const JSCallbackInfo& args);
+    void GetTypingStyle(const JSCallbackInfo& info);
     void SetTypingStyle(const JSCallbackInfo& info);
     void CloseSelectionMenu();
+    void SetSelection(int32_t selectionStart, int32_t selectionEnd);
+    void GetSelection(const JSCallbackInfo& args);
 
 private:
     bool ParseParagraphStyle(const JSRef<JSObject>& styleObject, struct UpdateParagraphStyle& style);
@@ -100,9 +111,12 @@ private:
     bool IsDrawable(const JSRef<JSVal>& jsValue);
     void ParseTextDecoration(
         const JSRef<JSObject>& styleObject, TextStyle& style, struct UpdateSpanStyle& updateSpanStyle);
+    void ParseTextShadow(
+        const JSRef<JSObject>& styleObject, TextStyle& style, struct UpdateSpanStyle& updateSpanStyle);
 
     static JSRef<JSVal> CreateJSSpansInfo(const RichEditorSelection& info);
     static JSRef<JSVal> CreateJSParagraphsInfo(const std::vector<ParagraphInfo>& info);
+    static JSRef<JSObject> CreateTypingStyleResult(const struct UpdateSpanStyle& typingStyle);
 
     WeakPtr<RichEditorControllerBase> controllerWeak_;
     ACE_DISALLOW_COPY_AND_MOVE(JSRichEditorController);

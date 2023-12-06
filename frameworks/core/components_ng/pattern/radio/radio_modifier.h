@@ -163,6 +163,11 @@ public:
         touchHoverType_ = touchHoverType;
     }
 
+    void SetShowHoverEffect(bool showHoverEffect)
+    {
+        showHoverEffect_ = showHoverEffect;
+    }
+
 private:
     float shadowWidth_ = 1.5f;
     float borderWidth_ = 1.5f;
@@ -174,6 +179,7 @@ private:
     float hoverDuration_ = 0.0f;
     float hoverToTouchDuration_ = 0.0f;
     float touchDuration_ = 0.0f;
+    bool showHoverEffect_ = true;
     OffsetF hotZoneOffset_;
     SizeF hotZoneSize_;
     RefPtr<PropertyBool> isOnAnimationFlag_;

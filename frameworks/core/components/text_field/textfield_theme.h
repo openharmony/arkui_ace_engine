@@ -46,69 +46,6 @@ public:
             if (!themeConstants) {
                 return theme;
             }
-            // init theme from global data
-            theme->padding_ = Edge(themeConstants->GetDimension(THEME_TEXTFIELD_PADDING_HORIZONTAL),
-                themeConstants->GetDimension(THEME_TEXTFIELD_PADDING_VERTICAL),
-                themeConstants->GetDimension(THEME_TEXTFIELD_PADDING_HORIZONTAL),
-                themeConstants->GetDimension(THEME_TEXTFIELD_PADDING_VERTICAL));
-            theme->height_ = themeConstants->GetDimension(THEME_TEXTFIELD_HEIGHT);
-            theme->fontSize_ = themeConstants->GetDimension(THEME_TEXTFIELD_FONT_SIZE);
-            theme->fontWeight_ = FontWeight(themeConstants->GetInt(THEME_TEXTFIELD_FONT_WEIGHT));
-            theme->borderRadius_ = Radius(themeConstants->GetDimension(THEME_TEXTFIELD_BORDER_RADIUS));
-
-            theme->bgColor_ = themeConstants->GetColor(THEME_TEXTFIELD_BACKGROUND_COLOR);
-            theme->placeholderColor_ = themeConstants->GetColor(THEME_TEXTFIELD_PLACEHOLDER_COLOR);
-            theme->textColor_ = themeConstants->GetColor(THEME_TEXTFIELD_TEXT_COLOR);
-            theme->selectedColor_ = themeConstants->GetColor(THEME_TEXTFIELD_TEXT_SELECTED_COLOR);
-            theme->hoverColor_ = themeConstants->GetColor(THEME_TEXTFIELD_HOVER_COLOR);
-            theme->pressColor_ = themeConstants->GetColor(THEME_TEXTFIELD_PRESS_COLOR);
-
-            theme->focusBgColor_ = themeConstants->GetColor(THEME_TEXTFIELD_FOCUS_BACKGROUND_COLOR);
-            theme->focusPlaceholderColor_ = themeConstants->GetColor(THEME_TEXTFIELD_FOCUS_PLACEHOLDER_COLOR);
-            theme->focusTextColor_ = themeConstants->GetColor(THEME_TEXTFIELD_FOCUS_TEXT_COLOR);
-
-            theme->disableOpacityRatio_ = themeConstants->GetDouble(THEME_TEXTFIELD_DISABLE_OPACITY_RATIO);
-            theme->disableTextColor_ = themeConstants->GetColor(THEME_TEXTFIELD_TEXT_COLOR_DISABLE);
-
-            theme->overHideLength_ = themeConstants->GetDimension(THEME_TEXTFIELD_OVER_HIDE_LENGTH);
-
-            theme->cursorColor_ = themeConstants->GetColor(THEME_TEXTFIELD_CURSOR_COLOR);
-            theme->cursorRadius_ = themeConstants->GetDimension(THEME_TEXTFIELD_CURSOR_RADIUS);
-            theme->needFade_ = static_cast<bool>(themeConstants->GetInt(THEME_TEXTFIELD_NEED_FADE));
-
-            theme->iconSize_ = themeConstants->GetDimension(THEME_TEXTFIELD_ICON_SIZE);
-            theme->iconHotZoneSize_ = themeConstants->GetDimension(THEME_TEXTFIELD_ICON_HOT_ZONE_SIZE);
-
-            theme->showEllipsis_ = static_cast<bool>(themeConstants->GetInt(THEME_TEXTFIELD_SHOW_ELLIPSIS));
-
-            theme->errorSpacing_ = themeConstants->GetDimension(THEME_TEXTFIELD_ERROR_SPACING);
-            theme->errorIsInner_ = static_cast<bool>(themeConstants->GetInt(THEME_TEXTFIELD_ERROR_IS_INNER));
-            theme->errorBorderWidth_ = themeConstants->GetDimension(THEME_TEXTFIELD_ERROR_BORDER_WIDTH);
-            theme->errorBorderColor_ = themeConstants->GetColor(THEME_TEXTFIELD_ERROR_BORDER_COLOR);
-            theme->errorTextStyle_.SetTextColor(themeConstants->GetColor(THEME_TEXTFIELD_ERROR_COLOR));
-            theme->errorTextStyle_.SetFontSize(themeConstants->GetDimension(THEME_TEXTFIELD_ERROR_FONT_SIZE));
-            theme->errorTextStyle_.SetFontWeight(FontWeight(themeConstants->GetInt(THEME_TEXTFIELD_ERROR_FONT_WEIGHT)));
-
-            theme->countTextStyle_.SetTextColor(themeConstants->GetColor(THEME_TEXTFIELD_COUNT_TEXT_COLOR));
-            theme->countTextStyle_.SetFontSize(themeConstants->GetDimension(THEME_TEXTFIELD_COUNT_FONT_SIZE));
-            theme->countTextStyle_.SetFontWeight(
-                FontWeight(themeConstants->GetInt(THEME_TEXTFIELD_COUNT_FONT_WEIGHT)));
-            theme->overCountStyle_.SetTextColor(themeConstants->GetColor(THEME_TEXTFIELD_OVER_COUNT_TEXT_COLOR));
-            theme->overCountStyle_.SetFontSize(themeConstants->GetDimension(THEME_TEXTFIELD_OVER_COUNT_FONT_SIZE));
-            theme->overCountStyle_.SetFontWeight(
-                FontWeight(themeConstants->GetInt(THEME_TEXTFIELD_OVER_COUNT_FONT_WEIGHT)));
-
-            theme->countTextStyleOuter_.SetTextColor(themeConstants->GetColor(THEME_TEXTFIELD_COUNT_TEXT_COLOR));
-            theme->countTextStyleOuter_.SetFontSize(
-                themeConstants->GetDimension(THEME_TEXTFIELD_COUNT_FONT_SIZE_OUTER));
-            theme->countTextStyleOuter_.SetFontWeight(
-                FontWeight(themeConstants->GetInt(THEME_TEXTFIELD_COUNT_FONT_WEIGHT)));
-            theme->overCountStyleOuter_.SetTextColor(themeConstants->GetColor(THEME_TEXTFIELD_OVER_COUNT_TEXT_COLOR));
-            theme->overCountStyleOuter_.SetFontSize(
-                themeConstants->GetDimension(THEME_TEXTFIELD_COUNT_FONT_SIZE_OUTER));
-            theme->overCountStyleOuter_.SetFontWeight(
-                FontWeight(themeConstants->GetInt(THEME_TEXTFIELD_OVER_COUNT_FONT_WEIGHT)));
-
             ParsePattern(themeConstants->GetThemeStyle(), theme);
             return theme;
         }
@@ -129,6 +66,35 @@ public:
             const double defaultDisableUnderlineAlpha = 0.4;
             const Color defaultUnderlineColor = Color(0x33182431);
             const Color defaultUnderlineTextColor = Color(0x99182431);
+            const Color defaultCounterColor = Color(0x66182431);
+            const Color overCounterColor = Color(0x99FA2A2D);
+            theme->padding_ = Edge(pattern->GetAttr<Dimension>("textfield_padding_horizontal", 0.0_vp),
+                pattern->GetAttr<Dimension>("textfield_padding_vertical", 0.0_vp),
+                pattern->GetAttr<Dimension>("textfield_padding_horizontal", 0.0_vp),
+                pattern->GetAttr<Dimension>("textfield_padding_vertical", 0.0_vp));
+            theme->fontWeight_ =
+                FontWeight(static_cast<int32_t>(pattern->GetAttr<double>("textfield_font_weight", 0.0)));
+            theme->borderRadius_ = Radius(pattern->GetAttr<Dimension>("textfield_border_radius", 0.0_vp));
+            theme->disableOpacityRatio_ = pattern->GetAttr<double>("textfield_disable_opacity_ratio", 0.0);
+            theme->overHideLength_ = pattern->GetAttr<Dimension>("textfield_over_hide_length", 0.0_vp);
+            theme->cursorRadius_ = pattern->GetAttr<Dimension>("textfield_cursor_radius", 0.0_vp);
+            theme->needFade_ = static_cast<bool>(pattern->GetAttr<double>("textfield_need_fade", 0.0));
+            theme->iconSize_ = pattern->GetAttr<Dimension>("textfield_icon_size", 0.0_vp);
+            theme->iconHotZoneSize_ = pattern->GetAttr<Dimension>("textfield_icon_hot_zone_size", 0.0_vp);
+            theme->showEllipsis_ = static_cast<bool>(pattern->GetAttr<double>("textfield_show_ellipsis", 0.0));
+            theme->errorSpacing_ = pattern->GetAttr<Dimension>("textfield_error_spacing", 0.0_vp);
+            theme->errorIsInner_ = static_cast<bool>(pattern->GetAttr<double>("textfield_error_is_inner", 0.0));
+            theme->errorBorderWidth_ = pattern->GetAttr<Dimension>("textfield_error_border_width", 0.0_vp);
+            theme->errorTextStyle_.SetFontWeight(
+                FontWeight(static_cast<int32_t>(pattern->GetAttr<double>("textfield_error_font_weight", 0.0))));
+            theme->countTextStyle_.SetFontWeight(
+                FontWeight(static_cast<int32_t>(pattern->GetAttr<double>("textfield_count_font_weight", 0.0))));
+            theme->overCountStyle_.SetFontWeight(
+                FontWeight(static_cast<int32_t>(pattern->GetAttr<double>("textfield_over_count_font_weight", 0.0))));
+            theme->countTextStyleOuter_.SetFontWeight(
+                FontWeight(static_cast<int32_t>(pattern->GetAttr<double>("textfield_count_font_weight", 0.0))));
+            theme->overCountStyleOuter_.SetFontWeight(
+                FontWeight(static_cast<int32_t>(pattern->GetAttr<double>("textfield_over_count_font_weight", 0.0))));
             theme->fontSize_ = pattern->GetAttr<Dimension>(PATTERN_TEXT_SIZE, 0.0_fp);
             theme->textColor_ = pattern->GetAttr<Color>(PATTERN_TEXT_COLOR, Color());
             theme->focusTextColor_ = pattern->GetAttr<Color>(PATTERN_TEXT_COLOR_FOCUSED, Color());
@@ -137,13 +103,17 @@ public:
             theme->bgColor_ = pattern->GetAttr<Color>(PATTERN_BG_COLOR, Color());
             theme->focusBgColor_ = pattern->GetAttr<Color>(PATTERN_BG_COLOR_FOCUSED, Color());
             // color of error border blend 60% opacity
-            theme->errorBorderColor_ = pattern->GetAttr<Color>("error_text_border_color", Color())
-                .BlendOpacity(pattern->GetAttr<double>("error_text_border_color_alpha", defaultErrorAlpha));
+            theme->errorBorderColor_ =
+                pattern->GetAttr<Color>("error_text_border_color", Color())
+                    .BlendOpacity(pattern->GetAttr<double>("error_text_border_color_alpha", defaultErrorAlpha));
             theme->errorUnderlineColor_ = pattern->GetAttr<Color>(ERROR_UNDERLINE_COLOR, Color());
             theme->underlineColor_ = pattern->GetAttr<Color>(UNDERLINE_COLOR, defaultUnderlineColor);
-            theme->disableUnderlineColor_ = pattern->GetAttr<Color>(UNDERLINE_COLOR, defaultUnderlineColor)
-                .BlendOpacity(pattern->GetAttr<double>(DISABLE_UNDERLINE_ALPHA, defaultDisableUnderlineAlpha));
+            theme->disableUnderlineColor_ =
+                pattern->GetAttr<Color>(UNDERLINE_COLOR, defaultUnderlineColor)
+                    .BlendOpacity(pattern->GetAttr<double>(DISABLE_UNDERLINE_ALPHA, defaultDisableUnderlineAlpha));
             theme->underlineTextColor_ = pattern->GetAttr<Color>(UNDERLINE_TEXT_COLOR, defaultUnderlineTextColor);
+            theme->defaultCounterColor_ = pattern->GetAttr<Color>(DEFAULT_COUNTER_COLOR, defaultCounterColor);
+            theme->overCounterColor_ = pattern->GetAttr<Color>(OVER_COUNTER_COLOR, overCounterColor);
             theme->underlineFontSize_ = pattern->GetAttr<Dimension>(UNDERLINE_FONT_SIZE, 0.0_fp);
             theme->errorTextStyle_.SetTextColor(pattern->GetAttr<Color>(ERROR_UNDERLINE_TEXT_COLOR, Color()));
             theme->errorTextStyle_.SetFontSize(pattern->GetAttr<Dimension>(ERROR_UNDERLINE_TEXT_SIZE, 0.0_fp));
@@ -154,19 +124,19 @@ public:
             theme->overCountStyle_.SetFontSize(pattern->GetAttr<Dimension>("over_text_font_size", 0.0_fp));
 
             theme->countTextStyleOuter_.SetTextColor(pattern->GetAttr<Color>("count_outer_text_color", Color()));
-            theme->countTextStyleOuter_.SetFontSize(
-                pattern->GetAttr<Dimension>("count_outer_text_font_size", 0.0_fp));
+            theme->countTextStyleOuter_.SetFontSize(pattern->GetAttr<Dimension>("count_outer_text_font_size", 0.0_fp));
             theme->overCountStyleOuter_.SetTextColor(pattern->GetAttr<Color>("over_outer_text_color", Color()));
-            theme->overCountStyleOuter_.SetFontSize(
-                pattern->GetAttr<Dimension>("over_outer_text_font_size", 0.0_fp));
+            theme->overCountStyleOuter_.SetFontSize(pattern->GetAttr<Dimension>("over_outer_text_font_size", 0.0_fp));
             theme->overCountTextStyle_.SetTextColor(pattern->GetAttr<Color>(OVER_COUNT_TEXT_COLOR, Color()));
             theme->overCountTextStyle_.SetFontSize(pattern->GetAttr<Dimension>(OVER_COUNT_TEXT_FONT_SIZE, 0.0_fp));
             theme->selectedColor_ = pattern->GetAttr<Color>(PATTERN_BG_COLOR_SELECTED, Color());
             theme->disableTextColor_ = pattern->GetAttr<Color>(PATTERN_TEXT_COLOR_DISABLED, Color());
-            theme->underlineActivedColor_ = pattern->GetAttr<Color>(PATTERN_UNDERLINE_ACTIVED_COLOR, Color())
-                .BlendOpacity(pattern->GetAttr<double>(UNDERLINE_COLOR_ALPHA, defaultUnderlineAlpha));
-            theme->underlineTypingColor_ = pattern->GetAttr<Color>(PATTERN_UNDERLINE_TYPING_COLOR, Color())
-                .BlendOpacity(pattern->GetAttr<double>(UNDERLINE_COLOR_ALPHA, defaultUnderlineAlpha));
+            theme->underlineActivedColor_ =
+                pattern->GetAttr<Color>(PATTERN_UNDERLINE_ACTIVED_COLOR, Color())
+                    .BlendOpacity(pattern->GetAttr<double>(UNDERLINE_COLOR_ALPHA, defaultUnderlineAlpha));
+            theme->underlineTypingColor_ =
+                pattern->GetAttr<Color>(PATTERN_UNDERLINE_TYPING_COLOR, Color())
+                    .BlendOpacity(pattern->GetAttr<double>(UNDERLINE_COLOR_ALPHA, defaultUnderlineAlpha));
             theme->textColorDisable_ = pattern->GetAttr<Color>(PATTERN_DISABLED_TEXT_COLOR, Color());
             theme->cursorColor_ = pattern->GetAttr<Color>("cursor_color", Color());
             theme->cursorWidth_ = pattern->GetAttr<Dimension>("cursor_width", 1.5_vp);
@@ -176,17 +146,20 @@ public:
             theme->disabledIconFillColor_ = theme->bgColor_.BlendOpacity(theme->disableOpacityRatio_);
             theme->passwordErrorTextColor_ = pattern->GetAttr<Color>(PATTERN_TEXT_COLOR, Color());
             theme->passwordErrorInputColor_ = pattern->GetAttr<Color>(ERROR_PASSWORD_INPUT_COLOR, Color());
-            theme->passwordErrorBorderColor_ = pattern->GetAttr<Color>(ERROR_PASSWORD_BORDER_COLOR, Color())
-                .BlendOpacity(pattern->GetAttr<double>(ERROR_PASSWORD_BORDER_ALPHA, defaultErrorAlpha));
+            theme->passwordErrorBorderColor_ =
+                pattern->GetAttr<Color>(ERROR_PASSWORD_BORDER_COLOR, Color())
+                    .BlendOpacity(pattern->GetAttr<double>(ERROR_PASSWORD_BORDER_ALPHA, defaultErrorAlpha));
             theme->passwordErrorLableColor_ = pattern->GetAttr<Color>(ERROR_PASSWORD_TEXT_COLOR, Color());
-            theme->overCountBorderColor_ = pattern->GetAttr<Color>(OVER_COUNT_BORDER_COLOR, Color())
-                .BlendOpacity(pattern->GetAttr<double>(OVER_COUNT_BORDER_COLOR_ALPHA, defaultErrorAlpha));
-            theme->inlineTextColor_ =  pattern->GetAttr<Color>(INLINE_TEXT_COLOR, Color());
+            theme->overCountBorderColor_ =
+                pattern->GetAttr<Color>(OVER_COUNT_BORDER_COLOR, Color())
+                    .BlendOpacity(pattern->GetAttr<double>(OVER_COUNT_BORDER_COLOR_ALPHA, defaultErrorAlpha));
+            theme->inlineTextColor_ = pattern->GetAttr<Color>(INLINE_TEXT_COLOR, Color());
             theme->inlineRadiusSize_ = Radius(pattern->GetAttr<Dimension>(INLINE_RADIUS_SIZE, 4.0_vp));
             theme->inlineBgColor_ = pattern->GetAttr<Color>(INLINE_BG_COLOR, Color());
             theme->inlineBorderColor_ = pattern->GetAttr<Color>(INLINE_BORDER_COLOR, Color());
             auto draggable = pattern->GetAttr<std::string>("draggable", "0");
             theme->draggable_ = StringUtils::StringToInt(draggable);
+            theme->height_ = pattern->GetAttr<Dimension>("textinput_default_height", 48.0_vp);
         }
     };
 
@@ -472,6 +445,16 @@ public:
         return draggable_;
     }
 
+    const Color& GetDefaultCounterColor() const
+    {
+        return defaultCounterColor_;
+    }
+
+    const Color& GetOverCounterColor() const
+    {
+        return overCounterColor_;
+    }
+
 protected:
     TextFieldTheme() = default;
 
@@ -521,6 +504,8 @@ private:
     Radius inlineRadiusSize_;
     Color inlineBgColor_;
     Color inlineBorderColor_;
+    Color defaultCounterColor_;
+    Color overCounterColor_;
 
     // UX::disable state: opacity is set to 38% of the default
     double disableOpacityRatio_ = 1.0;

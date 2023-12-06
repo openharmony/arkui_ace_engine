@@ -13,9 +13,6 @@
  * limitations under the License.
  */
 
-#ifndef NEW_SKIA
-#include "flutter_render_linear_track.h"
-#endif
 #include "rosen_render_linear_track.h"
 
 namespace OHOS::Ace {
@@ -28,11 +25,7 @@ RefPtr<RenderNode> RenderTrack::Create()
         return nullptr;
 #endif
     } else {
-#ifndef NEW_SKIA
-        return AceType::MakeRefPtr<FlutterRenderLinearTrack>();
-#else
         return nullptr;
-#endif
     }
 }
 } // namespace OHOS::Ace

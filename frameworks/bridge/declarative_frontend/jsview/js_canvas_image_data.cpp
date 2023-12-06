@@ -24,7 +24,6 @@ void JSCanvasImageData::Constructor(const JSCallbackInfo& args)
     args.SetReturnValue(Referenced::RawPtr(jsCanvasImageData));
 
     if (args.Length() < 2) {
-        LOGE("The argv is wrong, it is supposed to have at least 2 argument");
         return;
     }
     int32_t width = 0;
@@ -32,8 +31,8 @@ void JSCanvasImageData::Constructor(const JSCallbackInfo& args)
     if (args[0]->IsNumber() && args[1]->IsNumber()) {
         JSViewAbstract::ParseJsInteger(args[0], width);
         JSViewAbstract::ParseJsInteger(args[1], height);
-        width = SystemProperties::Vp2Px(width);
-        height = SystemProperties::Vp2Px(height);
+        width = PipelineBase::Vp2PxWithCurrentDensity(width);
+        height = PipelineBase::Vp2PxWithCurrentDensity(height);
         jsCanvasImageData->width_ = width;
         jsCanvasImageData->height_ = height;
     }
@@ -48,7 +47,6 @@ void JSCanvasImageData::Constructor(const JSCallbackInfo& args)
         int64_t tmp = static_cast<int64_t>(4) * ((int64_t)width * (int64_t)height + (int64_t)width)
             + static_cast<int64_t>(3);
         if ((int64_t)((int32_t)tmp) != tmp) {
-            LOGE("ImageData's width and height overflow");
             return;
         }
 

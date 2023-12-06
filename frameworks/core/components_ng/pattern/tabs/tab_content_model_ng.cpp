@@ -49,6 +49,7 @@ void TabContentModelNG::Create(std::function<void()>&& deepRenderFunc)
         }
         return deepChild;
     };
+    ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::TAB_CONTENT_ITEM_ETS_TAG, nodeId);
     auto frameNode = TabContentNode::GetOrCreateTabContentNode(V2::TAB_CONTENT_ITEM_ETS_TAG, nodeId,
         [shallowBuilder = AceType::MakeRefPtr<ShallowBuilder>(std::move(deepRender))]() {
             return AceType::MakeRefPtr<TabContentPattern>(shallowBuilder);
@@ -66,6 +67,7 @@ void TabContentModelNG::Create()
 {
     auto* stack = ViewStackProcessor::GetInstance();
     int32_t nodeId = stack->ClaimNodeId();
+    ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::TAB_CONTENT_ITEM_ETS_TAG, nodeId);
     auto frameNode = TabContentNode::GetOrCreateTabContentNode(
         V2::TAB_CONTENT_ITEM_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<TabContentPattern>(nullptr); });
     stack->Push(frameNode);
@@ -100,7 +102,6 @@ RefPtr<TabsNode> TabContentModelNG::FindTabsNode(const RefPtr<UINode>& tabConten
 
 void TabContentModelNG::AddTabBarItem(const RefPtr<UINode>& tabContent, int32_t position, bool update)
 {
-    LOGD("position %{public}d", position);
     CHECK_NULL_VOID(tabContent);
     auto tabContentId = tabContent->GetId();
 
@@ -108,7 +109,6 @@ void TabContentModelNG::AddTabBarItem(const RefPtr<UINode>& tabContent, int32_t 
     CHECK_NULL_VOID(tabContentNode);
 
     if (update && !tabContentNode->HasTabBarItemId()) {
-        LOGD("Update only, return");
         return;
     }
 
@@ -195,7 +195,7 @@ void TabContentModelNG::AddTabBarItem(const RefPtr<UINode>& tabContent, int32_t 
         }
         builderNode->MountToParent(columnNode);
         auto oldColumnNode = tabsNode->GetBuilderByContentId(tabContentId, columnNode);
-        if (!oldColumnNode)  {
+        if (!oldColumnNode) {
             columnNode->MountToParent(tabBarNode, myIndex);
         } else {
             tabBarNode->ReplaceChild(oldColumnNode, columnNode);
@@ -203,11 +203,6 @@ void TabContentModelNG::AddTabBarItem(const RefPtr<UINode>& tabContent, int32_t 
         tabBarPattern->AddTabBarItemType(tabContentId, true);
         tabBarFrameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
         return;
-    }
-    if (tabBarParam.GetText().empty()) {
-        LOGW("Text is empty.");
-    } else {
-        LOGD("Text %{public}s", tabBarParam.GetText().c_str());
     }
 
     // Create text node and image node.
@@ -299,7 +294,7 @@ void TabContentModelNG::AddTabBarItem(const RefPtr<UINode>& tabContent, int32_t 
             imageSourceInfo.SetFillColor(tabTheme->GetBottomTabIconOff());
         }
     }
-    
+
     imageProperty->UpdateImageSourceInfo(imageSourceInfo);
     columnNode->MarkModifyDone();
     textNode->MarkModifyDone();
@@ -317,7 +312,8 @@ void TabContentModelNG::RemoveTabBarItem(const RefPtr<TabContentNode>& tabConten
     }
 
     auto tabBarItemId = tabContentNode->GetTabBarItemId();
-    LOGD("Tab ID: %{public}d, Bar item ID: %{public}d", tabContentNode->GetId(), tabBarItemId);
+    TAG_LOGD(AceLogTag::ACE_TABS, "Start remove item, tab ID: %{public}d, Bar item ID: %{public}d",
+        tabContentNode->GetId(), tabBarItemId);
     auto tabBarItemNode = ElementRegister::GetInstance()->GetUINodeById(tabBarItemId);
     CHECK_NULL_VOID(tabBarItemNode);
     auto tabBarNode = tabBarItemNode->GetParent();

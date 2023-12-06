@@ -29,6 +29,8 @@
 #define ACE_SCOPED_TRACE(fmt, ...) AceScopedTrace aceScopedTrace(fmt, ##__VA_ARGS__)
 #define ACE_SVG_SCOPED_TRACE(fmt, ...) \
     AceScopedTraceFlag aceScopedTraceFlag(SystemProperties::GetSvgTraceEnabled(), fmt, ##__VA_ARGS__)
+#define ACE_LAYOUT_SCOPED_TRACE(fmt, ...) \
+    AceScopedTraceFlag aceScopedTraceFlag(SystemProperties::GetLayoutTraceEnabled(), fmt, ##__VA_ARGS__)
 #ifdef ACE_DEBUG
 #define ACE_DEBUG_SCOPED_TRACE(fmt, ...) AceScopedTrace aceScopedTrace(fmt, ##__VA_ARGS__)
 #else
@@ -44,13 +46,13 @@ namespace OHOS::Ace {
 bool ACE_EXPORT AceTraceEnabled();
 bool ACE_EXPORT AceAsyncTraceEnable();
 void ACE_EXPORT AceTraceBegin(const char* name);
-void ACE_EXPORT AceAsyncTraceBegin(int32_t taskId, const char* name);
+void ACE_EXPORT AceAsyncTraceBegin(int32_t taskId, const char* name, bool isAnimationTrace = false);
 bool ACE_EXPORT AceTraceBeginWithArgs(const char* format, ...) __attribute__((__format__(printf, 1, 2)));
 std::string ACE_EXPORT AceAsyncTraceBeginWithArgs(int32_t taskId, char* format, ...);
 bool ACE_EXPORT AceTraceBeginWithArgv(const char* format, va_list args);
 std::string ACE_EXPORT AceAsyncTraceBeginWithArgv(int32_t taskId, const char* format, va_list args);
 void ACE_EXPORT AceTraceEnd();
-void ACE_EXPORT AceAsyncTraceEnd(int32_t taskId, const char* name);
+void ACE_EXPORT AceAsyncTraceEnd(int32_t taskId, const char* name, bool isAnimationTrace = false);
 void ACE_EXPORT AceCountTrace(const char *key, int32_t count);
 void ACE_EXPORT AceCountTraceWidthArgs(int32_t count, const char* format, ...);
 

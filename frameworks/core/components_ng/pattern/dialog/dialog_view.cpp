@@ -82,11 +82,13 @@ RefPtr<FrameNode> DialogView::CreateDialogNode(
             tag = V2::DIALOG_ETS_TAG;
             break;
     }
-    RefPtr<FrameNode> dialog = FrameNode::CreateFrameNode(tag, ElementRegister::GetInstance()->MakeUniqueId(),
+    auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", tag.c_str(), nodeId);
+    RefPtr<FrameNode> dialog = FrameNode::CreateFrameNode(tag, nodeId,
         AceType::MakeRefPtr<DialogPattern>(dialogTheme, customNode));
 
     if (customNode) {
-        customNode->Build();
+        customNode->Build(nullptr);
     }
 
     // update layout and render props
@@ -99,10 +101,16 @@ RefPtr<FrameNode> DialogView::CreateDialogNode(
     dialogLayoutProp->UpdateAutoCancel(param.autoCancel);
     dialogLayoutProp->UpdateShowInSubWindow(param.isShowInSubWindow);
     dialogLayoutProp->UpdateDialogButtonDirection(param.buttonDirection);
+    dialogLayoutProp->UpdateIsModal(param.isModal);
     // create gray background
     auto dialogContext = dialog->GetRenderContext();
     CHECK_NULL_RETURN(dialogContext, dialog);
-    dialogContext->UpdateBackgroundColor(param.maskColor.value_or(dialogTheme->GetMaskColorEnd()));
+    if ((dialogLayoutProp->GetShowInSubWindowValue(false) && dialogLayoutProp->GetIsModal().value_or(true)) ||
+        !dialogLayoutProp->GetIsModal().value_or(true)) {
+        dialogContext->UpdateBackgroundColor(param.maskColor.value_or(Color(0x00000000)));
+    } else {
+        dialogContext->UpdateBackgroundColor(param.maskColor.value_or(dialogTheme->GetMaskColorEnd()));
+    }
 
     // set onCancel callback
     auto hub = dialog->GetEventHub<DialogEventHub>();

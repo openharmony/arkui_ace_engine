@@ -52,6 +52,29 @@ CanvasDrawFunction GaugePaintMethod::GetForegroundDrawFunction(PaintWrapper* pai
     return paintFunc;
 }
 
+void GaugePaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
+{
+    CHECK_NULL_VOID(gaugeModifier_);
+    auto gaugePattern = DynamicCast<GaugePattern>(pattern_.Upgrade());
+    CHECK_NULL_VOID(gaugePattern);
+    auto host = gaugePattern->GetHost();
+    CHECK_NULL_VOID(host);
+    auto hostGeometryNode = host->GetGeometryNode();
+    CHECK_NULL_VOID(hostGeometryNode);
+    CHECK_NULL_VOID(paintWrapper);
+    auto paintProperty = DynamicCast<GaugePaintProperty>(paintWrapper->GetPaintProperty());
+    CHECK_NULL_VOID(paintProperty);
+    GaugeShadowOptions shadowOptions;
+    if (paintProperty->HasShadowOptions()) {
+        shadowOptions = paintProperty->GetShadowOptionsValue();
+    }
+    RectF boundsRect(hostGeometryNode->GetFrameOffset().GetX() - std::abs(shadowOptions.offsetX) - shadowOptions.radius,
+        hostGeometryNode->GetFrameOffset().GetY() - std::abs(shadowOptions.offsetY) - shadowOptions.radius,
+        hostGeometryNode->GetFrameSize().Width() + std::abs(shadowOptions.offsetX) + shadowOptions.radius,
+        hostGeometryNode->GetFrameSize().Height() + std::abs(shadowOptions.offsetY) + shadowOptions.radius);
+    gaugeModifier_->SetBoundsRect(boundsRect);
+}
+
 void GaugePaintMethod::Paint(RSCanvas& canvas, PaintWrapper* paintWrapper) const
 {
     CHECK_NULL_VOID(paintWrapper);
@@ -103,7 +126,7 @@ void GaugePaintMethod::Paint(RSCanvas& canvas, PaintWrapper* paintWrapper) const
     float value = paintProperty->GetValueValue();
 
     if (colors.size() == 0 || colors.size() != weights.size()) {
-        LOGE("color size is 0 or is not equal to weight size");
+        TAG_LOGW(AceLogTag::ACE_GAUGE, "Gauge get the color size is 0 or is not equal to weight size");
         return;
     }
     float totalWeight = 0.0f;
@@ -111,7 +134,6 @@ void GaugePaintMethod::Paint(RSCanvas& canvas, PaintWrapper* paintWrapper) const
         totalWeight += weight;
     }
     if (NearEqual(totalWeight, 0.0)) {
-        LOGE("total weight is 0.0");
         return;
     }
     float currentStart = 0.0f;
@@ -234,7 +256,7 @@ void GaugePaintMethod::NewPaint(RSCanvas& canvas, PaintWrapper* paintWrapper) co
     data.contentSize = paddingSize;
     data.radius = radius;
     data.center = Offset(offset.GetX() + left + radius, offset.GetY() + top + radius);
-    auto theme = pipelineContext->GetTheme<ProgressTheme>();
+    auto theme = pipelineContext->GetTheme<GaugeTheme>();
     data.thickness = theme->GetTrackThickness().ConvertToPx();
     CalculateStartAndSweepDegree(paintProperty, data);
     switch (paintProperty->GetGaugeTypeValue(GaugeType::TYPE_CIRCULAR_SINGLE_SEGMENT_GRADIENT)) {
@@ -362,7 +384,7 @@ void GaugePaintMethod::PaintSingleSegmentGradientCircular(
     pen.SetWidth(data.thickness);
     pen.SetCapStyle(RSPen::CapStyle::ROUND_CAP);
     pen.SetShaderEffect(RSShaderEffect::CreateSweepGradient(ToRSPoint(PointF(data.center.GetX(), data.center.GetY())),
-        colors, pos, RSTileMode::CLAMP, offsetDegree, data.sweepDegree - offsetDegree));
+        colors, pos, RSTileMode::CLAMP, offsetDegree, data.sweepDegree - offsetDegree, nullptr));
 
     RSRect rRect(data.center.GetX() - data.radius + data.thickness * PERCENT_HALF,
                  data.center.GetY() - data.radius + data.thickness * PERCENT_HALF,
@@ -406,7 +428,7 @@ void GaugePaintMethod::PaintSingleSegmentGradientCircularShadow(RSCanvas& canvas
     shadowPen.SetFilter(filter);
     shadowPen.SetShaderEffect(
         RSShaderEffect::CreateSweepGradient(ToRSPoint(PointF(data.center.GetX(), data.center.GetY())), colors, pos,
-            RSTileMode::CLAMP, offsetDegree, data.sweepDegree - offsetDegree));
+            RSTileMode::CLAMP, offsetDegree, data.sweepDegree - offsetDegree, nullptr));
 
     RSRect rRect(data.center.GetX() - data.radius + data.thickness * PERCENT_HALF,
                  data.center.GetY() - data.radius + data.thickness * PERCENT_HALF,
@@ -447,7 +469,7 @@ void GaugePaintMethod::PaintMultiSegmentGradientCircular(
     }
 
     if (colors.size() == 0 || colors.size() != weights.size()) {
-        LOGE("color size is 0 or is not equal to weight size");
+        TAG_LOGW(AceLogTag::ACE_GAUGE, "Gauge get the color size is 0 or is not equal to weight size");
         return;
     }
     float totalWeight = 0.0f;
@@ -455,7 +477,6 @@ void GaugePaintMethod::PaintMultiSegmentGradientCircular(
         totalWeight += weight;
     }
     if (NearEqual(totalWeight, 0.0)) {
-        LOGE("total weight is 0.0");
         return;
     }
 
@@ -549,12 +570,12 @@ void GaugePaintMethod::DrawSingleSegmentGradient(RSCanvas& canvas, const RenderR
         }
         pen.SetShaderEffect(RSShaderEffect::CreateSweepGradient(
             ToRSPoint(PointF(data.center.GetX(), data.center.GetY())), colorValues, pos, RSTileMode::CLAMP,
-            drawStartDegree - offsetDegree, drawStartDegree + drawSweepDegree - offsetDegree));
+            drawStartDegree - offsetDegree, drawStartDegree + drawSweepDegree - offsetDegree, nullptr));
         path.AddArc(rRect, drawStartDegree - offsetDegree, drawSweepDegree);
     } else {
         pen.SetShaderEffect(RSShaderEffect::CreateSweepGradient(
             ToRSPoint(PointF(data.center.GetX(), data.center.GetY())), colorValues, pos, RSTileMode::CLAMP,
-            drawStartDegree + offsetDegree, drawStartDegree + drawSweepDegree + offsetDegree));
+            drawStartDegree + offsetDegree, drawStartDegree + drawSweepDegree + offsetDegree, nullptr));
         path.AddArc(rRect, drawStartDegree + offsetDegree, drawSweepDegree - 2.0f * offsetDegree);
     }
 
@@ -610,6 +631,8 @@ void GaugePaintMethod::DrawHighLight(RSCanvas& canvas, const RenderRingInfo& dat
                     data.center.GetY() + radius * std::sin((drawStartDegree - offsetDegree) * M_PI / HALF_CIRCLE),
                     (data.thickness * PERCENT_HALF + space));
 
+    canvas.ClipPath(path2, RSClipOp::DIFFERENCE, true);
+
     RSPath path3;
     path3.Op(path2, path1, RSPathOp::DIFFERENCE);
 
@@ -635,13 +658,8 @@ void GaugePaintMethod::DrawHighLight(RSCanvas& canvas, const RenderRingInfo& dat
 
     RSPath path5;
     path5.Op(path3, path4, RSPathOp::DIFFERENCE);
-    canvas.ClipPath(path5, RSClipOp::DIFFERENCE, true);
 
-    RSPath path6;
-    path6.AddCircle(data.center.GetX() + radius * std::cos((drawStartDegree - offsetDegree) * M_PI / HALF_CIRCLE),
-                    data.center.GetY() + radius * std::sin((drawStartDegree - offsetDegree) * M_PI / HALF_CIRCLE),
-                    data.thickness * PERCENT_HALF);
-    canvas.ClipPath(path6, RSClipOp::DIFFERENCE, true);
+    canvas.ClipPath(path5, RSClipOp::DIFFERENCE, true);
 }
 
 float GaugePaintMethod::GetOffsetDegree(const RenderRingInfo& data, const float oppositeSide) const
@@ -762,7 +780,7 @@ void GaugePaintMethod::CreateDefaultTrianglePath(
 {
     auto width = radius * RADIUS_TO_DIAMETER * INDICATOR_WIDTH_RATIO;
     auto height = radius * RADIUS_TO_DIAMETER * INDICATOR_HEIGHT_RATIO;
-    auto hypotenuse = std::sqrt((width * width) + (height * height));
+    auto hypotenuse = std::sqrt(((width / 2.0f) * (width / 2.0f)) + (height * height));
     if (NearZero(hypotenuse)) {
         return;
     }

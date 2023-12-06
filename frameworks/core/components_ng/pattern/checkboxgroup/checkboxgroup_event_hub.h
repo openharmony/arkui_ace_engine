@@ -17,6 +17,10 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_CHECKBOXGROUP_CHECKBOXGROUP_EVENT_HUB_H
 
 #include "base/memory/ace_type.h"
+#include "core/common/recorder/event_recorder.h"
+#include "core/common/recorder/node_data_cache.h"
+#include "core/components/checkable/checkable_component.h"
+#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/event/gesture_event_hub.h"
 
@@ -44,6 +48,23 @@ public:
         if (changeEvent_) {
             changeEvent_(info);
         }
+        auto groupRet = TypeInfoHelper::DynamicCast<CheckboxGroupResult>(info);
+        if (!groupRet) {
+            return;
+        }
+        if (Recorder::EventRecorder::Get().IsComponentRecordEnable()) {
+            Recorder::EventParamsBuilder builder;
+            auto host = GetFrameNode();
+            if (host) {
+                auto id = host->GetInspectorIdValue("");
+                builder.SetId(id).SetType(host->GetHostTag());
+                if (!id.empty()) {
+                    Recorder::NodeDataCache::Get().PutMultiple(id, groupname_, groupRet->GetNameList());
+                }
+            }
+            builder.SetTextArray(groupRet->GetNameList()).SetText(groupname_);
+            Recorder::EventRecorder::Get().OnChange(std::move(builder));
+        }
     }
 
     const std::string& GetGroupName()
@@ -59,6 +80,11 @@ public:
     void SetChangeEvent(GroupChangeEvent&& changeEvent)
     {
         selectAllChangeEvent_ = std::move(changeEvent);
+    }
+
+    bool HasChangeEvent()
+    {
+        return selectAllChangeEvent_ != nullptr;
     }
 
 private:

@@ -57,6 +57,32 @@ public:
     void SetMenuAlign(const MenuAlign& menuAlign) override;
     void SetSelectChangeEvent(NG::SelectChangeEvent&& selectChangeEvent) override;
     void SetValueChangeEvent(NG::ValueChangeEvent&& valueChangeEvent) override;
+    void SetOptionWidth(const Dimension& value) override;
+    void SetOptionHeight(const Dimension& value) override;
+    void SetOptionWidthFitTrigger(bool isFitTrigger) override;
+
+    static void SetArrowPosition(FrameNode* frameNode, const ArrowPosition value);
+    static void SetSpace(FrameNode* frameNode, const Dimension& value);
+    static void SetMenuAlign(FrameNode* frameNode, const MenuAlign& menuAlign);
+    static void SetValue(FrameNode* frameNode, const std::string& value);
+    static void SetSelected(FrameNode* frameNode, int32_t idx);
+    static void SetFontSize(FrameNode* frameNode, const Dimension& value);
+    static void SetFontWeight(FrameNode* frameNode, const FontWeight& value);
+    static void SetFontFamily(FrameNode* frameNode, const std::vector<std::string>& value);
+    static void SetItalicFontStyle(FrameNode* frameNode, const Ace::FontStyle& value);
+    static void SetFontColor(FrameNode* frameNode, const Color& color);
+    static void SetSelectedOptionBgColor(FrameNode* frameNode, const Color& color);
+    static void SetOptionFontSize(FrameNode* frameNode, const Dimension& value);
+    static void SetOptionFontWeight(FrameNode* frameNode, const FontWeight& value);
+    static void SetOptionFontFamily(FrameNode* frameNode, const std::vector<std::string>& value);
+    static void SetOptionItalicFontStyle(FrameNode* frameNode, const Ace::FontStyle& value);
+    static void SetOptionFontColor(FrameNode* frameNode, const Color& color);
+    static void SetOptionBgColor(FrameNode* frameNode, const Color& color);
+    static void SetSelectedOptionFontColor(FrameNode* frameNode, const Color& color);
+    static void SetSelectedOptionFontSize(FrameNode* frameNode, const Dimension& value);
+    static void SetSelectedOptionFontWeight(FrameNode* frameNode, const FontWeight& value);
+    static void SetSelectedOptionFontFamily(FrameNode* frameNode, const std::vector<std::string>& value);
+    static void SetSelectedOptionItalicFontStyle(FrameNode* frameNode, const Ace::FontStyle& value);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SELECT_SELECT_MODEL_NG_H

@@ -29,7 +29,9 @@ void DragDropProxy::OnTextDragStart(const std::string& extraInfo)
     auto manager = pipeline->GetDragDropManager();
     CHECK_NULL_VOID(manager);
     CHECK_NULL_VOID(manager->CheckDragDropProxy(id_));
+#ifndef ENABLE_DRAG_FRAMEWORK
     manager->AddDataToClipboard(extraInfo);
+#endif // ENABLE_DRAG_FRAMEWORK
 }
 
 void DragDropProxy::OnDragStart(
@@ -41,10 +43,16 @@ void DragDropProxy::OnDragStart(
     CHECK_NULL_VOID(manager);
     CHECK_NULL_VOID(manager->CheckDragDropProxy(id_));
 
-    manager->OnDragStart(Point(info.GetGlobalPoint().GetX(), info.GetGlobalPoint().GetY(),
-                             info.GetScreenLocation().GetX(), info.GetScreenLocation().GetY()),
-        frameNode);
+    auto point = Point(info.GetGlobalPoint().GetX(), info.GetGlobalPoint().GetY(), info.GetScreenLocation().GetX(),
+        info.GetScreenLocation().GetY());
+    auto pointerEvent = PointerEvent(info.GetGlobalPoint().GetX(), info.GetGlobalPoint().GetY(),
+        info.GetScreenLocation().GetX(), info.GetScreenLocation().GetY());
+    manager->OnDragStart(point, frameNode);
+    manager->OnDragMove(pointerEvent, extraInfo);
+    manager->SetExtraInfo(extraInfo);
+#ifndef ENABLE_DRAG_FRAMEWORK
     manager->AddDataToClipboard(extraInfo);
+#endif // ENABLE_DRAG_FRAMEWORK
 }
 
 void DragDropProxy::OnDragMove(const GestureEvent& info)
@@ -61,8 +69,7 @@ void DragDropProxy::OnDragMove(const GestureEvent& info)
     std::string extraInfo;
     manager->GetExtraInfoFromClipboard(extraInfo);
 #endif // ENABLE_DRAG_FRAMEWORK
-
-    manager->OnDragMove(Point(info.GetGlobalPoint().GetX(), info.GetGlobalPoint().GetY(),
+    manager->OnDragMove(PointerEvent(info.GetGlobalPoint().GetX(), info.GetGlobalPoint().GetY(),
                             info.GetScreenLocation().GetX(), info.GetScreenLocation().GetY()),
         extraInfo);
 }
@@ -84,8 +91,8 @@ void DragDropProxy::OnDragEnd(const GestureEvent& info, bool isTextDragEnd)
         manager->OnTextDragEnd(static_cast<float>(info.GetGlobalPoint().GetX()),
             static_cast<float>(info.GetGlobalPoint().GetY()), extraInfo);
     } else {
-        manager->OnDragEnd(Point(info.GetGlobalPoint().GetX(), info.GetGlobalPoint().GetY(),
-                               info.GetScreenLocation().GetX(), info.GetScreenLocation().GetY()),
+        manager->OnDragEnd(PointerEvent(info.GetGlobalPoint().GetX(), info.GetGlobalPoint().GetY(),
+                                info.GetScreenLocation().GetX(), info.GetScreenLocation().GetY()),
             extraInfo);
     }
 #ifndef ENABLE_DRAG_FRAMEWORK

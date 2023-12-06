@@ -21,8 +21,18 @@ sptr<IRemoteObject> AceContainer::GetToken()
     return token_;
 }
 
+sptr<IRemoteObject> AceContainer::GetParentToken()
+{
+    return token_;
+}
+
 std::shared_ptr<AbilityRuntime::Context> AceContainer::GetAbilityContextByModule(
     const std::string& bundle, const std::string& module)
+{
+    return nullptr;
+}
+
+sptr<OHOS::Rosen::Window> AceContainer::GetUIWindow(int32_t instanceId)
 {
     return nullptr;
 }

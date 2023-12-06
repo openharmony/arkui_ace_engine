@@ -34,6 +34,7 @@ enum class ListItemSwipeIndex {
     SWIPER_END = -1,
     ITEM_CHILD = 0,
     SWIPER_START = 1,
+    SWIPER_ACTION = 2,
 };
 
 class ACE_EXPORT ListItemPattern : public Pattern {
@@ -124,7 +125,7 @@ public:
 
     void SetSwiperItemForList();
 
-    void SwiperReset();
+    void SwiperReset(bool isCloseSwipeAction = false);
 
     static float CalculateFriction(float gamma);
 
@@ -151,16 +152,6 @@ public:
         if (!selectable) {
             MarkIsSelected(false);
         }
-    }
-
-    void SetUseStartDefaultDeleteAnimation(bool useStartDefaultDeleteAnimation)
-    {
-        useStartDefaultDeleteAnimation_ = useStartDefaultDeleteAnimation;
-    }
-
-    void SetUseEndDefaultDeleteAnimation(bool useEndDefaultDeleteAnimation)
-    {
-        useEndDefaultDeleteAnimation_ = useEndDefaultDeleteAnimation;
     }
 
     int32_t GetIndexInList() const
@@ -193,14 +184,30 @@ public:
         return listItemStyle_;
     }
 
+    void SetOffsetChangeCallBack(OnOffsetChangeFunc&& offsetChangeCallback);
+
+    void CloseSwipeAction(OnFinishFunc&& onFinishCallback);
+
+    void FireOnFinshEvent() const
+    {
+        if (onFinishEvent_) {
+            onFinishEvent_();
+        }
+    }
+
 protected:
     void OnModifyDone() override;
+
+    bool IsNeedInitClickEventRecorder() const override
+    {
+        return true;
+    }
 
 private:
     void InitSwiperAction(bool axisChanged);
     float GetFriction();
     void ChangeDeleteAreaStage();
-    void StartSpringMotion(float start, float end, float velocity);
+    void StartSpringMotion(float start, float end, float velocity, bool isCloseAllSwipeActions = false);
     void OnAttachToFrameNode() override;
     void SetListItemDefaultAttributes(const RefPtr<FrameNode>& listItemNode);
     void InitListItemCardStyleForList();
@@ -213,6 +220,18 @@ private:
     void InitDisableEvent();
     void SetAccessibilityAction();
     void DoDeleteAnimation(bool isRightDelete);
+    void FireSwipeActionOffsetChange(float oldOffset, float newOffset);
+    void FireSwipeActionStateChange(SwipeActionState newState);
+    void ResetToItemChild()
+    {
+        swiperIndex_ = ListItemSwipeIndex::ITEM_CHILD;
+        FireSwipeActionStateChange(SwipeActionState::COLLAPSED);
+    }
+    void ResetNodeSize()
+    {
+        startNodeSize_ = 0.0f;
+        endNodeSize_ = 0.0f;
+    }
 
     RefPtr<ShallowBuilder> shallowBuilder_;
     V2::ListItemStyle listItemStyle_ = V2::ListItemStyle::NONE;
@@ -230,14 +249,13 @@ private:
     float endNodeSize_ = 0.0f;
     Axis axis_ = Axis::NONE;
     ListItemSwipeIndex swiperIndex_ = ListItemSwipeIndex::ITEM_CHILD;
+    SwipeActionState swipeActionState_ = SwipeActionState::COLLAPSED;
     float startDeleteAreaDistance_ = 0.0f;
     float endDeleteAreaDistance_ = 0.0f;
     bool hasStartDeleteArea_ = false;
     bool hasEndDeleteArea_ = false;
     bool inStartDeleteArea_ = false;
     bool inEndDeleteArea_ = false;
-    bool useStartDefaultDeleteAnimation_ = false;
-    bool useEndDefaultDeleteAnimation_ = false;
 
     RefPtr<PanEvent> panEvent_;
     RefPtr<Animator> springController_;
@@ -251,6 +269,8 @@ private:
     RefPtr<TouchEventImpl> touchListener_;
     bool isHover_ = false;
     bool isPressed_ = false;
+    std::optional<double> enableOpacity_;
+    OnFinishFunc onFinishEvent_;
 
     ACE_DISALLOW_COPY_AND_MOVE(ListItemPattern);
 };

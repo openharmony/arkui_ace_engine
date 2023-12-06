@@ -38,16 +38,15 @@
 #else
 #include "core/components_ng/render/adapter/rosen/drawing_image.h"
 #endif
-#include "core/image/sk_image_cache.h"
 #include "core/image/image_loader.h"
+#include "core/image/sk_image_cache.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 
-namespace {
-
-void CacheImageObject(const RefPtr<ImageObject>& obj)
+void ImageProvider::CacheImageObject(const RefPtr<ImageObject>& obj)
 {
+    CHECK_NULL_VOID(obj);
     auto pipelineCtx = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineCtx);
     auto cache = pipelineCtx->GetImageCache();
@@ -56,7 +55,6 @@ void CacheImageObject(const RefPtr<ImageObject>& obj)
         cache->CacheImgObjNG(obj->GetSourceInfo().GetKey(), obj);
     }
 }
-} // namespace
 
 std::mutex ImageProvider::taskMtx_;
 std::unordered_map<std::string, ImageProvider::Task> ImageProvider::tasks_;
@@ -89,7 +87,7 @@ RefPtr<ImageObject> ImageProvider::QueryThumbnailCache(const ImageSourceInfo& sr
     CHECK_NULL_RETURN(cache, nullptr);
     auto data = DynamicCast<PixmapData>(cache->GetCacheImageData(src.GetKey()));
     if (data) {
-        LOGD("thumbnail cache found %{public}s", src.GetSrc().c_str());
+        TAG_LOGD(AceLogTag::ACE_IMAGE, "thumbnail cache found %{public}s", src.GetSrc().c_str());
         return PixelMapImageObject::Create(src, data);
     }
     return nullptr;
@@ -109,7 +107,7 @@ RefPtr<ImageObject> ImageProvider::QueryImageObjectFromCache(const ImageSourceIn
     CHECK_NULL_RETURN(imageCache, nullptr);
     RefPtr<ImageObject> imageObj = imageCache->GetCacheImgObjNG(src.GetKey());
     if (imageObj) {
-        LOGD("imageObj found in cache %{private}s", src.ToString().c_str());
+        TAG_LOGD(AceLogTag::ACE_IMAGE, "imageObj found in cache %{public}s", src.ToString().c_str());
     }
     return imageObj;
 }
@@ -206,12 +204,12 @@ bool ImageProvider::RegisterTask(const std::string& key, const WeakPtr<ImageLoad
     auto it = tasks_.find(key);
     if (it != tasks_.end()) {
         it->second.ctxs_.insert(ctx);
-        LOGD("task already exist %{public}s, callbacks size = %u", key.c_str(),
+        TAG_LOGD(AceLogTag::ACE_IMAGE, "task already exist %{public}s, callbacks size = %u", key.c_str(),
             static_cast<uint32_t>(it->second.ctxs_.size()));
         return false;
     }
     tasks_[key].ctxs_.insert(ctx);
-    LOGD("task is new %{public}s", key.c_str());
+    TAG_LOGD(AceLogTag::ACE_IMAGE, "task is new %{public}s", key.c_str());
     return true;
 }
 
@@ -220,29 +218,29 @@ std::set<WeakPtr<ImageLoadingContext>> ImageProvider::EndTask(const std::string&
     std::scoped_lock<std::mutex> lock(taskMtx_);
     auto it = tasks_.find(key);
     if (it == tasks_.end()) {
-        LOGW("task not found in map %{private}s", key.c_str());
+        TAG_LOGW(AceLogTag::ACE_IMAGE, "task not found in map %{private}s", key.c_str());
         return {};
     }
     auto ctxs = it->second.ctxs_;
     if (ctxs.empty()) {
-        LOGW("registered task has empty context %{public}s", key.c_str());
+        TAG_LOGW(AceLogTag::ACE_IMAGE, "registered task has empty context %{public}s", key.c_str());
     }
     tasks_.erase(it);
-    LOGD("endTask %s, ctx size = %u", key.c_str(), static_cast<uint32_t>(ctxs.size()));
+    TAG_LOGD(AceLogTag::ACE_IMAGE, "endTask %s, ctx size = %u", key.c_str(), static_cast<uint32_t>(ctxs.size()));
     return ctxs;
 }
 
 void ImageProvider::CancelTask(const std::string& key, const WeakPtr<ImageLoadingContext>& ctx)
 {
     std::scoped_lock<std::mutex> lock(taskMtx_);
-    LOGD("try cancel bgTask %{public}s", key.c_str());
+    TAG_LOGD(AceLogTag::ACE_IMAGE, "try cancel bgTask %{public}s", key.c_str());
     auto it = tasks_.find(key);
     CHECK_NULL_VOID(it != tasks_.end());
     CHECK_NULL_VOID(it->second.ctxs_.find(ctx) != it->second.ctxs_.end());
     // only one LoadingContext waiting for this task, can just cancel
     if (it->second.ctxs_.size() == 1) {
         bool canceled = it->second.bgTask_.Cancel();
-        LOGD("cancel bgTask %s, result: %d", key.c_str(), canceled);
+        TAG_LOGD(AceLogTag::ACE_IMAGE, "cancel bgTask %s, result: %d", key.c_str(), canceled);
         if (canceled) {
             tasks_.erase(it);
             return;
@@ -273,7 +271,8 @@ void ImageProvider::CreateImageObject(const ImageSourceInfo& src, const WeakPtr<
 RefPtr<ImageObject> ImageProvider::BuildImageObject(const ImageSourceInfo& src, const RefPtr<ImageData>& data)
 {
     if (!data) {
-        LOGW("data is null when try ParseImageObjectType, src: %{public}s", src.ToString().c_str());
+        TAG_LOGW(AceLogTag::ACE_IMAGE, "data is null when try ParseImageObjectType, src: %{public}s",
+            src.ToString().c_str());
         return nullptr;
     }
     if (src.IsSvg()) {
@@ -293,9 +292,16 @@ RefPtr<ImageObject> ImageProvider::BuildImageObject(const ImageSourceInfo& src, 
     CHECK_NULL_RETURN(rosenImageData, nullptr);
     auto [size, frameCount] = rosenImageData->Parse();
 #endif
-    CHECK_NULL_RETURN(size.IsPositive(), nullptr);
-
+    if (!size.IsPositive()) {
+        TAG_LOGW(AceLogTag::ACE_IMAGE,
+            "Image of src: %{public}s decode failed, imageData's size is invalid %{public}s, frameCount is %{public}d",
+            src.ToString().c_str(), size.ToString().c_str(), frameCount);
+        return nullptr;
+    }
     if (frameCount > 1) {
+        TAG_LOGD(AceLogTag::ACE_IMAGE,
+            "make AnimatedImageObject: imageData's size is %{public}s, frameCount is %{public}d",
+            size.ToString().c_str(), frameCount);
         return MakeRefPtr<AnimatedImageObject>(src, size, data);
     }
     return MakeRefPtr<StaticImageObject>(src, size, data);

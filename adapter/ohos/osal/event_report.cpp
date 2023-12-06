@@ -21,6 +21,7 @@
 
 #include "hisysevent.h"
 
+#include "base/log/ace_trace.h"
 #include "base/json/json_util.h"
 #include "core/common/ace_application_info.h"
 #include "core/common/ace_engine.h"
@@ -63,11 +64,20 @@ constexpr char EVENT_KEY_MAX_FRAMETIME[] = "MAX_FRAMETIME";
 constexpr char EVENT_KEY_MAX_SEQ_MISSED_FRAMES[] = "MAX_SEQ_MISSED_FRAMES";
 constexpr char EVENT_KEY_SOURCE_TYPE[] = "SOURCE_TYPE";
 constexpr char EVENT_KEY_NOTE[] = "NOTE";
+constexpr char EVENT_KEY_DISPLAY_ANIMATOR[] = "DISPLAY_ANIMATOR";
 constexpr char EVENT_KEY_SKIPPED_FRAME_TIME[] = "SKIPPED_FRAME_TIME";
 
 constexpr int32_t MAX_PACKAGE_NAME_LENGTH = 128;
 
 constexpr char DUMP_LOG_COMMAND[] = "B";
+
+constexpr char CLICK_TITLE_MAXIMIZE_MENU[] = "CLICK_TITLE_MAXIMIZE_MENU";
+constexpr char DOUBLE_CLICK_TITLE[] = "DOUBLE_CLICK_TITLE";
+constexpr char CURRENTPKG[] = "CURRENTPKG";
+constexpr char STATECHANGE[] = "STATECHANGE";
+constexpr char MAXMENUITEM[] = "MAXMENUITEM";
+constexpr char CHANGEDEFAULTSETTING[] = "CHANGEDEFAULTSETTING";
+constexpr char SCENE_BOARD_UE_DOMAIN[] = "SCENE_BOARD_UE";
 
 void StrTrim(std::string& str)
 {
@@ -336,6 +346,8 @@ void EventReport::ReportEventComplete(DataBase& data)
         EVENT_KEY_ANIMATION_END_LATENCY, static_cast<uint64_t>(animationEndLantency),
         EVENT_KEY_E2E_LATENCY, static_cast<uint64_t>(e2eLatency),
         EVENT_KEY_NOTE, note);
+    ACE_SCOPED_TRACE("INTERACTION_COMPLETED_LATENCY: inputTime=%lld(ms), e2eLatency=%lld(ms)",
+        static_cast<long long>(inputTime), static_cast<long long>(e2eLatency));
 }
 
 void EventReport::ReportEventJankFrame(DataBase& data)
@@ -357,6 +369,7 @@ void EventReport::ReportEventJankFrame(DataBase& data)
     const auto& maxFrameTime = data.maxFrameTime / NS_TO_MS;
     const auto& maxSeqMissedFrames = data.maxSuccessiveFrames;
     const auto& note = data.baseInfo.note;
+    const auto& isDisplayAnimator = data.isDisplayAnimator;
     HiSysEventWrite(OHOS::HiviewDFX::HiSysEvent::Domain::ACE, eventName,
         OHOS::HiviewDFX::HiSysEvent::EventType::BEHAVIOR,
         EVENT_KEY_UNIQUE_ID, static_cast<int32_t>(uniqueId),
@@ -373,7 +386,10 @@ void EventReport::ReportEventJankFrame(DataBase& data)
         EVENT_KEY_TOTAL_MISSED_FRAMES, totalMissedFrames,
         EVENT_KEY_MAX_FRAMETIME, static_cast<uint64_t>(maxFrameTime),
         EVENT_KEY_MAX_SEQ_MISSED_FRAMES, maxSeqMissedFrames,
-        EVENT_KEY_NOTE, note);
+        EVENT_KEY_NOTE, note,
+        EVENT_KEY_DISPLAY_ANIMATOR, isDisplayAnimator);
+    ACE_SCOPED_TRACE("INTERACTION_APP_JANK: inputTime=%lld(ms), maxFrameTime=%lld(ms)",
+        static_cast<long long>(startTime), static_cast<long long>(maxFrameTime));
 }
 
 void EventReport::ReportJankFrameApp(JankInfo& info)
@@ -395,5 +411,27 @@ void EventReport::ReportJankFrameApp(JankInfo& info)
         EVENT_KEY_VERSION_CODE, versionCode,
         EVENT_KEY_VERSION_NAME, versionName,
         EVENT_KEY_SKIPPED_FRAME_TIME, static_cast<uint64_t>(skippedFrameTime));
+    ACE_SCOPED_TRACE("JANK_FRAME_APP: skipppedFrameTime=%lld(ms)", static_cast<long long>(skippedFrameTime / NS_TO_MS));
+}
+
+void EventReport::ReportDoubleClickTitle(int32_t stateChange)
+{
+    auto packageName = AceApplicationInfo::GetInstance().GetPackageName();
+    StrTrim(packageName);
+    HiSysEventWrite(SCENE_BOARD_UE_DOMAIN, DOUBLE_CLICK_TITLE,
+        OHOS::HiviewDFX::HiSysEvent::EventType::BEHAVIOR,
+        CURRENTPKG, packageName,
+        STATECHANGE, stateChange);
+}
+
+void EventReport::ReportClickTitleMaximizeMenu(int32_t maxMenuItem, int32_t stateChange)
+{
+    auto packageName = AceApplicationInfo::GetInstance().GetPackageName();
+    StrTrim(packageName);
+    HiSysEventWrite(SCENE_BOARD_UE_DOMAIN, CLICK_TITLE_MAXIMIZE_MENU,
+        OHOS::HiviewDFX::HiSysEvent::EventType::BEHAVIOR,
+        CURRENTPKG, packageName,
+        MAXMENUITEM, maxMenuItem,
+        CHANGEDEFAULTSETTING, stateChange);
 }
 } // namespace OHOS::Ace

@@ -15,13 +15,9 @@
 
 #include "frameworks/core/components_ng/svg/parse/svg_fe.h"
 
-#ifndef NEW_SKIA
-#include "include/effects/SkColorFilterImageFilter.h"
-#else
 #include "include/core/SkColorFilter.h"
-#include "include/effects/SkImageFilters.h"
-#endif
 #include "include/effects/SkColorMatrix.h"
+#include "include/effects/SkImageFilters.h"
 
 #include "base/utils/utils.h"
 
@@ -60,30 +56,15 @@ void SvgFe::ConverImageFilterColor(
     sk_sp<SkImageFilter>& imageFilter, const ColorInterpolationType& srcColor, const ColorInterpolationType& dst)
 {
     if (dst == ColorInterpolationType::LINEAR_RGB && srcColor == ColorInterpolationType::SRGB) {
-#ifdef USE_SYSTEM_SKIA
-        imageFilter = SkColorFilterImageFilter::Make(SkColorFilter::MakeSRGBToLinearGamma(), imageFilter);
-#else
-#ifndef NEW_SKIA
-        imageFilter = SkColorFilterImageFilter::Make(SkColorFilters::SRGBToLinearGamma(), imageFilter);
-#else
         imageFilter = SkImageFilters::ColorFilter(SkColorFilters::SRGBToLinearGamma(), imageFilter);
-#endif
-#endif
+
     } else if (dst == ColorInterpolationType::SRGB && srcColor == ColorInterpolationType::LINEAR_RGB) {
-#ifdef USE_SYSTEM_SKIA
-        imageFilter = SkColorFilterImageFilter::Make(SkColorFilter::MakeLinearToSRGBGamma(), imageFilter);
-#else
-#ifndef NEW_SKIA
-        imageFilter = SkColorFilterImageFilter::Make(SkColorFilters::LinearToSRGBGamma(), imageFilter);
-#else
         imageFilter = SkImageFilters::ColorFilter(SkColorFilters::LinearToSRGBGamma(), imageFilter);
-#endif
-#endif
     }
 }
 #else
-void SvgFe::ConverImageFilterColor(std::shared_ptr<RSImageFilter>& imageFilter,
-    const ColorInterpolationType& srcColor, const ColorInterpolationType& dst)
+void SvgFe::ConverImageFilterColor(std::shared_ptr<RSImageFilter>& imageFilter, const ColorInterpolationType& srcColor,
+    const ColorInterpolationType& dst)
 {
     if (dst == ColorInterpolationType::LINEAR_RGB && srcColor == ColorInterpolationType::SRGB) {
         auto colorFilter = RSRecordingColorFilter::CreateSrgbGammaToLinear();
@@ -110,15 +91,9 @@ std::shared_ptr<RSImageFilter> SvgFe::MakeImageFilter(const FeInType& in, std::s
 #ifndef USE_ROSEN_DRAWING
             SkColorMatrix m;
             m.setScale(0, 0, 0, 1.0f);
-#ifdef USE_SYSTEM_SKIA
-            return SkColorFilterImageFilter::Make(SkColorFilter::MakeMatrixFilterRowMajor255(m.fMat), nullptr);
-#else
-#ifndef NEW_SKIA
-            return SkColorFilterImageFilter::Make(SkColorFilters::Matrix(m), nullptr);
-#else
+
             return SkImageFilters::ColorFilter(SkColorFilters::Matrix(m), nullptr);
-#endif
-#endif
+
 #else
             RSColorMatrix m;
             m.SetScale(0, 0, 0, 1.0f);

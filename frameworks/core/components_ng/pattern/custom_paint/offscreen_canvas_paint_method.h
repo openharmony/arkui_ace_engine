@@ -58,6 +58,10 @@ public:
     {
         return isSucceed_;
     }
+    size_t GetBitmapSize()
+    {
+        return bitmapSize_;
+    }
 private:
     void ImageObjReady(const RefPtr<Ace::ImageObject>& imageObj) override;
     void ImageObjFailed() override;
@@ -82,7 +86,8 @@ private:
         return skCanvas_.get();
     }
 #else
-    void PaintShadow(const RSPath& path, const Shadow& shadow, RSCanvas* canvas) override;
+    void PaintShadow(const RSPath& path, const Shadow& shadow, RSCanvas* canvas,
+        const RSBrush* brush = nullptr, const RSPen* pen = nullptr) override;
     void Path2DRect(const OffsetF& offset, const PathArgs& args) override;
     RSCanvas* GetRawPtrOfRSCanvas() override
     {
@@ -99,6 +104,7 @@ private:
     int32_t width_;
     int32_t height_;
     bool isSucceed_ = true;
+    size_t bitmapSize_ = 0;
 };
 } // namespace OHOS::Ace::NG
 

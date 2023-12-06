@@ -19,8 +19,9 @@
 #include <cstdint>
 #include <functional>
 #include <memory>
-
 #include <refbase.h>
+#include <list>
+#include <vector>
 
 #include "base/memory/referenced.h"
 #include "base/want/want_wrap.h"
@@ -35,6 +36,11 @@ class Session;
 class ILifecycleListener;
 enum class WSError;
 } // namespace OHOS::Rosen
+
+namespace OHOS::Accessibility {
+class AccessibilityElementInfo;
+class AccessibilityEventInfo;
+} // namespace OHOS::Accessibility
 
 namespace OHOS::MMI {
 class KeyEvent;
@@ -68,13 +74,22 @@ public:
 
     void SetModalOnDestroy(const std::function<void()>&& callback);
     void SetModalOnRemoteReadyCallback(
-        const std::function<void(const std::shared_ptr<ModalUIExtensionProxy>&)>&& callback);
+    const std::function<void(const std::shared_ptr<ModalUIExtensionProxy>&)>&& callback);
     void SetOnRemoteReadyCallback(const std::function<void(const RefPtr<UIExtensionProxy>&)>&& callback);
+    void SetOnSyncOnCallbackList(
+        const std::list<std::function<void(const RefPtr<UIExtensionProxy>&)>>&& callbackList);
+    void SetOnAsyncOnCallbackList(
+        const std::list<std::function<void(const RefPtr<UIExtensionProxy>&)>>&& callbackList);
+    void SetOnSyncOffCallbackList(
+        const std::list<std::function<void(const RefPtr<UIExtensionProxy>&)>>&& callbackList);
+    void SetOnAsyncOffCallbackList(
+        const std::list<std::function<void(const RefPtr<UIExtensionProxy>&)>>&& callbackList);
     void SetOnReleaseCallback(const std::function<void(int32_t)>&& callback);
     void SetOnResultCallback(const std::function<void(int32_t, const AAFwk::Want&)>&& callback);
     void SetOnReceiveCallback(const std::function<void(const AAFwk::WantParams&)>&& callback);
     void SetOnErrorCallback(
         const std::function<void(int32_t code, const std::string& name, const std::string& message)>&& callback);
+    void SetTransferringCaller(bool value);
 
     void RegisterLifecycleListener();
     void UnregisterLifecycleListener();
@@ -88,7 +103,30 @@ public:
     void RequestExtensionSessionBackground();
     void RequestExtensionSessionDestruction();
 
+    virtual void SearchExtensionElementInfoByAccessibilityId(int32_t elementId, int32_t mode,
+        int32_t baseParent, std::list<Accessibility::AccessibilityElementInfo>& output) override;
+    virtual void SearchElementInfosByText(int32_t elementId, const std::string& text,
+        int32_t baseParent, std::list<Accessibility::AccessibilityElementInfo>& output) override;
+    virtual void FindFocusedElementInfo(int32_t elementId, int32_t focusType,
+        int32_t baseParent, Accessibility::AccessibilityElementInfo& output) override;
+    virtual void FocusMoveSearch(int32_t elementId, int32_t direction,
+        int32_t baseParent, Accessibility::AccessibilityElementInfo& output) override;
+    virtual bool TransferExecuteAction(int32_t elementId, const std::map<std::string, std::string>& actionArguments,
+        int32_t action, int32_t offset) override;
+
     int32_t GetSessionId();
+    void SetModalFlag(bool isModal)
+    {
+        isModal_ = isModal;
+    }
+
+    int32_t GetUiExtensionId() override;
+    int32_t WrapExtensionAbilityId(int32_t extensionOffset, int32_t abilityId) override;
+
+    void OnAccessibilityEvent(
+        const Accessibility::AccessibilityEventInfo& info, const std::vector<int32_t>& uiExtensionIdLevelList);
+
+    void HandleDragEvent(const PointerEvent& info) override;
 
 private:
     enum ReleaseCode {
@@ -120,10 +158,11 @@ private:
 
     void InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub);
     void InitMouseEvent(const RefPtr<InputEventHub>& inputHub);
+    void InitHoverEvent(const RefPtr<InputEventHub>& inputHub);
     void HandleTouchEvent(const TouchEventInfo& info);
     void HandleMouseEvent(const MouseInfo& info);
+    void HandleHoverEvent(bool isHover);
     void UnregisterAbilityResultListener();
-    void OnConnectInner();
 
     void DispatchPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
     void DispatchKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent);
@@ -140,12 +179,20 @@ private:
     void ProcessUIExtensionSessionBackgroundResult(OHOS::Rosen::WSError errcode);
     void ProcessUIExtensionSessionDestructionResult(OHOS::Rosen::WSError errcode);
 
+    void onConfigurationUpdate();
+    void OnLanguageConfigurationUpdate() override;
+    void OnColorConfigurationUpdate() override;
+
     RefPtr<TouchEventImpl> touchEvent_;
     RefPtr<InputEvent> mouseEvent_;
+    RefPtr<InputEvent> hoverEvent_;
+    std::shared_ptr<MMI::PointerEvent> lastPointerEvent_ = nullptr;
 
     std::function<void()> onModalDestroy_;
     std::function<void(const std::shared_ptr<ModalUIExtensionProxy>&)> onModalRemoteReadyCallback_;
     std::function<void(const RefPtr<UIExtensionProxy>&)> onRemoteReadyCallback_;
+    std::list<std::function<void(const RefPtr<UIExtensionProxy>&)>> onSyncOnCallbackList_;
+    std::list<std::function<void(const RefPtr<UIExtensionProxy>&)>> onAsyncOnCallbackList_;
     std::function<void(int32_t)> onReleaseCallback_;
     std::function<void(int32_t, const AAFwk::Want&)> onResultCallback_;
     std::function<void(const AAFwk::WantParams&)> onReceiveCallback_;
@@ -159,6 +206,12 @@ private:
     int32_t instanceId_ = Container::CurrentId();
     AbilityState state_ = AbilityState::NONE;
     ACE_DISALLOW_COPY_AND_MOVE(UIExtensionPattern);
+
+    bool transferringCaller_ = false;
+    bool isVisible_ = true;
+    bool isModal_ = false;
+
+    int32_t uiExtensionId_ = 0;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_UI_EXTENSION_UI_EXTENSION_PATTERN_H

@@ -54,9 +54,8 @@ void RecognizerGroup::AddChildren(const std::list<RefPtr<NGGestureRecognizer>>& 
 {
     // TODO: add state adjustment.
     for (const auto& child : recognizers) {
-        if (child && !Existed(child)) {
+        if (child && !Existed(child) && child->SetGestureGroup(AceType::WeakClaim(this))) {
             recognizers_.emplace_back(child);
-            child->SetGestureGroup(AceType::WeakClaim(this));
         }
     }
 }
@@ -150,7 +149,7 @@ void RecognizerGroup::OnResetStatus()
     if (!remainChildOnResetStatus_) {
         for (const auto& child : recognizers_) {
             if (child) {
-                child->SetGestureGroup(nullptr);
+                child->ResetGestureGroup();
             }
         }
         recognizers_.clear();

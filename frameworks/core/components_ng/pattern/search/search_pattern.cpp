@@ -18,6 +18,9 @@
 #include <cstdint>
 
 #include "base/geometry/rect.h"
+#include "base/utils/system_properties.h"
+#include "base/utils/utils.h"
+#include "core/common/recorder/node_data_cache.h"
 #include "core/components/search/search_theme.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
@@ -36,6 +39,7 @@ constexpr int32_t CANCEL_IMAGE_INDEX = 2;
 constexpr int32_t CANCEL_BUTTON_INDEX = 3;
 constexpr int32_t BUTTON_INDEX = 4;
 constexpr int32_t DOUBLE = 2;
+constexpr int32_t ERROR = -1;
 
 // The focus state requires an 2vp inner stroke, which should be indented by 1vp when drawn.
 constexpr Dimension FOCUS_OFFSET = 1.0_vp;
@@ -158,6 +162,7 @@ void SearchPattern::OnModifyDone()
     auto buttonLayoutProperty = buttonFrameNode->GetLayoutProperty<ButtonLayoutProperty>();
     CHECK_NULL_VOID(buttonLayoutProperty);
     buttonLayoutProperty->UpdateLabel(searchButton_);
+    buttonLayoutProperty->UpdateTextOverflow(TextOverflow::ELLIPSIS);
     buttonFrameNode->MarkModifyDone();
 
     auto searchButtonEvent = buttonFrameNode->GetEventHub<ButtonEventHub>();
@@ -172,7 +177,7 @@ void SearchPattern::OnModifyDone()
 
     InitButtonAndImageClickEvent();
     InitCancelButtonClickEvent();
-    InitTextFieldMouseEvent();
+    InitTextFieldValueChangeEvent();
     InitButtonMouseEvent(searchButtonMouseEvent_, BUTTON_INDEX);
     InitButtonMouseEvent(cancelButtonMouseEvent_, CANCEL_BUTTON_INDEX);
     InitButtonTouchEvent(searchButtonTouchListener_, BUTTON_INDEX);
@@ -182,6 +187,38 @@ void SearchPattern::OnModifyDone()
     InitOnKeyEvent(focusHub);
     InitFocusEvent(focusHub);
     InitClickEvent();
+}
+
+void SearchPattern::InitTextFieldValueChangeEvent()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto textFieldFrameNode = AceType::DynamicCast<FrameNode>(host->GetChildren().front());
+    CHECK_NULL_VOID(textFieldFrameNode);
+    auto eventHub = textFieldFrameNode->GetEventHub<TextFieldEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    if (!eventHub->GetOnChange()) {
+        auto searchChangeFunc = [weak = AceType::WeakClaim(this)](const std::string& value) {
+            auto searchPattern = weak.Upgrade();
+            searchPattern->UpdateChangeEvent(value);
+        };
+        eventHub->SetOnChange(std::move(searchChangeFunc));
+    }
+}
+
+void SearchPattern::OnAfterModifyDone()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto inspectorId = host->GetInspectorId().value_or("");
+    if (!inspectorId.empty()) {
+        auto textFieldFrameNode = DynamicCast<FrameNode>(host->GetChildAtIndex(TEXTFIELD_INDEX));
+        CHECK_NULL_VOID(textFieldFrameNode);
+        auto textFieldPattern = textFieldFrameNode->GetPattern<TextFieldPattern>();
+        CHECK_NULL_VOID(textFieldPattern);
+        auto text = textFieldPattern->GetTextValue();
+        Recorder::NodeDataCache::Get().PutString(inspectorId, text);
+    }
 }
 
 void SearchPattern::InitButtonAndImageClickEvent()
@@ -254,7 +291,9 @@ void SearchPattern::InitSearchController()
     searchController_->SetGetTextContentRect([weak = WeakClaim(this)]() {
         auto search = weak.Upgrade();
         CHECK_NULL_RETURN(search, Rect(0, 0, 0, 0));
-        return search->HandleTextContentRect();
+        auto rect = search->searchController_->GetTextContentRect();
+        search->HandleTextContentRect(rect);
+        return rect;
     });
 
     searchController_->SetGetTextContentLinesNum([weak = WeakClaim(this)]() {
@@ -263,11 +302,45 @@ void SearchPattern::InitSearchController()
         return search->HandleTextContentLines();
     });
 
+    searchController_->SetGetCaretIndex([weak = WeakClaim(this)]() {
+        auto search = weak.Upgrade();
+        CHECK_NULL_RETURN(search, ERROR);
+        return search->HandleGetCaretIndex();
+    });
+
+    searchController_->SetGetCaretPosition([weak = WeakClaim(this)]() {
+        auto search = weak.Upgrade();
+        CHECK_NULL_RETURN(search, NG::OffsetF(ERROR, ERROR));
+        return search->HandleGetCaretPosition();
+    });
+
     searchController_->SetStopEditing([weak = WeakClaim(this)]() {
         auto search = weak.Upgrade();
         CHECK_NULL_VOID(search);
         search->StopEditing();
     });
+}
+
+int32_t SearchPattern::HandleGetCaretIndex()
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, ERROR);
+    auto textFieldFrameNode = AceType::DynamicCast<FrameNode>(host->GetChildren().front());
+    CHECK_NULL_RETURN(textFieldFrameNode, ERROR);
+    auto textFieldPattern = textFieldFrameNode->GetPattern<TextFieldPattern>();
+    CHECK_NULL_RETURN(textFieldPattern, ERROR);
+    return textFieldPattern->GetCaretIndex();
+}
+
+NG::OffsetF SearchPattern::HandleGetCaretPosition()
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, NG::OffsetF(ERROR, ERROR));
+    auto textFieldFrameNode = AceType::DynamicCast<FrameNode>(host->GetChildren().front());
+    CHECK_NULL_RETURN(textFieldFrameNode, NG::OffsetF(ERROR, ERROR));
+    auto textFieldPattern = textFieldFrameNode->GetPattern<TextFieldPattern>();
+    CHECK_NULL_RETURN(textFieldPattern, NG::OffsetF(ERROR, ERROR));
+    return textFieldPattern->GetCaretOffset();
 }
 
 void SearchPattern::HandleCaretPosition(int32_t caretPosition)
@@ -281,29 +354,17 @@ void SearchPattern::HandleCaretPosition(int32_t caretPosition)
     textFieldPattern->SetCaretPosition(caretPosition);
 }
 
-Rect SearchPattern::HandleTextContentRect()
+void SearchPattern::HandleTextContentRect(Rect& rect)
 {
     auto host = GetHost();
-    CHECK_NULL_RETURN(host, Rect(0, 0, 0, 0));
+    CHECK_NULL_VOID(host);
     auto textFieldFrameNode = AceType::DynamicCast<FrameNode>(host->GetChildren().front());
-    CHECK_NULL_RETURN(textFieldFrameNode, Rect(0, 0, 0, 0));
+    CHECK_NULL_VOID(textFieldFrameNode);
     auto textFieldPattern = textFieldFrameNode->GetPattern<TextFieldPattern>();
-    CHECK_NULL_RETURN(textFieldPattern, Rect(0, 0, 0, 0));
-    RectF rect = textFieldPattern->GetTextRect();
+    CHECK_NULL_VOID(textFieldPattern);
     RectF frameRect = textFieldPattern->GetFrameRect();
-    textFieldPattern->TextIsEmptyRect(rect);
-    textFieldPattern->UpdateRectByAlignment(rect);
-    auto y = rect.GetY() + frameRect.GetY();
-    if (NearEqual(rect.GetY(), 0)) {
-        y = textFieldPattern->GetPaddingTop() + textFieldPattern->GetBorderTop() + frameRect.GetY();
-    }
-    if (!textFieldPattern->IsOperation()) {
-        return Rect(rect.GetX() + frameRect.GetX(), y, 0, 0);
-    }
-    if (NearEqual(rect.GetX(), -Infinity<float>())) {
-        return Rect(frameRect.GetX(), y, 0, 0);
-    }
-    return Rect(rect.GetX() + frameRect.GetX(), y, rect.Width(), rect.Height());
+    rect.SetLeft(rect.Left() + frameRect.Left());
+    rect.SetTop(rect.Top() + frameRect.Top());
 }
 
 int32_t SearchPattern::HandleTextContentLines()
@@ -348,8 +409,8 @@ void SearchPattern::OnClickButtonAndImage()
     CHECK_NULL_VOID(textFieldFrameNode);
     auto textFieldPattern = textFieldFrameNode->GetPattern<TextFieldPattern>();
     CHECK_NULL_VOID(textFieldPattern);
-    auto text = textFieldPattern->GetEditingValue();
-    searchEventHub->UpdateSubmitEvent(text.text);
+    auto text = textFieldPattern->GetTextValue();
+    searchEventHub->UpdateSubmitEvent(text);
     textFieldPattern->CloseKeyboard(true);
 }
 
@@ -362,15 +423,14 @@ void SearchPattern::OnClickCancelButton()
     auto textFieldPattern = textFieldFrameNode->GetPattern<TextFieldPattern>();
     CHECK_NULL_VOID(textFieldPattern);
     textFieldPattern->InitEditingValueText("");
-    textFieldPattern->InitCaretPosition("");
     auto textRect = textFieldPattern->GetTextRect();
     textRect.SetLeft(0.0f);
     textFieldPattern->SetTextRect(textRect);
     auto textFieldLayoutProperty = textFieldFrameNode->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(textFieldLayoutProperty);
     textFieldLayoutProperty->UpdateValue("");
-    auto eventHub = host->GetEventHub<SearchEventHub>();
-    eventHub->UpdateChangeEvent("");
+    auto eventHub = textFieldFrameNode->GetEventHub<TextFieldEventHub>();
+    eventHub->FireOnChange("");
     host->MarkModifyDone();
     textFieldFrameNode->MarkModifyDone();
 }
@@ -558,27 +618,6 @@ void SearchPattern::InitButtonTouchEvent(RefPtr<TouchEventImpl>& touchEvent, int
     gesture->AddTouchEvent(touchEvent);
 }
 
-void SearchPattern::InitTextFieldMouseEvent()
-{
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto textFieldFrameNode = DynamicCast<FrameNode>(host->GetChildAtIndex(TEXTFIELD_INDEX));
-    CHECK_NULL_VOID(textFieldFrameNode);
-    auto eventHub = textFieldFrameNode->GetEventHub<TextFieldEventHub>();
-    CHECK_NULL_VOID(eventHub);
-    auto inputHub = eventHub->GetOrCreateInputEventHub();
-    CHECK_NULL_VOID(inputHub);
-
-    auto hoverTask = [weak = WeakClaim(this)](bool isHover) {
-        auto pattern = weak.Upgrade();
-        if (pattern) {
-            pattern->SetMouseStyle(isHover ? MouseFormat::TEXT_CURSOR : MouseFormat::DEFAULT);
-        }
-    };
-    textFieldHoverEvent_ = MakeRefPtr<InputEvent>(std::move(hoverTask));
-    inputHub->AddOnHoverEvent(textFieldHoverEvent_);
-}
-
 void SearchPattern::InitButtonMouseEvent(RefPtr<InputEvent>& inputEvent, int32_t childId)
 {
     if (inputEvent) {
@@ -672,8 +711,13 @@ void SearchPattern::HandleButtonMouseEvent(bool isHover, int32_t childId)
 void SearchPattern::AnimateTouchAndHover(RefPtr<RenderContext>& renderContext, float startOpacity, float endOpacity,
     int32_t duration, const RefPtr<Curve>& curve)
 {
+    auto colorMode = SystemProperties::GetColorMode();
     Color touchColorFrom = Color::FromRGBO(0, 0, 0, startOpacity);
     Color touchColorTo = Color::FromRGBO(0, 0, 0, endOpacity);
+    if (colorMode == ColorMode::DARK) {
+        touchColorFrom = Color::FromRGBO(255, 255, 255, startOpacity);
+        touchColorTo = Color::FromRGBO(255, 255, 255, endOpacity);
+    }
     Color highlightStart = renderContext->GetBackgroundColor().value_or(Color::TRANSPARENT).BlendColor(touchColorFrom);
     Color highlightEnd = renderContext->GetBackgroundColor().value_or(Color::TRANSPARENT).BlendColor(touchColorTo);
     renderContext->OnBackgroundColorUpdate(highlightStart);
@@ -682,6 +726,23 @@ void SearchPattern::AnimateTouchAndHover(RefPtr<RenderContext>& renderContext, f
     option.SetCurve(curve);
     AnimationUtils::Animate(
         option, [renderContext, highlightEnd]() { renderContext->OnBackgroundColorUpdate(highlightEnd); });
+}
+
+void SearchPattern::ResetDragOption()
+{
+    ClearButtonStyle(BUTTON_INDEX);
+    ClearButtonStyle(CANCEL_BUTTON_INDEX);
+}
+
+void SearchPattern::ClearButtonStyle(int32_t childId)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto buttonFrameNode = DynamicCast<FrameNode>(host->GetChildAtIndex(childId));
+    CHECK_NULL_VOID(buttonFrameNode);
+    auto renderContext = buttonFrameNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    AnimateTouchAndHover(renderContext, TOUCH_OPACITY, 0.0f, HOVER_TO_TOUCH_DURATION, Curves::SHARP);
 }
 
 void SearchPattern::InitFocusEvent(const RefPtr<FocusHub>& focusHub)
@@ -703,7 +764,6 @@ void SearchPattern::InitFocusEvent(const RefPtr<FocusHub>& focusHub)
 
 void SearchPattern::HandleFocusEvent()
 {
-    LOGI("Search %{public}d on focus", GetHost()->GetId());
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto textFieldFrameNode = DynamicCast<FrameNode>(host->GetChildAtIndex(TEXTFIELD_INDEX));
@@ -715,7 +775,6 @@ void SearchPattern::HandleFocusEvent()
 
 void SearchPattern::HandleBlurEvent()
 {
-    LOGI("Search %{public}d on blur", GetHost()->GetId());
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto textFieldFrameNode = DynamicCast<FrameNode>(host->GetChildAtIndex(TEXTFIELD_INDEX));
@@ -745,7 +804,6 @@ void SearchPattern::InitClickEvent()
 
 void SearchPattern::HandleClickEvent(GestureEvent& info)
 {
-    LOGI("Search %{public}d on click", GetHost()->GetId());
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto textFieldFrameNode = DynamicCast<FrameNode>(host->GetChildAtIndex(TEXTFIELD_INDEX));
@@ -776,7 +834,7 @@ void SearchPattern::ToJsonValueForTextField(std::unique_ptr<JsonValue>& json) co
     auto textFieldPattern = textFieldFrameNode->GetPattern<TextFieldPattern>();
     CHECK_NULL_VOID(textFieldPattern);
 
-    json->Put("value", textFieldPattern->GetTextEditingValue().text.c_str());
+    json->Put("value", textFieldPattern->GetTextValue().c_str());
     json->Put("placeholder", textFieldPattern->GetPlaceHolder().c_str());
     json->Put("placeholderColor", textFieldPattern->GetPlaceholderColor().c_str());
     json->Put("placeholderFont", textFieldPattern->GetPlaceholderFont().c_str());
@@ -792,6 +850,9 @@ void SearchPattern::ToJsonValueForTextField(std::unique_ptr<JsonValue>& json) co
     json->Put("textFont", textFontJson->ToString().c_str());
     json->Put("copyOption",
         ConvertCopyOptionsToString(textFieldLayoutProperty->GetCopyOptionsValue(CopyOptions::None)).c_str());
+    auto maxLength = GetMaxLength();
+    json->Put("maxLength", GreatOrEqual(maxLength, Infinity<uint32_t>()) ? "INF" : std::to_string(maxLength).c_str());
+    json->Put("type", textFieldPattern->TextInputTypeToString().c_str());
     textFieldLayoutProperty->HasCopyOptions();
 }
 
@@ -968,4 +1029,17 @@ void SearchPattern::OnColorConfigurationUpdate()
         textField_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     }
 }
+
+uint32_t SearchPattern::GetMaxLength() const
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, Infinity<uint32_t>());
+    auto textFieldFrameNode = DynamicCast<FrameNode>(host->GetChildAtIndex(TEXTFIELD_INDEX));
+    CHECK_NULL_RETURN(textFieldFrameNode, Infinity<uint32_t>());
+    auto textFieldLayoutProperty = textFieldFrameNode->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_RETURN(textFieldLayoutProperty, Infinity<uint32_t>());
+    return textFieldLayoutProperty->HasMaxLength() ? textFieldLayoutProperty->GetMaxLengthValue(Infinity<uint32_t>())
+                                          : Infinity<uint32_t>();
+}
+
 } // namespace OHOS::Ace::NG

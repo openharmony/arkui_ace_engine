@@ -43,6 +43,7 @@ void NavDestinationModelNG::Create()
     auto* stack = ViewStackProcessor::GetInstance();
     // navDestination node
     int32_t nodeId = stack->ClaimNodeId();
+    ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::NAVDESTINATION_VIEW_ETS_TAG, nodeId);
     auto navDestinationNode = NavDestinationGroupNode::GetOrCreateGroupNode(
         V2::NAVDESTINATION_VIEW_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
     if (!navDestinationNode->GetTitleBarNode()) {
@@ -55,6 +56,7 @@ void NavDestinationModelNG::Create()
     // content node
     if (!navDestinationNode->GetTitleBarNode()) {
         int32_t contentNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+        ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::NAVDESTINATION_CONTENT_ETS_TAG, contentNodeId);
         auto contentNode = FrameNode::GetOrCreateFrameNode(V2::NAVDESTINATION_CONTENT_ETS_TAG, contentNodeId,
             []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
         navDestinationNode->AddChild(contentNode);
@@ -67,6 +69,7 @@ void NavDestinationModelNG::Create()
 void NavDestinationModelNG::CreateImageButton(const RefPtr<NavDestinationGroupNode>& navDestinationNode)
 {
     int32_t titleBarNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::TITLE_BAR_ETS_TAG, titleBarNodeId);
     auto titleBarNode = TitleBarNode::GetOrCreateTitleBarNode(
         V2::TITLE_BAR_ETS_TAG, titleBarNodeId, []() { return AceType::MakeRefPtr<TitleBarPattern>(); });
     navDestinationNode->AddChild(titleBarNode);
@@ -85,7 +88,6 @@ void NavDestinationModelNG::CreateImageButton(const RefPtr<NavDestinationGroupNo
     auto backButtonLayoutProperty = backButtonNode->GetLayoutProperty<ImageLayoutProperty>();
     CHECK_NULL_VOID(backButtonLayoutProperty);
     backButtonLayoutProperty->UpdateImageSourceInfo(imageSourceInfo);
-    backButtonLayoutProperty->UpdateVisibility(VisibleType::GONE);
     backButtonNode->MarkModifyDone();
 
     auto titleBarLayoutProperty = titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>();
@@ -96,6 +98,7 @@ void NavDestinationModelNG::CreateImageButton(const RefPtr<NavDestinationGroupNo
 void NavDestinationModelNG::CreateBackButton(const RefPtr<NavDestinationGroupNode>& navDestinationNode)
 {
     int32_t titleBarNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::TITLE_BAR_ETS_TAG, titleBarNodeId);
     auto titleBarNode = TitleBarNode::GetOrCreateTitleBarNode(
         V2::TITLE_BAR_ETS_TAG, titleBarNodeId, []() { return AceType::MakeRefPtr<TitleBarPattern>(); });
     navDestinationNode->AddChild(titleBarNode);
@@ -104,15 +107,17 @@ void NavDestinationModelNG::CreateBackButton(const RefPtr<NavDestinationGroupNod
     int32_t backButtonNodeId = ElementRegister::GetInstance()->MakeUniqueId();
     auto backButtonNode =
         FrameNode::CreateFrameNode(V2::BACK_BUTTON_ETS_TAG, backButtonNodeId, AceType::MakeRefPtr<ButtonPattern>());
+    auto buttonPattern = backButtonNode->GetPattern<ButtonPattern>();
+    CHECK_NULL_VOID(buttonPattern);
+    buttonPattern->SetSkipColorConfigurationUpdate();
     titleBarNode->AddChild(backButtonNode);
     titleBarNode->SetBackButton(backButtonNode);
     auto backButtonLayoutProperty = backButtonNode->GetLayoutProperty<ButtonLayoutProperty>();
     CHECK_NULL_VOID(backButtonLayoutProperty);
-    backButtonLayoutProperty->UpdateVisibility(VisibleType::GONE);
     backButtonLayoutProperty->UpdateUserDefinedIdealSize(
         CalcSize(CalcLength(BACK_BUTTON_SIZE), CalcLength(BACK_BUTTON_SIZE)));
     backButtonLayoutProperty->UpdateType(ButtonType::NORMAL);
-    backButtonLayoutProperty->UpdateBorderRadius(BorderRadiusProperty(BUTTON_RADIUS));
+    backButtonLayoutProperty->UpdateBorderRadius(BorderRadiusProperty(BUTTON_RADIUS_SIZE));
     backButtonLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
     auto renderContext = backButtonNode->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
@@ -171,6 +176,7 @@ void NavDestinationModelNG::Create(std::function<void()>&& deepRenderFunc)
         ViewStackProcessor::GetInstance()->Finish();
         return parent;
     };
+    ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::NAVDESTINATION_VIEW_ETS_TAG, nodeId);
     auto navDestinationNode = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG, nodeId,
         [shallowBuilder = AceType::MakeRefPtr<ShallowBuilder>(std::move(deepRender))]() {
             return AceType::MakeRefPtr<NavDestinationPattern>(shallowBuilder);
@@ -185,6 +191,7 @@ void NavDestinationModelNG::Create(std::function<void()>&& deepRenderFunc)
     // content node
     if (!navDestinationNode->GetContentNode()) {
         int32_t contentNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+        ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::NAVDESTINATION_CONTENT_ETS_TAG, contentNodeId);
         auto contentNode = FrameNode::GetOrCreateFrameNode(V2::NAVDESTINATION_CONTENT_ETS_TAG, contentNodeId,
             []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
         navDestinationNode->AddChild(contentNode);
@@ -316,12 +323,14 @@ void NavDestinationModelNG::SetCustomTitle(const RefPtr<AceType>& customNode)
         } else {
             navDestinationNode->SetTitle(customTitle);
             navDestinationNode->UpdateTitleNodeOperation(ChildNodeOperation::REPLACE);
+            navDestinationNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         }
         return;
     }
     navDestinationNode->SetTitle(customTitle);
     navDestinationNode->UpdateTitleNodeOperation(ChildNodeOperation::ADD);
     navDestinationNode->UpdatePrevTitleIsCustom(true);
+    navDestinationNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
 void NavDestinationModelNG::SetTitleHeight(int32_t height)
@@ -334,9 +343,21 @@ void NavDestinationModelNG::SetTitleHeight(int32_t height)
     }
 }
 
-void NavDestinationModelNG::SetTitleHeight(const Dimension& titleHeight)
+void NavDestinationModelNG::SetTitleHeight(const Dimension& titleHeight, bool isValid)
 {
-    ACE_UPDATE_LAYOUT_PROPERTY(NavDestinationLayoutProperty, TitleBarHeight, titleHeight);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto navDestinationGroupNode = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
+    CHECK_NULL_VOID(navDestinationGroupNode);
+    auto navDestinationLayoutProperty = navDestinationGroupNode->GetLayoutProperty<NavDestinationLayoutProperty>();
+    CHECK_NULL_VOID(navDestinationLayoutProperty);
+    if (isValid) {
+        ACE_UPDATE_LAYOUT_PROPERTY(NavDestinationLayoutProperty, TitleBarHeight, titleHeight);
+    } else {
+        if (navDestinationLayoutProperty->HasTitleBarHeight()) {
+            return;
+        }
+        ACE_UPDATE_LAYOUT_PROPERTY(NavDestinationLayoutProperty, TitleBarHeight, Dimension(0.0f));
+    }
 }
 
 void NavDestinationModelNG::SetOnShown(std::function<void()>&& onShow)
@@ -370,5 +391,10 @@ RefPtr<AceType> NavDestinationModelNG::CreateEmpty()
     auto uiNode = ViewStackProcessor::GetInstance()->Finish();
     uiNode->SetRemoveSilently(true);
     return uiNode;
+}
+
+void NavDestinationModelNG::SetHideTitleBar(FrameNode* frameNode, bool hideTitleBar)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(NavDestinationLayoutProperty, HideTitleBar, hideTitleBar, frameNode);
 }
 } // namespace OHOS::Ace::NG

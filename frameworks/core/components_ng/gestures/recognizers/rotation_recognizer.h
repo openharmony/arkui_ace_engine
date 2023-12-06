@@ -44,12 +44,15 @@ private:
     double ComputeAngle();
     void OnResetStatus() override;
     void SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& callback);
+    GestureJudgeResult TriggerGestureJudgeCallback();
     static double ChangeValueRange(double value);
 
     double angle_ = 0.0;
     double initialAngle_ = 0.0;
     double currentAngle_ = 0.0;
     double resultAngle_ = 0.0;
+    double lastAngle_ = 0.0;
+    bool angleSignChanged_ = false;
     TimeStamp time_;
 };
 

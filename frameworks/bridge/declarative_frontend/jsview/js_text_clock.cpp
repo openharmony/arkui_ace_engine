@@ -22,8 +22,11 @@
 #include "base/utils/string_utils.h"
 #include "bridge/declarative_frontend/jsview/js_view_abstract.h"
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
+#include "bridge/declarative_frontend/jsview/js_utils.h"
 #include "bridge/declarative_frontend/jsview/models/text_clock_model_impl.h"
 #include "core/components/common/properties/text_style.h"
+#include "core/components/common/properties/text_style_parser.h"
+#include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/text_clock/text_clock_model.h"
 #include "core/components_ng/pattern/text_clock/text_clock_model_ng.h"
 
@@ -79,7 +82,6 @@ void JSTextClock::Create(const JSCallbackInfo& info)
     auto controller = TextClockModel::GetInstance()->Create();
     if (info.Length() < 1 || !info[0]->IsObject()) {
         SetFontDefault();
-        LOGD("TextClock Info is non-valid");
         return;
     }
     JSRef<JSObject> optionsObject = JSRef<JSObject>::Cast(info[0]);
@@ -88,7 +90,6 @@ void JSTextClock::Create(const JSCallbackInfo& info)
         TextClockModel::GetInstance()->SetHoursWest(hourWestVal->ToNumber<int32_t>());
     } else {
         TextClockModel::GetInstance()->SetHoursWest(INT_MAX);
-        LOGE("hourWest args is invalid");
     }
     auto controllerObj = optionsObject->GetProperty("controller");
     if (!controllerObj->IsUndefined() && !controllerObj->IsNull() && controllerObj->IsObject()) {
@@ -96,13 +97,10 @@ void JSTextClock::Create(const JSCallbackInfo& info)
         if (jsController != nullptr) {
             if (controller) {
                 jsController->AddController(controller);
-            } else {
-                LOGE("TextClockController is nullptr");
             }
         }
         return;
     }
-    LOGE("controllerObj is nullptr or undefined or invalid");
 }
 
 void JSTextClock::JSBind(BindingTarget globalObj)
@@ -123,6 +121,8 @@ void JSTextClock::JSBind(BindingTarget globalObj)
     JSClass<JSTextClock>::StaticMethod("fontWeight", &JSTextClock::SetFontWeight, opt);
     JSClass<JSTextClock>::StaticMethod("fontStyle", &JSTextClock::SetFontStyle, opt);
     JSClass<JSTextClock>::StaticMethod("fontFamily", &JSTextClock::SetFontFamily, opt);
+    JSClass<JSTextClock>::StaticMethod("textShadow", &JSTextClock::SetTextShadow, opt);
+    JSClass<JSTextClock>::StaticMethod("fontFeature", &JSTextClock::SetFontFeature, opt);
     JSClass<JSTextClock>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 
@@ -139,7 +139,6 @@ void JSTextClock::SetFontDefault()
 void JSTextClock::SetTextColor(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The argv is wrong, it is supposed to have at least 1 argument");
         return;
     }
     Color textColor;
@@ -156,7 +155,6 @@ void JSTextClock::SetTextColor(const JSCallbackInfo& info)
 void JSTextClock::SetFontSize(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("JSTextInput::SetFontSize The argv is wrong, it is supposed to have at least 1 argument");
         return;
     }
     auto pipelineContext = PipelineContext::GetCurrentContext();
@@ -183,7 +181,6 @@ void JSTextClock::SetFontSize(const JSCallbackInfo& info)
 void JSTextClock::SetFontWeight(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The argv is wrong, it is supposed to have at least 1 argument");
         return;
     }
     RefPtr<TextTheme> textTheme = GetTheme<TextTheme>();
@@ -210,7 +207,6 @@ void JSTextClock::SetFontWeight(const JSCallbackInfo& info)
 void JSTextClock::SetFontStyle(int32_t value)
 {
     if (value < 0 || value >= static_cast<int32_t>(FONT_STYLES.size())) {
-        LOGE("TextTimer fontStyle(%{public}d) illegal value", value);
         return;
     }
     TextClockModel::GetInstance()->SetItalicFontStyle(FONT_STYLES[value]);
@@ -219,12 +215,10 @@ void JSTextClock::SetFontStyle(int32_t value)
 void JSTextClock::SetFontFamily(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The argv is wrong, it is supposed to have at least 1 argument");
         return;
     }
     std::vector<std::string> fontFamilies;
     if (!ParseJsFontFamilies(info[0], fontFamilies)) {
-        LOGE("Parse FontFamilies failed");
         return;
     }
     TextClockModel::GetInstance()->SetFontFamily(fontFamilies);
@@ -233,11 +227,9 @@ void JSTextClock::SetFontFamily(const JSCallbackInfo& info)
 void JSTextClock::SetFormat(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have atleast 1 argument.");
         return;
     }
     if (!info[0]->IsString()) {
-        LOGE("The arg is not string,it is supposed to be a string.");
         TextClockModel::GetInstance()->SetFormat(DEFAULT_FORMAT);
         return;
     }
@@ -267,6 +259,33 @@ void JSTextClock::SetFormat(const JSCallbackInfo& info)
     TextClockModel::GetInstance()->SetFormat(value);
 }
 
+void JSTextClock::SetTextShadow(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        return;
+    }
+    std::vector<Shadow> shadows;
+    ParseTextShadowFromShadowObject(info[0], shadows);
+    if (!shadows.empty()) {
+        TextClockModel::GetInstance()->SetTextShadow(shadows);
+    }
+}
+
+void JSTextClock::SetFontFeature(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        LOGE("The arg is wrong, it is supposed to have atleast 1 argument.");
+        return;
+    }
+    if (!info[0]->IsString()) {
+        LOGE("The arg is not string,it is supposed to be a string.");
+        return;
+    }
+
+    std::string fontFeatureSettings = info[0]->ToString();
+    TextClockModel::GetInstance()->SetFontFeature(ParseFontFeatureSettings(fontFeatureSettings));
+}
+
 void JSTextClock::JsOnDateChange(const JSCallbackInfo& info)
 {
     if (!info[0]->IsFunction()) {
@@ -274,9 +293,12 @@ void JSTextClock::JsOnDateChange(const JSCallbackInfo& info)
     }
 
     auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
-    auto onChange = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](const std::string& value) {
+    WeakPtr<NG::FrameNode> targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto onChange = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = targetNode](
+                        const std::string& value) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("TextClock.onDateChange");
+        PipelineContext::SetCallBackNode(node);
         auto newJSVal = JSRef<JSVal>::Make(ToJSValue(value));
         func->ExecuteJS(1, &newJSVal);
     };

@@ -25,6 +25,9 @@
 #include "base/utils/string_utils.h"
 #include "base/utils/system_properties.h"
 #include "base/utils/utils.h"
+#include "core/common/ace_engine.h"
+#include "core/common/ace_view.h"
+#include "core/common/container.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/declaration/button/button_declaration.h"
@@ -57,7 +60,10 @@
 #endif
 namespace OHOS::Ace::NG {
 namespace {
-constexpr int32_t SECONDS_PER_HOUR = 3600;
+constexpr uint32_t SECONDS_PER_HOUR = 3600;
+constexpr uint32_t SECONDS_PER_MINUTE = 60;
+const std::string FORMAT_HH_MM_SS = "%02d:%02d:%02d";
+const std::string FORMAT_MM_SS = "%02d:%02d";
 constexpr int32_t MILLISECONDS_TO_SECONDS = 1000;
 constexpr uint32_t CURRENT_POS = 1;
 constexpr uint32_t SLIDER_POS = 2;
@@ -76,8 +82,13 @@ enum SliderChangeMode {
 
 std::string IntTimeToText(uint32_t time)
 {
-    bool needShowHour = time > SECONDS_PER_HOUR;
-    return Localization::GetInstance()->FormatDuration(time, needShowHour);
+    auto minutes = (time % SECONDS_PER_HOUR) / SECONDS_PER_MINUTE;
+    auto seconds = time % SECONDS_PER_MINUTE;
+    if (time >= SECONDS_PER_HOUR) {
+        auto hours = time / SECONDS_PER_HOUR;
+        return StringUtils::FormatString(FORMAT_HH_MM_SS.c_str(), hours, minutes, seconds);
+    }
+    return StringUtils::FormatString(FORMAT_MM_SS.c_str(), minutes, seconds);
 }
 
 SizeF CalculateFitContain(const SizeF& videoSize, const SizeF& layoutSize)
@@ -298,7 +309,42 @@ void VideoPattern::RegisterMediaPlayerEvent()
 
     mediaPlayer_->RegisterMediaPlayerEvent(
         positionUpdatedEvent, stateChangedEvent, errorEvent, resolutionChangeEvent, startRenderFrameEvent);
+
+#ifdef VIDEO_TEXTURE_SUPPORTED
+    auto&& textureRefreshEvent = [videoPattern, uiTaskExecutor](int32_t instanceId, int64_t textureId) {
+        uiTaskExecutor.PostSyncTask([&videoPattern, instanceId, textureId] {
+            auto video = videoPattern.Upgrade();
+            CHECK_NULL_VOID(video);
+            void* nativeWindow = video->GetNativeWindow(instanceId, textureId);
+            if (!nativeWindow) {
+                LOGE("the native window is nullptr.");
+                return;
+            }
+            video->OnTextureRefresh(nativeWindow);
+        });
+    };
+    mediaPlayer_->RegisterTextureEvent(textureRefreshEvent);
+#endif
 }
+
+#ifdef VIDEO_TEXTURE_SUPPORTED
+void* VideoPattern::GetNativeWindow(int32_t instanceId, int64_t textureId)
+{
+    auto container = AceEngine::Get().GetContainer(instanceId);
+    CHECK_NULL_RETURN(container, nullptr);
+    auto nativeView = static_cast<AceView*>(container->GetView());
+    CHECK_NULL_RETURN(nativeView, nullptr);
+    return const_cast<void*>(nativeView->GetNativeWindowById(textureId));
+}
+
+void VideoPattern::OnTextureRefresh(void* surface)
+{
+    CHECK_NULL_VOID(surface);
+    auto renderContextForMediaPlayer = renderContextForMediaPlayerWeakPtr_.Upgrade();
+    CHECK_NULL_VOID(renderContextForMediaPlayer);
+    renderContextForMediaPlayer->MarkNewFrameAvailable(surface);
+}
+#endif
 
 void VideoPattern::PrintPlayerStatus(PlaybackStatus status)
 {
@@ -661,12 +707,24 @@ void VideoPattern::OnAttachToFrameNode()
     CHECK_NULL_VOID(renderContext);
     static RenderContext::ContextParam param = { RenderContext::ContextType::HARDWARE_SURFACE, "MediaPlayerSurface" };
     renderContextForMediaPlayer_->InitContext(false, param);
+
+    if (SystemProperties::GetExtSurfaceEnabled()) {
+        RegisterRenderContextCallBack();
+    }
+
+    renderContext->UpdateBackgroundColor(Color::BLACK);
+    renderContextForMediaPlayer_->UpdateBackgroundColor(Color::BLACK);
+    renderContext->SetClipToBounds(true);
+}
+
+void VideoPattern::RegisterRenderContextCallBack()
+{
+#ifndef VIDEO_TEXTURE_SUPPORTED
     auto isFullScreen = IsFullScreen();
-    if (SystemProperties::GetExtSurfaceEnabled() && !isFullScreen) {
+    if (!isFullScreen) {
         auto OnAreaChangedCallBack = [weak = WeakClaim(this)](float x, float y, float w, float h) mutable {
             auto videoPattern = weak.Upgrade();
             CHECK_NULL_VOID(videoPattern);
-
             auto host = videoPattern->GetHost();
             CHECK_NULL_VOID(host);
             auto geometryNode = host->GetGeometryNode();
@@ -675,11 +733,9 @@ void VideoPattern::OnAttachToFrameNode()
             auto layoutProperty = videoPattern->GetLayoutProperty<VideoLayoutProperty>();
             CHECK_NULL_VOID(layoutProperty);
             auto videoFrameSize = MeasureVideoContentLayout(videoNodeSize, layoutProperty);
-
             Rect rect = Rect(x + (videoNodeSize.Width() - videoFrameSize.Width()) / AVERAGE_VALUE,
                 y + (videoNodeSize.Height() - videoFrameSize.Height()) / AVERAGE_VALUE, videoFrameSize.Width(),
                 videoFrameSize.Height());
-
             if (videoPattern->renderSurface_) {
                 if (videoPattern->renderSurface_->SetExtSurfaceBoundsSync(rect.Left(),
                     rect.Top(), rect.Width(), rect.Height())) {
@@ -689,9 +745,27 @@ void VideoPattern::OnAttachToFrameNode()
         };
         renderContextForMediaPlayer_->SetSurfaceChangedCallBack(OnAreaChangedCallBack);
     }
-    renderContext->UpdateBackgroundColor(Color::BLACK);
-    renderContextForMediaPlayer_->UpdateBackgroundColor(Color::BLACK);
-    renderContext->SetClipToBounds(true);
+#else
+    renderSurfaceWeakPtr_ = renderSurface_;
+    renderContextForMediaPlayerWeakPtr_ = renderContextForMediaPlayer_;
+    auto OnAttachCallBack = [weak = WeakClaim(this)](int64_t textureId, bool isAttach) mutable {
+        LOGI("OnAttachCallBack.");
+        auto videoPattern = weak.Upgrade();
+        CHECK_NULL_VOID(videoPattern);
+        if (auto renderSurface = videoPattern->renderSurfaceWeakPtr_.Upgrade(); renderSurface) {
+            renderSurface->AttachToGLContext(textureId, isAttach);
+        }
+    };
+    renderContextForMediaPlayer_->AddAttachCallBack(OnAttachCallBack);
+    auto OnUpdateCallBack = [weak = WeakClaim(this)](std::vector<float>& matrix) mutable {
+        auto videoPattern = weak.Upgrade();
+        CHECK_NULL_VOID(videoPattern);
+        if (auto renderSurface = videoPattern->renderSurfaceWeakPtr_.Upgrade(); renderSurface) {
+            renderSurface->UpdateTextureImage(matrix);
+        }
+    };
+    renderContextForMediaPlayer_->AddUpdateCallBack(OnUpdateCallBack);
+#endif
 }
 
 void VideoPattern::OnModifyDone()
@@ -721,8 +795,15 @@ void VideoPattern::OnModifyDone()
 
     // Update the media player when video node is not in full screen or current node is full screen node
     if (!fullScreenNodeId_.has_value() || InstanceOf<VideoFullScreenNode>(this)) {
-        TAG_LOGD(AceLogTag::ACE_VIDEO, "trigger modify media player");
-        UpdateMediaPlayerOnBg();
+        auto pipelineContext = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipelineContext);
+        auto uiTaskExecutor = SingleTaskExecutor::Make(pipelineContext->GetTaskExecutor(), TaskExecutor::TaskType::UI);
+        uiTaskExecutor.PostTask([weak = WeakClaim(this)]() {
+            auto videoPattern = weak.Upgrade();
+            CHECK_NULL_VOID(videoPattern);
+            TAG_LOGD(AceLogTag::ACE_VIDEO, "trigger modify media player");
+            videoPattern->UpdateMediaPlayerOnBg();
+        });
     }
 
     if (SystemProperties::GetExtSurfaceEnabled()) {
@@ -896,8 +977,12 @@ bool VideoPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, 
 
 void VideoPattern::OnAreaChangedInner()
 {
+#ifndef VIDEO_TEXTURE_SUPPORTED
     auto isFullScreen = IsFullScreen();
     if (SystemProperties::GetExtSurfaceEnabled() && isFullScreen) {
+#else
+    if (SystemProperties::GetExtSurfaceEnabled()) {
+#endif
         auto host = GetHost();
         CHECK_NULL_VOID(host);
         auto geometryNode = host->GetGeometryNode();
@@ -1394,8 +1479,11 @@ void VideoPattern::EnableDrag()
         imageSrcBefore = layoutProperty->GetPosterImageInfo().value().GetSrc();
     }
 #ifdef ENABLE_DRAG_FRAMEWORK
-    auto dragEnd = [this, videoSrcBefore](const RefPtr<OHOS::Ace::DragEvent>& event, const std::string& extraParams) {
-        auto videoLayoutProperty = this->GetLayoutProperty<VideoLayoutProperty>();
+    auto dragEnd = [wp = WeakClaim(this), videoSrcBefore](
+                       const RefPtr<OHOS::Ace::DragEvent>& event, const std::string& extraParams) {
+        auto videoPattern = wp.Upgrade();
+        CHECK_NULL_VOID(videoPattern);
+        auto videoLayoutProperty = videoPattern->GetLayoutProperty<VideoLayoutProperty>();
         CHECK_NULL_VOID(videoLayoutProperty);
         auto unifiedData = event->GetData();
         std::string videoSrc = "";
@@ -1415,20 +1503,22 @@ void VideoPattern::EnableDrag()
             return;
         }
 
-        dragEndAutoPlay_ = true;
+        videoPattern->SetIsDragEndAutoPlay(true);
         videoLayoutProperty->UpdateVideoSource(videoSrc);
-
-        auto frameNode = this->GetHost();
+        auto frameNode = videoPattern->GetHost();
+        CHECK_NULL_VOID(frameNode);
         frameNode->MarkModifyDone();
     };
 #else
-    auto dragEnd = [this, videoSrcBefore, imageSrcBefore](
+    auto dragEnd = [wp = WeakClaim(this), videoSrcBefore, imageSrcBefore](
                        const RefPtr<OHOS::Ace::DragEvent>& event, const std::string& extraParams) {
         if (extraParams.empty()) {
             TAG_LOGW(AceLogTag::ACE_VIDEO, "extraParams is empty");
             return;
         }
-        auto videoLayoutProperty = this->GetLayoutProperty<VideoLayoutProperty>();
+        auto videoPattern = wp.Upgrade();
+        CHECK_NULL_VOID(videoPattern);
+        auto videoLayoutProperty = videoPattern->GetLayoutProperty<VideoLayoutProperty>();
         CHECK_NULL_VOID(videoLayoutProperty);
         auto json = JsonUtil::ParseJsonString(extraParams);
         std::string key = "extraInfo";
@@ -1448,21 +1538,22 @@ void VideoPattern::EnableDrag()
             imageSrc = extraInfo.substr(0, index);
         }
 
-        bool isInitialState = this->isInitialState_;
+        bool isInitialState = videoPattern->IsInitialState();
         if ((!isInitialState && videoSrc == videoSrcBefore) ||
             (isInitialState && videoSrc == videoSrcBefore && imageSrc == imageSrcBefore)) {
             return;
         }
 
-        dragEndAutoPlay_ = true;
+        videoPattern->SetIsDragEndAutoPlay(true);
         videoLayoutProperty->UpdateVideoSource(videoSrc);
         ImageSourceInfo imageSourceInfo = ImageSourceInfo(imageSrc);
         videoLayoutProperty->UpdatePosterImageInfo(imageSourceInfo);
 
         if (!isInitialState) {
-            this->SetIsStop(true);
+            videoPattern->SetIsStop(true);
         }
-        auto frameNode = this->GetHost();
+        auto frameNode = videoPattern->GetHost();
+        CHECK_NULL_VOID(frameNode);
         frameNode->MarkModifyDone();
     };
 #endif

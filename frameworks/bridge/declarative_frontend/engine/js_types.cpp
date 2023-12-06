@@ -23,7 +23,6 @@ Local<JSValueRef> JsStopPropagation(panda::JsiRuntimeCallInfo *info)
     Local<JSValueRef> thisObj = info->GetThisRef();
     auto eventInfo = static_cast<BaseEventInfo*>(panda::Local<panda::ObjectRef>(thisObj)->GetNativePointerField(0));
     if (eventInfo) {
-        LOGD("JsStopPropagation is trigger");
         eventInfo->SetStopPropagation(true);
     }
     return JSValueRef::Undefined(info->GetVM());
@@ -34,7 +33,6 @@ Local<JSValueRef> JsPreventDefault(panda::JsiRuntimeCallInfo *info)
     Local<JSValueRef> thisObj = info->GetThisRef();
     auto eventInfo = static_cast<BaseEventInfo*>(panda::Local<panda::ObjectRef>(thisObj)->GetNativePointerField(0));
     if (eventInfo) {
-        LOGD("JsPreventDefault is trigger");
         eventInfo->SetPreventDefault(true);
     }
     return JSValueRef::Undefined(info->GetVM());
@@ -59,27 +57,29 @@ Local<JSValueRef> JsGetHistoricalPoints(panda::JsiRuntimeCallInfo *info)
         const OHOS::Ace::Offset& screenLocation = point.GetScreenLocation();
         touchObject->Set(info->GetVM(), ToJSValue("id"), ToJSValue(point.GetFingerId()));
         touchObject->Set(info->GetVM(), ToJSValue("type"), ToJSValue(static_cast<int32_t>(point.GetTouchType())));
-        touchObject->Set(info->GetVM(), ToJSValue("x"), ToJSValue(SystemProperties::Px2Vp(localLocation.GetX())));
-        touchObject->Set(info->GetVM(), ToJSValue("y"), ToJSValue(SystemProperties::Px2Vp(localLocation.GetY())));
-        touchObject->Set(
-            info->GetVM(), ToJSValue("screenX"), ToJSValue(SystemProperties::Px2Vp(globalLocation.GetX())));
-        touchObject->Set(
-            info->GetVM(), ToJSValue("screenY"), ToJSValue(SystemProperties::Px2Vp(globalLocation.GetY())));
-        touchObject->Set(
-            info->GetVM(), ToJSValue("windowX"), ToJSValue(SystemProperties::Px2Vp(globalLocation.GetX())));
-        touchObject->Set(
-            info->GetVM(), ToJSValue("windowY"), ToJSValue(SystemProperties::Px2Vp(globalLocation.GetY())));
-        touchObject->Set(
-            info->GetVM(), ToJSValue("displayX"), ToJSValue(SystemProperties::Px2Vp(screenLocation.GetX())));
-        touchObject->Set(
-            info->GetVM(), ToJSValue("displayY"), ToJSValue(SystemProperties::Px2Vp(screenLocation.GetY())));
+        touchObject->Set(info->GetVM(),
+            ToJSValue("x"), ToJSValue(PipelineBase::Px2VpWithCurrentDensity(localLocation.GetX())));
+        touchObject->Set(info->GetVM(),
+            ToJSValue("y"), ToJSValue(PipelineBase::Px2VpWithCurrentDensity(localLocation.GetY())));
+        touchObject->Set(info->GetVM(),
+            ToJSValue("screenX"), ToJSValue(PipelineBase::Px2VpWithCurrentDensity(globalLocation.GetX())));
+        touchObject->Set(info->GetVM(),
+            ToJSValue("screenY"), ToJSValue(PipelineBase::Px2VpWithCurrentDensity(globalLocation.GetY())));
+        touchObject->Set(info->GetVM(),
+            ToJSValue("windowX"), ToJSValue(PipelineBase::Px2VpWithCurrentDensity(globalLocation.GetX())));
+        touchObject->Set(info->GetVM(),
+            ToJSValue("windowY"), ToJSValue(PipelineBase::Px2VpWithCurrentDensity(globalLocation.GetY())));
+        touchObject->Set(info->GetVM(),
+            ToJSValue("displayX"), ToJSValue(PipelineBase::Px2VpWithCurrentDensity(screenLocation.GetX())));
+        touchObject->Set(info->GetVM(),
+            ToJSValue("displayY"), ToJSValue(PipelineBase::Px2VpWithCurrentDensity(screenLocation.GetY())));
 
         objRef->Set(info->GetVM(), ToJSValue("touchObject"), (touchObject));
         objRef->Set(info->GetVM(), ToJSValue("size"), ToJSValue(point.GetSize()));
         objRef->Set(info->GetVM(), ToJSValue("force"), ToJSValue(static_cast<double>(point.GetForce())));
         objRef->Set(info->GetVM(), ToJSValue("timestamp"),
             ToJSValue(static_cast<double>(point.GetTimeStamp().time_since_epoch().count())));
-        
+
         ArrayRef::SetValueAt(info->GetVM(), valueArray, index++, objRef);
     }
 

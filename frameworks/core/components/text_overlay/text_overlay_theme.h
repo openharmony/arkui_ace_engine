@@ -48,37 +48,6 @@ public:
             if (!themeConstants) {
                 return theme;
             }
-            // init theme from global data
-            theme->menuBorder_ = Border(BorderEdge(themeConstants->GetColor(THEME_TEXT_OVERLAY_MENU_BORDER_COLOR),
-                themeConstants->GetDimension(THEME_TEXT_OVERLAY_MENU_BORDER_WIDTH),
-                BorderStyle(themeConstants->GetInt(THEME_TEXT_OVERLAY_MENU_BORDER_STYLE))));
-            theme->menuBackgroundColor_ = themeConstants->GetColor(THEME_TEXT_OVERLAY_MENU_BACKGROUND_COLOR);
-            theme->handleColor_ = themeConstants->GetColor(THEME_TEXT_OVERLAY_HANDLE_COLOR);
-            theme->handleColorInner_ = themeConstants->GetColor(THEME_TEXT_OVERLAY_HANDLE_COLOR_INNER);
-            theme->buttonClickedColor_ = themeConstants->GetColor(THEME_TEXT_OVERLAY_BUTTON_CLICKED_COLOR);
-            theme->buttonHoverColor_ = themeConstants->GetColor(THEME_TEXT_OVERLAY_BUTTON_HOVER_COLOR);
-            theme->iconColor_ = themeConstants->GetColor(THEME_TEXT_OVERLAY_MENU_ICON_COLOR);
-            theme->menuIconColor_ = themeConstants->GetColor(THEME_TEXT_OVERLAY_MENU_ICON_COLOR);
-            theme->menuPadding_ = Edge(themeConstants->GetDimension(THEME_TEXT_OVERLAY_MENU_PADDING_LEFT),
-                themeConstants->GetDimension(THEME_TEXT_OVERLAY_MENU_PADDING_TOP),
-                themeConstants->GetDimension(THEME_TEXT_OVERLAY_MENU_PADDING_RIGHT),
-                themeConstants->GetDimension(THEME_TEXT_OVERLAY_MENU_PADDING_BOTTOM));
-            theme->handleDiameter_ = themeConstants->GetDimension(THEME_TEXT_OVERLAY_HANDLE_DIAMETER);
-            theme->handleDiameterInner_ = themeConstants->GetDimension(THEME_TEXT_OVERLAY_HANDLE_DIAMETER_INNER);
-            theme->menuSpacingWithText_ = themeConstants->GetDimension(THEME_TEXT_OVERLAY_MENU_SPACING_WITH_TEXT);
-            theme->menuButtonWidth_ = themeConstants->GetDimension(THEME_TEXT_OVERLAY_MENU_BUTTON_WIDTH);
-            theme->menuButtonHeight_ = themeConstants->GetDimension(THEME_TEXT_OVERLAY_MENU_BUTTON_HEIGHT);
-            theme->menuButtonTextStyle_.SetFontSize(
-                themeConstants->GetDimension(THEME_TEXT_OVERLAY_BUTTON_TEXT_FONTSIZE));
-            theme->menuButtonTextStyle_.SetFontWeight(
-                FontWeight(themeConstants->GetInt(THEME_TEXT_OVERLAY_BUTTON_TEXT_FONTWEIGHT)));
-            theme->menuButtonTextStyle_.SetTextColor(themeConstants->GetColor(THEME_TEXT_OVERLAY_BUTTON_TEXT_COLOR));
-            theme->menuButtonPadding_ =
-                Edge(themeConstants->GetDimension(THEME_TEXT_OVERLAY_MENU_BUTTON_PADDING_LEFT).Value(),
-                    themeConstants->GetDimension(THEME_TEXT_OVERLAY_MENU_BUTTON_PADDING_TOP).Value(),
-                    themeConstants->GetDimension(THEME_TEXT_OVERLAY_MENU_BUTTON_PADDING_RIGHT).Value(),
-                    themeConstants->GetDimension(THEME_TEXT_OVERLAY_MENU_BUTTON_PADDING_BOTTOM).Value(),
-                    themeConstants->GetDimension(THEME_TEXT_OVERLAY_MENU_PADDING_LEFT).Unit());
             theme->backResourceId_ = themeConstants->GetResourceId(THEME_NAVIGATION_BAR_RESOURCE_ID_BACK);
             theme->moreResourceId_ = themeConstants->GetResourceId(THEME_NAVIGATION_BAR_RESOURCE_ID_MORE);
             ParsePattern(themeConstants->GetThemeStyle(), theme);
@@ -95,6 +64,27 @@ public:
             if (pattern) {
                 const double defaultTertiaryColorAlpha = 0.4;
 
+                theme->menuBorder_ = Border(BorderEdge(
+                    pattern->GetAttr<Color>("text_overlay_menu_border_color", Color()),
+                    pattern->GetAttr<Dimension>("text_overlay_menu_border_width", 0.0_vp),
+                    BorderStyle(
+                        static_cast<int32_t>(pattern->GetAttr<double>("text_overlay_menu_border_style", 0.0)))));
+                theme->menuPadding_ = Edge(pattern->GetAttr<Dimension>("text_overlay_menu_padding_left", 0.0_vp),
+                    pattern->GetAttr<Dimension>("text_overlay_menu_padding_top", 0.0_vp),
+                    pattern->GetAttr<Dimension>("text_overlay_menu_padding_right", 0.0_vp),
+                    pattern->GetAttr<Dimension>("text_overlay_menu_padding_bottom", 0.0_vp));
+                theme->menuSpacingWithText_ =
+                    pattern->GetAttr<Dimension>("text_overlay_menu_spacing_with_text", 0.0_vp);
+                theme->menuButtonWidth_ = pattern->GetAttr<Dimension>("text_overlay_menu_button_width", 0.0_vp);
+                theme->menuButtonHeight_ = pattern->GetAttr<Dimension>("text_overlay_menu_button_height", 0.0_vp);
+                theme->menuButtonTextStyle_.SetFontWeight(FontWeight(
+                    static_cast<int32_t>(pattern->GetAttr<double>("text_overlay_button_text_font_weight", 0.0))));
+                theme->menuButtonPadding_ =
+                    Edge(pattern->GetAttr<Dimension>("text_overlay_menu_button_padding_left", 0.0_vp).Value(),
+                        pattern->GetAttr<Dimension>("text_overlay_menu_button_padding_top", 0.0_vp).Value(),
+                        pattern->GetAttr<Dimension>("text_overlay_menu_button_padding_right", 0.0_vp).Value(),
+                        pattern->GetAttr<Dimension>("text_overlay_menu_button_padding_bottom", 0.0_vp).Value(),
+                        pattern->GetAttr<Dimension>("text_overlay_menu_padding_left", 0.0_vp).Unit());
                 theme->iconColor_ = pattern->GetAttr<Color>("icon_color", Color());
                 theme->menuIconColor_ = pattern->GetAttr<Color>("memu_icon_color", Color());
                 theme->handleColor_ = pattern->GetAttr<Color>("handle_outer_color", Color());
@@ -111,6 +101,7 @@ public:
                 theme->selectOverlayMaxWidth_ = pattern->GetAttr<Dimension>("select_overlay_max_width", 280.0_vp);
                 theme->alphaDisabled_ =
                     pattern->GetAttr<double>(PATTERN_BG_COLOR_DISABLED_ALPHA, defaultTertiaryColorAlpha);
+                theme->cameraInput_ = pattern->GetAttr<std::string>("camera_input", "Camera input");
             } else {
                 LOGW("find pattern of textoverlay fail");
             }
@@ -249,6 +240,11 @@ public:
         return alphaDisabled_;
     }
 
+    const std::string& GetCameraInput() const
+    {
+        return cameraInput_;
+    }
+
 protected:
     TextOverlayTheme() = default;
 
@@ -273,6 +269,7 @@ private:
     Dimension selectOverlayMaxWidth_;
     TextStyle menuButtonTextStyle_;
     double alphaDisabled_ = 0.0;
+    std::string cameraInput_;
 
     InternalResource::ResourceId backResourceId_ = InternalResource::ResourceId::NO_ID;
     InternalResource::ResourceId moreResourceId_ = InternalResource::ResourceId::NO_ID;

@@ -30,9 +30,6 @@
 
 namespace OHOS::Ace {
 
-constexpr int32_t MIN_SUBCONTAINER_ID = 1000000;
-constexpr int32_t MIN_PA_SERVICE_ID = 100000;
-
 using SubwindowMap = std::unordered_map<int32_t, RefPtr<Subwindow>>;
 
 class ACE_FORCE_EXPORT SubwindowManager final : public NonCopyable {
@@ -65,10 +62,10 @@ public:
     Rect GetParentWindowRect();
 
     void ShowMenu(const RefPtr<Component>& newComponent);
-    void ShowMenuNG(const RefPtr<NG::FrameNode>& menuNode, int32_t targetId,
-        const NG::OffsetF& offset, bool isAboveApps = false);
+    void ShowMenuNG(
+        const RefPtr<NG::FrameNode>& menuNode, int32_t targetId, const NG::OffsetF& offset, bool isAboveApps = false);
     void HideMenuNG(const RefPtr<NG::FrameNode>& menu, int32_t targetId);
-    void HideMenuNG(bool showPreviewAnimation = true);
+    void HideMenuNG(bool showPreviewAnimation = true, bool startDrag = false);
     void ShowPopup(const RefPtr<Component>& newComponent, bool disableTouchEvent = true);
     void ShowPopupNG(int32_t targetId, const NG::PopupInfo& popupInfo);
     void HidePopupNG(int32_t targetId, int32_t instanceId = -1);
@@ -76,18 +73,32 @@ public:
     void CloseMenu();
     void ClearMenu();
     void ClearMenuNG(int32_t instanceId = -1, bool inWindow = true, bool showAnimation = false);
+    void ClearPopupInSubwindow(int32_t instanceId = -1);
     RefPtr<NG::FrameNode> ShowDialogNG(const DialogProperties& dialogProps, std::function<void()>&& buildFunc);
+    void CloseDialogNG(const RefPtr<NG::FrameNode>& dialogNode);
     void HideSubWindowNG();
-
+    void HideDialogSubWindow(int32_t instanceId);
+    void SetDialogHotAreas(const std::vector<Rect>& rects, int32_t overlayId, int32_t instanceId);
     void SetHotAreas(const std::vector<Rect>& rects, int32_t overlayId = -1, int32_t instanceId = -1);
-
+    int32_t GetDialogSubWindowId()
+    {
+        return dialogSubWindowId_;
+    }
+    void SetDialogSubWindowId(int32_t dialogSubWindowId)
+    {
+        dialogSubWindowId_ = dialogSubWindowId;
+    }
     void AddDialogSubwindow(int32_t instanceId, const RefPtr<Subwindow>& subwindow);
     // Get the dialog subwindow of instance, return the window or nullptr.
+    int32_t GetDialogSubwindowInstanceId(int32_t SubwindowId);
     const RefPtr<Subwindow> GetDialogSubwindow(int32_t instanceId);
     void SetCurrentDialogSubwindow(const RefPtr<Subwindow>& subwindow);
     const RefPtr<Subwindow>& GetCurrentDialogWindow();
+    void DeleteHotAreas(int32_t subwindowid, int32_t overlayid);
 
-    void ShowToast(const std::string& message, int32_t duration, const std::string& bottom);
+    void ClearToastInSubwindow();
+    void ShowToast(
+        const std::string& message, int32_t duration, const std::string& bottom, const NG::ToastShowMode& showMode);
     void ShowDialog(const std::string& title, const std::string& message, const std::vector<ButtonInfo>& buttons,
         bool autoCancel, std::function<void(int32_t, int32_t)>&& napiCallback,
         const std::set<std::string>& dialogCallbacks);
@@ -96,9 +107,9 @@ public:
     void ShowActionMenu(const std::string& title, const std::vector<ButtonInfo>& button,
         std::function<void(int32_t, int32_t)>&& callback);
     void CloseDialog(int32_t instanceId);
-    void RegisterOnShowMenu(const std::function<void()>& callback);
-    void RegisterOnHideMenu(const std::function<void()>& callback);
     void RequestFocusSubwindow(int32_t instanceId);
+    
+    bool GetShown();
 
 private:
     RefPtr<Subwindow> GetOrCreateSubWindow();
@@ -115,7 +126,7 @@ private:
     // Used to save the relationship between container and subwindow, it is 1:1
     std::mutex subwindowMutex_;
     SubwindowMap subwindowMap_;
-
+    int32_t dialogSubWindowId_;
     std::mutex currentSubwindowMutex_;
     std::string currentSubwindowName_;
 
@@ -126,8 +137,6 @@ private:
     SubwindowMap dialogSubwindowMap_;
     std::mutex currentDialogSubwindowMutex_;
     RefPtr<Subwindow> currentDialogSubwindow_;
-    std::function<void()> onShowMenuCallback_;
-    std::function<void()> onHideMenuCallback_;
 };
 
 } // namespace OHOS::Ace

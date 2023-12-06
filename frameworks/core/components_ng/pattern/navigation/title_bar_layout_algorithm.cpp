@@ -30,6 +30,7 @@
 #include "core/components_ng/pattern/navigation/title_bar_node.h"
 #include "core/components_ng/pattern/navigation/title_bar_pattern.h"
 #include "core/components_ng/pattern/navrouter/navdestination_group_node.h"
+#include "core/components_ng/pattern/navrouter/navdestination_pattern.h"
 #include "core/components_ng/pattern/navrouter/navdestination_layout_property.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/property/layout_constraint.h"
@@ -49,7 +50,7 @@ constexpr int32_t MENU_OFFSET_RATIO = 9;
 void TitleBarLayoutAlgorithm::MeasureBackButton(LayoutWrapper* layoutWrapper, const RefPtr<TitleBarNode>& titleBarNode,
     const RefPtr<TitleBarLayoutProperty>& titleBarLayoutProperty)
 {
-    auto backButtonNode = titleBarNode->GetBackButton();
+    auto backButtonNode = AceType::DynamicCast<FrameNode>(titleBarNode->GetBackButton());
     CHECK_NULL_VOID(backButtonNode);
     auto index = titleBarNode->GetChildIndexById(backButtonNode->GetId());
     auto backButtonWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
@@ -58,6 +59,19 @@ void TitleBarLayoutAlgorithm::MeasureBackButton(LayoutWrapper* layoutWrapper, co
     // navDestination title bar
     if (titleBarLayoutProperty->GetTitleBarParentTypeValue(TitleBarParentType::NAVBAR) ==
         TitleBarParentType::NAV_DESTINATION) {
+        if (!showBackButton_) {
+            constraint.selfIdealSize = OptionalSizeF(0.0f, 0.0f);
+            auto backButtonLayoutProperty = backButtonNode->GetLayoutProperty();
+            PaddingProperty padding;
+            padding.SetEdges(CalcLength(Dimension(0.0f, DimensionUnit::VP)));
+            backButtonLayoutProperty->UpdatePadding(padding);
+            backButtonWrapper->Measure(constraint);
+            return;
+        }
+        auto buttonLayoutProperty = backButtonNode->GetLayoutProperty();
+        PaddingProperty padding;
+        padding.SetEdges(CalcLength(BUTTON_PADDING));
+        buttonLayoutProperty->UpdatePadding(padding);
         if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
             constraint.selfIdealSize = OptionalSizeF(static_cast<float>(BACK_BUTTON_ICON_SIZE.ConvertToPx()),
                 static_cast<float>(BACK_BUTTON_ICON_SIZE.ConvertToPx()));
@@ -101,7 +115,7 @@ float TitleBarLayoutAlgorithm::GetTitleWidth(const RefPtr<TitleBarNode>& titleBa
         auto isCustom = navDestination->GetPrevTitleIsCustomValue(false);
         float occupiedWidth = 0.0f;
         // left padding
-        if (GetNavigationBackButtonState(titleBarNode)) {
+        if (showBackButton_) {
             occupiedWidth += isCustom ? (maxPaddingStart_ + BACK_BUTTON_ICON_SIZE + BUTTON_PADDING).ConvertToPx() :
                 (maxPaddingStart_ + BACK_BUTTON_ICON_SIZE + NAV_HORIZONTAL_MARGIN_L).ConvertToPx();
         } else {
@@ -109,35 +123,60 @@ float TitleBarLayoutAlgorithm::GetTitleWidth(const RefPtr<TitleBarNode>& titleBa
         }
         // right padding
         occupiedWidth += isCustom ? 0.0f : maxPaddingEnd_.ConvertToPx();
-        return titleBarSize.Width() - occupiedWidth;
+        return titleBarSize.Width() < occupiedWidth ? 0.0f : titleBarSize.Width() - occupiedWidth;
     }
+    // navBar title bar
     auto navBarNode = AceType::DynamicCast<NavBarNode>(titleBarNode->GetParent());
     CHECK_NULL_RETURN(navBarNode, 0.0f);
     float occupiedWidth = 0.0f;
     auto isCustom = navBarNode->GetPrevTitleIsCustomValue(false);
-    if (titleBarLayoutProperty->GetTitleModeValue(NavigationTitleMode::FREE) != NavigationTitleMode::MINI) {
+    if (titleBarLayoutProperty->GetTitleModeValue(NavigationTitleMode::FREE) == NavigationTitleMode::MINI) {
+        if (titleBarLayoutProperty->GetHideBackButtonValue(false)) {
+            occupiedWidth += isCustom ? 0.0f : maxPaddingStart_.ConvertToPx();
+        } else {
+            occupiedWidth += (maxPaddingStart_ + BACK_BUTTON_ICON_SIZE).ConvertToPx();
+            // custom right padding is the back button hot zone
+            occupiedWidth += isCustom ? BUTTON_PADDING.ConvertToPx() : NAV_HORIZONTAL_MARGIN_L.ConvertToPx();
+        }
+        // compute right padding
+        if (NearZero(menuWidth_)) {
+            occupiedWidth += isCustom ? 0.0f : maxPaddingEnd_.ConvertToPx();
+        } else {
+            occupiedWidth += menuWidth_;
+            auto isCustomMenu = navBarNode->GetPrevMenuIsCustomValue(false);
+            occupiedWidth += isCustomMenu ? 0.0f : defaultPaddingStart_.ConvertToPx();
+            // title is custom or menu is custom, the title right margin is not needed
+            if (!isCustomMenu) {
+                occupiedWidth += isCustom ? 0.0f : NAV_HORIZONTAL_MARGIN_L.ConvertToPx();
+            }
+        }
+        return titleBarSize.Width() < occupiedWidth ? 0.0f : titleBarSize.Width() - occupiedWidth;
+    }
+    if (titleBarLayoutProperty->GetTitleModeValue(NavigationTitleMode::FREE) == NavigationTitleMode::FULL) {
         occupiedWidth = isCustom ? 0.0f : (maxPaddingStart_ + maxPaddingEnd_).ConvertToPx();
-        return titleBarSize.Width() - occupiedWidth;
+        return titleBarSize.Width() < occupiedWidth ? 0.0f : titleBarSize.Width() - occupiedWidth;
     }
-    // mini mode
-    if (titleBarLayoutProperty->GetHideBackButtonValue(false)) {
-        occupiedWidth += isCustom ? 0 : maxPaddingStart_.ConvertToPx();
+    // free mode
+    auto titlePattern = titleBarNode->GetPattern<TitleBarPattern>();
+    CHECK_NULL_RETURN(titlePattern, 0.0f);
+    auto tempTitleOffsetY = titlePattern->GetTempTitleOffsetY();
+    if (tempTitleOffsetY <= menuHeight_ && !NearZero(tempTitleOffsetY)) { // Upslides may coincide
+        occupiedWidth += isCustom ? 0.0f : maxPaddingStart_.ConvertToPx();
+        if (NearZero(menuWidth_)) {
+            occupiedWidth += isCustom ? 0.0f : maxPaddingEnd_.ConvertToPx();
+        } else {
+            occupiedWidth += menuWidth_;
+            auto isCustomMenu = navBarNode->GetPrevMenuIsCustomValue(false);
+            occupiedWidth += isCustomMenu ? 0.0f : defaultPaddingStart_.ConvertToPx();
+            // title is custom or menu is custom, the title right margin is not needed
+            if (!isCustomMenu) {
+                occupiedWidth += isCustom ? 0.0f : NAV_HORIZONTAL_MARGIN_L.ConvertToPx();
+            }
+        }
     } else {
-        occupiedWidth += (maxPaddingStart_ + BACK_BUTTON_ICON_SIZE).ConvertToPx();
-        // custom right padding is the back button hot zone
-        occupiedWidth += isCustom ? BUTTON_PADDING.ConvertToPx() : (NAV_HORIZONTAL_MARGIN_L).ConvertToPx();
+        occupiedWidth = isCustom ? 0.0f : (maxPaddingStart_ + maxPaddingEnd_).ConvertToPx();
     }
-    // compute right padding
-    if (NearZero(menuWidth_)) {
-        occupiedWidth += isCustom ? 0.0f : maxPaddingEnd_.ConvertToPx();
-    } else {
-        occupiedWidth += menuWidth_;
-        // title is custom, the title right margin is not needed
-        occupiedWidth += isCustom ? 0.0f : (NAV_HORIZONTAL_MARGIN_L).ConvertToPx();
-        auto isCustomMenu = navBarNode->GetPrevMenuIsCustomValue(false);
-        occupiedWidth += isCustomMenu ? 0.0f : (defaultPaddingStart_).ConvertToPx();
-    }
-    return titleBarSize.Width() - occupiedWidth;
+    return titleBarSize.Width() < occupiedWidth ? 0.0f : titleBarSize.Width() - occupiedWidth;
 }
 
 void TitleBarLayoutAlgorithm::MeasureSubtitle(LayoutWrapper* layoutWrapper, const RefPtr<TitleBarNode>& titleBarNode,
@@ -176,10 +215,8 @@ void TitleBarLayoutAlgorithm::MeasureTitle(LayoutWrapper* layoutWrapper, const R
             constraint.maxSize.SetWidth(maxWidth);
             // custom title must be single line title
 
-            auto navDestinationProperty = navDestination->GetLayoutProperty<NavDestinationLayoutProperty>();
-            auto titleHeight = navDestinationProperty->GetTitleBarHeightValue(SINGLE_LINE_TITLEBAR_HEIGHT);
-            constraint.parentIdealSize.SetHeight(titleHeight.ConvertToPx());
-            constraint.maxSize.SetHeight(titleHeight.ConvertToPx());
+            constraint.parentIdealSize.SetHeight(titleBarSize.Height());
+            constraint.maxSize.SetHeight(titleBarSize.Height());
             titleWrapper->Measure(constraint);
             return;
         }
@@ -195,12 +232,12 @@ void TitleBarLayoutAlgorithm::MeasureTitle(LayoutWrapper* layoutWrapper, const R
         titleWrapper->Measure(constraint);
         return;
     }
+    constraint.maxSize.SetWidth(maxWidth);
     // NavigationCustomTitle: Custom title + height
     if (titleBarLayoutProperty->HasTitleHeight()) {
         constraint.parentIdealSize.SetWidth(maxWidth);
-        constraint.maxSize.SetWidth(maxWidth);
-        constraint.parentIdealSize.SetHeight(titleBarLayoutProperty->GetTitleHeightValue().ConvertToPx());
-        constraint.maxSize.SetHeight(titleBarLayoutProperty->GetTitleHeightValue().ConvertToPx());
+        constraint.parentIdealSize.SetHeight(titleBarSize.Height());
+        constraint.maxSize.SetHeight(titleBarSize.Height());
         titleWrapper->Measure(constraint);
         return;
     }
@@ -216,7 +253,6 @@ void TitleBarLayoutAlgorithm::MeasureTitle(LayoutWrapper* layoutWrapper, const R
         // mini mode double title height is 56vp, free/full mode is 82vp
         auto maxTitleHeight = titleMode == NavigationTitleMode::MINI ? SINGLE_LINE_TITLEBAR_HEIGHT.ConvertToPx() :
             DOUBLE_LINE_TITLEBAR_HEIGHT.ConvertToPx();
-        constraint.maxSize.SetWidth(maxWidth);
         constraint.maxSize.SetHeight(maxTitleHeight - geometryNode->GetFrameSize().Height());
         titleWrapper->Measure(constraint);
         return;
@@ -228,11 +264,9 @@ void TitleBarLayoutAlgorithm::MeasureTitle(LayoutWrapper* layoutWrapper, const R
     if (titleBarLayoutProperty->GetTitleModeValue(NavigationTitleMode::FREE) == NavigationTitleMode::MINI) {
         if (isCustomTitle) {
             constraint.parentIdealSize.SetWidth(maxWidth);
-            constraint.maxSize.SetWidth(maxWidth);
             constraint.parentIdealSize.SetHeight(titleBarSize.Height());
             constraint.maxSize.SetHeight(titleBarSize.Height());
         } else {
-            constraint.maxSize.SetWidth(maxWidth);
             constraint.maxSize.SetHeight(titleBarSize.Height());
         }
         titleWrapper->Measure(constraint);
@@ -241,7 +275,6 @@ void TitleBarLayoutAlgorithm::MeasureTitle(LayoutWrapper* layoutWrapper, const R
     // custom builder
     if (isCustomTitle) {
         constraint.parentIdealSize.SetWidth(maxWidth);
-        constraint.maxSize.SetWidth(maxWidth);
         if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
             constraint.parentIdealSize.SetHeight(titleBarSize.Height());
         } else {
@@ -257,7 +290,6 @@ void TitleBarLayoutAlgorithm::MeasureTitle(LayoutWrapper* layoutWrapper, const R
         return;
     }
     // resourceStr title
-    constraint.maxSize.SetWidth(maxWidth);
     constraint.maxSize.SetHeight(SINGLE_LINE_TITLEBAR_HEIGHT.ConvertToPx());
     titleWrapper->Measure(constraint);
 }
@@ -311,7 +343,10 @@ void TitleBarLayoutAlgorithm::LayoutBackButton(LayoutWrapper* layoutWrapper, con
     // navDestination title bar
     if (titleBarLayoutProperty->GetTitleBarParentTypeValue(TitleBarParentType::NAVBAR) ==
         TitleBarParentType::NAV_DESTINATION) {
-        if (!titleBarNode->GetBackButton()) {
+        if (!showBackButton_) {
+            SizeF size = SizeF(0.0f, 0.0f);
+            geometryNode->SetFrameSize(size);
+            backButtonWrapper->Layout();
             return;
         }
         if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
@@ -377,7 +412,7 @@ void TitleBarLayoutAlgorithm::LayoutTitle(LayoutWrapper* layoutWrapper, const Re
         auto isCustom = navDestination->GetPrevTitleIsCustomValue(false);
         // add sdk 9 compatible
         if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
-            if (GetNavigationBackButtonState(titleBarNode)) {
+            if (showBackButton_) {
                 geometryNode->SetMarginFrameOffset(OffsetF {
                     static_cast<float>((maxPaddingStart_ + BACK_BUTTON_ICON_SIZE +
                         NAV_HORIZONTAL_MARGIN_M).ConvertToPx()), offsetY });
@@ -388,7 +423,7 @@ void TitleBarLayoutAlgorithm::LayoutTitle(LayoutWrapper* layoutWrapper, const Re
             titleWrapper->Layout();
             return;
         }
-        if (GetNavigationBackButtonState(titleBarNode)) {
+        if (showBackButton_) {
             auto offsetX = isCustom ? (maxPaddingStart_ + BACK_BUTTON_ICON_SIZE + BUTTON_PADDING).ConvertToPx() :
                 (maxPaddingStart_ + BACK_BUTTON_ICON_SIZE + NAV_HORIZONTAL_MARGIN_L).ConvertToPx();
             offsetY = isCustom ? 0.0f : offsetY;
@@ -545,7 +580,7 @@ void TitleBarLayoutAlgorithm::LayoutSubtitle(LayoutWrapper* layoutWrapper, const
     if (titleBarLayoutProperty->GetTitleBarParentTypeValue(TitleBarParentType::NAVBAR) ==
         TitleBarParentType::NAV_DESTINATION) {
         // subtitle doesn't support custom title
-        if (GetNavigationBackButtonState(titleBarNode)) {
+        if (showBackButton_) {
             if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
                 geometryNode->SetMarginFrameOffset(OffsetF {
                     (maxPaddingStart_ + BACK_BUTTON_ICON_SIZE + NAV_HORIZONTAL_MARGIN_M).ConvertToPx(), offsetY });
@@ -634,7 +669,7 @@ void TitleBarLayoutAlgorithm::LayoutMenu(LayoutWrapper* layoutWrapper, const Ref
     if (titleBarLayoutProperty->GetTitleModeValue(NavigationTitleMode::FREE) == NavigationTitleMode::FREE) {
         auto titlePattern = titleBarNode->GetPattern<TitleBarPattern>();
         auto overDragOffset = titlePattern->GetOverDragOffset();
-        auto menuOffsetY = (SINGLE_LINE_TITLEBAR_HEIGHT.ConvertToPx() - menuHeight_) / 2;
+        auto menuOffsetY = isCustomMenu ? 0 : (SINGLE_LINE_TITLEBAR_HEIGHT.ConvertToPx() - menuHeight_) / 2;
         // custom menu width has no right padding
         auto offsetX = isCustomMenu ? maxWidth - menuWidth
                                     : (maxWidth - menuWidth - static_cast<float>(maxPaddingEnd_.ConvertToPx()) +
@@ -693,7 +728,17 @@ void TitleBarLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     const auto& padding = layoutWrapper->GetLayoutProperty()->CreatePaddingAndBorder();
     MinusPaddingToSize(padding, size);
     InitializeTheme();
-
+    do {
+        if (layoutProperty->GetTitleBarParentTypeValue(TitleBarParentType::NAVBAR) !=
+        TitleBarParentType::NAV_DESTINATION) {
+            break;
+        }
+        auto navDestinationNode = AceType::DynamicCast<FrameNode>(titleBarNode->GetParent());
+        CHECK_NULL_BREAK(navDestinationNode);
+        auto navDestinationPattern = AceType::DynamicCast<NavDestinationPattern>(navDestinationNode->GetPattern());
+        CHECK_NULL_BREAK(navDestinationPattern);
+        showBackButton_ = navDestinationPattern->GetBackButtonState();
+    } while (0);
     MeasureBackButton(layoutWrapper, titleBarNode, layoutProperty);
     MeasureMenu(layoutWrapper, titleBarNode, layoutProperty);
     auto titleMaxWidth = GetTitleWidth(titleBarNode, layoutProperty, size);
@@ -735,12 +780,4 @@ void TitleBarLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     LayoutMenu(layoutWrapper, titleBarNode, layoutProperty, subtitleHeight);
 }
 
-bool TitleBarLayoutAlgorithm::GetNavigationBackButtonState(const RefPtr<TitleBarNode>& titleBarNode)
-{
-    auto backButton = AceType::DynamicCast<FrameNode>(titleBarNode->GetBackButton());
-    CHECK_NULL_RETURN(backButton, false);
-    auto layoutProperty = backButton->GetLayoutProperty();
-    CHECK_NULL_RETURN(layoutProperty, false);
-    return layoutProperty->GetVisibilityValue(VisibleType::VISIBLE) == VisibleType::VISIBLE;
-}
 } // namespace OHOS::Ace::NG

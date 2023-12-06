@@ -21,6 +21,7 @@
 #include "base/utils/utils.h"
 #include "core/animation/spring_curve.h"
 #include "core/common/container.h"
+#include "core/common/recorder/event_recorder.h"
 #include "core/components/common/properties/animation_option.h"
 #include "core/components/refresh/refresh_theme.h"
 #include "core/components_ng/base/frame_node.h"
@@ -52,6 +53,7 @@ constexpr float CUSTOM_BUILDER_EXIT_DURATION = 100;
 constexpr float LOADING_EXIT_DURATION = 350;
 constexpr float MAX_OFFSET = 100000.0f;
 constexpr float HALF = 0.5f;
+constexpr float BASE_SCALE = 0.707f; // std::sqrt(2)/2
 constexpr float FAKE_VALUE = 0.01f;
 constexpr Dimension TRIGGER_LOADING_DISTANCE = 16.0_vp;
 constexpr Dimension TRIGGER_REFRESH_DISTANCE = 64.0_vp;
@@ -62,6 +64,8 @@ constexpr float DEFAULT_FRICTION = 64.0f;
 constexpr int32_t STATE_PROGRESS_LOADING = 1;
 constexpr int32_t STATE_PROGRESS_RECYCLE = 2;
 constexpr int32_t STATE_PROGRESS_DRAG = 3;
+const RefPtr<Curve> FADE_AWAY_CURVE = AceType::MakeRefPtr<CubicCurve>(0.2f, 0.0f, 0.1f, 1.0f);
+const std::string REFRESH_DRAG_SCENE = "refresh_drag_scene";
 } // namespace
 
 void RefreshPattern::OnAttachToFrameNode()
@@ -69,6 +73,7 @@ void RefreshPattern::OnAttachToFrameNode()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->GetRenderContext()->SetClipToBounds(true);
+    host->GetRenderContext()->UpdateClipEdge(true);
 }
 
 void RefreshPattern::OnModifyDone()
@@ -88,9 +93,25 @@ void RefreshPattern::OnModifyDone()
     InitPanEvent(gestureHub);
     InitOnKeyEvent();
     InitChildNode();
+    RefreshStatusChangeEffect();
+    SetAccessibilityAction();
+}
+
+void RefreshPattern::RefreshStatusChangeEffect()
+{
     auto paintProperty = GetPaintProperty<RefreshRenderProperty>();
     CHECK_NULL_VOID(paintProperty);
     auto refreshingProp = paintProperty->GetIsRefreshing().value_or(false);
+    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+        if (isRefreshing_ != refreshingProp) {
+            if (refreshingProp) {
+                QuickStartFresh();
+            } else {
+                QuickEndFresh();
+            }
+        }
+        return;
+    }
     if (isCustomBuilderExist_ || isRefreshing_ != refreshingProp) {
         if (refreshingProp) {
             QuickStartFresh();
@@ -98,7 +119,6 @@ void RefreshPattern::OnModifyDone()
             QuickEndFresh();
         }
     }
-    SetAccessibilityAction();
 }
 
 RefPtr<LayoutAlgorithm> RefreshPattern::CreateLayoutAlgorithm()
@@ -135,6 +155,8 @@ void RefreshPattern::InitOnKeyEvent()
 void RefreshPattern::QuickStartFresh()
 {
     if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+        SwitchToRefresh();
+        UpdateLoadingProgressStatus(RefreshAnimationState::RECYCLE, GetFollowRatio(scrollOffset_.GetY()));
         QuickFirstChildAppear();
         return;
     }
@@ -153,6 +175,8 @@ void RefreshPattern::QuickStartFresh()
 void RefreshPattern::QuickEndFresh()
 {
     if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+        SwitchToFinish();
+        UpdateLoadingProgressStatus(RefreshAnimationState::RECYCLE, GetFollowRatio(scrollOffset_.GetY()));
         QuickFirstChildDisappear();
         return;
     }
@@ -239,20 +263,20 @@ void RefreshPattern::TriggerFinish()
 
 void RefreshPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
 {
-    auto actionStartTask = [weak = WeakClaim(this)](const GestureEvent& /*info*/) {
+    auto actionStartTask = [weak = WeakClaim(this)](const GestureEvent& info) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
-        pattern->HandleDragStart();
+        pattern->HandleDragStart(true, static_cast<float>(info.GetMainVelocity()));
     };
     auto actionUpdateTask = [weak = WeakClaim(this)](const GestureEvent& info) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
-        pattern->HandleDragUpdate(static_cast<float>(info.GetMainDelta()));
+        pattern->HandleDragUpdate(static_cast<float>(info.GetMainDelta()), static_cast<float>(info.GetMainVelocity()));
     };
     auto actionEndTask = [weak = WeakClaim(this)](const GestureEvent& info) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
-        pattern->HandleDragEnd(info.GetSpeed());
+        pattern->HandleDragEnd(info.GetMainVelocity());
     };
     auto actionCancelTask = [weak = WeakClaim(this)]() {
         auto pattern = weak.Upgrade();
@@ -268,12 +292,16 @@ void RefreshPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
     panEvent_ = MakeRefPtr<PanEvent>(
         std::move(actionStartTask), std::move(actionUpdateTask), std::move(actionEndTask), std::move(actionCancelTask));
     gestureHub->AddPanEvent(panEvent_, panDirection, 1, DEFAULT_PAN_DISTANCE);
+    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+        gestureHub->SetIsAllowMouse(false);
+    }
 }
 
-void RefreshPattern::HandleDragStart()
+void RefreshPattern::HandleDragStart(bool isDrag, float mainSpeed)
 {
+    UpdateDragFRCSceneInfo(REFRESH_DRAG_SCENE, mainSpeed, SceneStatus::START);
     if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
-        UpdateFirstChildDragStart();
+        UpdateFirstChildDragStart(isDrag);
         return;
     }
     if (isRefreshing_) {
@@ -285,54 +313,62 @@ void RefreshPattern::HandleDragStart()
         return;
     }
     if (progressChild_) {
-        UpdateLoadingProgressStatus(RefreshAnimationState::FOLLOW_HAND);
+        UpdateLoadingProgressStatus(RefreshAnimationState::FOLLOW_HAND, GetFollowRatio(scrollOffset_.GetY()));
     }
     auto frameNode = GetHost();
     CHECK_NULL_VOID(frameNode);
     frameNode->OnAccessibilityEvent(AccessibilityEventType::SCROLL_START);
 }
 
-void RefreshPattern::HandleDragUpdate(float delta)
+void RefreshPattern::HandleDragUpdate(float delta, float mainSpeed)
 {
+    UpdateDragFRCSceneInfo(REFRESH_DRAG_SCENE, mainSpeed, SceneStatus::RUNNING);
     if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
         QuiteAnimation();
         scrollOffset_.SetY(GetScrollOffset(delta));
-        if (!isRefreshing_) {
-            if (LessNotEqual(scrollOffset_.GetY(), static_cast<float>(TRIGGER_REFRESH_DISTANCE.ConvertToPx()))) {
-                UpdateLoadingProgressStatus(RefreshAnimationState::FOLLOW_HAND);
-                UpdateRefreshStatus(RefreshStatus::DRAG);
+        if (NearEqual(scrollOffset_.GetY(), 0.0f)) {
+            SwitchToFinish();
+            UpdateLoadingProgressStatus(RefreshAnimationState::FOLLOW_HAND, 0.0f);
+        }
+        if (!isSourceFromAnimation_) {
+            if (!isRefreshing_) {
+                UpdateLoadingProgressStatus(RefreshAnimationState::FOLLOW_HAND, GetFollowRatio(scrollOffset_.GetY()));
+                if (LessNotEqual(scrollOffset_.GetY(), static_cast<float>(TRIGGER_REFRESH_DISTANCE.ConvertToPx()))) {
+                    UpdateRefreshStatus(RefreshStatus::DRAG);
+                } else {
+                    UpdateRefreshStatus(RefreshStatus::OVER_DRAG);
+                }
             } else {
-                UpdateRefreshStatus(RefreshStatus::OVER_DRAG);
-            }
-        } else {
-            if (NearEqual(scrollOffset_.GetY(), 0.0f)) {
-                UpdateLoadingProgressStatus(RefreshAnimationState::FOLLOW_HAND);
-                UpdateRefreshStatus(RefreshStatus::DONE);
+                UpdateLoadingProgressStatus(RefreshAnimationState::RECYCLE, GetFollowRatio(scrollOffset_.GetY()));
             }
         }
         UpdateFirstChildPlacement(scrollOffset_.GetY());
+        bool exitFlag = Positive(scrollOffset_.GetY()) || NonNegative(delta);
+        if (!exitFlag) {
+            HandleDragEnd(0.0f);
+        }
         return;
     }
     if (NearZero(delta) || isRefreshing_) {
-        LOGI("Delta is near zero or isRefreshing!");
         return;
     }
-
     scrollOffset_.SetY(GetScrollOffset(delta));
     if (customBuilder_) {
         HandleCustomBuilderDragUpdateStage();
         return;
     }
     CHECK_NULL_VOID(progressChild_);
+    float refreshFollowRadio = 0.0f;
     if (scrollOffset_.GetY() > triggerLoadingDistance_) {
-        auto refreshFollowRadio = GetFollowRatio();
+        refreshFollowRadio = GetFollowRatio(scrollOffset_.GetY());
         UpdateLoadingProgress(STATE_PROGRESS_DRAG, refreshFollowRadio);
         UpdateLoadingMarginTop(scrollOffset_.GetY());
         auto progressPaintProperty = progressChild_->GetPaintProperty<LoadingProgressPaintProperty>();
         CHECK_NULL_VOID(progressPaintProperty);
-        progressPaintProperty->UpdateRefreshFollowRatio(refreshFollowRadio);
+        progressPaintProperty->UpdateRefreshSizeScaleRatio(refreshFollowRadio);
+    } else {
+        UpdateLoadingProgress(STATE_PROGRESS_DRAG, 0.0f);
     }
-
     if (scrollOffset_.GetY() > TRIGGER_REFRESH_DISTANCE.ConvertToPx()) {
         UpdateRefreshStatus(RefreshStatus::OVER_DRAG);
     }
@@ -361,54 +397,36 @@ void RefreshPattern::UpdateLoadingProgress(int32_t state, float ratio)
     progressContext->UpdateOpacity(scale);
 }
 
-float RefreshPattern::GetFollowRatio()
+float RefreshPattern::GetFollowRatio(float scrollOffset)
 {
     if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
-        return std::clamp(
-            static_cast<float>(scrollOffset_.GetY() / TRIGGER_REFRESH_DISTANCE.ConvertToPx()), 0.0f, 1.0f);
+        if (progressChild_) {
+            auto loadingVisibleHeight = GetLoadingVisibleHeight();
+            auto ratio = 0.0f;
+            if (!NearEqual(static_cast<float>(TRIGGER_REFRESH_DISTANCE.ConvertToPx()), loadingVisibleHeight)) {
+                ratio = static_cast<float>((scrollOffset - loadingVisibleHeight) /
+                                           (TRIGGER_REFRESH_DISTANCE.ConvertToPx() - loadingVisibleHeight));
+            }
+            return std::clamp(ratio, 0.0f, 1.0f);
+        }
+        return std::clamp(static_cast<float>(scrollOffset / TRIGGER_REFRESH_DISTANCE.ConvertToPx()), 0.0f, 1.0f);
     }
     auto triggerLoading =
         std::clamp(triggerLoadingDistance_, 0.0f, static_cast<float>(TRIGGER_REFRESH_DISTANCE.ConvertToPx()));
     if (GreatNotEqual(TRIGGER_REFRESH_DISTANCE.ConvertToPx(), triggerLoading)) {
-        return (scrollOffset_.GetY() - triggerLoading) / (TRIGGER_REFRESH_DISTANCE.ConvertToPx() - triggerLoading);
+        return (scrollOffset - triggerLoading) / (TRIGGER_REFRESH_DISTANCE.ConvertToPx() - triggerLoading);
     }
-    return 1.0f;
-}
-
-float RefreshPattern::GetFadeAwayRatio()
-{
-    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
-        return std::clamp(
-            static_cast<float>(scrollOffset_.GetY() / TRIGGER_REFRESH_DISTANCE.ConvertToPx()), 0.0f, 1.0f);
-    }
-    CHECK_NULL_RETURN(progressChild_, 0.0f);
-    auto progressLayoutProperty = progressChild_->GetLayoutProperty<LoadingProgressLayoutProperty>();
-    CHECK_NULL_RETURN(progressLayoutProperty, 0.0f);
-    auto& marginProperty = progressLayoutProperty->GetMarginProperty();
-    CHECK_NULL_RETURN(marginProperty, 0.0f);
-    auto triggerLoading =
-        std::clamp(triggerLoadingDistance_, 0.0f, static_cast<float>(TRIGGER_REFRESH_DISTANCE.ConvertToPx()));
-    if (GreatNotEqual(TRIGGER_REFRESH_DISTANCE.ConvertToPx(), triggerLoading)) {
-        return (marginProperty->top->GetDimension().ConvertToPx() - triggerLoading) /
-               (TRIGGER_REFRESH_DISTANCE.ConvertToPx() - triggerLoading);
-    }
-    return 0.0f;
+    return GreatOrEqual(scrollOffset, triggerLoading) ? 1.0f : 0.0f;
 }
 
 void RefreshPattern::TransitionPeriodAnimation()
 {
     CHECK_NULL_VOID(progressChild_);
-    auto progressPaintProperty = progressChild_->GetPaintProperty<LoadingProgressPaintProperty>();
-    CHECK_NULL_VOID(progressPaintProperty);
-
-    auto progressLayoutProperty = progressChild_->GetLayoutProperty<LoadingProgressLayoutProperty>();
-    CHECK_NULL_VOID(progressLayoutProperty);
-    progressPaintProperty->UpdateRefreshAnimationState(static_cast<int32_t>(RefreshAnimationState::FOLLOW_TO_RECYCLE));
-    progressPaintProperty->UpdateRefreshTransitionRatio(0.0f);
-    progressChild_->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    animationId_++;
+    UpdateLoadingProgressStatus(RefreshAnimationState::FOLLOW_TO_RECYCLE, 0.0f);
     auto pipeline = AceType::DynamicCast<PipelineContext>(PipelineContext::GetCurrentContext());
     CHECK_NULL_VOID(pipeline);
-    pipeline->AddAnimationClosure([weak = AceType::WeakClaim(this)]() {
+    pipeline->AddAnimationClosure([weak = AceType::WeakClaim(this), animationId = animationId_]() {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         auto pipeline = PipelineContext::GetCurrentContext();
@@ -419,10 +437,14 @@ void RefreshPattern::TransitionPeriodAnimation()
         option.SetCurve(curve);
         option.SetIteration(1);
 
-        AnimationUtils::OpenImplicitAnimation(option, curve, [weak]() {
+        AnimationUtils::OpenImplicitAnimation(option, curve, [weak, animationId, id = Container::CurrentId()]() {
+            ContainerScope scope(id);
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
-            pattern->UpdateLoadingProgressStatus(RefreshAnimationState::RECYCLE);
+            if (pattern->animationId_ != animationId) {
+                return;
+            }
+            pattern->UpdateLoadingProgressStatus(RefreshAnimationState::RECYCLE, 1.0f);
         });
         auto distance = TRIGGER_REFRESH_DISTANCE.ConvertToPx();
         pattern->scrollOffset_.SetY(distance);
@@ -436,10 +458,8 @@ void RefreshPattern::TransitionPeriodAnimation()
 void RefreshPattern::LoadingProgressAppear()
 {
     CHECK_NULL_VOID(progressChild_);
-    auto progressPaintProperty = progressChild_->GetPaintProperty<LoadingProgressPaintProperty>();
-    CHECK_NULL_VOID(progressPaintProperty);
-    progressPaintProperty->UpdateRefreshAnimationState(static_cast<int32_t>(RefreshAnimationState::RECYCLE));
-    progressChild_->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    animationId_++;
+    UpdateLoadingProgressStatus(RefreshAnimationState::RECYCLE, 1.0f);
     auto pipeline = AceType::DynamicCast<PipelineContext>(PipelineContext::GetCurrentContext());
     CHECK_NULL_VOID(pipeline);
     pipeline->AddAnimationClosure([weak = AceType::WeakClaim(this)]() {
@@ -462,11 +482,8 @@ void RefreshPattern::LoadingProgressAppear()
 void RefreshPattern::LoadingProgressExit()
 {
     CHECK_NULL_VOID(progressChild_);
-    auto progressPaintProperty = progressChild_->GetPaintProperty<LoadingProgressPaintProperty>();
-    CHECK_NULL_VOID(progressPaintProperty);
-    progressPaintProperty->UpdateRefreshAnimationState(static_cast<int32_t>(RefreshAnimationState::FADEAWAY));
-    progressPaintProperty->UpdateRefreshFadeAwayRatio(GetFadeAwayRatio());
-    progressChild_->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    animationId_++;
+    UpdateLoadingProgressStatus(RefreshAnimationState::RECYCLE, GetFollowRatio(scrollOffset_.GetY()));
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     pipeline->FlushUITasks();
@@ -474,15 +491,19 @@ void RefreshPattern::LoadingProgressExit()
     AnimationOption option;
     option.SetDuration(LOADING_EXIT_DURATION);
     auto curve = AceType::MakeRefPtr<CubicCurve>(0.2f, 0.0f, 0.1f, 1.0f);
-    AnimationUtils::OpenImplicitAnimation(option, curve, [weak = AceType::WeakClaim(this)]() {
-        auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID(pattern);
-        pattern->OnExitAnimationFinish();
-    });
-
+    AnimationUtils::OpenImplicitAnimation(
+        option, curve, [weak = AceType::WeakClaim(this), animationId = animationId_, id = Container::CurrentId()]() {
+            ContainerScope scope(id);
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            if (pattern->animationId_ != animationId) {
+                return;
+            }
+            pattern->OnExitAnimationFinish();
+        });
     scrollOffset_.SetY(0.0f);
+    UpdateLoadingProgressStatus(RefreshAnimationState::RECYCLE, 0.0f);
     UpdateLoadingProgress(STATE_PROGRESS_LOADING, 0.0f);
-    progressPaintProperty->UpdateRefreshFadeAwayRatio(0.0f);
     progressChild_->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
     pipeline->FlushUITasks();
     AnimationUtils::CloseImplicitAnimation();
@@ -490,6 +511,7 @@ void RefreshPattern::LoadingProgressExit()
 
 void RefreshPattern::HandleDragEnd(float speed)
 {
+    UpdateDragFRCSceneInfo(REFRESH_DRAG_SCENE, speed, SceneStatus::END);
     if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
         SpeedTriggerAnimation(speed);
         return;
@@ -510,7 +532,13 @@ void RefreshPattern::HandleDragEnd(float speed)
         frameNode->OnAccessibilityEvent(AccessibilityEventType::SCROLL_END);
         return;
     }
-    LoadingProgressExit();
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->AddAnimationClosure([weak = AceType::WeakClaim(this)]() {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->LoadingProgressExit();
+    });
 }
 
 void RefreshPattern::HandleDragCancel()
@@ -530,6 +558,14 @@ void RefreshPattern::FireStateChange(int32_t value)
     auto refreshEventHub = GetEventHub<RefreshEventHub>();
     CHECK_NULL_VOID(refreshEventHub);
     refreshEventHub->FireOnStateChange(value);
+    if (refreshStatus_ == RefreshStatus::REFRESH && Recorder::EventRecorder::Get().IsComponentRecordEnable()) {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto inspectorId = host->GetInspectorId().value_or("");
+        Recorder::EventParamsBuilder builder;
+        builder.SetId(inspectorId).SetType(host->GetTag()).SetEventType(Recorder::EventType::REFRESH);
+        Recorder::EventRecorder::Get().OnEvent(std::move(builder));
+    }
 }
 
 void RefreshPattern::FireRefreshing()
@@ -601,6 +637,7 @@ void RefreshPattern::CustomBuilderAppear()
     if (GreatOrEqual(static_cast<double>(customBuilderOffset_), refreshingDistance)) {
         return;
     }
+    animationId_++;
     AnimationOption option;
     auto curve = AceType::MakeRefPtr<CubicCurve>(0.2f, 0.0f, 0.1f, 1.0f);
     option.SetDuration(CUSTOM_BUILDER_RECYCLE_DURATION);
@@ -621,6 +658,7 @@ void RefreshPattern::CustomBuilderExit()
     if (LessNotEqual(static_cast<double>(customBuilderOffset_), static_cast<double>(triggerLoadingDistance_))) {
         return;
     }
+    animationId_++;
     AnimationOption option;
     option.SetDuration(CUSTOM_BUILDER_EXIT_DURATION);
     auto finishCallback = [weak = AceType::WeakClaim(this)]() {
@@ -733,6 +771,7 @@ void RefreshPattern::CustomBuilderRefreshingAnimation()
     if (LessNotEqual(static_cast<double>(customBuilderOffset_), refreshingDistance)) {
         return;
     }
+    animationId_++;
     AnimationOption option;
     auto curve = AceType::MakeRefPtr<CubicCurve>(0.2f, 0.0f, 0.1f, 1.0f);
     option.SetDuration(CUSTOM_BUILDER_RECYCLE_DURATION);
@@ -798,10 +837,10 @@ void RefreshPattern::SetAccessibilityAction()
         if (pattern->IsRefreshing()) {
             return;
         }
-        pattern->HandleDragStart();
+        pattern->HandleDragStart(true, 0.0f);
         for (float delta = 0.0f; delta < MAX_SCROLL_DISTANCE.ConvertToPx();
              delta += TRIGGER_LOADING_DISTANCE.ConvertToPx()) {
-            pattern->HandleDragUpdate(delta);
+            pattern->HandleDragUpdate(delta, 0.0f);
         }
         pattern->HandleDragEnd(0.0f);
     });
@@ -816,20 +855,20 @@ void RefreshPattern::UpdateCustomBuilderIndex(int32_t index)
 
 void RefreshPattern::InitCoordinationEvent(RefPtr<ScrollableCoordinationEvent>& coordinationEvent)
 {
-    auto onScrollEvent = [weak = WeakClaim(this)](double offset) -> bool {
+    auto onScrollEvent = [weak = WeakClaim(this)](float offset, float mainSpeed) -> bool {
         auto pattern = weak.Upgrade();
         CHECK_NULL_RETURN(pattern, false);
-        pattern->HandleDragUpdate(static_cast<float>(offset));
+        pattern->HandleDragUpdate(offset, mainSpeed);
         return Positive(pattern->scrollOffset_.GetY()) || NonNegative(offset);
     };
     coordinationEvent->SetOnScrollEvent(onScrollEvent);
-    auto onScrollStartEvent = [weak = WeakClaim(this)]() {
+    auto onScrollStartEvent = [weak = WeakClaim(this)](bool isDrag, float mainSpeed) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
-        pattern->HandleDragStart();
+        pattern->HandleDragStart(isDrag, mainSpeed);
     };
     coordinationEvent->SetOnScrollStartEvent(onScrollStartEvent);
-    auto onScrollEndEvent = [weak = WeakClaim(this)](double speed) {
+    auto onScrollEndEvent = [weak = WeakClaim(this)](float speed) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         pattern->HandleDragEnd(speed);
@@ -851,8 +890,8 @@ void RefreshPattern::UpdateRefreshStatus(RefreshStatus newStatus)
         isRefreshing_ = false;
         FireChangeEvent("false");
     }
-
     FireStateChange(static_cast<int>(refreshStatus_));
+    TAG_LOGD(AceLogTag::ACE_REFRESH, "refresh status changed %{public}d", static_cast<int32_t>(refreshStatus_));
 }
 
 void RefreshPattern::SwitchToFinish()
@@ -877,7 +916,13 @@ void RefreshPattern::QuiteAnimation()
     auto curve = AceType::MakeRefPtr<SpringCurve>(0.0f, 1.0f, 228.0f, 30.0f);
     AnimationOption option;
     option.SetCurve(curve);
+    option.SetDuration(0);
     offsetProperty_->Set(scrollOffset_.GetY() + FAKE_VALUE);
+    UpdateFirstChildPlacement(scrollOffset_.GetY() + FAKE_VALUE);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->FlushUITasks();
+    updatePerFrame_ = false;
     animation_ = AnimationUtils::StartAnimation(
         option,
         [weak = AceType::WeakClaim(this), scrollOffset = scrollOffset_.GetY(), id = Container::CurrentId()]() {
@@ -885,6 +930,10 @@ void RefreshPattern::QuiteAnimation()
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
             pattern->offsetProperty_->Set(scrollOffset);
+            pattern->UpdateFirstChildPlacement(scrollOffset);
+            auto pipeline = PipelineContext::GetCurrentContext();
+            CHECK_NULL_VOID(pipeline);
+            pipeline->FlushUITasks();
         },
         [weak = AceType::WeakClaim(this), id = Container::CurrentId(), animationId = animationId_]() {
             ContainerScope scope(id);
@@ -893,7 +942,6 @@ void RefreshPattern::QuiteAnimation()
             if (pattern->animationId_ != animationId) {
                 return;
             }
-            pattern->updatePerFrame_ = false;
         });
 }
 
@@ -903,26 +951,20 @@ void RefreshPattern::SwitchToRefresh()
         return;
     }
     UpdateRefreshStatus(RefreshStatus::REFRESH);
-    if (progressChild_) {
-        UpdateLoadingProgressStatus(RefreshAnimationState::RECYCLE);
-    }
 }
 
-void RefreshPattern::UpdateLoadingProgressStatus(RefreshAnimationState state, float followToRecycleRatio)
+void RefreshPattern::UpdateLoadingProgressStatus(RefreshAnimationState state, float ratio)
 {
     CHECK_NULL_VOID(progressChild_);
     auto progressPaintProperty = progressChild_->GetPaintProperty<LoadingProgressPaintProperty>();
     CHECK_NULL_VOID(progressPaintProperty);
-    progressPaintProperty->UpdateRefreshAnimationState(static_cast<int32_t>(state));
+    progressPaintProperty->UpdateRefreshAnimationState(state);
     switch (state) {
         case RefreshAnimationState::FOLLOW_HAND:
-            progressPaintProperty->UpdateRefreshFollowRatio(GetFollowRatio());
+            progressPaintProperty->UpdateRefreshSizeScaleRatio(ratio);
             break;
-        case RefreshAnimationState::FOLLOW_TO_RECYCLE:
-            progressPaintProperty->UpdateRefreshTransitionRatio(std::clamp(followToRecycleRatio, 0.0f, 1.0f));
-            break;
-        case RefreshAnimationState::FADEAWAY:
-            progressPaintProperty->UpdateRefreshFadeAwayRatio(GetFadeAwayRatio());
+        case RefreshAnimationState::RECYCLE:
+            progressPaintProperty->UpdateRefreshSizeScaleRatio(ratio);
             break;
         default:
             break;
@@ -949,27 +991,25 @@ void RefreshPattern::ResetOffsetProperty()
     }
 }
 
-void RefreshPattern::UpdateFirstChildDragStart()
+void RefreshPattern::UpdateFirstChildDragStart(bool isDrag)
 {
-    switch (refreshStatus_) {
-        case RefreshStatus::INACTIVE:
-        case RefreshStatus::DONE:
-            scrollOffset_.SetY(0.0f);
-            break;
-        case RefreshStatus::REFRESH:
-            scrollOffset_.SetY(static_cast<float>(TRIGGER_REFRESH_DISTANCE.ConvertToPx()));
-            break;
-        default:
-            break;
+    if (NearEqual(scrollOffset_.GetY(), 0.0f)) {
+        isSourceFromAnimation_ = !isDrag;
     }
-    UpdateFirstChildPlacement(scrollOffset_.GetY());
 }
 
 void RefreshPattern::UpdateRefreshDraw()
 {
-    CHECK_NULL_VOID(customBuilder_);
-    if (updatePerFrame_) {
-        UpdateBuilderHeight(scrollOffset_.GetY());
+    if (!updatePerFrame_) {
+        return;
+    }
+    UpdateFirstChildPlacement(scrollOffset_.GetY());
+    if (!isRefreshing_) {
+        if (LessNotEqual(scrollOffset_.GetY(), static_cast<float>(TRIGGER_REFRESH_DISTANCE.ConvertToPx()))) {
+            UpdateRefreshStatus(RefreshStatus::DRAG);
+        } else {
+            UpdateRefreshStatus(RefreshStatus::OVER_DRAG);
+        }
     }
 }
 
@@ -982,10 +1022,25 @@ void RefreshPattern::UpdateFirstChildPlacement(float offset)
     auto refreshHeight = geometryNode->GetFrameSize().Height();
     auto scrollOffset = std::clamp(offset, 0.0f, refreshHeight);
     if (progressChild_) {
-        UpdateLoadingProgressTranslate(scrollOffset);
+        if (isSourceFromAnimation_) {
+            UpdateLoadingProgressTranslate(0.0f);
+            UpdateScrollTransition(scrollOffset);
+        } else {
+            UpdateLoadingProgressTranslate(scrollOffset);
+            UpdateScrollTransition(scrollOffset);
+            UpdateLoadingProgressStatus(GetLoadingProgressStatus(), GetFollowRatio(scrollOffset));
+        }
     } else if (customBuilder_) {
         UpdateBuilderHeight(scrollOffset);
     }
+}
+
+void RefreshPattern::UpdateScrollTransition(float scrollOffset)
+{
+    CHECK_NULL_VOID(scrollableNode_);
+    auto scrollableRenderContext = scrollableNode_->GetRenderContext();
+    CHECK_NULL_VOID(scrollableRenderContext);
+    scrollableRenderContext->UpdateTransformTranslate({ 0.0f, scrollOffset, 0.0f });
 }
 
 void RefreshPattern::UpdateBuilderHeight(float builderHeight)
@@ -1003,58 +1058,62 @@ void RefreshPattern::UpdateLoadingProgressTranslate(float scrollOffset)
     CHECK_NULL_VOID(progressChild_);
     auto renderContext = progressChild_->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
-    auto geometryNode = progressChild_->GetGeometryNode();
-    CHECK_NULL_VOID(geometryNode);
-    auto loadingHeight = geometryNode->GetFrameSize().Height();
-    if (GreatOrEqual(scrollOffset, loadingHeight) &&
-        !NearEqual(loadingHeight, static_cast<float>(TRIGGER_REFRESH_DISTANCE.ConvertToPx()))) {
+    auto loadingVisibleHeight = GetLoadingVisibleHeight();
+    if (GreatOrEqual(scrollOffset, loadingVisibleHeight) &&
+        !NearEqual(loadingVisibleHeight, static_cast<float>(TRIGGER_REFRESH_DISTANCE.ConvertToPx()))) {
         auto ratio = static_cast<float>(
-            (scrollOffset - loadingHeight) / (TRIGGER_REFRESH_DISTANCE.ConvertToPx() - loadingHeight));
+            (scrollOffset - loadingVisibleHeight) / (TRIGGER_REFRESH_DISTANCE.ConvertToPx() - loadingVisibleHeight));
         renderContext->UpdateOpacity(std::clamp(ratio, 0.0f, 1.0f));
-        renderContext->UpdateTransformTranslate({ 0.0f, (scrollOffset - loadingHeight) * HALF, 0.0f });
+        renderContext->UpdateTransformTranslate({ 0.0f, (scrollOffset - loadingVisibleHeight) * HALF, 0.0f });
     } else {
         renderContext->UpdateOpacity(0.0f);
     }
-    CHECK_NULL_VOID(scrollableNode_);
-    auto scrollableRenderContext = scrollableNode_->GetRenderContext();
-    CHECK_NULL_VOID(scrollableRenderContext);
-    scrollableRenderContext->UpdateTransformTranslate({ 0.0f, scrollOffset, 0.0f });
+}
+
+float RefreshPattern::GetLoadingVisibleHeight()
+{
+    CHECK_NULL_RETURN(progressChild_, 0.0f);
+    auto renderContext = progressChild_->GetRenderContext();
+    CHECK_NULL_RETURN(renderContext, 0.0f);
+    auto geometryNode = progressChild_->GetGeometryNode();
+    CHECK_NULL_RETURN(geometryNode, 0.0f);
+    auto loadingHeight = geometryNode->GetFrameSize().Height();
+    return (HALF + BASE_SCALE * HALF) * loadingHeight;
 }
 
 void RefreshPattern::SpeedTriggerAnimation(float speed)
 {
-    auto targetOffset = 0.0f;
-    switch (refreshStatus_) {
-        case RefreshStatus::OVER_DRAG:
-            UpdateLoadingProgressStatus(RefreshAnimationState::FOLLOW_TO_RECYCLE, 0.0f);
-            targetOffset = TRIGGER_REFRESH_DISTANCE.ConvertToPx();
-            break;
-        case RefreshStatus::REFRESH:
-            targetOffset = TRIGGER_REFRESH_DISTANCE.ConvertToPx();
-            break;
-        default:
-            targetOffset = 0.0f;
-            break;
+    auto targetOffset = GetTargetOffset();
+    auto dealSpeed = 0.0f;
+    if (!NearEqual(scrollOffset_.GetY(), targetOffset)) {
+        dealSpeed = speed / (targetOffset - scrollOffset_.GetY());
+    } else if (!NearEqual(dealSpeed, 0.0f)) {
+        scrollOffset_.SetY(scrollOffset_.GetY() + FAKE_VALUE);
+    }
+    if (refreshStatus_ == RefreshStatus::OVER_DRAG &&
+        NearEqual(targetOffset, static_cast<float>(TRIGGER_REFRESH_DISTANCE.ConvertToPx()))) {
+        SwitchToRefresh();
+        UpdateLoadingProgressStatus(RefreshAnimationState::FOLLOW_TO_RECYCLE, 0.0f);
+    } else if (NearEqual(targetOffset, 0.0f)) {
+        SwitchToFinish();
     }
     if (!offsetProperty_) {
         ResetOffsetProperty();
     }
     CHECK_NULL_VOID(offsetProperty_);
     animationId_++;
-    offsetProperty_->Set(scrollOffset_.GetY());
-    auto dealSpeed = 0.0f;
-    if (NearEqual(scrollOffset_.GetY(), targetOffset)) {
-        scrollOffset_.SetY(scrollOffset_.GetY() + FAKE_VALUE);
-        UpdateFirstChildPlacement(scrollOffset_.GetY());
-        auto pipeline = PipelineContext::GetCurrentContext();
-        CHECK_NULL_VOID(pipeline);
-        pipeline->FlushUITasks();
-    }
-    dealSpeed = speed / (targetOffset - scrollOffset_.GetY());
     updatePerFrame_ = true;
-    auto curve = AceType::MakeRefPtr<InterpolatingSpring>(dealSpeed, 1.0f, 228.0f, 30.0f);
+    offsetProperty_->Set(scrollOffset_.GetY());
     AnimationOption option;
-    option.SetCurve(curve);
+    if (NearEqual(dealSpeed, 0.0f)) {
+        auto span = std::abs(scrollOffset_.GetY() - targetOffset);
+        auto perDistance = std::clamp(static_cast<float>(span / TRIGGER_REFRESH_DISTANCE.ConvertToPx()), 0.0f, 1.0f);
+        option.SetDuration(LOADING_EXIT_DURATION * perDistance);
+        option.SetCurve(FADE_AWAY_CURVE);
+    } else {
+        auto curve = AceType::MakeRefPtr<InterpolatingSpring>(dealSpeed, 1.0f, 228.0f, 30.0f);
+        option.SetCurve(curve);
+    }
     animation_ = AnimationUtils::StartAnimation(
         option,
         [weak = AceType::WeakClaim(this), targetOffset, id = Container::CurrentId()]() {
@@ -1062,13 +1121,6 @@ void RefreshPattern::SpeedTriggerAnimation(float speed)
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
             pattern->offsetProperty_->Set(targetOffset);
-            if (pattern->refreshStatus_ == RefreshStatus::OVER_DRAG) {
-                pattern->UpdateLoadingProgressStatus(RefreshAnimationState::FOLLOW_TO_RECYCLE, 1.0f);
-            }
-            pattern->UpdateLoadingProgressTranslate(targetOffset);
-            auto pipeline = PipelineContext::GetCurrentContext();
-            CHECK_NULL_VOID(pipeline);
-            pipeline->FlushUITasks();
         },
         [weak = AceType::WeakClaim(this), animationId = animationId_]() {
             auto pattern = weak.Upgrade();
@@ -1076,31 +1128,45 @@ void RefreshPattern::SpeedTriggerAnimation(float speed)
             if (pattern->animationId_ != animationId) {
                 return;
             }
+            pattern->updatePerFrame_ = false;
             pattern->SpeedAnimationFinish();
         });
+}
+
+float RefreshPattern::GetTargetOffset()
+{
+    if (isSourceFromAnimation_) {
+        return 0.0f;
+    }
+    auto targetOffset = 0.0f;
+    switch (refreshStatus_) {
+        case RefreshStatus::OVER_DRAG:
+            if (GreatOrEqual(scrollOffset_.GetY(), static_cast<float>(TRIGGER_REFRESH_DISTANCE.ConvertToPx()))) {
+                targetOffset = TRIGGER_REFRESH_DISTANCE.ConvertToPx();
+            }
+            break;
+        case RefreshStatus::REFRESH:
+            if (GreatOrEqual(scrollOffset_.GetY(), static_cast<float>(TRIGGER_REFRESH_DISTANCE.ConvertToPx()))) {
+                targetOffset = TRIGGER_REFRESH_DISTANCE.ConvertToPx();
+            }
+            break;
+        default:
+            targetOffset = 0.0f;
+            break;
+    }
+    return targetOffset;
 }
 
 void RefreshPattern::SpeedAnimationFinish()
 {
     updatePerFrame_ = false;
-    switch (refreshStatus_) {
-        case RefreshStatus::INACTIVE:
-        case RefreshStatus::DONE:
-            scrollOffset_.SetY(0.0f);
-            break;
-        case RefreshStatus::DRAG:
-            UpdateRefreshStatus(RefreshStatus::INACTIVE);
-            scrollOffset_.SetY(0.0f);
-            break;
-        case RefreshStatus::REFRESH:
-            scrollOffset_.SetY(static_cast<float>(TRIGGER_REFRESH_DISTANCE.ConvertToPx()));
-            break;
-        case RefreshStatus::OVER_DRAG:
-            scrollOffset_.SetY(static_cast<float>(TRIGGER_REFRESH_DISTANCE.ConvertToPx()));
-            SwitchToRefresh();
-            break;
-        default:
-            break;
+    if (NearEqual(scrollOffset_.GetY(), 0.0f)) {
+        UpdateLoadingProgressStatus(RefreshAnimationState::FOLLOW_HAND, 0.0f);
+        UpdateFirstChildPlacement(scrollOffset_.GetY());
+        return;
+    }
+    if (isRefreshing_) {
+        UpdateLoadingProgressStatus(RefreshAnimationState::RECYCLE, 1.0f);
     }
     UpdateFirstChildPlacement(scrollOffset_.GetY());
 }
@@ -1112,6 +1178,7 @@ void RefreshPattern::InitChildNode()
     if (isCustomBuilderExist_ && HasCustomBuilderIndex()) {
         if (!customBuilder_) {
             customBuilder_ = AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(customBuilderIndex_.value_or(0)));
+            CHECK_NULL_VOID(customBuilder_);
             if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
                 UpdateBuilderHeight(0.0f);
             } else {
@@ -1123,6 +1190,7 @@ void RefreshPattern::InitChildNode()
         }
     } else if (!progressChild_) {
         progressChild_ = AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(host->TotalChildCount() - 1));
+        CHECK_NULL_VOID(progressChild_);
         auto progressPaintProperty = progressChild_->GetPaintProperty<LoadingProgressPaintProperty>();
         CHECK_NULL_VOID(progressPaintProperty);
         progressPaintProperty->UpdateLoadingProgressOwner(LoadingProgressOwner::REFRESH);
@@ -1138,18 +1206,21 @@ void RefreshPattern::QuickFirstChildAppear()
         ResetOffsetProperty();
     }
     CHECK_NULL_VOID(offsetProperty_);
+    if (progressChild_) {
+        updatePerFrame_ = true;
+    }
     animationId_++;
     auto curve = AceType::MakeRefPtr<CubicCurve>(0.2f, 0.0f, 0.1f, 1.0f);
     AnimationOption option;
     option.SetCurve(curve);
     option.SetDuration(LOADING_EXIT_DURATION);
     offsetProperty_->Set(scrollOffset_.GetY());
-    UpdateFirstChildPlacement(scrollOffset_.GetY());
-    UpdateLoadingProgressStatus(RefreshAnimationState::RECYCLE);
-    SwitchToRefresh();
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    pipeline->FlushUITasks();
+    if (customBuilder_) {
+        UpdateFirstChildPlacement(scrollOffset_.GetY());
+        auto pipeline = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
+        pipeline->FlushUITasks();
+    }
     animation_ = AnimationUtils::StartAnimation(
         option,
         [weak = AceType::WeakClaim(this), id = Container::CurrentId()]() {
@@ -1157,12 +1228,22 @@ void RefreshPattern::QuickFirstChildAppear()
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
             pattern->offsetProperty_->Set(static_cast<float>(TRIGGER_REFRESH_DISTANCE.ConvertToPx()));
-            pattern->UpdateFirstChildPlacement(static_cast<float>(TRIGGER_REFRESH_DISTANCE.ConvertToPx()));
-            auto pipeline = PipelineContext::GetCurrentContext();
-            CHECK_NULL_VOID(pipeline);
-            pipeline->FlushUITasks();
+            if (pattern->customBuilder_) {
+                pattern->UpdateFirstChildPlacement(static_cast<float>(TRIGGER_REFRESH_DISTANCE.ConvertToPx()));
+                auto pipeline = PipelineContext::GetCurrentContext();
+                CHECK_NULL_VOID(pipeline);
+                pipeline->FlushUITasks();
+            }
         },
-        nullptr);
+        [weak = AceType::WeakClaim(this), animationId = animationId_]() {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            if (pattern->animationId_ != animationId) {
+                return;
+            }
+            pattern->updatePerFrame_ = false;
+            pattern->UpdateLoadingProgressStatus(RefreshAnimationState::RECYCLE, 1.0f);
+        });
 }
 
 void RefreshPattern::QuickFirstChildDisappear()
@@ -1171,17 +1252,21 @@ void RefreshPattern::QuickFirstChildDisappear()
         ResetOffsetProperty();
     }
     CHECK_NULL_VOID(offsetProperty_);
+    if (progressChild_) {
+        updatePerFrame_ = true;
+    }
     animationId_++;
+    offsetProperty_->Set(scrollOffset_.GetY());
+    if (customBuilder_) {
+        UpdateFirstChildPlacement(scrollOffset_.GetY());
+        auto pipeline = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
+        pipeline->FlushUITasks();
+    }
     auto curve = AceType::MakeRefPtr<CubicCurve>(0.2f, 0.0f, 0.1f, 1.0f);
     AnimationOption option;
     option.SetCurve(curve);
     option.SetDuration(LOADING_EXIT_DURATION);
-    offsetProperty_->Set(scrollOffset_.GetY());
-    UpdateFirstChildPlacement(scrollOffset_.GetY());
-    SwitchToFinish();
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    pipeline->FlushUITasks();
     animation_ = AnimationUtils::StartAnimation(
         option,
         [weak = AceType::WeakClaim(this), id = Container::CurrentId()]() {
@@ -1189,11 +1274,12 @@ void RefreshPattern::QuickFirstChildDisappear()
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
             pattern->offsetProperty_->Set(0.0f);
-            pattern->UpdateFirstChildPlacement(0.0f);
-            pattern->UpdateLoadingProgressStatus(RefreshAnimationState::FOLLOW_HAND);
-            auto pipeline = PipelineContext::GetCurrentContext();
-            CHECK_NULL_VOID(pipeline);
-            pipeline->FlushUITasks();
+            if (pattern->customBuilder_) {
+                pattern->UpdateFirstChildPlacement(0.0f);
+                auto pipeline = PipelineContext::GetCurrentContext();
+                CHECK_NULL_VOID(pipeline);
+                pipeline->FlushUITasks();
+            }
         },
         [weak = AceType::WeakClaim(this), animationId = animationId_]() {
             auto pattern = weak.Upgrade();
@@ -1201,6 +1287,25 @@ void RefreshPattern::QuickFirstChildDisappear()
             if (pattern->animationId_ != animationId) {
                 return;
             }
+            pattern->updatePerFrame_ = false;
+            pattern->UpdateLoadingProgressStatus(RefreshAnimationState::FOLLOW_HAND, 0.0f);
+            pattern->UpdateFirstChildPlacement(0.0f);
         });
+}
+
+RefreshAnimationState RefreshPattern::GetLoadingProgressStatus()
+{
+    auto defaultValue = RefreshAnimationState::FOLLOW_HAND;
+    CHECK_NULL_RETURN(progressChild_, defaultValue);
+    auto progressPaintProperty = progressChild_->GetPaintProperty<LoadingProgressPaintProperty>();
+    CHECK_NULL_RETURN(progressPaintProperty, defaultValue);
+    return progressPaintProperty->GetRefreshAnimationState().value_or(defaultValue);
+}
+
+void RefreshPattern::UpdateDragFRCSceneInfo(const std::string& scene, float speed, SceneStatus sceneStatus)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->AddFRCSceneInfo(scene, std::abs(speed), sceneStatus);
 }
 } // namespace OHOS::Ace::NG

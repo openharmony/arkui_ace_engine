@@ -103,7 +103,7 @@ void GraphicsProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
     json->Put("brightness", propFrontBrightness.has_value() ? propFrontBrightness->Value() : 1.0);
     json->Put("saturate", propFrontSaturate.has_value() ? propFrontSaturate->Value() : 1.0);
     json->Put("contrast", propFrontContrast.has_value() ? propFrontContrast->Value() : 1.0);
-    json->Put("invert", propFrontInvert.has_value() ? propFrontInvert->Value() : 0.0);
+    json->Put("invert", propFrontInvert.has_value() ? std::get<float>(propFrontInvert.value()) : 0.0);
     json->Put("sepia", propFrontSepia.has_value() ? propFrontSepia->Value() : 0.0);
     json->Put("hueRotate", propFrontHueRotate.has_value() ? propFrontHueRotate.value() : 0.0);
     json->Put("colorBlend", propFrontColorBlend.has_value() ? propFrontColorBlend->ColorToString().c_str() : "");
@@ -124,11 +124,31 @@ void GraphicsProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
         json->Put("shadow", "ShadowStyle.OuterFloatingMD");
     } else {
         jsonShadow->Put("radius", std::to_string(shadow.GetBlurRadius()).c_str());
-        jsonShadow->Put("color", shadow.GetColor().ColorToString().c_str());
+        if (shadow.GetShadowColorStrategy() == ShadowColorStrategy::AVERAGE) {
+            jsonShadow->Put("color", "ColoringStrategy.AVERAGE");
+        } else if (shadow.GetShadowColorStrategy() == ShadowColorStrategy::PRIMARY) {
+            jsonShadow->Put("color", "ColoringStrategy.PRIMARY");
+        } else {
+            jsonShadow->Put("color", shadow.GetColor().ColorToString().c_str());
+        }
         jsonShadow->Put("offsetX", std::to_string(shadow.GetOffset().GetX()).c_str());
         jsonShadow->Put("offsetY", std::to_string(shadow.GetOffset().GetY()).c_str());
         jsonShadow->Put("type", std::to_string(static_cast<int32_t>(shadow.GetShadowType())).c_str());
+        jsonShadow->Put("fill", std::to_string(shadow.GetIsFilled()).c_str());
         json->Put("shadow", jsonShadow);
+    }
+    if (propFrontInvert.has_value()) {
+        if (propFrontInvert->index() == 0) {
+            json->Put("invert", std::get<float>(propFrontInvert.value()));
+        } else {
+            InvertOption option = std::get<InvertOption>(propFrontInvert.value());
+            auto jsonInvert = JsonUtil::Create(true);
+            jsonInvert->Put("low", option.low_);
+            jsonInvert->Put("high", option.high_);
+            jsonInvert->Put("threshold", option.threshold_);
+            jsonInvert->Put("thresholdRange", option.thresholdRange_);
+            json->Put("invert", jsonInvert);
+        }
     }
 }
 
@@ -273,5 +293,22 @@ void BorderProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
     propBorderRadius.value_or(BorderRadiusProperty()).ToJsonValue(json, jsonBorder);
 
     json->Put("border", jsonBorder->ToString().c_str());
+}
+
+void PointLightProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
+{
+    auto jsonLightIntensity = JsonUtil::Create(true);
+    jsonLightIntensity->Put("lightIntensity", propLightIntensity.has_value() ? propLightIntensity.value() : 0.0);
+    json->Put("pointLight", jsonLightIntensity);
+
+    if (propLightPosition.has_value()) {
+        auto jsonLightPosition = JsonUtil::Create(true);
+        jsonLightPosition->Put("x", propLightPosition->x.ToString().c_str());
+        jsonLightPosition->Put("y", propLightPosition->y.ToString().c_str());
+        jsonLightPosition->Put("z", propLightPosition->z.ToString().c_str());
+        json->Put("LightPosition", jsonLightPosition);
+    } else {
+        json->Put("LightPosition", JsonUtil::Create(true));
+    }
 }
 } // namespace OHOS::Ace::NG

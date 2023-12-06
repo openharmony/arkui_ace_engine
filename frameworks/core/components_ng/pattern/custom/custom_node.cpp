@@ -36,23 +36,30 @@ CustomNode::CustomNode(int32_t nodeId, const std::string& viewKey)
     : UINode(V2::JS_VIEW_ETS_TAG, nodeId, MakeRefPtr<CustomNodePattern>()), viewKey_(viewKey)
 {}
 
-void CustomNode::Build()
+void CustomNode::Build(std::shared_ptr<std::list<ExtraInfo>> extraInfos)
 {
     Render();
-    UINode::Build();
+    if (extraInfos) {
+        extraInfos_ = *extraInfos;
+    }
+    UINode::Build(extraInfos);
 }
 
 void CustomNode::Render()
 {
+    // NOTE: this function will be re-enter, we need backup needMarkParent_ first and restore it later.
+    bool needMarkParentBak = needMarkParent_;
     needMarkParent_ = false;
     if (renderFunction_) {
-        auto renderFunction = std::move(renderFunction_);
+        RenderFunction renderFunction = nullptr;
+        std::swap(renderFunction, renderFunction_);
         {
             ACE_SCOPED_TRACE("CustomNode:OnAppear");
             FireOnAppear();
         }
         {
-            ACE_SCOPED_TRACE("CustomNode:BuildItem %s", GetJSViewName().c_str());
+            ACE_SCOPED_TRACE("CustomNode:BuildItem [%s][self:%d][parent:%d]", GetJSViewName().c_str(), GetId(),
+                GetParent() ? GetParent()->GetId() : 0);
             // first create child node and wrapper.
             ScopedViewStackProcessor scopedViewStackProcessor;
             auto child = renderFunction();
@@ -64,7 +71,7 @@ void CustomNode::Render()
     {
         FireRecycleRenderFunc();
     }
-    needMarkParent_ = true;
+    needMarkParent_ = needMarkParentBak;
 }
 
 // used in HotReload to update root view @Component
@@ -78,7 +85,11 @@ void CustomNode::FlushReload()
 
 void CustomNode::SetJSViewActive(bool active)
 {
-    FireSetActiveFunc(active);
+    auto context = PipelineContext::GetCurrentContext();
+    if (!context) {
+        return;
+    }
+    context->SetJSViewActive(active, WeakClaim(this));
 }
 
 void CustomNode::AdjustLayoutWrapperTree(const RefPtr<LayoutWrapperNode>& parent, bool forceMeasure, bool forceLayout)
@@ -123,7 +134,7 @@ void CustomNode::AdjustLayoutWrapperTree(const RefPtr<LayoutWrapperNode>& parent
 
 RefPtr<LayoutWrapperNode> CustomNode::CreateLayoutWrapper(bool forceMeasure, bool forceLayout)
 {
-    Build();
+    Build(nullptr);
     return UINode::CreateLayoutWrapper(forceMeasure, forceLayout);
 }
 

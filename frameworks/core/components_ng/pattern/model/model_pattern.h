@@ -20,9 +20,9 @@
 
 #include "base/memory/referenced.h"
 #include "core/components_ng/event/touch_event.h"
+#include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/pattern/model/model_adapter_wrapper.h"
 #include "core/components_ng/pattern/model/model_layout_algorithm.h"
-#include "core/components_ng/pattern/model/model_layout_property.h"
 #include "core/components_ng/pattern/model/model_paint_method.h"
 #include "core/components_ng/pattern/model/model_paint_property.h"
 #include "core/components_ng/pattern/pattern.h"
@@ -33,8 +33,9 @@ class ACE_EXPORT ModelPattern : public Pattern {
     DECLARE_ACE_TYPE(ModelPattern, Pattern);
 
 public:
-    ModelPattern(uint32_t key);
-    ~ModelPattern() override = default;
+    ModelPattern(uint32_t key, Render3D::SurfaceType surfaceType, const std::string& bundleName,
+        const std::string& moduleName);
+    ~ModelPattern() override;
 
     RefPtr<PaintProperty> CreatePaintProperty() override
     {
@@ -48,7 +49,7 @@ public:
 
     RefPtr<LayoutProperty> CreateLayoutProperty() override
     {
-        return MakeRefPtr<ModelLayoutProperty>();
+        return MakeRefPtr<LayoutProperty>();
     }
 
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
@@ -57,6 +58,7 @@ public:
     }
 
     void OnModifyDone() override;
+    void OnRebuildFrame() override;
 
 private:
     uint32_t GetKey();

@@ -16,15 +16,12 @@ import(
 
 build_component("scroll_bar") {
   sources = [
-    "flutter_render_scroll_bar.cpp",
     "render_scroll_bar.cpp",
     "render_scroll_bar_creator.cpp",
     "scroll_bar_component.cpp",
     "scroll_bar_element.cpp",
     "scroll_bar_proxy.cpp",
   ]
-  if (ace_use_new_skia) {
-    sources -= [ "flutter_render_scroll_bar.cpp" ]
-  }
+
   rosen_sources = [ "rosen_render_scroll_bar.cpp" ]
 }

@@ -14,7 +14,6 @@
  */
 #include "js_plugin_callback_mgr.h"
 #include "core/components/plugin/plugin_component_manager.h"
-#include "hilog_wrapper.h"
 
 namespace OHOS::Ace::Napi {
 JSPluginCallbackMgr::JSPluginCallbackMgr()
@@ -62,7 +61,6 @@ bool JSPluginCallbackMgr::RegisterOnEvent(
 bool JSPluginCallbackMgr::RegisterRequestEvent(napi_env env, const AAFwk::Want& want, ACECallbackInfo& cbInfo,
     const std::shared_ptr<AceJSPluginRequestParam>& param)
 {
-    HILOG_INFO("%{public}s called.", __func__);
     std::lock_guard<std::mutex> lock(mutex_);
     if (param == nullptr) {
         return false;
@@ -100,7 +98,6 @@ bool JSPluginCallbackMgr::RegisterRequestEvent(napi_env env, const AAFwk::Want& 
 
 void JSPluginCallbackMgr::UnRegisterEvent(size_t key)
 {
-    HILOG_INFO("%{public}s called. ", __func__);
     std::lock_guard<std::mutex> lock(mutex_);
     auto iter = eventList_.find(key);
     if (iter != eventList_.end()) {

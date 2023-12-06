@@ -38,8 +38,6 @@ public:
         auto value = MakeRefPtr<ScrollLayoutProperty>();
         value->LayoutProperty::UpdateLayoutProperty(DynamicCast<LayoutProperty>(this));
         value->propAxis_ = CloneAxis();
-        value->propBarWidth_ = CloneBarWidth();
-        value->propEdgeEffect_ = CloneEdgeEffect();
         value->propScrollEnabled_ = CloneScrollEnabled();
         value->propScrollSnapAlign_ = CloneScrollSnapAlign();
         return value;
@@ -49,7 +47,6 @@ public:
     {
         LayoutProperty::Reset();
         ResetAxis();
-        ResetEdgeEffect();
         ResetScrollEnabled();
     }
 
@@ -61,10 +58,6 @@ public:
             { Axis::NONE, "ScrollDirection.None" } };
         Axis axis = GetAxisValue(Axis::VERTICAL);
         json->Put("scrollable", scrollableMap[axis].c_str());
-        std::unordered_map<EdgeEffect, std::string> edgeEffectMap { { EdgeEffect::SPRING, "EdgeEffect.Spring" },
-            { EdgeEffect::FADE, "EdgeEffect.Fade" }, { EdgeEffect::NONE, "EdgeEffect.None" } };
-        EdgeEffect edgeEffect = propEdgeEffect_.value_or(EdgeEffect::NONE);
-        json->Put("edgeEffect", edgeEffectMap[edgeEffect].c_str());
         json->Put("enableScrollInteraction", propScrollEnabled_.value_or(true));
         std::unordered_map<ScrollSnapAlign, std::string> scrollSnapAlignMap {
             { ScrollSnapAlign::NONE, "ScrollSnapAlign.NONE" }, { ScrollSnapAlign::START, "ScrollSnapAlign.START" },
@@ -75,10 +68,9 @@ public:
     }
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Axis, Axis, PROPERTY_UPDATE_MEASURE);
-    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(BarWidth, Dimension, PROPERTY_UPDATE_MEASURE);
-    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(EdgeEffect, EdgeEffect, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ScrollEnabled, bool, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ScrollSnapAlign, ScrollSnapAlign, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ScrollWidth, float, PROPERTY_UPDATE_MEASURE);
 };
 
 } // namespace OHOS::Ace::NG

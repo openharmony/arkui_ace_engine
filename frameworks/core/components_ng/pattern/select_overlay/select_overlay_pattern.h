@@ -88,7 +88,11 @@ public:
 
     void UpdateSelectMenuInfo(const SelectMenuInfo& info);
 
+    void UpdateSelectMenuInfo(std::function<void(SelectMenuInfo& menuInfo)> updateAction);
+
     void UpdateShowArea(const RectF& area);
+
+    void SetSelectRegionVisible(bool isSelectRegionVisible);
 
     void SetHandleReverse(bool reverse);
 
@@ -140,7 +144,9 @@ public:
     }
 
     bool IsMenuShow();
+    bool IsSingleHandleMenuShow();
     bool IsHandleShow();
+    bool IsSingleHandle();
 
     void SetHasShowAnimation(bool animation)
     {
@@ -153,6 +159,8 @@ public:
     }
 
     void BeforeCreateLayoutWrapper() override;
+
+    void StartHiddenHandleTask(bool isDelay = true);
 
 private:
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
@@ -169,7 +177,6 @@ private:
     void HandlePanCancel();
 
     void CheckHandleReverse();
-    void StartHiddenHandleTask();
     void StopHiddenHandleTask();
     void HiddenHandle();
     void AddMenuResponseRegion(std::vector<DimensionRect>& responseRegion);

@@ -22,6 +22,7 @@
 #include "base/geometry/axis.h"
 #include "base/geometry/ng/rect_t.h"
 #include "core/components/scroll/scroll_controller_base.h"
+#include "core/components_ng/pattern/grid/grid_layout_options.h"
 
 namespace OHOS::Ace::NG {
 
@@ -52,6 +53,8 @@ struct GridLayoutInfo {
     }
 
     void UpdateEndLine(float mainSize, float mainGap);
+    // for overScroll at top
+    void UpdateEndIndex(float overScrollOffset, float mainSize, float mainGap);
 
     void SwapItems(int32_t itemIndex, int32_t insertIndex);
     int32_t GetOriginalIndex() const;
@@ -81,6 +84,15 @@ struct GridLayoutInfo {
         return totalHeight - currentOffset_;
     }
 
+    float GetTotalLineHeight(float mainGap) const
+    {
+        float totalHeight = 0.0f;
+        for (auto iter = lineHeightMap_.begin(); iter != lineHeightMap_.end(); ++iter) {
+            totalHeight += (iter->second + mainGap);
+        }
+        return totalHeight - mainGap;
+    }
+
     void ResetPositionFlags()
     {
         reachEnd_ = false;
@@ -98,12 +110,18 @@ struct GridLayoutInfo {
         scrollAlign_ = align;
     }
 
+    float GetContentOffset(float mainGap) const;
+    float GetContentHeight(float mainGap) const;
+    float GetContentOffset(const GridLayoutOptions& options, float mainGap) const;
+    float GetContentHeight(const GridLayoutOptions& options, float mainGap) const;
+
     Axis axis_ = Axis::VERTICAL;
 
     float currentOffset_ = 0.0f;
     float prevOffset_ = 0.0f;
     float lastMainSize_ = 0.0f;
     float totalHeightOfItemsInView_ = 0.0f;
+    float contentEndPadding_ = 0.0f;
 
     std::optional<int32_t> lastCrossCount_;
     // index of first and last GridItem in viewport
@@ -142,6 +160,7 @@ struct GridLayoutInfo {
     bool offsetUpdated_ = false;
 
 private:
+    float GetCurrentOffsetOfRegularGrid(float mainGap) const;
     int32_t GetItemIndexByPosition(int32_t position);
     int32_t GetPositionByItemIndex(int32_t itemIndex);
     void MoveItemsBack(int32_t from, int32_t to, int32_t itemIndex);

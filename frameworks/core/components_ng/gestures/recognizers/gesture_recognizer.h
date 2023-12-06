@@ -19,6 +19,7 @@
 #include <memory>
 
 #include "base/memory/referenced.h"
+#include "core/components_ng/event/gesture_info.h"
 #include "core/components_ng/gestures/gesture_info.h"
 #include "core/components_ng/gestures/gesture_referee.h"
 #include "core/event/axis_event.h"
@@ -27,7 +28,25 @@
 
 namespace OHOS::Ace::NG {
 
+struct DelayedTask {
+    WeakPtr<NGGestureRecognizer> recognizer;
+    int64_t timeStamp = 0;
+    int32_t time = 0;
+    std::function<void()> task;
+};
+
 enum class RefereeState { READY, DETECTING, PENDING, PENDING_BLOCKED, SUCCEED_BLOCKED, SUCCEED, FAIL };
+
+inline std::string TransRefereeState(RefereeState state)
+{
+    const char *str[] = { "READY", "DETECTING", "PENDING", "PENDING_BLOCKED", "SUCCEED_BLOCKED", "SUCCEED", "FAIL" };
+    if (state >= RefereeState::READY && state <= RefereeState::FAIL) {
+        return str[static_cast<int32_t>(state)];
+    }
+    return std::string("State:").append(std::to_string(static_cast<int32_t>(state)));
+}
+
+class FrameNode;
 
 class ACE_EXPORT NGGestureRecognizer : public TouchEventTarget {
     DECLARE_ACE_TYPE(NGGestureRecognizer, TouchEventTarget)
@@ -38,6 +57,8 @@ public:
     static std::unordered_map<int, AncestorNodeInfo>& GetGlobalTransIds();
 
     static void ResetGlobalTransCfg();
+
+    static void Transform(PointF& localPointF, const WeakPtr<FrameNode>& node, bool isRealTime = false);
 
     // Triggered when the gesture referee finishes collecting gestures and begin a gesture referee.
     void BeginReferee(int32_t touchId, bool needUpdateChild = false)
@@ -50,6 +71,8 @@ public:
     {
         OnFinishGestureReferee(touchId, isBlocked);
     }
+
+    virtual void AboutToAccept();
 
     // Called when request of handling gesture sequence is accepted by gesture referee.
     virtual void OnAccepted() = 0;
@@ -120,9 +143,15 @@ public:
         return refereeState_;
     }
 
-    void SetGestureGroup(const WeakPtr<NGGestureRecognizer>& gestureGroup)
+    bool SetGestureGroup(const WeakPtr<NGGestureRecognizer>& gestureGroup);
+    void ResetGestureGroup()
     {
-        gestureGroup_ = gestureGroup;
+        gestureGroup_.Reset();
+    }
+
+    const WeakPtr<NGGestureRecognizer>& GetGestureGroup() const
+    {
+        return gestureGroup_;
     }
 
     void SetOnAction(const GestureEventFunc& onAction)
@@ -185,6 +214,8 @@ public:
             OnSucceedCancel();
         }
         refereeState_ = RefereeState::READY;
+        disposal_ = GestureDisposal::NONE;
+        currentFingers_ = 0;
         OnResetStatus();
     }
 
@@ -210,7 +241,42 @@ public:
     }
 
     void SetTransInfo(int id);
-    void Transform(PointF& windowPointF, PointF& originPointF);
+
+    virtual RefPtr<GestureSnapshot> Dump() const override;
+
+    // for recognizer
+    void AddGestureProcedure(const std::string& procedure) const;
+    // for recognizer group
+    void AddGestureProcedure(const TouchEvent& point, const RefPtr<NGGestureRecognizer>& recognizer) const;
+
+    void SetGestureInfo(const RefPtr<GestureInfo>& gestureInfo)
+    {
+        gestureInfo_ = gestureInfo;
+    }
+
+    RefPtr<GestureInfo> GetGestureInfo()
+    {
+        return gestureInfo_;
+    }
+
+    RefPtr<GestureInfo> GetOrCreateGestureInfo()
+    {
+        if (!gestureInfo_) {
+            gestureInfo_ = MakeRefPtr<GestureInfo>();
+        }
+        return gestureInfo_;
+    }
+
+    void SetIsSystemGesture(bool isSystemGesture)
+    {
+        if (gestureInfo_) {
+            gestureInfo_->SetIsSystemGesture(isSystemGesture);
+        } else {
+            gestureInfo_ = MakeRefPtr<GestureInfo>(isSystemGesture);
+        }
+    }
+
+    virtual void ForceCleanRecognizer() {};
 protected:
     void Adjudicate(const RefPtr<NGGestureRecognizer>& recognizer, GestureDisposal disposal)
     {
@@ -234,6 +300,7 @@ protected:
     virtual void OnResetStatus() = 0;
 
     virtual void OnSucceedCancel() {}
+    bool ShouldResponse() override;
 
     RefereeState refereeState_ = RefereeState::READY;
 
@@ -258,6 +325,8 @@ protected:
     int32_t transId_ = 0;
 
     int32_t currentFingers_ = 0;
+    RefPtr<GestureInfo> gestureInfo_;
+
 private:
     WeakPtr<NGGestureRecognizer> gestureGroup_;
 };

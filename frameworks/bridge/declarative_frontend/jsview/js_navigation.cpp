@@ -27,9 +27,10 @@
 #include "bridge/declarative_frontend/jsview/js_view_abstract.h"
 #include "bridge/declarative_frontend/jsview/models/navigation_model_impl.h"
 #include "core/components_ng/base/view_stack_model.h"
+#include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/pattern/navigation/navigation_declaration.h"
 #include "core/components_ng/pattern/navigation/navigation_model_data.h"
 #include "core/components_ng/pattern/navigation/navigation_model_ng.h"
-#include "core/components_ng/pattern/navigation/navigation_declaration.h"
 
 namespace OHOS::Ace {
 std::unique_ptr<NavigationModel> NavigationModel::instance_ = nullptr;
@@ -77,7 +78,6 @@ void JSNavigation::ParseToolBarItems(const JSRef<JSArray>& jsArray, std::list<Re
     for (size_t i = 0; i < length; i++) {
         auto item = jsArray->GetValueAt(i);
         if (!item->IsObject()) {
-            LOGE("tool bar item is not object");
             continue;
         }
 
@@ -87,25 +87,24 @@ void JSNavigation::ParseToolBarItems(const JSRef<JSArray>& jsArray, std::list<Re
         if (itemValueObject->IsString()) {
             toolBarItem->value = itemValueObject->ToString();
         }
-
         auto itemIconObject = itemObject->GetProperty("icon");
         std::string icon;
-        if (!ParseJsMedia(itemIconObject, icon)) {
-            LOGE("iconValue is null");
-        }
+        ParseJsMedia(itemIconObject, icon);
         toolBarItem->icon = icon;
-
         auto itemActionValue = itemObject->GetProperty("action");
         if (itemActionValue->IsFunction()) {
             auto onClickFunc = AceType::MakeRefPtr<JsClickFunction>(JSRef<JSFunc>::Cast(itemActionValue));
-            toolBarItem->action = EventMarker([func = std::move(onClickFunc)]() {
+            WeakPtr<NG::FrameNode> targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+            toolBarItem->action = EventMarker([func = std::move(onClickFunc), node = targetNode]() {
                 ACE_SCORING_EVENT("Navigation.toolBarItemClick");
+                PipelineContext::SetCallBackNode(node);
                 func->Execute();
             });
             auto onClickWithParamFunc = AceType::MakeRefPtr<JsClickFunction>(JSRef<JSFunc>::Cast(itemActionValue));
             toolBarItem->actionWithParam =
-                EventMarker([func = std::move(onClickWithParamFunc)](const BaseEventInfo* info) {
+                EventMarker([func = std::move(onClickWithParamFunc), node = targetNode](const BaseEventInfo* info) {
                     ACE_SCORING_EVENT("Navigation.menuItemButtonClick");
+                    PipelineContext::SetCallBackNode(node);
                     func->Execute();
                 });
         }
@@ -120,7 +119,6 @@ void JSNavigation::ParseBarItems(
     for (size_t i = 0; i < length; i++) {
         auto item = jsArray->GetValueAt(i);
         if (!item->IsObject()) {
-            LOGE("tool bar item is not object");
             continue;
         }
         auto itemObject = JSRef<JSObject>::Cast(item);
@@ -138,9 +136,12 @@ void JSNavigation::ParseBarItems(
         auto itemActionValue = itemObject->GetProperty("action");
         if (itemActionValue->IsFunction()) {
             RefPtr<JsFunction> onClickFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(itemActionValue));
-            auto onItemClick = [execCtx = info.GetExecutionContext(), func = std::move(onClickFunc)]() {
+            WeakPtr<NG::FrameNode> targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+            auto onItemClick = [execCtx = info.GetExecutionContext(), func = std::move(onClickFunc),
+                                   node = targetNode]() {
                 JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
                 if (func) {
+                    PipelineContext::SetCallBackNode(node);
                     func->ExecuteJS();
                 }
             };
@@ -178,9 +179,12 @@ void JSNavigation::ParseToolbarItemsConfiguration(
         auto itemActionValue = itemObject->GetProperty("action");
         if (itemActionValue->IsFunction()) {
             RefPtr<JsFunction> onClickFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(itemActionValue));
-            auto onItemClick = [execCtx = info.GetExecutionContext(), func = std::move(onClickFunc)]() {
+            WeakPtr<NG::FrameNode> targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+            auto onItemClick = [execCtx = info.GetExecutionContext(), func = std::move(onClickFunc),
+                                   node = targetNode]() {
                 JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
                 if (func) {
+                    PipelineContext::SetCallBackNode(node);
                     func->ExecuteJS();
                 }
             };
@@ -210,8 +214,7 @@ bool JSNavigation::ParseCommonTitle(const JSRef<JSVal>& jsValue)
     bool sub = subtitle->IsString();
     bool main = title->IsString();
     if (subtitle->IsString() || title->IsString()) {
-        NavigationModel::GetInstance()->ParseCommonTitle(
-            sub, main, subtitle->ToString(), title->ToString());
+        NavigationModel::GetInstance()->ParseCommonTitle(sub, main, subtitle->ToString(), title->ToString());
     }
     return isCommonTitle;
 }
@@ -274,17 +277,10 @@ void JSNavigation::JSBind(BindingTarget globalObj)
 void JSNavigation::SetTitle(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have at least 1 argument");
         return;
     }
-    if (info[0]->IsString() || info[0]->IsUndefined()) {
-        std::string title;
-        if (info[0]->IsUndefined()) {
-            title = "";
-        } else {
-            title = info[0]->ToString();
-        }
-        NavigationModel::GetInstance()->SetTitle(title);
+    if (info[0]->IsString()) {
+        NavigationModel::GetInstance()->SetTitle(info[0]->ToString());
     } else if (info[0]->IsObject()) {
         if (ParseCommonTitle(info[0])) {
             return;
@@ -295,6 +291,31 @@ void JSNavigation::SetTitle(const JSCallbackInfo& info)
         }
         // CustomBuilder | NavigationCustomTitle
         JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(info[0]);
+        do {
+            if (!jsObj->HasProperty("height")) {
+                break;
+            }
+            JSRef<JSVal> height = jsObj->GetProperty("height");
+            CalcDimension titleHeight;
+            bool isValid = JSContainerBase::ParseJsDimensionVpNG(height, titleHeight);
+            if (height->IsString()) {
+                std::string heightValue;
+                ParseJsString(height, heightValue);
+                if (heightValue == NG::TITLE_MAIN_WITH_SUB) {
+                    NavigationModel::GetInstance()->SetTitleHeight(NG::DOUBLE_LINE_TITLEBAR_HEIGHT);
+                    break;
+                }
+                if (heightValue == NG::TITLE_MAIN) {
+                    NavigationModel::GetInstance()->SetTitleHeight(NG::SINGLE_LINE_TITLEBAR_HEIGHT);
+                    break;
+                }
+            }
+            if (!isValid || titleHeight.Value() < 0) {
+                NavigationModel::GetInstance()->SetTitleHeight(titleHeight, false);
+                return;
+            }
+            NavigationModel::GetInstance()->SetTitleHeight(titleHeight);
+        } while (0);
         JSRef<JSVal> builderObject = jsObj->GetProperty("builder");
         if (builderObject->IsFunction()) {
             ViewStackModel::GetInstance()->NewScope();
@@ -304,33 +325,8 @@ void JSNavigation::SetTitle(const JSCallbackInfo& info)
             auto customNode = ViewStackModel::GetInstance()->Finish();
             NavigationModel::GetInstance()->SetCustomTitle(customNode);
         }
-
-        JSRef<JSVal> height = jsObj->GetProperty("height");
-        if (height->IsNumber()) {
-            CalcDimension titleHeight;
-            if (!JSContainerBase::ParseJsDimensionVp(height, titleHeight) || titleHeight.Value() < 0) {
-                return;
-            }
-            NavigationModel::GetInstance()->SetTitleHeight(titleHeight);
-        } else if (height->IsString()) {
-            std::string heightValue;
-            ParseJsString(height, heightValue);
-            if (heightValue == NG::TITLE_MAIN_WITH_SUB) {
-                NavigationModel::GetInstance()->SetTitleHeight(NG::DOUBLE_LINE_TITLEBAR_HEIGHT);
-            } else if (heightValue == NG::TITLE_MAIN) {
-                NavigationModel::GetInstance()->SetTitleHeight(NG::SINGLE_LINE_TITLEBAR_HEIGHT);
-            } else {
-                LOGW("title height value is invalid string");
-            }
-        } else {
-            CalcDimension titleHeight;
-            if (!JSContainerBase::ParseJsDimensionVp(height, titleHeight) || titleHeight.Value() <= 0) {
-                return;
-            }
-            NavigationModel::GetInstance()->SetTitleHeight(titleHeight);
-        }
     } else {
-        LOGE("arg is not [String|Function].");
+        NavigationModel::GetInstance()->SetTitle("");
     }
 }
 
@@ -338,8 +334,6 @@ void JSNavigation::SetTitleMode(int32_t value)
 {
     if (value >= 0 && value <= TITLE_MODE_RANGE) {
         NavigationModel::GetInstance()->SetTitleMode(static_cast<NG::NavigationTitleMode>(value));
-    } else {
-        LOGE("invalid value for titleMode");
     }
 }
 
@@ -361,7 +355,6 @@ void JSNavigation::SetHideNavBar(bool hide)
 void JSNavigation::SetBackButtonIcon(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have at least 1 arguments");
         return;
     }
     std::string src;
@@ -373,7 +366,10 @@ void JSNavigation::SetBackButtonIcon(const JSCallbackInfo& info)
         pixMap = CreatePixelMapFromNapiValue(info[0]);
     }
 #endif
-    NavigationModel::GetInstance()->SetBackButtonIcon(src, noPixMap, pixMap);
+    std::string bundleName;
+    std::string moduleName;
+    GetJsMediaBundleInfo(info[0], bundleName, moduleName);
+    NavigationModel::GetInstance()->SetBackButtonIcon(src, noPixMap, pixMap, bundleName, moduleName);
 }
 
 void JSNavigation::SetHideBackButton(bool hide)
@@ -389,11 +385,9 @@ void JSNavigation::SetHideToolBar(bool hide)
 void JSNavigation::SetToolBar(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have at least one argument");
         return;
     }
     if (!info[0]->IsObject() && !info[0]->IsUndefined()) {
-        LOGE("arg is not a object or is not undefined.");
         return;
     }
     if (info[0]->IsUndefined()) {
@@ -411,7 +405,6 @@ void JSNavigation::SetToolBar(const JSCallbackInfo& info)
 
     auto itemsValue = JSRef<JSObject>::Cast(info[0])->GetProperty("items");
     if (!itemsValue->IsObject() || !itemsValue->IsArray()) {
-        LOGE("arg format error: not find items");
         return;
     }
     if (NavigationModel::GetInstance()->NeedSetItems()) {
@@ -456,7 +449,6 @@ void JSNavigation::SetToolbarConfiguration(const JSCallbackInfo& info)
 void JSNavigation::SetMenus(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have at least one argument");
         return;
     }
 
@@ -484,8 +476,6 @@ void JSNavigation::SetMenus(const JSCallbackInfo& info)
             auto customNode = ViewStackModel::GetInstance()->Finish();
             NavigationModel::GetInstance()->SetCustomMenu(customNode);
         }
-    } else {
-        LOGE("arg is not [String|Function].");
     }
 }
 
@@ -497,30 +487,31 @@ void JSNavigation::SetMenuCount(int32_t menuCount)
 void JSNavigation::SetOnTitleModeChanged(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have at least one argument");
         return;
     }
     if (info[0]->IsFunction()) {
         auto onTitleModeChangeCallback =
             AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
-        auto onTitleModeChange = [execCtx = info.GetExecutionContext(), func = std::move(onTitleModeChangeCallback)](
-            NG::NavigationTitleMode mode) {
+        WeakPtr<NG::FrameNode> targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+        auto onTitleModeChange = [execCtx = info.GetExecutionContext(), func = std::move(onTitleModeChangeCallback),
+                                     node = targetNode](NG::NavigationTitleMode mode) {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             ACE_SCORING_EVENT("OnTitleModeChange");
+            PipelineContext::SetCallBackNode(node);
             JSRef<JSVal> param = JSRef<JSVal>::Make(ToJSValue(mode));
             func->ExecuteJS(1, &param);
         };
         auto changeHandler = AceType::MakeRefPtr<JsEventFunction<NavigationTitleModeChangeEvent, 1>>(
             JSRef<JSFunc>::Cast(info[0]), TitleModeChangeEventToJSValue);
-        auto eventInfo = [executionContext = info.GetExecutionContext(), func = std::move(changeHandler)](
-            const BaseEventInfo* baseInfo) {
+        auto eventInfo = [executionContext = info.GetExecutionContext(), func = std::move(changeHandler),
+                             node = targetNode](const BaseEventInfo* baseInfo) {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext);
             auto eventInfo = TypeInfoHelper::DynamicCast<NavigationTitleModeChangeEvent>(baseInfo);
             if (!eventInfo) {
-                LOGE("HandleChangeEvent eventInfo == nullptr");
                 return;
             }
             ACE_SCORING_EVENT("Navigation.onTitleModeChanged");
+            PipelineContext::SetCallBackNode(node);
             func->Execute(*eventInfo);
         };
         NavigationModel::GetInstance()->SetOnTitleModeChange(std::move(onTitleModeChange), std::move(eventInfo));
@@ -528,12 +519,15 @@ void JSNavigation::SetOnTitleModeChanged(const JSCallbackInfo& info)
     info.ReturnSelf();
 }
 
-void JSNavigation::SetUsrNavigationMode(int32_t value)
+void JSNavigation::SetUsrNavigationMode(const JSCallbackInfo& info)
 {
+    if (!info[0]->IsNumber()) {
+        NavigationModel::GetInstance()->SetUsrNavigationMode(NG::NavigationMode::AUTO);
+        return;
+    }
+    int32_t value = info[0]->ToNumber<int32_t>();
     if (value >= 0 && value <= NAVIGATION_MODE_RANGE) {
         NavigationModel::GetInstance()->SetUsrNavigationMode(static_cast<NG::NavigationMode>(value));
-    } else {
-        LOGE("invalid value for navigationMode");
     }
 }
 
@@ -541,15 +535,12 @@ void JSNavigation::SetNavBarPosition(int32_t value)
 {
     if (value >= 0 && value <= NAV_BAR_POSITION_RANGE) {
         NavigationModel::GetInstance()->SetNavBarPosition(static_cast<NG::NavBarPosition>(value));
-    } else {
-        LOGE("invalid value for navBarPosition");
     }
 }
 
 void JSNavigation::SetNavBarWidth(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have at least 1 argument");
         return;
     }
 
@@ -568,7 +559,6 @@ void JSNavigation::SetNavBarWidth(const JSCallbackInfo& info)
 void JSNavigation::SetMinContentWidth(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have at least 1 argument");
         return;
     }
 
@@ -587,9 +577,7 @@ void JSNavigation::SetMinContentWidth(const JSCallbackInfo& info)
 
 void JSNavigation::SetNavBarWidthRange(const JSCallbackInfo& info)
 {
-
     if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have at least 1 argument");
         return;
     }
     if (!info[0]->IsArray()) {
@@ -614,23 +602,23 @@ void JSNavigation::SetNavBarWidthRange(const JSCallbackInfo& info)
         maxNavBarWidth.SetValue(0);
     }
     NavigationModel::GetInstance()->SetMaxNavBarWidth(maxNavBarWidth);
-
 }
 
 void JSNavigation::SetOnNavBarStateChange(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have at least one argument");
         return;
     }
 
     if (info[0]->IsFunction()) {
         auto onNavBarStateChangeCallback =
             AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
-        auto onNavBarStateChange = [execCtx = info.GetExecutionContext(),
-            func = std::move(onNavBarStateChangeCallback)](bool isVisible) {
+        WeakPtr<NG::FrameNode> targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+        auto onNavBarStateChange = [execCtx = info.GetExecutionContext(), func = std::move(onNavBarStateChangeCallback),
+                                       node = targetNode](bool isVisible) {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             ACE_SCORING_EVENT("OnNavBarStateChange");
+            PipelineContext::SetCallBackNode(node);
             JSRef<JSVal> param = JSRef<JSVal>::Make(ToJSValue(isVisible));
             func->ExecuteJS(1, &param);
         };
@@ -642,14 +630,12 @@ void JSNavigation::SetOnNavBarStateChange(const JSCallbackInfo& info)
 void JSNavigation::SetNavDestination(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have at least 1 argument");
         return;
     }
 
     JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
     auto builder = obj->GetProperty("builder");
     if (!builder->IsFunction()) {
-        LOGE("JSNavigation::SetNavDestination builder param is not a function.");
         return;
     }
 
@@ -670,12 +656,13 @@ void JSNavigation::SetOnNavigationModeChange(const JSCallbackInfo& info)
         info.ReturnSelf();
         return;
     }
-    auto onModeChangeCallback =
-            AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
-    auto onModeChange = [execCtx = info.GetExecutionContext(),
-        func = std::move(onModeChangeCallback)](NG::NavigationMode mode) {
+    auto onModeChangeCallback = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
+    WeakPtr<NG::FrameNode> targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto onModeChange = [execCtx = info.GetExecutionContext(), func = std::move(onModeChangeCallback),
+                            node = targetNode](NG::NavigationMode mode) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("OnNavigationModeChange");
+        PipelineContext::SetCallBackNode(node);
         JSRef<JSVal> param = JSRef<JSVal>::Make(ToJSValue(static_cast<int8_t>(mode)));
         func->ExecuteJS(1, &param);
     };

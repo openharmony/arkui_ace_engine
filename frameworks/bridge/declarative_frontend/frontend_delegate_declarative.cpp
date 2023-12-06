@@ -25,6 +25,7 @@
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "base/resource/ace_res_config.h"
+#include "base/subwindow/subwindow_manager.h"
 #include "base/utils/measure_util.h"
 #include "base/utils/utils.h"
 #include "bridge/common/manifest/manifest_parser.h"
@@ -208,6 +209,20 @@ void FrontendDelegateDeclarative::RunPage(
     }
     AddRouterTask(RouterTask { RouterAction::PUSH, PageTarget(mainPagePath_), params });
     LoadPage(GenerateNextPageId(), PageTarget(mainPagePath_), true, params);
+}
+
+void FrontendDelegateDeclarative::RunPage(
+    const std::shared_ptr<std::vector<uint8_t>>& content, const std::string& params, const std::string& profile)
+{
+    ACE_SCOPED_TRACE("FrontendDelegateDeclarativeNG::RunPage by buffer size:%zu", content->size());
+    taskExecutor_->PostTask(
+        [delegate = Claim(this), weakPtr = WeakPtr<NG::PageRouterManager>(pageRouterManager_), content, params]() {
+            auto pageRouterManager = weakPtr.Upgrade();
+            CHECK_NULL_VOID(pageRouterManager);
+            pageRouterManager->RunPage(content, params);
+            auto pipeline = delegate->GetPipelineContext();
+        },
+        TaskExecutor::TaskType::JS);
 }
 
 void FrontendDelegateDeclarative::ChangeLocale(const std::string& language, const std::string& countryOrRegion)
@@ -625,8 +640,7 @@ void FrontendDelegateDeclarative::ResetStagingPage()
 {
     if (resetStagingPage_) {
         taskExecutor_->PostTask(
-            [resetStagingPage = resetStagingPage_] { resetStagingPage(); },
-            TaskExecutor::TaskType::JS);
+            [resetStagingPage = resetStagingPage_] { resetStagingPage(); }, TaskExecutor::TaskType::JS);
     } else {
         LOGE("resetStagingPage_ is null");
     }
@@ -797,13 +811,24 @@ void FrontendDelegateDeclarative::GetStageSourceMap(
     }
 }
 
-void FrontendDelegateDeclarative::InitializeRouterManager(
-    NG::LoadPageCallback&& loadPageCallback, NG::LoadNamedRouterCallback&& loadNamedRouterCallback)
+void FrontendDelegateDeclarative::InitializeRouterManager(NG::LoadPageCallback&& loadPageCallback,
+    NG::LoadPageByBufferCallback&& loadPageByBufferCallback,
+    NG::LoadNamedRouterCallback&& loadNamedRouterCallback,
+    NG::UpdateRootComponentCallback&& updateRootComponentCallback)
 {
     pageRouterManager_ = AceType::MakeRefPtr<NG::PageRouterManager>();
     pageRouterManager_->SetLoadJsCallback(std::move(loadPageCallback));
+    pageRouterManager_->SetLoadJsByBufferCallback(std::move(loadPageByBufferCallback));
     pageRouterManager_->SetLoadNamedRouterCallback(std::move(loadNamedRouterCallback));
+    pageRouterManager_->SetUpdateRootComponentCallback(std::move(updateRootComponentCallback));
 }
+
+#if defined(PREVIEW)
+void FrontendDelegateDeclarative::SetIsComponentPreview(NG::IsComponentPreviewCallback&& callback)
+{
+    pageRouterManager_->SetIsComponentPreview(std::move(callback));
+}
+#endif
 
 // Start FrontendDelegate overrides.
 void FrontendDelegateDeclarative::Push(const std::string& uri, const std::string& params)
@@ -979,10 +1004,8 @@ void FrontendDelegateDeclarative::AddRouterTask(const RouterTask& task)
 {
     if (routerQueue_.size() < MAX_ROUTER_STACK) {
         routerQueue_.emplace(task);
-        LOGI("router queue's size = %{public}zu, action = %{public}d, url = %{public}s", routerQueue_.size(),
+        LOGD("router queue's size = %{public}zu, action = %{public}d, url = %{public}s", routerQueue_.size(),
             static_cast<uint32_t>(task.action), task.target.url.c_str());
-    } else {
-        LOGW("router queue is full");
     }
 }
 
@@ -1324,11 +1347,6 @@ void FrontendDelegateDeclarative::PostJsTask(std::function<void()>&& task)
     taskExecutor_->PostTask(task, TaskExecutor::TaskType::JS);
 }
 
-void FrontendDelegateDeclarative::RemoveVisibleChangeNode(NodeId id)
-{
-    LOGW("RemoveVisibleChangeNode: Not implemented yet.");
-}
-
 const std::string& FrontendDelegateDeclarative::GetAppID() const
 {
     return manifestParser_->GetAppInfo()->GetAppID();
@@ -1359,18 +1377,19 @@ Size FrontendDelegateDeclarative::MeasureTextSize(const MeasureContext& context)
     return MeasureUtil::MeasureTextSize(context);
 }
 
-void FrontendDelegateDeclarative::ShowToast(const std::string& message, int32_t duration, const std::string& bottom)
+void FrontendDelegateDeclarative::ShowToast(
+    const std::string& message, int32_t duration, const std::string& bottom, const NG::ToastShowMode& showMode)
 {
-    LOGD("FrontendDelegateDeclarative ShowToast.");
     int32_t durationTime = std::clamp(duration, TOAST_TIME_DEFAULT, TOAST_TIME_MAX);
     bool isRightToLeft = AceApplicationInfo::GetInstance().IsRightToLeft();
     if (Container::IsCurrentUseNewPipeline()) {
-        auto task = [durationTime, message, bottom, isRightToLeft, containerId = Container::CurrentId()](
+        auto task = [durationTime, message, bottom, isRightToLeft, showMode, containerId = Container::CurrentId()](
                         const RefPtr<NG::OverlayManager>& overlayManager) {
             CHECK_NULL_VOID(overlayManager);
             ContainerScope scope(containerId);
-            LOGI("Begin to show toast message %{public}s, duration is %{public}d", message.c_str(), durationTime);
-            overlayManager->ShowToast(message, durationTime, bottom, isRightToLeft);
+            TAG_LOGD(AceLogTag::ACE_OVERLAY, "Begin to show toast message %{public}s,duration is %{public}d",
+                message.c_str(), durationTime);
+            overlayManager->ShowToast(message, durationTime, bottom, isRightToLeft, showMode);
         };
         MainWindowOverlay(std::move(task));
         return;
@@ -1401,8 +1420,23 @@ void FrontendDelegateDeclarative::ShowDialogInner(DialogProperties& dialogProper
         };
         auto task = [dialogProperties](const RefPtr<NG::OverlayManager>& overlayManager) {
             CHECK_NULL_VOID(overlayManager);
+            RefPtr<NG::FrameNode> dialog;
             LOGI("Begin to show dialog ");
-            overlayManager->ShowDialog(dialogProperties, nullptr, AceApplicationInfo::GetInstance().IsRightToLeft());
+            if (dialogProperties.isShowInSubWindow) {
+                dialog = SubwindowManager::GetInstance()->ShowDialogNG(dialogProperties, nullptr);
+                CHECK_NULL_VOID(dialog);
+                if (dialogProperties.isModal) {
+                    DialogProperties Maskarg;
+                    Maskarg.isMask = true;
+                    Maskarg.autoCancel = dialogProperties.autoCancel;
+                    auto mask = overlayManager->ShowDialog(Maskarg, nullptr, false);
+                    CHECK_NULL_VOID(mask);
+                }
+            } else {
+                dialog = overlayManager->ShowDialog(
+                    dialogProperties, nullptr, AceApplicationInfo::GetInstance().IsRightToLeft());
+                CHECK_NULL_VOID(dialog);
+            }
         };
         MainWindowOverlay(std::move(task));
         return;
@@ -1470,14 +1504,15 @@ void FrontendDelegateDeclarative::ShowDialog(const std::string& title, const std
     ShowDialogInner(dialogProperties, std::move(callback), callbacks);
 }
 
-void FrontendDelegateDeclarative::ShowDialog(const PromptDialogAttr& dialogAttr,
-    const std::vector<ButtonInfo>& buttons, std::function<void(int32_t, int32_t)>&& callback,
-    const std::set<std::string>& callbacks)
+void FrontendDelegateDeclarative::ShowDialog(const PromptDialogAttr& dialogAttr, const std::vector<ButtonInfo>& buttons,
+    std::function<void(int32_t, int32_t)>&& callback, const std::set<std::string>& callbacks)
 {
     DialogProperties dialogProperties = {
         .title = dialogAttr.title,
         .content = dialogAttr.message,
         .autoCancel = dialogAttr.autoCancel,
+        .isShowInSubWindow = dialogAttr.showInSubWindow,
+        .isModal = dialogAttr.isModal,
         .buttons = buttons,
         .maskRect = dialogAttr.maskRect,
     };
@@ -1490,14 +1525,16 @@ void FrontendDelegateDeclarative::ShowDialog(const PromptDialogAttr& dialogAttr,
     ShowDialogInner(dialogProperties, std::move(callback), callbacks);
 }
 
-void FrontendDelegateDeclarative::ShowDialog(const PromptDialogAttr& dialogAttr,
-    const std::vector<ButtonInfo>& buttons, std::function<void(int32_t, int32_t)>&& callback,
-    const std::set<std::string>& callbacks, std::function<void(bool)>&& onStatusChanged)
+void FrontendDelegateDeclarative::ShowDialog(const PromptDialogAttr& dialogAttr, const std::vector<ButtonInfo>& buttons,
+    std::function<void(int32_t, int32_t)>&& callback, const std::set<std::string>& callbacks,
+    std::function<void(bool)>&& onStatusChanged)
 {
     DialogProperties dialogProperties = {
         .title = dialogAttr.title,
         .content = dialogAttr.message,
         .autoCancel = dialogAttr.autoCancel,
+        .isShowInSubWindow = dialogAttr.showInSubWindow,
+        .isModal = dialogAttr.isModal,
         .buttons = buttons,
         .onStatusChanged = std::move(onStatusChanged),
         .maskRect = dialogAttr.maskRect,
@@ -1517,7 +1554,6 @@ void FrontendDelegateDeclarative::ShowActionMenuInner(DialogProperties& dialogPr
     ButtonInfo buttonInfo = { .text = Localization::GetInstance()->GetEntryLetters("common.cancel"), .textColor = "" };
     dialogProperties.buttons.emplace_back(buttonInfo);
     if (Container::IsCurrentUseNewPipeline()) {
-        LOGI("Dialog IsCurrentUseNewPipeline.");
         dialogProperties.onSuccess = std::move(callback);
         dialogProperties.onCancel = [callback, taskExecutor = taskExecutor_] {
             taskExecutor->PostTask([callback]() { callback(CALLBACK_ERRORCODE_CANCEL, CALLBACK_DATACODE_ZERO); },
@@ -1529,8 +1565,22 @@ void FrontendDelegateDeclarative::ShowActionMenuInner(DialogProperties& dialogPr
             [dialogProperties, weak = WeakPtr<NG::OverlayManager>(overlayManager)] {
                 auto overlayManager = weak.Upgrade();
                 CHECK_NULL_VOID(overlayManager);
-                overlayManager->ShowDialog(
-                    dialogProperties, nullptr, AceApplicationInfo::GetInstance().IsRightToLeft());
+                RefPtr<NG::FrameNode> dialog;
+                if (dialogProperties.isShowInSubWindow) {
+                    dialog = SubwindowManager::GetInstance()->ShowDialogNG(dialogProperties, nullptr);
+                    CHECK_NULL_VOID(dialog);
+                    if (dialogProperties.isModal) {
+                        DialogProperties Maskarg;
+                        Maskarg.isMask = true;
+                        Maskarg.autoCancel = dialogProperties.autoCancel;
+                        auto mask = overlayManager->ShowDialog(Maskarg, nullptr, false);
+                        CHECK_NULL_VOID(mask);
+                    }
+                } else {
+                    dialog = overlayManager->ShowDialog(
+                        dialogProperties, nullptr, AceApplicationInfo::GetInstance().IsRightToLeft());
+                    CHECK_NULL_VOID(dialog);
+                }
             },
             TaskExecutor::TaskType::UI);
         return;
@@ -1589,6 +1639,20 @@ void FrontendDelegateDeclarative::ShowActionMenu(const std::string& title, const
         .onStatusChanged = std::move(onStatusChanged),
     };
     ShowActionMenuInner(dialogProperties, button, std::move(callback));
+}
+
+void FrontendDelegateDeclarative::ShowActionMenu(const PromptDialogAttr& dialogAttr,
+    const std::vector<ButtonInfo>& buttons, std::function<void(int32_t, int32_t)>&& callback)
+{
+    DialogProperties dialogProperties = {
+        .title = dialogAttr.title,
+        .autoCancel = true,
+        .isMenu = true,
+        .buttons = buttons,
+        .isShowInSubWindow = dialogAttr.showInSubWindow,
+        .isModal = dialogAttr.isModal,
+    };
+    ShowActionMenuInner(dialogProperties, buttons, std::move(callback));
 }
 
 void FrontendDelegateDeclarative::EnableAlertBeforeBackPage(
@@ -2815,7 +2879,7 @@ std::string FrontendDelegateDeclarative::GetContentInfo()
 
     if (!Container::IsCurrentUseNewPipeline()) {
         std::lock_guard<std::mutex> lock(mutex_);
-        auto jsonRouterStack = JsonUtil::CreateArray(false);
+        auto jsonRouterStack = JsonUtil::CreateArray(true);
         for (size_t index = 0; index < pageRouteStack_.size(); ++index) {
             jsonRouterStack->Put("", pageRouteStack_[index].url.c_str());
         }

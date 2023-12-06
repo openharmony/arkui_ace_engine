@@ -45,7 +45,6 @@ void JSCanvasPattern::JSBind(BindingTarget globalObj)
 void JSCanvasPattern::JSSetTransform(const JSCallbackInfo& info)
 {
     if (info.Length() != SET_TRANSFORM_PARAMETER_SIZE || !info[0]->IsObject()) {
-        LOGE("The argument of the function is not object or the number of the argument must be only one parameter.");
         return;
     }
     auto* matrix = JSRef<JSObject>::Cast(info[0])->Unwrap<JSMatrix2d>();
@@ -54,8 +53,6 @@ void JSCanvasPattern::JSSetTransform(const JSCallbackInfo& info)
         if (canvasRenderer) {
             canvasRenderer->SetTransform(GetId(), matrix->GetTransform());
         }
-    } else {
-        LOGE("the parameter is null.");
     }
 }
 } // namespace OHOS::Ace::Framework

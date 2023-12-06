@@ -16,11 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_IMAGE_IMAGE_OBJECT_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_IMAGE_IMAGE_OBJECT_H
 
-#ifdef NEW_SKIA
 #include "modules/svg/include/SkSVGDOM.h"
-#else
-#include "experimental/svg/model/SkSVGDOM.h"
-#endif
 
 #include "base/image/pixel_map.h"
 #include "core/image/animated_image_player.h"
@@ -32,29 +28,20 @@ namespace OHOS::Ace {
 class RenderImage;
 class ImageObject : public virtual AceType {
     DECLARE_ACE_TYPE(ImageObject, AceType);
+
 public:
 #ifndef USE_ROSEN_DRAWING
     static RefPtr<ImageObject> BuildImageObject(
-        ImageSourceInfo source,
-        const RefPtr<PipelineBase> context,
-        const sk_sp<SkData>& skData,
-        bool useSkiaSvg);
+        ImageSourceInfo source, const RefPtr<PipelineBase> context, const sk_sp<SkData>& skData, bool useSkiaSvg);
 #else
-    static RefPtr<ImageObject> BuildImageObject(
-        ImageSourceInfo source,
-        const RefPtr<PipelineBase> context,
-        const std::shared_ptr<RSData>& rsData,
-        bool useSkiaSvg);
+    static RefPtr<ImageObject> BuildImageObject(ImageSourceInfo source, const RefPtr<PipelineBase> context,
+        const std::shared_ptr<RSData>& rsData, bool useSkiaSvg);
 #endif
 
     ImageObject() = default;
-    explicit ImageObject(ImageSourceInfo source) : imageSource_(source){}
+    explicit ImageObject(ImageSourceInfo source) : imageSource_(source) {}
 
-    ImageObject(
-        ImageSourceInfo source,
-        const Size& imageSize,
-        int32_t frameCount,
-        bool isSvg = false)
+    ImageObject(ImageSourceInfo source, const Size& imageSize, int32_t frameCount, bool isSvg = false)
         : imageSource_(source), imageSize_(imageSize), frameCount_(frameCount), isSvg_(isSvg)
     {}
     virtual ~ImageObject() = default;
@@ -66,7 +53,8 @@ public:
         return imageSize_;
     }
 
-    void SetImageSize(Size &size){
+    void SetImageSize(Size& size)
+    {
         imageSize_ = size;
     }
 
@@ -100,13 +88,9 @@ public:
         return isApng_;
     }
 
-    virtual void UploadToGpuForRender(
-        const WeakPtr<PipelineBase>& context,
-        const UploadSuccessCallback& successCallback,
-        const FailedCallback& failedCallback,
-        const Size& imageSize,
-        bool forceResize,
-        bool syncMode = false)
+    virtual void UploadToGpuForRender(const WeakPtr<PipelineBase>& context,
+        const UploadSuccessCallback& successCallback, const FailedCallback& failedCallback, const Size& imageSize,
+        bool forceResize, bool syncMode = false)
     {}
 
     virtual void Pause() {}
@@ -139,12 +123,10 @@ protected:
 
 class SvgSkiaImageObject : public ImageObject {
     DECLARE_ACE_TYPE(SvgSkiaImageObject, ImageObject);
+
 public:
     SvgSkiaImageObject(
-        ImageSourceInfo source,
-        const Size& imageSize,
-        int32_t frameCount,
-        const sk_sp<SkSVGDOM>& skiaDom)
+        ImageSourceInfo source, const Size& imageSize, int32_t frameCount, const sk_sp<SkSVGDOM>& skiaDom)
         : ImageObject(source, imageSize, frameCount, true), skiaDom_(skiaDom)
     {}
 
@@ -169,12 +151,9 @@ private:
 
 class SvgImageObject : public ImageObject {
     DECLARE_ACE_TYPE(SvgImageObject, ImageObject);
+
 public:
-    SvgImageObject(
-        ImageSourceInfo source,
-        const Size& imageSize,
-        int32_t frameCount,
-        const RefPtr<SvgDom>& svgDom)
+    SvgImageObject(ImageSourceInfo source, const Size& imageSize, int32_t frameCount, const RefPtr<SvgDom>& svgDom)
         : ImageObject(source, imageSize, frameCount, true), svgDom_(svgDom)
     {}
 
@@ -199,35 +178,24 @@ private:
 
 class StaticImageObject : public ImageObject {
     DECLARE_ACE_TYPE(StaticImageObject, ImageObject);
+
 public:
     using CancelableTask = CancelableCallback<void()>;
 #ifndef USE_ROSEN_DRAWING
-    StaticImageObject(
-        ImageSourceInfo source,
-        const Size& imageSize,
-        int32_t frameCount,
-        const sk_sp<SkData>& data)
+    StaticImageObject(ImageSourceInfo source, const Size& imageSize, int32_t frameCount, const sk_sp<SkData>& data)
         : ImageObject(source, imageSize, frameCount), skData_(data)
     {}
 #else
     StaticImageObject(
-        ImageSourceInfo source,
-        const Size& imageSize,
-        int32_t frameCount,
-        const std::shared_ptr<RSData>& data)
+        ImageSourceInfo source, const Size& imageSize, int32_t frameCount, const std::shared_ptr<RSData>& data)
         : ImageObject(source, imageSize, frameCount), data_(data)
     {}
 #endif
 
     ~StaticImageObject() override = default;
 
-    void UploadToGpuForRender(
-        const WeakPtr<PipelineBase>& context,
-        const UploadSuccessCallback& successCallback,
-        const FailedCallback& failedCallback,
-        const Size& imageSize,
-        bool forceResize,
-        bool syncMode = false) override;
+    void UploadToGpuForRender(const WeakPtr<PipelineBase>& context, const UploadSuccessCallback& successCallback,
+        const FailedCallback& failedCallback, const Size& imageSize, bool forceResize, bool syncMode = false) override;
 
     void ClearData() override
     {
@@ -258,14 +226,12 @@ private:
     CancelableTask uploadForPaintTask_;
 };
 
-
-
 #ifndef USE_ROSEN_DRAWING
-RefPtr<ImageObject> CreateAnimatedImageObject(ImageSourceInfo source, const Size& imageSize,
-        int32_t frameCount, const sk_sp<SkData>& data);
+RefPtr<ImageObject> CreateAnimatedImageObject(
+    ImageSourceInfo source, const Size& imageSize, int32_t frameCount, const sk_sp<SkData>& data);
 #else
-RefPtr<ImageObject> CreateAnimatedImageObject(ImageSourceInfo source, const Size& imageSize,
-    int32_t frameCount, const std::shared_ptr<RSData>& data);
+RefPtr<ImageObject> CreateAnimatedImageObject(
+    ImageSourceInfo source, const Size& imageSize, int32_t frameCount, const std::shared_ptr<RSData>& data);
 #endif
 
 class PixelMapImageObject : public ImageObject {
@@ -305,7 +271,7 @@ public:
 private:
     RefPtr<PixelMap> pixmap_;
 };
-RefPtr<ImageObject> GetImageSvgDomObj(ImageSourceInfo source, const std::unique_ptr<SkMemoryStream >& svgStream,
+RefPtr<ImageObject> GetImageSvgDomObj(ImageSourceInfo source, const std::unique_ptr<SkMemoryStream>& svgStream,
     const RefPtr<PipelineBase>& context, std::optional<Color>& color);
 } // namespace OHOS::Ace
 

@@ -160,6 +160,12 @@ const char FLEX_ETS_TAG[] = "Flex";
 const char WRAP_COMPONENT_TAG[] = "WrapComponent";
 const char WRAP_ETS_TAG[] = "Flex";
 
+// folderStack
+const char FOLDER_STACK_COMPONENT_TAG[] = "FolderStackComponent";
+const char FOLDER_STACK_ETS_TAG[] = "Folder";
+const char HOVER_STACK_ETS_TAG[] = "Hover";
+const char CONTROL_PARTS_STACK_ETS_TAG[] = "ControlParts";
+
 // grid
 const char GRID_COMPONENT_TAG[] = "GridLayoutComponent";
 const char GRID_ETS_TAG[] = "Grid";
@@ -250,6 +256,10 @@ const char QRCODE_ETS_TAG[] = "QRCode";
 const char SPAN_COMPONENT_TAG[] = "TextSpanComponent";
 const char SPAN_ETS_TAG[] = "Span";
 
+// placeholder span
+const char PLACEHOLDER_SPAN_COMPONENT_TAG[] = "PlaceholderSpanComponent";
+const char PLACEHOLDER_SPAN_ETS_TAG[] = "PlaceholderSpan";
+
 // blank
 const char BOX_COMPONENT_TAG[] = "BoxComponent";
 const char BLANK_ETS_TAG[] = "Blank";
@@ -304,6 +314,7 @@ const char BADGE_ETS_TAG[] = "Badge";
 // search
 const char SEARCH_COMPONENT_TAG[] = "SearchComponent";
 const char SEARCH_ETS_TAG[] = "Search";
+const char SEARCH_Field_ETS_TAG[] = "SearchField";
 
 // formComponent
 const char FORM_COMPONENT_TAG[] = "FormComponent";
@@ -493,6 +504,7 @@ const char TIME_PICKER_DIALOG_ETS_TAG[] = "TimePickerDialog";
 // web
 const char WEB_COMPONENT_TAG[] = "WebComponent";
 const char WEB_ETS_TAG[] = "Web";
+const char WEB_CORE_TAG[] = "WebCore";
 
 // richText
 const char RICH_TEXT_COMPONENT_TAG[] = "RichTextComponent";
@@ -514,8 +526,8 @@ const char REMOTE_WINDOW_ETS_TAG[] = "RemoteWindow";
 const char EFFECT_COMPONENT_ETS_TAG[] = "EffectComponent";
 
 // Model
-const char MODEL_COMPONENT_TAG[] = "ModelComponent";
-const char MODEL_ETS_TAG[] = "Model";
+const char MODEL_COMPONENT_TAG[] = "Component3DComponent";
+const char MODEL_ETS_TAG[] = "Component3D";
 
 // window scene
 ACE_EXPORT extern const char ROOT_SCENE_ETS_TAG[] = "RootScene";

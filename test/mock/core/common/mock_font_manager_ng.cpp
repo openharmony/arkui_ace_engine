@@ -31,9 +31,15 @@ bool FontManager::RegisterCallbackNG(
 
 void FontManager::UnRegisterCallbackNG(const WeakPtr<NG::UINode>& node) {}
 
-void FontManager::AddFontNodeNG(const WeakPtr<NG::UINode>& node) {}
+void FontManager::AddFontNodeNG(const WeakPtr<NG::UINode>& node)
+{
+    fontNodesNG_.emplace(node);
+}
 
-void FontManager::RemoveFontNodeNG(const WeakPtr<NG::UINode>& node) {}
+void FontManager::RemoveFontNodeNG(const WeakPtr<NG::UINode>& node)
+{
+    fontNodesNG_.erase(node);
+}
 
 void FontManager::AddVariationNodeNG(const WeakPtr<NG::UINode>& node) {}
 

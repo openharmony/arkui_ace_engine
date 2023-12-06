@@ -161,7 +161,6 @@ BorderWidthPropertyF ConvertToBorderWidthPropertyF(
     auto right = ConvertToPx(borderWidth.rightDimen, scaleProperty, percentReference);
     auto top = ConvertToPx(borderWidth.topDimen, scaleProperty, percentReference);
     auto bottom = ConvertToPx(borderWidth.bottomDimen, scaleProperty, percentReference);
-
     return BorderWidthPropertyF { left, top, right, bottom };
 }
 
@@ -194,6 +193,11 @@ void AddPaddingToSize(const PaddingPropertyF& padding, SizeF& size)
 void MinusPaddingToSize(const PaddingPropertyF& padding, SizeF& size)
 {
     size.MinusPadding(padding.left, padding.right, padding.top, padding.bottom);
+}
+
+void MinusPaddingToNonNegativeSize(const PaddingPropertyF& padding, SizeF& size)
+{
+    size.MinusPaddingToNonNegative(padding.left, padding.right, padding.top, padding.bottom);
 }
 
 void AddPaddingToSize(const PaddingPropertyF& padding, OptionalSizeF& size)

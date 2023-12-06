@@ -145,28 +145,28 @@ void JsDragEvent::GetJsPasteData(const JSCallbackInfo& args)
 
 void JsDragEvent::GetScreenX(const JSCallbackInfo& args)
 {
-    auto xValue = JSVal(ToJSValue(SystemProperties::Px2Vp(dragEvent_->GetScreenX())));
+    auto xValue = JSVal(ToJSValue(PipelineBase::Px2VpWithCurrentDensity(dragEvent_->GetScreenX())));
     auto xValueRef = JSRef<JSVal>::Make(xValue);
     args.SetReturnValue(xValueRef);
 }
 
 void JsDragEvent::GetScreenY(const JSCallbackInfo& args)
 {
-    auto yValue = JSVal(ToJSValue(SystemProperties::Px2Vp(dragEvent_->GetScreenY())));
+    auto yValue = JSVal(ToJSValue(PipelineBase::Px2VpWithCurrentDensity(dragEvent_->GetScreenY())));
     auto yValueRef = JSRef<JSVal>::Make(yValue);
     args.SetReturnValue(yValueRef);
 }
 
 void JsDragEvent::GetX(const JSCallbackInfo& args)
 {
-    auto xValue = JSVal(ToJSValue(SystemProperties::Px2Vp(dragEvent_->GetX())));
+    auto xValue = JSVal(ToJSValue(PipelineBase::Px2VpWithCurrentDensity(dragEvent_->GetX())));
     auto xValueRef = JSRef<JSVal>::Make(xValue);
     args.SetReturnValue(xValueRef);
 }
 
 void JsDragEvent::GetY(const JSCallbackInfo& args)
 {
-    auto yValue = JSVal(ToJSValue(SystemProperties::Px2Vp(dragEvent_->GetY())));
+    auto yValue = JSVal(ToJSValue(PipelineBase::Px2VpWithCurrentDensity(dragEvent_->GetY())));
     auto yValueRef = JSRef<JSVal>::Make(yValue);
     args.SetReturnValue(yValueRef);
 }
@@ -188,7 +188,6 @@ void JsDragEvent::SetDescription(const JSCallbackInfo& args)
 void JsDragEvent::SetData(const JSCallbackInfo& args)
 {
     if (!args[0]->IsObject()) {
-        LOGE("info[0] is not an object when try SetData");
         return;
     }
     auto engine = EngineHelper::GetCurrentEngine();
@@ -207,7 +206,7 @@ void JsDragEvent::GetData(const JSCallbackInfo& args)
 {
     auto dragData = dragEvent_->GetData();
     if (!dragEvent_->IsGetDataSuccess()) {
-        LOGE("UDMF GetData failed in first attempt");
+        TAG_LOGI(AceLogTag::ACE_DRAG, "UDMF GetData failed in first attempt");
         std::string udKey = dragEvent_->GetUdKey();
         if (udKey.empty()) {
             args.SetReturnValue(JSVal::Undefined());
@@ -215,7 +214,7 @@ void JsDragEvent::GetData(const JSCallbackInfo& args)
         }
         int ret = UdmfClient::GetInstance()->GetData(dragData, udKey);
         if (ret != 0) {
-            LOGW("UDMF GetData failed: %{public}d", ret);
+            TAG_LOGW(AceLogTag::ACE_DRAG, "UDMF GetData failed: %{public}d", ret);
             auto engine = EngineHelper::GetCurrentEngine();
             if (!engine) {
                 args.SetReturnValue(JSVal::Undefined());
@@ -257,6 +256,7 @@ void JsDragEvent::SetResult(const JSCallbackInfo& args)
 
 void JsDragEvent::GetResult(const JSCallbackInfo& args)
 {
+    CHECK_NULL_VOID(dragEvent_);
     auto dragRet = JSVal(ToJSValue(static_cast<int32_t>(dragEvent_->GetResult())));
     auto dragRetRef = JSRef<JSVal>::Make(dragRet);
     args.SetReturnValue(dragRetRef);
@@ -286,7 +286,6 @@ void JsDragEvent::GetUseCustomDropAnimation(const JSCallbackInfo& args)
 void JsDragEvent::SetDragInfo(const JSCallbackInfo& args)
 {
     if (!args[0]->IsObject()) {
-        LOGE("info[0] is not an object when try SetDragInfo");
         return;
     }
     auto engine = EngineHelper::GetCurrentEngine();
@@ -328,21 +327,22 @@ void JsDragEvent::GetDragBehavior(const JSCallbackInfo& args)
 
 void JsDragEvent::GetVelocityX(const JSCallbackInfo& args)
 {
-    auto jsValue = JSVal(ToJSValue(SystemProperties::Px2Vp(dragEvent_->GetVelocity().GetVelocityX())));
+    auto jsValue = JSVal(ToJSValue(PipelineBase::Px2VpWithCurrentDensity(dragEvent_->GetVelocity().GetVelocityX())));
     auto jsValueRef = JSRef<JSVal>::Make(jsValue);
     args.SetReturnValue(jsValueRef);
 }
 
 void JsDragEvent::GetVelocityY(const JSCallbackInfo& args)
 {
-    auto jsValue = JSVal(ToJSValue(SystemProperties::Px2Vp(dragEvent_->GetVelocity().GetVelocityY())));
+    auto jsValue = JSVal(ToJSValue(PipelineBase::Px2VpWithCurrentDensity(dragEvent_->GetVelocity().GetVelocityY())));
     auto jsValueRef = JSRef<JSVal>::Make(jsValue);
     args.SetReturnValue(jsValueRef);
 }
 
 void JsDragEvent::GetVelocity(const JSCallbackInfo& args)
 {
-    auto jsValue = JSVal(ToJSValue(SystemProperties::Px2Vp(dragEvent_->GetVelocity().GetVelocityValue())));
+    auto jsValue = JSVal(
+        ToJSValue(PipelineBase::Px2VpWithCurrentDensity(dragEvent_->GetVelocity().GetVelocityValue())));
     auto jsValueRef = JSRef<JSVal>::Make(jsValue);
     args.SetReturnValue(jsValueRef);
 }
@@ -364,10 +364,10 @@ void JsDragEvent::Destructor(JsDragEvent* dragEvent)
 JSRef<JSObject> JsDragEvent::CreateRectangle(const Rect& info)
 {
     JSRef<JSObject> rectObj = JSRef<JSObject>::New();
-    rectObj->SetProperty<double>("x", SystemProperties::Px2Vp(info.Left()));
-    rectObj->SetProperty<double>("y", SystemProperties::Px2Vp(info.Top()));
-    rectObj->SetProperty<double>("width", SystemProperties::Px2Vp(info.Width()));
-    rectObj->SetProperty<double>("height", SystemProperties::Px2Vp(info.Height()));
+    rectObj->SetProperty<double>("x", PipelineBase::Px2VpWithCurrentDensity(info.Left()));
+    rectObj->SetProperty<double>("y", PipelineBase::Px2VpWithCurrentDensity(info.Top()));
+    rectObj->SetProperty<double>("width", PipelineBase::Px2VpWithCurrentDensity(info.Width()));
+    rectObj->SetProperty<double>("height", PipelineBase::Px2VpWithCurrentDensity(info.Height()));
     return rectObj;
 }
 #endif
@@ -462,8 +462,8 @@ JSRef<JSObject> JsDragFunction::CreatePasteData(const RefPtr<PasteData>& info)
 JSRef<JSObject> JsDragFunction::CreateItemDragInfo(const ItemDragInfo& info)
 {
     JSRef<JSObject> itemDragInfoObj = JSRef<JSObject>::New();
-    itemDragInfoObj->SetProperty<double>("x", SystemProperties::Px2Vp(info.GetX()));
-    itemDragInfoObj->SetProperty<double>("y", SystemProperties::Px2Vp(info.GetY()));
+    itemDragInfoObj->SetProperty<double>("x", PipelineBase::Px2VpWithCurrentDensity(info.GetX()));
+    itemDragInfoObj->SetProperty<double>("y", PipelineBase::Px2VpWithCurrentDensity(info.GetY()));
     return itemDragInfoObj;
 }
 

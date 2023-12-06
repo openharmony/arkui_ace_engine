@@ -119,7 +119,6 @@ void JSOffscreenCanvas::JSBind(BindingTarget globalObj)
 void JSOffscreenCanvas::Constructor(const JSCallbackInfo& args)
 {
     if (args.Length() < 2) {
-        LOGE("The arg is wrong, it is supposed to have at least 2 argument");
         return;
     }
     if (Container::IsCurrentUseNewPipeline() && args[0]->IsNumber() && args[1]->IsNumber()) {
@@ -129,11 +128,11 @@ void JSOffscreenCanvas::Constructor(const JSCallbackInfo& args)
         double fWidth = 0.0;
         double fHeight = 0.0;
         if (JSViewAbstract::ParseJsDouble(args[0], fWidth)) {
-            fWidth = SystemProperties::Vp2Px(fWidth);
+            fWidth = PipelineBase::Vp2PxWithCurrentDensity(fWidth);
             offscreenCanvas->SetWidth(round(fWidth));
         }
         if (JSViewAbstract::ParseJsDouble(args[1], fHeight)) {
-            fHeight = SystemProperties::Vp2Px(fHeight);
+            fHeight = PipelineBase::Vp2PxWithCurrentDensity(fHeight);
             offscreenCanvas->SetHeight(round(fHeight));
         }
         args.SetReturnValue(Referenced::RawPtr(offscreenCanvas));
@@ -144,15 +143,12 @@ void JSOffscreenCanvas::Destructor(JSOffscreenCanvas* context)
 {
     if (context != nullptr) {
         context->DecRefCount();
-    } else {
-        LOGE("context is null");
-        return;
     }
 }
 
 void JSOffscreenCanvas::JsGetWidth(const JSCallbackInfo& info)
 {
-    double fWidth = SystemProperties::Px2Vp(GetWidth());
+    double fWidth = PipelineBase::Px2VpWithCurrentDensity(GetWidth());
     auto returnValue = JSVal(ToJSValue(fWidth));
     auto returnPtr = JSRef<JSVal>::Make(returnValue);
     info.SetReturnValue(returnPtr);
@@ -160,7 +156,7 @@ void JSOffscreenCanvas::JsGetWidth(const JSCallbackInfo& info)
 
 void JSOffscreenCanvas::JsGetHeight(const JSCallbackInfo& info)
 {
-    double fHeight = SystemProperties::Px2Vp(GetHeight());
+    double fHeight = PipelineBase::Px2VpWithCurrentDensity(GetHeight());
     auto returnValue = JSVal(ToJSValue(fHeight));
     auto returnPtr = JSRef<JSVal>::Make(returnValue);
     info.SetReturnValue(returnPtr);
@@ -169,7 +165,6 @@ void JSOffscreenCanvas::JsGetHeight(const JSCallbackInfo& info)
 void JSOffscreenCanvas::JsSetWidth(const JSCallbackInfo& info)
 {
     if (info.Length() != 1) {
-        LOGE("The arg is wrong, it is supposed to have 1 argument");
         return;
     }
     if (info[0]->IsUndefined() || info[0]->IsNull()) {
@@ -177,7 +172,7 @@ void JSOffscreenCanvas::JsSetWidth(const JSCallbackInfo& info)
     }
     double width = 0.0;
     if (JSViewAbstract::ParseJsDouble(info[0], width)) {
-        width_ = SystemProperties::Vp2Px(width);
+        width_ = PipelineBase::Vp2PxWithCurrentDensity(width);
     } else {
         return;
     }
@@ -191,7 +186,6 @@ void JSOffscreenCanvas::JsSetWidth(const JSCallbackInfo& info)
 void JSOffscreenCanvas::JsSetHeight(const JSCallbackInfo& info)
 {
     if (info.Length() != 1) {
-        LOGE("The arg is wrong, it is supposed to have 1 argument");
         return;
     }
 
@@ -200,7 +194,7 @@ void JSOffscreenCanvas::JsSetHeight(const JSCallbackInfo& info)
     }
     double height = 0.0;
     if (JSViewAbstract::ParseJsDouble(info[0], height)) {
-        height_ = SystemProperties::Vp2Px(height);
+        height_ = PipelineBase::Vp2PxWithCurrentDensity(height);
     } else {
         return;
     }
@@ -230,17 +224,15 @@ void JSOffscreenCanvas::JsTransferToImageBitmap(const JSCallbackInfo& info)
 void JSOffscreenCanvas::JsGetContext(const JSCallbackInfo& info)
 {
     if (info.Length() < 1 || info.Length() > 2) {
-        LOGE("The arg is wrong, it is supposed to have at least 1 argument and at most 2 arguments");
         return;
     }
     if (info[0]->IsUndefined() || info[0]->IsNull()) {
-        LOGE("Invalid arguments.");
         return;
     }
     if (!Container::IsCurrentUseNewPipeline()) {
         return;
     }
-    
+
     if (info[0]->IsString()) {
         std::string ruleStr;
         JSViewAbstract::ParseJsString(info[0], ruleStr);

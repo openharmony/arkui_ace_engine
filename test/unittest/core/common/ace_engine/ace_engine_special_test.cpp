@@ -22,7 +22,7 @@
 
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
-#include "base/test/mock/mock_task_executor.h"
+#include "test/mock/base/mock_task_executor.h"
 #include "core/common/ace_engine.h"
 #include "core/common/watch_dog.h"
 #include "core/pipeline/pipeline_context.h"
@@ -109,28 +109,6 @@ HWTEST_F(AceEngineSpecialTest, InitJsDumpHeadSignal01, TestSize.Level1)
     AceEngine::InitJsDumpHeadSignal();
     raise(39);
     raise(40);
-}
-
-/**
- * @tc.name: TriggerGarbageCollection01
- * @tc.desc: Verify the TriggerGarbageCollection Interface of AceEngine work correctly.
- * @tc.type: FUNC
- */
-HWTEST_F(AceEngineSpecialTest, TriggerGarbageCollection01, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Build an AceEngine.
-     */
-    AceEngine& aceEngine = AceEngine::Get();
-
-    /**
-     * @tc.steps: step2. Add Container.
-     * @tc.expected: call GetTaskExecutor and TriggerGarbageCollection once;
-     * @tc.steps: step2. TriggerGarbageCollection.
-     */
-    aceEngine.AddContainer(CONTAINER_INSTANCE_ID, MockContainer::container_);
-    EXPECT_CALL(*(MockContainer::container_), TriggerGarbageCollection()).Times(1);
-    aceEngine.TriggerGarbageCollection();
 }
 
 /**

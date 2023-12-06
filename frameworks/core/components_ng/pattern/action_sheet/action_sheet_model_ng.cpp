@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "base/subwindow/subwindow_manager.h"
 #include "core/components_ng/pattern/action_sheet/action_sheet_model_ng.h"
 
 #include "core/components_ng/event/click_event.h"
@@ -28,7 +29,21 @@ void ActionSheetModelNG::ShowActionSheet(const DialogProperties& arg)
     CHECK_NULL_VOID(context);
     auto overlayManager = context->GetOverlayManager();
     CHECK_NULL_VOID(overlayManager);
-    overlayManager->ShowDialog(arg, nullptr, false);
+    RefPtr<NG::FrameNode> dialog;
+    if (arg.isShowInSubWindow) {
+        dialog = SubwindowManager::GetInstance()->ShowDialogNG(arg, nullptr);
+        CHECK_NULL_VOID(dialog);
+        if (arg.isModal) {
+            DialogProperties Maskarg;
+            Maskarg.isMask = true;
+            Maskarg.autoCancel = arg.autoCancel;
+            auto mask = overlayManager->ShowDialog(Maskarg, nullptr, false);
+            CHECK_NULL_VOID(mask);
+        }
+    } else {
+        dialog = overlayManager->ShowDialog(arg, nullptr, false);
+        CHECK_NULL_VOID(dialog);
+    }
 }
 
 void ActionSheetModelNG::SetAction(GestureEventFunc&& eventFunc, ActionSheetInfo& sheetInfo)

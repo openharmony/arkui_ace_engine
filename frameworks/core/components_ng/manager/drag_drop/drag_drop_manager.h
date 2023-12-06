@@ -29,6 +29,7 @@
 namespace OHOS::Ace::NG {
 enum class DragDropMgrState : int32_t {
     IDLE,
+    ABOUT_TO_PREVIEW,
     DRAGGING
 };
 
@@ -72,9 +73,10 @@ public:
     }
 
     void UpdateDragWindowPosition(int32_t globalX, int32_t globalY);
+    void OnDragStart(const Point& point);
     void OnDragStart(const Point& point, const RefPtr<FrameNode>& frameNode);
-    void OnDragMove(const Point& point, const std::string& extraInfo);
-    void OnDragEnd(const Point& point, const std::string& extraInfo);
+    void OnDragMove(const PointerEvent& pointerEvent, const std::string& extraInfo);
+    void OnDragEnd(const PointerEvent& pointerEvent, const std::string& extraInfo);
     void OnTextDragEnd(float globalX, float globalY, const std::string& extraInfo);
     void onDragCancel();
     void OnItemDragStart(float globalX, float globalY, const RefPtr<FrameNode>& frameNode);
@@ -85,6 +87,10 @@ public:
     void GetExtraInfoFromClipboard(std::string& extraInfo);
     void RestoreClipboardData();
     void DestroyDragWindow();
+    void CancelItemDrag();
+    std::string GetExtraInfo();
+    void SetExtraInfo(const std::string& extraInfo);
+    void ClearExtraInfo();
 #ifdef ENABLE_DRAG_FRAMEWORK
     void UpdateDragAllowDrop(const RefPtr<FrameNode>& dragFrameNode, const bool isCopy);
     void RequireSummary();
@@ -98,14 +104,15 @@ public:
     Rect GetDragWindowRect(const Point& point);
     RefPtr<DragDropProxy> CreateFrameworkDragDropProxy();
     void UpdatePixelMapPosition(int32_t globalX, int32_t globalY);
-    std::string GetExtraInfo();
-    void SetExtraInfo(const std::string& extraInfo);
-    void ClearExtraInfo();
+    bool IsMsdpDragging() const;
 #endif // ENABLE_DRAG_FRAMEWORK
     void UpdateDragEvent(RefPtr<OHOS::Ace::DragEvent>& event, const Point& point);
+    void UpdateNotifyDragEvent(
+        RefPtr<NotifyDragEvent>& notifyEvent, const Point& point, const DragEventType dragEventType);
     bool CheckDragDropProxy(int64_t id) const;
+    void FireOnEditableTextComponent(const RefPtr<FrameNode>& frameNode, DragEventType type);
 
-    bool IsWindowConsumed()
+    bool IsWindowConsumed() const
     {
         return isWindowConsumed_;
     }
@@ -143,27 +150,86 @@ public:
         isDragWindowShow_ = isDragWindowShow;
     }
 
-    bool IsDragWindowShow()
+    bool IsDragWindowShow() const
     {
         return isDragWindowShow_;
     }
 
+    void SetPreviewRect(const Rect& rect)
+    {
+        previewRect_ = rect;
+    }
+
+    Rect GetPreviewRect() const
+    {
+        return previewRect_;
+    }
+
     RefPtr<FrameNode> FindTargetInChildNodes(const RefPtr<UINode> parentNode,
         std::vector<RefPtr<FrameNode>> hitFrameNodes, bool findDrop);
+
+    std::unordered_set<int32_t> FindHitFrameNodes(const Point& point);
+
+    void UpdateDragListener(const Point& point);
+
+    void NotifyDragRegisterFrameNode(std::unordered_map<int32_t, WeakPtr<FrameNode>> nodes, DragEventType dragEventType,
+        RefPtr<NotifyDragEvent>& notifyEvent);
+
+    void RegisterDragStatusListener(int32_t nodeId, const WeakPtr<FrameNode>& node)
+    {
+        auto ret = nodesForDragNotify_.try_emplace(nodeId, node);
+        if (!ret.second) {
+            nodesForDragNotify_[nodeId] = node;
+        }
+    }
+
+    void UnRegisterDragStatusListener(int32_t nodeId)
+    {
+        nodesForDragNotify_.erase(nodeId);
+    }
 
     void SetNotifyInDraggedCallback(const std::function<void(void)>& callback)
     {
         notifyInDraggedCallback_ = callback;
     }
 
-    bool IsDragging()
+    bool IsDragging() const
     {
         return dragDropState_ == DragDropMgrState::DRAGGING;
+    }
+
+    bool IsItemDragging() const
+    {
+        return dragDropState_ == DragDropMgrState::DRAGGING && draggedGridFrameNode_ != nullptr;
+    }
+
+    bool IsAboutToPreview() const
+    {
+        return dragDropState_ == DragDropMgrState::ABOUT_TO_PREVIEW;
     }
 
     void ResetDragging(DragDropMgrState dragDropMgrState = DragDropMgrState::IDLE)
     {
         dragDropState_ = dragDropMgrState;
+    }
+
+    bool IsSameDraggingPointer(int32_t currentPointerId) const
+    {
+        return currentPointerId_ == currentPointerId;
+    }
+
+    void SetDraggingPointer(int32_t currentPointerId)
+    {
+        currentPointerId_ = currentPointerId;
+    }
+
+    static inline bool IsEditableTextComponent(const std::string& frameTag)
+    {
+        if (frameTag != V2::TEXTINPUT_ETS_TAG && frameTag != V2::TEXTAREA_ETS_TAG &&
+            frameTag != V2::RICH_EDITOR_ETS_TAG && frameTag != V2::SEARCH_Field_ETS_TAG) {
+            return false;
+        }
+        return true;
     }
 
 private:
@@ -180,6 +246,10 @@ private:
     void ClearVelocityInfo();
     void UpdateVelocityTrackerPoint(const Point& point, bool isEnd = false);
     void PrintDragFrameNode(const Point& point, const RefPtr<FrameNode>& dragFrameNode);
+    void FireOnDragEventWithDragType(const RefPtr<EventHub>& eventHub, DragEventType type,
+        RefPtr<OHOS::Ace::DragEvent>& event, const std::string& extraParams);
+    void NotifyDragFrameNode(
+        const Point& point, const DragEventType& dragEventType, const DragRet& dragRet = DragRet::DRAG_DEFAULT);
 
     std::map<int32_t, WeakPtr<FrameNode>> dragFrameNodes_;
     std::map<int32_t, WeakPtr<FrameNode>> gridDragFrameNodes_;
@@ -198,17 +268,21 @@ private:
     std::string extraInfo_;
     std::unique_ptr<JsonValue> newData_ = nullptr;
     bool isDragCancel_ = false;
+    std::unordered_map<int32_t, WeakPtr<FrameNode>> nodesForDragNotify_;
+    std::unordered_set<int32_t> parentHitNodes_;
 #ifdef ENABLE_DRAG_FRAMEWORK
     std::map<std::string, int64_t> summaryMap_;
     uint32_t recordSize_ = 0;
 #endif // ENABLE_DRAG_FRAMEWORK
     int64_t currentId_ = -1;
+    int32_t currentPointerId_ = -1;
 
     std::function<void(void)> notifyInDraggedCallback_ = nullptr;
     bool isDragged_ = false;
     bool isMouseDragged_ = false;
     bool isWindowConsumed_ = false;
     bool isDragWindowShow_ = false;
+    bool hasNotifiedTransformation_ = false;
     VelocityTracker velocityTracker_;
     DragDropMgrState dragDropState_ = DragDropMgrState::IDLE;
     Rect previewRect_ { -1, -1, -1, -1 };

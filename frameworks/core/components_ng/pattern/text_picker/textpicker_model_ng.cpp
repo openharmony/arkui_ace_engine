@@ -34,6 +34,8 @@
 
 namespace OHOS::Ace::NG {
 namespace {
+const int32_t BUFFER_NODE_NUMBER = 2;
+
 void SetDialogProperties(DialogProperties& properties, TextPickerDialog& textPickerDialog,
                          const RefPtr<DialogTheme>& theme)
 {
@@ -72,13 +74,19 @@ void TextPickerModelNG::Create(RefPtr<PickerTheme> pickerTheme, uint32_t columnK
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
+    ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::TEXT_PICKER_ETS_TAG, nodeId);
     auto textPickerNode = FrameNode::GetOrCreateFrameNode(
         V2::TEXT_PICKER_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<TextPickerPattern>(); });
     auto textPickerPattern = textPickerNode->GetPattern<TextPickerPattern>();
     CHECK_NULL_VOID(textPickerPattern);
     textPickerPattern->SetColumnsKind(columnKind);
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto dialogTheme = pipeline->GetTheme<DialogTheme>();
+    CHECK_NULL_VOID(dialogTheme);
+    textPickerPattern->SetBackgroundColor(dialogTheme->GetBackgroundColor());
     CHECK_NULL_VOID(pickerTheme);
-    uint32_t showCount = pickerTheme->GetShowOptionCount();
+    uint32_t showCount = pickerTheme->GetShowOptionCount() + BUFFER_NODE_NUMBER;
 
     if (textPickerNode->GetChildren().empty()) {
         auto columnNode = CreateColumnNode(columnKind, showCount);
@@ -314,7 +322,7 @@ void TextPickerModelNG::MultiInit(const RefPtr<PickerTheme> pickerTheme)
     auto textPickerPattern = textPickerNode->GetPattern<TextPickerPattern>();
 
     CHECK_NULL_VOID(pickerTheme);
-    showCount_ = pickerTheme->GetShowOptionCount();
+    showCount_ = pickerTheme->GetShowOptionCount() + BUFFER_NODE_NUMBER;
     stack->Push(textPickerNode);
     rangeValue_.clear();
 }
@@ -506,10 +514,7 @@ void TextPickerDialogModelNG::SetTextPickerDialogShow(RefPtr<AceType>& PickerTex
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<DialogTheme>();
-    if (!theme) {
-        LOGE("DialogTheme is null");
-        return;
-    }
+    CHECK_NULL_VOID(theme);
 
     std::map<std::string, NG::DialogTextEvent> dialogEvent;
     std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent;
@@ -534,5 +539,120 @@ void TextPickerDialogModelNG::SetTextPickerDialogShow(RefPtr<AceType>& PickerTex
             overlayManager->ShowTextDialog(properties, settingData, dialogEvent, dialogCancelEvent);
         },
         TaskExecutor::TaskType::UI);
+}
+
+void TextPickerModelNG::SetCanLoop(FrameNode* frameNode, const bool value)
+{
+    CHECK_NULL_VOID(frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextPickerLayoutProperty, CanLoop, value, frameNode);
+}
+
+void TextPickerModelNG::SetSelecteds(FrameNode* frameNode, const std::vector<uint32_t>& values)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
+    CHECK_NULL_VOID(textPickerPattern);
+    textPickerPattern->SetSelecteds(values);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextPickerLayoutProperty, Selecteds, values, frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextPickerLayoutProperty, SelectedIndex, values, frameNode);
+}
+void TextPickerModelNG::SetSelected(FrameNode* frameNode, uint32_t value)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
+    textPickerPattern->SetSelected(value);
+    std::vector<uint32_t> values;
+    values.emplace_back(value);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextPickerLayoutProperty, Selected, value, frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextPickerLayoutProperty, SelectedIndex, values, frameNode);
+}
+void TextPickerModelNG::SetHasSelectAttr(FrameNode* frameNode, bool value)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
+    CHECK_NULL_VOID(textPickerPattern);
+    textPickerPattern->SetHasSelectAttr(value);
+}
+void TextPickerModelNG::SetNormalTextStyle(
+    FrameNode* frameNode, const RefPtr<PickerTheme>& pickerTheme, const NG::PickerTextStyle& value)
+{
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(pickerTheme);
+    auto normalStyle = pickerTheme->GetOptionStyle(false, false);
+    if (value.fontSize.has_value() && value.fontSize->IsValid()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextPickerLayoutProperty, FontSize, value.fontSize.value(), frameNode);
+    } else {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextPickerLayoutProperty, FontSize, normalStyle.GetFontSize(), frameNode);
+    }
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(
+        TextPickerLayoutProperty, Color, value.textColor.value_or(normalStyle.GetTextColor()), frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(
+        TextPickerLayoutProperty, Weight, value.fontWeight.value_or(normalStyle.GetFontWeight()), frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(
+        TextPickerLayoutProperty, FontFamily, value.fontFamily.value_or(normalStyle.GetFontFamilies()), frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(
+        TextPickerLayoutProperty, FontStyle, value.fontStyle.value_or(normalStyle.GetFontStyle()), frameNode);
+}
+void TextPickerModelNG::SetSelectedTextStyle(
+    FrameNode* frameNode, const RefPtr<PickerTheme>& pickerTheme, const NG::PickerTextStyle& value)
+{
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(pickerTheme);
+    auto selectedStyle = pickerTheme->GetOptionStyle(true, false);
+    if (value.fontSize.has_value() && value.fontSize->IsValid()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(
+            TextPickerLayoutProperty, SelectedFontSize, value.fontSize.value(), frameNode);
+    } else {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(
+            TextPickerLayoutProperty, SelectedFontSize, selectedStyle.GetFontSize(), frameNode);
+    }
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(
+        TextPickerLayoutProperty, SelectedColor,
+        value.textColor.value_or(selectedStyle.GetTextColor()), frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(
+        TextPickerLayoutProperty, SelectedWeight,
+        value.fontWeight.value_or(selectedStyle.GetFontWeight()), frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(
+        TextPickerLayoutProperty, SelectedFontFamily,
+        value.fontFamily.value_or(selectedStyle.GetFontFamilies()), frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(
+        TextPickerLayoutProperty, SelectedFontStyle, value.fontStyle.value_or(selectedStyle.GetFontStyle()), frameNode);
+}
+void TextPickerModelNG::SetDisappearTextStyle(
+    FrameNode* frameNode, const RefPtr<PickerTheme>& pickerTheme, const NG::PickerTextStyle& value)
+{
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(pickerTheme);
+    auto disappearStyle = pickerTheme->GetDisappearOptionStyle();
+    if (value.fontSize.has_value() && value.fontSize->IsValid()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(
+            TextPickerLayoutProperty, DisappearFontSize, value.fontSize.value(), frameNode);
+    } else {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(
+            TextPickerLayoutProperty, DisappearFontSize, disappearStyle.GetFontSize(), frameNode);
+    }
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(
+        TextPickerLayoutProperty, DisappearColor, value.textColor.value_or(disappearStyle.GetTextColor()), frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(
+        TextPickerLayoutProperty, DisappearWeight,
+        value.fontWeight.value_or(disappearStyle.GetFontWeight()), frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(
+        TextPickerLayoutProperty, DisappearFontFamily,
+        value.fontFamily.value_or(disappearStyle.GetFontFamilies()), frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(
+        TextPickerLayoutProperty, DisappearFontStyle,
+        value.fontStyle.value_or(disappearStyle.GetFontStyle()), frameNode);
+}
+void TextPickerModelNG::SetDefaultPickerItemHeight(FrameNode* frameNode, const Dimension& value)
+{
+    CHECK_NULL_VOID(frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextPickerLayoutProperty, DefaultPickerItemHeight, value, frameNode);
+}
+void TextPickerModelNG::SetBackgroundColor(FrameNode* frameNode, const Color& color)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
+    CHECK_NULL_VOID(textPickerPattern);
+    textPickerPattern->SetBackgroundColor(color);
 }
 } // namespace OHOS::Ace::NG

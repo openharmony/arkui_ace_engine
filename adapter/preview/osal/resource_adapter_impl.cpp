@@ -228,7 +228,7 @@ void RawThemeStyle::ParseContent()
             // state graphic value
             auto xmlWrapper = attrValue->GetLayoutValue();
             if (!xmlWrapper) {
-                LOGE("Parse %{public}s state resource %{public}s error! xml is null!", name_.c_str(), attrName.c_str());
+                LOGW("Parse %{public}s state resource %{public}s error! xml is null!", name_.c_str(), attrName.c_str());
                 continue;
             }
             auto stateResource = ParseStateResource(name_, attrName, std::move(xmlWrapper));
@@ -260,6 +260,18 @@ RefPtr<ResourceAdapter> ResourceAdapter::Create()
         return AceType::MakeRefPtr<ResourceAdapterImpl>();
     }
     return RefPtr<ResourceAdapter>();
+}
+
+RefPtr<ResourceAdapter> ResourceAdapter::CreateNewResourceAdapter(
+    const std::string& bundleName, const std::string& moduleName)
+{
+    return nullptr;
+}
+
+ResourceAdapterImpl::ResourceAdapterImpl(std::shared_ptr<Global::Resource::ResourceManager> resourceManager)
+{
+    resourceManager_ = resourceManager;
+    sysResourceManager_ = resourceManager;
 }
 
 void ResourceAdapterImpl::Init(const ResourceInfo& resourceInfo)
@@ -313,7 +325,7 @@ Color ResourceAdapterImpl::GetColor(uint32_t resId)
     uint32_t result = 0;
     auto ret = resourceManger_.GetColor(static_cast<int32_t>(resId), result);
     if (!ret) {
-        LOGE("GetColor error, id=%{public}u", resId);
+        LOGW("GetColor error, id=%{public}u", resId);
     }
     return Color(result);
 }
@@ -324,7 +336,7 @@ Dimension ResourceAdapterImpl::GetDimension(uint32_t resId)
     std::string unit = "";
     auto ret = resourceManger_.GetFloat(static_cast<int32_t>(resId), result, unit);
     if (!ret) {
-        LOGE("GetDimension error, id=%{public}u", resId);
+        LOGW("GetDimension error, id=%{public}u", resId);
     }
     return Dimension(result, ParseDimensionUnit(unit));
 }
@@ -334,7 +346,7 @@ std::string ResourceAdapterImpl::GetString(uint32_t resId)
     std::string strResult = "";
     auto ret = resourceManger_.GetString(static_cast<int32_t>(resId), strResult);
     if (!ret) {
-        LOGE("GetString error, id=%{public}u", resId);
+        LOGW("GetString error, id=%{public}u", resId);
     }
     return strResult;
 }
@@ -344,7 +356,7 @@ std::string ResourceAdapterImpl::GetPluralString(uint32_t resId, int quantity)
     std::vector<std::string> pluralResults;
     auto ret = resourceManger_.GetStringArray(static_cast<int32_t>(resId), pluralResults);
     if (!ret) {
-        LOGE("GetPluralString error, id=%{public}u", resId);
+        LOGW("GetPluralString error, id=%{public}u", resId);
     }
 
     auto pluralChoice = Localization::GetInstance()->PluralRulesFormat(quantity);
@@ -361,7 +373,7 @@ std::vector<std::string> ResourceAdapterImpl::GetStringArray(uint32_t resId) con
     std::vector<std::string> strResults;
     auto ret = resourceManger_.GetStringArray(static_cast<int32_t>(resId), strResults);
     if (!ret) {
-        LOGE("GetStringArray error, id=%{public}u", resId);
+        LOGW("GetStringArray error, id=%{public}u", resId);
     }
     return strResults;
 }
@@ -371,7 +383,7 @@ double ResourceAdapterImpl::GetDouble(uint32_t resId)
     float result = 0.0f;
     auto ret = resourceManger_.GetFloat(static_cast<int32_t>(resId), result);
     if (!ret) {
-        LOGE("GetDouble error, id=%{public}u", resId);
+        LOGW("GetDouble error, id=%{public}u", resId);
     }
     return static_cast<double>(result);
 }
@@ -381,7 +393,7 @@ int32_t ResourceAdapterImpl::GetInt(uint32_t resId)
     int32_t result = 0;
     auto ret = resourceManger_.GetInt(static_cast<int32_t>(resId), result);
     if (!ret) {
-        LOGE("GetInt error, id=%{public}u", resId);
+        LOGW("GetInt error, id=%{public}u", resId);
     }
     return result;
 }
@@ -427,7 +439,7 @@ bool ResourceAdapterImpl::GetIdByName(const std::string& resName, const std::str
     }
     int32_t globalResId = 0;
     if (!resourceManger_.GetIdByName("", resName, globalResType, globalResId)) {
-        LOGE("get resource id failed.(name=%{public}s, type=%{public}s)", resName.c_str(), resType.c_str());
+        LOGI("get resource id failed.(name=%{public}s, type=%{public}s)", resName.c_str(), resType.c_str());
         return false;
     }
     resId = static_cast<uint32_t>(globalResId);
@@ -439,7 +451,7 @@ std::string ResourceAdapterImpl::GetMediaPath(uint32_t resId)
     std::string mediaPath = "";
     auto ret = resourceManger_.GetString(static_cast<int32_t>(resId), mediaPath);
     if (!ret) {
-        LOGE("GetMediaPath error, id=%{public}u", resId);
+        LOGW("GetMediaPath error, id=%{public}u", resId);
         return "";
     }
     return "resource://" + mediaPath.substr(0, mediaPath.find_last_of("/")) + "/" +

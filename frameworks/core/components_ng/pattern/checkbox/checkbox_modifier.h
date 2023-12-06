@@ -22,6 +22,7 @@
 #include "core/animation/spring_curve.h"
 #include "core/common/container.h"
 #include "core/components_ng/base/modifier.h"
+#include "core/components_ng/pattern/checkbox/checkbox_model_ng.h"
 #include "core/components_ng/pattern/radio/radio_modifier.h"
 #include "core/components_ng/property/property.h"
 #include "core/components_ng/render/animation_utils.h"
@@ -172,6 +173,17 @@ public:
     {
         touchHoverType_ = touchHoverType;
     }
+    void SetCheckboxStyle(CheckBoxStyle checkBoxStyle)
+    {
+        checkBoxStyle_ = checkBoxStyle;
+        CHECK_NULL_VOID(checkBoxShape_);
+        checkBoxShape_->Set(static_cast<int32_t>(checkBoxStyle));
+    }
+
+    void SetHoverEffectType(const HoverEffectType hoverEffectType)
+    {
+        hoverEffectType_ = hoverEffectType;
+    }
 
 private:
     float borderWidth_ = 0.0f;
@@ -195,6 +207,9 @@ private:
     OffsetF hotZoneOffset_;
     SizeF hotZoneSize_;
     TouchHoverAnimationType touchHoverType_ = TouchHoverAnimationType::NONE;
+    CheckBoxStyle checkBoxStyle_ = CheckBoxStyle::CIRCULAR_STYLE;
+    HoverEffectType hoverEffectType_ = HoverEffectType::AUTO;
+    RefPtr<PropertyInt> checkBoxShape_;
 
     RefPtr<PropertyBool> enabled_;
     RefPtr<AnimatablePropertyColor> animatableBoardColor_;

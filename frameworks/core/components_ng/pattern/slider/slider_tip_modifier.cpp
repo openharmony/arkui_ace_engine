@@ -63,8 +63,7 @@ SliderTipModifier::SliderTipModifier(std::function<OffsetF()> getBubbleVertexFun
     AttachProperty(bubbleVertex_);
 }
 
-SliderTipModifier::~SliderTipModifier()
-{}
+SliderTipModifier::~SliderTipModifier() {}
 
 void SliderTipModifier::PaintTip(DrawingContext& context)
 {
@@ -177,13 +176,10 @@ void SliderTipModifier::PaintBubble(DrawingContext& context)
     auto& canvas = context.canvas;
     canvas.AttachPen(pen);
     canvas.AttachBrush(brush);
-#ifdef NEW_SKIA
     canvas.ClipPath(path, RSClipOp::INTERSECT, true);
     canvas.DrawPath(path);
-#else
-    canvas.DrawPath(path);
-    canvas.ClipPath(path, RSClipOp::INTERSECT, true);
-#endif
+    canvas.DetachBrush();
+    canvas.DetachPen();
 }
 
 void SliderTipModifier::onDraw(DrawingContext& context)
@@ -340,13 +336,13 @@ void SliderTipModifier::UpdateBubbleSize()
     textOffset_ = bubbleOffset_ + textOffsetInBubble;
 }
 
-void SliderTipModifier::UpdateOverlayRect(const SizeF& frameSize)
+bool SliderTipModifier::UpdateOverlayRect(const SizeF& frameSize)
 {
     auto contentSize = contentSize_->Get();
     auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
+    CHECK_NULL_RETURN(pipeline, false);
     auto theme = pipeline->GetTheme<SliderTheme>();
-    CHECK_NULL_VOID(theme);
+    CHECK_NULL_RETURN(theme, false);
     auto distance = static_cast<float>(theme->GetBubbleToCircleCenterDistance().ConvertToPx());
     auto hotShadowWidth = sliderMode_ == SliderModel::SliderMode::OUTSET
                               ? theme->GetOutsetHotBlockShadowWidth().ConvertToPx()
@@ -364,7 +360,10 @@ void SliderTipModifier::UpdateOverlayRect(const SizeF& frameSize)
         rect.SetSize(
             SizeF(maxWidth + bubbleSize_.Width() + distance, contentSize.Height() + bubbleSize_.Height() / HALF));
     }
-
-    SetBoundsRect(rect);
+    if (rect != GetBoundsRect()) {
+        SetBoundsRect(rect);
+        return true;
+    }
+    return false;
 }
 } // namespace OHOS::Ace::NG

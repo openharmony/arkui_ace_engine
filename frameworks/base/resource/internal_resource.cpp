@@ -25,30 +25,6 @@
 extern uint8_t _binary_errorcode_json_start[];
 extern uint8_t _binary_errorcode_json_end[];
 
-// binary/tv_rate_star_big_off.svg
-// Use objcopy transform to compiled object file.
-// The following parameters represent the beginning and end of the file.
-extern uint8_t _binary_tv_rate_star_big_off_svg_start[];
-extern uint8_t _binary_tv_rate_star_big_off_svg_end[];
-
-// binary/tv_rate_star_big_on.svg
-// Use objcopy transform to compiled object file.
-// The following parameters represent the beginning and end of the file.
-extern uint8_t _binary_tv_rate_star_big_on_svg_start[];
-extern uint8_t _binary_tv_rate_star_big_on_svg_end[];
-
-// binary/tv_rate_star_small_off.svg
-// Use objcopy transform to compiled object file.
-// The following parameters represent the beginning and end of the file.
-extern uint8_t _binary_tv_rate_star_small_off_svg_start[];
-extern uint8_t _binary_tv_rate_star_small_off_svg_end[];
-
-// binary/tv_rate_star_small_on.png
-// Use objcopy transform to compiled object file.
-// The following parameters represent the beginning and end of the file.
-extern uint8_t _binary_tv_rate_star_small_on_svg_start[];
-extern uint8_t _binary_tv_rate_star_small_on_svg_end[];
-
 // binary/indexletter_bar.json
 // Use objcopy transform to compiled object file.
 // The following parameters represent the beginning and end of the file.
@@ -81,19 +57,6 @@ InternalResource::~InternalResource() = default;
 const uint8_t* InternalResource::GetResource(const ResourceId id, size_t& size) const
 {
     static const std::map<InternalResource::ResourceId, ResourceData> RESOURCE_MAP = {
-        { InternalResource::ResourceId::TV_RATE_STAR_BIG_ON_SVG,
-            ResourceData(_binary_tv_rate_star_big_on_svg_start,
-                static_cast<size_t>(_binary_tv_rate_star_big_on_svg_end - _binary_tv_rate_star_big_on_svg_start)) },
-        { InternalResource::ResourceId::TV_RATE_STAR_BIG_OFF_SVG,
-            ResourceData(_binary_tv_rate_star_big_off_svg_start,
-                static_cast<size_t>(_binary_tv_rate_star_big_off_svg_end - _binary_tv_rate_star_big_off_svg_start)) },
-        { InternalResource::ResourceId::TV_RATE_STAR_SMALL_ON_SVG,
-            ResourceData(_binary_tv_rate_star_small_on_svg_start,
-                static_cast<size_t>(_binary_tv_rate_star_small_on_svg_end - _binary_tv_rate_star_small_on_svg_start)) },
-        { InternalResource::ResourceId::TV_RATE_STAR_SMALL_OFF_SVG,
-            ResourceData(_binary_tv_rate_star_small_off_svg_start,
-                static_cast<size_t>(
-                    _binary_tv_rate_star_small_off_svg_end - _binary_tv_rate_star_small_off_svg_start)) },
         { InternalResource::ResourceId::ERRORINFO_JSON,
             ResourceData(_binary_errorcode_json_start,
                 static_cast<size_t>(_binary_errorcode_json_end - _binary_errorcode_json_start)) },

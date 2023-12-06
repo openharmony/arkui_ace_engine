@@ -31,9 +31,9 @@
 #ifdef USE_ROSEN_DRAWING
 #include "core/components_ng/render/drawing_forward.h"
 #endif
+#include "base/network/download_manager_v2.h"
 #include "core/image/image_source_info.h"
 #include "core/pipeline/pipeline_base.h"
-
 namespace OHOS::Ace {
 
 class ImageLoader : public virtual AceType {
@@ -70,6 +70,9 @@ public:
 #endif
     static void CacheImageData(const std::string& key, const RefPtr<NG::ImageData>& data);
     static RefPtr<NG::ImageData> LoadImageDataFromFileCache(const std::string& key, const std::string& suffix);
+
+    static void WriteCacheToFile(const std::string& uri, const std::vector<uint8_t>& imageData);
+    static void WriteCacheToFile(const std::string& uri, const std::string& imageData);
 };
 
 // File image provider: read image from file.
@@ -143,6 +146,7 @@ public:
     std::shared_ptr<RSData> LoadImageData(
         const ImageSourceInfo& imageSourceInfo, const WeakPtr<PipelineBase>& context = nullptr) override;
 #endif
+    static bool DownloadImage(DownloadCallback&& downloadCallback, const std::string& src, bool sync);
 };
 
 class InternalImageLoader final : public ImageLoader {
@@ -223,6 +227,22 @@ private:
     std::condition_variable cv_;
     std::mutex mtx_;
     std::vector<uint8_t> data_;
+};
+class AstcImageLoader : public ImageLoader {
+public:
+    AstcImageLoader() = default;
+    ~AstcImageLoader() override = default;
+#ifndef USE_ROSEN_DRAWING
+    sk_sp<SkData> LoadImageData(
+        const ImageSourceInfo& imageSourceInfo, const WeakPtr<PipelineBase>& context = nullptr) override;
+#else
+    std::shared_ptr<RSData> LoadImageData(
+        const ImageSourceInfo& imageSourceInfo, const WeakPtr<PipelineBase>& context = nullptr) override;
+#endif
+    RefPtr<NG::ImageData> LoadDecodedImageData(
+        const ImageSourceInfo& imageSourceInfo, const WeakPtr<PipelineBase>& context = nullptr) override;
+private:
+    static std::string GetThumbnailOrientation(const ImageSourceInfo& src);
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_IMAGE_IMAGE_LOADER_H

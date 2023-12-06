@@ -80,8 +80,7 @@ void JSGauge::JSBind(BindingTarget globalObj)
 
 void JSGauge::Create(const JSCallbackInfo& info)
 {
-    if (info.Length() < 1 && !info[0]->IsObject()) {
-        LOGE("gauge create error, info is non-valid");
+    if (!info[0]->IsObject()) {
         return;
     }
 
@@ -93,6 +92,14 @@ void JSGauge::Create(const JSCallbackInfo& info)
     double gaugeMin = min->IsNumber() ? min->ToNumber<double>() : 0;
     double gaugeMax = max->IsNumber() ? max->ToNumber<double>() : 100;
     double gaugeValue = value->IsNumber() ? value->ToNumber<double>() : 0;
+    if (LessNotEqual(gaugeMax, gaugeMin)) {
+        gaugeMin = NG::DEFAULT_MIN_VALUE;
+        gaugeMax = NG::DEFAULT_MAX_VALUE;
+    }
+
+    if (LessNotEqual(gaugeValue, gaugeMin) || GreatNotEqual(gaugeValue, gaugeMax)) {
+        gaugeValue = gaugeMin;
+    }
     GaugeModel::GetInstance()->Create(gaugeValue, gaugeMin, gaugeMax);
     if (min->IsNumber() || max->IsNumber()) {
         GaugeModel::GetInstance()->SetIsShowLimitValue(true);
@@ -103,8 +110,7 @@ void JSGauge::Create(const JSCallbackInfo& info)
 
 void JSGauge::SetValue(const JSCallbackInfo& info)
 {
-    if (info.Length() < 1 && !info[0]->IsNumber()) {
-        LOGE("JSGauge::SetValue::The info is wrong, it is supposed to have atleast 1 arguments");
+    if (!info[0]->IsNumber()) {
         return;
     }
     GaugeModel::GetInstance()->SetValue(info[0]->ToNumber<float>());
@@ -112,8 +118,7 @@ void JSGauge::SetValue(const JSCallbackInfo& info)
 
 void JSGauge::SetStartAngle(const JSCallbackInfo& info)
 {
-    if (info.Length() < 1 && !info[0]->IsNumber()) {
-        LOGE("JSGauge::SetStartAngle::The info is wrong, it is supposed to have atleast 1 arguments");
+    if (!info[0]->IsNumber()) {
         return;
     }
     GaugeModel::GetInstance()->SetStartAngle(info[0]->ToNumber<float>());
@@ -121,8 +126,7 @@ void JSGauge::SetStartAngle(const JSCallbackInfo& info)
 
 void JSGauge::SetEndAngle(const JSCallbackInfo& info)
 {
-    if (info.Length() < 1 && !info[0]->IsNumber()) {
-        LOGE("JSGauge::SetEndAngle::The info is wrong, it is supposed to have atleast 1 arguments");
+    if (!info[0]->IsNumber()) {
         return;
     }
     GaugeModel::GetInstance()->SetEndAngle(info[0]->ToNumber<float>());
@@ -135,8 +139,7 @@ void JSGauge::SetColors(const JSCallbackInfo& info)
         return;
     }
 
-    if (info.Length() < 1 || !info[0]->IsArray()) {
-        LOGE("The number of argument is less than 1, or the argument is not array.");
+    if (!info[0]->IsArray()) {
         return;
     }
     std::vector<Color> colors;
@@ -169,12 +172,8 @@ void JSGauge::SetColors(const JSCallbackInfo& info)
 
 void JSGauge::SetGradientColors(const JSCallbackInfo& info)
 {
-    if (info.Length() < 1) {
-        LOGW("The number of argument is less than 1, or the argument is not array.");
-        return;
-    }
-
     if (info[0]->IsNull() || info[0]->IsUndefined()) {
+        GaugeModel::GetInstance()->ResetGradientColors();
         return;
     }
 
@@ -183,6 +182,11 @@ void JSGauge::SetGradientColors(const JSCallbackInfo& info)
     std::vector<float> weights;
     if (info[0]->IsArray()) {
         auto jsColorsArray = JSRef<JSArray>::Cast(info[0]);
+        if (jsColorsArray->Length() == 0) {
+            GaugeModel::GetInstance()->ResetGradientColors();
+            return;
+        }
+
         for (size_t i = 0; i < jsColorsArray->Length(); ++i) {
             if (static_cast<int32_t>(i) >= NG::COLORS_MAX_COUNT) {
                 break;
@@ -194,18 +198,38 @@ void JSGauge::SetGradientColors(const JSCallbackInfo& info)
             auto tempColors = JSRef<JSArray>::Cast(jsValue);
             // Get weight
             float weight = tempColors->GetValueAt(1)->ToNumber<float>();
-            weight = Negative(weight) ? 0.0f : weight;
+            if (NonPositive(weight)) {
+                continue;
+            }
             weights.push_back(weight);
             // Get color
             JSRef<JSVal> jsColorValue = tempColors->GetValueAt(0);
             ConvertGradientColor(jsColorValue, colors, type);
         }
         type = NG::GaugeType::TYPE_CIRCULAR_MULTI_SEGMENT_GRADIENT;
+        SortColorStopOffset(colors);
         GaugeModel::GetInstance()->SetGradientColors(colors, weights, type);
         return;
     }
     ConvertGradientColor(info[0], colors, type);
+    SortColorStopOffset(colors);
     GaugeModel::GetInstance()->SetGradientColors(colors, weights, type);
+}
+
+void JSGauge::SortColorStopOffset(std::vector<NG::ColorStopArray>& colors)
+{
+    for (auto& colorStopArray : colors) {
+        std::sort(colorStopArray.begin(), colorStopArray.end(),
+            [](const std::pair<Color, Dimension>& left, const std::pair<Color, Dimension>& right) {
+                return left.second.Value() < right.second.Value();
+            });
+
+        auto iter = std::unique(colorStopArray.begin(), colorStopArray.end(),
+            [](const std::pair<Color, Dimension>& left, const std::pair<Color, Dimension>& right) {
+                return left.second.Value() == right.second.Value();
+            });
+        colorStopArray.erase(iter, colorStopArray.end());
+    }
 }
 
 void JSGauge::ConvertGradientColor(
@@ -223,7 +247,13 @@ void JSGauge::ConvertGradientColor(
     }
 
     type = NG::GaugeType::TYPE_CIRCULAR_SINGLE_SEGMENT_GRADIENT;
-    colors.emplace_back(jsLinearGradient->GetGradient());
+    if (jsLinearGradient->GetGradient().size() == 0) {
+        NG::ColorStopArray colorStopArray;
+        colorStopArray.emplace_back(std::make_pair(Color::BLACK, Dimension(0.0)));
+        colors.emplace_back(colorStopArray);
+    } else {
+        colors.emplace_back(jsLinearGradient->GetGradient());
+    }
 }
 
 void JSGauge::ConvertResourceColor(const JsiRef<JsiValue>& itemParam, std::vector<NG::ColorStopArray>& colors)
@@ -239,10 +269,6 @@ void JSGauge::ConvertResourceColor(const JsiRef<JsiValue>& itemParam, std::vecto
 
 void JSGauge::SetStrokeWidth(const JSCallbackInfo& info)
 {
-    if (info.Length() < 1) {
-        LOGE(" JSGauge::SetStrokeWidth::The info is wrong, it is supposed to have atleast 1 arguments");
-        return;
-    }
     CalcDimension strokeWidth;
     if (!ParseJsDimensionVpNG(info[0], strokeWidth) || strokeWidth.Unit() == DimensionUnit::PERCENT) {
         strokeWidth = CalcDimension(0);
@@ -252,8 +278,7 @@ void JSGauge::SetStrokeWidth(const JSCallbackInfo& info)
 
 void JSGauge::SetLabelConfig(const JSCallbackInfo& info)
 {
-    if (info.Length() < 1 && !info[0]->IsObject()) {
-        LOGE("JSGauge::SetLabelTextConfig::The info is wrong, it is supposed to have atleast 1 arguments");
+    if (!info[0]->IsObject()) {
         return;
     }
     auto paramObject = JSRef<JSObject>::Cast(info[0]);
@@ -277,9 +302,13 @@ void JSGauge::SetShadowOptions(const JSCallbackInfo& info)
         GaugeModel::GetInstance()->SetShadowOptions(shadowOptions);
         return;
     }
+
     if (!info[0]->IsObject()) {
+        GaugeModel::GetInstance()->ResetShadowOptions();
+        GaugeModel::GetInstance()->SetIsShowIndicator(true);
         return;
     }
+
     auto paramObject = JSRef<JSObject>::Cast(info[0]);
     JSRef<JSVal> jsRadius = paramObject->GetProperty("radius");
     JSRef<JSVal> jsOffsetX = paramObject->GetProperty("offsetX");
@@ -347,7 +376,9 @@ void JSGauge::SetIndicator(const JSCallbackInfo& info)
         return;
     }
 
-    if (info[0]->IsUndefined()) {
+    if (!info[0]->IsObject()) {
+        GaugeModel::GetInstance()->ResetIndicatorIconPath();
+        GaugeModel::GetInstance()->ResetIndicatorSpace();
         GaugeModel::GetInstance()->SetIsShowIndicator(true);
         return;
     }
@@ -363,14 +394,17 @@ void JSGauge::SetIndicator(const JSCallbackInfo& info)
         std::string moduleName;
         GetJsMediaBundleInfo(jsIcon, bundleName, moduleName);
         GaugeModel::GetInstance()->SetIndicatorIconPath(iconPath, bundleName, moduleName);
+    } else {
+        GaugeModel::GetInstance()->ResetIndicatorIconPath();
     }
 
     CalcDimension space;
-    if (ParseJsDimensionVpNG(jsSpace, space, false)) {
-        if (space.IsNegative()) {
-            space = NG::INDICATOR_DISTANCE_TO_TOP;
-        }
-        GaugeModel::GetInstance()->SetIndicatorSpace(space);
+    if (!ParseJsDimensionVpNG(jsSpace, space, false)) {
+        space = NG::INDICATOR_DISTANCE_TO_TOP;
     }
+    if (space.IsNegative()) {
+        space = NG::INDICATOR_DISTANCE_TO_TOP;
+    }
+    GaugeModel::GetInstance()->SetIndicatorSpace(space);
 }
 } // namespace OHOS::Ace::Framework

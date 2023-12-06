@@ -16,13 +16,14 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_EVENT_DRAG_EVENT_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_EVENT_DRAG_EVENT_H
 
+#include <functional>
 #include <list>
 
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "core/components_ng/event/gesture_event_actuator.h"
-#include "core/components_ng/gestures/gesture_info.h"
 #include "core/components_ng/gestures/recognizers/sequenced_recognizer.h"
+#include "core/gestures/drag_event.h"
 
 namespace OHOS::Ace::NG {
 
@@ -66,6 +67,19 @@ private:
     GestureEventFunc actionUpdate_;
     GestureEventFunc actionEnd_;
     GestureEventNoParameter actionCancel_;
+};
+class DragStatusListener : public AceType {
+    DECLARE_ACE_TYPE(DragStatusListener, AceType);
+
+public:
+    DragStatusListener() = default;
+    ~DragStatusListener() = default;
+
+    virtual void OnDragStarted(const RefPtr<NotifyDragEvent>& notifyDragEvent) {};
+    virtual void OnDragEntered(const RefPtr<NotifyDragEvent>& notifyDragEvent) {};
+    virtual void OnDragMoved(const RefPtr<NotifyDragEvent>& notifyDragEvent) {};
+    virtual void OnDragLeaved(const RefPtr<NotifyDragEvent>& notifyDragEvent) {};
+    virtual void OnDragEnded(const RefPtr<NotifyDragEvent>& notifyDragEvent) {};
 };
 
 class ACE_EXPORT DragEventActuator : public GestureEventActuator {
@@ -112,12 +126,12 @@ public:
     void HidePixelMap(bool startDrag = false, double x = 0, double y = 0);
     void HideEventColumn();
     void BindClickEvent(const RefPtr<FrameNode>& columnNode);
-    void ShowPixelMapAnimation(const RefPtr<FrameNode>& imageNode);
+    void ShowPixelMapAnimation(const RefPtr<FrameNode>& imageNode, bool hasContextMenu);
     void SetTextAnimation(const RefPtr<GestureEventHub>& gestureHub, const Offset& globalLocation);
     void HideTextAnimation(bool startDrag = false, double globalX = 0, double globalY = 0);
     bool GetIsBindOverlayValue(const RefPtr<DragEventActuator>& actuator);
     bool IsAllowedDrag();
-    void GetTextPixelMap(bool startDrag);
+    void SetTextPixelMap(const RefPtr<GestureEventHub>& gestureHub);
     OffsetF GetFloatImageOffset(const RefPtr<FrameNode>& frameNode);
 #endif // ENABLE_DRAG_FRAMEWORK
     PanDirection GetDirection() const
@@ -144,9 +158,14 @@ public:
         return isNotInPreviewState_;
     }
 
-    void ResetTextReceivedLongPress()
+    void SetIsDragUserReject(bool isDragUserReject)
     {
-        isTextReceivedLongPress_ = false;
+        isDragUserReject_ = isDragUserReject;
+    }
+
+    bool IsDragUserReject() const
+    {
+        return isDragUserReject_;
     }
 
 private:
@@ -165,7 +184,8 @@ private:
     GestureEvent longPressInfo_;
     bool isReceivedLongPress_ = false;
     bool isNotInPreviewState_ = false;
-    bool isTextReceivedLongPress_ = false;
+
+    bool isDragUserReject_ = false;
 
     PanDirection direction_;
     int32_t fingers_ = 1;

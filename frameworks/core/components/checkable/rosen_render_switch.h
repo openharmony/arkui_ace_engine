@@ -27,6 +27,15 @@ class RosenRenderSwitch : public RenderSwitch, public RosenCheckablePainter {
     DECLARE_ACE_TYPE(RosenRenderSwitch, RenderSwitch);
 
 public:
+
+#ifdef USE_ROSEN_DRAWING
+    struct RosenPaint {
+        RSPen pen;
+        RSBrush brush;
+        bool useBrush;
+    };
+#endif
+
     RosenRenderSwitch() = default;
     ~RosenRenderSwitch() override = default;
 
@@ -36,7 +45,7 @@ public:
         double& originX, double& originY, uint32_t& trackColor, uint32_t& pointColor, SkPaint& trackPaint);
 #else
     void SetPaintStyle(
-        double& originX, double& originY, uint32_t& trackColor, uint32_t& pointColor, RSPen& trackPaint);
+        double& originX, double& originY, uint32_t& trackColor, uint32_t& pointColor, RosenPaint& trackPaint);
 #endif
     Size CalculateTextSize(const std::string& text, RefPtr<RenderText>& renderText) override;
 
@@ -49,12 +58,11 @@ private:
     void PaintTrack(SkCanvas* canvas, SkPaint& trackPaint, double originX, double originY, uint32_t trackColor) const;
 #else
     void DrawTrackAnimation(
-        const Offset& paintOffset, RSCanvas* canvas, RSPen& trackPaint) const;
+        const Offset& paintOffset, RSCanvas* canvas, RosenPaint& trackPaint) const;
     void DrawTrackOffAndOn(const Offset& paintOffset, double trackRadius,
-        RSCanvas* canvas, RSPen& trackPaint) const;
-    void PaintCenterPoint(RSCanvas* canvas, RSPen& paint,
-        double pointOriginX, double pointOriginY, uint32_t pointColor) const;
-    void PaintTrack(RSCanvas* canvas, RSPen& trackPaint,
+        RSCanvas* canvas, RosenPaint& trackPaint) const;
+    void PaintCenterPoint(RSCanvas* canvas, double pointOriginX, double pointOriginY, uint32_t pointColor) const;
+    void PaintTrack(RSCanvas* canvas, RosenPaint& trackPaint,
         double originX, double originY, uint32_t trackColor) const;
 #endif
     void PaintFocusBorder(RenderContext& context, const Offset& offset);

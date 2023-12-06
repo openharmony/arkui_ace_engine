@@ -74,6 +74,9 @@ public:
 
     void OnExtensionDied() override {}
 
+    void OnAccessibilityEvent(const Accessibility::AccessibilityEventInfo& info,
+        const std::vector<int32_t>& uiExtensionIdLevelVec) override {};
+
 private:
     WeakPtr<WindowPattern> windowPattern_;
 };
@@ -99,30 +102,18 @@ bool WindowPattern::IsMainWindow() const
 
 void WindowPattern::OnAttachToFrameNode()
 {
-    contentNode_ = FrameNode::CreateFrameNode(
-        V2::WINDOW_SCENE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
-    contentNode_->GetLayoutProperty()->UpdateMeasureType(MeasureType::MATCH_PARENT);
-    contentNode_->SetHitTestMode(HitTestMode::HTMNONE);
-
-    CHECK_NULL_VOID(session_);
-    auto surfaceNode = session_->GetSurfaceNode();
-    if (surfaceNode) {
-        auto context = AceType::DynamicCast<NG::RosenRenderContext>(contentNode_->GetRenderContext());
-        CHECK_NULL_VOID(context);
-        context->SetRSNode(surfaceNode);
-    }
-
+    CreateContentNode();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-
     auto state = session_->GetSessionState();
-    auto bundleName = session_->GetSessionInfo().bundleName_;
-    LOGI("Session state: %{public}u, bundle name: %{public}s", state, bundleName.c_str());
+    LOGI("Session id: %{public}d, state: %{public}u, bundle name: %{public}s",
+        session_->GetPersistentId(), state, session_->GetSessionInfo().bundleName_.c_str());
     if (state == Rosen::SessionState::STATE_DISCONNECT) {
         if (!HasStartingPage()) {
             return;
         }
-        if (session_->GetShowRecent()) {
+        if (session_->GetShowRecent() && session_->GetScenePersistence() &&
+            session_->GetScenePersistence()->IsSnapshotExisted()) {
             CreateSnapshotNode();
             host->AddChild(snapshotNode_);
             return;
@@ -132,9 +123,16 @@ void WindowPattern::OnAttachToFrameNode()
         return;
     }
 
-    if (state == Rosen::SessionState::STATE_BACKGROUND && session_->GetBufferAvailable() && session_->GetShowRecent()) {
+    if (state == Rosen::SessionState::STATE_BACKGROUND && session_->GetScenePersistence() &&
+        session_->GetScenePersistence()->IsSnapshotExisted()) {
         CreateSnapshotNode();
         host->AddChild(snapshotNode_);
+        return;
+    }
+
+    if (session_->GetShowRecent()) {
+        CreateStartingNode();
+        host->AddChild(startingNode_);
         return;
     }
 
@@ -142,9 +140,25 @@ void WindowPattern::OnAttachToFrameNode()
     if (!session_->GetBufferAvailable()) {
         CreateStartingNode();
         host->AddChild(startingNode_);
+        auto surfaceNode = session_->GetSurfaceNode();
         if (surfaceNode) {
             surfaceNode->SetBufferAvailableCallback(callback_);
         }
+    }
+}
+
+void WindowPattern::CreateContentNode()
+{
+    contentNode_ = FrameNode::CreateFrameNode(
+        V2::WINDOW_SCENE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    contentNode_->GetLayoutProperty()->UpdateMeasureType(MeasureType::MATCH_PARENT);
+    contentNode_->SetHitTestMode(HitTestMode::HTMNONE);
+    CHECK_NULL_VOID(session_);
+    auto surfaceNode = session_->GetSurfaceNode();
+    if (surfaceNode) {
+        auto context = AceType::DynamicCast<NG::RosenRenderContext>(contentNode_->GetRenderContext());
+        CHECK_NULL_VOID(context);
+        context->SetRSNode(surfaceNode);
     }
 }
 
@@ -171,25 +185,21 @@ void WindowPattern::CreateStartingNode()
 
 void WindowPattern::CreateSnapshotNode(std::optional<std::shared_ptr<Media::PixelMap>> snapshot)
 {
+    session_->SetNeedSnapshot(false);
     snapshotNode_ = FrameNode::CreateFrameNode(
         V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
     auto imageLayoutProperty = snapshotNode_->GetLayoutProperty<ImageLayoutProperty>();
     imageLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
+    auto imagePaintProperty = snapshotNode_->GetPaintProperty<ImageRenderProperty>();
+    imagePaintProperty->UpdateImageInterpolation(ImageInterpolation::MEDIUM);
     snapshotNode_->SetHitTestMode(HitTestMode::HTMNONE);
 
     auto backgroundColor = SystemProperties::GetColorMode() == ColorMode::DARK ? COLOR_BLACK : COLOR_WHITE;
     if (snapshot) {
         auto pixelMap = PixelMap::CreatePixelMap(&snapshot.value());
-        if (!pixelMap) {
-            LOGE("pixelMap is null");
-            snapshotNode_->GetRenderContext()->UpdateBackgroundColor(Color(backgroundColor));
-            return;
-        }
         imageLayoutProperty->UpdateImageSourceInfo(ImageSourceInfo(pixelMap));
     } else {
         snapshotNode_->GetRenderContext()->UpdateBackgroundColor(Color(backgroundColor));
-        CHECK_NULL_VOID(session_);
-        CHECK_NULL_VOID(session_->GetScenePersistence());
         ImageSourceInfo sourceInfo("file://" + session_->GetScenePersistence()->GetSnapshotFilePath());
         imageLayoutProperty->UpdateImageSourceInfo(sourceInfo);
         auto pipelineContext = PipelineContext::GetCurrentContext();

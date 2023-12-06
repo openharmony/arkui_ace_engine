@@ -24,7 +24,7 @@
 
 namespace OHOS::Ace::NG {
 constexpr Dimension TEXT_DEFAULT_FONT_SIZE = 16.0_fp;
-
+using FONT_FEATURES_MAP = std::unordered_map<std::string, int32_t>;
 struct FontStyle {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(FontSize, Dimension);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(TextColor, Color);
@@ -32,6 +32,7 @@ struct FontStyle {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(ItalicFontStyle, Ace::FontStyle);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(FontWeight, FontWeight);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(FontFamily, std::vector<std::string>);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(FontFeature, FONT_FEATURES_MAP);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(TextDecoration, TextDecoration);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(TextDecorationColor, Color);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(TextDecorationStyle, TextDecorationStyle);
@@ -53,6 +54,37 @@ struct TextLineStyle {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(HeightAdaptivePolicy, TextHeightAdaptivePolicy);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(TextIndent, Dimension);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(LeadingMargin, LeadingMargin);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(WordBreak, WordBreak);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(EllipsisMode, EllipsisMode);
+};
+
+struct HandleInfoNG {
+    void UpdateOffset(const OffsetF& offset)
+    {
+        rect.SetOffset(offset);
+    }
+
+    void AddOffset(float x, float y)
+    {
+        auto offset = rect.GetOffset();
+        offset.AddX(x);
+        offset.AddY(y);
+        UpdateOffset(offset);
+    }
+
+    bool operator==(const HandleInfoNG& handleInfo) const
+    {
+
+        return rect == handleInfo.rect && index == handleInfo.index;
+    }
+
+    bool operator!=(const HandleInfoNG& handleInfo) const
+    {
+        return !operator==(handleInfo);
+    }
+
+    int32_t index = 0;
+    RectF rect;
 };
 
 TextStyle CreateTextStyleUsingTheme(const std::unique_ptr<FontStyle>& fontStyle,

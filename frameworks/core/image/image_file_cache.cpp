@@ -21,6 +21,10 @@
 #include "core/image/image_loader.h"
 #include "core/image/image_source_info.h"
 
+#ifdef USE_ROSEN_DRAWING
+#include "core/components_ng/image_provider/adapter/rosen/drawing_image_data.h"
+#endif
+
 namespace OHOS::Ace {
 ImageFileCache::ImageFileCache() = default;
 ImageFileCache::~ImageFileCache() = default;
@@ -58,7 +62,7 @@ std::string ImageFileCache::GetImageCacheFilePath(const std::string& url)
 
 void ImageFileCache::SetCacheFileLimit(size_t cacheFileLimit)
 {
-    LOGI("Set file cache limit size : %{public}d", static_cast<int32_t>(cacheFileLimit));
+    TAG_LOGI(AceLogTag::ACE_IMAGE, "Set file cache limit size : %{public}d", static_cast<int32_t>(cacheFileLimit));
     fileLimit_ = cacheFileLimit;
 }
 
@@ -77,16 +81,15 @@ RefPtr<NG::ImageData> ImageFileCache::GetDataFromCacheFile(const std::string& fi
 {
     std::lock_guard<std::mutex> lock(cacheFileInfoMutex_);
     if (!GetFromCacheFileInner(filePath)) {
-        LOGD("file not cached, return nullptr");
+        TAG_LOGD(AceLogTag::ACE_IMAGE, "file not cached, return nullptr");
         return nullptr;
     }
     auto cacheFileLoader = AceType::MakeRefPtr<FileImageLoader>();
-#ifndef USE_ROSEN_DRAWING
-    auto data = cacheFileLoader->LoadImageData(ImageSourceInfo(std::string("file:/").append(filePath)));
-    return NG::ImageData::MakeFromDataWrapper(&data);
-#else
     auto rsData = cacheFileLoader->LoadImageData(ImageSourceInfo(std::string("file:/").append(filePath)));
-    return rsData ? AceType::MakeRefPtr<NG::DrawingImageData>(rsData) : nullptr;
+#ifndef USE_ROSEN_DRAWING
+    return NG::ImageData::MakeFromDataWrapper(&rsData);
+#else
+    return AceType::MakeRefPtr<NG::DrawingImageData>(rsData);
 #endif
 }
 
@@ -94,8 +97,8 @@ void ImageFileCache::WriteCacheFile(
     const std::string& url, const void* const data, size_t size, const std::string& suffix)
 {
     if (size > fileLimit_) {
-        LOGW("file size is %{public}d, greater than limit %{public}d, cannot cache", static_cast<int32_t>(size),
-            static_cast<int32_t>(fileLimit_));
+        TAG_LOGW(AceLogTag::ACE_IMAGE, "file size is %{public}d, greater than limit %{public}d, cannot cache",
+            static_cast<int32_t>(size), static_cast<int32_t>(fileLimit_));
         return;
     }
     std::vector<std::string> removeVector;
@@ -104,7 +107,7 @@ void ImageFileCache::WriteCacheFile(
     std::lock_guard<std::mutex> lock(cacheFileInfoMutex_);
     // 1. first check if file has been cached.
     if (GetFromCacheFileInner(cacheNetworkFilePath)) {
-        LOGI("file has been wrote %{private}s", cacheNetworkFilePath.c_str());
+        TAG_LOGI(AceLogTag::ACE_IMAGE, "file has been wrote %{private}s", cacheNetworkFilePath.c_str());
         return;
     }
 
@@ -115,11 +118,12 @@ void ImageFileCache::WriteCacheFile(
     std::ofstream outFile(cacheNetworkFilePath, std::fstream::out);
 #endif
     if (!outFile.is_open()) {
-        LOGW("open cache file failed, cannot write.");
+        TAG_LOGW(AceLogTag::ACE_IMAGE, "open cache file failed, cannot write.");
         return;
     }
     outFile.write(reinterpret_cast<const char*>(data), size);
-    LOGI("write image cache: %{public}s %{private}s", url.c_str(), cacheNetworkFilePath.c_str());
+    TAG_LOGI(
+        AceLogTag::ACE_IMAGE, "write image cache: %{public}s %{private}s", url.c_str(), cacheNetworkFilePath.c_str());
 
     cacheFileSize_ += size;
     cacheFileInfo_.emplace_back(cacheNetworkFilePath, size, time(nullptr));
@@ -144,10 +148,10 @@ void ImageFileCache::WriteCacheFile(
 
 void ImageFileCache::ClearCacheFile(const std::vector<std::string>& removeFiles)
 {
-    LOGD("begin to clear %{public}zu files: ", removeFiles.size());
+    TAG_LOGD(AceLogTag::ACE_IMAGE, "begin to clear %{public}zu files: ", removeFiles.size());
     for (auto&& iter : removeFiles) {
         if (remove(iter.c_str()) != 0) {
-            LOGW("remove file %{private}s failed.", iter.c_str());
+            TAG_LOGW(AceLogTag::ACE_IMAGE, "remove file %{private}s failed.", iter.c_str());
             continue;
         }
     }
@@ -181,7 +185,7 @@ void ImageFileCache::SetCacheFileInfo()
     std::string cacheFilePath = GetImageCacheFilePath();
     std::unique_ptr<DIR, decltype(&closedir)> dir(opendir(cacheFilePath.c_str()), closedir);
     if (dir == nullptr) {
-        LOGW("cache file path wrong! maybe it is not set.");
+        TAG_LOGW(AceLogTag::ACE_IMAGE, "cache file path wrong! maybe it is not set.");
         return;
     }
     int64_t cacheFileSize = 0;

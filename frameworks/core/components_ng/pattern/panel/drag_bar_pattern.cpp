@@ -173,7 +173,6 @@ void DragBarPattern::UpdateDrawPoint()
             rightPoint = POINT_R_EXPAND;
             break;
         default:
-            LOGE("Unsupported Show Mode:%{public}d", showMode_);
             return;
     }
     auto paintProperty = GetPaintProperty<DragBarPaintProperty>();

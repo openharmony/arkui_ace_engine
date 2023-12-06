@@ -58,10 +58,33 @@ public:
         return maxCount_;
     }
 
+    void SetSingleRange(bool isSingleRange) override
+    {
+        isSingleRange_ = isSingleRange;
+    }
+
+    bool GetSingleRange() override
+    {
+        return isSingleRange_;
+    }
+
     void SetHasSelectAttr(bool value) override;
     bool GetMultiOptions(std::vector<NG::TextCascadePickerOptions>& options) override;
     void SetOnValueChangeEvent(TextCascadeValueChangeEvent&& onChange) override;
     void SetOnSelectedChangeEvent(TextCascadeSelectedChangeEvent&& onChange) override;
+
+    static void SetCanLoop(FrameNode* frameNode, const bool value);
+    static void SetSelected(FrameNode* frameNode, uint32_t value);
+    static void SetSelecteds(FrameNode* frameNode, const std::vector<uint32_t>& values);
+    static void SetHasSelectAttr(FrameNode* frameNode, bool value);
+    static void SetNormalTextStyle(
+        FrameNode* frameNode, const RefPtr<PickerTheme>& pickerTheme, const NG::PickerTextStyle& value);
+    static void SetSelectedTextStyle(
+        FrameNode* frameNode, const RefPtr<PickerTheme>& pickerTheme, const NG::PickerTextStyle& value);
+    static void SetDisappearTextStyle(
+        FrameNode* frameNode, const RefPtr<PickerTheme>& pickerTheme, const NG::PickerTextStyle& value);
+    static void SetDefaultPickerItemHeight(FrameNode* frameNode, const Dimension& value);
+    static void SetBackgroundColor(FrameNode* frameNode, const Color& color);
 
 private:
     static RefPtr<FrameNode> CreateStackNode();
@@ -76,6 +99,7 @@ private:
     std::vector<NG::RangeContent> rangeValue_;
     std::vector<NG::TextCascadePickerOptions> options_;
     uint32_t maxCount_ = 0;
+    bool isSingleRange_ = true;
 };
 
 class ACE_EXPORT TextPickerDialogModelNG : public TextPickerDialogModel {

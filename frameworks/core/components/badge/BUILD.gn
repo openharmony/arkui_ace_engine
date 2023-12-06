@@ -17,12 +17,9 @@ import(
 build_component("badge") {
   sources = [
     "badge_component.cpp",
-    "flutter_render_badge.cpp",
     "render_badge.cpp",
     "render_badge_creator.cpp",
   ]
-  if (ace_use_new_skia) {
-    sources -= [ "flutter_render_badge.cpp" ]
-  }
+
   rosen_sources = [ "rosen_render_badge.cpp" ]
 }

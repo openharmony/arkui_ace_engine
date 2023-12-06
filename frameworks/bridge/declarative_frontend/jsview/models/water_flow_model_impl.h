@@ -45,7 +45,17 @@ public:
     void SetOnReachStart(OnReachEvent&& onReachStart) override;
     void SetOnReachEnd(OnReachEvent&& onReachEnd) override;
     void SetOnScrollFrameBegin(OnScrollFrameBeginEvent&& ScrollFrameBegin) override {};
+    void SetOnScroll(std::function<void(Dimension, ScrollState)>&& onScroll) override {};
+    void SetOnScrollStart(std::function<void()>&& onScrollStart) override {};
+    void SetOnScrollStop(std::function<void()>&& onScrollStop) override {};
+    void SetOnScrollIndex(std::function<void(int32_t, int32_t)>&& onScrollIndex) override {};
     void SetFriction(double friction) override {};
+    void SetCachedCount(int32_t value) override {};
+    void SetEdgeEffect(EdgeEffect /* edgeEffect */, bool /* alwaysEnabled */) override {};
+
+    void SetScrollBarMode(DisplayMode /* value */) override {};
+    void SetScrollBarColor(const std::string& /* value */) override {};
+    void SetScrollBarWidth(const std::string& /* value */) override {};
 };
 } // namespace OHOS::Ace::Framework
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_MODELS_WATER_FLOW_MODEL_IMPL_H

@@ -22,14 +22,17 @@
 #include "core/components/web/web_property.h"
 
 namespace OHOS::Ace {
+using ScriptItems = std::map<std::string, std::vector<std::string>>;
 class WebModel {
 public:
     static WebModel* GetInstance();
     virtual ~WebModel() = default;
 
-    virtual void Create(const std::string& src, const RefPtr<WebController>& webController) = 0;
+    virtual void Create(const std::string& src, const RefPtr<WebController>& webController,
+        WebType type = WebType::SURFACE) = 0;
     virtual void Create(const std::string& src, std::function<void(int32_t)>&& setWebIdCallback,
-        std::function<void(const std::string&)>&& setHapPathCallback, int32_t parentWebId, bool popup) = 0;
+        std::function<void(const std::string&)>&& setHapPathCallback,
+        int32_t parentWebId, bool popup, WebType type = WebType::SURFACE) = 0;
     virtual void SetCustomScheme(const std::string& cmdLine) = 0;
     virtual void SetFocusable(bool focusable) {};
     virtual void SetFocusNode(bool isFocusNode) {};
@@ -140,6 +143,10 @@ public:
     virtual void SetOverScrollId(std::function<void(const BaseEventInfo* info)>&& jsCallback) = 0;
 
     virtual void SetScreenCaptureRequestEventId(std::function<void(const BaseEventInfo* info)>&& jsCallback) {};
+    virtual void SetNestedScroll(const NestedScrollOptions& nestedOpt) {}
+    virtual void SetLayoutMode(WebLayoutMode mode) {}
+    virtual void SetOverScrollMode(OverScrollMode mode) {}
+    virtual void JavaScriptOnDocumentStart(const ScriptItems& scriptItems) {};
 
 private:
     static std::unique_ptr<WebModel> instance_;

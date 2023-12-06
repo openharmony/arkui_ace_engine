@@ -46,18 +46,26 @@ public:
             }
 
             // init theme from global data
-            theme->contentTextStyle_.SetFontSize(themeConstants->GetDimension(THEME_COUNTER_TITLE_FONTSIZE));
-            theme->contentTextStyle_.SetTextColor(themeConstants->GetColor(THEME_COUNTER_FONTCOLOR));
-            theme->backgroundColor_ = themeConstants->GetColor(THEME_COUNTER_BACKGROUND_COLOR);
-            auto themeStyle = themeConstants->GetThemeStyle();
-            if (!themeStyle) {
-                return theme;
-            }
-            auto pattern = themeStyle->GetAttr<RefPtr<ThemeStyle>>(THEME_PATTERN_COUNTER, nullptr);
-            if (pattern) {
-                theme->alphaDisabled_ = pattern->GetAttr<double>("button_alpha_disabled", BUTTON_ALPHA_DISABLED);
-            }
+            ParsePattern(themeConstants->GetThemeStyle(), theme);
             return theme;
+        }
+
+        void ParsePattern(const RefPtr<ThemeStyle>& themeStyle, const RefPtr<CounterTheme>& theme) const
+        {
+            if (!themeStyle) {
+                LOGW("Counter parse pattern failed, theme style is null");
+                return;
+            }
+            auto counterPattern = themeStyle->GetAttr<RefPtr<ThemeStyle>>(THEME_PATTERN_COUNTER, nullptr);
+            if (!counterPattern) {
+                LOGW("find pattern of counter fail");
+                return;
+            }
+            theme->alphaDisabled_ = counterPattern->GetAttr<double>("button_alpha_disabled", BUTTON_ALPHA_DISABLED);
+            theme->contentTextStyle_.SetFontSize(counterPattern->GetAttr<Dimension>("title_font_size", 15.0_vp));
+            theme->contentTextStyle_.SetTextColor(counterPattern->GetAttr<Color>("title_font_color",
+                Color(0xff191919)));
+            theme->backgroundColor_ = counterPattern->GetAttr<Color>("title_background_color", Color::WHITE);
         }
     };
 

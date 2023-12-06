@@ -21,6 +21,7 @@
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "core/components/common/layout/constants.h"
+#include "core/components_ng/event/response_ctrl.h"
 #include "core/components_ng/gestures/gesture_referee.h"
 #include "core/event/axis_event.h"
 #include "core/event/key_event.h"
@@ -29,12 +30,13 @@
 #include "core/event/touch_event.h"
 #include "core/focus/focus_node.h"
 #include "core/gestures/gesture_referee.h"
+#include "core/common/event_dump.h"
 
 namespace OHOS::Ace {
-
 namespace NG {
 class FrameNode;
 class SelectOverlayManager;
+class ResponseCtrl;
 } // namespace NG
 class RenderNode;
 class Element;
@@ -75,6 +77,8 @@ public:
 
     void TouchTest(const AxisEvent& event, const RefPtr<NG::FrameNode>& frameNode, const TouchRestrict& touchRestrict);
 
+    bool HasDifferentDirectionGesture();
+
     bool DispatchTouchEvent(const TouchEvent& point);
     bool DispatchTouchEvent(const AxisEvent& event);
     void FlushTouchEventsBegin(const std::list<TouchEvent>& touchEvents);
@@ -89,8 +93,7 @@ public:
     // Distribute the key event to the corresponding root node. If the root node is not processed, return false and the
     // platform will handle it.
     bool DispatchKeyEventNG(const KeyEvent& event, const RefPtr<NG::FrameNode>& focusNode);
-    bool DispatchTabIndexEventNG(
-        const KeyEvent& event, const RefPtr<NG::FrameNode>& focusNode, const RefPtr<NG::FrameNode>& mainNode);
+    bool DispatchTabIndexEventNG(const KeyEvent& event, const RefPtr<NG::FrameNode>& mainView);
 
     // Distribute the rotation event to the corresponding render tree or requested render node. If the render is not
     // processed, return false and the platform will handle it.
@@ -195,6 +198,20 @@ public:
         return isLastMoveBeforeUp_;
     }
 
+    NG::EventTreeRecord& GetEventTreeRecord()
+    {
+        return eventTree_;
+    }
+
+    void DumpEvent() const;
+
+    void AddGestureSnapshot(int32_t finger, int32_t depth, const RefPtr<TouchEventTarget>& target);
+
+    RefPtr<NG::ResponseCtrl> GetResponseCtrl()
+    {
+        return responseCtrl_;
+    }
+
 private:
     std::unordered_map<size_t, TouchTestResult> touchTestResults_;
     std::unordered_map<size_t, MouseTestResult> mouseTestResults_;
@@ -220,6 +237,9 @@ private:
     RefPtr<NG::GestureReferee> refereeNG_;
     std::list<WeakPtr<NG::FrameNode>> keyboardShortcutNode_;
     std::vector<KeyCode> pressedKeyCodes_;
+    NG::EventTreeRecord eventTree_;
+    RefPtr<NG::ResponseCtrl> responseCtrl_;
+    TimeStamp lastEventTime_;
 };
 
 } // namespace OHOS::Ace

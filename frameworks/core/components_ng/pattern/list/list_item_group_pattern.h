@@ -33,6 +33,7 @@ struct ListItemGroupPaintInfo {
     int32_t lanes = 1;
     float spaceWidth = 0.0f;
     float laneGutter = 0.0f;
+    int32_t totalItemCount = 0;
 };
 
 class ACE_EXPORT ListItemGroupPattern : public Pattern {
@@ -74,8 +75,9 @@ public:
             itemStartIndex_++;
         } else {
             host->ReplaceChild(host->GetChildAtIndex(headerIndex_), header);
+            host->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
         }
-        auto frameNode  = AceType::DynamicCast<FrameNode>(header);
+        auto frameNode = AceType::DynamicCast<FrameNode>(header->GetFrameChildByIndex(0, false));
         CHECK_NULL_VOID(frameNode);
         auto renderContext = frameNode->GetRenderContext();
         CHECK_NULL_VOID(renderContext);
@@ -92,8 +94,9 @@ public:
             itemStartIndex_++;
         } else {
             host->ReplaceChild(host->GetChildAtIndex(footerIndex_), footer);
+            host->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
         }
-        auto frameNode  = AceType::DynamicCast<FrameNode>(footer);
+        auto frameNode = AceType::DynamicCast<FrameNode>(footer->GetFrameChildByIndex(0, false));
         CHECK_NULL_VOID(frameNode);
         auto renderContext = frameNode->GetRenderContext();
         CHECK_NULL_VOID(renderContext);
@@ -120,14 +123,34 @@ public:
         return itemDisplayEndIndex_;
     }
 
-    int32_t GetDiasplayStartIndexInGroup() const
+    int32_t GetDisplayStartIndexInGroup() const
     {
-        return itemDiasplayStartIndex_;
+        return itemDisplayStartIndex_;
+    }
+
+    int32_t GetItemStartIndex() const
+    {
+        return itemStartIndex_;
     }
 
     int32_t GetEndIndexInGroup() const
     {
         return (itemTotalCount_ - 1);
+    }
+
+    int32_t GetTotalItemCount() const
+    {
+        return itemTotalCount_;
+    }
+
+    bool IsDisplayStart() const
+    {
+        return itemDisplayStartIndex_ == 0;
+    }
+
+    int32_t IsDisplayEnd() const
+    {
+        return itemTotalCount_ == 0 || itemDisplayEndIndex_ == (itemTotalCount_ - 1);
     }
 
     int32_t GetLanesInGroup() const
@@ -140,10 +163,26 @@ public:
         return listItemGroupStyle_;
     }
 
+    float GetHeaderMainSize() const
+    {
+        return headerMainSize_;
+    }
+
+    float GetFooterMainSize() const
+    {
+        return footerMainSize_;
+    }
+
 private:
+    bool IsNeedInitClickEventRecorder() const override
+    {
+        return true;
+    }
+
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
     void OnAttachToFrameNode() override;
     void SetListItemGroupDefaultAttributes(const RefPtr<FrameNode>& itemGroupNode);
+    void CheckListDirectionInCardStyle();
     RefPtr<ShallowBuilder> shallowBuilder_;
     V2::ListItemGroupStyle listItemGroupStyle_ = V2::ListItemGroupStyle::NONE;
 
@@ -154,7 +193,9 @@ private:
     int32_t itemStartIndex_ = 0;
     int32_t itemTotalCount_ = -1;
     int32_t itemDisplayEndIndex_ = -1;
-    int32_t itemDiasplayStartIndex_ = -1;
+    int32_t itemDisplayStartIndex_ = -1;
+    float_t headerMainSize_ = 0.0f;
+    float_t footerMainSize_ = 0.0f;
 
     ListItemGroupLayoutAlgorithm::PositionMap itemPosition_;
     float spaceWidth_ = 0.0f;

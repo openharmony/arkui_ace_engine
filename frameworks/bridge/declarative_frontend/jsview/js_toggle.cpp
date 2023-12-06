@@ -24,6 +24,7 @@
 #include "core/common/container.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/toggle/toggle_theme.h"
+#include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/button/toggle_button_model_ng.h"
 #include "core/components_ng/pattern/toggle/toggle_model_ng.h"
 
@@ -69,6 +70,7 @@ void JSToggle::JSBind(BindingTarget globalObj)
     JSClass<JSToggle>::StaticMethod("switchPointColor", &JSToggle::SwitchPointColor);
     JSClass<JSToggle>::StaticMethod("backgroundColor", &JSToggle::SetBackgroundColor);
     JSClass<JSToggle>::StaticMethod("hoverEffect", &JSToggle::JsHoverEffect);
+    JSClass<JSToggle>::StaticMethod("pop", &JSToggle::Pop);
 
     JSClass<JSToggle>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
     JSClass<JSToggle>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
@@ -85,9 +87,12 @@ void ParseToggleIsOnObject(const JSCallbackInfo& info, const JSRef<JSVal>& chang
     CHECK_NULL_VOID(changeEventVal->IsFunction());
 
     auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(changeEventVal));
-    auto onChangeEvent = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](bool isOn) {
+    WeakPtr<NG::FrameNode> targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto onChangeEvent = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = targetNode](
+                             bool isOn) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("Toggle.onChangeEvent");
+        PipelineContext::SetCallBackNode(node);
         auto newJSVal = JSRef<JSVal>::Make(ToJSValue(isOn));
         func->ExecuteJS(1, &newJSVal);
     };
@@ -96,8 +101,7 @@ void ParseToggleIsOnObject(const JSCallbackInfo& info, const JSRef<JSVal>& chang
 
 void JSToggle::Create(const JSCallbackInfo& info)
 {
-    if (info.Length() < 1 || !info[0]->IsObject()) {
-        LOGE("toggle create error, info is non-valid");
+    if (!info[0]->IsObject()) {
         return;
     }
 
@@ -132,7 +136,6 @@ void JSToggle::Create(const JSCallbackInfo& info)
 void JSToggle::JsWidth(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have atleast 1 arguments");
         return;
     }
 
@@ -164,7 +167,6 @@ void JSToggle::JsWidth(const JSRef<JSVal>& jsValue)
 void JSToggle::JsHeight(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have atleast 1 arguments");
         return;
     }
 
@@ -209,13 +211,7 @@ void JSToggle::JsResponseRegion(const JSCallbackInfo& info)
 
 void JSToggle::JsSize(const JSCallbackInfo& info)
 {
-    if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have atleast 1 arguments");
-        return;
-    }
-
     if (!info[0]->IsObject()) {
-        LOGE("arg is not Object or String.");
         return;
     }
 
@@ -226,14 +222,15 @@ void JSToggle::JsSize(const JSCallbackInfo& info)
 
 void JSToggle::OnChange(const JSCallbackInfo& args)
 {
-    if (args.Length() < 1 || !args[0]->IsFunction()) {
-        LOGE("The arg is wrong, it is supposed to have atleast 1 argument.");
+    if (!args[0]->IsFunction()) {
         return;
     }
     auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(args[0]));
-    auto onChange = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc)](bool isOn) {
+    WeakPtr<NG::FrameNode> targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto onChange = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), node = targetNode](bool isOn) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("Toggle.onChange");
+        PipelineContext::SetCallBackNode(node);
         auto newJSVal = JSRef<JSVal>::Make(ToJSValue(isOn));
         func->ExecuteJS(1, &newJSVal);
     };
@@ -244,7 +241,6 @@ void JSToggle::OnChange(const JSCallbackInfo& args)
 void JSToggle::SelectedColor(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have atleast 1 arguments");
         return;
     }
     Color color;
@@ -259,7 +255,6 @@ void JSToggle::SelectedColor(const JSCallbackInfo& info)
 void JSToggle::SwitchPointColor(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have atleast 1 arguments");
         return;
     }
     Color color;
@@ -276,7 +271,6 @@ void JSToggle::SwitchPointColor(const JSCallbackInfo& info)
 void JSToggle::JsPadding(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have atleast 1 arguments");
         return;
     }
     NG::PaddingPropertyF oldPadding = GetOldPadding(info);
@@ -288,21 +282,17 @@ NG::PaddingPropertyF JSToggle::GetOldPadding(const JSCallbackInfo& info)
 {
     NG::PaddingPropertyF padding({ 0.0f, 0.0f, 0.0f, 0.0f });
     if (info[0]->IsObject()) {
-        auto argsPtrItem = JsonUtil::ParseJsonString(info[0]->ToString());
-        if (!argsPtrItem || argsPtrItem->IsNull()) {
-            LOGE("Js Parse object failed. argsPtr is null. %s", info[0]->ToString().c_str());
-            return padding;
-        }
-        if (argsPtrItem->Contains("top") || argsPtrItem->Contains("bottom") || argsPtrItem->Contains("left") ||
-            argsPtrItem->Contains("right")) {
+        JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(info[0]);
+        if (jsObj->HasProperty("top") || jsObj->HasProperty("bottom")
+            || jsObj->HasProperty("left") || jsObj->HasProperty("right")) {
             CalcDimension topDimen = CalcDimension(0.0, DimensionUnit::VP);
             CalcDimension leftDimen = CalcDimension(0.0, DimensionUnit::VP);
             CalcDimension rightDimen = CalcDimension(0.0, DimensionUnit::VP);
             CalcDimension bottomDimen = CalcDimension(0.0, DimensionUnit::VP);
-            ParseJsonDimensionVp(argsPtrItem->GetValue("top"), topDimen);
-            ParseJsonDimensionVp(argsPtrItem->GetValue("left"), leftDimen);
-            ParseJsonDimensionVp(argsPtrItem->GetValue("right"), rightDimen);
-            ParseJsonDimensionVp(argsPtrItem->GetValue("bottom"), bottomDimen);
+            ParseJsDimensionVp(jsObj->GetProperty("top"), topDimen);
+            ParseJsDimensionVp(jsObj->GetProperty("left"), leftDimen);
+            ParseJsDimensionVp(jsObj->GetProperty("right"), rightDimen);
+            ParseJsDimensionVp(jsObj->GetProperty("bottom"), bottomDimen);
             if (leftDimen == 0.0_vp) {
                 leftDimen = rightDimen;
             }
@@ -398,7 +388,6 @@ NG::PaddingProperty JSToggle::GetPadding(const std::optional<CalcDimension>& top
 void JSToggle::SetBackgroundColor(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The argv is wrong, it is supposed to have at least 1 argument");
         return;
     }
     Color backgroundColor;
@@ -418,5 +407,10 @@ void JSToggle::JsHoverEffect(const JSCallbackInfo& info)
     if (info.Length() > 0 && info[0]->IsNumber()) {
         ToggleModel::GetInstance()->SetHoverEffect(static_cast<HoverEffectType>(info[0]->ToNumber<int32_t>()));
     }
+}
+
+void JSToggle::Pop()
+{
+    ToggleModel::GetInstance()->Pop();
 }
 } // namespace OHOS::Ace::Framework

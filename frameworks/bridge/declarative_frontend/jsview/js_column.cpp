@@ -97,8 +97,6 @@ void JSColumn::SetAlignItems(int32_t value)
         ColumnModel::GetInstance()->SetAlignItems(static_cast<FlexAlign>(value));
     } else if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)) {
         ColumnModel::GetInstance()->SetAlignItems(FlexAlign::CENTER);
-        // FIXME: we have a design issue here, setters return void, can not signal error to JS
-        LOGE("invalid value for justifyContent");
     }
 }
 
@@ -112,7 +110,6 @@ void JSColumn::SetJustifyContent(int32_t value)
         ColumnModel::GetInstance()->SetJustifyContent(static_cast<FlexAlign>(value));
     } else if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)) {
         ColumnModel::GetInstance()->SetJustifyContent(FlexAlign::FLEX_START);
-        LOGE("invalid value for justifyContent");
     }
 }
 
@@ -139,6 +136,7 @@ void JSColumn::JSBind(BindingTarget globalObj)
     JSClass<JSColumn>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
     JSClass<JSColumn>::StaticMethod("onPan", &JSInteractableView::JsOnPan);
     JSClass<JSColumn>::StaticMethod("remoteMessage", &JSInteractableView::JsCommonRemoteMessage);
+    JSClass<JSColumn>::StaticMethod("pointLight", &JSViewAbstract::JsPointLight, opt);
     JSClass<JSColumn>::InheritAndBind<JSContainerBase>(globalObj);
 
     JSClass<HorizontalAlignDeclaration>::Declare("HorizontalAlignDeclaration");

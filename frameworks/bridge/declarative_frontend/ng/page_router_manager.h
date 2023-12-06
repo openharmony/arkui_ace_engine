@@ -33,8 +33,14 @@ namespace OHOS::Ace::NG {
 
 using LoadPageCallback = std::function<bool(const std::string&,
     const std::function<void(const std::string&, int32_t)>&)>;
+using LoadPageByBufferCallback = std::function<bool(
+    const std::shared_ptr<std::vector<uint8_t>>& content,  const std::function<void(const std::string&, int32_t)>&)>;
 using LoadCardCallback = std::function<bool(const std::string&, int64_t cardId)>;
 using LoadNamedRouterCallback = std::function<bool(const std::string&, bool isTriggeredByJs)>;
+using UpdateRootComponentCallback = std::function<bool()>;
+#if defined(PREVIEW)
+using IsComponentPreviewCallback = std::function<bool()>;
+#endif
 
 enum class RouterMode {
     STANDARD = 0,
@@ -48,6 +54,7 @@ struct RouterPageInfo {
     std::function<void(const std::string&, int32_t)> errorCallback;
     std::string path;
     bool isNamedRouterMode = false;
+    std::shared_ptr<std::vector<uint8_t>> content;
 };
 
 class PageRouterManager : public AceType {
@@ -57,6 +64,7 @@ public:
     ~PageRouterManager() override = default;
 
     void RunPage(const std::string& url, const std::string& params);
+    void RunPage(const std::shared_ptr<std::vector<uint8_t>>& content, const std::string& params);
     void RunPageByNamedRouter(const std::string& name, const std::string& params);
     void RunCard(const std::string& url, const std::string& params, int64_t cardId);
 
@@ -70,6 +78,11 @@ public:
         loadJs_ = std::move(callback);
     }
 
+    void SetLoadJsByBufferCallback(LoadPageByBufferCallback&& callback)
+    {
+        loadJsByBuffer_ = std::move(callback);
+    }
+
     void SetLoadCardCallback(const LoadCardCallback& callback)
     {
         loadCard_ = callback;
@@ -79,6 +92,17 @@ public:
     {
         loadNamedRouter_ = callback;
     }
+
+    void SetUpdateRootComponentCallback(UpdateRootComponentCallback&& callback)
+    {
+        updateRootComponent_ = callback;
+    }
+#if defined(PREVIEW)
+    void SetIsComponentPreview(IsComponentPreviewCallback&& callback)
+    {
+        isComponentPreview_ = callback;
+    }
+#endif
 
     void EnableAlertBeforeBackPage(const std::string& message, std::function<void(int32_t)>&& callback);
 
@@ -101,7 +125,6 @@ public:
     RefPtr<FrameNode> GetCurrentPageNode() const
     {
         if (pageRouterStack_.empty()) {
-            LOGE("fail to get current page node due to page is null");
             return nullptr;
         }
         return pageRouterStack_.back().Upgrade();
@@ -176,13 +199,18 @@ private:
 
     bool inRouterOpt_ = false;
     LoadPageCallback loadJs_;
+    LoadPageByBufferCallback loadJsByBuffer_;
     LoadCardCallback loadCard_;
     LoadNamedRouterCallback loadNamedRouter_;
+    UpdateRootComponentCallback updateRootComponent_;
     bool isCardRouter_ = false;
     int32_t pageId_ = 0;
     std::list<WeakPtr<FrameNode>> pageRouterStack_;
     std::list<std::string> restorePageStack_;
     RouterPageInfo ngBackTarget_;
+#if defined(PREVIEW)
+    IsComponentPreviewCallback isComponentPreview_;
+#endif
 
     ACE_DISALLOW_COPY_AND_MOVE(PageRouterManager);
 };

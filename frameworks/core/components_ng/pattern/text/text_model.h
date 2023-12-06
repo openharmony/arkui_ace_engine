@@ -45,6 +45,7 @@ public:
     virtual void SetItalicFontStyle(Ace::FontStyle value) = 0;
     virtual void SetFontWeight(FontWeight value) = 0;
     virtual void SetFontFamily(const std::vector<std::string>& value) = 0;
+    virtual void SetWordBreak(WordBreak wordBreak) = 0;
     virtual void SetTextAlign(TextAlign value) = 0;
     virtual void SetTextOverflow(TextOverflow value) = 0;
     virtual void SetMaxLines(uint32_t value) = 0;
@@ -59,6 +60,8 @@ public:
     virtual void SetAdaptMinFontSize(const Dimension& value) = 0;
     virtual void SetAdaptMaxFontSize(const Dimension& value) = 0;
     virtual void SetHeightAdaptivePolicy(TextHeightAdaptivePolicy value) = 0;
+    virtual void SetTextDetectEnable(bool value) = 0;
+    virtual void SetTextDetectConfig(const std::string& value, std::function<void(const std::string&)>&& onResult) = 0;
     virtual void OnSetWidth() {};
     virtual void OnSetHeight() {};
     virtual void OnSetAlign() {};
@@ -66,6 +69,8 @@ public:
     virtual void ClearOnClick() = 0;
     virtual void SetRemoteMessage(std::function<void()>&& click) = 0;
     virtual void SetCopyOption(CopyOptions copyOption) = 0;
+    virtual void SetOnCopy(std::function<void(const std::string&)>&& func) = 0;
+    virtual void SetEllipsisMode(EllipsisMode modal) = 0;
 
     virtual void SetOnDragStart(NG::OnDragStartFunc&& onDragStart) = 0;
     virtual void SetOnDragEnter(NG::OnDragDropFunc&& onDragEnter) = 0;
@@ -74,6 +79,8 @@ public:
     virtual void SetOnDrop(NG::OnDragDropFunc&& onDrop) = 0;
     virtual void SetDraggable(bool draggable) = 0;
     virtual void SetMenuOptionItems(std::vector<NG::MenuOptionsParam>&& menuOptionsItems) = 0;
+
+    virtual void SetTextSelection(int32_t startIndex, int32_t endIndex) = 0;
 
 private:
     static std::unique_ptr<TextModel> instance_;

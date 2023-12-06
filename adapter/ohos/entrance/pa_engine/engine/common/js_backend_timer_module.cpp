@@ -169,7 +169,8 @@ napi_value StartTimeoutOrInterval(napi_env env, napi_callback_info info, bool is
     name.append(std::to_string(callbackId));
 
     // create timer task
-    AbilityRuntime::JsRuntime& jsRuntime = *reinterpret_cast<AbilityRuntime::JsRuntime*>(env);
+    AbilityRuntime::JsRuntime& jsRuntime =
+        *reinterpret_cast<AbilityRuntime::JsRuntime*>(reinterpret_cast<NativeEngine*>(env)->GetJsEngine());
     JsTimer task(jsRuntime, jsFunction, name, delayTime, isInterval);
     for (size_t index = 2; index < argc; ++index) {
         napi_ref value = nullptr;
@@ -223,7 +224,8 @@ napi_value StopTimeoutOrInterval(napi_env env, napi_callback_info info)
     name.append(std::to_string(callbackId));
 
     // event should be cancelable before executed
-    AbilityRuntime::JsRuntime& jsRuntime = *reinterpret_cast<AbilityRuntime::JsRuntime*>(env);
+    AbilityRuntime::JsRuntime& jsRuntime =
+        *reinterpret_cast<AbilityRuntime::JsRuntime*>(reinterpret_cast<NativeEngine*>(env)->GetJsEngine());
     jsRuntime.RemoveTask(name);
     return result;
 }

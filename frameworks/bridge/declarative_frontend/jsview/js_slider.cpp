@@ -120,7 +120,6 @@ void JSSlider::Create(const JSCallbackInfo& info)
     bool reverse = false;
 
     if (!info[0]->IsObject()) {
-        LOGE("slider create error, info is non-valid");
         SliderModel::GetInstance()->Create(
             static_cast<float>(value), static_cast<float>(step), static_cast<float>(min), static_cast<float>(max));
         return;
@@ -206,7 +205,6 @@ void JSSlider::Create(const JSCallbackInfo& info)
 void JSSlider::SetThickness(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have at least 1 arguments");
         return;
     }
     CalcDimension value;
@@ -219,7 +217,6 @@ void JSSlider::SetThickness(const JSCallbackInfo& info)
 void JSSlider::SetBlockColor(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have at least 1 arguments");
         return;
     }
     Color colorVal;
@@ -234,7 +231,6 @@ void JSSlider::SetBlockColor(const JSCallbackInfo& info)
 void JSSlider::SetTrackColor(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have atleast 1 arguments");
         return;
     }
     Color colorVal;
@@ -249,7 +245,6 @@ void JSSlider::SetTrackColor(const JSCallbackInfo& info)
 void JSSlider::SetSelectedColor(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have atleast 1 arguments");
         return;
     }
     Color colorVal;
@@ -263,13 +258,7 @@ void JSSlider::SetSelectedColor(const JSCallbackInfo& info)
 
 void JSSlider::SetMinLabel(const JSCallbackInfo& info)
 {
-    if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have at least 1 arguments");
-        return;
-    }
-
     if (!info[0]->IsString()) {
-        LOGE("arg is not string.");
         return;
     }
     SliderModel::GetInstance()->SetMinLabel(info[0]->ToNumber<float>());
@@ -277,13 +266,7 @@ void JSSlider::SetMinLabel(const JSCallbackInfo& info)
 
 void JSSlider::SetMaxLabel(const JSCallbackInfo& info)
 {
-    if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have at least 1 arguments");
-        return;
-    }
-
     if (!info[0]->IsString()) {
-        LOGE("arg is not string.");
         return;
     }
     SliderModel::GetInstance()->SetMaxLabel(info[0]->ToNumber<float>());
@@ -292,7 +275,6 @@ void JSSlider::SetMaxLabel(const JSCallbackInfo& info)
 void JSSlider::SetShowSteps(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have at least 1 arguments");
         return;
     }
     bool showSteps = false;
@@ -305,7 +287,6 @@ void JSSlider::SetShowSteps(const JSCallbackInfo& info)
 void JSSlider::SetShowTips(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have at least 1 arguments");
         return;
     }
     bool showTips = false;
@@ -327,7 +308,6 @@ void JSSlider::SetShowTips(const JSCallbackInfo& info)
 void JSSlider::SetBlockBorderColor(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGW("The arg is wrong, it is supposed to have at least 1 arguments");
         return;
     }
 
@@ -342,7 +322,6 @@ void JSSlider::SetBlockBorderColor(const JSCallbackInfo& info)
 void JSSlider::SetBlockBorderWidth(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGW("The arg is wrong, it is supposed to have at least 1 arguments");
         return;
     }
 
@@ -361,7 +340,6 @@ void JSSlider::SetBlockBorderWidth(const JSCallbackInfo& info)
 void JSSlider::SetStepColor(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGW("The arg is wrong, it is supposed to have at least 1 arguments");
         return;
     }
 
@@ -376,7 +354,6 @@ void JSSlider::SetStepColor(const JSCallbackInfo& info)
 void JSSlider::SetTrackBorderRadius(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGW("The arg is wrong, it is supposed to have at least 1 arguments");
         return;
     }
 
@@ -395,7 +372,6 @@ void JSSlider::SetTrackBorderRadius(const JSCallbackInfo& info)
 void JSSlider::SetBlockSize(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGW("The arg is wrong, it is supposed to have at least 1 arguments");
         return;
     }
     if (!info[0]->IsObject()) {
@@ -427,20 +403,13 @@ void JSSlider::SetBlockSize(const JSCallbackInfo& info)
 
 void JSSlider::SetBlockStyle(const JSCallbackInfo& info)
 {
-    if (info.Length() < 1) {
-        LOGW("The arg is wrong, it is supposed to have at least 1 arguments");
-        return;
-    }
-
     if (!info[0]->IsObject()) {
-        LOGW("arg is not object.");
         ResetBlockStyle();
         return;
     }
     auto jsObj = JSRef<JSObject>::Cast(info[0]);
     auto getType = jsObj->GetProperty("type");
     if (getType->IsNull() || !getType->IsNumber()) {
-        LOGW("block type is not number.");
         ResetBlockStyle();
         return;
     }
@@ -459,13 +428,11 @@ void JSSlider::SetBlockStyle(const JSCallbackInfo& info)
     } else if (type == SliderModel::BlockStyleType::SHAPE) {
         auto shape = jsObj->GetProperty("shape");
         if (!shape->IsObject()) {
-            LOGW("shape param is not an object.");
             ResetBlockStyle();
             return;
         }
         JSShapeAbstract* shapeAbstract = JSRef<JSObject>::Cast(shape)->Unwrap<JSShapeAbstract>();
         if (shapeAbstract == nullptr) {
-            LOGW("clipShape is null");
             ResetBlockStyle();
             return;
         }
@@ -477,7 +444,6 @@ void JSSlider::SetBlockStyle(const JSCallbackInfo& info)
 void JSSlider::SetStepSize(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGW("The arg is wrong, it is supposed to have at least 1 arguments");
         return;
     }
 
@@ -496,12 +462,7 @@ void JSSlider::SetStepSize(const JSCallbackInfo& info)
 
 void JSSlider::OnChange(const JSCallbackInfo& info)
 {
-    if (info.Length() < 1) {
-        LOGW("Must contain at least 1 argument");
-        return;
-    }
     if (!info[0]->IsFunction()) {
-        LOGW("Argument is not a function object");
         return;
     }
     SliderModel::GetInstance()->SetOnChange(

@@ -68,7 +68,6 @@ public:
         auto textPickerPaintMethod = MakeRefPtr<TextPickerPaintMethod>(WeakClaim(this));
         textPickerPaintMethod->SetDefaultPickerItemHeight(CalculateHeight());
         textPickerPaintMethod->SetEnabled(enabled_);
-        textPickerPaintMethod->SetBackgroundColor(backgroundColor_);
         return textPickerPaintMethod;
     }
 
@@ -106,7 +105,6 @@ public:
     void SetRange(const std::vector<NG::RangeContent>& value)
     {
         if (value.empty()) {
-            LOGE("input value of range is empty.");
             return;
         }
         range_.clear();
@@ -148,7 +146,6 @@ public:
     std::string GetOption(uint32_t index) const
     {
         if (index >= GetOptionCount()) {
-            LOGE("index out of range.");
             return "";
         }
         return options_[index].text_;
@@ -163,6 +160,11 @@ public:
         CHECK_NULL_VOID(host);
         backgroundColor_ = color;
         host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    }
+
+    Color GetBackgroundColor()
+    {
+        return backgroundColor_;
     }
 
     FocusPattern GetFocusPattern() const override
@@ -272,6 +274,11 @@ public:
     bool GetIsShowInDialog() const
     {
         return isShowInDialog_;
+    }
+
+    double GetDefaultPickerItemHeight() const
+    {
+        return defaultPickerItemHeight_;
     }
 
     void SetSelecteds(const std::vector<uint32_t>& values);

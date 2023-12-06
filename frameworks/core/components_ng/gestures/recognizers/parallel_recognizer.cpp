@@ -29,7 +29,7 @@ void ParallelRecognizer::OnAccepted()
 {
     refereeState_ = RefereeState::SUCCEED;
     if (currentBatchRecognizer_) {
-        currentBatchRecognizer_->OnAccepted();
+        currentBatchRecognizer_->AboutToAccept();
         currentBatchRecognizer_.Reset();
     }
 }
@@ -40,9 +40,6 @@ void ParallelRecognizer::OnRejected()
     for (const auto& recognizer : recognizers_) {
         if (!recognizer) {
             continue;
-        }
-        if (recognizer->GetRefereeState() == RefereeState::FAIL) {
-            LOGE("the %{public}s gesture recognizer already failed", AceType::TypeName(recognizer));
         }
         if (AceType::InstanceOf<RecognizerGroup>(recognizer)) {
             auto group = AceType::DynamicCast<RecognizerGroup>(recognizer);
@@ -56,7 +53,6 @@ void ParallelRecognizer::OnRejected()
 void ParallelRecognizer::OnPending()
 {
     refereeState_ = RefereeState::PENDING;
-    LOGD("the parallel gesture recognizer is pending!");
     if (currentBatchRecognizer_) {
         currentBatchRecognizer_->OnPending();
         currentBatchRecognizer_.Reset();
@@ -90,9 +86,10 @@ bool ParallelRecognizer::HandleEvent(const TouchEvent& point)
     auto size = recognizers_.size();
     for (const auto& recognizer : recognizers_) {
         if (recognizer && recognizer->CheckTouchId(point.id)) {
+            auto saveRecognizer = recognizer;
             recognizer->HandleEvent(point);
+            AddGestureProcedure(point, saveRecognizer);
             if (recognizers_.size() < size) {
-                LOGD("remove recognizer while handle event!");
                 break;
             }
         }
@@ -122,14 +119,11 @@ void ParallelRecognizer::BatchAdjudicate(const RefPtr<NGGestureRecognizer>& reco
         }
 
         if (refereeState_ == RefereeState::SUCCEED) {
-            LOGD("the sub gesture recognizer %{public}s is accepted because referee succeed",
-                AceType::TypeName(recognizer));
-            recognizer->OnAccepted();
+            recognizer->AboutToAccept();
         } else if ((refereeState_ == RefereeState::PENDING_BLOCKED) ||
                    (refereeState_ == RefereeState::SUCCEED_BLOCKED)) {
             recognizer->OnBlocked();
         } else {
-            LOGD("the sub gesture recognizer %{public}s ask for accept", AceType::TypeName(recognizer));
             currentBatchRecognizer_ = recognizer;
             GroupAdjudicate(AceType::Claim(this), GestureDisposal::ACCEPT);
         }
@@ -151,14 +145,11 @@ void ParallelRecognizer::BatchAdjudicate(const RefPtr<NGGestureRecognizer>& reco
         }
 
         if ((refereeState_ == RefereeState::SUCCEED) || (refereeState_ == RefereeState::PENDING)) {
-            LOGD("the sub gesture recognizer %{public}s is pending because referee is in current state",
-                AceType::TypeName(recognizer));
             recognizer->OnPending();
         } else if ((refereeState_ == RefereeState::PENDING_BLOCKED) ||
                    (refereeState_ == RefereeState::SUCCEED_BLOCKED)) {
             recognizer->OnBlocked();
         } else {
-            LOGD("the sub gesture recognizer %{public}s ask for pending", AceType::TypeName(recognizer));
             currentBatchRecognizer_ = recognizer;
             GroupAdjudicate(AceType::Claim(this), GestureDisposal::PENDING);
         }

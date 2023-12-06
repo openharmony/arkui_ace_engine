@@ -28,7 +28,7 @@ common_mock_files = [
   "$ace_root/frameworks/core/components/test/unittest/mock/overlay_mock.cpp",
   "$ace_root/frameworks/core/components/test/unittest/mock/semi_modal_mock.cpp",
   "$ace_root/frameworks/core/components/test/unittest/mock/event_report_mock.cpp",
-  "$ace_root/frameworks/core/common/test/mock/mock_watch_dog.cpp",
+  "$ace_root/test/mock/core/common/mock_watch_dog.cpp",
   "transition_test_utils.cpp",
 ]
 
@@ -195,7 +195,7 @@ common_module_files = [
   "$ace_root/frameworks/core/components/common/properties/scroll_bar.cpp",
   "$ace_root/frameworks/core/components/common/properties/shadow.cpp",
   "$ace_root/frameworks/core/components/common/properties/text_style.cpp",
-  "$ace_root/frameworks/core/common/test/mock/mock_ace_application_info.cpp",
+  "$ace_root/test/mock/core/common/mock_ace_application_info.cpp",
 
   # add secure c API
   "//third_party/bounds_checking_function/src/strcpy_s.c",
@@ -249,7 +249,7 @@ ohos_unittest("TransitionElementTest") {
     external_deps = [
       "hilog:libhilog",
       "hitrace:hitrace_meter",
-      "init_lite:libbegetutil",
+      "init:libbegetutil",
     ]
   }
   external_deps += [ "c_utils:utils" ]
@@ -306,7 +306,7 @@ ohos_unittest("SharedTransitionElementTest") {
     external_deps = [
       "hilog:libhilog",
       "hitrace:hitrace_meter",
-      "init_lite:libbegetutil",
+      "init:libbegetutil",
     ]
   }
   external_deps += [ "c_utils:utils" ]
@@ -366,7 +366,7 @@ ohos_unittest("TransitionPropertyElementTest") {
     external_deps = [
       "hilog:libhilog",
       "hitrace:hitrace_meter",
-      "init_lite:libbegetutil",
+      "init:libbegetutil",
     ]
   }
   external_deps += [ "c_utils:utils" ]

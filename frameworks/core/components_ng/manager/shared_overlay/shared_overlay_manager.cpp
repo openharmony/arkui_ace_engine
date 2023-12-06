@@ -34,7 +34,6 @@ RefPtr<SharedTransitionEffect> GetSharedEffect(
     auto dest = destWeak.Upgrade();
     auto src = srcWeak.Upgrade();
     if ((!src) && (!dest)) {
-        LOGW("No Shared element found. share id: %{public}s", shareId.c_str());
         return nullptr;
     }
     std::shared_ptr<SharedTransitionOption> options;
@@ -66,7 +65,8 @@ RefPtr<FrameNode> CreateBlankFrameNode(const RefPtr<FrameNode>& node)
     // set size so the node will keep its size
     newNode->GetLayoutProperty()->UpdateUserDefinedIdealSize(
         CalcSize(CalcLength(frameSize.Width()), CalcLength(frameSize.Height())));
-    LOGD("create new node, tag:%{public}s, id:%{public}d, frameSize:%{public}s, pre node globalOffset:%{public}s",
+    TAG_LOGD(AceLogTag::ACE_ANIMATION,
+        "create blank node, tag:%{public}s, id:%{public}d, frameSize:%{public}s, pre node globalOffset:%{public}s",
         node->GetTag().c_str(), nodeId, newNode->GetGeometryNode()->GetFrameSize().ToString().c_str(),
         node->GetOffsetRelativeToWindow().ToString().c_str());
     return newNode;
@@ -98,8 +98,8 @@ void SharedOverlayManager::StartSharedTransition(const RefPtr<FrameNode>& pageSr
     for (const auto& effect : effects_) {
         auto controller = effect->GetController();
         if (controller) {
-            LOGI("effect start, shareId = %{public}s, id = %{public}d", effect->GetShareId().c_str(),
-                effect->GetController()->GetId());
+            TAG_LOGI(AceLogTag::ACE_ANIMATION, "Animation effect start, shareId = %{public}s, id = %{public}d",
+                effect->GetShareId().c_str(), effect->GetController()->GetId());
             controller->SetFillMode(FillMode::FORWARDS);
             controller->SetAllowRunningAsynchronously(true);
             controller->AttachScheduler(pipeline);
@@ -157,8 +157,10 @@ void SharedOverlayManager::PrepareSharedTransition(const RefPtr<FrameNode>& page
         effect->SetSharedNode(sourceWeak, nullptr);
         anchorEffects.emplace_back(effect);
     }
-
-    LOGD("effectSize:%{public}zu, anchorEffectSize:%{public}zu, srcMap size:%{public}zu, destMap size:%{public}zu",
+    TAG_LOGI(AceLogTag::ACE_ANIMATION,
+        "Animation prepare transition, effectSize:%{public}zu, anchorEffectSize:%{public}zu, srcMap "
+        "size:%{public}zu, "
+        "destMap size:%{public}zu",
         effects.size(), anchorEffects.size(), srcMap.size(), destMap.size());
     // prepare each sharedTransition effect
     CheckAndPrepareTransition(effects, effects_);
@@ -166,7 +168,6 @@ void SharedOverlayManager::PrepareSharedTransition(const RefPtr<FrameNode>& page
     if (!effects_.empty()) {
         sharedManager_->RebuildRenderContextTree();
     }
-    LOGD("effective effects size:%{public}zu", effects_.size());
 }
 
 void SharedOverlayManager::CheckAndPrepareTransition(
@@ -175,15 +176,17 @@ void SharedOverlayManager::CheckAndPrepareTransition(
     for (auto& effect : effects) {
         const auto& shareId = effect->GetShareId();
         if (!effect->Allow()) {
-            LOGW("Shared transition not allowed, share id: %{public}s", shareId.c_str());
+            TAG_LOGI(AceLogTag::ACE_ANIMATION, "Shared transition not allowed, share id: %{public}s", shareId.c_str());
             continue;
         }
         if (!PrepareEachTransition(effect)) {
-            LOGW("Prepare shared transition failed. share id: %{public}s", shareId.c_str());
+            TAG_LOGI(
+                AceLogTag::ACE_ANIMATION, "Prepare shared transition failed. share id: %{public}s", shareId.c_str());
             continue;
         }
         if (!CheckIn(effect)) {
-            LOGW("CheckIn shared transition failed. share id: %{public}s", shareId.c_str());
+            TAG_LOGI(
+                AceLogTag::ACE_ANIMATION, "CheckIn shared transition failed. share id: %{public}s", shareId.c_str());
             continue;
         }
         effectiveEffects.emplace_back(effect);
@@ -193,14 +196,11 @@ void SharedOverlayManager::CheckAndPrepareTransition(
 bool SharedOverlayManager::PrepareEachTransition(const RefPtr<SharedTransitionEffect>& effect)
 {
     if (!effect->CreateAnimation()) {
-        LOGW("Create animation failed. share id: %{public}s", effect->GetShareId().c_str());
         return false;
     }
     if (!effect->ApplyAnimation()) {
-        LOGW("Apply animation failed. share id: %{public}s", effect->GetShareId().c_str());
         return false;
     }
-    LOGD("Prepare Shared Transition. share id: %{public}s", effect->GetShareId().c_str());
     return true;
 }
 
@@ -217,7 +217,6 @@ bool SharedOverlayManager::CheckIn(const RefPtr<SharedTransitionEffect>& effect)
 {
     // Check-in
     if (!AboardShuttle(effect)) {
-        LOGW("Check In failed. aboard shuttle failed. share id: %{public}s.", effect->GetShareId().c_str());
         return false;
     }
     const auto& controller = effect->GetController();
@@ -238,7 +237,10 @@ void SharedOverlayManager::PassengerAboard(
     auto ticket = passenger->GetPaintRectOffsetToPage();
     // Get offset relative to stage(or overlay), for safeArea
     ticket += pageOffset_;
-    LOGI("passenger offset is %{public}s, id = %{public}s", ticket.ToString().c_str(), effect->GetShareId().c_str());
+    if (SystemProperties::GetDebugEnabled()) {
+        TAG_LOGI(AceLogTag::ACE_ANIMATION, "Transition passenger offset is %{public}s, id = %{public}s",
+            ticket.ToString().c_str(), effect->GetShareId().c_str());
+    }
     auto initialPosition = passenger->GetRenderContext()->GetPosition();
     // save initialFrameOffset for static type sharedTransition
     auto initialFrameOffset = passenger->GetGeometryNode()->GetFrameOffset();
@@ -275,14 +277,12 @@ bool SharedOverlayManager::AboardShuttle(const RefPtr<SharedTransitionEffect>& e
 {
     auto passenger = effect->GetPassengerNode().Upgrade();
     if (!passenger) {
-        LOGW("passenger is null, shareId = %{public}s", effect->GetShareId().c_str());
         return false;
     }
     if (effect->GetType() == SharedTransitionEffectType::SHARED_EFFECT_EXCHANGE) {
         // passenger is src
         auto dest = effect->GetDestSharedNode().Upgrade();
         if (!dest) {
-            LOGW("dest is null, shareId = %{public}s", effect->GetShareId().c_str());
             return false;
         }
         PassengerAboard(effect, passenger);
@@ -299,16 +299,15 @@ bool SharedOverlayManager::AboardShuttle(const RefPtr<SharedTransitionEffect>& e
 void SharedOverlayManager::GetOffShuttle(const RefPtr<SharedTransitionEffect>& effect)
 {
     CHECK_NULL_VOID(effect);
-    LOGI("get off shuttle. id: %{public}s", effect->GetShareId().c_str());
+    TAG_LOGI(AceLogTag::ACE_ANIMATION, "Animation off shuttle, id: %{public}s", effect->GetShareId().c_str());
     auto passenger = effect->GetPassengerNode().Upgrade();
     CHECK_NULL_VOID(passenger);
     sharedManager_->RemoveChild(passenger);
     sharedManager_->RebuildRenderContextTree();
     auto passengerHolder = effect->GetPassengerHolder().Upgrade();
-    if (!passengerHolder) {
-        LOGD("passenger holder is null, maybe not need to place passenger back");
-    } else {
+    if (passengerHolder) {
         // restore the position and zIndex of passenger frameNode
+        passenger->GetGeometryNode()->SetFrameOffset(effect->GetPassengerInitFrameOffset());
         if (effect->GetPassengerInitPos().has_value()) {
             passenger->GetRenderContext()->UpdatePosition(effect->GetPassengerInitPos().value());
         } else {
@@ -326,7 +325,6 @@ void SharedOverlayManager::GetOffShuttle(const RefPtr<SharedTransitionEffect>& e
             passenger->MarkDirtyNode();
         }
         // restore initialFrameOffset for static type sharedTransition, because it may not layout again
-        passenger->GetGeometryNode()->SetFrameOffset(effect->GetPassengerInitFrameOffset());
         ReplaceFrameNode(passengerHolder, passenger);
         passenger->GetEventHub<EventHub>()->RestoreEnabled();
         auto isPassengerCurrentFocused = effect->GetPassengerCurrentFocused();

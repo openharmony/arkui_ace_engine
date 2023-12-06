@@ -29,6 +29,7 @@ void CounterModelNG::Create()
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
+    ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::COUNTER_ETS_TAG, nodeId);
     auto counterNode = CounterNode::GetOrCreateCounterNode(
         V2::COUNTER_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<CounterPattern>(); });
     auto counterPattern = counterNode->GetPattern<CounterPattern>();
@@ -39,7 +40,6 @@ void CounterModelNG::Create()
     CHECK_NULL_VOID(counterTheme);
     counterNode->GetLayoutProperty()->UpdateUserDefinedIdealSize(
         CalcSize(CalcLength(counterTheme->GetWidth()), CalcLength(counterTheme->GetHeight())));
-    counterNode->GetRenderContext()->UpdateBackgroundColor(Color::WHITE);
     counterNode->GetRenderContext()->SetClipToFrame(true);
     counterNode->GetLayoutProperty<LinearLayoutProperty>()->UpdateMainAxisAlign(FlexAlign::CENTER);
 
@@ -93,7 +93,6 @@ RefPtr<FrameNode> CounterModelNG::CreateButtonChild(
         []() { return AceType::MakeRefPtr<TextPattern>(); });
     textNode->GetRenderContext()->UpdateBackgroundColor(Color::TRANSPARENT);
     textNode->GetLayoutProperty<TextLayoutProperty>()->UpdateContent(symbol);
-    textNode->GetLayoutProperty<TextLayoutProperty>()->UpdateTextColor(Color::BLACK);
     textNode->GetLayoutProperty<TextLayoutProperty>()->UpdateTextAlign(TextAlign::CENTER);
     textNode->GetLayoutProperty()->UpdateUserDefinedIdealSize(
         CalcSize(CalcLength(counterTheme->GetControlWidth()), CalcLength(counterTheme->GetHeight())));
@@ -229,7 +228,7 @@ void CounterModelNG::SetHeight(const Dimension& value)
 
 void CounterModelNG::SetWidth(const Dimension& value)
 {
-    auto frameNode = ViewStackProcessor ::GetInstance()->GetMainFrameNode();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto layoutProperty = frameNode->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);
@@ -238,12 +237,12 @@ void CounterModelNG::SetWidth(const Dimension& value)
 
 void CounterModelNG::SetControlWidth(const Dimension& value)
 {
-    LOGE("no support SetControlWidth");
+    TAG_LOGD(AceLogTag::ACE_COUNTER, "Counter is not support SetControlWidth");
 }
 
 void CounterModelNG::SetStateChange(bool value)
 {
-    LOGE("no support SetStateChange");
+    TAG_LOGD(AceLogTag::ACE_COUNTER, "Counter is not support SetStateChange");
 }
 
 void CounterModelNG::SetBackgroundColor(const Color& value)
@@ -251,4 +250,43 @@ void CounterModelNG::SetBackgroundColor(const Color& value)
     ACE_UPDATE_RENDER_CONTEXT(BackgroundColor, value);
 }
 
+void CounterModelNG::SetEnableDec(FrameNode* frameNode, bool enableDec)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto subId = frameNode->GetPattern<CounterPattern>()->GetSubId();
+    auto subNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(frameNode->GetChildIndexById(subId)));
+    CHECK_NULL_VOID(subNode);
+    auto eventHub = subNode->GetEventHub<ButtonEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetEnabled(enableDec);
+    if (!eventHub->IsEnabled()) {
+        auto pipeline = PipelineBase::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
+        auto counterTheme = pipeline->GetTheme<CounterTheme>();
+        CHECK_NULL_VOID(counterTheme);
+        subNode->GetRenderContext()->UpdateOpacity(counterTheme->GetAlphaDisabled());
+    } else {
+        subNode->GetRenderContext()->UpdateOpacity(1.0);
+    }
+}
+
+void CounterModelNG::SetEnableInc(FrameNode* frameNode, bool enableInc)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto addId = frameNode->GetPattern<CounterPattern>()->GetAddId();
+    auto addNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(frameNode->GetChildIndexById(addId)));
+    CHECK_NULL_VOID(addNode);
+    auto eventHub = addNode->GetEventHub<ButtonEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetEnabled(enableInc);
+    if (!eventHub->IsEnabled()) {
+        auto pipeline = PipelineBase::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
+        auto counterTheme = pipeline->GetTheme<CounterTheme>();
+        CHECK_NULL_VOID(counterTheme);
+        addNode->GetRenderContext()->UpdateOpacity(counterTheme->GetAlphaDisabled());
+    } else {
+        addNode->GetRenderContext()->UpdateOpacity(1.0);
+    }
+}
 } // namespace OHOS::Ace::NG

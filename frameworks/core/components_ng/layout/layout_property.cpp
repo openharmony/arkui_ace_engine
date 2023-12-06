@@ -91,6 +91,7 @@ void LayoutProperty::Reset()
     padding_.reset();
     margin_.reset();
     borderWidth_.reset();
+    outerBorderWidth_.reset();
     magicItemProperty_.reset();
     positionProperty_.reset();
     measureType_.reset();
@@ -632,7 +633,7 @@ void LayoutProperty::UpdateGeometryTransition(const std::string& id, bool follow
 
     auto geometryTransitionOld = GetGeometryTransition();
     auto geometryTransitionNew =
-        ElementRegister::GetInstance()->GetOrCreateGeometryTransition(id, host_, followWithoutTransition);
+        ElementRegister::GetInstance()->GetOrCreateGeometryTransition(id, followWithoutTransition);
     CHECK_NULL_VOID(geometryTransitionOld != geometryTransitionNew);
     if (geometryTransitionOld) {
         geometryTransitionOld->OnFollowWithoutTransition();
@@ -647,9 +648,11 @@ void LayoutProperty::UpdateGeometryTransition(const std::string& id, bool follow
     }
     geometryTransition_ = geometryTransitionNew;
 
-    LOGI("GeometryTransition: node: %{public}d update id, old id: %{public}s, new id: %{public}s", host->GetId(),
-        geometryTransitionOld ? geometryTransitionOld->GetId().c_str() : "empty",
-        geometryTransitionNew ? id.c_str() : "empty");
+    if (SystemProperties::GetDebugEnabled()) {
+        LOGI("GeometryTransition: node: %{public}d update id, old id: %{public}s, new id: %{public}s", host->GetId(),
+            geometryTransitionOld ? geometryTransitionOld->GetId().c_str() : "empty",
+            geometryTransitionNew ? id.c_str() : "empty");
+    }
     ElementRegister::GetInstance()->DumpGeometryTransition();
     propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_LAYOUT | PROPERTY_UPDATE_MEASURE;
 }
@@ -679,6 +682,16 @@ void LayoutProperty::UpdateBorderWidth(const BorderWidthProperty& value)
         borderWidth_ = std::make_unique<BorderWidthProperty>();
     }
     if (borderWidth_->UpdateWithCheck(value)) {
+        propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_LAYOUT | PROPERTY_UPDATE_MEASURE;
+    }
+}
+
+void LayoutProperty::UpdateOuterBorderWidth(const BorderWidthProperty& value)
+{
+    if (!outerBorderWidth_) {
+        outerBorderWidth_ = std::make_unique<BorderWidthProperty>();
+    }
+    if (outerBorderWidth_->UpdateWithCheck(value)) {
         propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_LAYOUT | PROPERTY_UPDATE_MEASURE;
     }
 }
@@ -902,6 +915,16 @@ void LayoutProperty::UpdateAlignRules(const std::map<AlignDirection, AlignRule>&
     }
 }
 
+void LayoutProperty::UpdateBias(const BiasPair& biasPair)
+{
+    if (!flexItemProperty_) {
+        flexItemProperty_ = std::make_unique<FlexItemProperty>();
+    }
+    if (flexItemProperty_->UpdateBias(biasPair)) {
+        propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_MEASURE;
+    }
+}
+
 void LayoutProperty::UpdateDisplayIndex(int32_t displayIndex)
 {
     if (!flexItemProperty_) {
@@ -931,7 +954,6 @@ void LayoutProperty::UpdateVisibility(const VisibleType& value, bool allowTransi
 {
     if (propVisibility_.has_value()) {
         if (NearEqual(propVisibility_.value(), value)) {
-            LOGD("the Visibility is same, just ignore");
             return;
         }
     }

@@ -145,12 +145,6 @@ bool ElementRegister::RemoveItem(ElementIdType elementId, const std::string& tag
     }
     auto removed = itemMap_.erase(elementId);
     if (removed) {
-        auto iter = deletedCachedItems_.find(elementId);
-        if (iter != deletedCachedItems_.end()) {
-            LOGD("ElmtId %{public}d has already deleted by custom node", elementId);
-            deletedCachedItems_.erase(iter);
-            return true;
-        }
         LOGD("ElmtId %{public}d successfully removed from registry, added to list of removed Elements.", elementId);
         removedItems_.insert(std::pair(elementId, tag));
         LOGD("Size of removedItems_ removedItems_ %{public}d", static_cast<int32_t>(removedItems_.size()));
@@ -180,7 +174,7 @@ void ElementRegister::MoveRemovedItems(RemovedElementsType& removedItems)
 {
     LOGD("MoveRemovedItems return set of %{public}d elmtIds", static_cast<int32_t>(removedItems_.size()));
     removedItems = removedItems_;
-    removedItems_ = std::unordered_set<std::pair<ElementIdType, std::string>, deleted_element_hash>();
+    removedItems_.clear();
 }
 
 void ElementRegister::Clear()
@@ -192,17 +186,15 @@ void ElementRegister::Clear()
     pendingRemoveNodes_.clear();
 }
 
-RefPtr<NG::GeometryTransition> ElementRegister::GetOrCreateGeometryTransition(const std::string& id,
-                                                                              const WeakPtr<NG::FrameNode>& frameNode,
-                                                                              bool followWithoutTransition)
+RefPtr<NG::GeometryTransition> ElementRegister::GetOrCreateGeometryTransition(
+    const std::string& id, bool followWithoutTransition)
 {
     if (id.empty()) {
         return nullptr;
     }
-    CHECK_NULL_RETURN(frameNode.Upgrade(), nullptr);
     RefPtr<NG::GeometryTransition> geometryTransition;
     if (geometryTransitionMap_.find(id) == geometryTransitionMap_.end()) {
-        geometryTransition = AceType::MakeRefPtr<NG::GeometryTransition>(id, frameNode, followWithoutTransition);
+        geometryTransition = AceType::MakeRefPtr<NG::GeometryTransition>(id, followWithoutTransition);
         geometryTransitionMap_.emplace(id, geometryTransition);
     } else {
         geometryTransition = geometryTransitionMap_[id];
@@ -218,7 +210,10 @@ void ElementRegister::DumpGeometryTransition()
         if (!item || item->IsInAndOutEmpty()) {
             iter = geometryTransitionMap_.erase(iter);
         } else {
-            LOGI("GeometryTransition map item: id: %{public}s, %{public}s", itemId.c_str(), item->ToString().c_str());
+            if (SystemProperties::GetDebugEnabled()) {
+                LOGI("GeometryTransition map item: id: %{public}s, %{public}s", itemId.c_str(),
+                    item->ToString().c_str());
+            }
             iter++;
         }
     }
@@ -242,8 +237,6 @@ void ElementRegister::ClearPendingRemoveNodes()
 {
     LOGD("ElementRegister::ClearPendingRemoveNodes()");
     pendingRemoveNodes_.clear();
-    CallJSUINodeRegisterCallbackFunc();
-    CallJSUINodeRegisterGlobalFunc();
 }
 
 } // namespace OHOS::Ace

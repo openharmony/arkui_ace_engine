@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,7 +22,6 @@ namespace OHOS::Ace::NG {
 namespace {
 V2::ItemDivider ItemDividerFromJson(const std::unique_ptr<JsonValue>& json)
 {
-    LOGD("UITree json=%{public}s", json->ToString().c_str());
     V2::ItemDivider divider;
     divider.strokeWidth = Dimension::FromString(json->GetString("strokeWidth"));
     divider.startMargin = Dimension::FromString(json->GetString("startMargin"));
@@ -54,14 +53,6 @@ void ListLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
     } else {
         auto divider = JsonUtil::Create(true);
         json->Put("divider", divider);
-    }
-    auto edgeEffect = propEdgeEffect_.value_or(EdgeEffect::SPRING);
-    if (edgeEffect == EdgeEffect::SPRING) {
-        json->Put("edgeEffect", "EdgeEffect.Spring");
-    } else if (edgeEffect == EdgeEffect::FADE) {
-        json->Put("edgeEffect", "EdgeEffect.Fade");
-    } else {
-        json->Put("edgeEffect", "EdgeEffect.None");
     }
     json->Put("lanes", std::to_string(propLanes_.value_or(0)).c_str());
     json->Put("laneMinLength", propLaneMinLength_.value_or(Dimension(0, DimensionUnit::VP)).ToString().c_str());

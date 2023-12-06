@@ -59,6 +59,8 @@ public:
         bubbleMethod->SetChildOffset(childOffset_);
         bubbleMethod->SetChildSize(childSize_);
         bubbleMethod->SetShowArrow(showArrow_);
+        bubbleMethod->SetClipPath(clipPath_);
+        bubbleMethod->SetClipFrameNode(clipFrameNode_);
         return bubbleMethod;
     }
 
@@ -117,14 +119,9 @@ public:
         transitionStatus_ = transitionStatus;
     }
 
-    void SetSkipHotArea(bool skip)
+    TransitionStatus GetTransitionStatus() const
     {
-        skipHotArea_ = skip;
-    }
-
-    bool IsSkipHotArea() const
-    {
-        return skipHotArea_;
+        return transitionStatus_;
     }
 
 protected:
@@ -176,13 +173,15 @@ private:
     TransitionStatus transitionStatus_ = TransitionStatus::INVISIABLE;
 
     bool delayShow_ = false;
-    bool skipHotArea_ = false;
 
     std::optional<OffsetF> targetOffset_;
     std::optional<SizeF> targetSize_;
 
     bool isCustomPopup_ = false;
     RefPtr<FrameNode> messageNode_;
+
+    std::string clipPath_;
+    RefPtr<FrameNode> clipFrameNode_;
     ACE_DISALLOW_COPY_AND_MOVE(BubblePattern);
 };
 } // namespace OHOS::Ace::NG

@@ -46,14 +46,11 @@ source_set("qrcodegen") {
 
 build_component("qrcode") {
   sources = [
-    "flutter_render_qrcode.cpp",
     "qrcode_component.cpp",
     "render_qrcode.cpp",
     "render_qrcode_creator.cpp",
   ]
-  if (ace_use_new_skia) {
-    sources -= [ "flutter_render_qrcode.cpp" ]
-  }
+
   rosen_sources = [ "rosen_render_qrcode.cpp" ]
 
   deps = [ ":qrcodegen" ]

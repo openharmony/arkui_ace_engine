@@ -55,11 +55,9 @@ void JSNavRouter::Create(const JSCallbackInfo& info)
         }
         JSRef<JSVal> name = jsObj->GetProperty("name");
         if (name->IsEmpty()) {
-            LOGW("name is empty");
             return;
         }
         if (!name->IsString()) {
-            LOGW("name is not string");
             return;
         }
         JSRef<JSVal> param = jsObj->GetProperty("param");
@@ -78,15 +76,16 @@ void JSNavRouter::Create(const JSCallbackInfo& info)
 void JSNavRouter::SetOnStateChange(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGW("The arg is wrong, it is supposed to have at least one argument");
         return;
     }
     if (info[0]->IsFunction()) {
         auto onStateChangeCallback = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
-        auto onStateChange = [execCtx = info.GetExecutionContext(), func = std::move(onStateChangeCallback)](
-                                 bool isActivated) {
+        WeakPtr<NG::FrameNode> targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+        auto onStateChange = [execCtx = info.GetExecutionContext(), func = std::move(onStateChangeCallback),
+                                 node = targetNode](bool isActivated) {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             ACE_SCORING_EVENT("OnStateChange");
+            PipelineContext::SetCallBackNode(node);
             JSRef<JSVal> param = JSRef<JSVal>::Make(ToJSValue(isActivated));
             func->ExecuteJS(1, &param);
         };
@@ -104,8 +103,6 @@ void JSNavRouter::SetNavRouteMode(const JSCallbackInfo& info)
     auto value = info[0]->ToNumber<int32_t>();
     if (value >= 0 && value <= NAV_ROUTE_MODE_RANGE) {
         NavRouterModel::GetInstance()->SetNavRouteMode(value);
-    } else {
-        LOGW("invalid value for navRouteMode");
     }
 }
 

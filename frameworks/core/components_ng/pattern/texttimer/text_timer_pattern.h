@@ -70,6 +70,7 @@ public:
         }
         return textId_.value();
     }
+    void ResetCount();
 
 private:
     void OnAttachToFrameNode() override;
@@ -84,7 +85,6 @@ private:
     void HandleStart();
     void HandlePause();
     void HandleReset();
-
     uint64_t GetFormatDuration(uint64_t duration) const;
     uint64_t GetMillisecondsDuration(uint64_t duration) const;
 
@@ -106,6 +106,7 @@ private:
     double inputCount_ = 0.0;
     std::optional<int32_t> textId_;
     bool isRegisteredAreaCallback_ = false;
+    bool resetCount_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(TextTimerPattern);
 };

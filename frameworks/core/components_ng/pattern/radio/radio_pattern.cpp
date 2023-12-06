@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/radio/radio_pattern.h"
 
 #include "base/utils/utils.h"
+#include "core/common/recorder/node_data_cache.h"
 #include "core/components/checkable/checkable_theme.h"
 #include "core/components_ng/pattern/radio/radio_paint_property.h"
 #include "core/components_ng/pattern/stage/page_event_hub.h"
@@ -27,6 +28,7 @@ namespace OHOS::Ace::NG {
 
 namespace {
 constexpr int FOR_HOTZONESIZE_CALCULATE_MULTIPLY_TWO = 2;
+const Color ITEM_FILL_COLOR = Color::TRANSPARENT;
 } // namespace
 
 void RadioPattern::OnAttachToFrameNode()
@@ -93,6 +95,69 @@ void RadioPattern::OnModifyDone()
     auto focusHub = host->GetFocusHub();
     CHECK_NULL_VOID(focusHub);
     InitOnKeyEvent(focusHub);
+    SetAccessibilityAction();
+}
+
+void RadioPattern::SetAccessibilityAction()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto accessibilityProperty = host->GetAccessibilityProperty<AccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
+    accessibilityProperty->SetActionSelect([weakPtr = WeakClaim(this)]() {
+        const auto& pattern = weakPtr.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->UpdateSelectStatus(true);
+    });
+
+    accessibilityProperty->SetActionClearSelection([weakPtr = WeakClaim(this)]() {
+        const auto& pattern = weakPtr.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->UpdateSelectStatus(false);
+    });
+}
+
+void RadioPattern::UpdateSelectStatus(bool isSelected)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto context = host->GetRenderContext();
+    CHECK_NULL_VOID(context);
+    MarkIsSelected(isSelected);
+    context->OnMouseSelectUpdate(isSelected, ITEM_FILL_COLOR, ITEM_FILL_COLOR);
+}
+
+void RadioPattern::MarkIsSelected(bool isSelected)
+{
+    if (preCheck_ == isSelected) {
+        return;
+    }
+    preCheck_ = isSelected;
+    auto eventHub = GetEventHub<RadioEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->UpdateChangeEvent(isSelected);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    if (isSelected) {
+        eventHub->UpdateCurrentUIState(UI_STATE_SELECTED);
+        host->OnAccessibilityEvent(AccessibilityEventType::SELECTED);
+    } else {
+        eventHub->ResetCurrentUIState(UI_STATE_SELECTED);
+        host->OnAccessibilityEvent(AccessibilityEventType::CHANGE);
+    }
+}
+
+void RadioPattern::OnAfterModifyDone()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto inspectorId = host->GetInspectorId().value_or("");
+    if (inspectorId.empty()) {
+        return;
+    }
+    auto eventHub = host->GetEventHub<RadioEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    Recorder::NodeDataCache::Get().PutMultiple(inspectorId, eventHub->GetValue(), preCheck_);
 }
 
 void RadioPattern::InitClickEvent()

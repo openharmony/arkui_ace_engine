@@ -21,11 +21,15 @@
 #include "base/utils/utils.h"
 #include "core/common/thread_checker.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/pattern/custom/custom_node.h"
 
 namespace OHOS::Ace::NG {
 uint64_t UITaskScheduler::frameId_ = 0;
 
-UITaskScheduler::~UITaskScheduler() = default;
+UITaskScheduler::~UITaskScheduler()
+{
+    persistAfterLayoutTasks_.clear();
+}
 
 void UITaskScheduler::AddDirtyLayoutNode(const RefPtr<FrameNode>& dirty)
 {
@@ -40,7 +44,7 @@ void UITaskScheduler::AddDirtyRenderNode(const RefPtr<FrameNode>& dirty)
     CHECK_NULL_VOID(dirty);
     auto result = dirtyRenderNodes_[dirty->GetPageId()].emplace(dirty);
     if (!result.second) {
-        LOGW("fail to emplace %{public}s render node", dirty->GetTag().c_str());
+        LOGW("Fail to emplace %{public}s render node", dirty->GetTag().c_str());
     }
 }
 
@@ -99,8 +103,6 @@ void UITaskScheduler::FlushRenderTask(bool forceUseMainThread)
                     if (frameInfo_ != nullptr) {
                         frameInfo_->AddTaskInfo(node->GetTag(), node->GetId(), time, FrameInfo::TaskType::RENDER);
                     }
-                } else {
-                    LOGW("need to use multithread feature");
                 }
             }
         }
@@ -142,8 +144,33 @@ void UITaskScheduler::FlushTask()
     if (!afterLayoutTasks_.empty()) {
         FlushAfterLayoutTask();
     }
+    FlushDelayJsActive();
     ElementRegister::GetInstance()->ClearPendingRemoveNodes();
     FlushRenderTask();
+}
+
+void UITaskScheduler::SetJSViewActive(bool active, WeakPtr<CustomNode> custom)
+{
+    auto iter = delayJsActiveNodes_.find(custom);
+    if (iter != delayJsActiveNodes_.end()) {
+        iter->second = active;
+    } else {
+        delayJsActiveNodes_.emplace(custom, active);
+    }
+}
+
+void UITaskScheduler::FlushDelayJsActive()
+{
+    auto nodes = std::move(delayJsActiveNodes_);
+    for (auto [node, active] : nodes) {
+        auto customNode = node.Upgrade();
+        if (customNode) {
+            if (customNode->GetJsActive() != active) {
+                customNode->SetJsActive(active);
+                customNode->FireSetActiveFunc(active);
+            }
+        }
+    }
 }
 
 void UITaskScheduler::AddPredictTask(PredictTask&& task)
@@ -177,10 +204,30 @@ void UITaskScheduler::AddAfterLayoutTask(std::function<void()>&& task)
     afterLayoutTasks_.emplace_back(std::move(task));
 }
 
+void UITaskScheduler::AddPersistAfterLayoutTask(std::function<void()>&& task)
+{
+    persistAfterLayoutTasks_.emplace_back(std::move(task));
+    LOGI("AddPersistAfterLayoutTask size: %{public}u", static_cast<uint32_t>(persistAfterLayoutTasks_.size()));
+}
+
 void UITaskScheduler::FlushAfterLayoutTask()
 {
     decltype(afterLayoutTasks_) tasks(std::move(afterLayoutTasks_));
     for (const auto& task : tasks) {
+        if (task) {
+            task();
+        }
+    }
+}
+
+void UITaskScheduler::FlushPersistAfterLayoutTask()
+{
+    // only execute after layout
+    if (persistAfterLayoutTasks_.empty()) {
+        return;
+    }
+    ACE_SCOPED_TRACE("UITaskScheduler::FlushPersistAfterLayoutTask");
+    for (const auto& task : persistAfterLayoutTasks_) {
         if (task) {
             task();
         }

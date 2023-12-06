@@ -16,7 +16,7 @@ import("//build/config/features.gni")
 import("//build/test.gni")
 import("//foundation/ability/ability_runtime/ability_runtime.gni")
 import("//foundation/arkui/ace_engine/ace_config.gni")
-module_output_path = "arkui/utilmost"
+module_output_path = "ace_engine/ace_engine/utilmost"
 
 ##############################fuzztest##########################################
 import("//foundation/arkui/ace_engine/ace_config.gni")
@@ -43,8 +43,9 @@ ohos_fuzztest("UtilMostFuzzTest") {
     "$ace_root/frameworks/core/animation/curves.cpp",
     "$ace_root/frameworks/core/animation/spring_curve.cpp",
     "$ace_root/frameworks/core/animation/spring_model.cpp",
+    "$ace_root/frameworks/core/common/container_scope.cpp",
     "$ace_root/frameworks/core/components/common/properties/clip_path.cpp",
-    "$ace_root/frameworks/core/pipeline_ng/test/mock/mock_pipeline_base.cpp",
+    "$ace_root/test/mock/core/pipeline/mock_pipeline_context.cpp",
     "//third_party/cJSON/cJSON.c",
     "utilmost_fuzzer.cpp",
   ]

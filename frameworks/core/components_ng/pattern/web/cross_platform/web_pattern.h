@@ -23,6 +23,7 @@
 #include "base/thread/cancelable_callback.h"
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
+#include "base/geometry/axis.h"
 #include "core/components/dialog/dialog_properties.h"
 #include "core/components/dialog/dialog_theme.h"
 #include "core/components/web/web_property.h"
@@ -35,10 +36,13 @@
 #include "core/components_ng/pattern/web/web_layout_algorithm.h"
 #include "core/components_ng/pattern/web/web_paint_property.h"
 #include "core/components_ng/pattern/web/web_pattern_property.h"
+#include "core/components_ng/pattern/web/web_paint_method.h"
 #include "core/components_ng/pattern/web/web_delegate_interface.h"
 #include "core/components_ng/property/property.h"
 #include "core/components_ng/manager/select_overlay/selection_host.h"
 #include "core/components_ng/render/render_surface.h"
+#include "core/components_ng/pattern/scrollable/nestable_scroll_container.h"
+#include "core/components_ng/pattern/scroll/scroll_pattern.h"
 
 #include "core/components_ng/pattern/web/web_delegate_interface.h"
 
@@ -75,8 +79,8 @@ public:
     using JsProxyCallback = std::function<void()>;
     using OnControllerAttachedCallback = std::function<void()>;
     WebPattern();
-    WebPattern(std::string webSrc, const RefPtr<WebController>& webController);
-    WebPattern(std::string webSrc, const SetWebIdCallback& setWebIdCallback);
+    WebPattern(std::string webSrc, const RefPtr<WebController>& webController, WebType type = WebType::SURFACE);
+    WebPattern(std::string webSrc, const SetWebIdCallback& setWebIdCallback, WebType type = WebType::SURFACE);
 
     ~WebPattern() override;
 
@@ -88,13 +92,21 @@ public:
 
     std::optional<RenderContext::ContextParam> GetContextParam() const override
     {
+        if (type_ == WebType::TEXTURE) {
+            return RenderContext::ContextParam { RenderContext::ContextType::CANVAS };
+        } else {
         return RenderContext::ContextParam { RenderContext::ContextType::SURFACE, "RosenWeb" };
+        }
     }
+
+    RefPtr<NodePaintMethod> CreateNodePaintMethod() override;
 
     bool IsAtomicNode() const override
     {
         return true;
     }
+
+    void UpdateScrollOffset(SizeF frameSize) override;
 
     RefPtr<EventHub> CreateEventHub() override
     {
@@ -180,6 +192,16 @@ public:
         return setWebIdCallback_;
     }
 
+    void SetWebType(WebType type)
+    {
+        type_ = type;
+    }
+
+    WebType GetWebType()
+    {
+        return type_;
+    }
+
     void SetOnControllerAttachedCallback(OnControllerAttachedCallback&& callback)
     {
         onControllerAttachedCallback_ = std::move(callback);
@@ -227,7 +249,6 @@ public:
         if (!webPaintProperty_) {
             webPaintProperty_ = MakeRefPtr<WebPaintProperty>();
             if (!webPaintProperty_) {
-                LOGE("MakeRefPtr failed return null");
             }
         }
         return webPaintProperty_;
@@ -247,6 +268,11 @@ public:
     {
         return 1;
     }
+
+    void SetNestedScroll(const NestedScrollOptions& nestedOpt);
+    /**
+     *  End of NestableScrollContainer implementations
+     */
 
     ACE_DEFINE_PROPERTY_GROUP(WebProperty, WebPatternProperty);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, JsEnabled, bool);
@@ -288,7 +314,8 @@ public:
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, HorizontalScrollBarAccessEnabled, bool);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, VerticalScrollBarAccessEnabled, bool);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, ScrollBarColor, std::string);
-
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, OverScrollMode, int32_t);
+    
     void RequestFullScreen();
     void ExitFullScreen();
     bool IsFullScreen() const
@@ -296,16 +323,36 @@ public:
         return isFullScreen_;
     }
     void UpdateLocale();
+    void SetDrawRect(int32_t x, int32_t y, int32_t width, int32_t height);
     void OnCompleteSwapWithNewSize();
     void OnResizeNotWork();
     bool OnBackPressed() const;
     void SetFullScreenExitHandler(const std::shared_ptr<FullScreenEnterEvent>& fullScreenExitHandler);
+    void UpdateJavaScriptOnDocumentStart();
+    void JavaScriptOnDocumentStart(const ScriptItems& scriptItems);
 #ifdef ENABLE_DRAG_FRAMEWORK
     bool NotifyStartDragTask();
     bool IsImageDrag();
     DragRet GetDragAcceptableStatus();
     Offset GetDragOffset() const;
 #endif
+    void SetLayoutMode(WebLayoutMode mode)
+    {
+        layoutMode_ = mode;
+    }
+    WebLayoutMode GetLayoutMode() const
+    {
+        return layoutMode_;
+    }
+    void OnRootLayerChanged(int width, int height);
+    int GetRootLayerWidth() const
+    {
+        return rootLayerWidth_;
+    }
+    int GetRootLayerHeight() const
+    {
+        return rootLayerHeight_;
+    }
 
 private:
     void RegistVirtualKeyBoardListener();
@@ -364,6 +411,7 @@ private:
     void OnHorizontalScrollBarAccessEnabledUpdate(bool value);
     void OnVerticalScrollBarAccessEnabledUpdate(bool value);
     void OnScrollBarColorUpdate(const std::string& value);
+    void OnOverScrollModeUpdate(const int32_t value);
 
     void InitEvent();
     void InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub);
@@ -381,6 +429,10 @@ private:
     bool WebOnKeyEvent(const KeyEvent& keyEvent);
     void WebRequestFocus();
     void ResetDragAction();
+    RefPtr<ScrollPattern> SearchParent();
+    void InitScrollUpdateListener();
+    void CalculateHorizontalDrawRect(const SizeF frameSize);
+    void CalculateVerticalDrawRect(const SizeF frameSize);
 #ifdef ENABLE_DRAG_FRAMEWORK
     void InitCommonDragDropEvent(const RefPtr<GestureEventHub>& gestureHub);
     void InitWebEventHubDragDropStart(const RefPtr<WebEventHub>& eventHub);
@@ -427,12 +479,14 @@ private:
     void InitEnhanceSurfaceFlag();
     void UpdateBackgroundColorRightNow(int32_t color);
     void UpdateContentOffset(const RefPtr<LayoutWrapper>& dirty);
+    void PostTaskToUI(const std::function<void()>&& task) const;
 
     std::optional<std::string> webSrc_;
     std::optional<std::string> webData_;
     std::optional<std::string> customScheme_;
     RefPtr<WebController> webController_;
     SetWebIdCallback setWebIdCallback_ = nullptr;
+    WebType type_;
     SetHapPathCallback setHapPathCallback_ = nullptr;
     JsProxyCallback jsProxyCallback_ = nullptr;
     OnControllerAttachedCallback onControllerAttachedCallback_ = nullptr;
@@ -468,9 +522,14 @@ private:
     bool isVisible_ = true;
     bool isVisibleActiveEnable_ = true;
     bool isMemoryLevelEnable_ = true;
+    bool isParentHasScroll_ = false;
+    OffsetF relativeOffsetOfScroll_;
     RefPtr<WebDelegateInterface> delegate_ = nullptr;
 
     bool selectPopupMenuShowing_ = false;
+    WebLayoutMode layoutMode_ = WebLayoutMode::NONE;
+    int32_t rootLayerWidth_ = 0;
+    int32_t rootLayerHeight_ = 0;
     ACE_DISALLOW_COPY_AND_MOVE(WebPattern);
 };
 } // namespace OHOS::Ace::NG

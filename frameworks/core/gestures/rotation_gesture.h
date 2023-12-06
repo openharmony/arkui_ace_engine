@@ -23,7 +23,7 @@
 #include "base/geometry/offset.h"
 #include "base/memory/ace_type.h"
 #include "base/utils/macros.h"
-#include "core/gestures/gesture_info.h"
+#include "core/gestures/gesture_event.h"
 
 namespace OHOS::Ace {
 

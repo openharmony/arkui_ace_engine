@@ -17,20 +17,13 @@ import(
 build_component("slider") {
   sources = [
     "block_component.cpp",
-    "flutter_render_circle_block.cpp",
-    "flutter_render_slider.cpp",
     "render_block.cpp",
     "render_block_creator.cpp",
     "render_slider.cpp",
     "render_slider_creator.cpp",
     "slider_component.cpp",
   ]
-  if (ace_use_new_skia) {
-    sources -= [
-      "flutter_render_circle_block.cpp",
-      "flutter_render_slider.cpp",
-    ]
-  }
+
   rosen_sources = [
     "rosen_render_circle_block.cpp",
     "rosen_render_slider.cpp",

@@ -21,6 +21,7 @@
 #include "bridge/declarative_frontend/jsview/models/radio_model_impl.h"
 #include "core/components/checkable/checkable_theme.h"
 #include "core/components_ng/base/view_abstract.h"
+#include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/radio/radio_model_ng.h"
 
 namespace OHOS::Ace {
@@ -52,7 +53,6 @@ namespace OHOS::Ace::Framework {
 void JSRadio::Create(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("radio create error, info is not-valid");
         return;
     }
 
@@ -88,6 +88,7 @@ void JSRadio::JSBind(BindingTarget globalObj)
     JSClass<JSRadio>::StaticMethod("padding", &JSRadio::JsPadding);
     JSClass<JSRadio>::StaticMethod("radioStyle", &JSRadio::JsRadioStyle);
     JSClass<JSRadio>::StaticMethod("responseRegion", &JSRadio::JsResponseRegion);
+    JSClass<JSRadio>::StaticMethod("hoverEffect", &JSRadio::JsHoverEffect);
     JSClass<JSRadio>::StaticMethod("onChange", &JSRadio::OnChange);
     JSClass<JSRadio>::StaticMethod("onClick", &JSRadio::JsOnClick);
     JSClass<JSRadio>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
@@ -103,9 +104,11 @@ void ParseCheckedObject(const JSCallbackInfo& args, const JSRef<JSVal>& changeEv
     CHECK_NULL_VOID(changeEventVal->IsFunction());
 
     auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(changeEventVal));
-    auto onChecked = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc)](bool check) {
+    WeakPtr<NG::FrameNode> targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto onChecked = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), node = targetNode](bool check) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("Radio.onChangeEvent");
+        PipelineContext::SetCallBackNode(node);
         auto newJSVal = JSRef<JSVal>::Make(ToJSValue(check));
         func->ExecuteJS(1, &newJSVal);
     };
@@ -115,7 +118,6 @@ void ParseCheckedObject(const JSCallbackInfo& args, const JSRef<JSVal>& changeEv
 void JSRadio::Checked(const JSCallbackInfo& info)
 {
     if (info.Length() < 1 || info.Length() > 2) {
-        LOGE("The arg is wrong, it is supposed to have 1 or 2 arguments");
         return;
     }
 
@@ -133,7 +135,6 @@ void JSRadio::Checked(const JSCallbackInfo& info)
 void JSRadio::JsWidth(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have atleast 1 arguments");
         return;
     }
 
@@ -160,7 +161,6 @@ void JSRadio::JsWidth(const JSRef<JSVal>& jsValue)
 void JSRadio::JsHeight(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have atleast 1 arguments");
         return;
     }
 
@@ -192,13 +192,7 @@ void JSRadio::JsHeight(const JSRef<JSVal>& jsValue)
 
 void JSRadio::JsSize(const JSCallbackInfo& info)
 {
-    if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have atleast 1 arguments");
-        return;
-    }
-
     if (!info[0]->IsObject()) {
-        LOGE("arg is not Object or String.");
         return;
     }
 
@@ -210,7 +204,6 @@ void JSRadio::JsSize(const JSCallbackInfo& info)
 void JSRadio::JsPadding(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have atleast 1 arguments");
         return;
     }
     NG::PaddingPropertyF oldPadding = GetOldPadding(info);
@@ -222,21 +215,17 @@ NG::PaddingPropertyF JSRadio::GetOldPadding(const JSCallbackInfo& info)
 {
     NG::PaddingPropertyF padding({ 0.0f, 0.0f, 0.0f, 0.0f });
     if (info[0]->IsObject()) {
-        auto argsPtrItem = JsonUtil::ParseJsonString(info[0]->ToString());
-        if (!argsPtrItem || argsPtrItem->IsNull()) {
-            LOGE("Js Parse object failed. argsPtr is null. %s", info[0]->ToString().c_str());
-            return padding;
-        }
-        if (argsPtrItem->Contains("top") || argsPtrItem->Contains("bottom") || argsPtrItem->Contains("left") ||
-            argsPtrItem->Contains("right")) {
+        JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(info[0]);
+        if (jsObj->HasProperty("top") || jsObj->HasProperty("bottom")
+            || jsObj->HasProperty("left") || jsObj->HasProperty("right")) {
             CalcDimension topDimen = CalcDimension(0.0, DimensionUnit::VP);
             CalcDimension leftDimen = CalcDimension(0.0, DimensionUnit::VP);
             CalcDimension rightDimen = CalcDimension(0.0, DimensionUnit::VP);
             CalcDimension bottomDimen = CalcDimension(0.0, DimensionUnit::VP);
-            ParseJsonDimensionVp(argsPtrItem->GetValue("top"), topDimen);
-            ParseJsonDimensionVp(argsPtrItem->GetValue("left"), leftDimen);
-            ParseJsonDimensionVp(argsPtrItem->GetValue("right"), rightDimen);
-            ParseJsonDimensionVp(argsPtrItem->GetValue("bottom"), bottomDimen);
+            ParseJsDimensionVp(jsObj->GetProperty("top"), topDimen);
+            ParseJsDimensionVp(jsObj->GetProperty("left"), leftDimen);
+            ParseJsDimensionVp(jsObj->GetProperty("right"), rightDimen);
+            ParseJsDimensionVp(jsObj->GetProperty("bottom"), bottomDimen);
             if (leftDimen == 0.0_vp) {
                 leftDimen = rightDimen;
             }
@@ -358,7 +347,6 @@ void JSRadio::JsRadioStyle(const JSCallbackInfo& info)
 void JSRadio::JsResponseRegion(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have at least 1 arguments");
         return;
     }
 
@@ -376,9 +364,11 @@ void JSRadio::OnChange(const JSCallbackInfo& args)
         return;
     }
     auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(args[0]));
-    auto onChange = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc)](bool check) {
+    WeakPtr<NG::FrameNode> targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto onChange = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), node = targetNode](bool check) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("Radio.onChange");
+        PipelineContext::SetCallBackNode(node);
         auto newJSVal = JSRef<JSVal>::Make(ToJSValue(check));
         func->ExecuteJS(1, &newJSVal);
     };
@@ -399,4 +389,10 @@ void JSRadio::JsOnClick(const JSCallbackInfo& args)
     args.ReturnSelf();
 }
 
+void JSRadio::JsHoverEffect(const JSCallbackInfo& info)
+{
+    if (info[0]->IsNumber()) {
+        RadioModel::GetInstance()->SetHoverEffect(static_cast<HoverEffectType>(info[0]->ToNumber<int32_t>()));
+    }
+}
 } // namespace OHOS::Ace::Framework

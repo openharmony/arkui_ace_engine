@@ -32,8 +32,10 @@ namespace OHOS::Ace::NG {
 void PluginModelNG::Create(const RequestPluginInfo& pluginInfo)
 {
     auto* stack = ViewStackProcessor::GetInstance();
+    int32_t nodeId = stack->ClaimNodeId();
+    ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::PLUGIN_ETS_TAG, nodeId);
     auto frameNode = PluginNode::GetOrCreatePluginNode(
-        V2::PLUGIN_ETS_TAG, stack->ClaimNodeId(), []() { return AceType::MakeRefPtr<PluginPattern>(); });
+        V2::PLUGIN_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<PluginPattern>(); });
     stack->Push(frameNode);
     ACE_UPDATE_LAYOUT_PROPERTY(PluginLayoutProperty, RequestPluginInfo, pluginInfo);
 };

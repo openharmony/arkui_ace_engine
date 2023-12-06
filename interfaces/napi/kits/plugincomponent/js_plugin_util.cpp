@@ -17,7 +17,6 @@
 #include <cinttypes>
 #include <cstring>
 
-#include "hilog_wrapper.h"
 #include "napi/native_engine/native_value.h"
 #include "securec.h"
 
@@ -28,7 +27,6 @@ constexpr int NAPI_ACE_ERR_NO_ERROR = 0;
 constexpr int ACE_ARGS_TWO = 2;
 constexpr int ACE_PARAM0 = 0;
 constexpr int ACE_PARAM1 = 1;
-constexpr size_t MAX_STRING_BUFF_SIZE = 1024;
 
 bool AceToJson(napi_env env, napi_value param, Json::Value& jsonObject);
 napi_value ParseJsonToKVObject(napi_env env, Json::Value& jsonObject);
@@ -572,7 +570,7 @@ bool AceKVObjectToString(napi_env env, napi_value param, std::string& value)
     napi_call_function(env, jsonValue, stringifyValue, 1, funcArgv, &returnValue);
     size_t buffSize = 0;
     napi_status status = napi_get_value_string_utf8(env, returnValue, nullptr, 0, &buffSize);
-    if (status != napi_ok || buffSize == 0 || buffSize >= MAX_STRING_BUFF_SIZE) {
+    if (status != napi_ok || buffSize == 0) {
         return false;
     }
     std::unique_ptr<char[]> paramsChar = std::make_unique<char[]>(buffSize + 1);
@@ -909,8 +907,6 @@ napi_value AceGetCallbackErrorValue(napi_env env, int errCode)
  */
 ACEAsyncJSCallbackInfo* AceCreateAsyncJSCallbackInfo(napi_env env)
 {
-    HILOG_INFO("%{public}s called.", __func__);
-
     napi_value global = 0;
     NAPI_CALL(env, napi_get_global(env, &global));
 
@@ -1007,16 +1003,12 @@ bool AceWrapThreadReturnData(napi_env env, const ACEThreadReturnData* data, napi
  */
 bool AceCreateAsyncCallback(napi_env env, napi_value param, ACEAsyncJSCallbackInfo* callback)
 {
-    HILOG_INFO("%{public}s called.", __func__);
-
     if (param == nullptr || callback == nullptr) {
-        HILOG_INFO("%{public}s called, param or callback is null.", __func__);
         return false;
     }
 
     callback->cbInfo.callback = AceCreateCallbackRefFromJS(env, param);
     if (callback->cbInfo.callback == nullptr) {
-        HILOG_INFO("%{public}s, create ref failed.", __func__);
         return false;
     }
 
@@ -1026,7 +1018,6 @@ bool AceCreateAsyncCallback(napi_env env, napi_value param, ACEAsyncJSCallbackIn
 napi_ref AceCreateCallbackRefFromJS(napi_env env, napi_value param)
 {
     if (env == nullptr || param == nullptr) {
-        HILOG_INFO("%{public}s called, env or param is null", __func__);
         return nullptr;
     }
 
@@ -1034,7 +1025,6 @@ napi_ref AceCreateCallbackRefFromJS(napi_env env, napi_value param)
     NAPI_CALL(env, napi_typeof(env, param, &valueType));
 
     if (valueType != napi_function) {
-        HILOG_INFO("%{public}s called, Param is invalid.", __func__);
         return nullptr;
     }
 
@@ -1051,9 +1041,7 @@ napi_ref AceCreateCallbackRefFromJS(napi_env env, napi_value param)
  */
 void AceCompleteAsyncCallbackWork(napi_env env, ACEAsyncJSCallbackInfo* asyncCallbackInfo)
 {
-    HILOG_INFO("%{public}s called.", __func__);
     if (asyncCallbackInfo == nullptr) {
-        HILOG_INFO("%{public}s called, asyncCallbackInfo is null", __func__);
         return;
     }
 
@@ -1084,9 +1072,7 @@ void AceCompleteAsyncCallbackWork(napi_env env, ACEAsyncJSCallbackInfo* asyncCal
  */
 void AceCompletePromiseCallbackWork(napi_env env, ACEAsyncJSCallbackInfo* asyncCallbackInfo)
 {
-    HILOG_INFO("%{public}s called.", __func__);
     if (asyncCallbackInfo == nullptr) {
-        HILOG_INFO("%{public}s called, asyncCallbackInfo is null", __func__);
         return;
     }
 

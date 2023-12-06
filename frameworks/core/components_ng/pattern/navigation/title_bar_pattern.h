@@ -87,6 +87,10 @@ public:
 
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
 
+    void InitTitleParam();
+
+    bool IsHidden();
+
     bool IsInitialTitle() const
     {
         return isInitialTitle_;
@@ -106,13 +110,15 @@ public:
     {
         isInitialSubtitle_ = isInitialSubtitle;
     }
-    void ProcessTitleAssociatedUpdate(float offset);
+    bool ProcessTitleAssociatedUpdate(float offset);
     void ProcessTitleDragStart(float offset);
     void SetTitleStyleByOffset(float offset);
 
     void ProcessTitleDragUpdate(float offset, float dragOffsetY);
     void ProcessTitleDragEnd();
     
+    void OnColorConfigurationUpdate() override;
+
     float GetCurrentOffset()
     {
         return tempTitleBarHeight_ - defaultTitleBarHeight_;
@@ -152,9 +158,20 @@ public:
             return true;
         }
         GetMaxTitleBarHeight();
-        return LessNotEqual(tempTitleBarHeight_, maxTitleBarHeight_);
+        return LessOrEqual(tempTitleBarHeight_, maxTitleBarHeight_);
     }
 
+    bool GetCurrentNavBarStatus() const
+    {
+        if (NearZero(tempTitleBarHeight_)) {
+            return true;
+        }
+        GetMaxTitleBarHeight();
+        auto titleMiddleValue =
+            (static_cast<float>(SINGLE_LINE_TITLEBAR_HEIGHT.ConvertToPx()) + maxTitleBarHeight_) / 2;
+        return LessNotEqual(tempTitleBarHeight_, titleMiddleValue);
+    }
+    
     NavigationTitleMode GetNavigationTitleMode() const
     {
         return titleMode_;
@@ -171,7 +188,7 @@ public:
     }
 
     void ResetAssociatedScroll();
-    void UpdateAssociatedScrollOffset(float offset);
+    bool UpdateAssociatedScrollOffset(float offset);
 
 private:
     void TransformScale(float overDragOffset, const RefPtr<FrameNode>& frameNode);
@@ -206,11 +223,13 @@ private:
     void UpdateTitleFontSize(const Dimension& tempTitleFontSize);
     void UpdateSubTitleOpacity(const double &value);
     void UpdateTitleModeChange();
-
+    void MountTitle(const RefPtr<TitleBarNode>& hostNode);
     RefPtr<PanEvent> panEvent_;
     RefPtr<SpringMotion> springMotion_;
     RefPtr<Animator> springController_;
     RefPtr<Animator> animator_;
+    std::optional<float> fontSize_;
+    std::optional<float> opacity_;
 
     float overDragOffset_ = 0.0f;
     float maxTitleBarHeight_ = 0.0f;

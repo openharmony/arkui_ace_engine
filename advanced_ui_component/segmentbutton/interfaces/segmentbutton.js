@@ -23,6 +23,90 @@ const curves = globalThis.requireNativeModule("ohos.curves");
 const KeyCode = globalThis.requireNapi("multimodalInput.keyCode").KeyCode;
 const MIN_ITEM_COUNT = 2;
 const MAX_ITEM_COUNT = 5;
+const SegmentButtonTheme = {
+    FONT_COLOR: {
+        id: -1,
+        type: 10001,
+        params: ["sys.color.ohos_id_color_text_secondary"],
+        bundleName: "",
+        moduleName: ""
+    },
+    TAB_SELECTED_FONT_COLOR: {
+        id: -1,
+        type: 10001,
+        params: ["sys.color.ohos_id_color_text_primary"],
+        bundleName: "",
+        moduleName: ""
+    },
+    CAPSULE_SELECTED_FONT_COLOR: {
+        id: -1,
+        type: 10001,
+        params: ["sys.color.ohos_id_color_foreground_contrary"],
+        bundleName: "",
+        moduleName: ""
+    },
+    FONT_SIZE: {
+        id: -1,
+        type: 10002,
+        params: ["sys.float.ohos_id_text_size_body2"],
+        bundleName: "",
+        moduleName: ""
+    },
+    SELECTED_FONT_SIZE: {
+        id: -1,
+        type: 10002,
+        params: ["sys.float.ohos_id_text_size_body2"],
+        bundleName: "",
+        moduleName: ""
+    },
+    BACKGROUND_COLOR: {
+        id: -1,
+        type: 10001,
+        params: ["sys.color.ohos_id_color_button_normal"],
+        bundleName: "",
+        moduleName: ""
+    },
+    TAB_SELECTED_BACKGROUND_COLOR: {
+        id: -1,
+        type: 10001,
+        params: ["sys.color.ohos_id_color_foreground_contrary"],
+        bundleName: "",
+        moduleName: ""
+    },
+    CAPSULE_SELECTED_BACKGROUND_COLOR: {
+        id: -1,
+        type: 10001,
+        params: ["sys.color.ohos_id_color_emphasize"],
+        bundleName: "",
+        moduleName: ""
+    },
+    FOCUS_BORDER_COLOR: {
+        id: -1,
+        type: 10001,
+        params: ["sys.color.ohos_id_color_focused_outline"],
+        bundleName: "",
+        moduleName: ""
+    },
+    HOVER_COlOR: {
+        id: -1,
+        type: 10001,
+        params: ["sys.color.ohos_id_color_hover"],
+        bundleName: "",
+        moduleName: ""
+    },
+    PRESS_COLOR: {
+        id: -1,
+        type: 10001,
+        params: ["sys.color.ohos_id_color_click_effect"],
+        bundleName: "",
+        moduleName: ""
+    }
+};
+
+function nearEqual(t, e) {
+    return Math.abs(t - e) < .001
+}
+
 let SegmentButtonItemOptions = class {
     constructor(t) {
         this.icon = t.icon;
@@ -37,46 +121,64 @@ let SegmentButtonItemOptionsArray = SegmentButtonItemOptionsArray_1 = class exte
         this.changeStartIndex = void 0;
         this.deleteCount = void 0;
         this.addLength = void 0;
-        if (t.length < 2) throw new RangeError("Below the minimum number of elements (2).");
-        if (t.length > 5) throw new RangeError("Exceeded the maximum number of elements (5).");
-        super.push(...t.map((t => new SegmentButtonItemOptions(t))))
+        void 0 !== t && super.push(...t.map((t => new SegmentButtonItemOptions(t))))
     }
 
     push(...t) {
-        if (this.length + t.length > 5) throw new RangeError("Exceeded the maximum number of elements (5).");
-        this.changeStartIndex = this.length - 1;
+        if (this.length + t.length > 5) {
+            console.warn("Exceeded the maximum number of elements (5).");
+            return this.length
+        }
+        this.changeStartIndex = this.length;
         this.deleteCount = 0;
         this.addLength = t.length;
         return super.push(...t.map((t => new SegmentButtonItemOptions(t))))
     }
 
     pop() {
-        if (this.length <= 2) throw new RangeError("Below the minimum number of elements (2).");
-        this.changeStartIndex = this.length - 1;
-        this.deleteCount = 1;
-        this.addLength = 0;
-        return super.pop()
+        if (!(this.length <= 2)) {
+            this.changeStartIndex = this.length - 1;
+            this.deleteCount = 1;
+            this.addLength = 0;
+            return super.pop()
+        }
+        console.warn("Below the minimum number of elements (2).")
     }
 
     shift() {
-        if (this.length <= 2) throw new RangeError("Below the minimum number of elements (2).");
-        this.changeStartIndex = 0;
-        this.deleteCount = 1;
-        this.addLength = 0;
-        return super.shift()
+        if (!(this.length <= 2)) {
+            this.changeStartIndex = 0;
+            this.deleteCount = 1;
+            this.addLength = 0;
+            return super.shift()
+        }
+        console.warn("Below the minimum number of elements (2).")
     }
 
     unshift(...t) {
-        if (this.length + t.length > 5) throw new RangeError("Exceeded the maximum number of elements (5).");
-        this.changeStartIndex = 0;
-        this.deleteCount = 0;
-        this.addLength = 1;
+        if (this.length + t.length > 5) {
+            console.warn("Exceeded the maximum number of elements (5).");
+            return this.length
+        }
+        if (t.length > 0 && !t.includes(null)) {
+            this.changeStartIndex = 0;
+            this.deleteCount = 0;
+            this.addLength = t.length
+        }
         return super.unshift(...t.map((t => new SegmentButtonItemOptions(t))))
     }
 
     splice(t, e, ...o) {
-        if (e > 5 || this.length - e + o.length < 2) throw new RangeError("Below the minimum number of elements (2).");
-        if (this.length - e + o.length > 5) throw new RangeError("Exceeded the maximum number of elements (5).");
+        let s = this.length - e < 0 ? 0 : this.length - e;
+        s += o.length;
+        if (s < 2) {
+            console.warn("Below the minimum number of elements (2).");
+            return []
+        }
+        if (s > 5) {
+            console.warn("Exceeded the maximum number of elements (5).");
+            return []
+        }
         this.changeStartIndex = t;
         this.deleteCount = e;
         this.addLength = o.length;
@@ -91,73 +193,37 @@ SegmentButtonItemOptionsArray = SegmentButtonItemOptionsArray_1 = __decorate([Ob
 
 let SegmentButtonOptions = SegmentButtonOptions_1 = class {
     constructor(t) {
-        var e, o, s, i, n, r, d, a, h, c, p, u, l, m, _;
+        var e, o, s, i, n, r, d, h, a, c, u, l, p, m, _;
         this.multiply = !1;
         this.showText = !1;
         this.showIcon = !1;
-        this.fontColor = null !== (e = t.fontColor) && void 0 !== e ? e : {
-                                                                              id: -1,
-                                                                              type: 10001,
-                                                                              params: ["sys.color.ohos_id_color_text_secondary"],
-                                                                              bundleName: "",
-                                                                              moduleName: ""
-                                                                          };
-        this.selectedFontColor = null !== (o = t.selectedFontColor) && void 0 !== o ? o : {
-                                                                                              id: -1,
-                                                                                              type: 10001,
-                                                                                              params: ["sys.color.ohos_id_color_text_primary"],
-                                                                                              bundleName: "",
-                                                                                              moduleName: ""
-                                                                                          };
-        this.fontSize = null !== (s = t.fontSize) && void 0 !== s ? s : {
-                                                                            id: -1,
-                                                                            type: 10002,
-                                                                            params: ["sys.float.ohos_id_text_size_body2"],
-                                                                            bundleName: "",
-                                                                            moduleName: ""
-                                                                        };
-        this.selectedFontSize = null !== (i = t.selectedFontSize) && void 0 !== i ? i : {
-                                                                                            id: -1,
-                                                                                            type: 10002,
-                                                                                            params: ["sys.float.ohos_id_text_size_body2"],
-                                                                                            bundleName: "",
-                                                                                            moduleName: ""
-                                                                                        };
+        this.fontColor = null !== (e = t.fontColor) && void 0 !== e ? e : SegmentButtonTheme.FONT_COLOR;
+        this.selectedFontColor = null !== (o = t.selectedFontColor) && void 0 !== o ? o : SegmentButtonTheme.TAB_SELECTED_FONT_COLOR;
+        this.fontSize = null !== (s = t.fontSize) && void 0 !== s ? s : SegmentButtonTheme.FONT_SIZE;
+        this.selectedFontSize = null !== (i = t.selectedFontSize) && void 0 !== i ? i : SegmentButtonTheme.SELECTED_FONT_SIZE;
         this.fontWeight = null !== (n = t.fontWeight) && void 0 !== n ? n : FontWeight.Regular;
         this.selectedFontWeight = null !== (r = t.selectedFontWeight) && void 0 !== r ? r : FontWeight.Medium;
-        this.backgroundColor = null !== (d = t.backgroundColor) && void 0 !== d ? d : {
-                                                                                          id: -1,
-                                                                                          type: 10001,
-                                                                                          params: ["sys.color.ohos_id_color_button_normal"],
-                                                                                          bundleName: "",
-                                                                                          moduleName: ""
-                                                                                      };
-        this.selectedBackgroundColor = null !== (a = t.selectedBackgroundColor) && void 0 !== a ? a : {
-                                                                                                          id: -1,
-                                                                                                          type: 10001,
-                                                                                                          params: ["sys.color.ohos_id_color_foreground_contrary"],
-                                                                                                          bundleName: "",
-                                                                                                          moduleName: ""
-                                                                                                      };
-        this.imageSize = null !== (h = t.imageSize) && void 0 !== h ? h : { width: 24, height: 24 };
+        this.backgroundColor = null !== (d = t.backgroundColor) && void 0 !== d ? d : SegmentButtonTheme.BACKGROUND_COLOR;
+        this.selectedBackgroundColor = null !== (h = t.selectedBackgroundColor) && void 0 !== h ? h : SegmentButtonTheme.TAB_SELECTED_BACKGROUND_COLOR;
+        this.imageSize = null !== (a = t.imageSize) && void 0 !== a ? a : { width: 24, height: 24 };
         this.buttonMargin = null !== (c = t.buttonMargin) && void 0 !== c ? c : {
                                                                                     top: 4,
                                                                                     right: 8,
                                                                                     bottom: 4,
                                                                                     left: 8
                                                                                 };
-        this.textMargin = null !== (p = t.textMargin) && void 0 !== p ? p : 0;
+        this.textMargin = null !== (u = t.textMargin) && void 0 !== u ? u : 0;
         this.type = t.type;
         this.buttons = new SegmentButtonItemOptionsArray(t.buttons);
         if ("capsule" === this.type) {
-            this.multiply = null !== (u = t.multiply) && void 0 !== u && u;
+            this.multiply = null !== (l = t.multiply) && void 0 !== l && l;
             this.buttons.forEach((t => {
                 this.showText || (this.showText = void 0 !== t.text);
                 this.showIcon || (this.showIcon = void 0 !== t.icon || void 0 !== t.selectedIcon)
             }));
             if (this.showText && this.showIcon) {
                 this.iconTextRadius = 12;
-                this.buttonMargin = null !== (l = t.buttonMargin) && void 0 !== l ? l : {
+                this.buttonMargin = null !== (p = t.buttonMargin) && void 0 !== p ? p : {
                                                                                             top: 6,
                                                                                             right: 8,
                                                                                             bottom: 6,
@@ -165,22 +231,20 @@ let SegmentButtonOptions = SegmentButtonOptions_1 = class {
                                                                                         };
                 this.iconTextBackgroundRadius = 14
             }
-            this.selectedFontColor = null !== (m = t.selectedFontColor) && void 0 !== m ? m : {
-                                                                                                  id: -1,
-                                                                                                  type: 10001,
-                                                                                                  params: ["sys.color.ohos_id_color_foreground_contrary"],
-                                                                                                  bundleName: "",
-                                                                                                  moduleName: ""
-                                                                                              };
-            this.selectedBackgroundColor = null !== (_ = t.selectedBackgroundColor) && void 0 !== _ ? _ : {
-                                                                                                              id: -1,
-                                                                                                              type: 10001,
-                                                                                                              params: ["sys.color.ohos_id_color_emphasize"],
-                                                                                                              bundleName: "",
-                                                                                                              moduleName: ""
-                                                                                                          }
+            this.selectedFontColor = null !== (m = t.selectedFontColor) && void 0 !== m ? m : SegmentButtonTheme.CAPSULE_SELECTED_FONT_COLOR;
+            this.selectedBackgroundColor = null !== (_ = t.selectedBackgroundColor) && void 0 !== _ ? _ : SegmentButtonTheme.CAPSULE_SELECTED_BACKGROUND_COLOR
         } else this.showText = !0;
         this.componentPadding = this.multiply ? 0 : 2
+    }
+
+    get buttons() {
+        return this._buttons
+    }
+
+    set buttons(t) {
+        var e;
+        void 0 !== this._buttons && this._buttons !== t && (null === (e = this.onButtonsChange) || void 0 === e || e.call(this));
+        this._buttons = t
     }
 
     static tab(t) {
@@ -271,11 +335,12 @@ class MultiSelectBackground extends ViewPU {
                     If.create();
                         e < 5 ? this.ifElseBranchUpdateFunction(0, (() => {
                         this.observeComponentCreation(((t, o) => {
+                            var s;
                             ViewStackProcessor.StartGetAccessRecordingFor(t);
                             Stack.create();
                             Stack.layoutWeight(1);
                             Stack.height(this.buttonItemsSize[e].height);
-                            Stack.backgroundColor(this.options.backgroundColor);
+                            Stack.backgroundColor(null !== (s = this.options.backgroundColor) && void 0 !== s ? s : SegmentButtonTheme.BACKGROUND_COLOR);
                             Stack.borderRadius(this.buttonBorderRadius[e]);
                             o || Stack.pop();
                             ViewStackProcessor.StopGetAccessRecording()
@@ -398,13 +463,14 @@ class SelectItem extends ViewPU {
         this.observeComponentCreation(((t, e) => {
             ViewStackProcessor.StartGetAccessRecordingFor(t);
             If.create();
-                0 !== this.selectedIndexes.length ? this.ifElseBranchUpdateFunction(0, (() => {
+                void 0 !== this.selectedIndexes && 0 !== this.selectedIndexes.length ? this.ifElseBranchUpdateFunction(0, (() => {
                 this.observeComponentCreation(((t, e) => {
+                    var o;
                     ViewStackProcessor.StartGetAccessRecordingFor(t);
                     Stack.create();
                     Stack.borderRadius(this.buttonBorderRadius[this.selectedIndexes[0]]);
                     Stack.size(this.buttonItemsSize[this.selectedIndexes[0]]);
-                    Stack.backgroundColor(this.options.selectedBackgroundColor);
+                    Stack.backgroundColor(null !== (o = this.options.selectedBackgroundColor) && void 0 !== o ? o : "tab" === this.options.type ? SegmentButtonTheme.TAB_SELECTED_BACKGROUND_COLOR : SegmentButtonTheme.CAPSULE_SELECTED_BACKGROUND_COLOR);
                     Stack.position(ObservedObject.GetRawObject(this.selectedItemPosition));
                     Stack.scale({
                         x: this.zoomScaleArray[this.selectedIndexes[0]],
@@ -442,7 +508,8 @@ class MultiSelectItemArray extends ViewPU {
             length: 5
         }, (() => Color.Transparent)), this, "multiColor");
         this.setInitiallyProvidedValue(e);
-        this.declareWatch("selectedIndexes", this.selectedChange)
+        this.declareWatch("options", this.onOptionsChange);
+        this.declareWatch("selectedIndexes", this.onSelectedChange)
     }
 
     setInitiallyProvidedValue(t) {
@@ -526,13 +593,20 @@ class MultiSelectItemArray extends ViewPU {
         this.__multiColor.set(t)
     }
 
-    selectedChange() {
+    onOptionsChange() {
+        var t;
+        for (let e = 0;e < this.selectedIndexes.length; e++) this.multiColor[this.selectedIndexes[e]] = null !== (t = this.options.selectedBackgroundColor) && void 0 !== t ? t : SegmentButtonTheme.CAPSULE_SELECTED_BACKGROUND_COLOR
+    }
+
+    onSelectedChange() {
+        var t;
         for (let t = 0;t < 5; t++) this.multiColor[t] = Color.Transparent;
-        for (let t = 0;t < this.selectedIndexes.length; t++) this.multiColor[this.selectedIndexes[t]] = this.options.selectedBackgroundColor
+        for (let e = 0;e < this.selectedIndexes.length; e++) this.multiColor[this.selectedIndexes[e]] = null !== (t = this.options.selectedBackgroundColor) && void 0 !== t ? t : SegmentButtonTheme.CAPSULE_SELECTED_BACKGROUND_COLOR
     }
 
     aboutToAppear() {
-        for (let t = 0;t < this.selectedIndexes.length; t++) this.multiColor[this.selectedIndexes[t]] = this.options.selectedBackgroundColor
+        var t;
+        for (let e = 0;e < this.selectedIndexes.length; e++) this.multiColor[this.selectedIndexes[e]] = null !== (t = this.options.selectedBackgroundColor) && void 0 !== t ? t : SegmentButtonTheme.CAPSULE_SELECTED_BACKGROUND_COLOR
     }
 
     initialRender() {
@@ -633,10 +707,21 @@ class SegmentButtonItem extends ViewPU {
 
     initialRender() {
         this.observeComponentCreation(((t, e) => {
+            var o;
             ViewStackProcessor.StartGetAccessRecordingFor(t);
             Column.create({ space: 2 });
             Column.justifyContent(FlexAlign.Center);
-            Column.padding(this.options.buttonMargin);
+            Column.padding(null !== (o = this.options.buttonMargin) && void 0 !== o ? o : "capsule" === this.options.type && this.options.showText && this.options.showIcon ? {
+                                                                                                                                                                                  top: 6,
+                                                                                                                                                                                  right: 8,
+                                                                                                                                                                                  bottom: 6,
+                                                                                                                                                                                  left: 8
+                                                                                                                                                                              } : {
+                                                                                                                                                                                      top: 4,
+                                                                                                                                                                                      right: 8,
+                                                                                                                                                                                      bottom: 4,
+                                                                                                                                                                                      left: 8
+                                                                                                                                                                                  });
             Column.constraintSize({ minHeight: 28 });
             e || Column.pop();
             ViewStackProcessor.StopGetAccessRecording()
@@ -646,11 +731,13 @@ class SegmentButtonItem extends ViewPU {
             If.create();
             this.options.showIcon ? this.ifElseBranchUpdateFunction(0, (() => {
                 this.observeComponentCreation(((t, e) => {
+                    var o, s, i;
                     ViewStackProcessor.StartGetAccessRecordingFor(t);
                     Image.create(this.property.isSelected ? this.itemOptions.selectedIcon : this.itemOptions.icon);
-                    Image.size(this.options.imageSize);
+                    Image.size(null !== (o = this.options.imageSize) && void 0 !== o ? o : { width: 24, height: 24 });
                     Image.focusable(0 == this.index);
                     Image.draggable(!1);
+                    Image.fillColor(this.property.isSelected ? null !== (s = this.options.selectedFontColor) && void 0 !== s ? s : SegmentButtonTheme.CAPSULE_SELECTED_FONT_COLOR : null !== (i = this.options.fontColor) && void 0 !== i ? i : SegmentButtonTheme.FONT_COLOR);
                     e || Image.pop();
                     ViewStackProcessor.StopGetAccessRecording()
                 }))
@@ -665,6 +752,7 @@ class SegmentButtonItem extends ViewPU {
             If.create();
             this.options.showText ? this.ifElseBranchUpdateFunction(0, (() => {
                 this.observeComponentCreation(((t, e) => {
+                    var o;
                     ViewStackProcessor.StartGetAccessRecordingFor(t);
                     Text.create(this.itemOptions.text);
                     Text.fontColor(this.property.fontColor);
@@ -676,7 +764,7 @@ class SegmentButtonItem extends ViewPU {
                     Text.maxLines(1);
                     Text.textAlign(TextAlign.Center);
                     Text.focusable(0 == this.index && !this.options.showIcon);
-                    Text.padding(this.options.textMargin);
+                    Text.padding(null !== (o = this.options.textMargin) && void 0 !== o ? o : 0);
                     e || Text.pop();
                     ViewStackProcessor.StopGetAccessRecording()
                 }));
@@ -711,13 +799,7 @@ class PressAndHoverEffect extends ViewPU {
         this.__colorProperty = new SynchedPropertyNesedObjectPU(e.colorProperty, this, "colorProperty");
         this.__buttonBorderRadius = this.initializeConsume("buttonBorderRadius", "buttonBorderRadius");
         this.pressIndex = 0;
-        this.pressColor = {
-            id: -1,
-            type: 10001,
-            params: ["sys.color.ohos_id_color_click_effect"],
-            bundleName: "",
-            moduleName: ""
-        };
+        this.pressColor = SegmentButtonTheme.PRESS_COLOR;
         this.setInitiallyProvidedValue(e)
     }
 
@@ -817,8 +899,9 @@ class SegmentButtonItemArrayComponent extends ViewPU {
         this.__buttonHeight = new ObservedPropertyObjectPU(Array.from({ length: 5 }, (() => 0)), this, "buttonHeight");
         this.buttonItemsRealHeight = Array.from({ length: 5 }, (() => 0));
         this.setInitiallyProvidedValue(e);
-        this.declareWatch("optionsArray", this.optionsArrayChange);
-        this.declareWatch("buttonItemsSize", this.buttonItemsSizeChange)
+        this.declareWatch("optionsArray", this.onOptionsArrayChange);
+        this.declareWatch("options", this.onOptionsChange);
+        this.declareWatch("buttonItemsSize", this.onButtonItemsSizeChange)
     }
 
     setInitiallyProvidedValue(t) {
@@ -986,7 +1069,7 @@ class SegmentButtonItemArrayComponent extends ViewPU {
         this.__buttonHeight.set(t)
     }
 
-    buttonItemsSizeChange() {
+    onButtonItemsSizeChange() {
         this.buttonItemsSize.forEach(((t, e) => {
             this.buttonWidth[e] = t.width;
             this.buttonHeight[e] = t.height
@@ -994,7 +1077,8 @@ class SegmentButtonItemArrayComponent extends ViewPU {
     }
 
     changeSelectedIndexes(t) {
-        if (this.options.multiply) {
+        var e;
+        if (null !== (e = this.options.multiply) && void 0 !== e && e) {
             let t = this.selectedIndexes;
             for (let e = 0;e < this.optionsArray.deleteCount; e++) {
                 let e = t.indexOf(this.optionsArray.changeStartIndex);
@@ -1010,23 +1094,16 @@ class SegmentButtonItemArrayComponent extends ViewPU {
         } else {
             if (void 0 === this.selectedIndexes[0]) return;
             if (this.selectedIndexes[0] < this.optionsArray.changeStartIndex) return;
-            if (this.selectedIndexes[0] === this.optionsArray.changeStartIndex && this.optionsArray.changeStartIndex + this.optionsArray.deleteCount - this.optionsArray.addLength === this.optionsArray.length) {
-                this.selectedIndexes[0] = this.optionsArray.changeStartIndex - 1;
-                return
-            }
-                this.optionsArray.changeStartIndex + this.optionsArray.deleteCount > this.selectedIndexes[0] ? this.selectedIndexes[0] = this.optionsArray.changeStartIndex : this.selectedIndexes[0] = this.selectedIndexes[0] - this.optionsArray.deleteCount + this.optionsArray.addLength;
-            this.selectedIndexes[0] > t - 1 && (this.selectedIndexes[0] = t - 1)
+                this.optionsArray.changeStartIndex + this.optionsArray.deleteCount > this.selectedIndexes[0] ? "tab" === this.options.type ? this.selectedIndexes[0] = 0 : "capsule" === this.options.type && (this.selectedIndexes = []) : this.selectedIndexes[0] = this.selectedIndexes[0] - this.optionsArray.deleteCount + this.optionsArray.addLength
         }
     }
 
     changeFocusIndex(t) {
-        if (-1 !== this.focusIndex && !(this.focusIndex < this.optionsArray.changeStartIndex)) if (this.focusIndex !== this.optionsArray.changeStartIndex || this.optionsArray.changeStartIndex + this.optionsArray.deleteCount - this.optionsArray.addLength !== this.optionsArray.length) {
-                this.optionsArray.changeStartIndex + this.optionsArray.deleteCount > this.focusIndex ? this.focusIndex = this.optionsArray.changeStartIndex : this.focusIndex = this.focusIndex - this.optionsArray.deleteCount + this.optionsArray.addLength;
-            this.focusIndex > t - 1 && (this.focusIndex = t - 1)
-        } else this.focusIndex = this.optionsArray.changeStartIndex - 1
+        -1 !== this.focusIndex && (this.focusIndex < this.optionsArray.changeStartIndex || (this.optionsArray.changeStartIndex + this.optionsArray.deleteCount > this.focusIndex ? this.focusIndex = 0 : this.focusIndex = this.focusIndex - this.optionsArray.deleteCount + this.optionsArray.addLength))
     }
 
-    optionsArrayChange() {
+    onOptionsArrayChange() {
+        if (void 0 === this.options || void 0 === this.options.buttons) return;
         let t = Math.min(this.options.buttons.length, this.buttonItemsSize.length);
         if (void 0 !== this.optionsArray.changeStartIndex && void 0 !== this.optionsArray.deleteCount && void 0 !== this.optionsArray.addLength) {
             this.changeSelectedIndexes(t);
@@ -1035,6 +1112,10 @@ class SegmentButtonItemArrayComponent extends ViewPU {
             this.optionsArray.deleteCount = void 0;
             this.optionsArray.addLength = void 0
         }
+    }
+
+    onOptionsChange() {
+        void 0 !== this.options && void 0 !== this.options.buttons && this.calculateBorderRadius()
     }
 
     aboutToAppear() {
@@ -1067,13 +1148,7 @@ class SegmentButtonItemArrayComponent extends ViewPU {
                         width: "capsule" === this.options.type && this.buttonItemsSelected[this.focusIndex] ? this.buttonWidth[t] + 8 : this.buttonWidth[t],
                         height: "capsule" === this.options.type && this.buttonItemsSelected[this.focusIndex] ? this.buttonHeight[t] + 8 : this.buttonHeight[t]
                     });
-                    Stack.borderColor({
-                        id: -1,
-                        type: 10001,
-                        params: ["sys.color.ohos_id_color_focused_outline"],
-                        bundleName: "",
-                        moduleName: ""
-                    });
+                    Stack.borderColor(SegmentButtonTheme.FOCUS_BORDER_COLOR);
                     Stack.borderWidth(2);
                     o || Stack.pop();
                     ViewStackProcessor.StopGetAccessRecording()
@@ -1089,30 +1164,30 @@ class SegmentButtonItemArrayComponent extends ViewPU {
     }
 
     calculateBorderRadius() {
-        var t, e, o, s, i, n, r, d;
+        var t, e, o, s, i, n, r, d, h;
         let a = Array.from({ length: 5 }, (() => ({ topLeft: 0, topRight: 0, bottomLeft: 0, bottomRight: 0 })));
-        for (let h = 0;h < this.buttonBorderRadius.length; h++) {
-            let c = this.buttonItemsSize[h].height / 2;
-            if (this.options.multiply) if (0 === h) {
-                a[h].topLeft = null !== (i = this.options.iconTextRadius) && void 0 !== i ? i : c;
-                a[h].topRight = 0;
-                a[h].bottomLeft = null !== (n = this.options.iconTextRadius) && void 0 !== n ? n : c;
-                a[h].bottomRight = 0
-            } else if (h === Math.min(this.options.buttons.length, this.buttonItemsSize.length) - 1) {
-                a[h].topLeft = 0;
-                a[h].topRight = null !== (r = this.options.iconTextRadius) && void 0 !== r ? r : c;
-                a[h].bottomLeft = 0;
-                a[h].bottomRight = null !== (d = this.options.iconTextRadius) && void 0 !== d ? d : c
+        for (let c = 0;c < this.buttonBorderRadius.length; c++) {
+            let u = this.buttonItemsSize[c].height / 2;
+            if ("tab" !== this.options.type && null !== (t = this.options.multiply) && void 0 !== t && t) if (0 === c) {
+                a[c].topLeft = null !== (n = this.options.iconTextRadius) && void 0 !== n ? n : u;
+                a[c].topRight = 0;
+                a[c].bottomLeft = null !== (r = this.options.iconTextRadius) && void 0 !== r ? r : u;
+                a[c].bottomRight = 0
+            } else if (c === Math.min(this.options.buttons.length, this.buttonItemsSize.length) - 1) {
+                a[c].topLeft = 0;
+                a[c].topRight = null !== (d = this.options.iconTextRadius) && void 0 !== d ? d : u;
+                a[c].bottomLeft = 0;
+                a[c].bottomRight = null !== (h = this.options.iconTextRadius) && void 0 !== h ? h : u
             } else {
-                a[h].topLeft = 0;
-                a[h].topRight = 0;
-                a[h].bottomLeft = 0;
-                a[h].bottomRight = 0
+                a[c].topLeft = 0;
+                a[c].topRight = 0;
+                a[c].bottomLeft = 0;
+                a[c].bottomRight = 0
             } else {
-                a[h].topLeft = null !== (t = this.options.iconTextRadius) && void 0 !== t ? t : c;
-                a[h].topRight = null !== (e = this.options.iconTextRadius) && void 0 !== e ? e : c;
-                a[h].bottomLeft = null !== (o = this.options.iconTextRadius) && void 0 !== o ? o : c;
-                a[h].bottomRight = null !== (s = this.options.iconTextRadius) && void 0 !== s ? s : c
+                a[c].topLeft = null !== (e = this.options.iconTextRadius) && void 0 !== e ? e : u;
+                a[c].topRight = null !== (o = this.options.iconTextRadius) && void 0 !== o ? o : u;
+                a[c].bottomLeft = null !== (s = this.options.iconTextRadius) && void 0 !== s ? s : u;
+                a[c].bottomRight = null !== (i = this.options.iconTextRadius) && void 0 !== i ? i : u
             }
         }
         this.buttonBorderRadius = a
@@ -1122,7 +1197,7 @@ class SegmentButtonItemArrayComponent extends ViewPU {
         this.observeComponentCreation(((t, e) => {
             ViewStackProcessor.StartGetAccessRecordingFor(t);
             If.create();
-                this.optionsArray.length > 1 ? this.ifElseBranchUpdateFunction(0, (() => {
+                void 0 !== this.optionsArray && this.optionsArray.length > 1 ? this.ifElseBranchUpdateFunction(0, (() => {
                 this.observeComponentCreation(((t, e) => {
                     ViewStackProcessor.StartGetAccessRecordingFor(t);
                     Row.create({ space: 1 });
@@ -1143,12 +1218,13 @@ class SegmentButtonItemArrayComponent extends ViewPU {
                             If.create();
                                 e < 5 ? this.ifElseBranchUpdateFunction(0, (() => {
                                 this.observeComponentCreation(((t, o) => {
+                                    var s, i;
                                     ViewStackProcessor.StartGetAccessRecordingFor(t);
                                     Stack.create();
                                     Stack.borderRadius(this.buttonBorderRadius[e]);
                                     Stack.scale({
-                                        x: "capsule" === this.options.type && this.options.multiply ? 1 : this.zoomScaleArray[e],
-                                        y: "capsule" === this.options.type && this.options.multiply ? 1 : this.zoomScaleArray[e]
+                                        x: "capsule" === this.options.type && null !== (s = this.options.multiply) && void 0 !== s && s ? 1 : this.zoomScaleArray[e],
+                                        y: "capsule" === this.options.type && null !== (i = this.options.multiply) && void 0 !== i && i ? 1 : this.zoomScaleArray[e]
                                     });
                                     Stack.layoutWeight(1);
                                     Stack.onAreaChange(((t, o) => {
@@ -1174,13 +1250,7 @@ class SegmentButtonItemArrayComponent extends ViewPU {
                                     }));
                                     Stack.onHover((t => {
                                             t ? Context.animateTo({ duration: 250, curve: Curve.Friction }, (() => {
-                                            this.hoverColorArray[e].hoverColor = {
-                                                id: -1,
-                                                type: 10001,
-                                                params: ["sys.color.ohos_id_color_hover"],
-                                                bundleName: "",
-                                                moduleName: ""
-                                            }
+                                            this.hoverColorArray[e].hoverColor = SegmentButtonTheme.HOVER_COlOR
                                         })) : Context.animateTo({ duration: 250, curve: Curve.Friction }, (() => {
                                             this.hoverColorArray[e].hoverColor = Color.Transparent
                                         }))
@@ -1231,7 +1301,7 @@ class SegmentButtonItemArrayComponent extends ViewPU {
                                     __Common__.create();
                                     __Common__.onAreaChange(((t, o) => {
                                         this.buttonItemsRealHeight[e] = o.height;
-                                        let s = Math.max(...this.buttonItemsRealHeight);
+                                        let s = Math.max(...this.buttonItemsRealHeight.slice(0, this.options.buttons.length));
                                         for (let t = 0;t < this.buttonItemsSize.length; t++) this.buttonItemsSize[t] = {
                                             width: this.buttonItemsSize[t].width,
                                             height: s
@@ -1292,20 +1362,8 @@ class SegmentButtonItemArrayComponent extends ViewPU {
 
 let ItemProperty = class {
     constructor() {
-        this.fontColor = {
-            id: -1,
-            type: 10001,
-            params: ["sys.color.ohos_id_color_text_secondary"],
-            bundleName: "",
-            moduleName: ""
-        };
-        this.fontSize = {
-            id: -1,
-            type: 10002,
-            params: ["sys.float.ohos_id_text_size_body2"],
-            bundleName: "",
-            moduleName: ""
-        };
+        this.fontColor = SegmentButtonTheme.FONT_COLOR;
+        this.fontSize = SegmentButtonTheme.FONT_SIZE;
         this.fontWeight = FontWeight.Regular;
         this.isSelected = !1
     }
@@ -1351,10 +1409,12 @@ class SegmentButton extends ViewPU {
         this.addProvidedVar("zoomScaleArray", this.__zoomScaleArray);
         this.doSelectedChangeAnimate = !1;
         this.isCurrentPositionSelected = !1;
+        this.panGestureStartPoint = { x: 0, y: 0 };
+        this.isPanGestureMoved = !1;
         this.setInitiallyProvidedValue(e);
-        this.declareWatch("options", this.optionsChange);
-        this.declareWatch("selectedIndexes", this.selectedChange);
-        this.declareWatch("buttonItemsPosition", this.itemsPositionChange)
+        this.declareWatch("options", this.onOptionsChange);
+        this.declareWatch("selectedIndexes", this.onSelectedChange);
+        this.declareWatch("buttonItemsPosition", this.onItemsPositionChange)
     }
 
     setInitiallyProvidedValue(t) {
@@ -1369,7 +1429,9 @@ class SegmentButton extends ViewPU {
         void 0 !== t.selectedItemPosition && (this.selectedItemPosition = t.selectedItemPosition);
         void 0 !== t.zoomScaleArray && (this.zoomScaleArray = t.zoomScaleArray);
         void 0 !== t.doSelectedChangeAnimate && (this.doSelectedChangeAnimate = t.doSelectedChangeAnimate);
-        void 0 !== t.isCurrentPositionSelected && (this.isCurrentPositionSelected = t.isCurrentPositionSelected)
+        void 0 !== t.isCurrentPositionSelected && (this.isCurrentPositionSelected = t.isCurrentPositionSelected);
+        void 0 !== t.panGestureStartPoint && (this.panGestureStartPoint = t.panGestureStartPoint);
+        void 0 !== t.isPanGestureMoved && (this.isPanGestureMoved = t.isPanGestureMoved)
     }
 
     updateStateVars(t) {
@@ -1490,32 +1552,62 @@ class SegmentButton extends ViewPU {
         this.__zoomScaleArray.set(t)
     }
 
-    itemsPositionChange() {
-        this.doSelectedChangeAnimate ? this.updateAnimatedProperty(this.getSelectedChangeCurve()) : this.updateAnimatedProperty(null)
+    onItemsPositionChange() {
+        void 0 !== this.options && void 0 !== this.options.buttons && (this.doSelectedChangeAnimate ? this.updateAnimatedProperty(this.getSelectedChangeCurve()) : this.updateAnimatedProperty(null))
     }
 
     setItemsSelected() {
-        let t = Array.from({ length: 5 }, (() =>!1));
-        this.options.multiply ? this.selectedIndexes.forEach((e => t[e] = !0)) : void 0 !== this.selectedIndexes[0] && (t[this.selectedIndexes[0]] = !0);
-        this.buttonItemsSelected = t
+        var t;
+        this.buttonItemsSelected.forEach(((t, e) => {
+            this.buttonItemsSelected[e] = !1
+        }));
+            "capsule" === this.options.type && null !== (t = this.options.multiply) && void 0 !== t && t ? this.selectedIndexes.forEach((t => this.buttonItemsSelected[t] = !0)) : this.buttonItemsSelected[this.selectedIndexes[0]] = !0
     }
 
-    optionsChange() {
-        this.updateAnimatedProperty(null)
+    updateSelectedIndexes() {
+        var t;
+        void 0 === this.selectedIndexes && (this.selectedIndexes = []);
+        "tab" === this.options.type && 0 === this.selectedIndexes.length && (this.selectedIndexes[0] = 0);
+        if (this.selectedIndexes.length > 1) {
+            "tab" === this.options.type && (this.selectedIndexes = [0]);
+            "capsule" !== this.options.type || null !== (t = this.options.multiply) && void 0 !== t && t || (this.selectedIndexes = [])
+        }
+        this.selectedIndexes.some((t => void 0 === t || t < 0 || t >= this.options.buttons.length)) && ("tab" === this.options.type ? this.selectedIndexes = [0] : this.selectedIndexes = [])
     }
 
-    selectedChange() {
-        this.setItemsSelected();
-        this.doSelectedChangeAnimate ? this.updateAnimatedProperty(this.getSelectedChangeCurve()) : this.updateAnimatedProperty(null)
+    onOptionsChange() {
+        if (void 0 !== this.options && void 0 !== this.options.buttons) {
+            this.updateSelectedIndexes();
+            this.setItemsSelected();
+            this.updateAnimatedProperty(null)
+        }
+    }
+
+    onSelectedChange() {
+        if (void 0 !== this.options && void 0 !== this.options.buttons) {
+            this.updateSelectedIndexes();
+            this.setItemsSelected();
+            this.doSelectedChangeAnimate ? this.updateAnimatedProperty(this.getSelectedChangeCurve()) : this.updateAnimatedProperty(null)
+        }
     }
 
     aboutToAppear() {
-        if ("tab" === this.options.type && 0 === this.selectedIndexes.length) {
-            this.selectedIndexes[0] = 0;
-            this.buttonItemsSelected[0] = !0
+        if (void 0 !== this.options && void 0 !== this.options.buttons) {
+            this.options.onButtonsChange = () => {
+                    "tab" === this.options.type ? this.selectedIndexes = [0] : this.selectedIndexes = []
+            };
+            this.updateSelectedIndexes();
+            this.setItemsSelected();
+            this.updateAnimatedProperty(null)
         }
-        this.setItemsSelected();
-        this.updateAnimatedProperty(null)
+    }
+
+    isMouseWheelScroll(t) {
+        return t.source === SourceType.Mouse && !this.isPanGestureMoved
+    }
+
+    isMovedFromPanGestureStartPoint(t, e) {
+        return!nearEqual(t, this.panGestureStartPoint.x) || !nearEqual(e, this.panGestureStartPoint.y)
     }
 
     initialRender() {
@@ -1523,30 +1615,34 @@ class SegmentButton extends ViewPU {
             ViewStackProcessor.StartGetAccessRecordingFor(t);
             Stack.create();
             Stack.onFocus((() => {
-                    0 !== this.selectedIndexes.length ? this.options.multiply ? this.focusIndex = Math.min(...this.selectedIndexes) : this.focusIndex = this.selectedIndexes[0] : this.focusIndex = 0
+                var t;
+                void 0 !== this.options && (void 0 !== this.selectedIndexes && 0 !== this.selectedIndexes.length ? "tab" !== this.options.type && null !== (t = this.options.multiply) && void 0 !== t && t ? this.focusIndex = Math.min(...this.selectedIndexes) : this.focusIndex = this.selectedIndexes[0] : this.focusIndex = 0)
             }));
             Stack.onBlur((() => {
                 this.focusIndex = -1
             }));
             Stack.onKeyEvent((t => {
-                if (t.type === KeyType.Down) {
+                var e;
+                if (void 0 !== this.options && void 0 !== this.options.buttons && t.type === KeyType.Down) {
                     (t.keyCode === KeyCode.KEYCODE_DPAD_DOWN || t.keyCode === KeyCode.KEYCODE_DPAD_RIGHT) && this.focusIndex < Math.min(this.options.buttons.length, this.buttonItemsSize.length) - 1 && (this.focusIndex = this.focusIndex + 1);
                     (t.keyCode === KeyCode.KEYCODE_DPAD_UP || t.keyCode === KeyCode.KEYCODE_DPAD_LEFT) && this.focusIndex > 0 && (this.focusIndex = this.focusIndex - 1);
-                    t.keyCode === KeyCode.KEYCODE_SPACE && (this.options.multiply ? -1 === this.selectedIndexes.indexOf(this.focusIndex) ? this.selectedIndexes.push(this.focusIndex) : this.selectedIndexes.splice(this.selectedIndexes.indexOf(this.focusIndex), 1) : this.selectedIndexes[0] = this.focusIndex)
+                    t.keyCode !== KeyCode.KEYCODE_SPACE && t.keyCode !== KeyCode.KEYCODE_ENTER && t.keyCode !== KeyCode.KEYCODE_NUMPAD_ENTER || ("capsule" === this.options.type && null !== (e = this.options.multiply) && void 0 !== e && e ? -1 === this.selectedIndexes.indexOf(this.focusIndex) ? this.selectedIndexes.push(this.focusIndex) : this.selectedIndexes.splice(this.selectedIndexes.indexOf(this.focusIndex), 1) : this.selectedIndexes[0] = this.focusIndex)
                 }
             }));
             Gesture.create(GesturePriority.Low);
             GestureGroup.create(GestureMode.Parallel);
             TapGesture.create();
             TapGesture.onAction((t => {
-                let e = t.fingerList.find((t => null !== t));
-                if (void 0 === e) return;
-                let o = e.localX;
+                var e;
+                let o = t.fingerList.find(Boolean);
+                if (void 0 === o) return;
+                if (void 0 === this.options || void 0 === this.options.buttons) return;
+                let s = o.localX;
                 for (let t = 0;t < Math.min(this.options.buttons.length, this.buttonItemsSize.length); t++) {
-                    o -= this.buttonItemsSize[t].width;
-                    if (!(o >= 0)) {
-                        this.doSelectedChangeAnimate = !0;
-                            "capsule" === this.options.type && this.options.multiply ? -1 === this.selectedIndexes.indexOf(t) ? this.selectedIndexes.push(t) : this.selectedIndexes.splice(this.selectedIndexes.indexOf(t), 1) : this.selectedIndexes[0] = t;
+                    s -= this.buttonItemsSize[t].width;
+                    if (!(s >= 0)) {
+                        this.doSelectedChangeAnimate = !(this.selectedIndexes[0] > Math.min(this.options.buttons.length, this.buttonItemsSize.length));
+                            "capsule" === this.options.type && null !== (e = this.options.multiply) && void 0 !== e && e ? -1 === this.selectedIndexes.indexOf(t) ? this.selectedIndexes.push(t) : this.selectedIndexes.splice(this.selectedIndexes.indexOf(t), 1) : this.selectedIndexes[0] = t;
                         this.doSelectedChangeAnimate = !1;
                         break
                     }
@@ -1555,7 +1651,8 @@ class SegmentButton extends ViewPU {
             TapGesture.pop();
             SwipeGesture.create();
             SwipeGesture.onAction((t => {
-                if (!("capsule" === this.options.type && this.options.multiply || this.isCurrentPositionSelected)) if (t.angle > 0 && this.selectedIndexes[0] !== Math.min(this.options.buttons.length, this.buttonItemsSize.length) - 1) {
+                var e;
+                if (void 0 !== this.options && void 0 !== this.options.buttons && !("capsule" === this.options.type && null !== (e = this.options.multiply) && void 0 !== e && e || this.isCurrentPositionSelected)) if (t.angle > 0 && this.selectedIndexes[0] !== Math.min(this.options.buttons.length, this.buttonItemsSize.length) - 1) {
                     this.doSelectedChangeAnimate = !0;
                     this.selectedIndexes[0] = this.selectedIndexes[0] + 1;
                     this.doSelectedChangeAnimate = !1
@@ -1568,26 +1665,34 @@ class SegmentButton extends ViewPU {
             SwipeGesture.pop();
             PanGesture.create();
             PanGesture.onActionStart((t => {
-                let e = t.fingerList.find((t => null !== t));
-                if (void 0 === e) return;
-                let o = e.localX;
+                var e;
+                if (void 0 === this.options || void 0 === this.options.buttons) return;
+                if ("capsule" === this.options.type && null !== (e = this.options.multiply) && void 0 !== e && e) return;
+                let o = t.fingerList.find(Boolean);
+                if (void 0 === o) return;
+                let s = o.localX;
+                this.panGestureStartPoint = { x: o.globalX, y: o.globalY };
+                this.isPanGestureMoved = !1;
                 for (let t = 0;t < Math.min(this.options.buttons.length, this.buttonItemsSize.length); t++) {
-                    o -= this.buttonItemsSize[t].width;
-                    if (o < 0) {
+                    s -= this.buttonItemsSize[t].width;
+                    if (s < 0) {
                         this.isCurrentPositionSelected = t === this.selectedIndexes[0];
                         break
                     }
                 }
             }));
             PanGesture.onActionUpdate((t => {
-                if ("capsule" === this.options.type && this.options.multiply) return;
+                var e;
+                if (void 0 === this.options || void 0 === this.options.buttons) return;
+                if ("capsule" === this.options.type && null !== (e = this.options.multiply) && void 0 !== e && e) return;
                 if (!this.isCurrentPositionSelected) return;
-                let e = t.fingerList.find((t => null !== t));
-                if (void 0 === e) return;
-                let o = e.localX;
+                let o = t.fingerList.find(Boolean);
+                if (void 0 === o) return;
+                let s = o.localX;
+                !this.isPanGestureMoved && this.isMovedFromPanGestureStartPoint(o.globalX, o.globalY) && (this.isPanGestureMoved = !0);
                 for (let t = 0;t < Math.min(this.options.buttons.length, this.buttonItemsSize.length); t++) {
-                    o -= this.buttonItemsSize[t].width;
-                    if (o < 0) {
+                    s -= this.buttonItemsSize[t].width;
+                    if (s < 0) {
                         this.doSelectedChangeAnimate = !0;
                         this.selectedIndexes[0] = t;
                         this.doSelectedChangeAnimate = !1;
@@ -1595,14 +1700,33 @@ class SegmentButton extends ViewPU {
                     }
                 }
                 this.zoomScaleArray.forEach(((t, e) => {
-                        e === this.selectedIndexes[0] ? this.zoomScaleArray[e] = .95 : this.zoomScaleArray[e] = 1
+                        e === this.selectedIndexes[0] ? Context.animateTo({
+                        curve: curves.interpolatingSpring(10, 1, 410, 38)
+                    }, (() => {
+                        this.zoomScaleArray[e] = .95
+                    })) : Context.animateTo({ curve: curves.interpolatingSpring(10, 1, 410, 38) }, (() => {
+                        this.zoomScaleArray[e] = 1
+                    }))
                 }))
             }));
             PanGesture.onActionEnd((t => {
-                Context.animateTo({ curve: curves.interpolatingSpring(10, 1, 410, 38) }, (() => {
-                    this.zoomScaleArray[this.selectedIndexes[0]] = 1
-                }));
-                this.isCurrentPositionSelected = !1
+                var e;
+                if (void 0 === this.options || void 0 === this.options.buttons) return;
+                if ("capsule" === this.options.type && null !== (e = this.options.multiply) && void 0 !== e && e) return;
+                let o = t.fingerList.find(Boolean);
+                if (void 0 !== o) {
+                    !this.isPanGestureMoved && this.isMovedFromPanGestureStartPoint(o.globalX, o.globalY) && (this.isPanGestureMoved = !0);
+                    if (this.isMouseWheelScroll(t)) {
+                        let e = 0 !== t.offsetX ? t.offsetX : t.offsetY;
+                        this.doSelectedChangeAnimate = !0;
+                            e > 0 && this.selectedIndexes[0] > 0 ? this.selectedIndexes[0] -= 1 : e < 0 && this.selectedIndexes[0] < Math.min(this.options.buttons.length, this.buttonItemsSize.length) - 1 && (this.selectedIndexes[0] += 1);
+                        this.doSelectedChangeAnimate = !1
+                    }
+                    Context.animateTo({ curve: curves.interpolatingSpring(10, 1, 410, 38) }, (() => {
+                        this.zoomScaleArray[this.selectedIndexes[0]] = 1
+                    }));
+                    this.isCurrentPositionSelected = !1
+                }
             }));
             PanGesture.pop();
             GestureGroup.pop();
@@ -1613,50 +1737,104 @@ class SegmentButton extends ViewPU {
         this.observeComponentCreation(((t, e) => {
             ViewStackProcessor.StartGetAccessRecordingFor(t);
             If.create();
-                "capsule" === this.options.type && this.options.multiply ? this.ifElseBranchUpdateFunction(0, (() => {
-                this.observeComponentCreation(((t, e) => {
-                    ViewStackProcessor.StartGetAccessRecordingFor(t);
-                    if (e) {
-                        let e = () => ({ optionsArray: this.options.buttons, options: this.options });
-                        ViewPU.create(new MultiSelectBackground(this, {
-                            optionsArray: this.options.buttons,
-                            options: this.options
-                        }, void 0, t, e))
-                    } else this.updateStateVarsOfChildByElmtId(t, {
-                        optionsArray: this.options.buttons,
-                        options: this.options
-                    });
-                    ViewStackProcessor.StopGetAccessRecording()
-                }))
-            })) : this.ifElseBranchUpdateFunction(1, (() => {
+                void 0 !== this.options && null != this.options.buttons ? this.ifElseBranchUpdateFunction(0, (() => {
                 this.observeComponentCreation(((t, e) => {
                     var o;
                     ViewStackProcessor.StartGetAccessRecordingFor(t);
+                    If.create();
+                        "capsule" === this.options.type && null !== (o = this.options.multiply) && void 0 !== o && o ? this.ifElseBranchUpdateFunction(0, (() => {
+                        this.observeComponentCreation(((t, e) => {
+                            ViewStackProcessor.StartGetAccessRecordingFor(t);
+                            if (e) {
+                                let e = () => ({ optionsArray: this.options.buttons, options: this.options });
+                                ViewPU.create(new MultiSelectBackground(this, {
+                                    optionsArray: this.options.buttons,
+                                    options: this.options
+                                }, void 0, t, e))
+                            } else this.updateStateVarsOfChildByElmtId(t, {
+                                optionsArray: this.options.buttons,
+                                options: this.options
+                            });
+                            ViewStackProcessor.StopGetAccessRecording()
+                        }))
+                    })) : this.ifElseBranchUpdateFunction(1, (() => {
+                        this.observeComponentCreation(((t, e) => {
+                            var o, s;
+                            ViewStackProcessor.StartGetAccessRecordingFor(t);
+                            Stack.create();
+                            Stack.size(ObservedObject.GetRawObject(this.componentSize));
+                            Stack.backgroundColor(null !== (o = this.options.backgroundColor) && void 0 !== o ? o : SegmentButtonTheme.BACKGROUND_COLOR);
+                            Stack.borderRadius(null !== (s = this.options.iconTextBackgroundRadius) && void 0 !== s ? s : this.componentSize.height / 2);
+                            Stack.foregroundBlurStyle(BlurStyle.BACKGROUND_THICK, { colorMode: ThemeColorMode.LIGHT });
+                            e || Stack.pop();
+                            ViewStackProcessor.StopGetAccessRecording()
+                        }));
+                        Stack.pop()
+                    }));
+                    e || If.pop();
+                    ViewStackProcessor.StopGetAccessRecording()
+                }));
+                If.pop();
+                this.observeComponentCreation(((t, e) => {
+                    var o, s;
+                    ViewStackProcessor.StartGetAccessRecordingFor(t);
                     Stack.create();
                     Stack.size(ObservedObject.GetRawObject(this.componentSize));
-                    Stack.backgroundColor(this.options.backgroundColor);
-                    Stack.borderRadius(null !== (o = this.options.iconTextBackgroundRadius) && void 0 !== o ? o : this.componentSize.height / 2);
-                    Stack.foregroundBlurStyle(BlurStyle.BACKGROUND_THICK, { colorMode: ThemeColorMode.LIGHT });
+                    Stack.borderRadius(null !== (s = "capsule" === this.options.type && null !== (o = this.options.multiply) && void 0 !== o && o ? this.options.iconTextRadius : this.options.iconTextBackgroundRadius) && void 0 !== s ? s : this.componentSize.height / 2);
+                    Stack.clip(!0);
                     e || Stack.pop();
                     ViewStackProcessor.StopGetAccessRecording()
                 }));
-                Stack.pop()
-            }));
-            e || If.pop();
-            ViewStackProcessor.StopGetAccessRecording()
-        }));
-        If.pop();
-        this.observeComponentCreation(((t, e) => {
-            ViewStackProcessor.StartGetAccessRecordingFor(t);
-            Stack.create();
-            Stack.size(ObservedObject.GetRawObject(this.componentSize));
-            e || Stack.pop();
-            ViewStackProcessor.StopGetAccessRecording()
-        }));
-        this.observeComponentCreation(((t, e) => {
-            ViewStackProcessor.StartGetAccessRecordingFor(t);
-            If.create();
-                "capsule" === this.options.type && this.options.multiply ? this.ifElseBranchUpdateFunction(0, (() => {
+                this.observeComponentCreation(((t, e) => {
+                    var o;
+                    ViewStackProcessor.StartGetAccessRecordingFor(t);
+                    If.create();
+                        "capsule" === this.options.type && null !== (o = this.options.multiply) && void 0 !== o && o ? this.ifElseBranchUpdateFunction(0, (() => {
+                        this.observeComponentCreation(((t, e) => {
+                            ViewStackProcessor.StartGetAccessRecordingFor(t);
+                            if (e) {
+                                let e = () => ({
+                                    optionsArray: this.options.buttons,
+                                    options: this.options,
+                                    selectedIndexes: $selectedIndexes
+                                });
+                                ViewPU.create(new MultiSelectItemArray(this, {
+                                    optionsArray: this.options.buttons,
+                                    options: this.options,
+                                    selectedIndexes: this.__selectedIndexes
+                                }, void 0, t, e))
+                            } else this.updateStateVarsOfChildByElmtId(t, {
+                                optionsArray: this.options.buttons,
+                                options: this.options
+                            });
+                            ViewStackProcessor.StopGetAccessRecording()
+                        }))
+                    })) : this.ifElseBranchUpdateFunction(1, (() => {
+                        this.observeComponentCreation(((t, e) => {
+                            ViewStackProcessor.StartGetAccessRecordingFor(t);
+                            if (e) {
+                                let e = () => ({
+                                    optionsArray: this.options.buttons,
+                                    options: this.options,
+                                    selectedIndexes: $selectedIndexes
+                                });
+                                ViewPU.create(new SelectItem(this, {
+                                    optionsArray: this.options.buttons,
+                                    options: this.options,
+                                    selectedIndexes: this.__selectedIndexes
+                                }, void 0, t, e))
+                            } else this.updateStateVarsOfChildByElmtId(t, {
+                                optionsArray: this.options.buttons,
+                                options: this.options
+                            });
+                            ViewStackProcessor.StopGetAccessRecording()
+                        }))
+                    }));
+                    e || If.pop();
+                    ViewStackProcessor.StopGetAccessRecording()
+                }));
+                If.pop();
+                Stack.pop();
                 this.observeComponentCreation(((t, e) => {
                     ViewStackProcessor.StartGetAccessRecordingFor(t);
                     if (e) {
@@ -1665,7 +1843,7 @@ class SegmentButton extends ViewPU {
                             options: this.options,
                             selectedIndexes: $selectedIndexes
                         });
-                        ViewPU.create(new MultiSelectItemArray(this, {
+                        ViewPU.create(new SegmentButtonItemArrayComponent(this, {
                             optionsArray: this.options.buttons,
                             options: this.options,
                             selectedIndexes: this.__selectedIndexes
@@ -1677,55 +1855,17 @@ class SegmentButton extends ViewPU {
                     ViewStackProcessor.StopGetAccessRecording()
                 }))
             })) : this.ifElseBranchUpdateFunction(1, (() => {
-                this.observeComponentCreation(((t, e) => {
-                    ViewStackProcessor.StartGetAccessRecordingFor(t);
-                    if (e) {
-                        let e = () => ({
-                            optionsArray: this.options.buttons,
-                            options: this.options,
-                            selectedIndexes: $selectedIndexes
-                        });
-                        ViewPU.create(new SelectItem(this, {
-                            optionsArray: this.options.buttons,
-                            options: this.options,
-                            selectedIndexes: this.__selectedIndexes
-                        }, void 0, t, e))
-                    } else this.updateStateVarsOfChildByElmtId(t, {
-                        optionsArray: this.options.buttons,
-                        options: this.options
-                    });
-                    ViewStackProcessor.StopGetAccessRecording()
-                }))
             }));
             e || If.pop();
             ViewStackProcessor.StopGetAccessRecording()
         }));
         If.pop();
-        Stack.pop();
-        this.observeComponentCreation(((t, e) => {
-            ViewStackProcessor.StartGetAccessRecordingFor(t);
-            if (e) {
-                let e = () => ({
-                    optionsArray: this.options.buttons,
-                    options: this.options,
-                    selectedIndexes: $selectedIndexes
-                });
-                ViewPU.create(new SegmentButtonItemArrayComponent(this, {
-                    optionsArray: this.options.buttons,
-                    options: this.options,
-                    selectedIndexes: this.__selectedIndexes
-                }, void 0, t, e))
-            } else this.updateStateVarsOfChildByElmtId(t, {
-                optionsArray: this.options.buttons,
-                options: this.options
-            });
-            ViewStackProcessor.StopGetAccessRecording()
-        }));
         Stack.pop()
     }
 
     getSelectedChangeCurve() {
-        return "capsule" === this.options.type && this.options.multiply ? null : curves.springMotion(.347, .99)
+        var t;
+        return "capsule" === this.options.type && null !== (t = this.options.multiply) && void 0 !== t && t ? null : curves.springMotion(.347, .99)
     }
 
     updateAnimatedProperty(t) {
@@ -1733,13 +1873,15 @@ class SegmentButton extends ViewPU {
             this.selectedItemPosition = 0 === this.selectedIndexes.length ? {
                                                                             } : this.buttonItemsPosition[this.selectedIndexes[0]];
             this.buttonItemsSelected.forEach(((t, e) => {
-                this.buttonItemProperty[e].fontColor = t ? this.options.selectedFontColor : this.options.fontColor
+                var o, s;
+                this.buttonItemProperty[e].fontColor = t ? null !== (o = this.options.selectedFontColor) && void 0 !== o ? o : "tab" === this.options.type ? SegmentButtonTheme.TAB_SELECTED_FONT_COLOR : SegmentButtonTheme.CAPSULE_SELECTED_FONT_COLOR : null !== (s = this.options.fontColor) && void 0 !== s ? s : SegmentButtonTheme.FONT_COLOR
             }))
         };
             t ? Context.animateTo({ curve: t }, e) : e();
         this.buttonItemsSelected.forEach(((t, e) => {
-            this.buttonItemProperty[e].fontSize = t ? this.options.selectedFontSize : this.options.fontSize;
-            this.buttonItemProperty[e].fontWeight = t ? this.options.selectedFontWeight : this.options.fontWeight;
+            var o, s, i, n;
+            this.buttonItemProperty[e].fontSize = t ? null !== (o = this.options.selectedFontSize) && void 0 !== o ? o : SegmentButtonTheme.SELECTED_FONT_SIZE : null !== (s = this.options.fontSize) && void 0 !== s ? s : SegmentButtonTheme.FONT_SIZE;
+            this.buttonItemProperty[e].fontWeight = t ? null !== (i = this.options.selectedFontWeight) && void 0 !== i ? i : FontWeight.Medium : null !== (n = this.options.fontWeight) && void 0 !== n ? n : FontWeight.Regular;
             this.buttonItemProperty[e].isSelected = t
         }))
     }

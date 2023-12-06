@@ -32,7 +32,9 @@ var Color;
 
 var ColoringStrategy;
 (function (ColoringStrategy) {
-  ColoringStrategy["INVERT"] = "Invert";
+  ColoringStrategy["INVERT"] = "invert";
+  ColoringStrategy["AVERAGE"] = "average";
+  ColoringStrategy["PRIMARY"] = "primary";
 })(ColoringStrategy || (ColoringStrategy = {}));
 
 var TextInputStyle;
@@ -56,6 +58,14 @@ var TextAlign;
   TextAlign[TextAlign["JUSTIFY"] = 3] = "JUSTIFY";
 })(TextAlign || (TextAlign = {}));
 
+var TextDataDetectorType;
+(function (TextDataDetectorType) {
+  TextDataDetectorType[TextDataDetectorType["PHONE_NUMBER"] = 0] = "PHONE_NUMBER";
+  TextDataDetectorType[TextDataDetectorType["URL"] = 1] = "URL";
+  TextDataDetectorType[TextDataDetectorType["EMAIL"] = 2] = "EMAIL";
+  TextDataDetectorType[TextDataDetectorType["ADDRESS"] = 3] = "ADDRESS";
+})(TextDataDetectorType || (TextDataDetectorType = {}));
+
 var DataPanelType;
 (function (DataPanelType) {
   DataPanelType[DataPanelType["Line"] = 0] = "Line";
@@ -72,6 +82,20 @@ var FontWeight;
   FontWeight["Bold"] = "bold";
   FontWeight["Bolder"] = "bolder";
 })(FontWeight || (FontWeight = {}));
+
+var WordBreak;
+(function (WordBreak) {
+  WordBreak[WordBreak["NORMAL"] = 0] = "normal";
+  WordBreak[WordBreak["BREAK_ALL"] = 1] = "break-all";
+  WordBreak[WordBreak["BREAK_WORD"] = 2] = "break-word";
+})(WordBreak || (WordBreak = {}));
+
+var EllipsisMode;
+(function (EllipsisMode) {
+  EllipsisMode[EllipsisMode["START"] = 0] = "start";
+  EllipsisMode[EllipsisMode["CENTER"] = 1] = "center";
+  EllipsisMode[EllipsisMode["END"] = 2] = "end";
+})(EllipsisMode || (EllipsisMode = {}));
 
 var Curve;
 (function (Curve) {
@@ -242,6 +266,13 @@ var Alignment;
   Alignment[Alignment["Bottom"] = 7] = "Bottom";
   Alignment[Alignment["BottomEnd"] = 8] = "BottomEnd";
 })(Alignment || (Alignment = {}));
+
+var BlendMode;
+(function (BlendMode) {
+  BlendMode[BlendMode["NORMAL"] = 0] = "NORMAL";
+  BlendMode[BlendMode["DESTINATION_IN"] = 1] = "DESTINATION_IN";
+  BlendMode[BlendMode["SOURCE_IN"] = 2] = "SOURCE_IN";
+})(BlendMode || (BlendMode = {}));
 
 var TextOverflow;
 (function (TextOverflow) {
@@ -551,7 +582,14 @@ var FormDimension;
   FormDimension["Dimension_2_4"] = 3;
   FormDimension["Dimension_4_4"] = 4;
   FormDimension["Dimension_2_1"] = 5;
+  FormDimension["DIMENSION_1_1"] = 6;
 })(FormDimension || (FormDimension = {}));
+
+let FormRenderingMode;
+(function (FormRenderingMode) {
+  FormRenderingMode.FULL_COLOR = 0;
+  FormRenderingMode.SINGLE_COLOR = 1;
+})(FormRenderingMode || (FormRenderingMode = {}));
 
 var TransitionType;
 (function (TransitionType) {
@@ -760,7 +798,27 @@ var InputType;
   InputType[InputType["PhoneNumber"] = 3] = "PhoneNumber";
   InputType[InputType["Email"] = 5] = "Email";
   InputType[InputType["Password"] = 7] = "Password";
+  InputType[InputType["NUMBER_PASSWORD"] = 8] = "NUMBER_PASSWORD";
+  InputType[InputType["SCREEN_LOCK_PASSWORD"] = 9] = "SCREEN_LOCK_PASSWORD";
+  InputType[InputType["USER_NAME"] = 10] = "USER_NAME";
+  InputType[InputType["NEW_PASSWORD"] = 11] = "NEW_PASSWORD";
 })(InputType || (InputType = {}));
+
+var SearchType;
+(function (SearchType) {
+  SearchType[SearchType["NORMAL"] = 0] = "NORMAL";
+  SearchType[SearchType["NUMBER"] = 2] = "NUMBER";
+  SearchType[SearchType["PHONE_NUMBER"] = 3] = "PHONE_NUMBER";
+  SearchType[SearchType["EMAIL"] = 5] = "EMAIL";
+})(SearchType || (SearchType = {}));
+
+var TextAreaType;
+(function (TextAreaType) {
+  TextAreaType[TextAreaType["NORMAL"] = 0] = "NORMAL";
+  TextAreaType[TextAreaType["NUMBER"] = 2] = "NUMBER";
+  TextAreaType[TextAreaType["PHONE_NUMBER"] = 3] = "PHONE_NUMBER";
+  TextAreaType[TextAreaType["EMAIL"] = 5] = "EMAIL";
+})(TextAreaType || (TextAreaType = {}));
 
 var EnterKeyType;
 (function (EnterKeyType) {
@@ -817,6 +875,13 @@ var ResponseType;
   ResponseType[ResponseType["RightClick"] = 0] = "RightClick";
   ResponseType[ResponseType["LongPress"] = 1] = "LongPress";
 })(ResponseType || (ResponseType = {}));
+
+var RichEditorResponseType;
+(function (RichEditorResponseType) {
+  RichEditorResponseType[RichEditorResponseType["RIGHT_CLICK"] = 0] = "RIGHT_CLICK";
+  RichEditorResponseType[RichEditorResponseType["LONG_PRESS"] = 1] = "LONG_PRESS";
+  RichEditorResponseType[RichEditorResponseType["SELECT"] = 2] = "SELECT";
+})(RichEditorResponseType || (RichEditorResponseType = {}));
 
 var MenuPreviewMode;
 (function (MenuPreviewMode) {
@@ -948,6 +1013,12 @@ var WebDarkMode;
   WebDarkMode[WebDarkMode["Auto"] = 2] = "Auto";
 })(WebDarkMode || (WebDarkMode = {}));
 
+var OverScrollMode;
+(function (OverScrollMode) {
+  OverScrollMode[OverScrollMode["NEVER"] = 0] = "NEVER";
+  OverScrollMode[OverScrollMode["ALWAYS"] = 1] = "ALWAYS";
+})(OverScrollMode || (OverScrollMode = {}));
+
 var RenderExitReason;
 (function (RenderExitReason) {
   RenderExitReason[RenderExitReason["ProcessAbnormalTermination"] = 0] = "ProcessAbnormalTermination";
@@ -1007,7 +1078,7 @@ var CopyOptions;
   CopyOptions[CopyOptions["None"] = 0] = "None";
   CopyOptions[CopyOptions["InApp"] = 1] = "InApp";
   CopyOptions[CopyOptions["LocalDevice"] = 2] = "LocalDevice";
-  CopyOptions[CopyOptions["CrossDevice"] = 3] = "CrossDevice";
+  CopyOptions[CopyOptions["CROSS_DEVICE"] = 3] = "CrossDevice";
 })(CopyOptions || (CopyOptions = {}));
 
 var RichEditorSpanType;
@@ -1038,6 +1109,11 @@ var BlurStyle;
   BlurStyle[BlurStyle["BACKGROUND_REGULAR"] = 5] = "BACKGROUND_REGULAR";
   BlurStyle[BlurStyle["BACKGROUND_THICK"] = 6] = "BACKGROUND_THICK";
   BlurStyle[BlurStyle["BACKGROUND_ULTRA_THICK"] = 7] = "BACKGROUND_ULTRA_THICK";
+  BlurStyle[BlurStyle["COMPONENT_ULTRA_THIN"] = 8] = "COMPONENT_ULTRA_THIN";
+  BlurStyle[BlurStyle["COMPONENT_THIN"] = 9] = "COMPONENT_THIN";
+  BlurStyle[BlurStyle["COMPONENT_REGULAR"] = 10] = "COMPONENT_REGULAR";
+  BlurStyle[BlurStyle["COMPONENT_THICK"] = 11] = "COMPONENT_THICK";
+  BlurStyle[BlurStyle["COMPONENT_ULTRA_THICK"] = 12] = "COMPONENT_ULTRA_THICK";
   BlurStyle[BlurStyle["NONE"] = 0] = "NONE";
 })(BlurStyle || (BlurStyle = {}));
 
@@ -1177,7 +1253,15 @@ var SheetSize;
 (function (SheetSize) {
   SheetSize['MEDIUM'] = "MEDIUM";
   SheetSize['LARGE'] = "LARGE";
+  SheetSize['FIT_CONTENT'] = "FIT_CONTENT";
 })(SheetSize || (SheetSize = {}));
+
+var SheetType;
+(function (SheetType) {
+  SheetType[SheetType["BOTTOM"] = 0] = "BOTTOM";
+  SheetType[SheetType["CENTER"] = 1] = "CENTER";
+  SheetType[SheetType["POPUP"] = 2] = "POPUP";
+})(SheetType || (SheetType = {}));
 
 var FunctionKey;
 (function (FunctionKey) {
@@ -1195,6 +1279,27 @@ var FunctionKey;
   FunctionKey[FunctionKey["F11"] = 11] = "F11";
   FunctionKey[FunctionKey["F12"] = 12] = "F12";
 })(FunctionKey || (FunctionKey = {}));
+
+var GestureJudgeResult;
+(function (GestureJudgeResult) {
+  GestureJudgeResult[GestureJudgeResult["CONTINUE"] = 0] = "CONTINUE";
+  GestureJudgeResult[GestureJudgeResult["REJECT"] = 1] = "REJECT";
+})(GestureJudgeResult || (GestureJudgeResult = {}));
+
+var GestureControl;
+(function (GestureControl) {
+    let GestureType;
+    (function (GestureType) {
+        GestureType[GestureType["TAP_GESTURE"] = 0] = "TAP_GESTURE";
+        GestureType[GestureType["LONG_PRESS_GESTURE"] = 1] = "LONG_PRESS_GESTURE";
+        GestureType[GestureType["PAN_GESTURE"] = 2] = "PAN_GESTURE";
+        GestureType[GestureType["PINCH_GESTURE"] = 3] = "PINCH_GESTURE";
+        GestureType[GestureType["SWIPE_GESTURE"] = 4] = "SWIPE_GESTURE";
+        GestureType[GestureType["ROTATION_GESTURE"] = 5] = "ROTATION_GESTURE";
+        GestureType[GestureType["DRAG"] = 6] = "DRAG";
+        GestureType[GestureType["CLICK"] = 7] = "CLICK";
+    })(GestureType = GestureControl.GestureType || (GestureControl.GestureType = {}));
+})(GestureControl || (GestureControl = {}));
 
 class SubTabBarStyle {
   constructor(content) {
@@ -1496,23 +1601,50 @@ class NavPathStack {
     this.pathArray = [];
     // indicate class has changed.
     this.changeFlag = 0;
+    // replace value 0: don't do anything;
+    // 1: replace value and do replace animation;
+    // 2: don't replace value but do replace animation
+    this.isReplace = 0;
     this.type = this.constructor.name;
   }
   pushName(name, param) {
     this.pathArray.push(new NavPathInfo(name, param));
     this.changeFlag = this.changeFlag + 1;
+    this.isReplace = 0;
   }
   push(info) {
     this.pathArray.push(info);
     this.changeFlag = this.changeFlag + 1;
+    this.isReplace = 0;
   }
   pushPathByName(name, param) {
     this.pathArray.push(new NavPathInfo(name, param));
     this.changeFlag = this.changeFlag + 1;
+    this.isReplace = 0;
   }
   pushPath(info) {
     this.pathArray.push(info);
     this.changeFlag = this.changeFlag + 1;
+    this.isReplace = 0;
+  }
+  replacePath(info) {
+    if (this.pathArray.length !== 0) {
+      this.pathArray.pop();
+    }
+    this.pathArray.push(info);
+    this.isReplace = 1;
+    this.changeFlag = this.changeFlag + 1;
+  }
+  replacePathByName(name, param) {
+    if (this.pathArray.length !== 0) {
+      this.pathArray.pop();
+    }
+    this.isReplace = 1;
+    this.pathArray.push(new NavPathInfo(name, param));
+    this.changeFlag = this.changeFlag + 1;
+  }
+  setIsReplace(value) {
+    this.isReplace = value;
   }
   pop() {
     if (this.pathArray.length === 0) {
@@ -1520,6 +1652,7 @@ class NavPathStack {
     }
     let pathInfo = this.pathArray.pop();
     this.changeFlag = this.changeFlag + 1;
+    this.isReplace = 0;
     return pathInfo;
   }
   popTo(name) {
@@ -1528,6 +1661,7 @@ class NavPathStack {
       return -1;
     }
     this.pathArray.splice(index + 1);
+    this.isReplace = 0;
     this.changeFlag = this.changeFlag + 1;
     return index;
   }
@@ -1538,6 +1672,7 @@ class NavPathStack {
     }
     this.pathArray.splice(index + 1);
     this.changeFlag = this.changeFlag + 1;
+    this.isReplace = 0;
     return index;
   }
   popToIndex(index) {
@@ -1546,6 +1681,7 @@ class NavPathStack {
     }
     this.pathArray.splice(index + 1);
     this.changeFlag = this.changeFlag + 1;
+    this.isReplace = 0;
   }
   moveToTop(name) {
     let index = this.pathArray.findIndex(element => element.name === name);
@@ -1555,6 +1691,7 @@ class NavPathStack {
     let info = this.pathArray.splice(index, 1);
     this.pathArray.push(info[0]);
     this.changeFlag = this.changeFlag + 1;
+    this.isReplace = 0;
     return index;
   }
   moveIndexToTop(index) {
@@ -1564,10 +1701,12 @@ class NavPathStack {
     let info = this.pathArray.splice(index, 1);
     this.pathArray.push(info[0]);
     this.changeFlag = this.changeFlag + 1;
+    this.isReplace = 0;
   }
   clear() {
     this.pathArray.splice(0);
     this.changeFlag = this.changeFlag + 1;
+    this.isReplace = 0;
   }
   removeName(name) {
     var removed = false;
@@ -1579,6 +1718,7 @@ class NavPathStack {
     }
     if (removed) {
       this.changeFlag = this.changeFlag + 1;
+      this.isReplace = 0;
     }
   }
   removeIndex(index) {
@@ -1587,6 +1727,7 @@ class NavPathStack {
     }
     this.pathArray.splice(index, 1);
     this.changeFlag = this.changeFlag + 1;
+    this.isReplace = 0;
   }
   getAllPathName() {
     let array = this.pathArray.flatMap(element => element.name);
@@ -1778,6 +1919,16 @@ var NestedScrollMode;
   NestedScrollMode[NestedScrollMode["PARALLEL"] = 3] = "PARALLEL";
 })(NestedScrollMode || (NestedScrollMode = {}));
 
+var IlluminatedType;
+(function (IlluminatedType) {
+  IlluminatedType[IlluminatedType["NONE"] = 0] = "NONE";
+  IlluminatedType[IlluminatedType["BORDER"] = 1] = "BORDER";
+  IlluminatedType[IlluminatedType["CONTENT"] = 2] = "CONTENT";
+  IlluminatedType[IlluminatedType["BORDER_CONTENT"] = 3] = "BORDER_CONTENT";
+  IlluminatedType[IlluminatedType["BLOOM_BORDER"] = 4] = "BLOOM_BORDER";
+  IlluminatedType[IlluminatedType["BLOOM_BORDER_CONTENT"] = 5] = "BLOOM_BORDER_CONTENT";
+})(IlluminatedType || (IlluminatedType = {}));
+
 var ScrollAlign;
 (function (ScrollAlign) {
   ScrollAlign[ScrollAlign["START"] = 0] = "START";
@@ -1871,3 +2022,79 @@ var ParticleUpdater;
   ParticleUpdater[ParticleUpdater["RANDOM"] = 1] = "RANDOM";
   ParticleUpdater[ParticleUpdater["CURVE"] = 2] = "CURVE";
 })(ParticleUpdater || (ParticleUpdater = {}));
+
+var SwiperNestedScrollMode;
+(function (SwiperNestedScrollMode) {
+  SwiperNestedScrollMode[SwiperNestedScrollMode["SELF_ONLY"] = 0] = "SELF_ONLY";
+  SwiperNestedScrollMode[SwiperNestedScrollMode["SELF_FIRST"] = 1] = "SELF_FIRST";
+})(SwiperNestedScrollMode || (SwiperNestedScrollMode = {}));
+
+var CheckBoxStyle;
+(function (CheckBoxStyle) {
+  CheckBoxStyle["CIRCULAR_STYLE"] = 0;
+  CheckBoxStyle["SQUARE_STYLE"] = 1;
+})(CheckBoxStyle || (CheckBoxStyle = {}));
+
+var ModelType;
+(function (ModelType) {
+  ModelType[ModelType["TEXTURE"] = 0] = "TEXTURE";
+  ModelType[ModelType["SURFACE"] = 1] = "SURFACE";
+})(ModelType || (ModelType = {}));
+
+var ModelLightType;
+(function (ModelLightType) {
+  ModelLightType[ModelLightType["INVALID"] = 0] = "INVALID";
+  ModelLightType[ModelLightType["DIRECTIONAL"] = 1] = "DIRECTIONAL";
+  ModelLightType[ModelLightType["POINT"] = 2] = "POINT";
+  ModelLightType[ModelLightType["SPOT"] = 3] = "SPOT";
+})(ModelLightType || (ModelLightType = {}));
+
+var ModelAnimationStates;
+(function (ModelAnimationStates) {
+  ModelAnimationStates[ModelAnimationStates["PLAY"] = 0] = "PLAY";
+  ModelAnimationStates[ModelAnimationStates["PAUSE"] = 1] = "PAUSE";
+  ModelAnimationStates[ModelAnimationStates["STOP"] = 2] = "STOP";
+})(ModelAnimationStates || (ModelAnimationStates = {}));
+
+var SwipeActionState;
+(function (SwipeActionState) {
+  SwipeActionState[SwipeActionState["COLLAPSED"] = 0] = "COLLAPSED";
+  SwipeActionState[SwipeActionState["EXPANDED"] = 1] = "EXPANDED";
+  SwipeActionState[SwipeActionState["ACTIONING"] = 2] = "ACTIONING";
+})(SwipeActionState || (SwipeActionState = {}));
+
+var CheckBoxShape;
+(function (CheckBoxShape) {
+  CheckBoxShape["CIRCLE"] = 0;
+  CheckBoxShape["ROUNDED_SQUARE"] = 1;
+})(CheckBoxShape || (CheckBoxShape = {}));
+
+var FinishCallbackType;
+(function (FinishCallbackType) {
+  FinishCallbackType["REMOVED"] = 0;
+  FinishCallbackType["LOGICALLY"] = 1;
+})(FinishCallbackType || (FinishCallbackType = {}));
+var WebLayoutMode;
+(function (WebLayoutMode) {
+  WebLayoutMode[WebLayoutMode["NONE"] = 0] = "NONE";
+  WebLayoutMode[WebLayoutMode["FIT_CONTENT"] = 1] = "FIT_CONTENT";
+})(WebLayoutMode || (WebLayoutMode = {}));
+
+var OptionWidthMode;
+(function (OptionWidthMode) {
+  OptionWidthMode["FIT_CONTENT"] = "fit_content";
+  OptionWidthMode["FIT_TRIGGER"] = "fit_trigger";
+})(OptionWidthMode || (OptionWidthMode = {}));
+
+var ArrowPointPosition;
+(function (ArrowPointPosition) {
+  ArrowPointPosition["START"] = "Start";
+  ArrowPointPosition["CENTER"] = "Center";
+  ArrowPointPosition["END"] = "End";
+})(ArrowPointPosition || (ArrowPointPosition = {}));
+
+var DragPreviewMode;
+(function (DragPreviewMode) {
+  DragPreviewMode["AUTO"] = 1;
+  DragPreviewMode["DISABLE_SCALE"] = 2;
+})(DragPreviewMode || (DragPreviewMode = {}));

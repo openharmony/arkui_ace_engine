@@ -16,9 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_CONTAINER_SCOPE_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_CONTAINER_SCOPE_H
 
-#include <functional>
-#include <shared_mutex>
-#include <stdint.h>
+#include <cinttypes>
 
 #include "base/utils/macros.h"
 #include "base/utils/noncopyable.h"
@@ -29,26 +27,20 @@ class ACE_EXPORT ContainerScope {
 public:
     explicit ContainerScope(int32_t id)
     {
-        restoreId_ = ContainerScope::CurrentId();
-        ContainerScope::UpdateCurrent(id);
+        UpdateCurrent(id);
     }
 
     ~ContainerScope()
     {
-        ContainerScope::UpdateCurrent(restoreId_);
+        UpdateCurrent(restoreId_);
     }
 
     static int32_t CurrentId();
 
     static void UpdateCurrent(int32_t id);
 
-    static void SetScopeNotify(std::function<void(int32_t)>&& notify);
-
 private:
-    static thread_local int32_t currentId_;
-    int32_t restoreId_ = -1;
-    static std::function<void(int32_t)> updateScopeNotify_;
-    static std::shared_mutex scopeLock_;
+    int32_t restoreId_ = CurrentId();
 
     ACE_DISALLOW_COPY_AND_MOVE(ContainerScope);
 };

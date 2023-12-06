@@ -17,9 +17,6 @@ import(
 build_component("progress") {
   sources = [
     "bubble_progress_component.cpp",
-    "flutter_render_bubble_progress.cpp",
-    "flutter_render_loading_progress.cpp",
-    "flutter_render_progress.cpp",
     "loading_progress_component.cpp",
     "progress_component.cpp",
     "render_bubble_progress.cpp",
@@ -29,13 +26,7 @@ build_component("progress") {
     "render_progress.cpp",
     "render_progress_creator.cpp",
   ]
-  if (ace_use_new_skia) {
-    sources -= [
-      "flutter_render_bubble_progress.cpp",
-      "flutter_render_loading_progress.cpp",
-      "flutter_render_progress.cpp",
-    ]
-  }
+
   rosen_sources = [
     "rosen_render_bubble_progress.cpp",
     "rosen_render_loading_progress.cpp",

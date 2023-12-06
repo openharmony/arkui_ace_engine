@@ -13,9 +13,8 @@
 
 group("core_common_unittest") {
   testonly = true
-
   deps = [
-    "ace_engine:ace_engine_special_test",
+    "asset:asset_test",
     "clipboard:clip_board_test",
     "connect_server:ace_connect_server_manager_test",
     "environment:environment_test",
@@ -24,10 +23,13 @@ group("core_common_unittest") {
     "ime:ime_test",
     "others:thread_checker_test",
     "plugin:plugin_manager_test",
+    "recorder:event_recorder_test",
     "register:register_test",
+    "resource:resource_manager_test",
     "rosen:rosen_test",
     "sharedata:share_data_test",
     "storage:storage_test",
+    "task:thread_test",
     "vibrator:vibrator_test",
   ]
 }

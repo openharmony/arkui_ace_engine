@@ -189,7 +189,7 @@ public:
                 result = "ButtonType.Circle";
                 break;
             default:
-                LOGD("The input does not match any ButtonType");
+                break;
         }
         return result;
     }
@@ -232,7 +232,13 @@ public:
     }
 
 protected:
+    bool IsNeedInitClickEventRecorder() const override
+    {
+        return true;
+    }
+
     void OnModifyDone() override;
+    void OnAfterModifyDone() override;
     void OnAttachToFrameNode() override;
     void InitTouchEvent();
     void InitHoverEvent();

@@ -15,34 +15,30 @@
 
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
 
+#include "base/geometry/dimension.h"
 #include "base/memory/ace_type.h"
 #include "base/utils/utils.h"
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
+#include "core/components_ng/pattern/text/text_base.h"
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
 
 namespace OHOS::Ace::NG {
-const RefPtr<KeyEventHandler>& TextFieldManagerNG::GetKeyEventHandler()
-{
-    if (!keyEventHandler_) {
-        keyEventHandler_ = AceType::MakeRefPtr<KeyEventHandler>();
-    }
-    return keyEventHandler_;
-}
+namespace {
+constexpr Dimension RESERVE_BOTTOM_HEIGHT = 24.0_vp;
+} // namespace
 
 void TextFieldManagerNG::ClearOnFocusTextField()
 {
     onFocusTextField_ = nullptr;
-    CHECK_NULL_VOID(keyEventHandler_);
-    keyEventHandler_->ClearClient();
 }
 
 bool TextFieldManagerNG::OnBackPressed()
 {
     auto pattern = onFocusTextField_.Upgrade();
     CHECK_NULL_RETURN(pattern, false);
-    auto textfieldPattern = AceType::DynamicCast<TextFieldPattern>(pattern);
-    CHECK_NULL_RETURN(textfieldPattern, false);
-    return textfieldPattern->OnBackPressed();
+    auto textBasePattern = AceType::DynamicCast<TextBase>(pattern);
+    CHECK_NULL_RETURN(textBasePattern, false);
+    return textBasePattern->OnBackPressed();
 }
 
 RefPtr<FrameNode> TextFieldManagerNG::FindScrollableOfFocusedTextField(const RefPtr<FrameNode>& textField)
@@ -61,24 +57,29 @@ RefPtr<FrameNode> TextFieldManagerNG::FindScrollableOfFocusedTextField(const Ref
 
 void TextFieldManagerNG::ScrollToSafeAreaHelper(const SafeAreaInsets::Inset& bottomInset)
 {
-    auto textField = DynamicCast<TextFieldPattern>(onFocusTextField_.Upgrade());
-    CHECK_NULL_VOID(textField);
-    auto textFieldNode = textField->GetHost();
-    CHECK_NULL_VOID(textFieldNode);
+    auto node = onFocusTextField_.Upgrade();
+    CHECK_NULL_VOID(node);
+    auto frameNode = node->GetHost();
+    CHECK_NULL_VOID(frameNode);
+    auto textBase = DynamicCast<TextBase>(node);
+    CHECK_NULL_VOID(textBase);
 
-    auto scrollableNode = FindScrollableOfFocusedTextField(textFieldNode);
+    auto scrollableNode = FindScrollableOfFocusedTextField(frameNode);
     CHECK_NULL_VOID(scrollableNode);
     auto scrollPattern = scrollableNode->GetPattern<ScrollablePattern>();
     CHECK_NULL_VOID(scrollPattern);
+    if (scrollPattern->GetAxis() == Axis::HORIZONTAL) {
+        return;
+    }
 
     auto scrollableRect = scrollableNode->GetTransformRectRelativeToWindow();
     CHECK_NULL_VOID(scrollableRect.Top() < bottomInset.start);
 
-    auto caretRect = textField->GetCaretRect() + textFieldNode->GetOffsetRelativeToWindow();
+    auto caretRect = textBase->GetCaretRect() + frameNode->GetOffsetRelativeToWindow();
     // caret above scroll's content region
-    auto diffTop = (caretRect.Top() - caretRect.Height() * 2) - scrollableRect.Top();
+    auto diffTop = caretRect.Top() - scrollableRect.Top();
     if (diffTop < 0) {
-        scrollPattern->ScrollTo(scrollPattern->GetTotalOffset() + diffTop);
+        scrollPattern->ScrollTo(scrollPattern->GetTotalOffset() + diffTop - caretRect.Height() * 2);
         return;
     }
 
@@ -98,5 +99,10 @@ void TextFieldManagerNG::ScrollTextFieldToSafeArea()
     auto bottomInset = pipeline->GetSafeArea().bottom_.Combine(keyboardInset);
     CHECK_NULL_VOID(bottomInset.IsValid());
     ScrollToSafeAreaHelper(bottomInset);
+}
+
+void TextFieldManagerNG::SetHeight(float height)
+{
+    height_ = height + RESERVE_BOTTOM_HEIGHT.ConvertToPx();
 }
 } // namespace OHOS::Ace::NG

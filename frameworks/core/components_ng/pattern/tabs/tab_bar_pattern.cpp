@@ -19,6 +19,7 @@
 #include "base/geometry/dimension.h"
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/size_t.h"
+#include "base/log/dump_log.h"
 #include "base/memory/ace_type.h"
 #include "base/utils/utils.h"
 #include "core/components/common/layout/constants.h"
@@ -28,12 +29,15 @@
 #include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/scroll/scroll_spring_effect.h"
+#include "core/components_ng/pattern/swiper/swiper_event_hub.h"
+#include "core/components_ng/pattern/swiper/swiper_model.h"
 #include "core/components_ng/pattern/swiper/swiper_pattern.h"
 #include "core/components_ng/pattern/tabs/tabs_layout_property.h"
 #include "core/components_ng/pattern/tabs/tabs_node.h"
 #include "core/components_ng/pattern/tabs/tabs_pattern.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/property/property.h"
+#include "core/components_ng/property/safe_area_insets.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
@@ -54,6 +58,8 @@ constexpr float FULL_OPACITY = 1.0f;
 constexpr float NEAR_FULL_OPACITY = 0.99f;
 constexpr float NO_OPACITY = 0.0f;
 constexpr float TEXT_COLOR_THREDHOLD = 0.673f;
+
+const auto DurationCubicCurve = AceType::MakeRefPtr<CubicCurve>(0.2f, 0.0f, 0.1f, 1.0f);
 } // namespace
 
 void TabBarPattern::OnAttachToFrameNode()
@@ -63,6 +69,21 @@ void TabBarPattern::OnAttachToFrameNode()
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     renderContext->SetClipToFrame(true);
+    host->GetLayoutProperty()->UpdateSafeAreaExpandOpts(
+        SafeAreaExpandOpts { .type = SAFE_AREA_TYPE_SYSTEM, .edges = SAFE_AREA_EDGE_BOTTOM });
+
+    swiperController_->SetTabBarFinishCallback([weak = WeakClaim(this)]() {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        // always swipe with physical curve, ignore animationDuration
+        pattern->SetSwiperCurve(TabBarPhysicalCurve);
+
+        CHECK_NULL_VOID(pattern && pattern->scrollableEvent_);
+        auto scrollable = pattern->scrollableEvent_->GetScrollable();
+        if (scrollable) {
+            scrollable->StopScrollable();
+        }
+    });
 }
 
 void TabBarPattern::InitClick(const RefPtr<GestureEventHub>& gestureHub)
@@ -88,7 +109,6 @@ void TabBarPattern::InitScrollable(const RefPtr<GestureEventHub>& gestureHub)
     CHECK_NULL_VOID(layoutProperty);
     auto axis = layoutProperty->GetAxis().value_or(Axis::HORIZONTAL);
     if (axis_ == axis && scrollableEvent_) {
-        LOGD("Direction not changed, need't resister scroll event again.");
         return;
     }
 
@@ -147,18 +167,6 @@ void TabBarPattern::InitScrollable(const RefPtr<GestureEventHub>& gestureHub)
     if (scrollableEvent_) {
         gestureHub->RemoveScrollableEvent(scrollableEvent_);
     }
-
-    auto callback = [weak = WeakClaim(this)]() {
-        auto tabBarPattern = weak.Upgrade();
-        CHECK_NULL_VOID(tabBarPattern);
-        auto scrollable = tabBarPattern->scrollableEvent_->GetScrollable();
-        if (scrollable) {
-            scrollable->StopScrollable();
-        }
-        tabBarPattern->SetSwiperCurve(TabBarPhysicalCurve);
-    };
-
-    swiperController_->SetTabBarFinishCallback(std::move(callback));
 
     scrollableEvent_ = MakeRefPtr<ScrollableEvent>(axis);
     auto scrollable = MakeRefPtr<Scrollable>(task, axis);
@@ -495,6 +503,7 @@ void TabBarPattern::OnModifyDone()
     auto gestureHub = hub->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
 
+    SetDefaultAnimationDuration();
     InitClick(gestureHub);
     InitTurnPageRateEvent();
     auto layoutProperty = host->GetLayoutProperty<TabBarLayoutProperty>();
@@ -514,8 +523,6 @@ void TabBarPattern::OnModifyDone()
     SetAccessibilityAction();
     UpdateSubTabBoard();
     needSetCentered_ = true;
-    FocusIndexChange(layoutProperty->GetIndicatorValue(0));
-    focusIndicator_ = layoutProperty->GetIndicatorValue(0);
 
     CHECK_NULL_VOID(swiperController_);
     auto removeEventCallback = [weak = WeakClaim(this)]() {
@@ -556,6 +563,13 @@ void TabBarPattern::OnModifyDone()
         gestureHub->AddTouchEvent(tabBarPattern->touchEvent_);
     };
     swiperController_->SetAddTabBarEventCallback(std::move(addEventCallback));
+
+    auto surfaceChangeCallback = [weak = WeakClaim(this)]() {
+        auto tabBarPattern = weak.Upgrade();
+        CHECK_NULL_VOID(tabBarPattern);
+        tabBarPattern->isTouchingSwiper_ = false;
+    };
+    swiperController_->SetSurfaceChangeCallback(std::move(surfaceChangeCallback));
 }
 
 bool TabBarPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
@@ -610,15 +624,12 @@ void TabBarPattern::HandleClick(const GestureEvent& info)
         auto scrollable = scrollableEvent_->GetScrollable();
         if (scrollable && !scrollable->IsSpringStopped()) {
             if (IsOutOfBoundary()) {
-                LOGD("Tabbar is scrolling");
                 return;
             }
             scrollable->StopScrollable();
         }
     }
-    LOGI("Click event x is %{public}lf", info.GetLocalLocation().GetX());
     if (tabItemOffsets_.empty()) {
-        LOGW("tabItemOffsets is empty");
         return;
     }
 
@@ -632,8 +643,7 @@ void TabBarPattern::HandleClick(const GestureEvent& info)
         indicator_ >= static_cast<int32_t>(tabBarStyles_.size())) {
         return;
     }
-    auto curve = MakeRefPtr<CubicCurve>(0.2f, 0.0f, 0.1f, 1.0f);
-    SetSwiperCurve(curve);
+    SetSwiperCurve(DurationCubicCurve);
     TabBarClickEvent(index);
     if (tabBarStyles_[indicator_] == TabBarStyle::SUBTABBATSTYLE &&
         tabBarStyles_[index] == TabBarStyle::SUBTABBATSTYLE &&
@@ -1000,23 +1010,17 @@ int32_t TabBarPattern::CalculateSelectedIndex(const Offset& info)
     if (axis == Axis::VERTICAL) {
         auto clickRange = std::make_pair(tabItemOffsets_[0].GetY(), tabItemOffsets_[tabItemOffsets_.size() - 1].GetY());
         if (LessNotEqual(local.GetY(), clickRange.first) || GreatNotEqual(local.GetY(), clickRange.second)) {
-            LOGW("clicked (%{public}lf) position out of range [%{public}lf, %{public}lf]", local.GetY(),
-                clickRange.first, clickRange.second);
             return -1;
         }
     } else {
         auto clickRange = std::make_pair(tabItemOffsets_[0].GetX(), tabItemOffsets_[tabItemOffsets_.size() - 1].GetX());
         if (!isRTL_) {
             if (LessNotEqual(local.GetX(), clickRange.first) || GreatNotEqual(local.GetX(), clickRange.second)) {
-                LOGW("clicked (%{public}lf) position out of range [%{public}lf, %{public}lf]", local.GetX(),
-                    clickRange.first, clickRange.second);
                 return -1;
             }
         } else {
             if (GreatNotEqual(local.GetX(), frameSize.MainSize(axis)) ||
                 LessNotEqual(local.GetX(), clickRange.second)) {
-                LOGW("clicked (%{public}lf) position out of range [%{public}lf, %{public}lf]", local.GetX(),
-                    clickRange.first, clickRange.second);
                 return -1;
             }
         }
@@ -1083,7 +1087,7 @@ void TabBarPattern::PlayPressAnimation(int32_t index, const Color& pressColor, A
                            : static_cast<int32_t>(tabTheme->GetSubTabBarHoverDuration()));
     option.SetDelay(0);
 
-    option.SetCurve(animationType == AnimationType::PRESS   ? AceType::MakeRefPtr<CubicCurve>(0.2f, 0.0f, 0.1f, 1.0f)
+    option.SetCurve(animationType == AnimationType::PRESS   ? DurationCubicCurve
                     : animationType == AnimationType::HOVER ? Curves::FRICTION
                                                             : Curves::SHARP);
     option.SetFillMode(FillMode::FORWARDS);
@@ -1317,8 +1321,7 @@ bool TabBarPattern::IsContainsBuilder()
 
 void TabBarPattern::PlayTranslateAnimation(float startPos, float endPos, float targetCurrentOffset)
 {
-    LOGI("Play translate animation startPos: %{public}lf, endPos: %{public}lf", startPos, endPos);
-    auto curve = MakeRefPtr<CubicCurve>(0.2f, 0.0f, 0.1f, 1.0f);
+    auto curve = DurationCubicCurve;
     isAnimating_ = true;
 
     // If animation is still running, stop it before play new animation.
@@ -1384,8 +1387,7 @@ void TabBarPattern::PlayTabBarTranslateAnimation(int32_t targetIndex)
                             ? host->GetGeometryNode()->GetPaddingSize().Width() - childrenMainSize_
                             : space - frontChildrenMainSize;
     auto startOffset = currentOffset_;
-    LOGI("Play translate animation startPos: %{public}lf, endPos: %{public}lf", startOffset, targetOffset);
-    auto curve = MakeRefPtr<CubicCurve>(0.2f, 0.0f, 0.1f, 1.0f);
+    auto curve = DurationCubicCurve;
 
     // If animation is still running, stop it before play new animation.
     StopTabBarTranslateAnimation();
@@ -1952,19 +1954,27 @@ void TabBarPattern::InitTurnPageRateEvent()
         }
     };
     swiperController_->SetTurnPageRateCallback(std::move(turnPageRateCallback));
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto tabsNode = AceType::DynamicCast<TabsNode>(host->GetParent());
-    CHECK_NULL_VOID(tabsNode);
-    auto swiperNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabs());
-    auto eventHub = swiperNode->GetEventHub<SwiperEventHub>();
-    CHECK_NULL_VOID(eventHub);
-    eventHub->SetAnimationEndEvent([weak = WeakClaim(this)](int32_t index, const AnimationCallbackInfo& info) {
-        auto pattern = weak.Upgrade();
-        if (pattern && (NearZero(pattern->turnPageRate_) || NearEqual(pattern->turnPageRate_, 1.0f))) {
-            pattern->isTouchingSwiper_ = false;
-        }
-    });
+
+    if (!animationEndEvent_) {
+        AnimationEndEvent animationEndEvent =
+            [weak = WeakClaim(this)](int32_t index, const AnimationCallbackInfo& info) {
+                auto pattern = weak.Upgrade();
+                if (pattern && (NearZero(pattern->turnPageRate_) || NearEqual(pattern->turnPageRate_, 1.0f))) {
+                    pattern->isTouchingSwiper_ = false;
+                }
+            };
+        animationEndEvent_ = std::make_shared<AnimationEndEvent>(std::move(animationEndEvent));
+
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto tabsNode = AceType::DynamicCast<TabsNode>(host->GetParent());
+        CHECK_NULL_VOID(tabsNode);
+        auto swiperNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabs());
+        CHECK_NULL_VOID(swiperNode);
+        auto eventHub = swiperNode->GetEventHub<SwiperEventHub>();
+        CHECK_NULL_VOID(eventHub);
+        eventHub->AddAnimationEndEvent(animationEndEvent_);
+    }
 }
 
 float TabBarPattern::GetLeftPadding() const
@@ -1977,5 +1987,77 @@ float TabBarPattern::GetLeftPadding() const
         return 0.0f;
     }
     return geometryNode->GetPadding()->left.value_or(0.0f);
+}
+
+void TabBarPattern::SetDefaultAnimationDuration()
+{
+    if (animationDuration_.has_value() || Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+        return;
+    }
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto tabTheme = pipelineContext->GetTheme<TabTheme>();
+    CHECK_NULL_VOID(tabTheme);
+    SetAnimationDuration(static_cast<int32_t>(tabTheme->GetTabContentAnimationDuration()));
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto tabsNode = AceType::DynamicCast<TabsNode>(host->GetParent());
+    CHECK_NULL_VOID(tabsNode);
+    auto swiperNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabs());
+    CHECK_NULL_VOID(swiperNode);
+    auto swiperPaintProperty = swiperNode->GetPaintProperty<SwiperPaintProperty>();
+    CHECK_NULL_VOID(swiperPaintProperty);
+    swiperPaintProperty->UpdateDuration(static_cast<int32_t>(tabTheme->GetTabContentAnimationDuration()));
+}
+
+void TabBarPattern::DumpAdvanceInfo()
+{
+    isRTL_ ? DumpLog::GetInstance().AddDesc("isRTL:true") : DumpLog::GetInstance().AddDesc("isRTL:false");
+    touching_ ? DumpLog::GetInstance().AddDesc("touching:true") : DumpLog::GetInstance().AddDesc("touching:false");
+    isMaskAnimationByCreate_ ? DumpLog::GetInstance().AddDesc("isMaskAnimationByCreate:true")
+                             : DumpLog::GetInstance().AddDesc("isMaskAnimationByCreate:false");
+    animationDuration_.has_value()
+        ? DumpLog::GetInstance().AddDesc("animationDuration:" + std::to_string(animationDuration_.value()))
+        : DumpLog::GetInstance().AddDesc("animationDuration:null");
+    isFirstFocus_ ? DumpLog::GetInstance().AddDesc("isFirstFocus:true")
+                  : DumpLog::GetInstance().AddDesc("isFirstFocus:false");
+    isTouchingSwiper_ ? DumpLog::GetInstance().AddDesc("isTouchingSwiper:true")
+                      : DumpLog::GetInstance().AddDesc("isTouchingSwiper:false");
+    isAnimating_ ? DumpLog::GetInstance().AddDesc("isAnimating:true")
+                 : DumpLog::GetInstance().AddDesc("isAnimating:false");
+    changeByClick_ ? DumpLog::GetInstance().AddDesc("changeByClick:true")
+                   : DumpLog::GetInstance().AddDesc("changeByClick:false");
+    needSetCentered_ ? DumpLog::GetInstance().AddDesc("needSetCentered:true")
+                     : DumpLog::GetInstance().AddDesc("needSetCentered:false");
+    DumpLog::GetInstance().AddDesc("childrenMainSize:" + std::to_string(childrenMainSize_));
+    DumpLog::GetInstance().AddDesc("indicator:" + std::to_string(indicator_));
+    DumpLog::GetInstance().AddDesc("swiperStartIndex:" + std::to_string(swiperStartIndex_));
+    DumpLog::GetInstance().AddDesc("scrollMargin:" + std::to_string(scrollMargin_));
+    std::string regionString = std::string("region:");
+    for (auto item : gradientRegions_) {
+        item ? regionString.append("true ") : regionString.append("false ");
+    }
+    DumpLog::GetInstance().AddDesc(regionString);
+    switch (axis_) {
+        case Axis::NONE: {
+            DumpLog::GetInstance().AddDesc("Axis:NONE");
+            break;
+        }
+        case Axis::HORIZONTAL: {
+            DumpLog::GetInstance().AddDesc("Axis:HORIZONTAL");
+            break;
+        }
+        case Axis::FREE: {
+            DumpLog::GetInstance().AddDesc("Axis:FREE");
+            break;
+        }
+        case Axis::VERTICAL: {
+            DumpLog::GetInstance().AddDesc("Axis:VERTICAL");
+            break;
+        }
+        default: {
+            break;
+        }
+    }
 }
 } // namespace OHOS::Ace::NG

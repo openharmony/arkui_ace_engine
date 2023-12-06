@@ -17,10 +17,11 @@
 
 #include "base/utils/utils.h"
 #include "core/accessibility/accessibility_utils.h"
+#include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/event/gesture_event_hub.h"
+#include "core/components_ng/event/gesture_info.h"
 #include "core/components_ng/gestures/recognizers/click_recognizer.h"
-#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 
@@ -40,9 +41,9 @@ void ClickEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, c
     CHECK_NULL_VOID(frameNode);
 
     if (!clickRecognizer_) {
-        LOGD("Create clickRecognizer");
         clickRecognizer_ = MakeRefPtr<ClickRecognizer>();
     }
+    clickRecognizer_->SetGestureInfo(MakeRefPtr<GestureInfo>(GestureTypeName::CLICK, true));
     clickRecognizer_->SetOnAction(GetClickEvent());
     clickRecognizer_->SetCoordinateOffset(Offset(coordinateOffset.GetX(), coordinateOffset.GetY()));
     clickRecognizer_->SetGetEventTargetImpl(getEventTargetImpl);

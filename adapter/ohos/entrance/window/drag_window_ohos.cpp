@@ -128,6 +128,7 @@ RSColorType PixelFormatToColorType(const RefPtr<PixelMap>& pixmap)
         case PixelFormat::ALPHA_8:
             return RSColorType::COLORTYPE_ALPHA_8;
         case PixelFormat::RGBA_F16:
+            return RSColorType::COLORTYPE_RGBA_F16;
         case PixelFormat::UNKNOWN:
         case PixelFormat::ARGB_8888:
         case PixelFormat::RGB_888:
@@ -350,13 +351,8 @@ void DragWindowOhos::DrawPixelMap(const RefPtr<PixelMap>& pixelmap)
     rootNode_->SetFrame(0, 0, static_cast<float>(width_), static_cast<float>(height_));
     rsUiDirector_->SetRoot(rootNode_->GetId());
     auto canvasNode = std::static_pointer_cast<Rosen::RSCanvasNode>(rootNode_);
-#ifndef USE_ROSEN_DRAWING
-    auto skia = canvasNode->BeginRecording(width_, height_);
-    DrawPixelMapInner(skia, pixelmap, width_, height_);
-#else
     auto drawing = canvasNode->BeginRecording(width_, height_);
     DrawPixelMapInner(drawing, pixelmap, width_, height_);
-#endif
     canvasNode->FinishRecording();
     rsUiDirector_->SendMessages();
 #endif
@@ -478,10 +474,6 @@ void DragWindowOhos::DrawText(
         path.lineTo(renderText->GetStartOffset().GetX() - renderText->GetGlobalOffset().GetX(),
             renderText->GetStartOffset().GetY() - renderText->GetGlobalOffset().GetY());
     }
-    rootNode_->SetClipToBounds(true);
-    rootNode_->SetClipBounds(Rosen::RSPath::CreateRSPath(path));
-    auto skia = canvasNode->BeginRecording(width_, height_);
-    paragraph->Paint(skia, 0, 0);
 #else
     RSRecordingPath path;
     if (renderText->GetStartOffset().GetY() == renderText->GetEndOffset().GetY()) {
@@ -515,10 +507,11 @@ void DragWindowOhos::DrawText(
         path.LineTo(renderText->GetStartOffset().GetX() - renderText->GetGlobalOffset().GetX(),
             renderText->GetStartOffset().GetY() - renderText->GetGlobalOffset().GetY());
     }
+#endif
     rootNode_->SetClipToBounds(true);
     rootNode_->SetClipBounds(Rosen::RSPath::CreateRSPath(path));
-    TAG_LOGE(AceLogTag::ACE_DRAG, "Drawing is not supported");
-#endif
+    auto recordingCanvas = canvasNode->BeginRecording(width_, height_);
+    paragraph->Paint(recordingCanvas, 0, 0);
     canvasNode->FinishRecording();
     rsUiDirector_->SendMessages();
 #endif
@@ -624,6 +617,9 @@ void DragWindowOhos::DrawTextNG(const RefPtr<NG::Paragraph>& paragraph, const Re
     }
     rootNode_->SetClipToBounds(true);
     rootNode_->SetClipBounds(Rosen::RSPath::CreateRSPath(path));
+    auto recordingCanvas = canvasNode->BeginRecording(width_, height_);
+    paragraph->Paint(*recordingCanvas, textPattern->GetTextContentRect().GetX(),
+        textPattern->GetTextContentRect().GetY() - std::min(textPattern->GetBaselineOffset(), 0.0f));
 #endif
     canvasNode->FinishRecording();
     rsUiDirector_->SendMessages();

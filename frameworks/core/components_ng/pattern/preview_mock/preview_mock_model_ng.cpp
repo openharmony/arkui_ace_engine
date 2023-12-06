@@ -28,6 +28,7 @@ void PreviewMockModelNG::Create(const std::string& content)
     const std::string presentationText("Preview not available for this component.");
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
+    ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", content.c_str(), nodeId);
     auto frameNode =
         FrameNode::GetOrCreateFrameNode(content, nodeId, []() { return AceType::MakeRefPtr<PreviewMockPattern>(); });
     CHECK_NULL_VOID(frameNode);

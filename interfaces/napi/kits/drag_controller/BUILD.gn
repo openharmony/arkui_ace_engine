@@ -31,6 +31,7 @@ template("napi_dragcontroller_static") {
       "$ace_root/frameworks",
       "$root_out_dir/arkui/framework",
       "$ark_ets_path",
+      "$ark_runtime_path",
     ]
 
     sources = [ "js_drag_controller.cpp" ]
@@ -41,7 +42,7 @@ template("napi_dragcontroller_static") {
       deps += [ config.libace_target ]
     }
 
-    if (platform != "" && is_cross_platform_build) {
+    if (platform != "" && is_arkui_x) {
       deps += [ "$crossplatform_plugin_root/libs/napi:napi_$platform" ]
     } else {
       external_deps += [
@@ -50,7 +51,7 @@ template("napi_dragcontroller_static") {
       ]
     }
 
-    if (is_cross_platform_build) {
+    if (is_arkui_x) {
       if (defined(config.pixel_map_support) && config.pixel_map_support) {
         configs = [ "$crossplatform_multimedia_root/image_framework/interfaces/innerkits:image_external_config" ]
       }
@@ -63,7 +64,7 @@ template("napi_dragcontroller_static") {
       }
     }
 
-    if (!is_cross_platform_build && defined(config.enable_drag_framework) &&
+    if (!is_arkui_x && defined(config.enable_drag_framework) &&
         config.enable_drag_framework) {
       external_deps += [
         "device_status:devicestatus_client",
@@ -75,6 +76,7 @@ template("napi_dragcontroller_static") {
       if (defined(global_parts_info.distributeddatamgr_udmf)) {
         external_deps += [ "udmf:udmf_client" ]
         external_deps += [ "udmf:udmf_data_napi" ]
+        external_deps += [ "napi:ace_container_scope" ]
       }
       external_deps += [ "kv_store:distributeddata_inner" ]
     }

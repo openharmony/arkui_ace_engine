@@ -49,10 +49,14 @@ public:
     static void SetMinFontSize(const JSCallbackInfo& info);
     static void SetMaxFontSize(const JSCallbackInfo& info);
     static void SetLetterSpacing(const JSCallbackInfo& info);
+    static void SetWordBreak(const JSCallbackInfo& info);
+    static void SetEllipsisMode(const JSCallbackInfo& info);
+    static void SetTextSelection(const JSCallbackInfo& info);
     static void SetTextCase(int32_t value);
     static void SetBaselineOffset(const JSCallbackInfo& info);
     static void SetDecoration(const JSCallbackInfo& info);
     static void SetCopyOption(const JSCallbackInfo& info);
+    static void SetOnCopy(const JSCallbackInfo& info);
     static void SetHeightAdaptivePolicy(int32_t value);
     static void JsOnClick(const JSCallbackInfo& info);
     static void JsRemoteMessage(const JSCallbackInfo& info);
@@ -64,6 +68,8 @@ public:
     static void JsFocusable(const JSCallbackInfo& info);
     static void JsDraggable(const JSCallbackInfo& info);
     static void JsMenuOptionsExtension(const JSCallbackInfo& info);
+    static void JsEnableDataDetector(const JSCallbackInfo& info);
+    static void JsDataDetectorConfig(const JSCallbackInfo& info);
 
 private:
     static RefPtr<TextComponentV2> GetComponent();

@@ -16,8 +16,13 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_EVENT_STATE_STYLE_MANAGER_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_EVENT_STATE_STYLE_MANAGER_H
 
+#include <set>
+
+#include "base/geometry/ng/point_t.h"
+#include "base/geometry/offset.h"
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
+#include "base/thread/cancelable_callback.h"
 
 namespace OHOS::Ace::NG {
 
@@ -110,11 +115,51 @@ public:
 private:
     void FireStateFunc();
 
+    void PostPressStyleTask(uint32_t delayTime);
+
+    bool HandleScrollingParent();
+
+    void CancelPressStyleTask()
+    {
+        if (pressStyleTask_) {
+            pressStyleTask_.Cancel();
+        }
+    }
+
+    bool IsPressedStatePending()
+    {
+        return pressedPendingState_;
+    }
+
+    void ResetPressedPendingState()
+    {
+        pressedPendingState_ = false;
+    }
+
+    void PendingPressedState()
+    {
+        pressedPendingState_ = true;
+    }
+
+    void ResetPressedState()
+    {
+        ResetCurrentUIState(UI_STATE_PRESSED);
+        CancelPressStyleTask();
+        ResetPressedPendingState();
+    }
+
+    bool IsOutOfPressedRegion(int32_t sourceType, const Offset& location) const;
+    void Transform(PointF& localPointF, const WeakPtr<FrameNode>& node) const;
+
     WeakPtr<FrameNode> host_;
     RefPtr<TouchEventImpl> pressedFunc_;
 
     UIState supportedStates_ = UI_STATE_NORMAL;
     UIState currentState_ = UI_STATE_NORMAL;
+
+    std::set<int32_t> pointerId_;
+    CancelableCallback<void()> pressStyleTask_;
+    bool pressedPendingState_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(StateStyleManager);
 };

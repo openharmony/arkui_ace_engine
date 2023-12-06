@@ -50,7 +50,7 @@ enum class FontWeight {
 };
 
 enum class FontStyle {
-    NORMAL,
+    NORMAL = 0,
     ITALIC,
 };
 
@@ -67,6 +67,12 @@ enum class TextCase {
     NORMAL = 0,
     LOWERCASE,
     UPPERCASE,
+};
+
+enum class EllipsisMode {
+    HEAD,
+    MIDDLE,
+    TAIL,
 };
 
 enum class WordBreak { NORMAL = 0, BREAK_ALL, BREAK_WORD };
@@ -453,9 +459,29 @@ public:
         textShadows_ = textShadows;
     }
 
-    void SetShadow(Shadow &shadow)
+    void SetShadow(const Shadow& shadow)
     {
         textShadows_.emplace_back(shadow);
+    }
+
+    bool GetHalfLeading() const
+    {
+        return halfLeading_;
+    }
+
+    void SetHalfLeading(bool halfLeading)
+    {
+        halfLeading_ = halfLeading;
+    }
+
+    void SetEllipsisMode(EllipsisMode modal)
+    {
+        ellipsisMode_ = modal;
+    }
+
+    EllipsisMode GetEllipsisMode() const
+    {
+        return ellipsisMode_;
     }
 
 private:
@@ -482,7 +508,7 @@ private:
     TextDecorationStyle textDecorationStyle_ { TextDecorationStyle::SOLID };
     TextDecoration textDecoration_ { TextDecoration::NONE };
     std::vector<Shadow> textShadows_;
-    WhiteSpace whiteSpace_{ WhiteSpace::PRE };
+    WhiteSpace whiteSpace_ { WhiteSpace::PRE };
     Dimension wordSpacing_;
     Dimension textIndent_ { 0.0f, DimensionUnit::PX };
     Dimension letterSpacing_;
@@ -490,8 +516,10 @@ private:
     bool adaptTextSize_ = false;
     bool adaptHeight_ = false; // whether adjust text size with height.
     bool allowScale_ = true;
+    bool halfLeading_ = false;
     WordBreak wordBreak_ { WordBreak::BREAK_WORD };
     TextCase textCase_ { TextCase::NORMAL };
+    EllipsisMode ellipsisMode_ = EllipsisMode::TAIL;
 };
 
 namespace StringUtils {

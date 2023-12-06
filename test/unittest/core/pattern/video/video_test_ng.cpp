@@ -21,11 +21,16 @@
 #include <utility>
 #include <vector>
 
-#include "gtest/gtest.h"
 #include "gmock/gmock-actions.h"
+#include "gtest/gtest.h"
 
 #define private public
 #define protected public
+#include "test/mock/core/common/mock_theme_manager.h"
+#include "test/mock/core/render/mock_media_player.h"
+#include "test/mock/core/render/mock_render_context.h"
+#include "test/mock/core/render/mock_render_surface.h"
+
 #include "base/geometry/ng/size_t.h"
 #include "base/json/json_util.h"
 #include "base/memory/ace_type.h"
@@ -50,14 +55,9 @@
 #include "core/components_ng/pattern/video/video_node.h"
 #include "core/components_ng/pattern/video/video_pattern.h"
 #include "core/components_ng/pattern/video/video_styles.h"
-#include "core/components_ng/test/mock/render/mock_media_player.h"
-#include "core/components_ng/test/mock/render/mock_render_context.h"
-#include "core/components_ng/test/mock/render/mock_render_surface.h"
-#include "core/components_ng/test/mock/theme/mock_theme_manager.h"
 #include "core/components_v2/inspector/inspector_constants.h"
-#include "core/gestures/gesture_info.h"
 #include "core/image/image_source_info.h"
-#include "core/pipeline_ng/test/mock/mock_pipeline_base.h"
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -141,17 +141,17 @@ void VideoTestNg::SetUpTestSuite()
     testProperty.controls = CONTROL_VALUE;
     testProperty.loop = LOOP_VALUE;
     testProperty.objectFit = VIDEO_IMAGE_FIT;
-    MockPipelineBase::SetUp();
+    MockPipelineContext::SetUp();
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
-    MockPipelineBase::GetCurrent()->rootNode_ = FrameNode::CreateFrameNodeWithTree(
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    MockPipelineContext::GetCurrent()->rootNode_ = FrameNode::CreateFrameNodeWithTree(
         V2::ROOT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<RootPattern>());
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<VideoTheme>()));
 }
 
 void VideoTestNg::TearDownTestSuite()
 {
-    MockPipelineBase::TearDown();
+    MockPipelineContext::TearDown();
 }
 void VideoTestNg::SetUp()
 {
@@ -456,7 +456,7 @@ HWTEST_F(VideoTestNg, VideoMeasureTest005, TestSize.Level1)
 HWTEST_F(VideoTestNg, VideoPatternTest006, TestSize.Level1)
 {
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<VideoTheme>()));
 
     /**
@@ -526,7 +526,7 @@ HWTEST_F(VideoTestNg, VideoPatternTest008, TestSize.Level1)
     /**
      * @tc.steps: step2. Call UpdateMediaPlayerOnBg
      *            case: IsMediaPlayerValid is always false
-     * @tc.expected: step2. IsMediaPlayerValid will be called two times
+     * @tc.expected: step2. IsMediaPlayerValid will be called 3 times
      */
     EXPECT_CALL(*(AceType::DynamicCast<MockMediaPlayer>(pattern->mediaPlayer_)), IsMediaPlayerValid())
         .Times(3)
@@ -536,7 +536,7 @@ HWTEST_F(VideoTestNg, VideoPatternTest008, TestSize.Level1)
     /**
      * @tc.steps: step3. Call UpdateMediaPlayerOnBg
      *            case: IsMediaPlayerValid is always true & has not set VideoSource
-     * @tc.expected: step3. IsMediaPlayerValid will be called 4 times.
+     * @tc.expected: step3. IsMediaPlayerValid will be called 3 times.
      */
     EXPECT_CALL(*(AceType::DynamicCast<MockMediaPlayer>(pattern->mediaPlayer_)), IsMediaPlayerValid())
         .Times(3)
@@ -559,7 +559,7 @@ HWTEST_F(VideoTestNg, VideoPatternTest008, TestSize.Level1)
     /**
      * @tc.steps: step5. Call UpdateMediaPlayerOnBg
      *            case: IsMediaPlayerValid is always true & has set VideoSource & has set src_
-     * @tc.expected: step5. IsMediaPlayerValid will be called 4 times.
+     * @tc.expected: step5. IsMediaPlayerValid will be called 3 times.
      */
     EXPECT_CALL(*(AceType::DynamicCast<MockMediaPlayer>(pattern->mediaPlayer_)), IsMediaPlayerValid())
         .Times(3)
@@ -569,15 +569,14 @@ HWTEST_F(VideoTestNg, VideoPatternTest008, TestSize.Level1)
     /**
      * @tc.steps: step6. Call UpdateMediaPlayerOnBg
      *            case: first prepare and UpdateMediaPlayerOnBg successfully
-     * @tc.expected: step6. IsMediaPlayerValid will be called 6 times
+     * @tc.expected: step6. IsMediaPlayerValid will be called 5 times
      *                      other function will be called once and return right value when preparing MediaPlayer
      *                      firstly
      */
     pattern->src_.clear();
     EXPECT_CALL(*(AceType::DynamicCast<MockMediaPlayer>(pattern->mediaPlayer_)), IsMediaPlayerValid())
-        .Times(6)
+        .Times(5)
         .WillOnce(Return(false))
-        .WillOnce(Return(true))
         .WillOnce(Return(true))
         .WillOnce(Return(true))
         .WillOnce(Return(true))
@@ -588,10 +587,10 @@ HWTEST_F(VideoTestNg, VideoPatternTest008, TestSize.Level1)
     /**
      * @tc.steps: step7. Call UpdateMediaPlayerOnBg several times
      *            cases: first prepare and UpdateMediaPlayerOnBg fail
-     * @tc.expected: step7. IsMediaPlayerValid will be called 5 + 5 + 6 times totally.
+     * @tc.expected: step7. IsMediaPlayerValid will be called 5 + 5 + 5 times totally.
      */
     EXPECT_CALL(*(AceType::DynamicCast<MockMediaPlayer>(pattern->mediaPlayer_)), IsMediaPlayerValid())
-        .Times(16)
+        .Times(15)
         // 1st time.
         .WillOnce(Return(true))
         .WillOnce(Return(true))
@@ -611,7 +610,6 @@ HWTEST_F(VideoTestNg, VideoPatternTest008, TestSize.Level1)
         .WillOnce(Return(true))
         .WillOnce(Return(true))
         .WillOnce(Return(true))
-        .WillOnce(Return(true))
         .WillOnce(Return(true));
     pattern->src_.clear();
     pattern->UpdateMediaPlayerOnBg();
@@ -622,10 +620,9 @@ HWTEST_F(VideoTestNg, VideoPatternTest008, TestSize.Level1)
 
     // CreateMediaPlayer success but PrepareMediaPlayer fail for mediaPlayer is invalid
     EXPECT_CALL(*(AceType::DynamicCast<MockMediaPlayer>(pattern->mediaPlayer_)), IsMediaPlayerValid())
-        .Times(6)
+        .Times(5)
         .WillOnce(Return(false))
         .WillOnce(Return(true))
-        .WillOnce(Return(false))
         .WillOnce(Return(false))
         .WillOnce(Return(false))
         .WillOnce(Return(false));
@@ -696,7 +693,7 @@ HWTEST_F(VideoTestNg, VideoPatternTest009, TestSize.Level1)
 HWTEST_F(VideoTestNg, VideoPatternTest010, TestSize.Level1)
 {
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<VideoTheme>()));
     /**
      * @tc.steps: step1. Create Video
@@ -723,11 +720,11 @@ HWTEST_F(VideoTestNg, VideoPatternTest010, TestSize.Level1)
     auto videoEventHub = frameNode->GetEventHub<VideoEventHub>();
     ASSERT_TRUE(videoEventHub);
     std::string startCheck;
-    EventCallback onStart = [&startCheck](const std::string& /* param */) { startCheck = VIDEO_START_EVENT; };
+    VideoEventCallback onStart = [&startCheck](const std::string& /* param */) { startCheck = VIDEO_START_EVENT; };
     std::string pauseCheck;
-    EventCallback onPause = [&pauseCheck](const std::string& /* param */) { pauseCheck = VIDEO_PAUSE_EVENT; };
+    VideoEventCallback onPause = [&pauseCheck](const std::string& /* param */) { pauseCheck = VIDEO_PAUSE_EVENT; };
     std::string finishCheck;
-    EventCallback onFinish = [&finishCheck](const std::string& /* param */) { finishCheck = VIDEO_FINISH_EVENT; };
+    VideoEventCallback onFinish = [&finishCheck](const std::string& /* param */) { finishCheck = VIDEO_FINISH_EVENT; };
     videoEventHub->SetOnStart(std::move(onStart));
     videoEventHub->SetOnPause(std::move(onPause));
     videoEventHub->SetOnFinish(std::move(onFinish));
@@ -804,8 +801,8 @@ HWTEST_F(VideoTestNg, VideoPatternTest011, TestSize.Level1)
     auto videoEventHub = frameNode->GetEventHub<VideoEventHub>();
     ASSERT_TRUE(videoEventHub);
     std::string preparedCheck;
-    EventCallback onPrepared = [&preparedCheck](
-                                   const std::string& /* param */) { preparedCheck = VIDEO_PREPARED_EVENT; };
+    VideoEventCallback onPrepared = [&preparedCheck](
+                                        const std::string& /* param */) { preparedCheck = VIDEO_PREPARED_EVENT; };
     videoEventHub->SetOnPrepared(std::move(onPrepared));
     auto videoLayoutProperty = pattern->GetLayoutProperty<VideoLayoutProperty>();
 
@@ -868,10 +865,10 @@ HWTEST_F(VideoTestNg, VideoPatternTest012, TestSize.Level1)
     // set video event
     auto videoEventHub = pattern->GetEventHub<VideoEventHub>();
     std::string pauseCheck;
-    EventCallback onPause = [&pauseCheck](const std::string& /* param */) { pauseCheck = VIDEO_PAUSE_EVENT; };
+    VideoEventCallback onPause = [&pauseCheck](const std::string& /* param */) { pauseCheck = VIDEO_PAUSE_EVENT; };
     videoEventHub->SetOnPause(std::move(onPause));
     std::string updateCheck;
-    EventCallback onUpdate = [&updateCheck](const std::string& /* param */) { updateCheck = VIDEO_UPDATE_EVENT; };
+    VideoEventCallback onUpdate = [&updateCheck](const std::string& /* param */) { updateCheck = VIDEO_UPDATE_EVENT; };
     videoEventHub->SetOnUpdate(std::move(onUpdate));
 
     /**
@@ -973,10 +970,11 @@ HWTEST_F(VideoTestNg, VideoPatternTest013, TestSize.Level1)
     auto videoEventHub = frameNode->GetEventHub<VideoEventHub>();
     ASSERT_TRUE(videoEventHub);
     std::string seekingCheck;
-    EventCallback onSeeking = [&seekingCheck](const std::string& /* param */) { seekingCheck = VIDEO_SEEKING_EVENT; };
+    VideoEventCallback onSeeking = [&seekingCheck](
+                                       const std::string& /* param */) { seekingCheck = VIDEO_SEEKING_EVENT; };
     videoEventHub->SetOnSeeking(std::move(onSeeking));
     std::string seekedCheck;
-    EventCallback onSeeked = [&seekedCheck](const std::string& /* param */) { seekedCheck = VIDEO_SEEKED_EVENT; };
+    VideoEventCallback onSeeked = [&seekedCheck](const std::string& /* param */) { seekedCheck = VIDEO_SEEKED_EVENT; };
     videoEventHub->SetOnSeeked(std::move(onSeeked));
 
     /**
@@ -1047,7 +1045,7 @@ HWTEST_F(VideoTestNg, VideoFullScreenTest015, TestSize.Level1)
      * @tc.steps: step1. Create Video
      * @tc.expected: step1. Create Video successfully
      */
-    MockPipelineBase::GetCurrent()->SetRootSize(SCREEN_WIDTH_MEDIUM, SCREEN_HEIGHT_MEDIUM);
+    MockPipelineContext::GetCurrent()->SetRootSize(SCREEN_WIDTH_MEDIUM, SCREEN_HEIGHT_MEDIUM);
     VideoModelNG video;
     auto videoController = AceType::MakeRefPtr<VideoControllerV2>();
     video.Create(videoController);
@@ -1105,13 +1103,13 @@ HWTEST_F(VideoTestNg, VideoFullScreenTest015, TestSize.Level1)
     EXPECT_EQ(videoSize, SCREEN_SIZE_MEDIUM);
 
     // Change the root size to small
-    MockPipelineBase::GetCurrent()->SetRootSize(SCREEN_WIDTH_SMALL, SCREEN_HEIGHT_SMALL);
+    MockPipelineContext::GetCurrent()->SetRootSize(SCREEN_WIDTH_SMALL, SCREEN_HEIGHT_SMALL);
     auto size =
         fullScreenLayout->MeasureContent(layoutConstraint, &fullScreenLayoutWrapper).value_or(SizeF(0.0f, 0.0f));
     EXPECT_EQ(size, SCREEN_SIZE_SMALL);
 
     // Change the root size to large
-    MockPipelineBase::GetCurrent()->SetRootSize(SCREEN_WIDTH_LARGE, SCREEN_HEIGHT_LARGE);
+    MockPipelineContext::GetCurrent()->SetRootSize(SCREEN_WIDTH_LARGE, SCREEN_HEIGHT_LARGE);
     videoSize =
         fullScreenLayout->MeasureContent(layoutConstraint, &fullScreenLayoutWrapper).value_or(SizeF(0.0f, 0.0f));
     EXPECT_EQ(videoSize, SCREEN_SIZE_LARGE);
@@ -1448,7 +1446,7 @@ HWTEST_F(VideoTestNg, VideoPatternTest020, TestSize.Level1)
      * @tc.steps: step2. Call dragEnd in different wrong situation.
      * @tc.expected: step2. Log error message.
      */
-    auto json = JsonUtil::Create(false);
+    auto json = JsonUtil::Create(true);
     json->Put(EXTRA_INFO_KEY.c_str(), "");
     dragEnd(nullptr, json->ToString());
     json->Delete(EXTRA_INFO_KEY.c_str());
@@ -1650,7 +1648,7 @@ HWTEST_F(VideoTestNg, VideoPatternTest016, TestSize.Level1)
     ASSERT_TRUE(videoEventHub);
 
     std::string fullScreenCheck;
-    EventCallback onFullScreenChange = [&fullScreenCheck](const std::string& param) { fullScreenCheck = param; };
+    VideoEventCallback onFullScreenChange = [&fullScreenCheck](const std::string& param) { fullScreenCheck = param; };
     videoEventHub->SetOnFullScreenChange(std::move(onFullScreenChange));
 
     /**
@@ -1711,7 +1709,7 @@ HWTEST_F(VideoTestNg, VideoPatternTest016, TestSize.Level1)
      * @tc.expected: step4. ExitFullScreen() will be called
      */
     // construct a FullScreenManager
-    auto rootNode = MockPipelineBase::GetCurrent()->rootNode_;
+    auto rootNode = MockPipelineContext::GetCurrent()->rootNode_;
     auto fullScreenManager = AceType::MakeRefPtr<FullScreenManager>(rootNode);
 
     auto flag = fullScreenManager->OnBackPressed(); // will on videoPattern->OnBackPressed()
@@ -1894,7 +1892,7 @@ HWTEST_F(VideoTestNg, VideoFullScreenTest001, TestSize.Level1)
      * @tc.steps: step1. Create Video and get fullScreenPattern.
      * @tc.expected: Create Video successfully.
      */
-    MockPipelineBase::GetCurrent()->SetRootSize(SCREEN_WIDTH_MEDIUM, SCREEN_HEIGHT_MEDIUM);
+    MockPipelineContext::GetCurrent()->SetRootSize(SCREEN_WIDTH_MEDIUM, SCREEN_HEIGHT_MEDIUM);
     VideoModelNG video;
     video.Create(AceType::MakeRefPtr<VideoControllerV2>());
     auto videoNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());

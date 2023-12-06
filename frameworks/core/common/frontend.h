@@ -71,7 +71,7 @@ class ACE_EXPORT Frontend : public AceType {
 
 public:
     Frontend() = default;
-    ~Frontend() override = default;
+    ~Frontend() override;
 
     enum class State { ON_CREATE, ON_DESTROY, ON_SHOW, ON_HIDE, ON_ACTIVE, ON_INACTIVE, UNDEFINE };
 
@@ -112,6 +112,7 @@ public:
     virtual void GetStageSourceMap(std::unordered_map<std::string, RefPtr<Framework::RevSourceMap>>& sourceMap) const {}
 
     virtual void RunPage(const std::string& content, const std::string& params) = 0;
+    virtual void RunPage(const std::shared_ptr<std::vector<uint8_t>>& content, const std::string& params) {};
 
     virtual void RunPageByNamedRouter(const std::string& name) {}
 
@@ -301,6 +302,7 @@ protected:
     FrontendDialogCallback dialogCallback_ = nullptr;
     State state_ = State::UNDEFINE;
     mutable std::recursive_mutex mutex_;
+    mutable std::mutex destructMutex_;
 };
 
 } // namespace OHOS::Ace

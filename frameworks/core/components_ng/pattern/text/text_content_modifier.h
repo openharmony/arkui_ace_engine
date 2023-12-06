@@ -74,7 +74,7 @@ public:
         ifHaveSpanItemChildren_ = value;
     }
 
-    void SetDrawObscuredRects(const std::vector<Rect>& drawObscuredRects)
+    void SetDrawObscuredRects(const std::vector<RectF>& drawObscuredRects)
     {
         drawObscuredRects_ = drawObscuredRects;
     }
@@ -84,6 +84,7 @@ public:
     void SetClip(bool clip);
 
     void SetFontReady(bool value);
+    void ChangeDragStatus();
 
 protected:
     OffsetF GetPaintOffset() const
@@ -135,6 +136,7 @@ private:
         RefPtr<AnimatablePropertyFloat> offsetX;
         RefPtr<AnimatablePropertyFloat> offsetY;
         RefPtr<AnimatablePropertyColor> color;
+        RefPtr<PropertyBool> isFilled;
     };
     std::vector<ShadowProp> shadows_;
 
@@ -158,14 +160,14 @@ private:
     RefPtr<PropertyBool> clip_;
     RefPtr<PropertyString> fontFamilyString_;
     RefPtr<PropertyBool> fontReady_;
-
+    RefPtr<PropertyBool> dragStatus_;
     RefPtr<Paragraph> paragraph_;
     OffsetF paintOffset_;
     float textRaceSpaceWidth_ = 0;
 
     std::vector<ObscuredReasons> obscuredReasons_;
     bool ifHaveSpanItemChildren_ = false;
-    std::vector<Rect> drawObscuredRects_;
+    std::vector<RectF> drawObscuredRects_;
 
     ACE_DISALLOW_COPY_AND_MOVE(TextContentModifier);
 };

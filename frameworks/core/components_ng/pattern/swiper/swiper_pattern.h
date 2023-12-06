@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SWIPER_SWIPER_PATTERN_H
 
 #include <optional>
+#include <vector>
 
 #include "base/geometry/axis.h"
 #include "base/geometry/ng/offset_t.h"
@@ -24,9 +25,11 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components/swiper/swiper_controller.h"
 #include "core/components/swiper/swiper_indicator_theme.h"
+#include "core/components_ng/base/frame_scene_status.h"
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/event/input_event.h"
 #include "core/components_ng/pattern/pattern.h"
+#include "core/components_ng/pattern/scrollable/nestable_scroll_container.h"
 #include "core/components_ng/pattern/swiper/swiper_accessibility_property.h"
 #include "core/components_ng/pattern/swiper/swiper_event_hub.h"
 #include "core/components_ng/pattern/swiper/swiper_layout_algorithm.h"
@@ -37,8 +40,8 @@
 #include "core/components_v2/inspector/utils.h"
 
 namespace OHOS::Ace::NG {
-class SwiperPattern : public Pattern {
-    DECLARE_ACE_TYPE(SwiperPattern, Pattern);
+class SwiperPattern : public NestableScrollContainer {
+    DECLARE_ACE_TYPE(SwiperPattern, NestableScrollContainer);
 
 public:
     SwiperPattern();
@@ -48,6 +51,14 @@ public:
     {
         return false;
     }
+
+    bool ShouldDelayChildPressedState() const override
+    {
+        return true;
+    }
+
+    void RegisterScrollingListener(const RefPtr<ScrollingListener> listener) override;
+    void FireAndCleanScrollingListener() override;
 
     bool UsResRegion() override
     {
@@ -115,7 +126,6 @@ public:
         auto jumpIndex = json->GetInt("uiCastJumpIndex");
         if (currentOffset != currentOffset_) {
             auto delta = currentOffset - currentOffset_;
-            LOGD("UITree delta=%{public}f", delta);
             UpdateCurrentOffset(delta);
         } else if (jumpIndex >= 0) {
             jumpIndex_ = jumpIndex;
@@ -246,6 +256,21 @@ public:
     }
 
     void UpdateCurrentOffset(float offset);
+    /**
+     * @brief Checks if the given offset exceeds the bounds of the swiper container and triggers overScroll.
+     *
+     * @param offset The offset to check.
+     * @return True if overScroll is triggered, false otherwise.
+     */
+    bool CheckOverScroll(float offset);
+
+    /**
+     * @brief Applies spring effect to the over-scrolling of the swiper.
+     *
+     * @param offset The offset of the swiper.
+     * @return true if the spring effect is applied successfully, false otherwise.
+     */
+    bool SpringOverScroll(float offset);
 
     void CheckMarkDirtyNodeForRenderIndicator(float additionalOffset = 0.0f);
 
@@ -291,6 +316,18 @@ public:
             eventHub->AddOnChangeEvent(onIndexChangeEvent_);
         } else {
             (*onIndexChangeEvent_).swap(event);
+        }
+    }
+
+    void UpdateAnimationEndEvent(AnimationEndEvent&& event)
+    {
+        if (!animationEndEvent_) {
+            animationEndEvent_ = std::make_shared<AnimationEndEvent>(event);
+            auto eventHub = GetEventHub<SwiperEventHub>();
+            CHECK_NULL_VOID(eventHub);
+            eventHub->AddAnimationEndEvent(animationEndEvent_);
+        } else {
+            (*animationEndEvent_).swap(event);
         }
     }
 
@@ -403,6 +440,11 @@ public:
         indicatorIsBoolean_ = isBoolean;
     }
 
+    void SetNestedScroll(const NestedScrollOptions& nestedOpt)
+    {
+        enableNestedScroll_ = nestedOpt.NeedParent();
+    }
+
     bool GetIsAtHotRegion() const
     {
         return isAtHotRegion_;
@@ -422,6 +464,23 @@ public:
     {
         isIndicatorLongPress_ = isIndicatorLongPress;
     }
+    void SetCachedCount(int32_t cachedCount)
+    {
+        if (cachedCount_.has_value() && cachedCount_.value() != cachedCount) {
+            SetLazyLoadFeature(true);
+        }
+        cachedCount_ = cachedCount;
+    }
+
+    void SetFinishCallbackType(FinishCallbackType finishCallbackType)
+    {
+        finishCallbackType_ = finishCallbackType;
+    }
+
+    FinishCallbackType GetFinishCallbackType() const
+    {
+        return finishCallbackType_;
+    }
 
     std::shared_ptr<SwiperParameters> GetSwiperParameters() const;
     std::shared_ptr<SwiperDigitalParameters> GetSwiperDigitalParameters() const;
@@ -440,9 +499,14 @@ public:
     void StartAutoPlay();
     void StopTranslateAnimation();
     void StopSpringAnimation();
+    bool SpringAnimationIsRunning();
+    void DumpAdvanceInfo() override;
     int32_t GetLoopIndex(int32_t originalIndex) const;
+    int32_t GetDuration() const;
+
 private:
     void OnModifyDone() override;
+    void OnAfterModifyDone() override;
     void OnAttachToFrameNode() override;
     void OnDetachFromFrameNode(FrameNode* node) override;
     void InitSurfaceChangedCallback();
@@ -467,12 +531,12 @@ private:
     void InitIndicator();
     void InitArrow();
 
-    void HandleDragStart();
+    void HandleDragStart(const GestureEvent& info);
     void HandleDragUpdate(const GestureEvent& info);
     void HandleDragEnd(double dragVelocity);
 
     void HandleTouchEvent(const TouchEventInfo& info);
-    void HandleTouchDown();
+    void HandleTouchDown(const TouchLocationInfo& locationInfo);
     void HandleTouchUp();
 
     void HandleMouseEvent(const MouseInfo& info);
@@ -482,7 +546,8 @@ private:
     void PlayFadeAnimation();
 
     // use property animation feature
-    void PlayPropertyTranslateAnimation(float translate, int32_t nextIndex, float velocity = 0.0f);
+    void PlayPropertyTranslateAnimation(
+        float translate, int32_t nextIndex, float velocity = 0.0f, bool stopAutoPlay = false);
     void StopPropertyTranslateAnimation(bool isBeforeCreateLayoutWrapper = false);
     void UpdateOffsetAfterPropertyAnimation(float offset);
     void OnPropertyTranslateAnimationFinish(const OffsetF& offset);
@@ -495,7 +560,8 @@ private:
     void StopFadeAnimation();
 
     bool IsOutOfBoundary(float mainOffset = 0.0f) const;
-    float GetRemainingOffset() const;
+    bool AutoLinearIsOutOfBoundary(float mainOffset) const;
+    float GetDistanceToEdge() const;
     float MainSize() const;
     float GetMainContentSize() const;
     void FireChangeEvent() const;
@@ -511,8 +577,7 @@ private:
     int32_t GetDisplayCount() const;
     int32_t CalculateDisplayCount() const;
     int32_t CalculateCount(
-    float contentWidth, float minSize, float margin, float gutter, float swiperPadding = 0.0f) const;
-    int32_t GetDuration() const;
+        float contentWidth, float minSize, float margin, float gutter, float swiperPadding = 0.0f) const;
     int32_t GetInterval() const;
     RefPtr<Curve> GetCurve() const;
     EdgeEffect GetEdgeEffect() const;
@@ -523,7 +588,7 @@ private:
     std::pair<int32_t, SwiperItemInfo> GetFirstItemInfoInVisibleArea() const;
     std::pair<int32_t, SwiperItemInfo> GetLastItemInfoInVisibleArea() const;
     std::pair<int32_t, SwiperItemInfo> GetSecondItemInfoInVisibleArea() const;
-    void OnIndexChange() const;
+    void OnIndexChange();
     bool IsOutOfHotRegion(const PointF& dragPoint) const;
     void SaveDotIndicatorProperty(const RefPtr<FrameNode>& indicatorNode);
     void SaveDigitIndicatorProperty(const RefPtr<FrameNode>& indicatorNode);
@@ -551,8 +616,9 @@ private:
     void BeforeCreateLayoutWrapper() override;
 
     void SetLazyLoadFeature(bool useLazyLoad) const;
+    void SetLazyForEachLongPredict(bool useLazyLoad) const;
     void SetLazyLoadIsLoop() const;
-    int32_t ComputeNextIndexByVelocity(float velocity) const;
+    int32_t ComputeNextIndexByVelocity(float velocity, bool onlyDistance = false) const;
     void UpdateCurrentIndex(int32_t index);
     void OnSpringAnimationStart(float velocity);
     void OnSpringAndFadeAnimationFinish();
@@ -564,6 +630,68 @@ private:
     void UpdateItemRenderGroup(bool itemRenderGroup);
     void MarkDirtyNodeSelf();
     void ResetAndUpdateIndexOnAnimationEnd(int32_t nextIndex);
+    int32_t GetLoopIndex(int32_t index, int32_t childrenSize) const;
+    bool IsAutoLinear() const;
+    bool AutoLinearAnimationNeedReset(float translate) const;
+    void OnAnimationTranslateZero(int32_t nextIndex, bool stopAutoPlay);
+    void UpdateDragFRCSceneInfo(float speed, SceneStatus sceneStatus);
+
+    /**
+     * @brief Stops animations when the scroll starts.
+     *
+     * @param flushImmediately Whether to flush layout immediately.
+     */
+    void StopAnimationOnScrollStart(bool flushImmediately);
+    /**
+     * @brief Checks if the animation is currently running.
+     *
+     * @return true if the animation is running, false otherwise.
+     */
+    inline bool AnimationRunning() const;
+
+    /**
+     *  NestableScrollContainer implementations
+     *  ============================================================
+     */
+    Axis GetAxis() const override
+    {
+        return GetDirection();
+    }
+
+    /**
+     * @brief Closes gap to the edge, called before Swiper transfers extra offset to parent/child to ensure that Swiper
+     * actually reaches the edge.
+     *
+     * @param offset The scroll offset from DragUpdate.
+     */
+    void CloseTheGap(float offset);
+
+    ScrollResult HandleScroll(float offset, int32_t source, NestedState state) override;
+    ScrollResult HandleScrollSelfFirst(float offset, int32_t source, NestedState state);
+
+    bool HandleScrollVelocity(float velocity) override;
+
+    void OnScrollStartRecursive(float position) override;
+    void OnScrollEndRecursive() override;
+
+    /**
+     * @brief Notifies the parent component that the scroll has started at the specified position.
+     *
+     * @param position The position where the scroll has started.
+     */
+    void NotifyParentScrollStart(float position);
+    /**
+     * @brief Notifies the parent NestableScrollContainer that the scroll has ended.
+     */
+    void NotifyParentScrollEnd();
+
+    inline bool ChildFirst(NestedState state);
+
+    WeakPtr<NestableScrollContainer> parent_;
+    /**
+     *  ============================================================
+     *  End of NestableScrollContainer implementations
+     */
 
     RefPtr<PanEvent> panEvent_;
     RefPtr<TouchEventImpl> touchEvent_;
@@ -573,10 +701,10 @@ private:
     RefPtr<Animator> controller_;
 
     // Control spring animation when drag beyond boundary and drag end.
-    RefPtr<Animator> springController_;
+    std::shared_ptr<AnimationUtils::Animation> springAnimation_;
 
     // Control fade animation when drag beyond boundary and drag end.
-    RefPtr<Animator> fadeController_;
+    std::shared_ptr<AnimationUtils::Animation> fadeAnimation_;
 
     // Control translate animation for indicator.
     RefPtr<Animator> indicatorController_;
@@ -584,11 +712,13 @@ private:
     RefPtr<SwiperController> swiperController_;
     RefPtr<InputEvent> mouseEvent_;
 
+    bool enableNestedScroll_ = false;
     bool isLastIndicatorFocused_ = false;
     int32_t startIndex_ = 0;
     int32_t endIndex_ = 0;
     int32_t currentIndex_ = 0;
     int32_t oldIndex_ = 0;
+    int32_t nextIndex_ = 0;
 
     PanDirection panDirection_;
 
@@ -611,6 +741,10 @@ private:
     bool indicatorIsBoolean_ = true;
     bool isAtHotRegion_ = false;
     bool isDragging_ = false;
+    /**
+     * @brief Indicates whether the child NestableScrollContainer is currently scrolling and affecting Swiper.
+     */
+    bool childScrolling_ = false;
     bool isTouchDown_ = false;
     std::optional<bool> preLoop_;
 
@@ -618,6 +752,7 @@ private:
 
     ChangeEventPtr changeEvent_;
     ChangeEventPtr onIndexChangeEvent_;
+    AnimationEndEventPtr animationEndEvent_;
 
     mutable std::shared_ptr<SwiperParameters> swiperParameters_;
     mutable std::shared_ptr<SwiperDigitalParameters> swiperDigitalParameters_;
@@ -642,6 +777,7 @@ private:
     std::optional<int32_t> targetIndex_;
     std::optional<int32_t> preTargetIndex_;
     std::optional<int32_t> pauseTargetIndex_;
+    std::optional<int32_t> oldChildrenSize_;
     float currentDelta_ = 0.0f;
     SwiperLayoutAlgorithm::PositionMap itemPosition_;
     std::optional<float> velocity_;
@@ -649,16 +785,24 @@ private:
     bool mainSizeIsMeasured_ = false;
     bool isNeedResetPrevMarginAndNextMargin_ = false;
     bool usePropertyAnimation_ = false;
+    bool springAnimationIsRunning_ = false;
     int32_t propertyAnimationIndex_ = -1;
     bool isUserFinish_ = true;
     bool isVoluntarilyClear_ = false;
     bool isIndicatorLongPress_ = false;
     bool stopIndicatorAnimation_ = true;
+    bool isTouchPad_ = false;
+    bool fadeAnimationIsRunning_ = false;
 
     float mainDeltaSum_ = 0.0f;
+    std::optional<int32_t> cachedCount_;
 
     std::optional<int32_t> surfaceChangedCallbackId_;
     SwiperLayoutAlgorithm::PositionMap itemPositionInAnimation_;
+
+    WindowSizeChangeReason windowSizeChangeReason_ = WindowSizeChangeReason::UNDEFINED;
+    std::vector<RefPtr<ScrollingListener>> scrollingListener_;
+    FinishCallbackType finishCallbackType_ = FinishCallbackType::REMOVED;
 };
 } // namespace OHOS::Ace::NG
 

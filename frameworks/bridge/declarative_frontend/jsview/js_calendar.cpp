@@ -26,7 +26,10 @@
 #include "core/common/ace_application_info.h"
 #include "core/common/container.h"
 #include "core/components/common/properties/color.h"
+#include "core/components_ng/base/ui_node.h"
+#include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/calendar/calendar_model_ng.h"
+#include "core/pipeline/pipeline_context.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_calendar_controller.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "frameworks/bridge/declarative_frontend/jsview/models/calendar_model_impl.h"
@@ -134,51 +137,17 @@ void JSCalendar::SetCalendarData(
 
 #if defined(PREVIEW)
     if (obj->IsUndefined()) {
-        LOGE("obj is undefined");
         return;
     }
 #endif
 
-    auto yearValue = obj->GetProperty("year");
-    auto monthValue = obj->GetProperty("month");
-    auto arrayValue = obj->GetProperty("data");
-    auto data = JsonUtil::ParseJsonString(arrayValue->ToString());
-    if (!yearValue->IsNumber() || !monthValue->IsNumber() || !data->IsArray()) {
-        return;
-    }
-    ObtainedMonth obtainedMonth;
-    obtainedMonth.year = yearValue->ToNumber<int32_t>();
-    obtainedMonth.month = monthValue->ToNumber<int32_t>();
-    std::vector<CalendarDay> days;
-    auto child = data->GetChild();
-    while (child && child->IsValid()) {
-        CalendarDay day;
-        day.index = child->GetInt("index");
-        day.lunarMonth = child->GetString("lunarMonth");
-        day.lunarDay = child->GetString("lunarDay");
-        day.dayMark = child->GetString("dayMark");
-        day.dayMarkValue = child->GetString("dayMarkValue");
-        day.month.year = child->GetInt("year");
-        day.month.month = child->GetInt("month");
-        day.day = child->GetInt("day");
-        if (day.day == 1 && obtainedMonth.firstDayIndex == CALENDAR_INVALID) {
-            obtainedMonth.firstDayIndex = day.index;
-        }
-        day.isFirstOfLunar = child->GetBool("isFirstOfLunar");
-        day.hasSchedule = child->GetBool("hasSchedule");
-        day.markLunarDay = child->GetBool("markLunarDay");
-        days.emplace_back(std::move(day));
-        child = child->GetNext();
-    }
-    obtainedMonth.days = days;
-    component->SetCalendarData(obtainedMonth);
+    component->SetCalendarData(GetCalendarData(obj, monthState));
 }
 
 ObtainedMonth JSCalendar::GetCalendarData(const JSRef<JSObject>& obj, MonthState monthState)
 {
 #if defined(PREVIEW)
     if (obj->IsUndefined()) {
-        LOGE("obj is undefined");
         return ObtainedMonth();
     }
 #endif
@@ -186,33 +155,38 @@ ObtainedMonth JSCalendar::GetCalendarData(const JSRef<JSObject>& obj, MonthState
     auto yearValue = obj->GetProperty("year");
     auto monthValue = obj->GetProperty("month");
     auto arrayValue = obj->GetProperty("data");
-    auto data = JsonUtil::ParseJsonString(arrayValue->ToString());
-    if (!yearValue->IsNumber() || !monthValue->IsNumber() || !data->IsArray()) {
+    if (!yearValue->IsNumber() || !monthValue->IsNumber() || !arrayValue->IsArray()) {
         return ObtainedMonth();
     }
     ObtainedMonth obtainedMonth;
     obtainedMonth.year = yearValue->ToNumber<int32_t>();
     obtainedMonth.month = monthValue->ToNumber<int32_t>();
     std::vector<CalendarDay> days;
-    auto child = data->GetChild();
-    while (child && child->IsValid()) {
+    JSRef<JSArray> dataArray = JSRef<JSArray>::Cast(arrayValue);
+    size_t length = dataArray->Length();
+    for (size_t i = 0; i < length; ++i) {
         CalendarDay day;
-        day.index = child->GetInt("index");
-        day.lunarMonth = child->GetString("lunarMonth");
-        day.lunarDay = child->GetString("lunarDay");
-        day.dayMark = child->GetString("dayMark");
-        day.dayMarkValue = child->GetString("dayMarkValue");
-        day.month.year = child->GetInt("year");
-        day.month.month = child->GetInt("month");
-        day.day = child->GetInt("day");
+        JSRef<JSVal> item = dataArray->GetValueAt(i);
+        if (!item->IsObject()) {
+            days.emplace_back(std::move(day));
+            continue;
+        }
+        JSRef<JSObject> itemObj = JSRef<JSObject>::Cast(item);
+        day.index = itemObj->GetPropertyValue<int32_t>("index", 0);
+        day.lunarMonth = itemObj->GetPropertyValue<std::string>("lunarMonth", "");
+        day.lunarDay = itemObj->GetPropertyValue<std::string>("lunarDay", "");
+        day.dayMark = itemObj->GetPropertyValue<std::string>("dayMark", "");
+        day.dayMarkValue = itemObj->GetPropertyValue<std::string>("dayMarkValue", "");
+        day.month.year = itemObj->GetPropertyValue<int32_t>("year", 0);
+        day.month.month = itemObj->GetPropertyValue<int32_t>("month", 0);
+        day.day = itemObj->GetPropertyValue<int32_t>("day", 0);
         if (day.day == 1 && obtainedMonth.firstDayIndex == CALENDAR_INVALID) {
             obtainedMonth.firstDayIndex = day.index;
         }
-        day.isFirstOfLunar = child->GetBool("isFirstOfLunar");
-        day.hasSchedule = child->GetBool("hasSchedule");
-        day.markLunarDay = child->GetBool("markLunarDay");
+        day.isFirstOfLunar = itemObj->GetPropertyValue<bool>("isFirstOfLunar", false);
+        day.hasSchedule = itemObj->GetPropertyValue<bool>("hasSchedule", false);
+        day.markLunarDay = itemObj->GetPropertyValue<bool>("markLunarDay", false);
         days.emplace_back(std::move(day));
-        child = child->GetNext();
     }
     obtainedMonth.days = days;
     return obtainedMonth;
@@ -270,10 +244,6 @@ void JSCalendar::SetOffDays(int32_t offDays)
 void JSCalendar::SetShowHoliday(const JSCallbackInfo& info)
 {
     bool showHoliday = true;
-    if (info.Length() < 1) {
-        LOGE("The info is wrong, it is supposed to have atleast 1 arguments");
-        return;
-    }
     if (info[0]->IsBoolean()) {
         showHoliday = info[0]->ToBoolean();
     }
@@ -283,10 +253,6 @@ void JSCalendar::SetShowHoliday(const JSCallbackInfo& info)
 void JSCalendar::SetShowLunar(const JSCallbackInfo& info)
 {
     bool showLunar = false;
-    if (info.Length() < 1) {
-        LOGE("The info is wrong, it is supposed to have atleast 1 arguments");
-        return;
-    }
     if (info[0]->IsBoolean()) {
         showLunar = info[0]->ToBoolean();
     }
@@ -295,10 +261,6 @@ void JSCalendar::SetShowLunar(const JSCallbackInfo& info)
 
 void JSCalendar::SetStartOfWeek(const JSCallbackInfo& info)
 {
-    if (info.Length() < 1) {
-        LOGE("The info is wrong, it is supposed to have atleast 1 arguments");
-        return;
-    }
     if (info[0]->IsNumber()) {
         auto startOfWeek = info[0]->ToNumber<int32_t>();
         CalendarModel::GetInstance()->SetStartOfWeek(startOfWeek);
@@ -308,10 +270,6 @@ void JSCalendar::SetStartOfWeek(const JSCallbackInfo& info)
 void JSCalendar::SetNeedSlide(const JSCallbackInfo& info)
 {
     bool needSlide = false;
-    if (info.Length() < 1) {
-        LOGE("The info is wrong, it is supposed to have atleast 1 arguments");
-        return;
-    }
     if (info[0]->IsBoolean()) {
         needSlide = info[0]->ToBoolean();
     }
@@ -341,18 +299,18 @@ RefPtr<CalendarComponentV2> JSCalendar::GetComponent()
 
 void JSCalendar::JsOnSelectedChange(const JSCallbackInfo& info)
 {
-    if (info.Length() < 1 || !info[0]->IsFunction()) {
-        LOGE("The arg is wrong, it is supposed to have atleast 1 argument.");
+    if (!info[0]->IsFunction()) {
         return;
     }
-
     if (info[0]->IsFunction()) {
+        WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
         auto selectedChangeFuc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
-        auto selectedChange = [execCtx = info.GetExecutionContext(), func = std::move(selectedChangeFuc)](
-                                    const std::string& info) {
+        auto selectedChange = [execCtx = info.GetExecutionContext(), func = std::move(selectedChangeFuc),
+                                  node = frameNode](const std::string& info) {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             std::vector<std::string> keys = { "year", "month", "day" };
             ACE_SCORING_EVENT("Calendar.onSelectedChange");
+            PipelineContext::SetCallBackNode(node);
             func->Execute(keys, info);
         };
         CalendarModel::GetInstance()->SetSelectedChangeEvent(std::move(selectedChange));
@@ -361,16 +319,17 @@ void JSCalendar::JsOnSelectedChange(const JSCallbackInfo& info)
 
 void JSCalendar::JsOnRequestData(const JSCallbackInfo& info)
 {
-    if (info.Length() < 1 || !info[0]->IsFunction()) {
-        LOGE("The arg is wrong, it is supposed to have atleast 1 argument.");
+    if (!info[0]->IsFunction()) {
         return;
     }
+    WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
     auto requestDataFuc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
-    auto requestData = [execCtx = info.GetExecutionContext(), func = std::move(requestDataFuc)](
-                            const std::string& info) {
+    auto requestData = [execCtx = info.GetExecutionContext(), func = std::move(requestDataFuc), node = frameNode](
+                           const std::string& info) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("Calendar.onRequestData");
         std::vector<std::string> keys = { "year", "month", "currentMonth", "currentYear", "monthState" };
+        PipelineContext::SetCallBackNode(node);
         func->Execute(keys, info);
     };
     CalendarModel::GetInstance()->SetOnRequestDataEvent(std::move(requestData));
@@ -408,10 +367,6 @@ ObtainedMonth JSCalendar::GetNextData(const JSRef<JSObject>& obj)
 
 void JSCalendar::SetDirection(const JSCallbackInfo& info)
 {
-    if (info.Length() < 1) {
-        LOGE("The info is wrong, it is supposed to have atleast 1 arguments");
-        return;
-    }
     if (info[0]->IsNumber()) {
         auto dir = info[0]->ToNumber<int32_t>();
         CalendarModel::GetInstance()->SetDirection(dir);
@@ -420,8 +375,7 @@ void JSCalendar::SetDirection(const JSCallbackInfo& info)
 
 void JSCalendar::SetCurrentDayStyle(const JSCallbackInfo& info)
 {
-    if (info.Length() < 1 || !info[0]->IsObject()) {
-        LOGW("Invalid params");
+    if (!info[0]->IsObject()) {
         return;
     }
     auto obj = JSRef<JSObject>::Cast(info[0]);

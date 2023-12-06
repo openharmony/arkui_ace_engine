@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h"
 
 #include "base/utils/utils.h"
+#include "core/common/container.h"
 #include "core/components/common/properties/shadow_config.h"
 #include "core/components/select/select_theme.h"
 #include "core/components_ng/event/click_event.h"
@@ -32,8 +33,8 @@ void MenuWrapperPattern::HideMenu(const RefPtr<FrameNode>& menu)
 
     auto menuPattern = menu->GetPattern<MenuPattern>();
     CHECK_NULL_VOID(menuPattern);
-    LOGI("MenuWrapperPattern closing menu %{public}d", targetId_);
     menuPattern->HideMenu();
+    CallMenuStateChangeCallback("false");
 }
 
 void MenuWrapperPattern::OnAttachToFrameNode()
@@ -98,6 +99,22 @@ void MenuWrapperPattern::HideSubMenu()
         return;
     }
     auto subMenu = host->GetChildren().back();
+    auto iter = host->GetChildren().begin();
+    int32_t focusNodeId = 2;
+    std::advance(iter, host->GetChildren().size() - focusNodeId);
+    auto focusMenu = *iter;
+    if (focusMenu) {
+        auto menuHub = DynamicCast<FrameNode>(focusMenu);
+        CHECK_NULL_VOID(menuHub);
+        // SelectOverlay's custom menu does not need to be focused.
+        auto isCustomMenu = IsSelectOverlayCustomMenu(menuHub);
+        if (!isCustomMenu) {
+            auto focusHub = menuHub->GetFocusHub();
+            CHECK_NULL_VOID(focusHub);
+            focusHub->SetParentFocusable(true);
+            focusHub->RequestFocusImmediately();
+        }
+    }
     host->RemoveChild(subMenu);
     auto menuPattern = DynamicCast<FrameNode>(subMenu)->GetPattern<MenuPattern>();
     if (menuPattern) {
@@ -179,7 +196,12 @@ void MenuWrapperPattern::CheckAndShowAnimation()
 
 bool MenuWrapperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
 {
-    if (IsContextMenu()) {
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, false);
+    auto theme = pipeline->GetTheme<SelectTheme>();
+    CHECK_NULL_RETURN(theme, false);
+    auto expandDisplay = theme->GetExpandDisplay();
+    if ((IsContextMenu() && !IsHided()) || (expandDisplay && !IsHided())) {
         SetHotAreas(dirty);
     }
     CheckAndShowAnimation();
@@ -188,7 +210,12 @@ bool MenuWrapperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& d
 
 void MenuWrapperPattern::SetHotAreas(const RefPtr<LayoutWrapper>& layoutWrapper)
 {
-    if (layoutWrapper->GetAllChildrenWithBuild().empty() || !IsContextMenu()) {
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetTheme<SelectTheme>();
+    CHECK_NULL_VOID(theme);
+    auto expandDisplay = theme->GetExpandDisplay();
+    if ((layoutWrapper->GetAllChildrenWithBuild().empty() || !IsContextMenu()) && !expandDisplay) {
         return;
     }
     auto layoutProps = layoutWrapper->GetLayoutProperty();
@@ -277,5 +304,12 @@ OffsetT<Dimension> MenuWrapperPattern::GetAnimationOffset()
             break;
     }
     return offset;
+}
+
+bool MenuWrapperPattern::IsSelectOverlayCustomMenu(const RefPtr<FrameNode>& menu) const
+{
+    auto menuPattern = menu->GetPattern<MenuPattern>();
+    CHECK_NULL_RETURN(menuPattern, false);
+    return menuPattern->IsSelectOverlayCustomMenu();
 }
 } // namespace OHOS::Ace::NG

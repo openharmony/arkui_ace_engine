@@ -43,6 +43,10 @@ private:
     std::pair<int32_t, int32_t> GetCrossStartAndSpanWithUserFunction(
         int32_t itemIndex, const GridLayoutOptions& options, int32_t firstIrregularIndex);
 
+    void UpdateRealGridItemPositionInfo(
+        const RefPtr<LayoutWrapper>& itemLayoutWrapper, int32_t mainIndex, int32_t crossIndex) override
+    {}
+
     ACE_DISALLOW_COPY_AND_MOVE(GridScrollWithOptionsLayoutAlgorithm);
 };
 } // namespace OHOS::Ace::NG

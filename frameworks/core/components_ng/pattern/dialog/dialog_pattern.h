@@ -144,7 +144,6 @@ private:
     RefPtr<FrameNode> BuildSubTitle(const DialogProperties& dialogProperties);
     void ParseButtonFontColorAndBgColor(
         const ButtonInfo& params, std::string& textColor, std::optional<Color>& bgColor);
-    void SetButtonTextOpacity(const RefPtr<FrameNode>& textNode, bool enabled);
     void SetButtonEnabled(const RefPtr<FrameNode>& buttonNode, bool enabled);
     RefPtr<FrameNode> BuildTitle(const DialogProperties& dialogProperties);
     RefPtr<FrameNode> BuildContent(const DialogProperties& dialogProperties);
@@ -168,6 +167,7 @@ private:
     RefPtr<FrameNode> BuildSheetInfoIcon(const std::string& icon);
     // build actionMenu
     RefPtr<FrameNode> BuildMenu(const std::vector<ButtonInfo>& buttons, bool hasTitle);
+    void RecordEvent(int32_t btnIndex) const;
 
     RefPtr<DialogTheme> dialogTheme_;
     WeakPtr<UINode> customNode_;
@@ -184,6 +184,7 @@ private:
     DialogProperties dialogProperties_;
     WeakPtr<FrameNode> menuNode_;
     bool isFirstDefaultFocus_ = true;
+    RefPtr<FrameNode> buttonContainer_;
 
     ACE_DISALLOW_COPY_AND_MOVE(DialogPattern);
 };

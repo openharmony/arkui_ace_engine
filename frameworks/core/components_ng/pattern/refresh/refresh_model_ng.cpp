@@ -45,6 +45,7 @@ void RefreshModelNG::Create()
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
+    ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::REFRESH_ETS_TAG, nodeId);
     auto frameNode = FrameNode::GetOrCreateFrameNode(
         V2::REFRESH_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<RefreshPattern>(); });
     CHECK_NULL_VOID(frameNode);
@@ -65,6 +66,10 @@ void RefreshModelNG::Create()
 void RefreshModelNG::Pop()
 {
     auto refreshNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    if (refreshNode && refreshNode->IsAtomicNode()) {
+        ViewStackProcessor::GetInstance()->Pop();
+        refreshNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    }
     CHECK_NULL_VOID(refreshNode);
     auto layoutProperty = refreshNode->GetLayoutProperty<RefreshLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
@@ -74,7 +79,8 @@ void RefreshModelNG::Pop()
     CHECK_NULL_VOID(pattern);
     if (!pattern->GetIsCustomBuilderExist()) {
         if (refreshNode->TotalChildCount() >= CHILD_COUNT) {
-            LOGI("%{public}s have %{public}d child", refreshNode->GetTag().c_str(), refreshNode->TotalChildCount());
+            TAG_LOGD(AceLogTag::ACE_REFRESH, "%{public}s have %{public}d child", refreshNode->GetTag().c_str(),
+                refreshNode->TotalChildCount());
             return;
         }
         auto textChild = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, -1, AceType::MakeRefPtr<TextPattern>());

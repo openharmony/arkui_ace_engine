@@ -79,22 +79,22 @@ void RosenRenderOption::PaintBackground(RenderContext& context, const Offset& of
         size.Width() - 2.0 * diff + offset.GetX() + diff, size.Height() - 2.0 * diff + offset.GetY() + diff);
     path.AddRoundRect(tempRect, radius, radius);
     if (hovered_) {
-        RSPen pen;
-        pen.SetColor(HOVER_BORDER_COLOR);
-        canvas->AttachPen(pen);
+        RSBrush brush;
+        brush.SetColor(HOVER_BORDER_COLOR);
+        canvas->AttachBrush(brush);
         canvas->DrawPath(path);
-        canvas->DetachPen();
+        canvas->DetachBrush();
     }
 
-    RSPen pen;
-    pen.SetARGB(backColor_.GetAlpha(), backColor_.GetRed(), backColor_.GetGreen(), backColor_.GetBlue());
-    canvas->AttachPen(pen);
+    RSBrush brush;
+    brush.SetARGB(backColor_.GetAlpha(), backColor_.GetRed(), backColor_.GetGreen(), backColor_.GetBlue());
+    canvas->AttachBrush(brush);
     canvas->DrawPath(path);
-    canvas->DetachPen();
-    pen.SetColor(GetEventEffectColor().GetValue());
-    canvas->AttachPen(pen);
+    canvas->DetachBrush();
+    brush.SetColor(GetEventEffectColor().GetValue());
+    canvas->AttachBrush(brush);
     canvas->DrawPath(path);
-    canvas->DetachPen();
+    canvas->DetachBrush();
 #endif
     if (SystemProperties::GetDebugBoundaryEnabled()) {
         if (canvas == nullptr) {

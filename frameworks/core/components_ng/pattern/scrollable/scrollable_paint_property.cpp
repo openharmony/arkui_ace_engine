@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -55,17 +55,16 @@ Dimension ScrollablePaintProperty::GetBarWidth() const
 
 std::string ScrollablePaintProperty::GetBarStateString() const
 {
-    auto mode = propScrollBarProperty_ ? propScrollBarProperty_->propScrollBarMode.value_or(NG::DisplayMode::AUTO)
-                                       : NG::DisplayMode::AUTO;
+    auto mode = propScrollBarProperty_ ? propScrollBarProperty_->propScrollBarMode.value_or(DisplayMode::AUTO)
+                                       : DisplayMode::AUTO;
     switch (mode) {
-        case NG::DisplayMode::AUTO:
+        case DisplayMode::AUTO:
             return "BarState.Auto";
-        case NG::DisplayMode::ON:
+        case DisplayMode::ON:
             return "BarState.On";
-        case NG::DisplayMode::OFF:
+        case DisplayMode::OFF:
             return "BarState.Off";
         default:
-            LOGE("mode %{public}d is not valid", mode);
             break;
     }
     return "BarState.Off";

@@ -40,11 +40,14 @@ void Swap(int32_t& deviceWidth, int32_t& deviceHeight)
 
 bool SystemProperties::traceEnabled_ = false;
 bool SystemProperties::svgTraceEnable_ = false;
+bool SystemProperties::layoutTraceEnable_ = false;
 bool SystemProperties::accessibilityEnabled_ = false;
 bool SystemProperties::isRound_ = false;
 bool SystemProperties::isDeviceAccess_ = false;
 int32_t SystemProperties::deviceWidth_ = 0;
 int32_t SystemProperties::deviceHeight_ = 0;
+int32_t SystemProperties::devicePhysicalWidth_ = 0;
+int32_t SystemProperties::devicePhysicalHeight_ = 0;
 double SystemProperties::resolution_ = 1.0;
 DeviceType SystemProperties::deviceType_ { DeviceType::PHONE };
 DeviceOrientation SystemProperties::orientation_ { DeviceOrientation::PORTRAIT };
@@ -63,18 +66,22 @@ LongScreenType SystemProperties::LongScreen_ { LongScreenType::NOT_LONG };
 bool SystemProperties::unZipHap_ = true;
 bool SystemProperties::windowAnimationEnabled_ = false;
 bool SystemProperties::debugBoundaryEnabled_ = false;
+bool SystemProperties::downloadByNetworkEnabled_ = false;
 bool SystemProperties::gpuUploadEnabled_ = false;
 bool SystemProperties::isHookModeEnabled_ = false;
 bool SystemProperties::astcEnabled_ = false;
+bool SystemProperties::changeTitleStyleEnabled_ = false;
 int SystemProperties::astcMax_ = 0;
 int SystemProperties::astcPsnr_ = 0;
 bool SystemProperties::extSurfaceEnabled_ = false;
 uint32_t SystemProperties::dumpFrameCount_ = 0;
+bool SystemProperties::resourceDecoupling_ = true;
 #ifndef ENABLE_ROSEN_BACKEND
 bool SystemProperties::rosenBackendEnabled_ = false;
 #else
 bool SystemProperties::rosenBackendEnabled_ = true;
 #endif
+bool SystemProperties::flutterDecouplingEnabled_ = true;
 
 void SystemProperties::InitDeviceType(DeviceType type)
 {
@@ -184,13 +191,11 @@ std::string SystemProperties::GetRegion()
 
 std::string SystemProperties::GetPartialUpdatePkg()
 {
-    // TODO: add support for pc preview.
     return {};
 }
 
 std::string SystemProperties::GetNewPipePkg()
 {
-    // TODO: add support for pc preview.
     return {};
 }
 
@@ -210,6 +215,31 @@ bool SystemProperties::IsFormAnimationLimited()
 }
 
 bool SystemProperties::GetImageFrameworkEnabled()
+{
+    return false;
+}
+
+bool SystemProperties::GetDebugPixelMapSaveEnabled()
+{
+    return false;
+}
+
+bool SystemProperties::GetResourceDecoupling()
+{
+    return true;
+}
+
+int32_t SystemProperties::GetJankFrameThreshold()
+{
+    return 0;
+}
+
+std::string SystemProperties::GetCustomTitleFilePath()
+{
+    return UNDEFINED_PARAM;
+}
+
+bool SystemProperties::Is24HourClock()
 {
     return false;
 }

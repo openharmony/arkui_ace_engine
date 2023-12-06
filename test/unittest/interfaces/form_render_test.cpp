@@ -23,7 +23,7 @@
 #include "interfaces/inner_api/form_render/include/form_renderer.h"
 #include "interfaces/inner_api/form_render/include/form_renderer_delegate_impl.h"
 #include "interfaces/inner_api/form_render/include/form_renderer_group.h"
-#include "core/pipeline_ng/test/mock/mock_pipeline_base.h"
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -49,12 +49,12 @@ class FormRenderTest : public testing::Test {
 public:
     static void SetUpTestCase()
     {
-        NG::MockPipelineBase::SetUp();
+        NG::MockPipelineContext::SetUp();
     }
 
     static void TearDownTestCase()
     {
-        NG::MockPipelineBase::TearDown();
+        NG::MockPipelineContext::TearDown();
     }
 };
 
@@ -106,8 +106,8 @@ HWTEST_F(FormRenderTest, FormRenderTest001, TestSize.Level1)
     EXPECT_CALL(*((MockUIContent*)(formRenderer->uiContent_.get())), SetFormHeight(FORM_HEIGHT)).WillOnce(Return());
     EXPECT_CALL(*((MockUIContent*)(formRenderer->uiContent_.get())), UpdateFormSharedImage(_)).WillOnce(Return());
     EXPECT_CALL(*((MockUIContent*)(formRenderer->uiContent_.get())), UpdateFormData(_)).WillOnce(Return());
-    NativeValue* value = nullptr;
-    EXPECT_CALL(*((MockUIContent*)(formRenderer->uiContent_.get())), Initialize(An<OHOS::Rosen::Window*>(), _, value))
+
+    EXPECT_CALL(*((MockUIContent*)(formRenderer->uiContent_.get())), Initialize(An<OHOS::Rosen::Window*>(), "", _))
         .WillOnce(Return());
     EXPECT_CALL(*((MockUIContent*)(formRenderer->uiContent_.get())), SetActionEventHandler(_)).WillOnce(Return());
     EXPECT_CALL(*((MockUIContent*)(formRenderer->uiContent_.get())), SetErrorEventHandler(_)).WillOnce(Return());
@@ -231,8 +231,7 @@ HWTEST_F(FormRenderTest, FormRenderTest002, TestSize.Level1)
     EXPECT_CALL(*((MockUIContent*)(formRenderer->uiContent_.get())), SetFormHeight(_)).WillOnce(Return());
     EXPECT_CALL(*((MockUIContent*)(formRenderer->uiContent_.get())), UpdateFormSharedImage(_)).WillOnce(Return());
     EXPECT_CALL(*((MockUIContent*)(formRenderer->uiContent_.get())), UpdateFormData(_)).WillOnce(Return());
-    NativeValue* value = nullptr;
-    EXPECT_CALL(*((MockUIContent*)(formRenderer->uiContent_.get())), Initialize(An<OHOS::Rosen::Window*>(), _, value))
+    EXPECT_CALL(*((MockUIContent*)(formRenderer->uiContent_.get())), Initialize(An<OHOS::Rosen::Window*>(), "", _))
         .WillOnce(Return());
     EXPECT_CALL(*((MockUIContent*)(formRenderer->uiContent_.get())), SetActionEventHandler(_)).WillOnce(Return());
     EXPECT_CALL(*((MockUIContent*)(formRenderer->uiContent_.get())), SetErrorEventHandler(_)).WillOnce(Return());

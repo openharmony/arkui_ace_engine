@@ -79,7 +79,7 @@ std::pair<std::string, bool> PluginBridge::GetDeviceInfo()
     if (height != 0) {
         infoList->Put("windowHeight", height);
     }
-    infoList->Put("screenDensity", SystemProperties::GetResolution());
+    infoList->Put("screenDensity", PipelineBase::GetCurrentDensity());
 
     bool isRound = SystemProperties::GetIsScreenRound();
     if (isRound) {

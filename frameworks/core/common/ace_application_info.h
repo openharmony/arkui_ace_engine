@@ -178,6 +178,7 @@ public:
     }
     void SetAccessibilityEnabled(bool isEnabled)
     {
+        TAG_LOGI(AceLogTag::ACE_ACCESSIBILITY, "AceApplicationInfo set accessibility enabled:%{public}d", isEnabled);
         isAccessibilityEnabled_ = isEnabled;
     }
     bool IsAccessibilityEnabled() const
@@ -200,16 +201,6 @@ public:
     int32_t GetMissionId() const
     {
         return missionId_;
-    }
-
-    void SetDelayedUpdateOnInactive(bool isDelayedUpdateOnInactive)
-    {
-        delayedUpdateOnInactive_ = isDelayedUpdateOnInactive;
-    }
-
-    bool IsDelayedUpdateOnInactive() const
-    {
-        return delayedUpdateOnInactive_;
     }
 
 protected:
@@ -235,7 +226,6 @@ protected:
 
     int userId_ = 0;
     bool isAccessibilityEnabled_ = false;
-    bool delayedUpdateOnInactive_ = false;
 
     int32_t apiVersion_ = 0;
     std::string versionName_;

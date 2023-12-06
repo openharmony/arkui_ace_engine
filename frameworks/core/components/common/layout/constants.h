@@ -188,6 +188,13 @@ enum class TextAlign {
     END = 2,
 };
 
+enum class TextDataDetectType {
+    PHONE_NUMBER = 0,
+    URL,
+    EMAIL,
+    ADDRESS,
+};
+
 enum class WhiteSpace {
     NORMAL,
     PRE,
@@ -325,6 +332,7 @@ enum class SrcType {
     DATA_ABILITY_DECODED,
     RESOURCE_ID, // default resource which src is internal resource id
     PIXMAP,
+    ASTC,
 };
 
 enum class WrapAlignment {
@@ -544,7 +552,7 @@ enum class CopyOptions {
 };
 
 enum class VisibleType {
-    VISIBLE,
+    VISIBLE = 0,
     INVISIBLE,
     GONE,
 };
@@ -596,6 +604,8 @@ enum class PositionMode {
 
 enum class XComponentType { SURFACE = 0, COMPONENT, TEXTURE };
 
+enum class WebType { SURFACE = 0, TEXTURE };
+
 inline constexpr uint32_t STATE_NORMAL = 0;
 inline constexpr uint32_t STATE_PRESSED = 1;
 inline constexpr uint32_t STATE_FOCUS = 1 << 1;
@@ -609,6 +619,23 @@ enum class TabBarStyle {
     NOSTYLE = 0,
     SUBTABBATSTYLE,
     BOTTOMTABBATSTYLE,
+};
+
+enum class GestureJudgeResult {
+    CONTINUE = 0,
+    REJECT = 1,
+};
+
+enum class GestureTypeName {
+    TAP_GESTURE = 0,
+    LONG_PRESS_GESTURE = 1,
+    PAN_GESTURE = 2,
+    PINCH_GESTURE = 3,
+    SWIPE_GESTURE = 4,
+    ROTATION_GESTURE = 5,
+    DRAG = 6,
+    CLICK = 7,
+    BOXSELECT = 8,
 };
 
 enum class ModifierKey {
@@ -660,6 +687,36 @@ enum class RenderFit : int32_t {
     RESIZE_COVER,
     RESIZE_COVER_TOP_LEFT,
     RESIZE_COVER_BOTTOM_RIGHT,
+};
+
+enum class KeyBoardAvoidMode : int32_t {
+    OFFSET = 0,
+    RESIZE,
+};
+
+enum class SwipeActionState : uint32_t {
+    COLLAPSED = 0,
+    EXPANDED,
+    ACTIONING,
+};
+/**
+ * souce is Rosen::Orientation
+ */
+enum class Orientation : uint32_t {
+    BEGIN = 0,
+    UNSPECIFIED = BEGIN,
+    VERTICAL = 1,
+    HORIZONTAL = 2,
+    REVERSE_VERTICAL = 3,
+    REVERSE_HORIZONTAL = 4,
+    SENSOR = 5,
+    SENSOR_VERTICAL = 6,
+    SENSOR_HORIZONTAL = 7,
+    AUTO_ROTATION_RESTRICTED = 8,
+    AUTO_ROTATION_PORTRAIT_RESTRICTED = 9,
+    AUTO_ROTATION_LANDSCAPE_RESTRICTED = 10,
+    LOCKED = 11,
+    END = LOCKED,
 };
 
 } // namespace OHOS::Ace

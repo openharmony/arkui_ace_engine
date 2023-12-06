@@ -62,20 +62,31 @@ void ScrollLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 
     // Measure child.
     auto childWrapper = layoutWrapper->GetOrCreateChildByIndex(0);
-    CHECK_NULL_VOID(childWrapper);
-    childWrapper->Measure(childLayoutConstraint);
+    if (childWrapper) {
+        childWrapper->Measure(childLayoutConstraint);
 
-    // Use child size when self idea size of scroll is not setted.
-    auto childSize = childWrapper->GetGeometryNode()->GetMarginFrameSize();
-    if (!idealSize.Width()) {
-        idealSize.SetWidth(childSize.Width());
+        // Use child size when self idea size of scroll is not setted.
+        auto childSize = childWrapper->GetGeometryNode()->GetMarginFrameSize();
+        if (!idealSize.Width()) {
+            idealSize.SetWidth(childSize.Width());
+        }
+        if (!idealSize.Height()) {
+            idealSize.SetHeight(childSize.Height());
+        }
     }
-    if (!idealSize.Height()) {
-        idealSize.SetHeight(childSize.Height());
-    }
+    
     AddPaddingToSize(padding, idealSize);
     auto selfSize = idealSize.ConvertToSizeT();
     selfSize.Constrain(constraint->minSize, constraint->maxSize);
+    
+    auto scrollNode = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(scrollNode);
+    auto scrollPattern = scrollNode->GetPattern<ScrollPattern>();
+    if (scrollPattern->IsSelectScroll()) {
+        auto selectScrollWidth = scrollPattern->GetSelectScrollWidth();
+        selfSize.SetWidth(selectScrollWidth);
+    }
+    
     layoutWrapper->GetGeometryNode()->SetFrameSize(selfSize);
 }
 

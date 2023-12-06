@@ -21,9 +21,11 @@
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "base/want/want_wrap.h"
+#include "ui_extension_pattern.h"
 
 namespace OHOS::Rosen {
 class Session;
+enum class WSErrorCode : int32_t;
 } // namespace OHOS::Rosen
 
 namespace OHOS::Ace::NG {
@@ -31,11 +33,14 @@ class UIExtensionProxy : public AceType {
     DECLARE_ACE_TYPE(UIExtensionProxy, AceType);
 
 public:
-    explicit UIExtensionProxy(const sptr<Rosen::Session>& session);
+    UIExtensionProxy(const sptr<Rosen::Session>& session, const RefPtr<UIExtensionPattern>& pattern);
     void SendData(const RefPtr<WantParamsWrap>& params);
-
+    OHOS::Rosen::WSErrorCode SendDataSync(const RefPtr<WantParamsWrap>& wantParams,
+                                          AAFwk::WantParams& reWantParams);
+    RefPtr<UIExtensionPattern> GetPattern() const;
 private:
-    sptr<Rosen::Session> session_;
+    wptr<Rosen::Session> session_;
+    WeakPtr<UIExtensionPattern> pattern_;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_UI_EXTENSION_UI_EXTENSION_PROXY_H

@@ -333,7 +333,7 @@ public:
 
     void RefreshStageFocus();
 
-    void ShowContainerTitle(bool isShow, bool hasDeco = true) override;
+    void ShowContainerTitle(bool isShow, bool hasDeco = true, bool needUpdate = false) override;
 
     void SetContainerButtonHide(bool hideSplit, bool hideMaximize, bool hideMinimize) override;
 
@@ -352,6 +352,13 @@ public:
     bool RequestFocus(const RefPtr<Element>& targetElement);
     bool RequestFocus(const std::string& targetNodeId) override;
     bool RequestDefaultFocus();
+
+    bool NeedSoftKeyboard() override
+    {
+        return false;
+    }
+
+    void SetOnWindowFocused(const std::function<void()>& callback) override {};
 
     BaseId::IdType AddPageTransitionListener(const PageTransitionListenable::CallbackFuncType& funcObject);
 
@@ -426,6 +433,8 @@ public:
 
     void WindowFocus(bool isFocus) override;
 
+    void ContainerModalUnFocus() override;
+
     void OnPageShow() override;
 
     double GetStatusBarHeight() const
@@ -470,11 +479,6 @@ public:
     bool IsKeyEvent() const
     {
         return isKeyEvent_;
-    }
-
-    bool IsJsPlugin() const
-    {
-        return isJsPlugin_;
     }
 
     void RefreshRootBgColor() const override;
@@ -649,7 +653,7 @@ public:
     }
     void StartSystemDrag(const std::string& str, const RefPtr<PixelMap>& pixmap);
     void InitDragListener();
-    void OnDragEvent(int32_t x, int32_t y, DragEventAction action) override;
+    void OnDragEvent(const PointerEvent& pointerEvent, DragEventAction action) override;
     void SetPreTargetRenderNode(const RefPtr<DragDropEvent>& preDragDropNode);
     const RefPtr<DragDropEvent>& GetPreTargetRenderNode() const;
     void SetInitRenderNode(const RefPtr<RenderNode>& initRenderNode);
@@ -802,6 +806,7 @@ protected:
     bool OnDumpInfo(const std::vector<std::string>& params) const override;
     void FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount) override;
     void FlushPipelineWithoutAnimation() override;
+    void DispatchDisplaySync(uint64_t nanoTimestamp) override;
     void FlushAnimation(uint64_t nanoTimestamp) override;
     void FlushReload(const OnConfigurationChange& configurationChange) override;
     void FlushReloadTransition() override;
@@ -943,7 +948,6 @@ private:
     bool isFlushingAnimation_ = false;
     bool isMoving_ = false;
     std::atomic<bool> onShow_ = true;
-    std::atomic<bool> onFocus_ = true;
     bool isKeyEvent_ = false;
     bool needWindowBlurRegionRefresh_ = false;
     bool useLiteStyle_ = false;

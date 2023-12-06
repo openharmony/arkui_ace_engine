@@ -86,7 +86,7 @@ void FirePageTransition(const RefPtr<FrameNode>& page, PageTransitionType transi
             });
         return;
     }
-    PerfMonitor::GetPerfMonitor()->Start(PerfConstants::ABILITY_OR_PAGE_SWITCH, PerfActionType::LAST_UP, "NA");
+    PerfMonitor::GetPerfMonitor()->Start(PerfConstants::ABILITY_OR_PAGE_SWITCH, PerfActionType::LAST_UP, "");
     pagePattern->TriggerPageTransition(
         transitionType, [weak = WeakPtr<FrameNode>(page), instanceId = Container::CurrentId()]() {
             ContainerScope scope(instanceId);
@@ -175,7 +175,7 @@ bool StageManager::PushPage(const RefPtr<FrameNode>& node, bool needHideLast, bo
     // mount to parent and mark build render tree.
     node->MountToParent(stageNode_);
     // then build the total child.
-    node->Build();
+    node->Build(nullptr);
     stageNode_->RebuildRenderContextTree();
     FirePageShow(node, needTransition ? PageTransitionType::ENTER_PUSH : PageTransitionType::NONE);
 
@@ -231,7 +231,6 @@ bool StageManager::PopPage(bool needShowNext, bool needTransition)
     StopPageTransition();
     const auto& children = stageNode_->GetChildren();
     if (children.empty()) {
-        LOGE("fail to pop page due to children is null");
         return false;
     }
     auto pageNode = children.back();
@@ -270,16 +269,13 @@ bool StageManager::PopPageToIndex(int32_t index, bool needShowNext, bool needTra
     StopPageTransition();
     const auto& children = stageNode_->GetChildren();
     if (children.empty()) {
-        LOGE("fail to pop page due to children is null");
         return false;
     }
     int32_t popSize = static_cast<int32_t>(children.size()) - index - 1;
     if (popSize < 0) {
-        LOGE("fail to pop page due to index is out of range");
         return false;
     }
     if (popSize == 0) {
-        LOGD("already here");
         return true;
     }
 
@@ -334,7 +330,6 @@ bool StageManager::CleanPageStack()
     CHECK_NULL_RETURN(stageNode_, false);
     const auto& children = stageNode_->GetChildren();
     if (children.size() <= 1) {
-        LOGE("fail to clean page stack due to children size is illegal");
         return false;
     }
     auto popSize = static_cast<int32_t>(children.size() - 1);
@@ -357,12 +352,10 @@ bool StageManager::MovePageToFront(const RefPtr<FrameNode>& node, bool needHideL
     StopPageTransition();
     const auto& children = stageNode_->GetChildren();
     if (children.empty()) {
-        LOGE("child is empty");
         return false;
     }
     const auto& lastPage = children.back();
     if (lastPage == node) {
-        LOGD("page already on the top");
         return true;
     }
     if (needTransition) {
@@ -442,7 +435,6 @@ RefPtr<FrameNode> StageManager::GetLastPage()
     CHECK_NULL_RETURN(stageNode_, nullptr);
     const auto& children = stageNode_->GetChildren();
     if (children.empty()) {
-        LOGE("fail to return page due to children is null");
         return nullptr;
     }
     return DynamicCast<FrameNode>(children.back());
@@ -457,7 +449,6 @@ RefPtr<FrameNode> StageManager::GetPageById(int32_t pageId)
             return DynamicCast<FrameNode>(child);
         }
     }
-    LOGD("UITree page not found. %{public}d", pageId);
     return nullptr;
 }
 

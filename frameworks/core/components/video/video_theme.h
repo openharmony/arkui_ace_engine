@@ -45,26 +45,44 @@ public:
             if (!themeConstants) {
                 return theme;
             }
-            theme->btnSize_ = Size(themeConstants->GetDimension(THEME_VIDEO_BAR_BTN_WIDTH).Value(),
-                themeConstants->GetDimension(THEME_VIDEO_BAR_BTN_HEIGHT).Value());
-            theme->btnEdge_ = Edge(themeConstants->GetDimension(THEME_VIDEO_BAR_BTN_PADDING_LEFT).Value(),
-                themeConstants->GetDimension(THEME_VIDEO_BAR_BTN_PADDING_TOP).Value(),
-                themeConstants->GetDimension(THEME_VIDEO_BAR_BTN_PADDING_RIGHT).Value(),
-                themeConstants->GetDimension(THEME_VIDEO_BAR_BTN_PADDING_BOTTOM).Value());
-            theme->textEdge_ = Edge(themeConstants->GetDimension(THEME_VIDEO_BAR_TEXT_PADDING_LEFT).Value(),
-                themeConstants->GetDimension(THEME_VIDEO_BAR_TEXT_PADDING_TOP).Value(),
-                themeConstants->GetDimension(THEME_VIDEO_BAR_TEXT_PADDING_RIGHT).Value(),
-                themeConstants->GetDimension(THEME_VIDEO_BAR_TEXT_PADDING_BOTTOM).Value());
-            theme->sliderEdge_ = Edge(themeConstants->GetDimension(THEME_VIDEO_BAR_SLIDER_PADDING_LEFT).Value(),
-                themeConstants->GetDimension(THEME_VIDEO_BAR_SLIDER_PADDING_TOP).Value(),
-                themeConstants->GetDimension(THEME_VIDEO_BAR_SLIDER_PADDING_RIGHT).Value(),
-                themeConstants->GetDimension(THEME_VIDEO_BAR_SLIDER_PADDING_BOTTOM).Value());
-            theme->timeTextStyle_.SetFontSize(themeConstants->GetDimension(THEME_VIDEO_TEXT_FONTSIZE));
-            theme->timeTextStyle_.SetTextColor(themeConstants->GetColor(THEME_VIDEO_BAR_TIME_TEXT_COLOR));
-            theme->errorTextStyle_.SetFontSize(themeConstants->GetDimension(THEME_VIDEO_TEXT_FONTSIZE));
-            theme->errorTextStyle_.SetTextColor(themeConstants->GetColor(THEME_VIDEO_ERROR_TEXT_COLOR));
-            theme->bkgColor_ = themeConstants->GetColor(THEME_VIDEO_BAR_BACKGROUND);
+            ParsePattern(themeConstants->GetThemeStyle(), theme);
             return theme;
+        }
+
+        void ParsePattern(const RefPtr<ThemeStyle>& themeStyle, const RefPtr<VideoTheme>& theme) const
+        {
+            if (!themeStyle) {
+                LOGW("Video parse pattern failed, theme style is null");
+                return;
+            }
+            auto videoPattern = themeStyle->GetAttr<RefPtr<ThemeStyle>>(THEME_PATTERN_VIDEO, nullptr);
+            if (!videoPattern) {
+                LOGW("find pattern of video fail");
+                return;
+            }
+            theme->btnSize_ = Size(videoPattern->GetAttr<double>("control_bar_play_width", 40.0f),
+                videoPattern->GetAttr<double>("control_bar_play_height", 40.0f));
+            theme->btnEdge_ = Edge(
+                videoPattern->GetAttr<Dimension>("control_bar_play_padding_left", 10.0_vp).Value(),
+                videoPattern->GetAttr<Dimension>("control_bar_play_padding_top", 5.0_vp).Value(),
+                videoPattern->GetAttr<Dimension>("control_bar_play_padding_right", 10.0_vp).Value(),
+                videoPattern->GetAttr<Dimension>("control_bar_play_padding_bottom", 5.0_vp).Value());
+            theme->textEdge_ = Edge(
+                videoPattern->GetAttr<Dimension>("control_bar_current_time_padding_left", 5.0_vp).Value(),
+                videoPattern->GetAttr<Dimension>("control_bar_current_time_padding_top", 5.0_vp).Value(),
+                videoPattern->GetAttr<Dimension>("control_bar_current_time_padding_right", 5.0_vp).Value(),
+                videoPattern->GetAttr<Dimension>("control_bar_current_time_padding_bottom", 5.0_vp).Value());
+            theme->sliderEdge_ = Edge(
+                videoPattern->GetAttr<Dimension>("control_bar_progress_padding_left", 0.0_vp).Value(),
+                videoPattern->GetAttr<Dimension>("control_bar_progress_padding_top", 0.0_vp).Value(),
+                videoPattern->GetAttr<Dimension>("control_bar_progress_padding_right", 0.0_vp).Value(),
+                videoPattern->GetAttr<Dimension>("control_bar_progress_padding_bottom", 0.0_vp).Value());
+            theme->timeTextStyle_.SetFontSize(videoPattern->GetAttr<Dimension>("control_bar_text_font_size", 15.0_vp));
+            theme->timeTextStyle_.SetTextColor(videoPattern->GetAttr<Color>("control_bar_text_color", Color::BLACK));
+            theme->errorTextStyle_.SetFontSize(videoPattern->GetAttr<Dimension>("control_bar_text_font_size", 15.0_vp));
+            theme->errorTextStyle_.SetTextColor(videoPattern->GetAttr<Color>("control_bar_error_text_color",
+                Color::GRAY));
+            theme->bkgColor_ = videoPattern->GetAttr<Color>("control_bar_background_color", Color(0x64c8c8c8));
         }
     };
 

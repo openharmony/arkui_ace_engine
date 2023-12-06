@@ -19,6 +19,7 @@
 
 #include "base/i18n/localization.h"
 #include "base/utils/utils.h"
+#include "core/common/recorder/event_recorder.h"
 #include "core/components_ng/base/view_abstract_model.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
@@ -34,6 +35,9 @@
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+const int32_t BUFFER_NODE_NUMBER = 2;
+} // namespace
 
 WeakPtr<FrameNode> TextPickerDialogView::dialogNode_ = nullptr;
 
@@ -42,7 +46,6 @@ RefPtr<FrameNode> TextPickerDialogView::Show(const DialogProperties& dialogPrope
     std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent)
 {
     if (settingData.rangeVector.empty() && settingData.options.empty()) {
-        LOGI("Dialog input parameter range vector is empty, not display dialog.");
         return nullptr;
     }
     if (settingData.options.empty()) {
@@ -81,7 +84,7 @@ RefPtr<FrameNode> TextPickerDialogView::RangeShow(const DialogProperties& dialog
     pickerNodeLayout->UpdateUserDefinedIdealSize(
         CalcSize(NG::CalcLength(Dimension(1.0, DimensionUnit::PERCENT)), std::nullopt));
     pickerNodeLayout->UpdateCanLoop(settingData.canLoop);
-    uint32_t showCount = pickerTheme->GetShowOptionCount();
+    uint32_t showCount = pickerTheme->GetShowOptionCount() + BUFFER_NODE_NUMBER;
     OptionsCreateNode(textPickerPattern, settingData, textPickerNode, showCount, 1, pickerTheme);
     SetDefaultPickerItemHeight(settingData.height);
     SetTextProperties(pickerTheme, settingData.properties);
@@ -201,7 +204,7 @@ RefPtr<FrameNode> TextPickerDialogView::OptionsShow(const DialogProperties& dial
     pickerNodeLayout->UpdateUserDefinedIdealSize(
         CalcSize(NG::CalcLength(Dimension(1.0, DimensionUnit::PERCENT)), std::nullopt));
     pickerNodeLayout->UpdateCanLoop(settingData.canLoop);
-    uint32_t showCount = pickerTheme->GetShowOptionCount();
+    uint32_t showCount = pickerTheme->GetShowOptionCount() + BUFFER_NODE_NUMBER;
     OptionsShowInternal(textPickerPattern, settingData, textPickerNode, showCount, pickerTheme);
     SetDefaultPickerItemHeight(settingData.height);
     SetTextProperties(pickerTheme, settingData.properties);
@@ -415,7 +418,6 @@ RefPtr<FrameNode> TextPickerDialogView::CreateConfirmNode(
     CHECK_NULL_RETURN(pipeline, nullptr);
     auto dialogTheme = pipeline->GetTheme<DialogTheme>();
     auto pickerTheme = pipeline->GetTheme<PickerTheme>();
-
     auto buttonConfirmNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
     auto textConfirmNode = FrameNode::CreateFrameNode(
@@ -433,7 +435,6 @@ RefPtr<FrameNode> TextPickerDialogView::CreateConfirmNode(
     auto buttonConfirmEventHub = buttonConfirmNode->GetEventHub<ButtonEventHub>();
     CHECK_NULL_RETURN(buttonConfirmEventHub, nullptr);
     buttonConfirmEventHub->SetStateEffect(true);
-
     UpdateButtonConfirmLayoutProperty(buttonConfirmNode, pickerTheme);
     auto buttonConfirmRenderContext = buttonConfirmNode->GetRenderContext();
     buttonConfirmRenderContext->UpdateBackgroundColor(Color::TRANSPARENT);
@@ -458,6 +459,11 @@ RefPtr<FrameNode> TextPickerDialogView::CreateConfirmNode(
         auto textPickerEventHub = pickerPattern->GetEventHub<TextPickerEventHub>();
         CHECK_NULL_VOID(textPickerEventHub);
         textPickerEventHub->FireDialogAcceptEvent(str);
+        if (Recorder::EventRecorder::Get().IsComponentRecordEnable()) {
+            Recorder::EventParamsBuilder builder;
+            builder.SetType(dateNode->GetTag()).SetEventType(Recorder::EventType::DIALOG_ACCEPT).SetText(str);
+            Recorder::EventRecorder::Get().OnEvent(std::move(builder));
+        }
     };
     eventConfirmHub->AddClickEvent(AceType::MakeRefPtr<NG::ClickEvent>(clickCallback));
     buttonConfirmNode->MarkModifyDone();
@@ -489,6 +495,15 @@ RefPtr<FrameNode> TextPickerDialogView::CreateCancelNode(
     auto eventCancelHub = buttonCancelNode->GetOrCreateGestureEventHub();
     CHECK_NULL_RETURN(eventCancelHub, nullptr);
     eventCancelHub->AddClickEvent(AceType::MakeRefPtr<NG::ClickEvent>(std::move(cancelEvent)));
+    auto recordEvent = [](GestureEvent& info) {
+        if (Recorder::EventRecorder::Get().IsComponentRecordEnable()) {
+            Recorder::EventParamsBuilder builder;
+            builder.SetType("TextPickerDialog").SetEventType(Recorder::EventType::DIALOG_CANCEL);
+            Recorder::EventRecorder::Get().OnEvent(std::move(builder));
+        }
+    };
+    auto recordEventPtr = AceType::MakeRefPtr<ClickEvent>(std::move(recordEvent));
+    eventCancelHub->AddClickEvent(recordEventPtr);
 
     auto buttonCancelEventHub = buttonCancelNode->GetEventHub<ButtonEventHub>();
     CHECK_NULL_RETURN(buttonCancelEventHub, nullptr);

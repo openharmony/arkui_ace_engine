@@ -30,13 +30,28 @@
 namespace OHOS::Ace::Platform {
 AceViewPreview* AceViewPreview::CreateView(int32_t instanceId, bool useCurrentEventRunner, bool usePlatformThread)
 {
-    auto* aceView = new AceViewPreview(instanceId, FlutterThreadModel::CreateThreadModel(
-        useCurrentEventRunner, !usePlatformThread, !SystemProperties::GetRosenBackendEnabled()));
-    if (aceView != nullptr) {
-        aceView->IncRefCount();
+    if (SystemProperties::GetFlutterDecouplingEnabled()) {
+        auto* aceView =
+            new AceViewPreview(instanceId, ThreadModelImpl::CreateThreadModel(useCurrentEventRunner, !usePlatformThread,
+                !SystemProperties::GetRosenBackendEnabled()));
+        if (aceView != nullptr) {
+            aceView->IncRefCount();
+        }
+        return aceView;
+    } else {
+        auto* aceView =
+            new AceViewPreview(instanceId, FlutterThreadModel::CreateThreadModel(useCurrentEventRunner,
+                !usePlatformThread, !SystemProperties::GetRosenBackendEnabled()));
+        if (aceView != nullptr) {
+            aceView->IncRefCount();
+        }
+        return aceView;
     }
-    return aceView;
 }
+
+AceViewPreview::AceViewPreview(int32_t instanceId, std::unique_ptr<ThreadModelImpl> threadModelImpl)
+    : instanceId_(instanceId), threadModelImpl_(std::move(threadModelImpl))
+{}
 
 AceViewPreview::AceViewPreview(int32_t instanceId, std::unique_ptr<FlutterThreadModel> threadModel)
     : instanceId_(instanceId), threadModel_(std::move(threadModel))
@@ -95,7 +110,6 @@ std::unique_ptr<DrawDelegate> AceViewPreview::GetDrawDelegate()
         layer->AddToScene(*flutterSceneBuilder, 0.0, 0.0);
         auto scene_ = flutterSceneBuilder->Build();
         if (!flutter::UIDartState::Current()) {
-            LOGE("uiDartState is nullptr");
             return;
         }
         auto window = flutter::UIDartState::Current()->window();

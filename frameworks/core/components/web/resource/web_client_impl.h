@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -46,6 +46,24 @@ public:
 
 private:
     WeakPtr<WebDelegate> webDelegate_;
+    int32_t instanceId_ = -1;
+};
+
+class AccessibilityEventListenerImpl : public OHOS::NWeb::NWebAccessibilityEventCallback {
+public:
+    AccessibilityEventListenerImpl() = default;
+    explicit AccessibilityEventListenerImpl(int32_t instanceId) : instanceId_(instanceId) {}
+    ~AccessibilityEventListenerImpl() = default;
+
+    void OnAccessibilityEvent(int32_t nodeId, uint32_t eventType) override;
+
+    void SetWebDelegate(const RefPtr<WebDelegate>& delegate)
+    {
+        webDelegate_ = delegate;
+    }
+
+private:
+    RefPtr<WebDelegate> webDelegate_;
     int32_t instanceId_ = -1;
 };
 
@@ -188,6 +206,11 @@ public:
     void OnDateTimeChooserClose() override;
     void OnOverScroll(float xOffset, float yOffset) override;
     void OnScreenCaptureRequest(std::shared_ptr<NWeb::NWebScreenCaptureAccessRequest> request) override;
+    void OnOverScrollFlingVelocity(float xVelocity, float yVelocity, bool isFling) override;
+    void OnOverScrollFlingEnd() override;
+    void OnScrollState(bool scrollState) override;
+    void OnRootLayerChanged(int width, int height) override;
+    bool FilterScrollEvent(const float x, const float y, const float xVelocity, const float yVelocity) override;
 
     void SetWebDelegate(const WeakPtr<WebDelegate>& delegate)
     {

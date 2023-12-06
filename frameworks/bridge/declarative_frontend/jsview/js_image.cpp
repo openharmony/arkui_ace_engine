@@ -15,6 +15,7 @@
 
 #include "frameworks/bridge/declarative_frontend/jsview/js_image.h"
 
+
 #if !defined(PREVIEW)
 #include <dlfcn.h>
 #endif
@@ -27,6 +28,7 @@
 #include "bridge/declarative_frontend/jsview/models/image_model_impl.h"
 #include "core/common/container.h"
 #include "core/components/image/image_event.h"
+#include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_ng/pattern/image/image_model.h"
 #include "core/components_ng/pattern/image/image_model_ng.h"
@@ -87,26 +89,28 @@ JSRef<JSVal> LoadImageFailEventToJSValue(const LoadImageFailEvent& eventInfo)
 void JSImage::SetAlt(const JSCallbackInfo& args)
 {
     if (args.Length() < 1) {
-        LOGE("The argv is wrong, it it supposed to have at least 1 argument");
         return;
     }
 
     std::string src;
-    if (!ParseJsMedia(args[0], src)) {
+    if (args[0]->IsString()) {
+        src = args[0]->ToString();
+    } else if (!ParseJsMedia(args[0], src)) {
         return;
     }
     if (ImageSourceInfo::ResolveURIType(src) == SrcType::NETWORK) {
-        LOGW("Alt doesn't support network image %{public}s", src.c_str());
         return;
     }
-    ImageModel::GetInstance()->SetAlt(src);
+    std::string bundleName;
+    std::string moduleName;
+    GetJsMediaBundleInfo(args[0], bundleName, moduleName);
+    ImageModel::GetInstance()->SetAlt(ImageSourceInfo { src, bundleName, moduleName });
 }
 
 void JSImage::SetObjectFit(int32_t value)
 {
     auto fit = static_cast<ImageFit>(value);
     if (fit < ImageFit::FILL || fit > ImageFit::SCALE_DOWN) {
-        LOGW("The value of objectFit is out of range %{public}d", value);
         fit = ImageFit::COVER;
     }
     ImageModel::GetInstance()->SetImageFit(fit);
@@ -129,7 +133,6 @@ void JSImage::SetBorder(const Border& border)
 
 void JSImage::OnComplete(const JSCallbackInfo& args)
 {
-    LOGD("JSImage OnComplete");
     if (args[0]->IsFunction()) {
         auto jsLoadSuccFunc = AceType::MakeRefPtr<JsEventFunction<LoadImageSuccessEvent, 1>>(
             JSRef<JSFunc>::Cast(args[0]), LoadImageSuccEventToJSValue);
@@ -141,14 +144,11 @@ void JSImage::OnComplete(const JSCallbackInfo& args)
             func->Execute(info);
         };
         ImageModel::GetInstance()->SetOnComplete(std::move(onComplete));
-    } else {
-        LOGE("args not function");
     }
 }
 
 void JSImage::OnError(const JSCallbackInfo& args)
 {
-    LOGD("JSImage OnError");
     if (args[0]->IsFunction()) {
         auto jsLoadFailFunc = AceType::MakeRefPtr<JsEventFunction<LoadImageFailEvent, 1>>(
             JSRef<JSFunc>::Cast(args[0]), LoadImageFailEventToJSValue);
@@ -160,8 +160,6 @@ void JSImage::OnError(const JSCallbackInfo& args)
         };
 
         ImageModel::GetInstance()->SetOnError(onError);
-    } else {
-        LOGE("args not function");
     }
 }
 
@@ -172,9 +170,11 @@ void JSImage::OnFinish(const JSCallbackInfo& info)
         return;
     }
     RefPtr<JsFunction> jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(tmpInfo));
-    auto onFinish = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)]() {
+    WeakPtr<NG::FrameNode> targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto onFinish = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = targetNode]() {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("Image.onFinish");
+        PipelineContext::SetCallBackNode(node);
         func->Execute();
     };
     ImageModel::GetInstance()->SetSvgAnimatorFinishEvent(onFinish);
@@ -209,7 +209,7 @@ void JSImage::Create(const JSCallbackInfo& info)
     if (!srcValid) {
 #if defined(PIXEL_MAP_SUPPORTED)
         if (isCard) {
-            LOGE("Not supported pixmap when form render");
+            TAG_LOGD(AceLogTag::ACE_IMAGE, "Not supported pixmap when form render");
         } else {
             if (IsDrawable(info[0])) {
                 pixmap = GetDrawablePixmap(info[0]);
@@ -217,8 +217,6 @@ void JSImage::Create(const JSCallbackInfo& info)
                 pixmap = CreatePixelMapFromNapiValue(info[0]);
             }
         }
-#else
-        LOGW("Pixmap not supported under this environment.");
 #endif
     }
 
@@ -260,7 +258,6 @@ void JSImage::SetSourceSize(const JSCallbackInfo& info)
 void JSImage::SetImageFill(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have atleast 1 arguments");
         return;
     }
 
@@ -275,7 +272,6 @@ void JSImage::SetImageRenderMode(int32_t imageRenderMode)
 {
     auto renderMode = static_cast<ImageRenderMode>(imageRenderMode);
     if (renderMode < ImageRenderMode::ORIGINAL || renderMode > ImageRenderMode::TEMPLATE) {
-        LOGW("invalid imageRenderMode value %{public}d", imageRenderMode);
         renderMode = ImageRenderMode::ORIGINAL;
     }
     ImageModel::GetInstance()->SetImageRenderMode(renderMode);
@@ -285,7 +281,6 @@ void JSImage::SetImageInterpolation(int32_t imageInterpolation)
 {
     auto interpolation = static_cast<ImageInterpolation>(imageInterpolation);
     if (interpolation < ImageInterpolation::NONE || interpolation > ImageInterpolation::HIGH) {
-        LOGW("invalid imageInterpolation value %{public}d", imageInterpolation);
         interpolation = ImageInterpolation::NONE;
     }
     ImageModel::GetInstance()->SetImageInterpolation(interpolation);
@@ -295,7 +290,6 @@ void JSImage::SetImageRepeat(int32_t imageRepeat)
 {
     auto repeat = static_cast<ImageRepeat>(imageRepeat);
     if (repeat < ImageRepeat::NO_REPEAT || repeat > ImageRepeat::REPEAT) {
-        LOGW("invalid imageRepeat value %{public}d", imageRepeat);
         repeat = ImageRepeat::NO_REPEAT;
     }
     ImageModel::GetInstance()->SetImageRepeat(repeat);
@@ -326,7 +320,6 @@ void JSImage::JsBlur(const JSCallbackInfo& info)
     JSViewAbstract::JsBlur(info);
 #else
     if (info.Length() < 1) {
-        LOGE("The argv is wrong, it is supposed to have at least 1 argument");
         return;
     }
     double blur = 0.0;
@@ -360,17 +353,14 @@ void JSColorFilter::ConstructorCallback(const JSCallbackInfo& args)
     }
     auto tmpInfo = args[0];
     if (!tmpInfo->IsArray()) {
-        LOGD("jscallback is not object or array");
         return;
     }
     JSRef<JSArray> array = JSRef<JSArray>::Cast(tmpInfo);
     if (array->Length() != COLOR_FILTER_MATRIX_SIZE) {
-        LOGI("arg length illegal");
         return;
     }
     auto jscolorfilter = Referenced::MakeRefPtr<JSColorFilter>();
     if (jscolorfilter == nullptr) {
-        LOGW("make jscolorfilter object failed");
         return;
     }
     std::vector<float> colorfilter;
@@ -381,7 +371,6 @@ void JSColorFilter::ConstructorCallback(const JSCallbackInfo& args)
         }
     }
     if (colorfilter.size() != COLOR_FILTER_MATRIX_SIZE) {
-        LOGE("colorfilter length illegal");
         return;
     }
     jscolorfilter->SetColorFilterMatrix(std::move(colorfilter));
@@ -403,7 +392,6 @@ void JSImage::SetColorFilter(const JSCallbackInfo& info)
     }
     auto tmpInfo = info[0];
     if (!tmpInfo->IsArray() && !tmpInfo->IsObject()) {
-        LOGW("ColorFilter is not array or obj");
         return;
     }
     if (tmpInfo->IsObject() && !tmpInfo->IsArray()) {
@@ -411,20 +399,17 @@ void JSImage::SetColorFilter(const JSCallbackInfo& info)
         if (!tmpInfo->IsUndefined() && !tmpInfo->IsNull()) {
             colorFilter = JSRef<JSObject>::Cast(tmpInfo)->Unwrap<JSColorFilter>();
         } else {
-            LOGW("ColorFilter obj is null");
             return;
         }
         if (colorFilter && colorFilter->GetColorFilterMatrix().size() == COLOR_FILTER_MATRIX_SIZE) {
             ImageModel::GetInstance()->SetColorFilterMatrix(colorFilter->GetColorFilterMatrix());
         } else {
-            LOGW("ColorFilter cannot be parsed or length illegal");
             return;
         }
         return;
     }
     JSRef<JSArray> array = JSRef<JSArray>::Cast(tmpInfo);
     if (array->Length() != COLOR_FILTER_MATRIX_SIZE) {
-        LOGW("arg length illegal");
         return;
     }
     std::vector<float> colorfilter;
@@ -435,7 +420,6 @@ void JSImage::SetColorFilter(const JSCallbackInfo& info)
         }
     }
     if (colorfilter.size() != COLOR_FILTER_MATRIX_SIZE) {
-        LOGI("colorfilter length illegal");
         return;
     }
     ImageModel::GetInstance()->SetColorFilterMatrix(colorfilter);

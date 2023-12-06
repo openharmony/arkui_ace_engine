@@ -17,14 +17,15 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_SELECT_SELECT_THEME_H
 
 #include "base/geometry/dimension.h"
+#include "core/common/container.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/text_style.h"
 #include "core/components/theme/theme.h"
 #include "core/components/theme/theme_constants.h"
 #include "core/components/theme/theme_constants_defines.h"
-#include "core/components_ng/property/calc_length.h"
 #include "core/components_ng/property/border_property.h"
+#include "core/components_ng/property/calc_length.h"
 
 namespace OHOS::Ace {
 
@@ -33,7 +34,7 @@ constexpr double SELECT_OPTION_TOP_LENGTH = 15.0;
 constexpr double SELECT_OPTION_RIGHT_LENGTH = 16.0;
 constexpr double SELECT_OPTION_BOTTOM_LENGTH = 15.0;
 constexpr Dimension VERTICAL_INTERVAL = 14.4_vp;
-constexpr Dimension MENU_END_ICON_WIDTH = 12.0_vp;
+constexpr Dimension MENU_END_ICON_WIDTH = 24.0_vp;
 constexpr Dimension MENU_END_ICON_HEIGHT = 24.0_vp;
 constexpr Dimension DEFAULT_MENU_WIDTH = 0.0_vp;
 constexpr Dimension MIN_MENU_WIDTH = 64.0_vp;
@@ -57,61 +58,7 @@ public:
             if (!themeConstants) {
                 return theme;
             }
-            theme->disabledColor_ = themeConstants->GetColor(THEME_SELECT_DISABLED_COLOR);
-            theme->clickedColor_ = themeConstants->GetColor(THEME_SELECT_CLICKED_COLOR);
-            theme->selectedColor_ = themeConstants->GetColor(THEME_SELECT_SELECTED_COLOR);
-            theme->fontFamily_ = "sans-serif";
-            theme->fontSize_ = themeConstants->GetDimension(THEME_SELECT_FONT_SIZE);
-            theme->fontColor_ = themeConstants->GetColor(THEME_SELECT_FONT_COLOR);
-            theme->fontWeight_ = FontWeight::NORMAL;
-            theme->textDecoration_ = TextDecoration::NONE;
-            auto optionSize = themeConstants->GetInt(THEME_SELECT_OPTION_SHOW_COUNT);
-            theme->optionSize_ = optionSize < 0 ? theme->optionSize_ : static_cast<size_t>(optionSize);
-            theme->rrectSize_ = themeConstants->GetDimension(THEME_SELECT_ITSELF_RRECT_SIZE);
-            theme->popupBorderWidth_ = themeConstants->GetDimension(THEME_SELECT_POPUP_BORDER_WIDTH);
-            theme->popupShadowWidth_ = themeConstants->GetDimension(THEME_SELECT_POPUP_SHADOW_WIDTH);
-            theme->popupRRectSize_ = themeConstants->GetDimension(THEME_SELECT_POPUP_RRECT_SIZE);
-            theme->popupMinWidth_ = themeConstants->GetDimension(THEME_SELECT_POPUP_MIN_WIDTH);
-            theme->normalPadding_ = themeConstants->GetDimension(THEME_SELECT_NORMAL_PADDING);
-            theme->iconSize_ = themeConstants->GetDimension(THEME_SELECT_ITSELF_ICON_SIZE);
-            theme->isTV_ = themeConstants->GetInt(THEME_SELECT_IS_TV);
-            theme->horizontalSpacing_ = themeConstants->GetDimension(THEME_SELECT_POPUP_SPACING_HORIZONTAL);
-            theme->verticalSpacing_ = themeConstants->GetDimension(THEME_SELECT_POPUP_SPACING_VERTICAL);
-            theme->contentSpacing_ = themeConstants->GetDimension(THEME_SELECT_POPUP_SPACING_CONTENT);
-
-            theme->selectShowTime_ = 250; // unit is ms.
-            theme->selectHideTime_ = 250; // unit is ms.
-            theme->menuShowTime_ = 250;   // unit is ms.
-            theme->menuHideTime_ = 250;   // unit is ms.
-            theme->hoverAnimationDuration_ = 250;
-            theme->pressAnimationDuration_ = 100;
-            theme->titleLeftPadding_ = Dimension(16.0, DimensionUnit::VP);
-            theme->titleTopPadding_ = Dimension(8.0, DimensionUnit::VP);
-            theme->titleRightPadding_ = Dimension(8.0, DimensionUnit::VP);
-            theme->titleBottomPadding_ = Dimension(16.0, DimensionUnit::VP);
-            theme->titleStyle_.SetFontSize(themeConstants->GetDimension(THEME_OHOS_TEXT_SIZE_HEADLINE7));
-            std::vector<std::string> families;
-            families.emplace_back("sans-serif");
-            theme->titleStyle_.SetFontFamilies(families);
-            theme->titleStyle_.SetFontWeight(FontWeight::W500);
-            theme->titleStyle_.SetTextColor(themeConstants->GetColor(THEME_OHOS_COLOR_TEXT_PRIMARY));
-            theme->titleStyle_.SetTextDecoration(TextDecoration::NONE);
-            theme->optionPadding_ = Edge(SELECT_OPTION_LEFT_LENGTH, SELECT_OPTION_TOP_LENGTH,
-                SELECT_OPTION_RIGHT_LENGTH, SELECT_OPTION_BOTTOM_LENGTH, DimensionUnit::VP);
-            theme->optionInterval_ = theme->isTV_ ? Dimension(6.0, DimensionUnit::VP) : 0.0_vp;
-            theme->tvFocusTextColor_ = Color(0xE6000000);
-            theme->tvNormalBackColor_ = Color(0x33FFFFFF);
-            theme->tvBackColor_ = (theme->isTV_ ? Color(0x99000000) : Color::TRANSPARENT);
-            // disabled color
-            theme->normalDisableColor_ = themeConstants->GetColor(THEME_SELECT_OPTION_DISABLE_COLOR);
-            theme->focusedDisableColor_ = themeConstants->GetColor(THEME_SELECT_OPTION_FOCUSED_DISABLE_COLOR);
-            theme->normalTextDisableColor_ = themeConstants->GetColor(THEME_SELECT_OPTION_DISABLE_TEXT_COLOR);
-            theme->focusedTextDisableColor_ = themeConstants->GetColor(THEME_SELECT_OPTION_FOCUSED_DISABLE_TEXT_COLOR);
-            theme->optionTextStyle_.SetFontSize(themeConstants->GetDimension(THEME_OHOS_TEXT_SIZE_BODY1));
-            theme->optionTextStyle_.SetFontFamilies({ themeConstants->GetString(THEME_OHOS_TEXT_FONT_FAMILY_REGULAR) });
-            theme->optionTextStyle_.SetFontWeight(FontWeight::NORMAL);
-            theme->optionTextStyle_.SetTextColor(themeConstants->GetColor(THEME_SELECT_FONT_COLOR));
-            theme->optionTextStyle_.SetTextDecoration(TextDecoration::NONE);
+            ParseNewPattern(themeConstants->GetThemeStyle(), theme);
             Parse(themeConstants->GetThemeStyle(), theme);
             return theme;
         }
@@ -196,6 +143,88 @@ public:
             theme->endIconWidth_ = MENU_END_ICON_WIDTH;
             theme->endIconHeight_ = MENU_END_ICON_HEIGHT;
             theme->contentMargin_ = pattern->GetAttr<Dimension>("content_margin", theme->contentMargin_);
+            theme->selectDefaultBgColor_ =
+                pattern->GetAttr<Color>("select_default_bg_color", theme->selectDefaultBgColor_);
+            theme->selectDefaultBorderRadius_ =
+                pattern->GetAttr<Dimension>("select_default_border_radius", theme->selectDefaultBorderRadius_);
+            if (Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+                theme->expandDisplay_ = false;
+            } else {
+                std::string expandDisplay = pattern->GetAttr<std::string>("menu_expand_display", "");
+                theme->expandDisplay_ = (expandDisplay == "true");
+            }
+            theme->maxPaddingStart_ = pattern->GetAttr<Dimension>("max_padding_start", theme->maxPaddingStart_);
+            theme->maxPaddingEnd_ = pattern->GetAttr<Dimension>("max_padding_end", theme->maxPaddingEnd_);
+        }
+
+        void ParseNewPattern(const RefPtr<ThemeStyle>& style, const RefPtr<SelectTheme>& theme) const
+        {
+            if (!style || !theme) {
+                return;
+            }
+            auto pattern = style->GetAttr<RefPtr<ThemeStyle>>(THEME_PATTERN_SELECT, nullptr);
+            if (!pattern) {
+                LOGE("Pattern of select is null, please check!");
+                return;
+            }
+            theme->disabledColor_ = pattern->GetAttr<Color>("select_color_text_primary", Color(0x5C000000));
+            theme->clickedColor_ = pattern->GetAttr<Color>("select_clicked_color", Color(0x19000000));
+            theme->selectedColor_ = pattern->GetAttr<Color>("select_selected_color", Color(0x19254FF7));
+            theme->fontFamily_ = "sans-serif";
+            theme->fontSize_ = pattern->GetAttr<Dimension>("text_font_size", 16.0_fp);
+            theme->fontColor_ = pattern->GetAttr<Color>("select_font_color", Color(0xe5000000));
+            theme->fontWeight_ = FontWeight::NORMAL;
+            theme->textDecoration_ = TextDecoration::NONE;
+            auto optionSize = pattern->GetAttr<int>("select_option_show_count", INT32_MAX);
+            theme->optionSize_ = optionSize < 0 ? theme->optionSize_ : static_cast<size_t>(optionSize);
+            theme->rrectSize_ = pattern->GetAttr<Dimension>("select_itself_rrect_size", 8.0_vp);
+            theme->popupBorderWidth_ = pattern->GetAttr<Dimension>("select_popup_border_width", 2.0_vp);
+            theme->popupShadowWidth_ = pattern->GetAttr<Dimension>("select_popup_shadow_width", 60.0_vp);
+            theme->popupRRectSize_ = pattern->GetAttr<Dimension>("select_popup_rrect_size", 16.0_vp);
+            theme->popupMinWidth_ = pattern->GetAttr<Dimension>("select_popup_min_width", 136.0_vp);
+            theme->normalPadding_ = pattern->GetAttr<Dimension>("select_normal_padding", 16.0_vp);
+            theme->iconSize_ = pattern->GetAttr<Dimension>("select_itself_icon_size", 8.0_vp);
+            theme->isTV_ = pattern->GetAttr<int>("select_is_tv", 0);
+            theme->horizontalSpacing_ = pattern->GetAttr<Dimension>("select_popup_spacing_horizontal", 24.0_vp);
+            theme->verticalSpacing_ = pattern->GetAttr<Dimension>("select_popup_spacing_vertical", 27.0_vp);
+            theme->contentSpacing_ = pattern->GetAttr<Dimension>("select_popup_spacing_content", 0.0_vp);
+            theme->selectShowTime_ = 250; // unit is ms.
+            theme->selectHideTime_ = 250; // unit is ms.
+            theme->menuShowTime_ = 250;   // unit is ms.
+            theme->menuHideTime_ = 250;   // unit is ms.
+            theme->hoverAnimationDuration_ = 250;
+            theme->pressAnimationDuration_ = 100;
+            theme->titleLeftPadding_ = Dimension(16.0, DimensionUnit::VP);
+            theme->titleTopPadding_ = Dimension(8.0, DimensionUnit::VP);
+            theme->titleRightPadding_ = Dimension(8.0, DimensionUnit::VP);
+            theme->titleBottomPadding_ = Dimension(16.0, DimensionUnit::VP);
+            theme->titleStyle_.SetFontSize(pattern->GetAttr<Dimension>("text_size_headline7", 24.0_vp));
+            std::vector<std::string> families;
+            families.emplace_back("sans-serif");
+            theme->titleStyle_.SetFontFamilies(families);
+            theme->titleStyle_.SetFontWeight(FontWeight::W500);
+            theme->titleStyle_.SetTextColor(pattern->GetAttr<Color>("select_font_color", Color(0xe5000000)));
+            theme->titleStyle_.SetTextDecoration(TextDecoration::NONE);
+            theme->optionPadding_ = Edge(SELECT_OPTION_LEFT_LENGTH, SELECT_OPTION_TOP_LENGTH,
+                SELECT_OPTION_RIGHT_LENGTH, SELECT_OPTION_BOTTOM_LENGTH, DimensionUnit::VP);
+            theme->optionInterval_ = theme->isTV_ ? Dimension(6.0, DimensionUnit::VP) : 0.0_vp;
+            theme->tvFocusTextColor_ = Color(0xE6000000);
+            theme->tvNormalBackColor_ = Color(0x33FFFFFF);
+            theme->tvBackColor_ = (theme->isTV_ ? Color(0x99000000) : Color::TRANSPARENT);
+            // disabled color
+            theme->normalDisableColor_ = pattern->GetAttr<Color>("select_option_disable_color", Color(0x32FFFFFF));
+            theme->focusedDisableColor_ =
+                pattern->GetAttr<Color>("select_option_focused_disable_color", Color(0x5DFFFFFF));
+            theme->normalTextDisableColor_ =
+                pattern->GetAttr<Color>("select_option_focused_disable_color", Color(0x5DFFFFFF));
+            theme->focusedTextDisableColor_ =
+                pattern->GetAttr<Color>("select_option_focused_disable_text_color", Color(0x66000000));
+            theme->optionTextStyle_.SetFontSize(pattern->GetAttr<Dimension>("text_font_size", 16.0_fp));
+            theme->optionTextStyle_.SetFontFamilies({ pattern->GetAttr<std::string>("text_font_family_regular",
+                "sans-serif") });
+            theme->optionTextStyle_.SetFontWeight(FontWeight::NORMAL);
+            theme->optionTextStyle_.SetTextColor(pattern->GetAttr<Color>("select_font_color", Color(0xe5000000)));
+            theme->optionTextStyle_.SetTextDecoration(TextDecoration::NONE);
         }
     };
 
@@ -286,6 +315,11 @@ public:
         theme->endIconWidth_ = endIconWidth_;
         theme->endIconHeight_ = endIconHeight_;
         theme->contentMargin_ = contentMargin_;
+        theme->selectDefaultBgColor_ = selectDefaultBgColor_;
+        theme->selectDefaultBorderRadius_ = selectDefaultBorderRadius_;
+        theme->expandDisplay_ = expandDisplay_;
+        theme->maxPaddingStart_ = maxPaddingStart_;
+        theme->maxPaddingEnd_ = maxPaddingEnd_;
         return theme;
     }
 
@@ -813,6 +847,31 @@ public:
         return contentMargin_;
     }
 
+    const Color& GetSelectDefaultBgColor() const
+    {
+        return selectDefaultBgColor_;
+    }
+
+    const Dimension& GetSelectDefaultBorderRadius() const
+    {
+        return selectDefaultBorderRadius_;
+    }
+
+    bool GetExpandDisplay() const
+    {
+        return expandDisplay_;
+    }
+
+    const Dimension& GetMaxPaddingStart() const
+    {
+        return maxPaddingStart_;
+    }
+
+    const Dimension& GetMaxPaddingEnd() const
+    {
+        return maxPaddingEnd_;
+    }
+
 private:
     Color disabledColor_;
     Color clickedColor_;
@@ -908,6 +967,12 @@ private:
     int32_t pressAnimationDuration_ = 0;
 
     Edge optionPadding_;
+
+    Color selectDefaultBgColor_;
+    Dimension selectDefaultBorderRadius_;
+    bool expandDisplay_ = false;
+    Dimension maxPaddingStart_;
+    Dimension maxPaddingEnd_;
 };
 
 } // namespace OHOS::Ace

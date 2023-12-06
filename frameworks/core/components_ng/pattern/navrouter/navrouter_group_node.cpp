@@ -136,7 +136,6 @@ void NavRouterGroupNode::AddNavDestinationToNavigation(const RefPtr<UINode>& par
     auto navDestination = AceType::DynamicCast<NavDestinationGroupNode>(GetNavDestinationNode());
     // do nothing if this navDestination is already at the top
     if (navDestination && navigationPattern->GetNavDestinationNode() == navDestination) {
-        LOGW("this navDestination is displaying");
         return;
     }
 

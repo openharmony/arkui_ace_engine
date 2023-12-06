@@ -65,10 +65,13 @@ public:
             default:
                 break;
         }
+        if (!actualSize_.IsPositive()) {
+            return;
+        }
         // Animation is not displayed when created for the first time.
         if (isFirstCreated_) {
             animatableBoardColor_->Set(isSelect_->Get() ? LinearColor(userActiveColor_) : LinearColor(inactiveColor_));
-            pointOffset_->Set(isSelect_->Get() ? size_->Get().Width() - size_->Get().Height() : 0.0f);
+            pointOffset_->Set(isSelect_->Get() ? actualSize_.Width() - actualSize_.Height() : 0.0f);
             isFirstCreated_ = false;
         }
         AnimationOption colorOption = AnimationOption();
@@ -83,10 +86,10 @@ public:
         pointOption.SetCurve(Curves::FAST_OUT_SLOW_IN);
         float newPointOffset = 0.0f;
         if (!isDragEvent_) {
-            newPointOffset = isSelect_->Get() ? size_->Get().Width() - size_->Get().Height() : 0.0f;
+            newPointOffset = isSelect_->Get() ? actualSize_.Width() - actualSize_.Height() : 0.0f;
         } else {
             newPointOffset = std::clamp(
-                dragOffsetX_->Get() - offset_->Get().GetX(), 0.0f, size_->Get().Width() - size_->Get().Height());
+                dragOffsetX_->Get() - offset_->Get().GetX(), 0.0f, actualSize_.Width() - actualSize_.Height());
         }
         AnimationUtils::Animate(pointOption, [&]() { pointOffset_->Set(newPointOffset); });
     }
@@ -157,6 +160,7 @@ public:
 
     void SetSize(SizeF& size)
     {
+        actualSize_ = size;
         if (size_) {
             size_->Set(size);
         }
@@ -213,6 +217,7 @@ private:
 
     OffsetF hotZoneOffset_;
     SizeF hotZoneSize_;
+    SizeF actualSize_;
     TouchHoverAnimationType touchHoverType_ = TouchHoverAnimationType::NONE;
 
     RefPtr<AnimatablePropertyColor> animatableBoardColor_;

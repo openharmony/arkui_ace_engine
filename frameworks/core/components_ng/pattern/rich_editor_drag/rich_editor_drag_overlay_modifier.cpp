@@ -18,9 +18,13 @@
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/rect.h"
 #include "base/utils/utils.h"
+#include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
+#include "core/components_ng/pattern/rich_editor/rich_editor_pattern.h"
 #include "core/components_ng/pattern/rich_editor_drag/rich_editor_drag_pattern.h"
+#include "core/components_ng/property/measure_property.h"
 #include "core/components_ng/render/adapter/pixelmap_image.h"
+#include "core/components_ng/render/canvas_image.h"
 #include "core/components_ng/render/drawing_prop_convertor.h"
 
 namespace OHOS::Ace::NG {
@@ -42,23 +46,50 @@ void RichEditorDragOverlayModifier::onDraw(DrawingContext& context)
     canvas.ClipPath(*pattern->GetClipPath(), RSClipOp::INTERSECT, true);
     auto hostPattern = hostPattern_.Upgrade();
     CHECK_NULL_VOID(hostPattern);
-    OffsetF offset = { pattern->GetTextRect().GetX(), pattern->GetTextRect().GetY() };
-    for (auto&& info : hostPattern->GetParagraphs()) {
-        info.paragraph->Paint(canvas, offset.GetX(), offset.GetY());
-        offset.AddY(info.paragraph->GetHeight());
-    }
 
+    auto richEditor = DynamicCast<RichEditorPattern>(hostPattern);
+    if (richEditor) {
+        OffsetF offset = { pattern->GetTextRect().GetX(), pattern->GetTextRect().GetY() };
+        for (auto&& info : richEditor->GetParagraphs()) {
+            info.paragraph->Paint(canvas, offset.GetX(), offset.GetY());
+            offset.AddY(info.paragraph->GetHeight());
+        }
+    } else {
+        auto&& paragraph = hostPattern->GetParagraph();
+        paragraph->Paint(canvas, pattern->GetTextRect().GetX(), pattern->GetTextRect().GetY());
+    }
+    PaintImage(context);
+}
+
+void RichEditorDragOverlayModifier::PaintImage(DrawingContext& context)
+{
+    auto pattern = DynamicCast<RichEditorDragPattern>(pattern_.Upgrade());
+    CHECK_NULL_VOID(pattern);
+    auto canvas = context.canvas;
     size_t index = 0;
-    auto contentOffset = pattern->GetContentOffset();
     auto imageChildren = pattern->GetImageChildren();
     auto rectsForPlaceholders = pattern->GetRectsForPlaceholders();
     for (const auto& child : imageChildren) {
         auto rect = rectsForPlaceholders.at(index);
-        auto offset = OffsetF(rect.Left(), rect.Top()) - contentOffset;
+        auto offset = OffsetF(rect.Left(), rect.Top()) + pattern->GetTextRect().GetOffset();
         auto imageChild = DynamicCast<ImagePattern>(child->GetPattern());
         if (imageChild) {
-            RectF imageRect(offset.GetX(), offset.GetY(), rect.Width(), rect.Height());
-            auto canvasImage = imageChild->GetCanvasImage();
+            auto pixelMap = child->GetRenderContext()->GetThumbnailPixelMap();
+            CHECK_NULL_VOID(pixelMap);
+            auto canvasImage = CanvasImage::Create(pixelMap);
+            CHECK_NULL_VOID(canvasImage);
+            auto layoutProperty = imageChild->GetLayoutProperty<ImageLayoutProperty>();
+            CHECK_NULL_VOID(layoutProperty);
+            const auto& marginProperty = layoutProperty->GetMarginProperty();
+            float marginTop = 0.0f;
+            float marginLeft = 0.0f;
+            if (marginProperty) {
+                marginLeft =
+                    marginProperty->left.has_value() ? marginProperty->left->GetDimension().ConvertToPx() : 0.0f;
+                marginTop = marginProperty->top.has_value() ? marginProperty->top->GetDimension().ConvertToPx() : 0.0f;
+            }
+            RectF imageRect(
+                offset.GetX() + marginLeft, offset.GetY() + marginTop, pixelMap->GetWidth(), pixelMap->GetHeight());
             CHECK_NULL_VOID(canvasImage);
             auto pixelMapImage = DynamicCast<PixelMapImage>(canvasImage);
             CHECK_NULL_VOID(pixelMapImage);
@@ -66,5 +97,6 @@ void RichEditorDragOverlayModifier::onDraw(DrawingContext& context)
         }
         ++index;
     }
+    canvas.DetachBrush();
 }
 } // namespace OHOS::Ace::NG

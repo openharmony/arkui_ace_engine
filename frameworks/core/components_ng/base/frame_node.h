@@ -30,7 +30,9 @@
 #include "base/utils/macros.h"
 #include "base/utils/utils.h"
 #include "core/accessibility/accessibility_utils.h"
+#include "core/common/recorder/exposure_processor.h"
 #include "core/components/common/layout/constants.h"
+#include "core/components_ng/base/frame_scene_status.h"
 #include "core/components_ng/base/geometry_node.h"
 #include "core/components_ng/base/modifier.h"
 #include "core/components_ng/base/ui_node.h"
@@ -47,6 +49,11 @@
 #include "core/components_ng/render/render_context.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/components_v2/inspector/inspector_node.h"
+
+namespace OHOS::Accessibility {
+class AccessibilityElementInfo;
+class AccessibilityEventInfo;
+}
 
 namespace OHOS::Ace::NG {
 class PipelineContext;
@@ -85,7 +92,16 @@ public:
         return 1;
     }
 
-    void OnInspectorIdUpdate(const std::string& /*unused*/) override;
+    void SetCheckboxFlag(const bool checkboxFlag)
+    {
+        checkboxFlag_ = checkboxFlag;
+    }
+
+    bool GetCheckboxFlag() const
+    {
+        return checkboxFlag_;
+    }
+    void OnInspectorIdUpdate(const std::string& id) override;
 
     struct ZIndexComparator {
         bool operator()(const WeakPtr<FrameNode>& weakLeft, const WeakPtr<FrameNode>& weakRight) const
@@ -228,6 +244,8 @@ public:
     }
 
     static void PostTask(std::function<void()>&& task, TaskExecutor::TaskType taskType = TaskExecutor::TaskType::UI);
+
+    void AddJudgeToTargetComponent(RefPtr<TargetComponent>& targetComponent);
 
     // If return true, will prevent TouchTest Bubbling to parent and brother nodes.
     HitTestResult TouchTest(const PointF& globalPoint, const PointF& parentLocalPoint, const PointF& parentRevertPoint,
@@ -376,11 +394,28 @@ public:
     {
         draggable_ = draggable;
         userSet_ = true;
+        customerSet_ = false;
+    }
+
+    void SetCustomerDraggable(bool draggable) {
+        draggable_ = draggable;
+        userSet_ = true;
+        customerSet_ = true;
+    }
+
+    void SetDragPreviewOptions(const DragPreviewOption& previewOption)
+    {
+        previewOption_ = previewOption;
+    }
+
+    DragPreviewOption GetDragPreviewOption() const
+    {
+        return previewOption_;
     }
 
     void SetBackgroundFunction(std::function<RefPtr<UINode>()>&& buildFunc)
     {
-        builderFunc_ = buildFunc;
+        builderFunc_ = std::move(buildFunc);
         backgroundNode_ = nullptr;
     }
 
@@ -399,6 +434,11 @@ public:
         return userSet_;
     }
 
+    bool IsCustomerSet() const
+    {
+        return customerSet_;
+    }
+
     void SetAllowDrop(const std::set<std::string>& allowDrop)
     {
         allowDrop_ = allowDrop;
@@ -407,6 +447,16 @@ public:
     const std::set<std::string>& GetAllowDrop() const
     {
         return allowDrop_;
+    }
+
+    void SetDragPreview(const NG::DragDropInfo& info)
+    {
+        dragPreviewInfo_ = info;
+    }
+
+    const DragDropInfo& GetDragPreview() const
+    {
+        return dragPreviewInfo_;
     }
 
     void SetOverlayNode(const RefPtr<FrameNode>& overlayNode)
@@ -421,8 +471,10 @@ public:
 
     RefPtr<FrameNode> FindChildByPosition(float x, float y);
 
+    RefPtr<NodeAnimatablePropertyBase> GetAnimatablePropertyFloat(const std::string& propertyName) const;
     void CreateAnimatablePropertyFloat(
         const std::string& propertyName, float value, const std::function<void(float)>& onCallbackEvent);
+    void DeleteAnimatablePropertyFloat(const std::string& propertyName);
     void UpdateAnimatablePropertyFloat(const std::string& propertyName, float value);
     void CreateAnimatableArithmeticProperty(const std::string& propertyName, RefPtr<CustomAnimatableArithmetic>& value,
         std::function<void(const RefPtr<CustomAnimatableArithmetic>&)>& onCallbackEvent);
@@ -447,11 +499,6 @@ public:
 
     std::optional<RectF> GetViewPort() const;
 
-    enum class SceneStatus {
-        START,
-        RUNNING,
-        END,
-    };
     // Frame Rate Controller(FRC) decides FrameRateRange by scene, speed and scene status
     // speed is measured by millimeter/second
     void AddFRCSceneInfo(const std::string& scene, float speed, SceneStatus status);
@@ -554,6 +601,44 @@ public:
         return nullptr;
     }
 
+    virtual std::vector<RectF> GetResponseRegionList(const RectF& rect, int32_t sourceType);
+
+    bool IsFirstBuilding() const
+    {
+        return isFirstBuilding_;
+    }
+
+    void MarkBuildDone()
+    {
+        isFirstBuilding_ = false;
+    }
+
+    Matrix4 GetLocalMatrix() const
+    {
+        return localMat_;
+    }
+
+    RefPtr<FrameNode> GetPageNode();
+    void NotifyFillRequestSuccess(RefPtr<PageNodeInfoWrap> nodeWrap, AceAutoFillType autoFillType);
+    void NotifyFillRequestFailed(int32_t errCode);
+
+    int32_t GetUiExtensionId();
+    int32_t WrapExtensionAbilityId(int32_t extensionOffset, int32_t abilityId);
+    void SearchExtensionElementInfoByAccessibilityIdNG(int32_t elementId, int32_t mode,
+        int32_t offset, std::list<Accessibility::AccessibilityElementInfo>& output);
+    void SearchElementInfosByTextNG(int32_t elementId, const std::string& text,
+        int32_t offset, std::list<Accessibility::AccessibilityElementInfo>& output);
+    void FindFocusedExtensionElementInfoNG(int32_t elementId, int32_t focusType,
+        int32_t offset, Accessibility::AccessibilityElementInfo& output);
+    void FocusMoveSearchNG(int32_t elementId, int32_t direction,
+        int32_t offset, Accessibility::AccessibilityElementInfo& output);
+    bool TransferExecuteAction(int32_t elementId, const std::map<std::string, std::string>& actionArguments,
+        int32_t action, int32_t offset);
+    std::vector<RectF> GetResponseRegionListForRecognizer(int32_t sourceType);
+    bool InResponseRegionList(const PointF& parentLocalPoint, const std::vector<RectF>& responseRegionList) const;
+
+    bool GetMonopolizeEvents() const;
+
 private:
     void MarkNeedRender(bool isRenderBoundary);
     std::pair<float, float> ContextPositionConvertToPX(
@@ -587,19 +672,22 @@ private:
     void DumpOverlayInfo();
     void DumpCommonInfo();
     void DumpAdvanceInfo() override;
+    void DumpViewDataPageNode(RefPtr<ViewDataWrap> viewDataWrap) override;
+    bool CheckAutoSave() override;
     void FocusToJsonValue(std::unique_ptr<JsonValue>& json) const;
     void MouseToJsonValue(std::unique_ptr<JsonValue>& json) const;
     void TouchToJsonValue(std::unique_ptr<JsonValue>& json) const;
     void GeometryNodeToJsonValue(std::unique_ptr<JsonValue>& json) const;
 
     bool GetTouchable() const;
-    virtual std::vector<RectF> GetResponseRegionList(const RectF& rect, int32_t sourceType);
-    bool InResponseRegionList(const PointF& parentLocalPoint, const std::vector<RectF>& responseRegionList) const;
 
     void ProcessAllVisibleCallback(
         std::unordered_map<double, VisibleCallbackInfo>& visibleAreaCallbacks, double currentVisibleRatio);
     void OnVisibleAreaChangeCallback(
         VisibleCallbackInfo& callbackInfo, bool visibleType, double currentVisibleRatio, bool isHandled);
+
+    void OnPixelRoundFinish(const SizeF& pixelGridRoundSize);
+
     double CalculateCurrentVisibleRatio(const RectF& visibleRect, const RectF& renderRect);
 
     // set costom background layoutConstraint
@@ -607,6 +695,13 @@ private:
 
     void GetPercentSensitive();
     void UpdatePercentSensitive();
+
+    void UpdateParentAbsoluteOffset();
+    void AddFrameNodeSnapshot(bool isHit, int32_t parentId);
+
+    int32_t GetNodeExpectedRate();
+
+    void RecordExposureIfNeed(const std::string& inspectorId);
 
     // sort in ZIndex.
     std::multiset<WeakPtr<FrameNode>, ZIndexComparator> frameChildren_;
@@ -629,6 +724,7 @@ private:
     std::unique_ptr<OffsetF> lastParentOffsetToWindow_;
     std::set<std::string> allowDrop_;
     std::optional<RectF> viewPort_;
+    NG::DragDropInfo dragPreviewInfo_;
 
     RefPtr<LayoutAlgorithmWrapper> layoutAlgorithm_;
     RefPtr<GeometryNode> oldGeometryNode_;
@@ -648,6 +744,7 @@ private:
     bool isResponseRegion_ = false;
     bool bypass_ = false;
     bool isLayoutComplete_ = false;
+    bool isFirstBuilding_ = true;
 
     double lastVisibleRatio_ = 0.0;
 
@@ -659,12 +756,21 @@ private:
 
     bool draggable_ = false;
     bool userSet_ = false;
+    bool customerSet_ = false;
 
     std::map<std::string, RefPtr<NodeAnimatablePropertyBase>> nodeAnimatablePropertyMap_;
+    Matrix4 localMat_ = Matrix4::CreateIdentity();
 
     bool isRestoreInfoUsed_ = false;
+    bool checkboxFlag_ = false;
 
     RefPtr<FrameNode> overlayNode_;
+
+    std::unordered_map<std::string, int32_t> sceneRateMap_;
+
+    DragPreviewOption previewOption_ { DragPreviewMode::AUTO };
+
+    RefPtr<Recorder::ExposureProcessor> exposureProcessor_;
 
     friend class RosenRenderContext;
     friend class RenderContext;

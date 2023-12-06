@@ -15,7 +15,6 @@
 #include "core/components_ng/pattern/scrollable/refresh_coordination.h"
 
 #include "core/common/container.h"
-#include "core/components_ng/pattern/navigation/navigation_pattern.h"
 #include "core/components_ng/pattern/refresh/refresh_pattern.h"
 
 namespace OHOS::Ace::NG {
@@ -27,9 +26,6 @@ RefPtr<FrameNode> RefreshCoordination::FindRefreshNode() const
     while (parent) {
         if (InstanceOf<FrameNode>(parent)) {
             auto parentFrameNode = DynamicCast<FrameNode>(parent);
-            if (InstanceOf<NavigationPattern>(parentFrameNode->GetPattern())) {
-                return nullptr;
-            }
             if (InstanceOf<RefreshPattern>(parentFrameNode->GetPattern())) {
                 return DynamicCast<FrameNode>(parent);
             }
@@ -53,29 +49,29 @@ RefPtr<ScrollableCoordinationEvent> RefreshCoordination::CreateCoordinationEvent
     return coordinationEvent;
 }
 
-void RefreshCoordination::OnScrollStart() const
+void RefreshCoordination::OnScrollStart(bool isDrag, float mainVelocity) const
 {
     CHECK_NULL_VOID(coordinationEvent_);
     auto onScrollStart = coordinationEvent_->GetOnScrollStartEvent();
     if (onScrollStart) {
-        onScrollStart();
+        onScrollStart(isDrag, mainVelocity);
     }
 }
 
-bool RefreshCoordination::OnScroll(float offset) const
+bool RefreshCoordination::OnScroll(float offset, float mainVelocity) const
 {
     CHECK_NULL_RETURN(coordinationEvent_, false);
     auto onScroll = coordinationEvent_->GetOnScroll();
     CHECK_NULL_RETURN(onScroll, false);
-    return onScroll(offset);
+    return onScroll(offset, mainVelocity);
 }
 
-void RefreshCoordination::OnScrollEnd(float speed) const
+void RefreshCoordination::OnScrollEnd(float mainVelocity) const
 {
     CHECK_NULL_VOID(coordinationEvent_);
     auto onScrollEnd = coordinationEvent_->GetOnScrollEndEvent();
     if (onScrollEnd) {
-        onScrollEnd(speed);
+        onScrollEnd(mainVelocity);
     }
 }
 

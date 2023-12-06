@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,6 +21,17 @@
 #include "bridge/declarative_frontend/jsview/js_scroller.h"
 
 namespace OHOS::Ace::Framework {
+
+class JSListScroller : public JSScroller {
+public:
+    static void JSBind(BindingTarget globalObj);
+    static void Constructor(const JSCallbackInfo& args);
+    static void Destructor(JSListScroller* scroller);
+
+    void GetItemRectInGroup(const JSCallbackInfo& args);
+    void ScrollToItemInGroup(const JSCallbackInfo& args);
+    void CloseAllSwipeActions(const JSCallbackInfo& args);
+};
 
 class JSList : public JSContainerBase {
 public:
@@ -44,7 +55,9 @@ public:
     static void SetDivider(const JSCallbackInfo& args);
     static void SetDirection(int32_t direction);
     static void SetScrollBar(const JSCallbackInfo& info);
-    static void SetEdgeEffect(int32_t edgeEffect);
+    static void SetScrollBarColor(const std::string& color);
+    static void SetScrollBarWidth(const JSCallbackInfo& scrollWidth);
+    static void SetEdgeEffect(const JSCallbackInfo& info);
     static void SetEditMode(bool editMode);
     static void SetCachedCount(const JSCallbackInfo& info);
     static void SetChainAnimation(bool enableChainAnimation);

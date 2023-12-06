@@ -34,9 +34,9 @@ bool TextFieldAccessibilityProperty::IsPassword() const
 {
     auto frameNode = host_.Upgrade();
     CHECK_NULL_RETURN(frameNode, false);
-    auto textFieldLayoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
-    CHECK_NULL_RETURN(textFieldLayoutProperty, false);
-    return textFieldLayoutProperty->GetTextInputType() == TextInputType::VISIBLE_PASSWORD;
+    auto textFieldPattern = frameNode->GetPattern<TextFieldPattern>();
+    CHECK_NULL_RETURN(textFieldPattern, false);
+    return textFieldPattern->IsInPasswordMode();
 }
 
 AceTextCategory TextFieldAccessibilityProperty::GetTextInputType() const
@@ -66,6 +66,12 @@ AceTextCategory TextFieldAccessibilityProperty::GetTextInputType() const
             break;
         case TextInputType::VISIBLE_PASSWORD:
             ret = AceTextCategory::INPUT_TYPE_PASSWORD;
+            break;
+        case TextInputType::USER_NAME:
+            ret = AceTextCategory::INPUT_TYPE_USER_NAME;
+            break;
+        case TextInputType::NEW_PASSWORD:
+            ret = AceTextCategory::INPUT_TYPE_NEW_PASSWORD;
             break;
         default:
             break;
@@ -102,7 +108,9 @@ int32_t TextFieldAccessibilityProperty::GetTextSelectionStart() const
     CHECK_NULL_RETURN(frameNode, -1);
     auto textFieldPattern = frameNode->GetPattern<TextFieldPattern>();
     CHECK_NULL_RETURN(textFieldPattern, -1);
-    return textFieldPattern->GetTextSelector().GetStart();
+    auto textSelectController = textFieldPattern->GetTextSelectController();
+    CHECK_NULL_RETURN(textSelectController, -1);
+    return textSelectController->GetStartIndex();
 }
 
 int32_t TextFieldAccessibilityProperty::GetTextSelectionEnd() const
@@ -111,7 +119,9 @@ int32_t TextFieldAccessibilityProperty::GetTextSelectionEnd() const
     CHECK_NULL_RETURN(frameNode, -1);
     auto textFieldPattern = frameNode->GetPattern<TextFieldPattern>();
     CHECK_NULL_RETURN(textFieldPattern, -1);
-    return textFieldPattern->GetTextSelector().GetEnd();
+    auto textSelectController = textFieldPattern->GetTextSelectController();
+    CHECK_NULL_RETURN(textSelectController, -1);
+    return textSelectController->GetEndIndex();
 }
 
 std::string TextFieldAccessibilityProperty::GetText() const
@@ -133,11 +143,8 @@ bool TextFieldAccessibilityProperty::IsHint() const
     CHECK_NULL_RETURN(frameNode, false);
     auto textFieldLayoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_RETURN(textFieldLayoutProperty, false);
-    if (!textFieldLayoutProperty->GetValueValue("").empty() ||
-        textFieldLayoutProperty->GetPlaceholderValue("").empty()) {
-        return false;
-    }
-    return true;
+    return !(!textFieldLayoutProperty->GetValueValue("").empty() ||
+        textFieldLayoutProperty->GetPlaceholderValue("").empty());
 }
 
 std::string TextFieldAccessibilityProperty::GetHintText() const

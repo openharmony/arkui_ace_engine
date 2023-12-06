@@ -86,10 +86,11 @@ public:
     bool IsHitTestBlock() const
     {
         if (scrollable_ && !scrollable_->Idle()) {
-            return std::abs(scrollable_->GetCurrentVelocity()) > SystemProperties::Vp2Px(HTMBLOCK_VELOCITY);
+            return std::abs(
+                scrollable_->GetCurrentVelocity()) > PipelineBase::Vp2PxWithCurrentDensity(HTMBLOCK_VELOCITY);
         }
         if (getAnimateVelocityCallback_) {
-            return std::abs(getAnimateVelocityCallback_()) > SystemProperties::Vp2Px(HTMBLOCK_VELOCITY);
+            return std::abs(getAnimateVelocityCallback_()) > PipelineBase::Vp2PxWithCurrentDensity(HTMBLOCK_VELOCITY);
         }
         return false;
     }
@@ -122,6 +123,13 @@ public:
         getAnimateVelocityCallback_ = std::move(getAnimateVelocityCallback);
     }
 
+    void AddPreviewMenuHandleDragEnd(GestureEventFunc&& actionEnd)
+    {
+        if (scrollable_) {
+            scrollable_->AddPreviewMenuHandleDragEnd(std::move(actionEnd));
+        }
+    }
+
 private:
     Axis axis_ = Axis::VERTICAL;
     bool enable_ = true;
@@ -145,6 +153,18 @@ public:
     void RemoveScrollableEvent(const RefPtr<ScrollableEvent>& scrollableEvent)
     {
         scrollableEvents_.erase(scrollableEvent->GetAxis());
+    }
+
+    void AddPreviewMenuHandleDragEnd(GestureEventFunc&& actionEnd)
+    {
+        for (auto it = scrollableEvents_.begin(); it != scrollableEvents_.end(); ++it) {
+            auto scrollableEvent = it->second;
+            if (!scrollableEvent) {
+                continue;
+            }
+            scrollableEvent->AddPreviewMenuHandleDragEnd(std::move(actionEnd));
+            break;
+        }
     }
 
     void AddScrollEdgeEffect(const Axis& axis, RefPtr<ScrollEdgeEffect>& effect);

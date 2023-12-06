@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 class Font {
     /**
      * Construct new instance of Font.
@@ -27,6 +28,20 @@ class Font {
         __JSScopeUtil__.syncInstanceId(this.instanceId_);
         this.ohos_font.registerFont(options);
         __JSScopeUtil__.restoreInstanceId();
+    }
+
+    getSystemFontList() {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        let arrayResult_ = this.ohos_font.getSystemFontList();
+        __JSScopeUtil__.restoreInstanceId();
+        return arrayResult_;
+    }
+
+    getFontByName(fontName) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        let result_ = this.ohos_font.getFontByName(fontName);
+        __JSScopeUtil__.restoreInstanceId();
+        return result_;
     }
 }
 
@@ -52,13 +67,13 @@ class MediaQuery {
 class UIInspector {
     /**
      * Construct new instance of ArkUIInspector.
-     * initialzie with instanceId.
+     * initialize with instanceId.
      * @param instanceId obtained on the c++ side.
      * @since 10
      */
     constructor(instanceId) {
         this.instanceId_ = instanceId;
-        this.ohos_UIInspector  = globalThis.requireNapi('arkui.inspector');
+        this.ohos_UIInspector = globalThis.requireNapi('arkui.inspector');
     }
     createComponentObserver(id) {
         __JSScopeUtil__.syncInstanceId(this.instanceId_);
@@ -67,6 +82,63 @@ class UIInspector {
         return componentObserver;
     }
 }
+
+class DragController {
+    /**
+     * Construct new instance of DragController.
+     * initialize with instanceId.
+     * @param instanceId obtained on the c++ side.
+     * @since 11
+     */
+    constructor(instanceId) {
+        this.instanceId_ = instanceId;
+        this.ohos_dragController = globalThis.requireNapi('arkui.dragController');
+    }
+
+    executeDrag(custom, dragInfo, callback) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        if (typeof callback !== 'undefined') {
+            this.ohos_dragController.executeDrag(custom, dragInfo, callback);
+            __JSScopeUtil__.restoreInstanceId();
+        } else {
+            let eventPromise = this.ohos_dragController.executeDrag(custom, dragInfo);
+            __JSScopeUtil__.restoreInstanceId();
+            return eventPromise;
+        }
+    }
+
+    createDragAction() {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        let dragAction = this.ohos_dragController.createDragAction();
+        __JSScopeUtil__.restoreInstanceId();
+        return dragAction;
+    }
+
+    getDragPreview() {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        let dragPreview = this.ohos_dragController.getDragPreview();
+        __JSScopeUtil__.restoreInstanceId();
+        return dragPreview;
+    }
+}
+
+class UIObserver {
+    constructor(instanceId) {
+        this.instanceId_ = instanceId;
+        this.ohos_observer = globalThis.requireNapi('arkui.observer');
+    }
+    on(...args) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        this.ohos_observer.on(...args);
+        __JSScopeUtil__.restoreInstanceId();
+    }
+    off(...args) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        this.ohos_observer.off(...args);
+        __JSScopeUtil__.restoreInstanceId();
+    }
+}
+
 
 class UIContext {
     /**
@@ -79,11 +151,16 @@ class UIContext {
         this.instanceId_ = instanceId;
     }
 
+    getDragController() {
+        this.dragController_ = new DragController(this.instanceId_);
+        return this.dragController_;
+    }
+
     getFont() {
         this.font_ = new Font(this.instanceId_);
         return this.font_;
     }
-    
+
     getRouter() {
         this.router_ = new Router(this.instanceId_);
         return this.router_;
@@ -96,7 +173,7 @@ class UIContext {
         __JSScopeUtil__.restoreInstanceId();
         return animatorResult;
     }
-    
+
     getPromptAction() {
         this.promptAction_ = new PromptAction(this.instanceId_);
         return this.promptAction_;
@@ -107,13 +184,13 @@ class UIContext {
         return this.mediaQuery_;
     }
 
-    getUIInspector(){
+    getUIInspector() {
         this.UIInspector_ = new UIInspector(this.instanceId_);
         return this.UIInspector_;
     }
 
     getComponentUtils() {
-        if(this.componentUtils_ == null) {
+        if (this.componentUtils_ == null) {
             this.componentUtils_ = new ComponentUtils(this.instanceId_);
         }
         return this.componentUtils_;
@@ -147,7 +224,7 @@ class UIContext {
         TimePickerDialog.show(options);
         __JSScopeUtil__.restoreInstanceId();
     }
-    
+
     showTextPickerDialog(options) {
         __JSScopeUtil__.syncInstanceId(this.instanceId_);
         TextPickerDialog.show(options);
@@ -160,6 +237,35 @@ class UIContext {
             callback();
         }
         __JSScopeUtil__.restoreInstanceId();
+    }
+
+    setKeyboardAvoidMode(value) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        __KeyboardAvoid__.setKeyboardAvoid(value);
+        __JSScopeUtil__.restoreInstanceId();
+    }
+
+    getKeyboardAvoidMode() {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        let keyBoardAvoidMode = __KeyboardAvoid__.getKeyboardAvoid();
+        __JSScopeUtil__.restoreInstanceId();
+        return keyBoardAvoidMode;
+    }
+
+    getAtomicServiceBar() {
+        const bundleMgr = globalThis.requireNapi('bundle.bundleManager');
+        let data = bundleMgr.getBundleInfoForSelfSync(bundleMgr.BundleFlag.GET_BUNDLE_INFO_WITH_APPLICATION);
+        if (data.appInfo.bundleType == 1) {
+            this.atomServiceBar = new AtomicServiceBar(this.instanceId_);
+            return this.atomServiceBar;
+        } else {
+            return undefined;
+        }
+    }
+
+    getUIObserver() {
+        this.observer_ = new UIObserver();
+        return this.observer_;
     }
 }
 class ComponentUtils {
@@ -207,8 +313,7 @@ class Router {
         else if (typeof callback === 'undefined' && typeof modeOrCallback !== 'undefined') {
             let promise = this.ohos_router.pushUrl(options, modeOrCallback);
             __JSScopeUtil__.restoreInstanceId();
-            if(promise)
-            {
+            if (promise) {
                 return promise;
             }
         }
@@ -228,8 +333,7 @@ class Router {
         else if (typeof callback === 'undefined' && typeof modeOrCallback !== 'undefined') {
             let promise = this.ohos_router.replaceUrl(options, modeOrCallback);
             __JSScopeUtil__.restoreInstanceId();
-            if(promise)
-            {
+            if (promise) {
                 return promise;
             }
         }
@@ -294,8 +398,7 @@ class Router {
         else if (typeof callback === 'undefined' && typeof modeOrCallback !== 'undefined') {
             let promise = this.ohos_router.pushNamedRoute(options, modeOrCallback);
             __JSScopeUtil__.restoreInstanceId();
-            if(promise)
-            {
+            if (promise) {
                 return promise;
             }
         }
@@ -315,8 +418,7 @@ class Router {
         else if (typeof callback === 'undefined' && typeof modeOrCallback !== 'undefined') {
             let promise = this.ohos_router.replaceNamedRoute(options, modeOrCallback);
             __JSScopeUtil__.restoreInstanceId();
-            if(promise)
-            {
+            if (promise) {
                 return promise;
             }
         }
@@ -365,6 +467,49 @@ class PromptAction {
             __JSScopeUtil__.restoreInstanceId();
             return actionMenuSuccessResponse;
         }
+    }
+}
+
+class AtomicServiceBar {
+    /**
+     * Construct new instance of AtomicServiceBar.
+     * initialzie with instanceId.
+     * @param instanceId obtained on the c++ side.
+     * @since 11
+     */
+    constructor(instanceId) {
+        this.instanceId_ = instanceId;
+        this.ohos_atomicServiceBar = globalThis.requireNapi('atomicservicebar');
+    }
+
+    setVisible(visible) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        this.ohos_atomicServiceBar.setVisible(visible);
+        __JSScopeUtil__.restoreInstanceId();
+    }
+
+    setBackgroundColor(color) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        this.ohos_atomicServiceBar.setBackgroundColor(color);
+        __JSScopeUtil__.restoreInstanceId();
+    }
+
+    setTitleContent(content) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        this.ohos_atomicServiceBar.setTitleContent(content);
+        __JSScopeUtil__.restoreInstanceId();
+    }
+
+    setTitleFontStyle(font) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        this.ohos_atomicServiceBar.setTitleFontStyle(font);
+        __JSScopeUtil__.restoreInstanceId();
+    }
+
+    setIconColor(color) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        this.ohos_atomicServiceBar.setIconColor(color);
+        __JSScopeUtil__.restoreInstanceId();
     }
 }
 

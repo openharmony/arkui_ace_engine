@@ -41,6 +41,9 @@ struct TextProperties {
     Color upColor;
     Color currentColor;
     Color downColor;
+    FontWeight upFontWeight;
+    FontWeight fontWeight;
+    FontWeight downFontWeight;
 };
 
 struct TextPickerOptionProperty {
@@ -55,8 +58,8 @@ class EventParam : public virtual AceType {
 
 public:
     WeakPtr<FrameNode> instance;
-    int32_t itemIndex;
-    int32_t itemTotalCounts;
+    int32_t itemIndex = 0;
+    int32_t itemTotalCounts = 0;
 };
 
 enum class ScrollDirection {
@@ -64,7 +67,15 @@ enum class ScrollDirection {
     DOWN,
 };
 
-enum class OptionIndex { COLUMN_INDEX_0 = 0, COLUMN_INDEX_1, COLUMN_INDEX_2, COLUMN_INDEX_3, COLUMN_INDEX_4 };
+enum class OptionIndex {
+    COLUMN_INDEX_0 = 0,
+    COLUMN_INDEX_1,
+    COLUMN_INDEX_2,
+    COLUMN_INDEX_3,
+    COLUMN_INDEX_4,
+    COLUMN_INDEX_5,
+    COLUMN_INDEX_6
+};
 
 class TextPickerColumnPattern : public LinearLayoutPattern {
     DECLARE_ACE_TYPE(TextPickerColumnPattern, LinearLayoutPattern);
@@ -95,7 +106,8 @@ public:
         return MakeRefPtr<LinearLayoutProperty>(true);
     }
 
-    void FlushCurrentOptions(bool isDown = false, bool isUpateTextContentOnly = false, bool isDirectlyClear = false);
+    void FlushCurrentOptions(bool isDown = false, bool isUpateTextContentOnly = false, bool isDirectlyClear = false,
+        bool isUpdateAnimationProperties = false);
 
     void InitilaScorllEvent();
 
@@ -107,7 +119,7 @@ public:
 
     bool NotLoopOptions() const;
 
-    bool InnerHandleScroll(int32_t step, bool isUpatePropertiesOnly = false);
+    bool InnerHandleScroll(bool isDown, bool isUpatePropertiesOnly = false, bool isUpdateAnimationProperties = false);
 
     void SetDefaultPickerItemHeight(double defaultPickerItemHeight)
     {
@@ -130,7 +142,6 @@ public:
     void SetRange(const std::vector<std::string>& value)
     {
         if (value.empty()) {
-            LOGE("input value of range is empty.");
             return;
         }
         range_ = value;
@@ -166,7 +177,6 @@ public:
     std::string GetOption(uint32_t index) const
     {
         if (index >= GetOptionCount()) {
-            LOGE("index out of range.");
             return "";
         }
         return options_[index].text_;
@@ -209,8 +219,6 @@ public:
     {
         if (EventCallback_) {
             EventCallback_(refresh);
-        } else {
-            LOGE("event callback is null.");
         }
     }
 
@@ -254,14 +262,68 @@ public:
     {
         if (changeCallback_) {
             changeCallback_(GetHost(), isAdd, GetCurrentIndex(), needNotify);
-        } else {
-            LOGE("change callback is null.");
         }
     }
 
     int32_t GetHalfDisplayCounts() const
     {
         return halfDisplayCounts_;
+    }
+
+    double GetOffset() const
+    {
+        return offsetCurSet_;
+    }
+
+    void SetYLast(double value)
+    {
+        yLast_ = value;
+    }
+
+    void UpdateFinishToss(double offsetY);
+
+    void TossAnimationStoped();
+
+    void PlayResetAnimation();
+
+    std::vector<TextPickerOptionProperty> GetMidShiftDistance() const
+    {
+        return optionProperties_;
+    }
+
+    void SetMainVelocity(double mainVelocity)
+    {
+        mainVelocity_ = mainVelocity;
+    }
+
+    double GetMainVelocity() const
+    {
+        return mainVelocity_;
+    }
+
+    void SetTossStatus(bool status)
+    {
+        isTossStatus_ = status;
+    }
+
+    bool GetTossStatus() const
+    {
+        return isTossStatus_;
+    }
+
+    void SetYOffset(double value)
+    {
+        yOffset_ = value;
+    }
+
+    bool GetTouchBreakStatus() const
+    {
+        return touchBreak_;
+    }
+
+    void NeedResetOptionPropertyHeight(bool needOptionPropertyHeightReset)
+    {
+        needOptionPropertyHeightReset_ = needOptionPropertyHeightReset;
     }
 
 private:
@@ -277,8 +339,7 @@ private:
     void HandleDragMove(const GestureEvent& event);
     void HandleDragEnd();
     void CreateAnimation();
-    RefPtr<CurveAnimation<double>> CreateAnimation(double from, double to);
-    void HandleCurveStopped();
+    void CreateAnimation(double from, double to);
     void ScrollOption(double delta);
     std::vector<TextPickerOptionProperty> optionProperties_;
     std::vector<int32_t> algorithmOffset_;
@@ -320,17 +381,19 @@ private:
         bool isUpateTextContentOnly, bool isDirectlyClear);
 
     RefPtr<TextPickerLayoutProperty> GetParentLayout() const;
-    RefPtr<TouchEventImpl> CreateItemTouchEventListener(RefPtr<EventParam> param);
+    RefPtr<TouchEventImpl> CreateItemTouchEventListener();
     void OnAroundButtonClick(RefPtr<EventParam> param);
-    void OnMiddleButtonTouchDown(RefPtr<EventParam> param);
-    void OnMiddleButtonTouchMove(RefPtr<EventParam> param);
-    void OnMiddleButtonTouchUp(RefPtr<EventParam> param);
+    void OnMiddleButtonTouchDown();
+    void OnMiddleButtonTouchMove();
+    void OnMiddleButtonTouchUp();
     int32_t GetMiddleButtonIndex();
 
     bool touchEventInit_ = false;
     RefPtr<InputEvent> CreateMouseHoverEventListener(RefPtr<EventParam> param);
     RefPtr<ClickEvent> CreateItemClickEventListener(RefPtr<EventParam> param);
     void SetAccessibilityAction();
+
+    void ResetOptionPropertyHeight();
 
     float localDownDistance_ = 0.0f;
     Color pressColor_;
@@ -363,12 +426,11 @@ private:
     bool pressed_ = false;
     double scrollDelta_ = 0.0;
     bool animationCreated_ = false;
-    RefPtr<Animator> toController_;
-    RefPtr<Animator> fromController_;
-    RefPtr<CurveAnimation<double>> fromBottomCurve_;
-    RefPtr<CurveAnimation<double>> fromTopCurve_;
     RefPtr<TextPickerTossAnimationController> tossAnimationController_ =
         AceType::MakeRefPtr<TextPickerTossAnimationController>();
+    RefPtr<NodeAnimatablePropertyFloat> scrollProperty_;
+    RefPtr<NodeAnimatablePropertyFloat> aroundClickProperty_;
+    std::shared_ptr<AnimationUtils::Animation> animation_;
     std::vector<TextProperties> animationProperties_;
     float dividerSpacing_ = 0.0f;
     float gradientHeight_ = 0.0f;
@@ -377,6 +439,15 @@ private:
     ColumnChangeCallback changeCallback_;
 
     int32_t halfDisplayCounts_ = 0;
+
+    float mainVelocity_ = 0.0f;
+    float offsetCurSet_ = 0.0f;
+    float distancePercent_ = 0.0f;
+    bool isTossStatus_ = false;
+    bool clickBreak_ = false;
+    bool touchBreak_ = false;
+    bool animationBreak_ = false;
+    bool needOptionPropertyHeightReset_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(TextPickerColumnPattern);
 };

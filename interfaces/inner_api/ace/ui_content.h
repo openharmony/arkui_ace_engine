@@ -22,6 +22,7 @@
 #include <refbase.h>
 #include <string>
 #include <vector>
+#include <list>
 
 #include "macros.h"
 #include "modal_ui_extension_config.h"
@@ -40,10 +41,15 @@ class Ability;
 class FormAshmem;
 } // namespace AppExecFwk
 
+namespace Accessibility {
+class AccessibilityElementInfo;
+}
 namespace Rosen {
 class Window;
+struct Rect;
 enum class WindowSizeChangeReason : uint32_t;
 enum class WindowMode : uint32_t;
+enum class MaximizeMode : uint32_t;
 class RSSurfaceNode;
 class RSTransaction;
 } // namespace Rosen
@@ -62,14 +68,20 @@ namespace Media {
 class PixelMap;
 } // namespace Media
 
+namespace AbilityBase {
+struct ViewData;
+} // namespace AbilityBase
+
+class RefBase;
+class Parcelable;
+class IRemoteObject;
+
 } // namespace OHOS
 
 class NativeEngine;
-class NativeValue;
 typedef struct napi_value__* napi_value;
 
 namespace OHOS::Ace {
-
 class ACE_FORCE_EXPORT UIContent {
 public:
     static std::unique_ptr<UIContent> Create(
@@ -77,16 +89,20 @@ public:
     static std::unique_ptr<UIContent> Create(OHOS::AbilityRuntime::Context* context, NativeEngine* runtime);
     static std::unique_ptr<UIContent> Create(OHOS::AppExecFwk::Ability* ability);
     static void ShowDumpHelp(std::vector<std::string>& info);
+    static UIContent* GetUIContent(int32_t instanceId);
+    static std::string GetCurrentUIStackInfo();
 
     virtual ~UIContent() = default;
 
     // UI content life-cycles
-    virtual void Initialize(OHOS::Rosen::Window* window, const std::string& url, NativeValue* storage) = 0;
-    virtual void InitializeByName(OHOS::Rosen::Window* window, const std::string& name, NativeValue* storage) = 0;
+    virtual void Initialize(OHOS::Rosen::Window* window, const std::string& url, napi_value storage) = 0;
+    virtual void Initialize(
+        OHOS::Rosen::Window* window, const std::shared_ptr<std::vector<uint8_t>>& content, napi_value storage) = 0;
+    virtual void InitializeByName(OHOS::Rosen::Window* window, const std::string& name, napi_value storage) = 0;
 
     // UIExtensionAbility initialize for focusWindow ID
     virtual void Initialize(
-        OHOS::Rosen::Window* window, const std::string& url, NativeValue* storage, uint32_t focusWindowID) = 0;
+        OHOS::Rosen::Window* window, const std::string& url, napi_value storage, uint32_t focusWindowID) = 0;
     virtual void Foreground() = 0;
     virtual void Background() = 0;
     virtual void Focus() = 0;
@@ -95,15 +111,9 @@ public:
     virtual void OnNewWant(const OHOS::AAFwk::Want& want) = 0;
 
     // distribute
-    virtual void Restore(OHOS::Rosen::Window* window, const std::string& contentInfo, NativeValue* storage) = 0;
+    virtual void Restore(OHOS::Rosen::Window* window, const std::string& contentInfo, napi_value storage) = 0;
     virtual std::string GetContentInfo() const = 0;
     virtual void DestroyUIDirector() = 0;
-
-    virtual void Initialize(OHOS::Rosen::Window* window, const std::string& url, napi_value storage) = 0;
-    virtual void InitializeByName(OHOS::Rosen::Window* window, const std::string& name, napi_value storage) = 0;
-    virtual void Initialize(
-        OHOS::Rosen::Window* window, const std::string& url, napi_value storage, uint32_t focusWindowID) = 0;
-    virtual void Restore(OHOS::Rosen::Window* window, const std::string& contentInfo, napi_value storage) = 0;
 
     // UI content event process
     virtual bool ProcessBackPressed() = 0;
@@ -118,10 +128,23 @@ public:
     virtual void UpdateWindowMode(OHOS::Rosen::WindowMode mode, bool hasDeco = true) = 0;
     virtual void HideWindowTitleButton(bool hideSplit, bool hideMaximize, bool hideMinimize) = 0;
     virtual void SetIgnoreViewSafeArea(bool ignoreViewSafeArea) = 0;
+    virtual void UpdateMaximizeMode(OHOS::Rosen::MaximizeMode mode) {};
+    virtual void ProcessFormVisibleChange(bool isVisible) {};
+
+    // only vaild in ContainerModalPatternEnhance
+    virtual void UpdateTitleInTargetPos(bool isShow, int32_t height) = 0;
 
     // Window color
     virtual uint32_t GetBackgroundColor() = 0;
     virtual void SetBackgroundColor(uint32_t color) = 0;
+
+    // Judge whether window need soft keyboard or not
+    virtual bool NeedSoftKeyboard()
+    {
+        return false;
+    }
+
+    virtual void SetOnWindowFocused(const std::function<void()>& callback) {};
 
     virtual void DumpInfo(const std::vector<std::string>& params, std::vector<std::string>& info) = 0;
 
@@ -146,6 +169,7 @@ public:
     virtual float GetFormHeight() = 0;
     virtual void ReloadForm(const std::string& url) {};
     virtual void OnFormSurfaceChange(float width, float height) {}
+    virtual void SetFormBackgroundColor(const std::string& color) {};
 
     virtual void SetActionEventHandler(std::function<void(const std::string&)>&& actionCallback) {};
     virtual void SetErrorEventHandler(std::function<void(const std::string&, const std::string&)>&& errorCallback) {};
@@ -172,11 +196,6 @@ public:
 
     virtual void UpdateResource() {}
 
-    virtual NativeValue* GetUIContext()
-    {
-        return nullptr;
-    }
-
     virtual napi_value GetUINapiContext()
     {
         napi_value result = nullptr;
@@ -200,6 +219,77 @@ public:
      * If the sessionId is 0, refuse to close
      */
     virtual void CloseModalUIExtension(int32_t sessionId) = 0;
+
+    /**
+     * @description: Set parent ability token.
+     * @param token ability token.
+     */
+    virtual void SetParentToken(sptr<IRemoteObject> token);
+
+    /**
+     * @description: Get parent ability token.
+     * @return return parent ability token.
+     */
+    virtual sptr<IRemoteObject> GetParentToken();
+
+    virtual bool DumpViewData(AbilityBase::ViewData& viewData)
+    {
+        return false;
+    }
+
+    virtual bool CheckNeedAutoSave()
+    {
+        return false;
+    }
+
+    /**
+     * @description: Recycle form.
+     * @return return Json string of status data of ArkTS form.
+     */
+    virtual std::string RecycleForm()
+    {
+        return "";
+    }
+
+    /**
+     * @description: Recover form.
+     * @param statusData Indicates json string of status data of ArkTS form.
+     */
+    virtual void RecoverForm(const std::string &statusData) {}
+
+#ifndef PREVIEW
+    virtual void SearchElementInfoByAccessibilityId(
+        int32_t elementId, int32_t mode,
+        int32_t baseParent, std::list<Accessibility::AccessibilityElementInfo>& output) {};
+
+    virtual void SearchElementInfosByText(
+        int32_t elementId, const std::string& text, int32_t baseParent,
+        std::list<Accessibility::AccessibilityElementInfo>& output) {};
+
+    virtual void FindFocusedElementInfo(
+        int32_t elementId, int32_t focusType,
+        int32_t baseParent, Accessibility::AccessibilityElementInfo& output) {};
+
+    virtual void FocusMoveSearch(
+        int32_t elementId, int32_t direction,
+        int32_t baseParent, Accessibility::AccessibilityElementInfo& output) {};
+        
+    virtual bool NotifyExecuteAction(int32_t elementId, const std::map<std::string, std::string>& actionArguments,
+        int32_t action, int32_t offset)
+    {
+        return false;
+    }
+#endif
+
+    /**
+     * @description: Set UIContent callback after layout finish.
+     * @param callback callback func.
+     */
+    virtual void SetFrameLayoutFinishCallback(std::function<void()>&& callback) {};
+
+    // Actually paint size of window
+    virtual void GetAppPaintSize(OHOS::Rosen::Rect& paintrect) {};
+
 };
 
 } // namespace OHOS::Ace

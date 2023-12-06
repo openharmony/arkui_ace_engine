@@ -21,11 +21,7 @@ namespace OHOS::Ace {
 
 void FlutterRenderSvgFeColorMatrix::OnAsImageFilter(sk_sp<SkImageFilter>& imageFilter) const
 {
-#ifdef USE_SYSTEM_SKIA
-    auto colorFilter = SkColorFilter::MakeMatrixFilterRowMajor255(matrix_);
-#else
     auto colorFilter = SkColorFilters::Matrix(matrix_);
-#endif
     imageFilter = SkColorFilterImageFilter::Make(colorFilter, imageFilter);
 }
 

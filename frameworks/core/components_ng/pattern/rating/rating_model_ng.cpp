@@ -26,6 +26,7 @@ void RatingModelNG::Create(double rating, bool indicator)
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
+    ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::RATING_ETS_TAG, nodeId);
     auto frameNode = FrameNode::GetOrCreateFrameNode(
         V2::RATING_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<RatingPattern>(); });
     stack->Push(frameNode);
@@ -96,5 +97,48 @@ void RatingModelNG::SetOnChangeEvent(ChangeEvent&& onChangeEvent)
     auto eventHub = frameNode->GetEventHub<RatingEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnChangeEvent(std::move(onChangeEvent));
+}
+
+void RatingModelNG::SetStars(FrameNode* frameNode, int32_t value)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(RatingLayoutProperty, Stars, value, frameNode);
+}
+
+void RatingModelNG::SetStepSize(FrameNode* frameNode, double value)
+{
+    ACE_UPDATE_NODE_PAINT_PROPERTY(RatingRenderProperty, StepSize, value, frameNode);
+}
+
+void RatingModelNG::SetForegroundSrc(FrameNode* frameNode, const std::string& value, bool flag)
+{
+    if (flag) {
+        ACE_RESET_NODE_LAYOUT_PROPERTY_WITH_FLAG(
+            RatingLayoutProperty, ForegroundImageSourceInfo, PROPERTY_UPDATE_MEASURE, frameNode);
+    } else {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(
+            RatingLayoutProperty, ForegroundImageSourceInfo, ImageSourceInfo(value), frameNode);
+    }
+}
+
+void RatingModelNG::SetSecondarySrc(FrameNode* frameNode, const std::string& value, bool flag)
+{
+    if (flag) {
+        ACE_RESET_NODE_LAYOUT_PROPERTY_WITH_FLAG(
+            RatingLayoutProperty, SecondaryImageSourceInfo, PROPERTY_UPDATE_MEASURE, frameNode);
+    } else {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(
+            RatingLayoutProperty, SecondaryImageSourceInfo, ImageSourceInfo(value), frameNode);
+    }
+}
+
+void RatingModelNG::SetBackgroundSrc(FrameNode* frameNode, const std::string& value, bool flag)
+{
+    if (flag) {
+        ACE_RESET_NODE_LAYOUT_PROPERTY_WITH_FLAG(
+            RatingLayoutProperty, BackgroundImageSourceInfo, PROPERTY_UPDATE_MEASURE, frameNode);
+    } else {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(
+            RatingLayoutProperty, BackgroundImageSourceInfo, ImageSourceInfo(value), frameNode);
+    }
 }
 } // namespace OHOS::Ace::NG

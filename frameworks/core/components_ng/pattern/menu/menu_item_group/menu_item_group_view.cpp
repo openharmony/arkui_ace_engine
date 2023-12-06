@@ -42,9 +42,9 @@ void UpdateRowPadding(const RefPtr<FrameNode>& row)
 
 void MenuItemGroupView::Create()
 {
-    LOGI("MenuItemGroupView::Create");
     auto* stack = ViewStackProcessor::GetInstance();
     int32_t nodeId = stack->ClaimNodeId();
+    ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::MENU_ITEM_GROUP_ETS_TAG, nodeId);
     auto menuItemGroup = FrameNode::GetOrCreateFrameNode(
         V2::MENU_ITEM_GROUP_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<MenuItemGroupPattern>(); });
     CHECK_NULL_VOID(menuItemGroup);
@@ -54,7 +54,6 @@ void MenuItemGroupView::Create()
 
 void MenuItemGroupView::SetHeader(const RefPtr<UINode>& header)
 {
-    LOGI("MenuItemGroupView::SetHeader");
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<MenuItemGroupPattern>();
@@ -68,7 +67,6 @@ void MenuItemGroupView::SetHeader(const RefPtr<UINode>& header)
 
 void MenuItemGroupView::SetHeader(const std::string& headerStr)
 {
-    LOGI("MenuItemGroupView::SetHeader content is string");
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<MenuItemGroupPattern>();
@@ -96,7 +94,6 @@ void MenuItemGroupView::SetHeader(const std::string& headerStr)
 
 void MenuItemGroupView::SetFooter(const RefPtr<UINode>& footer)
 {
-    LOGI("MenuItemGroupView::SetFooter");
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<MenuItemGroupPattern>();
@@ -110,7 +107,6 @@ void MenuItemGroupView::SetFooter(const RefPtr<UINode>& footer)
 
 void MenuItemGroupView::SetFooter(const std::string& footerStr)
 {
-    LOGI("MenuItemGroupView::SetFooter content is string");
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<MenuItemGroupPattern>();

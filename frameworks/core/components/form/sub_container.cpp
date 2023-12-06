@@ -24,8 +24,10 @@
 #include "core/common/container_scope.h"
 #include "core/components/theme/theme_manager_impl.h"
 #include "core/components_ng/pattern/form/form_layout_property.h"
+#include "frameworks/core/common/asset_manager_impl.h"
 #include "frameworks/core/common/flutter/flutter_asset_manager.h"
 #include "frameworks/core/common/flutter/flutter_task_executor.h"
+#include "frameworks/core/common/task_executor_impl.h"
 #include "frameworks/core/components/form/form_element.h"
 #include "frameworks/core/components/form/form_window.h"
 #include "frameworks/core/components/form/render_form.h"
@@ -45,6 +47,12 @@ SubContainer::~SubContainer()
 
 void SubContainer::Initialize()
 {
+    auto formPattern = formPattern_.Upgrade();
+    if (formPattern && !formPattern->IsJsCard()) {
+        LOGI("ETS card do not require the creation of a separate TaskExecutor");
+        return;
+    }
+
     if (!outSidePipelineContext_.Upgrade()) {
         LOGE("no pipeline context for create form component container.");
         return;
@@ -56,12 +64,21 @@ void SubContainer::Initialize()
         return;
     }
 
-    auto taskExecutor = AceType::DynamicCast<FlutterTaskExecutor>(executor);
-    if (!taskExecutor) {
-        LOGE("main pipeline context executor is not flutter taskexecutor");
-        return;
+    if (SystemProperties::GetFlutterDecouplingEnabled()) {
+        auto taskExecutor = AceType::DynamicCast<TaskExecutorImpl>(executor);
+        if (!taskExecutor) {
+            LOGE("main pipeline context executor is not flutter taskexecutor");
+            return;
+        }
+        taskExecutor_ = Referenced::MakeRefPtr<TaskExecutorImpl>(taskExecutor);
+    } else {
+        auto taskExecutor = AceType::DynamicCast<FlutterTaskExecutor>(executor);
+        if (!taskExecutor) {
+            LOGE("main pipeline context executor is not flutter taskexecutor");
+            return;
+        }
+        taskExecutor_ = Referenced::MakeRefPtr<FlutterTaskExecutor>(taskExecutor);
     }
-    taskExecutor_ = Referenced::MakeRefPtr<FlutterTaskExecutor>(taskExecutor);
 }
 
 void SubContainer::Destroy()
@@ -185,23 +202,35 @@ void SubContainer::RunCard(int64_t formId, const std::string& path, const std::s
     frontend_->Initialize(cardType_, taskExecutor_);
     frontend_->ResetPageLoadState();
     LOGI("run card path:%{private}s, module:%{private}s, data:%{private}s", path.c_str(), module.c_str(), data.c_str());
+    RefPtr<AssetManagerImpl> assetManagerImpl;
     RefPtr<FlutterAssetManager> flutterAssetManager;
-    flutterAssetManager = Referenced::MakeRefPtr<FlutterAssetManager>();
-
-    if (flutterAssetManager) {
-        frontend_->SetAssetManager(flutterAssetManager);
-        assetManager_ = flutterAssetManager;
-
-        std::vector<std::string> basePaths;
-        basePaths.push_back("assets/js/" + module + "/");
-        basePaths.emplace_back("assets/js/share/");
-        basePaths.emplace_back("");
-        basePaths.emplace_back("js/");
-        basePaths.emplace_back("ets/");
-        auto assetProvider = CreateAssetProvider(path, basePaths);
-        if (assetProvider) {
-            LOGI("push card asset provider to queue.");
-            flutterAssetManager->PushBack(std::move(assetProvider));
+    std::vector<std::string> basePaths;
+    basePaths.push_back("assets/js/" + module + "/");
+    basePaths.emplace_back("assets/js/share/");
+    basePaths.emplace_back("");
+    basePaths.emplace_back("js/");
+    basePaths.emplace_back("ets/");
+    if (SystemProperties::GetFlutterDecouplingEnabled()) {
+        assetManagerImpl = Referenced::MakeRefPtr<AssetManagerImpl>();
+        if (assetManagerImpl) {
+            frontend_->SetAssetManager(assetManagerImpl);
+            assetManager_ = assetManagerImpl;
+            auto assetProvider = CreateAssetProviderImpl(path, basePaths);
+            if (assetProvider) {
+                LOGI("push card asset provider to queue.");
+                assetManagerImpl->PushBack(std::move(assetProvider));
+            }
+        }
+    } else {
+        flutterAssetManager = Referenced::MakeRefPtr<FlutterAssetManager>();
+        if (flutterAssetManager) {
+            frontend_->SetAssetManager(flutterAssetManager);
+            assetManager_ = flutterAssetManager;
+            auto assetProvider = CreateAssetProvider(path, basePaths);
+            if (assetProvider) {
+                LOGI("push card asset provider to queue.");
+                flutterAssetManager->PushBack(std::move(assetProvider));
+            }
         }
     }
     if (formSrc.compare(0, 2, "./") == 0) {       // 2:length of "./"
@@ -249,19 +278,35 @@ void SubContainer::RunCard(int64_t formId, const std::string& path, const std::s
         cardThemeManager->InitResource(cardResourceInfo);
         cardThemeManager->LoadSystemTheme(cardResourceInfo.GetThemeId());
         auto weakTheme = AceType::WeakClaim(AceType::RawPtr(cardThemeManager));
-        auto weakAsset = AceType::WeakClaim(AceType::RawPtr(flutterAssetManager));
-        taskExecutor_->PostTask(
-            [weakTheme, weakAsset]() {
-                auto themeManager = weakTheme.Upgrade();
-                if (themeManager == nullptr) {
-                    LOGE("themeManager or aceView is null!");
-                    return;
-                }
-                themeManager->ParseSystemTheme();
-                themeManager->SetColorScheme(ColorScheme::SCHEME_LIGHT);
-                themeManager->LoadCustomTheme(weakAsset.Upgrade());
-            },
-            TaskExecutor::TaskType::UI);
+        if (SystemProperties::GetFlutterDecouplingEnabled()) {
+            auto weakAsset = AceType::WeakClaim(AceType::RawPtr(assetManagerImpl));
+            taskExecutor_->PostTask(
+                [weakTheme, weakAsset]() {
+                    auto themeManager = weakTheme.Upgrade();
+                    if (themeManager == nullptr) {
+                        LOGE("themeManager or aceView is null!");
+                        return;
+                    }
+                    themeManager->ParseSystemTheme();
+                    themeManager->SetColorScheme(ColorScheme::SCHEME_LIGHT);
+                    themeManager->LoadCustomTheme(weakAsset.Upgrade());
+                },
+                TaskExecutor::TaskType::UI);
+        } else {
+            auto weakAsset = AceType::WeakClaim(AceType::RawPtr(flutterAssetManager));
+            taskExecutor_->PostTask(
+                [weakTheme, weakAsset]() {
+                    auto themeManager = weakTheme.Upgrade();
+                    if (themeManager == nullptr) {
+                        LOGE("themeManager or aceView is null!");
+                        return;
+                    }
+                    themeManager->ParseSystemTheme();
+                    themeManager->SetColorScheme(ColorScheme::SCHEME_LIGHT);
+                    themeManager->LoadCustomTheme(weakAsset.Upgrade());
+                },
+                TaskExecutor::TaskType::UI);
+        }
     }
 
     auto&& actionEventHandler = [weak = WeakClaim(this)](const std::string& action) {

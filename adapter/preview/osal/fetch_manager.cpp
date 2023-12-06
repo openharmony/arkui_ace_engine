@@ -28,7 +28,7 @@
     do {                                                                                            \
         CURLcode result = curl_easy_setopt(handle, opt, data);                                      \
         if (result != CURLE_OK) {                                                                   \
-            LOGE("Failed to set option: %{public}s, %{public}s", #opt, curl_easy_strerror(result)); \
+            LOGW("Failed to set option: %{public}s, %{public}s", #opt, curl_easy_strerror(result)); \
             return false;                                                                           \
         }                                                                                           \
     } while (0)
@@ -49,7 +49,6 @@ public:
 
         std::unique_ptr<CURL, decltype(&curl_easy_cleanup)> handle(curl_easy_init(), &curl_easy_cleanup);
         if (!handle) {
-            LOGE("Failed to create fetch task");
             return false;
         }
 
@@ -87,7 +86,7 @@ public:
         } else if (method == HttpConstant::HTTP_METHOD_POST || method == HttpConstant::HTTP_METHOD_PUT) {
             SetOptionForPost(requestData, handle.get());
         } else {
-            LOGE("no method match!");
+            LOGD("No method match!");
             responseData.SetCode(HttpConstant::ERROR);
             responseData.SetData(responseBody);
             return true;
@@ -95,7 +94,7 @@ public:
 
         CURLcode result = curl_easy_perform(handle.get());
         if (result != CURLE_OK) {
-            LOGE("Failed to fetch, url: %{private}s, %{public}s", requestData.GetUrl().c_str(),
+            LOGW("Failed to fetch, url: %{private}s, %{public}s", requestData.GetUrl().c_str(),
                 curl_easy_strerror(result));
             responseData.SetCode(HttpConstant::ERROR);
             responseData.SetData(responseBody);
@@ -151,9 +150,8 @@ public:
     bool SetOptionForPost(const RequestData requestData, CURL* curl) const
     {
         // refer to function buildConnectionWithStream() in HttpFetchImpl.java
-        LOGD("begin to set option for post");
         std::string url = requestData.GetUrl();
-        LOGD("final url : %{public}s", url.c_str());
+        LOGD("begin to set option for post, final url : %{public}s", url.c_str());
         ACE_CURL_EASY_SET_OPTION(curl, CURLOPT_URL, url.c_str());
         ACE_CURL_EASY_SET_OPTION(curl, CURLOPT_POSTFIELDS, requestData.GetData().c_str());
         return true;

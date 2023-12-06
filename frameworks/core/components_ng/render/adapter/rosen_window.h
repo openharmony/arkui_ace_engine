@@ -53,6 +53,8 @@ public:
 
     void SetRootFrameNode(const RefPtr<NG::FrameNode>& root) override;
 
+    void FlushFrameRate(int32_t rate) override;
+
     std::shared_ptr<Rosen::RSUIDirector> GetRSUIDirector() const override
     {
         return rsUIDirector_;
@@ -69,9 +71,19 @@ public:
 
     void SetTaskRunner(RefPtr<TaskExecutor> taskExecutor, int32_t id);
 
-    bool FlushCustomAnimation(uint64_t timeStamp) override
+    bool FlushAnimation(uint64_t timeStamp) override
     {
-        return rsUIDirector_->RunningCustomAnimation(timeStamp);
+        return rsUIDirector_->FlushAnimation(timeStamp);
+    }
+
+    void FlushModifier() override
+    {
+        rsUIDirector_->FlushModifier();
+    }
+
+    bool HasUIAnimation() override
+    {
+        return rsUIDirector_->HasUIAnimation();
     }
 
     void OnShow() override;

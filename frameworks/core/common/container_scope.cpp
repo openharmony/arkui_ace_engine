@@ -14,21 +14,18 @@
  */
 
 #include "core/common/container_scope.h"
-
-#include <mutex>
-
+#include "core/common/container_consts.h"
 #include "base/utils/utils.h"
 
 namespace OHOS::Ace {
-
+namespace {
 // preview not support multi-instance, always using default instance id 0.
 #if defined(PREVIEW)
-thread_local int32_t ContainerScope::currentId_ = 0;
+thread_local int32_t currentId_ = 0;
 #else
-thread_local int32_t ContainerScope::currentId_ = -1;
+thread_local int32_t currentId_ = INSTANCE_ID_UNDEFINED;
 #endif
-std::function<void(int32_t)> ContainerScope::updateScopeNotify_;
-std::shared_mutex ContainerScope::scopeLock_;
+}
 
 int32_t ContainerScope::CurrentId()
 {
@@ -38,15 +35,6 @@ int32_t ContainerScope::CurrentId()
 void ContainerScope::UpdateCurrent(int32_t id)
 {
     currentId_ = id;
-    std::shared_lock<std::shared_mutex> readLock(scopeLock_);
-    CHECK_NULL_VOID(updateScopeNotify_);
-    updateScopeNotify_(id);
-}
-
-void ContainerScope::SetScopeNotify(std::function<void(int32_t)>&& notify)
-{
-    std::unique_lock<std::shared_mutex> writeLock(scopeLock_);
-    updateScopeNotify_ = std::move(notify);
 }
 
 } // namespace OHOS::Ace

@@ -38,7 +38,7 @@ namespace OHOS::Ace::Framework {
 #ifdef USE_ARK_ENGINE
 
 namespace {
-
+const std::string EMPTY_STATUS_DATA = "empty_status_data";
 JSRef<JSObject> GenConstraint(const std::optional<NG::LayoutConstraintF>& parentConstraint)
 {
     auto minSize = parentConstraint->minSize;
@@ -126,12 +126,14 @@ JSRef<JSObject> GenSelfLayoutInfo(RefPtr<NG::LayoutProperty> layoutProperty)
     if (parentNode->GetTag() == V2::COMMON_VIEW_ETS_TAG) {
         layoutProperty = parentNode->GetLayoutProperty();
     }
-    auto width = layoutProperty->GetCalcLayoutConstraint()
-                     ? layoutProperty->GetCalcLayoutConstraint()->selfIdealSize->Width()->GetDimension().ConvertToVp()
-                     : 0.0f;
-    auto height = layoutProperty->GetCalcLayoutConstraint()
-                      ? layoutProperty->GetCalcLayoutConstraint()->selfIdealSize->Height()->GetDimension().ConvertToVp()
-                      : 0.0f;
+    auto width =
+        layoutProperty->GetLayoutConstraint()
+            ? layoutProperty->GetLayoutConstraint()->selfIdealSize.Width().value_or(0.0) / pipeline->GetDipScale()
+            : 0.0f;
+    auto height =
+        layoutProperty->GetLayoutConstraint()
+            ? layoutProperty->GetLayoutConstraint()->selfIdealSize.Height().value_or(0.0) / pipeline->GetDipScale()
+            : 0.0f;
 
     const std::unique_ptr<NG::PaddingProperty> defaultPadding = std::make_unique<NG::PaddingProperty>();
     const std::unique_ptr<NG::BorderWidthProperty>& defaultEdgeWidth = std::make_unique<NG::BorderWidthProperty>();
@@ -319,14 +321,17 @@ void ViewFunctions::ExecuteMeasureSize(NG::LayoutWrapper* layoutWrapper)
         measureWidth = { -1.0f };
     }
     NG::SizeF frameSize = { measureWidth.ConvertToPx(), measureHeight.ConvertToPx() };
-    layoutWrapper->GetGeometryNode()->SetFrameSize(frameSize);
     NG::CalcSize idealSize = { NG::CalcLength(measureWidth.ConvertToPx()),
         NG::CalcLength(measureHeight.ConvertToPx()) };
-    layoutWrapper->GetLayoutProperty()->UpdateUserDefinedIdealSize(idealSize);
     if (parentNode->GetTag() == V2::COMMON_VIEW_ETS_TAG) {
         auto parentLayoutProperty = parentNode->GetLayoutProperty();
         parentLayoutProperty->UpdateUserDefinedIdealSize(idealSize);
+        parentNode->GetGeometryNode()->SetFrameSize(frameSize);
+        parentLayoutProperty->UpdateMarginSelfIdealSize(
+            NG::SizeF { measureWidth.ConvertToPx(), measureHeight.ConvertToPx() });
     }
+    layoutWrapper->GetLayoutProperty()->UpdateUserDefinedIdealSize(idealSize);
+    layoutWrapper->GetGeometryNode()->SetFrameSize(frameSize);
 }
 
 void ViewFunctions::ExecuteReload(bool deep)
@@ -379,6 +384,22 @@ void ViewFunctions::ExecuteSetActive(bool active)
         func->Call(jsObject_.Lock(), 1, &isActive);
     } else {
         LOGE("the set active func is null");
+    }
+}
+
+void ViewFunctions::ExecuteOnDumpInfo(const std::vector<std::string>& params)
+{
+    JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(context_)
+    auto func = jsOnDumpInfo_.Lock();
+    if (!func->IsEmpty()) {
+        JSRef<JSArray> arr = JSRef<JSArray>::New();
+        for (size_t i = 0; i < params.size(); ++i) {
+            arr->SetValueAt(i, JSRef<JSVal>::Make(ToJSValue(params.at(i))));
+        }
+        JSRef<JSVal> argv = arr;
+        func->Call(jsObject_.Lock(), 1, &argv);
+    } else {
+        LOGE("the on dump info func is null");
     }
 }
 
@@ -453,6 +474,13 @@ void ViewFunctions::InitViewFunctions(
             jsSetActive_ = JSRef<JSFunc>::Cast(jsSetActive);
         } else {
             LOGD("View don't have the ability to prevent inactive update");
+        }
+
+        JSRef<JSVal> jsOnDumpInfo = jsObject->GetProperty("onDumpInfo");
+        if (jsOnDumpInfo->IsFunction()) {
+            jsOnDumpInfo_ = JSRef<JSFunc>::Cast(jsOnDumpInfo);
+        } else {
+            LOGD("View don't have the ability to dump info");
         }
     }
 
@@ -565,6 +593,20 @@ void ViewFunctions::InitViewFunctions(
             LOGD("updateWithValueParams is not a function");
         }
         jsRenderFunc_ = jsRenderFunction;
+    }
+
+    JSRef<JSVal> jsOnFormRecycleFunc = jsObject->GetProperty("onFormRecycle");
+    if (jsOnFormRecycleFunc->IsFunction()) {
+        jsOnFormRecycleFunc_ = JSRef<JSFunc>::Cast(jsOnFormRecycleFunc);
+    } else {
+        LOGD("onFormRecycle is not a function");
+    }
+
+    JSRef<JSVal> jsOnFormRecoverFunc = jsObject->GetProperty("onFormRecover");
+    if (jsOnFormRecoverFunc->IsFunction()) {
+        jsOnFormRecoverFunc_ = JSRef<JSFunc>::Cast(jsOnFormRecoverFunc);
+    } else {
+        LOGD("onFormRecover is not a function");
     }
 }
 
@@ -851,4 +893,31 @@ ViewFunctions::ViewFunctions(const JSRef<JSObject>& jsObject)
     InitViewFunctions(jsObject, JSRef<JSFunc>(), true);
 }
 
+std::string ViewFunctions::ExecuteOnFormRecycle()
+{
+    auto ret = ExecuteFunctionWithReturn(jsOnFormRecycleFunc_, "OnFormRecycle");
+    if (!ret->IsEmpty() && ret->IsString()) {
+        std::string statusData = ret->ToString();
+        return statusData.empty() ? EMPTY_STATUS_DATA : statusData;
+    }
+    LOGE("ExecuteOnFormRecycle failed");
+    return "";
+}
+
+void ViewFunctions::ExecuteOnFormRecover(const std::string &statusData)
+{
+    JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(context_)
+    if (jsOnFormRecoverFunc_.IsEmpty()) {
+        LOGE("jsOnFormRecoverFunc_ is null");
+        return;
+    }
+
+    std::string data;
+    if (statusData != EMPTY_STATUS_DATA) {
+        data = statusData;
+    }
+    auto jsData = JSRef<JSVal>::Make(ToJSValue(data));
+    auto func = jsOnFormRecoverFunc_.Lock();
+    func->Call(jsObject_.Lock(), 1, &jsData);
+}
 } // namespace OHOS::Ace::Framework

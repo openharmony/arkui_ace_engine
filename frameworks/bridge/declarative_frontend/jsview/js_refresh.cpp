@@ -62,14 +62,16 @@ void ParseRefreshingObject(const JSCallbackInfo& info, const JSRef<JSObject>& re
     CHECK_NULL_VOID(changeEventVal->IsFunction());
 
     auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(changeEventVal));
-    auto changeEvent = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](const std::string& param) {
+    WeakPtr<NG::FrameNode> targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto changeEvent = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = targetNode](
+                           const std::string& param) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         if (param != "true" && param != "false") {
-            LOGE("param is not equal true or false, invalid.");
             return;
         }
         bool newValue = StringToBool(param);
         ACE_SCORING_EVENT("Refresh.ChangeEvent");
+        PipelineContext::SetCallBackNode(node);
         auto newJSVal = JSRef<JSVal>::Make(ToJSValue(newValue));
         func->ExecuteJS(1, &newJSVal);
     };
@@ -93,12 +95,10 @@ void JSRefresh::JSBind(BindingTarget globalObj)
 void JSRefresh::Create(const JSCallbackInfo& info)
 {
     if (info.Length() < 1 || !info[0]->IsObject()) {
-        LOGE("refresh create error, info is non-valid");
         return;
     }
     RefPtr<RefreshTheme> theme = GetTheme<RefreshTheme>();
     if (!theme) {
-        LOGE("Refresh Theme is null");
         return;
     }
     auto paramObject = JSRef<JSObject>::Cast(info[0]);
@@ -139,7 +139,6 @@ void JSRefresh::Create(const JSCallbackInfo& info)
 void JSRefresh::ParseCustomBuilder(const JSCallbackInfo& info)
 {
     if (info.Length() < 1 || !info[0]->IsObject()) {
-        LOGE("Invalid params");
         return;
     }
     auto paramObject = JSRef<JSObject>::Cast(info[0]);
@@ -164,13 +163,15 @@ void JSRefresh::Pop()
 void JSRefresh::OnStateChange(const JSCallbackInfo& args)
 {
     if (args.Length() < 1 || !args[0]->IsFunction()) {
-        LOGI("refresh onStateChange error, param is non-valid");
         return;
     }
     auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(args[0]));
-    auto onStateChange = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc)](const int32_t& value) {
+    WeakPtr<NG::FrameNode> targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto onStateChange = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), node = targetNode](
+                             const int32_t& value) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("Refresh.OnStateChange");
+        PipelineContext::SetCallBackNode(node);
         auto newJSVal = JSRef<JSVal>::Make(ToJSValue(value));
         func->ExecuteJS(1, &newJSVal);
     };
@@ -180,13 +181,14 @@ void JSRefresh::OnStateChange(const JSCallbackInfo& args)
 void JSRefresh::OnRefreshing(const JSCallbackInfo& args)
 {
     if (args.Length() < 1 || !args[0]->IsFunction()) {
-        LOGI("refresh onRefreshing error, param is non-valid");
         return;
     }
     auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(args[0]));
-    auto onRefreshing = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc)]() {
+    WeakPtr<NG::FrameNode> targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto onRefreshing = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), node = targetNode]() {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("Refresh.OnRefreshing");
+        PipelineContext::SetCallBackNode(node);
         auto newJSVal = JSRef<JSVal>::Make();
         func->ExecuteJS(1, &newJSVal);
     };

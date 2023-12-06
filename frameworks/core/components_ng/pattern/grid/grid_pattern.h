@@ -16,19 +16,11 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_GRID_GRID_PATTERN_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_GRID_GRID_PATTERN_H
 
-#include <memory>
-
-#include "base/geometry/axis.h"
-#include "base/memory/referenced.h"
-#include "core/components/scroll/scroll_controller_base.h"
 #include "core/components_ng/pattern/grid/grid_accessibility_property.h"
 #include "core/components_ng/pattern/grid/grid_event_hub.h"
 #include "core/components_ng/pattern/grid/grid_layout_info.h"
 #include "core/components_ng/pattern/grid/grid_layout_property.h"
 #include "core/components_ng/pattern/grid/grid_paint_method.h"
-#include "core/components_ng/pattern/grid/grid_position_controller.h"
-#include "core/components_ng/pattern/pattern.h"
-#include "core/components_ng/pattern/scroll_bar/proxy/scroll_bar_proxy.h"
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
 
 namespace OHOS::Ace::NG {
@@ -56,8 +48,6 @@ public:
 
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override;
 
-    RefPtr<PaintProperty> CreatePaintProperty() override;
-
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override;
 
     RefPtr<AccessibilityProperty> CreateAccessibilityProperty() override
@@ -69,6 +59,8 @@ public:
     {
         return isConfigScrollable_;
     }
+
+    DisplayMode GetDefaultScrollBarDisplayMode() const override;
 
     void SetMultiSelectable(bool multiSelectable)
     {
@@ -165,8 +157,6 @@ public:
 
     bool OutBoundaryCallback() override;
 
-    void SetPositionController(const RefPtr<ScrollableController>& controller);
-
     void ScrollPage(bool reverse);
 
     bool UpdateStartIndex(int32_t index);
@@ -187,7 +177,12 @@ public:
 
     void ScrollBy(float offset);
 
-    bool OnScrollCallback(float offset, int32_t source) override;
+    ScrollAlign GetDefaultScrollAlign() const override
+    {
+        return ScrollAlign::AUTO;
+    }
+
+    void ScrollToIndex(int32_t index, bool smooth = false, ScrollAlign align = ScrollAlign::START) override;
 
     int32_t GetOriginalIndex() const;
     int32_t GetCrossCount() const;
@@ -197,13 +192,20 @@ public:
     float EstimateHeight() const;
     float GetAverageHeight() const;
 
-    void DumpInfo() override;
+    void DumpAdvanceInfo() override;
 
     std::string ProvideRestoreInfo() override;
     void OnRestoreInfo(const std::string& restoreInfo) override;
+    Rect GetItemRect(int32_t index) const override;
+
+    bool IsNeedInitClickEventRecorder() const override
+    {
+        return true;
+    }
 
 private:
-    float GetMainGap();
+    float GetEndOffset();
+    float GetMainGap() const;
     float GetAllDelta();
     void CheckRestartSpring();
     void CheckScrollable();
@@ -211,7 +213,6 @@ private:
     void SetEdgeEffectCallback(const RefPtr<ScrollEdgeEffect>& scrollEffect) override;
     SizeF GetContentSize() const;
     void OnModifyDone() override;
-    float GetMainContentSize() const;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
     WeakPtr<FocusHub> GetNextFocusNode(FocusStep step, const WeakPtr<FocusHub>& currentFocusNode);
     std::pair<int32_t, int32_t> GetNextIndexByStep(
@@ -230,7 +231,7 @@ private:
     bool HandleDirectionKey(KeyCode code);
 
     void ClearMultiSelect() override;
-    bool IsItemSelected(const MouseInfo& info) override;
+    bool IsItemSelected(const GestureEvent& info) override;
     void MultiSelectWithoutKeyboard(const RectF& selectedZone) override;
     void UpdateScrollBarOffset() override;
     void UpdateRectOfDraggedInItem(int32_t insertIndex);
@@ -240,8 +241,8 @@ private:
     void ProcessEvent(bool indexChanged, float finalOffset);
     void MarkDirtyNodeSelf();
     void OnScrollEndCallback() override;
-    void OnScrollStartCallback() override;
-    void FireOnScrollStart();
+
+    void FireOnScrollStart() override;
     void InitScrollableEvent();
 
     int32_t CalcIntersectAreaInTargetDirectionShadow(GridItemIndexInfo itemIndexInfo, bool isFindInMainAxis);
@@ -249,10 +250,7 @@ private:
     double GetNearestDistanceFromChildToCurFocusItemInCrossAxis(int32_t targetIndex, GridItemIndexInfo itemIndexInfo);
     void ResetAllDirectionsStep();
 
-    RefPtr<GridPositionController> positionController_;
     float animatorOffset_ = 0.0f;
-    bool scrollStop_ = false;
-    bool initialIndex_ = false;
     float prevHeight_ = 0;
     float currentHeight_ = 0;
 
@@ -261,7 +259,6 @@ private:
 
     bool scrollable_ = true;
 
-    bool firstShow_ = true;
     float endHeight_ = 0.0f;
 
     std::pair<std::optional<float>, std::optional<float>> scrollbarInfo_;

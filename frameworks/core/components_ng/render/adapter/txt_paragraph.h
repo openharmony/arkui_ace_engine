@@ -43,7 +43,7 @@ public:
         : paraStyle_(paraStyle), fontCollection_(std::move(fontCollection))
     {}
 #endif
-    ~TxtParagraph() override = default;
+    ~TxtParagraph() override;
 
     // whether the paragraph has been build
     bool IsValid() override;
@@ -67,26 +67,36 @@ public:
     float GetLongestLine() override;
     float GetMaxWidth() override;
     float GetAlphabeticBaseline() override;
+    float GetCharacterWidth(int32_t index) override;
 
     // interfaces for painting
     void Paint(RSCanvas& canvas, float x, float y) override;
+#ifndef USE_ROSEN_DRAWING
     void Paint(SkCanvas* skCanvas, float x, float y) override;
+#endif
 
     // interfaces for calculate the the specified paragraph position
-    int32_t GetHandlePositionForClick(const Offset& offset) override;
-    void GetRectsForRange(int32_t start, int32_t end, std::vector<Rect>& selectedRects) override;
-    void GetRectsForPlaceholders(std::vector<Rect>& selectedRects) override;
-    bool ComputeOffsetForCaretDownstream(int32_t extent, CaretMetrics& result) override;
-    bool ComputeOffsetForCaretUpstream(int32_t extent, CaretMetrics& result) override;
+    int32_t GetGlyphIndexByCoordinate(const Offset& offset) override;
+    void GetRectsForRange(int32_t start, int32_t end, std::vector<RectF>& selectedRects) override;
+    void GetRectsForPlaceholders(std::vector<RectF>& selectedRects) override;
+    bool ComputeOffsetForCaretDownstream(int32_t extent, CaretMetricsF& result) override;
+    bool ComputeOffsetForCaretUpstream(int32_t extent, CaretMetricsF& result) override;
+    bool CalcCaretMetricsByPosition(
+        int32_t extent, CaretMetricsF& caretCaretMetric, TextAffinity textAffinity) override;
+    bool CalcCaretMetricsByPosition(
+        int32_t extent, CaretMetricsF& caretCaretMetric, const OffsetF& lastTouchOffset) override;
     void SetIndents(const std::vector<float>& indents) override;
     bool GetWordBoundary(int32_t offset, int32_t& start, int32_t& end) override;
+    std::u16string GetParagraphText() override;
+    const ParagraphStyle& GetParagraphStyle() const override;
 
 private:
     void CreateBuilder();
     inline size_t GetParagraphLength() const
     {
-        return text_.length() + placeHolderIndex_ + 1;
+        return text_.length() + placeholderIndex_ + 1;
     }
+    float MakeEmptyOffsetX();
 
     ParagraphStyle paraStyle_;
 #ifndef USE_GRAPHIC_TEXT_GINE
@@ -99,7 +109,9 @@ private:
     std::shared_ptr<RSFontCollection> fontCollection_;
 #endif
     std::u16string text_;
-    int32_t placeHolderIndex_ = -1;
+    int32_t placeholderIndex_ = -1;
+    TextAlign textAlign_;
+    static uint32_t destructCount;
 
     ACE_DISALLOW_COPY_AND_MOVE(TxtParagraph);
 };

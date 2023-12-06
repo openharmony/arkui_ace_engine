@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -58,14 +58,6 @@ void GridLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
     json->Put("maxCount", propMaxCount_.value_or(Infinity<int32_t>()));
     json->Put("minCount", propMinCount_.value_or(1));
     json->Put("cellLength", propCellLength_.value_or(0));
-    auto edgeEffect = propEdgeEffect_.value_or(EdgeEffect::NONE);
-    if (edgeEffect == EdgeEffect::SPRING) {
-        json->Put("edgeEffect", "EdgeEffect.Spring");
-    } else if (edgeEffect == EdgeEffect::FADE) {
-        json->Put("edgeEffect", "EdgeEffect.Fade");
-    } else {
-        json->Put("edgeEffect", "EdgeEffect.None");
-    }
     json->Put("enableScrollInteraction", propScrollEnabled_.value_or(true));
 }
 
@@ -82,7 +74,7 @@ std::string GridLayoutProperty::GetGridDirectionStr() const
         case FlexDirection::COLUMN_REVERSE:
             return "GridDirection.ColumnReverse";
         default:
-            LOGE("grid direction %{public}d is not valid", gridDirection);
+            TAG_LOGW(AceLogTag::ACE_GRID, "grid direction %{public}d is not valid", gridDirection);
             break;
     }
     return "GridDirection.Row";

@@ -31,6 +31,7 @@
 namespace OHOS::Ace {
 
 class WebDelegate;
+using ScriptItems = std::map<std::string, std::vector<std::string>>;
 using OnMouseCallback = std::function<void(MouseInfo& info)>;
 using OnKeyEventCallback = std::function<void(KeyEventInfo& keyEventInfo)>;
 
@@ -47,10 +48,20 @@ enum WebCacheMode {
     USE_CACHE_ONLY
 };
 
+enum OverScrollMode {
+    NEVER = 0,
+    ALWAYS,
+};
+
 enum class WebDarkMode {
     Off,
     On,
     Auto,
+};
+
+enum class WebLayoutMode {
+    NONE,
+    FIT_CONTENT,
 };
 
 constexpr int32_t DEFAULT_TEXT_ZOOM_RATIO = 100;
@@ -233,7 +244,6 @@ public:
 
     void Backward()
     {
-        LOGI("Start backward.");
         if (backwardImpl_) {
             backwardImpl_();
         }
@@ -241,7 +251,6 @@ public:
 
     void Forward()
     {
-        LOGI("Start forward.");
         if (forwardimpl_) {
             forwardimpl_();
         }
@@ -249,7 +258,6 @@ public:
 
     void ClearHistory()
     {
-        LOGI("Start clear navigation history");
         if (clearHistoryImpl_) {
             clearHistoryImpl_();
         }
@@ -257,7 +265,6 @@ public:
 
     void ClearSslCache()
     {
-        LOGI("Start clear ssl cache");
         if (clearSslCacheImpl_) {
             clearSslCacheImpl_();
         }

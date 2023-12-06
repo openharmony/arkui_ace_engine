@@ -17,13 +17,11 @@
 
 #include "base/geometry/matrix3.h"
 #include "base/geometry/matrix4.h"
-#include "base/log/log.h"
 
 namespace OHOS::Ace {
 bool LeastSquareImpl::GetLeastSquareParams(std::vector<double>& params)
 {
     if (xVals_.size() <= 1 || ((paramsNum_ != Matrix3::DIMENSION) && (paramsNum_ != Matrix4::DIMENSION))) {
-        LOGE("size is invalid, %{public}d, %{public}d", static_cast<int32_t>(xVals_.size()), paramsNum_);
         return false;
     }
     params.resize(paramsNum_, 0);
@@ -63,7 +61,6 @@ bool LeastSquareImpl::GetLeastSquareParams(std::vector<double>& params)
         Matrix3 invert;
         auto transpose = matrixn3.Transpose();
         if (!(transpose * matrixn3).Invert(invert)) {
-            LOGE("fail to invert");
             return false;
         }
         auto matrix3n = invert * transpose;

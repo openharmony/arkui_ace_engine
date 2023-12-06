@@ -64,6 +64,7 @@ public:
         return MakeRefPtr<MenuItemLayoutAlgorithm>();
     }
 
+    void MarkIsSelected(bool isSelected);
     void SetSelected(bool isSelected)
     {
         isSelected_ = isSelected;
@@ -171,6 +172,7 @@ public:
 protected:
     void RegisterOnKeyEvent();
     void RegisterOnTouch();
+    void OnAfterModifyDone() override;
 
 private:
     // register menu item's callback
@@ -198,6 +200,8 @@ private:
     void AddSelfHoverRegion(const RefPtr<FrameNode>& targetNode);
     void SetAccessibilityAction();
     bool IsSelectOverlayMenu();
+
+    void RecordChangeEvent() const;
 
     std::list<TouchRegion> hoverRegions_;
 

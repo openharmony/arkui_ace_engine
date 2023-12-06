@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,11 +22,15 @@
 
 #include "base/geometry/dimension.h"
 #include "base/json/json_util.h"
+#include "base/log/log.h"
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
+#include "base/subwindow/subwindow_manager.h"
 #include "base/utils/utils.h"
 #include "bridge/common/dom/dom_type.h"
+#include "core/common/ace_engine.h"
 #include "core/common/container.h"
+#include "core/common/recorder/event_recorder.h"
 #include "core/components/button/button_theme.h"
 #include "core/components/common/properties/alignment.h"
 #include "core/components/theme/icon_theme.h"
@@ -45,9 +49,6 @@
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_property.h"
-#include "core/components_ng/pattern/list/list_item_pattern.h"
-#include "core/components_ng/pattern/list/list_layout_property.h"
-#include "core/components_ng/pattern/list/list_paint_property.h"
 #include "core/components_ng/pattern/list/list_pattern.h"
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
 #include "core/components_ng/pattern/relative_container/relative_container_pattern.h"
@@ -85,7 +86,6 @@ constexpr Dimension DIALOG_SUBTITLE_PADDING_LEFT = 24.0_vp;
 constexpr Dimension DIALOG_SUBTITLE_PADDING_RIGHT = 24.0_vp;
 constexpr Dimension DIALOG_TWO_TITLE_ZERO_SPACE = 0.0_vp;
 constexpr Dimension DIALOG_TWO_TITLE_SPACE = 16.0_vp;
-constexpr float BUTTON_TEXT_OPACITY = 0.6f; // [Button Component Defect]
 } // namespace
 
 void DialogPattern::OnModifyDone()
@@ -135,13 +135,20 @@ void DialogPattern::HandleClick(const GestureEvent& info)
         if (!contentRect.IsInRegion(
                 PointF(clickPosition.GetX() - globalOffset.GetX(), clickPosition.GetY() - globalOffset.GetY()))) {
             PopDialog(-1);
+            auto pipeline = PipelineContext::GetCurrentContext();
+            CHECK_NULL_VOID(pipeline);
+            auto overlayManager = pipeline->GetOverlayManager();
+            CHECK_NULL_VOID(overlayManager);
+            if (GetHost()->GetId() == overlayManager->GetMaskNodeId()) {
+                overlayManager->PopModalDialog();
+            }
         }
     }
 }
 
 void DialogPattern::PopDialog(int32_t buttonIdx = -1)
 {
-    LOGI("DialogPattern::PopDialog from click");
+    TAG_LOGD(AceLogTag::ACE_DIALOG, "DialogPattern::PopDialog from click");
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto overlayManager = pipeline->GetOverlayManager();
@@ -149,19 +156,54 @@ void DialogPattern::PopDialog(int32_t buttonIdx = -1)
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     if (host->IsRemoving()) {
-        LOGI("Dialog already in close animation, no need to fire event again.");
         return;
     }
 
     auto hub = host->GetEventHub<DialogEventHub>();
     if (buttonIdx != -1) {
         hub->FireSuccessEvent(buttonIdx);
+        RecordEvent(buttonIdx);
     } else {
         // trigger onCancel callback
         hub->FireCancelEvent();
+        RecordEvent(buttonIdx);
     }
-
+    if (dialogProperties_.isShowInSubWindow) {
+        SubwindowManager::GetInstance()->DeleteHotAreas(overlayManager->GetSubwindowId(), host->GetId());
+        SubwindowManager::GetInstance()->HideDialogSubWindow(overlayManager->GetSubwindowId());
+    }
     overlayManager->CloseDialog(host);
+    if (dialogProperties_.isShowInSubWindow && dialogProperties_.isModal) {
+        auto parentPipelineContext = PipelineContext::GetMainPipelineContext();
+        CHECK_NULL_VOID(parentPipelineContext);
+        auto parentOverlayManager = parentPipelineContext->GetOverlayManager();
+        CHECK_NULL_VOID(parentOverlayManager);
+        auto maskNode = parentOverlayManager->GetDialog(parentOverlayManager->GetMaskNodeId());
+        CHECK_NULL_VOID(maskNode);
+        parentOverlayManager->CloseDialog(maskNode);
+    }
+}
+
+void DialogPattern::RecordEvent(int32_t btnIndex) const
+{
+    std::string btnText;
+    if (btnIndex >= 0 && (size_t) btnIndex < dialogProperties_.buttons.size()) {
+        btnText = dialogProperties_.buttons.at(btnIndex).text;
+    }
+    Recorder::EventType eventType;
+    if (btnIndex == -1) {
+        eventType = Recorder::EventType::DIALOG_CANCEL;
+    } else {
+        eventType = Recorder::EventType::DIALOG_ACTION;
+    }
+    if (Recorder::EventRecorder::Get().IsComponentRecordEnable()) {
+        Recorder::EventParamsBuilder builder;
+        builder.SetEventType(eventType)
+            .SetText(btnText)
+            .SetExtra(Recorder::KEY_TITLE, title_)
+            .SetExtra(Recorder::KEY_SUB_TITLE, subtitle_);
+        Recorder::EventRecorder::Get().OnEvent(std::move(builder));
+    }
 }
 
 // set render context properties of content frame
@@ -201,7 +243,6 @@ RefPtr<FrameNode> DialogPattern::CreateDialogScroll(const DialogProperties& dial
 
 void DialogPattern::BuildChild(const DialogProperties& props)
 {
-    LOGI("build dialog child");
     // append customNode
     auto customNode = customNode_.Upgrade();
     if (customNode) {
@@ -401,7 +442,6 @@ RefPtr<FrameNode> DialogPattern::BuildContent(const DialogProperties& props)
     auto contentStyle = dialogTheme_->GetContentTextStyle();
     contentProp->UpdateFontSize(contentStyle.GetFontSize());
     contentProp->UpdateTextColor(contentStyle.GetTextColor());
-    LOGD("content = %s", props.content.c_str());
     // update padding
     Edge contentPaddingInTheme;
     PaddingProperty contentPadding;
@@ -499,7 +539,6 @@ RefPtr<FrameNode> DialogPattern::CreateButton(
     // append text inside button
     auto textNode = CreateButtonText(params.text, textColor);
     CHECK_NULL_RETURN(textNode, nullptr);
-    SetButtonTextOpacity(textNode, params.enabled);
     textNode->MountToParent(buttonNode);
     textNode->MarkModifyDone();
 
@@ -522,7 +561,7 @@ RefPtr<FrameNode> DialogPattern::CreateButton(
     // add scale animation
     auto inputHub = buttonNode->GetOrCreateInputEventHub();
     CHECK_NULL_RETURN(inputHub, nullptr);
-    inputHub->SetHoverEffect(HoverEffectType::NONE);
+    inputHub->SetHoverEffect(HoverEffectType::AUTO);
 
     // update background color
     auto renderContext = buttonNode->GetRenderContext();
@@ -631,7 +670,7 @@ RefPtr<FrameNode> DialogPattern::BuildButtons(
 
     AddButtonAndDivider(buttons, container, isVertical);
     container->MarkModifyDone();
-
+    buttonContainer_ = container;
     return container;
 }
 
@@ -669,6 +708,7 @@ RefPtr<FrameNode> DialogPattern::CreateButtonText(const std::string& text, const
     auto textProps = textNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_RETURN(textProps, nullptr);
     textProps->UpdateContent(text);
+    textProps->UpdateFontWeight(FontWeight::MEDIUM);
     textProps->UpdateMaxLines(1);
     textProps->UpdateTextOverflow(TextOverflow::ELLIPSIS);
     Dimension buttonTextSize =
@@ -718,6 +758,21 @@ RefPtr<FrameNode> DialogPattern::BuildSheetItem(const ActionSheetInfo& item)
     auto hub = itemRow->GetOrCreateGestureEventHub();
     if (item.action) {
         hub->AddClickEvent(item.action);
+        auto recordEvent = [weak = WeakClaim(this), title = item.title](GestureEvent& info) {
+            if (!Recorder::EventRecorder::Get().IsComponentRecordEnable()) {
+                return;
+            }
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            Recorder::EventParamsBuilder builder;
+            builder.SetEventType(Recorder::EventType::DIALOG_SELECT)
+                .SetText(title)
+                .SetExtra(Recorder::KEY_TITLE, pattern->title_)
+                .SetExtra(Recorder::KEY_SUB_TITLE, pattern->subtitle_);
+            Recorder::EventRecorder::Get().OnEvent(std::move(builder));
+        };
+        auto recordEventPtr = MakeRefPtr<ClickEvent>(std::move(recordEvent));
+        hub->AddClickEvent(recordEventPtr);
     }
 
     // close dialog when clicked
@@ -758,7 +813,6 @@ RefPtr<FrameNode> DialogPattern::BuildSheetInfoIcon(const std::string& icon)
     };
     auto iconProps = iconNode->GetLayoutProperty<ImageLayoutProperty>();
     iconProps->UpdateMargin(margin);
-    LOGD("item icon src = %s", icon.c_str());
     auto imageSrc = ImageSourceInfo(icon);
     iconProps->UpdateImageSourceInfo(imageSrc);
     iconProps->UpdateUserDefinedIdealSize(CalcSize(SHEET_IMAGE_SIZE, SHEET_IMAGE_SIZE));
@@ -767,7 +821,6 @@ RefPtr<FrameNode> DialogPattern::BuildSheetInfoIcon(const std::string& icon)
 
 RefPtr<FrameNode> DialogPattern::BuildSheet(const std::vector<ActionSheetInfo>& sheets)
 {
-    LOGI("start building action sheet items");
     auto listId = ElementRegister::GetInstance()->MakeUniqueId();
     auto list = FrameNode::CreateFrameNode(V2::LIST_ETS_TAG, listId, AceType::MakeRefPtr<ListPattern>());
     CHECK_NULL_RETURN(list, nullptr);
@@ -781,7 +834,7 @@ RefPtr<FrameNode> DialogPattern::BuildSheet(const std::vector<ActionSheetInfo>& 
         .bottom = padding,
     };
     list->GetLayoutProperty()->UpdatePadding(sheetPadding);
-    list->GetPaintProperty<ListPaintProperty>()->UpdateBarDisplayMode(DisplayMode::OFF);
+    list->GetPaintProperty<ScrollablePaintProperty>()->UpdateScrollBarMode(DisplayMode::OFF);
 
     for (auto&& item : sheets) {
         auto itemNode = BuildSheetItem(item);
@@ -874,11 +927,11 @@ void DialogPattern::OnColorConfigurationUpdate()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    auto context = host->GetContext();
+    CHECK_NULL_VOID(context);
+    auto dialogTheme = context->GetTheme<DialogTheme>();
+    CHECK_NULL_VOID(dialogTheme);
     if (!GetDialogProperties().customStyle) {
-        auto context = host->GetContext();
-        CHECK_NULL_VOID(context);
-        auto dialogTheme = context->GetTheme<DialogTheme>();
-        CHECK_NULL_VOID(dialogTheme);
         auto col = DynamicCast<FrameNode>(host->GetChildAtIndex(START_CHILD_INDEX));
         CHECK_NULL_VOID(col);
         auto colContext = col->GetContext();
@@ -887,9 +940,8 @@ void DialogPattern::OnColorConfigurationUpdate()
         CHECK_NULL_VOID(colRenderContext);
         colRenderContext->UpdateBackgroundColor(dialogTheme->GetBackgroundColor());
     }
-    auto menuNode = menuNode_.Upgrade();
-    CHECK_NULL_VOID(menuNode);
-    for (const auto& buttonNode : menuNode->GetChildren()) {
+    CHECK_NULL_VOID(buttonContainer_);
+    for (const auto& buttonNode : buttonContainer_->GetChildren()) {
         if (buttonNode->GetTag() != V2::BUTTON_ETS_TAG) {
             continue;
         }
@@ -898,19 +950,16 @@ void DialogPattern::OnColorConfigurationUpdate()
         auto pattern = buttonFrameNode->GetPattern<ButtonPattern>();
         CHECK_NULL_VOID(pattern);
         pattern->SetSkipColorConfigurationUpdate();
+        auto buttonTextNode = DynamicCast<FrameNode>(buttonFrameNode->GetFirstChild());
+        CHECK_NULL_VOID(buttonTextNode);
+        auto buttonTextLayoutProperty = buttonTextNode->GetLayoutProperty<TextLayoutProperty>();
+        CHECK_NULL_VOID(buttonTextLayoutProperty);
+        buttonTextLayoutProperty->UpdateTextColor(dialogTheme->GetButtonDefaultFontColor());
+        buttonTextNode->MarkModifyDone();
+        buttonTextNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     }
     OnModifyDone();
     host->MarkDirtyNode();
-}
-
-void DialogPattern::SetButtonTextOpacity(const RefPtr<FrameNode>& textNode, bool enabled)
-{
-    auto textNodeRenderContext = textNode->GetRenderContext();
-    CHECK_NULL_VOID(textNodeRenderContext);
-    // [Button Component Defect] Button text color is no set while disabled status.
-    if (!enabled) {
-        textNodeRenderContext->UpdateOpacity(BUTTON_TEXT_OPACITY);
-    }
 }
 
 void DialogPattern::SetButtonEnabled(const RefPtr<FrameNode>& buttonNode, bool enabled)

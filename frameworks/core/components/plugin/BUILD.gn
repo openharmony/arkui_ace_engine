@@ -18,8 +18,8 @@ import(
 build_component("plugin") {
   sources = [
     "file_asset_provider.cpp",
-    "flutter_render_plugin.cpp",
     "hap_asset_provider.cpp",
+    "hap_asset_provider_impl.cpp",
     "plugin_component.cpp",
     "plugin_component_manager.cpp",
     "plugin_element.cpp",
@@ -30,9 +30,7 @@ build_component("plugin") {
     "resource/plugin_manager_delegate.cpp",
     "resource/plugin_manager_resource.cpp",
   ]
-  if (ace_use_new_skia) {
-    sources -= [ "flutter_render_plugin.cpp" ]
-  }
+
   rosen_sources = [ "rosen_render_plugin.cpp" ]
 
   if (is_ohos_standard_system && !use_mingw_win && !use_mac && !use_linux) {
@@ -46,9 +44,7 @@ build_component("plugin") {
     external_deps = [
       "ability_base:extractortool",
       "ability_base:want",
-      "ability_runtime:ability_manager",
       "ability_runtime:abilitykit_native",
-      "bundle_framework:appexecfwk_base",
       "bundle_framework:appexecfwk_core",
       "input:libmmi-client",
       "ipc:ipc_core",

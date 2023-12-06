@@ -33,6 +33,7 @@ protected:
     static void SetFontStyle(int32_t value);
     static void SetFontFamily(const JSCallbackInfo& info);
     static void SetFontDefault();
+    static void SetTextShadow(const JSCallbackInfo& info);
     static void OnTimer(const JSCallbackInfo& info);
 };
 

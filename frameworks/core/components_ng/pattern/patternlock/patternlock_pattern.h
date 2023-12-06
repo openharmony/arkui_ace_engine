@@ -66,6 +66,7 @@ public:
         if (!patternLockModifier_) {
             patternLockModifier_ = AceType::MakeRefPtr<PatternLockModifier>();
         }
+        CalculateCellCenter();
         auto paintMethod =
             MakeRefPtr<PatternLockPaintMethod>(cellCenter_, isMoveEventValid_, choosePoint_, patternLockModifier_);
         return paintMethod;
@@ -112,14 +113,16 @@ private:
     void InitTouchEvent(RefPtr<GestureEventHub>& gestureHub, RefPtr<TouchEventImpl>& touchDownListener);
     void InitPatternLockController();
     void HandleTouchEvent(const TouchEventInfo& info);
-    void OnTouchDown(const TouchEventInfo& info);
+    void OnTouchDown(const TouchLocationInfo& info);
+    void OnTouchMove(const TouchLocationInfo& info);
     void AddPointEnd();
     void OnTouchUp();
-    void InitPanEvent(const RefPtr<GestureEventHub>& gestureHub);
     void HandleGestureUpdate(const GestureEvent& info);
 
     bool CheckChoosePoint(int32_t x, int32_t y) const;
     bool CheckInHotSpot(const OffsetF& offset, int32_t x, int32_t y);
+    void UpdateDotConnectEvent();
+    void AddPassPointToChoosePoint(int32_t lastCode, int32_t nowCode, std::vector<PatternLockCell> passPointVec);
     bool AddChoosePoint(const OffsetF& offset, int32_t x, int32_t y);
     void AddPassPoint(int32_t x, int32_t y);
     void HandleReset();
@@ -143,17 +146,22 @@ private:
     void StartModifierConnectedAnimate(int32_t x, int32_t y);
     void StartModifierAddPassPointAnimate(int32_t x, int32_t y);
     void StartModifierCanceledAnimate();
+    OffsetF GetLastChoosePointOffset();
+    void CalculateCellCenter();
 
     RefPtr<V2::PatternLockController> patternLockController_;
     RefPtr<TouchEventImpl> touchDownListener_;
     RefPtr<TouchEventImpl> touchUpListener_;
     RefPtr<TouchEventImpl> touchMoveListener_;
     RefPtr<PanEvent> panEvent_;
+    OffsetF globalTouchPoint_;
 
     bool isMoveEventValid_ = false;
+    bool isOnKeyEventState_ = false;
     std::vector<PatternLockCell> choosePoint_;
     int32_t passPointCount_ = 0;
     OffsetF cellCenter_;
+    int32_t fingerId_ = -1;
 
     mutable bool autoReset_ = true;
     Dimension circleRadius_;

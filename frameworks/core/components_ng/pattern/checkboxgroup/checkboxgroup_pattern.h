@@ -119,6 +119,16 @@ public:
         isUserSetResponseRegion_ = isUserSetResponseRegion;
     }
 
+    void SetUpdateFlag(bool updateFlag)
+    {
+        updateFlag_ = updateFlag;
+    }
+
+    void SetSkipFlag(bool skipFlag)
+    {
+        skipFlag_ = skipFlag;
+    }
+
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
     {
         Pattern::ToJsonValue(json);
@@ -138,11 +148,13 @@ public:
     void UpdateUIStatus(bool check);
     void UpdateModifierParam(CheckBoxGroupModifier::Parameters& paintParameters);
     void OnColorConfigurationUpdate() override;
+    void MarkIsSelected(bool isSelected);
 
 private:
     void OnAttachToFrameNode() override;
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
     void OnModifyDone() override;
+    void OnAfterModifyDone() override;
     void InitClickEvent();
     void InitTouchEvent();
     void InitMouseEvent();
@@ -163,6 +175,8 @@ private:
     void AddHotZoneRect();
     void RemoveLastHotZoneRect() const;
     void InitializeModifierParam(CheckBoxGroupModifier::Parameters& paintParameters);
+    void SetAccessibilityAction();
+    void UpdateSelectStatus(bool isSelected);
 
     std::optional<std::string> preGroup_;
     bool isAddToMap_ = true;
@@ -172,7 +186,8 @@ private:
     RefPtr<CheckBoxGroupModifier> checkBoxGroupModifier_;
     bool isHover_ = false;
     TouchHoverAnimationType touchHoverType_ = TouchHoverAnimationType::NONE;
-    bool isClick_ = false;
+    bool updateFlag_ = false;
+    bool skipFlag_ = false;
     bool isFirstCreated_ = true;
     bool isUserSetResponseRegion_ = false;
     UIStatus uiStatus_ = UIStatus::UNSELECTED;
@@ -182,6 +197,7 @@ private:
     SizeF size_;
     OffsetF hotZoneOffset_;
     SizeF hotZoneSize_;
+    bool initSelected_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(CheckBoxGroupPattern);
 };

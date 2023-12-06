@@ -20,12 +20,18 @@
 
 #include "base/geometry/offset.h"
 #include "base/memory/ace_type.h"
+#include "base/utils/time_util.h"
+#include "core/components_ng/event/target_component.h"
 #include "core/event/ace_events.h"
 #include "core/event/axis_event.h"
 
 namespace OHOS::MMI {
 class PointerEvent;
 } // namespace OHOS::MMI
+
+namespace OHOS::Ace::NG {
+class FrameNode;
+} // namespace OHOS::Ace::NG
 
 namespace OHOS::Ace {
 
@@ -83,6 +89,7 @@ struct TouchEvent final {
     int32_t targetDisplayId = 0;
     SourceType sourceType = SourceType::NONE;
     SourceTool sourceTool = SourceTool::UNKNOWN;
+    bool isInterpolated = false;
 
     // all points on the touch screen.
     std::vector<TouchPoint> pointers;
@@ -164,7 +171,7 @@ struct TouchEvent final {
     {
         if (NearZero(scale)) {
             return { id, x, y, screenX, screenY, type, pullType, time, size, force, tiltX, tiltY, deviceId,
-                targetDisplayId, sourceType, sourceTool, pointers, pointerEvent, enhanceData };
+                targetDisplayId, sourceType, sourceTool, isInterpolated, pointers, pointerEvent, enhanceData };
         }
         auto temp = pointers;
         std::for_each(temp.begin(), temp.end(), [scale](auto&& point) {
@@ -174,7 +181,7 @@ struct TouchEvent final {
             point.screenY = point.screenY / scale;
         });
         return { id, x / scale, y / scale, screenX / scale, screenY / scale, type, pullType, time, size, force, tiltX,
-            tiltY, deviceId, targetDisplayId, sourceType, sourceTool, temp, pointerEvent, enhanceData };
+            tiltY, deviceId, targetDisplayId, sourceType, sourceTool, isInterpolated, temp, pointerEvent, enhanceData };
     }
 
     TouchEvent UpdateScalePoint(float scale, float offsetX, float offsetY, int32_t pointId) const
@@ -188,8 +195,8 @@ struct TouchEvent final {
                 point.screenY = point.screenY - offsetY;
             });
             return { pointId, x - offsetX, y - offsetY, screenX - offsetX, screenY - offsetY, type, pullType, time,
-                size, force, tiltX, tiltY, deviceId, targetDisplayId, sourceType, sourceTool, temp, pointerEvent,
-                enhanceData };
+                size, force, tiltX, tiltY, deviceId, targetDisplayId, sourceType, sourceTool, isInterpolated,
+                temp, pointerEvent, enhanceData };
         }
 
         std::for_each(temp.begin(), temp.end(), [scale, offsetX, offsetY](auto&& point) {
@@ -200,7 +207,7 @@ struct TouchEvent final {
         });
         return { pointId, (x - offsetX) / scale, (y - offsetY) / scale, (screenX - offsetX) / scale,
             (screenY - offsetY) / scale, type, pullType, time, size, force, tiltX, tiltY, deviceId, targetDisplayId,
-            sourceType, sourceTool, temp, pointerEvent, enhanceData };
+            sourceType, sourceTool, isInterpolated, temp, pointerEvent, enhanceData };
     }
 
     TouchEvent UpdatePointers() const
@@ -226,6 +233,7 @@ struct TouchEvent final {
             .deviceId = deviceId,
             .targetDisplayId = targetDisplayId,
             .sourceType = sourceType,
+            .isInterpolated = isInterpolated,
             .pointerEvent = pointerEvent,
             .enhanceData = enhanceData };
         event.pointers.emplace_back(std::move(point));
@@ -427,6 +435,92 @@ private:
 
 using GetEventTargetImpl = std::function<std::optional<EventTarget>()>;
 
+struct StateRecord {
+    std::string procedure;
+    std::string state;
+    std::string disposal;
+    int64_t timestamp = 0;
+
+    StateRecord(const std::string& procedure, const std::string& state, const std::string& disposal,
+        int64_t timestamp):procedure(procedure), state(state), disposal(disposal), timestamp(timestamp)
+    {}
+
+    void Dump(std::list<std::pair<int32_t, std::string>>& dumpList, int32_t depth) const
+    {
+        std::stringstream oss;
+        oss << "procedure: " << procedure;
+        if (!state.empty()) {
+            oss << ", " << "state: " << state << ", "
+                << "disposal: " << disposal;
+        }
+        oss << ", " << "timestamp: " << ConvertTimestampToStr(timestamp);
+        dumpList.emplace_back(std::make_pair(depth, oss.str()));
+    }
+};
+
+struct GestureSnapshot : public virtual AceType {
+    DECLARE_ACE_TYPE(GestureSnapshot, AceType);
+
+public:
+    void AddProcedure(const std::string& procedure, const std::string& state, const std::string& disposal,
+        int64_t timestamp)
+    {
+        if (timestamp == 0) {
+            timestamp = GetCurrentTimestamp();
+        }
+        stateHistory.emplace_back(StateRecord(procedure, state, disposal, timestamp));
+    }
+
+    bool CheckNeedAddMove(const std::string& state, const std::string& disposal)
+    {
+        return stateHistory.empty() ||
+            stateHistory.back().state != state || stateHistory.back().disposal != disposal;
+    }
+
+    void Dump(std::list<std::pair<int32_t, std::string>>& dumpList, int32_t depth) const
+    {
+        std::stringstream oss;
+        oss << "frameNodeId: " << nodeId << ", "
+            << "type: " << type << ", "
+            << "depth: " << this->depth << ", "
+            << std::hex
+            << "id: 0x" << id << ", "
+            << "parentId: 0x" << parentId;
+        if (!customInfo.empty()) {
+            oss << ", " << "customInfo: " << customInfo;
+        }
+        dumpList.emplace_back(std::make_pair(depth + this->depth, oss.str()));
+        dumpList.emplace_back(std::make_pair(depth + 1 + this->depth, "stateHistory:"));
+        for (const auto& state : stateHistory) {
+            state.Dump(dumpList, depth + 1 + 1 + this->depth);
+        }
+    }
+
+    static std::string TransTouchType(TouchType type)
+    {
+        switch (type) {
+            case TouchType::DOWN:
+                return "TouchDown";
+            case TouchType::MOVE:
+                return "TouchMove";
+            case TouchType::UP:
+                return "TouchUp";
+            case TouchType::CANCEL:
+                return "TouchCancel";
+            default:
+                return std::string("Type:").append(std::to_string(static_cast<int32_t>(type)));
+        }
+    }
+
+    int32_t nodeId = -1;
+    std::string type;
+    uint64_t id = 0;
+    uint64_t parentId = 0;
+    int32_t depth = 0;
+    std::string customInfo;
+    std::list<StateRecord> stateHistory;
+};
+
 class ACE_EXPORT TouchEventTarget : public virtual AceType {
     DECLARE_ACE_TYPE(TouchEventTarget, AceType);
 
@@ -445,6 +539,10 @@ public:
     }
     virtual void OnFlushTouchEventsBegin() {}
     virtual void OnFlushTouchEventsEnd() {}
+    virtual Axis GetAxisDirection()
+    {
+        return direction_;
+    }
 
     void SetTouchRestrict(const TouchRestrict& touchRestrict)
     {
@@ -511,10 +609,51 @@ public:
         return nodeName_;
     }
 
+    virtual void AssignNodeId(int id)
+    {
+        if (nodeId_ != -1) {
+            return;
+        }
+        nodeId_ = id;
+    }
+
     int32_t GetNodeId() const
     {
         return nodeId_;
     }
+
+    virtual void AttachFrameNode(const WeakPtr<NG::FrameNode>& node)
+    {
+        if (!(node_.Invalid())) {
+            return;
+        }
+        node_ = node;
+    }
+
+    WeakPtr<NG::FrameNode> GetAttachedNode() const
+    {
+        return node_;
+    }
+
+    virtual RefPtr<GestureSnapshot> Dump() const
+    {
+        RefPtr<GestureSnapshot> info = AceType::MakeRefPtr<GestureSnapshot>();
+        info->type = GetTypeName();
+        info->id = reinterpret_cast<uintptr_t>(this);
+        return info;
+    }
+
+    void SetTargetComponent(const RefPtr<NG::TargetComponent>& targetComponent)
+    {
+        targetComponent_ = targetComponent;
+    }
+
+    RefPtr<NG::TargetComponent> GetTargetComponent()
+    {
+        return targetComponent_;
+    }
+private:
+    virtual bool ShouldResponse() { return true; };
 
 protected:
     Offset coordinateOffset_;
@@ -524,6 +663,9 @@ protected:
     float viewScale_ = 1.0f;
     std::string nodeName_ = "NULL";
     int32_t nodeId_ = -1;
+    WeakPtr<NG::FrameNode> node_ = nullptr;
+    Axis direction_ = Axis::NONE;
+    RefPtr<NG::TargetComponent> targetComponent_;
 };
 
 using TouchTestResult = std::list<RefPtr<TouchEventTarget>>;

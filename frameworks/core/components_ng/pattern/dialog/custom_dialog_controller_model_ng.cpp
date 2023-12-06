@@ -19,7 +19,6 @@
 #include "base/subwindow/subwindow_manager.h"
 #include "base/thread/task_executor.h"
 #include "core/common/container_scope.h"
-
 namespace OHOS::Ace::NG {
 void CustomDialogControllerModelNG::SetOpenDialog(DialogProperties& dialogProperties,
     std::vector<WeakPtr<AceType>>& dialogs, bool& pending, bool& isShown, std::function<void()>&& cancelTask,
@@ -29,7 +28,7 @@ void CustomDialogControllerModelNG::SetOpenDialog(DialogProperties& dialogProper
     auto container = Container::Current();
     auto currentId = Container::CurrentId();
     CHECK_NULL_VOID(container);
-    if (container->IsSubContainer()) {
+    if (container->IsSubContainer() && !dialogProperties.isShowInSubWindow) {
         currentId = SubwindowManager::GetInstance()->GetParentContainerId(Container::CurrentId());
         container = AceEngine::Get().GetContainer(currentId);
     }
@@ -52,14 +51,23 @@ void CustomDialogControllerModelNG::SetOpenDialog(DialogProperties& dialogProper
     auto task = [currentId, dialogProperties, &dialogs, func = std::move(buildFunc),
                     weakOverlayManager = AceType::WeakClaim(AceType::RawPtr(overlayManager))]() mutable {
         ContainerScope scope(currentId);
-        WeakPtr<NG::FrameNode> dialog;
+        RefPtr<NG::FrameNode> dialog;
+        auto overlayManager = weakOverlayManager.Upgrade();
+        CHECK_NULL_VOID(overlayManager);
         if (dialogProperties.isShowInSubWindow) {
             dialog = SubwindowManager::GetInstance()->ShowDialogNG(dialogProperties, std::move(func));
+            if (dialogProperties.isModal) {
+                DialogProperties Maskarg;
+                Maskarg.isMask = true;
+                Maskarg.autoCancel = dialogProperties.autoCancel;
+                Maskarg.maskColor = dialogProperties.maskColor;
+                auto mask = overlayManager->ShowDialog(Maskarg, nullptr, false);
+                CHECK_NULL_VOID(mask);
+            }
         } else {
-            auto overlayManager = weakOverlayManager.Upgrade();
-            CHECK_NULL_VOID(overlayManager);
             dialog = overlayManager->ShowDialog(dialogProperties, std::move(func), false);
         }
+        CHECK_NULL_VOID(dialog);
         dialogs.emplace_back(dialog);
     };
     executor->PostTask(task, TaskExecutor::TaskType::UI);
@@ -83,10 +91,10 @@ void CustomDialogControllerModelNG::SetCloseDialog(DialogProperties& dialogPrope
     CHECK_NULL_VOID(context);
     auto overlayManager = context->GetOverlayManager();
     CHECK_NULL_VOID(overlayManager);
-    
     auto executor = context->GetTaskExecutor();
     CHECK_NULL_VOID(executor);
-    auto task = [&dialogs, weakOverlayManager = AceType::WeakClaim(AceType::RawPtr(overlayManager))]() mutable {
+    auto task = [&dialogs, dialogProperties,
+                    weakOverlayManager = AceType::WeakClaim(AceType::RawPtr(overlayManager))]() mutable {
         auto overlayManager = weakOverlayManager.Upgrade();
         CHECK_NULL_VOID(overlayManager);
         RefPtr<NG::FrameNode> dialog;
@@ -99,15 +107,28 @@ void CustomDialogControllerModelNG::SetCloseDialog(DialogProperties& dialogPrope
             dialogs.pop_back();
         }
         if (dialogs.empty()) {
-            LOGW("dialogs are empty");
             return;
         }
-        if (!dialog) {
-            LOGW("dialog is null");
-            return;
+        CHECK_NULL_VOID(dialog);
+        if (dialogProperties.isShowInSubWindow) {
+            SubwindowManager::GetInstance()->CloseDialogNG(dialog);
+            dialogs.pop_back();
+
+            auto parentContext = PipelineContext::GetMainPipelineContext();
+            CHECK_NULL_VOID(parentContext);
+            auto parentOverlay = parentContext->GetOverlayManager();
+            CHECK_NULL_VOID(parentOverlay);
+            SubwindowManager::GetInstance()->DeleteHotAreas(parentOverlay->GetSubwindowId(), dialog->GetId());
+            SubwindowManager::GetInstance()->HideDialogSubWindow(parentOverlay->GetSubwindowId());
+            if (dialogProperties.isModal) {
+                auto maskNode = parentOverlay->GetDialog(parentOverlay->GetMaskNodeId());
+                CHECK_NULL_VOID(maskNode);
+                parentOverlay->CloseDialog(maskNode);
+            }
+        } else {
+            overlayManager->CloseDialog(dialog);
+            dialogs.pop_back();
         }
-        overlayManager->CloseDialog(dialog);
-        dialogs.pop_back();
     };
     executor->PostTask(task, TaskExecutor::TaskType::UI);
 }

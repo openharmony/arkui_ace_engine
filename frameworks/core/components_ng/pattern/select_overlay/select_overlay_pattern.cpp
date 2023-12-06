@@ -32,7 +32,6 @@
 #include "core/components_ng/pattern/select_overlay/select_overlay_property.h"
 #include "core/components_ng/property/property.h"
 #include "core/components_ng/property/safe_area_insets.h"
-#include "core/gestures/gesture_info.h"
 #include "core/pipeline/base/constants.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
@@ -121,6 +120,11 @@ void SelectOverlayPattern::BeforeCreateLayoutWrapper()
     auto theme = pipeline->GetTheme<TextOverlayTheme>();
     CHECK_NULL_VOID(theme);
 
+    if (info_->menuInfo.menuOffset.has_value()) {
+        layoutProperty->UpdateMenuOffset(info_->menuInfo.menuOffset.value());
+        return;
+    }
+
     // Calculate the spacing with text and handle, menu is fixed up the handle and text.
     double menuSpacing = theme->GetMenuSpacingWithText().ConvertToPx() + theme->GetHandleDiameter().ConvertToPx();
     // Get bound rect of handles
@@ -132,6 +136,7 @@ void SelectOverlayPattern::BeforeCreateLayoutWrapper()
     layoutProperty->UpdateTargetSize(safeArea.GetSize());
     OffsetF offset(safeArea.GetX(), safeArea.Bottom());
     layoutProperty->UpdateMenuOffset(offset);
+    layoutProperty->UpdateAlignType(MenuAlignType::CENTER);
 }
 
 void SelectOverlayPattern::AddMenuResponseRegion(std::vector<DimensionRect>& responseRegion)
@@ -255,6 +260,7 @@ void SelectOverlayPattern::HandleOnClick(GestureEvent& /*info*/)
             info_->menuInfo.menuIsShow = true;
             host->UpdateToolBar(false);
         }
+        info_->menuInfo.singleHandleMenuIsShow = info_->menuInfo.menuIsShow;
     }
 }
 
@@ -329,6 +335,11 @@ void SelectOverlayPattern::HandlePanMove(GestureEvent& info)
     } else {
         LOGW("the move point is not in drag area");
     }
+    auto context = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    if (host->IsLayoutDirtyMarked()) {
+        context->AddDirtyLayoutNode(host);
+    }
 }
 
 void SelectOverlayPattern::HandlePanEnd(GestureEvent& /*info*/)
@@ -365,7 +376,7 @@ void SelectOverlayPattern::CheckHandleReverse()
 {
     bool handleReverseChanged = false;
     double epsilon = std::max(info_->firstHandle.paintRect.Height(), info_->secondHandle.paintRect.Height());
-    epsilon = std::max(static_cast<double>(info_->singleLineHeight), epsilon);
+    epsilon = std::max(static_cast<double>(info_->singleLineHeight), epsilon) - 0.001f;
     if (NearEqual(info_->firstHandle.paintRect.Top(), info_->secondHandle.paintRect.Top(), epsilon)) {
         if (info_->firstHandle.paintRect.Left() > info_->secondHandle.paintRect.Left()) {
             if (!info_->handleReverse) {
@@ -401,6 +412,16 @@ void SelectOverlayPattern::SetHandleReverse(bool reverse)
     auto host = DynamicCast<SelectOverlayNode>(GetHost());
     CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
+void SelectOverlayPattern::SetSelectRegionVisible(bool isSelectRegionVisible)
+{
+    if (info_->isSelectRegionVisible != isSelectRegionVisible) {
+        info_->isSelectRegionVisible = isSelectRegionVisible;
+        auto host = DynamicCast<SelectOverlayNode>(GetHost());
+        CHECK_NULL_VOID(host);
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    }
 }
 
 void SelectOverlayPattern::UpdateFirstSelectHandleInfo(const SelectHandleInfo& info)
@@ -475,6 +496,15 @@ void SelectOverlayPattern::UpdateShowArea(const RectF& area)
     host->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
 }
 
+void SelectOverlayPattern::UpdateSelectMenuInfo(std::function<void(SelectMenuInfo& menuInfo)> updateAction)
+{
+    if (updateAction) {
+        SelectMenuInfo shadowMenuInfo = info_->menuInfo;
+        updateAction(shadowMenuInfo);
+        UpdateSelectMenuInfo(shadowMenuInfo);
+    }
+}
+
 void SelectOverlayPattern::ShowOrHiddenMenu(bool isHidden)
 {
     auto host = DynamicCast<SelectOverlayNode>(GetHost());
@@ -482,7 +512,8 @@ void SelectOverlayPattern::ShowOrHiddenMenu(bool isHidden)
     if (info_->menuInfo.menuIsShow && isHidden) {
         info_->menuInfo.menuIsShow = false;
         host->UpdateToolBar(false);
-    } else if (!info_->menuInfo.menuIsShow && !isHidden && (info_->firstHandle.isShow || info_->secondHandle.isShow)) {
+    } else if (!info_->menuInfo.menuIsShow && !isHidden &&
+               (info_->firstHandle.isShow || info_->secondHandle.isShow || info_->isSelectRegionVisible)) {
         info_->menuInfo.menuIsShow = true;
         host->UpdateToolBar(false);
     }
@@ -523,13 +554,25 @@ bool SelectOverlayPattern::IsMenuShow()
     return info_->menuInfo.menuIsShow;
 }
 
+bool SelectOverlayPattern::IsSingleHandleMenuShow()
+{
+    CHECK_NULL_RETURN(info_, false);
+    return info_->menuInfo.singleHandleMenuIsShow;
+}
+
 bool SelectOverlayPattern::IsHandleShow()
 {
     CHECK_NULL_RETURN(info_, false);
     return info_->firstHandle.isShow || info_->secondHandle.isShow;
 }
 
-void SelectOverlayPattern::StartHiddenHandleTask()
+bool SelectOverlayPattern::IsSingleHandle()
+{
+    CHECK_NULL_RETURN(info_, false);
+    return info_->isSingleHandle;
+}
+
+void SelectOverlayPattern::StartHiddenHandleTask(bool isDelay)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -543,7 +586,11 @@ void SelectOverlayPattern::StartHiddenHandleTask()
         CHECK_NULL_VOID(client);
         client->HiddenHandle();
     });
-    taskExecutor->PostDelayedTask(hiddenHandleTask_, TaskExecutor::TaskType::UI, HIDDEN_HANDLE_TIMER_MS);
+    if (isDelay) {
+        taskExecutor->PostDelayedTask(hiddenHandleTask_, TaskExecutor::TaskType::UI, HIDDEN_HANDLE_TIMER_MS);
+    } else {
+        taskExecutor->PostTask(hiddenHandleTask_, TaskExecutor::TaskType::UI);
+    }
 }
 
 void SelectOverlayPattern::HiddenHandle()

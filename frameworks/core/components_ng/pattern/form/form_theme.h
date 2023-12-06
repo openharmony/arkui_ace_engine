@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_FORM_FORM_THEME_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_FORM_FORM_THEME_H
 
+#include "base/utils/utils.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/text_style.h"
 #include "core/components/theme/theme.h"
@@ -50,16 +51,10 @@ public:
     private:
         void ParsePattern(const RefPtr<ThemeStyle>& themeStyle, const RefPtr<FormTheme>& theme) const
         {
-            if (!themeStyle) {
-                LOGE("themeStyle is null");
-                return;
-            }
+            CHECK_NULL_VOID(themeStyle);
 
             auto formPattern = themeStyle->GetAttr<RefPtr<ThemeStyle>>(THEME_PATTERN_FORM, nullptr);
-            if (!formPattern) {
-                LOGE("formPattern is null");
-                return;
-            }
+            CHECK_NULL_VOID(formPattern);
 
             theme->unTrustBackgroundColor_ = formPattern->GetAttr<Color>("form_untrust_background_color", Color::RED);
         }

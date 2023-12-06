@@ -22,6 +22,7 @@
 #include "base/geometry/dimension.h"
 #include "base/i18n/localization.h"
 #include "base/utils/utils.h"
+#include "core/common/container.h"
 #include "core/common/font_manager.h"
 #include "core/components/text/text_theme.h"
 #include "core/components_ng/base/frame_node.h"
@@ -61,7 +62,7 @@ void TextLayoutAlgorithm::OnReset() {}
 std::optional<SizeF> TextLayoutAlgorithm::MeasureContent(
     const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper)
 {
-    if (!contentConstraint.maxSize.IsPositive()) {
+    if (Negative(contentConstraint.maxSize.Width()) || Negative(contentConstraint.maxSize.Height())) {
         return std::nullopt;
     }
 
@@ -82,6 +83,7 @@ std::optional<SizeF> TextLayoutAlgorithm::MeasureContent(
         contentModifier->ModifyTextStyle(textStyle);
         contentModifier->SetFontReady(false);
     }
+    textStyle.SetHalfLeading(pipeline->GetHalfLeading());
     // Register callback for fonts.
     FontRegisterCallback(frameNode, textStyle);
 
@@ -104,7 +106,6 @@ std::optional<SizeF> TextLayoutAlgorithm::MeasureContent(
         pipeline->GetDipScale(), pipeline->GetFontScale(), pipeline->GetLogicScale(), 0.0f, baselineOffset);
 
     baselineOffset_ = static_cast<float>(baselineOffset);
-
     auto heightFinal = static_cast<float>(height + std::fabs(baselineOffset));
     if (contentConstraint.selfIdealSize.Height().has_value()) {
         heightFinal = std::min(
@@ -112,6 +113,16 @@ std::optional<SizeF> TextLayoutAlgorithm::MeasureContent(
     } else {
         heightFinal =
             std::min(static_cast<float>(height + std::fabs(baselineOffset)), contentConstraint.maxSize.Height());
+    }
+    if (NearZero(contentConstraint.maxSize.Height()) || NearZero(contentConstraint.maxSize.Width())) {
+        return SizeF {};
+    }
+    if (frameNode->GetTag() == V2::TEXT_ETS_TAG && textLayoutProperty->GetContent().value_or("").empty() &&
+        NonPositive(static_cast<double>(paragraph_->GetLongestLine()))) {
+        // text content is empty
+        ACE_SCOPED_TRACE("TextHeightFinal [%f], TextContentWidth [%f], FontSize [%lf]",
+            heightFinal, paragraph_->GetMaxWidth(), textStyle.GetFontSize().ConvertToPx());
+        return SizeF {};
     }
     return SizeF(paragraph_->GetMaxWidth(), heightFinal);
 }
@@ -155,23 +166,17 @@ void TextLayoutAlgorithm::FontRegisterCallback(const RefPtr<FrameNode>& frameNod
     CHECK_NULL_VOID(pipeline);
     auto fontManager = pipeline->GetFontManager();
     if (fontManager) {
-        bool isCustomFont = false;
         for (const auto& familyName : textStyle.GetFontFamilies()) {
-            bool customFont = fontManager->RegisterCallbackNG(frameNode, familyName, callback);
-            if (customFont) {
-                isCustomFont = true;
-            }
+            fontManager->RegisterCallbackNG(frameNode, familyName, callback);
         }
         fontManager->AddVariationNodeNG(frameNode);
-        if (isCustomFont) {
-            auto pattern = frameNode->GetPattern<TextPattern>();
-            CHECK_NULL_VOID(pattern);
-            pattern->SetIsCustomFont(true);
-            auto modifier = DynamicCast<TextContentModifier>(pattern->GetContentModifier());
-            CHECK_NULL_VOID(modifier);
-            modifier->SetIsCustomFont(true);
-        }
     }
+    auto pattern = frameNode->GetPattern<TextPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetIsCustomFont(true);
+    auto modifier = DynamicCast<TextContentModifier>(pattern->GetContentModifier());
+    CHECK_NULL_VOID(modifier);
+    modifier->SetIsCustomFont(true);
 }
 
 void TextLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
@@ -196,13 +201,21 @@ void TextLayoutAlgorithm::UpdateParagraph(LayoutWrapper* layoutWrapper)
     auto frameNode = layoutWrapper->GetHostNode();
     const auto& layoutConstrain = layoutProperty->CreateChildConstraint();
     const auto& children = layoutWrapper->GetAllChildrenWithBuild();
-    auto iterItems = children.begin();
+    auto pattern = frameNode->GetPattern<TextPattern>();
+    CHECK_NULL_VOID(pattern);
+    auto aiSpanMap = pattern->GetAISpanMap();
     for (const auto& child : spanItemChildren_) {
         if (!child) {
             continue;
         }
         auto imageSpanItem = AceType::DynamicCast<ImageSpanItem>(child);
         if (imageSpanItem) {
+            int32_t targetId = imageSpanItem->imageNodeId;
+            auto iterItems = children.begin();
+            // find the Corresponding ImageNode for every ImageSpanItem
+            while (iterItems != children.end() && (*iterItems) && (*iterItems)->GetHostNode()->GetId() != targetId) {
+                iterItems++;
+            }
             if (iterItems == children.end() || !(*iterItems)) {
                 continue;
             }
@@ -219,34 +232,158 @@ void TextLayoutAlgorithm::UpdateParagraph(LayoutWrapper* layoutWrapper)
             }
             auto width = geometryNode->GetMarginFrameSize().Width();
             auto height = geometryNode->GetMarginFrameSize().Height();
-            child->placeHolderIndex = child->UpdateParagraph(frameNode, paragraph_, width, height, verticalAlign);
+            child->placeholderIndex = child->UpdateParagraph(frameNode, paragraph_, width, height, verticalAlign);
+            child->content = " ";
+            child->position = spanTextLength + 1;
+            spanTextLength += 1;
+            iterItems++;
+        } else if (AceType::InstanceOf<PlaceholderSpanItem>(child)) {
+            auto placeholderSpanItem = AceType::DynamicCast<PlaceholderSpanItem>(child);
+            if (!placeholderSpanItem) {
+                continue;
+            }
+            int32_t targetId = placeholderSpanItem->placeholderSpanNodeId;
+            auto iterItems = children.begin();
+            // find the Corresponding ImageNode for every ImageSpanItem
+            while (iterItems != children.end() && (*iterItems) && (*iterItems)->GetHostNode()->GetId() != targetId) {
+                iterItems++;
+            }
+            if (iterItems == children.end() || !(*iterItems)) {
+                continue;
+            }
+            (*iterItems)->Measure(layoutConstrain);
+            auto geometryNode = (*iterItems)->GetGeometryNode();
+            if (!geometryNode) {
+                iterItems++;
+                continue;
+            }
+            auto width = geometryNode->GetMarginFrameSize().Width();
+            auto height = geometryNode->GetMarginFrameSize().Height();
+            child->placeholderIndex = child->UpdateParagraph(frameNode, paragraph_, width, height, VerticalAlign::NONE);
             child->content = " ";
             child->position = spanTextLength + 1;
             spanTextLength += 1;
             iterItems++;
         } else {
+            child->aiSpanMap = aiSpanMap;
             child->UpdateParagraph(frameNode, paragraph_);
+            aiSpanMap = child->aiSpanMap;
             child->position = spanTextLength + StringUtils::ToWstring(child->content).length();
             spanTextLength += StringUtils::ToWstring(child->content).length();
         }
     }
 }
 
+void TextLayoutAlgorithm::UpdateParagraphForAISpan(const TextStyle& textStyle, LayoutWrapper* layoutWrapper)
+{
+    CHECK_NULL_VOID(layoutWrapper);
+    auto layoutProperty = layoutWrapper->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    auto frameNode = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pipeline = frameNode->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto pattern = frameNode->GetPattern<TextPattern>();
+    CHECK_NULL_VOID(pattern);
+    auto textCase = textStyle.GetTextCase();
+    auto builder = paragraph_;
+    auto updateTextAction = [builder, textCase](const std::string content, TextStyle textStyle) {
+        if (content.empty()) {
+            return;
+        }
+        auto displayText = content;
+        StringUtils::TransformStrCase(displayText, static_cast<int32_t>(textCase));
+        builder->PushStyle(textStyle);
+        builder->AddText(StringUtils::Str8ToStr16(displayText));
+        builder->PopStyle();
+    };
+    auto textForAI = pattern->GetTextForAI();
+    auto wTextForAI = StringUtils::ToWstring(textForAI);
+    int32_t wTextForAILength = static_cast<int32_t>(wTextForAI.length());
+    int32_t preEnd = 0;
+    for (auto kv : pattern->GetAISpanMap()) {
+        auto aiSpan = kv.second;
+        if (aiSpan.start <= preEnd) {
+            TAG_LOGI(AceLogTag::ACE_TEXT, "Error prediction");
+            continue;
+        }
+        if (preEnd < aiSpan.start) {
+            auto beforeContent = StringUtils::ToString(wTextForAI.substr(preEnd, aiSpan.start - preEnd));
+            updateTextAction(beforeContent, textStyle);
+        }
+        TextStyle aiSpanTextStyle = textStyle;
+        aiSpanTextStyle.SetTextColor(Color::BLUE);
+        aiSpanTextStyle.SetTextDecoration(TextDecoration::UNDERLINE);
+        aiSpanTextStyle.SetTextDecorationColor(Color::BLUE);
+        preEnd = aiSpan.end;
+        updateTextAction(aiSpan.content, aiSpanTextStyle);
+    }
+    if (preEnd < wTextForAILength) {
+        auto afterContent = StringUtils::ToString(wTextForAI.substr(preEnd, wTextForAILength - preEnd));
+        updateTextAction(afterContent, textStyle);
+    }
+}
+
 bool TextLayoutAlgorithm::CreateParagraph(const TextStyle& textStyle, std::string content, LayoutWrapper* layoutWrapper)
 {
-    auto paraStyle = GetParagraphStyle(textStyle, content);
-    paragraph_ = Paragraph::Create(paraStyle, FontCollection::Current());
-    CHECK_NULL_RETURN(paragraph_, false);
-    paragraph_->PushStyle(textStyle);
-
-    if (spanItemChildren_.empty()) {
-        StringUtils::TransformStrCase(content, static_cast<int32_t>(textStyle.GetTextCase()));
-        paragraph_->AddText(StringUtils::Str8ToStr16(content));
+    auto frameNode = layoutWrapper->GetHostNode();
+    auto pipeline = frameNode->GetContext();
+    auto textLayoutProperty = DynamicCast<TextLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    auto pattern = frameNode->GetPattern<TextPattern>();
+    if (pattern->IsDragging()) {
+        auto dragContents = pattern->GetDragContents();
+        CreateParagraphDrag(textStyle, dragContents, content);
     } else {
-        UpdateParagraph(layoutWrapper);
+        auto paraStyle = GetParagraphStyle(textStyle, content);
+        if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN) && spanItemChildren_.empty()) {
+            paraStyle.fontSize = textStyle.GetFontSize().ConvertToPx();
+        }
+        paragraph_ = Paragraph::Create(paraStyle, FontCollection::Current());
+        CHECK_NULL_RETURN(paragraph_, -1);
+        paragraph_->PushStyle(textStyle);
+        CHECK_NULL_RETURN(pattern, -1);
+        if (spanItemChildren_.empty()) {
+            if (textLayoutProperty->GetCopyOptionValue(CopyOptions::None) != CopyOptions::None &&
+                pattern->GetTextDetectEnable() && !pattern->GetAISpanMap().empty()) {
+                UpdateParagraphForAISpan(textStyle, layoutWrapper);
+            } else {
+                StringUtils::TransformStrCase(content, static_cast<int32_t>(textStyle.GetTextCase()));
+                paragraph_->AddText(StringUtils::Str8ToStr16(content));
+            }
+        } else {
+            UpdateParagraph(layoutWrapper);
+        }
+        paragraph_->Build();
+    }
+    return true;
+}
+
+void TextLayoutAlgorithm::CreateParagraphDrag(const TextStyle& textStyle,
+    const std::vector<std::string>& contents, const std::string content)
+{
+    TextStyle dragTextStyle = textStyle;
+    Color color = textStyle.GetTextColor().ChangeAlpha(DRAGGED_TEXT_TRANSPARENCY);
+    dragTextStyle.SetTextColor(color);
+    std::vector<TextStyle> textStyles { textStyle, dragTextStyle, textStyle };
+    auto style = textStyles.begin();
+    ParagraphStyle paraStyle { .direction = GetTextDirection(content),
+        .maxLines = style->GetMaxLines(),
+        .fontLocale = Localization::GetInstance()->GetFontLocale(),
+        .wordBreak = style->GetWordBreak(),
+        .textOverflow = style->GetTextOverflow(),
+        .fontSize = style->GetFontSize().ConvertToPx()};
+
+    paragraph_ = Paragraph::Create(paraStyle, FontCollection::Current());
+    CHECK_NULL_VOID(paragraph_);
+    for (size_t i = 0; i < contents.size(); i++) {
+        std::string splitStr = contents[i];
+        auto& style = textStyles[i];
+        paragraph_->PushStyle(style);
+        StringUtils::TransformStrCase(splitStr, static_cast<int32_t>(style.GetTextCase()));
+        paragraph_->AddText(StringUtils::Str8ToStr16(splitStr));
+        paragraph_->PopStyle();
     }
     paragraph_->Build();
-    return true;
 }
 
 bool TextLayoutAlgorithm::CreateParagraphAndLayout(const TextStyle& textStyle, const std::string& content,
@@ -264,7 +401,7 @@ bool TextLayoutAlgorithm::CreateParagraphAndLayout(const TextStyle& textStyle, c
     return ret;
 }
 
-OffsetF TextLayoutAlgorithm::GetContentOffset(LayoutWrapper* layoutWrapper) const
+OffsetF TextLayoutAlgorithm::GetContentOffset(LayoutWrapper* layoutWrapper)
 {
     OffsetF contentOffset(0.0, 0.0);
     CHECK_NULL_RETURN(layoutWrapper, contentOffset);
@@ -292,22 +429,21 @@ void TextLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 {
     CHECK_NULL_VOID(layoutWrapper);
     auto contentOffset = GetContentOffset(layoutWrapper);
-    std::vector<int32_t> placeHolderIndex;
+    std::vector<int32_t> placeholderIndex;
     for (const auto& child : spanItemChildren_) {
         if (!child) {
             continue;
         }
-        auto imageSpanItem = AceType::DynamicCast<ImageSpanItem>(child);
-        if (imageSpanItem) {
-            placeHolderIndex.emplace_back(child->placeHolderIndex);
+        if (AceType::InstanceOf<ImageSpanItem>(child) || AceType::InstanceOf<PlaceholderSpanItem>(child)) {
+            placeholderIndex.emplace_back(child->placeholderIndex);
         }
     }
-    if (spanItemChildren_.empty() || placeHolderIndex.empty()) {
+    if (spanItemChildren_.empty() || placeholderIndex.empty()) {
         return;
     }
 
     size_t index = 0;
-    std::vector<Rect> rectsForPlaceholders;
+    std::vector<RectF> rectsForPlaceholders;
     GetPlaceholderRects(rectsForPlaceholders);
     const auto& children = layoutWrapper->GetAllChildrenWithBuild();
     // children only contains the image span.
@@ -316,9 +452,12 @@ void TextLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
             ++index;
             continue;
         }
-        if (index >= placeHolderIndex.size() || index >= rectsForPlaceholders.size()) {
-            return;
+        if (index >= placeholderIndex.size() ||
+            (index >= rectsForPlaceholders.size() && child->GetHostTag() != V2::PLACEHOLDER_SPAN_ETS_TAG)) {
+            child->SetActive(false);
+            continue;
         }
+        child->SetActive(true);
         auto rect = rectsForPlaceholders.at(index);
         auto geometryNode = child->GetGeometryNode();
         if (!geometryNode) {
@@ -337,7 +476,7 @@ void TextLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(pipeline);
     auto pattern = frameNode->GetPattern<TextPattern>();
     CHECK_NULL_VOID(pattern);
-    pattern->InitSpanImageLayout(placeHolderIndex, rectsForPlaceholders, contentOffset);
+    pattern->InitSpanImageLayout(placeholderIndex, rectsForPlaceholders, contentOffset);
 #endif
 }
 
@@ -356,7 +495,6 @@ bool TextLayoutAlgorithm::AdaptMinTextSize(TextStyle& textStyle, const std::stri
     }
     if (LessNotEqual(maxFontSize, minFontSize) || LessOrEqual(minFontSize, 0.0)) {
         if (!CreateParagraphAndLayout(textStyle, content, contentConstraint, layoutWrapper)) {
-            LOGE("fail to initialize text paragraph when adapt min text size.");
             return false;
         }
         return true;
@@ -443,8 +581,7 @@ bool TextLayoutAlgorithm::BuildParagraph(TextStyle& textStyle, const RefPtr<Text
 {
     if (!textStyle.GetAdaptTextSize()) {
         if (!CreateParagraphAndLayout(
-                textStyle, layoutProperty->GetContent().value_or(""), contentConstraint, layoutWrapper))
-        {
+                textStyle, layoutProperty->GetContent().value_or(""), contentConstraint, layoutWrapper)) {
             return false;
         }
     } else {
@@ -472,8 +609,7 @@ bool TextLayoutAlgorithm::BuildParagraphAdaptUseMinFontSize(TextStyle& textStyle
     const RefPtr<PipelineContext>& pipeline, LayoutWrapper* layoutWrapper)
 {
     if (!AdaptMaxTextSize(
-            textStyle, layoutProperty->GetContent().value_or(""), contentConstraint, pipeline, layoutWrapper))
-    {
+            textStyle, layoutProperty->GetContent().value_or(""), contentConstraint, pipeline, layoutWrapper)) {
         return false;
     }
 
@@ -643,7 +779,6 @@ bool TextLayoutAlgorithm::AdaptMaxTextSize(TextStyle& textStyle, const std::stri
     if (LessNotEqual(maxFontSize, minFontSize) || LessOrEqual(minFontSize, 0.0)) {
         // minFontSize or maxFontSize is invalid
         if (!CreateParagraphAndLayout(textStyle, content, contentConstraint, layoutWrapper)) {
-            LOGE("fail to initialize text paragraph when adapt min text size.");
             return false;
         }
         return true;
@@ -709,8 +844,7 @@ void TextLayoutAlgorithm::ApplyIndent(const TextStyle& textStyle, double width)
     double indent = 0.0;
     if (textStyle.GetTextIndent().Unit() != DimensionUnit::PERCENT) {
         if (!textStyle.GetTextIndent().NormalizeToPx(
-                pipeline->GetDipScale(), pipeline->GetFontScale(), pipeline->GetLogicScale(), width, indent))
-        {
+                pipeline->GetDipScale(), pipeline->GetFontScale(), pipeline->GetLogicScale(), width, indent)) {
             return;
         }
     } else {
@@ -729,21 +863,25 @@ bool TextLayoutAlgorithm::IncludeImageSpan(LayoutWrapper* layoutWrapper)
     return (!layoutWrapper->GetAllChildrenWithBuild().empty());
 }
 
-void TextLayoutAlgorithm::GetSpanAndImageSpanList(
-    std::list<RefPtr<SpanItem>>& spanList, std::map<int32_t, std::pair<Rect, RefPtr<ImageSpanItem>>>& imageSpanList)
+void TextLayoutAlgorithm::GetSpanAndImageSpanList(std::list<RefPtr<SpanItem>>& spanList,
+    std::map<int32_t, std::pair<RectF, RefPtr<PlaceholderSpanItem>>>& placeholderSpanList)
 {
-    std::vector<Rect> rectsForPlaceholders;
+    std::vector<RectF> rectsForPlaceholders;
     paragraph_->GetRectsForPlaceholders(rectsForPlaceholders);
-
     for (const auto& child : spanItemChildren_) {
         if (!child) {
             continue;
         }
         auto imageSpanItem = AceType::DynamicCast<ImageSpanItem>(child);
         if (imageSpanItem) {
-            int32_t index = child->placeHolderIndex;
+            int32_t index = child->placeholderIndex;
             if (index >= 0 && index < static_cast<int32_t>(rectsForPlaceholders.size())) {
-                imageSpanList.emplace(index, std::make_pair(rectsForPlaceholders.at(index), imageSpanItem));
+                placeholderSpanList.emplace(index, std::make_pair(rectsForPlaceholders.at(index), imageSpanItem));
+            }
+        } else if (auto placeholderSpanItem = AceType::DynamicCast<PlaceholderSpanItem>(child); placeholderSpanItem) {
+            int32_t index = child->placeholderIndex;
+            if (index >= 0 && index < static_cast<int32_t>(rectsForPlaceholders.size())) {
+                placeholderSpanList.emplace(index, std::make_pair(rectsForPlaceholders.at(index), placeholderSpanItem));
             }
         } else {
             spanList.emplace_back(child);
@@ -753,7 +891,7 @@ void TextLayoutAlgorithm::GetSpanAndImageSpanList(
 
 void TextLayoutAlgorithm::SplitSpanContentByLines(const TextStyle& textStyle,
     const std::list<RefPtr<SpanItem>>& spanList,
-    std::map<int32_t, std::pair<Rect, std::list<RefPtr<SpanItem>>>>& spanContentLines)
+    std::map<int32_t, std::pair<RectF, std::list<RefPtr<SpanItem>>>>& spanContentLines)
 {
     int32_t currentLine = 0;
     size_t currentLength = 0;
@@ -762,12 +900,12 @@ void TextLayoutAlgorithm::SplitSpanContentByLines(const TextStyle& textStyle,
             continue;
         }
         std::string textValue = child->content;
-        std::vector<Rect> selectedRects;
+        std::vector<RectF> selectedRects;
         if (!textValue.empty()) {
             paragraph_->GetRectsForRange(currentLength, currentLength + textValue.size(), selectedRects);
         }
         currentLength += textValue.size();
-        Rect currentRect;
+        RectF currentRect;
         auto preLinetLastSpan = spanContentLines.rbegin();
         double preLineFontSize = textStyle.GetFontSize().Value();
         if (preLinetLastSpan != spanContentLines.rend()) {
@@ -805,25 +943,25 @@ void TextLayoutAlgorithm::SplitSpanContentByLines(const TextStyle& textStyle,
 }
 
 void TextLayoutAlgorithm::SetImageSpanTextStyleByLines(const TextStyle& textStyle,
-    std::map<int32_t, std::pair<Rect, RefPtr<ImageSpanItem>>>& imageSpanList,
-    std::map<int32_t, std::pair<Rect, std::list<RefPtr<SpanItem>>>>& spanContentLines)
+    std::map<int32_t, std::pair<RectF, RefPtr<PlaceholderSpanItem>>>& placeholderSpanList,
+    std::map<int32_t, std::pair<RectF, std::list<RefPtr<SpanItem>>>>& spanContentLines)
 {
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
 
-    auto imageSpanItem = imageSpanList.begin();
+    auto placeholderItem = placeholderSpanList.begin();
     for (auto spanItem = spanContentLines.begin(); spanItem != spanContentLines.end(); spanItem++) {
-        for (; imageSpanItem != imageSpanList.end();) {
-            auto imageSpan = imageSpanItem->second.second;
-            if (!imageSpan) {
+        for (; placeholderItem != placeholderSpanList.end();) {
+            auto placeholder = placeholderItem->second.second;
+            if (!placeholder) {
                 continue;
             }
-            imageSpan->textStyle = textStyle;
+            placeholder->textStyle = textStyle;
 
-            auto offset = imageSpanItem->second.first.GetOffset();
-            auto imageSpanItemRect = imageSpanItem->second.first;
-            imageSpanItemRect.SetOffset(Offset(spanItem->second.first.GetOffset().GetX(), offset.GetY()));
-            bool isIntersectWith = spanItem->second.first.IsIntersectWith(imageSpanItemRect);
+            auto offset = placeholderItem->second.first.GetOffset();
+            auto placeholderItemRect = placeholderItem->second.first;
+            placeholderItemRect.SetOffset(OffsetF(spanItem->second.first.GetOffset().GetX(), offset.GetY()));
+            bool isIntersectWith = spanItem->second.first.IsIntersectWith(placeholderItemRect);
             if (!isIntersectWith) {
                 break;
             }
@@ -842,8 +980,8 @@ void TextLayoutAlgorithm::SetImageSpanTextStyleByLines(const TextStyle& textStyl
                         child->fontStyle, child->textLineStyle, pipelineContext->GetTheme<TextTheme>());
                 }
             }
-            imageSpan->textStyle = spanTextStyle;
-            imageSpanItem++;
+            placeholder->textStyle = spanTextStyle;
+            placeholderItem++;
         }
     }
 }
@@ -853,15 +991,15 @@ void TextLayoutAlgorithm::SetImageSpanTextStyle(const TextStyle& textStyle)
     CHECK_NULL_VOID(paragraph_);
 
     std::list<RefPtr<SpanItem>> spanList;
-    std::map<int32_t, std::pair<Rect, RefPtr<ImageSpanItem>>> imageSpanList;
-    GetSpanAndImageSpanList(spanList, imageSpanList);
+    std::map<int32_t, std::pair<RectF, RefPtr<PlaceholderSpanItem>>> placeholderList;
+    GetSpanAndImageSpanList(spanList, placeholderList);
 
     // split text content by lines
-    std::map<int32_t, std::pair<Rect, std::list<RefPtr<SpanItem>>>> spanContentLines;
+    std::map<int32_t, std::pair<RectF, std::list<RefPtr<SpanItem>>>> spanContentLines;
     SplitSpanContentByLines(textStyle, spanList, spanContentLines);
 
     // set imagespan textstyle
-    SetImageSpanTextStyleByLines(textStyle, imageSpanList, spanContentLines);
+    SetImageSpanTextStyleByLines(textStyle, placeholderList, spanContentLines);
 }
 
 bool TextLayoutAlgorithm::CreateImageSpanAndLayout(const TextStyle& textStyle, const std::string& content,
@@ -887,7 +1025,7 @@ size_t TextLayoutAlgorithm::GetLineCount() const
     return paragraph_->GetLineCount();
 }
 
-void TextLayoutAlgorithm::GetPlaceholderRects(std::vector<Rect>& rects)
+void TextLayoutAlgorithm::GetPlaceholderRects(std::vector<RectF>& rects)
 {
     CHECK_NULL_VOID(paragraph_);
     paragraph_->GetRectsForPlaceholders(rects);
@@ -895,12 +1033,14 @@ void TextLayoutAlgorithm::GetPlaceholderRects(std::vector<Rect>& rects)
 
 ParagraphStyle TextLayoutAlgorithm::GetParagraphStyle(const TextStyle& textStyle, const std::string& content) const
 {
-    return { .direction = GetTextDirection(content),
+    return {
+        .direction = GetTextDirection(content),
         .align = textStyle.GetTextAlign(),
         .maxLines = textStyle.GetMaxLines(),
         .fontLocale = Localization::GetInstance()->GetFontLocale(),
         .wordBreak = textStyle.GetWordBreak(),
-        .textOverflow = textStyle.GetTextOverflow()
+        .ellipsisMode = textStyle.GetEllipsisMode(),
+        .textOverflow = textStyle.GetTextOverflow(),
     };
 }
 } // namespace OHOS::Ace::NG

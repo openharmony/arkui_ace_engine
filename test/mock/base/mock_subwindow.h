@@ -18,7 +18,7 @@
 
 #include "gmock/gmock.h"
 
-#include "frameworks/base/subwindow/subwindow.h"
+#include "base/subwindow/subwindow.h"
 
 namespace OHOS::Ace {
 class ACE_EXPORT MockSubwindow : public Subwindow {
@@ -31,10 +31,11 @@ public:
     MOCK_METHOD1(ShowMenu, void(const RefPtr<Component>& newComponent));
     MOCK_METHOD3(ShowMenuNG, void(const RefPtr<NG::FrameNode> menuNode, int32_t targetId, const NG::OffsetF& offset));
     MOCK_METHOD2(HideMenuNG, void(const RefPtr<NG::FrameNode>& menu, int32_t targetId));
-    MOCK_METHOD1(HideMenuNG, void(bool showPreviewAnimation));
+    MOCK_METHOD2(HideMenuNG, void(bool showPreviewAnimation, bool startDrag));
     MOCK_METHOD2(ShowPopup, void(const RefPtr<Component>& newComponent, bool disableTouchEvent));
     MOCK_METHOD2(ShowPopupNG, void(int32_t targetId, const NG::PopupInfo& popupInfo));
     MOCK_METHOD1(HidePopupNG, void(int32_t targetId));
+    MOCK_METHOD0(ClearPopupNG, void());
     MOCK_METHOD2(GetPopupInfoNG, void(int32_t targetId, NG::PopupInfo& popupInfo));
     MOCK_METHOD1(CancelPopup, bool(const std::string& id));
     MOCK_METHOD0(CloseMenu, void());
@@ -42,12 +43,15 @@ public:
     MOCK_METHOD2(ClearMenuNG, void(bool inWindow, bool showAnimation));
     MOCK_METHOD2(
         ShowDialogNG, RefPtr<NG::FrameNode>(const DialogProperties& dialogProps, std::function<void()>&& buildFunc));
+    MOCK_METHOD1(CloseDialogNG, void(const RefPtr<NG::FrameNode>& dialogNode));
     MOCK_METHOD0(HideSubWindowNG, void());
     MOCK_CONST_METHOD0(GetChildContainerId, int32_t());
     MOCK_METHOD0(GetShown, bool());
     MOCK_METHOD2(SetHotAreas, void(const std::vector<Rect>& rects, int32_t overlayId));
     MOCK_CONST_METHOD0(GetParentWindowRect, Rect());
-    MOCK_METHOD3(ShowToast, void(const std::string& message, int32_t duration, const std::string& bottom));
+    MOCK_METHOD0(ClearToast, void());
+    MOCK_METHOD4(ShowToast, void(const std::string& message, int32_t duration, const std::string& bottom,
+        const NG::ToastShowMode& showMode));
     MOCK_METHOD6(ShowDialog,
         void(const std::string& title, const std::string& message, const std::vector<ButtonInfo>& buttons,
             bool autoCancel, std::function<void(int32_t, int32_t)>&& callback, const std::set<std::string>& callbacks));

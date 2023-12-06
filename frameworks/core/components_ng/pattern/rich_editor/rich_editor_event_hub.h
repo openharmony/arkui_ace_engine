@@ -44,6 +44,11 @@ public:
         return offsetInSpan_;
     }
 
+    std::string ToString() const
+    {
+        return "spanIndex_: " + std::to_string(spanIndex_) + ", offsetInSpan_" + std::to_string(offsetInSpan_);
+    }
+
 private:
     int32_t spanIndex_ = 0;
     int32_t offsetInSpan_ = 0;
@@ -220,7 +225,7 @@ public:
     }
 
 private:
-    long long timestamp_;
+    long long timestamp_ = 0;
     std::function<void(NG::TextCommonEvent&)> onPaste_;
     std::function<void()> onReady_;
     std::function<void(const BaseEventInfo*)> onSelect_;

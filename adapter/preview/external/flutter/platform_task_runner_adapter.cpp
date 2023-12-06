@@ -16,30 +16,41 @@
 #include "adapter/preview/external/flutter/platform_task_runner_adapter.h"
 
 #include "flutter/fml/time/time_point.h"
-#include "jsapp/rich/external/EventHandler.h"
 
+#include "adapter/preview/entrance/ace_preview_helper.h"
 namespace flutter {
 
 PlatformTaskRunnerAdapter::PlatformTaskRunnerAdapter(bool useCurrentEventRunner) : fml::TaskRunner(nullptr) {}
 
 void PlatformTaskRunnerAdapter::PostTask(fml::closure task, const std::string& caller)
 {
-    OHOS::AppExecFwk::EventHandler::PostTask(std::move(task));
+    auto postTask = OHOS::Ace::Platform::AcePreviewHelper::GetInstance()->GetCallbackOfPostTask();
+    if (postTask) {
+        postTask(std::move(task), 0);
+    }
 }
 
-void PlatformTaskRunnerAdapter::PostTaskForTime(fml::closure task, fml::TimePoint target_time, const std::string& caller)
+void PlatformTaskRunnerAdapter::PostTaskForTime(fml::closure task, fml::TimePoint targetTime, const std::string& caller)
 {
-    OHOS::AppExecFwk::EventHandler::PostTask(std::move(task), target_time.ToEpochDelta().ToMilliseconds());
+    auto postTask = OHOS::Ace::Platform::AcePreviewHelper::GetInstance()->GetCallbackOfPostTask();
+    if (postTask) {
+        postTask(std::move(task), targetTime.ToEpochDelta().ToMilliseconds());
+    }
 }
 
 void PlatformTaskRunnerAdapter::PostDelayedTask(fml::closure task, fml::TimeDelta delay, const std::string& caller)
 {
-    OHOS::AppExecFwk::EventHandler::PostTask(std::move(task), delay.ToMilliseconds());
+    auto postTask = OHOS::Ace::Platform::AcePreviewHelper::GetInstance()->GetCallbackOfPostTask();
+    if (postTask) {
+        postTask(std::move(task), delay.ToMilliseconds());
+    }
 }
 
 bool PlatformTaskRunnerAdapter::RunsTasksOnCurrentThread()
 {
-    return OHOS::AppExecFwk::EventHandler::IsCurrentRunnerThread();
+    auto isCurrentRunnerThread =
+        OHOS::Ace::Platform::AcePreviewHelper::GetInstance()->GetCallbackOfIsCurrentRunnerThread();
+    return isCurrentRunnerThread && isCurrentRunnerThread();
 }
 
 fml::TaskQueueId PlatformTaskRunnerAdapter::GetTaskQueueId()

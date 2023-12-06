@@ -30,10 +30,17 @@
 #include "core/components_ng/pattern/text_clock/text_clock_layout_algorithm.h"
 #include "core/components_ng/pattern/text_clock/text_clock_layout_property.h"
 #include "core/components_ng/property/property.h"
+#include "core/event/time/time_change_listener.h"
 
 namespace OHOS::Ace::NG {
+struct TextClockFormatElement {
+    char elementKey;
+    int32_t formatElementNum = 0;
+    std::string formatElement = "";
+};
+
 using TimeCallback = std::function<void()>;
-class TextClockPattern : public Pattern {
+class TextClockPattern : public Pattern, public TimeChangeListener {
     DECLARE_ACE_TYPE(TextClockPattern, Pattern);
 
 public:
@@ -73,40 +80,52 @@ public:
         return textId_.value();
     }
 
+    void OnVisibleChange(bool isVisible) override;
+
+    void OnTimeChange() override;
+
 private:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
+    void OnDetachFromFrameNode(FrameNode* frameNode) override;
     void InitTextClockController();
-    void UpdateTimeTextCallBack();
 
     void InitUpdateTimeTextCallBack();
     void UpdateTimeText();
     void RequestUpdateForNextSecond();
     void FireChangeEvent() const;
     std::string GetCurrentFormatDateTime();
+    void RegistVisibleAreaChangeCallback();
+    void OnVisibleAreaChange(bool visible);
+    void OnFormVisibleChange(bool visible);
     static void UpdateTextLayoutProperty(
         RefPtr<TextClockLayoutProperty>& layoutProperty, RefPtr<TextLayoutProperty>& textLayoutProperty);
-    std::vector<std::string> ParseInputFormat(
-        bool& is24H, int32_t& weekType, int32_t& month, int32_t& day, bool& isMilliSecond);
+    void ParseInputFormat(bool& is24H);
     static std::vector<std::string> ParseDateTimeValue(const std::string& strDateTimeValue);
+    void GetDateTimeIndex(const char& element, TextClockFormatElement& tempFormatElement);
     static std::string GetAmPm(const std::string& dateTimeValue);
     static std::string Abstract(const std::string& strSource, const bool& abstractItem);
     static int32_t GetDigitNumber(const std::string& strSource);
     static std::string GetWeek(const bool& isShortType, const int32_t& week);
-    static std::string SpliceDateTime(
-        const std::vector<std::string>& curDateTime, const std::vector<std::string>& inputFormatSplitter);
-    static std::string CheckDateTimeElement(const std::vector<std::string>& curDateTime, const std::string& str,
-        const char& element, const int32_t& elementIndex, const bool& oneElement);
+    std::string SpliceDateTime(const std::vector<std::string>& curDateTime);
+    static std::string CheckDateTimeElement(const std::vector<std::string>& curDateTime, const char& element,
+        const int32_t& elementIndex, const bool& oneElement);
 
     std::string GetFormat() const;
     int32_t GetHoursWest() const;
     RefPtr<FrameNode> GetTextNode();
 
     RefPtr<TextClockController> textClockController_;
-    TimeCallback timeCallback_;
-    bool isStart_ = true;
     int32_t hourWest_ = 0;
     std::optional<int32_t> textId_;
+    bool isStart_ = true;
+    bool is24H_ = SystemProperties::Is24HourClock();
+    bool isSetVisible_ = true;
+    bool isInVisibleArea_ = true;
+    bool isFormVisible_ = true;
+    bool isForm_ = false;
+    std::string prevTime_;
+    std::map<int32_t, TextClockFormatElement> formatElementMap;
 
     ACE_DISALLOW_COPY_AND_MOVE(TextClockPattern);
 };

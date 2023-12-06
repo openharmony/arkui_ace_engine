@@ -204,4 +204,8 @@ void ToggleModelImpl::SetPadding(const NG::PaddingPropertyF& args, const NG::Pad
     }
 }
 
+void ToggleModelImpl::Pop()
+{
+    ViewStackProcessor::GetInstance()->Pop();
+}
 } // namespace OHOS::Ace::Framework

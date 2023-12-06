@@ -103,7 +103,7 @@ public:
         registerListenerFunc_->Call(dataSourceObj_, ArraySize(args), args);
     }
 
-    void UnregisterListener(const RefPtr<V2::DataChangeListener>& listener)
+    void UnregisterListener(V2::DataChangeListener* listener)
     {
         if (!listener) {
             return;
@@ -111,7 +111,7 @@ public:
 
         auto listenerProxy = listenerProxy_.Upgrade();
         if (listenerProxy) {
-            listenerProxy->RemoveListener(listener);
+            listenerProxy->RemoveListener(Referenced::WeakClaim(listener));
         }
     }
 

@@ -54,7 +54,6 @@ void GestureModelNG::Finish()
 
     auto gesture = gestureProcessor->FinishGestureNG();
     if (!gesture) {
-        LOGE("gesture is not exist when component finish");
         return;
     }
     gesture->SetGestureMask(gestureProcessor->GetGestureMask());
@@ -70,6 +69,15 @@ void GestureModelNG::Pop()
     RefPtr<GestureProcessor> gestureProcessor;
     gestureProcessor = NG::ViewStackProcessor::GetInstance()->GetOrCreateGestureProcessor();
     gestureProcessor->PopGestureNG();
+}
+
+void GestureModelNG::SetTag(const std::string& tag)
+{
+    RefPtr<GestureProcessor> gestureProcessor;
+    gestureProcessor = NG::ViewStackProcessor::GetInstance()->GetOrCreateGestureProcessor();
+    auto gesture = gestureProcessor->TopGestureNG();
+    CHECK_NULL_VOID(gesture);
+    gesture->SetTag(tag);
 }
 
 void TapGestureModelNG::Create(int32_t countNum, int32_t fingersNum)
@@ -173,7 +181,6 @@ void GestureModelNG::SetOnActionFunc(const GestureEventFunc& gestureEventFunc, c
             gesture->SetOnActionEndId(gestureEventFunc);
             break;
         default:
-            LOGW("Unknown gesture action %{public}d", action);
             break;
     }
 }

@@ -857,16 +857,6 @@ void FrontendDelegateImpl::PostUITask(std::function<void()>&& task)
     taskExecutor_->PostTask(task, TaskExecutor::TaskType::UI);
 }
 
-void FrontendDelegateImpl::RemoveVisibleChangeNode(NodeId id)
-{
-    auto task = [nodeId = id, pipeline = AceType::DynamicCast<PipelineContext>(pipelineContextHolder_.Get())]() {
-        if (pipeline) {
-            pipeline->RemoveVisibleChangeNode(nodeId);
-        }
-    };
-    taskExecutor_->PostTask(task, TaskExecutor::TaskType::UI);
-}
-
 const std::string& FrontendDelegateImpl::GetAppID() const
 {
     return manifestParser_->GetAppInfo()->GetAppID();
@@ -923,10 +913,9 @@ Size FrontendDelegateImpl::MeasureTextSize(const MeasureContext& context)
     return MeasureUtil::MeasureTextSize(context);
 }
 
-
-void FrontendDelegateImpl::ShowToast(const std::string& message, int32_t duration, const std::string& bottom)
+void FrontendDelegateImpl::ShowToast(
+    const std::string& message, int32_t duration, const std::string& bottom, const NG::ToastShowMode& /* showMode */)
 {
-    LOGD("FrontendDelegateImpl ShowToast.");
     int32_t durationTime = std::clamp(duration, TOAST_TIME_DEFAULT, TOAST_TIME_MAX);
     auto pipelineContext = AceType::DynamicCast<PipelineContext>(pipelineContextHolder_.Get());
     bool isRightToLeft = AceApplicationInfo::GetInstance().IsRightToLeft();
@@ -1019,7 +1008,6 @@ void FrontendDelegateImpl::ShowActionMenu(const std::string& title,
     const std::vector<ButtonInfo>& button, std::function<void(int32_t, int32_t)>&& callback)
 {
     if (!taskExecutor_) {
-        LOGE("task executor is null.");
         return;
     }
 
@@ -1088,7 +1076,6 @@ void FrontendDelegateImpl::EnableAlertBeforeBackPage(
                 [weak, callback, successType]() {
                     callback(successType);
                     if (!successType) {
-                        LOGI("dialog choose cancel button, can not back");
                         return;
                     }
                     auto delegate = weak.Upgrade();
@@ -1103,7 +1090,6 @@ void FrontendDelegateImpl::EnableAlertBeforeBackPage(
 
     std::lock_guard<std::mutex> lock(mutex_);
     if (pageRouteStack_.empty()) {
-        LOGE("page stack is null.");
         return;
     }
 

@@ -27,6 +27,7 @@
 #include "base/memory/ace_type.h"
 #include "base/utils/macros.h"
 #include "core/components/common/properties/alignment.h"
+#include "core/components/common/properties/blend_mode.h"
 #include "core/components/common/properties/popup_param.h"
 #include "core/components/common/properties/shared_transition_option.h"
 #include "core/components_ng/base/view_abstract.h"
@@ -49,7 +50,7 @@ namespace OHOS::Ace {
 using ClickEventFunc = std::function<void(const ClickInfo* info)>;
 using RemoteCallback = std::function<void(const BaseEventInfo* info)>;
 using OnNewDragFunc = std::function<void(const RefPtr<OHOS::Ace::DragEvent>&)>;
-
+using BiasPair = std::pair<float, float>;
 enum class ResponseType : int32_t {
     RIGHT_CLICK = 0,
     LONG_PRESS,
@@ -107,6 +108,22 @@ public:
     virtual void SetBorderImage(const RefPtr<BorderImage>& borderImage, uint8_t bitset) = 0;
     virtual void SetBorderImageGradient(const NG::Gradient& gradient) = 0;
 
+    // outerBorder
+    virtual void SetOuterBorderRadius(const Dimension& value) = 0;
+    virtual void SetOuterBorderRadius(const std::optional<Dimension>& radiusTopLeft,
+        const std::optional<Dimension>& radiusTopRight, const std::optional<Dimension>& radiusBottomLeft,
+        const std::optional<Dimension>& radiusBottomRight) = 0;
+    virtual void SetOuterBorderColor(const Color& value) = 0;
+    virtual void SetOuterBorderColor(const std::optional<Color>& colorLeft, const std::optional<Color>& colorRight,
+        const std::optional<Color>& colorTop, const std::optional<Color>& colorBottom) = 0;
+    virtual void SetOuterBorderWidth(const Dimension& value) = 0;
+    virtual void SetOuterBorderWidth(const std::optional<Dimension>& left, const std::optional<Dimension>& right,
+        const std::optional<Dimension>& top, const std::optional<Dimension>& bottom) = 0;
+    virtual void SetOuterBorderStyle(const BorderStyle& value) = 0;
+    virtual void SetOuterBorderStyle(const std::optional<BorderStyle>& styleLeft,
+        const std::optional<BorderStyle>& styleRight, const std::optional<BorderStyle>& styleTop,
+        const std::optional<BorderStyle>& styleBottom) = 0;
+
     // layout
     virtual void SetLayoutPriority(int32_t priority) = 0;
     virtual void SetLayoutWeight(int32_t value) = 0;
@@ -115,6 +132,7 @@ public:
     virtual void ResetAspectRatio() = 0;
     virtual void SetAlign(const Alignment& alignment) = 0;
     virtual void SetAlignRules(const std::map<AlignDirection, AlignRule>& alignRules) = 0;
+    virtual void SetBias(const BiasPair& biasPair) = 0;
     virtual void SetUseAlign(
         AlignDeclarationPtr declaration, AlignDeclaration::Edge edge, const std::optional<Dimension>& offset) = 0;
     virtual void SetGrid(
@@ -167,13 +185,14 @@ public:
 
     // effects
     virtual void SetMask(const RefPtr<BasicShape>& shape) = 0;
-    virtual void SetBackdropBlur(const Dimension& radius) = 0;
+    virtual void SetBackdropBlur(const Dimension& radius, const BlurOption& blurOption) = 0;
     virtual void SetLinearGradientBlur(NG::LinearGradientBlurPara blurPara) = 0;
-    
+
     virtual void SetDynamicLightUp(float rate, float lightUpDegree) = 0;
 
-    virtual void SetFrontBlur(const Dimension& radius) = 0;
+    virtual void SetFrontBlur(const Dimension& radius, const BlurOption& blurOption) = 0;
     virtual void SetBackShadow(const std::vector<Shadow>& shadows) = 0;
+    virtual void SetBlendMode(BlendMode blendMode) = 0;
     virtual void SetColorBlend(const Color& value) = 0;
     virtual void SetWindowBlur(float progress, WindowBlurStyle blurStyle) = 0;
     virtual void SetBrightness(const Dimension& value) = 0;
@@ -181,13 +200,15 @@ public:
     virtual void SetContrast(const Dimension& value) = 0;
     virtual void SetSaturate(const Dimension& value) = 0;
     virtual void SetSepia(const Dimension& value) = 0;
-    virtual void SetInvert(const Dimension& value) = 0;
+    virtual void SetInvert(const InvertVariant& value) = 0;
     virtual void SetHueRotate(float value) = 0;
     virtual void SetClickEffectLevel(const ClickEffectLevel& level, float scaleValue) = 0;
     virtual void SetUseEffect(bool useEffect) = 0;
+    virtual void SetUseShadowBatching(bool useShadowBatching) = 0;
 
     // event
     virtual void SetOnClick(GestureEventFunc&& tapEventFunc, ClickEventFunc&& clickEventFunc) = 0;
+    virtual void SetOnGestureJudgeBegin(NG::GestureJudgeFunc&& gestureJudgeFunc) = 0;
     virtual void SetOnTouch(TouchEventFunc&& touchEventFunc) = 0;
     virtual void SetOnKeyEvent(OnKeyCallbackFunc&& onKeyCallback) = 0;
     virtual void SetOnMouse(OnMouseEventFunc&& onMouseEventFunc) = 0;
@@ -201,6 +222,7 @@ public:
     virtual void SetOnFocus(OnFocusFunc&& onFocusCallback) = 0;
     virtual void SetOnBlur(OnBlurFunc&& onBlurCallback) = 0;
     virtual void SetDraggable(bool draggable) = 0;
+    virtual void SetDragPreviewOptions(const NG::DragPreviewOption& previewOption) = 0;
     virtual void SetOnDragStart(NG::OnDragStartFunc&& onDragStart) = 0;
     virtual void SetOnDragEnter(NG::OnDragDropFunc&& onDragEnter) = 0;
     virtual void SetOnDragEnd(OnNewDragFunc&& onDragEnd) = 0;
@@ -208,6 +230,7 @@ public:
     virtual void SetOnDragMove(NG::OnDragDropFunc&& onDragMove) = 0;
     virtual void SetOnDrop(NG::OnDragDropFunc&& onDrop) = 0;
     virtual void SetAllowDrop(const std::set<std::string>& allowDrop) = 0;
+    virtual void SetDragPreview(const NG::DragDropInfo& info) = 0;
     virtual void SetOnVisibleChange(
         std::function<void(bool, double)>&& onVisibleChange, const std::vector<double>& ratios) = 0;
     virtual void SetOnAreaChanged(
@@ -244,6 +267,7 @@ public:
     virtual void SetHitTestMode(NG::HitTestMode hitTestMode) = 0;
     virtual void SetKeyboardShortcut(const std::string& value, const std::vector<ModifierKey>& keys,
         std::function<void()>&& onKeyboardShortcutAction) = 0;
+    virtual void SetMonopolizeEvents(bool monopolizeEvents) = 0;
 
     // obscured
     virtual void SetObscured(const std::vector<ObscuredReasons>& reasons) = 0;
@@ -261,8 +285,10 @@ public:
         std::function<void()>&& buildFunc, NG::ModalStyle& modalStyle, std::function<void()>&& onAppear,
         std::function<void()>&& onDisappear) = 0;
     virtual void BindSheet(bool isShow, std::function<void(const std::string&)>&& callback,
-        std::function<void()>&& buildFunc, NG::SheetStyle& sheetStyle, std::function<void()>&& onAppear,
-        std::function<void()>&& onDisappear) = 0;
+        std::function<void()>&& buildFunc, std::function<void()>&& titleBuildFunc, NG::SheetStyle& sheetStyle,
+        std::function<void()>&& onAppear, std::function<void()>&& onDisappear,
+        std::function<void()>&& shouldDismiss) = 0;
+    virtual void DismissSheet() = 0;
 
     // accessibility
     virtual void SetAccessibilityGroup(bool accessible) = 0;
@@ -277,16 +303,25 @@ public:
     virtual void SetForegroundColorStrategy(const ForegroundColorStrategy& strategy) = 0;
 
     // custom animation properties
-    virtual void CreateAnimatablePropertyFloat(const std::string& propertyName, float value,
-        const std::function<void(float)>& onCallbackEvent) = 0;
+    virtual void CreateAnimatablePropertyFloat(
+        const std::string& propertyName, float value, const std::function<void(float)>& onCallbackEvent) = 0;
     virtual void UpdateAnimatablePropertyFloat(const std::string& propertyName, float value) = 0;
 
     virtual void CreateAnimatableArithmeticProperty(const std::string& propertyName,
         RefPtr<NG::CustomAnimatableArithmetic>& value,
         std::function<void(const RefPtr<NG::CustomAnimatableArithmetic>&)>& onCallbackEvent) = 0;
-    virtual void UpdateAnimatableArithmeticProperty(const std::string& propertyName,
-        RefPtr<NG::CustomAnimatableArithmetic>& value) = 0;
+    virtual void UpdateAnimatableArithmeticProperty(
+        const std::string& propertyName, RefPtr<NG::CustomAnimatableArithmetic>& value) = 0;
     virtual void UpdateSafeAreaExpandOpts(const NG::SafeAreaExpandOpts& opts) = 0;
+
+    // global light
+    virtual void SetLightPosition(
+        const CalcDimension& positionX, const CalcDimension& positionY, const CalcDimension& positionZ) = 0;
+    virtual void SetLightIntensity(const float value) = 0;
+    virtual void SetLightIlluminated(const uint32_t value) = 0;
+    virtual void SetIlluminatedBorderWidth(const Dimension& value) = 0;
+    virtual void SetBloom(const float value) = 0;
+
 private:
     static std::unique_ptr<ViewAbstractModel> instance_;
     static std::mutex mutex_;

@@ -17,20 +17,11 @@ import(
 build_component("font") {
   sources = [
     "constants_converter.cpp",
-    "flutter_font_collection.cpp",
-    "flutter_font_loader.cpp",
-    "flutter_font_manager.cpp",
     "font_collection.cpp",
     "font_loader_creator.cpp",
     "font_manager_creator.cpp",
   ]
-  if (ace_use_new_skia) {
-    sources -= [
-      "flutter_font_collection.cpp",
-      "flutter_font_loader.cpp",
-      "flutter_font_manager.cpp",
-    ]
-  }
+
   rosen_sources = [
     "rosen_font_collection.cpp",
     "rosen_font_loader.cpp",

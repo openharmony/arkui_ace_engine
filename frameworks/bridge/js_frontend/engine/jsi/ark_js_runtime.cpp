@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,13 +15,17 @@
 
 #include "frameworks/bridge/js_frontend/engine/jsi/ark_js_runtime.h"
 
+#include <unistd.h>
+
 #include "ecmascript/napi/include/dfx_jsnapi.h"
 
 #include "frameworks/base/log/log_wrapper.h"
 #include "frameworks/base/utils/system_properties.h"
 #include "frameworks/bridge/common/utils/utils.h"
 #include "frameworks/bridge/js_frontend/engine/jsi/ark_js_value.h"
+#include "frameworks/core/common/ace_application_info.h"
 #include "frameworks/core/common/connect_server_manager.h"
+#include "frameworks/core/common/hdc_register.h"
 
 // NOLINTNEXTLINE(readability-identifier-naming)
 namespace OHOS::Ace::Framework {
@@ -29,6 +33,7 @@ namespace OHOS::Ace::Framework {
 static constexpr auto PANDA_MAIN_FUNCTION = "_GLOBAL::func_main_0";
 #if !defined(PREVIEW)
 constexpr int32_t FORMAT_JSON = 1;
+constexpr auto DEBUGGER = "@Debugger";
 #endif
 
 Local<JSValueRef> FunctionCallback(panda::JsiRuntimeCallInfo* info)
@@ -47,6 +52,8 @@ void FunctionDeleter(void *nativePointer, void *data)
         delete info;
     }
 }
+
+thread_local EcmaVM* ArkJSRuntime::threadVm_ = nullptr;
 
 bool ArkJSRuntime::Initialize(const std::string& libraryPath, bool isDebugMode, int32_t instanceId)
 {
@@ -86,7 +93,11 @@ void ArkJSRuntime::Reset()
 {
     if (vm_ != nullptr) {
         if (!usingExistVM_) {
-#if !defined(PREVIEW) && !defined(IOS_PLATFORM)
+#if !defined(PREVIEW)
+            HdcRegister::Get().StopHdcRegister(instanceId_);
+#if !defined(ANDROID_PLATFORM) && !defined(IOS_PLATFORM)
+            ConnectServerManager::Get().RemoveInstance(instanceId_);
+#endif
             JSNApi::StopDebugger(vm_);
 #endif
             JSNApi::DestroyJSVM(vm_);
@@ -103,21 +114,65 @@ void ArkJSRuntime::SetLogPrint(LOG_PRINT out)
     print_ = out;
 }
 
+#if !defined(PREVIEW)
+static int ParseHdcRegisterOption(std::string& option)
+{
+    LOGI("hdc option is %{public}s ", option.c_str());
+    if (option.find(":") == std::string::npos) {
+        return -1;
+    }
+    std::size_t pos = option.find_first_of(":");
+    std::string idStr = option.substr(pos + 1);
+    if (idStr.find(DEBUGGER) == std::string::npos) {
+        return -1;
+    }
+    pos = idStr.find(DEBUGGER);
+    idStr = idStr.substr(0, pos);
+    if (idStr.find("@") != std::string::npos) {
+        pos = idStr.find("@");
+        idStr = idStr.substr(pos + 1);
+    }
+    return static_cast<uint32_t>(std::atol(idStr.c_str()));
+}
+
+void ArkJSRuntime::StartDebuggerForSocketPair(std::string& option, uint32_t socketFd)
+{
+    CHECK_NULL_VOID(vm_);
+    int identifierId = ParseHdcRegisterOption(option);
+    panda::JSNApi::DebugOption debugOption = { libPath_.c_str(), isDebugMode_ };
+    panda::JSNApi::StartDebuggerForSocketPair(identifierId, debugOption, socketFd, debuggerPostTask_);
+}
+#endif
+
 bool ArkJSRuntime::StartDebugger()
 {
     bool ret = false;
 #if !defined(PREVIEW)
     if (!libPath_.empty()) {
-    JSNApi::DebugOption debugOption = {libPath_.c_str(), isDebugMode_};
+        auto callback = [instanceId = instanceId_, weak = weak_from_this()](int socketFd, std::string option) {
+            LOGI("HdcRegister callback socket %{public}d, option %{public}s.", socketFd, option.c_str());
+            if (option.find(DEBUGGER) == std::string::npos) {
+                ConnectServerManager::Get().StartConnectServerWithSocketPair(socketFd);
+            } else {
+                auto runtime = weak.lock();
+                CHECK_NULL_VOID(runtime);
+                runtime->StartDebuggerForSocketPair(option, socketFd);
+            }
+        };
+
+        HdcRegister::Get().StartHdcRegister(instanceId_, callback);
+        ConnectServerManager::Get().SetDebugMode();
+        JSNApi::DebugOption debugOption = { libPath_.c_str(), isDebugMode_ };
 #if !defined(ANDROID_PLATFORM) && !defined(IOS_PLATFORM)
         ConnectServerManager::Get().AddInstance(instanceId_, language_);
-        ret = JSNApi::StartDebugger(vm_, debugOption, instanceId_, debuggerPostTask_);
+        ret = JSNApi::NotifyDebugMode(getpid(), vm_, libPath_.c_str(), debugOption, instanceId_, debuggerPostTask_,
+            AceApplicationInfo::GetInstance().IsDebugVersion(), isDebugMode_);
 #elif defined(ANDROID_PLATFORM)
         ret = JSNApi::StartDebugger(vm_, debugOption, instanceId_, debuggerPostTask_);
 #endif
     }
 #if defined(IOS_PLATFORM)
-    JSNApi::DebugOption debugOption = {nullptr, isDebugMode_};
+    JSNApi::DebugOption debugOption = { nullptr, isDebugMode_ };
     ret = JSNApi::StartDebugger(vm_, debugOption, instanceId_, debuggerPostTask_);
 #endif
 #endif
@@ -277,18 +332,27 @@ bool ArkJSRuntime::HasPendingException()
 void ArkJSRuntime::HandleUncaughtException(panda::TryCatch& trycatch,
     const std::function<void(const std::string&, int32_t)>& errorCallback)
 {
+    if (errorCallback != nullptr) {
+        Local<ObjectRef> exception = trycatch.GetAndClearException();
+        if (!exception.IsEmpty() && !exception->IsHole()) {
+            errorCallback("loading js file has crash or the uri of router is not exist.",
+                Framework::ERROR_CODE_URI_ERROR);
+            return;
+        }
+    }
+
+    // Handle the uncaught exception by native engine created by ability runtime in the stage model project.
+    if (nativeEngine_) {
+        nativeEngine_->HandleUncaughtException();
+        return;
+    }
+
     if (uncaughtErrorHandler_ == nullptr) {
-        LOGE("uncaughtErrorHandler is null.");
         return;
     }
 
     Local<ObjectRef> exception = trycatch.GetAndClearException();
-    if (!exception.IsEmpty() && !exception->IsHole() && errorCallback != nullptr) {
-        errorCallback("loading js file has crash or the uri of router is not exist.", Framework::ERROR_CODE_URI_ERROR);
-    }
-
     if (!exception.IsEmpty() && !exception->IsHole()) {
-        LOGI("HandleUncaughtException catch exception.");
         shared_ptr<JsValue> errorPtr =
             std::static_pointer_cast<JsValue>(std::make_shared<ArkJSValue>(shared_from_this(), exception));
         uncaughtErrorHandler_(errorPtr, shared_from_this());
@@ -304,9 +368,6 @@ void ArkJSRuntime::ExecutePendingJob()
 #if !defined(PREVIEW) && !defined(IOS_PLATFORM)
 void ArkJSRuntime::DumpHeapSnapshot(bool isPrivate)
 {
-    if (vm_ == nullptr) {
-        LOGW("vm_ is nullptr.");
-    }
     LocalScope scope(vm_);
     panda::DFXJSNApi::DumpHeapSnapshot(vm_, FORMAT_JSON, true, isPrivate);
 }
@@ -321,7 +382,6 @@ Local<JSValueRef> PandaFunctionData::Callback(panda::JsiRuntimeCallInfo* info) c
 {
     auto runtime = runtime_.lock();
     if (runtime == nullptr) {
-        LOGE("runtime is nullptr");
         return Local<JSValueRef>();
     }
     EscapeLocalScope scope(runtime->GetEcmaVm());

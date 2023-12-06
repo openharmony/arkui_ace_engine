@@ -18,6 +18,9 @@
 #include "base/utils/utils.h"
 #include "core/common/ace_engine.h"
 #include "core/common/container_scope.h"
+#ifdef PLUGIN_COMPONENT_SUPPORTED
+#include "core/common/plugin_manager.h"
+#endif
 
 namespace OHOS::Ace {
 
@@ -31,6 +34,11 @@ RefPtr<Container> Container::Current()
     return AceEngine::Get().GetContainer(ContainerScope::CurrentId());
 }
 
+RefPtr<Container> Container::GetContainer(int32_t containerId)
+{
+    return AceEngine::Get().GetContainer(containerId);
+}
+
 RefPtr<Container> Container::GetActive()
 {
     RefPtr<Container> activeContainer;
@@ -41,6 +49,30 @@ RefPtr<Container> Container::GetActive()
         }
     });
     return activeContainer;
+}
+
+RefPtr<Container> Container::GetDefault()
+{
+    RefPtr<Container> defaultContainer;
+    AceEngine::Get().NotifyContainers([&defaultContainer](const RefPtr<Container>& container) {
+        auto front = container->GetFrontend();
+        if (front) {
+            defaultContainer = container;
+        }
+    });
+    return defaultContainer;
+}
+
+RefPtr<Container> Container::GetFoucsed()
+{
+    RefPtr<Container> foucsContainer;
+    AceEngine::Get().NotifyContainers([&foucsContainer](const RefPtr<Container>& container) {
+        auto pipeline = container->GetPipelineContext();
+        if (pipeline && pipeline->GetOnFoucs()) {
+            foucsContainer = container;
+        }
+    });
+    return foucsContainer;
 }
 
 RefPtr<TaskExecutor> Container::CurrentTaskExecutor()
@@ -71,6 +103,21 @@ bool Container::Dump(const std::vector<std::string>& params, std::vector<std::st
     tip.append(AceType::TypeName(this));
     info.emplace_back(tip);
     return true;
+}
+
+bool Container::IsIdAvailable(int32_t id)
+{
+    return !AceEngine::Get().GetContainer(id);
+}
+
+template<>
+int32_t Container::GenerateId<PLUGIN_SUBCONTAINER>()
+{
+#ifdef PLUGIN_COMPONENT_SUPPORTED
+    return PluginManager::GetInstance().GetPluginSubContainerId();
+#else
+    return INSTANCE_ID_UNDEFINED;
+#endif
 }
 
 } // namespace OHOS::Ace

@@ -623,8 +623,9 @@ double RosenRenderCustomPaint::MeasureTextInner(const MeasureContext& context)
         txtStyle.fontSize = context.fontSize.value().ConvertToPx();
 #endif
     } else {
-        auto context = PipelineBase::GetCurrentContext();
-        auto textTheme = context->GetTheme<TextTheme>();
+        auto pipelineContext = PipelineBase::GetCurrentContext();
+        CHECK_NULL_RETURN(pipelineContext, 0.0);
+        auto textTheme = pipelineContext->GetTheme<TextTheme>();
 #ifndef USE_GRAPHIC_TEXT_GINE
         txtStyle.font_size = textTheme->GetTextStyle().GetFontSize().ConvertToPx();
 #else
@@ -715,8 +716,9 @@ Size RosenRenderCustomPaint::MeasureTextSizeInner(const MeasureContext& context)
         txtStyle.fontSize = context.fontSize.value().ConvertToPx();
 #endif
     } else {
-        auto context = PipelineBase::GetCurrentContext();
-        auto textTheme = context->GetTheme<TextTheme>();
+        auto pipelineContext = PipelineBase::GetCurrentContext();
+        CHECK_NULL_RETURN(pipelineContext, Size(0.0, 0.0));
+        auto textTheme = pipelineContext->GetTheme<TextTheme>();
 #ifndef USE_GRAPHIC_TEXT_GINE
         txtStyle.font_size = textTheme->GetTextStyle().GetFontSize().ConvertToPx();
 #else
@@ -2007,12 +2009,6 @@ bool RosenRenderCustomPaint::UpdateParagraph(
         txtShadow.offset.SetY(shadow_.GetOffset().GetY());
 #endif
 
-        txtShadow.offset.SetX(shadow_.GetOffset().GetX());
-        txtShadow.offset.SetY(shadow_.GetOffset().GetY());
-
-        txtShadow.offset.SetX(shadow_.GetOffset().GetX());
-        txtShadow.offset.SetY(shadow_.GetOffset().GetY());
-
         txtShadow.blur_sigma = shadow_.GetBlurRadius();
         txtStyle.text_shadows.emplace_back(txtShadow);
 #else
@@ -2186,8 +2182,9 @@ void RosenRenderCustomPaint::UpdatePaintShader(
             shaderEffect =
                 RSShaderEffect::CreateRadialGradient(pts.at(1), gradient.GetOuterRadius(), colors, pos, mode);
         } else {
-            shaderEffect = RSShaderEffect::CreateTwoPointConical(
-                pts.at(0), gradient.GetInnerRadius(), pts.at(1), gradient.GetOuterRadius(), colors, pos, mode);
+            RSMatrix matrix;
+            shaderEffect = RSShaderEffect::CreateTwoPointConical(pts.at(0), gradient.GetInnerRadius(), pts.at(1),
+                gradient.GetOuterRadius(), colors, pos, mode, &matrix);
         }
     }
     if (pen != nullptr) {

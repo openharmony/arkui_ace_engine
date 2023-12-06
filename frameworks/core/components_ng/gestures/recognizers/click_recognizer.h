@@ -18,10 +18,12 @@
 
 #include <functional>
 
+#include "base/geometry/ng/rect_t.h"
+#include "base/geometry/ng/point_t.h"
 #include "base/thread/cancelable_callback.h"
 #include "core/accessibility/accessibility_utils.h"
-#include "core/components_ng/gestures/gesture_info.h"
 #include "core/components_ng/gestures/recognizers/multi_fingers_recognizer.h"
+#include "core/gestures/click_info.h"
 
 namespace OHOS::Ace::NG {
 using OnAccessibilityEventFunc = std::function<void(AccessibilityEventType)>;
@@ -75,7 +77,11 @@ public:
         return callback;
     }
 
+    virtual RefPtr<GestureSnapshot> Dump() const override;
+
 private:
+    // Recognize whether MOVE/UP event is in response region.
+    bool IsPointInRegion(const TouchEvent& event);
     void HandleTouchDownEvent(const TouchEvent& event) override;
     void HandleTouchUpEvent(const TouchEvent& event) override;
     void HandleTouchMoveEvent(const TouchEvent& event) override;
@@ -91,6 +97,7 @@ private:
         fingerDeadlineTimer_.Cancel();
         tapDeadlineTimer_.Cancel();
         currentTouchPointsNum_ = 0;
+        responseRegionBuffer_.clear();
     }
 
     void HandleOverdueDeadline();
@@ -98,6 +105,7 @@ private:
     Offset ComputeFocusPoint();
 
     void SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& callback);
+    GestureJudgeResult TriggerGestureJudgeCallback();
     bool ExceedSlop();
     void InitGlobalValue(SourceType deviceId);
 
@@ -120,6 +128,7 @@ private:
     bool useCatchMode_ = true;
     CancelableCallback<void()> fingerDeadlineTimer_;
     CancelableCallback<void()> tapDeadlineTimer_;
+    std::vector<RectF> responseRegionBuffer_;
 
     int32_t currentTouchPointsNum_ = 0;
 

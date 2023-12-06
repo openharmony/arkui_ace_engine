@@ -59,6 +59,7 @@ public:
         auto host = GetHost();
         CHECK_NULL_RETURN(host, nullptr);
         auto paintProperty = host->GetPaintProperty<CheckBoxPaintProperty>();
+        paintProperty->SetHost(host);
         auto isSelect = paintProperty->GetCheckBoxSelectValue(false);
         if (!checkboxModifier_) {
             auto pipeline = PipelineBase::GetCurrentContext();
@@ -71,6 +72,17 @@ public:
             checkboxModifier_ =
                 AceType::MakeRefPtr<CheckBoxModifier>(isSelect, boardColor, checkColor, borderColor, shadowColor);
         }
+        CheckBoxStyle checkboxStyle = CheckBoxStyle::CIRCULAR_STYLE;
+        if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+            checkboxStyle = CheckBoxStyle::CIRCULAR_STYLE;
+        } else {
+            checkboxStyle = CheckBoxStyle::SQUARE_STYLE;
+        }
+        if (paintProperty->HasCheckBoxSelectedStyle()) {
+            checkboxStyle = paintProperty->GetCheckBoxSelectedStyleValue(CheckBoxStyle::CIRCULAR_STYLE);
+        }
+        checkboxModifier_->SetCheckboxStyle(checkboxStyle);
+        host->SetCheckboxFlag(true);
         auto paintMethod = MakeRefPtr<CheckBoxPaintMethod>(checkboxModifier_);
         auto eventHub = host->GetEventHub<EventHub>();
         CHECK_NULL_RETURN(eventHub, nullptr);
@@ -132,6 +144,7 @@ public:
         prePageId_ = pageId;
     }
 
+    void MarkIsSelected(bool isSelected);
     void SetLastSelect(bool select)
     {
         lastSelect_ = select;
@@ -169,6 +182,7 @@ private:
     void OnAttachToFrameNode() override;
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
     void OnModifyDone() override;
+    void OnAfterModifyDone() override;
     void InitClickEvent();
     void InitTouchEvent();
     void InitMouseEvent();
@@ -189,6 +203,8 @@ private:
     void GetInnerFocusPaintRect(RoundRect& paintRect);
     void AddHotZoneRect();
     void RemoveLastHotZoneRect() const;
+    void SetAccessibilityAction();
+    void UpdateSelectStatus(bool isSelected);
 
     std::optional<std::string> preName_;
     std::optional<std::string> preGroup_;

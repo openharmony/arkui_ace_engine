@@ -48,6 +48,7 @@ RefPtr<NGGestureRecognizer> PinchGesture::CreateRecognizer()
 
     pinchRecognizer->SetPriority(priority_);
     pinchRecognizer->SetPriorityMask(gestureMask_);
+    pinchRecognizer->SetGestureInfo(gestureInfo_);
 
     return pinchRecognizer;
 }

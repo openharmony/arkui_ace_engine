@@ -37,7 +37,6 @@ void BadgeLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(host);
     auto children = host->GetChildren();
     if (children.empty()) {
-        LOGW("Badge has no child node.");
         return;
     }
     auto childrenSize = children.size();
@@ -136,7 +135,6 @@ void BadgeLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(host);
     auto children = host->GetChildren();
     if (children.empty()) {
-        LOGW("Badge has no child node.");
         return;
     }
     auto childrenSize = children.size();
@@ -255,6 +253,10 @@ void BadgeLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 
     auto childWrapper = layoutWrapper->GetOrCreateChildByIndex(childrenSize - 2);
     CHECK_NULL_VOID(childWrapper);
+    auto childGeometryNode = childWrapper->GetGeometryNode();
+    CHECK_NULL_VOID(childGeometryNode);
+    // the child node needs to use its own margin
+    childGeometryNode->SetMarginFrameOffset(OffsetF());
     childWrapper->Layout();
 }
 

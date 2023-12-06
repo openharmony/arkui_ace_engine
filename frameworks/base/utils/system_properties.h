@@ -150,7 +150,7 @@ public:
     static float GetFontWeightScale();
 
     /*
-     * Get resolution of device.
+     * Get density of default display.
      */
     static double GetResolution()
     {
@@ -219,6 +219,8 @@ public:
 
     static bool GetImageFrameworkEnabled();
 
+    static bool GetDebugPixelMapSaveEnabled();
+
     static bool GetRosenBackendEnabled()
     {
         return rosenBackendEnabled_;
@@ -234,6 +236,11 @@ public:
         return debugBoundaryEnabled_;
     }
 
+    static bool GetDownloadByNetworkEnabled()
+    {
+        return downloadByNetworkEnabled_;
+    }
+
     static bool GetTraceEnabled()
     {
         return traceEnabled_;
@@ -242,6 +249,11 @@ public:
     static bool GetSvgTraceEnabled()
     {
         return svgTraceEnable_;
+    }
+
+    static bool GetLayoutTraceEnabled()
+    {
+        return layoutTraceEnable_;
     }
 
     static bool GetAccessibilityEnabled()
@@ -300,19 +312,6 @@ public:
     static ScreenShape GetScreenShape()
     {
         return screenShape_;
-    }
-
-    /*
-     * Change px to vp
-     */
-    static double Px2Vp(double pxNum)
-    {
-        return pxNum / resolution_;
-    }
-
-    static double Vp2Px(double pxNum)
-    {
-        return pxNum * resolution_;
     }
 
     static int GetArkProperties();
@@ -380,9 +379,27 @@ public:
 
     static bool IsFormAnimationLimited();
 
+    static bool GetResourceDecoupling();
+
+    static int32_t GetJankFrameThreshold();
+
+    static bool GetTitleStyleEnabled() {
+        return changeTitleStyleEnabled_;
+    }
+
+    static std::string GetCustomTitleFilePath();
+
+    static bool GetFlutterDecouplingEnabled()
+    {
+        return flutterDecouplingEnabled_;
+    }
+
+    static bool Is24HourClock();
+
 private:
     static bool traceEnabled_;
     static bool svgTraceEnable_;
+    static bool layoutTraceEnable_;
     static bool accessibilityEnabled_;
     static bool isRound_;
     static bool isDeviceAccess_;
@@ -390,7 +407,7 @@ private:
     static int32_t deviceHeight_;
     static int32_t devicePhysicalWidth_;
     static int32_t devicePhysicalHeight_;
-    static double resolution_;
+    static double resolution_; // density of the default display
     static DeviceType deviceType_;
     static DeviceOrientation orientation_;
     static std::string brand_;
@@ -410,6 +427,7 @@ private:
     static bool windowAnimationEnabled_;
     static bool debugEnabled_;
     static bool debugBoundaryEnabled_;
+    static bool downloadByNetworkEnabled_;
     static bool gpuUploadEnabled_;
     static bool isHookModeEnabled_;
     static bool astcEnabled_;
@@ -417,6 +435,9 @@ private:
     static int32_t astcPsnr_;
     static bool extSurfaceEnabled_;
     static uint32_t dumpFrameCount_;
+    static bool resourceDecoupling_;
+    static bool changeTitleStyleEnabled_;
+    static bool flutterDecouplingEnabled_;
 };
 
 } // namespace OHOS::Ace

@@ -22,6 +22,7 @@ abcproxyclass_obj_path = base_output_path + "/abc_proxy_class.o"
 abcenumstyle_obj_path = base_output_path + "/abc_enum_style.o"
 abcuicontext_obj_path = base_output_path + "/abc_uicontext.o"
 jsmocksystemplugin_obj_path = base_output_path + "/abc_js_mock_system_plugin.o"
+arkcomponent_obj_path = base_output_path + "/abc_ark_component.o"
 
 es2abc_gen_abc("gen_stateMgmt_abc") {
   extra_visibility = [ ":*" ]  # Only targets in this file can depend on this.
@@ -53,7 +54,17 @@ es2abc_gen_abc("gen_jsUIContext_abc") {
   out_puts = [ base_output_path + "/jsUIContext.abc" ]
 }
 
-if (!is_cross_platform_build) {
+es2abc_gen_abc("gen_arkComponent_abc") {
+  extra_visibility = [ ":*" ]  # Only targets in this file can depend on this.
+  src_js = rebase_path(
+          "//foundation/arkui/ace_engine/frameworks/bridge/declarative_frontend/engine/arkComponent.js")
+  dst_file = rebase_path(base_output_path + "/arkComponent.abc")
+
+  in_puts = [ "//foundation/arkui/ace_engine/frameworks/bridge/declarative_frontend/engine/arkComponent.js" ]
+  out_puts = [ base_output_path + "/arkComponent.abc" ]
+}
+
+if (!is_arkui_x) {
   es2abc_gen_abc("gen_js_mock_system_plugin_abc") {
     extra_visibility = [ ":*" ]  # Only targets in this file can depend on this.
     src_js = rebase_path(
@@ -95,7 +106,16 @@ gen_obj("abc_uicontext") {
   snapshot_dep = [ ":gen_jsUIContext_abc" ]
 }
 
-if (!is_cross_platform_build) {
+gen_obj("abc_ark_component") {
+  input = base_output_path + "/arkComponent.abc"
+  if (use_mac || use_mingw_win || use_ios || use_linux) {
+    arkcomponent_obj_path = base_output_path + "/arkComponent.c"
+  }
+  output = arkcomponent_obj_path
+  snapshot_dep = [ ":gen_arkComponent_abc" ]
+}
+
+if (!is_arkui_x) {
   gen_obj("abc_mock_system_plugin") {
     input = base_output_path + "/jsMockSystemPlugin.abc"
     if (use_mac || use_mingw_win || use_linux) {
@@ -124,6 +144,53 @@ template("declarative_js_engine_ark") {
     configs = [ "$ace_root:ace_config" ]
 
     sources = [
+      "components/arkts_native_alphabet_indexer_modifier.cpp",
+      "components/arkts_native_api_impl.cpp",
+      "components/arkts_native_blank_modifier.cpp",
+      "components/arkts_native_button_modifier.cpp",
+      "components/arkts_native_calendar_picker_modifier.cpp",
+      "components/arkts_native_checkbox_modifier.cpp",
+      "components/arkts_native_checkboxgroup_modifier.cpp",
+      "components/arkts_native_column_modifier.cpp",
+      "components/arkts_native_column_split_modifier.cpp",
+      "components/arkts_native_common_modifier.cpp",
+      "components/arkts_native_counter_modifier.cpp",
+      "components/arkts_native_date_picker_modifier.cpp",
+      "components/arkts_native_divider_modifier.cpp",
+      "components/arkts_native_grid_col_modifier.cpp",
+      "components/arkts_native_grid_row_modifier.cpp",
+      "components/arkts_native_hyperlink_modifier.cpp",
+      "components/arkts_native_image_animator_modifier.cpp",
+      "components/arkts_native_image_modifier.cpp",
+      "components/arkts_native_image_span_modifier.cpp",
+      "components/arkts_native_menu_item_modifier.cpp",
+      "components/arkts_native_menu_modifier.cpp",
+      "components/arkts_native_nav_destination_modifier.cpp",
+      "components/arkts_native_nav_router_modifier.cpp",
+      "components/arkts_native_navigation_modifier.cpp",
+      "components/arkts_native_navigator_modifier.cpp",
+      "components/arkts_native_panel_modifier.cpp",
+      "components/arkts_native_pattern_lock_modifier.cpp",
+      "components/arkts_native_radio_modifier.cpp",
+      "components/arkts_native_rating_modifier.cpp",
+      "components/arkts_native_rich_editor_modifier.cpp",
+      "components/arkts_native_row_modifier.cpp",
+      "components/arkts_native_row_split_modifier.cpp",
+      "components/arkts_native_search_modifier.cpp",
+      "components/arkts_native_select_modifier.cpp",
+      "components/arkts_native_side_bar_container_modifier.cpp",
+      "components/arkts_native_slider_modifier.cpp",
+      "components/arkts_native_span_modifier.cpp",
+      "components/arkts_native_stack_modifier.cpp",
+      "components/arkts_native_stepper_item_modifier.cpp",
+      "components/arkts_native_tabs_modifier.cpp",
+      "components/arkts_native_text_area_modifier.cpp",
+      "components/arkts_native_text_input_modifier.cpp",
+      "components/arkts_native_text_modifier.cpp",
+      "components/arkts_native_textpicker_modifier.cpp",
+      "components/arkts_native_timepicker_modifier.cpp",
+      "components/arkts_native_toggle_modifier.cpp",
+      "components/arkts_native_video_modifier.cpp",
       "js_converter.cpp",
       "jsi_declarative_engine.cpp",
       "jsi_declarative_group_js_bridge.cpp",
@@ -138,7 +205,66 @@ template("declarative_js_engine_ark") {
       "modules/jsi_router_module.cpp",
       "modules/jsi_syscap_module.cpp",
       "modules/jsi_timer_module.cpp",
+      "nativeModule/arkts_native_alphabet_indexer_bridge.cpp",
+      "nativeModule/arkts_native_api_impl_bridge.cpp",
+      "nativeModule/arkts_native_blank_bridge.cpp",
+      "nativeModule/arkts_native_button_bridge.cpp",
+      "nativeModule/arkts_native_calendar_picker_bridge.cpp",
+      "nativeModule/arkts_native_checkbox_bridge.cpp",
+      "nativeModule/arkts_native_checkboxgroup_bridge.cpp",
+      "nativeModule/arkts_native_column_bridge.cpp",
+      "nativeModule/arkts_native_column_split_bridge.cpp",
+      "nativeModule/arkts_native_common_bridge.cpp",
+      "nativeModule/arkts_native_counter_bridge.cpp",
+      "nativeModule/arkts_native_date_picker_bridge.cpp",
+      "nativeModule/arkts_native_divider_bridge.cpp",
+      "nativeModule/arkts_native_grid_col_bridge.cpp",
+      "nativeModule/arkts_native_grid_row_bridge.cpp",
+      "nativeModule/arkts_native_hyperlink_bridge.cpp",
+      "nativeModule/arkts_native_image_animator_bridge.cpp",
+      "nativeModule/arkts_native_image_bridge.cpp",
+      "nativeModule/arkts_native_image_span_bridge.cpp",
+      "nativeModule/arkts_native_menu_bridge.cpp",
+      "nativeModule/arkts_native_menu_item_bridge.cpp",
+      "nativeModule/arkts_native_nav_destination_bridge.cpp",
+      "nativeModule/arkts_native_nav_router_bridge.cpp",
+      "nativeModule/arkts_native_navigation_bridge.cpp",
+      "nativeModule/arkts_native_navigator_bridge.cpp",
+      "nativeModule/arkts_native_panel_bridge.cpp",
+      "nativeModule/arkts_native_pattern_lock_bridge.cpp",
+      "nativeModule/arkts_native_radio_bridge.cpp",
+      "nativeModule/arkts_native_rating_bridge.cpp",
+      "nativeModule/arkts_native_rich_editor_bridge.cpp",
+      "nativeModule/arkts_native_row_bridge.cpp",
+      "nativeModule/arkts_native_row_split_bridge.cpp",
+      "nativeModule/arkts_native_search_bridge.cpp",
+      "nativeModule/arkts_native_select_bridge.cpp",
+      "nativeModule/arkts_native_side_bar_container_bridge.cpp",
+      "nativeModule/arkts_native_slider_bridge.cpp",
+      "nativeModule/arkts_native_span_bridge.cpp",
+      "nativeModule/arkts_native_stack_bridge.cpp",
+      "nativeModule/arkts_native_stepper_item_bridge.cpp",
+      "nativeModule/arkts_native_tabs_bridge.cpp",
+      "nativeModule/arkts_native_text_area_bridge.cpp",
+      "nativeModule/arkts_native_text_bridge.cpp",
+      "nativeModule/arkts_native_text_input_bridge.cpp",
+      "nativeModule/arkts_native_textpicker_bridge.cpp",
+      "nativeModule/arkts_native_timepicker_bridge.cpp",
+      "nativeModule/arkts_native_toggle_bridge.cpp",
+      "nativeModule/arkts_native_video_bridge.cpp",
+      "nativeModule/arkts_utils.cpp",
     ]
+
+    deps = []
+
+    if (defined(config.form_components_support) &&
+        config.form_components_support) {
+      sources += [
+        "components/arkts_native_form_component_modifier.cpp",
+        "nativeModule/arkts_native_form_component_bridge.cpp",
+      ]
+      deps += [ "${ace_root}/frameworks/core/components_ng/pattern/form:ace_core_components_form_pattern_ng_$platform" ]
+    }
 
     include_dirs = []
     if (defined(vendor_configs.extra_view_register_sources)) {
@@ -150,18 +276,17 @@ template("declarative_js_engine_ark") {
 
     include_dirs += [ "${ace_root}/interfaces/inner_api/ace" ]
 
-    deps = []
-    if (!is_cross_platform_build) {
+    if (!is_arkui_x) {
       deps +=
           [ "${ace_root}/interfaces/inner_api/ace:ace_forward_compatibility" ]
     }
 
-    if (platform == "ohos_ng" || is_cross_platform_build) {
+    if (platform == "ohos_ng" || is_arkui_x) {
       sources += [
         "jsi_animator_model_ng_build_impl.cpp",
         "jsi_view_register_impl_ng.cpp",
       ]
-      if (is_cross_platform_build) {
+      if (is_arkui_x) {
         defines += [ "CROSS_PLATFORM" ]
       }
     } else {
@@ -175,7 +300,7 @@ template("declarative_js_engine_ark") {
     external_deps = []
 
     # add for cross_platfrom_build temporarily, shall be removed after external_deps is supported
-    if (is_cross_platform_build) {
+    if (is_arkui_x) {
       configs += [ "$ark_ets_path:ark_jsruntime_public_config" ]
       deps += [ "$ark_ets_path:libark_jsruntime_static" ]
       public_deps = [ "//foundation/arkui/napi:ace_napi" ]
@@ -191,7 +316,7 @@ template("declarative_js_engine_ark") {
       sources += [ "utils/jsi_module_searcher.cpp" ]
     } else if (defined(config.use_build_in_js_engine) &&
                config.use_build_in_js_engine) {
-      if (platform == "ohos_ng" || is_cross_platform_build) {
+      if (platform == "ohos_ng" || is_arkui_x) {
         sources += [
           "$ace_root/frameworks/bridge/js_frontend/engine/common/js_api_perf.cpp",
           "$ace_root/frameworks/bridge/js_frontend/engine/jsi/ark_js_runtime.cpp",
@@ -208,6 +333,7 @@ template("declarative_js_engine_ark") {
     }
 
     deps += [
+      ":gen_obj_src_abc_ark_component",
       ":gen_obj_src_abc_enum_style",
       ":gen_obj_src_abc_proxyclass",
       ":gen_obj_src_abc_uicontext",

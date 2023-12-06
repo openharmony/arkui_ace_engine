@@ -15,16 +15,17 @@
 
 #include "core/components_ng/pattern/window_scene/screen/screen_model.h"
 
-#include "session_manager/include/screen_session_manager.h"
+#include "screen_session_manager/include/screen_session_manager_client.h"
 
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/pattern/window_scene/screen/screen_node.h"
 #include "core/components_ng/pattern/window_scene/screen/screen_pattren.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
 void ScreenModel::Create(uint64_t screenId)
 {
-    auto screenSession = Rosen::ScreenSessionManager::GetInstance().GetScreenSession(screenId);
+    auto screenSession = Rosen::ScreenSessionManagerClient::GetInstance().GetScreenSession(screenId);
     if (screenSession == nullptr) {
         LOGE("screenSession is nullptr");
         return;
@@ -32,7 +33,8 @@ void ScreenModel::Create(uint64_t screenId)
 
     auto stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
-    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::SCREEN_ETS_TAG, nodeId,
+    ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::SCREEN_ETS_TAG, nodeId);
+    auto frameNode = ScreenNode::GetOrCreateScreenNode(V2::SCREEN_ETS_TAG, nodeId,
         [&screenSession]() { return AceType::MakeRefPtr<ScreenPattern>(screenSession); });
     stack->Push(frameNode);
     frameNode->SetExclusiveEventForChild(true);

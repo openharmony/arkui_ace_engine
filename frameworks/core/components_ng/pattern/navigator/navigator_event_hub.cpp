@@ -16,7 +16,11 @@
 #include "navigator_event_hub.h"
 
 #include "base/utils/utils.h"
+#include "core/pipeline/pipeline_base.h"
 #include "frameworks/bridge/common/utils/engine_helper.h"
+#include "frameworks/core/pipeline_ng/pipeline_context.h"
+#include "core/common/recorder/event_recorder.h"
+#include "core/components_ng/base/frame_node.h"
 
 namespace OHOS::Ace::NG {
 
@@ -35,15 +39,28 @@ void NavigatorEventHub::NavigatePage()
             delegate->Back(url_, params_);
             break;
         default:
-            LOGE("Navigator type is invalid!");
+            break;
     }
-    LOGD("navigate success");
+
+    if (Recorder::EventRecorder::Get().IsComponentRecordEnable()) {
+        Recorder::EventParamsBuilder builder;
+        auto host = GetFrameNode();
+        if (host) {
+            auto id = host->GetInspectorIdValue("");
+            builder.SetId(id).SetType(host->GetHostTag());
+        }
+        builder.SetEventType(Recorder::EventType::NAVIGATOR)
+            .SetExtra(Recorder::KEY_NAV_PAGE, url_)
+            .SetExtra(Recorder::KEY_NAV_PAGE_PARAM, params_)
+            .SetExtra(Recorder::KEY_NAV_PAGE_TYPE, GetNavigatorType());
+        Recorder::EventRecorder::Get().OnEvent(std::move(builder));
+    }
 }
 
 void NavigatorEventHub::SetActive(bool active)
 {
     if (active) {
-        auto pipelineContext = PipelineContext::GetCurrentContext();
+        auto pipelineContext = PipelineBase::GetCurrentContext();
         CHECK_NULL_VOID(pipelineContext);
         pipelineContext->GetTaskExecutor()->PostTask(
             [weak = WeakClaim(this)] {

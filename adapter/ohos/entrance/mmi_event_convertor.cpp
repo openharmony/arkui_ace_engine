@@ -20,8 +20,16 @@
 #include "pointer_event.h"
 
 #include "base/utils/utils.h"
+#include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace::Platform {
+namespace {
+constexpr int32_t ANGLE_0 = 0;
+constexpr int32_t ANGLE_90 = 90;
+constexpr int32_t ANGLE_180 = 180;
+constexpr int32_t ANGLE_270 = 270;
+constexpr double SIZE_DIVIDE = 2.0;
+} // namespace
 
 SourceTool GetSourceTool(int32_t orgToolType)
 {
@@ -176,9 +184,7 @@ void GetMouseEventAction(int32_t action, MouseEvent& events, bool isScenceBoardW
             break;
         case OHOS::MMI::PointerEvent::POINTER_ACTION_PULL_MOVE:
             events.action = MouseAction::MOVE;
-            if (isScenceBoardWindow) {
-                events.pullAction = MouseAction::PULL_MOVE;
-            }
+            events.pullAction = MouseAction::PULL_MOVE;
             break;
         case OHOS::MMI::PointerEvent::POINTER_ACTION_PULL_UP:
             events.action = MouseAction::RELEASE;
@@ -260,6 +266,10 @@ void ConvertMouseEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
 #ifdef SECURITY_COMPONENT_ENABLE
     events.enhanceData = pointerEvent->GetEnhanceData();
 #endif
+    auto sourceTool = GetSourceTool(item.GetToolType());
+    if (events.sourceType == SourceType::TOUCH && sourceTool == SourceTool::PEN) {
+        events.id = TOUCH_TOOL_BASE_ID + static_cast<int32_t>(sourceTool);
+    }
     LOGD("ConvertMouseEvent: id: %{public}d (x,y): (%{public}f,%{public}f). Button: %{public}d. Action: %{public}d. "
          "DeviceType: %{public}d. PressedButton: %{public}d. Time: %{public}lld",
         events.id, events.x, events.y, events.button, events.action, events.sourceType, events.pressedButtons,
@@ -337,6 +347,9 @@ void ConvertKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent, KeyEvent& e
     event.key = MMI::KeyEvent::KeyCodeToString(keyEvent->GetKeyCode());
     event.deviceId = keyEvent->GetDeviceId();
     event.sourceType = SourceType::KEYBOARD;
+#ifdef SECURITY_COMPONENT_ENABLE
+    event.enhanceData = keyEvent->GetEnhanceData();
+#endif
     std::string pressedKeyStr = "Pressed Keys: ";
     for (const auto& curCode : keyEvent->GetPressedKeys()) {
         pressedKeyStr += (std::to_string(curCode) + " ");
@@ -344,6 +357,25 @@ void ConvertKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent, KeyEvent& e
     }
     LOGD("ConvertKeyEvent: KeyCode: %{private}d. KeyAction: %{public}d. PressedCodes: %{private}s. Time: %{public}lld",
         event.code, event.action, pressedKeyStr.c_str(), (long long)(keyEvent->GetActionTime()));
+}
+
+void ConvertPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, PointerEvent& event)
+{
+    event.rawPointerEvent = pointerEvent;
+    event.pointerId = pointerEvent->GetPointerId();
+    MMI::PointerEvent::PointerItem pointerItem;
+    pointerEvent->GetPointerItem(pointerEvent->GetPointerId(), pointerItem);
+    event.pressed = pointerItem.IsPressed();
+    event.windowX = pointerItem.GetWindowX();
+    event.windowY = pointerItem.GetWindowY();
+    event.displayX = pointerItem.GetDisplayX();
+    event.displayY = pointerItem.GetDisplayY();
+    event.size = std::max(pointerItem.GetWidth(), pointerItem.GetHeight()) / SIZE_DIVIDE;
+    event.force = static_cast<float>(pointerItem.GetPressure());
+    event.deviceId = pointerItem.GetDeviceId();
+    event.downTime = TimeStamp(std::chrono::microseconds(pointerItem.GetDownTime()));
+    event.sourceTool = GetSourceTool(pointerItem.GetToolType());
+    event.targetWindowId = pointerItem.GetTargetWindowId();
 }
 
 void LogPointInfo(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
@@ -371,21 +403,48 @@ void LogPointInfo(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
     }
 }
 
-void CalculatePointerEvent(
-    const NG::OffsetF& offsetF, const std::shared_ptr<MMI::PointerEvent>& point, const NG::VectorF& scale)
+void CalculatePointerEvent(const NG::OffsetF& offsetF, const std::shared_ptr<MMI::PointerEvent>& point,
+    const NG::VectorF& scale, int32_t udegree)
 {
     CHECK_NULL_VOID(point);
     int32_t pointerId = point->GetPointerId();
     MMI::PointerEvent::PointerItem item;
     bool ret = point->GetPointerItem(pointerId, item);
     if (ret) {
-        float xRelative = item.GetWindowX() - offsetF.GetX();
-        float yRelative = item.GetWindowY() - offsetF.GetY();
-        float xBeforeScale = NearZero(scale.x) ? xRelative : xRelative / scale.x;
-        float yBeforeScale = NearZero(scale.y) ? yRelative : yRelative / scale.y;
+        float xRelative = item.GetWindowX();
+        float yRelative = item.GetWindowY();
+        auto windowX = xRelative;
+        auto windowY = yRelative;
+        auto pipelineContext = PipelineBase::GetCurrentContext();
+        CHECK_NULL_VOID(pipelineContext);
+        auto displayWindowRect = pipelineContext->GetDisplayWindowRectInfo();
+        auto windowWidth = displayWindowRect.Width();
+        auto windowHeight = displayWindowRect.Height();
+        switch (udegree) {
+            case ANGLE_0:
+                windowX = xRelative - offsetF.GetX();
+                windowY = yRelative - offsetF.GetY();
+                break;
+            case ANGLE_90:
+                windowX = yRelative - offsetF.GetX();
+                windowY = windowWidth - offsetF.GetY() - xRelative;
+                break;
+            case ANGLE_180:
+                windowX = windowWidth - offsetF.GetX() - xRelative;
+                windowY = windowHeight - offsetF.GetY() - yRelative;
+                break;
+            case ANGLE_270:
+                windowX = windowHeight - offsetF.GetX() - yRelative;
+                windowY = xRelative - offsetF.GetY();
+                break;
+            default:
+                break;
+        }
+        windowX = NearZero(scale.x) ? windowX : windowX / scale.x;
+        windowY = NearZero(scale.y) ? windowY : windowY / scale.y;
 
-        item.SetWindowX(static_cast<int32_t>(xBeforeScale));
-        item.SetWindowY(static_cast<int32_t>(yBeforeScale));
+        item.SetWindowX(static_cast<int32_t>(windowX));
+        item.SetWindowY(static_cast<int32_t>(windowY));
         point->UpdatePointerItem(pointerId, item);
     }
 }
@@ -409,19 +468,19 @@ void CalculateWindowCoordinate(const NG::OffsetF& offsetF, const std::shared_ptr
         int32_t deviceWidth = SystemProperties::GetDevicePhysicalWidth();
         int32_t deviceHeight = SystemProperties::GetDevicePhysicalHeight();
 
-        if (udegree == 0) {
+        if (udegree == ANGLE_0) {
             windowX = xRelative - offsetF.GetX();
             windowY = yRelative - offsetF.GetY();
         }
-        if (udegree == 90) {
+        if (udegree == ANGLE_90) {
             windowX = yRelative - offsetF.GetX();
             windowY = deviceWidth - offsetF.GetY() - xRelative;
         }
-        if (udegree == 180) {
+        if (udegree == ANGLE_180) {
             windowX = deviceWidth - offsetF.GetX() - xRelative;
             windowY = deviceHeight - offsetF.GetY() - yRelative;
         }
-        if (udegree == 270) {
+        if (udegree == ANGLE_270) {
             windowX = deviceHeight - offsetF.GetX() - yRelative;
             windowY = xRelative - offsetF.GetY();
         }

@@ -112,17 +112,30 @@ public:
         isSelected_ = selected;
     }
 
-    void SetScrollIrregularItemInfo(GridItemIndexInfo info)
+    void SetIrregularItemInfo(GridItemIndexInfo info)
     {
         irregularItemInfo_ = info;
     }
-    std::optional<GridItemIndexInfo> GetScrollIrregularItemInfo() const
+    std::optional<GridItemIndexInfo> GetIrregularItemInfo() const
     {
         return irregularItemInfo_;
     }
 
+    void DumpAdvanceInfo() override;
+
+    void ResetGridItemInfo()
+    {
+        irregularItemInfo_.reset();
+    }
+
 protected:
     void OnModifyDone() override;
+
+    bool IsNeedInitClickEventRecorder() const override
+    {
+        return true;
+    }
+
 private:
     void SetAccessibilityAction();
     void OnAttachToFrameNode() override;

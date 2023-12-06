@@ -19,7 +19,9 @@ ohos_unittest("environment_test") {
   defines = [ "JS_JDWP_CONNECT" ]
 
   sources = [
+    "$ace_root/frameworks/core/common/container_scope.cpp",
     "$ace_root/frameworks/core/common/environment/environment_proxy.cpp",
+    "$ace_root/frameworks/core/components/common/properties/color.cpp",
     "$ace_root/test/mock/core/common/mock_container.cpp",
     "environment_test.cpp",
   ]

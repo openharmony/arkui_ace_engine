@@ -22,6 +22,7 @@
 #include "base/utils/utils.h"
 #include "core/common/ace_page.h"
 #include "core/common/container.h"
+#include "core/common/recorder/node_data_cache.h"
 #include "core/common/thread_checker.h"
 #include "core/components/navigator/navigator_component.h"
 #include "frameworks/bridge/card_frontend/form_frontend_delegate_declarative.h"
@@ -166,6 +167,8 @@ DeclarativeFrontend::~DeclarativeFrontend() noexcept
 
 void DeclarativeFrontend::Destroy()
 {
+    // The call doesn't change the page pop status
+    Recorder::NodeDataCache::Get().OnBeforePagePop(true);
     CHECK_RUN_ON(JS);
     LOGI("DeclarativeFrontend Destroy begin.");
     // To guarantee the jsEngine_ and delegate_ released in js thread
@@ -225,7 +228,6 @@ void DeclarativeFrontend::AttachPipelineContext(const RefPtr<PipelineBase>& cont
 
 void DeclarativeFrontend::AttachSubPipelineContext(const RefPtr<PipelineBase>& context)
 {
-    LOGI("DeclarativeFrontend AttachSubPipelineContext.");
     if (!context) {
         return;
     }
@@ -241,7 +243,6 @@ void DeclarativeFrontend::AttachSubPipelineContext(const RefPtr<PipelineBase>& c
 
 void DeclarativeFrontend::SetAssetManager(const RefPtr<AssetManager>& assetManager)
 {
-    LOGI("DeclarativeFrontend SetAssetManager.");
     if (delegate_) {
         delegate_->SetAssetManager(assetManager);
     }
@@ -256,6 +257,7 @@ void DeclarativeFrontend::InitializeFrontendDelegate(const RefPtr<TaskExecutor>&
             return;
         }
         jsEngine->LoadJs(url, jsPage, isMainPage);
+        jsEngine->UpdateRootComponent();
     };
 
     const auto& setPluginMessageTransferCallback = [weakEngine = WeakPtr<Framework::JsEngine>(jsEngine_)](
@@ -341,7 +343,6 @@ void DeclarativeFrontend::InitializeFrontendDelegate(const RefPtr<TaskExecutor>&
     const auto& onSaveAbilityStateCallBack = [weakEngine = WeakPtr<Framework::JsEngine>(jsEngine_)](std::string& data) {
         auto jsEngine = weakEngine.Upgrade();
         if (!jsEngine) {
-            LOGE("the js engine is nullptr");
             return;
         }
         jsEngine->OnSaveAbilityState(data);
@@ -350,7 +351,6 @@ void DeclarativeFrontend::InitializeFrontendDelegate(const RefPtr<TaskExecutor>&
                                                     const std::string& data) {
         auto jsEngine = weakEngine.Upgrade();
         if (!jsEngine) {
-            LOGE("the js engine is nullptr");
             return;
         }
         jsEngine->OnRestoreAbilityState(data);
@@ -359,7 +359,6 @@ void DeclarativeFrontend::InitializeFrontendDelegate(const RefPtr<TaskExecutor>&
     const auto& onNewWantCallBack = [weakEngine = WeakPtr<Framework::JsEngine>(jsEngine_)](const std::string& data) {
         auto jsEngine = weakEngine.Upgrade();
         if (!jsEngine) {
-            LOGE("the js engine is nullptr");
             return;
         }
         jsEngine->OnNewWant(data);
@@ -484,7 +483,6 @@ void DeclarativeFrontend::InitializeFrontendDelegate(const RefPtr<TaskExecutor>&
     };
 
     if (isFormRender_) {
-        LOGI("Init Form Delegate");
         delegate_ = AceType::MakeRefPtr<Framework::FormFrontendDelegateDeclarative>(taskExecutor, loadCallback,
             setPluginMessageTransferCallback, asyncEventCallback, syncEventCallback, updatePageCallback,
             resetStagingPageCallback, destroyPageCallback, destroyApplicationCallback, updateApplicationStateCallback,
@@ -508,7 +506,6 @@ void DeclarativeFrontend::InitializeFrontendDelegate(const RefPtr<TaskExecutor>&
         delegate_->DisallowPopLastPage();
     }
     if (!jsEngine_) {
-        LOGE("the js engine is nullptr");
         EventReport::SendAppStartException(AppStartExcepType::JS_ENGINE_CREATE_ERR);
         return;
     }
@@ -522,6 +519,15 @@ void DeclarativeFrontend::InitializeFrontendDelegate(const RefPtr<TaskExecutor>&
             }
             return jsEngine->LoadPageSource(url, errorCallback);
         };
+        auto loadPageByBufferCallback = [weakEngine = WeakPtr<Framework::JsEngine>(jsEngine_)](
+                                            const std::shared_ptr<std::vector<uint8_t>>& content,
+                                            const std::function<void(const std::string&, int32_t)>& errorCallback) {
+            auto jsEngine = weakEngine.Upgrade();
+            if (!jsEngine) {
+                return false;
+            }
+            return jsEngine->LoadPageSource(content, errorCallback);
+        };
         auto loadNamedRouterCallback = [weakEngine = WeakPtr<Framework::JsEngine>(jsEngine_)](
                                            const std::string& namedRouter, bool isTriggeredByJs) {
             auto jsEngine = weakEngine.Upgrade();
@@ -530,7 +536,27 @@ void DeclarativeFrontend::InitializeFrontendDelegate(const RefPtr<TaskExecutor>&
             }
             return jsEngine->LoadNamedRouterSource(namedRouter, isTriggeredByJs);
         };
-        delegate_->InitializeRouterManager(std::move(loadPageCallback), std::move(loadNamedRouterCallback));
+        auto updateRootComponentCallback = [weakEngine = WeakPtr<Framework::JsEngine>(jsEngine_)]() {
+            auto jsEngine = weakEngine.Upgrade();
+            if (!jsEngine) {
+                return false;
+            }
+            return jsEngine->UpdateRootComponent();
+        };
+        delegate_->InitializeRouterManager(std::move(loadPageCallback), std::move(loadPageByBufferCallback),
+                                           std::move(loadNamedRouterCallback),
+                                           std::move(updateRootComponentCallback));
+#if defined(PREVIEW)
+        auto isComponentPreviewCallback = [weakEngine = WeakPtr<Framework::JsEngine>(jsEngine_)]() {
+            auto jsEngine = weakEngine.Upgrade();
+            if (!jsEngine) {
+                return false;
+            }
+            return jsEngine->IsComponentPreview();
+        };
+        delegate_->SetIsComponentPreview(isComponentPreviewCallback);
+#endif
+
         auto moduleNamecallback = [weakEngine = WeakPtr<Framework::JsEngine>(jsEngine_)](const std::string& pageName)->
         std::string {
             auto jsEngine = weakEngine.Upgrade();
@@ -542,9 +568,7 @@ void DeclarativeFrontend::InitializeFrontendDelegate(const RefPtr<TaskExecutor>&
         auto container = Container::Current();
         if (container) {
             auto pageUrlChecker = container->GetPageUrlChecker();
-            if (pageUrlChecker != nullptr) {
-                pageUrlChecker->SetModuleNameCallback(std::move(moduleNamecallback));
-            }
+            pageUrlChecker->SetModuleNameCallback(std::move(moduleNamecallback));
         }
     }
 }
@@ -574,6 +598,20 @@ void DeclarativeFrontend::RunPage(const std::string& url, const std::string& par
         } else {
             delegate_->RunPage(url, params, pageProfile_);
         }
+    }
+}
+
+void DeclarativeFrontend::RunPage(const std::shared_ptr<std::vector<uint8_t>>& content, const std::string& params)
+{
+    auto container = Container::Current();
+    auto isStageModel = container ? container->IsUseStageModel() : false;
+    if (!isStageModel) {
+        LOGE("RunPage by buffer must be run under stage model.");
+        return;
+    }
+
+    if (delegate_) {
+        delegate_->RunPage(content, params, pageProfile_);
     }
 }
 
@@ -614,8 +652,8 @@ void DeclarativeFrontend::NavigatePage(uint8_t type, const PageTarget& target, c
             delegate_->BackWithTarget(target, params);
             break;
         default:
-            LOGE("Navigator type is invalid!");
             delegate_->BackWithTarget(target, params);
+            break;
     }
 }
 
@@ -801,7 +839,6 @@ void DeclarativeFrontend::OnNewWant(const std::string& data)
 RefPtr<AccessibilityManager> DeclarativeFrontend::GetAccessibilityManager() const
 {
     if (!delegate_) {
-        LOGE("GetAccessibilityManager delegate is null");
         return nullptr;
     }
     return delegate_->GetJSAccessibilityManager();
@@ -811,7 +848,6 @@ WindowConfig& DeclarativeFrontend::GetWindowConfig()
 {
     if (!delegate_) {
         static WindowConfig windowConfig;
-        LOGW("delegate is null, return default config");
         return windowConfig;
     }
     return delegate_->GetWindowConfig();
@@ -820,7 +856,6 @@ WindowConfig& DeclarativeFrontend::GetWindowConfig()
 bool DeclarativeFrontend::OnBackPressed()
 {
     if (!delegate_) {
-        LOGW("delegate is null, return false");
         return false;
     }
     return delegate_->OnPageBackPress();
@@ -862,7 +897,6 @@ void DeclarativeFrontend::OnInactive() {}
 bool DeclarativeFrontend::OnStartContinuation()
 {
     if (!delegate_) {
-        LOGW("delegate is null, return false");
         return false;
     }
     return delegate_->OnStartContinuation();
@@ -899,7 +933,6 @@ void DeclarativeFrontend::GetPluginsUsed(std::string& data)
 bool DeclarativeFrontend::OnRestoreData(const std::string& data)
 {
     if (!delegate_) {
-        LOGW("delegate is null, return false");
         return false;
     }
     return delegate_->OnRestoreData(data);
@@ -923,7 +956,6 @@ void DeclarativeFrontend::CallRouterBack()
 {
     if (delegate_) {
         if (delegate_->GetStackSize() == 1 && isSubWindow_) {
-            LOGW("Can't back because this is the last page of sub window!");
             return;
         }
         delegate_->CallPopPage();
@@ -1026,7 +1058,6 @@ void DeclarativeFrontend::RebuildAllPages()
 void DeclarativeFrontend::NotifyAppStorage(const std::string& key, const std::string& value)
 {
     if (!delegate_) {
-        LOGW("delegate is null, return false");
         return;
     }
     delegate_->NotifyAppStorage(jsEngine_, key, value);
@@ -1124,7 +1155,6 @@ void DeclarativeEventHandler::HandleSyncEvent(const EventMarker& eventMarker, co
 
 void DeclarativeEventHandler::HandleAsyncEvent(const EventMarker& eventMarker, int32_t param)
 {
-    LOGW("js event handler does not support this event type!");
     AccessibilityEvent accessibilityEvent;
     accessibilityEvent.nodeId = StringUtils::StringToInt(eventMarker.GetData().eventId);
     accessibilityEvent.eventType = eventMarker.GetData().eventType;
@@ -1133,7 +1163,6 @@ void DeclarativeEventHandler::HandleAsyncEvent(const EventMarker& eventMarker, i
 
 void DeclarativeEventHandler::HandleAsyncEvent(const EventMarker& eventMarker, const KeyEvent& info)
 {
-    LOGW("js event handler does not support this event type!");
     AccessibilityEvent accessibilityEvent;
     accessibilityEvent.nodeId = StringUtils::StringToInt(eventMarker.GetData().eventId);
     accessibilityEvent.eventType = eventMarker.GetData().eventType;
@@ -1167,7 +1196,6 @@ void DeclarativeEventHandler::HandleAsyncEvent(const EventMarker& eventMarker, c
 
 void DeclarativeEventHandler::HandleSyncEvent(const EventMarker& eventMarker, bool& result)
 {
-    LOGW("js event handler does not support this event type!");
     AccessibilityEvent accessibilityEvent;
     accessibilityEvent.nodeId = StringUtils::StringToInt(eventMarker.GetData().eventId);
     accessibilityEvent.eventType = eventMarker.GetData().eventType;
@@ -1184,7 +1212,6 @@ void DeclarativeEventHandler::HandleSyncEvent(
 
 void DeclarativeEventHandler::HandleSyncEvent(const EventMarker& eventMarker, const BaseEventInfo& info, bool& result)
 {
-    LOGW("js event handler does not support this event type!");
     AccessibilityEvent accessibilityEvent;
     accessibilityEvent.nodeId = StringUtils::StringToInt(eventMarker.GetData().eventId);
     accessibilityEvent.eventType = eventMarker.GetData().eventType;
@@ -1194,7 +1221,6 @@ void DeclarativeEventHandler::HandleSyncEvent(const EventMarker& eventMarker, co
 void DeclarativeEventHandler::HandleSyncEvent(
     const EventMarker& eventMarker, const std::string& param, std::string& result)
 {
-    LOGW("js event handler does not support this event type!");
     AccessibilityEvent accessibilityEvent;
     accessibilityEvent.nodeId = StringUtils::StringToInt(eventMarker.GetData().eventId);
     accessibilityEvent.eventType = eventMarker.GetData().eventType;

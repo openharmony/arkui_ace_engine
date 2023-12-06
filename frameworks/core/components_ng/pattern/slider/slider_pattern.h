@@ -124,6 +124,7 @@ public:
     void OnVisibleChange(bool isVisible) override;
 private:
     void OnAttachToFrameNode() override;
+    void OnDetachFromFrameNode(FrameNode* frameNode) override;
     void OnModifyDone() override;
     void CancelExceptionValue(float& min, float& max, float& step);
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, bool skipMeasure, bool skipLayout) override;
@@ -145,6 +146,7 @@ private:
     void UpdateMarkDirtyNode(const PropertyChangeFlag& Flag);
     Axis GetDirection() const;
 
+    void InitClickEvent(const RefPtr<GestureEventHub>& gestureHub);
     void InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub);
     void HandleTouchEvent(const TouchEventInfo& info);
     void InitMouseEvent(const RefPtr<InputEventHub>& inputEventHub);
@@ -185,6 +187,10 @@ private:
     void UpdateImagePositionY(float centerY);
     OffsetF GetBubbleVertexPosition(const OffsetF& blockCenter, float trackThickness, const SizeF& blockSize);
     void SetAccessibilityAction();
+    void UpdateTipState();
+    void OnIsFocusActiveUpdate(bool isFocusActive);
+    void AddIsFocusActiveUpdateEvent();
+    void RemoveIsFocusActiveUpdateEvent();
 
     Axis direction_ = Axis::HORIZONTAL;
     enum SliderChangeMode { Begin = 0, Moving = 1, End = 2, Click = 3 };
@@ -201,12 +207,14 @@ private:
     bool isVisibleArea_ = true;
     bool isVisible_ = true;
     bool isShow_ = true;
+    int32_t fingerId_ = -1;
 
     float stepRatio_ = 1.0f / 100.0f;
     float valueRatio_ = 0.0f;
     float sliderLength_ = 0.0f;
     float borderBlank_ = 0.0f;
     float hotBlockShadowWidth_ = 0.0f;
+    double axisOffset_ = 0.0;
     OffsetF circleCenter_ = { 0.0f, 0.0f }; // Relative to the content area
 
     float trackThickness_ = 0.0f;
@@ -226,6 +234,8 @@ private:
     RefPtr<SliderTipModifier> sliderTipModifier_;
 
     RefPtr<FrameNode> imageFrameNode_;
+    std::function<void(bool)> isFocusActiveUpdateEvent_;
+    bool isFocusActive_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(SliderPattern);
 };

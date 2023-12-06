@@ -20,7 +20,7 @@
 #include "parameters.h"
 
 namespace OHOS::Ace {
-#ifdef __aarch64__
+#if (defined(__aarch64__) || defined(__x86_64__))
 const char* FRAME_TRACE_SO_PATH = "/system/lib64/platformsdk/libframe_trace_intf.z.so";
 #else
 const char* FRAME_TRACE_SO_PATH = "/system/lib/platformsdk/libframe_trace_intf.z.so";

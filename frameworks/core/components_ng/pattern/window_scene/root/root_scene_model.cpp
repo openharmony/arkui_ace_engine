@@ -23,6 +23,7 @@ void RootSceneModel::Create()
 {
     auto stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
+    ACE_LAYOUT_SCOPED_TRACE("Create[RootScene][self:%d]", nodeId);
     auto rootSceneNode = RootSceneNode::GetOrCreateRootSceneNode(nodeId);
     stack->Push(rootSceneNode);
 }

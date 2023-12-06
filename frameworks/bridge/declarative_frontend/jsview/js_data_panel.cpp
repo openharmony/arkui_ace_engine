@@ -80,49 +80,44 @@ void JSDataPanel::Create(const JSCallbackInfo& info)
     if (!info[0]->IsObject()) {
         return;
     }
-    auto param = JsonUtil::ParseJsonString(info[0]->ToString());
-    if (!param || param->IsNull()) {
-        return;
-    }
+    JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(info[0]);
     // max
-    auto max = param->GetDouble("max", 100.0);
+    double max = jsObj->GetPropertyValue<double>("max", 100.0);
     // values
-    auto values = param->GetValue("values");
-    if (!values || !values->IsArray()) {
+    JSRef<JSVal> jsValue = jsObj->GetProperty("values");
+    if (!jsValue->IsArray()) {
         return;
     }
-    auto type = param->GetValue("type");
-    size_t length = static_cast<size_t>(values->GetArraySize());
+    JSRef<JSArray> jsArray = JSRef<JSArray>::Cast(jsValue);
+    size_t length = jsArray->Length();
     std::vector<double> dateValues;
     double dataSum = 0.0;
-    for (size_t i = 0; i < length && i < MAX_COUNT; i++) {
-        auto item = values->GetArrayItem(i);
-        if (!item || !item->IsNumber()) {
+    size_t count = std::min(length, MAX_COUNT);
+    for (size_t i = 0; i < count; ++i) {
+        JSRef<JSVal> item = jsArray->GetValueAt(i);
+        if (!item->IsNumber()) {
             continue;
         }
-        auto value = item->GetDouble();
+        double value = item->ToNumber<double>();
         if (LessOrEqual(value, 0.0)) {
             value = 0.0;
         }
-        dataSum += value;
-        if (GreatOrEqual(dataSum, max) && max > 0) {
-            value = max - (dataSum - value);
-            if (NearEqual(value, 0.0)) {
-                break;
-            }
+        // if the sum of values exceeds the maximum value, only fill in to the maximum value
+        if (GreatOrEqual(dataSum + value, max) && GreatNotEqual(max, 0)) {
+            dateValues.emplace_back(max - dataSum);
+            break;
         }
+        dataSum += value;
         dateValues.emplace_back(value);
     }
     if (LessOrEqual(max, 0.0)) {
         max = dataSum;
     }
+
     size_t dataPanelType = 0;
-    if (type->IsNumber()) {
-        if (type->GetInt() == static_cast<int32_t>(ChartType::LINE)) {
-            dataPanelType = 1;
-        } else if (type->GetInt() == static_cast<int32_t>(ChartType::RAINBOW)) {
-            dataPanelType = 0;
-        }
+    size_t type = jsObj->GetPropertyValue<int32_t>("type", static_cast<int32_t>(ChartType::RAINBOW));
+    if (type == static_cast<int32_t>(ChartType::LINE)) {
+        dataPanelType = 1;
     }
     DataPanelModel::GetInstance()->Create(dateValues, max, dataPanelType);
 }
@@ -151,7 +146,8 @@ void JSDataPanel::ValueColors(const JSCallbackInfo& info)
 
     auto paramArray = JSRef<JSArray>::Cast(info[0]);
     size_t length = paramArray->Length();
-    for (size_t i = 0; i < length && i < MAX_COUNT; i++) {
+    size_t count = std::min(length, MAX_COUNT);
+    for (size_t i = 0; i < count; ++i) {
         auto item = paramArray->GetValueAt(i);
         OHOS::Ace::NG::Gradient gradient;
         if (!ConvertGradientColor(item, gradient)) {
@@ -242,7 +238,7 @@ void JSDataPanel::ShadowOption(const JSCallbackInfo& info)
     auto colors = paramObject->GetProperty("colors");
     if (!colors->IsEmpty() && colors->IsArray()) {
         auto colorsArray = JSRef<JSArray>::Cast(colors);
-        for (size_t i = 0; i < colorsArray->Length(); i++) {
+        for (size_t i = 0; i < colorsArray->Length(); ++i) {
             auto item = colorsArray->GetValueAt(i);
             OHOS::Ace::NG::Gradient gradient;
             if (!ConvertGradientColor(item, gradient)) {
@@ -273,7 +269,10 @@ bool JSDataPanel::ConvertGradientColor(const JsiRef<JsiValue>& itemParam, OHOS::
     }
 
     size_t colorLength = jsLinearGradient->GetGradient().size();
-    for (size_t colorIndex = 0; colorIndex < colorLength; colorIndex++) {
+    if (colorLength == 0) {
+        return false;
+    }
+    for (size_t colorIndex = 0; colorIndex < colorLength; ++colorIndex) {
         OHOS::Ace::NG::GradientColor gradientColor;
         gradientColor.SetLinearColor(LinearColor(jsLinearGradient->GetGradient().at(colorIndex).first));
         gradientColor.SetDimension(jsLinearGradient->GetGradient().at(colorIndex).second);
@@ -286,7 +285,6 @@ bool JSDataPanel::ConvertResourceColor(const JsiRef<JsiValue>& itemParam, OHOS::
 {
     Color color;
     if (!ParseJsColor(itemParam, color)) {
-        LOGE("ParseJsColor error.");
         return false;
     }
     OHOS::Ace::NG::GradientColor gradientColorStart;

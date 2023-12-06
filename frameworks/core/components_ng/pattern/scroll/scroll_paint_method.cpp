@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,9 +16,8 @@
 #include "core/components_ng/pattern/scroll/scroll_paint_method.h"
 
 #include "base/utils/utils.h"
-#include "core/components_ng/render/drawing.h"
 #include "core/components_ng/pattern/scroll/inner/scroll_bar_overlay_modifier.h"
-#include "core/components_ng/pattern/scroll/scroll_paint_property.h"
+#include "core/components_ng/render/drawing.h"
 #include "core/pipeline/base/constants.h"
 
 namespace OHOS::Ace::NG {
@@ -48,9 +47,9 @@ void ScrollPaintMethod::UpdateOverlayModifier(PaintWrapper* paintWrapper)
     auto scrollBarOverlayModifier = scrollBarOverlayModifier_.Upgrade();
     CHECK_NULL_VOID(scrollBarOverlayModifier);
     auto scrollBar = scrollBar_.Upgrade();
-    if (!scrollBar || !scrollBar->NeedPaint()) {
-        LOGD("no need paint scroll bar.");
-        return;
+    CHECK_NULL_VOID(scrollBar);
+    if (scrollBar->GetPositionModeUpdate()) {
+        scrollBarOverlayModifier->SetPositionMode(scrollBar->GetPositionMode());
     }
     OffsetF fgOffset(scrollBar->GetActiveRect().Left(), scrollBar->GetActiveRect().Top());
     scrollBarOverlayModifier->StartBarAnimation(scrollBar->GetHoverAnimationType(),

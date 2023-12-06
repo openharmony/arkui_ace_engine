@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,6 +16,7 @@
 #include "bridge/declarative_frontend/jsview/js_scroll.h"
 
 #include "base/utils/utils.h"
+#include "bridge/declarative_frontend/jsview/js_scrollable.h"
 #include "bridge/declarative_frontend/jsview/js_scroller.h"
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "bridge/declarative_frontend/jsview/models/scroll_model_impl.h"
@@ -58,7 +59,6 @@ const std::vector<Axis> AXIS = { Axis::VERTICAL, Axis::HORIZONTAL, Axis::FREE, A
 bool ParseJsDimensionArray(const JSRef<JSVal>& jsValue, std::vector<Dimension>& result)
 {
     if (!jsValue->IsArray()) {
-        LOGE("args is not array orobject!");
         return false;
     }
     JSRef<JSArray> array = JSRef<JSArray>::Cast(jsValue);
@@ -82,7 +82,6 @@ bool CheckSnapPaginations(std::vector<Dimension> snapPaginations)
     auto unit = (*snapPaginations.begin()).Unit();
     for (auto iter = snapPaginations.begin() + 1; iter < snapPaginations.end(); ++iter) {
         if (Negative((*iter).Value()) || (*iter).Unit() != unit || LessOrEqual((*iter).Value(), preValue)) {
-            LOGE("Invalid snapPagination");
             return false;
         }
         preValue = (*iter).Value();
@@ -119,7 +118,6 @@ void JSScroll::Create(const JSCallbackInfo& info)
 void JSScroll::SetScrollable(int32_t value)
 {
     if (value < 0 || value >= static_cast<int32_t>(AXIS.size())) {
-        LOGE("value is not valid: %{public}d", value);
         return;
     }
     ScrollModel::GetInstance()->SetAxis(AXIS[value]);
@@ -140,12 +138,10 @@ void JSScroll::OnScrollBeginCallback(const JSCallbackInfo& args)
             auto params = ConvertToJSValues(dx, dy);
             auto result = func->Call(JSRef<JSObject>(), params.size(), params.data());
             if (result.IsEmpty()) {
-                LOGE("Error calling onScrollBegin, result is empty.");
                 return scrollInfo;
             }
 
             if (!result->IsObject()) {
-                LOGE("Error calling onScrollBegin, result is not object.");
                 return scrollInfo;
             }
 
@@ -175,12 +171,10 @@ void JSScroll::OnScrollFrameBeginCallback(const JSCallbackInfo& args)
             auto params = ConvertToJSValues(offset, state);
             auto result = func->Call(JSRef<JSObject>(), params.size(), params.data());
             if (result.IsEmpty()) {
-                LOGE("Error calling onScrollBegin, result is empty.");
                 return scrollRes;
             }
 
             if (!result->IsObject()) {
-                LOGE("Error calling onScrollBegin, result is not object.");
                 return scrollRes;
             }
 
@@ -260,6 +254,30 @@ void JSScroll::OnScrollStopCallback(const JSCallbackInfo& args)
     args.SetReturnValue(args.This());
 }
 
+void JSScroll::ReachStartCallback(const JSCallbackInfo& args)
+{
+    if (args[0]->IsFunction()) {
+        auto onReachStart = [execCtx = args.GetExecutionContext(), func = JSRef<JSFunc>::Cast(args[0])]() {
+            func->Call(JSRef<JSObject>());
+            return;
+        };
+        ScrollModel::GetInstance()->SetOnReachStart(std::move(onReachStart));
+    }
+    args.ReturnSelf();
+}
+
+void JSScroll::ReachEndCallback(const JSCallbackInfo& args)
+{
+    if (args[0]->IsFunction()) {
+        auto onReachEnd = [execCtx = args.GetExecutionContext(), func = JSRef<JSFunc>::Cast(args[0])]() {
+            func->Call(JSRef<JSObject>());
+            return;
+        };
+        ScrollModel::GetInstance()->SetOnReachEnd(std::move(onReachEnd));
+    }
+    args.ReturnSelf();
+}
+
 void JSScroll::JSBind(BindingTarget globalObj)
 {
     JSClass<JSScroll>::Declare("Scroll");
@@ -273,6 +291,8 @@ void JSScroll::JSBind(BindingTarget globalObj)
     JSClass<JSScroll>::StaticMethod("onScrollEnd", &JSScroll::OnScrollEndCallback, opt);
     JSClass<JSScroll>::StaticMethod("onScrollStart", &JSScroll::OnScrollStartCallback, opt);
     JSClass<JSScroll>::StaticMethod("onScrollStop", &JSScroll::OnScrollStopCallback, opt);
+    JSClass<JSScroll>::StaticMethod("onReachStart", &JSScroll::ReachStartCallback);
+    JSClass<JSScroll>::StaticMethod("onReachEnd", &JSScroll::ReachEndCallback);
     JSClass<JSScroll>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
     JSClass<JSScroll>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
     JSClass<JSScroll>::StaticMethod("onHover", &JSInteractableView::JsOnHover);
@@ -291,18 +311,18 @@ void JSScroll::JSBind(BindingTarget globalObj)
     JSClass<JSScroll>::StaticMethod("enableScrollInteraction", &JSScroll::SetScrollEnabled);
     JSClass<JSScroll>::StaticMethod("friction", &JSScroll::SetFriction);
     JSClass<JSScroll>::StaticMethod("scrollSnap", &JSScroll::SetScrollSnap);
+    JSClass<JSScroll>::StaticMethod("clip", &JSScrollable::JsClip);
     JSClass<JSScroll>::InheritAndBind<JSContainerBase>(globalObj);
 }
 
 void JSScroll::SetScrollBar(const JSCallbackInfo& args)
 {
     if (args.Length() < 1) {
-        LOGE("args is invalid");
         return;
     }
     int32_t displayMode;
     if (args[0]->IsNull() || args[0]->IsUndefined() || !ParseJsInt32(args[0], displayMode)) {
-        displayMode = static_cast<int32_t>(NG::DisplayMode::AUTO);
+        displayMode = static_cast<int32_t>(DisplayMode::AUTO);
     }
     ScrollModel::GetInstance()->SetDisplayMode(displayMode);
 }
@@ -315,7 +335,6 @@ void JSScroll::SetScrollBarWidth(const JSCallbackInfo& args)
     CHECK_NULL_VOID(theme);
     CalcDimension scrollBarWidth;
     if (args.Length() < 1) {
-        LOGE("args is invalid");
         return;
     }
     if (!ParseJsDimensionVp(args[0], scrollBarWidth) || args[0]->IsNull() || args[0]->IsUndefined() ||
@@ -342,16 +361,9 @@ void JSScroll::SetScrollBarColor(const std::string& scrollBarColor)
 
 void JSScroll::SetEdgeEffect(const JSCallbackInfo& args)
 {
-    if (args.Length() < 1) {
-        LOGE("args is invalid");
-        return;
-    }
-    int32_t edgeEffect;
-    if (args[0]->IsNull() || args[0]->IsUndefined() || !ParseJsInt32(args[0], edgeEffect) ||
-        edgeEffect < static_cast<int32_t>(EdgeEffect::SPRING) || edgeEffect > static_cast<int32_t>(EdgeEffect::NONE)) {
-        edgeEffect = static_cast<int32_t>(EdgeEffect::NONE);
-    }
-    ScrollModel::GetInstance()->SetEdgeEffect(static_cast<EdgeEffect>(edgeEffect));
+    auto edgeEffect = JSScrollable::ParseEdgeEffect(args, EdgeEffect::NONE);
+    auto alwaysEnabled = JSScrollable::ParseAlwaysEnable(args, true);
+    ScrollModel::GetInstance()->SetEdgeEffect(edgeEffect, alwaysEnabled);
 }
 
 void JSScroll::JsWidth(const JSCallbackInfo& info)
@@ -374,7 +386,6 @@ void JSScroll::SetNestedScroll(const JSCallbackInfo& args)
     };
     if (args.Length() < 1 || !args[0]->IsObject()) {
         ScrollModel::GetInstance()->SetNestedScroll(nestedOpt);
-        LOGW("Invalid params");
         return;
     }
     JSRef<JSObject> obj = JSRef<JSObject>::Cast(args[0]);
@@ -382,14 +393,12 @@ void JSScroll::SetNestedScroll(const JSCallbackInfo& args)
     JSViewAbstract::ParseJsInt32(obj->GetProperty("scrollForward"), froward);
     if (froward < static_cast<int32_t>(NestedScrollMode::SELF_ONLY) ||
         froward > static_cast<int32_t>(NestedScrollMode::PARALLEL)) {
-        LOGW("ScrollFroward params invalid");
         froward = 0;
     }
     int32_t backward = 0;
     JSViewAbstract::ParseJsInt32(obj->GetProperty("scrollBackward"), backward);
     if (backward < static_cast<int32_t>(NestedScrollMode::SELF_ONLY) ||
         backward > static_cast<int32_t>(NestedScrollMode::PARALLEL)) {
-        LOGW("ScrollFroward params invalid");
         backward = 0;
     }
     nestedOpt.forward = static_cast<NestedScrollMode>(froward);
@@ -402,7 +411,6 @@ void JSScroll::SetFriction(const JSCallbackInfo& info)
 {
     double friction = -1.0;
     if (!JSViewAbstract::ParseJsDouble(info[0], friction)) {
-        LOGW("Friction params invalid,can not convert to double");
         friction = -1.0;
     }
     ScrollModel::GetInstance()->SetFriction(friction);
@@ -411,7 +419,6 @@ void JSScroll::SetFriction(const JSCallbackInfo& info)
 void JSScroll::SetScrollSnap(const JSCallbackInfo& args)
 {
     if (args.Length() < 1 || !args[0]->IsObject()) {
-        LOGW("Invalid params");
         return;
     }
     JSRef<JSObject> obj = JSRef<JSObject>::Cast(args[0]);

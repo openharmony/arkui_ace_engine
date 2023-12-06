@@ -37,7 +37,7 @@ public:
 
     void SetSelectedColor(uint32_t selectedColor);
 
-    void SetSelectedRects(const std::vector<Rect>& selectedRects);
+    void SetSelectedRects(const std::vector<RectF>& selectedRects);
 
     void SetContentRect(const RectF& contentRect)
     {
@@ -50,17 +50,19 @@ public:
         isClip_->Set(isClip);
     }
 
+    void SetShowSelect(bool value);
 protected:
     std::optional<RectF> contentRect_;
+    RefPtr<PropertyBool> showSelect_;
 
 private:
-    bool IsSelectedRectsChanged(const std::vector<Rect>& selectedRects);
+    bool IsSelectedRectsChanged(const std::vector<RectF>& selectedRects);
 
     RefPtr<PropertyOffsetF> paintOffset_;
     RefPtr<PropertyInt> selectedColor_;
     RefPtr<PropertyBool> changeSelectedRects_;
     RefPtr<PropertyBool> isClip_;;
-    std::vector<Rect> selectedRects_;
+    std::vector<RectF> selectedRects_;
 
     ACE_DISALLOW_COPY_AND_MOVE(TextOverlayModifier);
 };

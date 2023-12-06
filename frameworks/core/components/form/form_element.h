@@ -58,6 +58,7 @@ public:
 private:
     void CreateCardContainer();
     void InitEvent(const RefPtr<FormComponent>& component);
+    void UpdateInner(const RequestFormInfo& info);
 
 private:
     RefPtr<SubContainer> subContainer_;

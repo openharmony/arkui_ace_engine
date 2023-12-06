@@ -31,9 +31,15 @@
 #include "core/animation/animator.h"
 #include "core/animation/curve.h"
 #include "core/animation/curve_animation.h"
+#include "core/animation/spring_motion.h"
 
 namespace OHOS::Ace::Napi {
-constexpr size_t MAX_STRING_BUFF_SIZE = 1024;
+
+namespace {
+constexpr size_t INTERPOLATING_SPRING_PARAMS_SIZE = 4;
+constexpr char INTERPOLATING_SPRING[] = "interpolating-spring";
+} // namespace
+
 static void ParseString(napi_env env, napi_value propertyNapi, std::string& property)
 {
     if (propertyNapi != nullptr) {
@@ -49,7 +55,7 @@ static void ParseString(napi_env env, napi_value propertyNapi, std::string& prop
 
         size_t buffSize = 0;
         napi_status status = napi_get_value_string_utf8(env, propertyNapi, nullptr, 0, &buffSize);
-        if (status != napi_ok || buffSize == 0 || buffSize >= MAX_STRING_BUFF_SIZE) {
+        if (status != napi_ok || buffSize == 0) {
             return;
         }
         std::unique_ptr<char[]> propertyString = std::make_unique<char[]>(buffSize + 1);
@@ -117,9 +123,50 @@ static AnimationDirection StringToAnimationDirection(const std::string& directio
     }
 }
 
+static RefPtr<Motion> ParseOptionToMotion(const std::shared_ptr<AnimatorOption>& option)
+{
+    const auto& curveStr = option->easing;
+    if (curveStr.back() != ')') {
+        return nullptr;
+    }
+    std::string::size_type leftEmbracePosition = curveStr.find_last_of('(');
+    if (leftEmbracePosition == std::string::npos) {
+        return nullptr;
+    }
+    auto aniTimFuncName = curveStr.substr(0, leftEmbracePosition);
+    if (aniTimFuncName.compare(INTERPOLATING_SPRING)) {
+        return nullptr;
+    }
+    auto params = curveStr.substr(leftEmbracePosition + 1, curveStr.length() - leftEmbracePosition - 2);
+    std::vector<std::string> paramsVector;
+    StringUtils::StringSplitter(params, ',', paramsVector);
+    if (paramsVector.size() != INTERPOLATING_SPRING_PARAMS_SIZE) {
+        return nullptr;
+    }
+    for (auto& param : paramsVector) {
+        Framework::RemoveHeadTailSpace(param);
+    }
+    float velocity = StringUtils::StringToFloat(paramsVector[0]);
+    float mass = StringUtils::StringToFloat(paramsVector[1]);
+    float stiffness = StringUtils::StringToFloat(paramsVector[2]);
+    float damping = StringUtils::StringToFloat(paramsVector[3]);
+    // input velocity is normalized velocity, while the velocity of arkui's springMotion is absolute velocity.
+    velocity = velocity * (option->end - option->begin);
+    if (LessOrEqual(mass, 0)) {
+        mass = 1.0f;
+    }
+    if (LessOrEqual(stiffness, 0)) {
+        stiffness = 1.0f;
+    }
+    if (LessOrEqual(damping, 0)) {
+        damping = 1.0f;
+    }
+    return AceType::MakeRefPtr<SpringMotion>(
+        option->begin, option->end, velocity, AceType::MakeRefPtr<SpringProperty>(mass, stiffness, damping));
+}
+
 static void ParseAnimatorOption(napi_env env, napi_callback_info info, std::shared_ptr<AnimatorOption>& option)
 {
-    LOGI("JsAnimator: ParseAnimatorOption");
     size_t argc = 1;
     napi_value argv;
     napi_get_cb_info(env, info, &argc, &argv, NULL, NULL);
@@ -167,9 +214,9 @@ static void ParseAnimatorOption(napi_env env, napi_callback_info info, std::shar
     ParseInt(env, iterationsNapi, iterations);
     ParseDouble(env, beginNapi, begin);
     ParseDouble(env, endNapi, end);
-    option->duration = duration;
-    option->delay = delay;
-    option->iterations = iterations;
+    option->duration = std::max(duration, 0);
+    option->delay = std::max(delay, 0);
+    option->iterations = iterations >= -1 ? iterations : 1;
     option->begin = begin;
     option->end = end;
     option->easing = easing;
@@ -177,14 +224,19 @@ static void ParseAnimatorOption(napi_env env, napi_callback_info info, std::shar
     option->direction = direction;
 }
 
-static RefPtr<Animator> GetAnimatorInResult(napi_env env, napi_callback_info info)
+static AnimatorResult* GetAnimatorResult(napi_env env, napi_callback_info info)
 {
     AnimatorResult* animatorResult = nullptr;
     napi_value thisVar;
-    napi_get_cb_info(env, info, NULL, NULL, &thisVar, NULL);
-    napi_unwrap(env, thisVar, (void**)&animatorResult);
+    napi_get_cb_info(env, info, nullptr, nullptr, &thisVar, nullptr);
+    napi_unwrap(env, thisVar, reinterpret_cast<void**>(&animatorResult));
+    return animatorResult;
+}
+
+static RefPtr<Animator> GetAnimatorInResult(napi_env env, napi_callback_info info)
+{
+    AnimatorResult* animatorResult = GetAnimatorResult(env, info);
     if (!animatorResult) {
-        LOGE("unwrap animator result is failed");
         return nullptr;
     }
     return animatorResult->GetAnimator();
@@ -192,26 +244,22 @@ static RefPtr<Animator> GetAnimatorInResult(napi_env env, napi_callback_info inf
 
 static napi_value JSReset(napi_env env, napi_callback_info info)
 {
-    LOGI("JsAnimator: JSReset");
     AnimatorResult* animatorResult = nullptr;
     napi_value thisVar;
     napi_get_cb_info(env, info, NULL, NULL, &thisVar, NULL);
     napi_unwrap(env, thisVar, (void**)&animatorResult);
     if (!animatorResult) {
-        LOGE("unwrap animator result is failed");
         NapiThrow(env, "Internal error. Unwrap animator result is failed.", Framework::ERROR_CODE_INTERNAL_ERROR);
         return nullptr;
     }
     auto option = animatorResult->GetAnimatorOption();
     if (!option) {
-        LOGE("Option is null in AnimatorResult");
         NapiThrow(env, "Internal error. Option is null in AnimatorResult.", Framework::ERROR_CODE_INTERNAL_ERROR);
         return nullptr;
     }
     ParseAnimatorOption(env, info, option);
     auto animator = animatorResult->GetAnimator();
     if (!animator) {
-        LOGW("animator is null");
         NapiThrow(env, "Internal error. Animator is null in AnimatorResult.", Framework::ERROR_CODE_INTERNAL_ERROR);
         return nullptr;
     }
@@ -220,13 +268,10 @@ static napi_value JSReset(napi_env env, napi_callback_info info)
     animatorResult->ApplyOption();
     napi_ref onframeRef = animatorResult->GetOnframeRef();
     if (onframeRef) {
-        auto curve = Framework::CreateCurve(option->easing);
-        auto animation = AceType::MakeRefPtr<CurveAnimation<double>>(option->begin, option->end, curve);
-        animation->AddListener([env, onframeRef](double value) {
+        auto onFrameCallback = [env, onframeRef](double value) {
             napi_handle_scope scope = nullptr;
             napi_open_handle_scope(env, &scope);
             if (scope == nullptr) {
-                LOGW("JsAnimator: open handle scope failed");
                 return;
             }
             napi_value ret = nullptr;
@@ -234,15 +279,25 @@ static napi_value JSReset(napi_env env, napi_callback_info info)
             napi_value onframe = nullptr;
             auto result = napi_get_reference_value(env, onframeRef, &onframe);
             if (result != napi_ok || onframe == nullptr) {
-                LOGW("JsAnimator: get onframe in callback failed");
                 napi_close_handle_scope(env, scope);
                 return;
             }
             napi_create_double(env, value, &valueNapi);
             napi_call_function(env, nullptr, onframe, 1, &valueNapi, &ret);
             napi_close_handle_scope(env, scope);
-        });
-        animator->AddInterpolator(animation);
+        };
+        RefPtr<Animation<double>> animation;
+        RefPtr<Motion> motion = ParseOptionToMotion(option);
+        if (motion) {
+            motion->AddListener(onFrameCallback);
+            animatorResult->SetMotion(motion);
+        } else {
+            auto curve = Framework::CreateCurve(option->easing);
+            animation = AceType::MakeRefPtr<CurveAnimation<double>>(option->begin, option->end, curve);
+            animation->AddListener(onFrameCallback);
+            animator->AddInterpolator(animation);
+            animatorResult->SetMotion(nullptr);
+        }
     }
     napi_value result;
     napi_get_null(env, &result);
@@ -252,7 +307,6 @@ static napi_value JSReset(napi_env env, napi_callback_info info)
 // since API 9 deprecated
 static napi_value JSUpdate(napi_env env, napi_callback_info info)
 {
-    LOGI("JsAnimator: JSUpdate");
     return JSReset(env, info);
 }
 
@@ -262,16 +316,30 @@ static napi_value JSPlay(napi_env env, napi_callback_info info)
     if (ft != nullptr) {
         ft->SetFrameTraceLimit();
     }
-    auto animator = GetAnimatorInResult(env, info);
-    LOGI("JsAnimator: JSPlay, id:%{public}d", animator ? animator->GetId() : -1);
+    auto animatorResult = GetAnimatorResult(env, info);
+    if (!animatorResult) {
+        TAG_LOGW(AceLogTag::ACE_ANIMATION, "JsAnimator: cannot find animator result when call play");
+        return nullptr;
+    }
+    auto animator = animatorResult->GetAnimator();
     if (!animator) {
-        LOGE("animator is null");
+        TAG_LOGW(AceLogTag::ACE_ANIMATION, "JsAnimator: no animator is created when call play");
         return nullptr;
     }
     if (!animator->HasScheduler()) {
-        animator->AttachSchedulerOnContainer();
+        auto result = animator->AttachSchedulerOnContainer();
+        if (!result) {
+            TAG_LOGW(AceLogTag::ACE_ANIMATION,
+                "JsAnimator: play failed, animator is not bound to specific context, id:%{public}d", animator->GetId());
+            return nullptr;
+        }
     }
-    animator->Play();
+    TAG_LOGI(AceLogTag::ACE_ANIMATION, "JsAnimator: JSPlay, id:%{public}d", animator->GetId());
+    if (animatorResult->GetMotion()) {
+        animator->PlayMotion(animatorResult->GetMotion());
+    } else {
+        animator->Play();
+    }
     napi_value result = nullptr;
     napi_get_null(env, &result);
     return result;
@@ -280,9 +348,8 @@ static napi_value JSPlay(napi_env env, napi_callback_info info)
 static napi_value JSFinish(napi_env env, napi_callback_info info)
 {
     auto animator = GetAnimatorInResult(env, info);
-    LOGI("JsAnimator: JSFinish, id:%{public}d", animator ? animator->GetId() : -1);
+    LOGD("JsAnimator: JSFinish, id:%{public}d", animator ? animator->GetId() : -1);
     if (!animator) {
-        LOGE("animator is null");
         return nullptr;
     }
     animator->Finish();
@@ -294,9 +361,8 @@ static napi_value JSFinish(napi_env env, napi_callback_info info)
 static napi_value JSPause(napi_env env, napi_callback_info info)
 {
     auto animator = GetAnimatorInResult(env, info);
-    LOGI("JsAnimator: JSPause, id:%{public}d", animator ? animator->GetId() : -1);
+    LOGD("JsAnimator: JSPause, id:%{public}d", animator ? animator->GetId() : -1);
     if (!animator) {
-        LOGE("animator is null");
         return nullptr;
     }
     animator->Pause();
@@ -308,9 +374,8 @@ static napi_value JSPause(napi_env env, napi_callback_info info)
 static napi_value JSCancel(napi_env env, napi_callback_info info)
 {
     auto animator = GetAnimatorInResult(env, info);
-    LOGI("JsAnimator: JSCancel, id:%{public}d", animator ? animator->GetId() : -1);
+    LOGD("JsAnimator: JSCancel, id:%{public}d", animator ? animator->GetId() : -1);
     if (!animator) {
-        LOGE("animator is null");
         return nullptr;
     }
     animator->Cancel();
@@ -321,14 +386,27 @@ static napi_value JSCancel(napi_env env, napi_callback_info info)
 
 static napi_value JSReverse(napi_env env, napi_callback_info info)
 {
-    auto animator = GetAnimatorInResult(env, info);
-    LOGI("JsAnimator: JSReverse, id:%{public}d", animator ? animator->GetId() : -1);
-    if (!animator) {
-        LOGE("animator is null");
+    auto animatorResult = GetAnimatorResult(env, info);
+    if (!animatorResult) {
+        TAG_LOGW(AceLogTag::ACE_ANIMATION, "JsAnimator: cannot find animator result when call reverse");
         return nullptr;
     }
+    if (animatorResult->GetMotion()) {
+        TAG_LOGW(AceLogTag::ACE_ANIMATION, "JsAnimator: interpolatingSpringCurve, cannot reverse");
+        return nullptr;
+    }
+    auto animator = animatorResult->GetAnimator();
+    if (!animator) {
+        TAG_LOGW(AceLogTag::ACE_ANIMATION, "JsAnimator: no animator is created when call reverse");
+        return nullptr;
+    }
+    TAG_LOGI(AceLogTag::ACE_ANIMATION, "JsAnimator: JSReverse, id:%{public}d", animator->GetId());
     if (!animator->HasScheduler()) {
-        animator->AttachSchedulerOnContainer();
+        auto result = animator->AttachSchedulerOnContainer();
+        if (!result) {
+            TAG_LOGW(AceLogTag::ACE_ANIMATION, "JsAnimator: reverse failed, animator is not bound to specific context");
+            return nullptr;
+        }
     }
     animator->Reverse();
     napi_value result;
@@ -338,7 +416,6 @@ static napi_value JSReverse(napi_env env, napi_callback_info info)
 
 static napi_value SetOnframe(napi_env env, napi_callback_info info)
 {
-    LOGI("JsAnimator: SetOnframe");
     AnimatorResult* animatorResult = nullptr;
     size_t argc = 1;
     napi_value thisVar = nullptr;
@@ -346,22 +423,17 @@ static napi_value SetOnframe(napi_env env, napi_callback_info info)
     napi_get_cb_info(env, info, &argc, &onframe, &thisVar, NULL);
     napi_unwrap(env, thisVar, (void**)&animatorResult);
     if (!animatorResult) {
-        LOGE("unwrap animator result is failed");
         return nullptr;
     }
     auto option = animatorResult->GetAnimatorOption();
     if (!option) {
-        LOGE("option is null");
         return nullptr;
     }
     auto animator = animatorResult->GetAnimator();
     if (!animator) {
-        LOGE("animator is null");
         return nullptr;
     }
     animator->ClearInterpolators();
-    auto curve = Framework::CreateCurve(option->easing);
-    auto animation = AceType::MakeRefPtr<CurveAnimation<double>>(option->begin, option->end, curve);
     // convert onframe function to reference
     napi_ref onframeRef = animatorResult->GetOnframeRef();
     if (onframeRef) {
@@ -370,11 +442,10 @@ static napi_value SetOnframe(napi_env env, napi_callback_info info)
     }
     napi_create_reference(env, onframe, 1, &onframeRef);
     animatorResult->SetOnframeRef(onframeRef);
-    animation->AddListener([env, onframeRef](double value) {
+    auto onFrameCallback = [env, onframeRef](double value) {
         napi_handle_scope scope = nullptr;
         napi_open_handle_scope(env, &scope);
         if (scope == nullptr) {
-            LOGW("JsAnimator: open handle scope failed");
             return;
         }
         napi_value ret = nullptr;
@@ -382,15 +453,25 @@ static napi_value SetOnframe(napi_env env, napi_callback_info info)
         napi_value onframe = nullptr;
         auto result = napi_get_reference_value(env, onframeRef, &onframe);
         if (result != napi_ok || onframe == nullptr) {
-            LOGW("JsAnimator: get onframe in callback failed");
             napi_close_handle_scope(env, scope);
             return;
         }
         napi_create_double(env, value, &valueNapi);
         napi_call_function(env, nullptr, onframe, 1, &valueNapi, &ret);
         napi_close_handle_scope(env, scope);
-    });
-    animator->AddInterpolator(animation);
+    };
+    RefPtr<Animation<double>> animation;
+    RefPtr<Motion> motion = ParseOptionToMotion(option);
+    if (motion) {
+        motion->AddListener(onFrameCallback);
+        animatorResult->SetMotion(motion);
+    } else {
+        auto curve = Framework::CreateCurve(option->easing);
+        animation = AceType::MakeRefPtr<CurveAnimation<double>>(option->begin, option->end, curve);
+        animation->AddListener(onFrameCallback);
+        animator->AddInterpolator(animation);
+        animatorResult->SetMotion(nullptr);
+    }
     if (!animator->HasScheduler()) {
         animator->AttachSchedulerOnContainer();
     }
@@ -401,7 +482,6 @@ static napi_value SetOnframe(napi_env env, napi_callback_info info)
 
 static napi_value SetOnfinish(napi_env env, napi_callback_info info)
 {
-    LOGI("JsAnimator: SetOnfinish");
     AnimatorResult* animatorResult = nullptr;
     size_t argc = 1;
     napi_value thisVar = nullptr;
@@ -409,17 +489,14 @@ static napi_value SetOnfinish(napi_env env, napi_callback_info info)
     napi_get_cb_info(env, info, &argc, &onfinish, &thisVar, NULL);
     napi_unwrap(env, thisVar, (void**)&animatorResult);
     if (!animatorResult) {
-        LOGE("unwrap animator result is failed");
         return nullptr;
     }
     auto option = animatorResult->GetAnimatorOption();
     if (!option) {
-        LOGE("option is null");
         return nullptr;
     }
     auto animator = animatorResult->GetAnimator();
     if (!animator) {
-        LOGE("animator is null");
         return nullptr;
     }
     // convert onfinish function to reference
@@ -432,18 +509,15 @@ static napi_value SetOnfinish(napi_env env, napi_callback_info info)
     animatorResult->SetOnfinishRef(onfinishRef);
     animator->ClearStopListeners();
     animator->AddStopListener([env, onfinishRef] {
-        LOGI("JsAnimator: onfinish");
         napi_handle_scope scope = nullptr;
         napi_open_handle_scope(env, &scope);
         if (scope == nullptr) {
-            LOGW("JsAnimator: open handle scope failed");
             return;
         }
         napi_value ret = nullptr;
         napi_value onfinish = nullptr;
         auto result = napi_get_reference_value(env, onfinishRef, &onfinish);
         if (result != napi_ok || onfinish == nullptr) {
-            LOGW("JsAnimator: get onfinish in callback failed");
             napi_close_handle_scope(env, scope);
             return;
         }
@@ -457,7 +531,6 @@ static napi_value SetOnfinish(napi_env env, napi_callback_info info)
 
 static napi_value SetOncancel(napi_env env, napi_callback_info info)
 {
-    LOGI("JsAnimator: SetOncancel");
     AnimatorResult* animatorResult = nullptr;
     size_t argc = 1;
     napi_value thisVar = nullptr;
@@ -465,17 +538,14 @@ static napi_value SetOncancel(napi_env env, napi_callback_info info)
     napi_get_cb_info(env, info, &argc, &oncancel, &thisVar, NULL);
     napi_unwrap(env, thisVar, (void**)&animatorResult);
     if (!animatorResult) {
-        LOGE("unwrap animator result is failed");
         return nullptr;
     }
     auto option = animatorResult->GetAnimatorOption();
     if (!option) {
-        LOGE("option is null");
         return nullptr;
     }
     auto animator = animatorResult->GetAnimator();
     if (!animator) {
-        LOGE("animator is null");
         return nullptr;
     }
     // convert oncancel function to reference
@@ -488,18 +558,15 @@ static napi_value SetOncancel(napi_env env, napi_callback_info info)
     animatorResult->SetOncancelRef(oncancelRef);
     animator->ClearIdleListeners();
     animator->AddIdleListener([env, oncancelRef] {
-        LOGI("JsAnimator: oncancel");
         napi_handle_scope scope = nullptr;
         napi_open_handle_scope(env, &scope);
         if (scope == nullptr) {
-            LOGW("JsAnimator: open handle scope failed");
             return;
         }
         napi_value ret = nullptr;
         napi_value oncancel = nullptr;
         auto result = napi_get_reference_value(env, oncancelRef, &oncancel);
         if (result != napi_ok || oncancel == nullptr) {
-            LOGW("JsAnimator: get oncancel in callback failed");
             napi_close_handle_scope(env, scope);
             return;
         }
@@ -513,7 +580,6 @@ static napi_value SetOncancel(napi_env env, napi_callback_info info)
 
 static napi_value SetOnrepeat(napi_env env, napi_callback_info info)
 {
-    LOGI("JsAnimator: SetOnrepeat");
     AnimatorResult* animatorResult = nullptr;
     size_t argc = 1;
     napi_value thisVar = nullptr;
@@ -521,17 +587,14 @@ static napi_value SetOnrepeat(napi_env env, napi_callback_info info)
     napi_get_cb_info(env, info, &argc, &onrepeat, &thisVar, NULL);
     napi_unwrap(env, thisVar, (void**)&animatorResult);
     if (!animatorResult) {
-        LOGE("unwrap animator result is failed");
         return nullptr;
     }
     auto option = animatorResult->GetAnimatorOption();
     if (!option) {
-        LOGE("option is null");
         return nullptr;
     }
     auto animator = animatorResult->GetAnimator();
     if (!animator) {
-        LOGE("animator is null");
         return nullptr;
     }
     // convert onrepeat function to reference
@@ -544,18 +607,15 @@ static napi_value SetOnrepeat(napi_env env, napi_callback_info info)
     animatorResult->SetOnrepeatRef(onrepeatRef);
     animator->ClearRepeatListeners();
     animator->AddRepeatListener([env, onrepeatRef] {
-        LOGI("JsAnimator: onrepeat");
         napi_handle_scope scope = nullptr;
         napi_open_handle_scope(env, &scope);
         if (scope == nullptr) {
-            LOGW("JsAnimator: open handle scope failed");
             return;
         }
         napi_value ret = nullptr;
         napi_value onrepeat = nullptr;
         auto result = napi_get_reference_value(env, onrepeatRef, &onrepeat);
         if (result != napi_ok || onrepeat == nullptr) {
-            LOGW("JsAnimator: get onrepeat in callback failed");
             napi_close_handle_scope(env, scope);
             return;
         }
@@ -569,10 +629,9 @@ static napi_value SetOnrepeat(napi_env env, napi_callback_info info)
 
 static napi_value JSCreate(napi_env env, napi_callback_info info)
 {
-    LOGI("JsAnimator: JSCreate");
     auto option = std::make_shared<AnimatorOption>();
     ParseAnimatorOption(env, info, option);
-    auto animator = CREATE_ANIMATOR();
+    auto animator = CREATE_ANIMATOR("ohos.animator");
     animator->AttachSchedulerOnContainer();
     AnimatorResult* animatorResult = new AnimatorResult(animator, option);
     napi_value jsAnimator = nullptr;
@@ -607,13 +666,11 @@ static napi_value JSCreate(napi_env env, napi_callback_info info)
 // since API 9 deprecated
 static napi_value JSCreateAnimator(napi_env env, napi_callback_info info)
 {
-    LOGI("JsAnimator: JSCreateAnimator");
     return JSCreate(env, info);
 }
 
 static napi_value AnimatorExport(napi_env env, napi_value exports)
 {
-    LOGI("JsAnimator: AnimatorExport");
     napi_property_descriptor animatorDesc[] = {
         DECLARE_NAPI_FUNCTION("create", JSCreate),
         DECLARE_NAPI_FUNCTION("createAnimator", JSCreateAnimator),
@@ -641,21 +698,26 @@ void AnimatorResult::ApplyOption()
 {
     CHECK_NULL_VOID(animator_);
     CHECK_NULL_VOID(option_);
-    animator_->SetDuration(option_->duration);
-    animator_->SetIteration(option_->iterations);
+    if (motion_) {
+        // duration not works. Iteration can only be 1. Direction can only be normal.
+        animator_->SetIteration(1);
+        animator_->SetAnimationDirection(AnimationDirection::NORMAL);
+    } else {
+        animator_->SetDuration(option_->duration);
+        animator_->SetIteration(option_->iterations);
+        animator_->SetAnimationDirection(StringToAnimationDirection(option_->direction));
+    }
     animator_->SetStartDelay(option_->delay);
+    // FillMode not works for motion in animator implementation.
     animator_->SetFillMode(StringToFillMode(option_->fill));
-    animator_->SetAnimationDirection(StringToAnimationDirection(option_->direction));
 }
 
 void AnimatorResult::Destroy(napi_env env)
 {
     if (animator_) {
-        LOGI("JsAnimator: animator object start destroying, isStopped:%{public}d, id:%{public}d",
-            animator_->IsStopped(), animator_->GetId());
         if (!animator_->IsStopped()) {
             animator_->Stop();
-            LOGW("JsAnimator: animator force stopping done, id:%{public}d", animator_->GetId());
+            LOGI("Animator force stopping done, id:%{public}d", animator_->GetId());
         }
     }
     if (onframe_ != nullptr) {

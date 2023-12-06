@@ -116,6 +116,11 @@ public:
         ViewStackProcessor::GetInstance()->GetAndPushFrameNode(tag, elmtId);
     }
 
+    bool CheckTopNodeFirstBuilding() const override
+    {
+        return ViewStackProcessor::GetInstance()->CheckTopNodeFirstBuilding();
+    }
+
 private:
     std::unique_ptr<ScopedViewStackProcessor> scopeStack_;
 };

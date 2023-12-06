@@ -17,26 +17,27 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_GESTURES_GESTURE_INFO_H
 
 #include <functional>
-#include <list>
 #include <string>
-#include <unordered_map>
-#include <vector>
 
-#include "base/geometry/offset.h"
-#include "base/geometry/point.h"
-#include "base/image/pixel_map.h"
 #include "base/memory/ace_type.h"
-#include "base/utils/event_callback.h"
 #include "base/utils/macros.h"
-#include "base/utils/type_definition.h"
-#include "core/event/ace_events.h"
-#include "core/gestures/gesture_info.h"
+#include "core/components_ng/event/gesture_info.h"
+#include "core/gestures/gesture_event.h"
 #include "core/gestures/velocity.h"
 #include "core/gestures/velocity_tracker.h"
 
 namespace OHOS::Ace::NG {
 
 class NGGestureRecognizer;
+
+enum class DragPreviewMode : int32_t {
+    AUTO = 1,
+    DISABLE_SCALE = 2,
+};
+
+typedef struct {
+    DragPreviewMode mode;
+} DragPreviewOption;
 
 class ACE_EXPORT Gesture : public virtual AceType {
     DECLARE_ACE_TYPE(Gesture, AceType);
@@ -85,6 +86,15 @@ public:
         return gestureMask_;
     }
 
+    void SetTag(std::string tag)
+    {
+        if (gestureInfo_) {
+            gestureInfo_->SetTag(std::move(tag));
+        } else {
+            gestureInfo_ = MakeRefPtr<GestureInfo>(tag);
+        }
+    }
+
     virtual RefPtr<NGGestureRecognizer> CreateRecognizer() = 0;
 
 protected:
@@ -96,6 +106,7 @@ protected:
     std::unique_ptr<GestureEventFunc> onActionUpdateId_;
     std::unique_ptr<GestureEventFunc> onActionEndId_;
     std::unique_ptr<GestureEventNoParameter> onActionCancelId_;
+    RefPtr<GestureInfo> gestureInfo_;
 };
 } // namespace OHOS::Ace::NG
 

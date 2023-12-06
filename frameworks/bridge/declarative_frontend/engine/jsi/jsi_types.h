@@ -190,6 +190,9 @@ public:
     JsiRef<JsiValue> ToJsonObject(const char* value) const;
 
     template<typename T>
+    T GetPropertyValue(const char* prop, T defaultValue) const;
+
+    template<typename T>
     void SetProperty(const char* prop, const T value) const;
     void SetPropertyJsonObject(const char* prop, const char* value) const;
     void SetPropertyObject(const char* prop, JsiRef<JsiValue> value) const;
@@ -266,9 +269,19 @@ public:
         return info_->GetVM();
     }
 
-private:
-    panda::JsiRuntimeCallInfo* info_ = nullptr;
+    void SetSize(size_t size) const
+    {
+        size_ = size;
+    }
 
+    size_t GetSize() const
+    {
+        return size_;
+    }
+
+private:
+    mutable size_t size_ = 0;
+    panda::JsiRuntimeCallInfo* info_ = nullptr;
     mutable std::variant<void*, panda::CopyableGlobal<panda::JSValueRef>> retVal_;
 };
 
@@ -294,6 +307,8 @@ class JsiException {
 public:
     template<typename... Args>
     static void Throw(const char* format, Args... args);
+    template<typename... Args>
+    static void Throw(int32_t code, const char* format, Args... args);
     template<typename... Args>
     static void ThrowRangeError(const char* format, Args... args);
     template<typename... Args>

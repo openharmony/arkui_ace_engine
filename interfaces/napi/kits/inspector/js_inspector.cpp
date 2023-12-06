@@ -77,23 +77,26 @@ static size_t ParseArgs(
 
 void ComponentObserver::callUserFunction(std::list<napi_ref>& cbList)
 {
-    for (auto& cbRef : cbList) {
-        napi_handle_scope scope = nullptr;
-        napi_open_handle_scope(env_, &scope);
-        if (scope == nullptr) {
-            return;
-        }
-        napi_value thisVal = nullptr;
-        napi_get_reference_value(env_, thisVarRef_, &thisVal);
+    napi_handle_scope scope = nullptr;
+    napi_open_handle_scope(env_, &scope);
+    if (scope == nullptr) {
+        return;
+    }
+    napi_value thisVal = nullptr;
+    napi_get_reference_value(env_, thisVarRef_, &thisVal);
 
+    std::list<napi_value> cbs;
+    for (auto& cbRef : cbList) {
         napi_value cb = nullptr;
         napi_get_reference_value(env_, cbRef, &cb);
-
+        cbs.emplace_back(cb);
+    }
+    for (auto& cb : cbs) {
         napi_value resultArg = nullptr;
         napi_value result = nullptr;
         napi_call_function(env_, thisVal, cb, 1, &resultArg, &result);
-        napi_close_handle_scope(env_, scope);
     }
+    napi_close_handle_scope(env_, scope);
 }
 
 std::list<napi_ref>::iterator ComponentObserver::FindCbList(napi_value cb, CalloutType calloutType)
@@ -155,7 +158,6 @@ void ComponentObserver::FunctionOn(napi_env& env, napi_value result, const char*
     auto On = [](napi_env env, napi_callback_info info) -> napi_value {
         auto jsEngine = EngineHelper::GetCurrentEngine();
         if (!jsEngine) {
-            LOGE("get jsEngine failed");
             return nullptr;
         }
 
@@ -172,7 +174,6 @@ void ComponentObserver::FunctionOn(napi_env& env, napi_value result, const char*
 
         ComponentObserver* observer = GetObserver(env, thisVar);
         if (!observer) {
-            LOGE("observer is null");
             napi_close_handle_scope(env, scope);
             return nullptr;
         }
@@ -192,21 +193,17 @@ void ComponentObserver::FunctionOff(napi_env& env, napi_value result, const char
 {
     napi_value funcValue = nullptr;
     auto Off = [](napi_env env, napi_callback_info info) -> napi_value {
-        LOGI("NAPI ComponentObserver off called");
         napi_value thisVar = nullptr;
         napi_value cb = nullptr;
         CalloutType calloutType = CalloutType::UNKNOW;
         size_t argc = ParseArgs(env, info, thisVar, cb, calloutType);
         ComponentObserver* observer = GetObserver(env, thisVar);
         if (!observer) {
-            LOGE("observer is null");
             return nullptr;
         }
         if (calloutType == CalloutType::LAYOUTCALLOUT) {
-            LOGI("NAPI ComponentObserver Off called NapiLayoutCallback");
             observer->DeleteCallbackFromList(argc, observer->cbLayoutList_, calloutType, cb, env);
         } else if (calloutType == CalloutType::DRAWCALLOUT) {
-            LOGI("NAPI ComponentObserver Off called NapiDrawCallback");
             observer->DeleteCallbackFromList(argc, observer->cbDrawList_, calloutType, cb, env);
         }
         return nullptr;
@@ -260,7 +257,6 @@ void ComponentObserver::Initialize(napi_env env, napi_value thisVar)
 
 static napi_value JSCreateComponentObserver(napi_env env, napi_callback_info info)
 {
-    LOGI("napi_value JSCreateComponentObserve");
     /* Get arguments */
     size_t argc = 1;
     napi_value argv = nullptr;
@@ -291,7 +287,6 @@ static napi_value JSCreateComponentObserver(napi_env env, napi_callback_info inf
 
     auto jsEngine = EngineHelper::GetCurrentEngine();
     if (!jsEngine) {
-        LOGE("get jsEngine failed");
         return nullptr;
     }
 

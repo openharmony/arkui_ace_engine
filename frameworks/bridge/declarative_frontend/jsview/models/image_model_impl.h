@@ -17,13 +17,14 @@
 #define FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_MODELS_IMAGE_MODEL_IMPL_H
 
 #include "core/components_ng/pattern/image/image_model.h"
+#include "core/image/image_source_info.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_interactable_view.h"
 
 namespace OHOS::Ace::Framework {
 
 class ImageModelImpl : public OHOS::Ace::ImageModel {
 public:
-    void SetAlt(const std::string& src) override;
+    void SetAlt(const ImageSourceInfo& src) override;
     void SetBorder(const Border& border) override;
     void SetBackBorder() override;
     void SetBlur(double blur) override;

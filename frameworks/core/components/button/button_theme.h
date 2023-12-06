@@ -43,48 +43,6 @@ public:
             if (!themeConstants) {
                 return theme;
             }
-            theme->radius_ = themeConstants->GetDimension(THEME_BUTTON_RADIUS);
-            theme->bgColor_ = themeConstants->GetColor(THEME_BUTTON_BACKGROUND_COLOR);
-            theme->bgFocusColor_ = themeConstants->GetColor(THEME_BUTTON_FOCUS_COLOR);
-            theme->clickedColor_ = themeConstants->GetColor(THEME_BUTTON_CLICKED_COLOR);
-            theme->disabledColor_ = themeConstants->GetColor(THEME_BUTTON_DISABLED_COLOR);
-            theme->bgDisabledAlpha_ = themeConstants->GetDouble(THEME_BUTTON_DISABLED_ALPHA);
-            theme->hoverColor_ = themeConstants->GetColor(THEME_BUTTON_HOVER_COLOR);
-            theme->borderColor_ = themeConstants->GetColor(THEME_BUTTON_BORDER_COLOR);
-            theme->borderWidth_ = themeConstants->GetDimension(THEME_BUTTON_BORDER_WIDTH);
-            theme->textFocusColor_ = themeConstants->GetColor(THEME_BUTTON_TEXT_FOCUS_COLOR);
-            theme->textDisabledColor_ = themeConstants->GetColor(THEME_BUTTON_TEXT_DISABLED_COLOR);
-            theme->textWaitingColor_ = themeConstants->GetColor(THEME_BUTTON_TEXT_WAITING_COLOR);
-            theme->textStyle_.SetTextColor(themeConstants->GetColor(THEME_BUTTON_TEXT_COLOR));
-            theme->textStyle_.SetFontSize(themeConstants->GetDimension(THEME_BUTTON_TEXT_FONTSIZE));
-            theme->textStyle_.SetFontWeight(FontWeight(themeConstants->GetInt(THEME_BUTTON_TEXT_FONTWEIGHT)));
-            theme->minWidth_ = themeConstants->GetDimension(THEME_BUTTON_MIN_WIDTH);
-            theme->height_ = themeConstants->GetDimension(THEME_BUTTON_HEIGHT);
-            theme->downloadHeight_ = themeConstants->GetDimension(THEME_BUTTON_DOWNLOAD_HEIGHT);
-            theme->padding_ = Edge(themeConstants->GetDimension(THEME_BUTTON_PADDING_HORIZONTAL).Value(),
-                themeConstants->GetDimension(THEME_BUTTON_PADDING_VERTICAL).Value(),
-                themeConstants->GetDimension(THEME_BUTTON_PADDING_HORIZONTAL).Value(),
-                themeConstants->GetDimension(THEME_BUTTON_PADDING_VERTICAL).Value(),
-                themeConstants->GetDimension(THEME_BUTTON_PADDING_VERTICAL).Unit());
-            theme->minFontSize_ = themeConstants->GetDimension(THEME_BUTTON_TEXT_FONTSIZE_MIN);
-            int32_t maxlines = themeConstants->GetInt(THEME_BUTTON_TEXT_MAX_LINES);
-            theme->textMaxLines_ = maxlines < 0 ? theme->textMaxLines_ : static_cast<uint32_t>(maxlines);
-            theme->minCircleButtonDiameter_ = themeConstants->GetDimension(THEME_BUTTON_CIRCLE_MIN_DIAMETER);
-            theme->minCircleButtonIcon_ = themeConstants->GetDimension(THEME_BUTTON_CIRCLE_MIN_ICON_SIZE);
-            theme->minCircleButtonPadding_ = Edge(themeConstants->GetDimension(THEME_BUTTON_CIRCLE_MIN_PADDING));
-            theme->maxCircleButtonDiameter_ = themeConstants->GetDimension(THEME_BUTTON_CIRCLE_MAX_DIAMETER);
-            theme->maxCircleButtonIcon_ = themeConstants->GetDimension(THEME_BUTTON_CIRCLE_MAX_ICON_SIZE);
-            theme->maxCircleButtonPadding_ = Edge(themeConstants->GetDimension(THEME_BUTTON_CIRCLE_MAX_PADDING));
-            theme->progressFocusColor_ = themeConstants->GetColor(THEME_BUTTON_PROGRESS_FOCUS_COLOR);
-            theme->downloadBorderColor_ = themeConstants->GetColor(THEME_BUTTON_DOWNLOAD_BORDER_COLOR);
-            theme->normalTextColor_ = themeConstants->GetColor(THEME_BUTTON_NORMAL_TEXT_COLOR);
-            theme->downloadBackgroundColor_ = themeConstants->GetColor(THEME_BUTTON_DOWNLOAD_BG_COLOR);
-            theme->downloadTextColor_ = themeConstants->GetColor(THEME_BUTTON_DOWNLOAD_TEXT_COLOR);
-            theme->downloadFontSize_ = themeConstants->GetDimension(THEME_BUTTON_DOWNLOAD_TEXT_FONTSIZE);
-            theme->progressColor_ = themeConstants->GetColor(THEME_BUTTON_PROGRESS_COLOR);
-            theme->progressDiameter_ = themeConstants->GetDimension(THEME_BUTTON_PROGRESS_DIAMETER);
-            theme->downloadProgressColor_ = themeConstants->GetColor(THEME_BUTTON_DOWNLOAD_PROGRESS_COLOR);
-            theme->innerPadding_ = themeConstants->GetDimension(THEME_BUTTON_INNER_PADDING);
             ParsePattern(themeConstants->GetThemeStyle(), theme);
             return theme;
         }
@@ -100,14 +58,14 @@ public:
                 LOGW("find pattern of button fail");
                 return;
             }
-            theme->bgColor_ = buttonPattern->GetAttr<Color>(PATTERN_BG_COLOR, Color());
+            theme->bgColor_ = buttonPattern->GetAttr<Color>("button_bg_color", Color());
             theme->clickedColor_ = buttonPattern->GetAttr<Color>("bg_color_clicked_blend", Color());
             theme->disabledColor_ = theme->bgColor_
                 .BlendOpacity(buttonPattern->GetAttr<double>(PATTERN_BG_COLOR_DISABLED_ALPHA, 0.0));
             theme->hoverColor_ = buttonPattern->GetAttr<Color>("bg_color_hovered_blend", Color());
             theme->borderColor_ = buttonPattern->GetAttr<Color>("border_color", Color());
             theme->borderWidth_ = buttonPattern->GetAttr<Dimension>("border_width", 0.0_vp);
-            theme->textStyle_.SetTextColor(buttonPattern->GetAttr<Color>(PATTERN_TEXT_COLOR, Color()));
+            theme->textStyle_.SetTextColor(buttonPattern->GetAttr<Color>("button_text_color", Color()));
             theme->textDisabledColor_ = buttonPattern->GetAttr<Color>(PATTERN_TEXT_COLOR, Color())
                 .BlendOpacity(buttonPattern->GetAttr<double>("text_color_disabled_alpha", 0.0));
             theme->textWaitingColor_ = buttonPattern->GetAttr<Color>("waiting_button_text_color", Color());
@@ -120,6 +78,36 @@ public:
                 .BlendOpacity(buttonPattern->GetAttr<double>("download_button_process_color_alpha", 0.0));
             theme->downloadTextColor_ = buttonPattern->GetAttr<Color>("download_button_text_color", Color());
             theme->progressColor_ = buttonPattern->GetAttr<Color>("process_button_text_color", Color());
+            theme->radius_ = buttonPattern->GetAttr<Dimension>("button_radius", 0.0_vp);
+            theme->bgFocusColor_ = buttonPattern->GetAttr<Color>("button_bg_focus_color", Color());
+            theme->bgDisabledAlpha_ = buttonPattern->GetAttr<double>(PATTERN_BG_COLOR_DISABLED_ALPHA, 0.0);
+            theme->textFocusColor_ = buttonPattern->GetAttr<Color>("button_text_focus_color", Color());
+            theme->textStyle_.SetFontSize(buttonPattern->GetAttr<Dimension>("button_font_size", 0.0_fp));
+            theme->textStyle_.SetFontWeight(
+                FontWeight(static_cast<int32_t>(buttonPattern->GetAttr<double>("button_font_weight", 0.0))));
+            theme->minWidth_ = buttonPattern->GetAttr<Dimension>("button_min_width", 0.0_vp);
+            theme->height_ = buttonPattern->GetAttr<Dimension>("button_height", 0.0_vp);
+            theme->downloadHeight_ = buttonPattern->GetAttr<Dimension>("button_download_height", 0.0_vp);
+            theme->padding_ = Edge(buttonPattern->GetAttr<Dimension>("button_horizontal_padding", 0.0_vp).Value(),
+                buttonPattern->GetAttr<Dimension>("button_vertical_padding", 0.0_vp).Value(),
+                buttonPattern->GetAttr<Dimension>("button_horizontal_padding", 0.0_vp).Value(),
+                buttonPattern->GetAttr<Dimension>("button_vertical_padding", 0.0_vp).Value(),
+                buttonPattern->GetAttr<Dimension>("button_vertical_padding", 0.0_vp).Unit());
+            theme->minFontSize_ = buttonPattern->GetAttr<Dimension>("button_min_font_size", 0.0_fp);
+            int32_t maxlines = static_cast<int32_t>(buttonPattern->GetAttr<double>("button_text_max_lines", 0.0));
+            theme->textMaxLines_ = maxlines < 0 ? theme->textMaxLines_ : static_cast<uint32_t>(maxlines);
+            theme->minCircleButtonDiameter_ = buttonPattern->GetAttr<Dimension>("min_circle_button_diameter", 0.0_vp);
+            theme->minCircleButtonIcon_ = buttonPattern->GetAttr<Dimension>("min_circle_button_icon_size", 0.0_vp);
+            theme->minCircleButtonPadding_ =
+                Edge(buttonPattern->GetAttr<Dimension>("min_circle_button_padding", 0.0_vp));
+            theme->maxCircleButtonDiameter_ = buttonPattern->GetAttr<Dimension>("max_circle_button_diameter", 0.0_vp);
+            theme->maxCircleButtonIcon_ = buttonPattern->GetAttr<Dimension>("max_circle_button_icon_size", 0.0_vp);
+            theme->maxCircleButtonPadding_ =
+                Edge(buttonPattern->GetAttr<Dimension>("button_max_circle_button_padding", 0.0_vp));
+            theme->progressFocusColor_ = buttonPattern->GetAttr<Color>("button_progress_focus_color", Color());
+            theme->downloadFontSize_ = buttonPattern->GetAttr<Dimension>("button_download_font_size", 0.0_fp);
+            theme->progressDiameter_ = buttonPattern->GetAttr<Dimension>("button_progress_diameter", 0.0_vp);
+            theme->innerPadding_ = buttonPattern->GetAttr<Dimension>("button_inner_padding", 0.0_vp);
         }
     };
 

@@ -24,7 +24,9 @@
 #include "wm/wm_common.h"
 
 #include "adapter/ohos/entrance/file_asset_provider.h"
+#include "adapter/ohos/entrance/file_asset_provider_impl.h"
 #include "adapter/ohos/entrance/hap_asset_provider.h"
+#include "adapter/ohos/entrance/hap_asset_provider_impl.h"
 
 namespace OHOS::Ace {
 
@@ -96,6 +98,23 @@ RefPtr<FlutterAssetProvider> CreateAssetProvider(
         auto assetProvider = AceType::MakeRefPtr<FileAssetProvider>();
         if (assetProvider->Initialize(packagePath, assetBasePaths)) {
             return assetProvider;
+        }
+    }
+    return nullptr;
+}
+
+RefPtr<AssetProviderImpl> CreateAssetProviderImpl(
+    const std::string& packagePath, const std::vector<std::string>& assetBasePaths, bool useCache)
+{
+    if (std::regex_match(packagePath, std::regex(".*\\.hap"))) {
+        auto assetProviderImpl = AceType::MakeRefPtr<HapAssetProviderImpl>();
+        if (assetProviderImpl->Initialize(packagePath, assetBasePaths, useCache)) {
+            return assetProviderImpl;
+        }
+    } else {
+        auto assetProviderImpl = AceType::MakeRefPtr<FileAssetProviderImpl>();
+        if (assetProviderImpl->Initialize(packagePath, assetBasePaths)) {
+            return assetProviderImpl;
         }
     }
     return nullptr;

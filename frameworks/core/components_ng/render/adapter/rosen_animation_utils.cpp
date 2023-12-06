@@ -22,6 +22,16 @@
 namespace OHOS::Ace {
 
 namespace {
+Rosen::FinishCallbackType ToAnimationFinishCallbackType(const FinishCallbackType finishCallbackType)
+{
+    if (finishCallbackType == FinishCallbackType::LOGICALLY) {
+        return Rosen::FinishCallbackType::LOGICALLY;
+    } else if (finishCallbackType == FinishCallbackType::REMOVED) {
+        return Rosen::FinishCallbackType::TIME_SENSITIVE;
+    } else {
+        return Rosen::FinishCallbackType::TIME_SENSITIVE;
+    }
+}
 Rosen::RSAnimationTimingProtocol OptionToTimingProtocol(const AnimationOption& option)
 {
     Rosen::RSAnimationTimingProtocol timingProtocol;
@@ -34,6 +44,11 @@ Rosen::RSAnimationTimingProtocol OptionToTimingProtocol(const AnimationOption& o
     timingProtocol.SetAutoReverse(option.GetAnimationDirection() == AnimationDirection::ALTERNATE ||
                                   option.GetAnimationDirection() == AnimationDirection::ALTERNATE_REVERSE);
     timingProtocol.SetFillMode(static_cast<Rosen::FillMode>(option.GetFillMode()));
+    timingProtocol.SetFinishCallbackType(ToAnimationFinishCallbackType(option.GetFinishCallbackType()));
+    auto rateRange = option.GetFrameRateRange();
+    if (rateRange) {
+        timingProtocol.SetFrameRateRange({ rateRange->min_, rateRange->max_, rateRange->preferred_ });
+    }
     return timingProtocol;
 }
 } // namespace
@@ -45,8 +60,8 @@ private:
     friend AnimationUtils;
 };
 
-void AnimationUtils::OpenImplicitAnimation(const AnimationOption& option, const RefPtr<Curve>& curve,
-    const std::function<void()>& finishCallback)
+void AnimationUtils::OpenImplicitAnimation(
+    const AnimationOption& option, const RefPtr<Curve>& curve, const std::function<void()>& finishCallback)
 {
     const auto& timingProtocol = OptionToTimingProtocol(option);
     Rosen::RSNode::OpenImplicitAnimation(timingProtocol, NativeCurveHelper::ToNativeCurve(curve), finishCallback);
@@ -56,6 +71,11 @@ bool AnimationUtils::CloseImplicitAnimation()
 {
     auto animations = Rosen::RSNode::CloseImplicitAnimation();
     return !animations.empty();
+}
+
+bool AnimationUtils::IsImplicitAnimationOpen()
+{
+    return Rosen::RSNode::IsImplicitAnimationOpen();
 }
 
 void AnimationUtils::Animate(const AnimationOption& option, const PropertyCallback& callback,
@@ -97,17 +117,16 @@ std::shared_ptr<AnimationUtils::Animation> AnimationUtils::StartAnimation(const 
     const auto& timingProtocol = OptionToTimingProtocol(option);
     animation->animations_ = Rosen::RSNode::Animate(
         timingProtocol, NativeCurveHelper::ToNativeCurve(option.GetCurve()), callback, finishCallback, repeatCallback);
-    if (animation->animations_.size()) {
+    if (!animation->animations_.empty()) {
         return animation;
-    } else {
-        return nullptr;
     }
+    return nullptr;
 }
 
 void AnimationUtils::StopAnimation(const std::shared_ptr<AnimationUtils::Animation>& animation)
 {
     CHECK_NULL_VOID(animation);
-    if (animation->animations_.size()) {
+    if (!animation->animations_.empty()) {
         for (auto& ani : animation->animations_) {
             ani->Finish();
         }
@@ -138,5 +157,16 @@ void AnimationUtils::ResumeAnimation(const std::shared_ptr<AnimationUtils::Anima
     for (auto& ani : animation->animations_) {
         ani->Resume();
     }
+}
+
+bool AnimationUtils::AnimationIsRunning(const std::shared_ptr<AnimationUtils::Animation>& animation)
+{
+    CHECK_NULL_RETURN(animation, false);
+    for (auto& ani : animation->animations_) {
+        if (ani->IsRunning() == true) {
+            return true;
+        }
+    }
+    return false;
 }
 } // namespace OHOS::Ace

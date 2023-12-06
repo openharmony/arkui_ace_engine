@@ -17,9 +17,7 @@
 
 #include <securec.h>
 
-#ifdef SECURITY_COMPONENT_ENABLE
 #include "adapter/ohos/entrance/ace_container.h"
-#endif
 #include "base/log/ace_scoring_log.h"
 #include "base/utils/system_properties.h"
 #include "core/common/container.h"
@@ -28,7 +26,6 @@
 #include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
-#ifdef SECURITY_COMPONENT_ENABLE
 using namespace OHOS::Security;
 using namespace OHOS::Security::SecurityComponent;
 namespace {
@@ -38,7 +35,7 @@ constexpr uint64_t SECOND_TO_MILLISECOND = 1000;
 static std::vector<uintptr_t> g_callList = {
     reinterpret_cast<uintptr_t>(SecurityComponentHandler::RegisterSecurityComponent),
     reinterpret_cast<uintptr_t>(SecurityComponentHandler::UpdateSecurityComponent),
-    reinterpret_cast<uintptr_t>(SecurityComponentHandler::ReportSecurityComponentClickEvent)
+    reinterpret_cast<uintptr_t>(SecurityComponentHandler::ReportSecurityComponentClickEventInner)
 };
 
 SecurityComponentProbe SecurityComponentHandler::probe;
@@ -77,7 +74,8 @@ bool SecurityComponentHandler::CheckOpacity(const RefPtr<FrameNode>& node, const
 {
     if (renderContext->GetOpacity().has_value() &&
         !NearEqual(renderContext->GetOpacity().value(), 1.0f)) {
-        LOGW("Parent %{public}s opacity is set, security component is invalid", node->GetTag().c_str());
+        LOGW("SecurityComponentCheckFail: Parent %{public}s opacity is set, security component is invalid",
+            node->GetTag().c_str());
         return true;
     }
     return false;
@@ -88,7 +86,8 @@ bool SecurityComponentHandler::CheckBrightness(const RefPtr<FrameNode>& node,
 {
     if (renderContext->GetFrontBrightness().has_value() &&
         !NearEqual(renderContext->GetFrontBrightness().value().ConvertToVp(), 1.0f)) {
-        LOGW("Parent %{public}s brightness is set, security component is invalid", node->GetTag().c_str());
+        LOGW("SecurityComponentCheckFail: Parent %{public}s brightness is set, security component is invalid",
+            node->GetTag().c_str());
         return true;
     }
     return false;
@@ -98,7 +97,8 @@ bool SecurityComponentHandler::CheckVisibility(const RefPtr<FrameNode>& node, Re
 {
     if (layoutProperty->GetVisibility().has_value() &&
         (layoutProperty->GetVisibility().value() != VisibleType::VISIBLE)) {
-        LOGW("Parent %{public}s is not visible, security component is invalid", node->GetTag().c_str());
+        LOGW("SecurityComponentCheckFail: Parent %{public}s is not visible, security component is invalid",
+            node->GetTag().c_str());
         return true;
     }
     return false;
@@ -108,7 +108,8 @@ bool SecurityComponentHandler::CheckBlur(const RefPtr<FrameNode>& node, const Re
 {
     if (renderContext->GetFrontBlurRadius().has_value() &&
         GreatNotEqual(renderContext->GetFrontBlurRadius().value().ConvertToPx(), 0.0f)) {
-        LOGW("Parent %{public}s is blur, security component is invalid", node->GetTag().c_str());
+        LOGW("SecurityComponentCheckFail: Parent %{public}s foregroundBlurStyle is set, security component is invalid",
+            node->GetTag().c_str());
         return true;
     }
     return false;
@@ -118,7 +119,8 @@ bool SecurityComponentHandler::CheckGrayScale(const RefPtr<FrameNode>& node, con
 {
     if (renderContext->GetFrontGrayScale().has_value() &&
         GreatNotEqual(renderContext->GetFrontGrayScale().value().ConvertToVp(), 0.0f)) {
-        LOGW("Parent %{public}s set gray scale, security component is invalid", node->GetTag().c_str());
+        LOGW("SecurityComponentCheckFail: Parent %{public}s grayscale is set, security component is invalid",
+            node->GetTag().c_str());
         return true;
     }
     return false;
@@ -128,7 +130,8 @@ bool SecurityComponentHandler::CheckSaturate(const RefPtr<FrameNode>& node, cons
 {
     if (renderContext->GetFrontSaturate().has_value() &&
         !NearEqual(renderContext->GetFrontSaturate().value().ConvertToVp(), 1.0f)) {
-        LOGW("Parent %{public}s set saturate, security component is invalid", node->GetTag().c_str());
+        LOGW("SecurityComponentCheckFail: Parent %{public}s saturate is set, security component is invalid",
+            node->GetTag().c_str());
         return true;
     }
     return false;
@@ -138,7 +141,8 @@ bool SecurityComponentHandler::CheckContrast(const RefPtr<FrameNode>& node, cons
 {
     if (renderContext->GetFrontContrast().has_value() &&
         !NearEqual(renderContext->GetFrontContrast().value().ConvertToVp(), 1.0f)) {
-        LOGW("Parent %{public}s set contrast, security component is invalid", node->GetTag().c_str());
+        LOGW("SecurityComponentCheckFail: Parent %{public}s contrast is set, security component is invalid",
+            node->GetTag().c_str());
         return true;
     }
     return false;
@@ -146,9 +150,10 @@ bool SecurityComponentHandler::CheckContrast(const RefPtr<FrameNode>& node, cons
 
 bool SecurityComponentHandler::CheckInvert(const RefPtr<FrameNode>& node, const RefPtr<RenderContext>& renderContext)
 {
-    if (renderContext->GetFrontInvert().has_value() &&
-        !NearEqual(renderContext->GetFrontInvert().value().ConvertToVp(), 0.0f)) {
-        LOGW("Parent %{public}s set Invert, security component is invalid", node->GetTag().c_str());
+    if (renderContext->GetFrontInvert().has_value() && renderContext->GetFrontInvert()->index() == 0 &&
+        !NearEqual(std::get<float>(renderContext->GetFrontInvert().value()), 0.0f)) {
+        LOGW("SecurityComponentCheckFail: Parent %{public}s invert is set, security component is invalid",
+            node->GetTag().c_str());
         return true;
     }
     return false;
@@ -158,7 +163,8 @@ bool SecurityComponentHandler::CheckSepia(const RefPtr<FrameNode>& node, const R
 {
     if (renderContext->GetFrontSepia().has_value() &&
         !NearEqual(renderContext->GetFrontSepia().value().ConvertToVp(), 0.0f)) {
-        LOGW("Parent %{public}s set sepia, security component is invalid", node->GetTag().c_str());
+        LOGW("SecurityComponentCheckFail: Parent %{public}s sepia is set, security component is invalid",
+            node->GetTag().c_str());
         return true;
     }
     return false;
@@ -169,7 +175,8 @@ bool SecurityComponentHandler::CheckHueRotate(const RefPtr<FrameNode>& node, con
     if (renderContext->GetFrontHueRotate().has_value() &&
         !NearEqual(renderContext->GetFrontHueRotate().value(), 0.0f) &&
         !NearEqual(renderContext->GetFrontHueRotate().value(), 360.0f)) {
-        LOGW("Parent %{public}s set HueRotate, security component is invalid", node->GetTag().c_str());
+        LOGW("SecurityComponentCheckFail: Parent %{public}s hueRotate is set, security component is invalid",
+            node->GetTag().c_str());
         return true;
     }
     return false;
@@ -180,7 +187,8 @@ bool SecurityComponentHandler::CheckColorBlend(const RefPtr<FrameNode>& node,
 {
     if (renderContext->GetFrontColorBlend().has_value() &&
         (renderContext->GetFrontColorBlend().value() != Color::TRANSPARENT)) {
-        LOGW("Parent %{public}s set color blend, security component is invalid", node->GetTag().c_str());
+        LOGW("SecurityComponentCheckFail: Parent %{public}s colorBlend is set, security component is invalid",
+            node->GetTag().c_str());
         return true;
     }
     return false;
@@ -189,7 +197,8 @@ bool SecurityComponentHandler::CheckColorBlend(const RefPtr<FrameNode>& node,
 bool SecurityComponentHandler::CheckClipMask(const RefPtr<FrameNode>& node, const RefPtr<RenderContext>& renderContext)
 {
     if (renderContext->GetClipMask().has_value()) {
-        LOGW("Parent %{public}s set clip mask, security component is invalid", node->GetTag().c_str());
+        LOGW("SecurityComponentCheckFail: Parent %{public}s clip mask is set, security component is invalid",
+            node->GetTag().c_str());
         return true;
     }
     return false;
@@ -200,7 +209,8 @@ bool SecurityComponentHandler::CheckForegroundColor(const RefPtr<FrameNode>& nod
 {
     if (renderContext->GetForegroundColor().has_value() &&
         (renderContext->GetForegroundColor().value() != Color::TRANSPARENT)) {
-        LOGW("Parent %{public}s set foreground color, security component is invalid", node->GetTag().c_str());
+        LOGW("SecurityComponentCheckFail: Parent %{public}s foregroundColor is set, security component is invalid",
+            node->GetTag().c_str());
         return true;
     }
     return false;
@@ -211,7 +221,8 @@ bool SecurityComponentHandler::CheckSphericalEffect(const RefPtr<FrameNode>& nod
 {
     if (renderContext->GetSphericalEffect().has_value() &&
         !NearEqual(renderContext->GetSphericalEffect().value(), 0.0f)) {
-        LOGW("Parent %{public}s set SphericalEffect, security component is invalid", node->GetTag().c_str());
+        LOGW("SecurityComponentCheckFail: Parent %{public}s sphericalEffect is set, security component is invalid",
+            node->GetTag().c_str());
         return true;
     }
     return false;
@@ -221,7 +232,8 @@ bool SecurityComponentHandler::CheckLightUpEffect(const RefPtr<FrameNode>& node,
     const RefPtr<RenderContext>& renderContext)
 {
     if (renderContext->GetLightUpEffect().has_value()) {
-        LOGW("Parent %{public}s set light up effect, security component is invalid", node->GetTag().c_str());
+        LOGW("SecurityComponentCheckFail: Parent %{public}s lightUpEffect is set, security component is invalid",
+            node->GetTag().c_str());
         return true;
     }
     return false;
@@ -231,7 +243,8 @@ bool SecurityComponentHandler::CheckPixelStretchEffect(const RefPtr<FrameNode>& 
     const RefPtr<RenderContext>& renderContext)
 {
     if (renderContext->GetPixelStretchEffect().has_value()) {
-        LOGW("Parent %{public}s set PixelStretchEffect, security component is invalid", node->GetTag().c_str());
+        LOGW("SecurityComponentCheckFail: Parent %{public}s pixelStretchEffect is set, security component is invalid",
+            node->GetTag().c_str());
         return true;
     }
     return false;
@@ -279,8 +292,8 @@ bool SecurityComponentHandler::CheckParentNodesEffect(RefPtr<FrameNode>& node)
         }
         GetVisibleRect(parentNode, visibleRect);
         double currentVisibleRatio = CalculateCurrentVisibleRatio(visibleRect, frameRect);
-        if (!NearEqual(currentVisibleRatio, 1)) {
-            LOGW("security component is not completely displayed.");
+        if (!NearEqual(currentVisibleRatio, 1) && (visibleRect.IsValid() || frameRect.IsValid())) {
+            LOGW("SecurityComponentCheckFail: Parents clip is set, security component is not completely displayed.");
             LOGW("visibleWidth: %{public}f, visibleHeight: %{public}f, frameWidth: %{public}f, frameHeight: %{public}f",
                 visibleRect.Width(), visibleRect.Height(), frameRect.Width(), frameRect.Height());
             return true;
@@ -317,11 +330,25 @@ bool SecurityComponentHandler::InitBaseInfo(OHOS::Security::SecurityComponent::S
     auto layoutProperty = AceType::DynamicCast<SecurityComponentLayoutProperty>(node->GetLayoutProperty());
     CHECK_NULL_RETURN(layoutProperty, false);
     buttonInfo.nodeId_ = node->GetId();
-    buttonInfo.padding_.top = layoutProperty->GetBackgroundTopPadding().value().ConvertToVp();
-    buttonInfo.padding_.right = layoutProperty->GetBackgroundRightPadding().value().ConvertToVp();
-    buttonInfo.padding_.bottom = layoutProperty->GetBackgroundBottomPadding().value().ConvertToVp();
-    buttonInfo.padding_.left = layoutProperty->GetBackgroundLeftPadding().value().ConvertToVp();
-    buttonInfo.textIconSpace_ = layoutProperty->GetTextIconSpace().value().ConvertToVp();
+
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, false);
+    auto theme = pipeline->GetTheme<SecurityComponentTheme>();
+    CHECK_NULL_RETURN(theme, false);
+    buttonInfo.padding_.top =
+        layoutProperty->GetBackgroundTopPadding().value_or(theme->GetBackgroundTopPadding()).ConvertToVp();
+    buttonInfo.padding_.right =
+        layoutProperty->GetBackgroundRightPadding().value_or(theme->GetBackgroundRightPadding()).ConvertToVp();
+    buttonInfo.padding_.bottom =
+        layoutProperty->GetBackgroundBottomPadding().value_or(theme->GetBackgroundBottomPadding()).ConvertToVp();
+    buttonInfo.padding_.left =
+        layoutProperty->GetBackgroundLeftPadding().value_or(theme->GetBackgroundLeftPadding()).ConvertToVp();
+    buttonInfo.textIconSpace_ =
+        layoutProperty->GetTextIconSpace().value_or(theme->GetTextIconSpace()).ConvertToVp();
+
+    auto container = AceType::DynamicCast<Platform::AceContainer>(Container::Current());
+    CHECK_NULL_RETURN(container, false);
+    buttonInfo.windowId_ = container->GetWindowId();
 
     if (!GetDisplayOffset(node, buttonInfo.rect_.x_, buttonInfo.rect_.y_)) {
         LOGW("Get display offset failed");
@@ -359,7 +386,11 @@ bool SecurityComponentHandler::InitChildInfo(OHOS::Security::SecurityComponent::
     if (textNode != nullptr) {
         auto textProp = textNode->GetLayoutProperty<TextLayoutProperty>();
         CHECK_NULL_RETURN(textProp, false);
-        buttonInfo.fontSize_ = textProp->GetFontSize().value().ConvertToVp();
+        auto pipeline = PipelineContext::GetCurrentContext();
+        CHECK_NULL_RETURN(pipeline, false);
+        auto theme = pipeline->GetTheme<SecurityComponentTheme>();
+        CHECK_NULL_RETURN(theme, false);
+        buttonInfo.fontSize_ = textProp->GetFontSize().value_or(theme->GetFontSize()).ConvertToVp();
         buttonInfo.fontColor_.value = textProp->GetTextColor().value().GetValue();
     }
 
@@ -382,7 +413,7 @@ bool SecurityComponentHandler::InitChildInfo(OHOS::Security::SecurityComponent::
     return true;
 }
 
-bool SecurityComponentHandler::InitButtonInfo(std::string& componentInfo, RefPtr<FrameNode>& node)
+bool SecurityComponentHandler::InitButtonInfo(std::string& componentInfo, RefPtr<FrameNode>& node, SecCompType& scType)
 {
     CHECK_NULL_RETURN(node, false);
     auto layoutProperty = AceType::DynamicCast<SecurityComponentLayoutProperty>(node->GetLayoutProperty());
@@ -396,6 +427,7 @@ bool SecurityComponentHandler::InitButtonInfo(std::string& componentInfo, RefPtr
         buttonInfo.bg_ = static_cast<SecCompBackground>(
             layoutProperty->GetBackgroundType().value());
         buttonInfo.type_ = SecCompType::LOCATION_COMPONENT;
+        scType = SecCompType::LOCATION_COMPONENT;
         if (!InitChildInfo(buttonInfo, node)) {
             return false;
         }
@@ -408,6 +440,7 @@ bool SecurityComponentHandler::InitButtonInfo(std::string& componentInfo, RefPtr
         buttonInfo.bg_ = static_cast<SecCompBackground>(
             layoutProperty->GetBackgroundType().value());
         buttonInfo.type_ = SecCompType::PASTE_COMPONENT;
+        scType = SecCompType::PASTE_COMPONENT;
         if (!InitChildInfo(buttonInfo, node)) {
             return false;
         }
@@ -420,6 +453,7 @@ bool SecurityComponentHandler::InitButtonInfo(std::string& componentInfo, RefPtr
         buttonInfo.bg_ = static_cast<SecCompBackground>(
             layoutProperty->GetBackgroundType().value());
         buttonInfo.type_ = SecCompType::SAVE_COMPONENT;
+        scType = SecCompType::SAVE_COMPONENT;
         if (!InitChildInfo(buttonInfo, node)) {
             return false;
         }
@@ -434,18 +468,20 @@ int32_t SecurityComponentHandler::RegisterSecurityComponent(RefPtr<FrameNode>& n
 {
     SecurityComponentHandler::probe.InitProbeTask();
     std::string componentInfo;
-    if (!InitButtonInfo(componentInfo, node)) {
+    SecCompType type;
+    if (!InitButtonInfo(componentInfo, node, type)) {
         return -1;
     }
     int32_t ret = SecCompKit::RegisterSecurityComponent(
-        SecCompType::LOCATION_COMPONENT, componentInfo, scId);
+        type, componentInfo, scId);
     return ret;
 }
 
 int32_t SecurityComponentHandler::UpdateSecurityComponent(RefPtr<FrameNode>& node, int32_t scId)
 {
     std::string componentInfo;
-    if (!InitButtonInfo(componentInfo, node)) {
+    SecCompType type;
+    if (!InitButtonInfo(componentInfo, node, type)) {
         return -1;
     }
     int32_t ret = SecCompKit::UpdateSecurityComponent(scId, componentInfo);
@@ -461,49 +497,53 @@ int32_t SecurityComponentHandler::UnregisterSecurityComponent(int32_t scId)
     return ret;
 }
 
-int32_t SecurityComponentHandler::ReportSecurityComponentClickEvent(int32_t scId,
-    RefPtr<FrameNode>& node, GestureEvent& event)
+int32_t SecurityComponentHandler::ReportSecurityComponentClickEventInner(int32_t scId,
+    RefPtr<FrameNode>& node, SecCompClickEvent& event)
 {
     if (scId == -1) {
         return -1;
     }
     std::string componentInfo;
-    if (!InitButtonInfo(componentInfo, node)) {
+    SecCompType type;
+    if (!InitButtonInfo(componentInfo, node, type)) {
         return -1;
-    }
-    SecCompClickEvent secEvent;
-    secEvent.touchX = event.GetDisplayX();
-    secEvent.touchY = event.GetDisplayY();
-    secEvent.timestamp = static_cast<uint64_t>(event.GetTimeStamp().time_since_epoch().count()) / SECOND_TO_MILLISECOND;
-    auto data = event.GetEnhanceData();
-    if (data.size() > 0) {
-        secEvent.extraInfo.data = data.data();
-        secEvent.extraInfo.dataSize = data.size();
     }
     auto container = AceType::DynamicCast<Platform::AceContainer>(Container::Current());
     CHECK_NULL_RETURN(container, -1);
-    return SecCompKit::ReportSecurityComponentClickEvent(scId, componentInfo, secEvent, container->GetToken());
-}
-#else
-int32_t SecurityComponentHandler::RegisterSecurityComponent(RefPtr<FrameNode>& node, int32_t& scId)
-{
-    return 0;
-}
-
-int32_t SecurityComponentHandler::UpdateSecurityComponent(RefPtr<FrameNode>& node, int32_t scId)
-{
-    return 0;
-}
-
-int32_t SecurityComponentHandler::UnregisterSecurityComponent(int32_t scId)
-{
-    return 0;
+    return SecCompKit::ReportSecurityComponentClickEvent(scId, componentInfo, event, container->GetToken());
 }
 
 int32_t SecurityComponentHandler::ReportSecurityComponentClickEvent(int32_t scId,
     RefPtr<FrameNode>& node, GestureEvent& event)
 {
-    return 0;
+    SecCompClickEvent secEvent;
+    secEvent.type = ClickEventType::POINT_EVENT_TYPE;
+    secEvent.point.touchX = event.GetDisplayX();
+    secEvent.point.touchY = event.GetDisplayY();
+    secEvent.point.timestamp =
+        static_cast<uint64_t>(event.GetTimeStamp().time_since_epoch().count()) / SECOND_TO_MILLISECOND;
+    auto data = event.GetEnhanceData();
+    if (data.size() > 0) {
+        secEvent.extraInfo.data = data.data();
+        secEvent.extraInfo.dataSize = data.size();
+    }
+    return ReportSecurityComponentClickEventInner(scId, node, secEvent);
 }
-#endif
+
+int32_t SecurityComponentHandler::ReportSecurityComponentClickEvent(int32_t scId,
+    RefPtr<FrameNode>& node, const KeyEvent& event)
+{
+    SecCompClickEvent secEvent;
+    secEvent.type = ClickEventType::KEY_EVENT_TYPE;
+
+    secEvent.key.timestamp =
+        static_cast<uint64_t>(event.timeStamp.time_since_epoch().count()) / SECOND_TO_MILLISECOND;
+    secEvent.key.keyCode = static_cast<int32_t>(event.code);
+    auto data = event.enhanceData;
+    if (data.size() > 0) {
+        secEvent.extraInfo.data = data.data();
+        secEvent.extraInfo.dataSize = data.size();
+    }
+    return ReportSecurityComponentClickEventInner(scId, node, secEvent);
+}
 } // namespace OHOS::Ace::NG

@@ -27,6 +27,7 @@
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "base/utils/macros.h"
+#include "base/view_data/view_data_wrap.h"
 #include "core/components_ng/event/focus_hub.h"
 #include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_ng/layout/layout_wrapper.h"
@@ -34,6 +35,11 @@
 #include "core/event/touch_event.h"
 
 namespace OHOS::Ace::NG {
+
+struct ExtraInfo {
+    std::string page;
+    int32_t line = 0;
+};
 
 class PipelineContext;
 constexpr int32_t DEFAULT_NODE_SLOT = -1;
@@ -134,6 +140,8 @@ public:
     // the corresponding LayoutWrapper tree node at this time like add self wrapper to wrapper tree.
     virtual void AdjustLayoutWrapperTree(const RefPtr<LayoutWrapperNode>& parent, bool forceMeasure, bool forceLayout);
 
+    void DumpViewDataPageNodes(RefPtr<ViewDataWrap> viewDataWrap);
+    bool NeedRequestAutoSave();
     // DFX info.
     void DumpTree(int32_t depth);
 
@@ -273,7 +281,7 @@ public:
     virtual void OnWindowShow() {}
 
     virtual void OnWindowHide() {}
-    virtual void Build();
+    virtual void Build(std::shared_ptr<std::list<ExtraInfo>> extraInfos);
 
     virtual void OnWindowFocused() {}
 
@@ -480,6 +488,9 @@ public:
         }
     }
 
+    std::string GetCurrentCustomNodeInfo();
+    static int32_t GenerateAccessibilityId();
+
 protected:
     std::list<RefPtr<UINode>>& ModifyChildren()
     {
@@ -506,6 +517,11 @@ protected:
     // dump self info.
     virtual void DumpInfo() {}
     virtual void DumpAdvanceInfo() {}
+    virtual void DumpViewDataPageNode(RefPtr<ViewDataWrap> viewDataWrap) {}
+    virtual bool CheckAutoSave()
+    {
+        return false;
+    }
     // Mount to the main tree to display.
     virtual void OnAttachToMainTree(bool recursive = false);
     virtual void OnDetachFromMainTree(bool recursive = false);

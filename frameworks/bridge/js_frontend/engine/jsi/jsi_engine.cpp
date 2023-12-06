@@ -833,7 +833,7 @@ std::string GetDeviceInfo()
         infoList->Put("windowHeight", "N/A");
     }
 
-    infoList->Put("screenDensity", SystemProperties::GetResolution());
+    infoList->Put("screenDensity", PipelineBase::GetCurrentDensity());
 
     bool isRound = SystemProperties::GetIsScreenRound();
     if (isRound) {
@@ -963,7 +963,7 @@ void ShowToast(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& 
     LOGD("ShowToast message = %{private}s duration = %{public}d bottom = %{private}s", message.c_str(), duration,
         bottom.c_str());
 
-    GetFrontendDelegate(runtime)->ShowToast(message, duration, bottom);
+    GetFrontendDelegate(runtime)->ShowToast(message, duration, bottom, NG::ToastShowMode::DEFAULT);
 }
 
 std::vector<ButtonInfo> ParseDialogButtons(
@@ -3226,7 +3226,8 @@ void JsiEngine::RegisterInitWorkerFunc()
     if (debugVersion) {
         libraryPath = ARK_DEBUGGER_LIB_PATH;
     }
-    auto&& initWorkerFunc = [weakInstance, libraryPath](NativeEngine* nativeEngine) {
+    auto&& initWorkerFunc = [weakInstance, libraryPath, debugVersion, instanceId = instanceId_](
+                                NativeEngine* nativeEngine) {
         LOGI("WorkerCore RegisterInitWorkerFunc called");
         if (nativeEngine == nullptr) {
             LOGE("nativeEngine is nullptr");
@@ -3249,8 +3250,9 @@ void JsiEngine::RegisterInitWorkerFunc()
             nativeEngine->CallDebuggerPostTaskFunc(std::move(callback));
         };
         bool debugMode = AceApplicationInfo::GetInstance().IsNeedDebugBreakPoint();
-        panda::JSNApi::DebugOption debugOption = {libraryPath.c_str(), debugMode};
-        panda::JSNApi::StartDebugger(vm, debugOption, gettid(), workerPostTask);
+        panda::JSNApi::DebugOption debugOption = { libraryPath.c_str(), debugMode };
+        JSNApi::NotifyDebugMode(
+            gettid(), vm, libraryPath.c_str(), debugOption, instanceId, workerPostTask, debugVersion, debugMode);
 #endif
         instance->RegisterConsoleModule(arkNativeEngine);
         // load jsfwk
@@ -3668,9 +3670,11 @@ std::string JsiEngine::GetStacktraceMessage()
         return "";
     }
     std::string stack;
-    arkNativeEngine->SuspendVM();
-    bool getStackSuccess = arkNativeEngine->BuildJsStackTrace(stack);
-    arkNativeEngine->ResumeVM();
+    bool getStackSuccess = false;
+    if (arkNativeEngine->SuspendVM()) {
+        getStackSuccess = arkNativeEngine->BuildJsStackTrace(stack);
+        arkNativeEngine->ResumeVM();
+    }
     if (!getStackSuccess) {
         LOGE("GetStacktraceMessage arkNativeEngine get stack failed");
         return "JS stacktrace is empty";

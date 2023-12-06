@@ -38,6 +38,8 @@ public:
     virtual void SetItalicFontStyle(Ace::FontStyle value) = 0;
     virtual void SetFontWeight(FontWeight value) = 0;
     virtual void SetFontFamily(const std::vector<std::string>& value) = 0;
+    virtual void SetTextShadow(const std::vector<Shadow>& value) = 0;
+    virtual void SetFontFeature(const std::unordered_map<std::string, int32_t>& value) = 0;
 
 private:
     static std::unique_ptr<TextClockModel> instance_;

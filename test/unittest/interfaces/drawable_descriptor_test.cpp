@@ -20,7 +20,7 @@
 #include "interfaces/inner_api/drawable_descriptor/drawable_descriptor.h"
 #include "interfaces/inner_api/drawable_descriptor/image_converter.h"
 
-#include "core/pipeline_ng/test/mock/mock_pipeline_base.h"
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -29,6 +29,7 @@ namespace OHOS::Ace {
 namespace {
 constexpr int32_t ID = 1;
 const uint32_t DENSITY = 0;
+const uint32_t ICONTYPE = 0;
 const std::string PATH_NAME = "";
 } // namespace
 class DrawableDescriptorTest : public testing::Test {
@@ -175,5 +176,12 @@ HWTEST_F(DrawableDescriptorTest, DrawableDescTest004, TestSize.Level1)
 
     auto res2 = drawableDescriptorFactory.Create(nullptr, resourceMgr, state, drawableType, DENSITY);
     EXPECT_EQ(res2, nullptr);
+    std::tuple<int32_t, uint32_t, uint32_t> drawableInfo(ID, ICONTYPE, DENSITY);
+    auto res3 = drawableDescriptorFactory.Create(drawableInfo, resourceMgr, state, drawableType);
+    EXPECT_EQ(res3, nullptr);
+
+    std::tuple<const char *, uint32_t, uint32_t> drawableInfoName(nullptr, ICONTYPE, DENSITY);
+    auto res4 = drawableDescriptorFactory.Create(drawableInfoName, resourceMgr, state, drawableType);
+    EXPECT_EQ(res4, nullptr);
 }
 } // namespace OHOS::Ace

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -30,12 +30,14 @@
 #include <EGL/eglext.h>
 #include <GLES3/gl3.h>
 #include "base/image/pixel_map.h"
+#include "core/common/recorder/event_recorder.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/web/resource/web_client_impl.h"
 #include "core/components/web/resource/web_resource.h"
 #include "core/components/web/web_component.h"
 #include "core/components/web/web_event.h"
 #include "core/components_ng/pattern/web/web_event_hub.h"
+#include "nweb_accessibility_node_info.h"
 #include "surface_delegate.h"
 #ifdef OHOS_STANDARD_SYSTEM
 #include "nweb_handler.h"
@@ -402,6 +404,9 @@ public:
         RELEASED,
     };
 
+    // for webcontoller, the enum is same as web_webview and core side
+    enum class JavaScriptObjIdErrorCode : int32_t { WEBCONTROLLERERROR = -2, WEBVIEWCONTROLLERERROR = -1, END = 0 };
+
     WebDelegate() = delete;
     ~WebDelegate() override;
     WebDelegate(const WeakPtr<PipelineBase>& context, ErrorCallback&& onError, const std::string& type)
@@ -479,6 +484,7 @@ public:
     void UpdateHorizontalScrollBarAccess(bool isHorizontalScrollBarAccessEnabled);
     void UpdateVerticalScrollBarAccess(bool isVerticalScrollBarAccessEnabled);
     void UpdateScrollBarColor(const std::string& colorValue);
+    void UpdateOverScrollMode(const int32_t overscrollModeValue);
     void LoadUrl();
     void CreateWebMessagePorts(std::vector<RefPtr<WebMessagePort>>& ports);
     void PostWebMessage(std::string& message, std::vector<RefPtr<WebMessagePort>>& ports, std::string& uri);
@@ -493,6 +499,7 @@ public:
     bool OnKeyEvent(int32_t keyCode, int32_t keyAction);
     void OnMouseEvent(int32_t x, int32_t y, const MouseButton button, const MouseAction action, int count);
     void OnFocus();
+    bool NeedSoftKeyboard();
     void OnBlur();
     void OnPermissionRequestPrompt(const std::shared_ptr<OHOS::NWeb::NWebAccessRequest>& request);
     void OnScreenCaptureRequest(const std::shared_ptr<OHOS::NWeb::NWebScreenCaptureAccessRequest>& request);
@@ -506,6 +513,7 @@ public:
     RefPtr<PixelMap> GetDragPixelMap();
     std::string GetUrl();
     void UpdateLocale();
+    void SetDrawRect(int32_t x, int32_t y, int32_t width, int32_t height);
     void OnInactive();
     void OnActive();
     void OnWebviewHide();
@@ -521,6 +529,10 @@ public:
     }
     void NotifyMemoryLevel(int32_t level);
     void SetAudioMuted(bool muted);
+    void SetRichtextIdentifier(std::optional<std::string>& richtextData)
+    {
+        richtextData_ = richtextData;
+    }
 #endif
     void OnErrorReceive(std::shared_ptr<OHOS::NWeb::NWebUrlResourceRequest> request,
         std::shared_ptr<OHOS::NWeb::NWebUrlResourceError> error);
@@ -528,6 +540,7 @@ public:
         std::shared_ptr<OHOS::NWeb::NWebUrlResourceResponse> response);
     RefPtr<WebResponse> OnInterceptRequest(const std::shared_ptr<BaseEventInfo>& info);
     bool IsEmptyOnInterceptRequest();
+    void RecordWebEvent(Recorder::EventType eventType, const std::string& param) const;
     void OnPageStarted(const std::string& param);
     void OnPageFinished(const std::string& param);
     void OnProgressChanged(int param);
@@ -551,6 +564,7 @@ public:
     bool OnSslSelectCertRequest(const std::shared_ptr<BaseEventInfo>& info);
     void OnDownloadStart(const std::string& url, const std::string& userAgent, const std::string& contentDisposition,
         const std::string& mimetype, long contentLength);
+    void OnAccessibilityEvent(int32_t accessibilityId, AccessibilityEventType eventType);
     void OnPageError(const std::string& param);
     void OnMessage(const std::string& param);
     void OnFullScreenEnter(std::shared_ptr<OHOS::NWeb::NWebFullScreenExitHandler> handler);
@@ -573,6 +587,7 @@ public:
     std::shared_ptr<OHOS::NWeb::NWebDragData> GetOrCreateDragData();
     bool IsImageDrag();
     std::shared_ptr<OHOS::NWeb::NWebDragData> dragData_ = nullptr;
+    std::string tempDir_;
     void UpdateDragCursor(NWeb::NWebDragData::DragOperation op)
     {
         op_ = op;
@@ -594,6 +609,10 @@ public:
     void OnFirstContentfulPaint(int64_t navigationStartTick, int64_t firstContentfulPaintMs);
     void OnGetTouchHandleHotZone(OHOS::NWeb::TouchHandleHotZone& hotZone);
     void OnOverScroll(float xOffset, float yOffset);
+    void OnOverScrollFlingVelocity(float xVelocity, float yVelocity, bool isFling);
+    void OnScrollState(bool scrollState);
+    void OnRootLayerChanged(int width, int height);
+    bool FilterScrollEvent(const float x, const float y, const float xVelocity, const float yVelocity);
 
     void SetNGWebPattern(const RefPtr<NG::WebPattern>& webPattern);
     void RequestFocus();
@@ -606,6 +625,8 @@ public:
     Offset GetWebRenderGlobalPos();
     bool InitWebSurfaceDelegate(const WeakPtr<PipelineBase>& context);
     int GetWebId();
+    void JavaScriptOnDocumentStart();
+    void SetJavaScriptItems(const ScriptItems& scriptItems);
 #if defined(ENABLE_ROSEN_BACKEND)
     void SetSurface(const sptr<Surface>& surface);
     sptr<Surface> surface_ = nullptr;
@@ -629,6 +650,18 @@ public:
     }
 #endif
     void SetToken();
+    void SetWebType(WebType type);
+    void SetVirtualKeyBoardArg(int32_t width, int32_t height, double keyboard);
+    bool ShouldVirtualKeyboardOverlay();
+    void ScrollBy(float deltaX, float deltaY);
+    void ExecuteAction(int32_t accessibilityId, AceAction action);
+    bool GetFocusedAccessibilityNodeInfo(
+        int32_t accessibilityId, bool isAccessibilityFocus, OHOS::NWeb::NWebAccessibilityNodeInfo& nodeInfo) const;
+    bool GetAccessibilityNodeInfoById(int32_t accessibilityId, OHOS::NWeb::NWebAccessibilityNodeInfo& nodeInfo) const;
+    bool GetAccessibilityNodeInfoByFocusMove(
+        int32_t accessibilityId, int32_t direction, OHOS::NWeb::NWebAccessibilityNodeInfo& nodeInfo) const;
+    void SetAccessibilityState(bool state);
+    void UpdateAccessibilityState(bool state);
 private:
     void InitWebEvent();
     void RegisterWebEvent();
@@ -702,8 +735,9 @@ private:
     void NotifyPopupWindowResult(bool result);
 
     EventCallbackV2 GetAudioStateChangedCallback(bool useNewPipe, const RefPtr<NG::WebEventHub>& eventHub);
-    void SurfaceOcclusionCallback(bool occlusion);
+    void SurfaceOcclusionCallback(float visibleRatio);
     void RegisterSurfaceOcclusionChangeFun();
+    void ratioStrToFloat(const std::string& str);
 #endif
 
     WeakPtr<WebComponent> webComponent_;
@@ -756,6 +790,7 @@ private:
     EventCallbackV2 onOverScrollV2_;
     EventCallbackV2 onScreenCaptureRequestV2_;
 
+    int32_t webType_;
     std::string bundlePath_;
     std::string bundleDataPath_;
     std::string hapPath_;
@@ -784,8 +819,12 @@ private:
     RefPtr<WebDelegateObserver> observer_;
     std::shared_ptr<Rosen::RSNode> rsNode_;
     Rosen::NodeId surfaceNodeId_ = 0;
-    bool surfaceOcclusion_ = true;
+    float visibleRatio_ = 1.0;
     uint32_t delayTime_ = 500;
+    float lowerFrameRateVisibleRatio_ = 0.1;
+    std::optional<ScriptItems> scriptItems_;
+    bool accessibilityState_ = false;
+    std::optional<std::string> richtextData_;
 #endif
 };
 

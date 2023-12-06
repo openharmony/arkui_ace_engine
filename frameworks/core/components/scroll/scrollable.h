@@ -22,6 +22,7 @@
 #include "core/animation/animator.h"
 #include "core/animation/friction_motion.h"
 #include "core/animation/scroll_motion.h"
+#include "core/components_ng/base/frame_scene_status.h"
 #include "core/components_ng/gestures/recognizers/pan_recognizer.h"
 #include "core/components_ng/pattern/scrollable/scrollable_properties.h"
 #include "core/event/axis_event.h"
@@ -63,6 +64,7 @@ using ContinuousSlidingCallback = std::function<double()>;
 using CalePredictSnapOffsetCallback = std::function<std::optional<float>(float delta)>;
 using NeedScrollSnapToSideCallback = std::function<bool(float delta)>;
 using NestableScrollCallback = std::function<ScrollResult(float, int32_t, NestedState)>;
+using DragFRCSceneCallback = std::function<void(double velocity, NG::SceneStatus sceneStatus)>;
 
 class Scrollable : public TouchEventTarget, public RelatedChild {
     DECLARE_ACE_TYPE(Scrollable, TouchEventTarget);
@@ -370,10 +372,11 @@ public:
     {
         handleScrollCallback_ = std::move(func);
     }
-    void SetHandleVelocityCallback(std::function<bool(float)>&& func)
+    void SetOverScrollCallback(std::function<bool(float)>&& func)
     {
-        handleVelocityCallback_ = std::move(func);
+        overScrollCallback_ = std::move(func);
     }
+    void StartScrollAnimation(float mainPosition, float velocity);
     void SetOnScrollStartRec(std::function<void(float)>&& func)
     {
         onScrollStartRec_ = std::move(func);
@@ -449,6 +452,21 @@ public:
         return needScrollSnapChange_;
     }
 
+    void AddPreviewMenuHandleDragEnd(GestureEventFunc&& actionEnd)
+    {
+        actionEnd_ = std::move(actionEnd);
+    }
+
+    bool GetIsDragging() const
+    {
+        return isDragging_;
+    }
+
+    void SetDragFRCSceneCallback(DragFRCSceneCallback&& dragFRCSceneCallback)
+    {
+        dragFRCSceneCallback_ = std::move(dragFRCSceneCallback);
+    }
+
 private:
     bool UpdateScrollPosition(double offset, int32_t source) const;
     void ProcessSpringMotion(double position);
@@ -500,6 +518,7 @@ private:
     bool touchUp_ = false;
     bool moved_ = false;
     bool isTouching_ = false;
+    bool isDragging_ = false;
     bool available_ = true;
     bool needCenterFix_ = false;
     bool isDragUpdateStop_ = false;
@@ -525,8 +544,8 @@ private:
     [[deprecated]] std::function<OverScrollOffset(double)> overScrollOffsetCallback_;
     // ScrollablePattern::HandleScroll
     NestableScrollCallback handleScrollCallback_;
-    // ScrollablePattern::HandleScrollVelocity
-    std::function<bool(float)> handleVelocityCallback_;
+    // ScrollablePattern::HandleOverScroll
+    std::function<bool(float)> overScrollCallback_;
     // ScrollablePattern::onScrollStartRecursive
     std::function<void(float)> onScrollStartRec_;
     // ScrollablePattern::onScrollEndRecursive
@@ -539,6 +558,9 @@ private:
     bool needScrollSnapChange_ = false;
     CalePredictSnapOffsetCallback calePredictSnapOffsetCallback_;
     NeedScrollSnapToSideCallback needScrollSnapToSideCallback_;
+    GestureEventFunc actionEnd_;
+
+    DragFRCSceneCallback dragFRCSceneCallback_;
 };
 
 } // namespace OHOS::Ace

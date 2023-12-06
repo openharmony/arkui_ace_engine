@@ -21,6 +21,7 @@
 #include "core/components_ng/pattern/rich_editor/rich_editor_pattern.h"
 #include "core/components_ng/pattern/rich_editor_drag/rich_editor_drag_overlay_modifier.h"
 #include "core/components_ng/pattern/rich_editor_drag/rich_editor_drag_paint_method.h"
+#include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/pattern/text_drag/text_drag_overlay_modifier.h"
 #include "core/components_ng/pattern/text_drag/text_drag_pattern.h"
 #include "core/components_ng/render/drawing.h"
@@ -30,7 +31,7 @@ class RichEditorDragPattern : public TextDragPattern {
     DECLARE_ACE_TYPE(RichEditorDragPattern, TextDragPattern);
 
 public:
-    explicit RichEditorDragPattern(const RefPtr<RichEditorPattern>& hostPattern) : hostPattern_(hostPattern) {};
+    explicit RichEditorDragPattern(const RefPtr<TextPattern>& hostPattern) : hostPattern_(hostPattern) {};
     ~RichEditorDragPattern() override = default;
 
     static RefPtr<FrameNode> CreateDragNode(
@@ -41,7 +42,16 @@ public:
         if (!overlayModifier_) {
             overlayModifier_ = AceType::MakeRefPtr<RichEditorDragOverlayModifier>(WeakClaim(this), hostPattern_);
         }
-        return MakeRefPtr<TextDragPaintMethod>(WeakClaim(this), overlayModifier_);
+
+        if (!contentModifier_) {
+            contentModifier_ = AceType::MakeRefPtr<RichEditorDragContentModifier>();
+        }
+        auto pattern = hostPattern_.Upgrade();
+        if (pattern) {
+            contentModifier_->SetIsCustomFont(pattern->GetIsCustomFont());
+        }
+
+        return MakeRefPtr<RichEditorDragPaintMethod>(WeakClaim(this), overlayModifier_, contentModifier_);
     }
 
     void Initialize(const TextDragData& data)
@@ -52,7 +62,8 @@ public:
 private:
     static RefPtr<FrameNode> CreateDragNode(const RefPtr<FrameNode>& hostNode);
 
-    WeakPtr<RichEditorPattern> hostPattern_;
+    WeakPtr<TextPattern> hostPattern_;
+    RefPtr<RichEditorDragContentModifier> contentModifier_;
 
     ACE_DISALLOW_COPY_AND_MOVE(RichEditorDragPattern);
 };

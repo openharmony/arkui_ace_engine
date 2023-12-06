@@ -20,7 +20,6 @@
 #include "core/common/ace_application_info.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/swiper/swiper_event_hub.h"
-#include "core/gestures/gesture_info.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
@@ -195,10 +194,10 @@ void CalendarMonthPattern::OnClick(Offset& localLocation, const ObtainedMonth& o
         for (auto& day : pattern->obtainedMonth_.days) {
             day.focused = false;
         }
-        pattern->obtainedMonth_.days[index].focused = true;
         auto calendarEventHub = GetEventHub<CalendarEventHub>();
         CHECK_NULL_VOID(calendarEventHub);
         if (index >= 0 && index < static_cast<int32_t>(obtainedMonth.days.size())) {
+            pattern->obtainedMonth_.days[index].focused = true;
             auto json = JsonUtil::Create(true);
             json->Put("day", obtainedMonth.days[index].day);
             json->Put("month", obtainedMonth.days[index].month.month);
@@ -214,8 +213,12 @@ void CalendarMonthPattern::OnTouchEvent(const Offset& localLocation, bool isPres
     if (!isCalendarDialog_ || obtainedMonth_.days.empty()) {
         return;
     }
+    auto index = JudgeArea(localLocation);
+    if (index < 0 || index >= static_cast<int32_t>(obtainedMonth_.days.size())) {
+        return;
+    }
     if (isPressed) {
-        obtainedMonth_.days[JudgeArea(localLocation)].isPressing = true;
+        obtainedMonth_.days[index].isPressing = true;
     } else {
         for (auto& day : obtainedMonth_.days) {
             day.isPressing = false;
@@ -232,11 +235,14 @@ void CalendarMonthPattern::OnHoverEvent(const Offset& localLocation, bool state)
     if (!isCalendarDialog_ || obtainedMonth_.days.empty()) {
         return;
     }
+    int32_t index = JudgeArea(localLocation);
+    if (index < 0 || index >= static_cast<int32_t>(obtainedMonth_.days.size())) {
+        return;
+    }
     for (auto& day : obtainedMonth_.days) {
         day.isHovering = false;
     }
-    int32_t index = JudgeArea(localLocation);
-    if (state && index >= 0) {
+    if (state) {
         obtainedMonth_.days[index].isHovering = true;
     }
 

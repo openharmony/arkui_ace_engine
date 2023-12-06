@@ -15,7 +15,7 @@
 import("//build/config/features.gni")
 import("//build/test.gni")
 import("//foundation/ability/ability_runtime/ability_runtime.gni")
-module_output_path = "arkui/utilengine"
+module_output_path = "ace_engine/ace_engine/utilengine"
 
 ##############################fuzztest##########################################
 import("//foundation/arkui/ace_engine/ace_config.gni")
@@ -37,8 +37,10 @@ ohos_fuzztest("UtilEngineFuzzTest") {
     "$ace_root/frameworks/base/subwindow/subwindow_manager.cpp",
     "$ace_root/frameworks/bridge/common/utils/engine_helper.cpp",
     "$ace_root/frameworks/bridge/js_frontend/engine/common/js_engine_loader.cpp",
-    "$ace_root/frameworks/core/components/test/unittest/mock/subwindow_mock.cpp",
+    "$ace_root/frameworks/core/common/container_scope.cpp",
+    "$ace_root/test/mock/base/mock_subwindow.cpp",
     "$ace_root/test/mock/core/common/mock_container.cpp",
+    "$ace_root/test/mock/interfaces/mock_ace_forward_compatibility.cpp",
     "//third_party/cJSON/cJSON.c",
     "utilengine_fuzzer.cpp",
   ]

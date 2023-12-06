@@ -92,7 +92,8 @@ void TextPickerPaintMethod::PaintGradient(RSCanvas& canvas, const RectF& frameRe
     RSPoint topEndPoint;
     topEndPoint.SetX(0.0f);
     topEndPoint.SetY(frameRect.Height());
-    Color endColor = backgroundColor_;
+    auto textPickerPattern = DynamicCast<TextPickerPattern>(pattern_.Upgrade());
+    Color endColor = textPickerPattern ? textPickerPattern->GetBackgroundColor() : Color::WHITE;
     Color middleColor = endColor.ChangeAlpha(0);
     if (NearZero(frameRect.Bottom())) {
         return;
@@ -123,5 +124,7 @@ void TextPickerPaintMethod::PaintDisable(RSCanvas& canvas, double X, double Y)
     canvas.AttachBrush(brush);
     canvas.AttachPen(pen);
     canvas.DrawPath(path);
+    canvas.DetachPen();
+    canvas.DetachBrush();
 }
 } // namespace OHOS::Ace::NG

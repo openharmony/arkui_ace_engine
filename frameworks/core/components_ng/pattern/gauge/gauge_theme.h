@@ -19,6 +19,7 @@
 #include "base/i18n/localization.h"
 #include "core/components/theme/theme.h"
 #include "core/components/theme/theme_constants.h"
+#include "core/components/theme/theme_constants_defines.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -44,11 +45,8 @@ inline constexpr float DESCRIPTION_X = 0.2778f;
 inline constexpr float DESCRIPTION_Y = 0.746f;
 inline constexpr float DESCRIPTION_IMAGE_X = 0.357f;
 inline constexpr float DESCRIPTION_IMAGE_Y = 0.714f;
-inline constexpr float LIMIT_VALUE_MIN_OR_MAX_WIDTH_RATIO = 0.247f;
 inline constexpr float LIMIT_VALUE_MIN_OR_MAX_HEIGHT_RATIO = 0.2222f;
-inline constexpr float LIMIT_VALUE_MIN_X = 0.221f;
 inline constexpr float LIMIT_VALUE_Y = 0.722f;
-inline constexpr float LIMIT_VALUE_MAX_X = 0.532f;
 inline constexpr float DEFAULT_GAUGE_SHADOW_RADIUS = 5.0f;
 inline constexpr float DEFAULT_GAUGE_SHADOW_OFFSETX = 5.0f;
 inline constexpr float DEFAULT_GAUGE_SHADOW_OFFSETY = 5.0f;
@@ -59,6 +57,9 @@ inline constexpr int32_t COLORS_MAX_COUNT = 9;
 inline constexpr float RADIUS_TO_DIAMETER = 2.0f;
 inline constexpr float INDICATOR_WIDTH_RADIO = 0.135f;
 inline constexpr float INDICATOR_HEIGHT_RADIO = 0.095f;
+inline constexpr float LIMIT_VALUE_MIN_SAFE_DISTANCE_RATIO = 0.031;
+inline constexpr float LIMIT_VALUE_MAX_SAFE_DISTANCE_RATIO = 0.031;
+inline constexpr float LIMIT_VALUE_SPACE_SAFE_DISTANCE_RATIO = 0.0635;
 inline const std::vector<Color> GAUGE_DEFAULT_COLOR { Color(0xFF64BB5C), Color(0xFFF7CE00), Color(0xFFE84026) };
 } // namespace
 
@@ -81,7 +82,7 @@ public:
             if (!themeConstants) {
                 return theme;
             }
-
+            theme->trackThickness_ = themeConstants->GetDimension(THEME_PROGRERSS_THICKNESS);
             ParsePattern(themeConstants->GetThemeStyle(), theme);
             return theme;
         }
@@ -90,13 +91,11 @@ public:
         void ParsePattern(const RefPtr<ThemeStyle>& themeStyle, const RefPtr<GaugeTheme>& theme) const
         {
             if (!themeStyle) {
-                LOGE("themeStyle is null");
                 return;
             }
 
             auto gaugePattern = themeStyle->GetAttr<RefPtr<ThemeStyle>>(THEME_PATTERN_GAUGE, nullptr);
             if (!gaugePattern) {
-                LOGE("gaugePattern is null");
                 return;
             }
 
@@ -123,6 +122,11 @@ public:
         return limitValueMinFontSize_;
     }
 
+    const Dimension& GetTrackThickness() const
+    {
+        return trackThickness_;
+    }
+
 protected:
     GaugeTheme() = default;
 
@@ -130,6 +134,7 @@ private:
     Color indicatorColor_;
     Color indicatorBorderColor_;
     Dimension limitValueMinFontSize_;
+    Dimension trackThickness_;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_GAUGE_GAUGE_THEME_H

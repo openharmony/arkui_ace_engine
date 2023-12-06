@@ -30,6 +30,8 @@ public:
     static bool SendEventByKey(const std::string& key, int action, const std::string& params);
     static void GetRectangleById(const std::string& key, Rectangle& rectangle);
     static std::string GetInspector(bool isLayoutInspector = false);
+    static std::string GetSubWindowInspector(bool isLayoutInspector = false);
+    static std::string GetSimplifiedInspector(int32_t containerId);
     static void HideAllMenus();
     static void AddOffscreenNode(RefPtr<FrameNode> node);
     static void RemoveOffscreenNode(RefPtr<FrameNode> node);

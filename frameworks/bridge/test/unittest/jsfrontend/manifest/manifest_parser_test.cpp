@@ -20,9 +20,9 @@
 #include "bridge/common/manifest/manifest_parser.h"
 #include "core/common/ace_engine.h"
 #include "core/components/test/mock/mock_resource_adapter.h"
-#include "core/components_ng/test/mock/theme/mock_theme_manager.h"
-#include "core/pipeline_ng/test/mock/mock_interface.h"
-#include "core/pipeline_ng/test/mock/mock_pipeline_base.h"
+#include "test/mock/core/common/mock_theme_manager.h"
+#include "test/mock/core/pipeline/mock_interface.h"
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -176,7 +176,7 @@ HWTEST_F(ManifestParserTest, ManifestParserTest002, TestSize.Level1)
     std::string resourceName = "color";
     std::string str = "string";
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    auto pipeline = AceType::MakeRefPtr<NG::MockPipelineBase>();
+    auto pipeline = AceType::MakeRefPtr<NG::MockPipelineContext>();
     auto container = AceType::MakeRefPtr<MockContainer>(pipeline);
     pipeline->SetThemeManager(themeManager);
     AceEngine::Get().AddContainer(-1, container);

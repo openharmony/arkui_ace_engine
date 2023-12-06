@@ -19,7 +19,7 @@
 
 #include "adapter/aosp/entrance/java/jni/ace_application_info.h"
 #include "base/test/mock/mock_asset_manager.h"
-#include "base/test/mock/mock_task_executor.h"
+#include "test/mock/base/mock_task_executor.h"
 #include "core/animation/animator.h"
 #include "core/animation/card_transition_controller.h"
 #include "core/animation/shared_transition_controller.h"

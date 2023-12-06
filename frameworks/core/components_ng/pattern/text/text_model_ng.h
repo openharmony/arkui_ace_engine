@@ -29,6 +29,7 @@ public:
     void SetFont(const Font& value) override;
     void SetFontSize(const Dimension& value) override;
     void SetTextColor(const Color& value) override;
+    void SetTextSelection(int32_t startIndex, int32_t endIndex) override;
     void SetTextShadow(const std::vector<Shadow>& value) override;
     void SetItalicFontStyle(Ace::FontStyle value) override;
     void SetFontWeight(FontWeight value) override;
@@ -42,16 +43,21 @@ public:
     void SetTextDecorationColor(const Color& value) override;
     void SetTextDecorationStyle(TextDecorationStyle value) override;
     void SetBaselineOffset(const Dimension& value) override;
+    void SetWordBreak(WordBreak value) override;
+    void SetEllipsisMode(EllipsisMode modal) override;
     void SetTextCase(TextCase value) override;
     void SetLetterSpacing(const Dimension& value) override;
     void SetAdaptMinFontSize(const Dimension& value) override;
     void SetAdaptMaxFontSize(const Dimension& value) override;
     void SetHeightAdaptivePolicy(TextHeightAdaptivePolicy value) override;
+    void SetTextDetectEnable(bool value) override;
+    void SetTextDetectConfig(const std::string& value, std::function<void(const std::string&)>&& onResult) override;
     // TODO: add extra event for text.
     void SetOnClick(std::function<void(const BaseEventInfo* info)>&& click) override;
     void ClearOnClick() override;
     void SetRemoteMessage(std::function<void()>&& event) override;
     void SetCopyOption(CopyOptions copyOption) override;
+    void SetOnCopy(std::function<void(const std::string&)>&& func) override;
     void SetOnDragStart(NG::OnDragStartFunc&& onDragStart) override;
     void SetOnDragEnter(NG::OnDragDropFunc&& onDragEnter) override;
     void SetOnDragMove(NG::OnDragDropFunc&& onDragMove) override;
@@ -59,7 +65,30 @@ public:
     void SetOnDrop(NG::OnDragDropFunc&& onDrop) override;
     void SetDraggable(bool draggable) override;
     void SetMenuOptionItems(std::vector<MenuOptionsParam>&& menuOptionsItems) override;
-    
+
+    static void SetFontWeight(FrameNode* frameNode, Ace::FontWeight value);
+    static void SetItalicFontStyle(FrameNode* frameNode, Ace::FontStyle value);
+    static void SetTextAlign(FrameNode* frameNode, Ace::TextAlign value);
+    static void SetTextColor(FrameNode* frameNode, const Color& value);
+    static void SetFontSize(FrameNode* frameNode, const Dimension& value);
+    static void SetLineHeight(FrameNode* frameNode, const Dimension& value);
+    static void SetTextOverflow(FrameNode* frameNode, TextOverflow value);
+    static void SetTextDecoration(FrameNode* frameNode, TextDecoration value);
+    static void SetTextDecorationColor(FrameNode* frameNode, const Color& value);
+    static void SetTextDecorationStyle(FrameNode* frameNode, TextDecorationStyle value);
+    static void SetTextCase(FrameNode* frameNode, TextCase value);
+    static void SetMaxLines(FrameNode* frameNode, uint32_t value);
+    static void SetAdaptMinFontSize(FrameNode* frameNode, const Dimension& value);
+    static void SetDraggable(FrameNode* frameNode, bool draggable);
+    static void SetAdaptMaxFontSize(FrameNode* frameNode, const Dimension& value);
+    static void SetFontFamily(FrameNode* frameNode, const std::vector<std::string>& value);
+    static void SetCopyOption(FrameNode* frameNode, CopyOptions copyOption);
+    static void SetTextShadow(FrameNode* frameNode, const std::vector<Shadow>& value);
+    static void SetHeightAdaptivePolicy(FrameNode* frameNode, TextHeightAdaptivePolicy value);
+    static void SetTextIndent(FrameNode* frameNode, const Dimension& value);
+    static void SetBaselineOffset(FrameNode* frameNode, const Dimension& value);
+    static void SetLetterSpacing(FrameNode* frameNode, const Dimension& value);
+    static void SetFont(FrameNode* frameNode, const Font& value);
 };
 } // namespace OHOS::Ace::NG
 

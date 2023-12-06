@@ -123,10 +123,9 @@ void JsInspectorManager::AssembleJSONTree(std::string& jsonStr)
         jsonNode->Put(INSPECTOR_WIDTH, std::to_string(rootWidth * scale).c_str());
         jsonNode->Put(INSPECTOR_HEIGHT, std::to_string(rootHeight * scale).c_str());
     }
-    jsonNode->Put(INSPECTOR_RESOLUTION, std::to_string(SystemProperties::GetResolution()).c_str());
+    jsonNode->Put(INSPECTOR_RESOLUTION, std::to_string(PipelineBase::GetCurrentDensity()).c_str());
     auto node = GetAccessibilityNodeFromPage(0);
     if (!node) {
-        LOGE("get root accessibilityNode failed");
         return;
     }
     jsonNode->Put(INSPECTOR_CHILDREN, GetChildrenJson(node));
@@ -138,7 +137,6 @@ std::unique_ptr<JsonValue> JsInspectorManager::GetChildrenJson(RefPtr<Accessibil
 {
     auto jsonNodeArray = JsonUtil::CreateArray(true);
     if (!node) {
-        LOGW("GetChildrenJson, AccessibilityNode is nullptr");
         return jsonNodeArray;
     }
     auto child = node->GetChildList();
@@ -152,7 +150,6 @@ std::unique_ptr<JsonValue> JsInspectorManager::GetChildJson(RefPtr<Accessibility
 {
     auto jsonNode = JsonUtil::Create(true);
     if (!node) {
-        LOGW("GetChildJson, AccessibilityNode is nullptr");
         return jsonNode;
     }
     if (node->GetTag() == "inspectDialog") {
@@ -216,24 +213,32 @@ bool JsInspectorManager::OperateComponent(const std::string& jsCode)
     LOGD("parentID = %{public}d, slot = %{public}d", parentID, slot);
     if (Container::IsCurrentUseNewPipeline()) {
         static RefPtr<NG::UINode> parent = nullptr;
-        static int32_t preSlot = -1;
         auto newChild = GetNewFrameNodeWithJsCode(root);
-        CHECK_NULL_RETURN(newChild, false);
+        CHECK_NULL_RETURN(newChild, false); // newChild should not be nullptr
         NG::Inspector::HideAllMenus();
         if (!root->Contains("id")) {
-            LOGD("Failed to get the nodeId!");
+            LOGD("Component Preview: parentNode is rootNode");
             parent = (parentID <= 0) ? GetRootUINode() : ElementRegister::GetInstance()->GetUINodeById(parentID);
             return OperateGeneralUINode(parent, slot, newChild);
         }
         auto nodeId = root->GetInt("id");
         auto oldChild = ElementRegister::GetInstance()->GetUINodeById(nodeId);
         if (!oldChild) {
-            return OperateGeneralUINode(parent, preSlot, newChild);
+            // Quickly modify components
+            auto iter = parents_.find(nodeId);
+            if (iter != parents_.end()) {
+                auto uiNode = iter->second.Upgrade()->GetChildAtIndex(slots_[nodeId]);
+                slots_.emplace(uiNode->GetId(), slots_[nodeId]);
+                parents_.emplace(uiNode->GetId(), parents_[nodeId]);
+                return OperateGeneralUINode(parents_[uiNode->GetId()].Upgrade(), slots_[uiNode->GetId()], newChild);
+            }
+            return false;
         }
         parent = oldChild->GetParent();
-        CHECK_NULL_RETURN(parent, false);
+        CHECK_NULL_RETURN(parent, false); // Parent should not be nullptr
         slot = parent->GetChildIndex(oldChild);
-        preSlot = slot;
+        slots_.emplace(nodeId, slot);
+        parents_.emplace(nodeId, parent);
         return OperateGeneralUINode(parent, slot, newChild);
     } else {
         auto operateType = root->GetString("type", "");
@@ -249,7 +254,6 @@ bool JsInspectorManager::OperateComponent(const std::string& jsCode)
 bool JsInspectorManager::OperateRootComponent(RefPtr<Component> newComponent)
 {
     if (!newComponent) {
-        LOGE("operateType:UpdateComponent, newComponent should not be nullptr");
         return false;
     }
     auto rootElement = GetRootElement().Upgrade();
@@ -264,7 +268,6 @@ bool JsInspectorManager::OperateGeneralComponent(
 {
     auto parentElement = GetInspectorElementById(parentID);
     if (!parentElement) {
-        LOGE("parentElement should not be nullptr or display");
         return false;
     }
 
@@ -300,17 +303,15 @@ RefPtr<Component> JsInspectorManager::GetNewComponentWithJsCode(const std::uniqu
     std::string jsCode = root->GetString("jsCode", "");
     std::string viewID = root->GetString("viewID", "");
     if (jsCode.length() == 0) {
-        LOGE("Get jsCode Failed");
+        LOGW("Get jsCode Failed");
         return nullptr;
     }
     auto context = context_.Upgrade();
     if (!context) {
-        LOGE("Get Context Failed");
         return nullptr;
     }
     auto frontend = context->GetFrontend();
     if (!frontend) {
-        LOGE("Get frontend Failed");
         return nullptr;
     }
 #ifdef NG_BUILD
@@ -319,7 +320,6 @@ RefPtr<Component> JsInspectorManager::GetNewComponentWithJsCode(const std::uniqu
     auto declarativeFrontend = AceType::DynamicCast<DeclarativeFrontend>(frontend);
 #endif
     if (!declarativeFrontend) {
-        LOGE("Get declarativeFrontend Failed");
         return nullptr;
     }
     auto component = declarativeFrontend->GetNewComponentWithJsCode(jsCode, viewID);
@@ -331,7 +331,6 @@ RefPtr<NG::UINode> JsInspectorManager::GetNewFrameNodeWithJsCode(const std::uniq
     std::string jsCode = root->GetString("jsCode", "");
     std::string viewID = root->GetString("viewID", "");
     if (jsCode.empty() || viewID.empty()) {
-        LOGE("Get jsCode Failed");
         return nullptr;
     }
     auto pipeline = context_.Upgrade();
@@ -355,12 +354,10 @@ RefPtr<V2::InspectorComposedElement> JsInspectorManager::GetInspectorElementById
 {
     auto composedElement = GetComposedElementFromPage(nodeId).Upgrade();
     if (!composedElement) {
-        LOGE("get composedElement failed");
         return nullptr;
     }
     auto inspectorElement = AceType::DynamicCast<V2::InspectorComposedElement>(composedElement);
     if (!inspectorElement) {
-        LOGE("get inspectorElement failed");
         return nullptr;
     }
     return inspectorElement;
@@ -370,12 +367,10 @@ WeakPtr<Element> JsInspectorManager::GetRootElement()
 {
     auto node = GetAccessibilityNodeFromPage(0);
     if (!node) {
-        LOGE("get AccessibilityNode failed");
         return nullptr;
     }
     auto child = node->GetChildList();
     if (child.empty()) {
-        LOGE("child is null");
         return nullptr;
     }
     auto InspectorComponentElement = GetInspectorElementById(child.front()->GetNodeId());
@@ -429,7 +424,6 @@ void JsInspectorManager::GetAttrsAndStylesV2(
     auto weakComposedElement = GetComposedElementFromPage(node->GetNodeId());
     auto composedElement = DynamicCast<V2::InspectorComposedElement>(weakComposedElement.Upgrade());
     if (!composedElement) {
-        LOGE("return");
         return;
     }
     std::string debugLine = composedElement->GetDebugLine();

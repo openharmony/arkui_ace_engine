@@ -29,4 +29,10 @@ bool OffscreenContextModelNG::IsSucceed(RefPtr<AceType> offscreenPattern)
     CHECK_NULL_RETURN(tempPattern, false);
     return tempPattern->IsSucceed();
 }
+size_t OffscreenContextModelNG::GetBitmapSize(RefPtr<AceType> offscreenPattern)
+{
+    auto tempPattern = OHOS::Ace::AceType::DynamicCast<OffscreenCanvasPattern>(offscreenPattern);
+    CHECK_NULL_RETURN(tempPattern, 0);
+    return tempPattern->GetBitmapSize();
+}
 } // namespace OHOS::Ace::NG

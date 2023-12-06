@@ -22,12 +22,20 @@
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "base/utils/noncopyable.h"
+#include "base/view_data/view_data_wrap.h"
+#include "core/common/recorder/event_recorder.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/property/property.h"
 #include "core/components_ng/render/node_paint_method.h"
 #include "core/components_ng/render/paint_property.h"
+#include "core/event/pointer_event.h"
+
+namespace OHOS::Accessibility {
+class AccessibilityElementInfo;
+class AccessibilityEventInfo;
+}
 
 namespace OHOS::Ace::NG {
 struct DirtySwapConfig {
@@ -37,6 +45,25 @@ struct DirtySwapConfig {
     bool contentOffsetChange = false;
     bool skipMeasure = false;
     bool skipLayout = false;
+};
+
+class ScrollingListener : public AceType {
+    DECLARE_ACE_TYPE(ScrollingListener, AceType);
+
+public:
+    explicit ScrollingListener(std::function<void()>&& callback) : callback_(std::move(callback)) {}
+
+    ~ScrollingListener() override = default;
+
+    void NotifyScrollingEvent()
+    {
+        if (callback_) {
+            callback_();
+        }
+    }
+
+private:
+    std::function<void()> callback_;
 };
 
 // Pattern is the base class for different measure, layout and paint behavior.
@@ -52,6 +79,12 @@ public:
     virtual bool IsAtomicNode() const
     {
         return true;
+    }
+
+    // The pattern needs softkeyboard is like search, rich editor, text area, text field pattern.
+    virtual bool NeedSoftKeyboard() const
+    {
+        return false;
     }
 
     virtual bool DefaultSupportDrag()
@@ -118,6 +151,18 @@ public:
 
     virtual void OnModifyDone()
     {
+        FrameNode::PostTask(
+            [weak = WeakClaim(this)]() {
+                if (Recorder::EventRecorder::Get().IsComponentRecordEnable()) {
+                    auto pattern = weak.Upgrade();
+                    CHECK_NULL_VOID(pattern);
+                    pattern->OnAfterModifyDone();
+                }
+            },
+            TaskExecutor::TaskType::UI);
+        if (IsNeedInitClickEventRecorder()) {
+            InitClickEventRecorder();
+        }
         auto frameNode = frameNode_.Upgrade();
         auto children = frameNode->GetChildren();
         if (children.empty()) {
@@ -184,6 +229,8 @@ public:
         }
     }
 
+    virtual void OnAfterModifyDone() {}
+
     virtual void OnMountToParentDone() {}
 
     virtual bool IsRootPattern() const
@@ -200,6 +247,8 @@ public:
     {
         return true;
     }
+
+    virtual void UpdateScrollOffset(SizeF /* frameSize */) {}
 
     // TODO: for temp use, need to delete this.
     virtual bool OnDirtyLayoutWrapperSwap(
@@ -267,6 +316,14 @@ public:
 
     virtual void DumpInfo() {}
     virtual void DumpAdvanceInfo() {}
+    virtual void DumpViewDataPageNode(RefPtr<ViewDataWrap> viewDataWrap) {}
+    virtual void NotifyFillRequestSuccess(RefPtr<PageNodeInfoWrap> nodeWrap, AceAutoFillType autoFillType) {}
+    virtual void NotifyFillRequestFailed(int32_t errCode) {}
+    virtual bool CheckAutoSave()
+    {
+        return false;
+    }
+
     template<typename T>
     RefPtr<T> GetLayoutProperty() const
     {
@@ -329,11 +386,18 @@ public:
     virtual void OnWindowHide() {}
     virtual void OnWindowFocused() {}
     virtual void OnWindowUnfocused() {}
+    virtual void OnPixelRoundFinish(const SizeF& pixelGridRoundSize) {}
     virtual void OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type) {}
     virtual void OnNotifyMemoryLevel(int32_t level) {}
 
     // get XTS inspector value
     virtual void ToJsonValue(std::unique_ptr<JsonValue>& json) const {}
+
+    // call by recycle framework.
+    virtual void OnRecycle() {}
+    virtual void OnReuse() {}
+
+    virtual void OnAttachToMainTree() {}
 
     virtual void FromJson(const std::unique_ptr<JsonValue>& json) {}
 
@@ -362,15 +426,118 @@ public:
         return -1;
     }
 
+    virtual void HandleOnDragStatusCallback(
+        const DragEventType& dragEventType, const RefPtr<NotifyDragEvent>& notifyDragEvent) {};
+
+    virtual void HandleDragEvent(const PointerEvent& info) {};
     virtual void OnLanguageConfigurationUpdate() {}
     virtual void OnColorConfigurationUpdate() {}
-    virtual void OnDirectionOrDpiConfigurationUpdate() {}
+    virtual void OnDirectionConfigurationUpdate() {}
+    virtual void OnDpiConfigurationUpdate() {}
+
+    virtual bool ShouldDelayChildPressedState() const
+    {
+        return false;
+    }
+
+    virtual void RegisterScrollingListener(const RefPtr<ScrollingListener> listener) {}
+    virtual void FireAndCleanScrollingListener() {}
+    virtual void ResetDragOption() {}
+
+    virtual int32_t WrapExtensionAbilityId(int32_t extensionOffset, int32_t abilityId)
+    {
+        return -1;
+    }
+    
+    virtual void SearchExtensionElementInfoByAccessibilityId(int32_t elementId, int32_t mode,
+        int32_t baseParent, std::list<Accessibility::AccessibilityElementInfo>& output) {}
+    virtual void SearchElementInfosByText(int32_t elementId, const std::string& text,
+        int32_t baseParent, std::list<Accessibility::AccessibilityElementInfo>& output) {}
+    virtual void FindFocusedElementInfo(int32_t elementId, int32_t focusType,
+        int32_t baseParent, Accessibility::AccessibilityElementInfo& output) {}
+    virtual void FocusMoveSearch(int32_t elementId, int32_t direction,
+        int32_t baseParent, Accessibility::AccessibilityElementInfo& output) {}
+    virtual bool TransferExecuteAction(
+        int32_t elementId, const std::map<std::string, std::string>& actionArguments, int32_t action, int32_t offset)
+    {
+        return false;
+    }
+
+    virtual int32_t GetUiExtensionId()
+    {
+        return -1;
+    }
+
+    GestureEventFunc GetLongPressEventRecorder()
+    {
+        auto longPressCallback = [weak = WeakClaim(this)](GestureEvent& info) {
+            if (!Recorder::EventRecorder::Get().IsComponentRecordEnable()) {
+                return;
+            }
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            auto host = pattern->GetHost();
+            CHECK_NULL_VOID(host);
+            auto inspectorId = host->GetInspectorId().value_or("");
+            auto text = host->GetAccessibilityProperty<NG::AccessibilityProperty>()->GetAccessibilityText(true);
+            if (inspectorId.empty() && text.empty()) {
+                return;
+            }
+
+            Recorder::EventParamsBuilder builder;
+            builder.SetId(inspectorId).SetType(host->GetTag()).SetEventType(Recorder::LONG_PRESS).SetText(text);
+            Recorder::EventRecorder::Get().OnEvent(std::move(builder));
+        };
+        return longPressCallback;
+    }
 
 protected:
     virtual void OnAttachToFrameNode() {}
     virtual void OnDetachFromFrameNode(FrameNode* frameNode) {}
 
+    virtual bool IsNeedInitClickEventRecorder() const
+    {
+        return false;
+    }
+
+    void InitClickEventRecorder()
+    {
+        if (clickCallback_) {
+            return;
+        }
+
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto gesture = host->GetOrCreateGestureEventHub();
+        CHECK_NULL_VOID(gesture);
+        if (!gesture->IsClickable()) {
+            return;
+        }
+
+        auto clickCallback = [weak = WeakClaim(this)](GestureEvent& info) {
+            if (!Recorder::EventRecorder::Get().IsComponentRecordEnable()) {
+                return;
+            }
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            auto host = pattern->GetHost();
+            CHECK_NULL_VOID(host);
+            auto inspectorId = host->GetInspectorId().value_or("");
+            auto text = host->GetAccessibilityProperty<NG::AccessibilityProperty>()->GetAccessibilityText(true);
+            if (inspectorId.empty() && text.empty()) {
+                return;
+            }
+
+            Recorder::EventParamsBuilder builder;
+            builder.SetId(inspectorId).SetType(host->GetTag()).SetText(text);
+            Recorder::EventRecorder::Get().OnClick(std::move(builder));
+        };
+        clickCallback_ = MakeRefPtr<ClickEvent>(std::move(clickCallback));
+        gesture->AddClickEvent(clickCallback_);
+    }
+
     WeakPtr<FrameNode> frameNode_;
+    RefPtr<ClickEvent> clickCallback_;
 
 private:
     ACE_DISALLOW_COPY_AND_MOVE(Pattern);

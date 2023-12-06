@@ -21,11 +21,11 @@
 #include "txt/paragraph_builder.h"
 #include "txt/paragraph_txt.h"
 #else
-#include "rosen_text/typography_create.h"
 #include "rosen_text/typography.h"
+#include "rosen_text/typography_create.h"
 #endif
-#include "render_service_client/core/ui/rs_node.h"
 #include "include/effects/SkGradientShader.h"
+#include "render_service_client/core/ui/rs_node.h"
 #include "unicode/uchar.h"
 
 #include "base/i18n/localization.h"
@@ -35,10 +35,10 @@
 #include "core/components/box/render_box_base.h"
 #include "core/components/calendar/rosen_render_calendar.h"
 #include "core/components/common/painter/rosen_decoration_painter.h"
+#include "core/components/common/painter/rosen_scroll_bar_painter.h"
 #include "core/components/font/constants_converter.h"
 #include "core/components/font/rosen_font_collection.h"
 #include "core/pipeline/base/rosen_render_context.h"
-#include "core/components/common/painter/rosen_scroll_bar_painter.h"
 
 #if defined(ENABLE_STANDARD_INPUT)
 #include "core/components/text_field/on_text_changed_listener_impl.h"
@@ -170,7 +170,8 @@ void RosenRenderTextField::PaintCaret(RSCanvas& canvas, const Rect& caretRect)
     } else {
         const RSScalar radius = static_cast<RSScalar>(NormalizeToPx(cursorRadius_));
         RSRoundRect rrect(RSRect(static_cast<RSScalar>(caretRect.Left()), static_cast<RSScalar>(caretRect.Top()),
-            static_cast<RSScalar>(caretRect.Right()), static_cast<RSScalar>(caretRect.Bottom())), radius, radius);
+                              static_cast<RSScalar>(caretRect.Right()), static_cast<RSScalar>(caretRect.Bottom())),
+            radius, radius);
         canvas.DrawRoundRect(rrect);
     }
     canvas.DetachBrush();
@@ -233,8 +234,7 @@ void RosenRenderTextField::PaintSelectCaret(RSCanvas* canvas)
         Offset startCaretOffset = Offset(
             boxes.back().rect.fRight - boxes.front().rect.fLeft, boxes.back().rect.fTop - boxes.front().rect.fTop);
 #else
-        Offset startCaretOffset = Offset(
-            boxes.back().rect.GetRight() - boxes.front().rect.GetLeft(),
+        Offset startCaretOffset = Offset(boxes.back().rect.GetRight() - boxes.front().rect.GetLeft(),
             boxes.back().rect.GetTop() - boxes.front().rect.GetTop());
 #endif
         if (start >= GetInitIndex() && end >= GetInitIndex()) {
@@ -256,7 +256,7 @@ void RosenRenderTextField::PaintSelectCaret(RSCanvas* canvas)
         canvas->AttachPen(pen);
         canvas->DrawLine(RSPoint((startCaretRect_.Left() + startCaretRect_.Right()) / 2.0, startCaretRect_.Top()),
             RSPoint((startCaretRect_.Top(), startCaretRect_.Left() + startCaretRect_.Right()) / 2.0,
-            startCaretRect_.Bottom()));
+                startCaretRect_.Bottom()));
         canvas->DetachPen();
 #endif
     }
@@ -399,7 +399,11 @@ void RosenRenderTextField::PaintSelection(RSCanvas* canvas) const
 #else
         auto rect = RSRect(selectionRect.Right(), selectionRect.Top(), selectionRect.Left(), selectionRect.Bottom());
 
+#ifndef USE_GRAPHIC_TEXT_GINE
         if (box.direction == txt::TextDirection::ltr) {
+#else
+        if (box.direction == Rosen::TextDirection::LTR) {
+#endif
             rect = RSRect(selectionRect.Left(), selectionRect.Top(), selectionRect.Right(), selectionRect.Bottom());
         }
         canvas->AttachBrush(brush);
@@ -496,8 +500,8 @@ SkVector RosenRenderTextField::GetSkRadii(const Radius& radius) const
 #else
 RSPoint RosenRenderTextField::GetRSRadii(const Radius& radius) const
 {
-    return RSPoint(static_cast<RSScalar>(
-        NormalizeToPx(radius.GetX())), static_cast<RSScalar>(NormalizeToPx(radius.GetY())));
+    return RSPoint(
+        static_cast<RSScalar>(NormalizeToPx(radius.GetX())), static_cast<RSScalar>(NormalizeToPx(radius.GetY())));
 }
 #endif
 
@@ -550,8 +554,8 @@ void RosenRenderTextField::PaintOverlayForHoverAndPress(const Offset& offset, RS
     brush.SetColor(GetEventEffectColor().GetValue());
     brush.SetAntiAlias(true);
 
-    auto rect = RSRect(offset.GetX(), offset.GetY(),
-        GetLayoutSize().Width() + offset.GetX(), GetLayoutSize().Height() + offset.GetY());
+    auto rect = RSRect(offset.GetX(), offset.GetY(), GetLayoutSize().Width() + offset.GetX(),
+        GetLayoutSize().Height() + offset.GetY());
     std::vector<RSPoint> fRadii;
     fRadii.push_back(GetRSRadii(border.TopLeftRadius()));
     fRadii.push_back(GetRSRadii(border.TopRightRadius()));
@@ -598,7 +602,7 @@ void RosenRenderTextField::PaintFocus(const Offset& offset, const Size& widthHei
     pen.SetAntiAlias(true);
 
     RSScalar left = offset.GetX() + NormalizeToPx(DEFAULT_FOCUS_BORDER_WIDTH) * HALF;
-    RSScalar top  = offset.GetY() + NormalizeToPx(DEFAULT_FOCUS_BORDER_WIDTH) * HALF;
+    RSScalar top = offset.GetY() + NormalizeToPx(DEFAULT_FOCUS_BORDER_WIDTH) * HALF;
     RSScalar width = widthHeight.Width() - NormalizeToPx(DEFAULT_FOCUS_BORDER_WIDTH);
     RSScalar height = widthHeight.Height() - NormalizeToPx(DEFAULT_FOCUS_BORDER_WIDTH);
     auto rect = RSRect(left, top, width + left, height + top);
@@ -614,7 +618,11 @@ void RosenRenderTextField::PaintFocus(const Offset& offset, const Size& widthHei
 #endif
 }
 
+#ifndef USE_ROSEN_DRAWING
 void RosenRenderTextField::PaintScrollBar(const Offset& offset, RenderContext& context, SkCanvas* canvas)
+#else
+void RosenRenderTextField::PaintScrollBar(const Offset& offset, RenderContext& context, RSCanvas* canvas)
+#endif
 {
     if (scrollBar_ && scrollBar_->NeedPaint()) {
         scrollBar_->UpdateScrollBarRegion(offset, GetLayoutSize(), GetLastOffset(), GetLongestLine());
@@ -893,11 +901,11 @@ double RosenRenderTextField::MeasureParagraph(
         }
         if (IsOverflowX()) {
 #ifndef USE_GRAPHIC_TEXT_GINE
-        (*paragraphStyle).max_lines = 1;
+            (*paragraphStyle).max_lines = 1;
 #else
-        (*paragraphStyle).maxLines = 1;
+            (*paragraphStyle).maxLines = 1;
 #endif
-        paragraph_->Layout(std::numeric_limits<double>::infinity());
+            paragraph_->Layout(std::numeric_limits<double>::infinity());
         }
     } else {
 #ifndef USE_GRAPHIC_TEXT_GINE
@@ -1068,11 +1076,7 @@ std::shared_ptr<RSShaderEffect> RosenRenderTextField::MakeGradientShader(double 
         }
     }
 #ifndef USE_ROSEN_DRAWING
-#ifdef USE_SYSTEM_SKIA
-    return SkGradientShader::MakeLinear(pts, &colors[start], &pos[start], renderCount, SkShader::kClamp_TileMode);
-#else
     return SkGradientShader::MakeLinear(pts, &colors[start], &pos[start], renderCount, SkTileMode::kClamp);
-#endif
 #else
     std::vector<RSColorQuad> colors;
     std::vector<RSScalar> pos;
@@ -1127,7 +1131,11 @@ void RosenRenderTextField::SetShaderIfNeeded(std::unique_ptr<Rosen::TypographySt
     txtStyle->foreground->setShader(shader);
 #endif
 #else
-    // Drawing is not supported
+#ifndef USE_GRAPHIC_TEXT_GINE
+    txtStyle->foreground_brush.SetShaderEffect(shader);
+#else
+    txtStyle->foregroundBrush->SetShaderEffect(shader);
+#endif
 #endif
     builder->PushStyle(*txtStyle);
 #ifndef USE_GRAPHIC_TEXT_GINE
@@ -1251,13 +1259,6 @@ std::unique_ptr<Rosen::TypographyStyle> RosenRenderTextField::CreateParagraphSty
     }
     UpdateDirectionStatus();
     if (keyboard_ != TextInputType::MULTILINE) {
-#ifndef NEW_SKIA
-#ifndef USE_GRAPHIC_TEXT_GINE
-        style->word_break_type = minikin::WordBreakType::kWordBreakType_BreakAll;
-#else
-        style->wordBreakType = Rosen::WordBreakType::BREAK_ALL;
-#endif
-#endif
 #ifdef USE_GRAPHIC_TEXT_GINE
         style->wordBreakType = Rosen::WordBreakType::BREAK_ALL;
 #endif
@@ -1339,7 +1340,7 @@ double RosenRenderTextField::GetBoundaryOfParagraph(bool isLeftBoundary) const
             rightBoundaryOfParagraph = box.rect.fRight;
 #else
         if (cursorPositionType_ == CursorPositionType::END &&
-                !NearEqual(box.rect.GetBottom(), bottomBoundaryOfParagraph)) {
+            !NearEqual(box.rect.GetBottom(), bottomBoundaryOfParagraph)) {
             bottomBoundaryOfParagraph = box.rect.GetBottom();
             leftBoundaryOfParagraph = box.rect.GetLeft();
             rightBoundaryOfParagraph = box.rect.GetRight();
@@ -1611,18 +1612,10 @@ int32_t RosenRenderTextField::GetCursorPositionForMoveUp()
     }
     double verticalOffset = -textOffsetForShowCaret_.GetY() - PreferredLineHeight();
     return static_cast<int32_t>(paragraph_
-#ifndef NEW_SKIA
-#ifndef USE_GRAPHIC_TEXT_GINE
-                                    ->GetGlyphPositionAtCoordinateWithCluster(
-#else
-                                    ->GetGlyphIndexByCoordinate(
-#endif
-#else
 #ifndef USE_GRAPHIC_TEXT_GINE
                                     ->GetGlyphPositionAtCoordinate(
 #else
                                     ->GetGlyphIndexByCoordinate(
-#endif
 #endif
 #ifndef USE_GRAPHIC_TEXT_GINE
                                         caretRect_.Left() - innerRect_.Left(), caretRect_.Top() + verticalOffset)
@@ -1640,18 +1633,11 @@ int32_t RosenRenderTextField::GetCursorPositionForMoveDown()
     }
     double verticalOffset = -textOffsetForShowCaret_.GetY() + PreferredLineHeight();
     return static_cast<int32_t>(paragraph_
-#ifndef NEW_SKIA
-#ifndef USE_GRAPHIC_TEXT_GINE
-                                    ->GetGlyphPositionAtCoordinateWithCluster(
-#else
-                                    ->GetGlyphIndexByCoordinate(
-#endif
-#else
+
 #ifndef USE_GRAPHIC_TEXT_GINE
                                     ->GetGlyphPositionAtCoordinate(
 #else
                                     ->GetGlyphIndexByCoordinate(
-#endif
 #endif
 
 #ifndef USE_GRAPHIC_TEXT_GINE
@@ -1676,18 +1662,11 @@ int32_t RosenRenderTextField::GetCursorPositionForClick(const Offset& offset)
         return 0;
     }
     return static_cast<int32_t>(
-#ifndef NEW_SKIA
-#ifndef USE_GRAPHIC_TEXT_GINE
-        paragraph_->GetGlyphPositionAtCoordinateWithCluster(clickOffset_.GetX(), clickOffset_.GetY()).position);
-#else
-        paragraph_->GetGlyphIndexByCoordinate(clickOffset_.GetX(), clickOffset_.GetY()).index);
-#endif
-#else
+
 #ifndef USE_GRAPHIC_TEXT_GINE
         paragraph_->GetGlyphPositionAtCoordinate(clickOffset_.GetX(), clickOffset_.GetY()).position);
 #else
         paragraph_->GetGlyphIndexByCoordinate(clickOffset_.GetX(), clickOffset_.GetY()).index);
-#endif
 #endif
 }
 
@@ -1956,8 +1935,8 @@ void RosenRenderTextField::PaintTextField(
 #else
     canvas->Save();
     // Restrict painting rect to text area, excluding the decoration.
-    canvas->ClipRect(RSRect(innerRect_.Left(), innerRect_.Top(), innerRect_.Right(), innerRect_.Bottom()),
-        RSClipOp::INTERSECT);
+    canvas->ClipRect(
+        RSRect(innerRect_.Left(), innerRect_.Top(), innerRect_.Right(), innerRect_.Bottom()), RSClipOp::INTERSECT);
 #endif
     auto pipelineContext = context_.Upgrade();
     if (!pipelineContext ||

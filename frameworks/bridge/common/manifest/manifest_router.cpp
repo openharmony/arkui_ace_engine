@@ -16,9 +16,6 @@
 #include "frameworks/bridge/common/manifest/manifest_router.h"
 
 #include <algorithm>
-#include <cstdint>
-#include <iterator>
-#include <string>
 
 #include "base/log/event_report.h"
 #include "base/log/log.h"
@@ -28,7 +25,6 @@ namespace OHOS::Ace::Framework {
 std::string ManifestRouter::GetEntry(const std::string& suffix) const
 {
     if (pages_.empty()) {
-        LOGE("pages list is empty");
         return "";
     }
     return pages_.front() + suffix;
@@ -38,11 +34,9 @@ std::string ManifestRouter::GetPagePath(std::string& uri) const
 {
     const std::string suffix = ".js";
     if (uri.empty()) {
-        LOGW("page uri is empty");
         return "";
     }
     if (pages_.empty()) {
-        LOGE("pages list is empty");
         return "";
     }
     // the case uri is starts with "/" and "/" is the mainPage
@@ -53,14 +47,13 @@ std::string ManifestRouter::GetPagePath(std::string& uri) const
     if (std::find(pages_.begin(), pages_.end(), uri) != pages_.end()) {
         return uri + suffix;
     }
-    LOGE("[Engine Log] can't find this page %{public}s path", uri.c_str());
+    LOGW("[Engine Log] can't find this page %{public}s path", uri.c_str());
     return "";
 }
 
 std::string ManifestRouter::GetPagePath(const std::string& uri, const std::string& suffix) const
 {
     if (uri.empty()) {
-        LOGW("page uri is empty");
         return "";
     }
     // the case uri is starts with "/" and "/" is the mainPage
@@ -76,7 +69,7 @@ std::string ManifestRouter::GetPagePath(const std::string& uri, const std::strin
     if (uri.rfind(suffix) != std::string::npos) {
         return uri;
     }
-    LOGE("[Engine Log] can't find this page %{public}s path", uri.c_str());
+    LOGW("[Engine Log] can't find this page %{public}s path", uri.c_str());
     return "";
 }
 
@@ -85,12 +78,10 @@ const std::list<std::string>& ManifestRouter::GetPageList()
     return pages_;
 }
 
-#if defined(PREVIEW)
 void ManifestRouter::InsertPageList(const std::string& uri)
 {
     pages_.emplace_back(uri);
 }
-#endif
 
 void ManifestRouter::RouterParse(const std::unique_ptr<JsonValue>& root)
 {
@@ -104,14 +95,11 @@ void ManifestRouter::RouterParse(const std::unique_ptr<JsonValue>& root)
             auto page = pagesArray->GetArrayItem(index);
             if (page && page->IsString()) {
                 pages_.emplace_back(page->GetString());
-            } else {
-                LOGW("page is not a string.");
             }
         }
     }
 
     if (pages_.empty()) {
-        LOGE("Nothing is parsed for page list.");
         EventReport::SendPageRouterException(PageRouterExcepType::ROUTE_PARSE_ERR);
     }
 }

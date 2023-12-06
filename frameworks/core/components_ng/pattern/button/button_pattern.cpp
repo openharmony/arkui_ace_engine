@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/button/button_pattern.h"
 
 #include "base/utils/utils.h"
+#include "core/common/recorder/node_data_cache.h"
 #include "core/components/button/button_theme.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/color.h"
@@ -41,6 +42,11 @@ void ButtonPattern::OnAttachToFrameNode()
     auto buttonTheme = pipeline->GetTheme<ButtonTheme>();
     CHECK_NULL_VOID(buttonTheme);
     clickedColor_ = buttonTheme->GetClickedColor();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    renderContext->SetAlphaOffscreen(true);
 }
 
 void ButtonPattern::UpdateTextLayoutProperty(
@@ -115,7 +121,7 @@ void ButtonPattern::InitButtonLabel()
     CHECK_NULL_VOID(buttonRenderContext);
     auto textRenderContext = textNode->GetRenderContext();
     CHECK_NULL_VOID(textRenderContext);
-    textRenderContext->UpdateClipEdge(buttonRenderContext->GetClipEdgeValue(false));
+    textRenderContext->UpdateClipEdge(buttonRenderContext->GetClipEdgeValue(true));
     textNode->MarkModifyDone();
     textNode->MarkDirtyNode();
 }
@@ -152,6 +158,17 @@ void ButtonPattern::InitTouchEvent()
     };
     touchListener_ = MakeRefPtr<TouchEventImpl>(std::move(touchCallback));
     gesture->AddTouchEvent(touchListener_);
+}
+
+void ButtonPattern::OnAfterModifyDone()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto inspectorId = host->GetInspectorId().value_or("");
+    if (!inspectorId.empty()) {
+        auto text = host->GetAccessibilityProperty<NG::AccessibilityProperty>()->GetText();
+        Recorder::NodeDataCache::Get().PutString(inspectorId, text);
+    }
 }
 
 void ButtonPattern::InitHoverEvent()

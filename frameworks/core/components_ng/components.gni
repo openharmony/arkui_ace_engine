@@ -105,24 +105,17 @@ template("build_component_ng") {
       if (enable_graphic_text_gine) {
         include_dirs += [ "//foundation/graphic/graphic_2d/rosen/modules/2d_engine/rosen_text/export" ]
       }
-      if (ace_use_new_skia) {
-        configs += [ "$ace_flutter_engine_root:flutter_config" ]
-        deps += [
-          "$ace_flutter_engine_root/libtxt:thirdparty_lib_txt_$platform",
-          "$skia_root_new:skia_$platform",
-        ]
-        if (enable_graphic_text_gine) {
-          deps -=
-              [ "$ace_flutter_engine_root/libtxt:thirdparty_lib_txt_$platform" ]
-          deps += [ "$ace_flutter_engine_root:flutter_engine_fml_$platform" ]
-        }
-      } else {
-        deps += [
-          "$ace_flutter_engine_root:third_party_flutter_engine_$platform",
-          "$ace_flutter_engine_root/skia:ace_skia_$platform",
-        ]
+      configs += [ "$ace_flutter_engine_root:flutter_config" ]
+      deps += [
+        "$ace_flutter_engine_root/libtxt:thirdparty_lib_txt_$platform",
+        "$skia_root_new:skia_$platform",
+      ]
+      if (enable_graphic_text_gine) {
+        deps -=
+            [ "$ace_flutter_engine_root/libtxt:thirdparty_lib_txt_$platform" ]
+        deps += [ "$ace_flutter_engine_root:flutter_engine_fml_$platform" ]
       }
-      if (!is_cross_platform_build && defined(config.enable_drag_framework) &&
+      if (!is_arkui_x && defined(config.enable_drag_framework) &&
           config.enable_drag_framework) {
         external_deps += [
           "device_status:devicestatus_client",
@@ -133,31 +126,14 @@ template("build_component_ng") {
         ]
       }
 
-      if (defined(config.model_component_support) &&
-          config.model_component_support) {
-        deps += [ "//foundation/graphic/graphic_3d/3d_widget_adapter:widget_adapter_source" ]
-        include_dirs += [
-          "//foundation/graphic/graphic_3d/3d_widget_adapter/include",
-          "//foundation/graphic/graphic_3d/3d_widget_adapter/include/custom",
-          "//foundation/graphic/graphic_3d/3d_widget_adapter/include/data_type",
-          "//foundation/graphic/graphic_3d/3d_widget_adapter/include/data_type/geometry",
-          "//foundation/graphic/graphic_3d/3d_widget_adapter/include/ohos",
-          "//foundation/graphic/graphic_2d/rosen/modules/",
-        ]
-      }
-
       if (platform == "ohos" || platform == "ohos_ng") {
-        deps += [
-          "//third_party/EGL:libEGL",
-          "//third_party/openGLES:libGLES",
-        ]
+        deps += [ "//third_party/openGLES:libGLES" ]
         external_deps += [ "graphic_2d:2d_graphics" ]
         if (enable_graphic_text_gine) {
           external_deps += [ "graphic_2d:rosen_text" ]
         }
       } else {
-        if (!is_cross_platform_build && defined(use_rosen_drawing) &&
-            use_rosen_drawing) {
+        if (!is_arkui_x && defined(use_rosen_drawing) && use_rosen_drawing) {
           external_deps += [ "graphic_2d:2d_graphics" ]
         } else {
           if (enable_graphic_text_gine) {
@@ -170,7 +146,7 @@ template("build_component_ng") {
       if (defined(config.enable_rosen_backend) && config.enable_rosen_backend &&
           defined(invoker.rosen_sources)) {
         sources += invoker.rosen_sources
-        if (is_cross_platform_build) {
+        if (is_arkui_x) {
           deps += [ "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client_static" ]
         } else {
           external_deps += [ "graphic_2d:librender_service_client" ]

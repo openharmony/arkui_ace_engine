@@ -84,6 +84,9 @@ public:
     virtual void SetMenuAlign(const MenuAlign& menuAlign);
     virtual void SetSelectChangeEvent(NG::SelectChangeEvent&& selectChangeEvent);
     virtual void SetValueChangeEvent(NG::ValueChangeEvent&& valueChangeEvent);
+    virtual void SetOptionWidth(const Dimension& value);
+    virtual void SetOptionHeight(const Dimension& value);
+    virtual void SetOptionWidthFitTrigger(bool isFitTrigger);
 
 private:
     static std::unique_ptr<SelectModel> instance_;

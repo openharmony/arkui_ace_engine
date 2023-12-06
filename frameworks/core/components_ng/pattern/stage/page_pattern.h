@@ -55,6 +55,11 @@ public:
         return pageInfo_;
     }
 
+    std::string GetPageUrl() const
+    {
+        return pageInfo_ ? pageInfo_->GetPageUrl() : "";
+    }
+
     void OnShow();
 
     void OnHide();
@@ -142,11 +147,32 @@ public:
         isRenderDone_ = true;
     }
 
+    void SetAutoFillPasswordTriggered(bool value)
+    {
+        autoFillPasswordTriggered_ = value;
+    }
+
+    bool IsAutoFillPasswordTriggered() const
+    {
+        return autoFillPasswordTriggered_;
+    }
+
+    void SetAutoFillNewPasswordTriggered(bool value)
+    {
+        autoFillNewPasswordTriggered_ = value;
+    }
+
+    bool IsAutoFillNewPasswordTriggered() const
+    {
+        return autoFillNewPasswordTriggered_;
+    }
+
 private:
     void OnAttachToFrameNode() override;
     void BeforeCreateLayoutWrapper() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& wrapper, const DirtySwapConfig& config) override;
     void FirePageTransitionFinish();
+    void ProcessAutoSave();
 
     bool AvoidKeyboard() const override;
     bool AvoidTop() const override
@@ -155,7 +181,6 @@ private:
     }
 
     RefPtr<PageInfo> pageInfo_;
-    RefPtr<Animator> controller_;
 
     std::function<void()> onPageShow_;
     std::function<void()> onPageHide_;
@@ -169,6 +194,8 @@ private:
     bool isFirstLoad_ = true;
     bool isPageInTransition_ = false;
     bool isRenderDone_ = false;
+    bool autoFillPasswordTriggered_ = false;
+    bool autoFillNewPasswordTriggered_ = false;
 
     SharedTransitionMap sharedTransitionMap_;
     JSAnimatorMap jsAnimatorMap_;

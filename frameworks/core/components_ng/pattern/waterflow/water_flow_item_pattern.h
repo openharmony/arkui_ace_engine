@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_WATERFLOW_WATER_FLOW_ITEM_PATTERN_H
 
 #include "core/components_ng/pattern/pattern.h"
+#include "core/components_ng/pattern/waterflow/water_flow_item_layout_property.h"
 
 namespace OHOS::Ace::NG {
 class ACE_EXPORT WaterFlowItemPattern : public Pattern {
@@ -26,6 +27,16 @@ public:
     bool IsAtomicNode() const override
     {
         return false;
+    }
+
+    RefPtr<LayoutProperty> CreateLayoutProperty() override
+    {
+        return MakeRefPtr<WaterFlowItemLayoutProperty>();
+    }
+
+    bool IsNeedInitClickEventRecorder() const override
+    {
+        return true;
     }
 };
 } // namespace OHOS::Ace::NG

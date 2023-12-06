@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 #include "core/components_ng/pattern/checkboxgroup/checkboxgroup_pattern.h"
+
+#include "core/common/recorder/node_data_cache.h"
 #include "core/components/checkable/checkable_component.h"
 #include "core/components_ng/pattern/checkbox/checkbox_paint_property.h"
 #include "core/components_ng/pattern/checkbox/checkbox_pattern.h"
@@ -25,6 +27,10 @@
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+const Color ITEM_FILL_COLOR = Color::TRANSPARENT;
+}
+
 void CheckBoxGroupPattern::OnAttachToFrameNode()
 {
     auto host = GetHost();
@@ -76,6 +82,57 @@ void CheckBoxGroupPattern::OnModifyDone()
     auto focusHub = host->GetFocusHub();
     CHECK_NULL_VOID(focusHub);
     InitOnKeyEvent(focusHub);
+    SetAccessibilityAction();
+}
+
+void CheckBoxGroupPattern::SetAccessibilityAction()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto accessibilityProperty = host->GetAccessibilityProperty<AccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
+    accessibilityProperty->SetActionSelect([weakPtr = WeakClaim(this)]() {
+        const auto& pattern = weakPtr.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->UpdateSelectStatus(true);
+    });
+
+    accessibilityProperty->SetActionClearSelection([weakPtr = WeakClaim(this)]() {
+        const auto& pattern = weakPtr.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->UpdateSelectStatus(false);
+    });
+}
+
+void CheckBoxGroupPattern::UpdateSelectStatus(bool isSelected)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto context = host->GetRenderContext();
+    CHECK_NULL_VOID(context);
+    MarkIsSelected(isSelected);
+    context->OnMouseSelectUpdate(isSelected, ITEM_FILL_COLOR, ITEM_FILL_COLOR);
+}
+
+void CheckBoxGroupPattern::MarkIsSelected(bool isSelected)
+{
+    if (updateFlag_ == isSelected) {
+        return;
+    }
+    updateFlag_ = isSelected;
+    auto eventHub = GetEventHub<CheckBoxGroupEventHub>();
+    std::vector<std::string> vec;
+    CheckboxGroupResult groupResult(vec, int(isSelected));
+    eventHub->UpdateChangeEvent(&groupResult);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    if (isSelected) {
+        eventHub->UpdateCurrentUIState(UI_STATE_SELECTED);
+        host->OnAccessibilityEvent(AccessibilityEventType::SELECTED);
+    } else {
+        eventHub->ResetCurrentUIState(UI_STATE_SELECTED);
+        host->OnAccessibilityEvent(AccessibilityEventType::CHANGE);
+    }
 }
 
 void CheckBoxGroupPattern::InitClickEvent()
@@ -165,7 +222,7 @@ void CheckBoxGroupPattern::OnClick()
     auto status = paintProperty->GetSelectStatus();
     isSelected = status == CheckBoxGroupPaintProperty::SelectStatus::NONE;
     paintProperty->UpdateCheckBoxGroupSelect(isSelected);
-    isClick_ = true;
+    updateFlag_ = true;
     UpdateState();
 }
 
@@ -252,6 +309,7 @@ void CheckBoxGroupPattern::UpdateState()
             if (selectAll || (!selectAll && !isFirstCreated_)) {
                 UpdateUIStatus(selectAll);
             }
+            initSelected_ = selectAll;
         }
         isFirstCreated_ = false;
         pattern->SetPreGroup(group);
@@ -270,17 +328,61 @@ void CheckBoxGroupPattern::UpdateState()
     }
     bool isSelected = paintProperty->GetCheckBoxGroupSelectValue();
     paintProperty->ResetCheckBoxGroupSelect();
+    if (eventHub->HasChangeEvent() && skipFlag_) {
+        skipFlag_ = false;
+        return;
+    }
 
     // Setting selectAll to false when clicked requires processing, changing selectAll to false dynamically does
     // not require processing
-    if (isClick_ || isSelected) {
+    if (updateFlag_ || isSelected) {
         if (pattern->GetIsAddToMap()) {
             UpdateGroupCheckStatus(host, isSelected);
         } else {
             UpdateRepeatedGroupStatus(host, isSelected);
         }
     }
-    isClick_ = false;
+    updateFlag_ = false;
+}
+
+void CheckBoxGroupPattern::OnAfterModifyDone()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto inspectorId = host->GetInspectorId().value_or("");
+    if (inspectorId.empty()) {
+        return;
+    }
+
+    auto eventHub = host->GetEventHub<CheckBoxGroupEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    std::vector<std::string> vec;
+    if (initSelected_) {
+        auto pipelineContext = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipelineContext);
+        auto stageManager = pipelineContext->GetStageManager();
+        CHECK_NULL_VOID(stageManager);
+        auto pageNode = stageManager->GetLastPage();
+        CHECK_NULL_VOID(pageNode);
+        auto pageEventHub = pageNode->GetEventHub<NG::PageEventHub>();
+        auto checkBoxGroupMap = pageEventHub->GetCheckBoxGroupMap();
+        const auto& list = checkBoxGroupMap[eventHub->GetGroupName()];
+        for (auto&& item : list) {
+            auto node = item.Upgrade();
+            if (!node || node == host) {
+                continue;
+            }
+            if (node->GetTag() == V2::CHECKBOXGROUP_ETS_TAG) {
+                continue;
+            }
+            auto paintProperty = node->GetPaintProperty<CheckBoxPaintProperty>();
+            CHECK_NULL_VOID(paintProperty);
+            auto eventHub = node->GetEventHub<CheckBoxEventHub>();
+            CHECK_NULL_VOID(eventHub);
+            vec.push_back(eventHub->GetName());
+        }
+    }
+    Recorder::NodeDataCache::Get().PutMultiple(inspectorId, eventHub->GetGroupName(), vec);
 }
 
 void CheckBoxGroupPattern::UpdateGroupCheckStatus(const RefPtr<FrameNode>& frameNode, bool select)

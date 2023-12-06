@@ -36,6 +36,7 @@ TextStyle CreateTextStyleUsingTheme(const std::unique_ptr<FontStyle>& fontStyle,
         UPDATE_TEXT_STYLE(fontStyle, ItalicFontStyle, SetFontStyle);
         UPDATE_TEXT_STYLE(fontStyle, FontWeight, SetFontWeight);
         UPDATE_TEXT_STYLE(fontStyle, FontFamily, SetFontFamilies);
+        UPDATE_TEXT_STYLE(fontStyle, FontFeature, SetFontFeatures);
         UPDATE_TEXT_STYLE(fontStyle, TextDecoration, SetTextDecoration);
         UPDATE_TEXT_STYLE(fontStyle, TextDecorationColor, SetTextDecorationColor);
         UPDATE_TEXT_STYLE(fontStyle, TextDecorationStyle, SetTextDecorationStyle);
@@ -52,6 +53,8 @@ TextStyle CreateTextStyleUsingTheme(const std::unique_ptr<FontStyle>& fontStyle,
         UPDATE_TEXT_STYLE(textLineStyle, TextAlign, SetTextAlign);
         UPDATE_TEXT_STYLE(textLineStyle, MaxLines, SetMaxLines);
         UPDATE_TEXT_STYLE(textLineStyle, TextIndent, SetTextIndent);
+        UPDATE_TEXT_STYLE(textLineStyle, WordBreak, SetWordBreak);
+        UPDATE_TEXT_STYLE(textLineStyle, EllipsisMode, SetEllipsisMode);
     }
     return textStyle;
 }

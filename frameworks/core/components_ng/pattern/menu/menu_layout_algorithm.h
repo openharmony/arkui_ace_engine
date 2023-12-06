@@ -45,6 +45,9 @@ public:
         return placement_;
     }
 
+    bool hierarchicalParameters_ = false;
+    void InitHierarchicalParameters();
+
 protected:
     float VerticalLayout(const SizeF& size, float clickPosition);
     float HorizontalLayout(const SizeF& size, float clickPosition, bool IsSelectMenu = false);
@@ -102,7 +105,8 @@ private:
     std::list<RefPtr<LayoutWrapper>> GetOptionsLayoutWrappper(LayoutWrapper* layoutWrapper);
 
     OffsetF GetPositionWithPlacement(const SizeF& childSize, const OffsetF& topPosition, const OffsetF& bottomPosition);
-    void InitTargetSizeAndPosition(const LayoutWrapper* layoutWrapper, bool isContextMenu);
+    void InitTargetSizeAndPosition(const LayoutWrapper* layoutWrapper, bool isContextMenu,
+        const RefPtr<MenuPattern>& menuPattern);
     OffsetF GetChildPosition(const SizeF& childSize, bool didNeedArrow = false);
     OffsetF FitToScreen(const OffsetF& position, const SizeF& childSize, bool didNeedArrow = false);
     bool CheckPosition(const OffsetF& position, const SizeF& childSize);
@@ -159,7 +163,7 @@ private:
     void UpdateScrollAndColumnLayoutConstraint(
         const RefPtr<LayoutWrapper>& previewLayoutWrapper, const RefPtr<LayoutWrapper>& menuLayoutWrapper);
     float GetMenuItemTotalHeight(const RefPtr<LayoutWrapper>& menuLayoutWrapper);
-    OffsetF FixMenuOriginOffset();
+    OffsetF FixMenuOriginOffset(float beforeAnimationScale, float afterAnimationScale);
 
     OffsetF targetOffset_;
     SizeF targetSize_;

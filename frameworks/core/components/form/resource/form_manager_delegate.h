@@ -27,6 +27,7 @@
 #include "core/pipeline/pipeline_base.h"
 
 #ifdef OHOS_STANDARD_SYSTEM
+#include "form_info.h"
 #include "form_js_info.h"
 #include "ui/rs_surface_node.h"
 #include "want.h"
@@ -57,7 +58,7 @@ public:
     using OnFormSurfaceChangeCallback = std::function<void(float width, float height)>;
     using ActionEventHandle = std::function<void(const std::string&)>;
     using UnTrustFormCallback = std::function<void()>;
-    using SnapshotCallback = std::function<void()>;
+    using SnapshotCallback = std::function<void(const uint32_t&)>;
 
     enum class State : char {
         WAITINGFORSIZE,
@@ -67,13 +68,24 @@ public:
         RELEASED,
     };
 
+    enum class RecycleStatus {
+        RECYCLED,
+        RECOVERING,
+        RECOVERED,
+    };
+
     FormManagerDelegate() = delete;
     ~FormManagerDelegate() override;
     explicit FormManagerDelegate(const WeakPtr<PipelineBase>& context)
         : FormManagerResource("formAdaptor", context), state_(State::WAITINGFORSIZE)
     {}
 
+#if OHOS_STANDARD_SYSTEM
+    void AddForm(const WeakPtr<PipelineBase>& context, const RequestFormInfo& info,
+        const AppExecFwk::FormInfo& formInfo);
+#else
     void AddForm(const WeakPtr<PipelineBase>& context, const RequestFormInfo& info);
+#endif
     void ReleasePlatformResource();
 
     void AddFormAcquireCallback(const OnFormAcquiredCallback& callback);
@@ -95,6 +107,7 @@ public:
     void OnFormError(const std::string& code, const std::string& msg);
     void OnFormLinkInfoUpdate(const std::vector<std::string>& formLinkInfos);
     void ReleaseRenderer();
+    void SetVisibleChange(bool isVisible);
 #ifdef OHOS_STANDARD_SYSTEM
     void ProcessFormUpdate(const AppExecFwk::FormJsInfo& formJsInfo);
     void ProcessFormUninstall(const int64_t formId);
@@ -106,6 +119,9 @@ public:
     void ResetForm();
     void ReleaseForm();
     void NotifySurfaceChange(float width, float height);
+    static bool GetFormInfo(const std::string& bundleName, const std::string& moduleName,
+        const std::string& cardName, AppExecFwk::FormInfo& formInfo);
+    void ProcessRecycleForm();
 #endif
 
 private:
@@ -120,8 +136,9 @@ private:
     void OnFormError(const std::string& param);
     void ReAddForm();
     void HandleUnTrustFormCallback();
-    void HandleSnapshotCallback();
+    void HandleSnapshotCallback(const uint32_t& delayTime);
     bool ParseAction(const std::string& action, const std::string& type, AAFwk::Want& want);
+    void HandleCachedClickEvents();
 
     onFormAcquiredCallbackForJava onFormAcquiredCallbackForJava_;
     OnFormUpdateCallbackForJava onFormUpdateCallbackForJava_;
@@ -138,6 +155,9 @@ private:
 
     State state_ { State::WAITINGFORSIZE };
     bool isDynamic_ = true;
+    std::mutex recycleMutex_;
+    RecycleStatus recycleStatus_ = RecycleStatus::RECOVERED;
+    std::vector<std::shared_ptr<MMI::PointerEvent>> pointerEventCache_;
 #ifdef OHOS_STANDARD_SYSTEM
     int64_t runningCardId_ = -1;
     std::string runningCompId_;

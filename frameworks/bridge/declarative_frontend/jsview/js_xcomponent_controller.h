@@ -18,7 +18,7 @@
 
 #include "base/memory/referenced.h"
 #include "bridge/declarative_frontend/engine/bindings.h"
-#include "core/components/xcomponent/xcomponent_controller.h"
+#include "core/components_ng/pattern/xcomponent/inner_xcomponent_controller.h"
 
 namespace OHOS::Ace::Framework {
 class JSXComponentController : public Referenced {
@@ -35,27 +35,27 @@ public:
 
     void GetXComponentContext(const JSCallbackInfo& args)
     {
-        args.SetReturnValue(renderContext_);
+        args.SetReturnValue(renderContext_.Lock());
     }
 
-    void SetXComponentContext(const JSRef<JSVal> &renderContext)
+    void SetXComponentContext(const JSRef<JSVal>& renderContext)
     {
         renderContext_ = renderContext;
     }
 
-    RefPtr<XComponentController> GetController() const
+    std::shared_ptr<InnerXComponentController> GetController() const
     {
         return xcomponentController_;
     }
 
-    void SetController(const RefPtr<XComponentController>& xcomponentController)
+    void SetController(const std::shared_ptr<InnerXComponentController>& xcomponentController)
     {
         xcomponentController_ = xcomponentController;
     }
 
 private:
-    RefPtr<XComponentController> xcomponentController_;
-    JSRef<JSVal> renderContext_;
+    std::shared_ptr<InnerXComponentController> xcomponentController_;
+    JSWeak<JSVal> renderContext_;
     ACE_DISALLOW_COPY_AND_MOVE(JSXComponentController);
 };
 } // namespace OHOS::Ace::Framework

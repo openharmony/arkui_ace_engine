@@ -61,15 +61,40 @@ public:
 
     void RemoveSurfaceChangedCallBack() override;
 
+    void MarkNewFrameAvailable(void* nativeWindow) override;
+    void AddAttachCallBack(const std::function<void(int64_t, bool)>& attachCallback) override;
+    void AddUpdateCallBack(const std::function<void(std::vector<float>&)>& updateCallback) override;
+
     void InitContext(bool isRoot, const std::optional<ContextParam>& param) override;
 
-    void SyncGeometryProperties(GeometryNode* geometryNode) override;
+    void SyncGeometryProperties(GeometryNode* geometryNode, bool needRoundToPixelGrid = false) override;
 
     void SyncGeometryProperties(const RectF& paintRect) override;
 
     void SetBorderRadius(const BorderRadiusProperty& value) override;
 
+    void SetBorderStyle(const BorderStyleProperty& value) override;
+
+    void SetBorderColor(const BorderColorProperty& value) override;
+
+    void SetBorderWidth(const BorderWidthProperty& value) override;
+
+    void SetOuterBorderRadius(const BorderRadiusProperty& value) override;
+
+    void SetOuterBorderStyle(const BorderStyleProperty& value) override;
+
+    void SetOuterBorderColor(const BorderColorProperty& value) override;
+
+    void SetOuterBorderWidth(const BorderWidthProperty& value) override;
+
     void SetSandBox(const std::optional<OffsetF>& parentPosition, bool force = false) override;
+
+    bool HasSandBox() const override
+    {
+        return sandBoxCount_ > 0;
+    }
+
+    void SetFrameWithoutAnimation(const RectF& paintRect) override;
 
     void RebuildFrame(FrameNode* self, const std::list<RefPtr<FrameNode>>& children) override;
 
@@ -144,6 +169,8 @@ public:
     void UpdateBackBlurRadius(const Dimension& radius) override;
     void UpdateBackBlurStyle(const std::optional<BlurStyleOption>& bgBlurStyle) override;
     void UpdateBackgroundEffect(const std::optional<EffectOption>& effectOption) override;
+    void UpdateBackBlur(const Dimension& radius, const BlurOption& blurOption) override;
+    void UpdateFrontBlur(const Dimension& radius, const BlurOption& blurOption) override;
     void UpdateFrontBlurRadius(const Dimension& radius) override;
     void UpdateFrontBlurStyle(const std::optional<BlurStyleOption>& fgBlurStyle) override;
     void ResetBackBlurStyle() override;
@@ -152,7 +179,9 @@ public:
     void OnLightUpEffectUpdate(double radio) override;
     void OnParticleOptionArrayUpdate(const std::list<ParticleOption>& optionList) override;
 
+    Rosen::SHADOW_COLOR_STRATEGY ToShadowColorStrategy(ShadowColorStrategy shadowColorStrategy);
     void OnBackShadowUpdate(const Shadow& shadow) override;
+    void OnBackBlendModeUpdate(BlendMode blendMode) override;
     void UpdateBorderWidthF(const BorderWidthPropertyF& value) override;
 
     void OnTransformMatrixUpdate(const Matrix4& matrix) override;
@@ -209,6 +238,8 @@ public:
     void UpdateTranslateInXY(const OffsetF& offset) override;
     OffsetF GetShowingTranslateProperty() override;
 
+    Matrix4 GetLocalTransformMatrix() override;
+
     void GetPointWithRevert(PointF& point) override;
 
     void GetPointWithTransform(PointF& point) override;
@@ -247,7 +278,7 @@ public:
 
     void OnBackgroundColorUpdate(const Color& value) override;
     void OnOpacityUpdate(double opacity) override;
-
+    void SetAlphaOffscreen(bool isOffScreen) override;
     void MarkContentChanged(bool isChanged) override;
     void MarkDrivenRender(bool flag) override;
     void MarkDrivenRenderItemIndex(int32_t index) override;
@@ -257,15 +288,16 @@ public:
     std::vector<double> GetTrans() override;
 #ifndef USE_ROSEN_DRAWING
     bool GetBitmap(SkBitmap& bitmap, std::shared_ptr<OHOS::Rosen::DrawCmdList> drawCmdList = nullptr);
-#else
-    bool GetBitmap(RSBitmap& bitmap, std::shared_ptr<RSDrawCmdList> drawCmdList = nullptr);
-#endif
-#ifndef USE_ROSEN_DRAWING
     bool GetPixelMap(const std::shared_ptr<Media::PixelMap>& pixelMap,
         std::shared_ptr<OHOS::Rosen::DrawCmdList> drawCmdList = nullptr, SkRect* rect = nullptr);
+#else
+    bool GetBitmap(RSBitmap& bitmap, std::shared_ptr<RSDrawCmdList> drawCmdList = nullptr);
+    bool GetPixelMap(const std::shared_ptr<Media::PixelMap>& pixelMap,
+        std::shared_ptr<RSDrawCmdList> drawCmdList = nullptr, Rosen::Drawing::Rect* rect = nullptr);
 #endif
     void SetActualForegroundColor(const Color& value) override;
     void AttachNodeAnimatableProperty(RefPtr<NodeAnimatablePropertyBase> property) override;
+    void DetachNodeAnimatableProperty(const RefPtr<NodeAnimatablePropertyBase>& property) override;
 
     void RegisterSharedTransition(const RefPtr<RenderContext>& other) override;
     void UnregisterSharedTransition(const RefPtr<RenderContext>& other) override;
@@ -273,7 +305,7 @@ public:
     void SetUsingContentRectForRenderFrame(bool value) override;
     void SetFrameGravity(OHOS::Rosen::Gravity gravity) override;
 
-    void AddFRCSceneInfo(const std::string& scene, float speed) override;
+    int32_t CalcExpectedFrameRate(const std::string& scene, float speed) override;
 
 private:
     void OnBackgroundImageUpdate(const ImageSourceInfo& src) override;
@@ -295,6 +327,11 @@ private:
     void OnBorderRadiusUpdate(const BorderRadiusProperty& value) override;
     void OnBorderColorUpdate(const BorderColorProperty& value) override;
     void OnBorderStyleUpdate(const BorderStyleProperty& value) override;
+
+    void OnOuterBorderRadiusUpdate(const BorderRadiusProperty& value) override;
+    void OnOuterBorderColorUpdate(const BorderColorProperty& value) override;
+    void OnOuterBorderStyleUpdate(const BorderStyleProperty& value) override;
+    void OnOuterBorderWidthUpdate(const BorderWidthProperty& value) override;
 
     void OnTransformScaleUpdate(const VectorF& value) override;
     void OnTransformCenterUpdate(const DimensionOffset& value) override;
@@ -318,7 +355,7 @@ private:
     void OnFrontContrastUpdate(const Dimension& contrast) override;
     void OnFrontSaturateUpdate(const Dimension& saturate) override;
     void OnFrontSepiaUpdate(const Dimension& sepia) override;
-    void OnFrontInvertUpdate(const Dimension& invert) override;
+    void OnFrontInvertUpdate(const InvertVariant& invert) override;
     void OnFrontHueRotateUpdate(float hueRotate) override;
     void OnFrontColorBlendUpdate(const Color& colorBlend) override;
     void OnLinearGradientBlurUpdate(const NG::LinearGradientBlurPara& blurPara) override;
@@ -328,9 +365,17 @@ private:
     void OnOverlayTextUpdate(const OverlayOptions& overlay) override;
     void OnMotionPathUpdate(const MotionPathOption& motionPath) override;
 
+    void OnLightPositionUpdate(const TranslateOptions& position) override;
+    void OnLightIntensityUpdate(const float lightIntensity) override;
+    void OnLightIlluminatedUpdate(const uint32_t lightIlluminated) override;
+    void OnIlluminatedBorderWidthUpdate(const Dimension& illuminatedBorderWidth) override;
+    void OnBloomUpdate(const float bloomIntensity) override;
+
     void OnUseEffectUpdate(bool useEffect) override;
+    void OnUseShadowBatchingUpdate(bool useShadowBatching) override;
     void OnFreezeUpdate(bool isFreezed) override;
     void OnRenderGroupUpdate(bool isRenderGroup) override;
+    void OnSuggestedRenderGroupUpdate(bool isRenderGroup) override;
     void OnRenderFitUpdate(RenderFit renderFit) override;
     void ReCreateRsNodeTree(const std::list<RefPtr<FrameNode>>& children);
 
@@ -347,6 +392,7 @@ private:
     void OnTransitionInFinish();
     void OnTransitionOutFinish();
     void RemoveDefaultTransition();
+    static void GetBestBreakPoint(RefPtr<UINode>& breakPointChild, RefPtr<UINode>& breakPointParent);
     void SetTransitionPivot(const SizeF& frameSize, bool transitionIn);
     void SetPivot(float xPivot, float yPivot, float zPivot = 0.0f);
     void SetPositionToRSNode();
@@ -432,6 +478,11 @@ private:
 
     void SetContentRectToFrame(RectF rect) override;
 
+    float RoundValueToPixelGrid(float value, bool forceCeil, bool forceFloor);
+    void RoundToPixelGrid(float absoluteLeft, float absoluteTop);
+    Matrix4 GetRevertMatrix();
+    bool IsUniRenderEnabled() override;
+
     RefPtr<ImageLoadingContext> bgLoadingCtx_;
     RefPtr<CanvasImage> bgImage_;
     RefPtr<ImageLoadingContext> bdImageLoadingCtx_;
@@ -448,6 +499,7 @@ private:
     bool hasDefaultTransition_ = false;
     bool measureTriggered_ = false;
     bool particleAnimationPlaying_ = false;
+    bool allowSandBox_ = true;
     int appearingTransitionCount_ = 0;
     int disappearingTransitionCount_ = 0;
     int sandBoxCount_ = 0;
@@ -489,6 +541,8 @@ private:
 
     RefPtr<TouchEventImpl> touchListener_;
     VectorF currentScale_ = VectorF(1.0f, 1.0f);
+    // borderLeft borderTop borderRight borderBottom
+    Rosen::Vector4f borderWidth_ = Rosen::Vector4f(0.0f, 0.0f, 0.0f, 0.0f);
     bool isTouchUpFinished_ = true;
 
     bool useContentRectForRSFrame_;

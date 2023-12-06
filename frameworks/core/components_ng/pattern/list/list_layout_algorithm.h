@@ -71,6 +71,8 @@ public:
         itemPosition_ = itemPosition;
     }
 
+    void ClearAllItemPosition(LayoutWrapper* layoutWrapper);
+
     void SetOverScrollFeature()
     {
         overScrollFeature_ = true;
@@ -94,6 +96,11 @@ public:
     void SetTargetIndex(int32_t index)
     {
         targetIndex_ = index;
+    }
+
+    std::optional<int32_t> GetTargetIndex() const
+    {
+        return targetIndexStaged_;
     }
 
     void SetPredictSnapOffset(float predictSnapOffset)
@@ -257,10 +264,20 @@ public:
     void HandleJumpAuto(LayoutWrapper* layoutWrapper,
         int32_t& startIndex, int32_t& endIndex, float& startPos, float& endPos);
 
+    void HandleJumpCenter(LayoutWrapper* layoutWrapper);
+
+    void HandleJumpStart(LayoutWrapper* layoutWrapper);
+
     void HandleJumpEnd(LayoutWrapper* layoutWrapper);
 
     bool NoNeedJump(LayoutWrapper* layoutWrapper, float startPos, float endPos,
-        int32_t startIndex, int32_t endIndex);
+        int32_t startIndex, int32_t endIndex, int32_t jumpIndex, float jumpIndexStartPos);
+
+    bool CheckNoNeedJumpListItem(LayoutWrapper* layoutWrapper, float startPos, float endPos,
+        int32_t startIndex, int32_t endIndex, int32_t jumpIndex);
+
+    bool CheckNoNeedJumpListItemGroup(LayoutWrapper* layoutWrapper, int32_t startIndex, int32_t endIndex,
+        int32_t jumpIndex, float jumpIndexStartPos);
 
     virtual float MeasureAndGetChildHeight(LayoutWrapper* layoutWrapper, int32_t childIndex);
 
@@ -290,6 +307,18 @@ public:
     {
         return scrollAutoType_;
     }
+
+    bool CheckJumpValid(LayoutWrapper* layoutWrapper);
+
+    float GetListGroupItemHeight(const RefPtr<LayoutWrapper>& layoutWrapper, int32_t index);
+
+    bool JudgeInOfScreenScrollAutoType(const RefPtr<LayoutWrapper>& layoutWrapper,
+        const RefPtr<ListLayoutProperty>& layoutProperty, float topPos, float bottomPos);
+
+    void JudgeOutOfScreenScrollAutoType(const RefPtr<LayoutWrapper>& layoutWrapper,
+        const RefPtr<ListLayoutProperty>& layoutProperty, int32_t indexInGroup, int32_t judgeIndex,
+        int32_t startIndex, int32_t endIndex);
+
 protected:
     virtual void UpdateListItemConstraint(
         Axis axis, const OptionalSizeF& selfIdealSize, LayoutConstraintF& contentConstraint);
@@ -304,13 +333,17 @@ protected:
     {
         return index;
     }
+    virtual int32_t GetLanesCeil(LayoutWrapper* layoutWrapper, int32_t index)
+    {
+        return index;
+    }
 
     void SetListItemGroupParam(const RefPtr<LayoutWrapper>& layoutWrapper, float referencePos, bool forwardLayout,
         const RefPtr<ListLayoutProperty>& layoutProperty, bool groupNeedAllLayout);
     static void SetListItemIndex(const RefPtr<LayoutWrapper>& layoutWrapper, int32_t index);
     void CheckListItemGroupRecycle(
         LayoutWrapper* layoutWrapper, int32_t index, float referencePos, bool forwardLayout) const;
-    void AdjustPostionForListItemGroup(LayoutWrapper* layoutWrapper, Axis axis, int32_t index);
+    void AdjustPostionForListItemGroup(LayoutWrapper* layoutWrapper, Axis axis, int32_t index, bool forwardLayout);
     void SetItemInfo(int32_t index, ListItemInfo&& info)
     {
         itemPosition_[index] = info;
@@ -318,6 +351,7 @@ protected:
     void LayoutItem(RefPtr<LayoutWrapper>& layoutWrapper, int32_t index, const ListItemInfo& pos,
         int32_t& startIndex, float crossSize);
     static void SyncGeometry(RefPtr<LayoutWrapper>& wrapper);
+    ListItemInfo GetListItemGroupPosition(const RefPtr<LayoutWrapper>& layoutWrapper, int32_t index);
 
     Axis axis_ = Axis::VERTICAL;
     LayoutConstraintF childLayoutConstraint_;
@@ -349,10 +383,12 @@ private:
     bool IsUniformHeightProbably();
     float CalculatePredictSnapEndPositionByIndex(uint32_t index, V2::ScrollSnapAlign scrollSnapAlign);
     void OnItemPositionAddOrUpdate(LayoutWrapper* layoutWrapper, uint32_t index);
+    void UpdateSnapCenterContentOffset(LayoutWrapper* layoutWrapper);
 
     std::optional<int32_t> jumpIndex_;
     std::optional<int32_t> jumpIndexInGroup_;
     std::optional<int32_t> targetIndex_;
+    std::optional<int32_t> targetIndexStaged_;
     std::optional<float> predictSnapOffset_;
     std::optional<float> predictSnapEndPos_;
     ScrollAlign scrollAlign_ = ScrollAlign::START;

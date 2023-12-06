@@ -16,7 +16,7 @@
 #include "gtest/gtest.h"
 
 #include "base/test/mock/mock_asset_manager.h"
-#include "core/common/flutter/flutter_task_executor.h"
+#include "core/common/task_executor_impl.h"
 #include "core/common/frontend.h"
 #include "core/common/test/mock/mock_resource_register.h"
 #include "core/components/plugin/plugin_sub_container.h"
@@ -44,7 +44,7 @@ RefPtr<PipelineContext> PluginCallBackClientTest::GetPipelineContext(const RefPt
 {
     auto platformWindow = PlatformWindow::Create(nullptr);
     auto window = std::make_unique<Window>(std::move(platformWindow));
-    auto taskExecutor = Referenced::MakeRefPtr<FlutterTaskExecutor>();
+    auto taskExecutor = Referenced::MakeRefPtr<TaskExecutorImpl>();
     auto assetManager = Referenced::MakeRefPtr<MockAssetManager>();
     auto resRegister = Referenced::MakeRefPtr<MockResourceRegister>();
     return AceType::MakeRefPtr<PipelineContext>(

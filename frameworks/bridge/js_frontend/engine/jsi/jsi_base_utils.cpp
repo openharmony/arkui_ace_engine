@@ -29,6 +29,9 @@
 
 namespace OHOS::Ace::Framework {
 constexpr char JS_CRASH_CODE[] = "100001";
+const std::string NAME = "name";
+const std::string MESSAGE = "message";
+const std::string STACK = "stack";
 
 int32_t GetLineOffset(const AceType* data)
 {
@@ -121,6 +124,28 @@ std::string JsiBaseUtils::GenerateErrorMsg(
         .append(GetMsgStr(rawStack))
         .append("\"}");
     return errMsg;
+}
+
+JsErrorObject JsiBaseUtils::GenerateJsErrorObject(
+    const std::shared_ptr<JsValue>& error, const std::shared_ptr<JsRuntime>& runtime)
+{
+    if (error == nullptr) {
+        return {};
+    }
+    JsErrorObject errInfo;
+    shared_ptr<JsValue> name = error->GetProperty(runtime, NAME);
+    if (name != nullptr) {
+        errInfo.name = name->ToString(runtime);
+    }
+    shared_ptr<JsValue> message = error->GetProperty(runtime, MESSAGE);
+    if (message != nullptr) {
+        errInfo.message = message->ToString(runtime);
+    }
+    shared_ptr<JsValue> stack = error->GetProperty(runtime, STACK);
+    if (stack != nullptr) {
+        errInfo.stack = stack->ToString(runtime);
+    }
+    return errInfo;
 }
 
 std::string JsiBaseUtils::GenerateSummaryBody(
@@ -299,21 +324,16 @@ std::string JsiBaseUtils::TransSourceStack(RefPtr<JsAcePage> runningPage, const 
             pageUrl = frontEnd->GetCurrentPageUrl();
             pageMap = frontEnd->GetCurrentPageSourceMap();
             appMap = frontEnd->GetFaAppSourceMap();
-        } else {
-            LOGE("fail to find frontEnd");
         }
     } else {
         if (runningPage) {
             pageUrl = runningPage->GetUrl();
             pageMap = runningPage->GetPageMap();
             appMap = runningPage->GetAppMap();
-        } else {
-            LOGE("runningPage is nullptr");
         }
     }
 
     if (!pageMap) {
-        LOGE("fail to find page map");
         return rawStack;
     }
 
@@ -393,7 +413,6 @@ std::string JsiBaseUtils::TranslateStack(const std::string& stackStr, const std:
         std::string column;
         GetPosInfo(temp, closeBracePos, line, column);
         if (line.empty() || column.empty()) {
-            LOGI("the stack without line info");
             break;
         }
 
@@ -447,7 +466,6 @@ std::string JsiBaseUtils::TranslateBySourceMap(const std::string& stackStr, cons
         std::string column;
         GetPosInfo(temp, closeBracePos, line, column);
         if (line.empty() || column.empty()) {
-            LOGI("the stack without line info");
             break;
         }
         std::string sourceInfo;
@@ -543,7 +561,6 @@ std::string JsiBaseUtils::GetRelativePath(const std::string& sources, std::strin
     if (i == pathLevel) {
         return sources.substr(splitPos);
     }
-    LOGI("The stack path error!");
     return sources;
 }
 
@@ -554,7 +571,6 @@ void JsiBaseUtils::ReportJsErrorEvent(std::shared_ptr<JsValue> error, std::share
         return;
     }
 
-    LOGI("ReportJsErrorEvent");
     auto arkJSRuntime = std::static_pointer_cast<ArkJSRuntime>(runtime);
     if (arkJSRuntime && arkJSRuntime->GetErrorEventHandler()) {
         std::string msg = GenerateErrorMsg(error, runtime);
@@ -562,12 +578,13 @@ void JsiBaseUtils::ReportJsErrorEvent(std::shared_ptr<JsValue> error, std::share
         arkJSRuntime->GetErrorEventHandler()(JS_CRASH_CODE, msg);
         return;
     }
+    auto errorInfo = GenerateJsErrorObject(error, runtime);
 
     std::string summaryBody = GenerateSummaryBody(error, runtime);
     LOGE("summaryBody: \n%{public}s", summaryBody.c_str());
     EventReport::JsErrReport(AceApplicationInfo::GetInstance().GetPackageName(), "", summaryBody);
 #if !defined(ANDROID_PLATFORM) && !defined(IOS_PLATFORM)
-    ExceptionHandler::HandleJsException(summaryBody);
+    ExceptionHandler::HandleJsException(summaryBody, errorInfo);
 #endif
 }
 
@@ -659,7 +676,6 @@ shared_ptr<JsValue> AppLogPrint(
 {
     // Should have at least 1 parameters.
     if (argc == 0) {
-        LOGE("the arg is error");
         return runtime->NewUndefined();
     }
     std::string content = GetLogContent(runtime, argv, argc);
@@ -714,7 +730,6 @@ shared_ptr<JsValue> JsLogPrint(
 {
     // Should have 1 parameters.
     if (argc == 0) {
-        LOGE("the arg is error");
         return runtime->NewUndefined();
     }
 
@@ -822,7 +837,6 @@ std::string GetLogContent(napi_env env, napi_callback_info info)
     for (size_t i = 0; i < argc; ++i) {
         napi_typeof(env, argv[i], &valueType);
         if (valueType != napi_string) {
-            LOGE("argv is not NativeString");
             continue;
         }
         size_t buffSize = 0;

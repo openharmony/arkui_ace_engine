@@ -27,6 +27,7 @@
 #include "core/event/key_event.h"
 #include "core/event/mouse_event.h"
 #include "core/event/touch_event.h"
+#include "core/event/pointer_event.h"
 
 namespace OHOS::Ace::Platform {
 namespace {
@@ -70,8 +71,8 @@ void GetEventDevice(int32_t sourceType, E& event)
 
 TouchEvent ConvertTouchEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
 
-void CalculatePointerEvent(
-    const NG::OffsetF& offsetF, const std::shared_ptr<MMI::PointerEvent>& point, const NG::VectorF& scale);
+void CalculatePointerEvent(const NG::OffsetF& offsetF, const std::shared_ptr<MMI::PointerEvent>& point,
+    const NG::VectorF& scale, int32_t udegree = 0);
 
 void CalculateWindowCoordinate(const NG::OffsetF& offsetF, const std::shared_ptr<MMI::PointerEvent>& point,
     const NG::VectorF& scale, const int32_t udegree = 0);
@@ -82,6 +83,8 @@ void ConvertMouseEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
 void ConvertAxisEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, AxisEvent& event);
 
 void ConvertKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent, KeyEvent& event);
+
+void ConvertPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, PointerEvent& event);
 
 void LogPointInfo(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
 

@@ -17,12 +17,9 @@ import(
 build_component("drop_filter") {
   sources = [
     "drop_filter_component.cpp",
-    "flutter_render_drop_filter.cpp",
     "render_drop_filter.cpp",
     "render_drop_filter_creator.cpp",
   ]
-  if (ace_use_new_skia) {
-    sources -= [ "flutter_render_drop_filter.cpp" ]
-  }
+
   rosen_sources = [ "rosen_render_drop_filter.cpp" ]
 }

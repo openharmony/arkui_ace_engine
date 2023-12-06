@@ -28,6 +28,7 @@ void AbilityComponentModelNG::Create(const std::string& bundleName, const std::s
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
+    ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::ABILITY_COMPONENT_ETS_TAG,  nodeId);
     auto frameNode = FrameNode::GetOrCreateFrameNode(V2::ABILITY_COMPONENT_ETS_TAG, nodeId,
         [bundleName, abilityName]() { return AceType::MakeRefPtr<AbilityComponentPattern>(bundleName, abilityName); });
     stack->Push(frameNode);

@@ -30,6 +30,7 @@ public:
     void SetFontSize(const Dimension& value) override;
     void SetTextColor(const Color& value) override;
     void SetTextShadow(const std::vector<Shadow>& value) override;
+    void SetTextSelection(int32_t startIndex, int32_t endIndex) override {};
     void SetItalicFontStyle(Ace::FontStyle value) override;
     void SetFontWeight(FontWeight value) override;
     void SetFontFamily(const std::vector<std::string>& value) override;
@@ -43,10 +44,13 @@ public:
     void SetTextDecorationStyle(TextDecorationStyle value) override;
     void SetBaselineOffset(const Dimension& value) override;
     void SetTextCase(TextCase value) override;
+    void SetWordBreak(WordBreak value) override {};
     void SetLetterSpacing(const Dimension& value) override;
     void SetAdaptMinFontSize(const Dimension& value) override;
     void SetAdaptMaxFontSize(const Dimension& value) override;
     void SetHeightAdaptivePolicy(TextHeightAdaptivePolicy value) override;
+    void SetTextDetectEnable(bool value) override;
+    void SetTextDetectConfig(const std::string& value, std::function<void(const std::string&)>&& onResult) override;
     void OnSetHeight() override;
     void OnSetWidth() override;
     void OnSetAlign() override;
@@ -54,6 +58,8 @@ public:
     void ClearOnClick() override {};
     void SetRemoteMessage(std::function<void()>&& event) override;
     void SetCopyOption(CopyOptions copyOption) override;
+    void SetOnCopy(std::function<void(const std::string&)>&& func) override {};
+    void SetEllipsisMode(EllipsisMode modal) override {}
 
     void SetOnDragStart(NG::OnDragStartFunc&& onDragStart) override;
     void SetOnDragEnter(NG::OnDragDropFunc&& onDragEnter) override;

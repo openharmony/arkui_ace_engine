@@ -26,10 +26,25 @@
 
 #include "base/memory/referenced.h"
 #include "base/utils/noncopyable.h"
+#include "core/components_ng/render/drawing.h"
 #include "core/components_ng/render/ext_surface_callback_interface.h"
 #include "core/components_ng/render/render_surface.h"
 
 namespace OHOS::Ace::NG {
+constexpr int32_t SURFACE_QUEUE_SIZE = 5;
+#ifdef OHOS_PLATFORM
+struct SurfaceBufferNode {
+    SurfaceBufferNode(sptr<SurfaceBuffer> buf, int32_t fence, OffsetF orgin)
+        : buffer_(std::move(buf)), fence_(fence), orgin_(orgin)
+    {}
+    ~SurfaceBufferNode() noexcept = default;
+
+    sptr<SurfaceBuffer> buffer_;
+    int32_t fence_;
+    OffsetF orgin_ { 0, 0 };
+};
+#endif
+
 class RosenRenderSurface : public RenderSurface {
     DECLARE_ACE_TYPE(RosenRenderSurface, NG::RenderSurface)
 public:
@@ -64,7 +79,35 @@ public:
         instanceId_ = instanceId;
     }
 
-    void ConsumeBuffer();
+    void SetSurfaceDefaultSize(int32_t width, int32_t height) override;
+
+    void ConsumeXComponentBuffer();
+
+    void ConsumeWebBuffer();
+
+    void SetWebMessage(OffsetF offset) override
+    {
+        orgin_ = offset;
+    }
+
+    void SetPatternType(const std::string& type) override
+    {
+        patternType_ = type;
+    }
+
+    std::string GetPatternType() const
+    {
+        return patternType_;
+    }
+
+    void SetSurfaceQueueSize(int32_t queueSize = SURFACE_QUEUE_SIZE) override
+    {
+        queueSize_ = queueSize;
+    }
+
+    void DrawBuffer();
+
+    void DrawBufferForXComponent(RSCanvas& canvas, float width, float height) override;
 
 #ifdef OHOS_PLATFORM
     OHOS::sptr<OHOS::Surface> GetSurface() const
@@ -78,12 +121,19 @@ public:
     void SetExtSurfaceCallback(const RefPtr<ExtSurfaceCallbackInterface>& extSurfaceCallback) override;
 
 private:
+    void PostTaskToUI(const std::function<void()>&& task) const;
+
+    std::mutex surfaceNodeMutex_;
+    OffsetF orgin_ { 0, 0 };
+    std::string patternType_;
+    int32_t queueSize_ = SURFACE_QUEUE_SIZE;
 #ifdef OHOS_PLATFORM
     OHOS::sptr<OHOS::Surface> producerSurface_ = nullptr;
     OHOS::sptr<IConsumerSurface> consumerSurface_ = nullptr;
     OHOS::sptr<IBufferConsumerListener> drawBufferListener_ = nullptr;
     struct NativeWindow* nativeWindow_ = nullptr;
     sptr<OHOS::SurfaceDelegate> surfaceDelegate_;
+    std::queue<std::shared_ptr<SurfaceBufferNode>> availableBuffers_;
 #endif
     WeakPtr<NG::RenderContext> renderContext_ = nullptr;
     RefPtr<ExtSurfaceCallbackInterface> extSurfaceCallbackInterface_ = nullptr;

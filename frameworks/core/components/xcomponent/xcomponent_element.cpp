@@ -365,9 +365,9 @@ void XComponentElement::SetMethodCall()
     });
 
 #ifdef OHOS_STANDARD_SYSTEM
-    xcomponentController_->surfaceId_ = std::to_string(producerSurface_->GetUniqueId());
+    xcomponentController_->SetSurfaceId(std::to_string(producerSurface_->GetUniqueId()));
 #else
-    xcomponentController_->surfaceId_ = xcomponent_->GetId();
+    xcomponentController_->SetSurfaceId(xcomponent_->GetId());
 #endif
 }
 

@@ -19,11 +19,13 @@
 
 #include "base/log/ace_scoring_log.h"
 #include "bridge/declarative_frontend/engine/js_types.h"
+#include "bridge/declarative_frontend/jsview/js_utils.h"
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "bridge/declarative_frontend/jsview/models/text_timer_model_impl.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/declaration/texttimer/texttimer_declaration.h"
 #include "core/components/text/text_theme.h"
+#include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/texttimer/text_timer_model.h"
 #include "core/components_ng/pattern/texttimer/text_timer_model_ng.h"
 
@@ -64,7 +66,6 @@ void JSTextTimer::Create(const JSCallbackInfo& info)
     auto controller = TextTimerModel::GetInstance()->Create();
     if (info.Length() < 1 || !info[0]->IsObject()) {
         SetFontDefault();
-        LOGI("TextTimer create error, info is non-valid");
         return;
     }
     auto paramObject = JSRef<JSObject>::Cast(info[0]);
@@ -80,12 +81,10 @@ void JSTextTimer::Create(const JSCallbackInfo& info)
                     TextTimerModel::GetInstance()->SetInputCount(inputCount);
                 } else {
                     TextTimerModel::GetInstance()->SetInputCount(TIME_DEFAULT_COUNT);
-                    LOGE("Parameter out of range, use default value.");
                 }
             }
             if (count->IsUndefined() || count->IsNull()) {
                 TextTimerModel::GetInstance()->SetInputCount(TIME_DEFAULT_COUNT);
-                LOGE("Parameter is undefined or null, use default value.");
             }
         }
     }
@@ -115,6 +114,7 @@ void JSTextTimer::JSBind(BindingTarget globalObj)
     JSClass<JSTextTimer>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
     JSClass<JSTextTimer>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
     JSClass<JSTextTimer>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
+    JSClass<JSTextTimer>::StaticMethod("textShadow", &JSTextTimer::SetTextShadow, opt);
     JSClass<JSTextTimer>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 
@@ -131,12 +131,10 @@ void JSTextTimer::SetFontDefault()
 void JSTextTimer::SetFormat(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have at least 1 arguments");
         return;
     }
 
     if (!info[0]->IsString()) {
-        LOGE("The arg is not string, it is supposed to be a string");
         TextTimerModel::GetInstance()->SetFormat(DEFAULT_FORMAT);
         return;
     }
@@ -168,7 +166,6 @@ void JSTextTimer::SetFormat(const JSCallbackInfo& info)
 void JSTextTimer::SetFontSize(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("JSTextInput::SetFontSize The argv is wrong, it is supposed to have at least 1 argument");
         return;
     }
     auto pipelineContext = PipelineContext::GetCurrentContext();
@@ -195,7 +192,6 @@ void JSTextTimer::SetFontSize(const JSCallbackInfo& info)
 void JSTextTimer::SetTextColor(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The argv is wrong, it is supposed to have at least 1 argument");
         return;
     }
     Color textColor;
@@ -209,10 +205,21 @@ void JSTextTimer::SetTextColor(const JSCallbackInfo& info)
     TextTimerModel::GetInstance()->SetTextColor(textColor);
 }
 
+void JSTextTimer::SetTextShadow(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        return;
+    }
+    std::vector<Shadow> shadows;
+    ParseTextShadowFromShadowObject(info[0], shadows);
+    if (!shadows.empty()) {
+        TextTimerModel::GetInstance()->SetTextShadow(shadows);
+    }
+}
+
 void JSTextTimer::SetFontWeight(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The argv is wrong, it is supposed to have at least 1 argument");
         return;
     }
     RefPtr<TextTheme> textTheme = GetTheme<TextTheme>();
@@ -239,7 +246,6 @@ void JSTextTimer::SetFontWeight(const JSCallbackInfo& info)
 void JSTextTimer::SetFontStyle(int32_t value)
 {
     if (value < 0 || value >= static_cast<int32_t>(FONT_STYLES.size())) {
-        LOGE("TextTimer fontStyle(%{public}d) illegal value", value);
         return;
     }
     TextTimerModel::GetInstance()->SetItalicFontStyle(FONT_STYLES[value]);
@@ -248,12 +254,10 @@ void JSTextTimer::SetFontStyle(int32_t value)
 void JSTextTimer::SetFontFamily(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The argv is wrong, it is supposed to have at least 1 argument");
         return;
     }
     std::vector<std::string> fontFamilies;
     if (!ParseJsFontFamilies(info[0], fontFamilies)) {
-        LOGE("Parse FontFamilies failed");
         return;
     }
     TextTimerModel::GetInstance()->SetFontFamily(fontFamilies);
@@ -263,10 +267,12 @@ void JSTextTimer::OnTimer(const JSCallbackInfo& info)
 {
     CHECK_NULL_VOID(info[0]->IsFunction());
     auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
-    auto onChange = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](
+    WeakPtr<NG::FrameNode> targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto onChange = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = targetNode](
                         const std::string& utc, const std::string& elapsedTime) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("TextTimer.onTimer");
+        PipelineContext::SetCallBackNode(node);
         JSRef<JSVal> newJSVal[2];
         newJSVal[0] = JSRef<JSVal>::Make(ToJSValue(utc));
         newJSVal[1] = JSRef<JSVal>::Make(ToJSValue(elapsedTime));

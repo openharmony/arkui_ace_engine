@@ -85,15 +85,13 @@ void TextTimerPattern::InitTimerDisplay()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-
-    auto weak = AceType::WeakClaim(this);
     if (!scheduler_) {
+        resetCount_ = false;
+        auto weak = AceType::WeakClaim(this);
         auto&& callback = [weak](uint64_t duration) {
             auto timer = weak.Upgrade();
             if (timer) {
                 timer->Tick(duration);
-            } else {
-                LOGW("empty timer, skip tick callback.");
             }
         };
         auto context = PipelineContext::GetCurrentContext();
@@ -101,7 +99,10 @@ void TextTimerPattern::InitTimerDisplay()
         scheduler_ = SchedulerBuilder::Build(callback, context);
         auto count = isCountDown_ ? inputCount_ : 0;
         UpdateTextTimer(static_cast<uint32_t>(count));
-    } else {
+        return;
+    }
+    if (resetCount_) {
+        resetCount_ = false;
         HandleReset();
     }
 }
@@ -144,6 +145,9 @@ void TextTimerPattern::UpdateTextLayoutProperty(
     if (layoutProperty->GetItalicFontStyle().has_value()) {
         textLayoutProperty->UpdateItalicFontStyle(layoutProperty->GetItalicFontStyle().value());
     }
+    if (layoutProperty->GetTextShadow().has_value()) {
+        textLayoutProperty->UpdateTextShadow(layoutProperty->GetTextShadow().value());
+    }
 }
 
 void TextTimerPattern::OnAttachToFrameNode()
@@ -160,9 +164,11 @@ void TextTimerPattern::OnModifyDone()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
 
-    auto textNode = GetTextNode();
-    CHECK_NULL_VOID(textNode);
-    auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
+    if (!textNode_) {
+        textNode_ = GetTextNode();
+    }
+    CHECK_NULL_VOID(textNode_);
+    auto textLayoutProperty = textNode_->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textLayoutProperty);
     textLayoutProperty->UpdateTextOverflow(TextOverflow::NONE);
     if (textLayoutProperty->GetPositionProperty()) {
@@ -175,7 +181,7 @@ void TextTimerPattern::OnModifyDone()
     CHECK_NULL_VOID(textTimerProperty);
     textLayoutProperty->UpdateTextOverflow(TextOverflow::NONE);
     UpdateTextLayoutProperty(textTimerProperty, textLayoutProperty);
-    auto textContext = textNode->GetRenderContext();
+    auto textContext = textNode_->GetRenderContext();
     CHECK_NULL_VOID(textContext);
     textContext->SetClipToFrame(false);
     textContext->UpdateClipEdge(false);
@@ -184,7 +190,7 @@ void TextTimerPattern::OnModifyDone()
 
     InitTextTimerController();
     InitTimerDisplay();
-    textNode->MarkModifyDone();
+    textNode_->MarkModifyDone();
     RegisterVisibleAreaChangeCallback();
 }
 
@@ -210,22 +216,15 @@ void TextTimerPattern::OnVisibleAreaChange(bool visible)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    CHECK_NULL_VOID(textNode_);
     if (visible) {
-        CHECK_NULL_VOID(textNode_);
         auto childNode = DynamicCast<FrameNode>(host->GetFirstChild());
         if (!childNode) {
             host->AddChild(textNode_);
             host->RebuildRenderContextTree();
         }
     } else {
-        auto childNode = DynamicCast<FrameNode>(host->GetFirstChild());
-        CHECK_NULL_VOID(childNode);
-        bool isTextNode = AceType::InstanceOf<TextPattern>(childNode->GetPattern());
-        if (!isTextNode) {
-            return;
-        }
-        textNode_ = childNode;
-        host->RemoveChild(childNode);
+        host->RemoveChild(textNode_);
         host->RebuildRenderContextTree();
     }
 }
@@ -234,9 +233,8 @@ void TextTimerPattern::UpdateTextTimer(uint32_t elapsedTime)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto textNode = GetTextNode();
-    CHECK_NULL_VOID(textNode);
-    auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(textNode_);
+    auto textLayoutProperty = textNode_->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textLayoutProperty);
 
     // format time text.
@@ -244,13 +242,12 @@ void TextTimerPattern::UpdateTextTimer(uint32_t elapsedTime)
     if (timerText.empty()) {
         timerText = Localization::GetInstance()->FormatDuration(elapsedTime, DEFAULT_FORMAT);
     }
-    if (textLayoutProperty->GetContent() == timerText) {
-        return; // needless to update
-    }
-
     textLayoutProperty->UpdateContent(timerText); // Update time text.
-    textNode->MarkModifyDone();
-    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    if (CheckMeasureFlag(textLayoutProperty->GetPropertyChangeFlag()) ||
+        CheckLayoutFlag(textLayoutProperty->GetPropertyChangeFlag())) {
+        textNode_->MarkModifyDone();
+        textNode_->MarkDirtyNode();
+    }
 }
 
 std::string TextTimerPattern::GetFormat() const
@@ -357,5 +354,10 @@ uint64_t TextTimerPattern::GetMillisecondsDuration(uint64_t duration) const
             break;
     }
     return duration;
+}
+
+void TextTimerPattern::ResetCount()
+{
+    resetCount_ = true;
 }
 } // namespace OHOS::Ace::NG

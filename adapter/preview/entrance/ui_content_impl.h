@@ -28,7 +28,6 @@
 #include "adapter/preview/external/ability/stage/stage_context.h"
 
 namespace OHOS::Ace {
-
 class ACE_FORCE_EXPORT UIContentImpl : public UIContent {
 public:
     UIContentImpl(OHOS::AbilityRuntime::Context* context, void* runtime);
@@ -41,10 +40,12 @@ public:
     }
 
     // UI content lifeCycles
-    void Initialize(OHOS::Rosen::Window* window, const std::string& url, NativeValue* storage) override;
-    void InitializeByName(OHOS::Rosen::Window* window, const std::string& name, NativeValue* storage) override {}
+    void Initialize(OHOS::Rosen::Window* window, const std::string& url, napi_value storage) override;
+    void Initialize(OHOS::Rosen::Window* window,
+        const std::shared_ptr<std::vector<uint8_t>>& content, napi_value storage) override {}
+    void InitializeByName(OHOS::Rosen::Window* window, const std::string& name, napi_value storage) override {}
     void Initialize(
-        OHOS::Rosen::Window* window, const std::string& url, NativeValue* storage, uint32_t focusWindowId) override {}
+        OHOS::Rosen::Window* window, const std::string& url, napi_value storage, uint32_t focusWindowId) override {}
     void Foreground() override {}
     void Background() override {}
     void Focus() override {}
@@ -53,15 +54,9 @@ public:
     void OnNewWant(const OHOS::AAFwk::Want& want) override {}
 
     // distribute
-    void Restore(OHOS::Rosen::Window* window, const std::string& contentInfo, NativeValue* storage) override {}
+    void Restore(OHOS::Rosen::Window* window, const std::string& contentInfo, napi_value storage) override {}
     std::string GetContentInfo() const override;
     void DestroyUIDirector() override;
-
-    void Initialize(OHOS::Rosen::Window* window, const std::string& url, napi_value storage) override;
-    void InitializeByName(OHOS::Rosen::Window* window, const std::string& name, napi_value storage) override {}
-    void Initialize(
-        OHOS::Rosen::Window* window, const std::string& url, napi_value storage, uint32_t focusWindowId) override {}
-    void Restore(OHOS::Rosen::Window* window, const std::string& contentInfo, napi_value storage) override {}
 
     // UI content event process
     bool ProcessBackPressed() override;
@@ -76,6 +71,7 @@ public:
     void UpdateWindowMode(OHOS::Rosen::WindowMode mode, bool hasDeco = true) override {}
     void HideWindowTitleButton(bool hideSplit, bool hideMaximize, bool hideMinimize) override {}
     void SetIgnoreViewSafeArea(bool ignoreViewSafeArea) override {}
+    void UpdateTitleInTargetPos(bool isShow, int32_t height) override {}
 
     // Window color
     uint32_t GetBackgroundColor() override;
@@ -119,6 +115,12 @@ public:
         const ModalUIExtensionCallbacks& callbacks, const ModalUIExtensionConfig& config) override;
     void CloseModalUIExtension(int32_t sessionId) override;
 
+    void SetParentToken(sptr<IRemoteObject> token) override {}
+    sptr<IRemoteObject> GetParentToken() override
+    {
+        return nullptr;
+    }
+
 private:
     void CommonInitialize(OHOS::Rosen::Window* window, const std::string& contentInfo, napi_value storage);
     void DestroyCallback() const;
@@ -157,7 +159,6 @@ private:
     // ArkTS Form
     bool isFormRender_ = false;
 };
-
 } // namespace OHOS::Ace
 
 #endif // FOUNDATION_ACE_ADAPTER_PREVIEW_ENTRANCE_UI_CONTENT_IMPL_H

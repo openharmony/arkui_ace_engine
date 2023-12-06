@@ -16,6 +16,7 @@
 #include "frameworks/bridge/declarative_frontend/ng/declarative_frontend_ng.h"
 
 #include "base/log/dump_log.h"
+#include "core/common/recorder/node_data_cache.h"
 #include "core/common/thread_checker.h"
 #include "frameworks/bridge/common/utils/utils.h"
 
@@ -28,18 +29,17 @@ DeclarativeFrontendNG::~DeclarativeFrontendNG() noexcept
 
 void DeclarativeFrontendNG::Destroy()
 {
+    // The call doesn't change the page pop status
+    Recorder::NodeDataCache::Get().OnBeforePagePop(true);
     CHECK_RUN_ON(JS);
-    LOGI("DeclarativeFrontendNG Destroy begin.");
     // To guarantee the jsEngine_ and delegate_ released in js thread
     delegate_.Reset();
     jsEngine_->Destroy();
     jsEngine_.Reset();
-    LOGI("DeclarativeFrontendNG Destroy end.");
 }
 
 bool DeclarativeFrontendNG::Initialize(FrontendType type, const RefPtr<TaskExecutor>& taskExecutor)
 {
-    LOGI("DeclarativeFrontendNG initialize begin.");
     type_ = type;
     taskExecutor_ = taskExecutor;
     ACE_DCHECK(type_ == FrontendType::DECLARATIVE_JS);
@@ -62,13 +62,11 @@ bool DeclarativeFrontendNG::Initialize(FrontendType type, const RefPtr<TaskExecu
     } else {
         initJSEngineTask();
     }
-    LOGI("DeclarativeFrontendNG initialize end.");
     return true;
 }
 
 void DeclarativeFrontendNG::AttachPipelineContext(const RefPtr<PipelineBase>& context)
 {
-    LOGI("DeclarativeFrontendNG AttachPipelineContext.");
     if (delegate_) {
         delegate_->AttachPipelineContext(context);
     }
@@ -76,7 +74,6 @@ void DeclarativeFrontendNG::AttachPipelineContext(const RefPtr<PipelineBase>& co
 
 void DeclarativeFrontendNG::AttachSubPipelineContext(const RefPtr<PipelineBase>& context)
 {
-    LOGI("DeclarativeFrontendNG AttachSubPipelineContext.");
     if (!delegate_) {
         return;
     }
@@ -85,7 +82,6 @@ void DeclarativeFrontendNG::AttachSubPipelineContext(const RefPtr<PipelineBase>&
 
 void DeclarativeFrontendNG::SetAssetManager(const RefPtr<AssetManager>& assetManager)
 {
-    LOGI("DeclarativeFrontendNG SetAssetManager.");
     if (delegate_) {
         delegate_->SetAssetManager(assetManager);
     }
@@ -101,6 +97,16 @@ void DeclarativeFrontendNG::InitializeDelegate(const RefPtr<TaskExecutor>& taskE
             return false;
         }
         return jsEngine->LoadPageSource(url, errorCallback);
+    };
+
+    auto loadPageByBufferCallback = [weakEngine = WeakPtr<Framework::JsEngine>(jsEngine_)](
+                                        const std::shared_ptr<std::vector<uint8_t>>& content,
+                                        const std::function<void(const std::string&, int32_t)>& errorCallback) {
+        auto jsEngine = weakEngine.Upgrade();
+        if (!jsEngine) {
+            return false;
+        }
+        return jsEngine->LoadPageSource(content, errorCallback);
     };
 
     auto mediaQueryCallback = [weakEngine = WeakPtr<Framework::JsEngine>(jsEngine_)](
@@ -226,8 +232,18 @@ void DeclarativeFrontendNG::InitializeDelegate(const RefPtr<TaskExecutor>& taskE
         return jsEngine->LoadNamedRouterSource(namedRouter, isTriggeredByJs);
     };
 
+    auto updateRootComponentCallback = [weakEngine = WeakPtr<Framework::JsEngine>(jsEngine_)]() {
+        auto jsEngine = weakEngine.Upgrade();
+        if (!jsEngine) {
+            return false;
+        }
+        return jsEngine->UpdateRootComponent();
+    };
+
     pageRouterManager->SetLoadJsCallback(std::move(loadPageCallback));
+    pageRouterManager->SetLoadJsByBufferCallback(std::move(loadPageByBufferCallback));
     pageRouterManager->SetLoadNamedRouterCallback(std::move(loadNamedRouterCallback));
+    pageRouterManager->SetUpdateRootComponentCallback(std::move(updateRootComponentCallback));
 
     delegate_ = AceType::MakeRefPtr<Framework::FrontendDelegateDeclarativeNG>(taskExecutor);
     delegate_->SetMediaQueryCallback(std::move(mediaQueryCallback));
@@ -314,7 +330,6 @@ void DeclarativeFrontendNG::OnRemoteTerminated()
 void DeclarativeFrontendNG::NotifyAppStorage(const std::string& key, const std::string& value)
 {
     if (!delegate_) {
-        LOGW("delegate is null, return false");
         return;
     }
     delegate_->NotifyAppStorage(jsEngine_, key, value);
@@ -331,7 +346,6 @@ int32_t DeclarativeFrontendNG::GetRouterSize() const
 bool DeclarativeFrontendNG::OnStartContinuation()
 {
     if (!delegate_) {
-        LOGW("delegate is null, return false");
         return false;
     }
     return delegate_->OnStartContinuation();
@@ -340,7 +354,6 @@ bool DeclarativeFrontendNG::OnStartContinuation()
 bool DeclarativeFrontendNG::OnRestoreData(const std::string& data)
 {
     if (!delegate_) {
-        LOGW("delegate is null, return false");
         return false;
     }
     return delegate_->OnRestoreData(data);
@@ -366,6 +379,20 @@ void DeclarativeFrontendNG::RunPage(const std::string& url, const std::string& p
     // Not use this pageId from backend, manage it in FrontendDelegateDeclarativeNg.
     if (delegate_) {
         delegate_->RunPage(url, params, pageProfile_);
+    }
+}
+
+void DeclarativeFrontendNG::RunPage(const std::shared_ptr<std::vector<uint8_t>>& content, const std::string& params)
+{
+    auto container = Container::Current();
+    auto isStageModel = container ? container->IsUseStageModel() : false;
+    if (!isStageModel) {
+        LOGE("RunPage by buffer must be run under stage model.");
+        return;
+    }
+
+    if (delegate_) {
+        delegate_->RunPage(content, params, pageProfile_);
     }
 }
 
@@ -398,14 +425,12 @@ void DeclarativeFrontendNG::NavigatePage(uint8_t type, const PageTarget& target,
 
 void DeclarativeFrontendNG::OnWindowDisplayModeChanged(bool isShownInMultiWindow, const std::string& data)
 {
-    LOGW("OnWindowDisplayModeChanged not implemented");
     delegate_->OnWindowDisplayModeChanged(isShownInMultiWindow, data);
 }
 
 RefPtr<AccessibilityManager> DeclarativeFrontendNG::GetAccessibilityManager() const
 {
     if (!delegate_) {
-        LOGE("GetAccessibilityManager delegate is null");
         return nullptr;
     }
     return delegate_->GetJSAccessibilityManager();
@@ -415,7 +440,6 @@ WindowConfig& DeclarativeFrontendNG::GetWindowConfig()
 {
     if (!delegate_) {
         static WindowConfig windowConfig;
-        LOGW("delegate is null, return default config");
         return windowConfig;
     }
     return delegate_->GetWindowConfig();
@@ -544,7 +568,6 @@ void DeclarativeFrontendNG::SetColorMode(ColorMode colorMode)
 
 void DeclarativeFrontendNG::RebuildAllPages()
 {
-    LOGW("RebuildAllPages not implemented");
     if (delegate_) {
         delegate_->RebuildAllPages();
     }
@@ -562,5 +585,14 @@ void DeclarativeFrontendNG::HotReload()
     auto manager = GetPageRouterManager();
     CHECK_NULL_VOID(manager);
     manager->FlushFrontend();
+}
+
+std::string DeclarativeFrontendNG::GetCurrentPageUrl() const
+{
+    auto pageRouterManager = GetPageRouterManager();
+    if (pageRouterManager) {
+        return pageRouterManager->GetCurrentPageUrl();
+    }
+    return "";
 }
 } // namespace OHOS::Ace

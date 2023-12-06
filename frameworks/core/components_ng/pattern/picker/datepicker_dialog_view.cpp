@@ -56,6 +56,7 @@ RefPtr<FrameNode> DatePickerDialogView::Show(const DialogProperties& dialogPrope
     const DatePickerSettingData& settingData, std::map<std::string, NG::DialogEvent> dialogEvent,
     std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent)
 {
+    ACE_LAYOUT_SCOPED_TRACE("Create[DatePickerDialogView]");
     auto contentColumn = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         AceType::MakeRefPtr<LinearLayoutPattern>(true));
     auto pickerStack = CreateStackNode();
@@ -497,6 +498,7 @@ RefPtr<FrameNode> DatePickerDialogView::CreateDateNode(int32_t dateNodeId,
     std::map<std::string, PickerDate> datePickerProperty, const PickerTextProperties& properties, bool isLunar,
     bool showTime)
 {
+    ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::DATE_PICKER_ETS_TAG, dateNodeId);
     auto dateNode = FrameNode::GetOrCreateFrameNode(
         V2::DATE_PICKER_ETS_TAG, dateNodeId, []() { return AceType::MakeRefPtr<DatePickerPattern>(); });
     CHECK_NULL_RETURN(dateNode, nullptr);
@@ -648,8 +650,10 @@ void DatePickerDialogView::CreateSingleDateNode(const RefPtr<FrameNode>& dateNod
 RefPtr<FrameNode> DatePickerDialogView::CreateTimeNode(
     std::map<std::string, PickerTime> timePickerProperty, const PickerTextProperties& properties, bool useMilitaryTime)
 {
+    auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::TIME_PICKER_ETS_TAG, nodeId);
     auto timePickerNode = FrameNode::GetOrCreateFrameNode(V2::TIME_PICKER_ETS_TAG,
-        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TimePickerRowPattern>(); });
+        nodeId, []() { return AceType::MakeRefPtr<TimePickerRowPattern>(); });
     CHECK_NULL_RETURN(timePickerNode, nullptr);
     auto timePickerRowPattern = timePickerNode->GetPattern<TimePickerRowPattern>();
     CHECK_NULL_RETURN(timePickerRowPattern, nullptr);

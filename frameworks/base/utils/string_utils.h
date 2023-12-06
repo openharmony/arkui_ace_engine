@@ -74,6 +74,11 @@ inline std::wstring ToWstring(const std::string& str)
     return result == DEFAULT_WSTRING ? L"" : result;
 }
 
+inline bool IsLetterOrNumberForWchar(wchar_t chr)
+{
+    return (chr >= L'0' && chr <= L'9') || (chr >= L'a' && chr <= L'z') || (chr >= L'A' && chr <= L'Z');
+}
+
 inline std::string ToString(const std::wstring& str)
 {
     if (str == DEFAULT_WSTRING) {
@@ -176,6 +181,7 @@ inline uint32_t StringToUint(const std::string& value, uint32_t defaultErr = 0)
 inline double StringToDouble(const std::string& value)
 {
     char* pEnd = nullptr;
+    errno = 0;
     double result = std::strtod(value.c_str(), &pEnd);
     if (pEnd == value.c_str() || errno == ERANGE) {
         return 0.0;
@@ -256,7 +262,7 @@ inline CalcDimension StringToCalcDimension(
     const std::string& value, bool useVp = false, DimensionUnit defaultUnit = DimensionUnit::PX)
 {
     if (value.find("calc") != std::string::npos) {
-        LOGI("StringToCalcDimension calc value = %{public}s", value.c_str());
+        LOGD("StringToCalcDimension calc value = %{public}s", value.c_str());
         return CalcDimension(value, DimensionUnit::CALC);
     } else {
         if (useVp) {

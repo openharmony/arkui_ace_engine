@@ -18,7 +18,7 @@
 #include <string>
 
 #include "cJSON.h"
-#include "json_util.h"
+#include "base/json/json_util.h"
 #include "bridge/common/dom/dom_type.h"
 
 const uint32_t u16m = 65535;

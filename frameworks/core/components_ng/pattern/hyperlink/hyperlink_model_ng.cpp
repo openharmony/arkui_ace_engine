@@ -16,43 +16,45 @@
 #include "core/components_ng/pattern/hyperlink/hyperlink_model_ng.h"
 
 #include "base/utils/utils.h"
+#include "core/components/hyperlink/hyperlink_theme.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/hyperlink/hyperlink_pattern.h"
-#include "core/components/hyperlink/hyperlink_theme.h"
 
 namespace OHOS::Ace::NG {
 void HyperlinkModelNG::Create(const std::string& address, const std::string& content)
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
+    ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::HYPERLINK_ETS_TAG, nodeId);
     auto hyperlinkNode = FrameNode::GetOrCreateFrameNode(
-        V2::HYPERLINK_ETS_TAG, nodeId, [address]() { return AceType::MakeRefPtr<HyperlinkPattern>(address); });
+        V2::HYPERLINK_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<HyperlinkPattern>(); });
 
     stack->Push(hyperlinkNode);
-    SetTextStyle(hyperlinkNode, content);
+    SetTextStyle(hyperlinkNode, content, address);
 
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
-    auto theme = pipeline->GetTheme<HyperlinkTheme>();
-    CHECK_NULL_VOID(theme);
-    SetDraggable(theme->GetDraggable());
+    auto draggable = pipeline->GetDraggable<HyperlinkTheme>();
+    SetDraggable(draggable);
 }
 
 void HyperlinkModelNG::SetColor(const Color& value)
 {
-    LOGI("Hyperlink setColor.");
-    ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, TextColor, value);
-    ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, ForegroundColor, value);
+    ACE_UPDATE_LAYOUT_PROPERTY(HyperlinkLayoutProperty, TextColor, value);
+    ACE_UPDATE_LAYOUT_PROPERTY(HyperlinkLayoutProperty, ForegroundColor, value);
+    ACE_UPDATE_LAYOUT_PROPERTY(HyperlinkLayoutProperty, Color, value);
     ACE_UPDATE_RENDER_CONTEXT(ForegroundColor, value);
 }
 
-void HyperlinkModelNG::SetTextStyle(const RefPtr<FrameNode>& hyperlinkNode, const std::string& content)
+void HyperlinkModelNG::SetTextStyle(
+    const RefPtr<FrameNode>& hyperlinkNode, const std::string& content, const std::string& address)
 {
     CHECK_NULL_VOID(hyperlinkNode);
-    auto textLayoutProperty = hyperlinkNode->GetLayoutProperty<TextLayoutProperty>();
+    auto textLayoutProperty = hyperlinkNode->GetLayoutProperty<HyperlinkLayoutProperty>();
     CHECK_NULL_VOID(textLayoutProperty);
     auto textStyle = PipelineBase::GetCurrentContext()->GetTheme<TextTheme>()->GetTextStyle();
-    textLayoutProperty->UpdateContent(content);
+    textLayoutProperty->UpdateContent(content.empty() ? address : content);
+    textLayoutProperty->UpdateAddress(address);
     auto theme = PipelineContext::GetCurrentContext()->GetTheme<HyperlinkTheme>();
     CHECK_NULL_VOID(theme);
     textLayoutProperty->UpdateTextOverflow(TextOverflow::ELLIPSIS);
@@ -77,5 +79,14 @@ void HyperlinkModelNG::SetDraggable(bool draggable)
         gestureHub->InitDragDropEvent();
     }
     frameNode->SetDraggable(draggable);
+}
+
+
+void HyperlinkModelNG::SetColor(FrameNode* frameNode, const Color& value)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(HyperlinkLayoutProperty, TextColor, value, frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(HyperlinkLayoutProperty, ForegroundColor, value, frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(HyperlinkLayoutProperty, Color, value, frameNode);
+    ACE_UPDATE_NODE_RENDER_CONTEXT(ForegroundColor, value, frameNode);
 }
 } // namespace OHOS::Ace::NG

@@ -64,7 +64,6 @@ public:
     void ClearUserCallback()
     {
         // When the event param is undefined, it will clear the callback.
-        LOGI("Clear user callback.");
         if (userCallback_) {
             userCallback_.Reset();
         }
@@ -99,6 +98,7 @@ public:
 
 private:
     bool TriggerTouchCallBack(const TouchEvent& changedPoint);
+    bool ShouldResponse() override;
 
     std::list<RefPtr<TouchEventImpl>> touchEvents_;
     RefPtr<TouchEventImpl> userCallback_;

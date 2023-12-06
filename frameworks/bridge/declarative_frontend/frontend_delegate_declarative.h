@@ -26,6 +26,7 @@
 #include "base/utils/measure_util.h"
 #include "bridge/declarative_frontend/ng/page_router_manager.h"
 #include "core/common/js_message_dispatcher.h"
+#include "core/components_ng/pattern/overlay/overlay_manager.h"
 #include "core/pipeline/pipeline_context.h"
 #include "frameworks/bridge/common/accessibility/accessibility_node_manager.h"
 #include "frameworks/bridge/common/manifest/manifest_parser.h"
@@ -82,6 +83,8 @@ public:
     // JSFrontend delegate functions.
     void RunPage(
         const std::string& url, const std::string& params, const std::string& profile, bool isNamedRouter = false);
+    void RunPage(const std::shared_ptr<std::vector<uint8_t>>& content,
+        const std::string& params, const std::string& profile);
     void SetJsMessageDispatcher(const RefPtr<JsMessageDispatcher>& dispatcher) const;
     void TransferComponentResponseData(int32_t callbackId, int32_t code, std::vector<uint8_t>&& data);
     void TransferJsResponseData(int32_t callbackId, int32_t code, std::vector<uint8_t>&& data) const;
@@ -183,7 +186,8 @@ public:
     double MeasureText(const MeasureContext& context) override;
     Size MeasureTextSize(const MeasureContext& context) override;
 
-    void ShowToast(const std::string& message, int32_t duration, const std::string& bottom) override;
+    void ShowToast(const std::string& message, int32_t duration, const std::string& bottom,
+        const NG::ToastShowMode& showMode = NG::ToastShowMode::DEFAULT) override;
     void SetToastStopListenerCallback(std::function<void()>&& stopCallback) override;
     void ShowDialog(const std::string& title, const std::string& message, const std::vector<ButtonInfo>& buttons,
         bool autoCancel, std::function<void(int32_t, int32_t)>&& callback,
@@ -207,6 +211,8 @@ public:
         std::function<void(int32_t, int32_t)>&& callback) override;
     void ShowActionMenu(const std::string& title, const std::vector<ButtonInfo>& button,
         std::function<void(int32_t, int32_t)>&& callback, std::function<void(bool)>&& onStatusChanged) override;
+    void ShowActionMenu(const PromptDialogAttr& dialogAttr, const std::vector<ButtonInfo>& buttons,
+        std::function<void(int32_t, int32_t)>&& callback) override;
     void ShowActionMenuInner(DialogProperties& dialogProperties, const std::vector<ButtonInfo>& button,
         std::function<void(int32_t, int32_t)>&& callback);
 
@@ -215,7 +221,6 @@ public:
     std::string GetInspector(NodeId nodeId) override;
 
     void PushJsCallbackToRenderNode(NodeId id, double ratio, std::function<void(bool, double)>&& callback) override;
-    void RemoveVisibleChangeNode(NodeId id) override;
     // For async event.
     void SetCallBackResult(const std::string& callBackId, const std::string& result) override;
 
@@ -308,7 +313,13 @@ public:
         std::unordered_map<std::string, RefPtr<Framework::RevSourceMap>>& sourceMap);
 
     void InitializeRouterManager(
-        NG::LoadPageCallback&& loadPageCallback, NG::LoadNamedRouterCallback&& loadNamedRouterCallback);
+        NG::LoadPageCallback&& loadPageCallback, NG::LoadPageByBufferCallback&& loadPageByBufferCallback,
+        NG::LoadNamedRouterCallback&& loadNamedRouterCallback,
+        NG::UpdateRootComponentCallback&& updateRootComponentCallback);
+
+#if defined(PREVIEW)
+    void SetIsComponentPreview(NG::IsComponentPreviewCallback&& callback);
+#endif
 
     const RefPtr<NG::PageRouterManager>& GetPageRouterManager() const
     {

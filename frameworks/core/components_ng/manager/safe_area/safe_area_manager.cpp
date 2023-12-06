@@ -73,6 +73,15 @@ bool SafeAreaManager::SetIsFullScreen(bool value)
     return true;
 }
 
+bool SafeAreaManager::SetIsNeedAvoidWindow(bool value)
+{
+    if (isNeedAvoidWindow_ == value) {
+        return false;
+    }
+    isNeedAvoidWindow_ = value;
+    return true;
+}
+
 bool SafeAreaManager::SetIgnoreSafeArea(bool value)
 {
     if (ignoreSafeArea_ == value) {
@@ -82,11 +91,18 @@ bool SafeAreaManager::SetIgnoreSafeArea(bool value)
     return true;
 }
 
+bool SafeAreaManager::SetKeyBoardAvoidMode(bool value)
+{
+    if (keyboardSafeAreaEnabled_ == value) {
+        return false;
+    }
+    keyboardSafeAreaEnabled_ = value;
+    LOGD("setKeyBoardAvoidMode %{public}d", value);
+    return true;
+}
+
 SafeAreaInsets SafeAreaManager::GetSystemSafeArea() const
 {
-    if (ignoreSafeArea_ || !isFullScreen_) {
-        return {};
-    }
     return systemSafeArea_;
 }
 
@@ -100,7 +116,7 @@ SafeAreaInsets SafeAreaManager::GetCutoutSafeArea() const
 
 SafeAreaInsets SafeAreaManager::GetSafeArea() const
 {
-    if (ignoreSafeArea_ || !isFullScreen_) {
+    if (ignoreSafeArea_ || (!isFullScreen_ && !isNeedAvoidWindow_)) {
         return {};
     }
     return systemSafeArea_.Combine(cutoutSafeArea_);

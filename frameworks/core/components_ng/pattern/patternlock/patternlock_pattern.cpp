@@ -48,7 +48,6 @@ void PatternLockPattern::OnModifyDone()
 
     auto gestureHub = host->GetOrCreateGestureEventHub();
     InitTouchEvent(gestureHub, touchDownListener_);
-    InitPanEvent(gestureHub);
     InitPatternLockController();
     InitFocusEvent();
     InitMouseEvent();
@@ -66,6 +65,7 @@ void PatternLockPattern::InitTouchEvent(RefPtr<GestureEventHub>& gestureHub, Ref
     };
     touchDownListener = MakeRefPtr<TouchEventImpl>(std::move(touchDownTask));
     gestureHub->AddTouchEvent(touchDownListener);
+    gestureHub->SetHitTestMode(HitTestMode::HTMBLOCK);
 }
 
 void PatternLockPattern::SetChallengeResult(V2::PatternLockChallengeResult challengeResult)
@@ -99,11 +99,23 @@ void PatternLockPattern::InitPatternLockController()
 
 void PatternLockPattern::HandleTouchEvent(const TouchEventInfo& info)
 {
-    auto touchType = info.GetTouches().front().GetTouchType();
-    if (touchType == TouchType::DOWN) {
-        OnTouchDown(info);
-    } else if (touchType == TouchType::UP) {
-        OnTouchUp();
+    auto touchList = info.GetChangedTouches();
+    CHECK_NULL_VOID(!touchList.empty());
+    if (fingerId_ == -1) {
+        fingerId_ = touchList.front().GetFingerId();
+    }
+    for (const auto& touchInfo : touchList) {
+        if (touchInfo.GetFingerId() == fingerId_) {
+            auto touchType = touchInfo.GetTouchType();
+            if (touchType == TouchType::DOWN) {
+                OnTouchDown(touchInfo);
+            } else if (touchType == TouchType::MOVE) {
+                OnTouchMove(touchInfo);
+            } else if (touchType == TouchType::UP) {
+                OnTouchUp();
+            }
+            break;
+        }
     }
 }
 
@@ -154,11 +166,7 @@ bool PatternLockPattern::AddChoosePoint(const OffsetF& offset, int32_t x, int32_
             AddPassPoint(x, y);
             choosePoint_.emplace_back(x, y);
             StartModifierConnectedAnimate(x, y);
-            auto host = GetHost();
-            CHECK_NULL_RETURN(host, false);
-            auto eventHub = host->GetEventHub<PatternLockEventHub>();
-            CHECK_NULL_RETURN(eventHub, false);
-            eventHub->UpdateDotConnectEvent(choosePoint_.back().GetCode());
+            UpdateDotConnectEvent();
         }
         return true;
     }
@@ -173,6 +181,40 @@ bool PatternLockPattern::CheckChoosePoint(int32_t x, int32_t y) const
         }
     }
     return false;
+}
+
+void PatternLockPattern::UpdateDotConnectEvent()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto eventHub = host->GetEventHub<PatternLockEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->UpdateDotConnectEvent(choosePoint_.back().GetCode());
+}
+
+void PatternLockPattern::AddPassPointToChoosePoint(
+    int32_t lastCode, int32_t nowCode, std::vector<PatternLockCell> passPointVec)
+{
+    passPointCount_ = static_cast<int32_t>(passPointVec.size());
+    if (nowCode > lastCode) {
+        choosePoint_.emplace_back(passPointVec.front());
+        UpdateDotConnectEvent();
+        StartModifierAddPassPointAnimate(passPointVec.front().GetColumn(), passPointVec.front().GetRow());
+        if (passPointCount_ > 1) {
+            choosePoint_.emplace_back(passPointVec.back());
+            UpdateDotConnectEvent();
+            StartModifierAddPassPointAnimate(passPointVec.back().GetColumn(), passPointVec.back().GetRow());
+        }
+    } else {
+        choosePoint_.emplace_back(passPointVec.back());
+        UpdateDotConnectEvent();
+        StartModifierAddPassPointAnimate(passPointVec.back().GetColumn(), passPointVec.back().GetRow());
+        if (passPointCount_ > 1) {
+            choosePoint_.emplace_back(passPointVec.front());
+            UpdateDotConnectEvent();
+            StartModifierAddPassPointAnimate(passPointVec.front().GetColumn(), passPointVec.front().GetRow());
+        }
+    }
 }
 
 void PatternLockPattern::AddPassPoint(int32_t x, int32_t y)
@@ -208,27 +250,13 @@ void PatternLockPattern::AddPassPoint(int32_t x, int32_t y)
     if (passPointLength == 0) {
         return;
     }
-    passPointCount_ = static_cast<int32_t>(passPointLength);
-    if (nowCode > lastCode) {
-        choosePoint_.emplace_back(passPointVec.front());
-        StartModifierAddPassPointAnimate(passPointVec.front().GetColumn(), passPointVec.front().GetRow());
-        if (passPointLength > 1) {
-            choosePoint_.emplace_back(passPointVec.back());
-            StartModifierAddPassPointAnimate(passPointVec.back().GetColumn(), passPointVec.back().GetRow());
-        }
-    } else {
-        choosePoint_.emplace_back(passPointVec.back());
-        StartModifierAddPassPointAnimate(passPointVec.back().GetColumn(), passPointVec.back().GetRow());
-        if (passPointLength > 1) {
-            choosePoint_.emplace_back(passPointVec.front());
-            StartModifierAddPassPointAnimate(passPointVec.front().GetColumn(), passPointVec.front().GetRow());
-        }
-    }
+    AddPassPointToChoosePoint(lastCode, nowCode, passPointVec);
 }
 
 void PatternLockPattern::HandleReset()
 {
     isMoveEventValid_ = false;
+    isOnKeyEventState_ = false;
     choosePoint_.clear();
     cellCenter_.Reset();
     if (patternLockModifier_) {
@@ -250,24 +278,22 @@ bool PatternLockPattern::CheckAutoReset() const
     return !(!autoReset_ && !choosePoint_.empty() && !isMoveEventValid_);
 }
 
-void PatternLockPattern::OnTouchDown(const TouchEventInfo& info)
+void PatternLockPattern::OnTouchDown(const TouchLocationInfo& info)
 {
-    const auto& locationInfo = info.GetTouches().front();
-    float moveDeltaX = locationInfo.GetLocalLocation().GetX();
-    float moveDeltaY = locationInfo.GetLocalLocation().GetY();
-    OffsetF touchPoint;
-    touchPoint.SetX(moveDeltaX);
-    touchPoint.SetY(moveDeltaY);
+    auto globalLocationX = static_cast<float>(info.GetGlobalLocation().GetX());
+    auto globalLocationY = static_cast<float>(info.GetGlobalLocation().GetY());
+    globalTouchPoint_.SetX(globalLocationX);
+    globalTouchPoint_.SetY(globalLocationY);
 
     if (!CheckAutoReset()) {
         return;
     }
     HandleReset();
-    cellCenter_ = touchPoint;
+    CalculateCellCenter();
     bool isAdd = false;
     for (int32_t i = 0; i < PATTERN_LOCK_COL_COUNT && !isAdd; i++) {
         for (int32_t j = 0; j < PATTERN_LOCK_COL_COUNT && !isAdd; j++) {
-            isAdd = AddChoosePoint(touchPoint, i + 1, j + 1);
+            isAdd = AddChoosePoint(cellCenter_, i + 1, j + 1);
         }
     }
 
@@ -280,55 +306,26 @@ void PatternLockPattern::OnTouchDown(const TouchEventInfo& info)
     isMoveEventValid_ = true;
 }
 
-void PatternLockPattern::HandleGestureUpdate(const GestureEvent& info)
+void PatternLockPattern::OnTouchMove(const TouchLocationInfo& info)
 {
-    if (info.GetInputEventType() == InputEventType::AXIS) {
-        return;
-    }
-    auto moveDeltaX = static_cast<float>(info.GetLocalLocation().GetX());
-    auto moveDeltaY = static_cast<float>(info.GetLocalLocation().GetY());
-    OffsetF touchPoint;
-    touchPoint.SetX(moveDeltaX);
-    touchPoint.SetY(moveDeltaY);
-
+    auto globalLocationX = static_cast<float>(info.GetGlobalLocation().GetX());
+    auto globalLocationY = static_cast<float>(info.GetGlobalLocation().GetY());
+    globalTouchPoint_.SetX(globalLocationX);
+    globalTouchPoint_.SetY(globalLocationY);
     if (!isMoveEventValid_) {
         return;
     }
-    cellCenter_ = touchPoint;
+    CalculateCellCenter();
     bool isAdd = false;
     for (int32_t i = 0; i < PATTERN_LOCK_COL_COUNT && !isAdd; i++) {
         for (int32_t j = 0; j < PATTERN_LOCK_COL_COUNT && !isAdd; j++) {
-            isAdd = AddChoosePoint(touchPoint, i + 1, j + 1);
+            isAdd = AddChoosePoint(cellCenter_, i + 1, j + 1);
         }
     }
 
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
-}
-
-void PatternLockPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
-{
-    auto actionStartTask = [weak = WeakClaim(this)](const GestureEvent& /* info */) { LOGD("Pan event start"); };
-
-    auto actionUpdateTask = [weak = WeakClaim(this)](const GestureEvent& info) {
-        auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID(pattern);
-        pattern->HandleGestureUpdate(info);
-    };
-
-    auto actionEndTask = [weak = WeakClaim(this)](const GestureEvent& /* info */) { LOGD("Pan event End"); };
-
-    auto actionCancelTask = [weak = WeakClaim(this)]() { LOGD("Pan event cancel"); };
-    if (panEvent_) {
-        gestureHub->RemovePanEvent(panEvent_);
-    }
-
-    PanDirection panDirection;
-    panDirection.type = PanDirection::ALL;
-    panEvent_ = MakeRefPtr<PanEvent>(
-        std::move(actionStartTask), std::move(actionUpdateTask), std::move(actionEndTask), std::move(actionCancelTask));
-    gestureHub->AddPanEvent(panEvent_, panDirection, 1, DEFAULT_PAN_DISTANCE);
 }
 
 void PatternLockPattern::AddPointEnd()
@@ -357,6 +354,7 @@ void PatternLockPattern::OnTouchUp()
     patternLockModifier_->SetIsTouchDown(false);
     StartModifierCanceledAnimate();
     AddPointEnd();
+    fingerId_ = -1;
 }
 
 void PatternLockPattern::InitFocusEvent()
@@ -468,9 +466,9 @@ void PatternLockPattern::OnFocusClick()
     AddPassPoint(currentPoint_.first, currentPoint_.second);
     choosePoint_.emplace_back(currentPoint_.first, currentPoint_.second);
     StartModifierConnectedAnimate(currentPoint_.first, currentPoint_.second);
-    auto eventHub = host->GetEventHub<PatternLockEventHub>();
-    CHECK_NULL_VOID(eventHub);
-    eventHub->UpdateDotConnectEvent(choosePoint_.back().GetCode());
+    UpdateDotConnectEvent();
+    isOnKeyEventState_ = true;
+
     isMoveEventValid_ = true;
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
@@ -530,6 +528,7 @@ bool PatternLockPattern::OnKeyEvent(const KeyEvent& event)
         case KeyCode::KEY_ENTER:
             if (isMoveEventValid_) {
                 AddPointEnd();
+                isOnKeyEventState_ = false;
             }
             return true;
         case KeyCode::KEY_DPAD_UP:
@@ -633,6 +632,38 @@ void PatternLockPattern::StartModifierCanceledAnimate()
     CHECK_NULL_VOID(patternLockModifier_);
     if (isMoveEventValid_) {
         patternLockModifier_->StartCanceledAnimate();
+    }
+}
+
+OffsetF PatternLockPattern::GetLastChoosePointOffset()
+{
+    OffsetF cellCenter;
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, cellCenter);
+    auto geometryNode = host->GetGeometryNode();
+    CHECK_NULL_RETURN(geometryNode, cellCenter);
+    float sideLength = geometryNode->GetContentSize().Width();
+    auto offset = geometryNode->GetContentOffset();
+    auto lastPoint = choosePoint_.back();
+    cellCenter.SetX(offset.GetX() + sideLength / PATTERN_LOCK_COL_COUNT / RADIUS_TO_DIAMETER *
+                                        (lastPoint.GetColumn() * RADIUS_TO_DIAMETER - 1));
+    cellCenter.SetY(offset.GetY() + sideLength / PATTERN_LOCK_COL_COUNT / RADIUS_TO_DIAMETER *
+                                        (lastPoint.GetRow() * RADIUS_TO_DIAMETER - 1));
+    return cellCenter;
+}
+
+void PatternLockPattern::CalculateCellCenter()
+{
+    if (isOnKeyEventState_) {
+        size_t count = choosePoint_.size();
+        if (count < 1) {
+            return;
+        }
+        cellCenter_ = GetLastChoosePointOffset();
+    } else {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        cellCenter_ = globalTouchPoint_ - host->GetTransformRelativeOffset();
     }
 }
 } // namespace OHOS::Ace::NG

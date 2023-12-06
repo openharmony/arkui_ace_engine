@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -30,6 +30,21 @@
 #include "frameworks/bridge/common/accessibility/accessibility_node_manager.h"
 
 namespace OHOS::Ace::Framework {
+
+struct SearchParameter {
+    int32_t nodeId;
+    std::string text;
+    int32_t mode;
+    int32_t uiExtensionOffset;
+};
+
+struct CommonProperty {
+    int32_t windowId = 0;
+    int32_t windowLeft = 0;
+    int32_t windowTop = 0;
+    int32_t pageId = 0;
+    std::string pagePath;
+};
 
 class JsAccessibilityManager : public AccessibilityNodeManager {
     DECLARE_ACE_TYPE(JsAccessibilityManager, AccessibilityNodeManager);
@@ -77,7 +92,12 @@ public:
     void DeregisterInteractionOperation();
     bool SendAccessibilitySyncEvent(
         const AccessibilityEvent& accessibilityEvent, Accessibility::AccessibilityEventInfo eventInfo);
-
+    bool TransferAccessibilityAsyncEvent(
+        const Accessibility::AccessibilityEventInfo& eventInfo,
+        const std::vector<int32_t>& uiExtensionIdLevelList) override;
+    void SendExtensionAccessibilityEvent(
+        const Accessibility::AccessibilityEventInfo& eventInfo,
+        const std::vector<int32_t>& uiExtensionIdLevelList) override;
     void SearchElementInfoByAccessibilityId(const int32_t elementId, const int32_t requestId,
         Accessibility::AccessibilityElementOperatorCallback& callback, const int32_t mode, const int32_t windowId);
     void SearchElementInfosByText(const int32_t elementId, const std::string& text, const int32_t requestId,
@@ -95,6 +115,23 @@ public:
     bool ClearCurrentFocus();
     void UpdateNodeChildIds(const RefPtr<AccessibilityNode>& node);
     void SendActionEvent(const Accessibility::ActionType& action, NodeId nodeId);
+    void SearchElementInfoByAccessibilityIdNG(int32_t elementId, int32_t mode,
+        std::list<Accessibility::AccessibilityElementInfo>& infos, const RefPtr<PipelineBase>& context,
+        const int32_t uiExtensionOffset = 0) override;
+    void SearchElementInfosByTextNG(int32_t elementId, const std::string& text,
+        std::list<Accessibility::AccessibilityElementInfo>& infos, const RefPtr<PipelineBase>& context,
+        const int32_t uiExtensionOffset = 0) override;
+    void FindFocusedElementInfoNG(int32_t elementId, int32_t focusType, Accessibility::AccessibilityElementInfo& info,
+        const RefPtr<PipelineBase>& context, const int32_t uiExtensionOffset = 0) override;
+    void FocusMoveSearchNG(int32_t elementId, int32_t direction, Accessibility::AccessibilityElementInfo& info,
+        const RefPtr<PipelineBase>& context, const int32_t uiExtensionOffset = 0) override;
+    bool ExecuteExtensionActionNG(int32_t elementId, const std::map<std::string, std::string>& actionArguments,
+        int32_t action, const RefPtr<PipelineBase>& context, int32_t uiExtensionOffset) override;
+#ifdef WEB_SUPPORTED
+    bool ExecuteWebActionNG(int32_t elementId, Accessibility::ActionType action, const RefPtr<NG::FrameNode>& frameNode,
+        const RefPtr<NG::PipelineContext>& ngPipeline);
+    void SetWebAccessibilityState(bool state);
+#endif
 
     std::string GetPagePath();
 
@@ -179,21 +216,10 @@ private:
     RefPtr<AccessibilityNode> GetPreviousFocusableNode(
         const std::list<RefPtr<AccessibilityNode>>& nodeList, RefPtr<AccessibilityNode>& node);
 
-    void SearchElementInfoByAccessibilityIdNG(int32_t elementId, int32_t mode,
-        std::list<Accessibility::AccessibilityElementInfo>& infos, const RefPtr<PipelineBase>& context);
-
-    void SearchElementInfosByTextNG(int32_t elementId, const std::string& text,
-        std::list<Accessibility::AccessibilityElementInfo>& infos, const RefPtr<PipelineBase>& context);
-
-    void FindFocusedElementInfoNG(int32_t elementId, int32_t focusType, Accessibility::AccessibilityElementInfo& info,
-        const RefPtr<PipelineBase>& context);
-
-    void FocusMoveSearchNG(int32_t elementId, int32_t direction, Accessibility::AccessibilityElementInfo& info,
-        const RefPtr<PipelineBase>& context);
-
     bool ExecuteActionNG(int32_t elementId, const std::map<std::string, std::string>& actionArguments,
-        Accessibility::ActionType action, const RefPtr<PipelineBase>& context);
-
+        Accessibility::ActionType action, const RefPtr<PipelineBase>& context, int32_t uiExtensionOffset);
+    bool ConvertActionTypeToBoolen(Accessibility::ActionType action, RefPtr<NG::FrameNode>& frameNode,
+        int32_t elementId, RefPtr<NG::PipelineContext>& context);
     void SetSearchElementInfoByAccessibilityIdResult(Accessibility::AccessibilityElementOperatorCallback& callback,
         const std::list<Accessibility::AccessibilityElementInfo>& infos, const int32_t requestId);
 
@@ -209,6 +235,25 @@ private:
     void SetExecuteActionResult(
         Accessibility::AccessibilityElementOperatorCallback& callback, const bool succeeded, const int32_t requestId);
 
+    void SearchExtensionElementInfoByAccessibilityIdNG(const SearchParameter& searchParam,
+        const RefPtr<NG::FrameNode>& node, std::list<Accessibility::AccessibilityElementInfo>& infos,
+        const RefPtr<PipelineBase>& context, const RefPtr<NG::PipelineContext>& ngPipeline);
+    void SearchElementInfosByTextNG(const SearchParameter& searchParam, const RefPtr<NG::FrameNode>& node,
+        std::list<Accessibility::AccessibilityElementInfo>& infos, const RefPtr<PipelineBase>& context,
+        const RefPtr<NG::PipelineContext>& ngPipeline);
+    std::list<Accessibility::AccessibilityElementInfo> SearchElementInfosByTextNG(
+        int32_t elementId, const std::string& text, const RefPtr<NG::FrameNode>& node, int32_t offset);
+    void FindFocusedExtensionElementInfoNG(const SearchParameter& searchParam,
+        Accessibility::AccessibilityElementInfo& info, const RefPtr<PipelineBase>& context,
+        const RefPtr<NG::FrameNode>& root);
+    void FocusExtensionElementMoveSearchNG(const SearchParameter& searchParam,
+        Accessibility::AccessibilityElementInfo& info, const RefPtr<PipelineBase>& context,
+        const RefPtr<NG::FrameNode>& root, RefPtr<NG::FrameNode>& outputExtensionNode);
+    void TransferExecuteAction(int32_t elementId, RefPtr<NG::FrameNode>& node,
+        const std::map<std::string, std::string>& actionArguments,
+        Accessibility::ActionType& action, int32_t uiExtensionOffset);
+    RefPtr<NG::FrameNode> FindNodeFromRootByExtensionId(const RefPtr<NG::FrameNode>& root, const int32_t uiExtensionId);
+
     void DumpProperty(const RefPtr<AccessibilityNode>& node);
     void DumpPropertyNG(const std::vector<std::string>& params);
     RefPtr<NG::PipelineContext> FindPipelineByElementId(const int32_t elementId, RefPtr<NG::FrameNode>& node);
@@ -216,6 +261,14 @@ private:
     RefPtr<PipelineBase> GetPipelineByWindowId(const int32_t windowId);
     void ProcessParameters(Accessibility::ActionType op, const std::vector<std::string>& params,
         std::map<std::string, std::string>& paramsMap);
+
+    void SearchExtensionElementInfoNG(const SearchParameter& searchParam, const RefPtr<NG::FrameNode>& node,
+        std::list<Accessibility::AccessibilityElementInfo>& infos, Accessibility::AccessibilityElementInfo& parentInfo);
+
+    void DumpTreeNodeNG(const RefPtr<NG::FrameNode>& parent, int32_t depth,
+        NodeId nodeID, const CommonProperty& commonProperty);
+
+    void GenerateCommonProperty(const RefPtr<PipelineBase>& context, CommonProperty& output);
 
     std::string callbackKey_;
     uint32_t windowId_ = 0;

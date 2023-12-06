@@ -93,8 +93,6 @@ void NavigationStack::Add(const std::string& name, const RefPtr<UINode>& navDest
         AddForDefault(name, navDestinationNode, routeInfo);
     } else if (mode == NavRouteMode::REPLACE) {
         AddForReplace(name, navDestinationNode, routeInfo);
-    } else {
-        LOGW("unsupported navRouteMode");
     }
 }
 
@@ -104,7 +102,7 @@ void NavigationStack::Add(
     // for the old page: keep the UINode, and keep in the stack
     auto index = FindIndex(name, navDestinationNode, true);
     if (index != NOT_EXIST) {
-        LOGW("This navDestination node already exists");
+        TAG_LOGW(AceLogTag::ACE_NAVIGATION, "This navigation destination node already exists");
         Remove(name, navDestinationNode);
     }
     navPathList_.emplace_back(std::make_pair(name, navDestinationNode));
@@ -278,5 +276,12 @@ RefPtr<UINode> NavigationStack::CreateNodeByIndex(int32_t index)
 RefPtr<UINode> NavigationStack::CreateNodeByRouteInfo(const RefPtr<RouteInfo>& routeInfo)
 {
     return nullptr;
+}
+
+void NavigationStack::UpdateReplaceValue(int32_t value) const {}
+
+int32_t NavigationStack::GetReplaceValue() const
+{
+    return 0;
 }
 } // namespace OHOS::Ace::NG

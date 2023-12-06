@@ -16,14 +16,20 @@
 #include "core/common/frontend.h"
 
 namespace OHOS::Ace {
+Frontend::~Frontend()
+{
+    std::lock_guard lock(destructMutex_);
+    LOG_DESTROY();
+}
+
 bool Frontend::MaybeRelease()
 {
-    CHECK_RUN_ON(JS);
     CHECK_NULL_RETURN(taskExecutor_, true);
     if (taskExecutor_->WillRunOnCurrentThread(TaskExecutor::TaskType::JS)) {
         LOGI("Destroy Frontend on JS thread.");
         return true;
     } else {
+        std::lock_guard lock(destructMutex_);
         LOGI("Post Destroy Frontend Task to JS thread.");
         return !taskExecutor_->PostTask([this] { delete this; }, TaskExecutor::TaskType::JS);
     }

@@ -157,7 +157,6 @@ void JSOffscreenRenderingContext::Constructor(const JSCallbackInfo& args)
     args.SetReturnValue(Referenced::RawPtr(jsRenderContext));
 
     if (args.Length() < 3) {
-        LOGE("The arg is wrong, it is supposed to have atleast 3 arguments");
         return;
     }
     if (args[0]->IsNumber() && args[1]->IsNumber()) {
@@ -168,13 +167,15 @@ void JSOffscreenRenderingContext::Constructor(const JSCallbackInfo& args)
         JSViewAbstract::ParseJsDouble(args[0], fWidth);
         JSViewAbstract::ParseJsDouble(args[1], fHeight);
 
-        fWidth = SystemProperties::Vp2Px(fWidth);
-        fHeight = SystemProperties::Vp2Px(fHeight);
+        fWidth = PipelineBase::Vp2PxWithCurrentDensity(fWidth);
+        fHeight = PipelineBase::Vp2PxWithCurrentDensity(fHeight);
         width = round(fWidth);
         height = round(fHeight);
 
         auto offscreenPattern = OffscreenContextModel::GetInstance()->CreateOffscreenPattern(width, height);
         CHECK_NULL_VOID(offscreenPattern);
+        size_t bitmapSize = OffscreenContextModel::GetInstance()->GetBitmapSize(offscreenPattern);
+        args.SetSize(bitmapSize);
         jsRenderContext->SetOffscreenPattern(offscreenPattern);
         std::lock_guard<std::mutex> lock(mutex_);
         offscreenPatternMap_[offscreenPatternCount_++] = offscreenPattern;
@@ -187,7 +188,6 @@ void JSOffscreenRenderingContext::Constructor(const JSCallbackInfo& args)
         JSRenderingContextSettings* jsContextSetting
             = JSRef<JSObject>::Cast(args[2])->Unwrap<JSRenderingContextSettings>();
         if (jsContextSetting == nullptr) {
-            LOGE("jsContextSetting is null");
             return;
         }
         bool anti = jsContextSetting->GetAntialias();
@@ -203,7 +203,6 @@ void JSOffscreenRenderingContext::Destructor(JSOffscreenRenderingContext* contex
         contextId = context->GetId();
         context->DecRefCount();
     } else {
-        LOGE("comtext is null");
         return;
     }
     std::lock_guard<std::mutex> lock(mutex_);

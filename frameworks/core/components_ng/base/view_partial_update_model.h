@@ -46,13 +46,16 @@ struct NodeInfoPU {
     std::function<void(int32_t)> nodeUpdateFunc;
     std::function<void(RefPtr<NG::CustomNodeBase>)> recycleCustomNodeFunc;
     std::function<void(bool)> setActiveFunc;
+    std::function<void(const std::vector<std::string>&)> onDumpInfoFunc;
 
     bool hasMeasureOrLayout = false;
     bool isStatic = false;
+    bool isCustomTitle = false;
     int32_t codeRow = -1;
     int32_t codeCol = -1;
 
     std::string jsViewName;
+    NG::ExtraInfo extraInfo;
 };
 
 using UpdateTask = std::tuple<int32_t, RefPtr<AceType>, RefPtr<AceType>>;

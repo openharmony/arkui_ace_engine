@@ -20,6 +20,9 @@
 #include <memory>
 
 #include "base/memory/ace_type.h"
+#include "core/common/recorder/event_recorder.h"
+#include "core/common/recorder/node_data_cache.h"
+#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/pattern/swiper/swiper_model.h"
 
@@ -62,9 +65,9 @@ public:
         animationStartEvent_ = std::move(animationStartEvent);
     }
 
-    void SetAnimationEndEvent(AnimationEndEvent&& animationEndEvent)
+    void AddAnimationEndEvent(const AnimationEndEventPtr& animationEndEvent)
     {
-        animationEndEvent_ = std::move(animationEndEvent);
+        animationEndEvents_.emplace_back(animationEndEvent);
     }
 
     void SetGestureSwipeEvent(GestureSwipeEvent&& gestureSwipeEvent)
@@ -90,6 +93,20 @@ public:
             std::for_each(
                 changeEvents_.begin(), changeEvents_.end(), [index](const ChangeEventPtr& event) { (*event)(index); });
         }
+
+        if (Recorder::EventRecorder::Get().IsComponentRecordEnable()) {
+            Recorder::EventParamsBuilder builder;
+            auto host = GetFrameNode();
+            if (host) {
+                auto id = host->GetInspectorIdValue("");
+                builder.SetId(id).SetType(host->GetHostTag());
+                if (!id.empty()) {
+                    Recorder::NodeDataCache::Get().PutInt(id, index);
+                }
+            }
+            builder.SetIndex(index);
+            Recorder::EventRecorder::Get().OnChange(std::move(builder));
+        }
     }
 
     void FireIndicatorChangeEvent(int32_t index) const
@@ -113,8 +130,9 @@ public:
 
     void FireAnimationEndEvent(int32_t index, const AnimationCallbackInfo& info) const
     {
-        if (animationEndEvent_) {
-            animationEndEvent_(index, info);
+        if (!animationEndEvents_.empty()) {
+            std::for_each(animationEndEvents_.begin(), animationEndEvents_.end(),
+                [index, info](const AnimationEndEventPtr& event) { (*event)(index, info); });
         }
     }
 
@@ -133,7 +151,7 @@ private:
     ChangeDoneEvent changeDoneEvent_;
     ChangeIndicatorEvent changeIndicatorEvent_;
     AnimationStartEvent animationStartEvent_;
-    AnimationEndEvent animationEndEvent_;
+    std::list<AnimationEndEventPtr> animationEndEvents_;
     GestureSwipeEvent gestureSwipeEvent_;
 };
 

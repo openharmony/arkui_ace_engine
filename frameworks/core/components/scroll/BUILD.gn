@@ -16,8 +16,6 @@ import(
 
 build_component("scroll") {
   sources = [
-    "flutter_render_multi_child_scroll.cpp",
-    "flutter_render_single_child_scroll.cpp",
     "render_multi_child_scroll.cpp",
     "render_multi_child_scroll_creator.cpp",
     "render_scroll.cpp",
@@ -33,12 +31,7 @@ build_component("scroll") {
     "scroll_spring_effect.cpp",
     "scrollable.cpp",
   ]
-  if (ace_use_new_skia) {
-    sources -= [
-      "flutter_render_multi_child_scroll.cpp",
-      "flutter_render_single_child_scroll.cpp",
-    ]
-  }
+
   rosen_sources = [
     "rosen_render_multi_child_scroll.cpp",
     "rosen_render_single_child_scroll.cpp",

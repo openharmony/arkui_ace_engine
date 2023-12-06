@@ -26,14 +26,17 @@
 #include "bridge/common/utils/utils.h"
 #include "bridge/declarative_frontend/engine/functions/js_click_function.h"
 #include "bridge/declarative_frontend/engine/functions/js_drag_function.h"
+#include "bridge/declarative_frontend/engine/functions/js_function.h"
 #include "bridge/declarative_frontend/jsview/js_interactable_view.h"
 #include "bridge/declarative_frontend/jsview/js_text.h"
 #include "bridge/declarative_frontend/jsview/js_utils.h"
 #include "bridge/declarative_frontend/jsview/js_view_abstract.h"
+#include "bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "bridge/declarative_frontend/jsview/models/text_model_impl.h"
 #include "bridge/declarative_frontend/view_stack_processor.h"
 #include "core/common/container.h"
 #include "core/components/text/text_theme.h"
+#include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_ng/pattern/text/text_model.h"
 #include "core/components_ng/pattern/text/text_model_ng.h"
@@ -77,6 +80,8 @@ const std::vector<TextAlign> TEXT_ALIGNS = { TextAlign::START, TextAlign::CENTER
     TextAlign::LEFT, TextAlign::RIGHT };
 const std::vector<TextHeightAdaptivePolicy> HEIGHT_ADAPTIVE_POLICY = { TextHeightAdaptivePolicy::MAX_LINES_FIRST,
     TextHeightAdaptivePolicy::MIN_FONT_SIZE_FIRST, TextHeightAdaptivePolicy::LAYOUT_CONSTRAINT_FIRST };
+const std::vector<WordBreak> WORD_BREAK_TYPES = { WordBreak::NORMAL, WordBreak::BREAK_ALL, WordBreak::BREAK_WORD };
+const std::vector<EllipsisMode> ELLIPSIS_MODALS = { EllipsisMode::HEAD, EllipsisMode::MIDDLE, EllipsisMode::TAIL };
 }; // namespace
 
 void JSText::SetWidth(const JSCallbackInfo& info)
@@ -109,16 +114,15 @@ void JSText::GetFontInfo(const JSCallbackInfo& info, Font& font)
     CalcDimension size;
     if (!JSContainerBase::ParseJsDimensionFp(fontSize, size) || fontSize->IsNull()) {
         font.fontSize = std::nullopt;
+    }
+    if (fontSize->IsUndefined() || size.IsNegative() || size.Unit() == DimensionUnit::PERCENT) {
+        auto pipelineContext = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipelineContext);
+        auto theme = pipelineContext->GetTheme<TextTheme>();
+        CHECK_NULL_VOID(theme);
+        font.fontSize = theme->GetTextStyle().GetFontSize();
     } else {
-        if (fontSize->IsUndefined() || size.IsNegative() || size.Unit() == DimensionUnit::PERCENT) {
-            auto pipelineContext = PipelineContext::GetCurrentContext();
-            CHECK_NULL_VOID(pipelineContext);
-            auto theme = pipelineContext->GetTheme<TextTheme>();
-            CHECK_NULL_VOID(theme);
-            font.fontSize = theme->GetTextStyle().GetFontSize();
-        } else {
-            font.fontSize = size;
-        }
+        font.fontSize = size;
     }
     std::string weight;
     auto fontWeight = paramObject->GetProperty("weight");
@@ -146,7 +150,6 @@ void JSText::GetFontInfo(const JSCallbackInfo& info, Font& font)
 void JSText::SetFontSize(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGI("The argv is wrong, it is supposed to have at least 1 argument");
         return;
     }
     auto pipelineContext = PipelineBase::GetCurrentContext();
@@ -187,33 +190,11 @@ void JSText::SetTextShadow(const JSCallbackInfo& info)
     if (info.Length() < 1) {
         return;
     }
-    auto tmpInfo = info[0];
-    if (!tmpInfo->IsNumber() && !tmpInfo->IsObject() && !tmpInfo->IsArray()) {
-        return;
-    }
-    if (!tmpInfo->IsArray()) {
-        Shadow shadow;
-        if (!JSViewAbstract::ParseShadowProps(info[0], shadow)) {
-            LOGI("Parse shadow object failed.");
-            return;
-        }
-        std::vector<Shadow> shadows { shadow };
+    std::vector<Shadow> shadows;
+    ParseTextShadowFromShadowObject(info[0], shadows);
+    if (!shadows.empty()) {
         TextModel::GetInstance()->SetTextShadow(shadows);
-        return;
     }
-    JSRef<JSArray> params = JSRef<JSArray>::Cast(tmpInfo);
-    auto shadowLength = params->Length();
-    std::vector<Shadow> shadows(shadowLength);
-    for (size_t i = 0; i < shadowLength; ++i) {
-        auto shadowJsVal = params->GetValueAt(i);
-        Shadow shadow;
-        if (!JSViewAbstract::ParseShadowProps(shadowJsVal, shadow)) {
-            LOGI("Parse shadow object failed.");
-            continue;
-        }
-        shadows[i] = shadow;
-    }
-    TextModel::GetInstance()->SetTextShadow(shadows);
 }
 
 void JSText::SetTextOverflow(const JSCallbackInfo& info)
@@ -225,17 +206,65 @@ void JSText::SetTextOverflow(const JSCallbackInfo& info)
         }
         JSRef<JSObject> obj = JSRef<JSObject>::Cast(tmpInfo);
         JSRef<JSVal> overflowValue = obj->GetProperty("overflow");
-        if (!overflowValue->IsNumber()) {
+        if (!overflowValue->IsNumber() && !overflowValue->IsUndefined()) {
             break;
         }
         auto overflow = overflowValue->ToNumber<int32_t>();
-        if (overflow < 0 || overflow >= static_cast<int32_t>(TEXT_OVERFLOWS.size())) {
+        if(overflowValue->IsUndefined()) {
+            overflow = 0;
+        } else if (overflow < 0 || overflow >= static_cast<int32_t>(TEXT_OVERFLOWS.size())) {
             break;
         }
         TextModel::GetInstance()->SetTextOverflow(TEXT_OVERFLOWS[overflow]);
     } while (false);
 
     info.SetReturnValue(info.This());
+}
+
+void JSText::SetWordBreak(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        return;
+    }
+    if (!info[0]->IsNumber()) {
+        return;
+    }
+    auto index = info[0]->ToNumber<int32_t>();
+    if (index < 0 || index >= static_cast<int32_t>(WORD_BREAK_TYPES.size())) {
+        return;
+    }
+    TextModel::GetInstance()->SetWordBreak(WORD_BREAK_TYPES[index]);
+}
+
+void JSText::SetEllipsisMode(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        return;
+    }
+    if (!info[0]->IsNumber()) {
+        return;
+    }
+    auto index = info[0]->ToNumber<int32_t>();
+    if (index < 0 || index >= static_cast<int32_t>(ELLIPSIS_MODALS.size())) {
+        return;
+    }
+    TextModel::GetInstance()->SetEllipsisMode(ELLIPSIS_MODALS[index]);
+}
+
+void JSText::SetTextSelection(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        return;
+    }
+    if (!info[0]->IsNumber() || !info[1]->IsNumber()) {
+        return;
+    }
+    auto startIndex = info[0]->ToNumber<int32_t>();
+    auto endIndex = info[1]->ToNumber<int32_t>();
+    if (startIndex >= endIndex) {
+        return;
+    }
+    TextModel::GetInstance()->SetTextSelection(startIndex, endIndex);
 }
 
 void JSText::SetMaxLines(const JSCallbackInfo& info)
@@ -249,10 +278,6 @@ void JSText::SetMaxLines(const JSCallbackInfo& info)
 
 void JSText::SetTextIndent(const JSCallbackInfo& info)
 {
-    if (info.Length() < 1) {
-        LOGE("The argv is wrong, it is supposed to have at least 1 argument");
-        return;
-    }
     CalcDimension value;
     if (!ParseJsDimensionFp(info[0], value)) {
         TextModel::GetInstance()->SetTextIndent(value);
@@ -264,7 +289,6 @@ void JSText::SetTextIndent(const JSCallbackInfo& info)
 void JSText::SetFontStyle(int32_t value)
 {
     if (value < 0 || value >= static_cast<int32_t>(FONT_STYLES.size())) {
-        LOGI("Text fontStyle(%{public}d) illegal value", value);
         return;
     }
     TextModel::GetInstance()->SetItalicFontStyle(FONT_STYLES[value]);
@@ -273,7 +297,6 @@ void JSText::SetFontStyle(int32_t value)
 void JSText::SetTextAlign(int32_t value)
 {
     if (value < 0 || value >= static_cast<int32_t>(TEXT_ALIGNS.size())) {
-        LOGI("Text: TextAlign(%d) expected positive number", value);
         return;
     }
     TextModel::GetInstance()->SetTextAlign(TEXT_ALIGNS[value]);
@@ -290,10 +313,6 @@ void JSText::SetAlign(const JSCallbackInfo& info)
 
 void JSText::SetLineHeight(const JSCallbackInfo& info)
 {
-    if (info.Length() < 1) {
-        LOGI("The argv is wrong, it is supposed to have at least 1 argument");
-        return;
-    }
     CalcDimension value;
     ParseJsDimensionFp(info[0], value);
     if (value.IsNegative()) {
@@ -304,13 +323,8 @@ void JSText::SetLineHeight(const JSCallbackInfo& info)
 
 void JSText::SetFontFamily(const JSCallbackInfo& info)
 {
-    if (info.Length() < 1) {
-        LOGI("The argv is wrong, it is supposed to have at least 1 argument");
-        return;
-    }
     std::vector<std::string> fontFamilies;
     if (!ParseJsFontFamilies(info[0], fontFamilies)) {
-        LOGI("Parse FontFamilies failed");
         return;
     }
     TextModel::GetInstance()->SetFontFamily(fontFamilies);
@@ -318,10 +332,6 @@ void JSText::SetFontFamily(const JSCallbackInfo& info)
 
 void JSText::SetMinFontSize(const JSCallbackInfo& info)
 {
-    if (info.Length() < 1) {
-        LOGI("The argv is wrong, it is supposed to have at least 1 argument");
-        return;
-    }
     CalcDimension fontSize;
     ParseJsDimensionFp(info[0], fontSize);
     TextModel::GetInstance()->SetAdaptMinFontSize(fontSize);
@@ -329,10 +339,6 @@ void JSText::SetMinFontSize(const JSCallbackInfo& info)
 
 void JSText::SetMaxFontSize(const JSCallbackInfo& info)
 {
-    if (info.Length() < 1) {
-        LOGI("The argv is wrong, it is supposed to have at least 1 argument");
-        return;
-    }
     CalcDimension fontSize;
     ParseJsDimensionFp(info[0], fontSize);
     TextModel::GetInstance()->SetAdaptMaxFontSize(fontSize);
@@ -340,10 +346,6 @@ void JSText::SetMaxFontSize(const JSCallbackInfo& info)
 
 void JSText::SetLetterSpacing(const JSCallbackInfo& info)
 {
-    if (info.Length() < 1) {
-        LOGI("The argv is wrong, it is supposed to have at least 1 argument");
-        return;
-    }
     if (info[0]->IsString()) {
         auto value = info[0]->ToString();
         if (!value.empty() && value.back() == '%') {
@@ -366,7 +368,6 @@ void JSText::SetLetterSpacing(const JSCallbackInfo& info)
 void JSText::SetTextCase(int32_t value)
 {
     if (value < 0 || value >= static_cast<int32_t>(TEXT_CASES.size())) {
-        LOGI("Text textCase(%{public}d) illegal value", value);
         return;
     }
     TextModel::GetInstance()->SetTextCase(TEXT_CASES[value]);
@@ -374,10 +375,6 @@ void JSText::SetTextCase(int32_t value)
 
 void JSText::SetBaselineOffset(const JSCallbackInfo& info)
 {
-    if (info.Length() < 1) {
-        LOGI("The argv is wrong, it is supposed to have at least 1 argument");
-        return;
-    }
     CalcDimension value;
     if (!ParseJsDimensionFp(info[0], value)) {
         return;
@@ -423,7 +420,6 @@ void JSText::SetDecoration(const JSCallbackInfo& info)
 void JSText::SetHeightAdaptivePolicy(int32_t value)
 {
     if (value < 0 || value >= static_cast<int32_t>(HEIGHT_ADAPTIVE_POLICY.size())) {
-        LOGW("Text: HeightAdaptivePolicy(%d) expected positive number", value);
         return;
     }
     TextModel::GetInstance()->SetHeightAdaptivePolicy(HEIGHT_ADAPTIVE_POLICY[value]);
@@ -433,20 +429,20 @@ void JSText::JsOnClick(const JSCallbackInfo& info)
 {
     if (Container::IsCurrentUseNewPipeline()) {
         if (info[0]->IsUndefined() && IsDisableEventVersion()) {
-            LOGD("JsOnClick callback is undefined");
             TextModel::GetInstance()->ClearOnClick();
             return;
         }
         if (!info[0]->IsFunction()) {
-            LOGW("the info is not click function");
             return;
         }
+        WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
         auto jsOnClickFunc = AceType::MakeRefPtr<JsClickFunction>(JSRef<JSFunc>::Cast(info[0]));
-        auto onClick = [execCtx = info.GetExecutionContext(), func = jsOnClickFunc](const BaseEventInfo* info) {
+        auto onClick = [execCtx = info.GetExecutionContext(), func = jsOnClickFunc, node = frameNode]
+            (const BaseEventInfo* info) {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-            LOGD("About to call onclick method on js");
             const auto* clickInfo = TypeInfoHelper::DynamicCast<GestureEvent>(info);
             ACE_SCORING_EVENT("Text.onClick");
+            PipelineContext::SetCallBackNode(node);
             func->Execute(*clickInfo);
         };
         TextModel::GetInstance()->SetOnClick(std::move(onClick));
@@ -455,17 +451,18 @@ void JSText::JsOnClick(const JSCallbackInfo& info)
         if (info[0]->IsFunction()) {
             auto inspector = ViewStackProcessor::GetInstance()->GetInspectorComposedComponent();
             auto impl = inspector ? inspector->GetInspectorFunctionImpl() : nullptr;
+            WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
             RefPtr<JsClickFunction> jsOnClickFunc = AceType::MakeRefPtr<JsClickFunction>(JSRef<JSFunc>::Cast(info[0]));
-            auto onClickId = [execCtx = info.GetExecutionContext(), func = std::move(jsOnClickFunc), impl](
-                                 const BaseEventInfo* info) {
+            auto onClickId = [execCtx = info.GetExecutionContext(), func = std::move(jsOnClickFunc), impl,
+                                 node = frameNode](const BaseEventInfo* info) {
                 JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-                LOGD("About to call onclick method on js");
                 const auto* clickInfo = TypeInfoHelper::DynamicCast<ClickInfo>(info);
                 auto newInfo = *clickInfo;
                 if (impl) {
                     impl->UpdateEventInfo(newInfo);
                 }
                 ACE_SCORING_EVENT("Text.onClick");
+                PipelineContext::SetCallBackNode(node);
                 func->Execute(newInfo);
             };
             TextModel::GetInstance()->SetOnClick(std::move(onClickId));
@@ -505,6 +502,13 @@ void JSText::SetCopyOption(const JSCallbackInfo& info)
     TextModel::GetInstance()->SetCopyOption(copyOptions);
 }
 
+void JSText::SetOnCopy(const JSCallbackInfo& info)
+{
+    CHECK_NULL_VOID(info[0]->IsFunction());
+    JsEventCallback<void(const std::string&)> callback(info.GetExecutionContext(), JSRef<JSFunc>::Cast(info[0]));
+    TextModel::GetInstance()->SetOnCopy(std::move(callback));
+}
+
 void JSText::JsOnDragStart(const JSCallbackInfo& info)
 {
     CHECK_NULL_VOID(info[0]->IsFunction());
@@ -513,19 +517,15 @@ void JSText::JsOnDragStart(const JSCallbackInfo& info)
                            const RefPtr<DragEvent>& info, const std::string& extraParams) -> NG::DragDropBaseInfo {
         NG::DragDropBaseInfo itemInfo;
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, itemInfo);
-
         auto ret = func->Execute(info, extraParams);
         if (!ret->IsObject()) {
-            LOGI("builder param is not an object.");
             return itemInfo;
         }
         auto node = ParseDragNode(ret);
         if (node) {
-            LOGI("use custom builder param.");
             itemInfo.node = node;
             return itemInfo;
         }
-
         auto builderObj = JSRef<JSObject>::Cast(ret);
 #if defined(PIXEL_MAP_SUPPORTED)
         auto pixmap = builderObj->GetProperty("pixelMap");
@@ -544,11 +544,13 @@ void JSText::JsOnDragStart(const JSCallbackInfo& info)
 void JSText::JsOnDragEnter(const JSCallbackInfo& info)
 {
     CHECK_NULL_VOID(info[0]->IsFunction());
+    WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
     RefPtr<JsDragFunction> jsOnDragEnterFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(info[0]));
-    auto onDragEnterId = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragEnterFunc)](
+    auto onDragEnterId = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragEnterFunc), node = frameNode](
                              const RefPtr<DragEvent>& info, const std::string& extraParams) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("onDragEnter");
+        PipelineContext::SetCallBackNode(node);
         func->Execute(info, extraParams);
     };
     TextModel::GetInstance()->SetOnDragEnter(std::move(onDragEnterId));
@@ -557,11 +559,13 @@ void JSText::JsOnDragEnter(const JSCallbackInfo& info)
 void JSText::JsOnDragMove(const JSCallbackInfo& info)
 {
     CHECK_NULL_VOID(info[0]->IsFunction());
+    WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
     RefPtr<JsDragFunction> jsOnDragMoveFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(info[0]));
-    auto onDragMoveId = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragMoveFunc)](
+    auto onDragMoveId = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragMoveFunc), node = frameNode](
                             const RefPtr<DragEvent>& info, const std::string& extraParams) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("onDragMove");
+        PipelineContext::SetCallBackNode(node);
         func->Execute(info, extraParams);
     };
     TextModel::GetInstance()->SetOnDragMove(std::move(onDragMoveId));
@@ -570,11 +574,13 @@ void JSText::JsOnDragMove(const JSCallbackInfo& info)
 void JSText::JsOnDragLeave(const JSCallbackInfo& info)
 {
     CHECK_NULL_VOID(info[0]->IsFunction());
+    WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
     RefPtr<JsDragFunction> jsOnDragLeaveFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(info[0]));
-    auto onDragLeaveId = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragLeaveFunc)](
+    auto onDragLeaveId = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragLeaveFunc), node = frameNode](
                              const RefPtr<DragEvent>& info, const std::string& extraParams) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("onDragLeave");
+        PipelineContext::SetCallBackNode(node);
         func->Execute(info, extraParams);
     };
     TextModel::GetInstance()->SetOnDragLeave(std::move(onDragLeaveId));
@@ -597,7 +603,6 @@ void JSText::JsFocusable(const JSCallbackInfo& info)
 {
     auto tmpInfo = info[0];
     if (!tmpInfo->IsBoolean()) {
-        LOGI("The info is wrong, it is supposed to be an boolean");
         return;
     }
     JSInteractableView::SetFocusable(tmpInfo->ToBoolean());
@@ -608,7 +613,6 @@ void JSText::JsDraggable(const JSCallbackInfo& info)
 {
     auto tmpInfo = info[0];
     if (!tmpInfo->IsBoolean()) {
-        LOGI("The info is wrong, it is supposed to be an boolean");
         return;
     }
     TextModel::GetInstance()->SetDraggable(tmpInfo->ToBoolean());
@@ -623,9 +627,39 @@ void JSText::JsMenuOptionsExtension(const JSCallbackInfo& info)
             JSViewAbstract::ParseMenuOptions(info, JSRef<JSArray>::Cast(tmpInfo), menuOptionsItems);
             TextModel::GetInstance()->SetMenuOptionItems(std::move(menuOptionsItems));
         }
-    } else {
-        LOGI("only newPipeline supply");
     }
+}
+
+void JSText::JsEnableDataDetector(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        LOGI("The argv is wrong, it is supposed to have at least 1 argument");
+        return;
+    }
+    if (!info[0]->IsBoolean()) {
+        TextModel::GetInstance()->SetTextDetectEnable(false);
+        return;
+    }
+    auto enable = info[0]->ToBoolean();
+    TextModel::GetInstance()->SetTextDetectEnable(enable);
+}
+
+void JSText::JsDataDetectorConfig(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        LOGI("The argv is wrong, it is supposed to have at least 1 argument");
+        return;
+    }
+    if (!info[0]->IsObject()) {
+        return;
+    }
+
+    std::string textTypes;
+    std::function<void(const std::string&)> onResult;
+    if (!ParseDataDetectorConfig(info, textTypes, onResult)) {
+        return;
+    }
+    TextModel::GetInstance()->SetTextDetectConfig(textTypes, std::move(onResult));
 }
 
 void JSText::JSBind(BindingTarget globalObj)
@@ -640,6 +674,9 @@ void JSText::JSBind(BindingTarget globalObj)
     JSClass<JSText>::StaticMethod("textShadow", &JSText::SetTextShadow, opt);
     JSClass<JSText>::StaticMethod("fontSize", &JSText::SetFontSize, opt);
     JSClass<JSText>::StaticMethod("fontWeight", &JSText::SetFontWeight, opt);
+    JSClass<JSText>::StaticMethod("wordBreak", &JSText::SetWordBreak, opt);
+    JSClass<JSText>::StaticMethod("ellipsisMode", &JSText::SetEllipsisMode, opt);
+    JSClass<JSText>::StaticMethod("selection", &JSText::SetTextSelection, opt);
     JSClass<JSText>::StaticMethod("maxLines", &JSText::SetMaxLines, opt);
     JSClass<JSText>::StaticMethod("textIndent", &JSText::SetTextIndent);
     JSClass<JSText>::StaticMethod("textOverflow", &JSText::SetTextOverflow, opt);
@@ -662,6 +699,7 @@ void JSText::JSBind(BindingTarget globalObj)
     JSClass<JSText>::StaticMethod("remoteMessage", &JSText::JsRemoteMessage);
     JSClass<JSText>::StaticMethod("copyOption", &JSText::SetCopyOption);
     JSClass<JSText>::StaticMethod("onClick", &JSText::JsOnClick);
+    JSClass<JSText>::StaticMethod("onCopy", &JSText::SetOnCopy);
     JSClass<JSText>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
     JSClass<JSText>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSText>::StaticMethod("onDragStart", &JSText::JsOnDragStart);
@@ -672,6 +710,8 @@ void JSText::JSBind(BindingTarget globalObj)
     JSClass<JSText>::StaticMethod("focusable", &JSText::JsFocusable);
     JSClass<JSText>::StaticMethod("draggable", &JSText::JsDraggable);
     JSClass<JSText>::StaticMethod("textMenuOptions", &JSText::JsMenuOptionsExtension);
+    JSClass<JSText>::StaticMethod("enableDataDetector", &JSText::JsEnableDataDetector);
+    JSClass<JSText>::StaticMethod("dataDetectorConfig", &JSText::JsDataDetectorConfig);
     JSClass<JSText>::InheritAndBind<JSContainerBase>(globalObj);
 }
 

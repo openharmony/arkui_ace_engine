@@ -24,6 +24,8 @@ public:
     static PasteButtonModelNG* GetInstance();
     void Create(int32_t text, int32_t icon,
         int32_t backgroundType) override;
+    RefPtr<FrameNode> CreateNode(int32_t text, int32_t icon,
+        int32_t backgroundType);
     virtual bool GetIconResource(int32_t iconStyle, InternalResource::ResourceId& id) override;
     virtual bool GetTextResource(int32_t textStyle, std::string& text) override;
 private:

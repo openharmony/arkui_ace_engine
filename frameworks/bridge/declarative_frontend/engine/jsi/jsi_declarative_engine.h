@@ -19,13 +19,13 @@
 #include <cstddef>
 #include <cstdint>
 #include <mutex>
+#include <shared_mutex>
 #include <string>
 #include <vector>
 
 #include "ecmascript/napi/include/jsnapi.h"
 #include "native_engine/impl/ark/ark_native_engine.h"
 
-#include "base/log/log.h"
 #include "base/memory/ace_type.h"
 #include "base/subwindow/subwindow_manager.h"
 #include "base/utils/noncopyable.h"
@@ -166,7 +166,6 @@ public:
             dispatcher->CallCurlFunction(requestData, callbackId);
             return true;
         } else {
-            LOGW("Dispatcher Upgrade fail when dispatch request message to platform");
             return false;
         }
     }
@@ -174,22 +173,22 @@ public:
     bool InitAceModule(const uint8_t* start, size_t length)
     {
         if (!runtime_) {
-            LOGE("jsi runtime is nullptr");
+            return false;
         }
         bool result = runtime_->EvaluateJsCode(start, length);
         if (!result) {
-            LOGE("jsi runtime InitAceModule Evaluate JsCode failed");
             return false;
         }
         return true;
     }
 #endif
 
-// ArkTsCard start
+    // ArkTsCard start
     static void PreloadAceModuleCard(void* runtime, const std::unordered_set<std::string>& formModuleList);
     static void ReloadAceModuleCard(void* runtime, const std::unordered_set<std::string>& formModuleList);
-// ArkTsCard end
+    // ArkTsCard end
     static bool IsPlugin();
+
 private:
     void InitGlobalObjectTemplate();
     void InitConsoleModule();  // add Console object to global
@@ -200,11 +199,12 @@ private:
     void InitJsContextModuleObject();
     void InitGroupJsBridge();
     static shared_ptr<JsRuntime> InnerGetCurrentRuntime();
-    shared_ptr<JsValue> CallGetUIContextFunc(const shared_ptr<JsRuntime>& runtime,
-        const std::vector<shared_ptr<JsValue>>& argv);
+    shared_ptr<JsValue> CallGetUIContextFunc(
+        const shared_ptr<JsRuntime>& runtime, const std::vector<shared_ptr<JsValue>>& argv);
     std::unordered_map<int32_t, panda::Global<panda::ObjectRef>> rootViewMap_;
     static std::unique_ptr<JsonValue> currentConfigResourceData_;
     static std::map<std::string, std::string> mediaResourceFileMap_;
+    static std::shared_mutex sharedMutex_;
 
     // runningPage_ is the page that is loaded and rendered successfully, while stagingPage_ is to
     // handle all page routing situation, which include two stages:
@@ -230,6 +230,7 @@ private:
     static bool isModuleInitialized_;
     static shared_ptr<JsRuntime> globalRuntime_;
     shared_ptr<JsValue> uiContext_;
+    static std::shared_mutex globalRuntimeMutex_;
 
     ACE_DISALLOW_COPY_AND_MOVE(JsiDeclarativeEngineInstance);
 };
@@ -250,8 +251,8 @@ public:
 #if !defined(PREVIEW)
     bool IsModule();
 
-    void LoadJsWithModule(std::string& urlName,
-        const std::function<void(const std::string&, int32_t)>& errorCallback = nullptr);
+    void LoadJsWithModule(
+        std::string& urlName, const std::function<void(const std::string&, int32_t)>& errorCallback = nullptr);
 
     void LoadPluginJsWithModule(std::string& urlName);
 
@@ -261,6 +262,8 @@ public:
 
     // Load the je file of the page in NG structure..
     bool LoadPageSource(const std::string& url,
+        const std::function<void(const std::string&, int32_t)>& errorCallback = nullptr) override;
+    bool LoadPageSource(const std::shared_ptr<std::vector<uint8_t>>& content,
         const std::function<void(const std::string&, int32_t)>& errorCallback = nullptr) override;
 
     bool LoadCard(const std::string& url, int64_t cardId) override;
@@ -333,8 +336,7 @@ public:
 
     void SetContext(int32_t instanceId, NativeReference* context) override;
 
-    void SetErrorEventHandler(
-        std::function<void(const std::string&, const std::string&)>&& errorCallback) override;
+    void SetErrorEventHandler(std::function<void(const std::string&, const std::string&)>&& errorCallback) override;
 
     RefPtr<GroupJsBridge> GetGroupJsBridge() override;
 
@@ -360,11 +362,6 @@ public:
         if (nativeEngine_ != nullptr) {
             nativeEngine_->Loop(LOOP_NOWAIT, false);
         }
-    }
-
-    const shared_ptr<JsValue>& GetRenderContext() const
-    {
-        return renderContext_;
     }
 
     void SetPluginBundleName(const std::string& pluginBundleName) override
@@ -399,11 +396,20 @@ public:
     void SetHspBufferTrackerCallback(std::function<bool(const std::string&, uint8_t**, size_t*)>&& callback);
     // Support to execute the ets code mocked by developer
     void SetMockModuleList(const std::map<std::string, std::string>& mockJsonInfo);
+    bool IsComponentPreview() override;
 #endif
     static void AddToNamedRouterMap(const EcmaVM* vm, panda::Global<panda::FunctionRef> pageGenerator,
         const std::string& namedRoute, panda::Local<panda::ObjectRef> params);
     bool LoadNamedRouterSource(const std::string& namedRoute, bool isTriggeredByJs) override;
     std::string SearchRouterRegisterMap(const std::string& pageName) override;
+    bool UpdateRootComponent() override;
+    bool LoadPluginComponent(const std::string& url, const RefPtr<JsAcePage>& page, bool isMainPage) override;
+    static void SetEntryObject(const panda::Global<panda::ObjectRef>& obj)
+    {
+        obj_ = obj;
+    }
+    bool ExecuteJs(const uint8_t* content, int32_t size) override;
+
 private:
     bool CallAppFunc(const std::string& appFuncName);
 
@@ -430,7 +436,6 @@ private:
 
     int32_t instanceId_ = 0;
     void* runtime_ = nullptr;
-    shared_ptr<JsValue> renderContext_;
 #if defined(PREVIEW)
     std::string assetPath_;
     std::string bundleName_;
@@ -439,8 +444,9 @@ private:
 #endif
     std::string pluginBundleName_;
     std::string pluginModuleName_;
-    static std::unordered_map<std::string, NamedRouterProperty> namedRouterRegisterMap_;
+    static thread_local std::unordered_map<std::string, NamedRouterProperty> namedRouterRegisterMap_;
     bool isFirstCallShow_ = true;
+    static panda::Global<panda::ObjectRef> obj_;
     ACE_DISALLOW_COPY_AND_MOVE(JsiDeclarativeEngine);
 };
 

@@ -183,6 +183,12 @@ public:
                GreatOrEqual(point.GetY(), y_) && LessOrEqual(point.GetY(), y_ + height_);
     }
 
+    bool IsInnerRegion(const PointT<T>& point) const
+    {
+        return GreatNotEqual(point.GetX(), x_) && LessNotEqual(point.GetX(), x_ + width_) &&
+               GreatNotEqual(point.GetY(), y_) && LessNotEqual(point.GetY(), y_ + height_);
+    }
+
     bool IsWrappedBy(const RectT& other) const
     {
         return GreatOrEqual(Left(), other.Left()) && LessOrEqual(Right(), other.Right()) &&
@@ -380,7 +386,7 @@ public:
     {
         static const int32_t precision = 2;
         std::stringstream ss;
-        ss << "[" << std::fixed << std::setprecision(precision) << x_ << ", " << y_ << "][";
+        ss << "[" << std::fixed << std::setprecision(precision) << x_ << ", " << y_ << "],[";
         if (NearEqual(width_, Infinity<T>())) {
             ss << "INFINITE";
         } else {

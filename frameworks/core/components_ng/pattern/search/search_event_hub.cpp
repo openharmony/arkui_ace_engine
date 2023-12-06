@@ -14,6 +14,7 @@
  */
 
 #include "base/memory/ace_type.h"
+#include "core/common/recorder/node_data_cache.h"
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/pattern/search/search_pattern.h"
 #include "core/components_ng/pattern/search/search_event_hub.h"
@@ -33,5 +34,9 @@ void SearchEventHub::UpdateChangeEvent(const std::string& value) const
     auto pattern = host->GetPattern<SearchPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->UpdateChangeEvent(value);
+    auto id = host->GetInspectorIdValue("");
+    if (!id.empty()) {
+        Recorder::NodeDataCache::Get().PutString(id, value);
+    }
 }
 } // namespace OHOS::Ace::NG

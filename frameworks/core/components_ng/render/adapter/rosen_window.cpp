@@ -76,6 +76,11 @@ RosenWindow::RosenWindow(const OHOS::sptr<OHOS::Rosen::Window>& window, RefPtr<T
         CHECK_NULL_VOID(taskExecutor);
         taskExecutor->PostTask(task, TaskExecutor::TaskType::UI);
     });
+    rsUIDirector_->SetRequestVsyncCallback([weak = weak_from_this()]() {
+        auto self = weak.lock();
+        CHECK_NULL_VOID(self);
+        self->RequestFrame();
+    });
 }
 
 void RosenWindow::Init()
@@ -85,6 +90,14 @@ void RosenWindow::Init()
     if (rsUIDirector_ && surfaceNode) {
         rsUIDirector_->SetRSSurfaceNode(surfaceNode);
     }
+}
+
+void RosenWindow::FlushFrameRate(int32_t rate)
+{
+    if (!rsWindow_ || rate < 0) {
+        return;
+    }
+    rsWindow_->FlushFrameRate(rate);
 }
 
 void RosenWindow::RequestFrame()

@@ -25,6 +25,7 @@
 #include "core/components/calendar/calendar_theme.h"
 #include "core/components/dialog/dialog_theme.h"
 #include "core/components_ng/base/view_abstract_model.h"
+#include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/calendar_picker/calendar_picker_model_ng.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
@@ -181,9 +182,12 @@ void JSCalendarPicker::SetOnChange(const JSCallbackInfo& info)
     }
 
     auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
-    auto onChange = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](const std::string& info) {
+    WeakPtr<NG::FrameNode> targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto onChange = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = targetNode](
+                        const std::string& info) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("CalendarPicker.onChange");
+        PipelineContext::SetCallBackNode(node);
         auto dateObj = JSDate::New(GetMSByDate(info));
         func->ExecuteJS(1, &dateObj);
     };
@@ -279,9 +283,12 @@ void JSCalendarPicker::ParseSelectedDateObject(const JSCallbackInfo& info, const
         return;
     }
     auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(changeEventVal));
-    auto changeEvent = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](const std::string& info) {
+    WeakPtr<NG::FrameNode> targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto changeEvent = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = targetNode](
+                           const std::string& info) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("DatePicker.SelectedDateTimeChangeEvent");
+        PipelineContext::SetCallBackNode(node);
         auto dateObj = JSDate::New(GetMSByDate(info));
         func->ExecuteJS(1, &dateObj);
     };
@@ -300,14 +307,15 @@ void JSCalendarPicker::Create(const JSCallbackInfo& info)
             dayRadius = calendarTheme->GetCalendarDayRadius();
         }
         auto selected = obj->GetProperty("selected");
-        if (selected->IsObject()) {
+        auto parseSelectedDate = ParseDate(selected);
+        if (selected->IsObject() && parseSelectedDate.GetYear() != 0) {
             JSRef<JSObject> selectedDateObj = JSRef<JSObject>::Cast(selected);
             JSRef<JSVal> changeEventVal = selectedDateObj->GetProperty("changeEvent");
             if (!changeEventVal->IsUndefined() && changeEventVal->IsFunction()) {
                 ParseSelectedDateObject(info, selectedDateObj);
                 settingData.selectedDate = ParseDate(selectedDateObj->GetProperty("value"));
             } else {
-                settingData.selectedDate = ParseDate(selectedDateObj);
+                settingData.selectedDate = parseSelectedDate;
             }
         }
     } else {
@@ -416,9 +424,12 @@ std::map<std::string, NG::DialogEvent> JSCalendarPickerDialog::ChangeDialogEvent
     auto onChange = paramObject->GetProperty("onChange");
     if (!onChange->IsUndefined() && onChange->IsFunction()) {
         auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onChange));
-        auto changeId = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](const std::string& info) {
+        WeakPtr<NG::FrameNode> targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+        auto changeId = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = targetNode](
+                            const std::string& info) {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             ACE_SCORING_EVENT("CalendarDialog.onChange");
+            PipelineContext::SetCallBackNode(node);
             auto dateObj = JSDate::New(GetMSByDate(info));
             func->ExecuteJS(1, &dateObj);
         };
@@ -427,9 +438,12 @@ std::map<std::string, NG::DialogEvent> JSCalendarPickerDialog::ChangeDialogEvent
     auto onAccept = paramObject->GetProperty("onAccept");
     if (!onAccept->IsUndefined() && onAccept->IsFunction()) {
         auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onAccept));
-        auto acceptId = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](const std::string& info) {
+        WeakPtr<NG::FrameNode> targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+        auto acceptId = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = targetNode](
+                            const std::string& info) {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             ACE_SCORING_EVENT("CalendarDialog.onAccept");
+            PipelineContext::SetCallBackNode(node);
             auto dateObj = JSDate::New(GetMSByDate(info));
             func->ExecuteJS(1, &dateObj);
         };
@@ -448,10 +462,12 @@ std::map<std::string, NG::DialogGestureEvent> JSCalendarPickerDialog::DialogCanc
     auto onCancel = paramObject->GetProperty("onCancel");
     if (!onCancel->IsUndefined() && onCancel->IsFunction()) {
         auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onCancel));
-        auto cancelId = [execCtx = info.GetExecutionContext(),
-            func = std::move(jsFunc)](const GestureEvent& /* info */) {
+        WeakPtr<NG::FrameNode> targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+        auto cancelId = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = targetNode](
+                            const GestureEvent& /* info */) {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             ACE_SCORING_EVENT("CalendarDialog.onCancel");
+            PipelineContext::SetCallBackNode(node);
             func->Execute();
         };
         dialogCancelEvent["cancelId"] = cancelId;
@@ -505,8 +521,7 @@ void JSCalendarPickerDialog::CalendarPickerDialogShow(const JSRef<JSObject>& par
     NG::CalendarSettingData settingData;
     auto selectedDate = paramObj->GetProperty("selected");
     auto parseSelectedDate = ParseDate(selectedDate);
-
-    if (selectedDate->IsObject()) {
+    if (selectedDate->IsObject() && parseSelectedDate.GetYear() != 0) {
         settingData.selectedDate = parseSelectedDate;
     }
 

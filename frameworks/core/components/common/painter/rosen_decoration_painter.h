@@ -93,7 +93,7 @@ public:
         SkCanvas* canvas, const sk_sp<SkImage>& image, double dipScale);
 #else
     static void PaintShadow(const RSPath& path, const Shadow& shadow,
-        RSCanvas* canvas);
+        RSCanvas* canvas, const RSBrush* brush = nullptr, const RSPen* pen = nullptr);
     static void PaintShadow(const RSPath& path, const Shadow& shadow,
         const std::shared_ptr<RSNode>& rsNode);
     static void PaintGrayScale(const RSRoundRect& outerRRect, RSCanvas* canvas,

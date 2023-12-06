@@ -83,15 +83,12 @@ void JSImageAnimator::JSBind(BindingTarget globalObj)
 void JSImageAnimator::SetImages(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("JSImageAnimator: The arg is wrong, it is supposed to have one object argument.");
         return;
     }
     if (info[0]->IsNull()) {
-        LOGE("JSImageAnimator: info is null.");
         return;
     }
     if (!info[0]->IsArray()) {
-        LOGE("JSImageAnimator: info is not array.");
         return;
     }
     JSRef<JSArray> imageArray = JSRef<JSArray>::Cast(info[0]);
@@ -105,60 +102,104 @@ void JSImageAnimator::SetImages(const JSCallbackInfo& info)
     ImageAnimatorModel::GetInstance()->SetImages(images);
 }
 
-void JSImageAnimator::SetState(int32_t state)
+void JSImageAnimator::SetState(const JSCallbackInfo& info)
 {
-    if (state < static_cast<int32_t>(Animator::Status::IDLE) ||
-        state > static_cast<int32_t>(Animator::Status::STOPPED)) {
-        LOGW("ImageAnimator SetState %{public}d, invalid, use default AnimationStatus.Initial", state);
-        state = static_cast<int32_t>(Animator::Status::IDLE);
+    if (info.Length() < 1) {
+        return;
+    }
+    int32_t state = static_cast<int32_t>(Animator::Status::IDLE);
+    if (info[0]->IsNumber()) {
+        state = info[0]->ToNumber<int32_t>();
+        if (state < static_cast<int32_t>(Animator::Status::IDLE) ||
+            state > static_cast<int32_t>(Animator::Status::STOPPED)) {
+            state = static_cast<int32_t>(Animator::Status::IDLE);
+        }
     }
 
     ImageAnimatorModel::GetInstance()->SetState(state);
 }
 
-void JSImageAnimator::SetDuration(int32_t duration)
+void JSImageAnimator::SetDuration(const JSCallbackInfo& info)
 {
-    if (duration < 0) {
-        LOGW("ImageAnimator SetDuration %{public}d, invalid, use default %{public}d", duration, DEFAULT_DURATION);
-        duration = DEFAULT_DURATION;
+    if (info.Length() < 1) {
+        return;
+    }
+    int32_t duration = DEFAULT_DURATION;
+    if (info[0]->IsNumber()) {
+        duration = info[0]->ToNumber<int32_t>();
+        if (duration < 0) {
+            duration = DEFAULT_DURATION;
+        }
     }
 
     ImageAnimatorModel::GetInstance()->SetDuration(duration);
 }
 
-void JSImageAnimator::SetIteration(int32_t iteration)
+void JSImageAnimator::SetIteration(const JSCallbackInfo& info)
 {
-    if (iteration < -1) {
-        LOGW("ImageAnimator SetIteration %{public}d, invalid, use default %{public}d", iteration, DEFAULT_ITERATIONS);
-        iteration = DEFAULT_ITERATIONS;
+    if (info.Length() < 1) {
+        return;
+    }
+    int32_t iteration = DEFAULT_ITERATIONS;
+    if (info[0]->IsNumber()) {
+        iteration = info[0]->ToNumber<int32_t>();
+        if (iteration < -1) {
+            iteration = DEFAULT_ITERATIONS;
+        }
     }
 
     ImageAnimatorModel::GetInstance()->SetIteration(iteration);
 }
 
-void JSImageAnimator::SetFillMode(int32_t fillMode)
+void JSImageAnimator::SetFillMode(const JSCallbackInfo& info)
 {
-    if (fillMode < static_cast<int32_t>(FillMode::NONE) || fillMode > static_cast<int32_t>(FillMode::BOTH)) {
-        LOGW("ImageAnimator SetFillMode %{public}d, invalid, use default %{public}d", fillMode,
-            static_cast<int32_t>(DEFAULT_FILL_MODE));
-        fillMode = static_cast<int32_t>(DEFAULT_FILL_MODE);
+    if (info.Length() < 1) {
+        return;
+    }
+    int32_t fillMode = static_cast<int32_t>(DEFAULT_FILL_MODE);
+    if (info[0]->IsNumber()) {
+        fillMode = info[0]->ToNumber<int32_t>();
+        if (fillMode < static_cast<int32_t>(FillMode::NONE) || fillMode > static_cast<int32_t>(FillMode::BOTH)) {
+            fillMode = static_cast<int32_t>(DEFAULT_FILL_MODE);
+        }
     }
 
     ImageAnimatorModel::GetInstance()->SetFillMode(fillMode);
 }
 
-void JSImageAnimator::SetPreDecode(int32_t preDecode)
+void JSImageAnimator::SetPreDecode(const JSCallbackInfo& info)
 {
+    if (info.Length() < 1) {
+        return;
+    }
+    int32_t preDecode = 0;
+    if (info[0]->IsNumber()) {
+        preDecode = info[0]->ToNumber<int32_t>();
+    }
     ImageAnimatorModel::GetInstance()->SetPreDecode(preDecode);
 }
 
-void JSImageAnimator::SetIsReverse(bool isReverse)
+void JSImageAnimator::SetIsReverse(const JSCallbackInfo& info)
 {
+    if (info.Length() < 1) {
+        return;
+    }
+    bool isReverse = false;
+    if (info[0]->IsBoolean()) {
+        isReverse = info[0]->ToBoolean();
+    }
     ImageAnimatorModel::GetInstance()->SetIsReverse(isReverse);
 }
 
-void JSImageAnimator::SetFixedSize(bool fixedSize)
+void JSImageAnimator::SetFixedSize(const JSCallbackInfo& info)
 {
+    if (info.Length() < 1) {
+        return;
+    }
+    bool fixedSize = true;
+    if (info[0]->IsBoolean()) {
+        fixedSize = info[0]->ToBoolean();
+    }
     ImageAnimatorModel::GetInstance()->SetFixedSize(fixedSize);
 }
 
@@ -195,12 +236,9 @@ void JSImageAnimator::OnFinish(const JSCallbackInfo& info)
 AnimatorEvent JSImageAnimator::GetAnimatorEvent(const JSCallbackInfo& info, std::string&& eventName)
 {
     if (info.Length() != 1) {
-        LOGW("JSImageAnimator: The arg is wrong, it is supposed to have one function argument. event:%{public}s",
-            eventName.c_str());
         return {};
     }
     if (!info[0]->IsFunction()) {
-        LOGE("JSImageAnimator: info[0] is not a function. event:%{public}s", eventName.c_str());
         return {};
     }
     auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
@@ -216,13 +254,11 @@ AnimatorEvent JSImageAnimator::GetAnimatorEvent(const JSCallbackInfo& info, std:
 void JSImageAnimator::ParseImages(const JSRef<JSVal>& image, ImageProperties& imageProperties)
 {
     if (!image->IsObject()) {
-        LOGE("image is not Object.");
         return;
     }
     JSRef<JSObject> jsObjImage = JSRef<JSObject>::Cast(image);
-    if (!ParseJsMedia(jsObjImage->GetProperty("src"), imageProperties.src)) {
-        LOGE("parse image property src failed!");
-    }
+    ParseJsMedia(jsObjImage->GetProperty("src"), imageProperties.src);
+    GetJsMediaBundleInfo(jsObjImage->GetProperty("src"), imageProperties.bundleName, imageProperties.moduleName);
     ParseJsDimensionVp(jsObjImage->GetProperty("width"), imageProperties.width);
     ParseJsDimensionVp(jsObjImage->GetProperty("height"), imageProperties.height);
     ParseJsDimensionVp(jsObjImage->GetProperty("top"), imageProperties.top);

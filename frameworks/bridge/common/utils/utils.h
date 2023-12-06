@@ -88,6 +88,12 @@ constexpr int32_t ERROR_CODE_PAGE_STACK_FULL = 100003;     // The pages are push
 constexpr int32_t ERROR_CODE_NAMED_ROUTE_ERROR = 100004;           // Named route error.
 constexpr int32_t ERROR_CODE_URI_ERROR_LITE = 200002;      // Uri error for lite.
 
+// Send synchronous message error code
+// No callback has been registered to process synchronous data transferring.
+constexpr int32_t ERROR_CODE_UIEXTENSION_NOT_REGISTER_SYNC_CALLBACK = 100011;
+// Transferring data failed
+constexpr int32_t ERROR_CODE_UIEXTENSION_TRANSFER_DATA_FAILED       = 100012;
+
 // Drag event error code
 constexpr int32_t ERROR_CODE_DRAG_DATA_NOT_FOUND = 190001;      // GetData failed, data not found.
 constexpr int32_t ERROR_CODE_DRAG_DATA_ERROR = 190002;      // GetData failed, data error.
@@ -96,18 +102,15 @@ template<class T>
 bool GetAssetContentImpl(const RefPtr<AssetManager>& assetManager, const std::string& url, T& content)
 {
     if (!assetManager) {
-        LOGE("AssetManager is null");
         return false;
     }
     auto jsAsset = assetManager->GetAsset(url);
     if (jsAsset == nullptr) {
-        LOGW("uri:%{public}s Asset is null", url.c_str());
         return false;
     }
     auto bufLen = jsAsset->GetSize();
     auto buffer = jsAsset->GetData();
     if ((buffer == nullptr) || (bufLen <= 0)) {
-        LOGE("uri:%{private}s buffer is null", url.c_str());
         return false;
     }
     content.assign(buffer, buffer + bufLen);
@@ -118,12 +121,10 @@ template<class T>
 bool GetAssetContentAllowEmpty(const RefPtr<AssetManager>& assetManager, const std::string& url, T& content)
 {
     if (!assetManager) {
-        LOGE("AssetManager is null");
         return false;
     }
     auto jsAsset = assetManager->GetAsset(url);
     if (jsAsset == nullptr) {
-        LOGW("uri:%{public}s Asset is null", url.c_str());
         return false;
     }
     auto bufLen = jsAsset->GetSize();
@@ -135,7 +136,6 @@ bool GetAssetContentAllowEmpty(const RefPtr<AssetManager>& assetManager, const s
 inline std::string GetAssetPathImpl(const RefPtr<AssetManager>& assetManager, const std::string& url)
 {
     if (!assetManager) {
-        LOGE("AssetManager is null");
         return {};
     }
     return assetManager->GetAssetPath(url, true);
@@ -146,7 +146,6 @@ inline std::unique_ptr<JsonValue> ParseFileData(const std::string& data)
     const char* endMsg = nullptr;
     auto fileData = JsonUtil::ParseJsonString(data, &endMsg);
     if (!fileData) {
-        LOGE("parse i18n data failed, error: %{private}s", endMsg);
         return nullptr;
     }
     return fileData;

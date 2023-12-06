@@ -29,8 +29,10 @@ public:
 
     std::optional<SizeF> MeasureContent(
         const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper) override;
+    void Measure(LayoutWrapper* layoutWrapper) override;
 
 private:
+    bool IsValidRootLayer(int32_t x, WebType type);
     ACE_DISALLOW_COPY_AND_MOVE(WebLayoutAlgorithm);
 };
 } // namespace OHOS::Ace::NG

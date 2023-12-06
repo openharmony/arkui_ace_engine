@@ -101,6 +101,12 @@ ACE_EXPORT extern const char RICH_EDITOR_DRAG_ETS_TAG[];
 ACE_EXPORT extern const char STACK_COMPONENT_TAG[];
 ACE_EXPORT extern const char STACK_ETS_TAG[];
 
+// folderStack
+ACE_EXPORT extern const char FOLDER_STACK_COMPONENT_TAG[];
+ACE_EXPORT extern const char FOLDER_STACK_ETS_TAG[];
+ACE_EXPORT extern const char HOVER_STACK_ETS_TAG[];
+ACE_EXPORT extern const char CONTROL_PARTS_STACK_ETS_TAG[];
+
 // swiper
 ACE_EXPORT extern const char SWIPER_COMPONENT_TAG[];
 ACE_EXPORT extern const char SWIPER_ETS_TAG[];
@@ -255,6 +261,10 @@ ACE_FORCE_EXPORT extern const char QRCODE_ETS_TAG[];
 ACE_EXPORT extern const char SPAN_COMPONENT_TAG[];
 ACE_EXPORT extern const char SPAN_ETS_TAG[];
 
+// placeholder span
+ACE_EXPORT extern const char PLACEHOLDER_SPAN_COMPONENT_TAG[];
+ACE_EXPORT extern const char PLACEHOLDER_SPAN_ETS_TAG[];
+
 // text
 ACE_EXPORT extern const char TEXT_COMPONENT_TAG[];
 ACE_EXPORT extern const char TEXT_ETS_TAG[];
@@ -313,6 +323,7 @@ ACE_EXPORT extern const char BADGE_ETS_TAG[];
 // search
 ACE_EXPORT extern const char SEARCH_COMPONENT_TAG[];
 ACE_EXPORT extern const char SEARCH_ETS_TAG[];
+extern const char SEARCH_Field_ETS_TAG[];
 
 // formComponent
 ACE_EXPORT extern const char FORM_COMPONENT_TAG[];
@@ -503,6 +514,7 @@ ACE_EXPORT extern const char TIME_PICKER_DIALOG_ETS_TAG[];
 // web
 ACE_EXPORT extern const char WEB_COMPONENT_TAG[];
 ACE_EXPORT extern const char WEB_ETS_TAG[];
+ACE_EXPORT extern const char WEB_CORE_TAG[];
 
 // richText
 ACE_EXPORT extern const char RICH_TEXT_COMPONENT_TAG[];

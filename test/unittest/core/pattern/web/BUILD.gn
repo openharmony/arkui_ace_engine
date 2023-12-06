@@ -1,0 +1,90 @@
+# Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
+
+template("web_pattern_unit_source_set") {
+  forward_variables_from(invoker, "*")
+
+  ohos_unittest(target_name) {
+    module_out_path = pattern_test_output_path
+    defines += invoker.defines
+    testonly = true
+    sources = []
+    if (defined(config.web_components_support) &&
+        config.web_components_support) {
+      defines += [ "OHOS_STANDARD_SYSTEM" ]
+      include_dirs = [
+        "//commonlibrary/c_utils/base/include",
+        "//foundation/window/window_manager/interfaces/innerkits/wm",
+        "//foundation/communication/ipc/interfaces/innerkits/ipc_core/include",
+        "//foundation/graphic/graphic_2d/utils/buffer_handle/export",
+        "//foundation/multimedia/image_framework/interfaces/innerkits/include",
+        "//foundation/window/window_manager/interfaces/innerkits",
+        "//foundation/multimodalinput/input/interfaces/native/innerkits/event/include",
+      ]
+      sources += [
+        "web_accessibility_property_test_ng.cpp",
+        "web_model_test_ng.cpp",
+        "web_pattern_event_test.cpp",
+        "web_pattern_test.cpp",
+        "web_pattern_test_ng.cpp",
+      ]
+      deps = [
+        "$ace_root/build:ace_ohos_unittest_base",
+        "$ace_root/frameworks/core/components/theme:build_theme_code",
+        "$ace_root/frameworks/core/components_ng/base:ace_core_components_base_ng_ohos",
+        "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client",
+        "//third_party/googletest:gmock_main",
+        "//third_party/googletest:gtest_main",
+      ]
+
+      external_deps = [
+        "ability_base:configuration",
+        "ability_runtime:app_manager",
+        "ability_runtime:runtime",
+        "webview:libnweb",
+        "window_manager:libwm",
+      ]
+      configs = [ "$ace_root:ace_config" ]
+    }
+    if (defined(config.enable_drag_framework) && config.enable_drag_framework) {
+      sources += [ "$ace_root/test/mock/core/common/mock_udmf.cpp" ]
+      sources += [ "$ace_root/test/mock/core/common/mock_interaction.cpp" ]
+      sources += [ "$ace_root/test/mock/adapter/mock_mmi_event_convertor.cpp" ]
+      defines += [ "ENABLE_DRAG_FRAMEWORK" ]
+    }
+  }
+}
+
+foreach(item, ace_platforms) {
+  web_pattern_unit_source_set("web_pattern_unit_test_" + item.name) {
+    if (defined(item.config)) {
+      config = item.config
+    } else {
+      config = {
+      }
+    }
+
+    if (defined(config.defines)) {
+      defines = config.defines
+    } else {
+      defines = []
+    }
+  }
+}
+
+group("web_pattern_unit_test") {
+  testonly = true
+  deps = [ ":web_pattern_unit_test_ohos" ]
+}

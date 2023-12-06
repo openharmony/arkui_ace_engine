@@ -17,6 +17,8 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_NAVIGATION_NAVIGATION_MODEL_NG_H
 
 #include "core/components_ng/pattern/navigation/navigation_model.h"
+#include "core/components_ng/pattern/navigation/nav_bar_node.h"
+#include "core/components_ng/pattern/navigation/navigation_group_node.h"
 
 namespace OHOS::Ace::NG {
 class ACE_EXPORT NavigationModelNG : public OHOS::Ace::NavigationModel {
@@ -29,12 +31,13 @@ public:
         const std::string& title) override;
     void SetTitle(const std::string& title, bool hasSubTitle = false) override;
     void SetCustomTitle(const RefPtr<AceType>& customNode) override;
-    void SetTitleHeight(const Dimension& height) override;
+    void SetTitleHeight(const Dimension& height, bool isValid = true) override;
     void SetTitleMode(NG::NavigationTitleMode mode) override;
     void SetSubtitle(const std::string& subtitle) override;
     void SetHideTitleBar(bool hideTitleBar) override;
     void SetHideNavBar(bool hideNavBar) override;
-    void SetBackButtonIcon(const std::string& src, bool noPixMap, RefPtr<PixelMap>& pixMap) override;
+    void SetBackButtonIcon(const std::string& src, bool noPixMap, RefPtr<PixelMap>& pixMap,
+        const std::string& bundleName, const std::string& moduleName) override;
     void SetHideBackButton(bool hideBackButton) override;
     void SetHideToolBar(bool hideToolBar) override;
     void SetCustomToolBar(const RefPtr<AceType>& customNode) override;
@@ -58,6 +61,25 @@ public:
     RefPtr<NG::NavigationStack> GetNavigationStack() override;
     void SetMenuCount(int32_t menuCount) override;
     void SetOnNavigationModeChange(std::function<void(NG::NavigationMode)>&& onModeChange) override;
+    static void SetHideToolBar(FrameNode* frameNode, bool hideToolBar);
+    static void SetMinContentWidth(FrameNode* frameNode, const Dimension& value);
+    static void SetMinNavBarWidth(FrameNode* frameNode, const Dimension& value);
+    static void SetMaxNavBarWidth(FrameNode* frameNode, const Dimension& value);
+    static void SetNavBarWidth(FrameNode* frameNode, const Dimension& value);
+    static void SetNavBarPosition(FrameNode* frameNode, NG::NavBarPosition mode);
+    static void SetUsrNavigationMode(FrameNode* frameNode, NavigationMode mode);
+    static void SetBackButtonIcon(
+        FrameNode* frameNode, const std::string& src, bool noPixMap, RefPtr<PixelMap>& pixMap);
+    static void SetHideNavBar(FrameNode* frameNode, bool hideNavBar);
+    static void SetHideTitleBar(FrameNode* frameNode, bool hideTitleBar);
+    static void SetSubtitle(FrameNode* frameNode, const std::string& subtitle);
+    static void SetHideBackButton(FrameNode* frameNode, bool hideBackButton);
+    static void SetTitleMode(FrameNode* frameNode, NG::NavigationTitleMode mode);
+
+private:
+    bool setDefaultNavBarWidthFlag_ = false;
+    static void PutComponentInsideNavigator(
+        NavigationGroupNode* navigationGroupNode, const RefPtr<NavBarNode>& navBarNode);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_NAVIGATION_NAVIGATION_MODEL_NG_H

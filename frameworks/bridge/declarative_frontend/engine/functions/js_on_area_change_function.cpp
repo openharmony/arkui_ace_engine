@@ -31,18 +31,18 @@ JSRef<JSObject> CreateAreaObject(const Rect& rect, const Offset& origin)
     JSRef<JSObject> offset = objectTemplate->NewInstance();
     JSRef<JSObject> globalOffset = objectTemplate->NewInstance();
     auto localOffset = rect.GetOffset();
-    offset->SetProperty<double>("x", SystemProperties::Px2Vp(localOffset.GetX()));
-    offset->SetProperty<double>("y", SystemProperties::Px2Vp(localOffset.GetY()));
-    globalOffset->SetProperty<double>("x", SystemProperties::Px2Vp(localOffset.GetX() + origin.GetX()));
-    globalOffset->SetProperty<double>("y", SystemProperties::Px2Vp(localOffset.GetY() + origin.GetY()));
+    offset->SetProperty<double>("x", PipelineBase::Px2VpWithCurrentDensity(localOffset.GetX()));
+    offset->SetProperty<double>("y", PipelineBase::Px2VpWithCurrentDensity(localOffset.GetY()));
+    globalOffset->SetProperty<double>("x", PipelineBase::Px2VpWithCurrentDensity(localOffset.GetX() + origin.GetX()));
+    globalOffset->SetProperty<double>("y", PipelineBase::Px2VpWithCurrentDensity(localOffset.GetY() + origin.GetY()));
     // keep compatible, need remove after
     area->SetPropertyObject("pos", offset);
     area->SetPropertyObject("position", offset);
     // keep compatible, need remove after
     area->SetPropertyObject("globalPos", globalOffset);
     area->SetPropertyObject("globalPosition", globalOffset);
-    area->SetProperty<double>("width", SystemProperties::Px2Vp(rect.Width()));
-    area->SetProperty<double>("height", SystemProperties::Px2Vp(rect.Height()));
+    area->SetProperty<double>("width", PipelineBase::Px2VpWithCurrentDensity(rect.Width()));
+    area->SetProperty<double>("height", PipelineBase::Px2VpWithCurrentDensity(rect.Height()));
     return area;
 }
 

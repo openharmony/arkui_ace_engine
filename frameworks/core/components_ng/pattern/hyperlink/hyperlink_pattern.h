@@ -24,17 +24,12 @@ class HyperlinkPattern : public TextPattern {
     DECLARE_ACE_TYPE(HyperlinkPattern, TextPattern);
 
 public:
-    explicit HyperlinkPattern(const std::string& address) : address_(address) {};
+    HyperlinkPattern() = default;
     ~HyperlinkPattern() override = default;
 
     RefPtr<LayoutProperty> CreateLayoutProperty() override
     {
         return MakeRefPtr<HyperlinkLayoutProperty>();
-    }
-
-    const std::string& GetAddress()
-    {
-        return address_;
     }
 
     void EnableDrag();
@@ -54,9 +49,8 @@ private:
     void OnAttachToFrameNode() override;
     void OnModifyDone() override;
 
-    void InitClickEvent(const RefPtr<GestureEventHub>& gestureHub);
+    void InitClickEvent(const RefPtr<GestureEventHub>& gestureHub) override;
     void InitInputEvent(const RefPtr<InputEventHub>& inputHub);
-    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
     void OnHoverEvent(bool isHovered);
     void OnMouseEvent(MouseInfo& info);
     void InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub);
@@ -67,13 +61,10 @@ private:
 
     bool isLinked_ = false;
     RefPtr<TouchEventImpl> onTouchEvent_;
-    RefPtr<LongPressEvent> longPressEvent_;
     RefPtr<InputEvent> onHoverEvent_;
     RefPtr<InputEvent> onMouseEvent_;
     RefPtr<ClickEvent> clickListener_;
-
-    // Mark the address in the pattern, used to link to the website.
-    std::string address_;
+    
     ACE_DISALLOW_COPY_AND_MOVE(HyperlinkPattern);
 };
 } // namespace OHOS::Ace::NG

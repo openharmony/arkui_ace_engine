@@ -16,7 +16,11 @@
 #if defined(ENABLE_ROSEN_BACKEND) && defined(OHOS_PLATFORM)
 #include "core/components_ng/render/adapter/rosen_render_surface.h"
 #endif
+#ifdef VIDEO_TEXTURE_SUPPORTED
+#include "core/components_ng/render/adapter/render_texture_impl.h"
+#else
 #include "core/components_ng/render/adapter/render_surface_impl.h"
+#endif
 #include "core/components_ng/render/render_surface.h"
 
 namespace OHOS::Ace::NG {
@@ -26,7 +30,11 @@ RefPtr<RenderSurface> RenderSurface::Create()
 #if defined(OHOS_PLATFORM) && defined(ENABLE_ROSEN_BACKEND)
         return MakeRefPtr<RosenRenderSurface>();
 #else
+#ifdef VIDEO_TEXTURE_SUPPORTED
+        return MakeRefPtr<RenderTextureImpl>();
+#else
         return MakeRefPtr<RenderSurfaceImpl>();
+#endif
 #endif
     }
     return MakeRefPtr<RenderSurface>();

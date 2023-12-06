@@ -28,16 +28,25 @@ using namespace OHOS::NWeb;
 class WebJavaScriptResultCallBack : public NWebJavaScriptResultCallBack {
 public:
     WebJavaScriptResultCallBack(int32_t instanceId) : instanceId_(instanceId) {}
+
     ~WebJavaScriptResultCallBack() = default;
 
     std::shared_ptr<NWebValue> GetJavaScriptResult(std::vector<std::shared_ptr<NWebValue>> args,
-                                                       const std::string& method,
-                                                       const std::string& object_name) override;
+        const std::string& method, const std::string& object_name, int32_t routing_id, int32_t object_id) override;
+
+    bool HasJavaScriptObjectMethods(int32_t object_id, const std::string& method_name) override;
+
+    std::shared_ptr<NWebValue> GetJavaScriptObjectMethods(int32_t object_id) override;
+
+    void RemoveJavaScriptObjectHolder(int32_t holder, int32_t object_id) override;
+
+    void RemoveTransientJavaScriptObject() override;
 
     using JavaScriptCallBackImpl = std::function<std::shared_ptr<WebJSValue>(
         const std::string& objectName,
         const std::string& objectMethod,
         const std::vector<std::shared_ptr<WebJSValue>>& args)>;
+
     void SetJavaScriptCallBack(const JavaScriptCallBackImpl&& javaScriptCallBackImpl)
     {
         javaScriptCallBackImpl_ = javaScriptCallBackImpl;

@@ -75,6 +75,12 @@ public:
         return nullptr;
     }
 
+    static std::unique_ptr<ImageSource> CreateImageSource(
+        const std::string path, const SourceOptions& opts, uint32_t& errorCode)
+    {
+        return nullptr;
+    }
+
     std::unique_ptr<PixelMap> CreatePixelMap(const DecodeOptions& opts, uint32_t& errorCode)
     {
         return nullptr;

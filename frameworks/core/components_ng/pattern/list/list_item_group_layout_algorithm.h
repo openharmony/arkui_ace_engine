@@ -32,7 +32,7 @@ public:
     using PositionMap = std::map<int32_t, std::pair<float, float>>;
 
     static const int32_t LAST_ITEM = -1;
-    
+
     ListItemGroupLayoutAlgorithm(int32_t headerIndex, int32_t footerIndex, int32_t itemStartIndex)
         :headerIndex_(headerIndex), footerIndex_(footerIndex), itemStartIndex_(itemStartIndex) {}
 
@@ -49,6 +49,8 @@ public:
     {
         itemPosition_ = itemPosition;
     }
+
+    void ClearItemPosition(LayoutWrapper* layoutWrapper);
 
     float GetSpaceWidth() const
     {
@@ -76,6 +78,13 @@ public:
             return index;
         }
         return index - index % lanes_;
+    }
+
+    int32_t GetLanesCeil(int32_t index) const
+    {
+        int32_t tmpIndex = (lanes_ <= 1) ? index : (index - index % lanes_ + lanes_ - 1);
+        tmpIndex = tmpIndex >= totalItemCount_ ? totalItemCount_ - 1 : tmpIndex;
+        return tmpIndex;
     }
 
     void SetListMainSize(float startPos, float endPos, float referencePos, bool forwardLayout)
@@ -147,6 +156,26 @@ public:
     {
         needAllLayout_ = true;
     }
+
+    void SetScrollAlign(ScrollAlign align)
+    {
+        scrollAlign_ = align;
+    }
+
+    std::pair<float, float> GetItemGroupPosition(int32_t index);
+
+    float GetHeaderMainSize() const
+    {
+        return headerMainSize_;
+    }
+
+    float GetFooterMainSize() const
+    {
+        return footerMainSize_;
+    }
+
+    float GetItemHeight(int32_t index);
+
 private:
     float CalculateLaneCrossOffset(float crossSize, float childCrossSize);
     void UpdateListItemConstraint(const OptionalSizeF& selfIdealSize, LayoutConstraintF& contentConstraint);
@@ -159,6 +188,10 @@ private:
     {
         return layoutWrapper->GetOrCreateChildByIndex(index + itemStartIndex_);
     }
+    inline void RecycleListItem(const RefPtr<LayoutWrapper>& layoutWrapper, int32_t index) const
+    {
+        layoutWrapper->RemoveChildInRenderTree(index + itemStartIndex_);
+    }
     void CalculateLanes(const RefPtr<ListLayoutProperty>& layoutProperty,
         const LayoutConstraintF& layoutConstraint, std::optional<float> crossSizeOptional, Axis axis);
 
@@ -167,22 +200,33 @@ private:
         int32_t& currentIndex, float startPos, float& endPos);
     int32_t MeasureALineBackward(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint,
         int32_t& currentIndex, float endPos, float& startPos);
-    void MeasureForward(
-        LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint, int32_t startIndex, float startPos);
-    void MeasureBackward(
-        LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint, int32_t endIndex, float endPos);
+    int32_t MeasureALineCenter(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint,
+        int32_t currentIndex);
+    int32_t MeasureALineAuto(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint,
+        int32_t currentIndex);
+    void MeasureForward(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint,
+        int32_t startIndex, float startPos);
+    void MeasureBackward(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint,
+        int32_t endIndex, float endPos);
+    void MeasureCenter(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint, int32_t startIndex);
+    void MeasureStart(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint, int32_t startIndex);
+    void MeasureEnd(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint, int32_t startIndex);
+    void MeasureAuto(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint, int32_t startIndex);
     void UpdateReferencePos(RefPtr<LayoutProperty> layoutProperty);
     bool NeedMeasureItem() const;
     static void SetListItemIndex(const LayoutWrapper* groupLayoutWrapper,
         const RefPtr<LayoutWrapper>& itemLayoutWrapper, int32_t indexInGroup);
     bool IsCardStyleForListItemGroup(const LayoutWrapper* groupLayoutWrapper);
     float GetListItemGroupMaxWidth(const OptionalSizeF& parentIdealSize, RefPtr<LayoutProperty> layoutProperty);
+    void AdjustItemPosition();
 
     bool isCardStyle_ = false;
     int32_t headerIndex_;
     int32_t footerIndex_;
     int32_t itemStartIndex_;
     RefPtr<ListLayoutProperty> listLayoutProperty_;
+    float paddingBeforeContent_ = 0.0f;
+    float paddingAfterContent_ = 0.0f;
 
     PositionMap itemPosition_;
     Axis axis_ = Axis::VERTICAL;
@@ -195,6 +239,7 @@ private:
 
     std::optional<int32_t> jumpIndex_;
     std::optional<int32_t> targetIndex_;
+    ScrollAlign scrollAlign_ = ScrollAlign::NONE;
     int32_t totalItemCount_ = 0;
     float totalMainSize_ = 0.0f;
     float headerMainSize_ = 0.0f;

@@ -15,6 +15,7 @@
 
 #include "frameworks/bridge/declarative_frontend/jsview/js_gesture.h"
 
+#include "base/log/log_wrapper.h"
 #include "bridge/declarative_frontend/jsview/models/gesture_model_impl.h"
 #include "core/components_ng/pattern/gesture/gesture_model_ng.h"
 #include "frameworks/base/log/ace_scoring_log.h"
@@ -242,7 +243,6 @@ constexpr char ROTATION_ANGLE[] = "angle";
 
 void JSGesture::Create(const JSCallbackInfo& info)
 {
-    LOGD("JS gesture create");
     int32_t priorityNum = 0;
     if (info.Length() > 0 && info[0]->IsNumber()) {
         priorityNum = info[0]->ToNumber<int32_t>();
@@ -258,19 +258,16 @@ void JSGesture::Create(const JSCallbackInfo& info)
 
 void JSGesture::Finish()
 {
-    LOGD("JS gesture finish");
     GestureModel::GetInstance()->Finish();
 }
 
 void JSGesture::Pop()
 {
-    LOGD("JS gesture pop");
     GestureModel::GetInstance()->Pop();
 }
 
 void JSTapGesture::Create(const JSCallbackInfo& args)
 {
-    LOGD("JSTapGesture Create");
     int32_t countNum = DEFAULT_TAP_COUNT;
     int32_t fingersNum = DEFAULT_TAP_FINGER;
     if (args.Length() > 0 && args[0]->IsObject()) {
@@ -288,13 +285,11 @@ void JSTapGesture::Create(const JSCallbackInfo& args)
         }
     }
 
-    LOGD("JS Tap gesture created with count %{public}d, fingers %{public}d", countNum, fingersNum);
     TapGestureModel::GetInstance()->Create(countNum, fingersNum);
 }
 
 void JSLongPressGesture::Create(const JSCallbackInfo& args)
 {
-    LOGD("JSLongPressGesture Create");
     int32_t fingersNum = DEFAULT_LONG_PRESS_FINGER;
     bool repeatResult = false;
     int32_t durationNum = DEFAULT_LONG_PRESS_DURATION;
@@ -322,7 +317,6 @@ void JSLongPressGesture::Create(const JSCallbackInfo& args)
 
 void JSPanGesture::Create(const JSCallbackInfo& args)
 {
-    LOGD("JSPanGesture Create");
     int32_t fingersNum = DEFAULT_PAN_FINGER;
     double distanceNum = DEFAULT_PAN_DISTANCE.ConvertToPx();
     PanDirection panDirection;
@@ -367,7 +361,6 @@ void JSPanGesture::Create(const JSCallbackInfo& args)
 
 void JSSwipeGesture::Create(const JSCallbackInfo& args)
 {
-    LOGD("JSSwipeGesture Create");
     int32_t fingersNum = DEFAULT_SLIDE_FINGER;
     double speedNum = DEFAULT_SLIDE_SPEED;
     SwipeDirection slideDirection;
@@ -403,7 +396,6 @@ void JSSwipeGesture::Create(const JSCallbackInfo& args)
 
 void JSPinchGesture::Create(const JSCallbackInfo& args)
 {
-    LOGD("JSPinchGesture Create");
     int32_t fingersNum = DEFAULT_PINCH_FINGER;
     double distanceNum = DEFAULT_PINCH_DISTANCE;
     if (args.Length() > 0 && args[0]->IsObject()) {
@@ -427,7 +419,6 @@ void JSPinchGesture::Create(const JSCallbackInfo& args)
 
 void JSRotationGesture::Create(const JSCallbackInfo& args)
 {
-    LOGD("JSRotationGesture Create");
     double angleNum = DEFAULT_ROTATION_ANGLE;
     int32_t fingersNum = DEFAULT_ROTATION_FINGER;
     if (args.Length() > 0 && args[0]->IsObject()) {
@@ -455,14 +446,12 @@ void JSGestureGroup::Create(const JSCallbackInfo& args)
         gestureMode = args[0]->ToNumber<int32_t>();
     }
 
-    LOGD("Js Gesture group create with mode %{public}d", gestureMode);
     GestureGroupModel::GetInstance()->Create(gestureMode);
 }
 
 void JSGesture::JsHandlerOnGestureEvent(Ace::GestureEventAction action, const JSCallbackInfo& args)
 {
     if (args.Length() < 1 || !args[0]->IsFunction()) {
-        LOGE("args is not js function");
         return;
     }
 
@@ -486,6 +475,15 @@ void JSGesture::JsHandlerOnGestureEvent(Ace::GestureEventAction action, const JS
     };
 
     GestureModel::GetInstance()->SetOnActionFunc(onActionFunc, action);
+}
+
+void JSGesture::SetTag(const JSCallbackInfo& args)
+{
+    std::string tag;
+    if (args.Length() > 0 && args[0]->IsString()) {
+        tag = args[0]->ToString();
+    }
+    GestureModel::GetInstance()->SetTag(tag);
 }
 
 void JSGesture::JsHandlerOnAction(const JSCallbackInfo& args)
@@ -619,6 +617,7 @@ void JSGesture::JSBind(BindingTarget globalObj)
 
     JSClass<JSTapGesture>::Declare("TapGesture");
     JSClass<JSTapGesture>::StaticMethod("create", &JSTapGesture::Create, opt);
+    JSClass<JSTapGesture>::StaticMethod("tag", &JSGesture::SetTag, opt);
     JSClass<JSTapGesture>::StaticMethod("pop", &JSGesture::Pop);
     JSClass<JSTapGesture>::StaticMethod("onAction", &JSGesture::JsHandlerOnAction);
     JSClass<JSTapGesture>::StaticMethod("onActionUpdate", &JSGesture::JsHandlerOnActionUpdate);
@@ -626,6 +625,7 @@ void JSGesture::JSBind(BindingTarget globalObj)
 
     JSClass<JSLongPressGesture>::Declare("LongPressGesture");
     JSClass<JSLongPressGesture>::StaticMethod("create", &JSLongPressGesture::Create, opt);
+    JSClass<JSLongPressGesture>::StaticMethod("tag", &JSGesture::SetTag, opt);
     JSClass<JSLongPressGesture>::StaticMethod("pop", &JSGesture::Pop);
     JSClass<JSLongPressGesture>::StaticMethod("onAction", &JSGesture::JsHandlerOnAction);
     JSClass<JSLongPressGesture>::StaticMethod("onActionEnd", &JSGesture::JsHandlerOnActionEnd);
@@ -635,6 +635,7 @@ void JSGesture::JSBind(BindingTarget globalObj)
 
     JSClass<JSPanGesture>::Declare("PanGesture");
     JSClass<JSPanGesture>::StaticMethod("create", &JSPanGesture::Create, opt);
+    JSClass<JSPanGesture>::StaticMethod("tag", &JSGesture::SetTag, opt);
     JSClass<JSPanGesture>::StaticMethod("pop", &JSGesture::Pop);
     JSClass<JSPanGesture>::StaticMethod("onActionStart", &JSGesture::JsHandlerOnActionStart);
     JSClass<JSPanGesture>::StaticMethod("onActionUpdate", &JSGesture::JsHandlerOnActionUpdate);
@@ -644,12 +645,14 @@ void JSGesture::JSBind(BindingTarget globalObj)
 
     JSClass<JSSwipeGesture>::Declare("SwipeGesture");
     JSClass<JSSwipeGesture>::StaticMethod("create", &JSSwipeGesture::Create, opt);
+    JSClass<JSSwipeGesture>::StaticMethod("tag", &JSGesture::SetTag, opt);
     JSClass<JSSwipeGesture>::StaticMethod("pop", &JSGesture::Pop);
     JSClass<JSSwipeGesture>::StaticMethod("onAction", &JSGesture::JsHandlerOnAction);
     JSClass<JSSwipeGesture>::Bind(globalObj);
 
     JSClass<JSPinchGesture>::Declare("PinchGesture");
     JSClass<JSPinchGesture>::StaticMethod("create", &JSPinchGesture::Create, opt);
+    JSClass<JSPinchGesture>::StaticMethod("tag", &JSGesture::SetTag, opt);
     JSClass<JSPinchGesture>::StaticMethod("pop", &JSGesture::Pop);
     JSClass<JSPinchGesture>::StaticMethod("onActionStart", &JSGesture::JsHandlerOnActionStart);
     JSClass<JSPinchGesture>::StaticMethod("onActionUpdate", &JSGesture::JsHandlerOnActionUpdate);
@@ -659,6 +662,7 @@ void JSGesture::JSBind(BindingTarget globalObj)
 
     JSClass<JSRotationGesture>::Declare("RotationGesture");
     JSClass<JSRotationGesture>::StaticMethod("create", &JSRotationGesture::Create, opt);
+    JSClass<JSRotationGesture>::StaticMethod("tag", &JSGesture::SetTag, opt);
     JSClass<JSRotationGesture>::StaticMethod("pop", &JSGesture::Pop);
     JSClass<JSRotationGesture>::StaticMethod("onActionStart", &JSGesture::JsHandlerOnActionStart);
     JSClass<JSRotationGesture>::StaticMethod("onActionUpdate", &JSGesture::JsHandlerOnActionUpdate);
@@ -681,7 +685,6 @@ void JSGesture::JSBind(BindingTarget globalObj)
 
 void JSTimeoutGesture::Create(const JSCallbackInfo& args)
 {
-    LOGD("JSTimeoutGesture::Create()");
     if (!args[0]->IsNumber()) {
         return;
     }
