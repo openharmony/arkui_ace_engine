@@ -34,8 +34,8 @@ void FormRendererDispatcherImpl::DispatchPointerEvent(const std::shared_ptr<OHOS
         return;
     }
 
-    handler->PostTask([=]() {
-        auto uiContent = uiContent_.lock();
+    handler->PostTask([content = uiContent_, pointerEvent]() {
+        auto uiContent = content.lock();
         if (!uiContent) {
             HILOG_ERROR("uiContent is nullptr");
             return;
@@ -63,8 +63,8 @@ void FormRendererDispatcherImpl::DispatchSurfaceChangeEvent(float width, float h
         return;
     }
 
-    handler->PostTask([=]() {
-        auto uiContent = uiContent_.lock();
+    handler->PostTask([content = uiContent_, width, height]() {
+        auto uiContent = content.lock();
         if (!uiContent) {
             HILOG_ERROR("uiContent is nullptr");
             return;
@@ -90,8 +90,8 @@ void FormRendererDispatcherImpl::SetVisibleChange(bool isVisible)
         return;
     }
 
-    handler->PostTask([=]() {
-        auto uiContent = uiContent_.lock();
+    handler->PostTask([content = uiContent_, isVisible]() {
+        auto uiContent = content.lock();
         if (!uiContent) {
             HILOG_ERROR("uiContent is nullptr");
             return;
