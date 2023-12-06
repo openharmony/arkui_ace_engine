@@ -291,8 +291,6 @@ private:
     void SetEdgeEffectCallback(const RefPtr<ScrollEdgeEffect>& scrollEffect) override;
     void AddScrollEdgeEffect(RefPtr<ScrollEdgeEffect> scrollEffect);
     void UpdateScrollBarOffset() override;
-    void FireOnScrollStart() override;
-    void FireOnScrollStop();
     void SetAccessibilityAction();
     void ScrollSnapTrigger();
     void CheckScrollable();

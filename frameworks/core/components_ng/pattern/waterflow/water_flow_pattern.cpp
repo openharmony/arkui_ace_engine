@@ -230,7 +230,7 @@ bool WaterFlowPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
     if (onReachEnd && layoutInfo.ReachEnd(prevOffset_)) {
         onReachEnd();
     }
-    OnScrollStop(eventHub->GetOnScrollStop(), false);
+    OnScrollStop(eventHub->GetOnScrollStop());
 
     layoutInfo_ = std::move(layoutInfo);
     layoutInfo_.UpdateStartIndex();
