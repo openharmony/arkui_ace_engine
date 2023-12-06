@@ -3,7 +3,8 @@ const TITLE_MODE_RANGE = 2;
 const NAV_BAR_POSITION_RANGE = 1;
 const NAVIGATION_MODE_RANGE = 2;
 const DEFAULT_NAV_BAR_WIDTH = 240;
-const MIN_NAV_BAR_WIDTH_DEFAULT = '0vp';
+const MIN_NAV_BAR_WIDTH_DEFAULT = '240vp';
+const MAX_NAV_BAR_WIDTH_DEFAULT = '40%';
 const NAVIGATION_TITLE_MODE_DEFAULT = 0
 const DEFAULT_UNIT = 'vp';
 
@@ -11,6 +12,10 @@ class ArkNavigationComponent extends ArkComponent implements NavigationAttribute
   navBarWidth(value: Length): NavigationAttribute {
     if (isNumber(value)) {
       value = value + DEFAULT_UNIT;
+    }
+
+    if(value === null || value === undefined) {
+      value = DEFAULT_NAV_BAR_WIDTH + DEFAULT_UNIT;
     }
 
     if (isString(value)) {
@@ -48,14 +53,14 @@ class ArkNavigationComponent extends ArkComponent implements NavigationAttribute
       let max: string | number;
 
       if (isNumber(value[1])) {
-        max = max + DEFAULT_UNIT
+        max = value[1] + DEFAULT_UNIT;
       } else {
-        max = value[1].toString()
+        max = value[1].toString();
       }
 
       modifier(this._modifiers, MaxNavBarWidthModifier, max);
     } else {
-      modifier(this._modifiers, MaxNavBarWidthModifier, MIN_NAV_BAR_WIDTH_DEFAULT);
+      modifier(this._modifiers, MaxNavBarWidthModifier, MAX_NAV_BAR_WIDTH_DEFAULT);
     }
 
     return this;
