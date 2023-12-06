@@ -177,10 +177,31 @@ void ResourceAdapterImplV2::Init(const ResourceInfo& resourceInfo)
     resConfig_ = resConfig;
 }
 
+bool ResourceAdapterImplV2::NeedUpdateResConfig(const std::shared_ptr<Global::Resource::ResConfig>& oldResConfig,
+    const std::shared_ptr<Global::Resource::ResConfig>& newResConfig)
+{
+    if (oldResConfig == nullptr) {
+        return true;
+    }
+    auto oldLocaleInfo = oldResConfig->GetLocaleInfo();
+    auto newLocaleInfo = newResConfig->GetLocaleInfo();
+    auto isLocaleChange = std::string(oldLocaleInfo->getLanguage()) != std::string(newLocaleInfo->getLanguage()) ||
+        std::string(oldLocaleInfo->getScript()) != std::string(newLocaleInfo->getScript()) ||
+        std::string(oldLocaleInfo->getCountry()) != std::string(newLocaleInfo->getCountry());
+
+    return oldResConfig->GetDeviceType() != newResConfig->GetDeviceType() ||
+           oldResConfig->GetDirection() != newResConfig->GetDirection() ||
+           oldResConfig->GetScreenDensity() != newResConfig->GetScreenDensity() ||
+           oldResConfig->GetColorMode() != newResConfig->GetColorMode() ||
+           oldResConfig->GetInputDevice() != newResConfig->GetInputDevice() ||
+           isLocaleChange;
+}
+
 void ResourceAdapterImplV2::UpdateConfig(const ResourceConfiguration& config, bool themeFlag)
 {
     auto resConfig = ConvertConfigToGlobal(config);
-    if (sysResourceManager_ && resConfig != nullptr) {
+    auto needUpdateResConfig = NeedUpdateResConfig(resConfig_, resConfig) || themeFlag;
+    if (sysResourceManager_ && resConfig != nullptr && needUpdateResConfig) {
         sysResourceManager_->UpdateResConfig(*resConfig, themeFlag);
     }
     resConfig_ = resConfig;
