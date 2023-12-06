@@ -64,6 +64,9 @@
 #include "core/pipeline/base/element_register.h"
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_calendar_picker_modifier.h"
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_alphabet_indexer_modifier.h"
+#include "bridge/declarative_frontend/engine/jsi/components/arkts_native_common_shape_modifier.h"
+#include "bridge/declarative_frontend/engine/jsi/components/arkts_native_shape_modifier.h"
+#include "bridge/declarative_frontend/engine/jsi/components/arkts_native_rect_modifier.h"
 
 #ifdef FORM_SUPPORTED
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_form_component_modifier.h"
@@ -125,6 +128,9 @@ static struct ArkUINodeAPI impl = {
     GetMenuModifier,
     GetDatePickerModifier,
     GetAlphabetIndexerModifier,
+    GetCommonShapeModifier,
+    GetShapeModifier,
+    GetRectModifier,
 
 #ifdef FORM_SUPPORTED
     GetFormComponentModifier,

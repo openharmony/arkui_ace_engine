@@ -59,6 +59,9 @@ private:
     static void RegisterTimepickerAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterTextpickerAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterCheckboxAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
+    static void RegisterCommonShapeAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
+    static void RegisterShapeAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
+    static void RegisterRectAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
 };
 } // namespace OHOS::Ace::NG
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_ENGINE_JSI_NATIVEMODULE_ARKTS_NATIVE_API_BRIDGE_H

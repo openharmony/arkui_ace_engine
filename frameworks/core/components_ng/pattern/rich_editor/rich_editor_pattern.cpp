@@ -4557,15 +4557,20 @@ std::string RichEditorPattern::GetPositionSpansText(int32_t position, int32_t& s
 
 void RichEditorPattern::CheckHandles(SelectHandleInfo& handleInfo)
 {
+    handleInfo.isShow = CheckHandleVisible(handleInfo.paintRect);
+}
+
+bool RichEditorPattern::CheckHandleVisible(const RectF& paintRect)
+{
     auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto offset = host->GetPaintRectOffset() + contentRect_.GetOffset() - pipeline->GetRootRect().GetOffset();
-    RectF contentGlobalRect(offset, contentRect_.GetSize());
-    contentGlobalRect = GetVisibleContentRect(host->GetAncestorNodeOfFrame(), contentGlobalRect);
-    auto handleOffset = handleInfo.paintRect.GetOffset();
-    handleInfo.isShow = contentGlobalRect.IsInRegion(PointF(handleOffset.GetX(), handleOffset.GetY() + BOX_EPSILON));
+    CHECK_NULL_RETURN(host, false);
+    // use global offset.
+    RectF visibleContentRect(contentRect_.GetOffset() + parentGlobalOffset_, contentRect_.GetSize());
+    auto parent = host->GetAncestorNodeOfFrame();
+    visibleContentRect = GetVisibleContentRect(parent, visibleContentRect);
+    PointF bottomPoint = { paintRect.Left(), paintRect.Bottom() - BOX_EPSILON };
+    PointF topPoint = { paintRect.Left(), paintRect.Top() + BOX_EPSILON };
+    return visibleContentRect.IsInRegion(bottomPoint) && visibleContentRect.IsInRegion(topPoint);
 }
 
 bool RichEditorPattern::IsShowSelectMenuUsingMouse()

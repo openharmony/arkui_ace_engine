@@ -128,6 +128,7 @@ enum class AceLogTag : uint8_t {
     ACE_UIEVENT,              // C03934
     ACE_UI_SERVICE,           // C03935 ace_engine/adapter/ohos/services/uiservice/src/ui_service_hilog.h
     ACE_DISPLAY_SYNC,         // C03936
+    ACE_RESOURCE,             // C03937
 
     FORM_RENDER = 255, // C039FF FormRenderer
     END = 256,         // Last one, do not use

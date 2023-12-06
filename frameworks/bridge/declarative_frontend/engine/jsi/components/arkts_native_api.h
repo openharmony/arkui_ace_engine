@@ -1089,6 +1089,49 @@ struct ArkUIFormComponentModifierAPI {
 };
 #endif
 
+struct ArkUICommonShapeModifierAPI {
+    void (*SetStrokeDashArray)(NodeHandle node, double* dashArray, int32_t* dimUnits, int32_t size);
+    void (*ResetStrokeDashArray)(NodeHandle node);
+    void (*SetStrokeMiterLimit)(NodeHandle node, const double miterLimit);
+    void (*ResetStrokeMiterLimit)(NodeHandle node);
+    void (*SetFillOpacity)(NodeHandle node, const double fillOpacity);
+    void (*ResetFillOpacity)(NodeHandle node);
+    void (*SetStrokeOpacity)(NodeHandle node, const double strokeOpacity);
+    void (*ResetStrokeOpacity)(NodeHandle node);
+    void (*SetStrokeWidth)(NodeHandle node, double value, int unit);
+    void (*ResetStrokeWidth)(NodeHandle node);
+    void (*SetAntiAlias)(NodeHandle node, const bool antiAlias);
+    void (*ResetAntiAlias)(NodeHandle node);
+    void (*SetStroke)(NodeHandle node, const uint32_t stroke);
+    void (*ResetStroke)(NodeHandle node);
+    void (*SetFill)(NodeHandle node, const uint32_t fill);
+    void (*ResetFill)(NodeHandle node);
+    void (*SetStrokeDashOffset)(NodeHandle node, double value, int unit);
+    void (*ResetStrokeDashOffset)(NodeHandle node);
+    void (*SetStrokeLineCap)(NodeHandle node, const int strokeLineCap);
+    void (*ResetStrokeLineCap)(NodeHandle node);
+    void (*SetStrokeLineJoin)(NodeHandle node, const int lineJoinStyle);
+    void (*ResetStrokeLineJoin)(NodeHandle node);
+};
+
+struct ArkUIShapeModifierAPI {
+    void (*SetShapeViewPort)(NodeHandle node, double* dimValues, int32_t* dimUnits);
+    void (*ResetShapeViewPort)(NodeHandle node);
+    void (*SetShapeMesh)(NodeHandle node, const double* mesh, size_t arrayItemCount, int32_t column, int32_t row);
+    void (*ResetShapeMesh)(NodeHandle node);
+};
+
+struct ArkUIRectModifierAPI {
+    void (*SetRectRadiusWidth)(NodeHandle node, double radiusWidthValue, int32_t radiusWidthUnit);
+    void (*ResetRectRadiusWidth)(NodeHandle node);
+    void (*SetRectRadiusHeight)(NodeHandle node, double radiusHeightValue, int32_t radiusHeightUnit);
+    void (*ResetRectRadiusHeight)(NodeHandle node);
+    void (*SetRectRadiusWithArray)(NodeHandle node, double* radiusValues, int32_t* radiusUnits, bool* radiusValidPairs,
+        int32_t radiusValidPairsSize);
+    void (*SetRectRadiusWithValue)(NodeHandle node, double radiusValue, int32_t radiusUnit);
+    void (*ResetRectRadius)(NodeHandle node);
+};
+
 struct ArkUINodeAPI {
     NodeHandle (*GetFrameNodeById)(int nodeId);
     ArkUICommonModifierAPI (*GetCommonModifier)();
@@ -1137,6 +1180,9 @@ struct ArkUINodeAPI {
     ArkUIMenuModifierAPI (*GetMenuModifier)();
     ArkUIDatePickerModifierAPI (*GetDatePickerModifier)();
     ArkUIAlphabetIndexerModifierAPI (*GetAlphabetIndexerModifier)();
+    ArkUICommonShapeModifierAPI(*GetCommonShapeModifier)();
+    ArkUIShapeModifierAPI(*GetShapeModifier)();
+    ArkUIRectModifierAPI (*GetRectModifier)();
 
 #ifdef FORM_SUPPORTED
     ArkUIFormComponentModifierAPI (*GetFormComponentModifier)();

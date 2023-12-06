@@ -325,6 +325,8 @@ public:
 
     void CheckHandles(SelectHandleInfo& handleInfo) override;
 
+    bool CheckHandleVisible(const RectF& paintRect) override;
+
     bool IsShowSelectMenuUsingMouse();
 
 private:

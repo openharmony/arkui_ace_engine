@@ -45,6 +45,23 @@ config("ace_config") {
     "-Werror=return-stack-address",
   ]
 
+  if (is_ohos && is_clang && (target_cpu == "arm" || target_cpu == "arm64") &&
+      enhanced_opt) {
+    if (ace_engine_feature_enable_pgo) {
+      cflags += [
+        "-fprofile-use=" + rebase_path(
+                "${ace_engine_feature_pgo_path}/libace_compatible.profdata",
+                root_build_dir),
+        "-Wno-error=backend-plugin",
+        "-Wno-profile-instr-out-of-date",
+        "-Wno-profile-instr-unprofiled",
+      ]
+    }
+    if (ace_engine_feature_enable_atomic) {
+      cflags += [ "-moutline-atomics" ]
+    }
+  }
+
   cflags_cc = [
     "-fvisibility-inlines-hidden",
     "-Wno-non-c-typedef-for-linkage",

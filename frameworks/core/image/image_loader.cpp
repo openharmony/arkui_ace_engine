@@ -315,9 +315,9 @@ std::shared_ptr<RSData> FileImageLoader::LoadImageData(
     auto result = SkData::MakeFromFileName(realPath);
     if (!result) {
         TAG_LOGW(AceLogTag::ACE_IMAGE,
-            "read data failed, filePath: %{public}s, src: %{public}s, skData size: %{public}zu, fail reason: "
+            "read data failed, filePath: %{public}s, src: %{public}s, fail reason: "
             "%{public}s",
-            filePath.c_str(), src.c_str(), result->size(), strerror(errno));
+            filePath.c_str(), src.c_str(), strerror(errno));
     }
 #ifndef USE_ROSEN_DRAWING
 #ifdef PREVIEW
