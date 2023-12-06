@@ -1638,8 +1638,12 @@ void WebPattern::OfflineMode()
     Size drawSize = Size(width, height);
     Offset offset = Offset(0, 0);
     delegate_->SetBoundsOrResize(drawSize, offset);
+    if (webSrc_) {
+        delegate_->LoadUrl();
+    } else if (webData_) {
+        delegate_->LoadDataWithRichText();
+    }
     isUrlLoaded_ = true;
-    delegate_->LoadUrl();
     OnWindowHide();
 }
 
