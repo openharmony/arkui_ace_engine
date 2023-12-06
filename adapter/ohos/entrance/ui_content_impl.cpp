@@ -1614,14 +1614,13 @@ bool UIContentImpl::ProcessPointerEvent(const std::shared_ptr<OHOS::MMI::Pointer
     CHECK_NULL_RETURN(container, false);
     container->SetCurPointerEvent(pointerEvent);
     if (pointerEvent->GetPointerAction() != MMI::PointerEvent::POINTER_ACTION_MOVE) {
-        auto info = Platform::AceContainer::GetContentInfo(instanceId_);
         TAG_LOGI(AceLogTag::ACE_INPUTTRACKING,
             "PointerEvent Process to ui_content, eventInfo: id:%{public}d, "
             "WindowName = %{public}s, WindowId = %{public}d, ViewWidth = %{public}d, ViewHeight = %{public}d, "
-            "ViewPosX = %{public}d, ViewPosY = %{public}d, ContentInfo = %{public}s",
+            "ViewPosX = %{public}d, ViewPosY = %{public}d",
             pointerEvent->GetId(), container->GetWindowName().c_str(), container->GetWindowId(),
-            container->GetViewWidth(), container->GetViewHeight(), container->GetViewPosX(), container->GetViewPosY(),
-            info.c_str());
+            container->GetViewWidth(), container->GetViewHeight(), container->GetViewPosX(),
+            container->GetViewPosY());
     }
     auto aceView = static_cast<Platform::AceViewOhos*>(container->GetView());
     Platform::AceViewOhos::DispatchTouchEvent(aceView, pointerEvent);
