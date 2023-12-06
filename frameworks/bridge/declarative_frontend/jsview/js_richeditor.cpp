@@ -616,12 +616,11 @@ void JSRichEditor::JsEnableDataDetector(const JSCallbackInfo& info)
     if (info.Length() < 1) {
         return;
     }
-    auto tmpInfo = info[0];
-    if (!tmpInfo->IsBoolean()) {
+    if (!info[0]->IsBoolean()) {
         RichEditorModel::GetInstance()->SetTextDetectEnable(false);
         return;
     }
-    auto enable = tmpInfo->ToBoolean();
+    auto enable = info[0]->ToBoolean();
     RichEditorModel::GetInstance()->SetTextDetectEnable(enable);
 }
 
@@ -630,8 +629,7 @@ void JSRichEditor::JsDataDetectorConfig(const JSCallbackInfo& info)
     if (info.Length() < 1) {
         return;
     }
-    auto tmpInfo = info[0];
-    if (!tmpInfo->IsObject()) {
+    if (!info[0]->IsObject()) {
         return;
     }
 
