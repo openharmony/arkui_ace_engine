@@ -290,7 +290,7 @@ void ResourceAdapterImpl::Init(const ResourceInfo& resourceInfo)
         initRet = resourceManger_.InitMock(hapFiles, resourceInfo.GetSystemPackagePath(), configuration);
     } else {
         initRet = resourceManger_.Init(hapFiles, handlers);
-        resourceManger_.UpdateConfig(configuration, themeFlag);
+        resourceManger_.UpdateConfig(configuration);
     }
     LOGI("Init result=%{public}d, handle=%{public}zu, ori=%{public}d, dpi=%{public}f, device=%{public}d, "
          "font=%{public}f, color=%{public}d",
@@ -304,7 +304,7 @@ void ResourceAdapterImpl::UpdateConfig(const ResourceConfiguration& config, bool
     LOGI("UpdateConfig ori=%{public}d, dpi=%{public}f, device=%{public}d, font=%{public}f, color=%{public}d",
         configuration.orientation_, configuration.resolution_, configuration.deviceType_, configuration.fontRatio_,
         configuration.colorMode_);
-    resourceManger_.UpdateConfig(configuration);
+    resourceManger_.UpdateConfig(configuration, themeFlag);
 }
 
 RefPtr<ThemeStyle> ResourceAdapterImpl::GetTheme(int32_t themeId)
