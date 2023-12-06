@@ -104,9 +104,9 @@ class PanelModeModifier extends Modifier<PanelMode> {
   static identity: Symbol = Symbol('panelMode');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().panel.ResetPanelMode(node);
+      GetUINativeModule().panel.resetPanelMode(node);
     } else {
-      GetUINativeModule().panel.SetPanelMode(node, this.value);
+      GetUINativeModule().panel.setPanelMode(node, this.value);
     }
   }
 }
@@ -115,9 +115,9 @@ class PanelTypeModifier extends Modifier<PanelType> {
   static identity: Symbol = Symbol('panelType');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().panel.ResetPanelType(node);
+      GetUINativeModule().panel.resetPanelType(node);
     } else {
-      GetUINativeModule().panel.SetPanelType(node, this.value);
+      GetUINativeModule().panel.setPanelType(node, this.value);
     }
   }
 }
@@ -170,9 +170,9 @@ class ShowCloseIconModifier extends Modifier<boolean> {
   static identity: Symbol = Symbol('showCloseIcon');
   applyPeer(node: KNode, reset: boolean) {
     if (reset) {
-      GetUINativeModule().panel.resetShowCloseIconModifier(node);
+      GetUINativeModule().panel.resetShowCloseIcon(node);
     } else {
-      GetUINativeModule().panel.setShowCloseIconModifier(node, this.value);
+      GetUINativeModule().panel.setShowCloseIcon(node, this.value);
     }
   }
 }
