@@ -1573,11 +1573,6 @@ void RichEditorPattern::HandleDoubleClickOrLongPress(GestureEvent& info)
     auto focusHub = host->GetOrCreateFocusHub();
     CHECK_NULL_VOID(focusHub);
     isLongPress_ = true;
-    if (!focusHub->IsCurrentFocus()) {
-        CalcCaretInfoByClick(info);
-        focusHub->RequestFocusImmediately();
-        return;
-    }
     auto textPaintOffset = GetTextRect().GetOffset() - OffsetF(0.0, std::min(baselineOffset_, 0.0f));
     Offset textOffset = { info.GetLocalLocation().GetX() - textPaintOffset.GetX(),
         info.GetLocalLocation().GetY() - textPaintOffset.GetY() };
@@ -2977,8 +2972,7 @@ void RichEditorPattern::HandleMouseLeftButton(const MouseInfo& info)
         mouseStatus_ = MouseStatus::MOVE;
         if (isFirstMouseSelect_) {
             int32_t extend = paragraphs_.GetIndex(textOffset);
-            int32_t extendEnd = extend + GetGraphemeClusterLength(GetWideText(), extend);
-            textSelector_.Update(extend, extendEnd);
+            textSelector_.Update(textSelector_.baseOffset, extend);
             isFirstMouseSelect_ = false;
         } else {
             int32_t extend = paragraphs_.GetIndex(textOffset);
@@ -3001,6 +2995,11 @@ void RichEditorPattern::HandleMouseLeftButton(const MouseInfo& info)
             blockPress_ = true;
             return;
         }
+        auto textPaintOffset = GetTextRect().GetOffset() - OffsetF(0.0, std::min(baselineOffset_, 0.0f));
+        Offset textOffset = { info.GetLocalLocation().GetX() - textPaintOffset.GetX(),
+            info.GetLocalLocation().GetY() - textPaintOffset.GetY() };
+        int32_t extend = paragraphs_.GetIndex(textOffset);
+        textSelector_.Update(extend);
         leftMousePress_ = true;
         mouseStatus_ = MouseStatus::PRESSED;
         blockPress_ = false;
