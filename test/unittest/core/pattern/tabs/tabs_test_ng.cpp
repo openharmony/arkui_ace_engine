@@ -10331,7 +10331,6 @@ HWTEST_F(TabsTestNg, Create003, TestSize.Level1)
     * @tc.steps: step1. Construct TabContentModelNG object
     */
     auto controller = AceType::MakeRefPtr<SwiperController>();
-    CHECK_NULL_VOID(controller);
     TabsModelNG Mode1NG;
     int32_t testIndex = 0;
 
@@ -10341,18 +10340,14 @@ HWTEST_F(TabsTestNg, Create003, TestSize.Level1)
     */
     Mode1NG.Create(BarPosition::END, testIndex, nullptr, controller);
     auto* stack = ViewStackProcessor::GetInstance();
-    CHECK_NULL_VOID(stack);
     auto nodeId = stack->ClaimNodeId();
-    CHECK_NULL_VOID(nodeId);
 
     auto tabsNode =
         TabsModelNG::GetOrCreateTabsNode(V2::TABS_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<TabsPattern>(); });
-    CHECK_NULL_VOID(tabsNode);
 
     auto swiperId = tabsNode->GetSwiperId();
     auto swiperNode = FrameNode::GetOrCreateFrameNode(
         V2::SWIPER_ETS_TAG, swiperId, []() { return AceType::MakeRefPtr<SwiperPattern>(); });
-    CHECK_NULL_VOID(swiperNode);
 
     auto swiperPaintProperty = swiperNode->GetPaintProperty<SwiperPaintProperty>();
     swiperPaintProperty->UpdateEdgeEffect(EdgeEffect::SPRING);
@@ -10360,7 +10355,6 @@ HWTEST_F(TabsTestNg, Create003, TestSize.Level1)
     ViewStackProcessor::GetInstance()->Push(tabsNode);
     ViewStackProcessor::GetInstance()->Push(tabsNode);
     auto tabsFrameNode = AceType::DynamicCast<FrameNode>(tabsNode);
-    CHECK_NULL_VOID(tabsFrameNode);
 
     auto tabsLayoutProperty = tabsFrameNode->GetLayoutProperty<TabsLayoutProperty>();
     EXPECT_TRUE(testIndex >= 0);
