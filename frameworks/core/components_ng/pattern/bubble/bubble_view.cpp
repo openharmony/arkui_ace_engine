@@ -267,7 +267,7 @@ RefPtr<FrameNode> BubbleView::CreateCustomBubbleNode(
     auto columnLayoutProperty = columnNode->GetLayoutProperty();
     CHECK_NULL_RETURN(columnLayoutProperty, nullptr);
     auto customFrameNode = AceType::DynamicCast<FrameNode>(customNode);
-    columnLayoutProperty->UpdateCalcMaxSize(CalcSize(NG::CalcLength(maxWidth), std::nullopt));
+    columnLayoutProperty->UpdateCalcMaxSize(CalcSize(NG::CalcLength(maxWidth), NG::CalcLength(BUBBLE_MAX_HEIGHT)));
     if (param->GetChildWidth().has_value()) {
         columnLayoutProperty->UpdateUserDefinedIdealSize(
             CalcSize(CalcLength(param->GetChildWidth().value()), std::nullopt));
@@ -405,6 +405,7 @@ RefPtr<FrameNode> BubbleView::CreateCombinedChild(
         AceType::MakeRefPtr<LinearLayoutPattern>(true));
     auto layoutProps = columnNode->GetLayoutProperty<LinearLayoutProperty>();
     layoutProps->UpdateMainAxisAlign(FlexAlign::FLEX_START); // mainAxisAlign
+    layoutProps->UpdateCrossAxisAlign(FlexAlign::FLEX_START);
     auto message = BubbleView::CreateMessage(param->GetMessage(), param->IsUseCustom());
     auto bubblePattern = bobbleNode->GetPattern<BubblePattern>();
     CHECK_NULL_RETURN(bubblePattern, nullptr);
