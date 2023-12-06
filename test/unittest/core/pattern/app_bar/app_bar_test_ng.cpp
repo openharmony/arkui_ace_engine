@@ -530,7 +530,7 @@ HWTEST_F(AppBarTestNg, BuildFaButton004, TestSize.Level1)
      * @tc.expected: Calling the BindContentCover interface to avoid QueryAppGalleryBundleName not being empty.
      */
     AppBarHelper::QueryAppGalleryBundleName() = "test";
-    AppBarView::BindContentCover(1);
+    AppBarView::BindContentCover(0);
     EXPECT_TRUE(frameNode);
     EXPECT_EQ(frameNode->GetChildren().size(), 3);
     auto titleBar = frameNode->GetChildAtIndex(0);
