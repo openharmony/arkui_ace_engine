@@ -1579,12 +1579,39 @@ int32_t ListLayoutAlgorithm::FindPredictSnapEndIndexInItemPositions(
     float stopOnScreen = GetStopOnScreenOffset(scrollSnapAlign);
     float startPos = 0.0f;
     float endPos = 0.0f;
-    for (const auto& positionInfo : itemPosition_) {
-        startPos = totalOffset_ + positionInfo.second.startPos - spaceWidth_ / 2.0f;
-        endPos = totalOffset_ + positionInfo.second.endPos + spaceWidth_ / 2.0f;
-        if (GreatOrEqual(predictEndPos + stopOnScreen, startPos) &&
-            LessNotEqual(predictEndPos + stopOnScreen, endPos)) {
-            endIndex = positionInfo.first;
+    float itemHeight = 0.0f;
+
+    if (scrollSnapAlign == V2::ScrollSnapAlign::START) {
+        for (const auto& positionInfo : itemPosition_) {
+            startPos = totalOffset_ + positionInfo.second.startPos - itemHeight / 2.0f;
+            itemHeight = positionInfo.second.endPos - positionInfo.second.startPos + spaceWidth_;
+            endPos = totalOffset_ + positionInfo.second.startPos + itemHeight / 2.0f;
+            if (GreatOrEqual(predictEndPos + stopOnScreen, startPos) &&
+                LessNotEqual(predictEndPos + stopOnScreen, endPos)) {
+                endIndex = positionInfo.first;
+                break;
+            }
+        }
+    } else if (scrollSnapAlign == V2::ScrollSnapAlign::CENTER) {
+        for (const auto& positionInfo : itemPosition_) {
+            startPos = totalOffset_ + positionInfo.second.startPos - spaceWidth_ / 2.0f;
+            endPos = totalOffset_ + positionInfo.second.endPos + spaceWidth_ / 2.0f;
+            if (GreatOrEqual(predictEndPos + stopOnScreen, startPos) &&
+                LessNotEqual(predictEndPos + stopOnScreen, endPos)) {
+                endIndex = positionInfo.first;
+                break;
+            }
+        }
+    } else if (scrollSnapAlign == V2::ScrollSnapAlign::END) {
+        for (const auto& positionInfo : itemPosition_) {
+            startPos = totalOffset_ + positionInfo.second.endPos - itemHeight / 2.0f;
+            itemHeight = positionInfo.second.endPos - positionInfo.second.startPos + spaceWidth_;
+            endPos = totalOffset_ + positionInfo.second.endPos + itemHeight / 2.0f;
+            if (GreatOrEqual(predictEndPos + stopOnScreen, startPos) &&
+                LessNotEqual(predictEndPos + stopOnScreen, endPos)) {
+                endIndex = positionInfo.first;
+                break;
+            }
         }
     }
     return endIndex;
