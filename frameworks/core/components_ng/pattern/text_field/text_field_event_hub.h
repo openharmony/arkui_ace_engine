@@ -149,6 +149,18 @@ public:
         }
     }
 
+    void SetOnPasteWithEvent(std::function<void(const std::string&, NG::TextCommonEvent&)>&& func)
+    {
+        onPasteWithEvent_ = std::move(func);
+    }
+
+    void FireOnPasteWithEvent(const std::string& value, , NG::TextCommonEvent& event)
+    {
+        if (onPasteWithEvent_) {
+            onPasteWithEvent_(value, event);
+        }
+    }
+
     void SetOnScroll(OnScrollEvent&& onScroll)
     {
         onScrollEvent_ = std::move(onScroll);
@@ -246,6 +258,7 @@ private:
     std::function<void(const std::string&)> onCopy_;
     std::function<void(const std::string&)> onCut_;
     std::function<void(const std::string&)> onPaste_;
+    std::function<void(const std::string&, NG::TextCommonEvent&)> onPasteWithEvent_;
     std::function<void(const std::string&)> onValueChangeEvent_;
     ACE_DISALLOW_COPY_AND_MOVE(TextFieldEventHub);
 };
