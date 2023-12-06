@@ -158,4 +158,15 @@ void AnimationUtils::ResumeAnimation(const std::shared_ptr<AnimationUtils::Anima
         ani->Resume();
     }
 }
+
+bool AnimationUtils::AnimationIsRunning(const std::shared_ptr<AnimationUtils::Animation>& animation)
+{
+    CHECK_NULL_RETURN(animation, false);
+    for (auto& ani : animation->animations_) {
+        if (ani->IsRunning() == true) {
+            return true;
+        }
+    }
+    return false;
+}
 } // namespace OHOS::Ace
