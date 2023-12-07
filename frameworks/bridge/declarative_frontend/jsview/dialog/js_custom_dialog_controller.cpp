@@ -73,7 +73,6 @@ void JSCustomDialogController::ConstructorCallback(const JSCallbackInfo& info)
         if (ownerView == nullptr) {
             info.SetReturnValue(instance);
             instance = nullptr;
-            LOGE("JSCustomDialogController creation with invalid arguments. Missing \'ownerView\'");
             return;
         }
 
@@ -86,7 +85,6 @@ void JSCustomDialogController::ConstructorCallback(const JSCallbackInfo& info)
             instance->jsBuilderFunction_ = nullptr;
             info.SetReturnValue(instance);
             instance = nullptr;
-            LOGE("JSCustomDialogController invalid builder function argument");
             return;
         }
 
@@ -212,8 +210,6 @@ void JSCustomDialogController::ConstructorCallback(const JSCallbackInfo& info)
             instance->dialogProperties_.isModal = isModalValue->ToBoolean();
         }
         info.SetReturnValue(instance);
-    } else {
-        LOGE("JSView creation with invalid arguments.");
     }
 }
 
@@ -228,7 +224,6 @@ void JSCustomDialogController::DestructorCallback(JSCustomDialogController* cont
 void JSCustomDialogController::ParseBorderRadius(const JSRef<JSVal>& args, NG::BorderRadiusProperty& radius)
 {
     if (!args->IsObject() && !args->IsNumber() && !args->IsString()) {
-        LOGE("args need a object or number or string. %{public}s", args->ToString().c_str());
         return;
     }
 
@@ -263,21 +258,16 @@ void JSCustomDialogController::ParseBorderRadius(const JSRef<JSVal>& args, NG::B
         radius.radiusBottomLeft = radiusBottomLeft;
         radius.radiusBottomRight = radiusBottomRight;
         radius.multiValued = true;
-    } else {
-        LOGE("args format error. %{public}s", args->ToString().c_str());
     }
 }
 
 void JSCustomDialogController::JsOpenDialog(const JSCallbackInfo& info)
 {
-    LOGI("JSCustomDialogController(JsOpenDialog)");
     if (!jsBuilderFunction_) {
-        LOGE("Builder of CustomDialog is null.");
         return;
     }
 
     if (this->ownerView_ == nullptr) {
-        LOGE("JSCustomDialogController(JsOpenDialog) Missing \'ownerView\'");
         return;
     }
     auto containerId = this->ownerView_->GetInstanceId();
@@ -289,7 +279,6 @@ void JSCustomDialogController::JsOpenDialog(const JSCallbackInfo& info)
     auto scopedDelegate = EngineHelper::GetCurrentDelegate();
     if (!scopedDelegate) {
         // this case usually means there is no foreground container, need to figure out the reason.
-        LOGE("scopedDelegate is null, please check");
         return;
     }
 
@@ -331,10 +320,8 @@ void JSCustomDialogController::JsOpenDialog(const JSCallbackInfo& info)
 
 void JSCustomDialogController::JsCloseDialog(const JSCallbackInfo& info)
 {
-    LOGI("JSCustomDialogController(JsCloseDialog)");
 
     if (this->ownerView_ == nullptr) {
-        LOGE("JSCustomDialogController(JsCloseDialog) Missing \'ownerView\'");
         return;
     }
     auto containerId = this->ownerView_->GetInstanceId();
@@ -343,7 +330,6 @@ void JSCustomDialogController::JsCloseDialog(const JSCallbackInfo& info)
     auto scopedDelegate = EngineHelper::GetCurrentDelegate();
     if (!scopedDelegate) {
         // this case usually means there is no foreground container, need to figure out the reason.
-        LOGE("scopedDelegate is null, please check");
         return;
     }
 

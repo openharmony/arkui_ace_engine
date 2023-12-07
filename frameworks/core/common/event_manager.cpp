@@ -48,6 +48,14 @@ enum class CtrlKeysBit {
     ALT = 4,
 };
 
+struct TouchTestResultInfo {
+    int32_t nodeId = 0;
+    std::string tag;
+    std::string inspectorId;
+    std::string frameRect;
+    int32_t depth = 0;
+};
+
 void EventManager::TouchTest(const TouchEvent& touchPoint, const RefPtr<RenderNode>& renderNode,
     const TouchRestrict& touchRestrict, const Offset& offset, float viewScale, bool needAppend)
 {
@@ -120,6 +128,40 @@ void EventManager::TouchTest(const TouchEvent& touchPoint, const RefPtr<NG::Fram
         hitTestResult.splice(hitTestResult.end(), prevHitTestResult);
     }
     touchTestResults_[touchPoint.id] = std::move(hitTestResult);
+    auto container = Container::Current();
+    CHECK_NULL_VOID(container);
+    if (!container->IsScenceBoardWindow()) {
+        return;
+    }
+    std::map<int32_t, TouchTestResultInfo> scenceBoardTouchTestResultInfo;
+    for (const auto& item : touchTestResults_[touchPoint.id]) {
+        auto node = item->GetAttachedNode().Upgrade();
+        if (!node) {
+            continue;
+        }
+        auto frameNode = AceType::DynamicCast<NG::FrameNode>(node);
+        if (!frameNode) {
+            continue;
+        }
+        scenceBoardTouchTestResultInfo[frameNode->GetId()] = { frameNode->GetId(), frameNode->GetTag(),
+            frameNode->GetInspectorIdValue(""), frameNode->GetGeometryNode()->GetFrameRect().ToString(),
+            frameNode->GetDepth() };
+    }
+    std::string resultInfo = std::string("fingerId: ").append(std::to_string(touchPoint.id));
+    for (const auto& item : scenceBoardTouchTestResultInfo) {
+        resultInfo.append(" id: ")
+            .append(std::to_string(item.first))
+            .append(", tag: ")
+            .append(item.second.tag)
+            .append(", inspectorId: ")
+            .append(item.second.inspectorId)
+            .append(", frameRect: ")
+            .append(item.second.frameRect)
+            .append(", depth: ")
+            .append(std::to_string(item.second.depth))
+            .append(".");
+    }
+    TAG_LOGI(AceLogTag::ACE_INPUTTRACKING, "SceneBoard touch test hitted node info: %{public}s", resultInfo.c_str());
 }
 
 void EventManager::TouchTest(

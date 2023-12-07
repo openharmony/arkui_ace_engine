@@ -215,6 +215,10 @@ void SpanItem::UpdateTextStyleForAISpan(
         }
         int32_t aiSpanStartInSpan = std::max(spanStart, aiSpan.start);
         int32_t aiSpanEndInSpan = std::min(position, aiSpan.end);
+        if (aiSpanStartInSpan < preEnd) {
+            TAG_LOGI(AceLogTag::ACE_TEXT, "Error prediction");
+            continue;
+        }
         if (preEnd < aiSpanStartInSpan) {
             auto beforeContent = StringUtils::ToString(
                 wSpanContent.substr(preEnd - spanStart, aiSpanStartInSpan- preEnd));
@@ -349,6 +353,17 @@ std::string SpanItem::GetSpanContent(const std::string& rawContent)
         data = rawContent.substr(0, rawContent.length() - 1);
     } else {
         data = rawContent;
+    }
+    return data;
+}
+
+std::string SpanItem::GetSpanContent()
+{
+    std::string data;
+    if (needRemoveNewLine) {
+        data = content.substr(0, content.length() - 1);
+    } else {
+        data = content;
     }
     return data;
 }

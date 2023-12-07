@@ -499,7 +499,6 @@ public:
     void StartAutoPlay();
     void StopTranslateAnimation();
     void StopSpringAnimation();
-    bool SpringAnimationIsRunning();
     void DumpAdvanceInfo() override;
     int32_t GetLoopIndex(int32_t originalIndex) const;
     int32_t GetDuration() const;
@@ -701,7 +700,7 @@ private:
     RefPtr<Animator> controller_;
 
     // Control spring animation when drag beyond boundary and drag end.
-    std::shared_ptr<AnimationUtils::Animation> springAnimation_;
+    RefPtr<Animator> springController_;
 
     // Control fade animation when drag beyond boundary and drag end.
     std::shared_ptr<AnimationUtils::Animation> fadeAnimation_;
@@ -785,7 +784,6 @@ private:
     bool mainSizeIsMeasured_ = false;
     bool isNeedResetPrevMarginAndNextMargin_ = false;
     bool usePropertyAnimation_ = false;
-    bool springAnimationIsRunning_ = false;
     int32_t propertyAnimationIndex_ = -1;
     bool isUserFinish_ = true;
     bool isVoluntarilyClear_ = false;

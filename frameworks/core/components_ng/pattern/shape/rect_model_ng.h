@@ -31,6 +31,9 @@ public:
 
     void SetShapeRectRadius(
         const RefPtr<ShapeRect>& shapeRect, const Dimension& radiusX, const Dimension& radiusY, int32_t index) override;
+    static void SetRadiusWidth(FrameNode* frameNode, const Dimension& value);
+    static void SetRadiusHeight(FrameNode* frameNode, const Dimension& value);
+    static void SetRadiusValue(FrameNode* frameNode, const Dimension& radiusX, const Dimension& radiusY, int32_t index);
 
 private:
     static void SetTopLeftRadius(const Radius& topLeftRadius);
@@ -38,6 +41,11 @@ private:
     static void SetBottomRightRadius(const Radius& bottomRightRadius);
     static void SetBottomLeftRadius(const Radius& bottomLeftRadius);
     static void UpdateRadius(const Radius& radius);
+    static void SetTopLeftRadius(FrameNode* frameNode, const Radius& topLeftRadius);
+    static void SetTopRightRadius(FrameNode* frameNode, const Radius& topRightRadius);
+    static void SetBottomRightRadius(FrameNode* frameNode, const Radius& bottomRightRadius);
+    static void SetBottomLeftRadius(FrameNode* frameNode, const Radius& bottomLeftRadius);
+    static void UpdateRadius(FrameNode* frameNode, const Radius& radius);
 };
 
 } // namespace OHOS::Ace::NG

@@ -865,13 +865,6 @@ void ScrollPattern::OnRestoreInfo(const std::string& restoreInfo)
     currentOffset_ = dimension.ConvertToPx();
 }
 
-void ScrollPattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const
-{
-    auto JsonEdgeEffectOptions = JsonUtil::Create(true);
-    JsonEdgeEffectOptions->Put("alwaysEnabled", GetAlwaysEnabled());
-    json->Put("edgeEffectOptions", JsonEdgeEffectOptions);
-}
-
 Rect ScrollPattern::GetItemRect(int32_t index) const
 {
     auto host = GetHost();

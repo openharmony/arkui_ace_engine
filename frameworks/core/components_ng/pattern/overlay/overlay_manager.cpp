@@ -1433,6 +1433,18 @@ RefPtr<FrameNode> OverlayManager::GetDialog(int32_t dialogId)
 
 void OverlayManager::CloseDialog(const RefPtr<FrameNode>& dialogNode)
 {
+    auto dialogLayoutProp = AceType::DynamicCast<DialogLayoutProperty>(dialogNode->GetLayoutProperty());
+    CHECK_NULL_VOID(dialogLayoutProp);
+    if (dialogLayoutProp->GetShowInSubWindowValue(false) && dialogLayoutProp->GetIsModal().value_or(true)) {
+        auto parentPipelineContext = PipelineContext::GetMainPipelineContext();
+        CHECK_NULL_VOID(parentPipelineContext);
+        auto parentOverlayManager = parentPipelineContext->GetOverlayManager();
+        CHECK_NULL_VOID(parentOverlayManager);
+        RefPtr<FrameNode> maskNode = parentOverlayManager->GetDialog(parentOverlayManager->GetMaskNodeId());
+        if (maskNode) {
+            parentOverlayManager->CloseDialog(maskNode);
+        }
+    }
     RemoveDialogFromMap(dialogNode);
     if (dialogNode->IsRemoving()) {
         // already in close animation

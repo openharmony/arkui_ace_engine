@@ -173,9 +173,12 @@ void RichEditorPattern::OnModifyDone()
         TextPattern::StartAITask();
     }
 #ifdef ENABLE_DRAG_FRAMEWORK
-    if (host->IsDraggable()) {
+    if (host->IsDraggable() && copyOption_ != CopyOptions::None) {
         InitDragDropEvent();
         AddDragFrameNodeToManager(host);
+    } else {
+        ClearDragDropEvent();
+        RemoveDragFrameNodeFromManager(host);
     }
 #endif // ENABLE_DRAG_FRAMEWORK
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
@@ -1060,7 +1063,6 @@ void RichEditorPattern::UpdateSpanStyle(
     // Custom menus do not actively close.
     if (!(SelectOverlayIsOn() && selectOverlayProxy_->GetSelectOverlayMangerInfo().menuInfo.menuBuilder != nullptr)) {
         CloseSelectOverlay();
-        ResetSelection();
     }
 }
 
@@ -1181,6 +1183,8 @@ void RichEditorPattern::UpdateParagraphStyle(int32_t start, int32_t end, const s
     for (const auto& spanNode : spanNodes) {
         if (style.textAlign.has_value()) {
             spanNode->UpdateTextAlign(*style.textAlign);
+        } else {
+            spanNode->UpdateTextAlign(TextAlign::START);
         }
         if (style.leadingMargin.has_value()) {
             spanNode->GetSpanItem()->leadingMargin = *style.leadingMargin;
@@ -1544,6 +1548,9 @@ bool RichEditorPattern::JudgeDraggable(GestureEvent& info)
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
+    if (copyOption_ == CopyOptions::None) {
+        return false;
+    }
     auto hub = host->GetEventHub<EventHub>();
     CHECK_NULL_RETURN(hub, false);
     auto gestureHub = hub->GetOrCreateGestureEventHub();
@@ -1728,6 +1735,23 @@ void RichEditorPattern::InitDragDropEvent()
         pattern->StopAutoScroll();
     };
     eventHub->SetOnDragLeave(onDragDragLeave);
+}
+
+void RichEditorPattern::ClearDragDropEvent()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto gestureHub = host->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
+    gestureHub->SetIsTextDraggable(false);
+    auto eventHub = host->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnDragStart(nullptr);
+    eventHub->SetOnDragEnter(nullptr);
+    eventHub->SetOnDragMove(nullptr);
+    eventHub->SetOnDragLeave(nullptr);
+    eventHub->SetOnDragEnd(nullptr);
+    eventHub->SetOnDrop(nullptr);
 }
 
 NG::DragDropInfo RichEditorPattern::OnDragStart(const RefPtr<OHOS::Ace::DragEvent>& event)
@@ -3364,13 +3388,6 @@ void RichEditorPattern::ShowSelectOverlay(const RectF& firstHandle, const RectF&
             pattern->HandleOnSelectAll();
         };
 
-        selectInfo.onClose = [weak](bool closedByGlobalEvent) {
-            auto pattern = weak.Upgrade();
-            CHECK_NULL_VOID(pattern);
-            if (closedByGlobalEvent) {
-                pattern->ResetSelection();
-            }
-        };
         selectInfo.callerFrameNode = host;
         pattern->CopySelectionMenuParams(selectInfo, responseType);
         pattern->UpdateSelectOverlayOrCreate(selectInfo);
@@ -3414,7 +3431,9 @@ void RichEditorPattern::HandleOnCopy()
         resultProcessor(*resultObj);
     }
     clipboard_->SetData(pasteData, copyOption_);
-    StartTwinkling();
+    if (!textDetectEnable_) {
+        StartTwinkling();
+    }
 }
 
 void RichEditorPattern::ResetAfterPaste()
@@ -3609,9 +3628,10 @@ void RichEditorPattern::CreateHandles()
     SizeF firstHandlePaintSize = { SelectHandleInfo::GetDefaultLineWidth().ConvertToPx(), startSelectHeight };
     SizeF secondHandlePaintSize = { SelectHandleInfo::GetDefaultLineWidth().ConvertToPx(), endSelectHeight };
     RectF firstHandle = RectF(firstHandleOffset, firstHandlePaintSize);
+    textSelector_.firstHandle = firstHandle;
     RectF secondHandle = RectF(secondHandleOffset, secondHandlePaintSize);
+    textSelector_.secondHandle = secondHandle;
     ShowSelectOverlay(firstHandle, secondHandle, IsSelectAll(), RichEditorResponseType::LONG_PRESS);
-    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 }
 
 void RichEditorPattern::OnAreaChangedInner()
@@ -4555,15 +4575,20 @@ std::string RichEditorPattern::GetPositionSpansText(int32_t position, int32_t& s
 
 void RichEditorPattern::CheckHandles(SelectHandleInfo& handleInfo)
 {
+    handleInfo.isShow = CheckHandleVisible(handleInfo.paintRect);
+}
+
+bool RichEditorPattern::CheckHandleVisible(const RectF& paintRect)
+{
     auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto offset = host->GetPaintRectOffset() + contentRect_.GetOffset() - pipeline->GetRootRect().GetOffset();
-    RectF contentGlobalRect(offset, contentRect_.GetSize());
-    contentGlobalRect = GetVisibleContentRect(host->GetAncestorNodeOfFrame(), contentGlobalRect);
-    auto handleOffset = handleInfo.paintRect.GetOffset();
-    handleInfo.isShow = contentGlobalRect.IsInRegion(PointF(handleOffset.GetX(), handleOffset.GetY() + BOX_EPSILON));
+    CHECK_NULL_RETURN(host, false);
+    // use global offset.
+    RectF visibleContentRect(contentRect_.GetOffset() + parentGlobalOffset_, contentRect_.GetSize());
+    auto parent = host->GetAncestorNodeOfFrame();
+    visibleContentRect = GetVisibleContentRect(parent, visibleContentRect);
+    PointF bottomPoint = { paintRect.Left(), paintRect.Bottom() - BOX_EPSILON };
+    PointF topPoint = { paintRect.Left(), paintRect.Top() + BOX_EPSILON };
+    return visibleContentRect.IsInRegion(bottomPoint) && visibleContentRect.IsInRegion(topPoint);
 }
 
 bool RichEditorPattern::IsShowSelectMenuUsingMouse()

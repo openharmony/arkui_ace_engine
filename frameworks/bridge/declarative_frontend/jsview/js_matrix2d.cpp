@@ -38,6 +38,28 @@ void JSMatrix2d::Destructor(JSMatrix2d* matrix2d)
     }
 }
 
+TransformParam JSMatrix2d::GetTransformInfo(const JSRef<JSObject>& obj)
+{
+    auto scaleXVal = obj->GetProperty("scaleX");
+    auto rotateXVal = obj->GetProperty("rotateX");
+    auto rotateYVal = obj->GetProperty("rotateY");
+    auto scaleYVal = obj->GetProperty("scaleY");
+    auto translateXVal = obj->GetProperty("translateX");
+    auto translateYVal = obj->GetProperty("translateY");
+
+    TransformParam param = {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
+    JSViewAbstract::ParseJsDouble(scaleXVal, param.scaleX);
+    JSViewAbstract::ParseJsDouble(rotateXVal, param.skewX);
+    JSViewAbstract::ParseJsDouble(rotateYVal, param.skewY);
+    JSViewAbstract::ParseJsDouble(scaleYVal, param.scaleY);
+    JSViewAbstract::ParseJsDouble(translateXVal, param.translateX);
+    JSViewAbstract::ParseJsDouble(translateYVal, param.translateY);
+    param.translateX = PipelineBase::Vp2PxWithCurrentDensity(param.translateX);
+    param.translateY = PipelineBase::Vp2PxWithCurrentDensity(param.translateY);
+
+    return param;
+}
+
 void JSMatrix2d::JSBind(BindingTarget globalObj)
 {
     JSClass<JSMatrix2d>::Declare("Matrix2D");
@@ -60,7 +82,6 @@ void JSMatrix2d::JSBind(BindingTarget globalObj)
 void JSMatrix2d::JsSetScaleX(const JSCallbackInfo& info)
 {
     if (info.Length() != JS_MATRIX2D_PARAMETER_COUNTS_1) {
-        LOGE("The argv is wrong.");
         return;
     }
     if (info[JS_MATRIX2D_PARAMETER_COUNTS_0]->IsNumber()) {
@@ -73,7 +94,6 @@ void JSMatrix2d::JsSetScaleX(const JSCallbackInfo& info)
 void JSMatrix2d::JsSetRotateY(const JSCallbackInfo& info)
 {
     if (info.Length() != JS_MATRIX2D_PARAMETER_COUNTS_1) {
-        LOGE("The argv is wrong.");
         return;
     }
     if (info[JS_MATRIX2D_PARAMETER_COUNTS_0]->IsNumber()) {
@@ -86,7 +106,6 @@ void JSMatrix2d::JsSetRotateY(const JSCallbackInfo& info)
 void JSMatrix2d::JsSetRotateX(const JSCallbackInfo& info)
 {
     if (info.Length() != JS_MATRIX2D_PARAMETER_COUNTS_1) {
-        LOGE("The argv is wrong.");
         return;
     }
     if (info[JS_MATRIX2D_PARAMETER_COUNTS_0]->IsNumber()) {
@@ -99,7 +118,6 @@ void JSMatrix2d::JsSetRotateX(const JSCallbackInfo& info)
 void JSMatrix2d::JsSetScaleY(const JSCallbackInfo& info)
 {
     if (info.Length() != JS_MATRIX2D_PARAMETER_COUNTS_1) {
-        LOGE("The argv is wrong.");
         return;
     }
     if (info[JS_MATRIX2D_PARAMETER_COUNTS_0]->IsNumber()) {
@@ -112,7 +130,6 @@ void JSMatrix2d::JsSetScaleY(const JSCallbackInfo& info)
 void JSMatrix2d::JsSetTranslateX(const JSCallbackInfo& info)
 {
     if (info.Length() != JS_MATRIX2D_PARAMETER_COUNTS_1) {
-        LOGE("The argv is wrong.");
         return;
     }
     if (info[JS_MATRIX2D_PARAMETER_COUNTS_0]->IsNumber()) {
@@ -126,7 +143,6 @@ void JSMatrix2d::JsSetTranslateX(const JSCallbackInfo& info)
 void JSMatrix2d::JsSetTranslateY(const JSCallbackInfo& info)
 {
     if (info.Length() != JS_MATRIX2D_PARAMETER_COUNTS_1) {
-        LOGE("The argv is wrong.");
         return;
     }
     if (info[JS_MATRIX2D_PARAMETER_COUNTS_0]->IsNumber()) {
@@ -184,7 +200,6 @@ void JSMatrix2d::JsGetTranslateY(const JSCallbackInfo& info)
 void JSMatrix2d::JsIdentity(const JSCallbackInfo& info)
 {
     if (info.Length() > JS_MATRIX2D_PARAMETER_COUNTS_0) {
-        LOGE("The argv is wrong.");
         return;
     }
     NG::Matrix2D::Identity(transform_);
@@ -194,7 +209,6 @@ void JSMatrix2d::JsIdentity(const JSCallbackInfo& info)
 void JSMatrix2d::JsInvert(const JSCallbackInfo& info)
 {
     if (info.Length() > JS_MATRIX2D_PARAMETER_COUNTS_0) {
-        LOGE("The argv is wrong.");
         return;
     }
     bool retValue = NG::Matrix2D::Invert(transform_);
@@ -212,7 +226,6 @@ void JSMatrix2d::JsInvert(const JSCallbackInfo& info)
 void JSMatrix2d::JsRotate(const JSCallbackInfo& info)
 {
     if (info.Length() < JS_MATRIX2D_PARAMETER_COUNTS_1 || info.Length() > JS_MATRIX2D_PARAMETER_COUNTS_3) {
-        LOGE("The argv is wrong, it is supposed to have at least 1 argument, and less than 4 arguments");
         return;
     }
     double degree = 0;
@@ -236,7 +249,6 @@ void JSMatrix2d::JsRotate(const JSCallbackInfo& info)
 void JSMatrix2d::JsTranslate(const JSCallbackInfo& info)
 {
     if (info.Length() > JS_MATRIX2D_PARAMETER_COUNTS_2) {
-        LOGE("The argv is wrong, it is supposed to have at most 2 arguments.");
         return;
     }
     double tx = 0;
@@ -256,7 +268,6 @@ void JSMatrix2d::JsTranslate(const JSCallbackInfo& info)
 void JSMatrix2d::JsScale(const JSCallbackInfo& info)
 {
     if (info.Length() > JS_MATRIX2D_PARAMETER_COUNTS_2) {
-        LOGE("The argv is wrong, it is supposed to have at most 2 arguments.");
         return;
     }
     double sx = 1.0f;

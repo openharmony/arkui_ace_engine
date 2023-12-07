@@ -67,7 +67,6 @@ constexpr Color DEFAULT_DIVIDER_COLOR = Color(0x08000000);
 void ParseAndSetWidth(const JSCallbackInfo& info, WidthType widthType)
 {
     if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have atleast 1 arguments");
         return;
     }
 
@@ -110,7 +109,6 @@ void JSSideBar::Create(const JSCallbackInfo& info)
         } else if (info[0]->IsNumber()) {
             style = static_cast<SideBarContainerType>(info[0]->ToNumber<int>());
         } else {
-            LOGE("JSSideBar::CreateForNG The SideBarContainerType arg is wrong");
             return;
         }
     }
@@ -125,14 +123,12 @@ void JSSideBar::SetShowControlButton(bool isShow)
 void JSSideBar::JsSideBarPosition(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have atleast 1 arguments");
         return;
     }
     SideBarPosition sideBarPosition = SideBarPosition::START;
     if (info[0]->IsNumber()) {
         sideBarPosition = static_cast<SideBarPosition>(info[0]->ToNumber<int>());
     } else {
-        LOGE("The arg is wrong");
         return;
     }
     SideBarContainerModel::GetInstance()->SetSideBarPosition(sideBarPosition);
@@ -172,7 +168,6 @@ void JSSideBar::JSBind(BindingTarget globalObj)
 void JSSideBar::OnChange(const JSCallbackInfo& info)
 {
     if (info.Length() < 1 || !info[0]->IsFunction()) {
-        LOGE("JSSideBar::OnChange info param is wrong.");
         return;
     }
 
@@ -224,7 +219,6 @@ void ParseShowSideBarObject(const JSCallbackInfo& args, const JSRef<JSVal>& chan
 void JSSideBar::JsShowSideBar(const JSCallbackInfo& info)
 {
     if (info.Length() < 1 || info.Length() > 2) {
-        LOGE("The arg is wrong, it is supposed to have 1 or 2 arguments");
         return;
     }
 
@@ -242,7 +236,6 @@ void JSSideBar::JsShowSideBar(const JSCallbackInfo& info)
 void JSSideBar::SetControlButtonIcon(SideBarControlButtonType iconType, JSRef<JSVal> icon)
 {
     if (icon->IsUndefined() || icon->IsNull()) {
-        LOGE("SetControlButtonIcon icon parse failed, icon is null.");
         return;
     }
     std::string iconPath;
@@ -273,7 +266,6 @@ void JSSideBar::SetControlButtonIcon(SideBarControlButtonType iconType, JSRef<JS
 void JSSideBar::JsControlButton(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("JSSideBar::JsControlButtonForNG The arg is wrong, it is supposed to have at least 1 arguments");
         return;
     }
 
@@ -301,7 +293,6 @@ void JSSideBar::JsControlButton(const JSCallbackInfo& info)
 void JSSideBar::JsDivider(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("Invalid params");
         return;
     }
 
@@ -342,18 +333,15 @@ void JSSideBar::JsDivider(const JSCallbackInfo& info)
 void JSSideBar::JsMinContentWidth(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGW("JsMinContentWidth::Invalid params");
         return;
     }
     if (info[0]->IsNull()) {
         SideBarContainerModel::GetInstance()->SetMinContentWidth(-1.0_vp);
-        LOGW("JsMinContentWidth::info[0]->IsNull()");
         return;
     }
     CalcDimension minContentWidth;
     if (!JSViewAbstract::ParseJsDimensionVp(info[0], minContentWidth)) {
         SideBarContainerModel::GetInstance()->SetMinContentWidth(-1.0_vp);
-        LOGW("JsMinContentWidth::ParseJsDimensionVp Fail!!!");
         return;
     }
     SideBarContainerModel::GetInstance()->SetMinContentWidth(minContentWidth);

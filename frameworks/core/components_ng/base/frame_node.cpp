@@ -2633,7 +2633,9 @@ void FrameNode::Layout()
         GetLayoutAlgorithm()->SetSkipLayout();
     }
 
-    bool isFocusOnPage = GetHostNode()->GetFocusHub() && GetHostNode()->GetFocusHub()->IsCurrentFocus();
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    bool isFocusOnPage = pipeline->CheckPageFocus();
     SaveGeoState();
     AvoidKeyboard(isFocusOnPage);
     ExpandSafeArea(isFocusOnPage);

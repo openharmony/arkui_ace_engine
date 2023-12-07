@@ -18,6 +18,7 @@
 #include <set>
 
 #include "base/i18n/localization.h"
+#include "base/log/log.h"
 #include "base/utils/system_properties.h"
 #include "core/common/ace_application_info.h"
 #include "core/common/container.h"
@@ -265,6 +266,10 @@ RefPtr<ResourceAdapter> ResourceAdapter::Create()
 RefPtr<ResourceAdapter> ResourceAdapter::CreateNewResourceAdapter(
     const std::string& bundleName, const std::string& moduleName)
 {
+    TAG_LOGW(AceLogTag::ACE_RESOURCE,
+        "Cannot preview the component from the %{public}s module, because it contains a resource reference. Preview it "
+        "in the %{public}s module instead.",
+        moduleName.c_str(), moduleName.c_str());
     return nullptr;
 }
 

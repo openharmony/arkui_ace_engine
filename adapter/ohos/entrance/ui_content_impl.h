@@ -26,6 +26,7 @@
 #include "native_engine/native_engine.h"
 #include "native_engine/native_value.h"
 #include "wm/window.h"
+#include "dm/display_manager.h"
 
 #include "adapter/ohos/entrance/distributed_ui_manager.h"
 #include "base/view_data/view_data_wrap.h"
@@ -231,6 +232,7 @@ private:
     void SetConfiguration(const std::shared_ptr<OHOS::AppExecFwk::Configuration>& config);
 
     void InitializeSafeArea(const RefPtr<Platform::AceContainer>& container);
+    void InitializeDisplayAvailableRect(const RefPtr<Platform::AceContainer>& container);
 
     std::weak_ptr<OHOS::AbilityRuntime::Context> context_;
     void* runtime_ = nullptr;
@@ -241,6 +243,7 @@ private:
     OHOS::sptr<OHOS::Rosen::IOccupiedAreaChangeListener> occupiedAreaChangeListener_ = nullptr;
     OHOS::sptr<OHOS::Rosen::IAvoidAreaChangedListener> avoidAreaChangedListener_ = nullptr;
     OHOS::sptr<OHOS::Rosen::DisplayManager::IFoldStatusListener> foldStatusListener_ = nullptr;
+    OHOS::sptr<OHOS::Rosen::DisplayManager::IAvailableAreaListener> availableAreaChangedListener_ = nullptr;
 
     // ITouchOutsideListener is used for touching out of hot areas of window.
     OHOS::sptr<OHOS::Rosen::ITouchOutsideListener> touchOutsideListener_ = nullptr;

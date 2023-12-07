@@ -263,10 +263,12 @@ void TextPattern::OnHandleMove(const RectF& handleRect, bool isFirstHandle)
     CHECK_NULL_VOID(paragraph_);
     // the handle position is calculated based on the middle of the handle height.
     if (isFirstHandle) {
-        auto start = GetHandleIndex(Offset(localOffset.GetX(), localOffset.GetY() + handleRect.Height() / 2));
+        auto start = GetHandleIndex(Offset(localOffset.GetX(), localOffset.GetY() +
+            (selectOverlayProxy_->IsHandleReverse() ? handleRect.Height() : 0)));
         textSelector_.Update(start, textSelector_.destinationOffset);
     } else {
-        auto end = GetHandleIndex(Offset(localOffset.GetX(), localOffset.GetY() + handleRect.Height() / 2));
+        auto end = GetHandleIndex(Offset(localOffset.GetX(), localOffset.GetY() +
+            (selectOverlayProxy_->IsHandleReverse() ? 0 : handleRect.Height())));
         textSelector_.Update(textSelector_.baseOffset, end);
     }
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
@@ -316,11 +318,28 @@ std::wstring TextPattern::GetWideText() const
 
 std::string TextPattern::GetSelectedText(int32_t start, int32_t end) const
 {
-    auto wideText = GetWideText();
-    auto min = std::clamp(std::max(std::min(start, end), 0), 0, static_cast<int32_t>(wideText.length()));
-    auto max = std::clamp(std::min(std::max(start, end), static_cast<int32_t>(wideText.length())), 0,
-        static_cast<int32_t>(wideText.length()));
-    return StringUtils::ToString(wideText.substr(min, max - min));
+    if (spans_.empty()) {
+        auto wideText = GetWideText();
+        auto min = std::clamp(std::max(std::min(start, end), 0), 0, static_cast<int32_t>(wideText.length()));
+        auto max = std::clamp(std::min(std::max(start, end), static_cast<int32_t>(wideText.length())), 0,
+            static_cast<int32_t>(wideText.length()));
+        return StringUtils::ToString(wideText.substr(min, max - min));
+    }
+    std::string value;
+    int32_t tag = 0;
+    for (const auto& span : spans_) {
+        if (span->position - 1 >= start && span->placeholderIndex == -1 && span->position != -1) {
+            auto wideString = StringUtils::ToWstring(span->GetSpanContent());
+            auto max = std::min(span->position, end);
+            auto min = std::max(start, tag);
+            value += StringUtils::ToString(wideString.substr(min - tag, max - min));
+        }
+        tag = span->position == -1 ? tag + 1 : span->position;
+        if (span->position >= end) {
+            break;
+        }
+    }
+    return value;
 }
 
 void TextPattern::HandleOnCopy()
@@ -593,6 +612,14 @@ void TextPattern::HandleSingleClickEvent(GestureEvent& info)
 void TextPattern::HandleSpanSingleClickEvent(
     GestureEvent& info, RectF textContentRect, PointF textOffset, bool& isClickOnSpan, bool& isClickOnAISpan)
 {
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    if (renderContext->GetClipEdge().has_value() && !renderContext->GetClipEdge().value() && overlayMod_) {
+        textContentRect = overlayMod_->GetBoundsRect();
+        textContentRect.SetTop(contentRect_.GetY() - std::min(baselineOffset_, 0.0f));
+    }
     if (textContentRect.IsInRegion(PointF(info.GetLocalLocation().GetX(), info.GetLocalLocation().GetY())) &&
         !spans_.empty() && paragraph_) {
         int32_t start = 0;
@@ -728,7 +755,6 @@ bool TextPattern::ShowUIExtensionMenu(const AISpan& aiSpan, const CalculateHandl
     } else {
         calculateHandleFunc();
     }
-    CalculateHandleOffsetAndShowOverlay();
     textSelector_.Update(baseOffset, destinationOffset);
     RectF aiRect;
     if (textSelector_.firstHandle.Top() != textSelector_.secondHandle.Top()) {
@@ -1111,10 +1137,6 @@ void TextPattern::InitDragEvent()
     CHECK_NULL_VOID(eventHub);
     auto gestureHub = host->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
-    if (eventHub->HasOnDragStart()) {
-        gestureHub->SetTextDraggable(false);
-        return;
-    }
     gestureHub->InitDragDropEvent();
     gestureHub->SetTextDraggable(true);
     gestureHub->SetThumbnailCallback(GetThumbnailCallback());
@@ -1347,8 +1369,10 @@ void TextPattern::InitTextDetect(int32_t startPos, std::string detectText)
         CHECK_NULL_VOID(pattern);
         auto host = pattern->GetHost();
         CHECK_NULL_VOID(host);
+        auto context = host->GetContext();
+        CHECK_NULL_VOID(context);
         auto uiTaskExecutor =
-            SingleTaskExecutor::Make(host->GetContext()->GetTaskExecutor(), TaskExecutor::TaskType::UI);
+            SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
         uiTaskExecutor.PostTask([result, weak, instanceID, startPos] {
             ContainerScope scope(instanceID);
             auto pattern = weak.Upgrade();
@@ -1426,12 +1450,12 @@ void TextPattern::ParseAIJson(
         int32_t end = startPos + charOffset + static_cast<int32_t>(wOriText.length());
         if (charOffset < 0 || startPos + charOffset >= static_cast<int32_t>(wTextForAI.length()) ||
             end >= startPos + AI_TEXT_MAX_LENGTH || oriText.empty()) {
-            LOGW("The result of AI is error");
+            TAG_LOGI(AceLogTag::ACE_TEXT, "The result of AI is error");
             continue;
         }
         if (oriText !=
             StringUtils::ToString(wTextForAI.substr(startPos + charOffset, static_cast<int32_t>(wOriText.length())))) {
-            LOGW("The charOffset is error");
+            TAG_LOGI(AceLogTag::ACE_TEXT, "The charOffset is error");
             continue;
         }
         AISpan aiSpan;
@@ -1580,6 +1604,13 @@ void TextPattern::PreCreateLayoutWrapper()
     // mark content dirty
     if (contentMod_) {
         contentMod_->ContentChange();
+    }
+
+    auto paintProperty = GetPaintProperty<PaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+    auto flag = paintProperty->GetPropertyChangeFlag();
+    if (!CheckNeedMeasure(flag)) {
+        return;
     }
 
     imageCount_ = 0;

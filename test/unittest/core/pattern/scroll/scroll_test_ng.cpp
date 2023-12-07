@@ -2527,7 +2527,7 @@ HWTEST_F(ScrollTestNg, ScrollSetFrictionTest001, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. set friction less than 0
-     * @tc.expected: shouled be more than 0.0,if out of range,should be default value.
+     * @tc.expected: should be more than 0.0,if out of range,should be default value.
      */
     double friction = -1;
     ScrollModelNG scrollModelNG_1;
@@ -2539,7 +2539,7 @@ HWTEST_F(ScrollTestNg, ScrollSetFrictionTest001, TestSize.Level1)
 
     /**
      * @tc.steps: step1. set friction more than 0
-     * @tc.expected: friction shouled be more than 0.0,if out of range,should be default value.
+     * @tc.expected: friction should be more than 0.0,if out of range,should be default value.
      */
     friction = 10;
     ScrollModelNG scrollModelNG_2;
@@ -2709,7 +2709,7 @@ HWTEST_F(ScrollTestNg, Drag001, TestSize.Level1)
 HWTEST_F(ScrollTestNg, Distributed001, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. Init Scroll node
+     * @tc.steps: step1. Initialize Scroll node
      */
     CreateWithContent();
 
@@ -2737,7 +2737,7 @@ HWTEST_F(ScrollTestNg, Distributed001, TestSize.Level1)
 HWTEST_F(ScrollTestNg, ScrollGetItemRect001, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. Init Scroll.
+     * @tc.steps: step1. Initialize Scroll.
      */
     CreateWithContent([](ScrollModelNG model) { model.SetAxis(Axis::HORIZONTAL); });
 
@@ -2820,11 +2820,16 @@ HWTEST_F(ScrollTestNg, EdgeEffectOption004, TestSize.Level1)
 
 /**
  * @tc.name: ScrollWidth001
- * @tc.desc: Test Get and Set of ScrollWidth
+ * @tc.desc: Test the usability of scroll width property and its get and set function.
  * @tc.type: FUNC
  */
 HWTEST_F(ScrollTestNg, ScrollWidth001, TestSize.Level1)
 {
+    /**
+     * @tc.steps: step1. Create scroll by calling CreateWithContent() and verify the scroll width property
+     * of scroll layout property.
+     * @tc.expected: Default value is ought to be false.
+     */
     CreateWithContent();
     float scrollWidth = 150.0f;
     EXPECT_FALSE(layoutProperty_->GetScrollWidth().has_value());
@@ -2833,15 +2838,26 @@ HWTEST_F(ScrollTestNg, ScrollWidth001, TestSize.Level1)
 }
 
 /**
- * @tc.name: ScrollWidth001
- * @tc.desc: Test Get and Set of ScrollWidth
+ * @tc.name: SelectScroll001
+ * @tc.desc: Test the flags of select scroll that determines whether it belong to or be modified by a select
+ * and their get and set functions.
  * @tc.type: FUNC
  */
 HWTEST_F(ScrollTestNg, SelectScroll001, TestSize.Level1)
 {
+    /**
+     * @tc.steps: step1. Create scroll by calling CreateWithContent() and verify the default value of the flags
+     * which inform whether the scroll belongs to or is modified by a select.
+     * @tc.expected: Default value is ought to be false.
+     */
     CreateWithContent();
     EXPECT_FALSE(pattern_->IsWidthModifiedBySelect());
     EXPECT_FALSE(pattern_->IsSelectScroll());
+    /**
+     * @tc.steps: step2. Set both flags to be true and verify the usability of their get and set functions in
+     * select pattern.
+     * @tc.expected: After setting the value should be true.
+     */
     pattern_->SetIsWidthModifiedBySelect(true);
     pattern_->SetIsSelectScroll(true);
     EXPECT_TRUE(pattern_->IsWidthModifiedBySelect());
@@ -2850,11 +2866,16 @@ HWTEST_F(ScrollTestNg, SelectScroll001, TestSize.Level1)
 
 /**
  * @tc.name: Measure002
- * @tc.desc: Test select scroll default width Measure
+ * @tc.desc: Test ScrollLayoutAlgorithm Measure when the scroll belongs to a select.
  * @tc.type: FUNC
  */
 HWTEST_F(ScrollTestNg, Measure002, TestSize.Level1)
 {
+    /**
+     * @tc.steps: step1. Create scroll model and set the width, height, axis of the scroll, create the content of
+     * the scroll and get its instance.
+     * @tc.expected: Objects are created successfully.
+     */
     CreateWithContent();
     ScrollModelNG model;
     model.Create();
@@ -2863,12 +2884,20 @@ HWTEST_F(ScrollTestNg, Measure002, TestSize.Level1)
     model.SetAxis(Axis::NONE);
     CreateContent();
     GetInstance();
-    
+    /**
+     * @tc.steps: step2. Create the layout wrapper of the scroll frame node and set the flag to inform that it is
+     * a select scroll.
+     * @tc.expected: Objects are created successfully.
+     */
     RefPtr<LayoutWrapperNode> layoutWrapper = frameNode_->CreateLayoutWrapper(false, false);
     pattern_->SetIsSelectScroll(true);
     FlushLayoutTask(frameNode_);
     layoutWrapper->MountToHostOnMainThread();
-    
+    /**
+     * @tc.steps: step3. Set the scroll size to be the actual frame size of the scroll.Set the expect size to be the
+     * size without the scroll, compare them.
+     * @tc.expected: Two sizes should be not equal.
+     */
     RefPtr<GridColumnInfo> columnInfo = GridSystemManager::GetInstance().GetInfoByType(GridColumnType::MENU);
     columnInfo->GetParent()->BuildColumnWidth();
     auto defaultWidth = static_cast<float>(columnInfo->GetWidth(2));
@@ -2880,11 +2909,16 @@ HWTEST_F(ScrollTestNg, Measure002, TestSize.Level1)
 
 /**
  * @tc.name: SelectScroll002
- * @tc.desc: Test select scroll default width Measure
+ * @tc.desc: Test select scroll default width.
  * @tc.type: FUNC
  */
 HWTEST_F(ScrollTestNg, SelectScroll002, TestSize.Level1)
 {
+    /**
+     * @tc.steps: step1. Get the width of select scroll without setting it, this case is meant to test the correctness
+     * of its default value.
+     * @tc.expected: Default width of select scroll should be 0.0.
+     */
     CreateWithContent();
     ASSERT_NE(pattern_, nullptr);
     auto ScrollWidth=pattern_->GetSelectScrollWidth();

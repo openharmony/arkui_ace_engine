@@ -98,7 +98,8 @@ void TextPickerDialogModelImpl::SetTextPickerDialogShow(RefPtr<AceType>& PickerT
     pickerText->SetRange(textPickerDialog.getRangeVector);
 
     DialogProperties properties {};
-    properties.alignment = DialogAlignment::CENTER;
+    properties.alignment = Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN) ? DialogAlignment::CENTER
+                                                                                          : DialogAlignment::DEFAULT;
     properties.customComponent = pickerText;
     properties.customStyle = true;
     auto acceptId = EventMarker(std::move(onAccept));

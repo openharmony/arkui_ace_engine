@@ -1542,7 +1542,7 @@ void ListPattern::UpdateScrollBarOffset()
     }
     float itemsSize = itemPosition_.rbegin()->second.endPos - itemPosition_.begin()->second.startPos + spaceWidth_;
     float currentOffset = itemsSize / itemPosition_.size() * itemPosition_.begin()->first - startMainPos_;
-    auto estimatedHeight = itemsSize / itemPosition_.size() * (maxListItemIndex_ + 1);
+    auto estimatedHeight = itemsSize / itemPosition_.size() * (maxListItemIndex_ + 1) - spaceWidth_;
     if (GetAlwaysEnabled()) {
         estimatedHeight = estimatedHeight - spaceWidth_;
     }
@@ -1888,9 +1888,6 @@ void ListPattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const
     if (!itemPosition_.empty()) {
         json->Put("itemStartPos", itemPosition_.begin()->second.startPos);
     }
-    auto JsonEdgeEffectOptions = JsonUtil::Create(true);
-    JsonEdgeEffectOptions->Put("alwaysEnabled", GetAlwaysEnabled());
-    json->Put("edgeEffectOptions", JsonEdgeEffectOptions);
 }
 
 void ListPattern::FromJson(const std::unique_ptr<JsonValue>& json)

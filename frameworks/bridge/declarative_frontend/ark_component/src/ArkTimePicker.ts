@@ -47,7 +47,7 @@ class ArkTimePickerComponent extends ArkComponent implements TimePickerAttribute
 class TimepickerTextStyleModifier extends Modifier<ArkTextStyle> {
   static identity: Symbol = Symbol('textStyle');
 
-  applyPeer(node: KNode, reset: boolean) {
+  applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
       GetUINativeModule().timepicker.resetTextStyle(node);
     }
@@ -60,7 +60,7 @@ class TimepickerTextStyleModifier extends Modifier<ArkTextStyle> {
 class TimepickerSelectedTextStyleModifier extends Modifier<ArkTextStyle> {
   static identity: Symbol = Symbol('selectedTextStyle');
 
-  applyPeer(node: KNode, reset: boolean) {
+  applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
       GetUINativeModule().timepicker.resetSelectedTextStyle(node);
     }
@@ -73,7 +73,7 @@ class TimepickerSelectedTextStyleModifier extends Modifier<ArkTextStyle> {
 class TimepickerDisappearTextStyleModifier extends Modifier<ArkTextStyle> {
   static identity: Symbol = Symbol('disappearTextStyle');
 
-  applyPeer(node: KNode, reset: boolean) {
+  applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
       GetUINativeModule().timepicker.resetDisappearTextStyle(node);
     }
@@ -93,4 +93,4 @@ globalThis.TimePicker.attributeModifier = function (modifier) {
   });
   modifier.applyNormalAttribute(component);
   component.applyModifierPatch();
-}
+};

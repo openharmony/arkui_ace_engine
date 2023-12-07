@@ -30,17 +30,14 @@ void JSScreen::JSBind(BindingTarget globalObj)
 void JSScreen::Create(const JSCallbackInfo& info)
 {
     if (!Container::IsCurrentUseNewPipeline()) {
-        LOGE("Window scene is only supported on new pipeline!");
         return;
     }
 
     if (info.Length() != 1) {
-        LOGE("The arg is wrong, it is supposed to have 1 argument");
         return;
     }
 
     if (!info[0]->IsNumber()) {
-        LOGE("The arg is not a number");
         return;
     }
 

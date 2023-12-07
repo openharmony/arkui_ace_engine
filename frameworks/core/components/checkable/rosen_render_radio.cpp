@@ -142,10 +142,10 @@ void RosenRenderRadio::Paint(RenderContext& context, const Offset& offset)
             break;
         case UIStatus::UNSELECTED:
             // draw inner circle
-            pen.SetColor(inactivePointColor_);
-            canvas->AttachPen(pen);
+            brush.SetColor(inactivePointColor_);
+            canvas->AttachBrush(brush);
             canvas->DrawCircle(RSPoint(centerX, centerY), outCircleRadius_ - borderWidth / 2.0);
-            canvas->DetachPen();
+            canvas->DetachBrush();
 
             // draw border with unselected color
             pen.SetColor(inactiveColor_);

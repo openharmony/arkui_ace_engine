@@ -61,9 +61,14 @@ ArkUINativeModuleValue TimepickerBridge::SetTextStyle(ArkUIRuntimeCallInfo*runti
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
 
     uint32_t color = colorArg->Uint32Value(vm);
-    std::string fontSize = ArkTSUtils::GetStringFromJS(vm, fontSizeArg);
-    std::string weight = ArkTSUtils::GetStringFromJS(vm, fontWeightArg);
-    std::string fontFamily = ArkTSUtils::GetStringFromJS(vm, fontFamilyArg);
+    std::string fontSize;
+    ArkTSUtils::GetStringFromJS(vm, fontSizeArg, fontSize);
+
+    std::string weight;
+    ArkTSUtils::GetStringFromJS(vm, fontWeightArg, weight);
+
+    std::string fontFamily;
+    ArkTSUtils::GetStringFromJS(vm, fontFamilyArg, fontFamily);
     int32_t styleVal = 0;
     if (!fontStyleArg->IsNull()) {
         styleVal = fontStyleArg->Int32Value(vm);
@@ -89,9 +94,14 @@ ArkUINativeModuleValue TimepickerBridge::SetSelectedTextStyle(ArkUIRuntimeCallIn
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
 
     uint32_t color = colorArg->Uint32Value(vm);
-    std::string fontSize = ArkTSUtils::GetStringFromJS(vm, fontSizeArg);
-    std::string weight = ArkTSUtils::GetStringFromJS(vm, fontWeightArg);
-    std::string fontFamily = ArkTSUtils::GetStringFromJS(vm, fontFamilyArg);
+    std::string fontSize;
+    ArkTSUtils::GetStringFromJS(vm, fontSizeArg, fontSize);
+
+    std::string weight;
+    ArkTSUtils::GetStringFromJS(vm, fontWeightArg, weight);
+
+    std::string fontFamily;
+    ArkTSUtils::GetStringFromJS(vm, fontFamilyArg, fontFamily);
     int32_t styleVal = 0;
     if (!fontStyleArg->IsNull()) {
         styleVal = fontStyleArg->Int32Value(vm);
@@ -117,9 +127,14 @@ ArkUINativeModuleValue TimepickerBridge::SetDisappearTextStyle(ArkUIRuntimeCallI
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
 
     uint32_t color = colorArg->Uint32Value(vm);
-    std::string fontSize = ArkTSUtils::GetStringFromJS(vm, fontSizeArg);
-    std::string weight = ArkTSUtils::GetStringFromJS(vm, fontWeightArg);
-    std::string fontFamily = ArkTSUtils::GetStringFromJS(vm, fontFamilyArg);
+    std::string fontSize;
+    ArkTSUtils::GetStringFromJS(vm, fontSizeArg, fontSize);
+
+    std::string weight;
+    ArkTSUtils::GetStringFromJS(vm, fontWeightArg, weight);
+
+    std::string fontFamily;
+    ArkTSUtils::GetStringFromJS(vm, fontFamilyArg, fontFamily);
     int32_t styleVal = 0;
     if (!fontStyleArg->IsNull()) {
         styleVal = fontStyleArg->Int32Value(vm);

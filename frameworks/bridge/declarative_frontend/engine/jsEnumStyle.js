@@ -2106,3 +2106,10 @@ var FoldStatus;
   FoldStatus[FoldStatus["FOLD_STATUS_FOLDED"] = 2] = "FOLD_STATUS_FOLDED";
   FoldStatus[FoldStatus["FOLD_STATUS_HALF_FOLDED"] = 3] = "FOLD_STATUS_HALF_FOLDED";
 })(FoldStatus || (FoldStatus = {}));
+
+var OutlineStyle;
+(function (OutlineStyle) {
+  OutlineStyle[OutlineStyle["SOLID"] = 0] = "SOLID";
+  OutlineStyle[OutlineStyle["DASHED"] = 1] = "DASHED";
+  OutlineStyle[OutlineStyle["DOTTED"] = 2] = "DOTTED";
+})(OutlineStyle || (OutlineStyle = {}));

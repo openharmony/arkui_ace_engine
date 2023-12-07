@@ -890,6 +890,8 @@ void TextFieldPattern::HandleBlurEvent()
     }
     needToRequestKeyboardInner_ = false;
     isFocusedBeforeClick_ = false;
+    UpdateShowMagnifier();
+    CloseSelectOverlay(true);
     StopTwinkling();
     if (customKeyboardBuilder_ && isCustomKeyboardAttached_) {
         CloseKeyboard(true);
@@ -2422,6 +2424,7 @@ void TextFieldPattern::CloseSelectOverlay(bool animation)
     CHECK_NULL_VOID(host);
     auto gesture = host->GetOrCreateGestureEventHub();
     gesture->AddTouchEvent(GetTouchListener());
+    UpdateShowMagnifier();
 }
 
 void TextFieldPattern::OnHandleMove(const RectF& handleRect, bool isFirstHandle)
@@ -2787,15 +2790,16 @@ void TextFieldPattern::HandleLeftMouseReleaseEvent(MouseInfo& info)
 
 void TextFieldPattern::UpdateTextFieldManager(const Offset& offset, float height)
 {
-    if (!HasFocus()) {
-        return;
-    }
     auto tmpHost = GetHost();
     CHECK_NULL_VOID(tmpHost);
     auto context = tmpHost->GetContext();
     CHECK_NULL_VOID(context);
     auto textFieldManager = DynamicCast<TextFieldManagerNG>(context->GetTextFieldManager());
     CHECK_NULL_VOID(textFieldManager);
+    textFieldManager->UpdateScrollableParentViewPort(tmpHost);
+    if (!HasFocus()) {
+        return;
+    }
     textFieldManager->SetClickPosition({ offset.GetX() + selectController_->GetCaretRect().GetX(),
         offset.GetY() + selectController_->GetCaretRect().GetY() });
     textFieldManager->SetHeight(selectController_->GetCaretRect().Height());
@@ -5840,8 +5844,14 @@ void TextFieldPattern::ScrollToSafeArea() const
 RefPtr<PixelMap> TextFieldPattern::GetPixelMap()
 {
     auto context = GetHost()->GetRenderContext();
+    if (!context) {
+        UpdateShowMagnifier();
+    }
     CHECK_NULL_RETURN(context, NULL);
     auto pixelMap = context->GetThumbnailPixelMap();
+    if (!pixelMap) {
+        UpdateShowMagnifier();
+    }
     CHECK_NULL_RETURN(pixelMap, NULL);
     return pixelMap;
 }

@@ -26,6 +26,7 @@
 #include "auto_fill_manager.h"
 #include "pointer_event.h"
 #include "scene_board_judgement.h"
+#include "window_manager.h"
 #include "wm/wm_common.h"
 
 #include "adapter/ohos/entrance/ace_application_info.h"
@@ -680,7 +681,7 @@ void AceContainer::InitializeCallback()
         context->GetTaskExecutor()->PostTask(
             [context, event, markProcess]() {
                 if (event.type != TouchType::MOVE) {
-                    TAG_LOGI(AceLogTag::ACE_INPUTTRACKING, "TouchEvent Process in ace_container: "
+                    TAG_LOGD(AceLogTag::ACE_INPUTTRACKING, "TouchEvent Process in ace_container: "
                         "eventInfo: id:%{public}d, pointX=%{public}f pointY=%{public}f "
                         "type=%{public}d timeStamp=%{public}lld", event.pointerEvent->GetId(),
                         event.x, event.y, (int)event.type, event.time.time_since_epoch().count());
@@ -724,7 +725,7 @@ void AceContainer::InitializeCallback()
         bool result = false;
         context->GetTaskExecutor()->PostSyncTask(
             [context, event, &result]() {
-                TAG_LOGI(AceLogTag::ACE_INPUTTRACKING, "Process KeyEvent in ace_container, eventInfo:"
+                TAG_LOGD(AceLogTag::ACE_INPUTTRACKING, "Process KeyEvent in ace_container, eventInfo:"
                     "code:%{public}d, action%{public}d", event.code, event.action);
                 result = context->OnKeyEvent(event);
             },
@@ -1835,6 +1836,24 @@ std::string AceContainer::GetFontFamilyName(std::string path)
     }
     closedir(dir);
     return fontFamilyName;
+}
+
+float AceContainer::GetSmallWindowScale() const
+{
+    float scale = 1.0f;
+    auto windowId = GetWindowId();
+    std::vector<sptr<OHOS::Rosen::AccessibilityWindowInfo>> windowInfos;
+    OHOS::Rosen::WindowManager::GetInstance().GetAccessibilityWindowInfo(windowInfos);
+    for (auto& window : windowInfos) {
+        if (!window) {
+            continue;
+        }
+        if (window->wid_ == windowId) {
+            scale = window->scaleVal_;
+            break;
+        }
+    }
+    return scale;
 }
 
 bool AceContainer::endsWith(std::string str, std::string suffix)

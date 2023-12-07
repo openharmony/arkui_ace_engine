@@ -16,7 +16,6 @@
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_date_picker_bridge.h"
 
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
-
 namespace OHOS::Ace::NG {
 constexpr int NUM_0 = 0;
 constexpr int NUM_1 = 1;
@@ -25,6 +24,7 @@ constexpr int NUM_3 = 3;
 constexpr int NUM_4 = 4;
 constexpr int NUM_5 = 5;
 const double PLACE_HOLDER_ARRAY = -10001;
+const std::string FORMAT_FONT = "%s|%s|%s";
 
 bool DataPickerParseJsColor(const EcmaVM* vm, const Local<JSValueRef>& value, Color& result)
 {
@@ -42,28 +42,6 @@ bool DataPickerParseJsColor(const EcmaVM* vm, const Local<JSValueRef>& value, Co
     return false;
 }
 
-void DataPickerParseJsWeight(const EcmaVM* vm, const Local<JSValueRef>& value, std::string weight)
-{
-    if (!value->IsNull() && !value->IsUndefined()) {
-        if (value->IsNumber()) {
-            weight = std::to_string(value->Uint32Value(vm));
-        } else {
-            weight = value->ToString(vm)->ToString();
-        }
-    }
-}
-
-void DataPickerParseJsSize(const EcmaVM* vm, const Local<JSValueRef>& value, CalcDimension& size)
-{
-    if (value->IsNull() || value->IsUndefined()) {
-        size = Dimension(-1);
-    } else {
-        if (!ArkTSUtils::ParseJsDimensionFp(vm, value, size) || size.Unit() == DimensionUnit::PERCENT) {
-            size = Dimension(-1);
-        }
-    }
-}
-
 ArkUINativeModuleValue DatePickerBridge::SetSelectedTextStyle(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
@@ -76,29 +54,28 @@ ArkUINativeModuleValue DatePickerBridge::SetSelectedTextStyle(ArkUIRuntimeCallIn
     Local<JSValueRef> fontFamilyArgs = runtimeCallInfo->GetCallArgRef(NUM_4);
     Local<JSValueRef> fontStyleArgs = runtimeCallInfo->GetCallArgRef(NUM_5);
 
-    Color textColor;
-    CalcDimension fontSize;
+    if (textColorArgs->IsUndefined() && fontSizeArgs->IsUndefined() &&
+        fontWeightArgs->IsUndefined() && fontFamilyArgs->IsUndefined() &&
+        fontStyleArgs->IsUndefined()) {
+        GetArkUIInternalNodeAPI()->GetDatePickerModifier().ResetSelectedTextStyle(nativeNode);
+    }
+    uint32_t textColor = textColorArgs->Uint32Value(vm);
+    std::string fontSize;
+    ArkTSUtils::GetStringFromJS(vm, fontSizeArgs, fontSize);
     std::string fontWeight;
+    ArkTSUtils::GetStringFromJS(vm, fontWeightArgs, fontWeight);
     std::string fontFamily;
+    ArkTSUtils::GetStringFromJS(vm, fontFamilyArgs, fontFamily);
     int32_t fontStyle = PLACE_HOLDER_ARRAY;
 
-    DataPickerParseJsSize(vm, fontSizeArgs, fontSize);
-    DataPickerParseJsWeight(vm, fontWeightArgs, fontWeight);
-    DataPickerParseJsColor(vm, textColorArgs, textColor);
+    std::string fontInfo =
+        StringUtils::FormatString(FORMAT_FONT.c_str(), fontSize.c_str(), fontWeight.c_str(), fontFamily.c_str());
     if (fontStyleArgs->IsNumber()) {
         fontStyle = fontStyleArgs->Int32Value(vm);
     }
-    if (!fontFamilyArgs->IsNull() && !fontFamilyArgs->IsUndefined() && fontFamilyArgs->IsString()) {
-        fontFamily = fontFamilyArgs->ToString(vm)->ToString();
-    }
-
-    int values[NUM_3] {};
-    values[NUM_0] = textColor.GetValue();
-    values[NUM_1] = static_cast<int>(fontSize.Unit());
-    values[NUM_2] = fontStyle;
-
+    
     GetArkUIInternalNodeAPI()->GetDatePickerModifier().SetSelectedTextStyle(
-        nativeNode, fontWeight.c_str(), fontFamily.c_str(), values, NUM_3);
+        nativeNode, fontInfo.c_str(), fontStyle, textColor);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -124,29 +101,28 @@ ArkUINativeModuleValue DatePickerBridge::SetTextStyle(ArkUIRuntimeCallInfo* runt
     Local<JSValueRef> fontFamilyArgs = runtimeCallInfo->GetCallArgRef(NUM_4);
     Local<JSValueRef> fontStyleArgs = runtimeCallInfo->GetCallArgRef(NUM_5);
 
-    Color textColor;
-    CalcDimension fontSize;
+    if (textColorArgs->IsUndefined() && fontSizeArgs->IsUndefined() &&
+        fontWeightArgs->IsUndefined() && fontFamilyArgs->IsUndefined() &&
+        fontStyleArgs->IsUndefined()) {
+        GetArkUIInternalNodeAPI()->GetDatePickerModifier().ResetSelectedTextStyle(nativeNode);
+    }
+    uint32_t textColor = textColorArgs->Uint32Value(vm);
+    std::string fontSize;
+    ArkTSUtils::GetStringFromJS(vm, fontSizeArgs, fontSize);
     std::string fontWeight;
+    ArkTSUtils::GetStringFromJS(vm, fontWeightArgs, fontWeight);
     std::string fontFamily;
+    ArkTSUtils::GetStringFromJS(vm, fontFamilyArgs, fontFamily);
     int32_t fontStyle = PLACE_HOLDER_ARRAY;
 
-    DataPickerParseJsSize(vm, fontSizeArgs, fontSize);
-    DataPickerParseJsWeight(vm, fontWeightArgs, fontWeight);
-    DataPickerParseJsColor(vm, textColorArgs, textColor);
+    std::string fontInfo =
+        StringUtils::FormatString(FORMAT_FONT.c_str(), fontSize.c_str(), fontWeight.c_str(), fontFamily.c_str());
     if (fontStyleArgs->IsNumber()) {
         fontStyle = fontStyleArgs->Int32Value(vm);
     }
-    if (!fontFamilyArgs->IsNull() && !fontFamilyArgs->IsUndefined() && fontFamilyArgs->IsString()) {
-        fontFamily = fontFamilyArgs->ToString(vm)->ToString();
-    }
-
-    int values[NUM_3];
-    values[NUM_0] = textColor.GetValue();
-    values[NUM_1] = static_cast<int>(fontSize.Unit());
-    values[NUM_2] = fontStyle;
-
+    
     GetArkUIInternalNodeAPI()->GetDatePickerModifier().SetDatePickerTextStyle(
-        nativeNode, fontWeight.c_str(), fontFamily.c_str(), values, NUM_3);
+        nativeNode, fontInfo.c_str(), fontStyle, textColor);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -172,28 +148,28 @@ ArkUINativeModuleValue DatePickerBridge::SetDisappearTextStyle(ArkUIRuntimeCallI
     Local<JSValueRef> fontFamilyArgs = runtimeCallInfo->GetCallArgRef(NUM_4);
     Local<JSValueRef> fontStyleArgs = runtimeCallInfo->GetCallArgRef(NUM_5);
 
-    Color textColor;
-    CalcDimension fontSize;
+    if (textColorArgs->IsUndefined() && fontSizeArgs->IsUndefined() &&
+        fontWeightArgs->IsUndefined() && fontFamilyArgs->IsUndefined() &&
+        fontStyleArgs->IsUndefined()) {
+        GetArkUIInternalNodeAPI()->GetDatePickerModifier().ResetSelectedTextStyle(nativeNode);
+    }
+    uint32_t textColor = textColorArgs->Uint32Value(vm);
+    std::string fontSize;
+    ArkTSUtils::GetStringFromJS(vm, fontSizeArgs, fontSize);
     std::string fontWeight;
+    ArkTSUtils::GetStringFromJS(vm, fontWeightArgs, fontWeight);
     std::string fontFamily;
+    ArkTSUtils::GetStringFromJS(vm, fontFamilyArgs, fontFamily);
     int32_t fontStyle = PLACE_HOLDER_ARRAY;
 
-    DataPickerParseJsSize(vm, fontSizeArgs, fontSize);
-    DataPickerParseJsWeight(vm, fontWeightArgs, fontWeight);
-    DataPickerParseJsColor(vm, textColorArgs, textColor);
+    std::string fontInfo =
+        StringUtils::FormatString(FORMAT_FONT.c_str(), fontSize.c_str(), fontWeight.c_str(), fontFamily.c_str());
     if (fontStyleArgs->IsNumber()) {
         fontStyle = fontStyleArgs->Int32Value(vm);
     }
-    if (!fontFamilyArgs->IsNull() && !fontFamilyArgs->IsUndefined() && fontFamilyArgs->IsString()) {
-        fontFamily = fontFamilyArgs->ToString(vm)->ToString();
-    }
-
-    int values[NUM_3];
-    values[NUM_0] = textColor.GetValue();
-    values[NUM_1] = static_cast<int>(fontSize.Unit());
-    values[NUM_2] = fontStyle;
+    
     GetArkUIInternalNodeAPI()->GetDatePickerModifier().SetDisappearTextStyle(
-        nativeNode, fontWeight.c_str(), fontFamily.c_str(), values, NUM_3);
+        nativeNode, fontInfo.c_str(), fontStyle, textColor);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -215,6 +191,7 @@ ArkUINativeModuleValue DatePickerBridge::SetLunar(ArkUIRuntimeCallInfo* runtimeC
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
     bool isLunar = secondArg->ToBoolean(vm)->Value();
+    
     GetArkUIInternalNodeAPI()->GetDatePickerModifier().SetLunar(nativeNode, isLunar);
     return panda::JSValueRef::Undefined(vm);
 }
