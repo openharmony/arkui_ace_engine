@@ -1851,4 +1851,91 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTouchTest050, TestSize.Level1)
     FRAME_NODE2->GetResponseRegionList(paintRect, 1);
     EXPECT_FALSE(gestureEventHub->GetResponseRegion().empty());
 }
+
+/**
+ * @tc.name: FrameNodeTestNg_TriggerVisibleAreaChangeCallback001
+ * @tc.desc: Test frame node method TriggerVisibleAreaChangeCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, TriggerVisibleAreaChangeCallback001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. set onMainTree_ is true
+     * @tc.expected: cover branch IsOnMainTree is true.
+     */
+    FRAME_NODE2->onMainTree_ = true;
+    FRAME_NODE2->InitializePatternAndContext();
+
+    /**
+     * @tc.steps: step2. set layoutProperty_
+     * @tc.expected: cover branch call IsVisible() right.
+     */
+    auto layoutProperty = AceType::MakeRefPtr<LayoutProperty>();
+    FRAME_NODE2->layoutProperty_ = layoutProperty;
+
+    /**
+     * @tc.steps: step3. call TriggerVisibleAreaChangeCallback
+     * @tc.expected: expect IsOnMainTree is true.
+     */
+    FRAME_NODE2->TriggerVisibleAreaChangeCallback(false);
+    EXPECT_TRUE(FRAME_NODE2->IsOnMainTree());
+
+    /**
+     * @tc.steps: step4. set parentNode and set isActive_ is true
+     * @tc.expected: expect cover branch parentFrame isActive_ is true.
+     */
+    auto& posProperty = FRAME_NODE2->renderContext_->GetOrCreatePositionProperty();
+    posProperty->UpdateOffset(OffsetT<Dimension>());
+    int32_t nodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    const RefPtr<FrameNode> parentNode =
+        FrameNode::CreateFrameNode("TriggerVisibleAreaChangeCallback001", nodeId, AceType::MakeRefPtr<Pattern>(), true);
+    parentNode->isActive_ = true;
+    FRAME_NODE2->SetParent(AceType::WeakClaim(AceType::RawPtr(parentNode)));
+
+    /**
+     * @tc.steps: step5. call TriggerVisibleAreaChangeCallback
+     * @tc.expected: expect parentNode isActive_ is true.
+     */
+    FRAME_NODE2->TriggerVisibleAreaChangeCallback(false);
+    EXPECT_TRUE(parentNode->isActive_);
+
+    /**
+     * @tc.steps: step6. set parentNode2 and call TriggerVisibleAreaChangeCallback
+     * @tc.expected: expect parentNode FRAME_NODE2 is true.
+     */
+    const RefPtr<FrameNode> parentNode2 = nullptr;
+    FRAME_NODE2->SetParent(AceType::WeakClaim(AceType::RawPtr(parentNode2)));
+    FRAME_NODE2->TriggerVisibleAreaChangeCallback(false);
+    EXPECT_TRUE(FRAME_NODE2->isActive_);
+}
+
+/**
+ * @tc.name: FrameNodeTestNg_DumpAdvanceInfo001
+ * @tc.desc: Test frame node method DumpAdvanceInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, DumpAdvanceInfo001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. initialize parameters.
+     */
+    FRAME_NODE3->isActive_ = true;
+    FRAME_NODE3->eventHub_->SetEnabled(true);
+    SystemProperties::debugEnabled_ = true;
+
+    auto mockRenderContext = AceType::MakeRefPtr<MockRenderContext>();
+    FRAME_NODE3->renderContext_ = mockRenderContext;
+    FRAME_NODE3->DumpInfo();
+
+    /**
+     * @tc.steps: step2. initialize layoutProperty_ and call DumpAdvanceInfo.
+     * @tc.expected: expect DumpAdvanceInfo run ok.
+     */
+    auto layoutProperty = AceType::MakeRefPtr<LayoutProperty>();
+    FRAME_NODE2->layoutProperty_ = layoutProperty;
+    FRAME_NODE3->layoutProperty_->geometryTransition_ =
+        ElementRegister::GetInstance()->GetOrCreateGeometryTransition("test", false);
+    FRAME_NODE3->DumpAdvanceInfo();
+    EXPECT_NE(FRAME_NODE3->renderContext_, nullptr);
+}
 } // namespace OHOS::Ace::NG
