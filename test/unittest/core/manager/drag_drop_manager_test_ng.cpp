@@ -2017,4 +2017,106 @@ HWTEST_F(DragDropManagerTestNg, DragDropManagerSetExtraInfoTest001, TestSize.Lev
     dragDropManager->SetExtraInfo("ExtraInfo");
     EXPECT_EQ(dragDropManager->GetExtraInfo(), "ExtraInfo");
 }
+
+/**
+ * @tc.name: DragDropProxyOnDragEndTest002
+ * @tc.desc: OnDragEnd
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(DragDropManagerTestNg, DragDropProxyOnDragEndTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct a DragDropManager
+     */
+    auto dragDropManager = AceType::MakeRefPtr<DragDropManager>();
+
+    /**
+     * @tc.steps: step2. call CreateAndShowDragWindow
+     * @tc.expected: step2. return a dragDropProxy successfully
+     *                      DragWindow.DrawPixelMap() will be called
+     */
+    void* voidPtr = static_cast<void*>(new char[0]);
+    RefPtr<PixelMap> pixelMap = PixelMap::CreatePixelMap(voidPtr);
+    GestureEvent gestureEvent;
+    EXPECT_CALL(*(AceType::DynamicCast<MockDragWindow>(MOCK_DRAG_WINDOW)), DrawPixelMap(_)).Times(1);
+    auto dragDropProxy = dragDropManager->CreateAndShowDragWindow(pixelMap, gestureEvent);
+    dragDropProxy->OnDragEnd(gestureEvent, true);
+    EXPECT_TRUE(dragDropProxy);
+    dragDropProxy->OnDragEnd(gestureEvent, false);
+    EXPECT_TRUE(dragDropProxy);
+}
+
+/**
+ * @tc.name: DragDropProxyDestroyDragWindowTest001
+ * @tc.desc: DestroyDragWindow
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(DragDropManagerTestNg, DragDropProxyDestroyDragWindowTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct a DragDropManager
+     */
+    auto dragDropManager = AceType::MakeRefPtr<DragDropManager>();
+
+    /**
+     * @tc.steps: step2. call CreateAndShowDragWindow
+     * @tc.expected: step2. return a dragDropProxy successfully
+     *                      DragWindow.DrawPixelMap() will be called
+     */
+    void* voidPtr = static_cast<void*>(new char[0]);
+    RefPtr<PixelMap> pixelMap = PixelMap::CreatePixelMap(voidPtr);
+    GestureEvent gestureEvent;
+    EXPECT_CALL(*(AceType::DynamicCast<MockDragWindow>(MOCK_DRAG_WINDOW)), DrawPixelMap(_)).Times(1);
+
+    auto dragDropProxy = dragDropManager->CreateAndShowDragWindow(pixelMap, gestureEvent);
+    dragDropProxy->DestroyDragWindow();
+    EXPECT_TRUE(dragDropProxy);
+}
+
+/**
+ * @tc.name: DragDropProxyOnDragEndTest003
+ * @tc.desc: OnDragEnd
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(DragDropManagerTestNg, DragDropProxyOnDragEndTest003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct a DragDropManager
+     */
+    auto dragDropManager = AceType::MakeRefPtr<DragDropManager>();
+
+    /**
+     * @tc.steps: step2. call CreateAndShowDragWindow
+     * @tc.expected: step2. return a dragDropProxy successfully
+     */
+    RefPtr<UINode> customNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    GestureEvent gestureEvent;
+    EXPECT_CALL(*(AceType::DynamicCast<MockDragWindow>(MOCK_DRAG_WINDOW)), DrawFrameNode(_)).Times(1);
+    auto dragDropProxy = dragDropManager->CreateAndShowDragWindow(customNode, gestureEvent);
+    EXPECT_TRUE(dragDropProxy);
+
+    /**
+     * @tc.steps: step3. call AddDataToClipboard
+     * @tc.expected: step3. ClipBoard.SetData() & ClipBoard.GetData() will be called with printing logs
+     *                      they're defined in "components_ng/test/mock/clipboard/mock_clipboard.cpp"
+     */
+    dragDropManager->AddDataToClipboard(EXTRA_INFO);
+
+    /**
+     * @tc.steps: step4. call GetExtraInfoFromClipboard after calling AddDataToClipboard
+     * @tc.expected: step4. get the extraInfo successfully
+     *                      ClipBoard.GetData() will be called with printing a log
+     *                      it's defined in "components_ng/test/mock/clipboard/mock_clipboard.cpp"
+     */
+    std::string extraInfo;
+    dragDropManager->GetExtraInfoFromClipboard(extraInfo);
+    EXPECT_EQ(extraInfo, EXTRA_INFO);
+    dragDropProxy->OnDragEnd(gestureEvent, true);
+    EXPECT_TRUE(dragDropProxy);
+    dragDropProxy->OnDragEnd(gestureEvent, false);
+    EXPECT_TRUE(dragDropProxy);
+}
 } // namespace OHOS::Ace::NG
