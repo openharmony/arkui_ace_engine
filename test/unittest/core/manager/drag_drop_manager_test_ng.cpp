@@ -1930,4 +1930,91 @@ HWTEST_F(DragDropManagerTestNg, DragDropManagerFireOnEditableTextComponent, Test
         dragDropManager->FireOnEditableTextComponent(frameNode, DragEventType::LEAVE);
     }
 }
+
+/**
+ * @tc.name: DragDropManagerClearVelocityInfoTest001
+ * @tc.desc: Test ClearVelocityInfo
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(DragDropManagerTestNg, DragDropManagerClearVelocityInfoTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct a DragDropManager
+     */
+    auto dragDropManager = AceType::MakeRefPtr<DragDropManager>();
+
+    /**
+     * @tc.steps: step2. call OnDragStart
+     * @tc.expected: step2. FireOnItemDropEvent
+     */
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    dragDropManager->OnDragStart({ GLOBAL_X, GLOBAL_Y }, frameNode);
+    auto draggedNode = dragDropManager->draggedFrameNode_;
+    auto preTargetNode = dragDropManager->preTargetFrameNode_;
+
+    dragDropManager->OnItemDragEnd(0.0, 0.0, 0, DragType::COMMON);
+    EXPECT_TRUE(draggedNode);
+    EXPECT_TRUE(preTargetNode);
+    OHOS::Ace::ItemDragInfo itemDragInfo;
+    dragDropManager->GetItemIndex(frameNode, DragType::TEXT, 0.0, 0.0);
+    EXPECT_TRUE(draggedNode);
+    dragDropManager->GetItemIndex(frameNode, DragType::COMMON, 0.0, 0.0);
+    EXPECT_TRUE(draggedNode);
+    dragDropManager->GetItemIndex(frameNode, DragType::GRID, 0.0, 0.0);
+    EXPECT_TRUE(draggedNode);
+    dragDropManager->draggedGridFrameNode_ = frameNode;
+    dragDropManager->GetItemIndex(frameNode, DragType::GRID, 0.0, 0.0);
+    dragDropManager->ClearVelocityInfo();
+    EXPECT_TRUE(draggedNode);
+}
+
+/**
+ * @tc.name: DragDropManagerClearExtraInfoTest001
+ * @tc.desc: Test ClearExtraInfo
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(DragDropManagerTestNg, DragDropManagerClearExtraInfoTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct a DragDropManager
+     */
+    auto dragDropManager = AceType::MakeRefPtr<DragDropManager>();
+
+    /**
+     * @tc.steps: step2. call OnDragStart
+     * @tc.expected: step2. FireOnItemDropEvent
+     */
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    dragDropManager->OnDragStart({ GLOBAL_X, GLOBAL_Y }, frameNode);
+    auto draggedNode = dragDropManager->draggedFrameNode_;
+
+    dragDropManager->ClearExtraInfo();
+    EXPECT_TRUE(draggedNode);
+}
+
+/**
+ * @tc.name: DragDropManagerSetExtraInfoTest001
+ * @tc.desc: Test SetExtraInfo
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(DragDropManagerTestNg, DragDropManagerSetExtraInfoTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct a DragDropManager
+     */
+    auto dragDropManager = AceType::MakeRefPtr<DragDropManager>();
+
+    /**
+     * @tc.steps: step2. call OnDragStart
+     * @tc.expected: step2. FireOnItemDropEvent
+     */
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    dragDropManager->OnDragStart({ GLOBAL_X, GLOBAL_Y }, frameNode);
+
+    dragDropManager->SetExtraInfo("ExtraInfo");
+    EXPECT_EQ(dragDropManager->GetExtraInfo(), "ExtraInfo");
+}
 } // namespace OHOS::Ace::NG
