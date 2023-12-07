@@ -37,7 +37,7 @@ class FontSizeModifier extends ModifierWithKey<number | string | Resource> {
   }
 }
 
-class FontWeightModifier extends ModifierWithKey<string> {
+class FontWeightModifier extends Modifier<string> {
   static identity: Symbol = Symbol('fontWeight');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -46,12 +46,9 @@ class FontWeightModifier extends ModifierWithKey<string> {
       GetUINativeModule().text.setFontWeight(node, this.value);
     }
   }
-  checkObjectDiff(): boolean {
-    return !isBaseOrResourceEqual(this.stageValue, this.value);
-  }
 }
 
-class FontStyleModifier extends ModifierWithKey<number> {
+class FontStyleModifier extends Modifier<number> {
   static identity: Symbol = Symbol('fontStyle');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -60,12 +57,9 @@ class FontStyleModifier extends ModifierWithKey<number> {
       GetUINativeModule().text.setFontStyle(node, this.value);
     }
   }
-  checkObjectDiff(): boolean {
-    return !isBaseOrResourceEqual(this.stageValue, this.value);
-  }
 }
 
-class TextAlignModifier extends ModifierWithKey<number> {
+class TextAlignModifier extends Modifier<number> {
   static identity: Symbol = Symbol('textAlign');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -73,9 +67,6 @@ class TextAlignModifier extends ModifierWithKey<number> {
     } else {
       GetUINativeModule().text.setTextAlign(node, this.value);
     }
-  }
-  checkObjectDiff(): boolean {
-    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
 
@@ -325,7 +316,6 @@ class TextTextShadowModifier extends ModifierWithKey<ShadowOptions | Array<Shado
 class TextDecorationModifier extends ModifierWithKey<{ type: TextDecorationType; color?: ResourceColor }> {
   static identity: Symbol = Symbol('textDecoration');
   applyPeer(node: KNode, reset: boolean): void {
-    //console.log('TextDecorationModifier start')
     if (reset) {
       GetUINativeModule().text.resetDecoration(node);
     } else {
@@ -350,16 +340,11 @@ class TextDecorationModifier extends ModifierWithKey<{ type: TextDecorationType;
 class TextFontModifier extends ModifierWithKey<Font> {
   static identity: Symbol = Symbol('textFont');
   applyPeer(node: KNode, reset: boolean): void {
-    //console.log('TextFontModifier start');
     if (reset) {
       GetUINativeModule().text.resetFont(node);
     } else {
-      //console.log('TextFontModifier 1');
-      //console.log('TextFontModifier 2');
-      //console.log('TextFontModifier 2 parames is: ' + JSON.parse(this.value));
       GetUINativeModule().text.setFont(node, this.value.size, this.value.weight, this.value.family, this.value.style);
     }
-    //console.log('TextFontModifier end');
   }
 
   checkObjectDiff(): boolean {
@@ -411,15 +396,41 @@ class ArkTextComponent extends ArkComponent implements TextAttribute {
     return this;
   }
   fontStyle(value: FontStyle): TextAttribute {
-    modifierWithKey(this._modifiersWithKeys, FontStyleModifier.identity, FontStyleModifier, value);
+    if (isNumber(value)) {
+      modifier(this._modifiers, FontStyleModifier, value);
+    }
     return this;
   }
-  fontWeight(value: any): TextAttribute {
-    modifierWithKey(this._modifiersWithKeys, FontWeightModifier.identity, FontWeightModifier, value);
+  fontWeight(value: number | FontWeight | string): TextAttribute {
+    let fontWeightStr: string = '400';
+    if (isNumber(value)) {
+      if (value === 0) {
+        fontWeightStr = 'Lighter';
+      } else if (value === 1) {
+        fontWeightStr = 'Normal';
+      } else if (value === 2) {
+        fontWeightStr = 'Regular';
+      } else if (value === 3) {
+        fontWeightStr = 'Medium';
+      } else if (value === 4) {
+        fontWeightStr = 'Bold';
+      } else if (value === 5) {
+        fontWeightStr = 'Bolder';
+      } else {
+        fontWeightStr = value.toString();
+      }
+    } else if (isString(value)) {
+      fontWeightStr = value;
+    }
+    modifier(this._modifiers, FontWeightModifier, fontWeightStr);
     return this;
   }
   textAlign(value: TextAlign): TextAttribute {
-    modifierWithKey(this._modifiersWithKeys, TextAlignModifier.identity, TextAlignModifier, value);
+    let textAlignNum = 0;
+    if (isNumber(value)) {
+      textAlignNum = value;
+    }
+    modifier(this._modifiers, TextAlignModifier, textAlignNum);
     return this;
   }
   lineHeight(value: number | string | Resource): TextAttribute {
