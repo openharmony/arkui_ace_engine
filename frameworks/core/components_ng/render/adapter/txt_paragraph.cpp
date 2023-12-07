@@ -27,6 +27,7 @@ namespace OHOS::Ace::NG {
 namespace {
 const std::u16string ELLIPSIS = u"\u2026";
 constexpr char16_t NEWLINE_CODE = u'\n';
+constexpr float TEXT_SPLIT_RATIO = 0.6f;
 } // namespace
 RefPtr<Paragraph> Paragraph::Create(const ParagraphStyle& paraStyle, const RefPtr<FontCollection>& fontCollection)
 {
@@ -58,6 +59,7 @@ void TxtParagraph::CreateBuilder()
     style.fontSize = paraStyle_.fontSize; // Rosen style.fontSize
     style.ellipsisModal = static_cast<Rosen::EllipsisModal>(paraStyle_.ellipsisMode);
     style.wordBreakType = static_cast<Rosen::WordBreakType>(paraStyle_.wordBreak);
+    style.textSplitRatio = TEXT_SPLIT_RATIO;
 #endif
     style.locale = paraStyle_.fontLocale;
     if (paraStyle_.textOverflow == TextOverflow::ELLIPSIS) {
