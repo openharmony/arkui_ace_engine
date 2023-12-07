@@ -303,7 +303,7 @@ public:
         const AAFwk::Want& want, const ModalUIExtensionCallbacks& callbacks, const CustomPopupUIExtensionConfig& config)
     {
         return 0;
-    }        
+    }
  
     /**
      * @description: Destroy the custom popup.
