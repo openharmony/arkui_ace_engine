@@ -170,6 +170,7 @@ private:
         CHECK_NULL_RETURN(object, nullptr);
         napi_valuetype valueType = napi_undefined;
         bool hasProperty = false;
+        double durationValue = 0;
         napi_has_named_property(env, object, "duration", &hasProperty);
         if (!hasProperty) {
             animationInfo.duration = DEFAULT_DURATION_VALUE;
@@ -178,8 +179,14 @@ private:
             napi_get_named_property(env, object, "duration", &durationNApi);
             napi_typeof(env, durationNApi, &valueType);
             NAPI_ASSERT(env, valueType == napi_number, "The type of duration is incorrect");
-            napi_status status = napi_get_value_int32(env, durationNApi, &animationInfo.duration);
+            napi_status status = napi_get_value_double(env, durationNApi, &durationValue);
             NAPI_ASSERT(env, status == napi_ok, "Parse duration failed");
+            if (GreatOrEqual(durationValue, INT32_MAX)) {
+                durationValue = INT32_MAX;
+            } else if (LessOrEqual(durationValue, 0)) {
+                durationValue = 0;
+            }
+            animationInfo.duration = static_cast<int32_t>(durationValue);
         }
         LOGI("animationInfo duration is %{public}d", animationInfo.duration);
 
