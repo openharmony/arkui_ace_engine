@@ -141,6 +141,7 @@ void TextClockPattern::OnModifyDone()
     textLayoutProperty->UpdateTextOverflow(TextOverflow::NONE);
     UpdateTextLayoutProperty(textClockProperty, textLayoutProperty);
     hourWest_ = GetHoursWest();
+    delayTask_.Cancel();
     UpdateTimeText();
 }
 
@@ -161,6 +162,7 @@ void TextClockPattern::InitTextClockController()
         auto textClock = wp.Upgrade();
         if (textClock) {
             textClock->isStart_ = false;
+            textClock->delayTask_.Cancel();
         }
     });
 }
@@ -170,8 +172,10 @@ void TextClockPattern::OnVisibleChange(bool isVisible)
     if (isVisible && !isSetVisible_) {
         isSetVisible_ = isVisible;
         UpdateTimeText();
+    } else if (!isVisible) {
+        isSetVisible_ = isVisible;
+        delayTask_.Cancel();
     }
-    isSetVisible_ = isVisible;
 }
 
 void TextClockPattern::OnVisibleAreaChange(bool visible)
@@ -179,8 +183,10 @@ void TextClockPattern::OnVisibleAreaChange(bool visible)
     if (visible && !isInVisibleArea_) {
         isInVisibleArea_ = visible;
         UpdateTimeText();
+    } else if (!visible) {
+        isInVisibleArea_ = visible;
+        delayTask_.Cancel();
     }
-    isInVisibleArea_ = visible;
 }
 
 void TextClockPattern::OnFormVisibleChange(bool visible)
@@ -188,8 +194,10 @@ void TextClockPattern::OnFormVisibleChange(bool visible)
     if (visible && !isFormVisible_) {
         isFormVisible_ = visible;
         UpdateTimeText();
+    } else if (!visible) {
+        isFormVisible_ = visible;
+        delayTask_.Cancel();
     }
-    isFormVisible_ = visible;
 }
 
 void TextClockPattern::RegistVisibleAreaChangeCallback()
@@ -240,10 +248,9 @@ void TextClockPattern::UpdateTimeText()
     CHECK_NULL_VOID(textLayoutProperty);
 
     std::string currentTime = GetCurrentFormatDateTime();
-    if (currentTime.empty() || currentTime == prevTime_) {
+    if (currentTime.empty()) {
         return;
     }
-    prevTime_ = currentTime;
 
     textLayoutProperty->UpdateContent(currentTime); // update time text.
     auto textContext = textNode->GetRenderContext();
@@ -253,7 +260,10 @@ void TextClockPattern::UpdateTimeText()
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
     textNode->MarkModifyDone();
     RequestUpdateForNextSecond();
-    FireChangeEvent();
+    if (currentTime != prevTime_) {
+        FireChangeEvent();
+    }
+    prevTime_ = currentTime;
 }
 
 void TextClockPattern::RequestUpdateForNextSecond()
@@ -282,16 +292,15 @@ void TextClockPattern::RequestUpdateForNextSecond()
     auto context = UINode::GetContext();
     CHECK_NULL_VOID(context);
     CHECK_NULL_VOID(context->GetTaskExecutor());
-    context->GetTaskExecutor()->PostDelayedTask(
-        [wp = WeakClaim(this)] {
-            auto textClock = wp.Upgrade();
-            CHECK_NULL_VOID(textClock);
-            if (!textClock->isStart_) {
-                return;
-            }
-            textClock->UpdateTimeText();
-        },
-        TaskExecutor::TaskType::UI, delayTime);
+    delayTask_.Reset([weak = WeakClaim(this)] {
+        auto textClock = weak.Upgrade();
+        CHECK_NULL_VOID(textClock);
+        if (!textClock->isStart_) {
+            return;
+        }
+        textClock->UpdateTimeText();
+    });
+    context->GetTaskExecutor()->PostDelayedTask(delayTask_, TaskExecutor::TaskType::UI, delayTime);
 }
 
 std::string TextClockPattern::GetCurrentFormatDateTime()
