@@ -495,23 +495,7 @@ void GridPattern::ProcessEvent(bool indexChanged, float finalOffset)
         }
     }
 
-    if (scrollStop_) {
-        auto onScrollStop = gridEventHub->GetOnScrollStop();
-        if (!GetScrollAbort()) {
-            if (onScrollStop) {
-                SetScrollSource(SCROLL_FROM_NONE);
-                onScrollStop();
-            }
-            auto scrollBar = GetScrollBar();
-            if (scrollBar) {
-                scrollBar->ScheduleDisappearDelayTask();
-            }
-            StartScrollBarAnimatorByProxy();
-        }
-        PerfMonitor::GetPerfMonitor()->End(PerfConstants::APP_LIST_FLING, false);
-        scrollStop_ = false;
-        SetScrollAbort(false);
-    }
+    OnScrollStop(gridEventHub->GetOnScrollStop());
 }
 
 void GridPattern::MarkDirtyNodeSelf()

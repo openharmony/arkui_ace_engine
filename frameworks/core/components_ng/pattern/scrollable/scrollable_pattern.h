@@ -409,7 +409,7 @@ protected:
 
     virtual void FireOnScroll(float finalOffset, OnScrollEvent& onScroll) const;
 
-    virtual void OnScrollStop(const OnScrollStopEvent& onScrollStop, bool withPerf);
+    virtual void OnScrollStop(const OnScrollStopEvent& onScrollStop);
 
     // select with mouse
     struct ItemSelectedStatus {

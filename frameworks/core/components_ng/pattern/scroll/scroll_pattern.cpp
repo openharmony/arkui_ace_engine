@@ -133,10 +133,7 @@ bool ScrollPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
             onReachEnd();
         }
     }
-    if (scrollStop_) {
-        FireOnScrollStop();
-        scrollStop_ = false;
-    }
+    OnScrollStop(eventHub->GetOnScrollStop());
     ScrollSnapTrigger();
     CheckScrollable();
     prevOffset_ = currentOffset_;
@@ -179,45 +176,6 @@ void ScrollPattern::CheckScrollable()
     } else {
         SetScrollEnable(layoutProperty->GetScrollEnabled().value_or(true) && GetAlwaysEnabled());
     }
-}
-
-void ScrollPattern::FireOnScrollStart()
-{
-    if (GetScrollAbort()) {
-        return;
-    }
-    auto scrollBar = GetScrollBar();
-    if (scrollBar) {
-        scrollBar->PlayScrollBarAppearAnimation();
-    }
-    StopScrollBarAnimatorByProxy();
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto hub = host->GetEventHub<ScrollEventHub>();
-    CHECK_NULL_VOID(hub);
-    auto onScrollStart = hub->GetOnScrollStart();
-    CHECK_NULL_VOID(onScrollStart);
-    onScrollStart();
-}
-
-void ScrollPattern::FireOnScrollStop()
-{
-    if (GetScrollAbort()) {
-        SetScrollAbort(false);
-        return;
-    }
-    auto scrollBar = GetScrollBar();
-    if (scrollBar) {
-        scrollBar->ScheduleDisappearDelayTask();
-    }
-    StartScrollBarAnimatorByProxy();
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto hub = host->GetEventHub<ScrollEventHub>();
-    CHECK_NULL_VOID(hub);
-    auto onScrollStop = hub->GetOnScrollStop();
-    CHECK_NULL_VOID(onScrollStop);
-    onScrollStop();
 }
 
 bool ScrollPattern::OnScrollCallback(float offset, int32_t source)

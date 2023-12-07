@@ -258,7 +258,6 @@ private:
     void InitScrollableEvent();
     void SetEdgeEffectCallback(const RefPtr<ScrollEdgeEffect>& scrollEffect) override;
     void HandleScrollEffect(float offset);
-    void FireOnScrollStart() override;
     void CheckRestartSpring();
     void StartDefaultOrCustomSpringMotion(float start, float end, const RefPtr<InterpolatingSpring>& curve);
     void UpdateScrollSnap();
