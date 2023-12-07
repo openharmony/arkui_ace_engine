@@ -16,9 +16,11 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_BUTTON_BUTTON_LAYOUT_ALGORITHM_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_BUTTON_BUTTON_LAYOUT_ALGORITHM_H
 
+#include "base/memory/referenced.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/layout/box_layout_algorithm.h"
 #include "core/components_ng/layout/layout_wrapper.h"
+#include "core/components_ng/pattern/button/button_layout_property.h"
 
 namespace OHOS::Ace::NG {
 class ACE_EXPORT ButtonLayoutAlgorithm : public BoxLayoutAlgorithm {
@@ -38,9 +40,11 @@ private:
     static void HandleChildLayoutConstraint(LayoutWrapper* layoutWrapper, LayoutConstraintF& layoutConstraint);
     static std::optional<SizeF> HandleLabelCircleButtonConstraint(LayoutWrapper* layoutWrapper);
     static void HandleBorderRadius(LayoutWrapper* layoutWrapper);
-    static void HandleLabelCircleButtonFrameSize(const LayoutConstraintF& layoutConstraint, SizeF& frameSize);
+    static void HandleLabelCircleButtonFrameSize(
+        const LayoutConstraintF& layoutConstraint, SizeF& frameSize, const float& defaultHeight);
     static void MeasureCircleButton(LayoutWrapper* layoutWrapper);
     static Dimension GetFirstValidRadius(const BorderRadiusProperty& borderRadius);
+    static float GetDefaultHeight(RefPtr<ButtonLayoutProperty> layoutProperty);
     SizeF childSize_;
 
     ACE_DISALLOW_COPY_AND_MOVE(ButtonLayoutAlgorithm);

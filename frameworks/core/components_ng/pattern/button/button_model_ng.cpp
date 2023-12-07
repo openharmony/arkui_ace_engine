@@ -101,15 +101,38 @@ void ButtonModelNG::SetLableStyle(ButtonParameters& buttonParameters)
     }
 }
 
+void ButtonModelNG::SetButtonStyle(const std::optional<ButtonStyleMode>& buttonStyle)
+{
+    if (buttonStyle.has_value()) {
+        ACE_UPDATE_LAYOUT_PROPERTY(ButtonLayoutProperty, ButtonStyle, buttonStyle.value());
+        auto buttonTheme = PipelineBase::GetCurrentContext()->GetTheme<ButtonTheme>();
+        CHECK_NULL_VOID(buttonTheme);
+        auto bgColor = buttonTheme->GetBgColor(buttonStyle.value());
+        auto textColor = buttonTheme->GetTextColor(buttonStyle.value());
+        BackgroundColor(bgColor, true);
+        SetFontColor(textColor);
+    }
+}
+
+void ButtonModelNG::SetControlSize(const std::optional<ControlSize>& controlSize)
+{
+    if (controlSize.has_value()) {
+        ACE_UPDATE_LAYOUT_PROPERTY(ButtonLayoutProperty, ControlSize, controlSize.value());
+        auto buttonTheme = PipelineBase::GetCurrentContext()->GetTheme<ButtonTheme>();
+        CHECK_NULL_VOID(buttonTheme);
+        auto padding = buttonTheme->GetPadding(controlSize.value());
+        PaddingProperty defaultPadding = { CalcLength(padding.Left()), CalcLength(padding.Right()),
+            CalcLength(padding.Top()), CalcLength(padding.Bottom()) };
+        ACE_UPDATE_LAYOUT_PROPERTY(ButtonLayoutProperty, Padding, defaultPadding);
+    }
+}
+
 void ButtonModelNG::CreateWithLabel(const CreateWithPara& para, std::list<RefPtr<Component>>& buttonChildren)
 {
     CreateWithLabel(para.label.value());
-    if (para.labelSetInfoFirst.value()) {
-        SetTypeAndStateEffect(para.typeFirst, para.stateEffectFirst);
-    }
-    if (para.labelSetInfoSecond.value()) {
-        SetTypeAndStateEffect(para.typeSecond, para.stateEffectSecond);
-    }
+    SetTypeAndStateEffect(para.type, para.stateEffect);
+    SetButtonStyle(para.buttonStyleMode);
+    SetControlSize(para.controlSize);
 }
 
 void ButtonModelNG::CreateWithLabel(const std::string& label)
@@ -152,8 +175,10 @@ void ButtonModelNG::CreateWithChild(const CreateWithPara& para)
 {
     std::string tagName = "Button";
     Create(tagName);
-    if (para.labelSetInfoFirst.value()) {
-        SetTypeAndStateEffect(para.typeFirst, para.stateEffectFirst);
+    if (para.optionSetFirst.has_value() && para.optionSetFirst.value()) {
+        SetTypeAndStateEffect(para.type, para.stateEffect);
+        SetButtonStyle(para.buttonStyleMode);
+        SetControlSize(para.controlSize);
     }
 }
 

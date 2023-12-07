@@ -37,6 +37,8 @@ public:
     static void SetType(const JSCallbackInfo& info);
     static void SetStateEffect(const JSCallbackInfo& info);
     static void SetLableStyle(const JSCallbackInfo& info);
+    static void SetButtonStyle(const JSCallbackInfo& info);
+    static void SetControlSize(const JSCallbackInfo& info);
     static void JsBackgroundColor(const JSCallbackInfo& info);
     static void JsRadius(const JSCallbackInfo& info);
     static void JsBorder(const JSCallbackInfo& info);
@@ -52,6 +54,10 @@ public:
     static void JSBind(BindingTarget globalObj);
     static void CreateWithChild(const JSCallbackInfo& info);
     static void CreateWithLabel(const JSCallbackInfo& info);
+    static constexpr char TYPE[] = "type";
+    static constexpr char STATE_EFFECT[] = "stateEffect";
+    static constexpr char BUTTON_STYLE[] = "buttonStyle";
+    static constexpr char CONTROL_SIZE[] = "controlSize";
 
 private:
     static void HandleDifferentRadius(const JSRef<JSVal>& args);
@@ -63,6 +69,7 @@ private:
     static NG::PaddingProperty SetPaddings(const std::optional<CalcDimension>& top,
         const std::optional<CalcDimension>& bottom, const std::optional<CalcDimension>& left,
         const std::optional<CalcDimension>& right);
+    static CreateWithPara ParseCreatePara(const JSCallbackInfo& info, bool hasLabel);
     static bool isLabelButton_;
 };
 } // namespace OHOS::Ace::Framework
