@@ -1728,7 +1728,7 @@ void TextFieldPattern::HandleDoubleClickEvent(GestureEvent& info)
         StopTwinkling();
         SetIsSingleHandle(false);
     }
-    if (info.GetSourceDevice() != SourceType::MOUSE) {
+    if (info.GetSourceDevice() != SourceType::MOUSE && !contentController_->IsEmpty()) {
         ProcessOverlay(true, true);
         UpdateSelectMenuVisibility(true);
     }
