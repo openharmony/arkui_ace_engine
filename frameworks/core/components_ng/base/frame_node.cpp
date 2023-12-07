@@ -1070,7 +1070,6 @@ void FrameNode::SetActive(bool active)
     }
     // inform the js side the active status
     SetJSViewActive(active);
-
 }
 
 void FrameNode::SetGeometryNode(const RefPtr<GeometryNode>& node)
@@ -2882,6 +2881,7 @@ void FrameNode::LayoutOverlay()
 void FrameNode::DoRemoveChildInRenderTree(uint32_t index, bool isAll)
 {
     isActive_ = false;
+    SetActive(false);
 }
 
 void FrameNode::OnInspectorIdUpdate(const std::string& id)
