@@ -45,6 +45,13 @@ void JSCanvasImageData::Constructor(const JSCallbackInfo& args)
         uint32_t count = 0;
         JSRef<JSArray> colorArray = JSRef<JSArray>::New();
 
+        int64_t tmp = static_cast<int64_t>(4) * ((int64_t)width * (int64_t)height + (int64_t)width)
+            + static_cast<int64_t>(3);
+        if ((int64_t)((int32_t)tmp) != tmp) {
+            LOGE("ImageData's width and height overflow");
+            return;
+        }
+
         for (int32_t i = 0; i < height; ++i) {
             for (int32_t j = 0; j < width; ++j) {
                 int32_t flag = j + width * i;
