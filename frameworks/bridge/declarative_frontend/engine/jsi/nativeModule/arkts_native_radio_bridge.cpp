@@ -61,15 +61,18 @@ ArkUINativeModuleValue RadioBridge::SetRadioStyle(ArkUIRuntimeCallInfo* runtimeC
     CHECK_NULL_RETURN(radioTheme, panda::NativePointerRef::New(vm, nullptr));
 
     Color checkedBackgroundColorVal;
-    if (!ArkTSUtils::ParseJsColor(vm, checkedBackgroundColor, checkedBackgroundColorVal)) {
+    if (checkedBackgroundColor->IsNull() || checkedBackgroundColor->IsUndefined() ||
+        !ArkTSUtils::ParseJsColorAlpha(vm, checkedBackgroundColor, checkedBackgroundColorVal)) {
         checkedBackgroundColorVal = radioTheme->GetActiveColor();
     }
     Color uncheckedBorderColorVal;
-    if (!ArkTSUtils::ParseJsColor(vm, uncheckedBorderColor, uncheckedBorderColorVal)) {
+    if (uncheckedBorderColor->IsNull() || uncheckedBorderColor->IsUndefined() ||
+        !ArkTSUtils::ParseJsColorAlpha(vm, uncheckedBorderColor, uncheckedBorderColorVal)) {
         uncheckedBorderColorVal = radioTheme->GetInactiveColor();
     }
     Color indicatorColorVal;
-    if (!ArkTSUtils::ParseJsColor(vm, indicatorColor, indicatorColorVal)) {
+    if (indicatorColor->IsNull() || indicatorColor->IsUndefined() ||
+        !ArkTSUtils::ParseJsColorAlpha(vm, indicatorColor, indicatorColorVal)) {
         indicatorColorVal = radioTheme->GetPointColor();
     }
 

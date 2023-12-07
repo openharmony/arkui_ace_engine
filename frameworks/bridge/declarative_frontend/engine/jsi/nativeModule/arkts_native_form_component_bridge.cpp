@@ -15,6 +15,7 @@
 
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_form_component_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_api.h"
+#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 
 namespace OHOS::Ace::NG {
 ArkUINativeModuleValue FormComponentBridge::SetVisibility(ArkUIRuntimeCallInfo* runtimeCallInfo)
@@ -68,8 +69,12 @@ ArkUINativeModuleValue FormComponentBridge::SetDimension(ArkUIRuntimeCallInfo* r
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    int32_t dimension = secondArg->Int32Value(vm);
-    GetArkUIInternalNodeAPI()->GetFormComponentModifier().SetDimension(nativeNode, dimension);
+    if (secondArg->IsNull() || secondArg->IsUndefined()) {
+        GetArkUIInternalNodeAPI()->GetFormComponentModifier().ResetDimension(nativeNode);
+    } else {
+        int32_t dimension = secondArg->Int32Value(vm);
+        GetArkUIInternalNodeAPI()->GetFormComponentModifier().SetDimension(nativeNode, dimension);
+    }
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -113,26 +118,18 @@ ArkUINativeModuleValue FormComponentBridge::SetSize(ArkUIRuntimeCallInfo* runtim
     Local<JSValueRef> widthValue = runtimeCallInfo->GetCallArgRef(1);
     Local<JSValueRef> heightValue = runtimeCallInfo->GetCallArgRef(2);
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    Dimension width = 0.0_vp;
-    Dimension height = 0.0_vp;
-
-    if (!widthValue->IsNull()) {
-        if (widthValue->IsNumber()) {
-            width = Dimension(widthValue->ToNumber(vm)->Value(), DimensionUnit::VP);
-        } else if (widthValue->IsString()) {
-            width = StringUtils::StringToDimension(widthValue->ToString(vm)->ToString(), true);
-        }
+    CalcDimension width = 0.0_vp;
+    CalcDimension height = 0.0_vp;
+    bool hasWidth = (!widthValue->IsNull() && !widthValue->IsUndefined() &&
+        ArkTSUtils::ParseJsDimensionVp(vm, widthValue, width));
+    bool hasHeight = (!heightValue->IsNull() && !heightValue->IsUndefined() &&
+        ArkTSUtils::ParseJsDimensionVp(vm, heightValue, height));
+    if (!hasWidth && !hasHeight) {
+        GetArkUIInternalNodeAPI()->GetFormComponentModifier().ResetFormSize(nativeNode);
+    } else {
+        GetArkUIInternalNodeAPI()->GetFormComponentModifier().SetFormSize(nativeNode,
+            width.Value(), static_cast<int>(width.Unit()), height.Value(), static_cast<int>(height.Unit()));
     }
-    
-    if (!heightValue->IsNull()) {
-        if (heightValue->IsNumber()) {
-            height = Dimension(heightValue->ToNumber(vm)->Value(), DimensionUnit::VP);
-        } else if (heightValue->IsString()) {
-            height = StringUtils::StringToDimension(heightValue->ToString(vm)->ToString(), true);
-        }
-    }
-    GetArkUIInternalNodeAPI()->GetFormComponentModifier().SetFormSize(nativeNode,
-        width.Value(), static_cast<int>(width.Unit()), height.Value(), static_cast<int>(height.Unit()));
     return panda::JSValueRef::Undefined(vm);
 }
 
