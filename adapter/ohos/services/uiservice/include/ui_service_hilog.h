@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef FORM_RENDERER_HILOG_H
-#define FORM_RENDERER_HILOG_H
+#ifndef OHOS_ACE_UI_SERVICE_HILOG_H
+#define OHOS_ACE_UI_SERVICE_HILOG_H
 
 #define CONFIG_HILOG
 #ifdef CONFIG_HILOG
@@ -41,18 +41,18 @@
 #endif
 
 #ifndef FR_LOG_DOMAIN
-#define FR_LOG_DOMAIN 0xDC039FF
+#define FR_LOG_DOMAIN 0xDC03935
 #endif
 
 #ifndef FR_LOG_TAG
-#define FR_LOG_TAG "FormRenderer"
+#define FR_LOG_TAG "AceUiService" // ACE_UI_SERVICE
 #endif
 
 #ifdef LOG_LABEL
 #undef LOG_LABEL
 #endif
 
-static constexpr OHOS::HiviewDFX::HiLogLabel LOG_LABEL = {LOG_CORE, FR_LOG_DOMAIN, FR_LOG_TAG};
+static constexpr OHOS::HiviewDFX::HiLogLabel LOG_LABEL = { LOG_CORE, FR_LOG_DOMAIN, FR_LOG_TAG };
 
 #define __FR_FILENAME__ (__builtin_strrchr(__FILE__, '/') ? __builtin_strrchr(__FILE__, '/') + 1 : __FILE__)
 
@@ -78,6 +78,6 @@ static constexpr OHOS::HiviewDFX::HiLogLabel LOG_LABEL = {LOG_CORE, FR_LOG_DOMAI
 #define HILOG_WARN(...)
 #define HILOG_INFO(...)
 #define HILOG_DEBUG(...)
-#endif  // CONFIG_HILOG
+#endif // CONFIG_HILOG
 
-#endif  // FORM_RENDERER_HILOG_H
+#endif // OHOS_ACE_UI_SERVICE_HILOG_H

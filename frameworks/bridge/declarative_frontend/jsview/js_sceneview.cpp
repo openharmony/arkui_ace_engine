@@ -16,6 +16,7 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_sceneview.h"
 
 #include <regex>
+
 #include "custom/custom_render_descriptor.h"
 #include "custom/shader_input_buffer.h"
 #include "data_type/constants.h"
@@ -74,8 +75,7 @@ bool GetResourceId(const std::string& uri, uint32_t& resId)
     }
 
     std::smatch appMatches;
-    if (std::regex_match(uri, appMatches, MODEL_APP_RES_ID_REGEX) &&
-        appMatches.size() == MODEL_RESOURCE_MATCH_SIZE) {
+    if (std::regex_match(uri, appMatches, MODEL_APP_RES_ID_REGEX) && appMatches.size() == MODEL_RESOURCE_MATCH_SIZE) {
         resId = static_cast<uint32_t>(std::stoul(appMatches[1].str()));
         return true;
     }
@@ -85,8 +85,7 @@ bool GetResourceId(const std::string& uri, uint32_t& resId)
 bool GetResourceId(const std::string& uri, std::string& path)
 {
     std::smatch matches;
-    if (std::regex_match(uri, matches, MODEL_APP_RES_PATH_REGEX) &&
-        matches.size() == MODEL_RESOURCE_MATCH_SIZE) {
+    if (std::regex_match(uri, matches, MODEL_APP_RES_PATH_REGEX) && matches.size() == MODEL_RESOURCE_MATCH_SIZE) {
         path = matches[1].str();
         return true;
     }
@@ -96,8 +95,7 @@ bool GetResourceId(const std::string& uri, std::string& path)
 bool GetResourceName(const std::string& uri, std::string& resName)
 {
     std::smatch matches;
-    if (std::regex_match(uri, matches, MODEL_RES_NAME_REGEX) &&
-        matches.size() == MODEL_RESOURCE_MATCH_SIZE) {
+    if (std::regex_match(uri, matches, MODEL_RES_NAME_REGEX) && matches.size() == MODEL_RESOURCE_MATCH_SIZE) {
         resName = matches[1].str();
         return true;
     }
@@ -127,10 +125,9 @@ bool SetOhosPath(const std::string& uri, std::string& ohosPath)
 
 // get Number data
 template<typename T>
-bool GetModelProperty(const JSRef<JSObject>& jsValue, const std::string& propertyName,
-    std::unordered_map<std::string, T>& propertyData)
+bool GetModelProperty(
+    const JSRef<JSObject>& jsValue, const std::string& propertyName, std::unordered_map<std::string, T>& propertyData)
 {
-    LOGD("Property process name %s", propertyName.c_str());
     auto item = jsValue->GetProperty(propertyName.c_str());
     if (item->IsObject()) {
         JSRef<JSObject> itemObj = JSRef<JSObject>::Cast(item);
@@ -144,7 +141,6 @@ bool GetModelProperty(const JSRef<JSObject>& jsValue, const std::string& propert
                 iter->second = itemData->ToBoolean();
                 continue;
             }
-            LOGD("Property parse error %s %s", (iter->first).c_str(), itemData->ToString().c_str());
             return false;
         }
         return true;
@@ -155,17 +151,14 @@ bool GetModelProperty(const JSRef<JSObject>& jsValue, const std::string& propert
 void JSSceneView::JsSetHandleCameraMove(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have atleast 1 arguments");
         return;
     }
 
     if (!info[0]->IsBoolean()) {
-        LOGE("arg is not Boolean.");
         return;
     }
 
     bool value = info[0]->ToBoolean();
-    LOGD("JSSceneView::JsSetHandleCameraMove %s", value ? "true" : "false");
     ModelView::GetInstance()->SetHandleCameraMove(value);
 }
 
@@ -178,8 +171,8 @@ void JSSceneView::Create(const JSCallbackInfo& info)
     if (length >= 2) { // 2: info size
         surfaceData = info[1]->ToNumber<int32_t>();
     }
-    auto surfaceType = (surfaceData == 0) ? OHOS::Render3D::SurfaceType::SURFACE_TEXTURE :
-        OHOS::Render3D::SurfaceType::SURFACE_WINDOW;
+    auto surfaceType =
+        (surfaceData == 0) ? OHOS::Render3D::SurfaceType::SURFACE_TEXTURE : OHOS::Render3D::SurfaceType::SURFACE_WINDOW;
 
     if (length >= 1) {
         ParseJsMedia(info[0], srcPath);
@@ -190,8 +183,6 @@ void JSSceneView::Create(const JSCallbackInfo& info)
     GetJsMediaBundleInfo(info[0], bundleName, moduleName);
     std::string ohosPath("");
     SetOhosPath(srcPath, ohosPath);
-    LOGD("srcPath after ParseJsMedia(): %s bundleName: %s, moduleName %s", ohosPath.c_str(),
-        bundleName.c_str(), moduleName.c_str());
     ModelView::GetInstance()->Create(ohosPath, bundleName, moduleName, surfaceType);
 }
 
@@ -199,28 +190,27 @@ void JSSceneView::JsCamera(const JSCallbackInfo& info)
 {
     // Parse the info object.
     if (info.Length() <= 0 || !info[0]->IsObject()) {
-        LOGE("JSSceneView: arg is invalid.");
         return;
     }
 
     AnimationOption animOption = ViewStackModel::GetInstance()->GetImplicitAnimationOption();
-    JSRef<JSObject>jsObj = JSRef<JSObject>::Cast(info[0]);
-    std::unordered_map<std::string, float> perspect { {"zNear", 0.5f}, {"zFar", 50.0f}, {"yFov", 60.0f} };
+    JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(info[0]);
+    std::unordered_map<std::string, float> perspect { { "zNear", 0.5f }, { "zFar", 50.0f }, { "yFov", 60.0f } };
     GetModelProperty(jsObj, "perspective", perspect);
-    LOGD("Camera perspective config zNear: %f, zFar: %f, yFov: %f",
-        perspect["zNear"], perspect["zFar"], perspect["yFov"]);
+    LOGD("Camera perspective config zNear: %f, zFar: %f, yFov: %f", perspect["zNear"], perspect["zFar"],
+        perspect["yFov"]);
     ModelView::GetInstance()->SetCameraFrustum(perspect["zNear"], perspect["zFar"], perspect["yFov"]);
     // cameraSpace
-    std::unordered_map<std::string, float> positionAng { {"theta", 0.0f}, {"phi", 0.0f}, {"radius", 4.0f} };
-    std::unordered_map<std::string, float> position { {"x", 0.0f}, {"y", 0.0f}, {"z", 4.0f} };
-    std::unordered_map<std::string, float> front { {"x", 0.0f}, {"y", 0.0f}, {"z", 0.0f} };
-    std::unordered_map<std::string, float> up { {"x", 0.0f}, {"y", 0.0f}, {"z", 0.0f} };
+    std::unordered_map<std::string, float> positionAng { { "theta", 0.0f }, { "phi", 0.0f }, { "radius", 4.0f } };
+    std::unordered_map<std::string, float> position { { "x", 0.0f }, { "y", 0.0f }, { "z", 4.0f } };
+    std::unordered_map<std::string, float> front { { "x", 0.0f }, { "y", 0.0f }, { "z", 0.0f } };
+    std::unordered_map<std::string, float> up { { "x", 0.0f }, { "y", 0.0f }, { "z", 0.0f } };
     if (GetModelProperty(jsObj, "cameraSpace", positionAng)) {
-        LOGD("positionInAngles: theta: %f, phi: %f, distance: %f",
-            positionAng["theta"], positionAng["phi"], positionAng["radius"]);
-        ModelView::GetInstance()->SetCameraPosition(
-            AnimatableFloat(positionAng["theta"], animOption), AnimatableFloat(0, animOption),
-            AnimatableFloat(positionAng["phi"], animOption), AnimatableFloat(positionAng["radius"], animOption), true);
+        LOGD("positionInAngles: theta: %f, phi: %f, distance: %f", positionAng["theta"], positionAng["phi"],
+            positionAng["radius"]);
+        ModelView::GetInstance()->SetCameraPosition(AnimatableFloat(positionAng["theta"], animOption),
+            AnimatableFloat(0, animOption), AnimatableFloat(positionAng["phi"], animOption),
+            AnimatableFloat(positionAng["radius"], animOption), true);
         return;
     }
     auto itemCameraSpace = jsObj->GetProperty("cameraSpace");
@@ -248,32 +238,26 @@ void JSSceneView::JsCamera(const JSCallbackInfo& info)
 void JSSceneView::JsSetTransparent(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have atleast 1 arguments");
         return;
     }
 
     if (!info[0]->IsBoolean()) {
-        LOGE("arg is not Boolean.");
         return;
     }
 
     bool value = info[0]->ToBoolean();
-    LOGD("JSSceneView::JsSetTransparentBackground(%s)", value ? "true" : "false");
     ModelView::GetInstance()->SetTransparent(value);
 }
 
 void JSSceneView::JsSetBackground(const JSCallbackInfo& info)
 {
-    LOGD("JSSceneView::JsSetBackground()");
     if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have atleast 1 arguments");
         return;
     }
 
     std::string srcPath;
     auto parseOk = ParseJsMedia(info[0], srcPath);
     if (!parseOk) {
-        LOGE("JSSceneView::JsSetBackground() arg parsing failed.");
         return;
     }
     std::string ohosPath("");
@@ -286,11 +270,9 @@ void JSSceneView::JsLight(const JSCallbackInfo& info)
 {
     // Parse the info object.
     if (info.Length() <= 0 || !info[0]->IsObject()) {
-        LOGE("JSSceneView: arg is invalid.");
         return;
     }
 
-    LOGD("JSLight() info[0]: %s", info[0]->ToString().c_str());
     JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(info[0]);
     JSRef<JSVal> itemType = jsObj->GetProperty("type");
     JSRef<JSVal> itemIntensity = jsObj->GetProperty("intensity");
@@ -301,9 +283,7 @@ void JSSceneView::JsLight(const JSCallbackInfo& info)
     LOGD("Light type: %d, intensity %d, shadow %d", type, intensity, shadow);
     JSRef<JSVal> lightColor = jsObj->GetProperty("color");
     Color color(0xffffffff); // red:255, green:255, blue:255
-    if (!ParseJsColor(lightColor, color)) {
-        LOGE("Light Color error, set default");
-    }
+    ParseJsColor(lightColor, color);
     AnimationOption animOption = ViewStackModel::GetInstance()->GetImplicitAnimationOption();
     Vec3 inputColor = Vec3(color.GetRed() / 255.0f, color.GetGreen() / 255.0f, color.GetBlue() / 255.0f, animOption);
     LOGD("light color r: %f, g: %f, b: %f, animOption: %d", inputColor.GetX(), inputColor.GetY(), inputColor.GetZ(),
@@ -311,15 +291,15 @@ void JSSceneView::JsLight(const JSCallbackInfo& info)
     OHOS::Ace::NG::ModelPosition position;
     double maxInvalid = std::numeric_limits<double>::max();
     Quaternion rotation = Quaternion(maxInvalid, maxInvalid, maxInvalid, maxInvalid);
-    std::unordered_map<std::string, float> positionAng { {"theta", 0.0f}, {"phi", 0.0f}, {"radius", 4.0f} };
-    std::unordered_map<std::string, float> pos { {"x", 0.0f}, {"y", 1.0f}, {"z", 0.0f} };
-    std::unordered_map<std::string, float> quat { {"x", 0.0f}, {"y", 1.0f}, {"z", 0.0f}, {"w", 1.0f} };
+    std::unordered_map<std::string, float> positionAng { { "theta", 0.0f }, { "phi", 0.0f }, { "radius", 4.0f } };
+    std::unordered_map<std::string, float> pos { { "x", 0.0f }, { "y", 1.0f }, { "z", 0.0f } };
+    std::unordered_map<std::string, float> quat { { "x", 0.0f }, { "y", 1.0f }, { "z", 0.0f }, { "w", 1.0f } };
     if (GetModelProperty(jsObj, "lightSpace", positionAng)) {
-        LOGD("Light positionInAngles: theta: %f, phi %f, distance: %f",
-            positionAng["theta"], positionAng["phi"], positionAng["radius"]);
-        position.Set({AnimatableFloat(positionAng["theta"], animOption), AnimatableFloat(0.0f, animOption),
-            AnimatableFloat(positionAng["phi"], animOption)}, AnimatableFloat(positionAng["radius"], animOption),
-            true);
+        LOGD("Light positionInAngles: theta: %f, phi %f, distance: %f", positionAng["theta"], positionAng["phi"],
+            positionAng["radius"]);
+        position.Set({ AnimatableFloat(positionAng["theta"], animOption), AnimatableFloat(0.0f, animOption),
+                         AnimatableFloat(positionAng["phi"], animOption) },
+            AnimatableFloat(positionAng["radius"], animOption), true);
         ModelView::GetInstance()->AddLight(AceType::MakeRefPtr<NG::ModelLight>(
             type, inputColor, AnimatableFloat(intensity, animOption), shadow, position, rotation));
         return;
@@ -329,8 +309,9 @@ void JSSceneView::JsLight(const JSCallbackInfo& info)
         JSRef<JSObject> spaceObj = JSRef<JSObject>::Cast(itemLightSpace);
         GetModelProperty(spaceObj, "position", pos);
         LOGD("Light position x: %f, y: %f, z %f", pos["x"], pos["y"], pos["z"]);
-        position.Set({AnimatableFloat(pos["x"], animOption), AnimatableFloat(pos["y"], animOption),
-            AnimatableFloat(pos["z"], animOption)}, AnimatableFloat(0.0f, animOption), false);
+        position.Set({ AnimatableFloat(pos["x"], animOption), AnimatableFloat(pos["y"], animOption),
+                         AnimatableFloat(pos["z"], animOption) },
+            AnimatableFloat(0.0f, animOption), false);
         GetModelProperty(spaceObj, "rotation", quat);
         LOGD("Light rotation: x %f, y: %f, z: %f w: %f", quat["x"], quat["y"], quat["z"], quat["w"]);
         rotation = Quaternion(quat["x"], quat["y"], quat["z"], quat["w"]);
@@ -343,7 +324,6 @@ void JSSceneView::JsAddCube(const JSCallbackInfo& info)
 {
     // Parse the info object.
     if (info.Length() <= 0 || !info[0]->IsObject()) {
-        LOGE("JSSceneView: arg is invalid.");
         return;
     }
 
@@ -356,7 +336,6 @@ void JSSceneView::JsAddCube(const JSCallbackInfo& info)
 
     OHOS::Render3D::Vec3 position(0.0f, 0.0f, 0.0f);
     if (jsObj->HasProperty("position")) {
-        LOGD("Cube position");
         JSRef<JSVal> positionArgs = jsObj->GetProperty("position");
         if (positionArgs->IsObject()) {
             JSRef<JSObject> posObj = JSRef<JSObject>::Cast(positionArgs);
@@ -375,7 +354,6 @@ void JSSceneView::JsAddSphere(const JSCallbackInfo& info)
 {
     // Parse the info object.
     if (info.Length() <= 0 || !info[0]->IsObject()) {
-        LOGE("JSSceneView: arg is invalid.");
         return;
     }
 
@@ -388,7 +366,6 @@ void JSSceneView::JsAddSphere(const JSCallbackInfo& info)
 
     OHOS::Render3D::Vec3 position(0.0f, 0.0f, 0.0f);
     if (jsObj->HasProperty("position")) {
-        LOGD("Cube position");
         JSRef<JSVal> positionArgs = jsObj->GetProperty("position");
         if (positionArgs->IsObject()) {
             JSRef<JSObject> posObj = JSRef<JSObject>::Cast(positionArgs);
@@ -407,7 +384,6 @@ void JSSceneView::JsAddCone(const JSCallbackInfo& info)
 {
     // Parse the info object.
     if (info.Length() <= 0 || !info[0]->IsObject()) {
-        LOGE("JSSceneView: arg is invalid.");
         return;
     }
 
@@ -420,7 +396,6 @@ void JSSceneView::JsAddCone(const JSCallbackInfo& info)
 
     OHOS::Render3D::Vec3 position(0.0f, 0.0f, 0.0f);
     if (jsObj->HasProperty("position")) {
-        LOGD("Cube position");
         JSRef<JSVal> positionArgs = jsObj->GetProperty("position");
         if (positionArgs->IsObject()) {
             JSRef<JSObject> posObj = JSRef<JSObject>::Cast(positionArgs);
@@ -439,11 +414,9 @@ void JSSceneView::JsGLTFAnimation(const JSCallbackInfo& info)
 {
     // Parse the info object.
     if (info.Length() < 1 || !info[0]->IsObject()) {
-        LOGE("JSSceneView JSGLTFAnimation: arg is invalid.");
         return;
     }
 
-    LOGD("JSGLTFAnimation() info[0]: %s", info[0]->ToString().c_str());
     JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(info[0]);
     JSRef<JSVal> itemName = jsObj->GetProperty("name");
     std::string name = (itemName->IsString()) ? itemName->ToString() : "";
@@ -465,19 +438,16 @@ void JSSceneView::JsGLTFAnimation(const JSCallbackInfo& info)
 void JSSceneView::JsAddCustomRender(const JSCallbackInfo& info)
 {
     if (info.Length() != 2) {
-        LOGE("customRender() invocation error - two arguments required");
         return;
     }
 
     if (info[1]->IsNull() || !info[1]->IsBoolean()) {
-        LOGE("customRender() invocation error - Needs frame callback flag. Must be a Boolean");
         return;
     }
 
     std::string uri;
     auto parseOk = ParseJsMedia(info[0], uri);
     if (!parseOk) {
-        LOGE("JSSceneView::JsAddCustomRender() arg parsing failed.");
         return;
     }
 
@@ -491,7 +461,6 @@ void JSSceneView::JsAddCustomRender(const JSCallbackInfo& info)
 void JSSceneView::JsWidth(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have atleast 1 arguments");
         return;
     }
 
@@ -509,7 +478,6 @@ void JSSceneView::JsWidth(const JSCallbackInfo& info)
 void JSSceneView::JsHeight(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have atleast 1 arguments");
         return;
     }
 
@@ -527,13 +495,10 @@ void JSSceneView::JsHeight(const JSCallbackInfo& info)
 void JSSceneView::JsRenderWidth(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The arg is wrong, it supposed to have at least 1 argument");
         return;
     }
-    LOGD("JSRenderWidth() info[0]: %s", info[0]->ToString().c_str());
     CalcDimension value;
     if (!ParseJsDimensionVp(info[0], value)) {
-        LOGE("invalid args for render width");
         value.SetValue(1.0f);
         return;
     }
@@ -552,7 +517,6 @@ void JSSceneView::JsRenderWidth(const JSCallbackInfo& info)
 void JSSceneView::JsRenderHeight(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The arg is wrong, it supposed to have at least 1 argument");
         return;
     }
     LOGD("JSRenderHeight() info[0]: %s", info[0]->ToString().c_str());
@@ -582,14 +546,12 @@ void JSSceneView::JsRenderFrameRate(const JSCallbackInfo& info)
 void JSSceneView::JsShader(const JSCallbackInfo& info)
 {
     if (info.Length() != 1) {
-        LOGE("The arg is wrong, it is supposed to have 1 argument");
         return;
     }
 
     std::string shaderPath;
     auto parseOk = ParseJsMedia(info[0], shaderPath);
     if (!parseOk) {
-        LOGE("JSSceneView::JsShader() arg parsing failed.");
         return;
     }
 
@@ -602,14 +564,12 @@ void JSSceneView::JsShader(const JSCallbackInfo& info)
 void JSSceneView::JsShaderImageTexture(const JSCallbackInfo& info)
 {
     if (info.Length() != 1) {
-        LOGE("The arg is wrong, it is supposed to have 1 argument");
         return;
     }
 
     std::string texturePath;
     auto parseOk = ParseJsMedia(info[0], texturePath);
     if (!parseOk) {
-        LOGE("JSSceneView::JsShaderImageTexture() arg parsing failed.");
         return;
     }
 
@@ -622,14 +582,12 @@ void JSSceneView::JsShaderImageTexture(const JSCallbackInfo& info)
 void JSSceneView::JsShaderInputBuffer(const JSCallbackInfo& info)
 {
     if (info.Length() != 1 || !info[0]->IsArray()) {
-        LOGE("JsShaderInputBuffer() Invalid args.");
         return;
     }
 
     JSRef<JSArray> array = JSRef<JSArray>::Cast(info[0]);
     int32_t length = static_cast<int32_t>(array->Length());
     if (length <= 0) {
-        LOGE("JsShaderInputBuffer() Buffer is empty.");
         return;
     }
 
@@ -643,7 +601,6 @@ void JSSceneView::JsShaderInputBuffer(const JSCallbackInfo& info)
     }
 
     if (!buffer->Alloc(length)) {
-        LOGE("JsShaderInputBuffer map shader input buffer error!");
         return;
     }
 
@@ -652,7 +609,6 @@ void JSSceneView::JsShaderInputBuffer(const JSCallbackInfo& info)
         if (jsValue->IsNumber()) {
             buffer->Update(jsValue->ToNumber<float>(), i);
         } else {
-            LOGE("JsShaderInputBuffer() Invalid data.");
             return;
         }
     }
@@ -660,13 +616,10 @@ void JSSceneView::JsShaderInputBuffer(const JSCallbackInfo& info)
     modelView->AddShaderInputBuffer(buffer);
 }
 
-void JSSceneView::JsOnError(const JSCallbackInfo& info)
-{
-    LOGD("JSOnError() info message");
-}
+void JSSceneView::JsOnError(const JSCallbackInfo& info) {}
+
 void JSSceneView::JSBind(BindingTarget globalObj)
 {
-    LOGD("JSSceneView::JSBind()");
     JSClass<JSSceneView>::Declare("Component3D");
     MethodOptions opt = MethodOptions::NONE;
     JSClass<JSSceneView>::StaticMethod("create", &JSSceneView::Create, opt);

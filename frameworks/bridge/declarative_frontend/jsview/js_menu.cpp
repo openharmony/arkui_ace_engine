@@ -55,7 +55,6 @@ void JSMenu::Create(const JSCallbackInfo& /* info */)
 void JSMenu::FontSize(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The argv is wrong, it is supposed to have at least 1 argument");
         return;
     }
     CalcDimension fontSize;
@@ -70,7 +69,7 @@ void JSMenu::Font(const JSCallbackInfo& info)
     CalcDimension fontSize;
     std::string weight;
     if (info.Length() < 1 || !info[0]->IsObject()) {
-        LOGW("The argv is wrong, it is supposed to have at least 1 object argument");
+        return;
     } else {
         JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
         JSRef<JSVal> size = obj->GetProperty("size");
@@ -117,7 +116,7 @@ void JSMenu::FontColor(const JSCallbackInfo& info)
 {
     std::optional<Color> color = std::nullopt;
     if (info.Length() < 1) {
-        LOGW("The argv is wrong, it is supposed to have at least 1 argument");
+        return;
     } else {
         Color textColor;
         if (ParseJsColor(info[0], textColor)) {
@@ -130,7 +129,6 @@ void JSMenu::FontColor(const JSCallbackInfo& info)
 void JSMenu::SetWidth(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The argv is wrong, it is supposed to have at least 1 argument");
         return;
     }
     CalcDimension width;
@@ -182,7 +180,6 @@ void JSMenu::HandleDifferentRadius(const JSRef<JSVal>& args)
 void JSMenu::SetRadius(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The argv is wrong, it is supposed to have at least 1 argument");
         return;
     }
     CalcDimension radius;

@@ -55,9 +55,7 @@ namespace OHOS::Ace::Framework {
 
 void JSViewStackProcessor::JSVisualState(const JSCallbackInfo& info)
 {
-    LOGD("JSVisualState");
     if ((info.Length() < 1) || (!info[0]->IsString())) {
-        LOGD("JSVisualState: is not a string.");
         ViewStackModel::GetInstance()->ClearVisualState();
         return;
     }
@@ -70,7 +68,6 @@ void JSViewStackProcessor::JSVisualState(const JSCallbackInfo& info)
 // public static emthods exposed to JS
 void JSViewStackProcessor::JSBind(BindingTarget globalObj)
 {
-    LOGD("JSViewStackProcessor::Bind");
     JSClass<JSViewStackProcessor>::Declare("ViewStackProcessor");
     MethodOptions opt = MethodOptions::NONE;
 
@@ -153,7 +150,6 @@ void JSViewStackProcessor::JsMoveDeletedElmtIds(const JSCallbackInfo& info)
 {
     LOGD("JSViewStackProcessor, moving elmtIds of all deleted Elements from ElementRegister to JS caller:");
     if (!info[0]->IsArray()) {
-        LOGE("info[0] is not array.");
         return;
     }
     JSRef<JSArray> jsArr = JSRef<JSArray>::Cast(info[0]);
@@ -189,11 +185,9 @@ int32_t JSViewStackProcessor::JsGetApiVersion()
 void JSViewStackProcessor::JsGetAndPushFrameNode(const JSCallbackInfo& info)
 {
     if (info.Length() < 2) {
-        LOGE("The arg is wrong, it is supposed to have 2 arguments");
         return;
     }
     if (!info[0]->IsString() || !info[1]->IsNumber()) {
-        LOGE("JsGetAndPushFrameNode() invalid args.");
         return;
     }
     ViewStackModel::GetInstance()->GetAndPushFrameNode(info[0]->ToString(), info[1]->ToNumber<int32_t>());

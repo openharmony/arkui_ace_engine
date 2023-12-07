@@ -76,7 +76,6 @@ void JSStepperItem::JSBind(BindingTarget globalObj)
 void JSStepperItem::SetPrevLabel(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have at least 1 arguments");
         return;
     }
 
@@ -87,7 +86,7 @@ void JSStepperItem::SetPrevLabel(const JSCallbackInfo& info)
     }
 
     if (!info[0]->IsString()) {
-        LOGE("Arg is not String.");
+        return;
     }
 
     StepperItemModel::GetInstance()->SetPrevLabel(info[0]->ToString());
@@ -96,7 +95,6 @@ void JSStepperItem::SetPrevLabel(const JSCallbackInfo& info)
 void JSStepperItem::SetNextLabel(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have at least 1 arguments");
         return;
     }
 
@@ -107,7 +105,7 @@ void JSStepperItem::SetNextLabel(const JSCallbackInfo& info)
     }
 
     if (!info[0]->IsString()) {
-        LOGE("Arg is not String.");
+        return;
     }
 
     StepperItemModel::GetInstance()->SetNextLabel(info[0]->ToString());
@@ -119,16 +117,13 @@ void JSStepperItem::SetStatus(const JSCallbackInfo& info)
     std::string status = statusArray[0];
     do {
         if (info.Length() < 1) {
-            LOGE("The arg is wrong, it is supposed to have at least 1 arguments");
             break;
         }
         if (!info[0]->IsNumber()) {
-            LOGE("Arg is not Number.");
             break;
         }
         auto index = info[0]->ToNumber<uint32_t>();
         if (index < 0 || index >= statusArray.size()) {
-            LOGE("The value of the index is not in the normal range.");
             break;
         }
         status = statusArray.at(index);

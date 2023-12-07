@@ -137,7 +137,6 @@ void JSWaterFlow::JSBind(BindingTarget globalObj)
 void JSWaterFlow::SetColumnsGap(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGW("Arg is wrong, it is supposed to have at least 1 argument");
         return;
     }
     CalcDimension colGap;
@@ -150,7 +149,6 @@ void JSWaterFlow::SetColumnsGap(const JSCallbackInfo& info)
 void JSWaterFlow::SetRowsGap(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGW("Arg is wrong, it is supposed to have at least 1 argument");
         return;
     }
     CalcDimension rowGap;
@@ -163,7 +161,6 @@ void JSWaterFlow::SetRowsGap(const JSCallbackInfo& info)
 void JSWaterFlow::SetLayoutDirection(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have at least 1 arguments");
         return;
     }
     auto value = static_cast<int32_t>(FlexDirection::COLUMN);
@@ -186,7 +183,6 @@ void JSWaterFlow::SetColumnsTemplate(const std::string& value)
 void JSWaterFlow::SetItemConstraintSize(const JSCallbackInfo& info)
 {
     if (info.Length() < 1 || !info[0]->IsObject()) {
-        LOGI("waterflow create error, info is invalid");
         return;
     }
 

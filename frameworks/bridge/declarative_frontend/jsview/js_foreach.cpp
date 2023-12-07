@@ -181,7 +181,6 @@ void JSForEach::SetIdArray(const JSCallbackInfo& info)
 void JSForEach::CreateNewChildStart(const JSCallbackInfo& info)
 {
     if ((info.Length() != 2) || !info[1]->IsObject() || (!info[0]->IsNumber() && !info[0]->IsString())) {
-        LOGW("Invalid arguments for ForEach.CreateNewChildStart");
         return;
     }
 
@@ -195,7 +194,6 @@ void JSForEach::CreateNewChildStart(const JSCallbackInfo& info)
 void JSForEach::CreateNewChildFinish(const JSCallbackInfo& info)
 {
     if ((info.Length() != 2) || !info[1]->IsObject() || (!info[0]->IsNumber() && !info[0]->IsString())) {
-        TAG_LOGW(AceLogTag::ACE_FOREACH, "Invalid arguments for ForEach.CreateNewChildFinish");
         return;
     }
 
