@@ -682,8 +682,8 @@ class BorderImageModifier extends ModifierWithKey<BorderImageOption> {
   }
 }
 
-class BorderModifier extends Modifier<ArkBorder>{
-  static identity: Symbol = Symbol("border");
+class BorderModifier extends ModifierWithKey<ArkBorder>{
+  static identity: Symbol = Symbol('border');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
       GetUINativeModule().common.resetBorder(node);
@@ -695,6 +695,10 @@ class BorderModifier extends Modifier<ArkBorder>{
         this.value.arkRadius.topLeft, this.value.arkRadius.topRight, this.value.arkRadius.bottomLeft, this.value.arkRadius.bottomRight,
         this.value.arkStyle.top, this.value.arkStyle.right, this.value.arkStyle.bottom, this.value.arkStyle.left);
     }
+  }
+  
+  checkObjectDiff(): boolean {
+    return this.value.checkObjectDiff(this.stageValue);
   }
 }
 
@@ -1886,92 +1890,48 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
   }
 
   border(value: BorderOptions): this {
-    let arkBorder = new ArkBorder()
-    if (!isResource(value?.width) && !isUndefined(value?.width) && value?.width !== null) {
-      if (isNumber(value.width)) {
-        arkBorder.arkWidth.left = Number(value.width)
-        arkBorder.arkWidth.right = Number(value.width)
-        arkBorder.arkWidth.top = Number(value.width)
-        arkBorder.arkWidth.bottom = Number(value.width)
-      } else if (isString(value.width)) {
-        arkBorder.arkWidth.left = String(value.width)
-        arkBorder.arkWidth.right = String(value.width)
-        arkBorder.arkWidth.top = String(value.width)
-        arkBorder.arkWidth.bottom = String(value.width)
-      } else {
-        if (isNumber((value.width as EdgeWidths)?.left) || isString((value.width as EdgeWidths)?.left)) {
-          arkBorder.arkWidth.left = (value.width as EdgeWidths).left
-        }
-        if (isNumber((value.width as EdgeWidths)?.right) || isString((value.width as EdgeWidths)?.right)) {
-          arkBorder.arkWidth.right = (value.width as EdgeWidths).right
-        }
-        if (isNumber((value.width as EdgeWidths)?.top) || isString((value.width as EdgeWidths)?.top)) {
-          arkBorder.arkWidth.top = (value.width as EdgeWidths).top
-        }
-        if (isNumber((value.width as EdgeWidths)?.bottom) || isString((value.width as EdgeWidths)?.bottom)) {
-          arkBorder.arkWidth.bottom = (value.width as EdgeWidths).bottom
-        }
-      }
-    }
-    if (!isResource(value?.color) && !isUndefined(value?.color) && value?.color !== null) {
-      let arkColor = new ArkColor();
-      if (isNumber(value.color)) {
-        arkColor.parseColorValue(Number(value.color))
-        arkBorder.arkColor.leftColor = arkColor.color
-        arkBorder.arkColor.rightColor = arkColor.color
-        arkBorder.arkColor.topColor = arkColor.color
-        arkBorder.arkColor.bottomColor = arkColor.color
-      } else if (isString(value?.color)) {
-        arkColor.parseColorValue(String(value.color))
-        arkBorder.arkColor.leftColor = arkColor.color
-        arkBorder.arkColor.rightColor = arkColor.color
-        arkBorder.arkColor.topColor = arkColor.color
-        arkBorder.arkColor.bottomColor = arkColor.color
-      } else {
-        if (isNumber((value.color as EdgeColors)?.left) || isString((value.color as EdgeColors)?.left)) {
-          arkColor.parseColorValue((value.color as EdgeColors).left)
-          arkBorder.arkColor.leftColor = arkColor?.color
-        }
-        if (isNumber((value.color as EdgeColors)?.right) || isString((value.color as EdgeColors)?.right)) {
-          arkColor.parseColorValue((value.color as EdgeColors).right)
-          arkBorder.arkColor.rightColor = arkColor?.color
-        }
-        if (isNumber((value.color as EdgeColors)?.top) || isString((value.color as EdgeColors)?.top)) {
-          arkColor.parseColorValue((value.color as EdgeColors).top)
-          arkBorder.arkColor.topColor = arkColor?.color
-        }
-        if (isNumber((value.color as EdgeColors)?.bottom) || isString((value.color as EdgeColors)?.bottom)) {
-          arkColor.parseColorValue((value.color as EdgeColors).bottom)
-          arkBorder.arkColor.bottomColor = arkColor?.color
-        }
-      }
+    let arkBorder = new ArkBorder();
+    if (isUndefined(value)) {     
+      arkBorder = undefined;
     }
 
-    if (!isResource(value?.radius) && !isUndefined(value?.radius) && value?.radius !== null) {
-      if (isNumber(value.radius)) {
-        arkBorder.arkRadius.topLeft = Number(value.radius)
-        arkBorder.arkRadius.topRight = Number(value.radius)
-        arkBorder.arkRadius.bottomLeft = Number(value.radius)
-        arkBorder.arkRadius.bottomRight = Number(value.radius)
-      } else if (isString(value.radius)) {
-        arkBorder.arkRadius.topLeft = String(value.radius)
-        arkBorder.arkRadius.topRight = String(value.radius)
-        arkBorder.arkRadius.bottomLeft = String(value.radius)
-        arkBorder.arkRadius.bottomRight = String(value.radius)
+    if (!isUndefined(value?.width) && value?.width !== null) {
+      if (isNumber(value.width) || isString(value.width) || isResource(value.width)) {
+        arkBorder.arkWidth.left = value.width;
+        arkBorder.arkWidth.right = value.width;
+        arkBorder.arkWidth.top = value.width;
+        arkBorder.arkWidth.bottom = value.width;
+      } else {
+        arkBorder.arkWidth.left = (value.width as EdgeWidths).left
+        arkBorder.arkWidth.right = (value.width as EdgeWidths).right
+        arkBorder.arkWidth.top = (value.width as EdgeWidths).top
+        arkBorder.arkWidth.bottom = (value.width as EdgeWidths).bottom
       }
-      else {
-        if (isNumber((value.radius as BorderRadiuses)?.topLeft) || isString((value.radius as BorderRadiuses)?.topLeft)) {
-          arkBorder.arkRadius.topLeft = (value.radius as BorderRadiuses)?.topLeft
-        }
-        if (isNumber((value.radius as BorderRadiuses)?.topRight) || isString((value.radius as BorderRadiuses)?.topRight)) {
-          arkBorder.arkRadius.topRight = (value.radius as BorderRadiuses)?.topRight
-        }
-        if (isNumber((value.radius as BorderRadiuses)?.bottomLeft) || isString((value.radius as BorderRadiuses)?.bottomLeft)) {
-          arkBorder.arkRadius.bottomLeft = (value.radius as BorderRadiuses)?.bottomLeft
-        }
-        if (isNumber((value.radius as BorderRadiuses)?.bottomRight) || isString((value.radius as BorderRadiuses)?.bottomRight)) {
-          arkBorder.arkRadius.bottomRight = (value.radius as BorderRadiuses)?.bottomRight
-        }
+    }
+    if (!isUndefined(value?.color) && value?.color !== null) {
+      if (isNumber(value.color) || isString(value.color) || isResource(value.color)) {
+        arkBorder.arkColor.leftColor = value.color;
+        arkBorder.arkColor.rightColor = value.color;
+        arkBorder.arkColor.topColor = value.color;
+        arkBorder.arkColor.bottomColor = value.color;
+      } else {
+        arkBorder.arkColor.leftColor = (value.color as EdgeColors).left
+        arkBorder.arkColor.rightColor = (value.color as EdgeColors).right
+        arkBorder.arkColor.topColor = (value.color as EdgeColors).top
+        arkBorder.arkColor.bottomColor = (value.color as EdgeColors).bottom
+      }
+    }
+    if (!isUndefined(value?.radius) && value?.radius !== null) {
+      if (isNumber(value.radius) || isString(value.radius) || isResource(value.radius)) {
+        arkBorder.arkRadius.topLeft = value.radius;
+        arkBorder.arkRadius.topRight = value.radius;
+        arkBorder.arkRadius.bottomLeft = value.radius;
+        arkBorder.arkRadius.bottomRight = value.radius;
+      } else {
+        arkBorder.arkRadius.topLeft = (value.radius as BorderRadiuses)?.topLeft
+        arkBorder.arkRadius.topRight = (value.radius as BorderRadiuses)?.topRight
+        arkBorder.arkRadius.bottomLeft = (value.radius as BorderRadiuses)?.bottomLeft
+        arkBorder.arkRadius.bottomRight = (value.radius as BorderRadiuses)?.bottomRight
       }
     }
     if (!isUndefined(value?.style) && value?.style !== null) {
@@ -1989,8 +1949,8 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
           arkBorder.arkStyle.right = arkBorderStyle.right
         }
       }
-    }
-    modifier(this._modifiers, BorderModifier, arkBorder);
+    }    
+    modifierWithKey(this._modifiersWithKeys, BorderModifier.identity, BorderModifier, arkBorder);
     return this;
   }
 

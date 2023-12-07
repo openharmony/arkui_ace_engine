@@ -65,6 +65,15 @@ constexpr uint32_t DEFAULT_DURATION = 1000;
 constexpr int64_t MICROSEC_TO_MILLISEC = 1000;
 constexpr SharedTransitionEffectType DEFAULT_SHARED_EFFECT = SharedTransitionEffectType::SHARED_EFFECT_EXCHANGE;
 
+BorderStyle ConvertBorderStyle(int32_t value)
+{
+    auto style = static_cast<BorderStyle>(value);
+    if (style < BorderStyle::SOLID || style > BorderStyle::NONE) {
+        style = BorderStyle::SOLID;
+    }
+    return style;
+}
+
 bool ParseJsDimensionVp(const EcmaVM *vm, const Local<JSValueRef> &value, CalcDimension &result)
 {
     if (value->IsNumber()) {
@@ -731,6 +740,7 @@ bool ParseMotionPath(const Framework::JSRef<Framework::JSVal>& jsValue, MotionPa
     return true;
 }
 
+
 bool ParseJsDoublePair(const EcmaVM *vm, const Local<JSValueRef> &value, double &first, double &second)
 {
     if (!value->IsArray(vm)) {
@@ -753,7 +763,7 @@ bool ParseJsDoublePair(const EcmaVM *vm, const Local<JSValueRef> &value, double 
     return true;
 }
 
-void ParseGradientCenter(const EcmaVM *vm, const Local<JSValueRef> &value, std::vector<double> &values)
+void ParseGradientCenter(const EcmaVM* vm, const Local<JSValueRef>& value, std::vector<double>& values)
 {
     bool hasValueX = false;
     bool hasValueY = false;
@@ -775,100 +785,157 @@ void ParseGradientCenter(const EcmaVM *vm, const Local<JSValueRef> &value, std::
     values.push_back(static_cast<double>(valueY.Unit()));
 }
 
-void ParseBorderWidth(ArkUIRuntimeCallInfo *runtimeCallInfo, EcmaVM *vm, double values[], int units[], int size)
+void PushOuterBordeDimensionVector(const std::optional<CalcDimension>& valueDimen, std::vector<double> &options)
 {
-    if (size != NUM_8) {
-        return;
+    options.push_back(static_cast<double>(valueDimen.has_value()));
+    if (valueDimen.has_value()) {
+        options.push_back(static_cast<double>(valueDimen.value().Value()));
+        options.push_back(static_cast<double>(valueDimen.value().Unit()));
+    } else {
+        options.push_back(0);
+        options.push_back(0);
     }
+}
+
+void ParseOuterBorder(EcmaVM* vm, const Local<JSValueRef>& args, std::optional<CalcDimension>& optionalDimention)
+{
+    CalcDimension valueDimen;
+    if (!args->IsUndefined() && ArkTSUtils::ParseJsDimensionVp(vm, args, valueDimen) && valueDimen.IsNonNegative()) {
+        if (valueDimen.Unit() == DimensionUnit::PERCENT) {
+            valueDimen.Reset();
+        }
+        optionalDimention = valueDimen;
+    }
+}
+
+void ParseOuterBorderWidth(ArkUIRuntimeCallInfo *runtimeCallInfo, EcmaVM *vm, std::vector<double> &values)
+{
     Local<JSValueRef> leftArgs = runtimeCallInfo->GetCallArgRef(NUM_1);
     Local<JSValueRef> rightArgs = runtimeCallInfo->GetCallArgRef(NUM_2);
     Local<JSValueRef> topArgs = runtimeCallInfo->GetCallArgRef(NUM_3);
     Local<JSValueRef> bottomArgs = runtimeCallInfo->GetCallArgRef(NUM_4);
+    std::optional<CalcDimension> leftDimen;
+    std::optional<CalcDimension> rightDimen;
+    std::optional<CalcDimension> topDimen;
+    std::optional<CalcDimension> bottomDimen;
 
-    CalcDimension left;
-    CalcDimension right;
-    CalcDimension top;
-    CalcDimension bottom;
+    ParseOuterBorder(vm, leftArgs, leftDimen);
+    ParseOuterBorder(vm, rightArgs, rightDimen);
+    ParseOuterBorder(vm, topArgs, topDimen);
+    ParseOuterBorder(vm, bottomArgs, bottomDimen);
 
-    ArkTSUtils::ParseAllBorder(vm, leftArgs, left);
-    ArkTSUtils::ParseAllBorder(vm, rightArgs, right);
-    ArkTSUtils::ParseAllBorder(vm, topArgs, top);
-    ArkTSUtils::ParseAllBorder(vm, bottomArgs, bottom);
-
-    values[NUM_0] = left.Value();
-    units[NUM_0] = static_cast<int>(left.Unit());
-    values[NUM_1] = right.Value();
-    units[NUM_1] = static_cast<int>(right.Unit());
-    values[NUM_2] = top.Value();
-    units[NUM_2] = static_cast<int>(top.Unit());
-    values[NUM_3] = bottom.Value();
-    units[NUM_3] = static_cast<int>(bottom.Unit());
+    PushOuterBordeDimensionVector(leftDimen, values);
+    PushOuterBordeDimensionVector(rightDimen, values);
+    PushOuterBordeDimensionVector(topDimen, values);
+    PushOuterBordeDimensionVector(bottomDimen, values);
 }
 
-void ParseBorderColor(ArkUIRuntimeCallInfo *runtimeCallInfo, EcmaVM *vm, uint32_t arr[], int size)
+void PushOuterBordeColorVector(const std::optional<Color>& valueColor, std::vector<uint32_t> &options)
 {
-    if (size != NUM_8) {
-        return;
+    options.push_back(static_cast<uint32_t>(valueColor.has_value()));
+    if (valueColor.has_value()) {
+        options.push_back(static_cast<uint32_t>(valueColor.value().GetValue()));
+    } else {
+        options.push_back(0);
     }
+}
+void ParseOuterBorderColor(ArkUIRuntimeCallInfo *runtimeCallInfo, EcmaVM *vm, std::vector<uint32_t> &values)
+{
     Local<JSValueRef> leftArg = runtimeCallInfo->GetCallArgRef(NUM_5);
-    Local<JSValueRef> rifghtArg = runtimeCallInfo->GetCallArgRef(NUM_6);
+    Local<JSValueRef> rightArg = runtimeCallInfo->GetCallArgRef(NUM_6);
     Local<JSValueRef> topArg = runtimeCallInfo->GetCallArgRef(NUM_7);
     Local<JSValueRef> bottomArg = runtimeCallInfo->GetCallArgRef(NUM_8);
+    
+    std::optional<Color> leftColor;
+    std::optional<Color> rightColor;
+    std::optional<Color> topColor;
+    std::optional<Color> bottomColor;
 
-    uint32_t leftColor = leftArg->Uint32Value(vm);
-    uint32_t rightColor = rifghtArg->Uint32Value(vm);
-    uint32_t topColor = topArg->Uint32Value(vm);
-    uint32_t bottomColor = bottomArg->Uint32Value(vm);
-    arr[NUM_0] = leftColor;
-    arr[NUM_1] = rightColor;
-    arr[NUM_2] = topColor;
-    arr[NUM_3] = bottomColor;
+    Color left;
+    if (!leftArg->IsUndefined() && ArkTSUtils::ParseJsColor(vm, leftArg, left)) {
+        leftColor = left;
+    }
+    Color right;
+    if (!rightArg->IsUndefined() && ArkTSUtils::ParseJsColor(vm, rightArg, right)) {
+        rightColor = right;
+    }
+    Color top;
+    if (!topArg->IsUndefined() && ArkTSUtils::ParseJsColor(vm, topArg, top)) {
+        topColor = top;
+    }
+    Color bottom;
+    if (!bottomArg->IsUndefined() && ArkTSUtils::ParseJsColor(vm, bottomArg, bottom)) {
+        bottomColor = bottom;
+    }
+
+    PushOuterBordeColorVector(leftColor, values);
+    PushOuterBordeColorVector(rightColor, values);
+    PushOuterBordeColorVector(topColor, values);
+    PushOuterBordeColorVector(bottomColor, values);
 }
 
-void ParseBorderRadius(ArkUIRuntimeCallInfo *runtimeCallInfo, EcmaVM *vm, double values[], int units[], int size)
+void ParseOuterBorderRadius(ArkUIRuntimeCallInfo *runtimeCallInfo, EcmaVM *vm, std::vector<double> &values)
 {
-    if (size != NUM_8) {
-        return;
-    }
     Local<JSValueRef> topLeftArgs = runtimeCallInfo->GetCallArgRef(NUM_9);
     Local<JSValueRef> topRightArgs = runtimeCallInfo->GetCallArgRef(NUM_10);
     Local<JSValueRef> bottomLeftArgs = runtimeCallInfo->GetCallArgRef(NUM_11);
     Local<JSValueRef> bottomRightArgs = runtimeCallInfo->GetCallArgRef(NUM_12);
 
-    CalcDimension topLeft;
-    CalcDimension topRight;
-    CalcDimension bottomLeft;
-    CalcDimension bottomRight;
+    std::optional<CalcDimension> topLeftOptinal;
+    std::optional<CalcDimension> topRightOptinal;
+    std::optional<CalcDimension> bottomLeftOptinal;
+    std::optional<CalcDimension> bottomRightOptinal;
 
-    ArkTSUtils::ParseAllBorder(vm, topLeftArgs, topLeft);
-    ArkTSUtils::ParseAllBorder(vm, topRightArgs, topRight);
-    ArkTSUtils::ParseAllBorder(vm, bottomLeftArgs, bottomLeft);
-    ArkTSUtils::ParseAllBorder(vm, bottomRightArgs, bottomRight);
+    ParseOuterBorder(vm, topLeftArgs, topLeftOptinal);
+    ParseOuterBorder(vm, topRightArgs, topRightOptinal);
+    ParseOuterBorder(vm, bottomLeftArgs, bottomLeftOptinal);
+    ParseOuterBorder(vm, bottomRightArgs, bottomRightOptinal);
 
-    values[NUM_4] = topLeft.Value();
-    units[NUM_4] = static_cast<int>(topLeft.Unit());
-    values[NUM_5] = topRight.Value();
-    units[NUM_5] = static_cast<int>(topRight.Unit());
-    values[NUM_6] = bottomLeft.Value();
-    units[NUM_6] = static_cast<int>(bottomLeft.Unit());
-    values[NUM_7] = bottomRight.Value();
-    units[NUM_7] = static_cast<int>(bottomRight.Unit());
+    PushOuterBordeDimensionVector(topLeftOptinal, values);
+    PushOuterBordeDimensionVector(topRightOptinal, values);
+    PushOuterBordeDimensionVector(bottomLeftOptinal, values);
+    PushOuterBordeDimensionVector(bottomRightOptinal, values);
 }
 
-void ParseBorderStyle(ArkUIRuntimeCallInfo *runtimeCallInfo, EcmaVM *vm, uint32_t styles[], int size)
+void PushOuterBordeStyleVector(const std::optional<BorderStyle>& value, std::vector<uint32_t> &options)
 {
-    if (size != NUM_8) {
-        return;
+    options.push_back(static_cast<uint32_t>(value.has_value()));
+    if (value.has_value()) {
+        options.push_back(static_cast<uint32_t>(value.value()));
+    } else {
+        options.push_back(0);
     }
+}
+
+void ParseOuterBorderStyle(ArkUIRuntimeCallInfo *runtimeCallInfo, EcmaVM *vm, std::vector<uint32_t> &values)
+{
+    std::optional<BorderStyle> styleLeft;
+    std::optional<BorderStyle> styleRight;
+    std::optional<BorderStyle> styleTop;
+    std::optional<BorderStyle> styleBottom;
+
     auto topArg = runtimeCallInfo->GetCallArgRef(NUM_13);
     auto rightArg = runtimeCallInfo->GetCallArgRef(NUM_14);
     auto bottomArg = runtimeCallInfo->GetCallArgRef(NUM_15);
     auto leftArg = runtimeCallInfo->GetCallArgRef(NUM_16);
 
-    styles[NUM_4] = topArg->Int32Value(vm);
-    styles[NUM_5] = rightArg->Int32Value(vm);
-    styles[NUM_6] = bottomArg->Int32Value(vm);
-    styles[NUM_7] = leftArg->Int32Value(vm);
+    if (!topArg->IsUndefined() && topArg->IsNumber()) {
+        styleTop = ConvertBorderStyle(topArg->Int32Value(vm));
+    }
+    if (!rightArg->IsUndefined() && rightArg->IsNumber()) {
+        styleRight = ConvertBorderStyle(rightArg->Int32Value(vm));
+    }
+    if (!bottomArg->IsUndefined() && bottomArg->IsNumber()) {
+        styleBottom = ConvertBorderStyle(bottomArg->Int32Value(vm));
+    }
+    if (!leftArg->IsUndefined() && leftArg->IsNumber()) {
+        styleLeft = ConvertBorderStyle(leftArg->Int32Value(vm));
+    }
+
+    PushOuterBordeStyleVector(styleLeft, values);
+    PushOuterBordeStyleVector(styleRight, values);
+    PushOuterBordeStyleVector(styleTop, values);
+    PushOuterBordeStyleVector(styleBottom, values);
 }
 
 void SetBackgroundImagePositionAlign(double &value, DimensionUnit &type, double valueContent,
@@ -2169,25 +2236,23 @@ ArkUINativeModuleValue CommonBridge::ResetBackgroundBlurStyle(ArkUIRuntimeCallIn
     return panda::JSValueRef::Undefined(vm);
 }
 
-ArkUINativeModuleValue CommonBridge::SetBorder(ArkUIRuntimeCallInfo *runtimeCallInfo)
+ArkUINativeModuleValue CommonBridge::SetBorder(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM *vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     auto nativeNode = firstArg->ToNativePointer(vm)->Value();
 
-    uint32_t size = SIZE_OF_EIGHT;
-    double values[size];
-    int units[size];
+    std::vector<double> options;
+    ParseOuterBorderWidth(runtimeCallInfo, vm, options);
+    ParseOuterBorderRadius(runtimeCallInfo, vm, options);
 
-    ParseBorderWidth(runtimeCallInfo, vm, values, units, size);
-    ParseBorderRadius(runtimeCallInfo, vm, values, units, size);
-
-    uint32_t colorAndStyle[size];
-    ParseBorderColor(runtimeCallInfo, vm, colorAndStyle, size);
-    ParseBorderStyle(runtimeCallInfo, vm, colorAndStyle, size);
-
-    GetArkUIInternalNodeAPI()->GetCommonModifier().SetBorder(nativeNode, values, units, colorAndStyle, size);
+    std::vector<uint32_t> colorAndStyleOptions;
+    ParseOuterBorderColor(runtimeCallInfo, vm, colorAndStyleOptions);
+    ParseOuterBorderStyle(runtimeCallInfo, vm, colorAndStyleOptions);
+    
+    GetArkUIInternalNodeAPI()->GetCommonModifier().SetBorder(
+        nativeNode, options.data(), options.size(), colorAndStyleOptions.data(), colorAndStyleOptions.size());
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -2284,26 +2349,24 @@ ArkUINativeModuleValue CommonBridge::SetBackgroundImageSize(ArkUIRuntimeCallInfo
         auto sizeType = imageSizeArg->ToNumber(vm)->Value();
         typeWidth = static_cast<OHOS::Ace::BackgroundImageSizeType>(sizeType);
         typeHeight = static_cast<OHOS::Ace::BackgroundImageSizeType>(sizeType);
-    } else if (widthArg->IsNumber() || widthArg->IsString() || heightArg->IsNumber() || heightArg->IsString()) {
+    } else {
         CalcDimension width;
         CalcDimension height;
+        ArkTSUtils::ParseJsDimensionVp(vm, widthArg, width);
+        ArkTSUtils::ParseJsDimensionVp(vm, heightArg, height);
 
-        bool hasWidth = ParseJsDimensionVp(vm, widthArg, width);
-        bool hasHeight = ParseJsDimensionVp(vm, heightArg, height);
-        if (hasWidth || hasHeight) {
-            valueWidth = width.ConvertToPx();
-            valueHeight = height.ConvertToPx();
-            typeWidth = BackgroundImageSizeType::LENGTH;
-            typeHeight = BackgroundImageSizeType::LENGTH;
+        valueWidth = width.ConvertToPx();
+        valueHeight = height.ConvertToPx();
+        typeWidth = BackgroundImageSizeType::LENGTH;
+        typeHeight = BackgroundImageSizeType::LENGTH;
 
-            if (width.Unit() == DimensionUnit::PERCENT) {
-                typeWidth = BackgroundImageSizeType::PERCENT;
-                valueWidth = width.Value() * FULL_DIMENSION;
-            }
-            if (height.Unit() == DimensionUnit::PERCENT) {
-                typeHeight = BackgroundImageSizeType::PERCENT;
-                valueHeight = height.Value() * FULL_DIMENSION;
-            }
+        if (width.Unit() == DimensionUnit::PERCENT) {
+            typeWidth = BackgroundImageSizeType::PERCENT;
+            valueWidth = width.Value() * FULL_DIMENSION;
+        }
+        if (height.Unit() == DimensionUnit::PERCENT) {
+            typeHeight = BackgroundImageSizeType::PERCENT;
+            valueHeight = height.Value() * FULL_DIMENSION;
         }
     }
     GetArkUIInternalNodeAPI()->GetCommonModifier().SetBackgroundImageSize(nativeNode, valueWidth, valueHeight,

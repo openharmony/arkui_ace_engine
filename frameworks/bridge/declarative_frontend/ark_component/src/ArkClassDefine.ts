@@ -61,10 +61,10 @@ class ArkBorderStyle implements Equable {
 }
 
 class ArkBorderColor {
-  leftColor: number | undefined | Resource;
-  rightColor: number | undefined | Resource;
-  topColor: number | undefined | Resource;
-  bottomColor: number | undefined | Resource;
+  leftColor: EdgeColors | ResourceColor;
+  rightColor: EdgeColors | ResourceColor;
+  topColor: EdgeColors | ResourceColor;
+  bottomColor: EdgeColors | ResourceColor;
 
   constructor() {
     this.leftColor = undefined;
@@ -98,10 +98,10 @@ class ArkPosition implements Equable {
 }
 
 class ArkBorderWidth implements Equable {
-  left: number | string | undefined | Resource;
-  right: number | string | undefined | Resource;
-  top: number | string | undefined | Resource;
-  bottom: number | string | undefined | Resource;
+  left: EdgeWidths | Length;
+  right: EdgeWidths | Length;
+  top: EdgeWidths | Length;
+  bottom: EdgeWidths | Length;
 
   constructor() {
     this.left = undefined;
@@ -121,10 +121,10 @@ class ArkBorderWidth implements Equable {
 }
 
 class ArkBorderRadius implements Equable {
-  topLeft: number | string | undefined | Resource;
-  topRight: number | string | undefined | Resource;
-  bottomLeft: number | string | undefined | Resource;
-  bottomRight: number | string | undefined | Resource;
+  topLeft: BorderRadiuses | Length;
+  topRight: BorderRadiuses | Length;
+  bottomLeft: BorderRadiuses | Length;
+  bottomRight: BorderRadiuses | Length;
 
   constructor() {
     this.topLeft = undefined;
@@ -704,6 +704,10 @@ class ArkBorder implements Equable {
       this.arkRadius.isEqual(another.arkRadius) &&
       this.arkStyle.isEqual(another.arkStyle)
     );
+  }
+  
+  checkObjectDiff(another: ArkBorder): boolean {
+    return !this.isEqual(another);
   }
 }
 
