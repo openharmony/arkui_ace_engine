@@ -1063,7 +1063,6 @@ void RichEditorPattern::UpdateSpanStyle(
     // Custom menus do not actively close.
     if (!(SelectOverlayIsOn() && selectOverlayProxy_->GetSelectOverlayMangerInfo().menuInfo.menuBuilder != nullptr)) {
         CloseSelectOverlay();
-        ResetSelection();
     }
 }
 
