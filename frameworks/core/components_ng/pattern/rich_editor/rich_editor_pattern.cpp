@@ -629,7 +629,7 @@ void RichEditorPattern::DeleteSpansByRange(
         ClearContent(*iter);
         host->RemoveChild(*iter);
     }
-    if (delEndSpan) {
+    if (endIter != childrens.end() && delEndSpan) {
         ClearContent(*endIter);
         host->RemoveChild(*endIter);
     }
