@@ -137,11 +137,6 @@ struct GridLayoutInfo {
     int32_t childrenCount_ = 0;
     ScrollAlign scrollAlign_ = ScrollAlign::AUTO;
 
-    bool reachEnd_ = false;
-    bool reachStart_ = false;
-
-    bool offsetEnd_ = false;
-
     // Map structure: [mainIndex, [crossIndex, index]],
     // when vertical, mainIndex is rowIndex and crossIndex is columnIndex.
     std::map<int32_t, std::map<int32_t, int32_t>> gridMatrix_;
@@ -153,6 +148,11 @@ struct GridLayoutInfo {
 
     // rect of grid item dragged in
     RectF currentRect_;
+
+    bool reachEnd_ = false;
+    bool reachStart_ = false;
+
+    bool offsetEnd_ = false;
 
     // Grid has GridItem whose columnEnd - columnStart > 0
     bool hasBigItem_;
