@@ -126,6 +126,7 @@ private:
     bool isForm_ = false;
     std::string prevTime_;
     std::map<int32_t, TextClockFormatElement> formatElementMap;
+    CancelableCallback<void()> delayTask_;
 
     ACE_DISALLOW_COPY_AND_MOVE(TextClockPattern);
 };
