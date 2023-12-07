@@ -18,12 +18,12 @@ ohos_unittest("rosen_test") {
   module_out_path = "$basic_test_output_path/common"
 
   sources = [
+    "$ace_root/adapter/ohos/entrance/file_asset_provider_impl.cpp",
     "$ace_root/frameworks/core/common/container_scope.cpp",
     "$ace_root/frameworks/core/common/rosen/rosen_asset_manager.cpp",
     "$ace_root/frameworks/core/common/rosen/rosen_convert_helper.cpp",
     "$ace_root/frameworks/core/common/rosen/rosen_window.cpp",
     "$ace_root/frameworks/core/components/common/properties/color.cpp",
-    "$ace_root/frameworks/core/components/plugin/file_asset_provider.cpp",
     "$ace_root/test/mock/core/common/mock_container.cpp",
     "rosen_test.cpp",
   ]
