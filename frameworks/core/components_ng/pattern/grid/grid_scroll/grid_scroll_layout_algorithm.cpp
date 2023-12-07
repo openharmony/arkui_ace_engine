@@ -284,6 +284,10 @@ void GridScrollLayoutAlgorithm::FillGridViewportAndMeasureChildren(
 {
     itemsCrossPosition_.clear();
     UpdateGridLayoutInfo(layoutWrapper, mainSize);
+    if (gridLayoutInfo_.targetIndex_.has_value()) {
+        UpdateGridMatrix(layoutWrapper, gridLayoutInfo_.targetIndex_.value(), crossSize);
+        gridLayoutInfo_.targetIndex_.reset();
+    }
     SkipLargeOffset(mainSize, layoutWrapper);
 
     if (!gridLayoutInfo_.lastCrossCount_) {
@@ -699,6 +703,72 @@ void GridScrollLayoutAlgorithm::UpdateGridLayoutInfo(LayoutWrapper* layoutWrappe
         default:
             ScrollToIndexAuto(layoutWrapper, mainSize, targetIndex);
     }
+}
+
+void GridScrollLayoutAlgorithm::UpdateGridMatrix(LayoutWrapper* layoutWrapper, int32_t index, float crossSize)
+{
+    auto totalItemCount = layoutWrapper->GetTotalChildCount();
+    if (gridLayoutInfo_.targetIndex_.value() == LAST_ITEM) {
+        gridLayoutInfo_.childrenCount_ = totalItemCount;
+        gridLayoutInfo_.targetIndex_ = gridLayoutInfo_.childrenCount_ - 1;
+    }
+    if (totalItemCount < index) {
+        return;
+    }
+    int32_t indexCount = index + 1;
+    int32_t mainCount = indexCount / crossCount_;
+    if (indexCount % crossCount_ != 0) {
+        mainCount++;
+    }
+    float mainSize = gridLayoutInfo_.lastMainSize_;
+    auto frameSize = axis_ == Axis::VERTICAL ? SizeF(crossSize, mainSize) : SizeF(mainSize, crossSize);
+    int32_t currentIndex = 0;
+    for (int32_t currentMainIndex = 0; (currentMainIndex < mainCount) && (currentIndex < totalItemCount);
+         ++currentMainIndex) {
+        float mainLength = 0.0;
+        for (int32_t currentCrossIndex = 0; (currentCrossIndex < crossCount_) && (currentIndex < totalItemCount);
+             ++currentCrossIndex) {
+            auto childLayoutWrapper = layoutWrapper->GetOrCreateChildByIndex(currentIndex);
+            if (!childLayoutWrapper) {
+                break;
+            }
+            AdjustRowColSpan(childLayoutWrapper, layoutWrapper, currentIndex);
+            auto mainSpan = axis_ == Axis::VERTICAL ? currentItemRowSpan_ : currentItemColSpan_;
+            auto crossSpan = axis_ == Axis::VERTICAL ? currentItemColSpan_ : currentItemRowSpan_;
+            int32_t state =
+                CheckGridPlacedState(currentIndex, currentMainIndex, currentCrossIndex, mainSpan, crossSpan);
+            if (state == SUCCESSFULLY) { // This position can correctly place the current index
+                MeasureChild(layoutWrapper, frameSize, childLayoutWrapper, currentCrossIndex, crossSpan);
+                float lineHeight = CalculateNodeHeight(childLayoutWrapper, mainSpan);
+                mainLength = std::max(lineHeight, mainLength);
+                currentIndex++;
+            } else if (state == currentIndex) { // This position is already occupied by the current index
+                indexCount++;
+                currentIndex++;
+                continue;
+            } else { // The current position cannot be placed
+                indexCount++;
+                continue;
+            }
+        }
+        mainCount = indexCount / crossCount_;
+        if (indexCount % crossCount_ != 0) {
+            mainCount++;
+        }
+        gridLayoutInfo_.lineHeightMap_.insert(std::make_pair(currentMainIndex, mainLength));
+    }
+}
+
+float GridScrollLayoutAlgorithm::CalculateNodeHeight(const RefPtr<LayoutWrapper>& childLayoutWrapper, int32_t mainSpan)
+{
+    auto itemSize = childLayoutWrapper->GetGeometryNode()->GetMarginFrameSize();
+    float lineHeight = 0.0;
+    if (mainSpan == 1) {
+        lineHeight = GetMainAxisSize(itemSize, gridLayoutInfo_.axis_);
+    } else {
+        lineHeight = GetMainAxisSize(itemSize, gridLayoutInfo_.axis_) / mainSpan;
+    }
+    return lineHeight;
 }
 
 void GridScrollLayoutAlgorithm::ScrollToIndexAuto(LayoutWrapper* layoutWrapper, float mainSize, int32_t targetIndex)
@@ -1440,6 +1510,53 @@ void GridScrollLayoutAlgorithm::MeasureChild(LayoutWrapper* layoutWrapper, const
         }
     }
     childLayoutWrapper->Measure(childConstraint);
+}
+
+int32_t GridScrollLayoutAlgorithm::CheckGridPlacedState(
+    int32_t index, int32_t main, int32_t cross, int32_t mainSpan, int32_t crossSpan)
+{
+    // If start position is already exist in gridMatrix, place grid item fail.
+    auto mainIter = gridLayoutInfo_.gridMatrix_.find(main);
+    if (mainIter != gridLayoutInfo_.gridMatrix_.end()) {
+        auto crossIter = mainIter->second.find(cross);
+        if (crossIter != mainIter->second.end()) {
+            return gridLayoutInfo_.gridMatrix_[main][cross];
+        }
+    }
+
+    // If cross length of grid item if out of range,  place grid item fail.
+    if (cross + crossSpan > static_cast<int32_t>(crossCount_)) {
+        return POSITION_SMALL; // The width of the index that needs to be placed is too wide to be placed
+    }
+
+    // If any grid item is already exist in gridMatrix, place grid item fail.
+    for (int32_t i = 0; i < mainSpan; i++) {
+        mainIter = gridLayoutInfo_.gridMatrix_.find(i + main);
+        if (mainIter == gridLayoutInfo_.gridMatrix_.end()) {
+            continue;
+        }
+        for (int32_t j = 0; j < crossSpan; j++) {
+            auto crossIter = mainIter->second.find(j + cross);
+            if (crossIter != mainIter->second.end()) {
+                return OCCUPIED; // The back of this position is occupied and cannot place the current index
+            }
+        }
+    }
+
+    // Padding grid matrix for grid item's range.
+    for (int32_t i = main; i < main + mainSpan; ++i) {
+        std::map<int32_t, int32_t> mainMap;
+        auto iter = gridLayoutInfo_.gridMatrix_.find(i);
+        if (iter != gridLayoutInfo_.gridMatrix_.end()) {
+            mainMap = iter->second;
+        }
+        for (int32_t j = cross; j < cross + crossSpan; ++j) {
+            mainMap.emplace(std::make_pair(j, index));
+        }
+        gridLayoutInfo_.gridMatrix_[i] = mainMap;
+    }
+    lastCross_ = cross + crossSpan;
+    return SUCCESSFULLY; // This position can be placed
 }
 
 bool GridScrollLayoutAlgorithm::CheckGridPlaced(
