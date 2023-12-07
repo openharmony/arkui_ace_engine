@@ -355,6 +355,8 @@ void BubbleView::UpdateCommonParam(int32_t popupId, const RefPtr<PopupParam>& pa
     popupLayoutProp->UpdatePositionOffset(OffsetF(param->GetTargetOffset().GetX(), param->GetTargetOffset().GetY()));
     if (param->IsMaskColorSetted()) {
         popupPaintProp->UpdateMaskColor(param->GetMaskColor());
+    } else {
+        popupPaintProp->UpdateMaskColor(Color::TRANSPARENT);
     }
     if (param->GetTargetSpace().has_value()) {
         popupLayoutProp->UpdateTargetSpace(param->GetTargetSpace().value());
