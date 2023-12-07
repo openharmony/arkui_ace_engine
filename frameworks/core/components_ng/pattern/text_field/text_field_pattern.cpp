@@ -830,7 +830,7 @@ void TextFieldPattern::InitDisableColor()
         underlineColor_ = IsDisabled() ? theme->GetDisableUnderlineColor() : theme->GetUnderlineColor();
         SaveUnderlineStates();
     }
-    layoutProperty->UpdateIsEnabled(IsDisabled());
+    layoutProperty->UpdateIsDisabled(IsDisabled());
 }
 
 void TextFieldPattern::InitFocusEvent()

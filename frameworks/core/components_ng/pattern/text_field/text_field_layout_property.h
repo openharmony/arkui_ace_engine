@@ -140,7 +140,7 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ShowUnderline, bool, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(DisplayMode, DisplayMode, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(MaxViewLines, uint32_t, PROPERTY_UPDATE_MEASURE);
-    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(IsEnabled, bool, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(IsDisabled, bool, PROPERTY_UPDATE_MEASURE);
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(WidthAuto, bool, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(TypeChanged, bool, PROPERTY_UPDATE_MEASURE);
@@ -192,7 +192,7 @@ protected:
         value->propTextAlignChanged_ = CloneTextAlignChanged();
         value->propDisplayMode_ = CloneDisplayMode();
         value->propMaxViewLines_ = CloneMaxViewLines();
-        value->propIsEnabled_ = CloneIsEnabled();
+        value->propIsDisabled_ = CloneIsDisabled();
         value->propSelectionMenuHidden_ = CloneSelectionMenuHidden();
         value->propPasswordRules_ = ClonePasswordRules();
         value->propEnableAutoFill_ = CloneEnableAutoFill();
