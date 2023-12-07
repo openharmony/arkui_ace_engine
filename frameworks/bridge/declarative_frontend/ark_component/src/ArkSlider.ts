@@ -23,7 +23,7 @@ class ArkSliderComponent extends ArkComponent implements SliderAttribute {
   }
   showSteps(value: boolean): this {
     modifier(this._modifiers, ShowStepsModifier, value);
-    return this;;
+    return this;
   }
   showTips(value: boolean, content?: any): this {
     let showTips = new ArkSliderTips(value, content);
@@ -59,7 +59,7 @@ class ArkSliderComponent extends ArkComponent implements SliderAttribute {
   }
   blockStyle(value: SliderBlockStyle): this {
     modifierWithKey(this._modifiersWithKeys, BlockStyleModifier.identity, BlockStyleModifier, value);
-    return this
+    return this;
   }
   stepSize(value: Length): this {
     modifierWithKey(this._modifiersWithKeys, StepSizeModifier.identity, StepSizeModifier, value);

@@ -420,7 +420,7 @@ class ArkTextComponent extends ArkComponent implements TextAttribute {
         fontWeightStr = value.toString();
       }
     } else if (isString(value)) {
-      fontWeightStr = value;
+      fontWeightStr = String(value);
     }
     modifier(this._modifiers, FontWeightModifier, fontWeightStr);
     return this;
