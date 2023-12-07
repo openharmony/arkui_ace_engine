@@ -308,15 +308,6 @@ int32_t RichEditorPattern::AddImageSpan(const ImageSpanOptions& options, bool is
     CHECK_NULL_RETURN(gesture, -1);
     // Masked the default drag behavior of node image
     gesture->SetDragEvent(nullptr, { PanDirection::DOWN }, 0, Dimension(0));
-    if (options.userGestureOption.onClick) {
-        auto tmpFunc = options.userGestureOption.onClick;
-        gesture->SetUserOnClick(std::move(tmpFunc));
-    }
-    if (options.userGestureOption.onLongPress) {
-        auto tmpFunc = options.userGestureOption.onLongPress;
-        auto tmpFuncPtr = AceType::MakeRefPtr<LongPressEvent>(std::move(tmpFunc));
-        gesture->SetLongPressEvent(tmpFuncPtr);
-    }
 
     int32_t spanIndex = 0;
     int32_t offset = -1;
@@ -371,6 +362,14 @@ int32_t RichEditorPattern::AddImageSpan(const ImageSpanOptions& options, bool is
     // The length of the imageSpan defaults to the length of a character to calculate the position
     spanItem->content = " ";
     AddSpanItem(spanItem, offset);
+    if (options.userGestureOption.onClick) {
+        auto tmpClickFunc = options.userGestureOption.onClick;
+        spanItem->SetOnClickEvent(std::move(tmpClickFunc));
+    }
+    if (options.userGestureOption.onLongPress) {
+        auto tmpLongPressFunc = options.userGestureOption.onLongPress;
+        spanItem->SetLongPressEvent(std::move(tmpLongPressFunc));
+    }
     if (options.offset.has_value() && options.offset.value() <= GetCaretPosition()) {
         SetCaretPosition(options.offset.value() + 1);
     } else {
@@ -507,12 +506,12 @@ int32_t RichEditorPattern::AddTextSpan(const TextSpanOptions& options, bool isPa
         UpdateParagraphStyle(start, end, *options.paraStyle);
     }
     if (options.userGestureOption.onClick) {
-        auto tmpFunc = options.userGestureOption.onClick;
-        spanItem->SetOnClickEvent(std::move(tmpFunc));
+        auto tmpClickFunc = options.userGestureOption.onClick;
+        spanItem->SetOnClickEvent(std::move(tmpClickFunc));
     }
     if (options.userGestureOption.onLongPress) {
-        auto tmpFunc = options.userGestureOption.onLongPress;
-        spanItem->SetLongPressEvent(std::move(tmpFunc));
+        auto tmpLongPressFunc = options.userGestureOption.onLongPress;
+        spanItem->SetLongPressEvent(std::move(tmpLongPressFunc));
     }
     if (!isPaste && textSelector_.IsValid()) {
         CloseSelectOverlay();
