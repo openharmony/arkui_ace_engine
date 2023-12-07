@@ -63,9 +63,14 @@ ArkUINativeModuleValue MenuBridge::SetFont(ArkUIRuntimeCallInfo* runtimeCallInfo
     Local<JSValueRef> fifthArg = runtimeCallInfo->GetCallArgRef(NUM_4);
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
 
-    std::string fontSize = ArkTSUtils::GetStringFromJS(vm, secondArg);
-    std::string weight = ArkTSUtils::GetStringFromJS(vm, thirdArg);
-    std::string fontFamily = ArkTSUtils::GetStringFromJS(vm, fourthArg);
+    std::string fontSize;
+    ArkTSUtils::GetStringFromJS(vm, secondArg, fontSize);
+
+    std::string weight;
+    ArkTSUtils::GetStringFromJS(vm, thirdArg, weight);
+
+    std::string fontFamily;
+    ArkTSUtils::GetStringFromJS(vm, fourthArg, fontFamily);
     
     int32_t styleVal = 0;
     if (!fifthArg->IsNull()) {

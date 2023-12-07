@@ -23,7 +23,7 @@
 
 namespace OHOS::Ace::NG {
 const DimensionUnit DEFAULT_UNIT = DimensionUnit::VP;
-const double DEFAULT_MARK_WIDTH = 2.0;
+constexpr float CHECK_BOX_MARK_SIZE_INVALID_VALUE = -1.0f;
 
 void SetSelect(NodeHandle node, bool isSelected)
 {
@@ -149,12 +149,8 @@ void ResetMark(NodeHandle node)
     auto checkBoxTheme = themeManager->GetTheme<CheckboxTheme>();
 
     CheckBoxModelNG::SetCheckMarkColor(frameNode, checkBoxTheme->GetPointColor());
-
-    Dimension size = Dimension(0.0, DEFAULT_UNIT);
-    CheckBoxModelNG::SetCheckMarkSize(frameNode, size);
-
-    Dimension width = Dimension(DEFAULT_MARK_WIDTH, DEFAULT_UNIT);
-    CheckBoxModelNG::SetCheckMarkWidth(frameNode, width);
+    CheckBoxModelNG::SetCheckMarkSize(frameNode, Dimension(CHECK_BOX_MARK_SIZE_INVALID_VALUE));
+    CheckBoxModelNG::SetCheckMarkWidth(frameNode, checkBoxTheme->GetCheckStroke());
 }
 
 ArkUICheckboxModifierAPI GetCheckboxModifier()

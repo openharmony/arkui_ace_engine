@@ -91,9 +91,12 @@ ArkUINativeModuleValue RatingBridge::SetStarStyle(ArkUIRuntimeCallInfo* runtimeC
     Local<JSValueRef> forthArg = runtimeCallInfo->GetCallArgRef(NUM_3);
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
 
-    std::string backgroundUri = ArkTSUtils::GetStringFromJS(vm, secondArg);
-    std::string foregroundUri = ArkTSUtils::GetStringFromJS(vm, thirdArg);
-    std::string secondaryUri = ArkTSUtils::GetStringFromJS(vm, forthArg);
+    std::string backgroundUri;
+    ArkTSUtils::GetStringFromJS(vm, secondArg, backgroundUri);
+    std::string foregroundUri;
+    ArkTSUtils::GetStringFromJS(vm, thirdArg, foregroundUri);
+    std::string secondaryUri;
+    ArkTSUtils::GetStringFromJS(vm, forthArg, secondaryUri);
 
     GetArkUIInternalNodeAPI()->GetRatingModifier().SetStarStyle(nativeNode,
         backgroundUri.c_str(), foregroundUri.c_str(), secondaryUri.c_str());

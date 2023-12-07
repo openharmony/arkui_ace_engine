@@ -82,7 +82,7 @@ public:
         }
         return true;
     }
-    static std::string GetStringFromJS(const EcmaVM *vm, const Local<JSValueRef> &value);
+    static void GetStringFromJS(const EcmaVM *vm, const Local<JSValueRef> &value, std::string& result);
     static bool ParseJsResource(const EcmaVM *vm, const Local<JSValueRef> &jsValue, CalcDimension &result);
     static void GetJsMediaBundleInfo(
         const EcmaVM* vm, const Local<JSValueRef>& jsValue, std::string& bundleName, std::string& moduleName);

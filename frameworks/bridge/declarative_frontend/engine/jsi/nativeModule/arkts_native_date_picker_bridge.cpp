@@ -60,9 +60,12 @@ ArkUINativeModuleValue DatePickerBridge::SetSelectedTextStyle(ArkUIRuntimeCallIn
         GetArkUIInternalNodeAPI()->GetDatePickerModifier().ResetSelectedTextStyle(nativeNode);
     }
     uint32_t textColor = textColorArgs->Uint32Value(vm);
-    std::string fontSize = ArkTSUtils::GetStringFromJS(vm, fontSizeArgs);
-    std::string fontWeight = ArkTSUtils::GetStringFromJS(vm, fontWeightArgs);
-    std::string fontFamily = ArkTSUtils::GetStringFromJS(vm, fontFamilyArgs);
+    std::string fontSize;
+    ArkTSUtils::GetStringFromJS(vm, fontSizeArgs, fontSize);
+    std::string fontWeight;
+    ArkTSUtils::GetStringFromJS(vm, fontWeightArgs, fontWeight);
+    std::string fontFamily;
+    ArkTSUtils::GetStringFromJS(vm, fontFamilyArgs, fontFamily);
     int32_t fontStyle = PLACE_HOLDER_ARRAY;
 
     std::string fontInfo =
@@ -104,9 +107,12 @@ ArkUINativeModuleValue DatePickerBridge::SetTextStyle(ArkUIRuntimeCallInfo* runt
         GetArkUIInternalNodeAPI()->GetDatePickerModifier().ResetSelectedTextStyle(nativeNode);
     }
     uint32_t textColor = textColorArgs->Uint32Value(vm);
-    std::string fontSize = ArkTSUtils::GetStringFromJS(vm, fontSizeArgs);
-    std::string fontWeight = ArkTSUtils::GetStringFromJS(vm, fontWeightArgs);
-    std::string fontFamily = ArkTSUtils::GetStringFromJS(vm, fontFamilyArgs);
+    std::string fontSize;
+    ArkTSUtils::GetStringFromJS(vm, fontSizeArgs, fontSize);
+    std::string fontWeight;
+    ArkTSUtils::GetStringFromJS(vm, fontWeightArgs, fontWeight);
+    std::string fontFamily;
+    ArkTSUtils::GetStringFromJS(vm, fontFamilyArgs, fontFamily);
     int32_t fontStyle = PLACE_HOLDER_ARRAY;
 
     std::string fontInfo =
@@ -148,9 +154,12 @@ ArkUINativeModuleValue DatePickerBridge::SetDisappearTextStyle(ArkUIRuntimeCallI
         GetArkUIInternalNodeAPI()->GetDatePickerModifier().ResetSelectedTextStyle(nativeNode);
     }
     uint32_t textColor = textColorArgs->Uint32Value(vm);
-    std::string fontSize = ArkTSUtils::GetStringFromJS(vm, fontSizeArgs);
-    std::string fontWeight = ArkTSUtils::GetStringFromJS(vm, fontWeightArgs);
-    std::string fontFamily = ArkTSUtils::GetStringFromJS(vm, fontFamilyArgs);
+    std::string fontSize;
+    ArkTSUtils::GetStringFromJS(vm, fontSizeArgs, fontSize);
+    std::string fontWeight;
+    ArkTSUtils::GetStringFromJS(vm, fontWeightArgs, fontWeight);
+    std::string fontFamily;
+    ArkTSUtils::GetStringFromJS(vm, fontFamilyArgs, fontFamily);
     int32_t fontStyle = PLACE_HOLDER_ARRAY;
 
     std::string fontInfo =
