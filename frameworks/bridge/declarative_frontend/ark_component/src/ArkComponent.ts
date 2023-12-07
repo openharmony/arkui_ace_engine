@@ -1975,10 +1975,10 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
         arkBorder.arkWidth.top = value.width;
         arkBorder.arkWidth.bottom = value.width;
       } else {
-        arkBorder.arkWidth.left = (value.width as EdgeWidths).left
-        arkBorder.arkWidth.right = (value.width as EdgeWidths).right
-        arkBorder.arkWidth.top = (value.width as EdgeWidths).top
-        arkBorder.arkWidth.bottom = (value.width as EdgeWidths).bottom
+        arkBorder.arkWidth.left = (value.width as EdgeWidths).left;
+        arkBorder.arkWidth.right = (value.width as EdgeWidths).right;
+        arkBorder.arkWidth.top = (value.width as EdgeWidths).top;
+        arkBorder.arkWidth.bottom = (value.width as EdgeWidths).bottom;
       }
     }
     if (!isUndefined(value?.color) && value?.color !== null) {
@@ -1988,10 +1988,10 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
         arkBorder.arkColor.topColor = value.color;
         arkBorder.arkColor.bottomColor = value.color;
       } else {
-        arkBorder.arkColor.leftColor = (value.color as EdgeColors).left
-        arkBorder.arkColor.rightColor = (value.color as EdgeColors).right
-        arkBorder.arkColor.topColor = (value.color as EdgeColors).top
-        arkBorder.arkColor.bottomColor = (value.color as EdgeColors).bottom
+        arkBorder.arkColor.leftColor = (value.color as EdgeColors).left;
+        arkBorder.arkColor.rightColor = (value.color as EdgeColors).right;
+        arkBorder.arkColor.topColor = (value.color as EdgeColors).top;
+        arkBorder.arkColor.bottomColor = (value.color as EdgeColors).bottom;
       }
     }
     if (!isUndefined(value?.radius) && value?.radius !== null) {
@@ -2001,25 +2001,25 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
         arkBorder.arkRadius.bottomLeft = value.radius;
         arkBorder.arkRadius.bottomRight = value.radius;
       } else {
-        arkBorder.arkRadius.topLeft = (value.radius as BorderRadiuses)?.topLeft
-        arkBorder.arkRadius.topRight = (value.radius as BorderRadiuses)?.topRight
-        arkBorder.arkRadius.bottomLeft = (value.radius as BorderRadiuses)?.bottomLeft
-        arkBorder.arkRadius.bottomRight = (value.radius as BorderRadiuses)?.bottomRight
+        arkBorder.arkRadius.topLeft = (value.radius as BorderRadiuses)?.topLeft;
+        arkBorder.arkRadius.topRight = (value.radius as BorderRadiuses)?.topRight;
+        arkBorder.arkRadius.bottomLeft = (value.radius as BorderRadiuses)?.bottomLeft;
+        arkBorder.arkRadius.bottomRight = (value.radius as BorderRadiuses)?.bottomRight;
       }
     }
     if (!isUndefined(value?.style) && value?.style !== null) {
       let arkBorderStyle = new ArkBorderStyle();
       if (arkBorderStyle.parseBorderStyle(value.style)) {
         if (!isUndefined(arkBorderStyle.style)) {
-          arkBorder.arkStyle.top = arkBorderStyle.style
-          arkBorder.arkStyle.left = arkBorderStyle.style
-          arkBorder.arkStyle.bottom = arkBorderStyle.style
-          arkBorder.arkStyle.right = arkBorderStyle.style
+          arkBorder.arkStyle.top = arkBorderStyle.style;
+          arkBorder.arkStyle.left = arkBorderStyle.style;
+          arkBorder.arkStyle.bottom = arkBorderStyle.style;
+          arkBorder.arkStyle.right = arkBorderStyle.style;
         } else {
-          arkBorder.arkStyle.top = arkBorderStyle.top
-          arkBorder.arkStyle.left = arkBorderStyle.left
-          arkBorder.arkStyle.bottom = arkBorderStyle.bottom
-          arkBorder.arkStyle.right = arkBorderStyle.right
+          arkBorder.arkStyle.top = arkBorderStyle.top;
+          arkBorder.arkStyle.left = arkBorderStyle.left;
+          arkBorder.arkStyle.bottom = arkBorderStyle.bottom;
+          arkBorder.arkStyle.right = arkBorderStyle.right;
         }
       }
     }    
