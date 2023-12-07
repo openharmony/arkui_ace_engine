@@ -1015,7 +1015,25 @@ void ParseDirection(EcmaVM *vm, const Local<JSValueRef> &directionArg, float &va
     }
 }
 
-void ParseRotate(ArkUIRuntimeCallInfo *runtimeCallInfo, double values[], int units[])
+void GetJsAngle(const EcmaVM* vm, const Local<JSValueRef>& angleArg, std::optional<float>& angle)
+{
+    if (angleArg->IsString()) {
+        angle = static_cast<float>(StringUtils::StringToDegree(angleArg->ToString(vm)->ToString()));
+    } else if (angleArg->IsNumber()) {
+        angle = static_cast<float>(angleArg->ToNumber(vm)->Value());
+    } else {
+        LOGE("Invalid value type");
+    }
+}
+
+void ParseCenterDimension(const EcmaVM* vm, const Local<JSValueRef>& centerArg, CalcDimension& centerDimension)
+{
+    if (!ArkTSUtils::ParseJsDimensionVp(vm, centerArg, centerDimension)) {
+        centerDimension = Dimension(0.5f, DimensionUnit::PERCENT);
+    }
+}
+
+bool ParseRotate(ArkUIRuntimeCallInfo *runtimeCallInfo, double values[], int units[])
 {
     EcmaVM *vm = runtimeCallInfo->GetVM();
     Local<JSValueRef> xDirectionArg = runtimeCallInfo->GetCallArgRef(NUM_1);
@@ -1023,17 +1041,23 @@ void ParseRotate(ArkUIRuntimeCallInfo *runtimeCallInfo, double values[], int uni
     Local<JSValueRef> zDirectionArg = runtimeCallInfo->GetCallArgRef(NUM_3);
     Local<JSValueRef> angleArg = runtimeCallInfo->GetCallArgRef(NUM_4);
     Local<JSValueRef> centerXArg = runtimeCallInfo->GetCallArgRef(NUM_5);
-    Local<JSValueRef> centerYArg = runtimeCallInfo->GetCallArgRef(NUM_3);
-    Local<JSValueRef> centerZArg = runtimeCallInfo->GetCallArgRef(NUM_6);
-    Local<JSValueRef> perspectiveArg = runtimeCallInfo->GetCallArgRef(NUM_7);
+    Local<JSValueRef> centerYArg = runtimeCallInfo->GetCallArgRef(NUM_6);
+    Local<JSValueRef> centerZArg = runtimeCallInfo->GetCallArgRef(NUM_7);
+    Local<JSValueRef> perspectiveArg = runtimeCallInfo->GetCallArgRef(NUM_8);
     float xDirection = 0.0f;
     float yDirection = 0.0f;
     float zDirection = 0.0f;
     float angle = 0.0f;
+    std::optional<float> angleOptional;
     CalcDimension centerX = 0.5_pct;
     CalcDimension centerY = 0.5_pct;
     CalcDimension centerZ = CalcDimension(0.0f, DimensionUnit::VP);
-    float perspective = 0.0f;
+    GetJsAngle(vm, angleArg, angleOptional);
+    if (!angleOptional) {
+        return false;
+    }
+    angle = angleOptional.value();
+    double perspective = 0.0;
     if (!xDirectionArg->IsNumber() && !yDirectionArg->IsNumber() && !zDirectionArg->IsNumber()) {
         xDirection = 0.0f;
         yDirection = 0.0f;
@@ -1042,17 +1066,10 @@ void ParseRotate(ArkUIRuntimeCallInfo *runtimeCallInfo, double values[], int uni
     ParseDirection(vm, xDirectionArg, xDirection);
     ParseDirection(vm, yDirectionArg, yDirection);
     ParseDirection(vm, zDirectionArg, zDirection);
-    if (angleArg->IsString()) {
-        angle = static_cast<float>(StringUtils::StringToDegree(angleArg->ToString(vm)->ToString()));
-    } else if (angleArg->IsNumber()) {
-        angle = static_cast<float>(angleArg->ToNumber(vm)->Value());
-    }
-    ParseAxisDimensionVp(vm, centerXArg, centerX, true);
-    ParseAxisDimensionVp(vm, centerYArg, centerY, true);
-    ParseAxisDimensionVp(vm, centerZArg, centerZ, true);
-    if (perspectiveArg->IsNumber()) {
-        perspective = static_cast<float>(perspectiveArg->ToNumber(vm)->Value());
-    }
+    ParseCenterDimension(vm, centerXArg, centerX);
+    ParseCenterDimension(vm, centerYArg, centerY);
+    ParseCenterDimension(vm, centerZArg, centerZ);
+    ArkTSUtils::ParseJsDouble(vm, perspectiveArg, perspective);
     values[NUM_0] = centerX.Value();
     units[NUM_0] = static_cast<int>(centerX.Unit());
     values[NUM_1] = centerY.Value();
@@ -1064,6 +1081,7 @@ void ParseRotate(ArkUIRuntimeCallInfo *runtimeCallInfo, double values[], int uni
     values[NUM_5] = zDirection;
     values[NUM_6] = angle;
     values[NUM_7] = perspective;
+    return true;
 }
 
 bool ParseCalcDimension(const EcmaVM* vm,
@@ -2538,8 +2556,12 @@ ArkUINativeModuleValue CommonBridge::SetRotate(ArkUIRuntimeCallInfo *runtimeCall
     double values[SIZE_OF_EIGHT];
     int units[SIZE_OF_THREE];
 
-    ParseRotate(runtimeCallInfo, values, units);
-    GetArkUIInternalNodeAPI()->GetCommonModifier().SetRotate(nativeNode, values, SIZE_OF_EIGHT, units, SIZE_OF_THREE);
+    if (ParseRotate(runtimeCallInfo, values, units)) {
+        GetArkUIInternalNodeAPI()->GetCommonModifier().SetRotate(
+            nativeNode, values, SIZE_OF_EIGHT, units, SIZE_OF_THREE);
+    } else {
+        GetArkUIInternalNodeAPI()->GetCommonModifier().ResetRotate(nativeNode);
+    }
     return panda::JSValueRef::Undefined(vm);
 }
 
