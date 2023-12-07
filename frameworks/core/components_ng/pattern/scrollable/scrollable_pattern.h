@@ -270,15 +270,6 @@ public:
         return !animator_ || animator_->IsStopped();
     }
 
-    bool HotzoneAnimateRunning() const
-    {
-        return hotzoneAnimator_ && hotzoneAnimator_->IsRunning();
-    }
-
-    bool HotzoneAnimateStoped() const
-    {
-        return !hotzoneAnimator_ || hotzoneAnimator_->IsStopped();
-    }
     void AbortScrollAnimator()
     {
         if (animator_ && !animator_->IsStopped()) {
@@ -607,11 +598,11 @@ private:
     bool edgeEffectAlwaysEnabled_ = false;
 
     RefPtr<Animator> hotzoneAnimator_;
-    float lastHonezoneOffset_ = 0.0f;
+    float lastHonezoneOffsetPct_ = 0.0f;
     RefPtr<BezierVariableVelocityMotion> velocityMotion_;
     std::optional<RefPtr<DragStatusListener>> dragStatusListener_;
     void UnRegister2DragDropManager();
-    HotzoneMoveDirection IsInHotZone(const PointF& point, float& offset);
+    float IsInHotZone(const PointF& point);
     void HotZoneScroll(const float offset, const HotzoneMoveDirection& direction);
     void StopHotzoneScroll();
     void HandleHotZone(const DragEventType& dragEventType, const RefPtr<NotifyDragEvent>& notifyDragEvent);
@@ -619,6 +610,7 @@ private:
         const DragEventType& dragEventType, const RefPtr<NotifyDragEvent>& notifyDragEvent) override;
     void HandleMoveEventInComp(const PointF& point);
     void HandleLeaveHotzoneEvent();
+    bool isVertical()
 };
 } // namespace OHOS::Ace::NG
 

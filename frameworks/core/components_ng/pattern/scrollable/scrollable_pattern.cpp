@@ -141,7 +141,7 @@ bool ScrollablePattern::ProcessNavBarReactOnUpdate(float offset)
     auto dragOffsetY = firstGeometryNode->GetFrameOffset().GetY();
     navBarPattern_->OnCoordScrollUpdate(offset, dragOffsetY);
     DraggedDownScrollEndProcess();
-    if (minTitle &&  Negative(offset)) {
+    if (minTitle && Negative(offset)) {
         return scrollEffect_ && scrollEffect_->IsNoneEffect();
     }
     return scrollEffect_ && scrollEffect_->IsSpringEffect();
@@ -458,15 +458,16 @@ bool ScrollablePattern::HandleEdgeEffect(float offset, int32_t source, const Siz
     bool isAtTop = IsAtTop();
     bool isAtBottom = IsAtBottom();
     // check edgeEffect is not springEffect
-    if (scrollEffect_ && scrollEffect_->IsFadeEffect() && (source == SCROLL_FROM_UPDATE ||
-        source == SCROLL_FROM_ANIMATION)) {    // handle edge effect
+    if (scrollEffect_ && scrollEffect_->IsFadeEffect() &&
+        (source == SCROLL_FROM_UPDATE || source == SCROLL_FROM_ANIMATION)) { // handle edge effect
         if ((isAtTop && Positive(offset)) || (isAtBottom && Negative(offset))) {
             auto isScrollFromUpdate = source == SCROLL_FROM_UPDATE;
             scrollEffect_->HandleOverScroll(GetAxis(), !reverse ? -offset : offset, size, isScrollFromUpdate);
         }
     }
-    if (!(scrollEffect_ && scrollEffect_->IsSpringEffect() && (source == SCROLL_FROM_UPDATE ||
-        source == SCROLL_FROM_ANIMATION || source == SCROLL_FROM_ANIMATION_SPRING))) {
+    if (!(scrollEffect_ && scrollEffect_->IsSpringEffect() &&
+            (source == SCROLL_FROM_UPDATE || source == SCROLL_FROM_ANIMATION ||
+                source == SCROLL_FROM_ANIMATION_SPRING))) {
         if (isAtTop && Positive(offset)) {
             animateOverScroll_ = false;
             return false;
@@ -534,15 +535,14 @@ void ScrollablePattern::RegisterScrollBarEventTask()
                 return scrollBar->InBarHoverRegion(Point(point.GetX(), point.GetY()));
             }
             return scrollBar->InBarTouchRegion(Point(point.GetX(), point.GetY()));
-        }
-    );
-    scrollableEvent_->SetBarCollectTouchTargetCallback([weak = AceType::WeakClaim(AceType::RawPtr(scrollBar_))]
-        (const OffsetF& coordinateOffset, const GetEventTargetImpl& getEventTargetImpl, TouchTestResult& result) {
+        });
+    scrollableEvent_->SetBarCollectTouchTargetCallback(
+        [weak = AceType::WeakClaim(AceType::RawPtr(scrollBar_))](
+            const OffsetF& coordinateOffset, const GetEventTargetImpl& getEventTargetImpl, TouchTestResult& result) {
             auto scrollBar = weak.Upgrade();
             CHECK_NULL_VOID(scrollBar);
             scrollBar->OnCollectTouchTarget(coordinateOffset, getEventTargetImpl, result);
-        }
-    );
+        });
 
     auto dragFRCSceneCallback = [weak = WeakClaim(this)](double velocity, SceneStatus sceneStatus) {
         auto pattern = weak.Upgrade();
@@ -886,12 +886,11 @@ void ScrollablePattern::AnimateTo(float position, float duration, const RefPtr<C
     FireOnScrollStart();
 }
 
-void ScrollablePattern::PlaySpringAnimation(
-    float position, float velocity, float mass, float stiffness, float damping)
+void ScrollablePattern::PlaySpringAnimation(float position, float velocity, float mass, float stiffness, float damping)
 {
     auto start = GetTotalOffset();
     const RefPtr<SpringProperty> DEFAULT_OVER_SPRING_PROPERTY =
-    AceType::MakeRefPtr<SpringProperty>(mass, stiffness, damping);
+        AceType::MakeRefPtr<SpringProperty>(mass, stiffness, damping);
     if (!springMotion_) {
         const RefPtr<SpringProperty> DEFAULT_OVER_SPRING_PROPERTY =
             AceType::MakeRefPtr<SpringProperty>(mass, stiffness, damping);
@@ -975,9 +974,9 @@ void ScrollablePattern::InitMouseEvent()
     gestureHub->AddPanEvent(boxSelectPanEvent_, panDirection, 1, DEFAULT_PAN_DISTANCE);
     gestureHub->SetPanEventType(GestureTypeName::BOXSELECT);
     gestureHub->SetOnGestureJudgeNativeBegin([](const RefPtr<NG::GestureInfo>& gestureInfo,
-                const std::shared_ptr<BaseGestureEvent>& info) -> GestureJudgeResult {
+                                                 const std::shared_ptr<BaseGestureEvent>& info) -> GestureJudgeResult {
         if (gestureInfo->GetType() == GestureTypeName::BOXSELECT &&
-                gestureInfo->GetInputEventType() != InputEventType::MOUSE_BUTTON) {
+            gestureInfo->GetInputEventType() != InputEventType::MOUSE_BUTTON) {
             return GestureJudgeResult::REJECT;
         }
         return GestureJudgeResult::CONTINUE;
@@ -1751,57 +1750,91 @@ void ScrollablePattern::Register2DragDropManager()
  * 2.Gives the distance from the edge of the hot zone from the drag point
  * @param {PointF&} point The drag point
  * @param {float&} offset The distance from the edge of the hot zone from the drag point
- * @return 1.The rolling direction 2.The distance from the edge of the hot zone from the drag point
+ * @return The distance from the edge of the hot zone from the drag point.scroll up:Offset percent is positive, scroll
+ * down:Offset percent is  negative
  */
-HotzoneMoveDirection ScrollablePattern::IsInHotZone(const PointF& point, float& offset)
+float ScrollablePattern::IsInHotZone(const PointF& point)
 {
     auto host = GetHost();
+    auto offset = 0.f;
     auto geometryNode = host->GetGeometryNode();
     if (!geometryNode) {
-        return HotzoneMoveDirection::NONE;
+        return 0.f;
     }
     auto wholeRect = geometryNode->GetFrameRect();
 
     auto hotZoneHeightPX = HOT_ZONE_HEIGHT_VP_DIM.ConvertToPx();
+    auto hotZoneWidthPX = HOT_ZONE_WIDTH_VP_DIM.ConvertToPx();
+    if (isVertical()) {
+        // create top hot zone,it is a rectangle
+        auto topHotzone = wholeRect;
+        topHotzone.SetHeight(hotZoneHeightPX);
 
-    // create top hot zone,it is a rectangle
-    auto topHotzone = wholeRect;
-    topHotzone.SetHeight(hotZoneHeightPX);
+        // create bottom hot zone,it is a rectangle
+        auto bottomHotzone = wholeRect;
+        auto bottomZoneEdgeY = wholeRect.GetY() + wholeRect.Height();
+        bottomHotzone.SetTop(bottomZoneEdgeY - hotZoneHeightPX);
+        bottomHotzone.SetHeight(hotZoneHeightPX);
 
-    // create bottom hot zone,it is a rectangle
-    auto bottomHotzone = wholeRect;
-    auto bottomZoneEdgeY = wholeRect.GetY() + wholeRect.Height();
-    bottomHotzone.SetTop(bottomZoneEdgeY - hotZoneHeightPX);
-    bottomHotzone.SetHeight(hotZoneHeightPX);
+        // Determines whether the drag point is within the hot zone,
+        // then gives the scroll component movement direction according to which hot zone the point is in
+        // top or bottom hot zone
+        if (topHotzone.IsInRegion(point)) {
+            offset = topHotzone.GetY() - point.GetY();
+            return offset / hotZoneHeightPX;
+        } else if (bottomHotzone.IsInRegion(point)) {
+            offset = bottomZoneEdgeY - point.GetY();
+            return offset / hotZoneHeightPX;
+        }
+    } else {
+        auto leftHotzone = wholeRect;
 
-    // Determines whether the drag point is within the hot zone,
-    // then gives the scroll component movement direction according to which hot zone the point is in
-    // top or bottom hot zone
-    if (topHotzone.IsInRegion(point)) {
-        offset = point.GetY() - topHotzone.GetY();
-        return HotzoneMoveDirection::DOWN;
-    } else if (bottomHotzone.IsInRegion(point)) {
-        offset = bottomZoneEdgeY - point.GetY();
-        return HotzoneMoveDirection::UP;
+        // create left hot zone,it is a rectangle
+        leftHotzone.SetWidth(hotZoneWidthPX);
+
+        // create right hot zone,it is a rectangle
+        auto rightHotzone = wholeRect;
+        rightHotzone.SetWidth(hotZoneWidthPX);
+        auto rightZoneEdgeX = wholeRect.GetX() + wholeRect.Width();
+        rightHotzone.SetLeft(rightZoneEdgeX - hotZoneWidthPX);
+
+        // Determines whether the drag point is within the hot zone,
+        // gives the scroll component movement direction according to which hot zone the point is in
+        // left or right hot zone
+        if (leftHotzone.IsInRegion(point)) {
+            offset = wholeRect.GetX() - point.GetX();
+            return offset / hotZoneWidthPX;
+        } else if (rightHotzone.IsInRegion(point)) {
+            offset = rightZoneEdgeX - point.GetX();
+            return offset / hotZoneWidthPX;
+        }
     }
 
-    return HotzoneMoveDirection::NONE;
+    return 0;
+}
+
+/**
+ * @description: Determines whether the scroll component is in the vertical direction
+ * @return True,If the scrolling component is vertical
+ */
+bool ScrollablePattern::isVertical()
+{
+    return axis_ == Axis::VERTICAL;
 }
 
 /**
  * @description: scroll up or down
  * @param {float} offset
- * @param {HotzoneMoveDirection&} direction up or down
  * @return None
  */
-void ScrollablePattern::HotZoneScroll(const float offset, const HotzoneMoveDirection& direction)
+void ScrollablePattern::HotZoneScroll(const float offsetPct)
 {
     auto host = GetHost();
     if (!IsScrollable()) {
         return;
     }
 
-    if (NearZero(offset)) {
+    if (NearZero(offsetPct)) {
         return;
     }
 
@@ -1809,21 +1842,21 @@ void ScrollablePattern::HotZoneScroll(const float offset, const HotzoneMoveDirec
     // 1. Enter the hot zone for the first time.
     // 2. When the drag point leaves the hot zone, it enters the hot zone again
     // 3. When the drag point moves within the hot zone, the hot zone offset changes
-    if (NearEqual(lastHonezoneOffset_, offset)) {
+    if (NearEqual(lastHonezoneOffset_, offsetPct)) {
         return;
     } else {
-        if (HotzoneAnimateRunning()) {
+        if (AnimateRunning()) {
             // Variable speed rolling
             // When the drag point is in the hot zone, and the hot zone offset changes.
-            // Then need to modify the offset
-            velocityMotion_->Reset(offset);
+            // Then need to modify the offset percent
+            velocityMotion_->Reset(offsetPct);
             return;
         }
     }
 
-    if (!hotzoneAnimator_) {
-        hotzoneAnimator_ = CREATE_ANIMATOR(PipelineBase::GetCurrentContext());
-        hotzoneAnimator_->AddStopListener([weak = AceType::WeakClaim(this)]() {
+    if (!animator_) {
+        animator_ = CREATE_ANIMATOR(PipelineBase::GetCurrentContext());
+        animator_->AddStopListener([weak = AceType::WeakClaim(this)]() {
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
             pattern->OnAnimateStop();
@@ -1833,14 +1866,14 @@ void ScrollablePattern::HotZoneScroll(const float offset, const HotzoneMoveDirec
     if (!velocityMotion_) {
         // Enter the hot zone for the first time.
         velocityMotion_ = AceType::MakeRefPtr<BezierVariableVelocityMotion>(
-            offset, [weak = WeakClaim(this), offset](HotzoneMoveDirection direction) -> bool {
+            offsetPct, [weak = WeakClaim(this)](float offset) -> bool {
                 auto pattern = weak.Upgrade();
                 CHECK_NULL_RETURN(pattern, true);
 
-                if (direction == HotzoneMoveDirection::UP && pattern->IsAtBottom()) {
+                if (offset < 0 && pattern->IsAtBottom()) {
                     // Stop scrolling when reach the bottom
                     return true;
-                } else if (direction == HotzoneMoveDirection::DOWN && pattern->IsAtTop()) {
+                } else if (offset > 0 && pattern->IsAtTop()) {
                     // Stop scrolling when reach the top
                     return true;
                 }
@@ -1854,15 +1887,15 @@ void ScrollablePattern::HotZoneScroll(const float offset, const HotzoneMoveDirec
             pattern->UpdateCurrentOffset(offset, SCROLL_FROM_AXIS);
             pattern->UpdateMouseStart(offset);
         });
-        velocityMotion_->ReInit(offset, direction);
+        velocityMotion_->ReInit(offsetPct);
     } else {
-        // When the drag point leaves the hot zone, it enters the hot zone again.Then need to reset direction and
-        // offset.
-        velocityMotion_->ReInit(offset, direction);
+        // When the drag point leaves the hot zone, it enters the hot zone again.Then need to reset offset percent.
+        velocityMotion_->ReInit(offsetPct);
     }
-    // Save the last offset
-    lastHonezoneOffset_ = offset;
-    hotzoneAnimator_->PlayMotion(velocityMotion_);
+    // Save the last offset percent
+    lastHonezoneOffsetPct_ = offsetPct;
+    animator_->PlayMotion(velocityMotion_);
+    FireOnScrollStart();
 }
 
 /**
@@ -1871,8 +1904,8 @@ void ScrollablePattern::HotZoneScroll(const float offset, const HotzoneMoveDirec
  */
 void ScrollablePattern::StopHotzoneScroll()
 {
-    if (!HotzoneAnimateStoped()) {
-        hotzoneAnimator_->Stop();
+    if (!AnimateStoped()) {
+        animator_->Stop();
     }
 }
 
@@ -1915,19 +1948,17 @@ void ScrollablePattern::HandleHotZone(
  * @description:When a drag point is inside the scroll component, it is necessary to handle the events of each moving
  * point
  * @param {PointF&} point the drag point
- * @param {float&} offset the distance from the edge of the hot zone from the drag point
  * @return None
  */
 void ScrollablePattern::HandleMoveEventInComp(const PointF& point)
 {
-    float offset = 0.f;
-    auto direction = IsInHotZone(point, offset);
-    if (direction == HotzoneMoveDirection::NONE) {
+    float offsetPct = IsInHotZone(point);
+    if (offsetPct == 0.f) {
         // Although it entered the rolling component, it is not in the rolling component hot zone.Then stop scrolling
         HandleLeaveHotzoneEvent();
     } else {
         // The drag point enters the hot zone
-        HotZoneScroll(offset, direction);
+        HotZoneScroll(offsetPct);
     }
 }
 

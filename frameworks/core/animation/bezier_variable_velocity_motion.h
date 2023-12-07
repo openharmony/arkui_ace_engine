@@ -23,9 +23,8 @@ namespace OHOS::Ace {
 
 // hot zone heights
 static constexpr Dimension HOT_ZONE_HEIGHT_VP_DIM = 59.0_vp;
-// Move direction
-enum class HotzoneMoveDirection { UP, DOWN, NONE };
-using MotionCompleteCallbck = std::function<bool(HotzoneMoveDirection)>;
+static constexpr Dimension HOT_ZONE_WIDTH_VP_DIM = 26.0_vp;
+using MotionCompleteCallbck = std::function<bool(float)>;
 constexpr float UNIT_CONVERT = 1000.0f;
 constexpr float MAX_SPEED = 2400.0f;
 
@@ -33,10 +32,10 @@ class ACE_EXPORT BezierVariableVelocityMotion : public Motion {
     DECLARE_ACE_TYPE(BezierVariableVelocityMotion, Motion);
 
 public:
-    BezierVariableVelocityMotion(float offsetMargin, MotionCompleteCallbck&& complete)
-        : complete_(complete), offsetMargin_(offsetMargin)
+    BezierVariableVelocityMotion(float offsetPct, MotionCompleteCallbck&& complete)
+        : complete_(complete), offsetPct_(offsetPct)
     {
-        Reset(offsetMargin_, true);
+        Reset(offsetPct_, true);
     };
     /**
      * @description: Get the roll distance
@@ -44,7 +43,7 @@ public:
      */
     double GetCurrentPosition() override
     {
-        return scrollOffset_;
+        return offsetPct_ > 0 ? scrollOffset_ : -scrollOffset_;
     };
 
     double GetCurrentVelocity() override
@@ -58,7 +57,7 @@ public:
     bool IsCompleted() override
     {
         if (complete_) {
-            return complete_(direction_);
+            return complete_(offsetPct_);
         }
         return true;
     };
@@ -67,13 +66,12 @@ public:
      * @description: The ratio of the hot zone offset to the maximum hot zone offset is used as an input parameter of
      * bezier, resulting in an output, which is the proportion of velocity.
      * The farther away you are from the outer edge of the hot zone, the greater the velocity
-     * @param {float} offsetMargin
+     * @param {float} offsetPct
      * @return Scroll speed
      */
-    double ComputeVelocity(float offsetMargin)
+    double ComputeVelocity(float offsetPct)
     {
-        auto hotZoneHeightPX = HOT_ZONE_HEIGHT_VP_DIM.ConvertToPx();
-        auto velocity = (1.f - Curves::SHARP->MoveInternal(std::abs(offsetMargin / hotZoneHeightPX))) * MAX_SPEED;
+        auto velocity = (1.f - Curves::SHARP->MoveInternal(std::abs(offsetPct))) * MAX_SPEED;
         return velocity;
     };
 
@@ -92,24 +90,20 @@ public:
     void Move(float offsetTime) override
     {
         scrollOffset_ = velocity_ * (offsetTime - lastOffsetTime_) / UNIT_CONVERT;
-        if (direction_ == HotzoneMoveDirection::UP) {
-            scrollOffset_ = -1 * scrollOffset_;
-        }
-
         lastOffsetTime_ = offsetTime;
     };
 
     /**
      * @description: Resets the hot spot offset to change the current speed, ultimately for variable speed scrolling
-     * @param {float} offsetMargin Hot Spot Offset. The ratio of its maximum offset to the hot zone is used as an input
-     * parameter to bezier
+     * @param {float} offsetPct Hot Spot Offset percent. The ratio of its maximum offset to the hot zone is used as an
+     * input parameter to bezier
      * @param {float} reset_time. When the animation starts, it needs to be reset
      * @return None
      */
-    void Reset(float offsetMargin, bool reset_time = false)
+    void Reset(float offsetPct, bool reset_time = false)
     {
-        offsetMargin_ = offsetMargin;
-        velocity_ = ComputeVelocity(offsetMargin_);
+        offsetPct_ = offsetPct;
+        velocity_ = ComputeVelocity(offsetPct_);
         if (reset_time) {
             lastOffsetTime_ = 0.0f;
         }
@@ -117,14 +111,12 @@ public:
 
     /**
      * @description:  reinitialize BezierVariableVelocityMotion
-     * @param {float} offsetMargin
-     * @param {HotzoneMoveDirection} direction
+     * @param {float} offsetPct
      * @return {*}
      */
-    void ReInit(float offsetMargin, HotzoneMoveDirection direction)
+    void ReInit(float offsetPct)
     {
-        direction_ = direction;
-        Reset(offsetMargin, true);
+        Reset(offsetPct, true);
     }
 
 private:
@@ -137,11 +129,9 @@ private:
     // The hot zone offset corresponds to a fixed velocity one-to-one by the bezier.
     // It is also possible to implement a generic class with velocity as an input parameter, but this is not necessary
     // at the moment
-    float offsetMargin_ { 0.0 };
+    float offsetPct_ { 0.0 };
     // Record the last time given by the move function
     float lastOffsetTime_ = 0.0f;
-
-    HotzoneMoveDirection direction_ = HotzoneMoveDirection::UP;
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_ANIMATION_BEZIER_VARIABLE_VELOCITY_MOTION_H
