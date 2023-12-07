@@ -485,6 +485,7 @@ void MenuLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(menuNode);
     auto menuPattern = menuNode->GetPattern<MenuPattern>();
     CHECK_NULL_VOID(menuPattern);
+    InitHierarchicalParameters();
     if (!targetTag_.empty()) {
         InitTargetSizeAndPosition(layoutWrapper, menuPattern->IsContextMenu(), menuPattern);
     }
@@ -1715,7 +1716,6 @@ void MenuLayoutAlgorithm::InitTargetSizeAndPosition(const LayoutWrapper* layoutW
     menuPattern->SetTargetSize(targetSize_);
     auto pipelineContext = GetCurrentPipelineContext();
     CHECK_NULL_VOID(pipelineContext);
-    InitHierarchicalParameters();
     if (isContextMenu || hierarchicalParameters_) {
         auto windowGlobalRect = pipelineContext->GetDisplayWindowRectInfo();
         float windowsOffsetX = static_cast<float>(windowGlobalRect.GetOffset().GetX());
