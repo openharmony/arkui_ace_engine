@@ -265,6 +265,7 @@ private:
     float formHeight_ = 0.0;
     std::string formData_;
     std::map<std::string, sptr<OHOS::AppExecFwk::FormAshmem>> formImageDataMap_;
+    std::unordered_map<int32_t, CustomPopupUIExtensionConfig> customPopupConfigMap_;
     std::unique_ptr<DistributedUIManager> uiManager_;
 
     sptr<IRemoteObject> parentToken_ = nullptr;
