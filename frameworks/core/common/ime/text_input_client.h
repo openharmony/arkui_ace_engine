@@ -154,6 +154,8 @@ public:
 
     virtual void HandleOnRedoAction() {}
 
+    virtual void HandleOnDelete() {}
+
     static std::map<KeyComb, std::function<bool(TextInputClient*)>> functionKeys_;
 
     static std::map<KeyComb, std::function<void(TextInputClient*)>> keyboardShortCuts_;
