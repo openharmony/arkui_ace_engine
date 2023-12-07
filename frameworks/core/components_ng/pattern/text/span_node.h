@@ -205,6 +205,8 @@ public:
     }
     std::string GetSpanContent(const std::string& rawContent);
 
+    std::string GetSpanContent();
+
 private:
     std::optional<TextStyle> textStyle_;
 };
