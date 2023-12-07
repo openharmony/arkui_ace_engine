@@ -300,13 +300,16 @@ public:
      * if creation is not successful, it returns 0 by default.
      */
     virtual int32_t CreateCustomPopupUIExtension(
-        const AAFwk::Want& want, const ModalUIExtensionCallbacks& callbacks, const CustomPopupUIExtensionConfig& config) = 0;
+        const AAFwk::Want& want, const ModalUIExtensionCallbacks& callbacks, const CustomPopupUIExtensionConfig& config)
+    {
+        return 0;
+    }        
  
     /**
-     * @description: Close the custom popup.
+     * @description: Destroy the custom popup.
      * @param config Indicates the ID of the UI node which bind the pupop
      */
-    virtual void CloseCustomPopupUIExtension(int32_t nodeId) = 0;
+    virtual void DestroyCustomPopupUIExtension(int32_t nodeId) {}
 };
 
 } // namespace OHOS::Ace

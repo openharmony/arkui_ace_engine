@@ -82,9 +82,8 @@
 #ifdef PLUGIN_COMPONENT_SUPPORTED
 #include "core/common/plugin_manager.h"
 #endif
-#include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/inspector.h"
-#include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
+#include "core/components_ng/base/view_abstract.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #ifdef NG_BUILD
 #include "frameworks/bridge/declarative_frontend/ng/declarative_frontend_ng.h"
@@ -2460,7 +2459,10 @@ int32_t UIContentImpl::CreateCustomPopupUIExtension(const AAFwk::Want& want,
     int32_t nodeId = 0;
     taskExecutor->PostSyncTask(
         [want, &nodeId, callbacks = callbacks, config = config, this]() {
-            auto targetNode = NG::Inspector::GetFrameNodeByKey(config.popupPosition);
+            if (config.inspectorId.empty()) {
+                return;
+            }
+            auto targetNode = NG::Inspector::GetFrameNodeByKey(config.inspectorId);
             CHECK_NULL_VOID(targetNode);
             if (customPopupConfigMap_.find(targetNode->GetId()) != customPopupConfigMap_.end()) {
                 LOGW("Nodeid=%{public}d has unclosed popup, cannot create new", targetNode->GetId());
@@ -2492,9 +2494,9 @@ int32_t UIContentImpl::CreateCustomPopupUIExtension(const AAFwk::Want& want,
     return nodeId;
 }
  
-void UIContentImpl::CloseCustomPopupUIExtension(int32_t nodeId)
+void UIContentImpl::DestroyCustomPopupUIExtension(int32_t nodeId)
 {
-    LOGI("Close custom popup start, nodeId=%{public}d", nodeId);
+    LOGI("Destroy custom popup start, nodeId=%{public}d", nodeId);
     auto container = Platform::AceContainer::GetContainer(instanceId_);
     CHECK_NULL_VOID(container);
     ContainerScope scope(instanceId_);

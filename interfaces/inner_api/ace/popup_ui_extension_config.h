@@ -64,7 +64,7 @@ struct PopupLength {
  
 struct CustomPopupUIExtensionConfig {
     bool isShowInSubWindow = true;
-    std::string popupPosition; // view id
+    std::string inspectorId;
     std::optional<bool> isAutoCancel;
     std::optional<bool> isEnableArrow;
     std::optional<PopupSize> targetSize;

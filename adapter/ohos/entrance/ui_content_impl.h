@@ -225,7 +225,7 @@ public:
 
     int32_t CreateCustomPopupUIExtension(const AAFwk::Want& want,
         const ModalUIExtensionCallbacks& callbacks, const CustomPopupUIExtensionConfig& config) override;
-    void CloseCustomPopupUIExtension(int32_t nodeId) override;
+    void DestroyCustomPopupUIExtension(int32_t nodeId) override;
 private:
     void InitializeInner(
         OHOS::Rosen::Window* window, const std::string& contentInfo, napi_value storage, bool isNamedRouter);
