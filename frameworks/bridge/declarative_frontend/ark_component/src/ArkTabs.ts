@@ -14,11 +14,7 @@ class ArkTabsComponent extends ArkComponent implements TabsAttribute {
     return this;
   }
   barPosition(value: BarPosition): TabsAttribute {
-    if (isNumber(value) && value >= BarPosition.Start && value <= BarPosition.End) {
       modifier(this._modifiers, BarPositionModifier, value);
-    } else {
-      modifier(this._modifiers, BarPositionModifier, BarPosition.Start);
-    }
     return this;
   }
   scrollable(value: boolean): TabsAttribute {
@@ -129,7 +125,7 @@ class DividerModifier extends Modifier<ArkDivider> {
   }
 }
 
-class BarWidthModifier extends Modifier<Length> {
+class BarWidthModifier extends ModifierWithKey<Length> {
   static identity: Symbol = Symbol('barWidth');
 
   applyPeer(node: KNode, reset: boolean): void {
@@ -161,7 +157,7 @@ class BarAdaptiveHeightModifier extends Modifier<boolean> {
   }
 }
 
-class BarHeightModifier extends Modifier<Length> {
+class BarHeightModifier extends ModifierWithKey<Length> {
   static identity: Symbol = Symbol('barHeight');
 
   applyPeer(node: KNode, reset: boolean): void {
@@ -267,7 +263,7 @@ class TabsHideTitleBarModifier extends Modifier<string> {
   }
 }
 
-class BarBackgroundColorModifier extends Modifier<ResourceColor> {
+class BarBackgroundColorModifier extends ModifierWithKey<ResourceColor> {
   static identity: Symbol = Symbol('barbackgroundcolor');
 
   applyPeer(node: KNode, reset: boolean): void {
