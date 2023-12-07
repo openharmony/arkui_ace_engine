@@ -3431,7 +3431,9 @@ void RichEditorPattern::HandleOnCopy()
         resultProcessor(*resultObj);
     }
     clipboard_->SetData(pasteData, copyOption_);
-    StartTwinkling();
+    if (!textDetectEnable_) {
+        StartTwinkling();
+    }
 }
 
 void RichEditorPattern::ResetAfterPaste()

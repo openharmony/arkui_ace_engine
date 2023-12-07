@@ -635,11 +635,12 @@ void JSText::JsEnableDataDetector(const JSCallbackInfo& info)
     if (info.Length() < 1) {
         return;
     }
-    if (!info[0]->IsBoolean()) {
+    auto tmpInfo = info[0];
+    if (!tmpInfo->IsBoolean()) {
         TextModel::GetInstance()->SetTextDetectEnable(false);
         return;
     }
-    auto enable = info[0]->ToBoolean();
+    auto enable = tmpInfo->ToBoolean();
     TextModel::GetInstance()->SetTextDetectEnable(enable);
 }
 

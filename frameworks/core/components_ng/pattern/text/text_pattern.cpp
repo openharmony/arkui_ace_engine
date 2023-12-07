@@ -755,7 +755,6 @@ bool TextPattern::ShowUIExtensionMenu(const AISpan& aiSpan, const CalculateHandl
     } else {
         calculateHandleFunc();
     }
-    CalculateHandleOffsetAndShowOverlay();
     textSelector_.Update(baseOffset, destinationOffset);
     RectF aiRect;
     if (textSelector_.firstHandle.Top() != textSelector_.secondHandle.Top()) {
