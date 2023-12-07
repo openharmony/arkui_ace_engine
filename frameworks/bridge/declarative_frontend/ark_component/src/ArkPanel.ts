@@ -140,7 +140,7 @@ class PanelCustomHeightModifier extends ModifierWithKey<Dimension | PanelHeight>
   }
 }
 
-class PanelFullHeightModifier extends Modifier<string> {
+class PanelFullHeightModifier extends Modifier<string | number> {
   static identity: Symbol = Symbol('panelFullHeight');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -151,7 +151,7 @@ class PanelFullHeightModifier extends Modifier<string> {
   }
 }
 
-class PanelHalfHeightModifier extends Modifier<string> {
+class PanelHalfHeightModifier extends Modifier<string | number> {
   static identity: Symbol = Symbol('panelHalfHeight');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -162,7 +162,7 @@ class PanelHalfHeightModifier extends Modifier<string> {
   }
 }
 
-class PanelMiniHeightModifier extends Modifier<string> {
+class PanelMiniHeightModifier extends Modifier<string | number> {
   static identity: Symbol = Symbol('panelMiniHeight');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {

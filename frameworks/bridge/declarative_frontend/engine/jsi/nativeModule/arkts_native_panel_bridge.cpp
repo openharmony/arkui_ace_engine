@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_panel_bridge.h"
-
+#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_api.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 
@@ -108,7 +108,7 @@ ArkUINativeModuleValue PanelBridge::SetPanelFullHeight(ArkUIRuntimeCallInfo* run
     Local<JSValueRef> jsValue = runtimeCallInfo->GetCallArgRef(1);
     CalcDimension height;
 
-    if (jsValue->IsUndefined() || !ArkTSUtils::ParseJsDimensionVpNG(vm, jsValue, height)) {
+    if (jsValue->IsUndefined() || !ArkTSUtils::ParseJsDimensionVpNG(vm, jsValue, height, true)) {
         GetArkUIInternalNodeAPI()->GetPanelModifier().ResetPanelFullHeight(nativeNode);
     } else {
         if (LessNotEqual(height.Value(), 0.0)) {
@@ -139,7 +139,7 @@ ArkUINativeModuleValue PanelBridge::SetPanelHalfHeight(ArkUIRuntimeCallInfo* run
     Local<JSValueRef> jsValue = runtimeCallInfo->GetCallArgRef(1);
     CalcDimension height;
 
-    if (jsValue->IsUndefined() || !ArkTSUtils::ParseJsDimensionVpNG(vm, jsValue, height)) {
+    if (jsValue->IsUndefined() || !ArkTSUtils::ParseJsDimensionVpNG(vm, jsValue, height, true)) {
         GetArkUIInternalNodeAPI()->GetPanelModifier().ResetPanelHalfHeight(nativeNode);
     } else {
         if (LessNotEqual(height.Value(), 0.0)) {
@@ -170,7 +170,7 @@ ArkUINativeModuleValue PanelBridge::SetPanelMiniHeight(ArkUIRuntimeCallInfo* run
     Local<JSValueRef> jsValue = runtimeCallInfo->GetCallArgRef(1);
     CalcDimension height;
 
-    if (jsValue->IsUndefined() || !ArkTSUtils::ParseJsDimensionVpNG(vm, jsValue, height)) {
+    if (jsValue->IsUndefined() || !ArkTSUtils::ParseJsDimensionVpNG(vm, jsValue, height, true)) {
         GetArkUIInternalNodeAPI()->GetPanelModifier().ResetPanelMiniHeight(nativeNode);
     } else {
         if (LessNotEqual(height.Value(), 0.0)) {
@@ -191,7 +191,7 @@ ArkUINativeModuleValue PanelBridge::SetPanelCustomHeight(ArkUIRuntimeCallInfo* r
     Local<JSValueRef> jsValue = runtimeCallInfo->GetCallArgRef(1);
     CalcDimension customHeight;
 
-    if (jsValue->IsUndefined()) {
+    if (jsValue->IsUndefined() || !ArkTSUtils::ParseJsDimensionVpNG(vm, jsValue, customHeight, true)) {
         GetArkUIInternalNodeAPI()->GetPanelModifier().ResetPanelCustomHeight(nativeNode);
         return panda::JSValueRef::Undefined(vm);
     }
