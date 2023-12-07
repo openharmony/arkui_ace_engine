@@ -15,45 +15,13 @@
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_navigation_bridge.h"
 
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_api.h"
-#include "core/components_ng/pattern/navigation/navigation_declaration.h"
-#include "core/components_ng/pattern/navigation/navigation_model_ng.h"
-
-namespace OHOS::Ace::NG {} // namespace OHOS::Ace::NG
-/*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-#include "bridge/declarative_frontend/engine/jsi/components/arkts_native_api.h"
-#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_navigation_bridge.h"
+#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 #include "bridge/declarative_frontend/jsview/js_utils.h"
 #include "core/components_ng/pattern/navigation/navigation_declaration.h"
 #include "core/components_ng/pattern/navigation/navigation_model_ng.h"
 #include "frameworks/bridge/declarative_frontend/engine/js_types.h"
-
+namespace OHOS::Ace::NG {} // namespace OHOS::Ace::NG
 namespace OHOS::Ace::NG {
-bool ParseNavJsDimensionVp(const EcmaVM* vm, const Local<JSValueRef>& value, CalcDimension& result)
-{
-    if (value->IsNumber()) {
-        result = CalcDimension(value->ToNumber(vm)->Value(), DimensionUnit::VP);
-        return true;
-    }
-    if (value->IsString()) {
-        result = StringUtils::StringToCalcDimension(value->ToString(vm)->ToString(), false, DimensionUnit::VP);
-        return true;
-    }
-    // resouce ignore by design
-    return false;
-}
 ArkUINativeModuleValue NavigationBridge::SetHideToolBar(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
@@ -239,12 +207,10 @@ ArkUINativeModuleValue NavigationBridge::SetNavBarWidth(ArkUIRuntimeCallInfo* ru
     Local<JSValueRef> jsValue = runtimeCallInfo->GetCallArgRef(1);
 
     CalcDimension width;
-    if (jsValue->IsUndefined() || !ParseNavJsDimensionVp(vm, jsValue, width)) {
+    if (jsValue->IsNull() || jsValue->IsUndefined() ||
+        !ArkTSUtils::ParseJsDimensionVpNG(vm, jsValue, width)) {
         GetArkUIInternalNodeAPI()->GetNavigationModifier().ResetNavBarWidth(nativeNode);
     } else {
-        if (LessNotEqual(width.Value(), 0.0)) {
-            width.SetValue(0.0);
-        }
         GetArkUIInternalNodeAPI()->GetNavigationModifier().SetNavBarWidth(
             nativeNode, width.Value(), static_cast<int>(width.Unit()));
     }
@@ -270,12 +236,10 @@ ArkUINativeModuleValue NavigationBridge::SetMinNavBarWidth(ArkUIRuntimeCallInfo*
     Local<JSValueRef> jsValue = runtimeCallInfo->GetCallArgRef(1);
 
     CalcDimension width;
-    if (jsValue->IsUndefined() || !ParseNavJsDimensionVp(vm, jsValue, width)) {
+    if (jsValue->IsNull() || jsValue->IsUndefined() ||
+        !ArkTSUtils::ParseJsDimensionVpNG(vm, jsValue, width)) {
         GetArkUIInternalNodeAPI()->GetNavigationModifier().ResetMinNavBarWidth(nativeNode);
     } else {
-        if (LessNotEqual(width.Value(), 0.0)) {
-            width.SetValue(0.0);
-        }
         GetArkUIInternalNodeAPI()->GetNavigationModifier().SetMinNavBarWidth(
             nativeNode, width.Value(), static_cast<int>(width.Unit()));
     }
@@ -301,12 +265,10 @@ ArkUINativeModuleValue NavigationBridge::SetMaxNavBarWidth(ArkUIRuntimeCallInfo*
     Local<JSValueRef> jsValue = runtimeCallInfo->GetCallArgRef(1);
 
     CalcDimension width;
-    if (jsValue->IsUndefined() || !ParseNavJsDimensionVp(vm, jsValue, width)) {
+    if (jsValue->IsNull() || jsValue->IsUndefined() ||
+        !ArkTSUtils::ParseJsDimensionVpNG(vm, jsValue, width)) {
         GetArkUIInternalNodeAPI()->GetNavigationModifier().ResetMaxNavBarWidth(nativeNode);
     } else {
-        if (LessNotEqual(width.Value(), 0.0)) {
-            width.SetValue(0.0);
-        }
         GetArkUIInternalNodeAPI()->GetNavigationModifier().SetMaxNavBarWidth(
             nativeNode, width.Value(), static_cast<int>(width.Unit()));
     }
@@ -332,12 +294,10 @@ ArkUINativeModuleValue NavigationBridge::SetMinContentWidth(ArkUIRuntimeCallInfo
     Local<JSValueRef> jsValue = runtimeCallInfo->GetCallArgRef(1);
 
     CalcDimension width;
-    if (jsValue->IsUndefined() || !ParseNavJsDimensionVp(vm, jsValue, width)) {
+    if (jsValue->IsNull() || jsValue->IsUndefined() ||
+        !ArkTSUtils::ParseJsDimensionVpNG(vm, jsValue, width)) {
         GetArkUIInternalNodeAPI()->GetNavigationModifier().ResetMinContentWidth(nativeNode);
     } else {
-        if (LessNotEqual(width.Value(), 0.0)) {
-            width.SetValue(0.0);
-        }
         GetArkUIInternalNodeAPI()->GetNavigationModifier().SetMinContentWidth(
             nativeNode, width.Value(), static_cast<int>(width.Unit()));
     }
