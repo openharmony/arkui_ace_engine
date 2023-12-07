@@ -14,7 +14,7 @@ class ArkNavigationComponent extends ArkComponent implements NavigationAttribute
       value = value + DEFAULT_UNIT;
     }
 
-    if(value === null || value === undefined) {
+    if (value === null || value === undefined) {
       value = DEFAULT_NAV_BAR_WIDTH + DEFAULT_UNIT;
     }
 
@@ -31,52 +31,26 @@ class ArkNavigationComponent extends ArkComponent implements NavigationAttribute
     return this;
   }
   navBarWidthRange(value: [Dimension, Dimension]): NavigationAttribute {
-    if (!value) {
-      return this;
+    if (!!value && value.length >= 1) {
+      modifierWithKey(this._modifiersWithKeys, MinNavBarWidthModifier.identity, MinNavBarWidthModifier, value[0].toString());
+    } else {
+      modifierWithKey(this._modifiersWithKeys, MinNavBarWidthModifier.identity, MinNavBarWidthModifier, undefined);
     }
 
-    if (!!value && value?.length > 0 && !!value[0]) {
-      let min: string | number;
-
-      if (isNumber(value[0])) {
-        min = value[0] + DEFAULT_UNIT;
-      } else {
-        min = value[0].toString()
-      }
-
-      modifier(this._modifiers, MinNavBarWidthModifier, min);
+    if (!!value && value.length >= 2) {
+      modifierWithKey(this._modifiersWithKeys, MaxNavBarWidthModifier.identity, MaxNavBarWidthModifier, value[1].toString());
     } else {
-      modifier(this._modifiers, MinNavBarWidthModifier, MIN_NAV_BAR_WIDTH_DEFAULT);
-    }
-
-    if (!!value && value?.length > 1 && !!value[1]) {
-      let max: string | number;
-
-      if (isNumber(value[1])) {
-        max = value[1] + DEFAULT_UNIT;
-      } else {
-        max = value[1].toString();
-      }
-
-      modifier(this._modifiers, MaxNavBarWidthModifier, max);
-    } else {
-      modifier(this._modifiers, MaxNavBarWidthModifier, MAX_NAV_BAR_WIDTH_DEFAULT);
+      modifierWithKey(this._modifiersWithKeys, MaxNavBarWidthModifier.identity, MaxNavBarWidthModifier, undefined);
     }
 
     return this;
   }
   minContentWidth(value: Dimension): NavigationAttribute {
-    let minContentWidth: string = 0 + DEFAULT_UNIT;
-
-    if ((isNumber(value) && Number(value) > 0)) {
-      minContentWidth = value + DEFAULT_UNIT
+    if (!isUndefined(value) && !isNull(value)) {
+      modifier(this._modifiers, MinContentWidthModifier, value.toString());
+    } else {
+      modifier(this._modifiers, MinContentWidthModifier, undefined);
     }
-
-    if (isString(value)) {
-      minContentWidth = value.toString()
-    }
-
-    modifier(this._modifiers, MinContentWidthModifier, minContentWidth);
 
     return this;
   }
@@ -160,7 +134,7 @@ class BackButtonIconModifier extends ModifierWithKey<boolean | object> {
   }
 }
 
-class MinNavBarWidthModifier extends Modifier<string> {
+class MinNavBarWidthModifier extends ModifierWithKey<string> {
   static identity: Symbol = Symbol('minNavBarWidth');
 
   applyPeer(node: KNode, reset: boolean): void {
@@ -170,9 +144,17 @@ class MinNavBarWidthModifier extends Modifier<string> {
       GetUINativeModule().navigation.setMinNavBarWidth(node, this.value);
     }
   }
+
+  checkObjectDiff(): boolean {
+    if (isResource(this.stageValue) && isResource(this.value)) {
+      return !isResourceEqual(this.stageValue, this.value);
+    } else {
+      return true;
+    }
+  }
 }
 
-class MaxNavBarWidthModifier extends Modifier<string> {
+class MaxNavBarWidthModifier extends ModifierWithKey<string> {
   static identity: Symbol = Symbol('maxNavBarWidth');
 
   applyPeer(node: KNode, reset: boolean): void {
@@ -180,6 +162,14 @@ class MaxNavBarWidthModifier extends Modifier<string> {
       GetUINativeModule().navigation.resetMaxNavBarWidth(node);
     } else {
       GetUINativeModule().navigation.setMaxNavBarWidth(node, this.value);
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    if (isResource(this.stageValue) && isResource(this.value)) {
+      return !isResourceEqual(this.stageValue, this.value);
+    } else {
+      return true;
     }
   }
 }
