@@ -142,6 +142,10 @@ void JSRect::SetRadiusWithJsVal(const RefPtr<T>& component, const JSRef<JSVal>& 
 template<class T>
 void JSRect::SetRadiusWithArrayValue(const RefPtr<T>& component, const JSRef<JSVal>& jsVal)
 {
+    if (!jsVal->IsArray()) {
+        LOGE("The arg is not array.");
+        return;
+    }
     JSRef<JSArray> array = JSRef<JSArray>::Cast(jsVal);
     int32_t length = static_cast<int32_t>(array->Length());
     if (length <= 0) {

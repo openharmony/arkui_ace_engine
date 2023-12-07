@@ -27,7 +27,7 @@ void JSCanvas::Create(const JSCallbackInfo& info)
 {
     if (Container::IsCurrentUseNewPipeline()) {
         auto pattern = NG::CustomPaintView::Create();
-        if (info[0]->IsObject()) {
+        if (info.Length() > 0 && info[0]->IsObject()) {
             JSCanvasRenderer* jsContext = JSRef<JSObject>::Cast(info[0])->Unwrap<JSCanvasRenderer>();
             if (jsContext) {
                 jsContext->SetCustomPaintPattern(pattern);
@@ -39,7 +39,7 @@ void JSCanvas::Create(const JSCallbackInfo& info)
     }
 
     RefPtr<OHOS::Ace::CustomPaintComponent> paintChild = AceType::MakeRefPtr<OHOS::Ace::CustomPaintComponent>();
-    if (info[0]->IsObject()) {
+    if (info.Length() > 0 && info[0]->IsObject()) {
         JSCanvasRenderer* jsContext = JSRef<JSObject>::Cast(info[0])->Unwrap<JSCanvasRenderer>();
         if (jsContext) {
             jsContext->SetComponent(paintChild->GetTaskPool());
@@ -71,7 +71,9 @@ void JSCanvas::JSBind(BindingTarget globalObj)
 
 void JSCanvas::OnReady(const JSCallbackInfo& info)
 {
-    if (!info[0]->IsFunction()) {
+    if (info.Length() < 1 || !info[0]->IsFunction()) {
+        LOGE("The argument is wrong, it is supposed to have at least 1 arguments"
+            "and the first argument must be a function.");
         return;
     }
 
