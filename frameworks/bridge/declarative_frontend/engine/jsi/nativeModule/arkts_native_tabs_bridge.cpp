@@ -387,14 +387,6 @@ ArkUINativeModuleValue TabsBridge::SetTabBarWidth(ArkUIRuntimeCallInfo* runtimeC
         return undefinedRes;
     }
 
-    CalcDimension invWidth;
-    if (NearZero(width.Value()) &&
-        ArkTSUtils::ParseJsDimensionFromResource(vm, jsValue, DimensionUnit::INVALID, invWidth) &&
-        invWidth.Unit() == DimensionUnit::INVALID) {
-        GetArkUIInternalNodeAPI()->GetTabsModifier().ResetTabBarWidth(nativeNode);
-        return undefinedRes;
-    }
-
     GetArkUIInternalNodeAPI()->GetTabsModifier().SetTabBarWidth(nativeNode, width.Value(),
         static_cast<int>(width.Unit()));
     return undefinedRes;
@@ -421,14 +413,6 @@ ArkUINativeModuleValue TabsBridge::SetTabBarHeight(ArkUIRuntimeCallInfo* runtime
     ArkUINativeModuleValue undefinedRes = panda::JSValueRef::Undefined(vm);
 
     if (jsValue->IsNull() || jsValue->IsUndefined() || !ArkTSUtils::ParseJsDimensionVpNG(vm, jsValue, height)) {
-        GetArkUIInternalNodeAPI()->GetTabsModifier().ResetTabBarHeight(nativeNode);
-        return undefinedRes;
-    }
-
-    CalcDimension invHeight;
-    if (NearZero(height.Value()) &&
-        ArkTSUtils::ParseJsDimensionFromResource(vm, jsValue, DimensionUnit::INVALID, invHeight) &&
-        invHeight.Unit() == DimensionUnit::INVALID) {
         GetArkUIInternalNodeAPI()->GetTabsModifier().ResetTabBarHeight(nativeNode);
         return undefinedRes;
     }
