@@ -20,6 +20,7 @@
 
 #include "interfaces/napi/kits/utils/napi_utils.h"
 
+#include "base/log/log_wrapper.h"
 #include "base/subwindow/subwindow_manager.h"
 #include "base/utils/system_properties.h"
 #include "bridge/common/utils/engine_helper.h"
@@ -78,6 +79,7 @@ napi_value GetReturnObject(napi_env env, std::string callbackString)
 
 napi_value JSPromptShowToast(napi_env env, napi_callback_info info)
 {
+    TAG_LOGD(AceLogTag::ACE_DIALOG, "show toast enter");
     size_t requireArgc = 1;
     size_t argc = 1;
     napi_value argv = nullptr;
@@ -191,8 +193,10 @@ napi_value JSPromptShowToast(napi_env env, napi_callback_info info)
             NapiThrow(env, "Can not get delegate.", Framework::ERROR_CODE_INTERNAL_ERROR);
             return nullptr;
         }
+        TAG_LOGD(AceLogTag::ACE_DIALOG, "before delegate show toast");
         delegate->ShowToast(messageString, duration, bottomString, showMode);
     } else if (SubwindowManager::GetInstance() != nullptr) {
+        TAG_LOGD(AceLogTag::ACE_DIALOG, "before subwindow manager show toast");
         SubwindowManager::GetInstance()->ShowToast(messageString, duration, bottomString, showMode);
     }
 #else
@@ -203,7 +207,6 @@ napi_value JSPromptShowToast(napi_env env, napi_callback_info info)
     }
     delegate->ShowToast(messageString, duration, bottomString, NG::ToastShowMode::DEFAULT);
 #endif
-
     return nullptr;
 }
 
@@ -330,6 +333,7 @@ void GetNapiDialogProps(napi_env env, const std::shared_ptr<PromptAsyncContext>&
     std::optional<DialogAlignment>& alignment, std::optional<DimensionOffset>& offset,
     std::optional<DimensionRect>& maskRect)
 {
+    TAG_LOGD(AceLogTag::ACE_DIALOG, "get napi dialog props enter");
     napi_valuetype valueType = napi_undefined;
     // parse alignment
     napi_typeof(env, asyncContext->alignmentApi, &valueType);
@@ -381,6 +385,7 @@ void GetNapiDialogProps(napi_env env, const std::shared_ptr<PromptAsyncContext>&
 
 napi_value JSPromptShowDialog(napi_env env, napi_callback_info info)
 {
+    TAG_LOGD(AceLogTag::ACE_DIALOG, "js prompt show dialog enter");
     size_t requireArgc = 1;
     size_t argc = 2;
     napi_value argv[3] = { 0 };
@@ -611,6 +616,7 @@ napi_value JSPromptShowDialog(napi_env env, napi_callback_info info)
 
 napi_value JSPromptShowActionMenu(napi_env env, napi_callback_info info)
 {
+    TAG_LOGD(AceLogTag::ACE_DIALOG, "js prompt show action menu enter");
     size_t requireArgc = 1;
     size_t argc = 2;
     napi_value argv[3] = { 0 };
