@@ -116,6 +116,7 @@ void ButtonModelNG::CreateWithLabel(const std::string& label)
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
+    ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::BUTTON_ETS_TAG, nodeId);
     auto buttonNode = FrameNode::GetOrCreateFrameNode(
         V2::BUTTON_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<ButtonPattern>(); });
     CHECK_NULL_VOID(buttonNode);
