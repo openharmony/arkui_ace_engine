@@ -1,43 +1,46 @@
 /// <reference path='./import.ts' />
-class ArkPolylineComponent extends ArkComponent implements PolylineAttribute {
-  points(value: any[]): this {
-    throw new Error('Method not implemented.');
+/// <reference path='./ArkCommonShape.ts' />
+const ARRAY_LENGTH = 2;
+class ArkPolylineComponent extends ArkCommonShapeComponent implements PolylineAttribute {
+  points(value: Array<any>): this {
+    modifierWithKey(this._modifiersWithKeys, PolylinePointsModifier.identity, PolylinePointsModifier, value);
+    return this;
   }
-  stroke(value: any): this {
-    throw new Error('Method not implemented.');
+}
+
+class PolylinePointsModifier extends ModifierWithKey<Array<any>> {
+  static identity: Symbol = Symbol('points');
+  applyPeer(node: KNode, reset: boolean): void {
+    let xPoint = [];
+    let yPoint = [];
+    if (Array.isArray(this.value)) {
+      for (let i = 0; i <= this.value.length; i++) {
+        let item = this.value[i];
+        if (!Array.isArray(item)) {
+          continue;
+        }
+
+        if (item.length < ARRAY_LENGTH || isUndefined(item[0]) || isUndefined(item[1])) {
+          reset = true;
+          break;
+        }
+        
+        xPoint.push(item[0]);
+        yPoint.push(item[1]);
+      }
+    } else {
+      reset = true;
+    }
+
+    if (reset) {
+      GetUINativeModule().polyline.resetPoints(node);
+    } else {
+      GetUINativeModule().polyline.setPoints(node, xPoint, yPoint);
+    }
   }
-  fill(value: any): this {
-    throw new Error('Method not implemented.');
-  }
-  strokeDashOffset(value: string | number): this {
-    throw new Error('Method not implemented.');
-  }
-  strokeLineCap(value: LineCapStyle): this {
-    throw new Error('Method not implemented.');
-  }
-  strokeLineJoin(value: LineJoinStyle): this {
-    throw new Error('Method not implemented.');
-  }
-  strokeMiterLimit(value: string | number): this {
-    throw new Error('Method not implemented.');
-  }
-  strokeOpacity(value: any): this {
-    throw new Error('Method not implemented.');
-  }
-  fillOpacity(value: any): this {
-    throw new Error('Method not implemented.');
-  }
-  strokeWidth(value: any): this {
-    throw new Error('Method not implemented.');
-  }
-  antiAlias(value: boolean): this {
-    throw new Error('Method not implemented.');
-  }
-  strokeDashArray(value: any[]): this {
-    throw new Error('Method not implemented.');
-  }
-  monopolizeEvents(monopolize: boolean): this {
-    throw new Error('Method not implemented.');
+
+  checkObjectDiff(): boolean {
+    return this.stageValue !== this.value;
   }
 }
 

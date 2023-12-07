@@ -835,6 +835,23 @@ struct ArkUIColumnSplitModifierAPI {
     void (*ResetColumnSplitResizeable)(NodeHandle node);
 };
 
+struct ArkUILineModifierAPI {
+    void (*SetStartPoint)(NodeHandle node, double* pointValues, int32_t* pointUnits, const char* pointStr[]);
+    void (*ResetStartPoint)(NodeHandle node);
+    void (*SetEndPoint)(NodeHandle node, double* pointValues, int32_t* pointUnits, const char* pointStr[]);
+    void (*ResetEndPoint)(NodeHandle node);
+};
+
+struct ArkUIPathModifierAPI {
+    void (*SetPathCommands)(NodeHandle node, const char* commands);
+    void (*ResetPathCommands)(NodeHandle node);
+};
+
+struct ArkUIPolylineModifierAPI {
+    void (*SetPoints)(NodeHandle node, const double* pointX, const double* pointY, int32_t length);
+    void (*ResetPoints)(NodeHandle node);
+};
+
 struct ArkUISpanModifierAPI {
     void (*SetSpanTextCase)(NodeHandle node, int32_t value);
     void (*ResetSpanTextCase)(NodeHandle node);
@@ -1168,6 +1185,9 @@ struct ArkUINodeAPI {
     ArkUINavRouterModifierAPI (*GetNavRouterModifier)();
     ArkUIPatternLockModifierAPI (*GetPatternLockModifier)();
     ArkUIColumnSplitModifierAPI (*GetColumnSplitModifier)();
+    ArkUILineModifierAPI (*GetLineModifier)();
+    ArkUIPathModifierAPI (*GetPathModifier)();
+    ArkUIPolylineModifierAPI (*GetPolylineModifier)();
     ArkUISpanModifierAPI (*GetSpanModifier)();
     ArkUIImageAnimatorModifierAPI (*GetImageAnimatorModifier)();
     ArkUISideBarContainerModifierAPI (*GetSideBarContainerModifier)();
