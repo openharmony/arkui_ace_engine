@@ -1044,6 +1044,13 @@ public:
 
     void OnFormRecover(const std::string& statusData);
 
+    virtual bool IsDragging() const
+    {
+        return false;
+    }
+
+    virtual void SetIsDragging(bool isDragging) {}
+
 protected:
     virtual bool MaybeRelease() override;
     void TryCallNextFrameLayoutCallback()
