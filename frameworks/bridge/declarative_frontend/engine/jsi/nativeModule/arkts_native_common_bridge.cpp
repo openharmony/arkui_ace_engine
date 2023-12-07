@@ -74,30 +74,6 @@ BorderStyle ConvertBorderStyle(int32_t value)
     return style;
 }
 
-bool ParseJsDimensionVp(const EcmaVM *vm, const Local<JSValueRef> &value, CalcDimension &result)
-{
-    if (value->IsNumber()) {
-        result = CalcDimension(value->ToNumber(vm)->Value(), DimensionUnit::VP);
-        return true;
-    }
-    if (value->IsString()) {
-        result = StringUtils::StringToCalcDimension(value->ToString(vm)->ToString(), false, DimensionUnit::VP);
-        return true;
-    }
-
-    return false;
-}
-
-bool ParseJsInteger(const EcmaVM *vm, const Local<JSValueRef> &value, int32_t &result)
-{
-    if (value->IsNumber()) {
-        result = value->Int32Value(vm);
-        return true;
-    }
-
-    return false;
-}
-
 bool ParseJsDouble(const EcmaVM *vm, const Local<JSValueRef> &value, double &result)
 {
     if (value->IsNumber()) {
@@ -739,7 +715,6 @@ bool ParseMotionPath(const Framework::JSRef<Framework::JSVal>& jsValue, MotionPa
     option.SetRotate(jsObj->GetPropertyValue<bool>("rotatable", false));
     return true;
 }
-
 
 bool ParseJsDoublePair(const EcmaVM *vm, const Local<JSValueRef> &value, double &first, double &second)
 {
@@ -1557,7 +1532,7 @@ ArkUINativeModuleValue CommonBridge::SetShadow(ArkUIRuntimeCallInfo *runtimeCall
     auto fillArg = runtimeCallInfo->GetCallArgRef(NUM_7);
     auto nativeNode = firstArg->ToNativePointer(vm)->Value();
     int32_t shadowStyle = 0;
-    if (ParseJsInteger(vm, styleArg, shadowStyle)) {
+    if (ArkTSUtils::ParseJsInteger(vm, styleArg, shadowStyle)) {
         double shadows[] = { shadowStyle };
         GetArkUIInternalNodeAPI()->GetCommonModifier().SetBackShadow(nativeNode, shadows,
             (sizeof(shadows) / sizeof(shadows[NUM_0])));
@@ -1838,8 +1813,12 @@ ArkUINativeModuleValue CommonBridge::SetColorBlend(ArkUIRuntimeCallInfo *runtime
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
     void *nativeNode = firstArg->ToNativePointer(vm)->Value();
-    uint32_t color = secondArg->Uint32Value(vm);
-    GetArkUIInternalNodeAPI()->GetCommonModifier().SetColorBlend(nativeNode, color);
+    Color color;
+    if (!ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color)) {
+        GetArkUIInternalNodeAPI()->GetCommonModifier().ResetColorBlend(nativeNode);
+        } else {
+            GetArkUIInternalNodeAPI()->GetCommonModifier().SetColorBlend(nativeNode, color.GetValue());
+        }
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -2343,19 +2322,16 @@ ArkUINativeModuleValue CommonBridge::SetBackgroundImagePosition(ArkUIRuntimeCall
         int32_t align = secondArg->ToNumber(vm)->Value();
         ParseBackgroundImagePositionAlign(align, valueX, valueY, typeX, typeY);
         isAlign = true;
-    } else if (xArg->IsNumber() || xArg->IsString() || yArg->IsNumber() || yArg->IsString()) {
-        CalcDimension x;
-        CalcDimension y;
+    } else {
+        CalcDimension x(0, DimensionUnit::VP);
+        CalcDimension y(0, DimensionUnit::VP);
 
-        bool hasX = ParseJsDimensionVp(vm, xArg, x);
-        bool hasY = ParseJsDimensionVp(vm, yArg, y);
-        if (hasX || hasY) {
+        if (ArkTSUtils::ParseJsDimensionVp(vm, xArg, x)) {
             valueX = x.Value();
-            valueY = y.Value();
-            typeX = DimensionUnit::PX;
-            typeY = DimensionUnit::PX;
         }
-
+        if (ArkTSUtils::ParseJsDimensionVp(vm, yArg, y)) {
+            valueY = y.Value();
+        }
         if (x.Unit() == DimensionUnit::PERCENT) {
             valueX = x.Value();
             typeX = DimensionUnit::PERCENT;
@@ -2408,23 +2384,24 @@ ArkUINativeModuleValue CommonBridge::SetBackgroundImageSize(ArkUIRuntimeCallInfo
         typeWidth = static_cast<OHOS::Ace::BackgroundImageSizeType>(sizeType);
         typeHeight = static_cast<OHOS::Ace::BackgroundImageSizeType>(sizeType);
     } else {
-        CalcDimension width;
-        CalcDimension height;
-        ArkTSUtils::ParseJsDimensionVp(vm, widthArg, width);
-        ArkTSUtils::ParseJsDimensionVp(vm, heightArg, height);
+        CalcDimension width(0, DimensionUnit::VP);
+        CalcDimension height(0, DimensionUnit::VP);
+        bool hasWidth = ArkTSUtils::ParseJsDimensionVp(vm, widthArg, width);
+        bool hasHeight = ArkTSUtils::ParseJsDimensionVp(vm, heightArg, height);
+        if (hasWidth || hasHeight) {
+            valueWidth = width.ConvertToPx();
+            valueHeight = height.ConvertToPx();
+            typeWidth = BackgroundImageSizeType::LENGTH;
+            typeHeight = BackgroundImageSizeType::LENGTH;
 
-        valueWidth = width.ConvertToPx();
-        valueHeight = height.ConvertToPx();
-        typeWidth = BackgroundImageSizeType::LENGTH;
-        typeHeight = BackgroundImageSizeType::LENGTH;
-
-        if (width.Unit() == DimensionUnit::PERCENT) {
-            typeWidth = BackgroundImageSizeType::PERCENT;
-            valueWidth = width.Value() * FULL_DIMENSION;
-        }
-        if (height.Unit() == DimensionUnit::PERCENT) {
-            typeHeight = BackgroundImageSizeType::PERCENT;
-            valueHeight = height.Value() * FULL_DIMENSION;
+            if (width.Unit() == DimensionUnit::PERCENT) {
+                typeWidth = BackgroundImageSizeType::PERCENT;
+                valueWidth = width.Value() * FULL_DIMENSION;
+            }
+            if (height.Unit() == DimensionUnit::PERCENT) {
+                typeHeight = BackgroundImageSizeType::PERCENT;
+                valueHeight = height.Value() * FULL_DIMENSION;
+            }
         }
     }
     GetArkUIInternalNodeAPI()->GetCommonModifier().SetBackgroundImageSize(nativeNode, valueWidth, valueHeight,
@@ -2452,15 +2429,16 @@ ArkUINativeModuleValue CommonBridge::SetBackgroundImage(ArkUIRuntimeCallInfo *ru
     void *nativeNode = firstArg->ToNativePointer(vm)->Value();
     std::string src;
     int32_t repeatIndex = 0;
-    if (!srcArg->IsString()) {
+    if (!ArkTSUtils::ParseJsMedia(vm, srcArg, src)) {
         GetArkUIInternalNodeAPI()->GetCommonModifier().ResetBackgroundImage(nativeNode);
         return panda::JSValueRef::Undefined(vm);
     }
-    src = srcArg->ToString(vm)->ToString();
     if (repeatArg->IsNumber()) {
         repeatIndex = repeatArg->ToNumber(vm)->Value();
+    } else {
+        GetArkUIInternalNodeAPI()->GetCommonModifier().ResetBackgroundImage(nativeNode);
+        return panda::JSValueRef::Undefined(vm);
     }
-
     GetArkUIInternalNodeAPI()->GetCommonModifier().SetBackgroundImage(nativeNode, src.c_str(), repeatIndex);
     return panda::JSValueRef::Undefined(vm);
 }

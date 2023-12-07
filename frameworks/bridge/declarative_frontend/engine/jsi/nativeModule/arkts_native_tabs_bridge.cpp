@@ -24,21 +24,6 @@
 #include "frameworks/core/components_ng/pattern/tabs/tabs_node.h"
 
 namespace OHOS::Ace::NG {
-namespace {
-bool ParseJsDimensionVp(const EcmaVM* vm, const Local<JSValueRef>& value, CalcDimension& result)
-{
-    if (value->IsNumber()) {
-        result = CalcDimension(value->ToNumber(vm)->Value(), DimensionUnit::VP);
-        return true;
-    }
-    if (value->IsString()) {
-        result = StringUtils::StringToCalcDimension(value->ToString(vm)->ToString(), false, DimensionUnit::VP);
-        return true;
-    }
-    // resouce ignore by design
-    return false;
-}
-} // namespace
 constexpr int SIZE_OF_FIVE = 5;
 constexpr int SIZE_OF_THREE = 3;
 constexpr int SIZE_OF_VALUES = 2;
@@ -79,15 +64,21 @@ ArkUINativeModuleValue TabsBridge::SetScrollableBarModeOptions(ArkUIRuntimeCallI
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
-    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
-    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
     Local<JSValueRef> thirdArg = runtimeCallInfo->GetCallArgRef(NUM_2);
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    Local<panda::StringRef> barModeValue = secondArg->ToString(vm);
-    int barModeStyle = thirdArg->Int32Value(vm);
 
-    CalcDimension margin = Dimension(0.0, DimensionUnit::VP);
-    margin = StringUtils::StringToCalcDimension(barModeValue->ToString(), false, DimensionUnit::VP);
+    if (thirdArg->IsUndefined()) {
+        GetArkUIInternalNodeAPI()->GetTabsModifier().ResetScrollableBarModeOptions(nativeNode);
+        return panda::JSValueRef::Undefined(vm);
+    }
+    int barModeStyle = thirdArg->Int32Value(vm);
+    
+    CalcDimension margin(0.0, DimensionUnit::VP);
+    if (!ArkTSUtils::ParseJsDimensionVp(vm, secondArg, margin)) {
+        margin.Reset();
+    }
 
     GetArkUIInternalNodeAPI()->GetTabsModifier().SetScrollableBarModeOptions(
         nativeNode, margin.Value(), static_cast<int>(margin.Unit()), barModeStyle);
@@ -132,13 +123,13 @@ ArkUINativeModuleValue TabsBridge::SetBarGridAlign(ArkUIRuntimeCallInfo* runtime
         lg = lgArg->Int32Value(vm);
     }
 
-    CalcDimension columnGutter;
-    CalcDimension columnMargin;
-    if (!ParseJsDimensionVp(vm, gutterArg, columnGutter) || !NonNegative(columnGutter.Value()) ||
+    CalcDimension columnGutter(0.0, DimensionUnit::VP);
+    CalcDimension columnMargin(0.0, DimensionUnit::VP);
+    if (!ArkTSUtils::ParseJsDimensionVp(vm, gutterArg, columnGutter) || !NonNegative(columnGutter.Value()) ||
         columnGutter.Unit() == DimensionUnit::PERCENT) {
         columnGutter.Reset();
     }
-    if (!ParseJsDimensionVp(vm, marginArg, columnMargin) || NonNegative(columnMargin.Value()) ||
+    if (!ArkTSUtils::ParseJsDimensionVp(vm, marginArg, columnMargin) || !NonNegative(columnMargin.Value()) ||
         columnMargin.Unit() == DimensionUnit::PERCENT) {
         columnMargin.Reset();
     }
@@ -185,9 +176,9 @@ ArkUINativeModuleValue TabsBridge::SetDivider(ArkUIRuntimeCallInfo* runtimeCallI
         return panda::JSValueRef::Undefined(vm);
     }
 
-    CalcDimension dividerStrokeWidth;
-    CalcDimension dividerStartMargin;
-    CalcDimension dividerEndMargin;
+    CalcDimension dividerStrokeWidth(0.0, DimensionUnit::VP);
+    CalcDimension dividerStartMargin(0.0, DimensionUnit::VP);
+    CalcDimension dividerEndMargin(0.0, DimensionUnit::VP);
     uint32_t color;
     auto* frameNode = reinterpret_cast<FrameNode*>(nativeNode);
     auto context = frameNode->GetContext();
@@ -196,20 +187,21 @@ ArkUINativeModuleValue TabsBridge::SetDivider(ArkUIRuntimeCallInfo* runtimeCallI
     auto tabTheme = themeManager->GetTheme<TabTheme>();
     CHECK_NULL_RETURN(tabTheme, panda::NativePointerRef::New(vm, nullptr));
 
-    if (dividerStrokeWidthArgs->IsUndefined() || !ParseJsDimensionVp(vm, dividerStrokeWidthArgs, dividerStrokeWidth) ||
+    if (!ArkTSUtils::ParseJsDimensionVp(vm, dividerStrokeWidthArgs, dividerStrokeWidth) ||
         dividerStrokeWidth.Value() < 0.0f || dividerStrokeWidth.Unit() == DimensionUnit::PERCENT) {
         dividerStrokeWidth.Reset();
     }
-    if (colorArg->IsUndefined()) {
+    Color colorObj;
+    if (!ArkTSUtils::ParseJsColorAlpha(vm, colorArg, colorObj)) {
         color = tabTheme->GetDividerColor().GetValue();
     } else {
-        color = colorArg->Uint32Value(vm);
+        color = colorObj.GetValue();
     }
-    if (dividerStartMarginArgs->IsUndefined() || !ParseJsDimensionVp(vm, dividerStartMarginArgs, dividerStartMargin) ||
+    if (!ArkTSUtils::ParseJsDimensionVp(vm, dividerStartMarginArgs, dividerStartMargin) ||
         dividerStartMargin.Value() < 0.0f || dividerStartMargin.Unit() == DimensionUnit::PERCENT) {
         dividerStartMargin.Reset();
     }
-    if (dividerEndMarginArgs->IsUndefined() || !ParseJsDimensionVp(vm, dividerEndMarginArgs, dividerEndMargin) ||
+    if (!ArkTSUtils::ParseJsDimensionVp(vm, dividerEndMarginArgs, dividerEndMargin) ||
         dividerEndMargin.Value() < 0.0f || dividerEndMargin.Unit() == DimensionUnit::PERCENT) {
         dividerEndMargin.Reset();
     }
