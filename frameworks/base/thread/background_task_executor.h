@@ -16,13 +16,11 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_BASE_THREAD_BACKGROUND_TASK_EXECUTOR_H
 #define FOUNDATION_ACE_FRAMEWORKS_BASE_THREAD_BACKGROUND_TASK_EXECUTOR_H
 
-#include <list>
-#include <thread>
-#ifdef LINUX_PLATFORM
-#include <mutex>
-#include <functional>
 #include <condition_variable>
-#endif
+#include <functional>
+#include <list>
+#include <mutex>
+#include <thread>
 
 #include "base/utils/noncopyable.h"
 

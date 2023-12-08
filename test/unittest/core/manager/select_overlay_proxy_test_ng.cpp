@@ -14,16 +14,20 @@
  */
 
 #include <optional>
+
+#include "gtest/gtest.h"
 #define private public
 #define protected public
-#include "gtest/gtest.h"
 
 #include "test/mock/base/mock_task_executor.h"
 #include "test/mock/core/common/mock_container.h"
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
+
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/rect_t.h"
 #include "base/geometry/ng/size_t.h"
 #include "base/memory/ace_type.h"
+#include "core/common/container.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/geometry_node.h"
 #include "core/components_ng/manager/select_overlay/select_overlay_manager.h"
@@ -31,8 +35,6 @@
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/select_overlay/select_overlay_pattern.h"
 #include "core/components_ng/pattern/select_overlay/select_overlay_property.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
-#include "core/common/container.h"
 
 using namespace testing;
 using namespace testing::ext;

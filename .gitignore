@@ -14,4 +14,4 @@ lite/jsfwk/
 lite/maplejs/
 lite/tools/
 lite/ui/
-
+test/unittest/scripts/*

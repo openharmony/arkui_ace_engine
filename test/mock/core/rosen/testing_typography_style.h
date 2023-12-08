@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_MOCK_ROSEN_TEST_TESTING_TYPOGRAPHY_STYLE_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_MOCK_ROSEN_TEST_TESTING_TYPOGRAPHY_STYLE_H
 
+#include <limits>
 #include <string>
 #include <vector>
 
@@ -43,7 +44,7 @@ public:
     std::u16string ellipsis;
     TextAlign textAlign = TextAlign::START;
     size_t maxLines = std::numeric_limits<size_t>::max();
-    std::string fontFamily = "";
+    std::string fontFamily;
 #endif
 };
 } // namespace OHOS::Ace::Testing

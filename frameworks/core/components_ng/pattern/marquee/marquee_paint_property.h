@@ -20,6 +20,7 @@
 #include "base/utils/macros.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/render/paint_property.h"
+
 namespace OHOS::Ace::NG {
 constexpr Dimension DEFAULT_MARQUEE_SCROLL_AMOUNT = 6.0_vp;
 class ACE_EXPORT MarqueePaintProperty : public PaintProperty {

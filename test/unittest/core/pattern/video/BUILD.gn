@@ -15,9 +15,5 @@ import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
 ace_unittest("video_test_ng") {
   type = "new"
-  sources = [
-    "$ace_root/test/mock/core/render/mock_media_player_creator.cpp",
-    "$ace_root/test/mock/core/render/mock_path_painter.cpp",
-    "video_test_ng.cpp",
-  ]
+  sources = [ "video_test_ng.cpp" ]
 }

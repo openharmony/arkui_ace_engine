@@ -16,12 +16,11 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_BASE_GEOMETRY_LEAST_SQUARE_IMPL_H
 #define FOUNDATION_ACE_FRAMEWORKS_BASE_GEOMETRY_LEAST_SQUARE_IMPL_H
 
+#include <cstdint>
 #include <vector>
 
 #include "base/utils/macros.h"
-#ifdef LINUX_PLATFORM
-#include <cstdint>
-#endif
+
 namespace OHOS::Ace {
 /**
  * @brief Least square method of four parametres.

@@ -17,7 +17,6 @@
 #include <memory>
 #include <utility>
 
-#include "gtest/gtest-test-part.h"
 #include "gtest/gtest.h"
 
 #include "base/geometry/ng/size_t.h"
@@ -3037,20 +3036,12 @@ HWTEST_F(ScrollTestNg, Measure002, TestSize.Level1)
     model.SetAxis(Axis::NONE);
     CreateContent();
     GetInstance();
-    /**
-     * @tc.steps: step2. Create the layout wrapper of the scroll frame node and set the flag to inform that it is
-     * a select scroll.
-     * @tc.expected: Objects are created successfully.
-     */
+
     RefPtr<LayoutWrapperNode> layoutWrapper = frameNode_->CreateLayoutWrapper(false, false);
     pattern_->SetIsSelectScroll(true);
     FlushLayoutTask(frameNode_);
     layoutWrapper->MountToHostOnMainThread();
-    /**
-     * @tc.steps: step3. Set the scroll size to be the actual frame size of the scroll.Set the expect size to be the
-     * size without the scroll, compare them.
-     * @tc.expected: Two sizes should be not equal.
-     */
+
     RefPtr<GridColumnInfo> columnInfo = GridSystemManager::GetInstance().GetInfoByType(GridColumnType::MENU);
     columnInfo->GetParent()->BuildColumnWidth();
     auto defaultWidth = static_cast<float>(columnInfo->GetWidth(2));
@@ -3074,7 +3065,7 @@ HWTEST_F(ScrollTestNg, SelectScroll002, TestSize.Level1)
      */
     CreateWithContent();
     ASSERT_NE(pattern_, nullptr);
-    auto ScrollWidth=pattern_->GetSelectScrollWidth();
+    auto ScrollWidth = pattern_->GetSelectScrollWidth();
     ASSERT_NE(ScrollWidth, 0.0);
 }
 

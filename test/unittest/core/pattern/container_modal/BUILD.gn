@@ -15,10 +15,5 @@ import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
 ace_unittest("container_modal_test_ng") {
   type = "new"
-  sources = [
-    "$ace_root/test/mock/core/common/mock_theme_constants.cpp",
-    "$ace_root/test/mock/core/common/mock_theme_utils.cpp",
-    "container_modal_test_ng.cpp",
-    "mock_container_modal_utils.cpp",
-  ]
+  sources = [ "container_modal_test_ng.cpp" ]
 }

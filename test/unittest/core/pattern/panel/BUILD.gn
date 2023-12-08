@@ -14,12 +14,8 @@
 import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
 ace_unittest("panel_test_ng") {
-  flutter_skia = true
-  render = true
   type = "new"
   sources = [
-    "$ace_root/frameworks/core/components/panel/render_sliding_panel.cpp",
-    "$ace_root/frameworks/core/components/panel/sliding_events.cpp",
     "close_icon_pattern_test_ng.cpp",
     "dragBar_pattern_test_ng.cpp",
     "panel_property_test_ng.cpp",

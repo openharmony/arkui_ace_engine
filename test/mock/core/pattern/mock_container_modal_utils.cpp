@@ -13,11 +13,15 @@
  * limitations under the License.
  */
 
-#include "core/components/custom_paint/render_custom_paint.h"
+#include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/pattern/container_modal/container_modal_utils.h"
+#include "core/components_ng/pattern/custom/custom_title_node.h"
 
-namespace OHOS::Ace {
-Size RenderCustomPaint::MeasureTextSize(const MeasureContext& context)
+namespace OHOS::Ace::NG {
+bool ExecuteCustomTitleAbc()
 {
-    return Size(70.0, 40.0);
+    auto custom = CustomTitleNode::CreateCustomNode(-1, "");
+    ViewStackProcessor::GetInstance()->SetCustomTitleNode(custom);
+    return true;
 }
 } // namespace OHOS::Ace::NG

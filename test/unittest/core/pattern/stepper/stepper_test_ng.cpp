@@ -14,24 +14,29 @@
  */
 
 #include <cstddef>
+
 #include "gtest/gtest.h"
+
 #define private public
 #define protected public
-#include "core/components_ng/base/view_stack_processor.h"
-#include "core/components_ng/pattern/stepper/stepper_event_hub.h"
-#include "core/components_ng/pattern/stepper/stepper_model_ng.h"
-#include "core/components_ng/pattern/stepper/stepper_item_model_ng.h"
-#include "core/components_ng/pattern/loading_progress/loading_progress_pattern.h"
-#include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
-#include "core/components_ng/pattern/stepper/stepper_pattern.h"
-#include "core/components_ng/pattern/stepper/stepper_item_pattern.h"
-#include "core/components_ng/pattern/swiper/swiper_pattern.h"
-#include "core/components_ng/pattern/text/text_pattern.h"
+
+#include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
+#include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
+#include "core/components_ng/pattern/loading_progress/loading_progress_pattern.h"
+#include "core/components_ng/pattern/stepper/stepper_event_hub.h"
+#include "core/components_ng/pattern/stepper/stepper_item_layout_property.h"
+#include "core/components_ng/pattern/stepper/stepper_item_model_ng.h"
+#include "core/components_ng/pattern/stepper/stepper_item_pattern.h"
+#include "core/components_ng/pattern/stepper/stepper_model_ng.h"
 #include "core/components_ng/pattern/stepper/stepper_node.h"
+#include "core/components_ng/pattern/stepper/stepper_pattern.h"
+#include "core/components_ng/pattern/swiper/swiper_pattern.h"
+#include "core/components_ng/pattern/swiper_indicator/indicator_common/swiper_indicator_pattern.h"
+#include "core/components_ng/pattern/text/text_pattern.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -39,6 +44,8 @@ using namespace testing::ext;
 namespace OHOS::Ace::NG {
 
 namespace {
+constexpr int32_t STEPPER_ERROR = -1;
+constexpr int32_t INDEX_NUM = 10;
 const std::string FINISH_EVENT_NAME = "FINISH_EVENT";
 const std::string SKIP_EVENT_NAME = "SKIP_EVENT";
 const std::string CHANGE_EVENT_NAME = "CHANGE_EVENT";
@@ -60,15 +67,29 @@ const float RK356_HEIGHT = 1136.0f;
 const SizeF CONTAINER_SIZE(RK356_WIDTH, RK356_HEIGHT);
 } // namespace
 
-class StepperPatternTestNg : public testing::Test {
-public:
-    static void SetUpTestCase();
-    static void TearDownTestCase();
-    static RefPtr<LayoutWrapperNode> CreateChildLayoutWrapper(
-        RefPtr<LayoutWrapperNode> layoutWrapper, RefPtr<FrameNode> parentNode, RefPtr<FrameNode> childNode);
+struct TestProperty {
+    std::optional<std::string> leftLabelValue = std::nullopt;
+    std::optional<std::string> rightLabelValue = std::nullopt;
+    std::optional<std::string> labelStatusValue = std::nullopt;
 };
 
-void StepperPatternTestNg::SetUpTestCase()
+class StepperTestNg : public testing::Test {
+public:
+    static void SetUpTestSuite();
+    static void TearDownTestSuite();
+    void InitStepperTestNg();
+    static RefPtr<LayoutWrapperNode> CreateChildLayoutWrapper(
+        RefPtr<LayoutWrapperNode> layoutWrapper, RefPtr<FrameNode> parentNode, RefPtr<FrameNode> childNode);
+    static RefPtr<FrameNode> CreateStepperItemNode(TestProperty& testProperty);
+
+    RefPtr<StepperNode> frameNode_;
+    RefPtr<StepperPattern> stepperPattern_;
+    RefPtr<StepperAccessibilityProperty> stepperAccessibilityProperty_;
+    RefPtr<FrameNode> swiperNode_;
+    RefPtr<SwiperLayoutProperty> swiperLayoutProperty_;
+};
+
+void StepperTestNg::SetUpTestSuite()
 {
     MockPipelineContext::SetUp();
     // set StepperTheme to themeManager before using themeManager to get StepperTheme
@@ -77,21 +98,58 @@ void StepperPatternTestNg::SetUpTestCase()
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<StepperTheme>()));
 }
 
-void StepperPatternTestNg::TearDownTestCase()
+void StepperTestNg::TearDownTestSuite()
 {
     MockPipelineContext::TearDown();
 }
 
-RefPtr<LayoutWrapperNode> StepperPatternTestNg::CreateChildLayoutWrapper(
+RefPtr<LayoutWrapperNode> StepperTestNg::CreateChildLayoutWrapper(
     RefPtr<LayoutWrapperNode> layoutWrapper, RefPtr<FrameNode> parentNode, RefPtr<FrameNode> childNode)
 {
     RefPtr<GeometryNode> childGeometryNode = AceType::MakeRefPtr<GeometryNode>();
     childGeometryNode->Reset();
-    RefPtr<LayoutWrapperNode> childLayoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
-        childNode, childGeometryNode, childNode->GetLayoutProperty());
+    RefPtr<LayoutWrapperNode> childLayoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(childNode, childGeometryNode, childNode->GetLayoutProperty());
     parentNode->AddChild(childNode);
     layoutWrapper->AppendChild(childLayoutWrapper);
     return childLayoutWrapper;
+}
+
+RefPtr<FrameNode> StepperTestNg::CreateStepperItemNode(TestProperty& testProperty)
+{
+    StepperItemModelNG().Create();
+    if (testProperty.labelStatusValue.has_value()) {
+        StepperItemModelNG().SetStatus(testProperty.labelStatusValue.value());
+    }
+    if (testProperty.leftLabelValue.has_value()) {
+        StepperItemModelNG().SetPrevLabel(testProperty.leftLabelValue.value());
+    }
+    if (testProperty.rightLabelValue.has_value()) {
+        StepperItemModelNG().SetNextLabel(testProperty.rightLabelValue.value());
+    }
+    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish(); // TextView pop
+    return AceType::DynamicCast<FrameNode>(element);
+}
+
+void StepperTestNg::InitStepperTestNg()
+{
+    frameNode_ = StepperNode::GetOrCreateStepperNode(V2::STEPPER_ETS_TAG,
+        ViewStackProcessor::GetInstance()->ClaimNodeId(), []() { return AceType::MakeRefPtr<StepperPattern>(); });
+    ASSERT_NE(frameNode_, nullptr);
+
+    stepperPattern_ = frameNode_->GetPattern<StepperPattern>();
+    ASSERT_NE(stepperPattern_, nullptr);
+
+    stepperAccessibilityProperty_ = frameNode_->GetAccessibilityProperty<StepperAccessibilityProperty>();
+    ASSERT_NE(stepperAccessibilityProperty_, nullptr);
+
+    swiperNode_ = FrameNode::GetOrCreateFrameNode(
+        V2::SWIPER_ETS_TAG, frameNode_->GetSwiperId(), []() { return AceType::MakeRefPtr<SwiperPattern>(); });
+    ASSERT_NE(swiperNode_, nullptr);
+    swiperNode_->MountToParent(frameNode_);
+
+    swiperLayoutProperty_ = swiperNode_->GetLayoutProperty<SwiperLayoutProperty>();
+    ASSERT_NE(swiperLayoutProperty_, nullptr);
 }
 
 /**
@@ -99,7 +157,7 @@ RefPtr<LayoutWrapperNode> StepperPatternTestNg::CreateChildLayoutWrapper(
  * @tc.desc: Test all the event of stepper.
  * @tc.type: FUNC
  */
-HWTEST_F(StepperPatternTestNg, StepperFrameNodeCreator001, TestSize.Level1)
+HWTEST_F(StepperTestNg, StepperFrameNodeCreator001, TestSize.Level1)
 {
     std::string eventName;
     int32_t eventParameterA = -1;
@@ -126,9 +184,9 @@ HWTEST_F(StepperPatternTestNg, StepperFrameNodeCreator001, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
     auto eventHub = frameNode->GetEventHub<StepperEventHub>();
     ASSERT_NE(eventHub, nullptr);
-    eventHub->FireFinishEvent(0);
+    eventHub->FireFinishEvent(1);
     EXPECT_EQ(eventName, FINISH_EVENT_NAME);
-    eventHub->FireSkipEvent(0);
+    eventHub->FireSkipEvent(1);
     EXPECT_EQ(eventName, SKIP_EVENT_NAME);
     eventHub->FireChangeEvent(1, 2);
     EXPECT_EQ(eventName, CHANGE_EVENT_NAME);
@@ -149,19 +207,19 @@ HWTEST_F(StepperPatternTestNg, StepperFrameNodeCreator001, TestSize.Level1)
  * @tc.desc: test create stepper node.
  * @tc.type: FUNC
  */
-HWTEST_F(StepperPatternTestNg, StepperNodeGetOrCreateStepperNode001, TestSize.Level1)
+HWTEST_F(StepperTestNg, StepperNodeGetOrCreateStepperNode001, TestSize.Level1)
 {
     auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
-    auto stepperNode = StepperNode::GetOrCreateStepperNode(STEPPER_ITEM_TAG,
-                    nodeId, []() { return AceType::MakeRefPtr<StepperPattern>(); });
+    auto stepperNode = StepperNode::GetOrCreateStepperNode(
+        STEPPER_ITEM_TAG, nodeId, []() { return AceType::MakeRefPtr<StepperPattern>(); });
     ASSERT_NE(stepperNode, nullptr);
     RefPtr<StepperNode> newStepperNode = stepperNode->GetOrCreateStepperNode(STEPPER_ITEM_TAG, nodeId, nullptr);
     ASSERT_NE(newStepperNode, nullptr);
     EXPECT_EQ(newStepperNode->GetTag(), stepperNode->GetTag());
 
     auto nodeIdGet = ElementRegister::GetInstance()->MakeUniqueId();
-    auto childStepperNode =  StepperNode::GetOrCreateStepperNode(STEPPER_ITEM_TAG_GET,
-                    nodeIdGet, []() { return AceType::MakeRefPtr<StepperPattern>(); });
+    auto childStepperNode = StepperNode::GetOrCreateStepperNode(
+        STEPPER_ITEM_TAG_GET, nodeIdGet, []() { return AceType::MakeRefPtr<StepperPattern>(); });
     ASSERT_NE(childStepperNode, nullptr);
     stepperNode->AddChild(childStepperNode);
     EXPECT_FALSE(stepperNode->children_.empty());
@@ -180,7 +238,7 @@ HWTEST_F(StepperPatternTestNg, StepperNodeGetOrCreateStepperNode001, TestSize.Le
  * @tc.desc: test AddChild and DeleteChild methods
  * @tc.type: FUNC
  */
-HWTEST_F(StepperPatternTestNg, StepperNodeAddChildToGroup001, TestSize.Level1)
+HWTEST_F(StepperTestNg, StepperNodeAddChildToGroup001, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. get Node Id
@@ -192,11 +250,11 @@ HWTEST_F(StepperPatternTestNg, StepperNodeAddChildToGroup001, TestSize.Level1)
     auto frameNode = StepperNode::GetOrCreateStepperNode(FRAME_NODE_TAG,
         ViewStackProcessor::GetInstance()->ClaimNodeId(), []() { return AceType::MakeRefPtr<StepperPattern>(); });
     ASSERT_NE(frameNode, nullptr);
-    auto stepperNode = AceType::MakeRefPtr<StepperNode>(STEPPER_ITEM_TAG,
-        nodeId, AceType::MakeRefPtr<StepperPattern>());
+    auto stepperNode =
+        AceType::MakeRefPtr<StepperNode>(STEPPER_ITEM_TAG, nodeId, AceType::MakeRefPtr<StepperPattern>());
     ASSERT_NE(stepperNode, nullptr);
-    auto swiperNode = FrameNode::GetOrCreateFrameNode(SWIPER_NODE_TAG,
-        stepperNode->GetSwiperId(), []() { return AceType::MakeRefPtr<SwiperPattern>(); });
+    auto swiperNode = FrameNode::GetOrCreateFrameNode(
+        SWIPER_NODE_TAG, stepperNode->GetSwiperId(), []() { return AceType::MakeRefPtr<SwiperPattern>(); });
     ASSERT_NE(swiperNode, nullptr);
     swiperNode->MountToParent(stepperNode);
     EXPECT_FALSE(frameNode->GetParent());
@@ -211,7 +269,7 @@ HWTEST_F(StepperPatternTestNg, StepperNodeAddChildToGroup001, TestSize.Level1)
  * @tc.desc: test Stepper pattern UpdateOrCreateRightButtonNode001.
  * @tc.type: FUNC
  */
-HWTEST_F(StepperPatternTestNg, StepperPatternInitSwiperChangeEvent001, TestSize.Level1)
+HWTEST_F(StepperTestNg, StepperPatternInitSwiperChangeEvent001, TestSize.Level1)
 {
     auto frameNode = StepperNode::GetOrCreateStepperNode(STEPPER_ITEM_TAG,
         ViewStackProcessor::GetInstance()->ClaimNodeId(), []() { return AceType::MakeRefPtr<StepperPattern>(); });
@@ -219,8 +277,8 @@ HWTEST_F(StepperPatternTestNg, StepperPatternInitSwiperChangeEvent001, TestSize.
     auto stepperPattern = frameNode->GetPattern<StepperPattern>();
     ASSERT_NE(stepperPattern, nullptr);
     EXPECT_EQ(stepperPattern->GetCurrentIndex(), INDEX);
-    auto swiperNode = FrameNode::GetOrCreateFrameNode(SWIPER_NODE_TAG,
-        frameNode->GetSwiperId(), []() { return AceType::MakeRefPtr<SwiperPattern>(); });
+    auto swiperNode = FrameNode::GetOrCreateFrameNode(
+        SWIPER_NODE_TAG, frameNode->GetSwiperId(), []() { return AceType::MakeRefPtr<SwiperPattern>(); });
     ASSERT_NE(swiperNode, nullptr);
     auto swiperEventHub = swiperNode->GetEventHub<SwiperEventHub>();
     EXPECT_NE(swiperEventHub, nullptr);
@@ -234,7 +292,7 @@ HWTEST_F(StepperPatternTestNg, StepperPatternInitSwiperChangeEvent001, TestSize.
  * @tc.desc: test Stepper pattern UpdateOrCreateLeftButtonNode.
  * @tc.type: FUNC
  */
-HWTEST_F(StepperPatternTestNg, UpdateOrCreateLeftButtonNode001, TestSize.Level1)
+HWTEST_F(StepperTestNg, UpdateOrCreateLeftButtonNode001, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create stepperNode
@@ -264,11 +322,11 @@ HWTEST_F(StepperPatternTestNg, UpdateOrCreateLeftButtonNode001, TestSize.Level1)
     EXPECT_FALSE(oldhostNode->HasLeftButtonNode());
 
     auto stepperNodeId = ViewStackProcessor::GetInstance()->ClaimNodeId();
-    auto stepperItemNode = StepperNode::GetOrCreateStepperNode(STEPPER_ITEM_TAG_GET,
-       stepperNodeId, []() { return AceType::MakeRefPtr<StepperPattern>(); });
+    auto stepperItemNode = StepperNode::GetOrCreateStepperNode(
+        STEPPER_ITEM_TAG_GET, stepperNodeId, []() { return AceType::MakeRefPtr<StepperPattern>(); });
     ASSERT_NE(stepperItemNode, nullptr);
-    auto swiperNode = FrameNode::GetOrCreateFrameNode(SWIPER_NODE_TAG,
-        frameNode->GetSwiperId(), []() { return AceType::MakeRefPtr<SwiperPattern>(); });
+    auto swiperNode = FrameNode::GetOrCreateFrameNode(
+        SWIPER_NODE_TAG, frameNode->GetSwiperId(), []() { return AceType::MakeRefPtr<SwiperPattern>(); });
     ASSERT_NE(swiperNode, nullptr);
     swiperNode->AddChild(stepperItemNode);
     stepperPattern->UpdateOrCreateLeftButtonNode(stepperNodeId);
@@ -280,7 +338,7 @@ HWTEST_F(StepperPatternTestNg, UpdateOrCreateLeftButtonNode001, TestSize.Level1)
  * @tc.desc: test Stepper pattern CreateLeftButtonNode.
  * @tc.type: FUNC
  */
-HWTEST_F(StepperPatternTestNg, StepperPatternCreateLeftButtonNode001, TestSize.Level1)
+HWTEST_F(StepperTestNg, StepperPatternCreateLeftButtonNode001, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create stepperNode
@@ -303,8 +361,8 @@ HWTEST_F(StepperPatternTestNg, StepperPatternCreateLeftButtonNode001, TestSize.L
      * @tc.expected: step3.
      */
     auto buttonId = hostNode->GetLeftButtonId();
-    auto buttonNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
-        buttonId, []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    auto buttonNode = FrameNode::GetOrCreateFrameNode(
+        V2::BUTTON_ETS_TAG, buttonId, []() { return AceType::MakeRefPtr<ButtonPattern>(); });
     ASSERT_NE(buttonNode, nullptr);
     EXPECT_EQ(buttonNode->GetParent(), hostNode);
     auto buttonInputHub = buttonNode->GetOrCreateInputEventHub();
@@ -329,7 +387,7 @@ HWTEST_F(StepperPatternTestNg, StepperPatternCreateLeftButtonNode001, TestSize.L
  * @tc.desc: test Stepper pattern UpdateOrCreateRightButtonNode001.
  * @tc.type: FUNC
  */
-HWTEST_F(StepperPatternTestNg, UpdateOrCreateRightButtonNode001, TestSize.Level1)
+HWTEST_F(StepperTestNg, UpdateOrCreateRightButtonNode001, TestSize.Level1)
 {
     StepperModelNG().Create(INDEX);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
@@ -349,7 +407,7 @@ HWTEST_F(StepperPatternTestNg, UpdateOrCreateRightButtonNode001, TestSize.Level1
  * @tc.desc: test Stepper pattern CreateArrowRightButtonNode.
  * @tc.type: FUNC
  */
-HWTEST_F(StepperPatternTestNg, StepperPatternCreateArrowRightButtonNode001, TestSize.Level1)
+HWTEST_F(StepperTestNg, StepperPatternCreateArrowRightButtonNode001, TestSize.Level1)
 {
     auto frameNode = StepperNode::GetOrCreateStepperNode(STEPPER_ITEM_TAG,
         ViewStackProcessor::GetInstance()->ClaimNodeId(), []() { return AceType::MakeRefPtr<StepperPattern>(); });
@@ -357,8 +415,8 @@ HWTEST_F(StepperPatternTestNg, StepperPatternCreateArrowRightButtonNode001, Test
     auto stepperPattern = frameNode->GetPattern<StepperPattern>();
     ASSERT_NE(stepperPattern, nullptr);
 
-    auto swiperNode = FrameNode::GetOrCreateFrameNode(SWIPER_NODE_TAG,
-        frameNode->GetSwiperId(), []() { return AceType::MakeRefPtr<SwiperPattern>(); });
+    auto swiperNode = FrameNode::GetOrCreateFrameNode(
+        SWIPER_NODE_TAG, frameNode->GetSwiperId(), []() { return AceType::MakeRefPtr<SwiperPattern>(); });
     ASSERT_NE(swiperNode, nullptr);
 
     StepperItemModelNG().Create();
@@ -371,8 +429,8 @@ HWTEST_F(StepperPatternTestNg, StepperPatternCreateArrowRightButtonNode001, Test
     auto hostNode = AceType::DynamicCast<StepperNode>(stepperPattern->GetHost());
     ASSERT_NE(hostNode, nullptr);
     auto buttonId = hostNode->GetRightButtonId();
-    auto buttonNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
-        buttonId, []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    auto buttonNode = FrameNode::GetOrCreateFrameNode(
+        V2::BUTTON_ETS_TAG, buttonId, []() { return AceType::MakeRefPtr<ButtonPattern>(); });
     ASSERT_NE(buttonNode, nullptr);
     EXPECT_EQ(buttonNode->GetParent(), hostNode);
     auto buttonInputHub = buttonNode->GetOrCreateInputEventHub();
@@ -393,7 +451,7 @@ HWTEST_F(StepperPatternTestNg, StepperPatternCreateArrowRightButtonNode001, Test
  * @tc.desc: test Stepper pattern CreateArrowlessRightButtonNode.
  * @tc.type: FUNC
  */
-HWTEST_F(StepperPatternTestNg, StepperPatternCreateArrowlessRightButtonNode001, TestSize.Level1)
+HWTEST_F(StepperTestNg, StepperPatternCreateArrowlessRightButtonNode001, TestSize.Level1)
 {
     auto frameNode = StepperNode::GetOrCreateStepperNode(STEPPER_ITEM_TAG,
         ViewStackProcessor::GetInstance()->ClaimNodeId(), []() { return AceType::MakeRefPtr<StepperPattern>(); });
@@ -401,21 +459,21 @@ HWTEST_F(StepperPatternTestNg, StepperPatternCreateArrowlessRightButtonNode001, 
     auto stepperPattern = frameNode->GetPattern<StepperPattern>();
     ASSERT_NE(stepperPattern, nullptr);
 
-    auto swiperNode = FrameNode::GetOrCreateFrameNode(SWIPER_NODE_TAG,
-        frameNode->GetSwiperId(), []() { return AceType::MakeRefPtr<SwiperPattern>(); });
+    auto swiperNode = FrameNode::GetOrCreateFrameNode(
+        SWIPER_NODE_TAG, frameNode->GetSwiperId(), []() { return AceType::MakeRefPtr<SwiperPattern>(); });
     ASSERT_NE(swiperNode, nullptr);
     StepperItemModelNG().Create();
     auto stepperItemNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(stepperItemNode, nullptr);
     frameNode->AddChild(swiperNode);
     swiperNode->AddChild(stepperItemNode);
-    stepperPattern->CreateArrowlessRightButtonNode(INDEX,
-        Localization::GetInstance()->GetEntryLetters("stepper.start"));
+    stepperPattern->CreateArrowlessRightButtonNode(
+        INDEX, Localization::GetInstance()->GetEntryLetters("stepper.start"));
     auto hostNode = AceType::DynamicCast<StepperNode>(stepperPattern->GetHost());
     ASSERT_NE(hostNode, nullptr);
     auto buttonId = hostNode->GetRightButtonId();
-    auto buttonNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
-        buttonId, []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    auto buttonNode = FrameNode::GetOrCreateFrameNode(
+        V2::BUTTON_ETS_TAG, buttonId, []() { return AceType::MakeRefPtr<ButtonPattern>(); });
     ASSERT_NE(buttonNode, nullptr);
     EXPECT_EQ(buttonNode->GetParent(), hostNode);
     auto buttonInputHub = buttonNode->GetOrCreateInputEventHub();
@@ -432,7 +490,7 @@ HWTEST_F(StepperPatternTestNg, StepperPatternCreateArrowlessRightButtonNode001, 
  * @tc.desc: test Stepper pattern CreateWaitingRightButtonNode.
  * @tc.type: FUNC
  */
-HWTEST_F(StepperPatternTestNg, StepperPatternCreateWaitingRightButtonNode001, TestSize.Level1)
+HWTEST_F(StepperTestNg, StepperPatternCreateWaitingRightButtonNode001, TestSize.Level1)
 {
     auto frameNode = StepperNode::GetOrCreateStepperNode(STEPPER_ITEM_TAG,
         ViewStackProcessor::GetInstance()->ClaimNodeId(), []() { return AceType::MakeRefPtr<StepperPattern>(); });
@@ -443,8 +501,8 @@ HWTEST_F(StepperPatternTestNg, StepperPatternCreateWaitingRightButtonNode001, Te
     auto hostNode = AceType::DynamicCast<StepperNode>(stepperPattern->GetHost());
     ASSERT_NE(hostNode, nullptr);
     auto buttonId = hostNode->GetRightButtonId();
-    auto loadingProgressNode = FrameNode::GetOrCreateFrameNode(V2::LOADING_PROGRESS_ETS_TAG,
-        buttonId, []() { return AceType::MakeRefPtr<LoadingProgressPattern>(); });
+    auto loadingProgressNode = FrameNode::GetOrCreateFrameNode(
+        V2::LOADING_PROGRESS_ETS_TAG, buttonId, []() { return AceType::MakeRefPtr<LoadingProgressPattern>(); });
     ASSERT_NE(loadingProgressNode, nullptr);
     EXPECT_EQ(loadingProgressNode->GetParent(), hostNode);
 }
@@ -453,7 +511,7 @@ HWTEST_F(StepperPatternTestNg, StepperPatternCreateWaitingRightButtonNode001, Te
  * @tc.desc: test Stepper pattern ButtonOnHover.
  * @tc.type: FUNC
  */
-HWTEST_F(StepperPatternTestNg, StepperPatternButtonOnHover001, TestSize.Level1)
+HWTEST_F(StepperTestNg, StepperPatternButtonOnHover001, TestSize.Level1)
 {
     auto frameNode = StepperNode::GetOrCreateStepperNode(STEPPER_ITEM_TAG,
         ViewStackProcessor::GetInstance()->ClaimNodeId(), []() { return AceType::MakeRefPtr<StepperPattern>(); });
@@ -464,8 +522,8 @@ HWTEST_F(StepperPatternTestNg, StepperPatternButtonOnHover001, TestSize.Level1)
     auto hostNode = AceType::DynamicCast<StepperNode>(stepperPattern->GetHost());
     ASSERT_NE(hostNode, nullptr);
     auto buttonId = hostNode->GetLeftButtonId();
-    auto buttonNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
-        buttonId, []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    auto buttonNode = FrameNode::GetOrCreateFrameNode(
+        V2::BUTTON_ETS_TAG, buttonId, []() { return AceType::MakeRefPtr<ButtonPattern>(); });
     ASSERT_NE(buttonNode, nullptr);
     EXPECT_FALSE(stepperPattern->leftIsHover_);
     stepperPattern->ButtonOnHover(buttonNode, true, true);
@@ -487,7 +545,7 @@ HWTEST_F(StepperPatternTestNg, StepperPatternButtonOnHover001, TestSize.Level1)
  * @tc.desc: test Stepper pattern button click event.
  * @tc.type: FUNC
  */
-HWTEST_F(StepperPatternTestNg, StepperPatternClickEvent001, TestSize.Level1)
+HWTEST_F(StepperTestNg, StepperPatternClickEvent001, TestSize.Level1)
 {
     auto frameNode = StepperNode::GetOrCreateStepperNode(STEPPER_ITEM_TAG,
         ViewStackProcessor::GetInstance()->ClaimNodeId(), []() { return AceType::MakeRefPtr<StepperPattern>(); });
@@ -497,12 +555,12 @@ HWTEST_F(StepperPatternTestNg, StepperPatternClickEvent001, TestSize.Level1)
     stepperPattern->CreateLeftButtonNode();
     auto hostNode = AceType::DynamicCast<StepperNode>(stepperPattern->GetHost());
     ASSERT_NE(hostNode, nullptr);
-    auto leftButtonNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
-        hostNode->GetLeftButtonId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    auto leftButtonNode = FrameNode::GetOrCreateFrameNode(
+        V2::BUTTON_ETS_TAG, hostNode->GetLeftButtonId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
     ASSERT_NE(leftButtonNode, nullptr);
     hostNode->AddChild(leftButtonNode);
-    auto rightButtonNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
-        hostNode->GetRightButtonId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    auto rightButtonNode = FrameNode::GetOrCreateFrameNode(
+        V2::BUTTON_ETS_TAG, hostNode->GetRightButtonId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
     ASSERT_NE(rightButtonNode, nullptr);
     hostNode->AddChild(rightButtonNode);
     stepperPattern->ButtonOnTouch(leftButtonNode, TouchType::DOWN);
@@ -520,7 +578,7 @@ HWTEST_F(StepperPatternTestNg, StepperPatternClickEvent001, TestSize.Level1)
  * @tc.desc: test Stepper pattern handle button click event.
  * @tc.type: FUNC
  */
-HWTEST_F(StepperPatternTestNg, StepperPatternHandleClickEvent001, TestSize.Level1)
+HWTEST_F(StepperTestNg, StepperPatternHandleClickEvent001, TestSize.Level1)
 {
     auto frameNode = StepperNode::GetOrCreateStepperNode(STEPPER_ITEM_TAG,
         ViewStackProcessor::GetInstance()->ClaimNodeId(), []() { return AceType::MakeRefPtr<StepperPattern>(); });
@@ -530,8 +588,8 @@ HWTEST_F(StepperPatternTestNg, StepperPatternHandleClickEvent001, TestSize.Level
     stepperPattern->CreateLeftButtonNode();
     auto hostNode = AceType::DynamicCast<StepperNode>(stepperPattern->GetHost());
     ASSERT_NE(hostNode, nullptr);
-    auto swiperNode = FrameNode::GetOrCreateFrameNode(SWIPER_NODE_TAG,
-        hostNode->GetSwiperId(), []() { return AceType::MakeRefPtr<SwiperPattern>(); });
+    auto swiperNode = FrameNode::GetOrCreateFrameNode(
+        SWIPER_NODE_TAG, hostNode->GetSwiperId(), []() { return AceType::MakeRefPtr<SwiperPattern>(); });
     hostNode->AddChild(swiperNode);
     auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
     swiperPattern->controller_ = CREATE_ANIMATOR(hostNode->GetContext());
@@ -564,7 +622,7 @@ HWTEST_F(StepperPatternTestNg, StepperPatternHandleClickEvent001, TestSize.Level
  * @tc.desc: test Stepper pattern algorithm.
  * @tc.type: FUNC
  */
-HWTEST_F(StepperPatternTestNg, StepperAlgorithmTest001, TestSize.Level1)
+HWTEST_F(StepperTestNg, StepperAlgorithmTest001, TestSize.Level1)
 {
     StepperModelNG().Create(INDEX);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
@@ -573,8 +631,8 @@ HWTEST_F(StepperPatternTestNg, StepperAlgorithmTest001, TestSize.Level1)
     ASSERT_NE(stepperPattern, nullptr);
     auto stepperFrameNode = AceType::DynamicCast<StepperNode>(stepperPattern->GetHost());
     ASSERT_NE(stepperFrameNode, nullptr);
-    RefPtr<LayoutWrapperNode> layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(stepperFrameNode,
-        AceType::MakeRefPtr<GeometryNode>(), stepperFrameNode->GetLayoutProperty());
+    RefPtr<LayoutWrapperNode> layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
+        stepperFrameNode, AceType::MakeRefPtr<GeometryNode>(), stepperFrameNode->GetLayoutProperty());
     auto stepperLayoutAlgorithm = stepperPattern->CreateLayoutAlgorithm();
     ASSERT_NE(stepperLayoutAlgorithm, nullptr);
     layoutWrapper->SetLayoutAlgorithm(AccessibilityManager::MakeRefPtr<LayoutAlgorithmWrapper>(stepperLayoutAlgorithm));
@@ -586,38 +644,37 @@ HWTEST_F(StepperPatternTestNg, StepperAlgorithmTest001, TestSize.Level1)
     layoutWrapper->GetLayoutProperty()->UpdateLayoutConstraint(parentLayoutConstraint);
     layoutWrapper->GetLayoutProperty()->UpdateContentConstraint();
 
-    auto swiperNode = FrameNode::GetOrCreateFrameNode(SWIPER_NODE_TAG,
-        stepperFrameNode->GetSwiperId(), []() { return AceType::MakeRefPtr<SwiperPattern>(); });
-    RefPtr<LayoutWrapperNode> swiperLayoutWrapper = CreateChildLayoutWrapper(layoutWrapper,
-                                                        stepperFrameNode, swiperNode);
+    auto swiperNode = FrameNode::GetOrCreateFrameNode(
+        SWIPER_NODE_TAG, stepperFrameNode->GetSwiperId(), []() { return AceType::MakeRefPtr<SwiperPattern>(); });
+    RefPtr<LayoutWrapperNode> swiperLayoutWrapper =
+        CreateChildLayoutWrapper(layoutWrapper, stepperFrameNode, swiperNode);
 
-    auto leftButtonNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
-        stepperFrameNode->GetLeftButtonId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
-    RefPtr<LayoutWrapperNode> leftButtonLayoutWrapper = CreateChildLayoutWrapper(layoutWrapper,
-                                                        stepperFrameNode, leftButtonNode);
+    auto leftButtonNode = FrameNode::GetOrCreateFrameNode(
+        V2::BUTTON_ETS_TAG, stepperFrameNode->GetLeftButtonId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    RefPtr<LayoutWrapperNode> leftButtonLayoutWrapper =
+        CreateChildLayoutWrapper(layoutWrapper, stepperFrameNode, leftButtonNode);
 
-    auto rightButtonNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
-        stepperFrameNode->GetRightButtonId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
-    RefPtr<LayoutWrapperNode> rightButtonLayoutWrapper = CreateChildLayoutWrapper(layoutWrapper,
-                                                        stepperFrameNode, rightButtonNode);
+    auto rightButtonNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG, stepperFrameNode->GetRightButtonId(),
+        []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    RefPtr<LayoutWrapperNode> rightButtonLayoutWrapper =
+        CreateChildLayoutWrapper(layoutWrapper, stepperFrameNode, rightButtonNode);
 
     auto rowNodeId = ElementRegister::GetInstance()->MakeUniqueId();
-    auto rowNode = FrameNode::GetOrCreateFrameNode(V2::ROW_ETS_TAG,
-        rowNodeId, []() { return AceType::MakeRefPtr<LinearLayoutPattern>(false); });
-    RefPtr<LayoutWrapperNode> rowLayoutWrapper = CreateChildLayoutWrapper(leftButtonLayoutWrapper,
-                                                        leftButtonNode, rowNode);
+    auto rowNode = FrameNode::GetOrCreateFrameNode(
+        V2::ROW_ETS_TAG, rowNodeId, []() { return AceType::MakeRefPtr<LinearLayoutPattern>(false); });
+    RefPtr<LayoutWrapperNode> rowLayoutWrapper =
+        CreateChildLayoutWrapper(leftButtonLayoutWrapper, leftButtonNode, rowNode);
     rightButtonNode->AddChild(rowNode);
     rightButtonLayoutWrapper->AppendChild(rowLayoutWrapper);
 
     auto rightTextNode = FrameNode::GetOrCreateFrameNode(V2::TEXT_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextPattern>(); });
-    RefPtr<LayoutWrapperNode> rightTextLayoutWrapper = CreateChildLayoutWrapper(rowLayoutWrapper,
-                                                        rowNode, rightTextNode);
+    RefPtr<LayoutWrapperNode> rightTextLayoutWrapper =
+        CreateChildLayoutWrapper(rowLayoutWrapper, rowNode, rightTextNode);
 
     auto leftTextNode = FrameNode::GetOrCreateFrameNode(V2::TEXT_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextPattern>(); });
-    RefPtr<LayoutWrapperNode> leftTextLayoutWrapper = CreateChildLayoutWrapper(rowLayoutWrapper,
-                                                        rowNode, leftTextNode);
+    RefPtr<LayoutWrapperNode> leftTextLayoutWrapper = CreateChildLayoutWrapper(rowLayoutWrapper, rowNode, leftTextNode);
 
     stepperLayoutAlgorithm->Measure(AccessibilityManager::RawPtr(layoutWrapper));
     stepperLayoutAlgorithm->Layout(AccessibilityManager::RawPtr(layoutWrapper));
@@ -629,7 +686,7 @@ HWTEST_F(StepperPatternTestNg, StepperAlgorithmTest001, TestSize.Level1)
  * @tc.desc: test Stepper pattern algorithm.
  * @tc.type: FUNC
  */
-HWTEST_F(StepperPatternTestNg, StepperAlgorithmTest002, TestSize.Level1)
+HWTEST_F(StepperTestNg, StepperAlgorithmTest002, TestSize.Level1)
 {
     auto stepperFrameNode = StepperNode::GetOrCreateStepperNode(STEPPER_ITEM_TAG,
         ViewStackProcessor::GetInstance()->ClaimNodeId(), []() { return AceType::MakeRefPtr<StepperPattern>(); });
@@ -659,7 +716,7 @@ HWTEST_F(StepperPatternTestNg, StepperAlgorithmTest002, TestSize.Level1)
  * @tc.desc: test Stepper pattern algorithm.
  * @tc.type: FUNC
  */
-HWTEST_F(StepperPatternTestNg, StepperAlgorithmTest003, TestSize.Level1)
+HWTEST_F(StepperTestNg, StepperAlgorithmTest003, TestSize.Level1)
 {
     auto stepperFrameNode = StepperNode::GetOrCreateStepperNode(STEPPER_ITEM_TAG,
         ViewStackProcessor::GetInstance()->ClaimNodeId(), []() { return AceType::MakeRefPtr<StepperPattern>(); });
@@ -693,7 +750,7 @@ HWTEST_F(StepperPatternTestNg, StepperAlgorithmTest003, TestSize.Level1)
  * @tc.desc: Test the change event of stepper.
  * @tc.type: FUNC
  */
-HWTEST_F(StepperPatternTestNg, StepperEventHubChangeEvent001, TestSize.Level1)
+HWTEST_F(StepperTestNg, StepperEventHubChangeEvent001, TestSize.Level1)
 {
     StepperModelNG().Create(INDEX);
     StepperModelNG().SetOnChangeEvent([](int32_t index) { EXPECT_EQ(index, 1); });
@@ -710,7 +767,7 @@ HWTEST_F(StepperPatternTestNg, StepperEventHubChangeEvent001, TestSize.Level1)
  * @tc.desc: Stepper Accessibility PerformAction test ScrollForward and ScrollBackward.
  * @tc.type: FUNC
  */
-HWTEST_F(StepperPatternTestNg, PerformActionTest001, TestSize.Level1)
+HWTEST_F(StepperTestNg, PerformActionTest001, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Create stepper and initialize related properties.
@@ -747,7 +804,7 @@ HWTEST_F(StepperPatternTestNg, PerformActionTest001, TestSize.Level1)
  * @tc.desc: test stepper pattern FocusNode
  * @tc.type: FUNC
  */
-HWTEST_F(StepperPatternTestNg, GetFocusNode001, TestSize.Level1)
+HWTEST_F(StepperTestNg, GetFocusNode001, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Create frameNode, pattern.
@@ -816,7 +873,7 @@ HWTEST_F(StepperPatternTestNg, GetFocusNode001, TestSize.Level1)
  * @tc.desc: test Stepper pattern CreateRightButtonNode.
  * @tc.type: FUNC
  */
-HWTEST_F(StepperPatternTestNg, StepperPatternCreateRightButtonNode001, TestSize.Level1)
+HWTEST_F(StepperTestNg, StepperPatternCreateRightButtonNode001, TestSize.Level1)
 {
     auto frameNode = StepperNode::GetOrCreateStepperNode(STEPPER_ITEM_TAG,
         ViewStackProcessor::GetInstance()->ClaimNodeId(), []() { return AceType::MakeRefPtr<StepperPattern>(); });
@@ -869,7 +926,7 @@ HWTEST_F(StepperPatternTestNg, StepperPatternCreateRightButtonNode001, TestSize.
  * @tc.desc: test Stepper pattern handle button click event.
  * @tc.type: FUNC
  */
-HWTEST_F(StepperPatternTestNg, StepperPatternHandleClickEvent011, TestSize.Level1)
+HWTEST_F(StepperTestNg, StepperPatternHandleClickEvent011, TestSize.Level1)
 {
     auto frameNode = StepperNode::GetOrCreateStepperNode(STEPPER_ITEM_TAG,
         ViewStackProcessor::GetInstance()->ClaimNodeId(), []() { return AceType::MakeRefPtr<StepperPattern>(); });
@@ -917,7 +974,7 @@ HWTEST_F(StepperPatternTestNg, StepperPatternHandleClickEvent011, TestSize.Level
  * @tc.desc: test  OnColorConfigurationUpdate.
  * @tc.type: FUNC
  */
-HWTEST_F(StepperPatternTestNg, StepperPatternOnColorConfigurationUpdate001, TestSize.Level1)
+HWTEST_F(StepperTestNg, StepperPatternOnColorConfigurationUpdate001, TestSize.Level1)
 {
     auto frameNode = StepperNode::GetOrCreateStepperNode(STEPPER_ITEM_TAG,
         ViewStackProcessor::GetInstance()->ClaimNodeId(), []() { return AceType::MakeRefPtr<StepperPattern>(); });
@@ -958,7 +1015,7 @@ HWTEST_F(StepperPatternTestNg, StepperPatternOnColorConfigurationUpdate001, Test
  * @tc.desc: test stepper pattern GetFocusNode.
  * @tc.type: FUNC
  */
-HWTEST_F(StepperPatternTestNg, GetFocusNode002, TestSize.Level1)
+HWTEST_F(StepperTestNg, GetFocusNode002, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Create frameNode, pattern.
@@ -1010,7 +1067,7 @@ HWTEST_F(StepperPatternTestNg, GetFocusNode002, TestSize.Level1)
  * @tc.desc: test stepper pattern UpdateOrCreateLeftButtonNode.
  * @tc.type: FUNC
  */
-HWTEST_F(StepperPatternTestNg, StepperPatternUpdateOrCreateLeftButtonNode002, TestSize.Level1)
+HWTEST_F(StepperTestNg, StepperPatternUpdateOrCreateLeftButtonNode002, TestSize.Level1)
 {
     auto frameNode = StepperNode::GetOrCreateStepperNode(STEPPER_ITEM_TAG,
         ViewStackProcessor::GetInstance()->ClaimNodeId(), []() { return AceType::MakeRefPtr<StepperPattern>(); });
@@ -1044,5 +1101,204 @@ HWTEST_F(StepperPatternTestNg, StepperPatternUpdateOrCreateLeftButtonNode002, Te
     stepperItemNode->GetLayoutProperty<StepperItemLayoutProperty>()->UpdateLabelStatus("normal");
     stepperPattern->UpdateOrCreateLeftButtonNode(1);
     EXPECT_EQ(swiperAnimationController->status_, Animator::Status::RUNNING);
+}
+
+/**
+ * @tc.name: StepperItemFrameNodeCreator001
+ * @tc.desc: Test all the properties of StepperItem.
+ * @tc.type: FUNC
+ */
+HWTEST_F(StepperTestNg, StepperFrameNodeCreator002, TestSize.Level1)
+{
+    TestProperty testProperty;
+    testProperty.leftLabelValue = LEFT_LABEL;
+    testProperty.rightLabelValue = RIGHT_LABEL;
+    testProperty.labelStatusValue = LABEL_STATUS;
+
+    RefPtr<FrameNode> frameNode = CreateStepperItemNode(testProperty);
+    EXPECT_NE(frameNode, nullptr);
+    RefPtr<StepperItemLayoutProperty> layoutProperty = frameNode->GetLayoutProperty<StepperItemLayoutProperty>();
+    EXPECT_NE(layoutProperty, nullptr);
+    EXPECT_EQ(layoutProperty->GetLeftLabelValue(), LEFT_LABEL);
+    EXPECT_EQ(layoutProperty->GetRightLabelValue(), RIGHT_LABEL);
+    EXPECT_EQ(layoutProperty->GetLabelStatus(), LABEL_STATUS);
+}
+
+/**
+ * @tc.name: StepperItemPatternCreate001
+ * @tc.desc: Test All the pattern of StepperItemPattern
+ * @tc.type: FUNC
+ */
+HWTEST_F(StepperTestNg, StepperItemPatternCreate001, TestSize.Level1)
+{
+    TestProperty testProperty;
+    testProperty.leftLabelValue = LEFT_LABEL;
+    testProperty.rightLabelValue = RIGHT_LABEL;
+    testProperty.labelStatusValue = LABEL_STATUS;
+
+    RefPtr<FrameNode> frameNode = CreateStepperItemNode(testProperty);
+    ASSERT_NE(frameNode, nullptr);
+    auto stepperItemPattern = frameNode->GetPattern<StepperItemPattern>();
+    ASSERT_NE(stepperItemPattern, nullptr);
+    bool isAtomicNode = stepperItemPattern->IsAtomicNode();
+    EXPECT_FALSE(isAtomicNode);
+}
+
+/**
+ * @tc.name: StepperAccessibilityPropertyGetCurrentIndex001
+ * @tc.desc: Test GetCurrentIndex of stepper.
+ * @tc.type: FUNC
+ */
+HWTEST_F(StepperTestNg, StepperAccessibilityPropertyGetCurrentIndex001, TestSize.Level1)
+{
+    InitStepperTestNg();
+
+    EXPECT_EQ(stepperAccessibilityProperty_->GetCurrentIndex(), STEPPER_ERROR);
+
+    for (int i = 0; i <= INDEX_NUM; i++) {
+        auto indicatorNode = FrameNode::GetOrCreateFrameNode(V2::SWIPER_INDICATOR_ETS_TAG,
+            ElementRegister::GetInstance()->MakeUniqueId(),
+            []() { return AceType::MakeRefPtr<SwiperIndicatorPattern>(); });
+        ASSERT_NE(indicatorNode, nullptr);
+        swiperNode_->AddChild(indicatorNode);
+    }
+    stepperPattern_->index_ = INDEX_NUM;
+    swiperLayoutProperty_->UpdateShowIndicator(false);
+    EXPECT_EQ(stepperAccessibilityProperty_->GetCurrentIndex(), INDEX_NUM);
+}
+
+/**
+ * @tc.name: StepperAccessibilityPropertyGetBeginIndex001
+ * @tc.desc: Test GetBeginIndex of stepper.
+ * @tc.type: FUNC
+ */
+HWTEST_F(StepperTestNg, StepperAccessibilityPropertyGetBeginIndex001, TestSize.Level1)
+{
+    InitStepperTestNg();
+
+    EXPECT_EQ(stepperAccessibilityProperty_->GetBeginIndex(), STEPPER_ERROR);
+
+    for (int i = 0; i <= INDEX_NUM; i++) {
+        auto indicatorNode = FrameNode::GetOrCreateFrameNode(V2::SWIPER_INDICATOR_ETS_TAG,
+            ElementRegister::GetInstance()->MakeUniqueId(),
+            []() { return AceType::MakeRefPtr<SwiperIndicatorPattern>(); });
+        ASSERT_NE(indicatorNode, nullptr);
+        swiperNode_->AddChild(indicatorNode);
+    }
+    swiperLayoutProperty_->UpdateShowIndicator(false);
+    EXPECT_EQ(stepperAccessibilityProperty_->GetBeginIndex(), 0);
+}
+
+/**
+ * @tc.name: StepperAccessibilityPropertyGetEndIndex001
+ * @tc.desc: Test GetEndIndex of stepper.
+ * @tc.type: FUNC
+ */
+HWTEST_F(StepperTestNg, StepperAccessibilityPropertyGetEndIndex001, TestSize.Level1)
+{
+    InitStepperTestNg();
+
+    EXPECT_EQ(stepperAccessibilityProperty_->GetEndIndex(), STEPPER_ERROR);
+
+    for (int i = 0; i <= INDEX_NUM; i++) {
+        auto indicatorNode = FrameNode::GetOrCreateFrameNode(V2::SWIPER_INDICATOR_ETS_TAG,
+            ElementRegister::GetInstance()->MakeUniqueId(),
+            []() { return AceType::MakeRefPtr<SwiperIndicatorPattern>(); });
+        ASSERT_NE(indicatorNode, nullptr);
+        swiperNode_->AddChild(indicatorNode);
+    }
+    swiperLayoutProperty_->UpdateShowIndicator(false);
+
+    EXPECT_EQ(stepperAccessibilityProperty_->GetEndIndex(), INDEX_NUM);
+}
+
+/**
+ * @tc.name: StepperAccessibilityPropertyIsScrollable001
+ * @tc.desc: Test IsScrollable of stepper.
+ * @tc.type: FUNC
+ */
+HWTEST_F(StepperTestNg, StepperAccessibilityPropertyIsScrollable001, TestSize.Level1)
+{
+    InitStepperTestNg();
+
+    auto swiperLayoutProperty = swiperNode_->GetLayoutProperty<SwiperLayoutProperty>();
+    ASSERT_NE(swiperLayoutProperty, nullptr);
+    swiperLayoutProperty->UpdateLoop(false);
+    EXPECT_FALSE(stepperAccessibilityProperty_->IsScrollable());
+
+    for (int i = 0; i <= INDEX_NUM; i++) {
+        auto indicatorNode = FrameNode::GetOrCreateFrameNode(V2::SWIPER_INDICATOR_ETS_TAG,
+            ElementRegister::GetInstance()->MakeUniqueId(),
+            []() { return AceType::MakeRefPtr<SwiperIndicatorPattern>(); });
+        ASSERT_NE(indicatorNode, nullptr);
+        swiperNode_->AddChild(indicatorNode);
+    }
+    swiperLayoutProperty_->UpdateShowIndicator(false);
+    auto swiperPattern = swiperNode_->GetPattern<SwiperPattern>();
+    EXPECT_TRUE(stepperAccessibilityProperty_->IsScrollable());
+}
+
+/**
+ * @tc.name: StepperAccessibilityPropertyGetCollectionItemCounts001
+ * @tc.desc: Test GetCollectionItemCounts of stepper.
+ * @tc.type: FUNC
+ */
+HWTEST_F(StepperTestNg, StepperAccessibilityPropertyGetCollectionItemCounts001, TestSize.Level1)
+{
+    InitStepperTestNg();
+
+    EXPECT_EQ(stepperAccessibilityProperty_->GetCollectionItemCounts(), STEPPER_ERROR);
+
+    for (int i = 0; i < INDEX_NUM; i++) {
+        auto indicatorNode = FrameNode::GetOrCreateFrameNode(V2::SWIPER_INDICATOR_ETS_TAG,
+            ElementRegister::GetInstance()->MakeUniqueId(),
+            []() { return AceType::MakeRefPtr<SwiperIndicatorPattern>(); });
+        ASSERT_NE(indicatorNode, nullptr);
+        swiperNode_->AddChild(indicatorNode);
+    }
+    swiperLayoutProperty_->UpdateShowIndicator(false);
+    EXPECT_EQ(stepperAccessibilityProperty_->GetCollectionItemCounts(), INDEX_NUM);
+}
+
+/**
+ * @tc.name: StepperAccessibilityPropertyGetSupportAction001
+ * @tc.desc: Test GetSupportAction of stepper.
+ * @tc.type: FUNC
+ */
+HWTEST_F(StepperTestNg, StepperAccessibilityPropertyGetSupportAction001, TestSize.Level1)
+{
+    InitStepperTestNg();
+
+    auto swiperLayoutProperty = swiperNode_->GetLayoutProperty<SwiperLayoutProperty>();
+    ASSERT_NE(swiperLayoutProperty, nullptr);
+    swiperLayoutProperty->UpdateLoop(false);
+    swiperLayoutProperty_->UpdateShowIndicator(false);
+    for (int index = 0; index <= INDEX_NUM; index++) {
+        RefPtr<FrameNode> indicatorNode = FrameNode::GetOrCreateFrameNode(V2::SWIPER_INDICATOR_ETS_TAG,
+            ElementRegister::GetInstance()->MakeUniqueId(),
+            []() { return AceType::MakeRefPtr<SwiperIndicatorPattern>(); });
+        ASSERT_NE(indicatorNode, nullptr);
+        swiperNode_->AddChild(indicatorNode);
+    }
+    stepperPattern_->index_ = 1;
+
+    stepperAccessibilityProperty_->ResetSupportAction();
+    std::unordered_set<AceAction> supportAceActions = stepperAccessibilityProperty_->GetSupportAction();
+    uint64_t actions = 0, expectActions = 0;
+    expectActions |= 1UL << static_cast<uint32_t>(AceAction::ACTION_SCROLL_FORWARD);
+    expectActions |= 1UL << static_cast<uint32_t>(AceAction::ACTION_SCROLL_BACKWARD);
+    for (auto action : supportAceActions) {
+        actions |= 1UL << static_cast<uint32_t>(action);
+    }
+    EXPECT_EQ(actions, expectActions);
+
+    swiperLayoutProperty->UpdateLoop(true);
+    stepperAccessibilityProperty_->ResetSupportAction();
+    supportAceActions = stepperAccessibilityProperty_->GetSupportAction();
+    actions = 0;
+    for (auto action : supportAceActions) {
+        actions |= 1UL << static_cast<uint32_t>(action);
+    }
+    EXPECT_EQ(actions, expectActions);
 }
 } // namespace OHOS::Ace::NG

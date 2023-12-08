@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 #include <cstdint>
+#include <iostream>
 #include <optional>
 #include <string>
 
@@ -20,7 +21,6 @@
 
 #define protected public
 #define private public
-#include <iostream>
 
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
@@ -86,7 +86,7 @@ struct TestProperty {
     std::optional<std::vector<std::string>> FontFamily = std::nullopt;
     std::optional<Color> FontColor = std::nullopt;
 };
-class SelectPropertyTestNg : public testing::Test {
+class SelectTestNg : public testing::Test {
 public:
     static void SetUpTestCase();
     static void TearDownTestCase();
@@ -101,7 +101,7 @@ protected:
     static RefPtr<FrameNode> CreateSelect(const std::vector<SelectParam>& value, const TestProperty& test);
 };
 
-void SelectPropertyTestNg::SetUpTestCase()
+void SelectTestNg::SetUpTestCase()
 {
     MockPipelineContext::SetUp();
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
@@ -109,21 +109,21 @@ void SelectPropertyTestNg::SetUpTestCase()
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
 }
 
-void SelectPropertyTestNg::TearDownTestCase()
+void SelectTestNg::TearDownTestCase()
 {
     MockPipelineContext::TearDown();
 }
 
-void SelectPropertyTestNg::SetUp() {}
+void SelectTestNg::SetUp() {}
 
-void SelectPropertyTestNg::TearDown()
+void SelectTestNg::TearDown()
 {
     frameNode_ = nullptr;
     selectPattern_ = nullptr;
     selectAccessibilityProperty_ = nullptr;
 }
 
-void SelectPropertyTestNg::InitSelectTestNg()
+void SelectTestNg::InitSelectTestNg()
 {
     frameNode_ = FrameNode::GetOrCreateFrameNode(V2::SELECT_ETS_TAG, ViewStackProcessor::GetInstance()->ClaimNodeId(),
         []() { return AceType::MakeRefPtr<SelectPattern>(); });
@@ -136,7 +136,7 @@ void SelectPropertyTestNg::InitSelectTestNg()
     ASSERT_NE(selectAccessibilityProperty_, nullptr);
 }
 
-RefPtr<FrameNode> SelectPropertyTestNg::CreateSelect(const std::vector<SelectParam>& value, const TestProperty& test)
+RefPtr<FrameNode> SelectTestNg::CreateSelect(const std::vector<SelectParam>& value, const TestProperty& test)
 {
     SelectModelNG selectModelInstance;
     selectModelInstance.Create(value);
@@ -165,7 +165,7 @@ RefPtr<FrameNode> SelectPropertyTestNg::CreateSelect(const std::vector<SelectPar
  * @tc.desc: Create Select.
  * @tc.type: FUNC
  */
-HWTEST_F(SelectPropertyTestNg, SelectLayoutPropertyTest001, TestSize.Level1)
+HWTEST_F(SelectTestNg, SelectLayoutPropertyTest001, TestSize.Level1)
 {
     SelectModelNG selectModelInstance;
 
@@ -190,7 +190,7 @@ HWTEST_F(SelectPropertyTestNg, SelectLayoutPropertyTest001, TestSize.Level1)
  * @tc.desc: Test Select OnDirtyLayoutWrapperSwap.
  * @tc.type: FUNC
  */
-HWTEST_F(SelectPropertyTestNg, SelectLayoutPropertyTest002, TestSize.Level1)
+HWTEST_F(SelectTestNg, SelectLayoutPropertyTest002, TestSize.Level1)
 {
     SelectModelNG selectModelInstance;
 
@@ -214,7 +214,7 @@ HWTEST_F(SelectPropertyTestNg, SelectLayoutPropertyTest002, TestSize.Level1)
  * @tc.desc: Test Select Layout Algorithm MeasureAndGetSize width.
  * @tc.type: FUNC
  */
-HWTEST_F(SelectPropertyTestNg, SelectLayoutPropertyTest003, TestSize.Level1)
+HWTEST_F(SelectTestNg, SelectLayoutPropertyTest003, TestSize.Level1)
 {
     auto text = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
     ASSERT_TRUE(text);
@@ -244,7 +244,7 @@ HWTEST_F(SelectPropertyTestNg, SelectLayoutPropertyTest003, TestSize.Level1)
  * @tc.desc: Test SelectSetMenuAlign
  * @tc.type: FUNC
  */
-HWTEST_F(SelectPropertyTestNg, SelectSetMenuAlign001, TestSize.Level1)
+HWTEST_F(SelectTestNg, SelectSetMenuAlign001, TestSize.Level1)
 {
     SelectModelNG selectModelInstance;
     // create select
@@ -276,7 +276,7 @@ HWTEST_F(SelectPropertyTestNg, SelectSetMenuAlign001, TestSize.Level1)
  * @tc.desc: Test SelectPattern PlayBgColorAnimation and OnKeyEvent
  * @tc.type: FUNC
  */
-HWTEST_F(SelectPropertyTestNg, SelectEvent001, TestSize.Level1)
+HWTEST_F(SelectTestNg, SelectEvent001, TestSize.Level1)
 {
     SelectModelNG selectModelInstance;
     /**
@@ -317,7 +317,7 @@ HWTEST_F(SelectPropertyTestNg, SelectEvent001, TestSize.Level1)
  * @tc.desc: Test SelectPattern OnModifyDone
  * @tc.type: FUNC
  */
-HWTEST_F(SelectPropertyTestNg, OnModifyDone001, TestSize.Level1)
+HWTEST_F(SelectTestNg, OnModifyDone001, TestSize.Level1)
 {
     SelectModelNG selectModelInstance;
     /**
@@ -346,7 +346,7 @@ HWTEST_F(SelectPropertyTestNg, OnModifyDone001, TestSize.Level1)
  * @tc.desc: Test SelectPattern UpdateSelectedProps
  * @tc.type: FUNC
  */
-HWTEST_F(SelectPropertyTestNg, UpdateSelectedProps001, TestSize.Level1)
+HWTEST_F(SelectTestNg, UpdateSelectedProps001, TestSize.Level1)
 {
     SelectModelNG selectModelInstance;
     /**
@@ -391,7 +391,7 @@ HWTEST_F(SelectPropertyTestNg, UpdateSelectedProps001, TestSize.Level1)
  * @tc.desc: Test SelectPattern UpdateSelectedProps
  * @tc.type: FUNC
  */
-HWTEST_F(SelectPropertyTestNg, UpdateSelectedProps002, TestSize.Level1)
+HWTEST_F(SelectTestNg, UpdateSelectedProps002, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Initialize testProperty and Create select frameNode.
@@ -430,7 +430,7 @@ HWTEST_F(SelectPropertyTestNg, UpdateSelectedProps002, TestSize.Level1)
  * @tc.desc: Test SetSelectOptionFont.
  * @tc.type: FUNC
  */
-HWTEST_F(SelectPropertyTestNg, SelectLayoutPropertyTest004, TestSize.Level1)
+HWTEST_F(SelectTestNg, SelectLayoutPropertyTest004, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Get frameNode and pattern.
@@ -477,7 +477,7 @@ HWTEST_F(SelectPropertyTestNg, SelectLayoutPropertyTest004, TestSize.Level1)
  * @tc.desc: Test SelectPattern ShowSelectMenu.
  * @tc.type: FUNC
  */
-HWTEST_F(SelectPropertyTestNg, ShowSelectMenuTest001, TestSize.Level1)
+HWTEST_F(SelectTestNg, ShowSelectMenuTest001, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Get frameNode and pattern.
@@ -501,7 +501,7 @@ HWTEST_F(SelectPropertyTestNg, ShowSelectMenuTest001, TestSize.Level1)
  * @tc.desc: Test Select Layout Algorithm Measure.
  * @tc.type: FUNC
  */
-HWTEST_F(SelectPropertyTestNg, SelectLayoutPropertyTest005, TestSize.Level1)
+HWTEST_F(SelectTestNg, SelectLayoutPropertyTest005, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Get frameNode and geometryNode.
@@ -528,7 +528,7 @@ HWTEST_F(SelectPropertyTestNg, SelectLayoutPropertyTest005, TestSize.Level1)
  * @tc.desc: Test the distributed capability of Select.
  * @tc.type: FUNC
  */
-HWTEST_F(SelectPropertyTestNg, SelectDistributedTest001, TestSize.Level1)
+HWTEST_F(SelectTestNg, SelectDistributedTest001, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Initialize select node
@@ -567,7 +567,7 @@ HWTEST_F(SelectPropertyTestNg, SelectDistributedTest001, TestSize.Level1)
  * @tc.desc: Test GetCurrentIndex of select.
  * @tc.type: FUNC
  */
-HWTEST_F(SelectPropertyTestNg, SelectAccessibilityPropertyGetCurrentIndex001, TestSize.Level1)
+HWTEST_F(SelectTestNg, SelectAccessibilityPropertyGetCurrentIndex001, TestSize.Level1)
 {
     InitSelectTestNg();
 
@@ -582,7 +582,7 @@ HWTEST_F(SelectPropertyTestNg, SelectAccessibilityPropertyGetCurrentIndex001, Te
  * @tc.desc: Test GetBeginIndex of select.
  * @tc.type: FUNC
  */
-HWTEST_F(SelectPropertyTestNg, SelectAccessibilityPropertyGetBeginIndex001, TestSize.Level1)
+HWTEST_F(SelectTestNg, SelectAccessibilityPropertyGetBeginIndex001, TestSize.Level1)
 {
     InitSelectTestNg();
 
@@ -601,7 +601,7 @@ HWTEST_F(SelectPropertyTestNg, SelectAccessibilityPropertyGetBeginIndex001, Test
  * @tc.desc: Test GetEndIndex of select.
  * @tc.type: FUNC
  */
-HWTEST_F(SelectPropertyTestNg, SelectAccessibilityPropertyGetEndIndex001, TestSize.Level1)
+HWTEST_F(SelectTestNg, SelectAccessibilityPropertyGetEndIndex001, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Initialize select and verify default value of its end index.
@@ -628,7 +628,7 @@ HWTEST_F(SelectPropertyTestNg, SelectAccessibilityPropertyGetEndIndex001, TestSi
  * @tc.desc: Test GetText of select.
  * @tc.type: FUNC
  */
-HWTEST_F(SelectPropertyTestNg, SelectAccessibilityPropertyGetText001, TestSize.Level1)
+HWTEST_F(SelectTestNg, SelectAccessibilityPropertyGetText001, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Initialize the text and verify its default value.
@@ -654,7 +654,7 @@ HWTEST_F(SelectPropertyTestNg, SelectAccessibilityPropertyGetText001, TestSize.L
  * @tc.desc: Test GetCollectionItemCounts of select.
  * @tc.type: FUNC
  */
-HWTEST_F(SelectPropertyTestNg, SelectAccessibilityPropertyGetCollectionItemCounts001, TestSize.Level1)
+HWTEST_F(SelectTestNg, SelectAccessibilityPropertyGetCollectionItemCounts001, TestSize.Level1)
 {
     InitSelectTestNg();
 
@@ -675,7 +675,7 @@ HWTEST_F(SelectPropertyTestNg, SelectAccessibilityPropertyGetCollectionItemCount
  * @tc.desc: setSpace
  * @tc.type: FUNC
  */
-HWTEST_F(SelectPropertyTestNg, SelectSetSpaceTest001, TestSize.Level1)
+HWTEST_F(SelectTestNg, SelectSetSpaceTest001, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Create select model, select frame node and the children node of select frame node.
@@ -724,7 +724,7 @@ HWTEST_F(SelectPropertyTestNg, SelectSetSpaceTest001, TestSize.Level1)
  * @tc.desc: Test SetArrowPosition
  * @tc.type: FUNC
  */
-HWTEST_F(SelectPropertyTestNg, SelectSetArrowPositionTest001, TestSize.Level1)
+HWTEST_F(SelectTestNg, SelectSetArrowPositionTest001, TestSize.Level1)
 {
     SelectModelNG selectModelInstance;
 
@@ -770,7 +770,7 @@ HWTEST_F(SelectPropertyTestNg, SelectSetArrowPositionTest001, TestSize.Level1)
  * @tc.desc: Test SetArrowPosition
  * @tc.type: FUNC
  */
-HWTEST_F(SelectPropertyTestNg, SelectSetArrowPositionTest002, TestSize.Level1)
+HWTEST_F(SelectTestNg, SelectSetArrowPositionTest002, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Create select model and parameters of select and call Create() of select model.
@@ -797,7 +797,7 @@ HWTEST_F(SelectPropertyTestNg, SelectSetArrowPositionTest002, TestSize.Level1)
  * @tc.desc: Test create menu
  * @tc.type: FUNC
  */
-HWTEST_F(SelectPropertyTestNg, CreateMenu001, TestSize.Level1)
+HWTEST_F(SelectTestNg, CreateMenu001, TestSize.Level1)
 {
     SelectModelNG selectModelInstance;
 
@@ -824,7 +824,7 @@ HWTEST_F(SelectPropertyTestNg, CreateMenu001, TestSize.Level1)
  * @tc.desc: Test on color configuration update
  * @tc.type: FUNC
  */
-HWTEST_F(SelectPropertyTestNg, OnColorConfigurationUpdate001, TestSize.Level1)
+HWTEST_F(SelectTestNg, OnColorConfigurationUpdate001, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Create select model and parameters of select.
@@ -872,7 +872,7 @@ HWTEST_F(SelectPropertyTestNg, OnColorConfigurationUpdate001, TestSize.Level1)
  * @tc.desc: Test Select Model
  * @tc.type: FUNC
  */
-HWTEST_F(SelectPropertyTestNg, SelectModel001, TestSize.Level1)
+HWTEST_F(SelectTestNg, SelectModel001, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Create select model and parameters of select.
@@ -915,7 +915,7 @@ HWTEST_F(SelectPropertyTestNg, SelectModel001, TestSize.Level1)
  * @tc.desc: Test Select Model
  * @tc.type: FUNC
  */
-HWTEST_F(SelectPropertyTestNg, SelectModel002, TestSize.Level1)
+HWTEST_F(SelectTestNg, SelectModel002, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Create select model and select event.
@@ -970,7 +970,7 @@ HWTEST_F(SelectPropertyTestNg, SelectModel002, TestSize.Level1)
  * @tc.desc: Test Select Model
  * @tc.type: FUNC
  */
-HWTEST_F(SelectPropertyTestNg, SelectModel003, TestSize.Level1)
+HWTEST_F(SelectTestNg, SelectModel003, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Create select model and select event.
@@ -1004,7 +1004,7 @@ HWTEST_F(SelectPropertyTestNg, SelectModel003, TestSize.Level1)
     selectModelInstance.SetPaddingTop(CalcDimension(20.00, DimensionUnit::VP));
     selectModelInstance.SetPaddingRight(CalcDimension(20.00, DimensionUnit::VP));
     selectModelInstance.SetPaddingBottom(CalcDimension(20.00, DimensionUnit::VP));
-	    /**
+    /**
      * @tc.steps: step4. Get the select frame node, select pattern and menu frame node.
      * @tc.expected: Objects are gotten successfully and should not be null.
      */
@@ -1020,7 +1020,7 @@ HWTEST_F(SelectPropertyTestNg, SelectModel003, TestSize.Level1)
  * @tc.desc: Test Select Model
  * @tc.type: FUNC
  */
-HWTEST_F(SelectPropertyTestNg, SelectModel004, TestSize.Level1)
+HWTEST_F(SelectTestNg, SelectModel004, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Create selectModelInstance.
@@ -1060,7 +1060,7 @@ HWTEST_F(SelectPropertyTestNg, SelectModel004, TestSize.Level1)
  * @tc.desc: Test OnColorConfigurationUpdate
  * @tc.type: FUNC
  */
-HWTEST_F(SelectPropertyTestNg, SelectPattern001, TestSize.Level1)
+HWTEST_F(SelectTestNg, SelectPattern001, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Create pipeline, select theme, select model and parameters of select.
@@ -1102,7 +1102,7 @@ HWTEST_F(SelectPropertyTestNg, SelectPattern001, TestSize.Level1)
  * @tc.desc: Test SelectModelNG SetOptionWidth.
  * @tc.type: FUNC
  */
-HWTEST_F(SelectPropertyTestNg, SelectOption001, TestSize.Level1)
+HWTEST_F(SelectTestNg, SelectOption001, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Create select model, select frame node and select pattern, call SetOptionWidth.
@@ -1149,7 +1149,7 @@ HWTEST_F(SelectPropertyTestNg, SelectOption001, TestSize.Level1)
  * @tc.desc: Test SelectModelNG SetOptionHeight.
  * @tc.type: FUNC
  */
-HWTEST_F(SelectPropertyTestNg, SelectOption002, TestSize.Level1)
+HWTEST_F(SelectTestNg, SelectOption002, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Create select model and call SetOptionHeight.
@@ -1180,7 +1180,7 @@ HWTEST_F(SelectPropertyTestNg, SelectOption002, TestSize.Level1)
  * @tc.desc: Test SelectPattern GetFontSize.
  * @tc.type: FUNC
  */
-HWTEST_F(SelectPropertyTestNg, SelectFont001, TestSize.Level1)
+HWTEST_F(SelectTestNg, SelectFont001, TestSize.Level1)
 {
     auto select = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     auto selectPattern = select->GetPattern<SelectPattern>();
@@ -1193,7 +1193,7 @@ HWTEST_F(SelectPropertyTestNg, SelectFont001, TestSize.Level1)
  * select button.
  * @tc.type: FUNC
  */
-HWTEST_F(SelectPropertyTestNg, ShowSelectMenuTest002, TestSize.Level1)
+HWTEST_F(SelectTestNg, ShowSelectMenuTest002, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Get select model, select frame node, test property and select pattern. Set the
@@ -1223,7 +1223,7 @@ HWTEST_F(SelectPropertyTestNg, ShowSelectMenuTest002, TestSize.Level1)
  * @tc.desc: Test SelectPattern SetSelectDefaultTheme to verify the default visual effect of select button.
  * @tc.type: FUNC
  */
-HWTEST_F(SelectPropertyTestNg, SetSelectDefaultThemeTest001, TestSize.Level1)
+HWTEST_F(SelectTestNg, SetSelectDefaultThemeTest001, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Build select frame node, select theme, select pattern.
@@ -1261,7 +1261,7 @@ HWTEST_F(SelectPropertyTestNg, SetSelectDefaultThemeTest001, TestSize.Level1)
  * @tc.desc: Test SelectPattern GetFontSize.
  * @tc.type: FUNC
  */
-HWTEST_F(SelectPropertyTestNg, GetFontSizeTest001, TestSize.Level1)
+HWTEST_F(SelectTestNg, GetFontSizeTest001, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Build select frame node, select pattern, pipeline and select theme.
@@ -1291,7 +1291,7 @@ HWTEST_F(SelectPropertyTestNg, GetFontSizeTest001, TestSize.Level1)
  * @tc.desc: Test Select Default padding
  * @tc.type: FUNC
  */
-HWTEST_F(SelectPropertyTestNg, SelectPadding001, TestSize.Level1)
+HWTEST_F(SelectTestNg, SelectPadding001, TestSize.Level1)
 {
     SelectModelNG selectModelInstance;
 
@@ -1305,7 +1305,7 @@ HWTEST_F(SelectPropertyTestNg, SelectPadding001, TestSize.Level1)
     ASSERT_NE(layoutProps, nullptr);
     const auto& padding = layoutProps->GetPaddingProperty();
     ASSERT_NE(padding, nullptr);
-    
+
     EXPECT_EQ(padding->left.value().GetDimension().ConvertToVp(), 4.0);
     EXPECT_EQ(padding->right.value().GetDimension().ConvertToVp(), 4.0);
 }

@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "mock_pipeline_context.h"
 
 #include "base/utils/utils.h"
 #include "core/components_ng/base/frame_node.h"
@@ -75,6 +75,11 @@ RefPtr<PipelineContext> PipelineContext::GetCurrentContext()
 }
 
 RefPtr<PipelineContext> PipelineContext::GetMainPipelineContext()
+{
+    return MockPipelineContext::GetCurrent();
+}
+
+RefPtr<PipelineContext> PipelineContext::GetContextByContainerId(int32_t /* containerId */)
 {
     return MockPipelineContext::GetCurrent();
 }
@@ -369,9 +374,9 @@ SafeAreaInsets PipelineContext::GetSafeArea() const
     return SafeAreaInsets({}, { 0, 1 }, {}, {});
 }
 
-void PipelineContext::AddFontNodeNG(const WeakPtr<NG::UINode>& node) {}
+void PipelineContext::AddFontNodeNG(const WeakPtr<UINode>& node) {}
 
-void PipelineContext::RemoveFontNodeNG(const WeakPtr<NG::UINode>& node) {}
+void PipelineContext::RemoveFontNodeNG(const WeakPtr<UINode>& node) {}
 
 void PipelineContext::SetWindowSceneConsumed(bool isConsumed) {}
 
@@ -385,6 +390,47 @@ bool PipelineContext::HasDifferentDirectionGesture() const
 {
     return false;
 }
+
+void PipelineContext::SetJSViewActive(bool active, WeakPtr<CustomNode> custom) {}
+
+RefPtr<FrameNode> PipelineContext::FindNavigationNodeToHandleBack(const RefPtr<UINode>& node)
+{
+    return nullptr;
+}
+
+bool PipelineContext::SetIsFocusActive(bool isFocusActive)
+{
+    return false;
+}
+
+bool PipelineContext::NeedSoftKeyboard()
+{
+    return false;
+}
+
+void PipelineContext::SetCursor(int32_t cursorValue) {}
+
+void PipelineContext::RestoreDefault() {}
+
+void PipelineContext::HandleSubwindow(bool isShow) {}
+
+std::string PipelineContext::GetCurrentExtraInfo()
+{
+    return std::string();
+}
+
+void PipelineContext::CloseFrontendAnimation() {}
+
+void PipelineContext::OpenFrontendAnimation(
+    const AnimationOption& option, const RefPtr<Curve>& curve, const std::function<void()>& finishCallback)
+{}
+
+bool PipelineContext::IsDragging() const
+{
+    return false;
+}
+
+void PipelineContext::SetIsDragging(bool isDragging) {}
 } // namespace OHOS::Ace::NG
 // pipeline_context ============================================================
 
@@ -513,40 +559,5 @@ void PipelineBase::SetTextFieldManager(const RefPtr<ManagerInterface>& manager)
 {
     textFieldManager_ = manager;
 }
-
-void NG::PipelineContext::SetJSViewActive(bool active, WeakPtr<NG::CustomNode> custom) {}
-
-RefPtr<NG::FrameNode> NG::PipelineContext::FindNavigationNodeToHandleBack(const RefPtr<NG::UINode>& node)
-{
-    return nullptr;
-}
-
-bool NG::PipelineContext::SetIsFocusActive(bool isFocusActive)
-{
-    return false;
-}
-
-bool NG::PipelineContext::NeedSoftKeyboard()
-{
-    return false;
-}
-
-void NG::PipelineContext::SetCursor(int32_t cursorValue) {}
-
-void NG::PipelineContext::RestoreDefault() {}
-
-void NG::PipelineContext::HandleSubwindow(bool isShow) {}
-
-std::string NG::PipelineContext::GetCurrentExtraInfo()
-{
-    return std::string();
-}
-
-bool NG::PipelineContext::IsDragging() const
-{
-    return false;
-}
-
-void NG::PipelineContext::SetIsDragging(bool isDragging) {}
 } // namespace OHOS::Ace
 // pipeline_base ===============================================================
