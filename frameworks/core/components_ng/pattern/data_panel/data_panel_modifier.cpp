@@ -700,7 +700,7 @@ void DataPanelModifier::Path2DArc(
     if (NearEqual(std::fmod(sweepAngle, WHOLE_CIRCLE), 0.0) && !NearEqual(startAngle, endAngle)) {
         path.ArcTo(point1, point2, startAngle, HALF_CIRCLE);
         path.ArcTo(point1, point2, startAngle + HALF_CIRCLE, HALF_CIRCLE);
-    } else if (!NearEqual(std::fmod(sweepAngle, WHOLE_CIRCLE), 0.0) && abs(sweepAngle) > WHOLE_CIRCLE) {
+    } else if (!NearEqual(std::fmod(sweepAngle, WHOLE_CIRCLE), 0.0) && std::abs(sweepAngle) > WHOLE_CIRCLE) {
         path.ArcTo(point1, point2, startAngle, HALF_CIRCLE);
         path.ArcTo(point1, point2, startAngle + HALF_CIRCLE, HALF_CIRCLE);
         path.ArcTo(point1, point2, startAngle + HALF_CIRCLE + HALF_CIRCLE, sweepAngle);
