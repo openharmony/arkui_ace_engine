@@ -43,7 +43,7 @@ template("pa_backend") {
       "hilog:libhilog",
       "i18n:intl_util",
       "ipc:ipc_core",
-      "ipc:ipc_napi_common",
+      "ipc:ipc_napi",
       "napi:ace_napi",
       "relational_store:native_dataability",
       "relational_store:native_rdb",

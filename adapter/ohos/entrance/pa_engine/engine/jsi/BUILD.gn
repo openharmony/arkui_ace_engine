@@ -76,7 +76,7 @@ template("js_pa_engine_ark") {
       "hilog:libhilog",
       "hisysevent:libhisysevent",
       "ipc:ipc_core",
-      "ipc:ipc_napi_common",
+      "ipc:ipc_napi",
       "napi:ace_napi",
       "relational_store:native_dataability",
       "relational_store:native_rdb",
