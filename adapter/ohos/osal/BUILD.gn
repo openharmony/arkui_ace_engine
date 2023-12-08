@@ -65,6 +65,8 @@ template("ace_osal_ohos_source_set") {
       "event_report.cpp",
       "exception_handler.cpp",
       "frame_report.cpp",
+      "image_analyzer_loader.cpp",
+      "image_analyzer_mgr.cpp",
       "layout_inspector.cpp",
       "log_wrapper.cpp",
       "modal_ui_extension_impl.cpp",

@@ -2120,3 +2120,9 @@ var OutlineStyle;
   OutlineStyle[OutlineStyle["DASHED"] = 1] = "DASHED";
   OutlineStyle[OutlineStyle["DOTTED"] = 2] = "DOTTED";
 })(OutlineStyle || (OutlineStyle = {}));
+
+var ImageAnalyzerType;
+(function (ImageAnalyzerType) {
+  ImageAnalyzerType[ImageAnalyzerType["SUBJECT"] = 0] = "SUBJECT";
+  ImageAnalyzerType[ImageAnalyzerType["TEXT"] = 1] = "TEXT";
+})(ImageAnalyzerType || (ImageAnalyzerType = {}));

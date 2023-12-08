@@ -14,17 +14,20 @@
  */
 
 #include "frameworks/bridge/declarative_frontend/jsview/js_image.h"
-
+#include <cstdint>
+#include <vector>
 
 #if !defined(PREVIEW)
 #include <dlfcn.h>
 #endif
 
+#include "base/geometry/ng/vector.h"
 #include "base/image/pixel_map.h"
 #include "base/log/ace_scoring_log.h"
 #include "base/log/ace_trace.h"
 #include "bridge/declarative_frontend/engine/functions/js_drag_function.h"
 #include "bridge/declarative_frontend/engine/js_ref_ptr.h"
+#include "bridge/declarative_frontend/engine/js_types.h"
 #include "bridge/declarative_frontend/jsview/models/image_model_impl.h"
 #include "core/common/container.h"
 #include "core/components/image/image_event.h"
@@ -33,6 +36,7 @@
 #include "core/components_ng/pattern/image/image_model.h"
 #include "core/components_ng/pattern/image/image_model_ng.h"
 #include "core/image/image_source_info.h"
+#include "interfaces/inner_api/ace/ai/image_analyzer.h"
 
 namespace OHOS::Ace {
 
@@ -466,6 +470,9 @@ void JSImage::JSBind(BindingTarget globalObj)
     JSClass<JSImage>::StaticMethod("transition", &JSImage::JsTransition);
     JSClass<JSImage>::InheritAndBind<JSViewAbstract>(globalObj);
 
+    JSClass<JSImage>::StaticMethod("enableAnalyzer", &JSImage::EnableAnalyzer);
+    JSClass<JSImage>::StaticMethod("analyzerConfig", &JSImage::AnalyzerConfig);
+
     JSClass<JSColorFilter>::Declare("ColorFilter");
     JSClass<JSColorFilter>::Bind(globalObj, JSColorFilter::ConstructorCallback, JSColorFilter::DestructorCallback);
 }
@@ -518,6 +525,66 @@ void JSImage::SetCopyOption(const JSCallbackInfo& info)
         }
     }
     ImageModel::GetInstance()->SetCopyOption(copyOptions);
+}
+
+void JSImage::EnableAnalyzer(bool isEnableAnalyzer)
+{
+    ImageModel::GetInstance()->EnableAnalyzer(isEnableAnalyzer);
+}
+
+void JSImage::AnalyzerConfig(const JSCallbackInfo &info)
+{
+    if (info[0]->IsNull() || !info[0]->IsObject()) {
+        return;
+    }
+    
+    auto paramObject = JSRef<JSObject>::Cast(info[0]);
+    JSRef<JSVal> typeVal = paramObject->GetProperty("types");
+    JSRef<JSVal> showButtonVal = paramObject->GetProperty("showAIbutton");
+    JSRef<JSVal> marginVal = paramObject->GetProperty("aiButtonOffset");
+    JSRef<JSVal> textOpVal = paramObject->GetProperty("textOptions");
+    JSRef<JSVal> subjectOpVal = paramObject->GetProperty("subjectOptions");
+    JSRef<JSVal> tagVal = paramObject->GetProperty("tag");
+
+    ImageAnalyzerConfig analyzerConfig;
+    if (typeVal->IsArray()) {
+        auto array = JSRef<JSArray>::Cast(typeVal);
+        std::set<ImageAnalyzerType> types;
+        for (size_t i = 0; i < array->Length(); ++i) {
+            if (!array->GetValueAt(i)->IsNumber()) {
+                continue;
+            }
+            int value = array->GetValueAt(i)->ToNumber<int>();
+            ImageAnalyzerType type = static_cast<ImageAnalyzerType>(value);
+            if (type != ImageAnalyzerType::SUBJECT && type != ImageAnalyzerType::TEXT) {
+                continue;
+            }
+            types.insert(type);
+        }
+        analyzerConfig.types = std::move(types);
+    }
+    if (showButtonVal->IsBoolean()) {
+        analyzerConfig.isShowAIButton = showButtonVal->ToBoolean();
+    }
+    if (!marginVal->IsNull() && marginVal->IsObject()) {
+        auto marginValue = JSRef<JSObject>::Cast(marginVal);
+        std::optional<CalcDimension> top;
+        std::optional<CalcDimension> bottom;
+        std::optional<CalcDimension> left;
+        std::optional<CalcDimension> right;
+        ParseMarginOrPaddingCorner(marginValue, top, bottom, left, right);
+        analyzerConfig.aiButtonMargin = NG::ConvertToCalcPaddingProperty(top, bottom, left, right);
+    }
+    if (subjectOpVal->IsObject()) {
+        ParseImageAnalyzerSubjectOptions(subjectOpVal, analyzerConfig);
+    }
+    if (textOpVal->IsObject()) {
+        ParseImageAnalyzerTextOptions(textOpVal, analyzerConfig);
+    }
+    if (tagVal->IsString()) {
+        analyzerConfig.tag = tagVal->ToString();
+    }
+    ImageModel::GetInstance()->SetImageAnalyzerConfig(analyzerConfig);
 }
 
 } // namespace OHOS::Ace::Framework

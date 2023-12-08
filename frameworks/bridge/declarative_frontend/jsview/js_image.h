@@ -56,6 +56,9 @@ public:
     static void JsOnDragStart(const JSCallbackInfo& info);
     static void SetCopyOption(const JSCallbackInfo& info);
 
+    static void EnableAnalyzer(bool isEnableAnalyzer);
+    static void AnalyzerConfig(const JSCallbackInfo &info);
+
 protected:
     static void SetBorder(const Border& border);
     static void SetAutoResize(bool autoResize);
