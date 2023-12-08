@@ -68,7 +68,8 @@ RefPtr<ImageData> QueryDataFromCache(const ImageSourceInfo& src, bool& dataHit)
 } // namespace
 
 ImageLoadingContext::ImageLoadingContext(const ImageSourceInfo& src, LoadNotifier&& loadNotifier, bool syncLoad)
-    : src_(src), notifiers_(std::move(loadNotifier)), syncLoad_(syncLoad)
+    : src_(src), notifiers_(std::move(loadNotifier)),
+    containerId_(Container::CurrentId()), syncLoad_(syncLoad)
 {
     stateManager_ = MakeRefPtr<ImageStateManager>(WeakClaim(this));
     // pixmap src is ready to draw
