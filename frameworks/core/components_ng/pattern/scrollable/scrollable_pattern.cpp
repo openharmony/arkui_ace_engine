@@ -1762,7 +1762,7 @@ float ScrollablePattern::IsInHotZone(const PointF& point)
         return 0.f;
     }
     auto wholeRect = geometryNode->GetFrameRect();
-
+    wholeRect.SetOffset(host->GetTransformRelativeOffset());
     auto hotZoneHeightPX = HOT_ZONE_HEIGHT_VP_DIM.ConvertToPx();
     auto hotZoneWidthPX = HOT_ZONE_WIDTH_VP_DIM.ConvertToPx();
     if (isVertical()) {
@@ -1780,10 +1780,10 @@ float ScrollablePattern::IsInHotZone(const PointF& point)
         // then gives the scroll component movement direction according to which hot zone the point is in
         // top or bottom hot zone
         if (topHotzone.IsInRegion(point)) {
-            offset = topHotzone.GetY() - point.GetY();
+            offset = point.GetY() - topHotzone.GetY();
             return offset / hotZoneHeightPX;
         } else if (bottomHotzone.IsInRegion(point)) {
-            offset = bottomZoneEdgeY - point.GetY();
+            offset = point.GetY() - bottomZoneEdgeY;
             return offset / hotZoneHeightPX;
         }
     } else {
@@ -1802,10 +1802,10 @@ float ScrollablePattern::IsInHotZone(const PointF& point)
         // gives the scroll component movement direction according to which hot zone the point is in
         // left or right hot zone
         if (leftHotzone.IsInRegion(point)) {
-            offset = wholeRect.GetX() - point.GetX();
+            offset = point.GetX() - wholeRect.GetX();
             return offset / hotZoneWidthPX;
         } else if (rightHotzone.IsInRegion(point)) {
-            offset = rightZoneEdgeX - point.GetX();
+            offset = point.GetX() - rightZoneEdgeX;
             return offset / hotZoneWidthPX;
         }
     }
@@ -1842,7 +1842,7 @@ void ScrollablePattern::HotZoneScroll(const float offsetPct)
     // 1. Enter the hot zone for the first time.
     // 2. When the drag point leaves the hot zone, it enters the hot zone again
     // 3. When the drag point moves within the hot zone, the hot zone offset changes
-    if (NearEqual(lastHonezoneOffset_, offsetPct)) {
+    if (NearEqual(lastHonezoneOffsetPct_, offsetPct)) {
         return;
     } else {
         if (AnimateRunning()) {

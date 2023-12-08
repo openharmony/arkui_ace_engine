@@ -603,14 +603,14 @@ private:
     std::optional<RefPtr<DragStatusListener>> dragStatusListener_;
     void UnRegister2DragDropManager();
     float IsInHotZone(const PointF& point);
-    void HotZoneScroll(const float offset, const HotzoneMoveDirection& direction);
+    void HotZoneScroll(const float offset);
     void StopHotzoneScroll();
     void HandleHotZone(const DragEventType& dragEventType, const RefPtr<NotifyDragEvent>& notifyDragEvent);
     void HandleOnDragStatusCallback(
         const DragEventType& dragEventType, const RefPtr<NotifyDragEvent>& notifyDragEvent) override;
     void HandleMoveEventInComp(const PointF& point);
     void HandleLeaveHotzoneEvent();
-    bool isVertical()
+    bool isVertical();
 };
 } // namespace OHOS::Ace::NG
 
