@@ -71,6 +71,27 @@ public:
 
     DisplayMode GetDisplayMode() const override;
 
+    static void SetEditMode(FrameNode* frameNode, bool editMode);
+    static void SetMultiSelectable(FrameNode* frameNode, bool selectable);
+    static void SetChainAnimation(FrameNode* frameNode, bool chainAnimation);
+    static void SetCachedCount(FrameNode* frameNode, int32_t cachedCount);
+    static void SetScrollEnabled(FrameNode* frameNode, bool enableScrollInteraction);
+    static void SetSticky(FrameNode* frameNode, int32_t stickyStyle);
+    static void SetEdgeEffect(FrameNode* frameNode, int32_t edgeEffect, bool alwaysEnabled);
+    static void SetListDirection(FrameNode* frameNode, int32_t axis);
+    static void SetListFriction(FrameNode* frameNode, double friction);
+    static void SetListNestedScroll(FrameNode* frameNode, const NestedScrollOptions& nestedOpt);
+    static void SetListScrollBar(FrameNode* frameNode, int32_t barState);
+    static void SetLanes(FrameNode* frameNode, int32_t lanes);
+    static void SetLaneConstrain(FrameNode* frameNode, const Dimension& laneMinLength, const Dimension& laneMaxLength);
+    static void SetLaneMinLength(FrameNode* frameNode, const Dimension& laneMinLength);
+    static void SetLaneMaxLength(FrameNode* frameNode, const Dimension& laneMaxLength);
+    static void SetLaneGutter(FrameNode* frameNode, const Dimension& laneGutter);
+    static void SetListItemAlign(FrameNode* frameNode, V2::ListItemAlign listItemAlign);
+    static void SetScrollSnapAlign(FrameNode* frameNode, V2::ScrollSnapAlign scrollSnapAlign);
+    static void SetDivider(FrameNode* frameNode, const V2::ItemDivider& divider);
+    static void SetChainAnimationOptions(FrameNode* frameNode, const ChainAnimationOptions& options);
+
 private:
     void AddDragFrameNodeToManager() const;
 };

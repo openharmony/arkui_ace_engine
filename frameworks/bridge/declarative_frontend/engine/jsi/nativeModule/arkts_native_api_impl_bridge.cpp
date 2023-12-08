@@ -26,6 +26,7 @@
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_grid_col_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_grid_row_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_hyperlink_bridge.h"
+#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_list_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_image_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_image_span_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_menu_bridge.h"
@@ -740,7 +741,7 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
     span->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetFont"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), SpanBridge::ResetFont));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "span"), span);
-    
+
     auto gridCol = panda::ObjectRef::New(vm);
     gridCol->Set(vm, panda::StringRef::NewFromUtf8(vm, "setSpan"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), GridColBridge::SetSpan));
@@ -920,7 +921,7 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
     columnSplit->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetResizeable"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), ColumnSplitBridge::ResetResizeable));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "columnSplit"), columnSplit);
-    
+
     auto imageAnimator = panda::ObjectRef::New(vm);
     imageAnimator->Set(vm, panda::StringRef::NewFromUtf8(vm, "setState"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ImageAnimatorBridge::SetState));
@@ -1092,6 +1093,7 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
     RegisterCommonShapeAttributes(object, vm);
     RegisterShapeAttributes(object, vm);
     RegisterRectAttributes(object, vm);
+    RegisterListAttributes(object, vm);
 
 #ifdef FORM_SUPPORTED
     RegisterFormAttributes(object, vm);
@@ -2051,4 +2053,79 @@ void ArkUINativeModule::RegisterRectAttributes(Local<panda::ObjectRef> object, E
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RectBridge::ResetRadius));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "rect"), rect);
 }
+
+void ArkUINativeModule::RegisterListAttributes(Local<panda::ObjectRef> object, EcmaVM* vm)
+{
+    auto list = panda::ObjectRef::New(vm);
+    list->Set(vm, panda::StringRef::NewFromUtf8(vm, "setEditMode"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ListBridge::SetEditMode));
+    list->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetEditMode"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ListBridge::ResetEditMode));
+    list->Set(vm, panda::StringRef::NewFromUtf8(vm, "setMultiSelectable"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ListBridge::SetMultiSelectable));
+    list->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetMultiSelectable"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ListBridge::ResetMultiSelectable));
+    list->Set(vm, panda::StringRef::NewFromUtf8(vm, "setChainAnimation"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ListBridge::SetChainAnimation));
+    list->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetChainAnimation"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ListBridge::ResetChainAnimation));
+    list->Set(vm, panda::StringRef::NewFromUtf8(vm, "setCachedCount"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ListBridge::SetCachedCount));
+    list->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetCachedCount"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ListBridge::ResetCachedCount));
+    list->Set(vm, panda::StringRef::NewFromUtf8(vm, "setEnableScrollInteraction"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ListBridge::SetEnableScrollInteraction));
+    list->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetEnableScrollInteraction"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ListBridge::ResetEnableScrollInteraction));
+    list->Set(vm, panda::StringRef::NewFromUtf8(vm, "setSticky"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ListBridge::SetSticky));
+    list->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetSticky"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ListBridge::ResetSticky));
+    list->Set(vm, panda::StringRef::NewFromUtf8(vm, "setSticky"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ListBridge::SetSticky));
+    list->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetSticky"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ListBridge::ResetSticky));
+    list->Set(vm, panda::StringRef::NewFromUtf8(vm, "setListEdgeEffect"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ListBridge::SetListEdgeEffect));
+    list->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetListEdgeEffect"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ListBridge::ResetListEdgeEffect));
+    list->Set(vm, panda::StringRef::NewFromUtf8(vm, "setListDirection"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ListBridge::SetListDirection));
+    list->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetListDirection"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ListBridge::ResetListDirection));
+    list->Set(vm, panda::StringRef::NewFromUtf8(vm, "setListFriction"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ListBridge::SetListFriction));
+    list->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetListFriction"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ListBridge::ResetListFriction));
+    list->Set(vm, panda::StringRef::NewFromUtf8(vm, "setListNestedScroll"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ListBridge::SetListNestedScroll));
+    list->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetListNestedScroll"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ListBridge::ResetListNestedScroll));
+    list->Set(vm, panda::StringRef::NewFromUtf8(vm, "setListScrollBar"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ListBridge::SetListScrollBar));
+    list->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetListScrollBar"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ListBridge::ResetListScrollBar));
+    list->Set(vm, panda::StringRef::NewFromUtf8(vm, "setAlignListItem"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ListBridge::SetAlignListItem));
+    list->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetAlignListItem"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ListBridge::ResetAlignListItem));
+    list->Set(vm, panda::StringRef::NewFromUtf8(vm, "setScrollSnapAlign"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ListBridge::SetScrollSnapAlign));
+    list->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetScrollSnapAlign"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ListBridge::ResetScrollSnapAlign));
+    list->Set(vm, panda::StringRef::NewFromUtf8(vm, "setDivider"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ListBridge::SetDivider));
+    list->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetDivider"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ListBridge::ResetDivider));
+    list->Set(vm, panda::StringRef::NewFromUtf8(vm, "setChainAnimationOptions"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ListBridge::SetChainAnimationOptions));
+    list->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetChainAnimationOptions"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ListBridge::ResetChainAnimationOptions));
+    list->Set(vm, panda::StringRef::NewFromUtf8(vm, "setListLanes"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ListBridge::SetListLanes));
+    list->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetListLanes"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ListBridge::ResetListLanes));
+    object->Set(vm, panda::StringRef::NewFromUtf8(vm, "list"), list);
+}
+
 } // namespace OHOS::Ace::NG
