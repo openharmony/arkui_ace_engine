@@ -1325,6 +1325,15 @@ void ViewAbstract::BindMenuWithItems(std::vector<OptionParam> &&params, const Re
     auto menuNode =
         MenuView::Create(std::move(params), targetNode->GetId(), targetNode->GetTag(), MenuType::MENU, menuParam);
     RegisterMenuCallback(menuNode, menuParam);
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetTheme<SelectTheme>();
+    CHECK_NULL_VOID(theme);
+    auto expandDisplay = theme->GetExpandDisplay();
+    if (expandDisplay) {
+        SubwindowManager::GetInstance()->ShowMenuNG(menuNode, targetNode->GetId(), offset, menuParam.isAboveApps);
+        return;
+    }
     BindMenu(menuNode, targetNode->GetId(), offset);
 }
 
