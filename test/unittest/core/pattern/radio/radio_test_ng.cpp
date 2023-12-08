@@ -382,6 +382,7 @@ HWTEST_F(RadioTestNg, RadioPatternTest007, TestSize.Level1)
     ASSERT_NE(radioPaintProperty, nullptr);
     EXPECT_EQ(radioPaintProperty->GetRadioCheckValue(), CHECKED);
     auto pageNode = stageManager->GetPageById(frameNode0->GetPageId());
+    ASSERT_EQ(pageNode, nullptr);
     pattern0->UpdateGroupCheckStatus(frameNode0, pageNode, false);
     EXPECT_TRUE(radioPaintProperty->GetRadioCheckValue());
 }
