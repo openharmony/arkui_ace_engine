@@ -1142,6 +1142,10 @@ void FocusHub::OnFocusNode()
     CHECK_NULL_VOID(pipeline);
     if (frameNode->GetFocusType() == FocusType::NODE) {
         pipeline->SetFocusNode(frameNode);
+#if defined (ENABLE_STANDARD_INPUT)
+    // If in window,focus pattern does not need softkeyboard, close it.
+    WindowSceneHelper::IsCloseKeyboard(frameNode);
+#endif
     }
 }
 
