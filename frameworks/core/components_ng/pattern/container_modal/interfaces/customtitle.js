@@ -24,6 +24,7 @@ export class Index extends ViewPU {
   constructor(parent, params, __localStorage, elmtId = -1) {
     super(parent, __localStorage, elmtId);
     this.__appLabel = new ObservedPropertySimplePU('', this, "appLabel");
+    this.__appTitle = new ObservedPropertySimplePU('', this, "appTitle");
     this.__textColor = new ObservedPropertySimplePU(0xff000000, this, "textColor");
     this.__appIcon = new ObservedPropertyObjectPU(new LayeredDrawableDescriptor(), this, "appIcon");
     this.__pixelMap = new ObservedPropertyObjectPU(undefined, this, "pixelMap");
@@ -35,6 +36,9 @@ export class Index extends ViewPU {
     }
     if (params.appLabel !== undefined) {
       this.appLabel = params.appLabel;
+    }
+    if (params.appTitle !== undefined) {
+      this.appTitle = params.appTitle;
     }
     if (params.appIcon !== undefined) {
       this.appIcon = params.appIcon;
@@ -48,12 +52,14 @@ export class Index extends ViewPU {
   purgeVariableDependenciesOnElmtId(rmElmtId) {
     this.__textColor.purgeDependencyOnElmtId(rmElmtId);
     this.__appLabel.purgeDependencyOnElmtId(rmElmtId);
+    this.__appTitle.purgeDependencyOnElmtId(rmElmtId);
     this.__appIcon.purgeDependencyOnElmtId(rmElmtId);
     this.__pixelMap.purgeDependencyOnElmtId(rmElmtId);
   }
   aboutToBeDeleted() {
     this.__textColor.aboutToBeDeleted();
     this.__appLabel.aboutToBeDeleted();
+    this.__appTitle.aboutToBeDeleted();
     this.__appIcon.aboutToBeDeleted();
     this.__pixelMap.aboutToBeDeleted();
     SubscriberManager.Get().delete(this.id__());
@@ -70,6 +76,12 @@ export class Index extends ViewPU {
   }
   set appLabel(newValue) {
     this.__appLabel.set(newValue);
+  }
+  get appTitle() {
+    return this.__appTitle.get();
+  }
+  set appTitle(newValue) {
+      this.__appTitle.set(newValue);
   }
   get appIcon() {
     return this.__appIcon.get();
@@ -109,7 +121,7 @@ export class Index extends ViewPU {
     this.textColor = 0x66000000;
   }
   setAppTitle(content) {
-    this.appLabel = content;
+    this.appTitle = content;
   }
   setAppIcon(pixelMap) {
     this.pixelMap = pixelMap;
@@ -123,6 +135,7 @@ export class Index extends ViewPU {
       Row.justifyContent(FlexAlign.Start);
       Row.alignItems(VerticalAlign.Center);
       Row.padding({ top: 6, bottom: 6 });
+      Row.clip(true);
       if (!isInitialRender) {
         Row.pop();
       }
@@ -144,7 +157,7 @@ export class Index extends ViewPU {
     });
     this.observeComponentCreation((elmtId, isInitialRender) => {
       ViewStackProcessor.StartGetAccessRecordingFor(elmtId);
-      Text.create(this.appLabel);
+      Text.create(this.appTitle ? this.appTitle : this.appLabel);
       Image.id("enhanceAppLabel");
       Text.maxLines(1);
       Text.fontSize(TITLE_TEXT_FONT_SIZE);
