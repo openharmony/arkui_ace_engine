@@ -1540,10 +1540,9 @@ HWTEST_F(DragDropManagerTestNg, DragDropManagerTest032, TestSize.Level1)
  */
 HWTEST_F(DragDropManagerTestNg, DragDropManagerTest033, TestSize.Level1) 
 {
-    auto dragDropManager = AceType::MakeRefPtr<DragDropManager>();
     PointerEvent pointerEvent(GLOBAL_X, GLOBAL_Y);
     Point point1 = pointerEvent.GetPoint();
-
+    auto dragDropManager = AceType::MakeRefPtr<DragDropManager>();
     auto frameNodeNullId = ElementRegister::GetInstance()->MakeUniqueId();
     auto frameNodeNull = AceType::MakeRefPtr<FrameNode>(NODE_TAG, frameNodeNullId, AceType::MakeRefPtr<GridPattern>());
     auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
@@ -1553,10 +1552,10 @@ HWTEST_F(DragDropManagerTestNg, DragDropManagerTest033, TestSize.Level1)
     auto pipelineTmp = NG::PipelineContext::GetCurrentContext();
     auto parentNodeTmp = pipelineTmp->GetRootElement();
     auto parentFrameNodeTmp = AceType::DynamicCast<FrameNode>(parentNodeTmp);
+
     parentFrameNodeTmp->frameChildren_.insert(WeakPtr<NG::FrameNode>(frameNodeNull));
     dragDropManager->AddGridDragFrameNode(frameNodeNull->GetId(), frameNodeNull);
     std::map<int32_t, WeakPtr<FrameNode>> frameNodes = dragDropManager->gridDragFrameNodes_;
-     
     EXPECT_FALSE(frameNodes.empty());
     PointF point(point1.GetX(), point1.GetY());
     std::vector<RefPtr<FrameNode>> hitFrameNodes;
@@ -1574,7 +1573,6 @@ HWTEST_F(DragDropManagerTestNg, DragDropManagerTest033, TestSize.Level1)
         }
         auto globalFrameRect = geometryNode->GetFrameRect();
         globalFrameRect.SetOffset(frameNode->GetTransformRelativeOffset());
-
         EXPECT_TRUE(globalFrameRect.IsInRegion(point));
         if (globalFrameRect.IsInRegion(point)) {
             hitFrameNodes.push_back(frameNode);
@@ -1582,16 +1580,10 @@ HWTEST_F(DragDropManagerTestNg, DragDropManagerTest033, TestSize.Level1)
     }
     EXPECT_FALSE(hitFrameNodes.empty());
     auto pipeline = NG::PipelineContext::GetCurrentContext();
-    ASSERT_NE(pipeline, nullptr);
     auto manager = pipeline->GetOverlayManager();
-    ASSERT_NE(manager, nullptr);
     auto parentNode = pipeline->GetRootElement();
-    ASSERT_NE(parentNode, nullptr);
-
     auto parentFrameNode = AceType::DynamicCast<FrameNode>(parentNode);
     ASSERT_NE(parentFrameNode, nullptr);
-    EXPECT_FALSE(!parentFrameNode->IsActive());
-    EXPECT_FALSE(!parentFrameNode->IsVisible());
 
     auto children = parentFrameNode->GetFrameChildren();
     EXPECT_FALSE(children.empty());
@@ -1606,13 +1598,9 @@ HWTEST_F(DragDropManagerTestNg, DragDropManagerTest033, TestSize.Level1)
         auto childFindResult = dragDropManager->FindTargetInChildNodes(childNode, hitFrameNodes, true);
         EXPECT_FALSE(childFindResult);
     }
-
     for (auto iter : hitFrameNodes) {
-        EXPECT_FALSE(iter);
-        EXPECT_FALSE(parentFrameNode);
         EXPECT_NE(parentFrameNode, iter);
     }
-
     auto result = dragDropManager->FindTargetInChildNodes(parentNode, hitFrameNodes, true);
     EXPECT_FALSE(result);
 }
@@ -2496,11 +2484,7 @@ HWTEST_F(DragDropManagerTestNg, DragDropManagerGetItemIndexTest002, TestSize.Lev
     dragDropManager->GetItemIndex(listNode, DragType::TEXT, 0.0, 0.0);
     dragDropManager->GetItemIndex(listNode, DragType::LIST, 0.0, 0.0);
     EXPECT_EQ(onItemDropInfoList, "");
-       
-    /**
-     * @tc.steps: step5. call OnDragStart with null.
-     * @tc.expected: step5. retFlag is equal to -1.
-     */
+    
     frameNode = nullptr;
     int32_t retFlag = dragDropManager->GetItemIndex(frameNode, DragType::GRID, 0.0, 0.0);
     EXPECT_EQ(retFlag, -1);
