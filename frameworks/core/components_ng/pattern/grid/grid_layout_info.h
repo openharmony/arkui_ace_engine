@@ -79,6 +79,123 @@ struct GridLayoutInfo {
         offsetEnd_ = false;
     }
 
+    // should only be used when all children of Grid are in gridMatrix_
+    float GetStartLineOffset(float mainGap) const
+    {
+        float totalHeight = 0;
+        for (auto iter = lineHeightMap_.begin(); iter != lineHeightMap_.end() && iter->first < startMainLineIndex_;
+             ++iter) {
+            totalHeight += (iter->second + mainGap);
+        }
+        return totalHeight - currentOffset_;
+    }
+
+    float GetCurrentOffsetOfRegularGrid(float mainGap) const
+    {
+        float lineHeight = 0.0f;
+        if (NearZero(crossCount_)) {
+            return 0.0f;
+        }
+        for (const auto& item : lineHeightMap_) {
+            auto line = gridMatrix_.find(item.first);
+            if (line == gridMatrix_.end()) {
+                continue;
+            }
+            if (line->second.empty()) {
+                continue;
+            }
+            lineHeight = item.second;
+            break;
+        }
+        auto lines = startIndex_ / crossCount_;
+        return lines * (lineHeight + mainGap) - currentOffset_;
+    }
+
+    float GetContentOffset(float mainGap) const
+    {
+        if (!hasBigItem_) {
+            return GetCurrentOffsetOfRegularGrid(mainGap);
+        }
+
+        float heightSum = 0;
+        int32_t itemCount = 0;
+        float height = 0;
+        for (const auto& item : lineHeightMap_) {
+            auto line = gridMatrix_.find(item.first);
+            if (line == gridMatrix_.end()) {
+                continue;
+            }
+            if (line->second.empty()) {
+                continue;
+            }
+            auto lineStart = line->second.begin()->second;
+            auto lineEnd = line->second.rbegin()->second;
+            itemCount += (lineEnd - lineStart + 1);
+            heightSum += item.second + mainGap;
+        }
+        if (itemCount == 0) {
+            return 0;
+        }
+        auto averageHeight = heightSum / itemCount;
+        height = startIndex_ * averageHeight - currentOffset_;
+        if (itemCount >= (childrenCount_ - 1)) {
+            height = GetStartLineOffset(mainGap);
+        }
+        return height;
+    }
+
+    float GetContentHeight(float mainGap) const
+    {
+        if (!hasBigItem_) {
+            float lineHeight = 0.0f;
+            for (const auto& item : lineHeightMap_) {
+                auto line = gridMatrix_.find(item.first);
+                if (line == gridMatrix_.end()) {
+                    continue;
+                }
+                if (line->second.empty()) {
+                    continue;
+                }
+                lineHeight = item.second;
+                break;
+            }
+            if (NearZero(crossCount_)) {
+                return 0.0f;
+            }
+            auto lines = (childrenCount_) / crossCount_;
+            if (childrenCount_ % crossCount_ == 0) {
+                return lines * lineHeight + (lines - 1) * mainGap;
+            }
+            return (lines + 1) * lineHeight + lines * mainGap;
+        }
+        float heightSum = 0;
+        int32_t itemCount = 0;
+        float estimatedHeight = 0;
+        for (const auto& item : lineHeightMap_) {
+            auto line = gridMatrix_.find(item.first);
+            if (line == gridMatrix_.end()) {
+                continue;
+            }
+            if (line->second.empty()) {
+                continue;
+            }
+            auto lineStart = line->second.begin()->second;
+            auto lineEnd = line->second.rbegin()->second;
+            itemCount += (lineEnd - lineStart + 1);
+            heightSum += item.second + mainGap;
+        }
+        if (itemCount == 0) {
+            return 0;
+        }
+        auto averageHeight = heightSum / itemCount;
+        if (itemCount >= (childrenCount_ - 1)) {
+            estimatedHeight = heightSum - mainGap;
+        } else {
+            estimatedHeight = heightSum + (childrenCount_ - itemCount) * averageHeight;
+        }
+        return estimatedHeight;
+    }
+
     Axis axis_ = Axis::VERTICAL;
 
     float currentOffset_ = 0.0f;

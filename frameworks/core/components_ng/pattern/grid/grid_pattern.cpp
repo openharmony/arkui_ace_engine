@@ -764,28 +764,14 @@ void GridPattern::UpdateScrollBarOffset()
     auto viewScopeSize = geometryNode->GetPaddingSize();
     auto layoutProperty = host->GetLayoutProperty<GridLayoutProperty>();
 
-    float heightSum = 0;
-    int32_t itemCount = 0;
     auto mainGap = GridUtils::GetMainGap(layoutProperty, viewScopeSize, info.axis_);
-    for (const auto& item : info.lineHeightMap_) {
-        auto line = info.gridMatrix_.find(item.first);
-        if (line != info.gridMatrix_.end()) {
-            itemCount += static_cast<int32_t>(line->second.size());
-        } else {
-            itemCount += info.crossCount_;
+    float offset = gridLayoutInfo_.GetContentOffset(mainGap);
+    float estimatedHeight = gridLayoutInfo_.GetContentHeight(mainGap);
+    if (info.startMainLineIndex_ != 0 && info.startIndex_ == 0) {
+        for (int32_t lineIndex = info.startMainLineIndex_ - 1; lineIndex >= 0; lineIndex--) {
+            offset += info.lineHeightMap_.find(lineIndex)->second;
         }
-        heightSum += item.second + mainGap;
     }
-
-    float estimatedHeight = 0.f;
-    auto averageHeight_ = heightSum / itemCount;
-    if (itemCount >= (info.childrenCount_ - 1)) {
-        estimatedHeight = heightSum - mainGap;
-    } else {
-        estimatedHeight = heightSum + (info.childrenCount_ - itemCount) * averageHeight_;
-    }
-
-    float offset = info.startIndex_ * averageHeight_ - info.currentOffset_;
     Size mainSize = { viewScopeSize.Width(), viewScopeSize.Height() };
     UpdateScrollBarRegion(offset, estimatedHeight, mainSize);
 }
