@@ -455,24 +455,21 @@ void GridPattern::ScrollToTargrtIndex(int32_t index)
     float targetPos = 0.0f;
     if (targetRow == -1) {
         return;
-    } else {
-        for (const auto& rowIndex : gridLayoutInfo_.lineHeightMap_) {
-            if (targetRow == rowIndex.first) {
-                AdjustingTargetPos(targetPos, rowIndex.first, rowIndex.second);
-                targetIndex_.reset();
-                return;
-            }
-            targetPos = targetPos + rowIndex.second + mainGap;
+    }
+    for (const auto& rowIndex : gridLayoutInfo_.lineHeightMap_) {
+        if (targetRow == rowIndex.first) {
+            AdjustingTargetPos(targetPos, rowIndex.first, rowIndex.second);
+            targetIndex_.reset();
+            return;
         }
+        targetPos = targetPos + rowIndex.second + mainGap;
     }
 }
 void GridPattern::AdjustingTargetPos(float targetPos, int32_t rowIndex, float lineHeight)
 {
     switch (scrollAlign_) {
-        case ScrollAlign::START:
-            break;
-        case ScrollAlign::NONE:
-            break;
+        case ScrollAlign::START:;
+        case ScrollAlign::NONE:break;
         case ScrollAlign::CENTER:
             // Centered layout requires subtracting half of the window size+ target row height
             targetPos = targetPos - ((gridLayoutInfo_.lastMainSize_ - lineHeight) * HALF);
