@@ -44,6 +44,7 @@ bool TxtParagraph::IsValid()
 
 void TxtParagraph::CreateBuilder()
 {
+    placeholderPosition_.clear();
 #ifndef USE_GRAPHIC_TEXT_GINE
     txt::ParagraphStyle style;
     style.text_direction = Constants::ConvertTxtTextDirection(paraStyle_.direction);
@@ -135,6 +136,8 @@ int32_t TxtParagraph::AddPlaceholder(const PlaceholderRun& span)
 #else
     builder_->AppendPlaceholder(txtSpan);
 #endif
+    auto position = placeholderIndex_ + text_.length() + 1;
+    placeholderPosition_.emplace_back(position);
     return ++placeholderIndex_;
 }
 
@@ -314,6 +317,18 @@ int32_t TxtParagraph::GetGlyphIndexByCoordinate(const Offset& offset)
     return index;
 }
 
+bool TxtParagraph::CalCulateAndCheckPreIsPlaceholder(int32_t index, int32_t& extent)
+{
+    for (auto placeholderIndex : placeholderPosition_) {
+        if (placeholderIndex == index) {
+            return true;
+        } else if (placeholderIndex < extent) {
+            extent--;
+        }
+    }
+    return false;
+}
+
 bool TxtParagraph::ComputeOffsetForCaretUpstream(int32_t extent, CaretMetricsF& result, bool needLineHighest)
 {
     if (!paragraph_) {
@@ -377,10 +392,9 @@ bool TxtParagraph::ComputeOffsetForCaretUpstream(int32_t extent, CaretMetricsF& 
 
     const auto& textBox = *boxes.begin();
     // when text_ ends with a \n, return the top position of the next line.
-    auto last = extent - placeholderIndex_ - 1;
-    auto index = static_cast<size_t>(last) == text_.length() ? last : extent;
-    prevChar = text_[std::max(0, index - 1)];
-    if (prevChar == NEWLINE_CODE && !text_[index]) {
+    auto preIsPlaceholder = CalCulateAndCheckPreIsPlaceholder(extent - 1, extent);
+    prevChar = text_[std::max(0, extent - 1)];
+    if (prevChar == NEWLINE_CODE && !text_[extent] && !preIsPlaceholder) {
         // Return the start of next line.
         result.offset.SetX(MakeEmptyOffsetX());
 #ifndef USE_GRAPHIC_TEXT_GINE

@@ -92,6 +92,7 @@ public:
 
 private:
     void CreateBuilder();
+    bool CalCulateAndCheckPreIsPlaceholder(int32_t index, int32_t& extent);
     inline size_t GetParagraphLength() const
     {
         return text_.length() + placeholderIndex_ + 1;
@@ -112,6 +113,7 @@ private:
     int32_t placeholderIndex_ = -1;
     TextAlign textAlign_;
     static uint32_t destructCount;
+    std::list<size_t> placeholderPosition_;
 
     ACE_DISALLOW_COPY_AND_MOVE(TxtParagraph);
 };
