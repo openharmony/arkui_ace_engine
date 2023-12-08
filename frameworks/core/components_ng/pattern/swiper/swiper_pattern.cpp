@@ -1496,6 +1496,13 @@ void SwiperPattern::HandleTouchDown(const TouchLocationInfo& locationInfo)
             }
         }
     }
+
+    if (childScrolling_) {
+        // Even if the child fails to notify scrollEnd, we reset childScrolling_ flag on TouchDown to ensure its
+        // value is correct.
+        childScrolling_ = false;
+    }
+
     if (indicatorController_) {
         indicatorController_->Stop();
     }
