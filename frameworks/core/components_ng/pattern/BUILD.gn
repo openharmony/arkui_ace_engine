@@ -499,8 +499,14 @@ build_component_ng("pattern_ng") {
   }
 
   if (is_ohos_standard_system) {
-    external_deps = [ "graphic_2d:librender_service_client" ]
+    external_deps = [
+      "graphic_2d:librender_service_client",
+      "napi:ace_napi",
+    ]
   } else if (is_arkui_x) {
-    deps += [ "$ace_graphic/rosen/modules/render_service_client:librender_service_client_static" ]
+    deps += [
+      "$ace_graphic/rosen/modules/render_service_client:librender_service_client_static",
+      "//plugins/libs/napi:napi_$platform",
+    ]
   }
 }

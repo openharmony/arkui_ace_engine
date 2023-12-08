@@ -39,6 +39,7 @@
 #include "core/components_ng/pattern/text/text_menu_extension.h"
 #include "core/components_ng/property/gradient_property.h"
 #include "core/components_ng/property/transition_property.h"
+#include "interfaces/inner_api/ace/ai/image_analyzer.h"
 
 namespace OHOS::Ace::Framework {
 
@@ -327,6 +328,9 @@ public:
     static void JSRenderFit(const JSCallbackInfo& info);
 
     static void JsExpandSafeArea(const JSCallbackInfo& info);
+
+    static void ParseImageAnalyzerTextOptions(const JSRef<JSVal>& optionVal, ImageAnalyzerConfig& analyzerConfig);
+    static void ParseImageAnalyzerSubjectOptions(const JSRef<JSVal>& optionVal, ImageAnalyzerConfig& analyzerConfig);
 
     static void ParseMenuOptions(
         const JSCallbackInfo& info, const JSRef<JSArray>& jsArray, std::vector<NG::MenuOptionsParam>& items);

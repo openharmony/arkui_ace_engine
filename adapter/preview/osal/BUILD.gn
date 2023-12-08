@@ -63,6 +63,7 @@ ohos_source_set("preview_osal_source") {
       "ace_engine_ext.cpp",
       "ace_trace.cpp",
       "advance/data_detector_mgr.cpp",
+      "advance/image_analyzer_mgr.cpp",
       "app_bar_helper_impl.cpp",
       "download_manager_preview.cpp",
       "download_manager_preview_v2.cpp",
@@ -121,6 +122,7 @@ ohos_source_set("preview_osal_source") {
       } else if (platform == "linux") {
         deps += [ "//base/global/resource_management/frameworks/resmgr:global_resmgr_linux" ]
       }
+      external_deps += [ "napi:ace_napi" ]
     } else {
       sources += [
         "frame_trace_adapter_impl.cpp",

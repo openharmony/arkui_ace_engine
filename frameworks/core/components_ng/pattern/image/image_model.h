@@ -27,6 +27,7 @@
 #include "core/components/common/properties/color.h"
 #include "core/components/image/image_event.h"
 #include "core/components_ng/event/gesture_event_hub.h"
+#include "interfaces/inner_api/ace/ai/image_analyzer.h"
 
 namespace OHOS::Ace {
 class ImageModel {
@@ -63,6 +64,8 @@ public:
     virtual void SetOnDrop(NG::OnDragDropFunc &&onDrop) = 0;
     virtual void SetCopyOption(const CopyOptions &copyOption) = 0;
     virtual bool UpdateDragItemInfo(DragItemInfo &itemInfo) = 0;
+    virtual void EnableAnalyzer(bool isEnableAnalyzer) = 0;
+    virtual void SetImageAnalyzerConfig(const ImageAnalyzerConfig& config) = 0;
 
 private:
     static std::unique_ptr<ImageModel> instance_;
