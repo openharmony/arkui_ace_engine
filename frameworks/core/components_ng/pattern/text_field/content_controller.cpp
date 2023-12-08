@@ -148,8 +148,9 @@ void ContentController::FilterValue()
     auto property = textField->GetLayoutProperty<TextFieldLayoutProperty>();
     if (property->GetInputFilter().has_value() && !content_.empty()) {
         textChanged |= FilterWithEvent(property->GetInputFilter().value(), result);
+    } else {
+        FilterTextInputStyle(textChanged, result);
     }
-    FilterTextInputStyle(textChanged, result);
     if (textChanged) {
         content_ = result;
     }
