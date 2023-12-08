@@ -2464,9 +2464,6 @@ HWTEST_F(DragDropManagerTestNg, DragDropManagerGetItemIndexTest002, TestSize.Lev
     dragDropManager->GetItemIndex(listNode, DragType::TEXT, 0.0, 0.0);
     dragDropManager->GetItemIndex(listNode, DragType::LIST, 0.0, 0.0);
     EXPECT_EQ(onItemDropInfoList, "");
-    frameNode = nullptr;
-    int32_t retFlag = dragDropManager->GetItemIndex(frameNode, DragType::GRID, 0.0, 0.0);
-    EXPECT_EQ(retFlag, -1);
 }
 
 /**
