@@ -1146,6 +1146,7 @@ private:
     void SaveInlineStates();
     void ApplyInlineStates(bool focusStatus);
     void RestorePreInlineStates();
+    void CalcInlineScrollRect(Rect& inlineScrollRect);
 
     bool ResetObscureTickCountDown();
 
@@ -1195,6 +1196,7 @@ private:
     RefPtr<Paragraph> paragraph_;
     RefPtr<Paragraph> errorParagraph_;
     RefPtr<Paragraph> dragParagraph_;
+    InlineMeasureItem inlineMeasureItem_;
     TextStyle nextLineUtilTextStyle_;
 
     RefPtr<ClickEvent> clickListener_;

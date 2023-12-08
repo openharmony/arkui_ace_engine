@@ -67,6 +67,7 @@ std::optional<SizeF> TextInputLayoutAlgorithm::MeasureContent(
     auto textFieldContentConstraint = CalculateContentMaxSizeWithCalculateConstraint(contentConstraint, layoutWrapper);
     // Paragraph layout.
     if (isInlineStyle) {
+        CreateInlineParagraph(textStyle, textContent_, false, pattern->GetNakedCharPosition(), disableTextAlign);
         return InlineMeasureContent(textFieldContentConstraint, layoutWrapper);
     }
     if (showPlaceHolder_) {
