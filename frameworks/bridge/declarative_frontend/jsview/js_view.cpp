@@ -312,6 +312,10 @@ void JSViewFullUpdate::FindChildById(const JSCallbackInfo& info)
 
 void JSViewFullUpdate::FindChildByIdForPreview(const JSCallbackInfo& info)
 {
+    if (!info[0]->IsString()) {
+        LOGE("info[0] is not a string.");
+        return;
+    }
     std::string viewId = info[0]->ToString();
     if (viewId_ == viewId) {
         info.SetReturnValue(jsViewObject_);
@@ -838,6 +842,10 @@ void JSViewPartialUpdate::IsFirstRender(const JSCallbackInfo& info)
 void JSViewPartialUpdate::FindChildByIdForPreview(const JSCallbackInfo& info)
 {
     LOGD("JSViewPartialUpdate::FindChildByIdForPreview");
+    if (!info[0]->IsString()) {
+        LOGE("info[0] is not a string.");
+        return;
+    }
     std::string viewId = info[0]->ToString();
     JSRef<JSObject> targetView = Framework::JSViewStackProcessor::GetViewById(viewId);
     info.SetReturnValue(targetView);

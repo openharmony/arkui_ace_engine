@@ -145,6 +145,9 @@ void JSRefresh::Pop()
 
 void JSRefresh::OnStateChange(const JSCallbackInfo& args)
 {
+    if (!args[0]->IsFunction()) {
+        return;
+    }
     auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(args[0]));
     auto onStateChange = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc)](const int32_t& value) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
@@ -157,6 +160,9 @@ void JSRefresh::OnStateChange(const JSCallbackInfo& args)
 
 void JSRefresh::OnRefreshing(const JSCallbackInfo& args)
 {
+    if (!args[0]->IsFunction()) {
+        return;
+    }
     auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(args[0]));
     auto onRefreshing = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc)]() {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
