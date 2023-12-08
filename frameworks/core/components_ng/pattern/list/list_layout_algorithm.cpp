@@ -1403,7 +1403,7 @@ void ListLayoutAlgorithm::AdjustPostionForListItemGroup(LayoutWrapper* layoutWra
         itemGroup->SetListMainSize(startMainPos_, endMainPos_, itemPosition_[index].startPos, !forwardLayout);
     }
     itemGroup->SetScrollAlign(ScrollAlign::NONE);
-    itemGroup->Measure(AceType::RawPtr(wrapper));
+    wrapper->Measure(childLayoutConstraint_);
     float mainLen = GetMainAxisSize(wrapper->GetGeometryNode()->GetMarginFrameSize(), axis);
     auto& pos = itemPosition_[index];
     if (forwardLayout) {
