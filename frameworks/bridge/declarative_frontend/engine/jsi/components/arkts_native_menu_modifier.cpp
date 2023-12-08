@@ -15,17 +15,17 @@
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_menu_modifier.h"
 
 #include "core/components/common/layout/constants.h"
+#include "core/components/common/properties/text_style.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/pattern/menu/menu_model_ng.h"
 #include "core/pipeline/base/element_register.h"
 #include "frameworks/bridge/common/utils/utils.h"
-#include "frameworks/core/components/common/properties/text_style.h"
 
 namespace OHOS::Ace::NG {
 constexpr uint32_t DEFAULT_MENU_FONTCOLOR_COLOR = 0xFF182431;
 const char DELIMITER = '|';
-const int SIZE_OF_FONT_INFO = 3;
+constexpr int32_t SIZE_OF_FONT_INFO = 4;
 const int NUM_0 = 0;
 const int NUM_1 = 1;
 const int NUM_2 = 2;
@@ -49,7 +49,7 @@ void ResetMenuFontColor(NodeHandle node)
     CHECK_NULL_VOID(frameNode);
     MenuModelNG::SetFontColor(frameNode, Color(DEFAULT_MENU_FONTCOLOR_COLOR));
 }
-void SetMenuFont(NodeHandle node, const char* fontInfo, int32_t styleVal)
+void SetMenuFont(NodeHandle node, const char* fontInfo, int32_t unit)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -57,26 +57,31 @@ void SetMenuFont(NodeHandle node, const char* fontInfo, int32_t styleVal)
     std::vector<std::string> res;
     std::string fontValues = std::string(fontInfo);
     StringUtils::StringSplitter(fontValues, DELIMITER, res);
-    if (res.size() == 0 || res.size() != SIZE_OF_FONT_INFO) {
+    if (res.empty() || res.size() != SIZE_OF_FONT_INFO) {
         return;
     }
 
+    CalcDimension fontSize = Dimension(-1.0);
     if (res[NUM_0] != ERR_CODE) {
-        CalcDimension fontSize = StringUtils::StringToCalcDimension(res[NUM_0], false);      
-        MenuModelNG::SetFontSize(frameNode, fontSize);
+        fontSize = CalcDimension(res[NUM_0], static_cast<OHOS::Ace::DimensionUnit>(unit));
     }
+    MenuModelNG::SetFontSize(frameNode, fontSize);
 
     if (res[NUM_1] != ERR_CODE) {
-        MenuModelNG::SetFontWeight(
-            frameNode, StringUtils::StringToFontWeight(res[NUM_1], FontWeight::NORMAL));
+        MenuModelNG::SetFontWeight(frameNode, Framework::ConvertStrToFontWeight(res[NUM_1]));
+    } else {
+        MenuModelNG::SetFontWeight(frameNode, FontWeight::NORMAL);
     }
 
     if (res[NUM_2] != ERR_CODE) {
-        MenuModelNG::SetFontFamily(frameNode, Framework::ConvertStrToFontFamilies(res[NUM_2]));
+        MenuModelNG::SetFontStyle(frameNode, Framework::ConvertStrToFontStyle(res[NUM_2]));
+    } else {
+        MenuModelNG::SetFontStyle(frameNode, FONT_STYLES[0]);
     }
 
-    auto style = static_cast<OHOS::Ace::FontStyle>(styleVal);
-    MenuModelNG::SetFontStyle(frameNode, style);
+    if (res[NUM_3] != ERR_CODE) {
+        MenuModelNG::SetFontFamily(frameNode, Framework::ConvertStrToFontFamilies(res[NUM_3]));
+    }
 }
 void ResetMenuFont(NodeHandle node)
 {
