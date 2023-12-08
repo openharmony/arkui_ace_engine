@@ -1525,7 +1525,7 @@ int32_t GridScrollLayoutAlgorithm::CheckGridPlacedState(
     }
 
     // If cross length of grid item if out of range,  place grid item fail.
-    if (cross + crossSpan > static_cast<int32_t>(crossCount_)) {
+    if ((cross + crossSpan) > static_cast<int32_t>(crossCount_)) {
         return POSITION_SMALL; // The width of the index that needs to be placed is too wide to be placed
     }
 
