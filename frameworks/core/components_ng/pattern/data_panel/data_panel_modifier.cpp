@@ -166,7 +166,7 @@ void DataPanelModifier::PaintCircle(DrawingContext& context, OffsetF offset) con
             auto totalValuePre = arcData.totalValue;
             arcData.totalValue += values_[i]->Get();
             if (GreatNotEqual(arcData.totalValue, arcData.maxValue)) {
-                return;
+                continue;
             }
             arcData.progressValue = arcData.totalValue * date_->Get();
             arcData.drawAngle = arcData.progressValue / arcData.maxValue * WHOLE_CIRCLE;

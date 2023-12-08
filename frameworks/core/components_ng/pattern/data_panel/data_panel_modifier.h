@@ -79,17 +79,6 @@ public:
     void onDraw(DrawingContext& context) override;
     void UpdateDate();
 
-    void PaintCircle(DrawingContext& context, OffsetF offset) const;
-    void PaintLinearProgress(DrawingContext& context, OffsetF offset) const;
-    void PaintBackground(RSCanvas& canvas, OffsetF offset, float totalWidth, float height, float segmentWidth) const;
-    void PaintColorSegment(RSCanvas& canvas, const LinearData& segmentLinearData) const;
-    void PaintSpace(RSCanvas& canvas, const LinearData& segmentLinearData, float spaceWidth) const;
-    void PaintTrackBackground(RSCanvas& canvas, ArcData arcData, const Color color) const;
-    void PaintProgress(RSCanvas& canvas, ArcData arcData, RSPath& path, RSPath& endPath, bool isShadow) const;
-    void GetPaintPath(ArcData& arcData, RSPath& path, RSPath& endPath) const;
-    void Path2DArc(
-        RSPath& path, double x, double y, double r, double startAngle, double endAngle, bool counterclockwise) const;
-
     void SetValues(std::vector<double> values)
     {
         for (size_t i = 0; i < values.size(); ++i) {
@@ -181,6 +170,16 @@ public:
     };
 
 private:
+    void PaintCircle(DrawingContext& context, OffsetF offset) const;
+    void PaintLinearProgress(DrawingContext& context, OffsetF offset) const;
+    void PaintBackground(RSCanvas& canvas, OffsetF offset, float totalWidth, float height, float segmentWidth) const;
+    void PaintColorSegment(RSCanvas& canvas, const LinearData& segmentLinearData) const;
+    void PaintSpace(RSCanvas& canvas, const LinearData& segmentLinearData, float spaceWidth) const;
+    void PaintTrackBackground(RSCanvas& canvas, ArcData arcData, const Color color) const;
+    void PaintProgress(RSCanvas& canvas, ArcData arcData, RSPath& path, RSPath& endPath, bool isShadow) const;
+    void GetPaintPath(ArcData& arcData, RSPath& path, RSPath& endPath) const;
+    void Path2DArc(
+        RSPath& path, double x, double y, double r, double startAngle, double endAngle, bool counterclockwise) const;
     void PaintColorSegmentFilterMask(RSCanvas& canvas, const LinearData& segmentLinearData) const;
     Gradient SortGradientColorsOffset(const Gradient& srcGradient) const;
     RefPtr<AnimatablePropertyFloat> date_;
