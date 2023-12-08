@@ -36,6 +36,7 @@
 #include "bridge/declarative_frontend/jsview/js_web_controller.h"
 #include "bridge/declarative_frontend/jsview/models/web_model_impl.h"
 #include "bridge/declarative_frontend/view_stack_processor.h"
+#include "core/common/ace_application_info.h"
 #include "core/common/container.h"
 #include "core/common/container_scope.h"
 #include "core/components/web/web_event.h"
@@ -44,6 +45,11 @@
 #include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace {
+namespace {
+const std::string RAWFILE_PREFIX = "resource://RAWFILE/";
+const std::string BUNDLE_NAME_PREFIX = "bundleName:";
+const std::string MODULE_NAME_PREFIX = "moduleName:";
+}
 
 std::unique_ptr<WebModel> WebModel::instance_ = nullptr;
 std::mutex WebModel::mutex_;
@@ -1873,6 +1879,24 @@ JSRef<JSVal> SearchResultReceiveEventToJSValue(const SearchResultReceiveEvent& e
     return JSRef<JSVal>::Cast(obj);
 }
 
+void JSWeb::ParseRawfileWebSrc(const JSRef<JSVal>& srcValue, std::string& webSrc)
+{
+    if (!srcValue->IsObject() || webSrc.substr(0, RAWFILE_PREFIX.size()) != RAWFILE_PREFIX) {
+        return;
+    }
+    std::string bundleName;
+    std::string moduleName;
+    GetJsMediaBundleInfo(srcValue, bundleName, moduleName);
+    auto container = Container::Current();
+    CHECK_NULL_VOID(container);
+    if ((!bundleName.empty() && !moduleName.empty()) &&
+        (bundleName != AceApplicationInfo::GetInstance().GetPackageName() ||
+        moduleName != container->GetModuleName())) {
+        webSrc = RAWFILE_PREFIX + BUNDLE_NAME_PREFIX + bundleName + "/" + MODULE_NAME_PREFIX + moduleName + "/" +
+            webSrc.substr(RAWFILE_PREFIX.size());
+    }
+}
+
 void JSWeb::Create(const JSCallbackInfo& info)
 {
     if (info.Length() < 1 || !info[0]->IsObject()) {
@@ -1885,6 +1909,7 @@ void JSWeb::Create(const JSCallbackInfo& info)
     if (srcValue->IsString()) {
         dstSrc = srcValue->ToString();
     } else if (ParseJsMedia(srcValue, webSrc)) {
+        ParseRawfileWebSrc(srcValue, webSrc);
         int np = static_cast<int>(webSrc.find_first_of("/"));
         dstSrc = np < 0 ? webSrc : webSrc.erase(np, 1);
     }
