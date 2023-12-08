@@ -357,6 +357,11 @@ std::string SpanItem::GetSpanContent(const std::string& rawContent)
     return data;
 }
 
+std::string SpanItem::GetSpanContent()
+{
+    return content;
+}
+
 #ifdef ENABLE_DRAG_FRAMEWORK
 void SpanItem::StartDrag(int32_t start, int32_t end)
 {
