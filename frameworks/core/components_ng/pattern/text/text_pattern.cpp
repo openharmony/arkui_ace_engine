@@ -318,11 +318,28 @@ std::wstring TextPattern::GetWideText() const
 
 std::string TextPattern::GetSelectedText(int32_t start, int32_t end) const
 {
-    auto wideText = GetWideText();
-    auto min = std::clamp(std::max(std::min(start, end), 0), 0, static_cast<int32_t>(wideText.length()));
-    auto max = std::clamp(std::min(std::max(start, end), static_cast<int32_t>(wideText.length())), 0,
-        static_cast<int32_t>(wideText.length()));
-    return StringUtils::ToString(wideText.substr(min, max - min));
+    if (spans_.empty()) {
+        auto wideText = GetWideText();
+        auto min = std::clamp(std::max(std::min(start, end), 0), 0, static_cast<int32_t>(wideText.length()));
+        auto max = std::clamp(std::min(std::max(start, end), static_cast<int32_t>(wideText.length())), 0,
+            static_cast<int32_t>(wideText.length()));
+        return StringUtils::ToString(wideText.substr(min, max - min));
+    }
+    std::string value;
+    int32_t tag = 0;
+    for (const auto& span : spans_) {
+        if (span->position - 1 >= start && span->placeholderIndex == -1 && span->position != -1) {
+            auto wideString = StringUtils::ToWstring(span->GetSpanContent());
+            auto max = std::min(span->position, end);
+            auto min = std::max(start, tag);
+            value += StringUtils::ToString(wideString.substr(min - tag, max - min));
+        }
+        tag = span->position == -1 ? tag + 1 : span->position;
+        if (span->position >= end) {
+            break;
+        }
+    }
+    return value;
 }
 
 void TextPattern::HandleOnCopy()
@@ -1580,6 +1597,16 @@ void TextPattern::PreCreateLayoutWrapper()
         contentMod_->ContentChange();
     }
 
+    auto paintProperty = GetPaintProperty<PaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+    auto flag = paintProperty->GetPropertyChangeFlag();
+    auto textLayoutProperty = GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(textLayoutProperty);
+    auto layoutFlag = textLayoutProperty->GetPropertyChangeFlag();
+    if (!CheckNeedMeasure(flag) && !CheckNeedMeasure(layoutFlag)) {
+        return;
+    }
+
     imageCount_ = 0;
     // When dirty areas are marked because of child node changes, the text rendering node tree is reset.
     const auto& children = host->GetChildren();
@@ -1606,7 +1633,7 @@ void TextPattern::PreCreateLayoutWrapper()
 
     bool isSpanHasClick = false;
     CollectSpanNodes(nodes, isSpanHasClick);
-
+    
     if (textCache != textForDisplay_) {
         host->OnAccessibilityEvent(AccessibilityEventType::TEXT_CHANGE, textCache, textForDisplay_);
         if (copyOption_ == CopyOptions::None || !textDetectEnable_) {
