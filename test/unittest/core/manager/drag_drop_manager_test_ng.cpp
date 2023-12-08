@@ -957,7 +957,6 @@ HWTEST_F(DragDropManagerTestNg, DragDropManagerTest014, TestSize.Level1)
     dragDropManager->OnTextDragEnd(globalX, globalY, extraInfo);
     EXPECT_EQ(dragDropManager->currentId_, -1);
 
-    //dragFrameNode不为空分支
     /**
      * @tc.steps: step3. construct TextFrameNode.
      * @tc.expected: frameNode is not null.
@@ -1688,7 +1687,7 @@ HWTEST_F(DragDropManagerTestNg, DragDropManagerTest035, TestSize.Level1)
 
 /**
  * @tc.name: DragDropManagerTest036
- * @tc.desc: Test FireOnDragEvent is empty branchs（Point）.
+ * @tc.desc: Test FireOnDragEvent is empty branchsPoint.
  * @tc.type: FUNC
  * @tc.author:
  */
