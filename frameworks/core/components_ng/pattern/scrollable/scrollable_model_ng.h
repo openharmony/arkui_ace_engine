@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SCROLLABLE_SCROLLABLE_MODEL_NG_H
 
 #include "base/utils/macros.h"
+#include "core/components_ng/base/frame_node.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/pattern/scrollable/scrollable_properties.h"
 
@@ -35,6 +36,9 @@ public:
     static void SetOnReachStart(OnReachEvent&& onReachStart);
     static void SetOnReachEnd(OnReachEvent&& onReachEnd);
     static void SetOnScrollFrameBegin(OnScrollFrameBeginEvent&& ScrollFrameBegin);
+
+    static void SetEdgeEffect(FrameNode* frameNode, EdgeEffect edgeEffect, bool alwaysEnabled);
+    static void SetScrollBarMode(FrameNode* frameNode, int32_t displayNumber);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SCROLLABLE_SCROLLABLE_MODEL_H

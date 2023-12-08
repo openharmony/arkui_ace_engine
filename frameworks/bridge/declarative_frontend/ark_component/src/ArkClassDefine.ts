@@ -465,6 +465,32 @@ class ArkSharedTransition implements Equable {
   }
 }
 
+class ArkListEdgeEffect implements Equable {
+  value: EdgeEffect;
+  options?: EdgeEffectOptions | undefined;
+  constructor() {
+    this.value = undefined;
+    this.options = undefined;
+  }
+  isEqual(another: ArkListEdgeEffect): boolean {
+    return (this.value === another.value) &&
+      (this.options === another.options);
+  }
+}
+
+class ArkListNestedScrollOptions implements Equable {
+  scrollForward: number;
+  scrollBackward: number;
+  constructor() {
+    this.scrollForward = undefined;
+    this.scrollBackward = undefined;
+  }
+  isEqual(another: ArkListNestedScrollOptions): boolean {
+    return (this.scrollForward === another.scrollForward &&
+      this.scrollBackward === another.scrollBackward)
+  }
+}
+
 class ArkFont implements Equable {
   size: Length;
   weight: number | string;
@@ -1433,5 +1459,23 @@ class ArkMesh {
       this.column === another.column &&
       this.row === another.row
     );
+  }
+}
+
+class ArkLanesOpt {
+  lanesNum: number;
+  minLength: Length;
+  maxLength: Length;
+  gutter?: undefined;
+  constructor() {
+    this.lanesNum = undefined;
+    this.minLength = undefined;
+    this.maxLength = undefined;
+    this.gutter = undefined;
+  }
+
+  isEqual(another: ArkLanesOpt): boolean {
+    return (this.lanesNum === another.lanesNum && this.minLength === another.minLength
+      && this.maxLength === another.maxLength && this.gutter === another.gutter);
   }
 }
