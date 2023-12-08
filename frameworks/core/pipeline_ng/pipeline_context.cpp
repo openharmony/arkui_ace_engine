@@ -2712,4 +2712,24 @@ void PipelineContext::CloseFrontendAnimation()
     }
     AnimationUtils::CloseImplicitAnimation();
 }
+
+bool PipelineContext::IsDragging() const
+{
+    if (!dragDropManager_) {
+        return false;
+    }
+    bool isDragging = dragDropManager_->IsDragging();
+#ifdef ENABLE_DRAG_FRAMEWORK
+    isDragging = (isDragging || dragDropManager_->IsMsdpDragging());
+#endif
+    return isDragging;
+}
+
+void PipelineContext::SetIsDragging(bool isDragging)
+{
+    if (!eventManager_) {
+        return;
+    }
+    eventManager_->SetIsDragging(isDragging);
+}
 } // namespace OHOS::Ace::NG

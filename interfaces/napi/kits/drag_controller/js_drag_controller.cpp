@@ -616,6 +616,18 @@ std::vector<Msdp::DeviceStatus::ShadowInfo> GetShadowInfoArray(DragControllerAsy
     return shadowInfos;
 }
 
+static void SetIsDragging(const RefPtr<Container>& container, bool isDragging)
+{
+    if (!container) {
+        return;
+    }
+    auto pipelineContext = container->GetPipelineContext();
+    if (!pipelineContext) {
+        return;
+    }
+    pipelineContext->SetIsDragging(isDragging);
+}
+
 void EnvelopedDataAndStartDrag(DragControllerAsyncCtx* asyncCtx)
 {
     auto shadowInfos = GetShadowInfoArray(asyncCtx);
@@ -660,6 +672,8 @@ void EnvelopedDataAndStartDrag(DragControllerAsyncCtx* asyncCtx)
         napi_close_handle_scope(asyncCtx->env, scope);
         return;
     }
+    auto container = AceEngine::Get().GetContainer(asyncCtx->instanceId);
+    SetIsDragging(container, true);
     LOGI("DragController start success");
     std::lock_guard<std::mutex> lock(asyncCtx->dragStateMutex);
     if (asyncCtx->dragState == DragState::SENDING) {
@@ -763,6 +777,8 @@ void OnComplete(DragControllerAsyncCtx* asyncCtx)
                 napi_close_handle_scope(asyncCtx->env, scope);
                 return;
             }
+            auto container = AceEngine::Get().GetContainer(asyncCtx->instanceId);
+            SetIsDragging(container, true);
             LOGI("drag start success");
             {
                 std::lock_guard<std::mutex> lock(asyncCtx->dragStateMutex);
@@ -1202,6 +1218,18 @@ bool ConfirmCurPointerEventInfo(DragControllerAsyncCtx *asyncCtx, const RefPtr<C
     return getPointSuccess;
 }
 
+static bool CheckDragging(const RefPtr<Container>& container)
+{
+    if (!container) {
+        return false;
+    }
+    auto pipelineContext = container->GetPipelineContext();
+    if (!pipelineContext || !pipelineContext->IsDragging()) {
+        return false;
+    }
+    return true;
+}
+
 static napi_value JSExecuteDrag(napi_env env, napi_callback_info info)
 {
     if (g_dragContext != nullptr) {
@@ -1233,6 +1261,14 @@ static napi_value JSExecuteDrag(napi_env env, napi_callback_info info)
         NapiThrow(g_dragContext->env, "container is null", Framework::ERROR_CODE_INTERNAL_ERROR);
         delete g_dragContext;
         g_dragContext = nullptr;
+        return nullptr;
+    }
+    if (CheckDragging(container)) {
+        NapiThrow(env, "only one drag is allowed at the same time", Framework::ERROR_CODE_INTERNAL_ERROR);
+        napi_escape_handle(env, scope, result, &result);
+        delete g_dragContext;
+        g_dragContext = nullptr;
+        napi_close_escapable_handle_scope(env, scope);
         return nullptr;
     }
     auto getPointSuccess = ConfirmCurPointerEventInfo(g_dragContext, container);
@@ -1288,6 +1324,14 @@ static napi_value JSCreateDragAction(napi_env env, napi_callback_info info)
     auto container = AceEngine::Get().GetContainer(g_dragContext->instanceId);
     if (!container) {
         NapiThrow(g_dragContext->env, "container is null", Framework::ERROR_CODE_INTERNAL_ERROR);
+        delete g_dragContext;
+        g_dragContext = nullptr;
+        napi_close_escapable_handle_scope(env, scope);
+        return nullptr;
+    }
+
+    if (CheckDragging(container)) {
+        NapiThrow(env, "only one drag is allowed at the same time", Framework::ERROR_CODE_INTERNAL_ERROR);
         delete g_dragContext;
         g_dragContext = nullptr;
         napi_close_escapable_handle_scope(env, scope);
