@@ -941,6 +941,10 @@ public:
         ViewAbstract::SetHitTestMode(hitTestMode);
     }
 
+    void SetOnTouchTestFunc(NG::OnChildTouchTestFunc&& onChildTouchTest) override
+    {
+        ViewAbstract::SetOnTouchTestFunc(std::move(onChildTouchTest));
+    }
     void SetKeyboardShortcut(const std::string& value, const std::vector<ModifierKey>& keys,
         std::function<void()>&& onKeyboardShortcutAction) override
     {

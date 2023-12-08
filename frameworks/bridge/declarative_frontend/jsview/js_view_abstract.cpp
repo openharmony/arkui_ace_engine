@@ -41,6 +41,7 @@
 #include "bridge/declarative_frontend/engine/functions/js_click_function.h"
 #include "bridge/declarative_frontend/engine/functions/js_clipboard_function.h"
 #include "bridge/declarative_frontend/engine/functions/js_drag_function.h"
+#include "bridge/declarative_frontend/engine/functions/js_on_child_touch_test_function.h"
 #include "bridge/declarative_frontend/engine/functions/js_focus_function.h"
 #include "bridge/declarative_frontend/engine/functions/js_function.h"
 #include "bridge/declarative_frontend/engine/functions/js_gesture_judge_function.h"
@@ -6308,6 +6309,7 @@ void JSViewAbstract::JSBind(BindingTarget globalObj)
     JSClass<JSViewAbstract>::StaticMethod("alignRules", &JSViewAbstract::JsAlignRules);
     JSClass<JSViewAbstract>::StaticMethod("onVisibleAreaChange", &JSViewAbstract::JsOnVisibleAreaChange);
     JSClass<JSViewAbstract>::StaticMethod("hitTestBehavior", &JSViewAbstract::JsHitTestBehavior);
+    JSClass<JSViewAbstract>::StaticMethod("onChildTouchTest", &JSViewAbstract::JsOnChildTouchTest);
     JSClass<JSViewAbstract>::StaticMethod("keyboardShortcut", &JSViewAbstract::JsKeyboardShortcut);
     JSClass<JSViewAbstract>::StaticMethod("obscured", &JSViewAbstract::JsObscured);
     JSClass<JSViewAbstract>::StaticMethod("allowDrop", &JSViewAbstract::JsAllowDrop);
@@ -7190,6 +7192,46 @@ void JSViewAbstract::JsHitTestBehavior(const JSCallbackInfo& info)
     NG::HitTestMode hitTestModeNG = NG::HitTestMode::HTMDEFAULT;
     hitTestModeNG = static_cast<NG::HitTestMode>(info[0]->ToNumber<int32_t>());
     ViewAbstractModel::GetInstance()->SetHitTestMode(hitTestModeNG);
+}
+
+void JSViewAbstract::JsOnChildTouchTest(const JSCallbackInfo& info)
+{
+    std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::FUNCTION };
+    if (!CheckJSCallbackInfo("onChildTouchTest", info, checkList)) {
+        return;
+    }
+
+    RefPtr<JsOnChildTouchTestFunction> jsOnChildTouchTestFunc =
+        AceType::MakeRefPtr<JsOnChildTouchTestFunction>(JSRef<JSFunc>::Cast(info[0]));
+
+    auto onTouchTestFunc = [execCtx = info.GetExecutionContext(), func = std::move(jsOnChildTouchTestFunc)](
+                               const std::vector<NG::TouchTestInfo>& touchInfo) -> NG::TouchResult {
+        NG::TouchResult touchRes;
+        NG::TouchResult defaultRes;
+        defaultRes.strategy = NG::TouchTestStrategy::DEFAULT;
+        defaultRes.id = "";
+        auto ret = func->Execute(touchInfo);
+        if (!ret->IsObject()) {
+            TAG_LOGW(AceLogTag::ACE_UIEVENT, "onChildTouchTest return value is not object, parse failed.");
+            return defaultRes;
+        }
+
+        auto retObj = JSRef<JSObject>::Cast(ret);
+        auto strategy = retObj->GetProperty("strategy");
+        if (!strategy->IsNumber()) {
+            TAG_LOGW(AceLogTag::ACE_UIEVENT, "onChildTouchTest return value strategy is not number, parse failed.");
+            return defaultRes;
+        }
+        touchRes.strategy = static_cast<NG::TouchTestStrategy>(strategy->ToNumber<int32_t>());
+        auto id = retObj->GetProperty("id");
+        if (!id->IsString()) {
+            TAG_LOGW(AceLogTag::ACE_UIEVENT, "onChildTouchTest return value id is not string, parse failed.");
+            return defaultRes;
+        }
+        touchRes.id = id->ToString();
+        return touchRes;
+    };
+    ViewAbstractModel::GetInstance()->SetOnTouchTestFunc(std::move(onTouchTestFunc));
 }
 
 void JSViewAbstract::JsForegroundColor(const JSCallbackInfo& info)
