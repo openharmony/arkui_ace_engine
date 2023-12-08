@@ -97,6 +97,7 @@ void JSFolderStack::JsEnableAnimation(const JSCallbackInfo& info)
 {
     if (!info[0]->IsBoolean()) {
         FolderStackModel::GetInstance()->SetEnableAnimation(true);
+        return;
     }
     auto isEnableAnimation = info[0]->ToBoolean();
     FolderStackModel::GetInstance()->SetEnableAnimation(isEnableAnimation);
