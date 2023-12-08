@@ -418,7 +418,10 @@ void FocusHub::SetParentFocusable(bool parentFocusable)
     TAG_LOGD(AceLogTag::ACE_FOCUS, "Set node: %{public}s/%{public}d parentFocusable from %{public}d to %{public}d",
         GetFrameName().c_str(), GetFrameId(), parentFocusable_, parentFocusable);
     parentFocusable_ = parentFocusable;
-    RefreshParentFocusable(IsFocusableNode());
+    auto focusableNode = IsFocusableNode();
+    if (focusableNode) {
+        RefreshParentFocusable(focusableNode);
+    }
 }
 
 bool FocusHub::IsFocusable()
