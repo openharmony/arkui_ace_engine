@@ -438,9 +438,11 @@ void ListTestNg::MouseSelect(Offset start, Offset end)
     GestureEvent info;
     info.SetInputEventType(InputEventType::MOUSE_BUTTON);
     info.SetLocalLocation(start);
+    info.SetGlobalLocation(start);
     pattern_->HandleDragStart(info);
     if (start != end) {
         info.SetLocalLocation(end);
+        info.SetGlobalLocation(end);
         pattern_->HandleDragUpdate(info);
     }
     pattern_->HandleDragEnd(info);
@@ -3351,28 +3353,39 @@ HWTEST_F(ListTestNg, MouseSelect001, TestSize.Level1)
      * @tc.steps: step1. Select zone.
      * @tc.expected: The 1st and 2nd items are selected.
      */
-    MouseSelect(Offset(0.f, 0.f), Offset(200.f, 100.f));
+    MouseSelect(Offset(0.f, 0.f), Offset(LIST_WIDTH, 50.f));
     EXPECT_TRUE(GetChildPattern<ListItemPattern>(frameNode_, 0)->IsSelected());
-    EXPECT_TRUE(GetChildPattern<ListItemPattern>(frameNode_, 1)->IsSelected());
 
     /**
-     * @tc.steps: step2. Change select zone.
+     * @tc.steps: step2. Select from selected zone.
+     * @tc.expected: Selected items unchanged.
+     */
+    MouseSelect(Offset(0.f, 50.f), Offset(LIST_WIDTH, 150.f));
+    EXPECT_TRUE(GetChildPattern<ListItemPattern>(frameNode_, 0)->IsSelected());
+    EXPECT_FALSE(GetChildPattern<ListItemPattern>(frameNode_, 1)->IsSelected());
+
+    /**
+     * @tc.steps: step3. Select from unselected zone.
      * @tc.expected: Selected items changed.
      */
-    MouseSelect(Offset(200.f, 200.f), Offset(200.f, 300.f));
+    MouseSelect(Offset(0.f, 150.f), Offset(LIST_WIDTH, 170.f));
     EXPECT_FALSE(GetChildPattern<ListItemPattern>(frameNode_, 0)->IsSelected());
     EXPECT_TRUE(GetChildPattern<ListItemPattern>(frameNode_, 1)->IsSelected());
-    EXPECT_TRUE(GetChildPattern<ListItemPattern>(frameNode_, 2)->IsSelected());
-    EXPECT_TRUE(GetChildPattern<ListItemPattern>(frameNode_, 3)->IsSelected());
 
     /**
-     * @tc.steps: step3. Click first item.
+     * @tc.steps: step4. Click selected zone.
+     * @tc.expected: Selected items unchanged.
+     */
+    MouseSelect(Offset(LIST_WIDTH / 2, 150.f), Offset(LIST_WIDTH / 2, 150.f));
+    EXPECT_TRUE(GetChildPattern<ListItemPattern>(frameNode_, 1)->IsSelected());
+
+    /**
+     * @tc.steps: step5. Click unselected zone.
      * @tc.expected: Each item not selected.
      */
-    MouseSelect(Offset(10.f, 10.f), Offset(10.f, 10.f));
-    for (int32_t index = 0; index < VIEW_LINE_NUMBER; index++) {
-        EXPECT_FALSE(GetChildPattern<ListItemPattern>(frameNode_, index)->IsSelected()) << "Index: " << index;
-    }
+    MouseSelect(Offset(LIST_WIDTH / 2, 50.f), Offset(LIST_WIDTH / 2, 50.f));
+    EXPECT_FALSE(GetChildPattern<ListItemPattern>(frameNode_, 0)->IsSelected());
+    EXPECT_FALSE(GetChildPattern<ListItemPattern>(frameNode_, 1)->IsSelected());
 }
 
 /**
@@ -3394,6 +3407,9 @@ HWTEST_F(ListTestNg, MouseSelect002, TestSize.Level1)
     MouseSelect(LEFT_TOP, RIGHT_BOTTOM);
     EXPECT_TRUE(GetChildPattern<ListItemPattern>(frameNode_, 2)->IsSelected());
     EXPECT_TRUE(GetChildPattern<ListItemPattern>(frameNode_, 3)->IsSelected());
+    pattern_->ClearMultiSelect(); // clear all selected
+    EXPECT_FALSE(GetChildPattern<ListItemPattern>(frameNode_, 2)->IsSelected());
+    EXPECT_FALSE(GetChildPattern<ListItemPattern>(frameNode_, 3)->IsSelected());
 
     /**
      * @tc.steps: step2. Select from RIGHT_TOP to LEFT_BOTTOM
@@ -3401,6 +3417,7 @@ HWTEST_F(ListTestNg, MouseSelect002, TestSize.Level1)
     MouseSelect(RIGHT_TOP, LEFT_BOTTOM);
     EXPECT_TRUE(GetChildPattern<ListItemPattern>(frameNode_, 2)->IsSelected());
     EXPECT_TRUE(GetChildPattern<ListItemPattern>(frameNode_, 3)->IsSelected());
+    pattern_->ClearMultiSelect();
 
     /**
      * @tc.steps: step3. Select from LEFT_BOTTOM to RIGHT_TOP
@@ -3408,6 +3425,7 @@ HWTEST_F(ListTestNg, MouseSelect002, TestSize.Level1)
     MouseSelect(LEFT_BOTTOM, RIGHT_TOP);
     EXPECT_TRUE(GetChildPattern<ListItemPattern>(frameNode_, 2)->IsSelected());
     EXPECT_TRUE(GetChildPattern<ListItemPattern>(frameNode_, 3)->IsSelected());
+    pattern_->ClearMultiSelect();
 
     /**
      * @tc.steps: step4. Select from RIGHT_BOTTOM to LEFT_TOP
@@ -4056,7 +4074,7 @@ HWTEST_F(ListTestNg, FocusStep005, TestSize.Level1)
     Create([](ListModelNG model) { CreateItem(TOTAL_LINE_NUMBER, Axis::VERTICAL); });
     ScrollDown();
     EXPECT_TRUE(IsEqualTotalOffset(ITEM_HEIGHT));
-    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, 8, 9));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, 8, NULL_VALUE));
     EXPECT_TRUE(IsEqualTotalOffset(ITEM_HEIGHT * 2));
 
     /**
@@ -5881,6 +5899,7 @@ HWTEST_F(ListTestNg, ListSelectForCardModeTest001, TestSize.Level1)
     MouseSelect(Offset(0.f, 0.f), Offset(200.f, 100.f));
     EXPECT_TRUE(GetChildPattern<ListItemPattern>(group, 0)->IsSelected());
     EXPECT_TRUE(GetChildPattern<ListItemPattern>(group, 1)->IsSelected());
+    pattern_->ClearMultiSelect();
 
     /**
      * @tc.steps: step2. Change select zone.
@@ -5891,6 +5910,7 @@ HWTEST_F(ListTestNg, ListSelectForCardModeTest001, TestSize.Level1)
     EXPECT_TRUE(GetChildPattern<ListItemPattern>(group, 1)->IsSelected());
     EXPECT_TRUE(GetChildPattern<ListItemPattern>(group, 2)->IsSelected());
     EXPECT_TRUE(GetChildPattern<ListItemPattern>(group, 3)->IsSelected());
+    pattern_->ClearMultiSelect();
 
     /**
      * @tc.steps: step3. Click first item.
@@ -5928,6 +5948,7 @@ HWTEST_F(ListTestNg, ListSelectForCardModeTest002, TestSize.Level1)
     MouseSelect(LEFT_TOP, RIGHT_BOTTOM);
     EXPECT_TRUE(GetChildPattern<ListItemPattern>(group, 0)->IsSelected());
     EXPECT_TRUE(GetChildPattern<ListItemPattern>(group, 1)->IsSelected());
+    pattern_->ClearMultiSelect();
 
     /**
      * @tc.steps: step2. Select from RIGHT_TOP to LEFT_BOTTOM
@@ -5935,6 +5956,7 @@ HWTEST_F(ListTestNg, ListSelectForCardModeTest002, TestSize.Level1)
     MouseSelect(RIGHT_TOP, LEFT_BOTTOM);
     EXPECT_TRUE(GetChildPattern<ListItemPattern>(group, 0)->IsSelected());
     EXPECT_TRUE(GetChildPattern<ListItemPattern>(group, 1)->IsSelected());
+    pattern_->ClearMultiSelect();
 
     /**
      * @tc.steps: step3. Select from LEFT_BOTTOM to RIGHT_TOP
@@ -5942,6 +5964,7 @@ HWTEST_F(ListTestNg, ListSelectForCardModeTest002, TestSize.Level1)
     MouseSelect(LEFT_BOTTOM, RIGHT_TOP);
     EXPECT_TRUE(GetChildPattern<ListItemPattern>(group, 0)->IsSelected());
     EXPECT_TRUE(GetChildPattern<ListItemPattern>(group, 1)->IsSelected());
+    pattern_->ClearMultiSelect();
 
     /**
      * @tc.steps: step4. Select from RIGHT_BOTTOM to LEFT_TOP
