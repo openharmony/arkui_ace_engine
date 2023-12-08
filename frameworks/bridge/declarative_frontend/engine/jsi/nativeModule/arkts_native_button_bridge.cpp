@@ -19,6 +19,7 @@
 #include "core/components/common/properties/text_style.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 #include "core/components_ng/pattern/button/button_request_data.h"
+#include "frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 
 namespace OHOS::Ace::NG {
 const std::vector<TextOverflow> TEXT_OVERFLOWS = { TextOverflow::NONE, TextOverflow::CLIP, TextOverflow::ELLIPSIS,
@@ -97,8 +98,12 @@ ArkUINativeModuleValue ButtonBridge::SetFontColor(ArkUIRuntimeCallInfo* runtimeC
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_1);
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    uint32_t fontColor = secondArg->Uint32Value(vm);
-    GetArkUIInternalNodeAPI()->GetButtonModifier().SetButtonFontColor(nativeNode, fontColor);
+    Color color;
+    if (!ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color)) {
+        GetArkUIInternalNodeAPI()->GetButtonModifier().ResetButtonFontColor(nativeNode);
+    } else {
+        GetArkUIInternalNodeAPI()->GetButtonModifier().SetButtonFontColor(nativeNode, color.GetValue());
+    }
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -122,7 +127,7 @@ ArkUINativeModuleValue ButtonBridge::SetFontSize(ArkUIRuntimeCallInfo* runtimeCa
     Ace::CalcDimension fontSize;
     if (ArkTSUtils::ParseJsDimensionVpNG(vm, secondArg, fontSize) && fontSize.Unit() != DimensionUnit::PERCENT &&
         GreatOrEqual(fontSize.Value(), 0.0)) {
-        ButtonParseJsDimensionFp(vm, secondArg, fontSize);
+        ArkTSUtils::ParseJsDimensionFp(vm, secondArg, fontSize);
     } else {
         auto pipeline = PipelineBase::GetCurrentContext();
         CHECK_NULL_RETURN(pipeline, panda::NativePointerRef::New(vm, nullptr));
@@ -196,11 +201,15 @@ ArkUINativeModuleValue ButtonBridge::SetFontFamily(ArkUIRuntimeCallInfo* runtime
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_1);
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    if (!secondArg->IsString()) {
+    std::string src;
+    if (secondArg->IsString()) {
+        src = secondArg->ToString(vm)->ToString();
+    } else if (secondArg->IsObject()) {
+        ArkTSUtils::ParseJsMedia(vm, secondArg, src);
+    } else {
         return panda::JSValueRef::Undefined(vm);
     }
-    std::string families = secondArg->ToString(vm)->ToString();
-    GetArkUIInternalNodeAPI()->GetButtonModifier().SetButtonFontFamily(nativeNode, families.c_str());
+    GetArkUIInternalNodeAPI()->GetButtonModifier().SetButtonFontFamily(nativeNode, src.c_str());
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -211,6 +220,32 @@ ArkUINativeModuleValue ButtonBridge::ResetFontFamily(ArkUIRuntimeCallInfo* runti
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
     GetArkUIInternalNodeAPI()->GetButtonModifier().ResetButtonFontFamily(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue ButtonBridge::SetBackgroundColor(ArkUIRuntimeCallInfo *runtimeCallInfo)
+{
+    EcmaVM *vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
+    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+    Color color;
+    if (!ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color)) {
+        GetArkUIInternalNodeAPI()->GetButtonModifier().ResetButtonBackgroundColor(nativeNode);
+    } else {
+        GetArkUIInternalNodeAPI()->GetButtonModifier().SetButtonBackgroundColor(nativeNode, color.GetValue());
+    }
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue ButtonBridge::ResetBackgroundColor(ArkUIRuntimeCallInfo *runtimeCallInfo)
+{
+    EcmaVM *vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    void *nativeNode = firstArg->ToNativePointer(vm)->Value();
+    GetArkUIInternalNodeAPI()->GetButtonModifier().ResetButtonBackgroundColor(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -257,9 +292,11 @@ ArkUINativeModuleValue ButtonBridge::SetLabelStyle(ArkUIRuntimeCallInfo* runtime
     }
     PutButtonDimensionParameters(runtimeCallInfo, vm, dimensionValueArray, dimensionUnitArray);
     Local<JSValueRef> tenthArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_9);
-    std::string families = tenthArg->ToString(vm)->ToString();
-    GetArkUIInternalNodeAPI()->GetButtonModifier().SetButtonLabelStyle(
-        nativeNode, families.c_str(), valueArray, dimensionValueArray, dimensionUnitArray);
+    std::vector<std::string> fontFamilies;
+    if (ArkTSUtils::ParseJsFontFamilies(vm, tenthArg, fontFamilies)) {
+        GetArkUIInternalNodeAPI()->GetButtonModifier().SetButtonLabelStyle(
+            nativeNode, fontFamilies[0].c_str(), valueArray, dimensionValueArray, dimensionUnitArray);
+    }
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -268,20 +305,20 @@ void ButtonBridge::PutButtonDimensionParameters(
 {
     if (dimensionValueArray != nullptr && dimensionUnitArray != nullptr) {
         Local<JSValueRef> fourthArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_3);
-        CalcDimension minFontSize;
-        if (ButtonParseJsDimensionFp(vm, fourthArg, minFontSize)) {
+        CalcDimension minFontSize(0, DimensionUnit::FP);
+        if (ArkTSUtils::ParseJsDimensionFp(vm, fourthArg, minFontSize, false)) {
             dimensionValueArray[INDEX_MIN_FONT_SIZE_0] = minFontSize.Value();
             dimensionUnitArray[INDEX_MIN_FONT_SIZE_0] = static_cast<int>(minFontSize.Unit());
         }
         Local<JSValueRef> fifthArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_4);
-        CalcDimension maxFontSize;
-        if (ButtonParseJsDimensionFp(vm, fifthArg, maxFontSize)) {
+        CalcDimension maxFontSize(0, DimensionUnit::FP);
+        if (ArkTSUtils::ParseJsDimensionFp(vm, fifthArg, maxFontSize, false)) {
             dimensionValueArray[INDEX_MAX_FONT_SIZE_1] = maxFontSize.Value();
             dimensionUnitArray[INDEX_MAX_FONT_SIZE_1] = static_cast<int>(maxFontSize.Unit());
         }
         Local<JSValueRef> seventhArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_6);
-        CalcDimension fontSize;
-        if (ButtonParseJsDimensionFp(vm, seventhArg, fontSize)) {
+        CalcDimension fontSize(0, DimensionUnit::FP);
+        if (ArkTSUtils::ParseJsDimensionFp(vm, seventhArg, fontSize, false)) {
             dimensionValueArray[INDEX_FONT_SIZE_2] = fontSize.Value();
             dimensionUnitArray[INDEX_FONT_SIZE_2] = static_cast<int>(fontSize.Unit());
         }

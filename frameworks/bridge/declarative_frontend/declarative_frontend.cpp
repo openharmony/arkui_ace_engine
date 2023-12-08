@@ -568,6 +568,7 @@ void DeclarativeFrontend::InitializeFrontendDelegate(const RefPtr<TaskExecutor>&
         auto container = Container::Current();
         if (container) {
             auto pageUrlChecker = container->GetPageUrlChecker();
+            // ArkTSCard container no SetPageUrlChecker
             if (pageUrlChecker != nullptr) {
                 pageUrlChecker->SetModuleNameCallback(std::move(moduleNamecallback));
             }

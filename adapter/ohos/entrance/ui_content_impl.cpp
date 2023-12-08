@@ -21,7 +21,6 @@
 #include "ability_context.h"
 #include "ability_info.h"
 #include "configuration.h"
-#include "dm/display_manager.h"
 #include "init_data.h"
 #include "ipc_skeleton.h"
 #include "js_runtime_utils.h"
@@ -252,6 +251,30 @@ public:
 private:
     NG::SafeAreaInsets systemSafeArea_;
     NG::SafeAreaInsets::Inset navigationBar_;
+    int32_t instanceId_ = -1;
+};
+
+class AvailableAreaChangedListener : public OHOS::Rosen::DisplayManager::IAvailableAreaListener {
+public:
+    explicit AvailableAreaChangedListener(int32_t instanceId) : instanceId_(instanceId) {}
+    ~AvailableAreaChangedListener() = default;
+
+    void OnAvailableAreaChanged(const Rosen::DMRect availableArea) override
+    {
+        auto container = Platform::AceContainer::GetContainer(instanceId_);
+        CHECK_NULL_VOID(container);
+        auto pipeline = AceType::DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
+        CHECK_NULL_VOID(pipeline);
+        auto taskExecutor = container->GetTaskExecutor();
+        CHECK_NULL_VOID(taskExecutor);
+        auto displayAvailableRect = ConvertDMRect2Rect(availableArea);
+        ContainerScope scope(instanceId_);
+        taskExecutor->PostTask(
+            [pipeline, displayAvailableRect] { pipeline->UpdateDisplayAvailableRect(displayAvailableRect); },
+            TaskExecutor::TaskType::UI);
+    }
+
+private:
     int32_t instanceId_ = -1;
 };
 
@@ -1415,6 +1438,7 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
     }
 
     InitializeSafeArea(container);
+    InitializeDisplayAvailableRect(container);
 
     // set container temp dir
     if (abilityContext) {
@@ -1437,6 +1461,22 @@ void UIContentImpl::InitializeSafeArea(const RefPtr<Platform::AceContainer>& con
         window_->RegisterAvoidAreaChangeListener(avoidAreaChangedListener_);
         pipeline->UpdateSystemSafeArea(container->GetViewSafeAreaByType(Rosen::AvoidAreaType::TYPE_SYSTEM));
         pipeline->UpdateCutoutSafeArea(container->GetViewSafeAreaByType(Rosen::AvoidAreaType::TYPE_CUTOUT));
+    }
+}
+
+void UIContentImpl::InitializeDisplayAvailableRect(const RefPtr<Platform::AceContainer>& container)
+{
+    auto pipeline = AceType::DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
+    auto& DMManager = Rosen::DisplayManager::GetInstance();
+    availableAreaChangedListener_ = new AvailableAreaChangedListener(instanceId_);
+    DMManager.RegisterAvailableAreaListener(availableAreaChangedListener_);
+    Rosen::DMRect availableArea;
+    auto defaultDisplay = DMManager.GetDefaultDisplay();
+    if (pipeline && defaultDisplay) {
+        Rosen::DMError ret = defaultDisplay->GetAvailableArea(availableArea);
+        if (ret == Rosen::DMError::DM_OK) {
+            pipeline->UpdateDisplayAvailableRect(ConvertDMRect2Rect(availableArea));
+        }
     }
 }
 
@@ -1614,14 +1654,13 @@ bool UIContentImpl::ProcessPointerEvent(const std::shared_ptr<OHOS::MMI::Pointer
     CHECK_NULL_RETURN(container, false);
     container->SetCurPointerEvent(pointerEvent);
     if (pointerEvent->GetPointerAction() != MMI::PointerEvent::POINTER_ACTION_MOVE) {
-        auto info = Platform::AceContainer::GetContentInfo(instanceId_);
         TAG_LOGI(AceLogTag::ACE_INPUTTRACKING,
             "PointerEvent Process to ui_content, eventInfo: id:%{public}d, "
             "WindowName = %{public}s, WindowId = %{public}d, ViewWidth = %{public}d, ViewHeight = %{public}d, "
-            "ViewPosX = %{public}d, ViewPosY = %{public}d, ContentInfo = %{public}s",
+            "ViewPosX = %{public}d, ViewPosY = %{public}d",
             pointerEvent->GetId(), container->GetWindowName().c_str(), container->GetWindowId(),
-            container->GetViewWidth(), container->GetViewHeight(), container->GetViewPosX(), container->GetViewPosY(),
-            info.c_str());
+            container->GetViewWidth(), container->GetViewHeight(), container->GetViewPosX(),
+            container->GetViewPosY());
     }
     auto aceView = static_cast<Platform::AceViewOhos*>(container->GetView());
     Platform::AceViewOhos::DispatchTouchEvent(aceView, pointerEvent);
@@ -1682,7 +1721,6 @@ void UIContentImpl::UpdateViewportConfig(const ViewportConfig& config, OHOS::Ros
     const std::shared_ptr<OHOS::Rosen::RSTransaction>& rsTransaction)
 {
     LOGI("UIContentImpl: UpdateViewportConfig %{public}s", config.ToString().c_str());
-    SystemProperties::SetResolution(config.Density());
     SystemProperties::SetDeviceOrientation(config.Orientation());
     ContainerScope scope(instanceId_);
     auto container = Platform::AceContainer::GetContainer(instanceId_);
@@ -1711,7 +1749,7 @@ void UIContentImpl::UpdateViewportConfig(const ViewportConfig& config, OHOS::Ros
         }
         auto aceView = static_cast<Platform::AceViewOhos*>(container->GetAceView());
         CHECK_NULL_VOID(aceView);
-        Platform::AceViewOhos::SetViewportMetrics(aceView, config);
+        Platform::AceViewOhos::SetViewportMetrics(aceView, config); // update density into pipeline
         Platform::AceViewOhos::SurfaceChanged(aceView, config.Width(), config.Height(), config.Orientation(),
             static_cast<WindowSizeChangeReason>(reason), rsTransaction);
         Platform::AceViewOhos::SurfacePositionChanged(aceView, config.Left(), config.Top());

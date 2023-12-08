@@ -41,6 +41,7 @@ void TextSelectController::UpdateCaretIndex(int32_t index)
     firstHandleInfo_.index = newIndex;
     secondHandleInfo_.index = newIndex;
     UpdateRecordCaretIndex(caretInfo_.index);
+    FireSelectEvent();
 }
 
 RectF TextSelectController::CalculateEmptyValueCaretRect() const
@@ -77,7 +78,7 @@ RectF TextSelectController::CalculateEmptyValueCaretRect() const
     }
     OffsetF offset = Alignment::GetAlignPosition(contentRect_.GetSize(), rect.GetSize(), align);
     rect.SetTop(offset.GetY() + contentRect_.GetY());
-    
+
     AdjustHandleAtEdge(rect);
     return rect;
 }
@@ -434,6 +435,7 @@ void TextSelectController::UpdateCaretOffset()
 void TextSelectController::UpdateCaretOffset(const OffsetF& offset)
 {
     caretInfo_.rect.SetOffset(offset);
+    secondHandleInfo_.UpdateOffset(offset);
 }
 
 void TextSelectController::UpdateSecondHandleInfoByMouseOffset(const Offset& localOffset)
@@ -453,7 +455,7 @@ void TextSelectController::MoveSecondHandleByKeyBoard(int32_t index)
 
 void TextSelectController::FireSelectEvent()
 {
-    if (!onAccessibilityCallback_ || !IsSelected()) {
+    if (!onAccessibilityCallback_) {
         return;
     }
     bool needReport = !GetFirstIndex().has_value() || !GetSecondIndex().has_value();

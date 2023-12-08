@@ -29,6 +29,7 @@
 #include "base/thread/task_executor.h"
 #include "base/utils/macros.h"
 #include "base/utils/noncopyable.h"
+#include "base/utils/system_properties.h"
 #include "core/common/ace_application_info.h"
 #include "core/common/display_info.h"
 #include "core/common/frontend.h"
@@ -327,6 +328,11 @@ public:
     virtual bool IsDialogContainer() const
     {
         return false;
+    }
+
+    virtual float GetSmallWindowScale() const
+    {
+        return 1.0f;
     }
 
     virtual void NotifyConfigurationChange(bool, const OnConfigurationChange& configurationChange = { false, false }) {}

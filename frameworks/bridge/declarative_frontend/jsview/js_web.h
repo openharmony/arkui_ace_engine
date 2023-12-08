@@ -84,6 +84,7 @@ public:
     static void TableData(bool tableData);
     static void OnFileSelectorShowAbandoned(const JSCallbackInfo& args);
     static void OnHttpAuthRequest(const JSCallbackInfo& args);
+    static void OnSslErrRequest(const JSCallbackInfo& args);
     static void OnSslErrorRequest(const JSCallbackInfo& args);
     static void OnSslSelectCertRequest(const JSCallbackInfo& args);
     static void OnPermissionRequest(const JSCallbackInfo& args);

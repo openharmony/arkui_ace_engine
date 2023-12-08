@@ -47,7 +47,7 @@ void ResetType(NodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    NavigatorModelNG::SetType(frameNode, OHOS::Ace::NavigatorType::DEFAULT);
+    NavigatorModelNG::SetType(frameNode, OHOS::Ace::NavigatorType::PUSH);
 }
 
 void SetActive(NodeHandle node, bool active)

@@ -49,6 +49,9 @@ const Ace::FontStyle ITALIC_FONT_STYLE_VALUE = Ace::FontStyle::ITALIC;
 const std::vector<std::string> FONT_FAMILY_VALUE = { "cursive" };
 const Ace::TextDecoration TEXT_DECORATION_VALUE = Ace::TextDecoration::INHERIT;
 const Color TEXT_DECORATION_COLOR_VALUE = Color::FromRGB(255, 100, 100);
+const Shadow TEXT_SHADOW1 = Shadow(0, 0, Offset(), Color::RED);
+const Shadow TEXT_SHADOW2 = Shadow(0, 0, Offset(), Color::WHITE);
+const std::vector<Shadow> TEXT_SHADOWS { TEXT_SHADOW1, TEXT_SHADOW2 };
 const Ace::TextCase TEXT_CASE_VALUE = Ace::TextCase::LOWERCASE;
 const Dimension LETTER_SPACING = Dimension(10, DimensionUnit::PX);
 void onClickFunc(const BaseEventInfo* info) {};
@@ -598,6 +601,20 @@ HWTEST_F(SpanTestNg, SpanDecorationStyleTest001, TestSize.Level1)
     spanModelNG.SetTextDecorationStyle(Ace::TextDecorationStyle::WAVY);
     auto spanNode = AceType::DynamicCast<SpanNode>(ViewStackProcessor::GetInstance()->Finish());
     EXPECT_EQ(spanNode->GetTextDecorationStyle(), Ace::TextDecorationStyle::WAVY);
+}
+
+/**
+ * @tc.name: SpanTextShadowTest002
+ * @tc.desc: test span_model_ng.cpp SetTextShadow
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanTestNg, SpanTextShadowTest002, TestSize.Level1)
+{
+    SpanModelNG spanModelNG;
+    spanModelNG.Create(CREATE_VALUE);
+    spanModelNG.SetTextShadow(TEXT_SHADOWS);
+    auto spanNode = AceType::DynamicCast<SpanNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_EQ(spanNode->GetTextShadow(), TEXT_SHADOWS);
 }
 
 /**

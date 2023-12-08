@@ -22,6 +22,8 @@
 #include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
+constexpr double FILL_OPACITY_MIN = 0.0f;
+constexpr double FILL_OPACITY_MAX = 1.0f;
 
 void ShapeModelNG::Create()
 {
@@ -104,4 +106,76 @@ void ShapeModelNG::SetAntiAlias(bool antiAlias)
     ShapeAbstractModelNG().SetAntiAlias(antiAlias);
 }
 
+void ShapeModelNG::SetStrokeDashArray(FrameNode* frameNode, const std::vector<Ace::Dimension>& segments)
+{
+    ACE_UPDATE_NODE_PAINT_PROPERTY(ShapePaintProperty, StrokeDashArray, segments, frameNode);
+}
+
+void ShapeModelNG::SetStroke(FrameNode* frameNode, const Color& color)
+{
+    ACE_UPDATE_NODE_PAINT_PROPERTY(ShapePaintProperty, Stroke, color, frameNode);
+}
+
+void ShapeModelNG::SetFill(FrameNode* frameNode, const Color& color)
+{
+    ACE_UPDATE_NODE_PAINT_PROPERTY(ShapePaintProperty, Fill, color, frameNode);
+}
+
+void ShapeModelNG::SetStrokeDashOffset(FrameNode* frameNode, const Ace::Dimension& dashOffset)
+{
+    ACE_UPDATE_NODE_PAINT_PROPERTY(ShapePaintProperty, StrokeDashOffset, dashOffset, frameNode);
+}
+
+void ShapeModelNG::SetStrokeLineCap(FrameNode* frameNode, int lineCapStyle)
+{
+    ACE_UPDATE_NODE_PAINT_PROPERTY(ShapePaintProperty, StrokeLineCap, lineCapStyle, frameNode);
+}
+
+void ShapeModelNG::SetStrokeLineJoin(FrameNode* frameNode, int lineJoinStyle)
+{
+    ACE_UPDATE_NODE_PAINT_PROPERTY(ShapePaintProperty, StrokeLineJoin, lineJoinStyle, frameNode);
+}
+
+void ShapeModelNG::SetStrokeMiterLimit(FrameNode* frameNode, double miterLimit)
+{
+    ACE_UPDATE_NODE_PAINT_PROPERTY(ShapePaintProperty, StrokeMiterLimit, miterLimit, frameNode);
+}
+
+void ShapeModelNG::SetFillOpacity(FrameNode* frameNode, double fillOpacity)
+{
+    ACE_UPDATE_NODE_PAINT_PROPERTY(
+        ShapePaintProperty, FillOpacity, std::clamp(fillOpacity, FILL_OPACITY_MIN, FILL_OPACITY_MAX), frameNode);
+}
+
+void ShapeModelNG::SetStrokeOpacity(FrameNode* frameNode, double strokeOpacity)
+{
+    ACE_UPDATE_NODE_PAINT_PROPERTY(ShapePaintProperty, StrokeOpacity, strokeOpacity, frameNode);
+}
+
+void ShapeModelNG::SetStrokeWidth(FrameNode* frameNode, const Ace::Dimension& strokeWidth)
+{
+    ACE_UPDATE_NODE_PAINT_PROPERTY(ShapePaintProperty, StrokeWidth, strokeWidth, frameNode);
+}
+
+void ShapeModelNG::SetAntiAlias(FrameNode* frameNode, bool antiAlias)
+{
+    ACE_UPDATE_NODE_PAINT_PROPERTY(ShapePaintProperty, AntiAlias, antiAlias, frameNode);
+}
+
+void ShapeModelNG::SetViewPort(FrameNode* frameNode, const Dimension& dimLeft, const Dimension& dimTop,
+    const Dimension& dimWidth, const Dimension& dimHeight)
+{
+    ShapeViewBox shapeViewBox;
+    shapeViewBox.SetLeft(dimLeft);
+    shapeViewBox.SetTop(dimTop);
+    shapeViewBox.SetWidth(dimWidth);
+    shapeViewBox.SetHeight(dimHeight);
+    ACE_UPDATE_NODE_PAINT_PROPERTY(ShapeContainerPaintProperty, ShapeViewBox, shapeViewBox, frameNode);
+}
+
+void ShapeModelNG::SetBitmapMesh(FrameNode* frameNode, std::vector<double>& mesh, int32_t column, int32_t row)
+{
+    ACE_UPDATE_NODE_PAINT_PROPERTY(
+        ShapeContainerPaintProperty, ImageMesh, ImageMesh(mesh, (int32_t)column, (int32_t)row), frameNode);
+}
 } // namespace OHOS::Ace::NG

@@ -233,7 +233,7 @@ void GridPattern::ClearMultiSelect()
     ClearSelectedZone();
 }
 
-bool GridPattern::IsItemSelected(const MouseInfo& info)
+bool GridPattern::IsItemSelected(const GestureEvent& info)
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
@@ -495,23 +495,7 @@ void GridPattern::ProcessEvent(bool indexChanged, float finalOffset)
         }
     }
 
-    if (scrollStop_) {
-        auto onScrollStop = gridEventHub->GetOnScrollStop();
-        if (!GetScrollAbort()) {
-            if (onScrollStop) {
-                SetScrollSource(SCROLL_FROM_NONE);
-                onScrollStop();
-            }
-            auto scrollBar = GetScrollBar();
-            if (scrollBar) {
-                scrollBar->ScheduleDisappearDelayTask();
-            }
-            StartScrollBarAnimatorByProxy();
-        }
-        PerfMonitor::GetPerfMonitor()->End(PerfConstants::APP_LIST_FLING, false);
-        scrollStop_ = false;
-        SetScrollAbort(false);
-    }
+    OnScrollStop(gridEventHub->GetOnScrollStop());
 }
 
 void GridPattern::MarkDirtyNodeSelf()
@@ -1209,9 +1193,6 @@ void GridPattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const
     ScrollablePattern::ToJsonValue(json);
     json->Put("multiSelectable", multiSelectable_ ? "true" : "false");
     json->Put("supportAnimation", supportAnimation_ ? "true" : "false");
-    auto JsonEdgeEffectOptions = JsonUtil::Create(true);
-    JsonEdgeEffectOptions->Put("alwaysEnabled", GetAlwaysEnabled());
-    json->Put("edgeEffectOptions", JsonEdgeEffectOptions);
 }
 
 void GridPattern::InitOnKeyEvent(const RefPtr<FocusHub>& focusHub)

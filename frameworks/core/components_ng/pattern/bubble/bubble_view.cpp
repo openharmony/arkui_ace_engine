@@ -210,7 +210,7 @@ RefPtr<FrameNode> BubbleView::CreateBubbleNode(
     auto renderContext = child->GetRenderContext();
     if (renderContext) {
         BlurStyleOption styleOption;
-        styleOption.blurStyle = BlurStyle::THICK;
+        styleOption.blurStyle = BlurStyle::COMPONENT_ULTRA_THICK;
         renderContext->UpdateBackBlurStyle(styleOption);
         auto backgroundColor = popupPaintProp->GetBackgroundColor().value_or(GetPopupTheme()->GetBackgroundColor());
         renderContext->UpdateBackgroundColor(backgroundColor);
@@ -262,12 +262,12 @@ RefPtr<FrameNode> BubbleView::CreateCustomBubbleNode(
     customNode->MountToParent(columnNode);
     auto maxWidth = GetMaxWith();
     BlurStyleOption styleOption;
-    styleOption.blurStyle = BlurStyle::THICK;
+    styleOption.blurStyle = BlurStyle::COMPONENT_ULTRA_THICK;
     auto columnRenderContext = columnNode->GetRenderContext();
     auto columnLayoutProperty = columnNode->GetLayoutProperty();
     CHECK_NULL_RETURN(columnLayoutProperty, nullptr);
     auto customFrameNode = AceType::DynamicCast<FrameNode>(customNode);
-    columnLayoutProperty->UpdateCalcMaxSize(CalcSize(NG::CalcLength(maxWidth), std::nullopt));
+    columnLayoutProperty->UpdateCalcMaxSize(CalcSize(NG::CalcLength(maxWidth), NG::CalcLength(BUBBLE_MAX_HEIGHT)));
     if (param->GetChildWidth().has_value()) {
         columnLayoutProperty->UpdateUserDefinedIdealSize(
             CalcSize(CalcLength(param->GetChildWidth().value()), std::nullopt));
@@ -372,7 +372,7 @@ void BubbleView::UpdateCommonParam(int32_t popupId, const RefPtr<PopupParam>& pa
     auto renderContext = childNode->GetRenderContext();
     if (renderContext) {
         BlurStyleOption styleOption;
-        styleOption.blurStyle = BlurStyle::THICK;
+        styleOption.blurStyle = BlurStyle::COMPONENT_ULTRA_THICK;
         renderContext->UpdateBackBlurStyle(styleOption);
         auto backgroundColor = popupPaintProp->GetBackgroundColor().value_or(GetPopupTheme()->GetBackgroundColor());
         renderContext->UpdateBackgroundColor(backgroundColor);
@@ -405,6 +405,7 @@ RefPtr<FrameNode> BubbleView::CreateCombinedChild(
         AceType::MakeRefPtr<LinearLayoutPattern>(true));
     auto layoutProps = columnNode->GetLayoutProperty<LinearLayoutProperty>();
     layoutProps->UpdateMainAxisAlign(FlexAlign::FLEX_START); // mainAxisAlign
+    layoutProps->UpdateCrossAxisAlign(FlexAlign::FLEX_START);
     auto message = BubbleView::CreateMessage(param->GetMessage(), param->IsUseCustom());
     auto bubblePattern = bobbleNode->GetPattern<BubblePattern>();
     CHECK_NULL_RETURN(bubblePattern, nullptr);

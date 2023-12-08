@@ -18,6 +18,7 @@
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 
 namespace OHOS::Ace::NG {
+const std::string DEFAULT_ERR_CODE = "-1";
 const std::string FORMAT_FONT = "%s|%s|%s";
 constexpr int NUM_0 = 0;
 constexpr int NUM_1 = 1;
@@ -25,6 +26,8 @@ constexpr int NUM_2 = 2;
 constexpr int NUM_3 = 3;
 constexpr int NUM_4 = 4;
 constexpr int NUM_5 = 5;
+constexpr uint32_t DEFAULT_TIME_PICKER_TEXT_COLOR = 0xFF182431;
+constexpr uint32_t DEFAULT_TIME_PICKER_SELECTED_TEXT_COLOR = 0xFF007DFF;
 
 ArkUINativeModuleValue TimepickerBridge::SetTimepickerBackgroundColor(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
@@ -59,20 +62,47 @@ ArkUINativeModuleValue TimepickerBridge::SetTextStyle(ArkUIRuntimeCallInfo*runti
     Local<JSValueRef> fontFamilyArg = runtimeCallInfo->GetCallArgRef(NUM_4);
     Local<JSValueRef> fontStyleArg = runtimeCallInfo->GetCallArgRef(NUM_5);
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-
-    uint32_t color = colorArg->Uint32Value(vm);
-    std::string fontSize = ArkTSUtils::GetStringFromJS(vm, fontSizeArg);
-    std::string weight = ArkTSUtils::GetStringFromJS(vm, fontWeightArg);
-    std::string fontFamily = ArkTSUtils::GetStringFromJS(vm, fontFamilyArg);
+    Color color;
+    if (colorArg->IsNull() || colorArg->IsUndefined() || !ArkTSUtils::ParseJsColorAlpha(vm, colorArg, color)) {
+        color.SetValue(DEFAULT_TIME_PICKER_TEXT_COLOR);
+    }
+    CalcDimension size;
+    if (fontSizeArg->IsNull() || fontSizeArg->IsUndefined()) {
+        size = Dimension(-1);
+    } else {
+        if (!ArkTSUtils::ParseJsDimensionFp(vm, fontSizeArg, size, false)) {
+            size = Dimension(-1);
+        }
+    }
+    std::string weight = DEFAULT_ERR_CODE;
+    if (!fontWeightArg->IsNull() && !fontWeightArg->IsUndefined()) {
+        if (fontWeightArg->IsNumber()) {
+            weight = std::to_string(fontWeightArg->Int32Value(vm));
+        } else {
+            ArkTSUtils::ParseJsString(vm, fontWeightArg, weight);
+        }
+    }
+    std::string families = DEFAULT_ERR_CODE;
+    std::vector<std::string> fontFamilies;
+    if (!fontFamilyArg->IsNull() && !fontFamilyArg->IsUndefined()) {
+        ArkTSUtils::ParseJsFontFamilies(vm, fontFamilyArg, fontFamilies);
+        if (fontFamilies.size() > 0) {
+            families = "";
+            for (uint32_t i = 0; i < fontFamilies.size(); i++) {
+                families += fontFamilies.at(i);
+            }
+        }
+    }
     int32_t styleVal = 0;
-    if (!fontStyleArg->IsNull()) {
+    if (!fontStyleArg->IsNull() && !fontStyleArg->IsUndefined()) {
         styleVal = fontStyleArg->Int32Value(vm);
     }
+    std::string fontSizeStr = size.ToString();
     std::string fontInfo = StringUtils::FormatString(
-        FORMAT_FONT.c_str(), fontSize.c_str(), weight.c_str(), fontFamily.c_str());
+        FORMAT_FONT.c_str(), fontSizeStr.c_str(), weight.c_str(), families.c_str());
 
     GetArkUIInternalNodeAPI()->GetTimepickerModifier().SetTimepickerTextStyle(
-        nativeNode, color, fontInfo.c_str(), styleVal);
+        nativeNode, color.GetValue(), fontInfo.c_str(), styleVal);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -87,20 +117,47 @@ ArkUINativeModuleValue TimepickerBridge::SetSelectedTextStyle(ArkUIRuntimeCallIn
     Local<JSValueRef> fontFamilyArg = runtimeCallInfo->GetCallArgRef(NUM_4);
     Local<JSValueRef> fontStyleArg = runtimeCallInfo->GetCallArgRef(NUM_5);
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-
-    uint32_t color = colorArg->Uint32Value(vm);
-    std::string fontSize = ArkTSUtils::GetStringFromJS(vm, fontSizeArg);
-    std::string weight = ArkTSUtils::GetStringFromJS(vm, fontWeightArg);
-    std::string fontFamily = ArkTSUtils::GetStringFromJS(vm, fontFamilyArg);
+    Color color;
+    if (colorArg->IsNull() || colorArg->IsUndefined() || !ArkTSUtils::ParseJsColorAlpha(vm, colorArg, color)) {
+        color.SetValue(DEFAULT_TIME_PICKER_SELECTED_TEXT_COLOR);
+    }
+    CalcDimension size;
+    if (fontSizeArg->IsNull() || fontSizeArg->IsUndefined()) {
+        size = Dimension(-1);
+    } else {
+        if (!ArkTSUtils::ParseJsDimensionFp(vm, fontSizeArg, size, false)) {
+            size = Dimension(-1);
+        }
+    }
+    std::string weight = DEFAULT_ERR_CODE;
+    if (!fontWeightArg->IsNull() && !fontWeightArg->IsUndefined()) {
+        if (fontWeightArg->IsNumber()) {
+            weight = std::to_string(fontWeightArg->Int32Value(vm));
+        } else {
+            ArkTSUtils::ParseJsString(vm, fontWeightArg, weight);
+        }
+    }
+    std::string families = DEFAULT_ERR_CODE;
+    std::vector<std::string> fontFamilies;
+    if (!fontFamilyArg->IsNull() && !fontFamilyArg->IsUndefined()) {
+        ArkTSUtils::ParseJsFontFamilies(vm, fontFamilyArg, fontFamilies);
+        if (fontFamilies.size() > 0) {
+            families = "";
+            for (uint32_t i = 0; i < fontFamilies.size(); i++) {
+                families += fontFamilies.at(i);
+            }
+        }
+    }
     int32_t styleVal = 0;
-    if (!fontStyleArg->IsNull()) {
+    if (!fontStyleArg->IsNull() && !fontStyleArg->IsUndefined()) {
         styleVal = fontStyleArg->Int32Value(vm);
     }
+    std::string fontSizeStr = size.ToString();
     std::string fontInfo = StringUtils::FormatString(
-        FORMAT_FONT.c_str(), fontSize.c_str(), weight.c_str(), fontFamily.c_str());
+        FORMAT_FONT.c_str(), fontSizeStr.c_str(), weight.c_str(), families.c_str());
 
     GetArkUIInternalNodeAPI()->GetTimepickerModifier().SetTimepickerSelectedTextStyle(
-        nativeNode, color, fontInfo.c_str(), styleVal);
+        nativeNode, color.GetValue(), fontInfo.c_str(), styleVal);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -115,20 +172,47 @@ ArkUINativeModuleValue TimepickerBridge::SetDisappearTextStyle(ArkUIRuntimeCallI
     Local<JSValueRef> fontFamilyArg = runtimeCallInfo->GetCallArgRef(NUM_4);
     Local<JSValueRef> fontStyleArg = runtimeCallInfo->GetCallArgRef(NUM_5);
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-
-    uint32_t color = colorArg->Uint32Value(vm);
-    std::string fontSize = ArkTSUtils::GetStringFromJS(vm, fontSizeArg);
-    std::string weight = ArkTSUtils::GetStringFromJS(vm, fontWeightArg);
-    std::string fontFamily = ArkTSUtils::GetStringFromJS(vm, fontFamilyArg);
+    Color color;
+    if (colorArg->IsNull() || colorArg->IsUndefined() || !ArkTSUtils::ParseJsColorAlpha(vm, colorArg, color)) {
+        color.SetValue(DEFAULT_TIME_PICKER_TEXT_COLOR);
+    }
+    CalcDimension size;
+    if (fontSizeArg->IsNull() || fontSizeArg->IsUndefined()) {
+        size = Dimension(-1);
+    } else {
+        if (!ArkTSUtils::ParseJsDimensionFp(vm, fontSizeArg, size, false)) {
+            size = Dimension(-1);
+        }
+    }
+    std::string weight = DEFAULT_ERR_CODE;
+    if (!fontWeightArg->IsNull() && !fontWeightArg->IsUndefined()) {
+        if (fontWeightArg->IsNumber()) {
+            weight = std::to_string(fontWeightArg->Int32Value(vm));
+        } else {
+            ArkTSUtils::ParseJsString(vm, fontWeightArg, weight);
+        }
+    }
+    std::string families = DEFAULT_ERR_CODE;
+    std::vector<std::string> fontFamilies;
+    if (!fontFamilyArg->IsNull() && !fontFamilyArg->IsUndefined()) {
+        ArkTSUtils::ParseJsFontFamilies(vm, fontFamilyArg, fontFamilies);
+        if (fontFamilies.size() > 0) {
+            families = "";
+            for (uint32_t i = 0; i < fontFamilies.size(); i++) {
+                families += fontFamilies.at(i);
+            }
+        }
+    }
     int32_t styleVal = 0;
-    if (!fontStyleArg->IsNull()) {
+    if (!fontStyleArg->IsNull() && !fontStyleArg->IsUndefined()) {
         styleVal = fontStyleArg->Int32Value(vm);
     }
+    std::string fontSizeStr = size.ToString();
     std::string fontInfo = StringUtils::FormatString(
-        FORMAT_FONT.c_str(), fontSize.c_str(), weight.c_str(), fontFamily.c_str());
+        FORMAT_FONT.c_str(), fontSizeStr.c_str(), weight.c_str(), families.c_str());
 
     GetArkUIInternalNodeAPI()->GetTimepickerModifier().SetTimepickerDisappearTextStyle(
-        nativeNode, color, fontInfo.c_str(), styleVal);
+        nativeNode, color.GetValue(), fontInfo.c_str(), styleVal);
     return panda::JSValueRef::Undefined(vm);
 }
 

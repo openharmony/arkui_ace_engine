@@ -282,7 +282,7 @@ void OnTextChangedListenerImpl::HandleSelect(int32_t keyCode, int32_t cursorMove
             return;
         }
         ContainerScope scope(client->GetInstanceId());
-        client->HandleSelect(keyCode, cursorMoveSkip);
+        client->HandleOnSelect(static_cast<KeyCode>(keyCode), static_cast<CursorMoveSkip>(cursorMoveSkip));
     };
     PostTaskToUI(task);
 }

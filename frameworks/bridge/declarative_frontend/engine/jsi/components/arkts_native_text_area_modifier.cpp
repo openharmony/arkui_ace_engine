@@ -29,7 +29,7 @@ namespace OHOS::Ace::NG {
 constexpr InputStyle DEFAULT_TEXT_AREA_STYLE = InputStyle::DEFAULT;
 constexpr bool DEFAULT_SELECTION_MENU_HIDDEN = false;
 constexpr uint32_t DEFAULT_MAX_VIEW_LINE = 3;
-constexpr CopyOptions DEFAULT_COPY_OPTIONS_VALUE = CopyOptions::None;
+constexpr CopyOptions DEFAULT_COPY_OPTIONS_VALUE = CopyOptions::Local;
 constexpr Dimension DEFAULT_FONT_SIZE = 16.0_fp;
 constexpr FontWeight DEFAULT_FONT_WEIGHT = FontWeight::NORMAL;
 constexpr Ace::FontStyle DEFAULT_FONT_STYLE = Ace::FontStyle::NORMAL;

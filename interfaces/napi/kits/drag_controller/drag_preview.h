@@ -38,6 +38,7 @@ using PreviewAnimation = Msdp::DeviceStatus::PreviewAnimation;
 namespace {
 constexpr int32_t argCount1 = 1;
 constexpr int32_t argCount2 = 2;
+constexpr int32_t DEFAULT_DURATION_VALUE = 1000;
 } // namespace
 
 class DragPreview {
@@ -168,18 +169,28 @@ private:
     {
         CHECK_NULL_RETURN(object, nullptr);
         napi_valuetype valueType = napi_undefined;
-        napi_value durationNApi = nullptr;
-        napi_get_named_property(env, object, "duration", &durationNApi);
-        napi_typeof(env, durationNApi, &valueType);
-        NAPI_ASSERT(env, valueType == napi_number, "The type of duration is incorrect");
-        napi_status status = napi_get_value_int32(env, durationNApi, &animationInfo.duration);
-        NAPI_ASSERT(env, status == napi_ok, "Parse duration failed");
+        bool hasProperty = false;
+        napi_has_named_property(env, object, "duration", &hasProperty);
+        if (!hasProperty) {
+            animationInfo.duration = DEFAULT_DURATION_VALUE;
+        } else {
+            napi_value durationNApi = nullptr;
+            napi_get_named_property(env, object, "duration", &durationNApi);
+            napi_typeof(env, durationNApi, &valueType);
+            NAPI_ASSERT(env, valueType == napi_number, "The type of duration is incorrect");
+            napi_status status = napi_get_value_int32(env, durationNApi, &animationInfo.duration);
+            NAPI_ASSERT(env, status == napi_ok, "Parse duration failed");
+        }
         LOGI("animationInfo duration is %{public}d", animationInfo.duration);
 
+        napi_has_named_property(env, object, "curve", &hasProperty);
+        if (!hasProperty) {
+            ParseCurveInfo(Curves::EASE_IN_OUT->ToString(), animationInfo.curveName, animationInfo.curve);
+            return nullptr;
+        }
         napi_value curveNApi = nullptr;
         napi_get_named_property(env, object, "curve", &curveNApi);
         ParseCurve(env, curveNApi, animationInfo.curveName, animationInfo.curve);
-
         return nullptr;
     }
     PreviewStyle previewStyle_ { {}, 0, -1, -1, -1 };

@@ -16,6 +16,8 @@
 #include "core/components_ng/pattern/text_field/on_text_changed_listener_impl.h"
 
 #include "core/common/container_scope.h"
+#include "core/common/ime/text_input_client.h"
+#include "core/event/key_event.h"
 #include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace::NG {
@@ -70,7 +72,7 @@ void OnTextChangedListenerImpl::DeleteForward(int32_t length)
         ContainerScope scope(client->GetInstanceId());
         client->DeleteForward(length);
     };
-    PostSyncTaskToUI(task);
+    PostTaskToUI(task);
 }
 
 void OnTextChangedListenerImpl::SetKeyboardStatus(bool status)
@@ -188,23 +190,23 @@ void OnTextChangedListenerImpl::MoveCursor(MiscServices::Direction direction)
         client->ResetTouchAtLeftOffsetFlag();
         switch (direction) {
             case MiscServices::Direction::UP:
-                client->CursorMoveUp();
+                client->CursorMove(CaretMoveIntent::Up);
                 break;
             case MiscServices::Direction::DOWN:
-                client->CursorMoveDown();
+                client->CursorMove(CaretMoveIntent::Down);
                 break;
             case MiscServices::Direction::LEFT:
-                client->CursorMoveLeft();
+                client->CursorMove(CaretMoveIntent::Left);
                 break;
             case MiscServices::Direction::RIGHT:
-                client->CursorMoveRight();
+                client->CursorMove(CaretMoveIntent::Right);
                 break;
             default:
                 TAG_LOGW(AceLogTag::ACE_TEXT_FIELD, "direction is not support: %{public}d", direction);
                 break;
         }
     };
-    PostSyncTaskToUI(task);
+    PostTaskToUI(task);
 }
 
 void OnTextChangedListenerImpl::HandleSetSelection(int32_t start, int32_t end)
@@ -219,7 +221,7 @@ void OnTextChangedListenerImpl::HandleSetSelection(int32_t start, int32_t end)
         ContainerScope scope(client->GetInstanceId());
         client->HandleSetSelection(start, end);
     };
-    PostSyncTaskToUI(task);
+    PostTaskToUI(task);
 }
 
 void OnTextChangedListenerImpl::HandleExtendAction(int32_t action)
@@ -239,15 +241,33 @@ void OnTextChangedListenerImpl::HandleExtendAction(int32_t action)
 void OnTextChangedListenerImpl::HandleSelect(int32_t keyCode, int32_t cursorMoveSkip)
 {
     TAG_LOGI(AceLogTag::ACE_TEXT_FIELD,
-        "[OnTextChangedListenerImpl] HandleSelect, keycode %{public}d, cursor move skip %{public}d", keyCode,
+        "[OnTextChangedListenerImpl] HandleSelect, keycode %{public}d, cursor move skip %{public}d(ignored)", keyCode,
         cursorMoveSkip);
     auto task = [textField = pattern_, keyCode, cursorMoveSkip] {
         auto client = textField.Upgrade();
         if (!client) {
             return;
         }
+        CaretMoveIntent direction;
+        switch (static_cast<KeyCode>(keyCode)) {
+            case KeyCode::KEY_DPAD_LEFT:
+                direction = CaretMoveIntent::Left;
+                break;
+            case KeyCode::KEY_DPAD_RIGHT:
+                direction = CaretMoveIntent::Right;
+                break;
+            case KeyCode::KEY_DPAD_UP:
+                direction = CaretMoveIntent::Up;
+                break;
+            case KeyCode::KEY_DPAD_DOWN:
+                direction = CaretMoveIntent::Down;
+                break;
+            default:
+                TAG_LOGW(AceLogTag::ACE_TEXT_FIELD, "keyCode is not support: %{public}d", keyCode);
+                return;
+        }
         ContainerScope scope(client->GetInstanceId());
-        client->HandleSelect(keyCode, cursorMoveSkip);
+        client->HandleSelect(direction);
     };
     PostTaskToUI(task);
 }

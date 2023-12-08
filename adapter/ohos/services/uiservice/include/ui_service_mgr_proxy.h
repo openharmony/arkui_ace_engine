@@ -16,7 +16,6 @@
 #ifndef OHOS_ACE_UI_SERVICE_MANAGER_PROXY_H
 #define OHOS_ACE_UI_SERVICE_MANAGER_PROXY_H
 
-#include "hilog_wrapper.h"
 #include "iremote_proxy.h"
 #include "ui_service_mgr_interface.h"
 

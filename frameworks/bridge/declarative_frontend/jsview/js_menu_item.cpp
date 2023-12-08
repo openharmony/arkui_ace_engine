@@ -50,7 +50,6 @@ namespace OHOS::Ace::Framework {
 void JSMenuItem::Create(const JSCallbackInfo& info)
 {
     if (info.Length() < 1 || (!info[0]->IsObject() && !info[0]->IsFunction())) {
-        LOGW("JSMenuItem The arg is wrong");
         return;
     }
     // custom menu item
@@ -81,32 +80,24 @@ void JSMenuItem::Create(const JSCallbackInfo& info)
 
         if (ParseJsMedia(startIcon, startIconPath)) {
             menuItemProps.startIcon = startIconPath;
-        } else {
-            LOGI("startIcon is null");
         }
 
-        if (!ParseJsString(content, contentStr)) {
-            LOGI("content is null");
-        }
+        ParseJsString(content, contentStr);
         menuItemProps.content = contentStr;
 
         if (ParseJsMedia(endIcon, endIconPath)) {
             menuItemProps.endIcon = endIconPath;
-        } else {
-            LOGI("endIcon is null");
         }
 
         if (ParseJsString(label, labelStr)) {
             menuItemProps.labelInfo = labelStr;
-        } else {
-            LOGI("labelInfo is null");
         }
 
         auto builder = menuItemObj->GetProperty("builder");
         if (!builder.IsEmpty() && builder->IsFunction()) {
             auto subBuilderFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(builder));
             CHECK_NULL_VOID(subBuilderFunc);
-            auto targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+            WeakPtr<NG::FrameNode> targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
             auto subBuildFunc = [execCtx = info.GetExecutionContext(), func = std::move(subBuilderFunc),
                                     node = targetNode]() {
                 JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
@@ -144,7 +135,7 @@ void ParseIsSelectedObject(const JSCallbackInfo& info, const JSRef<JSVal>& chang
     CHECK_NULL_VOID(changeEventVal->IsFunction());
 
     auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(changeEventVal));
-    auto targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    WeakPtr<NG::FrameNode> targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
     auto onSelected = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = targetNode](
                           bool selected) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
@@ -159,7 +150,6 @@ void ParseIsSelectedObject(const JSCallbackInfo& info, const JSRef<JSVal>& chang
 void JSMenuItem::IsSelected(const JSCallbackInfo& info)
 {
     if (info.Length() < 1 || info.Length() > 2) {
-        LOGE("The arg is wrong, it is supposed to have 1 or 2 arguments");
         return;
     }
 
@@ -177,19 +167,13 @@ void JSMenuItem::SelectIcon(const JSCallbackInfo& info)
 {
     bool isShow = false;
     std::string icon;
-    if (info.Length() < 1) {
-        LOGW("The arg is wrong, it is supposed to have at least 1 arguments");
-    } else {
-        if (info[0]->IsBoolean()) {
-            isShow = info[0]->ToBoolean();
-        } else if (info[0]->IsString()) {
-            icon = info[0]->ToString();
-            isShow = true;
-        } else if (ParseJsMedia(info[0], icon)) {
-            isShow = true;
-        } else {
-            LOGW("can not parse select icon.");
-        }
+    if (info[0]->IsBoolean()) {
+        isShow = info[0]->ToBoolean();
+    } else if (info[0]->IsString()) {
+        icon = info[0]->ToString();
+        isShow = true;
+    } else if (ParseJsMedia(info[0], icon)) {
+        isShow = true;
     }
     MenuItemModel::GetInstance()->SetSelectIcon(isShow);
     MenuItemModel::GetInstance()->SetSelectIconSrc(icon);
@@ -198,11 +182,10 @@ void JSMenuItem::SelectIcon(const JSCallbackInfo& info)
 void JSMenuItem::OnChange(const JSCallbackInfo& info)
 {
     if (info.Length() < 1 || !info[0]->IsFunction()) {
-        LOGE("The arg is wrong, it is supposed to have atleast 1 argument.");
         return;
     }
     auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
-    auto targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    WeakPtr<NG::FrameNode> targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
     auto onChange = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = targetNode](bool selected) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("MenuItem.onChange");
@@ -219,8 +202,8 @@ void JSMenuItem::ContentFont(const JSCallbackInfo& info)
 {
     CalcDimension fontSize;
     std::string weight;
-    if (info.Length() < 1 || !info[0]->IsObject()) {
-        LOGW("The argv is wrong, it is supposed to have at least 1 object argument");
+    if (!info[0]->IsObject()) {
+        return;
     } else {
         JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
         JSRef<JSVal> size = obj->GetProperty("size");
@@ -267,7 +250,7 @@ void JSMenuItem::ContentFontColor(const JSCallbackInfo& info)
 {
     std::optional<Color> color = std::nullopt;
     if (info.Length() < 1) {
-        LOGW("The argv is wrong, it is supposed to have at least 1 argument");
+        return;
     } else {
         Color textColor;
         if (ParseJsColor(info[0], textColor)) {
@@ -281,8 +264,8 @@ void JSMenuItem::LabelFont(const JSCallbackInfo& info)
 {
     CalcDimension fontSize;
     std::string weight;
-    if (info.Length() < 1 || !info[0]->IsObject()) {
-        LOGW("The argv is wrong, it is supposed to have at least 1 object argument");
+    if (!info[0]->IsObject()) {
+        return;
     } else {
         JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
         JSRef<JSVal> size = obj->GetProperty("size");
@@ -329,7 +312,7 @@ void JSMenuItem::LabelFontColor(const JSCallbackInfo& info)
 {
     std::optional<Color> color = std::nullopt;
     if (info.Length() < 1) {
-        LOGW("The argv is wrong, it is supposed to have at least 1 argument");
+        return;
     } else {
         Color textColor;
         if (ParseJsColor(info[0], textColor)) {

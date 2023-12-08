@@ -88,10 +88,10 @@ JSRef<JSObject> JsGestureJudgeFunction::CreateFingerInfo(const FingerInfo& finge
     const OHOS::Ace::Offset& globalLocation = fingerInfo.globalLocation_;
     const OHOS::Ace::Offset& localLocation = fingerInfo.localLocation_;
     fingerInfoObj->SetProperty<int32_t>("id", fingerInfo.fingerId_);
-    fingerInfoObj->SetProperty<double>("globalX", SystemProperties::Px2Vp(globalLocation.GetX()));
-    fingerInfoObj->SetProperty<double>("globalY", SystemProperties::Px2Vp(globalLocation.GetY()));
-    fingerInfoObj->SetProperty<double>("localX", SystemProperties::Px2Vp(localLocation.GetX()));
-    fingerInfoObj->SetProperty<double>("localY", SystemProperties::Px2Vp(localLocation.GetY()));
+    fingerInfoObj->SetProperty<double>("globalX", PipelineBase::Px2VpWithCurrentDensity(globalLocation.GetX()));
+    fingerInfoObj->SetProperty<double>("globalY", PipelineBase::Px2VpWithCurrentDensity(globalLocation.GetY()));
+    fingerInfoObj->SetProperty<double>("localX", PipelineBase::Px2VpWithCurrentDensity(localLocation.GetX()));
+    fingerInfoObj->SetProperty<double>("localY", PipelineBase::Px2VpWithCurrentDensity(localLocation.GetY()));
     return fingerInfoObj;
 }
 
@@ -130,14 +130,16 @@ void JsGestureJudgeFunction::SetUniqueAttributes(
         case OHOS::Ace::GestureTypeName::PAN_GESTURE: {
             auto panGestureEvent = TypeInfoHelper::DynamicCast<PanGestureEvent>(info.get());
             if (panGestureEvent) {
-                obj->SetProperty<double>("offsetX", SystemProperties::Px2Vp(panGestureEvent->GetOffsetX()));
-                obj->SetProperty<double>("offsetY", SystemProperties::Px2Vp(panGestureEvent->GetOffsetY()));
                 obj->SetProperty<double>(
-                    "velocityX", SystemProperties::Px2Vp(panGestureEvent->GetVelocity().GetVelocityX()));
+                    "offsetX", PipelineBase::Px2VpWithCurrentDensity(panGestureEvent->GetOffsetX()));
                 obj->SetProperty<double>(
-                    "velocityY", SystemProperties::Px2Vp(panGestureEvent->GetVelocity().GetVelocityY()));
+                    "offsetY", PipelineBase::Px2VpWithCurrentDensity(panGestureEvent->GetOffsetY()));
                 obj->SetProperty<double>(
-                    "velocity", SystemProperties::Px2Vp(panGestureEvent->GetVelocity().GetVelocityValue()));
+                    "velocityX", PipelineBase::Px2VpWithCurrentDensity(panGestureEvent->GetVelocity().GetVelocityX()));
+                obj->SetProperty<double>(
+                    "velocityY", PipelineBase::Px2VpWithCurrentDensity(panGestureEvent->GetVelocity().GetVelocityY()));
+                obj->SetProperty<double>("velocity",
+                    PipelineBase::Px2VpWithCurrentDensity(panGestureEvent->GetVelocity().GetVelocityValue()));
             }
             break;
         }
@@ -146,9 +148,9 @@ void JsGestureJudgeFunction::SetUniqueAttributes(
             if (pinchGestureEvent) {
                 obj->SetProperty<double>("scale", pinchGestureEvent->GetScale());
                 obj->SetProperty<double>(
-                    "pinchCenterX", SystemProperties::Px2Vp(pinchGestureEvent->GetPinchCenter().GetX()));
+                    "pinchCenterX", PipelineBase::Px2VpWithCurrentDensity(pinchGestureEvent->GetPinchCenter().GetX()));
                 obj->SetProperty<double>(
-                    "pinchCenterY", SystemProperties::Px2Vp(pinchGestureEvent->GetPinchCenter().GetY()));
+                    "pinchCenterY", PipelineBase::Px2VpWithCurrentDensity(pinchGestureEvent->GetPinchCenter().GetY()));
             }
             break;
         }

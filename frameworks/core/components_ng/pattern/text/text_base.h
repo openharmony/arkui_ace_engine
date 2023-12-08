@@ -72,24 +72,6 @@ public:
         return mouseStatus_;
     }
 
-    RectF GetVisibleContentRect(WeakPtr<FrameNode> parent, RectF visibleRect)
-    {
-        auto parentNode = parent.Upgrade();
-        CHECK_NULL_RETURN(parentNode, visibleRect);
-        if (parentNode->GetTag() == V2::PAGE_ETS_TAG) {
-            return visibleRect;
-        }
-        auto intersectRect = visibleRect;
-        auto scrollablePattern = AceType::DynamicCast<ScrollablePattern>(parentNode->GetPattern());
-        auto geometryNode = parentNode->GetGeometryNode();
-        if (scrollablePattern && geometryNode) {
-            auto parentViewPort = RectF(parentNode->GetTransformRelativeOffset(), geometryNode->GetFrameSize());
-            intersectRect = parentViewPort.IntersectRectT(visibleRect);
-        }
-        parentNode = parentNode->GetAncestorNodeOfFrame();
-        return GetVisibleContentRect(parentNode, intersectRect);
-    }
-
     static int32_t GetGraphemeClusterLength(const std::wstring& text, int32_t extend, bool checkPrev = false)
     {
         char16_t aroundChar = 0;

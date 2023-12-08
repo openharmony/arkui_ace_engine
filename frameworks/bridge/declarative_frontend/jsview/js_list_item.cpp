@@ -80,14 +80,12 @@ void JSListItem::Create(const JSCallbackInfo& args)
 void JSListItem::CreateForPartialUpdate(const JSCallbackInfo& args)
 {
     if (args.Length() < 2 || !args[0]->IsFunction()) {
-        LOGE("Expected deep render function parameter");
         ListItemModel::GetInstance()->Create();
         return;
     }
     RefPtr<JsFunction> jsDeepRender = AceType::MakeRefPtr<JsFunction>(args.This(), JSRef<JSFunc>::Cast(args[0]));
 
     if (!args[1]->IsBoolean()) {
-        LOGE("Expected isLazy parameter");
         return;
     }
     const bool isLazy = args[1]->ToBoolean();
@@ -148,7 +146,6 @@ void JSListItem::SetSelectable(bool selectable)
 void JSListItem::SetSelected(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGW("The arg is wrong, it is supposed to have 1 or 2 arguments");
         return;
     }
     bool select = false;
@@ -159,7 +156,7 @@ void JSListItem::SetSelected(const JSCallbackInfo& info)
 
     if (info.Length() > 1 && info[1]->IsFunction()) {
         auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[1]));
-        auto targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+        WeakPtr<NG::FrameNode> targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
         auto changeEvent = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = targetNode](
                                bool param) {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);

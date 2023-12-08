@@ -42,6 +42,7 @@
 #include "core/components_ng/pattern/stack/stack_layout_property.h"
 #include "core/components_ng/pattern/stack/stack_model_ng.h"
 #include "core/components_ng/pattern/stack/stack_pattern.h"
+#include "core/components_ng/pattern/stage/page_pattern.h"
 #include "core/components_ng/property/measure_property.h"
 #include "core/components_ng/property/property.h"
 #include "core/components_ng/render/render_context.h"
@@ -505,9 +506,10 @@ void NavigationGroupNode::ExitTransitionWithPush(const RefPtr<FrameNode>& node, 
                 if (needSetInvisible) {
                     auto navBarPattern = AceType::DynamicCast<NavigationPattern>(navigation->GetPattern());
                     CHECK_NULL_VOID(navBarPattern);
-                    auto latestMode = navBarPattern->GetLatestNavigationMode();
-                    if (latestMode == NavigationMode::STACK) {
+                    auto currentMode = navBarPattern->GetNavigationMode();
+                    if (currentMode == NavigationMode::STACK) {
                         node->GetLayoutProperty()->UpdateVisibility(VisibleType::INVISIBLE);
+                        navigation->NotifyPageHide();
                     }
                 }
                 if (mode == NavigationMode::SPLIT) {
@@ -562,8 +564,7 @@ void NavigationGroupNode::EnterTransitionWithPush(const RefPtr<FrameNode>& node,
     }
     CHECK_NULL_VOID(titleNode);
 
-    option.SetOnFinishEvent([weakNode = WeakPtr<FrameNode>(node), weakNavigation = WeakClaim(this),
-                                id = Container::CurrentId()] {
+    option.SetOnFinishEvent([weakNavigation = WeakClaim(this), id = Container::CurrentId()] {
         ContainerScope scope(id);
         auto context = PipelineContext::GetCurrentContext();
         CHECK_NULL_VOID(context);
@@ -571,22 +572,18 @@ void NavigationGroupNode::EnterTransitionWithPush(const RefPtr<FrameNode>& node,
         CHECK_NULL_VOID(taskExecutor);
         // animation finish event should be posted to UI thread.
         taskExecutor->PostTask(
-            [weakNode, weakNavigation]() {
+            [weakNavigation]() {
                 PerfMonitor::GetPerfMonitor()->End(PerfConstants::ABILITY_OR_PAGE_SWITCH, true);
                 TAG_LOGD(AceLogTag::ACE_NAVIGATION, "navigation animation end");
                 auto navigation = weakNavigation.Upgrade();
                 CHECK_NULL_VOID(navigation);
                 navigation->isOnAnimation_ = false;
                 navigation->OnAccessibilityEvent(AccessibilityEventType::PAGE_CHANGE);
-                auto node = weakNode.Upgrade();
-                CHECK_NULL_VOID(node);
-                node->GetEventHub<EventHub>()->SetEnabledInternal(true);
             },
             TaskExecutor::TaskType::UI);
     });
 
     // content
-    node->GetEventHub<EventHub>()->SetEnabledInternal(false);
     node->GetRenderContext()->ClipWithRRect(
         RectF(nodeWidth * HALF, 0.0f, nodeWidth, nodeHeight), RadiusF(EdgeF(0.0f, 0.0f)));
     node->GetRenderContext()->UpdateTranslateInXY({ nodeWidth * HALF, 0.0f });
@@ -648,8 +645,7 @@ void NavigationGroupNode::EnterTransitionWithPop(const RefPtr<FrameNode>& node, 
     }
     CHECK_NULL_VOID(titleNode);
 
-    option.SetOnFinishEvent([weakNode = WeakPtr<FrameNode>(node), weakNavigation = WeakClaim(this),
-                                id = Container::CurrentId()] {
+    option.SetOnFinishEvent([weakNavigation = WeakClaim(this), id = Container::CurrentId()] {
         ContainerScope scope(id);
         auto context = PipelineContext::GetCurrentContext();
         CHECK_NULL_VOID(context);
@@ -657,16 +653,13 @@ void NavigationGroupNode::EnterTransitionWithPop(const RefPtr<FrameNode>& node, 
         CHECK_NULL_VOID(taskExecutor);
         // animation finish event should be posted to UI thread.
         taskExecutor->PostTask(
-            [weakNode, weakNavigation]() {
+            [weakNavigation]() {
                 PerfMonitor::GetPerfMonitor()->End(PerfConstants::ABILITY_OR_PAGE_SWITCH, true);
                 TAG_LOGD(AceLogTag::ACE_NAVIGATION, "navigation animation end");
                 auto navigation = weakNavigation.Upgrade();
                 CHECK_NULL_VOID(navigation);
                 navigation->isOnAnimation_ = false;
                 navigation->OnAccessibilityEvent(AccessibilityEventType::PAGE_CHANGE);
-                auto node = weakNode.Upgrade();
-                CHECK_NULL_VOID(node);
-                node->GetEventHub<EventHub>()->SetEnabledInternal(true);
             },
             TaskExecutor::TaskType::UI);
     });
@@ -675,7 +668,6 @@ void NavigationGroupNode::EnterTransitionWithPop(const RefPtr<FrameNode>& node, 
             RectF(nodeWidth * PARENT_PAGE_OFFSET, 0.0f, nodeWidth, nodeHeight), RadiusF(EdgeF(0.0f, 0.0f)));
     }
     // content
-    node->GetEventHub<EventHub>()->SetEnabledInternal(false);
     node->GetRenderContext()->UpdateTranslateInXY({ -nodeWidth * PARENT_PAGE_OFFSET, 0.0f });
     // title
     titleNode->GetRenderContext()->UpdateTranslateInXY({ nodeWidth * PARENT_TITLE_OFFSET, 0.0f });
@@ -843,5 +835,22 @@ void NavigationGroupNode::DealNavigationExit(const RefPtr<FrameNode>& preNode, b
     CHECK_NULL_VOID(parent);
     parent->RemoveChild(preNode);
     parent->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+}
+
+void NavigationGroupNode::NotifyPageHide()
+{
+    auto context = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    auto stageManager = context->GetStageManager();
+    CHECK_NULL_VOID(stageManager);
+    auto container = Container::Current();
+    auto pageUrlChecker = container->GetPageUrlChecker();
+    CHECK_NULL_VOID(pageUrlChecker);
+    RefPtr<FrameNode> pageNode = stageManager->GetLastPage();
+    CHECK_NULL_VOID(pageNode);
+    auto pagePattern = pageNode->GetPattern<NG::PagePattern>();
+    CHECK_NULL_VOID(pagePattern);
+    auto pageInfo = pagePattern->GetPageInfo();
+    pageUrlChecker->NotifyPageHide(pageInfo->GetPageUrl());
 }
 } // namespace OHOS::Ace::NG

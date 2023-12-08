@@ -200,6 +200,11 @@ void PipelineContext::OnSurfaceChanged(int32_t width, int32_t height, WindowSize
 
 void PipelineContext::OnLayoutCompleted(const std::string& componentId) {}
 
+bool PipelineContext::CheckPageFocus()
+{
+    return true;
+}
+
 void PipelineContext::OnDrawCompleted(const std::string& componentId) {}
 
 void PipelineContext::SetNeedRenderNode(const RefPtr<FrameNode>& node) {}
@@ -426,6 +431,24 @@ RefPtr<PipelineBase> PipelineBase::GetCurrentContext()
     return NG::MockPipelineContext::GetCurrent();
 }
 
+double PipelineBase::GetCurrentDensity()
+{
+    auto pipelineContext = NG::MockPipelineContext::GetCurrentContext();
+    return pipelineContext ? pipelineContext->GetDensity() : 1.0;
+}
+
+double PipelineBase::Px2VpWithCurrentDensity(double px)
+{
+    double density = GetCurrentDensity();
+    return px / density;
+}
+
+double PipelineBase::Vp2PxWithCurrentDensity(double vp)
+{
+    double density = GetCurrentDensity();
+    return vp * density;
+}
+
 double PipelineBase::NormalizeToPx(const Dimension& dimension) const
 {
     if ((dimension.Unit() == DimensionUnit::VP) || (dimension.Unit() == DimensionUnit::FP)) {
@@ -518,5 +541,12 @@ std::string NG::PipelineContext::GetCurrentExtraInfo()
 {
     return std::string();
 }
+
+bool NG::PipelineContext::IsDragging() const
+{
+    return false;
+}
+
+void NG::PipelineContext::SetIsDragging(bool isDragging) {}
 } // namespace OHOS::Ace
 // pipeline_base ===============================================================

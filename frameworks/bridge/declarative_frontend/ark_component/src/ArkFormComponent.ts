@@ -1,14 +1,7 @@
 /// <reference path='./import.ts' />
 class ArkFormComponentComponent extends ArkComponent implements FormComponentAttribute {
-  size(value: { width: number; height: number }): this {
-    if (isObject(value)) {
-      let size = new ArkBlockSize();
-      size.width = value.width;
-      size.height = value.height;
-      modifier(this._modifiers, FormComponentSizeModifier, size);
-    } else {
-      modifier(this._modifiers, FormComponentSizeModifier, undefined);
-    }
+  size(value: { width: Length; height: Length }): this {
+    modifierWithKey(this._modifiersWithKeys, FormComponentSizeModifier.identity, FormComponentSizeModifier, value);
     return this;
   }
 
@@ -30,11 +23,8 @@ class ArkFormComponentComponent extends ArkComponent implements FormComponentAtt
     return this;
   }
   dimension(value: FormDimension): this {
-    if (isNumber(value)) {
-      modifier(this._modifiers, FormComponentDimensionModifier, value);
-    } else {
-      modifier(this._modifiers, FormComponentDimensionModifier, undefined);
-    }
+    modifierWithKey(this._modifiersWithKeys, FormComponentDimensionModifier.identity,
+      FormComponentDimensionModifier, value);
     return this;
   }
   allowUpdate(value: boolean): this {
@@ -72,16 +62,22 @@ class FormComponentModuleNameModifier extends Modifier<string> {
     }
   }
 }
-class FormComponentDimensionModifier extends Modifier<number> {
+
+class FormComponentDimensionModifier extends ModifierWithKey<FormDimension> {
   static identity: Symbol = Symbol('formComponentDimension');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
       GetUINativeModule().formComponent.resetDimension(node);
     } else {
-      GetUINativeModule().formComponent.setDimension(node, this.value!);
+      GetUINativeModule().formComponent.setDimension(node, this.value);
     }
   }
+
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
 }
+
 class FormComponentAllowUpdateModifier extends Modifier<boolean> {
   static identity: Symbol = Symbol('formComponentAllowUpdate');
   applyPeer(node: KNode, reset: boolean): void {
@@ -92,16 +88,24 @@ class FormComponentAllowUpdateModifier extends Modifier<boolean> {
     }
   }
 }
-class FormComponentSizeModifier extends Modifier<ArkBlockSize> {
+
+class FormComponentSizeModifier extends ModifierWithKey<{ width: Length; height: Length }> {
   static identity: Symbol = Symbol('formComponentSize');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
       GetUINativeModule().formComponent.resetSize(node);
     } else {
-      GetUINativeModule().formComponent.setSize(node, this.value.width, this.value.width);
+      GetUINativeModule().formComponent.setSize(node, this.value.width, this.value.height);
     }
   }
+
+  checkObjectDiff(): boolean {
+    let widthEQ = isBaseOrResourceEqual(this.stageValue.width, this.value.width);
+    let heightEQ = isBaseOrResourceEqual(this.stageValue.height, this.value.height);
+    return !widthEQ || !heightEQ;
+  }
 }
+
 class FormComponentVisibilityModifier extends Modifier<number> {
   static identity: Symbol = Symbol('formComponentVisibility');
   applyPeer(node: KNode, reset: boolean): void {

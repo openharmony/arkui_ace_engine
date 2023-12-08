@@ -30,6 +30,7 @@ const int POS_2 = 1;
 const char* ERR_CODE = "-1";
 const int SIZE_OF_TWO = 2;
 const int DEFAULT_SELECT = 0;
+const double FONTSIZE_DEFAULT = 16.0;
 
 void SetSpace(NodeHandle node, float value, int unit)
 {
@@ -117,10 +118,13 @@ void SetFont(NodeHandle node, const char* fontInfo, int32_t styleVal)
         return;
     }
 
+    CalcDimension fontSize;
     if (res[POS_0] != ERR_CODE) {
-        CalcDimension fontSize = StringUtils::StringToCalcDimension(res[POS_0], false);
-        SelectModelNG::SetFontSize(frameNode, fontSize);
+        fontSize = StringUtils::StringToCalcDimension(res[POS_0], false, DimensionUnit::FP);
+    } else {
+        fontSize = CalcDimension(FONTSIZE_DEFAULT, DimensionUnit::FP);
     }
+    SelectModelNG::SetFontSize(frameNode, fontSize);
 
     if (res[POS_1] != ERR_CODE) {
         std::string weight;
@@ -149,7 +153,7 @@ void SetOptionFont(NodeHandle node, const char* fontInfo, int32_t styleVal)
     }
 
     if (res[POS_0] != ERR_CODE) {
-        CalcDimension fontSize = StringUtils::StringToCalcDimension(res[POS_0], false);
+        CalcDimension fontSize = StringUtils::StringToCalcDimension(res[POS_0], false, DimensionUnit::FP);
         SelectModelNG::SetOptionFontSize(frameNode, fontSize);
     }
 
@@ -180,7 +184,7 @@ void SetSelectedOptionFont(NodeHandle node, const char* fontInfo, int32_t styleV
     }
 
     if (res[POS_0] != ERR_CODE) {
-        CalcDimension fontSize = StringUtils::StringToCalcDimension(res[POS_0], false);
+        CalcDimension fontSize = StringUtils::StringToCalcDimension(res[POS_0], false, DimensionUnit::FP);
         SelectModelNG::SetSelectedOptionFontSize(frameNode, fontSize);
     }
 
@@ -197,6 +201,7 @@ void SetSelectedOptionFont(NodeHandle node, const char* fontInfo, int32_t styleV
     auto style = static_cast<Ace::FontStyle>(styleVal);
     SelectModelNG::SetSelectedOptionItalicFontStyle(frameNode, style);
 }
+
 void ResetSpace(NodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -210,18 +215,21 @@ void ResetSpace(NodeHandle node)
     Dimension space = selectTheme->GetContentSpinnerPadding();
     SelectModelNG::SetSpace(frameNode, space);
 }
+
 void ResetValue(NodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     SelectModelNG::SetValue(frameNode, "");
 }
+
 void ResetSelected(NodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     SelectModelNG::SetSelected(frameNode, DEFAULT_SELECT);
 }
+
 void ResetSelectFontColor(NodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -234,6 +242,7 @@ void ResetSelectFontColor(NodeHandle node)
     CHECK_NULL_VOID(selectTheme);
     SelectModelNG::SetFontColor(frameNode, selectTheme->GetFontColor());
 }
+
 void ResetSelectedOptionBgColor(NodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -246,6 +255,7 @@ void ResetSelectedOptionBgColor(NodeHandle node)
     CHECK_NULL_VOID(selectTheme);
     SelectModelNG::SetSelectedOptionBgColor(frameNode, selectTheme->GetSelectedColor());
 }
+
 void ResetOptionBgColor(NodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -258,6 +268,7 @@ void ResetOptionBgColor(NodeHandle node)
     CHECK_NULL_VOID(selectTheme);
     SelectModelNG::SetOptionBgColor(frameNode, selectTheme->GetBackgroundColor());
 }
+
 void ResetOptionFontColor(NodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -270,6 +281,7 @@ void ResetOptionFontColor(NodeHandle node)
     CHECK_NULL_VOID(selectTheme);
     SelectModelNG::SetOptionFontColor(frameNode, selectTheme->GetMenuFontColor());
 }
+
 void ResetSelectedOptionFontColor(NodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -282,6 +294,7 @@ void ResetSelectedOptionFontColor(NodeHandle node)
     CHECK_NULL_VOID(selectTheme);
     SelectModelNG::SetSelectedOptionFontColor(frameNode, selectTheme->GetSelectedColorText());
 }
+
 void ResetArrowPosition (NodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);

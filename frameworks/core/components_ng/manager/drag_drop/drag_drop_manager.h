@@ -91,6 +91,7 @@ public:
     std::string GetExtraInfo();
     void SetExtraInfo(const std::string& extraInfo);
     void ClearExtraInfo();
+    float GetSmallWindowScale() const;
 #ifdef ENABLE_DRAG_FRAMEWORK
     void UpdateDragAllowDrop(const RefPtr<FrameNode>& dragFrameNode, const bool isCopy);
     void RequireSummary();
@@ -110,6 +111,7 @@ public:
     void UpdateNotifyDragEvent(
         RefPtr<NotifyDragEvent>& notifyEvent, const Point& point, const DragEventType dragEventType);
     bool CheckDragDropProxy(int64_t id) const;
+    void FireOnEditableTextComponent(const RefPtr<FrameNode>& frameNode, DragEventType type);
 
     bool IsWindowConsumed() const
     {
@@ -222,6 +224,15 @@ public:
         currentPointerId_ = currentPointerId;
     }
 
+    static inline bool IsEditableTextComponent(const std::string& frameTag)
+    {
+        if (frameTag != V2::TEXTINPUT_ETS_TAG && frameTag != V2::TEXTAREA_ETS_TAG &&
+            frameTag != V2::RICH_EDITOR_ETS_TAG && frameTag != V2::SEARCH_Field_ETS_TAG) {
+            return false;
+        }
+        return true;
+    }
+
 private:
     RefPtr<FrameNode> FindDragFrameNodeByPosition(float globalX, float globalY, DragType dragType, bool findDrop);
     void FireOnDragEvent(
@@ -272,6 +283,7 @@ private:
     bool isMouseDragged_ = false;
     bool isWindowConsumed_ = false;
     bool isDragWindowShow_ = false;
+    bool hasNotifiedTransformation_ = false;
     VelocityTracker velocityTracker_;
     DragDropMgrState dragDropState_ = DragDropMgrState::IDLE;
     Rect previewRect_ { -1, -1, -1, -1 };

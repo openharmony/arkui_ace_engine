@@ -25,6 +25,7 @@
 #include "core/components_ng/pattern/button/button_model_ng.h"
 #include "core/components_ng/pattern/button/button_request_data.h"
 #include "core/pipeline/base/element_register.h"
+#include "frameworks/core/components/button/button_theme.h"
 
 namespace OHOS::Ace::NG {
 constexpr int DEFAULT_BUTTON_TYPE = (int)ButtonType::CAPSULE;
@@ -280,12 +281,34 @@ void ResetButtonLabelStyle(NodeHandle node)
     return;
 }
 
+void SetButtonBackgroundColor(NodeHandle node, uint32_t color)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ButtonModelNG::BackgroundColor(frameNode, Color(color), true);
+}
+
+void ResetButtonBackgroundColor(NodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    Color backgroundColor;
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto buttonTheme = pipeline->GetTheme<ButtonTheme>();
+    CHECK_NULL_VOID(buttonTheme);
+    backgroundColor = buttonTheme->GetBgColor();
+    ButtonModelNG::BackgroundColor(frameNode, backgroundColor, false);
+}
+
 ArkUIButtonModifierAPI GetButtonModifier()
 {
     static const ArkUIButtonModifierAPI modifier = { SetButtonType, ResetButtonType, SetButtonStateEffect,
         ResetButtonStateEffect, SetButtonFontColor, ResetButtonFontColor, SetButtonFontSize, ResetButtonFontSize,
         SetButtonFontWeight, ResetButtonFontWeight, SetButtonFontStyle, ResetButtonFontStyle, SetButtonFontFamily,
-        ResetButtonFontFamily, SetButtonLabelStyle, ResetButtonLabelStyle };
+        ResetButtonFontFamily, SetButtonLabelStyle, ResetButtonLabelStyle,
+        SetButtonBackgroundColor, ResetButtonBackgroundColor
+        };
 
     return modifier;
 }

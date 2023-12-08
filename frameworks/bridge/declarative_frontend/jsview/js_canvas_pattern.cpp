@@ -47,12 +47,23 @@ void JSCanvasPattern::JSSetTransform(const JSCallbackInfo& info)
     if (info.Length() != SET_TRANSFORM_PARAMETER_SIZE || !info[0]->IsObject()) {
         return;
     }
-    auto* matrix = JSRef<JSObject>::Cast(info[0])->Unwrap<JSMatrix2d>();
-    if (matrix) {
-        auto canvasRenderer = canvasRenderWeak_.Upgrade();
-        if (canvasRenderer) {
-            canvasRenderer->SetTransform(GetId(), matrix->GetTransform());
+    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)) {
+        auto* matrix = JSRef<JSObject>::Cast(info[0])->Unwrap<JSMatrix2d>();
+        if (matrix) {
+            auto canvasRenderer = canvasRenderWeak_.Upgrade();
+            if (canvasRenderer) {
+                canvasRenderer->SetTransform(GetId(), matrix->GetTransform());
+            }
         }
+        return;
+    }
+
+    JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(info[0]);
+    TransformParam param = JSMatrix2d::GetTransformInfo(jsObj);
+
+    auto canvasRenderer = canvasRenderWeak_.Upgrade();
+    if (canvasRenderer) {
+        canvasRenderer->SetTransform(GetId(), param);
     }
 }
 } // namespace OHOS::Ace::Framework

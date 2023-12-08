@@ -1,5 +1,5 @@
 /// <reference path="./import.ts" />
-class GridRowAlignItemsModifier extends Modifier<number> {
+class GridRowAlignItemsModifier extends ModifierWithKey<number> {
   static identity: Symbol = Symbol('gridRowAlignItems');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -8,17 +8,16 @@ class GridRowAlignItemsModifier extends Modifier<number> {
       GetUINativeModule().gridRow.setAlignItems(node, this.value!);
     }
   }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
 }
 class ArkGridRowComponent extends ArkComponent implements CommonMethod<GridRowAttribute>{
   onBreakpointChange(callback: (breakpoints: string) => void): GridRowAttribute {
     throw new Error("Method not implemented.");
   }
   alignItems(value: ItemAlign): GridRowAttribute {
-    if (value in ItemAlign) {
-      modifier(this._modifiers, GridRowAlignItemsModifier, value);
-    } else {
-      modifier(this._modifiers, GridRowAlignItemsModifier, undefined);
-    }
+    modifierWithKey(this._modifiersWithKeys, GridRowAlignItemsModifier.identity, GridRowAlignItemsModifier, value);
     return this;
   }
   monopolizeEvents(monopolize: boolean): this {

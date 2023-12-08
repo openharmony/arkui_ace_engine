@@ -366,7 +366,7 @@ void JSDatePicker::OnChange(const JSCallbackInfo& info)
 
     auto jsFunc = AceType::MakeRefPtr<JsEventFunction<DatePickerChangeEvent, 1>>(
         JSRef<JSFunc>::Cast(info[0]), DatePickerChangeEventToJSValue);
-    auto targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    WeakPtr<NG::FrameNode> targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
     auto onChange = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = targetNode](
                         const BaseEventInfo* info) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
@@ -385,7 +385,7 @@ void JSDatePicker::OnDateChange(const JSCallbackInfo& info)
     }
     auto jsFunc = AceType::MakeRefPtr<JsEventFunction<DatePickerChangeEvent, 1>>(
         JSRef<JSFunc>::Cast(info[0]), DatePickerDateChangeEventToJSValue);
-    auto targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    WeakPtr<NG::FrameNode> targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
     auto onDateChange = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = targetNode](
                             const BaseEventInfo* info) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
@@ -405,7 +405,7 @@ void JSTimePicker::OnChange(const JSCallbackInfo& info)
 
     auto jsFunc = AceType::MakeRefPtr<JsEventFunction<DatePickerChangeEvent, 1>>(
         JSRef<JSFunc>::Cast(info[0]), DatePickerChangeEventToJSValue);
-    auto targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    WeakPtr<NG::FrameNode> targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
     auto onChange = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = targetNode](
                         const BaseEventInfo* index) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
@@ -491,7 +491,7 @@ void ParseSelectedDateTimeObject(const JSCallbackInfo& info, const JSRef<JSObjec
 {
     JSRef<JSVal> changeEventVal = selectedObject->GetProperty("changeEvent");
     auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(changeEventVal));
-    auto targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    WeakPtr<NG::FrameNode> targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
     auto changeEvent = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = targetNode](
                            const BaseEventInfo* info) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
@@ -818,10 +818,12 @@ void JSDatePickerDialog::Show(const JSCallbackInfo& info)
         if (alignment >= 0 && alignment <= static_cast<int32_t>(DIALOG_ALIGNMENT.size())) {
             pickerDialog.alignment = DIALOG_ALIGNMENT[alignment];
         }
-        if (alignment == static_cast<int32_t>(DialogAlignment::TOP) ||
-            alignment == static_cast<int32_t>(DialogAlignment::TOP_START) ||
-            alignment == static_cast<int32_t>(DialogAlignment::TOP_END)) {
-            pickerDialog.offset = DATEPICKER_OFFSET_DEFAULT_TOP;
+        if (Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+            if (alignment == static_cast<int32_t>(DialogAlignment::TOP) ||
+                alignment == static_cast<int32_t>(DialogAlignment::TOP_START) ||
+                alignment == static_cast<int32_t>(DialogAlignment::TOP_END)) {
+                pickerDialog.offset = DATEPICKER_OFFSET_DEFAULT_TOP;
+            }
         }
     }
 
@@ -889,11 +891,16 @@ void JSDatePickerDialog::DatePickerDialogShow(const JSRef<JSObject>& paramObj,
     DialogProperties properties;
     if (SystemProperties::GetDeviceType() == DeviceType::PHONE) {
         properties.alignment = DialogAlignment::BOTTOM;
+        if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+            properties.offset = DimensionOffset(Offset(0, -theme->GetMarginBottom().ConvertToPx()));
+        }
     } else {
         properties.alignment = DialogAlignment::CENTER;
     }
     properties.customStyle = false;
-    properties.offset = DimensionOffset(Offset(0, -theme->GetMarginBottom().ConvertToPx()));
+    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+        properties.offset = DimensionOffset(Offset(0, -theme->GetMarginBottom().ConvertToPx()));
+    }
 
     std::map<std::string, PickerDate> datePickerProperty;
     std::map<std::string, PickerTime> timePickerProperty;
@@ -1207,7 +1214,7 @@ void JSTimePickerDialog::Show(const JSCallbackInfo& info)
     std::function<void()> cancelEvent;
     std::function<void(const std::string&)> acceptEvent;
     std::function<void(const std::string&)> changeEvent;
-    auto targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    WeakPtr<NG::FrameNode> targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
     auto onChange = paramObject->GetProperty("onChange");
     if (!onChange->IsUndefined() && onChange->IsFunction()) {
         auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onChange));
@@ -1266,10 +1273,12 @@ void JSTimePickerDialog::Show(const JSCallbackInfo& info)
         if (alignment >= 0 && alignment <= static_cast<int32_t>(DIALOG_ALIGNMENT.size())) {
             pickerDialog.alignment = DIALOG_ALIGNMENT[alignment];
         }
-        if (alignment == static_cast<int32_t>(DialogAlignment::TOP) ||
-            alignment == static_cast<int32_t>(DialogAlignment::TOP_START) ||
-            alignment == static_cast<int32_t>(DialogAlignment::TOP_END)) {
-            pickerDialog.offset = DATEPICKER_OFFSET_DEFAULT_TOP;
+        if (Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+            if (alignment == static_cast<int32_t>(DialogAlignment::TOP) ||
+                alignment == static_cast<int32_t>(DialogAlignment::TOP_START) ||
+                alignment == static_cast<int32_t>(DialogAlignment::TOP_END)) {
+                pickerDialog.offset = DATEPICKER_OFFSET_DEFAULT_TOP;
+            }
         }
     }
 
@@ -1327,11 +1336,16 @@ void JSTimePickerDialog::TimePickerDialogShow(const JSRef<JSObject>& paramObj,
     DialogProperties properties;
     if (SystemProperties::GetDeviceType() == DeviceType::PHONE) {
         properties.alignment = DialogAlignment::BOTTOM;
+        if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+            properties.offset = DimensionOffset(Offset(0, -theme->GetMarginBottom().ConvertToPx()));
+        }
     } else {
         properties.alignment = DialogAlignment::CENTER;
     }
     properties.customStyle = false;
-    properties.offset = DimensionOffset(Offset(0, -theme->GetMarginBottom().ConvertToPx()));
+    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+        properties.offset = DimensionOffset(Offset(0, -theme->GetMarginBottom().ConvertToPx()));
+    }
 
     std::map<std::string, PickerTime> timePickerProperty;
     if (selectedTime->IsObject()) {

@@ -161,8 +161,11 @@ void ClickRecognizer::HandleTouchDownEvent(const TouchEvent& event)
             responseRegionBuffer_ = host->GetResponseRegionListForRecognizer(static_cast<int32_t>(event.sourceType));
         }
     }
-    ++currentTouchPointsNum_;
-    touchPoints_[event.id] = event;
+    if (fingersId_.find(event.id) == fingersId_.end()) {
+        fingersId_.insert(event.id);
+        ++currentTouchPointsNum_;
+        touchPoints_[event.id] = event;
+    }
     UpdateFingerListInfo();
     if (fingers_ > currentTouchPointsNum_) {
         // waiting for multi-finger press
@@ -200,6 +203,9 @@ void ClickRecognizer::HandleTouchUpEvent(const TouchEvent& event)
     touchPoints_[event.id] = event;
     UpdateFingerListInfo();
     auto isUpInRegion = IsPointInRegion(event);
+    if (fingersId_.find(event.id) != fingersId_.end()) {
+        fingersId_.erase(event.id);
+    }
     --currentTouchPointsNum_;
     if (currentTouchPointsNum_ == 0) {
         responseRegionBuffer_.clear();
@@ -311,7 +317,7 @@ bool ClickRecognizer::ExceedSlop()
     if (tappedCount_ > 0 && tappedCount_ < count_) {
         Offset currentFocusPoint = ComputeFocusPoint();
         Offset slop = currentFocusPoint - focusPoint_;
-        if (GreatOrEqual(SystemProperties::Px2Vp(slop.GetDistance()), MAX_THRESHOLD_MANYTAP)) {
+        if (GreatOrEqual(PipelineBase::Px2VpWithCurrentDensity(slop.GetDistance()), MAX_THRESHOLD_MANYTAP)) {
             return true;
         }
     }

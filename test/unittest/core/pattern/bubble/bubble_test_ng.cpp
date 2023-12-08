@@ -1747,7 +1747,7 @@ HWTEST_F(BubbleTestNg, BubbleLayoutTest008, TestSize.Level1)
          * @tc.expected: step4. GetChildPosition returns the result as the bubble position.
          */
         auto resultOffset = bubbleLayoutAlgorithm->GetChildPosition(childSize, needArrow, true);
-        EXPECT_NE(resultOffset, DISPLAY_WINDOW_OFFSET);
+        EXPECT_EQ(resultOffset, DISPLAY_WINDOW_OFFSET);
         OffsetF arrowPosition;
         /**
          * @tc.steps: step5. excute GetPositionWithPlacementLeftBottom

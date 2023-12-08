@@ -128,6 +128,7 @@ public:
     static void SetBorderStyle(const BorderStyleProperty &value);
     static void SetOpacity(double opacity);
     static void SetAllowDrop(const std::set<std::string> &allowDrop);
+    static void SetDragPreview(const NG::DragDropInfo& info);
 
     static void SetBorderImage(const RefPtr<BorderImage> &borderImage);
     static void SetBorderImageSource(const std::string &bdImageSrc);
@@ -229,6 +230,7 @@ public:
     static void SetMouseResponseRegion(const std::vector<DimensionRect> &mouseResponseRegion);
     static void SetTouchable(bool touchable);
     static void SetHitTestMode(HitTestMode hitTestMode);
+    static void SetOnTouchTestFunc(NG::OnChildTouchTestFunc&& onChildTouchTest);
     static void SetDraggable(bool draggable);
     static void SetDragPreviewOptions(const DragPreviewOption& previewOption);
     static void SetOnDragStart(

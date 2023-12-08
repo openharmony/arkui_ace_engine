@@ -1079,6 +1079,6 @@ HWTEST_F(NavBarTestNg, NavBarPattern011, TestSize.Level1)
      */
     info.SetSourceDevice(SourceType::TOUCH);
     firstClickListener->callback_(info);
-    EXPECT_TRUE(isClick);
+    EXPECT_FALSE(isClick);
 }
 } // namespace OHOS::Ace::NG

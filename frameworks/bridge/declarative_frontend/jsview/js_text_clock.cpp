@@ -250,7 +250,6 @@ void JSTextClock::SetFormat(const JSCallbackInfo& info)
         std::regex pattern(
             R"(^([Yy]*[_|\W\s]*[M]*[_|\W\s]*[d]*[_|\W\s]*[D]*[_|\W\s]*[Hh]*[_|\W\s]*[m]*[_|\W\s]*[s]*[_|\W\s]*[S]*)$)");
         if (!std::regex_match(value, pattern)) {
-            LOGW("The arg is wrong, because of format matching error.");
             TextClockModel::GetInstance()->SetFormat("hms");
             return;
         }
@@ -274,11 +273,9 @@ void JSTextClock::SetTextShadow(const JSCallbackInfo& info)
 void JSTextClock::SetFontFeature(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have atleast 1 argument.");
         return;
     }
     if (!info[0]->IsString()) {
-        LOGE("The arg is not string,it is supposed to be a string.");
         return;
     }
 
@@ -293,7 +290,7 @@ void JSTextClock::JsOnDateChange(const JSCallbackInfo& info)
     }
 
     auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
-    auto targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    WeakPtr<NG::FrameNode> targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
     auto onChange = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = targetNode](
                         const std::string& value) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);

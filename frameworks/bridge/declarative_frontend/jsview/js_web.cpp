@@ -1596,6 +1596,7 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSClass<JSWeb>::StaticMethod("tableData", &JSWeb::TableData);
     JSClass<JSWeb>::StaticMethod("onFileSelectorShow", &JSWeb::OnFileSelectorShowAbandoned);
     JSClass<JSWeb>::StaticMethod("onHttpAuthRequest", &JSWeb::OnHttpAuthRequest);
+    JSClass<JSWeb>::StaticMethod("onSslErrorReceive", &JSWeb::OnSslErrRequest);
     JSClass<JSWeb>::StaticMethod("onSslErrorEventReceive", &JSWeb::OnSslErrorRequest);
     JSClass<JSWeb>::StaticMethod("onClientAuthenticationRequest", &JSWeb::OnSslSelectCertRequest);
     JSClass<JSWeb>::StaticMethod("onPermissionRequest", &JSWeb::OnPermissionRequest);
@@ -2276,6 +2277,11 @@ void JSWeb::OnHttpAuthRequest(const JSCallbackInfo& args)
         return false;
     };
     WebModel::GetInstance()->SetOnHttpAuthRequest(jsCallback);
+}
+
+void JSWeb::OnSslErrRequest(const JSCallbackInfo& args)
+{
+    return;
 }
 
 void JSWeb::OnSslErrorRequest(const JSCallbackInfo& args)

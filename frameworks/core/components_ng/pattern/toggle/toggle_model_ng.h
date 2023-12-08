@@ -34,6 +34,7 @@ public:
     void OnChangeEvent(ChangeEvent&& onChangeEvent) override;
     void SetResponseRegion(const std::vector<DimensionRect>& responseRegion) override;
     void SetHoverEffect(HoverEffectType hoverEffect) override;
+    void Pop() override;
     static void SetSelectedColor(FrameNode* frameNode, const std::optional<Color>& selectedColor);
     static void SetSwitchPointColor(FrameNode* frameNode, const Color& switchPointColor);
     static void SetBackgroundColor(FrameNode* frameNode, const Color& color);

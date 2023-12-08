@@ -84,6 +84,25 @@ enum class HitTestMode {
     HTMTRANSPARENT_SELF,
 };
 
+enum class TouchTestStrategy {
+    DEFAULT = 0,
+    FORWARD_COMPETITION,
+    FORWARD
+};
+
+struct TouchTestInfo {
+    PointF windowPoint;
+    PointF currentCmpPoint;
+    PointF subCmpPoint;
+    RectF subRect;
+    std::string id;
+};
+
+struct TouchResult {
+    TouchTestStrategy strategy;
+    std::string id;
+};
+
 enum class HitTestResult {
     // The touch point is located outside the current component area;
     OUT_OF_REGION,
@@ -103,6 +122,7 @@ struct DragDropBaseInfo {
 
 using OnDragStartFunc = std::function<DragDropBaseInfo(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)>;
 using OnDragDropFunc = std::function<void(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)>;
+using OnChildTouchTestFunc = std::function<TouchResult(const std::vector<TouchTestInfo>& touchInfo)>;
 
 struct DragDropInfo {
     RefPtr<UINode> customNode;
@@ -223,9 +243,16 @@ public:
 
     void SetOnGestureJudgeBegin(GestureJudgeFunc&& gestureJudgeFunc);
 
+    void SetOnGestureJudgeNativeBegin(GestureJudgeFunc&& gestureJudgeFunc);
+
     GestureJudgeFunc GetOnGestureJudgeBeginCallback() const
     {
         return gestureJudgeFunc_;
+    }
+
+    GestureJudgeFunc GetOnGestureJudgeNativeBeginCallback() const
+    {
+        return gestureJudgeNativeFunc_;
     }
 
     // When the event param is undefined, it will clear the callback.
@@ -295,6 +322,12 @@ public:
             return;
         }
         panEventActuator_->RemovePanEvent(panEvent);
+    }
+
+    void SetPanEventType(GestureTypeName typeName)
+    {
+        CHECK_NULL_VOID(panEventActuator_);
+        panEventActuator_->SetPanEventType(typeName);
     }
 
     // Set by user define, which will replace old one.
@@ -374,6 +407,16 @@ public:
         if (!responseRegion_.empty()) {
             isResponseRegion_ = true;
         }
+    }
+
+    void SetOnTouchTestFunc(OnChildTouchTestFunc&& callback)
+    {
+        onChildTouchTestFunc_ = callback;
+    }
+
+    const OnChildTouchTestFunc& GetOnTouchTestFunc()
+    {
+        return onChildTouchTestFunc_;
     }
 
     void SetMouseResponseRegion(const std::vector<DimensionRect>& mouseResponseRegion)
@@ -553,8 +596,10 @@ private:
     OffsetF frameNodeOffset_;
     GestureEvent gestureInfoForWeb_;
     bool isReceivedDragGestureInfo_ = false;
+    OnChildTouchTestFunc onChildTouchTestFunc_;
 
     GestureJudgeFunc gestureJudgeFunc_;
+    GestureJudgeFunc gestureJudgeNativeFunc_;
 
     MenuPreviewMode previewMode_ = MenuPreviewMode::NONE;
     bool textDraggable_ = false;

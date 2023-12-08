@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_checkbox_bridge.h"
-
+#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_api.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 
@@ -22,8 +22,7 @@ constexpr int NUM_0 = 0;
 constexpr int NUM_1 = 1;
 constexpr int NUM_2 = 2;
 constexpr int NUM_3 = 3;
-const Color STROKE_COLOR = Color::WHITE;
-const double DEFAULT_MARK_WIDTH = 2.0;
+constexpr float CHECK_BOX_MARK_SIZE_INVALID_VALUE = -1.0f;
 
 ArkUINativeModuleValue CheckboxBridge::SetMark(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
@@ -34,23 +33,31 @@ ArkUINativeModuleValue CheckboxBridge::SetMark(ArkUIRuntimeCallInfo* runtimeCall
     Local<JSValueRef> sizeArg = runtimeCallInfo->GetCallArgRef(NUM_2);
     Local<JSValueRef> widthArg = runtimeCallInfo->GetCallArgRef(NUM_3);
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    uint32_t strokeColorValue = STROKE_COLOR.GetValue();
 
-    if (!colorArg->IsUndefined()) {
-        strokeColorValue= colorArg->Uint32Value(vm);
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, panda::NativePointerRef::New(vm, nullptr));
+    auto theme = pipeline->GetTheme<CheckboxTheme>();
+    CHECK_NULL_RETURN(theme, panda::NativePointerRef::New(vm, nullptr));
+
+    Color strokeColor;
+    if (!ArkTSUtils::ParseJsColor(vm, colorArg, strokeColor)) {
+        strokeColor = theme->GetPointColor();
     }
     
     CalcDimension size;
-    CalcDimension width;
-    if (!sizeArg->IsUndefined() && !widthArg->IsUndefined()) {
-        ArkTSUtils::ParseJsDimensionVp(vm, sizeArg, size);
-        if (!ArkTSUtils::ParseJsDimensionVp(vm, widthArg, width)) {
-            width.SetValue(DEFAULT_MARK_WIDTH);
-        }
+    if (!(ArkTSUtils::ParseJsDimensionVp(vm, sizeArg, size)) || (size.Unit() == DimensionUnit::PERCENT) ||
+        (size.ConvertToVp() < 0)) {
+        size = Dimension(CHECK_BOX_MARK_SIZE_INVALID_VALUE);
+    }
+
+    CalcDimension strokeWidth;
+    if (!(ArkTSUtils::ParseJsDimensionVp(vm, widthArg, strokeWidth)) ||
+        (strokeWidth.Unit() == DimensionUnit::PERCENT) || (strokeWidth.ConvertToVp() < 0)) {
+        strokeWidth = theme->GetCheckStroke();
     }
 
     GetArkUIInternalNodeAPI()->GetCheckboxModifier().SetMark(nativeNode,
-        strokeColorValue, width.Value(), size.Value());
+        strokeColor.GetValue(), strokeWidth.Value(), size.Value());
 
     return panda::JSValueRef::Undefined(vm);
 }
@@ -75,10 +82,19 @@ ArkUINativeModuleValue CheckboxBridge::SetSelectedColor(ArkUIRuntimeCallInfo* ru
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
-    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    Local<JSValueRef> colorArg = runtimeCallInfo->GetCallArgRef(NUM_1);
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    uint32_t selectedColor = secondArg->Uint32Value(vm);
-    GetArkUIInternalNodeAPI()->GetCheckboxModifier().SetSelectedColor(nativeNode, selectedColor);
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, panda::NativePointerRef::New(vm, nullptr));
+    auto theme = pipeline->GetTheme<CheckboxTheme>();
+    CHECK_NULL_RETURN(theme, panda::NativePointerRef::New(vm, nullptr));
+
+    Color selectedColor;
+    if (!ArkTSUtils::ParseJsColorAlpha(vm, colorArg, selectedColor)) {
+        selectedColor = theme->GetActiveColor();
+    }
+
+    GetArkUIInternalNodeAPI()->GetCheckboxModifier().SetSelectedColor(nativeNode, selectedColor.GetValue());
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -87,10 +103,19 @@ ArkUINativeModuleValue CheckboxBridge::SetUnSelectedColor(ArkUIRuntimeCallInfo* 
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
-    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    Local<JSValueRef> colorArg = runtimeCallInfo->GetCallArgRef(NUM_1);
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    uint32_t unSelectedColor = secondArg->Uint32Value(vm);
-    GetArkUIInternalNodeAPI()->GetCheckboxModifier().SetUnSelectedColor(nativeNode, unSelectedColor);
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, panda::NativePointerRef::New(vm, nullptr));
+    auto theme = pipeline->GetTheme<CheckboxTheme>();
+    CHECK_NULL_RETURN(theme, panda::NativePointerRef::New(vm, nullptr));
+
+    Color unSelectedColor;
+    if (!ArkTSUtils::ParseJsColorAlpha(vm, colorArg, unSelectedColor)) {
+        unSelectedColor = theme->GetInactiveColor();
+    }
+
+    GetArkUIInternalNodeAPI()->GetCheckboxModifier().SetUnSelectedColor(nativeNode, unSelectedColor.GetValue());
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -101,17 +126,22 @@ ArkUINativeModuleValue CheckboxBridge::SetCheckboxWidth(ArkUIRuntimeCallInfo* ru
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     Local<JSValueRef> jsValue = runtimeCallInfo->GetCallArgRef(NUM_1);
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    CalcDimension width;
-    if (!jsValue->IsUndefined()) {
-        ArkTSUtils::ParseJsDimensionVp(vm, jsValue, width);
-        if (width.IsNegative()) {
-            GetArkUIInternalNodeAPI()->GetCheckboxModifier().ResetCheckboxWidth(nativeNode);
-            return panda::JSValueRef::Undefined(vm);
-        }
-    
-        GetArkUIInternalNodeAPI()->GetCheckboxModifier().SetCheckboxWidth(
-            nativeNode, width.Value(), static_cast<int>(width.Unit()));
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, panda::NativePointerRef::New(vm, nullptr));
+    auto checkBoxTheme = pipeline->GetTheme<CheckboxTheme>();
+    CHECK_NULL_RETURN(checkBoxTheme, panda::NativePointerRef::New(vm, nullptr));
+
+    auto defaultWidth = checkBoxTheme->GetDefaultWidth();
+    auto horizontalPadding = checkBoxTheme->GetHotZoneHorizontalPadding();
+    auto width = defaultWidth - horizontalPadding * 2;
+    CalcDimension value(width);
+    ArkTSUtils::ParseJsDimensionVp(vm, jsValue, value);
+    if (value.IsNegative()) {
+        value = width;
     }
+
+    GetArkUIInternalNodeAPI()->GetCheckboxModifier().SetCheckboxWidth(
+        nativeNode, width.Value(), static_cast<int>(width.Unit()));
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -122,18 +152,22 @@ ArkUINativeModuleValue CheckboxBridge::SetCheckboxHeight(ArkUIRuntimeCallInfo* r
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     Local<JSValueRef> jsValue = runtimeCallInfo->GetCallArgRef(NUM_1);
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    CalcDimension height;
-    if (!jsValue->IsUndefined()) {
-        ArkTSUtils::ParseJsDimensionVp(vm, jsValue, height);
-        if (height.IsNegative()) {
-            GetArkUIInternalNodeAPI()->GetCheckboxModifier().ResetCheckboxHeight(nativeNode);
-            return panda::JSValueRef::Undefined(vm);
-        }
-    
-        GetArkUIInternalNodeAPI()->GetCheckboxModifier().SetCheckboxHeight(
-            nativeNode, height.Value(), static_cast<int>(height.Unit()));
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, panda::NativePointerRef::New(vm, nullptr));
+    auto checkBoxTheme = pipeline->GetTheme<CheckboxTheme>();
+    CHECK_NULL_RETURN(checkBoxTheme, panda::NativePointerRef::New(vm, nullptr));
+
+    auto defaultHeight = checkBoxTheme->GetDefaultHeight();
+    auto verticalPadding = checkBoxTheme->GetHotZoneVerticalPadding();
+    auto height = defaultHeight - verticalPadding * 2;
+    CalcDimension value(height);
+    ArkTSUtils::ParseJsDimensionVp(vm, jsValue, value);
+    if (value.IsNegative()) {
+        value = height;
     }
 
+    GetArkUIInternalNodeAPI()->GetCheckboxModifier().SetCheckboxHeight(
+        nativeNode, height.Value(), static_cast<int>(height.Unit()));
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -163,7 +197,9 @@ ArkUINativeModuleValue CheckboxBridge::ResetSelectedColor(ArkUIRuntimeCallInfo* 
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    GetArkUIInternalNodeAPI()->GetCheckboxModifier().ResetSelectedColor(nativeNode);
+    auto theme = Framework::JSViewAbstract::GetTheme<CheckboxTheme>();
+    uint32_t selectedColor = theme->GetActiveColor().GetValue();
+    GetArkUIInternalNodeAPI()->GetCheckboxModifier().SetSelectedColor(nativeNode, selectedColor);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -173,7 +209,9 @@ ArkUINativeModuleValue CheckboxBridge::ResetUnSelectedColor(ArkUIRuntimeCallInfo
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    GetArkUIInternalNodeAPI()->GetCheckboxModifier().ResetUnSelectedColor(nativeNode);
+    auto theme = Framework::JSViewAbstract::GetTheme<CheckboxTheme>();
+    uint32_t unSelectedColor = theme->GetInactiveColor().GetValue();
+    GetArkUIInternalNodeAPI()->GetCheckboxModifier().SetUnSelectedColor(nativeNode, unSelectedColor);
     return panda::JSValueRef::Undefined(vm);
 }
 

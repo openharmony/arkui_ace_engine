@@ -58,7 +58,6 @@ namespace OHOS::Ace::Framework {
 void JSMarquee::Create(const JSCallbackInfo& info)
 {
     if (info.Length() < 1 || !info[0]->IsObject()) {
-        LOGE("marquee create error, info is non-valid");
         return;
     }
 
@@ -136,7 +135,6 @@ void JSMarquee::JSBind(BindingTarget globalObj)
 void JSMarquee::SetTextColor(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("SetFontColor create error, info is non-valid");
         return;
     }
     std::optional<Color> colorOpt;
@@ -150,7 +148,6 @@ void JSMarquee::SetTextColor(const JSCallbackInfo& info)
 void JSMarquee::SetFontSize(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("SetFrontSize create error, info is non-valid");
         return;
     }
     std::optional<Dimension> fontSizeOpt;
@@ -166,7 +163,6 @@ void JSMarquee::SetFontSize(const JSCallbackInfo& info)
 void JSMarquee::SetAllowScale(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("SetAllowScale create error, info is non-valid");
         return;
     }
     std::optional<bool> allowScaleOpt;
@@ -185,7 +181,6 @@ void JSMarquee::SetFontWeight(const std::string& value)
 void JSMarquee::SetFontFamily(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("SetFrontFamily create error, info is non-valid");
         return;
     }
     std::optional<std::vector<std::string>> fontFamiliesOpt;
@@ -203,7 +198,7 @@ void JSMarquee::OnStart(const JSCallbackInfo& info)
     }
 
     auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
-    auto targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    WeakPtr<NG::FrameNode> targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
     auto onChange = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = targetNode]() {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("Marquee.onStart");
@@ -220,7 +215,7 @@ void JSMarquee::OnBounce(const JSCallbackInfo& info)
     }
 
     auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
-    auto targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    WeakPtr<NG::FrameNode> targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
     auto onChange = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = targetNode]() {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("Marquee.onBounce");
@@ -237,7 +232,7 @@ void JSMarquee::OnFinish(const JSCallbackInfo& info)
     }
 
     auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
-    auto targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    WeakPtr<NG::FrameNode> targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
     auto onChange = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = targetNode]() {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("Marquee.onFinish");

@@ -42,6 +42,7 @@ public:
     static bool ParseJsInteger(const EcmaVM *vm, const Local<JSValueRef> &value, int32_t &result);
     static bool ParseJsDouble(const EcmaVM *vm, const Local<JSValueRef> &value, double &result);
     static bool ParseAllBorder(const EcmaVM *vm, const Local<JSValueRef> &args, CalcDimension &result);
+    static bool ParseAllRadius(const EcmaVM *vm, const Local<JSValueRef> &args, CalcDimension &result);
     static bool ParseJsFontFamilies(
         const EcmaVM *vm, const Local<JSValueRef> &jsValue, std::vector<std::string> &result);
     static bool ParseJsFontFamiliesFromResource(
@@ -81,7 +82,7 @@ public:
         }
         return true;
     }
-    static std::string GetStringFromJS(const EcmaVM *vm, const Local<JSValueRef> &value);
+    static void GetStringFromJS(const EcmaVM *vm, const Local<JSValueRef> &value, std::string& result);
     static bool ParseJsResource(const EcmaVM *vm, const Local<JSValueRef> &jsValue, CalcDimension &result);
     static void GetJsMediaBundleInfo(
         const EcmaVM* vm, const Local<JSValueRef>& jsValue, std::string& bundleName, std::string& moduleName);

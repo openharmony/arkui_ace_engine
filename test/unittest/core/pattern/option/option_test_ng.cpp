@@ -347,7 +347,7 @@ HWTEST_F(OptionTestNg, OptionPaintPropertyTestNg002, TestSize.Level1)
 HWTEST_F(OptionTestNg, OptionPaintPropertyTestNg003, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. Build a object OptionPaintProperty, udpate property
+     * @tc.steps: step1. Build a object OptionPaintProperty, update property
      */
     OptionPaintProperty property;
     property.UpdateHover(true);
@@ -374,7 +374,7 @@ HWTEST_F(OptionTestNg, OptionPaintPropertyTestNg003, TestSize.Level1)
 HWTEST_F(OptionTestNg, OptionPaintPropertyTestNg004, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. Build a object OptionPaintProperty, udpate property
+     * @tc.steps: step1. Build a object OptionPaintProperty, update property
      */
     OptionPaintProperty property;
     property.UpdateHover(true);
@@ -427,7 +427,7 @@ HWTEST_F(OptionTestNg, OptionPaintMethodTestNg001, TestSize.Level1)
     RefPtr<OptionPaintMethod> paintMethod = AceType::MakeRefPtr<OptionPaintMethod>();
     PaintWrapper* paintWrapper = GetPaintWrapper(paintProp);
     /**
-     * @tc.steps: step2. excute GetOverlayDrawFunction.
+     * @tc.steps: step2. execute GetOverlayDrawFunction.
      * @tc.expected:  return value are as expected.
      */
     auto result = paintMethod->GetOverlayDrawFunction(paintWrapper);
@@ -457,7 +457,7 @@ HWTEST_F(OptionTestNg, OptionPaintMethodTestNg002, TestSize.Level1)
     EXPECT_CALL(canvas, DetachBrush()).WillRepeatedly(ReturnRef(canvas));
     EXPECT_CALL(canvas, DrawPath(_)).Times(AtLeast(1));
     /**
-     * @tc.steps: step2. excute GetOverlayDrawFunction.
+     * @tc.steps: step2. Execute GetOverlayDrawFunction.
      * @tc.expected:  return value are as expected.
      */
     PaintWrapper* paintWrapper = GetPaintWrapper(paintProp);
@@ -481,21 +481,22 @@ HWTEST_F(OptionTestNg, OptionPaintMethodTestNg002, TestSize.Level1)
 
 /**
  * @tc.name: OptionPaintPropertyTestNg006
- * @tc.desc: Verify the usability of select modified width height.
+ * @tc.desc: Verify the usability of select modified width and height.
  * @tc.type: FUNC
  */
 HWTEST_F(OptionTestNg, OptionPaintPropertyTestNg006, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. build a OptionPaintProperty object.
-     * @tc.expected: SelectModifiedWidth and SelectModifiedHeight properties has not value.
+     * @tc.steps: step1. Create a option paint property object and verify its default value.
+     * @tc.expected: Default value of select modified width and select modified height.
+     * properties is false.
      */
     OptionPaintProperty property;
     EXPECT_FALSE(property.GetSelectModifiedWidth().has_value());
     EXPECT_FALSE(property.GetSelectModifiedHeight().has_value());
     /**
-     * @tc.steps: step2. Update properties value.
-     * @tc.expected: properties value are as expected.
+     * @tc.steps: step2. Update select modified width and select modifiedHeight properties value.
+     * @tc.expected: properties values are as expected.
      */
     property.UpdateSelectModifiedWidth(WIDTH.ConvertToPx());
     property.UpdateSelectModifiedHeight(HEIGHT.ConvertToPx());
@@ -505,20 +506,20 @@ HWTEST_F(OptionTestNg, OptionPaintPropertyTestNg006, TestSize.Level1)
 
 /**
  * @tc.name: OptionPaintMethodTestNg003
- * @tc.desc: Verify select option attributes default value and function.
+ * @tc.desc: Verify select option attributes default value and their get and set function.
  * @tc.type: FUNC
  */
 HWTEST_F(OptionTestNg, OptionPaintMethodTestNg003, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. Verify the default balue of flags.
-     * @tc.expected: isWidthModifiedBySelect_ and isSelectOption_ should be false.
+     * @tc.steps: step1. Verify the default value of flags.
+     * @tc.expected: The value of isWidthModifiedBySelect_ and isSelectOption_ should be false.
      */
     EXPECT_FALSE(optionPattern_->IsWidthModifiedBySelect());
     EXPECT_FALSE(optionPattern_->IsSelectOption());
     /**
      * @tc.steps: step2. Update flags value and check them.
-     * @tc.expected: flags value are as expected, which are true.
+     * @tc.expected: Flags value are as expected, which are true.
      */
     optionPattern_->SetIsWidthModifiedBySelect(true);
     optionPattern_->SetIsSelectOption(true);
@@ -528,26 +529,38 @@ HWTEST_F(OptionTestNg, OptionPaintMethodTestNg003, TestSize.Level1)
 
 /**
  * @tc.name: OptionLayoutTest003
- * @tc.desc: Test OptionLayoutAlgorithm Measure when option belongs to select, mainly test GetSelectOptionWidth.
+ * @tc.desc: Test OptionLayoutAlgorithm Measure when option belongs to a select, mainly test GetSelectOptionWidth.
  * @tc.type: FUNC
  */
 HWTEST_F(OptionTestNg, OptionLayoutTest003, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. construct optionLayoutAlgorithm and layoutWrapper.
+     * @tc.steps: step1. Construct option layout algorithm and layout wrapper and set the horizontal interval.
+     * @tc.expected: The horizontal interval is setted successfully.
      */
     OptionLayoutAlgorithm rosenOptionLayoutAlgorithm;
     rosenOptionLayoutAlgorithm.horInterval_ = 2.0;
     EXPECT_FLOAT_EQ(rosenOptionLayoutAlgorithm.horInterval_, 2.0);
+    /**
+     * @tc.steps: step2. Construct the reference pointer of layout property and geometry node, set the margin of
+     * geometry node to be null.
+     * @tc.expected: the value of horInterval_ is updated
+     */
     auto rosenMakeRefPtr = AceType::MakeRefPtr<OHOS::Ace::NG::LayoutProperty>();
     auto rosenRefPtr = AceType::MakeRefPtr<OHOS::Ace::NG::GeometryNode>();
     rosenRefPtr->margin_ = nullptr;
+    /**
+     * @tc.steps: step3. Construct a layout wrapper node with the previous reference pointers and set another
+     * layout wrapper node to be its child node.
+     * @tc.expected: Objects are constructed successfully.
+     */
     LayoutWrapperNode* rosenLayoutWrapper = new LayoutWrapperNode(nullptr, rosenRefPtr, rosenMakeRefPtr);
     auto childWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(nullptr, rosenRefPtr, rosenMakeRefPtr);
     rosenLayoutWrapper->AppendChild(childWrapper);
     /**
-     * @tc.steps: step2. construct layoutConstraint and call Measure.
-     * @tc.expected: the value of horInterval_ is updated
+     * @tc.steps: step4. Construct and update layout and content constraint,set the flag to claim that this is
+     * a select option and call Measure.
+     * @tc.expected: Objects are constructed successfully.
      */
     LayoutConstraintF layoutConstraintSize;
     layoutConstraintSize.selfIdealSize.SetSize(SizeF(WIDTH.ConvertToPx(), HEIGHT.ConvertToPx()));
@@ -557,20 +570,30 @@ HWTEST_F(OptionTestNg, OptionLayoutTest003, TestSize.Level1)
     rosenLayoutWrapper->GetLayoutProperty()->UpdateCalcLayoutProperty(calcLayoutConstraint);
     optionPattern_->SetIsSelectOption(true);
     rosenOptionLayoutAlgorithm.Measure(rosenLayoutWrapper);
-
+    /**
+     * @tc.steps: step5. After the measure of option layout algorithm, compare the horizontal interval of option
+     * layout algorithm with the previous setted value. Compare frame width in the geometry node of option layout
+     * algorithm with the default width value.
+     * @tc.expected: The value of horInterval_ is updated and is no longer equal to the previous setted value.
+     * Frame width in the geometry node of option layout algorithm is equal to the default value of the frame size,
+     * which is 0.
+     */
     EXPECT_NE(rosenOptionLayoutAlgorithm.horInterval_, 2.0);
     EXPECT_EQ(rosenLayoutWrapper->GetGeometryNode()->GetFrameSize().Width(), 0);
 }
 
 /**
  * @tc.name: OptionLayoutTest004
- * @tc.desc: Test OptionLayoutAlgorithm Measure when option belongs to select, mainly test GetSelectOptionWidth.
+ * @tc.desc: Test OptionLayoutAlgorithm Measure when the flag indicates that the option belongs to a select, mainly
+ * test GetSelectOptionWidth.
  * @tc.type: FUNC
  */
 HWTEST_F(OptionTestNg, OptionLayoutTest004, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. construct optionLayoutAlgorithm and layoutWrapper.
+     * @tc.steps: step1. Get the width of select option without setting it, this case is meant to test the correctness
+     * of its default value.
+     * @tc.expected: Default width of select option should be 0.0.
      */
     ASSERT_NE(optionPattern_, nullptr);
     auto OptionWidth = optionPattern_->GetSelectOptionWidth();

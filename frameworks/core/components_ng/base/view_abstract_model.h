@@ -230,6 +230,7 @@ public:
     virtual void SetOnDragMove(NG::OnDragDropFunc&& onDragMove) = 0;
     virtual void SetOnDrop(NG::OnDragDropFunc&& onDrop) = 0;
     virtual void SetAllowDrop(const std::set<std::string>& allowDrop) = 0;
+    virtual void SetDragPreview(const NG::DragDropInfo& info) = 0;
     virtual void SetOnVisibleChange(
         std::function<void(bool, double)>&& onVisibleChange, const std::vector<double>& ratios) = 0;
     virtual void SetOnAreaChanged(
@@ -264,6 +265,7 @@ public:
     virtual void SetDebugLine(const std::string& line) = 0;
     virtual void SetHoverEffect(HoverEffectType hoverEffect) = 0;
     virtual void SetHitTestMode(NG::HitTestMode hitTestMode) = 0;
+    virtual void SetOnTouchTestFunc(NG::OnChildTouchTestFunc&& onChildTouchTest) = 0;
     virtual void SetKeyboardShortcut(const std::string& value, const std::vector<ModifierKey>& keys,
         std::function<void()>&& onKeyboardShortcutAction) = 0;
     virtual void SetMonopolizeEvents(bool monopolizeEvents) = 0;

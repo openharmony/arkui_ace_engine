@@ -6990,7 +6990,7 @@ HWTEST_F(GesturesTestNg, ClickRecognizerHandleTouchMoveEventTest002, TestSize.Le
     clickRecognizer.refereeState_ = RefereeState::PENDING;
     clickRecognizer.currentFingers_ = clickRecognizer.fingers_;
     clickRecognizer.HandleTouchMoveEvent(touchEvent);
-    EXPECT_EQ(clickRecognizer.touchPoints_.size(), 1);
+    EXPECT_EQ(clickRecognizer.touchPoints_.size(), 0);
 }
 
 /**

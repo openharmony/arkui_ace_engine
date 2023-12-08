@@ -31,7 +31,6 @@ void JSMenuItemGroup::Create(const JSCallbackInfo& info)
         auto headerProp = obj->GetProperty("header");
         if (!headerProp.IsEmpty()) {
             if (headerProp->IsFunction()) {
-                LOGI("JSMenuItemGroup set header");
                 RefPtr<NG::UINode> header;
                 {
                     auto headerBuilderFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(headerProp));
@@ -45,7 +44,6 @@ void JSMenuItemGroup::Create(const JSCallbackInfo& info)
             } else {
                 std::string headerStr;
                 if (!ParseJsString(headerProp, headerStr)) {
-                    LOGE("header content is null");
                     return;
                 }
                 NG::MenuItemGroupView::SetHeader(headerStr);
@@ -54,7 +52,6 @@ void JSMenuItemGroup::Create(const JSCallbackInfo& info)
         auto footerProp = obj->GetProperty("footer");
         if (!footerProp.IsEmpty()) {
             if (footerProp->IsFunction()) {
-                LOGI("JSMenuItemGroup set footer");
                 RefPtr<NG::UINode> footer;
                 {
                     auto footerBuilderFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(footerProp));
@@ -68,7 +65,6 @@ void JSMenuItemGroup::Create(const JSCallbackInfo& info)
             } else {
                 std::string footerStr;
                 if (!ParseJsString(footerProp, footerStr)) {
-                    LOGE("footer content is null");
                     return;
                 }
                 NG::MenuItemGroupView::SetFooter(footerStr);

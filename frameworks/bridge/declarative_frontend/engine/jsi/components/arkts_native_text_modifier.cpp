@@ -31,8 +31,8 @@ constexpr TextDecorationStyle DEFAULT_DECORATION_STYLE = TextDecorationStyle::SO
 constexpr TextCase DEFAULT_TEXT_CASE = TextCase::NORMAL;
 constexpr uint32_t DEFAULT_MAX_LINE = Infinity<uint32_t>();
 constexpr bool DEFAULT_TEXT_DRAGGABLE = false;
-constexpr Dimension DEFAULT_MAX_FONT_SIZE = Dimension(10.0, DimensionUnit::FP);
-constexpr Dimension DEFAULT_MIN_FONT_SIZE = Dimension(1.0, DimensionUnit::FP);
+constexpr Dimension DEFAULT_MAX_FONT_SIZE;
+constexpr Dimension DEFAULT_MIN_FONT_SIZE;
 constexpr CopyOptions DEFAULT_COPY_OPTION = CopyOptions::None;
 constexpr Dimension DEFAULT_BASELINE_OFFSET = 0.0_fp;
 constexpr Dimension DEFAULT_FONT_SIZE = 16.0_fp;
@@ -440,6 +440,9 @@ void ResetTextFont(NodeHandle node)
     font.fontSize = DEFAULT_FONT_SIZE;
     font.fontWeight = DEFAULT_FONT_WEIGHT;
     font.fontStyle = DEFAULT_FONT_STYLE;
+    std::vector<std::string> families;
+    families.emplace_back(DEFAULT_FAMILY);
+    font.fontFamilies = families;
     TextModelNG::SetFont(frameNode, font);
 }
 

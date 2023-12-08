@@ -642,7 +642,6 @@ ArkUINativeModuleValue TextBridge::SetBaselineOffset(ArkUIRuntimeCallInfo* runti
     std::string str;
     if (secondArg->IsNumber()) {
         offset.value = secondArg->ToNumber(vm)->Value();
-        offset.value = offset.value < 0 ? 0 : offset.value;
         GetArkUIInternalNodeAPI()->GetTextModifier().SetTextBaselineOffset(nativeNode, &offset);
     } else if (secondArg->IsString()) {
         str = secondArg->ToString(vm)->ToString();

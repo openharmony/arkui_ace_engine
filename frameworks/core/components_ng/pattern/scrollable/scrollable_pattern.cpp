@@ -55,6 +55,9 @@ void ScrollablePattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const
     } else {
         json->Put("edgeEffect", "EdgeEffect.None");
     }
+    auto JsonEdgeEffectOptions = JsonUtil::Create(true);
+    JsonEdgeEffectOptions->Put("alwaysEnabled", GetAlwaysEnabled());
+    json->Put("edgeEffectOptions", JsonEdgeEffectOptions);
 }
 
 void ScrollablePattern::SetAxis(Axis axis)
@@ -929,14 +932,15 @@ void ScrollablePattern::OnAttachToFrameNode()
 
 void ScrollablePattern::UninitMouseEvent()
 {
-    if (!mouseEvent_) {
+    if (!boxSelectPanEvent_) {
         return;
     }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto mouseEventHub = host->GetOrCreateInputEventHub();
-    CHECK_NULL_VOID(mouseEventHub);
-    mouseEventHub->RemoveOnMouseEvent(mouseEvent_);
+    auto gestureHub = host->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
+    gestureHub->RemovePanEvent(boxSelectPanEvent_);
+    boxSelectPanEvent_.Reset();
     ClearMultiSelect();
     ClearInvisibleItemsSelectedStatus();
     isMouseEventInit_ = false;
@@ -946,31 +950,92 @@ void ScrollablePattern::InitMouseEvent()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto mouseEventHub = host->GetOrCreateInputEventHub();
-    CHECK_NULL_VOID(mouseEventHub);
-    if (!mouseEvent_) {
-        auto mouseTask = [weak = WeakClaim(this)](MouseInfo& info) {
+    auto gestureHub = host->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
+    if (!boxSelectPanEvent_) {
+        auto actionStartTask = [weak = WeakClaim(this)](const GestureEvent& info) {
             auto pattern = weak.Upgrade();
-            if (pattern) {
-                pattern->HandleMouseEventWithoutKeyboard(info);
-            }
+            CHECK_NULL_VOID(pattern);
+            pattern->HandleDragStart(info);
         };
-        mouseEvent_ = MakeRefPtr<InputEvent>(std::move(mouseTask));
+
+        auto actionUpdateTask = [weak = WeakClaim(this)](const GestureEvent& info) {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            pattern->HandleDragUpdate(info);
+        };
+
+        auto actionEndTask = [weak = WeakClaim(this)](const GestureEvent& info) {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            pattern->HandleDragEnd(info);
+        };
+        GestureEventNoParameter actionCancelTask;
+        boxSelectPanEvent_ = MakeRefPtr<PanEvent>(std::move(actionStartTask), std::move(actionUpdateTask),
+            std::move(actionEndTask), std::move(actionCancelTask));
     }
-    mouseEventHub->AddOnMouseEvent(mouseEvent_);
-    isMouseEventInit_ = true;
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto dragDropManager = pipeline->GetDragDropManager();
-    CHECK_NULL_VOID(dragDropManager);
-    dragDropManager->SetNotifyInDraggedCallback([wp = WeakClaim(this)]() {
-        auto pattern = wp.Upgrade();
-        if (pattern && pattern->mousePressed_) {
-            pattern->OnMouseRelease();
+    PanDirection panDirection = { .type = PanDirection::ALL };
+    gestureHub->AddPanEvent(boxSelectPanEvent_, panDirection, 1, DEFAULT_PAN_DISTANCE);
+    gestureHub->SetPanEventType(GestureTypeName::BOXSELECT);
+    gestureHub->SetOnGestureJudgeNativeBegin([](const RefPtr<NG::GestureInfo>& gestureInfo,
+                const std::shared_ptr<BaseGestureEvent>& info) -> GestureJudgeResult {
+        if (gestureInfo->GetType() == GestureTypeName::BOXSELECT &&
+                gestureInfo->GetInputEventType() != InputEventType::MOUSE_BUTTON) {
+            return GestureJudgeResult::REJECT;
         }
+        return GestureJudgeResult::CONTINUE;
     });
+    isMouseEventInit_ = true;
 }
 
+void ScrollablePattern::HandleDragStart(const GestureEvent& info)
+{
+    auto mouseOffsetX = static_cast<float>(info.GetLocalLocation().GetX());
+    auto mouseOffsetY = static_cast<float>(info.GetLocalLocation().GetY());
+    if (!IsItemSelected(info)) {
+        ClearMultiSelect();
+        ClearInvisibleItemsSelectedStatus();
+        mouseStartOffset_ = OffsetF(mouseOffsetX, mouseOffsetY);
+        lastMouseStart_ = mouseStartOffset_;
+        mouseEndOffset_ = OffsetF(mouseOffsetX, mouseOffsetY);
+        mousePressOffset_ = OffsetF(mouseOffsetX, mouseOffsetY);
+        totalOffsetOfMousePressed_ = mousePressOffset_.GetMainOffset(axis_) + GetTotalOffset();
+        canMultiSelect_ = true;
+    }
+    mousePressed_ = true;
+}
+
+void ScrollablePattern::HandleDragUpdate(const GestureEvent& info)
+{
+    auto mouseOffsetX = static_cast<float>(info.GetLocalLocation().GetX());
+    auto mouseOffsetY = static_cast<float>(info.GetLocalLocation().GetY());
+    if (!mousePressed_ || !canMultiSelect_) {
+        return;
+    }
+    lastMouseMove_ = info;
+    auto delta = OffsetF(mouseOffsetX, mouseOffsetY) - mousePressOffset_;
+    if (Offset(delta.GetX(), delta.GetY()).GetDistance() > DEFAULT_PAN_DISTANCE.ConvertToPx()) {
+        mouseEndOffset_ = OffsetF(mouseOffsetX, mouseOffsetY);
+        // avoid large select zone
+        LimitMouseEndOffset();
+        auto selectedZone = ComputeSelectedZone(mouseStartOffset_, mouseEndOffset_);
+        MultiSelectWithoutKeyboard(selectedZone);
+        HandleInvisibleItemsSelectedStatus(selectedZone);
+    }
+    SelectWithScroll();
+}
+
+void ScrollablePattern::HandleDragEnd(const GestureEvent& info)
+{
+    mouseStartOffset_.Reset();
+    lastMouseStart_.Reset();
+    mouseEndOffset_.Reset();
+    mousePressed_ = false;
+    canMultiSelect_ = false;
+    ClearSelectedZone();
+    itemToBeSelected_.clear();
+    lastMouseMove_.SetLocalLocation(Offset::Zero());
+}
 void ScrollablePattern::ClearInvisibleItemsSelectedStatus()
 {
     for (auto& item : itemToBeSelected_) {
@@ -1010,59 +1075,6 @@ void ScrollablePattern::HandleInvisibleItemsSelectedStatus(const RectF& selected
 
     if (oldDirection != selectDirection_) {
         itemToBeSelected_.clear();
-    }
-}
-
-void ScrollablePattern::HandleMouseEventWithoutKeyboard(const MouseInfo& info)
-{
-    if (info.GetButton() != MouseButton::LEFT_BUTTON || (scrollBar_ && scrollBar_->IsHover())) {
-        return;
-    }
-
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto manager = pipeline->GetDragDropManager();
-    CHECK_NULL_VOID(manager);
-    if (manager->IsDragged()) {
-        if (mousePressed_) {
-            OnMouseRelease();
-        }
-        return;
-    }
-
-    auto mouseOffsetX = static_cast<float>(info.GetLocalLocation().GetX());
-    auto mouseOffsetY = static_cast<float>(info.GetLocalLocation().GetY());
-    if (info.GetAction() == MouseAction::PRESS) {
-        if (!IsItemSelected(info)) {
-            ClearMultiSelect();
-            ClearInvisibleItemsSelectedStatus();
-
-            mouseStartOffset_ = OffsetF(mouseOffsetX, mouseOffsetY);
-            lastMouseStart_ = mouseStartOffset_;
-            mouseEndOffset_ = OffsetF(mouseOffsetX, mouseOffsetY);
-            mousePressOffset_ = OffsetF(mouseOffsetX, mouseOffsetY);
-            totalOffsetOfMousePressed_ = mousePressOffset_.GetMainOffset(axis_) + GetTotalOffset();
-            canMultiSelect_ = true;
-        }
-        mousePressed_ = true;
-        // do not select when click
-    } else if (info.GetAction() == MouseAction::MOVE) {
-        if (!mousePressed_ || !canMultiSelect_) {
-            return;
-        }
-        lastMouseMove_ = info;
-        auto delta = OffsetF(mouseOffsetX, mouseOffsetY) - mousePressOffset_;
-        if (Offset(delta.GetX(), delta.GetY()).GetDistance() > DEFAULT_PAN_DISTANCE.ConvertToPx()) {
-            mouseEndOffset_ = OffsetF(mouseOffsetX, mouseOffsetY);
-            // avoid large select zone
-            LimitMouseEndOffset();
-            auto selectedZone = ComputeSelectedZone(mouseStartOffset_, mouseEndOffset_);
-            MultiSelectWithoutKeyboard(selectedZone);
-            HandleInvisibleItemsSelectedStatus(selectedZone);
-        }
-        SelectWithScroll();
-    } else if (info.GetAction() == MouseAction::RELEASE) {
-        OnMouseRelease();
     }
 }
 
@@ -1111,18 +1123,6 @@ void ScrollablePattern::SelectWithScroll()
     animator_->PlayMotion(selectMotion_);
 
     FireOnScrollStart();
-}
-
-void ScrollablePattern::OnMouseRelease()
-{
-    mouseStartOffset_.Reset();
-    lastMouseStart_.Reset();
-    mouseEndOffset_.Reset();
-    mousePressed_ = false;
-    canMultiSelect_ = false;
-    ClearSelectedZone();
-    itemToBeSelected_.clear();
-    lastMouseMove_.SetLocalLocation(Offset::Zero());
 }
 
 void ScrollablePattern::ClearSelectedZone()
@@ -1673,6 +1673,7 @@ void ScrollablePattern::NotifyFRCSceneInfo(const std::string& scene, double velo
 
 void ScrollablePattern::FireOnScrollStart()
 {
+    PerfMonitor::GetPerfMonitor()->Start(PerfConstants::APP_LIST_FLING, PerfActionType::FIRST_MOVE, "");
     if (GetScrollAbort()) {
         return;
     }
@@ -1688,7 +1689,6 @@ void ScrollablePattern::FireOnScrollStart()
     auto onScrollStart = hub->GetOnScrollStart();
     CHECK_NULL_VOID(onScrollStart);
     onScrollStart();
-    host->OnAccessibilityEvent(AccessibilityEventType::SCROLL_START);
 }
 
 void ScrollablePattern::OnScrollStartCallback()
@@ -1711,7 +1711,7 @@ void ScrollablePattern::FireOnScroll(float finalOffset, OnScrollEvent& onScroll)
     }
 }
 
-void ScrollablePattern::OnScrollStop(const OnScrollStopEvent& onScrollStop, bool withPerf)
+void ScrollablePattern::OnScrollStop(const OnScrollStopEvent& onScrollStop)
 {
     if (scrollStop_) {
         if (!GetScrollAbort()) {
@@ -1725,9 +1725,7 @@ void ScrollablePattern::OnScrollStop(const OnScrollStopEvent& onScrollStop, bool
             }
             StartScrollBarAnimatorByProxy();
         }
-        if (withPerf && !GetScrollAbort()) {
-            PerfMonitor::GetPerfMonitor()->End(PerfConstants::APP_LIST_FLING, false);
-        }
+        PerfMonitor::GetPerfMonitor()->End(PerfConstants::APP_LIST_FLING, false);
         scrollStop_ = false;
         SetScrollAbort(false);
     }

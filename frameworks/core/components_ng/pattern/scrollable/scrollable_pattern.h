@@ -409,7 +409,7 @@ protected:
 
     virtual void FireOnScroll(float finalOffset, OnScrollEvent& onScroll) const;
 
-    virtual void OnScrollStop(const OnScrollStopEvent& onScrollStop, bool withPerf);
+    virtual void OnScrollStop(const OnScrollStopEvent& onScrollStop);
 
     // select with mouse
     struct ItemSelectedStatus {
@@ -474,14 +474,15 @@ private:
     // select with mouse
     virtual void MultiSelectWithoutKeyboard(const RectF& selectedZone) {};
     virtual void ClearMultiSelect() {};
-    virtual bool IsItemSelected(const MouseInfo& info)
+    virtual bool IsItemSelected(const GestureEvent& info)
     {
         return false;
     }
     void ClearInvisibleItemsSelectedStatus();
     void HandleInvisibleItemsSelectedStatus(const RectF& selectedZone);
-    void HandleMouseEventWithoutKeyboard(const MouseInfo& info);
-    void OnMouseRelease();
+    void HandleDragStart(const GestureEvent& info);
+    void HandleDragUpdate(const GestureEvent& info);
+    void HandleDragEnd(const GestureEvent& info);
     void SelectWithScroll();
     RectF ComputeSelectedZone(const OffsetF& startOffset, const OffsetF& endOffset);
     float GetOutOfScrollableOffset() const;
@@ -573,9 +574,9 @@ private:
     OffsetF mouseEndOffset_;
     OffsetF mousePressOffset_;
     OffsetF lastMouseStart_;
-    MouseInfo lastMouseMove_;
+    GestureEvent lastMouseMove_;
     RefPtr<SelectMotion> selectMotion_;
-    RefPtr<InputEvent> mouseEvent_;
+    RefPtr<PanEvent> boxSelectPanEvent_;
 
     RefPtr<NavBarPattern> navBarPattern_;
     RefPtr<SheetPresentationPattern> sheetPattern_;

@@ -349,7 +349,6 @@ void WindowPattern::FilterInvalidPointerItem(const std::shared_ptr<MMI::PointerE
         MMI::PointerEvent::PointerItem item;
         bool ret = pointerEvent->GetPointerItem(id, item);
         if (!ret) {
-            LOGE("get pointer:%{public}d item failed", id);
             continue;
         }
         const NG::PointF point { static_cast<float>(item.GetDisplayX()), static_cast<float>(item.GetDisplayY()) };

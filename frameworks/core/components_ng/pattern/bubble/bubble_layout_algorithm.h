@@ -141,7 +141,7 @@ private:
     std::string ArcTo(double rx, double ry, double rotation, int32_t arc_flag, double x, double y);
     void UpdateClipOffset(const RefPtr<FrameNode>& frameNode);
 
-    std::string ClipBubbleWithArrow();
+    std::string ClipBubbleWithPath();
     float GetArrowOffset(const Placement& placement);
     void InitEdgeSize(Edge& edge);
     float ModifyBorderRadius(float borderRadius, float halfChildHeight);

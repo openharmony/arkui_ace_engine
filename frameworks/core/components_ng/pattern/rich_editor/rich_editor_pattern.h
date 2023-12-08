@@ -159,15 +159,17 @@ public:
     {
         FocusHub::LostFocusToViewRoot();
     }
-    bool CursorMoveLeft() override;
-    bool CursorMoveRight() override;
-    bool CursorMoveUp() override;
-    bool CursorMoveDown() override;
+    void CursorMove(CaretMoveIntent direction) override;
+    bool CursorMoveLeft();
+    bool CursorMoveRight();
+    bool CursorMoveUp();
+    bool CursorMoveDown();
     bool SetCaretPosition(int32_t pos);
     int32_t GetCaretPosition();
     int32_t GetTextContentLength();
     bool GetCaretVisible() const;
-    OffsetF CalcCursorOffsetByPosition(int32_t position, float& selectLineHeight, bool downStreamFirst = false);
+    OffsetF CalcCursorOffsetByPosition(int32_t position, float& selectLineHeight,
+        bool downStreamFirst = false, bool needLineHighest = true);
     void CopyTextSpanStyle(RefPtr<SpanNode>& source, RefPtr<SpanNode>& target);
     int32_t TextSpanSplit(int32_t position);
     SpanPositionInfo GetSpanPositionInfo(int32_t position);
@@ -324,6 +326,8 @@ public:
 
     void CheckHandles(SelectHandleInfo& handleInfo) override;
 
+    bool CheckHandleVisible(const RectF& paintRect) override;
+
     bool IsShowSelectMenuUsingMouse();
 
 private:
@@ -342,8 +346,8 @@ private:
     }
     void UpdateSelectionType(RichEditorSelection& selection);
     std::shared_ptr<SelectionMenuParams> GetMenuParams(RichEditorResponseType responseType, RichEditorType type);
-    void HandleOnPaste();
-    void HandleOnCut();
+    void HandleOnPaste() override;
+    void HandleOnCut() override;
     void InitClickEvent(const RefPtr<GestureEventHub>& gestureHub) override;
     void InitFocusEvent(const RefPtr<FocusHub>& focusHub);
     void HandleBlurEvent();
@@ -381,6 +385,7 @@ private:
     void ScrollToSafeArea() const override;
 #ifdef ENABLE_DRAG_FRAMEWORK
     void InitDragDropEvent();
+    void ClearDragDropEvent();
     void UpdateSpanItemDragStatus(const std::list<ResultObject>& resultObjects, bool IsDragging);
     NG::DragDropInfo OnDragStart(const RefPtr<OHOS::Ace::DragEvent>& event);
     void OnDragEnd();
@@ -393,6 +398,15 @@ private:
         auto dragDropManager = context->GetDragDropManager();
         CHECK_NULL_VOID(dragDropManager);
         dragDropManager->AddDragFrameNode(frameNode->GetId(), AceType::WeakClaim(AceType::RawPtr(frameNode)));
+    }
+
+    void RemoveDragFrameNodeFromManager(const RefPtr<FrameNode>& frameNode)
+    {
+        auto context = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(context);
+        auto dragDropManager = context->GetDragDropManager();
+        CHECK_NULL_VOID(dragDropManager);
+        dragDropManager->RemoveDragFrameNode(frameNode->GetId());
     }
 #endif // ENABLE_DRAG_FRAMEWORK
 
@@ -424,9 +438,6 @@ private:
         RichEditorAbstractSpanResult& spanResult);
     void DeleteByDeleteValueInfo(const RichEditorDeleteValue& info);
     bool OnKeyEvent(const KeyEvent& keyEvent);
-    bool HandleShiftPressedEvent(const KeyEvent& event);
-    bool HandleDirectionalKey(const KeyEvent& keyEvent);
-    void ParseAppendValue(KeyCode keyCode, std::string& appendElement);
     void MoveCaretAfterTextChange();
     bool BeforeIMEInsertValue(const std::string& insertValue);
     void AfterIMEInsertValue(const RefPtr<SpanNode>& spanNode, int32_t moveLength, bool isCreate);

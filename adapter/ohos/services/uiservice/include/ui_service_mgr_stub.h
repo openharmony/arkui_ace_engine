@@ -22,7 +22,6 @@
 #include <iremote_stub.h>
 #include <map>
 
-#include "hilog_wrapper.h"
 
 namespace OHOS {
 namespace Ace {

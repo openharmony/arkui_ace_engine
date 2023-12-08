@@ -126,12 +126,11 @@ void JSGridItem::SetSelectable(bool selectable)
 void JSGridItem::SelectCallback(const JSCallbackInfo& args)
 {
     if (!args[0]->IsFunction()) {
-        LOGE("fail to bind onSelect event due to info is not function");
         return;
     }
 
     RefPtr<JsMouseFunction> jsOnSelectFunc = AceType::MakeRefPtr<JsMouseFunction>(JSRef<JSFunc>::Cast(args[0]));
-    auto targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    WeakPtr<NG::FrameNode> targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
     auto onSelectId = [execCtx = args.GetExecutionContext(), func = std::move(jsOnSelectFunc), node = targetNode](
                           bool isSelected) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
@@ -144,7 +143,6 @@ void JSGridItem::SelectCallback(const JSCallbackInfo& args)
 void JSGridItem::SetSelected(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGW("The arg is wrong, it is supposed to have 1 or 2 arguments");
         return;
     }
     bool select = false;
@@ -155,7 +153,7 @@ void JSGridItem::SetSelected(const JSCallbackInfo& info)
 
     if (info.Length() > 1 && info[1]->IsFunction()) {
         auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[1]));
-        auto targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+        WeakPtr<NG::FrameNode> targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
         auto changeEvent = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = targetNode](
                                bool param) {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
@@ -170,7 +168,6 @@ void JSGridItem::SetSelected(const JSCallbackInfo& info)
 
 void JSGridItem::JSBind(BindingTarget globalObj)
 {
-    LOGD("GridItem:JSBind");
     JSClass<JSGridItem>::Declare("GridItem");
 
     MethodOptions opt = MethodOptions::NONE;

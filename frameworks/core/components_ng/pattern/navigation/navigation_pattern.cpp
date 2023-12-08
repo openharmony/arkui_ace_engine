@@ -36,6 +36,7 @@
 #include "core/components_ng/pattern/navrouter/navdestination_layout_property.h"
 #include "core/components_ng/pattern/navrouter/navdestination_pattern.h"
 #include "core/components_ng/pattern/navrouter/navrouter_group_node.h"
+#include "core/components_ng/pattern/stage/page_pattern.h"
 #include "core/components_ng/property/property.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "core/pipeline_ng/ui_task_scheduler.h"
@@ -272,7 +273,7 @@ void NavigationPattern::CheckTopNavPathChange(
             auto focusHub = newTopNavDestination->GetOrCreateFocusHub();
             context->AddAfterLayoutTask([focusHub]() {
                 focusHub->SetParentFocusable(true);
-                focusHub->RequestFocusWithDefaultFocusFirstly();
+                focusHub->RequestFocus();
             });
         }
     } else {
@@ -280,10 +281,19 @@ void NavigationPattern::CheckTopNavPathChange(
         auto navBarNode = AceType::DynamicCast<NavBarNode>(hostNode->GetNavBarNode());
         CHECK_NULL_VOID(navBarNode);
         navBarNode->GetLayoutProperty()->UpdateVisibility(VisibleType::VISIBLE);
+        auto stageManager = context->GetStageManager();
+        if (stageManager != nullptr) {
+            RefPtr<FrameNode> pageNode = stageManager->GetLastPage();
+            auto pagePattern = pageNode->GetPattern<NG::PagePattern>();
+            if (pagePattern != nullptr) {
+                auto pageInfo = pagePattern->GetPageInfo();
+                NotifyPageShow(pageInfo->GetPageUrl());
+            }
+        }
         navBarNode->GetEventHub<EventHub>()->SetEnabledInternal(true);
         auto focusHub = navBarNode->GetOrCreateFocusHub();
         focusHub->SetParentFocusable(true);
-        focusHub->RequestFocusWithDefaultFocusFirstly();
+        focusHub->RequestFocus();
     }
     // animation need to run after layout task
     if (navigationMode_ == NavigationMode::STACK) {
@@ -376,23 +386,19 @@ void NavigationPattern::FireNavigationStateChange(const RefPtr<UINode>& node, bo
 void NavigationPattern::NotifyPageHide(const std::string& pageName)
 {
     auto container = Container::Current();
-    if (container) {
-        auto pageUrlChecker = container->GetPageUrlChecker();
-        if (pageUrlChecker != nullptr) {
-            pageUrlChecker->NotifyPageHide(pageName);
-        }
-    }
+    CHECK_NULL_VOID(container);
+    auto pageUrlChecker = container->GetPageUrlChecker();
+    CHECK_NULL_VOID(pageUrlChecker);
+    pageUrlChecker->NotifyPageHide(pageName);
 }
 
 void NavigationPattern::NotifyPageShow(const std::string& pageName)
 {
     auto container = Container::Current();
-    if (container) {
-        auto pageUrlChecker = container->GetPageUrlChecker();
-        if (pageUrlChecker != nullptr) {
-            pageUrlChecker->NotifyPageShow(pageName);
-        }
-    }
+    CHECK_NULL_VOID(container);
+    auto pageUrlChecker = container->GetPageUrlChecker();
+    CHECK_NULL_VOID(pageUrlChecker);
+    pageUrlChecker->NotifyPageShow(pageName);
 }
 
 void NavigationPattern::DoStackModeTransitionAnimation(const RefPtr<NavDestinationGroupNode>& preTopNavDestination,
@@ -608,7 +614,6 @@ bool NavigationPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
                     navBarLayoutProperty->UpdateVisibility(VisibleType::INVISIBLE);
                 } else {
                     navBarNode->GetRenderContext()->UpdateOpacity(1.0f);
-                    navBarNode->GetRenderContext()->UpdateTranslateInXY({ 0.0f, 0.0f });
                     navBarLayoutProperty->UpdateVisibility(VisibleType::VISIBLE);
                 }
                 if (navDestinationNode->GetChildren().size() <= EMPTY_DESTINATION_CHILD_SIZE &&

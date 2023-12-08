@@ -27,6 +27,7 @@ namespace OHOS::Ace::NG {
 namespace {
 const std::u16string ELLIPSIS = u"\u2026";
 constexpr char16_t NEWLINE_CODE = u'\n';
+constexpr float TEXT_SPLIT_RATIO = 0.6f;
 } // namespace
 RefPtr<Paragraph> Paragraph::Create(const ParagraphStyle& paraStyle, const RefPtr<FontCollection>& fontCollection)
 {
@@ -43,6 +44,7 @@ bool TxtParagraph::IsValid()
 
 void TxtParagraph::CreateBuilder()
 {
+    placeholderPosition_.clear();
 #ifndef USE_GRAPHIC_TEXT_GINE
     txt::ParagraphStyle style;
     style.text_direction = Constants::ConvertTxtTextDirection(paraStyle_.direction);
@@ -58,6 +60,7 @@ void TxtParagraph::CreateBuilder()
     style.fontSize = paraStyle_.fontSize; // Rosen style.fontSize
     style.ellipsisModal = static_cast<Rosen::EllipsisModal>(paraStyle_.ellipsisMode);
     style.wordBreakType = static_cast<Rosen::WordBreakType>(paraStyle_.wordBreak);
+    style.textSplitRatio = TEXT_SPLIT_RATIO;
 #endif
     style.locale = paraStyle_.fontLocale;
     if (paraStyle_.textOverflow == TextOverflow::ELLIPSIS) {
@@ -133,6 +136,8 @@ int32_t TxtParagraph::AddPlaceholder(const PlaceholderRun& span)
 #else
     builder_->AppendPlaceholder(txtSpan);
 #endif
+    auto position = placeholderIndex_ + text_.length() + 1;
+    placeholderPosition_.emplace_back(position);
     return ++placeholderIndex_;
 }
 
@@ -312,7 +317,19 @@ int32_t TxtParagraph::GetGlyphIndexByCoordinate(const Offset& offset)
     return index;
 }
 
-bool TxtParagraph::ComputeOffsetForCaretUpstream(int32_t extent, CaretMetricsF& result)
+bool TxtParagraph::CalCulateAndCheckPreIsPlaceholder(int32_t index, int32_t& extent)
+{
+    for (auto placeholderIndex : placeholderPosition_) {
+        if (placeholderIndex == index) {
+            return true;
+        } else if (placeholderIndex < extent) {
+            extent--;
+        }
+    }
+    return false;
+}
+
+bool TxtParagraph::ComputeOffsetForCaretUpstream(int32_t extent, CaretMetricsF& result, bool needLineHighest)
 {
     if (!paragraph_) {
         return false;
@@ -342,7 +359,8 @@ bool TxtParagraph::ComputeOffsetForCaretUpstream(int32_t extent, CaretMetricsF& 
         prev, extent, txt::Paragraph::RectHeightStyle::kMax, txt::Paragraph::RectWidthStyle::kTight);
 #else
     auto boxes = paragraph_->GetTextRectsByBoundary(
-        prev, extent, Rosen::TextRectHeightStyle::COVER_TOP_AND_BOTTOM, Rosen::TextRectWidthStyle::TIGHT);
+        prev, extent, needLineHighest ? Rosen::TextRectHeightStyle::COVER_TOP_AND_BOTTOM :
+        Rosen::TextRectHeightStyle::TIGHT, Rosen::TextRectWidthStyle::TIGHT);
 #endif
     while (boxes.empty() && !text_.empty()) {
         graphemeClusterLength *= 2;
@@ -353,7 +371,8 @@ bool TxtParagraph::ComputeOffsetForCaretUpstream(int32_t extent, CaretMetricsF& 
                 0, extent, txt::Paragraph::RectHeightStyle::kMax, txt::Paragraph::RectWidthStyle::kTight);
 #else
             boxes = paragraph_->GetTextRectsByBoundary(
-                0, extent, Rosen::TextRectHeightStyle::COVER_TOP_AND_BOTTOM, Rosen::TextRectWidthStyle::TIGHT);
+                0, extent, needLineHighest ? Rosen::TextRectHeightStyle::COVER_TOP_AND_BOTTOM :
+                Rosen::TextRectHeightStyle::TIGHT, Rosen::TextRectWidthStyle::TIGHT);
 #endif
             break;
         }
@@ -362,7 +381,8 @@ bool TxtParagraph::ComputeOffsetForCaretUpstream(int32_t extent, CaretMetricsF& 
             prev, extent, txt::Paragraph::RectHeightStyle::kMax, txt::Paragraph::RectWidthStyle::kTight);
 #else
         boxes = paragraph_->GetTextRectsByBoundary(
-            prev, extent, Rosen::TextRectHeightStyle::COVER_TOP_AND_BOTTOM, Rosen::TextRectWidthStyle::TIGHT);
+            prev, extent, needLineHighest ? Rosen::TextRectHeightStyle::COVER_TOP_AND_BOTTOM :
+            Rosen::TextRectHeightStyle::TIGHT, Rosen::TextRectWidthStyle::TIGHT);
 #endif
     }
     if (boxes.empty()) {
@@ -372,10 +392,9 @@ bool TxtParagraph::ComputeOffsetForCaretUpstream(int32_t extent, CaretMetricsF& 
 
     const auto& textBox = *boxes.begin();
     // when text_ ends with a \n, return the top position of the next line.
-    auto last = extent - placeholderIndex_ - 1;
-    auto index = static_cast<size_t>(last) == text_.length() ? last : extent;
-    prevChar = text_[std::max(0, index - 1)];
-    if (prevChar == NEWLINE_CODE && !text_[index]) {
+    auto preIsPlaceholder = CalCulateAndCheckPreIsPlaceholder(extent - 1, extent);
+    prevChar = text_[std::max(0, extent - 1)];
+    if (prevChar == NEWLINE_CODE && !text_[extent] && !preIsPlaceholder) {
         // Return the start of next line.
         result.offset.SetX(MakeEmptyOffsetX());
 #ifndef USE_GRAPHIC_TEXT_GINE
@@ -430,7 +449,7 @@ float TxtParagraph::MakeEmptyOffsetX()
     }
 }
 
-bool TxtParagraph::ComputeOffsetForCaretDownstream(int32_t extent, CaretMetricsF& result)
+bool TxtParagraph::ComputeOffsetForCaretDownstream(int32_t extent, CaretMetricsF& result, bool needLineHighest)
 {
     if (!paragraph_ || static_cast<size_t>(extent) >= GetParagraphLength()) {
         return false;
@@ -444,7 +463,8 @@ bool TxtParagraph::ComputeOffsetForCaretDownstream(int32_t extent, CaretMetricsF
         extent, next, txt::Paragraph::RectHeightStyle::kMax, txt::Paragraph::RectWidthStyle::kTight);
 #else
     auto boxes = paragraph_->GetTextRectsByBoundary(
-        extent, next, Rosen::TextRectHeightStyle::COVER_TOP_AND_BOTTOM, Rosen::TextRectWidthStyle::TIGHT);
+        extent, next, needLineHighest ? Rosen::TextRectHeightStyle::COVER_TOP_AND_BOTTOM :
+        Rosen::TextRectHeightStyle::TIGHT, Rosen::TextRectWidthStyle::TIGHT);
 #endif
     if (boxes.empty()) {
         return false;

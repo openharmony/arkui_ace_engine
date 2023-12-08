@@ -17,13 +17,7 @@ export const defaultTheme = {
     icon: {
         size: { width: 32, height: 32 },
         margin: { top: 12, bottom: 12, left: 12, right: 12 },
-        fillColor: {
-            id: -1,
-            type: 10001,
-            params: ["sys.color.ohos_fa_icon_secondary"],
-            bundleName: "",
-            moduleName: ""
-        },
+        fillColor: "",
         borderRadius: {
             id: -1,
             type: 10002,
@@ -137,8 +131,8 @@ export const defaultTheme = {
 const noop = () => {
 };
 
-export function Popup(t, e = null) {
-    (e || this).observeComponentCreation2(((o, i) => {
+export function Popup(t, o = null) {
+    (o || this).observeComponentCreation2(((e, i) => {
         if (i) {
             let i = () => ({
                 icon: t.icon,
@@ -148,15 +142,15 @@ export function Popup(t, e = null) {
                 onClose: t.onClose,
                 buttons: t.buttons
             });
-            ViewPU.create(new PopupComponent(e || this, {
+            ViewPU.create(new PopupComponent(o || this, {
                 icon: t.icon,
                 title: t.title,
                 message: t.message,
                 showClose: t.showClose,
                 onClose: t.onClose,
                 buttons: t.buttons
-            }, void 0, o, i))
-        } else (e || this).updateStateVarsOfChildByElmtId(o, {
+            }, void 0, e, i))
+        } else (o || this).updateStateVarsOfChildByElmtId(e, {
             icon: t.icon,
             title: t.title,
             message: t.message,
@@ -167,15 +161,15 @@ export function Popup(t, e = null) {
 }
 
 export class PopupComponent extends ViewPU {
-    constructor(t, e, o, i = -1, n = void 0) {
-        super(t, o, i);
+    constructor(t, o, e, i = -1, n = void 0) {
+        super(t, e, i);
         "function" == typeof n && (this.paramsGenerator_ = n);
         this.theme = defaultTheme;
-        this.__icon = new SynchedPropertyObjectOneWayPU(e.icon, this, "icon");
-        this.__title = new SynchedPropertyObjectOneWayPU(e.title, this, "title");
-        this.__message = new SynchedPropertyObjectOneWayPU(e.message, this, "message");
-        this.__showClose = new SynchedPropertyObjectOneWayPU(e.showClose, this, "showClose");
-        this.__buttons = new SynchedPropertyObjectOneWayPU(e.buttons, this, "buttons");
+        this.__icon = new SynchedPropertyObjectOneWayPU(o.icon, this, "icon");
+        this.__title = new SynchedPropertyObjectOneWayPU(o.title, this, "title");
+        this.__message = new SynchedPropertyObjectOneWayPU(o.message, this, "message");
+        this.__showClose = new SynchedPropertyObjectOneWayPU(o.showClose, this, "showClose");
+        this.__buttons = new SynchedPropertyObjectOneWayPU(o.buttons, this, "buttons");
         this.onClose = noop;
         this.__closeButtonBackgroundColor = new ObservedPropertyObjectPU({
             id: -1,
@@ -200,7 +194,7 @@ export class PopupComponent extends ViewPU {
         }, this, "secondButtonBackgroundColor");
         this.__titleHeight = new ObservedPropertySimplePU(0, this, "titleHeight");
         this.__buttonHeight = new ObservedPropertySimplePU(0, this, "buttonHeight");
-        this.setInitiallyProvidedValue(e)
+        this.setInitiallyProvidedValue(o)
     }
 
     setInitiallyProvidedValue(t) {
@@ -346,23 +340,23 @@ export class PopupComponent extends ViewPU {
     }
 
     getIconWidth() {
-        var t, e;
-        return null !== (e = null === (t = this.icon) || void 0 === t ? void 0 : t.width) && void 0 !== e ? e : this.theme.icon.size.width
+        var t, o;
+        return null !== (o = null === (t = this.icon) || void 0 === t ? void 0 : t.width) && void 0 !== o ? o : this.theme.icon.size.width
     }
 
     getIconHeight() {
-        var t, e;
-        return null !== (e = null === (t = this.icon) || void 0 === t ? void 0 : t.height) && void 0 !== e ? e : this.theme.icon.size.height
+        var t, o;
+        return null !== (o = null === (t = this.icon) || void 0 === t ? void 0 : t.height) && void 0 !== o ? o : this.theme.icon.size.height
     }
 
     getIconFillColor() {
-        var t, e;
-        return null !== (e = null === (t = this.icon) || void 0 === t ? void 0 : t.fillColor) && void 0 !== e ? e : this.theme.icon.fillColor
+        var t, o;
+        return null !== (o = null === (t = this.icon) || void 0 === t ? void 0 : t.fillColor) && void 0 !== o ? o : this.theme.icon.fillColor
     }
 
     getIconBorderRadius() {
-        var t, e;
-        return null !== (e = null === (t = this.icon) || void 0 === t ? void 0 : t.borderRadius) && void 0 !== e ? e : this.theme.icon.borderRadius
+        var t, o;
+        return null !== (o = null === (t = this.icon) || void 0 === t ? void 0 : t.borderRadius) && void 0 !== o ? o : this.theme.icon.borderRadius
     }
 
     getIconMargin() {
@@ -395,18 +389,18 @@ export class PopupComponent extends ViewPU {
     }
 
     getTitleFontWeight() {
-        var t, e;
-        return null !== (e = null === (t = this.title) || void 0 === t ? void 0 : t.fontWeight) && void 0 !== e ? e : this.theme.title.fontWeight
+        var t, o;
+        return null !== (o = null === (t = this.title) || void 0 === t ? void 0 : t.fontWeight) && void 0 !== o ? o : this.theme.title.fontWeight
     }
 
     getTitleFontSize() {
-        var t, e;
-        return null !== (e = null === (t = this.title) || void 0 === t ? void 0 : t.fontSize) && void 0 !== e ? e : this.theme.title.fontSize
+        var t, o;
+        return null !== (o = null === (t = this.title) || void 0 === t ? void 0 : t.fontSize) && void 0 !== o ? o : this.theme.title.fontSize
     }
 
     getTitleFontColor() {
-        var t, e;
-        return null !== (e = null === (t = this.title) || void 0 === t ? void 0 : t.fontColor) && void 0 !== e ? e : this.theme.title.fontColor
+        var t, o;
+        return null !== (o = null === (t = this.title) || void 0 === t ? void 0 : t.fontColor) && void 0 !== o ? o : this.theme.title.fontColor
     }
 
     getCloseButtonWidth() {
@@ -478,33 +472,33 @@ export class PopupComponent extends ViewPU {
     }
 
     getFirstButtonText() {
-        var t, e;
-        return null === (e = null === (t = this.buttons) || void 0 === t ? void 0 : t[0]) || void 0 === e ? void 0 : e.text
+        var t, o;
+        return null === (o = null === (t = this.buttons) || void 0 === t ? void 0 : t[0]) || void 0 === o ? void 0 : o.text
     }
 
     getSecondButtonText() {
-        var t, e;
-        return null === (e = null === (t = this.buttons) || void 0 === t ? void 0 : t[1]) || void 0 === e ? void 0 : e.text
+        var t, o;
+        return null === (o = null === (t = this.buttons) || void 0 === t ? void 0 : t[1]) || void 0 === o ? void 0 : o.text
     }
 
     getFirstButtonFontSize() {
-        var t, e, o;
-        return null !== (o = null === (e = null === (t = this.buttons) || void 0 === t ? void 0 : t[0]) || void 0 === e ? void 0 : e.fontSize) && void 0 !== o ? o : this.theme.button.fontSize
+        var t, o, e;
+        return null !== (e = null === (o = null === (t = this.buttons) || void 0 === t ? void 0 : t[0]) || void 0 === o ? void 0 : o.fontSize) && void 0 !== e ? e : this.theme.button.fontSize
     }
 
     getSecondButtonFontSize() {
-        var t, e, o;
-        return null !== (o = null === (e = null === (t = this.buttons) || void 0 === t ? void 0 : t[1]) || void 0 === e ? void 0 : e.fontSize) && void 0 !== o ? o : this.theme.button.fontSize
+        var t, o, e;
+        return null !== (e = null === (o = null === (t = this.buttons) || void 0 === t ? void 0 : t[1]) || void 0 === o ? void 0 : o.fontSize) && void 0 !== e ? e : this.theme.button.fontSize
     }
 
     getFirstButtonFontColor() {
-        var t, e, o;
-        return null !== (o = null === (e = null === (t = this.buttons) || void 0 === t ? void 0 : t[0]) || void 0 === e ? void 0 : e.fontColor) && void 0 !== o ? o : this.theme.button.fontColor
+        var t, o, e;
+        return null !== (e = null === (o = null === (t = this.buttons) || void 0 === t ? void 0 : t[0]) || void 0 === o ? void 0 : o.fontColor) && void 0 !== e ? e : this.theme.button.fontColor
     }
 
     getSecondButtonFontColor() {
-        var t, e, o;
-        return null !== (o = null === (e = null === (t = this.buttons) || void 0 === t ? void 0 : t[1]) || void 0 === e ? void 0 : e.fontColor) && void 0 !== o ? o : this.theme.button.fontColor
+        var t, o, e;
+        return null !== (e = null === (o = null === (t = this.buttons) || void 0 === t ? void 0 : t[1]) || void 0 === o ? void 0 : o.fontColor) && void 0 !== e ? e : this.theme.button.fontColor
     }
 
     getButtonMinFontSize() {
@@ -520,8 +514,15 @@ export class PopupComponent extends ViewPU {
         }
     }
 
+    getLayoutWeight() {
+        var t, o, e, i, n, s, r, l;
+        let h;
+        h = "" !== this.icon.image && void 0 !== this.icon.image || "" !== this.title.text && void 0 !== this.title.text || this.showClose || void 0 === this.showClose || "" !== (null === (o = null === (t = this.buttons) || void 0 === t ? void 0 : t[0]) || void 0 === o ? void 0 : o.text) && void 0 !== (null === (i = null === (e = this.buttons) || void 0 === e ? void 0 : e[0]) || void 0 === i ? void 0 : i.text) || "" !== (null === (s = null === (n = this.buttons) || void 0 === n ? void 0 : n[1]) || void 0 === s ? void 0 : s.text) && void 0 !== (null === (l = null === (r = this.buttons) || void 0 === r ? void 0 : r[1]) || void 0 === l ? void 0 : l.text) ? 1 : 0;
+        return h
+    }
+
     initialRender() {
-        this.observeComponentCreation2(((t, e) => {
+        this.observeComponentCreation2(((t, o) => {
             Row.create();
             Row.padding(this.getWindowsPadding());
             Row.clip(!0);
@@ -530,10 +531,10 @@ export class PopupComponent extends ViewPU {
             Row.backgroundColor(Color.Transparent);
             Row.constraintSize({ maxHeight: "100%" })
         }), Row);
-        this.observeComponentCreation2(((t, e) => {
+        this.observeComponentCreation2(((t, o) => {
             If.create();
-            "" != this.icon.image ? this.ifElseBranchUpdateFunction(0, (() => {
-                this.observeComponentCreation2(((t, e) => {
+            "" !== this.icon.image && void 0 !== this.icon.image ? this.ifElseBranchUpdateFunction(0, (() => {
+                this.observeComponentCreation2(((t, o) => {
                     Image.create(this.getIconImage());
                     Image.width(this.getIconWidth());
                     Image.height(this.getIconHeight());
@@ -545,22 +546,22 @@ export class PopupComponent extends ViewPU {
             }))
         }), If);
         If.pop();
-        this.observeComponentCreation2(((t, e) => {
+        this.observeComponentCreation2(((t, o) => {
             If.create();
-            "" != this.title.text ? this.ifElseBranchUpdateFunction(0, (() => {
-                this.observeComponentCreation2(((t, e) => {
+            "" !== this.title.text && void 0 !== this.title.text ? this.ifElseBranchUpdateFunction(0, (() => {
+                this.observeComponentCreation2(((t, o) => {
                     Column.create();
-                    Column.layoutWeight(1)
+                    Column.layoutWeight(this.getLayoutWeight())
                 }), Column);
-                this.observeComponentCreation2(((t, e) => {
+                this.observeComponentCreation2(((t, o) => {
                     Flex.create({ alignItems: ItemAlign.Start });
                     Flex.width("100%");
                     Flex.margin(this.getTitleMargin());
-                    Flex.onAreaChange(((t, e) => {
-                        this.titleHeight = e.height
+                    Flex.onAreaChange(((t, o) => {
+                        this.titleHeight = o.height
                     }))
                 }), Flex);
-                this.observeComponentCreation2(((t, e) => {
+                this.observeComponentCreation2(((t, o) => {
                     Text.create(this.getTitleText());
                     Text.flexGrow(1);
                     Text.maxLines(2);
@@ -573,10 +574,10 @@ export class PopupComponent extends ViewPU {
                     Text.fontColor(this.getTitleFontColor())
                 }), Text);
                 Text.pop();
-                this.observeComponentCreation2(((t, e) => {
+                this.observeComponentCreation2(((t, o) => {
                     If.create();
-                    this.showClose ? this.ifElseBranchUpdateFunction(0, (() => {
-                        this.observeComponentCreation2(((t, e) => {
+                    this.showClose || void 0 === this.showClose ? this.ifElseBranchUpdateFunction(0, (() => {
+                        this.observeComponentCreation2(((t, o) => {
                             Button.createWithChild();
                             Button.width(this.getCloseButtonWidth());
                             Button.height(this.getCloseButtonHeight());
@@ -588,7 +589,7 @@ export class PopupComponent extends ViewPU {
                                 this.onClose && this.onClose()
                             }))
                         }), Button);
-                        this.observeComponentCreation2(((t, e) => {
+                        this.observeComponentCreation2(((t, o) => {
                             Image.create(this.getCloseButtonImage());
                             Image.focusable(!0);
                             Image.fillColor(this.getCloseButtonFillColor())
@@ -599,7 +600,7 @@ export class PopupComponent extends ViewPU {
                 }), If);
                 If.pop();
                 Flex.pop();
-                this.observeComponentCreation2(((t, e) => {
+                this.observeComponentCreation2(((t, o) => {
                     Scroll.create();
                     Scroll.width("100%");
                     Scroll.align(Alignment.TopStart);
@@ -608,26 +609,26 @@ export class PopupComponent extends ViewPU {
                     Scroll.scrollable(ScrollDirection.Vertical);
                     Scroll.constraintSize({ maxHeight: this.getScrollMaxHeight() })
                 }), Scroll);
-                this.observeComponentCreation2(((t, e) => {
+                this.observeComponentCreation2(((t, o) => {
                     Text.create(this.getMessageText());
                     Text.fontSize(this.getMessageFontSize());
                     Text.fontColor(this.getMessageFontColor())
                 }), Text);
                 Text.pop();
                 Scroll.pop();
-                this.observeComponentCreation2(((t, e) => {
+                this.observeComponentCreation2(((t, o) => {
                     Flex.create({ wrap: FlexWrap.Wrap });
                     Flex.margin(this.getButtonTextMargin());
                     Flex.flexGrow(1);
-                    Flex.onAreaChange(((t, e) => {
-                        this.buttonHeight = e.height
+                    Flex.onAreaChange(((t, o) => {
+                        this.buttonHeight = o.height
                     }))
                 }), Flex);
-                this.observeComponentCreation2(((t, e) => {
-                    var o, i;
+                this.observeComponentCreation2(((t, o) => {
+                    var e, i, n, s;
                     If.create();
-                    "" != (null === (i = null === (o = this.buttons) || void 0 === o ? void 0 : o[0]) || void 0 === i ? void 0 : i.text) ? this.ifElseBranchUpdateFunction(0, (() => {
-                        this.observeComponentCreation2(((t, e) => {
+                    "" !== (null === (i = null === (e = this.buttons) || void 0 === e ? void 0 : e[0]) || void 0 === i ? void 0 : i.text) && void 0 !== (null === (s = null === (n = this.buttons) || void 0 === n ? void 0 : n[0]) || void 0 === s ? void 0 : s.text) ? this.ifElseBranchUpdateFunction(0, (() => {
+                        this.observeComponentCreation2(((t, o) => {
                             Button.createWithChild();
                             Button.margin(this.getButtonMargin());
                             Button.backgroundColor(ObservedObject.GetRawObject(this.firstButtonBackgroundColor));
@@ -635,11 +636,11 @@ export class PopupComponent extends ViewPU {
                                 this.firstButtonBackgroundColor = t ? this.getButtonHoverColor() : this.getButtonBackgroundColor()
                             }));
                             Button.onClick((() => {
-                                var t, e, o, i;
-                                (null === (e = null === (t = this.buttons) || void 0 === t ? void 0 : t[0]) || void 0 === e ? void 0 : e.action) && (null === (i = null === (o = this.buttons) || void 0 === o ? void 0 : o[0]) || void 0 === i || i.action())
+                                var t, o, e, i;
+                                (null === (o = null === (t = this.buttons) || void 0 === t ? void 0 : t[0]) || void 0 === o ? void 0 : o.action) && (null === (i = null === (e = this.buttons) || void 0 === e ? void 0 : e[0]) || void 0 === i || i.action())
                             }))
                         }), Button);
-                        this.observeComponentCreation2(((t, e) => {
+                        this.observeComponentCreation2(((t, o) => {
                             Text.create(this.getFirstButtonText());
                             Text.maxLines(2);
                             Text.focusable(!0);
@@ -654,11 +655,11 @@ export class PopupComponent extends ViewPU {
                     }))
                 }), If);
                 If.pop();
-                this.observeComponentCreation2(((t, e) => {
-                    var o, i;
+                this.observeComponentCreation2(((t, o) => {
+                    var e, i, n, s;
                     If.create();
-                    "" != (null === (i = null === (o = this.buttons) || void 0 === o ? void 0 : o[1]) || void 0 === i ? void 0 : i.text) ? this.ifElseBranchUpdateFunction(0, (() => {
-                        this.observeComponentCreation2(((t, e) => {
+                    "" !== (null === (i = null === (e = this.buttons) || void 0 === e ? void 0 : e[1]) || void 0 === i ? void 0 : i.text) && void 0 !== (null === (s = null === (n = this.buttons) || void 0 === n ? void 0 : n[1]) || void 0 === s ? void 0 : s.text) ? this.ifElseBranchUpdateFunction(0, (() => {
+                        this.observeComponentCreation2(((t, o) => {
                             Button.createWithChild();
                             Button.margin(this.getButtonMargin());
                             Button.backgroundColor(ObservedObject.GetRawObject(this.secondButtonBackgroundColor));
@@ -666,11 +667,11 @@ export class PopupComponent extends ViewPU {
                                 this.secondButtonBackgroundColor = t ? this.getButtonHoverColor() : this.getButtonBackgroundColor()
                             }));
                             Button.onClick((() => {
-                                var t, e, o, i;
-                                (null === (e = null === (t = this.buttons) || void 0 === t ? void 0 : t[1]) || void 0 === e ? void 0 : e.action) && (null === (i = null === (o = this.buttons) || void 0 === o ? void 0 : o[1]) || void 0 === i || i.action())
+                                var t, o, e, i;
+                                (null === (o = null === (t = this.buttons) || void 0 === t ? void 0 : t[1]) || void 0 === o ? void 0 : o.action) && (null === (i = null === (e = this.buttons) || void 0 === e ? void 0 : e[1]) || void 0 === i || i.action())
                             }))
                         }), Button);
-                        this.observeComponentCreation2(((t, e) => {
+                        this.observeComponentCreation2(((t, o) => {
                             Text.create(this.getSecondButtonText());
                             Text.maxLines(2);
                             Text.focusable(!0);
@@ -688,35 +689,35 @@ export class PopupComponent extends ViewPU {
                 Flex.pop();
                 Column.pop()
             })) : this.ifElseBranchUpdateFunction(1, (() => {
-                this.observeComponentCreation2(((t, e) => {
+                this.observeComponentCreation2(((t, o) => {
                     Column.create();
-                    Column.layoutWeight(1)
+                    Column.layoutWeight(this.getLayoutWeight())
                 }), Column);
-                this.observeComponentCreation2(((t, e) => {
+                this.observeComponentCreation2(((t, o) => {
                     Row.create();
                     Row.alignItems(VerticalAlign.Top);
                     Row.margin(this.getTitleMargin())
                 }), Row);
-                this.observeComponentCreation2(((t, e) => {
+                this.observeComponentCreation2(((t, o) => {
                     Scroll.create();
-                    Scroll.layoutWeight(1);
+                    Scroll.layoutWeight(this.getLayoutWeight());
                     Scroll.align(Alignment.TopStart);
                     Scroll.padding(this.getMessagePadding());
                     Scroll.scrollBar(BarState.Auto);
                     Scroll.scrollable(ScrollDirection.Vertical);
                     Scroll.constraintSize({ maxHeight: this.getScrollMaxHeight() })
                 }), Scroll);
-                this.observeComponentCreation2(((t, e) => {
+                this.observeComponentCreation2(((t, o) => {
                     Text.create(this.getMessageText());
                     Text.fontSize(this.getMessageFontSize());
                     Text.fontColor(this.getMessageFontColor())
                 }), Text);
                 Text.pop();
                 Scroll.pop();
-                this.observeComponentCreation2(((t, e) => {
+                this.observeComponentCreation2(((t, o) => {
                     If.create();
-                    this.showClose ? this.ifElseBranchUpdateFunction(0, (() => {
-                        this.observeComponentCreation2(((t, e) => {
+                    this.showClose || void 0 === this.showClose ? this.ifElseBranchUpdateFunction(0, (() => {
+                        this.observeComponentCreation2(((t, o) => {
                             Button.createWithChild();
                             Button.width(this.getCloseButtonWidth());
                             Button.height(this.getCloseButtonHeight());
@@ -728,7 +729,7 @@ export class PopupComponent extends ViewPU {
                                 this.onClose && this.onClose()
                             }))
                         }), Button);
-                        this.observeComponentCreation2(((t, e) => {
+                        this.observeComponentCreation2(((t, o) => {
                             Image.create(this.getCloseButtonImage());
                             Image.focusable(!0);
                             Image.fillColor(this.getCloseButtonFillColor())
@@ -739,19 +740,19 @@ export class PopupComponent extends ViewPU {
                 }), If);
                 If.pop();
                 Row.pop();
-                this.observeComponentCreation2(((t, e) => {
+                this.observeComponentCreation2(((t, o) => {
                     Flex.create({ wrap: FlexWrap.Wrap });
                     Flex.margin(this.getButtonTextMargin());
                     Flex.flexGrow(1);
-                    Flex.onAreaChange(((t, e) => {
-                        this.buttonHeight = e.height
+                    Flex.onAreaChange(((t, o) => {
+                        this.buttonHeight = o.height
                     }))
                 }), Flex);
-                this.observeComponentCreation2(((t, e) => {
-                    var o, i;
+                this.observeComponentCreation2(((t, o) => {
+                    var e, i, n, s;
                     If.create();
-                    "" != (null === (i = null === (o = this.buttons) || void 0 === o ? void 0 : o[0]) || void 0 === i ? void 0 : i.text) ? this.ifElseBranchUpdateFunction(0, (() => {
-                        this.observeComponentCreation2(((t, e) => {
+                    "" !== (null === (i = null === (e = this.buttons) || void 0 === e ? void 0 : e[0]) || void 0 === i ? void 0 : i.text) && void 0 !== (null === (s = null === (n = this.buttons) || void 0 === n ? void 0 : n[0]) || void 0 === s ? void 0 : s.text) ? this.ifElseBranchUpdateFunction(0, (() => {
+                        this.observeComponentCreation2(((t, o) => {
                             Button.createWithChild();
                             Button.margin(this.getButtonMargin());
                             Button.backgroundColor(ObservedObject.GetRawObject(this.firstButtonBackgroundColor));
@@ -759,11 +760,11 @@ export class PopupComponent extends ViewPU {
                                 this.firstButtonBackgroundColor = t ? this.getButtonHoverColor() : this.getButtonBackgroundColor()
                             }));
                             Button.onClick((() => {
-                                var t, e, o, i;
-                                (null === (e = null === (t = this.buttons) || void 0 === t ? void 0 : t[0]) || void 0 === e ? void 0 : e.action) && (null === (i = null === (o = this.buttons) || void 0 === o ? void 0 : o[0]) || void 0 === i || i.action())
+                                var t, o, e, i;
+                                (null === (o = null === (t = this.buttons) || void 0 === t ? void 0 : t[0]) || void 0 === o ? void 0 : o.action) && (null === (i = null === (e = this.buttons) || void 0 === e ? void 0 : e[0]) || void 0 === i || i.action())
                             }))
                         }), Button);
-                        this.observeComponentCreation2(((t, e) => {
+                        this.observeComponentCreation2(((t, o) => {
                             Text.create(this.getFirstButtonText());
                             Text.maxLines(2);
                             Text.focusable(!0);
@@ -778,11 +779,11 @@ export class PopupComponent extends ViewPU {
                     }))
                 }), If);
                 If.pop();
-                this.observeComponentCreation2(((t, e) => {
-                    var o, i;
+                this.observeComponentCreation2(((t, o) => {
+                    var e, i, n, s;
                     If.create();
-                    "" != (null === (i = null === (o = this.buttons) || void 0 === o ? void 0 : o[1]) || void 0 === i ? void 0 : i.text) ? this.ifElseBranchUpdateFunction(0, (() => {
-                        this.observeComponentCreation2(((t, e) => {
+                    "" !== (null === (i = null === (e = this.buttons) || void 0 === e ? void 0 : e[1]) || void 0 === i ? void 0 : i.text) && void 0 !== (null === (s = null === (n = this.buttons) || void 0 === n ? void 0 : n[1]) || void 0 === s ? void 0 : s.text) ? this.ifElseBranchUpdateFunction(0, (() => {
+                        this.observeComponentCreation2(((t, o) => {
                             Button.createWithChild();
                             Button.margin(this.getButtonMargin());
                             Button.backgroundColor(ObservedObject.GetRawObject(this.secondButtonBackgroundColor));
@@ -790,11 +791,11 @@ export class PopupComponent extends ViewPU {
                                 this.secondButtonBackgroundColor = t ? this.getButtonHoverColor() : this.getButtonBackgroundColor()
                             }));
                             Button.onClick((() => {
-                                var t, e, o, i;
-                                (null === (e = null === (t = this.buttons) || void 0 === t ? void 0 : t[1]) || void 0 === e ? void 0 : e.action) && (null === (i = null === (o = this.buttons) || void 0 === o ? void 0 : o[1]) || void 0 === i || i.action())
+                                var t, o, e, i;
+                                (null === (o = null === (t = this.buttons) || void 0 === t ? void 0 : t[1]) || void 0 === o ? void 0 : o.action) && (null === (i = null === (e = this.buttons) || void 0 === e ? void 0 : e[1]) || void 0 === i || i.action())
                             }))
                         }), Button);
-                        this.observeComponentCreation2(((t, e) => {
+                        this.observeComponentCreation2(((t, o) => {
                             Text.create(this.getSecondButtonText());
                             Text.maxLines(2);
                             Text.focusable(!0);

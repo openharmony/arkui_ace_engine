@@ -137,6 +137,11 @@ public:
     static void ParseMarginOrPadding(const JSCallbackInfo& info, bool isMargin);
     static void ParseMarginOrPaddingCorner(JSRef<JSObject> obj, std::optional<CalcDimension>& top,
         std::optional<CalcDimension>& bottom, std::optional<CalcDimension>& left, std::optional<CalcDimension>& right);
+    static void JsOutline(const JSCallbackInfo& info);
+    static void JsOutlineWidth(const JSCallbackInfo& info);
+    static void JsOutlineColor(const JSCallbackInfo& info);
+    static void JsOutlineStyle(const JSCallbackInfo& info);
+    static void JsOutlineRadius(const JSCallbackInfo& info);
     static void JsBorder(const JSCallbackInfo& info);
     static void JsBorderWidth(const JSCallbackInfo& info);
     static void ParseBorderWidth(const JSRef<JSVal>& args);
@@ -179,6 +184,7 @@ public:
     static void JsRestoreId(int32_t restoreId);
     static void JsOnVisibleAreaChange(const JSCallbackInfo& info);
     static void JsHitTestBehavior(const JSCallbackInfo& info);
+    static void JsOnChildTouchTest(const JSCallbackInfo& info);
     static void JsForegroundColor(const JSCallbackInfo& info);
 
     // outer border
@@ -229,6 +235,7 @@ public:
     static bool IsGetResourceByName(const JSRef<JSObject>& jsObj);
     static void GetJsMediaBundleInfo(const JSRef<JSVal>& jsValue, std::string& bundleName, std::string& moduleName);
     static bool ParseShadowProps(const JSRef<JSVal>& jsValue, Shadow& shadow);
+    static bool GetShadowFromTheme(ShadowStyle shadowStyle, Shadow& shadow);
     static bool ParseJsResource(const JSRef<JSVal>& jsValue, CalcDimension& result);
     static bool ParseDataDetectorConfig(const JSCallbackInfo& info, std::string& types,
         std::function<void(const std::string&)>& onResult);
@@ -313,6 +320,7 @@ public:
     static void JsAccessibilityImportance(const std::string& importance);
     static void JsAccessibilityLevel(const std::string& level);
     static void JsAllowDrop(const JSCallbackInfo& info);
+    static void JsDragPreview(const JSCallbackInfo& info);
 
     static void JSCreateAnimatableProperty(const JSCallbackInfo& info);
     static void JSUpdateAnimatableProperty(const JSCallbackInfo& info);

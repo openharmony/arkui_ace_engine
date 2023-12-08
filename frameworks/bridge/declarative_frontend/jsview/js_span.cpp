@@ -84,7 +84,6 @@ void JSSpan::SetFont(const JSCallbackInfo& info)
 void JSSpan::SetFontSize(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The argv is wrong, it is supposed to have at least 1 argument");
         return;
     }
     CalcDimension fontSize;
@@ -108,7 +107,6 @@ void JSSpan::SetFontWeight(const std::string& value)
 void JSSpan::SetTextColor(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The argv is wrong, it is supposed to have at least 1 argument");
         return;
     }
     Color textColor;
@@ -127,20 +125,16 @@ void JSSpan::SetFontStyle(int32_t value)
     if (value >= 0 && value < static_cast<int32_t>(FONT_STYLES.size())) {
         auto style = FONT_STYLES[value];
         SpanModel::GetInstance()->SetItalicFontStyle(style);
-    } else {
-        LOGE("Text fontStyle(%{public}d) illegal value", value);
     }
 }
 
 void JSSpan::SetFontFamily(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The argv is wrong, it is supposed to have at least 1 argument");
         return;
     }
     std::vector<std::string> fontFamilies;
     if (!ParseJsFontFamilies(info[0], fontFamilies)) {
-        LOGE("Parse FontFamilies failed");
         return;
     }
     SpanModel::GetInstance()->SetFontFamily(fontFamilies);
@@ -149,7 +143,6 @@ void JSSpan::SetFontFamily(const JSCallbackInfo& info)
 void JSSpan::SetLetterSpacing(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The argv is wrong, it is supposed to have at least 1 argument");
         return;
     }
     CalcDimension value;
@@ -164,15 +157,12 @@ void JSSpan::SetTextCase(int32_t value)
     if (value >= 0 && value < static_cast<int32_t>(TEXT_CASES.size())) {
         auto textCase = TEXT_CASES[value];
         SpanModel::GetInstance()->SetTextCase(textCase);
-    } else {
-        LOGE("Text textCase(%{public}d) illegal value", value);
     }
 }
 
 void JSSpan::SetDecoration(const JSCallbackInfo& info)
 {
     if (!info[0]->IsObject()) {
-        LOGE("info[0] not is Object");
         return;
     }
     JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
@@ -211,16 +201,14 @@ void JSSpan::JsOnClick(const JSCallbackInfo& info)
 {
     if (Container::IsCurrentUseNewPipeline()) {
         if (info[0]->IsUndefined() && IsDisableEventVersion()) {
-            LOGD("JsOnClick callback is undefined");
             SpanModel::GetInstance()->ClearOnClick();
             return;
         }
         if (!info[0]->IsFunction()) {
-            LOGW("the info is not click function");
             return;
         }
         auto jsOnClickFunc = AceType::MakeRefPtr<JsClickFunction>(JSRef<JSFunc>::Cast(info[0]));
-        auto targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+        WeakPtr<NG::FrameNode> targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
         auto onClick = [execCtx = info.GetExecutionContext(), func = jsOnClickFunc, node = targetNode](
                            const BaseEventInfo* info) {
             const auto* clickInfo = TypeInfoHelper::DynamicCast<GestureEvent>(info);
@@ -238,11 +226,10 @@ void JSSpan::JsOnClick(const JSCallbackInfo& info)
         CHECK_NULL_VOID(inspector);
         auto impl = inspector->GetInspectorFunctionImpl();
         RefPtr<JsClickFunction> jsOnClickFunc = AceType::MakeRefPtr<JsClickFunction>(JSRef<JSFunc>::Cast(info[0]));
-        auto targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+        WeakPtr<NG::FrameNode> targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
         auto clickFunc = [execCtx = info.GetExecutionContext(), func = std::move(jsOnClickFunc), impl,
                              node = targetNode](const BaseEventInfo* info) {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-            LOGD("About to call onclick method on js");
             const auto* clickInfo = TypeInfoHelper::DynamicCast<ClickInfo>(info);
             auto newInfo = *clickInfo;
             if (impl) {
@@ -272,7 +259,6 @@ void JSSpan::JsRemoteMessage(const JSCallbackInfo& info)
 void JSSpan::SetLineHeight(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGI("The argv is wrong, it is supposed to have at least 1 argument");
         return;
     }
     CalcDimension value;

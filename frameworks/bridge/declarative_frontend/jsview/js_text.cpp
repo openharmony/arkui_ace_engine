@@ -633,21 +633,20 @@ void JSText::JsMenuOptionsExtension(const JSCallbackInfo& info)
 void JSText::JsEnableDataDetector(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGI("The argv is wrong, it is supposed to have at least 1 argument");
         return;
     }
-    if (!info[0]->IsBoolean()) {
+    auto tmpInfo = info[0];
+    if (!tmpInfo->IsBoolean()) {
         TextModel::GetInstance()->SetTextDetectEnable(false);
         return;
     }
-    auto enable = info[0]->ToBoolean();
+    auto enable = tmpInfo->ToBoolean();
     TextModel::GetInstance()->SetTextDetectEnable(enable);
 }
 
 void JSText::JsDataDetectorConfig(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGI("The argv is wrong, it is supposed to have at least 1 argument");
         return;
     }
     if (!info[0]->IsObject()) {
