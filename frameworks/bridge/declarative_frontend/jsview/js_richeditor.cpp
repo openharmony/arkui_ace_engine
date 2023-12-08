@@ -516,6 +516,9 @@ void JSRichEditor::SetCopyOptions(const JSCallbackInfo& info)
 void JSRichEditor::BindSelectionMenu(const JSCallbackInfo& info)
 {
     RichEditorType editorType = RichEditorType::NONE;
+    if (info.Length() >= 1 && info[0]->IsUndefined()) {
+        editorType = RichEditorType::TEXT;
+    }
     if (info.Length() >= 1 && info[0]->IsNumber()) {
         auto spanType = info[0]->ToNumber<int32_t>();
         editorType = static_cast<RichEditorType>(spanType);
