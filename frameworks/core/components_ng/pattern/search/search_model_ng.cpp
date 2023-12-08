@@ -583,7 +583,7 @@ void SearchModelNG::SetOnPasteWithEvent(std::function<void(const std::string&, N
         }
     };
     eventHub->SetOnPasteWithEvent(std::move(searchPasteFunc));
-} 
+}
 
 void SearchModelNG::SetOnPaste(std::function<void(const std::string&)>&& func)
 {
