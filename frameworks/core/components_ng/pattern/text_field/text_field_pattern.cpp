@@ -212,7 +212,8 @@ RefPtr<NodePaintMethod> TextFieldPattern::CreateNodePaintMethod()
     return paint;
 }
 
-void TextFieldPattern::CalcInlineScrollRect(Rect& inlineScrollRect) {
+void TextFieldPattern::CalcInlineScrollRect(Rect& inlineScrollRect)
+{
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto scrollBar = GetScrollBar();
@@ -229,8 +230,8 @@ void TextFieldPattern::CalcInlineScrollRect(Rect& inlineScrollRect) {
     } else {
         offsetScale_ = (barRegionSize_ - activeSize) / (estimatedHeight - mainSize);
     }
-    double lastMainOffset = std::max(
-        static_cast<double>(std::max(inlineMeasureItem_.inlineLastOffsetY, contentRect_.GetY() - textRect_.GetY())), 0.0);
+    double lastMainOffset = std::max(static_cast<double>(
+        std::max(inlineMeasureItem_.inlineLastOffsetY, contentRect_.GetY() - textRect_.GetY())), 0.0);
     double activeMainOffset = std::min(offsetScale_ * lastMainOffset, barRegionSize_ - activeSize);
     inlineScrollRect.SetLeft(inlineScrollRect.GetOffset().GetX() - inlineMeasureItem_.inlineScrollRectOffsetX);
     inlineScrollRect.SetTop(activeMainOffset);

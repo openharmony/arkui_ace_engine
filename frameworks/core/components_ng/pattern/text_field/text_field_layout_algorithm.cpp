@@ -106,15 +106,16 @@ std::optional<SizeF> TextFieldLayoutAlgorithm::InlineMeasureContent(
         paragraph_->Layout(contentConstraint.maxSize.Width());
         contentWidth = ConstraintWithMinWidth(contentConstraint, layoutWrapper, paragraph_);
         // calc inline status in advance
-        auto INLINE_CONSTRAINT_OFFSET = pattern->GetPaddingLeft() + pattern->GetPaddingRight() - static_cast<float>(safeBoundary);
         inlineParagraph_->Layout(
-            contentConstraint.maxSize.Width() + INLINE_CONSTRAINT_OFFSET - static_cast<float>(safeBoundary) - PARAGRAPH_SAVE_BOUNDARY);
+            contentConstraint.maxSize.Width() + pattern->GetPaddingLeft() + pattern->GetPaddingRight()
+            - static_cast<float>(safeBoundary) * 2 - PARAGRAPH_SAVE_BOUNDARY);
         auto longestLine = std::ceil(inlineParagraph_->GetLongestLine());
         inlineParagraph_->Layout(std::min(static_cast<float>(longestLine), inlineParagraph_->GetMaxWidth()));
         auto inlineContentWidth = ConstraintWithMinWidth(
-            contentConstraint, layoutWrapper, inlineParagraph_, static_cast<float>(safeBoundary) + PARAGRAPH_SAVE_BOUNDARY);
-        inlineMeasureItem_.inlineScrollRectOffsetX =
-            contentWidth + pattern->GetHorizontalPaddingAndBorderSum() - inlineContentWidth - safeBoundary - PARAGRAPH_SAVE_BOUNDARY;
+            contentConstraint, layoutWrapper, inlineParagraph_,
+            static_cast<float>(safeBoundary) + PARAGRAPH_SAVE_BOUNDARY);
+        inlineMeasureItem_.inlineScrollRectOffsetX = contentWidth
+            + pattern->GetHorizontalPaddingAndBorderSum() - inlineContentWidth - safeBoundary - PARAGRAPH_SAVE_BOUNDARY;
     }
 
     textRect_.SetSize(SizeF(GetVisualTextWidth(), paragraph_->GetHeight()));
@@ -126,11 +127,11 @@ std::optional<SizeF> TextFieldLayoutAlgorithm::InlineMeasureContent(
         inlineIdealHieght =
             pattern->GetSingleLineHeight() * textFieldLayoutProperty->GetMaxViewLinesValue(INLINE_DEFAULT_VIEW_MAXLINE);
     } else {
-        // calc inline status in advance
-        auto inlineLineHeight = inlineParagraph_->GetHeight() / inlineParagraph_->GetLineCount();
-        inlineMeasureItem_.inlineSizeHeight = inlineLineHeight * textFieldLayoutProperty->GetMaxViewLinesValue(INLINE_DEFAULT_VIEW_MAXLINE);
+        // calc inline status in advance 
+        inlineMeasureItem_.inlineSizeHeight = inlineParagraph_->GetHeight() / inlineParagraph_->GetLineCount()
+            * textFieldLayoutProperty->GetMaxViewLinesValue(INLINE_DEFAULT_VIEW_MAXLINE);
         inlineMeasureItem_.inlineContentRectHeight = GreatNotEqual(inlineParagraph_->GetLongestLine(), 0.0)
-                            ? inlineParagraph_->GetHeight() : std::max(preferredHeight_, inlineParagraph_->GetHeight());
+            ? inlineParagraph_->GetHeight() : std::max(preferredHeight_, inlineParagraph_->GetHeight());
         inlineMeasureItem_.inlineLastOffsetY =
             std::max(inlineMeasureItem_.inlineSizeHeight, inlineMeasureItem_.inlineContentRectHeight)
             - std::min(inlineMeasureItem_.inlineSizeHeight, inlineMeasureItem_.inlineContentRectHeight);
@@ -144,7 +145,8 @@ std::optional<SizeF> TextFieldLayoutAlgorithm::InlineMeasureContent(
 }
 
 float TextFieldLayoutAlgorithm::ConstraintWithMinWidth(
-    const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper, RefPtr<Paragraph>& paragraph, float removeValue)
+    const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper,
+    RefPtr<Paragraph>& paragraph, float removeValue)
 {
     if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
         const auto& calcLayoutConstraint = layoutWrapper->GetLayoutProperty()->GetCalcLayoutConstraint();
@@ -587,8 +589,8 @@ void TextFieldLayoutAlgorithm::CreateParagraph(const TextStyle& textStyle, const
     paragraph_->Build();
 }
 
-void TextFieldLayoutAlgorithm::CreateInlineParagraph(const TextStyle& textStyle, std::string content, bool needObscureText,
-    int32_t nakedCharPosition, bool disableTextAlign)
+void TextFieldLayoutAlgorithm::CreateInlineParagraph(const TextStyle& textStyle, std::string content,
+    bool needObscureText, int32_t nakedCharPosition, bool disableTextAlign)
 {
     auto paraStyle = GetParagraphStyle(textStyle, content);
     if (!disableTextAlign) {
