@@ -6767,4 +6767,100 @@ HWTEST_F(ListTestNg, ContentEndOffset001, TestSize.Level1)
     FlushLayoutTask(frameNode_);
     EXPECT_TRUE(pattern_->IsAtBottom());
 }
+
+/**
+ * @tc.name: SwiperItem021
+ * @tc.desc: Test swipeAction
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListTestNg, SwiperItem021, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create List
+     */
+    auto startFunc = GetDefaultSwiperBuilder(START_NODE_LEN);
+    auto endFunc = GetDefaultSwiperBuilder(END_NODE_LEN);
+    Create([startFunc, endFunc](
+               ListModelNG model) { CreateItemWithSwipe(startFunc, endFunc, V2::SwipeEdgeEffect::None); });
+    auto childNode = GetChildFrameNode(frameNode_, 0);
+    auto childPattern = childNode->GetPattern<ListItemPattern>();
+    auto childLayoutProperty = childNode->GetLayoutProperty<ListItemLayoutProperty>();
+    int32_t childrenSize = childNode->GetChildren().size();
+    EXPECT_EQ(childLayoutProperty->GetEdgeEffectValue(), V2::SwipeEdgeEffect::None);
+
+    /**
+     * @tc.steps: step2. swipeAction set null.
+     * @tc.expected: check whether the properties is correct.
+     */
+    childLayoutProperty->UpdateEdgeEffect(V2::SwipeEdgeEffect::Spring);
+    childPattern->SetStartNode(nullptr);
+    childPattern->SetEndNode(nullptr);
+    EXPECT_EQ(childNode->GetChildren().size(), childrenSize - 2);
+    EXPECT_EQ(childLayoutProperty->GetEdgeEffectValue(), V2::SwipeEdgeEffect::Spring);
+
+    /**
+     * @tc.steps: step3. set swipeAction.
+     * @tc.expected: check whether the properties is correct.
+     */
+    childLayoutProperty->UpdateEdgeEffect(V2::SwipeEdgeEffect::None);
+    startFunc();
+    childPattern->SetStartNode(ViewStackProcessor::GetInstance()->Finish());
+    endFunc();
+    childPattern->SetEndNode(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_EQ(childNode->GetChildren().size(), childrenSize);
+    EXPECT_EQ(childLayoutProperty->GetEdgeEffectValue(), V2::SwipeEdgeEffect::None);
+}
+
+/**
+ * @tc.name: ScrollToIndex006
+ * @tc.desc: Test ScrollToIndex
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListTestNg, ScrollToIndex006, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create List
+     */
+    const int32_t itemNumber = 20;
+    Create([=](ListModelNG model) { CreateItem(itemNumber); });
+    EXPECT_EQ(frameNode_->GetChildren().size(), itemNumber);
+
+    /**
+     * @tc.steps: step2. scroll to finally listItem.
+     * @tc.expected: check whether the properties is correct.
+     */
+    EXPECT_TRUE(ScrollToIndex(itemNumber - 1, true, ScrollAlign::START, 1200.f));
+    EXPECT_TRUE(ScrollToIndex(itemNumber - 1, true, ScrollAlign::CENTER, 1200.f));
+    EXPECT_TRUE(ScrollToIndex(itemNumber - 1, true, ScrollAlign::END, 1200.f));
+    EXPECT_TRUE(ScrollToIndex(itemNumber - 1, true, ScrollAlign::AUTO, 1200.f));
+    EXPECT_TRUE(ScrollToIndex(itemNumber - 1, false, ScrollAlign::START, 1200.f));
+    EXPECT_TRUE(ScrollToIndex(itemNumber - 1, false, ScrollAlign::CENTER, 1200.f));
+    EXPECT_TRUE(ScrollToIndex(itemNumber - 1, false, ScrollAlign::END, 1200.f));
+    EXPECT_TRUE(ScrollToIndex(itemNumber - 1, false, ScrollAlign::AUTO, 1200.f));
+
+    /**
+     * @tc.steps: step3. add listItem and scroll to the Item.
+     * @tc.expected: check whether the properties is correct.
+     */
+    {
+        ListItemModelNG itemModel;
+        itemModel.Create();
+        ViewAbstract::SetHeight(CalcLength(ITEM_HEIGHT));
+        ViewAbstract::SetWidth(CalcLength(FILL_LENGTH));
+        RefPtr<UINode> currentNode = ViewStackProcessor::GetInstance()->Finish();
+        auto currentFrameNode = AceType::DynamicCast<FrameNode>(currentNode);
+        currentFrameNode->MountToParent(frameNode_);
+    }
+    frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(frameNode_->GetChildren().size(), itemNumber + 1);
+    EXPECT_TRUE(ScrollToIndex(itemNumber, true, ScrollAlign::START, 1300.f));
+    EXPECT_TRUE(ScrollToIndex(itemNumber, true, ScrollAlign::CENTER, 1300.f));
+    EXPECT_TRUE(ScrollToIndex(itemNumber, true, ScrollAlign::END, 1300.f));
+    EXPECT_TRUE(ScrollToIndex(itemNumber, true, ScrollAlign::AUTO, 1300.f));
+    EXPECT_TRUE(ScrollToIndex(itemNumber, false, ScrollAlign::START, 1300.f));
+    EXPECT_TRUE(ScrollToIndex(itemNumber, false, ScrollAlign::CENTER, 1300.f));
+    EXPECT_TRUE(ScrollToIndex(itemNumber, false, ScrollAlign::END, 1300.f));
+    EXPECT_TRUE(ScrollToIndex(itemNumber, false, ScrollAlign::AUTO, 1300.f));
+}
 } // namespace OHOS::Ace::NG
