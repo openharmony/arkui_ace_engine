@@ -573,6 +573,10 @@ void JSCanvasRenderer::JsSetFillStyle(const JSCallbackInfo& info)
         }
         return;
     }
+    if (!info[0]->IsObject()) {
+        LOGE("The arg is not Object.");
+        return;
+    }
     JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
     JSRef<JSVal> typeValue = obj->GetProperty("__type");
     std::string type = "";
@@ -657,6 +661,10 @@ void JSCanvasRenderer::JsSetStrokeStyle(const JSCallbackInfo& info)
         if (!isOffscreen_ && pool_) {
             pool_->UpdateStrokeColor(color);
         }
+        return;
+    }
+    if (!info[0]->IsObject()) {
+        LOGE("The arg is not Object.");
         return;
     }
     JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
