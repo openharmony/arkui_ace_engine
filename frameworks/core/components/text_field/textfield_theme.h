@@ -455,6 +455,11 @@ public:
         return overCounterColor_;
     }
 
+    const Dimension& GetPasswordTypeHeight() const
+    {
+        return passwordTypeHeight_;
+    }
+
 protected:
     TextFieldTheme() = default;
 
@@ -527,6 +532,7 @@ private:
 
     bool showEllipsis_ = true;
     bool draggable_ = false;
+    Dimension passwordTypeHeight_ = 40.0_vp;;
 };
 
 } // namespace OHOS::Ace
