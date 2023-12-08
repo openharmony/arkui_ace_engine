@@ -13,18 +13,19 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/pattern/ui_extension/modal_ui_extension_proxy_impl.h"
+#include "core/components_ng/pattern/ui_extension/session_wrapper_factory.h"
 
-#include "frameworks/base/utils/utils.h"
+#include "base/memory/referenced.h"
+#include "core/components_ng/pattern/ui_extension/session_wrapper_impl.h"
+#include "core/components_ng/pattern/ui_extension/ui_extension_pattern.h"
 
 namespace OHOS::Ace::NG {
-ModalUIExtensionProxyImpl::ModalUIExtensionProxyImpl(const RefPtr<SessionWrapper>& sessionWrapper)
-    : sessionWrapper_(sessionWrapper)
-{}
-
-void ModalUIExtensionProxyImpl::SendData(const AAFwk::WantParams& params)
+RefPtr<SessionWrapper> SessionWrapperFactory::CreateSessionWrapper(SessionTye sessionType,
+    const WeakPtr<UIExtensionPattern>& hostPattern, int32_t instanceId, bool isTransferringCaller)
 {
-    CHECK_NULL_VOID(sessionWrapper_);
-    sessionWrapper_->SendDataAsync(params);
+    if (sessionType == SessionTye::UI_EXTENSION_ABILITY) {
+        return AceType::MakeRefPtr<SessionWrapperImpl>(hostPattern, instanceId, isTransferringCaller);
+    }
+    return nullptr;
 }
 } // namespace OHOS::Ace::NG
