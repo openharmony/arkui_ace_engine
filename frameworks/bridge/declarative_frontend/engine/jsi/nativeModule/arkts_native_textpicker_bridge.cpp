@@ -26,6 +26,8 @@ constexpr int NUM_2 = 2;
 constexpr int NUM_3 = 3;
 constexpr int NUM_4 = 4;
 constexpr int NUM_5 = 5;
+constexpr uint32_t DEFAULT_TIME_PICKER_TEXT_COLOR = 0xFF182431;
+constexpr uint32_t DEFAULT_TIME_PICKER_SELECTED_TEXT_COLOR = 0xFF007DFF;
 
 ArkUINativeModuleValue TextpickerBridge::SetBackgroundColor(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
@@ -110,7 +112,9 @@ ArkUINativeModuleValue TextpickerBridge::SetTextStyle(ArkUIRuntimeCallInfo* runt
     Local<JSValueRef> fontStyleArg = runtimeCallInfo->GetCallArgRef(NUM_5);
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
     Color textColor;
-    ArkTSUtils::ParseJsColor(vm, colorArg, textColor);
+    if (colorArg->IsNull() || colorArg->IsUndefined() || !ArkTSUtils::ParseJsColorAlpha(vm, colorArg, textColor)) {
+        textColor.SetValue(DEFAULT_TIME_PICKER_TEXT_COLOR);
+    }
     CalcDimension size;
     if (fontSizeArg->IsNull() || fontSizeArg->IsUndefined()) {
         size = Dimension(-1);
@@ -127,18 +131,19 @@ ArkUINativeModuleValue TextpickerBridge::SetTextStyle(ArkUIRuntimeCallInfo* runt
             ArkTSUtils::ParseJsString(vm, fontWeightArg, weight);
         }
     }
+    std::string families = DEFAULT_ERR_CODE;
     std::vector<std::string> fontFamilies;
-    ArkTSUtils::ParseJsFontFamilies(vm, fontFamilyArg, fontFamilies);
-    std::string families;
-    if (fontFamilies.size() > 0) {
-        for (uint32_t i = 0; i < fontFamilies.size(); i++) {
-            families += fontFamilies.at(i);
+    if (!fontFamilyArg->IsNull() && !fontFamilyArg->IsUndefined()) {
+        ArkTSUtils::ParseJsFontFamilies(vm, fontFamilyArg, fontFamilies);
+        if (fontFamilies.size() > 0) {
+            families = "";
+            for (uint32_t i = 0; i < fontFamilies.size(); i++) {
+                families += fontFamilies.at(i);
+            }
         }
-    } else {
-        families = DEFAULT_ERR_CODE;
     }
     int32_t styleVal = 0;
-    if (!fontStyleArg->IsNull()) {
+    if (!fontStyleArg->IsNull() && !fontStyleArg->IsUndefined()) {
         styleVal = fontStyleArg->Int32Value(vm);
     }
     std::string fontSizeStr = size.ToString();
@@ -161,7 +166,9 @@ ArkUINativeModuleValue TextpickerBridge::SetSelectedTextStyle(ArkUIRuntimeCallIn
     Local<JSValueRef> fontStyleArg = runtimeCallInfo->GetCallArgRef(NUM_5);
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
     Color textColor;
-    ArkTSUtils::ParseJsColor(vm, colorArg, textColor);
+    if (colorArg->IsNull() || colorArg->IsUndefined() || !ArkTSUtils::ParseJsColorAlpha(vm, colorArg, textColor)) {
+        textColor.SetValue(DEFAULT_TIME_PICKER_SELECTED_TEXT_COLOR);
+    }
     CalcDimension size;
     if (fontSizeArg->IsNull() || fontSizeArg->IsUndefined()) {
         size = Dimension(-1);
@@ -178,18 +185,19 @@ ArkUINativeModuleValue TextpickerBridge::SetSelectedTextStyle(ArkUIRuntimeCallIn
             ArkTSUtils::ParseJsString(vm, fontWeightArg, weight);
         }
     }
+    std::string families = DEFAULT_ERR_CODE;
     std::vector<std::string> fontFamilies;
-    ArkTSUtils::ParseJsFontFamilies(vm, fontFamilyArg, fontFamilies);
-    std::string families;
-    if (fontFamilies.size() > 0) {
-        for (uint32_t i = 0; i < fontFamilies.size(); i++) {
-            families += fontFamilies.at(i);
+    if (!fontFamilyArg->IsNull() && !fontFamilyArg->IsUndefined()) {
+        ArkTSUtils::ParseJsFontFamilies(vm, fontFamilyArg, fontFamilies);
+        if (fontFamilies.size() > 0) {
+            families = "";
+            for (uint32_t i = 0; i < fontFamilies.size(); i++) {
+                families += fontFamilies.at(i);
+            }
         }
-    } else {
-        families = DEFAULT_ERR_CODE;
     }
     int32_t styleVal = 0;
-    if (!fontStyleArg->IsNull()) {
+    if (!fontStyleArg->IsNull() && !fontStyleArg->IsUndefined()) {
         styleVal = fontStyleArg->Int32Value(vm);
     }
     std::string fontSizeStr = size.ToString();
@@ -212,7 +220,9 @@ ArkUINativeModuleValue TextpickerBridge::SetDisappearTextStyle(ArkUIRuntimeCallI
     Local<JSValueRef> fontStyleArg = runtimeCallInfo->GetCallArgRef(NUM_5);
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
     Color textColor;
-    ArkTSUtils::ParseJsColor(vm, colorArg, textColor);
+    if (colorArg->IsNull() || colorArg->IsUndefined() || !ArkTSUtils::ParseJsColorAlpha(vm, colorArg, textColor)) {
+        textColor.SetValue(DEFAULT_TIME_PICKER_TEXT_COLOR);
+    }
     CalcDimension size;
     if (fontSizeArg->IsNull() || fontSizeArg->IsUndefined()) {
         size = Dimension(-1);
@@ -229,18 +239,19 @@ ArkUINativeModuleValue TextpickerBridge::SetDisappearTextStyle(ArkUIRuntimeCallI
             ArkTSUtils::ParseJsString(vm, fontWeightArg, weight);
         }
     }
+    std::string families = DEFAULT_ERR_CODE;
     std::vector<std::string> fontFamilies;
-    ArkTSUtils::ParseJsFontFamilies(vm, fontFamilyArg, fontFamilies);
-    std::string families;
-    if (fontFamilies.size() > 0) {
-        for (uint32_t i = 0; i < fontFamilies.size(); i++) {
-            families += fontFamilies.at(i);
+    if (!fontFamilyArg->IsNull() && !fontFamilyArg->IsUndefined()) {
+        ArkTSUtils::ParseJsFontFamilies(vm, fontFamilyArg, fontFamilies);
+        if (fontFamilies.size() > 0) {
+            families = "";
+            for (uint32_t i = 0; i < fontFamilies.size(); i++) {
+                families += fontFamilies.at(i);
+            }
         }
-    } else {
-        families = DEFAULT_ERR_CODE;
     }
     int32_t styleVal = 0;
-    if (!fontStyleArg->IsNull()) {
+    if (!fontStyleArg->IsNull() && !fontStyleArg->IsUndefined()) {
         styleVal = fontStyleArg->Int32Value(vm);
     }
     std::string fontSizeStr = size.ToString();

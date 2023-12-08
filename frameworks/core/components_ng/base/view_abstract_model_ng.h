@@ -835,6 +835,11 @@ public:
         ViewAbstract::SetAllowDrop(allowDrop);
     }
 
+    void SetDragPreview(const NG::DragDropInfo& info) override
+    {
+        ViewAbstract::SetDragPreview(info);
+    }
+
     void SetOnVisibleChange(
         std::function<void(bool, double)>&& onVisibleChange, const std::vector<double>& ratios) override
     {

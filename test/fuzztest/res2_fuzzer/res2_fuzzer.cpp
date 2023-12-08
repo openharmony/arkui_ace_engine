@@ -18,8 +18,8 @@
 
 #include <stddef.h>
 #include <stdint.h>
-#include "adapter/ohos/entrance/file_asset_provider.h"
-#include "core/common/flutter/flutter_asset_manager.h"
+#include "adapter/ohos/entrance/file_asset_provider_impl.h"
+#include "core/common/asset_manager_impl.h"
 #include "frameworks/core/components/theme/theme_constants.h"
 #include "core/components/test/unittest/theme/theme_mock.h"
 
@@ -53,8 +53,8 @@ bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
     WriteDataToFile("/data/test/arkui/123.png", s.c_str(), ri);
     auto res = AceType::MakeRefPtr<ResourceAdapterMock>();
     auto theme = AceType::MakeRefPtr<ThemeConstants>(res);
-    auto file = AceType::MakeRefPtr<FileAssetProvider>(); 
-    auto asset = AceType::MakeRefPtr<FlutterAssetManager>();
+    auto file = AceType::MakeRefPtr<FileAssetProviderImpl>();
+    auto asset = AceType::MakeRefPtr<AssetManagerImpl>();
     string pack = "/data/test/arkui";
     vector<string> files  = {""};
     if(file->Initialize(pack,files)){

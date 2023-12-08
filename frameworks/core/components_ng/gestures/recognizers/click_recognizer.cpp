@@ -162,6 +162,7 @@ void ClickRecognizer::HandleTouchDownEvent(const TouchEvent& event)
         }
     }
     if (fingersId_.find(event.id) == fingersId_.end()) {
+        fingersId_.insert(event.id);
         ++currentTouchPointsNum_;
         touchPoints_[event.id] = event;
     }

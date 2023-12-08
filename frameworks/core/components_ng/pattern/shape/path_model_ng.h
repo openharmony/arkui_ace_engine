@@ -25,6 +25,8 @@ class ACE_EXPORT PathModelNG : public OHOS::Ace::PathModel {
 public:
     void Create() override;
     void SetCommands(const std::string& pathCmd) override;
+    
+    static void SetCommands(FrameNode* frameNode, const std::string& pathCmd);
 };
 
 } // namespace OHOS::Ace::NG

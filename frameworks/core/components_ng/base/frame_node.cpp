@@ -2374,7 +2374,7 @@ void FrameNode::AddFRCSceneInfo(const std::string& scene, float speed, SceneStat
     if (SystemProperties::GetDebugEnabled()) {
         const std::string sceneStatusStrs[] = {"START", "RUNNING", "END"};
         LOGI("%{public}s  AddFRCSceneInfo scene:%{public}s   speed:%{public}f  status:%{public}s", GetTag().c_str(),
-            scene.c_str(), speed, sceneStatusStrs[static_cast<int32_t>(status)].c_str());
+            scene.c_str(), std::abs(speed), sceneStatusStrs[static_cast<int32_t>(status)].c_str());
     }
 
     auto renderContext = GetRenderContext();
@@ -2384,7 +2384,7 @@ void FrameNode::AddFRCSceneInfo(const std::string& scene, float speed, SceneStat
     auto frameRateManager = pipelineContext->GetFrameRateManager();
     CHECK_NULL_VOID(frameRateManager);
 
-    auto expectedRate = renderContext->CalcExpectedFrameRate(scene, speed);
+    auto expectedRate = renderContext->CalcExpectedFrameRate(scene, std::abs(speed));
     auto nodeId = GetId();
     auto iter = sceneRateMap_.find(scene);
     switch (status) {
@@ -2633,7 +2633,9 @@ void FrameNode::Layout()
         GetLayoutAlgorithm()->SetSkipLayout();
     }
 
-    bool isFocusOnPage = GetHostNode()->GetFocusHub() && GetHostNode()->GetFocusHub()->IsCurrentFocus();
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    bool isFocusOnPage = pipeline->CheckPageFocus();
     SaveGeoState();
     AvoidKeyboard(isFocusOnPage);
     ExpandSafeArea(isFocusOnPage);

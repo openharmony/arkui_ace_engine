@@ -15,20 +15,16 @@
 
 #include "frameworks/bridge/declarative_frontend/jsview/js_scope_util.h"
 
-#include "frameworks/core/common/container.h"
 #include "base/memory/referenced.h"
+#include "frameworks/core/common/container.h"
 
 namespace OHOS::Ace::Framework {
 int32_t JSScopeUtil::restoreInstanceId_ = -1;
 
-JSScopeUtil::JSScopeUtil()
-{
-    LOGI("JSScopeUtil constructor");
-}
+JSScopeUtil::JSScopeUtil() {}
 
 void JSScopeUtil::JSBind(BindingTarget globalObj)
 {
-    LOGI("JSScopeUtil JSBind");
     JSClass<JSScopeUtil>::Declare("__JSScopeUtil__");
     JSClass<JSScopeUtil>::StaticMethod("syncInstanceId", &JSScopeUtil::SyncInstanceId);
     JSClass<JSScopeUtil>::StaticMethod("restoreInstanceId", &JSScopeUtil::RestoreInstanceId);
@@ -38,12 +34,10 @@ void JSScopeUtil::JSBind(BindingTarget globalObj)
 void JSScopeUtil::SyncInstanceId(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have atleast 1 arguments");
         return;
     }
 
     if (!info[0]->IsNumber()) {
-        LOGE("arg is not Number.");
         return;
     }
 

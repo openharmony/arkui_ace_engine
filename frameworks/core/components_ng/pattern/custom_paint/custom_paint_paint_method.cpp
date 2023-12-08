@@ -356,9 +356,8 @@ sk_sp<SkImage> CustomPaintPaintMethod::GetImage(const std::string& src)
     CHECK_NULL_RETURN(context, nullptr);
     auto image = Ace::ImageProvider::GetSkImage(src, context);
     CHECK_NULL_RETURN(image, nullptr);
-    auto rasterizedImage = image->makeRasterImage();
-    imageCache_->CacheImage(src, std::make_shared<Ace::CachedImage>(rasterizedImage));
-    return rasterizedImage;
+    imageCache_->CacheImage(src, std::make_shared<Ace::CachedImage>(image));
+    return image;
 }
 #else
 std::shared_ptr<RSImage> CustomPaintPaintMethod::GetImage(const std::string& src)

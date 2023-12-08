@@ -1589,6 +1589,55 @@ HWTEST_F(TextFieldKeyEventTest, KeyEvent002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: KeyEvent003
+ * @tc.desc: Test KeyEvent ctrl + c/v
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldKeyEventTest, KeyEvent003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize textInput and get focus
+     */
+    std::string expectStr = "fghij";
+    auto onCopy = [expectStr](const std::string& str) { EXPECT_EQ(expectStr, str); };
+    auto onPaste = [expectStr](const std::string& str) { EXPECT_EQ(expectStr, str); };
+    CreateTextField(DEFAULT_TEXT, DEFAULT_PLACE_HOLDER, [&](TextFieldModel& model) -> void {
+        model.SetOnCopy(onCopy);
+        model.SetOnPaste(onPaste);
+    });
+
+    /**
+     * @tc.steps: step2. Create keyboard events
+     */
+    KeyEvent event;
+    event.action = KeyAction::DOWN;
+    std::vector<KeyCode> presscodes = {};
+    event.pressedCodes = presscodes;
+
+    /**
+     * @tc.expected: shift + insert to input
+     */
+    event.pressedCodes.clear();
+    event.pressedCodes.push_back(KeyCode::KEY_CTRL_LEFT);
+    event.pressedCodes.push_back(KeyCode::KEY_C);
+    event.code = KeyCode::KEY_C;
+    pattern_->HandleSetSelection(5, 10, false);
+    auto ret = pattern_->OnKeyEvent(event);
+    FlushLayoutTask(frameNode_);
+    EXPECT_TRUE(ret);
+
+    event.pressedCodes.clear();
+    event.pressedCodes.push_back(KeyCode::KEY_CTRL_LEFT);
+    event.pressedCodes.push_back(KeyCode::KEY_V);
+    event.code = KeyCode::KEY_V;
+    pattern_->SetCaretPosition(0);
+    ret = pattern_->OnKeyEvent(event);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->GetTextValue(), expectStr + DEFAULT_TEXT);
+    EXPECT_TRUE(ret);
+}
+
+/**
  * @tc.name: UpdateCaretByTouchMove001
  * @tc.desc: Test UpdateCaretByTouchMove
  * @tc.type: FUNC

@@ -125,6 +125,10 @@ const std::string NEWLINE = "\n";
 const std::wstring WIDE_NEWLINE = StringUtils::ToWstring(NEWLINE);
 constexpr int32_t AUTO_FILL_FAILED = 1;
 
+#ifdef ENABLE_DRAG_FRAMEWORK
+constexpr Dimension INSERT_CURSOR_OFFSET = 8.0_vp;
+#endif // ENABLE_DRAG_FRAMEWORK
+
 // need to be moved to formatter
 const std::string DIGIT_WHITE_LIST = "[0-9]";
 const std::string PHONE_WHITE_LIST = "[\\d\\-\\+\\*\\#]+";
@@ -658,6 +662,13 @@ void TextFieldPattern::HandleFocusEvent()
         underlineWidth_ = TYPING_UNDERLINE_WIDTH;
         renderContext->UpdateBorderRadius({ radius.GetX(), radius.GetY(), radius.GetY(), radius.GetX() });
     }
+    // Show cancel button on focus if cleanNodeStyle_ = CleanNodeStyle::INPUT.
+    if (cleanNodeStyle_ == CleanNodeStyle::INPUT) {
+        auto cleanNodeResponseArea = AceType::DynamicCast<CleanNodeResponseArea>(cleanNodeResponseArea_);
+        if (cleanNodeResponseArea) {
+            cleanNodeResponseArea->UpdateCleanNode(true);
+        }
+    }
     host->MarkDirtyNode(layoutProperty->GetMaxLinesValue(Infinity<float>()) <= 1 ? PROPERTY_UPDATE_MEASURE_SELF
                                                                                  : PROPERTY_UPDATE_MEASURE);
 }
@@ -819,7 +830,7 @@ void TextFieldPattern::InitDisableColor()
         underlineColor_ = IsDisabled() ? theme->GetDisableUnderlineColor() : theme->GetUnderlineColor();
         SaveUnderlineStates();
     }
-    layoutProperty->UpdateIsEnabled(IsDisabled());
+    layoutProperty->UpdateIsDisabled(IsDisabled());
 }
 
 void TextFieldPattern::InitFocusEvent()
@@ -886,6 +897,8 @@ void TextFieldPattern::HandleBlurEvent()
     }
     needToRequestKeyboardInner_ = false;
     isFocusedBeforeClick_ = false;
+    UpdateShowMagnifier();
+    CloseSelectOverlay(true);
     StopTwinkling();
     if (customKeyboardBuilder_ && isCustomKeyboardAttached_) {
         CloseKeyboard(true);
@@ -893,6 +906,13 @@ void TextFieldPattern::HandleBlurEvent()
     }
     selectController_->UpdateCaretIndex(selectController_->GetCaretIndex());
     NotifyOnEditChanged(false);
+    // Hidden cancel button on blur if cleanNodeStyle_ = CleanNodeStyle::INPUT.
+    if (cleanNodeStyle_ == CleanNodeStyle::INPUT) {
+        auto cleanNodeResponseArea = AceType::DynamicCast<CleanNodeResponseArea>(cleanNodeResponseArea_);
+        if (cleanNodeResponseArea) {
+            cleanNodeResponseArea->UpdateCleanNode(false);
+        }
+    }
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
@@ -1506,7 +1526,8 @@ void TextFieldPattern::InitDragDropEvent()
         auto touchX = event->GetX();
         auto touchY = event->GetY();
         Offset offset = Offset(touchX, touchY) - Offset(pattern->textRect_.GetX(), pattern->textRect_.GetY()) -
-                        Offset(pattern->parentGlobalOffset_.GetX(), pattern->parentGlobalOffset_.GetY());
+                        Offset(pattern->parentGlobalOffset_.GetX(), pattern->parentGlobalOffset_.GetY()) -
+                        Offset(0, INSERT_CURSOR_OFFSET.ConvertToPx());
         auto position = pattern->ConvertTouchOffsetToCaretPosition(offset);
         auto host = pattern->GetHost();
         CHECK_NULL_VOID(host);
@@ -1726,7 +1747,7 @@ void TextFieldPattern::HandleDoubleClickEvent(GestureEvent& info)
         StopTwinkling();
         SetIsSingleHandle(false);
     }
-    if (info.GetSourceDevice() != SourceType::MOUSE) {
+    if (info.GetSourceDevice() != SourceType::MOUSE && !contentController_->IsEmpty()) {
         ProcessOverlay(true, true);
         UpdateSelectMenuVisibility(true);
     }
@@ -2422,6 +2443,7 @@ void TextFieldPattern::CloseSelectOverlay(bool animation)
     CHECK_NULL_VOID(host);
     auto gesture = host->GetOrCreateGestureEventHub();
     gesture->AddTouchEvent(GetTouchListener());
+    UpdateShowMagnifier();
 }
 
 void TextFieldPattern::OnHandleMove(const RectF& handleRect, bool isFirstHandle)
@@ -2787,15 +2809,16 @@ void TextFieldPattern::HandleLeftMouseReleaseEvent(MouseInfo& info)
 
 void TextFieldPattern::UpdateTextFieldManager(const Offset& offset, float height)
 {
-    if (!HasFocus()) {
-        return;
-    }
     auto tmpHost = GetHost();
     CHECK_NULL_VOID(tmpHost);
     auto context = tmpHost->GetContext();
     CHECK_NULL_VOID(context);
     auto textFieldManager = DynamicCast<TextFieldManagerNG>(context->GetTextFieldManager());
     CHECK_NULL_VOID(textFieldManager);
+    textFieldManager->UpdateScrollableParentViewPort(tmpHost);
+    if (!HasFocus()) {
+        return;
+    }
     textFieldManager->SetClickPosition({ offset.GetX() + selectController_->GetCaretRect().GetX(),
         offset.GetY() + selectController_->GetCaretRect().GetY() });
     textFieldManager->SetHeight(selectController_->GetCaretRect().Height());
@@ -5612,9 +5635,9 @@ bool TextFieldPattern::IsShowPasswordIcon() const
 
 bool TextFieldPattern::IsShowCancelButtonMode() const
 {
-    auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
-    return layoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED) == TextInputType::UNSPECIFIED &&
-           !IsTextArea();
+    auto paintProperty = GetPaintProperty<TextFieldPaintProperty>();
+    CHECK_NULL_RETURN(paintProperty, false);
+    return paintProperty->GetInputStyleValue(InputStyle::DEFAULT) != InputStyle::INLINE && !IsTextArea();
 }
 
 void TextFieldPattern::ProcessResponseArea()
@@ -5840,8 +5863,14 @@ void TextFieldPattern::ScrollToSafeArea() const
 RefPtr<PixelMap> TextFieldPattern::GetPixelMap()
 {
     auto context = GetHost()->GetRenderContext();
+    if (!context) {
+        UpdateShowMagnifier();
+    }
     CHECK_NULL_RETURN(context, NULL);
     auto pixelMap = context->GetThumbnailPixelMap();
+    if (!pixelMap) {
+        UpdateShowMagnifier();
+    }
     CHECK_NULL_RETURN(pixelMap, NULL);
     return pixelMap;
 }

@@ -200,6 +200,11 @@ void PipelineContext::OnSurfaceChanged(int32_t width, int32_t height, WindowSize
 
 void PipelineContext::OnLayoutCompleted(const std::string& componentId) {}
 
+bool PipelineContext::CheckPageFocus()
+{
+    return true;
+}
+
 void PipelineContext::OnDrawCompleted(const std::string& componentId) {}
 
 void PipelineContext::SetNeedRenderNode(const RefPtr<FrameNode>& node) {}
@@ -536,5 +541,12 @@ std::string NG::PipelineContext::GetCurrentExtraInfo()
 {
     return std::string();
 }
+
+bool NG::PipelineContext::IsDragging() const
+{
+    return false;
+}
+
+void NG::PipelineContext::SetIsDragging(bool isDragging) {}
 } // namespace OHOS::Ace
 // pipeline_base ===============================================================

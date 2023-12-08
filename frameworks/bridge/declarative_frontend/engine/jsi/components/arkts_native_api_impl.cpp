@@ -57,6 +57,9 @@
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_textpicker_modifier.h"
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_timepicker_modifier.h"
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_video_modifier.h"
+#include "bridge/declarative_frontend/engine/jsi/components/arkts_native_line_modifier.h"
+#include "bridge/declarative_frontend/engine/jsi/components/arkts_native_path_modifier.h"
+#include "bridge/declarative_frontend/engine/jsi/components/arkts_native_polyline_modifier.h"
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_side_bar_container_modifier.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/frame_node.h"
@@ -64,6 +67,9 @@
 #include "core/pipeline/base/element_register.h"
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_calendar_picker_modifier.h"
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_alphabet_indexer_modifier.h"
+#include "bridge/declarative_frontend/engine/jsi/components/arkts_native_common_shape_modifier.h"
+#include "bridge/declarative_frontend/engine/jsi/components/arkts_native_shape_modifier.h"
+#include "bridge/declarative_frontend/engine/jsi/components/arkts_native_rect_modifier.h"
 
 #ifdef FORM_SUPPORTED
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_form_component_modifier.h"
@@ -113,6 +119,9 @@ static struct ArkUINodeAPI impl = {
     GetNavRouterModifier,
     GetPatternLockModifier,
     GetColumnSplitModifier,
+    GetLineModifier,
+    GetPathModifier,
+    GetPolylineModifier,
     GetSpanModifier,
     GetImageAnimatorModifier,
     GetSideBarContainerModifier,
@@ -125,6 +134,9 @@ static struct ArkUINodeAPI impl = {
     GetMenuModifier,
     GetDatePickerModifier,
     GetAlphabetIndexerModifier,
+    GetCommonShapeModifier,
+    GetShapeModifier,
+    GetRectModifier,
 
 #ifdef FORM_SUPPORTED
     GetFormComponentModifier,

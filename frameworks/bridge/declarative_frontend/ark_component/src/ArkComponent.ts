@@ -341,11 +341,11 @@ class ShadowModifier extends ModifierWithKey<ShadowOptions | ShadowStyle> {
 
   checkObjectDiff(): boolean {
     return !((this.stageValue as ShadowOptions).radius === (this.value as ShadowOptions).radius &&
-    (this.stageValue as ShadowOptions).type === (this.value as ShadowOptions).type &&
-    (this.stageValue as ShadowOptions).color === (this.value as ShadowOptions).color &&
-    (this.stageValue as ShadowOptions).offsetX === (this.value as ShadowOptions).offsetX &&
-    (this.stageValue as ShadowOptions).offsetY === (this.value as ShadowOptions).offsetY &&
-    (this.stageValue as ShadowOptions).fill === (this.value as ShadowOptions).fill);
+      (this.stageValue as ShadowOptions).type === (this.value as ShadowOptions).type &&
+      (this.stageValue as ShadowOptions).color === (this.value as ShadowOptions).color &&
+      (this.stageValue as ShadowOptions).offsetX === (this.value as ShadowOptions).offsetX &&
+      (this.stageValue as ShadowOptions).offsetY === (this.value as ShadowOptions).offsetY &&
+      (this.stageValue as ShadowOptions).fill === (this.value as ShadowOptions).fill);
   }
 }
 
@@ -465,7 +465,7 @@ class SaturateModifier extends Modifier<number> {
   }
 }
 
-class ColorBlendModifier extends Modifier<number | string> {
+class ColorBlendModifier extends Modifier<Color | string | Resource> {
   static identity: Symbol = Symbol("colorBlend");
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -473,6 +473,14 @@ class ColorBlendModifier extends Modifier<number | string> {
     }
     else {
       GetUINativeModule().common.setColorBlend(node, this.value);
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    if (isResource(this.stageValue) && isResource(this.value)) {
+      return !isResourceEqual(this.stageValue, this.value);
+    } else {
+      return true;
     }
   }
 }
@@ -525,7 +533,7 @@ class BlurModifier extends Modifier<number> {
   }
 }
 
-class LinearGradientModifier extends Modifier<ArkLinearGradient> {
+class LinearGradientModifier extends ModifierWithKey<{ angle?: number | string; direction?: GradientDirection; colors: Array<any>; repeating?: boolean; }> {
   static identity: Symbol = Symbol("linearGradient");
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -537,9 +545,15 @@ class LinearGradientModifier extends Modifier<ArkLinearGradient> {
         this.value.colors, this.value.repeating);
     }
   }
+  checkObjectDiff(): boolean {
+    return !((this.stageValue.angle === this.value.angle) &&
+      (this.stageValue.direction === this.value.direction) &&
+      (this.stageValue.colors === this.value.colors) &&
+      (this.stageValue.repeating ===this.value.repeating));
+  }
 }
 
-class RadialGradientModifier extends Modifier<ArkRadialGradient> {
+class RadialGradientModifier extends ModifierWithKey<{ center: Array<any>; radius: number | string; colors: Array<any>; repeating?: boolean }> {
   static identity: Symbol = Symbol("radialGradient");
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -550,9 +564,15 @@ class RadialGradientModifier extends Modifier<ArkRadialGradient> {
         this.value.center, this.value.radius, this.value.colors, this.value.repeating);
     }
   }
+  checkObjectDiff(): boolean {
+    return !((this.stageValue.center === this.value.center) &&
+      (this.stageValue .radius === this.value.radius) &&
+      (this.stageValue.colors === this.value.colors) &&
+      (this.stageValue.repeating === this.value.repeating));
+  }
 }
 
-class SweepGradientModifier extends Modifier<ArkSweepGradient> {
+class SweepGradientModifier extends ModifierWithKey<{ center: Array<any>; start?: number | string; end?: number | string; rotation?: number | string; colors: Array<any>; repeating?: boolean; }> {
   static identity: Symbol = Symbol("sweepGradient");
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -564,6 +584,14 @@ class SweepGradientModifier extends Modifier<ArkSweepGradient> {
         this.value.start, this.value.end, this.value.rotation,
         this.value.colors, this.value.repeating);
     }
+  }
+  checkObjectDiff(): boolean {
+    return !((this.stageValue.center === this.value.center) &&
+      (this.stageValue.start === this.value.start) &&
+      (this.stageValue.end === this.value.end) &&
+      (this.stageValue.rotation === this.value.rotation) &&
+      (this.stageValue.colors === this.value.colors) &&
+      (this.stageValue.repeating === this.value.repeating));
   }
 }
 
@@ -587,30 +615,103 @@ class OverlayModifier extends ModifierWithKey<ArkOverlay> {
   }
 }
 
-class BorderImageModifier extends Modifier<ArkBorderImage> {
+class BorderImageModifier extends ModifierWithKey<BorderImageOption> {
   static identity: Symbol = Symbol("borderImage");
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
       GetUINativeModule().common.resetBorderImage(node);
     } else {
+      let sliceTop: Length | undefined = undefined;
+      let sliceRight: Length | undefined = undefined;
+      let sliceBottom: Length | undefined = undefined;
+      let sliceLeft: Length | undefined = undefined;
+      let repeat: RepeatMode | undefined = undefined;
+      let source: string | Resource | LinearGradient | undefined = undefined;
+      let sourceAngle: number | string | undefined = undefined;
+      let sourceDirection: GradientDirection | undefined = undefined;
+      let sourceColors: Array<any> | undefined = undefined;
+      let sourceRepeating: boolean | undefined = undefined;
+      let widthTop: Length | undefined = undefined;
+      let widthRight: Length | undefined = undefined;
+      let widthBottom: Length | undefined = undefined;
+      let widthLeft: Length | undefined = undefined;
+      let outsetTop: Length | undefined = undefined;
+      let outsetRight: Length | undefined = undefined;
+      let outsetBottom: Length | undefined = undefined;
+      let outsetLeft: Length | undefined = undefined;
+      let fill: boolean | undefined = undefined;
+
+      if (!isUndefined(this.value.slice)) {
+        if (isLengthType(this.value.slice) || isResource(this.value.slice)) {
+          let tmpSlice = this.value.slice as Length;
+          sliceTop = tmpSlice;
+          sliceRight = tmpSlice;
+          sliceBottom = tmpSlice;
+          sliceLeft = tmpSlice;
+        } else {
+          let tmpSlice = this.value.slice as EdgeWidths;
+          sliceTop = tmpSlice.top;
+          sliceRight = tmpSlice.right;
+          sliceBottom = tmpSlice.bottom;
+          sliceLeft = tmpSlice.left;
+        }
+      }
+      repeat = this.value.repeat;
+      if (!isUndefined(this.value.source)) {
+        if (isString(this.value.source) || isResource(this.value.source)) {
+          source = this.value.source;
+        } else {
+          let tmpSource = this.value.source as LinearGradient;
+          sourceAngle = tmpSource.angle;
+          sourceDirection = tmpSource.direction;
+          sourceColors = tmpSource.colors;
+          sourceRepeating = tmpSource.repeating;
+        }
+      }
+      if (!isUndefined(this.value.width)) {
+        if (isLengthType(this.value.width) || isResource(this.value.width)) {
+          let tmpWidth = this.value.width as Length;
+          widthTop = tmpWidth;
+          widthRight = tmpWidth;
+          widthBottom = tmpWidth;
+          widthLeft = tmpWidth;
+        } else {
+          let tmpWidth = this.value.width as EdgeWidths;
+          widthTop = tmpWidth.top;
+          widthRight = tmpWidth.right;
+          widthBottom = tmpWidth.bottom;
+          widthLeft = tmpWidth.left;
+        }
+      }
+      if (!isUndefined(this.value.outset)) {
+        if (isLengthType(this.value.outset) || isResource(this.value.outset)) {
+          let tmpOutset = this.value.outset as Length;
+          outsetTop = tmpOutset;
+          outsetRight = tmpOutset;
+          outsetBottom = tmpOutset;
+          outsetLeft = tmpOutset;
+        } else {
+          let tmpOutset = this.value.outset as EdgeWidths;
+          outsetTop = tmpOutset.top;
+          outsetRight = tmpOutset.right;
+          outsetBottom = tmpOutset.bottom;
+          outsetLeft = tmpOutset.left;
+        }
+      }
+      fill = this.value.fill;
       GetUINativeModule().common.setBorderImage(node,
-        this.value.sliceTop, this.value.sliceRight,
-        this.value.sliceBottom, this.value.sliceLeft,
-        this.value.repeat,
-        this.value.source,
-        this.value.sourceAngle, this.value.sourceDirection,
-        this.value.sourceColors, this.value.sourceRepeating,
-        this.value.widthTop, this.value.widthRight,
-        this.value.widthBottom, this.value.widthLeft,
-        this.value.outsetTop, this.value.outsetRight,
-        this.value.outsetBottom, this.value.outsetLeft,
-        this.value.fill);
+        sliceTop, sliceRight, sliceBottom, sliceLeft,
+        repeat,
+        source, sourceAngle, sourceDirection, sourceColors, sourceRepeating,
+        widthTop, widthRight, widthBottom, widthLeft,
+        outsetTop, outsetRight, outsetBottom, outsetLeft,
+        fill);
     }
   }
 }
 
-class BorderModifier extends Modifier<ArkBorder>{
-  static identity: Symbol = Symbol("border");
+class BorderModifier extends ModifierWithKey<ArkBorder>{
+  static identity: Symbol = Symbol('border');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
       GetUINativeModule().common.resetBorder(node);
@@ -623,9 +724,13 @@ class BorderModifier extends Modifier<ArkBorder>{
         this.value.arkStyle.top, this.value.arkStyle.right, this.value.arkStyle.bottom, this.value.arkStyle.left);
     }
   }
+  
+  checkObjectDiff(): boolean {
+    return this.value.checkObjectDiff(this.stageValue);
+  }
 }
 
-class ForegroundBlurStyleModifier extends Modifier<ArkForegroundBlurStyle> {
+class ForegroundBlurStyleModifier extends ModifierWithKey<ArkForegroundBlurStyle> {
   static identity: Symbol = Symbol("foregroundBlurStyle");
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -636,17 +741,37 @@ class ForegroundBlurStyleModifier extends Modifier<ArkForegroundBlurStyle> {
         this.value.blurStyle, this.value.colorMode, this.value.adaptiveColor, this.value.scale);
     }
   }
+
+  checkObjectDiff(): boolean {
+     return !((this.stageValue as ArkForegroundBlurStyle).blurStyle === (this.value as ArkForegroundBlurStyle).blurStyle &&
+       (this.stageValue as ArkForegroundBlurStyle).colorMode === (this.value as ArkForegroundBlurStyle).colorMode &&
+       (this.stageValue as ArkForegroundBlurStyle).adaptiveColor === (this.value as ArkForegroundBlurStyle).adaptiveColor &&
+       (this.stageValue as ArkForegroundBlurStyle).scale === (this.value as ArkForegroundBlurStyle).scale);
+  }
 }
 
-class BackgroundImagePositionModifier extends Modifier<ArkBackgroundImagePosition>{
+class BackgroundImagePositionModifier extends ModifierWithKey<Position | Alignment>{
   static identity: Symbol = Symbol("backgroundImagePosition");
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
       GetUINativeModule().common.resetBackgroundImagePosition(node);
     }
     else {
-      GetUINativeModule().common.setBackgroundImagePosition(node, this.value.alignment, this.value.x, this.value.y);
+      if (isNumber(this.value)) {
+        GetUINativeModule().common.setBackgroundImagePosition(node, this.value, undefined, undefined);
+      } else {
+        GetUINativeModule().common.setBackgroundImagePosition(node, undefined, (this.value as Position)?.x, (this.value as Position)?.y);
+      }
     }
+  }
+  checkObjectDiff(): boolean {
+    if (!((isResource(this.stageValue) && isResource(this.value) &&
+      isResourceEqual(this.stageValue, this.value)) ||
+      (!isResource(this.stageValue) && !isResource(this.value) &&
+      this.stageValue === this.value))) {
+      return true;
+    }
+    return false;
   }
 }
 
@@ -663,7 +788,7 @@ class LinearGradientBlurModifier extends Modifier<ArkLinearGradientBlur> {
   }
 }
 
-class BackgroundImageModifier extends Modifier<ArkBackgroundImage>{
+class BackgroundImageModifier extends ModifierWithKey<ArkBackgroundImage>{
   static identity: Symbol = Symbol("backgroundImage");
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -673,9 +798,13 @@ class BackgroundImageModifier extends Modifier<ArkBackgroundImage>{
       GetUINativeModule().common.setBackgroundImage(node, this.value.src, this.value.repeat);
     }
   }
+  checkObjectDiff(): boolean {
+    return !((this.stageValue as ArkBackgroundImage).src === (this.value as ArkBackgroundImage).src &&
+    (this.stageValue as ArkBackgroundImage).repeat === (this.value as ArkBackgroundImage).repeat)
+  }
 }
 
-class BackgroundBlurStyleModifier extends Modifier<ArkBackgroundBlurStyle> {
+class BackgroundBlurStyleModifier extends ModifierWithKey<ArkBackgroundBlurStyle> {
   static identity: Symbol = Symbol("backgroundBlurStyle");
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -688,16 +817,28 @@ class BackgroundBlurStyleModifier extends Modifier<ArkBackgroundBlurStyle> {
   }
 }
 
-
-class BackgroundImageSizeModifier extends Modifier<ArkBackgroundImageSize>{
+class BackgroundImageSizeModifier extends ModifierWithKey<SizeOptions | ImageSize>{
   static identity: Symbol = Symbol("backgroundImageSize");
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
       GetUINativeModule().common.resetBackgroundImageSize(node);
     }
     else {
-      GetUINativeModule().common.setBackgroundImageSize(node, this.value.imageSize, this.value.width, this.value.height);
+      if (isNumber(this.value)) {
+        GetUINativeModule().common.setBackgroundImageSize(node, this.value, undefined, undefined);
+      } else {
+        GetUINativeModule().common.setBackgroundImageSize(node, undefined, (this.value as SizeOptions)?.width, (this.value as SizeOptions)?.height);
+      }
     }
+  }
+  checkObjectDiff(): boolean {
+    if (!((isResource(this.stageValue) && isResource(this.value) &&
+      isResourceEqual(this.stageValue, this.value)) ||
+      (!isResource(this.stageValue) && !isResource(this.value) &&
+        this.stageValue === this.value))) {
+      return true;
+    }
+    return false;
   }
 }
 
@@ -782,7 +923,7 @@ class MaskModifier extends ModifierWithKey<boolean | object> {
   }
 }
 
-class PixelStretchEffectModifier extends Modifier<ArkPixelStretchEffect> {
+class PixelStretchEffectModifier extends ModifierWithKey<PixelStretchEffectOptions> {
   static identity: Symbol = Symbol("pixelStretchEffect");
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -793,9 +934,16 @@ class PixelStretchEffectModifier extends Modifier<ArkPixelStretchEffect> {
         this.value.top, this.value.right, this.value.bottom, this.value.left);
     }
   }
+
+  checkObjectDiff(): boolean {
+      return !((this.stageValue as PixelStretchEffectOptions).left === (this.value as PixelStretchEffectOptions).left &&
+        (this.stageValue as PixelStretchEffectOptions).right === (this.value as PixelStretchEffectOptions).right &&
+        (this.stageValue as PixelStretchEffectOptions).top === (this.value as PixelStretchEffectOptions).top &&
+        (this.stageValue as PixelStretchEffectOptions).bottom === (this.value as PixelStretchEffectOptions).bottom);
+  }
 }
 
-class LightUpEffectModifier extends Modifier<number> {
+class LightUpEffectModifier extends ModifierWithKey<number> {
   static identity: Symbol = Symbol("lightUpEffect");
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -1240,26 +1388,108 @@ class ObscuredModifier extends Modifier<ArkObscured> {
   }
 }
 
-class MouseResponseRegionModifier extends Modifier<ArkResponseRegion> {
+class MouseResponseRegionModifier extends ModifierWithKey<Array<Rectangle> | Rectangle> {
   static identity = Symbol("mouseResponseRegion");
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
       GetUINativeModule().common.resetMouseResponseRegion(node);
     }
     else {
-      GetUINativeModule().common.setMouseResponseRegion(node, this.value.responseRegion);
+      let responseRegion: (number | string | Resource)[] = [];
+      if (Array.isArray(this.value)) {
+        for (let i = 0; i < this.value.length; i++) {
+          responseRegion.push(this.value[i].x ?? 'PLACEHOLDER');
+          responseRegion.push(this.value[i].y ?? 'PLACEHOLDER');
+          responseRegion.push(this.value[i].width ?? 'PLACEHOLDER');
+          responseRegion.push(this.value[i].height ?? 'PLACEHOLDER');
+        }
+      } else {
+        responseRegion.push(this.value.x ?? 'PLACEHOLDER');
+        responseRegion.push(this.value.y ?? 'PLACEHOLDER');
+        responseRegion.push(this.value.width ?? 'PLACEHOLDER');
+        responseRegion.push(this.value.height ?? 'PLACEHOLDER');
+      }
+      GetUINativeModule().common.setMouseResponseRegion(node, responseRegion, responseRegion.length);
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    if (Array.isArray(this.value) && Array.isArray(this.stageValue)) {
+      if (this.value.length !== this.stageValue.length) {
+        return true;
+      } else {
+        for (let i = 0; i < this.value.length; i++) {
+          if (!(isBaseOrResourceEqual(this.stageValue[i].x, this.value[i].x) &&
+            isBaseOrResourceEqual(this.stageValue[i].y, this.value[i].y) &&
+            isBaseOrResourceEqual(this.stageValue[i].width, this.value[i].width) &&
+            isBaseOrResourceEqual(this.stageValue[i].height, this.value[i].height)
+          )) {
+            return true;
+          }
+        }
+        return false;
+      }
+    } else if (!Array.isArray(this.value) && !Array.isArray(this.stageValue)) {
+      return (!(isBaseOrResourceEqual(this.stageValue.x, this.value.x) &&
+        isBaseOrResourceEqual(this.stageValue.y, this.value.y) &&
+        isBaseOrResourceEqual(this.stageValue.width, this.value.width) &&
+        isBaseOrResourceEqual(this.stageValue.height, this.value.height)
+      ));
+    } else {
+      return false;
     }
   }
 }
 
-class ResponseRegionModifier extends Modifier<ArkResponseRegion> {
+class ResponseRegionModifier extends ModifierWithKey<Array<Rectangle> | Rectangle> {
   static identity = Symbol("responseRegion");
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
       GetUINativeModule().common.resetResponseRegion(node);
     }
     else {
-      GetUINativeModule().common.setResponseRegion(node, this.value.responseRegion);
+      let responseRegion: (number | string | Resource)[] = [];
+      if (Array.isArray(this.value)) {
+        for (let i = 0; i < this.value.length; i++) {
+          responseRegion.push(this.value[i].x ?? 'PLACEHOLDER');
+          responseRegion.push(this.value[i].y ?? 'PLACEHOLDER');
+          responseRegion.push(this.value[i].width ?? 'PLACEHOLDER');
+          responseRegion.push(this.value[i].height ?? 'PLACEHOLDER');
+        }
+      } else {
+        responseRegion.push(this.value.x ?? 'PLACEHOLDER');
+        responseRegion.push(this.value.y ?? 'PLACEHOLDER');
+        responseRegion.push(this.value.width ?? 'PLACEHOLDER');
+        responseRegion.push(this.value.height ?? 'PLACEHOLDER');
+      }
+      GetUINativeModule().common.setResponseRegion(node, responseRegion, responseRegion.length);
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    if (Array.isArray(this.value) && Array.isArray(this.stageValue)) {
+      if (this.value.length !== this.stageValue.length) {
+        return true;
+      } else {
+        for (let i = 0; i < this.value.length; i++) {
+          if (!(isBaseOrResourceEqual(this.stageValue[i].x, this.value[i].x) &&
+            isBaseOrResourceEqual(this.stageValue[i].y, this.value[i].y) &&
+            isBaseOrResourceEqual(this.stageValue[i].width, this.value[i].width) &&
+            isBaseOrResourceEqual(this.stageValue[i].height, this.value[i].height)
+          )) {
+            return true;
+          }
+        }
+        return false;
+      }
+    } else if (!Array.isArray(this.value) && !Array.isArray(this.stageValue)) {
+      return (!(isBaseOrResourceEqual(this.stageValue.x, this.value.x) &&
+        isBaseOrResourceEqual(this.stageValue.y, this.value.y) &&
+        isBaseOrResourceEqual(this.stageValue.width, this.value.width) &&
+        isBaseOrResourceEqual(this.stageValue.height, this.value.height)
+      ));
+    } else {
+      return false;
     }
   }
 }
@@ -1276,7 +1506,6 @@ class FlexGrowModifier extends ModifierWithKey<number> {
     return this.stageValue !== this.value;
   }
 }
-
 
 class FlexShrinkModifier extends ModifierWithKey<number> {
   static identity: Symbol = Symbol('flexShrink');
@@ -1609,22 +1838,14 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
   }
 
   responseRegion(value: Array<Rectangle> | Rectangle): this {
-    let arkResponseRegion = new ArkResponseRegion();
-    if (arkResponseRegion.parseRegionValue(value)) {
-      modifier(this._modifiers, ResponseRegionModifier, arkResponseRegion);
-    } else {
-      modifier(this._modifiers, ResponseRegionModifier, undefined);
-    }
+    modifierWithKey(this._modifiersWithKeys, ResponseRegionModifier.identity,
+      ResponseRegionModifier, value)
     return this;
   }
 
   mouseResponseRegion(value: Array<Rectangle> | Rectangle): this {
-    let arkMouseResponseRegion = new ArkResponseRegion();
-    if (arkMouseResponseRegion.parseRegionValue(value)) {
-      modifier(this._modifiers, MouseResponseRegionModifier, arkMouseResponseRegion);
-    } else {
-      modifier(this._modifiers, MouseResponseRegionModifier, undefined);
-    }
+    modifierWithKey(this._modifiersWithKeys, MouseResponseRegionModifier.identity,
+      MouseResponseRegionModifier, value)
     return this;
   }
 
@@ -1722,57 +1943,28 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
 
   backgroundImage(src: ResourceStr, repeat?: ImageRepeat): this {
     let arkBackgroundImage = new ArkBackgroundImage()
-    if (isString(src)) {
-      arkBackgroundImage.src = src
-    }
-    if (isNumber(repeat)) {
-      arkBackgroundImage.repeat = repeat
-    }
-    modifier(this._modifiers, BackgroundImageModifier, arkBackgroundImage);
+    arkBackgroundImage.src = src
+    arkBackgroundImage.repeat = repeat
+    modifierWithKey(this._modifiersWithKeys, BackgroundImageModifier.identity, BackgroundImageModifier, arkBackgroundImage);
     return this;
   }
 
   backgroundImageSize(value: SizeOptions | ImageSize): this {
-    if (isResource(value) || isUndefined(value)) {
-      modifier(this._modifiers, BackgroundImageSizeModifier, undefined);
-      return this
-    }
-    let arkBackgroundImageSize = new ArkBackgroundImageSize()
-    if (isNumber(value)) {
-      arkBackgroundImageSize.imageSize = value
-    } else {
-      if (isNumber((value as SizeOptions)?.width) || isString((value as SizeOptions)?.width)) {
-        arkBackgroundImageSize.width = (value as SizeOptions)?.width;
-      }
-      if (isNumber((value as SizeOptions)?.height) || isString((value as SizeOptions)?.height)) {
-        arkBackgroundImageSize.height = (value as SizeOptions)?.height;
-      }
-    }
-    modifier(this._modifiers, BackgroundImageSizeModifier, arkBackgroundImageSize);
+    modifierWithKey(this._modifiersWithKeys, BackgroundImageSizeModifier.identity, BackgroundImageSizeModifier, value);
     return this;
   }
 
   backgroundImagePosition(value: Position | Alignment): this {
-    if (isResource(value) || isUndefined(value)) {
-      modifier(this._modifiers, BackgroundImagePositionModifier, undefined);
-      return this
-    }
-    let arkBackgroundImagePosition = new ArkBackgroundImagePosition()
-    if (isNumber(value)) {
-      arkBackgroundImagePosition.alignment = value
-    } else {
-      if (isNumber((value as Position)?.x) || isString((value as Position)?.x)) {
-        arkBackgroundImagePosition.x = (value as Position)?.x;
-      }
-      if (isNumber((value as Position)?.y) || isString((value as Position)?.y)) {
-        arkBackgroundImagePosition.y = (value as Position)?.y;
-      }
-    }
-    modifier(this._modifiers, BackgroundImagePositionModifier, arkBackgroundImagePosition);
+    modifierWithKey(this._modifiersWithKeys, BackgroundImagePositionModifier.identity, BackgroundImagePositionModifier, value);
     return this;
   }
 
   backgroundBlurStyle(value: BlurStyle, options?: BackgroundBlurStyleOptions): this {
+    if (isUndefined(value)) {
+      modifierWithKey(this._modifiersWithKeys, BackgroundBlurStyleModifier.identity,
+        BackgroundBlurStyleModifier, undefined);
+      return this;
+    }
     let arkBackgroundBlurStyle = new ArkBackgroundBlurStyle();
     arkBackgroundBlurStyle.blurStyle = value;
     if (typeof options === "object") {
@@ -1780,11 +1972,17 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
       arkBackgroundBlurStyle.adaptiveColor = options.adaptiveColor;
       arkBackgroundBlurStyle.scale = options.scale;
     }
-    modifier(this._modifiers, BackgroundBlurStyleModifier, arkBackgroundBlurStyle);
+    modifierWithKey(this._modifiersWithKeys, BackgroundBlurStyleModifier.identity,
+      BackgroundBlurStyleModifier, arkBackgroundBlurStyle);
     return this;
   }
 
   foregroundBlurStyle(value: BlurStyle, options?: ForegroundBlurStyleOptions): this {
+    if (isUndefined(value)) {
+      modifierWithKey(this._modifiersWithKeys, ForegroundBlurStyleModifier.identity,
+        ForegroundBlurStyleModifier, undefined);
+      return this;
+    }
     let arkForegroundBlurStyle = new ArkForegroundBlurStyle();
     arkForegroundBlurStyle.blurStyle = value;
     if (typeof options === "object") {
@@ -1792,7 +1990,8 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
       arkForegroundBlurStyle.adaptiveColor = options.adaptiveColor;
       arkForegroundBlurStyle.scale = options.scale;
     }
-    modifier(this._modifiers, ForegroundBlurStyleModifier, arkForegroundBlurStyle);
+    modifierWithKey(this._modifiersWithKeys, ForegroundBlurStyleModifier.identity,
+      ForegroundBlurStyleModifier, arkForegroundBlurStyle);
     return this;
   }
 
@@ -1802,111 +2001,67 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
   }
 
   border(value: BorderOptions): this {
-    let arkBorder = new ArkBorder()
-    if (!isResource(value?.width) && !isUndefined(value?.width) && value?.width !== null) {
-      if (isNumber(value.width)) {
-        arkBorder.arkWidth.left = Number(value.width)
-        arkBorder.arkWidth.right = Number(value.width)
-        arkBorder.arkWidth.top = Number(value.width)
-        arkBorder.arkWidth.bottom = Number(value.width)
-      } else if (isString(value.width)) {
-        arkBorder.arkWidth.left = String(value.width)
-        arkBorder.arkWidth.right = String(value.width)
-        arkBorder.arkWidth.top = String(value.width)
-        arkBorder.arkWidth.bottom = String(value.width)
-      } else {
-        if (isNumber((value.width as EdgeWidths)?.left) || isString((value.width as EdgeWidths)?.left)) {
-          arkBorder.arkWidth.left = (value.width as EdgeWidths).left
-        }
-        if (isNumber((value.width as EdgeWidths)?.right) || isString((value.width as EdgeWidths)?.right)) {
-          arkBorder.arkWidth.right = (value.width as EdgeWidths).right
-        }
-        if (isNumber((value.width as EdgeWidths)?.top) || isString((value.width as EdgeWidths)?.top)) {
-          arkBorder.arkWidth.top = (value.width as EdgeWidths).top
-        }
-        if (isNumber((value.width as EdgeWidths)?.bottom) || isString((value.width as EdgeWidths)?.bottom)) {
-          arkBorder.arkWidth.bottom = (value.width as EdgeWidths).bottom
-        }
-      }
-    }
-    if (!isResource(value?.color) && !isUndefined(value?.color) && value?.color !== null) {
-      let arkColor = new ArkColor();
-      if (isNumber(value.color)) {
-        arkColor.parseColorValue(Number(value.color))
-        arkBorder.arkColor.leftColor = arkColor.color
-        arkBorder.arkColor.rightColor = arkColor.color
-        arkBorder.arkColor.topColor = arkColor.color
-        arkBorder.arkColor.bottomColor = arkColor.color
-      } else if (isString(value?.color)) {
-        arkColor.parseColorValue(String(value.color))
-        arkBorder.arkColor.leftColor = arkColor.color
-        arkBorder.arkColor.rightColor = arkColor.color
-        arkBorder.arkColor.topColor = arkColor.color
-        arkBorder.arkColor.bottomColor = arkColor.color
-      } else {
-        if (isNumber((value.color as EdgeColors)?.left) || isString((value.color as EdgeColors)?.left)) {
-          arkColor.parseColorValue((value.color as EdgeColors).left)
-          arkBorder.arkColor.leftColor = arkColor?.color
-        }
-        if (isNumber((value.color as EdgeColors)?.right) || isString((value.color as EdgeColors)?.right)) {
-          arkColor.parseColorValue((value.color as EdgeColors).right)
-          arkBorder.arkColor.rightColor = arkColor?.color
-        }
-        if (isNumber((value.color as EdgeColors)?.top) || isString((value.color as EdgeColors)?.top)) {
-          arkColor.parseColorValue((value.color as EdgeColors).top)
-          arkBorder.arkColor.topColor = arkColor?.color
-        }
-        if (isNumber((value.color as EdgeColors)?.bottom) || isString((value.color as EdgeColors)?.bottom)) {
-          arkColor.parseColorValue((value.color as EdgeColors).bottom)
-          arkBorder.arkColor.bottomColor = arkColor?.color
-        }
-      }
+    let arkBorder = new ArkBorder();
+    if (isUndefined(value)) {     
+      arkBorder = undefined;
     }
 
-    if (!isResource(value?.radius) && !isUndefined(value?.radius) && value?.radius !== null) {
-      if (isNumber(value.radius)) {
-        arkBorder.arkRadius.topLeft = Number(value.radius)
-        arkBorder.arkRadius.topRight = Number(value.radius)
-        arkBorder.arkRadius.bottomLeft = Number(value.radius)
-        arkBorder.arkRadius.bottomRight = Number(value.radius)
-      } else if (isString(value.radius)) {
-        arkBorder.arkRadius.topLeft = String(value.radius)
-        arkBorder.arkRadius.topRight = String(value.radius)
-        arkBorder.arkRadius.bottomLeft = String(value.radius)
-        arkBorder.arkRadius.bottomRight = String(value.radius)
+    if (!isUndefined(value?.width) && value?.width !== null) {
+      if (isNumber(value.width) || isString(value.width) || isResource(value.width)) {
+        arkBorder.arkWidth.left = value.width;
+        arkBorder.arkWidth.right = value.width;
+        arkBorder.arkWidth.top = value.width;
+        arkBorder.arkWidth.bottom = value.width;
+      } else {
+        arkBorder.arkWidth.left = (value.width as EdgeWidths).left;
+        arkBorder.arkWidth.right = (value.width as EdgeWidths).right;
+        arkBorder.arkWidth.top = (value.width as EdgeWidths).top;
+        arkBorder.arkWidth.bottom = (value.width as EdgeWidths).bottom;
       }
-      else {
-        if (isNumber((value.radius as BorderRadiuses)?.topLeft) || isString((value.radius as BorderRadiuses)?.topLeft)) {
-          arkBorder.arkRadius.topLeft = (value.radius as BorderRadiuses)?.topLeft
-        }
-        if (isNumber((value.radius as BorderRadiuses)?.topRight) || isString((value.radius as BorderRadiuses)?.topRight)) {
-          arkBorder.arkRadius.topRight = (value.radius as BorderRadiuses)?.topRight
-        }
-        if (isNumber((value.radius as BorderRadiuses)?.bottomLeft) || isString((value.radius as BorderRadiuses)?.bottomLeft)) {
-          arkBorder.arkRadius.bottomLeft = (value.radius as BorderRadiuses)?.bottomLeft
-        }
-        if (isNumber((value.radius as BorderRadiuses)?.bottomRight) || isString((value.radius as BorderRadiuses)?.bottomRight)) {
-          arkBorder.arkRadius.bottomRight = (value.radius as BorderRadiuses)?.bottomRight
-        }
+    }
+    if (!isUndefined(value?.color) && value?.color !== null) {
+      if (isNumber(value.color) || isString(value.color) || isResource(value.color)) {
+        arkBorder.arkColor.leftColor = value.color;
+        arkBorder.arkColor.rightColor = value.color;
+        arkBorder.arkColor.topColor = value.color;
+        arkBorder.arkColor.bottomColor = value.color;
+      } else {
+        arkBorder.arkColor.leftColor = (value.color as EdgeColors).left;
+        arkBorder.arkColor.rightColor = (value.color as EdgeColors).right;
+        arkBorder.arkColor.topColor = (value.color as EdgeColors).top;
+        arkBorder.arkColor.bottomColor = (value.color as EdgeColors).bottom;
+      }
+    }
+    if (!isUndefined(value?.radius) && value?.radius !== null) {
+      if (isNumber(value.radius) || isString(value.radius) || isResource(value.radius)) {
+        arkBorder.arkRadius.topLeft = value.radius;
+        arkBorder.arkRadius.topRight = value.radius;
+        arkBorder.arkRadius.bottomLeft = value.radius;
+        arkBorder.arkRadius.bottomRight = value.radius;
+      } else {
+        arkBorder.arkRadius.topLeft = (value.radius as BorderRadiuses)?.topLeft;
+        arkBorder.arkRadius.topRight = (value.radius as BorderRadiuses)?.topRight;
+        arkBorder.arkRadius.bottomLeft = (value.radius as BorderRadiuses)?.bottomLeft;
+        arkBorder.arkRadius.bottomRight = (value.radius as BorderRadiuses)?.bottomRight;
       }
     }
     if (!isUndefined(value?.style) && value?.style !== null) {
       let arkBorderStyle = new ArkBorderStyle();
       if (arkBorderStyle.parseBorderStyle(value.style)) {
         if (!isUndefined(arkBorderStyle.style)) {
-          arkBorder.arkStyle.top = arkBorderStyle.style
-          arkBorder.arkStyle.left = arkBorderStyle.style
-          arkBorder.arkStyle.bottom = arkBorderStyle.style
-          arkBorder.arkStyle.right = arkBorderStyle.style
+          arkBorder.arkStyle.top = arkBorderStyle.style;
+          arkBorder.arkStyle.left = arkBorderStyle.style;
+          arkBorder.arkStyle.bottom = arkBorderStyle.style;
+          arkBorder.arkStyle.right = arkBorderStyle.style;
         } else {
-          arkBorder.arkStyle.top = arkBorderStyle.top
-          arkBorder.arkStyle.left = arkBorderStyle.left
-          arkBorder.arkStyle.bottom = arkBorderStyle.bottom
-          arkBorder.arkStyle.right = arkBorderStyle.right
+          arkBorder.arkStyle.top = arkBorderStyle.top;
+          arkBorder.arkStyle.left = arkBorderStyle.left;
+          arkBorder.arkStyle.bottom = arkBorderStyle.bottom;
+          arkBorder.arkStyle.right = arkBorderStyle.right;
         }
       }
-    }
-    modifier(this._modifiers, BorderModifier, arkBorder);
+    }    
+    modifierWithKey(this._modifiersWithKeys, BorderModifier.identity, BorderModifier, arkBorder);
     return this;
   }
 
@@ -1937,18 +2092,12 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
 
 
   borderImage(value: BorderImageOption): this {
-    let arkBorderImage = new ArkBorderImage();
-    if (!arkBorderImage.parseOption(value)) {
-      modifier(this._modifiers, BorderImageModifier, undefined);
-      return this;
-    }
-    modifier(this._modifiers, BorderImageModifier, arkBorderImage);
+    modifierWithKey(this._modifiersWithKeys, BorderImageModifier.identity, BorderImageModifier, value);
     return this;
   }
 
   foregroundColor(value: ResourceColor | ColoringStrategy): this {
     modifierWithKey(this._modifiersWithKeys, ForegroundColorModifier.identity, ForegroundColorModifier, value);
-    let arkForegroundColor = new ArkForegroundColor
     return this;
   }
 
@@ -2063,6 +2212,10 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
   }
 
   linearGradientBlur(value: number, options: LinearGradientBlurOptions): this {
+    if (isUndefined(value) || isUndefined(options)) {
+      modifier(this._modifiers, LinearGradientBlurModifier, undefined);
+      return this;
+    }
     let arkLinearGradientBlur = new ArkLinearGradientBlur();
     arkLinearGradientBlur.blurRadius = value;
     arkLinearGradientBlur.fractionStops = options.fractionStops;
@@ -2102,12 +2255,7 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
   }
 
   colorBlend(value: Color | string | Resource): this {
-    let arkColor = new ArkColor();
-    if (arkColor.parseColorValue(value)) {
-      modifier(this._modifiers, ColorBlendModifier, arkColor.color);
-    } else {
-      modifier(this._modifiers, ColorBlendModifier, undefined);
-    }
+    modifierWithKey(this._modifiersWithKeys, ColorBlendModifier.identity, ColorBlendModifier, value);
     return this;
   }
 
@@ -2506,6 +2654,10 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
   }
 
   overlay(value: string | CustomBuilder, options?: { align?: Alignment; offset?: { x?: number; y?: number } }): this {
+    if (typeof value === 'undefined') {
+      modifierWithKey(this._modifiersWithKeys, OverlayModifier.identity, OverlayModifier, undefined);
+      return this;
+    }
     var arkOverlay = new ArkOverlay();
     if (arkOverlay.splitOverlayValue(value, options)) {
       modifierWithKey(this._modifiersWithKeys, OverlayModifier.identity, OverlayModifier, arkOverlay);
@@ -2521,8 +2673,7 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
     colors: Array<any>;
     repeating?: boolean;
   }): this {
-    let arkLinearGradient = new ArkLinearGradient(value.angle, value.direction, value.colors, value.repeating);
-    modifier(this._modifiers, LinearGradientModifier, arkLinearGradient);
+    modifierWithKey(this._modifiersWithKeys, LinearGradientModifier.identity, LinearGradientModifier, value);
     return this;
   }
 
@@ -2534,15 +2685,12 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
     colors: Array<any>;
     repeating?: boolean;
   }): this {
-    let arkSweepGradient = new ArkSweepGradient(value.center, value.start, value.end, value.rotation,
-      value.colors, value.repeating);
-    modifier(this._modifiers, SweepGradientModifier, arkSweepGradient);
+    modifierWithKey(this._modifiersWithKeys, SweepGradientModifier.identity, SweepGradientModifier, value);
     return this;
   }
 
   radialGradient(value: { center: Array<any>; radius: number | string; colors: Array<any>; repeating?: boolean }): this {
-    let arkRadialGradient = new ArkRadialGradient(value.center, value.radius, value.colors, value.repeating);
-    modifier(this._modifiers, RadialGradientModifier, arkRadialGradient);
+    modifierWithKey(this._modifiersWithKeys, RadialGradientModifier.identity, RadialGradientModifier, value);
     return this;
   }
 
@@ -2656,22 +2804,12 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
   }
 
   lightUpEffect(value: number): this {
-    modifier(this._modifiers, LightUpEffectModifier, value);
+    modifierWithKey(this._modifiersWithKeys, LightUpEffectModifier.identity, LightUpEffectModifier, value);
     return this;
   }
 
   pixelStretchEffect(options: PixelStretchEffectOptions): this {
-    if (isResource(options.top) || isResource(options.right) ||
-      isResource(options.bottom) || isResource(options.left)) {
-      modifier(this._modifiers, PixelStretchEffectModifier, undefined);
-      return this;
-    }
-    let arkPixelStretchEffect = new ArkPixelStretchEffect
-    arkPixelStretchEffect.top = options.top;
-    arkPixelStretchEffect.right = options.right;
-    arkPixelStretchEffect.bottom = options.bottom;
-    arkPixelStretchEffect.left = options.left;
-    modifier(this._modifiers, PixelStretchEffectModifier, arkPixelStretchEffect);
+    modifierWithKey(this._modifiersWithKeys, PixelStretchEffectModifier.identity, PixelStretchEffectModifier, options);
     return this;
   }
 

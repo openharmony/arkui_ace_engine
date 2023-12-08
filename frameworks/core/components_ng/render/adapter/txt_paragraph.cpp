@@ -27,6 +27,7 @@ namespace OHOS::Ace::NG {
 namespace {
 const std::u16string ELLIPSIS = u"\u2026";
 constexpr char16_t NEWLINE_CODE = u'\n';
+constexpr float TEXT_SPLIT_RATIO = 0.6f;
 } // namespace
 RefPtr<Paragraph> Paragraph::Create(const ParagraphStyle& paraStyle, const RefPtr<FontCollection>& fontCollection)
 {
@@ -58,6 +59,7 @@ void TxtParagraph::CreateBuilder()
     style.fontSize = paraStyle_.fontSize; // Rosen style.fontSize
     style.ellipsisModal = static_cast<Rosen::EllipsisModal>(paraStyle_.ellipsisMode);
     style.wordBreakType = static_cast<Rosen::WordBreakType>(paraStyle_.wordBreak);
+    style.textSplitRatio = TEXT_SPLIT_RATIO;
 #endif
     style.locale = paraStyle_.fontLocale;
     if (paraStyle_.textOverflow == TextOverflow::ELLIPSIS) {
@@ -312,7 +314,7 @@ int32_t TxtParagraph::GetGlyphIndexByCoordinate(const Offset& offset)
     return index;
 }
 
-bool TxtParagraph::ComputeOffsetForCaretUpstream(int32_t extent, CaretMetricsF& result)
+bool TxtParagraph::ComputeOffsetForCaretUpstream(int32_t extent, CaretMetricsF& result, bool needLineHighest)
 {
     if (!paragraph_) {
         return false;
@@ -342,7 +344,8 @@ bool TxtParagraph::ComputeOffsetForCaretUpstream(int32_t extent, CaretMetricsF& 
         prev, extent, txt::Paragraph::RectHeightStyle::kMax, txt::Paragraph::RectWidthStyle::kTight);
 #else
     auto boxes = paragraph_->GetTextRectsByBoundary(
-        prev, extent, Rosen::TextRectHeightStyle::COVER_TOP_AND_BOTTOM, Rosen::TextRectWidthStyle::TIGHT);
+        prev, extent, needLineHighest ? Rosen::TextRectHeightStyle::COVER_TOP_AND_BOTTOM :
+        Rosen::TextRectHeightStyle::TIGHT, Rosen::TextRectWidthStyle::TIGHT);
 #endif
     while (boxes.empty() && !text_.empty()) {
         graphemeClusterLength *= 2;
@@ -353,7 +356,8 @@ bool TxtParagraph::ComputeOffsetForCaretUpstream(int32_t extent, CaretMetricsF& 
                 0, extent, txt::Paragraph::RectHeightStyle::kMax, txt::Paragraph::RectWidthStyle::kTight);
 #else
             boxes = paragraph_->GetTextRectsByBoundary(
-                0, extent, Rosen::TextRectHeightStyle::COVER_TOP_AND_BOTTOM, Rosen::TextRectWidthStyle::TIGHT);
+                0, extent, needLineHighest ? Rosen::TextRectHeightStyle::COVER_TOP_AND_BOTTOM :
+                Rosen::TextRectHeightStyle::TIGHT, Rosen::TextRectWidthStyle::TIGHT);
 #endif
             break;
         }
@@ -362,7 +366,8 @@ bool TxtParagraph::ComputeOffsetForCaretUpstream(int32_t extent, CaretMetricsF& 
             prev, extent, txt::Paragraph::RectHeightStyle::kMax, txt::Paragraph::RectWidthStyle::kTight);
 #else
         boxes = paragraph_->GetTextRectsByBoundary(
-            prev, extent, Rosen::TextRectHeightStyle::COVER_TOP_AND_BOTTOM, Rosen::TextRectWidthStyle::TIGHT);
+            prev, extent, needLineHighest ? Rosen::TextRectHeightStyle::COVER_TOP_AND_BOTTOM :
+            Rosen::TextRectHeightStyle::TIGHT, Rosen::TextRectWidthStyle::TIGHT);
 #endif
     }
     if (boxes.empty()) {
@@ -430,7 +435,7 @@ float TxtParagraph::MakeEmptyOffsetX()
     }
 }
 
-bool TxtParagraph::ComputeOffsetForCaretDownstream(int32_t extent, CaretMetricsF& result)
+bool TxtParagraph::ComputeOffsetForCaretDownstream(int32_t extent, CaretMetricsF& result, bool needLineHighest)
 {
     if (!paragraph_ || static_cast<size_t>(extent) >= GetParagraphLength()) {
         return false;
@@ -444,7 +449,8 @@ bool TxtParagraph::ComputeOffsetForCaretDownstream(int32_t extent, CaretMetricsF
         extent, next, txt::Paragraph::RectHeightStyle::kMax, txt::Paragraph::RectWidthStyle::kTight);
 #else
     auto boxes = paragraph_->GetTextRectsByBoundary(
-        extent, next, Rosen::TextRectHeightStyle::COVER_TOP_AND_BOTTOM, Rosen::TextRectWidthStyle::TIGHT);
+        extent, next, needLineHighest ? Rosen::TextRectHeightStyle::COVER_TOP_AND_BOTTOM :
+        Rosen::TextRectHeightStyle::TIGHT, Rosen::TextRectWidthStyle::TIGHT);
 #endif
     if (boxes.empty()) {
         return false;

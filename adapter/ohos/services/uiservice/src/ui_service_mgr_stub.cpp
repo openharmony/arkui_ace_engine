@@ -39,11 +39,9 @@ UIServiceMgrStub::~UIServiceMgrStub()
 int32_t UIServiceMgrStub::OnRemoteRequest(uint32_t code, MessageParcel& data, MessageParcel& reply,
     MessageOption& option)
 {
-    HILOG_DEBUG("UIServiceMgrStub::OnRemoteRequest, cmd = %d, flags= %d", code, option.GetFlags());
     std::u16string descriptor = UIServiceMgrStub::GetDescriptor();
     std::u16string remoteDescriptor = data.ReadInterfaceToken();
     if (descriptor != remoteDescriptor) {
-        HILOG_INFO("local descriptor is not equal to remote");
         return ERR_INVALID_STATE;
     }
     auto itFunc = requestFuncMap_.find(code);
@@ -53,7 +51,6 @@ int32_t UIServiceMgrStub::OnRemoteRequest(uint32_t code, MessageParcel& data, Me
             return (this->*requestFunc)(data, reply);
         }
     }
-    HILOG_WARN("UIServiceMgrStub::OnRemoteRequest, default case, need check.");
     return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
 }
 
@@ -61,13 +58,11 @@ int32_t UIServiceMgrStub::RegisterCallBackInner(MessageParcel& data, MessageParc
 {
     std::shared_ptr<AAFwk::Want> want(data.ReadParcelable<AAFwk::Want>());
     if (want == nullptr) {
-        HILOG_ERROR("RegisterCallBackInner want is nullptr");
         return ERR_INVALID_VALUE;
     }
 
     auto object = data.ReadRemoteObject();
     if (object == nullptr) {
-        HILOG_ERROR("RegisterCallBackInner read remote object failed");
         return ERR_INVALID_VALUE;
     }
 
@@ -81,7 +76,6 @@ int32_t UIServiceMgrStub::UnregisterCallBackInner(MessageParcel& data, MessagePa
 {
     std::shared_ptr<AAFwk::Want> want(data.ReadParcelable<AAFwk::Want>());
     if (want == nullptr) {
-        HILOG_ERROR("UnregisterCallBackInner want is nullptr");
         return ERR_INVALID_VALUE;
     }
     int32_t result = UnregisterCallBack(*want);
@@ -93,7 +87,6 @@ int32_t UIServiceMgrStub::PushInner(MessageParcel& data, MessageParcel& reply)
 {
     std::shared_ptr<AAFwk::Want> want(data.ReadParcelable<AAFwk::Want>());
     if (want == nullptr) {
-        HILOG_ERROR("PushInner want is nullptr");
         return ERR_INVALID_VALUE;
     }
     const std::string& name = data.ReadString();
@@ -110,7 +103,6 @@ int32_t UIServiceMgrStub::RequestInner(MessageParcel& data, MessageParcel& reply
 {
     std::shared_ptr<AAFwk::Want> want(data.ReadParcelable<AAFwk::Want>());
     if (want == nullptr) {
-        HILOG_ERROR("RequestInner want is nullptr");
         return ERR_INVALID_VALUE;
     }
     const std::string& name = data.ReadString();
@@ -124,7 +116,6 @@ int32_t UIServiceMgrStub::ReturnRequestInner(MessageParcel& data, MessageParcel&
 {
     std::shared_ptr<AAFwk::Want> want(data.ReadParcelable<AAFwk::Want>());
     if (want == nullptr) {
-        HILOG_ERROR("ReturnRequestInner want is nullptr");
         return ERR_INVALID_VALUE;
     }
     const std::string& source = data.ReadString();

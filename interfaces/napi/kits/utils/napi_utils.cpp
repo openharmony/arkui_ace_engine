@@ -234,6 +234,7 @@ napi_value ParseCurve(napi_env env, napi_value value, std::string& curveTypeStri
     CHECK_NULL_RETURN(value, nullptr);
     napi_valuetype valueType = napi_undefined;
     napi_typeof(env, value, &valueType);
+    NAPI_ASSERT(env, valueType == napi_object || valueType == napi_string, "The type of curve is incorrect");
     if (valueType == napi_object) {
         napi_value curveObjectNApi = nullptr;
         napi_get_named_property(env, value, "__curveString", &curveObjectNApi);

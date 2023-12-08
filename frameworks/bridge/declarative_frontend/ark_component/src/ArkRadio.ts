@@ -16,26 +16,7 @@ class ArkRadioComponent extends ArkComponent implements RadioAttribute {
     throw new Error('Method not implemented.');
   }
   radioStyle(value: RadioStyle): this {
-    let arkRadioStyle = new ArkRadioStyle();
-    let getColor = new ArkColor();
-
-    if (isObject(value)) {
-      if (getColor.parseColorValue(value?.checkedBackgroundColor)) {
-        arkRadioStyle.checkedBackgroundColor = getColor.getColor();
-      }
-
-      if (getColor.parseColorValue(value?.uncheckedBorderColor)) {
-        arkRadioStyle.uncheckedBorderColor = getColor.getColor();
-      }
-
-      if (getColor.parseColorValue(value?.indicatorColor)) {
-        arkRadioStyle.indicatorColor = getColor.getColor();
-      }
-
-      modifier(this._modifiers, RadioStyleModifier, arkRadioStyle);
-    } else {
-      modifier(this._modifiers, RadioStyleModifier, undefined);
-    }
+    modifierWithKey(this._modifiersWithKeys, RadioStyleModifier.identity, RadioStyleModifier, value);
     return this;
   }
 }
@@ -51,7 +32,7 @@ class RadioCheckedModifier extends Modifier<boolean> {
   }
 }
 
-class RadioStyleModifier extends Modifier<ArkRadioStyle> {
+class RadioStyleModifier extends ModifierWithKey<RadioStyle> {
   static identity: Symbol = Symbol('radioStyle');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -60,6 +41,21 @@ class RadioStyleModifier extends Modifier<ArkRadioStyle> {
       GetUINativeModule().radio.setRadioStyle(
         node, this.value.checkedBackgroundColor, this.value.uncheckedBorderColor, this.value.indicatorColor);
     }
+  }
+
+  checkObjectDiff(): boolean {
+    let checkedBackgroundColorEQ =
+      isBaseOrResourceEqual(this.stageValue.checkedBackgroundColor,
+        this.value.checkedBackgroundColor);
+    let uncheckedBorderColorEQ =
+      isBaseOrResourceEqual(this.stageValue.uncheckedBorderColor,
+        this.value.uncheckedBorderColor);
+    let indicatorColorEQ =
+      isBaseOrResourceEqual(this.stageValue.indicatorColor,
+        this.value.indicatorColor);
+    return !checkedBackgroundColorEQ ||
+      !uncheckedBorderColorEQ ||
+      !indicatorColorEQ;
   }
 }
 

@@ -14,24 +14,22 @@
  */
 
 #include "ui_service_proxy.h"
-#include "hilog_wrapper.h"
+
 #include "message_parcel.h"
 #include "want.h"
 
+#include "ui_service_hilog.h"
+
 namespace OHOS {
 namespace Ace {
-UIServiceProxy::UIServiceProxy(const sptr<IRemoteObject>& remote)
-    : IRemoteProxy<IUIService>(remote)
-{}
-UIServiceProxy::~UIServiceProxy()
-{}
+UIServiceProxy::UIServiceProxy(const sptr<IRemoteObject>& remote) : IRemoteProxy<IUIService>(remote) {}
+UIServiceProxy::~UIServiceProxy() {}
 
 void UIServiceProxy::OnPushCallBack(const AAFwk::Want& want, const std::string& name, const std::string& jsonPath,
     const std::string& data, const std::string& extraData)
 {
     auto remote = Remote();
     if (remote == nullptr) {
-        HILOG_ERROR("%{public}s remote is nullptr", __func__);
         return;
     }
 
@@ -40,27 +38,23 @@ void UIServiceProxy::OnPushCallBack(const AAFwk::Want& want, const std::string& 
     OHOS::MessageOption option;
 
     if (!dataParcel.WriteInterfaceToken(UIServiceProxy::GetDescriptor())) {
-        HILOG_ERROR("%{public}s dataParcel.WriteInterfaceToken(GetDescriptor()) return false", __func__);
+        HILOG_WARN("%{public}s dataParcel.WriteInterfaceToken(GetDescriptor()) return false",
+            __func__);
         return;
     }
     if (!dataParcel.WriteParcelable(&want)) {
-        HILOG_ERROR("want write failed.");
         return;
     }
     if (!dataParcel.WriteString(name)) {
-        HILOG_ERROR("fail to WriteString name");
         return;
     }
     if (!dataParcel.WriteString(jsonPath)) {
-        HILOG_ERROR("fail to WriteString jsonPath");
         return;
     }
     if (!dataParcel.WriteString(data)) {
-        HILOG_ERROR("fail to WriteString data");
         return;
     }
     if (!dataParcel.WriteString(extraData)) {
-        HILOG_ERROR("fail to WriteString extraData");
         return;
     }
     int32_t result = remote->SendRequest(IUIService::UI_SERVICE_PUSH_CALL_BACK, dataParcel, reply, option);
@@ -68,7 +62,7 @@ void UIServiceProxy::OnPushCallBack(const AAFwk::Want& want, const std::string& 
         HILOG_INFO("%{public}s SendRequest ok, retval is %d", __func__, reply.ReadInt32());
         return;
     } else {
-        HILOG_ERROR("%{public}s SendRequest error, result=%{public}d", __func__, result);
+        HILOG_WARN("%{public}s SendRequest error, result=%{public}d", __func__, result);
         return;
     }
 }
@@ -77,7 +71,6 @@ void UIServiceProxy::OnRequestCallBack(const AAFwk::Want& want, const std::strin
 {
     auto remote = Remote();
     if (remote == nullptr) {
-        HILOG_ERROR("%{public}s remote is nullptr", __func__);
         return;
     }
 
@@ -86,19 +79,17 @@ void UIServiceProxy::OnRequestCallBack(const AAFwk::Want& want, const std::strin
     OHOS::MessageOption option;
 
     if (!dataParcel.WriteInterfaceToken(UIServiceProxy::GetDescriptor())) {
-        HILOG_ERROR("%{public}s dataParcel.WriteInterfaceToken(GetDescriptor()) return false", __func__);
+        HILOG_WARN("%{public}s dataParcel.WriteInterfaceToken(GetDescriptor()) return false",
+            __func__);
         return;
     }
     if (!dataParcel.WriteParcelable(&want)) {
-        HILOG_ERROR("want write failed.");
         return;
     }
     if (!dataParcel.WriteString(name)) {
-        HILOG_ERROR("fail to WriteString name");
         return;
     }
     if (!dataParcel.WriteString(data)) {
-        HILOG_ERROR("fail to WriteString data");
         return;
     }
     int32_t result = remote->SendRequest(IUIService::UI_SERVICE_REQUEST_CALL_BACK, dataParcel, reply, option);
@@ -106,7 +97,7 @@ void UIServiceProxy::OnRequestCallBack(const AAFwk::Want& want, const std::strin
         HILOG_INFO("%{public}s SendRequest ok, retval is %d", __func__, reply.ReadInt32());
         return;
     } else {
-        HILOG_ERROR("%{public}s SendRequest error, result=%{public}d", __func__, result);
+        HILOG_WARN("%{public}s SendRequest error, result=%{public}d", __func__, result);
         return;
     }
 }
@@ -116,7 +107,6 @@ void UIServiceProxy::OnReturnRequest(
 {
     auto remote = Remote();
     if (remote == nullptr) {
-        HILOG_ERROR("%{public}s remote is nullptr", __func__);
         return;
     }
 
@@ -125,23 +115,20 @@ void UIServiceProxy::OnReturnRequest(
     OHOS::MessageOption option;
 
     if (!dataParcel.WriteInterfaceToken(UIServiceProxy::GetDescriptor())) {
-        HILOG_ERROR("%{public}s dataParcel.WriteInterfaceToken(GetDescriptor()) return false", __func__);
+        HILOG_WARN("%{public}s dataParcel.WriteInterfaceToken(GetDescriptor()) return false",
+            __func__);
         return;
     }
     if (!dataParcel.WriteParcelable(&want)) {
-        HILOG_ERROR("want write failed.");
         return;
     }
     if (!dataParcel.WriteString(source)) {
-        HILOG_ERROR("fail to WriteString source");
         return;
     }
     if (!dataParcel.WriteString(data)) {
-        HILOG_ERROR("fail to WriteString data");
         return;
     }
     if (!dataParcel.WriteString(extraData)) {
-        HILOG_ERROR("fail to WriteString extraData");
         return;
     }
     int32_t result = remote->SendRequest(IUIService::UI_SERVICE_RETURN_REQUEST, dataParcel, reply, option);
@@ -149,9 +136,9 @@ void UIServiceProxy::OnReturnRequest(
         HILOG_INFO("%{public}s SendRequest ok, retval is %d", __func__, reply.ReadInt32());
         return;
     } else {
-        HILOG_ERROR("%{public}s SendRequest error, result=%{public}d", __func__, result);
+        HILOG_WARN("%{public}s SendRequest error, result=%{public}d", __func__, result);
         return;
     }
 }
-}  // namespace Ace
-}  // namespace OHOS
+} // namespace Ace
+} // namespace OHOS

@@ -44,40 +44,15 @@ class ArkAlphabetIndexerComponent extends ArkComponent implements AlphabetIndexe
     return this;
   }
   selectedFont(value: Font): this {
-    let font = new ArkFont();
-    if (isObject(value)) {
-      font.setSize(value.size);
-      font.parseFontWeight(value.weight);
-      font.setFamily(value.family);
-      font.setStyle(value.style);
-      modifier(this._modifiers, SelectedFontModifier, font);
-    } else {
-      modifier(this._modifiers, SelectedFontModifier, undefined);
-    }
+    modifierWithKey(this._modifiersWithKeys, SelectedFontModifier.identity, SelectedFontModifier, value);
     return this;
   }
   popupFont(value: Font): this {
-    let font = new ArkFont();
-    if (isObject(value)) {
-      font.setSize(value.size);
-      font.parseFontWeight(value.weight);
-      font.setFamily(value.family);
-      font.setStyle(value.style);
-      modifier(this._modifiers, PopupFontModifier, font);
-    } else {
-      modifier(this._modifiers, PopupFontModifier, undefined);
-    }
+    modifierWithKey(this._modifiersWithKeys, PopupFontModifier.identity, PopupFontModifier, value);
     return this;
   }
   popupItemFont(value: Font): this {
-    let font = new ArkFont();
-    if (isObject(value)) {
-      font.setSize(value.size);
-      font.setStyle(value.style);
-      modifier(this._modifiers, PopupItemFontModifier, font);
-    } else {
-      modifier(this._modifiers, PopupItemFontModifier, undefined);
-    }
+    modifierWithKey(this._modifiersWithKeys, PopupItemFontModifier.identity, PopupItemFontModifier, value);
     return this;
   }
   itemSize(value: string | number): this {
@@ -90,27 +65,14 @@ class ArkAlphabetIndexerComponent extends ArkComponent implements AlphabetIndexe
     return this;
   }
   font(value: Font): this {
-    let font = new ArkFont();
-    if (isObject(value)) {
-      font.setSize(value.size);
-      font.parseFontWeight(value.weight);
-      font.setFamily(value.family);
-      font.setStyle(value.style);
-      modifier(this._modifiers, AlphabetIndexerFontModifier, font);
-    } else {
-      modifier(this._modifiers, AlphabetIndexerFontModifier, font);
-    }
+    modifierWithKey(this._modifiersWithKeys, AlphabetIndexerFontModifier.identity, AlphabetIndexerFontModifier, value);
     return this;
   }
   alignStyle(value: IndexerAlign, offset?: any): this {
     let alignStyle = new ArkAlignStyle
-    if (typeof value === 'number') {
-      alignStyle.indexerAlign = value;
-      alignStyle.offset = offset;
-      modifier(this._modifiers, AlignStyleModifier, alignStyle);
-    } else {
-      modifier(this._modifiers, AlignStyleModifier, undefined);
-    }
+    alignStyle.indexerAlign = value;
+    alignStyle.offset = offset;
+    modifierWithKey(this._modifiersWithKeys, AlignStyleModifier.identity, AlignStyleModifier, alignStyle);
     return this;
   }
   onSelect(callback: (index: number) => void): this {
@@ -131,16 +93,7 @@ class ArkAlphabetIndexerComponent extends ArkComponent implements AlphabetIndexe
     return this;
   }
   popupPosition(value: Position): this {
-    if (!value || (!!value?.x && typeof value?.x != 'number' && typeof value?.x != 'string') ||
-      (!!value?.y && typeof value?.y != 'number' && typeof value?.x != 'string')) {
-      modifier(this._modifiers, PopupPositionModifier, undefined);
-    }
-    else {
-      let position = new ArkPosition()
-      position.x = value?.x;
-      position.y = value?.y;
-      modifier(this._modifiers, PopupPositionModifier, position);
-    }
+    modifierWithKey(this._modifiersWithKeys, PopupPositionModifier.identity, PopupPositionModifier, value);
     return this;
   }
 }
@@ -155,19 +108,26 @@ globalThis.AlphabetIndexer.attributeModifier = function (modifier) {
   component.applyModifierPatch();
 }
 
-class PopupItemFontModifier extends Modifier<ArkFont> {
+class PopupItemFontModifier extends ModifierWithKey<Font> {
   static identity: Symbol = Symbol('popupItemFont');
   applyPeer(node: KNode, reset: boolean) {
     if (reset) {
       GetUINativeModule().alphabetIndexer.resetPopupItemFont(node);
-    }
-    else {
+    } else {
       GetUINativeModule().alphabetIndexer.setPopupItemFont(node, this.value.size, this.value.weight, this.value.family, this.value.style);
     }
   }
+
+  checkObjectDiff(): boolean {
+    let sizeEQ = isBaseOrResourceEqual(this.stageValue.size, this.value.size);
+    let weightEQ = this.stageValue.weight === this.value.weight;
+    let familyEQ = isBaseOrResourceEqual(this.stageValue.family, this.value.family);
+    let styleEQ = this.stageValue.style === this.value.style;
+    return !sizeEQ || !weightEQ || !familyEQ || !styleEQ;
+  }
 }
 
-class SelectedFontModifier extends Modifier<ArkFont> {
+class SelectedFontModifier extends ModifierWithKey<Font> {
   static identity: Symbol = Symbol('alphaBetIndexerSelectedFont');
   applyPeer(node: KNode, reset: boolean) {
     if (reset) {
@@ -177,9 +137,17 @@ class SelectedFontModifier extends Modifier<ArkFont> {
       GetUINativeModule().alphabetIndexer.setSelectedFont(node, this.value.size, this.value.weight, this.value.family, this.value.style);
     }
   }
+
+  checkObjectDiff(): boolean {
+    let sizeEQ = isBaseOrResourceEqual(this.stageValue.size, this.value.size);
+    let weightEQ = this.stageValue.weight === this.value.weight;
+    let familyEQ = isBaseOrResourceEqual(this.stageValue.family, this.value.family);
+    let styleEQ = this.stageValue.style === this.value.style;
+    return !sizeEQ || !weightEQ || !familyEQ || !styleEQ;
+  }
 }
 
-class PopupFontModifier extends Modifier<ArkFont> {
+class PopupFontModifier extends ModifierWithKey<Font> {
   static identity: Symbol = Symbol('popupFont');
   applyPeer(node: KNode, reset: boolean) {
     if (reset) {
@@ -189,9 +157,17 @@ class PopupFontModifier extends Modifier<ArkFont> {
       GetUINativeModule().alphabetIndexer.setPopupFont(node, this.value.size, this.value.weight, this.value.family, this.value.style);
     }
   }
+
+  checkObjectDiff(): boolean {
+    let sizeEQ = isBaseOrResourceEqual(this.stageValue.size, this.value.size);
+    let weightEQ = this.stageValue.weight === this.value.weight;
+    let familyEQ = isBaseOrResourceEqual(this.stageValue.family, this.value.family);
+    let styleEQ = this.stageValue.style === this.value.style;
+    return !sizeEQ || !weightEQ || !familyEQ || !styleEQ;
+  }
 }
 
-class AlphabetIndexerFontModifier extends Modifier<ArkFont> {
+class AlphabetIndexerFontModifier extends ModifierWithKey<Font> {
   static identity: Symbol = Symbol('alphaBetIndexerFont');
   applyPeer(node: KNode, reset: boolean) {
     if (reset) {
@@ -200,6 +176,14 @@ class AlphabetIndexerFontModifier extends Modifier<ArkFont> {
     else {
       GetUINativeModule().alphabetIndexer.setFont(node, this.value.size, this.value.weight, this.value.family, this.value.style);
     }
+  }
+
+  checkObjectDiff(): boolean {
+    let sizeEQ = isBaseOrResourceEqual(this.stageValue.size, this.value.size);
+    let weightEQ = this.stageValue.weight === this.value.weight;
+    let familyEQ = isBaseOrResourceEqual(this.stageValue.family, this.value.family);
+    let styleEQ = this.stageValue.style === this.value.style;
+    return !sizeEQ || !weightEQ || !familyEQ || !styleEQ;
   }
 }
 
@@ -355,7 +339,7 @@ class PopupSelectedColorModifier extends ModifierWithKey<ResourceColor> {
   }
 }
 
-class AlignStyleModifier extends Modifier<ArkAlignStyle> {
+class AlignStyleModifier extends ModifierWithKey<ArkAlignStyle> {
   static identity = Symbol('alignStyle');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -363,6 +347,12 @@ class AlignStyleModifier extends Modifier<ArkAlignStyle> {
     } else {
       GetUINativeModule().alphabetIndexer.setAlignStyle(node, this.value.indexerAlign, this.value.offset);
     }
+  }
+
+  checkObjectDiff(): boolean {
+    let indexerAlignEQ = isBaseOrResourceEqual(this.stageValue.indexerAlign, this.value.indexerAlign);
+    let offsetEQ = isBaseOrResourceEqual(this.stageValue.offset, this.value.offset);
+    return !indexerAlignEQ || !offsetEQ;
   }
 }
 
@@ -400,14 +390,19 @@ class ItemSizeModifier extends Modifier<number | string> {
   }
 }
 
-class PopupPositionModifier extends Modifier<ArkPosition> {
+class PopupPositionModifier extends ModifierWithKey<Position> {
   static identity: Symbol = Symbol('popupPosition');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
       GetUINativeModule().alphabetIndexer.resetPopupPosition(node);
-    }
-    else {
+    } else {
       GetUINativeModule().alphabetIndexer.setPopupPosition(node, this.value.x, this.value.y);
     }
+  }
+
+  checkObjectDiff(): boolean {
+    let xEQ = isBaseOrResourceEqual(this.stageValue.x, this.value.x);
+    let yEQ = isBaseOrResourceEqual(this.stageValue.y, this.value.y);
+    return !xEQ || !yEQ;
   }
 }

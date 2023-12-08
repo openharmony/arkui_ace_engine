@@ -678,11 +678,9 @@ void JSSearch::SetCustomKeyboard(const JSCallbackInfo& info)
 void JSSearch::SetType(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGI("SetType create error, info is non-valid");
         return;
     }
     if (!info[0]->IsNumber()) {
-        LOGI("The inputType is not number");
         return;
     }
     TextInputType textInputType = static_cast<TextInputType>(info[0]->ToNumber<int32_t>());

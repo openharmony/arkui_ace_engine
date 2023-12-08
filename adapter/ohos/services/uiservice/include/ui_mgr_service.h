@@ -24,7 +24,6 @@
 #include "element_name.h"
 #include "event_handler.h"
 #include "event_runner.h"
-#include "hilog_wrapper.h"
 #include "iremote_object.h"
 
 #include "system_ability.h"

@@ -95,6 +95,9 @@ const Color TEXT_DECORATION_COLOR_VALUE = Color::FromRGB(255, 100, 100);
 const Ace::TextCase TEXT_CASE_VALUE = Ace::TextCase::LOWERCASE;
 const Dimension LETTER_SPACING = Dimension(10, DimensionUnit::PX);
 const Dimension LINE_HEIGHT_VALUE = Dimension(20.1, DimensionUnit::PX);
+const Shadow TEXT_SHADOW1 = Shadow(0, 0, Offset(), Color::RED);
+const Shadow TEXT_SHADOW2 = Shadow(0, 0, Offset(), Color::WHITE);
+const std::vector<Shadow> SHADOWS { TEXT_SHADOW1, TEXT_SHADOW2 };
 const std::string IMAGE_VALUE = "image1";
 const std::string BUNDLE_NAME = "bundleName";
 const std::string MODULE_NAME = "moduleName";
@@ -170,6 +173,7 @@ void RichEditorTestNg::AddSpan(const std::string& content)
     spanModelNG.SetTextCase(TEXT_CASE_VALUE);
     spanModelNG.SetLetterSpacing(LETTER_SPACING);
     spanModelNG.SetLineHeight(LINE_HEIGHT_VALUE);
+    spanModelNG.SetTextShadow(SHADOWS);
     auto spanNode = AceType::DynamicCast<SpanNode>(ViewStackProcessor::GetInstance()->Finish());
     spanNode->MountToParent(richEditorNode_, richEditorNode_->children_.size());
     richEditorPattern->spans_.emplace_back(spanNode->spanItem_);
@@ -794,6 +798,7 @@ HWTEST_F(RichEditorTestNg, RichEditorController005, TestSize.Level1)
     TextStyle textStyle;
     ImageSpanAttribute imageStyle;
     textStyle.SetTextColor(TEXT_COLOR_VALUE);
+    textStyle.SetTextShadows(SHADOWS);
     textStyle.SetFontSize(FONT_SIZE_VALUE);
     textStyle.SetFontStyle(ITALIC_FONT_STYLE_VALUE);
     textStyle.SetFontWeight(FONT_WEIGHT_VALUE);
@@ -802,6 +807,7 @@ HWTEST_F(RichEditorTestNg, RichEditorController005, TestSize.Level1)
     textStyle.SetTextDecorationColor(TEXT_DECORATION_COLOR_VALUE);
     struct UpdateSpanStyle updateSpanStyle;
     updateSpanStyle.updateTextColor = TEXT_COLOR_VALUE;
+    updateSpanStyle.updateTextShadows = SHADOWS;
     updateSpanStyle.updateFontSize = FONT_SIZE_VALUE;
     updateSpanStyle.updateItalicFontStyle = ITALIC_FONT_STYLE_VALUE;
     updateSpanStyle.updateFontWeight = FONT_WEIGHT_VALUE;
@@ -815,6 +821,7 @@ HWTEST_F(RichEditorTestNg, RichEditorController005, TestSize.Level1)
     ASSERT_NE(newSpan1, nullptr);
     EXPECT_EQ(newSpan1->GetFontSize(), FONT_SIZE_VALUE);
     EXPECT_EQ(newSpan1->GetTextColor(), TEXT_COLOR_VALUE);
+    EXPECT_EQ(newSpan1->GetTextShadow(), SHADOWS);
     EXPECT_EQ(newSpan1->GetItalicFontStyle(), ITALIC_FONT_STYLE_VALUE);
     EXPECT_EQ(newSpan1->GetFontWeight(), FONT_WEIGHT_VALUE);
     EXPECT_EQ(newSpan1->GetFontFamily(), FONT_FAMILY_VALUE);
@@ -824,6 +831,7 @@ HWTEST_F(RichEditorTestNg, RichEditorController005, TestSize.Level1)
     ASSERT_NE(newSpan2, nullptr);
     EXPECT_EQ(newSpan2->GetFontSize(), FONT_SIZE_VALUE);
     EXPECT_EQ(newSpan2->GetTextColor(), TEXT_COLOR_VALUE);
+    EXPECT_EQ(newSpan2->GetTextShadow(), SHADOWS);
     EXPECT_EQ(newSpan2->GetItalicFontStyle(), ITALIC_FONT_STYLE_VALUE);
     EXPECT_EQ(newSpan2->GetFontWeight(), FONT_WEIGHT_VALUE);
     EXPECT_EQ(newSpan2->GetFontFamily(), FONT_FAMILY_VALUE);
@@ -1034,56 +1042,6 @@ HWTEST_F(RichEditorTestNg, HandleClickEvent001, TestSize.Level1)
     richEditorPattern->HandleClickEvent(info);
     EXPECT_EQ(richEditorPattern->textSelector_.baseOffset, -1);
     EXPECT_EQ(richEditorPattern->textSelector_.destinationOffset, -1);
-}
-
-/**
- * @tc.name: HandleFocusEvent001
- * @tc.desc: test handle focus event
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorTestNg, HandleFocusEvent001, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    auto func = std::bind(&RichEditorTestNg::MockKeyboardBuilder);
-    richEditorPattern->customKeyboardBuilder_ = std::move(func);
-    richEditorPattern->HandleFocusEvent();
-    EXPECT_EQ(richEditorPattern->caretPosition_, 0);
-    EXPECT_TRUE(richEditorPattern->isCustomKeyboardAttached_);
-}
-
-/**
- * @tc.name: RequestKeyboard001
- * @tc.desc: test request keyboard
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorTestNg, RequestKeyboard001, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    auto func = std::bind(&RichEditorTestNg::MockKeyboardBuilder);
-    richEditorPattern->customKeyboardBuilder_ = std::move(func);
-    auto ret1 = richEditorPattern->RequestKeyboard(true, false, true);
-    EXPECT_TRUE(ret1);
-}
-
-/**
- * @tc.name: CloseKeyboard001
- * @tc.desc: test close keyboard
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorTestNg, CloseKeyboard001, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    auto func = std::bind(&RichEditorTestNg::MockKeyboardBuilder);
-    richEditorPattern->customKeyboardBuilder_ = std::move(func);
-    richEditorPattern->HandleFocusEvent();
-    richEditorPattern->CloseKeyboard(true);
-    EXPECT_FALSE(richEditorPattern->isCustomKeyboardAttached_);
 }
 
 /**

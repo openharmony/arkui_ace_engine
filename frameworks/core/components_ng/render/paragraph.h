@@ -108,8 +108,9 @@ public:
     virtual int32_t GetGlyphIndexByCoordinate(const Offset& offset) = 0;
     virtual void GetRectsForRange(int32_t start, int32_t end, std::vector<RectF>& selectedRects) = 0;
     virtual void GetRectsForPlaceholders(std::vector<RectF>& selectedRects) = 0;
-    virtual bool ComputeOffsetForCaretDownstream(int32_t extent, CaretMetricsF& result) = 0;
-    virtual bool ComputeOffsetForCaretUpstream(int32_t extent, CaretMetricsF& result) = 0;
+    virtual bool ComputeOffsetForCaretDownstream(
+        int32_t extent, CaretMetricsF& result, bool needLineHighest = true) = 0;
+    virtual bool ComputeOffsetForCaretUpstream(int32_t extent, CaretMetricsF& result, bool needLineHighest = true) = 0;
     virtual bool CalcCaretMetricsByPosition(
         int32_t extent, CaretMetricsF& caretCaretMetric, TextAffinity textAffinity) = 0;
     virtual bool CalcCaretMetricsByPosition(

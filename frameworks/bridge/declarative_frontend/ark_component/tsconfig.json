@@ -93,7 +93,8 @@
         "src/ArkCanvas.ts",
         "src/ArkGridContainer.ts",
         "src/ArkWindowScene.ts",
-        "src/ArkDatePicker.ts",   
+        "src/ArkDatePicker.ts",
+        "src/ArkCommonShape.ts",
     ],
 
     "compilerOptions": {

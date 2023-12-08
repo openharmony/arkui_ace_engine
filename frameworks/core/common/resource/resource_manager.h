@@ -84,14 +84,14 @@ public:
         return resourceAdapters_.at(adaptId);
     }
 
-    void UpdateResourceConfig(const ResourceConfiguration& config)
+    void UpdateResourceConfig(const ResourceConfiguration& config, bool themeFlag = false)
     {
         std::unique_lock<std::shared_mutex> lock(mutex_);
         for (auto iter = resourceAdapters_.begin(); iter != resourceAdapters_.end(); ++iter) {
-            iter->second->UpdateConfig(config);
+            iter->second->UpdateConfig(config, themeFlag);
         }
         for (auto iter = cacheList_.begin(); iter != cacheList_.end(); ++iter) {
-            iter->cacheObj->UpdateConfig(config);
+            iter->cacheObj->UpdateConfig(config, themeFlag);
         }
     }
 

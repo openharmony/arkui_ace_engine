@@ -38,18 +38,25 @@ ArkUINativeModuleValue CalendarPickerBridge::SetTextStyle(ArkUIRuntimeCallInfo* 
     Local<JSValueRef> fontSizeArg = runtimeCallInfo->GetCallArgRef(NUM_2);
     Local<JSValueRef> fontWeightArg = runtimeCallInfo->GetCallArgRef(NUM_3);
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    std::string fontSize = "16fp";
-    Color textColor = calendarTheme->GetEntryFontColor();
-    std::string fontWeight = "regular";
-    uint32_t color = textColor.GetValue();
-    if (colorArg->IsNumber()) {
-        color = colorArg->Uint32Value(vm);
+    Color textColor;
+    uint32_t color;
+    std::string fontSize;
+    std::string fontWeight;
+    if (!colorArg->IsNull() && !colorArg->IsUndefined() &&
+        !ArkTSUtils::ParseJsColorAlpha(vm, colorArg, textColor)) {
+        textColor = calendarTheme->GetEntryFontColor();
     }
-    if (fontSizeArg->IsString()) {
-        fontSize = fontSizeArg->ToString(vm)->ToString();
+    color = textColor.GetValue();
+    if (!fontSizeArg->IsNull() && !fontSizeArg->IsUndefined()) {
+        if (fontSizeArg->IsNumber()) {
+            fontSize = std::to_string(fontSizeArg->Uint32Value(vm));
+        } else if (!ArkTSUtils::ParseJsString(vm, fontSizeArg, fontSize)) {
+            fontSize = "16fp";
+        }
     }
-    if (fontWeightArg->IsString()) {
-        fontWeight = fontWeightArg->ToString(vm)->ToString();
+    if (!fontWeightArg->IsNull() && !fontWeightArg->IsUndefined() &&
+        !ArkTSUtils::ParseJsString(vm, fontWeightArg, fontWeight)) {
+        fontWeight = "regular";
     }
     GetArkUIInternalNodeAPI()->GetCalendarPickerModifier().SetTextStyle(
         nativeNode, color, fontSize.c_str(), fontWeight.c_str());
@@ -75,14 +82,14 @@ ArkUINativeModuleValue CalendarPickerBridge::SetEdgeAlign(ArkUIRuntimeCallInfo* 
     Local<JSValueRef> dxArg = runtimeCallInfo->GetCallArgRef(NUM_2);
     Local<JSValueRef> dyArg = runtimeCallInfo->GetCallArgRef(NUM_3);
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    if (alignTypeArg->IsNumber()) {
-        auto alignType = alignTypeArg->ToNumber(vm)->Value();
+    if (!alignTypeArg->IsNull() && !alignTypeArg->IsUndefined() && alignTypeArg->IsNumber()) {
+        int alignType = alignTypeArg->ToNumber(vm)->Value();
         CalcDimension dx;
         CalcDimension dy;
-        if (dxArg->IsNumber() || dxArg->IsString()) {
+        if (!dxArg->IsNull() && !dxArg->IsUndefined()) {
             ArkTSUtils::ParseJsDimensionVp(vm, dxArg, dx);
         }
-        if (dyArg->IsNumber() || dyArg->IsString()) {
+        if (!dyArg->IsNull() && !dyArg->IsUndefined()) {
             ArkTSUtils::ParseJsDimensionVp(vm, dyArg, dy);
         }
 

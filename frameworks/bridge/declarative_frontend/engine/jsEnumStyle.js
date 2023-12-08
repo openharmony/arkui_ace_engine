@@ -2098,3 +2098,18 @@ var DragPreviewMode;
   DragPreviewMode["AUTO"] = 1;
   DragPreviewMode["DISABLE_SCALE"] = 2;
 })(DragPreviewMode || (DragPreviewMode = {}));
+
+var FoldStatus;
+(function (FoldStatus) {
+  FoldStatus[FoldStatus["FOLD_STATUS_UNKNOWN"] = 0] = "FOLD_STATUS_UNKNOWN";
+  FoldStatus[FoldStatus["FOLD_STATUS_EXPANDED"] = 1] = "FOLD_STATUS_EXPANDED";
+  FoldStatus[FoldStatus["FOLD_STATUS_FOLDED"] = 2] = "FOLD_STATUS_FOLDED";
+  FoldStatus[FoldStatus["FOLD_STATUS_HALF_FOLDED"] = 3] = "FOLD_STATUS_HALF_FOLDED";
+})(FoldStatus || (FoldStatus = {}));
+
+var OutlineStyle;
+(function (OutlineStyle) {
+  OutlineStyle[OutlineStyle["SOLID"] = 0] = "SOLID";
+  OutlineStyle[OutlineStyle["DASHED"] = 1] = "DASHED";
+  OutlineStyle[OutlineStyle["DOTTED"] = 2] = "DOTTED";
+})(OutlineStyle || (OutlineStyle = {}));

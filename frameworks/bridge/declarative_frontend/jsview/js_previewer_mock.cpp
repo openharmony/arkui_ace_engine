@@ -53,7 +53,6 @@ void CreateMockComponent(const std::string inspectorTag)
 void JSForm::Create(const JSCallbackInfo& info)
 {
     if (info.Length() == 0 || !info[0]->IsObject()) {
-        LOGE("form create fail due to FormComponent construct param is empty or type is not Object");
         return;
     }
 
@@ -90,7 +89,6 @@ void JSForm::JSBind(BindingTarget globalObj)
 void JSRichText::Create(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGI("richtext create error, info is non-valid");
         return;
     }
     CreateMockComponent("RichText");
@@ -243,7 +241,6 @@ public:
 void JSWeb::Create(const JSCallbackInfo& info)
 {
     if (info.Length() < 1 || !info[0]->IsObject()) {
-        LOGI("web create error, info is invalid");
         return;
     }
 
@@ -385,7 +382,6 @@ void JSWebController::JSBind(BindingTarget globalObj)
 void JSXComponent::Create(const JSCallbackInfo& info)
 {
     if (info.Length() < 1 || !info[0]->IsObject()) {
-        LOGI("xcomponent create error, info is invalid");
         return;
     }
     CreateMockComponent("XComponent");
@@ -416,7 +412,6 @@ void JSXComponentController::Mock(const JSCallbackInfo& info) {}
 void JSVideo::Create(const JSCallbackInfo& info)
 {
     if (info.Length() <= 0 || !info[0]->IsObject()) {
-        LOGE("video create error, info is invalid.");
         return;
     }
     CreateMockComponent("Video");
@@ -477,7 +472,6 @@ void JSVideoController::Mock(const JSCallbackInfo& info) {}
 void JSPlugin::Create(const JSCallbackInfo& info)
 {
     if (info.Length() <= 0 || !info[0]->IsObject()) {
-        LOGE("plugin create error, info is invalid.");
         return;
     }
     CreateMockComponent("PluginComponent");

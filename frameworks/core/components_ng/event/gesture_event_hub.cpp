@@ -583,7 +583,12 @@ float GestureEventHub::GetPixelMapScale(
                 static_cast<float>(minDeviceLength / PIXELMAP_DRAG_WGR_SCALE) / width);
         }
     }
-    return scale;
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, scale);
+    auto dragDropManager = pipeline->GetDragDropManager();
+    CHECK_NULL_RETURN(dragDropManager, scale);
+    auto windowScale = dragDropManager->GetSmallWindowScale();
+    return scale * windowScale;
 }
 
 std::function<void()> GestureEventHub::GetMousePixelMapCallback(const GestureEvent& info)
@@ -594,23 +599,20 @@ std::function<void()> GestureEventHub::GetMousePixelMapCallback(const GestureEve
         std::shared_ptr<Media::PixelMap> pixelMap;
         auto frameNode = gestureHub->GetFrameNode();
         CHECK_NULL_VOID(frameNode);
+        RefPtr<RenderContext> context;
         if (gestureHub->GetTextDraggable()) {
             auto pattern = frameNode->GetPattern<TextDragBase>();
             CHECK_NULL_VOID(pattern);
             auto dragNode = pattern->MoveDragNode();
             CHECK_NULL_VOID(dragNode);
-            auto context = dragNode->GetRenderContext();
-            CHECK_NULL_VOID(context);
-            auto thumbnailPixelMap = context->GetThumbnailPixelMap();
-            CHECK_NULL_VOID(thumbnailPixelMap);
-            pixelMap = thumbnailPixelMap->GetPixelMapSharedPtr();
+            context = dragNode->GetRenderContext();
         } else {
-            auto context = frameNode->GetRenderContext();
-            CHECK_NULL_VOID(context);
-            auto thumbnailPixelMap = context->GetThumbnailPixelMap();
-            CHECK_NULL_VOID(thumbnailPixelMap);
-            pixelMap = thumbnailPixelMap->GetPixelMapSharedPtr();
+            context = frameNode->GetRenderContext();
         }
+        CHECK_NULL_VOID(context);
+        auto thumbnailPixelMap = context->GetThumbnailPixelMap();
+        CHECK_NULL_VOID(thumbnailPixelMap);
+        pixelMap = thumbnailPixelMap->GetPixelMapSharedPtr();
         CHECK_NULL_VOID(pixelMap);
         float scale = gestureHub->GetPixelMapScale(
             frameNode->GetDragPreviewOption(), pixelMap->GetHeight(), pixelMap->GetWidth());
@@ -635,6 +637,7 @@ std::function<void()> GestureEventHub::GetMousePixelMapCallback(const GestureEve
         }
         InteractionInterface::GetInstance()->SetDragWindowVisible(true);
         dragDropManager->SetIsDragWindowShow(true);
+        dragDropManager->FireOnEditableTextComponent(frameNode, DragEventType::ENTER);
         dragDropManager->SetPreviewRect(Rect(pixelMapOffset.GetX(), pixelMapOffset.GetY(), width, height));
     };
     return callback;
@@ -705,6 +708,23 @@ void GestureEventHub::HandleOnDragStart(const GestureEvent& info)
      */
     auto extraParams = eventHub->GetDragExtraParams(std::string(), info.GetGlobalPoint(), DragEventType::START);
     auto dragDropInfo = (eventHub->GetOnDragStart())(event, extraParams);
+    auto dragPreviewInfo = frameNode->GetDragPreview();
+    if (info.GetSourceDevice() != SourceType::MOUSE) {
+        if (dragPreviewInfo.pixelMap != nullptr || dragPreviewInfo.customNode != nullptr) {
+            dragDropInfo.pixelMap = pixelMap_;
+            OnDragStart(info, pipeline, frameNode, dragDropInfo, event);
+            return;
+        }
+    }
+    if (info.GetSourceDevice() == SourceType::MOUSE) {
+        if (dragPreviewInfo.pixelMap != nullptr) {
+            dragDropInfo.pixelMap = dragPreviewInfo.pixelMap;
+            OnDragStart(info, pipeline, frameNode, dragDropInfo, event);
+            return;
+        } else if (dragPreviewInfo.customNode != nullptr) {
+            dragDropInfo.customNode = dragPreviewInfo.customNode;
+        }
+    }
 #if defined(ENABLE_DRAG_FRAMEWORK) && defined(ENABLE_ROSEN_BACKEND) && defined(PIXEL_MAP_SUPPORTED)
     g_getPixelMapSucc = false;
     if (dragDropInfo.customNode) {
@@ -836,6 +856,7 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
         overlayManager->RemovePixelMap();
         pipeline->FlushPipelineImmediately();
         InteractionInterface::GetInstance()->SetDragWindowVisible(true);
+        dragDropManager->FireOnEditableTextComponent(frameNode, DragEventType::ENTER);
     } else if (info.GetInputEventType() == InputEventType::MOUSE_BUTTON &&
                (dragDropInfo.pixelMap || dragDropInfo.customNode)) {
         if (SystemProperties::GetDebugEnabled()) {

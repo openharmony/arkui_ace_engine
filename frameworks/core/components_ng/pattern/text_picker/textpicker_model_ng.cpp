@@ -39,16 +39,29 @@ const int32_t BUFFER_NODE_NUMBER = 2;
 void SetDialogProperties(DialogProperties& properties, TextPickerDialog& textPickerDialog,
                          const RefPtr<DialogTheme>& theme)
 {
-    if (SystemProperties::GetDeviceType() == DeviceType::PHONE) {
-        properties.alignment = DialogAlignment::BOTTOM;
-    } else {
-        properties.alignment = DialogAlignment::CENTER;
+    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+        if (SystemProperties::GetDeviceType() == DeviceType::PHONE) {
+            properties.alignment = DialogAlignment::BOTTOM;
+        } else {
+            properties.alignment = DialogAlignment::CENTER;
+        }
     }
     if (textPickerDialog.alignment.has_value()) {
         properties.alignment = textPickerDialog.alignment.value();
     }
     properties.customStyle = false;
-    properties.offset = DimensionOffset(Offset(0, -theme->GetMarginBottom().ConvertToPx()));
+    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+        properties.offset = DimensionOffset(Offset(0, -theme->GetMarginBottom().ConvertToPx()));
+    } else {
+        if (properties.alignment == DialogAlignment::DEFAULT) {
+            if (SystemProperties::GetDeviceType() == DeviceType::PHONE) {
+                properties.alignment = DialogAlignment::BOTTOM;
+                properties.offset = DimensionOffset(Offset(0, -theme->GetMarginBottom().ConvertToPx()));
+            } else {
+                properties.alignment = DialogAlignment::CENTER;
+            }
+        }
+    }
     if (textPickerDialog.offset.has_value()) {
         properties.offset = textPickerDialog.offset.value();
     }

@@ -125,7 +125,7 @@ void AceViewOhos::DispatchTouchEvent(AceViewOhos* view, const std::shared_ptr<MM
     DispatchEventToPerf(pointerEvent);
     int32_t pointerAction = pointerEvent->GetPointerAction();
     if (pointerAction != MMI::PointerEvent::POINTER_ACTION_MOVE) {
-        TAG_LOGI(AceLogTag::ACE_INPUTTRACKING, "touchEvent dispatched in ace_view, eventInfo: id:%{public}d ",
+        TAG_LOGD(AceLogTag::ACE_INPUTTRACKING, "touchEvent dispatched in ace_view, eventInfo: id:%{public}d ",
             pointerEvent->GetId());
     }
 
@@ -290,7 +290,7 @@ void AceViewOhos::ProcessTouchEvent(const std::shared_ptr<MMI::PointerEvent>& po
             touchPoint.y, (int)touchPoint.type, touchPoint.time.time_since_epoch().count(), touchPoint.id);
     }
     if (pointerEvent->GetPointerAction() != MMI::PointerEvent::POINTER_ACTION_MOVE) {
-        TAG_LOGI(AceLogTag::ACE_INPUTTRACKING, "touchEvent processed in ace_view, eventInfo: id:%{public}d, "
+        TAG_LOGD(AceLogTag::ACE_INPUTTRACKING, "touchEvent processed in ace_view, eventInfo: id:%{public}d, "
             "pointX=%{public}f pointY=%{public}f type=%{public}d timeStamp=%{public}lld",
             pointerEvent->GetId(), touchPoint.x, touchPoint.y,
             (int)touchPoint.type, touchPoint.time.time_since_epoch().count());

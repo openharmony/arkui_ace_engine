@@ -19,12 +19,14 @@
 #include <string>
 
 #include "base/log/log.h"
+#include "base/geometry/rect.h"
 #include "core/common/asset_manager_impl.h"
 #include "core/common/flutter/flutter_asset_manager.h"
 #include "core/components_ng/property/safe_area_insets.h"
 
 namespace OHOS::Rosen {
     class AvoidArea;
+    struct DMRect;
 }
 namespace OHOS::Ace {
 
@@ -56,6 +58,7 @@ inline const std::string GenerateFullPath(const std::string& prePath, const std:
 }
 
 NG::SafeAreaInsets ConvertAvoidArea(const OHOS::Rosen::AvoidArea& avoidArea);
+Rect ConvertDMRect2Rect(const OHOS::Rosen::DMRect& displayAvailableRect);
 } // namespace OHOS::Ace
 
 #endif // FOUNDATION_ACE_ACE_ENGINE_ADAPTER_OHOS_ENTRANCE_UTILS_H

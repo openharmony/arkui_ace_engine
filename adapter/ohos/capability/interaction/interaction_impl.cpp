@@ -102,6 +102,11 @@ int32_t InteractionImpl::GetDragExtraInfo(std::string& extraInfo)
     return InteractionManager::GetInstance()->GetExtraInfo(extraInfo);
 }
 
+int32_t InteractionImpl::EnterTextEditorArea(bool enable)
+{
+    return InteractionManager::GetInstance()->EnterTextEditorArea(enable);
+}
+
 Msdp::DeviceStatus::DragCursorStyle TranslateDragCursorStyle(OHOS::Ace::DragCursorStyleCore style)
 {
     switch (style) {

@@ -1557,6 +1557,14 @@ bool PipelineContext::CheckNeedAutoSave()
     return pageNode->NeedRequestAutoSave();
 }
 
+bool PipelineContext::CheckPageFocus()
+{
+    CHECK_NULL_RETURN(stageManager_, true);
+    auto pageNode = stageManager_->GetLastPage();
+    CHECK_NULL_RETURN(pageNode, true);
+    return pageNode->GetFocusHub() && pageNode->GetFocusHub()->IsCurrentFocus();
+}
+
 void PipelineContext::NotifyFillRequestSuccess(AceAutoFillType autoFillType, RefPtr<ViewDataWrap> viewDataWrap)
 {
     CHECK_NULL_VOID(viewDataWrap);
@@ -2703,5 +2711,25 @@ void PipelineContext::CloseFrontendAnimation()
         pendingFrontendAnimation_.pop();
     }
     AnimationUtils::CloseImplicitAnimation();
+}
+
+bool PipelineContext::IsDragging() const
+{
+    if (!dragDropManager_) {
+        return false;
+    }
+    bool isDragging = dragDropManager_->IsDragging();
+#ifdef ENABLE_DRAG_FRAMEWORK
+    isDragging = (isDragging || dragDropManager_->IsMsdpDragging());
+#endif
+    return isDragging;
+}
+
+void PipelineContext::SetIsDragging(bool isDragging)
+{
+    if (!eventManager_) {
+        return;
+    }
+    eventManager_->SetIsDragging(isDragging);
 }
 } // namespace OHOS::Ace::NG
