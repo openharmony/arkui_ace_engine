@@ -617,7 +617,8 @@ export class ChipComponent extends ViewPU {
 
     deleteChipNodeAnimate() {
         Context.animateTo({ duration: 150, curve: Curve.Sharp }, (() => {
-            this.chipOpacity = 0
+            this.chipOpacity = 0;
+            this.chipBlendColor = Color.Transparent
         }));
         Context.animateTo({ duration: 150, curve: Curve.FastOutLinearIn, onFinish: () => {
             this.deleteChip = !0
