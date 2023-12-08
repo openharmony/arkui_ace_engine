@@ -846,7 +846,8 @@ bool RichEditorPattern::SetCaretOffset(int32_t caretPosition)
     return success;
 }
 
-OffsetF RichEditorPattern::CalcCursorOffsetByPosition(int32_t position, float& selectLineHeight, bool downStreamFirst)
+OffsetF RichEditorPattern::CalcCursorOffsetByPosition(
+    int32_t position, float& selectLineHeight, bool downStreamFirst, bool needLineHighest)
 {
     selectLineHeight = 0.0f;
     auto host = GetHost();
@@ -855,7 +856,7 @@ OffsetF RichEditorPattern::CalcCursorOffsetByPosition(int32_t position, float& s
     CHECK_NULL_RETURN(pipeline, OffsetF(0, 0));
     auto rootOffset = pipeline->GetRootRect().GetOffset();
     auto textPaintOffset = GetTextRect().GetOffset() - OffsetF(0.0f, std::min(baselineOffset_, 0.0f));
-    auto startOffset = paragraphs_.ComputeCursorOffset(position, selectLineHeight, downStreamFirst);
+    auto startOffset = paragraphs_.ComputeCursorOffset(position, selectLineHeight, downStreamFirst, needLineHighest);
     auto children = host->GetChildren();
     if (NearZero(selectLineHeight)) {
         if (children.empty() || GetTextContentLength() == 0) {
@@ -1285,7 +1286,7 @@ void RichEditorPattern::HandleSingleClickEvent(OHOS::Ace::GestureEvent& info)
         if (focusHub->RequestFocusImmediately()) {
             float caretHeight = 0.0f;
             SetCaretPosition(position);
-            OffsetF caretOffset = CalcCursorOffsetByPosition(GetCaretPosition(), caretHeight);
+            OffsetF caretOffset = CalcCursorOffsetByPosition(GetCaretPosition(), caretHeight, false, false);
             MoveCaretToContentRect();
             CHECK_NULL_VOID(overlayMod_);
             DynamicCast<RichEditorOverlayModifier>(overlayMod_)->SetCaretOffsetAndHeight(caretOffset, caretHeight);
