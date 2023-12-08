@@ -1325,11 +1325,6 @@ void TextPattern::OnModifyDone()
         InitMouseEvent();
         InitTouchEvent();
         SetAccessibilityAction();
-    } else {
-        if (host->IsDraggable() || gestureEventHub->GetTextDraggable()) {
-            host->SetDraggable(false);
-            gestureEventHub->SetTextDraggable(false);
-        }
     }
     if (onClick_ || copyOption_ != CopyOptions::None) {
         InitClickEvent(gestureEventHub);

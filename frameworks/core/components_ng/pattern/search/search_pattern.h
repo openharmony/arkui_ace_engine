@@ -159,6 +159,8 @@ private:
     void RequestKeyboard();
     // Init touch and hover event
     void InitTextFieldValueChangeEvent();
+    void InitTextFieldDragEvent();
+    void RemoveDragFrameNodeFromManager();
     void InitButtonTouchEvent(RefPtr<TouchEventImpl>& touchEvent, int32_t childId);
     void InitButtonMouseEvent(RefPtr<InputEvent>& inputEvent, int32_t childId);
     void SetMouseStyle(MouseFormat format);
