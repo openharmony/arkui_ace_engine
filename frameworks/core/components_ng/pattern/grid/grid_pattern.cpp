@@ -72,17 +72,15 @@ RefPtr<LayoutAlgorithm> GridPattern::CreateLayoutAlgorithm()
     }
 
     // If only set one of rowTemplate and columnsTemplate, use scrollable layout algorithm.
+    RefPtr<GridScrollLayoutAlgorithm> result;
     if (!gridLayoutProperty->GetLayoutOptions().has_value()) {
-        auto result = MakeRefPtr<GridScrollLayoutAlgorithm>(gridLayoutInfo_, crossCount, mainCount);
-        result->SetCanOverScroll(CanOverScroll(GetScrollSource()));
-        result->SetScrollSource(GetScrollSource());
-        return result;
+        result = MakeRefPtr<GridScrollLayoutAlgorithm>(gridLayoutInfo_, crossCount, mainCount);
     } else {
-        auto result = MakeRefPtr<GridScrollWithOptionsLayoutAlgorithm>(gridLayoutInfo_, crossCount, mainCount);
-        result->SetCanOverScroll(CanOverScroll(GetScrollSource()));
-        result->SetScrollSource(GetScrollSource());
-        return result;
+        result = MakeRefPtr<GridScrollWithOptionsLayoutAlgorithm>(gridLayoutInfo_, crossCount, mainCount);
     }
+    result->SetCanOverScroll(CanOverScroll(GetScrollSource()));
+    result->SetScrollSource(GetScrollSource());
+    return result;
 }
 
 RefPtr<NodePaintMethod> GridPattern::CreateNodePaintMethod()
@@ -913,7 +911,7 @@ WeakPtr<FocusHub> GridPattern::SearchIrregularFocusableChild(int32_t tarMainInde
         auto childCrossSpan = hasIrregularItemInfo ? irregularInfo.value().crossSpan
                                                    : childItemProperty->GetCrossSpan(gridLayoutInfo_.axis_);
         auto childMainSpan = hasIrregularItemInfo ? irregularInfo.value().mainSpan
-                                                   : childItemProperty->GetMainSpan(gridLayoutInfo_.axis_);
+                                                  : childItemProperty->GetMainSpan(gridLayoutInfo_.axis_);
 
         GridItemIndexInfo childInfo;
         childInfo.mainIndex = childMainIndex;
