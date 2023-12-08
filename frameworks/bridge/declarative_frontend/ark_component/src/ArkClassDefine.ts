@@ -1478,6 +1478,138 @@ class ArkTextAreaShowCounter implements Equable {
   }
 }
 
+class ArkDotIndicator extends DotIndicator {
+  type: string | undefined;
+  leftValue: Length | undefined;
+  topValue: Length | undefined;
+  rightValue: Length | undefined;
+  bottomValue: Length | undefined;
+  itemWidthValue: Length | undefined;
+  itemHeightValue: Length | undefined;
+  selectedItemWidthValue: Length | undefined;
+  selectedItemHeightValue: Length | undefined;
+  maskValue: boolean | undefined;
+  colorValue: ResourceColor | undefined;
+  selectedColorValue: ResourceColor | undefined;
+
+  constructor() {
+    super();
+    this.type = undefined;
+    this.leftValue = undefined;
+    this.topValue = undefined;
+    this.rightValue = undefined;
+    this.bottomValue = undefined;
+    this.itemWidthValue = undefined;
+    this.itemHeightValue = undefined;
+    this.selectedItemWidthValue = undefined;
+    this.selectedItemHeightValue = undefined;
+    this.maskValue = undefined;
+    this.colorValue = undefined;
+    this.selectedColorValue = undefined;
+  }
+
+  isEqual(another: ArkDotIndicator): boolean {
+    return (
+      this.type === another.type &&
+      this.leftValue === another.leftValue &&
+      this.topValue === another.topValue &&
+      this.rightValue === another.rightValue &&
+      this.bottomValue === another.bottomValue &&
+      this.itemWidthValue === another.itemWidthValue &&
+      this.itemHeightValue === another.itemHeightValue &&
+      this.selectedItemWidthValue === another.selectedItemWidthValue &&
+      this.selectedItemHeightValue === another.selectedItemHeightValue &&
+      this.maskValue === another.maskValue &&
+      this.colorValue === another.colorValue &&
+      this.selectedColorValue === another.selectedColorValue
+    );
+  }
+}
+
+class ArkDigitIndicator extends DigitIndicator {
+  type: string | undefined;
+  leftValue: Length | undefined;
+  topValue: Length | undefined;
+  rightValue: Length | undefined;
+  bottomValue: Length | undefined;
+  fontColorValue: ResourceColor | undefined;
+  selectedFontColorValue: ResourceColor | undefined;
+  digitFontValue: ArkDigitFont | undefined;
+  selectedDigitFontValue: ArkDigitFont | undefined;
+
+  constructor() {
+    super();
+    this.type = undefined;
+    this.leftValue = undefined;
+    this.topValue = undefined;
+    this.rightValue = undefined;
+    this.bottomValue = undefined;
+    this.fontColorValue = undefined;
+    this.selectedFontColorValue = undefined;
+    this.digitFontValue = undefined;
+    this.selectedDigitFontValue = undefined;
+  }
+
+  isEqual(another: ArkDigitIndicator): boolean {
+    return (
+      this.type === another.type &&
+      this.leftValue === another.leftValue &&
+      this.topValue === another.topValue &&
+      this.rightValue === another.rightValue &&
+      this.bottomValue === another.bottomValue &&
+      this.digitFontValue === another.digitFontValue &&
+      this.selectedDigitFontValue === another.selectedDigitFontValue
+    );
+  }
+}
+
+class ArkDigitFont {
+  size: Length | undefined;
+  weight: number | FontWeight | string | undefined;
+
+  constructor() {
+    this.size = undefined;
+    this.weight = undefined;
+  }
+
+  isEqual(another: ArkDigitFont): boolean {
+    return this.size === another.size && this.weight === another.weight;
+  }
+
+  parseFontWeight(value: string | number | undefined) {
+    const valueWeightMap = {
+      [0]: 'lighter',
+      [1]: 'normal',
+      [2]: 'regular',
+      [3]: 'medium',
+      [4]: 'bold',
+      [5]: 'bolder'
+    };
+    if (isUndefined(value)) {
+      this.weight = '-';
+    } else if (value in valueWeightMap) {
+      this.weight = valueWeightMap[value];
+    } else {
+      this.weight = value.toString();
+    }
+    return this.weight;
+  }
+}
+
+class ArkDisplayArrow {
+  value: boolean | ArrowStyle;
+  isHoverShow: boolean | undefined;
+
+  constructor() {
+    this.value = undefined;
+    this.isHoverShow = undefined;
+  }
+
+  isEqual(another: ArkDisplayArrow): boolean {
+    return this.value === another.value && this.isHoverShow === another.isHoverShow;
+  }
+}
+
 class ArkGridEdgeEffect implements Equable {
   value: EdgeEffect;
   options?: EdgeEffectOptions | undefined;
