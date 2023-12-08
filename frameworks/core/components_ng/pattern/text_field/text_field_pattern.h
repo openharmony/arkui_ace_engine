@@ -1188,6 +1188,7 @@ private:
     bool ProcessAutoFill();
     void ScrollToSafeArea() const override;
     void RecordSubmitEvent() const;
+    void UpdateCancelNode(bool isShow);
 
     RectF frameRect_;
     RectF contentRect_;
