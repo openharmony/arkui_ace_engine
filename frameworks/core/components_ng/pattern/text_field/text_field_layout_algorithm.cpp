@@ -106,13 +106,12 @@ std::optional<SizeF> TextFieldLayoutAlgorithm::InlineMeasureContent(
         paragraph_->Layout(contentConstraint.maxSize.Width());
         contentWidth = ConstraintWithMinWidth(contentConstraint, layoutWrapper, paragraph_);
         // calc inline status in advance
-        inlineParagraph_->Layout(
-            contentConstraint.maxSize.Width() + pattern->GetPaddingLeft() + pattern->GetPaddingRight()
-            - static_cast<float>(safeBoundary) * 2 - PARAGRAPH_SAVE_BOUNDARY);
+        auto widthOffSet = pattern->GetPaddingLeft() + pattern->GetPaddingRight() - safeBoundary;
+        inlineParagraph_->Layout(contentConstraint.maxSize.Width() + widthOffSet
+            - safeBoundary - PARAGRAPH_SAVE_BOUNDARY);
         auto longestLine = std::ceil(inlineParagraph_->GetLongestLine());
         inlineParagraph_->Layout(std::min(static_cast<float>(longestLine), inlineParagraph_->GetMaxWidth()));
-        auto inlineContentWidth = ConstraintWithMinWidth(
-            contentConstraint, layoutWrapper, inlineParagraph_,
+        auto inlineContentWidth = ConstraintWithMinWidth(contentConstraint, layoutWrapper, inlineParagraph_,
             static_cast<float>(safeBoundary) + PARAGRAPH_SAVE_BOUNDARY);
         inlineMeasureItem_.inlineScrollRectOffsetX = contentWidth
             + pattern->GetHorizontalPaddingAndBorderSum() - inlineContentWidth - safeBoundary - PARAGRAPH_SAVE_BOUNDARY;
@@ -127,7 +126,7 @@ std::optional<SizeF> TextFieldLayoutAlgorithm::InlineMeasureContent(
         inlineIdealHieght =
             pattern->GetSingleLineHeight() * textFieldLayoutProperty->GetMaxViewLinesValue(INLINE_DEFAULT_VIEW_MAXLINE);
     } else {
-        // calc inline status in advance 
+        // calc inline status in advance
         inlineMeasureItem_.inlineSizeHeight = inlineParagraph_->GetHeight() / inlineParagraph_->GetLineCount()
             * textFieldLayoutProperty->GetMaxViewLinesValue(INLINE_DEFAULT_VIEW_MAXLINE);
         inlineMeasureItem_.inlineContentRectHeight = GreatNotEqual(inlineParagraph_->GetLongestLine(), 0.0)
@@ -138,8 +137,7 @@ std::optional<SizeF> TextFieldLayoutAlgorithm::InlineMeasureContent(
     }
 
     auto contentHeight = GreatNotEqual(paragraph_->GetLongestLine(), 0.0)
-                             ? paragraph_->GetHeight()
-                             : std::max(preferredHeight_, paragraph_->GetHeight());
+        ? paragraph_->GetHeight() : std::max(preferredHeight_, paragraph_->GetHeight());
 
     return SizeF(contentWidth, std::min(inlineIdealHieght, contentHeight));
 }
