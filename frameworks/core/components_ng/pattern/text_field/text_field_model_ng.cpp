@@ -466,6 +466,15 @@ void TextFieldModelNG::SetCounterType(int32_t value)
     ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, SetCounter, value);
 }
 
+void TextFieldModelNG::SetShowCounterBorder(bool value)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    CHECK_NULL_VOID(pattern);
+    ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, ShowHighlightBorder, value);
+}
+
 void TextFieldModelNG::SetBarState(OHOS::Ace::DisplayMode value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, DisplayMode, value);
