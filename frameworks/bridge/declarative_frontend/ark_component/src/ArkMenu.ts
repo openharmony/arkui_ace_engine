@@ -3,9 +3,9 @@ class MenuFontColorModifier extends ModifierWithKey<ResourceColor> {
   static identity: Symbol = Symbol('fontColor');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().common.resetMenuFontColor(node);
+      GetUINativeModule().menu.resetMenuFontColor(node);
     } else {
-      GetUINativeModule().common.setMenuFontColor(node, this.value);
+      GetUINativeModule().menu.setMenuFontColor(node, this.value);
     }
   }
 
@@ -18,14 +18,28 @@ class MenuFontColorModifier extends ModifierWithKey<ResourceColor> {
   }
 }
 
-class MenuFontModifier extends Modifier<ArkFont> {
+class MenuFontModifier extends ModifierWithKey<Font> {
   static identity: Symbol = Symbol('font');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
       GetUINativeModule().menu.resetFont(node);
     }
     else {
-      GetUINativeModule().menu.setFont(node, this.value.size, this.value.weight, this.value.family, this.value.style);
+      GetUINativeModule().menu.setFont(node,
+        this.value?.size ?? undefined,
+        this.value?.weight ?? undefined,
+        this.value?.family ?? undefined,
+        this.value?.style ?? undefined);
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    if (!(this.stageValue.weight === this.value.weight &&
+      this.stageValue.style === this.value.style)) {
+      return true;
+    } else {
+      return !isBaseOrResourceEqual(this.stageValue.size, this.value.size) ||
+        !isBaseOrResourceEqual(this.stageValue.family, this.value.family);
     }
   }
 }
@@ -68,14 +82,7 @@ class ArkMenuComponent extends ArkComponent implements MenuAttribute {
     throw new Error('Method not implemented.');
   }
   font(value: Font): MenuAttribute {
-    let font = new ArkFont();
-    if (isObject(value)) {
-      font.setSize(value.size);
-      font.parseFontWeight(value.weight);
-      font.setFamily(value.family);
-      font.setStyle(value.style);
-    }
-    modifier(this._modifiers, MenuFontModifier, font);
+    modifierWithKey(this._modifiersWithKeys, MenuFontModifier.identity, MenuFontModifier, value);
     return this;
   }
   fontColor(value: ResourceColor): this {

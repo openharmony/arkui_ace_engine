@@ -541,5 +541,12 @@ std::string NG::PipelineContext::GetCurrentExtraInfo()
 {
     return std::string();
 }
+
+bool NG::PipelineContext::IsDragging() const
+{
+    return false;
+}
+
+void NG::PipelineContext::SetIsDragging(bool isDragging) {}
 } // namespace OHOS::Ace
 // pipeline_base ===============================================================

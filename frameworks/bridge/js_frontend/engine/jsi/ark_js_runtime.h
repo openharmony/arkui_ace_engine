@@ -92,6 +92,8 @@ public:
     void RegisterUncaughtExceptionHandler(UncaughtExceptionCallback callback) override;
     void HandleUncaughtException(panda::TryCatch& tryCatch,
         const std::function<void(const std::string&, int32_t)>& errorCallback = nullptr) override;
+    void HandleUncaughtExceptionWithoutNativeEngine(panda::TryCatch& trycatch,
+        const std::function<void(const std::string&, int32_t)>& errorCallback = nullptr) override;
     bool HasPendingException() override;
     void ExecutePendingJob() override;
     void DumpHeapSnapshot(bool isPrivate) override;

@@ -2,23 +2,15 @@
 
 class ArkNavigatorComponent extends ArkComponent implements NavigatorAttribute {
   active(value: boolean): NavigatorAttribute {
-    if (isBoolean(value)) {
-      modifier(this._modifiers, ActiveModifier, value);
-    }
+    modifier(this._modifiers, ActiveModifier, value);
     return this;
   }
   type(value: NavigationType): NavigatorAttribute {
-    if (isNumber(value)) {
-      modifier(this._modifiers, TypeModifier, value);
-    } else {
-      modifier(this._modifiers, TypeModifier, undefined);
-    }
+    modifier(this._modifiers, TypeModifier, value);
     return this;
   }
   target(value: string): NavigatorAttribute {
-    if (isString(value)) {
-      modifier(this._modifiers, TargetModifier, value);
-    }
+    modifier(this._modifiers, TargetModifier, value);
     return this;
   }
   params(value: object): NavigatorAttribute {

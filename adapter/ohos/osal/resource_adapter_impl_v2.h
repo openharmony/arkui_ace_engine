@@ -34,7 +34,7 @@ public:
     ~ResourceAdapterImplV2() override = default;
 
     void Init(const ResourceInfo& resourceInfo) override;
-    void UpdateConfig(const ResourceConfiguration& config) override;
+    void UpdateConfig(const ResourceConfiguration& config, bool themeFlag = false) override;
 
     RefPtr<ThemeStyle> GetTheme(int32_t themeId) override;
 
@@ -76,6 +76,8 @@ public:
 
 private:
     std::string GetActualResourceName(const std::string& resName) const;
+    bool NeedUpdateResConfig(const std::shared_ptr<Global::Resource::ResConfig>& oldResConfig,
+        const std::shared_ptr<Global::Resource::ResConfig>& newResConfig);
 
     inline std::shared_ptr<Global::Resource::ResourceManager> GetResourceManager() const
     {

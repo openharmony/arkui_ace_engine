@@ -5,32 +5,20 @@ class ArkDatePickerComponent extends ArkComponent implements DatePickerAttribute
     return this;
   }
   disappearTextStyle(value: PickerTextStyle): DatePickerAttribute {
-    let pickerText: ArkDatePickerTextStyle = new ArkDatePickerTextStyle();
-    pickerText.color = value?.color ?? undefined;
-    pickerText.font = value?.font ?? undefined;
-
-    modifier(this._modifiers, DatePickerDisappearTextStyleModifier, pickerText);
-
+    modifierWithKey(this._modifiersWithKeys, DatePickerDisappearTextStyleModifier.identity,
+      DatePickerDisappearTextStyleModifier, value);
     return this;
   }
   textStyle(value: PickerTextStyle): DatePickerAttribute {
-    let pickerText: ArkDatePickerTextStyle = new ArkDatePickerTextStyle();
-    pickerText.color = value?.color ?? undefined;
-    pickerText.font = value?.font ?? undefined;
-
-    modifier(this._modifiers, DatePickerTextStyleModifier, pickerText);
-
+    modifierWithKey(this._modifiersWithKeys, DatePickerTextStyleModifier.identity,
+      DatePickerTextStyleModifier, value);
     return this;
   }
   selectedTextStyle(value: PickerTextStyle): DatePickerAttribute {
-    let pickerText: ArkDatePickerTextStyle = new ArkDatePickerTextStyle();
-    pickerText.color = value?.color ?? undefined;
-    pickerText.font = value?.font ?? undefined;
-
-    modifier(this._modifiers, DatePickerSelectedTextStyleModifier, pickerText);
-
-        return this;
-    }
+    modifierWithKey(this._modifiersWithKeys, DatePickerSelectedTextStyleModifier.identity,
+      DatePickerSelectedTextStyleModifier, value);
+    return this;
+  }
     onChange(callback: (value: DatePickerResult) => void): DatePickerAttribute {
         throw new Error('Method not implemented.');
     }
@@ -51,7 +39,7 @@ class DatePickerLunarModifier extends Modifier<boolean> {
   }
 }
 
-class DatePickerTextStyleModifier extends Modifier<ArkDatePickerTextStyle> {
+class DatePickerTextStyleModifier extends ModifierWithKey<PickerTextStyle> {
   static identity: Symbol = Symbol('textStyle');
   applyPeer(node: KNode, reset: boolean) {
     if (reset) {
@@ -65,9 +53,20 @@ class DatePickerTextStyleModifier extends Modifier<ArkDatePickerTextStyle> {
         this.value?.font?.style ?? undefined);
     }
   }
+
+  checkObjectDiff(): boolean {
+    if (!(this.stageValue?.font?.weight === this.value?.font?.weight &&
+      this.stageValue?.font?.style === this.value?.font?.style)) {
+      return true;
+    } else {
+      return !isBaseOrResourceEqual(this.stageValue?.color, this.value?.color) ||
+        !isBaseOrResourceEqual(this.stageValue?.font?.size, this.value?.font?.size) ||
+        !isBaseOrResourceEqual(this.stageValue?.font?.family, this.value?.font?.family);
+    }
+  }
 }
 
-class DatePickerSelectedTextStyleModifier extends Modifier<ArkDatePickerTextStyle> {
+class DatePickerSelectedTextStyleModifier extends ModifierWithKey<PickerTextStyle> {
   static identity: Symbol = Symbol('selectedTextStyle');
   applyPeer(node: KNode, reset: boolean) {
     if (reset) {
@@ -81,9 +80,20 @@ class DatePickerSelectedTextStyleModifier extends Modifier<ArkDatePickerTextStyl
         this.value?.font?.style ?? undefined);
     }
   }
+
+  checkObjectDiff(): boolean {
+    if (!(this.stageValue?.font?.weight === this.value?.font?.weight &&
+      this.stageValue?.font?.style === this.value?.font?.style)) {
+      return true;
+    } else {
+      return !isBaseOrResourceEqual(this.stageValue?.color, this.value?.color) ||
+        !isBaseOrResourceEqual(this.stageValue?.font?.size, this.value?.font?.size) ||
+        !isBaseOrResourceEqual(this.stageValue?.font?.family, this.value?.font?.family);
+    }
+  }
 }
 
-class DatePickerDisappearTextStyleModifier extends Modifier<ArkDatePickerTextStyle> {
+class DatePickerDisappearTextStyleModifier extends ModifierWithKey<PickerTextStyle> {
   static identity: Symbol = Symbol('disappearTextStyle');
   applyPeer(node: KNode, reset: boolean) {
     if (reset) {
@@ -95,6 +105,17 @@ class DatePickerDisappearTextStyleModifier extends Modifier<ArkDatePickerTextSty
         this.value?.font?.weight ?? undefined,
         this.value?.font?.family ?? undefined,
         this.value?.font?.style ?? undefined);
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    if (!(this.stageValue?.font?.weight === this.value?.font?.weight &&
+      this.stageValue?.font?.style === this.value?.font?.style)) {
+      return true;
+    } else {
+      return !isBaseOrResourceEqual(this.stageValue?.color, this.value?.color) ||
+        !isBaseOrResourceEqual(this.stageValue?.font?.size, this.value?.font?.size) ||
+        !isBaseOrResourceEqual(this.stageValue?.font?.family, this.value?.font?.family);
     }
   }
 }

@@ -298,13 +298,13 @@ void ResourceAdapterImpl::Init(const ResourceInfo& resourceInfo)
         configuration.fontRatio_, configuration.colorMode_);
 }
 
-void ResourceAdapterImpl::UpdateConfig(const ResourceConfiguration& config)
+void ResourceAdapterImpl::UpdateConfig(const ResourceConfiguration& config, bool themeFlag)
 {
     auto configuration = ConvertConfig(config);
     LOGI("UpdateConfig ori=%{public}d, dpi=%{public}f, device=%{public}d, font=%{public}f, color=%{public}d",
         configuration.orientation_, configuration.resolution_, configuration.deviceType_, configuration.fontRatio_,
         configuration.colorMode_);
-    resourceManger_.UpdateConfig(configuration);
+    resourceManger_.UpdateConfig(configuration, themeFlag);
 }
 
 RefPtr<ThemeStyle> ResourceAdapterImpl::GetTheme(int32_t themeId)

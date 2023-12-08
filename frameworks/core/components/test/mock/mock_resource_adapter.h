@@ -29,7 +29,7 @@ public:
     ~MockResourceAdapter() override = default;
     MOCK_METHOD0(Create, RefPtr<ResourceAdapter>());
     MOCK_METHOD1(Init, void(const ResourceInfo& resourceInfo));
-    MOCK_METHOD1(UpdateConfig, void(const ResourceConfiguration& config));
+    MOCK_METHOD2(UpdateConfig, void(const ResourceConfiguration& config, bool themeFlag));
     MOCK_METHOD1(GetTheme, RefPtr<ThemeStyle>(int32_t themeId));
     MOCK_METHOD1(GetColor, Color(uint32_t resId));
     MOCK_METHOD1(GetDimension, Dimension(uint32_t resId));

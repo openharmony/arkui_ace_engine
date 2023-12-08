@@ -79,8 +79,8 @@ public:
     int32_t GetGlyphIndexByCoordinate(const Offset& offset) override;
     void GetRectsForRange(int32_t start, int32_t end, std::vector<RectF>& selectedRects) override;
     void GetRectsForPlaceholders(std::vector<RectF>& selectedRects) override;
-    bool ComputeOffsetForCaretDownstream(int32_t extent, CaretMetricsF& result) override;
-    bool ComputeOffsetForCaretUpstream(int32_t extent, CaretMetricsF& result) override;
+    bool ComputeOffsetForCaretDownstream(int32_t extent, CaretMetricsF& result, bool needLineHighest = true) override;
+    bool ComputeOffsetForCaretUpstream(int32_t extent, CaretMetricsF& result, bool needLineHighest = true) override;
     bool CalcCaretMetricsByPosition(
         int32_t extent, CaretMetricsF& caretCaretMetric, TextAffinity textAffinity) override;
     bool CalcCaretMetricsByPosition(

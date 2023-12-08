@@ -1321,7 +1321,7 @@ class ArkPickerTextStyle implements Equable {
 
 class ArkEdgeAlign {
   alignType: number;
-  offset?: number | string | undefined | Resource;
+  offset?: Offset | undefined;
 
   constructor() {
     this.alignType = undefined;

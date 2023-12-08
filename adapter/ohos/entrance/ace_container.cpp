@@ -1926,7 +1926,7 @@ void AceContainer::UpdateConfiguration(const ParsedConfig& parsedConfig, const s
     SetResourceConfiguration(resConfig);
     themeManager->UpdateConfig(resConfig);
     if (SystemProperties::GetResourceDecoupling()) {
-        ResourceManager::GetInstance().UpdateResourceConfig(resConfig);
+        ResourceManager::GetInstance().UpdateResourceConfig(resConfig, !parsedConfig.themeTag.empty());
     }
     themeManager->LoadResourceThemes();
     auto front = GetFrontend();

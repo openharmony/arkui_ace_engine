@@ -1219,7 +1219,6 @@ void NavigationModelNG::SetMenuItems(std::vector<NG::BarItem>&& menuItems)
             navBarNode->UpdateMenuNodeOperation(ChildNodeOperation::ADD);
         }
     }
-    titleBarNode->MarkIsInitialTitle(true);
     auto navBarPattern = navBarNode->GetPattern<NavBarPattern>();
     CHECK_NULL_VOID(navBarPattern);
     navBarPattern->SetTitleBarMenuItems(menuItems);
@@ -1248,11 +1247,9 @@ void NavigationModelNG::SetCustomMenu(const RefPtr<AceType>& customNode)
         }
         navBarNode->SetMenu(customMenu);
         navBarNode->UpdatePrevMenuIsCustom(true);
-        titleBarNode->MarkIsInitialTitle(true);
         navBarNode->UpdateMenuNodeOperation(ChildNodeOperation::REPLACE);
         return;
     }
-    titleBarNode->MarkIsInitialTitle(true);
     navBarNode->SetMenu(customMenu);
     navBarNode->UpdatePrevMenuIsCustom(true);
     navBarNode->UpdateMenuNodeOperation(ChildNodeOperation::ADD);
