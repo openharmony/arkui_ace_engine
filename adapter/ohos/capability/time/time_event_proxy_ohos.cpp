@@ -63,13 +63,36 @@ TimeEventProxyOhos::~TimeEventProxyOhos()
     CommonEventManager::UnSubscribeCommonEvent(eventFwkSubscriber_);
 }
 
+namespace {
+void NotifyCard(const RefPtr<TimeChangeListener>& listener)
+{
+    auto taskExecutor = Container::CurrentTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    if (taskExecutor->WillRunOnCurrentThread(TaskExecutor::TaskType::UI)) {
+        listener->OnTimeChange();
+    } else {
+        taskExecutor->PostTask(
+            [listener, id = Container::CurrentId()] {
+                ContainerScope scope(id);
+                listener->OnTimeChange();
+            },
+            TaskExecutor::TaskType::UI);
+    }
+}
+} // namespace
+
 void TimeEventProxyOhos::OnTimeChange()
 {
     for (auto it = listeners_.begin(); it != listeners_.end();) {
         auto listener = it->first.Upgrade();
         if (listener) {
             ContainerScope scope(it->second);
-            listener->OnTimeChange();
+            auto container = Container::Current();
+            if (container && container->IsFRSCardContainer()) {
+                NotifyCard(listener);
+            } else {
+                listener->OnTimeChange();
+            }
             ++it;
         } else {
             it = listeners_.erase(it);
