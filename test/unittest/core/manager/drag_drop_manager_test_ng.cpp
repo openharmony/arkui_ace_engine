@@ -1554,16 +1554,14 @@ HWTEST_F(DragDropManagerTestNg, DragDropManagerTest033, TestSize.Level1)
     auto parentNodeTmp = pipelineTmp->GetRootElement();
     auto parentFrameNodeTmp = AceType::DynamicCast<FrameNode>(parentNodeTmp);
     parentFrameNodeTmp->frameChildren_.insert(WeakPtr<NG::FrameNode>(frameNodeNull));
-
-     dragDropManager->AddGridDragFrameNode(frameNodeNull->GetId(), frameNodeNull);
-     std::map<int32_t, WeakPtr<FrameNode>> frameNodes = dragDropManager->gridDragFrameNodes_;
+    dragDropManager->AddGridDragFrameNode(frameNodeNull->GetId(), frameNodeNull);
+    std::map<int32_t, WeakPtr<FrameNode>> frameNodes = dragDropManager->gridDragFrameNodes_;
      
     EXPECT_FALSE(frameNodes.empty());
     PointF point(point1.GetX(), point1.GetY());
     std::vector<RefPtr<FrameNode>> hitFrameNodes;
     for (auto iterOfFrameNode = frameNodes.begin(); iterOfFrameNode != frameNodes.end(); iterOfFrameNode++) {
         auto frameNode = iterOfFrameNode->second.Upgrade();
-
         EXPECT_TRUE(frameNode);
         EXPECT_TRUE(frameNode->IsVisible());
         if (!frameNode || !frameNode->IsVisible()) {
