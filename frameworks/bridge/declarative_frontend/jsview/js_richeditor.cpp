@@ -630,8 +630,7 @@ void JSRichEditor::JsDataDetectorConfig(const JSCallbackInfo& info)
     if (info.Length() < 1) {
         return;
     }
-    auto tmpInfo = info[0];
-    if (!tmpInfo->IsObject()) {
+    if (!info[0]->IsObject()) {
         return;
     }
 

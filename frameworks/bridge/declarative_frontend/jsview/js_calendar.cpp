@@ -513,7 +513,6 @@ void JSCalendar::SetCurrentDayStyle(const JSCallbackInfo& info)
 void JSCalendar::SetNonCurrentDayStyle(const JSCallbackInfo& info)
 {
     if (info.Length() < 1 || !info[0]->IsObject()) {
-        LOGW("Invalid params");
         return;
     }
     auto obj = JSRef<JSObject>::Cast(info[0]);
@@ -540,7 +539,6 @@ void JSCalendar::SetNonCurrentDayStyle(const JSCallbackInfo& info)
 void JSCalendar::SetTodayStyle(const JSCallbackInfo& info)
 {
     if (info.Length() < 1 || !info[0]->IsObject()) {
-        LOGW("Invalid params");
         return;
     }
     auto obj = JSRef<JSObject>::Cast(info[0]);
@@ -567,7 +565,6 @@ void JSCalendar::SetTodayStyle(const JSCallbackInfo& info)
 void JSCalendar::SetWeekStyle(const JSCallbackInfo& info)
 {
     if (info.Length() < 1 || !info[0]->IsObject()) {
-        LOGW("Invalid params");
         return;
     }
     auto obj = JSRef<JSObject>::Cast(info[0]);
@@ -606,7 +603,6 @@ void JSCalendar::SetWeekStyle(const JSCallbackInfo& info)
 void JSCalendar::SetWorkStateStyle(const JSCallbackInfo& info)
 {
     if (info.Length() < 1 || !info[0]->IsObject()) {
-        LOGW("Invalid params");
         return;
     }
     auto obj = JSRef<JSObject>::Cast(info[0]);

@@ -211,7 +211,8 @@ struct ArkUICommonModifierAPI {
     void (*SetBackgroundBlurStyle)(NodeHandle node, int32_t blurStyle, int32_t colorMode, int32_t adaptiveColor,
         double scale);
     void (*ResetBackgroundBlurStyle)(NodeHandle node);
-    void (*SetBorder)(NodeHandle node, double* values, int32_t* units, uint32_t* colorAndStyle, int32_t size);
+    void (*SetBorder)(NodeHandle node,
+        const double* values, int32_t valuesSize, const uint32_t* colorAndStyle, int32_t colorAndStyleSize);
     void (*ResetBorder)(NodeHandle node);
     void (*SetBackgroundImagePosition)(
         NodeHandle node, const double* values, const int32_t* types, bool isAlign, int size);
@@ -835,6 +836,23 @@ struct ArkUIColumnSplitModifierAPI {
     void (*ResetColumnSplitResizeable)(NodeHandle node);
 };
 
+struct ArkUILineModifierAPI {
+    void (*SetStartPoint)(NodeHandle node, double* pointValues, int32_t* pointUnits, const char* pointStr[]);
+    void (*ResetStartPoint)(NodeHandle node);
+    void (*SetEndPoint)(NodeHandle node, double* pointValues, int32_t* pointUnits, const char* pointStr[]);
+    void (*ResetEndPoint)(NodeHandle node);
+};
+
+struct ArkUIPathModifierAPI {
+    void (*SetPathCommands)(NodeHandle node, const char* commands);
+    void (*ResetPathCommands)(NodeHandle node);
+};
+
+struct ArkUIPolylineModifierAPI {
+    void (*SetPoints)(NodeHandle node, const double* pointX, const double* pointY, int32_t length);
+    void (*ResetPoints)(NodeHandle node);
+};
+
 struct ArkUISpanModifierAPI {
     void (*SetSpanTextCase)(NodeHandle node, int32_t value);
     void (*ResetSpanTextCase)(NodeHandle node);
@@ -1168,6 +1186,9 @@ struct ArkUINodeAPI {
     ArkUINavRouterModifierAPI (*GetNavRouterModifier)();
     ArkUIPatternLockModifierAPI (*GetPatternLockModifier)();
     ArkUIColumnSplitModifierAPI (*GetColumnSplitModifier)();
+    ArkUILineModifierAPI (*GetLineModifier)();
+    ArkUIPathModifierAPI (*GetPathModifier)();
+    ArkUIPolylineModifierAPI (*GetPolylineModifier)();
     ArkUISpanModifierAPI (*GetSpanModifier)();
     ArkUIImageAnimatorModifierAPI (*GetImageAnimatorModifier)();
     ArkUISideBarContainerModifierAPI (*GetSideBarContainerModifier)();

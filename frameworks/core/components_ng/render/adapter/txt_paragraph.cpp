@@ -327,7 +327,7 @@ bool TxtParagraph::CalCulateAndCheckPreIsPlaceholder(int32_t index, int32_t& ext
     return false;
 }
 
-bool TxtParagraph::ComputeOffsetForCaretUpstream(int32_t extent, CaretMetricsF& result)
+bool TxtParagraph::ComputeOffsetForCaretUpstream(int32_t extent, CaretMetricsF& result, bool needLineHighest)
 {
     if (!paragraph_) {
         return false;
@@ -357,7 +357,8 @@ bool TxtParagraph::ComputeOffsetForCaretUpstream(int32_t extent, CaretMetricsF& 
         prev, extent, txt::Paragraph::RectHeightStyle::kMax, txt::Paragraph::RectWidthStyle::kTight);
 #else
     auto boxes = paragraph_->GetTextRectsByBoundary(
-        prev, extent, Rosen::TextRectHeightStyle::COVER_TOP_AND_BOTTOM, Rosen::TextRectWidthStyle::TIGHT);
+        prev, extent, needLineHighest ? Rosen::TextRectHeightStyle::COVER_TOP_AND_BOTTOM :
+        Rosen::TextRectHeightStyle::TIGHT, Rosen::TextRectWidthStyle::TIGHT);
 #endif
     while (boxes.empty() && !text_.empty()) {
         graphemeClusterLength *= 2;
@@ -368,7 +369,8 @@ bool TxtParagraph::ComputeOffsetForCaretUpstream(int32_t extent, CaretMetricsF& 
                 0, extent, txt::Paragraph::RectHeightStyle::kMax, txt::Paragraph::RectWidthStyle::kTight);
 #else
             boxes = paragraph_->GetTextRectsByBoundary(
-                0, extent, Rosen::TextRectHeightStyle::COVER_TOP_AND_BOTTOM, Rosen::TextRectWidthStyle::TIGHT);
+                0, extent, needLineHighest ? Rosen::TextRectHeightStyle::COVER_TOP_AND_BOTTOM :
+                Rosen::TextRectHeightStyle::TIGHT, Rosen::TextRectWidthStyle::TIGHT);
 #endif
             break;
         }
@@ -377,7 +379,8 @@ bool TxtParagraph::ComputeOffsetForCaretUpstream(int32_t extent, CaretMetricsF& 
             prev, extent, txt::Paragraph::RectHeightStyle::kMax, txt::Paragraph::RectWidthStyle::kTight);
 #else
         boxes = paragraph_->GetTextRectsByBoundary(
-            prev, extent, Rosen::TextRectHeightStyle::COVER_TOP_AND_BOTTOM, Rosen::TextRectWidthStyle::TIGHT);
+            prev, extent, needLineHighest ? Rosen::TextRectHeightStyle::COVER_TOP_AND_BOTTOM :
+            Rosen::TextRectHeightStyle::TIGHT, Rosen::TextRectWidthStyle::TIGHT);
 #endif
     }
     if (boxes.empty()) {
@@ -444,7 +447,7 @@ float TxtParagraph::MakeEmptyOffsetX()
     }
 }
 
-bool TxtParagraph::ComputeOffsetForCaretDownstream(int32_t extent, CaretMetricsF& result)
+bool TxtParagraph::ComputeOffsetForCaretDownstream(int32_t extent, CaretMetricsF& result, bool needLineHighest)
 {
     if (!paragraph_ || static_cast<size_t>(extent) >= GetParagraphLength()) {
         return false;
@@ -458,7 +461,8 @@ bool TxtParagraph::ComputeOffsetForCaretDownstream(int32_t extent, CaretMetricsF
         extent, next, txt::Paragraph::RectHeightStyle::kMax, txt::Paragraph::RectWidthStyle::kTight);
 #else
     auto boxes = paragraph_->GetTextRectsByBoundary(
-        extent, next, Rosen::TextRectHeightStyle::COVER_TOP_AND_BOTTOM, Rosen::TextRectWidthStyle::TIGHT);
+        extent, next, needLineHighest ? Rosen::TextRectHeightStyle::COVER_TOP_AND_BOTTOM :
+        Rosen::TextRectHeightStyle::TIGHT, Rosen::TextRectWidthStyle::TIGHT);
 #endif
     if (boxes.empty()) {
         return false;

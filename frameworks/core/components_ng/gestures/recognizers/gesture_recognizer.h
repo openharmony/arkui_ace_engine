@@ -144,10 +144,6 @@ public:
     }
 
     bool SetGestureGroup(const WeakPtr<NGGestureRecognizer>& gestureGroup);
-    void ResetGestureGroup()
-    {
-        gestureGroup_.Reset();
-    }
 
     const WeakPtr<NGGestureRecognizer>& GetGestureGroup() const
     {

@@ -59,20 +59,36 @@ ArkUINativeModuleValue DatePickerBridge::SetSelectedTextStyle(ArkUIRuntimeCallIn
         fontStyleArgs->IsUndefined()) {
         GetArkUIInternalNodeAPI()->GetDatePickerModifier().ResetSelectedTextStyle(nativeNode);
     }
-    uint32_t textColor = textColorArgs->Uint32Value(vm);
-    std::string fontSize = ArkTSUtils::GetStringFromJS(vm, fontSizeArgs);
-    std::string fontWeight = ArkTSUtils::GetStringFromJS(vm, fontWeightArgs);
-    std::string fontFamily = ArkTSUtils::GetStringFromJS(vm, fontFamilyArgs);
+    Color textColor;
+    std::string fontSize;
+    std::string fontWeight;
+    std::string fontFamily;
     int32_t fontStyle = PLACE_HOLDER_ARRAY;
+    if (!textColorArgs->IsNull() && !textColorArgs->IsUndefined()) {
+        ArkTSUtils::ParseJsColorAlpha(vm, textColorArgs, textColor);
+    }
+    if (!fontSizeArgs->IsNull() && !fontSizeArgs->IsUndefined()) {
+        if (fontSizeArgs->IsNumber()) {
+            fontSize = std::to_string(fontSizeArgs->Uint32Value(vm));
+        } else {
+            ArkTSUtils::ParseJsString(vm, fontSizeArgs, fontSize);
+        }
+    }
+    if (!fontWeightArgs->IsNull() && !fontWeightArgs->IsUndefined()) {
+        ArkTSUtils::ParseJsString(vm, fontWeightArgs, fontWeight);
+    }
+    if (!fontFamilyArgs->IsNull() && !fontFamilyArgs->IsUndefined()) {
+        ArkTSUtils::ParseJsString(vm, fontFamilyArgs, fontFamily);
+    }
+    if (!fontStyleArgs->IsNull() && !fontStyleArgs->IsUndefined() && fontStyleArgs->IsNumber()) {
+        fontStyle = fontStyleArgs->Int32Value(vm);
+    }
 
     std::string fontInfo =
         StringUtils::FormatString(FORMAT_FONT.c_str(), fontSize.c_str(), fontWeight.c_str(), fontFamily.c_str());
-    if (fontStyleArgs->IsNumber()) {
-        fontStyle = fontStyleArgs->Int32Value(vm);
-    }
-    
+
     GetArkUIInternalNodeAPI()->GetDatePickerModifier().SetSelectedTextStyle(
-        nativeNode, fontInfo.c_str(), fontStyle, textColor);
+        nativeNode, fontInfo.c_str(), fontStyle, textColor.GetValue());
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -103,20 +119,36 @@ ArkUINativeModuleValue DatePickerBridge::SetTextStyle(ArkUIRuntimeCallInfo* runt
         fontStyleArgs->IsUndefined()) {
         GetArkUIInternalNodeAPI()->GetDatePickerModifier().ResetSelectedTextStyle(nativeNode);
     }
-    uint32_t textColor = textColorArgs->Uint32Value(vm);
-    std::string fontSize = ArkTSUtils::GetStringFromJS(vm, fontSizeArgs);
-    std::string fontWeight = ArkTSUtils::GetStringFromJS(vm, fontWeightArgs);
-    std::string fontFamily = ArkTSUtils::GetStringFromJS(vm, fontFamilyArgs);
+    Color textColor;
+    std::string fontSize;
+    std::string fontWeight;
+    std::string fontFamily;
     int32_t fontStyle = PLACE_HOLDER_ARRAY;
+    if (!textColorArgs->IsNull() && !textColorArgs->IsUndefined()) {
+        ArkTSUtils::ParseJsColorAlpha(vm, textColorArgs, textColor);
+    }
+    if (!fontSizeArgs->IsNull() && !fontSizeArgs->IsUndefined()) {
+        if (fontSizeArgs->IsNumber()) {
+            fontSize = std::to_string(fontSizeArgs->Uint32Value(vm));
+        } else {
+            ArkTSUtils::ParseJsString(vm, fontSizeArgs, fontSize);
+        }
+    }
+    if (!fontWeightArgs->IsNull() && !fontWeightArgs->IsUndefined()) {
+        ArkTSUtils::ParseJsString(vm, fontWeightArgs, fontWeight);
+    }
+    if (!fontFamilyArgs->IsNull() && !fontFamilyArgs->IsUndefined()) {
+        ArkTSUtils::ParseJsString(vm, fontFamilyArgs, fontFamily);
+    }
+    if (!fontStyleArgs->IsNull() && !fontStyleArgs->IsUndefined() && fontStyleArgs->IsNumber()) {
+        fontStyle = fontStyleArgs->Int32Value(vm);
+    }
 
     std::string fontInfo =
         StringUtils::FormatString(FORMAT_FONT.c_str(), fontSize.c_str(), fontWeight.c_str(), fontFamily.c_str());
-    if (fontStyleArgs->IsNumber()) {
-        fontStyle = fontStyleArgs->Int32Value(vm);
-    }
     
     GetArkUIInternalNodeAPI()->GetDatePickerModifier().SetDatePickerTextStyle(
-        nativeNode, fontInfo.c_str(), fontStyle, textColor);
+        nativeNode, fontInfo.c_str(), fontStyle, textColor.GetValue());
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -147,20 +179,36 @@ ArkUINativeModuleValue DatePickerBridge::SetDisappearTextStyle(ArkUIRuntimeCallI
         fontStyleArgs->IsUndefined()) {
         GetArkUIInternalNodeAPI()->GetDatePickerModifier().ResetSelectedTextStyle(nativeNode);
     }
-    uint32_t textColor = textColorArgs->Uint32Value(vm);
-    std::string fontSize = ArkTSUtils::GetStringFromJS(vm, fontSizeArgs);
-    std::string fontWeight = ArkTSUtils::GetStringFromJS(vm, fontWeightArgs);
-    std::string fontFamily = ArkTSUtils::GetStringFromJS(vm, fontFamilyArgs);
+    Color textColor;
+    std::string fontSize;
+    std::string fontWeight;
+    std::string fontFamily;
     int32_t fontStyle = PLACE_HOLDER_ARRAY;
+    if (!textColorArgs->IsNull() && !textColorArgs->IsUndefined()) {
+        ArkTSUtils::ParseJsColorAlpha(vm, textColorArgs, textColor);
+    }
+    if (!fontSizeArgs->IsNull() && !fontSizeArgs->IsUndefined()) {
+        if (fontSizeArgs->IsNumber()) {
+            fontSize = std::to_string(fontSizeArgs->Uint32Value(vm));
+        } else {
+            ArkTSUtils::ParseJsString(vm, fontSizeArgs, fontSize);
+        }
+    }
+    if (!fontWeightArgs->IsNull() && !fontWeightArgs->IsUndefined()) {
+        ArkTSUtils::ParseJsString(vm, fontWeightArgs, fontWeight);
+    }
+    if (!fontFamilyArgs->IsNull() && !fontFamilyArgs->IsUndefined()) {
+        ArkTSUtils::ParseJsString(vm, fontFamilyArgs, fontFamily);
+    }
+    if (!fontStyleArgs->IsNull() && !fontStyleArgs->IsUndefined() && fontStyleArgs->IsNumber()) {
+        fontStyle = fontStyleArgs->Int32Value(vm);
+    }
 
     std::string fontInfo =
         StringUtils::FormatString(FORMAT_FONT.c_str(), fontSize.c_str(), fontWeight.c_str(), fontFamily.c_str());
-    if (fontStyleArgs->IsNumber()) {
-        fontStyle = fontStyleArgs->Int32Value(vm);
-    }
-    
+
     GetArkUIInternalNodeAPI()->GetDatePickerModifier().SetDisappearTextStyle(
-        nativeNode, fontInfo.c_str(), fontStyle, textColor);
+        nativeNode, fontInfo.c_str(), fontStyle, textColor.GetValue());
     return panda::JSValueRef::Undefined(vm);
 }
 

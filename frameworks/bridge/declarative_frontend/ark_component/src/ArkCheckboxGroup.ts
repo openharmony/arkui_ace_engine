@@ -1,4 +1,4 @@
-/// <reference path='./ArkViewStackProcessor.ts' />
+/// <reference path='./import.ts' />
 class CheckboxGroupSelectAllModifier extends Modifier<boolean> {
     static identity: Symbol = Symbol('checkboxgroupSelectAll');
     applyPeer(node: KNode, reset: boolean) {
@@ -29,7 +29,7 @@ class CheckboxGroupSelectedColorModifier extends ModifierWithKey<ResourceColor> 
         else {
             return true;
         }
-    }    
+    }
 }
 
 class CheckboxGroupUnselectedColorModifier extends ModifierWithKey<ResourceColor> {
@@ -53,22 +53,22 @@ class CheckboxGroupUnselectedColorModifier extends ModifierWithKey<ResourceColor
     }
 }
 class CheckboxGroupMarkModifier extends ModifierWithKey<MarkStyle> {
-  static identity: Symbol = Symbol('checkboxgroupMark');
-  applyPeer(node: KNode, reset: boolean): void {
-    if (reset) {
-      GetUINativeModule().checkboxgroup.resetCheckboxGroupMark(node);
+    static identity: Symbol = Symbol('checkboxgroupMark');
+    applyPeer(node: KNode, reset: boolean): void {
+        if (reset) {
+            GetUINativeModule().checkboxgroup.resetCheckboxGroupMark(node);
+        }
+        else {
+            GetUINativeModule().checkboxgroup.setCheckboxGroupMark(node, this.value?.strokeColor, this.value?.size, this.value?.strokeWidth);
+        }
     }
-    else {
-      GetUINativeModule().checkboxgroup.setCheckboxGroupMark(node, this.value?.strokeColor, this.value?.size, this.value?.strokeWidth);
-    }
-  }
 
-  checkObjectDiff(): boolean {
-    let colorEQ = isBaseOrResourceEqual(this.stageValue.strokeColor, this.value.strokeColor);
-    let sizeEQ = isBaseOrResourceEqual(this.stageValue.size, this.value.size);
-    let widthEQ = isBaseOrResourceEqual(this.stageValue.strokeWidth, this.value.strokeWidth);
-    return !colorEQ || !sizeEQ || !widthEQ;    
-  }
+    checkObjectDiff(): boolean {
+        let colorEQ = isBaseOrResourceEqual(this.stageValue.strokeColor, this.value.strokeColor);
+        let sizeEQ = isBaseOrResourceEqual(this.stageValue.size, this.value.size);
+        let widthEQ = isBaseOrResourceEqual(this.stageValue.strokeWidth, this.value.strokeWidth);
+        return !colorEQ || !sizeEQ || !widthEQ;
+    }
 }
 class ArkCheckboxGroupComponent extends ArkComponent implements CheckboxGroupAttribute {
     selectAll(value: boolean): this {
@@ -89,7 +89,7 @@ class ArkCheckboxGroupComponent extends ArkComponent implements CheckboxGroupAtt
     }
     mark(value: MarkStyle): this {
         modifierWithKey(
-          this._modifiersWithKeys, CheckboxGroupMarkModifier.identity, CheckboxGroupMarkModifier, value);
+            this._modifiersWithKeys, CheckboxGroupMarkModifier.identity, CheckboxGroupMarkModifier, value);
         return this;
     }
     onChange(callback: (event: CheckboxGroupResult) => void): CheckboxGroupAttribute {

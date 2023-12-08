@@ -531,7 +531,7 @@ HWTEST_F(SelectPropertyTestNg, SelectLayoutPropertyTest005, TestSize.Level1)
 HWTEST_F(SelectPropertyTestNg, SelectDistributedTest001, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. Init select node
+     * @tc.steps: step1. Initialize select node
      */
     auto select = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     EXPECT_TRUE(select && select->GetTag() == V2::SELECT_ETS_TAG);
@@ -603,6 +603,10 @@ HWTEST_F(SelectPropertyTestNg, SelectAccessibilityPropertyGetBeginIndex001, Test
  */
 HWTEST_F(SelectPropertyTestNg, SelectAccessibilityPropertyGetEndIndex001, TestSize.Level1)
 {
+    /**
+     * @tc.steps: step1. Initialize select and verify default value of its end index.
+     * @tc.expected: Default text should be empty.
+     */
     InitSelectTestNg();
 
     EXPECT_EQ(selectAccessibilityProperty_->GetEndIndex(), SELECT_ERROR);
@@ -610,7 +614,10 @@ HWTEST_F(SelectPropertyTestNg, SelectAccessibilityPropertyGetEndIndex001, TestSi
     auto option = FrameNode::GetOrCreateFrameNode(V2::OPTION_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         []() { return AceType::MakeRefPtr<OptionPattern>(0); });
     ASSERT_NE(option, nullptr);
-
+    /**
+     * @tc.steps: step1. Add two option and verify end index of select.
+     * @tc.expected: The end index should be 1.
+     */
     selectPattern_->options_.push_back(option);
     selectPattern_->options_.push_back(option);
     EXPECT_EQ(selectAccessibilityProperty_->GetEndIndex(), 1);
@@ -623,10 +630,17 @@ HWTEST_F(SelectPropertyTestNg, SelectAccessibilityPropertyGetEndIndex001, TestSi
  */
 HWTEST_F(SelectPropertyTestNg, SelectAccessibilityPropertyGetText001, TestSize.Level1)
 {
+    /**
+     * @tc.steps: step1. Initialize the text and verify its default value.
+     * @tc.expected: Default text should be empty.
+     */
     InitSelectTestNg();
 
     EXPECT_EQ(selectAccessibilityProperty_->GetText(), EMPTY_TEXT);
-
+    /**
+     * @tc.steps: step1. Create text frame node and update its content.
+     * @tc.expected: Text of select should be the same as the original input.
+     */
     selectPattern_->text_ = FrameNode::CreateFrameNode(
         V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
     ASSERT_NE(selectPattern_->text_, nullptr);
@@ -663,6 +677,10 @@ HWTEST_F(SelectPropertyTestNg, SelectAccessibilityPropertyGetCollectionItemCount
  */
 HWTEST_F(SelectPropertyTestNg, SelectSetSpaceTest001, TestSize.Level1)
 {
+    /**
+     * @tc.steps: step1. Create select model, select frame node and the children node of select frame node.
+     * @tc.expected: Objects are created successfully.
+     */
     SelectModelNG selectModelInstance;
 
     auto select = FrameNode::GetOrCreateFrameNode(V2::SELECT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
@@ -680,12 +698,18 @@ HWTEST_F(SelectPropertyTestNg, SelectSetSpaceTest001, TestSize.Level1)
     auto spinner = FrameNode::GetOrCreateFrameNode(V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         []() { return AceType::MakeRefPtr<ImagePattern>(); });
     ASSERT_NE(spinner, nullptr);
-
+    /**
+     * @tc.steps: step2. Mount row to its parent node, which is select.
+     * @tc.expected: Row are mounted successfully.
+     */
     text->MountToParent(row);
     spinner->MountToParent(row);
     row->MountToParent(select);
     ViewStackProcessor::GetInstance()->Push(select);
-
+    /**
+     * @tc.steps: step3. Set the space of row and verify its usability.
+     * @tc.expected: Space value of row layout property should be the same as original value.
+     */
     selectModelInstance.SetSpace(Dimension(20.00, DimensionUnit::VP));
     ASSERT_FALSE(select->GetChildren().empty());
     row = FrameNode::GetFrameNode(select->GetFirstChild()->GetTag(), select->GetFirstChild()->GetId());
@@ -748,11 +772,20 @@ HWTEST_F(SelectPropertyTestNg, SelectSetArrowPositionTest001, TestSize.Level1)
  */
 HWTEST_F(SelectPropertyTestNg, SelectSetArrowPositionTest002, TestSize.Level1)
 {
+    /**
+     * @tc.steps: step1. Create select model and parameters of select and call Create() of select model.
+     * @tc.expected: Objects are created successfully.
+     */
     SelectModelNG selectModelInstance;
 
     std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE }, { OPTION_TEXT, INTERNAL_SOURCE },
         { OPTION_TEXT_2, INTERNAL_SOURCE } };
     selectModelInstance.Create(params);
+    /**
+     * @tc.steps: step2. Set space and arrow position of select, get select frame node and verify if it has
+     * child node.
+     * @tc.expected: select frame node has no child node.
+     */
     selectModelInstance.SetArrowPosition(ArrowPosition::END);
     selectModelInstance.SetSpace(Dimension(20.00, DimensionUnit::VP));
     auto select = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -793,10 +826,18 @@ HWTEST_F(SelectPropertyTestNg, CreateMenu001, TestSize.Level1)
  */
 HWTEST_F(SelectPropertyTestNg, OnColorConfigurationUpdate001, TestSize.Level1)
 {
+    /**
+     * @tc.steps: step1. Create select model and parameters of select.
+     * @tc.expected: Objects are created successfully.
+     */
     SelectModelNG selectModelInstance;
     std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE }, { OPTION_TEXT_2, INTERNAL_SOURCE },
         { OPTION_TEXT_3, INTERNAL_SOURCE } };
     selectModelInstance.Create(params);
+    /**
+     * @tc.steps: step2. Get select frame node, select pattern, pipeline base, select theme.
+     * @tc.expected: Objects are gotten successfully and should not be null.
+     */
     auto select = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(select, nullptr);
     auto selectPattern = select->GetPattern<SelectPattern>();
@@ -805,9 +846,19 @@ HWTEST_F(SelectPropertyTestNg, OnColorConfigurationUpdate001, TestSize.Level1)
     ASSERT_NE(pipeline, nullptr);
     auto selectTheme = pipeline->GetTheme<SelectTheme>();
     ASSERT_NE(selectTheme, nullptr);
+    /**
+     * @tc.steps: step3. Set the background color of select theme to be BLACK and call OnColorConfigurationUpdate()
+     * of select pattern.
+     * @tc.expected: Property is setted successfully.
+     */
     selectTheme->backgroundColor_ = Color::BLACK;
     selectPattern->OnColorConfigurationUpdate();
     EXPECT_TRUE(selectPattern->isColorConfigurationUpdate_);
+    /**
+     * @tc.steps: step4. Get menu frame node, menu pattern, render context and verify if the color of render context
+     * is the same as the original input.
+     * @tc.expected: Property is setted successfully and obejects should not be null.
+     */
     auto menuNode = selectPattern->GetMenuNode();
     ASSERT_NE(menuNode, nullptr);
     auto menuPattern = menuNode->GetPattern<MenuPattern>();
@@ -823,10 +874,18 @@ HWTEST_F(SelectPropertyTestNg, OnColorConfigurationUpdate001, TestSize.Level1)
  */
 HWTEST_F(SelectPropertyTestNg, SelectModel001, TestSize.Level1)
 {
+    /**
+     * @tc.steps: step1. Create select model and parameters of select.
+     * @tc.expected: Objects are created successfully.
+     */
     SelectModelNG selectModelInstance;
 
     std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE } };
     ViewStackProcessor::GetInstance()->StartGetAccessRecordingFor(100);
+    /**
+     * @tc.steps: step2. Call Create() of select model and set the properties of select.
+     * @tc.expected: Properties are setted successfully.
+     */
     selectModelInstance.Create(params);
     selectModelInstance.SetSelected(0);
     selectModelInstance.SetValue("select");
@@ -840,6 +899,10 @@ HWTEST_F(SelectPropertyTestNg, SelectModel001, TestSize.Level1)
     selectModelInstance.SetSelectedOptionItalicFontStyle(Ace::FontStyle::NORMAL);
     selectModelInstance.SetSelectedOptionFontColor(Color::BLACK);
     selectModelInstance.SetOptionBgColor(Color::BLACK);
+    /**
+     * @tc.steps: step3. Get the select frame node and select pattern.
+     * @tc.expected: Objects are gotten successfully and should not be null.
+     */
     auto select = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(select, nullptr);
     auto pattern = select->GetPattern<SelectPattern>();
@@ -854,8 +917,16 @@ HWTEST_F(SelectPropertyTestNg, SelectModel001, TestSize.Level1)
  */
 HWTEST_F(SelectPropertyTestNg, SelectModel002, TestSize.Level1)
 {
+    /**
+     * @tc.steps: step1. Create select model and select event.
+     * @tc.expected: Objects are created successfully.
+     */
     SelectModelNG selectModelInstance;
     SelectEvent eventOnSelect = [](int32_t intValue, const std::string& isSelect) {};
+    /**
+     * @tc.steps: step2. Initialize the value of paddings and parameters of select.
+     * @tc.expected: Objects are initialized successfully.
+     */
     CalcDimension width = 20.0_vp;
     CalcDimension height = 20.0_vp;
     CalcDimension top = 20.0_vp;
@@ -865,6 +936,10 @@ HWTEST_F(SelectPropertyTestNg, SelectModel002, TestSize.Level1)
 
     std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE } };
     ViewStackProcessor::GetInstance()->StartGetAccessRecordingFor(100);
+    /**
+     * @tc.steps: step3. Call the member methods of select model to set the geometry properties of select.
+     * @tc.expected: Settings are successful.
+     */
     selectModelInstance.SetOptionFontSize(Dimension(20.00, DimensionUnit::VP));
     selectModelInstance.SetOptionFontWeight(FontWeight::NORMAL);
     selectModelInstance.SetOptionItalicFontStyle(Ace::FontStyle::NORMAL);
@@ -880,6 +955,10 @@ HWTEST_F(SelectPropertyTestNg, SelectModel002, TestSize.Level1)
     selectModelInstance.SetPaddingRight(CalcDimension(20.00, DimensionUnit::VP));
     selectModelInstance.SetPaddingBottom(CalcDimension(20.00, DimensionUnit::VP));
     auto select = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    /**
+     * @tc.steps: step4. Get the select frame node and select pattern.
+     * @tc.expected: Objects are gotten successfully and should not be null.
+     */
     ASSERT_NE(select, nullptr);
     auto pattern = select->GetPattern<SelectPattern>();
     ASSERT_NE(pattern, nullptr);
@@ -893,8 +972,16 @@ HWTEST_F(SelectPropertyTestNg, SelectModel002, TestSize.Level1)
  */
 HWTEST_F(SelectPropertyTestNg, SelectModel003, TestSize.Level1)
 {
+    /**
+     * @tc.steps: step1. Create select model and select event.
+     * @tc.expected: Objects are created successfully.
+     */
     SelectModelNG selectModelInstance;
     SelectEvent eventOnSelect = [](int32_t intValue, const std::string& isSelect) {};
+    /**
+     * @tc.steps: step2. Initialize the value of paddings and parameters of select.
+     * @tc.expected: Objects are initialized successfully.
+     */
     CalcDimension width = -20.0_vp;
     CalcDimension height = -20.0_vp;
     CalcDimension top = -20.0_vp;
@@ -904,7 +991,10 @@ HWTEST_F(SelectPropertyTestNg, SelectModel003, TestSize.Level1)
 
     std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE } };
     ViewStackProcessor::GetInstance()->StartGetAccessRecordingFor(100);
-
+    /**
+     * @tc.steps: step3. Call the member methods of select model to set the geometry properties of select.
+     * @tc.expected: Settings are successful..
+     */
     selectModelInstance.SetWidth(width);
     selectModelInstance.SetHeight(height);
     selectModelInstance.SetSize(width, height);
@@ -914,6 +1004,10 @@ HWTEST_F(SelectPropertyTestNg, SelectModel003, TestSize.Level1)
     selectModelInstance.SetPaddingTop(CalcDimension(20.00, DimensionUnit::VP));
     selectModelInstance.SetPaddingRight(CalcDimension(20.00, DimensionUnit::VP));
     selectModelInstance.SetPaddingBottom(CalcDimension(20.00, DimensionUnit::VP));
+	    /**
+     * @tc.steps: step4. Get the select frame node, select pattern and menu frame node.
+     * @tc.expected: Objects are gotten successfully and should not be null.
+     */
     auto select = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(select, nullptr);
     auto pattern = select->GetPattern<SelectPattern>();
@@ -939,7 +1033,7 @@ HWTEST_F(SelectPropertyTestNg, SelectModel004, TestSize.Level1)
     selectModelInstance.Create(params);
     /**
      * @tc.steps: step2. initialize paddings.
-     * @tc.steps: the values of select which is setted successfully.
+     * @tc.expected: the values of select which is setted successfully.
      */
     CalcDimension calcDimension(DEFAULT_STR);
     CalcDimension width = -20.0_vp;
@@ -968,18 +1062,34 @@ HWTEST_F(SelectPropertyTestNg, SelectModel004, TestSize.Level1)
  */
 HWTEST_F(SelectPropertyTestNg, SelectPattern001, TestSize.Level1)
 {
+    /**
+     * @tc.steps: step1. Create pipeline, select theme, select model and parameters of select.
+     * @tc.expected: Objects are created successfully.
+     */
     auto pipeline = MockPipelineContext::GetCurrent();
     auto selectTheme = pipeline->GetTheme<SelectTheme>();
     SelectModelNG selectModelInstance;
     std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE } };
     ViewStackProcessor::GetInstance()->StartGetAccessRecordingFor(100);
+    /**
+     * @tc.steps: step2. Call Create() of select model and get select frame node and select pattern.
+     * @tc.expected: Objects are created and gotten successfully and select pattern should not be null.
+     */
     selectModelInstance.Create(params);
     auto select = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     auto pattern = select->GetPattern<SelectPattern>();
     ASSERT_NE(pattern, nullptr);
+    /**
+     * @tc.steps: step3. Get frame node of options and their option pattern.
+     * @tc.expected: Objects are gotten successfully and option pattern should not be null.
+     */
     auto options = pattern->GetOptions();
     auto optionPattern = options.front()->GetPattern<OptionPattern>();
     ASSERT_NE(optionPattern, nullptr);
+    /**
+     * @tc.steps: step4. Set and update background color of option.
+     * @tc.expected: Objects are gotten successfully and option pattern should not be null.
+     */
     pattern->SetSelectedOptionBgColor(Color::BLACK);
     ASSERT_NE(pattern, nullptr);
     pattern->OnColorConfigurationUpdate();
@@ -989,11 +1099,15 @@ HWTEST_F(SelectPropertyTestNg, SelectPattern001, TestSize.Level1)
 
 /**
  * @tc.name: SelectOption001
- * @tc.desc: Test SetOptionWidth.
+ * @tc.desc: Test SelectModelNG SetOptionWidth.
  * @tc.type: FUNC
  */
 HWTEST_F(SelectPropertyTestNg, SelectOption001, TestSize.Level1)
 {
+    /**
+     * @tc.steps: step1. Create select model, select frame node and select pattern, call SetOptionWidth.
+     * @tc.expected: Objects are created successfully.
+     */
     Dimension OPTION_WIDTH = Dimension(150.0f, DimensionUnit::VP);
     Dimension OPTION_MARGIN = Dimension(8.0f, DimensionUnit::VP);
     SelectModelNG selectModelInstance;
@@ -1001,16 +1115,28 @@ HWTEST_F(SelectPropertyTestNg, SelectOption001, TestSize.Level1)
     selectModelInstance.SetOptionWidth(OPTION_WIDTH);
     auto select = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     auto selectPattern = select->GetPattern<SelectPattern>();
-
+    /**
+     * @tc.steps: step2. Get menu frame node and menu layout property,
+     * compare the original value with the width.
+     * @tc.expected: Setting is successful, width of menu and original value are equal.
+     */
     auto menu = selectPattern->GetMenuNode();
     auto menuLayoutProperty = menu->GetLayoutProperty<MenuLayoutProperty>();
     EXPECT_EQ(menuLayoutProperty->GetSelectMenuModifiedWidth().value(),
         OPTION_WIDTH.ConvertToPx() + OPTION_MARGIN.ConvertToPx());
-
+    /**
+     * @tc.steps: step3. Get scroll frame node and scroll layout property,
+     * compare the original value with the width.
+     * @tc.expected: Setting is successful, width of scroll and original value are equal.
+     */
     auto scroll = AceType::DynamicCast<FrameNode>(menu->GetFirstChild());
     auto scrollLayoutProperty = scroll->GetLayoutProperty<ScrollLayoutProperty>();
     EXPECT_EQ(scrollLayoutProperty->GetScrollWidth().value(), OPTION_WIDTH.ConvertToPx() + OPTION_MARGIN.ConvertToPx());
-
+    /**
+     * @tc.steps: step4. Get option frame node and option paint property,
+     * compare the original value with the width.
+     * @tc.expected: Setting is successful, width of option plus margin is equal to the original value.
+     */
     auto options = selectPattern->GetOptions();
     if (options.size() > 0) {
         auto optionPaintProperty = options[0]->GetPaintProperty<OptionPaintProperty>();
@@ -1020,18 +1146,29 @@ HWTEST_F(SelectPropertyTestNg, SelectOption001, TestSize.Level1)
 
 /**
  * @tc.name: SelectOption002
- * @tc.desc: Test SetOptionHeight.
+ * @tc.desc: Test SelectModelNG SetOptionHeight.
  * @tc.type: FUNC
  */
 HWTEST_F(SelectPropertyTestNg, SelectOption002, TestSize.Level1)
 {
+    /**
+     * @tc.steps: step1. Create select model and call SetOptionHeight.
+     * @tc.expected: Objects are created successfully.
+     */
     Dimension OPTION_HEIGHT = Dimension(100.0f, DimensionUnit::VP);
     SelectModelNG selectModelInstance;
     selectModelInstance.SetOptionHeight(OPTION_HEIGHT);
-
+    /**
+     * @tc.steps: step2. Get select frame node, select pattern and option node.
+     * @tc.expected: Objects are gotten successfully.
+     */
     auto select = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     auto selectPattern = select->GetPattern<SelectPattern>();
     auto options = selectPattern->GetOptions();
+    /**
+     * @tc.steps: step3. Get option paint property, compare the height of option with the original value.
+     * @tc.expected: Setting is successful, values are equal.
+     */
     if (options.size() > 0) {
         auto optionPaintProperty = options[0]->GetPaintProperty<OptionPaintProperty>();
         EXPECT_EQ(optionPaintProperty->GetSelectModifiedHeight().value(), OPTION_HEIGHT.ConvertToPx());
@@ -1040,7 +1177,7 @@ HWTEST_F(SelectPropertyTestNg, SelectOption002, TestSize.Level1)
 
 /**
  * @tc.name: SelectFont001
- * @tc.desc: Test GetFontSize.
+ * @tc.desc: Test SelectPattern GetFontSize.
  * @tc.type: FUNC
  */
 HWTEST_F(SelectPropertyTestNg, SelectFont001, TestSize.Level1)
@@ -1052,13 +1189,16 @@ HWTEST_F(SelectPropertyTestNg, SelectFont001, TestSize.Level1)
 
 /**
  * @tc.name: ShowSelectMenuTest002
- * @tc.desc: Test SelectPattern ShowSelectMenu when fit trigger.
+ * @tc.desc: Test ShowSelectMenu of the SelectPattern when the width of select menu fit the width of
+ * select button.
  * @tc.type: FUNC
  */
 HWTEST_F(SelectPropertyTestNg, ShowSelectMenuTest002, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. Get selectModel, frameNode and pattern, set the options to fit the trigger.
+     * @tc.steps: step1. Get select model, select frame node, test property and select pattern. Set the
+     * options to fit the trigger.
+     * @tc.expected: Get pattern successfully.
      */
     SelectModelNG selectModelInstance;
     selectModelInstance.SetOptionWidthFitTrigger(true);
@@ -1068,7 +1208,11 @@ HWTEST_F(SelectPropertyTestNg, ShowSelectMenuTest002, TestSize.Level1)
     auto frameNode = CreateSelect(CREATE_VALUE, testProperty);
     auto pattern = frameNode->GetPattern<SelectPattern>();
     EXPECT_TRUE(pattern);
-
+    /**
+     * @tc.steps: step2. Call ShowSelectMenu and compare the ordinate of offset with the height of selectSize_,
+     * which is a member of select pattern.
+     * @tc.expected: Ordinate of offset and the height of offset of selectSize_ are equal.
+     */
     pattern->ShowSelectMenu();
     auto offset = pattern->GetHost()->GetPaintRectOffset();
     EXPECT_EQ(offset.GetY(), pattern->selectSize_.Height());
@@ -1076,26 +1220,32 @@ HWTEST_F(SelectPropertyTestNg, ShowSelectMenuTest002, TestSize.Level1)
 
 /**
  * @tc.name: SetSelectDefaultThemeTest001
- * @tc.desc: Test SelectPattern SetSelectDefaultTheme.
+ * @tc.desc: Test SelectPattern SetSelectDefaultTheme to verify the default visual effect of select button.
  * @tc.type: FUNC
  */
 HWTEST_F(SelectPropertyTestNg, SetSelectDefaultThemeTest001, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. build select theme, select pattern and render context.
-     * @tc.expected: objects created successfully.
+     * @tc.steps: step1. Build select frame node, select theme, select pattern.
+     * @tc.expected: Objects are created successfully.
      */
     auto select = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(select, nullptr);
     auto selectPattern = select->GetPattern<SelectPattern>();
     ASSERT_NE(selectPattern, nullptr);
     selectPattern->SetSelectDefaultTheme();
-
+    /**
+     * @tc.steps: step2. build render context, pipeline and select theme.
+     * @tc.expected: Objects are created successfully.
+     */
     auto renderContext = select->GetRenderContext();
     auto pipeline = PipelineBase::GetCurrentContext();
     auto selectTheme = pipeline->GetTheme<SelectTheme>();
     ASSERT_NE(selectTheme, nullptr);
-
+    /**
+     * @tc.steps: step3. compare the attributes in render context with the attributes in select theme.
+     * @tc.expected: Attributes are equal.
+     */
     EXPECT_EQ(
         renderContext->GetBorderRadius().value().radiusTopLeft.value(), selectTheme->GetSelectDefaultBorderRadius());
     EXPECT_EQ(
@@ -1108,17 +1258,30 @@ HWTEST_F(SelectPropertyTestNg, SetSelectDefaultThemeTest001, TestSize.Level1)
 
 /**
  * @tc.name: GetFontSizeTest001
- * @tc.desc: Test SelectPattern SetSelectDefaultTheme.
+ * @tc.desc: Test SelectPattern GetFontSize.
  * @tc.type: FUNC
  */
 HWTEST_F(SelectPropertyTestNg, GetFontSizeTest001, TestSize.Level1)
 {
+    /**
+     * @tc.steps: step1. Build select frame node, select pattern, pipeline and select theme.
+     * @tc.expected: Objects are created successfully.
+     */
     auto select = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     auto selectPattern = select->GetPattern<SelectPattern>();
     auto pipeline = PipelineBase::GetCurrentContext();
     auto selectTheme = pipeline->GetTheme<SelectTheme>();
+    /**
+     * @tc.steps: step2. Build the text frame node and assign it to be the member of select pattern.
+     * @tc.expected: Object is created successfully.
+     */
     selectPattern->text_ = FrameNode::CreateFrameNode(
         V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    /**
+     * @tc.steps: step3. build text layout property, respectively get the font size from text layout property and
+     * select pattern and compare them.
+     * @tc.expected: Two sizes should be equal.
+     */
     auto textLayoutProps = selectPattern->text_->GetLayoutProperty<TextLayoutProperty>();
     EXPECT_EQ(textLayoutProps->GetFontSize().value_or(selectTheme->GetFontSize()), selectPattern->GetFontSize());
 }

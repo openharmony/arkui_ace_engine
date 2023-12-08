@@ -5,8 +5,13 @@ class GridColSpanModifier extends ModifierWithKey<ArkGridColColumnOption> {
     if (reset) {
       GetUINativeModule().gridCol.resetSpan(node);
     } else {
-      GetUINativeModule().gridCol.setSpan(node, this.value.xs,
-        this.value.sm, this.value.md, this.value.lg, this.value.xl, this.value.xxl);
+      if (isNumber(this.value)) {
+        GetUINativeModule().gridCol.setSpan(node, this.value,
+          this.value, this.value, this.value, this.value, this.value);
+      } else {
+        GetUINativeModule().gridCol.setSpan(node, this.value.xs,
+          this.value.sm, this.value.md, this.value.lg, this.value.xl, this.value.xxl);
+      }
     }
   }
   checkObjectDiff(): boolean {
@@ -30,8 +35,13 @@ class GridColOffsetModifier extends ModifierWithKey<ArkGridColColumnOption> {
     if (reset) {
       GetUINativeModule().gridCol.resetGridColOffset(node);
     } else {
-      GetUINativeModule().gridCol.setGridColOffset(node, this.value.xs,
-        this.value.sm, this.value.md, this.value.lg, this.value.xl, this.value.xxl);
+      if (isNumber(this.value)) {
+        GetUINativeModule().gridCol.setGridColOffset(node, this.value,
+          this.value, this.value, this.value, this.value, this.value);
+      } else {
+        GetUINativeModule().gridCol.setGridColOffset(node, this.value.xs,
+          this.value.sm, this.value.md, this.value.lg, this.value.xl, this.value.xxl);
+      }
     }
   }
   checkObjectDiff(): boolean {
@@ -55,8 +65,13 @@ class GridColOrderModifier extends ModifierWithKey<ArkGridColColumnOption> {
     if (reset) {
       GetUINativeModule().gridCol.resetOrder(node);
     } else {
-      GetUINativeModule().gridCol.setOrder(node, this.value.xs,
-        this.value.sm, this.value.md, this.value.lg, this.value.xl, this.value.xxl);
+      if (isNumber(this.value)) {
+        GetUINativeModule().gridCol.setOrder(node, this.value,
+          this.value, this.value, this.value, this.value, this.value);
+      } else {
+        GetUINativeModule().gridCol.setOrder(node, this.value.xs,
+          this.value.sm, this.value.md, this.value.lg, this.value.xl, this.value.xxl);
+      }
     }
   }
   checkObjectDiff(): boolean {

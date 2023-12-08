@@ -62,7 +62,7 @@ void ResetPopupItemFont(NodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    IndexerModelNG::SetFontSize(frameNode, Dimension(DEFAULT_POPUPITEMFONT_SIZE));
+    IndexerModelNG::SetFontSize(frameNode, Dimension(DEFAULT_POPUPITEMFONT_SIZE, DimensionUnit::FP));
     IndexerModelNG::SetFontWeight(frameNode, FontWeight::MEDIUM);
 }
 

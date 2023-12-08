@@ -102,11 +102,9 @@ void JSStepper::JSBind(BindingTarget globalObj)
 void JSStepper::OnFinish(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGW("Must contain at least 1 argument");
         return;
     }
     if (!info[0]->IsFunction()) {
-        LOGW("Argument is not a function object");
         return;
     }
     StepperModel::GetInstance()->SetOnFinish(
@@ -117,11 +115,9 @@ void JSStepper::OnFinish(const JSCallbackInfo& info)
 void JSStepper::OnSkip(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGW("Must contain at least 1 argument");
         return;
     }
     if (!info[0]->IsFunction()) {
-        LOGW("Argument is not a function object");
         return;
     }
     StepperModel::GetInstance()->SetOnSkip(
@@ -132,11 +128,9 @@ void JSStepper::OnSkip(const JSCallbackInfo& info)
 void JSStepper::OnChange(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGW("Must contain at least 1 argument");
         return;
     }
     if (!info[0]->IsFunction()) {
-        LOGW("Argument is not a function object");
         return;
     }
     StepperModel::GetInstance()->SetOnChange(
@@ -147,11 +141,9 @@ void JSStepper::OnChange(const JSCallbackInfo& info)
 void JSStepper::OnNext(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGW("Must contain at least 1 argument");
         return;
     }
     if (!info[0]->IsFunction()) {
-        LOGW("Argument is not a function object");
         return;
     }
     StepperModel::GetInstance()->SetOnNext(
@@ -162,11 +154,9 @@ void JSStepper::OnNext(const JSCallbackInfo& info)
 void JSStepper::OnPrevious(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGW("Must contain at least 1 argument");
         return;
     }
     if (!info[0]->IsFunction()) {
-        LOGW("Argument is not a function object");
         return;
     }
     StepperModel::GetInstance()->SetOnPrevious(

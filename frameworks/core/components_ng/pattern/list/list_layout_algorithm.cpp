@@ -1468,7 +1468,7 @@ std::list<int32_t> ListLayoutAlgorithm::LayoutCachedItem(LayoutWrapper* layoutWr
     for (int32_t i = 0; i < cacheCount && currIndex + i < totalItemCount_; i++) {
         int32_t index = currIndex + i;
         auto wrapper = layoutWrapper->GetChildByIndex(index);
-        if (!wrapper) {
+        if (!wrapper || wrapper->CheckNeedForceMeasureAndLayout()) {
             predictBuildList.emplace_back(index);
             continue;
         }
@@ -1488,7 +1488,7 @@ std::list<int32_t> ListLayoutAlgorithm::LayoutCachedItem(LayoutWrapper* layoutWr
     for (int32_t i = 0; i < cacheCount && currIndex - i >= 0; i++) {
         int32_t index = currIndex - i;
         auto wrapper = layoutWrapper->GetChildByIndex(index);
-        if (!wrapper) {
+        if (!wrapper || wrapper->CheckNeedForceMeasureAndLayout()) {
             predictBuildList.emplace_back(index);
             continue;
         }
@@ -1505,17 +1505,19 @@ std::list<int32_t> ListLayoutAlgorithm::LayoutCachedItem(LayoutWrapper* layoutWr
     return predictBuildList;
 }
 
-void ListLayoutAlgorithm::PredictBuildItem(RefPtr<LayoutWrapper> wrapper, const LayoutConstraintF& constraint)
+bool ListLayoutAlgorithm::PredictBuildItem(RefPtr<LayoutWrapper> wrapper, const LayoutConstraintF& constraint)
 {
-    CHECK_NULL_VOID(wrapper);
+    CHECK_NULL_RETURN(wrapper, false);
     wrapper->SetActive(false);
     bool isGroup = wrapper->GetHostTag() == V2::LIST_ITEM_GROUP_ETS_TAG;
     if (!isGroup) {
         auto frameNode = wrapper->GetHostNode();
-        CHECK_NULL_VOID(frameNode);
+        CHECK_NULL_RETURN(frameNode, false);
         frameNode->GetGeometryNode()->SetParentLayoutConstraint(constraint);
         FrameNode::ProcessOffscreenNode(frameNode);
+        return true;
     }
+    return false;
 }
 
 void ListLayoutAlgorithm::PostIdleTask(RefPtr<FrameNode> frameNode, const ListPredictLayoutParam& param)
@@ -1539,17 +1541,18 @@ void ListLayoutAlgorithm::PostIdleTask(RefPtr<FrameNode> frameNode, const ListPr
         if (!pattern->GetPredictLayoutParam().has_value()) {
             return;
         }
+        bool needMarkDirty = false;
         auto param = pattern->GetPredictLayoutParam().value();
         for (auto it = param.items.begin(); it != param.items.end();) {
             if (GetSysTimestamp() > deadline) {
                 break;
             }
             auto wrapper = frameNode->GetOrCreateChildByIndex(*it, false);
-            if (wrapper) {
-                PredictBuildItem(wrapper, param.layoutConstraint);
-                frameNode->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
-            }
+            needMarkDirty |= PredictBuildItem(wrapper, param.layoutConstraint);
             param.items.erase(it++);
+        }
+        if (needMarkDirty) {
+            frameNode->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
         }
         pattern->SetPredictLayoutParam(std::nullopt);
         if (!param.items.empty()) {

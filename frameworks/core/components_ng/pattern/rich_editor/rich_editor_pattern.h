@@ -168,7 +168,8 @@ public:
     int32_t GetCaretPosition();
     int32_t GetTextContentLength();
     bool GetCaretVisible() const;
-    OffsetF CalcCursorOffsetByPosition(int32_t position, float& selectLineHeight, bool downStreamFirst = false);
+    OffsetF CalcCursorOffsetByPosition(int32_t position, float& selectLineHeight,
+        bool downStreamFirst = false, bool needLineHighest = true);
     void CopyTextSpanStyle(RefPtr<SpanNode>& source, RefPtr<SpanNode>& target);
     int32_t TextSpanSplit(int32_t position);
     SpanPositionInfo GetSpanPositionInfo(int32_t position);
@@ -384,6 +385,7 @@ private:
     void ScrollToSafeArea() const override;
 #ifdef ENABLE_DRAG_FRAMEWORK
     void InitDragDropEvent();
+    void ClearDragDropEvent();
     void UpdateSpanItemDragStatus(const std::list<ResultObject>& resultObjects, bool IsDragging);
     NG::DragDropInfo OnDragStart(const RefPtr<OHOS::Ace::DragEvent>& event);
     void OnDragEnd();
@@ -396,6 +398,15 @@ private:
         auto dragDropManager = context->GetDragDropManager();
         CHECK_NULL_VOID(dragDropManager);
         dragDropManager->AddDragFrameNode(frameNode->GetId(), AceType::WeakClaim(AceType::RawPtr(frameNode)));
+    }
+
+    void RemoveDragFrameNodeFromManager(const RefPtr<FrameNode>& frameNode)
+    {
+        auto context = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(context);
+        auto dragDropManager = context->GetDragDropManager();
+        CHECK_NULL_VOID(dragDropManager);
+        dragDropManager->RemoveDragFrameNode(frameNode->GetId());
     }
 #endif // ENABLE_DRAG_FRAMEWORK
 

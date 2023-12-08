@@ -67,6 +67,7 @@ constexpr float DEFAULT_TOUCH_WIDTH = 32.0f;
 constexpr float ITEM_WIDTH = SCROLL_WIDTH / VIEW_LINE_NUMBER;
 constexpr float ITEM_HEIGHT = SCROLL_HEIGHT / VIEW_LINE_NUMBER;
 constexpr float VERTICAL_SCROLLABLE_DISTANCE = (TOTAL_LINE_NUMBER - VIEW_LINE_NUMBER) * ITEM_HEIGHT;
+constexpr float NORMAL_WIDTH = 4.f;
 } // namespace
 
 class ScrollTestNg : public TestNG {
@@ -112,6 +113,7 @@ void ScrollTestNg::SetUpTestSuite()
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     auto scrollBarTheme = AceType::MakeRefPtr<ScrollBarTheme>();
+    scrollBarTheme->normalWidth_ = Dimension(NORMAL_WIDTH);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(scrollBarTheme));
     MockPipelineContext::GetCurrentContext()->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
 }
@@ -148,6 +150,8 @@ void ScrollTestNg::Create(const std::function<void(ScrollModelNG)>& callback)
 {
     ScrollModelNG model;
     model.Create();
+    auto proxy = model.CreateScrollBarProxy();
+    model.SetScrollBarProxy(proxy);
     ViewAbstract::SetWidth(CalcLength(SCROLL_WIDTH));
     ViewAbstract::SetHeight(CalcLength(SCROLL_HEIGHT));
     if (callback) {
@@ -679,6 +683,41 @@ HWTEST_F(ScrollTestNg, Event005, TestSize.Level1)
     pattern_->ScrollToEdge(ScrollEdgeType::SCROLL_TOP, false);
     FlushLayoutTask(frameNode_);
     EXPECT_TRUE(reachStart);
+}
+
+/**
+ * @tc.name: Event006
+ * @tc.desc: Test animate scroll func about event
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollTestNg, Event006, TestSize.Level1)
+{
+    bool isStartTrigger = false;
+    bool isStopTrigger = false;
+    CreateWithContent([&isStartTrigger, &isStopTrigger](ScrollModelNG model) {
+        OnScrollStartEvent startEvent = [&isStartTrigger]() { isStartTrigger = true; };
+        OnScrollStopEvent stopEvent = [&isStopTrigger]() { isStopTrigger = true; };
+        model.SetOnScrollStart(std::move(startEvent));
+        model.SetOnScrollStop(std::move(stopEvent));
+    });
+
+    /**
+     * @tc.steps: step1. Scroll with animate by run ScrollToEdge
+     * @tc.expected: onScrollStart would not be trigger
+     */
+    pattern_->ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, true);
+    EXPECT_TRUE(isStartTrigger);
+
+    /**
+     * @tc.steps: step1. When animte stop
+     * @tc.expected: onScrollStop would not be trigger
+     */
+    float endValue = pattern_->springMotion_->GetEndValue();
+    pattern_->springMotion_->NotifyListener(endValue);
+    // when out of scrollable distance, will trigger animator stop
+    pattern_->springMotion_->NotifyListener(pattern_->GetTotalOffset() + 1);
+    FlushLayoutTask(frameNode_);
+    EXPECT_TRUE(isStopTrigger);
 }
 
 /**
@@ -1527,10 +1566,10 @@ HWTEST_F(ScrollTestNg, ScrollBar001, TestSize.Level1)
     scrollBar->shapeMode_ = ShapeMode::RECT;
     scrollBar->positionMode_ = PositionMode::LEFT;
     scrollBar->UpdateScrollBarRegion(Offset::Zero(), Size(100.0, 100.0), Offset(1.f, 1.f), 1.0);
-    auto barRect = Rect(0.0, 0.0, 0.0, 100.0) + Offset::Zero();
-    EXPECT_EQ(scrollBar->barRect_, barRect);
-    EXPECT_EQ(scrollBar->activeRect_, Rect(0.0, -9900.0, 0.0, 10000.0));
-    EXPECT_EQ(scrollBar->touchRegion_, Rect(0.0, -9900.0, 0.0, 10000.0));
+    auto barRect = Rect(0.0, 0.0, NORMAL_WIDTH, 100.0) + Offset::Zero();
+    EXPECT_TRUE(IsEqual(scrollBar->barRect_, barRect));
+    EXPECT_TRUE(IsEqual(scrollBar->activeRect_, Rect(0.0, -9900.0, NORMAL_WIDTH, 10000.0)));
+    EXPECT_TRUE(IsEqual(scrollBar->touchRegion_, Rect(0.0, -9900.0, NORMAL_WIDTH, 10000.0)));
 
     /**
      * @tc.steps: step2. When the ShapeMode is RECT and DisplayMode is BOTTOM, verify the UpdateScrollBarRegion
@@ -1541,10 +1580,10 @@ HWTEST_F(ScrollTestNg, ScrollBar001, TestSize.Level1)
     scrollBar->positionMode_ = PositionMode::BOTTOM;
     scrollBar->SetOutBoundary(1.0);
     scrollBar->UpdateScrollBarRegion(Offset::Zero(), Size(100.0, 100.0), Offset(1.f, 1.f), 1.0);
-    barRect = Rect(0.0, 100.0, 100.0, 0.0) + Offset::Zero();
-    EXPECT_EQ(scrollBar->barRect_, barRect);
-    EXPECT_EQ(scrollBar->activeRect_, Rect(-9899.0, 100.0, 9999.0, 0.0));
-    EXPECT_EQ(scrollBar->touchRegion_, Rect(-9899.0, 100.0, 9999.0, 0.0));
+    barRect = Rect(0.0, 100.0 - NORMAL_WIDTH, 100.0, NORMAL_WIDTH) + Offset::Zero();
+    EXPECT_TRUE(IsEqual(scrollBar->barRect_, barRect));
+    EXPECT_TRUE(IsEqual(scrollBar->activeRect_, Rect(-9899.0, 100.0 - NORMAL_WIDTH, 9999.0, NORMAL_WIDTH)));
+    EXPECT_TRUE(IsEqual(scrollBar->touchRegion_, Rect(-9899.0, 100.0, 9999.0, 0.0)));
 
     /**
      * @tc.steps: step3. When the ShapeMode is RECT and DisplayMode is RIGHT, verify the UpdateScrollBarRegion function.
@@ -1553,10 +1592,10 @@ HWTEST_F(ScrollTestNg, ScrollBar001, TestSize.Level1)
     scrollBar->positionModeUpdate_ = true;
     scrollBar->positionMode_ = PositionMode::RIGHT;
     scrollBar->UpdateScrollBarRegion(Offset::Zero(), Size(100.0, 100.0), Offset(1.f, 1.f), 1.0);
-    barRect = Rect(100.0, 0.0, 0.0, 100.0) + Offset::Zero();
-    EXPECT_EQ(scrollBar->barRect_, barRect);
-    EXPECT_EQ(scrollBar->activeRect_, Rect(100.0, -9899.0, 0.0, 9999.0));
-    EXPECT_EQ(scrollBar->touchRegion_, Rect(100.0, -9899.0, 0.0, 9999.0));
+    barRect = Rect(100.0 - NORMAL_WIDTH, 0.0, NORMAL_WIDTH, 100.0) + Offset::Zero();
+    EXPECT_TRUE(IsEqual(scrollBar->barRect_, barRect));
+    EXPECT_TRUE(IsEqual(scrollBar->activeRect_, Rect(100.0 - NORMAL_WIDTH, -9899.0, NORMAL_WIDTH, 9999.0)));
+    EXPECT_TRUE(IsEqual(scrollBar->touchRegion_, Rect(100.0, -9899.0, 0.0, 9999.0)));
 
     /**
      * @tc.steps: step4. When the ShapeMode is ROUND and DisplayMode is LEFT, verify the UpdateScrollBarRegion function.
@@ -1873,6 +1912,120 @@ HWTEST_F(ScrollTestNg, ScrollBar005, TestSize.Level1)
         << "startReservedHeight_: " << scrollBar->startReservedHeight_.ConvertToPx();
     EXPECT_EQ(scrollBar->endReservedHeight_, Dimension(11.25))
         << "endReservedHeight_: " << scrollBar->endReservedHeight_.ConvertToPx();
+}
+
+/**
+ * @tc.name: ScrollBar006
+ * @tc.desc: Test scrollbar width
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollTestNg, ScrollBar006, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Not set bar width
+     * @tc.expected: It will be default
+     */
+    CreateWithContent([](ScrollModelNG model) {
+        model.SetDisplayMode(static_cast<int>(DisplayMode::ON));
+    });
+    EXPECT_EQ(pattern_->scrollBar_->activeRect_.Width(), NORMAL_WIDTH);
+
+    /**
+     * @tc.steps: step2. Set bar width less than bar height
+     * @tc.expected: It will be the value that was set
+     */
+    CreateWithContent([](ScrollModelNG model) {
+        model.SetDisplayMode(static_cast<int>(DisplayMode::ON));
+        model.SetScrollBarWidth(Dimension(10));
+    });
+    EXPECT_EQ(pattern_->scrollBar_->activeRect_.Width(), 10);
+
+    /**
+     * @tc.steps: step3. Set bar width greater than SCROLL_HEIGHT
+     * @tc.expected: It will be default
+     */
+    CreateWithContent([](ScrollModelNG model) {
+        model.SetDisplayMode(static_cast<int>(DisplayMode::ON));
+        model.SetScrollBarWidth(Dimension(SCROLL_HEIGHT + 1));
+    });
+    EXPECT_EQ(pattern_->scrollBar_->activeRect_.Width(), NORMAL_WIDTH);
+
+    /**
+     * @tc.steps: step4. Set bar width greater than SCROLL_HEIGHT
+     * @tc.expected: The bar width will be the value that was set, and bar height will be equal to bar width
+     */
+    CreateWithContent([](ScrollModelNG model) {
+        model.SetDisplayMode(static_cast<int>(DisplayMode::ON));
+        model.SetScrollBarWidth(Dimension(SCROLL_HEIGHT - 1));
+    });
+    EXPECT_EQ(pattern_->scrollBar_->activeRect_.Width(), SCROLL_HEIGHT - 1);
+    EXPECT_EQ(pattern_->scrollBar_->activeRect_.Height(), SCROLL_HEIGHT - 1);
+}
+
+/**
+ * @tc.name: ScrollBar007
+ * @tc.desc: when IsPressed is true, can not trigger scrollstart event
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollTestNg, ScrollBar007, TestSize.Level1)
+{
+    bool isTrigger = false;
+    CreateWithContent([&isTrigger](ScrollModelNG model) {
+        Dimension intervalSize = Dimension(10.f);
+        std::vector<Dimension> snapPaginations = {
+            Dimension(10.f),
+            Dimension(20.f),
+            Dimension(30.f),
+        };
+        std::pair<bool, bool> enableSnapToSide = {true, true};
+        model.SetScrollSnap(ScrollSnapAlign::START, intervalSize, snapPaginations, enableSnapToSide);
+        OnScrollStartEvent event = [&isTrigger]() { isTrigger = true; };
+        model.SetOnScrollStart(std::move(event));
+    });
+
+    /**
+     * @tc.steps: step1. when scrollbar IsPressed() is false
+     * @tc.expected: can trigger snap scrollstart event
+     */
+    auto scrollBar = pattern_->GetScrollBar();
+    pattern_->ScrollTo(5.f);
+    pattern_->scrollableEvent_ = nullptr; // make ScrollableIdle() true
+    scrollBar->SetPressed(false);
+    FlushLayoutTask(frameNode_);
+    EXPECT_TRUE(isTrigger);
+}
+
+/**
+ * @tc.name: ScrollBar008
+ * @tc.desc: when IsPressed is false, can trigger scrollstart event
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollTestNg, ScrollBar008, TestSize.Level1)
+{
+    bool isTrigger = false;
+    CreateWithContent([&isTrigger](ScrollModelNG model) {
+        Dimension intervalSize = Dimension(10.f);
+        std::vector<Dimension> snapPaginations = {
+            Dimension(10.f),
+            Dimension(20.f),
+            Dimension(30.f),
+        };
+        std::pair<bool, bool> enableSnapToSide = {true, true};
+        model.SetScrollSnap(ScrollSnapAlign::START, intervalSize, snapPaginations, enableSnapToSide);
+        OnScrollStartEvent event = [&isTrigger]() { isTrigger = true; };
+        model.SetOnScrollStart(std::move(event));
+    });
+
+    /**
+     * @tc.steps: step1. when scrollbar IsPressed() is true
+     * @tc.expected: can not trigger snap scrollstart event
+     */
+    auto scrollBar = pattern_->GetScrollBar();
+    pattern_->ScrollTo(5.f);
+    pattern_->scrollableEvent_ = nullptr; // make ScrollableIdle() true
+    scrollBar->SetPressed(true);
+    FlushLayoutTask(frameNode_);
+    EXPECT_FALSE(isTrigger);
 }
 
 /**
@@ -2527,7 +2680,7 @@ HWTEST_F(ScrollTestNg, ScrollSetFrictionTest001, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. set friction less than 0
-     * @tc.expected: shouled be more than 0.0,if out of range,should be default value.
+     * @tc.expected: should be more than 0.0,if out of range,should be default value.
      */
     double friction = -1;
     ScrollModelNG scrollModelNG_1;
@@ -2539,7 +2692,7 @@ HWTEST_F(ScrollTestNg, ScrollSetFrictionTest001, TestSize.Level1)
 
     /**
      * @tc.steps: step1. set friction more than 0
-     * @tc.expected: friction shouled be more than 0.0,if out of range,should be default value.
+     * @tc.expected: friction should be more than 0.0,if out of range,should be default value.
      */
     friction = 10;
     ScrollModelNG scrollModelNG_2;
@@ -2709,7 +2862,7 @@ HWTEST_F(ScrollTestNg, Drag001, TestSize.Level1)
 HWTEST_F(ScrollTestNg, Distributed001, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. Init Scroll node
+     * @tc.steps: step1. Initialize Scroll node
      */
     CreateWithContent();
 
@@ -2737,7 +2890,7 @@ HWTEST_F(ScrollTestNg, Distributed001, TestSize.Level1)
 HWTEST_F(ScrollTestNg, ScrollGetItemRect001, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. Init Scroll.
+     * @tc.steps: step1. Initialize Scroll.
      */
     CreateWithContent([](ScrollModelNG model) { model.SetAxis(Axis::HORIZONTAL); });
 
@@ -2820,11 +2973,16 @@ HWTEST_F(ScrollTestNg, EdgeEffectOption004, TestSize.Level1)
 
 /**
  * @tc.name: ScrollWidth001
- * @tc.desc: Test Get and Set of ScrollWidth
+ * @tc.desc: Test the usability of scroll width property and its get and set function.
  * @tc.type: FUNC
  */
 HWTEST_F(ScrollTestNg, ScrollWidth001, TestSize.Level1)
 {
+    /**
+     * @tc.steps: step1. Create scroll by calling CreateWithContent() and verify the scroll width property
+     * of scroll layout property.
+     * @tc.expected: Default value is ought to be false.
+     */
     CreateWithContent();
     float scrollWidth = 150.0f;
     EXPECT_FALSE(layoutProperty_->GetScrollWidth().has_value());
@@ -2833,15 +2991,26 @@ HWTEST_F(ScrollTestNg, ScrollWidth001, TestSize.Level1)
 }
 
 /**
- * @tc.name: ScrollWidth001
- * @tc.desc: Test Get and Set of ScrollWidth
+ * @tc.name: SelectScroll001
+ * @tc.desc: Test the flags of select scroll that determines whether it belong to or be modified by a select
+ * and their get and set functions.
  * @tc.type: FUNC
  */
 HWTEST_F(ScrollTestNg, SelectScroll001, TestSize.Level1)
 {
+    /**
+     * @tc.steps: step1. Create scroll by calling CreateWithContent() and verify the default value of the flags
+     * which inform whether the scroll belongs to or is modified by a select.
+     * @tc.expected: Default value is ought to be false.
+     */
     CreateWithContent();
     EXPECT_FALSE(pattern_->IsWidthModifiedBySelect());
     EXPECT_FALSE(pattern_->IsSelectScroll());
+    /**
+     * @tc.steps: step2. Set both flags to be true and verify the usability of their get and set functions in
+     * select pattern.
+     * @tc.expected: After setting the value should be true.
+     */
     pattern_->SetIsWidthModifiedBySelect(true);
     pattern_->SetIsSelectScroll(true);
     EXPECT_TRUE(pattern_->IsWidthModifiedBySelect());
@@ -2850,11 +3019,16 @@ HWTEST_F(ScrollTestNg, SelectScroll001, TestSize.Level1)
 
 /**
  * @tc.name: Measure002
- * @tc.desc: Test select scroll default width Measure
+ * @tc.desc: Test ScrollLayoutAlgorithm Measure when the scroll belongs to a select.
  * @tc.type: FUNC
  */
 HWTEST_F(ScrollTestNg, Measure002, TestSize.Level1)
 {
+    /**
+     * @tc.steps: step1. Create scroll model and set the width, height, axis of the scroll, create the content of
+     * the scroll and get its instance.
+     * @tc.expected: Objects are created successfully.
+     */
     CreateWithContent();
     ScrollModelNG model;
     model.Create();
@@ -2863,12 +3037,20 @@ HWTEST_F(ScrollTestNg, Measure002, TestSize.Level1)
     model.SetAxis(Axis::NONE);
     CreateContent();
     GetInstance();
-    
+    /**
+     * @tc.steps: step2. Create the layout wrapper of the scroll frame node and set the flag to inform that it is
+     * a select scroll.
+     * @tc.expected: Objects are created successfully.
+     */
     RefPtr<LayoutWrapperNode> layoutWrapper = frameNode_->CreateLayoutWrapper(false, false);
     pattern_->SetIsSelectScroll(true);
     FlushLayoutTask(frameNode_);
     layoutWrapper->MountToHostOnMainThread();
-    
+    /**
+     * @tc.steps: step3. Set the scroll size to be the actual frame size of the scroll.Set the expect size to be the
+     * size without the scroll, compare them.
+     * @tc.expected: Two sizes should be not equal.
+     */
     RefPtr<GridColumnInfo> columnInfo = GridSystemManager::GetInstance().GetInfoByType(GridColumnType::MENU);
     columnInfo->GetParent()->BuildColumnWidth();
     auto defaultWidth = static_cast<float>(columnInfo->GetWidth(2));
@@ -2880,14 +3062,51 @@ HWTEST_F(ScrollTestNg, Measure002, TestSize.Level1)
 
 /**
  * @tc.name: SelectScroll002
- * @tc.desc: Test select scroll default width Measure
+ * @tc.desc: Test select scroll default width.
  * @tc.type: FUNC
  */
 HWTEST_F(ScrollTestNg, SelectScroll002, TestSize.Level1)
 {
+    /**
+     * @tc.steps: step1. Get the width of select scroll without setting it, this case is meant to test the correctness
+     * of its default value.
+     * @tc.expected: Default width of select scroll should be 0.0.
+     */
     CreateWithContent();
     ASSERT_NE(pattern_, nullptr);
     auto ScrollWidth=pattern_->GetSelectScrollWidth();
     ASSERT_NE(ScrollWidth, 0.0);
+}
+
+/**
+ * @tc.name: ScrollTo001
+ * @tc.desc: Test ScrollTo
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollTestNg, ScrollTo001, TestSize.Level1)
+{
+    CreateWithContent([](ScrollModelNG model) {});
+
+    /**
+     * @tc.steps: step1. ScrollTo normal position
+     */
+    pattern_->ScrollTo(ITEM_HEIGHT);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->GetTotalOffset(), ITEM_HEIGHT);
+
+    /**
+     * @tc.steps: step2. ScrollTo same position
+     */
+    pattern_->ScrollTo(ITEM_HEIGHT);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->GetTotalOffset(), ITEM_HEIGHT);
+
+    /**
+     * @tc.steps: step3. ScrollTo invalid position
+     * @tc.expected: ScrollTo zero position
+     */
+    pattern_->ScrollTo(-1);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->GetTotalOffset(), 0);
 }
 } // namespace OHOS::Ace::NG

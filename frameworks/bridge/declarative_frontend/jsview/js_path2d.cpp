@@ -66,13 +66,22 @@ void JSPath2D::JsPath2DAddPath(const JSCallbackInfo& args)
     }
     auto canvasPath2D = jsPath2d->GetCanvasPath2d();
     path2d_->AddPath(canvasPath2D);
-    if (args.Length() == JS_PATH2D_PARAMETER_COUNTS) {
+    if (args.Length() != JS_PATH2D_PARAMETER_COUNTS) {
+        return;
+    }
+
+    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)) {
         auto* jsMatrix2d = JSRef<JSObject>::Cast(args[1])->Unwrap<JSMatrix2d>();
         if (jsMatrix2d != nullptr) {
             path2d_->SetTransform(jsMatrix2d->JsGetScaleX(), jsMatrix2d->JsGetRotateX(), jsMatrix2d->JsGetRotateY(),
                 jsMatrix2d->JsGetScaleY(), jsMatrix2d->JsGetTranslateX(), jsMatrix2d->JsGetTranslateY());
         }
+        return;
     }
+
+    JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(args[1]);
+    TransformParam param = JSMatrix2d::GetTransformInfo(jsObj);
+    path2d_->SetTransform(param.scaleX, param.skewX, param.skewY, param.scaleY, param.translateX, param.translateY);
 }
 
 } // namespace OHOS::Ace::Framework

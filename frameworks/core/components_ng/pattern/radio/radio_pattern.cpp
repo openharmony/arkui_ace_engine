@@ -396,7 +396,7 @@ void RadioPattern::UpdateGroupCheckStatus(
     const RefPtr<FrameNode>& frameNode, const RefPtr<FrameNode>& pageNode, bool check)
 {
     frameNode->MarkNeedRenderOnly();
-
+    CHECK_NULL_VOID(pageNode);
     auto pageEventHub = pageNode->GetEventHub<NG::PageEventHub>();
     CHECK_NULL_VOID(pageEventHub);
 

@@ -28,6 +28,7 @@
 #include "core/components_ng/pattern/texttimer/text_timer_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/core/render/mock_paragraph.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 
 using namespace testing;
@@ -48,6 +49,9 @@ const std::string EMPTY_TEXT = "";
 const std::string TEXTTIMER_CONTENT = "08:00:00";
 const Dimension FONT_SIZE_VALUE = Dimension(20.1, DimensionUnit::PX);
 const Color TEXT_COLOR_VALUE = Color::FromRGB(255, 100, 100);
+const Shadow TEXT_SHADOW1 = Shadow(0, 0, Offset(), Color::RED);
+const Shadow TEXT_SHADOW2 = Shadow(0, 0, Offset(), Color::WHITE);
+const std::vector<Shadow> TEXT_SHADOWS { TEXT_SHADOW1, TEXT_SHADOW2 };
 const Ace::FontStyle ITALIC_FONT_STYLE_VALUE = Ace::FontStyle::ITALIC;
 const Ace::FontWeight FONT_WEIGHT_VALUE = Ace::FontWeight::W100;
 const std::vector<std::string> FONT_FAMILY_VALUE = { "cursive" };
@@ -59,6 +63,7 @@ struct TestProperty {
     std::optional<bool> isCountDown = std::nullopt;
     std::optional<Dimension> fontSize = std::nullopt;
     std::optional<Color> textColor = std::nullopt;
+    std::optional<std::vector<Shadow>> textShadow = std::nullopt;
     std::optional<Ace::FontStyle> italicFontStyle = std::nullopt;
     std::optional<Ace::FontWeight> fontWeight = std::nullopt;
     std::optional<std::vector<std::string>> fontFamily = std::nullopt;
@@ -76,11 +81,13 @@ protected:
 void TextTimerTestNg::SetUpTestCase()
 {
     MockPipelineContext::SetUp();
+    MockParagraph::GetOrCreateMockParagraph();
 }
 
 void TextTimerTestNg::TearDownTestCase()
 {
     MockPipelineContext::TearDown();
+    MockParagraph::TearDown();
 }
 
 RefPtr<FrameNode> TextTimerTestNg::CreateTextTimerParagraph(const TestProperty& testProperty)
@@ -101,6 +108,9 @@ RefPtr<FrameNode> TextTimerTestNg::CreateTextTimerParagraph(const TestProperty& 
     }
     if (testProperty.textColor.has_value()) {
         textTimerModel.SetTextColor(testProperty.textColor.value());
+    }
+    if (testProperty.textShadow.has_value()) {
+        textTimerModel.SetTextShadow(testProperty.textShadow.value());
     }
     if (testProperty.italicFontStyle.has_value()) {
         textTimerModel.SetItalicFontStyle(testProperty.italicFontStyle.value());
@@ -130,6 +140,7 @@ HWTEST_F(TextTimerTestNg, TextTimerTest001, TestSize.Level1)
     testProperty.isCountDown = std::make_optional(IS_COUNT_DOWN);
     testProperty.fontSize = std::make_optional(FONT_SIZE_VALUE);
     testProperty.textColor = std::make_optional(TEXT_COLOR_VALUE);
+    testProperty.textShadow = std::make_optional(TEXT_SHADOWS);
     testProperty.italicFontStyle = std::make_optional(ITALIC_FONT_STYLE_VALUE);
     testProperty.fontWeight = std::make_optional(FONT_WEIGHT_VALUE);
     testProperty.fontFamily = std::make_optional(FONT_FAMILY_VALUE);
@@ -155,6 +166,7 @@ HWTEST_F(TextTimerTestNg, TextTimerTest001, TestSize.Level1)
     EXPECT_EQ(textTimerLayoutProperty->GetIsCountDown(), IS_COUNT_DOWN);
     EXPECT_EQ(textTimerLayoutProperty->GetFontSize(), FONT_SIZE_VALUE);
     EXPECT_EQ(textTimerLayoutProperty->GetTextColor(), TEXT_COLOR_VALUE);
+    EXPECT_EQ(textTimerLayoutProperty->GetTextShadow(), TEXT_SHADOWS);
     EXPECT_EQ(textTimerLayoutProperty->GetItalicFontStyle(), ITALIC_FONT_STYLE_VALUE);
     EXPECT_EQ(textTimerLayoutProperty->GetFontWeight(), FONT_WEIGHT_VALUE);
     EXPECT_EQ(textTimerLayoutProperty->GetFontFamily(), FONT_FAMILY_VALUE);
@@ -376,6 +388,7 @@ HWTEST_F(TextTimerTestNg, TextTimerTest005, TestSize.Level1)
     testProperty.fontSize = std::make_optional(FONT_SIZE_VALUE);
     testProperty.fontWeight = std::make_optional(FONT_WEIGHT_VALUE);
     testProperty.textColor = std::make_optional(TEXT_COLOR_VALUE);
+    testProperty.textShadow = std::make_optional(TEXT_SHADOWS);
     testProperty.italicFontStyle = std::make_optional(ITALIC_FONT_STYLE_VALUE);
     testProperty.fontFamily = std::make_optional(FONT_FAMILY_VALUE);
     auto frameNode = CreateTextTimerParagraph(testProperty);
@@ -423,6 +436,7 @@ HWTEST_F(TextTimerTestNg, TextTimerTest006, TestSize.Level1)
     testProperty.isCountDown = std::make_optional(IS_COUNT_DOWN);
     testProperty.fontSize = std::make_optional(FONT_SIZE_VALUE);
     testProperty.textColor = std::make_optional(TEXT_COLOR_VALUE);
+    testProperty.textShadow = std::make_optional(TEXT_SHADOWS);
     testProperty.italicFontStyle = std::make_optional(ITALIC_FONT_STYLE_VALUE);
     testProperty.fontWeight = std::make_optional(FONT_WEIGHT_VALUE);
     testProperty.fontFamily = std::make_optional(FONT_FAMILY_VALUE);
@@ -487,6 +501,7 @@ HWTEST_F(TextTimerTestNg, TextTimerTest007, TestSize.Level1)
     testProperty.isCountDown = std::make_optional(IS_COUNT_DOWN);
     testProperty.fontSize = std::make_optional(FONT_SIZE_VALUE);
     testProperty.textColor = std::make_optional(TEXT_COLOR_VALUE);
+    testProperty.textShadow = std::make_optional(TEXT_SHADOWS);
     testProperty.italicFontStyle = std::make_optional(ITALIC_FONT_STYLE_VALUE);
     testProperty.fontWeight = std::make_optional(FONT_WEIGHT_VALUE);
     testProperty.fontFamily = std::make_optional(FONT_FAMILY_VALUE);
@@ -583,6 +598,7 @@ HWTEST_F(TextTimerTestNg, TextTimerLayoutAlgorithmTest001, TestSize.Level1)
     testProperty.fontSize = std::make_optional(FONT_SIZE_VALUE);
     testProperty.textColor = std::make_optional(TEXT_COLOR_VALUE);
     testProperty.italicFontStyle = std::make_optional(ITALIC_FONT_STYLE_VALUE);
+    testProperty.textShadow = std::make_optional(TEXT_SHADOWS);
     testProperty.fontWeight = std::make_optional(FONT_WEIGHT_VALUE);
     testProperty.fontFamily = std::make_optional(FONT_FAMILY_VALUE);
     auto frameNode = CreateTextTimerParagraph(testProperty);
@@ -673,5 +689,60 @@ HWTEST_F(TextTimerTestNg, TextTimerTest009, TestSize.Level1)
     textLayoutProperty->UpdatePropertyChangeFlag(PROPERTY_UPDATE_LAYOUT);
     pattern->scheduler_->callback_(1);
     EXPECT_EQ(textLayoutProperty->GetPropertyChangeFlag(), PROPERTY_UPDATE_LAYOUT);
+}
+
+/**
+ * @tc.name: TextTimerTest010
+ * @tc.desc: Test the text shadows of texttimer.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTimerTestNg, TextTimerTest010, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize all properties of texttimer.
+     */
+    TestProperty testProperty;
+    testProperty.format = std::make_optional(TEXT_TIMER_FORMAT);
+    testProperty.inputCount = std::make_optional(INPUT_COUNT);
+    testProperty.isCountDown = std::make_optional(IS_COUNT_DOWN);
+    testProperty.fontSize = std::make_optional(FONT_SIZE_VALUE);
+    testProperty.textColor = std::make_optional(TEXT_COLOR_VALUE);
+    testProperty.textShadow = std::make_optional(TEXT_SHADOWS);
+    testProperty.italicFontStyle = std::make_optional(ITALIC_FONT_STYLE_VALUE);
+    testProperty.fontWeight = std::make_optional(FONT_WEIGHT_VALUE);
+    testProperty.fontFamily = std::make_optional(FONT_FAMILY_VALUE);
+
+    /**
+     * @tc.steps: step2. create frameNode to get layout properties.
+     * @tc.expected: step2. related function is called.
+     */
+    RefPtr<FrameNode> frameNode = CreateTextTimerParagraph(testProperty);
+    RefPtr<LayoutProperty> layoutProperty = frameNode->GetLayoutProperty();
+    RefPtr<TextTimerLayoutProperty> textTimerLayoutProperty =
+        AceType::DynamicCast<TextTimerLayoutProperty>(layoutProperty);
+
+    /**
+     * @tc.steps: step3. get the properties of all settings.
+     * @tc.expected: step3. check whether the properties is correct.
+     */
+    EXPECT_EQ(textTimerLayoutProperty->GetFormat(), TEXT_TIMER_FORMAT);
+    EXPECT_EQ(textTimerLayoutProperty->GetInputCount(), INPUT_COUNT);
+    EXPECT_EQ(textTimerLayoutProperty->GetIsCountDown(), IS_COUNT_DOWN);
+    EXPECT_EQ(textTimerLayoutProperty->GetFontSize(), FONT_SIZE_VALUE);
+    EXPECT_EQ(textTimerLayoutProperty->GetTextColor(), TEXT_COLOR_VALUE);
+    EXPECT_EQ(textTimerLayoutProperty->GetTextShadow(), TEXT_SHADOWS);
+    EXPECT_EQ(textTimerLayoutProperty->GetItalicFontStyle(), ITALIC_FONT_STYLE_VALUE);
+    EXPECT_EQ(textTimerLayoutProperty->GetFontWeight(), FONT_WEIGHT_VALUE);
+    EXPECT_EQ(textTimerLayoutProperty->GetFontFamily(), FONT_FAMILY_VALUE);
+
+    /**
+     * @tc.steps: step4. get the json value after set the shadows.
+     * @tc.expected: step4. the value is "textShadow", check whether the properties is correct.
+     */
+    textTimerLayoutProperty->UpdateTextShadow(TEXT_SHADOWS);
+    auto json = JsonUtil::Create(true);
+    textTimerLayoutProperty->ToJsonValue(json);
+    EXPECT_TRUE(json->Contains("textShadow"));
+    EXPECT_EQ(textTimerLayoutProperty->GetTextShadow(), TEXT_SHADOWS);
 }
 } // namespace OHOS::Ace::NG

@@ -1930,4 +1930,193 @@ HWTEST_F(DragDropManagerTestNg, DragDropManagerFireOnEditableTextComponent, Test
         dragDropManager->FireOnEditableTextComponent(frameNode, DragEventType::LEAVE);
     }
 }
+
+/**
+ * @tc.name: DragDropManagerClearVelocityInfoTest001
+ * @tc.desc: Test ClearVelocityInfo
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(DragDropManagerTestNg, DragDropManagerClearVelocityInfoTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct a DragDropManager
+     */
+    auto dragDropManager = AceType::MakeRefPtr<DragDropManager>();
+
+    /**
+     * @tc.steps: step2. call OnDragStart
+     * @tc.expected: step2. FireOnItemDropEvent
+     */
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    dragDropManager->OnDragStart({ GLOBAL_X, GLOBAL_Y }, frameNode);
+    auto draggedNode = dragDropManager->draggedFrameNode_;
+    auto preTargetNode = dragDropManager->preTargetFrameNode_;
+
+    dragDropManager->OnItemDragEnd(0.0, 0.0, 0, DragType::COMMON);
+    EXPECT_TRUE(draggedNode);
+    EXPECT_TRUE(preTargetNode);
+    OHOS::Ace::ItemDragInfo itemDragInfo;
+    dragDropManager->GetItemIndex(frameNode, DragType::TEXT, 0.0, 0.0);
+    EXPECT_TRUE(draggedNode);
+    dragDropManager->GetItemIndex(frameNode, DragType::COMMON, 0.0, 0.0);
+    EXPECT_TRUE(draggedNode);
+    dragDropManager->GetItemIndex(frameNode, DragType::GRID, 0.0, 0.0);
+    EXPECT_TRUE(draggedNode);
+    dragDropManager->draggedGridFrameNode_ = frameNode;
+    dragDropManager->GetItemIndex(frameNode, DragType::GRID, 0.0, 0.0);
+    dragDropManager->ClearVelocityInfo();
+    EXPECT_TRUE(draggedNode);
+}
+
+/**
+ * @tc.name: DragDropManagerClearExtraInfoTest001
+ * @tc.desc: Test ClearExtraInfo
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(DragDropManagerTestNg, DragDropManagerClearExtraInfoTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct a DragDropManager
+     */
+    auto dragDropManager = AceType::MakeRefPtr<DragDropManager>();
+
+    /**
+     * @tc.steps: step2. call OnDragStart
+     * @tc.expected: step2. FireOnItemDropEvent
+     */
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    dragDropManager->OnDragStart({ GLOBAL_X, GLOBAL_Y }, frameNode);
+    auto draggedNode = dragDropManager->draggedFrameNode_;
+
+    dragDropManager->ClearExtraInfo();
+    EXPECT_TRUE(draggedNode);
+}
+
+/**
+ * @tc.name: DragDropManagerSetExtraInfoTest001
+ * @tc.desc: Test SetExtraInfo
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(DragDropManagerTestNg, DragDropManagerSetExtraInfoTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct a DragDropManager
+     */
+    auto dragDropManager = AceType::MakeRefPtr<DragDropManager>();
+
+    /**
+     * @tc.steps: step2. call OnDragStart
+     * @tc.expected: step2. FireOnItemDropEvent
+     */
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    dragDropManager->OnDragStart({ GLOBAL_X, GLOBAL_Y }, frameNode);
+
+    dragDropManager->SetExtraInfo("ExtraInfo");
+    EXPECT_EQ(dragDropManager->GetExtraInfo(), "ExtraInfo");
+}
+
+/**
+ * @tc.name: DragDropProxyOnDragEndTest002
+ * @tc.desc: OnDragEnd
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(DragDropManagerTestNg, DragDropProxyOnDragEndTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct a DragDropManager
+     */
+    auto dragDropManager = AceType::MakeRefPtr<DragDropManager>();
+
+    /**
+     * @tc.steps: step2. call CreateAndShowDragWindow
+     * @tc.expected: step2. return a dragDropProxy successfully
+     *                      DragWindow.DrawPixelMap() will be called
+     */
+    void* voidPtr = static_cast<void*>(new char[0]);
+    RefPtr<PixelMap> pixelMap = PixelMap::CreatePixelMap(voidPtr);
+    GestureEvent gestureEvent;
+    EXPECT_CALL(*(AceType::DynamicCast<MockDragWindow>(MOCK_DRAG_WINDOW)), DrawPixelMap(_)).Times(1);
+    auto dragDropProxy = dragDropManager->CreateAndShowDragWindow(pixelMap, gestureEvent);
+    dragDropProxy->OnDragEnd(gestureEvent, true);
+    EXPECT_TRUE(dragDropProxy);
+    dragDropProxy->OnDragEnd(gestureEvent, false);
+    EXPECT_TRUE(dragDropProxy);
+}
+
+/**
+ * @tc.name: DragDropProxyDestroyDragWindowTest001
+ * @tc.desc: DestroyDragWindow
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(DragDropManagerTestNg, DragDropProxyDestroyDragWindowTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct a DragDropManager
+     */
+    auto dragDropManager = AceType::MakeRefPtr<DragDropManager>();
+
+    /**
+     * @tc.steps: step2. call CreateAndShowDragWindow
+     * @tc.expected: step2. return a dragDropProxy successfully
+     *                      DragWindow.DrawPixelMap() will be called
+     */
+    void* voidPtr = static_cast<void*>(new char[0]);
+    RefPtr<PixelMap> pixelMap = PixelMap::CreatePixelMap(voidPtr);
+    GestureEvent gestureEvent;
+    EXPECT_CALL(*(AceType::DynamicCast<MockDragWindow>(MOCK_DRAG_WINDOW)), DrawPixelMap(_)).Times(1);
+
+    auto dragDropProxy = dragDropManager->CreateAndShowDragWindow(pixelMap, gestureEvent);
+    dragDropProxy->DestroyDragWindow();
+    EXPECT_TRUE(dragDropProxy);
+}
+
+/**
+ * @tc.name: DragDropProxyOnDragEndTest003
+ * @tc.desc: OnDragEnd
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(DragDropManagerTestNg, DragDropProxyOnDragEndTest003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct a DragDropManager
+     */
+    auto dragDropManager = AceType::MakeRefPtr<DragDropManager>();
+
+    /**
+     * @tc.steps: step2. call CreateAndShowDragWindow
+     * @tc.expected: step2. return a dragDropProxy successfully
+     */
+    RefPtr<UINode> customNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    GestureEvent gestureEvent;
+    EXPECT_CALL(*(AceType::DynamicCast<MockDragWindow>(MOCK_DRAG_WINDOW)), DrawFrameNode(_)).Times(1);
+    auto dragDropProxy = dragDropManager->CreateAndShowDragWindow(customNode, gestureEvent);
+    EXPECT_TRUE(dragDropProxy);
+
+    /**
+     * @tc.steps: step3. call AddDataToClipboard
+     * @tc.expected: step3. ClipBoard.SetData() & ClipBoard.GetData() will be called with printing logs
+     *                      they're defined in "components_ng/test/mock/clipboard/mock_clipboard.cpp"
+     */
+    dragDropManager->AddDataToClipboard(EXTRA_INFO);
+
+    /**
+     * @tc.steps: step4. call GetExtraInfoFromClipboard after calling AddDataToClipboard
+     * @tc.expected: step4. get the extraInfo successfully
+     *                      ClipBoard.GetData() will be called with printing a log
+     *                      it's defined in "components_ng/test/mock/clipboard/mock_clipboard.cpp"
+     */
+    std::string extraInfo;
+    dragDropManager->GetExtraInfoFromClipboard(extraInfo);
+    EXPECT_EQ(extraInfo, EXTRA_INFO);
+    dragDropProxy->OnDragEnd(gestureEvent, true);
+    EXPECT_TRUE(dragDropProxy);
+    dragDropProxy->OnDragEnd(gestureEvent, false);
+    EXPECT_TRUE(dragDropProxy);
+}
 } // namespace OHOS::Ace::NG

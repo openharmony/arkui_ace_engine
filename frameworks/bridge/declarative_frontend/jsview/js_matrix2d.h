@@ -31,6 +31,7 @@ public:
     static void JSBind(BindingTarget globalObj);
     static void Constructor(const JSCallbackInfo& info);
     static void Destructor(JSMatrix2d* matrix2d);
+    static TransformParam GetTransformInfo(const JSRef<JSObject>& obj);
     void JsSetScaleX(const JSCallbackInfo& info);
     void JsSetRotateY(const JSCallbackInfo& info);
     void JsSetRotateX(const JSCallbackInfo& info);

@@ -50,7 +50,7 @@ size_t SkiaImageData::GetSize() const
 size_t DrawingImageData::GetSize() const
 {
     CHECK_NULL_RETURN(rsData_, 0);
-    return rsData_->size();
+    return rsData_->GetSize();
 }
 #endif
 
@@ -64,7 +64,7 @@ const void* SkiaImageData::GetData() const
 const void* DrawingImageData::GetData() const
 {
     CHECK_NULL_RETURN(rsData_, nullptr);
-    return rsData_->data();
+    return rsData_->GetData();
 }
 #endif
 

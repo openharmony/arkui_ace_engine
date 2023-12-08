@@ -50,7 +50,6 @@ ohos_unittest("UIMgrServiceTest") {
     "bundle_framework:appexecfwk_base",
     "c_utils:utils",
     "eventhandler:libeventhandler",
-    "hilog:libhilog",
     "ipc:ipc_core",
   ]
 }

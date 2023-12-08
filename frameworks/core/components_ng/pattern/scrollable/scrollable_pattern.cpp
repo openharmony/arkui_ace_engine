@@ -55,6 +55,9 @@ void ScrollablePattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const
     } else {
         json->Put("edgeEffect", "EdgeEffect.None");
     }
+    auto JsonEdgeEffectOptions = JsonUtil::Create(true);
+    JsonEdgeEffectOptions->Put("alwaysEnabled", GetAlwaysEnabled());
+    json->Put("edgeEffectOptions", JsonEdgeEffectOptions);
 }
 
 void ScrollablePattern::SetAxis(Axis axis)
@@ -1670,6 +1673,7 @@ void ScrollablePattern::NotifyFRCSceneInfo(const std::string& scene, double velo
 
 void ScrollablePattern::FireOnScrollStart()
 {
+    PerfMonitor::GetPerfMonitor()->Start(PerfConstants::APP_LIST_FLING, PerfActionType::FIRST_MOVE, "");
     if (GetScrollAbort()) {
         return;
     }
@@ -1685,7 +1689,6 @@ void ScrollablePattern::FireOnScrollStart()
     auto onScrollStart = hub->GetOnScrollStart();
     CHECK_NULL_VOID(onScrollStart);
     onScrollStart();
-    host->OnAccessibilityEvent(AccessibilityEventType::SCROLL_START);
 }
 
 void ScrollablePattern::OnScrollStartCallback()
@@ -1708,7 +1711,7 @@ void ScrollablePattern::FireOnScroll(float finalOffset, OnScrollEvent& onScroll)
     }
 }
 
-void ScrollablePattern::OnScrollStop(const OnScrollStopEvent& onScrollStop, bool withPerf)
+void ScrollablePattern::OnScrollStop(const OnScrollStopEvent& onScrollStop)
 {
     if (scrollStop_) {
         if (!GetScrollAbort()) {
@@ -1722,9 +1725,7 @@ void ScrollablePattern::OnScrollStop(const OnScrollStopEvent& onScrollStop, bool
             }
             StartScrollBarAnimatorByProxy();
         }
-        if (withPerf && !GetScrollAbort()) {
-            PerfMonitor::GetPerfMonitor()->End(PerfConstants::APP_LIST_FLING, false);
-        }
+        PerfMonitor::GetPerfMonitor()->End(PerfConstants::APP_LIST_FLING, false);
         scrollStop_ = false;
         SetScrollAbort(false);
     }

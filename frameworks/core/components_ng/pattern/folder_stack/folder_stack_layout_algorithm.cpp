@@ -22,9 +22,11 @@
 #include "core/common/display_info.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/layout/layout_wrapper.h"
+#include "core/components_ng/pattern/folder_stack/control_parts_stack_node.h"
 #include "core/components_ng/pattern/folder_stack/folder_stack_group_node.h"
 #include "core/components_ng/pattern/folder_stack/folder_stack_layout_property.h"
 #include "core/components_ng/pattern/folder_stack/folder_stack_pattern.h"
+#include "core/components_ng/pattern/folder_stack/hover_stack_node.h"
 #include "core/components_ng/pattern/stack/stack_layout_algorithm.h"
 #include "core/components_ng/pattern/stack/stack_layout_property.h"
 #include "core/components_ng/syntax/if_else_model.h"
@@ -44,15 +46,19 @@ void FolderStackLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     auto folderStackLayoutProperty =
         AceType::DynamicCast<FolderStackLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(folderStackLayoutProperty);
+    auto hostNode = AceType::DynamicCast<FolderStackGroupNode>(layoutWrapper->GetHostNode());
+    CHECK_NULL_VOID(hostNode);
+    auto align = Alignment::CENTER;
+    if (folderStackLayoutProperty->GetPositionProperty()) {
+        align = folderStackLayoutProperty->GetPositionProperty()->GetAlignment().value_or(Alignment::CENTER);
+    }
+    PerformLayout(hostNode, align);
     if (!isIntoFolderStack_) {
         auto childLayoutProperty = AceType::DynamicCast<StackLayoutProperty>(layoutWrapper->GetLayoutProperty());
-        childLayoutProperty->GetPositionProperty()->UpdateAlignment(
-            folderStackLayoutProperty->GetPositionProperty()->GetAlignment().value_or(Alignment::CENTER));
+        childLayoutProperty->GetPositionProperty()->UpdateAlignment(align);
         StackLayoutAlgorithm::Layout(layoutWrapper);
         return;
     }
-    auto hostNode = AceType::DynamicCast<FolderStackGroupNode>(layoutWrapper->GetHostNode());
-    CHECK_NULL_VOID(hostNode);
     LayoutHoverStack(layoutWrapper, hostNode, folderStackLayoutProperty);
     LayoutControlPartsStack(layoutWrapper, hostNode, folderStackLayoutProperty);
 }
@@ -269,6 +275,21 @@ NG::OffsetF FolderStackLayoutAlgorithm::CalculateStackAlignment(
     offset.SetX((OFFSET_VALUE + alignment.GetHorizontal()) * (parentSize.Width() - childSize.Width()) / OFFSET_DIVISOR);
     offset.SetY((OFFSET_VALUE + alignment.GetVertical()) * (parentSize.Height() - childSize.Height()) / OFFSET_DIVISOR);
     return offset;
+}
+
+void FolderStackLayoutAlgorithm::PerformLayout(const RefPtr<FolderStackGroupNode>& hostNode, const Alignment align)
+{
+    auto controlPartsStackNode = AceType::DynamicCast<ControlPartsStackNode>(hostNode->GetControlPartsStackNode());
+    if (controlPartsStackNode) {
+        auto controlPartsLayoutProperty =
+            AceType::DynamicCast<LayoutProperty>(controlPartsStackNode->GetLayoutProperty());
+        controlPartsLayoutProperty->UpdateAlignment(align);
+    }
+    auto hoverStackNode = AceType::DynamicCast<HoverStackNode>(hostNode->GetHoverNode());
+    if (hoverStackNode) {
+        auto hoverLayoutProperty = AceType::DynamicCast<LayoutProperty>(hoverStackNode->GetLayoutProperty());
+        hoverLayoutProperty->UpdateAlignment(align);
+    }
 }
 
 bool FolderStackLayoutAlgorithm::IsIntoFolderStack(

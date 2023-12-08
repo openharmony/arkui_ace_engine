@@ -36,6 +36,7 @@
 #include "base/utils/macros.h"
 #include "base/utils/utils.h"
 #include "core/common/flutter/flutter_asset_manager.h"
+#include "core/common/asset_manager_impl.h"
 #include "core/common/rosen/rosen_asset_manager.h"
 
 namespace OHOS::Ace {

@@ -156,7 +156,7 @@ void ResourceAdapterImpl::Init(const ResourceInfo& resourceInfo)
     resConfig_ = resConfig;
 }
 
-void ResourceAdapterImpl::UpdateConfig(const ResourceConfiguration& config)
+void ResourceAdapterImpl::UpdateConfig(const ResourceConfiguration& config, bool themeFlag)
 {
     auto resConfig = ConvertConfigToGlobal(config);
     LOGI("UpdateConfig ori=%{public}d, dpi=%{public}f, device=%{public}d, "
@@ -164,11 +164,11 @@ void ResourceAdapterImpl::UpdateConfig(const ResourceConfiguration& config)
         resConfig->GetDirection(), resConfig->GetScreenDensity(), resConfig->GetDeviceType(), resConfig->GetColorMode(),
         resConfig->GetInputDevice());
     if (sysResourceManager_ && resConfig != nullptr) {
-        sysResourceManager_->UpdateResConfig(*resConfig);
+        sysResourceManager_->UpdateResConfig(*resConfig, themeFlag);
     }
     for (auto& resMgr : resourceManagers_) {
         if (resConfig != nullptr) {
-            resMgr.second->UpdateResConfig(*resConfig);
+            resMgr.second->UpdateResConfig(*resConfig, themeFlag);
         }
     }
     resConfig_ = resConfig;

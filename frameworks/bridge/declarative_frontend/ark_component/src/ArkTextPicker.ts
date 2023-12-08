@@ -97,6 +97,20 @@ class TextpickerTextStyleModifier extends ModifierWithKey<PickerTextStyle> {
         this.value.color, this.value.font?.size, this.value.font?.weight, this.value.font?.family, this.value.font?.style);
     }
   }
+
+  checkObjectDiff(): boolean {
+    let colorEQ = isBaseOrResourceEqual((this.stageValue as PickerTextStyle).color,
+      (this.value as PickerTextStyle).color);
+    let sizeEQ = isBaseOrResourceEqual((this.stageValue as PickerTextStyle).font?.size,
+      (this.value as PickerTextStyle).font?.size);
+    let weightEQ = isBaseOrResourceEqual((this.stageValue as PickerTextStyle).font?.weight,
+      (this.value as PickerTextStyle).font?.weight);
+    let familyEQ = isBaseOrResourceEqual((this.stageValue as PickerTextStyle).font?.family,
+      (this.value as PickerTextStyle).font?.family);
+    let styleEQ = isBaseOrResourceEqual((this.stageValue as PickerTextStyle).font?.style,
+      (this.value as PickerTextStyle).font?.style);
+    return !colorEQ || !sizeEQ || !weightEQ || !familyEQ || !styleEQ;
+  }
 }
 
 class TextpickerSelectedTextStyleModifier extends ModifierWithKey<PickerTextStyle> {
@@ -110,6 +124,20 @@ class TextpickerSelectedTextStyleModifier extends ModifierWithKey<PickerTextStyl
         this.value.color, this.value.font?.size, this.value.font?.weight, this.value.font?.family, this.value.font?.style);
     }
   }
+
+  checkObjectDiff(): boolean {
+    let colorEQ = isBaseOrResourceEqual((this.stageValue as PickerTextStyle).color,
+      (this.value as PickerTextStyle).color);
+    let sizeEQ = isBaseOrResourceEqual((this.stageValue as PickerTextStyle).font?.size,
+      (this.value as PickerTextStyle).font?.size);
+    let weightEQ = isBaseOrResourceEqual((this.stageValue as PickerTextStyle).font?.weight,
+      (this.value as PickerTextStyle).font?.weight);
+    let familyEQ = isBaseOrResourceEqual((this.stageValue as PickerTextStyle).font?.family,
+      (this.value as PickerTextStyle).font?.family);
+    let styleEQ = isBaseOrResourceEqual((this.stageValue as PickerTextStyle).font?.style,
+      (this.value as PickerTextStyle).font?.style);
+    return !colorEQ || !sizeEQ || !weightEQ || !familyEQ || !styleEQ;
+  }
 }
 
 class TextpickerDisappearTextStyleModifier extends ModifierWithKey<PickerTextStyle> {
@@ -122,6 +150,20 @@ class TextpickerDisappearTextStyleModifier extends ModifierWithKey<PickerTextSty
       GetUINativeModule().textpicker.setDisappearTextStyle(node,
         this.value.color, this.value.font?.size, this.value.font?.weight, this.value.font?.family, this.value.font?.style);
     }
+  }
+
+  checkObjectDiff(): boolean {
+    let colorEQ = isBaseOrResourceEqual((this.stageValue as PickerTextStyle).color,
+      (this.value as PickerTextStyle).color);
+    let sizeEQ = isBaseOrResourceEqual((this.stageValue as PickerTextStyle).font?.size,
+      (this.value as PickerTextStyle).font?.size);
+    let weightEQ = isBaseOrResourceEqual((this.stageValue as PickerTextStyle).font?.weight,
+      (this.value as PickerTextStyle).font?.weight);
+    let familyEQ = isBaseOrResourceEqual((this.stageValue as PickerTextStyle).font?.family,
+      (this.value as PickerTextStyle).font?.family);
+    let styleEQ = isBaseOrResourceEqual((this.stageValue as PickerTextStyle).font?.style,
+      (this.value as PickerTextStyle).font?.style);
+    return !colorEQ || !sizeEQ || !weightEQ || !familyEQ || !styleEQ;
   }
 }
 
@@ -146,4 +188,4 @@ globalThis.TextPicker.attributeModifier = function (modifier) {
   });
   modifier.applyNormalAttribute(component);
   component.applyModifierPatch();
-}
+};

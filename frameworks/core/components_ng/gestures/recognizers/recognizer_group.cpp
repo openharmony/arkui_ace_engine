@@ -149,7 +149,7 @@ void RecognizerGroup::OnResetStatus()
     if (!remainChildOnResetStatus_) {
         for (const auto& child : recognizers_) {
             if (child) {
-                child->ResetGestureGroup();
+                child->SetGestureGroup(nullptr);
             }
         }
         recognizers_.clear();

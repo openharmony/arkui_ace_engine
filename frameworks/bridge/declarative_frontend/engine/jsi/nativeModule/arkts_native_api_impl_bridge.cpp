@@ -57,6 +57,9 @@
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_stepper_item_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_tabs_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_column_split_bridge.h"
+#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_line_bridge.h"
+#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_path_bridge.h"
+#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_polyline_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_side_bar_container_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_calendar_picker_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_alphabet_indexer_bridge.h"
@@ -1067,6 +1070,9 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
     RegisterNavRouterAttributes(object, vm);
     RegisterNavigatorAttributes(object, vm);
     RegisterPanelAttributes(object, vm);
+    RegisterLineAttributes(object, vm);
+    RegisterPathAttributes(object, vm);
+    RegisterPolylineAttributes(object, vm);
     RegisterSideBarContainerAttributes(object, vm);
     RegisterCalendarPickerAttributes(object, vm);
     RegisterTabAttributes(object, vm);
@@ -1249,6 +1255,10 @@ void ArkUINativeModule::RegisterSliderAttributes(Local<panda::ObjectRef> object,
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SliderBridge::SetThickness));
     slider->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetThickness"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SliderBridge::ResetThickness));
+    slider->Set(vm, panda::StringRef::NewFromUtf8(vm, "setBlockStyle"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SliderBridge::SetBlockStyle));
+    slider->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetBlockStyle"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SliderBridge::ResetBlockStyle));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "slider"), slider);
 }
 
@@ -1612,6 +1622,40 @@ void ArkUINativeModule::RegisterNavigatorAttributes(Local<panda::ObjectRef> obje
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "navigator"), navigator);
 }
 
+void ArkUINativeModule::RegisterLineAttributes(Local<panda::ObjectRef> object, EcmaVM *vm)
+{
+    auto line = panda::ObjectRef::New(vm);
+    line->Set(vm, panda::StringRef::NewFromUtf8(vm, "setStartPoint"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), LineBridge::SetStartPoint));
+    line->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetStartPoint"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), LineBridge::ResetStartPoint));
+    line->Set(vm, panda::StringRef::NewFromUtf8(vm, "setEndPoint"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), LineBridge::SetEndPoint));
+    line->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetEndPoint"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), LineBridge::ResetEndPoint));
+    object->Set(vm, panda::StringRef::NewFromUtf8(vm, "line"), line);
+}
+
+void ArkUINativeModule::RegisterPathAttributes(Local<panda::ObjectRef> object, EcmaVM *vm)
+{
+    auto path = panda::ObjectRef::New(vm);
+    path->Set(vm, panda::StringRef::NewFromUtf8(vm, "setPathCommands"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), PathBridge::SetPathCommands));
+    path->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetPathCommands"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), PathBridge::ResetPathCommands));
+    object->Set(vm, panda::StringRef::NewFromUtf8(vm, "path"), path);
+}
+
+void ArkUINativeModule::RegisterPolylineAttributes(Local<panda::ObjectRef> object, EcmaVM *vm)
+{
+    auto polyline = panda::ObjectRef::New(vm);
+    polyline->Set(vm, panda::StringRef::NewFromUtf8(vm, "setPoints"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), PolylineBridge::SetPoints));
+    polyline->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetPoints"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), PolylineBridge::ResetPoints));
+    object->Set(vm, panda::StringRef::NewFromUtf8(vm, "polyline"), polyline);
+}
+
 void ArkUINativeModule::RegisterSideBarContainerAttributes(Local<panda::ObjectRef> object, EcmaVM* vm)
 {
     auto sideBarContainer = panda::ObjectRef::New(vm);
@@ -1837,9 +1881,9 @@ void ArkUINativeModule::RegisterDatePickerAttributes(Local<panda::ObjectRef> obj
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), DatePickerBridge::SetSelectedTextStyle));
     datePicker->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetSelectedTextStyle"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), DatePickerBridge::ResetSelectedTextStyle));
-    datePicker->Set(vm, panda::StringRef::NewFromUtf8(vm, "setNormalTextStyle"),
+    datePicker->Set(vm, panda::StringRef::NewFromUtf8(vm, "setTextStyle"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), DatePickerBridge::SetTextStyle));
-    datePicker->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetNormalTextStyle"),
+    datePicker->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetTextStyle"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), DatePickerBridge::ResetTextStyle));
     datePicker->Set(vm, panda::StringRef::NewFromUtf8(vm, "setDisappearTextStyle"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), DatePickerBridge::SetDisappearTextStyle));

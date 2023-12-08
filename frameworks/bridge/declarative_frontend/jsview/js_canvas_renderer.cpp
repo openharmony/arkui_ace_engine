@@ -1975,9 +1975,17 @@ void JSCanvasRenderer::JsSetTransform(const JSCallbackInfo& info)
         if (!info[0]->IsObject()) {
             return;
         }
-        auto* jsMatrix2d = JSRef<JSObject>::Cast(info[0])->Unwrap<JSMatrix2d>();
-        CHECK_NULL_VOID(jsMatrix2d);
-        TransformParam param = jsMatrix2d->GetTransform();
+
+        if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)) {
+            auto* jsMatrix2d = JSRef<JSObject>::Cast(info[0])->Unwrap<JSMatrix2d>();
+            CHECK_NULL_VOID(jsMatrix2d);
+            TransformParam param = jsMatrix2d->GetTransform();
+            CanvasRendererModel::GetInstance()->SetTransform(baseInfo, param, false);
+            return;
+        }
+
+        JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(info[0]);
+        TransformParam param = JSMatrix2d::GetTransformInfo(jsObj);
         CanvasRendererModel::GetInstance()->SetTransform(baseInfo, param, false);
     }
 }

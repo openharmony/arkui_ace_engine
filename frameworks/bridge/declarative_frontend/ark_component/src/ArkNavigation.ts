@@ -10,82 +10,35 @@ const DEFAULT_UNIT = 'vp';
 
 class ArkNavigationComponent extends ArkComponent implements NavigationAttribute {
   navBarWidth(value: Length): NavigationAttribute {
-    if (isNumber(value)) {
-      value = value + DEFAULT_UNIT;
-    }
-
-    if(value === null || value === undefined) {
-      value = DEFAULT_NAV_BAR_WIDTH + DEFAULT_UNIT;
-    }
-
-    if (isString(value)) {
-      modifier(this._modifiers, NavBarWidthModifier, value.toString());
-    }
-
+    modifierWithKey(this._modifiersWithKeys, NavBarWidthModifier.identity, NavBarWidthModifier, value);
     return this;
   }
   navBarPosition(value: NavBarPosition): NavigationAttribute {
-    if (value >= 0 && value <= NAV_BAR_POSITION_RANGE) {
-      modifier(this._modifiers, NavBarPositionModifier, value);
-    }
+    modifier(this._modifiers, NavBarPositionModifier, value);
     return this;
   }
   navBarWidthRange(value: [Dimension, Dimension]): NavigationAttribute {
-    if (!value) {
-      return this;
+    if (!!value && value.length >= 1) {
+      modifierWithKey(this._modifiersWithKeys, MinNavBarWidthModifier.identity, MinNavBarWidthModifier, value[0].toString());
+    } else {
+      modifierWithKey(this._modifiersWithKeys, MinNavBarWidthModifier.identity, MinNavBarWidthModifier, undefined);
     }
 
-    if (!!value && value?.length > 0 && !!value[0]) {
-      let min: string | number;
-
-      if (isNumber(value[0])) {
-        min = value[0] + DEFAULT_UNIT;
-      } else {
-        min = value[0].toString()
-      }
-
-      modifier(this._modifiers, MinNavBarWidthModifier, min);
+    if (!!value && value.length >= 2) {
+      modifierWithKey(this._modifiersWithKeys, MaxNavBarWidthModifier.identity, MaxNavBarWidthModifier, value[1].toString());
     } else {
-      modifier(this._modifiers, MinNavBarWidthModifier, MIN_NAV_BAR_WIDTH_DEFAULT);
-    }
-
-    if (!!value && value?.length > 1 && !!value[1]) {
-      let max: string | number;
-
-      if (isNumber(value[1])) {
-        max = value[1] + DEFAULT_UNIT;
-      } else {
-        max = value[1].toString();
-      }
-
-      modifier(this._modifiers, MaxNavBarWidthModifier, max);
-    } else {
-      modifier(this._modifiers, MaxNavBarWidthModifier, MAX_NAV_BAR_WIDTH_DEFAULT);
+      modifierWithKey(this._modifiersWithKeys, MaxNavBarWidthModifier.identity, MaxNavBarWidthModifier, undefined);
     }
 
     return this;
   }
   minContentWidth(value: Dimension): NavigationAttribute {
-    let minContentWidth: string = 0 + DEFAULT_UNIT;
-
-    if ((isNumber(value) && Number(value) > 0)) {
-      minContentWidth = value + DEFAULT_UNIT
-    }
-
-    if (isString(value)) {
-      minContentWidth = value.toString()
-    }
-
-    modifier(this._modifiers, MinContentWidthModifier, minContentWidth);
+    modifierWithKey(this._modifiersWithKeys, MinContentWidthModifier.identity, MinContentWidthModifier, value);
 
     return this;
   }
   mode(value: NavigationMode): NavigationAttribute {
-    if (!isNumber(value)) {
-      modifier(this._modifiers, ModeModifier, NavigationMode.Auto);
-    } else if (value >= NavigationMode.Stack && value <= NAVIGATION_MODE_RANGE) {
-      modifier(this._modifiers, ModeModifier, value);
-    }
+    modifier(this._modifiers, ModeModifier, value);
     return this;
   }
   backButtonIcon(value: any): NavigationAttribute {
@@ -112,9 +65,7 @@ class ArkNavigationComponent extends ArkComponent implements NavigationAttribute
     return this;
   }
   titleMode(value: NavigationTitleMode): NavigationAttribute {
-    if (value >= NAVIGATION_TITLE_MODE_DEFAULT && value <= TITLE_MODE_RANGE) {
-      modifier(this._modifiers, TitleModeModifier, value);
-    }
+    modifier(this._modifiers, TitleModeModifier, value);
     return this;
   }
   menus(value: any): NavigationAttribute {
@@ -160,7 +111,7 @@ class BackButtonIconModifier extends ModifierWithKey<boolean | object> {
   }
 }
 
-class MinNavBarWidthModifier extends Modifier<string> {
+class MinNavBarWidthModifier extends ModifierWithKey<string> {
   static identity: Symbol = Symbol('minNavBarWidth');
 
   applyPeer(node: KNode, reset: boolean): void {
@@ -170,9 +121,17 @@ class MinNavBarWidthModifier extends Modifier<string> {
       GetUINativeModule().navigation.setMinNavBarWidth(node, this.value);
     }
   }
+
+  checkObjectDiff(): boolean {
+    if (isResource(this.stageValue) && isResource(this.value)) {
+      return !isResourceEqual(this.stageValue, this.value);
+    } else {
+      return true;
+    }
+  }
 }
 
-class MaxNavBarWidthModifier extends Modifier<string> {
+class MaxNavBarWidthModifier extends ModifierWithKey<string> {
   static identity: Symbol = Symbol('maxNavBarWidth');
 
   applyPeer(node: KNode, reset: boolean): void {
@@ -182,8 +141,16 @@ class MaxNavBarWidthModifier extends Modifier<string> {
       GetUINativeModule().navigation.setMaxNavBarWidth(node, this.value);
     }
   }
+
+  checkObjectDiff(): boolean {
+    if (isResource(this.stageValue) && isResource(this.value)) {
+      return !isResourceEqual(this.stageValue, this.value);
+    } else {
+      return true;
+    }
+  }
 }
-class MinContentWidthModifier extends Modifier<string> {
+class MinContentWidthModifier extends ModifierWithKey<Dimension> {
   static identity: Symbol = Symbol('minContentWidth');
 
   applyPeer(node: KNode, reset: boolean): void {
@@ -193,9 +160,17 @@ class MinContentWidthModifier extends Modifier<string> {
       GetUINativeModule().navigation.setMinContentWidth(node, this.value);
     }
   }
+
+  checkObjectDiff(): boolean {
+    if (isResource(this.stageValue) && isResource(this.value)) {
+      return !isResourceEqual(this.stageValue, this.value);
+    } else {
+      return true;
+    }
+  }
 }
 
-class NavBarWidthModifier extends Modifier<string> {
+class NavBarWidthModifier extends ModifierWithKey<string> {
   static identity: Symbol = Symbol('navBarWidth');
 
   applyPeer(node: KNode, reset: boolean): void {
@@ -203,6 +178,14 @@ class NavBarWidthModifier extends Modifier<string> {
       GetUINativeModule().navigation.resetNavBarWidth(node);
     } else {
       GetUINativeModule().navigation.setNavBarWidth(node, this.value);
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    if (isResource(this.stageValue) && isResource(this.value)) {
+      return !isResourceEqual(this.stageValue, this.value);
+    } else {
+      return true;
     }
   }
 }

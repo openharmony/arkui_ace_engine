@@ -517,8 +517,6 @@ void DialogContainer::ShowActionMenu(int32_t instanceId, const std::string& titl
     auto delegate = frontend->GetDelegate();
     CHECK_NULL_VOID(delegate);
     delegate->ShowActionMenu(title, button, std::move(callback), [instanceId = instanceId](bool isShow) {
-        TAG_LOGD(AceLogTag::ACE_PROMPT_ACTION_MENU, "DialogContainer ShowActionMenu HideWindow instanceId = %{public}d",
-            instanceId);
         if (!isShow) {
             DialogContainer::HideWindow(instanceId);
         }
