@@ -168,7 +168,8 @@ public:
     int32_t GetCaretPosition();
     int32_t GetTextContentLength();
     bool GetCaretVisible() const;
-    OffsetF CalcCursorOffsetByPosition(int32_t position, float& selectLineHeight, bool downStreamFirst = false);
+    OffsetF CalcCursorOffsetByPosition(int32_t position, float& selectLineHeight,
+        bool downStreamFirst = false, bool needLineHighest = true);
     void CopyTextSpanStyle(RefPtr<SpanNode>& source, RefPtr<SpanNode>& target);
     int32_t TextSpanSplit(int32_t position);
     SpanPositionInfo GetSpanPositionInfo(int32_t position);
