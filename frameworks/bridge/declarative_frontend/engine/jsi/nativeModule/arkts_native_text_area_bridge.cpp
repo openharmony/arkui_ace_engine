@@ -417,7 +417,7 @@ ArkUINativeModuleValue TextAreaBridge::SetMaxLength(ArkUIRuntimeCallInfo *runtim
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
     void *nativeNode = firstArg->ToNativePointer(vm)->Value();
-    if (secondArg->IsNumber() && secondArg->Int32Value(vm) > 0) {
+    if (secondArg->IsNumber() && secondArg->Int32Value(vm) >= 0) {
         GetArkUIInternalNodeAPI()->GetTextAreaModifier().SetTextAreaMaxLength(nativeNode, secondArg->Int32Value(vm));
     } else {
         GetArkUIInternalNodeAPI()->GetTextAreaModifier().ResetTextAreaMaxLength(nativeNode);
