@@ -672,6 +672,7 @@ private:
     bool canUseLongPredictTask_ = false;
     bool isWindowSceneConsumed_ = false;
     bool isDensityChanged_ = false;
+    bool isBeforeDragHandleAxis_ = false;
     WeakPtr<FrameNode> activeNode_;
 
     RefPtr<FrameNode> focusNode_;
