@@ -285,7 +285,7 @@ ArkUINativeModuleValue PanelBridge::SetShow(ArkUIRuntimeCallInfo* runtimeCallInf
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
     if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN) &&
         (secondArg->IsUndefined() || secondArg->IsNull())) {
-        GetArkUIInternalNodeAPI()->GetPanelModifier().SetShow(nativeNode, false);
+        GetArkUIInternalNodeAPI()->GetPanelModifier().SetShow(nativeNode, true);
         return panda::JSValueRef::Undefined(vm);
     } else {
         GetArkUIInternalNodeAPI()->GetPanelModifier().SetShow(nativeNode, secondArg->ToBoolean(vm)->Value());
