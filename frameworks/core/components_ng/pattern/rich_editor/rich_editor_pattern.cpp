@@ -1945,6 +1945,11 @@ void RichEditorPattern::OnHover(bool isHover)
 
 bool RichEditorPattern::RequestKeyboard(bool isFocusViewChanged, bool needStartTwinkling, bool needShowSoftKeyboard)
 {
+#if defined(OHOS_STANDARD_SYSTEM) && !defined(PREVIEW)
+    if (imeShown_) {
+        return true;
+    }
+#endif
     auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(context, false);
     CHECK_NULL_RETURN(needShowSoftKeyboard, false);
@@ -3387,6 +3392,12 @@ void RichEditorPattern::ShowSelectOverlay(const RectF& firstHandle, const RectF&
             pattern->HandleOnSelectAll();
         };
 
+        selectInfo.menuCallback.onCameraInput = [weak, usingMouse]() {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            pattern->HandleOnCameraInput();
+        };
+
         selectInfo.callerFrameNode = host;
         pattern->CopySelectionMenuParams(selectInfo, responseType);
         pattern->UpdateSelectOverlayOrCreate(selectInfo);
@@ -4006,6 +4017,27 @@ float RichEditorPattern::GetLineHeight() const
     return selectedRects.front().Height();
 }
 
+void RichEditorPattern::UpdateSelectMenuInfo(bool hasData, SelectOverlayInfo& selectInfo, bool isCopyAll)
+{
+    auto hasValue = (static_cast<int32_t>(GetWideText().length()) + imageCount_) > 0;
+    bool isShowItem = copyOption_ != CopyOptions::None;
+    selectInfo.menuInfo.showCopy = isShowItem && hasValue && textSelector_.IsValid() &&
+                                    !textSelector_.StartEqualToDest();
+    selectInfo.menuInfo.showCut = isShowItem && hasValue && textSelector_.IsValid() &&
+                                    !textSelector_.StartEqualToDest();
+    selectInfo.menuInfo.showCopyAll = !isCopyAll && hasValue;
+    selectInfo.menuInfo.showPaste = hasData;
+    bool isSupportCameraInput = false;
+#if defined(ENABLE_STANDARD_INPUT)
+    auto inputMethod = MiscServices::InputMethodController::GetInstance();
+    isSupportCameraInput =
+        inputMethod && inputMethod->IsInputTypeSupported(MiscServices::InputType::CAMERA_INPUT);
+#endif
+    selectInfo.menuInfo.showCameraInput = !IsSelected() && isSupportCameraInput;
+    selectInfo.menuInfo.menuIsShow = hasValue || hasData || selectInfo.menuInfo.showCameraInput;
+    selectMenuInfo_ = selectInfo.menuInfo;
+}
+
 void RichEditorPattern::UpdateSelectionType(RichEditorSelection& selection)
 {
     selectedType_ = RichEditorType::NONE;
@@ -4597,5 +4629,40 @@ bool RichEditorPattern::IsShowSelectMenuUsingMouse()
     auto selectOverlayManager = pipeline->GetSelectOverlayManager();
     CHECK_NULL_RETURN(selectOverlayManager, false);
     return selectOverlayManager->GetSelectOverlayInfo().isUsingMouse;
+}
+
+void RichEditorPattern::HandleOnCameraInput()
+{
+#if defined(ENABLE_STANDARD_INPUT)
+    if (richEditTextChangeListener_ == nullptr) {
+        richEditTextChangeListener_ = new OnTextChangedListenerImpl(WeakClaim(this));
+    }
+    auto inputMethod = MiscServices::InputMethodController::GetInstance();
+    if (!inputMethod) {
+        return;
+    }
+#if defined(OHOS_STANDARD_SYSTEM) && !defined(PREVIEW)
+    if (imeShown_) {
+        inputMethod->StartInputType(MiscServices::InputType::CAMERA_INPUT);
+    } else {
+        auto optionalTextConfig = GetMiscTextConfig();
+        CHECK_NULL_VOID(optionalTextConfig.has_value());
+        MiscServices::TextConfig textConfig = optionalTextConfig.value();
+        TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "HandleOnCameraInput set calling window id is : %{public}u",
+            textConfig.windowId);
+#ifdef WINDOW_SCENE_SUPPORTED
+        auto systemWindowId = GetSCBSystemWindowId();
+        if (systemWindowId) {
+            TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "windowId From %{public}u to %{public}u.", textConfig.windowId,
+                systemWindowId);
+            textConfig.windowId = systemWindowId;
+        }
+#endif
+        inputMethod->Attach(richEditTextChangeListener_, false, textConfig);
+        inputMethod->StartInputType(MiscServices::InputType::CAMERA_INPUT);
+        inputMethod->ShowTextInput();
+    }
+#endif
+#endif
 }
 } // namespace OHOS::Ace::NG
