@@ -106,7 +106,7 @@ frameworks/core/components_ng/pattern/radio/  @luoying_ace_admin
 frameworks/core/components_ng/pattern/rating/  @luoying_ace_admin
 frameworks/core/components_ng/pattern/recycle_view/  @guozejun
 frameworks/core/components_ng/pattern/refresh/  @aryawang
-frameworks/core/components_ng/pattern/relative_container/  @nickyjd
+frameworks/core/components_ng/pattern/relative_container/  @xiexiyun
 frameworks/core/components_ng/pattern/remote_window/  @liuchao92
 frameworks/core/components_ng/pattern/rendering_context/  @keerecles
 frameworks/core/components_ng/pattern/rich_editor/  @wu-yinxiao
@@ -121,7 +121,7 @@ frameworks/core/components_ng/pattern/select_overlay/  @lijuan124
 frameworks/core/components_ng/pattern/shape/  @sunbees
 frameworks/core/components_ng/pattern/side_bar/  @tsj_2020
 frameworks/core/components_ng/pattern/slider/  @luoying_ace_admin
-frameworks/core/components_ng/pattern/stack/  @nickyjd
+frameworks/core/components_ng/pattern/stack/  @xiexiyun
 frameworks/core/components_ng/pattern/stage/  @yan-shuifeng
 frameworks/core/components_ng/pattern/stepper/  @tsj_2020
 frameworks/core/components_ng/pattern/swiper/  @xuzhidan
