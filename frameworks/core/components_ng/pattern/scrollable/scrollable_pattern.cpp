@@ -1782,12 +1782,12 @@ float ScrollablePattern::IsInHotZone(const PointF& point)
 
         if (topHotzone.IsInRegion(point)) {
             offset = point.GetY() - topHotzone.GetY();
-            if (!NearZero(0.f)) {
+            if (!NearZero(hotZoneHeightPX)) {
                 return offset / hotZoneHeightPX;
             }
         } else if (bottomHotzone.IsInRegion(point)) {
             offset = point.GetY() - bottomZoneEdgeY;
-            if (!NearZero(0.f)) {
+            if (!NearZero(hotZoneHeightPX)) {
                 return offset / hotZoneHeightPX;
             }
         }
@@ -1809,18 +1809,18 @@ float ScrollablePattern::IsInHotZone(const PointF& point)
 
         if (leftHotzone.IsInRegion(point)) {
             offset = point.GetX() - wholeRect.GetX();
-            if (!NearZero(0.f)) {
+            if (!NearZero(hotZoneWidthPX)) {
                 return offset / hotZoneWidthPX;
             }
         } else if (rightHotzone.IsInRegion(point)) {
             offset = point.GetX() - rightZoneEdgeX;
-            if (!NearZero(0.f)) {
+            if (!NearZero(hotZoneWidthPX)) {
                 return offset / hotZoneWidthPX;
             }
         }
     }
 
-    return 0;
+    return 0.f;
 }
 
 /**
