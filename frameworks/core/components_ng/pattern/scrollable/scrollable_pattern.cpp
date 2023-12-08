@@ -1779,12 +1779,15 @@ float ScrollablePattern::IsInHotZone(const PointF& point)
         // Determines whether the drag point is within the hot zone,
         // then gives the scroll component movement direction according to which hot zone the point is in
         // top or bottom hot zone
-        if (hotZoneHeightPX != 0.f) {
-            if (topHotzone.IsInRegion(point)) {
-                offset = point.GetY() - topHotzone.GetY();
+
+        if (topHotzone.IsInRegion(point)) {
+            offset = point.GetY() - topHotzone.GetY();
+            if (!NearZero(0.f)) {
                 return offset / hotZoneHeightPX;
-            } else if (bottomHotzone.IsInRegion(point)) {
-                offset = point.GetY() - bottomZoneEdgeY;
+            }
+        } else if (bottomHotzone.IsInRegion(point)) {
+            offset = point.GetY() - bottomZoneEdgeY;
+            if (!NearZero(0.f)) {
                 return offset / hotZoneHeightPX;
             }
         }
@@ -1803,16 +1806,19 @@ float ScrollablePattern::IsInHotZone(const PointF& point)
         // Determines whether the drag point is within the hot zone,
         // gives the scroll component movement direction according to which hot zone the point is in
         // left or right hot zone
-        if (hotZoneWidthPX != 0.f) {
-            if (leftHotzone.IsInRegion(point))
-                offset = point.GetX() - wholeRect.GetX();
-            return offset / hotZoneWidthPX;
+
+        if (leftHotzone.IsInRegion(point)) {
+            offset = point.GetX() - wholeRect.GetX();
+            if (!NearZero(0.f)) {
+                return offset / hotZoneWidthPX;
+            }
         } else if (rightHotzone.IsInRegion(point)) {
             offset = point.GetX() - rightZoneEdgeX;
-            return offset / hotZoneWidthPX;
+            if (!NearZero(0.f)) {
+                return offset / hotZoneWidthPX;
+            }
         }
     }
-}
 
     return 0;
 }
