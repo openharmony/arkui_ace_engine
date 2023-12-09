@@ -84,9 +84,9 @@ class PanelBackgroundMaskModifier extends ModifierWithKey<ResourceColor> {
   static identity: Symbol = Symbol("panelBackgroundMask");
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().panel.resetBackgroundMask(node);
+      GetUINativeModule().panel.resetPanelBackgroundMask(node);
     } else {
-      GetUINativeModule().panel.setBackgroundMask(node, this.value);
+      GetUINativeModule().panel.setPanelBackgroundMask(node, this.value);
     }
   }
 
