@@ -205,8 +205,7 @@ private:
         theme->hoverTextAlpha_ =
             indexerPattern->GetAttr<Dimension>("hover_text_alpha", Dimension(HOVER_TEXT_ALPHA, DimensionUnit::PX));
         theme->slipHoverBackgroundColor_ =
-            indexerPattern->GetAttr<Color>("slip_hover_background_color", Color(SLIP_HOVER_BACKGROUD_COLOR))
-                .ChangeOpacity(SLIP_BACKGROUND_OPACITY);
+            indexerPattern->GetAttr<Color>("slip_hover_background_color", Color(SLIP_HOVER_BACKGROUD_COLOR));
         theme->focusBgOutlineColor_ =
             indexerPattern->GetAttr<Color>("focus_bg_outline_color", Color(FOCUS_BG_OUTLINE_COLOR));
         theme->focusBgOutlineSize_ = indexerPattern->GetAttr<Dimension>(
