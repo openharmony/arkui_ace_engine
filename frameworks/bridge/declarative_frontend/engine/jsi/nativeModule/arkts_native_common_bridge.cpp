@@ -4210,10 +4210,7 @@ ArkUINativeModuleValue CommonBridge::SetClickEffect(ArkUIRuntimeCallInfo* runtim
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
     Local<JSValueRef> levelArg = runtimeCallInfo->GetCallArgRef(NUM_1);
     Local<JSValueRef> scaleArg = runtimeCallInfo->GetCallArgRef(NUM_2);
-    if (levelArg->IsUndefined() && scaleArg->IsUndefined()) {
-        GetArkUIInternalNodeAPI()->GetCommonModifier().ResetClickEffect(nativeNode);
-        return panda::JSValueRef::Undefined(vm);
-    }
+    
     int32_t clickEffectLevelValue = 0;
     if (levelArg->IsNumber()) {
         clickEffectLevelValue = levelArg->Int32Value(vm);

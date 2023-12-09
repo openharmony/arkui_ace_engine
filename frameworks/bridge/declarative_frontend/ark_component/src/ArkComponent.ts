@@ -1630,7 +1630,7 @@ class HoverEffectModifier extends Modifier<HoverEffect> {
 class ClickEffectModifier extends Modifier<ArkClickEffect> {
   static identity: Symbol = Symbol("clickEffect");
   applyPeer(node: KNode, reset: boolean): void {
-    if (reset) {
+    if (reset || !this.value) {
       GetUINativeModule().common.resetClickEffect(node);
     }
     else {
@@ -2601,14 +2601,14 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
   }
 
   clickEffect(value: ClickEffect | null): this {
-    let arkClickEffect = new ArkClickEffect();
-    arkClickEffect.level = 0;
-    arkClickEffect.scale = 0.9;
     if (value) {
+      let arkClickEffect = new ArkClickEffect();
       arkClickEffect.level = value.level;
       arkClickEffect.scale = value.scale;
+      modifier(this._modifiers, ClickEffectModifier, arkClickEffect);
+    } else {
+      modifier(this._modifiers, ClickEffectModifier, undefined);
     }
-    modifier(this._modifiers, ClickEffectModifier, arkClickEffect);
     return this;
   }
 
