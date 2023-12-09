@@ -1325,7 +1325,8 @@ void TabBarPattern::PlayTranslateAnimation(float startPos, float endPos, float t
     auto tabTheme = pipelineContext->GetTheme<TabTheme>();
     CHECK_NULL_VOID(tabTheme);
     AnimationOption option = AnimationOption();
-    option.SetDuration(static_cast<int32_t>(GetAnimationDuration().value_or(tabTheme->GetTabContentAnimationDuration())));
+    option.SetDuration(static_cast<int32_t>(GetAnimationDuration().value_or(
+        tabTheme->GetTabContentAnimationDuration())));
     option.SetCurve(curve);
     option.SetFillMode(FillMode::FORWARDS);
 
@@ -1412,7 +1413,8 @@ void TabBarPattern::PlayTabBarTranslateAnimation(int32_t targetIndex)
     CHECK_NULL_VOID(tabTheme);
     auto curve = DurationCubicCurve;
     AnimationOption option = AnimationOption();
-    option.SetDuration(static_cast<int32_t>(GetAnimationDuration().value_or(tabTheme->GetTabContentAnimationDuration())));
+    option.SetDuration(static_cast<int32_t>(GetAnimationDuration().value_or(
+        tabTheme->GetTabContentAnimationDuration())));
     option.SetCurve(curve);
 
     auto weak = AceType::WeakClaim(this);
