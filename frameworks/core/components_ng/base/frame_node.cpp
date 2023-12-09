@@ -2930,6 +2930,7 @@ void FrameNode::LayoutOverlay()
 void FrameNode::DoRemoveChildInRenderTree(uint32_t index, bool isAll)
 {
     isActive_ = false;
+    SetActive(false);
 }
 
 void FrameNode::OnInspectorIdUpdate(const std::string& id)
