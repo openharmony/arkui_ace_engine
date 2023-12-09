@@ -153,18 +153,18 @@ void LongPressRecognizer::HandleTouchDownEvent(const TouchEvent& event)
     ThumbnailTimer(thumbnailDeadline);
 }
 
-void LongPressRecognizer::HandleTouchUpEvent(const TouchEvent& /*event*/)
+void LongPressRecognizer::HandleTouchUpEvent(const TouchEvent& event)
 {
     TAG_LOGI(AceLogTag::ACE_GESTURE, "Long press recognizer receives touch up event");
     auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
     context->RemoveGestureTask(task_);
-    if (static_cast<int32_t>(touchPoints_.size()) < fingers_) {
-        return;
+    if (touchPoints_.find(event.id) != touchPoints_.end()) {
+        touchPoints_.erase(event.id);
     }
     if (refereeState_ == RefereeState::SUCCEED) {
         SendCallbackMsg(onActionUpdate_, false);
-        if (static_cast<int32_t>(touchPoints_.size()) == fingers_) {
+        if (static_cast<int32_t>(touchPoints_.size()) == 0) {
             SendCallbackMsg(onActionEnd_, false);
         }
     } else {
