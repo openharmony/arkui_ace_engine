@@ -1147,6 +1147,11 @@ struct ArkUIListModifierAPI {
     void (*ResetChainAnimationOptions)(NodeHandle node);
 };
 
+struct ArkUIListItemGroupModifierAPI {
+    void (*ListItemGroupSetDivider)(NodeHandle node, uint32_t color, const double* values, const int* units);
+    void (*ListItemGroupResetDivider)(NodeHandle node);
+};
+
 #ifdef FORM_SUPPORTED
 struct ArkUIFormComponentModifierAPI {
     void (*SetFormVisibility)(NodeHandle node, int32_t visible);
@@ -1261,6 +1266,7 @@ struct ArkUINodeAPI {
     ArkUIShapeModifierAPI(*GetShapeModifier)();
     ArkUIRectModifierAPI (*GetRectModifier)();
     ArkUIListModifierAPI (*GetListModifier)();
+    ArkUIListItemGroupModifierAPI(*GetListItemGroupModifier)();
 
 #ifdef FORM_SUPPORTED
     ArkUIFormComponentModifierAPI (*GetFormComponentModifier)();

@@ -72,6 +72,7 @@
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_shape_modifier.h"
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_rect_modifier.h"
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_list_modifier.h"
+#include "bridge/declarative_frontend/engine/jsi/components/arkts_native_list_item_group_modifier.h"
 
 #ifdef FORM_SUPPORTED
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_form_component_modifier.h"
@@ -141,6 +142,7 @@ static struct ArkUINodeAPI impl = {
     GetShapeModifier,
     GetRectModifier,
     GetListModifier,
+    GetListItemGroupModifier,
 
 #ifdef FORM_SUPPORTED
     GetFormComponentModifier,
