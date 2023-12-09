@@ -2301,7 +2301,15 @@ void OverlayManager::BindSheet(bool isShow, std::function<void(const std::string
         eventConfirmHub->AddClickEvent(sheetMaskClickEvent_);
         PlaySheetMaskTransition(maskNode, true);
     }
-    sheetNode->MountToParent(rootNode);
+    auto columnNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    CHECK_NULL_VOID(columnNode);
+    auto columnLayoutProps = columnNode->GetLayoutProperty();
+    CHECK_NULL_VOID(columnLayoutProps);
+    columnLayoutProps->UpdateMeasureType(MeasureType::MATCH_PARENT);
+    columnLayoutProps->UpdateAlignment(Alignment::TOP_LEFT);
+    sheetNode->MountToParent(columnNode);
+    columnNode->MountToParent(rootNode);
     modalList_.emplace_back(WeakClaim(RawPtr(sheetNode)));
     FireModalPageShow();
     rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
@@ -2429,7 +2437,9 @@ void OverlayManager::PlaySheetTransition(
                         }
                         auto root = overlayManager->FindWindowScene(sheet);
                         CHECK_NULL_VOID(root);
-                        root->RemoveChild(sheet);
+                        auto sheetParent = DynamicCast<FrameNode>(sheet->GetParent());
+                        CHECK_NULL_VOID(sheetParent);
+                        root->RemoveChild(sheetParent);
                         root->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
                     },
                     TaskExecutor::TaskType::UI);
@@ -2477,7 +2487,9 @@ void OverlayManager::PlayBubbleStyleSheetTransition(RefPtr<FrameNode> sheetNode,
                         }
                         auto root = overlayManager->FindWindowScene(sheet);
                         CHECK_NULL_VOID(root);
-                        root->RemoveChild(sheet);
+                        auto sheetParent = DynamicCast<FrameNode>(sheet->GetParent());
+                        CHECK_NULL_VOID(sheetParent);
+                        root->RemoveChild(sheetParent);
                         root->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
                     },
                     TaskExecutor::TaskType::UI);
@@ -2676,7 +2688,9 @@ void OverlayManager::DestroySheet(const RefPtr<FrameNode>& sheetNode, int32_t ta
             root->RemoveChild(maskNode);
         }
         sheetNode->GetPattern<SheetPresentationPattern>()->OnDisappear();
-        root->RemoveChild(sheetNode);
+        auto sheetParent = DynamicCast<FrameNode>(sheetNode->GetParent());
+        CHECK_NULL_VOID(sheetParent);
+        root->RemoveChild(sheetParent);
         root->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
         sheetMap_.erase(targetId);
         modalStack_.pop();
@@ -2715,12 +2729,15 @@ void OverlayManager::DeleteModal(int32_t targetId)
                 modalNode->GetPattern<ModalPresentationPattern>()->FireCallback("false");
                 // Fire hidden event of navdestination on the disappeared modal
                 FireNavigationStateChange(rootNode, false, modalNode);
+                rootNode->RemoveChild(modalNode);
             } else {
                 modalNode->GetPattern<SheetPresentationPattern>()->OnDisappear();
                 modalNode->GetPattern<SheetPresentationPattern>()->FireCallback("false");
                 sheetMap_.erase(targetId);
+                auto sheetParent = DynamicCast<FrameNode>(modalNode->GetParent());
+                CHECK_NULL_VOID(sheetParent);
+                rootNode->RemoveChild(sheetParent);
             }
-            rootNode->RemoveChild(modalNode);
             rootNode->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
             break;
         }
@@ -2740,9 +2757,11 @@ RefPtr<FrameNode> OverlayManager::GetSheetMask(const RefPtr<FrameNode>& sheetNod
 {
     // get bindsheet masknode
     CHECK_NULL_RETURN(sheetNode, NULL);
-    auto rootNode = sheetNode->GetParent();
+    auto sheetParent = sheetNode->GetParent();
+    CHECK_NULL_RETURN(sheetParent, NULL);
+    auto rootNode = sheetParent->GetParent();
     CHECK_NULL_RETURN(rootNode, NULL);
-    auto sheetChildIter = std::find(rootNode->GetChildren().begin(), rootNode->GetChildren().end(), sheetNode);
+    auto sheetChildIter = std::find(rootNode->GetChildren().begin(), rootNode->GetChildren().end(), sheetParent);
     if (sheetChildIter == rootNode->GetChildren().end()) {
         return NULL;
     }

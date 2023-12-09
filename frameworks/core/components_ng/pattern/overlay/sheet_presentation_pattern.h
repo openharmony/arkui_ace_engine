@@ -158,6 +158,7 @@ public:
             height_ = currentHeight;
             ChangeScrollHeight(height_);
         }
+        ProcessColumnRect(height_);
     }
 
     void SetCurrentHeightToOverlay(float height)
@@ -295,6 +296,7 @@ private:
     std::string MoveTo(double x, double y);
     std::string LineTo(double x, double y);
     std::string ArcTo(double rx, double ry, double rotation, int32_t arc_flag, double x, double y);
+    void ProcessColumnRect(float height);
 
     uint32_t keyboardHeight_ = 0;
     int32_t targetId_ = -1;
@@ -321,6 +323,8 @@ private:
     float sheetMaxWidth_ = 0.0f;
     float centerHeight_ = 0.0f;
     float sheetFitContentHeight_ = 0.0f;
+    float sheetOffsetX_ = 0.0f;
+    float sheetOffsetY_ = 0.0f;
     bool isFirstInit_ = true;
     SheetType sheetType_ = SheetType::SHEET_BOTTOM;
 
