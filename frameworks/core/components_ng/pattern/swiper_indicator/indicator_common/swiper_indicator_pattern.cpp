@@ -283,6 +283,20 @@ void SwiperIndicatorPattern::InitTouchEvent(const RefPtr<GestureEventHub>& gestu
     }
     touchEvent_ = MakeRefPtr<TouchEventImpl>(std::move(touchTask));
     gestureHub->AddTouchEvent(touchEvent_);
+
+    auto swiperNode = GetSwiperNode();
+    CHECK_NULL_VOID(swiperNode);
+    auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_VOID(swiperPattern);
+    auto stopAnimationCb = [weak = WeakClaim(this)]() {
+        auto pattern = weak.Upgrade();
+        if (pattern) {
+            if (pattern->dotIndicatorModifier_) {
+                pattern->dotIndicatorModifier_->StopAnimation();
+            }
+        }
+    };
+    swiperPattern->SetStopIndicatorAnimationCb(stopAnimationCb);
 }
 
 void SwiperIndicatorPattern::HandleTouchEvent(const TouchEventInfo& info)
@@ -353,7 +367,7 @@ void SwiperIndicatorPattern::GetMouseClickIndex()
     float centerX = padding;
     float centerY = ((axis == Axis::HORIZONTAL ? frameSize.Height() : frameSize.Width()) - itemHeight) * 0.5f;
     PointF hoverPoint = axis == Axis::HORIZONTAL ? hoverPoint_ : PointF(hoverPoint_.GetY(), hoverPoint_.GetX());
-    int start = currentIndex >= 0 ? loopCount * itemCount : -(loopCount +1) * itemCount;
+    int start = currentIndex >= 0 ? loopCount * itemCount : -(loopCount + 1) * itemCount;
     int end = currentIndex >= 0 ? (loopCount + 1) * itemCount : -loopCount * itemCount;
     for (int32_t i = start; i < end; ++i) {
         if (i != currentIndex) {
@@ -525,7 +539,6 @@ bool SwiperIndicatorPattern::CheckIsTouchBottom(const TouchLocationInfo& info)
     CHECK_NULL_RETURN(swiperLayoutProperty, false);
     auto displayCount = swiperLayoutProperty->GetDisplayCount().value_or(1);
 
-    auto isLoop = swiperLayoutProperty->GetLoop().value_or(true);
     auto dragPoint =
         PointF(static_cast<float>(info.GetLocalLocation().GetX()), static_cast<float>(info.GetLocalLocation().GetY()));
     auto offset = dragPoint - dragStartPoint_;
@@ -538,13 +551,13 @@ bool SwiperIndicatorPattern::CheckIsTouchBottom(const TouchLocationInfo& info)
     swiperPattern->SetTouchBottomRate(std::abs(touchBottomRate));
     TouchBottomType touchBottomType = TouchBottomType::NONE;
 
-    if ((currentIndex <= 0) && !isLoop) {
+    if (currentIndex <= 0) {
         if (NonPositive(touchOffset)) {
             touchBottomType = TouchBottomType::START;
         }
     }
 
-    if ((currentIndex >= childrenSize - displayCount) && !isLoop) {
+    if (currentIndex >= childrenSize - displayCount) {
         if (Positive(touchOffset)) {
             touchBottomType = TouchBottomType::END;
         }
