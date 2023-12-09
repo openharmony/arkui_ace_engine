@@ -59,11 +59,11 @@ void SetMinNavBarWidth(NodeHandle node, double minValue, int minUnit)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-
     CalcDimension minNavBarWidth = Dimension(minValue, static_cast<OHOS::Ace::DimensionUnit>(minUnit));
     if (LessNotEqual(minNavBarWidth.Value(), 0.0)) {
         minNavBarWidth.SetValue(0);
     }
+
     NavigationModelNG::SetMinNavBarWidth(frameNode, minNavBarWidth);
 }
 
@@ -80,11 +80,11 @@ void SetMaxNavBarWidth(NodeHandle node, double maxValue, int maxUnit)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-
     CalcDimension maxNavBarWidth = Dimension(maxValue, static_cast<OHOS::Ace::DimensionUnit>(maxUnit));
     if (LessNotEqual(maxNavBarWidth.Value(), 0.0)) {
         maxNavBarWidth.SetValue(0);
     }
+    
     NavigationModelNG::SetMaxNavBarWidth(frameNode, maxNavBarWidth);
 }
 
