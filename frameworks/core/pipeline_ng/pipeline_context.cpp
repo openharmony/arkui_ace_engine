@@ -1484,7 +1484,6 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, bool isSubPipe)
         }
         if (lastMoveEvent.has_value()) {
             eventManager_->SetLastMoveBeforeUp(scalePoint.sourceType == SourceType::MOUSE);
-            eventManager_->DispatchTouchEvent(lastMoveEvent.value());
             eventManager_->SetLastMoveBeforeUp(false);
         }
     }
