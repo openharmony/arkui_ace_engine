@@ -146,9 +146,12 @@ void ContentController::FilterValue()
     auto textField = DynamicCast<TextFieldPattern>(pattern);
     CHECK_NULL_VOID(textField);
     auto property = textField->GetLayoutProperty<TextFieldLayoutProperty>();
-    if (property->GetInputFilter().has_value() && !content_.empty()) {
+
+    bool hasInputFilter = property->GetInputFilter().has_value() && !content_.empty();
+    if (hasInputFilter) {
         textChanged |= FilterWithEvent(property->GetInputFilter().value(), result);
-    } else {
+    }
+    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN) || !hasInputFilter) {
         FilterTextInputStyle(textChanged, result);
     }
     if (textChanged) {
