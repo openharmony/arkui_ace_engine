@@ -1748,7 +1748,7 @@ void ScrollablePattern::Register2DragDropManager()
  * @description: Determine whether it is in the hot zone, then
  * 1.Gives the rolling direction according to the location of the hot zone
  * 2.Gives the distance from the edge of the hot zone from the drag point
- * @param {PointF&} point The drag point 
+ * @param {PointF&} point The drag point
  * @return The distance from the edge of the hot zone from the drag point.scroll up:Offset percent is positive, scroll
  * down:Offset percent is  negative
  */
