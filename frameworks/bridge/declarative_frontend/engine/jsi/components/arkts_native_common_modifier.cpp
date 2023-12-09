@@ -2492,7 +2492,7 @@ void SetAlignRules(NodeHandle node, char** anchors, int8_t* direction, int32_t l
     for (int index = 0; index < length; index++) {
         AlignRule alignRule;
         alignRule.anchor = std::string(*(anchors + index) == nullptr ? "" : *(anchors + index));
-        if (index < DIRECTION_RANGE) {
+        if (index < HORIZONTAL_DIRECTION_RANGE) {
             alignRule.horizontal = static_cast<HorizontalAlign>(*(direction + index));
         } else {
             alignRule.vertical = static_cast<VerticalAlign>(*(direction + index));

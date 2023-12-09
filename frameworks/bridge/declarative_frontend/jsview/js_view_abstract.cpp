@@ -6400,13 +6400,14 @@ void JSViewAbstract::JsAlignRules(const JSCallbackInfo& info)
             JSRef<JSVal> align = val->GetProperty("align");
             AlignRule alignRule;
             alignRule.anchor = val->GetProperty("anchor")->ToString();
-            if (i < DIRECTION_RANGE) {
+            if (i < HORIZONTAL_DIRECTION_RANGE) {
                 alignRule.horizontal = static_cast<HorizontalAlign>(val->GetProperty("align")->ToNumber<int32_t>());
             } else {
                 alignRule.vertical = static_cast<VerticalAlign>(val->GetProperty("align")->ToNumber<int32_t>());
             }
-            alignRules[static_cast<AlignDirection>(i)] = alignRule;
-
+            if (i < VERTICAL_DIRECTION_RANGE) {
+                alignRules[static_cast<AlignDirection>(i)] = alignRule;
+            }
             auto biasX = val->GetProperty("horizontal");
             if (biasX->IsNumber()) {
                 biasPair.first = biasX->ToNumber<float>();
