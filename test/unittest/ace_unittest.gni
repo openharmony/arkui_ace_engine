@@ -35,10 +35,7 @@ template("ace_unittest") {
   ace_external_deps = []
   flutter_sources = []
   flutter_external_deps = []
-  ace_unittest_deps = [
-    "$ace_root/test/unittest:ace_unittest_log",
-    "//third_party/googletest:gmock",
-  ]
+  ace_unittest_deps = [ "//third_party/googletest:gmock" ]
 
   # temporary support
   if (defined(invoker.external_deps)) {
@@ -153,7 +150,7 @@ template("ace_unittest") {
         "$ace_root/test/unittest:ace_core_animation",
         "$ace_root/test/unittest:ace_core_extra",
       ]
-
+      cflags = [ "-fvisibility=hidden" ]
       configs = []
       configs = ace_unittest_config
 
@@ -176,6 +173,7 @@ template("ace_unittest") {
         "$ace_root/test/unittest:ace_components_event",
         "$ace_root/test/unittest:ace_components_gestures",
         "$ace_root/test/unittest:ace_components_layout",
+        "$ace_root/test/unittest:ace_components_manager",
         "$ace_root/test/unittest:ace_components_pattern",
         "$ace_root/test/unittest:ace_components_property",
         "$ace_root/test/unittest:ace_components_render",

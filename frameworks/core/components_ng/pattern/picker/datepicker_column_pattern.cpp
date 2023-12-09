@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/picker/datepicker_column_pattern.h"
 
 #include <cstdint>
+#include <cstdlib>
 #include <iterator>
 #include <list>
 #include <stdint.h>
@@ -1182,7 +1183,7 @@ void DatePickerColumnPattern::OnAroundButtonClick(RefPtr<DatePickerEventParam> p
         animation_ = AnimationUtils::StartAnimation(option, [weak = AceType::WeakClaim(this), step, distance]() {
             auto column = weak.Upgrade();
             CHECK_NULL_VOID(column);
-            column->aroundClickProperty_->Set(step > 0 ? 0.0 - abs(distance) : abs(distance));
+            column->aroundClickProperty_->Set(step > 0 ? 0.0 - std::abs(distance) : std::abs(distance));
         });
     }
 }
@@ -1210,7 +1211,7 @@ void DatePickerColumnPattern::AddHotZoneRectToText()
     auto childSize = static_cast<int32_t>(host->GetChildren().size());
     auto midSize = childSize / MINDDLE_CHILD_INDEX;
     auto middleChildHeight = optionProperties_[midSize].height;
-    auto otherChildHeight = optionProperties_[midSize-1].height;
+    auto otherChildHeight = optionProperties_[midSize - 1].height;
     for (int32_t i = 0; i < childSize; i++) {
         RefPtr<FrameNode> childNode = DynamicCast<FrameNode>(host->GetChildAtIndex(i));
         CHECK_NULL_VOID(childNode);
@@ -1225,14 +1226,14 @@ void DatePickerColumnPattern::AddHotZoneRectToText()
                 hotZoneHegiht = (size_.Height() - middleChildHeight) / MINDDLE_CHILD_INDEX;
                 hotZoneOffsetY = (i == midSize - 1) ? (otherChildHeight - hotZoneHegiht) : 0;
             }
-        }  else if (size_.Height() <= (middleChildHeight + HOT_ZONE_HEIGHT_DISAPPEAR * otherChildHeight)) {
+        } else if (size_.Height() <= (middleChildHeight + HOT_ZONE_HEIGHT_DISAPPEAR * otherChildHeight)) {
             if (i == midSize) {
                 hotZoneHegiht = middleChildHeight;
             } else if ((i == midSize + 1) || (i == midSize - 1)) {
                 hotZoneHegiht = otherChildHeight;
             } else if ((i == midSize + HOT_ZONE_HEIGHT_CANDIDATE) || (i == midSize - HOT_ZONE_HEIGHT_CANDIDATE)) {
-                hotZoneHegiht = (size_.Height() - middleChildHeight - HOT_ZONE_HEIGHT_CANDIDATE * otherChildHeight)
-                                / MINDDLE_CHILD_INDEX;
+                hotZoneHegiht = (size_.Height() - middleChildHeight - HOT_ZONE_HEIGHT_CANDIDATE * otherChildHeight) /
+                                MINDDLE_CHILD_INDEX;
                 hotZoneOffsetY = (i == midSize - HOT_ZONE_HEIGHT_CANDIDATE) ? (otherChildHeight - hotZoneHegiht) : 0;
             }
         } else {

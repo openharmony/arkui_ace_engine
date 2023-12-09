@@ -168,7 +168,8 @@ public:
     int32_t GetCaretPosition();
     int32_t GetTextContentLength();
     bool GetCaretVisible() const;
-    OffsetF CalcCursorOffsetByPosition(int32_t position, float& selectLineHeight, bool downStreamFirst = false);
+    OffsetF CalcCursorOffsetByPosition(int32_t position, float& selectLineHeight,
+        bool downStreamFirst = false, bool needLineHighest = true);
     void CopyTextSpanStyle(RefPtr<SpanNode>& source, RefPtr<SpanNode>& target);
     int32_t TextSpanSplit(int32_t position);
     SpanPositionInfo GetSpanPositionInfo(int32_t position);
@@ -329,20 +330,10 @@ public:
 
     bool IsShowSelectMenuUsingMouse();
 
+    void HandleOnCameraInput() override;
+
 private:
-    void UpdateSelectMenuInfo(bool hasData, SelectOverlayInfo& selectInfo, bool isCopyAll)
-    {
-        auto hasValue = (static_cast<int32_t>(GetWideText().length()) + imageCount_) > 0;
-        bool isShowItem = copyOption_ != CopyOptions::None;
-        selectInfo.menuInfo.showCopy = isShowItem && hasValue && textSelector_.IsValid() &&
-                                       !textSelector_.StartEqualToDest();
-        selectInfo.menuInfo.showCut = isShowItem && hasValue && textSelector_.IsValid() &&
-                                      !textSelector_.StartEqualToDest();
-        selectInfo.menuInfo.showCopyAll = !isCopyAll && hasValue;
-        selectInfo.menuInfo.showPaste = hasData;
-        selectInfo.menuInfo.menuIsShow = hasValue || hasData;
-        selectMenuInfo_ = selectInfo.menuInfo;
-    }
+    void UpdateSelectMenuInfo(bool hasData, SelectOverlayInfo& selectInfo, bool isCopyAll);
     void UpdateSelectionType(RichEditorSelection& selection);
     std::shared_ptr<SelectionMenuParams> GetMenuParams(RichEditorResponseType responseType, RichEditorType type);
     void HandleOnPaste() override;

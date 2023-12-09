@@ -13,19 +13,15 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/pattern/animator/animator_model_ng.h"
+#include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/pattern/container_modal/container_modal_utils.h"
+#include "core/components_ng/pattern/custom/custom_title_node.h"
 
-namespace OHOS::Ace::Framework {
-namespace {
-} // namespace
-
-void AnimatorModelNG::Create(const std::string& animatorId) {}
-
-RefPtr<AnimatorInfo> AnimatorModelNG::GetAnimatorInfo(const std::string& animatorId)
+namespace OHOS::Ace::NG {
+bool ExecuteCustomTitleAbc()
 {
-    auto animatorInfo = AceType::MakeRefPtr<AnimatorInfo>();
-    auto animator = AceType::MakeRefPtr<Animator>();
-    animatorInfo->SetAnimator(animator);
-    return animatorInfo;
+    auto custom = CustomTitleNode::CreateCustomNode(-1, "");
+    ViewStackProcessor::GetInstance()->SetCustomTitleNode(custom);
+    return true;
 }
-} // namespace OHOS::Ace::Framework
+} // namespace OHOS::Ace::NG

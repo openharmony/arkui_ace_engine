@@ -24,6 +24,12 @@
 #include "core/components_ng/pattern/scrollable/scrollable_properties.h"
 
 namespace OHOS::Ace::NG {
+enum PlacedState : int32_t {
+
+    SUCCESSFULLY = -1,
+    OCCUPIED = -2,
+    POSITION_SMALL = -3,
+};
 
 class ACE_EXPORT GridScrollLayoutAlgorithm : public GridLayoutBaseAlgorithm {
     DECLARE_ACE_TYPE(GridScrollLayoutAlgorithm, GridLayoutBaseAlgorithm);
@@ -117,6 +123,9 @@ private:
     void ScrollToIndexAuto(LayoutWrapper* layoutWrapper, float mainSize, int32_t targetIndex);
     void UpdateCurrentOffsetForJumpTo(LayoutWrapper* layoutWrapper, float mainSize);
     void SkipRegularLines(bool forward);
+    void UpdateGridMatrix(LayoutWrapper* layoutWrapper, int32_t index, float crossSize);
+    float CalculateNodeHeight(const RefPtr<LayoutWrapper>& childLayoutWrapper, int32_t mainSpan);
+    int32_t CheckGridPlacedState(int32_t index, int32_t main, int32_t cross, int32_t mainSpan, int32_t crossSpan);
 
 protected:
     uint32_t crossCount_ = 0;

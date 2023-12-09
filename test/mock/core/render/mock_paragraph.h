@@ -50,8 +50,10 @@ public:
     MOCK_METHOD1(GetRectsForPlaceholders, void(std::vector<RectF>& selectedRects));
     MOCK_METHOD1(SetIndents, void(const std::vector<float>& indents));
     MOCK_METHOD1(GetCharacterWidth, float(int32_t index));
-    MOCK_METHOD2(ComputeOffsetForCaretDownstream, bool(int32_t extent, CaretMetricsF& result));
-    MOCK_METHOD2(ComputeOffsetForCaretUpstream, bool(int32_t extent, CaretMetricsF& result));
+    MOCK_METHOD3(ComputeOffsetForCaretDownstream, bool(int32_t extent, CaretMetricsF& result,
+        bool needLineHighest));
+    MOCK_METHOD3(ComputeOffsetForCaretUpstream, bool(int32_t extent, CaretMetricsF& result,
+        bool needLineHighest));
     MOCK_METHOD3(GetRectsForRange, void(int32_t start, int32_t end, std::vector<RectF>& selectedRects));
     MOCK_METHOD3(Paint, void(RSCanvas& canvas, float x, float y));
 #ifndef USE_ROSEN_DRAWING

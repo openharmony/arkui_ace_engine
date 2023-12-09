@@ -13,23 +13,23 @@
  * limitations under the License.
  */
 
-#include <memory>
 #include <atomic>
 #include <chrono>
 #include <ctime>
+#include <memory>
 #include <regex>
 #include <sys/time.h>
 
 #include "gtest/gtest.h"
 
+#include "base/log/log.h"
 #include "base/utils/base_id.h"
 #include "base/utils/date_util.h"
-#include "base/log/log.h"
-#include "base/utils/utils.h"
 #include "base/utils/resource_configuration.h"
 #include "base/utils/string_expression.h"
 #include "base/utils/string_utils.h"
 #include "base/utils/time_util.h"
+#include "base/utils/utils.h"
 
 #ifndef WINDOWS_PLATFORM
 #include "securec.h"
@@ -92,36 +92,10 @@ const std::u16string DEFAULT_USTRING = u"error";
 const std::wstring TEST_INPUT_W_STRING = L"THIS IS A STRING";
 const std::wstring DEFAULT_WSTRING = L"error";
 const char TEST_INPUT_ARGS_ONE[MAX_STRING_SIZE] = "TODAY";
-const std::vector<int64_t> RESOURCEHANDLERS = {255};
+const std::vector<int64_t> RESOURCEHANDLERS = { 255 };
 } // namespace
 
-class BaseUtilsTest : public testing::Test {
-public:
-    static void SetUpTestCase();
-    static void TearDownTestCase();
-    void SetUp();
-    void TearDown();
-};
-
-void BaseUtilsTest::SetUpTestCase()
-{
-    GTEST_LOG_(INFO) << "BaseUtilsTest SetUpTestCase";
-}
-
-void BaseUtilsTest::TearDownTestCase()
-{
-    GTEST_LOG_(INFO) << "BaseUtilsTest TearDownTestCase";
-}
-
-void BaseUtilsTest::SetUp()
-{
-    GTEST_LOG_(INFO) << "BaseUtilsTest SetUp";
-}
-
-void BaseUtilsTest::TearDown()
-{
-    GTEST_LOG_(INFO) << "BaseUtilsTest TearDown";
-}
+class BaseUtilsTest : public testing::Test {};
 
 /**
  * @tc.name: BaseUtilsTest001
@@ -345,8 +319,9 @@ HWTEST_F(BaseUtilsTest, BaseUtilsTest009, TestSize.Level1)
 HWTEST_F(BaseUtilsTest, BaseUtilsTest010, TestSize.Level1)
 {
     ResourceConfiguration resConfiguration;
-    ASSERT_EQ(resConfiguration.TestFlag(ResourceConfiguration::COLOR_MODE_UPDATED_FLAG,
-        ResourceConfiguration::FONT_RATIO_UPDATED_FLAG), false);
+    ASSERT_EQ(resConfiguration.TestFlag(
+                  ResourceConfiguration::COLOR_MODE_UPDATED_FLAG, ResourceConfiguration::FONT_RATIO_UPDATED_FLAG),
+        false);
     resConfiguration.SetDeviceType(DeviceType::UNKNOWN);
     resConfiguration.SetOrientation(DeviceOrientation::ORIENTATION_UNDEFINED);
     resConfiguration.SetDensity(CONFIGURATION_OF_DENSITY);

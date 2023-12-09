@@ -14,8 +14,6 @@
 import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
 ace_unittest("indexer_test_ng") {
-  render = true
-  flutter_skia = true
   type = "new"
   sources = [ "indexer_test_ng.cpp" ]
 }

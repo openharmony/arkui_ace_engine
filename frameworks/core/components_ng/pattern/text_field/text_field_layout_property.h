@@ -74,6 +74,8 @@ public:
         ResetIconSrc();
         ResetIconColor();
         ResetSelectAllValue();
+        ResetShowHighlightBorder();
+        ResetSetCounter();
     }
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
@@ -83,6 +85,7 @@ public:
         json->Put("errorText", propErrorText_.value_or("").c_str());
         json->Put("showErrorText", propShowErrorText_.value_or(false));
         json->Put("showCounter", propShowCounter_.value_or(false));
+        json->Put("highlightBorder", propShowHighlightBorder_.value_or(true));
         json->Put("showUnderline", propShowUnderline_.value_or(false));
         auto jsonCancelButton = JsonUtil::Create(true);
         jsonCancelButton->Put("style", static_cast<int32_t>(propCleanNodeStyle_.value_or(CleanNodeStyle::INPUT)));
@@ -140,7 +143,7 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ShowUnderline, bool, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(DisplayMode, DisplayMode, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(MaxViewLines, uint32_t, PROPERTY_UPDATE_MEASURE);
-    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(IsEnabled, bool, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(IsDisabled, bool, PROPERTY_UPDATE_MEASURE);
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(WidthAuto, bool, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(TypeChanged, bool, PROPERTY_UPDATE_MEASURE);
@@ -164,6 +167,7 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(IconSrc, std::string, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(IconColor, Color, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(SetCounter, int32_t, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ShowHighlightBorder, bool, PROPERTY_UPDATE_MEASURE);
 
 protected:
     void Clone(RefPtr<LayoutProperty> property) const override
@@ -192,7 +196,7 @@ protected:
         value->propTextAlignChanged_ = CloneTextAlignChanged();
         value->propDisplayMode_ = CloneDisplayMode();
         value->propMaxViewLines_ = CloneMaxViewLines();
-        value->propIsEnabled_ = CloneIsEnabled();
+        value->propIsDisabled_ = CloneIsDisabled();
         value->propSelectionMenuHidden_ = CloneSelectionMenuHidden();
         value->propPasswordRules_ = ClonePasswordRules();
         value->propEnableAutoFill_ = CloneEnableAutoFill();
@@ -201,6 +205,7 @@ protected:
         value->propIconColor_ = CloneIconColor();
         value->propSelectAllValue_ = CloneSelectAllValue();
         value->propSetCounter_ = CloneSetCounter();
+        value->propShowHighlightBorder_ = CloneShowHighlightBorder();
     }
 
     ACE_DISALLOW_COPY_AND_MOVE(TextFieldLayoutProperty);

@@ -19,37 +19,25 @@
 
 #include "gtest/gtest.h"
 
-#define private public
-#define protected public
-#include "base/geometry/dimension.h"
-#include "base/memory/ace_type.h"
-#include "base/memory/referenced.h"
-#include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/animator/animator_model_ng.h"
 
 using namespace testing;
 using namespace testing::ext;
-using namespace OHOS::Ace::Framework;
+
+namespace OHOS::Ace::Framework {
+void AnimatorModelNG::Create(const std::string& animatorId) {}
+
+RefPtr<AnimatorInfo> AnimatorModelNG::GetAnimatorInfo(const std::string& animatorId)
+{
+    auto animatorInfo = AceType::MakeRefPtr<AnimatorInfo>();
+    auto animator = AceType::MakeRefPtr<Animator>();
+    animatorInfo->SetAnimator(animator);
+    return animatorInfo;
+}
+} // namespace OHOS::Ace::Framework
 
 namespace OHOS::Ace::NG {
-namespace {
-} // namespace
-
-class AnimatorTestNg : public testing::Test {
-public:
-    static void SetUpTestSuite();
-    static void TearDownTestSuite();
-    void SetUp() override;
-    void TearDown() override;
-};
-
-void AnimatorTestNg::SetUpTestSuite() {}
-
-void AnimatorTestNg::TearDownTestSuite() {}
-
-void AnimatorTestNg::SetUp() {}
-
-void AnimatorTestNg::TearDown() {}
+class AnimatorTestNg : public testing::Test {};
 
 /**
  * @tc.name: Test001
@@ -58,21 +46,21 @@ void AnimatorTestNg::TearDown() {}
  */
 HWTEST_F(AnimatorTestNg, Test001, TestSize.Level1)
 {
-    AnimatorModelNG aimatorModel;
-    aimatorModel.AddEventListener(nullptr, EventOperation::START, "-1");
-    aimatorModel.AddEventListener(nullptr, EventOperation::PAUSE, "-1");
-    aimatorModel.AddEventListener(nullptr, EventOperation::REPEAT, "-1");
-    aimatorModel.AddEventListener(nullptr, EventOperation::CANCEL, "-1");
-    aimatorModel.AddEventListener(nullptr, EventOperation::FINISH, "-1");
-    aimatorModel.AddEventListener(nullptr, EventOperation::NONE, "-1");
+    Framework::AnimatorModelNG aimatorModel;
+    aimatorModel.AddEventListener(nullptr, Framework::EventOperation::START, "-1");
+    aimatorModel.AddEventListener(nullptr, Framework::EventOperation::PAUSE, "-1");
+    aimatorModel.AddEventListener(nullptr, Framework::EventOperation::REPEAT, "-1");
+    aimatorModel.AddEventListener(nullptr, Framework::EventOperation::CANCEL, "-1");
+    aimatorModel.AddEventListener(nullptr, Framework::EventOperation::FINISH, "-1");
+    aimatorModel.AddEventListener(nullptr, Framework::EventOperation::NONE, "-1");
 
     auto event = []() {};
-    aimatorModel.AddEventListener(event, EventOperation::START, "-1");
-    aimatorModel.AddEventListener(event, EventOperation::PAUSE, "-1");
-    aimatorModel.AddEventListener(event, EventOperation::REPEAT, "-1");
-    aimatorModel.AddEventListener(event, EventOperation::CANCEL, "-1");
-    aimatorModel.AddEventListener(event, EventOperation::FINISH, "-1");
-    aimatorModel.AddEventListener(event, EventOperation::NONE, "-1");
+    aimatorModel.AddEventListener(event, Framework::EventOperation::START, "-1");
+    aimatorModel.AddEventListener(event, Framework::EventOperation::PAUSE, "-1");
+    aimatorModel.AddEventListener(event, Framework::EventOperation::REPEAT, "-1");
+    aimatorModel.AddEventListener(event, Framework::EventOperation::CANCEL, "-1");
+    aimatorModel.AddEventListener(event, Framework::EventOperation::FINISH, "-1");
+    aimatorModel.AddEventListener(event, Framework::EventOperation::NONE, "-1");
 
     EXPECT_TRUE(true);
 }

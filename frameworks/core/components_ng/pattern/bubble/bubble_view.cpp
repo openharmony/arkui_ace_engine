@@ -210,7 +210,7 @@ RefPtr<FrameNode> BubbleView::CreateBubbleNode(
     auto renderContext = child->GetRenderContext();
     if (renderContext) {
         BlurStyleOption styleOption;
-        styleOption.blurStyle = BlurStyle::THICK;
+        styleOption.blurStyle = BlurStyle::COMPONENT_ULTRA_THICK;
         renderContext->UpdateBackBlurStyle(styleOption);
         auto backgroundColor = popupPaintProp->GetBackgroundColor().value_or(GetPopupTheme()->GetBackgroundColor());
         renderContext->UpdateBackgroundColor(backgroundColor);
@@ -262,7 +262,7 @@ RefPtr<FrameNode> BubbleView::CreateCustomBubbleNode(
     customNode->MountToParent(columnNode);
     auto maxWidth = GetMaxWith();
     BlurStyleOption styleOption;
-    styleOption.blurStyle = BlurStyle::THICK;
+    styleOption.blurStyle = BlurStyle::COMPONENT_ULTRA_THICK;
     auto columnRenderContext = columnNode->GetRenderContext();
     auto columnLayoutProperty = columnNode->GetLayoutProperty();
     CHECK_NULL_RETURN(columnLayoutProperty, nullptr);
@@ -372,7 +372,7 @@ void BubbleView::UpdateCommonParam(int32_t popupId, const RefPtr<PopupParam>& pa
     auto renderContext = childNode->GetRenderContext();
     if (renderContext) {
         BlurStyleOption styleOption;
-        styleOption.blurStyle = BlurStyle::THICK;
+        styleOption.blurStyle = BlurStyle::COMPONENT_ULTRA_THICK;
         renderContext->UpdateBackBlurStyle(styleOption);
         auto backgroundColor = popupPaintProp->GetBackgroundColor().value_or(GetPopupTheme()->GetBackgroundColor());
         renderContext->UpdateBackgroundColor(backgroundColor);

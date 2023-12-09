@@ -25,6 +25,7 @@ template("declarative_frontend") {
     subsystem_name = ace_engine_subsystem
     part_name = ace_engine_part
     defines += invoker.defines
+    defines += [ "USE_ARK_ENGINE" ]
     configs = [ "$ace_root:ace_config" ]
 
     if (platform == "ohos_ng" || is_arkui_x) {
@@ -154,6 +155,7 @@ template("declarative_js_engine") {
       "engine/functions/js_key_function.cpp",
       "engine/functions/js_mouse_function.cpp",
       "engine/functions/js_on_area_change_function.cpp",
+      "engine/functions/js_on_child_touch_test_function.cpp",
       "engine/functions/js_page_transition_function.cpp",
       "engine/functions/js_pan_function.cpp",
       "engine/functions/js_swiper_function.cpp",
@@ -622,6 +624,7 @@ template("declarative_js_engine_ng") {
       "engine/functions/js_key_function.cpp",
       "engine/functions/js_mouse_function.cpp",
       "engine/functions/js_on_area_change_function.cpp",
+      "engine/functions/js_on_child_touch_test_function.cpp",
       "engine/functions/js_page_transition_function.cpp",
       "engine/functions/js_pan_function.cpp",
       "engine/functions/js_swiper_function.cpp",

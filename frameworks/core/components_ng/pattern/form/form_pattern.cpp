@@ -962,13 +962,17 @@ void FormPattern::OnActionEvent(const std::string& action)
         auto host = GetHost();
         CHECK_NULL_VOID(host);
         auto uiTaskExecutor =
-        SingleTaskExecutor::Make(host->GetContext()->GetTaskExecutor(), TaskExecutor::TaskType::UI);
-        uiTaskExecutor.PostTask([weak = WeakClaim(this), action] {
-            auto pattern = weak.Upgrade();
-            CHECK_NULL_VOID(pattern);
-            auto eventAction = JsonUtil::ParseJsonString(action);
-            pattern->FireOnRouterEvent(eventAction);
-        });
+            SingleTaskExecutor::Make(host->GetContext()->GetTaskExecutor(), TaskExecutor::TaskType::UI);
+        if (uiTaskExecutor.IsRunOnCurrentThread()) {
+            FireOnRouterEvent(eventAction);
+        } else {
+            uiTaskExecutor.PostTask([weak = WeakClaim(this), action] {
+                auto pattern = weak.Upgrade();
+                CHECK_NULL_VOID(pattern);
+                auto eventAction = JsonUtil::ParseJsonString(action);
+                pattern->FireOnRouterEvent(eventAction);
+            });
+        }
     }
 
     formManagerBridge_->OnActionEvent(action);

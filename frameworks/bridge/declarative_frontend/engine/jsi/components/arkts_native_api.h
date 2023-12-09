@@ -65,6 +65,17 @@ struct SearchButtonOptionsStruct {
     int32_t fontColor;
 };
 
+struct Int32AndInt32 {
+    int32_t number1;
+    int32_t number2;
+};
+
+struct ListLanesStruct {
+    int32_t number;
+    int32_t minLength;
+    int32_t maxlength;
+};
+
 struct ArkUISizeType {
     double value;
     int8_t unit;
@@ -1024,16 +1035,16 @@ struct ArkUIMenuItemModifierAPI {
     void (*ResetLabelFontColor)(NodeHandle node);
     void (*SetContentFontColor)(NodeHandle node, const uint32_t colorVal);
     void (*ResetContentFontColor)(NodeHandle node);
-    void (*SetLabelFont)(NodeHandle node, const char* fontInfo, int32_t style);
+    void (*SetLabelFont)(NodeHandle node, const char* fontInfo, int32_t unit);
     void (*ResetLabelFont)(NodeHandle node);
-    void (*SetContentFont)(NodeHandle node, const char* fontInfo, int32_t style);
+    void (*SetContentFont)(NodeHandle node, const char* fontInfo, int32_t unit);
     void (*ResetContentFont)(NodeHandle node);
 };
 
 struct ArkUIMenuModifierAPI {
     void (*SetMenuFontColor)(NodeHandle node, uint32_t colorVal);
     void (*ResetMenuFontColor)(NodeHandle node);
-    void (*SetFont)(NodeHandle node, const char* fontInfo, int32_t style);
+    void (*SetFont)(NodeHandle node, const char* fontInfo, int32_t unit);
     void (*ResetFont)(NodeHandle node);
     void (*SetRadius)(NodeHandle node, const double* values, const int* units, int32_t length);
     void (*ResetRadius)(NodeHandle node);
@@ -1090,6 +1101,45 @@ struct ArkUIAlphabetIndexerModifierAPI {
     void (*ResetItemSize)(NodeHandle node);
     void (*SetPopupPosition)(NodeHandle node, double xValue, int xUnit, double yValue, int yUnit);
     void (*ResetPopupPosition)(NodeHandle node);
+};
+
+struct ArkUIListModifierAPI {
+    void (*SetListLanes)(NodeHandle node, int32_t lanesNum, OHOS::Ace::Dimension minLength,
+        OHOS::Ace::Dimension maxLength, OHOS::Ace::Dimension gutter);
+    void (*ResetListLanes)(NodeHandle node);
+    void (*SetEditMode)(NodeHandle node, bool editMode);
+    void (*ResetEditMode)(NodeHandle node);
+    void (*SetMultiSelectable)(NodeHandle node, bool selectable);
+    void (*ResetMultiSelectable)(NodeHandle node);
+    void (*SetChainAnimation)(NodeHandle node, bool chainAnimation);
+    void (*ResetChainAnimation)(NodeHandle node);
+    void (*SetCachedCount)(NodeHandle node, int32_t cachedCount);
+    void (*ResetCachedCount)(NodeHandle node);
+    void (*SetEnableScrollInteraction)(NodeHandle node, bool enableScrollInteraction);
+    void (*ResetEnableScrollInteraction)(NodeHandle node);
+    void (*SetSticky)(NodeHandle node, int32_t stickyStyle);
+    void (*ResetSticky)(NodeHandle node);
+    void (*SetListEdgeEffect)(NodeHandle node, int32_t edgeEffect, bool alwaysEnabled);
+    void (*ResetListEdgeEffect)(NodeHandle node);
+    void (*SetListDirection)(NodeHandle node, int32_t axis);
+    void (*ResetListDirection)(NodeHandle node);
+    void (*SetListFriction)(NodeHandle node, double friction);
+    void (*ResetListFriction)(NodeHandle node);
+    void (*SetListNestedScroll)(NodeHandle node, int32_t forward, int32_t backward);
+    void (*ResetListNestedScroll)(NodeHandle node);
+    void (*SetListScrollBar)(NodeHandle node, int32_t barState);
+    void (*ResetListScrollBar)(NodeHandle node);
+    void (*SetAlignListItem)(NodeHandle node, int32_t listItemAlign);
+    void (*ResetAlignListItem)(NodeHandle node);
+    void (*SetScrollSnapAlign)(NodeHandle node, int32_t scrollSnapAlign);
+    void (*ResetScrollSnapAlign)(NodeHandle node);
+    void (*ListSetDivider)(NodeHandle node, double strokeWidth, const uint32_t color, double startMargin,
+        double endMargin, int32_t strokeWidth_size, int32_t startMargin_size, int32_t endMargin_size);
+    void (*ListResetDivider)(NodeHandle node);
+    void (*SetChainAnimationOptions)(NodeHandle node, double minSpace, double maxSpace, 
+        double conductivity, double intensity, int32_t edgeEffect, double stiffness, double damping, 
+        int32_t minSpace_size, int32_t maxSpace_size);
+    void (*ResetChainAnimationOptions)(NodeHandle node);
 };
 
 #ifdef FORM_SUPPORTED
@@ -1204,6 +1254,7 @@ struct ArkUINodeAPI {
     ArkUICommonShapeModifierAPI(*GetCommonShapeModifier)();
     ArkUIShapeModifierAPI(*GetShapeModifier)();
     ArkUIRectModifierAPI (*GetRectModifier)();
+    ArkUIListModifierAPI (*GetListModifier)();
 
 #ifdef FORM_SUPPORTED
     ArkUIFormComponentModifierAPI (*GetFormComponentModifier)();

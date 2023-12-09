@@ -1232,6 +1232,13 @@ var TransitionEdge;
   TransitionEdge['END'] = 3;
 })(TransitionEdge || (TransitionEdge = {}));
 
+var TouchTestStrategy;
+(function (TouchTestStrategy) {
+  TouchTestStrategy['DEFAULT'] = 0;
+  TouchTestStrategy['FORWARD_COMPETITION'] = 1;
+  TouchTestStrategy['FORWARD'] = 2;
+})(TouchTestStrategy || (TouchTestStrategy = {}));
+
 var ModalTransition;
 (function (ModalTransition) {
   ModalTransition[ModalTransition["Default"] = 0] = "Default";
@@ -2126,3 +2133,8 @@ var ControlSize;
   ControlSize[ControlSize["SMALL"] = 0] = "SMALL";
   ControlSize[ControlSize["NORMAL"] = 1] = "NORMAL";
 })(ControlSize || (ControlSize = {}));
+var ImageAnalyzerType;
+(function (ImageAnalyzerType) {
+  ImageAnalyzerType[ImageAnalyzerType["SUBJECT"] = 0] = "SUBJECT";
+  ImageAnalyzerType[ImageAnalyzerType["TEXT"] = 1] = "TEXT";
+})(ImageAnalyzerType || (ImageAnalyzerType = {}));

@@ -14,6 +14,7 @@
  */
 
 #include <array>
+#include <cstddef>
 #include <memory>
 #include <optional>
 #include <string>
@@ -31,6 +32,7 @@
 #include "test/mock/core/common/mock_data_detector_mgr.h"
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/core/render/mock_paragraph.h"
 #include "test/mock/core/render/mock_render_context.h"
 #include "test/mock/core/rosen/mock_canvas.h"
 #include "test/unittest/core/pattern/test_ng.h"
@@ -111,6 +113,14 @@ struct TestItem {
     {}
     TestItem() = default;
 };
+struct ExpectParagraphParams {
+    float height = 50.f;
+    float longestLine = 460.f;
+    float maxWidth = 460.f;
+    size_t lineCount = 1;
+    bool firstCalc = true;
+    bool secondCalc = true;
+};
 constexpr float CONTEXT_WIDTH_VALUE = 300.0f;
 constexpr float CONTEXT_HEIGHT_VALUE = 150.0f;
 } // namespace
@@ -123,6 +133,7 @@ protected:
 
     void CreateTextField(const std::string& text = "", const std::string& placeHolder = "",
         const std::function<void(TextFieldModelNG&)>& callback = nullptr);
+    static void ExpectCallParagraphMethods(ExpectParagraphParams params);
     void GetFocus();
 
     RefPtr<FrameNode> frameNode_;
@@ -135,6 +146,7 @@ protected:
 void TextInputBase::SetUpTestSuite()
 {
     TestNG::SetUpTestSuite();
+    ExpectCallParagraphMethods(ExpectParagraphParams());
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     auto textFieldTheme = AceType::MakeRefPtr<TextFieldTheme>();
@@ -158,6 +170,7 @@ void TextInputBase::SetUpTestSuite()
 void TextInputBase::TearDownTestSuite()
 {
     TestNG::TearDownTestSuite();
+    MockParagraph::TearDown();
 }
 
 void TextInputBase::TearDown()
@@ -167,6 +180,22 @@ void TextInputBase::TearDown()
     eventHub_ = nullptr;
     layoutProperty_ = nullptr;
     accessibilityProperty_ = nullptr;
+}
+
+void TextInputBase::ExpectCallParagraphMethods(ExpectParagraphParams params)
+{
+    auto paragraph = MockParagraph::GetOrCreateMockParagraph();
+    EXPECT_CALL(*paragraph, PushStyle(_)).Times(AnyNumber());
+    EXPECT_CALL(*paragraph, AddText(_)).Times(AnyNumber());
+    EXPECT_CALL(*paragraph, PopStyle()).Times(AnyNumber());
+    EXPECT_CALL(*paragraph, Build()).Times(AnyNumber());
+    EXPECT_CALL(*paragraph, Layout(_)).Times(AnyNumber());
+    EXPECT_CALL(*paragraph, GetTextWidth()).WillRepeatedly(Return(params.maxWidth));
+    EXPECT_CALL(*paragraph, GetAlphabeticBaseline()).WillRepeatedly(Return(0.f));
+    EXPECT_CALL(*paragraph, GetHeight()).WillRepeatedly(Return(params.height));
+    EXPECT_CALL(*paragraph, GetLongestLine()).WillRepeatedly(Return(params.longestLine));
+    EXPECT_CALL(*paragraph, GetMaxWidth()).WillRepeatedly(Return(params.maxWidth));
+    EXPECT_CALL(*paragraph, GetLineCount()).WillRepeatedly(Return(params.lineCount));
 }
 
 void TextInputBase::CreateTextField(
@@ -405,7 +434,7 @@ HWTEST_F(TextInputCursorTest, CaretPosition005, TestSize.Level1)
     for (const auto& testItem : testItems) {
         CreateTextField(
             text, "", [testItem](TextFieldModelNG& model) { model.SetInputFilter(testItem.item, nullptr); });
-        auto errorMessage = "InputType is " + testItem.error + ", text is " + pattern_->GetTextValue();
+        auto errorMessage = "InputType is " + testItem.item + ", text is " + pattern_->GetTextValue();
         EXPECT_EQ(pattern_->GetCaretIndex(), testItem.expected) << errorMessage;
         TearDown();
     }
@@ -2245,6 +2274,7 @@ HWTEST_F(TextFieldUXTest, NeedSoftKeyboard001, TestSize.Level1)
     ASSERT_NE(pattern_, nullptr);
     EXPECT_TRUE(pattern_->NeedSoftKeyboard());
 }
+
 /*
  * @tc.name: AdjustWordCursorAndSelect01
  * @tc.desc: Test .adjust word cursor and select(true)

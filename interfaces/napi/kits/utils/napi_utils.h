@@ -48,6 +48,8 @@ void NapiThrow(napi_env env, const std::string& message, int32_t errCode);
 
 napi_value ParseCurve(napi_env env, napi_value value, std::string& curveTypeString, std::vector<float>& curveValue);
 
+void ParseCurveInfo(const std::string& curveString, std::string& curveTypeString, std::vector<float>& curveValue);
+
 bool ParseColor(napi_env env, napi_value value, Color& info);
 
 bool ParseResourceParam(napi_env env, napi_value value, ResourceInfo& info);

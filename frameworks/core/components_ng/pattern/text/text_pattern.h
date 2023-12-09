@@ -369,6 +369,9 @@ public:
             case SelectOverlayMenuId::SELECT_ALL:
                 HandleOnSelectAll();
                 return;
+            case SelectOverlayMenuId::CAMERA_INPUT:
+                HandleOnCameraInput();
+                return;
             default:
                 return;
         }
@@ -459,6 +462,7 @@ protected:
     void ResetSelection();
     void RecoverSelection();
     virtual void HandleOnSelectAll();
+    virtual void HandleOnCameraInput() {};
     void InitSelection(const Offset& pos);
     void HandleLongPress(GestureEvent& info);
     void HandleMouseEventOfAISpan(const MouseInfo& info, PointF textOffset, bool& isClickOnAISpan);

@@ -1325,6 +1325,11 @@ void TextPattern::OnModifyDone()
         InitMouseEvent();
         InitTouchEvent();
         SetAccessibilityAction();
+    } else {
+        if (host->IsDraggable() || gestureEventHub->GetTextDraggable()) {
+            host->SetDraggable(false);
+            gestureEventHub->SetTextDraggable(false);
+        }
     }
     if (onClick_ || copyOption_ != CopyOptions::None) {
         InitClickEvent(gestureEventHub);
@@ -1609,7 +1614,10 @@ void TextPattern::PreCreateLayoutWrapper()
     auto paintProperty = GetPaintProperty<PaintProperty>();
     CHECK_NULL_VOID(paintProperty);
     auto flag = paintProperty->GetPropertyChangeFlag();
-    if (!CheckNeedMeasure(flag)) {
+    auto textLayoutProperty = GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(textLayoutProperty);
+    auto layoutFlag = textLayoutProperty->GetPropertyChangeFlag();
+    if (!CheckNeedMeasure(flag) && !CheckNeedMeasure(layoutFlag)) {
         return;
     }
 
@@ -1639,7 +1647,7 @@ void TextPattern::PreCreateLayoutWrapper()
 
     bool isSpanHasClick = false;
     CollectSpanNodes(nodes, isSpanHasClick);
-
+    
     if (textCache != textForDisplay_) {
         host->OnAccessibilityEvent(AccessibilityEventType::TEXT_CHANGE, textCache, textForDisplay_);
         if (copyOption_ == CopyOptions::None || !textDetectEnable_) {

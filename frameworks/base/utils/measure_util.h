@@ -32,11 +32,13 @@ struct MeasureContext {
     std::optional<Dimension> lineHeight = std::nullopt;
     std::optional<Dimension> baselineOffset = std::nullopt;
     std::optional<Dimension> letterSpacing = std::nullopt;
+    std::optional<Dimension> textIndent = std::nullopt;
     int32_t maxlines = 0;
     TextAlign textAlign = TextAlign::START;
     FontStyle fontStyle = FontStyle::NORMAL;
     TextOverflow textOverlayFlow = TextOverflow::CLIP;
     TextCase textCase = TextCase::NORMAL;
+    WordBreak wordBreak = WordBreak::BREAK_WORD;
 };
 
 class MeasureUtil {

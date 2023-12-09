@@ -26,8 +26,10 @@ char LogWrapper::GetSeparatorCharacter()
 
 void LogWrapper::PrintLog(LogDomain domain, LogLevel level, AceLogTag tag, const char* fmt, va_list args) {}
 
+#ifdef ACE_INSTANCE_LOG
 int32_t LogWrapper::GetId()
 {
     return 0;
 }
+#endif
 } // namespace OHOS::Ace

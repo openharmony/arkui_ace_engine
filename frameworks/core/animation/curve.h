@@ -16,12 +16,11 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_ANIMATION_CURVE_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_ANIMATION_CURVE_H
 
+#include <functional>
+
 #include "base/memory/ace_type.h"
 #include "base/utils/macros.h"
 #include "base/utils/utils.h"
-#ifdef LINUX_PLATFORM
-#include <functional>
-#endif
 
 namespace OHOS::Ace {
 class NativeCurveHelper;

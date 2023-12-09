@@ -28,10 +28,6 @@ bool TouchEventActuator::DispatchEvent(const TouchEvent& point)
 
 bool TouchEventActuator::HandleEvent(const TouchEvent& point)
 {
-    auto attachedNode = GetAttachedNode();
-    if (attachedNode.Invalid()) {
-        return true;
-    }
     // if current node is forbidden by monopolize, upper nodes should not response either
     if (!ShouldResponse()) {
         return false;

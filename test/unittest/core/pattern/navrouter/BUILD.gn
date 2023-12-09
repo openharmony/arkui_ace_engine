@@ -14,11 +14,6 @@
 import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
 ace_unittest("navrouter_test_ng") {
-  render = true
-  flutter_skia = true
   type = "new"
-  sources = [
-    "$ace_root/test/mock/base/mock_mouse_style.cpp",
-    "navrouter_test_ng.cpp",
-  ]
+  sources = [ "navrouter_test_ng.cpp" ]
 }

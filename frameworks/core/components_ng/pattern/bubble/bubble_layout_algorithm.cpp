@@ -238,6 +238,9 @@ void BubbleLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         }
         SubwindowManager::GetInstance()->SetHotAreas(rects, frameNode->GetId(), bubblePattern->GetContainerId());
     }
+    targetOffsetForPaint_ = targetOffset_;
+    childOffsetForPaint_ = childOffset_;
+    arrowPositionForPaint_ = arrowPosition_;
     UpdateClipOffset(frameNode);
 }
 bool BubbleLayoutAlgorithm::GetIfNeedArrow(const RefPtr<BubbleLayoutProperty>& bubbleProp, const SizeF& childSize)

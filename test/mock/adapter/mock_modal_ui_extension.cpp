@@ -13,11 +13,17 @@
  * limitations under the License.
  */
 
-#include "core/components/custom_paint/render_custom_paint.h"
+#include "core/common/modal_ui_extension.h"
 
 namespace OHOS::Ace {
-Size RenderCustomPaint::MeasureTextSize(const MeasureContext& context)
+RefPtr<NG::FrameNode> ModalUIExtension::Create(
+    const AAFwk::Want& /* want */, const ModalUIExtensionCallbacks& /* callbacks */)
 {
-    return Size(70.0, 40.0);
+    return nullptr;
 }
-} // namespace OHOS::Ace::NG
+
+int32_t ModalUIExtension::GetSessionId(const RefPtr<NG::FrameNode>& /* uiExtNode */)
+{
+    return 0;
+}
+} // namespace OHOS::Ace

@@ -422,7 +422,10 @@ void FocusHub::SetParentFocusable(bool parentFocusable)
     TAG_LOGD(AceLogTag::ACE_FOCUS, "Set node: %{public}s/%{public}d parentFocusable from %{public}d to %{public}d",
         GetFrameName().c_str(), GetFrameId(), parentFocusable_, parentFocusable);
     parentFocusable_ = parentFocusable;
-    RefreshParentFocusable(IsFocusableNode());
+    auto focusableNode = IsFocusableNode();
+    if (focusableNode) {
+        RefreshParentFocusable(focusableNode);
+    }
 }
 
 bool FocusHub::IsFocusable()
@@ -1142,6 +1145,10 @@ void FocusHub::OnFocusNode()
     CHECK_NULL_VOID(pipeline);
     if (frameNode->GetFocusType() == FocusType::NODE) {
         pipeline->SetFocusNode(frameNode);
+#if defined (ENABLE_STANDARD_INPUT)
+    // If in window,focus pattern does not need softkeyboard, close it.
+    WindowSceneHelper::IsCloseKeyboard(frameNode);
+#endif
     }
 }
 

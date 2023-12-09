@@ -12,15 +12,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#ifndef FRAMEWORKS_INTERFACE_INNER_API_COMPONENTS_ARKTS_NATIVE_LIST_MODIFIER_H
+#define FRAMEWORKS_INTERFACE_INNER_API_COMPONENTS_ARKTS_NATIVE_LIST_MODIFIER_H
 
-#include "core/common/app_bar_helper.h"
+#include "bridge/declarative_frontend/engine/jsi/components/arkts_native_api.h"
 
-namespace OHOS::Ace {
-
-RefPtr<NG::FrameNode> AppBarHelper::CreateUIExtensionNode(const std::string& bundleName, const std::string& abilityName,
-    const std::map<std::string, std::string>& params, std::function<void(int32_t)>&& onRelease)
-{
-    return nullptr;
+namespace OHOS::Ace::NG {
+ArkUIListModifierAPI GetListModifier();
 }
 
-} // namespace OHOS::Ace
+#endif // FRAMEWORKS_INTERFACE_INNER_API_COMPONENTS_ARKTS_NATIVE_LIST_MODIFIER_H

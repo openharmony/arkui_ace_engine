@@ -27,6 +27,7 @@ constexpr int NUM_2 = 2;
 constexpr int NUM_3 = 3;
 constexpr int NUM_4 = 4;
 const std::string FORMAT_FONT = "%s|%s|%s|%s";
+const std::string DEFAULT_ERR_CODE = "-1";
 ArkUINativeModuleValue MenuItemBridge::SetMenuItemSelected(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
@@ -111,24 +112,19 @@ ArkUINativeModuleValue MenuItemBridge::SetLabelFont(ArkUIRuntimeCallInfo* runtim
     Local<JSValueRef> familyArg = runtimeCallInfo->GetCallArgRef(NUM_3);
     Local<JSValueRef> styleArg = runtimeCallInfo->GetCallArgRef(NUM_4);
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-
     if (sizeArg->IsUndefined() && weightArg->IsUndefined() && familyArg->IsUndefined() && styleArg->IsUndefined()) {
         GetArkUIInternalNodeAPI()->GetMenuItemModifier().ResetLabelFont(nativeNode);
         return panda::JSValueRef::Undefined(vm);
     }
-
-    CalcDimension fontSize;
-    std::string weight;
     std::string style;
     std::string family;
 
-    ArkTSUtils::ParseJsDimensionFp(vm, sizeArg, fontSize);
-    if (fontSize.Unit() == DimensionUnit::PERCENT) {
-        fontSize = CalcDimension();
-    }
+    CalcDimension fontSize = Dimension(-1.0);
+    ArkTSUtils::ParseJsDimensionFp(vm, sizeArg, fontSize, false);
 
+    std::string weight = DEFAULT_ERR_CODE;
     if (weightArg->IsNumber()) {
-        weight = std::to_string(weightArg->ToNumber(vm)->Value());
+        weight = std::to_string(weightArg->Int32Value(vm));
     } else {
         ArkTSUtils::ParseJsString(vm, weightArg, weight);
     }
@@ -138,11 +134,9 @@ ArkUINativeModuleValue MenuItemBridge::SetLabelFont(ArkUIRuntimeCallInfo* runtim
     } else {
         ArkTSUtils::ParseJsString(vm, styleArg, style);
     }
-
     if (familyArg->IsString()) {
         family = familyArg->ToString(vm)->ToString();
     }
-
     std::string fontInfo = StringUtils::FormatString(FORMAT_FONT.c_str(),
         StringUtils::DoubleToString(fontSize.Value()).c_str(), weight.c_str(), style.c_str(), family.c_str());
 
@@ -171,24 +165,19 @@ ArkUINativeModuleValue MenuItemBridge::SetContentFont(ArkUIRuntimeCallInfo* runt
     Local<JSValueRef> familyArg = runtimeCallInfo->GetCallArgRef(NUM_3);
     Local<JSValueRef> styleArg = runtimeCallInfo->GetCallArgRef(NUM_4);
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-
     if (sizeArg->IsUndefined() && weightArg->IsUndefined() && familyArg->IsUndefined() && styleArg->IsUndefined()) {
         GetArkUIInternalNodeAPI()->GetMenuItemModifier().ResetLabelFont(nativeNode);
         return panda::JSValueRef::Undefined(vm);
     }
-
-    CalcDimension fontSize;
-    std::string weight;
     std::string style;
     std::string family;
 
-    ArkTSUtils::ParseJsDimensionFp(vm, sizeArg, fontSize);
-    if (fontSize.Unit() == DimensionUnit::PERCENT) {
-        fontSize = CalcDimension();
-    }
+    CalcDimension fontSize = Dimension(-1.0);
+    ArkTSUtils::ParseJsDimensionFp(vm, sizeArg, fontSize, false);
 
+    std::string weight = DEFAULT_ERR_CODE;
     if (weightArg->IsNumber()) {
-        weight = std::to_string(weightArg->ToNumber(vm)->Value());
+        weight = std::to_string(weightArg->Int32Value(vm));
     } else {
         ArkTSUtils::ParseJsString(vm, weightArg, weight);
     }
@@ -198,14 +187,11 @@ ArkUINativeModuleValue MenuItemBridge::SetContentFont(ArkUIRuntimeCallInfo* runt
     } else {
         ArkTSUtils::ParseJsString(vm, styleArg, style);
     }
-
     if (familyArg->IsString()) {
         family = familyArg->ToString(vm)->ToString();
     }
-
     std::string fontInfo = StringUtils::FormatString(FORMAT_FONT.c_str(),
         StringUtils::DoubleToString(fontSize.Value()).c_str(), weight.c_str(), style.c_str(), family.c_str());
-
     GetArkUIInternalNodeAPI()->GetMenuItemModifier().SetContentFont(
         nativeNode, fontInfo.c_str(), static_cast<int>(fontSize.Unit()));
     return panda::JSValueRef::Undefined(vm);

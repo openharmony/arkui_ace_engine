@@ -524,15 +524,17 @@ public:
     void OnFoldStatusChange(FoldStatus foldStatus) override;
 
     // for frontend animation interface.
-    void OpenFrontendAnimation(const AnimationOption& option, const RefPtr<Curve>& curve,
-        const std::function<void()>& finishCallback);
+    void OpenFrontendAnimation(
+        const AnimationOption& option, const RefPtr<Curve>& curve, const std::function<void()>& finishCallback);
     void CloseFrontendAnimation();
 
+    bool IsDragging() const override;
+    void SetIsDragging(bool isDragging) override;
 protected:
     void StartWindowSizeChangeAnimate(int32_t width, int32_t height, WindowSizeChangeReason type,
         const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr);
-    void StartWindowMaximizeAnimation(int32_t width, int32_t height,
-        const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr);
+    void StartWindowMaximizeAnimation(
+        int32_t width, int32_t height, const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr);
 
     void FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount) override;
     void FlushPipelineWithoutAnimation() override;
@@ -544,8 +546,7 @@ protected:
 
     void OnVirtualKeyboardHeightChange(
         float keyboardHeight, const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr) override;
-    void OnVirtualKeyboardHeightChange(
-        float keyboardHeight, double positionY, double height,
+    void OnVirtualKeyboardHeightChange(float keyboardHeight, double positionY, double height,
         const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr) override;
 
 private:
@@ -606,8 +607,8 @@ private:
 
     std::tuple<float, float, uint64_t> GetAvgPoint(const std::vector<TouchEvent>& events, const bool isScreen);
 
-    TouchEvent GetResampleTouchEvent(const std::vector<TouchEvent>& history,
-        const std::vector<TouchEvent>& current, const uint64_t nanoTimeStamp);
+    TouchEvent GetResampleTouchEvent(
+        const std::vector<TouchEvent>& history, const std::vector<TouchEvent>& current, const uint64_t nanoTimeStamp);
 
     TouchEvent GetLatestPoint(const std::vector<TouchEvent>& current, const uint64_t nanoTimeStamp);
 
@@ -671,6 +672,7 @@ private:
     bool canUseLongPredictTask_ = false;
     bool isWindowSceneConsumed_ = false;
     bool isDensityChanged_ = false;
+    bool isBeforeDragHandleAxis_ = false;
     WeakPtr<FrameNode> activeNode_;
 
     RefPtr<FrameNode> focusNode_;

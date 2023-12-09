@@ -547,6 +547,13 @@ bool ArkTSUtils::ParseJsDimension(const EcmaVM *vm, const Local<JSValueRef> &jsV
         if (stringValue.back() == '%' && !isSupportPercent) {
             return false;
         }
+        errno = 0;
+        char* pEnd = nullptr;
+        std::string str = jsValue->ToString(vm)->ToString();
+        std::strtod(str.c_str(), &pEnd);
+        if (pEnd == str.c_str() || errno == ERANGE) {
+            return false;
+        }
         result = StringUtils::StringToCalcDimension(jsValue->ToString(vm)->ToString(), false, defaultUnit);
         return true;
     }

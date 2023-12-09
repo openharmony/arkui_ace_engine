@@ -40,17 +40,13 @@ void Scrollable::StartSpringMotion(
     double mainPosition, double mainVelocity, const ExtentPair& extent, const ExtentPair& initExtent)
 {}
 
-void Scrollable::UpdateScrollSnapStartOffset(double offset)
-{}
+void Scrollable::UpdateScrollSnapStartOffset(double offset) {}
 
-void Scrollable::StartScrollSnapMotion(float predictSnapOffset, float scrollSnapVelocity)
-{}
+void Scrollable::StartScrollSnapMotion(float predictSnapOffset, float scrollSnapVelocity) {}
 
-void Scrollable::UpdateScrollSnapEndWithOffset(double offset)
-{}
+void Scrollable::UpdateScrollSnapEndWithOffset(double offset) {}
 
-void Scrollable::SetAxis(Axis axis)
-{}
+void Scrollable::SetAxis(Axis axis) {}
 
 bool Scrollable::IsSpringStopped() const
 {

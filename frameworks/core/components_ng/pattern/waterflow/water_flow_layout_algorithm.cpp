@@ -156,6 +156,9 @@ void WaterFlowLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     }
 
     FillViewport(mainSize_, layoutWrapper);
+    if (layoutInfo_.targetIndex_.has_value()) {
+        MeasureForAnimation(layoutWrapper);
+    }
     if (matchChildren) {
         mainSize_ = layoutInfo_.GetMaxMainHeight() + footerMainSize_;
         idealSize.SetMainSize(mainSize_, axis_);
@@ -165,6 +168,46 @@ void WaterFlowLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     layoutInfo_.lastMainSize_ = mainSize_;
 
     layoutWrapper->SetCacheCount(layoutProperty->GetCachedCountValue(1));
+}
+
+void WaterFlowLayoutAlgorithm::MeasureForAnimation(LayoutWrapper* layoutWrapper)
+{
+    if (layoutInfo_.targetIndex_.value() > layoutInfo_.childrenCount_) {
+        layoutInfo_.targetIndex_.reset();
+        return;
+    }
+    auto layoutProperty = AceType::DynamicCast<WaterFlowLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    auto currentIndex = layoutInfo_.endIndex_;
+    auto position = GetItemPosition(currentIndex);
+    if (layoutInfo_.targetIndex_.value() == LAST_ITEM) {
+        layoutInfo_.targetIndex_ = layoutInfo_.childrenCount_ - 1;
+    }
+    while (layoutInfo_.targetIndex_.has_value() && (layoutInfo_.endIndex_ < layoutInfo_.targetIndex_.value())) {
+        auto itemWrapper = layoutWrapper->GetOrCreateChildByIndex(GetChildIndexWithFooter(currentIndex));
+        if (!itemWrapper) {
+            layoutInfo_.targetIndex_.reset();
+            break;
+        }
+        itemWrapper->Measure(CreateChildConstraint(position.crossIndex, layoutProperty, itemWrapper));
+        auto itemSize = itemWrapper->GetGeometryNode()->GetMarginFrameSize();
+        auto itemHeight = GetMainAxisSize(itemSize, axis_);
+        auto item = layoutInfo_.waterFlowItems_[position.crossIndex].find(currentIndex);
+        if (item == layoutInfo_.waterFlowItems_[position.crossIndex].end()) {
+            layoutInfo_.waterFlowItems_[position.crossIndex][currentIndex] =
+                std::make_pair(position.startMainPos, itemHeight);
+        } else {
+            if (item->second.second != itemHeight) {
+                item->second.second = itemHeight;
+                layoutInfo_.ClearCacheAfterIndex(currentIndex);
+                TAG_LOGD(AceLogTag::ACE_WATERFLOW, "item size changed");
+            }
+        }
+        if (layoutInfo_.targetIndex_.value() == currentIndex) {
+            layoutInfo_.targetIndex_.reset();
+        }
+        currentIndex++;
+        position = GetItemPosition(currentIndex);
+    }
 }
 
 void WaterFlowLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)

@@ -13,10 +13,9 @@
  * limitations under the License.
  */
 
-#include "base/log/ace_checker.h"
-#include "base/log/ace_performance_check.h"
+#include <string>
+
 #include "base/utils/system_properties.h"
-#include "bridge/common/utils/engine_helper.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -47,55 +46,9 @@ int32_t SystemProperties::deviceWidth_ = 720;
 int32_t SystemProperties::deviceHeight_ = 1280;
 bool SystemProperties::downloadByNetworkEnabled_ = false;
 bool SystemProperties::traceEnabled_ = false;
-
-int32_t AceChecker::pageNodes_ = 0;
-int32_t AceChecker::pageDepth_ = 0;
-int32_t AceChecker::nodeChildren_ = 0;
-int32_t AceChecker::functionTimeout_ = 0;
-int32_t AceChecker::vsyncTimeout_ = 0;
-int32_t AceChecker::nodeTimeout_ = 0;
-int32_t AceChecker::foreachItems_ = 0;
-int32_t AceChecker::flexLayouts_ = 0;
-
-// =================================================================================
-// resolve compile error temporarily and wait
-// for unittest cases to be integrated and modified
-ScopedDelegate::ScopedDelegate(const RefPtr<Framework::FrontendDelegate>& delegate, int32_t id)
-    : delegate_(delegate), scope_(new ContainerScope(id))
-{}
-
-ScopedDelegate::~ScopedDelegate()
-{
-    delete scope_;
-    scope_ = nullptr;
-}
-
-std::pair<int32_t, int32_t> EngineHelper::GetPositionOnJsCode()
-{
-    return { 0, 0 };
-}
-
-ScopedDelegate EngineHelper::GetCurrentDelegate()
-{
-    return { nullptr, 0 };
-}
-
-void AceScopedPerformanceCheck::RecordPerformanceCheckData(const PerformanceCheckNodeMap& nodeMap, int64_t vsyncTimeout)
-{}
-
-AceScopedPerformanceCheck::AceScopedPerformanceCheck(const std::string& /* name */) {}
-
-AceScopedPerformanceCheck::~AceScopedPerformanceCheck() {}
-
-bool AceChecker::IsPerformanceCheckEnabled()
-{
-    return false;
-}
-
-void AceChecker::NotifyCaution(const std::string& tag) {}
-
-void AceChecker::InitPerformanceParameters() {}
-// =================================================================================
+bool SystemProperties::changeTitleStyleEnabled_ = false;
+int32_t SystemProperties::devicePhysicalWidth_ = 0;
+int32_t SystemProperties::devicePhysicalHeight_ = 0;
 
 float SystemProperties::GetFontWeightScale()
 {
@@ -142,5 +95,10 @@ bool SystemProperties::Is24HourClock()
 bool SystemProperties::GetImageFrameworkEnabled()
 {
     return true;
+}
+
+std::string SystemProperties::GetCustomTitleFilePath()
+{
+    return {};
 }
 } // namespace OHOS::Ace

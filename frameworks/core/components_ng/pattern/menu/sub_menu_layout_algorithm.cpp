@@ -118,7 +118,7 @@ OffsetF SubMenuLayoutAlgorithm::GetSubMenuPosition(const RefPtr<FrameNode>& pare
     CHECK_NULL_RETURN(parentMenu, position);
     auto scroll = AceType::DynamicCast<FrameNode>(parentMenu->GetParent());
     CHECK_NULL_RETURN(scroll, position);
-    while (scroll->GetTag() != V2::SCROLL_ETS_TAG) {
+    while (scroll && (scroll->GetTag() != V2::SCROLL_ETS_TAG)) {
         scroll = AceType::DynamicCast<FrameNode>(scroll->GetParent());
     }
     CHECK_NULL_RETURN(scroll, position);
@@ -216,8 +216,10 @@ void SubMenuLayoutAlgorithm::ModifySubMenuWrapper(LayoutWrapper* layoutWrapper)
     auto menuPattern = menuNode->GetPattern<MenuPattern>();
     CHECK_NULL_VOID(menuPattern);
     auto mainMenuPattern = menuPattern->GetMainMenuPattern();
-    CHECK_NULL_VOID(mainMenuPattern);
-    auto isContextMenu = mainMenuPattern->IsContextMenu();
+    auto isContextMenu = false;
+    if (mainMenuPattern) {
+        isContextMenu = mainMenuPattern->IsContextMenu();
+    }
     if (isContextMenu && !expandDisplay) {
         wrapperSize_ = SizeF(windowGlobalRect.Width(), windowGlobalRect.Height() - bottom);
     } else {

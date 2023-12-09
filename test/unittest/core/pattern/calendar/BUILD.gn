@@ -14,7 +14,6 @@
 import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
 ace_unittest("calendar_test_ng") {
-  flutter_skia = true
   type = "new"
   sources = [ "calendar_test_ng.cpp" ]
 }

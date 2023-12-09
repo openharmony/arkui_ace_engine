@@ -900,4 +900,28 @@ HWTEST_F(GridLayoutTestNg, ChangeItemNumber001, TestSize.Level1)
     EXPECT_TRUE(IsEqual(GetChildOffset(frameNode_, 6), OffsetF(ITEM_WIDTH * 2, ITEM_HEIGHT)));
     EXPECT_TRUE(IsEqual(GetChildOffset(frameNode_, 8), OffsetF(0, ITEM_HEIGHT * 2)));
 }
+
+/**
+ * @tc.name: UpdateGridMatrix001
+ * @tc.desc: Test UpdateGridMatrix
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridTestNg, UpdateGridMatrix001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create 100 items
+     * @tc.expected: The added item in the correct position
+     */
+    Create([](GridModelNG model) {
+        model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+        CreateRowItem(100);
+    });
+
+    /**
+     * @tc.steps: step2. Scroll To 99 item
+     * @tc.expected: Scroll to the correct position,lineHeightMap_ size is 25
+     */
+    pattern_->ScrollToIndex(99, true, ScrollAlign::END);
+    EXPECT_TRUE(IsEqual<int32_t>(pattern_->gridLayoutInfo_.lineHeightMap_.size(), 25));
+}
 } // namespace OHOS::Ace::NG
