@@ -148,11 +148,13 @@ void ContentController::FilterValue()
     auto property = textField->GetLayoutProperty<TextFieldLayoutProperty>();
 
     bool hasInputFilter = property->GetInputFilter().has_value() && !content_.empty();
-    if (hasInputFilter) {
-        textChanged |= FilterWithEvent(property->GetInputFilter().value(), result);
-    }
-    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN) || !hasInputFilter) {
+    if (!hasInputFilter) {
         FilterTextInputStyle(textChanged, result);
+    } else {
+        textChanged |= FilterWithEvent(property->GetInputFilter().value(), result);
+        if (Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+            FilterTextInputStyle(textChanged, result);
+        }
     }
     if (textChanged) {
         content_ = result;
