@@ -151,6 +151,8 @@ void WindowScene::OnBoundsChanged(const Rosen::Vector4f& bounds)
     host->GetGeometryNode()->SetFrameSize(SizeF(windowRect.width_, windowRect.height_));
 
     CHECK_NULL_VOID(session_);
+    windowRect.posX_ = std::round(bounds.x_ + session_->GetOffsetX());
+    windowRect.posY_ = std::round(bounds.y_ + session_->GetOffsetY());
     auto transactionController = Rosen::RSSyncTransactionController::GetInstance();
     if (transactionController && (session_->GetSessionRect() != windowRect)) {
         session_->UpdateRect(windowRect, Rosen::SizeChangeReason::UNDEFINED,
