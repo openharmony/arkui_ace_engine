@@ -24,6 +24,7 @@ constexpr int NUM_1 = 1;
 constexpr int NUM_2 = 2;
 constexpr int NUM_3 = 3;
 constexpr int SIZE_OF_TWO = 2;
+constexpr Dimension DEFAULT_TEXTSTYLE_FONTSIZE = 16.0_fp;
 
 ArkUINativeModuleValue CalendarPickerBridge::SetTextStyle(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
@@ -38,28 +39,22 @@ ArkUINativeModuleValue CalendarPickerBridge::SetTextStyle(ArkUIRuntimeCallInfo* 
     Local<JSValueRef> fontSizeArg = runtimeCallInfo->GetCallArgRef(NUM_2);
     Local<JSValueRef> fontWeightArg = runtimeCallInfo->GetCallArgRef(NUM_3);
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    Color textColor;
-    uint32_t color;
-    std::string fontSize;
-    std::string fontWeight;
-    if (!colorArg->IsNull() && !colorArg->IsUndefined() &&
-        !ArkTSUtils::ParseJsColorAlpha(vm, colorArg, textColor)) {
-        textColor = calendarTheme->GetEntryFontColor();
+    Color textColor = calendarTheme->GetEntryFontColor();
+    if (!colorArg->IsUndefined()) {
+        ArkTSUtils::ParseJsColorAlpha(vm, colorArg, textColor);
     }
-    color = textColor.GetValue();
-    if (!fontSizeArg->IsNull() && !fontSizeArg->IsUndefined()) {
-        if (fontSizeArg->IsNumber()) {
-            fontSize = std::to_string(fontSizeArg->Uint32Value(vm));
-        } else if (!ArkTSUtils::ParseJsString(vm, fontSizeArg, fontSize)) {
-            fontSize = "16fp";
-        }
+    CalcDimension fontSizeData(DEFAULT_TEXTSTYLE_FONTSIZE);
+    std::string fontSize = fontSizeData.ToString();
+    if (ArkTSUtils::ParseJsDimensionFp(vm, fontSizeArg, fontSizeData) && !fontSizeData.IsNegative() &&
+        fontSizeData.Unit() != DimensionUnit::PERCENT) {
+        fontSize = fontSizeData.ToString();
     }
-    if (!fontWeightArg->IsNull() && !fontWeightArg->IsUndefined() &&
-        !ArkTSUtils::ParseJsString(vm, fontWeightArg, fontWeight)) {
-        fontWeight = "regular";
+    std::string fontWeight = "regular";
+    if (fontWeightArg->IsString() || fontWeightArg->IsNumber()) {
+        fontWeight = fontWeightArg->ToString(vm)->ToString();
     }
     GetArkUIInternalNodeAPI()->GetCalendarPickerModifier().SetTextStyle(
-        nativeNode, color, fontSize.c_str(), fontWeight.c_str());
+        nativeNode, textColor.GetValue(), fontSize.c_str(), fontWeight.c_str());
     return panda::JSValueRef::Undefined(vm);
 }
 
