@@ -2220,6 +2220,26 @@ void ArkUINativeModule::RegisterDataPanelAttributes(Local<panda::ObjectRef> obje
 void ArkUINativeModule::RegisterScrollAttributes(Local<panda::ObjectRef> object, EcmaVM *vm)
 {
     auto scroll = panda::ObjectRef::New(vm);
+    scroll->Set(vm, panda::StringRef::NewFromUtf8(vm, "setNestedScroll"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), ScrollBridge::SetNestedScroll));
+    scroll->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetNestedScroll"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), ScrollBridge::ResetNestedScroll));
+    scroll->Set(vm, panda::StringRef::NewFromUtf8(vm, "setEnableScroll"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), ScrollBridge::SetEnableScroll));
+    scroll->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetEnableScroll"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), ScrollBridge::ResetEnableScroll));
+    scroll->Set(vm, panda::StringRef::NewFromUtf8(vm, "setFriction"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), ScrollBridge::SetFriction));
+    scroll->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetFriction"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), ScrollBridge::ResetFriction));
+    scroll->Set(vm, panda::StringRef::NewFromUtf8(vm, "setScrollSnap"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), ScrollBridge::SetScrollSnap));
+    scroll->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetScrollSnap"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), ScrollBridge::ResetScrollSnap));
+    scroll->Set(vm, panda::StringRef::NewFromUtf8(vm, "setScrollBar"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), ScrollBridge::SetScrollBar));
+    scroll->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetScrollBar"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), ScrollBridge::ResetScrollBar));
     scroll->Set(vm, panda::StringRef::NewFromUtf8(vm, "setScrollable"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), ScrollBridge::SetScrollable));
     scroll->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetScrollable"),
@@ -2236,7 +2256,7 @@ void ArkUINativeModule::RegisterScrollAttributes(Local<panda::ObjectRef> object,
         panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), ScrollBridge::SetEdgeEffect));
     scroll->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetEdgeEffect"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), ScrollBridge::ResetEdgeEffect));
-    scroll->Set(vm, panda::StringRef::NewFromUtf8(vm, "scroll"), scroll);
+    object->Set(vm, panda::StringRef::NewFromUtf8(vm, "scroll"), scroll);
 }
 
 void ArkUINativeModule::RegisterGridItemAttributes(Local<panda::ObjectRef> object, EcmaVM* vm)

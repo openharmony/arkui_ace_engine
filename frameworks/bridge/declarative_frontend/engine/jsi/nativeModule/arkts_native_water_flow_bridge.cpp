@@ -61,10 +61,7 @@ ArkUINativeModuleValue WaterFlowBridge::SetColumnsTemplate(ArkUIRuntimeCallInfo*
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
     std::string value = secondArg->ToString(vm)->ToString();
-    int32_t charLength = strlen(value.c_str()) + NUM_1;
-    char* val = new char[charLength];
-    std::strcpy(val, value.c_str());
-    GetArkUIInternalNodeAPI()->GetWaterFlowModifier().SetColumnsTemplate(nativeNode, val);
+    GetArkUIInternalNodeAPI()->GetWaterFlowModifier().SetColumnsTemplate(nativeNode, value.c_str());
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -86,10 +83,7 @@ ArkUINativeModuleValue WaterFlowBridge::SetRowsTemplate(ArkUIRuntimeCallInfo* ru
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
     std::string value = secondArg->ToString(vm)->ToString();
-    int32_t charLength = strlen(value.c_str()) + NUM_1;
-    char* val = new char[charLength];
-    std::strcpy(val, value.c_str());
-    GetArkUIInternalNodeAPI()->GetWaterFlowModifier().SetRowsTemplate(nativeNode, val);
+    GetArkUIInternalNodeAPI()->GetWaterFlowModifier().SetRowsTemplate(nativeNode, value.c_str());
     return panda::JSValueRef::Undefined(vm);
 }
 

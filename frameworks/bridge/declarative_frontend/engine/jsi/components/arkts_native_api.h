@@ -1148,13 +1148,13 @@ struct ArkUIMarqueeModifierAPI {
 
 struct ArkUIDatePickerModifierAPI {
     void (*SetSelectedTextStyle)(
-    NodeHandle node, const char* fontInfo, uint32_t color, int32_t style);
+        NodeHandle node, const char* fontInfo, uint32_t color, int32_t style);
     void (*ResetSelectedTextStyle)(NodeHandle node);
     void (*SetDatePickerTextStyle)(
-    NodeHandle node, const char* fontInfo, uint32_t color, int32_t style);
+        NodeHandle node, const char* fontInfo, uint32_t color, int32_t style);
     void (*ResetDatePickerTextStyle)(NodeHandle node);
     void (*SetDisappearTextStyle)(
-    NodeHandle node, const char* fontInfo, uint32_t color, int32_t style);
+        NodeHandle node, const char* fontInfo, uint32_t color, int32_t style);
     void (*ResetDisappearTextStyle)(NodeHandle node);
     void (*SetLunar)(NodeHandle node, bool isLunar);
     void (*ResetLunar)(NodeHandle node);
@@ -1274,13 +1274,24 @@ struct ArkUIGaugeModifierAPI {
 };
 
 struct ArkUIScrollModifierAPI {
-    void (*SetScrollScrollable)(NodeHandle node, uint32_t scrollDirection);
+    void (*SetScrollNestedScroll)(NodeHandle node, int32_t scrollForward, int32_t scrollBackward);
+    void (*ResetScrollNestedScroll)(NodeHandle node);
+    void (*SetScrollEnableScroll)(NodeHandle node, bool value);
+    void (*ResetScrollEnableScroll)(NodeHandle node);
+    void (*SetScrollFriction)(NodeHandle node, double value);
+    void (*ResetScrollFriction)(NodeHandle node);
+    void (*SetScrollScrollSnap)(NodeHandle node, const double* paginationValue, int32_t paginationSize,
+        const int32_t* paginationParam, int32_t paramSize);
+    void (*ResetScrollScrollSnap)(NodeHandle node);
+    void (*SetScrollScrollBar)(NodeHandle node, int32_t value);
+    void (*ResetScrollScrollBar)(NodeHandle node);
+    void (*SetScrollScrollable)(NodeHandle node, int32_t scrollDirection);
     void (*ResetScrollScrollable)(NodeHandle node);
     void (*SetScrollScrollBarColor)(NodeHandle node, uint32_t scrollBarColor);
     void (*ResetScrollScrollBarColor)(NodeHandle node);
-    void (*SetScrollScrollBarWidth)(NodeHandle node, double value, int unit);
+    void (*SetScrollScrollBarWidth)(NodeHandle node, double value, int32_t unit);
     void (*ResetScrollScrollBarWidth)(NodeHandle node);
-    void (*SetScrollEdgeEffect)(NodeHandle node, uint32_t edgeEffect, bool alwaysEnabled);
+    void (*SetScrollEdgeEffect)(NodeHandle node, int32_t edgeEffect, bool alwaysEnabled);
     void (*ResetScrollEdgeEffect)(NodeHandle node);
 };
 
