@@ -3061,7 +3061,7 @@ void TextFieldPattern::InsertValue(const std::string& insertValue)
     CHECK_NULL_VOID(pattern);
     auto textFieldLayoutProperty = host->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(textFieldLayoutProperty);
-    auto inputValue = textFieldLayoutProperty->GetSetCounterValue();
+    auto inputValue = textFieldLayoutProperty->GetSetCounterValue(INVAILD_VALUE);
     auto passwordResponse = DynamicCast<PasswordResponseArea>(pattern->GetResponseArea());
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
@@ -3213,7 +3213,7 @@ void TextFieldPattern::CleanCounterNode()
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
     auto textFieldLayoutProperty = pattern->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(textFieldLayoutProperty);
-    auto counterType = textFieldLayoutProperty->GetSetCounterValue();
+    auto counterType = textFieldLayoutProperty->GetSetCounterValue(INVAILD_VALUE);
     if (counterType == ILLEGAL_VALUE) {
         auto counterNode = DynamicCast<UINode>(counterTextNode_.Upgrade());
         CHECK_NULL_VOID(counterNode);
@@ -5210,7 +5210,7 @@ void TextFieldPattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const
     auto jsonShowCounter = JsonUtil::Create(true);
     jsonShowCounter->Put("value", layoutProperty->GetShowCounterValue(false));
     auto jsonShowCounterOptions = JsonUtil::Create(true);
-    auto counterType = layoutProperty->GetSetCounterValue();
+    auto counterType = layoutProperty->GetSetCounterValue(INVAILD_VALUE);
     auto showBorder = layoutProperty->GetShowHighlightBorderValue();
     jsonShowCounterOptions->Put("thresholdPercentage", counterType);
     jsonShowCounterOptions->Put("highlightBorder", showBorder);
