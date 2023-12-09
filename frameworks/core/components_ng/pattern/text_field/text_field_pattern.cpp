@@ -1986,6 +1986,7 @@ void TextFieldPattern::OnModifyDone()
     }
     UpdateCounterMargin();
     preInputStyle_ = inputStyle;
+    Register2DragDropManager();
 }
 
 void TextFieldPattern::OnAfterModifyDone()

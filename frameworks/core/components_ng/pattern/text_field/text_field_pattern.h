@@ -617,17 +617,18 @@ public:
 
     bool UpdateCurrentOffset(float offset, int32_t source) override
     {
+        OnScrollCallback(offset, source);
         return true;
     }
 
     bool IsAtTop() const override
     {
-        return true;
+        return contentRect_.GetY() == textRect_.GetY();
     }
 
     bool IsAtBottom() const override
     {
-        return true;
+        return contentRect_.GetY() + contentRect_.Height() == textRect_.GetY() + textRect_.Height();
     }
 
     bool IsScrollable() const override
