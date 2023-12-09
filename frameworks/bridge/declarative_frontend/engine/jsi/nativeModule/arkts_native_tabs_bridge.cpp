@@ -176,9 +176,9 @@ ArkUINativeModuleValue TabsBridge::SetDivider(ArkUIRuntimeCallInfo* runtimeCallI
         return panda::JSValueRef::Undefined(vm);
     }
 
-    CalcDimension dividerStrokeWidth(0.0, DimensionUnit::VP);
-    CalcDimension dividerStartMargin(0.0, DimensionUnit::VP);
-    CalcDimension dividerEndMargin(0.0, DimensionUnit::VP);
+    CalcDimension dividerStrokeWidth;
+    CalcDimension dividerStartMargin;
+    CalcDimension dividerEndMargin;
     uint32_t color;
     auto* frameNode = reinterpret_cast<FrameNode*>(nativeNode);
     auto context = frameNode->GetContext();
@@ -192,7 +192,7 @@ ArkUINativeModuleValue TabsBridge::SetDivider(ArkUIRuntimeCallInfo* runtimeCallI
         dividerStrokeWidth.Reset();
     }
     Color colorObj;
-    if (!ArkTSUtils::ParseJsColorAlpha(vm, colorArg, colorObj)) {
+    if (!ArkTSUtils::ParseJsColor(vm, colorArg, colorObj)) {
         color = tabTheme->GetDividerColor().GetValue();
     } else {
         color = colorObj.GetValue();
