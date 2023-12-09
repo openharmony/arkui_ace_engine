@@ -2384,28 +2384,26 @@ ArkUINativeModuleValue CommonBridge::SetBackgroundImageSize(ArkUIRuntimeCallInfo
         typeWidth = static_cast<OHOS::Ace::BackgroundImageSizeType>(sizeType);
         typeHeight = static_cast<OHOS::Ace::BackgroundImageSizeType>(sizeType);
     } else {
-        CalcDimension width(0, DimensionUnit::VP);
-        CalcDimension height(0, DimensionUnit::VP);
-        bool hasWidth = ArkTSUtils::ParseJsDimensionVp(vm, widthArg, width);
-        bool hasHeight = ArkTSUtils::ParseJsDimensionVp(vm, heightArg, height);
-        if (hasWidth || hasHeight) {
-            valueWidth = width.ConvertToPx();
-            valueHeight = height.ConvertToPx();
-            typeWidth = BackgroundImageSizeType::LENGTH;
-            typeHeight = BackgroundImageSizeType::LENGTH;
+        CalcDimension width;
+        CalcDimension height;
+        ArkTSUtils::ParseJsDimensionVp(vm, widthArg, width);
+        ArkTSUtils::ParseJsDimensionVp(vm, heightArg, height);
 
-            if (width.Unit() == DimensionUnit::PERCENT) {
-                typeWidth = BackgroundImageSizeType::PERCENT;
-                valueWidth = width.Value() * FULL_DIMENSION;
-            }
-            if (height.Unit() == DimensionUnit::PERCENT) {
-                typeHeight = BackgroundImageSizeType::PERCENT;
-                valueHeight = height.Value() * FULL_DIMENSION;
-            }
+        valueWidth = width.ConvertToPx();
+        valueHeight = height.ConvertToPx();
+        typeWidth = BackgroundImageSizeType::LENGTH;
+        typeHeight = BackgroundImageSizeType::LENGTH;
+        if (width.Unit() == DimensionUnit::PERCENT) {
+            typeWidth = BackgroundImageSizeType::PERCENT;
+            valueWidth = width.Value() * FULL_DIMENSION;
+        }
+        if (height.Unit() == DimensionUnit::PERCENT) {
+            typeHeight = BackgroundImageSizeType::PERCENT;
+            valueHeight = height.Value() * FULL_DIMENSION;
         }
     }
-    GetArkUIInternalNodeAPI()->GetCommonModifier().SetBackgroundImageSize(nativeNode, valueWidth, valueHeight,
-        static_cast<int32_t>(typeWidth), static_cast<int32_t>(typeHeight));
+    GetArkUIInternalNodeAPI()->GetCommonModifier().SetBackgroundImageSize(
+        nativeNode, valueWidth, valueHeight, static_cast<int32_t>(typeWidth), static_cast<int32_t>(typeHeight));
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -2433,13 +2431,14 @@ ArkUINativeModuleValue CommonBridge::SetBackgroundImage(ArkUIRuntimeCallInfo *ru
         GetArkUIInternalNodeAPI()->GetCommonModifier().ResetBackgroundImage(nativeNode);
         return panda::JSValueRef::Undefined(vm);
     }
+    std::string bundle;
+    std::string module;
+    ArkTSUtils::GetJsMediaBundleInfo(vm, srcArg, bundle, module);
     if (repeatArg->IsNumber()) {
         repeatIndex = repeatArg->ToNumber(vm)->Value();
-    } else {
-        GetArkUIInternalNodeAPI()->GetCommonModifier().ResetBackgroundImage(nativeNode);
-        return panda::JSValueRef::Undefined(vm);
     }
-    GetArkUIInternalNodeAPI()->GetCommonModifier().SetBackgroundImage(nativeNode, src.c_str(), repeatIndex);
+    GetArkUIInternalNodeAPI()->GetCommonModifier().SetBackgroundImage(
+        nativeNode, src.c_str(), bundle.c_str(), module.c_str(), repeatIndex);
     return panda::JSValueRef::Undefined(vm);
 }
 

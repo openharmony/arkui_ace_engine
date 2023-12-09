@@ -765,13 +765,8 @@ class BackgroundImagePositionModifier extends ModifierWithKey<Position | Alignme
     }
   }
   checkObjectDiff(): boolean {
-    if (!((isResource(this.stageValue) && isResource(this.value) &&
-      isResourceEqual(this.stageValue, this.value)) ||
-      (!isResource(this.stageValue) && !isResource(this.value) &&
-      this.stageValue === this.value))) {
-      return true;
-    }
-    return false;
+    return !((this.value as Position)?.x === (this.stageValue as Position)?.x &&
+      (this.value as Position)?.y === (this.stageValue as Position)?.y);
   }
 }
 
@@ -832,13 +827,8 @@ class BackgroundImageSizeModifier extends ModifierWithKey<SizeOptions | ImageSiz
     }
   }
   checkObjectDiff(): boolean {
-    if (!((isResource(this.stageValue) && isResource(this.value) &&
-      isResourceEqual(this.stageValue, this.value)) ||
-      (!isResource(this.stageValue) && !isResource(this.value) &&
-        this.stageValue === this.value))) {
-      return true;
-    }
-    return false;
+    return !((this.value as SizeOptions).width === (this.stageValue as SizeOptions).width &&
+      (this.value as SizeOptions).height === (this.stageValue as SizeOptions).height);
   }
 }
 
