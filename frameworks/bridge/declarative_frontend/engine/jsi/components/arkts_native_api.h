@@ -759,6 +759,10 @@ struct ArkUINavigatorModifierAPI {
     void (*ResetParams)(NodeHandle node);
 };
 
+struct ArkUINodeContainerModifierAPI {
+    void (*Rebuild)(int32_t nodeId);
+};
+
 struct ArkUIColumnModifierAPI {
     void (*SetColumnJustifyContent)(NodeHandle node, int32_t flexAlign);
     void (*ResetColumnJustifyContent)(NodeHandle node);
@@ -1234,6 +1238,7 @@ struct ArkUINodeAPI {
     ArkUIVideoModifierAPI (*GetVideoModifier)();
     ArkUINavigatorModifierAPI (*GetNavigatorModifier)();
     ArkUINavRouterModifierAPI (*GetNavRouterModifier)();
+    ArkUINodeContainerModifierAPI (*GetNodeContainerModifier)();
     ArkUIPatternLockModifierAPI (*GetPatternLockModifier)();
     ArkUIColumnSplitModifierAPI (*GetColumnSplitModifier)();
     ArkUILineModifierAPI (*GetLineModifier)();

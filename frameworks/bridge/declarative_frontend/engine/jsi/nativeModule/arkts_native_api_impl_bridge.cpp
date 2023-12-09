@@ -37,6 +37,7 @@
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_navigation_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_navigator_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_panel_bridge.h"
+#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_node_container_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_pattern_lock_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_text_area_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_text_bridge.h"
@@ -1070,6 +1071,7 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
     RegisterImageAttributes(object, vm);
     RegisterNavRouterAttributes(object, vm);
     RegisterNavigatorAttributes(object, vm);
+    RegisterNodeContainerAttributes(object, vm);
     RegisterPanelAttributes(object, vm);
     RegisterLineAttributes(object, vm);
     RegisterPathAttributes(object, vm);
@@ -1622,6 +1624,14 @@ void ArkUINativeModule::RegisterNavigatorAttributes(Local<panda::ObjectRef> obje
     navigator->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetParams"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NavigatorBridge::ResetParams));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "navigator"), navigator);
+}
+
+void ArkUINativeModule::RegisterNodeContainerAttributes(Local<panda::ObjectRef> object, EcmaVM* vm)
+{
+    auto nodeContainer = panda::ObjectRef::New(vm);
+    nodeContainer->Set(vm, panda::StringRef::NewFromUtf8(vm, "rebuild"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NodeContainerBridge::Rebuild));
+    object->Set(vm, panda::StringRef::NewFromUtf8(vm, "nodeContainer"), nodeContainer);
 }
 
 void ArkUINativeModule::RegisterLineAttributes(Local<panda::ObjectRef> object, EcmaVM *vm)

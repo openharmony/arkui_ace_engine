@@ -36,6 +36,7 @@
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_nav_router_modifier.h"
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_navigation_modifier.h"
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_navigator_modifier.h"
+#include "bridge/declarative_frontend/engine/jsi/components/arkts_native_node_container_modifier.h"
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_panel_modifier.h"
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_pattern_lock_modifier.h"
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_text_area_modifier.h"
@@ -118,6 +119,7 @@ static struct ArkUINodeAPI impl = {
     GetVideoModifier,
     GetNavigatorModifier,
     GetNavRouterModifier,
+    GetNodeContainerModifier,
     GetPatternLockModifier,
     GetColumnSplitModifier,
     GetLineModifier,
