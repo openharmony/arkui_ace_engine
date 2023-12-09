@@ -18,6 +18,7 @@
 
 #include <cstdint>
 #include <map>
+#include <optional>
 #include <sstream>
 
 #include "base/utils/utils.h"
