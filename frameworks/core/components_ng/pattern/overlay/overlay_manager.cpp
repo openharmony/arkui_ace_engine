@@ -17,6 +17,7 @@
 
 #include <cstdint>
 #include <utility>
+#include <vector>
 
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/size_t.h"
@@ -895,27 +896,26 @@ void OverlayManager::HidePopup(int32_t targetId, const PopupInfo& popupInfo)
 #endif // ENABLE_DRAG_FRAMEWORK
 }
 
-void OverlayManager::HidePopupWithoutAnimation(int32_t targetId, const PopupInfo& popupInfo)
+RefPtr<FrameNode> OverlayManager::HidePopupWithoutAnimation(int32_t targetId, const PopupInfo& popupInfo)
 {
     popupMap_[targetId] = popupInfo;
-    CHECK_NULL_VOID(popupInfo.markNeedUpdate);
-    if (!popupInfo.markNeedUpdate) {
-        return;
-    }
-    CHECK_NULL_VOID(popupInfo.popupNode);
+    CHECK_NULL_RETURN(popupInfo.markNeedUpdate, nullptr);
+    CHECK_NULL_RETURN(popupInfo.popupNode, nullptr);
+
     popupInfo.popupNode->GetEventHub<BubbleEventHub>()->FireChangeEvent(false);
-    CHECK_NULL_VOID(popupInfo.isCurrentOnShow);
+    CHECK_NULL_RETURN(popupInfo.isCurrentOnShow, nullptr);
     popupMap_[targetId].isCurrentOnShow = false;
     auto pattern = popupInfo.popupNode->GetPattern<BubblePattern>();
-    CHECK_NULL_VOID(pattern);
+    CHECK_NULL_RETURN(pattern, nullptr);
     pattern->SetTransitionStatus(TransitionStatus::INVISIABLE);
     auto rootNode = rootNodeWeak_.Upgrade();
-    CHECK_NULL_VOID(rootNode);
+    CHECK_NULL_RETURN(rootNode, nullptr);
     auto rootChildren = rootNode->GetChildren();
     auto iter = std::find(rootChildren.begin(), rootChildren.end(), popupInfo.popupNode);
     if (iter != rootChildren.end()) {
-        rootNode->RemoveChild(popupMap_[targetId].popupNode);
+        return popupMap_[targetId].popupNode;
     }
+    return nullptr;
 }
 
 void OverlayManager::ShowIndexerPopup(int32_t targetId, RefPtr<FrameNode>& customNode)
@@ -1270,19 +1270,28 @@ void OverlayManager::CleanPopupInSubWindow()
 {
     auto rootNode = rootNodeWeak_.Upgrade();
     CHECK_NULL_VOID(rootNode);
+    std::vector<RefPtr<FrameNode>> removeNodes;
     for (const auto& child : rootNode->GetChildren()) {
-        if (child && child->GetTag() == V2::POPUP_ETS_TAG) {
-            auto id = child->GetId();
-            for (const auto& popup : popupMap_) {
-                auto popupInfo = popup.second;
-                auto target = popup.first;
-                if (id == popupInfo.popupId) {
-                    popupInfo.markNeedUpdate = true;
-                    HidePopupWithoutAnimation(target, popupInfo);
-                    break;
-                }
-            }
+        if (!child || child->GetTag() != V2::POPUP_ETS_TAG) {
+            continue;
         }
+        auto id = child->GetId();
+        for (const auto& popup : popupMap_) {
+            auto popupInfo = popup.second;
+            auto target = popup.first;
+            if (id != popupInfo.popupId) {
+                continue;
+            }
+            popupInfo.markNeedUpdate = true;
+            auto removeNode = HidePopupWithoutAnimation(target, popupInfo);
+            if (removeNode) {
+                removeNodes.emplace_back(removeNode);
+            }
+            break;
+        }
+    }
+    for (const auto& removeNode : removeNodes) {
+        rootNode->RemoveChild(removeNode);
     }
     rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 }
