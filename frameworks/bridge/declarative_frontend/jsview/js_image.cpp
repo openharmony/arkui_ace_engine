@@ -534,11 +534,12 @@ void JSImage::EnableAnalyzer(bool isEnableAnalyzer)
 
 void JSImage::AnalyzerConfig(const JSCallbackInfo &info)
 {
-    if (info[0]->IsNull() || !info[0]->IsObject()) {
+    auto configParams = info[0];
+    if (configParams->IsNull() || !configParams->IsObject()) {
         return;
     }
     
-    auto paramObject = JSRef<JSObject>::Cast(info[0]);
+    auto paramObject = JSRef<JSObject>::Cast(configParams);
     JSRef<JSVal> typeVal = paramObject->GetProperty("types");
     JSRef<JSVal> showButtonVal = paramObject->GetProperty("showAIbutton");
     JSRef<JSVal> marginVal = paramObject->GetProperty("aiButtonOffset");

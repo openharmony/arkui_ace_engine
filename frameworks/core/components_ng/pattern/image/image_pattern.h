@@ -180,8 +180,9 @@ private:
     void LoadImage(const ImageSourceInfo& src);
     void LoadAltImage(const RefPtr<ImageLayoutProperty>& imageLayoutProperty);
 
-    void InitAnalyzerUIConfig();
+    void UpdateAnalyzerUIConfig(const RefPtr<LayoutWrapper>& dirty);
     void CreateAnalyzerOverlay();
+    bool IsSupportImageAnalyzerFeature();
 
     CopyOptions copyOption_ = CopyOptions::None;
 

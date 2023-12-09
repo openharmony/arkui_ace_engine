@@ -298,6 +298,11 @@ bool ImagePattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, 
     if (config.skipMeasure || dirty->SkipMeasureContent()) {
         return false;
     }
+    
+    if (IsSupportImageAnalyzerFeature()) {
+        UpdateAnalyzerUIConfig(dirty);
+    }
+
     return image_;
 }
 
@@ -398,10 +403,6 @@ void ImagePattern::OnModifyDone()
         auto inputHub = host->GetOrCreateInputEventHub();
         inputHub->RemoveOnMouseEvent(mouseEvent_);
         mouseEvent_ = nullptr;
-    }
-
-    if (isEnableAnalyzer_ && copyOption_ != CopyOptions::None) {
-        InitAnalyzerUIConfig();
     }
 }
 
@@ -842,21 +843,19 @@ void ImagePattern::SetImageAnalyzerConfig(const ImageAnalyzerConfig &config)
         return;
     }
     analyzerConfig_ = std::move(config);
-    if (copyOption_ != CopyOptions::None && isAnalyzerOverlayBuild_) {
+    if (IsSupportImageAnalyzerFeature() && isAnalyzerOverlayBuild_) {
         ImageAnalyzerMgr::GetInstance().UpdateConfig(&overlayData_, &analyzerConfig_);
     }
 }
 
 void ImagePattern::CreateAnalyzerOverlay()
 {
-    if (!isEnableAnalyzer_ || copyOption_ == CopyOptions::None ||
-        !ImageAnalyzerMgr::GetInstance().IsImageAnalyzerSupported() || !image_) {
+    if (!IsSupportImageAnalyzerFeature()) {
         return;
     }
     auto pixelMap = image_->GetPixelMap();
     napi_value pixelmapNapiVal = ConvertPixmapNapi(pixelMap);
     auto frameNode = GetHost();
-    auto hostLayoutProperty = AceType::DynamicCast<LayoutProperty>(frameNode->GetLayoutProperty());
     auto overlayNode = frameNode->GetOverlayNode();
 
     if (!isAnalyzerOverlayBuild_) {
@@ -885,8 +884,6 @@ void ImagePattern::CreateAnalyzerOverlay()
         auto focusHub = overlayNode->GetOrCreateFocusHub();
         CHECK_NULL_VOID(focusHub);
         focusHub->SetFocusable(false);
-
-        overlayNode->Layout();
         overlayNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     } else {
         ImageAnalyzerMgr::GetInstance().UpdateImage(
@@ -895,9 +892,25 @@ void ImagePattern::CreateAnalyzerOverlay()
     }
 }
 
-void ImagePattern::InitAnalyzerUIConfig()
+bool ImagePattern::IsSupportImageAnalyzerFeature()
+{
+    return isEnableAnalyzer_ && ImageAnalyzerMgr::GetInstance().IsImageAnalyzerSupported() && image_ &&
+        !loadingCtx_->GetSourceInfo().IsSvg();
+}
+
+void ImagePattern::UpdateAnalyzerUIConfig(const RefPtr<LayoutWrapper>& dirty)
 {
     bool isUIConfigUpdate = false;
+
+    auto& geometryNode = dirty->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    if (analyzerUIConfig_.contentWidth != geometryNode->GetFrameSize().Width() ||
+        analyzerUIConfig_.contentHeight != geometryNode->GetFrameSize().Height()) {
+        analyzerUIConfig_.contentWidth = geometryNode->GetFrameSize().Width();
+        analyzerUIConfig_.contentHeight = geometryNode->GetFrameSize().Height();
+        isUIConfigUpdate = true;
+    }
+
     auto layoutProps = GetLayoutProperty<ImageLayoutProperty>();
     CHECK_NULL_VOID(layoutProps);
     if (analyzerUIConfig_.imageFit != layoutProps->GetImageFit().value_or(ImageFit::COVER)) {
@@ -907,17 +920,6 @@ void ImagePattern::InitAnalyzerUIConfig()
 
     auto frameNode = GetHost();
     CHECK_NULL_VOID(frameNode);
-    auto& geometryNode = frameNode->GetGeometryNode();
-    CHECK_NULL_VOID(geometryNode);
-
-    RectF paintRect = CalcImageContentPaintSize(geometryNode);
-    if (analyzerUIConfig_.contentWidth != paintRect.Width() || analyzerUIConfig_.contentHeight !=
-        paintRect.Height()) {
-        analyzerUIConfig_.contentWidth = paintRect.Width();
-        analyzerUIConfig_.contentHeight = paintRect.Height();
-        isUIConfigUpdate = true;
-    }
-
     auto renderContext = frameNode->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     Matrix4 localMat = renderContext->GetLocalTransformMatrix();

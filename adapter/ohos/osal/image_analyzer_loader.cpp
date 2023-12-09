@@ -35,18 +35,18 @@ bool ImageAnalyzerLoader::Init(std::string libPath)
 {
     libraryHandle_ = dlopen(libPath.c_str(), 0);
     if (libraryHandle_ == nullptr) {
-        LOGE("Could not dlopen %s: %s", libPath.c_str(), dlerror());
+        TAG_LOGE(AceLogTag::ACE_IMAGE, " Could not dlopen %s: %s", libPath.c_str(), dlerror());
     }
     createImageAnalyzerInstance_ =
         (ImageAnalyzerInterface* (*)(napi_env)) dlsym(libraryHandle_, "createImageAnalyzerInstance");
     destroyImageAnalyzerInstance_ =
         (void (*)(ImageAnalyzerInterface *)) dlsym(libraryHandle_, "destroyImageAnalyzerInstance");
     if (createImageAnalyzerInstance_ == nullptr || destroyImageAnalyzerInstance_ == nullptr) {
-        LOGE("Could not find engine interface functions in %s", libPath.c_str());
+        TAG_LOGE(AceLogTag::ACE_IMAGE, " Could not find engine interface functions in %s", libPath.c_str());
         Close();
         return false;
     }
-    LOGD("Loaded engine from %s", libraryPath.c_str());
+    TAG_LOGD(AceLogTag::ACE_IMAGE, " Loaded engine from %s", libraryPath.c_str());
     return true;
 }
 
