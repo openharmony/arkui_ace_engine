@@ -231,7 +231,8 @@ struct ArkUICommonModifierAPI {
     void (*SetBackgroundImageSize)(
         NodeHandle node, double valueWidth, double valueHeight, int32_t typeWidth, int32_t typeHeight);
     void (*ResetBackgroundImageSize)(NodeHandle node);
-    void (*SetBackgroundImage)(NodeHandle node, const char* src, int32_t repeatIndex);
+    void (*SetBackgroundImage)(
+        NodeHandle node, const char* src, const char* bundle, const char* module, int32_t repeatIndex);
     void (*ResetBackgroundImage)(NodeHandle node);
     void (*SetTranslate)(NodeHandle node, const double* values, const int* units, int32_t length);
     void (*ResetTranslate)(NodeHandle node);
