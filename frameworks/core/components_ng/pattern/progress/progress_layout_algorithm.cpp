@@ -88,8 +88,6 @@ std::optional<SizeF> ProgressLayoutAlgorithm::MeasureContent(
             height_ = contentConstraint.parentIdealSize.Height().value_or(GetChildHeight(layoutWrapper, width_));
         }
     }
-    height_ = std::min(height_, static_cast<float>(contentConstraint.percentReference.Height()));
-    width_ = std::min(width_, static_cast<float>(contentConstraint.percentReference.Width()));
     if (type_ == ProgressType::LINEAR) {
         if (width_ >= height_) {
             height_ = std::min(height_, strokeWidth_);
