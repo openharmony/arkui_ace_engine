@@ -42,7 +42,7 @@ public:
      */
     double GetCurrentPosition() override
     {
-        return Positive(offsetPct_) ? scrollOffset_ : Positive(offsetPct_) ? -scrollOffset_ : 0;
+        return Positive(offsetPct_) ? scrollOffset_ : Negative(offsetPct_) ? -scrollOffset_ : 0;
     }
 
     double GetCurrentVelocity() override
