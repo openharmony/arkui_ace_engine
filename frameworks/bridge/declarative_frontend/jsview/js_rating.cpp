@@ -142,20 +142,34 @@ void JSRating::SetStarStyle(const JSCallbackInfo& info)
     std::string backgroundUri;
     if (getBackgroundUri->IsString()) {
         backgroundUri = getBackgroundUri->ToString();
-        RatingModel::GetInstance()->SetBackgroundSrc(backgroundUri, false);
+        if (backgroundUri.empty()) {
+            RatingModel::GetInstance()->SetBackgroundSrc("", true);
+        } else {
+            RatingModel::GetInstance()->SetBackgroundSrc(backgroundUri, false);
+        }
     } else {
         RatingModel::GetInstance()->SetBackgroundSrc("", true);
     }
 
     if (getForegroundUri->IsString()) {
-        RatingModel::GetInstance()->SetForegroundSrc(getForegroundUri->ToString(), false);
+        std::string foregroundUri = getForegroundUri->ToString();
+        if (foregroundUri.empty()) {
+            RatingModel::GetInstance()->SetForegroundSrc("", true);
+        } else {
+            RatingModel::GetInstance()->SetForegroundSrc(foregroundUri, false);
+        }
     } else {
         RatingModel::GetInstance()->SetForegroundSrc("", true);
     }
 
     if (getSecondaryUri->IsString()) {
-        RatingModel::GetInstance()->SetSecondarySrc(getSecondaryUri->ToString(), false);
-    } else if (getBackgroundUri->IsString()) {
+        std::string secondaryUri = getSecondaryUri->ToString();
+        if (secondaryUri.empty()) {
+            RatingModel::GetInstance()->SetSecondarySrc("", true);
+        } else {
+            RatingModel::GetInstance()->SetSecondarySrc(secondaryUri, false);
+        }
+    } else if (getBackgroundUri->IsString() && !backgroundUri.empty()) {
         RatingModel::GetInstance()->SetSecondarySrc(backgroundUri, false);
     } else {
         RatingModel::GetInstance()->SetSecondarySrc("", true);
