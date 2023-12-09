@@ -40,7 +40,6 @@
 #include "test/mock/base/mock_drag_window.h"
 #include "test/mock/core/common/mock_interaction_interface.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
-#include "test/mock/core/pattern/mock_list_drag_status_listener.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -1760,130 +1759,6 @@ HWTEST_F(DragDropManagerTestNg, DragDropManagerGetItemIndexTest003, TestSize.Lev
     dragDropManager->GetItemIndex(listNode, DragType::GRID, 0.0, 0.0);
     dragDropManager->GetItemIndex(listNode, DragType::GRID, 1.0f, 2.0f);
     EXPECT_EQ(onItemDropInfoList, "");
-}
-
-/**
- * @tc.name: DragDropManagerNotifyDragRegisterFrameNode001
- * @tc.desc: Test NotifyDragRegisterFrameNode
- * @tc.type: FUNC
- * @tc.author:
- */
-HWTEST_F(DragDropManagerTestNg, DragDropManagerNotifyDragRegisterFrameNode001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. construct a DragDropManager
-     */
-    auto dragDropManager = AceType::MakeRefPtr<DragDropManager>();
-
-    /**
-     * @tc.steps: step2. Create a DragStatusListener and Register to DragDropManager
-     * @tc.expected: step2.
-     */
-    auto listNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<ListPattern>());
-    auto listPattern = listNode->GetPattern<ListPattern>();
-    RefPtr<ListDragStatusListener> mockListDragStatusListener = AceType::MakeRefPtr<MockListDragStatusListener>();
-    EXPECT_CALL(*(AceType::DynamicCast<MockListDragStatusListener>(mockListDragStatusListener)), OnDragStarted(_))
-        .Times(1);
-    EXPECT_CALL(*(AceType::DynamicCast<MockListDragStatusListener>(mockListDragStatusListener)), OnDragEntered(_))
-        .Times(1);
-    EXPECT_CALL(*(AceType::DynamicCast<MockListDragStatusListener>(mockListDragStatusListener)), OnDragMoved(_))
-        .Times(1);
-    EXPECT_CALL(*(AceType::DynamicCast<MockListDragStatusListener>(mockListDragStatusListener)), OnDragLeaved(_))
-        .Times(1);
-    EXPECT_CALL(*(AceType::DynamicCast<MockListDragStatusListener>(mockListDragStatusListener)), OnDragEnded(_))
-        .Times(1);
-    if (!listPattern->listDragStatusListener_.has_value()) {
-        listPattern->listDragStatusListener_ = mockListDragStatusListener;
-    }
-    dragDropManager->RegisterDragStatusListener(listNode->GetId(), AceType::WeakClaim(AceType::RawPtr(listNode)));
-    EXPECT_EQ(dragDropManager->nodesForDragNotify_.size(), 1);
-
-    /**
-     * @tc.steps: step3. call UpdateNotifyDragEvent with different DragStatusType
-     * @tc.expected: step3. Successfully callback UpdateNotifyDragEvent.
-     */
-    RefPtr<NotifyDragEvent> notifyEvent = AceType::MakeRefPtr<NotifyDragEvent>();
-    dragDropManager->UpdateNotifyDragEvent(notifyEvent, Point(1.0f, 1.0f), DragEventType::START);
-    dragDropManager->UpdateNotifyDragEvent(notifyEvent, Point(1.0f, 1.0f), DragEventType::DROP);
-    EXPECT_DOUBLE_EQ(notifyEvent->GetX(), 1.0);
-    EXPECT_DOUBLE_EQ(notifyEvent->GetY(), 1.0);
-
-    /**
-     * @tc.steps: step3. call NotifyDragRegisterFrameNode with different DragStatusType
-     * @tc.expected: step3. Successfully callback NotifyDragRegisterFrameNode.
-     */
-    dragDropManager->NotifyDragRegisterFrameNode(
-        dragDropManager->nodesForDragNotify_, DragEventType::START, notifyEvent);
-    dragDropManager->NotifyDragRegisterFrameNode(
-        dragDropManager->nodesForDragNotify_, DragEventType::ENTER, notifyEvent);
-    dragDropManager->NotifyDragRegisterFrameNode(
-        dragDropManager->nodesForDragNotify_, DragEventType::MOVE, notifyEvent);
-    dragDropManager->NotifyDragRegisterFrameNode(
-        dragDropManager->nodesForDragNotify_, DragEventType::LEAVE, notifyEvent);
-    dragDropManager->NotifyDragRegisterFrameNode(
-        dragDropManager->nodesForDragNotify_, DragEventType::DROP, notifyEvent);
-    dragDropManager->UnRegisterDragStatusListener(listNode->GetId());
-    EXPECT_EQ(dragDropManager->nodesForDragNotify_.size(), 0);
-}
-
-/**
- * @tc.name: DragDropManagerNotifyDragRegisterFrameNode002
- * @tc.desc: Test NotifyDragRegisterFrameNode
- * @tc.type: FUNC
- * @tc.author:
- */
-HWTEST_F(DragDropManagerTestNg, DragDropManagerNotifyDragRegisterFrameNode002, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. construct a DragDropManager
-     */
-    auto dragDropManager = AceType::MakeRefPtr<DragDropManager>();
-
-    /**
-     * @tc.steps: step2. Create a DragStatusListener and Register to DragDropManager
-     * @tc.expected: step2.
-     */
-    RefPtr<ListDragStatusListener> mockListDragStatusListener = AceType::MakeRefPtr<MockListDragStatusListener>();
-    EXPECT_CALL(*(AceType::DynamicCast<MockListDragStatusListener>(mockListDragStatusListener)), OnDragEntered(_))
-        .Times(1);
-    EXPECT_CALL(*(AceType::DynamicCast<MockListDragStatusListener>(mockListDragStatusListener)), OnDragMoved(_))
-        .Times(1);
-    EXPECT_CALL(*(AceType::DynamicCast<MockListDragStatusListener>(mockListDragStatusListener)), OnDragLeaved(_))
-        .Times(1);
-    auto listNode1 = AceType::MakeRefPtr<FrameNode>(NODE_TAG, 1, AceType::MakeRefPtr<ListPattern>());
-    auto listPattern1 = listNode1->GetPattern<ListPattern>();
-    listPattern1->listDragStatusListener_ = mockListDragStatusListener;
-    auto listNode2 = AceType::MakeRefPtr<FrameNode>(NODE_TAG_EX, 2, AceType::MakeRefPtr<ListPattern>());
-    auto listPattern2 = listNode2->GetPattern<ListPattern>();
-    listPattern2->listDragStatusListener_ = mockListDragStatusListener;
-    auto listNode3 = AceType::MakeRefPtr<FrameNode>(NODE_TAG_EX2, 3, AceType::MakeRefPtr<ListPattern>());
-    auto listPattern3 = listNode3->GetPattern<ListPattern>();
-    listPattern3->listDragStatusListener_ = mockListDragStatusListener;
-    dragDropManager->RegisterDragStatusListener(listNode1->GetId(), AceType::WeakClaim(AceType::RawPtr(listNode1)));
-    dragDropManager->RegisterDragStatusListener(listNode2->GetId(), AceType::WeakClaim(AceType::RawPtr(listNode2)));
-    dragDropManager->RegisterDragStatusListener(listNode3->GetId(), AceType::WeakClaim(AceType::RawPtr(listNode3)));
-    EXPECT_EQ(dragDropManager->nodesForDragNotify_.size(), 3);
-
-    auto geometryNode1 = listNode1->GetGeometryNode();
-    auto geometryNode2 = listNode2->GetGeometryNode();
-    auto geometryNode3 = listNode3->GetGeometryNode();
-    listNode1->SetActive(true);
-    listNode2->SetActive(true);
-    listNode3->SetActive(true);
-    geometryNode1->frame_.rect_ = RectF(1.0f, 1.0f, 10.0f, 10.0f);
-    geometryNode2->frame_.rect_ = RectF(3.0f, 3.0f, 20.0f, 20.0f);
-    geometryNode3->frame_.rect_ = RectF(5.0f, 5.0f, 30.0f, 30.0f);
-    dragDropManager->parentHitNodes_.emplace(listNode1->GetId());
-    dragDropManager->parentHitNodes_.emplace(listNode2->GetId());
-
-    dragDropManager->UpdateVelocityTrackerPoint(Point(15.0f, 15.0f), true);
-    dragDropManager->UpdateDragListener(Point(15.0f, 15.0f));
-    EXPECT_EQ(dragDropManager->parentHitNodes_.size(), 2);
-
-    dragDropManager->UnRegisterDragStatusListener(listNode1->GetId());
-    dragDropManager->UnRegisterDragStatusListener(listNode2->GetId());
-    dragDropManager->UnRegisterDragStatusListener(listNode3->GetId());
-    EXPECT_EQ(dragDropManager->nodesForDragNotify_.size(), 0);
 }
 
 /**

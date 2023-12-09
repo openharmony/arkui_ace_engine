@@ -19,7 +19,6 @@
 #include "core/animation/chain_animation.h"
 #include "core/components_ng/pattern/list/list_accessibility_property.h"
 #include "core/components_ng/pattern/list/list_content_modifier.h"
-#include "core/components_ng/pattern/list/list_drag_status_listener.h"
 #include "core/components_ng/pattern/list/list_event_hub.h"
 #include "core/components_ng/pattern/list/list_item_pattern.h"
 #include "core/components_ng/pattern/list/list_layout_algorithm.h"
@@ -282,7 +281,6 @@ private:
     void GetListItemGroupEdge(bool& groupAtStart, bool& groupAtEnd) const;
     void RefreshLanesItemRange();
     void UpdateListDirectionInCardStyle();
-    void InitNotifyDragEvent();
     RefPtr<ListContentModifier> listContentModifier_;
 
     int32_t maxListItemIndex_ = 0;
@@ -335,7 +333,6 @@ private:
     RefPtr<Scrollable> scrollableTouchEvent_;
 
     bool isScrollEnd_ = false;
-    std::optional<RefPtr<ListDragStatusListener>> listDragStatusListener_;
     std::optional<ListPredictLayoutParam> predictLayoutParam_;
 
     bool isNeedToUpdateListDirection_ = false;
