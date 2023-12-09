@@ -478,6 +478,7 @@ void SelectModelNG::SetSpace(FrameNode* frameNode, const Dimension& value)
     CHECK_NULL_VOID(pattern);
     pattern->SetSpace(value);
 }
+
 void SelectModelNG::SetMenuAlign(FrameNode* frameNode, const MenuAlign& menuAlign)
 {
     CHECK_NULL_VOID(frameNode);
@@ -485,6 +486,7 @@ void SelectModelNG::SetMenuAlign(FrameNode* frameNode, const MenuAlign& menuAlig
     CHECK_NULL_VOID(pattern);
     pattern->SetMenuAlign(menuAlign);
 }
+
 void SelectModelNG::SetValue(FrameNode* frameNode, const std::string& value)
 {
     CHECK_NULL_VOID(frameNode);
@@ -492,6 +494,7 @@ void SelectModelNG::SetValue(FrameNode* frameNode, const std::string& value)
     CHECK_NULL_VOID(pattern);
     pattern->SetValue(value);
 }
+
 void SelectModelNG::SetSelected(FrameNode* frameNode, int32_t idx)
 {
     CHECK_NULL_VOID(frameNode);
@@ -499,6 +502,7 @@ void SelectModelNG::SetSelected(FrameNode* frameNode, int32_t idx)
     CHECK_NULL_VOID(pattern);
     pattern->SetSelected(idx);
 }
+
 void SelectModelNG::SetFontSize(FrameNode* frameNode, const Dimension& value)
 {
     CHECK_NULL_VOID(frameNode);
@@ -506,6 +510,7 @@ void SelectModelNG::SetFontSize(FrameNode* frameNode, const Dimension& value)
     CHECK_NULL_VOID(pattern);
     pattern->SetFontSize(value);
 }
+
 void SelectModelNG::SetFontWeight(FrameNode* frameNode, const FontWeight& value)
 {
     CHECK_NULL_VOID(frameNode);
@@ -513,6 +518,7 @@ void SelectModelNG::SetFontWeight(FrameNode* frameNode, const FontWeight& value)
     CHECK_NULL_VOID(pattern);
     pattern->SetFontWeight(value);
 }
+
 void SelectModelNG::SetFontFamily(FrameNode* frameNode, const std::vector<std::string>& value)
 {
     CHECK_NULL_VOID(frameNode);
@@ -520,6 +526,7 @@ void SelectModelNG::SetFontFamily(FrameNode* frameNode, const std::vector<std::s
     CHECK_NULL_VOID(pattern);
     pattern->SetFontFamily(value);
 }
+
 void SelectModelNG::SetItalicFontStyle(FrameNode* frameNode, const Ace::FontStyle& value)
 {
     CHECK_NULL_VOID(frameNode);
@@ -527,6 +534,7 @@ void SelectModelNG::SetItalicFontStyle(FrameNode* frameNode, const Ace::FontStyl
     CHECK_NULL_VOID(pattern);
     pattern->SetItalicFontStyle(value);
 }
+
 void SelectModelNG::SetFontColor(FrameNode* frameNode, const Color& color)
 {
     CHECK_NULL_VOID(frameNode);
@@ -534,6 +542,7 @@ void SelectModelNG::SetFontColor(FrameNode* frameNode, const Color& color)
     CHECK_NULL_VOID(pattern);
     pattern->SetFontColor(color);
 }
+
 void SelectModelNG::SetSelectedOptionBgColor(FrameNode* frameNode, const Color& color)
 {
     CHECK_NULL_VOID(frameNode);
@@ -541,6 +550,7 @@ void SelectModelNG::SetSelectedOptionBgColor(FrameNode* frameNode, const Color& 
     CHECK_NULL_VOID(pattern);
     pattern->SetSelectedOptionBgColor(color);
 }
+
 void SelectModelNG::SetOptionFontSize(FrameNode* frameNode, const Dimension& value)
 {
     CHECK_NULL_VOID(frameNode);
@@ -548,6 +558,7 @@ void SelectModelNG::SetOptionFontSize(FrameNode* frameNode, const Dimension& val
     CHECK_NULL_VOID(pattern);
     pattern->SetOptionFontSize(value);
 }
+
 void SelectModelNG::SetOptionFontWeight(FrameNode* frameNode, const FontWeight& value)
 {
     CHECK_NULL_VOID(frameNode);
@@ -555,6 +566,7 @@ void SelectModelNG::SetOptionFontWeight(FrameNode* frameNode, const FontWeight& 
     CHECK_NULL_VOID(pattern);
     pattern->SetOptionFontWeight(value);
 }
+
 void SelectModelNG::SetOptionFontFamily(FrameNode* frameNode, const std::vector<std::string>& value)
 {
     CHECK_NULL_VOID(frameNode);
@@ -562,6 +574,7 @@ void SelectModelNG::SetOptionFontFamily(FrameNode* frameNode, const std::vector<
     CHECK_NULL_VOID(pattern);
     pattern->SetOptionFontFamily(value);
 }
+
 void SelectModelNG::SetOptionItalicFontStyle(FrameNode* frameNode, const Ace::FontStyle& value)
 {
     CHECK_NULL_VOID(frameNode);
@@ -569,6 +582,7 @@ void SelectModelNG::SetOptionItalicFontStyle(FrameNode* frameNode, const Ace::Fo
     CHECK_NULL_VOID(pattern);
     pattern->SetOptionItalicFontStyle(value);
 }
+
 void SelectModelNG::SetOptionBgColor(FrameNode* frameNode, const Color& color)
 {
     CHECK_NULL_VOID(frameNode);
@@ -576,6 +590,7 @@ void SelectModelNG::SetOptionBgColor(FrameNode* frameNode, const Color& color)
     CHECK_NULL_VOID(pattern);
     pattern->SetOptionBgColor(color);
 }
+
 void SelectModelNG::SetSelectedOptionFontColor(FrameNode* frameNode, const Color& color)
 {
     CHECK_NULL_VOID(frameNode);
@@ -583,6 +598,7 @@ void SelectModelNG::SetSelectedOptionFontColor(FrameNode* frameNode, const Color
     CHECK_NULL_VOID(pattern);
     pattern->SetSelectedOptionFontColor(color);
 }
+
 void SelectModelNG::SetSelectedOptionFontSize(FrameNode* frameNode, const Dimension& value)
 {
     CHECK_NULL_VOID(frameNode);
@@ -590,6 +606,7 @@ void SelectModelNG::SetSelectedOptionFontSize(FrameNode* frameNode, const Dimens
     CHECK_NULL_VOID(pattern);
     pattern->SetSelectedOptionFontSize(value);
 }
+
 void SelectModelNG::SetSelectedOptionFontWeight(FrameNode* frameNode, const FontWeight& value)
 {
     CHECK_NULL_VOID(frameNode);
@@ -597,6 +614,7 @@ void SelectModelNG::SetSelectedOptionFontWeight(FrameNode* frameNode, const Font
     CHECK_NULL_VOID(pattern);
     pattern->SetSelectedOptionFontWeight(value);
 }
+
 void SelectModelNG::SetSelectedOptionFontFamily(FrameNode* frameNode, const std::vector<std::string>& value)
 {
     CHECK_NULL_VOID(frameNode);
@@ -604,6 +622,7 @@ void SelectModelNG::SetSelectedOptionFontFamily(FrameNode* frameNode, const std:
     CHECK_NULL_VOID(pattern);
     pattern->SetSelectedOptionFontFamily(value);
 }
+
 void SelectModelNG::SetSelectedOptionItalicFontStyle(FrameNode* frameNode, const Ace::FontStyle& value)
 {
     CHECK_NULL_VOID(frameNode);
@@ -611,6 +630,7 @@ void SelectModelNG::SetSelectedOptionItalicFontStyle(FrameNode* frameNode, const
     CHECK_NULL_VOID(pattern);
     pattern->SetSelectedOptionItalicFontStyle(value);
 }
+
 void SelectModelNG::SetOptionFontColor(FrameNode* frameNode, const Color& color)
 {
     CHECK_NULL_VOID(frameNode);
