@@ -78,5 +78,17 @@
     {
         "first_introduced": "10",
         "name": "OH_NativeXComponent_GetHistoricalPoints"
+    },
+    {
+        "first_introduced": "11",
+        "name": "OH_NativeXComponent_SetExpectedFrameRateRange"
+    },
+    {
+        "first_introduced": "11",
+        "name": "OH_NativeXComponent_RegisterOnFrameCallback"
+    },
+    {
+        "first_introduced": "11",
+        "name": "OH_NativeXComponent_UnRegisterOnFrameCallback"
     }
 ]

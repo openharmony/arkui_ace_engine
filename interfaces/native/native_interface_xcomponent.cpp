@@ -201,6 +201,33 @@ int32_t OH_NativeXComponent_GetKeyEventTimestamp(OH_NativeXComponent_KeyEvent* k
     (*timestamp) = keyEvent->timestamp;
     return OH_NATIVEXCOMPONENT_RESULT_SUCCESS;
 }
+
+int32_t OH_NativeXComponent_SetExpectedFrameRateRange(
+    OH_NativeXComponent* component, OH_NativeXComponent_ExpectedRateRange* range)
+{
+    if (component == nullptr || range == nullptr) {
+        return OH_NATIVEXCOMPONENT_RESULT_BAD_PARAMETER;
+    }
+    return component->SetExpectedFrameRateRange(range);
+}
+
+int32_t OH_NativeXComponent_RegisterOnFrameCallback(OH_NativeXComponent* component,
+    void (*callback)(OH_NativeXComponent* component, uint64_t timestamp, uint64_t targetTimestamp))
+{
+    if (component == nullptr) {
+        return OH_NATIVEXCOMPONENT_RESULT_BAD_PARAMETER;
+    }
+    return component->RegisterOnFrameCallback(callback);
+}
+
+int32_t OH_NativeXComponent_UnRegisterOnFrameCallback(OH_NativeXComponent* component)
+{
+    if (component == nullptr) {
+        return OH_NATIVEXCOMPONENT_RESULT_BAD_PARAMETER;
+    }
+    return component->UnRegisterOnFrameCallback();
+}
+
 #ifdef __cplusplus
 };
 #endif
