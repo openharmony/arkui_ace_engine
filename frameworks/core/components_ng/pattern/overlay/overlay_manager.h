@@ -368,7 +368,8 @@ private:
     std::unordered_map<int32_t, RefPtr<FrameNode>> customKeyboardMap_;
     std::stack<WeakPtr<FrameNode>> modalStack_;
     std::list<WeakPtr<FrameNode>> modalList_;
-    WeakPtr<FrameNode> lastModalNode_;
+    std::unordered_map<int32_t, WeakPtr<FrameNode>> sheetMap_;
+    WeakPtr<FrameNode> lastModalNode_; // Previous Modal Node
     float sheetHeight_ { 0.0 };
     WeakPtr<UINode> rootNodeWeak_;
     int32_t dialogCount_ = 0;
