@@ -145,7 +145,7 @@ void PinchRecognizer::HandleTouchUpEvent(const AxisEvent& event)
 
 void PinchRecognizer::HandleTouchMoveEvent(const TouchEvent& event)
 {
-    if (!IsActiveFinger(event.id)) {
+    if (!IsActiveFinger(event.id) || currentFingers_ < fingers_) {
         return;
     }
 
