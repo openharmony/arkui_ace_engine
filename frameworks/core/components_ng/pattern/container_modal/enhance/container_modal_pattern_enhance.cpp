@@ -220,7 +220,7 @@ void ContainerModalPatternEnhance::UpdateTitleInTargetPos(bool isShow, int32_t h
             floatingContext->OnTransformTranslateUpdate({ 0.0f, height, 0.0f });
         });
         buttonsContext->OnTransformTranslateUpdate({ 0.0f, height - static_cast<float>(titlePopupDistance), 0.0f });
-        floatingLayoutProperty->UpdateVisibility(VisibleType::VISIBLE);
+        controlButtonsLayoutProperty->UpdateVisibility(VisibleType::VISIBLE);
         AnimationUtils::Animate(option, [buttonsContext, height]() {
             buttonsContext->OnTransformTranslateUpdate({ 0.0f, height, 0.0f });
         });

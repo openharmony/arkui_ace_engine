@@ -15,6 +15,8 @@
 
 #include "core/components_ng/pattern/image/image_modifier.h"
 
+#include <cstdlib>
+
 namespace OHOS::Ace::NG {
 ImageModifier::ImageModifier()
 {
@@ -56,8 +58,8 @@ void ImageModifier::SetImageFit(ImageFit imagefit)
     imageFit_->Set(static_cast<float>(imagefit));
 }
 
-void ImageModifier::UpdateImageData(const WeakPtr<CanvasImage>& canvasImage,
-    const OffsetF& offset, const SizeF& contentSize)
+void ImageModifier::UpdateImageData(
+    const WeakPtr<CanvasImage>& canvasImage, const OffsetF& offset, const SizeF& contentSize)
 {
     canvasImage_ = canvasImage;
     offset_ = offset;
@@ -94,7 +96,7 @@ void ImageModifier::DrawImageWithAnimation(DrawingContext& context)
     float ratio = 1.0f;
     if (!NearZero(difference)) {
         // ratio goes from 0 to 1
-        ratio = abs((imageFit_->Get() - static_cast<float>(startImageFit_)) / difference);
+        ratio = std::abs((imageFit_->Get() - static_cast<float>(startImageFit_)) / difference);
     }
     UpdatePaintConfig(ratio);
     auto canvas = canvasImage_.Upgrade();

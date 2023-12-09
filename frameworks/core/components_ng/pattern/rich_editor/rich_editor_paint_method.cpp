@@ -41,6 +41,10 @@ void RichEditorPaintMethod::UpdateOverlayModifier(PaintWrapper* paintWrapper)
     if (!richEditorPattern->HasFocus() && !richEditorPattern->GetTextDetectEnable()) {
         overlayMod->UpdateScrollBar(paintWrapper);
         overlayMod->SetCaretVisible(false);
+        const auto& selection = richEditorPattern->GetTextSelector();
+        if (richEditorPattern->GetTextContentLength() > 0 && selection.GetTextStart() != selection.GetTextEnd()) {
+            overlayMod->SetSelectedRects(pManager_->GetRects(selection.GetTextStart(), selection.GetTextEnd()));
+        }
         return;
     }
     auto caretVisible = richEditorPattern->GetCaretVisible();
@@ -52,11 +56,13 @@ void RichEditorPaintMethod::UpdateOverlayModifier(PaintWrapper* paintWrapper)
     auto caretPosition = richEditorPattern->GetCaretPosition();
     if (richEditorPattern->GetTextContentLength() > 0) {
         float caretHeight = 0.0f;
-        OffsetF caretOffsetDown = richEditorPattern->CalcCursorOffsetByPosition(caretPosition, caretHeight, true);
+        OffsetF caretOffsetDown =
+            richEditorPattern->CalcCursorOffsetByPosition(caretPosition, caretHeight, true, false);
         OffsetF lastClickOffset = richEditorPattern->GetLastClickOffset();
         if (lastClickOffset != caretOffsetDown) {
             caretHeight = 0.0f;
-            OffsetF caretOffsetUp = richEditorPattern->CalcCursorOffsetByPosition(caretPosition, caretHeight);
+            OffsetF caretOffsetUp =
+                richEditorPattern->CalcCursorOffsetByPosition(caretPosition, caretHeight, false, false);
             overlayMod->SetCaretOffsetAndHeight(caretOffsetUp, caretHeight);
             richEditorPattern->ResetLastClickOffset();
         } else {

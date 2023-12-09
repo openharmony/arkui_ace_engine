@@ -369,6 +369,9 @@ public:
             case SelectOverlayMenuId::SELECT_ALL:
                 HandleOnSelectAll();
                 return;
+            case SelectOverlayMenuId::CAMERA_INPUT:
+                HandleOnCameraInput();
+                return;
             default:
                 return;
         }
@@ -452,13 +455,17 @@ public:
 protected:
     void OnAfterModifyDone() override;
     virtual void HandleOnCopy();
+    void ClickAISpanOfSpan(std::map<int, OHOS::Ace::AISpan>::iterator& aiSpanIterator,
+        const OHOS::Ace::RefPtr<OHOS::Ace::NG::SpanItem>& item, PointF textOffset, bool& isClickOnAISpan);
     virtual bool ClickAISpan(const PointF& textOffset, const AISpan& aiSpan);
     void InitMouseEvent();
     void ResetSelection();
     void RecoverSelection();
     virtual void HandleOnSelectAll();
+    virtual void HandleOnCameraInput() {};
     void InitSelection(const Offset& pos);
     void HandleLongPress(GestureEvent& info);
+    void HandleMouseEventOfAISpan(const MouseInfo& info, PointF textOffset, bool& isClickOnAISpan);
     void HandleClickEvent(GestureEvent& info);
     void HandleSingleClickEvent(GestureEvent& info);
     void HandleSpanSingleClickEvent(
@@ -518,6 +525,7 @@ protected:
     bool textDetectEnable_ = false;
     bool aiDetectInitialized_ = false;
     bool aiDetectTypesChanged_ = false;
+    bool hasClickedAISpan_ = false;
     std::string textDetectTypes_;
     std::set<std::string> textDetectTypesSet_;
     std::string textForAI_;

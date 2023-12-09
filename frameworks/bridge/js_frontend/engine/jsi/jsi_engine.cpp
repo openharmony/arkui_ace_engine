@@ -833,7 +833,7 @@ std::string GetDeviceInfo()
         infoList->Put("windowHeight", "N/A");
     }
 
-    infoList->Put("screenDensity", SystemProperties::GetResolution());
+    infoList->Put("screenDensity", PipelineBase::GetCurrentDensity());
 
     bool isRound = SystemProperties::GetIsScreenRound();
     if (isRound) {

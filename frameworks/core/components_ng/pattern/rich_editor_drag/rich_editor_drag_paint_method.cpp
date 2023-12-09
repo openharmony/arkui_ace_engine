@@ -16,11 +16,12 @@
 
 namespace OHOS::Ace::NG {
 RichEditorDragPaintMethod::RichEditorDragPaintMethod(const WeakPtr<Pattern>& pattern,
-    const RefPtr<RichEditorDragOverlayModifier>& overlayMod) : pattern_(pattern),
-    overlayModifier_(overlayMod) {}
+    const RefPtr<TextDragOverlayModifier>& overlayMod, const RefPtr<RichEditorDragContentModifier>& contentMod)
+    : TextDragPaintMethod(pattern, overlayMod), contentModifier_(contentMod)
+{}
 
-RefPtr<Modifier> RichEditorDragPaintMethod::GetOverlayModifier(PaintWrapper* paintWrapper)
+RefPtr<Modifier> RichEditorDragPaintMethod::GetContentModifier(PaintWrapper* paintWrapper)
 {
-    return overlayModifier_;
+    return contentModifier_;
 }
 } // namespace OHOS::Ace::NG

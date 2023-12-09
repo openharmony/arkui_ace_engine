@@ -43,15 +43,19 @@ void RenderingContext2DModifier::onDraw(DrawingContext& drawingContext)
     if (!drawCmdList) {
         return;
     }
+
+    auto rsDrawCmdList = recordingCanvas->GetDrawCmdList();
+    CHECK_NULL_VOID(rsDrawCmdList);
+    recordingCanvasDrawSize_.SetWidth(rsDrawCmdList->GetWidth());
+    recordingCanvasDrawSize_.SetHeight(rsDrawCmdList->GetHeight());
+    drawCmdSize_.SetWidth(drawCmdList->GetWidth());
+    drawCmdSize_.SetHeight(drawCmdList->GetHeight());
+    rsDrawCmdList->SetWidth(drawCmdList->GetWidth());
+    rsDrawCmdList->SetHeight(drawCmdList->GetHeight());
+    
     if (drawCmdList->GetSize() == 0) {
         return;
     }
-    recordingCanvasDrawSize_.SetWidth(recordingCanvas->GetDrawCmdList()->GetWidth());
-    recordingCanvasDrawSize_.SetHeight(recordingCanvas->GetDrawCmdList()->GetHeight());
-    drawCmdSize_.SetWidth(drawCmdList->GetWidth());
-    drawCmdSize_.SetHeight(drawCmdList->GetHeight());
-    recordingCanvas->GetDrawCmdList()->SetWidth(drawCmdList->GetWidth());
-    recordingCanvas->GetDrawCmdList()->SetHeight(drawCmdList->GetHeight());
     auto canvas = std::make_shared<OHOS::Rosen::RSPaintFilterCanvas>(recordingCanvas);
     CHECK_NULL_VOID(canvas);
     canvas->SetRecordingState(true);
@@ -71,8 +75,10 @@ void RenderingContext2DModifier::onDraw(DrawingContext& drawingContext)
         return;
     }
     if (recordingCanvas.GetDrawingType() == Rosen::Drawing::DrawingType::RECORDING) {
-        recordingCanvasDrawSize_.SetWidth(recordingCanvas->GetDrawCmdList()->GetWidth());
-        recordingCanvasDrawSize_.SetHeight(recordingCanvas->GetDrawCmdList()->GetHeight());
+        recordingCanvasDrawSize_.SetWidth(
+            static_cast<RSRecordingCanvas&>(recordingCanvas).GetDrawCmdList()->GetWidth());
+        recordingCanvasDrawSize_.SetHeight(
+            static_cast<RSRecordingCanvas&>(recordingCanvas).GetDrawCmdList()->GetHeight());
         drawCmdSize_.SetWidth(drawCmdList->GetWidth());
         drawCmdSize_.SetHeight(drawCmdList->GetHeight());
         static_cast<RSRecordingCanvas&>(recordingCanvas).GetDrawCmdList()->SetWidth(drawCmdList->GetWidth());

@@ -249,6 +249,8 @@ build_component_ng("pattern_ng") {
     "navrouter/navrouter_group_node.cpp",
     "navrouter/navrouter_model_ng.cpp",
     "navrouter/navrouter_pattern.cpp",
+    "node_container/node_container_model_ng.cpp",
+    "node_container/node_container_pattern.cpp",
     "option/option_accessibility_property.cpp",
     "option/option_layout_algorithm.cpp",
     "option/option_paint_method.cpp",
@@ -310,6 +312,7 @@ build_component_ng("pattern_ng") {
     "relative_container/relative_container_view.cpp",
     "rendering_context/rendering_context_model_ng.cpp",
     "rich_editor_drag/rich_editor_drag_overlay_modifier.cpp",
+    "rich_editor_drag/rich_editor_drag_paint_method.cpp",
     "rich_editor_drag/rich_editor_drag_pattern.cpp",
     "root/root_layout_algorithm.cpp",
     "scroll/effect/scroll_fade_controller.cpp",
@@ -498,8 +501,14 @@ build_component_ng("pattern_ng") {
   }
 
   if (is_ohos_standard_system) {
-    external_deps = [ "graphic_2d:librender_service_client" ]
+    external_deps = [
+      "graphic_2d:librender_service_client",
+      "napi:ace_napi",
+    ]
   } else if (is_arkui_x) {
-    deps += [ "$ace_graphic/rosen/modules/render_service_client:librender_service_client_static" ]
+    deps += [
+      "$ace_graphic/rosen/modules/render_service_client:librender_service_client_static",
+      "//plugins/libs/napi:napi_$platform",
+    ]
   }
 }

@@ -35,6 +35,8 @@ struct GridItemIndexInfo {
     int32_t crossEnd = -1;
 };
 
+constexpr float HALF = 0.5f;
+
 class ACE_EXPORT GridPattern : public ScrollablePattern {
     DECLARE_ACE_TYPE(GridPattern, ScrollablePattern);
 
@@ -182,8 +184,7 @@ public:
         return ScrollAlign::AUTO;
     }
 
-    void ScrollToIndex(int32_t index, bool smooth = false, ScrollAlign align = ScrollAlign::START) override;
-
+    void ScrollToIndex(int32_t index, bool smooth = false, ScrollAlign align = ScrollAlign::AUTO) override;
     int32_t GetOriginalIndex() const;
     int32_t GetCrossCount() const;
     int32_t GetChildrenCount() const;
@@ -231,7 +232,7 @@ private:
     bool HandleDirectionKey(KeyCode code);
 
     void ClearMultiSelect() override;
-    bool IsItemSelected(const MouseInfo& info) override;
+    bool IsItemSelected(const GestureEvent& info) override;
     void MultiSelectWithoutKeyboard(const RectF& selectedZone) override;
     void UpdateScrollBarOffset() override;
     void UpdateRectOfDraggedInItem(int32_t insertIndex);
@@ -249,6 +250,8 @@ private:
     double GetNearestDistanceFromChildToCurFocusItemInMainAxis(int32_t targetIndex, GridItemIndexInfo itemIndexInfo);
     double GetNearestDistanceFromChildToCurFocusItemInCrossAxis(int32_t targetIndex, GridItemIndexInfo itemIndexInfo);
     void ResetAllDirectionsStep();
+    void ScrollToTargrtIndex(int32_t index);
+    void AdjustingTargetPos(float targetPos, int32_t rowIndex, float lineHeight);
 
     float animatorOffset_ = 0.0f;
     float prevHeight_ = 0;
@@ -260,15 +263,16 @@ private:
     bool scrollable_ = true;
 
     float endHeight_ = 0.0f;
-
-    std::pair<std::optional<float>, std::optional<float>> scrollbarInfo_;
-
     bool isLeftStep_ = false;
     bool isRightStep_ = false;
     bool isUpStep_ = false;
     bool isDownStep_ = false;
     bool isLeftEndStep_ = false;
     bool isRightEndStep_ = false;
+
+    ScrollAlign scrollAlign_ = ScrollAlign::AUTO;
+    std::optional<int32_t> targetIndex_;
+    std::pair<std::optional<float>, std::optional<float>> scrollbarInfo_;
     GridItemIndexInfo curFocusIndexInfo_;
 
     ACE_DISALLOW_COPY_AND_MOVE(GridPattern);

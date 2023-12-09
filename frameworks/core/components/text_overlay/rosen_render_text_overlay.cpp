@@ -136,21 +136,22 @@ void RosenRenderTextOverlay::PaintHandle(RSCanvas* canvas, Offset centerOffset, 
         return;
     }
 
-    RSPen pen;
-    pen.SetAntiAlias(true);
+    RSBrush brush;
+    brush.SetAntiAlias(true);
     canvas->Save();
     canvas->Translate(centerOffset.GetX(), centerOffset.GetY());
     // Paint outer circle.
-    pen.SetColor(handleColor_.GetValue());
-    canvas->AttachPen(pen);
+    brush.SetColor(handleColor_.GetValue());
+    canvas->AttachBrush(brush);
     canvas->DrawCircle(RSPoint(0.0, 0.0), NormalizeToPx(handleRadius_));
-    canvas->DetachPen();
+    canvas->DetachBrush();
     // Paint inner circle.
-    pen.SetColor(handleColorInner_.GetValue());
-    canvas->AttachPen(pen);
+    brush.SetColor(handleColorInner_.GetValue());
+    canvas->AttachBrush(brush);
     canvas->DrawCircle(RSPoint(0.0, 0.0), NormalizeToPx(handleRadiusInner_));
-    canvas->DetachPen();
+    canvas->DetachBrush();
     // Paint line of handle.
+    RSPen pen;
     pen.SetAntiAlias(true);
     pen.SetColor(handleColor_.GetValue());
     pen.SetWidth(NormalizeToPx(HANDLE_LINE_WIDTH));

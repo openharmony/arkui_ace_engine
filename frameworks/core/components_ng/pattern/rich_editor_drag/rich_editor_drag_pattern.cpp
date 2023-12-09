@@ -30,7 +30,7 @@ RefPtr<FrameNode> RichEditorDragPattern::CreateDragNode(const RefPtr<FrameNode>&
     CHECK_NULL_RETURN(hostPattern, nullptr);
     const auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
     auto dragNode = FrameNode::GetOrCreateFrameNode(V2::RICH_EDITOR_DRAG_ETS_TAG, nodeId, [hostPattern]() {
-        return MakeRefPtr<RichEditorDragPattern>(DynamicCast<RichEditorPattern>(hostPattern));
+        return MakeRefPtr<RichEditorDragPattern>(DynamicCast<TextPattern>(hostPattern));
     });
     auto dragContext = dragNode->GetRenderContext();
     CHECK_NULL_RETURN(dragContext, nullptr);
@@ -63,7 +63,7 @@ RefPtr<FrameNode> RichEditorDragPattern::CreateDragNode(
     CHECK_NULL_RETURN(dragNode, nullptr);
     auto dragPattern = dragNode->GetPattern<RichEditorDragPattern>();
     CHECK_NULL_RETURN(dragPattern, nullptr);
-    auto richEditor = hostNode->GetPattern<RichEditorPattern>();
+    auto richEditor = hostNode->GetPattern<TextPattern>();
     CHECK_NULL_RETURN(richEditor, nullptr);
     auto placeholderIndex = richEditor->GetPlaceHolderIndex();
     auto rectsForPlaceholders = richEditor->GetRectsForPlaceholders();
@@ -77,8 +77,7 @@ RefPtr<FrameNode> RichEditorDragPattern::CreateDragNode(
         auto rect = rectsForPlaceholders.at(imageIndex);
 
         for (const auto& box : boxes) {
-            if (LessOrEqual(box.Left(), rect.Left()) && GreatOrEqual(box.Right(), rect.Right()) &&
-                LessOrEqual(box.Top(), rect.Top()) && GreatOrEqual(box.Bottom(), rect.Bottom())) {
+            if (box.IsInRegion({rect.GetX() + rect.Width() / 2, rect.GetY() + rect.Height() / 2})) {
                 realImageChildren.emplace_back(child);
                 realRectsForPlaceholders.emplace_back(rect);
             }

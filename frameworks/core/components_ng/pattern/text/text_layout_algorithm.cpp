@@ -62,7 +62,7 @@ void TextLayoutAlgorithm::OnReset() {}
 std::optional<SizeF> TextLayoutAlgorithm::MeasureContent(
     const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper)
 {
-    if (!contentConstraint.maxSize.IsPositive()) {
+    if (Negative(contentConstraint.maxSize.Width()) || Negative(contentConstraint.maxSize.Height())) {
         return std::nullopt;
     }
 
@@ -113,6 +113,9 @@ std::optional<SizeF> TextLayoutAlgorithm::MeasureContent(
     } else {
         heightFinal =
             std::min(static_cast<float>(height + std::fabs(baselineOffset)), contentConstraint.maxSize.Height());
+    }
+    if (NearZero(contentConstraint.maxSize.Height()) || NearZero(contentConstraint.maxSize.Width())) {
+        return SizeF {};
     }
     if (frameNode->GetTag() == V2::TEXT_ETS_TAG && textLayoutProperty->GetContent().value_or("").empty() &&
         NonPositive(static_cast<double>(paragraph_->GetLongestLine()))) {
@@ -300,7 +303,7 @@ void TextLayoutAlgorithm::UpdateParagraphForAISpan(const TextStyle& textStyle, L
     int32_t preEnd = 0;
     for (auto kv : pattern->GetAISpanMap()) {
         auto aiSpan = kv.second;
-        if (aiSpan.start <= preEnd) {
+        if (aiSpan.start < preEnd) {
             TAG_LOGI(AceLogTag::ACE_TEXT, "Error prediction");
             continue;
         }
@@ -340,7 +343,8 @@ bool TextLayoutAlgorithm::CreateParagraph(const TextStyle& textStyle, std::strin
         paragraph_->PushStyle(textStyle);
         CHECK_NULL_RETURN(pattern, -1);
         if (spanItemChildren_.empty()) {
-            if (pattern->GetTextDetectEnable() && !pattern->GetAISpanMap().empty()) {
+            if (textLayoutProperty->GetCopyOptionValue(CopyOptions::None) != CopyOptions::None &&
+                pattern->GetTextDetectEnable() && !pattern->GetAISpanMap().empty()) {
                 UpdateParagraphForAISpan(textStyle, layoutWrapper);
             } else {
                 StringUtils::TransformStrCase(content, static_cast<int32_t>(textStyle.GetTextCase()));

@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 #include "ui_service_stub.h"
-#include "hilog_wrapper.h"
 
 namespace OHOS {
 namespace Ace {
@@ -32,12 +31,9 @@ UIServiceStub::~UIServiceStub()
 int32_t UIServiceStub::OnRemoteRequest(
     uint32_t code, MessageParcel& data, MessageParcel& reply, MessageOption& option)
 {
-    HILOG_DEBUG("UIServiceStub::%{public}s, cmd = %{public}d, flags= %{public}d, code=%{public}d",
-        __func__, code, option.GetFlags(), code);
     std::u16string descriptor = UIServiceStub::GetDescriptor();
     std::u16string remoteDescriptor = data.ReadInterfaceToken();
     if (descriptor != remoteDescriptor) {
-        HILOG_INFO("local descriptor is not equal to remote");
         return ERR_INVALID_STATE;
     }
 
@@ -48,7 +44,6 @@ int32_t UIServiceStub::OnRemoteRequest(
             return (this->*requestFunc)(data, reply);
         }
     }
-    HILOG_WARN("%{public}s, default case, need check.", __func__);
     return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
 }
 
@@ -56,7 +51,6 @@ int32_t UIServiceStub::OnPushCallBackInner(MessageParcel& data, MessageParcel& r
 {
     std::shared_ptr<AAFwk::Want> want(data.ReadParcelable<AAFwk::Want>());
     if (want == nullptr) {
-        HILOG_ERROR("OnPushCallBackInner want is nullptr");
         return ERR_INVALID_VALUE;
     }
     const std::string& name = data.ReadString();
@@ -71,7 +65,6 @@ int32_t UIServiceStub::OnReturnRequestInner(MessageParcel& data, MessageParcel& 
 {
     std::shared_ptr<AAFwk::Want> want(data.ReadParcelable<AAFwk::Want>());
     if (want == nullptr) {
-        HILOG_ERROR("OnReturnRequestInner want is nullptr");
         return ERR_INVALID_VALUE;
     }
     const std::string& source = data.ReadString();
@@ -85,7 +78,6 @@ int32_t UIServiceStub::OnRequestCallBackInner(MessageParcel& data, MessageParcel
 {
     std::shared_ptr<AAFwk::Want> want(data.ReadParcelable<AAFwk::Want>());
     if (want == nullptr) {
-        HILOG_ERROR("OnRequestCallBackInner want is nullptr");
         return ERR_INVALID_VALUE;
     }
     const std::string& name = data.ReadString();
@@ -96,8 +88,6 @@ int32_t UIServiceStub::OnRequestCallBackInner(MessageParcel& data, MessageParcel
 
 void UIServiceCallbackRecipient::OnRemoteDied(const wptr<IRemoteObject>& remote)
 {
-    HILOG_ERROR("recv UIServiceCallbackRecipient death notice");
-
     if (handler_) {
         handler_(remote);
     }

@@ -34,6 +34,7 @@ public:
     void OnChangeEvent(NG::ChangeEvent&& onChange) override {};
     void SetResponseRegion(const std::vector<DimensionRect>& responseRegion) override {};
     void SetHoverEffect(HoverEffectType hoverEffect) override {};
+    void Pop() override;
 };
 
 } // namespace OHOS::Ace::Framework

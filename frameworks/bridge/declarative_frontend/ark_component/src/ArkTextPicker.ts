@@ -13,41 +13,26 @@ class ArkTextPickerComponent extends ArkComponent implements TextPickerAttribute
     return this;
   }
   canLoop(value: boolean): this {
-    if (isBoolean(value)) {
-      modifier(this._modifiers, TextpickerCanLoopModifier, value);
-    } else {
+    if (isUndefined(value)) {
       modifier(this._modifiers, TextpickerCanLoopModifier, undefined);
+    } else {
+      modifier(this._modifiers, TextpickerCanLoopModifier, value);
     }
     return this;
   }
   disappearTextStyle(value: PickerTextStyle): this {
-    let disappearTextStyle = new ArkTextStyle();
-    if (isObject(value)) {
-      disappearTextStyle.parseTextStyle(value);
-      modifier(this._modifiers, TextpickerDisappearTextStyleModifier, disappearTextStyle);
-    } else {
-      modifier(this._modifiers, TextpickerDisappearTextStyleModifier, undefined);
-    }
+    modifierWithKey(
+      this._modifiersWithKeys, TextpickerDisappearTextStyleModifier.identity, TextpickerDisappearTextStyleModifier, value);
     return this;
   }
   textStyle(value: PickerTextStyle): this {
-    let textStyle = new ArkTextStyle();
-    if (isObject(value)) {
-      textStyle.parseTextStyle(value);
-      modifier(this._modifiers, TextpickerTextStyleModifier, textStyle);
-    } else {
-      modifier(this._modifiers, TextpickerTextStyleModifier, undefined);
-    }
+    modifierWithKey(
+      this._modifiersWithKeys, TextpickerTextStyleModifier.identity, TextpickerTextStyleModifier, value);
     return this;
   }
   selectedTextStyle(value: PickerTextStyle): this {
-    let textStyle = new ArkTextStyle();
-    if (isObject(value)) {
-      textStyle.parseTextStyle(value);
-      modifier(this._modifiers, TextpickerSelectedTextStyleModifier, textStyle);
-    } else {
-      modifier(this._modifiers, TextpickerSelectedTextStyleModifier, undefined);
-    }
+    modifierWithKey(
+      this._modifiersWithKeys, TextpickerSelectedTextStyleModifier.identity, TextpickerSelectedTextStyleModifier, value);
     return this;
   }
   onAccept(callback: (value: string, index: number) => void): this {
@@ -79,7 +64,7 @@ class ArkTextPickerComponent extends ArkComponent implements TextPickerAttribute
 
 class TextpickerCanLoopModifier extends Modifier<boolean> {
   static identity: Symbol = Symbol('textpickerCanLoop');
-  applyPeer(node: KNode, reset: boolean) {
+  applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
       GetUINativeModule().textpicker.resetCanLoop(node);
     }
@@ -91,7 +76,7 @@ class TextpickerCanLoopModifier extends Modifier<boolean> {
 
 class TextpickerSelectedIndexModifier extends Modifier<ArkSelectedIndices> {
   static identity: Symbol = Symbol('textpickerSelectedIndex');
-  applyPeer(node: KNode, reset: boolean) {
+  applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
       GetUINativeModule().textpicker.resetSelectedIndex(node);
     }
@@ -101,9 +86,9 @@ class TextpickerSelectedIndexModifier extends Modifier<ArkSelectedIndices> {
   }
 }
 
-class TextpickerTextStyleModifier extends Modifier<ArkTextStyle> {
+class TextpickerTextStyleModifier extends ModifierWithKey<PickerTextStyle> {
   static identity: Symbol = Symbol('textpickerTextStyle');
-  applyPeer(node: KNode, reset: boolean) {
+  applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
       GetUINativeModule().textpicker.resetTextStyle(node);
     }
@@ -112,11 +97,25 @@ class TextpickerTextStyleModifier extends Modifier<ArkTextStyle> {
         this.value.color, this.value.font?.size, this.value.font?.weight, this.value.font?.family, this.value.font?.style);
     }
   }
+
+  checkObjectDiff(): boolean {
+    let colorEQ = isBaseOrResourceEqual((this.stageValue as PickerTextStyle).color,
+      (this.value as PickerTextStyle).color);
+    let sizeEQ = isBaseOrResourceEqual((this.stageValue as PickerTextStyle).font?.size,
+      (this.value as PickerTextStyle).font?.size);
+    let weightEQ = isBaseOrResourceEqual((this.stageValue as PickerTextStyle).font?.weight,
+      (this.value as PickerTextStyle).font?.weight);
+    let familyEQ = isBaseOrResourceEqual((this.stageValue as PickerTextStyle).font?.family,
+      (this.value as PickerTextStyle).font?.family);
+    let styleEQ = isBaseOrResourceEqual((this.stageValue as PickerTextStyle).font?.style,
+      (this.value as PickerTextStyle).font?.style);
+    return !colorEQ || !sizeEQ || !weightEQ || !familyEQ || !styleEQ;
+  }
 }
 
-class TextpickerSelectedTextStyleModifier extends Modifier<ArkTextStyle> {
+class TextpickerSelectedTextStyleModifier extends ModifierWithKey<PickerTextStyle> {
   static identity: Symbol = Symbol('textpickerSelectedTextStyle');
-  applyPeer(node: KNode, reset: boolean) {
+  applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
       GetUINativeModule().textpicker.resetSelectedTextStyle(node);
     }
@@ -125,29 +124,57 @@ class TextpickerSelectedTextStyleModifier extends Modifier<ArkTextStyle> {
         this.value.color, this.value.font?.size, this.value.font?.weight, this.value.font?.family, this.value.font?.style);
     }
   }
-}
 
-class TextpickerDefaultPickerItemHeightModifier extends Modifier<number | string> {
-  static identity: Symbol = Symbol('textpickerDefaultPickerItemHeight');
-  applyPeer(node: KNode, reset: boolean) {
-    if (reset) {
-      GetUINativeModule().textpicker.resetDefaultPickerItemHeight(node);
-    }
-    else {
-      GetUINativeModule().textpicker.setDefaultPickerItemHeight(node, this.value);
-    }
+  checkObjectDiff(): boolean {
+    let colorEQ = isBaseOrResourceEqual((this.stageValue as PickerTextStyle).color,
+      (this.value as PickerTextStyle).color);
+    let sizeEQ = isBaseOrResourceEqual((this.stageValue as PickerTextStyle).font?.size,
+      (this.value as PickerTextStyle).font?.size);
+    let weightEQ = isBaseOrResourceEqual((this.stageValue as PickerTextStyle).font?.weight,
+      (this.value as PickerTextStyle).font?.weight);
+    let familyEQ = isBaseOrResourceEqual((this.stageValue as PickerTextStyle).font?.family,
+      (this.value as PickerTextStyle).font?.family);
+    let styleEQ = isBaseOrResourceEqual((this.stageValue as PickerTextStyle).font?.style,
+      (this.value as PickerTextStyle).font?.style);
+    return !colorEQ || !sizeEQ || !weightEQ || !familyEQ || !styleEQ;
   }
 }
 
-class TextpickerDisappearTextStyleModifier extends Modifier<ArkTextStyle> {
+class TextpickerDisappearTextStyleModifier extends ModifierWithKey<PickerTextStyle> {
   static identity: Symbol = Symbol('textpickerDisappearTextStyle');
-  applyPeer(node: KNode, reset: boolean) {
+  applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
       GetUINativeModule().textpicker.resetDisappearTextStyle(node);
     }
     else {
       GetUINativeModule().textpicker.setDisappearTextStyle(node,
         this.value.color, this.value.font?.size, this.value.font?.weight, this.value.font?.family, this.value.font?.style);
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    let colorEQ = isBaseOrResourceEqual((this.stageValue as PickerTextStyle).color,
+      (this.value as PickerTextStyle).color);
+    let sizeEQ = isBaseOrResourceEqual((this.stageValue as PickerTextStyle).font?.size,
+      (this.value as PickerTextStyle).font?.size);
+    let weightEQ = isBaseOrResourceEqual((this.stageValue as PickerTextStyle).font?.weight,
+      (this.value as PickerTextStyle).font?.weight);
+    let familyEQ = isBaseOrResourceEqual((this.stageValue as PickerTextStyle).font?.family,
+      (this.value as PickerTextStyle).font?.family);
+    let styleEQ = isBaseOrResourceEqual((this.stageValue as PickerTextStyle).font?.style,
+      (this.value as PickerTextStyle).font?.style);
+    return !colorEQ || !sizeEQ || !weightEQ || !familyEQ || !styleEQ;
+  }
+}
+
+class TextpickerDefaultPickerItemHeightModifier extends Modifier<number | string> {
+  static identity: Symbol = Symbol('textpickerDefaultPickerItemHeight');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      GetUINativeModule().textpicker.resetDefaultPickerItemHeight(node);
+    }
+    else {
+      GetUINativeModule().textpicker.setDefaultPickerItemHeight(node, this.value);
     }
   }
 }
@@ -161,4 +188,4 @@ globalThis.TextPicker.attributeModifier = function (modifier) {
   });
   modifier.applyNormalAttribute(component);
   component.applyModifierPatch();
-}
+};

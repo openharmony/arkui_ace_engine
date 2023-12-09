@@ -116,6 +116,7 @@ void ButtonModelNG::CreateWithLabel(const std::string& label)
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
+    ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::BUTTON_ETS_TAG, nodeId);
     auto buttonNode = FrameNode::GetOrCreateFrameNode(
         V2::BUTTON_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<ButtonPattern>(); });
     CHECK_NULL_VOID(buttonNode);
@@ -179,6 +180,11 @@ void ButtonModelNG::OnClick(GestureEventFunc&& tapEventFunc, ClickEventFunc&& cl
 void ButtonModelNG::BackgroundColor(const Color& color, const bool& colorFlag)
 {
     ViewAbstract::SetBackgroundColor(color);
+}
+
+void ButtonModelNG::BackgroundColor(FrameNode* frameNode, const Color& color, const bool& colorFlag)
+{
+    ViewAbstract::SetBackgroundColor(frameNode, color);
 }
 
 void ButtonModelNG::SetSize(const std::optional<Dimension>& width, const std::optional<Dimension>& height)

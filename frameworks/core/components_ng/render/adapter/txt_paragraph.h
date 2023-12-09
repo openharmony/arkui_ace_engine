@@ -79,8 +79,8 @@ public:
     int32_t GetGlyphIndexByCoordinate(const Offset& offset) override;
     void GetRectsForRange(int32_t start, int32_t end, std::vector<RectF>& selectedRects) override;
     void GetRectsForPlaceholders(std::vector<RectF>& selectedRects) override;
-    bool ComputeOffsetForCaretDownstream(int32_t extent, CaretMetricsF& result) override;
-    bool ComputeOffsetForCaretUpstream(int32_t extent, CaretMetricsF& result) override;
+    bool ComputeOffsetForCaretDownstream(int32_t extent, CaretMetricsF& result, bool needLineHighest = true) override;
+    bool ComputeOffsetForCaretUpstream(int32_t extent, CaretMetricsF& result, bool needLineHighest = true) override;
     bool CalcCaretMetricsByPosition(
         int32_t extent, CaretMetricsF& caretCaretMetric, TextAffinity textAffinity) override;
     bool CalcCaretMetricsByPosition(
@@ -92,6 +92,7 @@ public:
 
 private:
     void CreateBuilder();
+    bool CalCulateAndCheckPreIsPlaceholder(int32_t index, int32_t& extent);
     inline size_t GetParagraphLength() const
     {
         return text_.length() + placeholderIndex_ + 1;
@@ -112,6 +113,7 @@ private:
     int32_t placeholderIndex_ = -1;
     TextAlign textAlign_;
     static uint32_t destructCount;
+    std::list<size_t> placeholderPosition_;
 
     ACE_DISALLOW_COPY_AND_MOVE(TxtParagraph);
 };

@@ -41,7 +41,6 @@ protected:
     {                                                                                                             \
         CalcDimension item##name;                                                                                     \
         if (!ParseJsDimensionVp(info[0], item##name)) {                                                           \
-            LOGE("Fail to parse %{public}s of grid item in CalcDimension unit", #name);                               \
             return;                                                                                               \
         }                                                                                                         \
         auto gridItem =                                                                                           \
@@ -56,11 +55,9 @@ protected:
     static void SetGridItem##name(const JSCallbackInfo& info)                    \
     {                                                                            \
         if (info.Length() < 1) {                                                 \
-            LOGE("The arg is wrong when set %{public}s of grid item", #name);    \
             return;                                                              \
         }                                                                        \
         if (!JSViewAbstract::Js##name(info[0])) {                                \
-            LOGE("JSViewAbstract fail to parse %{public}s of grid item", #name); \
             return;                                                              \
         }                                                                        \
         SetComponent##name(info);                                                \

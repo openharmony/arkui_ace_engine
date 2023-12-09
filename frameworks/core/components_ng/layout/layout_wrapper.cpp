@@ -83,15 +83,14 @@ void LayoutWrapper::RestoreGeoState()
     }
 }
 
-void LayoutWrapper::AvoidKeyboard()
+void LayoutWrapper::AvoidKeyboard(bool isFocusOnPage)
 {
     // apply keyboard avoidance on Page
     if (GetHostTag() == V2::PAGE_ETS_TAG) {
         auto pipeline = PipelineContext::GetCurrentContext();
         CHECK_NULL_VOID(pipeline);
         auto manager = pipeline->GetSafeAreaManager();
-        if (GetHostNode()->GetFocusHub() && !GetHostNode()->GetFocusHub()->IsCurrentFocus() &&
-            LessNotEqual(manager->GetKeyboardOffset(), 0.0)) {
+        if (!isFocusOnPage && LessNotEqual(manager->GetKeyboardOffset(), 0.0)) {
             return;
         }
         GetGeometryNode()->SetFrameOffset(
@@ -113,7 +112,7 @@ void LayoutWrapper::SaveGeoState()
     }
 }
 
-void LayoutWrapper::ExpandSafeArea()
+void LayoutWrapper::ExpandSafeArea(bool isFocusOnPage)
 {
     auto&& opts = GetLayoutProperty()->GetSafeAreaExpandOpts();
     CHECK_NULL_VOID(opts && opts->Expansive());
@@ -126,7 +125,7 @@ void LayoutWrapper::ExpandSafeArea()
         return;
     }
 
-    if ((opts->edges & SAFE_AREA_EDGE_BOTTOM) && (opts->type & SAFE_AREA_TYPE_KEYBOARD)) {
+    if ((opts->edges & SAFE_AREA_EDGE_BOTTOM) && (opts->type & SAFE_AREA_TYPE_KEYBOARD) && isFocusOnPage) {
         ExpandIntoKeyboard();
     }
 

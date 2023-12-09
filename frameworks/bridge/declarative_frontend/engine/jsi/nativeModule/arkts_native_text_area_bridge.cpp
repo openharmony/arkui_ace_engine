@@ -128,7 +128,7 @@ ArkUINativeModuleValue TextAreaBridge::SetCopyOption(ArkUIRuntimeCallInfo *runti
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
     void *nativeNode = firstArg->ToNativePointer(vm)->Value();
-    int32_t copyOptions = static_cast<int32_t>(OHOS::Ace::CopyOptions::None);
+    int32_t copyOptions = static_cast<int32_t>(OHOS::Ace::CopyOptions::Local);
     int32_t copyOptionsDistributed = static_cast<int32_t>(OHOS::Ace::CopyOptions::Distributed);
     if (secondArg->IsNumber() && secondArg->Int32Value(vm) >= copyOptions &&
         secondArg->Int32Value(vm) <= copyOptionsDistributed) {
@@ -417,7 +417,7 @@ ArkUINativeModuleValue TextAreaBridge::SetMaxLength(ArkUIRuntimeCallInfo *runtim
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
     void *nativeNode = firstArg->ToNativePointer(vm)->Value();
-    if (secondArg->IsNumber() && secondArg->Int32Value(vm) > 0) {
+    if (secondArg->IsNumber() && secondArg->Int32Value(vm) >= 0) {
         GetArkUIInternalNodeAPI()->GetTextAreaModifier().SetTextAreaMaxLength(nativeNode, secondArg->Int32Value(vm));
     } else {
         GetArkUIInternalNodeAPI()->GetTextAreaModifier().ResetTextAreaMaxLength(nativeNode);

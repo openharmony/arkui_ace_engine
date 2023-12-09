@@ -41,6 +41,7 @@
 #include "bridge/declarative_frontend/engine/functions/js_click_function.h"
 #include "bridge/declarative_frontend/engine/functions/js_clipboard_function.h"
 #include "bridge/declarative_frontend/engine/functions/js_drag_function.h"
+#include "bridge/declarative_frontend/engine/functions/js_on_child_touch_test_function.h"
 #include "bridge/declarative_frontend/engine/functions/js_focus_function.h"
 #include "bridge/declarative_frontend/engine/functions/js_function.h"
 #include "bridge/declarative_frontend/engine/functions/js_gesture_judge_function.h"
@@ -2816,6 +2817,67 @@ void JSViewAbstract::ParseMarginOrPaddingCorner(JSRef<JSObject> obj, std::option
     }
 }
 
+void JSViewAbstract::JsOutline(const JSCallbackInfo& info)
+{
+    std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::OBJECT };
+    if (!CheckJSCallbackInfo("JsOutline", info, checkList)) {
+        CalcDimension borderWidth;
+        ViewAbstractModel::GetInstance()->SetOuterBorderWidth(borderWidth);
+        ViewAbstractModel::GetInstance()->SetOuterBorderColor(Color::BLACK);
+        ViewAbstractModel::GetInstance()->SetOuterBorderRadius(borderWidth);
+        ViewAbstractModel::GetInstance()->SetOuterBorderStyle(BorderStyle::SOLID);
+        return;
+    }
+    JSRef<JSObject> object = JSRef<JSObject>::Cast(info[0]);
+    auto valueOuterWidth = object->GetProperty("width");
+    if (!valueOuterWidth->IsUndefined()) {
+        ParseOuterBorderWidth(valueOuterWidth);
+    }
+
+    // use default value when undefined.
+    ParseOuterBorderColor(object->GetProperty("color"));
+
+    auto valueOuterRadius = object->GetProperty("radius");
+    if (!valueOuterRadius->IsUndefined()) {
+        ParseOuterBorderRadius(valueOuterRadius);
+    }
+    // use default value when undefined.
+    ParseOuterBorderStyle(object->GetProperty("style"));
+    info.ReturnSelf();
+}
+
+void JSViewAbstract::JsOutlineWidth(const JSCallbackInfo& info)
+{
+    std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::STRING, JSCallbackInfoType::NUMBER,
+        JSCallbackInfoType::OBJECT };
+    if (!CheckJSCallbackInfo("JsOutlineWidth", info, checkList)) {
+        ViewAbstractModel::GetInstance()->SetOuterBorderWidth({});
+        return;
+    }
+    ParseOuterBorderWidth(info[0]);
+}
+
+void JSViewAbstract::JsOutlineColor(const JSCallbackInfo& info)
+{
+    ParseOuterBorderColor(info[0]);
+}
+
+void JSViewAbstract::JsOutlineRadius(const JSCallbackInfo& info)
+{
+    std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::STRING, JSCallbackInfoType::NUMBER,
+        JSCallbackInfoType::OBJECT };
+    if (!CheckJSCallbackInfo("JsOutlineRadius", info, checkList)) {
+        ViewAbstractModel::GetInstance()->SetOuterBorderRadius({});
+        return;
+    }
+    ParseOuterBorderRadius(info[0]);
+}
+
+void JSViewAbstract::JsOutlineStyle(const JSCallbackInfo& info)
+{
+    ParseOuterBorderStyle(info[0]);
+}
+
 void JSViewAbstract::JsBorder(const JSCallbackInfo& info)
 {
     std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::OBJECT };
@@ -2827,34 +2889,8 @@ void JSViewAbstract::JsBorder(const JSCallbackInfo& info)
         ViewAbstractModel::GetInstance()->SetBorderStyle(BorderStyle::SOLID);
         return;
     }
-    JSRef<JSObject> object;
-    JSRef<JSObject> outerObject;
-    if (info[0]->IsArray()) {
-        JSRef<JSArray> infoArray = JSRef<JSArray>::Cast(info[0]);
-        if ((infoArray->Length()) > 0) {
-            object = JSRef<JSObject>::Cast(infoArray->GetValueAt(0));
-        }
-        if ((infoArray->Length()) > 1) {
-            outerObject = JSRef<JSObject>::Cast(infoArray->GetValueAt(1));
-            auto valueOuterWidth = outerObject->GetProperty("width");
-            if (!valueOuterWidth->IsUndefined()) {
-                ParseOuterBorderWidth(valueOuterWidth);
-            }
-
-            // use default value when undefined.
-            ParseOuterBorderColor(outerObject->GetProperty("color"));
-
-            auto valueOuterRadius = outerObject->GetProperty("radius");
-            if (!valueOuterRadius->IsUndefined()) {
-                ParseOuterBorderRadius(valueOuterRadius);
-            }
-            // use default value when undefined.
-            ParseOuterBorderStyle(outerObject->GetProperty("style"));
-        }
-    } else {
-        object = JSRef<JSObject>::Cast(info[0]);
-    }
-
+    JSRef<JSObject> object = JSRef<JSObject>::Cast(info[0]);
+    
     auto valueWidth = object->GetProperty("width");
     if (!valueWidth->IsUndefined()) {
         ParseBorderWidth(valueWidth);
@@ -5702,7 +5738,7 @@ void JSViewAbstract::ParseSheetStyle(const JSRef<JSObject>& paramObj, NG::SheetS
     auto sheetDetents = paramObj->GetProperty("detents");
     auto backgroundBlurStyle = paramObj->GetProperty("blurStyle");
     auto showCloseIcon = paramObj->GetProperty("showClose");
-    auto type = paramObj->GetProperty("type");
+    auto type = paramObj->GetProperty("preferType");
 
     std::vector<NG::SheetHeight> detents;
     if (ParseSheetDetents(sheetDetents, detents)) {
@@ -5822,6 +5858,11 @@ void JSViewAbstract::ParseSheetDetentHeight(const JSRef<JSVal>& args, NG::SheetH
         }
         if (heightStr == SHEET_HEIGHT_LARGE) {
             detent.sheetMode = NG::SheetMode::LARGE;
+            detent.height.reset();
+            return;
+        }
+        if (heightStr == SHEET_HEIGHT_FITCONTENT) {
+            detent.sheetMode = NG::SheetMode::AUTO;
             detent.height.reset();
             return;
         }
@@ -6148,6 +6189,11 @@ void JSViewAbstract::JSBind(BindingTarget globalObj)
     JSClass<JSViewAbstract>::StaticMethod("lightUpEffect", &JSViewAbstract::JsLightUpEffect);
     JSClass<JSViewAbstract>::StaticMethod("sphericalEffect", &JSViewAbstract::JsSphericalEffect);
     JSClass<JSViewAbstract>::StaticMethod("pixelStretchEffect", &JSViewAbstract::JsPixelStretchEffect);
+    JSClass<JSViewAbstract>::StaticMethod("outline", &JSViewAbstract::JsOutline);
+    JSClass<JSViewAbstract>::StaticMethod("outlineWidth", &JSViewAbstract::JsOutlineWidth);
+    JSClass<JSViewAbstract>::StaticMethod("outlineStyle", &JSViewAbstract::JsOutlineStyle);
+    JSClass<JSViewAbstract>::StaticMethod("outlineColor", &JSViewAbstract::JsOutlineColor);
+    JSClass<JSViewAbstract>::StaticMethod("outlineRadius", &JSViewAbstract::JsOutlineRadius);
     JSClass<JSViewAbstract>::StaticMethod("border", &JSViewAbstract::JsBorder);
     JSClass<JSViewAbstract>::StaticMethod("borderWidth", &JSViewAbstract::JsBorderWidth);
     JSClass<JSViewAbstract>::StaticMethod("borderColor", &JSViewAbstract::JsBorderColor);
@@ -6263,9 +6309,11 @@ void JSViewAbstract::JSBind(BindingTarget globalObj)
     JSClass<JSViewAbstract>::StaticMethod("alignRules", &JSViewAbstract::JsAlignRules);
     JSClass<JSViewAbstract>::StaticMethod("onVisibleAreaChange", &JSViewAbstract::JsOnVisibleAreaChange);
     JSClass<JSViewAbstract>::StaticMethod("hitTestBehavior", &JSViewAbstract::JsHitTestBehavior);
+    JSClass<JSViewAbstract>::StaticMethod("onChildTouchTest", &JSViewAbstract::JsOnChildTouchTest);
     JSClass<JSViewAbstract>::StaticMethod("keyboardShortcut", &JSViewAbstract::JsKeyboardShortcut);
     JSClass<JSViewAbstract>::StaticMethod("obscured", &JSViewAbstract::JsObscured);
     JSClass<JSViewAbstract>::StaticMethod("allowDrop", &JSViewAbstract::JsAllowDrop);
+    JSClass<JSViewAbstract>::StaticMethod("dragPreview", &JSViewAbstract::JsDragPreview);
 
     JSClass<JSViewAbstract>::StaticMethod("createAnimatableProperty", &JSViewAbstract::JSCreateAnimatableProperty);
     JSClass<JSViewAbstract>::StaticMethod("updateAnimatableProperty", &JSViewAbstract::JSUpdateAnimatableProperty);
@@ -6291,6 +6339,45 @@ void JSViewAbstract::JsAllowDrop(const JSCallbackInfo& info)
         allowDropSet.insert(allowDrop);
     }
     ViewAbstractModel::GetInstance()->SetAllowDrop(allowDropSet);
+}
+
+void JSViewAbstract::JsDragPreview(const JSCallbackInfo& info)
+{
+    if (!info[0]->IsObject()) {
+        return;
+    }
+    NG::DragDropInfo dragPreviewInfo;
+    JSRef<JSVal> builder;
+    JSRef<JSVal> pixelMap;
+    JSRef<JSVal> extraInfo;
+    if (info[0]->IsFunction()) {
+        builder = info[0];
+    } else if (info[0]->IsObject()) {
+        auto dragItemInfo = JSRef<JSObject>::Cast(info[0]);
+        builder = dragItemInfo->GetProperty("builder");
+#if defined(PIXEL_MAP_SUPPORTED)
+        pixelMap = dragItemInfo->GetProperty("pixelMap");
+        dragPreviewInfo.pixelMap = CreatePixelMapFromNapiValue(pixelMap);
+#endif
+        extraInfo = dragItemInfo->GetProperty("extraInfo");
+        ParseJsString(extraInfo, dragPreviewInfo.extraInfo);
+    } else {
+        return;
+    }
+
+    if (builder->IsFunction()) {
+        RefPtr<JsFunction> builderFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(builder));
+        if (builderFunc != nullptr) {
+            ViewStackModel::GetInstance()->NewScope();
+            {
+                ACE_SCORING_EVENT("dragPreview.builder");
+                builderFunc->Execute();
+            }
+            RefPtr<AceType> node = ViewStackModel::GetInstance()->Finish();
+            dragPreviewInfo.customNode = AceType::DynamicCast<NG::UINode>(node);
+        }
+    }
+    ViewAbstractModel::GetInstance()->SetDragPreview(dragPreviewInfo);
 }
 
 void JSViewAbstract::JsAlignRules(const JSCallbackInfo& info)
@@ -6555,24 +6642,7 @@ bool JSViewAbstract::ParseShadowProps(const JSRef<JSVal>& jsValue, Shadow& shado
     int32_t shadowStyle = 0;
     if (ParseJsInteger<int32_t>(jsValue, shadowStyle)) {
         auto style = static_cast<ShadowStyle>(shadowStyle);
-        auto colorMode = SystemProperties::GetColorMode();
-        if (style == ShadowStyle::None) {
-            return true;
-        }
-        
-        auto container = Container::Current();
-        CHECK_NULL_RETURN(container, false);
-        auto pipelineContext = container->GetPipelineContext();
-        CHECK_NULL_RETURN(pipelineContext, false);
-        
-        auto shadowTheme = pipelineContext->GetTheme<ShadowTheme>();
-        if (!shadowTheme) {
-            LOGW("cannot find theme of shadowStyle, create shadowStyle failed");
-            return false;
-        }
-        
-        shadow = shadowTheme->GetShadow(style, colorMode);
-        return true;
+        return GetShadowFromTheme(style, shadow);
     }
     JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsValue);
     double radius = 0.0;
@@ -6610,6 +6680,27 @@ bool JSViewAbstract::ParseShadowProps(const JSRef<JSVal>& jsValue, Shadow& shado
     shadow.SetShadowType(static_cast<ShadowType>(type));
     bool isFilled = jsObj->GetPropertyValue<bool>("fill", false);
     shadow.SetIsFilled(isFilled);
+    return true;
+}
+
+bool JSViewAbstract::GetShadowFromTheme(ShadowStyle shadowStyle, Shadow& shadow)
+{
+    auto colorMode = SystemProperties::GetColorMode();
+    if (shadowStyle == ShadowStyle::None) {
+        return true;
+    }
+
+    auto container = Container::Current();
+    CHECK_NULL_RETURN(container, false);
+    auto pipelineContext = container->GetPipelineContext();
+    CHECK_NULL_RETURN(pipelineContext, false);
+
+    auto shadowTheme = pipelineContext->GetTheme<ShadowTheme>();
+    if (!shadowTheme) {
+        return false;
+    }
+
+    shadow = shadowTheme->GetShadow(shadowStyle, colorMode);
     return true;
 }
 
@@ -7103,6 +7194,46 @@ void JSViewAbstract::JsHitTestBehavior(const JSCallbackInfo& info)
     ViewAbstractModel::GetInstance()->SetHitTestMode(hitTestModeNG);
 }
 
+void JSViewAbstract::JsOnChildTouchTest(const JSCallbackInfo& info)
+{
+    std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::FUNCTION };
+    if (!CheckJSCallbackInfo("onChildTouchTest", info, checkList)) {
+        return;
+    }
+
+    RefPtr<JsOnChildTouchTestFunction> jsOnChildTouchTestFunc =
+        AceType::MakeRefPtr<JsOnChildTouchTestFunction>(JSRef<JSFunc>::Cast(info[0]));
+
+    auto onTouchTestFunc = [execCtx = info.GetExecutionContext(), func = std::move(jsOnChildTouchTestFunc)](
+                               const std::vector<NG::TouchTestInfo>& touchInfo) -> NG::TouchResult {
+        NG::TouchResult touchRes;
+        NG::TouchResult defaultRes;
+        defaultRes.strategy = NG::TouchTestStrategy::DEFAULT;
+        defaultRes.id = "";
+        auto ret = func->Execute(touchInfo);
+        if (!ret->IsObject()) {
+            TAG_LOGW(AceLogTag::ACE_UIEVENT, "onChildTouchTest return value is not object, parse failed.");
+            return defaultRes;
+        }
+
+        auto retObj = JSRef<JSObject>::Cast(ret);
+        auto strategy = retObj->GetProperty("strategy");
+        if (!strategy->IsNumber()) {
+            TAG_LOGW(AceLogTag::ACE_UIEVENT, "onChildTouchTest return value strategy is not number, parse failed.");
+            return defaultRes;
+        }
+        touchRes.strategy = static_cast<NG::TouchTestStrategy>(strategy->ToNumber<int32_t>());
+        auto id = retObj->GetProperty("id");
+        if (!id->IsString()) {
+            TAG_LOGW(AceLogTag::ACE_UIEVENT, "onChildTouchTest return value id is not string, parse failed.");
+            return defaultRes;
+        }
+        touchRes.id = id->ToString();
+        return touchRes;
+    };
+    ViewAbstractModel::GetInstance()->SetOnTouchTestFunc(std::move(onTouchTestFunc));
+}
+
 void JSViewAbstract::JsForegroundColor(const JSCallbackInfo& info)
 {
     Color foregroundColor;
@@ -7275,5 +7406,91 @@ void JSViewAbstract::GetJsMediaBundleInfo(const JSRef<JSVal>& jsValue, std::stri
             moduleName = module->ToString();
         }
     }
+}
+
+void JSViewAbstract::ParseImageAnalyzerSubjectOptions(const JSRef<JSVal>& optionVal,
+    ImageAnalyzerConfig& analyzerConfig)
+{
+    ImageAnalyzerSubjectOptions subjectOptions;
+    auto obj = JSRef<JSObject>::Cast(optionVal);
+    JSRef<JSVal> onAnalyzedVal = obj->GetProperty("onAnalyzed");
+    if (onAnalyzedVal->IsFunction()) {
+        RefPtr<JsFunction> jsOnAnalyzedFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(),
+            JSRef<JSFunc>::Cast(onAnalyzedVal));
+        onSubcjectAnalyzedFunc onAnalyzedCallback =
+            [func = std::move(jsOnAnalyzedFunc)](std::string tag, std::vector<uint8_t> data) {
+            JSRef<JSVal> params[2];
+            params[0] = JSRef<JSVal>::Make(ToJSValue(tag));
+            JSRef<JSArray> indexArray = JSRef<JSArray>::New();
+            for (uint32_t i = 0; i < data.size(); i++) {
+                indexArray->SetValueAt(i, JSRef<JSVal>::Make(ToJSValue(data[i])));
+            }
+            params[1] = JSRef<JSVal>::Cast(indexArray);
+            func->ExecuteJS(2, params);
+        };
+        subjectOptions.onAnalyzedCallback = std::move(onAnalyzedCallback);
+    }
+
+    JSRef<JSVal> dataVal = obj->GetProperty("analyzedData");
+    if (dataVal->IsArray()) {
+        JSRef<JSArray> dataArray  = JSRef<JSArray>::Cast(dataVal);
+        std::vector<uint8_t> analyzedData;
+        for (size_t i = 0; i < dataArray->Length(); ++i) {
+            JSRef<JSVal> value = dataArray->GetValueAt(i);
+            if (value->IsNumber()) {
+                analyzedData.emplace_back(value->ToNumber<uint8_t>());
+            }
+        }
+        subjectOptions.analyzedData = std::move(analyzedData);
+    }
+
+#if defined(PIXEL_MAP_SUPPORTED)
+    auto pixmapVal = obj->GetProperty("sourcePixelmap");
+    RefPtr<PixelMap> pixmap = CreatePixelMapFromNapiValue(pixmapVal);
+    if (pixmap != nullptr) {
+        subjectOptions.sourcePixelmap = ConvertPixmapNapi(pixmap);
+    }
+#endif
+    analyzerConfig.subjectOptions_ = std::move(subjectOptions);
+}
+
+void JSViewAbstract::ParseImageAnalyzerTextOptions(const JSRef<JSVal>& optionVal, ImageAnalyzerConfig& analyzerConfig)
+{
+    ImageAnalyzerTextOptions textOptions;
+    auto obj = JSRef<JSObject>::Cast(optionVal);
+    JSRef<JSVal> onAnalyzedVal = obj->GetProperty("onAnalyzed");
+    if (onAnalyzedVal->IsFunction()) {
+        RefPtr<JsFunction> jsFunc =
+            AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onAnalyzedVal));
+        onTextAnalyzedFunc onAnalyzedCallback = [func = std::move(jsFunc)] (
+            std::string tag, std::string data) {
+            JSRef<JSVal> params[2];
+            params[0] = JSRef<JSVal>::Make(ToJSValue(tag));
+            params[1] = JSRef<JSVal>::Make(ToJSValue(data));
+            func->ExecuteJS(2, params);
+        };
+        textOptions.onAnalyzedCallback = std::move(onAnalyzedCallback);
+    }
+
+    JSRef<JSVal> onTextSelected = obj->GetProperty("onTextSelected");
+    if (onTextSelected->IsFunction()) {
+        RefPtr<JsFunction> jsOnTextSelectedFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(),
+        JSRef<JSFunc>::Cast(onTextSelected));
+        onTextSelectedFunc onTextSelectedCallback =
+            [func = std::move(jsOnTextSelectedFunc)] (std::string tag, std::string data) {
+            JSRef<JSVal> params[2];
+            params[0] = JSRef<JSVal>::Make(ToJSValue(tag));
+            params[1] = JSRef<JSVal>::Make(ToJSValue(data));
+            func->ExecuteJS(2, params);
+        };
+        textOptions.onTextSelected = std::move(onTextSelectedCallback);
+    }
+
+    JSRef<JSVal> dataVal = obj->GetProperty("analyzedData");
+    if (dataVal->IsArray()) {
+        std::string analyzedData = dataVal->ToString();
+        textOptions.analyzedData = std::move(analyzedData);
+    }
+    analyzerConfig.textOptions = std::move(textOptions);
 }
 } // namespace OHOS::Ace::Framework

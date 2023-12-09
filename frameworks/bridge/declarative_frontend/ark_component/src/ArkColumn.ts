@@ -1,5 +1,5 @@
 /// <reference path="./import.ts" />
-class ColumnAlignItemsModifier extends Modifier<number> {
+class ColumnAlignItemsModifier extends ModifierWithKey<number> {
   static identity: Symbol = Symbol('columnAlignItems');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -8,9 +8,12 @@ class ColumnAlignItemsModifier extends Modifier<number> {
       GetUINativeModule().column.setAlignItems(node, this.value!);
     }
   }
+  checkObjectDiff(): boolean {
+    return this.stageValue !== this.value;
+  }
 }
 
-class ColumnJustifyContentModifier extends Modifier<number> {
+class ColumnJustifyContentModifier extends ModifierWithKey<number> {
   static identity: Symbol = Symbol('columnJustifyContent');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -19,27 +22,18 @@ class ColumnJustifyContentModifier extends Modifier<number> {
       GetUINativeModule().column.setJustifyContent(node, this.value!);
     }
   }
+  checkObjectDiff(): boolean {
+    return this.stageValue !== this.value;
+  }
 }
 
 class ArkColumnComponent extends ArkComponent implements CommonMethod<ColumnAttribute>{
   alignItems(value: HorizontalAlign): ColumnAttribute {
-    if (value === null || value === undefined) {
-      modifier(this._modifiers, ColumnAlignItemsModifier, undefined);
-    } else if (!(value in HorizontalAlign)) {
-      modifier(this._modifiers, ColumnAlignItemsModifier, undefined);
-    } else {
-      modifier(this._modifiers, ColumnAlignItemsModifier, value);
-    }
+    modifierWithKey(this._modifiersWithKeys, ColumnAlignItemsModifier.identity, ColumnAlignItemsModifier, value);
     return this;
   }
   justifyContent(value: FlexAlign): ColumnAttribute {
-    if (value === null || value === undefined) {
-      modifier(this._modifiers, ColumnJustifyContentModifier, undefined);
-    } else if (!(value in FlexAlign)) {
-      modifier(this._modifiers, ColumnJustifyContentModifier, undefined);
-    } else {
-      modifier(this._modifiers, ColumnJustifyContentModifier, value);
-    }
+    modifierWithKey(this._modifiersWithKeys, ColumnJustifyContentModifier.identity, ColumnJustifyContentModifier, value);
     return this;
   }
   pointLight(value: PointLightStyle): ColumnAttribute {

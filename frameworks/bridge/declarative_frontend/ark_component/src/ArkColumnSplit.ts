@@ -1,5 +1,5 @@
 /// <reference path="./import.ts" />
-class ColumnSplitDividerModifier extends ModifierWithKey<ArkColumnSplitDividerStyle> {
+class ColumnSplitDividerModifier extends ModifierWithKey<ColumnSplitDividerStyle | null> {
   static identity: Symbol = Symbol('columnSplitDivider');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -13,7 +13,7 @@ class ColumnSplitDividerModifier extends ModifierWithKey<ArkColumnSplitDividerSt
       !isBaseOrResourceEqual(this.stageValue.endMargin, this.value.endMargin)
   }
 }
-class ColumnSplitResizeableModifier extends Modifier<boolean> {
+class ColumnSplitResizeableModifier extends ModifierWithKey<boolean> {
   static identity: Symbol = Symbol('columnSplitResizeable');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -21,29 +21,19 @@ class ColumnSplitResizeableModifier extends Modifier<boolean> {
     } else {
       GetUINativeModule().columnSplit.setResizeable(node, this.value);
     }
-
+  }
+  checkObjectDiff(): boolean {
+    return this.stageValue !== this.value;
   }
 }
 class ArkColumnSplitComponent extends ArkComponent implements CommonMethod<ColumnSplitAttribute> {
   resizeable(value: boolean): ColumnSplitAttribute {
-    if (isBoolean(value)) {
-      modifier(this._modifiers, ColumnSplitResizeableModifier, value);
-    } else {
-      modifier(this._modifiers, ColumnSplitResizeableModifier, undefined);
-    }
+    modifierWithKey(this._modifiersWithKeys, ColumnSplitResizeableModifier.identity, ColumnSplitResizeableModifier, value);
     return this;
   }
   divider(value: ColumnSplitDividerStyle | null): ColumnSplitAttribute {
-    let arkValue = new ArkColumnSplitDividerStyle();
-    if (!value) {
-      modifierWithKey(this._modifiersWithKeys, ColumnSplitDividerModifier.identity, ColumnSplitDividerModifier, undefined);
-      return this;
-    } else {
-      arkValue.startMargin = value?.startMargin;
-      arkValue.endMargin = value?.endMargin;
-      modifierWithKey(this._modifiersWithKeys, ColumnSplitDividerModifier.identity, ColumnSplitDividerModifier, arkValue);
-      return this;
-    }
+    modifierWithKey(this._modifiersWithKeys, ColumnSplitDividerModifier.identity, ColumnSplitDividerModifier, value);
+    return this;
   }
   monopolizeEvents(monopolize: boolean): this {
     throw new Error("Method not implemented.");

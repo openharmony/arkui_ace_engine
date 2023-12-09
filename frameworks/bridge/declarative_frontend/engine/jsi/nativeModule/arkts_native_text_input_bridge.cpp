@@ -23,6 +23,9 @@
 namespace OHOS::Ace::NG {
 constexpr int16_t DEFAULT_APLHA = 255;
 constexpr double DEFAULT_OPACITY = 0.2;
+constexpr double DEFAULT_FONT_SIZE = 16.0;
+constexpr Ace::FontStyle DEFAULT_FONT_STYLE = Ace::FontStyle::NORMAL;
+const std::string DEFAULT_FONT_WEIGHT = "400";
 ArkUINativeModuleValue TextInputBridge::SetCaretColor(ArkUIRuntimeCallInfo *runtimeCallInfo)
 {
     EcmaVM *vm = runtimeCallInfo->GetVM();
@@ -138,6 +141,8 @@ ArkUINativeModuleValue TextInputBridge::SetCaretPosition(ArkUIRuntimeCallInfo *r
     if (secondArg->IsInt() && secondArg->Int32Value(vm) >= 0) {
         int32_t caretPosition = secondArg->Int32Value(vm);
         GetArkUIInternalNodeAPI()->GetTextInputModifier().SetTextInputCaretPosition(nativeNode, caretPosition);
+    } else {
+        GetArkUIInternalNodeAPI()->GetTextInputModifier().ResetTextInputCaretPosition(nativeNode);
     }
     return panda::JSValueRef::Undefined(vm);
 }
@@ -357,9 +362,8 @@ ArkUINativeModuleValue TextInputBridge::SetCaretStyle(ArkUIRuntimeCallInfo *runt
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
     void *nativeNode = firstArg->ToNativePointer(vm)->Value();
-
     CalcDimension width;
-    ArkUILengthType length = {nullptr, 0.0, static_cast<int8_t>(DimensionUnit::VP)};
+    struct ArkUILengthType length = { nullptr, 0.0, static_cast<int8_t>(DimensionUnit::VP) };
     if (!ArkTSUtils::ParseJsDimensionVpNG(vm, secondArg, width, false) || LessNotEqual(width.Value(), 0.0)) {
         GetArkUIInternalNodeAPI()->GetTextInputModifier().ResetTextInputCaretStyle(nativeNode);
     } else {
@@ -508,7 +512,7 @@ ArkUINativeModuleValue TextInputBridge::SetFontSize(ArkUIRuntimeCallInfo *runtim
     void *nativeNode = firstArg->ToNativePointer(vm)->Value();
 
     CalcDimension fontSize;
-    ArkUILengthType value;
+    ArkUILengthType value{ nullptr, 0.0, static_cast<int8_t>(DimensionUnit::FP) };
     if (!ArkTSUtils::ParseJsDimensionNG(vm, secondArg, fontSize, DimensionUnit::FP, false)) {
         GetArkUIInternalNodeAPI()->GetTextInputModifier().ResetTextInputFontSize(nativeNode);
     } else {
@@ -635,9 +639,8 @@ ArkUINativeModuleValue TextInputBridge::SetPlaceholderFont(ArkUIRuntimeCallInfo 
     Local<JSValueRef> jsFamily = runtimeCallInfo->GetCallArgRef(3);
     Local<JSValueRef> jsStyle = runtimeCallInfo->GetCallArgRef(4);
     void *nativeNode = firstArg->ToNativePointer(vm)->Value();
-
-    struct ArkUILengthType length = {nullptr, 0.0, static_cast<int8_t>(DimensionUnit::VP)};
-    CalcDimension size;
+    ArkUILengthType length{ nullptr, DEFAULT_FONT_SIZE, static_cast<int8_t>(DimensionUnit::FP) };
+    CalcDimension size(DEFAULT_FONT_SIZE, DimensionUnit::FP);
     if (!ArkTSUtils::ParseJsDimensionFp(vm, jsSize, size) || size.Unit() == DimensionUnit::PERCENT) {
         auto theme = Framework::JSViewAbstract::GetTheme<TextFieldTheme>();
         if (theme != nullptr) {
@@ -651,7 +654,7 @@ ArkUINativeModuleValue TextInputBridge::SetPlaceholderFont(ArkUIRuntimeCallInfo 
         length.number = size.Value();
     }
     
-    std::string weight;
+    std::string weight = DEFAULT_FONT_WEIGHT;
     if (!jsWeight->IsNull()) {
         if (jsWeight->IsString()) {
             weight = jsWeight->ToString(vm)->ToString();
@@ -661,7 +664,7 @@ ArkUINativeModuleValue TextInputBridge::SetPlaceholderFont(ArkUIRuntimeCallInfo 
         }
     }
 
-    int32_t style = -1;
+    int32_t style = static_cast<int32_t>(DEFAULT_FONT_STYLE);
     if (jsStyle->IsNumber()) {
         style = jsStyle->ToNumber(vm)->Value();
     }

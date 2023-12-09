@@ -113,12 +113,19 @@ void TextFieldOverlayModifier::PaintUnderline(RSCanvas& canvas) const
     auto contentRect = textFieldPattern->GetContentRect();
     auto textFrameRect = textFieldPattern->GetFrameRect();
     auto responseArea = textFieldPattern->GetResponseArea();
-    auto responseAreaWidth = responseArea ? responseArea->GetAreaRect().Width() : 0.0f;
     Point leftPoint, rightPoint;
-    leftPoint.SetX(contentRect.Left());
-    leftPoint.SetY(textFrameRect.Height());
-    rightPoint.SetX(contentRect.Right() + responseAreaWidth);
-    rightPoint.SetY(textFrameRect.Height());
+    if (layoutProperty->GetShowCounterValue(false)) {
+        leftPoint.SetX(contentRect.Left());
+        leftPoint.SetY(textFrameRect.Height());
+        rightPoint.SetX(contentRect.Right());
+        rightPoint.SetY(textFrameRect.Height());
+    } else {
+        auto responseAreaWidth = responseArea ? responseArea->GetAreaRect().Width() : 0.0f;
+        leftPoint.SetX(contentRect.Left());
+        leftPoint.SetY(textFrameRect.Height());
+        rightPoint.SetX(contentRect.Right() + responseAreaWidth);
+        rightPoint.SetY(textFrameRect.Height());
+    }
     RSPen pen;
     pen.SetColor(ToRSColor(underlineColor_->Get()));
     pen.SetWidth(underlineWidth_->Get());
@@ -231,6 +238,8 @@ void TextFieldOverlayModifier::PaintMagnifier(DrawingContext& context)
 {
     auto pattern = DynamicCast<TextFieldPattern>(pattern_.Upgrade());
     CHECK_NULL_VOID(pattern);
+    auto pixelMap = pattern->GetPixelMap();
+    CHECK_NULL_VOID(pixelMap);
     if (!pattern->GetShowMagnifier()) {
         return;
     }
@@ -262,8 +271,6 @@ void TextFieldOverlayModifier::PaintMagnifier(DrawingContext& context)
     auto magnifierGain = MAGNIFIER_GAIN;
     auto pixelMapImageOffset = PIXEL_MAP_IMAGE_OFFSET.ConvertToPx();
 
-    auto pixelMap = pattern->GetPixelMap();
-    CHECK_NULL_VOID(pixelMap);
     PixelMapImage pixelMapImage(pixelMap);
     auto magnifierPaintConfig = pixelMapImage.GetPaintConfig();
     magnifierPaintConfig.scaleX_ = magnifierGain;

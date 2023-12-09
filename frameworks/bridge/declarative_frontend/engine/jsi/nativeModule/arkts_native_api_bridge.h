@@ -41,7 +41,11 @@ private:
     static void RegisterImageAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterNavRouterAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterNavigatorAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
+    static void RegisterNodeContainerAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterPanelAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
+    static void RegisterLineAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
+    static void RegisterPathAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
+    static void RegisterPolylineAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterSideBarContainerAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterCalendarPickerAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterTabAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
@@ -59,6 +63,10 @@ private:
     static void RegisterTimepickerAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterTextpickerAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterCheckboxAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
+    static void RegisterCommonShapeAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
+    static void RegisterShapeAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
+    static void RegisterRectAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
+    static void RegisterListAttributes(Local<panda::ObjectRef> object, EcmaVM* vm); 
 };
 } // namespace OHOS::Ace::NG
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_ENGINE_JSI_NATIVEMODULE_ARKTS_NATIVE_API_BRIDGE_H

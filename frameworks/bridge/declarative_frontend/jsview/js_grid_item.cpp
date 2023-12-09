@@ -126,7 +126,6 @@ void JSGridItem::SetSelectable(bool selectable)
 void JSGridItem::SelectCallback(const JSCallbackInfo& args)
 {
     if (!args[0]->IsFunction()) {
-        LOGE("fail to bind onSelect event due to info is not function");
         return;
     }
 
@@ -144,7 +143,6 @@ void JSGridItem::SelectCallback(const JSCallbackInfo& args)
 void JSGridItem::SetSelected(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGW("The arg is wrong, it is supposed to have 1 or 2 arguments");
         return;
     }
     bool select = false;
@@ -170,7 +168,6 @@ void JSGridItem::SetSelected(const JSCallbackInfo& info)
 
 void JSGridItem::JSBind(BindingTarget globalObj)
 {
-    LOGD("GridItem:JSBind");
     JSClass<JSGridItem>::Declare("GridItem");
 
     MethodOptions opt = MethodOptions::NONE;

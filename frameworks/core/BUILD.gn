@@ -209,6 +209,7 @@ template("ace_core_source_set") {
       # textfield
       "common/ime/text_editing_value.cpp",
       "common/ime/text_input_action.cpp",
+      "common/ime/text_input_client.cpp",
       "common/ime/text_input_configuration.cpp",
       "common/ime/text_input_connection.cpp",
       "common/ime/text_input_formatter.cpp",
@@ -592,6 +593,7 @@ template("ace_core_source_set") {
       ]
     }
 
+    external_deps += [ "napi:ace_napi" ]
     cflags_cc = []
     cflags_cc += invoker.cflags_cc
   }
@@ -739,6 +741,7 @@ template("ace_core_ng_source_set") {
       # textfield
       "common/ime/text_editing_value.cpp",
       "common/ime/text_input_action.cpp",
+      "common/ime/text_input_client.cpp",
       "common/ime/text_input_configuration.cpp",
       "common/ime/text_input_connection.cpp",
       "common/ime/text_input_formatter.cpp",
@@ -1020,6 +1023,7 @@ template("ace_core_ng_source_set") {
     }
 
     deps += [ "$ace_root/frameworks/core/components_ng/pattern/security_component:ace_core_components_security_component_pattern_ng_$platform" ]
+    external_deps += [ "napi:ace_napi" ]
 
     if (defined(config.model_component_support) &&
         config.model_component_support) {

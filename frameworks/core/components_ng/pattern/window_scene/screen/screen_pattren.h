@@ -48,6 +48,9 @@ private:
     void UpdateToInputManager(float rotation);
     void InputManagerUpdateDisplayInfo(RectF paintRect, MMI::DisplayInfo displayInfo, MMI::WindowInfo windowInfo);
 
+    static float screenMaxWidth_;
+    static float screenMaxHeight_;
+
     sptr<Rosen::ScreenSession> screenSession_;
 
     ACE_DISALLOW_COPY_AND_MOVE(ScreenPattern);

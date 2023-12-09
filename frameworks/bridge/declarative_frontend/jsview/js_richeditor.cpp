@@ -203,7 +203,7 @@ JSRef<JSObject> JSRichEditor::CreateParagraphStyleResult(const ParagraphInfo& in
     lmObj->SetPropertyObject("size", size);
 #ifdef PIXEL_MAP_SUPPORTED
     if (info.leadingMarginPixmap) {
-        lmObj->SetPropertyObject("placeholder", ConvertPixmap(info.leadingMarginPixmap));
+        lmObj->SetPropertyObject("pixelMap", ConvertPixmap(info.leadingMarginPixmap));
     }
 #endif
     obj->SetPropertyObject("leadingMargin", lmObj);
@@ -516,6 +516,9 @@ void JSRichEditor::SetCopyOptions(const JSCallbackInfo& info)
 void JSRichEditor::BindSelectionMenu(const JSCallbackInfo& info)
 {
     RichEditorType editorType = RichEditorType::NONE;
+    if (info.Length() >= 1 && info[0]->IsUndefined()) {
+        editorType = RichEditorType::TEXT;
+    }
     if (info.Length() >= 1 && info[0]->IsNumber()) {
         auto spanType = info[0]->ToNumber<int32_t>();
         editorType = static_cast<RichEditorType>(spanType);
@@ -630,8 +633,7 @@ void JSRichEditor::JsDataDetectorConfig(const JSCallbackInfo& info)
     if (info.Length() < 1) {
         return;
     }
-    auto tmpInfo = info[0];
-    if (!tmpInfo->IsObject()) {
+    if (!info[0]->IsObject()) {
         return;
     }
 

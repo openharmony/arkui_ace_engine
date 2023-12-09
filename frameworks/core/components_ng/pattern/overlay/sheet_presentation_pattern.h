@@ -267,6 +267,8 @@ public:
         return sheetMaxWidth_;
     }
 
+    float GetFitContentHeight();
+
 private:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
@@ -283,6 +285,7 @@ private:
     OffsetT<Dimension> GetInvisibleOffset();
     void CheckSheetHeightChange();
     void InitSheetDetents();
+    void HandleFitContontChange(float height);
     void ChangeSheetHeight(float height);
     void StartSheetTransitionAnimation(const AnimationOption& option, bool isTransitionIn, float offset);
     void ClipSheetNode();
@@ -317,6 +320,7 @@ private:
     float sheetMaxHeight_ = 0.0f;
     float sheetMaxWidth_ = 0.0f;
     float centerHeight_ = 0.0f;
+    float sheetFitContentHeight_ = 0.0f;
     bool isFirstInit_ = true;
     SheetType sheetType_ = SheetType::SHEET_BOTTOM;
 

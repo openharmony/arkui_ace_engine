@@ -66,8 +66,6 @@ void JSStack::SetStackFit(int value)
 {
     if (value >= static_cast<int>(StackFit::KEEP) && value <= static_cast<int>(StackFit::FIRST_CHILD)) {
         StackModel::GetInstance()->SetStackFit(static_cast<StackFit>(value));
-    } else {
-        LOGE("Invalid value for stackfit");
     }
 }
 
@@ -75,8 +73,6 @@ void JSStack::SetOverflow(int value)
 {
     if (value >= static_cast<int>(Overflow::CLIP) && value <= static_cast<int>(Overflow::OBSERVABLE)) {
         StackModel::GetInstance()->SetOverflow(static_cast<Overflow>(value));
-    } else {
-        LOGE("Invalid value for overflow");
     }
 }
 
@@ -118,7 +114,6 @@ bool GetAlignment(const JSCallbackInfo& info, Alignment& alignment)
             alignment = Alignment::BOTTOM_RIGHT;
             break;
         default:
-            LOGE("Invalid value for alignment");
             return false;
     }
     return true;
@@ -132,7 +127,6 @@ void JSStack::SetAlignment(const JSCallbackInfo& info)
 void JSStack::SetWidth(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have at least 1 arguments");
         return;
     }
 
@@ -148,7 +142,6 @@ void JSStack::SetWidth(const JSRef<JSVal>& jsValue)
 void JSStack::SetHeight(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have at least 1 arguments");
         return;
     }
 
@@ -164,12 +157,10 @@ void JSStack::SetHeight(const JSRef<JSVal>& jsValue)
 void JSStack::SetSize(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have atleast 1 arguments");
         return;
     }
 
     if (!info[0]->IsObject()) {
-        LOGE("arg is not Object or String.");
         return;
     }
 

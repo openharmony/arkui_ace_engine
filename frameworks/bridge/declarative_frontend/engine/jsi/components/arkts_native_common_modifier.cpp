@@ -46,6 +46,8 @@ constexpr int NUM_12 = 12;
 constexpr int NUM_13 = 13;
 constexpr int NUM_14 = 14;
 constexpr int NUM_15 = 15;
+constexpr int NUM_16 = 16;
+constexpr int NUM_24 = 24;
 constexpr int DEFAULT_LENGTH = 4;
 constexpr double ROUND_UNIT = 360.0;
 constexpr TextDirection DEFAULT_COMMON_DIRECTION = TextDirection::AUTO;
@@ -59,6 +61,7 @@ constexpr uint8_t DEFAULT_SAFE_AREA_EDGE = 0b1111;
 constexpr Dimension DEFAULT_FLEX_BASIS { 0.0, DimensionUnit::AUTO };
 constexpr int32_t DEFAULT_DISPLAY_PRIORITY = 0;
 constexpr int32_t DEFAULT_ID = 0;
+constexpr double DEFAULT_PADDING = 16.0;
 
 BorderStyle ConvertBorderStyle(int32_t value)
 {
@@ -304,8 +307,7 @@ void SetRadialGradientValues(NG::Gradient& gradient, const double* values, int32
 }
 
 bool SetCalcDimension(std::optional<CalcDimension>& optDimension,
-    const StringAndDouble* options, int32_t optionsLength, int32_t offset,
-    const CalcDimension* defDimension)
+    const StringAndDouble* options, int32_t optionsLength, int32_t offset)
 {
     if ((options == nullptr) || (offset < 0) || ((offset + NUM_3) >= optionsLength)) {
         return false;
@@ -316,29 +318,60 @@ bool SetCalcDimension(std::optional<CalcDimension>& optDimension,
     if (static_cast<bool>(hasValue.value)) {
         DimensionUnit unitValue = static_cast<DimensionUnit>(unit.value);
         if (unitValue == DimensionUnit::CALC) {
-            std::string str = value.valueStr;
+            std::string str;
+            if (value.valueStr != nullptr) {
+                str = value.valueStr;
+            }
             CalcDimension calcDimension(str, unitValue);
             optDimension = calcDimension;
         } else {
             CalcDimension calcDimension(value.value, unitValue);
             optDimension = calcDimension;
         }
-    } else if (defDimension != nullptr) {
-        optDimension = *defDimension;
     }
     return true;
+}
+
+void SetOptionalBorder(
+    std::optional<Dimension>& optioalDimension, const double* values, int32_t valuesSize, int32_t& offset)
+{
+    bool hasValue = static_cast<bool>(values[offset]);
+    if (hasValue) {
+        optioalDimension =
+            Dimension(values[offset + NUM_1], static_cast<OHOS::Ace::DimensionUnit>(values[offset + NUM_2]));
+    }
+    offset = offset + NUM_3;
+}
+
+void SetOptionalBorderColor(
+    std::optional<Color>& optioalColor, const uint32_t* values, int32_t valuesSize, int32_t& offset)
+{
+    auto hasValue = values[offset];
+    if (static_cast<bool>(hasValue)) {
+        optioalColor = Color(values[offset + NUM_1]);
+    }
+    offset = offset + NUM_2;
+}
+
+void SetOptionalBorderStyle(
+    std::optional<BorderStyle>& optioaStyle, const uint32_t* values, int32_t valuesSize, int32_t& offset)
+{
+    auto hasValue = values[offset];
+    if (static_cast<bool>(hasValue)) {
+        optioaStyle = ConvertBorderStyle(values[offset + NUM_1]);
+    }
+    offset = offset + NUM_2;
 }
 
 void SetBorderImageSlice(RefPtr<BorderImage>& borderImage,
     const std::vector<BorderImageDirection> directions,
     const StringAndDouble* options, int32_t optionsLength, int32_t& offset)
 {
-    std::unique_ptr<CalcDimension> defDimension = std::make_unique<CalcDimension>(0.0);
     for (unsigned int index = 0; index < NUM_12; index += NUM_3) {
         std::optional<CalcDimension> optDimension;
-        SetCalcDimension(optDimension, options, optionsLength, offset + index, defDimension.get());
-        auto direction = directions[index / NUM_3];
+        SetCalcDimension(optDimension, options, optionsLength, offset + index);
         if (optDimension.has_value()) {
+            auto direction = directions[index / NUM_3];
             borderImage->SetEdgeSlice(direction, optDimension.value());
         }
     }
@@ -364,12 +397,11 @@ void SetBorderImageWidth(RefPtr<BorderImage>& borderImage,
     const std::vector<BorderImageDirection> directions,
     const StringAndDouble* options, int32_t optionsLength, int32_t& offset)
 {
-    std::unique_ptr<CalcDimension> defDimension = std::make_unique<CalcDimension>(0.0);
     for (unsigned int index = 0; index < NUM_12; index += NUM_3) {
         std::optional<CalcDimension> optDimension;
-        SetCalcDimension(optDimension, options, optionsLength, offset + index, defDimension.get());
-        auto direction = directions[index / NUM_3];
+        SetCalcDimension(optDimension, options, optionsLength, offset + index);
         if (optDimension.has_value()) {
+            auto direction = directions[index / NUM_3];
             borderImage->SetEdgeWidth(direction, optDimension.value());
         }
     }
@@ -380,12 +412,11 @@ void SetBorderImageOutset(RefPtr<BorderImage>& borderImage,
     const std::vector<BorderImageDirection> directions,
     const StringAndDouble* options, int32_t optionsLength, int32_t& offset)
 {
-    std::unique_ptr<CalcDimension> defDimension = std::make_unique<CalcDimension>(0.0);
     for (unsigned int index = 0; index < NUM_12; index += NUM_3) {
         std::optional<CalcDimension> optDimension;
-        SetCalcDimension(optDimension, options, optionsLength, offset + index, defDimension.get());
-        auto direction = directions[index / NUM_3];
+        SetCalcDimension(optDimension, options, optionsLength, offset + index);
         if (optDimension.has_value()) {
+            auto direction = directions[index / NUM_3];
             borderImage->SetEdgeOutset(direction, optDimension.value());
         }
     }
@@ -404,6 +435,28 @@ void SetBorderImageFill(RefPtr<BorderImage>& borderImage,
         borderImage->SetNeedFillCenter(static_cast<bool>(value.value));
     }
     offset += NUM_2;
+}
+
+void SetBorderImage(FrameNode* frameNode, const RefPtr<BorderImage>& borderImage, uint8_t bitset)
+{
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(borderImage);
+    if (bitset | BorderImage::SOURCE_BIT) {
+        ViewAbstract::SetBorderImageSource(frameNode, borderImage->GetSrc());
+    }
+    if (bitset | BorderImage::OUTSET_BIT) {
+        ViewAbstract::SetHasBorderImageOutset(frameNode, true);
+    }
+    if (bitset | BorderImage::SLICE_BIT) {
+        ViewAbstract::SetHasBorderImageSlice(frameNode, true);
+    }
+    if (bitset | BorderImage::REPEAT_BIT) {
+        ViewAbstract::SetHasBorderImageRepeat(frameNode, true);
+    }
+    if (bitset | BorderImage::WIDTH_BIT) {
+        ViewAbstract::SetHasBorderImageWidth(frameNode, true);
+    }
+    ViewAbstract::SetBorderImage(frameNode, borderImage);
 }
 
 /**
@@ -990,7 +1043,7 @@ void SetLinearGradient(NodeHandle node, const double *values, int32_t valuesLeng
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    if ((values == nullptr) || (valuesLength != NUM_4) || (colors == nullptr) || ((colorsLength % NUM_3) != 0)) {
+    if ((values == nullptr) || (valuesLength != NUM_4) || ((colorsLength % NUM_3) != 0)) {
         return;
     }
     NG::Gradient gradient;
@@ -1029,7 +1082,7 @@ void SetSweepGradient(NodeHandle node, const double* values, int32_t valuesLengt
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    if ((values == nullptr) || (valuesLength != NUM_13) || (colors == nullptr) || ((colorsLength % NUM_3) != 0)) {
+    if ((values == nullptr) || (valuesLength != NUM_13) || ((colorsLength % NUM_3) != 0)) {
         return;
     }
     NG::Gradient gradient;
@@ -1066,7 +1119,7 @@ void SetRadialGradient(NodeHandle node, const double* values, int32_t valuesLeng
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    if ((values == nullptr) || (valuesLength != NUM_10) || (colors == nullptr) || ((colorsLength % NUM_3) != 0)) {
+    if ((values == nullptr) || (valuesLength != NUM_10) || ((colorsLength % NUM_3) != 0)) {
         return;
     }
     NG::Gradient gradient;
@@ -1191,23 +1244,7 @@ void SetBorderImage(NodeHandle node, const char* src, const StringAndDouble* opt
     SetBorderImageOutset(borderImage, directions, options, optionsLength, loc); // read 12 double
     SetBorderImageFill(borderImage, options, optionsLength, loc); // read 2 double
     auto bitsetValue = options[loc].value;
-    uint8_t bitset = static_cast<uint8_t>(bitsetValue);
-    if (bitset | BorderImage::SOURCE_BIT) {
-        ViewAbstract::SetBorderImageSource(frameNode, borderImage->GetSrc());
-    }
-    if (bitset | BorderImage::OUTSET_BIT) {
-        ViewAbstract::SetHasBorderImageOutset(frameNode, true);
-    }
-    if (bitset | BorderImage::SLICE_BIT) {
-        ViewAbstract::SetHasBorderImageSlice(frameNode, true);
-    }
-    if (bitset | BorderImage::REPEAT_BIT) {
-        ViewAbstract::SetHasBorderImageRepeat(frameNode, true);
-    }
-    if (bitset | BorderImage::WIDTH_BIT) {
-        ViewAbstract::SetHasBorderImageWidth(frameNode, true);
-    }
-    ViewAbstract::SetBorderImage(frameNode, borderImage);
+    SetBorderImage(frameNode, borderImage, static_cast<uint8_t>(bitsetValue));
 }
 
 void ResetBorderImage(NodeHandle node)
@@ -1215,7 +1252,8 @@ void ResetBorderImage(NodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     RefPtr<BorderImage> borderImage = AceType::MakeRefPtr<BorderImage>();
-    ViewAbstract::SetBorderImage(frameNode, borderImage);
+    uint8_t imageBorderBitsets = 0;
+    SetBorderImage(frameNode, borderImage, imageBorderBitsets);
 }
 
 void SetBorderImageGradient(NodeHandle node, const double* values, int32_t valuesLength,
@@ -1223,7 +1261,7 @@ void SetBorderImageGradient(NodeHandle node, const double* values, int32_t value
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    if ((values == nullptr) || (valuesLength != NUM_4) || (colors == nullptr) || ((colorsLength % NUM_3) != 0)) {
+    if ((values == nullptr) || (valuesLength != NUM_4) || ((colorsLength % NUM_3) != 0)) {
         return;
     }
     NG::Gradient gradient;
@@ -1349,9 +1387,7 @@ void SetBackgroundBlurStyle(NodeHandle node, int32_t blurStyle, int32_t colorMod
             adaptiveColor <= static_cast<int32_t>(AdaptiveColor::AVERAGE)) {
             bgBlurStyle.adaptiveColor = static_cast<AdaptiveColor>(adaptiveColor);
         }
-        if (scale >= 0) {
-            bgBlurStyle.scale = std::clamp(scale, 0.0, 1.0);
-        }
+        bgBlurStyle.scale = std::clamp(scale, 0.0, 1.0);
     }
     ViewAbstract::SetBackgroundBlurStyle(frameNode, bgBlurStyle);
 }
@@ -1364,42 +1400,77 @@ void ResetBackgroundBlurStyle(NodeHandle node)
     ViewAbstract::SetBackgroundBlurStyle(frameNode, bgBlurStyle);
 }
 
-void SetBorder(NodeHandle node, double* values, int32_t* units, uint32_t* colorAndStyle, int32_t size)
+/**
+ * @param src source borderWidthand and BorderRadius value
+ * @param options option value
+ * values[offset + 0], option[offset + 1], option[offset + 2]: borderWidth left(hasValue, value, unit)
+ * values[offset + 3], option[offset + 4], option[offset + 5]: borderWidth right(hasValue, value, unit)
+ * values[offset + 6], option[offset + 7], option[offset + 8]: borderWidth top(hasValue, value, unit)
+ * values[offset + 9], option[offset + 10], option[offset + 11]: borderWidth bottom(hasValue, value, unit)
+ * values[offset + 12], option[offset + 13], option[offset + 14] : BorderRadius TopLeft(hasValue, value, unit)
+ * values[offset + 15], option[offset + 16], option[offset + 17] : BorderRadius TopRight(hasValue, value, unit)
+ * values[offset + 18], option[offset + 19], option[offset + 20] : BorderRadius BottomLeft(hasValue, value, unit)
+ * values[offset + 21], option[offset + 22], option[offset + 23] : BorderRadius BottomRight(hasValue, value, unit)
+ * @param optionsLength options valuesSize
+ * @param src source color and Style value
+ * colorAndStyle[offset + 0], option[offset + 1]: borderColors leftColor(hasValue, value)
+ * colorAndStyle[offset + 2], option[offset + 3]: borderColors rightColor(hasValue, value)
+ * colorAndStyle[offset + 4], option[offset + 5]: borderColors topColor(hasValue, value)
+ * colorAndStyle[offset + 6], option[offset + 7]: borderColors bottomColor(hasValue, value)
+ * colorAndStyle[offset + 8], option[offset + 9]: borderStyles styleLeft(hasValue, value)
+ * colorAndStyle[offset + 10], option[offset + 11]: borderStyles styleRight(hasValue, value)
+ * colorAndStyle[offset + 12], option[offset + 12]: borderStyles styleTop(hasValue, value)
+ * colorAndStyle[offset + 14], option[offset + 15]: borderStyles styleBottom(hasValue, value)
+ * @param optionsLength options colorAndStyleSize
+ */
+void SetBorder(NodeHandle node,
+    const double* values, int32_t valuesSize, const uint32_t* colorAndStyle, int32_t colorAndStyleSize)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    if (size != NUM_8) {
+    if ((values == nullptr) || (valuesSize != NUM_24) || (colorAndStyle == nullptr) || colorAndStyleSize != NUM_16) {
         return;
     }
-    NG::BorderWidthProperty borderWidth;
-    borderWidth.leftDimen = Dimension(values[NUM_0], static_cast<OHOS::Ace::DimensionUnit>(units[NUM_0]));
-    borderWidth.rightDimen = Dimension(values[NUM_1], static_cast<OHOS::Ace::DimensionUnit>(units[NUM_1]));
-    borderWidth.topDimen = Dimension(values[NUM_2], static_cast<OHOS::Ace::DimensionUnit>(units[NUM_2]));
-    borderWidth.bottomDimen = Dimension(values[NUM_3], static_cast<OHOS::Ace::DimensionUnit>(units[NUM_3]));
-    borderWidth.multiValued = true;
-    ViewAbstract::SetBorderWidth(frameNode, borderWidth);
 
+    int32_t offset = NUM_0;
+    NG::BorderWidthProperty borderWidth;
+
+    SetOptionalBorder(borderWidth.leftDimen, values, valuesSize, offset);
+    SetOptionalBorder(borderWidth.rightDimen, values, valuesSize, offset);
+    SetOptionalBorder(borderWidth.topDimen, values, valuesSize, offset);
+    SetOptionalBorder(borderWidth.bottomDimen, values, valuesSize, offset);
+    borderWidth.multiValued = true;
+    if (borderWidth.leftDimen.has_value() || borderWidth.rightDimen.has_value() || borderWidth.topDimen.has_value() ||
+        borderWidth.bottomDimen.has_value()) {
+        ViewAbstract::SetBorderWidth(frameNode, borderWidth);
+    }
+
+    NG::BorderRadiusProperty borderRadius;
+    SetOptionalBorder(borderRadius.radiusTopLeft, values, valuesSize, offset);
+    SetOptionalBorder(borderRadius.radiusTopRight, values, valuesSize, offset);
+    SetOptionalBorder(borderRadius.radiusBottomLeft, values, valuesSize, offset);
+    SetOptionalBorder(borderRadius.radiusBottomRight, values, valuesSize, offset);
+
+    borderRadius.multiValued = true;
+    if (borderRadius.radiusTopLeft.has_value() || borderRadius.radiusTopRight.has_value() ||
+        borderRadius.radiusBottomLeft.has_value() || borderRadius.radiusBottomRight.has_value()) {
+        ViewAbstract::SetBorderRadius(frameNode, borderRadius);
+    }
+
+    int32_t colorAndStyleOffset = NUM_0;
     NG::BorderColorProperty borderColors;
-    borderColors.leftColor = Color(colorAndStyle[NUM_0]);
-    borderColors.rightColor = Color(colorAndStyle[NUM_1]);
-    borderColors.topColor = Color(colorAndStyle[NUM_2]);
-    borderColors.bottomColor = Color(colorAndStyle[NUM_3]);
+    SetOptionalBorderColor(borderColors.leftColor, colorAndStyle, colorAndStyleSize, colorAndStyleOffset);
+    SetOptionalBorderColor(borderColors.rightColor, colorAndStyle, colorAndStyleSize, colorAndStyleOffset);
+    SetOptionalBorderColor(borderColors.topColor, colorAndStyle, colorAndStyleSize, colorAndStyleOffset);
+    SetOptionalBorderColor(borderColors.bottomColor, colorAndStyle, colorAndStyleSize, colorAndStyleOffset);
     borderColors.multiValued = true;
     ViewAbstract::SetBorderColor(frameNode, borderColors);
 
-    NG::BorderRadiusProperty borderRadius;
-    borderRadius.radiusTopLeft = Dimension(values[NUM_4], static_cast<OHOS::Ace::DimensionUnit>(units[NUM_4]));
-    borderRadius.radiusTopRight = Dimension(values[NUM_5], static_cast<OHOS::Ace::DimensionUnit>(units[NUM_5]));
-    borderRadius.radiusBottomLeft = Dimension(values[NUM_6], static_cast<OHOS::Ace::DimensionUnit>(units[NUM_6]));
-    borderRadius.radiusBottomRight = Dimension(values[NUM_7], static_cast<OHOS::Ace::DimensionUnit>(units[NUM_7]));
-    borderRadius.multiValued = true;
-    ViewAbstract::SetBorderRadius(frameNode, borderRadius);
-
     NG::BorderStyleProperty borderStyles;
-    borderStyles.styleTop = ConvertBorderStyle(colorAndStyle[NUM_4]);
-    borderStyles.styleRight = ConvertBorderStyle(colorAndStyle[NUM_5]);
-    borderStyles.styleBottom = ConvertBorderStyle(colorAndStyle[NUM_6]);
-    borderStyles.styleLeft = ConvertBorderStyle(colorAndStyle[NUM_7]);
+    SetOptionalBorderStyle(borderStyles.styleLeft, colorAndStyle, colorAndStyleSize, colorAndStyleOffset);
+    SetOptionalBorderStyle(borderStyles.styleRight, colorAndStyle, colorAndStyleSize, colorAndStyleOffset);
+    SetOptionalBorderStyle(borderStyles.styleTop, colorAndStyle, colorAndStyleSize, colorAndStyleOffset);
+    SetOptionalBorderStyle(borderStyles.styleBottom, colorAndStyle, colorAndStyleSize, colorAndStyleOffset);
     borderStyles.multiValued = true;
     ViewAbstract::SetBorderStyle(frameNode, borderStyles);
 }
@@ -1653,16 +1724,35 @@ void SetPadding(NodeHandle node, const struct ArkUISizeType *top, const struct A
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    std::optional<OHOS::Ace::CalcDimension> topDimen;
-    std::optional<OHOS::Ace::CalcDimension> rightDimen;
-    std::optional<OHOS::Ace::CalcDimension> bottomDimen;
-    std::optional<OHOS::Ace::CalcDimension> leftDimen;
-
-    topDimen = CalcDimension(top->value, static_cast<DimensionUnit>(top->unit));
-    rightDimen = CalcDimension(right->value, static_cast<DimensionUnit>(right->unit));
-    bottomDimen = CalcDimension(bottom->value, static_cast<DimensionUnit>(bottom->unit));
-    leftDimen = CalcDimension(left->value, static_cast<DimensionUnit>(left->unit));
-    NG::PaddingProperty paddings = NG::ConvertToCalcPaddingProperty(topDimen, bottomDimen, leftDimen, rightDimen);
+    CalcDimension topDimen;
+    CalcDimension rightDimen;
+    CalcDimension bottomDimen;
+    CalcDimension leftDimen;
+    if (top->string != nullptr) {
+        topDimen = CalcDimension(top->string, DimensionUnit::CALC);
+    } else {
+        topDimen = CalcDimension(top->value, static_cast<DimensionUnit>(top->unit));
+    }
+    if (right->string != nullptr) {
+        rightDimen = CalcDimension(right->string, DimensionUnit::CALC);
+    } else {
+        rightDimen = CalcDimension(right->value, static_cast<DimensionUnit>(right->unit));
+    }
+    if (bottom->string != nullptr) {
+        bottomDimen = CalcDimension(bottom->string, DimensionUnit::CALC);
+    } else {
+        bottomDimen = CalcDimension(bottom->value, static_cast<DimensionUnit>(bottom->unit));
+    }
+    if (left->string != nullptr) {
+        leftDimen = CalcDimension(left->string, DimensionUnit::CALC);
+    } else {
+        leftDimen = CalcDimension(left->value, static_cast<DimensionUnit>(left->unit));
+    }
+    NG::PaddingProperty paddings;
+    paddings.top = std::optional<CalcLength>(topDimen);
+    paddings.bottom = std::optional<CalcLength>(bottomDimen);
+    paddings.left = std::optional<CalcLength>(leftDimen);
+    paddings.right = std::optional<CalcLength>(rightDimen);
     ViewAbstract::SetPadding(frameNode, paddings);
 }
 
@@ -1670,7 +1760,12 @@ void ResetPadding(NodeHandle node)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    ViewAbstract::SetPadding(frameNode, NG::CalcLength(0.0));
+    NG::PaddingProperty paddings;
+    paddings.top = std::optional<CalcLength>(CalcLength(0.0, DimensionUnit::VP));
+    paddings.bottom = std::optional<CalcLength>(CalcLength(0.0, DimensionUnit::VP));
+    paddings.left = std::optional<CalcLength>(CalcLength(DEFAULT_PADDING, DimensionUnit::VP));
+    paddings.right = std::optional<CalcLength>(CalcLength(DEFAULT_PADDING, DimensionUnit::VP));
+    ViewAbstract::SetPadding(frameNode, paddings);
 }
 
 /**
@@ -1766,7 +1861,7 @@ void ResetSphericalEffect(NodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    ViewAbstract::SetSphericalEffect(frameNode, 1.0);
+    ViewAbstract::SetSphericalEffect(frameNode, 0.0);
 }
 
 void SetRenderGroup(NodeHandle node, bool isRenderGroup)
@@ -1832,7 +1927,6 @@ void ResetForegroundColor(NodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    ViewAbstract::SetForegroundColor(frameNode, Color());
 }
 
 
@@ -1950,15 +2044,35 @@ void SetMargin(NodeHandle node, const struct ArkUISizeType *top, const struct Ar
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    std::optional<OHOS::Ace::CalcDimension> topDimen;
-    std::optional<OHOS::Ace::CalcDimension> rightDimen;
-    std::optional<OHOS::Ace::CalcDimension> bottomDimen;
-    std::optional<OHOS::Ace::CalcDimension> leftDimen;
-    topDimen = CalcDimension(top->value, static_cast<DimensionUnit>(top->unit));
-    rightDimen = CalcDimension(right->value, static_cast<DimensionUnit>(right->unit));
-    bottomDimen = CalcDimension(bottom->value, static_cast<DimensionUnit>(bottom->unit));
-    leftDimen = CalcDimension(left->value, static_cast<DimensionUnit>(left->unit));
-    NG::PaddingProperty paddings = NG::ConvertToCalcPaddingProperty(topDimen, bottomDimen, leftDimen, rightDimen);
+    CalcDimension topDimen;
+    CalcDimension rightDimen;
+    CalcDimension bottomDimen;
+    CalcDimension leftDimen;
+    if (top->string != nullptr) {
+        topDimen = CalcDimension(top->string, DimensionUnit::CALC);
+    } else {
+        topDimen = CalcDimension(top->value, static_cast<DimensionUnit>(top->unit));
+    }
+    if (right->string != nullptr) {
+        rightDimen = CalcDimension(right->string, DimensionUnit::CALC);
+    } else {
+        rightDimen = CalcDimension(right->value, static_cast<DimensionUnit>(right->unit));
+    }
+    if (bottom->string != nullptr) {
+        bottomDimen = CalcDimension(bottom->string, DimensionUnit::CALC);
+    } else {
+        bottomDimen = CalcDimension(bottom->value, static_cast<DimensionUnit>(bottom->unit));
+    }
+    if (left->string != nullptr) {
+        leftDimen = CalcDimension(left->string, DimensionUnit::CALC);
+    } else {
+        leftDimen = CalcDimension(left->value, static_cast<DimensionUnit>(left->unit));
+    }
+    NG::PaddingProperty paddings;
+    paddings.top = std::optional<CalcLength>(topDimen);
+    paddings.bottom = std::optional<CalcLength>(bottomDimen);
+    paddings.left = std::optional<CalcLength>(leftDimen);
+    paddings.right = std::optional<CalcLength>(rightDimen);
     ViewAbstract::SetMargin(frameNode, paddings);
 }
 

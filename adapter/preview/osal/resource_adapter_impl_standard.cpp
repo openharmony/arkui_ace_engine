@@ -18,6 +18,7 @@
 #include "adapter/ohos/osal/resource_theme_style.h"
 #include "adapter/preview/entrance/ace_application_info.h"
 #include "adapter/preview/osal/resource_convertor.h"
+#include "base/log/log.h"
 #include "core/common/container.h"
 #include "core/components/theme/theme_attributes.h"
 
@@ -148,10 +149,14 @@ void ResourceAdapterImpl::Init(const ResourceInfo& resourceInfo)
 RefPtr<ResourceAdapter> ResourceAdapter::CreateNewResourceAdapter(
     const std::string& bundleName, const std::string& moduleName)
 {
+    TAG_LOGW(AceLogTag::ACE_RESOURCE,
+        "Cannot preview the component from the %{public}s module, because it contains a resource reference. Preview it "
+        "in the %{public}s module instead.",
+        moduleName.c_str(), moduleName.c_str());
     return nullptr;
 }
 
-void ResourceAdapterImpl::UpdateConfig(const ResourceConfiguration& config)
+void ResourceAdapterImpl::UpdateConfig(const ResourceConfiguration& config, bool themeFlag)
 {
     auto resConfig = ConvertConfigToGlobal(config);
     LOGI("UpdateConfig ori=%{public}d, dpi=%{public}f, device=%{public}d", resConfig->GetDirection(),

@@ -196,6 +196,7 @@ public:
     void SetDebugLine(const std::string& line) override;
     void SetHoverEffect(HoverEffectType hoverEffect) override;
     void SetHitTestMode(NG::HitTestMode hitTestMode) override;
+    void SetOnTouchTestFunc(NG::OnChildTouchTestFunc&& onChildTouchTest) override {};
     void SetKeyboardShortcut(const std::string& value, const std::vector<ModifierKey>& keys,
         std::function<void()>&& onKeyboardShortcutAction) override {};
     void SetObscured(const std::vector<ObscuredReasons>& reasons) override {};
@@ -238,6 +239,7 @@ public:
     void SetForegroundColor(const Color& color) override {}
     void SetForegroundColorStrategy(const ForegroundColorStrategy& strategy) override {}
     void SetAllowDrop(const std::set<std::string>& allowDrop) override {}
+    void SetDragPreview(const NG::DragDropInfo& info) override {}
 
     void CreateAnimatablePropertyFloat(const std::string& propertyName, float value,
         const std::function<void(float)>& onCallbackEvent) override {};

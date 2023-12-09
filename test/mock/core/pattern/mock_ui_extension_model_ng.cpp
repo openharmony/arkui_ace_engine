@@ -13,10 +13,9 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/pattern/ui_extension/ui_extension_model_ng.h"
-
 #include "base/want/want_wrap.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/pattern/ui_extension/ui_extension_model_ng.h"
 
 namespace OHOS::Ace::NG {
 RefPtr<FrameNode> UIExtensionModelNG::Create(const std::string& bundleName, const std::string& abilityName,
@@ -34,4 +33,9 @@ void UIExtensionModelNG::SetOnResult(std::function<void(int32_t, const AAFwk::Wa
 
 void UIExtensionModelNG::SetOnReceive(std::function<void(const AAFwk::WantParams&)>&& onReceive) {}
 
+void UIExtensionModelNG::SetOnRemoteReady(std::function<void(const RefPtr<UIExtensionProxy>&)>&& onRemoteReady) {}
+
+void UIExtensionModelNG::SetOnError(
+    std::function<void(int32_t code, const std::string& name, const std::string& message)>&& onError)
+{}
 } // namespace OHOS::Ace::NG

@@ -373,11 +373,6 @@ void DragDropManager::NotifyDragRegisterFrameNode(std::unordered_map<int32_t, We
         CHECK_NULL_VOID(frameNode);
         auto eventHub = frameNode->GetEventHub<EventHub>();
         if (!CheckParentVisible(frameNode) || (eventHub && !eventHub->IsEnabled())) {
-            if (SystemProperties::GetDebugEnabled()) {
-                LOGI("DragDropManager NotifyDragRegisterFrameNode. Dragged frameNode is %{public}s is InVisible or "
-                     "Disabled",
-                    frameNode->GetTag().c_str());
-            }
             continue;
         }
         auto pattern = frameNode->GetPattern<Pattern>();
@@ -496,6 +491,7 @@ void DragDropManager::OnDragEnd(const PointerEvent& pointerEvent, const std::str
     Point point  = pointerEvent.GetPoint();
     dragDropState_ = DragDropMgrState::IDLE;
     preTargetFrameNode_ = nullptr;
+    hasNotifiedTransformation_ = false;
 #ifdef ENABLE_DRAG_FRAMEWORK
     auto container = Container::Current();
     if (container && container->IsScenceBoardWindow()) {
@@ -557,8 +553,8 @@ void DragDropManager::OnDragEnd(const PointerEvent& pointerEvent, const std::str
     auto eventHub = dragFrameNode->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     RefPtr<OHOS::Ace::DragEvent> event = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
-    auto extraParams = eventHub->GetDragExtraParams(extraInfo_, point, DragEventType::DROP);
     UpdateDragEvent(event, point);
+    auto extraParams = eventHub->GetDragExtraParams(extraInfo_, point, DragEventType::DROP);
     eventHub->FireCustomerOnDragFunc(DragFuncType::DRAG_DROP, event, extraParams);
     eventHub->HandleInternalOnDrop(event, extraParams);
     ClearVelocityInfo();
@@ -618,8 +614,8 @@ Rect DragDropManager::GetDragWindowRect(const Point& point)
 {
     if (!previewRect_.IsValid()) {
         ShadowOffsetData shadowOffsetData { -1, -1, -1, -1 };
-        int retOffset = InteractionInterface::GetInstance()->GetShadowOffset(shadowOffsetData);
-        if (retOffset == 0) {
+        int ret = InteractionInterface::GetInstance()->GetShadowOffset(shadowOffsetData);
+        if (ret == 0) {
             previewRect_ = Rect(
                 shadowOffsetData.offsetX,
                 shadowOffsetData.offsetY,
@@ -708,6 +704,7 @@ void DragDropManager::FireOnDragEvent(
     event->SetPreviewRect(GetDragWindowRect(point));
 #endif // ENABLE_DRAG_FRAMEWORK
 
+    FireOnEditableTextComponent(frameNode, type);
     FireOnDragEventWithDragType(eventHub, type, event, extraParams);
 
 #ifdef ENABLE_DRAG_FRAMEWORK
@@ -740,11 +737,14 @@ void DragDropManager::OnItemDragMove(float globalX, float globalY, int32_t dragg
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
 
-    UpdateDragWindowPosition(static_cast<int32_t>(globalX), static_cast<int32_t>(globalY));
+    auto windowScale = GetSmallWindowScale();
+    auto windowX = globalX * windowScale;
+    auto windowY = globalY * windowScale;
+    UpdateDragWindowPosition(static_cast<int32_t>(windowX), static_cast<int32_t>(windowY));
 
     OHOS::Ace::ItemDragInfo itemDragInfo;
-    itemDragInfo.SetX(pipeline->ConvertPxToVp(Dimension(globalX, DimensionUnit::PX)));
-    itemDragInfo.SetY(pipeline->ConvertPxToVp(Dimension(globalY, DimensionUnit::PX)));
+    itemDragInfo.SetX(pipeline->ConvertPxToVp(Dimension(windowX, DimensionUnit::PX)));
+    itemDragInfo.SetY(pipeline->ConvertPxToVp(Dimension(windowY, DimensionUnit::PX)));
 
     // use -1 for grid item not in eventGrid
     auto getDraggedIndex = [draggedGrid = draggedGridFrameNode_, draggedIndex, dragType](
@@ -752,7 +752,7 @@ void DragDropManager::OnItemDragMove(float globalX, float globalY, int32_t dragg
         return (dragType == DragType::GRID) ? (eventGrid == draggedGrid ? draggedIndex : -1) : draggedIndex;
     };
 
-    auto dragFrameNode = FindDragFrameNodeByPosition(globalX, globalY, dragType, false);
+    auto dragFrameNode = FindDragFrameNodeByPosition(windowX, windowY, dragType, false);
     if (!dragFrameNode) {
         if (preGridTargetFrameNode_) {
             FireOnItemDragEvent(preGridTargetFrameNode_, dragType, itemDragInfo, DragEventType::LEAVE,
@@ -763,7 +763,7 @@ void DragDropManager::OnItemDragMove(float globalX, float globalY, int32_t dragg
     }
 
     if (dragFrameNode == preGridTargetFrameNode_) {
-        int32_t insertIndex = GetItemIndex(dragFrameNode, dragType, globalX, globalY);
+        int32_t insertIndex = GetItemIndex(dragFrameNode, dragType, windowX, windowY);
         FireOnItemDragEvent(
             dragFrameNode, dragType, itemDragInfo, DragEventType::MOVE, getDraggedIndex(dragFrameNode), insertIndex);
         return;
@@ -778,17 +778,31 @@ void DragDropManager::OnItemDragMove(float globalX, float globalY, int32_t dragg
     preGridTargetFrameNode_ = dragFrameNode;
 }
 
+float DragDropManager::GetSmallWindowScale() const
+{
+    float scale = 1.0f;
+#ifdef ENABLE_DRAG_FRAMEWORK
+    auto container = Container::Current();
+    CHECK_NULL_RETURN(container, scale);
+    scale = container->GetSmallWindowScale();
+#endif // ENABLE_DRAG_FRAMEWORK
+    return scale;
+}
+
 void DragDropManager::OnItemDragEnd(float globalX, float globalY, int32_t draggedIndex, DragType dragType)
 {
     dragDropState_ = DragDropMgrState::IDLE;
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
+    auto windowScale = GetSmallWindowScale();
+    auto windowX = globalX * windowScale;
+    auto windowY = globalY * windowScale;
 
     OHOS::Ace::ItemDragInfo itemDragInfo;
-    itemDragInfo.SetX(pipeline->ConvertPxToVp(Dimension(globalX, DimensionUnit::PX)));
-    itemDragInfo.SetY(pipeline->ConvertPxToVp(Dimension(globalY, DimensionUnit::PX)));
+    itemDragInfo.SetX(pipeline->ConvertPxToVp(Dimension(windowX, DimensionUnit::PX)));
+    itemDragInfo.SetY(pipeline->ConvertPxToVp(Dimension(windowY, DimensionUnit::PX)));
 
-    auto dragFrameNode = FindDragFrameNodeByPosition(globalX, globalY, dragType, true);
+    auto dragFrameNode = FindDragFrameNodeByPosition(windowX, windowY, dragType, true);
     if (!dragFrameNode) {
         // drag on one grid and drop on other area
         if (draggedGridFrameNode_) {
@@ -803,7 +817,7 @@ void DragDropManager::OnItemDragEnd(float globalX, float globalY, int32_t dragge
             }
         }
     } else {
-        int32_t insertIndex = GetItemIndex(dragFrameNode, dragType, globalX, globalY);
+        int32_t insertIndex = GetItemIndex(dragFrameNode, dragType, windowX, windowY);
         // drag and drop on the same grid
         if (dragFrameNode == draggedGridFrameNode_) {
             FireOnItemDropEvent(dragFrameNode, dragType, itemDragInfo, draggedIndex, insertIndex, true);
@@ -1085,10 +1099,11 @@ void DragDropManager::UpdateDragEvent(RefPtr<OHOS::Ace::DragEvent>& event, const
     }
     auto unifiedData = udData;
     event->SetData(unifiedData);
+    RequireSummary();
     event->SetSummary(summaryMap_);
     ShadowOffsetData shadowOffsetData { -1, -1, -1, -1 };
-    int retOffset = InteractionInterface::GetInstance()->GetShadowOffset(shadowOffsetData);
-    if (retOffset == 0) {
+    ret = InteractionInterface::GetInstance()->GetShadowOffset(shadowOffsetData);
+    if (ret == 0) {
         previewRect_ = Rect(
             point.GetX() + shadowOffsetData.offsetX,
             point.GetY() + shadowOffsetData.offsetY,
@@ -1096,6 +1111,9 @@ void DragDropManager::UpdateDragEvent(RefPtr<OHOS::Ace::DragEvent>& event, const
             shadowOffsetData.height);
         event->SetPreviewRect(previewRect_);
     } else {
+        if (SystemProperties::GetDebugEnabled()) {
+            TAG_LOGI(AceLogTag::ACE_DRAG, "Interaction GetShadowOffset in DragEnd with code:%{public}d", ret);
+        }
         event->SetPreviewRect(previewRect_ + Offset(point.GetX(), point.GetY()));
     }
 #endif // ENABLE_DRAG_FRAMEWORK
@@ -1135,6 +1153,44 @@ void DragDropManager::UpdateVelocityTrackerPoint(const Point& point, bool isEnd)
     std::chrono::microseconds microseconds(GetMicroTickCount());
     TimeStamp curTime(microseconds);
     velocityTracker_.UpdateTrackerPoint(point.GetX(), point.GetY(), curTime, isEnd);
+}
+
+void DragDropManager::FireOnEditableTextComponent(const RefPtr<FrameNode>& frameNode,
+    DragEventType type)
+{
+    auto frameTag = frameNode->GetTag();
+    if (!IsEditableTextComponent(frameTag)) {
+        if (SystemProperties::GetDebugEnabled()) {
+            TAG_LOGI(AceLogTag::ACE_DRAG,
+                "This frame node is not editable text component %{public}s", frameTag.c_str());
+        }
+        return;
+    }
+
+    if (type != DragEventType::ENTER && type != DragEventType::LEAVE) {
+        if (SystemProperties::GetDebugEnabled()) {
+            TAG_LOGI(AceLogTag::ACE_DRAG, "It is an invalid drag type %{public}d", type);
+        }
+        return;
+    }
+
+    if (type == DragEventType::LEAVE) {
+        TAG_LOGI(AceLogTag::ACE_DRAG, "The current control has been dragged away.");
+        hasNotifiedTransformation_ = false;
+        return;
+    }
+
+    if (hasNotifiedTransformation_) {
+        TAG_LOGI(AceLogTag::ACE_DRAG, "Coordinates have been transformed.");
+        return;
+    }
+#ifdef ENABLE_DRAG_FRAMEWORK
+    auto ret = InteractionInterface::GetInstance()->EnterTextEditorArea(true);
+    if (ret != 0) {
+        TAG_LOGI(AceLogTag::ACE_DRAG, "Fail to notify entering text editor erea.");
+    }
+#endif // ENABLE_DRAG_FRAMEWORK
+    hasNotifiedTransformation_ = true;
 }
 
 } // namespace OHOS::Ace::NG

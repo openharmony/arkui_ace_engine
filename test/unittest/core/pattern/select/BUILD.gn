@@ -13,10 +13,7 @@
 
 import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
-ace_unittest("select_pattern_test_ng") {
+ace_unittest("select_test_ng") {
   type = "new"
-  sources = [
-    "$ace_root/frameworks/core/components_v2/inspector/utils.cpp",
-    "select_pattern_test_ng.cpp",
-  ]
+  sources = [ "select_test_ng.cpp" ]
 }

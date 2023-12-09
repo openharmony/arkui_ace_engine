@@ -1,46 +1,43 @@
 /// <reference path='./import.ts' />
-class ArkLineComponent extends ArkComponent implements LineAttribute {
-  startPoint(value: any[]): this {
-    throw new Error('Method not implemented.');
+/// <reference path='./ArkCommonShape.ts' />
+class ArkLineComponent extends ArkCommonShapeComponent implements LineAttribute {
+  startPoint(value: Array<Length>): this {
+    modifierWithKey(this._modifiersWithKeys, LineStartPointModifier.identity, LineStartPointModifier, value);
+    return this;
   }
-  endPoint(value: any[]): this {
-    throw new Error('Method not implemented.');
+  endPoint(value: Array<Length>): this {
+    modifierWithKey(this._modifiersWithKeys, LineEndPointModifier.identity, LineEndPointModifier, value);
+    return this;
   }
-  stroke(value: any): this {
-    throw new Error('Method not implemented.');
+}
+
+class LineStartPointModifier extends ModifierWithKey<object> {
+  static identity: Symbol = Symbol('startPoint');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      GetUINativeModule().line.resetStartPoint(node);
+    } else {
+      GetUINativeModule().line.setStartPoint(node, this.value);
+    }
   }
-  fill(value: any): this {
-    throw new Error('Method not implemented.');
+
+  checkObjectDiff(): boolean {
+    return this.stageValue !== this.value;
   }
-  strokeDashOffset(value: string | number): this {
-    throw new Error('Method not implemented.');
+}
+
+class LineEndPointModifier extends ModifierWithKey<object> {
+  static identity: Symbol = Symbol('endPoint');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      GetUINativeModule().line.resetEndPoint(node);
+    } else {
+      GetUINativeModule().line.setEndPoint(node, this.value);
+    }
   }
-  strokeLineCap(value: LineCapStyle): this {
-    throw new Error('Method not implemented.');
-  }
-  strokeLineJoin(value: LineJoinStyle): this {
-    throw new Error('Method not implemented.');
-  }
-  strokeMiterLimit(value: string | number): this {
-    throw new Error('Method not implemented.');
-  }
-  strokeOpacity(value: any): this {
-    throw new Error('Method not implemented.');
-  }
-  fillOpacity(value: any): this {
-    throw new Error('Method not implemented.');
-  }
-  strokeWidth(value: any): this {
-    throw new Error('Method not implemented.');
-  }
-  antiAlias(value: boolean): this {
-    throw new Error('Method not implemented.');
-  }
-  strokeDashArray(value: any[]): this {
-    throw new Error('Method not implemented.');
-  }
-  monopolizeEvents(monopolize: boolean): this {
-    throw new Error('Method not implemented.');
+
+  checkObjectDiff(): boolean {
+    return this.stageValue !== this.value;
   }
 }
 

@@ -41,5 +41,10 @@ void PolygonModelNG::SetPoints(const ShapePoints& points)
     ACE_UPDATE_PAINT_PROPERTY(PolygonPaintProperty, Points, points);
 }
 
+void PolygonModelNG::SetPoints(FrameNode* frameNode, const ShapePoints& points)
+{
+    ACE_UPDATE_NODE_PAINT_PROPERTY(PolygonPaintProperty, Points, points, frameNode);
+}
+
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SHAPE_POLYGON_MODEL_NG_CPP

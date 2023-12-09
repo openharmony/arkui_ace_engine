@@ -28,6 +28,8 @@
 
 namespace OHOS::Ace::NG {
 
+const std::vector<DisplayMode> DISPLAY_MODE = { DisplayMode::OFF, DisplayMode::AUTO, DisplayMode::ON };
+
 void ListModelNG::Create()
 {
     auto* stack = ViewStackProcessor::GetInstance();
@@ -372,4 +374,143 @@ DisplayMode ListModelNG::GetDisplayMode() const
     CHECK_NULL_RETURN(list, DisplayMode::AUTO);
     return list->GetDefaultScrollBarDisplayMode();
 }
+
+void ListModelNG::SetEditMode(FrameNode* frameNode, bool editMode)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListLayoutProperty, EditMode, editMode, frameNode);
+}
+
+void ListModelNG::SetMultiSelectable(FrameNode* frameNode, bool selectable)
+{
+    auto pattern = frameNode->GetPattern<ListPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetMultiSelectable(selectable);
+}
+
+void ListModelNG::SetChainAnimation(FrameNode* frameNode, bool chainAnimation)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListLayoutProperty, ChainAnimation, chainAnimation, frameNode);
+}
+
+void ListModelNG::SetCachedCount(FrameNode* frameNode, int32_t cachedCount)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListLayoutProperty, CachedCount, cachedCount, frameNode);
+}
+
+void ListModelNG::SetScrollEnabled(FrameNode* frameNode, bool enableScrollInteraction)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListLayoutProperty, ScrollEnabled, enableScrollInteraction, frameNode);
+}
+
+void ListModelNG::SetSticky(FrameNode* frameNode, int32_t stickyStyle)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListLayoutProperty, StickyStyle,
+        static_cast<V2::StickyStyle>(stickyStyle), frameNode);
+}
+
+void ListModelNG::SetEdgeEffect(FrameNode* frameNode, int32_t edgeEffect, bool alwaysEnabled)
+{
+    ScrollableModelNG::SetEdgeEffect(frameNode, static_cast<EdgeEffect>(edgeEffect), alwaysEnabled);
+}
+
+void ListModelNG::SetListDirection(FrameNode* frameNode, int32_t axis)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListLayoutProperty, ListDirection, static_cast<Axis>(axis), frameNode);
+}
+
+void ListModelNG::SetListFriction(FrameNode* frameNode, double friction)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<ListPattern>();
+    CHECK_NULL_VOID(pattern);
+    if (LessOrEqual(friction, 0.0)) {
+        pattern->SetFriction(FRICTION);
+    }
+    pattern->SetFriction(friction);
+}
+
+void ListModelNG::SetListNestedScroll(FrameNode* frameNode, const NestedScrollOptions& nestedOpt)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<ListPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetNestedScroll(nestedOpt);
+}
+
+void ListModelNG::SetListScrollBar(FrameNode* frameNode, int32_t barState)
+{
+    int32_t displayNumber;
+    DisplayMode mode;
+    if (barState < 0 || barState >= static_cast<int32_t>(DISPLAY_MODE.size())) {
+        auto list = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<ListPattern>();
+        if (!list) {
+            mode = DisplayMode::AUTO;
+        } else {
+            mode = list->GetDefaultScrollBarDisplayMode();
+        }
+        displayNumber = static_cast<int32_t>(mode);
+    } else {
+        displayNumber = barState;
+    }
+    ScrollableModelNG::SetScrollBarMode(frameNode, displayNumber);
+    
+}
+
+void ListModelNG::SetLanes(FrameNode* frameNode, int32_t lanes)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListLayoutProperty, Lanes, lanes, frameNode);
+}
+
+void ListModelNG::SetLaneConstrain(FrameNode* frameNode, const Dimension& laneMinLength, const Dimension& laneMaxLength)
+{
+    SetLaneMinLength(frameNode, laneMinLength);
+    SetLaneMaxLength(frameNode, laneMaxLength);
+}
+
+void ListModelNG::SetLaneMinLength(FrameNode* frameNode, const Dimension& laneMinLength)
+{
+    if (laneMinLength.IsValid()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListLayoutProperty, LaneMinLength, laneMinLength, frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY_WITH_FLAG(ListLayoutProperty, LaneMinLength, PROPERTY_UPDATE_MEASURE, frameNode);
+    }
+}
+
+void ListModelNG::SetLaneMaxLength(FrameNode* frameNode, const Dimension& laneMaxLength)
+{
+    if (laneMaxLength.IsValid()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListLayoutProperty, LaneMaxLength, laneMaxLength, frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY_WITH_FLAG(ListLayoutProperty, LaneMaxLength, PROPERTY_UPDATE_MEASURE, frameNode);
+    }
+}
+
+void ListModelNG::SetLaneGutter(FrameNode* frameNode, const Dimension& laneGutter)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListLayoutProperty, LaneGutter, laneGutter, frameNode);
+}
+
+void ListModelNG::SetListItemAlign(FrameNode* frameNode, V2::ListItemAlign listItemAlign)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListLayoutProperty, ListItemAlign, listItemAlign, frameNode);
+}
+
+void ListModelNG::SetScrollSnapAlign(FrameNode* frameNode, V2::ScrollSnapAlign scrollSnapAlign)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListLayoutProperty, ScrollSnapAlign, scrollSnapAlign, frameNode);
+}
+
+void ListModelNG::SetDivider(FrameNode* frameNode, const V2::ItemDivider& divider)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListLayoutProperty, Divider, divider, frameNode);
+}
+
+void ListModelNG::SetChainAnimationOptions(FrameNode* frameNode, const ChainAnimationOptions& options)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<ListPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetChainAnimationOptions(options);
+}
+
 } // namespace OHOS::Ace::NG

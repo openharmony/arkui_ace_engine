@@ -1,6 +1,6 @@
 
 /// <reference path="./import.ts" />
-class ImageSpanObjectFitModifier extends Modifier<number> {
+class ImageSpanObjectFitModifier extends ModifierWithKey<number> {
     static identity: Symbol = Symbol('imageSpanObjectFit');
     applyPeer(node: KNode, reset: boolean): void {
         if (reset) {
@@ -9,8 +9,11 @@ class ImageSpanObjectFitModifier extends Modifier<number> {
             GetUINativeModule().imageSpan.setObjectFit(node, this.value!);
         }
     }
+    checkObjectDiff(): boolean {
+        return this.stageValue !== this.value;
+    }
 }
-class ImageSpanVerticalAlignModifier extends Modifier<number> {
+class ImageSpanVerticalAlignModifier extends ModifierWithKey<number> {
     static identity: Symbol = Symbol('imageSpanVerticalAlign');
     applyPeer(node: KNode, reset: boolean): void {
         if (reset) {
@@ -19,22 +22,17 @@ class ImageSpanVerticalAlignModifier extends Modifier<number> {
             GetUINativeModule().imageSpan.setVerticalAlign(node, this.value!);
         }
     }
+    checkObjectDiff(): boolean {
+        return this.stageValue !== this.value;
+    }
 }
 class ArkImageSpanComponent extends ArkComponent implements ImageSpanAttribute {
     objectFit(value: ImageFit): ImageSpanAttribute {
-        if (value in ImageFit) {
-            modifier(this._modifiers, ImageSpanObjectFitModifier, value);
-        } else {
-            modifier(this._modifiers, ImageSpanObjectFitModifier, undefined);
-        }
+        modifierWithKey(this._modifiersWithKeys, ImageSpanObjectFitModifier.identity, ImageSpanObjectFitModifier, value);
         return this;
     }
     verticalAlign(value: ImageSpanAlignment): ImageSpanAttribute {
-        if (value in ImageSpanAlignment) {
-            modifier(this._modifiers, ImageSpanVerticalAlignModifier, value);
-        } else {
-            modifier(this._modifiers, ImageSpanVerticalAlignModifier, undefined);
-        }
+        modifierWithKey(this._modifiersWithKeys, ImageSpanVerticalAlignModifier.identity, ImageSpanVerticalAlignModifier, value);
         return this;
     }
 }

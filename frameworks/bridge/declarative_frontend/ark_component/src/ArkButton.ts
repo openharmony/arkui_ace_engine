@@ -22,6 +22,10 @@ class ArkButtonComponent extends ArkComponent implements ButtonAttribute {
   onGestureJudgeBegin(callback: (gestureInfo: GestureInfo, event: BaseGestureEvent) => GestureJudgeResult): this {
     throw new Error('Method not implemented.');
   }
+  backgroundColor(value: ResourceColor): this {
+    modifierWithKey(this._modifiersWithKeys, ButtonBackgroundColorModifier.identity, ButtonBackgroundColorModifier, value);
+    return this;
+  }
   type (value: ButtonType): this {
     if (isNumber(value)) {
       modifier(this._modifiers, ButtonTypeModifier, value);
@@ -40,20 +44,11 @@ class ArkButtonComponent extends ArkComponent implements ButtonAttribute {
     return this;
   }
   fontColor(value: ResourceColor): this {
-    let arkColor = new ArkColor();
-    if (arkColor.parseColorValue(value)) {
-      modifier(this._modifiers, ButtonFontColorModifier, arkColor.color);
-    } else {
-      modifier(this._modifiers, ButtonFontColorModifier, undefined);
-    }
+    modifierWithKey(this._modifiersWithKeys, ButtonFontColorModifier.identity, ButtonFontColorModifier, value);
     return this;
   }
   fontSize(value: Length): this {
-    if (typeof value === 'number' || typeof value === 'string') {
-      modifier(this._modifiers, ButtonFontSizeModifier, value);
-    } else {
-      modifier(this._modifiers, ButtonFontSizeModifier, undefined);
-    }
+    modifierWithKey(this._modifiersWithKeys, ButtonFontSizeModifier.identity, ButtonFontSizeModifier, value);
     return this;
   }
   fontWeight(value: string | number | FontWeight): this {
@@ -73,32 +68,30 @@ class ArkButtonComponent extends ArkComponent implements ButtonAttribute {
     return this;
   }
   fontFamily(value: string | Resource): this {
-    if (isString(value)) {
-      modifier(this._modifiers, ButtonFontFamilyModifier, value as string);
-    } else {
-      modifier(this._modifiers, ButtonFontFamilyModifier, undefined);
-    }
+    modifierWithKey(this._modifiersWithKeys, ButtonFontFamilyModifier.identity, ButtonFontFamilyModifier, value);
     return this;
   }
   labelStyle(value: LabelStyle): this {
-    if (isObject(value)) {
-      let data = new ArkLabelStyle();
-      data.heightAdaptivePolicy = value.heightAdaptivePolicy;
-      data.maxFontSize = value.maxFontSize;
-      data.maxLines = value.maxLines;
-      data.minFontSize = value.minFontSize;
-      data.overflow = value.overflow;
-      if (isObject(value.font)) {
-        data.font.family = value.font.family;
-        data.font.size = value.font.size;
-        data.font.style = value.font.style;
-        data.font.weight = value.font.weight;
-      }
-      modifier(this._modifiers, ButtonLabelStyleModifier, data);
-    } else {
-      modifier(this._modifiers, ButtonLabelStyleModifier, undefined);
-    }
+    modifierWithKey(this._modifiersWithKeys, ButtonLabelStyleModifier.identity,ButtonLabelStyleModifier, value);
     return this;
+  }
+}
+class ButtonBackgroundColorModifier extends ModifierWithKey<ResourceColor> {
+  static identity: Symbol = Symbol("buttonBackgroundColor");
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      GetUINativeModule().button.resetBackgroundColor(node);
+    } else {
+      GetUINativeModule().button.setBackgroundColor(node, this.value);
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    if (isResource(this.stageValue) && isResource(this.value)) {
+      return !isResourceEqual(this.stageValue, this.value);
+    } else {
+      return true;
+    }
   }
 }
 class ButtonStateEffectModifier extends Modifier<boolean> {
@@ -123,7 +116,7 @@ class ButtonFontStyleModifier extends Modifier<number> {
     }
   }
 }
-class ButtonFontFamilyModifier extends Modifier<string> {
+class ButtonFontFamilyModifier extends ModifierWithKey<string | Resource> {
   static identity: Symbol = Symbol('buttonFontFamily');
   applyPeer(node: KNode, reset: boolean): void {
       if (reset) {
@@ -133,42 +126,62 @@ class ButtonFontFamilyModifier extends Modifier<string> {
         GetUINativeModule().button.setFontFamily(node, this.value);
       }
   }
+  checkObjectDiff(): boolean {
+    if (isResource(this.stageValue) && isResource(this.value)) {
+      return !isResourceEqual(this.stageValue, this.value);
+    }
+    else {
+      return true;
+    }
+  }
 }
-class ButtonLabelStyleModifier extends Modifier<ArkLabelStyle> {
+class ButtonLabelStyleModifier extends ModifierWithKey<LabelStyle> {
   static identity: Symbol = Symbol('buttonLabelStyle');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
         GetUINativeModule().button.resetLabelStyle(node);
     }
     else {
-      if (isObject(this.value))
+      let textOverflow = this.value.overflow; // number -> Ace::TextOverflow
+      let maxLines = this.value.maxLines; // number -> uint32_t
+      let minFontSize = this.value.minFontSize; // number/string -> Dimension
+      let maxFontSize = this.value.maxFontSize; // number/string -> Dimension
+      let heightAdaptivePolicy = this.value.heightAdaptivePolicy; // number -> Ace::TextHeightAdaptivePolicy
+      let fontSize = undefined; // number/string ->Dimension
+      let fontWeight = undefined; // string -> Ace::FontWeight
+      let fontStyle = undefined; // number -> Ace::FontStyle
+      let fontFamily = undefined; // string ->std::vector<std::string>
+      if (isObject(this.value.font))
       {
-        let textOverflow = this.value.overflow; // number -> Ace::TextOverflow
-        let maxLines = this.value.maxLines; // number -> uint32_t
-        let minFontSize = this.value.minFontSize; // number/string -> Dimension
-        let maxFontSize = this.value.maxFontSize; // number/string -> Dimension
-        let heightAdaptivePolicy = this.value.heightAdaptivePolicy; // number -> Ace::TextHeightAdaptivePolicy
-        let fontSize = undefined; // number/string ->Dimension
-        let fontWeight = undefined; // string -> Ace::FontWeight
-        let fontStyle = undefined; // number -> Ace::FontStyle
-        let fontFamily = undefined; // string ->std::vector<std::string>
-        if (isObject(this.value.font))
-        {
-          fontSize = this.value.font.size;
-          fontWeight = 'normal';
-          fontStyle = this.value.font.style;
-          fontFamily = this.value.font.family;
-          if (typeof this.value.font.weight === "string") {
-            fontWeight = this.value.font.weight;
-          } else {
-            if (this.value.font.weight in FontWeightMap) {
-              fontWeight = FontWeightMap[this.value.font.weight];
-            }
+        fontSize = this.value.font.size;
+        fontWeight = 'normal';
+        fontStyle = this.value.font.style;
+        fontFamily = this.value.font.family;
+        if (typeof this.value.font.weight === "string") {
+          fontWeight = this.value.font.weight;
+        } else {
+          if (this.value.font.weight in FontWeightMap) {
+            fontWeight = FontWeightMap[this.value.font.weight];
           }
-        }
-        GetUINativeModule().button.setLabelStyle(node, textOverflow, maxLines, minFontSize, maxFontSize,
-          heightAdaptivePolicy, fontSize, fontWeight, fontStyle, fontFamily);
       }
+      GetUINativeModule().button.setLabelStyle(node, textOverflow, maxLines, minFontSize, maxFontSize,
+        heightAdaptivePolicy, fontSize, fontWeight, fontStyle, fontFamily);
+      }
+    }
+  }
+  checkObjectDiff(): boolean {
+    if (isResource(this.stageValue) && isResource(this.value)) {
+      return !isResourceEqual(this.stageValue, this.value);
+    }else if(!isResource(this.stageValue) && !isResource(this.value)){
+      return !(this.value.overflow === this.stageValue.overflow &&
+        this.value.maxLines === this.stageValue.maxLines &&
+        this.value.minFontSize === this.stageValue.minFontSize &&
+        this.value.maxFontSize === this.stageValue.maxFontSize  &&
+        this.value.heightAdaptivePolicy === this.stageValue.heightAdaptivePolicy &&
+        this.value.font === this.stageValue.font)
+    }
+    else {
+      return true;
     }
   }
 }
@@ -183,7 +196,7 @@ class ButtonTypeModifier extends Modifier<number> {
     }
   }
 }
-class ButtonFontColorModifier extends Modifier<number | undefined> {
+class ButtonFontColorModifier extends ModifierWithKey<ResourceColor> {
   static identity: Symbol = Symbol('buttonFontColor');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -193,8 +206,17 @@ class ButtonFontColorModifier extends Modifier<number | undefined> {
       GetUINativeModule().button.setFontColor(node, this.value);
     }
   }
+  
+  checkObjectDiff(): boolean {
+    if (isResource(this.stageValue) && isResource(this.value)) {
+      return !isResourceEqual(this.stageValue, this.value);
+    } 
+    else {
+      return true;
+    }
+  }
 }
-class ButtonFontSizeModifier extends Modifier<number> {
+class ButtonFontSizeModifier extends ModifierWithKey<Length> {
   static identity: Symbol = Symbol('buttonFontSize');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -202,6 +224,15 @@ class ButtonFontSizeModifier extends Modifier<number> {
     }
     else {
       GetUINativeModule().button.setFontSize(node, this.value);
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    if (isResource(this.stageValue) && isResource(this.value)) {
+      return !isResourceEqual(this.stageValue, this.value);
+    }
+    else {
+      return true;
     }
   }
 }

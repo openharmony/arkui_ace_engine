@@ -5,11 +5,7 @@ class ArkStackComponent extends ArkComponent implements StackAttribute {
     throw new Error("Method not implemented.");
   }
   alignContent(value: Alignment): StackAttribute {
-    if (value in Alignment) {
-      modifier(this._modifiers, StackAlignContentModifier, value);
-    } else {
-      modifier(this._modifiers, StackAlignContentModifier, undefined);
-    }
+    modifierWithKey(this._modifiersWithKeys, StackAlignContentModifier.identity, StackAlignContentModifier, value);
     return this;
   }
 }
@@ -22,6 +18,9 @@ class StackAlignContentModifier extends Modifier<number> {
     } else {
       GetUINativeModule().stack.setAlignContent(node, this.value!);
     }
+  }
+  checkObjectDiff(): boolean {
+    return this.stageValue !== this.value;
   }
 }
 // @ts-ignore

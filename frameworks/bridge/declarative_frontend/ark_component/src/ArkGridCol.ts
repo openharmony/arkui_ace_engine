@@ -1,82 +1,107 @@
 /// <reference path="./import.ts" />
-class GridColSpanModifier extends Modifier<ArkGridColColumnOption> {
+class GridColSpanModifier extends ModifierWithKey<ArkGridColColumnOption> {
   static identity: Symbol = Symbol('gridColSpan');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
       GetUINativeModule().gridCol.resetSpan(node);
     } else {
-      GetUINativeModule().gridCol.setSpan(node, this.value.xs,
-        this.value.sm, this.value.md, this.value.lg, this.value.xl, this.value.xxl);
+      if (isNumber(this.value)) {
+        GetUINativeModule().gridCol.setSpan(node, this.value,
+          this.value, this.value, this.value, this.value, this.value);
+      } else {
+        GetUINativeModule().gridCol.setSpan(node, this.value.xs,
+          this.value.sm, this.value.md, this.value.lg, this.value.xl, this.value.xxl);
+      }
+    }
+  }
+  checkObjectDiff(): boolean {
+    if(isNumber(this.stageValue)&&isNumber(this.value)) {
+      return this.stageValue !== this.value;
+    } else if (isObject(this.stageValue)&&isObject(this.value)) {
+      return this.stageValue.xs !== this.value.xs ||
+      this.stageValue.sm !== this.value.sm ||
+      this.stageValue.md !== this.value.md ||
+      this.stageValue.lg !== this.value.lg ||
+      this.stageValue.xl !== this.value.xl ||
+      this.stageValue.xxl !== this.value.xxl;
+    } else {
+      return true;
     }
   }
 }
-class GridColOffsetModifier extends Modifier<ArkGridColColumnOption> {
+class GridColOffsetModifier extends ModifierWithKey<ArkGridColColumnOption> {
   static identity: Symbol = Symbol('gridColOffset');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
       GetUINativeModule().gridCol.resetGridColOffset(node);
     } else {
-      GetUINativeModule().gridCol.setGridColOffset(node, this.value.xs,
-        this.value.sm, this.value.md, this.value.lg, this.value.xl, this.value.xxl);
+      if (isNumber(this.value)) {
+        GetUINativeModule().gridCol.setGridColOffset(node, this.value,
+          this.value, this.value, this.value, this.value, this.value);
+      } else {
+        GetUINativeModule().gridCol.setGridColOffset(node, this.value.xs,
+          this.value.sm, this.value.md, this.value.lg, this.value.xl, this.value.xxl);
+      }
+    }
+  }
+  checkObjectDiff(): boolean {
+    if(isNumber(this.stageValue)&&isNumber(this.value)) {
+      return this.stageValue !== this.value;
+    } else if (isObject(this.stageValue)&&isObject(this.value)) {
+      return this.stageValue.xs !== this.value.xs ||
+      this.stageValue.sm !== this.value.sm ||
+      this.stageValue.md !== this.value.md ||
+      this.stageValue.lg !== this.value.lg ||
+      this.stageValue.xl !== this.value.xl ||
+      this.stageValue.xxl !== this.value.xxl;
+    } else {
+      return true;
     }
   }
 }
-class GridColOrderModifier extends Modifier<ArkGridColColumnOption> {
+class GridColOrderModifier extends ModifierWithKey<ArkGridColColumnOption> {
   static identity: Symbol = Symbol('gridColOrder');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
       GetUINativeModule().gridCol.resetOrder(node);
     } else {
-      GetUINativeModule().gridCol.setOrder(node, this.value.xs,
-        this.value.sm, this.value.md, this.value.lg, this.value.xl, this.value.xxl);
+      if (isNumber(this.value)) {
+        GetUINativeModule().gridCol.setOrder(node, this.value,
+          this.value, this.value, this.value, this.value, this.value);
+      } else {
+        GetUINativeModule().gridCol.setOrder(node, this.value.xs,
+          this.value.sm, this.value.md, this.value.lg, this.value.xl, this.value.xxl);
+      }
+    }
+  }
+  checkObjectDiff(): boolean {
+    if(isNumber(this.stageValue)&&isNumber(this.value)) {
+      return this.stageValue !== this.value;
+    } else if (isObject(this.stageValue)&&isObject(this.value)) {
+      return this.stageValue.xs !== this.value.xs ||
+      this.stageValue.sm !== this.value.sm ||
+      this.stageValue.md !== this.value.md ||
+      this.stageValue.lg !== this.value.lg ||
+      this.stageValue.xl !== this.value.xl ||
+      this.stageValue.xxl !== this.value.xxl;
+    } else {
+      return true;
     }
   }
 }
 
 class ArkGridColComponent extends ArkComponent implements GridColAttribute {
   span(value: number | GridColColumnOption): GridColAttribute {
-    modifier(this._modifiers, GridColSpanModifier, this.parserGridColColumnOption(value));
+    modifierWithKey(this._modifiersWithKeys, GridColSpanModifier.identity, GridColSpanModifier, value);
     return this;
   }
   gridColOffset(value: number | GridColColumnOption): GridColAttribute {
-    modifier(this._modifiers, GridColOffsetModifier, this.parserGridColColumnOption(value));
+    modifierWithKey(this._modifiersWithKeys, GridColOffsetModifier.identity, GridColOffsetModifier, value);
     return this;
   }
   order(value: number | GridColColumnOption): GridColAttribute {
-    modifier(this._modifiers, GridColOrderModifier, this.parserGridColColumnOption(value));
+    modifierWithKey(this._modifiersWithKeys, GridColOrderModifier.identity, GridColOrderModifier, value);
     return this;
-  }
-  private parserGridColColumnOption(jsValue: any) {
-    let gridColColumnOption = new ArkGridColColumnOption();
-    if (isNumber(jsValue) && jsValue >= 0) {
-      gridColColumnOption.xs = jsValue;
-      gridColColumnOption.sm = jsValue;
-      gridColColumnOption.md = jsValue;
-      gridColColumnOption.lg = jsValue;
-      gridColColumnOption.xl = jsValue;
-      gridColColumnOption.xxl = jsValue;
-    }
-    else if (isObject(jsValue)) {
-      if (isNumber(jsValue.xs) && jsValue.xs >= 0) {
-        gridColColumnOption.xs = jsValue.xs;
-      }
-      if (isNumber(jsValue.sm) && jsValue.sm >= 0) {
-        gridColColumnOption.sm = jsValue.sm;
-      }
-      if (isNumber(jsValue.md) && jsValue.md >= 0) {
-        gridColColumnOption.md = jsValue.md;
-      }
-      if (isNumber(jsValue.lg) && jsValue.lg >= 0) {
-        gridColColumnOption.lg = jsValue.lg;
-      }
-      if (isNumber(jsValue.xl) && jsValue.xl >= 0) {
-        gridColColumnOption.xl = jsValue.xl;
-      }
-      if (isNumber(jsValue.xxl) && jsValue.xxl >= 0) {
-        gridColColumnOption.xxl = jsValue.xxl;
-      }
-    }
-    return gridColColumnOption;
   }
 }
 

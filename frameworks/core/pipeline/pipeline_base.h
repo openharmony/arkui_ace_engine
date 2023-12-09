@@ -111,6 +111,21 @@ public:
 
     static void SetCallBackNode(const WeakPtr<NG::FrameNode>& node);
 
+    /*
+     * Change px to vp with density of current pipeline
+     */
+    static double Px2VpWithCurrentDensity(double px);
+
+    /*
+     * Change vp to px with density of current pipeline
+     */
+    static double Vp2PxWithCurrentDensity(double vp);
+
+    /*
+     * Get density of current pipeline if valid, or return density of default display
+     */
+    static double GetCurrentDensity();
+
     virtual void SetupRootElement() = 0;
 
     virtual uint64_t GetTimeFromExternalTimer();
@@ -1028,6 +1043,13 @@ public:
     }
 
     void OnFormRecover(const std::string& statusData);
+
+    virtual bool IsDragging() const
+    {
+        return false;
+    }
+
+    virtual void SetIsDragging(bool isDragging) {}
 
 protected:
     virtual bool MaybeRelease() override;

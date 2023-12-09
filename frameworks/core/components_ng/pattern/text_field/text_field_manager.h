@@ -21,7 +21,6 @@
 #include "base/utils/macros.h"
 #include "core/common/manager_interface.h"
 #include "core/components_ng/pattern/pattern.h"
-#include "core/components_ng/pattern/text_field/key_event_handler.h"
 #include "core/components_ng/property/safe_area_insets.h"
 
 namespace OHOS::Ace::NG {
@@ -69,7 +68,7 @@ public:
 
     bool OnBackPressed();
 
-    const RefPtr<KeyEventHandler>& GetKeyEventHandler();
+    void UpdateScrollableParentViewPort(const RefPtr<FrameNode>& node);
 
 private:
     void ScrollToSafeAreaHelper(const SafeAreaInsets::Inset& bottomInset);
@@ -78,7 +77,6 @@ private:
     bool hasMove_ = false;
     Offset position_;
     float height_ = 0.0f;
-    RefPtr<KeyEventHandler> keyEventHandler_;
     WeakPtr<Pattern> onFocusTextField_;
 };
 

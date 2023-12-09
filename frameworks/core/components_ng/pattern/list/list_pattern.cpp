@@ -90,6 +90,7 @@ void ListPattern::OnModifyDone()
     if (!listDragStatusListener_.has_value()) {
         InitNotifyDragEvent();
     }
+    Register2DragDropManager();
     SetAccessibilityAction();
 }
 
@@ -351,23 +352,7 @@ void ListPattern::ProcessEvent(
         }
     }
 
-    if (scrollStop_) {
-        auto onScrollStop = listEventHub->GetOnScrollStop();
-        if (!GetScrollAbort()) {
-            if (onScrollStop) {
-                SetScrollSource(SCROLL_FROM_NONE);
-                onScrollStop();
-            }
-            auto scrollBar = GetScrollBar();
-            if (scrollBar) {
-                scrollBar->ScheduleDisappearDelayTask();
-            }
-            StartScrollBarAnimatorByProxy();
-        }
-        PerfMonitor::GetPerfMonitor()->End(PerfConstants::APP_LIST_FLING, false);
-        scrollStop_ = false;
-        SetScrollAbort(false);
-    }
+    OnScrollStop(listEventHub->GetOnScrollStop());
 }
 
 void ListPattern::DrivenRender(const RefPtr<LayoutWrapper>& layoutWrapper)
@@ -755,26 +740,6 @@ bool ListPattern::IsOutOfBoundary(bool useCurrentDelta)
             (endIndex_ == maxListItemIndex_) && LessNotEqual(endPos - itemHeight / 2.0f, contentMainSize_ / 2.0f);
     }
     return outOfStart || outOfEnd;
-}
-
-void ListPattern::FireOnScrollStart()
-{
-    PerfMonitor::GetPerfMonitor()->Start(PerfConstants::APP_LIST_FLING, PerfActionType::FIRST_MOVE, "");
-    if (GetScrollAbort()) {
-        return;
-    }
-    auto scrollBar = GetScrollBar();
-    if (scrollBar) {
-        scrollBar->PlayScrollBarAppearAnimation();
-    }
-    StopScrollBarAnimatorByProxy();
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto hub = host->GetEventHub<ListEventHub>();
-    CHECK_NULL_VOID(hub);
-    auto onScrollStart = hub->GetOnScrollStart();
-    CHECK_NULL_VOID(onScrollStart);
-    onScrollStart();
 }
 
 bool ListPattern::OnScrollCallback(float offset, int32_t source)
@@ -1542,7 +1507,7 @@ void ListPattern::UpdateScrollBarOffset()
     }
     float itemsSize = itemPosition_.rbegin()->second.endPos - itemPosition_.begin()->second.startPos + spaceWidth_;
     float currentOffset = itemsSize / itemPosition_.size() * itemPosition_.begin()->first - startMainPos_;
-    auto estimatedHeight = itemsSize / itemPosition_.size() * (maxListItemIndex_ + 1);
+    auto estimatedHeight = itemsSize / itemPosition_.size() * (maxListItemIndex_ + 1) - spaceWidth_;
     if (GetAlwaysEnabled()) {
         estimatedHeight = estimatedHeight - spaceWidth_;
     }
@@ -1820,7 +1785,7 @@ void ListPattern::ClearMultiSelect()
     ClearSelectedZone();
 }
 
-bool ListPattern::IsItemSelected(const MouseInfo& info)
+bool ListPattern::IsItemSelected(const GestureEvent& info)
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
@@ -1888,9 +1853,6 @@ void ListPattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const
     if (!itemPosition_.empty()) {
         json->Put("itemStartPos", itemPosition_.begin()->second.startPos);
     }
-    auto JsonEdgeEffectOptions = JsonUtil::Create(true);
-    JsonEdgeEffectOptions->Put("alwaysEnabled", GetAlwaysEnabled());
-    json->Put("edgeEffectOptions", JsonEdgeEffectOptions);
 }
 
 void ListPattern::FromJson(const std::unique_ptr<JsonValue>& json)
@@ -1980,43 +1942,9 @@ bool ListPattern::IsListItemGroup(int32_t listIndex, RefPtr<FrameNode>& node)
 
 void ListPattern::InitNotifyDragEvent()
 {
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
     if (!listDragStatusListener_.has_value()) {
         listDragStatusListener_ = AceType::MakeRefPtr<ListDragStatusListener>();
-    }
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto dragDropManager = pipeline->GetDragDropManager();
-    CHECK_NULL_VOID(dragDropManager);
-    dragDropManager->RegisterDragStatusListener(host->GetId(), AceType::WeakClaim(AceType::RawPtr(host)));
-}
-
-void ListPattern::HandleOnDragStatusCallback(
-    const DragEventType& dragEventType, const RefPtr<NotifyDragEvent>& notifyDragEvent)
-{
-    if (!listDragStatusListener_.has_value()) {
-        return;
-    }
-    auto listDragStatusListener = listDragStatusListener_.value();
-    switch (dragEventType) {
-        case DragEventType::START:
-            listDragStatusListener->OnDragStarted(notifyDragEvent);
-            break;
-        case DragEventType::ENTER:
-            listDragStatusListener->OnDragEntered(notifyDragEvent);
-            break;
-        case DragEventType::MOVE:
-            listDragStatusListener->OnDragMoved(notifyDragEvent);
-            break;
-        case DragEventType::LEAVE:
-            listDragStatusListener->OnDragLeaved(notifyDragEvent);
-            break;
-        case DragEventType::DROP:
-            listDragStatusListener->OnDragEnded(notifyDragEvent);
-            break;
-        default:
-            break;
+        SetDragStatusListener(listDragStatusListener_.value());
     }
 }
 

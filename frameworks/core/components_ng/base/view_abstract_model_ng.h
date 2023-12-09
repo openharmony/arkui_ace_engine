@@ -835,6 +835,11 @@ public:
         ViewAbstract::SetAllowDrop(allowDrop);
     }
 
+    void SetDragPreview(const NG::DragDropInfo& info) override
+    {
+        ViewAbstract::SetDragPreview(info);
+    }
+
     void SetOnVisibleChange(
         std::function<void(bool, double)>&& onVisibleChange, const std::vector<double>& ratios) override
     {
@@ -936,6 +941,10 @@ public:
         ViewAbstract::SetHitTestMode(hitTestMode);
     }
 
+    void SetOnTouchTestFunc(NG::OnChildTouchTestFunc&& onChildTouchTest) override
+    {
+        ViewAbstract::SetOnTouchTestFunc(std::move(onChildTouchTest));
+    }
     void SetKeyboardShortcut(const std::string& value, const std::vector<ModifierKey>& keys,
         std::function<void()>&& onKeyboardShortcutAction) override
     {

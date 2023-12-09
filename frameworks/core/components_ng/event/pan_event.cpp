@@ -134,4 +134,15 @@ void PanEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, con
     result.emplace_back(panRecognizer_);
 }
 
+void PanEventActuator::SetPanEventType(GestureTypeName typeName)
+    {
+        if (panEvents_.empty()) {
+            return;
+        }
+        auto gestureInfo = panRecognizer_->GetOrCreateGestureInfo();
+        CHECK_NULL_VOID(gestureInfo);
+        gestureInfo->SetType(typeName);
+        gestureInfo->SetIsSystemGesture(true);
+    }
+
 } // namespace OHOS::Ace::NG

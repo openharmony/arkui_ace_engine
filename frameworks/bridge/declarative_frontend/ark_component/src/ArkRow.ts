@@ -1,5 +1,5 @@
 /// <reference path="./import.ts" />
-class RowAlignItemsModifier extends Modifier<number> {
+class RowAlignItemsModifier extends ModifierWithKey<number> {
   static identity: Symbol = Symbol('rowAlignItems');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -8,9 +8,12 @@ class RowAlignItemsModifier extends Modifier<number> {
       GetUINativeModule().row.setAlignItems(node, this.value!);
     }
   }
+  checkObjectDiff(): boolean {
+    return this.stageValue !== this.value;
+  }
 }
 
-class RowJustifyContentlModifier extends Modifier<number> {
+class RowJustifyContentlModifier extends ModifierWithKey<number> {
   static identity: Symbol = Symbol('rowJustifyContent');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -19,27 +22,18 @@ class RowJustifyContentlModifier extends Modifier<number> {
       GetUINativeModule().row.setJustifyContent(node, this.value!);
     }
   }
+  checkObjectDiff(): boolean {
+    return this.stageValue !== this.value;
+  }
 }
 
 class ArkRowComponent extends ArkComponent implements RowAttribute {
   alignItems(value: VerticalAlign): RowAttribute {
-    if (value === null || value === undefined) {
-      modifier(this._modifiers, RowAlignItemsModifier, undefined);
-    } else if (!(value in VerticalAlign)) {
-      modifier(this._modifiers, RowAlignItemsModifier, undefined);
-    } else {
-      modifier(this._modifiers, RowAlignItemsModifier, value);
-    }
+    modifierWithKey(this._modifiersWithKeys, RowAlignItemsModifier.identity, RowAlignItemsModifier, value);
     return this;
   }
   justifyContent(value: FlexAlign): RowAttribute {
-    if (value === null || value === undefined) {
-      modifier(this._modifiers, RowJustifyContentlModifier, undefined);
-    } else if (!(value in FlexAlign)) {
-      modifier(this._modifiers, RowJustifyContentlModifier, undefined);
-    } else {
-      modifier(this._modifiers, RowJustifyContentlModifier, value);
-    }
+    modifierWithKey(this._modifiersWithKeys, RowJustifyContentlModifier.identity, RowJustifyContentlModifier, value);
     return this;
   }
   pointLight(value: PointLightStyle): RowAttribute {

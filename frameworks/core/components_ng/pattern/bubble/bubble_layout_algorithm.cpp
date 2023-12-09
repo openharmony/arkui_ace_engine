@@ -43,8 +43,6 @@ namespace OHOS::Ace::NG {
 namespace {
 constexpr double HALF = 2.0;
 constexpr Dimension ARROW_RADIUS = 2.0_vp;
-constexpr Dimension BUBBLE_MIN_HEIGHT = 0.0_vp;
-constexpr Dimension BUBBLE_MAX_HEIGHT = 480.0_vp;
 constexpr double BUBBLE_ARROW_HALF = 2.0;
 constexpr size_t ALIGNMENT_STEP_OFFSET = 2;
 constexpr Dimension BUBBLE_ARROW_WIDTH = 16.0_vp;
@@ -160,7 +158,6 @@ void BubbleLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         LOGE("fail to measure bubble due to layoutConstraint is nullptr");
         return;
     }
-    bool useCustom = bubbleLayoutProperty->GetUseCustom().value_or(false);
     // bubble size fit screen.
     layoutWrapper->GetGeometryNode()->SetFrameSize(layoutConstraint->maxSize);
     layoutWrapper->GetGeometryNode()->SetContentSize(layoutConstraint->maxSize);
@@ -173,44 +170,6 @@ void BubbleLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto child = children.front();
     // childSize_ and childOffset_ is used in Layout.
     child->Measure(childLayoutConstraint);
-    bool showInSubWindow = bubbleLayoutProperty->GetShowInSubWindowValue(false);
-    if (useCustom && !showInSubWindow) {
-        auto context = PipelineBase::GetCurrentContext();
-        CHECK_NULL_VOID(context);
-        float rootH = context->GetRootHeight();
-        float rootW = context->GetRootWidth();
-        auto childHeight = child->GetGeometryNode()->GetMarginFrameSize().Height();
-        auto childWidth = child->GetGeometryNode()->GetMarginFrameSize().Width();
-        auto scaledBubbleSpacing = scaledBubbleSpacing_ * 2;
-        auto targetNode = FrameNode::GetFrameNode(targetTag_, targetNodeId_);
-        CHECK_NULL_VOID(targetNode);
-        auto geometryNode = targetNode->GetGeometryNode();
-        CHECK_NULL_VOID(geometryNode);
-        auto targetSize = geometryNode->GetFrameSize();
-        auto targetOffset = targetNode->GetPaintRectOffset();
-        auto constrainHeight = layoutWrapper->GetGeometryNode()->GetFrameSize().Height();
-        auto constrainWidth = layoutWrapper->GetGeometryNode()->GetFrameSize().Width();
-        auto placement = bubbleLayoutProperty->GetPlacement().value_or(Placement::BOTTOM);
-        if (setHorizontal_.find(placement) != setHorizontal_.end()) {
-            if (childWidth + targetOffset.GetX() + targetSize.Width() + scaledBubbleSpacing <= rootW &&
-                targetOffset.GetX() - childWidth - scaledBubbleSpacing >= 0) {
-                return;
-            }
-            constrainWidth = rootW - scaledBubbleSpacing;
-        }
-        if (setVertical_.find(placement) != setVertical_.end()) {
-            if (childHeight + targetOffset.GetY() + targetSize.Height() + scaledBubbleSpacing <= rootH &&
-                targetOffset.GetY() - childHeight - scaledBubbleSpacing >= 0) {
-                return;
-            }
-            constrainHeight = std::max(rootH - targetOffset.GetY() - targetSize.Height() - scaledBubbleSpacing,
-                targetOffset.GetY() - scaledBubbleSpacing);
-        }
-        SizeF size = SizeF(constrainWidth, std::clamp(static_cast<double>(constrainHeight),
-            BUBBLE_MIN_HEIGHT.ConvertToPx(), BUBBLE_MAX_HEIGHT.ConvertToPx()));
-        childLayoutConstraint.UpdateMaxSizeWithCheck(size);
-        child->Measure(childLayoutConstraint);
-    }
 }
 
 void BubbleLayoutAlgorithm::BubbleAvoidanceRule(RefPtr<LayoutWrapper> child, RefPtr<BubbleLayoutProperty> bubbleProp,
@@ -279,6 +238,9 @@ void BubbleLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         }
         SubwindowManager::GetInstance()->SetHotAreas(rects, frameNode->GetId(), bubblePattern->GetContainerId());
     }
+    targetOffsetForPaint_ = targetOffset_;
+    childOffsetForPaint_ = childOffset_;
+    arrowPositionForPaint_ = arrowPosition_;
     UpdateClipOffset(frameNode);
 }
 bool BubbleLayoutAlgorithm::GetIfNeedArrow(const RefPtr<BubbleLayoutProperty>& bubbleProp, const SizeF& childSize)
@@ -330,6 +292,7 @@ void BubbleLayoutAlgorithm::InitProps(const RefPtr<BubbleLayoutProperty>& layout
     auto top = safeAreaManager->GetSystemSafeArea().top_.Length();
     paddingTop_ = top;
     wrapperSize_ = SizeF(wrapperSize_.Width(), wrapperSize_.Height() - bottom);
+    showArrow_ = false;
 }
 
 OffsetF BubbleLayoutAlgorithm::GetChildPosition(const SizeF& childSize, bool didNeedArrow, bool useArrowOffset)
@@ -557,6 +520,9 @@ OffsetF BubbleLayoutAlgorithm::GetChildPosition(const SizeF& childSize, bool did
         if (NearEqual(position, OffsetF(0.0f, 0.0f))) {
             showArrow_ = false;
             position = AdjustPosition(defaultPosition, childSize.Width(), childSize.Height(), targetSecurity_);
+            if (NearEqual(position, OffsetF(0.0f, 0.0f))) {
+                position = OffsetF(0.0f, paddingTop_);
+            }
         }
     }
     positionOffset_ = positionOffset;
@@ -1236,12 +1202,10 @@ void BubbleLayoutAlgorithm::UpdateClipOffset(const RefPtr<FrameNode>& frameNode)
     childOffset_ = OffsetF(0.0f, 0.0f);
     clipFrameNode_ = childNode;
     clipPath_.clear();
-    if (enableArrow_ && showArrow_) {
-        clipPath_ = ClipBubbleWithArrow();
-    }
+    clipPath_ = ClipBubbleWithPath();
 }
 
-std::string BubbleLayoutAlgorithm::ClipBubbleWithArrow()
+std::string BubbleLayoutAlgorithm::ClipBubbleWithPath()
 {
     std::string path;
     float arrowOffset = 0.0;
@@ -1251,7 +1215,9 @@ std::string BubbleLayoutAlgorithm::ClipBubbleWithArrow()
     auto borderRadius = ModifyBorderRadius(border_.BottomLeftRadius().GetY().ConvertToPx(), childSize_.Height() / 2);
     float radiusPx = borderRadius;
     Placement arrowBuildplacement = Placement::NONE;
-    GetArrowBuildPlacement(arrowBuildplacement);
+    if (enableArrow_ && showArrow_) {
+        GetArrowBuildPlacement(arrowBuildplacement);
+    }
     if ((arrowBuildplacement == Placement::TOP_LEFT) || (arrowBuildplacement == Placement::LEFT_TOP)) {
         path += MoveTo(childOffset_.GetX(), childOffset_.GetY());
     } else {

@@ -16,8 +16,5 @@ import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 ace_unittest("gestures_test_ng") {
   type = "new"
   module_output = "gestures"
-  sources = [
-    "$ace_root/frameworks/core/common/event_manager.cpp",
-    "gestures_test_ng.cpp",
-  ]
+  sources = [ "gestures_test_ng.cpp" ]
 }

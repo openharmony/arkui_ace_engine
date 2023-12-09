@@ -18,6 +18,7 @@
 #include <set>
 
 #include "base/i18n/localization.h"
+#include "base/log/log.h"
 #include "base/utils/system_properties.h"
 #include "core/common/ace_application_info.h"
 #include "core/common/container.h"
@@ -265,6 +266,10 @@ RefPtr<ResourceAdapter> ResourceAdapter::Create()
 RefPtr<ResourceAdapter> ResourceAdapter::CreateNewResourceAdapter(
     const std::string& bundleName, const std::string& moduleName)
 {
+    TAG_LOGW(AceLogTag::ACE_RESOURCE,
+        "Cannot preview the component from the %{public}s module, because it contains a resource reference. Preview it "
+        "in the %{public}s module instead.",
+        moduleName.c_str(), moduleName.c_str());
     return nullptr;
 }
 
@@ -293,13 +298,13 @@ void ResourceAdapterImpl::Init(const ResourceInfo& resourceInfo)
         configuration.fontRatio_, configuration.colorMode_);
 }
 
-void ResourceAdapterImpl::UpdateConfig(const ResourceConfiguration& config)
+void ResourceAdapterImpl::UpdateConfig(const ResourceConfiguration& config, bool themeFlag)
 {
     auto configuration = ConvertConfig(config);
     LOGI("UpdateConfig ori=%{public}d, dpi=%{public}f, device=%{public}d, font=%{public}f, color=%{public}d",
         configuration.orientation_, configuration.resolution_, configuration.deviceType_, configuration.fontRatio_,
         configuration.colorMode_);
-    resourceManger_.UpdateConfig(configuration);
+    resourceManger_.UpdateConfig(configuration, themeFlag);
 }
 
 RefPtr<ThemeStyle> ResourceAdapterImpl::GetTheme(int32_t themeId)

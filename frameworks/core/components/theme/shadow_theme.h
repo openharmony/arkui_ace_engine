@@ -106,8 +106,8 @@ protected:
 private:
     static int32_t GetKeyOfShadowStyle(ShadowStyle style, ColorMode colorMode)
     {
-        const static int32_t shiftNumber = 8; // can hold 2^8 blurStyle enums
-        return (static_cast<int32_t>(colorMode) << shiftNumber) + static_cast<int32_t>(style);
+        const static int32_t SHIFT_NUMBER = 8;
+        return (static_cast<int32_t>(colorMode) << SHIFT_NUMBER) + static_cast<int32_t>(style);
     }
 
     std::unordered_map<int32_t, Shadow> shadowStyles_;

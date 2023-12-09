@@ -124,13 +124,6 @@ void TabBarPattern::InitScrollable(const RefPtr<GestureEventHub>& gestureHub)
         if (!pattern) {
             return false;
         }
-        if (pattern->controller_ && pattern->controller_->IsRunning()) {
-            auto scrollable = pattern->scrollableEvent_->GetScrollable();
-            if (scrollable) {
-                scrollable->StopScrollable();
-            }
-            return true;
-        }
         if (pattern->tabBarStyle_ == TabBarStyle::SUBTABBATSTYLE && pattern->axis_ == Axis::HORIZONTAL &&
             pattern->IsOutOfBoundary()) {
             // over scroll in drag update from normal to over scroll.
@@ -452,7 +445,6 @@ void TabBarPattern::GetInnerFocusPaintRect(RoundRect& paintRect)
         } else {
             indicator = focusIndicator_;
         }
-        AdjustFocusPosition();
     }
     auto childNode = AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(indicator));
     CHECK_NULL_VOID(childNode);
@@ -1326,57 +1318,79 @@ bool TabBarPattern::IsContainsBuilder()
 void TabBarPattern::PlayTranslateAnimation(float startPos, float endPos, float targetCurrentOffset)
 {
     auto curve = DurationCubicCurve;
-    isAnimating_ = true;
-
-    // If animation is still running, stop it before play new animation.
     StopTranslateAnimation();
     SetSwiperCurve(curve);
-
-    auto translate = AceType::MakeRefPtr<CurveAnimation<double>>(startPos, endPos, curve);
-    auto weak = AceType::WeakClaim(this);
-    translate->AddListener(Animation<double>::ValueCallback([weak, startPos, endPos](double value) {
-        auto tabBarPattern = weak.Upgrade();
-        CHECK_NULL_VOID(tabBarPattern);
-        tabBarPattern->UpdateIndicatorCurrentOffset(static_cast<float>(value - tabBarPattern->currentIndicatorOffset_));
-    }));
-    auto startCurrentOffset = currentOffset_;
-    auto tabBarTranslate = AceType::MakeRefPtr<CurveAnimation<double>>(startCurrentOffset, targetCurrentOffset, curve);
-    tabBarTranslate->AddListener(
-        Animation<double>::ValueCallback([weak, startCurrentOffset, targetCurrentOffset](double value) {
-            auto tabBarPattern = weak.Upgrade();
-            CHECK_NULL_VOID(tabBarPattern);
-            tabBarPattern->currentOffset_ = value;
-            auto host = tabBarPattern->GetHost();
-            host->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
-        }));
-
-    if (!controller_) {
-        auto pipeline = PipelineBase::GetCurrentContext();
-        CHECK_NULL_VOID(pipeline);
-        controller_ = CREATE_ANIMATOR(pipeline);
-    }
-    controller_->ClearStopListeners();
-    controller_->ClearInterpolators();
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
     auto tabTheme = pipelineContext->GetTheme<TabTheme>();
     CHECK_NULL_VOID(tabTheme);
-    controller_->SetDuration(
-        static_cast<int32_t>(GetAnimationDuration().value_or(tabTheme->GetTabContentAnimationDuration())));
-    controller_->AddInterpolator(translate);
-    controller_->AddInterpolator(tabBarTranslate);
-    controller_->Play();
+    AnimationOption option = AnimationOption();
+    option.SetDuration(static_cast<int32_t>(GetAnimationDuration().value_or(tabTheme->GetTabContentAnimationDuration())));
+    option.SetCurve(curve);
+    option.SetFillMode(FillMode::FORWARDS);
+
+    auto weak = AceType::WeakClaim(this);
+    const auto& pattern = weak.Upgrade();
+    auto host = pattern->GetHost();
+
+    host->CreateAnimatablePropertyFloat("tabbarindicator", 0, [weak](float value) {
+        auto tabBarPattern = weak.Upgrade();
+        CHECK_NULL_VOID(tabBarPattern);
+        tabBarPattern->UpdateIndicatorCurrentOffset(static_cast<float>(value - tabBarPattern->currentIndicatorOffset_));
+    });
+    host->UpdateAnimatablePropertyFloat("tabbarindicator", startPos);
+    auto delta = endPos;
+    indicatorAnimationIsRunning_ = true;
+    tabbarIndicatorAnimation_ = AnimationUtils::StartAnimation(option,
+        [host, delta]() {
+            host->UpdateAnimatablePropertyFloat("tabbarindicator", delta);
+        },
+        [weak]() {
+            auto tabBarPattern = weak.Upgrade();
+            CHECK_NULL_VOID(tabBarPattern);
+            tabBarPattern->indicatorAnimationIsRunning_ = false;
+        });
+    
+    auto startCurrentOffset = currentOffset_;
+    host->CreateAnimatablePropertyFloat("tabbar", 0, [weak](float value) {
+        auto tabBarPattern = weak.Upgrade();
+        CHECK_NULL_VOID(tabBarPattern);
+        tabBarPattern->currentOffset_ = value;
+        auto host = tabBarPattern->GetHost();
+        host->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
+    });
+    host->UpdateAnimatablePropertyFloat("tabbar", startCurrentOffset);
+    delta = targetCurrentOffset;
+    translateAnimationIsRunning_ = true;
+    translateAnimation_ = AnimationUtils::StartAnimation(option,
+        [host, delta]() {
+            host->UpdateAnimatablePropertyFloat("tabbar", delta);
+        },
+        [weak]() {
+            auto tabBarPattern = weak.Upgrade();
+            CHECK_NULL_VOID(tabBarPattern);
+            tabBarPattern->translateAnimationIsRunning_ = false;
+        });
 }
 
 void TabBarPattern::StopTranslateAnimation()
 {
-    if (controller_ && !controller_->IsStopped()) {
-        controller_->Stop();
-    }
+    if (translateAnimation_)
+        AnimationUtils::StopAnimation(translateAnimation_);
+
+    if (tabbarIndicatorAnimation_)
+        AnimationUtils::StopAnimation(tabbarIndicatorAnimation_);
+    
+    if (indicatorAnimationIsRunning_)
+        indicatorAnimationIsRunning_ = false;
+
+    if (translateAnimationIsRunning_)
+        translateAnimationIsRunning_ = false;
 }
 
 void TabBarPattern::PlayTabBarTranslateAnimation(int32_t targetIndex)
 {
+    StopTabBarTranslateAnimation();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     if (host->GetGeometryNode()->GetPaddingSize().Width() >= childrenMainSize_) {
@@ -1391,49 +1405,45 @@ void TabBarPattern::PlayTabBarTranslateAnimation(int32_t targetIndex)
                             ? host->GetGeometryNode()->GetPaddingSize().Width() - childrenMainSize_
                             : space - frontChildrenMainSize;
     auto startOffset = currentOffset_;
-    auto curve = DurationCubicCurve;
 
-    // If animation is still running, stop it before play new animation.
-    StopTabBarTranslateAnimation();
-
-    auto weak = AceType::WeakClaim(this);
-    auto tabBarTranslate = AceType::MakeRefPtr<CurveAnimation<double>>(startOffset, targetOffset, curve);
-    tabBarTranslate->AddListener(Animation<double>::ValueCallback([weak, startOffset, targetOffset](double value) {
-        auto tabBarPattern = weak.Upgrade();
-        CHECK_NULL_VOID(tabBarPattern);
-        if (!NearEqual(value, startOffset) && !NearEqual(value, targetOffset) &&
-            !NearEqual(startOffset, targetOffset)) {
-            float moveRate = Curves::EASE_OUT->MoveInternal(
-                static_cast<float>((value - startOffset) / (targetOffset - startOffset)));
-            value = startOffset + (targetOffset - startOffset) * moveRate;
-        }
-        tabBarPattern->currentOffset_ = value;
-        auto host = tabBarPattern->GetHost();
-        host->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
-    }));
-
-    if (!controller_) {
-        auto pipeline = PipelineBase::GetCurrentContext();
-        CHECK_NULL_VOID(pipeline);
-        controller_ = CREATE_ANIMATOR(pipeline);
-    }
-    controller_->ClearStopListeners();
-    controller_->ClearInterpolators();
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
     auto tabTheme = pipelineContext->GetTheme<TabTheme>();
     CHECK_NULL_VOID(tabTheme);
-    controller_->SetDuration(
-        static_cast<int32_t>(GetAnimationDuration().value_or(tabTheme->GetTabContentAnimationDuration())));
-    controller_->AddInterpolator(tabBarTranslate);
-    controller_->Play();
+    auto curve = DurationCubicCurve;
+    AnimationOption option = AnimationOption();
+    option.SetDuration(static_cast<int32_t>(GetAnimationDuration().value_or(tabTheme->GetTabContentAnimationDuration())));
+    option.SetCurve(curve);
+
+    auto weak = AceType::WeakClaim(this);
+    host->CreateAnimatablePropertyFloat("tabbar", 0, [weak, startOffset, targetOffset](float value) {
+        auto tabBarPattern = weak.Upgrade();
+        CHECK_NULL_VOID(tabBarPattern);
+        tabBarPattern->currentOffset_ = value;
+        auto host = tabBarPattern->GetHost();
+        host->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
+    });
+    host->UpdateAnimatablePropertyFloat("tabbar", startOffset);
+    auto delta = targetOffset;
+    tabBarTranslateAnimationIsRunning_ = true;
+    tabBarTranslateAnimation_ = AnimationUtils::StartAnimation(option,
+        [host, delta]() {
+            host->UpdateAnimatablePropertyFloat("tabbar", delta);
+        },
+        [weak]() {
+            auto tabBarPattern = weak.Upgrade();
+            CHECK_NULL_VOID(tabBarPattern);
+            tabBarPattern->tabBarTranslateAnimationIsRunning_ = false;
+        });
 }
 
 void TabBarPattern::StopTabBarTranslateAnimation()
 {
-    if (tabBarTranslateController_ && !tabBarTranslateController_->IsStopped()) {
-        tabBarTranslateController_->Stop();
-    }
+    if (tabBarTranslateAnimation_)
+        AnimationUtils::StopAnimation(tabBarTranslateAnimation_);
+
+    if (tabBarTranslateAnimationIsRunning_)
+        tabBarTranslateAnimationIsRunning_ = false;
 }
 
 void TabBarPattern::UpdateIndicatorCurrentOffset(float offset)
@@ -1681,7 +1691,6 @@ void TabBarPattern::SetAccessibilityAction()
         if (tabBarLayoutProperty->GetTabBarMode().value_or(TabBarMode::FIXED) == TabBarMode::SCROLLABLE &&
             frameNode->TotalChildCount() - MASK_COUNT > 1) {
             auto index = pattern->GetIndicator() + 1;
-            pattern->PlayTabBarTranslateAnimation(index);
             pattern->FocusIndexChange(index);
             frameNode->OnAccessibilityEvent(AccessibilityEventType::SCROLL_END);
         }
@@ -1697,7 +1706,6 @@ void TabBarPattern::SetAccessibilityAction()
         if (tabBarLayoutProperty->GetTabBarMode().value_or(TabBarMode::FIXED) == TabBarMode::SCROLLABLE &&
            frameNode->TotalChildCount() - MASK_COUNT > 1) {
             auto index = pattern->GetIndicator() - 1;
-            pattern->PlayTabBarTranslateAnimation(index);
             pattern->FocusIndexChange(index);
             frameNode->OnAccessibilityEvent(AccessibilityEventType::SCROLL_END);
         }

@@ -92,6 +92,11 @@ bool IsLayoutTraceEnabled()
     return (system::GetParameter("persist.ace.trace.layout.enabled", "false") == "true");
 }
 
+bool IsDeveloperModeOn()
+{
+    return (system::GetParameter("const.security.developermode.state", "false") == "true");
+}
+
 bool IsHookModeEnabled()
 {
 #ifdef PREVIEW
@@ -229,14 +234,14 @@ bool IsFlutterDecouplingEnabled()
 
 bool SystemProperties::traceEnabled_ = IsTraceEnabled();
 bool SystemProperties::svgTraceEnable_ = IsSvgTraceEnabled();
-bool SystemProperties::layoutTraceEnable_ = IsLayoutTraceEnabled();
+bool SystemProperties::layoutTraceEnable_ = IsLayoutTraceEnabled() && IsDeveloperModeOn();
 bool SystemProperties::accessibilityEnabled_ = IsAccessibilityEnabled();
 bool SystemProperties::isRound_ = false;
 bool SystemProperties::isDeviceAccess_ = false;
 ACE_WEAK_SYM int32_t SystemProperties::deviceWidth_ = 0;
 ACE_WEAK_SYM int32_t SystemProperties::deviceHeight_ = 0;
-int32_t SystemProperties::devicePhysicalWidth_ = 0;
-int32_t SystemProperties::devicePhysicalHeight_ = 0;
+ACE_WEAK_SYM int32_t SystemProperties::devicePhysicalWidth_ = 0;
+ACE_WEAK_SYM int32_t SystemProperties::devicePhysicalHeight_ = 0;
 ACE_WEAK_SYM double SystemProperties::resolution_ = 1.0;
 ACE_WEAK_SYM DeviceType SystemProperties::deviceType_ { DeviceType::UNKNOWN };
 ACE_WEAK_SYM DeviceOrientation SystemProperties::orientation_ { DeviceOrientation::PORTRAIT };
@@ -266,7 +271,7 @@ int32_t SystemProperties::astcPsnr_ = GetAstcPsnrProp();
 ACE_WEAK_SYM bool SystemProperties::extSurfaceEnabled_ = IsExtSurfaceEnabled();
 ACE_WEAK_SYM uint32_t SystemProperties::dumpFrameCount_ = GetSysDumpFrameCount();
 bool SystemProperties::resourceDecoupling_ = GetResourceDecoupling();
-bool SystemProperties::changeTitleStyleEnabled_ = IsTitleStyleEnabled();
+ACE_WEAK_SYM bool SystemProperties::changeTitleStyleEnabled_ = IsTitleStyleEnabled();
 bool SystemProperties::flutterDecouplingEnabled_ = IsFlutterDecouplingEnabled();
 
 bool SystemProperties::IsSyscapExist(const char* cap)
@@ -379,7 +384,7 @@ void SystemProperties::InitDeviceInfo(
     debugEnabled_ = IsDebugEnabled();
     traceEnabled_ = IsTraceEnabled();
     svgTraceEnable_ = IsSvgTraceEnabled();
-    layoutTraceEnable_ = IsLayoutTraceEnabled();
+    layoutTraceEnable_ = IsLayoutTraceEnabled() && IsDeveloperModeOn();
     accessibilityEnabled_ = IsAccessibilityEnabled();
     rosenBackendEnabled_ = IsRosenBackendEnabled();
     isHookModeEnabled_ = IsHookModeEnabled();
@@ -503,7 +508,7 @@ int32_t SystemProperties::GetJankFrameThreshold()
     return system::GetIntParameter<int>("persist.sys.arkui.perf.threshold", DEFAULT_THRESHOLD_JANK);
 }
 
-std::string SystemProperties::GetCustomTitleFilePath()
+ACE_WEAK_SYM std::string SystemProperties::GetCustomTitleFilePath()
 {
     return system::GetParameter(CUSTOM_TITLE_KEY, "");
 }

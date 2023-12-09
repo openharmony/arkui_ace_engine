@@ -218,6 +218,9 @@ void ResetSpanFont(NodeHandle node)
     font.fontSize = DEFAULT_FONT_SIZE;
     font.fontWeight = DEFAULT_FONT_WEIGHT;
     font.fontStyle = DEFAULT_FONT_STYLE;
+    std::vector<std::string> families;
+    families.emplace_back(DEFAULT_FONT_FAMILY);
+    font.fontFamilies = families;
     SpanModelNG::SetFont(frameNode, font);
 }
 

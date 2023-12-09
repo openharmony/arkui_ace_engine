@@ -16,11 +16,14 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SCROLLABLE_SCROLLABLE_PATTERN_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SCROLLABLE_SCROLLABLE_PATTERN_H
 
+#include <cmath>
 #include <vector>
 
 #include "base/geometry/axis.h"
 #include "core/animation/select_motion.h"
+#include "core/animation/bezier_variable_velocity_motion.h"
 #include "core/components_ng/base/frame_scene_status.h"
+#include "core/components_ng/event/drag_event.h"
 #include "core/components_ng/pattern/navigation/nav_bar_pattern.h"
 #include "core/components_ng/pattern/overlay/sheet_presentation_pattern.h"
 #include "core/components_ng/pattern/pattern.h"
@@ -54,6 +57,11 @@ public:
     ScrollablePattern(EdgeEffect edgeEffect, bool alwaysEnabled)
         : edgeEffect_(edgeEffect), edgeEffectAlwaysEnabled_(alwaysEnabled)
     {}
+
+    ~ScrollablePattern()
+    {
+        UnRegister2DragDropManager();
+    }
 
     bool IsAtomicNode() const override
     {
@@ -261,6 +269,7 @@ public:
     {
         return !animator_ || animator_->IsStopped();
     }
+
     void AbortScrollAnimator()
     {
         if (animator_ && !animator_->IsStopped()) {
@@ -409,7 +418,7 @@ protected:
 
     virtual void FireOnScroll(float finalOffset, OnScrollEvent& onScroll) const;
 
-    virtual void OnScrollStop(const OnScrollStopEvent& onScrollStop, bool withPerf);
+    virtual void OnScrollStop(const OnScrollStopEvent& onScrollStop);
 
     // select with mouse
     struct ItemSelectedStatus {
@@ -458,6 +467,9 @@ protected:
     // for onReachStart of the first layout
     bool isInitialized_ = false;
 
+    void Register2DragDropManager();
+    void SetDragStatusListener(RefPtr<DragStatusListener> dragStatusListener);
+
 private:
     virtual void OnScrollEndCallback() {};
 
@@ -474,14 +486,15 @@ private:
     // select with mouse
     virtual void MultiSelectWithoutKeyboard(const RectF& selectedZone) {};
     virtual void ClearMultiSelect() {};
-    virtual bool IsItemSelected(const MouseInfo& info)
+    virtual bool IsItemSelected(const GestureEvent& info)
     {
         return false;
     }
     void ClearInvisibleItemsSelectedStatus();
     void HandleInvisibleItemsSelectedStatus(const RectF& selectedZone);
-    void HandleMouseEventWithoutKeyboard(const MouseInfo& info);
-    void OnMouseRelease();
+    void HandleDragStart(const GestureEvent& info);
+    void HandleDragUpdate(const GestureEvent& info);
+    void HandleDragEnd(const GestureEvent& info);
     void SelectWithScroll();
     RectF ComputeSelectedZone(const OffsetF& startOffset, const OffsetF& endOffset);
     float GetOutOfScrollableOffset() const;
@@ -573,9 +586,9 @@ private:
     OffsetF mouseEndOffset_;
     OffsetF mousePressOffset_;
     OffsetF lastMouseStart_;
-    MouseInfo lastMouseMove_;
+    GestureEvent lastMouseMove_;
     RefPtr<SelectMotion> selectMotion_;
-    RefPtr<InputEvent> mouseEvent_;
+    RefPtr<PanEvent> boxSelectPanEvent_;
 
     RefPtr<NavBarPattern> navBarPattern_;
     RefPtr<SheetPresentationPattern> sheetPattern_;
@@ -583,6 +596,21 @@ private:
 
     EdgeEffect edgeEffect_ = EdgeEffect::NONE;
     bool edgeEffectAlwaysEnabled_ = false;
+
+    RefPtr<Animator> hotzoneAnimator_;
+    float lastHonezoneOffsetPct_ = 0.0f;
+    RefPtr<BezierVariableVelocityMotion> velocityMotion_;
+    std::optional<RefPtr<DragStatusListener>> dragStatusListener_;
+    void UnRegister2DragDropManager();
+    float IsInHotZone(const PointF& point);
+    void HotZoneScroll(const float offset);
+    void StopHotzoneScroll();
+    void HandleHotZone(const DragEventType& dragEventType, const RefPtr<NotifyDragEvent>& notifyDragEvent);
+    void HandleOnDragStatusCallback(
+        const DragEventType& dragEventType, const RefPtr<NotifyDragEvent>& notifyDragEvent) override;
+    void HandleMoveEventInComp(const PointF& point);
+    void HandleLeaveHotzoneEvent();
+    bool isVertical() const;
 };
 } // namespace OHOS::Ace::NG
 

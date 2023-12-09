@@ -47,7 +47,7 @@ void ResetType(NodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    NavigatorModelNG::SetType(frameNode, OHOS::Ace::NavigatorType::DEFAULT);
+    NavigatorModelNG::SetType(frameNode, OHOS::Ace::NavigatorType::PUSH);
 }
 
 void SetActive(NodeHandle node, bool active)
@@ -76,7 +76,7 @@ void ResetParams(NodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    NavigatorModelNG::SetParams(frameNode, nullptr);
+    NavigatorModelNG::SetParams(frameNode, "");
 }
 
 ArkUINavigatorModifierAPI GetNavigatorModifier()

@@ -170,7 +170,6 @@ void JSList::SetChainAnimation(bool enableChainAnimation)
 void JSList::SetChainAnimationOptions(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The argv is wrong, it is supposed to have at least 1 argument");
         return;
     }
 
@@ -218,7 +217,6 @@ void JSList::SetListItemAlign(int32_t itemAlignment)
 void JSList::SetLanes(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The argv is wrong, it is supposed to have at least 1 argument");
         return;
     }
 
@@ -251,7 +249,6 @@ void JSList::SetLanes(const JSCallbackInfo& info)
         CalcDimension maxLengthValue;
         if (!ParseJsDimensionVp(minLengthParam, minLengthValue)
             || !ParseJsDimensionVp(maxLengthParam, maxLengthValue)) {
-            LOGW("minLength param or maxLength param is invalid");
             ListModel::GetInstance()->SetLanes(1);
             ListModel::GetInstance()->SetLaneConstrain(-1.0_vp, -1.0_vp);
             return;
@@ -290,7 +287,6 @@ void JSList::SetScrollSnapAlign(int32_t scrollSnapAlign)
 void JSList::SetDivider(const JSCallbackInfo& args)
 {
     if (args.Length() < 1 || !args[0]->IsObject()) {
-        LOGW("Invalid params");
         return;
     }
 
@@ -300,7 +296,6 @@ void JSList::SetDivider(const JSCallbackInfo& args)
     bool needReset = obj->GetProperty("strokeWidth")->IsString() &&
         !std::regex_match(obj->GetProperty("strokeWidth")->ToString(), DIMENSION_REGEX);
     if (needReset || !ConvertFromJSValue(obj->GetProperty("strokeWidth"), divider.strokeWidth)) {
-        LOGW("Invalid strokeWidth of divider");
         divider.strokeWidth = 0.0_vp;
     }
     if (!ConvertFromJSValue(obj->GetProperty("color"), divider.color)) {
@@ -336,7 +331,6 @@ void JSList::SetNestedScroll(const JSCallbackInfo& args)
     };
     if (args.Length() < 1 || !args[0]->IsObject()) {
         ListModel::GetInstance()->SetNestedScroll(nestedOpt);
-        LOGW("Invalid params");
         return;
     }
     JSRef<JSObject> obj = JSRef<JSObject>::Cast(args[0]);
@@ -344,14 +338,12 @@ void JSList::SetNestedScroll(const JSCallbackInfo& args)
     JSViewAbstract::ParseJsInt32(obj->GetProperty("scrollForward"), froward);
     if (froward < static_cast<int32_t>(NestedScrollMode::SELF_ONLY) ||
         froward > static_cast<int32_t>(NestedScrollMode::PARALLEL)) {
-        LOGW("ScrollFroward params invalid");
         froward = 0;
     }
     int32_t backward = 0;
     JSViewAbstract::ParseJsInt32(obj->GetProperty("scrollBackward"), backward);
     if (backward < static_cast<int32_t>(NestedScrollMode::SELF_ONLY) ||
         backward > static_cast<int32_t>(NestedScrollMode::PARALLEL)) {
-        LOGW("ScrollFroward params invalid");
         backward = 0;
     }
     nestedOpt.forward = static_cast<NestedScrollMode>(froward);
@@ -383,7 +375,6 @@ void JSList::SetFriction(const JSCallbackInfo& info)
 {
     double friction = -1.0;
     if (!JSViewAbstract::ParseJsDouble(info[0], friction)) {
-        LOGW("Friction params invalid,can not convert to double");
         friction = -1.0;
     }
     ListModel::GetInstance()->SetFriction(friction);
@@ -487,7 +478,6 @@ void JSList::ScrollIndexCallback(const JSCallbackInfo& args)
 void JSList::ItemDragStartCallback(const JSCallbackInfo& info)
 {
     if (!info[0]->IsFunction()) {
-        LOGE("fail to bind onItemDragStart event due to info is not function");
         return;
     }
 
@@ -497,19 +487,16 @@ void JSList::ItemDragStartCallback(const JSCallbackInfo& info)
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, nullptr);
         auto ret = func->ItemDragStartExecute(dragInfo, itemIndex);
         if (!ret->IsObject()) {
-            LOGE("builder param is not an object.");
             return nullptr;
         }
 
         auto builderObj = JSRef<JSObject>::Cast(ret);
         auto builder = builderObj->GetProperty("builder");
         if (!builder->IsFunction()) {
-            LOGE("builder param is not a function.");
             return nullptr;
         }
         auto builderFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(builder));
         if (!builderFunc) {
-            LOGE("builder function is null.");
             return nullptr;
         }
         // use another VSP instance while executing the builder function
@@ -526,7 +513,6 @@ void JSList::ItemDragStartCallback(const JSCallbackInfo& info)
 void JSList::ItemDragEnterCallback(const JSCallbackInfo& info)
 {
     if (!info[0]->IsFunction()) {
-        LOGE("fail to bind onItemDragEnter event due to info is not function");
         return;
     }
 
@@ -543,7 +529,6 @@ void JSList::ItemDragEnterCallback(const JSCallbackInfo& info)
 void JSList::ItemDragMoveCallback(const JSCallbackInfo& info)
 {
     if (!info[0]->IsFunction()) {
-        LOGE("fail to bind onItemDragMove event due to info is not function");
         return;
     }
 
@@ -560,7 +545,6 @@ void JSList::ItemDragMoveCallback(const JSCallbackInfo& info)
 void JSList::ItemDragLeaveCallback(const JSCallbackInfo& info)
 {
     if (!info[0]->IsFunction()) {
-        LOGE("fail to bind onItemDragLeave event due to info is not function");
         return;
     }
 
@@ -577,7 +561,6 @@ void JSList::ItemDragLeaveCallback(const JSCallbackInfo& info)
 void JSList::ItemDropCallback(const JSCallbackInfo& info)
 {
     if (!info[0]->IsFunction()) {
-        LOGE("fail to bind onItemDrop event due to info is not function");
         return;
     }
 
@@ -606,12 +589,10 @@ void JSList::ScrollBeginCallback(const JSCallbackInfo& args)
             auto params = ConvertToJSValues(dx, dy);
             auto result = func->Call(JSRef<JSObject>(), params.size(), params.data());
             if (result.IsEmpty()) {
-                LOGE("Error calling onScrollBegin, result is empty.");
                 return scrollInfo;
             }
 
             if (!result->IsObject()) {
-                LOGE("Error calling onScrollBegin, result is not object.");
                 return scrollInfo;
             }
 
@@ -640,12 +621,10 @@ void JSList::ScrollFrameBeginCallback(const JSCallbackInfo& args)
             auto params = ConvertToJSValues(offset, state);
             auto result = func->Call(JSRef<JSObject>(), params.size(), params.data());
             if (result.IsEmpty()) {
-                LOGE("Error calling onScrollFrameBegin, result is empty.");
                 return scrollRes;
             }
 
             if (!result->IsObject()) {
-                LOGE("Error calling onScrollFrameBegin, result is not object.");
                 return scrollRes;
             }
 

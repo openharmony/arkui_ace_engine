@@ -102,7 +102,6 @@ HWTEST_F(UIServiceMgrStubTest, UIServiceMgrStubTest_RegisterCallBack_0100, TestS
     AAFwk::Want want;
     data.WriteParcelable(&want);
     if (uiService == nullptr) {
-        HILOG_ERROR("register observer fail, uiService is nullptr");
         return;
     }
     if (!data.WriteRemoteObject(iUIService->AsObject())) {
@@ -147,7 +146,6 @@ HWTEST_F(UIServiceMgrStubTest, UIServiceMgrStubTest_UnregisterCallBack_0100, Tes
     AAFwk::Want want;
     data.WriteParcelable(&want);
     if (uiService == nullptr) {
-        HILOG_ERROR("register observer fail, uiService is nullptr");
         return;
     }
     if (!data.WriteRemoteObject(iUIService->AsObject())) {
@@ -196,20 +194,16 @@ HWTEST_F(UIServiceMgrStubTest, UIServiceMgrStubTest_Push_0100, TestSize.Level1)
     data.WriteParcelable(&want);
 
     if (!data.WriteString(name)) {
-        HILOG_ERROR("fail to WriteString name");
         return;
     }
 
     if (!data.WriteString(jsonPath)) {
-        HILOG_ERROR("fail to WriteString jsonPath");
         return;
     }
     if (!data.WriteString(dataStr)) {
-        HILOG_ERROR("fail to WriteString dataStr");
         return;
     }
     if (!data.WriteString(extraData)) {
-        HILOG_ERROR("fail to WriteString extraData");
         return;
     }
     EXPECT_CALL(*uiService, Push(testing::_, testing::_, testing::_, testing::_,
@@ -252,11 +246,9 @@ HWTEST_F(UIServiceMgrStubTest, UIServiceMgrStubTest_Request_0100, TestSize.Level
     data.WriteParcelable(&want);
 
     if (!data.WriteString(name)) {
-        HILOG_ERROR("fail to WriteString name");
         return;
     }
     if (!data.WriteString(dataStr)) {
-        HILOG_ERROR("fail to WriteString dataStr");
         return;
     }
     EXPECT_CALL(*uiService, Request(testing::_, testing::_,
@@ -300,15 +292,12 @@ HWTEST_F(UIServiceMgrStubTest, UIServiceMgrStubTest_ReturnRequest_0100, TestSize
     data.WriteParcelable(&want);
 
     if (!data.WriteString(source)) {
-        HILOG_ERROR("fail to WriteString source");
         return;
     }
     if (!data.WriteString(dataStr)) {
-        HILOG_ERROR("fail to WriteString dataStr");
         return;
     }
     if (!data.WriteString(extraData)) {
-        HILOG_ERROR("fail to WriteString extraData");
         return;
     }
     EXPECT_CALL(*uiService, ReturnRequest(testing::_, testing::_, testing::_,

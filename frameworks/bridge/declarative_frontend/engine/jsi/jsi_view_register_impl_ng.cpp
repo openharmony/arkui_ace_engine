@@ -74,6 +74,8 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_indexer.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_keyboard_avoid.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_lazy_foreach.h"
+#include "bridge/declarative_frontend/jsview/js_base_node.h"
+#include "bridge/declarative_frontend/jsview/js_node_container.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_line.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_linear_gradient.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_list.h"
@@ -570,6 +572,8 @@ void JsBindViews(BindingTarget globalObj)
     JSProfiler::JSBind(globalObj);
     JSRichEditor::JSBind(globalObj);
     JSRichEditorController::JSBind(globalObj);
+    JSNodeContainer::JSBind(globalObj);
+    JSBaseNode::JSBind(globalObj);
     JSSaveButton::JSBind(globalObj);
     JSShareData::JSBind(globalObj);
 #ifdef WEB_SUPPORTED

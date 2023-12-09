@@ -437,7 +437,8 @@ void RefreshPattern::TransitionPeriodAnimation()
         option.SetCurve(curve);
         option.SetIteration(1);
 
-        AnimationUtils::OpenImplicitAnimation(option, curve, [weak, animationId]() {
+        AnimationUtils::OpenImplicitAnimation(option, curve, [weak, animationId, id = Container::CurrentId()]() {
+            ContainerScope scope(id);
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
             if (pattern->animationId_ != animationId) {
@@ -491,7 +492,8 @@ void RefreshPattern::LoadingProgressExit()
     option.SetDuration(LOADING_EXIT_DURATION);
     auto curve = AceType::MakeRefPtr<CubicCurve>(0.2f, 0.0f, 0.1f, 1.0f);
     AnimationUtils::OpenImplicitAnimation(
-        option, curve, [weak = AceType::WeakClaim(this), animationId = animationId_]() {
+        option, curve, [weak = AceType::WeakClaim(this), animationId = animationId_, id = Container::CurrentId()]() {
+            ContainerScope scope(id);
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
             if (pattern->animationId_ != animationId) {

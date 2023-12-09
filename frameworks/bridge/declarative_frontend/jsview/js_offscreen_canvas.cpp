@@ -128,11 +128,11 @@ void JSOffscreenCanvas::Constructor(const JSCallbackInfo& args)
         double fWidth = 0.0;
         double fHeight = 0.0;
         if (JSViewAbstract::ParseJsDouble(args[0], fWidth)) {
-            fWidth = SystemProperties::Vp2Px(fWidth);
+            fWidth = PipelineBase::Vp2PxWithCurrentDensity(fWidth);
             offscreenCanvas->SetWidth(round(fWidth));
         }
         if (JSViewAbstract::ParseJsDouble(args[1], fHeight)) {
-            fHeight = SystemProperties::Vp2Px(fHeight);
+            fHeight = PipelineBase::Vp2PxWithCurrentDensity(fHeight);
             offscreenCanvas->SetHeight(round(fHeight));
         }
         args.SetReturnValue(Referenced::RawPtr(offscreenCanvas));
@@ -148,7 +148,7 @@ void JSOffscreenCanvas::Destructor(JSOffscreenCanvas* context)
 
 void JSOffscreenCanvas::JsGetWidth(const JSCallbackInfo& info)
 {
-    double fWidth = SystemProperties::Px2Vp(GetWidth());
+    double fWidth = PipelineBase::Px2VpWithCurrentDensity(GetWidth());
     auto returnValue = JSVal(ToJSValue(fWidth));
     auto returnPtr = JSRef<JSVal>::Make(returnValue);
     info.SetReturnValue(returnPtr);
@@ -156,7 +156,7 @@ void JSOffscreenCanvas::JsGetWidth(const JSCallbackInfo& info)
 
 void JSOffscreenCanvas::JsGetHeight(const JSCallbackInfo& info)
 {
-    double fHeight = SystemProperties::Px2Vp(GetHeight());
+    double fHeight = PipelineBase::Px2VpWithCurrentDensity(GetHeight());
     auto returnValue = JSVal(ToJSValue(fHeight));
     auto returnPtr = JSRef<JSVal>::Make(returnValue);
     info.SetReturnValue(returnPtr);
@@ -172,7 +172,7 @@ void JSOffscreenCanvas::JsSetWidth(const JSCallbackInfo& info)
     }
     double width = 0.0;
     if (JSViewAbstract::ParseJsDouble(info[0], width)) {
-        width_ = SystemProperties::Vp2Px(width);
+        width_ = PipelineBase::Vp2PxWithCurrentDensity(width);
     } else {
         return;
     }
@@ -194,7 +194,7 @@ void JSOffscreenCanvas::JsSetHeight(const JSCallbackInfo& info)
     }
     double height = 0.0;
     if (JSViewAbstract::ParseJsDouble(info[0], height)) {
-        height_ = SystemProperties::Vp2Px(height);
+        height_ = PipelineBase::Vp2PxWithCurrentDensity(height);
     } else {
         return;
     }
@@ -232,7 +232,7 @@ void JSOffscreenCanvas::JsGetContext(const JSCallbackInfo& info)
     if (!Container::IsCurrentUseNewPipeline()) {
         return;
     }
-    
+
     if (info[0]->IsString()) {
         std::string ruleStr;
         JSViewAbstract::ParseJsString(info[0], ruleStr);

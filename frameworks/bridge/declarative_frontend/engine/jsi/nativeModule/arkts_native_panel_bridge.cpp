@@ -13,60 +13,11 @@
  * limitations under the License.
  */
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_panel_bridge.h"
-
+#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_api.h"
+#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 
 namespace OHOS::Ace::NG {
-namespace {
-bool ParseJsDimensionNG(const EcmaVM* vm, const Local<JSValueRef>& jsValue, Dimension& result,
-    DimensionUnit defaultUnit, bool isSupportPercent = true)
-{
-    if (jsValue->IsNumber()) {
-        result = Dimension(jsValue->ToNumber(vm)->Value(), defaultUnit);
-        return true;
-    }
-    if (jsValue->IsString()) {
-        auto value = jsValue->ToString(vm)->ToString();
-        if (value.back() == '%' && !isSupportPercent) {
-            return false;
-        }
-        return StringUtils::StringToDimensionWithUnitNG(jsValue->ToString(vm)->ToString(), result, defaultUnit);
-    }
-    // resouce ignore by design
-    return false;
-}
-
-bool ParseJsCalcDimensionNG(const EcmaVM* vm, const Local<JSValueRef>& jsValue, CalcDimension& result,
-    DimensionUnit defaultUnit, bool isSupportPercent = true)
-{
-    if (jsValue->IsNumber()) {
-        result = CalcDimension(jsValue->ToNumber(vm)->Value(), defaultUnit);
-        return true;
-    }
-    if (jsValue->IsString()) {
-        auto value = jsValue->ToString(vm)->ToString();
-        if (value.back() == '%' && !isSupportPercent) {
-            return false;
-        }
-        return StringUtils::StringToCalcDimensionNG(jsValue->ToString(vm)->ToString(), result, false, defaultUnit);
-    }
-    // resouce ignore by design
-    return false;
-}
-
-bool ParseJsDimensionVpNG(
-    const EcmaVM* vm, const Local<JSValueRef>& jsValue, Dimension& result, bool isSupportPercent = true)
-{
-    return ParseJsDimensionNG(vm, jsValue, result, DimensionUnit::VP, isSupportPercent);
-}
-
-bool ParseJsCalcDimensionVpNG(
-    const EcmaVM* vm, const Local<JSValueRef>& jsValue, CalcDimension& result, bool isSupportPercent = true)
-{
-    return ParseJsCalcDimensionNG(vm, jsValue, result, DimensionUnit::VP, isSupportPercent);
-}
-}
-
 ArkUINativeModuleValue PanelBridge::SetPanelBackgroundMask(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
@@ -74,8 +25,13 @@ ArkUINativeModuleValue PanelBridge::SetPanelBackgroundMask(ArkUIRuntimeCallInfo*
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    uint32_t color = secondArg->Uint32Value(vm);
-    GetArkUIInternalNodeAPI()->GetPanelModifier().SetPanelBackgroundMask(nativeNode, color);
+
+    Color color;
+    if (!ArkTSUtils::ParseJsColor(vm, secondArg, color)) {
+        GetArkUIInternalNodeAPI()->GetPanelModifier().ResetPanelBackgroundMask(nativeNode);
+    } else {
+        GetArkUIInternalNodeAPI()->GetPanelModifier().SetPanelBackgroundMask(nativeNode, color.GetValue());
+    }
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -150,9 +106,9 @@ ArkUINativeModuleValue PanelBridge::SetPanelFullHeight(ArkUIRuntimeCallInfo* run
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
     Local<JSValueRef> jsValue = runtimeCallInfo->GetCallArgRef(1);
-    Dimension height;
+    CalcDimension height;
 
-    if (jsValue->IsUndefined() || !ParseJsDimensionVpNG(vm, jsValue, height)) {
+    if (jsValue->IsUndefined() || !ArkTSUtils::ParseJsDimensionVpNG(vm, jsValue, height, true)) {
         GetArkUIInternalNodeAPI()->GetPanelModifier().ResetPanelFullHeight(nativeNode);
     } else {
         if (LessNotEqual(height.Value(), 0.0)) {
@@ -181,9 +137,9 @@ ArkUINativeModuleValue PanelBridge::SetPanelHalfHeight(ArkUIRuntimeCallInfo* run
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
     Local<JSValueRef> jsValue = runtimeCallInfo->GetCallArgRef(1);
-    Dimension height;
+    CalcDimension height;
 
-    if (jsValue->IsUndefined() || !ParseJsDimensionVpNG(vm, jsValue, height)) {
+    if (jsValue->IsUndefined() || !ArkTSUtils::ParseJsDimensionVpNG(vm, jsValue, height, true)) {
         GetArkUIInternalNodeAPI()->GetPanelModifier().ResetPanelHalfHeight(nativeNode);
     } else {
         if (LessNotEqual(height.Value(), 0.0)) {
@@ -212,9 +168,9 @@ ArkUINativeModuleValue PanelBridge::SetPanelMiniHeight(ArkUIRuntimeCallInfo* run
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
     Local<JSValueRef> jsValue = runtimeCallInfo->GetCallArgRef(1);
-    Dimension height;
+    CalcDimension height;
 
-    if (jsValue->IsUndefined() || !ParseJsDimensionVpNG(vm, jsValue, height)) {
+    if (jsValue->IsUndefined() || !ArkTSUtils::ParseJsDimensionVpNG(vm, jsValue, height, true)) {
         GetArkUIInternalNodeAPI()->GetPanelModifier().ResetPanelMiniHeight(nativeNode);
     } else {
         if (LessNotEqual(height.Value(), 0.0)) {
@@ -233,17 +189,22 @@ ArkUINativeModuleValue PanelBridge::SetPanelCustomHeight(ArkUIRuntimeCallInfo* r
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
     Local<JSValueRef> jsValue = runtimeCallInfo->GetCallArgRef(1);
-    CalcDimension height;
+    CalcDimension customHeight;
 
-    if (jsValue->IsUndefined() || !ParseJsCalcDimensionVpNG(vm, jsValue, height)) {
+    if (jsValue->IsUndefined() || !ArkTSUtils::ParseJsDimensionVpNG(vm, jsValue, customHeight, true)) {
         GetArkUIInternalNodeAPI()->GetPanelModifier().ResetPanelCustomHeight(nativeNode);
-    } else {
-        if (LessNotEqual(height.Value(), 0.0)) {
-            height.SetValue(0.0);
-        }
-        GetArkUIInternalNodeAPI()->GetPanelModifier().SetPanelCustomHeight(
-            nativeNode, height.Value(), static_cast<int>(height.Unit()));
+        return panda::JSValueRef::Undefined(vm);
     }
+
+    if (jsValue->IsString() && jsValue->ToString(vm)->ToString().find("wrapContent") != std::string::npos) {
+        customHeight = CalcDimension(jsValue->ToString(vm)->ToString());
+    } else if (!ArkTSUtils::ParseJsDimensionVp(vm, jsValue, customHeight)) {
+        customHeight = Dimension(0.0);
+    }
+
+    GetArkUIInternalNodeAPI()->GetPanelModifier().SetPanelCustomHeight(
+        nativeNode, customHeight.Value(), static_cast<int>(customHeight.Unit()));
+
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -324,7 +285,7 @@ ArkUINativeModuleValue PanelBridge::SetShow(ArkUIRuntimeCallInfo* runtimeCallInf
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
     if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN) &&
         (secondArg->IsUndefined() || secondArg->IsNull())) {
-        GetArkUIInternalNodeAPI()->GetPanelModifier().SetShow(nativeNode, false);
+        GetArkUIInternalNodeAPI()->GetPanelModifier().SetShow(nativeNode, true);
         return panda::JSValueRef::Undefined(vm);
     } else {
         GetArkUIInternalNodeAPI()->GetPanelModifier().SetShow(nativeNode, secondArg->ToBoolean(vm)->Value());

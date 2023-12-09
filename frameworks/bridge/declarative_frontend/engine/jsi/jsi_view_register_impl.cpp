@@ -39,6 +39,7 @@
 #include "bridge/declarative_frontend/jsview/dialog/js_custom_dialog_controller.h"
 #include "bridge/declarative_frontend/jsview/js_animator.h"
 #include "bridge/declarative_frontend/jsview/js_badge.h"
+#include "bridge/declarative_frontend/jsview/js_base_node.h"
 #include "bridge/declarative_frontend/jsview/js_blank.h"
 #include "bridge/declarative_frontend/jsview/js_button.h"
 #include "bridge/declarative_frontend/jsview/js_calendar.h"
@@ -98,6 +99,7 @@
 #include "bridge/declarative_frontend/jsview/js_navigation.h"
 #include "bridge/declarative_frontend/jsview/js_navigator.h"
 #include "bridge/declarative_frontend/jsview/js_navrouter.h"
+#include "bridge/declarative_frontend/jsview/js_node_container.h"
 #include "bridge/declarative_frontend/jsview/js_offscreen_canvas.h"
 #include "bridge/declarative_frontend/jsview/js_offscreen_rendering_context.h"
 #include "bridge/declarative_frontend/jsview/js_page_transition.h"
@@ -754,6 +756,8 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
 #endif
     { "RichEditor", JSRichEditor::JSBind },
     { "RichEditorController", JSRichEditorController::JSBind },
+    { "NodeContainer", JSNodeContainer::JSBind },
+    { "__JSBaseNode__", JSBaseNode::JSBind },
 };
 
 void RegisterAllModule(BindingTarget globalObj)
@@ -792,6 +796,8 @@ void RegisterAllModule(BindingTarget globalObj)
 #endif
 #endif
     JSRichEditorController::JSBind(globalObj);
+    JSNodeContainer::JSBind(globalObj);
+    JSBaseNode::JSBind(globalObj);
     for (auto& iter : bindFuncs) {
         iter.second(globalObj);
     }

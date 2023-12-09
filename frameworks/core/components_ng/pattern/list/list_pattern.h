@@ -173,10 +173,6 @@ public:
         multiSelectable_ = multiSelectable;
     }
 
-    // dragStatusCallback
-    void HandleOnDragStatusCallback(
-        const DragEventType& dragEventType, const RefPtr<NotifyDragEvent>& notifyDragEvent) override;
-
     void SetSwiperItem(WeakPtr<ListItemPattern> swiperItem);
     void SetSwiperItemEnd(WeakPtr<ListItemPattern> swiperItem)
     {
@@ -258,7 +254,6 @@ private:
     void InitScrollableEvent();
     void SetEdgeEffectCallback(const RefPtr<ScrollEdgeEffect>& scrollEffect) override;
     void HandleScrollEffect(float offset);
-    void FireOnScrollStart() override;
     void CheckRestartSpring();
     void StartDefaultOrCustomSpringMotion(float start, float end, const RefPtr<InterpolatingSpring>& curve);
     void UpdateScrollSnap();
@@ -275,7 +270,7 @@ private:
 
     // multiSelectable
     void ClearMultiSelect() override;
-    bool IsItemSelected(const MouseInfo& info) override;
+    bool IsItemSelected(const GestureEvent& info) override;
     void MultiSelectWithoutKeyboard(const RectF& selectedZone) override;
     void HandleCardModeSelectedEvent(
         const RectF& selectedZone, const RefPtr<FrameNode>& itemGroupNode, float itemGroupTop);

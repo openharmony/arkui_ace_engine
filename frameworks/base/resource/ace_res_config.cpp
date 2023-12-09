@@ -28,6 +28,7 @@
 #include "base/resource/ace_res_key_parser.h"
 #include "base/utils/linear_map.h"
 #include "base/utils/utils.h"
+#include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -731,7 +732,7 @@ std::vector<std::string> AceResConfig::GetDeclarativeResourceFallback(const std:
 
 std::string AceResConfig::GetCurrentDeviceResTag()
 {
-    ResolutionType resolutionType = AceResConfig::GetResolutionType(SystemProperties::GetResolution());
+    ResolutionType resolutionType = AceResConfig::GetResolutionType(PipelineBase::GetCurrentDensity());
     AceResConfig deviceResConfig = AceResConfig(SystemProperties::GetMcc(), SystemProperties::GetMnc(),
         SystemProperties::GetDeviceOrientation(), SystemProperties::GetColorMode(),
         (SystemProperties::GetParamDeviceType() == "tablet" || SystemProperties::GetParamDeviceType() == "2in1")
@@ -747,8 +748,8 @@ std::string AceResConfig::GetCurrentDeviceDeclarativeResTag()
     std::string language, script, region;
     Localization::ParseLocaleTag(localeTag, language, script, region, false);
 
-    ResolutionType resolutionType = AceResConfig::GetResolutionType(SystemProperties::GetResolution());
-    LongScreenType longScreenType = AceResConfig::GetLongScreenType(SystemProperties::GetResolution());
+    ResolutionType resolutionType = AceResConfig::GetResolutionType(PipelineBase::GetCurrentDensity());
+    LongScreenType longScreenType = AceResConfig::GetLongScreenType(PipelineBase::GetCurrentDensity());
     AceResConfig deviceResConfig;
 
     deviceResConfig = AceResConfig(language, script, region, longScreenType, SystemProperties::GetScreenShape(),

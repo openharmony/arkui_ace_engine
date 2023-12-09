@@ -43,6 +43,7 @@ public:
 
 private:
     FlowItemPosition GetItemPosition(int32_t index);
+    void MeasureForAnimation(LayoutWrapper* layoutWrapper);
     void FillViewport(float mainSize, LayoutWrapper* layoutWrapper);
     void ModifyCurrentOffsetWhenReachEnd(float mainSize, LayoutWrapper* layoutWrapper);
     LayoutConstraintF CreateChildConstraint(int32_t crossIndex, const RefPtr<WaterFlowLayoutProperty>& layoutProperty,

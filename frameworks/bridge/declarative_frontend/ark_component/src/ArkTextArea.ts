@@ -1,5 +1,5 @@
 /// <reference path="./import.ts" />
-class TextAreaFontStyleModifier extends Modifier<number> {
+class TextAreaFontStyleModifier extends ModifierWithKey<FontStyle> {
   static identity: Symbol = Symbol('textAreaFontStyle');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -8,9 +8,12 @@ class TextAreaFontStyleModifier extends Modifier<number> {
       GetUINativeModule().textArea.setFontStyle(node, this.value!);
     }
   }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
 }
 
-class TextAreaCopyOptionModifier extends Modifier<CopyOptions> {
+class TextAreaCopyOptionModifier extends ModifierWithKey<CopyOptions> {
   static identity: Symbol = Symbol('textAreaCopyOption');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -19,9 +22,12 @@ class TextAreaCopyOptionModifier extends Modifier<CopyOptions> {
       GetUINativeModule().textArea.setCopyOption(node, this.value!);
     }
   }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
 }
 
-class TextAreaMaxLinesModifier extends Modifier<number | undefined> {
+class TextAreaMaxLinesModifier extends ModifierWithKey<number | undefined> {
   static identity: Symbol = Symbol('textAreaMaxLines');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -30,14 +36,15 @@ class TextAreaMaxLinesModifier extends Modifier<number | undefined> {
       GetUINativeModule().textArea.setMaxLines(node, this.value!);
     }
   }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
 }
 
 class TextAreaFontSizeModifier extends ModifierWithKey<string | number> {
   static identity: Symbol = Symbol('textAreaFontSize');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().textArea.resetFontSize(node);
-    } else if (!isString(this.value) && !isNumber(this.value) && !isResource(this.value)) {
       GetUINativeModule().textArea.resetFontSize(node);
     } else {
       GetUINativeModule().textArea.setFontSize(node, this.value!);
@@ -84,7 +91,7 @@ class TextAreaFontColorModifier extends ModifierWithKey<ResourceColor> {
   }
 }
 
-class TextAreaFontWeightModifier extends Modifier<number> {
+class TextAreaFontWeightModifier extends ModifierWithKey<number | FontWeight | string> {
   static identity: Symbol = Symbol('textAreaFontWeight');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -93,9 +100,12 @@ class TextAreaFontWeightModifier extends Modifier<number> {
       GetUINativeModule().textArea.setFontWeight(node, this.value!);
     }
   }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
 }
 
-class TextAreaBarStateModifier extends Modifier<number> {
+class TextAreaBarStateModifier extends ModifierWithKey<BarState> {
   static identity: Symbol = Symbol('textAreaBarState');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -104,9 +114,12 @@ class TextAreaBarStateModifier extends Modifier<number> {
       GetUINativeModule().textArea.setBarState(node, this.value!);
     }
   }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
 }
 
-class TextAreaEnableKeyboardOnFocusModifier extends Modifier<boolean> {
+class TextAreaEnableKeyboardOnFocusModifier extends ModifierWithKey<boolean> {
   static identity: Symbol = Symbol('textAreaEnableKeyboardOnFocus');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -114,6 +127,9 @@ class TextAreaEnableKeyboardOnFocusModifier extends Modifier<boolean> {
     } else {
       GetUINativeModule().textArea.setEnableKeyboardOnFocus(node, this.value!);
     }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
 
@@ -150,7 +166,7 @@ class TextAreaCaretColorModifier extends ModifierWithKey<ResourceColor> {
   }
 }
 
-class TextAreaMaxLengthModifier extends Modifier<number> {
+class TextAreaMaxLengthModifier extends ModifierWithKey<number> {
   static identity: Symbol = Symbol('textAreaMaxLength');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -159,9 +175,12 @@ class TextAreaMaxLengthModifier extends Modifier<number> {
       GetUINativeModule().textArea.setMaxLength(node, this.value!);
     }
   }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
 }
 
-class TextAreaStyleModifier extends Modifier<number> {
+class TextAreaStyleModifier extends ModifierWithKey<TextContentStyle> {
   static identity: Symbol = Symbol('textAreaStyle');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -170,9 +189,12 @@ class TextAreaStyleModifier extends Modifier<number> {
       GetUINativeModule().textArea.setStyle(node, this.value!);
     }
   }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
 }
 
-class TextAreaSelectionMenuHiddenModifier extends Modifier<boolean> {
+class TextAreaSelectionMenuHiddenModifier extends ModifierWithKey<boolean> {
   static identity: Symbol = Symbol('textAreaSelectionMenuHidden');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -180,6 +202,9 @@ class TextAreaSelectionMenuHiddenModifier extends Modifier<boolean> {
     } else {
       GetUINativeModule().textArea.setSelectionMenuHidden(node, this.value!);
     }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
 
@@ -189,13 +214,6 @@ class TextAreaPlaceholderFontModifier extends ModifierWithKey<Font> {
     if (reset) {
       GetUINativeModule().textArea.resetPlaceholderFont(node);
     } else {
-      if (!(isNumber(this.value.size)) && !(isString(this.value.size)) &&
-        !(isResource(this.value.size))) {
-        this.value.size = undefined;
-      }
-      if (!(isString(this.value.family)) && !(isResource(this.value.family))) {
-        this.value.family = undefined;
-      }
       GetUINativeModule().textArea.setPlaceholderFont(node, this.value.size,
         this.value.weight, this.value.family, this.value.style);
     }
@@ -212,7 +230,7 @@ class TextAreaPlaceholderFontModifier extends ModifierWithKey<Font> {
   }
 }
 
-class TextAreaTextAlignModifier extends Modifier<number> {
+class TextAreaTextAlignModifier extends Modifier<TextAlign> {
   static identity: Symbol = Symbol('textAreaTextAlign');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -221,16 +239,23 @@ class TextAreaTextAlignModifier extends Modifier<number> {
       GetUINativeModule().textArea.setTextAlign(node, this.value!);
     }
   }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
 }
 
-class TextAreaShowCounterModifier extends Modifier<ArkTextAreaShowCounter> {
+class TextAreaShowCounterModifier extends ModifierWithKey<ArkTextAreaShowCounter> {
   static identity: Symbol = Symbol('textAreaShowCounter');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
       GetUINativeModule().textArea.resetShowCounter(node);
     } else {
-      GetUINativeModule().textArea.setShowCounter(node, this.value.value!, this.value?.options?.thresholdPercentage);
+      GetUINativeModule().textArea.setShowCounter(node, this.value.value!, this.value.options);
     }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue.value, this.value.value) ||
+      !isBaseOrResourceEqual(this.stageValue.options, this.value.options)
   }
 }
 
@@ -243,22 +268,12 @@ class ArkTextAreaComponent extends ArkComponent implements CommonMethod<TextArea
     return this;
   }
   placeholderFont(value: Font): TextAreaAttribute {
-    if (!isLengthType(value.weight)) {
-      value.weight = undefined;
-    }
-    if (!(value.style in FontStyle)) {
-      value.style = undefined;
-    }
     modifierWithKey(this._modifiersWithKeys, TextAreaPlaceholderFontModifier.identity, TextAreaPlaceholderFontModifier, value);
     return this;
   }
 
   textAlign(value: TextAlign): TextAreaAttribute {
-    if (value) {
-      modifier(this._modifiers, TextAreaTextAlignModifier, value);
-    } else {
-      modifier(this._modifiers, TextAreaTextAlignModifier, undefined);
-    }
+    modifierWithKey(this._modifiersWithKeys, TextAreaTextAlignModifier.identity, TextAreaTextAlignModifier, value);
     return this;
   }
   caretColor(value: ResourceColor): TextAreaAttribute {
@@ -274,19 +289,11 @@ class ArkTextAreaComponent extends ArkComponent implements CommonMethod<TextArea
     return this;
   }
   fontStyle(value: FontStyle): TextAreaAttribute {
-    if (value in FontStyle) {
-      modifier(this._modifiers, TextAreaFontStyleModifier, value);
-    } else {
-      modifier(this._modifiers, TextAreaFontStyleModifier, undefined);
-    }
+    modifierWithKey(this._modifiersWithKeys, TextAreaFontStyleModifier.identity, TextAreaFontStyleModifier, value);
     return this;
   }
   fontWeight(value: number | FontWeight | string): TextAreaAttribute {
-    if (!isLengthType(value)) {
-      modifier(this._modifiers, TextAreaFontWeightModifier, undefined);
-    } else {
-      modifier(this._modifiers, TextAreaFontWeightModifier, value);
-    }
+    modifierWithKey(this._modifiersWithKeys, TextAreaFontWeightModifier.identity, TextAreaFontWeightModifier, value);
     return this;
   }
   fontFamily(value: ResourceStr): TextAreaAttribute {
@@ -318,68 +325,40 @@ class ArkTextAreaComponent extends ArkComponent implements CommonMethod<TextArea
     throw new Error('Method not implemented.');
   }
   copyOption(value: CopyOptions): TextAreaAttribute {
-    if (isNumber(value)) {
-      modifier(this._modifiers, TextAreaCopyOptionModifier, value);
-    } else {
-      modifier(this._modifiers, TextAreaCopyOptionModifier, undefined);
-    }
+    modifierWithKey(this._modifiersWithKeys, TextAreaCopyOptionModifier.identity, TextAreaCopyOptionModifier, value);
     return this;
   }
 
   enableKeyboardOnFocus(value: boolean): TextAreaAttribute {
-    if (value) {
-      modifier(this._modifiers, TextAreaEnableKeyboardOnFocusModifier, value);
-    } else {
-      modifier(this._modifiers, TextAreaEnableKeyboardOnFocusModifier, undefined);
-    }
+    modifierWithKey(this._modifiersWithKeys, TextAreaEnableKeyboardOnFocusModifier.identity, TextAreaEnableKeyboardOnFocusModifier, value);
     return this;
   }
 
   maxLength(value: number): TextAreaAttribute {
-    if (isNumber(value)) {
-      modifier(this._modifiers, TextAreaMaxLengthModifier, value);
-    } else {
-      modifier(this._modifiers, TextAreaMaxLengthModifier, undefined);
-    }
+    modifierWithKey(this._modifiersWithKeys, TextAreaMaxLengthModifier.identity, TextAreaMaxLengthModifier, value);
     return this;
   }
   showCounter(value: boolean, options?: InputCounterOptions): TextAreaAttribute {
     let arkValue: ArkTextAreaShowCounter = new ArkTextAreaShowCounter();
     arkValue.value = value;
-    arkValue.options = options;
-    modifier(this._modifiers, TextAreaShowCounterModifier, arkValue);
+    arkValue.options = options; 
+    modifierWithKey(this._modifiersWithKeys, TextAreaShowCounterModifier.identity, TextAreaShowCounterModifier, arkValue);
     return this;
   }
   style(value: TextContentStyle): TextAreaAttribute {
-    if (value) {
-      modifier(this._modifiers, TextAreaStyleModifier, value);
-    } else {
-      modifier(this._modifiers, TextAreaStyleModifier, undefined);
-    }
+    modifierWithKey(this._modifiersWithKeys, TextAreaStyleModifier.identity, TextAreaStyleModifier, value);
     return this;
   }
   barState(value: BarState): TextAreaAttribute {
-    if (isNumber(value)) {
-      modifier(this._modifiers, TextAreaBarStateModifier, value);
-    } else {
-      modifier(this._modifiers, TextAreaBarStateModifier, undefined);
-    }
+    modifierWithKey(this._modifiersWithKeys, TextAreaBarStateModifier.identity, TextAreaBarStateModifier, value);
     return this;
   }
   selectionMenuHidden(value: boolean): TextAreaAttribute {
-    if (value) {
-      modifier(this._modifiers, TextAreaSelectionMenuHiddenModifier, value);
-    } else {
-      modifier(this._modifiers, TextAreaSelectionMenuHiddenModifier, undefined);
-    }
+    modifierWithKey(this._modifiersWithKeys, TextAreaSelectionMenuHiddenModifier.identity, TextAreaSelectionMenuHiddenModifier, value);
     return this;
   }
   maxLines(value: number): TextAreaAttribute {
-    if (!isNumber(value)) {
-      modifier(this._modifiers, TextAreaMaxLinesModifier, undefined);
-    } else {
-      modifier(this._modifiers, TextAreaMaxLinesModifier, value);
-    }
+    modifierWithKey(this._modifiersWithKeys, TextAreaMaxLinesModifier.identity, TextAreaMaxLinesModifier, value);
     return this;
   }
   customKeyboard(value: CustomBuilder): TextAreaAttribute {

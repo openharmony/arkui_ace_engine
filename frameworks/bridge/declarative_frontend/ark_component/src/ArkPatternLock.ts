@@ -9,11 +9,7 @@ class PatternLockActiveColorModifier extends ModifierWithKey<ResourceColor> {
     }
   }
   checkObjectDiff(): boolean {
-    if (isResource(this.stageValue) && isResource(this.value)) {
-      return !isResourceEqual(this.stageValue, this.value);
-    } else {
-      return true;
-    }
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
 
@@ -27,11 +23,7 @@ class PatternLockSelectedColorModifier extends ModifierWithKey<ResourceColor> {
     }
   }
   checkObjectDiff(): boolean {
-    if (isResource(this.stageValue) && isResource(this.value)) {
-      return !isResourceEqual(this.stageValue, this.value);
-    } else {
-      return true;
-    }
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
 
@@ -45,11 +37,7 @@ class PatternLockPathColorModifier extends ModifierWithKey<ResourceColor> {
     }
   }
   checkObjectDiff(): boolean {
-    if (isResource(this.stageValue) && isResource(this.value)) {
-      return !isResourceEqual(this.stageValue, this.value);
-    } else {
-      return true;
-    }
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
 
@@ -63,15 +51,11 @@ class PatternLockRegularColorModifier extends ModifierWithKey<ResourceColor> {
     }
   }
   checkObjectDiff(): boolean {
-    if (isResource(this.stageValue) && isResource(this.value)) {
-      return !isResourceEqual(this.stageValue, this.value);
-    } else {
-      return true;
-    }
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
 
-class PatternLockSideLengthModifier extends ModifierWithKey<Resource> {
+class PatternLockSideLengthModifier extends ModifierWithKey<Length> {
   static identity: Symbol = Symbol('patternLockSideLength');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -81,15 +65,11 @@ class PatternLockSideLengthModifier extends ModifierWithKey<Resource> {
     }
   }
   checkObjectDiff(): boolean {
-    if (isResource(this.stageValue) && isResource(this.value)) {
-      return !isResourceEqual(this.stageValue, this.value);
-    } else {
-      return true;
-    }
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
 
-class PatternLockPathStrokeModifier extends Modifier<number | string> {
+class PatternLockPathStrokeModifier extends ModifierWithKey<number | string> {
   static identity: Symbol = Symbol('patternLockPathStroke');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -98,9 +78,12 @@ class PatternLockPathStrokeModifier extends Modifier<number | string> {
       GetUINativeModule().patternLock.setPathStrokeWidth(node, this.value!);
     }
   }
+  checkObjectDiff(): boolean {
+    return this.stageValue !== this.value;
+  }
 }
 
-class PatternLockCircleRadiusModifier extends ModifierWithKey<Resource> {
+class PatternLockCircleRadiusModifier extends ModifierWithKey<Length> {
   static identity: Symbol = Symbol('patternLockCircleRadius');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -110,15 +93,11 @@ class PatternLockCircleRadiusModifier extends ModifierWithKey<Resource> {
     }
   }
   checkObjectDiff(): boolean {
-    if (isResource(this.stageValue) && isResource(this.value)) {
-      return !isResourceEqual(this.stageValue, this.value);
-    } else {
-      return true;
-    }
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
 
-class PatternLockAutoResetModifier extends Modifier<boolean> {
+class PatternLockAutoResetModifier extends ModifierWithKey<boolean> {
   static identity: Symbol = Symbol('patternlockautoreset');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -126,6 +105,9 @@ class PatternLockAutoResetModifier extends Modifier<boolean> {
     } else {
       GetUINativeModule().patternLock.setAutoReset(node, this.value!);
     }
+  }
+  checkObjectDiff(): boolean {
+    return this.stageValue !== this.value;
   }
 }
 
@@ -161,19 +143,13 @@ class ArkPatternLockComponent extends ArkComponent implements PatternLockAttribu
     return this;
   }
   pathStrokeWidth(value: number | string): PatternLockAttribute {
-    if (isLengthType(value)) {
-      modifier(this._modifiers, PatternLockPathStrokeModifier, <number | string>value);
-    } else {
-      modifier(this._modifiers, PatternLockPathStrokeModifier, undefined);
-    }
+    modifierWithKey(this._modifiersWithKeys, PatternLockPathStrokeModifier.identity,
+      PatternLockPathStrokeModifier, value);
     return this;
   }
   autoReset(value: boolean): PatternLockAttribute {
-    if (isBoolean(value)) {
-      modifier(this._modifiers, PatternLockAutoResetModifier, value);
-    } else {
-      modifier(this._modifiers, PatternLockAutoResetModifier, undefined);
-    }
+    modifierWithKey(this._modifiersWithKeys, PatternLockAutoResetModifier.identity,
+      PatternLockAutoResetModifier, value);
     return this;
   }
   onPatternComplete(callback: (input: Array<number>) => void): PatternLockAttribute {

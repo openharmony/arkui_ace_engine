@@ -197,11 +197,11 @@ void PagePattern::OnHide()
     auto container = Container::Current();
     if (container) {
         auto pageUrlChecker = container->GetPageUrlChecker();
+        // ArkTSCard container no SetPageUrlChecker
         if (pageUrlChecker != nullptr) {
             pageUrlChecker->NotifyPageHide(pageInfo_->GetPageUrl());
         }
     }
-    
     if (onPageHide_) {
         onPageHide_();
     }

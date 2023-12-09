@@ -36,11 +36,14 @@ RefPtr<NG::FrameNode> DataDetectorMgr::CreateUIExtensionMenu(
 }
 
 bool DataDetectorMgr::ShowUIExtensionMenu(const std::map<std::string, std::string>& paramaters, NG::RectF safeArea,
-    std::function<void(const std::string&)> onClickMenu, std::vector<std::string> aiMenuOptions,
-    const RefPtr<NG::FrameNode>& targetNode)
+    std::function<void(const std::string&)> onClickMenu, const RefPtr<NG::FrameNode>& targetNode)
 {
     return false;
 }
+
+void DataDetectorMgr::ResponseBestMatchItem(const std::map<std::string, std::string>& paramaters, const AISpan& aiSpan)
+{}
+
 void DataDetectorMgr::AdjustCursorPosition(
     int32_t& caretPos, const std::string& content, TimeStamp& lastAiPosTimeStamp, const TimeStamp& lastClickTimeStamp)
 {

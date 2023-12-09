@@ -106,7 +106,7 @@ void LoadingProgressPattern::RegisterVisibleAreaChange()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     pipeline->RemoveVisibleAreaChangeNode(host->GetId());
-    pipeline->AddVisibleAreaChangeNode(host, 0.0f, callback);
+    pipeline->AddVisibleAreaChangeNode(host, 0.0f, callback, false);
 
     pipeline->AddWindowStateChangedCallback(host->GetId());
     hasVisibleChangeRegistered_ = true;

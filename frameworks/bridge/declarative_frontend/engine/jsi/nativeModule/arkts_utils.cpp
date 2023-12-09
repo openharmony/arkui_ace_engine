@@ -490,6 +490,18 @@ bool ArkTSUtils::ParseAllBorder(const EcmaVM* vm, const Local<JSValueRef>& args,
     }
 }
 
+bool ArkTSUtils::ParseAllRadius(const EcmaVM* vm, const Local<JSValueRef>& args, CalcDimension& result)
+{
+    if (ParseJsDimensionVp(vm, args, result)) {
+        if (result.IsNegative()) {
+            result.Reset();
+        }
+        return true;
+    } else {
+        return false;
+    }
+}
+
 bool ArkTSUtils::ParseJsDimensionNG(const EcmaVM *vm, const Local<JSValueRef> &jsValue, CalcDimension &result,
     DimensionUnit defaultUnit, bool isSupportPercent)
 {
@@ -533,6 +545,13 @@ bool ArkTSUtils::ParseJsDimension(const EcmaVM *vm, const Local<JSValueRef> &jsV
     if (jsValue->IsString()) {
         auto stringValue = jsValue->ToString(vm)->ToString();
         if (stringValue.back() == '%' && !isSupportPercent) {
+            return false;
+        }
+        errno = 0;
+        char* pEnd = nullptr;
+        std::string str = jsValue->ToString(vm)->ToString();
+        std::strtod(str.c_str(), &pEnd);
+        if (pEnd == str.c_str() || errno == ERANGE) {
             return false;
         }
         result = StringUtils::StringToCalcDimension(jsValue->ToString(vm)->ToString(), false, defaultUnit);
@@ -676,16 +695,15 @@ bool ArkTSUtils::ParseJsMediaFromResource(const EcmaVM *vm, const Local<JSValueR
     return false;
 }
 
-std::string ArkTSUtils::GetStringFromJS(const EcmaVM *vm, const Local<JSValueRef> &value)
+void ArkTSUtils::GetStringFromJS(const EcmaVM *vm, const Local<JSValueRef> &value, std::string& result)
 {
-    std::string result = DEFAULT_STR;
+    result = DEFAULT_STR;
     if (!value->IsNull() && value->IsString()) {
         result = value->ToString(vm)->ToString();
     }
     if (value->IsObject()) {
         ParseJsStringFromResource(vm, value, result);
     }
-    return result;
 }
 
 bool ArkTSUtils::ParseJsIntegerArray(const EcmaVM* vm, Local<JSValueRef> values, std::vector<uint32_t>& result)

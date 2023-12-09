@@ -501,6 +501,18 @@ struct KeyEvent final {
         timeStamp = time;
     }
 
+    bool HasKey(KeyCode expectCode) const
+    {
+        auto curPressedCode = pressedCodes.rbegin();
+        while (curPressedCode != pressedCodes.rend()) {
+            if (expectCode == *curPressedCode) {
+                return true;
+            }
+            ++curPressedCode;
+        }
+        return false;
+    }
+
     bool IsKey(std::vector<KeyCode> expectCodes) const
     {
         if (expectCodes.size() > pressedCodes.size() || pressedCodes.empty()) {

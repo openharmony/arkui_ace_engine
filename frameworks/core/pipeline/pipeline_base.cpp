@@ -116,6 +116,24 @@ RefPtr<PipelineBase> PipelineBase::GetCurrentContext()
     return currentContainer->GetPipelineContext();
 }
 
+double PipelineBase::GetCurrentDensity()
+{
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    return pipelineContext ? pipelineContext->GetDensity() : SystemProperties::GetResolution();
+}
+
+double PipelineBase::Px2VpWithCurrentDensity(double px)
+{
+    double density = PipelineBase::GetCurrentDensity();
+    return px / density;
+}
+
+double PipelineBase::Vp2PxWithCurrentDensity(double vp)
+{
+    double density = PipelineBase::GetCurrentDensity();
+    return vp * density;
+}
+
 RefPtr<PipelineBase> PipelineBase::GetMainPipelineContext()
 {
     auto containerId = Container::CurrentId();

@@ -1433,6 +1433,18 @@ RefPtr<FrameNode> OverlayManager::GetDialog(int32_t dialogId)
 
 void OverlayManager::CloseDialog(const RefPtr<FrameNode>& dialogNode)
 {
+    auto dialogLayoutProp = AceType::DynamicCast<DialogLayoutProperty>(dialogNode->GetLayoutProperty());
+    CHECK_NULL_VOID(dialogLayoutProp);
+    if (dialogLayoutProp->GetShowInSubWindowValue(false) && dialogLayoutProp->GetIsModal().value_or(true)) {
+        auto parentPipelineContext = PipelineContext::GetMainPipelineContext();
+        CHECK_NULL_VOID(parentPipelineContext);
+        auto parentOverlayManager = parentPipelineContext->GetOverlayManager();
+        CHECK_NULL_VOID(parentOverlayManager);
+        RefPtr<FrameNode> maskNode = parentOverlayManager->GetDialog(parentOverlayManager->GetMaskNodeId());
+        if (maskNode) {
+            parentOverlayManager->CloseDialog(maskNode);
+        }
+    }
     RemoveDialogFromMap(dialogNode);
     if (dialogNode->IsRemoving()) {
         // already in close animation
@@ -2559,16 +2571,6 @@ void OverlayManager::ComputeSingleGearSheetOffset(NG::SheetStyle& sheetStyle, Re
     auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
     CHECK_NULL_VOID(sheetPattern);
     auto sheetMaxHeight = sheetPattern->GetSheetMaxHeight();
-    auto titleColumn = DynamicCast<FrameNode>(sheetNode->GetFirstChild());
-    CHECK_NULL_VOID(titleColumn);
-    auto titleGeometryNode = titleColumn->GetGeometryNode();
-    CHECK_NULL_VOID(titleGeometryNode);
-    auto scrollNode = DynamicCast<FrameNode>(sheetNode->GetChildAtIndex(1));
-    CHECK_NULL_VOID(scrollNode);
-    auto builderNode = DynamicCast<FrameNode>(scrollNode->GetChildAtIndex(0));
-    CHECK_NULL_VOID(builderNode);
-    auto builderGeometryNode = builderNode->GetGeometryNode();
-    CHECK_NULL_VOID(builderGeometryNode);
     auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
     auto manager = context->GetSafeAreaManager();
@@ -2581,8 +2583,8 @@ void OverlayManager::ComputeSingleGearSheetOffset(NG::SheetStyle& sheetStyle, Re
         } else if (sheetStyle.sheetMode == SheetMode::LARGE) {
             sheetHeight_ = largeHeight;
         } else if (sheetStyle.sheetMode == SheetMode::AUTO) {
-            sheetHeight_ = builderGeometryNode->GetFrameSize().Height() + titleGeometryNode->GetFrameSize().Height();
-            if (sheetHeight_ > largeHeight) {
+            sheetHeight_ = sheetPattern->GetFitContentHeight();
+            if (GreatNotEqual(sheetHeight_, largeHeight)) {
                 sheetHeight_ = largeHeight;
             }
         }
@@ -2620,6 +2622,11 @@ void OverlayManager::ComputeDetentsSheetOffset(NG::SheetStyle& sheetStyle, RefPt
             sheetHeight_ = sheetMaxHeight * MEDIUM_SIZE;
         } else if (selection.sheetMode == SheetMode::LARGE) {
             sheetHeight_ = largeHeight;
+        } else if (selection.sheetMode == SheetMode::AUTO) {
+            sheetHeight_ = sheetPattern->GetFitContentHeight();
+            if (GreatNotEqual(sheetHeight_, largeHeight)) {
+                sheetHeight_ = largeHeight;
+            }
         }
     } else {
         float height = 0.0f;
@@ -3141,7 +3148,7 @@ void OverlayManager::CloseModalUIExtension(int32_t sessionId)
 }
 
 RefPtr<FrameNode> OverlayManager::BindUIExtensionToMenu(const RefPtr<FrameNode>& uiExtNode,
-    const RefPtr<NG::FrameNode>& targetNode, const std::vector<std::string>& aiMenuOptions)
+    const RefPtr<NG::FrameNode>& targetNode, std::string longestContent, int32_t menuSize)
 {
     CHECK_NULL_RETURN(uiExtNode, nullptr);
     CHECK_NULL_RETURN(targetNode, nullptr);
@@ -3155,7 +3162,7 @@ RefPtr<FrameNode> OverlayManager::BindUIExtensionToMenu(const RefPtr<FrameNode>&
     CHECK_NULL_RETURN(menuWrapperNode, nullptr);
     auto menuNode = DynamicCast<FrameNode>(menuWrapperNode->GetFirstChild());
     CHECK_NULL_RETURN(menuNode, nullptr);
-    auto idealSize = CaculateMenuSize(menuNode, aiMenuOptions);
+    auto idealSize = CaculateMenuSize(menuNode, longestContent, menuSize);
     auto uiExtLayoutProperty = uiExtNode->GetLayoutProperty();
     CHECK_NULL_RETURN(uiExtLayoutProperty, nullptr);
     uiExtLayoutProperty->UpdateUserDefinedIdealSize(
@@ -3174,21 +3181,15 @@ RefPtr<FrameNode> OverlayManager::BindUIExtensionToMenu(const RefPtr<FrameNode>&
 }
 
 SizeF OverlayManager::CaculateMenuSize(
-    const RefPtr<FrameNode>& menuNode, const std::vector<std::string>& aiMenuOptions)
+    const RefPtr<FrameNode>& menuNode, std::string longestContent, int32_t menuSize)
 {
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, SizeF());
     auto textTheme = pipeline->GetTheme<TextTheme>();
     CHECK_NULL_RETURN(textTheme, SizeF());
     TextStyle textStyle = textTheme ? textTheme->GetTextStyle() : TextStyle();
-    std::string textContent = "";
-    for (const auto& option : aiMenuOptions) {
-        if (option.length() > textContent.length()) {
-            textContent = option;
-        }
-    }
     MeasureContext measureContext;
-    measureContext.textContent = textContent;
+    measureContext.textContent = longestContent;
     measureContext.fontSize = textStyle.GetFontSize();
     auto fontweight = StringUtils::FontWeightToString(textStyle.GetFontWeight());
     measureContext.fontWeight = fontweight;
@@ -3217,16 +3218,16 @@ SizeF OverlayManager::CaculateMenuSize(
     auto minWidth = static_cast<float>(columnInfo->GetWidth()) - padding.Width();
     childConstraint.minSize.SetWidth(minWidth);
     auto idealWidth = std::max(contentWidth, childConstraint.minSize.Width());
-    auto idealHeight = groupHeight * (aiMenuOptions.size() - 1) +
+    auto idealHeight = groupHeight * (menuSize - 1) +
         menuItemHeight + static_cast<float>(selectTheme->GetOutPadding().ConvertToPx()) * 2;
     return SizeF(idealWidth, idealHeight);
 }
 
 bool OverlayManager::ShowUIExtensionMenu(const RefPtr<NG::FrameNode>& uiExtNode, NG::RectF aiRect,
-    const std::vector<std::string>& aiMenuOptions, const RefPtr<NG::FrameNode>& targetNode)
+    std::string longestContent, int32_t menuSize, const RefPtr<NG::FrameNode>& targetNode)
 {
     CHECK_NULL_RETURN(uiExtNode, false);
-    auto menuNode = BindUIExtensionToMenu(uiExtNode, targetNode, aiMenuOptions);
+    auto menuNode = BindUIExtensionToMenu(uiExtNode, targetNode, longestContent, menuSize);
     CHECK_NULL_RETURN(menuNode, false);
     auto menuLayoutProperty = menuNode->GetLayoutProperty<MenuLayoutProperty>();
     CHECK_NULL_RETURN(menuLayoutProperty, false);

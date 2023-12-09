@@ -1,6 +1,6 @@
 /// <reference path="./import.ts" />
 
-class VideoObjectFitModifier extends Modifier<ImageFit> {
+class VideoObjectFitModifier extends ModifierWithKey<ImageFit> {
   static identity: Symbol = Symbol('videoObjectFit');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -9,8 +9,11 @@ class VideoObjectFitModifier extends Modifier<ImageFit> {
       GetUINativeModule().video.setObjectFit(node, this.value!);
     }
   }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
 }
-class VideoAutoPlayModifier extends Modifier<boolean> {
+class VideoAutoPlayModifier extends ModifierWithKey<boolean> {
   static identity: Symbol = Symbol('videoAutoPlayr');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -19,8 +22,11 @@ class VideoAutoPlayModifier extends Modifier<boolean> {
       GetUINativeModule().video.setAutoPlay(node, this.value!);
     }
   }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
 }
-class VideoControlsModifier extends Modifier<boolean> {
+class VideoControlsModifier extends ModifierWithKey<boolean> {
   static identity: Symbol = Symbol('videoControls');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -29,8 +35,11 @@ class VideoControlsModifier extends Modifier<boolean> {
       GetUINativeModule().video.setControls(node, this.value!);
     }
   }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
 }
-class VideoLoopModifier extends Modifier<boolean> {
+class VideoLoopModifier extends ModifierWithKey<boolean> {
   static identity: Symbol = Symbol('videoLoop');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -39,8 +48,11 @@ class VideoLoopModifier extends Modifier<boolean> {
       GetUINativeModule().video.setLoop(node, this.value!);
     }
   }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
 }
-class VideoMutedModifier extends Modifier<boolean> {
+class VideoMutedModifier extends ModifierWithKey<boolean> {
   static identity: Symbol = Symbol('videoMuted');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -49,46 +61,34 @@ class VideoMutedModifier extends Modifier<boolean> {
       GetUINativeModule().video.setMuted(node, this.value!);
     }
   }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
 }
 class ArkVideoComponent extends ArkComponent implements CommonMethod<VideoAttribute> {
   muted(value: boolean): VideoAttribute {
-    if (isBoolean(value)) {
-      modifier(this._modifiers, VideoMutedModifier, value);
-    } else {
-      modifier(this._modifiers, VideoMutedModifier, undefined);
-    }
+    modifierWithKey(this._modifiersWithKeys, VideoMutedModifier.identity,
+      VideoMutedModifier, value);
     return this;
   }
   autoPlay(value: boolean): VideoAttribute {
-    if (isBoolean(value)) {
-      modifier(this._modifiers, VideoAutoPlayModifier, value);
-    } else {
-      modifier(this._modifiers, VideoAutoPlayModifier, undefined);
-    }
+    modifierWithKey(this._modifiersWithKeys, VideoAutoPlayModifier.identity,
+      VideoAutoPlayModifier, value);
     return this;
   }
   controls(value: boolean): VideoAttribute {
-    if (isBoolean(value)) {
-      modifier(this._modifiers, VideoControlsModifier, value);
-    } else {
-      modifier(this._modifiers, VideoControlsModifier, undefined);
-    }
+    modifierWithKey(this._modifiersWithKeys, VideoControlsModifier.identity,
+      VideoControlsModifier, value);
     return this;
   }
   loop(value: boolean): VideoAttribute {
-    if (isBoolean(value)) {
-      modifier(this._modifiers, VideoLoopModifier, value);
-    } else {
-      modifier(this._modifiers, VideoLoopModifier, undefined);
-    }
+    modifierWithKey(this._modifiersWithKeys, VideoLoopModifier.identity,
+      VideoLoopModifier, value);
     return this;
   }
   objectFit(value: ImageFit): VideoAttribute {
-    if (value in ImageFit) {
-      modifier(this._modifiers, VideoObjectFitModifier, value);
-    } else {
-      modifier(this._modifiers, VideoObjectFitModifier, undefined);
-    }
+    modifierWithKey(this._modifiersWithKeys, VideoObjectFitModifier.identity,
+      VideoObjectFitModifier, value);
     return this;
   }
   onStart(callback: () => void): VideoAttribute {

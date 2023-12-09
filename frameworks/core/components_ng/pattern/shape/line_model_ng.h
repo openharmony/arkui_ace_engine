@@ -26,6 +26,9 @@ public:
     void Create() override;
     void StartPoint(const ShapePoint& value) override;
     void EndPoint(const ShapePoint& value) override;
+    
+    static void StartPoint(FrameNode* frameNode, const ShapePoint& value);
+    static void EndPoint(FrameNode* frameNode, const ShapePoint& value);
 };
 
 } // namespace OHOS::Ace::NG

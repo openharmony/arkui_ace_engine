@@ -30,6 +30,8 @@ Global::Resource::DeviceType ConvertDeviceTypeToGlobal(DeviceType type)
             return Global::Resource::DeviceType::DEVICE_CAR;
         case DeviceType::TABLET:
             return Global::Resource::DeviceType::DEVICE_TABLET;
+        case DeviceType::TWO_IN_ONE:
+            return Global::Resource::DeviceType::DEVICE_TWOINONE;
         default:
             return Global::Resource::DeviceType::DEVICE_NOT_SET;
     }
