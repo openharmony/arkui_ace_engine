@@ -101,6 +101,10 @@ bool NGGestureRecognizer::ShouldResponse()
 
 bool NGGestureRecognizer::HandleEvent(const TouchEvent& point)
 {
+    auto attachedNode = GetAttachedNode();
+    if (attachedNode.Invalid()) {
+        return true;
+    }
     if (!ShouldResponse()) {
         return true;
     }
