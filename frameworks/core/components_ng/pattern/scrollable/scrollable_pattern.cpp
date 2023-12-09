@@ -1757,7 +1757,7 @@ float ScrollablePattern::IsInHotZone(const PointF& point)
     auto host = GetHost();
     auto offset = 0.f;
     auto geometryNode = host->GetGeometryNode();
-    CHECK_NULL_RETURN(geometryNode, 0.f)
+    CHECK_NULL_RETURN(geometryNode, 0.f);
 
     auto wholeRect = geometryNode->GetFrameRect();
     wholeRect.SetOffset(host->GetTransformRelativeOffset());
@@ -1838,14 +1838,14 @@ bool ScrollablePattern::isVertical() const
 void ScrollablePattern::HotZoneScroll(const float offsetPct)
 {
     auto host = GetHost();
-    CHECK_NULL_VOID(IsScrollable())
-    CHECK_NULL_VOID(!NearZero(offsetPct))
+    CHECK_NULL_VOID(IsScrollable());
+    CHECK_NULL_VOID(!NearZero(offsetPct));
 
     // There are three types of situations to consider.
     // 1. Enter the hot zone for the first time.
     // 2. When the drag point leaves the hot zone, it enters the hot zone again
     // 3. When the drag point moves within the hot zone, the hot zone offset changes
-    CHECK_NULL_VOID(!NearEqual(lastHonezoneOffsetPct_, offsetPct))
+    CHECK_NULL_VOID(!NearEqual(lastHonezoneOffsetPct_, offsetPct));
 
     if (AnimateRunning()) {
         // Variable speed rolling
@@ -1922,9 +1922,7 @@ void ScrollablePattern::HandleHotZone(
     const DragEventType& dragEventType, const RefPtr<NotifyDragEvent>& notifyDragEvent)
 {
     // The starting version of the auto-scroll feature is 11
-    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
-        return;
-    }
+    CHECK_NULL_VOID(Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN));
     PointF point(static_cast<float>(notifyDragEvent->GetX()), static_cast<float>(notifyDragEvent->GetY()));
     switch (dragEventType) {
         case DragEventType::ENTER: {
@@ -1993,9 +1991,7 @@ void ScrollablePattern::HandleOnDragStatusCallback(
     const DragEventType& dragEventType, const RefPtr<NotifyDragEvent>& notifyDragEvent)
 {
     HandleHotZone(dragEventType, notifyDragEvent);
-    if (!dragStatusListener_.has_value()) {
-        return;
-    }
+    CHECK_NULL_VOID(dragStatusListener_.has_value());
 
     auto dragStatusListener = dragStatusListener_.value();
     switch (dragEventType) {
