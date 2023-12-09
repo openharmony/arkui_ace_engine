@@ -1107,6 +1107,17 @@ struct ArkUIAlphabetIndexerModifierAPI {
     void (*ResetPopupPosition)(NodeHandle node);
 };
 
+struct ArkUIScrollModifierAPI {
+    void (*SetScrollScrollable)(NodeHandle node, uint32_t scrollDirection);
+    void (*ResetScrollScrollable)(NodeHandle node);
+    void (*SetScrollScrollBarColor)(NodeHandle node, uint32_t scrollBarColor);
+    void (*ResetScrollScrollBarColor)(NodeHandle node);
+    void (*SetScrollScrollBarWidth)(NodeHandle node, double value, int unit);
+    void (*ResetScrollScrollBarWidth)(NodeHandle node);
+    void (*SetScrollEdgeEffect)(NodeHandle node, uint32_t edgeEffect, bool alwaysEnabled);
+    void (*ResetScrollEdgeEffect)(NodeHandle node);
+};
+
 struct ArkUIListModifierAPI {
     void (*SetListLanes)(NodeHandle node, int32_t lanesNum, OHOS::Ace::Dimension minLength,
         OHOS::Ace::Dimension maxLength, OHOS::Ace::Dimension gutter);
@@ -1256,6 +1267,7 @@ struct ArkUINodeAPI {
     ArkUIMenuModifierAPI (*GetMenuModifier)();
     ArkUIDatePickerModifierAPI (*GetDatePickerModifier)();
     ArkUIAlphabetIndexerModifierAPI (*GetAlphabetIndexerModifier)();
+    ArkUIScrollModifierAPI (*GetScrollModifier)();
     ArkUICommonShapeModifierAPI(*GetCommonShapeModifier)();
     ArkUIShapeModifierAPI(*GetShapeModifier)();
     ArkUIRectModifierAPI (*GetRectModifier)();
