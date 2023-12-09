@@ -319,6 +319,18 @@ public:
         }
     }
 
+    void UpdateAnimationStartEvent(AnimationStartEvent&& event)
+    {
+        if (!animationStartEvent_) {
+            animationStartEvent_ = std::make_shared<AnimationStartEvent>(event);
+            auto eventHub = GetEventHub<SwiperEventHub>();
+            CHECK_NULL_VOID(eventHub);
+            eventHub->AddAnimationStartEvent(animationStartEvent_);
+        } else {
+            (*animationStartEvent_).swap(event);
+        }
+    }
+
     void UpdateAnimationEndEvent(AnimationEndEvent&& event)
     {
         if (!animationEndEvent_) {
@@ -751,6 +763,7 @@ private:
 
     ChangeEventPtr changeEvent_;
     ChangeEventPtr onIndexChangeEvent_;
+    AnimationStartEventPtr animationStartEvent_;
     AnimationEndEventPtr animationEndEvent_;
 
     mutable std::shared_ptr<SwiperParameters> swiperParameters_;

@@ -85,6 +85,8 @@ constexpr int32_t TEST_SELECTED_MASK_COUNT = 2;
 constexpr int32_t TEST_UNSELECTED_MASK_COUNT = 1;
 constexpr int32_t LG_COLUMN_NUM = 12;
 constexpr int32_t XS_COLUMN_NUM = 2;
+constexpr int32_t PLATFORM_VERSION_10 = 10;
+constexpr int32_t PLATFORM_VERSION_11 = 11;
 } // namespace
 
 class TabsTestNg : public testing::Test {
@@ -4463,7 +4465,7 @@ HWTEST_F(TabsTestNg, TabsModelNg001, TestSize.Level1)
      */
     auto onAnimationStart = [](int32_t index, int32_t targetIndex, const AnimationCallbackInfo& info) {};
     tabsModel.SetOnAnimationStart(std::move(onAnimationStart));
-    EXPECT_NE(eventHub->animationStartEvent_, nullptr);
+    EXPECT_NE(pattern->animationStartEvent_, nullptr);
 
     /**
      * @tc.steps: step2.2. Test SetOnAnimationEnd function.
@@ -8805,6 +8807,69 @@ HWTEST_F(TabsTestNg, TabsModelSetAnimationDuration002, TestSize.Level1)
     tabsModel.SetAnimationDuration(duration);
     EXPECT_FLOAT_EQ(duration, -1);
 }
+
+/**
+ * @tc.name: TabsModelSetAnimationDuration003
+ * @tc.desc: test SetAnimationDuration
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsTestNg, TabsModelSetAnimationDuration003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: steps1. Create tabsModel
+     */
+    TabsModelNG tabsModel;
+    tabsModel.Create(BarPosition::START, 0, nullptr, nullptr);
+    auto tabsFrameNode = AceType::DynamicCast<TabsNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+    ASSERT_NE(tabsFrameNode, nullptr);
+    auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsFrameNode->GetChildAtIndex(TEST_TAB_BAR_INDEX));
+    ASSERT_NE(tabBarNode, nullptr);
+    auto tabBarPattern = tabBarNode->GetPattern<TabBarPattern>();
+    auto pipeline = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+    auto tabTheme = pipeline->GetTheme<TabTheme>();
+    ASSERT_NE(tabTheme, nullptr);
+    auto defaultDuration = tabTheme->GetTabContentAnimationDuration();
+
+    /**
+     * @tc.steps: step2. Test function SetAnimationDuration in APIVersion 10.
+     * @tc.expected: Related function runs ok.
+     */
+    pipeline->SetMinPlatformVersion(PLATFORM_VERSION_10);
+    EXPECT_FLOAT_EQ(tabBarPattern->GetAnimationDuration().value_or(-1), 0);
+    tabBarPattern->animationDuration_.reset();
+    tabsModel.SetAnimationDuration(1);
+    EXPECT_FLOAT_EQ(tabBarPattern->GetAnimationDuration().value_or(-1), 1);
+    tabBarPattern->animationDuration_.reset();
+    tabsModel.SetAnimationDuration(-1);
+    EXPECT_FLOAT_EQ(tabBarPattern->GetAnimationDuration().value_or(-1), defaultDuration);
+    tabBarPattern->animationDuration_.reset();
+
+    /**
+     * @tc.steps: step3. Test function SetAnimationDuration in APIVersion 11.
+     * @tc.expected: Related function runs ok.
+     */
+    pipeline->SetMinPlatformVersion(PLATFORM_VERSION_11);
+    EXPECT_FLOAT_EQ(tabBarPattern->GetAnimationDuration().value_or(-1), defaultDuration);
+    tabBarPattern->animationDuration_.reset();
+    tabsModel.SetAnimationDuration(1);
+    EXPECT_FLOAT_EQ(tabBarPattern->GetAnimationDuration().value_or(-1), 1);
+    tabBarPattern->animationDuration_.reset();
+    tabsModel.SetAnimationDuration(-1);
+    EXPECT_FLOAT_EQ(tabBarPattern->GetAnimationDuration().value_or(-1), defaultDuration);
+    tabBarPattern->animationDuration_.reset();
+
+    tabBarPattern->SetTabBarStyle(TabBarStyle::BOTTOMTABBATSTYLE, 0);
+    EXPECT_FLOAT_EQ(tabBarPattern->GetAnimationDuration().value_or(-1), 0);
+    tabBarPattern->animationDuration_.reset();
+    tabsModel.SetAnimationDuration(1);
+    EXPECT_FLOAT_EQ(tabBarPattern->GetAnimationDuration().value_or(-1), 1);
+    tabBarPattern->animationDuration_.reset();
+    tabsModel.SetAnimationDuration(-1);
+    EXPECT_FLOAT_EQ(tabBarPattern->GetAnimationDuration().value_or(-1), 0);
+    tabBarPattern->animationDuration_.reset();
+}
+
 /**
  * @tc.name: SetOnChangeEvent002.
  * @tc.desc: Test the SetOnChangeEvent function in the TabsPattern class.

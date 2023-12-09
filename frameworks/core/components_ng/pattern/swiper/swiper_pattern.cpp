@@ -2794,10 +2794,6 @@ void SwiperPattern::TriggerAnimationEndOnSwipeToLeft()
         currentIndexOffset_ = secondItemInfoInVisibleArea.second.startPos;
         UpdateCurrentIndex(secondItemInfoInVisibleArea.first);
     }
-
-    AnimationCallbackInfo info;
-    info.currentOffset = GetCustomPropertyOffset() + Dimension(currentIndexOffset_, DimensionUnit::PX).ConvertToVp();
-    FireAnimationEndEvent(GetLoopIndex(currentIndex_), info);
 }
 
 void SwiperPattern::TriggerAnimationEndOnSwipeToRight()
@@ -2813,21 +2809,12 @@ void SwiperPattern::TriggerAnimationEndOnSwipeToRight()
         currentIndexOffset_ = firstItemInfoInVisibleArea.second.startPos;
         UpdateCurrentIndex(firstItemInfoInVisibleArea.first);
     }
-
-    AnimationCallbackInfo info;
-    info.currentOffset = GetCustomPropertyOffset() + Dimension(currentIndexOffset_, DimensionUnit::PX).ConvertToVp();
-    FireAnimationEndEvent(GetLoopIndex(currentIndex_), info);
 }
 
 void SwiperPattern::TriggerAnimationEndOnForceStop()
 {
     auto pauseTargetIndex = pauseTargetIndex_.has_value() ? pauseTargetIndex_.value() : currentIndex_;
-    if (currentIndex_ == pauseTargetIndex) {
-        AnimationCallbackInfo info;
-        info.currentOffset =
-            GetCustomPropertyOffset() + Dimension(currentIndexOffset_, DimensionUnit::PX).ConvertToVp();
-        FireAnimationEndEvent(GetLoopIndex(currentIndex_), info);
-    } else {
+    if (currentIndex_ != pauseTargetIndex) {
         auto firstItemInfoInVisibleArea = GetFirstItemInfoInVisibleArea();
         if (currentIndex_ == firstItemInfoInVisibleArea.first) {
             // swipe to left
@@ -2855,6 +2842,9 @@ void SwiperPattern::TriggerAnimationEndOnForceStop()
         OnIndexChange();
         oldIndex_ = currentIndex_;
     }
+    AnimationCallbackInfo info;
+    info.currentOffset = GetCustomPropertyOffset() + Dimension(currentIndexOffset_, DimensionUnit::PX).ConvertToVp();
+    FireAnimationEndEvent(GetLoopIndex(currentIndex_), info);
     UpdateItemRenderGroup(false);
 }
 
