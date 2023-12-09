@@ -6880,4 +6880,119 @@ HWTEST_F(ListTestNg, ScrollToIndex006, TestSize.Level1)
     EXPECT_TRUE(ScrollToIndex(itemNumber, false, ScrollAlign::END, 1300.f));
     EXPECT_TRUE(ScrollToIndex(itemNumber, false, ScrollAlign::AUTO, 1300.f));
 }
+
+/**
+ * @tc.name: ContentOffset001
+ * @tc.desc: Test top content offset and bottom end offset
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListTestNg, ContentOffset001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create List
+     * @tc.expected: Total Offset is negative contentStartOffset.
+     */
+    const int32_t itemNumber = 20;
+    const float contentStartOffset = 100;
+    const float contentEndOffset = 50;
+    Create([=](ListModelNG model) {
+        model.SetContentStartOffset(contentStartOffset);
+        model.SetContentEndOffset(contentEndOffset);
+        CreateItem(itemNumber);
+    });
+
+    for (int32_t index = 0; index < 7; index++) {
+        EXPECT_EQ(GetChildRect(frameNode_, index).GetY(), contentStartOffset + index * ITEM_HEIGHT);
+    }
+
+    float offset = pattern_->GetTotalOffset();
+    EXPECT_FLOAT_EQ(offset, -contentStartOffset);
+
+    /**
+     * @tc.steps: step2. scroll to bottom
+     * @tc.expected: Bottom content offset equal to contentEndOffset.
+     */
+    ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM);
+    offset = pattern_->GetTotalOffset();
+    EXPECT_FLOAT_EQ(offset, itemNumber * ITEM_HEIGHT - LIST_HEIGHT + contentEndOffset);
+}
+
+/**
+ * @tc.name: ContentOffset002
+ * @tc.desc: Test scroll to Index with content offset
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListTestNg, ContentOffset002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create List
+     */
+    const int32_t itemNumber = 20;
+    const float contentStartOffset = 100;
+    const float contentEndOffset = 50;
+    Create([=](ListModelNG model) {
+        model.SetContentStartOffset(contentStartOffset);
+        model.SetContentEndOffset(contentEndOffset);
+        CreateItem(itemNumber);
+    });
+
+    /**
+     * @tc.steps: step2. scroll to target item align start.
+     * @tc.expected: check whether the offset is correct.
+     */
+    EXPECT_TRUE(ScrollToIndex(0, false, ScrollAlign::START, -contentStartOffset));
+    EXPECT_TRUE(ScrollToIndex(1, false, ScrollAlign::START, ITEM_HEIGHT - contentStartOffset));
+    EXPECT_TRUE(ScrollToIndex(2, false, ScrollAlign::START, ITEM_HEIGHT * 2 - contentStartOffset));
+
+    /**
+     * @tc.steps: step3. scroll to target item align end.
+     * @tc.expected: check whether the offset is correct.
+     */
+    const float MAX_OFFSET = itemNumber * ITEM_HEIGHT - LIST_HEIGHT + contentEndOffset;
+    EXPECT_TRUE(ScrollToIndex(itemNumber - 1, false, ScrollAlign::END, MAX_OFFSET));
+    EXPECT_TRUE(ScrollToIndex(itemNumber - 2, false, ScrollAlign::END, MAX_OFFSET - ITEM_HEIGHT));
+    EXPECT_TRUE(ScrollToIndex(itemNumber - 3, false, ScrollAlign::END, MAX_OFFSET - ITEM_HEIGHT * 2));
+}
+
+/**
+ * @tc.name: ContentOffset003
+ * @tc.desc: Test scroll to ListItemGroup with content offset
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListTestNg, ContentOffset003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create List
+     */
+    const int32_t GroupNumber = 5;
+    const float contentStartOffset = 100;
+    const float contentEndOffset = 50;
+    Create([=](ListModelNG model) {
+        model.SetContentStartOffset(contentStartOffset);
+        model.SetContentEndOffset(contentEndOffset);
+        CreateGroup(GroupNumber);
+    });
+
+    /**
+     * @tc.steps: step2. scroll to target group align start.
+     * @tc.expected: check whether the offset is correct.
+     */
+    for (int32_t i = 0; i < 3; i++) {
+        pattern_->ScrollToIndex(i, false, ScrollAlign::START);
+        FlushLayoutTask(frameNode_);
+        EXPECT_EQ(GetChildRect(frameNode_, i).GetY(), contentStartOffset);
+    }
+
+    /**
+     * @tc.steps: step3. scroll to target group align end.
+     * @tc.expected: check whether the offset is correct.
+     */
+    for (int32_t i = 0; i < 3; i++) {
+        int32_t index = GroupNumber - i - 1;
+        pattern_->ScrollToIndex(index, false, ScrollAlign::END);
+        FlushLayoutTask(frameNode_);
+        auto rect = GetChildRect(frameNode_, index);
+        EXPECT_EQ(rect.Bottom(), LIST_HEIGHT - contentEndOffset);
+    }
+}
 } // namespace OHOS::Ace::NG
