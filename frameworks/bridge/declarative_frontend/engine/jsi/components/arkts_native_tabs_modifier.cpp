@@ -32,7 +32,7 @@ constexpr int NUM_3 = 3;
 constexpr int NUM_4 = 4;
 constexpr int DEFAULT_LENGTH = 3;
 constexpr int DEFAULT_LENGTH_OF_BAR_GRID_ALIGN = 5;
-constexpr int DEFAULT_LENGTH_OF_BAR_GRID_ALIGN_VALUES = 5;
+constexpr int DEFAULT_LENGTH_OF_BAR_GRID_ALIGN_VALUES = 2;
 constexpr int DEFAULT_ANIMATION_DURATION = 300;
 
 void SetTabBarMode(NodeHandle node, int32_t tabsBarMode)

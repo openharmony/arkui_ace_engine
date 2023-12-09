@@ -123,8 +123,8 @@ ArkUINativeModuleValue TabsBridge::SetBarGridAlign(ArkUIRuntimeCallInfo* runtime
         lg = lgArg->Int32Value(vm);
     }
 
-    CalcDimension columnGutter(0.0, DimensionUnit::VP);
-    CalcDimension columnMargin(0.0, DimensionUnit::VP);
+    CalcDimension columnGutter;
+    CalcDimension columnMargin;
     if (!ArkTSUtils::ParseJsDimensionVp(vm, gutterArg, columnGutter) || !NonNegative(columnGutter.Value()) ||
         columnGutter.Unit() == DimensionUnit::PERCENT) {
         columnGutter.Reset();
