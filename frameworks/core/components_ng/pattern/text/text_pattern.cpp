@@ -64,6 +64,9 @@ constexpr int32_t API_PROTEXTION_GREATER_NINE = 9;
 constexpr float BOX_EPSILON = 0.5f;
 constexpr float DOUBLECLICK_INTERVAL_MS = 300.0f;
 constexpr uint32_t SECONDS_TO_MILLISECONDS = 1000;
+const std::pair<std::string, std::string> UI_EXTENSION_TYPE = {
+    "ability.want.params.uiExtensionType", "sys/commonUI"
+};
 const std::unordered_map<TextDataDetectType, std::string> TEXT_DETECT_MAP = {
     { TextDataDetectType::PHONE_NUMBER, "phoneNum" }, { TextDataDetectType::URL, "url" },
     { TextDataDetectType::EMAIL, "email" }, { TextDataDetectType::ADDRESS, "location" }
@@ -551,6 +554,7 @@ void TextPattern::HandleClickEvent(GestureEvent& info)
             return;
         }
     }
+    hasClickedAISpan_ = false;
     HandleSingleClickEvent(info);
 }
 
@@ -692,11 +696,12 @@ bool TextPattern::ClickAISpan(const PointF& textOffset, const AISpan& aiSpan)
     paragraph_->GetRectsForRange(aiSpan.start, aiSpan.end, aiRects);
     for (auto&& rect : aiRects) {
         if (rect.IsInRegion(textOffset)) {
+            hasClickedAISpan_ = true;
             if (isMousePressed_) {
                 std::map<std::string, std::string> paramaters;
                 paramaters["entityType"] = TEXT_DETECT_MAP.at(aiSpan.type);
                 paramaters["entityText"] = aiSpan.content;
-                paramaters["copyOption"] = copyOption_ == CopyOptions::None ? "false" : "true";
+                paramaters[UI_EXTENSION_TYPE.first] = UI_EXTENSION_TYPE.second;
                 paramaters["clickType"] = "leftMouse";
                 DataDetectorMgr::GetInstance().ResponseBestMatchItem(paramaters, aiSpan);
                 return true;
@@ -770,7 +775,7 @@ bool TextPattern::ShowUIExtensionMenu(const AISpan& aiSpan, const CalculateHandl
     std::map<std::string, std::string> paramaters;
     paramaters["entityType"] = TEXT_DETECT_MAP.at(aiSpan.type);
     paramaters["entityText"] = aiSpan.content;
-    paramaters["copyOption"] = copyOption_ == CopyOptions::None ? "false" : "true";
+    paramaters[UI_EXTENSION_TYPE.first] = UI_EXTENSION_TYPE.second;
     if (TEXT_DETECT_MAP.find(aiSpan.type) == TEXT_DETECT_MAP.end() ||
         aiMenuOptionsMap_.find(TEXT_DETECT_MAP.at(aiSpan.type)) == aiMenuOptionsMap_.end()) {
         TAG_LOGI(AceLogTag::ACE_TEXT, "Error menu options");
@@ -785,7 +790,7 @@ bool TextPattern::ShowUIExtensionMenu(const AISpan& aiSpan, const CalculateHandl
 
 void TextPattern::HandleDoubleClickEvent(GestureEvent& info)
 {
-    if (copyOption_ == CopyOptions::None || textForDisplay_.empty()) {
+    if (copyOption_ == CopyOptions::None || textForDisplay_.empty() || hasClickedAISpan_) {
         return;
     }
     auto host = GetHost();

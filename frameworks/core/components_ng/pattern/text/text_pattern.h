@@ -525,6 +525,7 @@ protected:
     bool textDetectEnable_ = false;
     bool aiDetectInitialized_ = false;
     bool aiDetectTypesChanged_ = false;
+    bool hasClickedAISpan_ = false;
     std::string textDetectTypes_;
     std::set<std::string> textDetectTypesSet_;
     std::string textForAI_;
