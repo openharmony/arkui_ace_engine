@@ -73,7 +73,7 @@ public:
     void RemoveIndexerPopupById(int32_t targetId);
     void RemoveIndexerPopup();
     void HidePopup(int32_t targetId, const PopupInfo& popupInfo);
-    void HidePopupWithoutAnimation(int32_t targetId, const PopupInfo& popupInfo);
+    RefPtr<FrameNode> HidePopupWithoutAnimation(int32_t targetId, const PopupInfo& popupInfo);
     void ShowPopup(int32_t targetId, const PopupInfo& popupInfo);
     void ErasePopup(int32_t targetId);
     void HideAllPopups();
