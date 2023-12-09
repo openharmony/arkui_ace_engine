@@ -2355,7 +2355,6 @@ void UIContentImpl::RecoverForm(const std::string& statusData)
 
 void UIContentImpl::RemoveOldPopInfoIfExsited(bool isShowInSubWindow, int32_t nodeId)
 {
-    ContainerScope scope(instanceId_);
     auto pipeline = NG::PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto overlayManager = pipeline->GetOverlayManager();
@@ -2443,11 +2442,11 @@ void UIContentImpl::OnPopupStateChange(const std::string& event,
     auto taskExecutor = Container::CurrentTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
     taskExecutor->PostDelayedTask(
-        [config, nodeId, this]() {
+        [config, nodeId]() {
             RemoveOldPopInfoIfExsited(config.isShowInSubWindow, nodeId);
-            customPopupConfigMap_.erase(nodeId);
         },
         TaskExecutor::TaskType::UI, 100); // delay 100ms
+    customPopupConfigMap_.erase(nodeId);
 }
  
 int32_t UIContentImpl::CreateCustomPopupUIExtension(const AAFwk::Want& want,

@@ -238,8 +238,9 @@ private:
     void InitializeSafeArea(const RefPtr<Platform::AceContainer>& container);
 
     RefPtr<PopupParam> CreateCustomPopupParam(bool isShow, const CustomPopupUIExtensionConfig& config);
-    void RemoveOldPopInfoIfExsited(bool isShowInSubWindow, int32_t nodeId);
     void OnPopupStateChange(const std::string& event, const CustomPopupUIExtensionConfig& config, int32_t nodeId);
+
+    static void RemoveOldPopInfoIfExsited(bool isShowInSubWindow, int32_t nodeId);
 
     std::weak_ptr<OHOS::AbilityRuntime::Context> context_;
     void* runtime_ = nullptr;
