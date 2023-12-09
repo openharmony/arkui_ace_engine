@@ -235,6 +235,10 @@ ArkUINativeModuleValue TabsBridge::SetFadingEdge(ArkUIRuntimeCallInfo* runtimeCa
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+    if (secondArg->IsUndefined() || secondArg->IsNull()) {
+        GetArkUIInternalNodeAPI()->GetTabsModifier().ResetFadingEdge(nativeNode);
+        return panda::JSValueRef::Undefined(vm);
+    }
     bool fadingEdge = secondArg->ToBoolean(vm)->Value();
     GetArkUIInternalNodeAPI()->GetTabsModifier().SetFadingEdge(nativeNode, fadingEdge);
     return panda::JSValueRef::Undefined(vm);
