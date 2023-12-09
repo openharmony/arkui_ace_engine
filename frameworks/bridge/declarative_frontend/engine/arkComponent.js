@@ -687,13 +687,9 @@ class BackgroundImagePositionModifier extends ModifierWithKey {
     }
   }
   checkObjectDiff() {
-    if (!((isResource(this.stageValue) && isResource(this.value) &&
-      isResourceEqual(this.stageValue, this.value)) ||
-      (!isResource(this.stageValue) && !isResource(this.value) &&
-        this.stageValue === this.value))) {
-      return true;
-    }
-    return false;
+    let _a, _b, _c, _d;
+    return !(((_a = this.value) === null || _a === void 0 ? void 0 : _a.x) === ((_b = this.stageValue) === null || _b === void 0 ? void 0 : _b.x) &&
+      ((_c = this.value) === null || _c === void 0 ? void 0 : _c.y) === ((_d = this.stageValue) === null || _d === void 0 ? void 0 : _d.y));
   }
 }
 BackgroundImagePositionModifier.identity = Symbol('backgroundImagePosition');
@@ -750,13 +746,8 @@ class BackgroundImageSizeModifier extends ModifierWithKey {
     }
   }
   checkObjectDiff() {
-    if (!((isResource(this.stageValue) && isResource(this.value) &&
-      isResourceEqual(this.stageValue, this.value)) ||
-      (!isResource(this.stageValue) && !isResource(this.value) &&
-        this.stageValue === this.value))) {
-      return true;
-    }
-    return false;
+    return !(this.value.width === this.stageValue.width &&
+      this.value.height === this.stageValue.height);
   }
 }
 BackgroundImageSizeModifier.identity = Symbol('backgroundImageSize');
@@ -7663,7 +7654,7 @@ class ArkToggleComponent extends ArkComponent {
     return this;
   }
 }
-class ToggleSelectedColorModifier extends Modifier {
+class ToggleSelectedColorModifier extends ModifierWithKey {
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().toggle.resetSelectedColor(node);
@@ -7680,7 +7671,7 @@ class ToggleSelectedColorModifier extends Modifier {
   }
 }
 ToggleSelectedColorModifier.identity = Symbol('toggleSelectedColor');
-class ToggleSwitchPointColorModifier extends Modifier {
+class ToggleSwitchPointColorModifier extends ModifierWithKey {
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().toggle.resetSwitchPointColor(node);
@@ -9294,10 +9285,10 @@ class ArkPanelComponent extends ArkComponent {
 class PanelBackgroundMaskModifier extends ModifierWithKey {
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().panel.resetBackgroundMask(node);
+      GetUINativeModule().panel.resetPanelBackgroundMask(node);
     }
     else {
-      GetUINativeModule().panel.setBackgroundMask(node, this.value);
+      GetUINativeModule().panel.setPanelBackgroundMask(node, this.value);
     }
   }
   checkObjectDiff() {
@@ -9409,10 +9400,10 @@ DragBarModifier.identity = Symbol('dragBar');
 class ShowModifier extends Modifier {
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().panel.resetDragBar(node);
+      GetUINativeModule().panel.resetShow(node);
     }
     else {
-      GetUINativeModule().panel.setDragBar(node, this.value);
+      GetUINativeModule().panel.setShow(node, this.value);
     }
   }
 }
