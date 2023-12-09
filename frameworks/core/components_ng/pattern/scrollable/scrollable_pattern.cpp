@@ -1748,8 +1748,7 @@ void ScrollablePattern::Register2DragDropManager()
  * @description: Determine whether it is in the hot zone, then
  * 1.Gives the rolling direction according to the location of the hot zone
  * 2.Gives the distance from the edge of the hot zone from the drag point
- * @param {PointF&} point The drag point
- * @param {float&} offset The distance from the edge of the hot zone from the drag point
+ * @param {PointF&} point The drag point 
  * @return The distance from the edge of the hot zone from the drag point.scroll up:Offset percent is positive, scroll
  * down:Offset percent is  negative
  */
@@ -1758,9 +1757,8 @@ float ScrollablePattern::IsInHotZone(const PointF& point)
     auto host = GetHost();
     auto offset = 0.f;
     auto geometryNode = host->GetGeometryNode();
-    if (!geometryNode) {
-        return 0.f;
-    }
+    CHECK_NULL_RETURN(geometryNode, 0.f)
+
     auto wholeRect = geometryNode->GetFrameRect();
     wholeRect.SetOffset(host->GetTransformRelativeOffset());
     auto hotZoneHeightPX = HOT_ZONE_HEIGHT_VP_DIM.ConvertToPx();
@@ -1779,14 +1777,13 @@ float ScrollablePattern::IsInHotZone(const PointF& point)
         // Determines whether the drag point is within the hot zone,
         // then gives the scroll component movement direction according to which hot zone the point is in
         // top or bottom hot zone
-
         if (topHotzone.IsInRegion(point)) {
-            offset = point.GetY() - topHotzone.GetY();
+            offset = hotZoneHeightPX - point.GetY() + topHotzone.GetY();
             if (!NearZero(hotZoneHeightPX)) {
                 return offset / hotZoneHeightPX;
             }
         } else if (bottomHotzone.IsInRegion(point)) {
-            offset = point.GetY() - bottomZoneEdgeY;
+            offset = bottomZoneEdgeY - point.GetY() - hotZoneHeightPX;
             if (!NearZero(hotZoneHeightPX)) {
                 return offset / hotZoneHeightPX;
             }
@@ -1806,14 +1803,13 @@ float ScrollablePattern::IsInHotZone(const PointF& point)
         // Determines whether the drag point is within the hot zone,
         // gives the scroll component movement direction according to which hot zone the point is in
         // left or right hot zone
-
         if (leftHotzone.IsInRegion(point)) {
-            offset = point.GetX() - wholeRect.GetX();
+            offset = hotZoneWidthPX - point.GetX() + wholeRect.GetX();
             if (!NearZero(hotZoneWidthPX)) {
                 return offset / hotZoneWidthPX;
             }
         } else if (rightHotzone.IsInRegion(point)) {
-            offset = point.GetX() - rightZoneEdgeX;
+            offset = rightZoneEdgeX - point.GetX() - hotZoneWidthPX;
             if (!NearZero(hotZoneWidthPX)) {
                 return offset / hotZoneWidthPX;
             }
@@ -1827,41 +1823,36 @@ float ScrollablePattern::IsInHotZone(const PointF& point)
  * @description: Determines whether the scroll component is in the vertical direction
  * @return True,If the scrolling component is vertical
  */
-bool ScrollablePattern::isVertical()
+bool ScrollablePattern::isVertical() const
 {
     return axis_ == Axis::VERTICAL;
 }
 
 /**
  * @description: scroll up or down
- * @param {float} offset
+ * @param {float} offsetPct offset percent.When scrolling in the vertical or horizontal direction, there is a distance
+ * between the drag point and the outer edge of the hot zone, and the percentage represents the proportion of this
+ * distance to the height or width of the hot zone
  * @return None
  */
 void ScrollablePattern::HotZoneScroll(const float offsetPct)
 {
     auto host = GetHost();
-    if (!IsScrollable()) {
-        return;
-    }
-
-    if (NearZero(offsetPct)) {
-        return;
-    }
+    CHECK_NULL_VOID(IsScrollable())
+    CHECK_NULL_VOID(!NearZero(offsetPct))
 
     // There are three types of situations to consider.
     // 1. Enter the hot zone for the first time.
     // 2. When the drag point leaves the hot zone, it enters the hot zone again
     // 3. When the drag point moves within the hot zone, the hot zone offset changes
-    if (NearEqual(lastHonezoneOffsetPct_, offsetPct)) {
+    CHECK_NULL_VOID(!NearEqual(lastHonezoneOffsetPct_, offsetPct))
+
+    if (AnimateRunning()) {
+        // Variable speed rolling
+        // When the drag point is in the hot zone, and the hot zone offset changes.
+        // Then need to modify the offset percent
+        velocityMotion_->Reset(offsetPct);
         return;
-    } else {
-        if (AnimateRunning()) {
-            // Variable speed rolling
-            // When the drag point is in the hot zone, and the hot zone offset changes.
-            // Then need to modify the offset percent
-            velocityMotion_->Reset(offsetPct);
-            return;
-        }
     }
 
     if (!animator_) {
@@ -1880,10 +1871,10 @@ void ScrollablePattern::HotZoneScroll(const float offsetPct)
                 auto pattern = weak.Upgrade();
                 CHECK_NULL_RETURN(pattern, true);
 
-                if (offset < 0 && pattern->IsAtBottom()) {
+                if (LessNotEqual(offset, 0) && pattern->IsAtBottom()) {
                     // Stop scrolling when reach the bottom
                     return true;
-                } else if (offset > 0 && pattern->IsAtTop()) {
+                } else if (GreatNotEqual(offset, 0) && pattern->IsAtTop()) {
                     // Stop scrolling when reach the top
                     return true;
                 }
@@ -1963,8 +1954,9 @@ void ScrollablePattern::HandleHotZone(
 void ScrollablePattern::HandleMoveEventInComp(const PointF& point)
 {
     float offsetPct = IsInHotZone(point);
-    if (offsetPct == 0.f) {
-        // Although it entered the rolling component, it is not in the rolling component hot zone.Then stop scrolling
+    if (NearZero(offsetPct)) {
+        // Although it entered the rolling component, it is not in the rolling component hot zone.Then stop
+        // scrolling
         HandleLeaveHotzoneEvent();
     } else {
         // The drag point enters the hot zone
@@ -2015,6 +2007,7 @@ void ScrollablePattern::HandleOnDragStatusCallback(
             break;
         case DragEventType::MOVE:
             dragStatusListener->OnDragMoved(notifyDragEvent);
+            break;
         case DragEventType::LEAVE:
             dragStatusListener->OnDragLeaved(notifyDragEvent);
             break;

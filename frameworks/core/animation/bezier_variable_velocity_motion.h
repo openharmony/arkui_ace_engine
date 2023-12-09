@@ -21,7 +21,6 @@
 
 namespace OHOS::Ace {
 
-// hot zone heights
 static constexpr Dimension HOT_ZONE_HEIGHT_VP_DIM = 59.0_vp;
 static constexpr Dimension HOT_ZONE_WIDTH_VP_DIM = 26.0_vp;
 using MotionCompleteCallbck = std::function<bool(float)>;
@@ -36,20 +35,20 @@ public:
         : complete_(complete), offsetPct_(offsetPct)
     {
         Reset(offsetPct_, true);
-    };
+    }
     /**
      * @description: Get the roll distance
      * @return The scroll distance notified to the listener
      */
     double GetCurrentPosition() override
     {
-        return offsetPct_ > 0 ? scrollOffset_ : -scrollOffset_;
-    };
+        return Positive(offsetPct_) ? scrollOffset_ : Positive(offsetPct_) ? -scrollOffset_ : 0;
+    }
 
     double GetCurrentVelocity() override
     {
         return velocity_;
-    };
+    }
     /**
      * @description: By adding a callback, it is up to the listener to decide whether to stop the motion
      * @return True stop
@@ -60,7 +59,7 @@ public:
             return complete_(offsetPct_);
         }
         return true;
-    };
+    }
 
     /**
      * @description: The ratio of the hot zone offset to the maximum hot zone offset is used as an input parameter of
@@ -71,9 +70,8 @@ public:
      */
     double ComputeVelocity(float offsetPct)
     {
-        auto velocity = (1.f - Curves::SHARP->MoveInternal(std::abs(offsetPct))) * MAX_SPEED;
-        return velocity;
-    };
+        return Curves::SHARP->MoveInternal(std::abs(offsetPct)) * MAX_SPEED;
+    }
 
     std::string GetMotionType() const override
     {
@@ -91,7 +89,7 @@ public:
     {
         scrollOffset_ = velocity_ * (offsetTime - lastOffsetTime_) / UNIT_CONVERT;
         lastOffsetTime_ = offsetTime;
-    };
+    }
 
     /**
      * @description: Resets the hot spot offset to change the current speed, ultimately for variable speed scrolling
@@ -125,11 +123,11 @@ private:
     MotionCompleteCallbck complete_;
     // It is used to record the current speed, and different speeds can be passed in through the reset function, so that
     // the speed can be changed
-    float velocity_ { 0.0 };
+    float velocity_ = 0.0f;
     // The hot zone offset corresponds to a fixed velocity one-to-one by the bezier.
     // It is also possible to implement a generic class with velocity as an input parameter, but this is not necessary
     // at the moment
-    float offsetPct_ { 0.0 };
+    float offsetPct_ = 0.0f;
     // Record the last time given by the move function
     float lastOffsetTime_ = 0.0f;
 };

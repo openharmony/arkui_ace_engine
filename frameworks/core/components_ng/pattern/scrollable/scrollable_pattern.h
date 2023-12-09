@@ -610,7 +610,7 @@ private:
         const DragEventType& dragEventType, const RefPtr<NotifyDragEvent>& notifyDragEvent) override;
     void HandleMoveEventInComp(const PointF& point);
     void HandleLeaveHotzoneEvent();
-    bool isVertical();
+    bool isVertical() const;
 };
 } // namespace OHOS::Ace::NG
 
