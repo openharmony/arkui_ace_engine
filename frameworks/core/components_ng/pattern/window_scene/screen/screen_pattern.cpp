@@ -57,6 +57,8 @@ MMI::Direction ConvertDegreeToMMIRotation(float degree)
 }
 } // namespace
 
+float ScreenPattern::screenMaxWidth_;
+float ScreenPattern::screenMaxHeight_;
 
 ScreenPattern::ScreenPattern(const sptr<Rosen::ScreenSession>& screenSession)
 {
@@ -119,12 +121,14 @@ void ScreenPattern::UpdateToInputManager(float rotation)
         tempWidth = tempHeight;
         tempHeight = temp;
     }
+    screenMaxWidth_ = std::max(screenMaxWidth_, tempWidth);
+    screenMaxHeight_ = std::max(screenMaxHeight_, tempHeight);
 
     MMI::Rect screenRect = {
         paintRect.Left(),
         paintRect.Top(),
-        tempWidth,
-        tempHeight,
+        screenMaxWidth_,
+        screenMaxHeight_,
     };
     MMI::WindowInfo windowInfo = {
         .id = 0,    // root scene id 0
