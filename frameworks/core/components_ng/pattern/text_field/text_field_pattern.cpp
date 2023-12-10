@@ -663,13 +663,6 @@ void TextFieldPattern::HandleFocusEvent()
         underlineWidth_ = TYPING_UNDERLINE_WIDTH;
         renderContext->UpdateBorderRadius({ radius.GetX(), radius.GetY(), radius.GetY(), radius.GetX() });
     }
-    // Show cancel button on focus if cleanNodeStyle_ = CleanNodeStyle::INPUT.
-    if (cleanNodeStyle_ == CleanNodeStyle::INPUT) {
-        auto cleanNodeResponseArea = AceType::DynamicCast<CleanNodeResponseArea>(cleanNodeResponseArea_);
-        if (cleanNodeResponseArea) {
-            cleanNodeResponseArea->UpdateCleanNode(true);
-        }
-    }
     host->MarkDirtyNode(layoutProperty->GetMaxLinesValue(Infinity<float>()) <= 1 ? PROPERTY_UPDATE_MEASURE_SELF
                                                                                  : PROPERTY_UPDATE_MEASURE);
 }
@@ -907,13 +900,6 @@ void TextFieldPattern::HandleBlurEvent()
     }
     selectController_->UpdateCaretIndex(selectController_->GetCaretIndex());
     NotifyOnEditChanged(false);
-    // Hidden cancel button on blur if cleanNodeStyle_ = CleanNodeStyle::INPUT.
-    if (cleanNodeStyle_ == CleanNodeStyle::INPUT) {
-        auto cleanNodeResponseArea = AceType::DynamicCast<CleanNodeResponseArea>(cleanNodeResponseArea_);
-        if (cleanNodeResponseArea) {
-            cleanNodeResponseArea->UpdateCleanNode(false);
-        }
-    }
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
@@ -2033,7 +2019,13 @@ bool TextFieldPattern::FireOnTextChangeEvent()
     CHECK_NULL_RETURN(eventHub, false);
     auto layoutProperty = host->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, false);
-
+    if (cleanNodeStyle_ == CleanNodeStyle::INPUT) {
+        if (contentController_->IsEmpty()) {
+            UpdateCancelNode(false);
+        } else {
+            UpdateCancelNode(true);
+        }
+    }
     auto textCache = layoutProperty->GetValueValue("");
     if (textCache == contentController_->GetTextValue()) {
         return false;
@@ -5754,10 +5746,10 @@ void TextFieldPattern::ProcessResponseArea()
         } else {
             cleanNodeResponseArea->Refresh();
         }
-        if (cleanNodeStyle_ == CleanNodeStyle::CONSTANT || (HasFocus() && cleanNodeStyle_ == CleanNodeStyle::INPUT)) {
-            cleanNodeResponseArea->UpdateCleanNode(true);
-        } else {
-            cleanNodeResponseArea->UpdateCleanNode(false);
+        if (cleanNodeStyle_ == CleanNodeStyle::CONSTANT) {
+            UpdateCancelNode(true);
+        } else if (cleanNodeStyle_ == CleanNodeStyle::INVISIBLE) {
+            UpdateCancelNode(false);
         }
     }
 
@@ -5781,6 +5773,13 @@ void TextFieldPattern::ProcessResponseArea()
     if (responseArea_) {
         responseArea_->ClearArea();
     }
+}
+
+void TextFieldPattern::UpdateCancelNode(bool isShow)
+{
+    auto cleanNodeResponseArea = DynamicCast<CleanNodeResponseArea>(cleanNodeResponseArea_);
+    CHECK_NULL_VOID(cleanNodeResponseArea);
+    cleanNodeResponseArea->UpdateCleanNode(isShow);
 }
 
 bool TextFieldPattern::HasInputOperation()
