@@ -12,265 +12,243 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import i18n from "@ohos.i18n";
-import curves from "@ohos.curves";
-
-const PUBLIC_TIPS = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAAAXNSR0IArs4c6QAAA7ZJREFUSEu1VU1oXFUU/s6dSVK1xUlnbmKsKdZCJRFrmZmX5r20ZSIopf51U4pZ6EKlqIgLsViQIioiiuJC8G/ThWJXNSpR/Fm0tJM7mbmv01JMMVASm4AkM2ltK9XMzHtH32RmMOmbl2y82/ud853znXu/Q/ifDwXln0yl1qy79vd+JtoP4G4AdwBwAJom8FmAvoiubR2h48crzfL4EnAqFZ7/c+EAA68DWA9gkgDbJb4gWDgM3gTgHgBbAcwAOBjT6igBvJzoBoJCYmcXqDIMYBsDn7mMT26z1Tm/CucNo9tFyyEwPwtgRITcoejY2NX/YpcQzCaszYI4DUAw0YMdudEzqxnRnGHuJsZXAKZaFkJW5Nypy/W4BsGlROJWB605ELVDVAZkNjuxmuR1zKxhWoLxMwH56PUrgzQ+XvLuGgTFpPUmgw8RYMa0yi5PPm2aN60p0xmAW2Jr27b4DbaYtB5j8DCYX5J25v0GwR/37mgvtzkXGTjSodULfpXPGjvuEuxc8O4qYd7UlclM+eEKSfN7AANoExtkOn2t2kHBsJ4B86eCKhujudy0X2CtiEveXYhLkfW2fcV38MntD7gQPwIYklp9uUiwyNoutepvpjsDVEya3nt3pVYtTXH79oWKkzPzAL6TWg3VCX77t62fpFZPBw12LmkWieDInOoMwhUM81swNkqt7qsTlAj0TkyPvhoYmDAn4BFo1ROEKybMD5jwlNRqXZ3gLzA+lLZ6ObADo18RqCxzalcgLmG+RYQXpVa31AisXwG2Pc0CO0j2j8Aj0GpvMM46Cua4tNWW2iuqahaXWm0I7sDczQ6487T6YQWJJplwXmq1py7RAQAfQwhDZtO6WXAxaT4PZjdmZz5qijEsg5mzxPych6sSXO3riy64oRmAh6XOPO770eLbtwohzlZ/p8u9sdOZ8364uYR5jAh7Kk64uyt/stCwikLSeg3gwyAMypw6sTz48rZUpBJe8PypLEJuz3LXXPxP/Y8C9DUIb8icOrzEi6peU2IFojuZKLVaJ60XUrOSvOeoZS6Zt9v29SUE1QoWd4ECEHHBD3XqjGfdK55i3LqfBX9e3XYc7pP2yd/rQTcsnNo8jgHYBeL3XMHvdo6NzfrqHR/YSSH3IBgPe1sv7NBge37Uc4XG8V+ZgCgY1pMEfhuMDgB5MI0TYYqBCpgJVE0ar8rAdMQJO6/4FRK49Lm3t3Xu5sgjAngCzD0gdHvbDsBFgCeI6BRBfBPNpX9ppmMgwYrirwLwDyWbkigJz8KuAAAAAElFTkSuQmCC";
-const RIGHT_ICON = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAAAXNSR0IArs4c6QAAAR1JREFUSEvt1E9Kw1AQBvBvxgpexIUbN7pRiHgDKYFuBaWW0jaXiQmxWXgAE72BxVJPIf5ZiAgKQheC6MuUtxCCCzMPkl2zHr4ffJN5hIY/ajgfS6CyYVVF2Vl8WLCZdrqjx8rEPwMqIB9HdwDW2LDX7vefXBAVkCXJOrG5BfAFMjt+N3jWIirAhl2m0YaIzACag4ynRdSARbI03iSRKYAPLeIEWOQqjbcKkQmAd/ON3c5g8PpfXc6ADcuT0z0w3UDk3O8Nj2oHLtJwn4UngIT+yTCoFciScJuYryF4a7UK7+B49FIb0OiSS7/pp8stqJZcPjTXa1YB+Th6ALDqGm53owLsY7eCn1m7F9xrn4jfORXgGlqeXwKV7TVe0QK81HAZuzhflQAAAABJRU5ErkJggg==";
+const START_TIME = 250;
+const END_TIME = 200;
+const HEIGHT = 80;
+const BORDER_RADIUS = 12;
+const OPACITY_NUM = .18;
 
 export var HardwareStatusType;
-!function(e){
-    e[e.on=1] = "on";
-    e[e.off=0] = "off"
+!function(t){
+    t[t.ON=0] = "ON";
+    t[t.OFF=1] = "OFF"
 }(HardwareStatusType || (HardwareStatusType = {}));
 
-export var TypeEnum;
-!function(e){
-    e[e.DEFAULT_HIDE=0] = "DEFAULT_HIDE";
-    e[e.NETWORK_NOT_CONNECTED=1] = "NETWORK_NOT_CONNECTED";
-    e[e.NETWORK_CONNECTED_UNSTABLE=2] = "NETWORK_CONNECTED_UNSTABLE";
-    e[e.UNSTABLE_CONNECT_SERVER=3] = "UNSTABLE_CONNECT_SERVER";
-    e[e.CUSTOM_NETWORK_TIPS=4] = "CUSTOM_NETWORK_TIPS";
-    e[e.CUSTOM_TIPS=5] = "CUSTOM_TIPS"
-}(TypeEnum || (TypeEnum = {}));
+export var MarginStateType;
+!function(t){
+    t[t.DEFAULT_MARGIN=0] = "DEFAULT_MARGIN";
+    t[t.FIT_MARGIN=1] = "FIT_MARGIN"
+}(MarginStateType || (MarginStateType = {}));
+
+export var PromptType;
+!function(t){
+    t[t.DEFAULT_HIDE=0] = "DEFAULT_HIDE";
+    t[t.NETWORK_NOT_CONNECTED=1] = "NETWORK_NOT_CONNECTED";
+    t[t.NETWORK_CONNECTED_UNSTABLE=2] = "NETWORK_CONNECTED_UNSTABLE";
+    t[t.UNSTABLE_CONNECT_SERVER=3] = "UNSTABLE_CONNECT_SERVER";
+    t[t.CUSTOM_NETWORK_TIPS=4] = "CUSTOM_NETWORK_TIPS";
+    t[t.CUSTOM_TIPS=5] = "CUSTOM_TIPS"
+}(PromptType || (PromptType = {}));
 
 export class ExceptionPrompt extends ViewPU {
-    constructor(e, t, o, s = -1) {
-        super(e, o, s);
-        this.__Type = new SynchedPropertySimpleTwoWayPU(t.Type, this, "Type");
-        this.__Options = new SynchedPropertyObjectTwoWayPU(t.Options, this, "Options");
-        this.__ShowStatus = new ObservedPropertySimplePU(!1, this, "ShowStatus");
-        this.__OpacityNum = new ObservedPropertySimplePU(.18, this, "OpacityNum");
-        this.__HEIGHT = new ObservedPropertySimplePU(80, this, "HEIGHT");
-        this.__BORDER_RADIUS = new ObservedPropertySimplePU(12, this, "BORDER_RADIUS");
-        this.__BG_OPACITY = new ObservedPropertySimplePU(1, this, "BG_OPACITY");
-        this.__state = new ObservedPropertySimplePU(!1, this, "state");
-        this.__text = new ObservedPropertySimplePU("", this, "text");
-        this.__BGCKGROUND_COLOR = new ObservedPropertyObjectPU({
+    constructor(t, e, o, i = -1) {
+        super(t, o, i);
+        this.__type = new SynchedPropertySimpleOneWayPU(e.type, this, "type");
+        this.__options = new SynchedPropertyObjectOneWayPU(e.options, this, "options");
+        this.__isShowStatus = new ObservedPropertySimplePU(!1, this, "isShowStatus");
+        this.__isState = new ObservedPropertySimplePU(!1, this, "isState");
+        this.__tipText = new ObservedPropertySimplePU("", this, "tipText");
+        this.touchBackgroundColor = {
             id: -1,
             type: 10001,
             params: ["sys.color.ohos_id_color_sub_background_transparent"],
             bundleName: "",
             moduleName: ""
-        }, this, "BGCKGROUND_COLOR");
-        this.__SetNetwork = new ObservedPropertySimplePU("设置网络", this, "SetNetwork");
-        this.__ErrorDefaultObj = new ObservedPropertyObjectPU({
-            NETWORK_NOT_CONNECTED: "网络未连接",
-            NETWORK_CONNECTED_UNSTABLE: "网络连接不稳定，请点击重试",
-            UNSTABLE_CONNECT_SERVER: "无法连接到服务器，请点击重试",
-            CUSTOM_NETWORK_TIPS1: "无法获取",
-            CUSTOM_NETWORK_TIPS2: "请点击重试",
-            CUSTOM_TIPS: ""
-        }, this, "ErrorDefaultObj");
-        this.ReconnectionFunction = () => {
         };
-        this.ConfigureNetworkFunction = () => {
+        this.setNetwork = {
+            id: -1,
+            type: 10003,
+            params: ["app.string.test"],
+            bundleName: "",
+            moduleName: ""
         };
-        this.setInitiallyProvidedValue(t);
-        this.declareWatch("Type", this.TypeStatusChange)
+        this.__errorDefaultObj = new ObservedPropertyObjectPU({
+            networkConnected: "网络未连接",
+            networkConnectedUnstable: "网络连接不稳定，请点击重试",
+            unstableConnectServer: "无法连接到服务器，请点击重试",
+            customNetworkLeft: "无法获取",
+            customNetworkRight: "请点击重试",
+            customTips: ""
+        }, this, "errorDefaultObj");
+        this.onReconnectionFunction = () => {
+        };
+        this.onConfigureNetworkFunction = () => {
+        };
+        this.setInitiallyProvidedValue(e);
+        this.declareWatch("type", this.typeStatusChange)
     }
 
-    setInitiallyProvidedValue(e) {
-        void 0 !== e.ShowStatus && (this.ShowStatus = e.ShowStatus);
-        void 0 !== e.OpacityNum && (this.OpacityNum = e.OpacityNum);
-        void 0 !== e.HEIGHT && (this.HEIGHT = e.HEIGHT);
-        void 0 !== e.BORDER_RADIUS && (this.BORDER_RADIUS = e.BORDER_RADIUS);
-        void 0 !== e.BG_OPACITY && (this.BG_OPACITY = e.BG_OPACITY);
-        void 0 !== e.state && (this.state = e.state);
-        void 0 !== e.text && (this.text = e.text);
-        void 0 !== e.BGCKGROUND_COLOR && (this.BGCKGROUND_COLOR = e.BGCKGROUND_COLOR);
-        void 0 !== e.SetNetwork && (this.SetNetwork = e.SetNetwork);
-        void 0 !== e.ErrorDefaultObj && (this.ErrorDefaultObj = e.ErrorDefaultObj);
-        void 0 !== e.ReconnectionFunction && (this.ReconnectionFunction = e.ReconnectionFunction);
-        void 0 !== e.ConfigureNetworkFunction && (this.ConfigureNetworkFunction = e.ConfigureNetworkFunction)
+    setInitiallyProvidedValue(t) {
+        void 0 !== t.isShowStatus && (this.isShowStatus = t.isShowStatus);
+        void 0 !== t.isState && (this.isState = t.isState);
+        void 0 !== t.tipText && (this.tipText = t.tipText);
+        void 0 !== t.touchBackgroundColor && (this.touchBackgroundColor = t.touchBackgroundColor);
+        void 0 !== t.setNetwork && (this.setNetwork = t.setNetwork);
+        void 0 !== t.errorDefaultObj && (this.errorDefaultObj = t.errorDefaultObj);
+        void 0 !== t.onReconnectionFunction && (this.onReconnectionFunction = t.onReconnectionFunction);
+        void 0 !== t.onConfigureNetworkFunction && (this.onConfigureNetworkFunction = t.onConfigureNetworkFunction)
     }
 
-    updateStateVars(e) {
+    updateStateVars(t) {
+        this.__type.reset(t.type);
+        this.__options.reset(t.options)
     }
 
-    purgeVariableDependenciesOnElmtId(e) {
-        this.__Type.purgeDependencyOnElmtId(e);
-        this.__Options.purgeDependencyOnElmtId(e);
-        this.__ShowStatus.purgeDependencyOnElmtId(e);
-        this.__OpacityNum.purgeDependencyOnElmtId(e);
-        this.__HEIGHT.purgeDependencyOnElmtId(e);
-        this.__BORDER_RADIUS.purgeDependencyOnElmtId(e);
-        this.__BG_OPACITY.purgeDependencyOnElmtId(e);
-        this.__state.purgeDependencyOnElmtId(e);
-        this.__text.purgeDependencyOnElmtId(e);
-        this.__BGCKGROUND_COLOR.purgeDependencyOnElmtId(e);
-        this.__SetNetwork.purgeDependencyOnElmtId(e);
-        this.__ErrorDefaultObj.purgeDependencyOnElmtId(e)
+    purgeVariableDependenciesOnElmtId(t) {
+        this.__type.purgeDependencyOnElmtId(t);
+        this.__options.purgeDependencyOnElmtId(t);
+        this.__isShowStatus.purgeDependencyOnElmtId(t);
+        this.__isState.purgeDependencyOnElmtId(t);
+        this.__tipText.purgeDependencyOnElmtId(t);
+        this.__errorDefaultObj.purgeDependencyOnElmtId(t)
     }
 
     aboutToBeDeleted() {
-        this.__Type.aboutToBeDeleted();
-        this.__Options.aboutToBeDeleted();
-        this.__ShowStatus.aboutToBeDeleted();
-        this.__OpacityNum.aboutToBeDeleted();
-        this.__HEIGHT.aboutToBeDeleted();
-        this.__BORDER_RADIUS.aboutToBeDeleted();
-        this.__BG_OPACITY.aboutToBeDeleted();
-        this.__state.aboutToBeDeleted();
-        this.__text.aboutToBeDeleted();
-        this.__BGCKGROUND_COLOR.aboutToBeDeleted();
-        this.__SetNetwork.aboutToBeDeleted();
-        this.__ErrorDefaultObj.aboutToBeDeleted();
+        this.__type.aboutToBeDeleted();
+        this.__options.aboutToBeDeleted();
+        this.__isShowStatus.aboutToBeDeleted();
+        this.__isState.aboutToBeDeleted();
+        this.__tipText.aboutToBeDeleted();
+        this.__errorDefaultObj.aboutToBeDeleted();
         SubscriberManager.Get().delete(this.id__());
         this.aboutToBeDeletedInternal()
     }
 
-    get Type() {
-        return this.__Type.get()
+    get type() {
+        return this.__type.get()
     }
 
-    set Type(e) {
-        this.__Type.set(e)
+    set type(t) {
+        this.__type.set(t)
     }
 
-    get Options() {
-        return this.__Options.get()
+    get options() {
+        return this.__options.get()
     }
 
-    set Options(e) {
-        this.__Options.set(e)
+    set options(t) {
+        this.__options.set(t)
     }
 
-    get ShowStatus() {
-        return this.__ShowStatus.get()
+    get isShowStatus() {
+        return this.__isShowStatus.get()
     }
 
-    set ShowStatus(e) {
-        this.__ShowStatus.set(e)
+    set isShowStatus(t) {
+        this.__isShowStatus.set(t)
     }
 
-    get OpacityNum() {
-        return this.__OpacityNum.get()
+    get isState() {
+        return this.__isState.get()
     }
 
-    set OpacityNum(e) {
-        this.__OpacityNum.set(e)
+    set isState(t) {
+        this.__isState.set(t)
     }
 
-    get HEIGHT() {
-        return this.__HEIGHT.get()
+    get tipText() {
+        return this.__tipText.get()
     }
 
-    set HEIGHT(e) {
-        this.__HEIGHT.set(e)
+    set tipText(t) {
+        this.__tipText.set(t)
     }
 
-    get BORDER_RADIUS() {
-        return this.__BORDER_RADIUS.get()
+    get errorDefaultObj() {
+        return this.__errorDefaultObj.get()
     }
 
-    set BORDER_RADIUS(e) {
-        this.__BORDER_RADIUS.set(e)
-    }
-
-    get BG_OPACITY() {
-        return this.__BG_OPACITY.get()
-    }
-
-    set BG_OPACITY(e) {
-        this.__BG_OPACITY.set(e)
-    }
-
-    get state() {
-        return this.__state.get()
-    }
-
-    set state(e) {
-        this.__state.set(e)
-    }
-
-    get text() {
-        return this.__text.get()
-    }
-
-    set text(e) {
-        this.__text.set(e)
-    }
-
-    get BGCKGROUND_COLOR() {
-        return this.__BGCKGROUND_COLOR.get()
-    }
-
-    set BGCKGROUND_COLOR(e) {
-        this.__BGCKGROUND_COLOR.set(e)
-    }
-
-    get SetNetwork() {
-        return this.__SetNetwork.get()
-    }
-
-    set SetNetwork(e) {
-        this.__SetNetwork.set(e)
-    }
-
-    get ErrorDefaultObj() {
-        return this.__ErrorDefaultObj.get()
-    }
-
-    set ErrorDefaultObj(e) {
-        this.__ErrorDefaultObj.set(e)
+    set errorDefaultObj(t) {
+        this.__errorDefaultObj.set(t)
     }
 
     SetText() {
-        this.Type === TypeEnum.NETWORK_NOT_CONNECTED && (this.text = `${this.ErrorDefaultObj.NETWORK_NOT_CONNECTED}`);
-        this.Type === TypeEnum.NETWORK_CONNECTED_UNSTABLE && (this.text = `${this.ErrorDefaultObj.NETWORK_CONNECTED_UNSTABLE}`);
-        this.Type === TypeEnum.UNSTABLE_CONNECT_SERVER && (this.text = `${this.ErrorDefaultObj.UNSTABLE_CONNECT_SERVER}`);
-        this.Type === TypeEnum.CUSTOM_NETWORK_TIPS && (this.text = `${this.ErrorDefaultObj.CUSTOM_NETWORK_TIPS1}${this.Options.ContentText || ""}，${this.ErrorDefaultObj.CUSTOM_NETWORK_TIPS2}`);
-        this.Type === TypeEnum.CUSTOM_TIPS && (this.text = `${this.Options.TipContent}` || `${this.ErrorDefaultObj.CUSTOM_TIPS}`)
+        this.type === PromptType.NETWORK_NOT_CONNECTED && (this.tipText = `${this.errorDefaultObj.networkConnected}`);
+        this.type === PromptType.NETWORK_CONNECTED_UNSTABLE && (this.tipText = `${this.errorDefaultObj.networkConnectedUnstable}`);
+        this.type === PromptType.UNSTABLE_CONNECT_SERVER && (this.tipText = `${this.errorDefaultObj.unstableConnectServer}`);
+        this.type === PromptType.CUSTOM_NETWORK_TIPS && (this.tipText = `${this.errorDefaultObj.customNetworkLeft}${this.options.networkTip || ""}，${this.errorDefaultObj.customNetworkRight}`);
+        this.type === PromptType.CUSTOM_TIPS && (this.tipText = `${this.options.tip}` || `${this.errorDefaultObj.customTips}`)
     }
 
-    TypeStatusChange(e) {
-        if (this.Type !== TypeEnum.DEFAULT_HIDE) {
-            this.state && this.Type !== TypeEnum.NETWORK_NOT_CONNECTED && this.Type !== TypeEnum.NETWORK_CONNECTED_UNSTABLE && setTimeout((() => {
-                this.state = !1
+    typeStatusChange(t) {
+        if (this.type !== PromptType.DEFAULT_HIDE) {
+            this.isState && this.type !== PromptType.NETWORK_NOT_CONNECTED && this.type !== PromptType.NETWORK_CONNECTED_UNSTABLE && setTimeout((() => {
+                this.isState = !1
             }), 200);
-            this.Type !== TypeEnum.NETWORK_NOT_CONNECTED && this.Type !== TypeEnum.NETWORK_CONNECTED_UNSTABLE || (this.ShowStatus ? setTimeout((() => {
-                this.state = !0
-            }), 250) : this.state = !0);
-            if (this.ShowStatus) {
-                this.ShowStatus = !1;
+            this.type !== PromptType.NETWORK_NOT_CONNECTED && this.type !== PromptType.NETWORK_CONNECTED_UNSTABLE || (this.isShowStatus ? setTimeout((() => {
+                this.isState = !0
+            }), 250) : this.isState = !0);
+            if (this.isShowStatus) {
+                this.isShowStatus = !1;
                 setTimeout((() => {
                     this.SetText();
-                    this.ShowStatus = !0
+                    this.isShowStatus = !0
                 }), 250)
             } else {
                 this.SetText();
-                this.ShowStatus = !0
+                this.isShowStatus = !0
             }
         } else {
-            this.ShowStatus = !1;
+            this.isShowStatus = !1;
             setTimeout((() => {
-                this.state = !1
-            }), 200)
+                this.isState = !1
+            }), 250)
         }
     }
 
     aboutToAppear() {
-        const e = i18n.System.getSystemLanguage();
-        -1 != e.indexOf("zh") || e.indexOf("en");
-        if (this.Type !== TypeEnum.DEFAULT_HIDE) {
-            this.ShowStatus = !0;
+        if (this.type !== PromptType.DEFAULT_HIDE) {
+            this.isShowStatus = !0;
             this.SetText()
         }
-        this.Type !== TypeEnum.NETWORK_NOT_CONNECTED && this.Type !== TypeEnum.NETWORK_CONNECTED_UNSTABLE || (this.state = !0)
+        this.type !== PromptType.NETWORK_NOT_CONNECTED && this.type !== PromptType.NETWORK_CONNECTED_UNSTABLE || (this.isState = !0)
     }
 
     isOneColum() {
-        return this.Type === TypeEnum.UNSTABLE_CONNECT_SERVER || this.Type === TypeEnum.CUSTOM_NETWORK_TIPS || this.text.length < 10
+        return this.type === PromptType.UNSTABLE_CONNECT_SERVER || this.type === PromptType.CUSTOM_NETWORK_TIPS || JSON.stringify(this.tipText).length < 10
     }
 
-    FirstBuilder(e = null) {
-        this.observeComponentCreation(((e, t) => {
-            ViewStackProcessor.StartGetAccessRecordingFor(e);
+    OptionalMargins() {
+        return this.options.marginState === MarginStateType.DEFAULT_MARGIN ? {
+                                                                                 left: {
+                                                                                     id: -1,
+                                                                                     type: 10002,
+                                                                                     params: ["sys.float.ohos_id_card_margin_start"],
+                                                                                     bundleName: "",
+                                                                                     moduleName: ""
+                                                                                 },
+                                                                                 right: {
+                                                                                     id: -1,
+                                                                                     type: 10002,
+                                                                                     params: ["sys.float.ohos_id_card_margin_end"],
+                                                                                     bundleName: "",
+                                                                                     moduleName: ""
+                                                                                 }
+                                                                             } : {
+                                                                                     left: {
+                                                                                         id: -1,
+                                                                                         type: 10002,
+                                                                                         params: ["sys.float.ohos_id_max_padding_start"],
+                                                                                         bundleName: "",
+                                                                                         moduleName: ""
+                                                                                     },
+                                                                                     right: {
+                                                                                         id: -1,
+                                                                                         type: 10002,
+                                                                                         params: ["sys.float.ohos_id_max_padding_end"],
+                                                                                         bundleName: "",
+                                                                                         moduleName: ""
+                                                                                     }
+                                                                                 }
+    }
+
+    FirstBuilder(t = null) {
+        this.observeComponentCreation(((t, e) => {
+            ViewStackProcessor.StartGetAccessRecordingFor(t);
             Column.create();
             Column.height("100%");
             Column.width("100%");
-            Column.borderRadius(this.BORDER_RADIUS);
+            Column.borderRadius(12);
             Column.backgroundColor({
                 id: -1,
                 type: 10001,
@@ -278,19 +256,19 @@ export class ExceptionPrompt extends ViewPU {
                 bundleName: "",
                 moduleName: ""
             });
-            t || Column.pop();
+            e || Column.pop();
             ViewStackProcessor.StopGetAccessRecording()
         }));
         Column.pop()
     }
 
-    SecondBuilder(e = null) {
-        this.observeComponentCreation(((e, t) => {
-            ViewStackProcessor.StartGetAccessRecordingFor(e);
+    SecondBuilder(t = null) {
+        this.observeComponentCreation(((t, e) => {
+            ViewStackProcessor.StartGetAccessRecordingFor(t);
             Column.create();
             Column.height("100%");
             Column.width("100%");
-            Column.borderRadius(this.BORDER_RADIUS);
+            Column.borderRadius(12);
             Column.backgroundColor({
                 id: -1,
                 type: 10001,
@@ -298,18 +276,18 @@ export class ExceptionPrompt extends ViewPU {
                 bundleName: "",
                 moduleName: ""
             });
-            Column.opacity(this.OpacityNum);
+            Column.opacity(.18);
             Column.position({});
             Column.zIndex(999);
-            t || Column.pop();
+            e || Column.pop();
             ViewStackProcessor.StopGetAccessRecording()
         }));
         Column.pop()
     }
 
-    TextBuilder(e = null) {
-        this.observeComponentCreation(((e, t) => {
-            ViewStackProcessor.StartGetAccessRecordingFor(e);
+    TextBuilder(t = null) {
+        this.observeComponentCreation(((t, e) => {
+            ViewStackProcessor.StartGetAccessRecordingFor(t);
             Flex.create({ justifyContent: FlexAlign.SpaceBetween, alignItems: ItemAlign.Center });
             Flex.padding({ left: 12, right: 4 });
             Flex.position({});
@@ -317,28 +295,28 @@ export class ExceptionPrompt extends ViewPU {
             Flex.width("100%");
             Flex.height("100%");
             Flex.onClick((() => {
-                this.Options.HardwareStatus && this.ReconnectionFunction()
+                this.options.hardwareStatus === HardwareStatusType.ON && this.onReconnectionFunction()
             }));
-            t || Flex.pop();
+            e || Flex.pop();
             ViewStackProcessor.StopGetAccessRecording()
         }));
-        this.observeComponentCreation(((e, t) => {
-            ViewStackProcessor.StartGetAccessRecordingFor(e);
+        this.observeComponentCreation(((t, e) => {
+            ViewStackProcessor.StartGetAccessRecordingFor(t);
             Flex.create({ alignItems: ItemAlign.Center });
             Flex.width("100%");
             Flex.height("100%");
-            t || Flex.pop();
+            e || Flex.pop();
             ViewStackProcessor.StopGetAccessRecording()
         }));
-        this.observeComponentCreation(((e, t) => {
-            ViewStackProcessor.StartGetAccessRecordingFor(e);
-            Image.create(this.Options.Icon || {
+        this.observeComponentCreation(((t, e) => {
+            ViewStackProcessor.StartGetAccessRecordingFor(t);
+            Image.create(this.options.icon || {
                 id: -1,
                 type: 2e4,
                 params: ["app.media.ic_public_fail"],
                 bundleName: "",
                 moduleName: ""
-            } || PUBLIC_TIPS);
+            });
             Image.width("24vp");
             Image.height("24vp");
             Image.objectFit(ImageFit.Contain);
@@ -349,12 +327,12 @@ export class ExceptionPrompt extends ViewPU {
                 bundleName: "",
                 moduleName: ""
             });
-            t || Image.pop();
+            e || Image.pop();
             ViewStackProcessor.StopGetAccessRecording()
         }));
-        this.observeComponentCreation(((e, t) => {
-            ViewStackProcessor.StartGetAccessRecordingFor(e);
-            Text.create(this.text);
+        this.observeComponentCreation(((t, e) => {
+            ViewStackProcessor.StartGetAccessRecordingFor(t);
+            Text.create(this.tipText);
             Text.fontSize({
                 id: -1,
                 type: 10002,
@@ -372,20 +350,20 @@ export class ExceptionPrompt extends ViewPU {
             Text.textOverflow({ overflow: TextOverflow.Ellipsis });
             Text.maxLines(2);
             Text.margin({ left: 16, right: 16 });
-            t || Text.pop();
+            e || Text.pop();
             ViewStackProcessor.StopGetAccessRecording()
         }));
         Text.pop();
         Flex.pop();
-        this.observeComponentCreation(((e, t) => {
-            ViewStackProcessor.StartGetAccessRecordingFor(e);
+        this.observeComponentCreation(((t, e) => {
+            ViewStackProcessor.StartGetAccessRecordingFor(t);
             If.create();
-            this.state ? this.ifElseBranchUpdateFunction(0, (() => {
-                this.observeComponentCreation(((e, t) => {
-                    ViewStackProcessor.StartGetAccessRecordingFor(e);
+            this.isState ? this.ifElseBranchUpdateFunction(0, (() => {
+                this.observeComponentCreation(((t, e) => {
+                    ViewStackProcessor.StartGetAccessRecordingFor(t);
                     Button.createWithChild({ stateEffect: !0, type: ButtonType.Normal });
-                    Button.backgroundColor(ObservedObject.GetRawObject(this.BGCKGROUND_COLOR));
-                    Button.width(this.state ? 120 : 0);
+                    Button.backgroundColor(this.touchBackgroundColor);
+                    Button.width(this.isState ? 120 : 0);
                     Button.height(32);
                     Button.borderRadius({
                         id: -1,
@@ -395,15 +373,14 @@ export class ExceptionPrompt extends ViewPU {
                         moduleName: ""
                     });
                     Button.padding({ right: 8, left: 8 });
-                    Button.onTouch((e => {
-                        e.type === TouchType.Down && (this.BGCKGROUND_COLOR = {
+                    Button.onTouch((t => {
+                            t.type === TouchType.Down ? this.touchBackgroundColor = {
                             id: -1,
                             type: 10001,
                             params: ["sys.color.ohos_id_color_click_effect"],
                             bundleName: "",
                             moduleName: ""
-                        });
-                        e.type === TouchType.Up && (this.BGCKGROUND_COLOR = {
+                        } : t.type === TouchType.Up && (this.touchBackgroundColor = {
                             id: -1,
                             type: 10001,
                             params: ["sys.color.ohos_id_color_sub_background_transparent"],
@@ -412,20 +389,20 @@ export class ExceptionPrompt extends ViewPU {
                         })
                     }));
                     Button.onClick((() => {
-                        this.ConfigureNetworkFunction()
+                        this.onConfigureNetworkFunction()
                     }));
-                    t || Button.pop();
+                    e || Button.pop();
                     ViewStackProcessor.StopGetAccessRecording()
                 }));
-                this.observeComponentCreation(((e, t) => {
-                    ViewStackProcessor.StartGetAccessRecordingFor(e);
+                this.observeComponentCreation(((t, e) => {
+                    ViewStackProcessor.StartGetAccessRecordingFor(t);
                     Row.create();
-                    t || Row.pop();
+                    e || Row.pop();
                     ViewStackProcessor.StopGetAccessRecording()
                 }));
-                this.observeComponentCreation(((e, t) => {
-                    ViewStackProcessor.StartGetAccessRecordingFor(e);
-                    Text.create(`${this.SetNetwork}`);
+                this.observeComponentCreation(((t, e) => {
+                    ViewStackProcessor.StartGetAccessRecordingFor(t);
+                    Text.create(this.setNetwork);
                     Text.fontSize({
                         id: -1,
                         type: 10002,
@@ -444,19 +421,19 @@ export class ExceptionPrompt extends ViewPU {
                     Text.padding(0);
                     Text.margin({ right: 4 });
                     Text.textAlign(TextAlign.End);
-                    t || Text.pop();
+                    e || Text.pop();
                     ViewStackProcessor.StopGetAccessRecording()
                 }));
                 Text.pop();
-                this.observeComponentCreation(((e, t) => {
-                    ViewStackProcessor.StartGetAccessRecordingFor(e);
+                this.observeComponentCreation(((t, e) => {
+                    ViewStackProcessor.StartGetAccessRecordingFor(t);
                     Image.create({
                         id: -1,
                         type: 2e4,
-                        params: ["sys.media.ohos_ic_public_arrow_right"],
+                        params: ["app.media.ic_public_arrow_right"],
                         bundleName: "",
                         moduleName: ""
-                    } || RIGHT_ICON);
+                    });
                     Image.width("12vp");
                     Image.height("24vp");
                     Image.fillColor({
@@ -466,13 +443,13 @@ export class ExceptionPrompt extends ViewPU {
                         bundleName: "",
                         moduleName: ""
                     });
-                    t || Image.pop();
+                    e || Image.pop();
                     ViewStackProcessor.StopGetAccessRecording()
                 }));
                 Row.pop();
                 Button.pop()
             })) : If.branchId(1);
-            t || If.pop();
+            e || If.pop();
             ViewStackProcessor.StopGetAccessRecording()
         }));
         If.pop();
@@ -480,56 +457,53 @@ export class ExceptionPrompt extends ViewPU {
     }
 
     initialRender() {
-        this.observeComponentCreation(((e, t) => {
-            ViewStackProcessor.StartGetAccessRecordingFor(e);
+        this.observeComponentCreation(((t, e) => {
+            ViewStackProcessor.StartGetAccessRecordingFor(t);
             Column.create();
             Column.width("100%");
             Column.height(this.isOneColum() ? 48 : 58);
-            Column.position({ y: this.HEIGHT });
+            Column.position({ y: 80 });
             Column.zIndex(999);
-            t || Column.pop();
+            e || Column.pop();
             ViewStackProcessor.StopGetAccessRecording()
         }));
-        this.observeComponentCreation(((e, t) => {
-            ViewStackProcessor.StartGetAccessRecordingFor(e);
+        this.observeComponentCreation(((t, e) => {
+            ViewStackProcessor.StartGetAccessRecordingFor(t);
             Stack.create();
-            Stack.padding(this.Options.PaddingStatus ? {
-                                                           left: {
-                                                               id: -1,
-                                                               type: 10002,
-                                                               params: ["sys.float.ohos_id_card_margin_start"],
-                                                               bundleName: "",
-                                                               moduleName: ""
-                                                           },
-                                                           right: {
-                                                               id: -1,
-                                                               type: 10002,
-                                                               params: ["sys.float.ohos_id_card_margin_end"],
-                                                               bundleName: "",
-                                                               moduleName: ""
-                                                           }
-                                                       } : {
-                                                               left: {
-                                                                   id: -1,
-                                                                   type: 10002,
-                                                                   params: ["sys.float.ohos_id_max_padding_start"],
-                                                                   bundleName: "",
-                                                                   moduleName: ""
-                                                               },
-                                                               right: {
-                                                                   id: -1,
-                                                                   type: 10002,
-                                                                   params: ["sys.float.ohos_id_max_padding_end"],
-                                                                   bundleName: "",
-                                                                   moduleName: ""
-                                                               }
-                                                           });
-            Stack.transition(TransitionEffect.OPACITY.animation({
-                curve: curves.cubicBezierCurve(.33, 0, .67, 1),
-                duration: this.ShowStatus ? 250 : 200
-            }));
-            Stack.visibility(this.ShowStatus ? Visibility.Visible : Visibility.None);
-            t || Stack.pop();
+            Stack.padding(this.options.marginState === MarginStateType.DEFAULT_MARGIN ? {
+                                                                                            left: {
+                                                                                                id: -1,
+                                                                                                type: 10002,
+                                                                                                params: ["sys.float.ohos_id_card_margin_start"],
+                                                                                                bundleName: "",
+                                                                                                moduleName: ""
+                                                                                            },
+                                                                                            right: {
+                                                                                                id: -1,
+                                                                                                type: 10002,
+                                                                                                params: ["sys.float.ohos_id_card_margin_end"],
+                                                                                                bundleName: "",
+                                                                                                moduleName: ""
+                                                                                            }
+                                                                                        } : {
+                                                                                                left: {
+                                                                                                    id: -1,
+                                                                                                    type: 10002,
+                                                                                                    params: ["sys.float.ohos_id_max_padding_start"],
+                                                                                                    bundleName: "",
+                                                                                                    moduleName: ""
+                                                                                                },
+                                                                                                right: {
+                                                                                                    id: -1,
+                                                                                                    type: 10002,
+                                                                                                    params: ["sys.float.ohos_id_max_padding_end"],
+                                                                                                    bundleName: "",
+                                                                                                    moduleName: ""
+                                                                                                }
+                                                                                            });
+            Stack.transition(TransitionEffect.OPACITY.animation({ duration: this.isShowStatus ? 250 : 200 }));
+            Stack.visibility(this.isShowStatus ? Visibility.Visible : Visibility.None);
+            e || Stack.pop();
             ViewStackProcessor.StopGetAccessRecording()
         }));
         this.FirstBuilder.bind(this)();
