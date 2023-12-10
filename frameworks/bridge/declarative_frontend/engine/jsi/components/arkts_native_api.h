@@ -1040,16 +1040,16 @@ struct ArkUIMenuItemModifierAPI {
     void (*ResetLabelFontColor)(NodeHandle node);
     void (*SetContentFontColor)(NodeHandle node, const uint32_t colorVal);
     void (*ResetContentFontColor)(NodeHandle node);
-    void (*SetLabelFont)(NodeHandle node, const char* fontInfo, int32_t unit);
+    void (*SetLabelFont)(NodeHandle node, const char* fontInfo, int32_t styleVal);
     void (*ResetLabelFont)(NodeHandle node);
-    void (*SetContentFont)(NodeHandle node, const char* fontInfo, int32_t unit);
+    void (*SetContentFont)(NodeHandle node, const char* fontInfo, int32_t styleVal);
     void (*ResetContentFont)(NodeHandle node);
 };
 
 struct ArkUIMenuModifierAPI {
     void (*SetMenuFontColor)(NodeHandle node, uint32_t colorVal);
     void (*ResetMenuFontColor)(NodeHandle node);
-    void (*SetFont)(NodeHandle node, const char* fontInfo, int32_t unit);
+    void (*SetFont)(NodeHandle node, const char* fontInfo, int32_t styleVal);
     void (*ResetFont)(NodeHandle node);
     void (*SetRadius)(NodeHandle node, const double* values, const int* units, int32_t length);
     void (*ResetRadius)(NodeHandle node);

@@ -26,6 +26,7 @@ const std::string FORMAT_FONT = "%s|%s|%s";
 const int SIZE_OF_FOUR = 4;
 const int SIZE_OF_ONE = 1;
 const std::string DEFAULT_ERR_CODE = "-1";
+const std::string DEFAULT_FAMILY = "HarmonyOS Sans";
 
 ArkUINativeModuleValue MenuBridge::SetMenuFontColor(ArkUIRuntimeCallInfo *runtimeCallInfo)
 {
@@ -75,21 +76,21 @@ ArkUINativeModuleValue MenuBridge::SetFont(ArkUIRuntimeCallInfo* runtimeCallInfo
         ArkTSUtils::ParseJsString(vm, weightArg, weight);
     }
 
-    std::string fontFamily;
-    ArkTSUtils::GetStringFromJS(vm, familyArg, fontFamily);
-
-    std::string style;
+    int32_t style = 0;
     if (styleArg->IsNumber()) {
-        style = styleArg->ToString(vm)->ToString();
-    } else {
-        ArkTSUtils::ParseJsString(vm, styleArg, style);
+        style = styleArg->Int32Value(vm);
+    }
+
+    std::string family = DEFAULT_FAMILY;
+    if (familyArg->IsString()) {
+        family = familyArg->ToString(vm)->ToString();
     }
 
     std::string fontInfo = StringUtils::FormatString(FORMAT_FONT.c_str(),
-        StringUtils::DoubleToString(fontSize.Value()).c_str(), weight.c_str(), style.c_str(), fontFamily.c_str());
+        StringUtils::DoubleToString(fontSize.Value()).c_str(), weight.c_str(), family.c_str());
 
     GetArkUIInternalNodeAPI()->GetMenuModifier().SetFont(
-        nativeNode, fontInfo.c_str(), static_cast<int>(fontSize.Unit()));
+        nativeNode, fontInfo.c_str(), style);
     return panda::JSValueRef::Undefined(vm);
 }
 
