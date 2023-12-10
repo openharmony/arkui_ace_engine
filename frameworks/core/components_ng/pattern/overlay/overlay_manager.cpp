@@ -2231,6 +2231,7 @@ void OverlayManager::BindSheet(bool isShow, std::function<void(const std::string
         CHECK_NULL_VOID(topModalNode);
         if (topModalNode->GetTag() == V2::SHEET_PAGE_TAG &&
             topModalNode->GetPattern<SheetPresentationPattern>()->GetTargetId() == targetId) {
+            CHECK_NULL_VOID(!pipeline->IsLayouting());
             if (sheetStyle.backgroundColor.has_value()) {
                 topModalNode->GetRenderContext()->UpdateBackgroundColor(sheetStyle.backgroundColor.value());
             }
@@ -2257,6 +2258,7 @@ void OverlayManager::BindSheet(bool isShow, std::function<void(const std::string
             return;
         }
     }
+    CHECK_NULL_VOID(!pipeline->IsLayouting());
     // builder content
     auto builder = AceType::DynamicCast<FrameNode>(buildNodeFunc());
     CHECK_NULL_VOID(builder);
