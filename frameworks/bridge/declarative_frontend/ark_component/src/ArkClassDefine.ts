@@ -1443,6 +1443,19 @@ class ArkTextAreaShowCounter implements Equable {
   }
 }
 
+class ArkGridEdgeEffect implements Equable {
+  value: EdgeEffect;
+  options?: EdgeEffectOptions | undefined;
+  constructor() {
+    this.value = undefined;
+    this.options = undefined;
+  }
+  isEqual(another: ArkGridEdgeEffect): boolean {
+    return (this.value === another.value) &&
+      (this.options === another.options);
+  }
+}
+
 class ArkMesh {
   value: Array<any> | undefined;
   column: number | undefined;
