@@ -1200,6 +1200,21 @@ struct ArkUIListModifierAPI {
     void (*ResetChainAnimationOptions)(NodeHandle node);
 };
 
+struct ArkUIGridItemModifierAPI {
+    void (*SetGridItemSelectable)(NodeHandle node, bool selectable);
+    void (*ResetGridItemSelectable)(NodeHandle node);
+    void (*SetGridItemSelected)(NodeHandle node, bool selected);
+    void (*ResetGridItemSelected)(NodeHandle node);
+    void (*SetGridItemRowStart)(NodeHandle node, int32_t rowStart);
+    void (*ResetGridItemRowStart)(NodeHandle node);
+    void (*SetGridItemRowEnd)(NodeHandle node, int32_t rowEnd);
+    void (*ResetGridItemRowEnd)(NodeHandle node);
+    void (*SetGridItemColumnStart)(NodeHandle node, int32_t columnStart);
+    void (*ResetGridItemColumnStart)(NodeHandle node);
+    void (*SetGridItemColumnEnd)(NodeHandle node, int32_t columnEnd);
+    void (*ResetGridItemColumnEnd)(NodeHandle node);
+};
+
 struct ArkUIListItemGroupModifierAPI {
     void (*ListItemGroupSetDivider)(NodeHandle node, uint32_t color, const double* values, const int* units);
     void (*ListItemGroupResetDivider)(NodeHandle node);
@@ -1348,6 +1363,7 @@ struct ArkUINodeAPI {
     ArkUIDatePickerModifierAPI (*GetDatePickerModifier)();
     ArkUIAlphabetIndexerModifierAPI (*GetAlphabetIndexerModifier)();
     ArkUIScrollModifierAPI (*GetScrollModifier)();
+    ArkUIGridItemModifierAPI (*GetGridItemModifier)();
     ArkUICommonShapeModifierAPI(*GetCommonShapeModifier)();
     ArkUIShapeModifierAPI(*GetShapeModifier)();
     ArkUIRectModifierAPI (*GetRectModifier)();

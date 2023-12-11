@@ -26,6 +26,7 @@
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_divider_modifier.h"
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_grid_modifier.h"
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_grid_col_modifier.h"
+#include "bridge/declarative_frontend/engine/jsi/components/arkts_native_grid_item_modifier.h"
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_grid_row_modifier.h"
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_hyperlink_modifier.h"
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_image_animator_modifier.h"
@@ -145,6 +146,7 @@ static struct ArkUINodeAPI impl = {
     GetDatePickerModifier,
     GetAlphabetIndexerModifier,
     GetScrollModifier,
+    GetGridItemModifier,
     GetCommonShapeModifier,
     GetShapeModifier,
     GetRectModifier,
