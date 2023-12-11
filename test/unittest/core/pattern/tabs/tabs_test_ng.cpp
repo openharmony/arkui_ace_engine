@@ -1967,7 +1967,6 @@ HWTEST_F(TabsTestNg, TabBarPatternHandleSubTabBarClick001, TestSize.Level1)
     tabBarPattern->indicator_ = 1;
     tabBarPattern->HandleSubTabBarClick(tabBarLayoutProperty, 1);
     EXPECT_EQ(tabBarPattern->indicator_, 1);
-    PipelineContext::GetCurrentContext()->SetThemeManager(nullptr);
 }
 
 /**
@@ -3219,7 +3218,8 @@ HWTEST_F(TabsTestNg, TabBarLayoutAlgorithmUpdateChildConstraint001, TestSize.Lev
      */
 
     LayoutConstraintF childConstraint = LayoutConstraintF();
-    std::optional<int32_t> tabBarTestId_(1);
+    auto tabsFrameNode = AceType::DynamicCast<TabsNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+    std::optional<int32_t> tabBarTestId_(tabsFrameNode->GetTabBarId());
     auto tabBarNode = GroupNode::GetFrameNode(V2::TAB_BAR_ETS_TAG, tabBarTestId_.value());
     ASSERT_NE(tabBarNode, nullptr);
     auto tabBarPattern = tabBarNode->GetPattern<TabBarPattern>();
