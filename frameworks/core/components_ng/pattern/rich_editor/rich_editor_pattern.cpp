@@ -4268,7 +4268,7 @@ void RichEditorPattern::InitSelection(const Offset& pos)
         std::swap(currentPosition, nextPosition);
     }
     nextPosition = std::min(nextPosition, GetTextContentLength());
-    AdjustWordSelection(currentPosition, nextPosition);
+    bool adjusted = AdjustWordSelection(currentPosition, nextPosition);
     textSelector_.Update(currentPosition, nextPosition);
     auto selectedRects = paragraphs_.GetRects(currentPosition, nextPosition);
     if (selectedRects.empty() && !spans_.empty()) {
@@ -4286,6 +4286,11 @@ void RichEditorPattern::InitSelection(const Offset& pos)
             return;
         }
     }
+
+    if (adjusted) {
+        return;
+    }
+
     bool selectedSingle =
         selectedRects.size() == 1 && (pos.GetX() < selectedRects[0].Left() || pos.GetY() < selectedRects[0].Top());
     bool selectedLast = selectedRects.empty() && currentPosition == GetTextContentLength();
@@ -4937,7 +4942,7 @@ void RichEditorPattern::AdjustCursorPosition(int32_t& pos)
     }
 }
 
-void RichEditorPattern::AdjustWordSelection(int32_t& start, int32_t& end)
+bool RichEditorPattern::AdjustWordSelection(int32_t& start, int32_t& end)
 {
     // the rich text has some spans, the pos is belong to the whole richtext content, should use (pos - spanStarint)
     int32_t spanStart = -1;
@@ -4948,13 +4953,15 @@ void RichEditorPattern::AdjustWordSelection(int32_t& start, int32_t& end)
         int32_t aiPosEnd = end - spanStart;
         DataDetectorMgr::GetInstance().AdjustWordSelection(aiPosStart, content, aiPosStart, aiPosEnd);
         if (aiPosStart < 0 || aiPosEnd < 0) {
-            return;
+            return false;
         }
 
         start = std::min(aiPosStart + spanStart, GetTextContentLength());
         end = std::min(aiPosEnd + spanStart, GetTextContentLength());
         TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "get ai selector [%{public}d--%{public}d", start, end);
+        return true;
     }
+    return false;
 }
 
 bool RichEditorPattern::IsClickBoundary(const int32_t position)
