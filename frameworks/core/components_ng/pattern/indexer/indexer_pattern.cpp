@@ -702,11 +702,12 @@ void IndexerPattern::UpdateBubbleListView(std::vector<std::string>& currentListD
     auto indexerTheme = pipeline->GetTheme<IndexerTheme>();
     CHECK_NULL_VOID(indexerTheme);
     currentPopupIndex_ = childPressIndex_ >= 0 ? childPressIndex_ : selected_;
-    if (lastPopupIndex_ != currentPopupIndex_) {
+    auto popupSize = currentListData.size();
+    if (popupSize != lastPopupSize_ || lastPopupIndex_ != currentPopupIndex_) {
         lastPopupIndex_ = currentPopupIndex_;
         CreateBubbleListView(currentListData);
+        lastPopupSize_ = popupSize;
     }
-    auto popupSize = currentListData.size();
     auto listActualSize = popupSize < INDEXER_BUBBLE_MAXSIZE ? popupSize : INDEXER_BUBBLE_MAXSIZE;
     auto listLayoutProperty = listNode->GetLayoutProperty<ListLayoutProperty>();
     CHECK_NULL_VOID(listLayoutProperty);
