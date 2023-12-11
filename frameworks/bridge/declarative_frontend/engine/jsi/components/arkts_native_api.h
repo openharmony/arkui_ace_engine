@@ -1190,6 +1190,15 @@ struct ArkUIAlphabetIndexerModifierAPI {
     void (*ResetPopupPosition)(NodeHandle node);
 };
 
+struct ArkUIDataPanelModifierAPI {
+    void (*SetCloseEffect)(NodeHandle node, bool value);
+    void (*ResetCloseEffect)(NodeHandle node);
+    void (*SetDataPanelTrackBackgroundColor)(NodeHandle node, uint32_t value);
+    void (*ResetDataPanelTrackBackgroundColor)(NodeHandle node);
+    void (*SetDataPanelStrokeWidth)(NodeHandle node, double value, int32_t unit);
+    void (*ResetDataPanelStrokeWidth)(NodeHandle node);
+};
+
 struct ArkUIScrollModifierAPI {
     void (*SetScrollScrollable)(NodeHandle node, uint32_t scrollDirection);
     void (*ResetScrollScrollable)(NodeHandle node);
@@ -1426,6 +1435,7 @@ struct ArkUINodeAPI {
     ArkUIDatePickerModifierAPI (*GetDatePickerModifier)();
     ArkUIWaterFlowModifierAPI (*GetWaterFlowModifier)();
     ArkUIAlphabetIndexerModifierAPI (*GetAlphabetIndexerModifier)();
+    ArkUIDataPanelModifierAPI (*GetDataPanelModifier)();
     ArkUIScrollModifierAPI (*GetScrollModifier)();
     ArkUIGridItemModifierAPI (*GetGridItemModifier)();
     ArkUICommonShapeModifierAPI(*GetCommonShapeModifier)();
