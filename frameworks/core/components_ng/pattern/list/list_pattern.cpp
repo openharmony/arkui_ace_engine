@@ -1283,11 +1283,14 @@ bool ListPattern::GetListItemGroupAnimatePosWithoutIndexInGroup(int32_t index, f
     CHECK_NULL_RETURN(groupNode, false);
     auto groupPattern = groupNode->GetPattern<ListItemGroupPattern>();
     CHECK_NULL_RETURN(groupPattern, false);
+    auto groupLayoutProperty = groupNode->GetLayoutProperty<ListItemGroupLayoutProperty>();
+    CHECK_NULL_RETURN(groupLayoutProperty, false);
+    auto visible = groupLayoutProperty->GetVisibility().value_or(VisibleType::VISIBLE);
 
     switch (align) {
         case ScrollAlign::START:
         case ScrollAlign::NONE:
-            if (!groupPattern->IsDisplayStart()) {
+            if (visible != VisibleType::GONE && !groupPattern->IsDisplayStart()) {
                 return false;
             }
             targetPos = startPos;
@@ -1296,13 +1299,13 @@ bool ListPattern::GetListItemGroupAnimatePosWithoutIndexInGroup(int32_t index, f
             }
             break;
         case ScrollAlign::CENTER:
-            if (!groupPattern->IsDisplayStart() || !groupPattern->IsDisplayEnd()) {
+            if (visible != VisibleType::GONE && (!groupPattern->IsDisplayStart() || !groupPattern->IsDisplayEnd())) {
                 return false;
             }
             targetPos = (endPos + startPos) / 2.0f - contentMainSize_ / 2.0f;
             break;
         case ScrollAlign::END:
-            if (!groupPattern->IsDisplayEnd()) {
+            if (visible != VisibleType::GONE && !groupPattern->IsDisplayEnd()) {
                 return false;
             }
             targetPos = endPos - contentMainSize_;
