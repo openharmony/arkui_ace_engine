@@ -121,7 +121,12 @@ struct GridLayoutInfo {
     float prevOffset_ = 0.0f;
     float lastMainSize_ = 0.0f;
     float totalHeightOfItemsInView_ = 0.0f;
+
+    // additional padding to accommodate navigation bar when SafeArea is expanded
     float contentEndPadding_ = 0.0f;
+
+    // total height of all previous rows
+    std::optional<float> totalHeight_ = 0.0f;
 
     std::optional<int32_t> lastCrossCount_;
     // index of first and last GridItem in viewport

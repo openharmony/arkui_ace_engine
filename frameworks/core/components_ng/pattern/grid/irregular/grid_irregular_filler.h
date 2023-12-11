@@ -18,25 +18,34 @@
 
 #include "base/utils/noncopyable.h"
 #include "core/components_ng/layout/layout_wrapper.h"
-#include "core/components_ng/pattern/grid/grid_layout_base_algorithm.h"
 #include "core/components_ng/pattern/grid/grid_layout_info.h"
+#include "core/components_ng/pattern/grid/grid_layout_options.h"
 
 namespace OHOS::Ace::NG {
 class GridIrregularFiller {
+    ACE_DISALLOW_COPY_AND_MOVE(GridIrregularFiller);
+
 public:
-    GridIrregularFiller(GridLayoutInfo* info, LayoutWrapper* wrapper, float targetLength)
-        : targetLength_(targetLength), info_(info), wrapper_(wrapper) {};
+    GridIrregularFiller(GridLayoutInfo* info, LayoutWrapper* wrapper);
     ~GridIrregularFiller() = default;
 
-    void Fill(float targetLength);
-    // uint32_t crossCount_ = 0;
-    // uint32_t mainCount_ = 0;
+    float Fill(float targetLength, const std::vector<float>& crossLens);
 
 private:
-    void LoadOne();
+    std::pair<int32_t, int32_t> LoadOne();
+    void MeasureNewItem(const std::vector<float>& crossLens, int32_t col);
+
+    void UpdateMainLen();
+
+    inline bool IsFull(float targetLen);
+    inline bool ItemCanFit(const std::map<int, std::map<int, int>>::iterator& it, int32_t itemWidth);
+
+    GridItemSize GetItemSize(int32_t idx);
+
     float length_ = 0.0f;
-    const float targetLength_;
+
     GridLayoutInfo* info_;
+    GetSizeByIndex* getSizeByIndex_ {};
     LayoutWrapper* wrapper_;
 };
 

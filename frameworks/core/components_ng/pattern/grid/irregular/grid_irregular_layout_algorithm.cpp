@@ -15,21 +15,76 @@
 
 #include "core/components_ng/pattern/grid/irregular/grid_irregular_layout_algorithm.h"
 
+#include "core/components_ng/pattern/grid/grid_layout_property.h"
+#include "core/components_ng/pattern/grid/grid_utils.h"
+#include "core/components_ng/pattern/grid/irregular/grid_irregular_filler.h"
+#include "core/components_ng/pattern/scrollable/scrollable_utils.h"
+#include "core/components_ng/property/templates_parser.h"
+
 namespace OHOS::Ace::NG {
-void GridIrregularLayout::Measure(LayoutWrapper* layoutWrapper) {
-    // obtain self size
-    int selfMainLength;
-    int contentLength = 0;
-    int32_t index = 0;
-    while (contentLength < selfMainLength && index < layoutWrapper->GetTotalChildCount()) {
-        LoadChild(layoutWrapper, index++);
-    }
-}
-
-void GridIrregularLayout::LoadChild(LayoutWrapper* wrapper, int32_t index)
+void GridIrregularLayout::Measure(LayoutWrapper* layoutWrapper)
 {
-    auto child = 
+    wrapper_ = layoutWrapper;
+    auto props = DynamicCast<GridLayoutProperty>(layoutWrapper->GetLayoutProperty());
+
+    // set self size
+    auto size =
+        CreateIdealSize(props->GetLayoutConstraint().value(), gridLayoutInfo_.axis_, props->GetMeasureType(), true);
+    layoutWrapper->GetGeometryNode()->SetFrameSize(size);
+
+    // set content size
+    MinusPaddingToSize(props->CreatePaddingAndBorder(), size);
+    gridLayoutInfo_.contentEndPadding_ = ScrollableUtils::CheckHeightExpansion(props, gridLayoutInfo_.axis_);
+    size.AddHeight(gridLayoutInfo_.contentEndPadding_);
+    layoutWrapper->GetGeometryNode()->SetContentSize(size);
+
+    Init(props);
+
+    float targetLen = size.MainSize(gridLayoutInfo_.axis_) - gridLayoutInfo_.currentOffset_;
+    targetLen -= gridLayoutInfo_.totalHeight_.value_or(0.0f);
+    // fill content with new children and measure them
+    GridIrregularFiller filler(&gridLayoutInfo_, wrapper_);
+    float additionalLen = filler.Fill(targetLen, crossLens_);
+    if (!gridLayoutInfo_.totalHeight_) {
+        gridLayoutInfo_.totalHeight_ = 0.0f;
+    }
+    *gridLayoutInfo_.totalHeight_ += additionalLen;
+
+    wrapper_->SetCacheCount(static_cast<int32_t>(props->GetCachedCountValue(1) * gridLayoutInfo_.crossCount_));
 }
 
-void GridIrregularLayout::Layout(LayoutWrapper* layoutWrapper) {}
+void GridIrregularLayout::Init(const RefPtr<GridLayoutProperty>& props)
+{
+    auto scale = props->GetLayoutConstraint()->scaleProperty;
+    auto crossSize = wrapper_->GetGeometryNode()->GetContentSize().CrossSize(gridLayoutInfo_.axis_);
+
+    std::string args;
+    if (gridLayoutInfo_.axis_ == Axis::HORIZONTAL) {
+        crossGap_ = ConvertToPx(props->GetRowsGap().value_or(0.0_vp), scale, crossSize).value_or(0.0f);
+        mainGap_ = ConvertToPx(props->GetColumnsGap().value_or(0.0_vp), scale, crossSize).value_or(0.0f);
+        args = props->GetRowsTemplate().value_or("");
+    } else {
+        mainGap_ = ConvertToPx(props->GetRowsGap().value_or(0.0_vp), scale, crossSize).value_or(0.0f);
+        crossGap_ = ConvertToPx(props->GetColumnsGap().value_or(0.0_vp), scale, crossSize).value_or(0.0f);
+        args = props->GetColumnsTemplate().value_or("");
+    }
+
+    auto res = ParseTemplateArgs(GridUtils::ParseArgs(args), crossSize, crossGap_, wrapper_->GetTotalChildCount());
+
+    crossLens_ = std::vector<float>(res.first.begin(), res.first.end());
+    if (crossLens_.empty()) {
+        crossLens_.push_back(crossSize);
+    }
+
+    if (res.second) {
+        crossGap_ = 0.0f;
+    }
+
+    gridLayoutInfo_.crossCount_ = crossLens_.size();
+}
+
+void GridIrregularLayout::Layout(LayoutWrapper* layoutWrapper)
+{
+    wrapper_ = layoutWrapper;
+}
 } // namespace OHOS::Ace::NG
