@@ -79,6 +79,7 @@
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_shape_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_rect_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_list_item_group_bridge.h"
+#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_text_timer_bridge.h"
 
 #ifdef FORM_SUPPORTED
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_form_component_bridge.h"
@@ -1118,6 +1119,7 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
     RegisterLoadingProgressAttributes(object, vm);
     RegisterTextClockAttributes(object, vm);
     RegisterListItemAttributes(object, vm);
+    RegisterTextTimerAttributes(object, vm);
 
 #ifdef FORM_SUPPORTED
     RegisterFormAttributes(object, vm);
@@ -2398,6 +2400,7 @@ void ArkUINativeModule::RegisterQRCodeAttributes(Local<panda::ObjectRef> object,
         panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), QRCodeBridge::ResetContentOpacity));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "qrcode"), qrcode);
 }
+
 void ArkUINativeModule::RegisterLoadingProgressAttributes(Local<panda::ObjectRef> object, EcmaVM *vm)
 {
     auto loadingProgress = panda::ObjectRef::New(vm);
@@ -2440,5 +2443,35 @@ void ArkUINativeModule::RegisterTextClockAttributes(Local<panda::ObjectRef> obje
     textClock->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetFontFamily"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextClockBridge::ResetFontFamily));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "textClock"), textClock);
+}
+
+void ArkUINativeModule::RegisterTextTimerAttributes(Local<panda::ObjectRef> object, EcmaVM *vm)
+{
+    auto textTimer = panda::ObjectRef::New(vm);
+    textTimer->Set(vm, panda::StringRef::NewFromUtf8(vm, "setFontColor"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), TextTimerBridge::SetFontColor));
+    textTimer->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetFontColor"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), TextTimerBridge::ResetFontColor));
+    textTimer->Set(vm, panda::StringRef::NewFromUtf8(vm, "setFontSize"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), TextTimerBridge::SetFontSize));
+    textTimer->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetFontSize"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), TextTimerBridge::ResetFontSize));
+    textTimer->Set(vm, panda::StringRef::NewFromUtf8(vm, "setFontWeight"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), TextTimerBridge::SetFontWeight));
+    textTimer->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetFontWeight"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), TextTimerBridge::ResetFontWeight));
+    textTimer->Set(vm, panda::StringRef::NewFromUtf8(vm, "setFontStyle"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), TextTimerBridge::SetFontStyle));
+    textTimer->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetFontStyle"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), TextTimerBridge::ResetFontStyle));
+    textTimer->Set(vm, panda::StringRef::NewFromUtf8(vm, "setFontFamily"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), TextTimerBridge::SetFontFamily));
+    textTimer->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetFontFamily"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), TextTimerBridge::ResetFontFamily));
+    textTimer->Set(vm, panda::StringRef::NewFromUtf8(vm, "setFormat"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), TextTimerBridge::SetFormat));
+    textTimer->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetFormat"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), TextTimerBridge::ResetFormat));
+    object->Set(vm, panda::StringRef::NewFromUtf8(vm, "textTimer"), textTimer);
 }
 } // namespace OHOS::Ace::NG

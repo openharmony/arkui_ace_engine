@@ -16,7 +16,7 @@ class ArkLoadingProgressComponent extends ArkComponent implements LoadingProgres
 
 class LoadingProgressColorModifier extends ModifierWithKey<ResourceColor> {
   static identity: Symbol = Symbol('loadingProgressColor');
-  applyPeer(node, reset) {
+  applyPeer(node: KNode, reset: boolean) {
     if (reset) {
       GetUINativeModule().loadingProgress.resetColor(node);
     }
@@ -25,7 +25,7 @@ class LoadingProgressColorModifier extends ModifierWithKey<ResourceColor> {
     }
   }
 
-  checkObjectDiff() {
+  checkObjectDiff(): boolean {
     return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
