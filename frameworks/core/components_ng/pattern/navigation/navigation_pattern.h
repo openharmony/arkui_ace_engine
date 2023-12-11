@@ -153,6 +153,11 @@ public:
         navigationStack_->RemoveAll();
     }
 
+    void DisableAnimation()
+    {
+        navigationStack_->UpdateAnimatedValue(false);
+    }
+
     void SetNavigationStackProvided(bool provided)
     {
         navigationStackProvided_ = provided;
@@ -283,9 +288,10 @@ public:
 private:
     void CheckTopNavPathChange(const std::optional<std::pair<std::string, RefPtr<UINode>>>& preTopNavPath,
         const std::optional<std::pair<std::string, RefPtr<UINode>>>& newTopNavPath, bool isPopPage);
-    void DoStackModeTransitionAnimation(const RefPtr<NavDestinationGroupNode>& preTopNavDestination,
+    void TransitionWithAnimation(const RefPtr<NavDestinationGroupNode>& preTopNavDestination,
         const RefPtr<NavDestinationGroupNode>& newTopNavDestination, bool isPopPage);
-    void DoSplitModeTransitionAnimation(const RefPtr<NavDestinationGroupNode>& preTopNavDestination,
+
+    void TransitionWithOutAnimation(const RefPtr<NavDestinationGroupNode>& preTopNavDestination,
         const RefPtr<NavDestinationGroupNode>& newTopNavDestination, bool isPopPage);
     RefPtr<RenderContext> GetTitleBarRenderContext();
     void DoAnimation(NavigationMode usrNavigationMode);
