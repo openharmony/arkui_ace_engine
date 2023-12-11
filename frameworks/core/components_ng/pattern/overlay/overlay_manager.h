@@ -93,6 +93,13 @@ public:
         return popupMap_.find(targetId) != popupMap_.end();
     }
 
+    void ErasePopupInfo(int32_t targetId)
+    {
+        if (popupMap_.find(targetId) != popupMap_.end()) {
+            popupMap_.erase(targetId);
+        }
+    }
+
     void ShowMenu(int32_t targetId, const NG::OffsetF& offset, RefPtr<FrameNode> menu = nullptr);
     void HideMenu(const RefPtr<FrameNode>& menu, int32_t targetId, bool isMenuOnTouch = false);
     void DeleteMenu(int32_t targetId);
