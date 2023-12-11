@@ -43,7 +43,7 @@
 #include "test/mock/core/pattern/mock_list_drag_status_listener.h"
 
 #include "core/components_ng/pattern/text/text_pattern.h"
-#include "core/pipeline/base/render_node.cpp"
+#include "core/pipeline/base/render_node.h"
 
 using namespace testing;
 using namespace testing::ext;
