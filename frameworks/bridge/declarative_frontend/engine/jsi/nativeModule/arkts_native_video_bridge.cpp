@@ -19,8 +19,8 @@
 #include "core/components/common/layout/constants.h"
 
 namespace OHOS::Ace::NG {
-constexpr int NUM_0 = 0;
-constexpr int NUM_1 = 1;
+constexpr int32_t NUM_0 = 0;
+constexpr int32_t NUM_1 = 1;
 
 ArkUINativeModuleValue VideoBridge::SetAutoPlay(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
