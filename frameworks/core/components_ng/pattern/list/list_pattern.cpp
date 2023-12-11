@@ -594,13 +594,13 @@ OverScrollOffset ListPattern::GetOverScrollOffset(double delta) const
     if (startIndex_ == 0 && groupAtStart) {
         auto startPos = startMainPos_ + GetChainDelta(0);
         auto newStartPos = startPos + delta;
-        if (startPos > 0 && newStartPos > 0) {
+        if (startPos > contentStartOffset_ && newStartPos > contentStartOffset_) {
             offset.start = delta;
         }
-        if (startPos > 0 && newStartPos <= 0) {
+        if (startPos > contentStartOffset_ && newStartPos <= contentStartOffset_) {
             offset.start = -startPos;
         }
-        if (startPos <= 0 && newStartPos > 0) {
+        if (startPos <= contentStartOffset_ && newStartPos > contentStartOffset_) {
             offset.start = newStartPos;
         }
         if (IsScrollSnapAlignCenter() && !itemPosition_.empty()) {
@@ -614,18 +614,19 @@ OverScrollOffset ListPattern::GetOverScrollOffset(double delta) const
     }
     if (endIndex_ == maxListItemIndex_ && groupAtEnd) {
         auto endPos = endMainPos_ + GetChainDelta(endIndex_);
-        if (GreatNotEqual(contentMainSize_, endMainPos_ - startMainPos_)) {
-            endPos = startMainPos_ + contentMainSize_;
+        auto contentEndPos = contentMainSize_ - contentEndOffset_;
+        if (GreatNotEqual(contentEndPos, endMainPos_ - startMainPos_)) {
+            endPos = startMainPos_ + contentEndPos;
         }
         auto newEndPos = endPos + delta;
-        if (endPos < contentMainSize_ && newEndPos < contentMainSize_) {
+        if (endPos < contentEndPos && newEndPos < contentEndPos) {
             offset.end = delta;
         }
-        if (endPos < contentMainSize_ && newEndPos >= contentMainSize_) {
-            offset.end = contentMainSize_ - endPos;
+        if (endPos < contentEndPos && newEndPos >= contentEndPos) {
+            offset.end = contentEndPos - endPos;
         }
-        if (endPos >= contentMainSize_ && newEndPos < contentMainSize_) {
-            offset.end = newEndPos - contentMainSize_;
+        if (endPos >= contentEndPos && newEndPos < contentEndPos) {
+            offset.end = newEndPos - contentEndPos;
         }
         if (IsScrollSnapAlignCenter() && !itemPosition_.empty()) {
             float endItemHeight = itemPosition_.begin()->second.endPos - itemPosition_.begin()->second.startPos;
@@ -727,12 +728,15 @@ bool ListPattern::IsOutOfBoundary(bool useCurrentDelta)
     if (endIndex_ == maxListItemIndex_) {
         endPos += GetChainDelta(endIndex_);
     }
-    bool outOfStart = (startIndex_ == 0) && Positive(startPos) && GreatNotEqual(endPos, contentMainSize_);
+    auto contentEndPos = contentMainSize_ - contentEndOffset_;
+    bool outOfStart = (startIndex_ == 0) && GreatNotEqual(startPos, contentStartOffset_) &&
+        GreatNotEqual(endPos, contentEndPos);
     if (GetAlwaysEnabled()) {
-        outOfStart = (startIndex_ == 0) && Positive(startPos);
+        outOfStart = (startIndex_ == 0) && GreatNotEqual(startPos, contentStartOffset_);
     }
 
-    bool outOfEnd = (endIndex_ == maxListItemIndex_) && LessNotEqual(endPos, contentMainSize_) && Negative(startPos);
+    bool outOfEnd = (endIndex_ == maxListItemIndex_) && LessNotEqual(endPos, contentEndPos) &&
+        LessNotEqual(startPos, contentStartOffset_);
     if (IsScrollSnapAlignCenter()) {
         auto itemHeight = itemPosition_.begin()->second.endPos - itemPosition_.begin()->second.startPos;
         outOfStart = (startIndex_ == 0) && Positive(startPos + itemHeight / 2.0f - contentMainSize_ / 2.0f);
@@ -1248,12 +1252,18 @@ bool ListPattern::GetListItemAnimatePos(float startPos, float endPos, ScrollAlig
         case ScrollAlign::START:
         case ScrollAlign::NONE:
             targetPos = startPos;
+            if (!IsScrollSnapAlignCenter()) {
+                targetPos -= contentStartOffset_;
+            }
             break;
         case ScrollAlign::CENTER:
             targetPos = (endPos + startPos) / 2.0f - contentMainSize_ / 2.0f;
             break;
         case ScrollAlign::END:
             targetPos = endPos - contentMainSize_;
+            if (!IsScrollSnapAlignCenter()) {
+                targetPos += contentEndOffset_;
+            }
             break;
         case ScrollAlign::AUTO:
             targetPos = CalculateTargetPos(startPos, endPos);
@@ -1281,6 +1291,9 @@ bool ListPattern::GetListItemGroupAnimatePosWithoutIndexInGroup(int32_t index, f
                 return false;
             }
             targetPos = startPos;
+            if (!IsScrollSnapAlignCenter()) {
+                targetPos -= contentStartOffset_;
+            }
             break;
         case ScrollAlign::CENTER:
             if (!groupPattern->IsDisplayStart() || !groupPattern->IsDisplayEnd()) {
@@ -1293,6 +1306,9 @@ bool ListPattern::GetListItemGroupAnimatePosWithoutIndexInGroup(int32_t index, f
                 return false;
             }
             targetPos = endPos - contentMainSize_;
+            if (!IsScrollSnapAlignCenter()) {
+                targetPos += contentEndOffset_;
+            }
             break;
         case ScrollAlign::AUTO:
             if (targetIndex_.has_value()) {
@@ -1339,6 +1355,9 @@ bool ListPattern::GetListItemGroupAnimatePosWithIndexInGroup(int32_t index, int3
             if (stickyStyle == V2::StickyStyle::HEADER || stickyStyle == V2::StickyStyle::BOTH) {
                 targetPos -= groupPattern->GetHeaderMainSize();
             }
+            if (!IsScrollSnapAlignCenter()) {
+                targetPos -= contentStartOffset_;
+            }
             break;
         case ScrollAlign::CENTER:
             targetPos = paddingBeforeContent + startPos +
@@ -1349,6 +1368,9 @@ bool ListPattern::GetListItemGroupAnimatePosWithIndexInGroup(int32_t index, int3
             targetPos = paddingBeforeContent + startPos + itemPosInGroup.value().second - contentMainSize_;
             if (stickyStyle == V2::StickyStyle::FOOTER || stickyStyle == V2::StickyStyle::BOTH) {
                 targetPos += groupPattern->GetFooterMainSize();
+            }
+            if (!IsScrollSnapAlignCenter()) {
+                targetPos += contentEndOffset_;
             }
             break;
         case ScrollAlign::AUTO:
