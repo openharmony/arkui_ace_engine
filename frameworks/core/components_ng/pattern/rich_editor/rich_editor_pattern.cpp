@@ -274,6 +274,14 @@ int32_t RichEditorPattern::AddImageSpan(const ImageSpanOptions& options, bool is
     imageNode->SetDraggable(false);
     auto gesture = imageNode->GetOrCreateGestureEventHub();
     CHECK_NULL_RETURN(gesture, -1);
+
+    OperationRecord record;
+    record.beforeCaretPosition = options.offset.value_or(static_cast<int32_t>(GetTextContentLength()));
+    record.addText = " ";
+    ClearRedoOperationRecords();
+    record.afterCaretPosition = record.beforeCaretPosition + 1;
+    AddOperationRecord(record);
+
     // Masked the default drag behavior of node image
     gesture->SetDragEvent(nullptr, { PanDirection::DOWN }, 0, Dimension(0));
 
@@ -418,6 +426,17 @@ int32_t RichEditorPattern::AddPlaceholderSpan(const RefPtr<UINode>& customNode, 
 
 int32_t RichEditorPattern::AddTextSpan(const TextSpanOptions& options, bool isPaste, int32_t index)
 {
+    OperationRecord record;
+    record.beforeCaretPosition = options.offset.value_or(static_cast<int32_t>(GetTextContentLength()));
+    record.addText = options.value;
+    ClearRedoOperationRecords();
+    record.afterCaretPosition = record.beforeCaretPosition + StringUtils::ToWstring(options.value).length();
+    AddOperationRecord(record);
+    return AddTextSpanOperation(options, isPaste, index);
+}
+
+int32_t RichEditorPattern::AddTextSpanOperation(const TextSpanOptions& options, bool isPaste, int32_t index)
+{
     auto host = GetHost();
     CHECK_NULL_RETURN(host, -1);
 
@@ -521,6 +540,18 @@ void RichEditorPattern::DeleteSpans(const RangeOptions& options)
     if (start > length || end < 0 || start == end) {
         return;
     }
+
+    OperationRecord record;
+    record.beforeCaretPosition = start;
+    std::wstringstream wss;
+    for (auto iter = spans_.cbegin(); iter != spans_.cend(); iter++) {
+        wss << StringUtils::ToWstring((*iter)->content);
+    }
+    std::wstring deleteText = wss.str().substr(start, end - start);
+    record.deleteText = StringUtils::ToString(deleteText);
+    ClearRedoOperationRecords();
+    record.afterCaretPosition = start;
+    AddOperationRecord(record);
 
     auto startInfo = GetSpanPositionInfo(start);
     auto endInfo = GetSpanPositionInfo(end - 1);
@@ -2251,7 +2282,7 @@ std::wstring RichEditorPattern::InsertValueOperation(const std::string& insertVa
         options.value = insertValueTemp;
         options.offset = caretPosition_;
         options.style = typingTextStyle_;
-        AddTextSpan(options);
+        AddTextSpanOperation(options);
         AfterIMEInsertValue(spanNode, static_cast<int32_t>(StringUtils::ToWstring(insertValueTemp).length()), true);
         return deleteText;
     }
@@ -3919,7 +3950,7 @@ void RichEditorPattern::InsertValueByPaste(const std::string& insertValue)
             CHECK_NULL_VOID(spanNode);
             if (typingStyle_.has_value() && !HasSameTypingStyle(spanNode)) {
                 options.offset = newSpanOffset;
-                caretSpanIndex_ = AddTextSpan(options, true);
+                caretSpanIndex_ = AddTextSpanOperation(options, true);
             } else {
                 InsertValueToSpanNode(spanNode, insertValue, info);
             }
@@ -3927,7 +3958,7 @@ void RichEditorPattern::InsertValueByPaste(const std::string& insertValue)
         } else if (!child) {
             auto spanNodeBefore = DynamicCast<SpanNode>(GetChildByIndex(info.GetSpanIndex() - 1));
             if (spanNodeBefore == nullptr) {
-                caretSpanIndex_ = AddTextSpan(options, true);
+                caretSpanIndex_ = AddTextSpanOperation(options, true);
                 return;
             }
             if (typingStyle_.has_value() && !HasSameTypingStyle(spanNodeBefore)) {
@@ -3947,7 +3978,7 @@ void RichEditorPattern::InsertValueByPaste(const std::string& insertValue)
             CHECK_NULL_VOID(spanNode);
             if (typingStyle_.has_value() && !HasSameTypingStyle(spanNode)) {
                 options.offset = newSpanOffset;
-                caretSpanIndex_ = AddTextSpan(options, true);
+                caretSpanIndex_ = AddTextSpanOperation(options, true);
             } else {
                 InsertValueToBeforeSpan(spanNode, insertValue);
             }
@@ -3959,7 +3990,7 @@ void RichEditorPattern::InsertValueByPaste(const std::string& insertValue)
         if (spanNodeBefore != nullptr && caretSpanIndex_ == -1) {
             if (typingStyle_.has_value() && !HasSameTypingStyle(spanNodeBefore)) {
                 options.offset = newSpanOffset;
-                caretSpanIndex_ = AddTextSpan(options, true);
+                caretSpanIndex_ = AddTextSpanOperation(options, true);
             } else {
                 InsertValueToBeforeSpan(spanNodeBefore, insertValue);
                 caretSpanIndex_ = info.GetSpanIndex() - 1;
@@ -3967,13 +3998,13 @@ void RichEditorPattern::InsertValueByPaste(const std::string& insertValue)
         } else {
             auto imageNode = DynamicCast<FrameNode>(child);
             if (imageNode && caretSpanIndex_ == -1) {
-                caretSpanIndex_ = AddTextSpan(options, true, info.GetSpanIndex());
+                caretSpanIndex_ = AddTextSpanOperation(options, true, info.GetSpanIndex());
             } else {
-                caretSpanIndex_ = AddTextSpan(options, true, caretSpanIndex_ + 1);
+                caretSpanIndex_ = AddTextSpanOperation(options, true, caretSpanIndex_ + 1);
             }
         }
     } else {
-        caretSpanIndex_ = AddTextSpan(options, true);
+        caretSpanIndex_ = AddTextSpanOperation(options, true);
     }
 }
 
