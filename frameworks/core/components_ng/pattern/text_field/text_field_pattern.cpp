@@ -415,7 +415,7 @@ bool TextFieldPattern::HasFocus() const
     return focusHub->IsCurrentFocus();
 }
 
-void TextFieldPattern::UpdateCaretInfoToController() const // todo确定更新时机
+void TextFieldPattern::UpdateCaretInfoToController() const
 {
     CHECK_NULL_VOID(HasFocus());
 #if defined(ENABLE_STANDARD_INPUT)
@@ -2819,7 +2819,6 @@ uint32_t TextFieldPattern::GetSCBSystemWindowId()
 }
 #endif
 
-// todo 代整改
 bool TextFieldPattern::RequestKeyboard(bool isFocusViewChanged, bool needStartTwinkling, bool needShowSoftKeyboard)
 {
     auto tmpHost = GetHost();
