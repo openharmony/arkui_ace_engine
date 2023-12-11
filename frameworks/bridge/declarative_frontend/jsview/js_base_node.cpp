@@ -34,11 +34,12 @@ void JSBaseNode::BuildNode(const JSCallbackInfo& info)
     CHECK_NULL_VOID(buildFunc);
 
     JSRef<JSVal> param = info[1];
-    NG::ScopedViewStackProcessor builderViewStackProcessor;
     {
+        NG::ScopedViewStackProcessor builderViewStackProcessor;
+        NG::ViewStackProcessor::GetInstance()->SetIsBuilderNode(true);
         buildFunc->ExecuteJS(1, &param);
+        viewNode_ = NG::ViewStackProcessor::GetInstance()->Finish();
     }
-    viewNode_ = NG::ViewStackProcessor::GetInstance()->Finish();
 }
 
 void JSBaseNode::ConstructorCallback(const JSCallbackInfo& info)
