@@ -107,6 +107,7 @@ public:
             theme->progressFocusColor_ = buttonPattern->GetAttr<Color>("button_progress_focus_color", Color());
             theme->downloadFontSize_ = buttonPattern->GetAttr<Dimension>("button_download_font_size", 0.0_fp);
             theme->progressDiameter_ = buttonPattern->GetAttr<Dimension>("button_progress_diameter", 0.0_vp);
+            theme->innerPadding_ = buttonPattern->GetAttr<Dimension>("button_inner_padding", 0.0_vp);
             ParseSubStylePattern(buttonPattern, theme);
         }
 
