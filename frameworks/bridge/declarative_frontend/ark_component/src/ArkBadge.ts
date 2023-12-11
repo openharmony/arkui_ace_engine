@@ -1,5 +1,8 @@
 /// <reference path='./import.ts' />
 class ArkBadgeComponent extends ArkComponent implements BadgeAttribute {
+  constructor(nativePtr: KNode) {
+    super(nativePtr);
+  }
   monopolizeEvents(monopolize: boolean): this {
     throw new Error('Method not implemented.');
   }

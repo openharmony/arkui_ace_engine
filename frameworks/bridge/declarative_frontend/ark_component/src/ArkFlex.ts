@@ -1,5 +1,8 @@
 /// <reference path='./import.ts' />
 class ArkFlexComponent extends ArkComponent implements FlexAttribute {
+  constructor(nativePtr: KNode) {
+    super(nativePtr);
+  }
   pointLight(value: PointLightStyle): this {
     throw new Error('Method not implemented.');
   }

@@ -27,6 +27,9 @@ class ListItemSelectableModifier extends ModifierWithKey<boolean> {
   }
 }
 class ArkListItemComponent extends ArkComponent implements ListItemAttribute {
+  constructor(nativePtr: KNode) {
+    super(nativePtr);
+  }
   sticky(value: Sticky): this {
     throw new Error('Method not implemented.');
   }

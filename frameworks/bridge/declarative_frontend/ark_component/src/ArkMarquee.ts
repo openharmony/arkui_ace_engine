@@ -18,6 +18,9 @@ const MarqueeFontWeightMap = {
 }
 
 class ArkMarqueeComponent extends ArkComponent implements MarqueeAttribute {
+  constructor(nativePtr: KNode) {
+    super(nativePtr);
+  }
   onGestureJudgeBegin(callback: (gestureInfo: GestureInfo, event: BaseGestureEvent) => GestureJudgeResult): this {
     throw new Error('Method not implemented.');
   }

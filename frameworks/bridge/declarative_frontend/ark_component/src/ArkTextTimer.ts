@@ -1,6 +1,8 @@
 /// <reference path='./import.ts' />
 class ArkTextTimerComponent extends ArkComponent implements TextTimerAttribute {
-
+  constructor(nativePtr: KNode) {
+    super(nativePtr);
+  }
   fontColor(value: any): this {
     modifierWithKey(this._modifiersWithKeys, TextTimerFontColorModifier.identity, TextTimerFontColorModifier, value);
     return this;

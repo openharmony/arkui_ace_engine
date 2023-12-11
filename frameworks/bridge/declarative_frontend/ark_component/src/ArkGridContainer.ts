@@ -1,5 +1,8 @@
 /// <reference path='./import.ts' />
 class ArkGridContainerComponent extends ArkComponent implements ColumnAttribute {
+  constructor(nativePtr: KNode) {
+    super(nativePtr);
+  }
   alignItems(value: HorizontalAlign): ColumnAttribute {
     throw new Error('Method not implemented.');
   }

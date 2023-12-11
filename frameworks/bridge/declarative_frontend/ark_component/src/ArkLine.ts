@@ -1,6 +1,9 @@
 /// <reference path='./import.ts' />
 /// <reference path='./ArkCommonShape.ts' />
 class ArkLineComponent extends ArkCommonShapeComponent implements LineAttribute {
+  constructor(nativePtr: KNode) {
+    super(nativePtr);
+  }
   startPoint(value: Array<Length>): this {
     modifierWithKey(this._modifiersWithKeys, LineStartPointModifier.identity, LineStartPointModifier, value);
     return this;
@@ -12,6 +15,9 @@ class ArkLineComponent extends ArkCommonShapeComponent implements LineAttribute 
 }
 
 class LineStartPointModifier extends ModifierWithKey<object> {
+  constructor(value: object) {
+    super(value);
+  }
   static identity: Symbol = Symbol('startPoint');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -27,6 +33,9 @@ class LineStartPointModifier extends ModifierWithKey<object> {
 }
 
 class LineEndPointModifier extends ModifierWithKey<object> {
+  constructor(value: object) {
+    super(value);
+  }
   static identity: Symbol = Symbol('endPoint');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {

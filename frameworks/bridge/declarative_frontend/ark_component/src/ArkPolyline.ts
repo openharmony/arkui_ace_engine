@@ -2,6 +2,9 @@
 /// <reference path='./ArkCommonShape.ts' />
 const ARRAY_LENGTH = 2;
 class ArkPolylineComponent extends ArkCommonShapeComponent implements PolylineAttribute {
+  constructor(nativePtr: KNode) {
+    super(nativePtr);
+  }
   points(value: Array<any>): this {
     modifierWithKey(this._modifiersWithKeys, PolylinePointsModifier.identity, PolylinePointsModifier, value);
     return this;
@@ -9,6 +12,9 @@ class ArkPolylineComponent extends ArkCommonShapeComponent implements PolylineAt
 }
 
 class PolylinePointsModifier extends ModifierWithKey<Array<any>> {
+  constructor(value: Array<any>) {
+    super(value);
+  }
   static identity: Symbol = Symbol('points');
   applyPeer(node: KNode, reset: boolean): void {
     let xPoint = [];

@@ -1,6 +1,9 @@
 /// <reference path='./import.ts' />
 
 class ItemConstraintSizeModifier extends ModifierWithKey<ArkConstraintSizeOptions> {
+  constructor(value: ArkConstraintSizeOptions) {
+    super(value);
+  }
   static identity: Symbol = Symbol('itemConstraintSize');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -19,6 +22,9 @@ class ItemConstraintSizeModifier extends ModifierWithKey<ArkConstraintSizeOption
 }
 
 class ColumnsTemplateModifier extends Modifier<string> {
+  constructor(value: string) {
+    super(value);
+  }
   static identity: Symbol = Symbol('columnsTemplate');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -30,6 +36,9 @@ class ColumnsTemplateModifier extends Modifier<string> {
 }
 
 class RowsTemplateModifier extends Modifier<string> {
+  constructor(value: string) {
+    super(value);
+  }
   static identity: Symbol = Symbol('rowsTemplate');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -41,6 +50,9 @@ class RowsTemplateModifier extends Modifier<string> {
 }
 
 class EnableScrollInteractionModifier extends Modifier<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
   static identity = Symbol('enableScrollInteraction');
   applyPeer(node: KNode, reset: boolean): void {
       if (reset) {
@@ -53,6 +65,9 @@ class EnableScrollInteractionModifier extends Modifier<boolean> {
 }
 
 class RowsGapModifier extends ModifierWithKey<number | string> {
+  constructor(value: number | string) {
+    super(value);
+  }
   static identity: Symbol = Symbol('rowsGap');
   applyPeer(node: KNode, reset: boolean): void {
       if (reset) {
@@ -72,6 +87,9 @@ class RowsGapModifier extends ModifierWithKey<number | string> {
 }
 
 class ColumnsGapModifier extends ModifierWithKey<number | string> {
+  constructor(value: number | string) {
+    super(value);
+  }
   static identity: Symbol = Symbol('columnsGap');
   applyPeer(node: KNode, reset: boolean): void {
       if (reset) {
@@ -91,6 +109,9 @@ class ColumnsGapModifier extends ModifierWithKey<number | string> {
 }
 
 class LayoutDirectionModifier extends Modifier<number> {
+  constructor(value: number) {
+    super(value);
+  }
   static identity: Symbol = Symbol('layoutDirection');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -103,6 +124,9 @@ class LayoutDirectionModifier extends Modifier<number> {
 }
 
 class NestedScrollModifier extends Modifier<ArkNestedScrollOptions> {
+  constructor(value: ArkNestedScrollOptions) {
+    super(value);
+  }
   static identity: Symbol = Symbol('nestedScroll');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -115,6 +139,9 @@ class NestedScrollModifier extends Modifier<ArkNestedScrollOptions> {
 }
 
 class FrictionModifier extends ModifierWithKey<number | Resource> {
+  constructor(value: number | Resource) {
+    super(value);
+  }
   static identity: Symbol = Symbol('friction');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -134,6 +161,9 @@ class FrictionModifier extends ModifierWithKey<number | Resource> {
 }
 
 class ArkWaterFlowComponent extends ArkComponent implements WaterFlowAttribute {
+  constructor(nativePtr: KNode) {
+    super(nativePtr);
+  }
   columnsTemplate(value: string): this {
     if (isString(value)) {
       modifier(this._modifiers, ColumnsTemplateModifier, value);

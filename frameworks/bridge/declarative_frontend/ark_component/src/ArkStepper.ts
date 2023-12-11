@@ -1,5 +1,8 @@
 /// <reference path='./import.ts' />
 class ArkStepperComponent extends ArkComponent implements StepperAttribute {
+  constructor(nativePtr: KNode) {
+    super(nativePtr);
+  }
   onFinish(callback: () => void): this {
     throw new Error('Method not implemented.');
   }

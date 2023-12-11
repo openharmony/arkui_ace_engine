@@ -1,5 +1,8 @@
 /// <reference path="./import.ts" />
 class ColumnSplitDividerModifier extends ModifierWithKey<ColumnSplitDividerStyle | null> {
+  constructor(value: ColumnSplitDividerStyle | null) {
+    super(value);
+  }
   static identity: Symbol = Symbol('columnSplitDivider');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -14,6 +17,9 @@ class ColumnSplitDividerModifier extends ModifierWithKey<ColumnSplitDividerStyle
   }
 }
 class ColumnSplitResizeableModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
   static identity: Symbol = Symbol('columnSplitResizeable');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -27,6 +33,9 @@ class ColumnSplitResizeableModifier extends ModifierWithKey<boolean> {
   }
 }
 class ArkColumnSplitComponent extends ArkComponent implements CommonMethod<ColumnSplitAttribute> {
+  constructor(nativePtr: KNode) {
+    super(nativePtr);
+  }
   resizeable(value: boolean): ColumnSplitAttribute {
     modifierWithKey(this._modifiersWithKeys, ColumnSplitResizeableModifier.identity, ColumnSplitResizeableModifier, value);
     return this;

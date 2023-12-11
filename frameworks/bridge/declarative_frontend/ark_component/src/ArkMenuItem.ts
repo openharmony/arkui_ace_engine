@@ -1,5 +1,8 @@
 /// <reference path='./import.ts' />
 class MenuItemSelectedModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
   static identity: Symbol = Symbol('selected');
   applyPeer(node: KNode, reset: boolean) {
     if (reset) {
@@ -15,6 +18,9 @@ class MenuItemSelectedModifier extends ModifierWithKey<boolean> {
 }
 
 class LabelFontColorModifier extends ModifierWithKey<ResourceColor> {
+  constructor(value: ResourceColor) {
+    super(value);
+  }
   static identity: Symbol = Symbol("labelfontColor");
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -34,6 +40,9 @@ class LabelFontColorModifier extends ModifierWithKey<ResourceColor> {
 }
 
 class ContentFontColorModifier extends ModifierWithKey<ResourceColor> {
+  constructor(value: ResourceColor) {
+    super(value);
+  }
   static identity: Symbol = Symbol("contentfontColor");
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -53,6 +62,9 @@ class ContentFontColorModifier extends ModifierWithKey<ResourceColor> {
 }
 
 class LabelFontModifier extends ModifierWithKey<Font> {
+  constructor(value: Font) {
+    super(value);
+  }
   static identity: Symbol = Symbol("labelFont");
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -85,6 +97,9 @@ class LabelFontModifier extends ModifierWithKey<Font> {
 }
 
 class ContentFontModifier extends ModifierWithKey<Font> {
+  constructor(value: Font) {
+    super(value);
+  }
   static identity: Symbol = Symbol("contentFont");
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -117,6 +132,9 @@ class ContentFontModifier extends ModifierWithKey<Font> {
 }
 
 class ArkMenuItemComponent extends ArkComponent implements MenuItemAttribute {
+  constructor(nativePtr: KNode) {
+    super(nativePtr);
+  }
   selected(value: boolean): this {
     modifierWithKey(this._modifiersWithKeys, MenuItemSelectedModifier.identity, MenuItemSelectedModifier, value);
     return this;

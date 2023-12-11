@@ -2,6 +2,9 @@
 const NAV_ROUTE_MODE_RANGE = 2;
 const NAV_ROUTE_MODE_DEFAULT = 0;
 class ArkNavRouterComponent extends ArkComponent implements NavRouterAttribute {
+  constructor(nativePtr: KNode) {
+    super(nativePtr);
+  }
   onStateChange(callback: (isActivated: boolean) => void): NavRouterAttribute {
     throw new Error('Method not implemented.');
   }
@@ -16,6 +19,9 @@ class ArkNavRouterComponent extends ArkComponent implements NavRouterAttribute {
 }
 
 class NavRouterModeModifier extends Modifier<number> {
+  constructor(value: number) {
+    super(value);
+  }
   static identity: Symbol = Symbol('mode');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {

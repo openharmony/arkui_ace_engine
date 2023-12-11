@@ -1,6 +1,9 @@
 /// <reference path='./import.ts' />
 
 class ArkNavigatorComponent extends ArkComponent implements NavigatorAttribute {
+  constructor(nativePtr: KNode) {
+    super(nativePtr);
+  }
   active(value: boolean): NavigatorAttribute {
     modifier(this._modifiers, ActiveModifier, value);
     return this;
@@ -20,6 +23,9 @@ class ArkNavigatorComponent extends ArkComponent implements NavigatorAttribute {
 }
 
 class ParamsModifier extends Modifier<string> {
+  constructor(value: string) {
+    super(value);
+  }
   static identity: Symbol = Symbol('params');
 
   applyPeer(node: KNode, reset: boolean): void {
@@ -32,6 +38,9 @@ class ParamsModifier extends Modifier<string> {
 }
 
 class TypeModifier extends Modifier<number> {
+  constructor(value: number) {
+    super(value);
+  }
   static identity: Symbol = Symbol('type');
 
   applyPeer(node: KNode, reset: boolean): void {
@@ -44,6 +53,9 @@ class TypeModifier extends Modifier<number> {
 }
 
 class ActiveModifier extends Modifier<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
   static identity: Symbol = Symbol('active');
 
   applyPeer(node: KNode, reset: boolean): void {
@@ -56,6 +68,9 @@ class ActiveModifier extends Modifier<boolean> {
 }
 
 class TargetModifier extends Modifier<string> {
+  constructor(value: string) {
+    super(value);
+  }
   static identity: Symbol = Symbol('target');
 
   applyPeer(node: KNode, reset: boolean): void {

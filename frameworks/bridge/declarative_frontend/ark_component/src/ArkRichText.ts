@@ -1,5 +1,8 @@
 /// <reference path='./import.ts' />
 class ArkRichTextComponent extends ArkComponent implements CommonMethod<RichTextAttribute> {
+  constructor(nativePtr: KNode) {
+    super(nativePtr);
+  }
   onStart(callback: () => void): RichTextAttribute {
     throw new Error('Method not implemented.');
   }

@@ -1,5 +1,8 @@
 /// <reference path='./import.ts' />
 class ArkCanvasComponent extends ArkComponent implements CanvasAttribute {
+  constructor(nativePtr: KNode) {
+    super(nativePtr);
+  }
   onReady(event: () => void): this {
     throw new Error('Method not implemented.');
   }

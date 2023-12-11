@@ -1,5 +1,8 @@
 /// <reference path="./import.ts" />
 class GridColSpanModifier extends ModifierWithKey<ArkGridColColumnOption> {
+  constructor(value: ArkGridColColumnOption) {
+    super(value);
+  }
   static identity: Symbol = Symbol('gridColSpan');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -30,6 +33,9 @@ class GridColSpanModifier extends ModifierWithKey<ArkGridColColumnOption> {
   }
 }
 class GridColOffsetModifier extends ModifierWithKey<ArkGridColColumnOption> {
+  constructor(value: ArkGridColColumnOption) {
+    super(value);
+  }
   static identity: Symbol = Symbol('gridColOffset');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -60,6 +66,9 @@ class GridColOffsetModifier extends ModifierWithKey<ArkGridColColumnOption> {
   }
 }
 class GridColOrderModifier extends ModifierWithKey<ArkGridColColumnOption> {
+  constructor(value: ArkGridColColumnOption) {
+    super(value);
+  }
   static identity: Symbol = Symbol('gridColOrder');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -91,6 +100,9 @@ class GridColOrderModifier extends ModifierWithKey<ArkGridColColumnOption> {
 }
 
 class ArkGridColComponent extends ArkComponent implements GridColAttribute {
+  constructor(nativePtr: KNode) {
+    super(nativePtr);
+  }
   span(value: number | GridColColumnOption): GridColAttribute {
     modifierWithKey(this._modifiersWithKeys, GridColSpanModifier.identity, GridColSpanModifier, value);
     return this;

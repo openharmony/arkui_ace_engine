@@ -1,5 +1,8 @@
 /// <reference path='./import.ts' />
 class ArkSliderComponent extends ArkComponent implements SliderAttribute {
+  constructor(nativePtr: KNode) {
+    super(nativePtr);
+  }
   onGestureJudgeBegin(callback: (gestureInfo: GestureInfo, event: BaseGestureEvent) => GestureJudgeResult): this {
     throw new Error('Method not implemented.');
   }
@@ -68,6 +71,9 @@ class ArkSliderComponent extends ArkComponent implements SliderAttribute {
 }
 
 class BlockStyleModifier extends ModifierWithKey<SliderBlockStyle> {
+  constructor(value: SliderBlockStyle) {
+    super(value);
+  }
   static identity: Symbol = Symbol('sliderBlockStyle');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -87,6 +93,9 @@ class BlockStyleModifier extends ModifierWithKey<SliderBlockStyle> {
 }
 
 class ShowTipsModifier extends ModifierWithKey<ArkSliderTips> {
+  constructor(value: ArkSliderTips) {
+    super(value);
+  }
   static identity: Symbol = Symbol('sliderShowTips');
   applyPeer(node: KNode, reset: boolean) {
     if (reset) {
@@ -106,6 +115,9 @@ class ShowTipsModifier extends ModifierWithKey<ArkSliderTips> {
 }
 
 class StepSizeModifier extends ModifierWithKey<Length> {
+  constructor(value: Length) {
+    super(value);
+  }
   static identity: Symbol = Symbol('sliderStepSize');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -125,6 +137,9 @@ class StepSizeModifier extends ModifierWithKey<Length> {
 }
 
 class BlockSizeModifier extends ModifierWithKey<SizeOptions> {
+  constructor(value: SizeOptions) {
+    super(value);
+  }
   static identity: Symbol = Symbol('sliderBlockSize');
   applyPeer(node: KNode, reset: boolean) {
     if (reset) {
@@ -145,6 +160,9 @@ class BlockSizeModifier extends ModifierWithKey<SizeOptions> {
 }
 
 class TrackBorderRadiusModifier extends ModifierWithKey<Length> {
+  constructor(value: Length) {
+    super(value);
+  }
   static identity: Symbol = Symbol('sliderTrackBorderRadius');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -164,6 +182,9 @@ class TrackBorderRadiusModifier extends ModifierWithKey<Length> {
 }
 
 class StepColorModifier extends ModifierWithKey<ResourceColor> {
+  constructor(value: ResourceColor) {
+    super(value);
+  }
   static identity: Symbol = Symbol('sliderStepColor');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -183,6 +204,9 @@ class StepColorModifier extends ModifierWithKey<ResourceColor> {
 }
 
 class BlockBorderColorModifier extends ModifierWithKey<ResourceColor> {
+  constructor(value: ResourceColor) {
+    super(value);
+  }
   static identity: Symbol = Symbol('sliderBlockBorderColor');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -202,6 +226,9 @@ class BlockBorderColorModifier extends ModifierWithKey<ResourceColor> {
 }
 
 class BlockBorderWidthModifier extends ModifierWithKey<Length> {
+  constructor(value: Length) {
+    super(value);
+  }
   static identity: Symbol = Symbol('sliderBlockBorderWidth');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -221,6 +248,9 @@ class BlockBorderWidthModifier extends ModifierWithKey<Length> {
 }
 
 class BlockColorModifier extends ModifierWithKey<ResourceColor> {
+  constructor(value: ResourceColor) {
+    super(value);
+  }
   static identity: Symbol = Symbol('sliderBlockColor');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -240,6 +270,9 @@ class BlockColorModifier extends ModifierWithKey<ResourceColor> {
 }
 
 class TrackColorModifier extends ModifierWithKey<ResourceColor> {
+  constructor(value: ResourceColor) {
+    super(value);
+  }
   static identity: Symbol = Symbol('sliderTrackColor');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -259,6 +292,9 @@ class TrackColorModifier extends ModifierWithKey<ResourceColor> {
 }
 
 class SelectColorModifier extends ModifierWithKey<ResourceColor> {
+  constructor(value: ResourceColor) {
+    super(value);
+  }
   static identity: Symbol = Symbol('sliderSelectColor');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -278,6 +314,9 @@ class SelectColorModifier extends ModifierWithKey<ResourceColor> {
 }
 
 class ShowStepsModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
   static identity: Symbol = Symbol('sliderShowSteps');
   applyPeer(node: KNode, reset: boolean) {
     if (reset) {
@@ -293,6 +332,9 @@ class ShowStepsModifier extends ModifierWithKey<boolean> {
 }
 
 class TrackThicknessModifier extends ModifierWithKey<Length> {
+  constructor(value: Length) {
+    super(value);
+  }
   static identity: Symbol = Symbol('sliderTrackThickness');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {

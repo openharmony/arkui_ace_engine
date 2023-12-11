@@ -1,6 +1,9 @@
 
 /// <reference path='./import.ts' />
 class ArkRefreshComponent extends ArkComponent implements RefreshAttribute {
+  constructor(nativePtr: KNode) {
+    super(nativePtr);
+  }
   onGestureJudgeBegin(callback: (gestureInfo: GestureInfo, event: BaseGestureEvent) => GestureJudgeResult): this {
     throw new Error('Method not implemented.');
   }

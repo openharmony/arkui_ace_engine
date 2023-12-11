@@ -1,6 +1,9 @@
 /// <reference path='./import.ts' />
 
 class ArkUIExtensionComponentComponent extends ArkComponent implements UIExtensionComponentAttribute {
+  constructor(nativePtr: KNode) {
+    super(nativePtr);
+  }
   onRemoteReady(callback: any): UIExtensionComponentAttribute {
     throw new Error('Method not implemented.');
   }

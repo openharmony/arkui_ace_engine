@@ -1,5 +1,8 @@
 /// <reference path='./import.ts' />
 class ArkSwiperComponent extends ArkComponent implements SwiperAttribute {
+  constructor(nativePtr: KNode) {
+    super(nativePtr);
+  }
   index(value: number): this {
     throw new Error('Method not implemented.');
   }

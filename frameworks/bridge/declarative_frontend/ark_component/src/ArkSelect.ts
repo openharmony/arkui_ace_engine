@@ -1,5 +1,8 @@
 /// <reference path='./import.ts' />
 class ArkSelectComponent extends ArkComponent implements SelectAttribute {
+  constructor(nativePtr: KNode) {
+    super(nativePtr);
+  }
   onGestureJudgeBegin(callback: (gestureInfo: GestureInfo, event: BaseGestureEvent) => GestureJudgeResult): this {
     throw new Error('Method not implemented.');
   }
@@ -81,6 +84,9 @@ class ArkSelectComponent extends ArkComponent implements SelectAttribute {
 }
 
 class FontModifier extends ModifierWithKey<Font> {
+  constructor(value: Font) {
+    super(value);
+  }
   static identity: Symbol = Symbol('selectFont');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -101,6 +107,9 @@ class FontModifier extends ModifierWithKey<Font> {
 }
 
 class OptionFontModifier extends ModifierWithKey<Font> {
+  constructor(value: Font) {
+    super(value);
+  }
   static identity: Symbol = Symbol('selectOptionFont');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -121,6 +130,9 @@ class OptionFontModifier extends ModifierWithKey<Font> {
 }
 
 class SelectedOptionFontModifier extends ModifierWithKey<Font>{
+  constructor(value: Font) {
+    super(value);
+  }
   static identity: Symbol = Symbol('selectSelectedOptionFont');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -141,6 +153,9 @@ class SelectedOptionFontModifier extends ModifierWithKey<Font>{
 }
 
 class MenuAlignModifier extends ModifierWithKey<ArkMenuAlignType>{
+  constructor(value: ArkMenuAlignType) {
+    super(value);
+  }
   static identity: Symbol = Symbol('selectMenuAlign');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -170,6 +185,9 @@ class MenuAlignModifier extends ModifierWithKey<ArkMenuAlignType>{
 }
 
 class ArrowPositionModifier extends ModifierWithKey<ArrowPosition>{
+  constructor(value: ArrowPosition) {
+    super(value);
+  }
   static identity: Symbol = Symbol('selectArrowPosition');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -185,6 +203,9 @@ class ArrowPositionModifier extends ModifierWithKey<ArrowPosition>{
   }
 }
 class SpaceModifier extends ModifierWithKey<Length>{
+  constructor(value: Length) {
+    super(value);
+  }
   static identity: Symbol = Symbol('selectSpace');
 
   applyPeer(node: KNode, reset: boolean): void {
@@ -201,6 +222,9 @@ class SpaceModifier extends ModifierWithKey<Length>{
   }
 }
 class ValueModifier extends ModifierWithKey<ResourceStr> {
+  constructor(value: ResourceStr) {
+    super(value);
+  }
   static identity: Symbol = Symbol('selectValue');
 
   applyPeer(node: KNode, reset: boolean): void {
@@ -217,6 +241,9 @@ class ValueModifier extends ModifierWithKey<ResourceStr> {
   }
 }
 class SelectedModifier extends ModifierWithKey<number | Resource> {
+  constructor(value: number | Resource) {
+    super(value);
+  }
   static identity: Symbol = Symbol('selectSelected');
 
   applyPeer(node: KNode, reset: boolean): void {
@@ -233,6 +260,9 @@ class SelectedModifier extends ModifierWithKey<number | Resource> {
   }
 }
 class SelectFontColorModifier extends ModifierWithKey<ResourceColor> {
+  constructor(value: ResourceColor) {
+    super(value);
+  }
   static identity: Symbol = Symbol('selectFontColor');
 
   applyPeer(node: KNode, reset: boolean): void {
@@ -248,6 +278,9 @@ class SelectFontColorModifier extends ModifierWithKey<ResourceColor> {
   }
 }
 class SelectedOptionBgColorModifier extends ModifierWithKey<ResourceColor> {
+  constructor(value: ResourceColor) {
+    super(value);
+  }
   static identity: Symbol = Symbol('selectSelectedOptionBgColor');
 
   applyPeer(node: KNode, reset: boolean): void {
@@ -263,6 +296,9 @@ class SelectedOptionBgColorModifier extends ModifierWithKey<ResourceColor> {
   }
 }
 class OptionBgColorModifier extends ModifierWithKey<ResourceColor> {
+  constructor(value: ResourceColor) {
+    super(value);
+  }
   static identity: Symbol = Symbol('selectOptionBgColor');
 
   applyPeer(node: KNode, reset: boolean): void {
@@ -278,6 +314,9 @@ class OptionBgColorModifier extends ModifierWithKey<ResourceColor> {
   }
 }
 class OptionFontColorModifier extends ModifierWithKey<ResourceColor>{
+  constructor(value: ResourceColor) {
+    super(value);
+  }
   static identity: Symbol = Symbol('selectOptionFontColor');
 
   applyPeer(node: KNode, reset: boolean): void {
@@ -293,6 +332,9 @@ class OptionFontColorModifier extends ModifierWithKey<ResourceColor>{
   }
 }
 class SelectedOptionFontColorModifier extends ModifierWithKey<ResourceColor>{
+  constructor(value: ResourceColor) {
+    super(value);
+  }
   static identity: Symbol = Symbol('selectSelectedOptionFontColor');
 
   applyPeer(node: KNode, reset: boolean): void {

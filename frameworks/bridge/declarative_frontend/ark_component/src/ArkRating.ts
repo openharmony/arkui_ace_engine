@@ -1,6 +1,9 @@
 /// <reference path='./import.ts' />
 
 class RatingStarsModifier extends Modifier<number> {
+  constructor(value: number) {
+    super(value);
+  }
   static identity: Symbol = Symbol('ratingStars');
   applyPeer(node: KNode, reset: boolean) {
     if (reset) {
@@ -13,6 +16,9 @@ class RatingStarsModifier extends Modifier<number> {
 }
 
 class RatingStepSizeModifier extends Modifier<number> {
+  constructor(value: number) {
+    super(value);
+  }
   static identity: Symbol = Symbol('ratingStepSize');
   applyPeer(node: KNode, reset: boolean) {
     if (reset) {
@@ -25,6 +31,9 @@ class RatingStepSizeModifier extends Modifier<number> {
 }
 
 class RatingStarStyleModifier extends Modifier<ArkStarStyle> {
+  constructor(value: ArkStarStyle) {
+    super(value);
+  }
   static identity: Symbol = Symbol('ratingStarStyle');
   applyPeer(node: KNode, reset: boolean) {
     if (reset) {
@@ -38,6 +47,9 @@ class RatingStarStyleModifier extends Modifier<ArkStarStyle> {
 }
 
 class ArkRatingComponent extends ArkComponent implements RatingAttribute {
+  constructor(nativePtr: KNode) {
+    super(nativePtr);
+  }
   onGestureJudgeBegin(callback: (gestureInfo: GestureInfo, event: BaseGestureEvent) => GestureJudgeResult): this {
     throw new Error('Method not implemented.');
   }

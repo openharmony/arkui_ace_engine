@@ -19,6 +19,9 @@ const FontWeightMap = {
 }
 
 class ArkButtonComponent extends ArkComponent implements ButtonAttribute {
+  constructor(nativePtr: KNode) {
+    super(nativePtr);
+  }
   onGestureJudgeBegin(callback: (gestureInfo: GestureInfo, event: BaseGestureEvent) => GestureJudgeResult): this {
     throw new Error('Method not implemented.');
   }
@@ -77,6 +80,9 @@ class ArkButtonComponent extends ArkComponent implements ButtonAttribute {
   }
 }
 class ButtonBackgroundColorModifier extends ModifierWithKey<ResourceColor> {
+  constructor(value: ResourceColor) {
+    super(value);
+  }
   static identity: Symbol = Symbol("buttonBackgroundColor");
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -95,6 +101,9 @@ class ButtonBackgroundColorModifier extends ModifierWithKey<ResourceColor> {
   }
 }
 class ButtonStateEffectModifier extends Modifier<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
   static identity: Symbol = Symbol('buttonStateEffect');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -106,6 +115,9 @@ class ButtonStateEffectModifier extends Modifier<boolean> {
   }
 }
 class ButtonFontStyleModifier extends Modifier<number> {
+  constructor(value: number) {
+    super(value);
+  }
   static identity: Symbol = Symbol('buttonFontStyle');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -117,6 +129,9 @@ class ButtonFontStyleModifier extends Modifier<number> {
   }
 }
 class ButtonFontFamilyModifier extends ModifierWithKey<string | Resource> {
+  constructor(value: string | Resource) {
+    super(value);
+  }
   static identity: Symbol = Symbol('buttonFontFamily');
   applyPeer(node: KNode, reset: boolean): void {
       if (reset) {
@@ -136,6 +151,9 @@ class ButtonFontFamilyModifier extends ModifierWithKey<string | Resource> {
   }
 }
 class ButtonLabelStyleModifier extends ModifierWithKey<LabelStyle> {
+  constructor(value: LabelStyle) {
+    super(value);
+  }
   static identity: Symbol = Symbol('buttonLabelStyle');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -186,6 +204,9 @@ class ButtonLabelStyleModifier extends ModifierWithKey<LabelStyle> {
   }
 }
 class ButtonTypeModifier extends Modifier<number> {
+  constructor(value: number) {
+    super(value);
+  }
   static identity: Symbol = Symbol('buttonType');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -197,6 +218,9 @@ class ButtonTypeModifier extends Modifier<number> {
   }
 }
 class ButtonFontColorModifier extends ModifierWithKey<ResourceColor> {
+  constructor(value: ResourceColor) {
+    super(value);
+  }
   static identity: Symbol = Symbol('buttonFontColor');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -217,6 +241,9 @@ class ButtonFontColorModifier extends ModifierWithKey<ResourceColor> {
   }
 }
 class ButtonFontSizeModifier extends ModifierWithKey<Length> {
+  constructor(value: Length) {
+    super(value);
+  }
   static identity: Symbol = Symbol('buttonFontSize');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -237,6 +264,9 @@ class ButtonFontSizeModifier extends ModifierWithKey<Length> {
   }
 }
 class ButtonFontWeightModifier extends Modifier<string | number | FontWeight> {
+  constructor(value: string | number | FontWeight) {
+    super(value);
+  }
   static identity: Symbol = Symbol('buttonFontWeight');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {

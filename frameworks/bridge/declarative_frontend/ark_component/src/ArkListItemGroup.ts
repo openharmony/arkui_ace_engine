@@ -1,5 +1,8 @@
 /// <reference path='./import.ts' />
 class ListItemGroupDividerModifier extends ModifierWithKey<{ strokeWidth: any; color?: any; startMargin?: any; endMargin?: any; } | null> {
+  constructor(value: { strokeWidth: any; color?: any; startMargin?: any; endMargin?: any; } | null) {
+    super(value);
+  }
   static identity: Symbol = Symbol('listItemGroupDivider');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -18,6 +21,9 @@ class ListItemGroupDividerModifier extends ModifierWithKey<{ strokeWidth: any; c
 }
 
 class ArkListItemGroupComponent extends ArkComponent implements ListItemGroupAttribute {
+  constructor(nativePtr: KNode) {
+    super(nativePtr);
+  }
   divider(value: { strokeWidth: any; color?: any; startMargin?: any; endMargin?: any; } | null): this {
     modifierWithKey(this._modifiersWithKeys, ListItemGroupDividerModifier.identity, ListItemGroupDividerModifier, value);
     return this;

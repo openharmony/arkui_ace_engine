@@ -1,6 +1,9 @@
 /// <reference path='./import.ts' />
 
 class ArkNavDestinationComponent extends ArkComponent implements NavDestinationAttribute {
+  constructor(nativePtr: KNode) {
+    super(nativePtr);
+  }
   title(value: any): this {
     throw new Error('Method not implemented.');
   }
@@ -20,6 +23,9 @@ class ArkNavDestinationComponent extends ArkComponent implements NavDestinationA
 }
 
 class HideTitleBarModifier extends Modifier<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
   static identity: Symbol = Symbol('hideTitleBar');
 
   applyPeer(node: KNode, reset: boolean): void {

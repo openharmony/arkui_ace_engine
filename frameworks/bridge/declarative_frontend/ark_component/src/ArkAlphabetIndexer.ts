@@ -1,5 +1,8 @@
 /// <reference path='./import.ts' />
 class ArkAlphabetIndexerComponent extends ArkComponent implements AlphabetIndexerAttribute {
+  constructor(nativePtr: KNode) {
+    super(nativePtr);
+  }
   onSelected(callback: (index: number) => void): this {
     throw new Error('Method not implemented.');
   }
@@ -109,6 +112,9 @@ globalThis.AlphabetIndexer.attributeModifier = function (modifier) {
 }
 
 class PopupItemFontModifier extends ModifierWithKey<Font> {
+  constructor(value: Font) {
+    super(value);
+  }
   static identity: Symbol = Symbol('popupItemFont');
   applyPeer(node: KNode, reset: boolean) {
     if (reset) {
@@ -128,6 +134,9 @@ class PopupItemFontModifier extends ModifierWithKey<Font> {
 }
 
 class SelectedFontModifier extends ModifierWithKey<Font> {
+  constructor(value: Font) {
+    super(value);
+  }
   static identity: Symbol = Symbol('alphaBetIndexerSelectedFont');
   applyPeer(node: KNode, reset: boolean) {
     if (reset) {
@@ -148,6 +157,9 @@ class SelectedFontModifier extends ModifierWithKey<Font> {
 }
 
 class PopupFontModifier extends ModifierWithKey<Font> {
+  constructor(value: Font) {
+    super(value);
+  }
   static identity: Symbol = Symbol('popupFont');
   applyPeer(node: KNode, reset: boolean) {
     if (reset) {
@@ -168,6 +180,9 @@ class PopupFontModifier extends ModifierWithKey<Font> {
 }
 
 class AlphabetIndexerFontModifier extends ModifierWithKey<Font> {
+  constructor(value: Font) {
+    super(value);
+  }
   static identity: Symbol = Symbol('alphaBetIndexerFont');
   applyPeer(node: KNode, reset: boolean) {
     if (reset) {
@@ -188,6 +203,9 @@ class AlphabetIndexerFontModifier extends ModifierWithKey<Font> {
 }
 
 class PopupItemBackgroundColorModifier extends ModifierWithKey<ResourceColor> {
+  constructor(value: ResourceColor) {
+    super(value);
+  }
   static identity: Symbol = Symbol("popupItemBackgroundColor");
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -207,6 +225,9 @@ class PopupItemBackgroundColorModifier extends ModifierWithKey<ResourceColor> {
 }
 
 class ColorModifier extends ModifierWithKey<ResourceColor> {
+  constructor(value: ResourceColor) {
+    super(value);
+  }
   static identity: Symbol = Symbol("alphabetColor");
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -226,6 +247,9 @@ class ColorModifier extends ModifierWithKey<ResourceColor> {
 }
 
 class PopupColorModifier extends ModifierWithKey<ResourceColor> {
+  constructor(value: ResourceColor) {
+    super(value);
+  }
   static identity: Symbol = Symbol("popupColor");
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -245,6 +269,9 @@ class PopupColorModifier extends ModifierWithKey<ResourceColor> {
 }
 
 class SelectedColorModifier extends ModifierWithKey<ResourceColor> {
+  constructor(value: ResourceColor) {
+    super(value);
+  }
   static identity: Symbol = Symbol("selectedColor");
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -264,6 +291,9 @@ class SelectedColorModifier extends ModifierWithKey<ResourceColor> {
 }
 
 class PopupBackgroundModifier extends ModifierWithKey<ResourceColor> {
+  constructor(value: ResourceColor) {
+    super(value);
+  }
   static identity: Symbol = Symbol("popupBackground");
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -283,6 +313,9 @@ class PopupBackgroundModifier extends ModifierWithKey<ResourceColor> {
 }
 
 class SelectedBackgroundColorModifier extends ModifierWithKey<ResourceColor> {
+  constructor(value: ResourceColor) {
+    super(value);
+  }
   static identity: Symbol = Symbol("selectedBackgroundColor");
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -302,6 +335,9 @@ class SelectedBackgroundColorModifier extends ModifierWithKey<ResourceColor> {
 }
 
 class PopupUnselectedColorModifier extends ModifierWithKey<ResourceColor> {
+  constructor(value: ResourceColor) {
+    super(value);
+  }
   static identity: Symbol = Symbol("popupUnselectedColor");
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -321,6 +357,9 @@ class PopupUnselectedColorModifier extends ModifierWithKey<ResourceColor> {
 }
 
 class PopupSelectedColorModifier extends ModifierWithKey<ResourceColor> {
+  constructor(value: ResourceColor) {
+    super(value);
+  }
   static identity: Symbol = Symbol("popupSelectedColor");
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -340,6 +379,9 @@ class PopupSelectedColorModifier extends ModifierWithKey<ResourceColor> {
 }
 
 class AlignStyleModifier extends ModifierWithKey<ArkAlignStyle> {
+  constructor(value: ArkAlignStyle) {
+    super(value);
+  }
   static identity = Symbol('alignStyle');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -357,6 +399,9 @@ class AlignStyleModifier extends ModifierWithKey<ArkAlignStyle> {
 }
 
 class UsingPopupModifier extends Modifier<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
   static identity = Symbol('usingPopup');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -368,6 +413,9 @@ class UsingPopupModifier extends Modifier<boolean> {
 }
 
 class AlphabetIndexerSelectedModifier extends Modifier<number> {
+  constructor(value: number) {
+    super(value);
+  }
   static identity = Symbol('alphabetIndexerSelected');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -379,6 +427,9 @@ class AlphabetIndexerSelectedModifier extends Modifier<number> {
 }
 
 class ItemSizeModifier extends Modifier<number | string> {
+  constructor(value: number | string) {
+    super(value);
+  }
   static identity: Symbol = Symbol('itemSize');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -391,6 +442,9 @@ class ItemSizeModifier extends Modifier<number | string> {
 }
 
 class PopupPositionModifier extends ModifierWithKey<Position> {
+  constructor(value: Position) {
+    super(value);
+  }
   static identity: Symbol = Symbol('popupPosition');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {

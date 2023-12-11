@@ -1,5 +1,8 @@
 /// <reference path='./import.ts' />
 class ArkTabContentComponent extends ArkComponent implements TabContentAttribute {
+  constructor(nativePtr: KNode) {
+    super(nativePtr);
+  }
   tabBar(value: any): this;
   tabBar(value: SubTabBarStyle | BottomTabBarStyle): this;
   tabBar(value: unknown): this {

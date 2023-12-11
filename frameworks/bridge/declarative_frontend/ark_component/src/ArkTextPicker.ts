@@ -1,5 +1,8 @@
 /// <reference path='./import.ts' />
 class ArkTextPickerComponent extends ArkComponent implements TextPickerAttribute {
+  constructor(nativePtr: KNode) {
+    super(nativePtr);
+  }
   onGestureJudgeBegin(callback: (gestureInfo: GestureInfo, event: BaseGestureEvent) => GestureJudgeResult): this {
     throw new Error('Method not implemented.');
   }
@@ -63,6 +66,9 @@ class ArkTextPickerComponent extends ArkComponent implements TextPickerAttribute
 }
 
 class TextpickerCanLoopModifier extends Modifier<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
   static identity: Symbol = Symbol('textpickerCanLoop');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -75,6 +81,9 @@ class TextpickerCanLoopModifier extends Modifier<boolean> {
 }
 
 class TextpickerSelectedIndexModifier extends Modifier<ArkSelectedIndices> {
+  constructor(value: ArkSelectedIndices) {
+    super(value);
+  }
   static identity: Symbol = Symbol('textpickerSelectedIndex');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -87,6 +96,9 @@ class TextpickerSelectedIndexModifier extends Modifier<ArkSelectedIndices> {
 }
 
 class TextpickerTextStyleModifier extends ModifierWithKey<PickerTextStyle> {
+  constructor(value: PickerTextStyle) {
+    super(value);
+  }
   static identity: Symbol = Symbol('textpickerTextStyle');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -114,6 +126,9 @@ class TextpickerTextStyleModifier extends ModifierWithKey<PickerTextStyle> {
 }
 
 class TextpickerSelectedTextStyleModifier extends ModifierWithKey<PickerTextStyle> {
+  constructor(value: PickerTextStyle) {
+    super(value);
+  }
   static identity: Symbol = Symbol('textpickerSelectedTextStyle');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -141,6 +156,9 @@ class TextpickerSelectedTextStyleModifier extends ModifierWithKey<PickerTextStyl
 }
 
 class TextpickerDisappearTextStyleModifier extends ModifierWithKey<PickerTextStyle> {
+  constructor(value: PickerTextStyle) {
+    super(value);
+  }
   static identity: Symbol = Symbol('textpickerDisappearTextStyle');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -168,6 +186,9 @@ class TextpickerDisappearTextStyleModifier extends ModifierWithKey<PickerTextSty
 }
 
 class TextpickerDefaultPickerItemHeightModifier extends Modifier<number | string> {
+  constructor(value: number | string) {
+    super(value);
+  }
   static identity: Symbol = Symbol('textpickerDefaultPickerItemHeight');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {

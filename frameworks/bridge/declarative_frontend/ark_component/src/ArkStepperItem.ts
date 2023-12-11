@@ -1,5 +1,8 @@
 /// <reference path='./import.ts' />
 class ArkStepperItemComponent extends ArkComponent implements StepperItemAttribute {
+  constructor(nativePtr: KNode) {
+    super(nativePtr);
+  }
   prevLabel(value: string): this {
     throw new Error('Method not implemented.');
   }
@@ -16,6 +19,9 @@ class ArkStepperItemComponent extends ArkComponent implements StepperItemAttribu
 }
 
 class NextLabelModifier extends Modifier<string> {
+  constructor(value: string) {
+    super(value);
+  }
   static identity: Symbol = Symbol('NextLabel');
 
   applyPeer(node: KNode, reset: boolean): void {

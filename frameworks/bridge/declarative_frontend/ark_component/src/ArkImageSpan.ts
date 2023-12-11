@@ -1,6 +1,9 @@
 
 /// <reference path="./import.ts" />
 class ImageSpanObjectFitModifier extends ModifierWithKey<number> {
+    constructor(value: number) {
+      super(value);
+    }
     static identity: Symbol = Symbol('imageSpanObjectFit');
     applyPeer(node: KNode, reset: boolean): void {
         if (reset) {
@@ -14,6 +17,9 @@ class ImageSpanObjectFitModifier extends ModifierWithKey<number> {
     }
 }
 class ImageSpanVerticalAlignModifier extends ModifierWithKey<number> {
+    constructor(value: number) {
+      super(value);
+    }
     static identity: Symbol = Symbol('imageSpanVerticalAlign');
     applyPeer(node: KNode, reset: boolean): void {
         if (reset) {
@@ -27,6 +33,9 @@ class ImageSpanVerticalAlignModifier extends ModifierWithKey<number> {
     }
 }
 class ArkImageSpanComponent extends ArkComponent implements ImageSpanAttribute {
+    constructor(nativePtr: KNode) {
+      super(nativePtr);
+    }
     objectFit(value: ImageFit): ImageSpanAttribute {
         modifierWithKey(this._modifiersWithKeys, ImageSpanObjectFitModifier.identity, ImageSpanObjectFitModifier, value);
         return this;

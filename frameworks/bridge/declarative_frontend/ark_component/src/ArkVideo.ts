@@ -1,6 +1,9 @@
 /// <reference path="./import.ts" />
 
 class VideoObjectFitModifier extends ModifierWithKey<ImageFit> {
+  constructor(value: ImageFit) {
+    super(value);
+  }
   static identity: Symbol = Symbol('videoObjectFit');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -14,6 +17,9 @@ class VideoObjectFitModifier extends ModifierWithKey<ImageFit> {
   }
 }
 class VideoAutoPlayModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
   static identity: Symbol = Symbol('videoAutoPlayr');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -27,6 +33,9 @@ class VideoAutoPlayModifier extends ModifierWithKey<boolean> {
   }
 }
 class VideoControlsModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
   static identity: Symbol = Symbol('videoControls');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -40,6 +49,9 @@ class VideoControlsModifier extends ModifierWithKey<boolean> {
   }
 }
 class VideoLoopModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
   static identity: Symbol = Symbol('videoLoop');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -53,6 +65,9 @@ class VideoLoopModifier extends ModifierWithKey<boolean> {
   }
 }
 class VideoMutedModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
   static identity: Symbol = Symbol('videoMuted');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -66,6 +81,9 @@ class VideoMutedModifier extends ModifierWithKey<boolean> {
   }
 }
 class ArkVideoComponent extends ArkComponent implements CommonMethod<VideoAttribute> {
+  constructor(nativePtr: KNode) {
+    super(nativePtr);
+  }
   muted(value: boolean): VideoAttribute {
     modifierWithKey(this._modifiersWithKeys, VideoMutedModifier.identity,
       VideoMutedModifier, value);

@@ -1,5 +1,8 @@
 /// <reference path='./import.ts' />
 class ArkToggleComponent extends ArkComponent implements ToggleAttribute {
+    constructor(nativePtr: KNode) {
+      super(nativePtr);
+    }
     onGestureJudgeBegin(callback: (gestureInfo: GestureInfo, event: BaseGestureEvent) => GestureJudgeResult): this {
         throw new Error('Method not implemented.');
     }
@@ -16,6 +19,9 @@ class ArkToggleComponent extends ArkComponent implements ToggleAttribute {
     }
 }
 class ToggleSelectedColorModifier extends ModifierWithKey<ResourceColor> {
+    constructor(value: ResourceColor) {
+      super(value);
+    }
     static identity = Symbol('toggleSelectedColor');
     applyPeer(node: KNode, reset: boolean): void {
         if (reset) {
@@ -33,6 +39,9 @@ class ToggleSelectedColorModifier extends ModifierWithKey<ResourceColor> {
     }
 }
 class ToggleSwitchPointColorModifier extends ModifierWithKey<ResourceColor> {
+    constructor(value: ResourceColor) {
+      super(value);
+    }
     static identity = Symbol('toggleSwitchPointColor');
     applyPeer(node: KNode, reset: boolean): void {
         if (reset) {

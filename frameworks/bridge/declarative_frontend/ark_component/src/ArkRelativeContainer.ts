@@ -1,5 +1,8 @@
 /// <reference path='./import.ts' />
 class ArkRelativeContainerComponent extends ArkComponent implements RelativeContainerAttribute {
+  constructor(nativePtr: KNode) {
+    super(nativePtr);
+  }
   monopolizeEvents(monopolize: boolean): this {
     throw new Error('Method not implemented.');
   }

@@ -1,5 +1,8 @@
 /// <reference path='./import.ts' />
 class ListEditModeModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
   static identity: Symbol = Symbol('editMode');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -11,6 +14,9 @@ class ListEditModeModifier extends ModifierWithKey<boolean> {
 }
 
 class ListMultiSelectableModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
   static identity: Symbol = Symbol('listMultiSelectable');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -22,6 +28,9 @@ class ListMultiSelectableModifier extends ModifierWithKey<boolean> {
 }
 
 class ListAlignListItemModifier extends ModifierWithKey<ListItemAlign> {
+  constructor(value: ListItemAlign) {
+    super(value);
+  }
   static identity: Symbol = Symbol('listAlignListItem');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -33,6 +42,9 @@ class ListAlignListItemModifier extends ModifierWithKey<ListItemAlign> {
 }
 
 class ListScrollSnapAlignModifier extends ModifierWithKey<ScrollSnapAlign> {
+  constructor(value: ScrollSnapAlign) {
+    super(value);
+  }
   static identity: Symbol = Symbol('listScrollSnapAlign');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -44,6 +56,9 @@ class ListScrollSnapAlignModifier extends ModifierWithKey<ScrollSnapAlign> {
 }
 
 class ListDividerModifier extends ModifierWithKey<{ strokeWidth: any; color?: any; startMargin?: any; endMargin?: any; } | null> {
+  constructor(value: { strokeWidth: any; color?: any; startMargin?: any; endMargin?: any; } | null) {
+    super(value);
+  }
   static identity: Symbol = Symbol('listDivider');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -59,6 +74,9 @@ class ListDividerModifier extends ModifierWithKey<{ strokeWidth: any; color?: an
 }
 
 class ChainAnimationOptionsModifier extends ModifierWithKey<ChainAnimationOptions> {
+  constructor(value: ChainAnimationOptions) {
+    super(value);
+  }
   static identity: Symbol = Symbol('chainAnimationOptions');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -77,6 +95,9 @@ class ChainAnimationOptionsModifier extends ModifierWithKey<ChainAnimationOption
 }
 
 class ListChainAnimationModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
   static identity: Symbol = Symbol('listChainAnimation');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -91,6 +112,9 @@ class ListChainAnimationModifier extends ModifierWithKey<boolean> {
 }
 
 class ListCachedCountModifier extends ModifierWithKey<number> {
+  constructor(value: number) {
+    super(value);
+  }
   static identity: Symbol = Symbol('listCachedCount');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -102,6 +126,9 @@ class ListCachedCountModifier extends ModifierWithKey<number> {
 }
 
 class ListEnableScrollInteractionModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
   static identity: Symbol = Symbol('listEnableScrollInteraction');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -113,6 +140,9 @@ class ListEnableScrollInteractionModifier extends ModifierWithKey<boolean> {
 }
 
 class ListStickyModifier extends ModifierWithKey<number> {
+  constructor(value: number) {
+    super(value);
+  }
   static identity: Symbol = Symbol('listSticky');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -124,6 +154,9 @@ class ListStickyModifier extends ModifierWithKey<number> {
 }
 
 class ListEdgeEffectModifier extends ModifierWithKey<ArkListEdgeEffect> {
+  constructor(value: ArkListEdgeEffect) {
+    super(value);
+  }
   static identity: Symbol = Symbol('listEdgeEffect');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -139,6 +172,9 @@ class ListEdgeEffectModifier extends ModifierWithKey<ArkListEdgeEffect> {
 }
 
 class ListListDirectionModifier extends ModifierWithKey<number> {
+  constructor(value: number) {
+    super(value);
+  }
   static identity: Symbol = Symbol('listListDirection');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -150,6 +186,9 @@ class ListListDirectionModifier extends ModifierWithKey<number> {
 }
 
 class ListFrictionModifier extends ModifierWithKey<number | Resource> {
+  constructor(value: number | Resource) {
+    super(value);
+  }
   static identity: Symbol = Symbol('listFriction');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -175,6 +214,9 @@ class ListFrictionModifier extends ModifierWithKey<number | Resource> {
 }
 
 class ListNestedScrollModifier extends ModifierWithKey<ArkListNestedScrollOptions> {
+  constructor(value: ArkListNestedScrollOptions) {
+    super(value);
+  }
   static identity: Symbol = Symbol('listNestedScroll');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -186,6 +228,9 @@ class ListNestedScrollModifier extends ModifierWithKey<ArkListNestedScrollOption
 }
 
 class ListScrollBarModifier extends ModifierWithKey<number> {
+  constructor(value: number) {
+    super(value);
+  }
   static identity: Symbol = Symbol('listScrollBar');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -197,6 +242,9 @@ class ListScrollBarModifier extends ModifierWithKey<number> {
 }
 
 class ListLanesModifier extends ModifierWithKey<ArkLanesOpt> {
+  constructor(value: ArkLanesOpt) {
+    super(value);
+  }
   static identity: Symbol = Symbol('listLanes');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -212,6 +260,9 @@ class ListLanesModifier extends ModifierWithKey<ArkLanesOpt> {
 }
 
 class ArkListComponent extends ArkComponent implements ListAttribute {
+  constructor(nativePtr: KNode) {
+    super(nativePtr);
+  }
   lanes(value: number | LengthConstrain, gutter?: any): this {
     let opt: ArkLanesOpt = new ArkLanesOpt();
     opt.gutter = gutter;

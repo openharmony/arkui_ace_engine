@@ -1,5 +1,8 @@
 /// <reference path="./import.ts" />
 class RowAlignItemsModifier extends ModifierWithKey<number> {
+  constructor(value: number) {
+    super(value);
+  }
   static identity: Symbol = Symbol('rowAlignItems');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -14,6 +17,9 @@ class RowAlignItemsModifier extends ModifierWithKey<number> {
 }
 
 class RowJustifyContentlModifier extends ModifierWithKey<number> {
+  constructor(value: number) {
+    super(value);
+  }
   static identity: Symbol = Symbol('rowJustifyContent');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -28,6 +34,9 @@ class RowJustifyContentlModifier extends ModifierWithKey<number> {
 }
 
 class ArkRowComponent extends ArkComponent implements RowAttribute {
+  constructor(nativePtr: KNode) {
+    super(nativePtr);
+  }
   alignItems(value: VerticalAlign): RowAttribute {
     modifierWithKey(this._modifiersWithKeys, RowAlignItemsModifier.identity, RowAlignItemsModifier, value);
     return this;

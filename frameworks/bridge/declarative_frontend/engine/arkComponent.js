@@ -100,6 +100,9 @@ class ModifierWithKey {
   }
 }
 class BackgroundColorModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().common.resetBackgroundColor(node);
@@ -119,6 +122,9 @@ class BackgroundColorModifier extends ModifierWithKey {
 }
 BackgroundColorModifier.identity = Symbol('backgroundColor');
 class WidthModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().common.resetWidth(node);
@@ -138,6 +144,9 @@ class WidthModifier extends ModifierWithKey {
 }
 WidthModifier.identity = Symbol('width');
 class BorderWidthModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().common.resetBorderWidth(node);
@@ -168,6 +177,9 @@ class BorderWidthModifier extends ModifierWithKey {
 }
 BorderWidthModifier.identity = Symbol('borderWidth');
 class HeightModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().common.resetHeight(node);
@@ -187,6 +199,9 @@ class HeightModifier extends ModifierWithKey {
 }
 HeightModifier.identity = Symbol('height');
 class BorderRadiusModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().common.resetBorderRadius(node);
@@ -217,6 +232,9 @@ class BorderRadiusModifier extends ModifierWithKey {
 }
 BorderRadiusModifier.identity = Symbol('borderRadius');
 class PositionModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().common.resetPosition(node);
@@ -232,6 +250,9 @@ class PositionModifier extends ModifierWithKey {
 }
 PositionModifier.identity = Symbol('position');
 class BorderColorModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().common.resetBorderColor(node);
@@ -263,6 +284,9 @@ class BorderColorModifier extends ModifierWithKey {
 }
 BorderColorModifier.identity = Symbol('borderColor');
 class TransformModifier extends Modifier {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().common.resetTransform(node);
@@ -274,6 +298,9 @@ class TransformModifier extends Modifier {
 }
 TransformModifier.identity = Symbol('transform');
 class BorderStyleModifier extends Modifier {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().common.resetBorderStyle(node);
@@ -285,6 +312,9 @@ class BorderStyleModifier extends Modifier {
 }
 BorderStyleModifier.identity = Symbol('borderStyle');
 class ShadowModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().common.resetShadow(node);
@@ -309,6 +339,9 @@ class ShadowModifier extends ModifierWithKey {
 }
 ShadowModifier.identity = Symbol('shadow');
 class HitTestBehaviorModifier extends Modifier {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().common.resetHitTestBehavior(node);
@@ -320,6 +353,9 @@ class HitTestBehaviorModifier extends Modifier {
 }
 HitTestBehaviorModifier.identity = Symbol('hitTestBehavior');
 class ZIndexModifier extends Modifier {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().common.resetZIndex(node);
@@ -331,6 +367,9 @@ class ZIndexModifier extends Modifier {
 }
 ZIndexModifier.identity = Symbol('zIndex');
 class OpacityModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().common.resetOpacity(node);
@@ -350,6 +389,9 @@ class OpacityModifier extends ModifierWithKey {
 }
 OpacityModifier.identity = Symbol('opacity');
 class AlignModifier extends Modifier {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().common.resetAlign(node);
@@ -361,6 +403,9 @@ class AlignModifier extends Modifier {
 }
 AlignModifier.identity = Symbol('align');
 class BackdropBlurModifier extends Modifier {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().common.resetBackdropBlur(node);
@@ -372,6 +417,9 @@ class BackdropBlurModifier extends Modifier {
 }
 BackdropBlurModifier.identity = Symbol('backdropBlur');
 class HueRotateModifier extends Modifier {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().common.resetHueRotate(node);
@@ -383,6 +431,9 @@ class HueRotateModifier extends Modifier {
 }
 HueRotateModifier.identity = Symbol('hueRotate');
 class InvertModifier extends Modifier {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().common.resetInvert(node);
@@ -394,6 +445,9 @@ class InvertModifier extends Modifier {
 }
 InvertModifier.identity = Symbol('invert');
 class SepiaModifier extends Modifier {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().common.resetSepia(node);
@@ -405,6 +459,9 @@ class SepiaModifier extends Modifier {
 }
 SepiaModifier.identity = Symbol('sepia');
 class SaturateModifier extends Modifier {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().common.resetSaturate(node);
@@ -416,6 +473,9 @@ class SaturateModifier extends Modifier {
 }
 SaturateModifier.identity = Symbol('saturate');
 class ColorBlendModifier extends Modifier {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().common.resetColorBlend(node);
@@ -435,6 +495,9 @@ class ColorBlendModifier extends Modifier {
 }
 ColorBlendModifier.identity = Symbol('colorBlend');
 class GrayscaleModifier extends Modifier {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().common.resetGrayscale(node);
@@ -446,6 +509,9 @@ class GrayscaleModifier extends Modifier {
 }
 GrayscaleModifier.identity = Symbol('grayscale');
 class ContrastModifier extends Modifier {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().common.resetContrast(node);
@@ -457,6 +523,9 @@ class ContrastModifier extends Modifier {
 }
 ContrastModifier.identity = Symbol('contrast');
 class BrightnessModifier extends Modifier {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().common.resetBrightness(node);
@@ -468,6 +537,9 @@ class BrightnessModifier extends Modifier {
 }
 BrightnessModifier.identity = Symbol('brightness');
 class BlurModifier extends Modifier {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().common.resetBlur(node);
@@ -479,6 +551,9 @@ class BlurModifier extends Modifier {
 }
 BlurModifier.identity = Symbol('blur');
 class LinearGradientModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().common.resetLinearGradient(node);
@@ -496,6 +571,9 @@ class LinearGradientModifier extends ModifierWithKey {
 }
 LinearGradientModifier.identity = Symbol('linearGradient');
 class RadialGradientModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().common.resetRadialGradient(node);
@@ -513,6 +591,9 @@ class RadialGradientModifier extends ModifierWithKey {
 }
 RadialGradientModifier.identity = Symbol('radialGradient');
 class SweepGradientModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().common.resetSweepGradient(node);
@@ -532,6 +613,9 @@ class SweepGradientModifier extends ModifierWithKey {
 }
 SweepGradientModifier.identity = Symbol('sweepGradient');
 class OverlayModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().common.resetOverlay(node);
@@ -549,6 +633,9 @@ class OverlayModifier extends ModifierWithKey {
 }
 OverlayModifier.identity = Symbol('overlay');
 class BorderImageModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().common.resetBorderImage(node);
@@ -641,6 +728,9 @@ class BorderImageModifier extends ModifierWithKey {
 }
 BorderImageModifier.identity = Symbol('borderImage');
 class BorderModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().common.resetBorder(node);
@@ -655,6 +745,9 @@ class BorderModifier extends ModifierWithKey {
 }
 BorderModifier.identity = Symbol('border');
 class ForegroundBlurStyleModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().common.resetForegroundBlurStyle(node);
@@ -672,6 +765,9 @@ class ForegroundBlurStyleModifier extends ModifierWithKey {
 }
 ForegroundBlurStyleModifier.identity = Symbol('foregroundBlurStyle');
 class BackgroundImagePositionModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     let _a, _b;
     if (reset) {
@@ -694,6 +790,9 @@ class BackgroundImagePositionModifier extends ModifierWithKey {
 }
 BackgroundImagePositionModifier.identity = Symbol('backgroundImagePosition');
 class LinearGradientBlurModifier extends Modifier {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().common.resetLinearGradientBlur(node);
@@ -705,6 +804,9 @@ class LinearGradientBlurModifier extends Modifier {
 }
 LinearGradientBlurModifier.identity = Symbol('linearGradientBlur');
 class BackgroundImageModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().common.resetBackgroundImage(node);
@@ -720,6 +822,9 @@ class BackgroundImageModifier extends ModifierWithKey {
 }
 BackgroundImageModifier.identity = Symbol('backgroundImage');
 class BackgroundBlurStyleModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().common.resetBackgroundBlurStyle(node);
@@ -731,6 +836,9 @@ class BackgroundBlurStyleModifier extends ModifierWithKey {
 }
 BackgroundBlurStyleModifier.identity = Symbol('backgroundBlurStyle');
 class BackgroundImageSizeModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     let _a, _b;
     if (reset) {
@@ -752,6 +860,9 @@ class BackgroundImageSizeModifier extends ModifierWithKey {
 }
 BackgroundImageSizeModifier.identity = Symbol('backgroundImageSize');
 class TranslateModifier extends Modifier {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().common.resetTranslate(node);
@@ -763,6 +874,9 @@ class TranslateModifier extends Modifier {
 }
 TranslateModifier.identity = Symbol('translate');
 class ScaleModifier extends Modifier {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().common.resetScale(node);
@@ -774,6 +888,9 @@ class ScaleModifier extends Modifier {
 }
 ScaleModifier.identity = Symbol('scale');
 class RotateModifier extends Modifier {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().common.resetRotate(node);
@@ -785,6 +902,9 @@ class RotateModifier extends Modifier {
 }
 RotateModifier.identity = Symbol('rotate');
 class GeometryTransitionModifier extends Modifier {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().common.resetGeometryTransition(node);
@@ -796,6 +916,9 @@ class GeometryTransitionModifier extends Modifier {
 }
 GeometryTransitionModifier.identity = Symbol('geometryTransition');
 class ClipModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().common.resetClip(node);
@@ -810,6 +933,9 @@ class ClipModifier extends ModifierWithKey {
 }
 ClipModifier.identity = Symbol('clip');
 class MaskModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().common.resetMask(node);
@@ -824,6 +950,9 @@ class MaskModifier extends ModifierWithKey {
 }
 MaskModifier.identity = Symbol('mask');
 class PixelStretchEffectModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().common.resetPixelStretchEffect(node);
@@ -841,6 +970,9 @@ class PixelStretchEffectModifier extends ModifierWithKey {
 }
 PixelStretchEffectModifier.identity = Symbol('pixelStretchEffect');
 class LightUpEffectModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().common.resetLightUpEffect(node);
@@ -852,6 +984,9 @@ class LightUpEffectModifier extends ModifierWithKey {
 }
 LightUpEffectModifier.identity = Symbol('lightUpEffect');
 class SphericalEffectModifier extends Modifier {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().common.resetSphericalEffect(node);
@@ -863,6 +998,9 @@ class SphericalEffectModifier extends Modifier {
 }
 SphericalEffectModifier.identity = Symbol('sphericalEffect');
 class RenderGroupModifier extends Modifier {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().common.resetRenderGroup(node);
@@ -874,6 +1012,9 @@ class RenderGroupModifier extends Modifier {
 }
 RenderGroupModifier.identity = Symbol('renderGroup');
 class RenderFitModifier extends Modifier {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().common.resetRenderFit(node);
@@ -885,6 +1026,9 @@ class RenderFitModifier extends Modifier {
 }
 RenderFitModifier.identity = Symbol('renderFit');
 class UseEffectModifier extends Modifier {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().common.resetUseEffect(node);
@@ -896,6 +1040,9 @@ class UseEffectModifier extends Modifier {
 }
 UseEffectModifier.identity = Symbol('useEffect');
 class ForegroundColorModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().common.resetForegroundColor(node);
@@ -915,6 +1062,9 @@ class ForegroundColorModifier extends ModifierWithKey {
 }
 ForegroundColorModifier.identity = Symbol('foregroundColor');
 class MotionPathModifier extends Modifier {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().common.resetMotionPath(node);
@@ -926,6 +1076,9 @@ class MotionPathModifier extends Modifier {
 }
 MotionPathModifier.identity = Symbol('motionPath');
 class GroupDefaultFocusModifier extends Modifier {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().common.resetGroupDefaultFocus(node);
@@ -937,6 +1090,9 @@ class GroupDefaultFocusModifier extends Modifier {
 }
 GroupDefaultFocusModifier.identity = Symbol('groupDefaultFocus');
 class FocusOnTouchModifier extends Modifier {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().common.resetFocusOnTouch(node);
@@ -948,6 +1104,9 @@ class FocusOnTouchModifier extends Modifier {
 }
 FocusOnTouchModifier.identity = Symbol('focusOnTouch');
 class OffsetModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     let _a, _b;
     if (reset) {
@@ -964,6 +1123,9 @@ class OffsetModifier extends ModifierWithKey {
 }
 OffsetModifier.identity = Symbol('offset');
 class MarkAnchorModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     let _a, _b;
     if (reset) {
@@ -980,6 +1142,9 @@ class MarkAnchorModifier extends ModifierWithKey {
 }
 MarkAnchorModifier.identity = Symbol('markAnchor');
 class DefaultFocusModifier extends Modifier {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().common.resetDefaultFocus(node);
@@ -991,6 +1156,9 @@ class DefaultFocusModifier extends Modifier {
 }
 DefaultFocusModifier.identity = Symbol('defaultFocus');
 class FocusableModifier extends Modifier {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().common.resetFocusable(node);
@@ -1002,6 +1170,9 @@ class FocusableModifier extends Modifier {
 }
 FocusableModifier.identity = Symbol('focusable');
 class TouchableModifier extends Modifier {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().common.resetTouchable(node);
@@ -1013,6 +1184,9 @@ class TouchableModifier extends Modifier {
 }
 TouchableModifier.identity = Symbol('touchable');
 class MarginModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().common.resetMargin(node);
@@ -1030,6 +1204,9 @@ class MarginModifier extends ModifierWithKey {
 }
 MarginModifier.identity = Symbol('margin');
 class PaddingModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().common.resetPadding(node);
@@ -1047,6 +1224,9 @@ class PaddingModifier extends ModifierWithKey {
 }
 PaddingModifier.identity = Symbol('padding');
 class VisibilityModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().common.resetVisibility(node);
@@ -1061,6 +1241,9 @@ class VisibilityModifier extends ModifierWithKey {
 }
 VisibilityModifier.identity = Symbol('visibility');
 class AccessibilityTextModifier extends Modifier {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().common.resetAccessibilityText(node);
@@ -1072,6 +1255,9 @@ class AccessibilityTextModifier extends Modifier {
 }
 AccessibilityTextModifier.identity = Symbol('accessibilityText');
 class AllowDropModifier extends Modifier {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().common.resetAllowDrop(node);
@@ -1083,6 +1269,9 @@ class AllowDropModifier extends Modifier {
 }
 AllowDropModifier.identity = Symbol('allowDrop');
 class AccessibilityLevelModifier extends Modifier {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().common.resetAccessibilityLevel(node);
@@ -1094,6 +1283,9 @@ class AccessibilityLevelModifier extends Modifier {
 }
 AccessibilityLevelModifier.identity = Symbol('accessibilityLevel');
 class AccessibilityDescriptionModifier extends Modifier {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().common.resetAccessibilityDescription(node);
@@ -1105,6 +1297,9 @@ class AccessibilityDescriptionModifier extends Modifier {
 }
 AccessibilityDescriptionModifier.identity = Symbol('accessibilityDescription');
 class DirectionModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().common.resetDirection(node);
@@ -1119,6 +1314,9 @@ class DirectionModifier extends ModifierWithKey {
 }
 DirectionModifier.identity = Symbol('direction');
 class AlignRulesModifier extends Modifier {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().common.resetAlignRules(node);
@@ -1130,6 +1328,9 @@ class AlignRulesModifier extends Modifier {
 }
 AlignRulesModifier.identity = Symbol('alignRules');
 class ExpandSafeAreaModifier extends Modifier {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().common.resetExpandSafeArea(node);
@@ -1141,6 +1342,9 @@ class ExpandSafeAreaModifier extends Modifier {
 }
 ExpandSafeAreaModifier.identity = Symbol('expandSafeArea');
 class GridSpanModifier extends Modifier {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().common.resetGridSpan(node);
@@ -1152,6 +1356,9 @@ class GridSpanModifier extends Modifier {
 }
 GridSpanModifier.identity = Symbol('gridSpan');
 class GridOffsetModifier extends Modifier {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().common.resetGridOffset(node);
@@ -1163,6 +1370,9 @@ class GridOffsetModifier extends Modifier {
 }
 GridOffsetModifier.identity = Symbol('gridOffset');
 class AlignSelfModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().common.resetAlignSelf(node);
@@ -1177,6 +1387,9 @@ class AlignSelfModifier extends ModifierWithKey {
 }
 AlignSelfModifier.identity = Symbol('alignSelf');
 class SizeModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().common.resetSize(node);
@@ -1192,6 +1405,9 @@ class SizeModifier extends ModifierWithKey {
 }
 SizeModifier.identity = Symbol('size');
 class DisplayPriorityModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().common.resetDisplayPriority(node);
@@ -1206,6 +1422,9 @@ class DisplayPriorityModifier extends ModifierWithKey {
 }
 DisplayPriorityModifier.identity = Symbol('displayPriority');
 class IDModifier extends Modifier {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().common.resetId(node);
@@ -1217,6 +1436,9 @@ class IDModifier extends Modifier {
 }
 IDModifier.identity = Symbol('id');
 class KeyModifier extends Modifier {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().common.resetKey(node);
@@ -1228,6 +1450,9 @@ class KeyModifier extends Modifier {
 }
 KeyModifier.identity = Symbol('key');
 class RestoreIdModifier extends Modifier {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().common.resetRestoreId(node);
@@ -1239,6 +1464,9 @@ class RestoreIdModifier extends Modifier {
 }
 RestoreIdModifier.identity = Symbol('restoreId');
 class TabIndexModifier extends Modifier {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().common.resetTabIndex(node);
@@ -1250,6 +1478,9 @@ class TabIndexModifier extends Modifier {
 }
 TabIndexModifier.identity = Symbol('tabIndex');
 class ObscuredModifier extends Modifier {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().common.resetObscured(node);
@@ -1261,6 +1492,9 @@ class ObscuredModifier extends Modifier {
 }
 ObscuredModifier.identity = Symbol('obscured');
 class MouseResponseRegionModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     let _a, _b, _c, _d, _e, _f, _g, _h;
     if (reset) {
@@ -1315,6 +1549,9 @@ class MouseResponseRegionModifier extends ModifierWithKey {
 }
 MouseResponseRegionModifier.identity = Symbol('mouseResponseRegion');
 class ResponseRegionModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     let _a, _b, _c, _d, _e, _f, _g, _h;
     if (reset) {
@@ -1369,6 +1606,9 @@ class ResponseRegionModifier extends ModifierWithKey {
 }
 ResponseRegionModifier.identity = Symbol('responseRegion');
 class FlexGrowModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().common.resetFlexGrow(node);
@@ -1383,6 +1623,9 @@ class FlexGrowModifier extends ModifierWithKey {
 }
 FlexGrowModifier.identity = Symbol('flexGrow');
 class FlexShrinkModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().common.resetFlexShrink(node);
@@ -1397,6 +1640,9 @@ class FlexShrinkModifier extends ModifierWithKey {
 }
 FlexShrinkModifier.identity = Symbol('flexShrink');
 class AspectRatioModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().common.resetAspectRatio(node);
@@ -1411,6 +1657,9 @@ class AspectRatioModifier extends ModifierWithKey {
 }
 AspectRatioModifier.identity = Symbol('aspectRatio');
 class ConstraintSizeModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().common.resetConstraintSize(node);
@@ -1428,6 +1677,9 @@ class ConstraintSizeModifier extends ModifierWithKey {
 }
 ConstraintSizeModifier.identity = Symbol('constraintSize');
 class FlexBasisModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().common.resetFlexBasis(node);
@@ -1442,6 +1694,9 @@ class FlexBasisModifier extends ModifierWithKey {
 }
 FlexBasisModifier.identity = Symbol('flexBasis');
 class LayoutWeightModifier extends Modifier {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().common.resetLayoutWeight(node);
@@ -1453,6 +1708,9 @@ class LayoutWeightModifier extends Modifier {
 }
 LayoutWeightModifier.identity = Symbol('layoutWeight');
 class EnabledModifier extends Modifier {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().common.resetEnabled(node);
@@ -1464,6 +1722,9 @@ class EnabledModifier extends Modifier {
 }
 EnabledModifier.identity = Symbol('enabled');
 class DraggableModifier extends Modifier {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().common.resetDraggable(node);
@@ -1475,6 +1736,9 @@ class DraggableModifier extends Modifier {
 }
 DraggableModifier.identity = Symbol('draggable');
 class AccessibilityGroupModifier extends Modifier {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().common.resetAccessibilityGroup(node);
@@ -1486,6 +1750,9 @@ class AccessibilityGroupModifier extends Modifier {
 }
 AccessibilityGroupModifier.identity = Symbol('accessibilityGroup');
 class HoverEffectModifier extends Modifier {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().common.resetHoverEffect(node);
@@ -1497,6 +1764,9 @@ class HoverEffectModifier extends Modifier {
 }
 HoverEffectModifier.identity = Symbol('hoverEffect');
 class ClickEffectModifier extends Modifier {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset || !this.value) {
       GetUINativeModule().common.resetClickEffect(node);
@@ -1508,6 +1778,9 @@ class ClickEffectModifier extends Modifier {
 }
 ClickEffectModifier.identity = Symbol('clickEffect');
 class KeyBoardShortCutModifier extends Modifier {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().common.resetKeyBoardShortCut(node);
@@ -1519,6 +1792,9 @@ class KeyBoardShortCutModifier extends Modifier {
 }
 KeyBoardShortCutModifier.identity = Symbol('keyboardShortcut');
 class TransitionModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().common.resetTransition(node);
@@ -1533,6 +1809,9 @@ class TransitionModifier extends ModifierWithKey {
 }
 TransitionModifier.identity = Symbol('transition');
 class SharedTransitionModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().common.resetSharedTransition(node);
@@ -2627,6 +2906,9 @@ const isNonEmptyMap = (val) => val instanceof Map && val.size > 0;
 const isTruthyString = (val) => typeof val === 'string' && val.trim() !== '';
 /// <reference path='./import.ts' />
 class BlankColorModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().blank.resetColor(node);
@@ -2646,6 +2928,9 @@ class BlankColorModifier extends ModifierWithKey {
 }
 BlankColorModifier.identity = Symbol('blankColor');
 class ArkBlankComponent extends ArkComponent {
+  constructor(nativePtr) {
+    super(nativePtr);
+  }
   color(value) {
     modifierWithKey(this._modifiersWithKeys, BlankColorModifier.identity, BlankColorModifier, value);
     return this;
@@ -2663,6 +2948,9 @@ globalThis.Blank.attributeModifier = function (modifier) {
 };
 /// <reference path='./import.ts' />
 class ColumnAlignItemsModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().column.resetAlignItems(node);
@@ -2677,6 +2965,9 @@ class ColumnAlignItemsModifier extends ModifierWithKey {
 }
 ColumnAlignItemsModifier.identity = Symbol('columnAlignItems');
 class ColumnJustifyContentModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().column.resetJustifyContent(node);
@@ -2691,6 +2982,9 @@ class ColumnJustifyContentModifier extends ModifierWithKey {
 }
 ColumnJustifyContentModifier.identity = Symbol('columnJustifyContent');
 class ArkColumnComponent extends ArkComponent {
+  constructor(nativePtr) {
+    super(nativePtr);
+  }
   alignItems(value) {
     modifierWithKey(this._modifiersWithKeys, ColumnAlignItemsModifier.identity, ColumnAlignItemsModifier, value);
     return this;
@@ -2718,6 +3012,9 @@ globalThis.Column.attributeModifier = function (modifier) {
 };
 /// <reference path='./import.ts' />
 class ColumnSplitDividerModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().columnSplit.resetDivider(node);
@@ -2733,6 +3030,9 @@ class ColumnSplitDividerModifier extends ModifierWithKey {
 }
 ColumnSplitDividerModifier.identity = Symbol('columnSplitDivider');
 class ColumnSplitResizeableModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().columnSplit.resetResizeable(node);
@@ -2747,6 +3047,9 @@ class ColumnSplitResizeableModifier extends ModifierWithKey {
 }
 ColumnSplitResizeableModifier.identity = Symbol('columnSplitResizeable');
 class ArkColumnSplitComponent extends ArkComponent {
+  constructor(nativePtr) {
+    super(nativePtr);
+  }
   resizeable(value) {
     modifierWithKey(this._modifiersWithKeys, ColumnSplitResizeableModifier.identity, ColumnSplitResizeableModifier, value);
     return this;
@@ -2771,6 +3074,9 @@ globalThis.ColumnSplit.attributeModifier = function (modifier) {
 };
 /// <reference path='./import.ts' />
 class DividerVerticalModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().divider.resetVertical(node);
@@ -2785,6 +3091,9 @@ class DividerVerticalModifier extends ModifierWithKey {
 }
 DividerVerticalModifier.identity = Symbol('dividerVertical');
 class DividerLineCapModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().divider.resetLineCap(node);
@@ -2799,6 +3108,9 @@ class DividerLineCapModifier extends ModifierWithKey {
 }
 DividerLineCapModifier.identity = Symbol('dividerLineCap');
 class DividerColorModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().divider.resetColor(node);
@@ -2813,6 +3125,9 @@ class DividerColorModifier extends ModifierWithKey {
 }
 DividerColorModifier.identity = Symbol('dividerColor');
 class DividerStrokeWidthModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().divider.resetStrokeWidth(node);
@@ -2827,6 +3142,9 @@ class DividerStrokeWidthModifier extends ModifierWithKey {
 }
 DividerStrokeWidthModifier.identity = Symbol('dividerStrokeWidth');
 class ArkDividerComponent extends ArkComponent {
+  constructor(nativePtr) {
+    super(nativePtr);
+  }
   vertical(value) {
     modifierWithKey(this._modifiersWithKeys, DividerVerticalModifier.identity, DividerVerticalModifier, value);
     return this;
@@ -2856,6 +3174,9 @@ globalThis.Divider.attributeModifier = function (modifier) {
 };
 /// <reference path='./import.ts' />
 class ArkFlexComponent extends ArkComponent {
+  constructor(nativePtr) {
+    super(nativePtr);
+  }
   pointLight(value) {
     throw new Error('Method not implemented.');
   }
@@ -2875,6 +3196,9 @@ globalThis.Flex.attributeModifier = function (modifier) {
 };
 /// <reference path='./import.ts' />
 class GridRowAlignItemsModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().gridRow.resetAlignItems(node);
@@ -2889,6 +3213,9 @@ class GridRowAlignItemsModifier extends ModifierWithKey {
 }
 GridRowAlignItemsModifier.identity = Symbol('gridRowAlignItems');
 class ArkGridRowComponent extends ArkComponent {
+  constructor(nativePtr) {
+    super(nativePtr);
+  }
   onBreakpointChange(callback) {
     throw new Error('Method not implemented.');
   }
@@ -2912,6 +3239,9 @@ globalThis.GridRow.attributeModifier = function (modifier) {
 };
 /// <reference path='./import.ts' />
 class ArkGridComponent extends ArkComponent {
+  constructor(nativePtr) {
+    super(nativePtr);
+  }
   columnsTemplate(value) {
     modifierWithKey(this._modifiersWithKeys, GridColumnsTemplateModifier.identity, GridColumnsTemplateModifier, value);
     return this;
@@ -3290,6 +3620,9 @@ globalThis.Grid.attributeModifier = function (modifier) {
 };
 /// <reference path='./import.ts' />
 class GridColSpanModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().gridCol.resetSpan(node);
@@ -3322,6 +3655,9 @@ class GridColSpanModifier extends ModifierWithKey {
 }
 GridColSpanModifier.identity = Symbol('gridColSpan');
 class GridColOffsetModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().gridCol.resetGridColOffset(node);
@@ -3354,6 +3690,9 @@ class GridColOffsetModifier extends ModifierWithKey {
 }
 GridColOffsetModifier.identity = Symbol('gridColOffset');
 class GridColOrderModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().gridCol.resetOrder(node);
@@ -3386,6 +3725,9 @@ class GridColOrderModifier extends ModifierWithKey {
 }
 GridColOrderModifier.identity = Symbol('gridColOrder');
 class ArkGridColComponent extends ArkComponent {
+  constructor(nativePtr) {
+    super(nativePtr);
+  }
   span(value) {
     modifierWithKey(this._modifiersWithKeys, GridColSpanModifier.identity, GridColSpanModifier, value);
     return this;
@@ -3411,6 +3753,9 @@ globalThis.GridCol.attributeModifier = function (modifier) {
 };
 /// <reference path='./import.ts' />
 class ImageColorFilterModifier extends Modifier {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().image.resetColorFilter(node);
@@ -3422,6 +3767,9 @@ class ImageColorFilterModifier extends Modifier {
 }
 ImageColorFilterModifier.identity = Symbol('imageColorFilter');
 class ImageFillColorModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().image.resetFillColor(node);
@@ -3436,6 +3784,9 @@ class ImageFillColorModifier extends ModifierWithKey {
 }
 ImageFillColorModifier.identity = Symbol('imageFillColor');
 class ImageAltModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().image.resetAlt(node);
@@ -3450,6 +3801,9 @@ class ImageAltModifier extends ModifierWithKey {
 }
 ImageAltModifier.identity = Symbol('imageAlt');
 class ImageCopyOptionModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().image.resetCopyOption(node);
@@ -3464,6 +3818,9 @@ class ImageCopyOptionModifier extends ModifierWithKey {
 }
 ImageCopyOptionModifier.identity = Symbol('imageCopyOption');
 class ImageAutoResizeModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().image.resetAutoResize(node);
@@ -3478,6 +3835,9 @@ class ImageAutoResizeModifier extends ModifierWithKey {
 }
 ImageAutoResizeModifier.identity = Symbol('imageAutoResize');
 class ImageFitOriginalSizeModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().image.resetFitOriginalSize(node);
@@ -3492,6 +3852,9 @@ class ImageFitOriginalSizeModifier extends ModifierWithKey {
 }
 ImageFitOriginalSizeModifier.identity = Symbol('imageFitOriginalSize');
 class ImageDraggableModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().image.resetDraggable(node);
@@ -3506,6 +3869,9 @@ class ImageDraggableModifier extends ModifierWithKey {
 }
 ImageDraggableModifier.identity = Symbol('imageDraggable');
 class ImageInterpolationModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().image.resetImageInterpolation(node);
@@ -3520,6 +3886,9 @@ class ImageInterpolationModifier extends ModifierWithKey {
 }
 ImageInterpolationModifier.identity = Symbol('imageInterpolation');
 class ImageSourceSizeModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().image.resetSourceSize(node);
@@ -3535,6 +3904,9 @@ class ImageSourceSizeModifier extends ModifierWithKey {
 }
 ImageSourceSizeModifier.identity = Symbol('imageSourceSize');
 class ImageMatchTextDirectionModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().image.resetMatchTextDirection(node);
@@ -3549,6 +3921,9 @@ class ImageMatchTextDirectionModifier extends ModifierWithKey {
 }
 ImageMatchTextDirectionModifier.identity = Symbol('imageMatchTextDirection');
 class ImageObjectRepeatModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().image.resetObjectRepeat(node);
@@ -3563,6 +3938,9 @@ class ImageObjectRepeatModifier extends ModifierWithKey {
 }
 ImageObjectRepeatModifier.identity = Symbol('imageObjectRepeat');
 class ImageRenderModeModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().image.resetRenderMode(node);
@@ -3577,6 +3955,9 @@ class ImageRenderModeModifier extends ModifierWithKey {
 }
 ImageRenderModeModifier.identity = Symbol('imageRenderMode');
 class ImageSyncLoadModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().image.resetSyncLoad(node);
@@ -3591,6 +3972,9 @@ class ImageSyncLoadModifier extends ModifierWithKey {
 }
 ImageSyncLoadModifier.identity = Symbol('imageSyncLoad');
 class ImageObjectFitModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().image.resetObjectFit(node);
@@ -3605,6 +3989,9 @@ class ImageObjectFitModifier extends ModifierWithKey {
 }
 ImageObjectFitModifier.identity = Symbol('imageObjectFit');
 class ArkImageComponent extends ArkComponent {
+  constructor(nativePtr) {
+    super(nativePtr);
+  }
   onGestureJudgeBegin(callback) {
     throw new Error('Method not implemented.');
   }
@@ -3697,6 +4084,9 @@ globalThis.Image.attributeModifier = function (modifier) {
 };
 /// <reference path='./import.ts' />
 class ImageAnimatorImagesModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().imageAnimator.resetImages(node);
@@ -3771,6 +4161,9 @@ class ImageAnimatorImagesModifier extends ModifierWithKey {
 }
 ImageAnimatorImagesModifier.identity = Symbol('imageAnimatorImages');
 class ImageAnimatorDurationModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().imageAnimator.resetDuration(node);
@@ -3785,6 +4178,9 @@ class ImageAnimatorDurationModifier extends ModifierWithKey {
 }
 ImageAnimatorDurationModifier.identity = Symbol('imageAnimatorDuration');
 class ImageAnimatorReverseModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().imageAnimator.resetReverse(node);
@@ -3799,6 +4195,9 @@ class ImageAnimatorReverseModifier extends ModifierWithKey {
 }
 ImageAnimatorReverseModifier.identity = Symbol('imageAnimatorReverse');
 class ImageAnimatorStateModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().imageAnimator.resetState(node);
@@ -3813,6 +4212,9 @@ class ImageAnimatorStateModifier extends ModifierWithKey {
 }
 ImageAnimatorStateModifier.identity = Symbol('imageAnimatorState');
 class ImageAnimatorFixedSizeModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().imageAnimator.resetFixedSize(node);
@@ -3827,6 +4229,9 @@ class ImageAnimatorFixedSizeModifier extends ModifierWithKey {
 }
 ImageAnimatorFixedSizeModifier.identity = Symbol('imageAnimatorFixedSize');
 class ImageAnimatorFillModeModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().imageAnimator.resetFillMode(node);
@@ -3841,6 +4246,9 @@ class ImageAnimatorFillModeModifier extends ModifierWithKey {
 }
 ImageAnimatorFillModeModifier.identity = Symbol('imageAnimatorFillMode');
 class ImageAnimatorIterationsModeModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().imageAnimator.resetIterations(node);
@@ -3855,6 +4263,9 @@ class ImageAnimatorIterationsModeModifier extends ModifierWithKey {
 }
 ImageAnimatorIterationsModeModifier.identity = Symbol('imageAnimatorIterationsMode');
 class ArkImageAnimatorComponent extends ArkComponent {
+  constructor(nativePtr) {
+    super(nativePtr);
+  }
   images(value) {
     modifierWithKey(this._modifiersWithKeys, ImageAnimatorImagesModifier.identity, ImageAnimatorImagesModifier, value);
     return this;
@@ -3917,6 +4328,9 @@ globalThis.ImageAnimator.attributeModifier = function (modifier) {
 };
 /// <reference path='./import.ts' />
 class ImageSpanObjectFitModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().imageSpan.resetObjectFit(node);
@@ -3931,6 +4345,9 @@ class ImageSpanObjectFitModifier extends ModifierWithKey {
 }
 ImageSpanObjectFitModifier.identity = Symbol('imageSpanObjectFit');
 class ImageSpanVerticalAlignModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().imageSpan.resetVerticalAlign(node);
@@ -3945,6 +4362,9 @@ class ImageSpanVerticalAlignModifier extends ModifierWithKey {
 }
 ImageSpanVerticalAlignModifier.identity = Symbol('imageSpanVerticalAlign');
 class ArkImageSpanComponent extends ArkComponent {
+  constructor(nativePtr) {
+    super(nativePtr);
+  }
   objectFit(value) {
     modifierWithKey(this._modifiersWithKeys, ImageSpanObjectFitModifier.identity, ImageSpanObjectFitModifier, value);
     return this;
@@ -3966,6 +4386,9 @@ globalThis.ImageSpan.attributeModifier = function (modifier) {
 };
 /// <reference path='./import.ts' />
 class PatternLockActiveColorModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().patternLock.resetActiveColor(node);
@@ -3980,6 +4403,9 @@ class PatternLockActiveColorModifier extends ModifierWithKey {
 }
 PatternLockActiveColorModifier.identity = Symbol('patternLockActiveColor');
 class PatternLockSelectedColorModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().patternLock.resetSelectedColor(node);
@@ -3994,6 +4420,9 @@ class PatternLockSelectedColorModifier extends ModifierWithKey {
 }
 PatternLockSelectedColorModifier.identity = Symbol('patternLockSelectedColor');
 class PatternLockPathColorModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().patternLock.resetPathColor(node);
@@ -4008,6 +4437,9 @@ class PatternLockPathColorModifier extends ModifierWithKey {
 }
 PatternLockPathColorModifier.identity = Symbol('patternLockPathColor');
 class PatternLockRegularColorModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().patternLock.resetRegularColor(node);
@@ -4022,6 +4454,9 @@ class PatternLockRegularColorModifier extends ModifierWithKey {
 }
 PatternLockRegularColorModifier.identity = Symbol('patternLockRegularColor');
 class PatternLockSideLengthModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().patternLock.resetSideLength(node);
@@ -4036,6 +4471,9 @@ class PatternLockSideLengthModifier extends ModifierWithKey {
 }
 PatternLockSideLengthModifier.identity = Symbol('patternLockSideLength');
 class PatternLockPathStrokeModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().patternLock.resetPathStrokeWidth(node);
@@ -4050,6 +4488,9 @@ class PatternLockPathStrokeModifier extends ModifierWithKey {
 }
 PatternLockPathStrokeModifier.identity = Symbol('patternLockPathStroke');
 class PatternLockCircleRadiusModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().patternLock.resetCircleRadius(node);
@@ -4064,6 +4505,9 @@ class PatternLockCircleRadiusModifier extends ModifierWithKey {
 }
 PatternLockCircleRadiusModifier.identity = Symbol('patternLockCircleRadius');
 class PatternLockAutoResetModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().patternLock.resetAutoReset(node);
@@ -4078,6 +4522,9 @@ class PatternLockAutoResetModifier extends ModifierWithKey {
 }
 PatternLockAutoResetModifier.identity = Symbol('patternlockautoreset');
 class ArkPatternLockComponent extends ArkComponent {
+  constructor(nativePtr) {
+    super(nativePtr);
+  }
   sideLength(value) {
     modifierWithKey(this._modifiersWithKeys, PatternLockSideLengthModifier.identity, PatternLockSideLengthModifier, value);
     return this;
@@ -4132,6 +4579,9 @@ globalThis.PatternLock.attributeModifier = function (modifier) {
 };
 /// <reference path='./import.ts' />
 class RichEditorCopyOptionsModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().richEditor.resetCopyOptions(node);
@@ -4146,6 +4596,9 @@ class RichEditorCopyOptionsModifier extends ModifierWithKey {
 }
 RichEditorCopyOptionsModifier.identity = Symbol('richEditorCopyOptions');
 class ArkRichEditorComponent extends ArkComponent {
+  constructor(nativePtr) {
+    super(nativePtr);
+  }
   enableDataDetector(enable) {
     throw new Error('Method not implemented.');
   }
@@ -4196,6 +4649,9 @@ globalThis.RichEditor.attributeModifier = function (modifier) {
 };
 /// <reference path='./import.ts' />
 class RowAlignItemsModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().row.resetAlignItems(node);
@@ -4210,6 +4666,9 @@ class RowAlignItemsModifier extends ModifierWithKey {
 }
 RowAlignItemsModifier.identity = Symbol('rowAlignItems');
 class RowJustifyContentlModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().row.resetJustifyContent(node);
@@ -4224,6 +4683,9 @@ class RowJustifyContentlModifier extends ModifierWithKey {
 }
 RowJustifyContentlModifier.identity = Symbol('rowJustifyContent');
 class ArkRowComponent extends ArkComponent {
+  constructor(nativePtr) {
+    super(nativePtr);
+  }
   alignItems(value) {
     modifierWithKey(this._modifiersWithKeys, RowAlignItemsModifier.identity, RowAlignItemsModifier, value);
     return this;
@@ -4251,6 +4713,9 @@ globalThis.Row.attributeModifier = function (modifier) {
 };
 /// <reference path='./import.ts' />
 class RowSplitResizeableModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().rowSplit.resetResizeable(node);
@@ -4262,6 +4727,9 @@ class RowSplitResizeableModifier extends ModifierWithKey {
 }
 RowSplitResizeableModifier.identity = Symbol('rowSplitResizeable');
 class ArkRowSplitComponent extends ArkComponent {
+  constructor(nativePtr) {
+    super(nativePtr);
+  }
   resizeable(value) {
     modifierWithKey(this._modifiersWithKeys, RowSplitResizeableModifier.identity, RowSplitResizeableModifier, value);
     return this;
@@ -4282,6 +4750,9 @@ globalThis.RowSplit.attributeModifier = function (modifier) {
 };
 /// <reference path='./import.ts' />
 class SearchSelectionMenuHiddenModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().search.resetSelectionMenuHidden(node);
@@ -4296,6 +4767,9 @@ class SearchSelectionMenuHiddenModifier extends ModifierWithKey {
 }
 SearchSelectionMenuHiddenModifier.identity = Symbol('searchSelectionMenuHidden');
 class SearchCaretStyleModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().search.resetCaretStyle(node);
@@ -4311,6 +4785,9 @@ class SearchCaretStyleModifier extends ModifierWithKey {
 }
 SearchCaretStyleModifier.identity = Symbol('searchCaretStyle');
 class SearchEnableKeyboardOnFocusModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().search.resetEnableKeyboardOnFocus(node);
@@ -4325,6 +4802,9 @@ class SearchEnableKeyboardOnFocusModifier extends ModifierWithKey {
 }
 SearchEnableKeyboardOnFocusModifier.identity = Symbol('searchEnableKeyboardOnFocus');
 class SearchSearchIconModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().search.resetSearchIcon(node);
@@ -4341,6 +4821,9 @@ class SearchSearchIconModifier extends ModifierWithKey {
 }
 SearchSearchIconModifier.identity = Symbol('searchSearchIcon');
 class SearchPlaceholderFontModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().search.resetPlaceholderFont(node);
@@ -4358,6 +4841,9 @@ class SearchPlaceholderFontModifier extends ModifierWithKey {
 }
 SearchPlaceholderFontModifier.identity = Symbol('searchPlaceholderFont');
 class SearchSearchButtonModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().search.resetSearchButton(node);
@@ -4374,6 +4860,9 @@ class SearchSearchButtonModifier extends ModifierWithKey {
 }
 SearchSearchButtonModifier.identity = Symbol('searchSearchButton');
 class SearchFontColorModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().search.resetFontColor(node);
@@ -4388,6 +4877,9 @@ class SearchFontColorModifier extends ModifierWithKey {
 }
 SearchFontColorModifier.identity = Symbol('searchFontColor');
 class SearchCopyOptionModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().search.resetCopyOption(node);
@@ -4402,6 +4894,9 @@ class SearchCopyOptionModifier extends ModifierWithKey {
 }
 SearchCopyOptionModifier.identity = Symbol('searchCopyOption');
 class SearchTextFontModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().search.resetTextFont(node);
@@ -4419,6 +4914,9 @@ class SearchTextFontModifier extends ModifierWithKey {
 }
 SearchTextFontModifier.identity = Symbol('searchTextFont');
 class SearchPlaceholderColorModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().search.resetPlaceholderColor(node);
@@ -4433,6 +4931,9 @@ class SearchPlaceholderColorModifier extends ModifierWithKey {
 }
 SearchPlaceholderColorModifier.identity = Symbol('searchPlaceholderColor');
 class SearchCancelButtonModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     let _a, _b, _c;
     if (reset) {
@@ -4452,6 +4953,9 @@ class SearchCancelButtonModifier extends ModifierWithKey {
 }
 SearchCancelButtonModifier.identity = Symbol('searchCancelButton');
 class SearchTextAlignModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().search.resetTextAlign(node);
@@ -4466,6 +4970,9 @@ class SearchTextAlignModifier extends ModifierWithKey {
 }
 SearchTextAlignModifier.identity = Symbol('searchTextAlign');
 class ArkSearchComponent extends ArkComponent {
+  constructor(nativePtr) {
+    super(nativePtr);
+  }
   onEditChange(callback) {
     throw new Error('Method not implemented.');
   }
@@ -4573,6 +5080,9 @@ globalThis.Search.attributeModifier = function (modifier) {
 };
 /// <reference path='./import.ts' />
 class SpanFontSizeModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().span.resetFontSize(node);
@@ -4587,6 +5097,9 @@ class SpanFontSizeModifier extends ModifierWithKey {
 }
 SpanFontSizeModifier.identity = Symbol('spanFontSize');
 class SpanFontFamilyModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().span.resetFontFamily(node);
@@ -4601,6 +5114,9 @@ class SpanFontFamilyModifier extends ModifierWithKey {
 }
 SpanFontFamilyModifier.identity = Symbol('spanFontFamily');
 class SpanLineHeightModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().span.resetLineHeight(node);
@@ -4615,6 +5131,9 @@ class SpanLineHeightModifier extends ModifierWithKey {
 }
 SpanLineHeightModifier.identity = Symbol('spanLineHeight');
 class SpanFontStyleModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().span.resetFontStyle(node);
@@ -4629,6 +5148,9 @@ class SpanFontStyleModifier extends ModifierWithKey {
 }
 SpanFontStyleModifier.identity = Symbol('spanFontStyle');
 class SpanTextCaseModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().span.resetTextCase(node);
@@ -4643,6 +5165,9 @@ class SpanTextCaseModifier extends ModifierWithKey {
 }
 SpanTextCaseModifier.identity = Symbol('spanTextCase');
 class SpanFontColorModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().span.resetFontColor(node);
@@ -4657,6 +5182,9 @@ class SpanFontColorModifier extends ModifierWithKey {
 }
 SpanFontColorModifier.identity = Symbol('spanFontColor');
 class SpanLetterSpacingModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().span.resetLetterSpacing(node);
@@ -4668,6 +5196,9 @@ class SpanLetterSpacingModifier extends ModifierWithKey {
 }
 SpanLetterSpacingModifier.identity = Symbol('spanLetterSpacing');
 class SpanFontModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().span.resetFont(node);
@@ -4697,6 +5228,9 @@ class SpanFontModifier extends ModifierWithKey {
 }
 SpanFontModifier.identity = Symbol('spanFont');
 class SpanDecorationModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().span.resetDecoration(node);
@@ -4722,6 +5256,9 @@ class SpanDecorationModifier extends ModifierWithKey {
 }
 SpanDecorationModifier.identity = Symbol('spanDecoration');
 class SpanFontWeightModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().span.resetFontWeight(node);
@@ -4733,6 +5270,9 @@ class SpanFontWeightModifier extends ModifierWithKey {
 }
 SpanFontWeightModifier.identity = Symbol('spanfontweight');
 class ArkSpanComponent extends ArkComponent {
+  constructor(nativePtr) {
+    super(nativePtr);
+  }
   decoration(value) {
     modifierWithKey(this._modifiersWithKeys, SpanDecorationModifier.identity, SpanDecorationModifier, value);
     return this;
@@ -4786,6 +5326,9 @@ globalThis.Span.attributeModifier = function (modifier) {
 };
 /// <reference path='./import.ts' />
 class SideBarContainerPositionModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().sideBarContainer.resetSideBarPosition(node);
@@ -4800,6 +5343,9 @@ class SideBarContainerPositionModifier extends ModifierWithKey {
 }
 SideBarContainerPositionModifier.identity = Symbol('sideBarContainerPosition');
 class SideBarContainerAutoHideModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().sideBarContainer.resetAutoHide(node);
@@ -4814,6 +5360,9 @@ class SideBarContainerAutoHideModifier extends ModifierWithKey {
 }
 SideBarContainerAutoHideModifier.identity = Symbol('sideBarContainerautoHide');
 class SideBarContainerShowSideBarModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().sideBarContainer.resetShowSideBar(node);
@@ -4828,6 +5377,9 @@ class SideBarContainerShowSideBarModifier extends ModifierWithKey {
 }
 SideBarContainerShowSideBarModifier.identity = Symbol('sideBarContainerShowSideBar');
 class SideBarContainerMaxSideBarWidthModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().sideBarContainer.resetMaxSideBarWidth(node);
@@ -4842,6 +5394,9 @@ class SideBarContainerMaxSideBarWidthModifier extends ModifierWithKey {
 }
 SideBarContainerMaxSideBarWidthModifier.identity = Symbol('sideBarContainerMaxSideBarWidth');
 class SideBarContainerWidthModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().sideBarContainer.resetSideBarWidth(node);
@@ -4856,6 +5411,9 @@ class SideBarContainerWidthModifier extends ModifierWithKey {
 }
 SideBarContainerWidthModifier.identity = Symbol('sideBarContainerWidth');
 class SideBarContainerMinContentWidthModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().sideBarContainer.resetMinContentWidth(node);
@@ -4870,6 +5428,9 @@ class SideBarContainerMinContentWidthModifier extends ModifierWithKey {
 }
 SideBarContainerMinContentWidthModifier.identity = Symbol('sideBarContainerMinContentWidth');
 class SideBarContainerShowControlButtonModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().sideBarContainer.resetShowControlButton(node);
@@ -4884,6 +5445,9 @@ class SideBarContainerShowControlButtonModifier extends ModifierWithKey {
 }
 SideBarContainerShowControlButtonModifier.identity = Symbol('sideBarContainerShowControlButton');
 class SideBarContainerMinSideBarWidthModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().sideBarContainer.resetMinSideBarWidth(node);
@@ -4898,6 +5462,9 @@ class SideBarContainerMinSideBarWidthModifier extends ModifierWithKey {
 }
 SideBarContainerMinSideBarWidthModifier.identity = Symbol('sideBarContainerMinSideBarWidth');
 class SideBarContainerControlButtonModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     let _a, _b, _c;
     if (reset) {
@@ -4924,6 +5491,9 @@ class SideBarContainerControlButtonModifier extends ModifierWithKey {
 }
 SideBarContainerControlButtonModifier.identity = Symbol('sideBarContainercontrolButton');
 class SideBarContainerDividerModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().sideBarContainer.resetDivider(node);
@@ -4946,6 +5516,9 @@ class SideBarContainerDividerModifier extends ModifierWithKey {
 }
 SideBarContainerDividerModifier.identity = Symbol('sideBarContainerdivider');
 class ArkSideBarContainerComponent extends ArkComponent {
+  constructor(nativePtr) {
+    super(nativePtr);
+  }
   onChange(callback) {
     throw new Error('Method not implemented.');
   }
@@ -5002,6 +5575,9 @@ globalThis.SideBarContainer.attributeModifier = function (modifier) {
 };
 /// <reference path='./import.ts' />
 class ArkStackComponent extends ArkComponent {
+  constructor(nativePtr) {
+    super(nativePtr);
+  }
   onGestureJudgeBegin(callback) {
     throw new Error('Method not implemented.');
   }
@@ -5011,6 +5587,9 @@ class ArkStackComponent extends ArkComponent {
   }
 }
 class StackAlignContentModifier extends Modifier {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().stack.resetAlignContent(node);
@@ -5036,6 +5615,9 @@ globalThis.Stack.attributeModifier = function (modifier) {
 };
 /// <reference path='./import.ts' />
 class FontColorModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().text.resetFontColor(node);
@@ -5055,6 +5637,9 @@ class FontColorModifier extends ModifierWithKey {
 }
 FontColorModifier.identity = Symbol('fontColor');
 class FontSizeModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().text.resetFontSize(node);
@@ -5074,6 +5659,9 @@ class FontSizeModifier extends ModifierWithKey {
 }
 FontSizeModifier.identity = Symbol('fontSize');
 class FontWeightModifier extends Modifier {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().text.resetFontWeight(node);
@@ -5085,6 +5673,9 @@ class FontWeightModifier extends Modifier {
 }
 FontWeightModifier.identity = Symbol('fontWeight');
 class FontStyleModifier extends Modifier {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().text.resetFontStyle(node);
@@ -5096,6 +5687,9 @@ class FontStyleModifier extends Modifier {
 }
 FontStyleModifier.identity = Symbol('fontStyle');
 class TextAlignModifier extends Modifier {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().text.resetTextAlign(node);
@@ -5107,6 +5701,9 @@ class TextAlignModifier extends Modifier {
 }
 TextAlignModifier.identity = Symbol('textAlign');
 class TextHeightAdaptivePolicyModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().text.resetHeightAdaptivePolicy(node);
@@ -5121,6 +5718,9 @@ class TextHeightAdaptivePolicyModifier extends ModifierWithKey {
 }
 TextHeightAdaptivePolicyModifier.identity = Symbol('textHeightAdaptivePolicy');
 class TextDraggableModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().text.resetDraggable(node);
@@ -5135,6 +5735,9 @@ class TextDraggableModifier extends ModifierWithKey {
 }
 TextDraggableModifier.identity = Symbol('textDraggable');
 class TextMinFontSizeModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().text.resetMinFontSize(node);
@@ -5152,6 +5755,9 @@ class TextMinFontSizeModifier extends ModifierWithKey {
 }
 TextMinFontSizeModifier.identity = Symbol('textMinFontSize');
 class TextMaxFontSizeModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().text.resetMaxFontSize(node);
@@ -5169,6 +5775,9 @@ class TextMaxFontSizeModifier extends ModifierWithKey {
 }
 TextMaxFontSizeModifier.identity = Symbol('textMaxFontSize');
 class TextLineHeightModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().text.resetLineHeight(node);
@@ -5186,6 +5795,9 @@ class TextLineHeightModifier extends ModifierWithKey {
 }
 TextLineHeightModifier.identity = Symbol('textLineHeight');
 class TextCopyOptionModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().text.resetCopyOption(node);
@@ -5200,6 +5812,9 @@ class TextCopyOptionModifier extends ModifierWithKey {
 }
 TextCopyOptionModifier.identity = Symbol('textCopyOption');
 class TextFontFamilyModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().text.resetFontFamily(node);
@@ -5217,6 +5832,9 @@ class TextFontFamilyModifier extends ModifierWithKey {
 }
 TextFontFamilyModifier.identity = Symbol('textFontFamily');
 class TextMaxLinesModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().text.resetMaxLines(node);
@@ -5234,6 +5852,9 @@ class TextMaxLinesModifier extends ModifierWithKey {
 }
 TextMaxLinesModifier.identity = Symbol('textMaxLines');
 class TextLetterSpacingModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().text.resetLetterSpacing(node);
@@ -5251,6 +5872,9 @@ class TextLetterSpacingModifier extends ModifierWithKey {
 }
 TextLetterSpacingModifier.identity = Symbol('textLetterSpacing');
 class TextTextOverflowModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().text.resetTextOverflow(node);
@@ -5265,6 +5889,9 @@ class TextTextOverflowModifier extends ModifierWithKey {
 }
 TextTextOverflowModifier.identity = Symbol('textTextOverflow');
 class TextBaselineOffsetModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().text.resetBaselineOffset(node);
@@ -5282,6 +5909,9 @@ class TextBaselineOffsetModifier extends ModifierWithKey {
 }
 TextBaselineOffsetModifier.identity = Symbol('textBaselineOffset');
 class TextTextCaseModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().text.resetTextCase(node);
@@ -5296,6 +5926,9 @@ class TextTextCaseModifier extends ModifierWithKey {
 }
 TextTextCaseModifier.identity = Symbol('textTextCase');
 class TextTextIndentModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().text.resetTextIndent(node);
@@ -5313,6 +5946,9 @@ class TextTextIndentModifier extends ModifierWithKey {
 }
 TextTextIndentModifier.identity = Symbol('textTextIndent');
 class TextTextShadowModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().text.resetTextShadow(node);
@@ -5353,6 +5989,9 @@ class TextTextShadowModifier extends ModifierWithKey {
 }
 TextTextShadowModifier.identity = Symbol('textTextShadow');
 class TextDecorationModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().text.resetDecoration(node);
@@ -5378,6 +6017,9 @@ class TextDecorationModifier extends ModifierWithKey {
 }
 TextDecorationModifier.identity = Symbol('textDecoration');
 class TextFontModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().text.resetFont(node);
@@ -5407,6 +6049,9 @@ class TextFontModifier extends ModifierWithKey {
 }
 TextFontModifier.identity = Symbol('textFont');
 class ArkTextComponent extends ArkComponent {
+  constructor(nativePtr) {
+    super(nativePtr);
+  }
   enableDataDetector(enable) {
     throw new Error('Method not implemented.');
   }
@@ -5558,6 +6203,9 @@ globalThis.Text.attributeModifier = function (modifier) {
 };
 /// <reference path='./import.ts' />
 class TextAreaFontStyleModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().textArea.resetFontStyle(node);
@@ -5572,6 +6220,9 @@ class TextAreaFontStyleModifier extends ModifierWithKey {
 }
 TextAreaFontStyleModifier.identity = Symbol('textAreaFontStyle');
 class TextAreaCopyOptionModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().textArea.resetCopyOption(node);
@@ -5586,6 +6237,9 @@ class TextAreaCopyOptionModifier extends ModifierWithKey {
 }
 TextAreaCopyOptionModifier.identity = Symbol('textAreaCopyOption');
 class TextAreaMaxLinesModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().textArea.resetMaxLines(node);
@@ -5600,6 +6254,9 @@ class TextAreaMaxLinesModifier extends ModifierWithKey {
 }
 TextAreaMaxLinesModifier.identity = Symbol('textAreaMaxLines');
 class TextAreaFontSizeModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().textArea.resetFontSize(node);
@@ -5614,6 +6271,9 @@ class TextAreaFontSizeModifier extends ModifierWithKey {
 }
 TextAreaFontSizeModifier.identity = Symbol('textAreaFontSize');
 class TextAreaPlaceholderColorModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().textArea.resetPlaceholderColor(node);
@@ -5633,6 +6293,9 @@ class TextAreaPlaceholderColorModifier extends ModifierWithKey {
 }
 TextAreaPlaceholderColorModifier.identity = Symbol('textAreaPlaceholderColor');
 class TextAreaFontColorModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().textArea.resetFontColor(node);
@@ -5652,6 +6315,9 @@ class TextAreaFontColorModifier extends ModifierWithKey {
 }
 TextAreaFontColorModifier.identity = Symbol('textAreaFontColor');
 class TextAreaFontWeightModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().textArea.resetFontWeight(node);
@@ -5666,6 +6332,9 @@ class TextAreaFontWeightModifier extends ModifierWithKey {
 }
 TextAreaFontWeightModifier.identity = Symbol('textAreaFontWeight');
 class TextAreaBarStateModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().textArea.resetBarState(node);
@@ -5680,6 +6349,9 @@ class TextAreaBarStateModifier extends ModifierWithKey {
 }
 TextAreaBarStateModifier.identity = Symbol('textAreaBarState');
 class TextAreaEnableKeyboardOnFocusModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().textArea.resetEnableKeyboardOnFocus(node);
@@ -5694,6 +6366,9 @@ class TextAreaEnableKeyboardOnFocusModifier extends ModifierWithKey {
 }
 TextAreaEnableKeyboardOnFocusModifier.identity = Symbol('textAreaEnableKeyboardOnFocus');
 class TextAreaFontFamilyModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().textArea.resetFontFamily(node);
@@ -5708,6 +6383,9 @@ class TextAreaFontFamilyModifier extends ModifierWithKey {
 }
 TextAreaFontFamilyModifier.identity = Symbol('textAreaFontFamily');
 class TextAreaCaretColorModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().textArea.resetCaretColor(node);
@@ -5727,6 +6405,9 @@ class TextAreaCaretColorModifier extends ModifierWithKey {
 }
 TextAreaCaretColorModifier.identity = Symbol('textAreaCaretColor');
 class TextAreaMaxLengthModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().textArea.resetMaxLength(node);
@@ -5741,6 +6422,9 @@ class TextAreaMaxLengthModifier extends ModifierWithKey {
 }
 TextAreaMaxLengthModifier.identity = Symbol('textAreaMaxLength');
 class TextAreaStyleModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().textArea.resetStyle(node);
@@ -5755,6 +6439,9 @@ class TextAreaStyleModifier extends ModifierWithKey {
 }
 TextAreaStyleModifier.identity = Symbol('textAreaStyle');
 class TextAreaSelectionMenuHiddenModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().textArea.resetSelectionMenuHidden(node);
@@ -5769,6 +6456,9 @@ class TextAreaSelectionMenuHiddenModifier extends ModifierWithKey {
 }
 TextAreaSelectionMenuHiddenModifier.identity = Symbol('textAreaSelectionMenuHidden');
 class TextAreaPlaceholderFontModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().textArea.resetPlaceholderFont(node);
@@ -5790,6 +6480,9 @@ class TextAreaPlaceholderFontModifier extends ModifierWithKey {
 }
 TextAreaPlaceholderFontModifier.identity = Symbol('textAreaPlaceholderFont');
 class TextAreaTextAlignModifier extends Modifier {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().textArea.resetTextAlign(node);
@@ -5804,6 +6497,9 @@ class TextAreaTextAlignModifier extends Modifier {
 }
 TextAreaTextAlignModifier.identity = Symbol('textAreaTextAlign');
 class TextAreaShowCounterModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().textArea.resetShowCounter(node);
@@ -5819,6 +6515,9 @@ class TextAreaShowCounterModifier extends ModifierWithKey {
 }
 TextAreaShowCounterModifier.identity = Symbol('textAreaShowCounter');
 class ArkTextAreaComponent extends ArkComponent {
+  constructor(nativePtr) {
+    super(nativePtr);
+  }
   type(value) {
     throw new Error('Method not implemented.');
   }
@@ -5933,6 +6632,9 @@ globalThis.TextArea.attributeModifier = function (modifier) {
 };
 /// <reference path='./import.ts' />
 class TextInputStyleModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().textInput.resetStyle(node);
@@ -5947,6 +6649,9 @@ class TextInputStyleModifier extends ModifierWithKey {
 }
 TextInputStyleModifier.identity = Symbol('textInputStyle');
 class TextInputMaxLengthModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().textInput.resetMaxLength(node);
@@ -5961,6 +6666,9 @@ class TextInputMaxLengthModifier extends ModifierWithKey {
 }
 TextInputMaxLengthModifier.identity = Symbol('textInputMaxLength');
 class TextInputMaxLinesModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().textInput.resetMaxLines(node);
@@ -5975,6 +6683,9 @@ class TextInputMaxLinesModifier extends ModifierWithKey {
 }
 TextInputMaxLinesModifier.identity = Symbol('textInputMaxLines');
 class TextInputShowPasswordIconModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().textInput.resetShowPasswordIcon(node);
@@ -5989,6 +6700,9 @@ class TextInputShowPasswordIconModifier extends ModifierWithKey {
 }
 TextInputShowPasswordIconModifier.identity = Symbol('textInputShowPasswordIcon');
 class TextInputTextAlignModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().textInput.resetTextAlign(node);
@@ -6003,6 +6717,9 @@ class TextInputTextAlignModifier extends ModifierWithKey {
 }
 TextInputTextAlignModifier.identity = Symbol('textInputTextAlign');
 class TextInputPlaceholderFontModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().textInput.resetPlaceholderFont(node);
@@ -6035,6 +6752,9 @@ class TextInputPlaceholderFontModifier extends ModifierWithKey {
 }
 TextInputPlaceholderFontModifier.identity = Symbol('textInputPlaceholderFont');
 class TextInputPlaceholderColorModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().textInput.resetPlaceholderColor(node);
@@ -6049,6 +6769,9 @@ class TextInputPlaceholderColorModifier extends ModifierWithKey {
 }
 TextInputPlaceholderColorModifier.identity = Symbol('textInputPlaceholderColor');
 class TextInputPasswordIconModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().textInput.resetPasswordIcon(node);
@@ -6064,6 +6787,9 @@ class TextInputPasswordIconModifier extends ModifierWithKey {
 }
 TextInputPasswordIconModifier.identity = Symbol('textInputPasswordIcon');
 class TextInputSelectedBackgroundColorModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().textInput.resetSelectedBackgroundColor(node);
@@ -6078,6 +6804,9 @@ class TextInputSelectedBackgroundColorModifier extends ModifierWithKey {
 }
 TextInputSelectedBackgroundColorModifier.identity = Symbol('textInputSelectedBackgroundColor');
 class TextInputSelectionMenuHiddenModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().textInput.resetSelectionMenuHidden(node);
@@ -6092,6 +6821,9 @@ class TextInputSelectionMenuHiddenModifier extends ModifierWithKey {
 }
 TextInputSelectionMenuHiddenModifier.identity = Symbol('textInputSelectionMenuHidden');
 class TextInputShowUnderlineModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().textInput.resetShowUnderline(node);
@@ -6106,6 +6838,9 @@ class TextInputShowUnderlineModifier extends ModifierWithKey {
 }
 TextInputShowUnderlineModifier.identity = Symbol('textInputShowUnderLine');
 class TextInputShowErrorModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().textInput.resetShowError(node);
@@ -6120,6 +6855,9 @@ class TextInputShowErrorModifier extends ModifierWithKey {
 }
 TextInputShowErrorModifier.identity = Symbol('textInputShowError');
 class TextInputTypeModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().textInput.resetType(node);
@@ -6134,6 +6872,9 @@ class TextInputTypeModifier extends ModifierWithKey {
 }
 TextInputTypeModifier.identity = Symbol('textInputType');
 class TextInputCaretPositionModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().textInput.resetCaretPosition(node);
@@ -6148,6 +6889,9 @@ class TextInputCaretPositionModifier extends ModifierWithKey {
 }
 TextInputCaretPositionModifier.identity = Symbol('textInputCaretPosition');
 class TextInputCopyOptionModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().textInput.resetCopyOption(node);
@@ -6162,6 +6906,9 @@ class TextInputCopyOptionModifier extends ModifierWithKey {
 }
 TextInputCopyOptionModifier.identity = Symbol('textInputCopyOption');
 class TextInputEnableKeyboardOnFocusModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().textInput.resetEnableKeyboardOnFocus(node);
@@ -6176,6 +6923,9 @@ class TextInputEnableKeyboardOnFocusModifier extends ModifierWithKey {
 }
 TextInputEnableKeyboardOnFocusModifier.identity = Symbol('textInputEnableKeyboardOnFocus');
 class TextInputCaretStyleModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().textInput.resetCaretStyle(node);
@@ -6195,6 +6945,9 @@ class TextInputCaretStyleModifier extends ModifierWithKey {
 }
 TextInputCaretStyleModifier.identity = Symbol('textInputCaretStyle');
 class TextInputEnterKeyTypeModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().textInput.resetEnterKeyType(node);
@@ -6209,6 +6962,9 @@ class TextInputEnterKeyTypeModifier extends ModifierWithKey {
 }
 TextInputEnterKeyTypeModifier.identity = Symbol('textInputEnterKeyType');
 class TextInputBarStateModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().textInput.resetBarState(node);
@@ -6223,6 +6979,9 @@ class TextInputBarStateModifier extends ModifierWithKey {
 }
 TextInputBarStateModifier.identity = Symbol('textInputBarState');
 class TextInputCaretColorModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().textInput.resetCaretColor(node);
@@ -6237,6 +6996,9 @@ class TextInputCaretColorModifier extends ModifierWithKey {
 }
 TextInputCaretColorModifier.identity = Symbol('textinputCaretColor');
 class TextInputFontColorModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().textInput.resetFontColor(node);
@@ -6251,6 +7013,9 @@ class TextInputFontColorModifier extends ModifierWithKey {
 }
 TextInputFontColorModifier.identity = Symbol('textInputFontColor');
 class TextInputFontSizeModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().textInput.resetFontSize(node);
@@ -6265,6 +7030,9 @@ class TextInputFontSizeModifier extends ModifierWithKey {
 }
 TextInputFontSizeModifier.identity = Symbol('textInputFontSize');
 class TextInputFontStyleModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().textInput.resetFontStyle(node);
@@ -6279,6 +7047,9 @@ class TextInputFontStyleModifier extends ModifierWithKey {
 }
 TextInputFontStyleModifier.identity = Symbol('textInputFontStyle');
 class TextInputFontWeightModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().textInput.resetFontWeight(node);
@@ -6293,6 +7064,9 @@ class TextInputFontWeightModifier extends ModifierWithKey {
 }
 TextInputFontWeightModifier.identity = Symbol('textInputFontWeight');
 class TextInputFontFamilyModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().textInput.resetFontFamily(node);
@@ -6307,6 +7081,9 @@ class TextInputFontFamilyModifier extends ModifierWithKey {
 }
 TextInputFontFamilyModifier.identity = Symbol('textInputFontFamily');
 class ArkTextInputComponent extends ArkComponent {
+  constructor(nativePtr) {
+    super(nativePtr);
+  }
   cancelButton(value) {
     throw new Error('Method not implemented.');
   }
@@ -6474,6 +7251,9 @@ globalThis.TextInput.attributeModifier = function (modifier) {
 };
 /// <reference path='./import.ts' />
 class VideoObjectFitModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().video.resetObjectFit(node);
@@ -6488,6 +7268,9 @@ class VideoObjectFitModifier extends ModifierWithKey {
 }
 VideoObjectFitModifier.identity = Symbol('videoObjectFit');
 class VideoAutoPlayModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().video.resetAutoPlay(node);
@@ -6502,6 +7285,9 @@ class VideoAutoPlayModifier extends ModifierWithKey {
 }
 VideoAutoPlayModifier.identity = Symbol('videoAutoPlayr');
 class VideoControlsModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().video.resetControls(node);
@@ -6516,6 +7302,9 @@ class VideoControlsModifier extends ModifierWithKey {
 }
 VideoControlsModifier.identity = Symbol('videoControls');
 class VideoLoopModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().video.resetLoop(node);
@@ -6530,6 +7319,9 @@ class VideoLoopModifier extends ModifierWithKey {
 }
 VideoLoopModifier.identity = Symbol('videoLoop');
 class VideoMutedModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().video.resetMuted(node);
@@ -6544,6 +7336,9 @@ class VideoMutedModifier extends ModifierWithKey {
 }
 VideoMutedModifier.identity = Symbol('videoMuted');
 class ArkVideoComponent extends ArkComponent {
+  constructor(nativePtr) {
+    super(nativePtr);
+  }
   muted(value) {
     modifierWithKey(this._modifiersWithKeys, VideoMutedModifier.identity, VideoMutedModifier, value);
     return this;
@@ -7716,6 +8511,9 @@ const FontWeightMap = {
   900: '900',
 };
 class ArkButtonComponent extends ArkComponent {
+  constructor(nativePtr) {
+    super(nativePtr);
+  }
   onGestureJudgeBegin(callback) {
     throw new Error('Method not implemented.');
   }
@@ -7777,6 +8575,9 @@ class ArkButtonComponent extends ArkComponent {
   }
 }
 class ButtonBackgroundColorModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().button.resetBackgroundColor(node);
@@ -7796,6 +8597,9 @@ class ButtonBackgroundColorModifier extends ModifierWithKey {
 }
 ButtonBackgroundColorModifier.identity = Symbol('buttonBackgroundColor');
 class ButtonStateEffectModifier extends Modifier {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().button.resetStateEffect(node);
@@ -7807,6 +8611,9 @@ class ButtonStateEffectModifier extends Modifier {
 }
 ButtonStateEffectModifier.identity = Symbol('buttonStateEffect');
 class ButtonFontStyleModifier extends Modifier {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().button.resetFontStyle(node);
@@ -7818,6 +8625,9 @@ class ButtonFontStyleModifier extends Modifier {
 }
 ButtonFontStyleModifier.identity = Symbol('buttonFontStyle');
 class ButtonFontFamilyModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().button.resetFontFamily(node);
@@ -7837,6 +8647,9 @@ class ButtonFontFamilyModifier extends ModifierWithKey {
 }
 ButtonFontFamilyModifier.identity = Symbol('buttonFontFamily');
 class ButtonLabelStyleModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().button.resetLabelStyle(node);
@@ -7887,6 +8700,9 @@ class ButtonLabelStyleModifier extends ModifierWithKey {
 }
 ButtonLabelStyleModifier.identity = Symbol('buttonLabelStyle');
 class ButtonTypeModifier extends Modifier {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().button.resetType(node);
@@ -7898,6 +8714,9 @@ class ButtonTypeModifier extends Modifier {
 }
 ButtonTypeModifier.identity = Symbol('buttonType');
 class ButtonFontColorModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().button.resetFontColor(node);
@@ -7917,6 +8736,9 @@ class ButtonFontColorModifier extends ModifierWithKey {
 }
 ButtonFontColorModifier.identity = Symbol('buttonFontColor');
 class ButtonFontSizeModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().button.resetFontSize(node);
@@ -7936,6 +8758,9 @@ class ButtonFontSizeModifier extends ModifierWithKey {
 }
 ButtonFontSizeModifier.identity = Symbol('buttonFontSize');
 class ButtonFontWeightModifier extends Modifier {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().button.resetFontWeight(node);
@@ -7967,6 +8792,9 @@ globalThis.Button.attributeModifier = function (modifier) {
 };
 /// <reference path='./import.ts' />
 class ArkLoadingProgressComponent extends ArkComponent {
+  constructor(nativePtr) {
+    super(nativePtr);
+  }
   onGestureJudgeBegin(callback) {
     throw new Error('Method not implemented.');
   }
@@ -8016,6 +8844,9 @@ globalThis.LoadingProgress.attributeModifier = function (modifier) {
 };
 /// <reference path='./import.ts' />
 class ArkRefreshComponent extends ArkComponent {
+  constructor(nativePtr) {
+    super(nativePtr);
+  }
   onGestureJudgeBegin(callback) {
     throw new Error('Method not implemented.');
   }
@@ -8038,6 +8869,9 @@ globalThis.Refresh.attributeModifier = function (modifier) {
 };
 /// <reference path='./import.ts' />
 class ArkScrollComponent extends ArkComponent {
+  constructor(nativePtr) {
+    super(nativePtr);
+  }
   onGestureJudgeBegin(callback) {
     throw new Error('Method not implemented.');
   }
@@ -8166,6 +9000,9 @@ globalThis.Scroll.attributeModifier = function (modifier) {
 };
 /// <reference path='./import.ts' />
 class ArkToggleComponent extends ArkComponent {
+  constructor(nativePtr) {
+    super(nativePtr);
+  }
   onGestureJudgeBegin(callback) {
     throw new Error('Method not implemented.');
   }
@@ -8182,6 +9019,9 @@ class ArkToggleComponent extends ArkComponent {
   }
 }
 class ToggleSelectedColorModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().toggle.resetSelectedColor(node);
@@ -8199,6 +9039,9 @@ class ToggleSelectedColorModifier extends ModifierWithKey {
 }
 ToggleSelectedColorModifier.identity = Symbol('toggleSelectedColor');
 class ToggleSwitchPointColorModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().toggle.resetSwitchPointColor(node);
@@ -8227,6 +9070,9 @@ globalThis.Toggle.attributeModifier = function (modifier) {
 };
 /// <reference path='./import.ts' />
 class ArkSelectComponent extends ArkComponent {
+  constructor(nativePtr) {
+    super(nativePtr);
+  }
   onGestureJudgeBegin(callback) {
     throw new Error('Method not implemented.');
   }
@@ -8294,6 +9140,9 @@ class ArkSelectComponent extends ArkComponent {
   }
 }
 class FontModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().select.resetFont(node);
@@ -8312,6 +9161,9 @@ class FontModifier extends ModifierWithKey {
 }
 FontModifier.identity = Symbol('selectFont');
 class OptionFontModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().select.resetOptionFont(node);
@@ -8330,6 +9182,9 @@ class OptionFontModifier extends ModifierWithKey {
 }
 OptionFontModifier.identity = Symbol('selectOptionFont');
 class SelectedOptionFontModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().select.resetSelectedOptionFont(node);
@@ -8348,6 +9203,9 @@ class SelectedOptionFontModifier extends ModifierWithKey {
 }
 SelectedOptionFontModifier.identity = Symbol('selectSelectedOptionFont');
 class MenuAlignModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().select.resetMenuAlign(node);
@@ -8374,6 +9232,9 @@ class MenuAlignModifier extends ModifierWithKey {
 }
 MenuAlignModifier.identity = Symbol('selectMenuAlign');
 class ArrowPositionModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().select.resetArrowPosition(node);
@@ -8388,6 +9249,9 @@ class ArrowPositionModifier extends ModifierWithKey {
 }
 ArrowPositionModifier.identity = Symbol('selectArrowPosition');
 class SpaceModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().select.resetSpace(node);
@@ -8402,6 +9266,9 @@ class SpaceModifier extends ModifierWithKey {
 }
 SpaceModifier.identity = Symbol('selectSpace');
 class ValueModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().select.resetValue(node);
@@ -8416,6 +9283,9 @@ class ValueModifier extends ModifierWithKey {
 }
 ValueModifier.identity = Symbol('selectValue');
 class SelectedModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().select.resetSelected(node);
@@ -8430,6 +9300,9 @@ class SelectedModifier extends ModifierWithKey {
 }
 SelectedModifier.identity = Symbol('selectSelected');
 class SelectFontColorModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().select.resetFontColor(node);
@@ -8444,6 +9317,9 @@ class SelectFontColorModifier extends ModifierWithKey {
 }
 SelectFontColorModifier.identity = Symbol('selectFontColor');
 class SelectedOptionBgColorModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().select.resetSelectedOptionBgColor(node);
@@ -8458,6 +9334,9 @@ class SelectedOptionBgColorModifier extends ModifierWithKey {
 }
 SelectedOptionBgColorModifier.identity = Symbol('selectSelectedOptionBgColor');
 class OptionBgColorModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().select.resetOptionBgColor(node);
@@ -8472,6 +9351,9 @@ class OptionBgColorModifier extends ModifierWithKey {
 }
 OptionBgColorModifier.identity = Symbol('selectOptionBgColor');
 class OptionFontColorModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().select.resetOptionFontColor(node);
@@ -8486,6 +9368,9 @@ class OptionFontColorModifier extends ModifierWithKey {
 }
 OptionFontColorModifier.identity = Symbol('selectOptionFontColor');
 class SelectedOptionFontColorModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().select.resetSelectedOptionFontColor(node);
@@ -8511,6 +9396,9 @@ globalThis.Select.attributeModifier = function (modifier) {
 };
 /// <reference path='./import.ts' />
 class ArkRadioComponent extends ArkComponent {
+  constructor(nativePtr) {
+    super(nativePtr);
+  }
   onGestureJudgeBegin(callback) {
     throw new Error('Method not implemented.');
   }
@@ -8532,6 +9420,9 @@ class ArkRadioComponent extends ArkComponent {
   }
 }
 class RadioCheckedModifier extends Modifier {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().radio.resetRadioChecked(node);
@@ -8543,6 +9434,9 @@ class RadioCheckedModifier extends Modifier {
 }
 RadioCheckedModifier.identity = Symbol('radioChecked');
 class RadioStyleModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().radio.resetRadioStyle(node);
@@ -8573,6 +9467,9 @@ globalThis.Radio.attributeModifier = function (modifier) {
 };
 /// <reference path='./import.ts' />
 class ArkTimePickerComponent extends ArkComponent {
+  constructor(nativePtr) {
+    super(nativePtr);
+  }
   onGestureJudgeBegin(callback) {
     throw new Error('Method not implemented.');
   }
@@ -8599,6 +9496,9 @@ class ArkTimePickerComponent extends ArkComponent {
   }
 }
 class TimepickerTextStyleModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     let _a, _b, _c, _d;
     if (reset) {
@@ -8620,6 +9520,9 @@ class TimepickerTextStyleModifier extends ModifierWithKey {
 }
 TimepickerTextStyleModifier.identity = Symbol('textStyle');
 class TimepickerSelectedTextStyleModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     let _a, _b, _c, _d;
     if (reset) {
@@ -8641,6 +9544,9 @@ class TimepickerSelectedTextStyleModifier extends ModifierWithKey {
 }
 TimepickerSelectedTextStyleModifier.identity = Symbol('selectedTextStyle');
 class TimepickerDisappearTextStyleModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     let _a, _b, _c, _d;
     if (reset) {
@@ -8673,6 +9579,9 @@ globalThis.TimePicker.attributeModifier = function (modifier) {
 };
 /// <reference path='./import.ts' />
 class ArkTextPickerComponent extends ArkComponent {
+  constructor(nativePtr) {
+    super(nativePtr);
+  }
   onGestureJudgeBegin(callback) {
     throw new Error('Method not implemented.');
   }
@@ -8732,6 +9641,9 @@ class ArkTextPickerComponent extends ArkComponent {
   }
 }
 class TextpickerCanLoopModifier extends Modifier {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().textpicker.resetCanLoop(node);
@@ -8743,6 +9655,9 @@ class TextpickerCanLoopModifier extends Modifier {
 }
 TextpickerCanLoopModifier.identity = Symbol('textpickerCanLoop');
 class TextpickerSelectedIndexModifier extends Modifier {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().textpicker.resetSelectedIndex(node);
@@ -8754,6 +9669,9 @@ class TextpickerSelectedIndexModifier extends Modifier {
 }
 TextpickerSelectedIndexModifier.identity = Symbol('textpickerSelectedIndex');
 class TextpickerTextStyleModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     let _a, _b, _c, _d;
     if (reset) {
@@ -8775,6 +9693,9 @@ class TextpickerTextStyleModifier extends ModifierWithKey {
 }
 TextpickerTextStyleModifier.identity = Symbol('textpickerTextStyle');
 class TextpickerSelectedTextStyleModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     let _a, _b, _c, _d;
     if (reset) {
@@ -8796,6 +9717,9 @@ class TextpickerSelectedTextStyleModifier extends ModifierWithKey {
 }
 TextpickerSelectedTextStyleModifier.identity = Symbol('textpickerSelectedTextStyle');
 class TextpickerDisappearTextStyleModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     let _a, _b, _c, _d;
     if (reset) {
@@ -8817,6 +9741,9 @@ class TextpickerDisappearTextStyleModifier extends ModifierWithKey {
 }
 TextpickerDisappearTextStyleModifier.identity = Symbol('textpickerDisappearTextStyle');
 class TextpickerDefaultPickerItemHeightModifier extends Modifier {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().textpicker.resetDefaultPickerItemHeight(node);
@@ -8839,6 +9766,9 @@ globalThis.TextPicker.attributeModifier = function (modifier) {
 };
 /// <reference path='./import.ts' />
 class ArkSliderComponent extends ArkComponent {
+  constructor(nativePtr) {
+    super(nativePtr);
+  }
   onGestureJudgeBegin(callback) {
     throw new Error('Method not implemented.');
   }
@@ -8906,6 +9836,9 @@ class ArkSliderComponent extends ArkComponent {
   }
 }
 class BlockStyleModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().slider.resetBlockStyle(node);
@@ -8922,6 +9855,9 @@ class BlockStyleModifier extends ModifierWithKey {
 }
 BlockStyleModifier.identity = Symbol('sliderBlockStyle');
 class ShowTipsModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     let _a;
     if (reset) {
@@ -8939,6 +9875,9 @@ class ShowTipsModifier extends ModifierWithKey {
 }
 ShowTipsModifier.identity = Symbol('sliderShowTips');
 class StepSizeModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().slider.resetStepSize(node);
@@ -8958,6 +9897,9 @@ class StepSizeModifier extends ModifierWithKey {
 }
 StepSizeModifier.identity = Symbol('sliderStepSize');
 class BlockSizeModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().slider.resetBlockSize(node);
@@ -8977,6 +9919,9 @@ class BlockSizeModifier extends ModifierWithKey {
 }
 BlockSizeModifier.identity = Symbol('sliderBlockSize');
 class TrackBorderRadiusModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().slider.resetTrackBorderRadius(node);
@@ -8996,6 +9941,9 @@ class TrackBorderRadiusModifier extends ModifierWithKey {
 }
 TrackBorderRadiusModifier.identity = Symbol('sliderTrackBorderRadius');
 class StepColorModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().slider.resetStepColor(node);
@@ -9015,6 +9963,9 @@ class StepColorModifier extends ModifierWithKey {
 }
 StepColorModifier.identity = Symbol('sliderStepColor');
 class BlockBorderColorModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().slider.resetBlockBorderColor(node);
@@ -9034,6 +9985,9 @@ class BlockBorderColorModifier extends ModifierWithKey {
 }
 BlockBorderColorModifier.identity = Symbol('sliderBlockBorderColor');
 class BlockBorderWidthModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().slider.resetBlockBorderWidth(node);
@@ -9053,6 +10007,9 @@ class BlockBorderWidthModifier extends ModifierWithKey {
 }
 BlockBorderWidthModifier.identity = Symbol('sliderBlockBorderWidth');
 class BlockColorModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().slider.resetBlockColor(node);
@@ -9072,6 +10029,9 @@ class BlockColorModifier extends ModifierWithKey {
 }
 BlockColorModifier.identity = Symbol('sliderBlockColor');
 class TrackColorModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().slider.resetTrackBackgroundColor(node);
@@ -9091,6 +10051,9 @@ class TrackColorModifier extends ModifierWithKey {
 }
 TrackColorModifier.identity = Symbol('sliderTrackColor');
 class SelectColorModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().slider.resetSelectColor(node);
@@ -9110,6 +10073,9 @@ class SelectColorModifier extends ModifierWithKey {
 }
 SelectColorModifier.identity = Symbol('sliderSelectColor');
 class ShowStepsModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().slider.resetShowSteps(node);
@@ -9124,6 +10090,9 @@ class ShowStepsModifier extends ModifierWithKey {
 }
 ShowStepsModifier.identity = Symbol('sliderShowSteps');
 class TrackThicknessModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().slider.resetThickness(node);
@@ -9154,6 +10123,9 @@ globalThis.Slider.attributeModifier = function (modifier) {
 };
 /// <reference path='./import.ts' />
 class RatingStarsModifier extends Modifier {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().rating.resetStars(node);
@@ -9165,6 +10137,9 @@ class RatingStarsModifier extends Modifier {
 }
 RatingStarsModifier.identity = Symbol('ratingStars');
 class RatingStepSizeModifier extends Modifier {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().rating.resetStepSize(node);
@@ -9176,6 +10151,9 @@ class RatingStepSizeModifier extends Modifier {
 }
 RatingStepSizeModifier.identity = Symbol('ratingStepSize');
 class RatingStarStyleModifier extends Modifier {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     let _a, _b, _c;
     if (reset) {
@@ -9188,6 +10166,9 @@ class RatingStarStyleModifier extends Modifier {
 }
 RatingStarStyleModifier.identity = Symbol('ratingStarStyle');
 class ArkRatingComponent extends ArkComponent {
+  constructor(nativePtr) {
+    super(nativePtr);
+  }
   onGestureJudgeBegin(callback) {
     throw new Error('Method not implemented.');
   }
@@ -9238,6 +10219,9 @@ globalThis.Rating.attributeModifier = function (modifier) {
 };
 /// <reference path='./import.ts' />
 class ArkCheckboxComponent extends ArkComponent {
+  constructor(nativePtr) {
+    super(nativePtr);
+  }
   shape(value) {
     throw new Error('Method not implemented.');
   }
@@ -9270,6 +10254,9 @@ class ArkCheckboxComponent extends ArkComponent {
   }
 }
 class CheckboxMarkModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     let _a, _b, _c;
     if (reset) {
@@ -9288,6 +10275,9 @@ class CheckboxMarkModifier extends ModifierWithKey {
 }
 CheckboxMarkModifier.identity = Symbol('checkboxMark');
 class CheckboxSelectModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().checkbox.resetSelect(node);
@@ -9302,6 +10292,9 @@ class CheckboxSelectModifier extends ModifierWithKey {
 }
 CheckboxSelectModifier.identity = Symbol('checkboxSelect');
 class CheckboxHeightModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().checkbox.resetHeight(node);
@@ -9316,6 +10309,9 @@ class CheckboxHeightModifier extends ModifierWithKey {
 }
 CheckboxHeightModifier.identity = Symbol('checkboxHeight');
 class CheckboxWidthModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().checkbox.resetWidth(node);
@@ -9330,6 +10326,9 @@ class CheckboxWidthModifier extends ModifierWithKey {
 }
 CheckboxWidthModifier.identity = Symbol('checkboxWidth');
 class CheckboxSelectedColorModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().checkbox.resetSelectedColor(node);
@@ -9344,6 +10343,9 @@ class CheckboxSelectedColorModifier extends ModifierWithKey {
 }
 CheckboxSelectedColorModifier.identity = Symbol('checkboxSelectedColor');
 class CheckboxUnselectedColorModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().checkbox.resetUnSelectedColor(node);
@@ -9369,6 +10371,9 @@ globalThis.Checkbox.attributeModifier = function (modifier) {
 };
 /// <reference path='./import.ts' />
 class ArkNavDestinationComponent extends ArkComponent {
+  constructor(nativePtr) {
+    super(nativePtr);
+  }
   title(value) {
     throw new Error('Method not implemented.');
   }
@@ -9387,6 +10392,9 @@ class ArkNavDestinationComponent extends ArkComponent {
   }
 }
 class HideTitleBarModifier extends Modifier {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().navDestination.resetHideTitleBar(node);
@@ -9409,6 +10417,9 @@ globalThis.NavDestination.attributeModifier = function (modifier) {
 };
 /// <reference path='./import.ts' />
 class ArkCounterComponent extends ArkComponent {
+  constructor(nativePtr) {
+    super(nativePtr);
+  }
   onInc(event) {
     throw new Error('Method not implemented.');
   }
@@ -9435,6 +10446,9 @@ class ArkCounterComponent extends ArkComponent {
   }
 }
 class EnableIncModifier extends Modifier {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().counter.resetEnableInc(node);
@@ -9446,6 +10460,9 @@ class EnableIncModifier extends Modifier {
 }
 EnableIncModifier.identity = Symbol('enableInc');
 class EnableDecModifier extends Modifier {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().counter.resetEnableDec(node);
@@ -9468,6 +10485,9 @@ globalThis.Counter.attributeModifier = function (modifier) {
 };
 /// <reference path='./import.ts' />
 class CheckboxGroupSelectAllModifier extends Modifier {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().checkboxgroup.resetCheckboxGroupSelectAll(node);
@@ -9479,6 +10499,9 @@ class CheckboxGroupSelectAllModifier extends Modifier {
 }
 CheckboxGroupSelectAllModifier.identity = Symbol('checkboxgroupSelectAll');
 class CheckboxGroupSelectedColorModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().checkboxgroup.resetCheckboxGroupSelectedColor(node);
@@ -9498,6 +10521,9 @@ class CheckboxGroupSelectedColorModifier extends ModifierWithKey {
 }
 CheckboxGroupSelectedColorModifier.identity = Symbol('checkboxgroupSelectedColor');
 class CheckboxGroupUnselectedColorModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().checkboxgroup.resetCheckboxGroupUnSelectedColor(node);
@@ -9517,6 +10543,9 @@ class CheckboxGroupUnselectedColorModifier extends ModifierWithKey {
 }
 CheckboxGroupUnselectedColorModifier.identity = Symbol('checkboxgroupUnselectedColor');
 class CheckboxGroupMarkModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     let _a, _b, _c;
     if (reset) {
@@ -9535,6 +10564,9 @@ class CheckboxGroupMarkModifier extends ModifierWithKey {
 }
 CheckboxGroupMarkModifier.identity = Symbol('checkboxgroupMark');
 class ArkCheckboxGroupComponent extends ArkComponent {
+  constructor(nativePtr) {
+    super(nativePtr);
+  }
   selectAll(value) {
     if (isBoolean(value)) {
       modifier(this._modifiers, CheckboxGroupSelectAllModifier, value);
@@ -9722,6 +10754,9 @@ class ArkColor {
 }
 /// <reference path='./import.ts' />
 class ArkPanelComponent extends ArkComponent {
+  constructor(nativePtr) {
+    super(nativePtr);
+  }
   mode(value) {
     if (typeof value === 'number') {
       modifier(this._modifiers, PanelModeModifier, value);
@@ -9810,6 +10845,9 @@ class ArkPanelComponent extends ArkComponent {
   }
 }
 class PanelBackgroundMaskModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().panel.resetPanelBackgroundMask(node);
@@ -9829,6 +10867,9 @@ class PanelBackgroundMaskModifier extends ModifierWithKey {
 }
 PanelBackgroundMaskModifier.identity = Symbol('panelBackgroundMask');
 class PanelModeModifier extends Modifier {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().panel.resetPanelMode(node);
@@ -9840,6 +10881,9 @@ class PanelModeModifier extends Modifier {
 }
 PanelModeModifier.identity = Symbol('panelMode');
 class PanelTypeModifier extends Modifier {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().panel.resetPanelType(node);
@@ -9851,6 +10895,9 @@ class PanelTypeModifier extends Modifier {
 }
 PanelTypeModifier.identity = Symbol('panelType');
 class PanelCustomHeightModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().panel.resetPanelCustomHeight(node);
@@ -9870,6 +10917,9 @@ class PanelCustomHeightModifier extends ModifierWithKey {
 }
 PanelCustomHeightModifier.identity = Symbol('panelCustomHeight');
 class PanelFullHeightModifier extends Modifier {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().panel.resetPanelFullHeight(node);
@@ -9881,6 +10931,9 @@ class PanelFullHeightModifier extends Modifier {
 }
 PanelFullHeightModifier.identity = Symbol('panelFullHeight');
 class PanelHalfHeightModifier extends Modifier {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().panel.resetPanelHalfHeight(node);
@@ -9892,6 +10945,9 @@ class PanelHalfHeightModifier extends Modifier {
 }
 PanelHalfHeightModifier.identity = Symbol('panelHalfHeight');
 class PanelMiniHeightModifier extends Modifier {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().panel.resetPanelMiniHeight(node);
@@ -9903,6 +10959,9 @@ class PanelMiniHeightModifier extends Modifier {
 }
 PanelMiniHeightModifier.identity = Symbol('panelMiniHeight');
 class ShowCloseIconModifier extends Modifier {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().panel.resetShowCloseIcon(node);
@@ -9914,6 +10973,9 @@ class ShowCloseIconModifier extends Modifier {
 }
 ShowCloseIconModifier.identity = Symbol('showCloseIcon');
 class DragBarModifier extends Modifier {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().panel.resetDragBar(node);
@@ -9925,6 +10987,9 @@ class DragBarModifier extends Modifier {
 }
 DragBarModifier.identity = Symbol('dragBar');
 class ShowModifier extends Modifier {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().panel.resetShow(node);
@@ -9955,6 +11020,9 @@ const MAX_NAV_BAR_WIDTH_DEFAULT = '40%';
 const NAVIGATION_TITLE_MODE_DEFAULT = 0;
 const DEFAULT_UNIT = 'vp';
 class ArkNavigationComponent extends ArkComponent {
+  constructor(nativePtr) {
+    super(nativePtr);
+  }
   navBarWidth(value) {
     modifierWithKey(this._modifiersWithKeys, NavBarWidthModifier.identity, NavBarWidthModifier, value);
     return this;
@@ -10040,6 +11108,9 @@ class ArkNavigationComponent extends ArkComponent {
   }
 }
 class BackButtonIconModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().navigation.resetBackButtonIcon(node);
@@ -10059,6 +11130,9 @@ class BackButtonIconModifier extends ModifierWithKey {
 }
 BackButtonIconModifier.identity = Symbol('backButtonIcon');
 class MinNavBarWidthModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().navigation.resetMinNavBarWidth(node);
@@ -10078,6 +11152,9 @@ class MinNavBarWidthModifier extends ModifierWithKey {
 }
 MinNavBarWidthModifier.identity = Symbol('minNavBarWidth');
 class MaxNavBarWidthModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().navigation.resetMaxNavBarWidth(node);
@@ -10097,6 +11174,9 @@ class MaxNavBarWidthModifier extends ModifierWithKey {
 }
 MaxNavBarWidthModifier.identity = Symbol('maxNavBarWidth');
 class MinContentWidthModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().navigation.resetMinContentWidth(node);
@@ -10116,6 +11196,9 @@ class MinContentWidthModifier extends ModifierWithKey {
 }
 MinContentWidthModifier.identity = Symbol('minContentWidth');
 class NavBarWidthModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().navigation.resetNavBarWidth(node);
@@ -10135,6 +11218,9 @@ class NavBarWidthModifier extends ModifierWithKey {
 }
 NavBarWidthModifier.identity = Symbol('navBarWidth');
 class NavBarPositionModifier extends Modifier {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().navigation.resetNavBarPosition(node);
@@ -10146,6 +11232,9 @@ class NavBarPositionModifier extends Modifier {
 }
 NavBarPositionModifier.identity = Symbol('navBarPosition');
 class ModeModifier extends Modifier {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().navigation.resetMode(node);
@@ -10157,6 +11246,9 @@ class ModeModifier extends Modifier {
 }
 ModeModifier.identity = Symbol('mode');
 class HideToolBarModifier extends Modifier {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().navigation.resetHideToolBar(node);
@@ -10168,6 +11260,9 @@ class HideToolBarModifier extends Modifier {
 }
 HideToolBarModifier.identity = Symbol('hideToolBar');
 class TitleModeModifier extends Modifier {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().navigation.resetTitleMode(node);
@@ -10179,6 +11274,9 @@ class TitleModeModifier extends Modifier {
 }
 TitleModeModifier.identity = Symbol('titleMode');
 class HideBackButtonModifier extends Modifier {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().navigation.resetHideBackButton(node);
@@ -10190,6 +11288,9 @@ class HideBackButtonModifier extends Modifier {
 }
 HideBackButtonModifier.identity = Symbol('hideBackButton');
 class SubTitleModifier extends Modifier {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().navigation.resetSubTitle(node);
@@ -10201,6 +11302,9 @@ class SubTitleModifier extends Modifier {
 }
 SubTitleModifier.identity = Symbol('subTitle');
 class NavigationHideTitleBarModifier extends Modifier {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().navigation.resetHideTitleBar(node);
@@ -10212,6 +11316,9 @@ class NavigationHideTitleBarModifier extends Modifier {
 }
 NavigationHideTitleBarModifier.identity = Symbol('hideTitleBar');
 class HideNavBarModifier extends Modifier {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().navigation.resetHideNavBar(node);
@@ -10236,6 +11343,9 @@ globalThis.Navigation.attributeModifier = function (modifier) {
 const NAV_ROUTE_MODE_RANGE = 2;
 const NAV_ROUTE_MODE_DEFAULT = 0;
 class ArkNavRouterComponent extends ArkComponent {
+  constructor(nativePtr) {
+    super(nativePtr);
+  }
   onStateChange(callback) {
     throw new Error('Method not implemented.');
   }
@@ -10250,6 +11360,9 @@ class ArkNavRouterComponent extends ArkComponent {
   }
 }
 class NavRouterModeModifier extends Modifier {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().navRouter.resetMode(node);
@@ -10272,6 +11385,9 @@ globalThis.NavRouter.attributeModifier = function (modifier) {
 };
 /// <reference path='./import.ts' />
 class ArkNavigatorComponent extends ArkComponent {
+  constructor(nativePtr) {
+    super(nativePtr);
+  }
   active(value) {
     modifier(this._modifiers, ActiveModifier, value);
     return this;
@@ -10290,6 +11406,9 @@ class ArkNavigatorComponent extends ArkComponent {
   }
 }
 class ParamsModifier extends Modifier {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().navigator.resetParams(node);
@@ -10301,6 +11420,9 @@ class ParamsModifier extends Modifier {
 }
 ParamsModifier.identity = Symbol('params');
 class TypeModifier extends Modifier {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().navigator.resetType(node);
@@ -10312,6 +11434,9 @@ class TypeModifier extends Modifier {
 }
 TypeModifier.identity = Symbol('type');
 class ActiveModifier extends Modifier {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().navigator.resetActive(node);
@@ -10323,6 +11448,9 @@ class ActiveModifier extends Modifier {
 }
 ActiveModifier.identity = Symbol('active');
 class TargetModifier extends Modifier {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().navigator.resetTarget(node);
@@ -10345,6 +11473,9 @@ globalThis.Navigator.attributeModifier = function (modifier) {
 };
 /// <reference path='./import.ts' />
 class ArkAlphabetIndexerComponent extends ArkComponent {
+  constructor(nativePtr) {
+    super(nativePtr);
+  }
   onSelected(callback) {
     throw new Error('Method not implemented.');
   }
@@ -10455,6 +11586,9 @@ globalThis.AlphabetIndexer.attributeModifier = function (modifier) {
   component.applyModifierPatch();
 };
 class PopupItemFontModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().alphabetIndexer.resetPopupItemFont(node);
@@ -10473,6 +11607,9 @@ class PopupItemFontModifier extends ModifierWithKey {
 }
 PopupItemFontModifier.identity = Symbol('popupItemFont');
 class SelectedFontModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().alphabetIndexer.resetSelectedFont(node);
@@ -10491,6 +11628,9 @@ class SelectedFontModifier extends ModifierWithKey {
 }
 SelectedFontModifier.identity = Symbol('alphaBetIndexerSelectedFont');
 class PopupFontModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().alphabetIndexer.resetPopupFont(node);
@@ -10509,6 +11649,9 @@ class PopupFontModifier extends ModifierWithKey {
 }
 PopupFontModifier.identity = Symbol('popupFont');
 class AlphabetIndexerFontModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().alphabetIndexer.resetFont(node);
@@ -10527,6 +11670,9 @@ class AlphabetIndexerFontModifier extends ModifierWithKey {
 }
 AlphabetIndexerFontModifier.identity = Symbol('alphaBetIndexerFont');
 class PopupItemBackgroundColorModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().alphabetIndexer.resetPopupItemBackgroundColor(node);
@@ -10546,6 +11692,9 @@ class PopupItemBackgroundColorModifier extends ModifierWithKey {
 }
 PopupItemBackgroundColorModifier.identity = Symbol('popupItemBackgroundColor');
 class ColorModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().alphabetIndexer.resetColor(node);
@@ -10565,6 +11714,9 @@ class ColorModifier extends ModifierWithKey {
 }
 ColorModifier.identity = Symbol('alphabetColor');
 class PopupColorModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().alphabetIndexer.resetPopupColor(node);
@@ -10584,6 +11736,9 @@ class PopupColorModifier extends ModifierWithKey {
 }
 PopupColorModifier.identity = Symbol('popupColor');
 class SelectedColorModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().alphabetIndexer.resetSelectedColor(node);
@@ -10603,6 +11758,9 @@ class SelectedColorModifier extends ModifierWithKey {
 }
 SelectedColorModifier.identity = Symbol('selectedColor');
 class PopupBackgroundModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().alphabetIndexer.resetPopupBackground(node);
@@ -10622,6 +11780,9 @@ class PopupBackgroundModifier extends ModifierWithKey {
 }
 PopupBackgroundModifier.identity = Symbol('popupBackground');
 class SelectedBackgroundColorModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().alphabetIndexer.resetSelectedBackgroundColor(node);
@@ -10641,6 +11802,9 @@ class SelectedBackgroundColorModifier extends ModifierWithKey {
 }
 SelectedBackgroundColorModifier.identity = Symbol('selectedBackgroundColor');
 class PopupUnselectedColorModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().alphabetIndexer.resetPopupUnselectedColor(node);
@@ -10660,6 +11824,9 @@ class PopupUnselectedColorModifier extends ModifierWithKey {
 }
 PopupUnselectedColorModifier.identity = Symbol('popupUnselectedColor');
 class PopupSelectedColorModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().alphabetIndexer.resetPopupSelectedColor(node);
@@ -10679,6 +11846,9 @@ class PopupSelectedColorModifier extends ModifierWithKey {
 }
 PopupSelectedColorModifier.identity = Symbol('popupSelectedColor');
 class AlignStyleModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().alphabetIndexer.resetAlignStyle(node);
@@ -10695,6 +11865,9 @@ class AlignStyleModifier extends ModifierWithKey {
 }
 AlignStyleModifier.identity = Symbol('alignStyle');
 class UsingPopupModifier extends Modifier {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().alphabetIndexer.resetUsingPopup(node);
@@ -10706,6 +11879,9 @@ class UsingPopupModifier extends Modifier {
 }
 UsingPopupModifier.identity = Symbol('usingPopup');
 class AlphabetIndexerSelectedModifier extends Modifier {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().alphabetIndexer.resetSelected(node);
@@ -10717,6 +11893,9 @@ class AlphabetIndexerSelectedModifier extends Modifier {
 }
 AlphabetIndexerSelectedModifier.identity = Symbol('alphabetIndexerSelected');
 class ItemSizeModifier extends Modifier {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().alphabetIndexer.resetItemSize(node);
@@ -10728,6 +11907,9 @@ class ItemSizeModifier extends Modifier {
 }
 ItemSizeModifier.identity = Symbol('itemSize');
 class PopupPositionModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().alphabetIndexer.resetPopupPosition(node);
@@ -10745,6 +11927,9 @@ class PopupPositionModifier extends ModifierWithKey {
 PopupPositionModifier.identity = Symbol('popupPosition');
 /// <reference path='./import.ts' />
 class TextStyleModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     let _a, _b, _c, _d, _e, _f, _g, _h;
     if (reset) {
@@ -10767,6 +11952,9 @@ class TextStyleModifier extends ModifierWithKey {
 }
 TextStyleModifier.identity = Symbol('textStyle');
 class EdgeAlignModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     let _a, _b, _c, _d, _e, _f, _g, _h;
     if (reset) {
@@ -10789,6 +11977,9 @@ class EdgeAlignModifier extends ModifierWithKey {
 }
 EdgeAlignModifier.identity = Symbol('edgeAlign');
 class ArkCalendarPickerComponent extends ArkComponent {
+  constructor(nativePtr) {
+    super(nativePtr);
+  }
   edgeAlign(alignType, offset) {
     let arkEdgeAlign = new ArkEdgeAlign();
     arkEdgeAlign.alignType = alignType;
@@ -10819,6 +12010,9 @@ globalThis.CalendarPicker.attributeModifier = function (modifier) {
 };
 /// <reference path='./import.ts' />
 class ArkDataPanelComponent extends ArkComponent {
+  constructor(nativePtr) {
+    super(nativePtr);
+  }
   closeEffect(value) {
     throw new Error('Method not implemented.');
   }
@@ -10850,6 +12044,9 @@ globalThis.DataPanel.attributeModifier = function (modifier) {
 };
 /// <reference path='./import.ts' />
 class ArkDatePickerComponent extends ArkComponent {
+  constructor(nativePtr) {
+    super(nativePtr);
+  }
   lunar(value) {
     modifier(this._modifiers, DatePickerLunarModifier, isBoolean(value) ? value : false);
     return this;
@@ -10874,6 +12071,9 @@ class ArkDatePickerComponent extends ArkComponent {
   }
 }
 class DatePickerLunarModifier extends Modifier {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().datePicker.resetLunar(node);
@@ -10885,6 +12085,9 @@ class DatePickerLunarModifier extends Modifier {
 }
 DatePickerLunarModifier.identity = Symbol('lunar');
 class DatePickerTextStyleModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     let _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p;
     if (reset) {
@@ -10909,6 +12112,9 @@ class DatePickerTextStyleModifier extends ModifierWithKey {
 }
 DatePickerTextStyleModifier.identity = Symbol('textStyle');
 class DatePickerSelectedTextStyleModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     let _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p;
     if (reset) {
@@ -10933,6 +12139,9 @@ class DatePickerSelectedTextStyleModifier extends ModifierWithKey {
 }
 DatePickerSelectedTextStyleModifier.identity = Symbol('selectedTextStyle');
 class DatePickerDisappearTextStyleModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     let _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p;
     if (reset) {
@@ -10968,6 +12177,9 @@ globalThis.DatePicker.attributeModifier = function (modifier) {
 };
 /// <reference path='./import.ts' />
 class ArkFormComponentComponent extends ArkComponent {
+  constructor(nativePtr) {
+    super(nativePtr);
+  }
   size(value) {
     modifierWithKey(this._modifiersWithKeys, FormComponentSizeModifier.identity, FormComponentSizeModifier, value);
     return this;
@@ -11020,6 +12232,9 @@ class ArkFormComponentComponent extends ArkComponent {
   }
 }
 class FormComponentModuleNameModifier extends Modifier {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().formComponent.resetModuleName(node);
@@ -11031,6 +12246,9 @@ class FormComponentModuleNameModifier extends Modifier {
 }
 FormComponentModuleNameModifier.identity = Symbol('formComponentModuleName');
 class FormComponentDimensionModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().formComponent.resetDimension(node);
@@ -11045,6 +12263,9 @@ class FormComponentDimensionModifier extends ModifierWithKey {
 }
 FormComponentDimensionModifier.identity = Symbol('formComponentDimension');
 class FormComponentAllowUpdateModifier extends Modifier {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().formComponent.resetAllowUpdate(node);
@@ -11056,6 +12277,9 @@ class FormComponentAllowUpdateModifier extends Modifier {
 }
 FormComponentAllowUpdateModifier.identity = Symbol('formComponentAllowUpdate');
 class FormComponentSizeModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().formComponent.resetSize(node);
@@ -11072,6 +12296,9 @@ class FormComponentSizeModifier extends ModifierWithKey {
 }
 FormComponentSizeModifier.identity = Symbol('formComponentSize');
 class FormComponentVisibilityModifier extends Modifier {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().formComponent.resetVisibility(node);
@@ -11094,6 +12321,9 @@ globalThis.FormComponent.attributeModifier = function (modifier) {
 };
 /// <reference path='./import.ts' />
 class ArkGaugeComponent extends ArkComponent {
+  constructor(nativePtr) {
+    super(nativePtr);
+  }
   value(value) {
     throw new Error('Method not implemented.');
   }
@@ -11134,6 +12364,9 @@ globalThis.Gauge.attributeModifier = function (modifier) {
 };
 /// <reference path='./import.ts' />
 class ArkMarqueeComponent extends ArkComponent {
+  constructor(nativePtr) {
+    super(nativePtr);
+  }
   fontColor(value) {
     throw new Error('Method not implemented.');
   }
@@ -11174,6 +12407,9 @@ globalThis.Marquee.attributeModifier = function (modifier) {
 };
 /// <reference path='./import.ts' />
 class MenuFontColorModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().menu.resetMenuFontColor(node);
@@ -11193,6 +12429,9 @@ class MenuFontColorModifier extends ModifierWithKey {
 }
 MenuFontColorModifier.identity = Symbol('fontColor');
 class MenuFontModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     let _a, _b, _c, _d, _e, _f, _g, _h;
     if (reset) {
@@ -11215,6 +12454,9 @@ class MenuFontModifier extends ModifierWithKey {
 }
 MenuFontModifier.identity = Symbol('font');
 class RadiusModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().menu.resetRadius(node);
@@ -11245,6 +12487,9 @@ class RadiusModifier extends ModifierWithKey {
 }
 RadiusModifier.identity = Symbol('radius');
 class ArkMenuComponent extends ArkComponent {
+  constructor(nativePtr) {
+    super(nativePtr);
+  }
   fontSize(value) {
     throw new Error('Method not implemented.');
   }
@@ -11276,6 +12521,9 @@ globalThis.Menu.attributeModifier = function (modifier) {
 };
 /// <reference path='./import.ts' />
 class MenuItemSelectedModifier extends Modifier {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().menuitem.resetSelected(node);
@@ -11287,6 +12535,9 @@ class MenuItemSelectedModifier extends Modifier {
 }
 MenuItemSelectedModifier.identity = Symbol('selected');
 class LabelFontColorModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().menuitem.resetLabelFontColor(node);
@@ -11306,6 +12557,9 @@ class LabelFontColorModifier extends ModifierWithKey {
 }
 LabelFontColorModifier.identity = Symbol('labelfontColor');
 class ContentFontColorModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().menuitem.resetContentFontColor(node);
@@ -11325,6 +12579,9 @@ class ContentFontColorModifier extends ModifierWithKey {
 }
 ContentFontColorModifier.identity = Symbol('contentfontColor');
 class LabelFontModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().menuitem.resetLabelFont(node);
@@ -11356,6 +12613,9 @@ class LabelFontModifier extends ModifierWithKey {
 }
 LabelFontModifier.identity = Symbol('labelFont');
 class ContentFontModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().menuitem.resetContentFont(node);
@@ -11387,6 +12647,9 @@ class ContentFontModifier extends ModifierWithKey {
 }
 ContentFontModifier.identity = Symbol('contentFont');
 class ArkMenuItemComponent extends ArkComponent {
+  constructor(nativePtr) {
+    super(nativePtr);
+  }
   selected(value) {
     if (typeof value === 'boolean') {
       modifier(this._modifiers, MenuItemSelectedModifier, value);
@@ -11431,6 +12694,9 @@ globalThis.MenuItem.attributeModifier = function (modifier) {
 };
 /// <reference path='./import.ts' />
 class ArkMenuItemGroupComponent extends ArkComponent {
+  constructor(nativePtr) {
+    super(nativePtr);
+  }
   monopolizeEvents(monopolize) {
     throw new Error('Method not implemented.');
   }
@@ -11447,6 +12713,9 @@ globalThis.MenuItemGroup.attributeModifier = function (modifier) {
 };
 /// <reference path='./import.ts' />
 class ArkPluginComponentComponent extends ArkComponent {
+  constructor(nativePtr) {
+    super(nativePtr);
+  }
   onComplete(callback) {
     throw new Error('Method not implemented.');
   }
@@ -11469,6 +12738,9 @@ globalThis.PluginComponent.attributeModifier = function (modifier) {
 };
 /// <reference path='./import.ts' />
 class ArkProgressComponent extends ArkComponent {
+  constructor(nativePtr) {
+    super(nativePtr);
+  }
   value(value) {
     throw new Error('Method not implemented.');
   }
@@ -11494,6 +12766,9 @@ globalThis.Progress.attributeModifier = function (modifier) {
 };
 /// <reference path='./import.ts' />
 class ArkQRCodeComponent extends ArkComponent {
+  constructor(nativePtr) {
+    super(nativePtr);
+  }
   color(value) {
     modifierWithKey(this._modifiersWithKeys, QRColorModifier.identity, QRColorModifier, value);
     return this;
@@ -11574,6 +12849,9 @@ globalThis.QRCode.attributeModifier = function (modifier) {
 };
 /// <reference path='./import.ts' />
 class ArkRichTextComponent extends ArkComponent {
+  constructor(nativePtr) {
+    super(nativePtr);
+  }
   onStart(callback) {
     throw new Error('Method not implemented.');
   }
@@ -11596,6 +12874,9 @@ globalThis.RichText.attributeModifier = function (modifier) {
 };
 /// <reference path='./import.ts' />
 class ArkScrollBarComponent extends ArkComponent {
+  constructor(nativePtr) {
+    super(nativePtr);
+  }
   monopolizeEvents(monopolize) {
     throw new Error('Method not implemented.');
   }
@@ -11612,6 +12893,9 @@ globalThis.ScrollBar.attributeModifier = function (modifier) {
 };
 /// <reference path='./import.ts' />
 class ArkStepperComponent extends ArkComponent {
+  constructor(nativePtr) {
+    super(nativePtr);
+  }
   onFinish(callback) {
     throw new Error('Method not implemented.');
   }
@@ -11643,6 +12927,9 @@ globalThis.Stepper.attributeModifier = function (modifier) {
 };
 /// <reference path='./import.ts' />
 class ArkStepperItemComponent extends ArkComponent {
+  constructor(nativePtr) {
+    super(nativePtr);
+  }
   prevLabel(value) {
     throw new Error('Method not implemented.');
   }
@@ -11658,6 +12945,9 @@ class ArkStepperItemComponent extends ArkComponent {
   }
 }
 class NextLabelModifier extends Modifier {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().stepperItem.resetNextLabel(node);
@@ -11680,6 +12970,9 @@ globalThis.StepperItem.attributeModifier = function (modifier) {
 };
 /// <reference path='./import.ts' />
 class ArkTextClockComponent extends ArkComponent {
+  constructor(nativePtr) {
+    super(nativePtr);
+  }
   format(value) {
     modifierWithKey(this._modifiersWithKeys, TextClockFormatModifier.identity, TextClockFormatModifier, value);
     return this;
@@ -11804,6 +13097,9 @@ globalThis.TextClock.attributeModifier = function (modifier) {
 };
 /// <reference path='./import.ts' />
 class ArkTextTimerComponent extends ArkComponent {
+  constructor(nativePtr) {
+    super(nativePtr);
+  }
   format(value) {
     throw new Error('Method not implemented.');
   }
@@ -11841,6 +13137,9 @@ globalThis.TextTimer.attributeModifier = function (modifier) {
 };
 /// <reference path='./import.ts' />
 class ArkWebComponent extends ArkComponent {
+  constructor(nativePtr) {
+    super(nativePtr);
+  }
   javaScriptAccess(javaScriptAccess) {
     throw new Error('Method not implemented.');
   }
@@ -12124,6 +13423,9 @@ globalThis.Web.attributeModifier = function (modifier) {
 };
 /// <reference path='./import.ts' />
 class ArkXComponentComponent extends ArkComponent {
+  constructor(nativePtr) {
+    super(nativePtr);
+  }
   onLoad(callback) {
     throw new Error('Method not implemented.');
   }
@@ -12146,6 +13448,9 @@ globalThis.XComponent.attributeModifier = function (modifier) {
 };
 /// <reference path='./import.ts' />
 class ArkBadgeComponent extends ArkComponent {
+  constructor(nativePtr) {
+    super(nativePtr);
+  }
   monopolizeEvents(monopolize) {
     throw new Error('Method not implemented.');
   }
@@ -12162,6 +13467,9 @@ globalThis.Badge.attributeModifier = function (modifier) {
 };
 /// <reference path='./import.ts' />
 class ArkFlowItemComponent extends ArkComponent {
+  constructor(nativePtr) {
+    super(nativePtr);
+  }
   monopolizeEvents(monopolize) {
     throw new Error('Method not implemented.');
   }
@@ -12178,6 +13486,9 @@ globalThis.FlowItem.attributeModifier = function (modifier) {
 };
 /// <reference path='./import.ts' />
 class ArkFormLinkComponent extends ArkComponent {
+  constructor(nativePtr) {
+    super(nativePtr);
+  }
   monopolizeEvents(monopolize) {
     throw new Error('Method not implemented.');
   }
@@ -12194,6 +13505,9 @@ globalThis.FormLink.attributeModifier = function (modifier) {
 };
 /// <reference path='./import.ts' />
 class ArkGridItemComponent extends ArkComponent {
+  constructor(nativePtr) {
+    super(nativePtr);
+  }
   rowStart(value) {
     throw new Error('Method not implemented.');
   }
@@ -12234,12 +13548,18 @@ globalThis.GridItem.attributeModifier = function (modifier) {
 };
 /// <reference path='./import.ts' />
 class ArkHyperlinkComponent extends ArkComponent {
+  constructor(nativePtr) {
+    super(nativePtr);
+  }
   color(value) {
     modifierWithKey(this._modifiersWithKeys, HyperlinkColorModifier.identity, HyperlinkColorModifier, value);
     return this;
   }
 }
 class HyperlinkColorModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().hyperlink.resetColor(node);
@@ -12270,6 +13590,9 @@ globalThis.Hyperlink.attributeModifier = function (modifier) {
 };
 /// <reference path='./import.ts' />
 class ListEditModeModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().list.resetEditMode(node);
@@ -12281,6 +13604,9 @@ class ListEditModeModifier extends ModifierWithKey {
 }
 ListEditModeModifier.identity = Symbol('editMode');
 class ListMultiSelectableModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().list.resetMultiSelectable(node);
@@ -12292,6 +13618,9 @@ class ListMultiSelectableModifier extends ModifierWithKey {
 }
 ListMultiSelectableModifier.identity = Symbol('listMultiSelectable');
 class ListAlignListItemModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().list.resetAlignListItem(node);
@@ -12303,6 +13632,9 @@ class ListAlignListItemModifier extends ModifierWithKey {
 }
 ListAlignListItemModifier.identity = Symbol('listAlignListItem');
 class ListScrollSnapAlignModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().list.resetScrollSnapAlign(node);
@@ -12314,6 +13646,9 @@ class ListScrollSnapAlignModifier extends ModifierWithKey {
 }
 ListScrollSnapAlignModifier.identity = Symbol('listScrollSnapAlign');
 class ListDividerModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     let _a, _b, _c, _d;
     if (reset) {
@@ -12329,6 +13664,9 @@ class ListDividerModifier extends ModifierWithKey {
 }
 ListDividerModifier.identity = Symbol('listDivider');
 class ChainAnimationOptionsModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     let _a, _b, _c, _d, _e, _f, _g;
     if (reset) {
@@ -12347,6 +13685,9 @@ class ChainAnimationOptionsModifier extends ModifierWithKey {
 }
 ChainAnimationOptionsModifier.identity = Symbol('chainAnimationOptions');
 class ListChainAnimationModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().list.resetChainAnimation(node);
@@ -12361,6 +13702,9 @@ class ListChainAnimationModifier extends ModifierWithKey {
 }
 ListChainAnimationModifier.identity = Symbol('listChainAnimation');
 class ListCachedCountModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().list.resetCachedCount(node);
@@ -12372,6 +13716,9 @@ class ListCachedCountModifier extends ModifierWithKey {
 }
 ListCachedCountModifier.identity = Symbol('listCachedCount');
 class ListEnableScrollInteractionModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().list.resetEnableScrollInteraction(node);
@@ -12383,6 +13730,9 @@ class ListEnableScrollInteractionModifier extends ModifierWithKey {
 }
 ListEnableScrollInteractionModifier.identity = Symbol('listEnableScrollInteraction');
 class ListStickyModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().list.resetSticky(node);
@@ -12394,6 +13744,9 @@ class ListStickyModifier extends ModifierWithKey {
 }
 ListStickyModifier.identity = Symbol('listSticky');
 class ListEdgeEffectModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     let _a;
     if (reset) {
@@ -12410,6 +13763,9 @@ class ListEdgeEffectModifier extends ModifierWithKey {
 }
 ListEdgeEffectModifier.identity = Symbol('listEdgeEffect');
 class ListListDirectionModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().list.resetListDirection(node);
@@ -12421,6 +13777,9 @@ class ListListDirectionModifier extends ModifierWithKey {
 }
 ListListDirectionModifier.identity = Symbol('listListDirection');
 class ListFrictionModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().list.resetListFriction(node);
@@ -12448,6 +13807,9 @@ class ListFrictionModifier extends ModifierWithKey {
 }
 ListFrictionModifier.identity = Symbol('listFriction');
 class ListNestedScrollModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().list.resetListNestedScroll(node);
@@ -12459,6 +13821,9 @@ class ListNestedScrollModifier extends ModifierWithKey {
 }
 ListNestedScrollModifier.identity = Symbol('listNestedScroll');
 class ListScrollBarModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().list.resetListScrollBar(node);
@@ -12470,6 +13835,9 @@ class ListScrollBarModifier extends ModifierWithKey {
 }
 ListScrollBarModifier.identity = Symbol('listScrollBar');
 class ListLanesModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().list.resetListLanes(node);
@@ -12484,6 +13852,9 @@ class ListLanesModifier extends ModifierWithKey {
 }
 ListLanesModifier.identity = Symbol('listLanes');
 class ArkListComponent extends ArkComponent {
+  constructor(nativePtr) {
+    super(nativePtr);
+  }
   lanes(value, gutter) {
     let opt = new ArkLanesOpt();
     opt.gutter = gutter;
@@ -12624,6 +13995,9 @@ globalThis.List.attributeModifier = function (modifier) {
 };
 /// <reference path='./import.ts' />
 class ArkListItemComponent extends ArkComponent {
+  constructor(nativePtr) {
+    super(nativePtr);
+  }
   sticky(value) {
     throw new Error('Method not implemented.');
   }
@@ -12677,6 +14051,9 @@ class ListItemGroupDividerModifier extends ModifierWithKey {
 }
 ListItemGroupDividerModifier.identity = Symbol('listItemGroupDivider');
 class ArkListItemGroupComponent extends ArkComponent {
+  constructor(nativePtr) {
+    super(nativePtr);
+  }
   divider(value) {
     modifierWithKey(this._modifiersWithKeys, ListItemGroupDividerModifier.identity, ListItemGroupDividerModifier, value);
     return this;
@@ -12697,6 +14074,9 @@ globalThis.ListItemGroup.attributeModifier = function (modifier) {
 };
 /// <reference path='./import.ts' />
 class ArkRelativeContainerComponent extends ArkComponent {
+  constructor(nativePtr) {
+    super(nativePtr);
+  }
   monopolizeEvents(monopolize) {
     throw new Error('Method not implemented.');
   }
@@ -12713,6 +14093,9 @@ globalThis.RelativeContainer.attributeModifier = function (modifier) {
 };
 /// <reference path='./import.ts' />
 class ArkSwiperComponent extends ArkComponent {
+  constructor(nativePtr) {
+    super(nativePtr);
+  }
   index(value) {
     throw new Error('Method not implemented.');
   }
@@ -12798,6 +14181,9 @@ globalThis.Swiper.attributeModifier = function (modifier) {
 };
 /// <reference path='./import.ts' />
 class ArkTabsComponent extends ArkComponent {
+  constructor(nativePtr) {
+    super(nativePtr);
+  }
   onAnimationStart(handler) {
     throw new Error('Method not implemented.');
   }
@@ -12871,6 +14257,9 @@ class ArkTabsComponent extends ArkComponent {
   }
 }
 class BarGridAlignModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().tabs.resetBarGridAlign(node);
@@ -12889,6 +14278,9 @@ class BarGridAlignModifier extends ModifierWithKey {
 }
 BarGridAlignModifier.identity = Symbol('barGridAlign');
 class DividerModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().tabs.resetDivider(node);
@@ -12906,6 +14298,9 @@ class DividerModifier extends ModifierWithKey {
 }
 DividerModifier.identity = Symbol('Divider');
 class BarWidthModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().tabs.resetTabBarWidth(node);
@@ -12925,6 +14320,9 @@ class BarWidthModifier extends ModifierWithKey {
 }
 BarWidthModifier.identity = Symbol('barWidth');
 class BarAdaptiveHeightModifier extends Modifier {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().tabs.resetBarAdaptiveHeight(node);
@@ -12936,6 +14334,9 @@ class BarAdaptiveHeightModifier extends Modifier {
 }
 BarAdaptiveHeightModifier.identity = Symbol('barAdaptiveHeight');
 class BarHeightModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().tabs.resetTabBarHeight(node);
@@ -12955,6 +14356,9 @@ class BarHeightModifier extends ModifierWithKey {
 }
 BarHeightModifier.identity = Symbol('barHeight');
 class BarOverlapModifier extends Modifier {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().tabs.resetBarOverlap(node);
@@ -12966,6 +14370,9 @@ class BarOverlapModifier extends Modifier {
 }
 BarOverlapModifier.identity = Symbol('barOverlap');
 class TabsVerticalModifier extends Modifier {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().tabs.resetIsVertical(node);
@@ -12977,6 +14384,9 @@ class TabsVerticalModifier extends Modifier {
 }
 TabsVerticalModifier.identity = Symbol('vertical');
 class AnimationDurationModifier extends Modifier {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().tabs.resetAnimationDuration(node);
@@ -12988,6 +14398,9 @@ class AnimationDurationModifier extends Modifier {
 }
 AnimationDurationModifier.identity = Symbol('animationduration');
 class ScrollableModifier extends Modifier {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().tabs.resetScrollable(node);
@@ -12999,6 +14412,9 @@ class ScrollableModifier extends Modifier {
 }
 ScrollableModifier.identity = Symbol('scrollable');
 class TabBarModeModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     let _a, _b;
     if (reset) {
@@ -13025,6 +14441,9 @@ class TabBarModeModifier extends ModifierWithKey {
 }
 TabBarModeModifier.identity = Symbol('tabsbarMode');
 class BarPositionModifier extends Modifier {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().tabs.resetTabBarPosition(node);
@@ -13036,6 +14455,9 @@ class BarPositionModifier extends Modifier {
 }
 BarPositionModifier.identity = Symbol('barPosition');
 class TabsHideTitleBarModifier extends Modifier {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().tabs.resetHideTitleBar(node);
@@ -13047,6 +14469,9 @@ class TabsHideTitleBarModifier extends Modifier {
 }
 TabsHideTitleBarModifier.identity = Symbol('hideTitleBar');
 class BarBackgroundColorModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().tabs.resetBarBackgroundColor(node);
@@ -13066,6 +14491,9 @@ class BarBackgroundColorModifier extends ModifierWithKey {
 }
 BarBackgroundColorModifier.identity = Symbol('barbackgroundcolor');
 class FadingEdgeModifier extends Modifier {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().tabs.resetFadingEdge(node);
@@ -13088,6 +14516,9 @@ globalThis.Tabs.attributeModifier = function (modifier) {
 };
 /// <reference path='./import.ts' />
 class ArkTabContentComponent extends ArkComponent {
+  constructor(nativePtr) {
+    super(nativePtr);
+  }
   tabBar(value) {
     throw new Error('Method not implemented.');
   }
@@ -13107,6 +14538,9 @@ globalThis.TabContent.attributeModifier = function (modifier) {
 };
 /// <reference path='./import.ts' />
 class ArkUIExtensionComponentComponent extends ArkComponent {
+  constructor(nativePtr) {
+    super(nativePtr);
+  }
   onRemoteReady(callback) {
     throw new Error('Method not implemented.');
   }
@@ -13264,6 +14698,9 @@ class FrictionModifier extends ModifierWithKey {
 }
 FrictionModifier.identity = Symbol('friction');
 class ArkWaterFlowComponent extends ArkComponent {
+  constructor(nativePtr) {
+    super(nativePtr);
+  }
   columnsTemplate(value) {
     if (isString(value)) {
       modifier(this._modifiers, ColumnsTemplateModifier, value);
@@ -13366,6 +14803,9 @@ globalThis.WaterFlow.attributeModifier = function (modifier) {
 };
 /// <reference path='./import.ts' />
 class ArkCircleComponent extends ArkComponent {
+  constructor(nativePtr) {
+    super(nativePtr);
+  }
   stroke(value) {
     throw new Error('Method not implemented.');
   }
@@ -13415,6 +14855,9 @@ globalThis.Circle.attributeModifier = function (modifier) {
 };
 /// <reference path='./import.ts' />
 class ArkEllipseComponent extends ArkComponent {
+  constructor(nativePtr) {
+    super(nativePtr);
+  }
   stroke(value) {
     throw new Error('Method not implemented.');
   }
@@ -13478,6 +14921,9 @@ globalThis.Ellipse.attributeModifier = function (modifier) {
  */
 /// <reference path='./import.ts' />
 class ArkCommonShapeComponent extends ArkComponent {
+  constructor(nativePtr) {
+    super(nativePtr);
+  }
   viewPort(value) {
     throw new Error('Method not implemented.');
   }
@@ -13530,6 +14976,9 @@ class ArkCommonShapeComponent extends ArkComponent {
   }
 }
 class StrokeDashArrayModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().commonShape.resetStrokeDashArray(node);
@@ -13549,6 +14998,9 @@ class StrokeDashArrayModifier extends ModifierWithKey {
 }
 StrokeDashArrayModifier.identity = Symbol('strokeDashArray');
 class StrokeModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().commonShape.resetStroke(node);
@@ -13568,6 +15020,9 @@ class StrokeModifier extends ModifierWithKey {
 }
 StrokeModifier.identity = Symbol('stroke');
 class FillModifier extends Modifier {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().commonShape.resetFill(node);
@@ -13587,6 +15042,9 @@ class FillModifier extends Modifier {
 }
 FillModifier.identity = Symbol('fill');
 class StrokeDashOffsetModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().commonShape.resetStrokeDashOffset(node);
@@ -13606,6 +15064,9 @@ class StrokeDashOffsetModifier extends ModifierWithKey {
 }
 StrokeDashOffsetModifier.identity = Symbol('strokeDashOffset');
 class StrokeLineCapModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().commonShape.resetStrokeLineCap(node);
@@ -13617,6 +15078,9 @@ class StrokeLineCapModifier extends ModifierWithKey {
 }
 StrokeLineCapModifier.identity = Symbol('strokeLineCap');
 class StrokeLineJoinModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().commonShape.resetStrokeLineJoin(node);
@@ -13628,6 +15092,9 @@ class StrokeLineJoinModifier extends ModifierWithKey {
 }
 StrokeLineJoinModifier.identity = Symbol('strokeLineJoin');
 class StrokeMiterLimitModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().commonShape.resetStrokeMiterLimit(node);
@@ -13639,6 +15106,9 @@ class StrokeMiterLimitModifier extends ModifierWithKey {
 }
 StrokeMiterLimitModifier.identity = Symbol('strokeMiterLimit');
 class FillOpacityModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().commonShape.resetFillOpacity(node);
@@ -13658,6 +15128,9 @@ class FillOpacityModifier extends ModifierWithKey {
 }
 FillOpacityModifier.identity = Symbol('FillOpacity');
 class StrokeOpacityModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().commonShape.resetStrokeOpacity(node);
@@ -13677,6 +15150,9 @@ class StrokeOpacityModifier extends ModifierWithKey {
 }
 StrokeOpacityModifier.identity = Symbol('StrokeOpacity');
 class StrokeWidthModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().commonShape.resetStrokeWidth(node);
@@ -13688,6 +15164,9 @@ class StrokeWidthModifier extends ModifierWithKey {
 }
 StrokeWidthModifier.identity = Symbol('strokeWidth');
 class AntiAliasModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().commonShape.resetAntiAlias(node);
@@ -13701,6 +15180,9 @@ AntiAliasModifier.identity = Symbol('antiAlias');
 /// <reference path='./import.ts' />
 /// <reference path='./ArkCommonShape.ts' />
 class ArkLineComponent extends ArkCommonShapeComponent {
+  constructor(nativePtr) {
+    super(nativePtr);
+  }
   startPoint(value) {
     modifierWithKey(this._modifiersWithKeys, LineStartPointModifier.identity, LineStartPointModifier, value);
     return this;
@@ -13711,6 +15193,9 @@ class ArkLineComponent extends ArkCommonShapeComponent {
   }
 }
 class LineStartPointModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().line.resetStartPoint(node);
@@ -13725,6 +15210,9 @@ class LineStartPointModifier extends ModifierWithKey {
 }
 LineStartPointModifier.identity = Symbol('startPoint');
 class LineEndPointModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().line.resetEndPoint(node);
@@ -13752,12 +15240,18 @@ globalThis.Line.attributeModifier = function (modifier) {
 /// <reference path='./ArkCommonShape.ts' />
 const ARRAY_LENGTH = 2;
 class ArkPolylineComponent extends ArkCommonShapeComponent {
+  constructor(nativePtr) {
+    super(nativePtr);
+  }
   points(value) {
     modifierWithKey(this._modifiersWithKeys, PolylinePointsModifier.identity, PolylinePointsModifier, value);
     return this;
   }
 }
 class PolylinePointsModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     let xPoint = [];
     let yPoint = [];
@@ -13802,6 +15296,9 @@ globalThis.Polyline.attributeModifier = function (modifier) {
 };
 /// <reference path='./import.ts' />
 class ArkPolygonComponent extends ArkComponent {
+  constructor(nativePtr) {
+    super(nativePtr);
+  }
   points(value) {
     throw new Error('Method not implemented.');
   }
@@ -13854,12 +15351,18 @@ globalThis.Polygon.attributeModifier = function (modifier) {
 };
 /// <reference path='./import.ts' />
 class ArkPathComponent extends ArkCommonShapeComponent {
+  constructor(nativePtr) {
+    super(nativePtr);
+  }
   commands(value) {
     modifierWithKey(this._modifiersWithKeys, CommandsModifier.identity, CommandsModifier, value);
     return this;
   }
 }
 class CommandsModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().path.resetPathCommands(node);
@@ -13905,6 +15408,9 @@ globalThis.Path.attributeModifier = function (modifier) {
 /// <reference path='./import.ts' />
 /// <reference path='./ArkCommonShape.ts' />
 class RectRadiusWidthModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().rect.resetRectRadiusWidth(node);
@@ -13916,6 +15422,9 @@ class RectRadiusWidthModifier extends ModifierWithKey {
 }
 RectRadiusWidthModifier.identity = Symbol('rectRadiusWidth');
 class RectRadiusHeightModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().rect.resetRectRadiusHeight(node);
@@ -13927,6 +15436,9 @@ class RectRadiusHeightModifier extends ModifierWithKey {
 }
 RectRadiusHeightModifier.identity = Symbol('rectRadiusHeight');
 class RectRadiusModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().rect.resetRectRadius(node);
@@ -13941,6 +15453,9 @@ class RectRadiusModifier extends ModifierWithKey {
 }
 RectRadiusModifier.identity = Symbol('rectRadius');
 class ArkRectComponent extends ArkCommonShapeComponent {
+  constructor(nativePtr) {
+    super(nativePtr);
+  }
   radiusWidth(value) {
     modifierWithKey(this._modifiersWithKeys, RectRadiusWidthModifier.identity, RectRadiusWidthModifier, value);
     return this;
@@ -13981,6 +15496,9 @@ globalThis.Rect.attributeModifier = function (modifier) {
 /// <reference path='./import.ts' />
 /// <reference path='./ArkCommonShape.ts' />
 class ShapeViewPortModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().shape.resetShapeViewPort(node);
@@ -13996,6 +15514,9 @@ class ShapeViewPortModifier extends ModifierWithKey {
 }
 ShapeViewPortModifier.identity = Symbol('shapeViewPort');
 class ShapeMeshModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().shape.resetShapeMesh(node);
@@ -14010,6 +15531,9 @@ class ShapeMeshModifier extends ModifierWithKey {
 }
 ShapeMeshModifier.identity = Symbol('shapeMesh');
 class ArkShapeComponent extends ArkCommonShapeComponent {
+  constructor(nativePtr) {
+    super(nativePtr);
+  }
   viewPort(value) {
     if (value === null) {
       value = undefined;
@@ -14040,6 +15564,9 @@ globalThis.Shape.attributeModifier = function (modifier) {
 };
 /// <reference path='./import.ts' />
 class ArkCanvasComponent extends ArkComponent {
+  constructor(nativePtr) {
+    super(nativePtr);
+  }
   onReady(event) {
     throw new Error('Method not implemented.');
   }
@@ -14059,6 +15586,9 @@ globalThis.Canvas.attributeModifier = function (modifier) {
 };
 /// <reference path='./import.ts' />
 class ArkGridContainerComponent extends ArkComponent {
+  constructor(nativePtr) {
+    super(nativePtr);
+  }
   alignItems(value) {
     throw new Error('Method not implemented.');
   }

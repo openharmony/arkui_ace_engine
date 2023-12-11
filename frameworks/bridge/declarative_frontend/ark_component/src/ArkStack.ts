@@ -1,6 +1,9 @@
 
 /// <reference path="./import.ts" />
 class ArkStackComponent extends ArkComponent implements StackAttribute {
+  constructor(nativePtr: KNode) {
+    super(nativePtr);
+  }
   onGestureJudgeBegin(callback: (gestureInfo: GestureInfo, event: BaseGestureEvent) => GestureJudgeResult): this {
     throw new Error("Method not implemented.");
   }
@@ -11,6 +14,9 @@ class ArkStackComponent extends ArkComponent implements StackAttribute {
 }
 
 class StackAlignContentModifier extends Modifier<number> {
+  constructor(nativePtr: number) {
+    super(nativePtr);
+  }
   static identity: Symbol = Symbol('stackAlignContent');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {

@@ -1,5 +1,8 @@
 /// <reference path="./import.ts" />
 class ImageColorFilterModifier extends Modifier<string> {
+  constructor(value: string) {
+    super(value);
+  }
   static identity: Symbol = Symbol('imageColorFilter');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -11,6 +14,9 @@ class ImageColorFilterModifier extends Modifier<string> {
 }
 
 class ImageFillColorModifier extends ModifierWithKey<ResourceColor> {
+  constructor(value: ResourceColor) {
+    super(value);
+  }
   static identity: Symbol = Symbol('imageFillColor');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -25,6 +31,9 @@ class ImageFillColorModifier extends ModifierWithKey<ResourceColor> {
 }
 
 class ImageAltModifier extends ModifierWithKey<ResourceStr> {
+  constructor(value: ResourceStr) {
+    super(value);
+  }
   static identity: Symbol = Symbol('imageAlt');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -39,6 +48,9 @@ class ImageAltModifier extends ModifierWithKey<ResourceStr> {
 }
 
 class ImageCopyOptionModifier extends ModifierWithKey<CopyOptions> {
+  constructor(value: CopyOptions) {
+    super(value);
+  }
   static identity: Symbol = Symbol('imageCopyOption');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -53,6 +65,9 @@ class ImageCopyOptionModifier extends ModifierWithKey<CopyOptions> {
 }
 
 class ImageAutoResizeModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
   static identity: Symbol = Symbol('imageAutoResize');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -67,6 +82,9 @@ class ImageAutoResizeModifier extends ModifierWithKey<boolean> {
 }
 
 class ImageFitOriginalSizeModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
   static identity: Symbol = Symbol('imageFitOriginalSize');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -81,6 +99,9 @@ class ImageFitOriginalSizeModifier extends ModifierWithKey<boolean> {
 }
 
 class ImageDraggableModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
   static identity: Symbol = Symbol('imageDraggable');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -95,6 +116,9 @@ class ImageDraggableModifier extends ModifierWithKey<boolean> {
 }
 
 class ImageInterpolationModifier extends ModifierWithKey<ImageInterpolation> {
+  constructor(value: ImageInterpolation) {
+    super(value);
+  }
   static identity: Symbol = Symbol('imageInterpolation');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -109,6 +133,9 @@ class ImageInterpolationModifier extends ModifierWithKey<ImageInterpolation> {
 }
 
 class ImageSourceSizeModifier extends ModifierWithKey<{ width: number; height: number }> {
+  constructor(value: { width: number; height: number }) {
+    super(value);
+  }
   static identity: Symbol = Symbol("imageSourceSize");
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -124,6 +151,9 @@ class ImageSourceSizeModifier extends ModifierWithKey<{ width: number; height: n
 }
 
 class ImageMatchTextDirectionModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
   static identity: Symbol = Symbol('imageMatchTextDirection');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -138,6 +168,9 @@ class ImageMatchTextDirectionModifier extends ModifierWithKey<boolean> {
 }
 
 class ImageObjectRepeatModifier extends ModifierWithKey<ImageRepeat> {
+  constructor(value: ImageRepeat) {
+    super(value);
+  }
   static identity: Symbol = Symbol('imageObjectRepeat');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -152,6 +185,9 @@ class ImageObjectRepeatModifier extends ModifierWithKey<ImageRepeat> {
 }
 
 class ImageRenderModeModifier extends ModifierWithKey<ImageRenderMode> {
+  constructor(value: ImageRenderMode) {
+    super(value);
+  }
   static identity: Symbol = Symbol('imageRenderMode');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -166,6 +202,9 @@ class ImageRenderModeModifier extends ModifierWithKey<ImageRenderMode> {
 }
 
 class ImageSyncLoadModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
   static identity: Symbol = Symbol('imageSyncLoad');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -180,6 +219,9 @@ class ImageSyncLoadModifier extends ModifierWithKey<boolean> {
 }
 
 class ImageObjectFitModifier extends ModifierWithKey<ImageFit> {
+  constructor(value: ImageFit) {
+    super(value);
+  }
   static identity: Symbol = Symbol('imageObjectFit');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -194,6 +236,9 @@ class ImageObjectFitModifier extends ModifierWithKey<ImageFit> {
 }
 
 class ArkImageComponent extends ArkComponent implements ImageAttribute {
+  constructor(nativePtr: KNode) {
+    super(nativePtr);
+  }
   onGestureJudgeBegin(callback): this {
     throw new Error("Method not implemented.");
   }
