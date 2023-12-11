@@ -18,18 +18,7 @@ class ArkNavigationComponent extends ArkComponent implements NavigationAttribute
     return this;
   }
   navBarWidthRange(value: [Dimension, Dimension]): NavigationAttribute {
-    if (!!value && value.length >= 1) {
-      modifierWithKey(this._modifiersWithKeys, MinNavBarWidthModifier.identity, MinNavBarWidthModifier, value[0].toString());
-    } else {
-      modifierWithKey(this._modifiersWithKeys, MinNavBarWidthModifier.identity, MinNavBarWidthModifier, undefined);
-    }
-
-    if (!!value && value.length >= 2) {
-      modifierWithKey(this._modifiersWithKeys, MaxNavBarWidthModifier.identity, MaxNavBarWidthModifier, value[1].toString());
-    } else {
-      modifierWithKey(this._modifiersWithKeys, MaxNavBarWidthModifier.identity, MaxNavBarWidthModifier, undefined);
-    }
-
+    modifierWithKey(this._modifiersWithKeys, NavBarWidthRangeModifier.identity, NavBarWidthRangeModifier, value);
     return this;
   }
   minContentWidth(value: Dimension): NavigationAttribute {
@@ -111,14 +100,13 @@ class BackButtonIconModifier extends ModifierWithKey<boolean | object> {
   }
 }
 
-class MinNavBarWidthModifier extends ModifierWithKey<string> {
-  static identity: Symbol = Symbol('minNavBarWidth');
-
+class NavBarWidthRangeModifier extends ModifierWithKey<[Dimension, Dimension]> {
+  static identity: Symbol = Symbol('navBarWidthRange');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().navigation.resetMinNavBarWidth(node);
+      GetUINativeModule().navigation.resetNavBarWidthRange(node);
     } else {
-      GetUINativeModule().navigation.setMinNavBarWidth(node, this.value);
+      GetUINativeModule().navigation.setNavBarWidthRange(node, this.value);
     }
   }
 
@@ -131,25 +119,6 @@ class MinNavBarWidthModifier extends ModifierWithKey<string> {
   }
 }
 
-class MaxNavBarWidthModifier extends ModifierWithKey<string> {
-  static identity: Symbol = Symbol('maxNavBarWidth');
-
-  applyPeer(node: KNode, reset: boolean): void {
-    if (reset) {
-      GetUINativeModule().navigation.resetMaxNavBarWidth(node);
-    } else {
-      GetUINativeModule().navigation.setMaxNavBarWidth(node, this.value);
-    }
-  }
-
-  checkObjectDiff(): boolean {
-    if (isResource(this.stageValue) && isResource(this.value)) {
-      return !isResourceEqual(this.stageValue, this.value);
-    } else {
-      return true;
-    }
-  }
-}
 class MinContentWidthModifier extends ModifierWithKey<Dimension> {
   static identity: Symbol = Symbol('minContentWidth');
 
@@ -170,7 +139,7 @@ class MinContentWidthModifier extends ModifierWithKey<Dimension> {
   }
 }
 
-class NavBarWidthModifier extends ModifierWithKey<string> {
+class NavBarWidthModifier extends ModifierWithKey<Length> {
   static identity: Symbol = Symbol('navBarWidth');
 
   applyPeer(node: KNode, reset: boolean): void {
