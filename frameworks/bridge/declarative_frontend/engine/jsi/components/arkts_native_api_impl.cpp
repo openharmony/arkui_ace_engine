@@ -80,6 +80,7 @@
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_rect_modifier.h"
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_list_modifier.h"
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_list_item_group_modifier.h"
+#include "bridge/declarative_frontend/engine/jsi/components/arkts_native_text_timer_modifier.h"
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_loading_progress_modifier.h"
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_text_clock_modifier.h"
 
@@ -161,6 +162,7 @@ static struct ArkUINodeAPI impl = {
     GetQRCodeModifier,
     GetLoadingProgressModifier,
     GetTextClockModifier,
+    GetTextTimerModifier,
 
 #ifdef FORM_SUPPORTED
     GetFormComponentModifier,
