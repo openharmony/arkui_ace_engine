@@ -366,6 +366,7 @@ ACE_EXPORT extern const char SHEET_COMPONENT_TAG[];
 ACE_EXPORT extern const char SHEET_ETS_TAG[];
 ACE_EXPORT extern const char SHEET_MASK_TAG[];
 ACE_EXPORT extern const char SHEET_PAGE_TAG[];
+ACE_EXPORT extern const char SHEET_WRAPPER_TAG[];
 
 // full screen modal
 ACE_EXPORT extern const char MODAL_PAGE_TAG[];
