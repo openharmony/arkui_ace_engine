@@ -152,10 +152,12 @@ bool ArkJSRuntime::StartDebugger()
         auto callback = [instanceId = instanceId_, weak = weak_from_this()](int socketFd, std::string option) {
             LOGI("HdcRegister callback socket %{public}d, option %{public}s.", socketFd, option.c_str());
             if (option.find(DEBUGGER) == std::string::npos) {
+                ConnectServerManager::Get().StopConnectServer();
                 ConnectServerManager::Get().StartConnectServerWithSocketPair(socketFd);
             } else {
                 auto runtime = weak.lock();
                 CHECK_NULL_VOID(runtime);
+                JSNApi::StopDebugger(ParseHdcRegisterOption(option));
                 runtime->StartDebuggerForSocketPair(option, socketFd);
             }
         };
