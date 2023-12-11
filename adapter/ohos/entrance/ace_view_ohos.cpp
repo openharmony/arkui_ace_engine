@@ -209,7 +209,9 @@ void AceViewOhos::DispatchEventToPerf(const std::shared_ptr<MMI::KeyEvent>& keyE
     int32_t keyCode = keyEvent->GetKeyCode();
     if (keyCode != MMI::KeyEvent::KEYCODE_VOLUME_DOWN
         && keyCode != MMI::KeyEvent::KEYCODE_VOLUME_UP
-        && keyCode != MMI::KeyEvent::KEYCODE_POWER) {
+        && keyCode != MMI::KeyEvent::KEYCODE_POWER
+        && keyCode != MMI::KeyEvent::KEYCODE_META_LEFT
+        && keyCode != MMI::KeyEvent::KEYCODE_ESCAPE) {
         return;
     }
     PerfMonitor* pMonitor = PerfMonitor::GetPerfMonitor();
