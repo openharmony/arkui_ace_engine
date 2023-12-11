@@ -51,10 +51,9 @@ public:
 #endif
     }
 
-    RectF GetRoundRect() const
+    std::shared_ptr<Rosen::RectF> GetOverlayRect()
     {
-        auto rect = roundRect_.GetRect();
-        return RectF(rect.GetLeft(), rect.GetTop(), rect.GetWidth(), rect.GetHeight());
+        return overlayRect_;
     }
 
     void SetRoundRect(const RoundRect& rect, float borderWidth)
@@ -107,6 +106,9 @@ public:
             rect.GetCornerRadius(RoundRect::CornerPos::BOTTOM_RIGHT_POS).x,
             rect.GetCornerRadius(RoundRect::CornerPos::BOTTOM_RIGHT_POS).y);
 #endif
+        overlayRect_ = std::make_shared<Rosen::RectF>(
+            rect.GetRect().Left() - borderWidth / 2, rect.GetRect().Top() - borderWidth / 2,
+            rect.GetRect().Width() + borderWidth, rect.GetRect().Height() + borderWidth);
     }
 
     void SetPaintTask(const std::function<void(const RSRoundRect&, RSCanvas&)>& paintTask)
@@ -116,6 +118,7 @@ public:
 
 private:
     RSRoundRect roundRect_;
+    std::shared_ptr<Rosen::RectF> overlayRect_;
     std::function<void(const RSRoundRect&, RSCanvas&)> paintTask_;
 
     ACE_DISALLOW_COPY_AND_MOVE(FocusStateModifier);
