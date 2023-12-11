@@ -76,11 +76,9 @@ namespace {
 const std::vector<TextAlign> TEXT_ALIGNS = { TextAlign::START, TextAlign::CENTER, TextAlign::END, TextAlign::JUSTIFY };
 const std::vector<FontStyle> FONT_STYLES = { FontStyle::NORMAL, FontStyle::ITALIC };
 const std::vector<std::string> INPUT_FONT_FAMILY_VALUE = { "sans-serif" };
-constexpr uint32_t MAX_LINES = 3;
-constexpr uint32_t MINI_VAILD_VALUE = 1;
-constexpr uint32_t MAX_VAILD_VALUE = 100;
-constexpr uint32_t ILLEGAL_VALUE = 0;
-constexpr uint32_t INVAILD_VALUE = -1;
+const uint32_t MAX_LINES = 3;
+const uint32_t MINI_VAILD_VALUE = 1;
+const uint32_t MAX_VAILD_VALUE = 100;
 } // namespace
 
 void ParseTextFieldTextObject(const JSCallbackInfo& info, const JSRef<JSVal>& changeEventVal)
@@ -986,32 +984,15 @@ void JSTextField::SetShowCounter(const JSCallbackInfo& info)
         TextFieldModel::GetInstance()->SetShowCounter(false);
         return;
     }
-    TextFieldModel::GetInstance()->SetShowCounter(info[0]->ToBoolean());
     if (info[1]->IsObject()) {
         auto paramObject = JSRef<JSObject>::Cast(info[1]);
-        auto param = paramObject->GetProperty("highlightBorder");
-        auto isBorderShow = param->ToBoolean();
-        if (!param->IsBoolean() || param->IsUndefined() || param->IsNull()) {
-            TextFieldModel::GetInstance()->SetShowCounterBorder(true);
-        } else {
-            TextFieldModel::GetInstance()->SetShowCounterBorder(isBorderShow);
-        }
-        auto parameter = paramObject->GetProperty("thresholdPercentage");
-        auto inputNumber = parameter->ToNumber<int32_t>();
-        if (!parameter->IsNumber() || parameter->IsNull()) {
-            TextFieldModel::GetInstance()->SetCounterType(INVAILD_VALUE);
-            return;
-        }
+        auto inputNumber = (paramObject->GetProperty("thresholdPercentage")->ToNumber<int32_t>());
         if (inputNumber < MINI_VAILD_VALUE || inputNumber > MAX_VAILD_VALUE) {
-            LOGI("The info is wrong, it is supposed to be a right number");
-            TextFieldModel::GetInstance()->SetCounterType(ILLEGAL_VALUE);
             return;
         }
         TextFieldModel::GetInstance()->SetCounterType(inputNumber);
-        return;
     }
-    TextFieldModel::GetInstance()->SetCounterType(INVAILD_VALUE);
-    TextFieldModel::GetInstance()->SetShowCounterBorder(true);
+    TextFieldModel::GetInstance()->SetShowCounter(info[0]->ToBoolean());
 }
 
 void JSTextField::SetBarState(const JSCallbackInfo& info)

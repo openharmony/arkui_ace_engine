@@ -71,7 +71,7 @@ public:
     void CounterLayout(LayoutWrapper* layoutWrapper);
     float CounterNodeMeasure(float contentWidth, LayoutWrapper* layoutWrapper);
     void UpdateCounterTextMargin(LayoutWrapper* layoutWrapper);
-    void UpdateCounterBorderStyle(uint32_t& textLength, uint32_t& maxLength, LayoutWrapper* layoutWrapper);
+
     void UpdateCounterNode(uint32_t textLength, uint32_t maxLength, const LayoutConstraintF& contentConstraint,
         LayoutWrapper* layoutWrapper);
 

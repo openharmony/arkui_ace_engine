@@ -113,19 +113,12 @@ void TextFieldOverlayModifier::PaintUnderline(RSCanvas& canvas) const
     auto contentRect = textFieldPattern->GetContentRect();
     auto textFrameRect = textFieldPattern->GetFrameRect();
     auto responseArea = textFieldPattern->GetResponseArea();
+    auto responseAreaWidth = responseArea ? responseArea->GetAreaRect().Width() : 0.0f;
     Point leftPoint, rightPoint;
-    if (layoutProperty->GetShowCounterValue(false)) {
-        leftPoint.SetX(contentRect.Left());
-        leftPoint.SetY(textFrameRect.Height());
-        rightPoint.SetX(contentRect.Right());
-        rightPoint.SetY(textFrameRect.Height());
-    } else {
-        auto responseAreaWidth = responseArea ? responseArea->GetAreaRect().Width() : 0.0f;
-        leftPoint.SetX(contentRect.Left());
-        leftPoint.SetY(textFrameRect.Height());
-        rightPoint.SetX(contentRect.Right() + responseAreaWidth);
-        rightPoint.SetY(textFrameRect.Height());
-    }
+    leftPoint.SetX(contentRect.Left());
+    leftPoint.SetY(textFrameRect.Height());
+    rightPoint.SetX(contentRect.Right() + responseAreaWidth);
+    rightPoint.SetY(textFrameRect.Height());
     RSPen pen;
     pen.SetColor(ToRSColor(underlineColor_->Get()));
     pen.SetWidth(underlineWidth_->Get());
