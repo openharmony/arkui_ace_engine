@@ -199,6 +199,11 @@ public:
     static bool ParseJsResponseRegionArray(const JSRef<JSVal>& jsValue, std::vector<DimensionRect>& result);
     static bool ParseJsDimensionRect(const JSRef<JSVal>& jsValue, DimensionRect& result);
 
+    // for dynamic $r
+    static void CompleteResourceObject(JSRef<JSObject>& jsObj);
+    static bool ConvertResourceType(const std::string& typeName, ResourceType& resType);
+    static bool ParseDollarResource(const JSRef<JSVal>& jsValue, ResourceType& resType, std::string& resName);
+
     // mouse response response region
     static void JsMouseResponseRegion(const JSCallbackInfo& info);
 
