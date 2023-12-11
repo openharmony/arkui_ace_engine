@@ -1272,6 +1272,28 @@ struct ArkUIRectModifierAPI {
     void (*ResetRectRadius)(NodeHandle node);
 };
 
+struct ArkUILoadingProgressModifierAPI {
+    void (*SetColor)(NodeHandle node, uint32_t color);
+    void (*ResetColor)(NodeHandle node);
+    void (*SetEnableLoading)(NodeHandle node, bool value);
+    void (*ResetEnableLoading)(NodeHandle node);
+};
+
+struct ArkUITextClockModifierAPI {
+    void (*SetFormat)(NodeHandle node, const char* format);
+    void (*ResetFormat)(NodeHandle node);
+    void (*SetFontColor)(NodeHandle node, uint32_t color);
+    void (*ResetFontColor)(NodeHandle node);
+    void (*SetFontSize)(NodeHandle node, double value, int unit);
+    void (*ResetFontSize)(NodeHandle node);
+    void (*SetFontStyle)(NodeHandle node, uint32_t fontStyle);
+    void (*ResetFontStyle)(NodeHandle node);
+    void (*SetFontWeight)(NodeHandle node, const char* weight);
+    void (*ResetFontWeight)(NodeHandle node);
+    void (*SetFontFamily)(NodeHandle node, const char *fontFamily);
+    void (*ResetFontFamily)(NodeHandle node);
+};
+
 struct ArkUINodeAPI {
     NodeHandle (*GetFrameNodeById)(int nodeId);
     ArkUICommonModifierAPI (*GetCommonModifier)();
@@ -1332,6 +1354,8 @@ struct ArkUINodeAPI {
     ArkUIListModifierAPI (*GetListModifier)();
     ArkUIListItemGroupModifierAPI(*GetListItemGroupModifier)();
     ArkUIQRCodeModifierAPI (*GetQRCodeModifier)();
+    ArkUILoadingProgressModifierAPI (*GetLoadingProgressModifier)();
+    ArkUITextClockModifierAPI (*GetTextClockModifier)();
 
 #ifdef FORM_SUPPORTED
     ArkUIFormComponentModifierAPI (*GetFormComponentModifier)();
