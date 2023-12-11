@@ -1186,6 +1186,12 @@ HWTEST_F(SearchTestNg, SetOn001, TestSize.Level1)
      */
     searchModelInstance.SetOnPaste([](const std::string& title) {});
     eventHub->FireOnPaste("");
+    /**
+     * SetOnPasteWithEvent
+     */
+    searchModelInstance.SetOnPasteWithEvent([](const std::string& title, NG::TextCommonEvent& event) {});
+    TextCommonEvent event;
+    eventHub->FireOnPasteWithEvent("", event);
 }
 
 /**

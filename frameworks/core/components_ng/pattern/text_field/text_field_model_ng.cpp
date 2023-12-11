@@ -366,6 +366,13 @@ void TextFieldModelNG::SetOnPaste(std::function<void(const std::string&)>&& func
     eventHub->SetOnPaste(std::move(func));
 }
 
+void TextFieldModelNG::SetOnPasteWithEvent(std::function<void(const std::string&, NG::TextCommonEvent&)>&& func)
+{
+    auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<TextFieldEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnPasteWithEvent(std::move(func));
+}
+
 void TextFieldModelNG::SetCopyOption(CopyOptions copyOption)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, CopyOptions, copyOption);

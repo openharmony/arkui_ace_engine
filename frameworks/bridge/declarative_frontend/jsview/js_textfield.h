@@ -94,6 +94,7 @@ public:
     static void SetEnableAutoFill(const JSCallbackInfo& info);
     static void SetCancelButton(const JSCallbackInfo& info);
     static void SetSelectAllValue(const JSCallbackInfo& info);
+    static JSRef<JSVal> CreateJSTextCommonEvent(NG::TextCommonEvent& event);
 };
 
 } // namespace OHOS::Ace::Framework

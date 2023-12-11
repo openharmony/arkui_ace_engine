@@ -468,6 +468,13 @@ private:
     ACE_DISALLOW_COPY_AND_MOVE(EventHub);
 };
 
+class TextCommonEvent : public BaseEventInfo {
+    DECLARE_RELATIONSHIP_OF_CLASSES(TextCommonEvent, BaseEventInfo)
+public:
+    TextCommonEvent() : BaseEventInfo("TextCommonEvent") {}
+    ~TextCommonEvent() override = default;
+};
+
 } // namespace OHOS::Ace::NG
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_EVENT_EVENT_HUB_H
