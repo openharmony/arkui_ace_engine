@@ -1097,6 +1097,33 @@ struct ArkUIMenuModifierAPI {
     void (*ResetRadius)(NodeHandle node);
 };
 
+struct ArkUIWaterFlowModifierAPI {
+    void (*ResetColumnsTemplate)(NodeHandle node);
+    void (*SetColumnsTemplate)(NodeHandle node, const char* value);
+    void (*ResetRowsTemplate)(NodeHandle node);
+    void (*SetRowsTemplate)(NodeHandle node, const char* value);
+    void (*ResetWaterFlowEnableScrollInteraction)(NodeHandle node);
+    void (*SetWaterFlowEnableScrollInteraction)(NodeHandle node, bool value);
+    void (*SetColumnsGap)(NodeHandle node, double value, int unit, const char* calcValue);
+    void (*ResetColumnsGap)(NodeHandle node);
+    void (*SetRowsGap)(NodeHandle node, double value, int unit, const char* calcValue);
+    void (*ResetRowsGap)(NodeHandle node);
+    void (*SetItemMinWidth)(NodeHandle node, double value, int unit, const char* calcValue);
+    void (*ResetItemMinWidth)(NodeHandle node);
+    void (*SetItemMaxWidth)(NodeHandle node, double value, int unit, const char* calcValue);
+    void (*ResetItemMaxWidth)(NodeHandle node);
+    void (*SetItemMinHeight)(NodeHandle node, double value, int unit, const char* calcValue);
+    void (*ResetItemMinHeight)(NodeHandle node);
+    void (*SetItemMaxHeight)(NodeHandle node, double value, int unit, const char* calcValue);
+    void (*ResetItemMaxHeight)(NodeHandle node);
+    void (*SetLayoutDirection)(NodeHandle node, int32_t value);
+    void (*ResetLayoutDirection)(NodeHandle node);
+    void (*SetWaterFlowNestedScroll)(NodeHandle node, int32_t scrollForward, int32_t scrollBackward);
+    void (*ResetWaterFlowNestedScroll)(NodeHandle node);
+    void (*SetWaterFlowFriction)(NodeHandle node, double friction);
+    void (*ResetWaterFlowFriction)(NodeHandle node);
+};
+
 struct ArkUIDatePickerModifierAPI {
     void (*SetSelectedTextStyle)(
     NodeHandle node, const char* fontInfo, uint32_t color, int32_t style);
@@ -1313,6 +1340,7 @@ struct ArkUINodeAPI {
     ArkUIMenuItemModifierAPI (*GetMenuItemModifier)();
     ArkUIMenuModifierAPI (*GetMenuModifier)();
     ArkUIDatePickerModifierAPI (*GetDatePickerModifier)();
+    ArkUIWaterFlowModifierAPI (*GetWaterFlowModifier)();
     ArkUIAlphabetIndexerModifierAPI (*GetAlphabetIndexerModifier)();
     ArkUICommonShapeModifierAPI(*GetCommonShapeModifier)();
     ArkUIShapeModifierAPI(*GetShapeModifier)();
