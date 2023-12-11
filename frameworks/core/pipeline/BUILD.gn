@@ -83,12 +83,6 @@ template("ace_core_pipeline_source_set") {
       }
     }
 
-    if (platform == "ohos" && defined(config.enable_native_view) &&
-        config.enable_native_view) {
-      sources += [ "layers/ace_scene_builder.cpp" ]
-      deps += [ "$ace_flutter_engine_root/ohos_layers:flutter_ohos_layers" ]
-    }
-
     cflags_cc = []
     cflags_cc += invoker.cflags_cc
   }
