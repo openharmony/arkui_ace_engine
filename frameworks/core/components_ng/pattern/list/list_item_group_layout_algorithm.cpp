@@ -498,6 +498,7 @@ int32_t ListItemGroupLayoutAlgorithm::MeasureALineBackward(LayoutWrapper* layout
 void ListItemGroupLayoutAlgorithm::MeasureCenter(LayoutWrapper* layoutWrapper,
     const LayoutConstraintF& layoutConstraint, int32_t startIndex)
 {
+    startIndex = GetLanesFloor(startIndex);
     MeasureALineCenter(layoutWrapper, layoutConstraint, startIndex);
 
     float currentEndPos = GetEndPosition();
@@ -532,11 +533,16 @@ void ListItemGroupLayoutAlgorithm::MeasureCenter(LayoutWrapper* layoutWrapper,
 
     totalMainSize_ = GetEndPosition() - GetStartPosition() + headerMainSize_ + footerMainSize_;
     currentStartPos = headerMainSize_;
+    int32_t i = 0;
+    int32_t lanes = lanes_ > 1 ? lanes_ : 1;
     for (auto& pos : itemPosition_) {
         float len = pos.second.second - pos.second.first;
         pos.second.first = currentStartPos;
         pos.second.second = currentStartPos + len;
-        currentStartPos = pos.second.second + spaceWidth_;
+        i++;
+        if (i % lanes == 0) {
+            currentStartPos = pos.second.second + spaceWidth_;
+        }
     }
 }
 
@@ -575,11 +581,16 @@ void ListItemGroupLayoutAlgorithm::MeasureStart(LayoutWrapper* layoutWrapper,
 
     totalMainSize_ = GetEndPosition() - GetStartPosition() + headerMainSize_ + footerMainSize_;
     currentStartPos = headerMainSize_;
+    int32_t i = 0;
+    int32_t lanes = lanes_ > 1 ? lanes_ : 1;
     for (auto& pos : itemPosition_) {
         float len = pos.second.second - pos.second.first;
         pos.second.first = currentStartPos;
         pos.second.second = currentStartPos + len;
-        currentStartPos = pos.second.second + spaceWidth_;
+        i++;
+        if (i % lanes == 0) {
+            currentStartPos = pos.second.second + spaceWidth_;
+        }
     }
 }
 
@@ -608,11 +619,16 @@ void ListItemGroupLayoutAlgorithm::MeasureEnd(LayoutWrapper* layoutWrapper,
 
     totalMainSize_ = GetEndPosition() - GetStartPosition() + headerMainSize_ + footerMainSize_;
     currentStartPos = headerMainSize_;
+    int32_t i = 0;
+    int32_t lanes = lanes_ > 1 ? lanes_ : 1;
     for (auto& pos : itemPosition_) {
         float len = pos.second.second - pos.second.first;
         pos.second.first = currentStartPos;
         pos.second.second = currentStartPos + len;
-        currentStartPos = pos.second.second + spaceWidth_;
+        i++;
+        if (i % lanes == 0) {
+            currentStartPos = pos.second.second + spaceWidth_;
+        }
     }
 }
 

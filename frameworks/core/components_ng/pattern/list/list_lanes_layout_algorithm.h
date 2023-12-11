@@ -42,6 +42,11 @@ public:
     static int32_t CalculateLanesParam(std::optional<float>& minLaneLength, std::optional<float>& maxLaneLength,
         int32_t lanes, std::optional<float> crossSizeOptional, float laneGutter = 0.0f);
 
+    LayoutConstraintF& GetGroupLayoutConstraint() override
+    {
+        return groupLayoutConstraint_;
+    }
+
 protected:
     void UpdateListItemConstraint(Axis axis, const OptionalSizeF& selfIdealSize,
         LayoutConstraintF& contentConstraint) override;

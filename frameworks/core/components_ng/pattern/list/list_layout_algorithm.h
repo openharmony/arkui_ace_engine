@@ -319,6 +319,11 @@ public:
         const RefPtr<ListLayoutProperty>& layoutProperty, int32_t indexInGroup, int32_t judgeIndex,
         int32_t startIndex, int32_t endIndex);
 
+    virtual LayoutConstraintF& GetGroupLayoutConstraint()
+    {
+        return childLayoutConstraint_;
+    }
+
 protected:
     virtual void UpdateListItemConstraint(
         Axis axis, const OptionalSizeF& selfIdealSize, LayoutConstraintF& contentConstraint);
