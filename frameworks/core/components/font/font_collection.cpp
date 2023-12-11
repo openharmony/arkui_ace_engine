@@ -15,7 +15,6 @@
 
 #include "core/components/font/font_collection.h"
 
-#include "core/components/font/flutter_font_collection.h"
 #ifdef ENABLE_ROSEN_BACKEND
 #include "core/components/font/rosen_font_collection.h"
 #endif
@@ -27,7 +26,7 @@ FontCollection* FontCollection::GetInstance()
 #ifdef ENABLE_ROSEN_BACKEND
     return &RosenFontCollection::GetInstance();
 #else
-    return &FlutterFontCollection::GetInstance();
+    return nullptr;
 #endif
 }
 
