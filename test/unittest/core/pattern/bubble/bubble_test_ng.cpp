@@ -1776,13 +1776,13 @@ HWTEST_F(BubbleTestNg, BubbleLayoutTest008, TestSize.Level1)
         arrowBuildplacement = Placement::TOP_RIGHT;
         bubbleLayoutAlgorithm->arrowPlacement_ = BUBBLE_LAYOUT_PROPERTY_PLACEMENTS[i];
         result = bubbleLayoutAlgorithm->BuildTopLinePath(ARROW_OFFSET, RADIUS, arrowBuildplacement);
-        EXPECT_NE(arrowBuildplacement, Placement::NONE);
+        EXPECT_EQ(arrowBuildplacement, Placement::TOP_RIGHT);
         arrowBuildplacement = Placement::TOP_LEFT;
         result = bubbleLayoutAlgorithm->BuildTopLinePath(ARROW_OFFSET, RADIUS, arrowBuildplacement);
-        EXPECT_NE(arrowBuildplacement, Placement::NONE);
+        EXPECT_EQ(arrowBuildplacement, Placement::TOP_LEFT);
         arrowBuildplacement = Placement::TOP;
         result = bubbleLayoutAlgorithm->BuildTopLinePath(ARROW_OFFSET, RADIUS, arrowBuildplacement);
-        EXPECT_NE(arrowBuildplacement, Placement::NONE);
+        EXPECT_EQ(arrowBuildplacement, Placement::TOP);
         /**
          * @tc.steps: step8. excute BuildRightLinePath
          * @tc.expected: step8. BuildRightLinePath returns the Right edge drawing path of the bubble.
@@ -1790,13 +1790,13 @@ HWTEST_F(BubbleTestNg, BubbleLayoutTest008, TestSize.Level1)
         bubbleLayoutAlgorithm->arrowPlacement_ = BUBBLE_LAYOUT_PROPERTY_PLACEMENTS[i];
         arrowBuildplacement = Placement::RIGHT_BOTTOM;
         result = bubbleLayoutAlgorithm->BuildRightLinePath(ARROW_OFFSET, RADIUS, arrowBuildplacement);
-        EXPECT_NE(arrowBuildplacement, Placement::NONE);
+        EXPECT_EQ(arrowBuildplacement, Placement::RIGHT_BOTTOM);
         arrowBuildplacement = Placement::RIGHT_TOP;
         result = bubbleLayoutAlgorithm->BuildRightLinePath(ARROW_OFFSET, RADIUS, arrowBuildplacement);
-        EXPECT_NE(arrowBuildplacement, Placement::NONE);
+        EXPECT_EQ(arrowBuildplacement, Placement::RIGHT_TOP);
         arrowBuildplacement = Placement::RIGHT;
         result = bubbleLayoutAlgorithm->BuildRightLinePath(ARROW_OFFSET, RADIUS, arrowBuildplacement);
-        EXPECT_NE(arrowBuildplacement, Placement::NONE);
+        EXPECT_EQ(arrowBuildplacement, Placement::RIGHT);
         /**
          * @tc.steps: step9. excute BuildBottomLinePath
          * @tc.expected: step9. BuildBottomLinePath returns the Bottom edge drawing path of the bubble.
@@ -1804,13 +1804,13 @@ HWTEST_F(BubbleTestNg, BubbleLayoutTest008, TestSize.Level1)
         bubbleLayoutAlgorithm->arrowPlacement_ = BUBBLE_LAYOUT_PROPERTY_PLACEMENTS[i];
         arrowBuildplacement = Placement::BOTTOM_RIGHT;
         result = bubbleLayoutAlgorithm->BuildBottomLinePath(ARROW_OFFSET, RADIUS, arrowBuildplacement);
-        EXPECT_NE(arrowBuildplacement, Placement::NONE);
+        EXPECT_EQ(arrowBuildplacement, Placement::BOTTOM_RIGHT);
         arrowBuildplacement = Placement::BOTTOM_LEFT;
         result = bubbleLayoutAlgorithm->BuildBottomLinePath(ARROW_OFFSET, RADIUS, arrowBuildplacement);
-        EXPECT_NE(arrowBuildplacement, Placement::NONE);
+        EXPECT_EQ(arrowBuildplacement, Placement::BOTTOM_LEFT);
         arrowBuildplacement = Placement::BOTTOM;
         result = bubbleLayoutAlgorithm->BuildBottomLinePath(ARROW_OFFSET, RADIUS, arrowBuildplacement);
-        EXPECT_NE(arrowBuildplacement, Placement::NONE);
+        EXPECT_EQ(arrowBuildplacement, Placement::BOTTOM);
         /**
          * @tc.steps: step10. excute BuildLeftLinePath
          * @tc.expected: step10. BuildLeftLinePath returns the Left edge drawing path of the bubble.
@@ -1818,13 +1818,13 @@ HWTEST_F(BubbleTestNg, BubbleLayoutTest008, TestSize.Level1)
         bubbleLayoutAlgorithm->arrowPlacement_ = BUBBLE_LAYOUT_PROPERTY_PLACEMENTS[i];
         arrowBuildplacement = Placement::LEFT_BOTTOM;
         result = bubbleLayoutAlgorithm->BuildLeftLinePath(ARROW_OFFSET, RADIUS, arrowBuildplacement);
-        EXPECT_NE(arrowBuildplacement, Placement::NONE);
+        EXPECT_EQ(arrowBuildplacement, Placement::LEFT_BOTTOM);
         arrowBuildplacement = Placement::LEFT_TOP;
         result = bubbleLayoutAlgorithm->BuildLeftLinePath(ARROW_OFFSET, RADIUS, arrowBuildplacement);
-        EXPECT_NE(arrowBuildplacement, Placement::NONE);
+        EXPECT_EQ(arrowBuildplacement, Placement::LEFT_TOP);
         arrowBuildplacement = Placement::LEFT;
         result = bubbleLayoutAlgorithm->BuildLeftLinePath(ARROW_OFFSET, RADIUS, arrowBuildplacement);
-        EXPECT_NE(arrowBuildplacement, Placement::NONE);
+        EXPECT_EQ(arrowBuildplacement, Placement::LEFT);
     }
 }
 
@@ -1863,6 +1863,10 @@ HWTEST_F(BubbleTestNg, BubbleLayoutTest009, TestSize.Level1)
          */
         bubbleLayoutAlgorithm->InitCaretTargetSizeAndPosition();
         EXPECT_TRUE(bubbleLayoutAlgorithm->bCaretMode_);
+        auto targetSize = bubbleLayoutAlgorithm->targetSize_;
+        EXPECT_EQ(targetSize, SizeF(0.0f, 0.0f));
+        auto targetOffset = bubbleLayoutAlgorithm->targetOffset_;
+        EXPECT_EQ(targetOffset, OffsetF(0.0f, 0.0f));
     }
 }
 } // namespace OHOS::Ace::NG

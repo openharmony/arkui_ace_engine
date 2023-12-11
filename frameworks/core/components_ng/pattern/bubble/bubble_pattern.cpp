@@ -75,6 +75,26 @@ bool BubblePattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
             StartEnteringAnimation(nullptr);
         }
     }
+    auto useCustom = paintProperty->GetUseCustom().value_or(false);
+    if (useCustom) {
+        RefPtr<RenderContext> customRenderContext;
+        auto columnNode = AceType::DynamicCast<FrameNode>(host->GetFirstChild());
+        CHECK_NULL_RETURN(columnNode, false);
+        auto customNode = AceType::DynamicCast<FrameNode>(columnNode->GetFirstChild());
+        auto columnRenderContext = columnNode->GetRenderContext();
+        if (columnRenderContext) {
+            if (customNode) {
+                customRenderContext = customNode->GetRenderContext();
+            }
+        }
+        if (customRenderContext) {
+            if (customRenderContext->HasBackgroundColor() &&
+                customRenderContext->GetBackgroundColorValue() != Color::TRANSPARENT) {
+                columnRenderContext->UpdateBackgroundColor(customRenderContext->GetBackgroundColorValue());
+                customRenderContext->UpdateBackgroundColor(Color::TRANSPARENT);
+            }
+        }
+    }
     return true;
 }
 
