@@ -11573,22 +11573,6 @@ globalThis.QRCode.attributeModifier = function (modifier) {
   component.applyModifierPatch();
 };
 /// <reference path='./import.ts' />
-class ArkRemoteWindowComponent extends ArkComponent {
-  monopolizeEvents(monopolize) {
-    throw new Error('Method not implemented.');
-  }
-}
-// @ts-ignore
-globalThis.RemoteWindow.attributeModifier = function (modifier) {
-  const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
-  let component = this.createOrGetNode(elmtId, () => {
-    return new ArkRemoteWindowComponent(nativeNode);
-  });
-  modifier.applyNormalAttribute(component);
-  component.applyModifierPatch();
-};
-/// <reference path='./import.ts' />
 class ArkRichTextComponent extends ArkComponent {
   onStart(callback) {
     throw new Error('Method not implemented.');
@@ -12172,22 +12156,6 @@ globalThis.Badge.attributeModifier = function (modifier) {
   let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkBadgeComponent(nativeNode);
-  });
-  modifier.applyNormalAttribute(component);
-  component.applyModifierPatch();
-};
-/// <reference path='./import.ts' />
-class ArkEffectComponentComponent extends ArkComponent {
-  monopolizeEvents(monopolize) {
-    throw new Error('Method not implemented.');
-  }
-}
-// @ts-ignore
-globalThis.EffectComponent.attributeModifier = function (modifier) {
-  const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
-  let component = this.createOrGetNode(elmtId, () => {
-    return new ArkEffectComponentComponent(nativeNode);
   });
   modifier.applyNormalAttribute(component);
   component.applyModifierPatch();
@@ -14107,19 +14075,6 @@ globalThis.GridContainer.attributeModifier = function (modifier) {
   let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkGridContainerComponent(nativeNode);
-  });
-  modifier.applyNormalAttribute(component);
-  component.applyModifierPatch();
-};
-/// <reference path='./import.ts' />
-class ArkWindowSceneComponent extends ArkComponent {
-}
-// @ts-ignore
-globalThis.WindowScene.attributeModifier = function (modifier) {
-  const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
-  let component = this.createOrGetNode(elmtId, () => {
-    return new ArkWindowSceneComponent(nativeNode);
   });
   modifier.applyNormalAttribute(component);
   component.applyModifierPatch();
