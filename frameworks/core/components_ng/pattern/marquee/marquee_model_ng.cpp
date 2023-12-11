@@ -166,4 +166,61 @@ void MarqueeModelNG::SetOnFinish(std::function<void()>&& onChange)
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnFinish(std::move(onChange));
 }
+
+void MarqueeModelNG::SetAllowScale(FrameNode* frameNode, const bool allowScale)
+{
+    CHECK_NULL_VOID(frameNode);
+    if (allowScale) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(MarqueeLayoutProperty, AllowScale, allowScale, frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY_WITH_FLAG(MarqueeLayoutProperty, AllowScale,
+            PROPERTY_UPDATE_MEASURE, frameNode);
+    }
+}
+
+void MarqueeModelNG::SetFontWeight(FrameNode* frameNode, const std::optional<FontWeight>& fontWeight)
+{
+    CHECK_NULL_VOID(frameNode);
+    if (fontWeight.has_value()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(MarqueeLayoutProperty, FontWeight, fontWeight.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY_WITH_FLAG(MarqueeLayoutProperty, FontWeight,
+            PROPERTY_UPDATE_MEASURE, frameNode);
+    }
+}
+
+void MarqueeModelNG::SetFontFamily(FrameNode* frameNode, const std::optional<std::vector<std::string>>& fontFamilies)
+{
+    CHECK_NULL_VOID(frameNode);
+    if (fontFamilies.has_value()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(MarqueeLayoutProperty, FontFamily, fontFamilies.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY_WITH_FLAG(MarqueeLayoutProperty, FontFamily,
+            PROPERTY_UPDATE_MEASURE, frameNode);
+    }
+}
+
+void MarqueeModelNG::SetFontSize(FrameNode* frameNode, const std::optional<Dimension>& fontSize)
+{
+    if (fontSize.has_value()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(MarqueeLayoutProperty, FontSize, fontSize.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY_WITH_FLAG(
+            MarqueeLayoutProperty, FontSize, PROPERTY_UPDATE_MEASURE, frameNode);
+    }
+}
+
+void MarqueeModelNG::SetTextColor(FrameNode* frameNode, const std::optional<Color>& textColor)
+{
+    ACE_UPDATE_NODE_RENDER_CONTEXT(ForegroundColor, textColor.value_or(Color()), frameNode);
+    ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, ForegroundColorStrategy, frameNode);
+    ACE_UPDATE_NODE_RENDER_CONTEXT(ForegroundColorFlag, true, frameNode);
+    if (textColor.has_value()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(MarqueeLayoutProperty, FontColor, textColor.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY_WITH_FLAG(
+            MarqueeLayoutProperty, FontColor, PROPERTY_UPDATE_MEASURE, frameNode);
+    }
+}
+
 } // namespace OHOS::Ace::NG
