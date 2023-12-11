@@ -63,6 +63,7 @@
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_line_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_path_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_polyline_bridge.h"
+#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_qrcode_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_side_bar_container_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_calendar_picker_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_alphabet_indexer_bridge.h"
@@ -1100,6 +1101,7 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
     RegisterListAttributes(object, vm);
     RegisterGridAttributes(object, vm);
     RegisterLisitItemGroupAttributes(object, vm);
+    RegisterQRCodeAttributes(object, vm);
 
 #ifdef FORM_SUPPORTED
     RegisterFormAttributes(object, vm);
@@ -2232,5 +2234,23 @@ void ArkUINativeModule::RegisterLisitItemGroupAttributes(Local<panda::ObjectRef>
     listItemGroup->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetDivider"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ListeItemGroupBridege::ResetDivider));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "listItemGroup"), listItemGroup);
+}
+
+void ArkUINativeModule::RegisterQRCodeAttributes(Local<panda::ObjectRef> object, EcmaVM *vm)
+{
+    auto qrcode = panda::ObjectRef::New(vm);
+    qrcode->Set(vm, panda::StringRef::NewFromUtf8(vm, "setQRColor"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), QRCodeBridge::SetQRColor));
+    qrcode->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetQRColor"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), QRCodeBridge::ResetQRColor));
+    qrcode->Set(vm, panda::StringRef::NewFromUtf8(vm, "setQRBackgroundColor"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), QRCodeBridge::SetQRBackgroundColor));
+    qrcode->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetQRBackgroundColor"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), QRCodeBridge::ResetQRBackgroundColor));
+    qrcode->Set(vm, panda::StringRef::NewFromUtf8(vm, "setContentOpacity"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), QRCodeBridge::SetContentOpacity));
+    qrcode->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetContentOpacity"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), QRCodeBridge::ResetContentOpacity));
+    object->Set(vm, panda::StringRef::NewFromUtf8(vm, "qrcode"), qrcode);
 }
 } // namespace OHOS::Ace::NG

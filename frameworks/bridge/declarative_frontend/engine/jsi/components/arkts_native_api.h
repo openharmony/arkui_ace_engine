@@ -1194,6 +1194,15 @@ struct ArkUIListItemGroupModifierAPI {
     void (*ListItemGroupResetDivider)(NodeHandle node);
 };
 
+struct ArkUIQRCodeModifierAPI {
+    void (*SetQRColor)(NodeHandle node, uint32_t color);
+    void (*ResetQRColor)(NodeHandle node);
+    void (*SetQRBackgroundColor)(NodeHandle node, uint32_t color);
+    void (*ResetQRBackgroundColor)(NodeHandle node);
+    void (*SetContentOpacity)(NodeHandle node, double opacity);
+    void (*ResetContentOpacity)(NodeHandle node);
+};
+
 #ifdef FORM_SUPPORTED
 struct ArkUIFormComponentModifierAPI {
     void (*SetFormVisibility)(NodeHandle node, int32_t visible);
@@ -1310,6 +1319,7 @@ struct ArkUINodeAPI {
     ArkUIRectModifierAPI (*GetRectModifier)();
     ArkUIListModifierAPI (*GetListModifier)();
     ArkUIListItemGroupModifierAPI(*GetListItemGroupModifier)();
+    ArkUIQRCodeModifierAPI (*GetQRCodeModifier)();
 
 #ifdef FORM_SUPPORTED
     ArkUIFormComponentModifierAPI (*GetFormComponentModifier)();
