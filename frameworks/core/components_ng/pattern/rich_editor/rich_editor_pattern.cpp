@@ -2338,15 +2338,15 @@ RefPtr<SpanNode> RichEditorPattern::InsertValueToBeforeSpan(
     auto text = spanItem->content;
     std::wstring textTemp = StringUtils::ToWstring(text);
     std::wstring insertValueTemp = StringUtils::ToWstring(insertValue);
+    textTemp.append(insertValueTemp);
 
-    auto index = insertValueTemp.find(lineSeparator);
+    auto index = textTemp.find(lineSeparator);
     if (index != std::wstring::npos) {
-        auto textBefore = insertValueTemp.substr(0, index + 1);
-        auto textAfter = insertValueTemp.substr(index + 1);
-        textTemp.append(textBefore);
-        text = StringUtils::ToString(textTemp);
+        auto textBefore = textTemp.substr(0, index + 1);
+        auto textAfter = textTemp.substr(index + 1);
+        text = StringUtils::ToString(textBefore);
         spanNodeBefore->UpdateContent(text);
-        spanItem->position += static_cast<int32_t>(textBefore.length());
+        spanItem->position += insertValueTemp.length() - static_cast<int32_t>(textAfter.length());
         if (!textAfter.empty()) {
             auto host = GetHost();
             CHECK_NULL_RETURN(spanItem, spanNodeBefore);
@@ -2358,10 +2358,13 @@ RefPtr<SpanNode> RichEditorPattern::InsertValueToBeforeSpan(
             spanNodeAfter->MountToParent(host, infoAfter.GetSpanIndex());
             spanNodeAfter->UpdateContent(StringUtils::ToString(textAfter));
             CopyTextSpanStyle(spanNodeBefore, spanNodeAfter);
+            auto spanItemAfter = spanNodeAfter->GetSpanItem();
+            spanItemAfter->position = textTemp.length();
+            AddSpanItem(spanItemAfter, host->GetChildIndex(spanNodeBefore) + 1);
+            SpanNodeFission(spanNodeAfter);
             return spanNodeAfter;
         }
     } else {
-        textTemp.append(insertValueTemp);
         text = StringUtils::ToString(textTemp);
         spanNodeBefore->UpdateContent(text);
         spanItem->position += static_cast<int32_t>(StringUtils::ToWstring(insertValue).length());
