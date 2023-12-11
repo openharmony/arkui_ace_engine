@@ -2789,6 +2789,7 @@ void OverlayManager::PlayKeyboardTransition(RefPtr<FrameNode> customKeyboard, bo
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto pageNode = pipeline->GetStageManager()->GetLastPage();
+    CHECK_NULL_VOID(pageNode);
     auto pageHeight = pageNode->GetGeometryNode()->GetFrameSize().Height();
     if (isTransitionIn) {
         context->OnTransformTranslateUpdate({ 0.0f, pageHeight, 0.0f });
