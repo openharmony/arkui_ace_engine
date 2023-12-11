@@ -1,3 +1,6 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+
 # Copyright (c) 2023 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,6 +17,7 @@
 import os
 import time
 import json
+import stat
 import argparse
 import subprocess
 import multiprocessing
@@ -48,8 +52,7 @@ def parse_xml(xml_file_path):
     return failed_info
 
 
-def run_command(test_binary_path: str, alter_cmds: list = []):
-
+def run_command(test_binary_path: str, alter_cmds: list = None):
     """
     Run a gtest test binary.
     """
@@ -58,7 +61,8 @@ def run_command(test_binary_path: str, alter_cmds: list = []):
     default_cmds.append("--gtest_output=xml:{}.xml".format(test_binary_path))
     default_cmds.append("--gtest_print_time=0")
     default_cmds.append("--gtest_brief=1")
-    default_cmds.extend(alter_cmds)
+    if alter_cmds is not None:
+        default_cmds.extend(alter_cmds)
     subprocess.run(default_cmds)
 
 
@@ -69,7 +73,7 @@ def run_single_test(tests_path, test_suite_name):
     test_suite_path = None
     for root, _, files in os.walk(tests_path):
         for file in files:
-            if test_suite_name in file and ".xml" not in file and ".rsp" not in file:
+            if test_suite_name in file and ".xml" not in file and ".rsp" not in file and ".json" not in file:
                 test_suite_path =  os.path.join(root, test_suite_name)
     if test_suite_path is not None:
         run_command(test_suite_path)
@@ -102,20 +106,22 @@ def run_tests_parallel(test_directory):
     total_tests_count = 0
     failed_tests_count = 0
     for test_binary in test_binaries:
-        xml_file_path = test_binary + ".xml"
+        xml_file_path = "{}.xml".format(test_binary)
         if os.path.exists(xml_file_path):
             failed_info = parse_xml(xml_file_path)
-            total_tests_count = total_tests_count + int(failed_info['total_count'])
-            failed_tests_count = failed_tests_count + int(failed_info['failed_count'])
-            if int(failed_info['failed_count']):
+            total_tests_count = total_tests_count + int(failed_info.get('total_count', '0'))
+            failed_tests_count = failed_tests_count + int(failed_info.get('failed_count', '0'))
+            if int(failed_info.get('failed_count', '0')):
                 test_result['failed'].append(failed_info)
         else:
             test_result["unavailable"].append(test_binary.split('/')[-1])
     test_result["execute_time"] = "{} seconds".format(round(end - start, 2))
     test_result['total_execute_tests'] = total_tests_count
     test_result['failed_tests_count'] = failed_tests_count
-    json_file_path = test_directory + "/test_result.json"
-    with open(json_file_path, 'w') as json_file:
+    json_file_path = os.path.join(test_directory, "test_result.json")
+    flags = os.O_CREAT | os.O_WRONLY | os.O_TRUNC
+    mode = stat.S_IRUSR | stat.S_IWUSR
+    with os.fdopen(os.open(json_file_path, flags, mode), 'w') as json_file:
         json.dump(test_result, json_file, indent=2)
 
     print("The test results have been generated, path is {}".format(json_file_path))
