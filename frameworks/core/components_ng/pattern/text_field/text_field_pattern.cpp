@@ -5207,7 +5207,7 @@ void TextFieldPattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const
     jsonShowCounter->Put("value", layoutProperty->GetShowCounterValue(false));
     auto jsonShowCounterOptions = JsonUtil::Create(true);
     auto counterType = layoutProperty->GetSetCounterValue(INVAILD_VALUE);
-    auto showBorder = layoutProperty->GetShowHighlightBorderValue();
+    auto showBorder = layoutProperty->GetShowHighlightBorderValue(true);
     jsonShowCounterOptions->Put("thresholdPercentage", counterType);
     jsonShowCounterOptions->Put("highlightBorder", showBorder);
     jsonShowCounter->Put("options", jsonShowCounterOptions);
