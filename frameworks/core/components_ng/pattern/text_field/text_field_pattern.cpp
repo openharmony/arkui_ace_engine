@@ -2648,7 +2648,6 @@ void TextFieldPattern::HandleMouseEvent(MouseInfo& info)
     }
     ChangeMouseState(info.GetLocalLocation(), pipeline, frameId);
 
-    isUsingMouse_ = true;
     if (info.GetButton() == MouseButton::RIGHT_BUTTON) {
         HandleRightMouseEvent(info);
     } else if (info.GetButton() == MouseButton::LEFT_BUTTON) {
@@ -2663,6 +2662,7 @@ void TextFieldPattern::HandleRightMouseEvent(MouseInfo& info)
         return;
     }
     if (info.GetAction() == OHOS::Ace::MouseAction::RELEASE) {
+        isUsingMouse_ = true;
         HandleRightMouseReleaseEvent(info);
     }
 }
