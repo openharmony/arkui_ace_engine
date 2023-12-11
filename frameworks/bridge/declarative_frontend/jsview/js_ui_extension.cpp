@@ -117,18 +117,17 @@ void JSUIExtensionProxy::SendSync(const JSCallbackInfo& info)
     auto wantParams = WantParamsWrap::CreateWantWrap(reinterpret_cast<napi_env>(nativeEngine), nativeValue);
     if (proxy_) {
         AAFwk::WantParams reWantParams;
-        Rosen::WSErrorCode sendCode = proxy_->SendDataSync(wantParams, reWantParams);
-        if (sendCode != Rosen::WSErrorCode::WS_OK) {
-            const int32_t reErrorCode = static_cast<int32_t>(sendCode);
+        int32_t sendCode = proxy_->SendDataSync(wantParams, reWantParams);
+        if (sendCode != 0) {
             std::string errMsg;
-            if (reErrorCode == ERROR_CODE_UIEXTENSION_NOT_REGISTER_SYNC_CALLBACK) {
+            if (sendCode == ERROR_CODE_UIEXTENSION_NOT_REGISTER_SYNC_CALLBACK) {
                 errMsg = "No callback has been registered to process synchronous data transferring.";
-            } else if (reErrorCode == ERROR_CODE_UIEXTENSION_TRANSFER_DATA_FAILED) {
+            } else if (sendCode == ERROR_CODE_UIEXTENSION_TRANSFER_DATA_FAILED) {
                 errMsg = "Transferring data failed.";
             } else {
                 errMsg = "Unknown error.";
             }
-            JSException::Throw(reErrorCode, errMsg.c_str());
+            JSException::Throw(sendCode, errMsg.c_str());
             return;
         }
         auto execCtx = info.GetExecutionContext();
@@ -283,9 +282,9 @@ void JSUIExtensionProxy::On(const JSCallbackInfo& info)
     CHECK_NULL_VOID(pattern);
     auto onFuncList = GetOnFuncList(registerType);
     if (registerType == RegisterType::SYNC) {
-        pattern->SetOnSyncOnCallbackList(std::move(onFuncList));
+        pattern->SetSyncCallbacks(std::move(onFuncList));
     } else if (registerType == RegisterType::ASYNC) {
-        pattern->SetOnAsyncOnCallbackList(std::move(onFuncList));
+        pattern->SetAsyncCallbacks(std::move(onFuncList));
     }
 }
 
@@ -319,9 +318,9 @@ void JSUIExtensionProxy::Off(const JSCallbackInfo& info)
     CHECK_NULL_VOID(pattern);
     auto onFuncList = GetOnFuncList(registerType);
     if (registerType == RegisterType::SYNC) {
-        pattern->SetOnSyncOffCallbackList(std::move(onFuncList));
+        pattern->SetSyncCallbacks(std::move(onFuncList));
     } else if (registerType == RegisterType::ASYNC) {
-        pattern->SetOnAsyncOffCallbackList(std::move(onFuncList));
+        pattern->SetAsyncCallbacks(std::move(onFuncList));
     }
 }
 

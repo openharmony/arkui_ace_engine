@@ -13,22 +13,21 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_UI_EXTENSION_MODAL_UI_EXTENSION_PROXY_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_UI_EXTENSION_MODAL_UI_EXTENSION_PROXY_H
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_UI_EXTENSION_SESSION_WRAPPER_FACTORY_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_UI_EXTENSION_SESSION_WRAPPER_FACTORY_H
 
-#include "interfaces/inner_api/ace/modal_ui_extension_proxy.h"
-
+#include "base/memory/referenced.h"
 #include "core/components_ng/pattern/ui_extension/session_wrapper.h"
+#include "core/components_ng/pattern/ui_extension/ui_extension_pattern.h"
 
 namespace OHOS::Ace::NG {
-class ModalUIExtensionProxyImpl : public ModalUIExtensionProxy {
-public:
-    explicit ModalUIExtensionProxyImpl(const RefPtr<SessionWrapper>& sessionWrapper);
-    ~ModalUIExtensionProxyImpl() override = default;
-    void SendData(const AAFwk::WantParams& params) override;
 
-private:
-    RefPtr<SessionWrapper> sessionWrapper_;
+enum class SessionTye { UI_EXTENSION_ABILITY, UNKNOWN };
+
+class SessionWrapperFactory {
+public:
+    static RefPtr<SessionWrapper> CreateSessionWrapper(SessionTye sessionType,
+        const WeakPtr<UIExtensionPattern>& hostPattern, int32_t instanceId, bool isTransferringCaller);
 };
 } // namespace OHOS::Ace::NG
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_UI_EXTENSION_MODAL_UI_EXTENSION_PROXY_H
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_UI_EXTENSION_SESSION_WRAPPER_FACTORY_H
