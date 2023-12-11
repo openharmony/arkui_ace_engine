@@ -61,7 +61,7 @@ export class ExceptionPrompt extends ViewPU {
         this.setNetwork = {
             id: -1,
             type: 10003,
-            params: ["app.string.test"],
+            params: ["sys.string.ohos_set_network"],
             bundleName: "",
             moduleName: ""
         };
@@ -69,38 +69,32 @@ export class ExceptionPrompt extends ViewPU {
             networkConnected: {
                 id: -1,
                 type: 10003,
-                params: ["sys.string.ohos_lab_send_messages"],
+                params: ["sys.string.ohos_network_not_connected"],
                 bundleName: "",
                 moduleName: ""
             },
             networkConnectedUnstable: {
                 id: -1,
                 type: 10003,
-                params: ["sys.string.ohos_desc_access_biometric"],
+                params: ["sys.string.ohos_network_connected_unstable"],
                 bundleName: "",
                 moduleName: ""
             },
             unstableConnectServer: {
                 id: -1,
                 type: 10003,
-                params: ["sys.string.ohos_lab_write_audio"],
+                params: ["sys.string.ohos_unstable_connect_server"],
                 bundleName: "",
                 moduleName: ""
             },
             customNetwork: {
                 id: -1,
                 type: 10003,
-                params: ["sys.string.ohos_lab_read_call_log"],
+                params: ["sys.string.ohos_custom_network_tips_left"],
                 bundleName: "",
                 moduleName: ""
             },
-            customTips: {
-                id: -1,
-                type: 10003,
-                params: ["sys.string.ohos_lab_write_call_log"],
-                bundleName: "",
-                moduleName: ""
-            }
+            customTips: ""
         }, this, "errorDefaultObj");
         this.onReconnectionCallback = () => {
         };
@@ -306,7 +300,7 @@ export class ExceptionPrompt extends ViewPU {
                     Image.create(null !== (o = this.options.icon) && void 0 !== o ? o : {
                                                                                             id: -1,
                                                                                             type: 2e4,
-                                                                                            params: ["app.media.ic_public_fail"],
+                                                                                            params: ["sys.media.ohos_ic_public_fail"],
                                                                                             bundleName: "",
                                                                                             moduleName: ""
                                                                                         });
@@ -426,7 +420,7 @@ export class ExceptionPrompt extends ViewPU {
                     Image.create({
                         id: -1,
                         type: 2e4,
-                        params: ["app.media.ic_public_arrow_right"],
+                        params: ["sys.media.ohos_ic_public_arrow_right"],
                         bundleName: "",
                         moduleName: ""
                     });
