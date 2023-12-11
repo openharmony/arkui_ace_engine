@@ -17,13 +17,16 @@ const END_TIME = 200
 const HEIGHT = 80
 const BORDER_RADIUS = 12
 const OPACITY_NUM = 0.18
+const DEFAULT_HEIGHT = 48
+const FIT_HEIGHT = 58
+const ZINDEX_NUM = 999
 
 export enum HardwareStatusType {
   ON = 0,
   OFF = 1,
 }
 
-export enum MarginStateType {
+export enum MarginState {
   DEFAULT_MARGIN = 0,
   FIT_MARGIN = 1,
 }
@@ -42,7 +45,7 @@ export interface PromptOptions {
   icon?: ResourceStr,
   tip?: ResourceStr,
   networkTip?: ResourceStr,
-  marginState: MarginStateType
+  marginState: MarginState
 }
 
 interface ErrorTipsInfoType {
@@ -71,10 +74,10 @@ export struct ExceptionPrompt {
     customNetworkRight: '请点击重试',
     customTips: ''
   }
-  onReconnectionFunction: () => void = () => {
+  onReconnection: () => void = () => {
     // Click the text on the left to change into the connecting state
   }
-  onConfigureNetworkFunction: () => void = () => {
+  onConfigureNetwork: () => void = () => {
     // Click Set Network to open the Set network pop-up interface
   }
 
@@ -96,7 +99,7 @@ export struct ExceptionPrompt {
       this.tipText = `${this.options.tip}` || `${this.errorDefaultObj.customTips}`
     }
   }
-  // 监听Type数据变化
+
   typeStatusChange(_propName: string): void {
     if (this.type !== PromptType.DEFAULT_HIDE) {
       if (this.isState && this.type !== PromptType.NETWORK_NOT_CONNECTED && this.type !== PromptType.NETWORK_CONNECTED_UNSTABLE) {
@@ -147,10 +150,6 @@ export struct ExceptionPrompt {
       .length < 10
   }
 
-  OptionalMargins() {
-    return this.options.marginState === MarginStateType.DEFAULT_MARGIN ? { left: $r('sys.float.ohos_id_card_margin_start'), right: $r('sys.float.ohos_id_card_margin_end') } : { left: $r('sys.float.ohos_id_max_padding_start'), right: $r('sys.float.ohos_id_max_padding_end') }
-  }
-
   @Builder FirstBuilder() {
     Column() {
     }
@@ -175,7 +174,7 @@ export struct ExceptionPrompt {
   @Builder TextBuilder() {
     Flex({ justifyContent: FlexAlign.SpaceBetween, alignItems: ItemAlign.Center }) {
       Flex({ alignItems: ItemAlign.Center }) {
-        Image(this.options.icon || $r('app.media.ic_public_fail'))
+        Image(this.options.icon || $r('sys.media.ohos_ic_public_fail'))
           .width("24vp")
           .height('24vp')
           .objectFit(ImageFit.Contain)
@@ -189,7 +188,7 @@ export struct ExceptionPrompt {
       }
       .width('100%')
       .height('100%')
-      // 设置网络
+
       if (this.isState) {
         Button({ stateEffect: true, type: ButtonType.Normal }) {
           Row() {
@@ -217,14 +216,11 @@ export struct ExceptionPrompt {
           } else if (event.type === TouchType.Up) {
             this.touchBackgroundColor = $r('sys.color.ohos_id_color_sub_background_transparent')
           }
-
         })
         .onClick(() => {
-          // 点击设置网络，打开设置网络弹出框
-          this.onConfigureNetworkFunction()
+          this.onConfigureNetwork() //Click Set Network to open the Set network pop-up interface
         })
       }
-
     }
     .padding({ left: 12, right: 4 })
     .position({})
@@ -233,12 +229,10 @@ export struct ExceptionPrompt {
     .height('100%')
     .onClick(() => {
       if (this.options.hardwareStatus === HardwareStatusType.ON) {
-        // 点击左侧文本，变为正在连接状态'
-        this.onReconnectionFunction()
+        this.onReconnection() //Click the text on the left to change into the connecting state
       }
     })
   }
-
   build() {
     Column() {
       Stack() {
@@ -246,18 +240,17 @@ export struct ExceptionPrompt {
         this.SecondBuilder()
         this.TextBuilder()
       }
-      .padding(this.options.marginState === MarginStateType.DEFAULT_MARGIN ? { left: $r('sys.float.ohos_id_card_margin_start'), right: $r('sys.float.ohos_id_card_margin_end') } : { left: $r('sys.float.ohos_id_max_padding_start'), right: $r('sys.float.ohos_id_max_padding_end') })
+      .padding(this.options.marginState === MarginState.DEFAULT_MARGIN ? { left: $r('sys.float.ohos_id_card_margin_start'), right: $r('sys.float.ohos_id_card_margin_end') } : { left: $r('sys.float.ohos_id_max_padding_start'), right: $r('sys.float.ohos_id_max_padding_end') })
       .transition(
-        // @ts-ignore
         TransitionEffect.OPACITY.animation({
-          duration: this.isShowStatus ? 250 : 200
+          duration: this.isShowStatus ? START_TIME : END_TIME
         })
       )
       .visibility(this.isShowStatus ? Visibility.Visible : Visibility.None)
     }
     .width('100%')
-    .height(this.isOneColum() ? 48 : 58)
+    .height(this.isOneColum() ? DEFAULT_HEIGHT : FIT_HEIGHT)
     .position({ y: HEIGHT })
-    .zIndex(999)
+    .zIndex(ZINDEX_NUM)
   }
 }
