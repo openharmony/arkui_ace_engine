@@ -15,9 +15,8 @@
 
 #include "core/components_ng/pattern/ui_extension/ui_extension_model_ng.h"
 
-#include "want.h"
-
 #include "interfaces/inner_api/ace/modal_ui_extension_config.h"
+#include "want.h"
 
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/view_stack_processor.h"
@@ -34,8 +33,8 @@ RefPtr<FrameNode> UIExtensionModelNG::Create(const std::string& bundleName, cons
     ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::UI_EXTENSION_COMPONENT_ETS_TAG, nodeId);
     auto wantWrap = WantWrap::CreateWantWrap(bundleName, abilityName);
     wantWrap->SetWantParam(params);
-    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::UI_EXTENSION_COMPONENT_ETS_TAG, nodeId,
-        []() { return AceType::MakeRefPtr<UIExtensionPattern>(); });
+    auto frameNode = FrameNode::GetOrCreateFrameNode(
+        V2::UI_EXTENSION_COMPONENT_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<UIExtensionPattern>(); });
     auto pattern = frameNode->GetPattern<UIExtensionPattern>();
     CHECK_NULL_RETURN(pattern, frameNode);
     pattern->UpdateWant(wantWrap);
@@ -47,11 +46,10 @@ RefPtr<FrameNode> UIExtensionModelNG::Create(const std::string& bundleName, cons
 RefPtr<FrameNode> UIExtensionModelNG::Create(const AAFwk::Want& want, const ModalUIExtensionCallbacks& callbacks)
 {
     auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
-    auto frameNode = FrameNode::GetOrCreateFrameNode(
-        V2::UI_EXTENSION_COMPONENT_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<UIExtensionPattern>(); });
+    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::UI_EXTENSION_COMPONENT_ETS_TAG, nodeId,
+        []() { return AceType::MakeRefPtr<UIExtensionPattern>(false, true); });
     auto pattern = frameNode->GetPattern<UIExtensionPattern>();
     CHECK_NULL_RETURN(pattern, frameNode);
-    pattern->SetModalFlag(true);
     pattern->UpdateWant(want);
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, frameNode);
@@ -70,10 +68,9 @@ void UIExtensionModelNG::Create(const RefPtr<OHOS::Ace::WantWrap>& wantWrap, boo
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
     auto frameNode = FrameNode::GetOrCreateFrameNode(V2::UI_EXTENSION_COMPONENT_ETS_TAG, nodeId,
-        []() { return AceType::MakeRefPtr<UIExtensionPattern>(); });
+        [transferringCaller]() { return AceType::MakeRefPtr<UIExtensionPattern>(transferringCaller); });
     auto pattern = frameNode->GetPattern<UIExtensionPattern>();
     CHECK_NULL_VOID(pattern);
-    pattern->SetTransferringCaller(transferringCaller);
     pattern->UpdateWant(wantWrap);
     stack->Push(frameNode);
     auto pipeline = PipelineContext::GetCurrentContext();

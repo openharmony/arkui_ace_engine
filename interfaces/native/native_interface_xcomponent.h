@@ -327,6 +327,21 @@ struct OH_NativeXComponent_KeyEvent;
 typedef struct OH_NativeXComponent_KeyEvent OH_NativeXComponent_KeyEvent;
 
 /**
+ * @brief Defines the expected frame rate range struct.
+ *
+ * @since 11
+ * @version 1.0
+ */
+typedef struct {
+    /** The minimum frame rate of dynamical callback rate range. */
+    int32_t min;
+    /** The maximum frame rate of dynamical callback rate range. */
+    int32_t max;
+    /** The expected frame rate of dynamical callback rate range. */
+    int32_t expected;
+} OH_NativeXComponent_ExpectedRateRange;
+
+/**
  * @brief Obtains the ID of the ArkUI XComponent.
  *
  * @param component Indicates the pointer to this <b>OH_NativeXComponent</b> instance.
@@ -571,6 +586,40 @@ int32_t OH_NativeXComponent_GetKeyEventDeviceId(OH_NativeXComponent_KeyEvent* ke
  * @version 1.0
  */
 int32_t OH_NativeXComponent_GetKeyEventTimestamp(OH_NativeXComponent_KeyEvent* keyEvent, int64_t* timestamp);
+
+/**
+ * @brief Set the Expected FrameRateRange.
+ *
+ * @param component Indicates the pointer to this <b>OH_NativeXComponent</b> instance.
+ * @param callback Indicates the pointer to a expected rate range.
+ * @return Returns the status code of the execution.
+ * @since 11
+ * @version 1.0
+ */
+int32_t OH_NativeXComponent_SetExpectedFrameRateRange(
+    OH_NativeXComponent* component, OH_NativeXComponent_ExpectedRateRange* range);
+
+/**
+ * @brief Registers a callback for this <b>OH_NativeXComponent</b> instance.
+ *
+ * @param component Indicates the pointer to this <b>OH_NativeXComponent</b> instance.
+ * @param callback Indicates the pointer to a onFrame callback.
+ * @return Returns the status code of the execution.
+ * @since 11
+ * @version 1.0
+ */
+int32_t OH_NativeXComponent_RegisterOnFrameCallback(OH_NativeXComponent* component,
+    void (*callback)(OH_NativeXComponent* component, uint64_t timestamp, uint64_t targetTimestamp));
+
+/**
+ * @brief Unregister a callback for this <b>OH_NativeXComponent</b> instance.
+ *
+ * @param component Indicates the pointer to this <b>OH_NativeXComponent</b> instance.
+ * @return Returns the status code of the execution.
+ * @since 11
+ * @version 1.0
+ */
+int32_t OH_NativeXComponent_UnRegisterOnFrameCallback(OH_NativeXComponent* component);
 
 #ifdef __cplusplus
 };

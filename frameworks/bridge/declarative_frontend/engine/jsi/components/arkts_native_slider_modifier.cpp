@@ -21,11 +21,20 @@
 #include "core/pipeline/base/element_register.h"
 
 namespace OHOS::Ace::NG {
+const bool DEFAULT_SHOW_STEPS = false;
+const bool DEFAULT_SHOW_TIPS = false;
 void SetShowTips(NodeHandle node, bool isShow, const char* value)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    std::optional<std::string> content = std::optional(value);
+    std::optional<std::string> content;
+    
+    if (value == nullptr) {
+        content = std::nullopt;
+    } else {
+        content = std::string(value);
+    }
+    
     SliderModelNG::SetShowTips(frameNode, isShow, content);
 }
 
@@ -33,7 +42,8 @@ void ResetShowTips(NodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    SliderModelNG::ResetShowTips(frameNode);
+    std::optional<std::string> content;
+    SliderModelNG::SetShowTips(frameNode, DEFAULT_SHOW_TIPS, content);
 }
 
 void SetSliderStepSize(NodeHandle node, const float value, const int unit)
@@ -62,9 +72,17 @@ void SetBlockSize(NodeHandle node, float widthVal, int widthUnit, float heightVa
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    Dimension width = Dimension(widthVal, static_cast<DimensionUnit>(widthUnit));
-    Dimension height = Dimension(heightVal, static_cast<DimensionUnit>(heightUnit));
-    SliderModelNG::SetBlockSize(frameNode, width, height);
+    Dimension blockWidth = Dimension(widthVal, static_cast<DimensionUnit>(widthUnit));
+    Dimension blockHeight = Dimension(heightVal, static_cast<DimensionUnit>(heightUnit));
+
+    if (LessNotEqual(blockWidth.Value(), 0.0)) {
+        blockWidth.SetValue(0.0);
+    }
+    if (LessNotEqual(blockHeight.Value(), 0.0)) {
+        blockHeight.SetValue(0.0);
+    }
+    
+    SliderModelNG::SetBlockSize(frameNode, blockWidth, blockHeight);
 }
 
 void ResetBlockSize(NodeHandle node)
@@ -157,7 +175,15 @@ void ResetTrackBackgroundColor(NodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    SliderModelNG::ResetTrackBackgroundColor(frameNode);
+    auto context = frameNode->GetContext();
+    CHECK_NULL_VOID(context);
+    auto themeManager = context->GetThemeManager();
+    CHECK_NULL_VOID(themeManager);
+
+    auto theme = themeManager->GetTheme<SliderTheme>();
+    CHECK_NULL_VOID(theme);
+
+    SliderModelNG::SetTrackBackgroundColor(frameNode, theme->GetTrackBgColor());
 }
 
 void SetSelectColor(NodeHandle node, uint32_t color)
@@ -171,7 +197,14 @@ void ResetSelectColor(NodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    SliderModelNG::ResetSelectColor(frameNode);
+    auto context = frameNode->GetContext();
+    CHECK_NULL_VOID(context);
+    auto themeManager = context->GetThemeManager();
+    CHECK_NULL_VOID(themeManager);
+
+    auto theme = themeManager->GetTheme<SliderTheme>();
+    CHECK_NULL_VOID(theme);
+    SliderModelNG::SetSelectColor(frameNode, theme->GetTrackSelectedColor());
 }
 
 void SetShowSteps(NodeHandle node, bool showSteps)
@@ -185,7 +218,7 @@ void ResetShowSteps(NodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    SliderModelNG::ResetShowSteps(frameNode);
+    SliderModelNG::SetShowSteps(frameNode, DEFAULT_SHOW_STEPS);
 }
 
 void SetThickness(NodeHandle node, const float value, const int unit)
@@ -200,7 +233,7 @@ void ResetThickness(NodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    SliderModelNG::ResetThickness(frameNode);
+    SliderModelNG::SetThickness(frameNode, CalcDimension(0.0));
 }
 
 ArkUISliderModifierAPI GetSliderModifier()

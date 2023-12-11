@@ -88,7 +88,9 @@ void ClickRecognizer::InitGlobalValue(SourceType sourceType)
 
 void ClickRecognizer::OnAccepted()
 {
-    TAG_LOGI(AceLogTag::ACE_GESTURE, "Click gesture has been accepted");
+    auto node = GetAttachedNode().Upgrade();
+    TAG_LOGI(AceLogTag::ACE_GESTURE, "Click gesture has been accepted, node tag = %{public}s, id = %{public}s",
+        node ? node->GetTag().c_str() : "null", node ? std::to_string(node->GetId()).c_str() : "invalid");
     if (onAccessibilityEventFunc_) {
         onAccessibilityEventFunc_(AccessibilityEventType::CLICK);
     }
@@ -280,6 +282,11 @@ void ClickRecognizer::HandleTouchCancelEvent(const TouchEvent& event)
 
 void ClickRecognizer::HandleOverdueDeadline()
 {
+    auto attachedNode = GetAttachedNode();
+    if (attachedNode.Invalid()) {
+        Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
+        return;
+    }
     if (currentTouchPointsNum_ < fingers_ || tappedCount_ < count_) {
         Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
     }

@@ -217,4 +217,28 @@ void ScrollModelNG::SetScrollSnap(ScrollSnapAlign scrollSnapAlign, const Dimensi
     pattern->SetSnapPaginations(snapPaginations);
     pattern->SetEnableSnapToSide(enableSnapToSide);
 }
+
+void ScrollModelNG::SetScrollable(FrameNode* frameNode, uint32_t scrollDirection)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(ScrollLayoutProperty, Axis, static_cast<Axis>(scrollDirection), frameNode);
+}
+
+void ScrollModelNG::SetScrollBarColor(FrameNode* frameNode, const Color& color)
+{
+    ACE_UPDATE_NODE_PAINT_PROPERTY(ScrollablePaintProperty, ScrollBarColor, color, frameNode);
+}
+
+void ScrollModelNG::SetScrollBarWidth(FrameNode* frameNode, const Dimension& dimension)
+{
+    ACE_UPDATE_NODE_PAINT_PROPERTY(ScrollablePaintProperty, ScrollBarWidth, dimension, frameNode);
+}
+
+void ScrollModelNG::SetEdgeEffect(FrameNode* frameNode, const EdgeEffect& edgeEffect, bool alwaysEnabled)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<ScrollablePattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetEdgeEffect(edgeEffect, alwaysEnabled);
+    frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+}
 } // namespace OHOS::Ace::NG

@@ -16,6 +16,10 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_RICH_EDITOR_RICH_EDITOR_PATTERN_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_RICH_EDITOR_RICH_EDITOR_PATTERN_H
 
+#include <cstdint>
+#include <optional>
+#include <string>
+
 #include "core/common/ime/text_edit_controller.h"
 #include "core/common/ime/text_input_action.h"
 #include "core/common/ime/text_input_client.h"
@@ -86,6 +90,13 @@ public:
     RichEditorPattern();
     ~RichEditorPattern() override;
 
+    struct OperationRecord {
+        std::optional<std::string> addText;
+        std::optional<std::string> deleteText;
+        int32_t beforeCaretPosition;
+        int32_t afterCaretPosition;
+    };
+
     // RichEditor needs softkeyboard, override function.
     bool NeedSoftKeyboard() const override
     {
@@ -93,7 +104,7 @@ public:
     }
 
     uint32_t GetSCBSystemWindowId();
-    
+
     RefPtr<EventHub> CreateEventHub() override
     {
         return MakeRefPtr<RichEditorEventHub>();
@@ -142,6 +153,7 @@ public:
     void UpdateEditingValue(const std::shared_ptr<TextEditingValue>& value, bool needFireChangeEvent = true) override;
     void PerformAction(TextInputAction action, bool forceCloseKeyboard = true) override;
     void InsertValue(const std::string& insertValue) override;
+    std::wstring InsertValueOperation(const std::string& insertValue);
     void InsertValueByPaste(const std::string& insertValue);
     bool IsLineSeparatorInLast(RefPtr<SpanNode>& spanNode);
     void InsertValueToSpanNode(
@@ -150,8 +162,11 @@ public:
     void SpanNodeFission(RefPtr<SpanNode>& spanNode);
     void CreateTextSpanNode(
         RefPtr<SpanNode>& spanNode, const TextInsertValueInfo& info, const std::string& insertValue, bool isIME = true);
+    void HandleOnDelete() override;
     void DeleteBackward(int32_t length = 0) override;
+    std::wstring DeleteBackwardOperation(int32_t length = 0);
     void DeleteForward(int32_t length) override;
+    std::wstring DeleteForwardOperation(int32_t length);
     void SetInputMethodStatus(bool keyboardShown) override;
     bool ClickAISpan(const PointF& textOffset, const AISpan& aiSpan) override;
     void HandleClickAISpanEvent(GestureEvent& info);
@@ -159,11 +174,26 @@ public:
     {
         FocusHub::LostFocusToViewRoot();
     }
+    void ClearRedoOperationRecords();
+    void AddOperationRecord(const OperationRecord& record);
+    void HandleOnUndoAction() override;
+    void HandleOnRedoAction() override;
     void CursorMove(CaretMoveIntent direction) override;
     bool CursorMoveLeft();
     bool CursorMoveRight();
     bool CursorMoveUp();
     bool CursorMoveDown();
+    bool CursorMoveLeftWord();
+    bool CursorMoveRightWord();
+    bool CursorMoveToParagraphBegin();
+    bool CursorMoveToParagraphEnd();
+    bool CursorMoveHome();
+    bool CursorMoveEnd();
+    int32_t GetLeftWordPosition(int32_t caretPosition);
+    int32_t GetRightWordPosition(int32_t caretPosition);
+    int32_t GetParagraphBeginPosition(int32_t caretPosition);
+    int32_t GetParagraphEndPosition(int32_t caretPosition);
+    void HandleSelect(CaretMoveIntent direction) override;
     bool SetCaretPosition(int32_t pos);
     int32_t GetCaretPosition();
     int32_t GetTextContentLength();
@@ -498,6 +528,9 @@ private:
 
     // still in progress
     ParagraphManager paragraphs_;
+
+    std::vector<OperationRecord> operationRecords_;
+    std::vector<OperationRecord> redoOperationRecords_;
 
     RefPtr<TouchEventImpl> touchListener_;
     struct UpdateSpanStyle updateSpanStyle_;

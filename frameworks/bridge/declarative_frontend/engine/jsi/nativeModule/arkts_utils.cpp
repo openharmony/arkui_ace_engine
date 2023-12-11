@@ -822,7 +822,7 @@ bool ArkTSUtils::ParseJsStringFromResource(const EcmaVM* vm, const Local<JSValue
     auto obj = jsValue->ToObject(vm);
     auto type = obj->Get(vm, panda::StringRef::NewFromUtf8(vm, "type"));
     auto resId = obj->Get(vm, panda::StringRef::NewFromUtf8(vm, "id"));
-    auto args = obj->Get(vm, panda::StringRef::NewFromUtf8(vm, "args"));
+    auto args = obj->Get(vm, panda::StringRef::NewFromUtf8(vm, "params"));
     if (!type->IsNumber() || !resId->IsNumber() || !args->IsArray(vm)) {
         return false;
     }

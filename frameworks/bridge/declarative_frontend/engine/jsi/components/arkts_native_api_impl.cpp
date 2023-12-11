@@ -24,6 +24,7 @@
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_counter_modifier.h"
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_date_picker_modifier.h"
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_divider_modifier.h"
+#include "bridge/declarative_frontend/engine/jsi/components/arkts_native_grid_modifier.h"
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_grid_col_modifier.h"
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_grid_row_modifier.h"
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_hyperlink_modifier.h"
@@ -61,6 +62,8 @@
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_line_modifier.h"
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_path_modifier.h"
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_polyline_modifier.h"
+#include "bridge/declarative_frontend/engine/jsi/components/arkts_native_qrcode_modifier.h"
+#include "bridge/declarative_frontend/engine/jsi/components/arkts_native_water_flow_modifier.h"
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_side_bar_container_modifier.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/frame_node.h"
@@ -68,10 +71,14 @@
 #include "core/pipeline/base/element_register.h"
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_calendar_picker_modifier.h"
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_alphabet_indexer_modifier.h"
+#include "bridge/declarative_frontend/engine/jsi/components/arkts_native_scroll_modifier.h"
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_common_shape_modifier.h"
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_shape_modifier.h"
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_rect_modifier.h"
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_list_modifier.h"
+#include "bridge/declarative_frontend/engine/jsi/components/arkts_native_list_item_group_modifier.h"
+#include "bridge/declarative_frontend/engine/jsi/components/arkts_native_loading_progress_modifier.h"
+#include "bridge/declarative_frontend/engine/jsi/components/arkts_native_text_clock_modifier.h"
 
 #ifdef FORM_SUPPORTED
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_form_component_modifier.h"
@@ -108,6 +115,7 @@ static struct ArkUINodeAPI impl = {
     GetDividerModifier,
     GetStackModifier,
     GetNavDestinationModifier,
+    GetGridModifier,
     GetGridColModifier,
     GetGridRowModifier,
     GetPanelModifier,
@@ -136,11 +144,17 @@ static struct ArkUINodeAPI impl = {
     GetMenuItemModifier,
     GetMenuModifier,
     GetDatePickerModifier,
+    GetWaterFlowModifier,
     GetAlphabetIndexerModifier,
+    GetScrollModifier,
     GetCommonShapeModifier,
     GetShapeModifier,
     GetRectModifier,
     GetListModifier,
+    GetListItemGroupModifier,
+    GetQRCodeModifier,
+    GetLoadingProgressModifier,
+    GetTextClockModifier,
 
 #ifdef FORM_SUPPORTED
     GetFormComponentModifier,

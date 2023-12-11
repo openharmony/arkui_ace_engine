@@ -39,11 +39,12 @@ constexpr int32_t UI_EXTENSION_OFFSET_MIN = 100000;
 constexpr int32_t UI_EXTENSION_ID_FACTOR = 10;
 constexpr int32_t UI_EXTENSION_LEVEL_MAX = 3;
 constexpr int32_t UI_EXTENSION_ROOT_ID = -1;
-};
+}; // namespace
 
 class UIExtensionPattern;
 class UIExtensionManager : public AceType {
     DECLARE_ACE_TYPE(UIExtensionManager, AceType);
+
 public:
     UIExtensionManager() = default;
     ~UIExtensionManager() override = default;
@@ -60,13 +61,12 @@ public:
     void RecycleExtensionId(int32_t id);
 
 private:
-
     class UIExtensionIdUtility {
     public:
         UIExtensionIdUtility() = default;
         ~UIExtensionIdUtility() = default;
         UIExtensionIdUtility(const UIExtensionIdUtility&) = delete;
-        UIExtensionIdUtility &operator=(const UIExtensionIdUtility&) = delete;
+        UIExtensionIdUtility& operator=(const UIExtensionIdUtility&) = delete;
 
         int32_t ApplyExtensionId();
         void RecycleExtensionId(int32_t id);
@@ -79,5 +79,5 @@ private:
     WeakPtr<UIExtensionPattern> uiExtensionFocused_;
     std::unique_ptr<UIExtensionIdUtility> extensionIdUtility_ = std::make_unique<UIExtensionIdUtility>();
 };
-} // namespace OHOS::Ace
+} // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_UI_EXTENSION_UI_EXTENSION_MANAGER_H

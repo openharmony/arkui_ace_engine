@@ -18,6 +18,7 @@
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_api.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 #include "core/components/common/properties/color.h"
+#include "frameworks/bridge/common/utils/utils.h"
 #include "frameworks/bridge/declarative_frontend/engine/js_types.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_abstract.h"
 #include "frameworks/core/components/tab_bar/tab_theme.h"
@@ -38,15 +39,41 @@ constexpr int32_t MD_COLUMN_NUM = 8;
 constexpr int32_t LG_COLUMN_NUM = 12;
 constexpr int32_t DEFAULT_COLUMN = -1;
 constexpr int REMAINDER = 2;
+constexpr int TABBARMODE_SCROLLABLE = 1;
 ArkUINativeModuleValue TabsBridge::SetTabBarMode(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
-    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
-    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    int32_t tabBarMode = secondArg->Int32Value(vm);
+    Local<JSValueRef> barModeArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    Local<JSValueRef> marginArg = runtimeCallInfo->GetCallArgRef(NUM_2);
+    Local<JSValueRef> nonScrollableLayoutStyleArg = runtimeCallInfo->GetCallArgRef(NUM_3);
+
+    if (barModeArg->IsNull() || barModeArg->IsUndefined()) {
+        GetArkUIInternalNodeAPI()->GetTabsModifier().ResetTabBarMode(nativeNode);
+        return panda::JSValueRef::Undefined(vm);
+    }
+    TabBarMode barMode = TabBarMode::FIXED;
+    barMode = Framework::ConvertStrToTabBarMode(barModeArg->ToString(vm)->ToString());
+    int32_t tabBarMode = static_cast<int32_t>(barMode);
     GetArkUIInternalNodeAPI()->GetTabsModifier().SetTabBarMode(nativeNode, tabBarMode);
+
+    if (tabBarMode == TABBARMODE_SCROLLABLE) {
+        if (marginArg->IsNull() || marginArg->IsUndefined() || nonScrollableLayoutStyleArg->IsNull() ||
+            nonScrollableLayoutStyleArg->IsUndefined()) {
+            GetArkUIInternalNodeAPI()->GetTabsModifier().ResetScrollableBarModeOptions(nativeNode);
+            return panda::JSValueRef::Undefined(vm);
+        }
+        int barModeStyle = nonScrollableLayoutStyleArg->Int32Value(vm);
+        CalcDimension margin(0.0, DimensionUnit::VP);
+        if (!ArkTSUtils::ParseJsDimensionVp(vm, marginArg, margin)) {
+            margin.Reset();
+        }
+        
+        GetArkUIInternalNodeAPI()->GetTabsModifier().SetScrollableBarModeOptions(
+            nativeNode, margin.Value(), static_cast<int>(margin.Unit()), barModeStyle);
+    }
     return panda::JSValueRef::Undefined(vm);
 }
 

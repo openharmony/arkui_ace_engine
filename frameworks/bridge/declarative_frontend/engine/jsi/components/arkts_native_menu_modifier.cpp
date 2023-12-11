@@ -25,7 +25,7 @@
 namespace OHOS::Ace::NG {
 constexpr uint32_t DEFAULT_MENU_FONTCOLOR_COLOR = 0xFF182431;
 const char DELIMITER = '|';
-constexpr int32_t SIZE_OF_FONT_INFO = 4;
+constexpr int32_t SIZE_OF_FONT_INFO = 3;
 const int NUM_0 = 0;
 const int NUM_1 = 1;
 const int NUM_2 = 2;
@@ -49,7 +49,7 @@ void ResetMenuFontColor(NodeHandle node)
     CHECK_NULL_VOID(frameNode);
     MenuModelNG::SetFontColor(frameNode, Color(DEFAULT_MENU_FONTCOLOR_COLOR));
 }
-void SetMenuFont(NodeHandle node, const char* fontInfo, int32_t unit)
+void SetMenuFont(NodeHandle node, const char* fontInfo, int32_t styleVal)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -63,7 +63,7 @@ void SetMenuFont(NodeHandle node, const char* fontInfo, int32_t unit)
 
     CalcDimension fontSize = Dimension(-1.0);
     if (res[NUM_0] != ERR_CODE) {
-        fontSize = CalcDimension(res[NUM_0], static_cast<OHOS::Ace::DimensionUnit>(unit));
+        fontSize = StringUtils::StringToCalcDimension(res[NUM_0], false, DimensionUnit::FP);
     }
     MenuModelNG::SetFontSize(frameNode, fontSize);
 
@@ -73,14 +73,14 @@ void SetMenuFont(NodeHandle node, const char* fontInfo, int32_t unit)
         MenuModelNG::SetFontWeight(frameNode, FontWeight::NORMAL);
     }
 
-    if (res[NUM_2] != ERR_CODE) {
-        MenuModelNG::SetFontStyle(frameNode, Framework::ConvertStrToFontStyle(res[NUM_2]));
+    if (styleVal >= 0 && styleVal < static_cast<int32_t>(FONT_STYLES.size())) {
+        MenuModelNG::SetFontStyle(frameNode, FONT_STYLES[styleVal]);
     } else {
         MenuModelNG::SetFontStyle(frameNode, FONT_STYLES[0]);
     }
 
-    if (res[NUM_3] != ERR_CODE) {
-        MenuModelNG::SetFontFamily(frameNode, Framework::ConvertStrToFontFamilies(res[NUM_3]));
+    if (res[NUM_2] != ERR_CODE) {
+        MenuModelNG::SetFontFamily(frameNode, Framework::ConvertStrToFontFamilies(res[NUM_2]));
     }
 }
 void ResetMenuFont(NodeHandle node)

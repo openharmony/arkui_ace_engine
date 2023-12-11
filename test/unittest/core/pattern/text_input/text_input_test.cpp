@@ -777,9 +777,12 @@ HWTEST_F(TextInputCursorTest, OnTextChangedListenerCaretPosition008, TestSize.Le
     };
     auto onCopy = [expectStr](const std::string& str) { EXPECT_EQ(expectStr, str); };
     auto onPaste = [expectStr](const std::string& str) { EXPECT_EQ(expectStr, str); };
+    auto onPasteWithEvent = [expectStr](const std::string& str, NG::TextCommonEvent& event) {
+        EXPECT_EQ(expectStr, str); };
     CreateTextField(DEFAULT_TEXT, DEFAULT_PLACE_HOLDER, [&](TextFieldModel& model) -> void {
         model.SetOnCopy(onCopy);
         model.SetOnPaste(onPaste);
+        model.SetOnPasteWithEvent(onPasteWithEvent);
     });
 
     /**

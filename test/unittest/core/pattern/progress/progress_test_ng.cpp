@@ -608,8 +608,8 @@ HWTEST_F(ProgressTestNg, LinearProgressCreator001, TestSize.Level1)
     size = progressLayoutAlgorithm->MeasureContent(contentConstraint, &layoutWrapper);
     ASSERT_NE(size, std::nullopt);
     EXPECT_EQ(progressLayoutAlgorithm->GetStrokeWidth(), STROKE_WIDTH.ConvertToPx());
-    EXPECT_EQ(size->Height(), PROGRESS_COMPONENT_MAXSIZE_HEIGHT);
-    EXPECT_EQ(size->Width(), STROKE_WIDTH.ConvertToPx());
+    EXPECT_EQ(size->Height(), STROKE_WIDTH.ConvertToPx());
+    EXPECT_EQ(size->Width(), LARG_PROGRESS_COMPONENT_WIDTH);
 }
 
 /**

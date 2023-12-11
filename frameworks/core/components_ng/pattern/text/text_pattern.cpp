@@ -440,6 +440,7 @@ void TextPattern::ShowSelectOverlay(
     selectInfo.isUsingMouse = isUsingMouse;
     selectInfo.menuInfo.menuIsShow = selectInfo.firstHandle.isShow || selectInfo.secondHandle.isShow;
     selectInfo.menuInfo.showCut = false;
+    selectInfo.menuInfo.showCopy = textSelector_.IsValid() && !textSelector_.StartEqualToDest();
     selectInfo.menuInfo.showPaste = false;
     selectInfo.menuInfo.showCopyAll = !IsSelectAll();
     selectInfo.menuCallback.onCopy = [weak = WeakClaim(this)]() {

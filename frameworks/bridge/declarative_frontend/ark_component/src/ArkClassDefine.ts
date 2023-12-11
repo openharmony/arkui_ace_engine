@@ -1430,6 +1430,41 @@ class ArkResourceColor {
   }
 }
 
+class ArkNestedScrollOptions {
+  scrollForward: NestedScrollMode | undefined;
+  scrollBackward: NestedScrollMode | undefined;
+  constructor() {
+      this.scrollForward = undefined;
+      this.scrollBackward = undefined;
+  }
+  isEqual(another: ArkNestedScrollOptions): boolean {
+      return ((this.scrollForward === another.scrollForward) && (this.scrollBackward === another.scrollBackward));
+  }
+}
+
+class ArkConstraintSizeOptions {
+  minWidth?: Length | undefined;
+  maxWidth?: Length | undefined;
+  minHeight?: Length | undefined;
+  maxHeight?: Length | undefined;
+
+  constructor() {
+    this.minWidth = undefined;
+    this.maxWidth = undefined;
+    this.minHeight = undefined;
+    this.maxHeight = undefined;
+  }
+
+  isEqual(another: ArkConstraintSizeOptions): boolean {
+    return (
+      this.minWidth === another.minWidth &&
+      this.maxWidth === another.maxWidth &&
+      this.minHeight === another.minHeight &&
+      this.maxHeight === another.maxHeight
+    );
+  }
+}
+
 class ArkTextAreaShowCounter implements Equable {
   value: boolean;
   options?: any;
@@ -1438,6 +1473,19 @@ class ArkTextAreaShowCounter implements Equable {
     this.options = undefined;
   }
   isEqual(another: ArkTextAreaShowCounter): boolean {
+    return (this.value === another.value) &&
+      (this.options === another.options);
+  }
+}
+
+class ArkGridEdgeEffect implements Equable {
+  value: EdgeEffect;
+  options?: EdgeEffectOptions | undefined;
+  constructor() {
+    this.value = undefined;
+    this.options = undefined;
+  }
+  isEqual(another: ArkGridEdgeEffect): boolean {
     return (this.value === another.value) &&
       (this.options === another.options);
   }

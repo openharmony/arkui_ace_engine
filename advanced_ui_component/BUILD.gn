@@ -13,7 +13,6 @@
 
 group("advanced_ui_component") {
   deps = [
-    "breadcrumb/interfaces:breadcrumb",
     "chip/interfaces:chip",
     "composelistitem/interfaces:composelistitem",
     "composetitlebar/interfaces:composetitlebar",

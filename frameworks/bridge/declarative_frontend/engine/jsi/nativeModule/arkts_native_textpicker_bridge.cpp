@@ -119,7 +119,7 @@ ArkUINativeModuleValue TextpickerBridge::SetTextStyle(ArkUIRuntimeCallInfo* runt
     if (fontSizeArg->IsNull() || fontSizeArg->IsUndefined()) {
         size = Dimension(-1);
     } else {
-        if (!ArkTSUtils::ParseJsDimensionFp(vm, fontSizeArg, size, false)) {
+        if (!ArkTSUtils::ParseJsDimensionNG(vm, fontSizeArg, size, DimensionUnit::FP, false)) {
             size = Dimension(-1);
         }
     }
@@ -173,7 +173,7 @@ ArkUINativeModuleValue TextpickerBridge::SetSelectedTextStyle(ArkUIRuntimeCallIn
     if (fontSizeArg->IsNull() || fontSizeArg->IsUndefined()) {
         size = Dimension(-1);
     } else {
-        if (!ArkTSUtils::ParseJsDimensionFp(vm, fontSizeArg, size, false)) {
+        if (!ArkTSUtils::ParseJsDimensionNG(vm, fontSizeArg, size, DimensionUnit::FP, false)) {
             size = Dimension(-1);
         }
     }
@@ -227,7 +227,7 @@ ArkUINativeModuleValue TextpickerBridge::SetDisappearTextStyle(ArkUIRuntimeCallI
     if (fontSizeArg->IsNull() || fontSizeArg->IsUndefined()) {
         size = Dimension(-1);
     } else {
-        if (!ArkTSUtils::ParseJsDimensionFp(vm, fontSizeArg, size, false)) {
+        if (!ArkTSUtils::ParseJsDimensionNG(vm, fontSizeArg, size, DimensionUnit::FP, false)) {
             size = Dimension(-1);
         }
     }
@@ -272,7 +272,7 @@ ArkUINativeModuleValue TextpickerBridge::SetDefaultPickerItemHeight(ArkUIRuntime
 
     CalcDimension height;
     if (jsValue->IsNumber() || jsValue->IsString()) {
-        if (!ArkTSUtils::ParseJsDimensionFp(vm, jsValue, height)) {
+        if (!ArkTSUtils::ParseJsDimensionNG(vm, jsValue, height, DimensionUnit::FP, false)) {
             return panda::JSValueRef::Undefined(vm);
         }
     }

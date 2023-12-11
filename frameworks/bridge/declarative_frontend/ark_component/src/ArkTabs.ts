@@ -14,7 +14,7 @@ class ArkTabsComponent extends ArkComponent implements TabsAttribute {
     return this;
   }
   barPosition(value: BarPosition): TabsAttribute {
-      modifier(this._modifiers, BarPositionModifier, value);
+    modifier(this._modifiers, BarPositionModifier, value);
     return this;
   }
   scrollable(value: boolean): TabsAttribute {
@@ -22,10 +22,10 @@ class ArkTabsComponent extends ArkComponent implements TabsAttribute {
     return this;
   }
   barMode(value: BarMode, options?: ScrollableBarModeOptions | undefined): TabsAttribute {
-    modifierWithKey(this._modifiersWithKeys, ScrollableBarModeOptionsModifier.identity,
-      ScrollableBarModeOptionsModifier, options);
-    modifierWithKey(this._modifiersWithKeys, TabBarModeModifier.identity, TabBarModeModifier, value);
-
+    let arkBarMode = new ArkBarMode();
+    arkBarMode.barMode = value;
+    arkBarMode.options = options;
+    modifierWithKey(this._modifiersWithKeys, TabBarModeModifier.identity, TabBarModeModifier, arkBarMode);
     return this;
   }
 
@@ -109,10 +109,10 @@ class DividerModifier extends ModifierWithKey<DividerStyle> {
   }
 
   checkObjectDiff(): boolean {
-      return !(this.stageValue.strokeWidth === this.value.strokeWidth &&
-        this.stageValue.color === this.value.color &&
-        this.stageValue.startMargin === this.value.startMargin &&
-        this.stageValue.endMargin === this.value.endMargin);
+    return !(this.stageValue.strokeWidth === this.value.strokeWidth &&
+      this.stageValue.color === this.value.color &&
+      this.stageValue.startMargin === this.value.startMargin &&
+      this.stageValue.endMargin === this.value.endMargin);
   }
 }
 
@@ -216,19 +216,30 @@ class ScrollableModifier extends Modifier<boolean> {
   }
 }
 
-class TabBarModeModifier extends ModifierWithKey<BarMode> {
+class TabBarModeModifier extends ModifierWithKey<ArkBarMode> {
   static identity: Symbol = Symbol('tabsbarMode');
 
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
       GetUINativeModule().tabs.resetTabBarMode(node);
     } else {
-      GetUINativeModule().tabs.setTabBarMode(node, this.value);
+      GetUINativeModule().tabs.setTabBarMode(node, this.value.barMode
+        , this.value.options?.margin
+        , this.value.options?.nonScrollableLayoutStyle);
     }
   }
 
   checkObjectDiff(): boolean {
-    return !(this.stageValue === this.value);
+    if (isResource(this.stageValue) && isResource(this.value)) {
+      return !isResourceEqual(this.stageValue, this.value);
+    } else if (!isResource(this.stageValue) && !isResource(this.value)) {
+      return !(this.value.barMode === this.stageValue.barMode &&
+        this.value.options?.margin === this.stageValue.options?.margin &&
+        this.value.options?.nonScrollableLayoutStyle === this.stageValue.options?.nonScrollableLayoutStyle);
+    }
+    else {
+      return true;
+    }
   }
 }
 
@@ -286,28 +297,6 @@ class FadingEdgeModifier extends Modifier<boolean> {
       GetUINativeModule().tabs.setFadingEdge(node, this.value);
     }
   }
-}
-
-class ScrollableBarModeOptionsModifier extends ModifierWithKey<ScrollableBarModeOptions> {
-  static identity: Symbol = Symbol('tabsscrollableBarModeOptions');
-
-  applyPeer(node: KNode, reset: boolean): void {
-    if (reset) {
-      GetUINativeModule().tabs.resetScrollableBarModeOptions(node);
-    } else {
-      GetUINativeModule().tabs.setScrollableBarModeOptions(
-        node,
-        this.value['margin'],
-        this.value['nonScrollableLayoutStyle']
-      );
-    }
-  }
-
-  checkObjectDiff(): boolean {
-    return !(this.stageValue.margin === this.value.margin &&
-      this.stageValue.nonScrollableLayoutStyle === this.value.nonScrollableLayoutStyle);
-  }
-
 }
 
 // @ts-ignore

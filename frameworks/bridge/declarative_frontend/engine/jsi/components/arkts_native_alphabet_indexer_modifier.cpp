@@ -38,7 +38,6 @@ constexpr uint32_t DEFAULT_POPUP_COLOR = 0xFF254FF7;
 constexpr uint32_t DEFAULT_SELECTED_COLOR = 0xFF254FF7;
 constexpr uint32_t DEFAULT_POPUP_BG_COLOR = 0xFFFFFFFF;
 constexpr uint32_t DEFAULT_SELECTED_BG_COLOR = 0x1F0A59F7;
-constexpr uint32_t DEFAULT_BUTTON_COLOR = 0xFF007DFF;
 constexpr uint32_t DEFAULT_POPUP_SELECTED_COLOR = 0xFF182431;
 constexpr bool DEFAULT_USINGPOPUP = false;
 constexpr int32_t DEFAULT_SELECTED = 0;
@@ -254,7 +253,7 @@ void ResetPopupUnselectedColor(NodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    IndexerModelNG::SetPopupUnselectedColor(frameNode, Color(DEFAULT_BUTTON_COLOR));
+    IndexerModelNG::SetPopupUnselectedColor(frameNode, Color(DEFAULT_POPUP_SELECTED_COLOR));
 }
 
 void SetAlignStyle(NodeHandle node, int32_t value)

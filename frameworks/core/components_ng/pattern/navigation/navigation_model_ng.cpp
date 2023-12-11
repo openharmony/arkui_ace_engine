@@ -1423,16 +1423,31 @@ void NavigationModelNG::SetHideToolBar(FrameNode* frameNode, bool hideToolBar)
 
 void NavigationModelNG::SetMinContentWidth(FrameNode* frameNode, const Dimension& value)
 {
+    auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    CHECK_NULL_VOID(navigationGroupNode);
+    auto navigationPattern = navigationGroupNode->GetPattern<NavigationPattern>();
+    CHECK_NULL_VOID(navigationPattern);
+    navigationPattern->SetIfNeedInit(true);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(NavigationLayoutProperty, MinContentWidth, value, frameNode);
 }
 
 void NavigationModelNG::SetMinNavBarWidth(FrameNode* frameNode, const Dimension& value)
 {
+    auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    CHECK_NULL_VOID(navigationGroupNode);
+    auto navigationPattern = navigationGroupNode->GetPattern<NavigationPattern>();
+    CHECK_NULL_VOID(navigationPattern);
+    navigationPattern->SetIfNeedInit(true);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(NavigationLayoutProperty, MinNavBarWidth, value, frameNode);
 }
 
 void NavigationModelNG::SetMaxNavBarWidth(FrameNode* frameNode, const Dimension& value)
 {
+    auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    CHECK_NULL_VOID(navigationGroupNode);
+    auto navigationPattern = navigationGroupNode->GetPattern<NavigationPattern>();
+    CHECK_NULL_VOID(navigationPattern);
+    navigationPattern->SetIfNeedInit(true);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(NavigationLayoutProperty, MaxNavBarWidth, value, frameNode);
 }
 

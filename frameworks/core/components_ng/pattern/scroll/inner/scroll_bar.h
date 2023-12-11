@@ -240,6 +240,11 @@ public:
         displayMode_ = displayMode;
     }
 
+    double GetOutBoundary() const
+    {
+        return outBoundary_;
+    }
+
     void SetOutBoundary(double outBoundary)
     {
         outBoundary_ = outBoundary;

@@ -49,7 +49,9 @@ PinchRecognizer::PinchRecognizer(int32_t fingers, double distance)
 
 void PinchRecognizer::OnAccepted()
 {
-    TAG_LOGI(AceLogTag::ACE_GESTURE, "Pinch gesture has been accepted");
+    auto node = GetAttachedNode().Upgrade();
+    TAG_LOGI(AceLogTag::ACE_GESTURE, "Pinch gesture has been accepted, node tag = %{public}s, id = %{public}s",
+        node ? node->GetTag().c_str() : "null", node ? std::to_string(node->GetId()).c_str() : "invalid");
     ResSchedReport::GetInstance().ResSchedDataReport("click");
     refereeState_ = RefereeState::SUCCEED;
     SendCallbackMsg(onActionStart_);
@@ -77,8 +79,7 @@ void PinchRecognizer::HandleTouchDownEvent(const TouchEvent& event)
         return;
     }
 
-    TAG_LOGI(AceLogTag::ACE_GESTURE,
-        "Pinch recognizer receives touch down event, begin to detect pinch event");
+    TAG_LOGI(AceLogTag::ACE_GESTURE, "Pinch recognizer receives touch down event, begin to detect pinch event");
     activeFingers_.emplace_back(event.id);
     touchPoints_[event.id] = event;
     lastTouchEvent_ = event;
@@ -95,8 +96,7 @@ void PinchRecognizer::HandleTouchDownEvent(const AxisEvent& event)
     if (IsRefereeFinished()) {
         return;
     }
-    TAG_LOGI(AceLogTag::ACE_GESTURE,
-        "Pinch recognizer receives touch down event, begin to detect pinch event");
+    TAG_LOGI(AceLogTag::ACE_GESTURE, "Pinch recognizer receives touch down event, begin to detect pinch event");
     if (refereeState_ == RefereeState::READY) {
         scale_ = 1.0f;
         pinchCenter_ = Offset(event.x, event.y);

@@ -52,6 +52,10 @@ public:
     void SetFriction(double friction) override;
     void SetScrollSnap(ScrollSnapAlign scrollSnapAlign, const Dimension& intervalSize,
         const std::vector<Dimension>& snapPaginations, const std::pair<bool, bool>& enableSnapToSide) override;
+    static void SetScrollable(FrameNode* frameNode, uint32_t scrollDirection);
+    static void SetScrollBarColor(FrameNode* frameNode, const Color& color);
+    static void SetScrollBarWidth(FrameNode* frameNode, const Dimension& dimension);
+    static void SetEdgeEffect(FrameNode* frameNode, const EdgeEffect& edgeEffect, bool alwaysEnabled);
 };
 
 } // namespace OHOS::Ace::NG

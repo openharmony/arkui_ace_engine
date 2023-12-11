@@ -356,6 +356,129 @@ void GridModelNG::SetOnReachEnd(OnReachEvent&& onReachEnd)
     eventHub->SetOnReachEnd(std::move(onReachEnd));
 }
 
+void GridModelNG::SetColumnsTemplate(FrameNode* frameNode, const std::string& columnsTemplate)
+{
+    if (columnsTemplate.empty()) {
+        TAG_LOGW(AceLogTag::ACE_GRID, "Columns Template [%{public}s] is not valid.", columnsTemplate.c_str());
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(GridLayoutProperty, ColumnsTemplate, "1fr", frameNode);
+        return;
+    }
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(GridLayoutProperty, ColumnsTemplate, columnsTemplate, frameNode);
+}
+
+void GridModelNG::SetRowsTemplate(FrameNode* frameNode, const std::string& rowsTemplate)
+{
+    if (rowsTemplate.empty()) {
+        TAG_LOGW(AceLogTag::ACE_GRID, "Rows Template [%{public}s] is not valid.", rowsTemplate.c_str());
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(GridLayoutProperty, RowsTemplate, "1fr", frameNode);
+        return;
+    }
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(GridLayoutProperty, RowsTemplate, rowsTemplate, frameNode);
+}
+
+void GridModelNG::SetColumnsGap(FrameNode* frameNode, const Dimension& columnsGap)
+{
+    if (columnsGap.IsNonNegative()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(GridLayoutProperty, ColumnsGap, columnsGap, frameNode);
+    }
+}
+
+void GridModelNG::SetRowsGap(FrameNode* frameNode, const Dimension& rowsGap)
+{
+    if (rowsGap.IsNonNegative()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(GridLayoutProperty, RowsGap, rowsGap, frameNode);
+    }
+}
+
+void GridModelNG::SetScrollBarMode(FrameNode* frameNode, DisplayMode scrollBarMode)
+{
+    ACE_UPDATE_NODE_PAINT_PROPERTY(ScrollablePaintProperty, ScrollBarMode, scrollBarMode, frameNode);
+}
+
+void GridModelNG::SetScrollBarWidth(FrameNode* frameNode, const Dimension& scrollBarWidth)
+{
+    ACE_UPDATE_NODE_PAINT_PROPERTY(ScrollablePaintProperty, ScrollBarWidth, scrollBarWidth, frameNode);
+}
+
+void GridModelNG::SetScrollBarColor(FrameNode* frameNode, const Color& scrollBarColor)
+{
+    ACE_UPDATE_NODE_PAINT_PROPERTY(ScrollablePaintProperty, ScrollBarColor, scrollBarColor, frameNode);
+}
+
+void GridModelNG::SetCachedCount(FrameNode* frameNode, int32_t cachedCount)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(GridLayoutProperty, CachedCount, cachedCount, frameNode);
+}
+
+void GridModelNG::SetEditable(FrameNode* frameNode, bool editMode)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(GridLayoutProperty, Editable, editMode, frameNode);
+}
+
+void GridModelNG::SetMultiSelectable(FrameNode* frameNode, bool multiSelectable)
+{
+    auto pattern = frameNode->GetPattern<GridPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetMultiSelectable(multiSelectable);
+}
+
+void GridModelNG::SetMaxCount(FrameNode* frameNode, int32_t maxCount)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(GridLayoutProperty, MaxCount, maxCount, frameNode);
+}
+
+void GridModelNG::SetMinCount(FrameNode* frameNode, int32_t minCount)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(GridLayoutProperty, MinCount, minCount, frameNode);
+}
+
+void GridModelNG::SetCellLength(FrameNode* frameNode, int32_t cellLength)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(GridLayoutProperty, CellLength, cellLength, frameNode);
+}
+
+void GridModelNG::SetLayoutDirection(FrameNode* frameNode, FlexDirection layoutDirection)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(GridLayoutProperty, GridDirection, layoutDirection, frameNode);
+}
+
+void GridModelNG::SetSupportAnimation(FrameNode* frameNode, bool supportAnimation)
+{
+    auto pattern = frameNode->GetPattern<GridPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetSupportAnimation(supportAnimation);
+}
+
+void GridModelNG::SetEdgeEffect(FrameNode* frameNode, EdgeEffect edgeEffect, bool alwaysEnabled)
+{
+    auto pattern = frameNode->GetPattern<ScrollablePattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetEdgeEffect(edgeEffect, alwaysEnabled);
+    frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+}
+
+void GridModelNG::SetNestedScroll(FrameNode* frameNode, const NestedScrollOptions& nestedOpt)
+{
+    auto pattern = frameNode->GetPattern<GridPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetNestedScroll(nestedOpt);
+}
+
+void GridModelNG::SetScrollEnabled(FrameNode* frameNode, bool scrollEnabled)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(GridLayoutProperty, ScrollEnabled, scrollEnabled, frameNode);
+}
+
+void GridModelNG::SetFriction(FrameNode* frameNode, double friction)
+{
+    auto pattern = frameNode->GetPattern<GridPattern>();
+    CHECK_NULL_VOID(pattern);
+    if (LessOrEqual(friction, 0.0)) {
+        pattern->SetFriction(FRICTION);
+    }
+    pattern->SetFriction(friction);
+}
+
 RefPtr<ScrollControllerBase> GridModelNG::CreatePositionController()
 {
     return AceType::MakeRefPtr<ScrollableController>();

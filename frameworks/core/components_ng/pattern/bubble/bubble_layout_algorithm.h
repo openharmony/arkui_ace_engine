@@ -125,7 +125,7 @@ private:
         const OffsetF& topPosition, const OffsetF& bottomPosition, OffsetF& arrowPosition);
     void InitTargetSizeAndPosition(bool showInSubWindow);
     void InitCaretTargetSizeAndPosition();
-    void InitProps(const RefPtr<BubbleLayoutProperty>& layoutProp);
+    void InitProps(const RefPtr<BubbleLayoutProperty>& layoutProp, bool showInSubWindow);
     void InitArrowState(const RefPtr<BubbleLayoutProperty>& layoutProp);
     OffsetF GetPositionWithPlacement(
         const SizeF& childSize, const OffsetF& topPosition, const OffsetF& bottomPosition, OffsetF& arrowPosition);

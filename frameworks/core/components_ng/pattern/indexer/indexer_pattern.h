@@ -169,6 +169,7 @@ private:
     int32_t childPressIndex_ = -1;
     int32_t animationId_ = 0;
     int32_t lastPopupIndex_ = -1;
+    uint32_t lastPopupSize_ = 0;
     int32_t currentPopupIndex_ = -1;
     float itemSizeRender_ = 0.0f;
     int32_t lastSelectProp_ = -1;

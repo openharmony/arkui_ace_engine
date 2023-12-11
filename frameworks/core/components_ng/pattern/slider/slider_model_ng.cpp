@@ -339,70 +339,52 @@ void SliderModelNG::SetBlockImage(
     ACE_UPDATE_NODE_PAINT_PROPERTY(SliderPaintProperty, BlockImageBundleName, bundleName, frameNode);
     ACE_UPDATE_NODE_PAINT_PROPERTY(SliderPaintProperty, BlockImageModuleName, moduleName, frameNode);
 }
-void SliderModelNG::ResetShowTips(FrameNode* frameNode)
-{
-    ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(SliderPaintProperty, ShowTips, PROPERTY_UPDATE_RENDER, frameNode);
-    ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(SliderPaintProperty, CustomContent, PROPERTY_UPDATE_RENDER, frameNode);
-}
+
 void SliderModelNG::ResetStepSize(FrameNode* frameNode)
 {
     ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(SliderPaintProperty, StepSize, PROPERTY_UPDATE_RENDER, frameNode);
 }
+
 void SliderModelNG::ResetBlockType(FrameNode* frameNode)
 {
     ACE_RESET_NODE_PAINT_PROPERTY(SliderPaintProperty, BlockType, frameNode);
 }
+
 void SliderModelNG::ResetBlockShape(FrameNode* frameNode)
 {
     ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(SliderPaintProperty, BlockShape, PROPERTY_UPDATE_RENDER, frameNode);
 }
+
 void SliderModelNG::ResetBlockSize(FrameNode* frameNode)
 {
     ACE_RESET_NODE_LAYOUT_PROPERTY_WITH_FLAG(SliderLayoutProperty, BlockSize, PROPERTY_UPDATE_MEASURE, frameNode);
 }
+
 void SliderModelNG::ResetTrackBorderRadius(FrameNode* frameNode)
 {
     ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(SliderPaintProperty, TrackBorderRadius, PROPERTY_UPDATE_RENDER, frameNode);
 }
+
 void SliderModelNG::ResetStepColor(FrameNode* frameNode)
 {
     ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(SliderPaintProperty, StepColor, PROPERTY_UPDATE_RENDER, frameNode);
 }
+
 void SliderModelNG::ResetBlockBorderColor(FrameNode* frameNode)
 {
     ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(SliderPaintProperty, BlockBorderColor, PROPERTY_UPDATE_RENDER, frameNode);
 }
+
 void SliderModelNG::ResetBlockBorderWidth(FrameNode* frameNode)
 {
     ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(SliderPaintProperty, BlockBorderWidth, PROPERTY_UPDATE_RENDER, frameNode);
 }
+
 void SliderModelNG::ResetBlockColor(FrameNode* frameNode)
 {
     ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(SliderPaintProperty, BlockColor, PROPERTY_UPDATE_RENDER, frameNode);
 }
-void SliderModelNG::ResetTrackBackgroundColor(FrameNode* frameNode)
-{
-    ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(
-        SliderPaintProperty, TrackBackgroundColor, PROPERTY_UPDATE_RENDER, frameNode);
-}
-void SliderModelNG::ResetSelectColor(FrameNode* frameNode)
-{
-    ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(SliderPaintProperty, SelectColor, PROPERTY_UPDATE_RENDER, frameNode);
-}
-void SliderModelNG::ResetShowSteps(FrameNode* frameNode)
-{
-    ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(SliderPaintProperty, ShowSteps, PROPERTY_UPDATE_RENDER, frameNode);
-}
-void SliderModelNG::ResetBlockStyle(FrameNode* frameNode)
-{
-    ResetBlockType(frameNode);
-    ResetBlockImage(frameNode);
-    ResetBlockShape(frameNode);
-}
-void SliderModelNG::ResetThickness(FrameNode* frameNode)
-{
-    ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(SliderLayoutProperty, Thickness, PROPERTY_UPDATE_RENDER, frameNode);
-}
+
 void SliderModelNG::ResetBlockImage(FrameNode* frameNode)
 {
     ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(

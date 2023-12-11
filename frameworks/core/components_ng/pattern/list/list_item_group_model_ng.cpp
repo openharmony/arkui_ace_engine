@@ -79,4 +79,9 @@ void ListItemGroupModelNG::SetFooter(std::function<void()>&& footer)
     CHECK_NULL_VOID(pattern);
     pattern->AddFooter(footerNode);
 }
+
+void ListItemGroupModelNG::SetDivider(FrameNode* frameNode, const V2::ItemDivider& divider)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListItemGroupLayoutProperty, Divider, divider, frameNode);
+}
 } // namespace OHOS::Ace::NG

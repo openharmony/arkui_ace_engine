@@ -38,13 +38,13 @@ public:
         const std::function<void(int32_t)>& createLayoutInfo, const std::function<void(bool)>& setStatus);
     std::function<void(int32_t)> GetLayoutInspectorCallback();
     void StartConnectServerWithSocketPair(int32_t socketFd);
+    void StopConnectServer();
 
 private:
     ConnectServerManager();
     bool InitFunc();
     void InitConnectServer();
     void CloseConnectServerSo();
-    void StopConnectServer();
     bool CheckDebugVersion();
     std::string GetInstanceMapMessage(const char* messageType, int32_t instanceId, const std::string& language = "");
 

@@ -105,16 +105,13 @@ ArkUINativeModuleValue SelectBridge::SetSelectedOptionBgColor(ArkUIRuntimeCallIn
     Local<JSValueRef> colorArg = runtimeCallInfo->GetCallArgRef(1);
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
 
-    Color optionBgColor;
-    if (!ArkTSUtils::ParseJsColorAlpha(vm, colorArg, optionBgColor)) {
-        if (colorArg->IsUndefined() || colorArg->IsNull()) {
-            return ResetSelectedOptionBgColor(runtimeCallInfo);
-        } else {
-            return panda::JSValueRef::Undefined(vm);
-        }
+    Color selectedOptionBgColor;
+    if (!ArkTSUtils::ParseJsColorAlpha(vm, colorArg, selectedOptionBgColor)) {
+        return ResetSelectedOptionBgColor(runtimeCallInfo);
     }
 
-    GetArkUIInternalNodeAPI()->GetSelectModifier().SetSelectedOptionBgColor(nativeNode, optionBgColor.GetValue());
+    GetArkUIInternalNodeAPI()->GetSelectModifier().SetSelectedOptionBgColor(
+        nativeNode, selectedOptionBgColor.GetValue());
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -128,11 +125,7 @@ ArkUINativeModuleValue SelectBridge::SetOptionBgColor(ArkUIRuntimeCallInfo* runt
 
     Color optionBgColor;
     if (!ArkTSUtils::ParseJsColorAlpha(vm, colorArg, optionBgColor)) {
-        if (colorArg->IsUndefined() || colorArg->IsNull()) {
-            return ResetOptionBgColor(runtimeCallInfo);
-        } else {
-            return panda::JSValueRef::Undefined(vm);
-        }
+        return ResetOptionBgColor(runtimeCallInfo);
     }
     GetArkUIInternalNodeAPI()->GetSelectModifier().SetOptionBgColor(nativeNode, optionBgColor.GetValue());
     return panda::JSValueRef::Undefined(vm);
@@ -147,12 +140,8 @@ ArkUINativeModuleValue SelectBridge::SetOptionFontColor(ArkUIRuntimeCallInfo* ru
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
 
     Color optionFontColor;
-    if (!ArkTSUtils::ParseJsColor(vm, colorArg, optionFontColor)) {
-        if (colorArg->IsUndefined() || colorArg->IsNull()) {
-            return ResetOptionFontColor(runtimeCallInfo);
-        } else {
-            return panda::JSValueRef::Undefined(vm);
-        }
+    if (!ArkTSUtils::ParseJsColorAlpha(vm, colorArg, optionFontColor)) {
+        return ResetOptionFontColor(runtimeCallInfo);
     }
     GetArkUIInternalNodeAPI()->GetSelectModifier().SetOptionFontColor(nativeNode, optionFontColor.GetValue());
     return panda::JSValueRef::Undefined(vm);
@@ -166,14 +155,9 @@ ArkUINativeModuleValue SelectBridge::SetSelectedOptionFontColor(ArkUIRuntimeCall
     Local<JSValueRef> colorArg = runtimeCallInfo->GetCallArgRef(1);
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
     Color optionFontColor;
-    if (!ArkTSUtils::ParseJsColor(vm, colorArg, optionFontColor)) {
-        if (colorArg->IsUndefined() || colorArg->IsNull()) {
-            return ResetSelectedOptionFontColor(runtimeCallInfo);
-        } else {
-            return panda::JSValueRef::Undefined(vm);
-        }
+    if (!ArkTSUtils::ParseJsColorAlpha(vm, colorArg, optionFontColor)) {
+        return ResetSelectedOptionFontColor(runtimeCallInfo);
     }
-
     GetArkUIInternalNodeAPI()->GetSelectModifier().SetSelectedOptionFontColor(
         nativeNode, optionFontColor.GetValue());
 
@@ -209,11 +193,11 @@ ArkUINativeModuleValue SelectBridge::SetMenuAlign(ArkUIRuntimeCallInfo* runtimeC
 
     CalcDimension menuAlignOffsetDx = Dimension(0.0);
     CalcDimension menuAlignOffsetDy = Dimension(0.0);
-    if (offsetDx->IsNull() || !ArkTSUtils::ParseJsDimensionFp(vm, offsetDx, menuAlignOffsetDx)) {
+    if (offsetDx->IsNull() || !ArkTSUtils::ParseJsDimensionVp(vm, offsetDx, menuAlignOffsetDx)) {
         menuAlignOffsetDx = Dimension(0.0);
     }
 
-    if (offsetDy->IsNull() || !ArkTSUtils::ParseJsDimensionFp(vm, offsetDy, menuAlignOffsetDy)) {
+    if (offsetDy->IsNull() || !ArkTSUtils::ParseJsDimensionVp(vm, offsetDy, menuAlignOffsetDy)) {
         menuAlignOffsetDy = Dimension(0.0);
     }
 
@@ -242,7 +226,7 @@ ArkUINativeModuleValue SelectBridge::SetFont(ArkUIRuntimeCallInfo* runtimeCallIn
     std::string fontSizeStr = DEFAULT_STR;
     CalcDimension fontSize;
     if (!secondArg->IsNull() && !secondArg->IsUndefined() &&
-        ArkTSUtils::ParseJsDimensionFp(vm, secondArg, fontSize, false)) {
+        ArkTSUtils::ParseJsDimensionNG(vm, secondArg, fontSize, DimensionUnit::FP, false)) {
         fontSizeStr = fontSize.ToString();
     }
 
@@ -295,7 +279,7 @@ ArkUINativeModuleValue SelectBridge::SetOptionFont(ArkUIRuntimeCallInfo* runtime
 
     CalcDimension fontSize;
     if (secondArg->IsNull() || secondArg->IsUndefined() ||
-        !ArkTSUtils::ParseJsDimensionFp(vm, secondArg, fontSize, false)) {
+        !ArkTSUtils::ParseJsDimensionNG(vm, secondArg, fontSize, DimensionUnit::FP, false)) {
         fontSize = selectTheme->GetMenuFontSize();
     }
 
@@ -349,7 +333,7 @@ ArkUINativeModuleValue SelectBridge::SetSelectedOptionFont(ArkUIRuntimeCallInfo*
 
     CalcDimension fontSize;
     if (secondArg->IsNull() || secondArg->IsUndefined() ||
-        !ArkTSUtils::ParseJsDimensionFp(vm, secondArg, fontSize, false)) {
+        !ArkTSUtils::ParseJsDimensionNG(vm, secondArg, fontSize, DimensionUnit::FP, false)) {
         fontSize = selectTheme->GetFontSize();
     }
 

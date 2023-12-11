@@ -3244,7 +3244,8 @@ void JsiEngine::RegisterInitWorkerFunc()
             return;
         }
 #ifdef OHOS_PLATFORM
-        ConnectServerManager::Get().AddInstance(gettid(), "js");
+        auto tid = gettid();
+        ConnectServerManager::Get().AddInstance(tid, "js");
         auto vm = const_cast<EcmaVM*>(arkNativeEngine->GetEcmaVm());
         auto workerPostTask = [nativeEngine](std::function<void()>&& callback) {
             nativeEngine->CallDebuggerPostTaskFunc(std::move(callback));
@@ -3252,7 +3253,7 @@ void JsiEngine::RegisterInitWorkerFunc()
         bool debugMode = AceApplicationInfo::GetInstance().IsNeedDebugBreakPoint();
         panda::JSNApi::DebugOption debugOption = { libraryPath.c_str(), debugMode };
         JSNApi::NotifyDebugMode(
-            gettid(), vm, libraryPath.c_str(), debugOption, instanceId, workerPostTask, debugVersion, debugMode);
+            tid, vm, libraryPath.c_str(), debugOption, tid, workerPostTask, debugVersion, debugMode);
 #endif
         instance->RegisterConsoleModule(arkNativeEngine);
         // load jsfwk

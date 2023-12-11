@@ -70,7 +70,7 @@ ArkUINativeModuleValue TimepickerBridge::SetTextStyle(ArkUIRuntimeCallInfo*runti
     if (fontSizeArg->IsNull() || fontSizeArg->IsUndefined()) {
         size = Dimension(-1);
     } else {
-        if (!ArkTSUtils::ParseJsDimensionFp(vm, fontSizeArg, size, false)) {
+        if (!ArkTSUtils::ParseJsDimensionNG(vm, fontSizeArg, size, DimensionUnit::FP, false)) {
             size = Dimension(-1);
         }
     }
@@ -125,7 +125,7 @@ ArkUINativeModuleValue TimepickerBridge::SetSelectedTextStyle(ArkUIRuntimeCallIn
     if (fontSizeArg->IsNull() || fontSizeArg->IsUndefined()) {
         size = Dimension(-1);
     } else {
-        if (!ArkTSUtils::ParseJsDimensionFp(vm, fontSizeArg, size, false)) {
+        if (!ArkTSUtils::ParseJsDimensionNG(vm, fontSizeArg, size, DimensionUnit::FP, false)) {
             size = Dimension(-1);
         }
     }
@@ -180,7 +180,7 @@ ArkUINativeModuleValue TimepickerBridge::SetDisappearTextStyle(ArkUIRuntimeCallI
     if (fontSizeArg->IsNull() || fontSizeArg->IsUndefined()) {
         size = Dimension(-1);
     } else {
-        if (!ArkTSUtils::ParseJsDimensionFp(vm, fontSizeArg, size, false)) {
+        if (!ArkTSUtils::ParseJsDimensionNG(vm, fontSizeArg, size, DimensionUnit::FP, false)) {
             size = Dimension(-1);
         }
     }

@@ -62,11 +62,18 @@ private:
     static void RegisterRatingAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterTimepickerAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterTextpickerAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
+    static void RegisterWaterFlowAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterCheckboxAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
+    static void RegisterScrollAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterCommonShapeAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterShapeAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterRectAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterListAttributes(Local<panda::ObjectRef> object, EcmaVM* vm); 
+    static void RegisterGridAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
+    static void RegisterLisitItemGroupAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
+    static void RegisterQRCodeAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
+    static void RegisterLoadingProgressAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
+    static void RegisterTextClockAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
 };
 } // namespace OHOS::Ace::NG
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_ENGINE_JSI_NATIVEMODULE_ARKTS_NATIVE_API_BRIDGE_H

@@ -237,7 +237,7 @@ ArkUINativeModuleValue NavigationBridge::SetMinNavBarWidth(ArkUIRuntimeCallInfo*
 
     CalcDimension width;
     if (jsValue->IsNull() || jsValue->IsUndefined() ||
-        !ArkTSUtils::ParseJsDimensionVpNG(vm, jsValue, width)) {
+        !ArkTSUtils::ParseJsDimensionVp(vm, jsValue, width)) {
         GetArkUIInternalNodeAPI()->GetNavigationModifier().ResetMinNavBarWidth(nativeNode);
     } else {
         GetArkUIInternalNodeAPI()->GetNavigationModifier().SetMinNavBarWidth(
@@ -266,7 +266,7 @@ ArkUINativeModuleValue NavigationBridge::SetMaxNavBarWidth(ArkUIRuntimeCallInfo*
 
     CalcDimension width;
     if (jsValue->IsNull() || jsValue->IsUndefined() ||
-        !ArkTSUtils::ParseJsDimensionVpNG(vm, jsValue, width)) {
+        !ArkTSUtils::ParseJsDimensionVp(vm, jsValue, width)) {
         GetArkUIInternalNodeAPI()->GetNavigationModifier().ResetMaxNavBarWidth(nativeNode);
     } else {
         GetArkUIInternalNodeAPI()->GetNavigationModifier().SetMaxNavBarWidth(

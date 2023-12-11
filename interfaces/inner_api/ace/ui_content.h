@@ -26,6 +26,7 @@
 
 #include "macros.h"
 #include "modal_ui_extension_config.h"
+#include "popup_ui_extension_config.h"
 #include "serializeable_object.h"
 #include "viewport_config.h"
 
@@ -290,6 +291,25 @@ public:
     // Actually paint size of window
     virtual void GetAppPaintSize(OHOS::Rosen::Rect& paintrect) {};
 
+    /**
+     * @description: Create a custom popup with UIExtensionComponent.
+     * @param want Indicates the want of UIExtensionAbility.
+     * @param callbacks Indicates the UIExtensionComponent callbacks.
+     * @param config Indicates the custom popup configs.
+     * @return The return value is the ID of the UI node which bind the pupop
+     * if creation is not successful, it returns 0 by default.
+     */
+    virtual int32_t CreateCustomPopupUIExtension(
+        const AAFwk::Want& want, const ModalUIExtensionCallbacks& callbacks, const CustomPopupUIExtensionConfig& config)
+    {
+        return 0;
+    }
+ 
+    /**
+     * @description: Destroy the custom popup.
+     * @param config Indicates the ID of the UI node which bind the pupop
+     */
+    virtual void DestroyCustomPopupUIExtension(int32_t nodeId) {}
 };
 
 } // namespace OHOS::Ace

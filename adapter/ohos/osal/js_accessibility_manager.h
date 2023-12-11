@@ -132,6 +132,8 @@ public:
         const RefPtr<NG::PipelineContext>& ngPipeline);
     void SetWebAccessibilityState(bool state);
 #endif
+    void GetResultOfFocusMoveSearchNG(
+        int32_t elementId, int32_t direction, Accessibility::AccessibilityElementInfo& info);
 
     std::string GetPagePath();
 
