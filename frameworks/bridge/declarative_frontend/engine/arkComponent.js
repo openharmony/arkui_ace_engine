@@ -6205,6 +6205,139 @@ globalThis.TextInput.attributeModifier = function (modifier) {
   modifier.applyNormalAttribute(component);
   component.applyModifierPatch();
 };
+/// <reference path='./import.ts' />
+class VideoObjectFitModifier extends ModifierWithKey {
+  applyPeer(node, reset) {
+    if (reset) {
+      GetUINativeModule().video.resetObjectFit(node);
+    }
+    else {
+      GetUINativeModule().video.setObjectFit(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+VideoObjectFitModifier.identity = Symbol('videoObjectFit');
+class VideoAutoPlayModifier extends ModifierWithKey {
+  applyPeer(node, reset) {
+    if (reset) {
+      GetUINativeModule().video.resetAutoPlay(node);
+    }
+    else {
+      GetUINativeModule().video.setAutoPlay(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+VideoAutoPlayModifier.identity = Symbol('videoAutoPlayr');
+class VideoControlsModifier extends ModifierWithKey {
+  applyPeer(node, reset) {
+    if (reset) {
+      GetUINativeModule().video.resetControls(node);
+    }
+    else {
+      GetUINativeModule().video.setControls(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+VideoControlsModifier.identity = Symbol('videoControls');
+class VideoLoopModifier extends ModifierWithKey {
+  applyPeer(node, reset) {
+    if (reset) {
+      GetUINativeModule().video.resetLoop(node);
+    }
+    else {
+      GetUINativeModule().video.setLoop(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+VideoLoopModifier.identity = Symbol('videoLoop');
+class VideoMutedModifier extends ModifierWithKey {
+  applyPeer(node, reset) {
+    if (reset) {
+      GetUINativeModule().video.resetMuted(node);
+    }
+    else {
+      GetUINativeModule().video.setMuted(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+VideoMutedModifier.identity = Symbol('videoMuted');
+class ArkVideoComponent extends ArkComponent {
+  muted(value) {
+    modifierWithKey(this._modifiersWithKeys, VideoMutedModifier.identity, VideoMutedModifier, value);
+    return this;
+  }
+  autoPlay(value) {
+    modifierWithKey(this._modifiersWithKeys, VideoAutoPlayModifier.identity, VideoAutoPlayModifier, value);
+    return this;
+  }
+  controls(value) {
+    modifierWithKey(this._modifiersWithKeys, VideoControlsModifier.identity, VideoControlsModifier, value);
+    return this;
+  }
+  loop(value) {
+    modifierWithKey(this._modifiersWithKeys, VideoLoopModifier.identity, VideoLoopModifier, value);
+    return this;
+  }
+  objectFit(value) {
+    modifierWithKey(this._modifiersWithKeys, VideoObjectFitModifier.identity, VideoObjectFitModifier, value);
+    return this;
+  }
+  onStart(callback) {
+    throw new Error('Method not implemented.');
+  }
+  onPause(callback) {
+    throw new Error('Method not implemented.');
+  }
+  onFinish(event) {
+    throw new Error('Method not implemented.');
+  }
+  onFullscreenChange(callback) {
+    throw new Error('Method not implemented.');
+  }
+  onPrepared(callback) {
+    throw new Error('Method not implemented.');
+  }
+  onSeeking(callback) {
+    throw new Error('Method not implemented.');
+  }
+  onSeeked(callback) {
+    throw new Error('Method not implemented.');
+  }
+  onUpdate(callback) {
+    throw new Error('Method not implemented.');
+  }
+  onError(callback) {
+    throw new Error('Method not implemented.');
+  }
+  monopolizeEvents(monopolize) {
+    throw new Error('Method not implemented.');
+  }
+}
+// @ts-ignore
+globalThis.Video.attributeModifier = function (modifier) {
+  const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
+  let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+  let component = this.createOrGetNode(elmtId, () => {
+    return new ArkVideoComponent(nativeNode);
+  });
+  modifier.applyNormalAttribute(component);
+  component.applyModifierPatch();
+};
 /*
  * Copyright (c) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the 'License');
@@ -12526,139 +12659,6 @@ globalThis.WaterFlow.attributeModifier = function (modifier) {
   let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkWaterFlowComponent(nativeNode);
-  });
-  modifier.applyNormalAttribute(component);
-  component.applyModifierPatch();
-};
-/// <reference path='./import.ts' />
-class VideoObjectFitModifier extends ModifierWithKey {
-  applyPeer(node, reset) {
-    if (reset) {
-      GetUINativeModule().video.resetObjectFit(node);
-    }
-    else {
-      GetUINativeModule().video.setObjectFit(node, this.value);
-    }
-  }
-  checkObjectDiff() {
-    return !isBaseOrResourceEqual(this.stageValue, this.value);
-  }
-}
-VideoObjectFitModifier.identity = Symbol('videoObjectFit');
-class VideoAutoPlayModifier extends ModifierWithKey {
-  applyPeer(node, reset) {
-    if (reset) {
-      GetUINativeModule().video.resetAutoPlay(node);
-    }
-    else {
-      GetUINativeModule().video.setAutoPlay(node, this.value);
-    }
-  }
-  checkObjectDiff() {
-    return !isBaseOrResourceEqual(this.stageValue, this.value);
-  }
-}
-VideoAutoPlayModifier.identity = Symbol('videoAutoPlayr');
-class VideoControlsModifier extends ModifierWithKey {
-  applyPeer(node, reset) {
-    if (reset) {
-      GetUINativeModule().video.resetControls(node);
-    }
-    else {
-      GetUINativeModule().video.setControls(node, this.value);
-    }
-  }
-  checkObjectDiff() {
-    return !isBaseOrResourceEqual(this.stageValue, this.value);
-  }
-}
-VideoControlsModifier.identity = Symbol('videoControls');
-class VideoLoopModifier extends ModifierWithKey {
-  applyPeer(node, reset) {
-    if (reset) {
-      GetUINativeModule().video.resetLoop(node);
-    }
-    else {
-      GetUINativeModule().video.setLoop(node, this.value);
-    }
-  }
-  checkObjectDiff() {
-    return !isBaseOrResourceEqual(this.stageValue, this.value);
-  }
-}
-VideoLoopModifier.identity = Symbol('videoLoop');
-class VideoMutedModifier extends ModifierWithKey {
-  applyPeer(node, reset) {
-    if (reset) {
-      GetUINativeModule().video.resetMuted(node);
-    }
-    else {
-      GetUINativeModule().video.setMuted(node, this.value);
-    }
-  }
-  checkObjectDiff() {
-    return !isBaseOrResourceEqual(this.stageValue, this.value);
-  }
-}
-VideoMutedModifier.identity = Symbol('videoMuted');
-class ArkVideoComponent extends ArkComponent {
-  muted(value) {
-    modifierWithKey(this._modifiersWithKeys, VideoMutedModifier.identity, VideoMutedModifier, value);
-    return this;
-  }
-  autoPlay(value) {
-    modifierWithKey(this._modifiersWithKeys, VideoAutoPlayModifier.identity, VideoAutoPlayModifier, value);
-    return this;
-  }
-  controls(value) {
-    modifierWithKey(this._modifiersWithKeys, VideoControlsModifier.identity, VideoControlsModifier, value);
-    return this;
-  }
-  loop(value) {
-    modifierWithKey(this._modifiersWithKeys, VideoLoopModifier.identity, VideoLoopModifier, value);
-    return this;
-  }
-  objectFit(value) {
-    modifierWithKey(this._modifiersWithKeys, VideoObjectFitModifier.identity, VideoObjectFitModifier, value);
-    return this;
-  }
-  onStart(callback) {
-    throw new Error('Method not implemented.');
-  }
-  onPause(callback) {
-    throw new Error('Method not implemented.');
-  }
-  onFinish(event) {
-    throw new Error('Method not implemented.');
-  }
-  onFullscreenChange(callback) {
-    throw new Error('Method not implemented.');
-  }
-  onPrepared(callback) {
-    throw new Error('Method not implemented.');
-  }
-  onSeeking(callback) {
-    throw new Error('Method not implemented.');
-  }
-  onSeeked(callback) {
-    throw new Error('Method not implemented.');
-  }
-  onUpdate(callback) {
-    throw new Error('Method not implemented.');
-  }
-  onError(callback) {
-    throw new Error('Method not implemented.');
-  }
-  monopolizeEvents(monopolize) {
-    throw new Error('Method not implemented.');
-  }
-}
-// @ts-ignore
-globalThis.Video.attributeModifier = function (modifier) {
-  const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
-  let component = this.createOrGetNode(elmtId, () => {
-    return new ArkVideoComponent(nativeNode);
   });
   modifier.applyNormalAttribute(component);
   component.applyModifierPatch();
