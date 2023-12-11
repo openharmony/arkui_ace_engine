@@ -169,4 +169,24 @@ void ListItemModelNG::InstallSwiperCallBack(RefPtr<ListItemEventHub> eventHub,
         eventHub->SetEndOnStateChange(std::move(onStateChange));
     }
 }
+
+void ListItemModelNG::SetSelected(FrameNode* frameNode, bool selected)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<ListItemPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetSelected(selected);
+    auto eventHub = frameNode->GetEventHub<ListItemEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetCurrentUIState(UI_STATE_SELECTED, selected);
+}
+
+void ListItemModelNG::SetSelectable(FrameNode* frameNode, bool selectable)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<ListItemPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetSelectable(selectable);
+}
+
 } // namespace OHOS::Ace::NG

@@ -29,6 +29,7 @@
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_grid_item_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_hyperlink_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_list_bridge.h"
+#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_list_item_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_image_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_image_span_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_loading_progress_bridge.h"
@@ -1116,6 +1117,7 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
     RegisterQRCodeAttributes(object, vm);
     RegisterLoadingProgressAttributes(object, vm);
     RegisterTextClockAttributes(object, vm);
+    RegisterListItemAttributes(object, vm);
 
 #ifdef FORM_SUPPORTED
     RegisterFormAttributes(object, vm);
@@ -2279,6 +2281,20 @@ void ArkUINativeModule::RegisterRectAttributes(Local<panda::ObjectRef> object, E
     rect->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetRectRadius"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RectBridge::ResetRadius));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "rect"), rect);
+}
+
+void ArkUINativeModule::RegisterListItemAttributes(Local<panda::ObjectRef> object, EcmaVM* vm)
+{
+    auto listItem = panda::ObjectRef::New(vm);
+    listItem->Set(vm, panda::StringRef::NewFromUtf8(vm, "setListItemSelected"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ListItemBridge::SetListItemSelected));
+    listItem->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetListItemSelected"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ListItemBridge::ResetListItemSelected));
+    listItem->Set(vm, panda::StringRef::NewFromUtf8(vm, "setSelectable"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ListItemBridge::SetSelectable));
+    listItem->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetSelectable"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ListItemBridge::ResetSelectable));
+    object->Set(vm, panda::StringRef::NewFromUtf8(vm, "listItem"), listItem);
 }
 
 void ArkUINativeModule::RegisterListAttributes(Local<panda::ObjectRef> object, EcmaVM* vm)
