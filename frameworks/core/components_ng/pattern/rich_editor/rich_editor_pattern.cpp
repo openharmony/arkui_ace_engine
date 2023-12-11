@@ -87,10 +87,11 @@ constexpr float DEFAULT_CARET_HEIGHT = 18.5f;
 constexpr int32_t IMAGE_SPAN_LENGTH = 1;
 constexpr int32_t RICH_EDITOR_TWINKLING_INTERVAL_MS = 500;
 constexpr float DEFAULT_TEXT_SIZE = 16.0f;
-constexpr int32_t AUTO_SCROLL_INTERVAL = 20;
-constexpr Dimension AUTO_SCROLL_MOVE_THRESHOLD = 2.0_vp;
+constexpr int32_t AUTO_SCROLL_INTERVAL = 15;
 constexpr Dimension AUTO_SCROLL_EDGE_DISTANCE = 15.0_vp;
-constexpr Dimension AUTO_SCROLL_DRAG_EDGE_DISTANCE = 25.0_vp;
+constexpr Dimension AUTO_SCROLL_DRAG_EDGE_DISTANCE = 26.0_vp;
+constexpr float MAX_DRAG_SCROLL_SPEED = 2400.0f;
+constexpr float TIME_UNIT = 1000.0f;
 constexpr float DOUBLE_CLICK_INTERVAL_MS = 300.0f;
 constexpr float BOX_EPSILON = 0.5f;
 constexpr uint32_t RECORD_MAX_LENGTH = 20;
@@ -4822,22 +4823,20 @@ void RichEditorPattern::UpdateChildrenOffset()
 
 void RichEditorPattern::AutoScrollByEdgeDetection(AutoScrollParam param, OffsetF offset, EdgeDetectionStrategy strategy)
 {
-    auto deltaOffset = offset - prevAutoScrollOffset_;
-    auto thresholdDistance = AUTO_SCROLL_MOVE_THRESHOLD.ConvertToPx();
-    if (std::abs(deltaOffset.GetY()) < thresholdDistance) {
+    if (NearEqual(prevAutoScrollOffset_.GetY(), offset.GetY())) {
         return;
     }
     prevAutoScrollOffset_ = offset;
     auto contentRect = GetTextContentRect();
-    float edgeThreshold = param.autoScrollEvent == AutoScrollEvent::DRAG ? AUTO_SCROLL_DRAG_EDGE_DISTANCE.ConvertToPx()
-                                                                         : AUTO_SCROLL_EDGE_DISTANCE.ConvertToPx();
+    auto isDragging = param.autoScrollEvent == AutoScrollEvent::DRAG;
+    float edgeThreshold = isDragging ? AUTO_SCROLL_DRAG_EDGE_DISTANCE.ConvertToPx()
+                                     : AUTO_SCROLL_EDGE_DISTANCE.ConvertToPx();
     if (GreatOrEqual(edgeThreshold, contentRect.Height())) {
         TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "AutoScrollByEdgeDetection: Content height is too small.");
         return;
     }
-    float topEdgeThreshold = edgeThreshold + contentRect.GetY();
-    float bottomThreshold = contentRect.Bottom() - edgeThreshold;
-
+    float topEdgeThreshold = isDragging ? edgeThreshold : edgeThreshold + contentRect.GetY();
+    float bottomThreshold = isDragging ? frameRect_.Bottom() - edgeThreshold : contentRect.Bottom() - edgeThreshold;
     if (param.autoScrollEvent == AutoScrollEvent::HANDLE) {
         auto handleTopOffset = offset;
         auto handleBottomOffset = OffsetF(offset.GetX(), offset.GetY() + param.handleRect.Height());
@@ -4852,34 +4851,55 @@ void RichEditorPattern::AutoScrollByEdgeDetection(AutoScrollParam param, OffsetF
         }
         return;
     }
-
     // drag and mouse
     if (GreatNotEqual(offset.GetY(), bottomThreshold)) {
-        param.offset = bottomThreshold - offset.GetY();
+        param.offset = isDragging ? -CalcDragSpeed(bottomThreshold, frameRect_.Bottom(), offset.GetY())
+                                  : bottomThreshold - offset.GetY();
         ScheduleAutoScroll(param);
     } else if (LessNotEqual(offset.GetY(), topEdgeThreshold)) {
-        param.offset = topEdgeThreshold - offset.GetY();
+        param.offset = isDragging ? CalcDragSpeed(topEdgeThreshold, 0, offset.GetY())
+                                  : topEdgeThreshold - offset.GetY();
         ScheduleAutoScroll(param);
     } else {
         StopAutoScroll();
     }
 }
 
+float RichEditorPattern::CalcDragSpeed(float hotAreaStart, float hotAreaEnd, float point)
+{
+    auto distanceRatio = (point - hotAreaStart) / (hotAreaEnd - hotAreaStart);
+    auto speedFactor = Curves::SHARP->MoveInternal(distanceRatio);
+    return ((MAX_DRAG_SCROLL_SPEED * speedFactor) / TIME_UNIT) * AUTO_SCROLL_INTERVAL;
+}
+
 void RichEditorPattern::ScheduleAutoScroll(AutoScrollParam param)
 {
-    auto context = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(context);
-    if (!context->GetTaskExecutor()) {
+    if (GreatNotEqual(param.offset, 0.0f) && IsReachTop()) {
         return;
     }
-    autoScrollTask_.Reset([weak = WeakClaim(this), param]() {
-        auto client = weak.Upgrade();
-        CHECK_NULL_VOID(client);
-        client->OnAutoScroll(param);
-    });
-
+    if (LessNotEqual(param.offset, 0.0f) && IsReachBottom()) {
+        return;
+    }
+    auto context = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(context);
     auto taskExecutor = context->GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
+    if (param.isFirstRun_) {
+        param.isFirstRun_ = false;
+        currentScrollParam_ = param;
+        if (isAutoScrollRunning_) {
+            return;
+        }
+    }
+    autoScrollTask_.Reset([weak = WeakClaim(this)]() {
+        auto client = weak.Upgrade();
+        CHECK_NULL_VOID(client);
+        client->OnAutoScroll(client->currentScrollParam_);
+        if (client->IsReachTop() || client->IsReachBottom()) {
+            client->StopAutoScroll();
+        }
+    });
+    isAutoScrollRunning_ = true;
     taskExecutor->PostDelayedTask(autoScrollTask_, TaskExecutor::TaskType::UI, AUTO_SCROLL_INTERVAL);
 }
 
@@ -4933,6 +4953,7 @@ void RichEditorPattern::OnAutoScroll(AutoScrollParam param)
 
 void RichEditorPattern::StopAutoScroll()
 {
+    isAutoScrollRunning_ = false;
     autoScrollTask_.Cancel();
     prevAutoScrollOffset_ = OffsetF(0.0f, 0.0f);
     auto scrollBar = GetScrollBar();
