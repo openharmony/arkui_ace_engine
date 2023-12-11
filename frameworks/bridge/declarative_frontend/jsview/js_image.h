@@ -30,7 +30,7 @@ public:
     static void SetMatchTextDirection(bool value);
     static void SetFitOriginalSize(bool value);
     static void SetSourceSize(const JSCallbackInfo& info);
-    static void SetObjectFit(int32_t value);
+    static void SetObjectFit(const JSCallbackInfo& args);
     static void SetImageFill(const JSCallbackInfo& info);
     static void SetImageInterpolation(int32_t imageInterpolation);
     static void SetImageRenderMode(int32_t imageRenderMode);

@@ -31,12 +31,19 @@
 #include "bridge/declarative_frontend/jsview/models/image_model_impl.h"
 #include "core/common/container.h"
 #include "core/components/image/image_event.h"
+#include "core/components/image/image_theme.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_ng/pattern/image/image_model.h"
 #include "core/components_ng/pattern/image/image_model_ng.h"
 #include "core/image/image_source_info.h"
 #include "interfaces/inner_api/ace/ai/image_analyzer.h"
+
+namespace {
+    const std::vector<float> DEFAULT_COLORFILTER_MATRIX = {
+        1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0
+    };
+}
 
 namespace OHOS::Ace {
 
@@ -111,12 +118,18 @@ void JSImage::SetAlt(const JSCallbackInfo& args)
     ImageModel::GetInstance()->SetAlt(ImageSourceInfo { src, bundleName, moduleName });
 }
 
-void JSImage::SetObjectFit(int32_t value)
+void JSImage::SetObjectFit(const JSCallbackInfo& args)
 {
-    auto fit = static_cast<ImageFit>(value);
-    if (fit < ImageFit::FILL || fit > ImageFit::SCALE_DOWN) {
-        fit = ImageFit::COVER;
+    if (args.Length() < 1) {
+        ImageModel::GetInstance()->SetImageFit(ImageFit::COVER);
+        return;
     }
+    int32_t parseRes = 2;
+    ParseJsInteger(args[0], parseRes);
+    if (parseRes < static_cast<int32_t>(ImageFit::FILL) || parseRes > static_cast<int32_t>(ImageFit::SCALE_DOWN)) {
+        parseRes = 2;
+    }
+    auto fit = static_cast<ImageFit>(parseRes);
     ImageModel::GetInstance()->SetImageFit(fit);
 }
 
@@ -267,7 +280,11 @@ void JSImage::SetImageFill(const JSCallbackInfo& info)
 
     Color color;
     if (!ParseJsColor(info[0], color)) {
-        return;
+        auto pipelineContext = PipelineBase::GetCurrentContext();
+        CHECK_NULL_VOID(pipelineContext);
+        auto theme = pipelineContext->GetTheme<ImageTheme>();
+        CHECK_NULL_VOID(theme);
+        color = theme->GetFillColor();
     }
     ImageModel::GetInstance()->SetImageFill(color);
 }
@@ -392,10 +409,12 @@ void JSColorFilter::DestructorCallback(JSColorFilter* obj)
 void JSImage::SetColorFilter(const JSCallbackInfo& info)
 {
     if (info.Length() != 1) {
+        ImageModel::GetInstance()->SetColorFilterMatrix(DEFAULT_COLORFILTER_MATRIX);
         return;
     }
     auto tmpInfo = info[0];
     if (!tmpInfo->IsArray() && !tmpInfo->IsObject()) {
+        ImageModel::GetInstance()->SetColorFilterMatrix(DEFAULT_COLORFILTER_MATRIX);
         return;
     }
     if (tmpInfo->IsObject() && !tmpInfo->IsArray()) {
@@ -403,17 +422,18 @@ void JSImage::SetColorFilter(const JSCallbackInfo& info)
         if (!tmpInfo->IsUndefined() && !tmpInfo->IsNull()) {
             colorFilter = JSRef<JSObject>::Cast(tmpInfo)->Unwrap<JSColorFilter>();
         } else {
+            ImageModel::GetInstance()->SetColorFilterMatrix(DEFAULT_COLORFILTER_MATRIX);
             return;
         }
         if (colorFilter && colorFilter->GetColorFilterMatrix().size() == COLOR_FILTER_MATRIX_SIZE) {
             ImageModel::GetInstance()->SetColorFilterMatrix(colorFilter->GetColorFilterMatrix());
-        } else {
-            return;
         }
+        ImageModel::GetInstance()->SetColorFilterMatrix(DEFAULT_COLORFILTER_MATRIX);
         return;
     }
     JSRef<JSArray> array = JSRef<JSArray>::Cast(tmpInfo);
     if (array->Length() != COLOR_FILTER_MATRIX_SIZE) {
+        ImageModel::GetInstance()->SetColorFilterMatrix(DEFAULT_COLORFILTER_MATRIX);
         return;
     }
     std::vector<float> colorfilter;
@@ -421,10 +441,10 @@ void JSImage::SetColorFilter(const JSCallbackInfo& info)
         JSRef<JSVal> value = array->GetValueAt(i);
         if (value->IsNumber()) {
             colorfilter.emplace_back(value->ToNumber<float>());
+        } else {
+            ImageModel::GetInstance()->SetColorFilterMatrix(DEFAULT_COLORFILTER_MATRIX);
+            return;
         }
-    }
-    if (colorfilter.size() != COLOR_FILTER_MATRIX_SIZE) {
-        return;
     }
     ImageModel::GetInstance()->SetColorFilterMatrix(colorfilter);
 }
