@@ -139,6 +139,7 @@ public:
 
 protected:
     static void OnCommonDialog(const JSCallbackInfo& args, int dialogEventType);
+    static void ParseRawfileWebSrc(const JSRef<JSVal>& srcValue, std::string& webSrc);
 };
 } // namespace OHOS::Ace::Framework
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_WEB_H
