@@ -179,6 +179,11 @@ RefPtr<NodePaintMethod> TextFieldPattern::CreateNodePaintMethod()
         paint->SetScrollBar(scrollBar);
         if (scrollBar->NeedPaint()) {
             textFieldOverlayModifier->SetRect(scrollBar->GetActiveRect());
+        } else if (IsNormalInlineState() && !HasFocus()) {
+            auto inlineScrollRect = scrollBar->GetActiveRect();
+            CalcInlineScrollRect(inlineScrollRect);
+            textFieldOverlayModifier->SetRect(inlineScrollRect);
+            textFieldOverlayModifier->SetOpacity(0);
         }
     }
     auto host = GetHost();
@@ -206,6 +211,32 @@ RefPtr<NodePaintMethod> TextFieldPattern::CreateNodePaintMethod()
         textFieldOverlayModifier->SetBoundsRect(boundsRect);
     }
     return paint;
+}
+
+void TextFieldPattern::CalcInlineScrollRect(Rect& inlineScrollRect)
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto scrollBar = GetScrollBar();
+    CHECK_NULL_VOID(scrollBar);
+    Size size(frameRect_.Width(), inlineMeasureItem_.inlineSizeHeight);
+    auto positionMode_ = scrollBar->GetPositionMode();
+    double mainSize = (positionMode_ == PositionMode::BOTTOM ? size.Width() : size.Height());
+    auto barRegionSize_ = mainSize;
+    double estimatedHeight = inlineMeasureItem_.inlineContentRectHeight;
+    double activeSize = barRegionSize_ * mainSize / estimatedHeight - scrollBar->GetOutBoundary();
+    auto offsetScale_ = 0.0f;
+    if (NearEqual(mainSize, estimatedHeight)) {
+        offsetScale_ = 0.0;
+    } else {
+        offsetScale_ = (barRegionSize_ - activeSize) / (estimatedHeight - mainSize);
+    }
+    double lastMainOffset = std::max(static_cast<double>(
+        std::max(inlineMeasureItem_.inlineLastOffsetY, contentRect_.GetY() - textRect_.GetY())), 0.0);
+    double activeMainOffset = std::min(offsetScale_ * lastMainOffset, barRegionSize_ - activeSize);
+    inlineScrollRect.SetLeft(inlineScrollRect.GetOffset().GetX() - inlineMeasureItem_.inlineScrollRectOffsetX);
+    inlineScrollRect.SetTop(activeMainOffset);
+    inlineScrollRect.SetHeight(activeSize);
 }
 
 std::u16string TextFieldPattern::CreateObscuredText(int32_t len)
@@ -364,6 +395,7 @@ bool TextFieldPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
     paragraphWidth_ = paragraphWidth;
     textRect_ = textRect;
     parentGlobalOffset_ = textFieldLayoutAlgorithm->GetParentGlobalOffset();
+    inlineMeasureItem_ = textFieldLayoutAlgorithm->GetInlineMeasureItem();
     bool isEditorValueChanged = FireOnTextChangeEvent();
     UpdateSelectController();
     UpdateTextFieldManager(Offset(parentGlobalOffset_.GetX(), parentGlobalOffset_.GetY()), frameRect_.Height());
