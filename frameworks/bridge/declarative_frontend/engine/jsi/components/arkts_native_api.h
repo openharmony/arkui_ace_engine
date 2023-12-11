@@ -593,17 +593,17 @@ struct ArkUIRatingModifierAPI {
 struct ArkUISliderModifierAPI {
     void (*SetShowTips)(NodeHandle node, bool isShow, const char *value);
     void (*ResetShowTips)(NodeHandle node);
-    void (*SetSliderStepSize)(NodeHandle node, float value, int unit);
+    void (*SetSliderStepSize)(NodeHandle node, double value, int unit);
     void (*ResetSliderStepSize)(NodeHandle node);
-    void (*SetBlockSize)(NodeHandle node, float widthVal, int widthUnit, float heightVal, int heightUnit);
+    void (*SetBlockSize)(NodeHandle node, double widthVal, int widthUnit, double heightVal, int heightUnit);
     void (*ResetBlockSize)(NodeHandle node);
-    void (*SetTrackBorderRadius)(NodeHandle node, float value, int unit);
+    void (*SetTrackBorderRadius)(NodeHandle node, double value, int unit);
     void (*ResetTrackBorderRadius)(NodeHandle node);
     void (*SetStepColor)(NodeHandle node, uint32_t color);
     void (*ResetStepColor)(NodeHandle node);
     void (*SetBlockBorderColor)(NodeHandle node, uint32_t color);
     void (*ResetBlockBorderColor)(NodeHandle node);
-    void (*SetBlockBorderWidth)(NodeHandle node, float value, int unit);
+    void (*SetBlockBorderWidth)(NodeHandle node, double value, int unit);
     void (*ResetBlockBorderWidth)(NodeHandle node);
     void (*SetBlockColor)(NodeHandle node, uint32_t color);
     void (*ResetBlockColor)(NodeHandle node);
@@ -613,7 +613,7 @@ struct ArkUISliderModifierAPI {
     void (*ResetSelectColor)(NodeHandle node);
     void (*SetShowSteps)(NodeHandle node, bool showSteps);
     void (*ResetShowSteps)(NodeHandle node);
-    void (*SetThickness)(NodeHandle node, float value, int unit);
+    void (*SetThickness)(NodeHandle node, double value, int unit);
     void (*ResetThickness)(NodeHandle node);
 };
 
@@ -1093,7 +1093,7 @@ struct ArkUIMenuModifierAPI {
     void (*ResetMenuFontColor)(NodeHandle node);
     void (*SetFont)(NodeHandle node, const char* fontInfo, int32_t styleVal);
     void (*ResetFont)(NodeHandle node);
-    void (*SetRadius)(NodeHandle node, const double* values, const int* units, int32_t length);
+    void (*SetRadius)(NodeHandle node, const double* values, const int* units);
     void (*ResetRadius)(NodeHandle node);
 };
 

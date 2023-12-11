@@ -1,13 +1,16 @@
 /// <reference path='./import.ts' />
-class MenuItemSelectedModifier extends Modifier<boolean> {
+class MenuItemSelectedModifier extends ModifierWithKey<boolean> {
   static identity: Symbol = Symbol('selected');
   applyPeer(node: KNode, reset: boolean) {
     if (reset) {
       GetUINativeModule().menuitem.resetSelected(node);
-    }
-    else {
+    } else {
       GetUINativeModule().menuitem.setSelected(node, this.value);
     }
+  }
+
+  checkObjectDiff(): boolean {
+    return this.stageValue !== this.value;
   }
 }
 
@@ -115,11 +118,7 @@ class ContentFontModifier extends ModifierWithKey<Font> {
 
 class ArkMenuItemComponent extends ArkComponent implements MenuItemAttribute {
   selected(value: boolean): this {
-    if (typeof value === 'boolean') {
-      modifier(this._modifiers, MenuItemSelectedModifier, value);
-    } else {
-      modifier(this._modifiers, MenuItemSelectedModifier, false);
-    }
+    modifierWithKey(this._modifiersWithKeys, MenuItemSelectedModifier.identity, MenuItemSelectedModifier, value);
     return this;
   }
   selectIcon(value: any): MenuItemAttribute {

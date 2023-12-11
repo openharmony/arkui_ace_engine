@@ -33,11 +33,11 @@ ArkUINativeModuleValue MenuItemBridge::SetMenuItemSelected(ArkUIRuntimeCallInfo*
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
-    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
-    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    bool boolValue = secondArg->ToBoolean(vm)->Value();
-    GetArkUIInternalNodeAPI()->GetMenuItemModifier().SetMenuItemSelected(nativeNode, boolValue);
+    auto isSelected = secondArg->IsBoolean() ? secondArg->BooleaValue() : false;
+    GetArkUIInternalNodeAPI()->GetMenuItemModifier().SetMenuItemSelected(nativeNode, isSelected);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -45,7 +45,7 @@ ArkUINativeModuleValue MenuItemBridge::ResetMenuItemSelected(ArkUIRuntimeCallInf
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
-    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
     GetArkUIInternalNodeAPI()->GetMenuItemModifier().ResetMenuItemSelected(nativeNode);
     return panda::JSValueRef::Undefined(vm);

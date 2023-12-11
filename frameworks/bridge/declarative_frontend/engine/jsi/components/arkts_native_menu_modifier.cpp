@@ -31,8 +31,6 @@ const int NUM_1 = 1;
 const int NUM_2 = 2;
 const int NUM_3 = 3;
 static const char* ERR_CODE = "-1";
-const int LENGTH_FOUR = 4;
-const int LENGTH_ONE = 1;
 const std::string DEFAULT_SIZE = "24.0vp";
 const std::string DEFAULT_FONT_WEIGHT = "normal";
 const std::string DEFAULT_FONT_FAMILY = "HarmonyOS Sans";
@@ -99,20 +97,15 @@ void ResetMenuFont(NodeHandle node)
     MenuModelNG::SetFontFamily(frameNode, fontFamily);
     MenuModelNG::SetFontStyle(frameNode, fontStyle);
 }
-void SetRadius(NodeHandle node, const double* values, const int* units, int32_t length)
+void SetRadius(NodeHandle node, const double* values, const int* units)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    if (length == LENGTH_ONE) {
-        auto radius = Dimension(values[NUM_0], static_cast<OHOS::Ace::DimensionUnit>(units[NUM_0]));
-        MenuModelNG::SetBorderRadius(frameNode, radius);
-    } else if (length == LENGTH_FOUR) {
-        auto topLeft = Dimension(values[NUM_0], static_cast<OHOS::Ace::DimensionUnit>(units[NUM_0]));
-        auto topRight = Dimension(values[NUM_1], static_cast<OHOS::Ace::DimensionUnit>(units[NUM_1]));
-        auto bottomLeft = Dimension(values[NUM_2], static_cast<OHOS::Ace::DimensionUnit>(units[NUM_2]));
-        auto bottomRight = Dimension(values[NUM_3], static_cast<OHOS::Ace::DimensionUnit>(units[NUM_3]));
-        MenuModelNG::SetBorderRadius(frameNode, topLeft, topRight, bottomLeft, bottomRight);
-    }
+    auto topLeft = Dimension(values[NUM_0], static_cast<OHOS::Ace::DimensionUnit>(units[NUM_0]));
+    auto topRight = Dimension(values[NUM_1], static_cast<OHOS::Ace::DimensionUnit>(units[NUM_1]));
+    auto bottomLeft = Dimension(values[NUM_2], static_cast<OHOS::Ace::DimensionUnit>(units[NUM_2]));
+    auto bottomRight = Dimension(values[NUM_3], static_cast<OHOS::Ace::DimensionUnit>(units[NUM_3]));
+    MenuModelNG::SetBorderRadius(frameNode, topLeft, topRight, bottomLeft, bottomRight);
 }
 void ResetRadius(NodeHandle node)
 {

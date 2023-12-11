@@ -1650,9 +1650,6 @@ class TransitionModifier extends ModifierWithKey<object> {
       GetUINativeModule().common.setTransition(node, this.value);
     }
   }
-  checkObjectDiff(): boolean {
-    return false;
-  }
 }
 
 class SharedTransitionModifier extends ModifierWithKey<ArkSharedTransition> {
@@ -1664,9 +1661,6 @@ class SharedTransitionModifier extends ModifierWithKey<ArkSharedTransition> {
     else {
       GetUINativeModule().common.setSharedTransition(node, this.value.id, this.value.options);
     }
-  }
-  checkObjectDiff(): boolean {
-    return false;
   }
 }
 

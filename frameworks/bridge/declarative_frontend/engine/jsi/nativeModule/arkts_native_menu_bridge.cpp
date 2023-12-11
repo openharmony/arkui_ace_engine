@@ -23,8 +23,6 @@ constexpr int NUM_2 = 2;
 constexpr int NUM_3 = 3;
 constexpr int NUM_4 = 4;
 const std::string FORMAT_FONT = "%s|%s|%s";
-const int SIZE_OF_FOUR = 4;
-const int SIZE_OF_ONE = 1;
 const std::string DEFAULT_ERR_CODE = "-1";
 const std::string DEFAULT_FAMILY = "HarmonyOS Sans";
 
@@ -36,12 +34,12 @@ ArkUINativeModuleValue MenuBridge::SetMenuFontColor(ArkUIRuntimeCallInfo *runtim
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
     Color color;
-    if (secondArg->IsNull() || secondArg->IsUndefined() ||
-        !ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color)) {
+    if (!ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color)) {
         GetArkUIInternalNodeAPI()->GetMenuModifier().ResetMenuFontColor(nativeNode);
     } else {
         GetArkUIInternalNodeAPI()->GetMenuModifier().SetMenuFontColor(nativeNode, color.GetValue());
     }
+
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -120,44 +118,37 @@ ArkUINativeModuleValue MenuBridge::SetRadius(ArkUIRuntimeCallInfo* runtimeCallIn
         return panda::JSValueRef::Undefined(vm);
     }
 
-    CalcDimension radius;
-    if (topLeftArgs->IsNumber() || topLeftArgs->IsString() || ArkTSUtils::ParseJsDimensionVp(vm, topLeftArgs, radius)) {
-        if (LessNotEqual(radius.Value(), 0.0)) {
-            GetArkUIInternalNodeAPI()->GetMenuModifier().ResetRadius(nativeNode);
-            return panda::JSValueRef::Undefined(vm);
-        }
-        uint32_t size = SIZE_OF_ONE;
-        double values[size];
-        int units[size];
-        values[NUM_0] = radius.Value();
-        units[NUM_0] = static_cast<int>(radius.Unit());
-        GetArkUIInternalNodeAPI()->GetMenuModifier().SetRadius(nativeNode, values, units, SIZE_OF_ONE);
-        return panda::JSValueRef::Undefined(vm);
-    }
-
     CalcDimension topLeft;
     CalcDimension topRight;
     CalcDimension bottomLeft;
     CalcDimension bottomRight;
-    ArkTSUtils::ParseJsDimensionVp(vm, topLeftArgs, topLeft);
-    ArkTSUtils::ParseJsDimensionVp(vm, topRightArgs, topRight);
-    ArkTSUtils::ParseJsDimensionVp(vm, bottomLeftArgs, bottomLeft);
-    ArkTSUtils::ParseJsDimensionVp(vm, bottomRightArgs, bottomRight);
+    if (!ArkTSUtils::ParseJsDimensionVpNG(vm, topLeftArgs, topLeft, true)) {
+        topLeft = CalcDimension(0.0, DimensionUnit::VP);
+    }
 
-    uint32_t size = SIZE_OF_FOUR;
-    double values[size];
-    int units[size];
+    if (!ArkTSUtils::ParseJsDimensionVpNG(vm, topRightArgs, topRight, true)) {
+        topRight = CalcDimension(0.0, DimensionUnit::VP);
+    }
 
-    values[NUM_0] = topLeft.Value();
-    units[NUM_0] = static_cast<int>(topLeft.Unit());
-    values[NUM_1] = topRight.Value();
-    units[NUM_1] = static_cast<int>(topRight.Unit());
-    values[NUM_2] = bottomLeft.Value();
-    units[NUM_2] = static_cast<int>(bottomLeft.Unit());
-    values[NUM_3] = bottomRight.Value();
-    units[NUM_3] = static_cast<int>(bottomRight.Unit());
+    if (!ArkTSUtils::ParseJsDimensionVpNG(vm, bottomLeftArgs, bottomLeft, true)) {
+        bottomLeft = CalcDimension(0.0, DimensionUnit::VP);
+    }
 
-    GetArkUIInternalNodeAPI()->GetMenuModifier().SetRadius(nativeNode, values, units, SIZE_OF_FOUR);
+    if (!ArkTSUtils::ParseJsDimensionVpNG(vm, bottomRightArgs, bottomRight, true)) {
+        bottomRight = CalcDimension(0.0, DimensionUnit::VP);
+    }
+  
+    std::vector<double> radiusValues;
+    std::vector<int32_t> radiusUnits;
+    radiusUnits.push_back(static_cast<int>(topLeft.Unit()));
+    radiusUnits.push_back(static_cast<int>(topRight.Unit()));
+    radiusUnits.push_back(static_cast<int>(bottomLeft.Unit()));
+    radiusUnits.push_back(static_cast<int>(bottomRight.Unit()));
+    radiusValues.push_back(topLeft.Value());
+    radiusValues.push_back(topRight.Value());
+    radiusValues.push_back(bottomLeft.Value());
+    radiusValues.push_back(bottomRight.Value());
+    GetArkUIInternalNodeAPI()->GetMenuModifier().SetRadius(nativeNode, radiusValues.data(), radiusUnits.data());
     return panda::JSValueRef::Undefined(vm);
 }
 
