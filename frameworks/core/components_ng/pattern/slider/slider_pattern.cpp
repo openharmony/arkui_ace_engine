@@ -740,8 +740,7 @@ void SliderPattern::FireChangeEvent(int32_t mode)
 {
     auto sliderEventHub = GetEventHub<SliderEventHub>();
     CHECK_NULL_VOID(sliderEventHub);
-    if ((mode == SliderChangeMode::Click || mode == SliderChangeMode::Moving) &&
-        NearEqual(value_, sliderEventHub->GetValue())) {
+    if (mode == SliderChangeMode::Moving && NearEqual(value_, sliderEventHub->GetValue())) {
         return;
     }
     sliderEventHub->FireChangeEvent(static_cast<float>(value_), mode);
