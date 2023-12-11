@@ -19,8 +19,6 @@
 #include <deque>
 #include <vector>
 
-#include "flutter/assets/asset_resolver.h"
-
 #include "base/log/event_report.h"
 #include "base/memory/ace_type.h"
 #include "base/resource/asset_manager.h"
