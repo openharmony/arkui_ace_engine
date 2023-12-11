@@ -13184,17 +13184,11 @@ class LabelFontModifier extends ModifierWithKey {
     super(value);
   }
   applyPeer(node, reset) {
-    if (reset) {
+    if (reset || !this.value) {
       GetUINativeModule().menuitem.resetLabelFont(node);
     }
     else {
-      const valueType = typeof this.value;
-      if (valueType === 'number' || valueType === 'string' || isResource(this.value)) {
-        GetUINativeModule().menuitem.setLabelFont(node, this.value, this.value, this.value, this.value);
-      }
-      else {
-        GetUINativeModule().menuitem.setLabelFont(node, this.value.size, this.value.weight, this.value.family, this.value.style);
-      }
+      GetUINativeModule().menuitem.setLabelFont(node, this.value.size, this.value.weight, this.value.family, this.value.style);
     }
   }
   checkObjectDiff() {
@@ -13218,17 +13212,11 @@ class ContentFontModifier extends ModifierWithKey {
     super(value);
   }
   applyPeer(node, reset) {
-    if (reset) {
+    if (reset || !this.value) {
       GetUINativeModule().menuitem.resetContentFont(node);
     }
     else {
-      const valueType = typeof this.value;
-      if (valueType === 'number' || valueType === 'string' || isResource(this.value)) {
-        GetUINativeModule().menuitem.setContentFont(node, this.value, this.value, this.value, this.value);
-      }
-      else {
-        GetUINativeModule().menuitem.setContentFont(node, this.value.size, this.value.weight, this.value.family, this.value.style);
-      }
+      GetUINativeModule().menuitem.setContentFont(node, this.value.size, this.value.weight, this.value.family, this.value.style);
     }
   }
   checkObjectDiff() {
@@ -16011,7 +15999,7 @@ class ItemConstraintSizeModifier extends ModifierWithKey {
   }
 }
 ItemConstraintSizeModifier.identity = Symbol('itemConstraintSize');
-class ColumnsTemplateModifier extends Modifier {
+class ColumnsTemplateModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
   }
@@ -16025,7 +16013,7 @@ class ColumnsTemplateModifier extends Modifier {
   }
 }
 ColumnsTemplateModifier.identity = Symbol('columnsTemplate');
-class RowsTemplateModifier extends Modifier {
+class RowsTemplateModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
   }
@@ -16039,7 +16027,7 @@ class RowsTemplateModifier extends Modifier {
   }
 }
 RowsTemplateModifier.identity = Symbol('rowsTemplate');
-class EnableScrollInteractionModifier extends Modifier {
+class EnableScrollInteractionModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
   }
@@ -16097,7 +16085,7 @@ class ColumnsGapModifier extends ModifierWithKey {
   }
 }
 ColumnsGapModifier.identity = Symbol('columnsGap');
-class LayoutDirectionModifier extends Modifier {
+class LayoutDirectionModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
   }
@@ -16111,7 +16099,7 @@ class LayoutDirectionModifier extends Modifier {
   }
 }
 LayoutDirectionModifier.identity = Symbol('layoutDirection');
-class NestedScrollModifier extends Modifier {
+class NestedScrollModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
   }
@@ -16152,21 +16140,11 @@ class ArkWaterFlowComponent extends ArkComponent {
     super(nativePtr);
   }
   columnsTemplate(value) {
-    if (isString(value)) {
-      modifier(this._modifiers, ColumnsTemplateModifier, value);
-    }
-    else {
-      modifier(this._modifiers, ColumnsTemplateModifier, undefined);
-    }
+    modifierWithKey(this._modifiersWithKeys, ColumnsTemplateModifier.identity, ColumnsTemplateModifier, value);
     return this;
   }
   rowsTemplate(value) {
-    if (isString(value)) {
-      modifier(this._modifiers, RowsTemplateModifier, value);
-    }
-    else {
-      modifier(this._modifiers, RowsTemplateModifier, undefined);
-    }
+    modifierWithKey(this._modifiersWithKeys, RowsTemplateModifier.identity, RowsTemplateModifier, value);
     return this;
   }
   itemConstraintSize(value) {
@@ -16191,12 +16169,7 @@ class ArkWaterFlowComponent extends ArkComponent {
     return this;
   }
   layoutDirection(value) {
-    if (value in FlexDirection) {
-      modifier(this._modifiers, LayoutDirectionModifier, value);
-    }
-    else {
-      modifier(this._modifiers, LayoutDirectionModifier, undefined);
-    }
+    modifierWithKey(this._modifiersWithKeys, LayoutDirectionModifier.identity, LayoutDirectionModifier, value);
     return this;
   }
   nestedScroll(value) {
@@ -16208,17 +16181,12 @@ class ArkWaterFlowComponent extends ArkComponent {
       if (value.scrollBackward) {
         options.scrollBackward = value.scrollBackward;
       }
-      modifier(this._modifiers, NestedScrollModifier, options);
+      modifierWithKey(this._modifiersWithKeys, NestedScrollModifier.identity, NestedScrollModifier, options);
     }
     return this;
   }
   enableScrollInteraction(value) {
-    if (typeof value === 'boolean') {
-      modifier(this._modifiers, EnableScrollInteractionModifier, value);
-    }
-    else {
-      modifier(this._modifiers, EnableScrollInteractionModifier, undefined);
-    }
+    modifierWithKey(this._modifiersWithKeys, EnableScrollInteractionModifier.identity, EnableScrollInteractionModifier, value);
     return this;
   }
   friction(value) {
@@ -16365,7 +16333,7 @@ class StrokeModifier extends ModifierWithKey {
   }
 }
 StrokeModifier.identity = Symbol('stroke');
-class FillModifier extends Modifier {
+class FillModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
   }

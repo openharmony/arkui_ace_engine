@@ -67,18 +67,13 @@ class LabelFontModifier extends ModifierWithKey<Font> {
   }
   static identity: Symbol = Symbol("labelFont");
   applyPeer(node: KNode, reset: boolean): void {
-    if (reset) {
+    if (reset || !this.value) {
       GetUINativeModule().menuitem.resetLabelFont(node);
     }
     else {
-      const valueType: string = typeof this.value;
-      if (valueType === "number" || valueType === "string" || isResource(this.value)) {
-        GetUINativeModule().menuitem.setLabelFont(node, this.value, this.value, this.value, this.value);
-      } else {
-        GetUINativeModule().menuitem.setLabelFont(node, (this.value as Font).size,
-          (this.value as Font).weight, (this.value as Font).family,
-          (this.value as Font).style);
-      }
+      GetUINativeModule().menuitem.setLabelFont(node, (this.value as Font).size,
+        (this.value as Font).weight, (this.value as Font).family,
+        (this.value as Font).style);
     }
   }
 
@@ -102,18 +97,13 @@ class ContentFontModifier extends ModifierWithKey<Font> {
   }
   static identity: Symbol = Symbol("contentFont");
   applyPeer(node: KNode, reset: boolean): void {
-    if (reset) {
+    if (reset || !this.value) {
       GetUINativeModule().menuitem.resetContentFont(node);
     }
     else {
-      const valueType: string = typeof this.value;
-      if (valueType === "number" || valueType === "string" || isResource(this.value)) {
-        GetUINativeModule().menuitem.setContentFont(node, this.value, this.value, this.value, this.value);
-      } else {
-        GetUINativeModule().menuitem.setContentFont(node, (this.value as Font).size,
-          (this.value as Font).weight, (this.value as Font).family,
-          (this.value as Font).style);
-      }
+      GetUINativeModule().menuitem.setContentFont(node, (this.value as Font).size,
+        (this.value as Font).weight, (this.value as Font).family,
+        (this.value as Font).style);
     }
   }
 

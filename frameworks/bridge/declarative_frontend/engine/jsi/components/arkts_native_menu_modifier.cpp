@@ -23,7 +23,6 @@
 #include "frameworks/bridge/common/utils/utils.h"
 
 namespace OHOS::Ace::NG {
-constexpr uint32_t DEFAULT_MENU_FONTCOLOR_COLOR = 0xFF182431;
 const char DELIMITER = '|';
 constexpr int32_t SIZE_OF_FONT_INFO = 3;
 const int NUM_0 = 0;
@@ -31,7 +30,7 @@ const int NUM_1 = 1;
 const int NUM_2 = 2;
 const int NUM_3 = 3;
 static const char* ERR_CODE = "-1";
-const std::string DEFAULT_SIZE = "24.0vp";
+const std::string DEFAULT_SIZE = "16.0vp";
 const std::string DEFAULT_FONT_WEIGHT = "normal";
 const std::string DEFAULT_FONT_FAMILY = "HarmonyOS Sans";
 const std::vector<OHOS::Ace::FontStyle> FONT_STYLES = { OHOS::Ace::FontStyle::NORMAL, OHOS::Ace::FontStyle::ITALIC };
@@ -45,7 +44,8 @@ void ResetMenuFontColor(NodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    MenuModelNG::SetFontColor(frameNode, Color(DEFAULT_MENU_FONTCOLOR_COLOR));
+    std::optional<Color> color = std::nullopt;
+    MenuModelNG::SetFontColor(frameNode, color);
 }
 void SetMenuFont(NodeHandle node, const char* fontInfo, int32_t styleVal)
 {
