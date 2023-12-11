@@ -2303,8 +2303,8 @@ void OverlayManager::BindSheet(bool isShow, std::function<void(const std::string
         eventConfirmHub->AddClickEvent(sheetMaskClickEvent_);
         PlaySheetMaskTransition(maskNode, true);
     }
-    auto columnNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
-        AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    auto columnNode = FrameNode::CreateFrameNode(V2::SHEET_WRAPPER_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<LinearLayoutPattern>(true));
     CHECK_NULL_VOID(columnNode);
     auto columnLayoutProps = columnNode->GetLayoutProperty();
     CHECK_NULL_VOID(columnLayoutProps);
@@ -2411,14 +2411,24 @@ void OverlayManager::PlaySheetTransition(
             option.SetDuration(0);
             option.SetCurve(Curves::LINEAR);
         }
+        option.SetOnFinishEvent(
+            [sheetWK = WeakClaim(RawPtr(sheetNode)), height = sheetHeight_] {
+                auto sheet = sheetWK.Upgrade();
+                CHECK_NULL_VOID(sheet);
+                auto sheetPattern = sheet->GetPattern<SheetPresentationPattern>();
+                CHECK_NULL_VOID(sheetPattern);
+                sheetPattern->ProcessColumnRect(height);
+        });
         AnimationUtils::Animate(
             option,
             [context, offset]() {
                 if (context) {
                     context->OnTransformTranslateUpdate({ 0.0f, offset, 0.0f });
                 }
-            });
+            },
+            option.GetOnFinishEvent());
     } else {
+        sheetPattern->ProcessColumnRect(sheetMaxHeight, true);
         option.SetOnFinishEvent(
             [rootWeak = rootNodeWeak_, sheetWK = WeakClaim(RawPtr(sheetNode)), id = Container::CurrentId(),
                     weakOverlayManager = WeakClaim(this)] {
@@ -2461,12 +2471,19 @@ void OverlayManager::PlayBubbleStyleSheetTransition(RefPtr<FrameNode> sheetNode,
 {
     auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
     CHECK_NULL_VOID(sheetPattern);
-    sheetPattern->ResetToInvisible();
     if (isTransitionIn) {
+        sheetPattern->ResetToInvisible();
         sheetPattern->SetCurrentHeight(sheetHeight_);
         sheetPattern->StartOffsetEnteringAnimation();
-        sheetPattern->StartAlphaEnteringAnimation(nullptr);
+        sheetPattern->StartAlphaEnteringAnimation([sheetWK = WeakClaim(RawPtr(sheetNode))] {
+            auto sheet = sheetWK.Upgrade();
+            CHECK_NULL_VOID(sheet);
+            auto sheetPattern = sheet->GetPattern<SheetPresentationPattern>();
+            CHECK_NULL_VOID(sheetPattern);
+            sheetPattern->ProcessColumnRect();
+        });
     } else {
+        sheetPattern->ProcessColumnRect(sheetHeight_, true);
         sheetPattern->StartOffsetExitingAnimation();
         sheetPattern->StartAlphaExitingAnimation(
             [rootWeak = rootNodeWeak_, sheetWK = WeakClaim(RawPtr(sheetNode)), id = Container::CurrentId(),
