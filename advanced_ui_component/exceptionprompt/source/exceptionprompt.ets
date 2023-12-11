@@ -21,12 +21,12 @@ const DEFAULT_HEIGHT = 48
 const FIT_HEIGHT = 58
 const ZINDEX_NUM = 999
 
-export enum HardwareStatusType {
+export enum HardwareStatus {
   ON = 0,
   OFF = 1,
 }
 
-export enum MarginState {
+export enum MarginType {
   DEFAULT_MARGIN = 0,
   FIT_MARGIN = 1,
 }
@@ -41,19 +41,18 @@ export enum PromptType {
 }
 
 export interface PromptOptions {
-  hardwareStatus: HardwareStatusType,
+  hardwareStatus: HardwareStatus,
   icon?: ResourceStr,
   tip?: ResourceStr,
   networkTip?: ResourceStr,
-  marginState: MarginState
+  marginState: MarginType
 }
 
 interface ErrorTipsInfoType {
   networkConnected: ResourceStr;
   networkConnectedUnstable: ResourceStr;
   unstableConnectServer: ResourceStr;
-  customNetworkLeft?: ResourceStr;
-  customNetworkRight?: ResourceStr;
+  customNetwork: ResourceStr;
   customTips?: ResourceStr;
 }
 
@@ -63,44 +62,42 @@ export struct ExceptionPrompt {
   @Prop options: PromptOptions
   @State isShowStatus: boolean = false
   @State isState: boolean = false
-  @State tipText: string = ''
+  tipText: ResourceStr = ''
   touchBackgroundColor: Resource = $r('sys.color.ohos_id_color_sub_background_transparent')
   setNetwork: ResourceStr = $r('sys.string.ohos_set_network')
   @State errorDefaultObj: ErrorTipsInfoType = {
-    networkConnected: '网络未连接',
-    networkConnectedUnstable: '网络连接不稳定，请点击重试',
-    unstableConnectServer: '无法连接到服务器，请点击重试',
-    customNetworkLeft: '无法获取',
-    customNetworkRight: '请点击重试',
-    customTips: ''
+    networkConnected: $r('sys.string.ohos_network_not_connected'),
+    networkConnectedUnstable: $r('sys.string.ohos_network_connected_unstable'),
+    unstableConnectServer: $r('sys.string.ohos_unstable_connect_server'),
+    customNetwork: $r('sys.string.ohos_custom_network_tips_left'),
+    customTips:''
   }
-  onReconnection: () => void = () => {
+  onReconnectionCallback: () => void = () => {
     // Click the text on the left to change into the connecting state
   }
-  onConfigureNetwork: () => void = () => {
+  onConfigureCallback: () => void = () => {
     // Click Set Network to open the Set network pop-up interface
   }
 
-  SetText() {
+  setText() {
     if (this.type === PromptType.NETWORK_NOT_CONNECTED) {
-      this.tipText = `${this.errorDefaultObj.networkConnected}`
-
+      this.tipText = this.errorDefaultObj.networkConnected
     }
     if (this.type === PromptType.NETWORK_CONNECTED_UNSTABLE) {
-      this.tipText = `${this.errorDefaultObj.networkConnectedUnstable}`
+      this.tipText = this.errorDefaultObj.networkConnectedUnstable
     }
     if (this.type === PromptType.UNSTABLE_CONNECT_SERVER) {
-      this.tipText = `${this.errorDefaultObj.unstableConnectServer}`
+      this.tipText = this.errorDefaultObj.unstableConnectServer
     }
     if (this.type === PromptType.CUSTOM_NETWORK_TIPS) {
-      this.tipText = `${this.errorDefaultObj.customNetworkLeft}${this.options.networkTip || ''}，${this.errorDefaultObj.customNetworkRight}`
+      this.tipText = this.options.networkTip || this.errorDefaultObj.customNetwork
     }
     if (this.type === PromptType.CUSTOM_TIPS) {
-      this.tipText = `${this.options.tip}` || `${this.errorDefaultObj.customTips}`
+      this.tipText = this.options.tip || this.errorDefaultObj.customTips
     }
   }
 
-  typeStatusChange(_propName: string): void {
+  typeStatusChange(propName: string): void {
     if (this.type !== PromptType.DEFAULT_HIDE) {
       if (this.isState && this.type !== PromptType.NETWORK_NOT_CONNECTED && this.type !== PromptType.NETWORK_CONNECTED_UNSTABLE) {
         setTimeout(() => {
@@ -119,11 +116,11 @@ export struct ExceptionPrompt {
       if (this.isShowStatus) {
         this.isShowStatus = false
         setTimeout(() => {
-          this.SetText()
+          this.setText()
           this.isShowStatus = true
         }, START_TIME)
       } else {
-        this.SetText()
+        this.setText()
         this.isShowStatus = true
       }
     } else {
@@ -137,17 +134,15 @@ export struct ExceptionPrompt {
   aboutToAppear() {
     if (this.type !== PromptType.DEFAULT_HIDE) {
       this.isShowStatus = true
-      this.SetText()
+      this.setText()
     }
     if (this.type === PromptType.NETWORK_NOT_CONNECTED || this.type === PromptType.NETWORK_CONNECTED_UNSTABLE) {
       this.isState = true
-
     }
   }
 
   isOneColum() {
-    return (this.type === PromptType.UNSTABLE_CONNECT_SERVER || this.type === PromptType.CUSTOM_NETWORK_TIPS) || JSON.stringify(this.tipText)
-      .length < 10
+    return (this.type === PromptType.UNSTABLE_CONNECT_SERVER || this.type === PromptType.CUSTOM_NETWORK_TIPS)
   }
 
   @Builder FirstBuilder() {
@@ -173,21 +168,28 @@ export struct ExceptionPrompt {
 
   @Builder TextBuilder() {
     Flex({ justifyContent: FlexAlign.SpaceBetween, alignItems: ItemAlign.Center }) {
-      Flex({ alignItems: ItemAlign.Center }) {
-        Image(this.options.icon || $r('sys.media.ohos_ic_public_fail'))
-          .width("24vp")
-          .height('24vp')
-          .objectFit(ImageFit.Contain)
-          .fillColor($r('sys.color.ohos_id_color_warning'))
-        Text(this.tipText)
-          .fontSize($r('sys.float.ohos_id_text_size_body1'))
-          .fontColor($r('sys.color.ohos_id_color_warning'))
-          .textOverflow({ overflow: TextOverflow.Ellipsis })
-          .maxLines(2)
-          .margin({ left: 16, right: 16 })
+      if (this.isShowStatus) {
+        Flex({ alignItems: ItemAlign.Center }) {
+          Image(this.options.icon??$r('sys.media.ohos_ic_public_fail'))
+            .width("24vp")
+            .height('24vp')
+            .objectFit(ImageFit.Contain)
+            .fillColor($r('sys.color.ohos_id_color_warning'))
+          Text(this.tipText)
+            .fontSize($r('sys.float.ohos_id_text_size_body1'))
+            .fontColor($r('sys.color.ohos_id_color_warning'))
+            .textOverflow({ overflow: TextOverflow.Ellipsis })
+            .maxLines(2)
+            .margin({ left: 16, right: 16 })
+        }
+        .width('100%')
+        .height('100%')
+        .onClick(() => {
+          if (this.options.hardwareStatus === HardwareStatus.ON) {
+            this.onReconnectionCallback() //Click the text on the left to change into the connecting state
+          }
+        })
       }
-      .width('100%')
-      .height('100%')
 
       if (this.isState) {
         Button({ stateEffect: true, type: ButtonType.Normal }) {
@@ -211,28 +213,24 @@ export struct ExceptionPrompt {
         .borderRadius($r('sys.float.ohos_id_corner_radius_subtab'))
         .padding({ right: 8, left: 8 })
         .onTouch((event) => {
+          this.onConfigureCallback() //Click Set Network to open the Set network pop-up interface
           if (event.type === TouchType.Down) {
             this.touchBackgroundColor = $r('sys.color.ohos_id_color_click_effect')
           } else if (event.type === TouchType.Up) {
             this.touchBackgroundColor = $r('sys.color.ohos_id_color_sub_background_transparent')
           }
-        })
-        .onClick(() => {
-          this.onConfigureNetwork() //Click Set Network to open the Set network pop-up interface
+
         })
       }
+
     }
     .padding({ left: 12, right: 4 })
     .position({})
     .zIndex(999)
     .width('100%')
     .height('100%')
-    .onClick(() => {
-      if (this.options.hardwareStatus === HardwareStatusType.ON) {
-        this.onReconnection() //Click the text on the left to change into the connecting state
-      }
-    })
   }
+
   build() {
     Column() {
       Stack() {
@@ -240,7 +238,7 @@ export struct ExceptionPrompt {
         this.SecondBuilder()
         this.TextBuilder()
       }
-      .padding(this.options.marginState === MarginState.DEFAULT_MARGIN ? { left: $r('sys.float.ohos_id_card_margin_start'), right: $r('sys.float.ohos_id_card_margin_end') } : { left: $r('sys.float.ohos_id_max_padding_start'), right: $r('sys.float.ohos_id_max_padding_end') })
+      .padding(this.options.marginState === MarginType.DEFAULT_MARGIN ? { left: $r('sys.float.ohos_id_card_margin_start'), right: $r('sys.float.ohos_id_card_margin_end') } : { left: $r('sys.float.ohos_id_max_padding_start'), right: $r('sys.float.ohos_id_max_padding_end') })
       .transition(
         TransitionEffect.OPACITY.animation({
           duration: this.isShowStatus ? START_TIME : END_TIME
