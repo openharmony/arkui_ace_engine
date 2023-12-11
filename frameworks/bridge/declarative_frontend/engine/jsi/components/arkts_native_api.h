@@ -1161,6 +1161,13 @@ struct ArkUIScrollModifierAPI {
     void (*ResetScrollEdgeEffect)(NodeHandle node);
 };
 
+struct ArkUIListItemModifierAPI {
+    void (*SetListItemSelected)(NodeHandle node, bool selected);
+    void (*ResetListItemSelected)(NodeHandle node);
+    void (*SetSelectable)(NodeHandle node, bool selectable);
+    void (*ResetSelectable)(NodeHandle node);
+};
+
 struct ArkUIListModifierAPI {
     void (*SetListLanes)(NodeHandle node, int32_t lanesNum, OHOS::Ace::Dimension minLength,
         OHOS::Ace::Dimension maxLength, OHOS::Ace::Dimension gutter);
@@ -1351,6 +1358,7 @@ struct ArkUINodeAPI {
     ArkUICommonShapeModifierAPI(*GetCommonShapeModifier)();
     ArkUIShapeModifierAPI(*GetShapeModifier)();
     ArkUIRectModifierAPI (*GetRectModifier)();
+    ArkUIListItemModifierAPI (*GetListItemModifier)();
     ArkUIListModifierAPI (*GetListModifier)();
     ArkUIListItemGroupModifierAPI(*GetListItemGroupModifier)();
     ArkUIQRCodeModifierAPI (*GetQRCodeModifier)();
@@ -1361,6 +1369,5 @@ struct ArkUINodeAPI {
     ArkUIFormComponentModifierAPI (*GetFormComponentModifier)();
 #endif
 };
-
 ArkUINodeAPI* GetArkUIInternalNodeAPI(void);
 #endif // FRAMEWORKS_INTERFACE_INNER_API_COMPONENTS_ARKTS_NATIVE_API_H
