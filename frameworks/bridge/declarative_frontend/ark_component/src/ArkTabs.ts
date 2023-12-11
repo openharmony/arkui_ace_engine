@@ -14,7 +14,7 @@ class ArkTabsComponent extends ArkComponent implements TabsAttribute {
     return this;
   }
   barPosition(value: BarPosition): TabsAttribute {
-      modifier(this._modifiers, BarPositionModifier, value);
+    modifier(this._modifiers, BarPositionModifier, value);
     return this;
   }
   scrollable(value: boolean): TabsAttribute {
@@ -109,10 +109,10 @@ class DividerModifier extends ModifierWithKey<DividerStyle> {
   }
 
   checkObjectDiff(): boolean {
-      return !(this.stageValue.strokeWidth === this.value.strokeWidth &&
-        this.stageValue.color === this.value.color &&
-        this.stageValue.startMargin === this.value.startMargin &&
-        this.stageValue.endMargin === this.value.endMargin);
+    return !(this.stageValue.strokeWidth === this.value.strokeWidth &&
+      this.stageValue.color === this.value.color &&
+      this.stageValue.startMargin === this.value.startMargin &&
+      this.stageValue.endMargin === this.value.endMargin);
   }
 }
 
@@ -224,18 +224,18 @@ class TabBarModeModifier extends ModifierWithKey<ArkBarMode> {
       GetUINativeModule().tabs.resetTabBarMode(node);
     } else {
       GetUINativeModule().tabs.setTabBarMode(node, this.value.barMode
-                                                  ,this.value.options?.margin
-                                                  ,this.value.options?.nonScrollableLayoutStyle);
+        , this.value.options?.margin
+        , this.value.options?.nonScrollableLayoutStyle);
     }
   }
 
   checkObjectDiff(): boolean {
     if (isResource(this.stageValue) && isResource(this.value)) {
       return !isResourceEqual(this.stageValue, this.value);
-    }else if(!isResource(this.stageValue) && !isResource(this.value)){
+    } else if (!isResource(this.stageValue) && !isResource(this.value)) {
       return !(this.value.barMode === this.stageValue.barMode &&
         this.value.options?.margin === this.stageValue.options?.margin &&
-        this.value.options?.nonScrollableLayoutStyle === this.stageValue.options?.nonScrollableLayoutStyle)
+        this.value.options?.nonScrollableLayoutStyle === this.stageValue.options?.nonScrollableLayoutStyle);
     }
     else {
       return true;

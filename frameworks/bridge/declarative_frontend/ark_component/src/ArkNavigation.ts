@@ -107,7 +107,11 @@ class BackButtonIconModifier extends ModifierWithKey<boolean | object> {
   }
 
   checkObjectDiff(): boolean {
-    return false;
+    if (isResource(this.stageValue) && isResource(this.value)) {
+      return !isResourceEqual(this.stageValue, this.value);
+    } else {
+      return true;
+    }
   }
 }
 

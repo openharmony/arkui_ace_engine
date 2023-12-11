@@ -9522,7 +9522,12 @@ class BackButtonIconModifier extends ModifierWithKey {
     }
   }
   checkObjectDiff() {
-    return false;
+    if (isResource(this.stageValue) && isResource(this.value)) {
+      return !isResourceEqual(this.stageValue, this.value);
+    }
+    else {
+      return true;
+    }
   }
 }
 BackButtonIconModifier.identity = Symbol('backButtonIcon');
