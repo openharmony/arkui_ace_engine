@@ -1538,7 +1538,7 @@ HWTEST_F(DragDropManagerTestNg, DragDropManagerTest032, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.author:
  */
-HWTEST_F(DragDropManagerTestNg, DragDropManagerTest033, TestSize.Level1) 
+HWTEST_F(DragDropManagerTestNg, DragDropManagerTest033, TestSize.Level1)
 {
     auto dragDropManager = AceType::MakeRefPtr<DragDropManager>();
     auto frameNodeNullId = ElementRegister::GetInstance()->MakeUniqueId();
