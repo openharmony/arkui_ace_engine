@@ -491,7 +491,7 @@ private:
     bool NeedAiAnalysis(
         const CaretUpdateType targeType, const int32_t pos, const int32_t& spanStart, const std::string& content);
     void AdjustCursorPosition(int32_t& pos);
-    void AdjustWordSelection(int32_t& start, int32_t& end);
+    bool AdjustWordSelection(int32_t& start, int32_t& end);
     bool IsClickBoundary(const int32_t position);
 
 #if defined(ENABLE_STANDARD_INPUT)
