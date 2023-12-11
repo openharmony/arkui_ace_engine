@@ -45,7 +45,7 @@ const SegmentButtonTheme: SegmentButtonThemeInterface = {
   FOCUS_BORDER_COLOR: $r("sys.color.ohos_id_color_focused_outline"),
   HOVER_COlOR: $r("sys.color.ohos_id_color_hover"),
   PRESS_COLOR: $r("sys.color.ohos_id_color_click_effect"),
-  BACKGROUND_BLUR_STYLE: BlurStyle.Thin
+  BACKGROUND_BLUR_STYLE: BlurStyle.NONE
 }
 
 interface Point {
@@ -135,10 +135,17 @@ export class SegmentButtonItemOptionsArray extends Array<SegmentButtonItemOption
   deleteCount: number | undefined = void 0
   addLength: number | undefined = void 0
 
-  constructor(elements: SegmentButtonItemTuple) {
+  constructor(length: number)
+
+  constructor(elements: SegmentButtonItemTuple)
+
+  constructor(elementsOrLength: SegmentButtonItemTuple | number) {
     super()
-    if (elements !== void 0) {
-      super.push(...elements.map((element?: SegmentButtonTextItem | SegmentButtonIconItem | SegmentButtonIconTextItem) => new SegmentButtonItemOptions(element as SegmentButtonItemOptionsConstructorOptions)))
+    if (typeof elementsOrLength === "number") {
+      super(elementsOrLength)
+    }
+    else if (elementsOrLength !== void 0) {
+      super.push(...elementsOrLength.map((element?: SegmentButtonTextItem | SegmentButtonIconItem | SegmentButtonIconTextItem) => new SegmentButtonItemOptions(element as SegmentButtonItemOptionsConstructorOptions)))
     }
   }
 
@@ -765,11 +772,15 @@ export struct SegmentButton {
   @Provide buttonItemsSize: SizeOptions[] = Array.from({ length: MAX_ITEM_COUNT }, (_: Object, index): SizeOptions => {
     return {}
   })
-  @Provide @Watch('onItemsPositionChange') buttonItemsPosition: Position[] = Array.from({ length: MAX_ITEM_COUNT }, (_: Object, index):Position => {
+  @Provide @Watch('onItemsPositionChange') buttonItemsPosition: Position[] = Array.from({
+    length: MAX_ITEM_COUNT
+  }, (_: Object, index): Position => {
     return {}
   })
   @Provide buttonItemsSelected: boolean[] = Array.from({ length: MAX_ITEM_COUNT }, (_: Object, index) => false)
-  @Provide buttonItemProperty: ItemProperty[] = Array.from({ length: MAX_ITEM_COUNT }, (_: Object, index) => new ItemProperty())
+  @Provide buttonItemProperty: ItemProperty[] = Array.from({
+    length: MAX_ITEM_COUNT
+  }, (_: Object, index) => new ItemProperty())
   @Provide focusIndex: number = -1
   @Provide selectedItemPosition: Position = {}
   @Provide zoomScaleArray: number[] = Array.from({ length: MAX_ITEM_COUNT }, (_: Object, index) => 1.0)

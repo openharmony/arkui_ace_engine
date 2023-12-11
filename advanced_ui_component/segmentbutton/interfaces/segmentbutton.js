@@ -101,7 +101,7 @@ const SegmentButtonTheme = {
         bundleName: "",
         moduleName: ""
     },
-    BACKGROUND_BLUR_STYLE: BlurStyle.Thin
+    BACKGROUND_BLUR_STYLE: BlurStyle.NONE
 };
 
 function nearEqual(t, e) {
@@ -122,7 +122,7 @@ let SegmentButtonItemOptionsArray = SegmentButtonItemOptionsArray_1 = class exte
         this.changeStartIndex = void 0;
         this.deleteCount = void 0;
         this.addLength = void 0;
-        void 0 !== t && super.push(...t.map((t => new SegmentButtonItemOptions(t))))
+        "number" == typeof t ? super(t) : void 0 !== t && super.push(...t.map((t => new SegmentButtonItemOptions(t))))
     }
 
     push(...t) {
