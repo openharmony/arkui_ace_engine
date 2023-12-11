@@ -87,11 +87,11 @@ void EventManager::TouchTest(const TouchEvent& touchPoint, const RefPtr<RenderNo
 void EventManager::TouchTest(const TouchEvent& touchPoint, const RefPtr<NG::FrameNode>& frameNode,
     const TouchRestrict& touchRestrict, const Offset& offset, float viewScale, bool needAppend)
 {
-    TAG_LOGI(AceLogTag::ACE_INPUTTRACKING, "TouchEvent do TouchTest in EventManager: "
+    TAG_LOGI(AceLogTag::ACE_INPUTTRACKING,
+        "TouchEvent do TouchTest in EventManager: "
         "eventInfo: id:%{public}d, pointX=%{public}f pointY=%{public}f "
-        "touchPoint referee state:%{public}d, needAppend:%{public}d", touchPoint.id,
-        touchPoint.x, touchPoint.y, (int)(refereeNG_->QueryAllDone(touchPoint.id)),
-        (int)needAppend);
+        "touchPoint referee state:%{public}d, needAppend:%{public}d",
+        touchPoint.id, touchPoint.x, touchPoint.y, (int)(refereeNG_->QueryAllDone(touchPoint.id)), (int)needAppend);
     ContainerScope scope(instanceId_);
 
     ACE_FUNCTION_TRACE();
@@ -252,8 +252,7 @@ void EventManager::HandleGlobalEventNG(const TouchEvent& touchPoint,
     const RefPtr<NG::SelectOverlayManager>& selectOverlayManager, const NG::OffsetF& rootOffset)
 {
     CHECK_NULL_VOID(selectOverlayManager);
-    if (touchPoint.type == TouchType::DOWN &&
-        touchTestResults_.find(touchPoint.id) != touchTestResults_.end()) {
+    if (touchPoint.type == TouchType::DOWN && touchTestResults_.find(touchPoint.id) != touchTestResults_.end()) {
         std::vector<std::string> touchTestIds;
         const auto& resultList = touchTestResults_[touchPoint.id];
         for (const auto& result : resultList) {
@@ -346,9 +345,11 @@ void EventManager::FlushTouchEventsEnd(const std::list<TouchEvent>& touchEvents)
 bool EventManager::DispatchTouchEvent(const TouchEvent& event)
 {
     if (event.type != TouchType::MOVE) {
-        TAG_LOGI(AceLogTag::ACE_INPUTTRACKING, "TouchEvent Dispatch in EventManager: "
+        TAG_LOGI(AceLogTag::ACE_INPUTTRACKING,
+            "TouchEvent Dispatch in EventManager: "
             "eventInfo: id:%{public}d, pointX=%{public}f pointY=%{public}f "
-            "type=%{public}d", event.id, event.x, event.y, (int)event.type);
+            "type=%{public}d",
+            event.id, event.x, event.y, (int)event.type);
     }
     ContainerScope scope(instanceId_);
     TouchEvent point = event;
@@ -362,13 +363,13 @@ bool EventManager::DispatchTouchEvent(const TouchEvent& event)
         point.type = TouchType::UP;
     }
 #endif // ENABLE_DRAG_FRAMEWORK
+    ACE_SCOPED_TRACE(
+        "DispatchTouchEvent id:%d, pointX=%f pointY=%f type=%d", point.id, point.x, point.y, (int)point.type);
     const auto iter = touchTestResults_.find(point.id);
     if (iter == touchTestResults_.end()) {
         LOGI("the %{public}d touch test result does not exist!", point.id);
         return false;
     }
-    ACE_SCOPED_TRACE("DispatchTouchEvent id:%d, pointX=%f pointY=%f type=%d",
-        point.id, point.x, point.y, (int)point.type);
 
     if (point.type == TouchType::DOWN) {
         int64_t currentEventTime = static_cast<int64_t>(point.time.time_since_epoch().count());
@@ -404,16 +405,13 @@ bool EventManager::DispatchTouchEvent(const TouchEvent& event)
                 auto recognizer = AceType::DynamicCast<NG::NGGestureRecognizer>(entry);
                 if (recognizer) {
                     entry->HandleMultiContainerEvent(point);
-                    eventTree_.AddGestureProcedure(
-                        reinterpret_cast<uintptr_t>(AceType::RawPtr(recognizer)),
-                        point,
+                    eventTree_.AddGestureProcedure(reinterpret_cast<uintptr_t>(AceType::RawPtr(recognizer)), point,
                         NG::TransRefereeState(recognizer->GetRefereeState()),
                         NG::TransGestureDisposal(recognizer->GetGestureDisposal()));
                 }
                 if (!recognizer && !isStopTouchEvent) {
                     isStopTouchEvent = !entry->HandleMultiContainerEvent(point);
-                    eventTree_.AddGestureProcedure(
-                        reinterpret_cast<uintptr_t>(AceType::RawPtr(entry)),
+                    eventTree_.AddGestureProcedure(reinterpret_cast<uintptr_t>(AceType::RawPtr(entry)),
                         std::string("Handle").append(GestureSnapshot::TransTouchType(point.type)), "", "");
                 }
             }
@@ -682,8 +680,8 @@ void EventManager::MouseTest(
     const MouseEvent& event, const RefPtr<NG::FrameNode>& frameNode, const TouchRestrict& touchRestrict)
 {
     TAG_LOGD(AceLogTag::ACE_MOUSE,
-        "Mouse test start. Event is (%{public}f,%{public}f), button: %{public}d, action: %{public}d", event.x,
-        event.y, event.button, event.action);
+        "Mouse test start. Event is (%{public}f,%{public}f), button: %{public}d, action: %{public}d", event.x, event.y,
+        event.button, event.action);
     CHECK_NULL_VOID(frameNode);
     const NG::PointF point { event.x, event.y };
     TouchTestResult testResult;
@@ -745,7 +743,7 @@ bool EventManager::DispatchMouseEventNG(const MouseEvent& event)
         CHECK_NULL_RETURN(container, false);
         if ((event.button == MouseButton::LEFT_BUTTON && !container->IsScenceBoardWindow()) ||
             (event.button == MouseButton::LEFT_BUTTON && container->IsScenceBoardWindow() &&
-            event.pullAction != MouseAction::PULL_UP && event.pullAction != MouseAction::PULL_MOVE)) {
+                event.pullAction != MouseAction::PULL_UP && event.pullAction != MouseAction::PULL_MOVE)) {
             for (const auto& mouseTarget : pressMouseTestResults_) {
                 if (mouseTarget) {
                     handledResults.emplace_back(mouseTarget);

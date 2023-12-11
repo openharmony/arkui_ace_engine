@@ -509,7 +509,9 @@ void NavigationGroupNode::ExitTransitionWithPush(const RefPtr<FrameNode>& node, 
                     auto currentMode = navBarPattern->GetNavigationMode();
                     if (currentMode == NavigationMode::STACK) {
                         node->GetLayoutProperty()->UpdateVisibility(VisibleType::INVISIBLE);
-                        navigation->NotifyPageHide();
+                        if (isNavBar) {
+                            navigation->NotifyPageHide();
+                        }
                     }
                 }
                 if (mode == NavigationMode::SPLIT) {

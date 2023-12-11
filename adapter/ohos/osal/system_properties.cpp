@@ -240,8 +240,8 @@ bool SystemProperties::isRound_ = false;
 bool SystemProperties::isDeviceAccess_ = false;
 ACE_WEAK_SYM int32_t SystemProperties::deviceWidth_ = 0;
 ACE_WEAK_SYM int32_t SystemProperties::deviceHeight_ = 0;
-int32_t SystemProperties::devicePhysicalWidth_ = 0;
-int32_t SystemProperties::devicePhysicalHeight_ = 0;
+ACE_WEAK_SYM int32_t SystemProperties::devicePhysicalWidth_ = 0;
+ACE_WEAK_SYM int32_t SystemProperties::devicePhysicalHeight_ = 0;
 ACE_WEAK_SYM double SystemProperties::resolution_ = 1.0;
 ACE_WEAK_SYM DeviceType SystemProperties::deviceType_ { DeviceType::UNKNOWN };
 ACE_WEAK_SYM DeviceOrientation SystemProperties::orientation_ { DeviceOrientation::PORTRAIT };
@@ -271,7 +271,7 @@ int32_t SystemProperties::astcPsnr_ = GetAstcPsnrProp();
 ACE_WEAK_SYM bool SystemProperties::extSurfaceEnabled_ = IsExtSurfaceEnabled();
 ACE_WEAK_SYM uint32_t SystemProperties::dumpFrameCount_ = GetSysDumpFrameCount();
 bool SystemProperties::resourceDecoupling_ = GetResourceDecoupling();
-bool SystemProperties::changeTitleStyleEnabled_ = IsTitleStyleEnabled();
+ACE_WEAK_SYM bool SystemProperties::changeTitleStyleEnabled_ = IsTitleStyleEnabled();
 bool SystemProperties::flutterDecouplingEnabled_ = IsFlutterDecouplingEnabled();
 
 bool SystemProperties::IsSyscapExist(const char* cap)
@@ -508,7 +508,7 @@ int32_t SystemProperties::GetJankFrameThreshold()
     return system::GetIntParameter<int>("persist.sys.arkui.perf.threshold", DEFAULT_THRESHOLD_JANK);
 }
 
-std::string SystemProperties::GetCustomTitleFilePath()
+ACE_WEAK_SYM std::string SystemProperties::GetCustomTitleFilePath()
 {
     return system::GetParameter(CUSTOM_TITLE_KEY, "");
 }

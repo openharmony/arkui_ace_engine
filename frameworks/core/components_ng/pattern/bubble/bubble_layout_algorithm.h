@@ -53,7 +53,7 @@ public:
 
     OffsetF GetTargetOffset() const
     {
-        return targetOffset_;
+        return targetOffsetForPaint_;
     }
 
     SizeF GetChildSize() const
@@ -63,7 +63,7 @@ public:
 
     OffsetF GetChildOffset() const
     {
-        return childOffset_;
+        return childOffsetForPaint_;
     }
 
     bool ShowArrow() const
@@ -73,7 +73,7 @@ public:
 
     OffsetF GetArrowPosition() const
     {
-        return arrowPosition_;
+        return arrowPositionForPaint_;
     }
 
     RectF GetTouchRegion() const
@@ -125,7 +125,7 @@ private:
         const OffsetF& topPosition, const OffsetF& bottomPosition, OffsetF& arrowPosition);
     void InitTargetSizeAndPosition(bool showInSubWindow);
     void InitCaretTargetSizeAndPosition();
-    void InitProps(const RefPtr<BubbleLayoutProperty>& layoutProp);
+    void InitProps(const RefPtr<BubbleLayoutProperty>& layoutProp, bool showInSubWindow);
     void InitArrowState(const RefPtr<BubbleLayoutProperty>& layoutProp);
     OffsetF GetPositionWithPlacement(
         const SizeF& childSize, const OffsetF& topPosition, const OffsetF& bottomPosition, OffsetF& arrowPosition);
@@ -171,9 +171,12 @@ private:
 
     SizeF targetSize_;
     OffsetF targetOffset_;
+    OffsetF targetOffsetForPaint_;
     SizeF childSize_;
     OffsetF childOffset_;
+    OffsetF childOffsetForPaint_;
     OffsetF arrowPosition_;
+    OffsetF arrowPositionForPaint_;
     SizeF selfSize_;
     RectF touchRegion_;
     SizeF buttonRowSize_;

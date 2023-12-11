@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "frameworks/core/components_ng/pattern/folder_stack/folder_stack_layout_algorithm.h"
+#include "core/components_ng/pattern/folder_stack/folder_stack_layout_algorithm.h"
 
 #include "base/memory/ace_type.h"
 #include "base/subwindow/subwindow_manager.h"
@@ -55,7 +55,9 @@ void FolderStackLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     PerformLayout(hostNode, align);
     if (!isIntoFolderStack_) {
         auto childLayoutProperty = AceType::DynamicCast<StackLayoutProperty>(layoutWrapper->GetLayoutProperty());
-        childLayoutProperty->GetPositionProperty()->UpdateAlignment(align);
+        if (childLayoutProperty->GetPositionProperty()) {
+            childLayoutProperty->GetPositionProperty()->UpdateAlignment(align);
+        }
         StackLayoutAlgorithm::Layout(layoutWrapper);
         return;
     }

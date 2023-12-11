@@ -112,7 +112,7 @@ constexpr LogType LOG_TYPES[] = {
     LOG_APP,
 };
 
-}
+} // namespace
 
 // initial static member object
 LogLevel LogWrapper::level_ = LogLevel::DEBUG;

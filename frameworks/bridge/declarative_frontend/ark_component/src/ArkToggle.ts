@@ -15,7 +15,7 @@ class ArkToggleComponent extends ArkComponent implements ToggleAttribute {
         return this;
     }
 }
-class ToggleSelectedColorModifier extends Modifier<ResourceColor> {
+class ToggleSelectedColorModifier extends ModifierWithKey<ResourceColor> {
     static identity = Symbol('toggleSelectedColor');
     applyPeer(node: KNode, reset: boolean): void {
         if (reset) {
@@ -32,7 +32,7 @@ class ToggleSelectedColorModifier extends Modifier<ResourceColor> {
         return true;
     }
 }
-class ToggleSwitchPointColorModifier extends Modifier<ResourceColor> {
+class ToggleSwitchPointColorModifier extends ModifierWithKey<ResourceColor> {
     static identity = Symbol('toggleSwitchPointColor');
     applyPeer(node: KNode, reset: boolean): void {
         if (reset) {

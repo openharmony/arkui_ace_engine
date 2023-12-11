@@ -192,7 +192,7 @@ ArkUINativeModuleValue CheckboxGroupBridge::SetCheckboxGroupMark(ArkUIRuntimeCal
     }
 
     GetArkUIInternalNodeAPI()->GetCheckboxGroupModifier().SetCheckboxGroupMark(nativeNode,
-        strokeColor.GetValue(), strokeWidth.Value(), size.Value());
+        strokeColor.GetValue(), size.Value(), strokeWidth.Value());
 
     return panda::JSValueRef::Undefined(vm);
 }

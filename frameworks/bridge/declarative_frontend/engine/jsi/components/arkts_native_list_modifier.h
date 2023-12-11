@@ -12,20 +12,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#ifndef FRAMEWORKS_INTERFACE_INNER_API_COMPONENTS_ARKTS_NATIVE_LIST_MODIFIER_H
+#define FRAMEWORKS_INTERFACE_INNER_API_COMPONENTS_ARKTS_NATIVE_LIST_MODIFIER_H
 
-#include "core/components_ng/pattern/animator/animator_model_ng.h"
+#include "bridge/declarative_frontend/engine/jsi/components/arkts_native_api.h"
 
-namespace OHOS::Ace::Framework {
-namespace {
-} // namespace
-
-void AnimatorModelNG::Create(const std::string& animatorId) {}
-
-RefPtr<AnimatorInfo> AnimatorModelNG::GetAnimatorInfo(const std::string& animatorId)
-{
-    auto animatorInfo = AceType::MakeRefPtr<AnimatorInfo>();
-    auto animator = AceType::MakeRefPtr<Animator>();
-    animatorInfo->SetAnimator(animator);
-    return animatorInfo;
+namespace OHOS::Ace::NG {
+ArkUIListModifierAPI GetListModifier();
 }
-} // namespace OHOS::Ace::Framework
+
+#endif // FRAMEWORKS_INTERFACE_INNER_API_COMPONENTS_ARKTS_NATIVE_LIST_MODIFIER_H

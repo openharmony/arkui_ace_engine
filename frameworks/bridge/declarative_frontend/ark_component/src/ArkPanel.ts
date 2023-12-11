@@ -84,9 +84,9 @@ class PanelBackgroundMaskModifier extends ModifierWithKey<ResourceColor> {
   static identity: Symbol = Symbol("panelBackgroundMask");
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().panel.resetBackgroundMask(node);
+      GetUINativeModule().panel.resetPanelBackgroundMask(node);
     } else {
-      GetUINativeModule().panel.setBackgroundMask(node, this.value);
+      GetUINativeModule().panel.setPanelBackgroundMask(node, this.value);
     }
   }
 
@@ -199,9 +199,9 @@ class ShowModifier extends Modifier<boolean> {
   static identity: Symbol = Symbol('show');
   applyPeer(node: KNode, reset: boolean) {
     if (reset) {
-      GetUINativeModule().panel.resetDragBar(node);
+      GetUINativeModule().panel.resetShow(node);
     } else {
-      GetUINativeModule().panel.setDragBar(node, this.value);
+      GetUINativeModule().panel.setShow(node, this.value);
     }
   }
 }

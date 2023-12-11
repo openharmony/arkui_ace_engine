@@ -98,4 +98,19 @@ void ScrollableModelNG::SetOnScrollFrameBegin(OnScrollFrameBeginEvent&& ScrollFr
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnScrollFrameBegin(std::move(ScrollFrameBegin));
 }
+
+void ScrollableModelNG::SetEdgeEffect(FrameNode* frameNode, EdgeEffect edgeEffect, bool alwaysEnabled)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<ScrollablePattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetEdgeEffect(edgeEffect, alwaysEnabled);
+    frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+}
+
+void ScrollableModelNG::SetScrollBarMode(FrameNode* frameNode, int32_t displayNumber)
+{
+    ACE_UPDATE_NODE_PAINT_PROPERTY(ScrollablePaintProperty, ScrollBarMode,
+        static_cast<DisplayMode>(displayNumber), frameNode);
+}
 } // namespace OHOS::Ace::NG

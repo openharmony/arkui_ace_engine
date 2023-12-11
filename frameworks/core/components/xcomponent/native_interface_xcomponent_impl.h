@@ -16,6 +16,7 @@
 #ifndef _NATIVE_INTERFACE_XCOMPONENT_IMPL_
 #define _NATIVE_INTERFACE_XCOMPONENT_IMPL_
 
+#include <functional>
 #include <string>
 #include <unistd.h>
 #include <vector>
@@ -44,6 +45,10 @@ namespace OHOS::Ace {
 class NativeXComponentImpl : public virtual AceType {
     DECLARE_ACE_TYPE(NativeXComponentImpl, AceType);
     using NativeXComponent_Callback = void (*)(OH_NativeXComponent*, void*);
+    using SetExpectedRateRangeEvent_Callback  = std::function<void()>;
+    using SetOnFrameEvent_Callback = std::function<void()>;
+    using SetUnregisterOnFrameEvent_Callback = std::function<void()>;
+    using OnFrame_Callback = void (*)(OH_NativeXComponent*, uint64_t, uint64_t);
 
 public:
     NativeXComponentImpl() {}
@@ -244,6 +249,47 @@ public:
         blurEventCallback_ = callback;
     }
 
+    void SetOnFrameCallback(OnFrame_Callback callback)
+    {
+        onFrameCallback_ = callback;
+    }
+
+    OnFrame_Callback GetOnFrameCallback()
+    {
+        return onFrameCallback_;
+    }
+
+    OH_NativeXComponent_ExpectedRateRange* GetRateRange()
+    {
+        return rateRange_;
+    }
+
+    void SetRateRange(OH_NativeXComponent_ExpectedRateRange* rateRange)
+    {
+        rateRange_ = rateRange;
+    }
+
+    void SetExpectedRateRangeEventCallback(SetExpectedRateRangeEvent_Callback callback)
+    {
+        setExpectedRateRangeCallback_ = callback;
+    }
+
+    void SetOnFrameEventCallback(SetOnFrameEvent_Callback callback)
+    {
+        setOnFrameEventCallback_ = callback;
+    }
+
+    void SetUnregisterOnFrameEventCallback(SetUnregisterOnFrameEvent_Callback callback)
+    {
+        setUnregisterOnFrameEventCallback_ = callback;
+    }
+
+    SetExpectedRateRangeEvent_Callback setExpectedRateRangeCallback_;
+
+    SetOnFrameEvent_Callback setOnFrameEventCallback_;
+
+    SetUnregisterOnFrameEvent_Callback setUnregisterOnFrameEventCallback_;
+
 private:
     std::string xcomponentId_;
     void* window_ = nullptr;
@@ -261,6 +307,8 @@ private:
     NativeXComponent_Callback blurEventCallback_ = nullptr;
     std::vector<XComponentTouchPoint> touchPoints_;
     std::vector<OH_NativeXComponent_HistoricalPoint> historicalPoints_;
+    OnFrame_Callback onFrameCallback_ = nullptr;
+    OH_NativeXComponent_ExpectedRateRange* rateRange_ = nullptr;
 };
 } // namespace OHOS::Ace
 
@@ -283,6 +331,10 @@ struct OH_NativeXComponent {
     int32_t RegisterKeyEventCallback(void (*callback)(OH_NativeXComponent* component, void* window));
     int32_t RegisterBlurEventCallback(void (*callback)(OH_NativeXComponent* component, void* window));
     int32_t GetKeyEvent(OH_NativeXComponent_KeyEvent** keyEvent);
+    int32_t SetExpectedFrameRateRange(OH_NativeXComponent_ExpectedRateRange* range);
+    int32_t RegisterOnFrameCallback(
+        void (*callback)(OH_NativeXComponent* component, uint64_t timestamp, uint64_t targetTimestamp));
+    int32_t UnRegisterOnFrameCallback();
 
 private:
     OHOS::Ace::NativeXComponentImpl* xcomponentImpl_ = nullptr;

@@ -76,7 +76,7 @@ void ResetParams(NodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    NavigatorModelNG::SetParams(frameNode, nullptr);
+    NavigatorModelNG::SetParams(frameNode, "");
 }
 
 ArkUINavigatorModifierAPI GetNavigatorModifier()

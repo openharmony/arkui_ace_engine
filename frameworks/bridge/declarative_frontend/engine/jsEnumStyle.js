@@ -1232,6 +1232,13 @@ var TransitionEdge;
   TransitionEdge['END'] = 3;
 })(TransitionEdge || (TransitionEdge = {}));
 
+var TouchTestStrategy;
+(function (TouchTestStrategy) {
+  TouchTestStrategy['DEFAULT'] = 0;
+  TouchTestStrategy['FORWARD_COMPETITION'] = 1;
+  TouchTestStrategy['FORWARD'] = 2;
+})(TouchTestStrategy || (TouchTestStrategy = {}));
+
 var ModalTransition;
 (function (ModalTransition) {
   ModalTransition[ModalTransition["Default"] = 0] = "Default";
@@ -2113,3 +2120,18 @@ var OutlineStyle;
   OutlineStyle[OutlineStyle["DASHED"] = 1] = "DASHED";
   OutlineStyle[OutlineStyle["DOTTED"] = 2] = "DOTTED";
 })(OutlineStyle || (OutlineStyle = {}));
+
+var ImageAnalyzerType;
+(function (ImageAnalyzerType) {
+  ImageAnalyzerType[ImageAnalyzerType["SUBJECT"] = 0] = "SUBJECT";
+  ImageAnalyzerType[ImageAnalyzerType["TEXT"] = 1] = "TEXT";
+})(ImageAnalyzerType || (ImageAnalyzerType = {}));
+
+function wrapBuilder(builder) {
+    return new WrappedBuilder(builder);
+}
+class WrappedBuilder {
+    constructor(builder) {
+        this.builder = builder;
+    }
+}

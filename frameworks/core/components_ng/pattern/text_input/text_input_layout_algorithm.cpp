@@ -95,7 +95,7 @@ void TextInputLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(pipeline);
     auto textFieldTheme = pipeline->GetTheme<TextFieldTheme>();
     CHECK_NULL_VOID(textFieldTheme);
-    auto defaultHeight = static_cast<float>(textFieldTheme->GetHeight().ConvertToPx());
+    auto defaultHeight = GetDefaultHeightByType(layoutWrapper);
 
     frameSize.SetWidth(contentWidth + pattern->GetHorizontalPaddingAndBorderSum());
 
@@ -219,5 +219,20 @@ void TextInputLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
             TextFieldLayoutAlgorithm::CounterLayout(layoutWrapper);
         }
     }
+}
+float TextInputLayoutAlgorithm::GetDefaultHeightByType(LayoutWrapper* layoutWrapper)
+{
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, 0.0f);
+    auto textFieldTheme = pipeline->GetTheme<TextFieldTheme>();
+    CHECK_NULL_RETURN(textFieldTheme, 0.0f);
+    auto frameNode = layoutWrapper->GetHostNode();
+    CHECK_NULL_RETURN(frameNode, 0.0f);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    CHECK_NULL_RETURN(pattern, 0.0f);
+    if (pattern->IsShowPasswordIcon()) {
+        return static_cast<float>(textFieldTheme->GetPasswordTypeHeight().ConvertToPx());
+    }
+    return static_cast<float>(textFieldTheme->GetHeight().ConvertToPx());
 }
 } // namespace OHOS::Ace::NG

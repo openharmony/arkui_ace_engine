@@ -275,6 +275,16 @@ void PasswordResponseArea::LoadImageSourceInfo()
     if (hideIcon_->GetResourceId() == InternalResource::ResourceId::HIDE_PASSWORD_SVG) {
         hideIcon_->SetFillColor(textFieldTheme->GetTextColor());
     }
+    if (layoutProperty->GetIsDisabledValue(false)) {
+        auto iconTheme = pipeline->GetTheme<IconTheme>();
+        CHECK_NULL_VOID(iconTheme);
+        auto textDisableColor = textFieldTheme->GetTextColorDisable();
+        auto hideIconPath = iconTheme->GetIconPath(hideIcon_->GetResourceId());
+        hideIcon_->SetSrc(hideIconPath, textDisableColor);
+        auto showIconPath = iconTheme->GetIconPath(showIcon_->GetResourceId());
+        showIcon_->SetSrc(showIconPath, textDisableColor);
+        UpdateImageSource();
+    }
 }
 
 ImageSourceInfo PasswordResponseArea::GetDefaultSourceInfo(bool isObscured)

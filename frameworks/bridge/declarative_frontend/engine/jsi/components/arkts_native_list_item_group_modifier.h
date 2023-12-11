@@ -1,4 +1,3 @@
-
 /*
  * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,16 +12,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#ifndef FRAMEWORKS_INTERFACE_INNER_API_ARKTS_NATIVE_LIST_ITEM_GROUP_BRIDGE_MODIFIER_H
+#define FRAMEWORKS_INTERFACE_INNER_API_ARKTS_NATIVE_LIST_ITEM_GROUP_BRIDGE_MODIFIER_H
 
-#include "core/components_ng/base/view_stack_processor.h"
-#include "core/components_ng/pattern/container_modal/container_modal_utils.h"
-#include "core/components_ng/pattern/custom/custom_title_node.h"
+#include "bridge/declarative_frontend/engine/jsi/components/arkts_native_api.h"
 
 namespace OHOS::Ace::NG {
-bool ExecuteCustomTitleAbc()
-{
-    auto custom = CustomTitleNode::CreateCustomNode(-1, "");
-    ViewStackProcessor::GetInstance()->SetCustomTitleNode(custom);
-    return true;
+ArkUIListItemGroupModifierAPI GetListItemGroupModifier();
 }
-} // namespace OHOS::Ace::NG
+
+#endif // FRAMEWORKS_INTERFACE_INNER_API_ARKTS_NATIVE_LIST_ITEM_GROUP_BRIDGE_MODIFIER_H

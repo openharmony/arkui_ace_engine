@@ -58,7 +58,9 @@ RefPtr<LayoutAlgorithm> GridPattern::CreateLayoutAlgorithm()
         std::swap(crossCount, mainCount);
     }
     gridLayoutInfo_.crossCount_ = crossCount;
-
+    if (targetIndex_.has_value()) {
+        gridLayoutInfo_.targetIndex_ = targetIndex_;
+    }
     // When rowsTemplate and columnsTemplate is both setting, use static layout algorithm.
     if (!rows.empty() && !cols.empty()) {
         return MakeRefPtr<GridLayoutAlgorithm>(gridLayoutInfo_, crossCount, mainCount);
@@ -152,6 +154,8 @@ void GridPattern::OnModifyDone()
             return grid->GetMainContentSize();
         });
     }
+    
+    Register2DragDropManager();
 }
 
 void GridPattern::MultiSelectWithoutKeyboard(const RectF& selectedZone)
@@ -402,6 +406,12 @@ bool GridPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
                         (gridLayoutInfo.endIndex_ != gridLayoutInfo_.endIndex_);
     bool offsetEnd = gridLayoutInfo_.offsetEnd_;
     gridLayoutInfo_ = gridLayoutInfo;
+
+    if (targetIndex_.has_value()) {
+        ScrollToTargrtIndex(targetIndex_.value());
+        targetIndex_.reset();
+        scrollAlign_ = ScrollAlign::AUTO;
+    }
     if (gridLayoutInfo_.startIndex_ == 0 && NearZero(gridLayoutInfo_.currentOffset_)) {
         gridLayoutInfo_.reachStart_ = true;
     }
@@ -424,6 +434,62 @@ bool GridPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     MarkSelectedItems();
     isInitialized_ = true;
     return false;
+}
+
+void GridPattern::ScrollToTargrtIndex(int32_t index)
+{
+    if (index == LAST_ITEM) {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto totalItemCount = host->TotalChildCount();
+        index = totalItemCount - 1;
+    }
+    int32_t targetRow = -1;
+    for (const auto& rowIndex : gridLayoutInfo_.gridMatrix_) {
+        for (const auto& columnIndex : rowIndex.second) {
+            if (columnIndex.second == index) {
+                targetRow = rowIndex.first;
+                break;
+            }
+        }
+    }
+    float mainGap = GetMainGap();
+    float targetPos = 0.0f;
+    if (targetRow == -1) {
+        return;
+    }
+    for (const auto& rowIndex : gridLayoutInfo_.lineHeightMap_) {
+        if (targetRow == rowIndex.first) {
+            AdjustingTargetPos(targetPos, rowIndex.first, rowIndex.second);
+            targetIndex_.reset();
+            return;
+        }
+        targetPos = targetPos + rowIndex.second + mainGap;
+    }
+}
+void GridPattern::AdjustingTargetPos(float targetPos, int32_t rowIndex, float lineHeight)
+{
+    switch (scrollAlign_) {
+        case ScrollAlign::START:;
+        case ScrollAlign::NONE:break;
+        case ScrollAlign::CENTER:
+            // Centered layout requires subtracting half of the window size+ target row height
+            targetPos = targetPos - ((gridLayoutInfo_.lastMainSize_ - lineHeight) * HALF);
+            break;
+        case ScrollAlign::END:
+            targetPos = targetPos - gridLayoutInfo_.lastMainSize_ + lineHeight;
+            break;
+        case ScrollAlign::AUTO:
+            if (gridLayoutInfo_.startMainLineIndex_ > rowIndex) {
+                // Scroll down from top and use ScrollAlign::START layout
+            } else if (rowIndex > gridLayoutInfo_.endMainLineIndex_) {
+                targetPos = targetPos - gridLayoutInfo_.lastMainSize_ + lineHeight;
+            } else {
+                return;
+            }
+            break;
+    }
+    AnimateTo(targetPos, -1, nullptr, true);
 }
 
 void GridPattern::CheckScrollable()
@@ -1735,14 +1801,21 @@ Rect GridPattern::GetItemRect(int32_t index) const
         itemGeometry->GetFrameRect().Width(), itemGeometry->GetFrameRect().Height());
 }
 
-void GridPattern::ScrollToIndex(int32_t index, bool /* smooth */, ScrollAlign align)
+void GridPattern::ScrollToIndex(int32_t index, bool smooth, ScrollAlign align)
 {
-    // move to layout algorithm
-    if (index == LAST_ITEM) {
-        index = gridLayoutInfo_.childrenCount_ - 1;
-    }
+    SetScrollSource(SCROLL_FROM_JUMP);
     StopAnimate();
-    UpdateStartIndex(index, align);
+    if ((index >= 0) || (index == LAST_ITEM)) {
+        if (smooth) {
+            targetIndex_ = index;
+            scrollAlign_ = align;
+            auto host = GetHost();
+            CHECK_NULL_VOID(host);
+            host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+        } else {
+            UpdateStartIndex(index, align);
+        }
+    }
     FireAndCleanScrollingListener();
 }
 } // namespace OHOS::Ace::NG

@@ -18,7 +18,7 @@
 #include "base/memory/ace_type.h"
 
 namespace OHOS::Ace {
-RefPtr<FoldableWindow> FoldableWindow::CreateFoldableWindow(int32_t)
+RefPtr<FoldableWindow> FoldableWindow::CreateFoldableWindow(int32_t /* id */)
 {
     static RefPtr<FoldableWindow> foldablewindow = AceType::MakeRefPtr<MockFoldableWindow>();
     return foldablewindow;

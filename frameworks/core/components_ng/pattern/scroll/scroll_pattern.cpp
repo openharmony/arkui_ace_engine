@@ -77,6 +77,7 @@ void ScrollPattern::OnModifyDone()
     if (scrollSnapUpdate_) {
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     }
+    Register2DragDropManager();
 }
 
 void ScrollPattern::RegisterScrollEventTask()

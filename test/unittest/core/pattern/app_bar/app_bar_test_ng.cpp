@@ -36,7 +36,6 @@
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/property/calc_length.h"
 
-
 using namespace testing;
 using namespace testing::ext;
 
@@ -47,8 +46,6 @@ class AppBarTestNg : public testing::Test {
 public:
     static void SetUpTestSuite();
     static void TearDownTestSuite();
-    void SetUp() override;
-    void TearDown() override;
     void ClickBtn(RefPtr<FrameNode> frameNode);
 };
 
@@ -66,10 +63,6 @@ void AppBarTestNg::TearDownTestSuite()
 {
     MockPipelineContext::TearDown();
 }
-
-void AppBarTestNg::SetUp() {}
-
-void AppBarTestNg::TearDown() {}
 
 void AppBarTestNg::ClickBtn(RefPtr<FrameNode> frameNode)
 {

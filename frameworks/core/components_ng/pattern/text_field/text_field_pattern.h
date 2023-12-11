@@ -199,8 +199,13 @@ public:
 
     void InsertValue(const std::string& insertValue) override;
     void InsertValueOperation(const std::string& insertValue);
-    void UpdateAreaTextColor();
+    void UpdateCounterTextColor();
+    void UpdateCounterMargin();
+    void CleanCounterNode();
     void UltralimitShake();
+    void UpdateCounterBorderStyle(uint32_t& textLength, uint32_t& maxLength);
+    void UpdateAreaBorderStyle(BorderWidthProperty& currentBorderWidth, BorderWidthProperty& overCountBorderWidth,
+    BorderColorProperty& overCountBorderColor, BorderColorProperty& currentBorderColor);
     void DeleteBackward(int32_t length) override;
     void DeleteBackwardOperation(int32_t length);
     void DeleteForward(int32_t length) override;
@@ -612,17 +617,18 @@ public:
 
     bool UpdateCurrentOffset(float offset, int32_t source) override
     {
+        OnScrollCallback(offset, source);
         return true;
     }
 
     bool IsAtTop() const override
     {
-        return true;
+        return contentRect_.GetY() == textRect_.GetY();
     }
 
     bool IsAtBottom() const override
     {
-        return true;
+        return contentRect_.GetY() + contentRect_.Height() == textRect_.GetY() + textRect_.Height();
     }
 
     bool IsScrollable() const override
@@ -1188,6 +1194,7 @@ private:
     bool ProcessAutoFill();
     void ScrollToSafeArea() const override;
     void RecordSubmitEvent() const;
+    void UpdateCancelNode(bool isShow);
 
     RectF frameRect_;
     RectF contentRect_;

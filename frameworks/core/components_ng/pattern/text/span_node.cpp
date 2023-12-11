@@ -359,13 +359,7 @@ std::string SpanItem::GetSpanContent(const std::string& rawContent)
 
 std::string SpanItem::GetSpanContent()
 {
-    std::string data;
-    if (needRemoveNewLine) {
-        data = content.substr(0, content.length() - 1);
-    } else {
-        data = content;
-    }
-    return data;
+    return content;
 }
 
 #ifdef ENABLE_DRAG_FRAMEWORK

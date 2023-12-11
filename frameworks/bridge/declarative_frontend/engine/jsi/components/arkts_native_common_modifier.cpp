@@ -1535,19 +1535,19 @@ void ResetBackgroundImageSize(NodeHandle node)
     ViewAbstract::SetBackgroundImageSize(frameNode, bgImgSize);
 }
 
-void SetBackgroundImage(NodeHandle node, const char* src, int32_t repeatIndex)
+void SetBackgroundImage(NodeHandle node, const char* src, const char* bundle, const char* module, int32_t repeatIndex)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     std::string srcStr(src);
-    std::string bundle;
-    std::string module;
-    ViewAbstract::SetBackgroundImage(frameNode, OHOS::Ace::ImageSourceInfo { srcStr, bundle, module });
+    std::string bundleStr(bundle);
+    std::string moduleStr(module);
+    ViewAbstract::SetBackgroundImage(frameNode, OHOS::Ace::ImageSourceInfo { srcStr, bundleStr, moduleStr });
     auto repeat = static_cast<ImageRepeat>(repeatIndex);
     if (repeat >= OHOS::Ace::ImageRepeat::NO_REPEAT && repeat <= OHOS::Ace::ImageRepeat::REPEAT) {
-        ViewAbstract::SetBackgroundImageRepeat(repeat);
+        ViewAbstract::SetBackgroundImageRepeat(frameNode, repeat);
     } else {
-        ViewAbstract::SetBackgroundImageRepeat(OHOS::Ace::ImageRepeat::NO_REPEAT);
+        ViewAbstract::SetBackgroundImageRepeat(frameNode, OHOS::Ace::ImageRepeat::NO_REPEAT);
     }
 }
 
@@ -1559,7 +1559,7 @@ void ResetBackgroundImage(NodeHandle node)
     std::string bundle;
     std::string module;
     ViewAbstract::SetBackgroundImage(frameNode, OHOS::Ace::ImageSourceInfo { srcStr, bundle, module });
-    ViewAbstract::SetBackgroundImageRepeat(OHOS::Ace::ImageRepeat::NO_REPEAT);
+    ViewAbstract::SetBackgroundImageRepeat(frameNode, OHOS::Ace::ImageRepeat::NO_REPEAT);
 }
 void SetTranslate(NodeHandle node, const double* values, const int* units, int32_t length)
 {

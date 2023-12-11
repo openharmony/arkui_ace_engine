@@ -20,21 +20,21 @@
 
 #define private public
 #define protected public
-#include "bridge/declarative_frontend/view_stack_processor.h"
-#include "core/components/common/layout/constants.h"
-#include "core/components_ng/base/view_stack_processor.h"
-#include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
-#include "core/components_ng/pattern/text/text_pattern.h"
 #include "test/mock/core/common/mock_theme_manager.h"
-#include "core/components_v2/inspector/inspector_constants.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
+
 #include "core/components/badge/badge_theme.h"
+#include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/badge/badge_layout_algorithm.h"
 #include "core/components_ng/pattern/badge/badge_layout_property.h"
 #include "core/components_ng/pattern/badge/badge_model_ng.h"
 #include "core/components_ng/pattern/badge/badge_pattern.h"
+#include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
+#include "core/components_ng/pattern/text/text_pattern.h"
+#include "core/components_v2/inspector/inspector_constants.h"
 
 #undef private
 #undef protected
@@ -79,6 +79,7 @@ public:
 protected:
     std::pair<RefPtr<FrameNode>, RefPtr<LayoutWrapperNode>> CreateChild(const LayoutConstraintF& childLayoutConstraint);
 };
+
 void BadgeTestNg::SetUp()
 {
     MockPipelineContext::SetUp();

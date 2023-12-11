@@ -13,26 +13,19 @@
  * limitations under the License.
  */
 
-#define protected public
-#define private public
 #include "test/unittest/core/pattern/test_ng.h"
+
+#define private public
+#define protected public
+#include "test/mock/base/mock_task_executor.h"
+#include "test/mock/core/common/mock_container.h"
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#undef private
+#undef protected
 
 namespace OHOS::Ace::NG {
 void TestNG::SetUpTestSuite()
 {
-    auto paragraph = MockParagraph::GetOrCreateMockParagraph();
-    EXPECT_CALL(*paragraph, PushStyle(_)).Times(AnyNumber());
-    EXPECT_CALL(*paragraph, AddText(_)).Times(AnyNumber());
-    EXPECT_CALL(*paragraph, PopStyle()).Times(AnyNumber());
-    EXPECT_CALL(*paragraph, Build()).Times(AnyNumber());
-    EXPECT_CALL(*paragraph, Layout(_)).Times(AnyNumber());
-    EXPECT_CALL(*paragraph, GetTextWidth()).WillRepeatedly(Return(0.f));
-    EXPECT_CALL(*paragraph, GetAlphabeticBaseline()).WillRepeatedly(Return(0.f));
-    EXPECT_CALL(*paragraph, GetHeight()).WillRepeatedly(Return(50.f));
-    EXPECT_CALL(*paragraph, GetLongestLine()).WillRepeatedly(Return(460.f));
-    EXPECT_CALL(*paragraph, GetMaxWidth()).WillRepeatedly(Return(460.f));
-    EXPECT_CALL(*paragraph, GetLineCount()).WillRepeatedly(Return(1));
-
     MockContainer::SetUp();
     MockContainer::Current()->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
     MockPipelineContext::SetUp();
@@ -42,7 +35,6 @@ void TestNG::TearDownTestSuite()
 {
     MockPipelineContext::TearDown();
     MockContainer::TearDown();
-    MockParagraph::TearDown();
 }
 
 void TestNG::FlushLayoutTask(const RefPtr<FrameNode>& frameNode)

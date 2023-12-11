@@ -14,7 +14,6 @@
 import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
 ace_unittest("water_flow_test_ng") {
-  render = true
   type = "new"
   sources = [ "water_flow_test_ng.cpp" ]
 }

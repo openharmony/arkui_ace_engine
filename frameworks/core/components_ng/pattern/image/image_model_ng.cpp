@@ -306,5 +306,19 @@ void ImageModelNG::SetDraggable(FrameNode *frameNode, bool draggable)
     }
     frameNode->SetCustomerDraggable(draggable);
 }
+
+void ImageModelNG::EnableAnalyzer(bool isEnableAnalyzer)
+{
+    auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<ImagePattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->EnableAnalyzer(isEnableAnalyzer);
+}
+
+void ImageModelNG::SetImageAnalyzerConfig(const ImageAnalyzerConfig& config)
+{
+    auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<ImagePattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetImageAnalyzerConfig(config);
+}
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_IMAGE_IMAGE_MODEL_NG_CPP

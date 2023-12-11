@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/text_picker/textpicker_column_pattern.h"
 
 #include <cstdint>
+#include <cstdlib>
 
 #include "base/geometry/dimension.h"
 #include "base/geometry/ng/size_t.h"
@@ -348,8 +349,8 @@ void TextPickerColumnPattern::ResetOptionPropertyHeight()
             auto pickerItemHeight = 0.0;
             auto pattern = parentNode->GetPattern<TextPickerPattern>();
             CHECK_NULL_VOID(pattern);
-            pickerItemHeight = pattern->GetResizeFlag() ? pattern->GetResizePickerItemHeight()
-                                                        : pattern->GetDefaultPickerItemHeight();
+            pickerItemHeight =
+                pattern->GetResizeFlag() ? pattern->GetResizePickerItemHeight() : pattern->GetDefaultPickerItemHeight();
             int32_t itemCounts = GetShowOptionCount();
             for (int32_t i = 0; i < itemCounts; i++) {
                 TextPickerOptionProperty& prop = optionProperties_[i];
@@ -971,7 +972,7 @@ void TextPickerColumnPattern::HandleDragEnd()
         ScrollOption(0.0);
         return;
     }
-    ScrollDirection dir = scrollDelta_ > 0.0 ? ScrollDirection::DOWN :ScrollDirection::UP;
+    ScrollDirection dir = scrollDelta_ > 0.0 ? ScrollDirection::DOWN : ScrollDirection::UP;
     int32_t middleIndex = GetShowOptionCount() / HALF_NUMBER;
     auto shiftDistance = (dir == ScrollDirection::UP) ? optionProperties_[middleIndex].prevDistance
                                                       : optionProperties_[middleIndex].nextDistance;
@@ -1099,7 +1100,7 @@ double TextPickerColumnPattern::GetShiftDistance(int32_t index, ScrollDirection 
                 distance = -optionProperties_[nextIndex].height;
             } else {
                 val = optionProperties_[index].height +
-                    (optionProperties_[nextIndex].height - optionProperties_[nextIndex].fontheight) / HALF_NUMBER;
+                      (optionProperties_[nextIndex].height - optionProperties_[nextIndex].fontheight) / HALF_NUMBER;
                 distance = std::ceil(val);
             }
             break;
@@ -1412,7 +1413,7 @@ void TextPickerColumnPattern::OnAroundButtonClick(RefPtr<EventParam> param)
         animation_ = AnimationUtils::StartAnimation(option, [weak = AceType::WeakClaim(this), step, distance]() {
             auto column = weak.Upgrade();
             CHECK_NULL_VOID(column);
-            column->aroundClickProperty_->Set(step > 0 ? 0.0 - abs(distance) : abs(distance));
+            column->aroundClickProperty_->Set(step > 0 ? 0.0 - std::abs(distance) : std::abs(distance));
         });
     }
 }

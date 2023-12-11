@@ -13,11 +13,12 @@
  * limitations under the License.
  */
 
-#include "core/components/custom_paint/render_custom_paint.h"
+#ifndef FRAMEWORKS_INTERFACE_INNER_API_COMPONENTS_ARKTS_NATIVE_NODE_CONTAINER_MODIFIER_H
+#define FRAMEWORKS_INTERFACE_INNER_API_COMPONENTS_ARKTS_NATIVE_NODE_CONTAINER_MODIFIER_H
 
-namespace OHOS::Ace {
-Size RenderCustomPaint::MeasureTextSize(const MeasureContext& context)
-{
-    return Size(70.0, 40.0);
+#include "bridge/declarative_frontend/engine/jsi/components/arkts_native_api.h"
+
+namespace OHOS::Ace::NG {
+ArkUINodeContainerModifierAPI GetNodeContainerModifier();
 }
-} // namespace OHOS::Ace::NG
+#endif // FRAMEWORKS_INTERFACE_INNER_API_COMPONENTS_ARKTS_NATIVE_NODE_CONTAINER_MODIFIER_H

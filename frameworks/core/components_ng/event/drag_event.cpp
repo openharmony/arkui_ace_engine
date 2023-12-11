@@ -405,21 +405,24 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
             CHECK_NULL_VOID(gestureHub);
             auto frameNode = gestureHub->GetFrameNode();
             CHECK_NULL_VOID(frameNode);
+            auto pipeline = PipelineContext::GetCurrentContext();
+            CHECK_NULL_VOID(pipeline);
             auto dragPreviewInfo = frameNode->GetDragPreview();
             if (dragPreviewInfo.pixelMap != nullptr) {
                 gestureHub->SetPixelMap(dragPreviewInfo.pixelMap);
             } else if (dragPreviewInfo.customNode != nullptr) {
 #if defined(ENABLE_DRAG_FRAMEWORK) && defined(ENABLE_ROSEN_BACKEND) && defined(PIXEL_MAP_SUPPORTED)
-                auto callback = [id = Container::CurrentId(), gestureHub, frameNode, dragPreviewInfo](
-                                    std::shared_ptr<Media::PixelMap> pixelMap, int32_t arg, std::function<void()>) {
+                auto callback = [id = Container::CurrentId(), pipeline, gestureHub]
+                    (std::shared_ptr<Media::PixelMap> pixelMap, int32_t arg, std::function<void()>) {
                     ContainerScope scope(id);
                     if (pixelMap != nullptr) {
-                        DragDropInfo newDragPreviewInfo;
-                        newDragPreviewInfo.customNode = dragPreviewInfo.customNode;
-                        newDragPreviewInfo.extraInfo = dragPreviewInfo.extraInfo;
-                        newDragPreviewInfo.pixelMap = PixelMap::CreatePixelMap(reinterpret_cast<void*>(&pixelMap));
-                        frameNode->SetDragPreview(newDragPreviewInfo);
-                        gestureHub->SetPixelMap(newDragPreviewInfo.pixelMap);
+                        auto customPixelMap = PixelMap::CreatePixelMap(reinterpret_cast<void*>(&pixelMap));
+                        auto taskScheduler = pipeline->GetTaskExecutor();
+                        CHECK_NULL_VOID(taskScheduler);
+                        taskScheduler->PostTask([gestureHub, customPixelMap]() {
+                            CHECK_NULL_VOID(gestureHub);
+                            gestureHub->SetPixelMap(customPixelMap);
+                            }, TaskExecutor::TaskType::UI);
                     }
                 };
 

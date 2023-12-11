@@ -16,6 +16,8 @@
 #ifndef FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_MODELS_IMAGE_MODEL_IMPL_H
 #define FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_MODELS_IMAGE_MODEL_IMPL_H
 
+#define NAPI_VERSION 8
+
 #include "core/components_ng/pattern/image/image_model.h"
 #include "core/image/image_source_info.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_interactable_view.h"
@@ -53,6 +55,8 @@ public:
     void SetOnDrop(NG::OnDragDropFunc&& onDrop) override;
     void SetCopyOption(const CopyOptions& copyOption) override;
     bool UpdateDragItemInfo(DragItemInfo& itemInfo) override;
+    void EnableAnalyzer(bool isEnableAnalyzer) override {}
+    void SetImageAnalyzerConfig(const ImageAnalyzerConfig& config) override {}
 };
 
 } // namespace OHOS::Ace::Framework

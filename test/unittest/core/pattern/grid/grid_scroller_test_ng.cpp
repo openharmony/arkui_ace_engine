@@ -157,6 +157,27 @@ HWTEST_F(GridScrollerTestNg, ScrollToIndex002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: ScrollToIndex003
+ * @tc.desc: Test ScrollToIndex
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridScrollerTestNg, ScrollToIndex003, TestSize.Level1)
+{
+    Create([](GridModelNG model) {
+        model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+        CreateColItem(5);
+    });
+    /**
+     * @tc.steps: step1. Call ScrollToIndex()
+     * @tc.expected: pattern_->targetIndex.value() is 30.
+     * @tc.expected: pattern_->scrollAlign_ is ScrollAlign::END.
+     */
+    pattern_->ScrollToIndex(30, true, ScrollAlign::END);
+    EXPECT_EQ(pattern_->targetIndex_.value(), 30);
+    EXPECT_EQ(pattern_->scrollAlign_, ScrollAlign::END);
+}
+
+/**
  * @tc.name: ScrollTo001
  * @tc.desc: Test ScrollTo Function.
  * @tc.type: FUNC

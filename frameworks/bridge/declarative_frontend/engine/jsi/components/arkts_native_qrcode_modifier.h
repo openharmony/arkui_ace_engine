@@ -13,14 +13,13 @@
  * limitations under the License.
  */
 
-#include "core/common/app_bar_helper.h"
+#ifndef FRAMEWORKS_INTERFACE_INNER_API_COMPONENTS_ARKTS_NATIVE_QRCODE_MODIFIER_H
+#define FRAMEWORKS_INTERFACE_INNER_API_COMPONENTS_ARKTS_NATIVE_QRCODE_MODIFIER_H
 
-namespace OHOS::Ace {
+#include "bridge/declarative_frontend/engine/jsi/components/arkts_native_api.h"
 
-RefPtr<NG::FrameNode> AppBarHelper::CreateUIExtensionNode(const std::string& bundleName, const std::string& abilityName,
-    const std::map<std::string, std::string>& params, std::function<void(int32_t)>&& onRelease)
-{
-    return nullptr;
+namespace OHOS::Ace::NG {
+ArkUIQRCodeModifierAPI GetQRCodeModifier();
 }
 
-} // namespace OHOS::Ace
+#endif // FRAMEWORKS_INTERFACE_INNER_API_COMPONENTS_ARKTS_NATIVE_QRCODE_MODIFIER_H

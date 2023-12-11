@@ -158,6 +158,7 @@ struct GridLayoutInfo {
     bool hasBigItem_;
 
     bool offsetUpdated_ = false;
+    std::optional<int32_t> targetIndex_;
 
 private:
     float GetCurrentOffsetOfRegularGrid(float mainGap) const;

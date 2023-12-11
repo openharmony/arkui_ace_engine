@@ -196,6 +196,7 @@ public:
     void SetDebugLine(const std::string& line) override;
     void SetHoverEffect(HoverEffectType hoverEffect) override;
     void SetHitTestMode(NG::HitTestMode hitTestMode) override;
+    void SetOnTouchTestFunc(NG::OnChildTouchTestFunc&& onChildTouchTest) override {};
     void SetKeyboardShortcut(const std::string& value, const std::vector<ModifierKey>& keys,
         std::function<void()>&& onKeyboardShortcutAction) override {};
     void SetObscured(const std::vector<ObscuredReasons>& reasons) override {};

@@ -22,12 +22,10 @@ class ArkTabsComponent extends ArkComponent implements TabsAttribute {
     return this;
   }
   barMode(value: BarMode, options?: ScrollableBarModeOptions | undefined): TabsAttribute {
-    let arkBarMode: ArkBarMode = new ArkBarMode();
+    let arkBarMode = new ArkBarMode();
     arkBarMode.barMode = value;
     arkBarMode.options = options;
-
-    modifier(this._modifiers, TabBarModeModifier, arkBarMode);
-
+    modifierWithKey(this._modifiersWithKeys, TabBarModeModifier.identity, TabBarModeModifier, arkBarMode);
     return this;
   }
 
@@ -60,17 +58,7 @@ class ArkTabsComponent extends ArkComponent implements TabsAttribute {
     return this;
   }
   divider(value: DividerStyle | null): TabsAttribute {
-    let arkDrivider = new ArkDivider();
-    if (!!value) {
-      arkDrivider.divider.strokeWidth = value?.strokeWidth;
-      arkDrivider.divider.color = value?.color;
-      arkDrivider.divider.startMargin = value?.startMargin;
-      arkDrivider.divider.endMargin = value?.endMargin;
-      modifier(this._modifiers, DividerModifier, arkDrivider);
-    } else {
-      modifier(this._modifiers, DividerModifier, undefined);
-    }
-
+    modifierWithKey(this._modifiersWithKeys, DividerModifier.identity, DividerModifier, value);
     return this;
   }
   barOverlap(value: boolean): TabsAttribute {
@@ -82,46 +70,49 @@ class ArkTabsComponent extends ArkComponent implements TabsAttribute {
     return this;
   }
   barGridAlign(value: BarGridColumnOptions): TabsAttribute {
-    if (isObject(value)) {
-      let arkBarGridAlign = new ArkBarGridAlign();
-      arkBarGridAlign.barGridAlign = value;
-      modifier(this._modifiers, BarGridAlignModifier, arkBarGridAlign);
-    } else {
-      modifier(this._modifiers, BarGridAlignModifier, undefined);
-    }
-
+    modifierWithKey(this._modifiersWithKeys, BarGridAlignModifier.identity, BarGridAlignModifier, value);
     return this;
   }
 }
 
-class BarGridAlignModifier extends Modifier<ArkBarGridAlign> {
+class BarGridAlignModifier extends ModifierWithKey<BarGridColumnOptions> {
   static identity: Symbol = Symbol('barGridAlign');
 
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
       GetUINativeModule().tabs.resetBarGridAlign(node);
     } else {
-      GetUINativeModule().tabs.setBarGridAlign(node, this.value.barGridAlign.sm
-        , this.value.barGridAlign?.md
-        , this.value.barGridAlign?.lg
-        , this.value.barGridAlign?.margin
-        , this.value.barGridAlign?.gutter);
+      GetUINativeModule().tabs.setBarGridAlign(node, this.value.sm,
+        this.value.md, this.value.lg, this.value.gutter, this.value.margin);
     }
+  }
+
+  checkObjectDiff(): boolean {
+    return !(this.stageValue.sm === this.value.sm &&
+      this.stageValue.md === this.value.md &&
+      this.stageValue.lg === this.value.lg &&
+      this.stageValue.gutter === this.value.gutter &&
+      this.stageValue.margin === this.value.margin);
   }
 }
 
-class DividerModifier extends Modifier<ArkDivider> {
+class DividerModifier extends ModifierWithKey<DividerStyle> {
   static identity: Symbol = Symbol('Divider');
 
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
       GetUINativeModule().tabs.resetDivider(node);
     } else {
-      GetUINativeModule().tabs.setDivider(node, this.value.divider.strokeWidth
-        , this.value.divider.color
-        , this.value.divider.startMargin
-        , this.value.divider.endMargin);
+      GetUINativeModule().tabs.setDivider(node, this.value.strokeWidth,
+        this.value.color, this.value.startMargin, this.value.endMargin);
     }
+  }
+
+  checkObjectDiff(): boolean {
+      return !(this.stageValue.strokeWidth === this.value.strokeWidth &&
+        this.stageValue.color === this.value.color &&
+        this.stageValue.startMargin === this.value.startMargin &&
+        this.stageValue.endMargin === this.value.endMargin);
   }
 }
 
@@ -225,16 +216,29 @@ class ScrollableModifier extends Modifier<boolean> {
   }
 }
 
-class TabBarModeModifier extends Modifier<ArkBarMode> {
+class TabBarModeModifier extends ModifierWithKey<ArkBarMode> {
   static identity: Symbol = Symbol('tabsbarMode');
 
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
       GetUINativeModule().tabs.resetTabBarMode(node);
     } else {
-      GetUINativeModule().tabs.setTabBarMode(node, this.value.barMode,
-        this.value.options?.margin,
-        this.value.options?.nonScrollableLayoutStyle);
+      GetUINativeModule().tabs.setTabBarMode(node, this.value.barMode
+                                                  ,this.value.options?.margin
+                                                  ,this.value.options?.nonScrollableLayoutStyle);
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    if (isResource(this.stageValue) && isResource(this.value)) {
+      return !isResourceEqual(this.stageValue, this.value);
+    }else if(!isResource(this.stageValue) && !isResource(this.value)){
+      return !(this.value.barMode === this.stageValue.barMode &&
+        this.value.options?.margin === this.stageValue.options?.margin &&
+        this.value.options?.nonScrollableLayoutStyle === this.stageValue.options?.nonScrollableLayoutStyle)
+    }
+    else {
+      return true;
     }
   }
 }

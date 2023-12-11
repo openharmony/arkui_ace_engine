@@ -41,6 +41,7 @@
 #include "bridge/declarative_frontend/engine/functions/js_click_function.h"
 #include "bridge/declarative_frontend/engine/functions/js_clipboard_function.h"
 #include "bridge/declarative_frontend/engine/functions/js_drag_function.h"
+#include "bridge/declarative_frontend/engine/functions/js_on_child_touch_test_function.h"
 #include "bridge/declarative_frontend/engine/functions/js_focus_function.h"
 #include "bridge/declarative_frontend/engine/functions/js_function.h"
 #include "bridge/declarative_frontend/engine/functions/js_gesture_judge_function.h"
@@ -6308,6 +6309,7 @@ void JSViewAbstract::JSBind(BindingTarget globalObj)
     JSClass<JSViewAbstract>::StaticMethod("alignRules", &JSViewAbstract::JsAlignRules);
     JSClass<JSViewAbstract>::StaticMethod("onVisibleAreaChange", &JSViewAbstract::JsOnVisibleAreaChange);
     JSClass<JSViewAbstract>::StaticMethod("hitTestBehavior", &JSViewAbstract::JsHitTestBehavior);
+    JSClass<JSViewAbstract>::StaticMethod("onChildTouchTest", &JSViewAbstract::JsOnChildTouchTest);
     JSClass<JSViewAbstract>::StaticMethod("keyboardShortcut", &JSViewAbstract::JsKeyboardShortcut);
     JSClass<JSViewAbstract>::StaticMethod("obscured", &JSViewAbstract::JsObscured);
     JSClass<JSViewAbstract>::StaticMethod("allowDrop", &JSViewAbstract::JsAllowDrop);
@@ -7192,6 +7194,46 @@ void JSViewAbstract::JsHitTestBehavior(const JSCallbackInfo& info)
     ViewAbstractModel::GetInstance()->SetHitTestMode(hitTestModeNG);
 }
 
+void JSViewAbstract::JsOnChildTouchTest(const JSCallbackInfo& info)
+{
+    std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::FUNCTION };
+    if (!CheckJSCallbackInfo("onChildTouchTest", info, checkList)) {
+        return;
+    }
+
+    RefPtr<JsOnChildTouchTestFunction> jsOnChildTouchTestFunc =
+        AceType::MakeRefPtr<JsOnChildTouchTestFunction>(JSRef<JSFunc>::Cast(info[0]));
+
+    auto onTouchTestFunc = [execCtx = info.GetExecutionContext(), func = std::move(jsOnChildTouchTestFunc)](
+                               const std::vector<NG::TouchTestInfo>& touchInfo) -> NG::TouchResult {
+        NG::TouchResult touchRes;
+        NG::TouchResult defaultRes;
+        defaultRes.strategy = NG::TouchTestStrategy::DEFAULT;
+        defaultRes.id = "";
+        auto ret = func->Execute(touchInfo);
+        if (!ret->IsObject()) {
+            TAG_LOGW(AceLogTag::ACE_UIEVENT, "onChildTouchTest return value is not object, parse failed.");
+            return defaultRes;
+        }
+
+        auto retObj = JSRef<JSObject>::Cast(ret);
+        auto strategy = retObj->GetProperty("strategy");
+        if (!strategy->IsNumber()) {
+            TAG_LOGW(AceLogTag::ACE_UIEVENT, "onChildTouchTest return value strategy is not number, parse failed.");
+            return defaultRes;
+        }
+        touchRes.strategy = static_cast<NG::TouchTestStrategy>(strategy->ToNumber<int32_t>());
+        auto id = retObj->GetProperty("id");
+        if (!id->IsString()) {
+            TAG_LOGW(AceLogTag::ACE_UIEVENT, "onChildTouchTest return value id is not string, parse failed.");
+            return defaultRes;
+        }
+        touchRes.id = id->ToString();
+        return touchRes;
+    };
+    ViewAbstractModel::GetInstance()->SetOnTouchTestFunc(std::move(onTouchTestFunc));
+}
+
 void JSViewAbstract::JsForegroundColor(const JSCallbackInfo& info)
 {
     Color foregroundColor;
@@ -7364,5 +7406,91 @@ void JSViewAbstract::GetJsMediaBundleInfo(const JSRef<JSVal>& jsValue, std::stri
             moduleName = module->ToString();
         }
     }
+}
+
+void JSViewAbstract::ParseImageAnalyzerSubjectOptions(const JSRef<JSVal>& optionVal,
+    ImageAnalyzerConfig& analyzerConfig)
+{
+    ImageAnalyzerSubjectOptions subjectOptions;
+    auto obj = JSRef<JSObject>::Cast(optionVal);
+    JSRef<JSVal> onAnalyzedVal = obj->GetProperty("onAnalyzed");
+    if (onAnalyzedVal->IsFunction()) {
+        RefPtr<JsFunction> jsOnAnalyzedFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(),
+            JSRef<JSFunc>::Cast(onAnalyzedVal));
+        onSubcjectAnalyzedFunc onAnalyzedCallback =
+            [func = std::move(jsOnAnalyzedFunc)](std::string tag, std::vector<uint8_t> data) {
+            JSRef<JSVal> params[2];
+            params[0] = JSRef<JSVal>::Make(ToJSValue(tag));
+            JSRef<JSArray> indexArray = JSRef<JSArray>::New();
+            for (uint32_t i = 0; i < data.size(); i++) {
+                indexArray->SetValueAt(i, JSRef<JSVal>::Make(ToJSValue(data[i])));
+            }
+            params[1] = JSRef<JSVal>::Cast(indexArray);
+            func->ExecuteJS(2, params);
+        };
+        subjectOptions.onAnalyzedCallback = std::move(onAnalyzedCallback);
+    }
+
+    JSRef<JSVal> dataVal = obj->GetProperty("analyzedData");
+    if (dataVal->IsArray()) {
+        JSRef<JSArray> dataArray  = JSRef<JSArray>::Cast(dataVal);
+        std::vector<uint8_t> analyzedData;
+        for (size_t i = 0; i < dataArray->Length(); ++i) {
+            JSRef<JSVal> value = dataArray->GetValueAt(i);
+            if (value->IsNumber()) {
+                analyzedData.emplace_back(value->ToNumber<uint8_t>());
+            }
+        }
+        subjectOptions.analyzedData = std::move(analyzedData);
+    }
+
+#if defined(PIXEL_MAP_SUPPORTED)
+    auto pixmapVal = obj->GetProperty("sourcePixelmap");
+    RefPtr<PixelMap> pixmap = CreatePixelMapFromNapiValue(pixmapVal);
+    if (pixmap != nullptr) {
+        subjectOptions.sourcePixelmap = ConvertPixmapNapi(pixmap);
+    }
+#endif
+    analyzerConfig.subjectOptions_ = std::move(subjectOptions);
+}
+
+void JSViewAbstract::ParseImageAnalyzerTextOptions(const JSRef<JSVal>& optionVal, ImageAnalyzerConfig& analyzerConfig)
+{
+    ImageAnalyzerTextOptions textOptions;
+    auto obj = JSRef<JSObject>::Cast(optionVal);
+    JSRef<JSVal> onAnalyzedVal = obj->GetProperty("onAnalyzed");
+    if (onAnalyzedVal->IsFunction()) {
+        RefPtr<JsFunction> jsFunc =
+            AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onAnalyzedVal));
+        onTextAnalyzedFunc onAnalyzedCallback = [func = std::move(jsFunc)] (
+            std::string tag, std::string data) {
+            JSRef<JSVal> params[2];
+            params[0] = JSRef<JSVal>::Make(ToJSValue(tag));
+            params[1] = JSRef<JSVal>::Make(ToJSValue(data));
+            func->ExecuteJS(2, params);
+        };
+        textOptions.onAnalyzedCallback = std::move(onAnalyzedCallback);
+    }
+
+    JSRef<JSVal> onTextSelected = obj->GetProperty("onTextSelected");
+    if (onTextSelected->IsFunction()) {
+        RefPtr<JsFunction> jsOnTextSelectedFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(),
+        JSRef<JSFunc>::Cast(onTextSelected));
+        onTextSelectedFunc onTextSelectedCallback =
+            [func = std::move(jsOnTextSelectedFunc)] (std::string tag, std::string data) {
+            JSRef<JSVal> params[2];
+            params[0] = JSRef<JSVal>::Make(ToJSValue(tag));
+            params[1] = JSRef<JSVal>::Make(ToJSValue(data));
+            func->ExecuteJS(2, params);
+        };
+        textOptions.onTextSelected = std::move(onTextSelectedCallback);
+    }
+
+    JSRef<JSVal> dataVal = obj->GetProperty("analyzedData");
+    if (dataVal->IsArray()) {
+        std::string analyzedData = dataVal->ToString();
+        textOptions.analyzedData = std::move(analyzedData);
+    }
+    analyzerConfig.textOptions = std::move(textOptions);
 }
 } // namespace OHOS::Ace::Framework

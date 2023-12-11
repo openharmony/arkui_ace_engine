@@ -26,8 +26,6 @@ constexpr int NUM_2 = 2;
 constexpr int NUM_3 = 3;
 constexpr int NUM_4 = 4;
 const std::string FORMAT_FONT = "%s|%s|%s";
-const std::string DEFAULT_FONT_SIZE = "12fp";
-const std::string DEFAULT_FONT_WEIGHT = "400";
 const std::string DEFAULT_FAMILY = "HarmonyOS Sans";
 constexpr double DEFAULT_POPUPITEMFONT_SIZE = 24.0;
 constexpr Dimension DEFAULT_FONT_SIZE_VAL = 12.0_fp;
@@ -68,19 +66,19 @@ ArkUINativeModuleValue AlphabetIndexerBridge::SetPopupItemFont(ArkUIRuntimeCallI
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
     Local<JSValueRef> thirdArg = runtimeCallInfo->GetCallArgRef(NUM_2);
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    CalcDimension fontSizeData;
     CalcDimension fontSize;
-    if (ArkTSUtils::ParseJsDimensionFp(vm, secondArg, fontSizeData, false) && !fontSizeData.IsNegative()) {
-        fontSize = fontSizeData;
-    } else {
-        fontSize.SetValue(DEFAULT_POPUPITEMFONT_SIZE);
-        fontSize.SetUnit(DimensionUnit::FP);
+    if (secondArg->IsNull() || secondArg->IsUndefined() ||
+        !ArkTSUtils::ParseJsDimensionFp(vm, secondArg, fontSize)) {
+        fontSize = Dimension(DEFAULT_POPUPITEMFONT_SIZE, DimensionUnit::FP);
     }
     std::string weight = DEFAULT_POPUP_ITEM_FONT_WEIGHT;
-    if (thirdArg->IsNumber() && thirdArg->Int32Value(vm) >= 0) {
-        weight = std::to_string(thirdArg->Int32Value(vm));
+    if (!thirdArg->IsNull() && !thirdArg->IsUndefined()) {
+        if (thirdArg->IsNumber()) {
+            weight = std::to_string(thirdArg->Int32Value(vm));
+        } else {
+            ArkTSUtils::ParseJsString(vm, thirdArg, weight);
+        }
     }
-    ArkTSUtils::ParseJsString(vm, thirdArg, weight);
     GetArkUIInternalNodeAPI()->GetAlphabetIndexerModifier().SetPopupItemFont(
         nativeNode, fontSize.Value(), static_cast<int>(fontSize.Unit()), weight.c_str());
     return panda::JSValueRef::Undefined(vm);
@@ -106,26 +104,37 @@ ArkUINativeModuleValue AlphabetIndexerBridge::SetSelectedFont(ArkUIRuntimeCallIn
     Local<JSValueRef> fourthArg = runtimeCallInfo->GetCallArgRef(NUM_3);
     Local<JSValueRef> fifthArg = runtimeCallInfo->GetCallArgRef(NUM_4);
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    if (secondArg->IsUndefined() && thirdArg->IsUndefined() && fourthArg->IsUndefined() && fifthArg->IsUndefined()) {
+    if ((secondArg->IsNull() || secondArg->IsUndefined()) &&
+        (thirdArg->IsNull() || thirdArg->IsUndefined()) &&
+        (fourthArg->IsNull() || fourthArg->IsUndefined()) &&
+        (fifthArg->IsNull() || fifthArg->IsUndefined())) {
         GetArkUIInternalNodeAPI()->GetAlphabetIndexerModifier().ResetSelectedFont(nativeNode);
     }
     CalcDimension fontSizeData(DEFAULT_FONT_SIZE_VAL);
     std::string fontSize = fontSizeData.ToString();
-    if (ArkTSUtils::ParseJsDimensionFp(vm, secondArg, fontSizeData) && !fontSizeData.IsNegative() &&
+    if (!secondArg->IsNull() && !secondArg->IsUndefined() &&
+        ArkTSUtils::ParseJsDimensionFp(vm, secondArg, fontSizeData) && !fontSizeData.IsNegative() &&
         fontSizeData.Unit() != DimensionUnit::PERCENT) {
         fontSize = fontSizeData.ToString();
     }
     std::string weight = "normal";
-    if (thirdArg->IsString() || thirdArg->IsNumber()) {
+    if (!thirdArg->IsNull() && !thirdArg->IsUndefined() &&
+        (thirdArg->IsString() || thirdArg->IsNumber())) {
         weight = thirdArg->ToString(vm)->ToString();
     }
     std::string fontFamily = DEFAULT_FAMILY;
     std::vector<std::string> fontFamilies;
-    if (ArkTSUtils::ParseJsFontFamilies(vm, fourthArg, fontFamilies)) {
-        fontFamily = fourthArg->ToString(vm)->ToString();
+    if (!fourthArg->IsNull() && !fourthArg->IsUndefined()) {
+        ArkTSUtils::ParseJsFontFamilies(vm, fourthArg, fontFamilies);
+        if (fontFamilies.size() > 0) {
+            fontFamily = "";
+            for (uint32_t i = 0; i < fontFamilies.size(); i++) {
+                fontFamily += fontFamilies.at(i);
+            }
+        }
     }
     int32_t styleVal = 0;
-    if (fifthArg->IsNumber()) {
+    if (!fifthArg->IsNull() && !fifthArg->IsUndefined() && fifthArg->IsNumber()) {
         styleVal = fifthArg->Int32Value(vm);
     }
     std::string fontInfo =
@@ -154,19 +163,41 @@ ArkUINativeModuleValue AlphabetIndexerBridge::SetPopupFont(ArkUIRuntimeCallInfo*
     Local<JSValueRef> fourthArg = runtimeCallInfo->GetCallArgRef(NUM_3);
     Local<JSValueRef> fifthArg = runtimeCallInfo->GetCallArgRef(NUM_4);
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    if (secondArg->IsUndefined() && thirdArg->IsUndefined() && fourthArg->IsUndefined() && fifthArg->IsUndefined()) {
+    if ((secondArg->IsNull() || secondArg->IsUndefined()) &&
+        (thirdArg->IsNull() || thirdArg->IsUndefined()) &&
+        (fourthArg->IsNull() || fourthArg->IsUndefined()) &&
+        (fifthArg->IsNull() || fifthArg->IsUndefined())) {
         GetArkUIInternalNodeAPI()->GetAlphabetIndexerModifier().ResetPopupFont(nativeNode);
     }
-    std::string fontSize = "-1";
-    std::string weight = "-1";
-    std::string fontFamily = "-1";
+    CalcDimension fontSizeData(DEFAULT_FONT_SIZE_VAL);
+    std::string fontSize = fontSizeData.ToString();
+    if (!secondArg->IsNull() && !secondArg->IsUndefined() &&
+        ArkTSUtils::ParseJsDimensionFp(vm, secondArg, fontSizeData) && !fontSizeData.IsNegative() &&
+        fontSizeData.Unit() != DimensionUnit::PERCENT) {
+        fontSize = fontSizeData.ToString();
+    }
+    std::string weight = "normal";
+    if (!thirdArg->IsNull() && !thirdArg->IsUndefined() &&
+        (thirdArg->IsString() || thirdArg->IsNumber())) {
+        weight = thirdArg->ToString(vm)->ToString();
+    }
+    std::string fontFamily = DEFAULT_FAMILY;
+    std::vector<std::string> fontFamilies;
+    if (!fourthArg->IsNull() && !fourthArg->IsUndefined()) {
+        ArkTSUtils::ParseJsFontFamilies(vm, fourthArg, fontFamilies);
+        if (fontFamilies.size() > 0) {
+            fontFamily = "";
+            for (uint32_t i = 0; i < fontFamilies.size(); i++) {
+                fontFamily += fontFamilies.at(i);
+            }
+        }
+    }
     int32_t styleVal = 0;
-    fontSize = secondArg->ToString(vm)->ToString();
-    weight = thirdArg->ToString(vm)->ToString();
-    fontFamily = fourthArg->ToString(vm)->ToString();
+    if (!fifthArg->IsNull() && !fifthArg->IsUndefined() && fifthArg->IsNumber()) {
+        styleVal = fifthArg->Int32Value(vm);
+    }
     std::string fontInfo =
         StringUtils::FormatString(FORMAT_FONT.c_str(), fontSize.c_str(), weight.c_str(), fontFamily.c_str());
-    styleVal = fifthArg->Int32Value(vm);
     GetArkUIInternalNodeAPI()->GetAlphabetIndexerModifier().SetPopupFont(nativeNode, fontInfo.c_str(), styleVal);
     return panda::JSValueRef::Undefined(vm);
 }
@@ -191,26 +222,37 @@ ArkUINativeModuleValue AlphabetIndexerBridge::SetFont(ArkUIRuntimeCallInfo* runt
     Local<JSValueRef> fourthArg = runtimeCallInfo->GetCallArgRef(NUM_3);
     Local<JSValueRef> fifthArg = runtimeCallInfo->GetCallArgRef(NUM_4);
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    if (secondArg->IsUndefined() && thirdArg->IsUndefined() && fourthArg->IsUndefined() && fifthArg->IsUndefined()) {
+    if ((secondArg->IsNull() || secondArg->IsUndefined()) &&
+        (thirdArg->IsNull() || thirdArg->IsUndefined()) &&
+        (fourthArg->IsNull() || fourthArg->IsUndefined()) &&
+        (fifthArg->IsNull() || fifthArg->IsUndefined())) {
         GetArkUIInternalNodeAPI()->GetAlphabetIndexerModifier().ResetAlphabetIndexerFont(nativeNode);
     }
     CalcDimension fontSizeData(DEFAULT_FONT_SIZE_VAL);
     std::string fontSize = fontSizeData.ToString();
-    if (ArkTSUtils::ParseJsDimensionFp(vm, secondArg, fontSizeData) && !fontSizeData.IsNegative() &&
+    if (!secondArg->IsNull() && !secondArg->IsUndefined() &&
+        ArkTSUtils::ParseJsDimensionFp(vm, secondArg, fontSizeData) && !fontSizeData.IsNegative() &&
         fontSizeData.Unit() != DimensionUnit::PERCENT) {
         fontSize = fontSizeData.ToString();
     }
     std::string weight = "normal";
-    if (thirdArg->IsString() || thirdArg->IsNumber()) {
+    if (!thirdArg->IsNull() && !thirdArg->IsUndefined() &&
+        (thirdArg->IsString() || thirdArg->IsNumber())) {
         weight = thirdArg->ToString(vm)->ToString();
     }
     std::string fontFamily = DEFAULT_FAMILY;
     std::vector<std::string> fontFamilies;
-    if (ArkTSUtils::ParseJsFontFamilies(vm, fourthArg, fontFamilies)) {
-        fontFamily = fourthArg->ToString(vm)->ToString();
+    if (!fourthArg->IsNull() && !fourthArg->IsUndefined()) {
+        ArkTSUtils::ParseJsFontFamilies(vm, fourthArg, fontFamilies);
+        if (fontFamilies.size() > 0) {
+            fontFamily = "";
+            for (uint32_t i = 0; i < fontFamilies.size(); i++) {
+                fontFamily += fontFamilies.at(i);
+            }
+        }
     }
     int32_t styleVal = 0;
-    if (fifthArg->IsNumber()) {
+    if (!fifthArg->IsNull() && !fifthArg->IsUndefined() && fifthArg->IsNumber()) {
         styleVal = fifthArg->Int32Value(vm);
     }
     std::string fontInfo =
@@ -419,23 +461,19 @@ ArkUINativeModuleValue AlphabetIndexerBridge::SetAlignStyle(ArkUIRuntimeCallInfo
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
-    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
-    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
     Local<JSValueRef> thirdArg = runtimeCallInfo->GetCallArgRef(NUM_2);
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    int32_t value = Container::IsCurrentUseNewPipeline() ? static_cast<int32_t>(NG::AlignStyle::RIGHT)
-                                                         : static_cast<int32_t>(V2::AlignStyle::RIGHT);
     if (!secondArg->IsNumber()) {
         GetArkUIInternalNodeAPI()->GetAlphabetIndexerModifier().ResetAlignStyle(nativeNode);
         return panda::JSValueRef::Undefined(vm);
     }
     int32_t alignValue = secondArg->Int32Value(vm);
-    if (alignValue >= 0 && alignValue < static_cast<int32_t>(ALIGN_STYLE.size())) {
-        value = alignValue;
-    }
-    GetArkUIInternalNodeAPI()->GetAlphabetIndexerModifier().SetAlignStyle(nativeNode, value);
+    GetArkUIInternalNodeAPI()->GetAlphabetIndexerModifier().SetAlignStyle(nativeNode, alignValue);
     CalcDimension popupHorizontalSpace;
-    if (!thirdArg->IsUndefined() && ParseJsDimensionVp(vm, thirdArg, popupHorizontalSpace)) {
+    if (!thirdArg->IsNull() && !thirdArg->IsUndefined() &&
+        ArkTSUtils::ParseJsDimensionVp(vm, thirdArg, popupHorizontalSpace)) {
         GetArkUIInternalNodeAPI()->GetAlphabetIndexerModifier().SetPopupHorizontalSpace(
             nativeNode, popupHorizontalSpace.Value(), static_cast<int>(popupHorizontalSpace.Unit()));
     } else {
@@ -564,10 +602,12 @@ ArkUINativeModuleValue AlphabetIndexerBridge::SetPopupPosition(ArkUIRuntimeCallI
     Local<JSValueRef> sizeY = runtimeCallInfo->GetCallArgRef(NUM_2);
     CalcDimension x;
     CalcDimension y;
-    if (!ParseJsDimensionVp(vm, sizeX, x)) {
+    if (sizeX->IsNull() || sizeX->IsUndefined() ||
+        !ArkTSUtils::ParseJsDimensionVp(vm, sizeX, x)) {
         x = DEFAULT_POPUP_POSITION_X;
     }
-    if (!ParseJsDimensionVp(vm, sizeY, y)) {
+    if (sizeY->IsNull() || sizeY->IsUndefined() ||
+        !ArkTSUtils::ParseJsDimensionVp(vm, sizeY, y)) {
         y = DEFAULT_POPUP_POSITION_Y;
     }
     GetArkUIInternalNodeAPI()->GetAlphabetIndexerModifier().SetPopupPosition(

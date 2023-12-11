@@ -1607,7 +1607,7 @@ void WebPattern::OnModifyDone()
     pipelineContext->AddOnAreaChangeNode(host->GetId());
 
     // offline mode
-    if (!host->IsOnMainTree()) {
+    if (!host->IsOnMainTree() && !webData_) {
         TAG_LOGE(AceLogTag::ACE_WEB, "Web offline mode type");
         isOfflineMode_ = true;
         OfflineMode();

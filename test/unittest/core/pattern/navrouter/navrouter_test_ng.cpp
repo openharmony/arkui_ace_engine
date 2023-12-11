@@ -14,7 +14,6 @@
  */
 
 #include <cstddef>
-#include <fortify/fortify.h>
 #include <list>
 #include <optional>
 #include <string>
@@ -471,7 +470,6 @@ HWTEST_F(NavrouterTestNg, NavrouterTestNg0010, TestSize.Level1)
     auto titleNode = titlePattern->frameNode_.Upgrade();
     ASSERT_NE(titleNode, nullptr);
     auto list = titleNode->GetChildren();
-    list.empty();
 
     auto titleBarNode = AceType::MakeRefPtr<TitleBarNode>("TitleBarNode", 66, titlePattern);
     auto layoutProperty = AceType::MakeRefPtr<NavDestinationLayoutProperty>();
@@ -534,7 +532,6 @@ HWTEST_F(NavrouterTestNg, NavrouterTestNg0011, TestSize.Level1)
     auto titleNode = titlePattern->frameNode_.Upgrade();
     ASSERT_NE(titleNode, nullptr);
     auto list = titleNode->GetChildren();
-    list.empty();
 
     auto titleBarNode = AceType::MakeRefPtr<TitleBarNode>("TitleBarNode", 66, titlePattern);
 

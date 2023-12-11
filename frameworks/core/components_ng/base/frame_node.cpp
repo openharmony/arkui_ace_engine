@@ -1624,7 +1624,8 @@ void FrameNode::AddJudgeToTargetComponent(RefPtr<TargetComponent>& targetCompone
 }
 
 HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& parentLocalPoint,
-    const PointF& parentRevertPoint, const TouchRestrict& touchRestrict, TouchTestResult& result, int32_t touchId)
+    const PointF& parentRevertPoint, const TouchRestrict& touchRestrict, TouchTestResult& result, int32_t touchId,
+    bool isDispatch)
 {
     auto targetComponent = MakeRefPtr<TargetComponent>();
     targetComponent->SetNode(WeakClaim(this));
@@ -1676,7 +1677,7 @@ HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& pare
         ACE_DEBUG_SCOPED_TRACE("FrameNode::IsOutOfTouchTestRegion");
         bool isOutOfRegion = IsOutOfTouchTestRegion(parentRevertPoint, static_cast<int32_t>(touchRestrict.sourceType));
         AddFrameNodeSnapshot(!isOutOfRegion, parentId);
-        if (isOutOfRegion) {
+        if ((!isDispatch) && isOutOfRegion) {
             return HitTestResult::OUT_OF_REGION;
         }
     }
@@ -1698,8 +1699,35 @@ HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& pare
     renderContext_->GetPointWithRevert(revertPoint);
     auto subRevertPoint = revertPoint - origRect.GetOffset();
     bool consumed = false;
+
+    std::vector<TouchTestInfo> touchInfos;
+    CollectTouchInfos(globalPoint, subRevertPoint, touchInfos);
+    TouchResult touchRes = GetOnChildTouchTestRet(touchInfos);
+    if ((touchRes.strategy != TouchTestStrategy::DEFAULT) && touchRes.id.empty()) {
+        TAG_LOGW(AceLogTag::ACE_UIEVENT, "onChildTouchTest result is: id = %{public}s, strategy = %{public}d.",
+            touchRes.id.c_str(), static_cast<int32_t>(touchRes.strategy));
+        touchRes.strategy = TouchTestStrategy::DEFAULT;
+    }
+
+    auto childNode = GetDispatchFrameNode(touchRes);
+    if (childNode != nullptr) {
+        auto hitResult = childNode->TouchTest(
+            globalPoint, localPoint, subRevertPoint, touchRestrict, newComingTargets, touchId, true);
+        if (hitResult == HitTestResult::STOP_BUBBLING) {
+            preventBubbling = true;
+            consumed = true;
+        }
+
+        if (hitResult == HitTestResult::BUBBLING) {
+            consumed = true;
+        }
+    }
+
     for (auto iter = frameChildren_.rbegin(); iter != frameChildren_.rend(); ++iter) {
         if (GetHitTestMode() == HitTestMode::HTMBLOCK) {
+            break;
+        }
+        if (touchRes.strategy == TouchTestStrategy::FORWARD) {
             break;
         }
 
@@ -1707,6 +1735,15 @@ HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& pare
         if (!child) {
             continue;
         }
+
+        std::string id;
+        if (child->GetInspectorId().has_value()) {
+            id = child->GetInspectorId().value();
+        }
+        if (touchRes.strategy == TouchTestStrategy::FORWARD_COMPETITION && touchRes.id == id) {
+            continue;
+        }
+
         auto childHitResult =
             child->TouchTest(globalPoint, localPoint, subRevertPoint, touchRestrict, newComingTargets, touchId);
         if (childHitResult == HitTestResult::STOP_BUBBLING) {
@@ -1739,7 +1776,7 @@ HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& pare
     }
 
     if (!preventBubbling && (GetHitTestMode() != HitTestMode::HTMNONE) &&
-        (InResponseRegionList(revertPoint, responseRegionList))) {
+        (isDispatch || (InResponseRegionList(revertPoint, responseRegionList)))) {
         pattern_->OnTouchTestHit(touchRestrict.hitTestType);
         consumed = true;
         if (touchRestrict.hitTestType == SourceType::TOUCH) {
@@ -2893,6 +2930,7 @@ void FrameNode::LayoutOverlay()
 void FrameNode::DoRemoveChildInRenderTree(uint32_t index, bool isAll)
 {
     isActive_ = false;
+    SetActive(false);
 }
 
 void FrameNode::OnInspectorIdUpdate(const std::string& id)
@@ -2999,6 +3037,89 @@ bool FrameNode::TransferExecuteAction(int32_t elementId, const std::map<std::str
         isExecuted = pattern_->TransferExecuteAction(elementId, actionArguments, action, offset);
     }
     return isExecuted;
+}
+
+TouchResult FrameNode::GetOnChildTouchTestRet(const std::vector<TouchTestInfo>& touchInfo)
+{
+    TouchResult res;
+    res.strategy = TouchTestStrategy::DEFAULT;
+
+    auto func = GetOnTouchTestFunc();
+    if (func == nullptr) {
+        return res;
+    }
+    return func(touchInfo);
+}
+
+OnChildTouchTestFunc FrameNode::GetOnTouchTestFunc()
+{
+    auto gestureHub = eventHub_->GetGestureEventHub();
+    if (gestureHub == nullptr) {
+        return nullptr;
+    }
+    auto& func = gestureHub->GetOnTouchTestFunc();
+    return func;
+}
+
+void FrameNode::CollectTouchInfos(
+    const PointF& globalPoint, const PointF& parentRevertPoint, std::vector<TouchTestInfo>& touchInfos)
+{
+    if (GetHitTestMode() == HitTestMode::HTMBLOCK) {
+        return;
+    }
+    if (GetOnTouchTestFunc() == nullptr) {
+        return;
+    }
+
+    for (auto iter = frameChildren_.rbegin(); iter != frameChildren_.rend(); ++iter) {
+        const auto& child = iter->Upgrade();
+        if (!child) {
+            continue;
+        }
+
+        TouchTestInfo info;
+        if (!child->GetInspectorId().has_value()) {
+            continue;
+        }
+        info.id = child->GetInspectorId().value();
+        info.windowPoint = globalPoint;
+        info.currentCmpPoint = parentRevertPoint;
+
+        auto renderContext = child->GetRenderContext();
+        CHECK_NULL_VOID(renderContext);
+        auto origRect = renderContext->GetPaintRectWithoutTransform();
+        auto revertPoint = parentRevertPoint;
+        renderContext->GetPointWithRevert(revertPoint);
+        auto subRevertPoint = revertPoint - origRect.GetOffset();
+        info.subCmpPoint = subRevertPoint;
+
+        info.subRect = child->GetGeometryNode()->GetFrameRect();
+
+        touchInfos.emplace_back(info);
+    }
+}
+
+RefPtr<FrameNode> FrameNode::GetDispatchFrameNode(const TouchResult& touchRes)
+{
+    if (GetHitTestMode() == HitTestMode::HTMBLOCK) {
+        return nullptr;
+    }
+    if (touchRes.strategy != TouchTestStrategy::FORWARD_COMPETITION &&
+        touchRes.strategy != TouchTestStrategy::FORWARD) {
+        return nullptr;
+    }
+
+    for (auto iter = frameChildren_.rbegin(); iter != frameChildren_.rend(); ++iter) {
+        const auto& child = iter->Upgrade();
+        if (!child) {
+            continue;
+        }
+        std::string id = child->GetInspectorId().value_or("");
+        if ((!touchRes.id.empty()) && (touchRes.id == id)) {
+            return child;
+        }
+    }
+    return nullptr;
 }
 
 } // namespace OHOS::Ace::NG

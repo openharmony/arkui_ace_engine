@@ -204,7 +204,7 @@ public:
         onLongPress = std::move(onLongPress_);
     }
     std::string GetSpanContent(const std::string& rawContent);
-
+    
     std::string GetSpanContent();
 
 private:

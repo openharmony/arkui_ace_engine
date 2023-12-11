@@ -21,4 +21,4 @@ FrameTraceAdapter* FrameTraceAdapter::GetInstance()
     static MockFrameTraceAdapter instance;
     return &instance;
 }
-}
+} // namespace OHOS::Ace

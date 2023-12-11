@@ -24,7 +24,6 @@
 
 #define protected public
 #define private public
-#include "interfaces/inner_api/ace/ui_content.h"
 #include "test/mock/base/mock_task_executor.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 
@@ -335,7 +334,8 @@ HWTEST_F(InspectorTestNg, InspectorTestNg007, TestSize.Level1)
      */
     auto pageRootNode = context1->GetStageManager()->GetLastPage();
     auto test = Inspector::GetInspector(false);
-    EXPECT_EQ(test, "{\"$type\":\"root\",\"width\":\"0.000000\",\"height\":\"0.000000\",\"$resolution\":\"0.000000\"}");
+    auto str = "{\"$type\":\"root\",\"width\":\"720.000000\",\"height\":\"1280.000000\",\"$resolution\":\"1.000000\"}";
+    EXPECT_EQ(test, str);
 
     context1->stageManager_ = nullptr;
 }

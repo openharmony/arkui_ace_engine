@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_QRCODE_QRCODE_MODEL_NG_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_QRCODE_QRCODE_MODEL_NG_H
 
+#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/qrcode/qrcode_model.h"
 
 namespace OHOS::Ace::NG {
@@ -25,6 +26,10 @@ public:
     void SetQRCodeColor(const Color& color) override;
     void SetQRBackgroundColor(const Color& color) override;
     void SetContentOpacity(const double opacity) override;
+    
+    static void SetQRCodeColor(FrameNode* frameNode, const Color& color);
+    static void SetQRBackgroundColor(FrameNode* frameNode, const Color& color);
+    static void SetContentOpacity(FrameNode* frameNode, const double opacity);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_QRCODE_QRCODE_MODEL_NG_H

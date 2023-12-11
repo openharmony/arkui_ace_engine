@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,22 +13,17 @@
  * limitations under the License.
  */
 
-#include "core/components/common/properties/motion_path_evaluator.h"
+#include "core/common/modal_ui_extension.h"
 
 namespace OHOS::Ace {
-MotionPathEvaluator::MotionPathEvaluator(
-    const MotionPathOption& option, const Offset& start, const Offset& end, PositionType type)
-    : motionPathOption_(option), startPoint_(start), endPoint_(end), positionType_(type)
-{}
-
-DimensionOffset DimensionOffsetEvaluator::Evaluate(
-    const DimensionOffset& start, const DimensionOffset& end, float fraction)
+RefPtr<NG::FrameNode> ModalUIExtension::Create(
+    const AAFwk::Want& /* want */, const ModalUIExtensionCallbacks& /* callbacks */)
 {
-    return DimensionOffset();
+    return nullptr;
 }
 
-float RotateEvaluator::Evaluate(const float& start, const float& end, float fraction)
+int32_t ModalUIExtension::GetSessionId(const RefPtr<NG::FrameNode>& /* uiExtNode */)
 {
-    return 0.0f;
+    return 0;
 }
 } // namespace OHOS::Ace

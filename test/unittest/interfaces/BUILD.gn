@@ -14,7 +14,7 @@
 import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
 ohos_unittest("viewport_config_test") {
-  module_out_path = "$interface_test_output_path/inner_api"
+  module_out_path = interface_test_output_path
 
   sources = [ "viewport_config_test.cpp" ]
 
@@ -22,7 +22,7 @@ ohos_unittest("viewport_config_test") {
 }
 
 ohos_unittest("ui_content_test") {
-  module_out_path = "$interface_test_output_path/inner_api"
+  module_out_path = interface_test_output_path
 
   sources = [
     "$ace_root/frameworks/core/common/container_scope.cpp",
@@ -62,7 +62,7 @@ ohos_unittest("ui_content_test") {
 }
 
 ohos_unittest("form_render_test") {
-  module_out_path = "$interface_test_output_path/inner_api"
+  module_out_path = interface_test_output_path
   include_dirs = [
     "$ace_root/interfaces/inner_api/form_render/include",
     "${accessibility_path}/interfaces/innerkits/common/include/",
@@ -76,18 +76,20 @@ ohos_unittest("form_render_test") {
     "$ace_root/interfaces/inner_api/form_render/src/form_renderer_dispatcher_proxy.cpp",
     "$ace_root/interfaces/inner_api/form_render/src/form_renderer_dispatcher_stub.cpp",
     "$ace_root/interfaces/inner_api/form_render/src/form_renderer_group.cpp",
+    "$ace_root/test/mock/base/mock_ace_performance_check.cpp",
+    "$ace_root/test/mock/base/mock_engine_helper.cpp",
     "$ace_root/test/mock/base/mock_frame_trace_adapter.cpp",
     "$ace_root/test/mock/base/mock_ressched_report.cpp",
     "$ace_root/test/mock/base/mock_system_properties.cpp",
     "$ace_root/test/mock/core/common/mock_ace_application_info.cpp",
     "$ace_root/test/mock/core/common/mock_container.cpp",
+    "$ace_root/test/mock/core/common/mock_scrollable.cpp",
     "$ace_root/test/mock/core/image_provider/mock_image_source_info.cpp",
     "$ace_root/test/mock/core/pipeline/mock_element_register.cpp",
     "$ace_root/test/mock/core/pipeline/mock_pipeline_context.cpp",
     "$ace_root/test/mock/core/render/mock_animation_utils.cpp",
     "$ace_root/test/mock/core/render/mock_render_context_creator.cpp",
     "$ace_root/test/mock/interfaces/mock_uicontent_creator.cpp",
-    "$ace_root/test/unittest/core/event/mock_scrollable.cpp",
     "form_render_test.cpp",
   ]
 
@@ -133,7 +135,7 @@ ohos_unittest("form_render_test") {
 }
 
 ohos_unittest("drawable_descriptor_test") {
-  module_out_path = "$interface_test_output_path/inner_api"
+  module_out_path = interface_test_output_path
 
   sources = [
     "$ace_root/interfaces/inner_api/drawable_descriptor/drawable_descriptor.cpp",
@@ -165,7 +167,7 @@ ohos_unittest("drawable_descriptor_test") {
 }
 
 ohos_unittest("ace_forward_compatibility_test") {
-  module_out_path = "$interface_test_output_path/inner_api"
+  module_out_path = interface_test_output_path
 
   sources = [
     "$ace_root/interfaces/inner_api/ace/ace_forward_compatibility.cpp",

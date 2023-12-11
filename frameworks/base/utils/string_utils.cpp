@@ -21,10 +21,8 @@
 
 namespace OHOS::Ace::StringUtils {
 namespace {
-
 const size_t MAX_STRING_SIZE = 256;
-
-}
+} // namespace
 
 const char DEFAULT_STRING[] = "error";
 const std::wstring DEFAULT_WSTRING = L"error";

@@ -73,7 +73,7 @@ public:
     void RemoveIndexerPopupById(int32_t targetId);
     void RemoveIndexerPopup();
     void HidePopup(int32_t targetId, const PopupInfo& popupInfo);
-    void HidePopupWithoutAnimation(int32_t targetId, const PopupInfo& popupInfo);
+    RefPtr<FrameNode> HidePopupWithoutAnimation(int32_t targetId, const PopupInfo& popupInfo);
     void ShowPopup(int32_t targetId, const PopupInfo& popupInfo);
     void ErasePopup(int32_t targetId);
     void HideAllPopups();
@@ -91,6 +91,13 @@ public:
     bool HasPopupInfo(int32_t targetId) const
     {
         return popupMap_.find(targetId) != popupMap_.end();
+    }
+
+    void ErasePopupInfo(int32_t targetId)
+    {
+        if (popupMap_.find(targetId) != popupMap_.end()) {
+            popupMap_.erase(targetId);
+        }
     }
 
     void ShowMenu(int32_t targetId, const NG::OffsetF& offset, RefPtr<FrameNode> menu = nullptr);
@@ -368,7 +375,8 @@ private:
     std::unordered_map<int32_t, RefPtr<FrameNode>> customKeyboardMap_;
     std::stack<WeakPtr<FrameNode>> modalStack_;
     std::list<WeakPtr<FrameNode>> modalList_;
-    WeakPtr<FrameNode> lastModalNode_;
+    std::unordered_map<int32_t, WeakPtr<FrameNode>> sheetMap_;
+    WeakPtr<FrameNode> lastModalNode_; // Previous Modal Node
     float sheetHeight_ { 0.0 };
     WeakPtr<UINode> rootNodeWeak_;
     int32_t dialogCount_ = 0;

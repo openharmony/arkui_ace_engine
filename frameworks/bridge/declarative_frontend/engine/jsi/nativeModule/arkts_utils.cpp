@@ -547,6 +547,13 @@ bool ArkTSUtils::ParseJsDimension(const EcmaVM *vm, const Local<JSValueRef> &jsV
         if (stringValue.back() == '%' && !isSupportPercent) {
             return false;
         }
+        errno = 0;
+        char* pEnd = nullptr;
+        std::string str = jsValue->ToString(vm)->ToString();
+        std::strtod(str.c_str(), &pEnd);
+        if (pEnd == str.c_str() || errno == ERANGE) {
+            return false;
+        }
         result = StringUtils::StringToCalcDimension(jsValue->ToString(vm)->ToString(), false, defaultUnit);
         return true;
     }
@@ -815,7 +822,7 @@ bool ArkTSUtils::ParseJsStringFromResource(const EcmaVM* vm, const Local<JSValue
     auto obj = jsValue->ToObject(vm);
     auto type = obj->Get(vm, panda::StringRef::NewFromUtf8(vm, "type"));
     auto resId = obj->Get(vm, panda::StringRef::NewFromUtf8(vm, "id"));
-    auto args = obj->Get(vm, panda::StringRef::NewFromUtf8(vm, "args"));
+    auto args = obj->Get(vm, panda::StringRef::NewFromUtf8(vm, "params"));
     if (!type->IsNumber() || !resId->IsNumber() || !args->IsArray(vm)) {
         return false;
     }

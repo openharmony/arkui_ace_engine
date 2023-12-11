@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_ADAPTER_PREVIEW_ACE_PREVIEW_HELPER_H
 
 #include <functional>
+#include <string>
 
 #include "base/utils/macros.h"
 

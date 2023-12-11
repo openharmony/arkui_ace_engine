@@ -30,6 +30,7 @@
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/render/canvas_image.h"
 #include "core/image/image_source_info.h"
+#include "interfaces/inner_api/ace/ai/image_analyzer.h"
 
 namespace OHOS::Ace::NG {
 
@@ -107,6 +108,13 @@ public:
         syncLoad_ = value;
     }
 
+    void EnableAnalyzer(bool value)
+    {
+        isEnableAnalyzer_ = value;
+    }
+
+    void SetImageAnalyzerConfig(const ImageAnalyzerConfig& config);
+
     void BeforeCreatePaintWrapper() override;
     void DumpAdvanceInfo() override;
 
@@ -172,6 +180,10 @@ private:
     void LoadImage(const ImageSourceInfo& src);
     void LoadAltImage(const RefPtr<ImageLayoutProperty>& imageLayoutProperty);
 
+    void UpdateAnalyzerUIConfig(const RefPtr<LayoutWrapper>& dirty);
+    void CreateAnalyzerOverlay();
+    bool IsSupportImageAnalyzerFeature();
+
     CopyOptions copyOption_ = CopyOptions::None;
 
     RefPtr<ImageLoadingContext> loadingCtx_;
@@ -192,10 +204,17 @@ private:
     RefPtr<InputEvent> mouseEvent_;
     RefPtr<Clipboard> clipboard_;
     RefPtr<SelectOverlayProxy> selectOverlay_;
+    ImageAnalyzerConfig analyzerConfig_;
+    ImageAnalyzerInnerConfig analyzerUIConfig_;
+
+    void* aiNapiValue_ = nullptr;
+    void* overlayData_ = nullptr;
 
     bool syncLoad_ = false;
     bool isShow_ = true;
-
+    bool isEnableAnalyzer_ = false;
+    bool isAnalyzerOverlayBuild_ = false;
+ 
     ACE_DISALLOW_COPY_AND_MOVE(ImagePattern);
 };
 
