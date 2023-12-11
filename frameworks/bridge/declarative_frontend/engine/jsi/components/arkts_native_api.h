@@ -1124,6 +1124,19 @@ struct ArkUIWaterFlowModifierAPI {
     void (*ResetWaterFlowFriction)(NodeHandle node);
 };
 
+struct ArkUIMarqueeModifierAPI {
+    void (*SetMarqueeFontSize)(NodeHandle node, double value, int unit);
+    void (*ResetMarqueeFontSize)(NodeHandle node);
+    void (*SetMarqueeFontColor)(NodeHandle node, uint32_t color);
+    void (*ResetMarqueeFontColor)(NodeHandle node);
+    void (*SetMarqueeAllowScale)(NodeHandle node, bool allowScale);
+    void (*ResetMarqueeAllowScale)(NodeHandle node);
+    void (*SetMarqueeFontWeight)(NodeHandle node, const char *fontWeight);
+    void (*ResetMarqueeFontWeight)(NodeHandle node);
+    void (*SetMarqueeFontFamily)(NodeHandle node, const char *fontFamily);
+    void (*ResetMarqueeFontFamily)(NodeHandle node);
+};
+
 struct ArkUIDatePickerModifierAPI {
     void (*SetSelectedTextStyle)(
     NodeHandle node, const char* fontInfo, uint32_t color, int32_t style);
@@ -1385,6 +1398,7 @@ struct ArkUINodeAPI {
     ArkUITabsModifierAPI (*GetTabsModifier)();
     ArkUIStepperItemModifierAPI (*GetStepperItemModifier)();
     ArkUIHyperlinkModifierAPI (*GetHyperlinkModifier)();
+    ArkUIMarqueeModifierAPI (*GetMarqueeModifier)();
     ArkUIMenuItemModifierAPI (*GetMenuItemModifier)();
     ArkUIMenuModifierAPI (*GetMenuModifier)();
     ArkUIDatePickerModifierAPI (*GetDatePickerModifier)();

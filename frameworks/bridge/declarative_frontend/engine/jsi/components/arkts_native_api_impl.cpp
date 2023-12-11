@@ -66,6 +66,7 @@
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_qrcode_modifier.h"
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_water_flow_modifier.h"
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_side_bar_container_modifier.h"
+#include "bridge/declarative_frontend/engine/jsi/components/arkts_native_marquee_modifier.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_abstract.h"
@@ -142,6 +143,7 @@ static struct ArkUINodeAPI impl = {
     GetTabsModifier,
     GetStepperItemModifier,
     GetHyperlinkModifier,
+    GetMarqueeModifier,
     GetMenuItemModifier,
     GetMenuModifier,
     GetDatePickerModifier,
