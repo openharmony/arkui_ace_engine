@@ -547,7 +547,7 @@ public:
     template<typename T>
     bool GetDraggable()
     {
-        if (IsJsCard()) {
+        if (isJsCard_ || isFormRender_) {
             return false;
         }
         auto theme = GetTheme<T>();
