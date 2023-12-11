@@ -641,6 +641,48 @@ struct ArkUIStackModifierAPI {
     void (*ResetAlignContent)(NodeHandle node);
 };
 
+struct ArkUIGridModifierAPI {
+    void (*SetGridColumnsTemplate)(NodeHandle node, const char* columnsTemplate);
+    void (*ResetGridColumnsTemplate)(NodeHandle node);
+    void (*SetGridRowsTemplate)(NodeHandle node, const char* rowsTemplate);
+    void (*ResetGridRowsTemplate)(NodeHandle node);
+    void (*SetGridColumnsGap)(NodeHandle node, const struct ArkUIResourceLength* columnsGap);
+    void (*ResetGridColumnsGap)(NodeHandle node);
+    void (*SetGridRowsGap)(NodeHandle node, const struct ArkUIResourceLength* rowsGap);
+    void (*ResetGridRowsGap)(NodeHandle node);
+    void (*SetGridScrollBar)(NodeHandle node, const int32_t scrollBar);
+    void (*ResetGridScrollBar)(NodeHandle node);
+    void (*SetGridScrollBarWidth)(NodeHandle node, OHOS::Ace::Dimension& scrollBarWidth);
+    void (*ResetGridScrollBarWidth)(NodeHandle node);
+    void (*SetGridScrollBarColor)(NodeHandle node, uint32_t scrollBarColor);
+    void (*ResetGridScrollBarColor)(NodeHandle node);
+    void (*SetGridCachedCount)(NodeHandle node, const int32_t cachedCount);
+    void (*ResetGridCachedCount)(NodeHandle node);
+    void (*SetGridEditMode)(NodeHandle node, bool editMode);
+    void (*ResetGridEditMode)(NodeHandle node);
+    void (*SetGridMultiSelectable)(NodeHandle node, bool multiSelectable);
+    void (*ResetGridMultiSelectable)(NodeHandle node);
+    void (*SetGridMaxCount)(NodeHandle node, int32_t maxCount);
+    void (*ResetGridMaxCount)(NodeHandle node);
+    void (*SetGridMinCount)(NodeHandle node, int32_t minCount);
+    void (*ResetGridMinCount)(NodeHandle node);
+    void (*SetGridCellLength)(NodeHandle node, int32_t cellLength);
+    void (*ResetGridCellLength)(NodeHandle node);
+    void (*SetGridLayoutDirection)(NodeHandle node, int32_t layoutDirection);
+    void (*ResetGridLayoutDirection)(NodeHandle node);
+    void (*SetGridSupportAnimation)(NodeHandle node, bool supportAnimation);
+    void (*ResetGridSupportAnimation)(NodeHandle node);
+
+    void (*SetEdgeEffect)(NodeHandle node, int32_t edgeEffect, bool alwaysEnabled);
+    void (*ResetEdgeEffect)(NodeHandle node);
+    void (*SetNestedScroll)(NodeHandle node, int32_t forward, int32_t backward);
+    void (*ResetNestedScroll)(NodeHandle node);
+    void (*SetEnableScroll)(NodeHandle node, bool ScrollEnabled);
+    void (*ResetEnableScroll)(NodeHandle node);
+    void (*SetFriction)(NodeHandle node, double friction);
+    void (*ResetFriction)(NodeHandle node);
+};
+
 struct ArkUIGridColModifierAPI {
     void (*SetSpan)(NodeHandle node, int32_t* containerSizeArray, int32_t size);
     void (*ResetSpan)(NodeHandle node);
@@ -1233,6 +1275,7 @@ struct ArkUINodeAPI {
     ArkUIDividerModifierAPI (*GetDividerModifier)();
     ArkUIStackModifierAPI (*GetStackModifier)();
     ArkUINavDestinationModifierAPI (*GetNavDestinationModifier)();
+    ArkUIGridModifierAPI (*GetGridModifier)();
     ArkUIGridColModifierAPI (*GetGridColModifier)();
     ArkUIGridRowModifierAPI (*GetGridRowModifier)();
     ArkUIPanelModifierAPI (*GetPanelModifier)();

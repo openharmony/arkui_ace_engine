@@ -23,6 +23,7 @@
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_image_animator_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_counter_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_divider_bridge.h"
+#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_grid_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_grid_col_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_grid_row_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_hyperlink_bridge.h"
@@ -1097,6 +1098,7 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
     RegisterShapeAttributes(object, vm);
     RegisterRectAttributes(object, vm);
     RegisterListAttributes(object, vm);
+    RegisterGridAttributes(object, vm);
     RegisterLisitItemGroupAttributes(object, vm);
 
 #ifdef FORM_SUPPORTED
@@ -1462,6 +1464,88 @@ void ArkUINativeModule::RegisterDividerAttributes(Local<panda::ObjectRef> object
     divider->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetVertical"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), DividerBridge::ResetVertical));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "divider"), divider);
+}
+
+void ArkUINativeModule::RegisterGridAttributes(Local<panda::ObjectRef> object, EcmaVM* vm)
+{
+    auto grid = panda::ObjectRef::New(vm);
+    grid->Set(vm, panda::StringRef::NewFromUtf8(vm, "setColumnsTemplate"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), GridBridge::SetColumnsTemplate));
+    grid->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetColumnsTemplate"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), GridBridge::ResetColumnsTemplate));
+    grid->Set(vm, panda::StringRef::NewFromUtf8(vm, "setRowsTemplate"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), GridBridge::SetRowsTemplate));
+    grid->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetRowsTemplate"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), GridBridge::ResetRowsTemplate));
+    grid->Set(vm, panda::StringRef::NewFromUtf8(vm, "setColumnsGap"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), GridBridge::SetColumnsGap));
+    grid->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetColumnsGap"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), GridBridge::ResetColumnsGap));
+    grid->Set(vm, panda::StringRef::NewFromUtf8(vm, "setRowsGap"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), GridBridge::SetRowsGap));
+    grid->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetRowsGap"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), GridBridge::ResetRowsGap));
+    grid->Set(vm, panda::StringRef::NewFromUtf8(vm, "setScrollBar"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), GridBridge::SetScrollBar));
+    grid->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetScrollBar"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), GridBridge::ResetScrollBar));
+    grid->Set(vm, panda::StringRef::NewFromUtf8(vm, "setScrollBarWidth"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), GridBridge::SetScrollBarWidth));
+    grid->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetScrollBarWidth"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), GridBridge::ResetScrollBarWidth));
+    grid->Set(vm, panda::StringRef::NewFromUtf8(vm, "setScrollBarColor"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), GridBridge::SetScrollBarColor));
+    grid->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetScrollBarColor"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), GridBridge::ResetScrollBarColor));
+    grid->Set(vm, panda::StringRef::NewFromUtf8(vm, "setCachedCount"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), GridBridge::SetCachedCount));
+    grid->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetCachedCount"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), GridBridge::ResetCachedCount));
+    grid->Set(vm, panda::StringRef::NewFromUtf8(vm, "setEditMode"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), GridBridge::SetEditMode));
+    grid->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetEditMode"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), GridBridge::ResetEditMode));
+    grid->Set(vm, panda::StringRef::NewFromUtf8(vm, "setMultiSelectable"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), GridBridge::SetMultiSelectable));
+    grid->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetMultiSelectable"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), GridBridge::ResetMultiSelectable));
+    grid->Set(vm, panda::StringRef::NewFromUtf8(vm, "setMaxCount"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), GridBridge::SetMaxCount));
+    grid->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetMaxCount"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), GridBridge::ResetMaxCount));
+    grid->Set(vm, panda::StringRef::NewFromUtf8(vm, "setMinCount"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), GridBridge::SetMinCount));
+    grid->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetMinCount"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), GridBridge::ResetMinCount));
+    grid->Set(vm, panda::StringRef::NewFromUtf8(vm, "setCellLength"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), GridBridge::SetCellLength));
+    grid->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetCellLength"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), GridBridge::ResetCellLength));
+    grid->Set(vm, panda::StringRef::NewFromUtf8(vm, "setLayoutDirection"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), GridBridge::SetLayoutDirection));
+    grid->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetLayoutDirection"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), GridBridge::ResetLayoutDirection));
+    grid->Set(vm, panda::StringRef::NewFromUtf8(vm, "setSupportAnimation"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), GridBridge::SetSupportAnimation));
+    grid->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetSupportAnimation"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), GridBridge::ResetSupportAnimation));
+    grid->Set(vm, panda::StringRef::NewFromUtf8(vm, "setEdgeEffect"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), GridBridge::SetEdgeEffect));
+    grid->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetEdgeEffect"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), GridBridge::ResetEdgeEffect));
+    grid->Set(vm, panda::StringRef::NewFromUtf8(vm, "setNestedScroll"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), GridBridge::SetNestedScroll));
+    grid->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetNestedScroll"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), GridBridge::ResetNestedScroll));
+    grid->Set(vm, panda::StringRef::NewFromUtf8(vm, "setEnableScroll"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), GridBridge::SetEnableScroll));
+    grid->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetEnableScroll"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), GridBridge::ResetEnableScroll));
+    grid->Set(vm, panda::StringRef::NewFromUtf8(vm, "setFriction"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), GridBridge::SetFriction));
+    grid->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetFriction"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), GridBridge::ResetFriction));
+    object->Set(vm, panda::StringRef::NewFromUtf8(vm, "grid"), grid);
 }
 
 void ArkUINativeModule::RegisterNavigationAttributes(Local<panda::ObjectRef> object, EcmaVM* vm)

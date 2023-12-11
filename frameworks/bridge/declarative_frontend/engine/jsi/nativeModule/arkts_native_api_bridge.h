@@ -67,6 +67,7 @@ private:
     static void RegisterShapeAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterRectAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterListAttributes(Local<panda::ObjectRef> object, EcmaVM* vm); 
+    static void RegisterGridAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterLisitItemGroupAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
 };
 } // namespace OHOS::Ace::NG
