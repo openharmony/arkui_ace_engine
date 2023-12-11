@@ -304,9 +304,6 @@ void ButtonPattern::HandleBackgroundColor()
     if (!renderContext->HasBackgroundColor()) {
         renderContext->UpdateBackgroundColor(buttonTheme->GetBgColor(buttonStyle));
     }
-    if (!layoutProperty->HasFontColor() && !renderContext->HasForegroundColor()) {
-        renderContext->UpdateForegroundColor(buttonTheme->GetTextColor(buttonStyle));
-    }
 }
 
 void ButtonPattern::HandleEnabled()
