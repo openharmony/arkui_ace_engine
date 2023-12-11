@@ -602,6 +602,7 @@ public:
     void OnWindowExit();
     void OnPageVisible(const std::string& url);
     void OnDataResubmitted(std::shared_ptr<OHOS::NWeb::NWebDataResubmissionCallback> handler);
+    void OnNavigationEntryCommitted(std::shared_ptr<OHOS::NWeb::NWebLoadCommittedDetails> details);
     void OnFaviconReceived(const void* data, size_t width, size_t height, OHOS::NWeb::ImageColorType colorType,
         OHOS::NWeb::ImageAlphaType alphaType);
     void OnTouchIconUrl(const std::string& iconUrl, bool precomposed);
@@ -789,6 +790,7 @@ private:
     EventCallbackV2 onFirstContentfulPaintV2_;
     EventCallbackV2 onOverScrollV2_;
     EventCallbackV2 onScreenCaptureRequestV2_;
+    EventCallbackV2 onNavigationEntryCommittedV2_;
 
     int32_t webType_;
     std::string bundlePath_;

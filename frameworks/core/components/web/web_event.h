@@ -30,6 +30,14 @@ enum DialogEventType {
     DIALOG_EVENT_PROMPT = 3
 };
 
+enum class NavigationType {
+    NAVIGATION_TYPE_UNKNOWN = 0,
+    NAVIGATION_TYPE_MAIN_FRAME_NEW_ENTRY = 1,
+    NAVIGATION_TYPE_MAIN_FRAME_EXISTING_ENTRY = 2,
+    NAVIGATION_TYPE_NEW_SUBFRAME = 4,
+    NAVIGATION_TYPE_AUTO_SUBFRAME = 5,
+};
+
 class WebConsoleLog : public AceType {
     DECLARE_ACE_TYPE(WebConsoleLog, AceType)
 public:
@@ -1424,6 +1432,45 @@ public:
 private:
     float xOffset_ = 0.0f;
     float yOffset_ = 0.0f;
+};
+
+class ACE_EXPORT NavigationEntryCommittedEvent : public BaseEventInfo {
+    DECLARE_RELATIONSHIP_OF_CLASSES(NavigationEntryCommittedEvent, BaseEventInfo);
+
+public:
+    NavigationEntryCommittedEvent(const std::string& url, NavigationType type,
+        bool isMainFrame, bool isSameDocument, bool didReplaceEntry)
+        : BaseEventInfo("NavigationEntryCommittedEvent"), url_(url), type_(type),
+          isMainFrame_(isMainFrame), isSameDocument_(isSameDocument),
+          didReplaceEntry_(didReplaceEntry) {}
+    ~NavigationEntryCommittedEvent() = default;
+
+    const std::string& GetUrl() const {
+        return url_;
+    }
+
+    NavigationType GetNavigationType() const {
+        return type_;
+    }
+
+    bool IsMainFrame() const {
+        return isMainFrame_;
+    }
+
+    bool IsSameDocument() const {
+        return isSameDocument_;
+    }
+
+    bool DidReplaceEntry() const {
+        return didReplaceEntry_;
+    }
+
+private:
+    std::string url_;
+    NavigationType type_ = NavigationType::NAVIGATION_TYPE_UNKNOWN;
+    bool isMainFrame_ = false;
+    bool isSameDocument_ = false;
+    bool didReplaceEntry_ = false;
 };
 } // namespace OHOS::Ace
 

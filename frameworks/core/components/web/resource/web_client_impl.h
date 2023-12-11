@@ -184,6 +184,7 @@ public:
     void OnWindowExitByJS() override;
     void OnPageVisible(const std::string& url) override;
     void OnDataResubmission(std::shared_ptr<NWeb::NWebDataResubmissionCallback> handler) override;
+    void OnNavigationEntryCommitted(std::shared_ptr<NWeb::NWebLoadCommittedDetails> details) override;
     void OnPageIcon(
         const void* data,
         size_t width,
