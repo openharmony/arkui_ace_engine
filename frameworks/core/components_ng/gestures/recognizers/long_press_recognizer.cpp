@@ -52,7 +52,9 @@ LongPressRecognizer::LongPressRecognizer(
 
 void LongPressRecognizer::OnAccepted()
 {
-    TAG_LOGI(AceLogTag::ACE_GESTURE, "Long press gesture has been accepted");
+    auto node = GetAttachedNode().Upgrade();
+    TAG_LOGI(AceLogTag::ACE_GESTURE, "Long press gesture has been accepted, node tag = %{public}s, id = %{public}s",
+        node ? node->GetTag().c_str() : "null", node ? std::to_string(node->GetId()).c_str() : "invalid");
     if (onAccessibilityEventFunc_) {
         onAccessibilityEventFunc_(AccessibilityEventType::LONG_PRESS);
     }

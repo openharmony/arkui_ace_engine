@@ -62,7 +62,9 @@ double ComputeAngle(double x, double y)
 
 void SwipeRecognizer::OnAccepted()
 {
-    TAG_LOGI(AceLogTag::ACE_GESTURE, "Swipe gesture has been accepted");
+    auto node = GetAttachedNode().Upgrade();
+    TAG_LOGI(AceLogTag::ACE_GESTURE, "Swipe gesture has been accepted, node tag = %{public}s, id = %{public}s",
+        node ? node->GetTag().c_str() : "null", node ? std::to_string(node->GetId()).c_str() : "invalid");
     refereeState_ = RefereeState::SUCCEED;
     SendCallbackMsg(onAction_);
 }
@@ -403,7 +405,7 @@ RefPtr<GestureSnapshot> SwipeRecognizer::Dump() const
 {
     RefPtr<GestureSnapshot> info = NGGestureRecognizer::Dump();
     std::stringstream oss;
-    oss << "direction: " <<  direction_.type << ", "
+    oss << "direction: " << direction_.type << ", "
         << "speed: " << speed_ << ", "
         << "fingers: " << fingers_;
     info->customInfo = oss.str();
