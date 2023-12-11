@@ -35,8 +35,9 @@ enum class SignalType {
     SIGNAL_JSHEAP_OLD,
     SIGNAL_JSHEAP,
     SIGNAL_JSHEAP_PRIV,
-    SIGNAL_START_SAMPLE,
-    SIGNAL_STOP_SAMPLE,
+    SIGNAL_NO_TRIGGERID,
+    SIGNAL_NO_TRIGGERID_PRIV,
+    SIGNAL_FORCE_FULLGC,
 };
 
 void HandleSignal(int signal, [[maybe_unused]] siginfo_t *siginfo, void *context)
@@ -60,12 +61,18 @@ void HandleSignal(int signal, [[maybe_unused]] siginfo_t *siginfo, void *context
             AceEngine::Get().DumpJsHeap(true);
             break;
         }
-        case SignalType::SIGNAL_START_SAMPLE: {
-            LOGW("HandleSignal failed, SIGNAL_START_SAMPLE is retained");
+        case SignalType::SIGNAL_NO_TRIGGERID: {
+            AceEngine::Get().DumpJsHeap(false);
+            AceEngine::Get().DestroyHeapProfiler();
             break;
         }
-        case SignalType::SIGNAL_STOP_SAMPLE: {
-            LOGW("HandleSignal failed, SIGNAL_STOP_SAMPLE is retained");
+        case SignalType::SIGNAL_NO_TRIGGERID_PRIV: {
+            AceEngine::Get().DumpJsHeap(true);
+            AceEngine::Get().DestroyHeapProfiler();
+            break;
+        }
+        case SignalType::SIGNAL_FORCE_FULLGC: {
+            AceEngine::Get().ForceFullGC();
             break;
         }
         default:
@@ -211,6 +218,30 @@ void AceEngine::DumpJsHeap(bool isPrivate) const
     }
     for (const auto& container : copied) {
         container.second->DumpHeapSnapshot(isPrivate);
+    }
+}
+
+void AceEngine::DestroyHeapProfiler() const
+{
+    std::unordered_map<int32_t, RefPtr<Container>> copied;
+    {
+        std::shared_lock<std::shared_mutex> lock(mutex_);
+        copied = containerMap_;
+    }
+    for (const auto& container : copied) {
+        container.second->DestroyHeapProfiler();
+    }
+}
+
+void AceEngine::ForceFullGC() const
+{
+    std::unordered_map<int32_t, RefPtr<Container>> copied;
+    {
+        std::shared_lock<std::shared_mutex> lock(mutex_);
+        copied = containerMap_;
+    }
+    for (const auto& container : copied) {
+        container.second->ForceFullGC();
     }
 }
 

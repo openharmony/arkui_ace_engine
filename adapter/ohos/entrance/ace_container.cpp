@@ -1223,6 +1223,28 @@ void AceContainer::DumpHeapSnapshot(bool isPrivate)
         TaskExecutor::TaskType::JS);
 }
 
+void AceContainer::DestroyHeapProfiler()
+{
+    taskExecutor_->PostTask(
+        [frontend = WeakPtr<Frontend>(frontend_)] {
+            auto sp = frontend.Upgrade();
+            CHECK_NULL_VOID(sp);
+            sp->DestroyHeapProfiler();
+        },
+        TaskExecutor::TaskType::JS);
+}
+
+void AceContainer::ForceFullGC()
+{
+    taskExecutor_->PostTask(
+        [frontend = WeakPtr<Frontend>(frontend_)] {
+            auto sp = frontend.Upgrade();
+            CHECK_NULL_VOID(sp);
+            sp->ForceFullGC();
+        },
+        TaskExecutor::TaskType::JS);
+}
+
 void AceContainer::SetLocalStorage(NativeReference* storage, NativeReference* context)
 {
     ContainerScope scope(instanceId_);

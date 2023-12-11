@@ -80,6 +80,8 @@ public:
     virtual bool HasPendingException() = 0;
     virtual void ExecutePendingJob() = 0;
     virtual void DumpHeapSnapshot(bool isPrivate) {}
+    virtual void DestroyHeapProfiler() {}
+    virtual void ForceFullGC() {}
     virtual void SetErrorEventHandler(
         std::function<void(const std::string&, const std::string&)>&& errorCallback) {}
 

@@ -777,6 +777,20 @@ void JsFrontend::DumpHeapSnapshot(bool isPrivate)
     }
 }
 
+void JsFrontend::DestroyHeapProfiler()
+{
+    if (jsEngine_) {
+        jsEngine_->DestroyHeapProfiler();
+    }
+}
+
+void JsFrontend::ForceFullGC()
+{
+    if (jsEngine_) {
+        jsEngine_->ForceFullGC();
+    }
+}
+
 void JsFrontend::RebuildAllPages()
 {
     if (delegate_) {

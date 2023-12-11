@@ -47,6 +47,8 @@ public:
     static AceEngine& Get();
     static void InitJsDumpHeadSignal();
     void DumpJsHeap(bool isPrivate) const;
+    void DestroyHeapProfiler() const;
+    void ForceFullGC() const;
 
     void TriggerGarbageCollection();
     void NotifyContainers(const std::function<void(const RefPtr<Container>&)>& callback);

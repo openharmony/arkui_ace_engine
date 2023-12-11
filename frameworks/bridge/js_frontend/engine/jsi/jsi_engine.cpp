@@ -3662,6 +3662,20 @@ void JsiEngine::DumpHeapSnapshot(bool isPrivate)
     }
 }
 
+void JsiEngine::DestroyHeapProfiler()
+{
+    if (engineInstance_ && engineInstance_->GetJsRuntime()) {
+        engineInstance_->GetJsRuntime()->DestroyHeapProfiler();
+    }
+}
+
+void JsiEngine::ForceFullGC()
+{
+    if (engineInstance_ && engineInstance_->GetJsRuntime()) {
+        engineInstance_->GetJsRuntime()->RunFullGC();
+    }
+}
+
 std::string JsiEngine::GetStacktraceMessage()
 {
     auto arkNativeEngine = static_cast<ArkNativeEngine*>(nativeEngine_);

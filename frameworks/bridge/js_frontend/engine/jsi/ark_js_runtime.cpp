@@ -378,6 +378,19 @@ void ArkJSRuntime::DumpHeapSnapshot(bool isPrivate)
 }
 #endif
 
+#if !defined(PREVIEW) && !defined(IOS_PLATFORM)
+void ArkJSRuntime::DestroyHeapProfiler()
+{
+    LocalScope scope(vm_);
+    panda::DFXJSNApi::DestroyHeapProfiler(vm_);
+}
+#else
+void ArkJSRuntime::DestroyHeapProfiler()
+{
+    LOGE("Do not support Ark DestroyHeapProfiler on Windows or MacOS");
+}
+#endif
+
 Local<JSValueRef> PandaFunctionData::Callback(panda::JsiRuntimeCallInfo* info) const
 {
     auto runtime = runtime_.lock();
