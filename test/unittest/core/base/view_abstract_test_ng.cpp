@@ -1088,6 +1088,9 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractTest025, TestSize.Level1)
     PopupInfo info = overlayManager->GetPopupInfo(targetNode->GetId());
     info.isCurrentOnShow = true;
     info.popupId = 1;
+    auto popupNode1 = FrameNode::CreateFrameNode(
+        V2::POPUP_ETS_TAG, info.popupId, AceType::MakeRefPtr<BubblePattern>(targetNode->GetId(), targetNode->GetTag()));
+    info.popupNode = popupNode1;
     overlayManager->ShowPopup(targetNode->GetId(), info);
 
     /**
@@ -1096,7 +1099,8 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractTest025, TestSize.Level1)
      */
     ViewAbstract::BindPopup(param, targetNode, customNode);
     ViewAbstract::BindPopup(param, targetNode, customNode);
-    auto popupNode = overlayManager->GetPopupInfo(targetNode->GetId()).popupNode;
+    auto popupInfo = overlayManager->GetPopupInfo(targetNode->GetId());
+    auto popupNode = popupInfo.popupNode;
     ASSERT_NE(popupNode, nullptr);
     popupNode->GetPattern<BubblePattern>()->transitionStatus_ = TransitionStatus::ENTERING;
     ViewAbstract::BindPopup(param, targetNode, customNode);
