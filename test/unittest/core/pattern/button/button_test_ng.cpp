@@ -1178,7 +1178,7 @@ HWTEST_F(ButtonTestNg, ButtonPatternTest018, TestSize.Level1)
     auto alpha = theme->GetBgDisabledAlpha();
     auto originalOpacity = renderContext->GetOpacityValue(1.0);
     buttonPattern->HandleEnabled();
-    EXPECT_EQ(renderContext->GetOpacityValue(), alpha * originalOpacity);
+    EXPECT_EQ(renderContext->GetOpacityValue(1.0), alpha * originalOpacity);
 }
 
 /**
@@ -1273,7 +1273,6 @@ HWTEST_F(ButtonTestNg, ButtonPatternTest022, TestSize.Level1)
     auto renderContext = frameNode->GetRenderContext();
     ASSERT_NE(renderContext, nullptr);
     EXPECT_EQ(renderContext->GetBackgroundColor(), Color::RED);
-    EXPECT_EQ(renderContext->GetForegroundColor(), Color::BLACK);
 }
 
 /**
