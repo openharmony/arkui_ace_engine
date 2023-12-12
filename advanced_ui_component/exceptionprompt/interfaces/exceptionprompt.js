@@ -36,7 +36,6 @@ export class ExceptionPrompt extends ViewPU {
     constructor(e, o, t, i = -1) {
         super(e, t, i);
         this.__options = new SynchedPropertyObjectOneWayPU(o.options, this, "options");
-        this.tipText = "";
         this.touchBackgroundColor = {
             id: -1,
             type: 10001,
@@ -44,7 +43,7 @@ export class ExceptionPrompt extends ViewPU {
             bundleName: "",
             moduleName: ""
         };
-        this.onReconnectionCallback = () => {
+        this.onClickTextCallback = () => {
         };
         this.onConfigureCallback = () => {
         };
@@ -52,9 +51,8 @@ export class ExceptionPrompt extends ViewPU {
     }
 
     setInitiallyProvidedValue(e) {
-        void 0 !== e.tipText && (this.tipText = e.tipText);
         void 0 !== e.touchBackgroundColor && (this.touchBackgroundColor = e.touchBackgroundColor);
-        void 0 !== e.onReconnectionCallback && (this.onReconnectionCallback = e.onReconnectionCallback);
+        void 0 !== e.onClickTextCallback && (this.onClickTextCallback = e.onClickTextCallback);
         void 0 !== e.onConfigureCallback && (this.onConfigureCallback = e.onConfigureCallback)
     }
 
@@ -155,7 +153,7 @@ export class ExceptionPrompt extends ViewPU {
             Flex.width("100%");
             Flex.height("100%");
             Flex.onClick((() => {
-                this.options.hardwareStatus === HardwareStatus.ON && this.onReconnectionCallback()
+                this.options.hardwareStatus === HardwareStatus.ON && this.onClickTextCallback()
             }));
             o || Flex.pop();
             ViewStackProcessor.StopGetAccessRecording()
