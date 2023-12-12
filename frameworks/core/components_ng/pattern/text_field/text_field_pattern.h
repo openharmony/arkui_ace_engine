@@ -981,11 +981,6 @@ public:
         return cleanNodeResponseArea_;
     }
 
-    void SetCleanNodeStyle(CleanNodeStyle cleanNodeStyle)
-    {
-        cleanNodeStyle_ = cleanNodeStyle;
-    }
-
     bool IsShowUnit() const;
     bool IsShowPasswordIcon() const;
     bool IsInPasswordMode() const;
@@ -1200,7 +1195,7 @@ private:
     bool ProcessAutoFill();
     void ScrollToSafeArea() const override;
     void RecordSubmitEvent() const;
-    void UpdateCancelNode(bool isShow);
+    void UpdateCancelNode();
 
     RectF frameRect_;
     RectF contentRect_;
@@ -1350,7 +1345,6 @@ private:
     std::string lastAutoFillPasswordTextValue_;
     bool isSupportCameraInput_ = false;
     std::function<void()> processOverlayDelayTask_;
-    CleanNodeStyle cleanNodeStyle_ = CleanNodeStyle::INVISIBLE;
     FocuseIndex focusIndex_ = FocuseIndex::TEXT;
     bool isShowMagnifier_ = false;
     OffsetF localOffset_;

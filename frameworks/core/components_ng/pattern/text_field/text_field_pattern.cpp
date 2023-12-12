@@ -393,6 +393,7 @@ bool TextFieldPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
     parentGlobalOffset_ = textFieldLayoutAlgorithm->GetParentGlobalOffset();
     inlineMeasureItem_ = textFieldLayoutAlgorithm->GetInlineMeasureItem();
     bool isEditorValueChanged = FireOnTextChangeEvent();
+    UpdateCancelNode();
     UpdateSelectController();
     UpdateTextFieldManager(Offset(parentGlobalOffset_.GetX(), parentGlobalOffset_.GetY()), frameRect_.Height());
     AdjustTextInReasonableArea();
@@ -1680,7 +1681,11 @@ void TextFieldPattern::HandleSingleClickEvent(GestureEvent& info)
     CloseSelectOverlay(true);
 
     if (RepeatClickCaret(info.GetLocalLocation(), lastCaretIndex) && info.GetSourceDevice() != SourceType::MOUSE) {
-        ProcessOverlay(true, true, true, true);
+        if (contentController_->IsEmpty()) {
+            ProcessOverlay(true, true, true, true);
+        } else {
+            ProcessOverlay(true, true);
+        }
     } else if (!contentController_->IsEmpty() && info.GetSourceDevice() != SourceType::MOUSE
         && !IsNormalInlineState()) {
         if (GetNakedCharPosition() >= 0) {
@@ -2057,11 +2062,13 @@ bool TextFieldPattern::FireOnTextChangeEvent()
     CHECK_NULL_RETURN(eventHub, false);
     auto layoutProperty = host->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, false);
-    if (cleanNodeStyle_ == CleanNodeStyle::INPUT) {
-        if (contentController_->IsEmpty()) {
-            UpdateCancelNode(false);
-        } else {
-            UpdateCancelNode(true);
+    auto cleanNodeStyle = layoutProperty->GetCleanNodeStyle().value_or(CleanNodeStyle::INPUT);
+    if (cleanNodeStyle == CleanNodeStyle::INPUT) {
+        auto cleanNodeResponseArea = DynamicCast<CleanNodeResponseArea>(cleanNodeResponseArea_);
+        if (cleanNodeResponseArea && contentController_->IsEmpty() && cleanNodeResponseArea->IsShow()) {
+            cleanNodeResponseArea->UpdateCleanNode(false);
+        } else if (cleanNodeResponseArea && !contentController_->IsEmpty() && !cleanNodeResponseArea->IsShow()) {
+            cleanNodeResponseArea->UpdateCleanNode(true);
         }
     }
     auto textCache = layoutProperty->GetValueValue("");
@@ -2647,7 +2654,8 @@ void TextFieldPattern::OnHover(bool isHover)
 
 void TextFieldPattern::ChangeMouseState(const Offset location, const RefPtr<PipelineContext>& pipeline, int32_t frameId)
 {
-    auto responseAreaWidth = responseArea_ ? responseArea_->GetAreaRect().Width() : 0.0f;
+    auto responseAreaWidth = (responseArea_ ? responseArea_->GetAreaRect().Width() : 0.0f) +
+                             (cleanNodeResponseArea_ ? cleanNodeResponseArea_->GetAreaRect().Width() : 0.0f);
     auto x = location.GetX();
     auto y = location.GetY();
     if (GreatNotEqual(x, 0) && LessNotEqual(x, frameRect_.Width()) && GreatNotEqual(y, 0) &&
@@ -5628,7 +5636,11 @@ bool TextFieldPattern::RepeatClickCaret(const Offset& offset, int32_t lastCaretI
     if (!selectController_->CaretAtLast()) {
         return lastCaretIndex == touchDownIndex && HasFocus();
     }
-    return selectController_->GetCaretRect().IsInRegion(PointF(offset.GetX(), offset.GetY()));
+    // Increase the cursor area if there is no text
+    auto caretRect = selectController_->GetCaretRect();
+    caretRect.SetLeft(caretRect.GetX() - caretRect.Height() / 2);
+    caretRect.SetWidth(caretRect.Height());
+    return caretRect.IsInRegion(PointF(offset.GetX(), offset.GetY()));
 }
 
 bool TextFieldPattern::IsSingleHandle() const
@@ -5769,25 +5781,22 @@ bool TextFieldPattern::IsShowCancelButtonMode() const
 {
     auto paintProperty = GetPaintProperty<TextFieldPaintProperty>();
     CHECK_NULL_RETURN(paintProperty, false);
-    return paintProperty->GetInputStyleValue(InputStyle::DEFAULT) != InputStyle::INLINE && !IsTextArea();
+    auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, false);
+    return paintProperty->GetInputStyleValue(InputStyle::DEFAULT) != InputStyle::INLINE && !IsTextArea() &&
+           layoutProperty->GetIsShowCancelButton().value_or(false);
 }
 
 void TextFieldPattern::ProcessResponseArea()
 {
+    if (cleanNodeResponseArea_) {
+        cleanNodeResponseArea_->ClearArea();
+        cleanNodeResponseArea_.Reset();
+    }
     if (IsShowCancelButtonMode()) {
-        auto cleanNodeResponseArea = DynamicCast<CleanNodeResponseArea>(cleanNodeResponseArea_);
-        if (!cleanNodeResponseArea) {
-            cleanNodeResponseArea_ = AceType::MakeRefPtr<CleanNodeResponseArea>(WeakClaim(this));
-            cleanNodeResponseArea_->InitResponseArea();
-            cleanNodeResponseArea = DynamicCast<CleanNodeResponseArea>(cleanNodeResponseArea_);
-        } else {
-            cleanNodeResponseArea->Refresh();
-        }
-        if (cleanNodeStyle_ == CleanNodeStyle::CONSTANT) {
-            UpdateCancelNode(true);
-        } else if (cleanNodeStyle_ == CleanNodeStyle::INVISIBLE) {
-            UpdateCancelNode(false);
-        }
+        cleanNodeResponseArea_ = AceType::MakeRefPtr<CleanNodeResponseArea>(WeakClaim(this));
+        cleanNodeResponseArea_->InitResponseArea();
+        UpdateCancelNode();
     }
 
     if (IsShowPasswordIcon()) {
@@ -5812,11 +5821,22 @@ void TextFieldPattern::ProcessResponseArea()
     }
 }
 
-void TextFieldPattern::UpdateCancelNode(bool isShow)
+void TextFieldPattern::UpdateCancelNode()
 {
     auto cleanNodeResponseArea = DynamicCast<CleanNodeResponseArea>(cleanNodeResponseArea_);
     CHECK_NULL_VOID(cleanNodeResponseArea);
-    cleanNodeResponseArea->UpdateCleanNode(isShow);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto layoutProperty = host->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    auto cleanNodeStyle = layoutProperty->GetCleanNodeStyle().value_or(CleanNodeStyle::INPUT);
+    if (cleanNodeStyle == CleanNodeStyle::CONSTANT ||
+        (cleanNodeStyle == CleanNodeStyle::INPUT && !contentController_->IsEmpty())) {
+        cleanNodeResponseArea->UpdateCleanNode(true);
+    } else if (cleanNodeStyle == CleanNodeStyle::INVISIBLE ||
+               (cleanNodeStyle == CleanNodeStyle::INPUT && contentController_->IsEmpty())) {
+        cleanNodeResponseArea->UpdateCleanNode(false);
+    }
 }
 
 bool TextFieldPattern::HasInputOperation()

@@ -84,6 +84,7 @@ public:
     void SetCancelIconSize(const CalcDimension& iconSize) override {};
     void SetCanacelIconSrc(const std::string& iconSrc) override {};
     void SetCancelIconColor(const Color& iconColor) override {};
+    void SetIsShowCancelButton(bool isShowCancelButton) override {};
     void SetSelectAllValue(bool isSetSelectAllValue) override {};
 
 private:
