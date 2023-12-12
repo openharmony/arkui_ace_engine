@@ -14,6 +14,8 @@
 import("//arkcompiler/ets_frontend/es2panda/es2abc_config.gni")
 import("//build/ohos.gni")
 import("//foundation/arkui/ace_engine/ace_config.gni")
+import("//foundation/arkui/ace_engine/adapter/preview/build/config.gni")
+import("//foundation/arkui/ace_engine/build/ace_gen_obj.gni")
 
 es2abc_gen_abc("gen_selecttitlebar_abc") {
   src_js = rebase_path("selecttitlebar.js")
@@ -30,10 +32,21 @@ gen_js_obj("selecttitlebar_abc") {
   dep = ":gen_selecttitlebar_abc"
 }
 
+gen_obj("selecttitlebar_abc_preview") {
+  input = get_label_info(":gen_selecttitlebar_abc", "target_out_dir") +
+          "/selecttitlebar.abc"
+  output = target_out_dir + "/selecttitlebar_abc.c"
+  snapshot_dep = [ ":gen_selecttitlebar_abc" ]
+}
+
 ohos_shared_library("selecttitlebar") {
   sources = [ "selecttitlebar.cpp" ]
 
-  deps = [ ":selecttitlebar_abc" ]
+  if (use_mingw_win || use_mac || use_linux) {
+    deps = [ ":gen_obj_src_selecttitlebar_abc_preview" ]
+  } else {
+    deps = [ ":selecttitlebar_abc" ]
+  }
 
   external_deps = [
     "hilog:libhilog",
