@@ -613,7 +613,7 @@ bool SwiperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     if (!IsAutoPlay() && config.skipMeasure && config.skipLayout) {
         return false;
     }
-
+    autoLinearReachBoundary = false;
     bool isJump = false;
     auto layoutAlgorithmWrapper = dirty->GetLayoutAlgorithm();
     CHECK_NULL_RETURN(layoutAlgorithmWrapper, false);
@@ -673,6 +673,7 @@ bool SwiperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
                     nextIndex = firstItem.first;
                     targetPos = firstItem.second.startPos;
                     stopAutoPlay = true;
+                    autoLinearReachBoundary = true;
                 }
 
                 context->AddAfterLayoutTask([weak = WeakClaim(this), targetPos, velocity = velocity_.value_or(0.0f),
@@ -918,7 +919,7 @@ void SwiperPattern::ShowPrevious()
         return;
     }
 
-    if (IsAutoLinear() && static_cast<int32_t>(itemPosition_.size()) == TotalCount()) {
+    if (IsAutoLinear() && static_cast<int32_t>(itemPosition_.size()) == TotalCount() && !autoLinearReachBoundary) {
         return;
     }
 
