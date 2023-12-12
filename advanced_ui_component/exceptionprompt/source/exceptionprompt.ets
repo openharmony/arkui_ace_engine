@@ -20,18 +20,12 @@ const DEFAULT_HEIGHT = 48;
 const FIT_HEIGHT = 58;
 const ZINDEX_NUM = 999;
 
-export enum HardwareStatus {
-  ON = 0,
-  OFF = 1,
-}
-
 export enum MarginType {
   DEFAULT_MARGIN = 0,
   FIT_MARGIN = 1,
 }
 
 export interface PromptOptions {
-  hardwareStatus: HardwareStatus,
   icon?: ResourceStr,
   tip?: ResourceStr,
   marginState: MarginType,
@@ -45,11 +39,11 @@ export interface PromptOptions {
 export struct ExceptionPrompt {
   @Prop options: PromptOptions
   touchBackgroundColor: Resource = $r('sys.color.ohos_id_color_sub_background_transparent')
-  onClickTextCallback: () => void = () => {
+  onTextClick: () => void = () => {
     // Click the text on the left to change into the connecting state
   }
-  onConfigureCallback: () => void = () => {
-    // Click the icon button on the right for the callback
+  onConfigure: () => void = () => {
+    // Click Set Network to open the Set network pop-up interface
   }
 
   @Builder FirstBuilder() {
@@ -90,9 +84,7 @@ export struct ExceptionPrompt {
       .width('100%')
       .height('100%')
       .onClick(() => {
-        if (this.options.hardwareStatus === HardwareStatus.ON) {
-          this.onClickTextCallback() //Click the callback of the prompt text
-        }
+        this.onTextClick() //Click the callback of the prompt text
       })
 
       if (this.options.isTouchShow) {
@@ -123,17 +115,18 @@ export struct ExceptionPrompt {
 
           if (event.type === TouchType.Down) {
             this.touchBackgroundColor = $r('sys.color.ohos_id_color_click_effect')
-            this.onConfigureCallback() //Click the icon button on the right for the callback
+            this.onConfigure() //Click the icon button on the right for the callback
           } else if (event.type === TouchType.Up) {
             this.touchBackgroundColor = $r('sys.color.ohos_id_color_sub_background_transparent')
-
           }
-
         })
       }
 
     }
-    .padding({ left: $r('sys.float.ohos_id_notification_margin_start'), right: $r('sys.float.ohos_id_text_paragraph_margin_s') })
+    .padding({
+      left: $r('sys.float.ohos_id_notification_margin_start'),
+      right: $r('sys.float.ohos_id_text_paragraph_margin_s')
+    })
     .position({})
     .zIndex(ZINDEX_NUM)
     .width('100%')

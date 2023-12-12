@@ -20,12 +20,6 @@ const DEFAULT_HEIGHT = 48;
 const FIT_HEIGHT = 58;
 const ZINDEX_NUM = 999;
 
-export var HardwareStatus;
-!function(e){
-    e[e.ON=0] = "ON";
-    e[e.OFF=1] = "OFF"
-}(HardwareStatus || (HardwareStatus = {}));
-
 export var MarginType;
 !function(e){
     e[e.DEFAULT_MARGIN=0] = "DEFAULT_MARGIN";
@@ -43,17 +37,17 @@ export class ExceptionPrompt extends ViewPU {
             bundleName: "",
             moduleName: ""
         };
-        this.onClickTextCallback = () => {
+        this.onTextClick = () => {
         };
-        this.onConfigureCallback = () => {
+        this.onConfigure = () => {
         };
         this.setInitiallyProvidedValue(o)
     }
 
     setInitiallyProvidedValue(e) {
         void 0 !== e.touchBackgroundColor && (this.touchBackgroundColor = e.touchBackgroundColor);
-        void 0 !== e.onClickTextCallback && (this.onClickTextCallback = e.onClickTextCallback);
-        void 0 !== e.onConfigureCallback && (this.onConfigureCallback = e.onConfigureCallback)
+        void 0 !== e.onTextClick && (this.onTextClick = e.onTextClick);
+        void 0 !== e.onConfigure && (this.onConfigure = e.onConfigure)
     }
 
     updateStateVars(e) {
@@ -153,7 +147,7 @@ export class ExceptionPrompt extends ViewPU {
             Flex.width("100%");
             Flex.height("100%");
             Flex.onClick((() => {
-                this.options.hardwareStatus === HardwareStatus.ON && this.onClickTextCallback()
+                this.onTextClick()
             }));
             o || Flex.pop();
             ViewStackProcessor.StopGetAccessRecording()
@@ -263,7 +257,7 @@ export class ExceptionPrompt extends ViewPU {
                                 bundleName: "",
                                 moduleName: ""
                             };
-                            this.onConfigureCallback()
+                            this.onConfigure()
                         } else e.type === TouchType.Up && (this.touchBackgroundColor = {
                             id: -1,
                             type: 10001,
