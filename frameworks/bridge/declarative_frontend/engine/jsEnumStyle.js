@@ -2172,6 +2172,18 @@ var OutlineStyle;
   OutlineStyle[OutlineStyle["DOTTED"] = 2] = "DOTTED";
 })(OutlineStyle || (OutlineStyle = {}));
 
+var ButtonStyleMode;
+(function (ButtonStyleMode) {
+  ButtonStyleMode["NORMAL"] = 0;
+  ButtonStyleMode["EMPHASIZED"] = 1;
+  ButtonStyleMode["TEXTUAL"] = 2;
+})(ButtonStyleMode || (ButtonStyleMode = {}));
+
+var ControlSize;
+(function (ControlSize) {
+  ControlSize[ControlSize["SMALL"] = 0] = "SMALL";
+  ControlSize[ControlSize["NORMAL"] = 1] = "NORMAL";
+})(ControlSize || (ControlSize = {}));
 var ImageAnalyzerType;
 (function (ImageAnalyzerType) {
   ImageAnalyzerType[ImageAnalyzerType["SUBJECT"] = 0] = "SUBJECT";
