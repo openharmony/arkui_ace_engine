@@ -14,11 +14,241 @@
  */
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_gauge_bridge.h"
 
+#include "base/geometry/dimension.h"
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_api.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
+#include "bridge/declarative_frontend/jsview/js_linear_gradient.h"
+#include "core/components/common/properties/color.h"
+#include "core/components_ng/pattern/gauge/gauge_paint_property.h"
 #include "core/components_ng/pattern/gauge/gauge_theme.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+constexpr int NUM_0 = 0;
+constexpr int NUM_1 = 1;
+void ResetColor(void* nativeNode)
+{
+    if (!Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+        GetArkUIInternalNodeAPI()->GetGaugeModifier().ResetGradientColors(nativeNode);
+    } else {
+        GetArkUIInternalNodeAPI()->GetGaugeModifier().ResetColors(nativeNode);
+    }
+}
+}
+
+template<typename T>
+RefPtr<T> GetTheme()
+{
+    auto container = Container::Current();
+    CHECK_NULL_RETURN(container, nullptr);
+    auto pipelineContext = container->GetPipelineContext();
+    CHECK_NULL_RETURN(pipelineContext, nullptr);
+    auto themeManager = pipelineContext->GetThemeManager();
+    CHECK_NULL_RETURN(themeManager, nullptr);
+    return themeManager->GetTheme<T>();
+}
+
+void SortColorStopOffset(std::vector<NG::ColorStopArray>& colors)
+{
+    for (auto& colorStopArray : colors) {
+        std::sort(colorStopArray.begin(), colorStopArray.end(),
+            [](const std::pair<Color, Dimension>& left, const std::pair<Color, Dimension>& right) {
+                return left.second.Value() < right.second.Value();
+            });
+
+        auto iter = std::unique(colorStopArray.begin(), colorStopArray.end(),
+            [](const std::pair<Color, Dimension>& left, const std::pair<Color, Dimension>& right) {
+                return left.second.Value() == right.second.Value();
+            });
+        colorStopArray.erase(iter, colorStopArray.end());
+    }
+}
+
+void ConvertResourceColor(const EcmaVM* vm, const Local<JSValueRef>& item, std::vector<NG::ColorStopArray>& colors)
+{
+    Color color;
+    if (!ArkTSUtils::ParseJsColor(vm, item, color)) {
+        color = Color::BLACK;
+    }
+    NG::ColorStopArray colorStopArray;
+    colorStopArray.emplace_back(std::make_pair(color, Dimension(0.0)));
+    colors.emplace_back(colorStopArray);
+}
+
+void ConvertGradientColor(
+    const EcmaVM* vm, const Local<JSValueRef>& itemParam, std::vector<NG::ColorStopArray>& colors, NG::GaugeType& type)
+{
+    if (!itemParam->IsObject()) {
+        type = NG::GaugeType::TYPE_CIRCULAR_MONOCHROME;
+        return ConvertResourceColor(vm, itemParam, colors);
+    }
+    Framework::JSLinearGradient* jsLinearGradient =
+        static_cast<Framework::JSLinearGradient*>(itemParam->ToObject(vm)->GetNativePointerField(0));
+    if (!jsLinearGradient) {
+        type = NG::GaugeType::TYPE_CIRCULAR_MONOCHROME;
+        return ConvertResourceColor(vm, itemParam, colors);
+    }
+
+    type = NG::GaugeType::TYPE_CIRCULAR_SINGLE_SEGMENT_GRADIENT;
+    if (jsLinearGradient->GetGradient().size() == 0) {
+        NG::ColorStopArray colorStopArray;
+        colorStopArray.emplace_back(std::make_pair(Color::BLACK, Dimension(0.0)));
+        colors.emplace_back(colorStopArray);
+    } else {
+        colors.emplace_back(jsLinearGradient->GetGradient());
+    }
+}
+
+void SetGradientColorsObject(const EcmaVM* vm, const Local<JSValueRef>& info, std::vector<NG::ColorStopArray>& colors,
+    std::vector<float>& weights, NG::GaugeType& type, void* nativeNode)
+{
+    ArkUIGradientType gradient;
+    ConvertGradientColor(vm, info, colors, type);
+    auto colorStruct = std::make_unique<uint32_t[]>(colors[0].size());
+    auto offsetStruct = std::make_unique<ArkUILengthType[]>(colors[0].size());
+    std::vector<uint32_t> linearLengths { colors[0].size() };
+    for (uint32_t i = 0; i < colors[0].size(); i++) {
+        colorStruct[i] = colors[0][i].first.GetValue();
+        offsetStruct[i].number = colors[0][i].second.Value();
+        offsetStruct[i].unit = static_cast<int8_t>(colors[0][i].second.Unit());
+    }
+    gradient.color = colorStruct.get();
+    gradient.offset = offsetStruct.get();
+    gradient.gradientLength = &(*linearLengths.begin());
+    gradient.weight = nullptr;
+    gradient.type = static_cast<uint32_t>(type);
+    gradient.length = 1;
+    GetArkUIInternalNodeAPI()->GetGaugeModifier().SetGradientColors(nativeNode, &gradient, 0);
+}
+
+void SetGradientColorsArray(const EcmaVM* vm, const Local<JSValueRef>& info, std::vector<NG::ColorStopArray>& colors,
+    std::vector<float>& weights, NG::GaugeType& type, void* nativeNode)
+{
+    ArkUIGradientType gradient;
+    uint32_t totalLength = 0;
+    std::vector<uint32_t> linearLengths(colors.size(), 0);
+    for (uint32_t i = 0; i < colors.size(); i++) {
+        linearLengths[i] = colors[i].size();
+        totalLength += colors[i].size();
+    }
+    auto colorStruct = std::make_unique<uint32_t[]>(totalLength);
+    auto offsetStruct = std::make_unique<ArkUILengthType[]>(totalLength);
+    int32_t pos = 0;
+    for (uint32_t i = 0; i < colors.size(); i++) {
+        for (uint32_t j = 0; j < colors[i].size(); j++, pos++) {
+            colorStruct[pos] = colors[i][j].first.GetValue();
+            offsetStruct[pos].number = colors[i][j].second.Value();
+            offsetStruct[pos].unit = static_cast<int8_t>(colors[i][j].second.Unit());
+        }
+    }
+    gradient.color = colorStruct.get();
+    gradient.offset = offsetStruct.get();
+    gradient.gradientLength = &(*linearLengths.begin());
+    gradient.weight = &(*weights.begin());
+    gradient.type = static_cast<uint32_t>(type);
+    gradient.length = colors.size();
+    GetArkUIInternalNodeAPI()->GetGaugeModifier().SetGradientColors(nativeNode, &gradient, weights.size());
+}
+
+void SetGradientColors(const EcmaVM* vm, const Local<JSValueRef>& info, void* nativeNode)
+{
+    if (info->IsNull() || info->IsUndefined()) {
+        GetArkUIInternalNodeAPI()->GetGaugeModifier().ResetGradientColors(nativeNode);
+        return;
+    }
+    NG::GaugeType type = NG::GaugeType::TYPE_CIRCULAR_MULTI_SEGMENT_GRADIENT;
+    std::vector<NG::ColorStopArray> colors;
+    std::vector<float> weights;
+    if (!info->IsArray(vm)) {
+        SetGradientColorsObject(vm, info, colors, weights, type, nativeNode);
+        return;
+    }
+    auto jsColorsArray = panda::CopyableGlobal<panda::ArrayRef>(vm, info);
+    if (jsColorsArray->Length(vm) == 0) {
+        GetArkUIInternalNodeAPI()->GetGaugeModifier().ResetGradientColors(nativeNode);
+        return;
+    }
+
+    for (size_t i = 0; i < jsColorsArray->Length(vm); ++i) {
+        if (static_cast<int32_t>(i) >= NG::COLORS_MAX_COUNT) {
+            break;
+        }
+        auto jsValue = jsColorsArray->GetValueAt(vm, info, i);
+        if (!jsValue->IsArray(vm)) {
+            continue;
+        }
+        auto tempColors = panda::CopyableGlobal<panda::ArrayRef>(vm, jsValue);
+        // Get weight
+        float weight = tempColors->GetValueAt(vm, jsValue, 1)->ToNumber(vm)->Value();
+        if (NonPositive(weight)) {
+            continue;
+        }
+        weights.push_back(weight);
+        // Get color
+        auto jsColorValue = tempColors->GetValueAt(vm, jsValue, 0);
+        ConvertGradientColor(vm, jsColorValue, colors, type);
+    }
+    type = NG::GaugeType::TYPE_CIRCULAR_MULTI_SEGMENT_GRADIENT;
+    SortColorStopOffset(colors);
+    SetGradientColorsArray(vm, info, colors, weights, type, nativeNode);
+}
+
+ArkUINativeModuleValue GaugeBridge::SetColors(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    Local<JSValueRef> jsArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+
+    if (!Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+        SetGradientColors(vm, jsArg, nativeNode);
+        return panda::JSValueRef::Undefined(vm);
+    }
+
+    if (!jsArg->IsArray(vm)) {
+        ResetColor(nativeNode);
+        return panda::JSValueRef::Undefined(vm);
+    }
+    auto jsColor = panda::CopyableGlobal<panda::ArrayRef>(vm, jsArg);
+    int32_t length = jsColor->Length(vm);
+    auto colors = std::make_unique<uint32_t[]>(length);
+    auto weights = std::make_unique<float[]>(length);
+
+    auto theme = GetTheme<ProgressTheme>();
+    for (int32_t i = 0; i < length; i++) {
+        auto jsValue = jsColor->GetValueAt(vm, jsArg, i);
+        if (!jsValue->IsArray(vm)) {
+            ResetColor(nativeNode);
+            return panda::JSValueRef::Undefined(vm);
+        }
+        auto handle = panda::CopyableGlobal<panda::ArrayRef>(vm, jsValue);
+        float weight = handle->GetValueAt(vm, jsValue, 1)->ToNumber(vm)->Value();
+        Color selectedColor;
+        if (!ArkTSUtils::ParseJsColor(vm, handle->GetValueAt(vm, jsValue, 1), selectedColor)) {
+            selectedColor = Color::BLACK;
+        }
+        colors[i] = selectedColor.GetValue();
+        if (weight > 0) {
+            weights[i] = weight;
+        } else {
+            weights[i] = 0.0f;
+        }
+    }
+    GetArkUIInternalNodeAPI()->GetGaugeModifier().SetColors(nativeNode, colors.get(), weights.get(), length);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue GaugeBridge::ResetColors(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+    ResetColor(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
 ArkUINativeModuleValue GaugeBridge::SetGaugeVaule(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();

@@ -21,6 +21,10 @@
 namespace OHOS::Ace::NG {
 class DataPanelBridge {
 public:
+    static ArkUINativeModuleValue SetValueColors(ArkUIRuntimeCallInfo *runtimeCallInfo);
+    static ArkUINativeModuleValue ResetValueColors(ArkUIRuntimeCallInfo *runtimeCallInfo);
+    static ArkUINativeModuleValue SetTrackShadow(ArkUIRuntimeCallInfo *runtimeCallInfo);
+    static ArkUINativeModuleValue ResetTrackShadow(ArkUIRuntimeCallInfo *runtimeCallInfo);
     static ArkUINativeModuleValue SetCloseEffect(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetCloseEffect(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetDataPanelTrackBackgroundColor(ArkUIRuntimeCallInfo* runtimeCallInfo);

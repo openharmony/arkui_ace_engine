@@ -12,8 +12,9 @@ class ArkGaugeComponent extends ArkComponent implements GaugeAttribute {
     modifierWithKey(this._modifiersWithKeys, GaugeEndAngleModifier.identity, GaugeEndAngleModifier, angle);
     return this;
   }
-  colors(colors: any): this {
-    throw new Error('Method not implemented.');
+  colors(colors: ResourceColor | LinearGradient | Array<[ResourceColor | LinearGradient, number]>): this {
+    modifierWithKey(this._modifiersWithKeys, GaugeColorsModifier.identity, GaugeColorsModifier, colors);
+    return this;
   }
   strokeWidth(length: any): this {
     modifierWithKey(this._modifiersWithKeys, GaugeStrokeWidthModifier.identity, GaugeStrokeWidthModifier, length);
@@ -48,6 +49,20 @@ class GaugeIndicatorModifier extends ModifierWithKey<GaugeIndicatorOptions> {
   checkObjectDiff(): boolean {
     return !isBaseOrResourceEqual(this.stageValue.icon, this.value.icon) ||
       !isBaseOrResourceEqual(this.stageValue.space, this.value.space);
+  }
+}
+
+class GaugeColorsModifier extends ModifierWithKey<ResourceColor | LinearGradient | Array<[ResourceColor | LinearGradient, number]>> {
+  static identity = Symbol('gaugeColors');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      GetUINativeModule().gauge.resetGaugeColors(node);
+    } else {
+      GetUINativeModule().gauge.setGaugeColors(node, this.value!);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return true;
   }
 }
 
