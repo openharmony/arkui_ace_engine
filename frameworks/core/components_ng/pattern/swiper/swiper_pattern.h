@@ -791,6 +791,7 @@ private:
     bool stopIndicatorAnimation_ = true;
     bool isTouchPad_ = false;
     bool fadeAnimationIsRunning_ = false;
+    bool autoLinearReachBoundary = false;
 
     float mainDeltaSum_ = 0.0f;
     std::optional<int32_t> cachedCount_;
