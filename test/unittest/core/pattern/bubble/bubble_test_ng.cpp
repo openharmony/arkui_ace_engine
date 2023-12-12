@@ -1390,7 +1390,6 @@ HWTEST_F(BubbleTestNg, BubbleLayoutTest003, TestSize.Level1)
     auto frameNode =
         FrameNode::CreateFrameNode(V2::POPUP_ETS_TAG, popupId, AceType::MakeRefPtr<BubblePattern>(targetId, targetTag));
     EXPECT_FALSE(frameNode == nullptr);
-
     /**
      * @tc.steps: step2. get layout property, layoutAlgorithm and create layoutWrapper.
      * @tc.expected: step2. related function is called.
@@ -1448,7 +1447,6 @@ HWTEST_F(BubbleTestNg, BubbleLayoutTest003, TestSize.Level1)
     textLayoutWrapper->SetLayoutAlgorithm(AccessibilityManager::MakeRefPtr<LayoutAlgorithmWrapper>(boxLayoutAlgorithm));
     frameNode->AddChild(textFrameNode);
     layoutWrapper->AppendChild(textLayoutWrapper);
-
     /**
      * @tc.steps: step5. use layoutAlgorithm to measure and layout.
      * @tc.expected: step5. check whether the value of the bubble child's frameSize and frameOffset is correct.
@@ -1456,8 +1454,8 @@ HWTEST_F(BubbleTestNg, BubbleLayoutTest003, TestSize.Level1)
     bubbleLayoutAlgorithm->Measure(AceType::RawPtr(layoutWrapper));
     bubbleLayoutAlgorithm->Layout(AceType::RawPtr(layoutWrapper));
     EXPECT_EQ(textLayoutWrapper->GetGeometryNode()->GetFrameSize(), SizeF(BUBBLE_WIDTH, BUBBLE_HEIGHT));
-    EXPECT_NE(textLayoutWrapper->GetGeometryNode()->GetFrameOffset().GetX(), 0);
-    EXPECT_EQ(textLayoutWrapper->GetGeometryNode()->GetFrameOffset().GetY(), 0);
+    EXPECT_EQ(textLayoutWrapper->GetGeometryNode()->GetFrameOffset().GetX(), 16);
+    EXPECT_EQ(textLayoutWrapper->GetGeometryNode()->GetFrameOffset().GetY(), 1);
 }
 
 /**
@@ -1694,7 +1692,8 @@ HWTEST_F(BubbleTestNg, BubbleLayoutTest007, TestSize.Level1)
     EXPECT_FALSE(children.empty());
     bubbleLayoutAlgorithm->Measure(AceType::RawPtr(layoutWrapper));
     bubbleLayoutAlgorithm->Layout(AceType::RawPtr(layoutWrapper));
-    EXPECT_FALSE(bubbleLayoutAlgorithm->GetChildPosition(SizeF(ZERO, ZERO), true, true) == DISPLAY_WINDOW_OFFSET);
+    EXPECT_FALSE(
+        bubbleLayoutAlgorithm->GetChildPosition(SizeF(ZERO, ZERO), bubbleLayoutProperty) == DISPLAY_WINDOW_OFFSET);
 }
 
 /**
@@ -1736,6 +1735,7 @@ HWTEST_F(BubbleTestNg, BubbleLayoutTest008, TestSize.Level1)
         bubbleLayoutAlgorithm->arrowPlacement_ = BUBBLE_LAYOUT_PROPERTY_PLACEMENTS[i];
         bubbleLayoutAlgorithm->targetSize_ = SizeF(TARGET_SIZE_WIDTH, TARGET_SIZE_HEIGHT);
         bubbleLayoutAlgorithm->targetOffset_ = OffsetF(POSITION_OFFSET, POSITION_OFFSET);
+        bubbleLayoutAlgorithm->wrapperSize_ = childSize;
         /**
          * @tc.steps: step3. excute GetIfNeedArrow
          * @tc.expected: step3. GetIfNeedArrow returns a sharp corner that needs to be drawn.
@@ -1746,7 +1746,7 @@ HWTEST_F(BubbleTestNg, BubbleLayoutTest008, TestSize.Level1)
          * @tc.steps: step4. excute GetChildPosition
          * @tc.expected: step4. GetChildPosition returns the result as the bubble position.
          */
-        auto resultOffset = bubbleLayoutAlgorithm->GetChildPosition(childSize, needArrow, true);
+        auto resultOffset = bubbleLayoutAlgorithm->GetChildPosition(childSize, bubbleLayoutProperty);
         EXPECT_EQ(resultOffset, DISPLAY_WINDOW_OFFSET);
         OffsetF arrowPosition;
         /**
