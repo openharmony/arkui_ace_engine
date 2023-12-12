@@ -521,10 +521,8 @@ HWTEST_F(AppBarTestNg, BuildFaButton004, TestSize.Level1)
      * @tc.expected: appBar is not null.
      */
     auto test = AceType::MakeRefPtr<FrameNode>("test", 1, AceType::MakeRefPtr<Pattern>());
-    CHECK_NULL_VOID(test);
     SystemProperties::SetExtSurfaceEnabled(true);
     auto frameNode = AppBarView::Create(test);
-    CHECK_NULL_VOID(frameNode);
     /**
      * @tc.steps: step1. Construct a non empty QueryAppGalleryBundleName case.
      * @tc.expected: Calling the BindContentCover interface to avoid QueryAppGalleryBundleName not being empty.
