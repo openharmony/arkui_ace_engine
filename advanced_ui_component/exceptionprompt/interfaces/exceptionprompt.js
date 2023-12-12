@@ -115,7 +115,6 @@ export class ExceptionPrompt extends ViewPU {
                 moduleName: ""
             });
             Column.opacity(.18);
-            Column.position({});
             Column.zIndex(999);
             o || Column.pop();
             ViewStackProcessor.StopGetAccessRecording()
@@ -127,7 +126,22 @@ export class ExceptionPrompt extends ViewPU {
         this.observeComponentCreation(((e, o) => {
             ViewStackProcessor.StartGetAccessRecordingFor(e);
             Flex.create({ justifyContent: FlexAlign.SpaceBetween, alignItems: ItemAlign.Center });
-            Flex.padding({ left: 12, right: 4 });
+            Flex.padding({
+                left: {
+                    id: -1,
+                    type: 10002,
+                    params: ["sys.float.ohos_id_notification_margin_start"],
+                    bundleName: "",
+                    moduleName: ""
+                },
+                right: {
+                    id: -1,
+                    type: 10002,
+                    params: ["sys.float.ohos_id_text_paragraph_margin_s"],
+                    bundleName: "",
+                    moduleName: ""
+                }
+            });
             Flex.position({});
             Flex.zIndex(999);
             Flex.width("100%");
@@ -188,7 +202,22 @@ export class ExceptionPrompt extends ViewPU {
             });
             Text.textOverflow({ overflow: TextOverflow.Ellipsis });
             Text.maxLines(2);
-            Text.margin({ left: 16, right: 16 });
+            Text.margin({
+                left: {
+                    id: -1,
+                    type: 10002,
+                    params: ["sys.float.ohos_id_dialog_margin_end"],
+                    bundleName: "",
+                    moduleName: ""
+                },
+                right: {
+                    id: -1,
+                    type: 10002,
+                    params: ["sys.float.ohos_id_dialog_margin_end"],
+                    bundleName: "",
+                    moduleName: ""
+                }
+            });
             o || Text.pop();
             ViewStackProcessor.StopGetAccessRecording()
         }));
@@ -211,7 +240,22 @@ export class ExceptionPrompt extends ViewPU {
                         bundleName: "",
                         moduleName: ""
                     });
-                    Button.padding({ right: 8, left: 8 });
+                    Button.padding({
+                        right: {
+                            id: -1,
+                            type: 10002,
+                            params: ["sys.float.ohos_id_elements_margin_vertical_l"],
+                            bundleName: "",
+                            moduleName: ""
+                        },
+                        left: {
+                            id: -1,
+                            type: 10002,
+                            params: ["sys.float.ohos_id_elements_margin_vertical_l"],
+                            bundleName: "",
+                            moduleName: ""
+                        }
+                    });
                     Button.onTouch((e => {
                         if (e.type === TouchType.Down) {
                             this.touchBackgroundColor = {
@@ -258,7 +302,15 @@ export class ExceptionPrompt extends ViewPU {
                     });
                     Text.maxLines(1);
                     Text.padding(0);
-                    Text.margin({ right: 4 });
+                    Text.margin({
+                        right: {
+                            id: -1,
+                            type: 10002,
+                            params: ["sys.float.ohos_id_text_paragraph_margin_s"],
+                            bundleName: "",
+                            moduleName: ""
+                        }
+                    });
                     Text.textAlign(TextAlign.End);
                     o || Text.pop();
                     ViewStackProcessor.StopGetAccessRecording()
