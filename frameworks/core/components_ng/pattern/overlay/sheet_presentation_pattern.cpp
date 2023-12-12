@@ -151,6 +151,14 @@ void SheetPresentationPattern::InitPanEvent()
     if (panEvent_) {
         return;
     }
+
+    auto actionStartTask = [weak = WeakClaim(this)](const GestureEvent& event) {
+        auto pattern = weak.Upgrade();
+        if (pattern) {
+            pattern->HandleDragStart();
+        }
+    };
+
     auto actionUpdateTask = [weak = WeakClaim(this)](const GestureEvent& info) {
         auto pattern = weak.Upgrade();
         if (pattern) {
@@ -175,6 +183,15 @@ void SheetPresentationPattern::InitPanEvent()
     panEvent_ = MakeRefPtr<PanEvent>(
         nullptr, std::move(actionUpdateTask), std::move(actionEndTask), std::move(actionCancelTask));
     gestureHub->AddPanEvent(panEvent_, panDirection, 1, DEFAULT_PAN_DISTANCE);
+}
+
+void SheetPresentationPattern::HandleDragStart()
+{
+    if (animation_ && isAnimationProcess_) {
+        AnimationUtils::StopAnimation(animation_);
+        isAnimationBreak_ = true;
+    }
+    currentOffset_ = 0.0f;
 }
 
 void SheetPresentationPattern::HandleDragUpdate(const GestureEvent& info)
@@ -273,9 +290,14 @@ void SheetPresentationPattern::HandleDragEnd(float dragVelocity)
         }
     }
 }
+
 void SheetPresentationPattern::OnCoordScrollStart()
 {
-    currentOffset_ = 0;
+    if (animation_ && isAnimationProcess_) {
+        AnimationUtils::StopAnimation(animation_);
+        isAnimationBreak_ = true;
+    }
+    currentOffset_ = 0.0f;
 }
 
 bool SheetPresentationPattern::OnCoordScrollUpdate(float scrollOffset)
@@ -441,26 +463,27 @@ void SheetPresentationPattern::SheetTransition(bool isTransitionIn, float dragVe
             overlayManager->PlaySheetMaskTransition(maskNode, false);
         }
     }
-    auto sheetType = GetSheetType();
-    if (sheetType == SheetType::SHEET_CENTER) {
-        ProcessColumnRect(pageHeight_, true);
-    }
-    option.SetOnFinishEvent([weak = AceType::WeakClaim(this), id = Container::CurrentId(),
-        isTransitionIn, height = height_]() {
+    option.SetOnFinishEvent([weak = AceType::WeakClaim(this), id = Container::CurrentId(), isTransitionIn]() {
         ContainerScope scope(id);
         auto context = PipelineContext::GetCurrentContext();
         CHECK_NULL_VOID(context);
         auto taskExecutor = context->GetTaskExecutor();
         CHECK_NULL_VOID(taskExecutor);
         taskExecutor->PostTask(
-            [weak, id, isTransitionIn, height]() {
+            [weak, id, isTransitionIn]() {
                 auto pattern = weak.Upgrade();
                 CHECK_NULL_VOID(pattern);
                 if (isTransitionIn) {
-                    pattern->SetCurrentOffset(0.0);
-                    pattern->ProcessColumnRect(height);
-                    pattern->ChangeScrollHeight(height);
+                    if (!pattern->GetAnimationBreak()) {
+                        pattern->SetCurrentOffset(0.0f);
+                        pattern->ProcessColumnRect(pattern->height_);
+                        pattern->ChangeScrollHeight(pattern->height_);
+                        pattern->SetAnimationProcess(false);
+                    } else {
+                        pattern->isAnimationBreak_ = false;
+                    }
                 } else {
+                    pattern->SetAnimationProcess(false);
                     auto context = PipelineContext::GetCurrentContext();
                     CHECK_NULL_VOID(context);
                     auto overlayManager = context->GetOverlayManager();
@@ -771,7 +794,6 @@ void SheetPresentationPattern::BubbleStyleSheetTransition(bool isTransitionIn)
     auto host = this->GetHost();
     CHECK_NULL_VOID(host);
     if (!isTransitionIn) {
-        ProcessColumnRect(height_, true);
         auto pipelineContext = PipelineContext::GetCurrentContext();
         CHECK_NULL_VOID(pipelineContext);
         auto overlayManager = pipelineContext->GetOverlayManager();
@@ -946,6 +968,7 @@ void SheetPresentationPattern::StartSheetTransitionAnimation(
     CHECK_NULL_VOID(host);
     auto context = host->GetRenderContext();
     CHECK_NULL_VOID(context);
+    isAnimationProcess_ = true;
     if (isTransitionIn) {
         AnimationUtils::Animate(
             option,
@@ -1156,7 +1179,7 @@ float SheetPresentationPattern::GetFitContentHeight()
     return builderGeometryNode->GetFrameSize().Height() + titleGeometryNode->GetFrameSize().Height();
 }
 
-void SheetPresentationPattern::ProcessColumnRect(float height, bool isLargeHeight)
+void SheetPresentationPattern::ProcessColumnRect(float height)
 {
     auto sheetNode = GetHost();
     CHECK_NULL_VOID(sheetNode);
@@ -1173,21 +1196,13 @@ void SheetPresentationPattern::ProcessColumnRect(float height, bool isLargeHeigh
     if (sheetType == SheetType::SHEET_POPUP) {
         sheetOffsetX = sheetOffsetX_;
         sheetWidth = sheetSize.Width();
-        if (isLargeHeight) {
-            sheetHeight = pageHeight_;
-        } else {
-            sheetOffsetY = sheetOffsetY_;
-            sheetHeight = sheetSize.Height();
-        }
+        sheetOffsetY = sheetOffsetY_;
+        sheetHeight = sheetSize.Height();
     } else if (sheetType == SheetType::SHEET_CENTER) {
         sheetOffsetX = sheetOffsetX_;
         sheetOffsetY = pageHeight_ - height;
         sheetWidth = sheetSize.Width();
-        if (isLargeHeight) {
-            sheetHeight = pageHeight_;
-        } else {
-            sheetHeight = sheetSize.Height();
-        }
+        sheetHeight = sheetSize.Height();
     } else if ((sheetType == SheetType::SHEET_BOTTOM) || (sheetType == SheetType::SHEET_BOTTOMPC)) {
         sheetOffsetY = pageHeight_ - height;
         sheetWidth = sheetMaxWidth_;
@@ -1198,8 +1213,6 @@ void SheetPresentationPattern::ProcessColumnRect(float height, bool isLargeHeigh
         sheetWidth = sheetSize.Width();
         sheetHeight = height;
     }
-    RectF rect = RectF(sheetOffsetX, sheetOffsetY, sheetWidth, sheetHeight);
-    column->GetRenderContext()->ClipWithRect(rect);
     auto hub = column->GetEventHub<EventHub>();
     auto gestureHub = hub->GetOrCreateGestureEventHub();
     std::vector<DimensionRect> mouseResponseRegion;

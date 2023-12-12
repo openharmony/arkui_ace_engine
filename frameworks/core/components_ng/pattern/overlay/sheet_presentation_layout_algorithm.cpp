@@ -33,7 +33,6 @@
 namespace OHOS::Ace::NG {
 namespace {
 constexpr int32_t SHEET_HALF_SIZE = 2;
-constexpr int32_t SHEET_PADDING_COUNTER = 2;
 } // namespace
 
 void SheetPresentationLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
@@ -65,8 +64,7 @@ void SheetPresentationLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         layoutWrapper->GetGeometryNode()->SetFrameSize(idealSize);
         layoutWrapper->GetGeometryNode()->SetContentSize(idealSize);
         auto childConstraint = CreateSheetChildConstraint(layoutProperty);
-        layoutConstraint->percentReference = SizeF(
-            sheetWidth_ - sheetTheme->GetTitleTextMargin().ConvertToPx() * SHEET_PADDING_COUNTER, sheetHeight_);
+        layoutConstraint->percentReference = SizeF(sheetWidth_, sheetHeight_);
         for (auto&& child : layoutWrapper->GetAllChildrenWithBuild()) {
             child->Measure(childConstraint);
         }
@@ -130,7 +128,7 @@ void SheetPresentationLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     auto geometryNode = layoutWrapper->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
     geometryNode->SetMarginFrameOffset(positionOffset);
-    OffsetF translate(sheetTheme->GetTitleTextMargin().ConvertToPx(), 0);
+    OffsetF translate(0.0f, 0.0f);
     if (sheetType_ == SheetType::SHEET_POPUP) {
         translate += OffsetF(0, SHEET_ARROW_HEIGHT.ConvertToPx());
     }
@@ -236,20 +234,15 @@ LayoutConstraintF SheetPresentationLayoutAlgorithm::CreateSheetChildConstraint(
     auto sheetTheme = pipeline->GetTheme<SheetTheme>();
     CHECK_NULL_RETURN(sheetTheme, childConstraint);
 
-    childConstraint.maxSize.SetWidth(
-        sheetWidth_ - sheetTheme->GetTitleTextMargin().ConvertToPx() * SHEET_PADDING_COUNTER);
+    childConstraint.maxSize.SetWidth(sheetWidth_);
     auto maxHeight = sheetHeight_;
     if ((sheetStyle_.isTitleBuilder.has_value()) &&
         ((sheetType_ == SheetType::SHEET_CENTER) || (sheetType_ == SheetType::SHEET_POPUP))) {
         maxHeight -= SHEET_OPERATION_AREA_HEIGHT.ConvertToPx();
     }
     childConstraint.maxSize.SetHeight(maxHeight);
-    childConstraint.minSize =
-        SizeF(sheetWidth_ - sheetTheme->GetTitleTextMargin().ConvertToPx() * SHEET_PADDING_COUNTER, 0);
-    childConstraint.parentIdealSize = OptionalSizeF(
-        sheetWidth_ - sheetTheme->GetTitleTextMargin().ConvertToPx() * SHEET_PADDING_COUNTER, sheetHeight_);
-    childConstraint.percentReference = SizeF(
-        sheetWidth_ - sheetTheme->GetTitleTextMargin().ConvertToPx() * SHEET_PADDING_COUNTER, sheetHeight_);
+    childConstraint.parentIdealSize = OptionalSizeF(sheetWidth_, sheetHeight_);
+    childConstraint.percentReference = SizeF(sheetWidth_, sheetHeight_);
     return childConstraint;
 }
 } // namespace OHOS::Ace::NG

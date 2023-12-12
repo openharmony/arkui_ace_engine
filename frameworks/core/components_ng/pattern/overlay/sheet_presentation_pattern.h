@@ -133,6 +133,8 @@ public:
     // initial drag gesture event
     void InitPanEvent();
 
+    void HandleDragStart();
+
     void HandleDragUpdate(const GestureEvent& info);
 
     void HandleDragEnd(float dragVelocity);
@@ -257,6 +259,16 @@ public:
 
     bool IsFold();
 
+    bool GetAnimationBreak() const
+    {
+        return isAnimationBreak_;
+    }
+
+    void SetAnimationProcess(bool isProcess)
+    {
+        isAnimationProcess_ = isProcess;
+    }
+
     float GetSheetMaxHeight()
     {
         return pageHeight_;
@@ -269,7 +281,7 @@ public:
 
     float GetFitContentHeight();
 
-    void ProcessColumnRect(float height = 0.0f, bool isLargeHeight = false);
+    void ProcessColumnRect(float height = 0.0f);
 
 private:
     void OnModifyDone() override;
@@ -325,11 +337,15 @@ private:
     float sheetOffsetX_ = 0.0f;
     float sheetOffsetY_ = 0.0f;
     bool isFirstInit_ = true;
+    bool isAnimationBreak_ = false;
+    bool isAnimationProcess_ = false;
     SheetType sheetType_ = SheetType::SHEET_BOTTOM;
 
     std::string sheetThemeType_ = "auto";
 
     std::vector<float> sheetDetentHeight_;
+
+    std::shared_ptr<AnimationUtils::Animation> animation_;
 
     ACE_DISALLOW_COPY_AND_MOVE(SheetPresentationPattern);
 };

@@ -2447,7 +2447,6 @@ void OverlayManager::PlaySheetTransition(
             },
             option.GetOnFinishEvent());
     } else {
-        sheetPattern->ProcessColumnRect(sheetMaxHeight, true);
         option.SetOnFinishEvent(
             [rootWeak = rootNodeWeak_, sheetWK = WeakClaim(RawPtr(sheetNode)), id = Container::CurrentId(),
                     weakOverlayManager = WeakClaim(this)] {
@@ -2502,7 +2501,6 @@ void OverlayManager::PlayBubbleStyleSheetTransition(RefPtr<FrameNode> sheetNode,
             sheetPattern->ProcessColumnRect();
         });
     } else {
-        sheetPattern->ProcessColumnRect(sheetHeight_, true);
         sheetPattern->StartOffsetExitingAnimation();
         sheetPattern->StartAlphaExitingAnimation(
             [rootWeak = rootNodeWeak_, sheetWK = WeakClaim(RawPtr(sheetNode)), id = Container::CurrentId(),
