@@ -15,19 +15,57 @@
 
 #include "core/components_ng/pattern/grid/irregular/grid_irregular_layout_algorithm.h"
 
+#include "core/components_ng/pattern/grid/grid_layout_info.h"
 #include "core/components_ng/pattern/grid/grid_layout_property.h"
 #include "core/components_ng/pattern/grid/grid_utils.h"
 #include "core/components_ng/pattern/grid/irregular/grid_irregular_filler.h"
 #include "core/components_ng/pattern/grid/irregular/layout_range_solver.h"
 #include "core/components_ng/pattern/scrollable/scrollable_utils.h"
+#include "core/components_ng/property/measure_property.h"
 #include "core/components_ng/property/templates_parser.h"
 
 namespace OHOS::Ace::NG {
 void GridIrregularLayout::Measure(LayoutWrapper* layoutWrapper)
 {
     wrapper_ = layoutWrapper;
-    auto props = DynamicCast<GridLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    auto props = DynamicCast<GridLayoutProperty>(wrapper_->GetLayoutProperty());
 
+    float mainSize = MeasureSelf(props);
+    Init(props);
+
+    /* alias */
+    auto& info = gridLayoutInfo_;
+
+    GridLayoutRangeSolver solver(&info, wrapper_);
+    auto res = solver.FindStartingRow(mainGap_);
+
+    firstRowPos_ = res.pos;
+    info.startMainLineIndex_ = res.row;
+    info.startIndex_ = info.gridMatrix_[res.row][0];
+    float targetLen = mainSize + res.height;
+
+    GridIrregularFiller filler(&gridLayoutInfo_, wrapper_);
+    filler.Fill({ crossLens_, targetLen, crossGap_, mainGap_ });
+
+    wrapper_->SetCacheCount(static_cast<int32_t>(props->GetCachedCountValue(1) * gridLayoutInfo_.crossCount_));
+}
+
+void GridIrregularLayout::Layout(LayoutWrapper* layoutWrapper)
+{
+    wrapper_ = layoutWrapper;
+
+    RemoveOutOfBoundChildren();
+
+    float mainOffset = firstRowPos_ + gridLayoutInfo_.currentOffset_;
+    LOGI("ZTE layout from %d to %d, line from %d to %d", gridLayoutInfo_.startIndex_, gridLayoutInfo_.endIndex_,
+        gridLayoutInfo_.startMainLineIndex_, gridLayoutInfo_.endMainLineIndex_);
+    LayoutChildren(mainOffset);
+
+    UpdateLayoutInfo();
+}
+
+float GridIrregularLayout::MeasureSelf(const RefPtr<GridLayoutProperty>& props)
+{
     // set self size
     auto size =
         CreateIdealSize(props->GetLayoutConstraint().value(), gridLayoutInfo_.axis_, props->GetMeasureType(), true);
@@ -41,27 +79,14 @@ void GridIrregularLayout::Measure(LayoutWrapper* layoutWrapper)
     size.AddHeight(gridLayoutInfo_.contentEndPadding_);
     wrapper_->GetGeometryNode()->SetContentSize(size);
 
-    Init(props);
-
-    float targetLen = size.MainSize(gridLayoutInfo_.axis_) - gridLayoutInfo_.currentOffset_;
-    targetLen -= gridLayoutInfo_.totalHeight_.value_or(0.0f);
-
-    // fill content with new children and measure them
-    GridIrregularFiller filler(&gridLayoutInfo_, wrapper_);
-    float additionalLen = filler.Fill(targetLen, crossLens_, crossGap_);
-    if (!gridLayoutInfo_.totalHeight_) {
-        gridLayoutInfo_.totalHeight_ = 0.0f;
-    }
-    *gridLayoutInfo_.totalHeight_ += additionalLen;
-
-    wrapper_->SetCacheCount(static_cast<int32_t>(props->GetCachedCountValue(1) * gridLayoutInfo_.crossCount_));
+    return size.MainSize(gridLayoutInfo_.axis_);
 }
 
 void GridIrregularLayout::Init(const RefPtr<GridLayoutProperty>& props)
 {
-    auto crossSize = wrapper_->GetGeometryNode()->GetContentSize().CrossSize(gridLayoutInfo_.axis_);
-    crossGap_ = GridUtils::GetCrossGap(props, wrapper_->GetGeometryNode()->GetContentSize(), gridLayoutInfo_.axis_);
-    mainGap_ = GridUtils::GetMainGap(props, wrapper_->GetGeometryNode()->GetContentSize(), gridLayoutInfo_.axis_);
+    const auto& contentSize = wrapper_->GetGeometryNode()->GetContentSize();
+    crossGap_ = GridUtils::GetCrossGap(props, contentSize, gridLayoutInfo_.axis_);
+    mainGap_ = GridUtils::GetMainGap(props, contentSize, gridLayoutInfo_.axis_);
 
     std::string args;
     if (gridLayoutInfo_.axis_ == Axis::HORIZONTAL) {
@@ -70,6 +95,7 @@ void GridIrregularLayout::Init(const RefPtr<GridLayoutProperty>& props)
         args = props->GetColumnsTemplate().value_or("");
     }
 
+    const float crossSize = contentSize.CrossSize(gridLayoutInfo_.axis_);
     auto res = ParseTemplateArgs(GridUtils::ParseArgs(args), crossSize, crossGap_, wrapper_->GetTotalChildCount());
 
     crossLens_ = std::vector<float>(res.first.begin(), res.first.end());
@@ -85,43 +111,37 @@ void GridIrregularLayout::Init(const RefPtr<GridLayoutProperty>& props)
     gridLayoutInfo_.crossCount_ = crossLens_.size();
 }
 
-void GridIrregularLayout::Layout(LayoutWrapper* layoutWrapper)
+bool GridIrregularLayout::ReachedEnd() const
 {
-    wrapper_ = layoutWrapper;
-    // handle layout backward separately??
-
-    GridLayoutRangeSolver solver(&gridLayoutInfo_, wrapper_);
-    float firstRowPos = solver.FindLayoutRange(mainGap_);
-
-    RemoveOutOfBoundChildren();
-
-    // layout children
-    float mainOffset = firstRowPos + gridLayoutInfo_.currentOffset_;
-    auto crossPos = CalculateCrossPositions();
-    for (int32_t r = gridLayoutInfo_.startMainLineIndex_; r <= gridLayoutInfo_.endMainLineIndex_; ++r) {
-        const auto& row = gridLayoutInfo_.gridMatrix_.at(r);
-        for (int32_t c = 0; c < gridLayoutInfo_.crossCount_; ++c) {
-            if (row.at(c) == -1) {
-                // block of an irregular item
-                continue;
-            }
-            auto child = wrapper_->GetChildByIndex(row.at(c));
-
-            if (!child) {
-                TAG_LOGW(
-                    AceLogTag::ACE_GRID, "Child not present at a valid index! r = %{public}d, c = %{public}d", r, c);
-            }
-
-            auto offset = gridLayoutInfo_.axis_ == Axis::HORIZONTAL ? OffsetF { mainOffset, crossPos[c] }
-                                                                    : OffsetF { crossPos[c], mainOffset };
-            child->GetGeometryNode()->SetMarginFrameOffset(offset);
-            // re-layout previously hidden nodes
-            if (!child->IsActive()) {
-                child->Layout();
-            }
-        }
-        mainOffset += gridLayoutInfo_.lineHeightMap_[r] + mainGap_;
+    const auto& info = gridLayoutInfo_;
+    if (info.endIndex_ < wrapper_->GetTotalChildCount() - 1) {
+        return false;
     }
+    auto child = wrapper_->GetChildByIndex(info.endIndex_);
+    CHECK_NULL_RETURN(child, false);
+
+    float bottom = wrapper_->GetGeometryNode()->GetFrameSize().MainSize(info.axis_) - info.contentEndPadding_;
+    float itemBot = info.axis_ == Axis::HORIZONTAL ? child->GetGeometryNode()->GetFrameRect().Right()
+                                                   : child->GetGeometryNode()->GetFrameRect().Bottom();
+    LOGI("ZTE frame bottom = %f, contentBottom = %f", bottom, itemBot);
+    return itemBot < bottom;
+}
+
+void GridIrregularLayout::UpdateLayoutInfo()
+{
+    auto& info = gridLayoutInfo_;
+
+    if (info.currentOffset_ > 0.0f) {
+        info.reachStart_ = true;
+    } else if (ReachedEnd()) {
+        info.reachEnd_ = true;
+    } else {
+        info.reachStart_ = false;
+        info.reachEnd_ = false;
+    }
+
+    info.lastMainSize_ = wrapper_->GetGeometryNode()->GetContentSize().MainSize(info.axis_);
+    info.totalHeightOfItemsInView_ = info.GetTotalHeightOfItemsInView(mainGap_);
 }
 
 void GridIrregularLayout::RemoveOutOfBoundChildren()
@@ -134,6 +154,7 @@ void GridIrregularLayout::RemoveOutOfBoundChildren()
             // no more children to remove
             break;
         }
+        LOGI("ZTE remove child %d", idx);
         wrapper_->RemoveChildInRenderTree(idx);
     }
 
@@ -141,19 +162,54 @@ void GridIrregularLayout::RemoveOutOfBoundChildren()
     idx = gridLayoutInfo_.endIndex_;
     while (idx < wrapper_->GetTotalChildCount() - 1) {
         auto child = wrapper_->GetChildByIndex(++idx);
+        bool skipFlag = false;
         if (!child || !child->IsActive()) {
+            skipFlag = true;
             // no more children to remove
-            break;
+            continue;
+        }
+        if (skipFlag) {
+            LOGI("ZTE remove child %d after skip", idx);
         }
         wrapper_->RemoveChildInRenderTree(idx);
     }
 }
 
-std::vector<float> GridIrregularLayout::CalculateCrossPositions()
+void GridIrregularLayout::LayoutChildren(float mainOffset)
+{
+    const auto& padding = *wrapper_->GetGeometryNode()->GetPadding();
+    mainOffset += gridLayoutInfo_.axis_ == Axis::HORIZONTAL ? padding.left.value_or(0.0f) : padding.top.value_or(0.0f);
+    auto crossPos = CalculateCrossPositions(padding);
+    const auto& info = gridLayoutInfo_;
+
+    for (int32_t r = info.startMainLineIndex_; r <= info.endMainLineIndex_; ++r) {
+        const auto& row = info.gridMatrix_.at(r);
+        for (int32_t c = 0; c < info.crossCount_; ++c) {
+            if (row.find(c) == row.end() || row.at(c) == -1) {
+                continue;
+            }
+            auto child = wrapper_->GetOrCreateChildByIndex(row.at(c));
+
+            if (!child) {
+                TAG_LOGW(
+                    AceLogTag::ACE_GRID, "Child not present at a valid index! r = %{public}d, c = %{public}d", r, c);
+            }
+
+            auto offset = info.axis_ == Axis::HORIZONTAL ? OffsetF { mainOffset, crossPos[c] }
+                                                         : OffsetF { crossPos[c], mainOffset };
+            child->GetGeometryNode()->SetMarginFrameOffset(offset);
+            // re-layout previously hidden nodes
+            child->Layout();
+        }
+        // add mainGap below the item
+        mainOffset += info.lineHeightMap_.at(r) + mainGap_;
+    }
+}
+
+std::vector<float> GridIrregularLayout::CalculateCrossPositions(const PaddingPropertyF& padding)
 {
     std::vector<float> res(gridLayoutInfo_.crossCount_, 0.0f);
-    const auto& padding = *wrapper_->GetGeometryNode()->GetPadding();
-    res[0] = gridLayoutInfo_.axis_ == Axis::HORIZONTAL ? padding.top.value_or(0) : padding.left.value_or(0);
+    res[0] = gridLayoutInfo_.axis_ == Axis::HORIZONTAL ? padding.top.value_or(0.0f) : padding.left.value_or(0.0f);
     for (int32_t i = 1; i < gridLayoutInfo_.crossCount_; ++i) {
         res[i] = res[i - 1] + crossLens_[i - 1] + crossGap_;
     }

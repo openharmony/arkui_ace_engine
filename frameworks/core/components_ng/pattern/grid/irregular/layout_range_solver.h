@@ -26,12 +26,24 @@ public:
     GridLayoutRangeSolver(GridLayoutInfo* info, LayoutWrapper* wrapper);
     ~GridLayoutRangeSolver() = default;
 
-    float FindLayoutRange(float mainGap);
+    struct StartingRowInfo {
+        // Row index of the starting row.
+        int32_t row = 0;
+
+        // Main position of the starting row in the contentRect.
+        float pos = 0.0f;
+
+        // Height of the starting row (with irregular items that occupy multiple rows, this is multiple rows in
+        // GridLayoutInfo::lineHeightMap_ combined)
+        float height = 0.0f;
+    };
+
+    StartingRowInfo FindStartingRow(float mainGap);
 
 private:
     std::pair<int32_t, float> AddNextRow(float mainGap, int32_t row);
 
-    GridLayoutInfo* info_;
+    const GridLayoutInfo* info_;
     const LayoutWrapper* wrapper_;
     const GridLayoutOptions* opts_;
 

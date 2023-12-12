@@ -29,14 +29,24 @@ public:
     GridIrregularFiller(GridLayoutInfo* info, LayoutWrapper* wrapper);
     ~GridIrregularFiller() = default;
 
-    // crossGap can't be obtained from LayoutProperty because its actual value may be reset by GridTemplate.
-    float Fill(float targetLength, const std::vector<float>& crossLens, float crossGap);
+    struct FillParameters {
+        std::vector<float> crossLens;
+        float targetLen = 0.0f;
+        float crossGap = 0.0f;
+        float mainGap = 0.0f;
+    };
+
+    float Fill(const FillParameters& params);
 
 private:
-    std::pair<int32_t, int32_t> LoadOne();
-    void MeasureNewItem(const std::vector<float>& crossLens, int32_t col, float crossGap);
+    void FitOne();
+    void UpdateLength(int32_t prevRow, float mainGap);
+    void MeasureNewItem(const FillParameters& params, int32_t col);
 
-    void UpdateMainLen();
+    void InitPos();
+
+    bool FindNextItem(int32_t target);
+    bool AdvancePos();
 
     inline bool IsFull(float targetLen);
     inline bool ItemCanFit(const decltype(GridLayoutInfo::gridMatrix_)::iterator& it, int32_t itemWidth);
@@ -44,6 +54,9 @@ private:
     GridItemSize GetItemSize(int32_t idx);
 
     float length_ = 0.0f;
+
+    int32_t posY_ = 0;
+    int32_t posX_ = -1;
 
     GridLayoutInfo* info_;
     LayoutWrapper* wrapper_;
