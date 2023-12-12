@@ -468,7 +468,6 @@ protected:
     bool isInitialized_ = false;
 
     void Register2DragDropManager();
-    void SetDragStatusListener(RefPtr<DragStatusListener> dragStatusListener);
 
 private:
     virtual void OnScrollEndCallback() {};
@@ -600,7 +599,6 @@ private:
     RefPtr<Animator> hotzoneAnimator_;
     float lastHonezoneOffsetPct_ = 0.0f;
     RefPtr<BezierVariableVelocityMotion> velocityMotion_;
-    std::optional<RefPtr<DragStatusListener>> dragStatusListener_;
     void UnRegister2DragDropManager();
     float IsInHotZone(const PointF& point);
     void HotZoneScroll(const float offset);

@@ -377,12 +377,6 @@ void DragDropManager::NotifyDragRegisterFrameNode(std::unordered_map<int32_t, We
         }
         auto pattern = frameNode->GetPattern<Pattern>();
         CHECK_NULL_VOID(pattern);
-        if (SystemProperties::GetDebugEnabled()) {
-            TAG_LOGI(AceLogTag::ACE_DRAG,
-                "Drag notify is regist. Dragged frameNode is %{public}s, depth is %{public}d, "
-                "DragEventType is %{public}d.",
-                frameNode->GetTag().c_str(), frameNode->GetDepth(), static_cast<int32_t>(dragEventType));
-        }
         pattern->HandleOnDragStatusCallback(dragEventType, notifyEvent);
     }
 }
