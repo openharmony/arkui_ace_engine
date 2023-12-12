@@ -4978,7 +4978,6 @@ HWTEST_F(SwiperTestNg, SwiperPatternSwipeTo001, TestSize.Level1)
         pattern_->SwipeTo(index);
         pattern_->springController_->status_ = Animator::Status::STOPPED;
     }
-    pattern_->indicatorController_ = AceType::MakeRefPtr<Animator>();
     pattern_->usePropertyAnimation_ = true;
     pattern_->SwipeTo(index);
 }
@@ -5067,7 +5066,6 @@ HWTEST_F(SwiperTestNg, SwiperPatternShowNext001, TestSize.Level1)
     frameNode_->AddChild(rightArrow);
     for (int i = 0; i <= 1; i++) {
         pattern_->ShowNext();
-        pattern_->indicatorController_ = AceType::MakeRefPtr<Animator>();
         pattern_->isVisible_ = false;
     }
 }
@@ -5177,8 +5175,6 @@ HWTEST_F(SwiperTestNg, SwiperPatternFinishAnimation001, TestSize.Level1)
     for (int i = 0; i <= 1; i++) {
         for (int j = 0; j <= 1; j++) {
             pattern_->FinishAnimation();
-            pattern_->indicatorController_ = AceType::MakeRefPtr<Animator>();
-            ASSERT_NE(pattern_->indicatorController_, nullptr);
             pattern_->usePropertyAnimation_ = true;
             pattern_->isUserFinish_ = true;
                 }
@@ -5515,7 +5511,7 @@ HWTEST_F(SwiperTestNg, SwiperPatternGetCurveIncludeMotion001, TestSize.Level1)
     for (int i = 0; i <= 1; i++) {
         for (int j = 0; j <= 1; j++) {
             for (int k = 0; k <= 1; k++) {
-                pattern_->GetCurveIncludeMotion(velocity);
+                pattern_->GetCurveIncludeMotion();
                 if (i == 1) {
                     curve2->UpdateVelocity(-0.1f);
                     continue;
@@ -5552,9 +5548,7 @@ HWTEST_F(SwiperTestNg, SwiperPatternPlayIndicatorTranslateAnimation001, TestSize
                 break;
             }
             pattern_->indicatorId_ = 1;
-            pattern_->indicatorController_ = nullptr;
         }
-        pattern_->indicatorController_ = AceType::MakeRefPtr<Animator>();
     }
 }
 
@@ -7195,7 +7189,6 @@ HWTEST_F(SwiperTestNg, SwiperPatternBeforeCreateLayoutWrapper001, TestSize.Level
             pattern_->GetLayoutProperty<SwiperLayoutProperty>()->UpdateShowIndicator(false);
             frameNode_->AddChild(leftArrow);
             frameNode_->AddChild(rightArrow);
-            pattern_->indicatorController_ = AceType::MakeRefPtr<Animator>();
         }
         pattern_->GetLayoutProperty<SwiperLayoutProperty>()->UpdateLoop(false);
         pattern_->jumpIndex_ = -1;
@@ -7622,7 +7615,6 @@ HWTEST_F(SwiperTestNg, SwiperPatternShowPrevious002, TestSize.Level1)
 
     for (int i = 0; i <= 1; i++) {
         pattern_->ShowPrevious();
-        pattern_->indicatorController_ = AceType::MakeRefPtr<Animator>();
         pattern_->isVisible_ = false;
         pattern_->preTargetIndex_ = 0;
     }
@@ -7926,7 +7918,6 @@ HWTEST_F(SwiperTestNg, SwiperPatternOnTouchTestHit002, TestSize.Level1)
 HWTEST_F(SwiperTestNg, SwiperPatternHandleTouchDown001, TestSize.Level1)
 {
     CreateWithItem([](SwiperModelNG model) {});
-    pattern_->indicatorController_ = AceType::MakeRefPtr<Animator>();
     pattern_->usePropertyAnimation_ = true;
 
     /**
@@ -7946,7 +7937,6 @@ HWTEST_F(SwiperTestNg, SwiperPatternHandleTouchDown001, TestSize.Level1)
 HWTEST_F(SwiperTestNg, SwiperPatternPlayPropertyTranslateAnimation002, TestSize.Level1)
 {
     CreateWithItem([](SwiperModelNG model) {});
-    pattern_->indicatorController_ = AceType::MakeRefPtr<Animator>();
     pattern_->usePropertyAnimation_ = true;
     float translate = 0.1f;
     int32_t nextIndex = 1;
@@ -7954,7 +7944,6 @@ HWTEST_F(SwiperTestNg, SwiperPatternPlayPropertyTranslateAnimation002, TestSize.
     pattern_->usePropertyAnimation_ = true;
     pattern_->itemPositionInAnimation_.clear();
     pattern_->targetIndex_ = 1;
-    pattern_->indicatorController_ = nullptr;
 
     /**
      * @tc.steps: step2. call HandleTouchDown.
@@ -8503,15 +8492,10 @@ HWTEST_F(SwiperTestNg, SwiperPatternShowPrevious003, TestSize.Level1)
      */
     pattern_->ShowPrevious();
     EXPECT_EQ(pattern_->preTargetIndex_.value(), -1);
-    pattern_->indicatorController_ = AceType::MakeRefPtr<Animator>();
-    pattern_->indicatorController_->elapsedTime_ = 1;
     pattern_->isVisible_ = false;
     pattern_->preTargetIndex_ = 0;
     pattern_->isUserFinish_ = true;
-    pattern_->indicatorController_->iteration_ = 1;
-    pattern_->indicatorController_->status_ = Animator::Status::IDLE;
     pattern_->ShowPrevious();
-    EXPECT_EQ(pattern_->indicatorController_->elapsedTime_, 0);
     EXPECT_EQ(pattern_->preTargetIndex_.value(), 0);
 }
 
@@ -9012,7 +8996,7 @@ HWTEST_F(SwiperTestNg, SwiperIndicatorPatternTouchBottom001, TestSize.Level1)
     TouchLocationInfo touchLocationInfo("down", 0);
     touchLocationInfo.SetTouchType(TouchType::DOWN);
     EXPECT_FALSE(indicatorPattern->CheckIsTouchBottom(info));
-    EXPECT_FALSE(indicatorPattern->CheckIsTouchBottom(touchLocationInfo));
+    EXPECT_TRUE(indicatorPattern->CheckIsTouchBottom(touchLocationInfo));
 
     pattern_->currentIndex_ = 0;
     layoutProperty_->UpdateLoop(false);
@@ -9115,8 +9099,6 @@ HWTEST_F(SwiperTestNg, SwiperIndicatorPatternTestNg0011, TestSize.Level1)
     pattern_->currentIndex_ = 0;
     layoutProperty_->UpdateLoop(false);
     indicatorPattern->HandleLongDragUpdate(touchEventInfo.GetTouches().front());
-    pattern_->indicatorController_ = AceType::MakeRefPtr<Animator>();
-    pattern_->indicatorController_->status_ = Animator::Status::RUNNING;
     indicatorPattern->HandleLongDragUpdate(touchEventInfo.GetTouches().front());
 }
 
@@ -9325,10 +9307,6 @@ HWTEST_F(SwiperTestNg, SwiperPatternPlayIndicatorTranslateAnimation004, TestSize
     for (int i = 0; i <= 1; i++) {
         for (int j = 0; j <= 1; j++) {
             pattern_->PlayIndicatorTranslateAnimation(translate);
-            auto translateAnimation = static_cast<CurveAnimation<double>*>(
-                AceType::RawPtr(pattern_->indicatorController_->interpolators_.front()));
-            auto callBack = translateAnimation->callbacks_.begin()->second;
-            callBack(0.2);
             if (i == 1) {
                 pattern_->swiperController_->SetTurnPageRateCallback(nullptr);
                 continue;
@@ -9843,7 +9821,7 @@ HWTEST_F(SwiperTestNg, SwiperIndicatorPatternTestNg0020, TestSize.Level1)
     TouchEventInfo touchEventInfo("down");
     touchEventInfo.touches_ = infoSwiper;
     pattern_->currentIndex_ = 0;
-    EXPECT_FALSE(indicatorPattern->CheckIsTouchBottom(touchEventInfo.GetTouches().front()));
+    EXPECT_TRUE(indicatorPattern->CheckIsTouchBottom(touchEventInfo.GetTouches().front()));
     layoutProperty_->UpdateLoop(false);
     ASSERT_FALSE(layoutProperty_->GetLoop().value_or(true));
     pattern_->leftButtonId_ = 1;
@@ -10262,7 +10240,6 @@ HWTEST_F(SwiperTestNg, SwiperPatternInitSurfaceChangedCallback001, TestSize.Leve
     auto callbacknumber2 = pattern_->surfaceChangedCallbackId_;
     EXPECT_EQ(callbacknumber2, 1);
 
-    pattern_->indicatorController_ = AceType::MakeRefPtr<Animator>();
     auto childswiperNode1 = FrameNode::CreateFrameNode("childswiper", 1, AceType::MakeRefPtr<SwiperPattern>(), false);
     childswiperNode1->MountToParent(frameNode_);
     auto childswiperNode2 =

@@ -25,6 +25,8 @@
 #include "core/components_ng/render/render_context.h"
 
 namespace OHOS::Ace::NG {
+enum class PointAnimationStage { STATE_SHRINKT_TO_BLACK_POINT, STATE_EXPAND_TO_LONG_POINT };
+
 class ACE_EXPORT DotIndicatorPaintMethod : public NodePaintMethod {
     DECLARE_ACE_TYPE(DotIndicatorPaintMethod, NodePaintMethod)
 public:
@@ -44,8 +46,8 @@ public:
     void PaintHoverIndicator(const PaintWrapper* paintWrapper);
     void PaintPressIndicator(const PaintWrapper* paintWrapper);
     void CalculateNormalMargin(const LinearVector<float>& itemHalfSizes, const SizeF& frameSize);
-    void CalculatePointCenterX(const LinearVector<float>& itemHalfSizes, float margin,
-        float padding, float space, int32_t index);
+    std::pair<float, float> CalculatePointCenterX(
+        const LinearVector<float>& itemHalfSizes, float margin, float padding, float space, int32_t index);
     void CalculateHoverIndex(const LinearVector<float>& itemHalfSizes);
     bool isHoverPoint(const PointF& hoverPoint, const OffsetF& leftCenter,
         const OffsetF& rightCenter, const LinearVector<float>& itemHalfSizes);
@@ -101,6 +103,16 @@ public:
         turnPageRate_ = turnPageRate;
     }
 
+    void SetGestureState(GestureState gestureState)
+    {
+        gestureState_ = gestureState;
+    }
+
+    void SetTouchBottomTypeLoop(TouchBottomTypeLoop touchBottomTypeLoop)
+    {
+        touchBottomTypeLoop_ = touchBottomTypeLoop;
+    }
+
     void SetTouchBottomRate(float touchBottomRate)
     {
         touchBottomRate_ = touchBottomRate;
@@ -115,6 +127,12 @@ public:
     {
         touchBottomType_ = touchBottomType;
     }
+
+    void SetPointAnimationStage(PointAnimationStage pointAnimationStage)
+    {
+        pointAnimationStage_ = pointAnimationStage;
+    }
+
 private:
     struct StarAndEndPointCenter {
         float startLongPointLeftCenterX = 0.0f;
@@ -122,11 +140,13 @@ private:
         float startLongPointRightCenterX = 0.0f;
         float endLongPointRightCenterX = 0.0f;
     };
-    void CalculatePointCenterX(const StarAndEndPointCenter& starAndEndPointCenter,
+    std::pair<float, float> CalculatePointCenterX(const StarAndEndPointCenter& starAndEndPointCenter,
         const LinearVector<float>& startVectorBlackPointCenterX, const LinearVector<float>& endVectorBlackPointCenterX);
-    void ForwardCalculation(
+    std::tuple<std::pair<float, float>, LinearVector<float>> CalculateLongPointCenterX(
+        const PaintWrapper* paintWrapper);
+    std::pair<float, float> ForwardCalculation(
         const LinearVector<float>& itemHalfSizes, float startCenterX, float endCenterX, float space, int32_t index);
-    void BackwardCalculation(
+    std::pair<float, float> BackwardCalculation(
         const LinearVector<float>& itemHalfSizes, float startCenterX, float endCenterX, float space, int32_t index);
     static RefPtr<OHOS::Ace::SwiperIndicatorTheme> GetSwiperIndicatorTheme()
     {
@@ -136,6 +156,13 @@ private:
         CHECK_NULL_RETURN(swiperTheme, nullptr);
         return swiperTheme;
     }
+    void UpdateNormalIndicator(LinearVector<float>& itemHalfSizes, const PaintWrapper* paintWrapper);
+    std::pair<int32_t, int32_t> GetStartAndEndIndex(int32_t index);
+    void GetLongPointAnimationStateSecondCenter(
+        const PaintWrapper* paintWrapper, std::vector<std::pair<float, float>>& pointCenterX);
+    std::tuple<float, float, float> GetMoveRate();
+    void AdjustPointCenterXForTouchBottom(StarAndEndPointCenter& pointCenter,
+        LinearVector<float>& endVectorBlackPointCenterX, int32_t startCurrentIndex, int32_t endCurrentIndex);
 
     RefPtr<DotIndicatorModifier> dotIndicatorModifier_;
     PointF hoverPoint_;
@@ -146,6 +173,9 @@ private:
     int32_t itemCount_ = 0;
     int32_t displayCount_ = 1;
     float turnPageRate_ = 0.0f;
+    GestureState gestureState_ = GestureState::GESTURE_STATE_FOLLOW;
+    TouchBottomTypeLoop touchBottomTypeLoop_ = TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_NONE;
+    PointAnimationStage pointAnimationStage_ = PointAnimationStage::STATE_SHRINKT_TO_BLACK_POINT;
     float touchBottomRate_ = 0.0f;
     bool isLoop_ = true;
     bool isHover_ = false;
