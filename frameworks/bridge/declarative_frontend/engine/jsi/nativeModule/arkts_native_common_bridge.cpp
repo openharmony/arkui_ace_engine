@@ -1131,14 +1131,24 @@ bool ParseResponseRegion(
         CalcDimension heightDimen = CalcDimension(1, DimensionUnit::PERCENT);
         auto s1 = width->ToString(vm)->ToString();
         auto s2 = height->ToString(vm)->ToString();
-        if (s1.find('-') == std::string::npos) {
-            ArkTSUtils::ParseJsDimensionNG(vm, width, widthDimen, DimensionUnit::VP);
+        if (s1.find('-') != std::string::npos) {
+            width = ToJSValue("100%");
         }
-        if (s2.find('-') == std::string::npos) {
-            ArkTSUtils::ParseJsDimensionNG(vm, height, heightDimen, DimensionUnit::VP);
+        if (s2.find('-') != std::string::npos) {
+            height = ToJSValue("100%");
         }
-        ArkTSUtils::ParseJsDimensionNG(vm, x, xDimen, DimensionUnit::VP);
-        ArkTSUtils::ParseJsDimensionNG(vm, y, yDimen, DimensionUnit::VP);
+        if (!ArkTSUtils::ParseJsDimensionNG(vm, x, xDimen, DimensionUnit::VP)) {
+            xDimen = CalcDimension(0.0, DimensionUnit::VP);
+        }
+        if (!ArkTSUtils::ParseJsDimensionNG(vm, y, yDimen, DimensionUnit::VP)) {
+            yDimen = CalcDimension(0.0, DimensionUnit::VP);
+        }
+        if (!ArkTSUtils::ParseJsDimensionNG(vm, width, widthDimen, DimensionUnit::VP)) {
+            widthDimen = CalcDimension(1, DimensionUnit::PERCENT);
+        }
+        if (!ArkTSUtils::ParseJsDimensionNG(vm, height, heightDimen, DimensionUnit::VP)) {
+            heightDimen = CalcDimension(1, DimensionUnit::PERCENT);
+        }
         regionValues[i + NUM_0] = xDimen.Value();
         regionUnits[i + NUM_0] = static_cast<int32_t>(xDimen.Unit());
         regionValues[i + NUM_1] = yDimen.Value();
