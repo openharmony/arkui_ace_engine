@@ -344,7 +344,7 @@ bool LayeredDrawableDescriptor::CreatePixelMap()
     std::shared_ptr<SkBitmap> foreground;
     if (foreground_.has_value()) {
         foreground = ImageConverter::PixelMapToBitmap(foreground_.value());
-    } else if (GetPixelMapFromJsonBuf(false)) {
+    } else if (GetPixelMapFromJsonBuf(false) && foreground_.has_value()) {
         foreground = ImageConverter::PixelMapToBitmap(foreground_.value());
     } else {
         HILOG_INFO("Get pixelMap of foreground failed.");
@@ -354,7 +354,7 @@ bool LayeredDrawableDescriptor::CreatePixelMap()
     std::shared_ptr<SkBitmap> background;
     if (background_.has_value()) {
         background = ImageConverter::PixelMapToBitmap(background_.value());
-    } else if (GetPixelMapFromJsonBuf(true)) {
+    } else if (GetPixelMapFromJsonBuf(true) && background_.has_value()) {
         background = ImageConverter::PixelMapToBitmap(background_.value());
     } else {
         HILOG_ERROR("Get pixelMap of background failed.");
@@ -364,9 +364,9 @@ bool LayeredDrawableDescriptor::CreatePixelMap()
     std::shared_ptr<SkBitmap> mask;
     if (mask_.has_value()) {
         mask = ImageConverter::PixelMapToBitmap(mask_.value());
-    } else if (GetMaskByPath()) {
+    } else if (GetMaskByPath() && mask_.has_value()) {
         mask = ImageConverter::PixelMapToBitmap(mask_.value());
-    } else if (GetDefaultMask()) {
+    } else if (GetDefaultMask() && mask_.has_value()) {
         mask = ImageConverter::PixelMapToBitmap(mask_.value());
     } else {
         HILOG_ERROR("Get pixelMap of mask failed.");
