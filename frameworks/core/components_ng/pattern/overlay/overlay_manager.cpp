@@ -490,15 +490,8 @@ void OverlayManager::PopMenuAnimation(const RefPtr<FrameNode>& menu, bool showPr
         taskExecutor->PostTask(
             [rootWeak, menuWK, id, weak]() {
                 auto menu = menuWK.Upgrade();
+                CHECK_NULL_VOID(menu);
                 auto root = rootWeak.Upgrade();
-                auto overlayManager = weak.Upgrade();
-                CHECK_NULL_VOID(menu && overlayManager);
-                ContainerScope scope(id);
-                auto container = Container::Current();
-                if (container && container->IsScenceBoardWindow()) {
-                    root = overlayManager->FindWindowScene(menu);
-                }
-                CHECK_NULL_VOID(root);
                 auto menuWrapperPattern = menu->GetPattern<MenuWrapperPattern>();
                 menuWrapperPattern->CallMenuDisappearCallback();
                 auto mainPipeline = PipelineContext::GetMainPipelineContext();
@@ -515,6 +508,14 @@ void OverlayManager::PopMenuAnimation(const RefPtr<FrameNode>& menu, bool showPr
                     SubwindowManager::GetInstance()->ClearMenuNG(id);
                     return;
                 }
+                ContainerScope scope(id);
+                auto container = Container::Current();
+                auto overlayManager = weak.Upgrade();
+                CHECK_NULL_VOID(overlayManager);
+                if (container && container->IsScenceBoardWindow()) {
+                    root = overlayManager->FindWindowScene(menu);
+                }
+                CHECK_NULL_VOID(root);
                 overlayManager->BlurOverlayNode(menu);
                 root->RemoveChild(menu);
                 root->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
@@ -1193,6 +1194,8 @@ void OverlayManager::DeleteMenu(int32_t targetId)
     if (it == menuMap_.end()) {
         return;
     }
+    HideAllMenus();
+    HideMenuInSubWindow(false);
     menuMap_.erase(it);
 }
 
