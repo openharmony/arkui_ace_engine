@@ -12,13 +12,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-const START_TIME = 250
-const END_TIME = 200
-const BORDER_RADIUS = 12
-const OPACITY_NUM = 0.18
-const DEFAULT_HEIGHT = 48
-const FIT_HEIGHT = 58
-const ZINDEX_NUM = 999
+const START_TIME = 250;
+const END_TIME = 200;
+const BORDER_RADIUS = 12;
+const OPACITY_NUM = 0.18;
+const DEFAULT_HEIGHT = 48;
+const FIT_HEIGHT = 58;
+const ZINDEX_NUM = 999;
 
 export enum HardwareStatus {
   ON = 0,
@@ -70,8 +70,7 @@ export struct ExceptionPrompt {
     .borderRadius(BORDER_RADIUS)
     .backgroundColor($r('sys.color.ohos_id_color_warning'))
     .opacity(OPACITY_NUM)
-    .position({})
-    .zIndex(999)
+    .zIndex(ZINDEX_NUM)
   }
 
   @Builder TextBuilder() {
@@ -87,7 +86,7 @@ export struct ExceptionPrompt {
           .fontColor($r('sys.color.ohos_id_color_warning'))
           .textOverflow({ overflow: TextOverflow.Ellipsis })
           .maxLines(2)
-          .margin({ left: 16, right: 16 })
+          .margin({ left: $r('sys.float.ohos_id_dialog_margin_end'), right: $r('sys.float.ohos_id_dialog_margin_end') })
       }
       .width('100%')
       .height('100%')
@@ -105,7 +104,7 @@ export struct ExceptionPrompt {
               .fontColor($r('sys.color.ohos_id_color_text_secondary'))
               .maxLines(1)
               .padding(0)
-              .margin({ right: 4 })
+              .margin({ right: $r('sys.float.ohos_id_text_paragraph_margin_s') })
               .textAlign(TextAlign.End)
             Image($r('sys.media.ohos_ic_public_arrow_right'))
               .width('12vp')
@@ -117,7 +116,10 @@ export struct ExceptionPrompt {
         .width(this.options.isTouchShow ? 120 : 0)
         .height(32)
         .borderRadius($r('sys.float.ohos_id_corner_radius_subtab'))
-        .padding({ right: 8, left: 8 })
+        .padding({
+          right: $r('sys.float.ohos_id_elements_margin_vertical_l'),
+          left: $r('sys.float.ohos_id_elements_margin_vertical_l')
+        })
         .onTouch((event) => {
 
           if (event.type === TouchType.Down) {
@@ -132,9 +134,12 @@ export struct ExceptionPrompt {
       }
 
     }
-    .padding({ left: 12, right: 4 })
+    .padding({
+      left: $r('sys.float.ohos_id_notification_margin_start'),
+      right: $r('sys.float.ohos_id_text_paragraph_margin_s')
+    })
     .position({})
-    .zIndex(999)
+    .zIndex(ZINDEX_NUM)
     .width('100%')
     .height('100%')
   }
@@ -146,7 +151,13 @@ export struct ExceptionPrompt {
         this.SecondBuilder()
         this.TextBuilder()
       }
-      .padding(this.options.marginState === MarginType.DEFAULT_MARGIN ? { left: $r('sys.float.ohos_id_card_margin_start'), right: $r('sys.float.ohos_id_card_margin_end') } : { left: $r('sys.float.ohos_id_max_padding_start'), right: $r('sys.float.ohos_id_max_padding_end') })
+      .padding(this.options.marginState === MarginType.DEFAULT_MARGIN ? {
+                                                                          left: $r('sys.float.ohos_id_card_margin_start'),
+                                                                          right: $r('sys.float.ohos_id_card_margin_end')
+                                                                        } : {
+                                                                              left: $r('sys.float.ohos_id_max_padding_start'),
+                                                                              right: $r('sys.float.ohos_id_max_padding_end')
+                                                                            })
       .transition(
         TransitionEffect.OPACITY.animation({
           duration: this.options.isShow ? START_TIME : END_TIME
