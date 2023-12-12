@@ -43,6 +43,7 @@
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_panel_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_node_container_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_pattern_lock_bridge.h"
+#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_progress_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_text_area_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_text_clock_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_swiper_bridge.h"
@@ -1115,6 +1116,7 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
     RegisterScrollAttributes(object, vm);
     RegisterGridItemAttributes(object, vm);
     RegisterMarqueeAttributes(object, vm);
+    RegisterProgressAttributes(object, vm);
     RegisterCommonShapeAttributes(object, vm);
     RegisterShapeAttributes(object, vm);
     RegisterRectAttributes(object, vm);
@@ -2268,6 +2270,27 @@ void ArkUINativeModule::RegisterGridItemAttributes(Local<panda::ObjectRef> objec
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), GridItemBridge::ResetGridItemColumnEnd));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "gridItem"), gridItem);
 }
+
+void ArkUINativeModule::RegisterProgressAttributes(Local<panda::ObjectRef> object, EcmaVM* vm)
+{
+    auto progress = panda::ObjectRef::New(vm);
+    progress->Set(vm, panda::StringRef::NewFromUtf8(vm, "SetProgressValue"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ProgressBridge::SetProgressValue));
+    progress->Set(vm, panda::StringRef::NewFromUtf8(vm, "ResetProgressValue"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ProgressBridge::ResetProgressValue));
+    progress->Set(vm, panda::StringRef::NewFromUtf8(vm, "SetProgressColor"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ProgressBridge::SetProgressColor));
+    progress->Set(vm, panda::StringRef::NewFromUtf8(vm, "ResetProgressColor"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ProgressBridge::ResetProgressColor));
+    progress->Set(vm, panda::StringRef::NewFromUtf8(vm, "SetProgressColorWithLinearGradient"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ProgressBridge::SetProgressColorWithLinearGradient));
+    progress->Set(vm, panda::StringRef::NewFromUtf8(vm, "ResetProgressStyle"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ProgressBridge::ResetProgressStyle));
+    progress->Set(vm, panda::StringRef::NewFromUtf8(vm, "SetProgressStyle"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ProgressBridge::SetProgressStyle));
+    object->Set(vm, panda::StringRef::NewFromUtf8(vm, "progress"), progress);
+}
+
 
 void ArkUINativeModule::RegisterCommonShapeAttributes(Local<panda::ObjectRef> object, EcmaVM* vm)
 {

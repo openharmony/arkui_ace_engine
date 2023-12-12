@@ -42,6 +42,7 @@
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_node_container_modifier.h"
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_panel_modifier.h"
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_pattern_lock_modifier.h"
+#include "bridge/declarative_frontend/engine/jsi/components/arkts_native_progress_modifier.h"
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_text_area_modifier.h"
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_text_input_modifier.h"
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_swiper_modifier.h"
@@ -158,6 +159,7 @@ static struct ArkUINodeAPI impl = {
     GetGaugeModifier,
     GetScrollModifier,
     GetGridItemModifier,
+    GetProgressModifier,
     GetCommonShapeModifier,
     GetShapeModifier,
     GetRectModifier,
