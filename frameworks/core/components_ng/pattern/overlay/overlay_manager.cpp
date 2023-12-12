@@ -39,6 +39,7 @@
 #include "core/components/select/select_theme.h"
 #include "core/components/text_overlay/text_overlay_theme.h"
 #include "core/components/toast/toast_theme.h"
+#include "core/components_ng/animation/geometry_transition.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/base/view_abstract.h"
@@ -1906,7 +1907,10 @@ void OverlayManager::FireNavigationStateChange(const RefPtr<UINode>& root, bool 
     }
 
     // Fire show event with non-empty stack. Only Check top modal node.
-    auto topModalNode = modalStack_.empty() ? nullptr : modalStack_.top().Upgrade();
+    RefPtr<FrameNode> topModalNode;
+    if (!modalStack_.empty()) {
+        topModalNode = GetModalNodeInStack(modalStack_);
+    }
     if (show && topModalNode) {
         // Modal always displays on top of stage. If it existed, only need to check the top of modal stack.
         NavigationPattern::FireNavigationStateChange(topModalNode, show);
@@ -1921,6 +1925,22 @@ void OverlayManager::FireNavigationStateChange(const RefPtr<UINode>& root, bool 
             continue;
         }
         NavigationPattern::FireNavigationStateChange(child, show);
+    }
+}
+
+RefPtr<FrameNode> OverlayManager::GetModalNodeInStack(std::stack<WeakPtr<FrameNode>>& stack)
+{
+    if (stack.empty()) {
+        return nullptr;
+    }
+    auto topModalNode = stack.top().Upgrade();
+    if (topModalNode->GetTag() == V2::MODAL_PAGE_TAG) {
+        return topModalNode;
+    } else {
+        stack.pop();
+        auto modalNode = GetModalNodeInStack(stack);
+        stack.push(topModalNode);
+        return modalNode;
     }
 }
 
