@@ -1210,7 +1210,6 @@ HWTEST_F(StageTestNg, PagePatternTest008, TestSize.Level1)
     insetBottom.end = RK356_HEIGHT;
     pipeline->safeAreaManager_->cutoutSafeArea_ = SafeAreaInsets(insetleft, insetTop, insetRight, insetBottom);
     auto host = pattern->GetHost();
-    CHECK_NULL_VOID(host);
     auto props = host->GetLayoutProperty();
     props->UpdateSafeAreaInsets(pipeline->safeAreaManager_->cutoutSafeArea_);
     EXPECT_TRUE(props->GetSafeAreaInsets());
