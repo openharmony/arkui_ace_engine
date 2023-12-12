@@ -58,10 +58,6 @@ public:
     void OnClick();
     void OnColorConfigurationUpdate() override;
     void MarkIsSelected(bool isSelected);
-    void SetSelected(bool isSelected)
-    {
-        isOn_ = isSelected;
-    }
 
 private:
     void OnAttachToFrameNode() override;
