@@ -268,7 +268,7 @@ void TextFieldLayoutAlgorithm::UpdateCounterNode(
     auto counterType = textFieldLayoutProperty->GetSetCounterValue(INVAILD_VALUE);
     pattern->CleanCounterNode();
     uint32_t limitsize = maxLength * counterType / SHOW_COUNTER_PERCENT;
-    if ((pattern->GetCounterState() == true) && (counterType != INVAILD_VALUE)) {
+    if ((pattern->GetCounterState() == true) && textLength == maxLength && (counterType != INVAILD_VALUE)) {
         countTextStyle = theme->GetOverCountTextStyle();
         counterText = std::to_string(textLength) + "/" + std::to_string(maxLength);
         countTextStyle.SetTextColor(theme->GetOverCounterColor());
