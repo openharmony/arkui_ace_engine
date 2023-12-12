@@ -328,40 +328,45 @@ public:
 
     const Color& GetBgColor(ButtonStyleMode buttonStyle) const
     {
-        if (bgColorMap_.find(buttonStyle) != bgColorMap_.end()) {
-            return bgColorMap_.find(buttonStyle)->second;
+        auto result = bgColorMap_.find(buttonStyle);
+        if (result != bgColorMap_.end()) {
+            return result->second;
         }
         return bgColor_;
     }
 
     const Color& GetTextColor(ButtonStyleMode buttonStyle) const
     {
-        if (textColorMap_.find(buttonStyle) != textColorMap_.end()) {
-            return textColorMap_.find(buttonStyle)->second;
+        auto result = textColorMap_.find(buttonStyle);
+        if (result != textColorMap_.end()) {
+            return result->second;
         }
         return normalTextColor_;
     }
 
     const Dimension& GetHeight(ControlSize controlSize) const
     {
-        if (heightMap_.find(controlSize) != heightMap_.end()) {
-            return heightMap_.find(controlSize)->second;
+        auto result = heightMap_.find(controlSize);
+        if (result != heightMap_.end()) {
+            return result->second;
         }
         return height_;
     }
 
     const Dimension& GetTextSize(ControlSize controlSize) const
     {
-        if (textSizeMap_.find(controlSize) != textSizeMap_.end()) {
-            return textSizeMap_.find(controlSize)->second;
+        auto result = textSizeMap_.find(controlSize);
+        if (result != textSizeMap_.end()) {
+            return result->second;
         }
         return textStyle_.GetFontSize();
     }
 
     const Edge& GetPadding(ControlSize controlSize) const
     {
-        if (paddingMap_.find(controlSize) != paddingMap_.end()) {
-            return paddingMap_.find(controlSize)->second;
+        auto result = paddingMap_.find(controlSize);
+        if (result != paddingMap_.end()) {
+            return result->second;
         }
         return padding_;
     }
