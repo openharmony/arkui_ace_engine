@@ -56,7 +56,7 @@ const static std::array<Alignment, 9> ALIGNMENT_ARR { Alignment::TOP_LEFT, Align
 JSRef<JSVal> FolderStackEventToJSValue(const NG::FolderEventInfo& eventInfo)
 {
     JSRef<JSObject> obj = JSRef<JSObject>::New();
-    obj->SetProperty("folderStackState", eventInfo.GetFolderState());
+    obj->SetProperty("foldStatus", static_cast<int32_t>(eventInfo.GetFolderState()));
     return JSRef<JSVal>::Cast(obj);
 }
 
@@ -97,6 +97,7 @@ void JSFolderStack::JsEnableAnimation(const JSCallbackInfo& info)
 {
     if (!info[0]->IsBoolean()) {
         FolderStackModel::GetInstance()->SetEnableAnimation(true);
+        return;
     }
     auto isEnableAnimation = info[0]->ToBoolean();
     FolderStackModel::GetInstance()->SetEnableAnimation(isEnableAnimation);

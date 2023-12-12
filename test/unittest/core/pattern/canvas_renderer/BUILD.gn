@@ -60,12 +60,6 @@ ohos_unittest("canvas_renderer_test_ng") {
     ]
   }
 
-  if (ace_use_rosen_drawing) {
-    deps += [
-      "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics::2d_graphics",
-    ]
-  }
-
   external_deps = [
     "ability_runtime:abilitykit_native",
     "ability_runtime:runtime",
@@ -78,6 +72,10 @@ ohos_unittest("canvas_renderer_test_ng") {
     "window_manager:scene_session",
     "window_manager:scene_session_manager",
   ]
+
+  if (ace_use_rosen_drawing) {
+    external_deps += [ "graphic_2d:2d_graphics" ]
+  }
 
   if (enable_graphic_text_gine) {
     external_deps += [ "graphic_2d:rosen_text" ]

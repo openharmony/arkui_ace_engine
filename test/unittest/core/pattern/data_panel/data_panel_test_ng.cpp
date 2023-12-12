@@ -784,39 +784,6 @@ HWTEST_F(DataPanelTestNg, DataPanelPaintPropertyTest010, TestSize.Level1)
 }
 
 /**
- * @tc.name: DataPanelPaintRainbowFilterMaskTest001
- * @tc.desc: Test DataPanel PaintMethod PaintRainbowFilterMask
- * @tc.type: FUNC
- */
-HWTEST_F(DataPanelTestNg, DataPanelPaintRainbowFilterMaskTest001, TestSize.Level1)
-{
-    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
-    auto dataTheme = AceType::MakeRefPtr<DataPanelTheme>();
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillOnce(Return(dataTheme));
-
-    DataPanelModifier dataPanelModifier;
-    Testing::MockCanvas rsCanvas;
-    ArcData arcData;
-    EXPECT_CALL(rsCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(rsCanvas));
-    EXPECT_CALL(rsCanvas, DetachBrush()).WillRepeatedly(ReturnRef(rsCanvas));
-    EXPECT_CALL(rsCanvas, AttachPen(_)).WillRepeatedly(ReturnRef(rsCanvas));
-    EXPECT_CALL(rsCanvas, DetachPen()).WillRepeatedly(ReturnRef(rsCanvas));
-
-    Gradient gradient;
-    GradientColor gradientColorStart;
-    gradientColorStart.SetColor(START_COLOR);
-    gradientColorStart.SetDimension(Dimension(0.0));
-    gradient.AddColor(gradientColorStart);
-    GradientColor gradientColorEnd;
-    gradientColorEnd.SetColor(END_COLOR);
-    gradientColorEnd.SetDimension(Dimension(1.0));
-    arcData.shadowColor = gradient;
-
-    dataPanelModifier.PaintRainbowFilterMask(rsCanvas, arcData);
-}
-
-/**
  * @tc.name: DataPanelPaintProgressTest001
  * @tc.desc: Test DataPanel PaintMethod PaintProgress
  * @tc.type: FUNC
@@ -833,8 +800,6 @@ HWTEST_F(DataPanelTestNg, DataPanelPaintProgressTest001, TestSize.Level1)
     ArcData arcData;
     EXPECT_CALL(rsCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(rsCanvas));
     EXPECT_CALL(rsCanvas, DetachBrush()).WillRepeatedly(ReturnRef(rsCanvas));
-    EXPECT_CALL(rsCanvas, AttachPen(_)).WillRepeatedly(ReturnRef(rsCanvas));
-    EXPECT_CALL(rsCanvas, DetachPen()).WillRepeatedly(ReturnRef(rsCanvas));
 
     Gradient gradient;
     GradientColor gradientColorStart;
@@ -845,8 +810,14 @@ HWTEST_F(DataPanelTestNg, DataPanelPaintProgressTest001, TestSize.Level1)
     gradientColorEnd.SetColor(END_COLOR);
     gradientColorEnd.SetDimension(Dimension(1.0));
     arcData.progressColors = gradient;
+    RSPath path;
+    RSPath endPath;
 
-    dataPanelModifier.PaintProgress(rsCanvas, arcData);
+    dataPanelModifier.PaintProgress(rsCanvas, arcData, path, endPath, true);
+    EXPECT_CALL(rsCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(rsCanvas));
+
+    dataPanelModifier.PaintProgress(rsCanvas, arcData, path, endPath, false);
+    EXPECT_CALL(rsCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(rsCanvas));
 }
 
 /**
@@ -963,8 +934,8 @@ HWTEST_F(DataPanelTestNg, DataPanelPaintCircleTest001, TestSize.Level1)
     DrawingContext context { rsCanvas, -10.0f, -10.0f };
     EXPECT_CALL(rsCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(rsCanvas));
     EXPECT_CALL(rsCanvas, DetachBrush()).WillRepeatedly(ReturnRef(rsCanvas));
-    EXPECT_CALL(rsCanvas, AttachPen(_)).WillRepeatedly(ReturnRef(rsCanvas));
-    EXPECT_CALL(rsCanvas, DetachPen()).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, AttachPen(_)).WillOnce(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, DetachPen()).WillOnce(ReturnRef(rsCanvas));
     dataPanelModifier.PaintCircle(context, OFFSET);
 }
 
@@ -990,8 +961,8 @@ HWTEST_F(DataPanelTestNg, DataPanelPaintCircleTest002, TestSize.Level1)
     DrawingContext context { rsCanvas, 10.0f, 10.0f };
     EXPECT_CALL(rsCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(rsCanvas));
     EXPECT_CALL(rsCanvas, DetachBrush()).WillRepeatedly(ReturnRef(rsCanvas));
-    EXPECT_CALL(rsCanvas, AttachPen(_)).WillRepeatedly(ReturnRef(rsCanvas));
-    EXPECT_CALL(rsCanvas, DetachPen()).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, AttachPen(_)).WillOnce(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, DetachPen()).WillOnce(ReturnRef(rsCanvas));
     dataPanelModifier.SetMax(100.0f);
     std::vector<double> VALUES = { 10.0f, 10.0f };
     dataPanelModifier.SetValues(VALUES);
@@ -1051,19 +1022,22 @@ HWTEST_F(DataPanelTestNg, DataPanelPaintCircleTest003, TestSize.Level1)
      */
     dataPanelModifier.SetEffect(true);
     dataPanelModifier.PaintCircle(context, OFFSET);
-    EXPECT_CALL(rsCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, AttachPen(_)).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, DetachPen()).WillRepeatedly(ReturnRef(rsCanvas));
     /**
      * case2: effect = false.
      */
     dataPanelModifier.SetEffect(false);
     dataPanelModifier.PaintCircle(context, OFFSET);
-    EXPECT_CALL(rsCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, AttachPen(_)).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, DetachPen()).WillRepeatedly(ReturnRef(rsCanvas));
     /**
      * case3: isHasShadowValue = true.
      */
     dataPanelModifier.SetIsHasShadowValue(true);
     dataPanelModifier.PaintCircle(context, OFFSET);
-    EXPECT_CALL(rsCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, AttachPen(_)).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, DetachPen()).WillRepeatedly(ReturnRef(rsCanvas));
 }
 
 /**

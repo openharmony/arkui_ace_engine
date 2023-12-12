@@ -15,9 +15,7 @@
 
 #include "gtest/gtest.h"
 #include "core/components/test/unittest/mock/mock_render_common.h"
-#include "core/components/text/flutter_render_text.h"
 #include "core/components/text/rosen_render_text.h"
-#include "core/pipeline/base/flutter_render_context.h"
 #include "core/pipeline/base/rosen_render_context.h"
 #include "core/components/text/text_component.h"
 #include "core/components/text_overlay/text_overlay_component.h"
@@ -90,33 +88,6 @@ void RenderTextTest::TestRTL(TextDirection direction, const std::string& data,
         RefPtr<RosenRenderContext> rosenRenderContext = AceType::MakeRefPtr<RosenRenderContext>();
         auto renderNode = AceType::DynamicCast<RenderNode>(renderText);
         rosenRenderContext->Repaint(renderNode);
-    } else {
-        /**
-         * @tc.steps: step3. construct RenderText and set property.
-         */
-        auto mockContext = MockRenderCommon::GetMockContext();
-        RefPtr<FlutterRenderText> renderText = AceType::MakeRefPtr<FlutterRenderText>();
-        renderText->Attach(mockContext);
-        renderText->Update(textComponent);
-        TextStyle textStyle;
-        textStyle.SetTextAlign(TextAlign::START);
-        renderText->SetTextStyle(textStyle);
-
-        /**
-         * @tc.steps: step4. PerformLayout.
-         */
-        LayoutParam layoutParam;
-        layoutParam.SetMinSize(Size(0.0, 0.0));
-        layoutParam.SetMaxSize(Size(RECT_WIDTH, RECT_HEIGHT));
-        renderText->SetLayoutParam(layoutParam);
-        renderText->PerformLayout();
-
-        /**
-         * @tc.steps: step5. Paint.
-         */
-        RefPtr<FlutterRenderContext> flutterRenderContext = AceType::MakeRefPtr<FlutterRenderContext>();
-        auto renderNode = AceType::DynamicCast<RenderNode>(renderText);
-        flutterRenderContext->Repaint(renderNode);
     }
 
     /**
@@ -182,21 +153,6 @@ public:
 };
 
 /**
- * @tc.name: RenderTextTestRTL001
- * @tc.desc: Test UpdateParagraph and Paint of FlutterRenderText for LTR
- * @tc.type: FUNC
- * @tc.require: issueI5NC7M
- */
-HWTEST_F(RenderTextTest, RenderTextTestRTL001, TestSize.Level1)
-{
-    GTEST_LOG_(INFO) << "RenderTextTest rtl001 start";
-
-    TestRTL(TextDirection::LTR, "text", TextAlign::START, false);
-
-    GTEST_LOG_(INFO) << "RenderTextTest rtl001 stop";
-}
-
-/**
  * @tc.name: RenderTextTestRTL002
  * @tc.desc: Test UpdateParagraph and Paint of RosenRenderText for LTR
  * @tc.type: FUNC
@@ -209,21 +165,6 @@ HWTEST_F(RenderTextTest, RenderTextTestRTL002, TestSize.Level1)
     TestRTL(TextDirection::LTR, "text", TextAlign::START, true);
 
     GTEST_LOG_(INFO) << "RenderTextTest rtl002 stop";
-}
-
-/**
- * @tc.name: RenderTextTestRTL003
- * @tc.desc: Test UpdateParagraph and Paint of FlutterRenderText for LTR
- * @tc.type: FUNC
- * @tc.require: issueI5NC7M
- */
-HWTEST_F(RenderTextTest, RenderTextTestRTL003, TestSize.Level1)
-{
-    GTEST_LOG_(INFO) << "RenderTextTest rtl003 start";
-
-    TestRTL(TextDirection::LTR, "text", TextAlign::END, false);
-
-    GTEST_LOG_(INFO) << "RenderTextTest rtl003 stop";
 }
 
 /**
@@ -242,21 +183,6 @@ HWTEST_F(RenderTextTest, RenderTextTestRTL004, TestSize.Level1)
 }
 
 /**
- * @@tc.name: RenderTextTestRTL005
- * @tc.desc: Test UpdateParagraph and Paint of FlutterRenderText for LTR
- * @tc.type: FUNC
- * @tc.require: issueI5NC7M
- */
-HWTEST_F(RenderTextTest, RenderTextTestRTL005, TestSize.Level1)
-{
-    GTEST_LOG_(INFO) << "RenderTextTest rtl005 start";
-
-    TestRTL(TextDirection::LTR, "text", TextAlign::LEFT, false);
-
-    GTEST_LOG_(INFO) << "RenderTextTest rtl005 stop";
-}
-
-/**
  * @@tc.name: RenderTextTestRTL006
  * @tc.desc: Test UpdateParagraph and Paint of RosenRenderText for LTR
  * @tc.type: FUNC
@@ -269,21 +195,6 @@ HWTEST_F(RenderTextTest, RenderTextTestRTL006, TestSize.Level1)
     TestRTL(TextDirection::LTR, "text", TextAlign::LEFT, true);
 
     GTEST_LOG_(INFO) << "RenderTextTest rtl006 stop";
-}
-
-/**
- * @@tc.name: RenderTextTestRTL007
- * @tc.desc: Test UpdateParagraph and Paint of FlutterRenderText for LTR
- * @tc.type: FUNC
- * @tc.require: issueI5NC7M
- */
-HWTEST_F(RenderTextTest, RenderTextTestRTL007, TestSize.Level1)
-{
-    GTEST_LOG_(INFO) << "RenderTextTest rtl007 start";
-
-    TestRTL(TextDirection::LTR, "text", TextAlign::RIGHT, false);
-
-    GTEST_LOG_(INFO) << "RenderTextTest rtl007 stop";
 }
 
 /**
@@ -302,21 +213,6 @@ HWTEST_F(RenderTextTest, RenderTextTestRTL008, TestSize.Level1)
 }
 
 /**
- * @@tc.name: RenderTextTestRTL009
- * @tc.desc: Test UpdateParagraph and Paint of FlutterRenderText for RTL
- * @tc.type: FUNC
- * @tc.require: issueI5NC7M
- */
-HWTEST_F(RenderTextTest, RenderTextTestRTL009, TestSize.Level1)
-{
-    GTEST_LOG_(INFO) << "RenderTextTest rtl009 start";
-
-    TestRTL(TextDirection::RTL, "", TextAlign::START, false);
-
-    GTEST_LOG_(INFO) << "RenderTextTest rtl009 stop";
-}
-
-/**
  * @@tc.name: RenderTextTestRTL010
  * @tc.desc: Test UpdateParagraph and Paint of RosenRenderText for RTL
  * @tc.type: FUNC
@@ -329,21 +225,6 @@ HWTEST_F(RenderTextTest, RenderTextTestRTL010, TestSize.Level1)
     TestRTL(TextDirection::RTL, "", TextAlign::START, true);
 
     GTEST_LOG_(INFO) << "RenderTextTest rtl010 stop";
-}
-
-/**
- * @@tc.name: RenderTextTestRTL011
- * @tc.desc: Test UpdateParagraph and Paint of FlutterRenderText for RTL
- * @tc.type: FUNC
- * @tc.require: issueI5NC7M
- */
-HWTEST_F(RenderTextTest, RenderTextTestRTL011, TestSize.Level1)
-{
-    GTEST_LOG_(INFO) << "RenderTextTest rtl011 start";
-
-    TestRTL(TextDirection::RTL, "1234567890", TextAlign::START, false);
-
-    GTEST_LOG_(INFO) << "RenderTextTest rtl011 stop";
 }
 
 /**
@@ -362,21 +243,6 @@ HWTEST_F(RenderTextTest, RenderTextTestRTL012, TestSize.Level1)
 }
 
 /**
- * @@tc.name: RenderTextTestRTL013
- * @tc.desc: Test UpdateParagraph and Paint of FlutterRenderText for RTL
- * @tc.type: FUNC
- * @tc.require: issueI5NC7M
- */
-HWTEST_F(RenderTextTest, RenderTextTestRTL013, TestSize.Level1)
-{
-    GTEST_LOG_(INFO) << "RenderTextTest rtl013 start";
-
-    TestRTL(TextDirection::RTL, "اللغة العربية", TextAlign::START, false);
-
-    GTEST_LOG_(INFO) << "RenderTextTest rtl013 stop";
-}
-
-/**
  * @@tc.name: RenderTextTestRTL014
  * @tc.desc: Test UpdateParagraph and Paint of RosenRenderText for RTL
  * @tc.type: FUNC
@@ -389,21 +255,6 @@ HWTEST_F(RenderTextTest, RenderTextTestRTL014, TestSize.Level1)
     TestRTL(TextDirection::RTL, "اللغة العربية", TextAlign::START, true);
 
     GTEST_LOG_(INFO) << "RenderTextTest rtl014 stop";
-}
-
-/**
- * @@tc.name: RenderTextTestRTL015
- * @tc.desc: Test UpdateParagraph and Paint of FlutterRenderText for RTL
- * @tc.type: FUNC
- * @tc.require: issueI5NC7M
- */
-HWTEST_F(RenderTextTest, RenderTextTestRTL015, TestSize.Level1)
-{
-    GTEST_LOG_(INFO) << "RenderTextTest rtl015 start";
-
-    TestRTL(TextDirection::RTL, "اللغة العربية", TextAlign::END, false);
-
-    GTEST_LOG_(INFO) << "RenderTextTest rtl015 stop";
 }
 
 /**
@@ -422,21 +273,6 @@ HWTEST_F(RenderTextTest, RenderTextTestRTL016, TestSize.Level1)
 }
 
 /**
- * @@tc.name: RenderTextTestRTL017
- * @tc.desc: Test UpdateParagraph and Paint of FlutterRenderText for RTL
- * @tc.type: FUNC
- * @tc.require: issueI5NC7M
- */
-HWTEST_F(RenderTextTest, RenderTextTestRTL017, TestSize.Level1)
-{
-    GTEST_LOG_(INFO) << "RenderTextTest rtl017 start";
-
-    TestRTL(TextDirection::RTL, "اللغة العربية", TextAlign::LEFT, false);
-
-    GTEST_LOG_(INFO) << "RenderTextTest rtl017 stop";
-}
-
-/**
  * @@tc.name: RenderTextTestRTL018
  * @tc.desc: Test UpdateParagraph and Paint of RosenRenderText for RTL
  * @tc.type: FUNC
@@ -449,21 +285,6 @@ HWTEST_F(RenderTextTest, RenderTextTestRTL018, TestSize.Level1)
     TestRTL(TextDirection::RTL, "اللغة العربية", TextAlign::LEFT, true);
 
     GTEST_LOG_(INFO) << "RenderTextTest rtl018 stop";
-}
-
-/**
- * @@tc.name: RenderTextTestRTL019
- * @tc.desc: Test UpdateParagraph and Paint of FlutterRenderText for RTL
- * @tc.type: FUNC
- * @tc.require: issueI5NC7M
- */
-HWTEST_F(RenderTextTest, RenderTextTestRTL019, TestSize.Level1)
-{
-    GTEST_LOG_(INFO) << "RenderTextTest rtl019 start";
-
-    TestRTL(TextDirection::RTL, "اللغة العربية", TextAlign::RIGHT, false);
-
-    GTEST_LOG_(INFO) << "RenderTextTest rtl019 stop";
 }
 
 /**

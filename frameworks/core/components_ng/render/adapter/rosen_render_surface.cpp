@@ -225,7 +225,9 @@ void RosenRenderSurface::DrawBuffer()
         Rosen::RSModifierType::CONTENT_STYLE,
         [surfaceNode](const std::shared_ptr<RSCanvas>& canvas) {
             CHECK_NULL_VOID(canvas);
-            Rosen::DrawingSurfaceBufferInfo info {surfaceBuffer, 0, 0, width, height};
+            Rosen::DrawingSurfaceBufferInfo info {surfaceNode->buffer_, surfaceNode->orgin_.GetX(),
+                surfaceNode->orgin_.GetY(), surfaceNode->buffer_->GetSurfaceBufferWidth(),
+                surfaceNode->buffer_->GetSurfaceBufferHeight()};
             auto* recordingCanvas = static_cast<Rosen::Drawing::RecordingCanvas*>(canvas.get());
             CHECK_NULL_VOID(recordingCanvas);
             recordingCanvas->DrawSurfaceBuffer(info);
@@ -368,11 +370,10 @@ void RosenRenderSurface::DrawBufferForXComponent(RSCanvas& canvas, float width, 
         static_cast<int32_t>(height) };
     recordingCanvas->DrawSurfaceBuffer(info);
 #else
-    auto* recordingCanvas = static_cast<Rosen::Drawing::RecordingCanvas*>(canvas.get());
-    CHECK_NULL_VOID(recordingCanvas);
+    auto& recordingCanvas = static_cast<Rosen::Drawing::RecordingCanvas&>(canvas);
     Rosen::DrawingSurfaceBufferInfo info {surfaceNode->buffer_, 0, 0, static_cast<int32_t>(width),
         static_cast<int32_t>(height)};
-    recordingCanvas->DrawSurfaceBuffer(info);
+    recordingCanvas.DrawSurfaceBuffer(info);
 #endif
 #endif
 }

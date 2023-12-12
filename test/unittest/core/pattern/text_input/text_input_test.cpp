@@ -14,6 +14,7 @@
  */
 
 #include <array>
+#include <cstddef>
 #include <memory>
 #include <optional>
 #include <string>
@@ -31,6 +32,7 @@
 #include "test/mock/core/common/mock_data_detector_mgr.h"
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/core/render/mock_paragraph.h"
 #include "test/mock/core/render/mock_render_context.h"
 #include "test/mock/core/rosen/mock_canvas.h"
 #include "test/unittest/core/pattern/test_ng.h"
@@ -111,6 +113,14 @@ struct TestItem {
     {}
     TestItem() = default;
 };
+struct ExpectParagraphParams {
+    float height = 50.f;
+    float longestLine = 460.f;
+    float maxWidth = 460.f;
+    size_t lineCount = 1;
+    bool firstCalc = true;
+    bool secondCalc = true;
+};
 constexpr float CONTEXT_WIDTH_VALUE = 300.0f;
 constexpr float CONTEXT_HEIGHT_VALUE = 150.0f;
 } // namespace
@@ -123,6 +133,7 @@ protected:
 
     void CreateTextField(const std::string& text = "", const std::string& placeHolder = "",
         const std::function<void(TextFieldModelNG&)>& callback = nullptr);
+    static void ExpectCallParagraphMethods(ExpectParagraphParams params);
     void GetFocus();
 
     RefPtr<FrameNode> frameNode_;
@@ -135,6 +146,7 @@ protected:
 void TextInputBase::SetUpTestSuite()
 {
     TestNG::SetUpTestSuite();
+    ExpectCallParagraphMethods(ExpectParagraphParams());
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     auto textFieldTheme = AceType::MakeRefPtr<TextFieldTheme>();
@@ -158,6 +170,7 @@ void TextInputBase::SetUpTestSuite()
 void TextInputBase::TearDownTestSuite()
 {
     TestNG::TearDownTestSuite();
+    MockParagraph::TearDown();
 }
 
 void TextInputBase::TearDown()
@@ -167,6 +180,22 @@ void TextInputBase::TearDown()
     eventHub_ = nullptr;
     layoutProperty_ = nullptr;
     accessibilityProperty_ = nullptr;
+}
+
+void TextInputBase::ExpectCallParagraphMethods(ExpectParagraphParams params)
+{
+    auto paragraph = MockParagraph::GetOrCreateMockParagraph();
+    EXPECT_CALL(*paragraph, PushStyle(_)).Times(AnyNumber());
+    EXPECT_CALL(*paragraph, AddText(_)).Times(AnyNumber());
+    EXPECT_CALL(*paragraph, PopStyle()).Times(AnyNumber());
+    EXPECT_CALL(*paragraph, Build()).Times(AnyNumber());
+    EXPECT_CALL(*paragraph, Layout(_)).Times(AnyNumber());
+    EXPECT_CALL(*paragraph, GetTextWidth()).WillRepeatedly(Return(params.maxWidth));
+    EXPECT_CALL(*paragraph, GetAlphabeticBaseline()).WillRepeatedly(Return(0.f));
+    EXPECT_CALL(*paragraph, GetHeight()).WillRepeatedly(Return(params.height));
+    EXPECT_CALL(*paragraph, GetLongestLine()).WillRepeatedly(Return(params.longestLine));
+    EXPECT_CALL(*paragraph, GetMaxWidth()).WillRepeatedly(Return(params.maxWidth));
+    EXPECT_CALL(*paragraph, GetLineCount()).WillRepeatedly(Return(params.lineCount));
 }
 
 void TextInputBase::CreateTextField(
@@ -405,7 +434,7 @@ HWTEST_F(TextInputCursorTest, CaretPosition005, TestSize.Level1)
     for (const auto& testItem : testItems) {
         CreateTextField(
             text, "", [testItem](TextFieldModelNG& model) { model.SetInputFilter(testItem.item, nullptr); });
-        auto errorMessage = "InputType is " + testItem.error + ", text is " + pattern_->GetTextValue();
+        auto errorMessage = "InputType is " + testItem.item + ", text is " + pattern_->GetTextValue();
         EXPECT_EQ(pattern_->GetCaretIndex(), testItem.expected) << errorMessage;
         TearDown();
     }
@@ -748,9 +777,12 @@ HWTEST_F(TextInputCursorTest, OnTextChangedListenerCaretPosition008, TestSize.Le
     };
     auto onCopy = [expectStr](const std::string& str) { EXPECT_EQ(expectStr, str); };
     auto onPaste = [expectStr](const std::string& str) { EXPECT_EQ(expectStr, str); };
+    auto onPasteWithEvent = [expectStr](const std::string& str, NG::TextCommonEvent& event) {
+        EXPECT_EQ(expectStr, str); };
     CreateTextField(DEFAULT_TEXT, DEFAULT_PLACE_HOLDER, [&](TextFieldModel& model) -> void {
         model.SetOnCopy(onCopy);
         model.SetOnPaste(onPaste);
+        model.SetOnPasteWithEvent(onPasteWithEvent);
     });
 
     /**
@@ -1505,6 +1537,7 @@ HWTEST_F(TextFieldKeyEventTest, KeyEvent001, TestSize.Level1)
      * @tc.expected: return as expected
      */
     KeyEvent event;
+    event.action = KeyAction::DOWN;
     std::vector<KeyCode> eventCodes = {
         KeyCode::KEY_DPAD_UP,
         KeyCode::KEY_DPAD_DOWN,
@@ -1518,6 +1551,7 @@ HWTEST_F(TextFieldKeyEventTest, KeyEvent001, TestSize.Level1)
     for (auto eventCode : eventCodes) {
         event.pressedCodes.emplace_back(KeyCode::KEY_SHIFT_LEFT);
         event.pressedCodes.emplace_back(eventCode);
+        event.code = eventCode;
         auto ret = pattern_->OnKeyEvent(event);
         EXPECT_TRUE(ret);
     }
@@ -1526,11 +1560,13 @@ HWTEST_F(TextFieldKeyEventTest, KeyEvent001, TestSize.Level1)
         event.pressedCodes.emplace_back(KeyCode::KEY_CTRL_LEFT);
         event.pressedCodes.emplace_back(KeyCode::KEY_SHIFT_LEFT);
         event.pressedCodes.emplace_back(eventCode);
+        event.code = eventCode;
         auto ret = pattern_->OnKeyEvent(event);
         EXPECT_TRUE(ret);
     }
     event.pressedCodes.clear();
     event.pressedCodes.emplace_back(KeyCode::KEY_BACK);
+    event.code = KeyCode::KEY_BACK;
     auto ret = pattern_->OnKeyEvent(event);
     EXPECT_FALSE(ret);
 }
@@ -1552,6 +1588,7 @@ HWTEST_F(TextFieldKeyEventTest, KeyEvent002, TestSize.Level1)
      * @tc.expected: return as expected
      */
     KeyEvent event;
+    event.action = KeyAction::DOWN;
     std::vector<KeyCode> eventCodes = {
         KeyCode::KEY_DPAD_LEFT,
         KeyCode::KEY_DPAD_UP,
@@ -1565,24 +1602,156 @@ HWTEST_F(TextFieldKeyEventTest, KeyEvent002, TestSize.Level1)
     for (auto eventCode : eventCodes) {
         event.pressedCodes.emplace_back(KeyCode::KEY_CTRL_LEFT);
         event.pressedCodes.emplace_back(eventCode);
+        event.code = eventCode;
         auto ret = pattern_->OnKeyEvent(event);
         EXPECT_TRUE(ret) << "KeyCode: " + std::to_string(static_cast<int>(eventCode));
     }
     event.pressedCodes.clear();
-    std::array<bool, 6> results = { true, false, true, true, false, true };
-    int index = 0;
     for (auto eventCode : eventCodes) {
         event.pressedCodes.emplace_back(eventCode);
         event.code = eventCode;
         auto ret = pattern_->OnKeyEvent(event);
-        EXPECT_EQ(results[index], ret) << "KeyCode: " + std::to_string(static_cast<int>(eventCode));
-        index++;
+        EXPECT_TRUE(ret) << "KeyCode: " + std::to_string(static_cast<int>(eventCode));
     }
     event.code = KeyCode::KEY_DPAD_CENTER;
     event.pressedCodes.clear();
     event.pressedCodes.emplace_back(event.code);
     auto ret = pattern_->OnKeyEvent(event);
     EXPECT_FALSE(ret) << "KeyCode: " + std::to_string(static_cast<int>(event.code));
+}
+
+/**
+ * @tc.name: KeyEvent003
+ * @tc.desc: Test KeyEvent ctrl + c/v
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldKeyEventTest, KeyEvent003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize textInput and get focus
+     */
+    std::string expectStr = "fghij";
+    auto onCopy = [expectStr](const std::string& str) { EXPECT_EQ(expectStr, str); };
+    auto onPaste = [expectStr](const std::string& str) { EXPECT_EQ(expectStr, str); };
+    CreateTextField(DEFAULT_TEXT, DEFAULT_PLACE_HOLDER, [&](TextFieldModel& model) -> void {
+        model.SetOnCopy(onCopy);
+        model.SetOnPaste(onPaste);
+    });
+
+    /**
+     * @tc.steps: step2. Create keyboard events
+     */
+    KeyEvent event;
+    event.action = KeyAction::DOWN;
+    std::vector<KeyCode> presscodes = {};
+    event.pressedCodes = presscodes;
+
+    /**
+     * @tc.expected: shift + insert to input
+     */
+    event.pressedCodes.clear();
+    event.pressedCodes.push_back(KeyCode::KEY_CTRL_LEFT);
+    event.pressedCodes.push_back(KeyCode::KEY_C);
+    event.code = KeyCode::KEY_C;
+    pattern_->HandleSetSelection(5, 10, false);
+    auto ret = pattern_->OnKeyEvent(event);
+    FlushLayoutTask(frameNode_);
+    EXPECT_TRUE(ret);
+
+    event.pressedCodes.clear();
+    event.pressedCodes.push_back(KeyCode::KEY_CTRL_LEFT);
+    event.pressedCodes.push_back(KeyCode::KEY_V);
+    event.code = KeyCode::KEY_V;
+    pattern_->SetCaretPosition(0);
+    ret = pattern_->OnKeyEvent(event);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->GetTextValue(), expectStr + DEFAULT_TEXT);
+    EXPECT_TRUE(ret);
+}
+
+/**
+ * @tc.name: KeyEvent004
+ * @tc.desc: Test KeyEvent ctrl + a
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldKeyEventTest, KeyEvent004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize textInput
+     */
+    CreateTextField(DEFAULT_TEXT);
+
+    /**
+     * @tc.steps: step2. Create keyboard events
+     */
+    KeyEvent event;
+    event.action = KeyAction::DOWN;
+    std::vector<KeyCode> presscodes = {};
+    event.pressedCodes = presscodes;
+
+    /**
+     * @tc.expected: shift + a to input
+     */
+    event.pressedCodes.clear();
+    event.pressedCodes.push_back(KeyCode::KEY_CTRL_LEFT);
+    event.pressedCodes.push_back(KeyCode::KEY_A);
+    event.code = KeyCode::KEY_A;
+    pattern_->HandleSetSelection(5, 10, false);
+    auto ret = pattern_->OnKeyEvent(event);
+    FlushLayoutTask(frameNode_);
+    EXPECT_TRUE(ret);
+    EXPECT_EQ(pattern_->selectController_->GetFirstHandleInfo().index, 0);
+    EXPECT_EQ(pattern_->selectController_->GetSecondHandleInfo().index, 26)
+        << "Second index is " + std::to_string(pattern_->selectController_->GetSecondHandleInfo().index);
+}
+
+/**
+ * @tc.name: KeyEvent005
+ * @tc.desc: Test KeyEvent ctrl + x
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldKeyEventTest, KeyEvent005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: steps1. Initialize text input and Move the handles and then cut text snippet.
+     */
+    int32_t start = 5;
+    int32_t end = 10;
+    std::string expectStr = "fghij";
+    std::vector<std::int32_t> action = {
+        ACTION_SELECT_ALL,
+        ACTION_CUT,
+        ACTION_COPY,
+        ACTION_PASTE,
+    };
+    auto callback = [expectStr](const std::string& str) { EXPECT_EQ(expectStr, str); };
+    CreateTextField(DEFAULT_TEXT, DEFAULT_PLACE_HOLDER, [&](TextFieldModel& model) {
+        model.SetOnCut(callback); });
+
+    /**
+     * @tc.steps: step2. Create keyboard events
+     */
+    KeyEvent event;
+    event.action = KeyAction::DOWN;
+    std::vector<KeyCode> presscodes = {};
+    event.pressedCodes = presscodes;
+
+    /**
+     * @tc.expected: shift + x to input
+     */
+    event.pressedCodes.clear();
+    event.pressedCodes.push_back(KeyCode::KEY_CTRL_LEFT);
+    event.pressedCodes.push_back(KeyCode::KEY_X);
+    event.code = KeyCode::KEY_X;
+    pattern_->HandleSetSelection(start, end, false);
+    auto ret = pattern_->OnKeyEvent(event);
+    FlushLayoutTask(frameNode_);
+    EXPECT_TRUE(ret);
+    EXPECT_EQ(pattern_->selectController_->GetFirstHandleInfo().index, start);
+    EXPECT_EQ(pattern_->selectController_->GetSecondHandleInfo().index, start)
+        << "Second index is " + std::to_string(pattern_->selectController_->GetSecondHandleInfo().index);
+    EXPECT_EQ(pattern_->GetTextSelectController()->GetCaretIndex(), start);
+    EXPECT_EQ(pattern_->contentController_->GetTextValue().compare("abcdeklmnopqrstuvwxyz"), 0);
 }
 
 /**
@@ -2196,6 +2365,7 @@ HWTEST_F(TextFieldUXTest, NeedSoftKeyboard001, TestSize.Level1)
     ASSERT_NE(pattern_, nullptr);
     EXPECT_TRUE(pattern_->NeedSoftKeyboard());
 }
+
 /*
  * @tc.name: AdjustWordCursorAndSelect01
  * @tc.desc: Test .adjust word cursor and select(true)

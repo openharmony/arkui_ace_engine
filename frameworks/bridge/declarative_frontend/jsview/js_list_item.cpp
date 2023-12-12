@@ -80,14 +80,12 @@ void JSListItem::Create(const JSCallbackInfo& args)
 void JSListItem::CreateForPartialUpdate(const JSCallbackInfo& args)
 {
     if (args.Length() < 2 || !args[0]->IsFunction()) {
-        LOGE("Expected deep render function parameter");
         ListItemModel::GetInstance()->Create();
         return;
     }
     RefPtr<JsFunction> jsDeepRender = AceType::MakeRefPtr<JsFunction>(args.This(), JSRef<JSFunc>::Cast(args[0]));
 
     if (!args[1]->IsBoolean()) {
-        LOGE("Expected isLazy parameter");
         return;
     }
     const bool isLazy = args[1]->ToBoolean();
@@ -148,7 +146,6 @@ void JSListItem::SetSelectable(bool selectable)
 void JSListItem::SetSelected(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGW("The arg is wrong, it is supposed to have 1 or 2 arguments");
         return;
     }
     bool select = false;
@@ -323,11 +320,13 @@ void JSListItem::JsOnDragStart(const JSCallbackInfo& info)
         return;
     }
     RefPtr<JsDragFunction> jsOnDragStartFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(info[0]));
-    auto onDragStart = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragStartFunc)](
+    WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto onDragStart = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragStartFunc),
+                           targetNode = frameNode](
                            const RefPtr<DragEvent>& info, const std::string& extraParams) -> NG::DragDropBaseInfo {
         NG::DragDropBaseInfo itemInfo;
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, itemInfo);
-
+        PipelineContext::SetCallBackNode(targetNode);
         auto ret = func->Execute(info, extraParams);
         if (!ret->IsObject()) {
             return itemInfo;

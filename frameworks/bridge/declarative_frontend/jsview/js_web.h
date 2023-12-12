@@ -84,6 +84,7 @@ public:
     static void TableData(bool tableData);
     static void OnFileSelectorShowAbandoned(const JSCallbackInfo& args);
     static void OnHttpAuthRequest(const JSCallbackInfo& args);
+    static void OnSslErrRequest(const JSCallbackInfo& args);
     static void OnSslErrorRequest(const JSCallbackInfo& args);
     static void OnSslSelectCertRequest(const JSCallbackInfo& args);
     static void OnPermissionRequest(const JSCallbackInfo& args);
@@ -138,6 +139,7 @@ public:
 
 protected:
     static void OnCommonDialog(const JSCallbackInfo& args, int dialogEventType);
+    static void ParseRawfileWebSrc(const JSRef<JSVal>& srcValue, std::string& webSrc);
 };
 } // namespace OHOS::Ace::Framework
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_WEB_H

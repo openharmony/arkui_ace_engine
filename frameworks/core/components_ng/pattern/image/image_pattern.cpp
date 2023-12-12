@@ -13,25 +13,49 @@
  * limitations under the License.
  */
 
+#define NAPI_VERSION 8
+
 #include "core/components_ng/pattern/image/image_pattern.h"
 
 #include <array>
+#include <cstdint>
 
+#include "base/geometry/matrix4.h"
 #include "base/geometry/ng/rect_t.h"
 #include "base/log/dump_log.h"
 #include "base/utils/utils.h"
+#include "core/common/ai/image_analyzer_mgr.h"
+#include "core/common/frontend.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/image/image_theme.h"
 #include "core/components/theme/icon_theme.h"
+#include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/image/image_paint_method.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "frameworks/bridge/common/utils/engine_helper.h"
+#if defined(PIXEL_MAP_SUPPORTED)
+#include "foundation/multimedia/image_framework/interfaces/kits/js/common/include/pixel_map_napi.h"
+#endif
 #ifdef ENABLE_DRAG_FRAMEWORK
 #include "core/common/ace_engine_ext.h"
 #include "core/common/udmf/udmf_client.h"
 #endif
 
 namespace OHOS::Ace::NG {
+napi_value ConvertPixmapNapi(const RefPtr<PixelMap>& pixelMap)
+{
+#if defined(PIXEL_MAP_SUPPORTED)
+    auto engine = EngineHelper::GetCurrentEngine();
+    CHECK_NULL_RETURN(engine, {});
+    NativeEngine* nativeEngine = engine->GetNativeEngine();
+    auto* env = reinterpret_cast<napi_env>(nativeEngine);
+    napi_value napiValue = OHOS::Media::PixelMapNapi::CreatePixelMap(env, pixelMap->GetPixelMapSharedPtr());
+    return napiValue;
+#else
+    return nullptr;
+#endif
+}
 
 DataReadyNotifyTask ImagePattern::CreateDataReadyCallback()
 {
@@ -191,6 +215,7 @@ void ImagePattern::OnImageLoadSuccess()
     altDstRect_.reset();
     altSrcRect_.reset();
 
+    CreateAnalyzerOverlay();
     host->MarkNeedRenderOnly();
 }
 
@@ -273,6 +298,11 @@ bool ImagePattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, 
     if (config.skipMeasure || dirty->SkipMeasureContent()) {
         return false;
     }
+    
+    if (IsSupportImageAnalyzerFeature()) {
+        UpdateAnalyzerUIConfig(dirty);
+    }
+
     return image_;
 }
 
@@ -804,6 +834,102 @@ void ImagePattern::OnColorConfigurationUpdate()
     LoadImage(src);
     if (loadingCtx_->NeedAlt() && imageLayoutProperty->GetAlt()) {
         LoadAltImage(imageLayoutProperty);
+    }
+}
+
+void ImagePattern::SetImageAnalyzerConfig(const ImageAnalyzerConfig &config)
+{
+    if (!isEnableAnalyzer_) {
+        return;
+    }
+    analyzerConfig_ = std::move(config);
+    if (IsSupportImageAnalyzerFeature() && isAnalyzerOverlayBuild_) {
+        ImageAnalyzerMgr::GetInstance().UpdateConfig(&overlayData_, &analyzerConfig_);
+    }
+}
+
+void ImagePattern::CreateAnalyzerOverlay()
+{
+    if (!IsSupportImageAnalyzerFeature()) {
+        return;
+    }
+    auto pixelMap = image_->GetPixelMap();
+    napi_value pixelmapNapiVal = ConvertPixmapNapi(pixelMap);
+    auto frameNode = GetHost();
+    auto overlayNode = frameNode->GetOverlayNode();
+
+    if (!isAnalyzerOverlayBuild_) {
+        auto buildNodeFunction = [this, &pixelmapNapiVal]() -> RefPtr<UINode> {
+            ScopedViewStackProcessor builderViewStackProcessor;
+            ImageAnalyzerMgr::GetInstance().BuildNodeFunc(
+                pixelmapNapiVal, &analyzerConfig_, &analyzerUIConfig_, &overlayData_);
+            auto customNode = ViewStackProcessor::GetInstance()->Finish();
+            return customNode;
+        };
+        overlayNode = AceType::DynamicCast<FrameNode>(buildNodeFunction());
+        CHECK_NULL_VOID(overlayNode);
+        frameNode->SetOverlayNode(overlayNode);
+        overlayNode->SetParent(AceType::WeakClaim(AceType::RawPtr(frameNode)));
+        overlayNode->SetActive(true);
+        isAnalyzerOverlayBuild_ = true;
+
+        auto layoutProperty = AceType::DynamicCast<LayoutProperty>(overlayNode->GetLayoutProperty());
+        CHECK_NULL_VOID(layoutProperty);
+        layoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
+        layoutProperty->UpdateAlignment(Alignment::TOP_LEFT);
+        
+        auto renderContext = overlayNode->GetRenderContext();
+        CHECK_NULL_VOID(renderContext);
+        renderContext->UpdateZIndex(INT32_MAX);
+        auto focusHub = overlayNode->GetOrCreateFocusHub();
+        CHECK_NULL_VOID(focusHub);
+        focusHub->SetFocusable(false);
+        overlayNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    } else {
+        ImageAnalyzerMgr::GetInstance().UpdateImage(
+            &overlayData_, pixelmapNapiVal, &analyzerConfig_, &analyzerUIConfig_);
+        overlayNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    }
+}
+
+bool ImagePattern::IsSupportImageAnalyzerFeature()
+{
+    return isEnableAnalyzer_ && ImageAnalyzerMgr::GetInstance().IsImageAnalyzerSupported() && image_ &&
+        !loadingCtx_->GetSourceInfo().IsSvg();
+}
+
+void ImagePattern::UpdateAnalyzerUIConfig(const RefPtr<LayoutWrapper>& dirty)
+{
+    bool isUIConfigUpdate = false;
+
+    auto& geometryNode = dirty->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    if (analyzerUIConfig_.contentWidth != geometryNode->GetFrameSize().Width() ||
+        analyzerUIConfig_.contentHeight != geometryNode->GetFrameSize().Height()) {
+        analyzerUIConfig_.contentWidth = geometryNode->GetFrameSize().Width();
+        analyzerUIConfig_.contentHeight = geometryNode->GetFrameSize().Height();
+        isUIConfigUpdate = true;
+    }
+
+    auto layoutProps = GetLayoutProperty<ImageLayoutProperty>();
+    CHECK_NULL_VOID(layoutProps);
+    if (analyzerUIConfig_.imageFit != layoutProps->GetImageFit().value_or(ImageFit::COVER)) {
+        analyzerUIConfig_.imageFit = layoutProps->GetImageFit().value_or(ImageFit::COVER);
+        isUIConfigUpdate = true;
+    }
+
+    auto frameNode = GetHost();
+    CHECK_NULL_VOID(frameNode);
+    auto renderContext = frameNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    Matrix4 localMat = renderContext->GetLocalTransformMatrix();
+    if (!(analyzerUIConfig_.transformMat == localMat)) {
+        analyzerUIConfig_.transformMat = localMat;
+        isUIConfigUpdate = true;
+    }
+
+    if (isUIConfigUpdate) {
+        ImageAnalyzerMgr::GetInstance().UpdateInnerConfig(&overlayData_, &analyzerUIConfig_);
     }
 }
 } // namespace OHOS::Ace::NG

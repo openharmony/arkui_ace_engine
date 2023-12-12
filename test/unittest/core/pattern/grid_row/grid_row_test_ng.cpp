@@ -15,13 +15,15 @@
 
 #include <optional>
 
+#include "gtest/gtest.h"
+
 #define private public
 #define protected public
 
-#include "gtest/gtest.h"
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
 
-#include "base/memory/ace_type.h"
 #include "base/geometry/dimension.h"
+#include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/layout/layout_property.h"
@@ -29,7 +31,6 @@
 #include "core/components_ng/pattern/grid_col/grid_col_model_ng.h"
 #include "core/components_ng/pattern/grid_row/grid_row_layout_pattern.h"
 #include "core/components_ng/pattern/grid_row/grid_row_model_ng.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -169,9 +170,8 @@ testing::AssertionResult GridRowTestNg::TestGridColGeometry(
     if (secondColOffset == expectOffset) {
         return testing::AssertionSuccess();
     }
-    return testing::AssertionFailure() <<
-        "secondColOffset: " << secondColOffset.ToString() <<
-        " But expect offset: " << expectOffset.ToString();
+    return testing::AssertionFailure() << "secondColOffset: " << secondColOffset.ToString()
+                                       << " But expect offset: " << expectOffset.ToString();
 }
 
 OffsetF GridRowTestNg::GetColOffset(RefPtr<LayoutWrapperNode>& layoutWrapper, int32_t index)

@@ -39,6 +39,7 @@
 #include "core/components_ng/pattern/text/text_menu_extension.h"
 #include "core/components_ng/property/gradient_property.h"
 #include "core/components_ng/property/transition_property.h"
+#include "interfaces/inner_api/ace/ai/image_analyzer.h"
 
 namespace OHOS::Ace::Framework {
 
@@ -137,6 +138,11 @@ public:
     static void ParseMarginOrPadding(const JSCallbackInfo& info, bool isMargin);
     static void ParseMarginOrPaddingCorner(JSRef<JSObject> obj, std::optional<CalcDimension>& top,
         std::optional<CalcDimension>& bottom, std::optional<CalcDimension>& left, std::optional<CalcDimension>& right);
+    static void JsOutline(const JSCallbackInfo& info);
+    static void JsOutlineWidth(const JSCallbackInfo& info);
+    static void JsOutlineColor(const JSCallbackInfo& info);
+    static void JsOutlineStyle(const JSCallbackInfo& info);
+    static void JsOutlineRadius(const JSCallbackInfo& info);
     static void JsBorder(const JSCallbackInfo& info);
     static void JsBorderWidth(const JSCallbackInfo& info);
     static void ParseBorderWidth(const JSRef<JSVal>& args);
@@ -179,6 +185,7 @@ public:
     static void JsRestoreId(int32_t restoreId);
     static void JsOnVisibleAreaChange(const JSCallbackInfo& info);
     static void JsHitTestBehavior(const JSCallbackInfo& info);
+    static void JsOnChildTouchTest(const JSCallbackInfo& info);
     static void JsForegroundColor(const JSCallbackInfo& info);
 
     // outer border
@@ -191,6 +198,11 @@ public:
     static void JsResponseRegion(const JSCallbackInfo& info);
     static bool ParseJsResponseRegionArray(const JSRef<JSVal>& jsValue, std::vector<DimensionRect>& result);
     static bool ParseJsDimensionRect(const JSRef<JSVal>& jsValue, DimensionRect& result);
+
+    // for dynamic $r
+    static void CompleteResourceObject(JSRef<JSObject>& jsObj);
+    static bool ConvertResourceType(const std::string& typeName, ResourceType& resType);
+    static bool ParseDollarResource(const JSRef<JSVal>& jsValue, ResourceType& resType, std::string& resName);
 
     // mouse response response region
     static void JsMouseResponseRegion(const JSCallbackInfo& info);
@@ -314,6 +326,7 @@ public:
     static void JsAccessibilityImportance(const std::string& importance);
     static void JsAccessibilityLevel(const std::string& level);
     static void JsAllowDrop(const JSCallbackInfo& info);
+    static void JsDragPreview(const JSCallbackInfo& info);
 
     static void JSCreateAnimatableProperty(const JSCallbackInfo& info);
     static void JSUpdateAnimatableProperty(const JSCallbackInfo& info);
@@ -321,6 +334,9 @@ public:
     static void JSRenderFit(const JSCallbackInfo& info);
 
     static void JsExpandSafeArea(const JSCallbackInfo& info);
+
+    static void ParseImageAnalyzerTextOptions(const JSRef<JSVal>& optionVal, ImageAnalyzerConfig& analyzerConfig);
+    static void ParseImageAnalyzerSubjectOptions(const JSRef<JSVal>& optionVal, ImageAnalyzerConfig& analyzerConfig);
 
     static void ParseMenuOptions(
         const JSCallbackInfo& info, const JSRef<JSArray>& jsArray, std::vector<NG::MenuOptionsParam>& items);

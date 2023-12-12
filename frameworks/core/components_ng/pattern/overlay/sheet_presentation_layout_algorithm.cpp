@@ -110,13 +110,10 @@ void SheetPresentationLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(pipeline);
     auto sheetTheme = pipeline->GetTheme<SheetTheme>();
     CHECK_NULL_VOID(sheetTheme);
-    float offsetX = 0.0f;
-    float offsetY = 0.0f;
-
     if (sheetType_ == SheetType::SHEET_BOTTOMLANDSPACE) {
-        offsetX = (sheetMaxWidth_ - sheetWidth_) / SHEET_HALF_SIZE;
+        sheetOffsetX_ = (sheetMaxWidth_ - sheetWidth_) / SHEET_HALF_SIZE;
     } else if (sheetType_ == SheetType::SHEET_CENTER) {
-        offsetX = (sheetMaxWidth_ - sheetWidth_) / SHEET_HALF_SIZE;
+        sheetOffsetX_ = (sheetMaxWidth_ - sheetWidth_) / SHEET_HALF_SIZE;
     } else if (sheetType_ == SheetType::SHEET_POPUP) {
         auto frameNode = layoutWrapper->GetHostNode();
         CHECK_NULL_VOID(frameNode);
@@ -124,16 +121,15 @@ void SheetPresentationLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         CHECK_NULL_VOID(parent);
         auto parentOffset = parent->GetPaintRectOffset();
         OffsetF popupStyleSheetOffset = GetPopupStyleSheetOffset();
-        offsetX = popupStyleSheetOffset.GetX() - parentOffset.GetX();
-        offsetY = popupStyleSheetOffset.GetY() - parentOffset.GetY();
+        sheetOffsetX_ = popupStyleSheetOffset.GetX() - parentOffset.GetX();
+        sheetOffsetY_ = popupStyleSheetOffset.GetY() - parentOffset.GetY();
     }
     OffsetF positionOffset;
-    positionOffset.SetX(offsetX);
-    positionOffset.SetY(offsetY);
+    positionOffset.SetX(sheetOffsetX_);
+    positionOffset.SetY(sheetOffsetY_);
     auto geometryNode = layoutWrapper->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
     geometryNode->SetMarginFrameOffset(positionOffset);
-
     OffsetF translate(sheetTheme->GetTitleTextMargin().ConvertToPx(), 0);
     if (sheetType_ == SheetType::SHEET_POPUP) {
         translate += OffsetF(0, SHEET_ARROW_HEIGHT.ConvertToPx());

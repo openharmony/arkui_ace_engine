@@ -150,6 +150,8 @@ AceAbility::AceAbility(const AceRunArgs& runArgs) : runArgs_(runArgs)
     config.SetColorMode(SystemProperties::GetColorMode());
     config.SetFontRatio(runArgs.deviceConfig.fontRatio);
     container->SetResourceConfiguration(config);
+    container->SetBundleName(bundleName_);
+    container->SetModuleName(moduleName_);
     InitializeClipboard();
 }
 

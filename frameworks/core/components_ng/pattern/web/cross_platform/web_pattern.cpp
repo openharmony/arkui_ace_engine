@@ -900,6 +900,12 @@ bool WebPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, co
     drawSizeCache_ = drawSize_;
     auto offset = Offset(GetCoordinatePoint()->GetX(), GetCoordinatePoint()->GetY());
     delegate_->SetBoundsOrResize(drawSize_, offset);
+    if (!isUrlLoaded_) {
+        isUrlLoaded_ = true;
+        if (webData_) {
+            delegate_->LoadDataWithRichText();
+        }
+    }
     return false;
 }
 

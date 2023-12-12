@@ -509,7 +509,9 @@ void NavigationGroupNode::ExitTransitionWithPush(const RefPtr<FrameNode>& node, 
                     auto currentMode = navBarPattern->GetNavigationMode();
                     if (currentMode == NavigationMode::STACK) {
                         node->GetLayoutProperty()->UpdateVisibility(VisibleType::INVISIBLE);
-                        navigation->NotifyPageHide();
+                        if (isNavBar) {
+                            navigation->NotifyPageHide();
+                        }
                     }
                 }
                 if (mode == NavigationMode::SPLIT) {
@@ -845,6 +847,7 @@ void NavigationGroupNode::NotifyPageHide()
     CHECK_NULL_VOID(stageManager);
     auto container = Container::Current();
     auto pageUrlChecker = container->GetPageUrlChecker();
+    CHECK_NULL_VOID(pageUrlChecker);
     RefPtr<FrameNode> pageNode = stageManager->GetLastPage();
     CHECK_NULL_VOID(pageNode);
     auto pagePattern = pageNode->GetPattern<NG::PagePattern>();

@@ -191,4 +191,16 @@ JSRef<JSVal> ConvertPixmap(const RefPtr<PixelMap>& pixelMap)
     return JsConverter::ConvertNapiValueToJsVal(napiValue);
 }
 #endif
+
+#ifdef PIXEL_MAP_SUPPORTED
+napi_value ConvertPixmapNapi(const RefPtr<PixelMap>& pixelMap)
+{
+    auto engine = EngineHelper::GetCurrentEngine();
+    CHECK_NULL_RETURN(engine, {});
+    NativeEngine* nativeEngine = engine->GetNativeEngine();
+    auto* env = reinterpret_cast<napi_env>(nativeEngine);
+    napi_value napiValue = OHOS::Media::PixelMapNapi::CreatePixelMap(env, pixelMap->GetPixelMapSharedPtr());
+    return napiValue;
+}
+#endif
 } // namespace OHOS::Ace::Framework

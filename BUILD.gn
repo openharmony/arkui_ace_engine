@@ -24,11 +24,7 @@ config("ace_config") {
   ]
 
   if (is_ohos_standard_system && !use_mingw_win && !use_mac && !use_linux) {
-    include_dirs += [
-      "//base/global/resource_management/frameworks/resmgr/include",
-      "//base/global/resource_management/interfaces/inner_api/include",
-      "$ace_root/adapter/ohos/services/uiservice/include",
-    ]
+    include_dirs += [ "$ace_root/adapter/ohos/services/uiservice/include" ]
   }
   defines = ace_common_defines
 
@@ -48,6 +44,23 @@ config("ace_config") {
     "-Os",
     "-Werror=return-stack-address",
   ]
+
+  if (is_ohos && is_clang && (target_cpu == "arm" || target_cpu == "arm64") &&
+      enhanced_opt) {
+    if (ace_engine_feature_enable_pgo) {
+      cflags += [
+        "-fprofile-use=" + rebase_path(
+                "${ace_engine_feature_pgo_path}/libace_compatible.profdata",
+                root_build_dir),
+        "-Wno-error=backend-plugin",
+        "-Wno-profile-instr-out-of-date",
+        "-Wno-profile-instr-unprofiled",
+      ]
+    }
+    if (ace_engine_feature_enable_atomic) {
+      cflags += [ "-moutline-atomics" ]
+    }
+  }
 
   cflags_cc = [
     "-fvisibility-inlines-hidden",
@@ -91,10 +104,7 @@ config("ace_test_config") {
   defines = ace_common_defines
 
   if (is_ohos_standard_system && !use_mingw_win && !use_mac && !use_linux) {
-    include_dirs += [
-      "//base/global/resource_management/frameworks/resmgr/include",
-      "//base/global/resource_management/interfaces/inner_api/include",
-    ]
+    include_dirs += [ "$ace_root/adapter/ohos/services/uiservice/include" ]
 
     cflags_cc += [
       "-Wno-thread-safety-attributes",

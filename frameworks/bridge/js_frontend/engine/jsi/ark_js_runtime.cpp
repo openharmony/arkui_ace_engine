@@ -152,10 +152,12 @@ bool ArkJSRuntime::StartDebugger()
         auto callback = [instanceId = instanceId_, weak = weak_from_this()](int socketFd, std::string option) {
             LOGI("HdcRegister callback socket %{public}d, option %{public}s.", socketFd, option.c_str());
             if (option.find(DEBUGGER) == std::string::npos) {
+                ConnectServerManager::Get().StopConnectServer();
                 ConnectServerManager::Get().StartConnectServerWithSocketPair(socketFd);
             } else {
                 auto runtime = weak.lock();
                 CHECK_NULL_VOID(runtime);
+                JSNApi::StopDebugger(ParseHdcRegisterOption(option));
                 runtime->StartDebuggerForSocketPair(option, socketFd);
             }
         };
@@ -321,6 +323,8 @@ void ArkJSRuntime::ThrowError(const std::string& msg, int32_t code)
 void ArkJSRuntime::RegisterUncaughtExceptionHandler(UncaughtExceptionCallback callback)
 {
     JSNApi::EnableUserUncaughtErrorHandler(vm_);
+    JSNApi::RegisterUncatchableErrorHandler(vm_,
+        std::bind(&ArkJSRuntime::HandleUncaughtExceptionWithoutNativeEngine, this, std::placeholders::_1, nullptr));
     uncaughtErrorHandler_ = callback;
 }
 
@@ -347,6 +351,13 @@ void ArkJSRuntime::HandleUncaughtException(panda::TryCatch& trycatch,
         return;
     }
 
+    // Handle the uncaught exception without native engine, such as oom error
+    HandleUncaughtExceptionWithoutNativeEngine(trycatch, errorCallback);
+}
+
+void ArkJSRuntime::HandleUncaughtExceptionWithoutNativeEngine(panda::TryCatch& trycatch,
+    const std::function<void(const std::string&, int32_t)>& errorCallback)
+{
     if (uncaughtErrorHandler_ == nullptr) {
         return;
     }

@@ -34,6 +34,8 @@ public:
     void SetDivider(const V2::ItemDivider& divider) override;
     void SetHeader(std::function<void()>&& header) override;
     void SetFooter(std::function<void()>&& footer) override;
+
+    static void SetDivider(FrameNode* frameNode, const V2::ItemDivider& divider);
 };
 
 } // namespace OHOS::Ace::NG

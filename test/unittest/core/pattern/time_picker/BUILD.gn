@@ -15,8 +15,5 @@ import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
 ace_unittest("time_picker_test_ng") {
   type = "new"
-  sources = [
-    "$ace_root/test/mock/base/mock_measure_util.cpp",
-    "time_picker_test_ng.cpp",
-  ]
+  sources = [ "time_picker_test_ng.cpp" ]
 }

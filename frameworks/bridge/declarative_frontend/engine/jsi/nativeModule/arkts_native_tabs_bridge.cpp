@@ -18,27 +18,13 @@
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_api.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 #include "core/components/common/properties/color.h"
+#include "frameworks/bridge/common/utils/utils.h"
 #include "frameworks/bridge/declarative_frontend/engine/js_types.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_abstract.h"
 #include "frameworks/core/components/tab_bar/tab_theme.h"
 #include "frameworks/core/components_ng/pattern/tabs/tabs_node.h"
 
 namespace OHOS::Ace::NG {
-namespace {
-bool ParseJsDimensionVp(const EcmaVM* vm, const Local<JSValueRef>& value, CalcDimension& result)
-{
-    if (value->IsNumber()) {
-        result = CalcDimension(value->ToNumber(vm)->Value(), DimensionUnit::VP);
-        return true;
-    }
-    if (value->IsString()) {
-        result = StringUtils::StringToCalcDimension(value->ToString(vm)->ToString(), false, DimensionUnit::VP);
-        return true;
-    }
-    // resouce ignore by design
-    return false;
-}
-} // namespace
 constexpr int SIZE_OF_FIVE = 5;
 constexpr int SIZE_OF_THREE = 3;
 constexpr int SIZE_OF_VALUES = 2;
@@ -53,15 +39,41 @@ constexpr int32_t MD_COLUMN_NUM = 8;
 constexpr int32_t LG_COLUMN_NUM = 12;
 constexpr int32_t DEFAULT_COLUMN = -1;
 constexpr int REMAINDER = 2;
+constexpr int TABBARMODE_SCROLLABLE = 1;
 ArkUINativeModuleValue TabsBridge::SetTabBarMode(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
-    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
-    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    int32_t tabBarMode = secondArg->Int32Value(vm);
+    Local<JSValueRef> barModeArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    Local<JSValueRef> marginArg = runtimeCallInfo->GetCallArgRef(NUM_2);
+    Local<JSValueRef> nonScrollableLayoutStyleArg = runtimeCallInfo->GetCallArgRef(NUM_3);
+
+    if (barModeArg->IsNull() || barModeArg->IsUndefined()) {
+        GetArkUIInternalNodeAPI()->GetTabsModifier().ResetTabBarMode(nativeNode);
+        return panda::JSValueRef::Undefined(vm);
+    }
+    TabBarMode barMode = TabBarMode::FIXED;
+    barMode = Framework::ConvertStrToTabBarMode(barModeArg->ToString(vm)->ToString());
+    int32_t tabBarMode = static_cast<int32_t>(barMode);
     GetArkUIInternalNodeAPI()->GetTabsModifier().SetTabBarMode(nativeNode, tabBarMode);
+
+    if (tabBarMode == TABBARMODE_SCROLLABLE) {
+        if (marginArg->IsNull() || marginArg->IsUndefined() || nonScrollableLayoutStyleArg->IsNull() ||
+            nonScrollableLayoutStyleArg->IsUndefined()) {
+            GetArkUIInternalNodeAPI()->GetTabsModifier().ResetScrollableBarModeOptions(nativeNode);
+            return panda::JSValueRef::Undefined(vm);
+        }
+        int barModeStyle = nonScrollableLayoutStyleArg->Int32Value(vm);
+        CalcDimension margin(0.0, DimensionUnit::VP);
+        if (!ArkTSUtils::ParseJsDimensionVp(vm, marginArg, margin)) {
+            margin.Reset();
+        }
+        
+        GetArkUIInternalNodeAPI()->GetTabsModifier().SetScrollableBarModeOptions(
+            nativeNode, margin.Value(), static_cast<int>(margin.Unit()), barModeStyle);
+    }
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -79,15 +91,21 @@ ArkUINativeModuleValue TabsBridge::SetScrollableBarModeOptions(ArkUIRuntimeCallI
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
-    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
-    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
     Local<JSValueRef> thirdArg = runtimeCallInfo->GetCallArgRef(NUM_2);
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    Local<panda::StringRef> barModeValue = secondArg->ToString(vm);
-    int barModeStyle = thirdArg->Int32Value(vm);
 
-    CalcDimension margin = Dimension(0.0, DimensionUnit::VP);
-    margin = StringUtils::StringToCalcDimension(barModeValue->ToString(), false, DimensionUnit::VP);
+    if (thirdArg->IsUndefined()) {
+        GetArkUIInternalNodeAPI()->GetTabsModifier().ResetScrollableBarModeOptions(nativeNode);
+        return panda::JSValueRef::Undefined(vm);
+    }
+    int barModeStyle = thirdArg->Int32Value(vm);
+    
+    CalcDimension margin(0.0, DimensionUnit::VP);
+    if (!ArkTSUtils::ParseJsDimensionVp(vm, secondArg, margin)) {
+        margin.Reset();
+    }
 
     GetArkUIInternalNodeAPI()->GetTabsModifier().SetScrollableBarModeOptions(
         nativeNode, margin.Value(), static_cast<int>(margin.Unit()), barModeStyle);
@@ -134,11 +152,11 @@ ArkUINativeModuleValue TabsBridge::SetBarGridAlign(ArkUIRuntimeCallInfo* runtime
 
     CalcDimension columnGutter;
     CalcDimension columnMargin;
-    if (!ParseJsDimensionVp(vm, gutterArg, columnGutter) || !NonNegative(columnGutter.Value()) ||
+    if (!ArkTSUtils::ParseJsDimensionVp(vm, gutterArg, columnGutter) || !NonNegative(columnGutter.Value()) ||
         columnGutter.Unit() == DimensionUnit::PERCENT) {
         columnGutter.Reset();
     }
-    if (!ParseJsDimensionVp(vm, marginArg, columnMargin) || NonNegative(columnMargin.Value()) ||
+    if (!ArkTSUtils::ParseJsDimensionVp(vm, marginArg, columnMargin) || !NonNegative(columnMargin.Value()) ||
         columnMargin.Unit() == DimensionUnit::PERCENT) {
         columnMargin.Reset();
     }
@@ -196,20 +214,21 @@ ArkUINativeModuleValue TabsBridge::SetDivider(ArkUIRuntimeCallInfo* runtimeCallI
     auto tabTheme = themeManager->GetTheme<TabTheme>();
     CHECK_NULL_RETURN(tabTheme, panda::NativePointerRef::New(vm, nullptr));
 
-    if (dividerStrokeWidthArgs->IsUndefined() || !ParseJsDimensionVp(vm, dividerStrokeWidthArgs, dividerStrokeWidth) ||
+    if (!ArkTSUtils::ParseJsDimensionVp(vm, dividerStrokeWidthArgs, dividerStrokeWidth) ||
         dividerStrokeWidth.Value() < 0.0f || dividerStrokeWidth.Unit() == DimensionUnit::PERCENT) {
         dividerStrokeWidth.Reset();
     }
-    if (colorArg->IsUndefined()) {
+    Color colorObj;
+    if (!ArkTSUtils::ParseJsColor(vm, colorArg, colorObj)) {
         color = tabTheme->GetDividerColor().GetValue();
     } else {
-        color = colorArg->Uint32Value(vm);
+        color = colorObj.GetValue();
     }
-    if (dividerStartMarginArgs->IsUndefined() || !ParseJsDimensionVp(vm, dividerStartMarginArgs, dividerStartMargin) ||
+    if (!ArkTSUtils::ParseJsDimensionVp(vm, dividerStartMarginArgs, dividerStartMargin) ||
         dividerStartMargin.Value() < 0.0f || dividerStartMargin.Unit() == DimensionUnit::PERCENT) {
         dividerStartMargin.Reset();
     }
-    if (dividerEndMarginArgs->IsUndefined() || !ParseJsDimensionVp(vm, dividerEndMarginArgs, dividerEndMargin) ||
+    if (!ArkTSUtils::ParseJsDimensionVp(vm, dividerEndMarginArgs, dividerEndMargin) ||
         dividerEndMargin.Value() < 0.0f || dividerEndMargin.Unit() == DimensionUnit::PERCENT) {
         dividerEndMargin.Reset();
     }
@@ -243,6 +262,10 @@ ArkUINativeModuleValue TabsBridge::SetFadingEdge(ArkUIRuntimeCallInfo* runtimeCa
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+    if (secondArg->IsUndefined() || secondArg->IsNull()) {
+        GetArkUIInternalNodeAPI()->GetTabsModifier().ResetFadingEdge(nativeNode);
+        return panda::JSValueRef::Undefined(vm);
+    }
     bool fadingEdge = secondArg->ToBoolean(vm)->Value();
     GetArkUIInternalNodeAPI()->GetTabsModifier().SetFadingEdge(nativeNode, fadingEdge);
     return panda::JSValueRef::Undefined(vm);
@@ -382,22 +405,11 @@ ArkUINativeModuleValue TabsBridge::SetTabBarWidth(ArkUIRuntimeCallInfo* runtimeC
     CalcDimension width;
     ArkUINativeModuleValue undefinedRes = panda::JSValueRef::Undefined(vm);
 
-    if (jsValue->IsUndefined() || !ArkTSUtils::ParseJsDimensionFromResource(vm, jsValue, DimensionUnit::VP, width)) {
+    if (jsValue->IsNull() || jsValue->IsUndefined() || !ArkTSUtils::ParseJsDimensionVpNG(vm, jsValue, width)) {
         GetArkUIInternalNodeAPI()->GetTabsModifier().ResetTabBarWidth(nativeNode);
         return undefinedRes;
     }
 
-    CalcDimension invWidth;
-    if (NearZero(width.Value()) &&
-        ArkTSUtils::ParseJsDimensionFromResource(vm, jsValue, DimensionUnit::INVALID, invWidth) &&
-        invWidth.Unit() == DimensionUnit::INVALID) {
-        GetArkUIInternalNodeAPI()->GetTabsModifier().ResetTabBarWidth(nativeNode);
-        return undefinedRes;
-    }
-
-    if (LessNotEqual(width.Value(), 0.0)) {
-        width.SetValue(0.0);
-    }
     GetArkUIInternalNodeAPI()->GetTabsModifier().SetTabBarWidth(nativeNode, width.Value(),
         static_cast<int>(width.Unit()));
     return undefinedRes;
@@ -423,22 +435,11 @@ ArkUINativeModuleValue TabsBridge::SetTabBarHeight(ArkUIRuntimeCallInfo* runtime
     CalcDimension height;
     ArkUINativeModuleValue undefinedRes = panda::JSValueRef::Undefined(vm);
 
-    if (jsValue->IsUndefined() || !ArkTSUtils::ParseJsDimensionFromResource(vm, jsValue, DimensionUnit::VP, height)) {
+    if (jsValue->IsNull() || jsValue->IsUndefined() || !ArkTSUtils::ParseJsDimensionVpNG(vm, jsValue, height)) {
         GetArkUIInternalNodeAPI()->GetTabsModifier().ResetTabBarHeight(nativeNode);
         return undefinedRes;
     }
-
-    CalcDimension invHeight;
-    if (NearZero(height.Value()) &&
-        ArkTSUtils::ParseJsDimensionFromResource(vm, jsValue, DimensionUnit::INVALID, invHeight) &&
-        invHeight.Unit() == DimensionUnit::INVALID) {
-        GetArkUIInternalNodeAPI()->GetTabsModifier().ResetTabBarHeight(nativeNode);
-        return undefinedRes;
-    }
-
-    if (LessNotEqual(height.Value(), 0.0)) {
-        height.SetValue(0.0);
-    }
+    
     GetArkUIInternalNodeAPI()->GetTabsModifier().SetTabBarHeight(
         nativeNode, height.Value(), static_cast<int>(height.Unit()));
     return undefinedRes;

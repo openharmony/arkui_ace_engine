@@ -44,4 +44,17 @@ void LoadingProgressModelNG::SetEnableLoading(bool enable)
 {
     ACE_UPDATE_PAINT_PROPERTY(LoadingProgressPaintProperty, EnableLoading, enable);
 }
+
+void LoadingProgressModelNG::SetColor(FrameNode* frameNode, const Color& value)
+{
+    ACE_UPDATE_NODE_PAINT_PROPERTY(LoadingProgressPaintProperty, Color, value, frameNode);
+    ACE_UPDATE_NODE_RENDER_CONTEXT(ForegroundColor, value, frameNode);
+    ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, ForegroundColorStrategy, frameNode);
+    ACE_UPDATE_NODE_RENDER_CONTEXT(ForegroundColorFlag, true, frameNode);
+}
+
+void LoadingProgressModelNG::SetEnableLoading(FrameNode* frameNode, bool enable)
+{
+    ACE_UPDATE_NODE_PAINT_PROPERTY(LoadingProgressPaintProperty, EnableLoading, enable, frameNode);
+}
 } // namespace OHOS::Ace::NG

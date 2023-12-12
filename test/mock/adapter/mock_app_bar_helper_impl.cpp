@@ -30,4 +30,4 @@ std::string AppBarHelper::QueryAppGalleryBundleName()
     return "";
 }
 
-} // namespace OHOS::Ace
+} // namespace OHOS::Ac

@@ -48,7 +48,7 @@ ace_unittest("render_property_test_ng") {
   sources = [ "render_property_test_ng.cpp" ]
 }
 
-group("render_unittest") {
+group("core_render_unittest") {
   testonly = true
   deps = [
     ":drawing_prop_convertor_test_ng",

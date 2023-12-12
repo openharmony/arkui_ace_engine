@@ -135,7 +135,8 @@ private:
     SizeF GetContentSize() const;
     void MarkDirtyNodeSelf();
     void OnScrollEndCallback() override;
-
+    bool ScrollToTargrtIndex(int32_t index);
+    std::optional<int32_t> targetIndex_;
     WaterFlowLayoutInfo layoutInfo_;
 
     float prevOffset_ = 0.0f;

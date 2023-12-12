@@ -419,7 +419,8 @@ void GaugePaintMethod::PaintSingleSegmentGradientCircularShadow(RSCanvas& canvas
 
     float offsetDegree = GetOffsetDegree(data, data.thickness * PERCENT_HALF);
     RSFilter filter;
-    filter.SetMaskFilter(RSMaskFilter::CreateBlurMaskFilter(RSBlurType::NORMAL, shadowOptions.radius));
+    filter.SetImageFilter(
+        RSImageFilter::CreateBlurImageFilter(shadowOptions.radius, shadowOptions.radius, RSTileMode::CLAMP, nullptr));
     RSPen shadowPen;
     shadowPen.SetAntiAlias(true);
     shadowPen.SetWidth(data.thickness);
@@ -557,7 +558,8 @@ void GaugePaintMethod::DrawSingleSegmentGradient(RSCanvas& canvas, const RenderR
 
     if (info.isDrawShadow) {
         RSFilter filter;
-        filter.SetMaskFilter(RSMaskFilter::CreateBlurMaskFilter(RSBlurType::NORMAL, info.shadowRadius));
+        filter.SetImageFilter(
+            RSImageFilter::CreateBlurImageFilter(info.shadowRadius, info.shadowRadius, RSTileMode::CLAMP, nullptr));
         pen.SetFilter(filter);
         pen.SetAlphaF(SHADOW_ALPHA);
     } else {

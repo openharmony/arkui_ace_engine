@@ -14,25 +14,36 @@
  */
 
 #include "frameworks/bridge/declarative_frontend/jsview/js_image.h"
-
+#include <cstdint>
+#include <vector>
 
 #if !defined(PREVIEW)
 #include <dlfcn.h>
 #endif
 
+#include "base/geometry/ng/vector.h"
 #include "base/image/pixel_map.h"
 #include "base/log/ace_scoring_log.h"
 #include "base/log/ace_trace.h"
 #include "bridge/declarative_frontend/engine/functions/js_drag_function.h"
 #include "bridge/declarative_frontend/engine/js_ref_ptr.h"
+#include "bridge/declarative_frontend/engine/js_types.h"
 #include "bridge/declarative_frontend/jsview/models/image_model_impl.h"
 #include "core/common/container.h"
 #include "core/components/image/image_event.h"
+#include "core/components/image/image_theme.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_ng/pattern/image/image_model.h"
 #include "core/components_ng/pattern/image/image_model_ng.h"
 #include "core/image/image_source_info.h"
+#include "interfaces/inner_api/ace/ai/image_analyzer.h"
+
+namespace {
+    const std::vector<float> DEFAULT_COLORFILTER_MATRIX = {
+        1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0
+    };
+}
 
 namespace OHOS::Ace {
 
@@ -107,12 +118,18 @@ void JSImage::SetAlt(const JSCallbackInfo& args)
     ImageModel::GetInstance()->SetAlt(ImageSourceInfo { src, bundleName, moduleName });
 }
 
-void JSImage::SetObjectFit(int32_t value)
+void JSImage::SetObjectFit(const JSCallbackInfo& args)
 {
-    auto fit = static_cast<ImageFit>(value);
-    if (fit < ImageFit::FILL || fit > ImageFit::SCALE_DOWN) {
-        fit = ImageFit::COVER;
+    if (args.Length() < 1) {
+        ImageModel::GetInstance()->SetImageFit(ImageFit::COVER);
+        return;
     }
+    int32_t parseRes = 2;
+    ParseJsInteger(args[0], parseRes);
+    if (parseRes < static_cast<int32_t>(ImageFit::FILL) || parseRes > static_cast<int32_t>(ImageFit::SCALE_DOWN)) {
+        parseRes = 2;
+    }
+    auto fit = static_cast<ImageFit>(parseRes);
     ImageModel::GetInstance()->SetImageFit(fit);
 }
 
@@ -263,7 +280,11 @@ void JSImage::SetImageFill(const JSCallbackInfo& info)
 
     Color color;
     if (!ParseJsColor(info[0], color)) {
-        return;
+        auto pipelineContext = PipelineBase::GetCurrentContext();
+        CHECK_NULL_VOID(pipelineContext);
+        auto theme = pipelineContext->GetTheme<ImageTheme>();
+        CHECK_NULL_VOID(theme);
+        color = theme->GetFillColor();
     }
     ImageModel::GetInstance()->SetImageFill(color);
 }
@@ -388,10 +409,12 @@ void JSColorFilter::DestructorCallback(JSColorFilter* obj)
 void JSImage::SetColorFilter(const JSCallbackInfo& info)
 {
     if (info.Length() != 1) {
+        ImageModel::GetInstance()->SetColorFilterMatrix(DEFAULT_COLORFILTER_MATRIX);
         return;
     }
     auto tmpInfo = info[0];
     if (!tmpInfo->IsArray() && !tmpInfo->IsObject()) {
+        ImageModel::GetInstance()->SetColorFilterMatrix(DEFAULT_COLORFILTER_MATRIX);
         return;
     }
     if (tmpInfo->IsObject() && !tmpInfo->IsArray()) {
@@ -399,17 +422,18 @@ void JSImage::SetColorFilter(const JSCallbackInfo& info)
         if (!tmpInfo->IsUndefined() && !tmpInfo->IsNull()) {
             colorFilter = JSRef<JSObject>::Cast(tmpInfo)->Unwrap<JSColorFilter>();
         } else {
+            ImageModel::GetInstance()->SetColorFilterMatrix(DEFAULT_COLORFILTER_MATRIX);
             return;
         }
         if (colorFilter && colorFilter->GetColorFilterMatrix().size() == COLOR_FILTER_MATRIX_SIZE) {
             ImageModel::GetInstance()->SetColorFilterMatrix(colorFilter->GetColorFilterMatrix());
-        } else {
-            return;
         }
+        ImageModel::GetInstance()->SetColorFilterMatrix(DEFAULT_COLORFILTER_MATRIX);
         return;
     }
     JSRef<JSArray> array = JSRef<JSArray>::Cast(tmpInfo);
     if (array->Length() != COLOR_FILTER_MATRIX_SIZE) {
+        ImageModel::GetInstance()->SetColorFilterMatrix(DEFAULT_COLORFILTER_MATRIX);
         return;
     }
     std::vector<float> colorfilter;
@@ -417,10 +441,10 @@ void JSImage::SetColorFilter(const JSCallbackInfo& info)
         JSRef<JSVal> value = array->GetValueAt(i);
         if (value->IsNumber()) {
             colorfilter.emplace_back(value->ToNumber<float>());
+        } else {
+            ImageModel::GetInstance()->SetColorFilterMatrix(DEFAULT_COLORFILTER_MATRIX);
+            return;
         }
-    }
-    if (colorfilter.size() != COLOR_FILTER_MATRIX_SIZE) {
-        return;
     }
     ImageModel::GetInstance()->SetColorFilterMatrix(colorfilter);
 }
@@ -466,6 +490,9 @@ void JSImage::JSBind(BindingTarget globalObj)
     JSClass<JSImage>::StaticMethod("transition", &JSImage::JsTransition);
     JSClass<JSImage>::InheritAndBind<JSViewAbstract>(globalObj);
 
+    JSClass<JSImage>::StaticMethod("enableAnalyzer", &JSImage::EnableAnalyzer);
+    JSClass<JSImage>::StaticMethod("analyzerConfig", &JSImage::AnalyzerConfig);
+
     JSClass<JSColorFilter>::Declare("ColorFilter");
     JSClass<JSColorFilter>::Bind(globalObj, JSColorFilter::ConstructorCallback, JSColorFilter::DestructorCallback);
 }
@@ -481,11 +508,12 @@ void JSImage::JsOnDragStart(const JSCallbackInfo& info)
         return;
     }
     RefPtr<JsDragFunction> jsOnDragStartFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(info[0]));
-    auto onDragStartId = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragStartFunc)](
+    WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto onDragStartId = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragStartFunc), node = frameNode](
                              const RefPtr<DragEvent>& info, const std::string& extraParams) -> NG::DragDropBaseInfo {
         NG::DragDropBaseInfo itemInfo;
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, itemInfo);
-
+        PipelineContext::SetCallBackNode(node);
         auto ret = func->Execute(info, extraParams);
         if (!ret->IsObject()) {
             return itemInfo;
@@ -518,6 +546,67 @@ void JSImage::SetCopyOption(const JSCallbackInfo& info)
         }
     }
     ImageModel::GetInstance()->SetCopyOption(copyOptions);
+}
+
+void JSImage::EnableAnalyzer(bool isEnableAnalyzer)
+{
+    ImageModel::GetInstance()->EnableAnalyzer(isEnableAnalyzer);
+}
+
+void JSImage::AnalyzerConfig(const JSCallbackInfo &info)
+{
+    auto configParams = info[0];
+    if (configParams->IsNull() || !configParams->IsObject()) {
+        return;
+    }
+    
+    auto paramObject = JSRef<JSObject>::Cast(configParams);
+    JSRef<JSVal> typeVal = paramObject->GetProperty("types");
+    JSRef<JSVal> showButtonVal = paramObject->GetProperty("showAIbutton");
+    JSRef<JSVal> marginVal = paramObject->GetProperty("aiButtonOffset");
+    JSRef<JSVal> textOpVal = paramObject->GetProperty("textOptions");
+    JSRef<JSVal> subjectOpVal = paramObject->GetProperty("subjectOptions");
+    JSRef<JSVal> tagVal = paramObject->GetProperty("tag");
+
+    ImageAnalyzerConfig analyzerConfig;
+    if (typeVal->IsArray()) {
+        auto array = JSRef<JSArray>::Cast(typeVal);
+        std::set<ImageAnalyzerType> types;
+        for (size_t i = 0; i < array->Length(); ++i) {
+            if (!array->GetValueAt(i)->IsNumber()) {
+                continue;
+            }
+            int value = array->GetValueAt(i)->ToNumber<int>();
+            ImageAnalyzerType type = static_cast<ImageAnalyzerType>(value);
+            if (type != ImageAnalyzerType::SUBJECT && type != ImageAnalyzerType::TEXT) {
+                continue;
+            }
+            types.insert(type);
+        }
+        analyzerConfig.types = std::move(types);
+    }
+    if (showButtonVal->IsBoolean()) {
+        analyzerConfig.isShowAIButton = showButtonVal->ToBoolean();
+    }
+    if (!marginVal->IsNull() && marginVal->IsObject()) {
+        auto marginValue = JSRef<JSObject>::Cast(marginVal);
+        std::optional<CalcDimension> top;
+        std::optional<CalcDimension> bottom;
+        std::optional<CalcDimension> left;
+        std::optional<CalcDimension> right;
+        ParseMarginOrPaddingCorner(marginValue, top, bottom, left, right);
+        analyzerConfig.aiButtonMargin = NG::ConvertToCalcPaddingProperty(top, bottom, left, right);
+    }
+    if (subjectOpVal->IsObject()) {
+        ParseImageAnalyzerSubjectOptions(subjectOpVal, analyzerConfig);
+    }
+    if (textOpVal->IsObject()) {
+        ParseImageAnalyzerTextOptions(textOpVal, analyzerConfig);
+    }
+    if (tagVal->IsString()) {
+        analyzerConfig.tag = tagVal->ToString();
+    }
+    ImageModel::GetInstance()->SetImageAnalyzerConfig(analyzerConfig);
 }
 
 } // namespace OHOS::Ace::Framework

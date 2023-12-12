@@ -26,11 +26,13 @@
 #include "native_engine/native_engine.h"
 #include "native_engine/native_value.h"
 #include "wm/window.h"
+#include "dm/display_manager.h"
 
 #include "adapter/ohos/entrance/distributed_ui_manager.h"
 #include "base/view_data/view_data_wrap.h"
 #include "core/common/asset_manager_impl.h"
 #include "core/common/flutter/flutter_asset_manager.h"
+#include "core/components/common/properties/popup_param.h"
 
 namespace OHOS::Accessibility {
 class AccessibilityElementInfo;
@@ -221,6 +223,10 @@ public:
     std::string RecycleForm() override;
     
     void RecoverForm(const std::string& statusData) override;
+
+    int32_t CreateCustomPopupUIExtension(const AAFwk::Want& want,
+        const ModalUIExtensionCallbacks& callbacks, const CustomPopupUIExtensionConfig& config) override;
+    void DestroyCustomPopupUIExtension(int32_t nodeId) override;
 private:
     void InitializeInner(
         OHOS::Rosen::Window* window, const std::string& contentInfo, napi_value storage, bool isNamedRouter);
@@ -231,6 +237,12 @@ private:
     void SetConfiguration(const std::shared_ptr<OHOS::AppExecFwk::Configuration>& config);
 
     void InitializeSafeArea(const RefPtr<Platform::AceContainer>& container);
+    void InitializeDisplayAvailableRect(const RefPtr<Platform::AceContainer>& container);
+
+    RefPtr<PopupParam> CreateCustomPopupParam(bool isShow, const CustomPopupUIExtensionConfig& config);
+    void OnPopupStateChange(const std::string& event, const CustomPopupUIExtensionConfig& config, int32_t nodeId);
+
+    static void RemoveOldPopInfoIfExsited(bool isShowInSubWindow, int32_t nodeId);
 
     std::weak_ptr<OHOS::AbilityRuntime::Context> context_;
     void* runtime_ = nullptr;
@@ -241,6 +253,7 @@ private:
     OHOS::sptr<OHOS::Rosen::IOccupiedAreaChangeListener> occupiedAreaChangeListener_ = nullptr;
     OHOS::sptr<OHOS::Rosen::IAvoidAreaChangedListener> avoidAreaChangedListener_ = nullptr;
     OHOS::sptr<OHOS::Rosen::DisplayManager::IFoldStatusListener> foldStatusListener_ = nullptr;
+    OHOS::sptr<OHOS::Rosen::DisplayManager::IAvailableAreaListener> availableAreaChangedListener_ = nullptr;
 
     // ITouchOutsideListener is used for touching out of hot areas of window.
     OHOS::sptr<OHOS::Rosen::ITouchOutsideListener> touchOutsideListener_ = nullptr;
@@ -256,6 +269,7 @@ private:
     float formHeight_ = 0.0;
     std::string formData_;
     std::map<std::string, sptr<OHOS::AppExecFwk::FormAshmem>> formImageDataMap_;
+    std::unordered_map<int32_t, CustomPopupUIExtensionConfig> customPopupConfigMap_;
     std::unique_ptr<DistributedUIManager> uiManager_;
 
     sptr<IRemoteObject> parentToken_ = nullptr;

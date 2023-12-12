@@ -15,6 +15,5 @@ import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
 ace_unittest("marquee_test_ng") {
   type = "new"
-  flutter_skia = true
   sources = [ "marquee_test_ng.cpp" ]
 }

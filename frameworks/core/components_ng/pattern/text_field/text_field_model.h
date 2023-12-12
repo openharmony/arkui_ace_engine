@@ -205,6 +205,7 @@ public:
     virtual void SetOnCopy(std::function<void(const std::string&)>&& func) = 0;
     virtual void SetOnCut(std::function<void(const std::string&)>&& func) = 0;
     virtual void SetOnPaste(std::function<void(const std::string&)>&& func) = 0;
+    virtual void SetOnPasteWithEvent(std::function<void(const std::string&, NG::TextCommonEvent&)>&& func) = 0;
     virtual void SetCopyOption(CopyOptions copyOption) = 0;
     virtual void ResetMaxLength() = 0;
     virtual void SetForegroundColor(const Color& value) = 0;
@@ -229,6 +230,7 @@ public:
     virtual void SetSelectionMenuHidden(bool contextMenuHidden) = 0;
     virtual void SetCustomKeyboard(const std::function<void()>&& buildFunc) = 0;
     virtual void SetCounterType(int32_t value) {};
+    virtual void SetShowCounterBorder(bool value) {};
     virtual void SetCleanNodeStyle(CleanNodeStyle cleanNodeStyle) = 0;
     virtual void SetCancelIconSize(const CalcDimension& iconSize) = 0;
     virtual void SetCanacelIconSrc(const std::string& iconSrc) = 0;

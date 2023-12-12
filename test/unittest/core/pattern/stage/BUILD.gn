@@ -15,8 +15,5 @@ import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
 ace_unittest("stage_test_ng") {
   type = "new"
-  sources = [
-    "$ace_root/frameworks/core/components/common/properties/test/mock/mock_motion_path_evaluator.cpp",
-    "stage_test_ng.cpp",
-  ]
+  sources = [ "stage_test_ng.cpp" ]
 }

@@ -201,11 +201,7 @@ void BubblePaintMethod::ClipBubble(PaintWrapper* paintWrapper)
     CHECK_NULL_VOID(popupTheme);
     border_.SetBorderRadius(popupTheme->GetRadius());
     if (clipFrameNode_) {
-        if (enableArrow_ && showArrow_) {
-            ClipArrowBubble(clipFrameNode_);
-        } else {
-            ClipArrowlessBubble(clipFrameNode_);
-        }
+        ClipBubbleWithPath(clipFrameNode_);
     }
 }
 
@@ -573,22 +569,13 @@ void BubblePaintMethod::InitEdgeSize(Edge& edge)
                   std::max(padding_.Bottom().ConvertToPx(), border_.BottomLeftRadius().GetY().ConvertToPx())));
 }
 
-void BubblePaintMethod::ClipArrowBubble(const RefPtr<FrameNode>& frameNode)
+void BubblePaintMethod::ClipBubbleWithPath(const RefPtr<FrameNode>& frameNode)
 {
     auto path = AceType::MakeRefPtr<Path>();
     path->SetValue(clipPath_);
     path->SetBasicShapeType(BasicShapeType::PATH);
     auto renderContext = frameNode->GetRenderContext();
     renderContext->UpdateClipShape(path);
-}
-
-void BubblePaintMethod::ClipArrowlessBubble(const RefPtr<FrameNode>& frameNode)
-{
-    auto geometryNode = frameNode->GetGeometryNode();
-    auto renderContext = frameNode->GetRenderContext();
-    renderContext->ClipWithRRect(
-        RectF(0.0f, 0.0f, geometryNode->GetFrameSize().Width(), geometryNode->GetFrameSize().Height()),
-        RadiusF(EdgeF(border_.TopLeftRadius().GetX().ConvertToPx(), border_.TopRightRadius().GetX().ConvertToPx())));
 }
 
 } // namespace OHOS::Ace::NG

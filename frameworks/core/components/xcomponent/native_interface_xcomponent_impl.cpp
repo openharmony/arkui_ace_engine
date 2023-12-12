@@ -200,3 +200,42 @@ int32_t OH_NativeXComponent::GetKeyEvent(OH_NativeXComponent_KeyEvent** keyEvent
     (*keyEvent) = xcomponentImpl_->GetKeyEvent();
     return OH_NATIVEXCOMPONENT_RESULT_SUCCESS;
 }
+
+int32_t OH_NativeXComponent::SetExpectedFrameRateRange(OH_NativeXComponent_ExpectedRateRange* range)
+{
+    if (xcomponentImpl_ == nullptr || range == nullptr || !xcomponentImpl_->setExpectedRateRangeCallback_) {
+        return OH_NATIVEXCOMPONENT_RESULT_BAD_PARAMETER;
+    }
+    int32_t min = range->min;
+    int32_t max = range->max;
+    int32_t expected = range->expected;
+
+    if (!(min <= max && expected >= min && expected <= max)) {
+        LOGE("Xcomponent Expeted FrameRateRange Error.");
+        return OH_NATIVEXCOMPONENT_RESULT_BAD_PARAMETER;
+    }
+    xcomponentImpl_->SetRateRange(range);
+    xcomponentImpl_->setExpectedRateRangeCallback_();
+    return OH_NATIVEXCOMPONENT_RESULT_SUCCESS;
+}
+
+int32_t OH_NativeXComponent::RegisterOnFrameCallback(
+    void (*callback)(OH_NativeXComponent* component, uint64_t timestamp, uint64_t targetTimestamp))
+{
+    if (xcomponentImpl_ == nullptr || !xcomponentImpl_->setOnFrameEventCallback_) {
+        return OH_NATIVEXCOMPONENT_RESULT_BAD_PARAMETER;
+    }
+    xcomponentImpl_->SetOnFrameCallback(callback);
+    xcomponentImpl_->setOnFrameEventCallback_();
+    return OH_NATIVEXCOMPONENT_RESULT_SUCCESS;
+}
+
+int32_t OH_NativeXComponent::UnRegisterOnFrameCallback()
+{
+    if (xcomponentImpl_ == nullptr || !xcomponentImpl_->setUnregisterOnFrameEventCallback_) {
+        return OH_NATIVEXCOMPONENT_RESULT_BAD_PARAMETER;
+    }
+    xcomponentImpl_->SetOnFrameCallback(nullptr);
+    xcomponentImpl_->setUnregisterOnFrameEventCallback_();
+    return OH_NATIVEXCOMPONENT_RESULT_SUCCESS;
+}

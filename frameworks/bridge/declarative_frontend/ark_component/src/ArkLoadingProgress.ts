@@ -5,12 +5,43 @@ class ArkLoadingProgressComponent extends ArkComponent implements LoadingProgres
     throw new Error('Method not implemented.');
   }
   color(value: ResourceColor): this {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, LoadingProgressColorModifier.identity, LoadingProgressColorModifier, value);
+    return this;
   }
   enableLoading(value: boolean): this {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, LoadingProgressEnableLoadingModifier.identity, LoadingProgressEnableLoadingModifier, value);
+    return this;
   }
 }
+
+class LoadingProgressColorModifier extends ModifierWithKey<ResourceColor> {
+  static identity: Symbol = Symbol('loadingProgressColor');
+  applyPeer(node: KNode, reset: boolean) {
+    if (reset) {
+      GetUINativeModule().loadingProgress.resetColor(node);
+    }
+    else {
+      GetUINativeModule().loadingProgress.setColor(node, this.value);
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
+class LoadingProgressEnableLoadingModifier extends ModifierWithKey<boolean> {
+  static identity: Symbol = Symbol('loadingProgressEnableLoading');
+  applyPeer(node: KNode, reset: boolean) {
+    if (reset) {
+      GetUINativeModule().loadingProgress.resetEnableLoading(node);
+    }
+    else {
+      GetUINativeModule().loadingProgress.setEnableLoading(node, this.value);
+    }
+  }
+}
+
 // @ts-ignore
 globalThis.LoadingProgress.attributeModifier = function (modifier) {
   const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();

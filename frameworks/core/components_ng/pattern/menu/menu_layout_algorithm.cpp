@@ -485,6 +485,7 @@ void MenuLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(menuNode);
     auto menuPattern = menuNode->GetPattern<MenuPattern>();
     CHECK_NULL_VOID(menuPattern);
+    InitHierarchicalParameters();
     if (!targetTag_.empty()) {
         InitTargetSizeAndPosition(layoutWrapper, menuPattern->IsContextMenu(), menuPattern);
     }
@@ -1506,26 +1507,22 @@ void MenuLayoutAlgorithm::UpdateConstraintWidth(LayoutWrapper* layoutWrapper, La
 
 void MenuLayoutAlgorithm::UpdateConstraintHeight(LayoutWrapper* layoutWrapper, LayoutConstraintF& constraint)
 {
-    auto menuNode = layoutWrapper->GetHostNode();
-    CHECK_NULL_VOID(menuNode);
-    auto menuPattern = menuNode->GetPattern<MenuPattern>();
-    CHECK_NULL_VOID(menuPattern);
-    auto isSubMenu = menuPattern->IsSubMenu() || menuPattern->IsSelectOverlaySubMenu();
-    auto mainMenuPattern = menuPattern->GetMainMenuPattern();
-    CHECK_NULL_VOID(mainMenuPattern);
-    auto isContextMenu = mainMenuPattern->IsContextMenu();
-    if (isContextMenu && isSubMenu && !hierarchicalParameters_) {
-        auto pipelineContext = GetCurrentPipelineContext();
-        CHECK_NULL_VOID(pipelineContext);
+    auto pipelineContext = GetCurrentPipelineContext();
+    CHECK_NULL_VOID(pipelineContext);
+
+    float maxAvailableHeight = 0;
+    if (hierarchicalParameters_) {
+        auto displayAvailableRect = pipelineContext->GetDisplayAvailableRect();
+        maxAvailableHeight = displayAvailableRect.Height();
+    } else {
         auto safeAreaManager = pipelineContext->GetSafeAreaManager();
-        auto bottom = safeAreaManager->GetSystemSafeArea().bottom_.Length();
         CHECK_NULL_VOID(safeAreaManager);
+        auto top = safeAreaManager->GetSystemSafeArea().top_.Length();
+        auto bottom = safeAreaManager->GetSystemSafeArea().bottom_.Length();
         auto windowGlobalRect = pipelineContext->GetDisplayWindowRectInfo();
-        float maxSpaceHeight = (windowGlobalRect.Height() - bottom) * HEIGHT_CONSTRAINT_FACTOR;
-        constraint.maxSize.SetHeight(maxSpaceHeight);
-        return;
+        maxAvailableHeight = windowGlobalRect.Height() - top - bottom;
     }
-    float maxSpaceHeight = wrapperSize_.Height() * HEIGHT_CONSTRAINT_FACTOR;
+    float maxSpaceHeight = maxAvailableHeight * HEIGHT_CONSTRAINT_FACTOR;
     constraint.maxSize.SetHeight(maxSpaceHeight);
 }
 
@@ -1702,6 +1699,7 @@ OffsetF MenuLayoutAlgorithm::GetMenuWrapperOffset(const LayoutWrapper* layoutWra
 void MenuLayoutAlgorithm::InitTargetSizeAndPosition(const LayoutWrapper* layoutWrapper, bool isContextMenu,
     const RefPtr<MenuPattern>& menuPattern)
 {
+    CHECK_NULL_VOID(layoutWrapper);
     CHECK_NULL_VOID(menuPattern);
     auto targetNode = FrameNode::GetFrameNode(targetTag_, targetNodeId_);
     CHECK_NULL_VOID(targetNode);
@@ -1719,7 +1717,6 @@ void MenuLayoutAlgorithm::InitTargetSizeAndPosition(const LayoutWrapper* layoutW
     menuPattern->SetTargetSize(targetSize_);
     auto pipelineContext = GetCurrentPipelineContext();
     CHECK_NULL_VOID(pipelineContext);
-    InitHierarchicalParameters();
     if (isContextMenu || hierarchicalParameters_) {
         auto windowGlobalRect = pipelineContext->GetDisplayWindowRectInfo();
         float windowsOffsetX = static_cast<float>(windowGlobalRect.GetOffset().GetX());

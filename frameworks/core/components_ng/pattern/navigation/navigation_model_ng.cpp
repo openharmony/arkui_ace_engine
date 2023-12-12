@@ -1219,7 +1219,6 @@ void NavigationModelNG::SetMenuItems(std::vector<NG::BarItem>&& menuItems)
             navBarNode->UpdateMenuNodeOperation(ChildNodeOperation::ADD);
         }
     }
-    titleBarNode->MarkIsInitialTitle(true);
     auto navBarPattern = navBarNode->GetPattern<NavBarPattern>();
     CHECK_NULL_VOID(navBarPattern);
     navBarPattern->SetTitleBarMenuItems(menuItems);
@@ -1248,11 +1247,9 @@ void NavigationModelNG::SetCustomMenu(const RefPtr<AceType>& customNode)
         }
         navBarNode->SetMenu(customMenu);
         navBarNode->UpdatePrevMenuIsCustom(true);
-        titleBarNode->MarkIsInitialTitle(true);
         navBarNode->UpdateMenuNodeOperation(ChildNodeOperation::REPLACE);
         return;
     }
-    titleBarNode->MarkIsInitialTitle(true);
     navBarNode->SetMenu(customMenu);
     navBarNode->UpdatePrevMenuIsCustom(true);
     navBarNode->UpdateMenuNodeOperation(ChildNodeOperation::ADD);
@@ -1426,16 +1423,31 @@ void NavigationModelNG::SetHideToolBar(FrameNode* frameNode, bool hideToolBar)
 
 void NavigationModelNG::SetMinContentWidth(FrameNode* frameNode, const Dimension& value)
 {
+    auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    CHECK_NULL_VOID(navigationGroupNode);
+    auto navigationPattern = navigationGroupNode->GetPattern<NavigationPattern>();
+    CHECK_NULL_VOID(navigationPattern);
+    navigationPattern->SetIfNeedInit(true);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(NavigationLayoutProperty, MinContentWidth, value, frameNode);
 }
 
 void NavigationModelNG::SetMinNavBarWidth(FrameNode* frameNode, const Dimension& value)
 {
+    auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    CHECK_NULL_VOID(navigationGroupNode);
+    auto navigationPattern = navigationGroupNode->GetPattern<NavigationPattern>();
+    CHECK_NULL_VOID(navigationPattern);
+    navigationPattern->SetIfNeedInit(true);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(NavigationLayoutProperty, MinNavBarWidth, value, frameNode);
 }
 
 void NavigationModelNG::SetMaxNavBarWidth(FrameNode* frameNode, const Dimension& value)
 {
+    auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    CHECK_NULL_VOID(navigationGroupNode);
+    auto navigationPattern = navigationGroupNode->GetPattern<NavigationPattern>();
+    CHECK_NULL_VOID(navigationPattern);
+    navigationPattern->SetIfNeedInit(true);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(NavigationLayoutProperty, MaxNavBarWidth, value, frameNode);
 }
 

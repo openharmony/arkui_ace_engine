@@ -65,6 +65,17 @@ struct SearchButtonOptionsStruct {
     int32_t fontColor;
 };
 
+struct Int32AndInt32 {
+    int32_t number1;
+    int32_t number2;
+};
+
+struct ListLanesStruct {
+    int32_t number;
+    int32_t minLength;
+    int32_t maxlength;
+};
+
 struct ArkUISizeType {
     double value;
     int8_t unit;
@@ -134,6 +145,15 @@ struct ArkUIPlaceholderFontType {
     const char** fontFamilies;
     uint32_t length;
     int32_t style;
+};
+
+struct ArkUIGradientType {
+    const uint32_t* color;
+    const ArkUILengthType* offset;
+    const float* weight;
+    const uint32_t* gradientLength;
+    uint32_t length;
+    uint32_t type;
 };
 
 typedef void* NodeHandle;
@@ -211,7 +231,8 @@ struct ArkUICommonModifierAPI {
     void (*SetBackgroundBlurStyle)(NodeHandle node, int32_t blurStyle, int32_t colorMode, int32_t adaptiveColor,
         double scale);
     void (*ResetBackgroundBlurStyle)(NodeHandle node);
-    void (*SetBorder)(NodeHandle node, double* values, int32_t* units, uint32_t* colorAndStyle, int32_t size);
+    void (*SetBorder)(NodeHandle node,
+        const double* values, int32_t valuesSize, const uint32_t* colorAndStyle, int32_t colorAndStyleSize);
     void (*ResetBorder)(NodeHandle node);
     void (*SetBackgroundImagePosition)(
         NodeHandle node, const double* values, const int32_t* types, bool isAlign, int size);
@@ -219,7 +240,8 @@ struct ArkUICommonModifierAPI {
     void (*SetBackgroundImageSize)(
         NodeHandle node, double valueWidth, double valueHeight, int32_t typeWidth, int32_t typeHeight);
     void (*ResetBackgroundImageSize)(NodeHandle node);
-    void (*SetBackgroundImage)(NodeHandle node, const char* src, int32_t repeatIndex);
+    void (*SetBackgroundImage)(
+        NodeHandle node, const char* src, const char* bundle, const char* module, int32_t repeatIndex);
     void (*ResetBackgroundImage)(NodeHandle node);
     void (*SetTranslate)(NodeHandle node, const double* values, const int* units, int32_t length);
     void (*ResetTranslate)(NodeHandle node);
@@ -425,18 +447,18 @@ struct ArkUICounterModifierAPI {
 };
 
 struct ArkUICheckboxGroupModifierAPI {
-    void (*SetGroupSelectedColor)(NodeHandle node, uint32_t color);
-    void (*ResetGroupSelectedColor)(NodeHandle node);
-    void (*SetGroupUnSelectedColor)(NodeHandle node, uint32_t color);
-    void (*ResetGroupUnSelectedColor)(NodeHandle node);
-    void (*SetGroupSelectAll)(NodeHandle node, bool isSelected);
-    void (*ResetGroupSelectAll)(NodeHandle node);
+    void (*SetCheckboxGroupSelectedColor)(NodeHandle node, uint32_t color);
+    void (*ResetCheckboxGroupSelectedColor)(NodeHandle node);
+    void (*SetCheckboxGroupUnSelectedColor)(NodeHandle node, uint32_t color);
+    void (*ResetCheckboxGroupUnSelectedColor)(NodeHandle node);
+    void (*SetCheckboxGroupSelectAll)(NodeHandle node, bool isSelected);
+    void (*ResetCheckboxGroupSelectAll)(NodeHandle node);
     void (*SetCheckboxGroupWidth)(NodeHandle node, double value, int unit);
     void (*ResetCheckboxGroupWidth)(NodeHandle node);
     void (*SetCheckboxGroupHeight)(NodeHandle node, double value, int unit);
     void (*ResetCheckboxGroupHeight)(NodeHandle node);
-    void (*SetGroupMark)(NodeHandle node, uint32_t color, double sizeValue, double widthValue);
-    void (*ResetGroupMark)(NodeHandle node);
+    void (*SetCheckboxGroupMark)(NodeHandle node, uint32_t color, double sizeValue, double widthValue);
+    void (*ResetCheckboxGroupMark)(NodeHandle node);
 };
 
 struct ArkUIImageSpanModifierAPI {
@@ -580,17 +602,17 @@ struct ArkUIRatingModifierAPI {
 struct ArkUISliderModifierAPI {
     void (*SetShowTips)(NodeHandle node, bool isShow, const char *value);
     void (*ResetShowTips)(NodeHandle node);
-    void (*SetSliderStepSize)(NodeHandle node, float value, int unit);
+    void (*SetSliderStepSize)(NodeHandle node, double value, int unit);
     void (*ResetSliderStepSize)(NodeHandle node);
-    void (*SetBlockSize)(NodeHandle node, float widthVal, int widthUnit, float heightVal, int heightUnit);
+    void (*SetBlockSize)(NodeHandle node, double widthVal, int widthUnit, double heightVal, int heightUnit);
     void (*ResetBlockSize)(NodeHandle node);
-    void (*SetTrackBorderRadius)(NodeHandle node, float value, int unit);
+    void (*SetTrackBorderRadius)(NodeHandle node, double value, int unit);
     void (*ResetTrackBorderRadius)(NodeHandle node);
     void (*SetStepColor)(NodeHandle node, uint32_t color);
     void (*ResetStepColor)(NodeHandle node);
     void (*SetBlockBorderColor)(NodeHandle node, uint32_t color);
     void (*ResetBlockBorderColor)(NodeHandle node);
-    void (*SetBlockBorderWidth)(NodeHandle node, float value, int unit);
+    void (*SetBlockBorderWidth)(NodeHandle node, double value, int unit);
     void (*ResetBlockBorderWidth)(NodeHandle node);
     void (*SetBlockColor)(NodeHandle node, uint32_t color);
     void (*ResetBlockColor)(NodeHandle node);
@@ -600,7 +622,7 @@ struct ArkUISliderModifierAPI {
     void (*ResetSelectColor)(NodeHandle node);
     void (*SetShowSteps)(NodeHandle node, bool showSteps);
     void (*ResetShowSteps)(NodeHandle node);
-    void (*SetThickness)(NodeHandle node, float value, int unit);
+    void (*SetThickness)(NodeHandle node, double value, int unit);
     void (*ResetThickness)(NodeHandle node);
 };
 
@@ -626,6 +648,48 @@ struct ArkUIDividerModifierAPI {
 struct ArkUIStackModifierAPI {
     void (*SetAlignContent)(NodeHandle node, int32_t alignment);
     void (*ResetAlignContent)(NodeHandle node);
+};
+
+struct ArkUIGridModifierAPI {
+    void (*SetGridColumnsTemplate)(NodeHandle node, const char* columnsTemplate);
+    void (*ResetGridColumnsTemplate)(NodeHandle node);
+    void (*SetGridRowsTemplate)(NodeHandle node, const char* rowsTemplate);
+    void (*ResetGridRowsTemplate)(NodeHandle node);
+    void (*SetGridColumnsGap)(NodeHandle node, const struct ArkUIResourceLength* columnsGap);
+    void (*ResetGridColumnsGap)(NodeHandle node);
+    void (*SetGridRowsGap)(NodeHandle node, const struct ArkUIResourceLength* rowsGap);
+    void (*ResetGridRowsGap)(NodeHandle node);
+    void (*SetGridScrollBar)(NodeHandle node, const int32_t scrollBar);
+    void (*ResetGridScrollBar)(NodeHandle node);
+    void (*SetGridScrollBarWidth)(NodeHandle node, OHOS::Ace::Dimension& scrollBarWidth);
+    void (*ResetGridScrollBarWidth)(NodeHandle node);
+    void (*SetGridScrollBarColor)(NodeHandle node, uint32_t scrollBarColor);
+    void (*ResetGridScrollBarColor)(NodeHandle node);
+    void (*SetGridCachedCount)(NodeHandle node, const int32_t cachedCount);
+    void (*ResetGridCachedCount)(NodeHandle node);
+    void (*SetGridEditMode)(NodeHandle node, bool editMode);
+    void (*ResetGridEditMode)(NodeHandle node);
+    void (*SetGridMultiSelectable)(NodeHandle node, bool multiSelectable);
+    void (*ResetGridMultiSelectable)(NodeHandle node);
+    void (*SetGridMaxCount)(NodeHandle node, int32_t maxCount);
+    void (*ResetGridMaxCount)(NodeHandle node);
+    void (*SetGridMinCount)(NodeHandle node, int32_t minCount);
+    void (*ResetGridMinCount)(NodeHandle node);
+    void (*SetGridCellLength)(NodeHandle node, int32_t cellLength);
+    void (*ResetGridCellLength)(NodeHandle node);
+    void (*SetGridLayoutDirection)(NodeHandle node, int32_t layoutDirection);
+    void (*ResetGridLayoutDirection)(NodeHandle node);
+    void (*SetGridSupportAnimation)(NodeHandle node, bool supportAnimation);
+    void (*ResetGridSupportAnimation)(NodeHandle node);
+
+    void (*SetEdgeEffect)(NodeHandle node, int32_t edgeEffect, bool alwaysEnabled);
+    void (*ResetEdgeEffect)(NodeHandle node);
+    void (*SetNestedScroll)(NodeHandle node, int32_t forward, int32_t backward);
+    void (*ResetNestedScroll)(NodeHandle node);
+    void (*SetEnableScroll)(NodeHandle node, bool ScrollEnabled);
+    void (*ResetEnableScroll)(NodeHandle node);
+    void (*SetFriction)(NodeHandle node, double friction);
+    void (*ResetFriction)(NodeHandle node);
 };
 
 struct ArkUIGridColModifierAPI {
@@ -747,6 +811,10 @@ struct ArkUINavigatorModifierAPI {
     void (*ResetParams)(NodeHandle node);
 };
 
+struct ArkUINodeContainerModifierAPI {
+    void (*Rebuild)(int32_t nodeId);
+};
+
 struct ArkUIColumnModifierAPI {
     void (*SetColumnJustifyContent)(NodeHandle node, int32_t flexAlign);
     void (*ResetColumnJustifyContent)(NodeHandle node);
@@ -833,6 +901,23 @@ struct ArkUIColumnSplitModifierAPI {
     void (*ResetColumnSplitDivider)(NodeHandle node);
     void (*SetColumnSplitResizeable)(NodeHandle node, bool resizeable);
     void (*ResetColumnSplitResizeable)(NodeHandle node);
+};
+
+struct ArkUILineModifierAPI {
+    void (*SetStartPoint)(NodeHandle node, double* pointValues, int32_t* pointUnits, const char* pointStr[]);
+    void (*ResetStartPoint)(NodeHandle node);
+    void (*SetEndPoint)(NodeHandle node, double* pointValues, int32_t* pointUnits, const char* pointStr[]);
+    void (*ResetEndPoint)(NodeHandle node);
+};
+
+struct ArkUIPathModifierAPI {
+    void (*SetPathCommands)(NodeHandle node, const char* commands);
+    void (*ResetPathCommands)(NodeHandle node);
+};
+
+struct ArkUIPolylineModifierAPI {
+    void (*SetPoints)(NodeHandle node, const double* pointX, const double* pointY, int32_t length);
+    void (*ResetPoints)(NodeHandle node);
 };
 
 struct ArkUISpanModifierAPI {
@@ -1006,30 +1091,70 @@ struct ArkUIMenuItemModifierAPI {
     void (*ResetLabelFontColor)(NodeHandle node);
     void (*SetContentFontColor)(NodeHandle node, const uint32_t colorVal);
     void (*ResetContentFontColor)(NodeHandle node);
-    void (*SetLabelFont)(NodeHandle node, const char* fontInfo, int32_t style);
+    void (*SetLabelFont)(NodeHandle node, const char* fontInfo, int32_t styleVal);
     void (*ResetLabelFont)(NodeHandle node);
-    void (*SetContentFont)(NodeHandle node, const char* fontInfo, int32_t style);
+    void (*SetContentFont)(NodeHandle node, const char* fontInfo, int32_t styleVal);
     void (*ResetContentFont)(NodeHandle node);
 };
 
 struct ArkUIMenuModifierAPI {
     void (*SetMenuFontColor)(NodeHandle node, uint32_t colorVal);
     void (*ResetMenuFontColor)(NodeHandle node);
-    void (*SetFont)(NodeHandle node, const char* fontInfo, int32_t style);
+    void (*SetFont)(NodeHandle node, const char* fontInfo, int32_t styleVal);
     void (*ResetFont)(NodeHandle node);
-    void (*SetRadius)(NodeHandle node, const double* values, const int* units, int32_t length);
+    void (*SetRadius)(NodeHandle node, const double* values, const int* units);
     void (*ResetRadius)(NodeHandle node);
+};
+
+struct ArkUIWaterFlowModifierAPI {
+    void (*ResetColumnsTemplate)(NodeHandle node);
+    void (*SetColumnsTemplate)(NodeHandle node, const char* value);
+    void (*ResetRowsTemplate)(NodeHandle node);
+    void (*SetRowsTemplate)(NodeHandle node, const char* value);
+    void (*ResetWaterFlowEnableScrollInteraction)(NodeHandle node);
+    void (*SetWaterFlowEnableScrollInteraction)(NodeHandle node, bool value);
+    void (*SetColumnsGap)(NodeHandle node, double value, int unit, const char* calcValue);
+    void (*ResetColumnsGap)(NodeHandle node);
+    void (*SetRowsGap)(NodeHandle node, double value, int unit, const char* calcValue);
+    void (*ResetRowsGap)(NodeHandle node);
+    void (*SetItemMinWidth)(NodeHandle node, double value, int unit, const char* calcValue);
+    void (*ResetItemMinWidth)(NodeHandle node);
+    void (*SetItemMaxWidth)(NodeHandle node, double value, int unit, const char* calcValue);
+    void (*ResetItemMaxWidth)(NodeHandle node);
+    void (*SetItemMinHeight)(NodeHandle node, double value, int unit, const char* calcValue);
+    void (*ResetItemMinHeight)(NodeHandle node);
+    void (*SetItemMaxHeight)(NodeHandle node, double value, int unit, const char* calcValue);
+    void (*ResetItemMaxHeight)(NodeHandle node);
+    void (*SetLayoutDirection)(NodeHandle node, int32_t value);
+    void (*ResetLayoutDirection)(NodeHandle node);
+    void (*SetWaterFlowNestedScroll)(NodeHandle node, int32_t scrollForward, int32_t scrollBackward);
+    void (*ResetWaterFlowNestedScroll)(NodeHandle node);
+    void (*SetWaterFlowFriction)(NodeHandle node, double friction);
+    void (*ResetWaterFlowFriction)(NodeHandle node);
+};
+
+struct ArkUIMarqueeModifierAPI {
+    void (*SetMarqueeFontSize)(NodeHandle node, double value, int unit);
+    void (*ResetMarqueeFontSize)(NodeHandle node);
+    void (*SetMarqueeFontColor)(NodeHandle node, uint32_t color);
+    void (*ResetMarqueeFontColor)(NodeHandle node);
+    void (*SetMarqueeAllowScale)(NodeHandle node, bool allowScale);
+    void (*ResetMarqueeAllowScale)(NodeHandle node);
+    void (*SetMarqueeFontWeight)(NodeHandle node, const char *fontWeight);
+    void (*ResetMarqueeFontWeight)(NodeHandle node);
+    void (*SetMarqueeFontFamily)(NodeHandle node, const char *fontFamily);
+    void (*ResetMarqueeFontFamily)(NodeHandle node);
 };
 
 struct ArkUIDatePickerModifierAPI {
     void (*SetSelectedTextStyle)(
-        NodeHandle node, const char* weightChar, const char* familiesChar, const int* values, double size);
+    NodeHandle node, const char* fontInfo, uint32_t color, int32_t style);
     void (*ResetSelectedTextStyle)(NodeHandle node);
     void (*SetDatePickerTextStyle)(
-        NodeHandle node, const char* weightChar, const char* familiesChar, const int* values, double size);
+    NodeHandle node, const char* fontInfo, uint32_t color, int32_t style);
     void (*ResetDatePickerTextStyle)(NodeHandle node);
     void (*SetDisappearTextStyle)(
-        NodeHandle node, const char* weightChar, const char* familiesChar, const int* values, double size);
+    NodeHandle node, const char* fontInfo, uint32_t color, int32_t style);
     void (*ResetDisappearTextStyle)(NodeHandle node);
     void (*SetLunar)(NodeHandle node, bool isLunar);
     void (*ResetLunar)(NodeHandle node);
@@ -1074,6 +1199,166 @@ struct ArkUIAlphabetIndexerModifierAPI {
     void (*ResetPopupPosition)(NodeHandle node);
 };
 
+struct ArkUISwiperModifierAPI {
+    void (*SetSwiperNextMargin)(NodeHandle node, double nextMarginValue, int32_t nextMarginUnit);
+    void (*ResetSwiperNextMargin)(NodeHandle node);
+    void (*SetSwiperPrevMargin)(NodeHandle node, double prevMarginValue, int32_t prevMarginUnit);
+    void (*ResetSwiperPrevMargin)(NodeHandle node);
+    void (*SetSwiperDisplayCount)(NodeHandle node, const char* displayCountChar, int32_t displayCountUnit);
+    void (*ResetSwiperDisplayCount)(NodeHandle node);
+    void (*SetSwiperDisplayArrow)(NodeHandle node, const char* displayArrowStr);
+    void (*ResetSwiperDisplayArrow)(NodeHandle node);
+    void (*SetSwiperCurve)(NodeHandle node, const char* curveChar);
+    void (*ResetSwiperCurve)(NodeHandle node);
+    void (*SetSwiperDisableSwipe)(NodeHandle node, bool disableSwipe);
+    void (*ResetSwiperDisableSwipe)(NodeHandle node);
+    void (*SetSwiperEffectMode)(NodeHandle node, int32_t edgeEffect);
+    void (*ResetSwiperEffectMode)(NodeHandle node);
+    void (*SetSwiperCachedCount)(NodeHandle node, int32_t cachedCount);
+    void (*ResetSwiperCachedCount)(NodeHandle node);
+    void (*SetSwiperDisplayMode)(NodeHandle node, int32_t displayMode);
+    void (*ResetSwiperDisplayMode)(NodeHandle node);
+    void (*SetSwiperItemSpace)(NodeHandle node, double itemSpaceValue, int32_t itemSpaceUnit);
+    void (*ResetSwiperItemSpace)(NodeHandle node);
+    void (*SetSwiperVertical)(NodeHandle node, bool isVertical);
+    void (*ResetSwiperVertical)(NodeHandle node);
+    void (*SetSwiperLoop)(NodeHandle node, bool loop);
+    void (*ResetSwiperLoop)(NodeHandle node);
+    void (*SetSwiperInterval)(NodeHandle node, int32_t interval);
+    void (*ResetSwiperInterval)(NodeHandle node);
+    void (*SetSwiperAutoPlay)(NodeHandle node, bool autoPlay);
+    void (*ResetSwiperAutoPlay)(NodeHandle node);
+    void (*SetSwiperIndex)(NodeHandle node, int32_t index);
+    void (*ResetSwiperIndex)(NodeHandle node);
+    void (*SetSwiperIndicator)(NodeHandle node, const char* indicatorStr);
+    void (*ResetSwiperIndicator)(NodeHandle node);
+    void (*SetSwiperDuration)(NodeHandle node, int32_t duration);
+    void (*ResetSwiperDuration)(NodeHandle node);
+};
+
+struct ArkUIDataPanelModifierAPI {
+    void (*SetCloseEffect)(NodeHandle node, bool value);
+    void (*ResetCloseEffect)(NodeHandle node);
+    void (*SetDataPanelTrackBackgroundColor)(NodeHandle node, uint32_t value);
+    void (*ResetDataPanelTrackBackgroundColor)(NodeHandle node);
+    void (*SetDataPanelStrokeWidth)(NodeHandle node, double value, int32_t unit);
+    void (*ResetDataPanelStrokeWidth)(NodeHandle node);
+    void (*SetValueColors)(NodeHandle node, const struct ArkUIGradientType* gradient);
+    void (*ResetValueColors)(NodeHandle node);
+    void (*SetTrackShadow)(
+        NodeHandle node, const struct ArkUIGradientType* gradient, double radius, double offsetX, double offsetY);
+    void (*ResetTrackShadow)(NodeHandle node);
+};
+
+struct ArkUIGaugeModifierAPI {
+    void (*SetGaugeVaule)(NodeHandle node, float vaule);
+    void (*ResetGaugeVaule)(NodeHandle node);
+    void (*SetGaugeStartAngle)(NodeHandle node, float vaule);
+    void (*ResetGaugeStartAngle)(NodeHandle node);
+    void (*SetGaugeEndAngle)(NodeHandle node, float vaule);
+    void (*ResetGaugeEndAngle)(NodeHandle node);
+    void (*SetGaugeStrokeWidth)(NodeHandle node, double value, int32_t unit);
+    void (*ResetGaugeStrokeWidth)(NodeHandle node);
+    void (*SetShadowOptions)(NodeHandle node, double radius, double offsetX, double offsetY, bool isShadowVisible);
+    void (*ResetShadowOptions)(NodeHandle node);
+    void (*SetIsShowIndicator)(NodeHandle node, bool isShowIndicator);
+    void (*SetIndicatorIconPath)(NodeHandle node, const char* iconPath,
+        const char* bundleName, const char* moduleName);
+    void (*ResetIndicatorIconPath)(NodeHandle node);
+    void (*SetIndicatorSpace)(NodeHandle node, const char* spaceStrValue, double spaceValue, int32_t spaceUnit);
+    void (*ResetIndicatorSpace)(NodeHandle node);
+    void (*SetColors)(NodeHandle node, const uint32_t* colors, const float* weight, uint32_t length);
+    void (*ResetColors)(NodeHandle node);
+    void (*SetGradientColors)(NodeHandle node, const struct ArkUIGradientType* gradient, uint32_t weightLength);
+    void (*ResetGradientColors)(NodeHandle node);
+};
+
+struct ArkUIScrollModifierAPI {
+    void (*SetScrollScrollable)(NodeHandle node, uint32_t scrollDirection);
+    void (*ResetScrollScrollable)(NodeHandle node);
+    void (*SetScrollScrollBarColor)(NodeHandle node, uint32_t scrollBarColor);
+    void (*ResetScrollScrollBarColor)(NodeHandle node);
+    void (*SetScrollScrollBarWidth)(NodeHandle node, double value, int unit);
+    void (*ResetScrollScrollBarWidth)(NodeHandle node);
+    void (*SetScrollEdgeEffect)(NodeHandle node, uint32_t edgeEffect, bool alwaysEnabled);
+    void (*ResetScrollEdgeEffect)(NodeHandle node);
+};
+
+struct ArkUIListItemModifierAPI {
+    void (*SetListItemSelected)(NodeHandle node, bool selected);
+    void (*ResetListItemSelected)(NodeHandle node);
+    void (*SetSelectable)(NodeHandle node, bool selectable);
+    void (*ResetSelectable)(NodeHandle node);
+};
+
+struct ArkUIListModifierAPI {
+    void (*SetListLanes)(NodeHandle node, int32_t lanesNum, OHOS::Ace::Dimension minLength,
+        OHOS::Ace::Dimension maxLength, OHOS::Ace::Dimension gutter);
+    void (*ResetListLanes)(NodeHandle node);
+    void (*SetEditMode)(NodeHandle node, bool editMode);
+    void (*ResetEditMode)(NodeHandle node);
+    void (*SetMultiSelectable)(NodeHandle node, bool selectable);
+    void (*ResetMultiSelectable)(NodeHandle node);
+    void (*SetChainAnimation)(NodeHandle node, bool chainAnimation);
+    void (*ResetChainAnimation)(NodeHandle node);
+    void (*SetCachedCount)(NodeHandle node, int32_t cachedCount);
+    void (*ResetCachedCount)(NodeHandle node);
+    void (*SetEnableScrollInteraction)(NodeHandle node, bool enableScrollInteraction);
+    void (*ResetEnableScrollInteraction)(NodeHandle node);
+    void (*SetSticky)(NodeHandle node, int32_t stickyStyle);
+    void (*ResetSticky)(NodeHandle node);
+    void (*SetListEdgeEffect)(NodeHandle node, int32_t edgeEffect, bool alwaysEnabled);
+    void (*ResetListEdgeEffect)(NodeHandle node);
+    void (*SetListDirection)(NodeHandle node, int32_t axis);
+    void (*ResetListDirection)(NodeHandle node);
+    void (*SetListFriction)(NodeHandle node, double friction);
+    void (*ResetListFriction)(NodeHandle node);
+    void (*SetListNestedScroll)(NodeHandle node, int32_t forward, int32_t backward);
+    void (*ResetListNestedScroll)(NodeHandle node);
+    void (*SetListScrollBar)(NodeHandle node, int32_t barState);
+    void (*ResetListScrollBar)(NodeHandle node);
+    void (*SetAlignListItem)(NodeHandle node, int32_t listItemAlign);
+    void (*ResetAlignListItem)(NodeHandle node);
+    void (*SetScrollSnapAlign)(NodeHandle node, int32_t scrollSnapAlign);
+    void (*ResetScrollSnapAlign)(NodeHandle node);
+    void (*ListSetDivider)(NodeHandle node, double strokeWidth, const uint32_t color, double startMargin,
+        double endMargin, int32_t strokeWidth_size, int32_t startMargin_size, int32_t endMargin_size);
+    void (*ListResetDivider)(NodeHandle node);
+    void (*SetChainAnimationOptions)(NodeHandle node, double minSpace, double maxSpace, 
+        double conductivity, double intensity, int32_t edgeEffect, double stiffness, double damping, 
+        int32_t minSpace_size, int32_t maxSpace_size);
+    void (*ResetChainAnimationOptions)(NodeHandle node);
+};
+
+struct ArkUIGridItemModifierAPI {
+    void (*SetGridItemSelectable)(NodeHandle node, bool selectable);
+    void (*ResetGridItemSelectable)(NodeHandle node);
+    void (*SetGridItemSelected)(NodeHandle node, bool selected);
+    void (*ResetGridItemSelected)(NodeHandle node);
+    void (*SetGridItemRowStart)(NodeHandle node, int32_t rowStart);
+    void (*ResetGridItemRowStart)(NodeHandle node);
+    void (*SetGridItemRowEnd)(NodeHandle node, int32_t rowEnd);
+    void (*ResetGridItemRowEnd)(NodeHandle node);
+    void (*SetGridItemColumnStart)(NodeHandle node, int32_t columnStart);
+    void (*ResetGridItemColumnStart)(NodeHandle node);
+    void (*SetGridItemColumnEnd)(NodeHandle node, int32_t columnEnd);
+    void (*ResetGridItemColumnEnd)(NodeHandle node);
+};
+
+struct ArkUIListItemGroupModifierAPI {
+    void (*ListItemGroupSetDivider)(NodeHandle node, uint32_t color, const double* values, const int* units);
+    void (*ListItemGroupResetDivider)(NodeHandle node);
+};
+
+struct ArkUIQRCodeModifierAPI {
+    void (*SetQRColor)(NodeHandle node, uint32_t color);
+    void (*ResetQRColor)(NodeHandle node);
+    void (*SetQRBackgroundColor)(NodeHandle node, uint32_t color);
+    void (*ResetQRBackgroundColor)(NodeHandle node);
+    void (*SetContentOpacity)(NodeHandle node, double opacity);
+    void (*ResetContentOpacity)(NodeHandle node);
+};
+
 #ifdef FORM_SUPPORTED
 struct ArkUIFormComponentModifierAPI {
     void (*SetFormVisibility)(NodeHandle node, int32_t visible);
@@ -1088,6 +1373,86 @@ struct ArkUIFormComponentModifierAPI {
     void (*ResetFormSize)(NodeHandle node);
 };
 #endif
+
+struct ArkUICommonShapeModifierAPI {
+    void (*SetStrokeDashArray)(NodeHandle node, double* dashArray, int32_t* dimUnits, int32_t size);
+    void (*ResetStrokeDashArray)(NodeHandle node);
+    void (*SetStrokeMiterLimit)(NodeHandle node, const double miterLimit);
+    void (*ResetStrokeMiterLimit)(NodeHandle node);
+    void (*SetFillOpacity)(NodeHandle node, const double fillOpacity);
+    void (*ResetFillOpacity)(NodeHandle node);
+    void (*SetStrokeOpacity)(NodeHandle node, const double strokeOpacity);
+    void (*ResetStrokeOpacity)(NodeHandle node);
+    void (*SetStrokeWidth)(NodeHandle node, double value, int unit);
+    void (*ResetStrokeWidth)(NodeHandle node);
+    void (*SetAntiAlias)(NodeHandle node, const bool antiAlias);
+    void (*ResetAntiAlias)(NodeHandle node);
+    void (*SetStroke)(NodeHandle node, const uint32_t stroke);
+    void (*ResetStroke)(NodeHandle node);
+    void (*SetFill)(NodeHandle node, const uint32_t fill);
+    void (*ResetFill)(NodeHandle node);
+    void (*SetStrokeDashOffset)(NodeHandle node, double value, int unit);
+    void (*ResetStrokeDashOffset)(NodeHandle node);
+    void (*SetStrokeLineCap)(NodeHandle node, const int strokeLineCap);
+    void (*ResetStrokeLineCap)(NodeHandle node);
+    void (*SetStrokeLineJoin)(NodeHandle node, const int lineJoinStyle);
+    void (*ResetStrokeLineJoin)(NodeHandle node);
+};
+
+struct ArkUIShapeModifierAPI {
+    void (*SetShapeViewPort)(NodeHandle node, double* dimValues, int32_t* dimUnits);
+    void (*ResetShapeViewPort)(NodeHandle node);
+    void (*SetShapeMesh)(NodeHandle node, const double* mesh, size_t arrayItemCount, int32_t column, int32_t row);
+    void (*ResetShapeMesh)(NodeHandle node);
+};
+
+struct ArkUIRectModifierAPI {
+    void (*SetRectRadiusWidth)(NodeHandle node, double radiusWidthValue, int32_t radiusWidthUnit);
+    void (*ResetRectRadiusWidth)(NodeHandle node);
+    void (*SetRectRadiusHeight)(NodeHandle node, double radiusHeightValue, int32_t radiusHeightUnit);
+    void (*ResetRectRadiusHeight)(NodeHandle node);
+    void (*SetRectRadiusWithArray)(NodeHandle node, double* radiusValues, int32_t* radiusUnits, bool* radiusValidPairs,
+        int32_t radiusValidPairsSize);
+    void (*SetRectRadiusWithValue)(NodeHandle node, double radiusValue, int32_t radiusUnit);
+    void (*ResetRectRadius)(NodeHandle node);
+};
+
+struct ArkUITextTimerModifierAPI {
+    void (*SetFontColor)(NodeHandle node, uint32_t color);
+    void (*ResetFontColor)(NodeHandle node);
+    void (*SetFontSize)(NodeHandle node, double value, int32_t unit);
+    void (*ResetFontSize)(NodeHandle node);
+    void (*SetFontStyle)(NodeHandle node, uint32_t fontStyle);
+    void (*ResetFontStyle)(NodeHandle node);
+    void (*SetFontWeight)(NodeHandle node, const char* weight);
+    void (*ResetFontWeight)(NodeHandle node);
+    void (*SetFontFamily)(NodeHandle node, const char *fontFamily);
+    void (*ResetFontFamily)(NodeHandle node);
+    void (*SetTextTimerFormat)(NodeHandle node, const char* format);
+    void (*ResetTextTimerFormat)(NodeHandle node);
+};
+
+struct ArkUILoadingProgressModifierAPI {
+    void (*SetColor)(NodeHandle node, uint32_t color);
+    void (*ResetColor)(NodeHandle node);
+    void (*SetEnableLoading)(NodeHandle node, bool value);
+    void (*ResetEnableLoading)(NodeHandle node);
+};
+
+struct ArkUITextClockModifierAPI {
+    void (*SetFormat)(NodeHandle node, const char* format);
+    void (*ResetFormat)(NodeHandle node);
+    void (*SetFontColor)(NodeHandle node, uint32_t color);
+    void (*ResetFontColor)(NodeHandle node);
+    void (*SetFontSize)(NodeHandle node, double value, int unit);
+    void (*ResetFontSize)(NodeHandle node);
+    void (*SetFontStyle)(NodeHandle node, uint32_t fontStyle);
+    void (*ResetFontStyle)(NodeHandle node);
+    void (*SetFontWeight)(NodeHandle node, const char* weight);
+    void (*ResetFontWeight)(NodeHandle node);
+    void (*SetFontFamily)(NodeHandle node, const char *fontFamily);
+    void (*ResetFontFamily)(NodeHandle node);
+};
 
 struct ArkUINodeAPI {
     NodeHandle (*GetFrameNodeById)(int nodeId);
@@ -1112,6 +1477,7 @@ struct ArkUINodeAPI {
     ArkUIDividerModifierAPI (*GetDividerModifier)();
     ArkUIStackModifierAPI (*GetStackModifier)();
     ArkUINavDestinationModifierAPI (*GetNavDestinationModifier)();
+    ArkUIGridModifierAPI (*GetGridModifier)();
     ArkUIGridColModifierAPI (*GetGridColModifier)();
     ArkUIGridRowModifierAPI (*GetGridRowModifier)();
     ArkUIPanelModifierAPI (*GetPanelModifier)();
@@ -1123,8 +1489,12 @@ struct ArkUINodeAPI {
     ArkUIVideoModifierAPI (*GetVideoModifier)();
     ArkUINavigatorModifierAPI (*GetNavigatorModifier)();
     ArkUINavRouterModifierAPI (*GetNavRouterModifier)();
+    ArkUINodeContainerModifierAPI (*GetNodeContainerModifier)();
     ArkUIPatternLockModifierAPI (*GetPatternLockModifier)();
     ArkUIColumnSplitModifierAPI (*GetColumnSplitModifier)();
+    ArkUILineModifierAPI (*GetLineModifier)();
+    ArkUIPathModifierAPI (*GetPathModifier)();
+    ArkUIPolylineModifierAPI (*GetPolylineModifier)();
     ArkUISpanModifierAPI (*GetSpanModifier)();
     ArkUIImageAnimatorModifierAPI (*GetImageAnimatorModifier)();
     ArkUISideBarContainerModifierAPI (*GetSideBarContainerModifier)();
@@ -1133,15 +1503,31 @@ struct ArkUINodeAPI {
     ArkUITabsModifierAPI (*GetTabsModifier)();
     ArkUIStepperItemModifierAPI (*GetStepperItemModifier)();
     ArkUIHyperlinkModifierAPI (*GetHyperlinkModifier)();
+    ArkUIMarqueeModifierAPI (*GetMarqueeModifier)();
     ArkUIMenuItemModifierAPI (*GetMenuItemModifier)();
     ArkUIMenuModifierAPI (*GetMenuModifier)();
     ArkUIDatePickerModifierAPI (*GetDatePickerModifier)();
+    ArkUIWaterFlowModifierAPI (*GetWaterFlowModifier)();
     ArkUIAlphabetIndexerModifierAPI (*GetAlphabetIndexerModifier)();
+    ArkUIDataPanelModifierAPI (*GetDataPanelModifier)();
+    ArkUIGaugeModifierAPI (*GetGaugeModifier)();
+    ArkUIScrollModifierAPI (*GetScrollModifier)();
+    ArkUIGridItemModifierAPI (*GetGridItemModifier)();
+    ArkUICommonShapeModifierAPI(*GetCommonShapeModifier)();
+    ArkUIShapeModifierAPI(*GetShapeModifier)();
+    ArkUIRectModifierAPI (*GetRectModifier)();
+    ArkUISwiperModifierAPI (*GetSwiperModifier)();
+    ArkUIListItemModifierAPI (*GetListItemModifier)();
+    ArkUIListModifierAPI (*GetListModifier)();
+    ArkUIListItemGroupModifierAPI(*GetListItemGroupModifier)();
+    ArkUIQRCodeModifierAPI (*GetQRCodeModifier)();
+    ArkUILoadingProgressModifierAPI (*GetLoadingProgressModifier)();
+    ArkUITextClockModifierAPI (*GetTextClockModifier)();
+    ArkUITextTimerModifierAPI (*GetTextTimerModifier)();
 
 #ifdef FORM_SUPPORTED
     ArkUIFormComponentModifierAPI (*GetFormComponentModifier)();
 #endif
 };
-
 ArkUINodeAPI* GetArkUIInternalNodeAPI(void);
 #endif // FRAMEWORKS_INTERFACE_INNER_API_COMPONENTS_ARKTS_NATIVE_API_H

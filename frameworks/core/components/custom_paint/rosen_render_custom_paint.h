@@ -105,6 +105,7 @@ public:
 
     void SetFillRuleForPath(const CanvasFillRule& rule) override;
     void SetFillRuleForPath2D(const CanvasFillRule& rule) override;
+    static bool IsApplyIndent(const MeasureContext& context, double& indent);
 
     bool IsRepaintBoundary() const override
     {

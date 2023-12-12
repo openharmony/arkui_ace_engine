@@ -40,6 +40,7 @@
 #include "core/components_ng/pattern/text/text_base.h"
 #include "core/components_ng/pattern/text_drag/text_drag_base.h"
 #include "core/components_ng/pattern/text_drag/text_drag_pattern.h"
+#include "core/components_ng/render/adapter/component_snapshot.h"
 #include "core/components_ng/render/adapter/rosen_render_context.h"
 #include "core/components_ng/render/render_context.h"
 #include "core/components_v2/inspector/inspector_constants.h"
@@ -66,6 +67,7 @@ constexpr int32_t PIXELMAP_ANIMATION_DURATION = 300;
 constexpr float SPRING_RESPONSE = 0.416f;
 constexpr float SPRING_DAMPING_FRACTION = 0.73f;
 constexpr Dimension PIXELMAP_BORDER_RADIUS = 16.0_vp;
+constexpr int32_t CREATE_PIXELMAP_TIME = 80;
 #endif // ENABLE_DRAG_FRAMEWORK
 } // namespace
 
@@ -402,11 +404,38 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
             CHECK_NULL_VOID(gestureHub);
             auto frameNode = gestureHub->GetFrameNode();
             CHECK_NULL_VOID(frameNode);
-            auto context = frameNode->GetRenderContext();
-            CHECK_NULL_VOID(context);
-            auto pixelMap = context->GetThumbnailPixelMap();
-            gestureHub->SetPixelMap(pixelMap);
+            auto pipeline = PipelineContext::GetCurrentContext();
+            CHECK_NULL_VOID(pipeline);
+            auto dragPreviewInfo = frameNode->GetDragPreview();
+            if (dragPreviewInfo.pixelMap != nullptr) {
+                gestureHub->SetPixelMap(dragPreviewInfo.pixelMap);
+            } else if (dragPreviewInfo.customNode != nullptr) {
+#if defined(ENABLE_DRAG_FRAMEWORK) && defined(ENABLE_ROSEN_BACKEND) && defined(PIXEL_MAP_SUPPORTED)
+                auto callback = [id = Container::CurrentId(), pipeline, gestureHub]
+                    (std::shared_ptr<Media::PixelMap> pixelMap, int32_t arg, std::function<void()>) {
+                    ContainerScope scope(id);
+                    if (pixelMap != nullptr) {
+                        auto customPixelMap = PixelMap::CreatePixelMap(reinterpret_cast<void*>(&pixelMap));
+                        auto taskScheduler = pipeline->GetTaskExecutor();
+                        CHECK_NULL_VOID(taskScheduler);
+                        taskScheduler->PostTask([gestureHub, customPixelMap]() {
+                            CHECK_NULL_VOID(gestureHub);
+                            gestureHub->SetPixelMap(customPixelMap);
+                            }, TaskExecutor::TaskType::UI);
+                    }
+                };
+
+                auto customNode = AceType::DynamicCast<FrameNode>(dragPreviewInfo.customNode);
+                OHOS::Ace::NG::ComponentSnapshot::Create(customNode, std::move(callback), false, CREATE_PIXELMAP_TIME);
+#endif
+            } else {
+                auto context = frameNode->GetRenderContext();
+                CHECK_NULL_VOID(context);
+                auto pixelMap = context->GetThumbnailPixelMap();
+                gestureHub->SetPixelMap(pixelMap);
+            }
         };
+
         longPressRecognizer_->SetThumbnailCallback(std::move(callback));
     }
     std::vector<RefPtr<NGGestureRecognizer>> recognizers { longPressRecognizer_, panRecognizer_ };

@@ -924,6 +924,13 @@ void ViewAbstract::SetHitTestMode(HitTestMode hitTestMode)
     gestureHub->SetHitTestMode(hitTestMode);
 }
 
+void ViewAbstract::SetOnTouchTestFunc(NG::OnChildTouchTestFunc&& onChildTouchTest)
+{
+    auto gestureHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
+    gestureHub->SetOnTouchTestFunc(std::move(onChildTouchTest));
+}
+
 void ViewAbstract::AddDragFrameNodeToManager()
 {
     auto pipeline = PipelineContext::GetCurrentContext();
@@ -1081,6 +1088,13 @@ void ViewAbstract::SetAllowDrop(const std::set<std::string> &allowDrop)
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     frameNode->SetAllowDrop(allowDrop);
+}
+
+void ViewAbstract::SetDragPreview(const NG::DragDropInfo& info)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    frameNode->SetDragPreview(info);
 }
 
 void ViewAbstract::SetPosition(const OffsetT<Dimension> &value)
@@ -1311,6 +1325,15 @@ void ViewAbstract::BindMenuWithItems(std::vector<OptionParam> &&params, const Re
     auto menuNode =
         MenuView::Create(std::move(params), targetNode->GetId(), targetNode->GetTag(), MenuType::MENU, menuParam);
     RegisterMenuCallback(menuNode, menuParam);
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetTheme<SelectTheme>();
+    CHECK_NULL_VOID(theme);
+    auto expandDisplay = theme->GetExpandDisplay();
+    if (expandDisplay) {
+        SubwindowManager::GetInstance()->ShowMenuNG(menuNode, targetNode->GetId(), offset, menuParam.isAboveApps);
+        return;
+    }
     BindMenu(menuNode, targetNode->GetId(), offset);
 }
 

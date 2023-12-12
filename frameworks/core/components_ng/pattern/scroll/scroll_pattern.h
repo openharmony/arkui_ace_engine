@@ -267,7 +267,7 @@ public:
     {
         return isSelectScroll_;
     }
-    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
+
 protected:
     void DoJump(float position, int32_t source = SCROLL_FROM_JUMP);
 
@@ -291,8 +291,6 @@ private:
     void SetEdgeEffectCallback(const RefPtr<ScrollEdgeEffect>& scrollEffect) override;
     void AddScrollEdgeEffect(RefPtr<ScrollEdgeEffect> scrollEffect);
     void UpdateScrollBarOffset() override;
-    void FireOnScrollStart() override;
-    void FireOnScrollStop();
     void SetAccessibilityAction();
     void ScrollSnapTrigger();
     void CheckScrollable();

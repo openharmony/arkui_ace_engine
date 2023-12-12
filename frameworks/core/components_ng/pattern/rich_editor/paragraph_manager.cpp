@@ -87,7 +87,8 @@ std::vector<RectF> ParagraphManager::GetPlaceholderRects() const
     return res;
 }
 
-OffsetF ParagraphManager::ComputeCursorOffset(int32_t index, float& selectLineHeight, bool downStreamFirst) const
+OffsetF ParagraphManager::ComputeCursorOffset(
+    int32_t index, float& selectLineHeight, bool downStreamFirst, bool needLineHighest) const
 {
     CHECK_NULL_RETURN(!paragraphs_.empty(), {});
     auto it = paragraphs_.begin();
@@ -116,11 +117,11 @@ OffsetF ParagraphManager::ComputeCursorOffset(int32_t index, float& selectLineHe
     CaretMetricsF metrics;
     auto computeSuccess = false;
     if (downStreamFirst) {
-        computeSuccess = paragraph->ComputeOffsetForCaretDownstream(relativeIndex, metrics) ||
-                          paragraph->ComputeOffsetForCaretUpstream(relativeIndex, metrics);
+        computeSuccess = paragraph->ComputeOffsetForCaretDownstream(relativeIndex, metrics, needLineHighest) ||
+                          paragraph->ComputeOffsetForCaretUpstream(relativeIndex, metrics, needLineHighest);
     } else {
-        computeSuccess = paragraph->ComputeOffsetForCaretUpstream(relativeIndex, metrics) ||
-                          paragraph->ComputeOffsetForCaretDownstream(relativeIndex, metrics);
+        computeSuccess = paragraph->ComputeOffsetForCaretUpstream(relativeIndex, metrics, needLineHighest) ||
+                          paragraph->ComputeOffsetForCaretDownstream(relativeIndex, metrics, needLineHighest);
     }
     CHECK_NULL_RETURN(computeSuccess, OffsetF(0.0f, y));
     if (NearZero(paragraph->GetTextWidth()) && paragraph->GetParagraphStyle().leadingMargin) {

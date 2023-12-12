@@ -15,17 +15,16 @@
 
 #include "core/components_ng/pattern/ui_extension/modal_ui_extension_proxy_impl.h"
 
-#include "session/host/include/extension_session.h"
+#include "frameworks/base/utils/utils.h"
 
 namespace OHOS::Ace::NG {
-ModalUIExtensionProxyImpl::ModalUIExtensionProxyImpl(const sptr<Rosen::Session>& session) : session_(session) {}
+ModalUIExtensionProxyImpl::ModalUIExtensionProxyImpl(const RefPtr<SessionWrapper>& sessionWrapper)
+    : sessionWrapper_(sessionWrapper)
+{}
 
 void ModalUIExtensionProxyImpl::SendData(const AAFwk::WantParams& params)
 {
-    auto session = session_.promote();
-    if (session) {
-        sptr<Rosen::ExtensionSession> extensionSession(static_cast<Rosen::ExtensionSession*>(session.GetRefPtr()));
-        extensionSession->TransferComponentData(params);
-    }
+    CHECK_NULL_VOID(sessionWrapper_);
+    sessionWrapper_->SendDataAsync(params);
 }
 } // namespace OHOS::Ace::NG

@@ -366,6 +366,13 @@ void TextFieldModelNG::SetOnPaste(std::function<void(const std::string&)>&& func
     eventHub->SetOnPaste(std::move(func));
 }
 
+void TextFieldModelNG::SetOnPasteWithEvent(std::function<void(const std::string&, NG::TextCommonEvent&)>&& func)
+{
+    auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<TextFieldEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnPasteWithEvent(std::move(func));
+}
+
 void TextFieldModelNG::SetCopyOption(CopyOptions copyOption)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, CopyOptions, copyOption);
@@ -464,6 +471,15 @@ void TextFieldModelNG::SetCounterType(int32_t value)
     auto layoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, SetCounter, value);
+}
+
+void TextFieldModelNG::SetShowCounterBorder(bool value)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    CHECK_NULL_VOID(pattern);
+    ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, ShowHighlightBorder, value);
 }
 
 void TextFieldModelNG::SetBarState(OHOS::Ace::DisplayMode value)

@@ -249,7 +249,7 @@ public:
 
     // If return true, will prevent TouchTest Bubbling to parent and brother nodes.
     HitTestResult TouchTest(const PointF& globalPoint, const PointF& parentLocalPoint, const PointF& parentRevertPoint,
-        const TouchRestrict& touchRestrict, TouchTestResult& result, int32_t touchId) override;
+        const TouchRestrict& touchRestrict, TouchTestResult& result, int32_t touchId, bool isDispatch = false) override;
 
     HitTestResult MouseTest(const PointF& globalPoint, const PointF& parentLocalPoint, MouseTestResult& onMouseResult,
         MouseTestResult& onHoverResult, RefPtr<FrameNode>& hoverNode) override;
@@ -449,6 +449,16 @@ public:
         return allowDrop_;
     }
 
+    void SetDragPreview(const NG::DragDropInfo& info)
+    {
+        dragPreviewInfo_ = info;
+    }
+
+    const DragDropInfo& GetDragPreview() const
+    {
+        return dragPreviewInfo_;
+    }
+
     void SetOverlayNode(const RefPtr<FrameNode>& overlayNode)
     {
         overlayNode_ = overlayNode;
@@ -472,6 +482,12 @@ public:
 
     void SetHitTestMode(HitTestMode mode);
     HitTestMode GetHitTestMode() const override;
+
+    TouchResult GetOnChildTouchTestRet(const std::vector<TouchTestInfo>& touchInfo);
+    OnChildTouchTestFunc GetOnTouchTestFunc();
+    void CollectTouchInfos(
+        const PointF& globalPoint, const PointF& parentRevertPoint, std::vector<TouchTestInfo>& touchInfos);
+    RefPtr<FrameNode> GetDispatchFrameNode(const TouchResult& touchRes);
 
     std::string ProvideRestoreInfo();
 
@@ -714,6 +730,7 @@ private:
     std::unique_ptr<OffsetF> lastParentOffsetToWindow_;
     std::set<std::string> allowDrop_;
     std::optional<RectF> viewPort_;
+    NG::DragDropInfo dragPreviewInfo_;
 
     RefPtr<LayoutAlgorithmWrapper> layoutAlgorithm_;
     RefPtr<GeometryNode> oldGeometryNode_;

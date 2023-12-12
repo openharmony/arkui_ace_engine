@@ -29,6 +29,7 @@ public:
     std::optional<SizeF> MeasureContent(
         const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper) override;
     void Layout(LayoutWrapper* layoutWrapper) override;
+    float GetDefaultHeightByType(LayoutWrapper* layoutWrapper);
 };
 } // namespace OHOS::Ace::NG
 

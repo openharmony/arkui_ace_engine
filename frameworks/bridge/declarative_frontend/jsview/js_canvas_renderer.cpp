@@ -1130,6 +1130,9 @@ void JSCanvasRenderer::JsGetPixelMap(const JSCallbackInfo& info)
     napi_create_int32(env, 0, &temp);
     napi_set_named_property(env, napiValue, "index", temp);
 #endif
+#else
+    TAG_LOGD(
+        AceLogTag::ACE_CANVAS, "[Engine Log] The function 'getPixelMap' is not supported on the current platform.");
 #endif
 }
 
@@ -1972,9 +1975,17 @@ void JSCanvasRenderer::JsSetTransform(const JSCallbackInfo& info)
         if (!info[0]->IsObject()) {
             return;
         }
-        auto* jsMatrix2d = JSRef<JSObject>::Cast(info[0])->Unwrap<JSMatrix2d>();
-        CHECK_NULL_VOID(jsMatrix2d);
-        TransformParam param = jsMatrix2d->GetTransform();
+
+        if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)) {
+            auto* jsMatrix2d = JSRef<JSObject>::Cast(info[0])->Unwrap<JSMatrix2d>();
+            CHECK_NULL_VOID(jsMatrix2d);
+            TransformParam param = jsMatrix2d->GetTransform();
+            CanvasRendererModel::GetInstance()->SetTransform(baseInfo, param, false);
+            return;
+        }
+
+        JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(info[0]);
+        TransformParam param = JSMatrix2d::GetTransformInfo(jsObj);
         CanvasRendererModel::GetInstance()->SetTransform(baseInfo, param, false);
     }
 }

@@ -28,6 +28,12 @@ public:
     void SetTrackBackground(const Color& trackBackgroundColor) override;
     void SetStrokeWidth(const Dimension& strokeWidth) override;
     void SetShadowOption(const DataPanelShadow& shadowOption) override;
+
+    static void SetCloseEffect(FrameNode* frameNode, bool isClose);
+    static void SetTrackBackground(FrameNode* frameNode, const Color& trackBackgroundColor);
+    static void SetStrokeWidth(FrameNode* frameNode, const Dimension& strokeWidth);
+    static void SetShadowOption(FrameNode* frameNode, const DataPanelShadow& shadowOption);
+    static void SetValueColors(FrameNode* frameNode, const std::vector<Gradient>& valueColors);
 };
 } // namespace OHOS::Ace::NG
 

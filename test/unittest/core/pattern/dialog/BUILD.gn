@@ -14,8 +14,6 @@
 import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
 ace_unittest("dialog_test_ng") {
-  flutter_skia = true
-  render = true
   type = "new"
   sources = [ "dialog_test_ng.cpp" ]
 }

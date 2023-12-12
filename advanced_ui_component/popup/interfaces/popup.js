@@ -17,13 +17,7 @@ export const defaultTheme = {
     icon: {
         size: { width: 32, height: 32 },
         margin: { top: 12, bottom: 12, left: 12, right: 12 },
-        fillColor: {
-            id: -1,
-            type: 10001,
-            params: ["sys.color.ohos_fa_icon_secondary"],
-            bundleName: "",
-            moduleName: ""
-        },
+        fillColor: "",
         borderRadius: {
             id: -1,
             type: 10002,
@@ -198,8 +192,12 @@ export class PopupComponent extends ViewPU {
             bundleName: "",
             moduleName: ""
         }, this, "secondButtonBackgroundColor");
+        this.__textHeight = new ObservedPropertySimplePU(0, this, "textHeight");
         this.__titleHeight = new ObservedPropertySimplePU(0, this, "titleHeight");
+        this.__applyHeight = new ObservedPropertySimplePU(0, this, "applyHeight");
         this.__buttonHeight = new ObservedPropertySimplePU(0, this, "buttonHeight");
+        this.__scrollHeight = new ObservedPropertySimplePU(0, this, "scrollHeight");
+        this.__scrollMaxHeight = new ObservedPropertySimplePU(0, this, "scrollMaxHeight");
         this.setInitiallyProvidedValue(e)
     }
 
@@ -214,8 +212,12 @@ export class PopupComponent extends ViewPU {
         void 0 !== t.closeButtonBackgroundColor && (this.closeButtonBackgroundColor = t.closeButtonBackgroundColor);
         void 0 !== t.firstButtonBackgroundColor && (this.firstButtonBackgroundColor = t.firstButtonBackgroundColor);
         void 0 !== t.secondButtonBackgroundColor && (this.secondButtonBackgroundColor = t.secondButtonBackgroundColor);
+        void 0 !== t.textHeight && (this.textHeight = t.textHeight);
         void 0 !== t.titleHeight && (this.titleHeight = t.titleHeight);
-        void 0 !== t.buttonHeight && (this.buttonHeight = t.buttonHeight)
+        void 0 !== t.applyHeight && (this.applyHeight = t.applyHeight);
+        void 0 !== t.buttonHeight && (this.buttonHeight = t.buttonHeight);
+        void 0 !== t.scrollHeight && (this.scrollHeight = t.scrollHeight);
+        void 0 !== t.scrollMaxHeight && (this.scrollMaxHeight = t.scrollMaxHeight)
     }
 
     updateStateVars(t) {
@@ -235,8 +237,12 @@ export class PopupComponent extends ViewPU {
         this.__closeButtonBackgroundColor.purgeDependencyOnElmtId(t);
         this.__firstButtonBackgroundColor.purgeDependencyOnElmtId(t);
         this.__secondButtonBackgroundColor.purgeDependencyOnElmtId(t);
+        this.__textHeight.purgeDependencyOnElmtId(t);
         this.__titleHeight.purgeDependencyOnElmtId(t);
-        this.__buttonHeight.purgeDependencyOnElmtId(t)
+        this.__applyHeight.purgeDependencyOnElmtId(t);
+        this.__buttonHeight.purgeDependencyOnElmtId(t);
+        this.__scrollHeight.purgeDependencyOnElmtId(t);
+        this.__scrollMaxHeight.purgeDependencyOnElmtId(t)
     }
 
     aboutToBeDeleted() {
@@ -248,8 +254,12 @@ export class PopupComponent extends ViewPU {
         this.__closeButtonBackgroundColor.aboutToBeDeleted();
         this.__firstButtonBackgroundColor.aboutToBeDeleted();
         this.__secondButtonBackgroundColor.aboutToBeDeleted();
+        this.__textHeight.aboutToBeDeleted();
         this.__titleHeight.aboutToBeDeleted();
+        this.__applyHeight.aboutToBeDeleted();
         this.__buttonHeight.aboutToBeDeleted();
+        this.__scrollHeight.aboutToBeDeleted();
+        this.__scrollMaxHeight.aboutToBeDeleted();
         SubscriberManager.Get().delete(this.id__());
         this.aboutToBeDeletedInternal()
     }
@@ -318,12 +328,28 @@ export class PopupComponent extends ViewPU {
         this.__secondButtonBackgroundColor.set(t)
     }
 
+    get textHeight() {
+        return this.__textHeight.get()
+    }
+
+    set textHeight(t) {
+        this.__textHeight.set(t)
+    }
+
     get titleHeight() {
         return this.__titleHeight.get()
     }
 
     set titleHeight(t) {
         this.__titleHeight.set(t)
+    }
+
+    get applyHeight() {
+        return this.__applyHeight.get()
+    }
+
+    set applyHeight(t) {
+        this.__applyHeight.set(t)
     }
 
     get buttonHeight() {
@@ -334,15 +360,20 @@ export class PopupComponent extends ViewPU {
         this.__buttonHeight.set(t)
     }
 
-    getScrollMaxHeight() {
-        let t = 480;
-        t -= this.titleHeight;
-        t -= this.buttonHeight;
-        t -= this.theme.windows.padding.top;
-        t -= this.theme.button.textMargin.bottom / 2;
-        t -= this.theme.title.margin.bottom;
-        t -= this.theme.windows.padding.bottom - this.theme.button.textMargin.bottom / 2;
-        return t
+    get scrollHeight() {
+        return this.__scrollHeight.get()
+    }
+
+    set scrollHeight(t) {
+        this.__scrollHeight.set(t)
+    }
+
+    get scrollMaxHeight() {
+        return this.__scrollMaxHeight.get()
+    }
+
+    set scrollMaxHeight(t) {
+        this.__scrollMaxHeight.set(t)
     }
 
     getIconWidth() {
@@ -520,19 +551,37 @@ export class PopupComponent extends ViewPU {
         }
     }
 
+    getScrollMaxHeight() {
+        this.textHeight > this.scrollHeight && (this.scrollMaxHeight = this.applyHeight);
+        let t = this.scrollMaxHeight;
+        t -= this.titleHeight;
+        t -= this.buttonHeight;
+        t -= this.theme.windows.padding.top;
+        t -= this.theme.button.textMargin.bottom / 2;
+        t -= this.theme.title.margin.bottom;
+        t -= this.theme.windows.padding.bottom - this.theme.button.textMargin.bottom / 2;
+        return t
+    }
+
+    getLayoutWeight() {
+        var t, e, o, i, n, s, l, r;
+        let h;
+        h = "" !== this.icon.image && void 0 !== this.icon.image || "" !== this.title.text && void 0 !== this.title.text || this.showClose || void 0 === this.showClose || "" !== (null === (e = null === (t = this.buttons) || void 0 === t ? void 0 : t[0]) || void 0 === e ? void 0 : e.text) && void 0 !== (null === (i = null === (o = this.buttons) || void 0 === o ? void 0 : o[0]) || void 0 === i ? void 0 : i.text) || "" !== (null === (s = null === (n = this.buttons) || void 0 === n ? void 0 : n[1]) || void 0 === s ? void 0 : s.text) && void 0 !== (null === (r = null === (l = this.buttons) || void 0 === l ? void 0 : l[1]) || void 0 === r ? void 0 : r.text) ? 1 : 0;
+        return h
+    }
+
     initialRender() {
         this.observeComponentCreation2(((t, e) => {
             Row.create();
-            Row.padding(this.getWindowsPadding());
-            Row.clip(!0);
-            Row.focusable(!0);
             Row.alignItems(VerticalAlign.Top);
-            Row.backgroundColor(Color.Transparent);
-            Row.constraintSize({ maxHeight: "100%" })
+            Row.padding(this.getWindowsPadding());
+            Row.onAreaChange(((t, e) => {
+                this.applyHeight !== e.height && (this.applyHeight = e.height)
+            }))
         }), Row);
         this.observeComponentCreation2(((t, e) => {
             If.create();
-            "" != this.icon.image ? this.ifElseBranchUpdateFunction(0, (() => {
+            "" !== this.icon.image && void 0 !== this.icon.image ? this.ifElseBranchUpdateFunction(0, (() => {
                 this.observeComponentCreation2(((t, e) => {
                     Image.create(this.getIconImage());
                     Image.width(this.getIconWidth());
@@ -547,10 +596,10 @@ export class PopupComponent extends ViewPU {
         If.pop();
         this.observeComponentCreation2(((t, e) => {
             If.create();
-            "" != this.title.text ? this.ifElseBranchUpdateFunction(0, (() => {
+            "" !== this.title.text && void 0 !== this.title.text ? this.ifElseBranchUpdateFunction(0, (() => {
                 this.observeComponentCreation2(((t, e) => {
                     Column.create();
-                    Column.layoutWeight(1)
+                    Column.layoutWeight(this.getLayoutWeight())
                 }), Column);
                 this.observeComponentCreation2(((t, e) => {
                     Flex.create({ alignItems: ItemAlign.Start });
@@ -575,7 +624,7 @@ export class PopupComponent extends ViewPU {
                 Text.pop();
                 this.observeComponentCreation2(((t, e) => {
                     If.create();
-                    this.showClose ? this.ifElseBranchUpdateFunction(0, (() => {
+                    this.showClose || void 0 === this.showClose ? this.ifElseBranchUpdateFunction(0, (() => {
                         this.observeComponentCreation2(((t, e) => {
                             Button.createWithChild();
                             Button.width(this.getCloseButtonWidth());
@@ -606,12 +655,18 @@ export class PopupComponent extends ViewPU {
                     Scroll.padding(this.getMessagePadding());
                     Scroll.scrollBar(BarState.Auto);
                     Scroll.scrollable(ScrollDirection.Vertical);
-                    Scroll.constraintSize({ maxHeight: this.getScrollMaxHeight() })
+                    Scroll.constraintSize({ maxHeight: this.getScrollMaxHeight() });
+                    Scroll.onAreaChange(((t, e) => {
+                        this.scrollHeight !== e.height && (this.scrollHeight = e.height)
+                    }))
                 }), Scroll);
                 this.observeComponentCreation2(((t, e) => {
                     Text.create(this.getMessageText());
                     Text.fontSize(this.getMessageFontSize());
-                    Text.fontColor(this.getMessageFontColor())
+                    Text.fontColor(this.getMessageFontColor());
+                    Text.onAreaChange(((t, e) => {
+                        this.textHeight !== e.height && (this.textHeight = e.height)
+                    }))
                 }), Text);
                 Text.pop();
                 Scroll.pop();
@@ -624,9 +679,9 @@ export class PopupComponent extends ViewPU {
                     }))
                 }), Flex);
                 this.observeComponentCreation2(((t, e) => {
-                    var o, i;
+                    var o, i, n, s;
                     If.create();
-                    "" != (null === (i = null === (o = this.buttons) || void 0 === o ? void 0 : o[0]) || void 0 === i ? void 0 : i.text) ? this.ifElseBranchUpdateFunction(0, (() => {
+                    "" !== (null === (i = null === (o = this.buttons) || void 0 === o ? void 0 : o[0]) || void 0 === i ? void 0 : i.text) && void 0 !== (null === (s = null === (n = this.buttons) || void 0 === n ? void 0 : n[0]) || void 0 === s ? void 0 : s.text) ? this.ifElseBranchUpdateFunction(0, (() => {
                         this.observeComponentCreation2(((t, e) => {
                             Button.createWithChild();
                             Button.margin(this.getButtonMargin());
@@ -655,9 +710,9 @@ export class PopupComponent extends ViewPU {
                 }), If);
                 If.pop();
                 this.observeComponentCreation2(((t, e) => {
-                    var o, i;
+                    var o, i, n, s;
                     If.create();
-                    "" != (null === (i = null === (o = this.buttons) || void 0 === o ? void 0 : o[1]) || void 0 === i ? void 0 : i.text) ? this.ifElseBranchUpdateFunction(0, (() => {
+                    "" !== (null === (i = null === (o = this.buttons) || void 0 === o ? void 0 : o[1]) || void 0 === i ? void 0 : i.text) && void 0 !== (null === (s = null === (n = this.buttons) || void 0 === n ? void 0 : n[1]) || void 0 === s ? void 0 : s.text) ? this.ifElseBranchUpdateFunction(0, (() => {
                         this.observeComponentCreation2(((t, e) => {
                             Button.createWithChild();
                             Button.margin(this.getButtonMargin());
@@ -690,7 +745,7 @@ export class PopupComponent extends ViewPU {
             })) : this.ifElseBranchUpdateFunction(1, (() => {
                 this.observeComponentCreation2(((t, e) => {
                     Column.create();
-                    Column.layoutWeight(1)
+                    Column.layoutWeight(this.getLayoutWeight())
                 }), Column);
                 this.observeComponentCreation2(((t, e) => {
                     Row.create();
@@ -699,23 +754,29 @@ export class PopupComponent extends ViewPU {
                 }), Row);
                 this.observeComponentCreation2(((t, e) => {
                     Scroll.create();
-                    Scroll.layoutWeight(1);
+                    Scroll.layoutWeight(this.getLayoutWeight());
                     Scroll.align(Alignment.TopStart);
                     Scroll.padding(this.getMessagePadding());
                     Scroll.scrollBar(BarState.Auto);
                     Scroll.scrollable(ScrollDirection.Vertical);
-                    Scroll.constraintSize({ maxHeight: this.getScrollMaxHeight() })
+                    Scroll.constraintSize({ maxHeight: this.getScrollMaxHeight() });
+                    Scroll.onAreaChange(((t, e) => {
+                        this.scrollHeight !== e.height && (this.scrollHeight = e.height)
+                    }))
                 }), Scroll);
                 this.observeComponentCreation2(((t, e) => {
                     Text.create(this.getMessageText());
                     Text.fontSize(this.getMessageFontSize());
-                    Text.fontColor(this.getMessageFontColor())
+                    Text.fontColor(this.getMessageFontColor());
+                    Text.onAreaChange(((t, e) => {
+                        this.textHeight !== e.height && (this.textHeight = e.height)
+                    }))
                 }), Text);
                 Text.pop();
                 Scroll.pop();
                 this.observeComponentCreation2(((t, e) => {
                     If.create();
-                    this.showClose ? this.ifElseBranchUpdateFunction(0, (() => {
+                    this.showClose || void 0 === this.showClose ? this.ifElseBranchUpdateFunction(0, (() => {
                         this.observeComponentCreation2(((t, e) => {
                             Button.createWithChild();
                             Button.width(this.getCloseButtonWidth());
@@ -748,9 +809,9 @@ export class PopupComponent extends ViewPU {
                     }))
                 }), Flex);
                 this.observeComponentCreation2(((t, e) => {
-                    var o, i;
+                    var o, i, n, s;
                     If.create();
-                    "" != (null === (i = null === (o = this.buttons) || void 0 === o ? void 0 : o[0]) || void 0 === i ? void 0 : i.text) ? this.ifElseBranchUpdateFunction(0, (() => {
+                    "" !== (null === (i = null === (o = this.buttons) || void 0 === o ? void 0 : o[0]) || void 0 === i ? void 0 : i.text) && void 0 !== (null === (s = null === (n = this.buttons) || void 0 === n ? void 0 : n[0]) || void 0 === s ? void 0 : s.text) ? this.ifElseBranchUpdateFunction(0, (() => {
                         this.observeComponentCreation2(((t, e) => {
                             Button.createWithChild();
                             Button.margin(this.getButtonMargin());
@@ -779,9 +840,9 @@ export class PopupComponent extends ViewPU {
                 }), If);
                 If.pop();
                 this.observeComponentCreation2(((t, e) => {
-                    var o, i;
+                    var o, i, n, s;
                     If.create();
-                    "" != (null === (i = null === (o = this.buttons) || void 0 === o ? void 0 : o[1]) || void 0 === i ? void 0 : i.text) ? this.ifElseBranchUpdateFunction(0, (() => {
+                    "" !== (null === (i = null === (o = this.buttons) || void 0 === o ? void 0 : o[1]) || void 0 === i ? void 0 : i.text) && void 0 !== (null === (s = null === (n = this.buttons) || void 0 === n ? void 0 : n[1]) || void 0 === s ? void 0 : s.text) ? this.ifElseBranchUpdateFunction(0, (() => {
                         this.observeComponentCreation2(((t, e) => {
                             Button.createWithChild();
                             Button.margin(this.getButtonMargin());

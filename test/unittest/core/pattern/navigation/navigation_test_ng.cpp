@@ -19,6 +19,7 @@
 #include "mock_navigation_stack.h"
 
 #include "base/memory/ace_type.h"
+#include "core/components_ng/animation/geometry_transition.h"
 
 #define protected public
 #define private public
@@ -58,6 +59,7 @@
 #include "core/components_ng/pattern/navrouter/navdestination_layout_algorithm.h"
 #include "core/components_ng/pattern/navrouter/navdestination_model.h"
 #include "core/components_ng/pattern/navrouter/navdestination_model_ng.h"
+#include "core/components_ng/pattern/stage/page_pattern.h"
 #include "core/components_ng/pattern/navrouter/navdestination_pattern.h"
 #include "core/components_ng/pattern/navrouter/navrouter_event_hub.h"
 #include "core/components_ng/pattern/navrouter/navrouter_group_node.h"
@@ -1597,6 +1599,11 @@ HWTEST_F(NavigationTestNg, NavigationModelNG006, TestSize.Level1)
 
     preTopNavPath = std::pair<std::string, RefPtr<UINode>>();
     newTopNavPath = std::nullopt;
+    auto context = PipelineContext::GetCurrentContext();
+    auto stageManager = context->GetStageManager();
+    auto pageNode =
+        FrameNode::CreateFrameNode("1", 1, AceType::MakeRefPtr<PagePattern>(AceType::MakeRefPtr<PageInfo>()));
+    stageManager->stageNode_->children_.emplace_back(pageNode);
     navigationPattern->CheckTopNavPathChange(preTopNavPath, newTopNavPath, false);
     ASSERT_EQ(navigationPattern->navigationMode_, NavigationMode::AUTO);
 

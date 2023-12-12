@@ -513,10 +513,13 @@ void JSText::JsOnDragStart(const JSCallbackInfo& info)
 {
     CHECK_NULL_VOID(info[0]->IsFunction());
     RefPtr<JsDragFunction> jsOnDragStartFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(info[0]));
-    auto onDragStart = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragStartFunc)](
+    WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto onDragStart = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragStartFunc),
+                           targetNode = frameNode](
                            const RefPtr<DragEvent>& info, const std::string& extraParams) -> NG::DragDropBaseInfo {
         NG::DragDropBaseInfo itemInfo;
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, itemInfo);
+        PipelineContext::SetCallBackNode(targetNode);
         auto ret = func->Execute(info, extraParams);
         if (!ret->IsObject()) {
             return itemInfo;
@@ -633,21 +636,20 @@ void JSText::JsMenuOptionsExtension(const JSCallbackInfo& info)
 void JSText::JsEnableDataDetector(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGI("The argv is wrong, it is supposed to have at least 1 argument");
         return;
     }
-    if (!info[0]->IsBoolean()) {
+    auto tmpInfo = info[0];
+    if (!tmpInfo->IsBoolean()) {
         TextModel::GetInstance()->SetTextDetectEnable(false);
         return;
     }
-    auto enable = info[0]->ToBoolean();
+    auto enable = tmpInfo->ToBoolean();
     TextModel::GetInstance()->SetTextDetectEnable(enable);
 }
 
 void JSText::JsDataDetectorConfig(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGI("The argv is wrong, it is supposed to have at least 1 argument");
         return;
     }
     if (!info[0]->IsObject()) {

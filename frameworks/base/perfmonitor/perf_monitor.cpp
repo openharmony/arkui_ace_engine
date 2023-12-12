@@ -104,6 +104,7 @@ void ConvertToRsData(OHOS::Rosen::DataBaseRs &dataRs, DataBase& data)
     dataRs.pageUrl = data.baseInfo.pageUrl;
     dataRs.sourceType = GetSourceTypeName(data.sourceType);
     dataRs.note = data.baseInfo.note;
+    dataRs.isDisplayAnimator = data.isDisplayAnimator;
 }
 
 void ReportPerfEventToRS(DataBase& data)

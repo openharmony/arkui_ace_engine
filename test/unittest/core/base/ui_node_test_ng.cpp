@@ -68,7 +68,7 @@ public:
     explicit TestNode(int32_t nodeId) : UINode("TestNode", nodeId) {}
 
     HitTestResult TouchTest(const PointF& globalPoint, const PointF& parentLocalPoint, const PointF& parentRevertPoint,
-        const TouchRestrict& touchRestrict, TouchTestResult& result, int32_t touchId) override
+        const TouchRestrict& touchRestrict, TouchTestResult& result, int32_t touchId, bool isDispatch = false) override
     {
         return hitTestResult_;
     }
@@ -1425,5 +1425,134 @@ HWTEST_F(UINodeTestNg, GetPerformanceCheckData003, TestSize.Level1)
     child->tag_ = V2::JS_FOR_EACH_ETS_TAG;
     parent->UINode::GetPerformanceCheckData(nodeMap);
     EXPECT_FALSE(parent->isBuildByJS_);
+}
+
+/**
+ * @tc.name: UpdateConfigurationUpdate001
+ * @tc.desc: Test ui node method UpdateConfigurationUpdate
+ * @tc.type: FUNC
+ */
+HWTEST_F(UINodeTestNg, UpdateConfigurationUpdate001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frame node
+     */
+    auto parentId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto parent = FrameNode::CreateFrameNode("parent", parentId, AceType::MakeRefPtr<Pattern>(), true);
+    parent->tag_ = V2::COMMON_VIEW_ETS_TAG;
+    parent->nodeInfo_ = std::make_unique<PerformanceCheckNode>();
+
+    /**
+     * @tc.steps: step2.  construct parameter configurationChange and call UpdateConfigurationUpdate
+     * @tc.expected: cover branch needCallChildrenUpdate_ is true
+     */
+    OHOS::Ace::NG::UINode::OnConfigurationChange configurationChange;
+    parent->UINode::UpdateConfigurationUpdate(configurationChange);
+    EXPECT_TRUE(parent->needCallChildrenUpdate_);
+
+    /**
+     * @tc.steps: step3. create child frame node and call UpdateConfigurationUpdate
+     * @tc.expected: cover branch children is not empty
+     */
+    auto childId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto childTwoId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto child = FrameNode::CreateFrameNode("child", childId, AceType::MakeRefPtr<Pattern>(), true);
+    auto childTwo = FrameNode::CreateFrameNode("childTwo", childTwoId, AceType::MakeRefPtr<Pattern>(), true);
+    child->tag_ = V2::COMMON_VIEW_ETS_TAG;
+    child->nodeInfo_ = std::make_unique<PerformanceCheckNode>();
+    childTwo->tag_ = V2::COMMON_VIEW_ETS_TAG;
+    childTwo->nodeInfo_ = std::make_unique<PerformanceCheckNode>();
+    parent->AddChild(child);
+    parent->AddChild(childTwo);
+    parent->UINode::UpdateConfigurationUpdate(configurationChange);
+    EXPECT_TRUE(parent->needCallChildrenUpdate_);
+
+    /**
+     * @tc.steps: step4. set needCallChildrenUpdate_ and call UpdateConfigurationUpdate
+     * @tc.expected: cover branch needCallChildrenUpdate_ is false
+     */
+    parent->SetNeedCallChildrenUpdate(false);
+    parent->UINode::UpdateConfigurationUpdate(configurationChange);
+    EXPECT_FALSE(parent->needCallChildrenUpdate_);
+}
+
+/**
+ * @tc.name: DumpTreeById001
+ * @tc.desc: Test ui node method DumpTreeById
+ * @tc.type: FUNC
+ */
+HWTEST_F(UINodeTestNg, DumpTreeById001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frame node
+     */
+    auto parentId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto childId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto parent = FrameNode::CreateFrameNode("parent", parentId, AceType::MakeRefPtr<Pattern>(), true);
+    auto child = FrameNode::CreateFrameNode("child", childId, AceType::MakeRefPtr<Pattern>(), true);
+
+    parent->tag_ = V2::JS_FOR_EACH_ETS_TAG;
+    parent->nodeInfo_ = std::make_unique<PerformanceCheckNode>();
+    child->tag_ = V2::COMMON_VIEW_ETS_TAG;
+    child->nodeInfo_ = std::make_unique<PerformanceCheckNode>();
+    parent->AddChild(child);
+
+    /**
+     * @tc.steps: step2. call DumpTreeById
+     * @tc.expected: cover branch GetDumpFile is nullptr and result is false
+     */
+    bool result = parent->UINode::DumpTreeById(0, "");
+    EXPECT_FALSE(result);
+
+    /**
+     * @tc.steps: step3. set DumpFile and call DumpTreeById
+     * @tc.expected: cover branch GetDumpFile is not nullptr and result is true
+     */
+    std::unique_ptr<std::ostream> ostream = std::make_unique<std::ostringstream>();
+    ASSERT_NE(ostream, nullptr);
+    DumpLog::GetInstance().SetDumpFile(std::move(ostream));
+
+    result = parent->UINode::DumpTreeById(0, "");
+    EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.name: DumpTreeById002
+ * @tc.desc: Test ui node method DumpTreeById
+ * @tc.type: FUNC
+ */
+HWTEST_F(UINodeTestNg, DumpTreeById002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frame node
+     */
+    auto parentId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto childId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto parent = FrameNode::CreateFrameNode("parent", parentId, AceType::MakeRefPtr<Pattern>(), true);
+    auto child = FrameNode::CreateFrameNode("child", childId, AceType::MakeRefPtr<Pattern>(), true);
+
+    parent->tag_ = V2::JS_FOR_EACH_ETS_TAG;
+    parent->nodeInfo_ = std::make_unique<PerformanceCheckNode>();
+    child->tag_ = V2::COMMON_VIEW_ETS_TAG;
+    child->nodeInfo_ = std::make_unique<PerformanceCheckNode>();
+    parent->AddChild(child);
+
+    std::unique_ptr<std::ostream> ostream = std::make_unique<std::ostringstream>();
+    ASSERT_NE(ostream, nullptr);
+    DumpLog::GetInstance().SetDumpFile(std::move(ostream));
+
+    /**
+     * @tc.steps: step2. construt parameter and call DumpTreeById
+     * @tc.expected: result is false
+     */
+    bool result = parent->UINode::DumpTreeById(0, "DumpTreeById002");
+    EXPECT_FALSE(result);
+
+    /**
+     * @tc.steps: step3. change parameter and call DumpTreeById
+     * @tc.expected: result is false
+     */
+    result = parent->UINode::DumpTreeById(1, "");
+    EXPECT_TRUE(result);
 }
 } // namespace OHOS::Ace::NG

@@ -69,7 +69,7 @@ export const defaultTheme: PopupTheme = {
   icon: {
     size: { width: 32, height: 32 },
     margin: { top: 12, bottom: 12, left: 12, right: 12 },
-    fillColor: $r('sys.color.ohos_fa_icon_secondary'),
+    fillColor: '',
     borderRadius: $r('sys.float.ohos_id_corner_radius_default_s')
 
   },
@@ -155,28 +155,21 @@ export function Popup(options: PopupOptions) {
 @Component
 export struct PopupComponent {
   private theme: PopupTheme = defaultTheme;
-  @Prop icon: PopupIconOptions = { image: "" };
+  @Prop icon: PopupIconOptions = { image: '' };
   @Prop title: PopupTextOptions = { text: '' };
   @Prop message: PopupTextOptions = { text: '' };
   @Prop showClose: boolean | Resource = true;
-  @Prop buttons: [PopupButtonOptions?, PopupButtonOptions?] = [{ text: '' },{ text: '' }];
+  @Prop buttons: [PopupButtonOptions?, PopupButtonOptions?] = [{ text: '' }, { text: '' }];
   private onClose: () => void = noop;
   @State closeButtonBackgroundColor: ResourceColor = $r('sys.color.ohos_id_color_background_transparent');
   @State firstButtonBackgroundColor: ResourceColor = $r('sys.color.ohos_id_color_background_transparent');
   @State secondButtonBackgroundColor: ResourceColor = $r('sys.color.ohos_id_color_background_transparent');
+  @State textHeight: number = 0;
   @State titleHeight: number = 0;
+  @State applyHeight: number = 0;
   @State buttonHeight: number = 0;
-
-  getScrollMaxHeight(): number {
-    let scrollMaxHeight: number = 480
-    scrollMaxHeight -= this.titleHeight
-    scrollMaxHeight -= this.buttonHeight
-    scrollMaxHeight -= this.theme.windows.padding.top as number
-    scrollMaxHeight -= (this.theme.button.textMargin.bottom as number / 2)
-    scrollMaxHeight -= this.theme.title.margin.bottom as number
-    scrollMaxHeight -= (this.theme.windows.padding.bottom as number - (this.theme.button.textMargin.bottom as number / 2))
-    return scrollMaxHeight
-  }
+  @State scrollHeight: number = 0;
+  @State scrollMaxHeight: number = 0;
 
   private getIconWidth(): Dimension {
     return this.icon?.width ?? this.theme.icon.size.width as number
@@ -335,9 +328,37 @@ export struct PopupComponent {
     }
   }
 
+  getScrollMaxHeight(): number {
+    if(this.textHeight > this.scrollHeight){
+      this.scrollMaxHeight = this.applyHeight
+    }
+    let scrollMaxHeight: number = this.scrollMaxHeight
+    scrollMaxHeight -= this.titleHeight
+    scrollMaxHeight -= this.buttonHeight
+    scrollMaxHeight -= this.theme.windows.padding.top as number
+    scrollMaxHeight -= (this.theme.button.textMargin.bottom as number / 2)
+    scrollMaxHeight -= this.theme.title.margin.bottom as number
+    scrollMaxHeight -= (this.theme.windows.padding.bottom as number - (this.theme.button.textMargin.bottom as number / 2))
+    return scrollMaxHeight
+  }
+
+  private getLayoutWeight(): number {
+    let layoutWeight: number
+    if ((this.icon.image !== '' && this.icon.image !== void (0)) ||
+      (this.title.text !== '' && this.title.text !== void (0)) ||
+      (this.showClose || this.showClose === void (0)) ||
+      (this.buttons?.[0]?.text !== '' && this.buttons?.[0]?.text !== void (0)) ||
+      (this.buttons?.[1]?.text !== '' && this.buttons?.[1]?.text !== void (0))) {
+      layoutWeight = 1
+    } else {
+      layoutWeight = 0
+    }
+    return layoutWeight
+  }
+
   build() {
     Row() {
-      if (this.icon.image !== "") {
+      if (this.icon.image !== '' && this.icon.image !== void (0)) {
         Image(this.getIconImage())
           .width(this.getIconWidth())
           .height(this.getIconHeight())
@@ -345,7 +366,7 @@ export struct PopupComponent {
           .fillColor(this.getIconFillColor())
           .borderRadius(this.getIconBorderRadius())
       }
-      if (this.title.text !== '') {
+      if (this.title.text !== '' && this.title.text !== void (0)) {
         Column() {
           Flex({ alignItems: ItemAlign.Start }) {
             Text(this.getTitleText())
@@ -358,7 +379,7 @@ export struct PopupComponent {
               .fontWeight(this.getTitleFontWeight())
               .fontSize(this.getTitleFontSize())
               .fontColor(this.getTitleFontColor())
-            if (this.showClose) {
+            if (this.showClose || this.showClose === void (0)) {
               Button() {
                 Image(this.getCloseButtonImage())
                   .focusable(true)
@@ -392,6 +413,11 @@ export struct PopupComponent {
             Text(this.getMessageText())
               .fontSize(this.getMessageFontSize())
               .fontColor(this.getMessageFontColor())
+              .onAreaChange((_, rect) => {
+                if(this.textHeight !== rect.height as number){
+                  this.textHeight = rect.height as number
+                }
+              })
           }
           .width("100%")
           .align(Alignment.TopStart)
@@ -399,9 +425,14 @@ export struct PopupComponent {
           .scrollBar(BarState.Auto)
           .scrollable(ScrollDirection.Vertical)
           .constraintSize({ maxHeight: this.getScrollMaxHeight() })
+          .onAreaChange((_, rect) => {
+            if(this.scrollHeight !== rect.height as number){
+              this.scrollHeight = rect.height as number
+            }
+          })
 
           Flex({ wrap: FlexWrap.Wrap }) {
-            if (this.buttons?.[0]?.text !== '') {
+            if (this.buttons?.[0]?.text !== '' && this.buttons?.[0]?.text !== void (0)) {
               Button() {
                 Text(this.getFirstButtonText())
                   .maxLines(2)
@@ -427,7 +458,7 @@ export struct PopupComponent {
                 }
               })
             }
-            if (this.buttons?.[1]?.text !== '') {
+            if (this.buttons?.[1]?.text !== '' && this.buttons?.[1]?.text !== void (0)) {
               Button() {
                 Text(this.getSecondButtonText())
                   .maxLines(2)
@@ -460,7 +491,7 @@ export struct PopupComponent {
             this.buttonHeight = rect.height as number
           })
         }
-        .layoutWeight(1)
+        .layoutWeight(this.getLayoutWeight())
       }
       else {
         Column() {
@@ -469,15 +500,25 @@ export struct PopupComponent {
               Text(this.getMessageText())
                 .fontSize(this.getMessageFontSize())
                 .fontColor(this.getMessageFontColor())
+                .onAreaChange((_, rect) => {
+                  if(this.textHeight !== rect.height as number){
+                    this.textHeight = rect.height as number
+                  }
+                })
             }
-            .layoutWeight(1)
+            .layoutWeight(this.getLayoutWeight())
             .align(Alignment.TopStart)
             .padding(this.getMessagePadding())
             .scrollBar(BarState.Auto)
             .scrollable(ScrollDirection.Vertical)
             .constraintSize({ maxHeight: this.getScrollMaxHeight() })
+            .onAreaChange((_, rect) => {
+              if(this.scrollHeight !== rect.height as number){
+                this.scrollHeight = rect.height as number
+              }
+            })
 
-            if (this.showClose) {
+            if (this.showClose || this.showClose === void (0)) {
               Button() {
                 Image(this.getCloseButtonImage())
                   .focusable(true)
@@ -505,7 +546,7 @@ export struct PopupComponent {
           .margin(this.getTitleMargin())
 
           Flex({ wrap: FlexWrap.Wrap }) {
-            if (this.buttons?.[0]?.text !== '') {
+            if (this.buttons?.[0]?.text !== '' && this.buttons?.[0]?.text !== void (0)) {
               Button() {
                 Text(this.getFirstButtonText())
                   .maxLines(2)
@@ -531,7 +572,7 @@ export struct PopupComponent {
                 }
               })
             }
-            if (this.buttons?.[1]?.text !== '') {
+            if (this.buttons?.[1]?.text !== '' && this.buttons?.[1]?.text !== void (0)) {
               Button() {
                 Text(this.getSecondButtonText())
                   .maxLines(2)
@@ -564,14 +605,15 @@ export struct PopupComponent {
             this.buttonHeight = rect.height as number
           })
         }
-        .layoutWeight(1)
+        .layoutWeight(this.getLayoutWeight())
       }
     }
-    .padding(this.getWindowsPadding())
-    .clip(true)
-    .focusable(true)
     .alignItems(VerticalAlign.Top)
-    .backgroundColor(Color.Transparent)
-    .constraintSize({ maxHeight: "100%" })
+    .padding(this.getWindowsPadding())
+    .onAreaChange((_, rect) => {
+      if(this.applyHeight !== rect.height as number){
+        this.applyHeight = rect.height as number
+      }
+    })
   }
 }

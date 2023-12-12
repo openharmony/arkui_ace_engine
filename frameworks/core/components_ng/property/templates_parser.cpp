@@ -52,10 +52,11 @@ enum class RepeatType {
     AUTO_FILL,
 };
 
-using Value = struct {
+struct Repeat {
     std::string str;
     bool isRepeat = false;
 };
+using Value = Repeat;
 
 double ConvertVirtualSize(const std::string& val, const DimensionUnit& unit, double size)
 {

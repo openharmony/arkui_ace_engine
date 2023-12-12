@@ -26,8 +26,6 @@ std::optional<SizeF> LoadingProgressLayoutAlgorithm::MeasureContent(
                                                                : contentConstraint.percentReference.Height();
     float width_ = (contentConstraint.selfIdealSize.Width()) ? contentConstraint.selfIdealSize.Width().value()
                                                              : contentConstraint.percentReference.Width();
-    height_ = std::min(height_, contentConstraint.percentReference.Height());
-    width_ = std::min(width_, contentConstraint.percentReference.Width());
     auto diameter = std::min(width_, height_);
     return SizeF(diameter, diameter);
 }

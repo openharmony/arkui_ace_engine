@@ -26,7 +26,7 @@
 #include "mock_rosen.h"
 #include "test/mock/core/common/mock_container.h"
 
-#include "core/components/plugin/file_asset_provider.h"
+#include "adapter/ohos/entrance/file_asset_provider_impl.h"
 #include "core/pipeline/base/render_node.h"
 
 using namespace testing;
@@ -329,7 +329,7 @@ HWTEST_F(RosenTest, CastToRosenTest007, TestSize.Level1)
      * @tc.expected: step2. Return expected results.
      */
     RSAssetManager object;
-    auto assetProvider = AceType::MakeRefPtr<Plugin::FileAssetProvider>();
+    auto assetProvider = AceType::MakeRefPtr<Ace::FileAssetProviderImpl>();
     std::string hapPath = "/system/app/com.ohos.photos/Photos.hap";
     std::vector<std::string> assetBasePaths;
     assetBasePaths.push_back("resources/base/profile/");
@@ -408,7 +408,7 @@ HWTEST_F(RosenTest, CastToRosenTest0010, TestSize.Level1)
     RSAssetManager object;
     std::string hapPath = "test";
     MediaFileInfo fileInfo = { .fileName = hapPath, .offset = 1, .length = 1, .lastModTime = 1, .lastModDate = 1 };
-    auto assetProvider = AceType::MakeRefPtr<Plugin::FileAssetProvider>();
+    auto assetProvider = AceType::MakeRefPtr<Ace::FileAssetProviderImpl>();
     std::vector<std::string> assetBasePaths;
     assetBasePaths.push_back("resources/base/profile/");
     assetProvider->Initialize(hapPath, assetBasePaths);

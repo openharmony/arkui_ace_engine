@@ -353,6 +353,14 @@ public:
     {
         return rootLayerHeight_;
     }
+    void RichTextInit()
+    {
+        richTextInit_ = true;
+    }
+    bool GetRichTextInit() const
+    {
+        return richTextInit_;
+    }
 
 private:
     void RegistVirtualKeyBoardListener();
@@ -530,6 +538,7 @@ private:
     WebLayoutMode layoutMode_ = WebLayoutMode::NONE;
     int32_t rootLayerWidth_ = 0;
     int32_t rootLayerHeight_ = 0;
+    bool richTextInit_ = false;
     ACE_DISALLOW_COPY_AND_MOVE(WebPattern);
 };
 } // namespace OHOS::Ace::NG

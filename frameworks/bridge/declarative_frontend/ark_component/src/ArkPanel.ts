@@ -25,11 +25,7 @@ class ArkPanelComponent extends ArkComponent implements PanelAttribute {
     return this;
   }
   customHeight(value: any): this {
-    if (typeof value !== 'number' && typeof value !== 'string') {
-      modifier(this._modifiers, PanelCustomHeightModifier, undefined);
-    } else {
-      modifier(this._modifiers, PanelCustomHeightModifier, value);
-    }
+    modifierWithKey(this._modifiersWithKeys, PanelCustomHeightModifier.identity, PanelCustomHeightModifier, value);
     return this;
   }
   fullHeight(value: string | number): this {
@@ -65,12 +61,7 @@ class ArkPanelComponent extends ArkComponent implements PanelAttribute {
     return this;
   }
   backgroundMask(color: ResourceColor): this {
-    let arkColor = new ArkColor();
-    if (arkColor.parseColorValue(color)) {
-      modifier(this._modifiers, PanelBackgroundMaskModifier, arkColor.color);
-    } else {
-      modifier(this._modifiers, PanelBackgroundMaskModifier, undefined);
-    }
+    modifierWithKey(this._modifiersWithKeys, PanelBackgroundMaskModifier.identity, PanelBackgroundMaskModifier, color);
     return this;
   }
   showCloseIcon(value: boolean): this {
@@ -89,13 +80,21 @@ class ArkPanelComponent extends ArkComponent implements PanelAttribute {
   }
 }
 
-class PanelBackgroundMaskModifier extends Modifier<number | undefined> {
-  static identity: Symbol = Symbol('panelBackgroundMask');
+class PanelBackgroundMaskModifier extends ModifierWithKey<ResourceColor> {
+  static identity: Symbol = Symbol("panelBackgroundMask");
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().panel.resetBackgroundMask(node);
+      GetUINativeModule().panel.resetPanelBackgroundMask(node);
     } else {
-      GetUINativeModule().panel.setBackgroundMask(node, this.value);
+      GetUINativeModule().panel.setPanelBackgroundMask(node, this.value);
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    if (isResource(this.stageValue) && isResource(this.value)) {
+      return !isResourceEqual(this.stageValue, this.value);
+    } else {
+      return true;
     }
   }
 }
@@ -104,9 +103,9 @@ class PanelModeModifier extends Modifier<PanelMode> {
   static identity: Symbol = Symbol('panelMode');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().panel.ResetPanelMode(node);
+      GetUINativeModule().panel.resetPanelMode(node);
     } else {
-      GetUINativeModule().panel.SetPanelMode(node, this.value);
+      GetUINativeModule().panel.setPanelMode(node, this.value);
     }
   }
 }
@@ -115,15 +114,15 @@ class PanelTypeModifier extends Modifier<PanelType> {
   static identity: Symbol = Symbol('panelType');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().panel.ResetPanelType(node);
+      GetUINativeModule().panel.resetPanelType(node);
     } else {
-      GetUINativeModule().panel.SetPanelType(node, this.value);
+      GetUINativeModule().panel.setPanelType(node, this.value);
     }
   }
 }
 
-class PanelCustomHeightModifier extends Modifier<string> {
-  static identity: Symbol = Symbol('panelCustomHeight');
+class PanelCustomHeightModifier extends ModifierWithKey<Dimension | PanelHeight> {
+  static identity: Symbol = Symbol("panelCustomHeight");
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
       GetUINativeModule().panel.resetPanelCustomHeight(node);
@@ -131,9 +130,17 @@ class PanelCustomHeightModifier extends Modifier<string> {
       GetUINativeModule().panel.setPanelCustomHeight(node, this.value);
     }
   }
+
+  checkObjectDiff(): boolean {
+    if (isResource(this.stageValue) && isResource(this.value)) {
+      return !isResourceEqual(this.stageValue, this.value);
+    } else {
+      return true;
+    }
+  }
 }
 
-class PanelFullHeightModifier extends Modifier<string> {
+class PanelFullHeightModifier extends Modifier<string | number> {
   static identity: Symbol = Symbol('panelFullHeight');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -144,7 +151,7 @@ class PanelFullHeightModifier extends Modifier<string> {
   }
 }
 
-class PanelHalfHeightModifier extends Modifier<string> {
+class PanelHalfHeightModifier extends Modifier<string | number> {
   static identity: Symbol = Symbol('panelHalfHeight');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -155,7 +162,7 @@ class PanelHalfHeightModifier extends Modifier<string> {
   }
 }
 
-class PanelMiniHeightModifier extends Modifier<string> {
+class PanelMiniHeightModifier extends Modifier<string | number> {
   static identity: Symbol = Symbol('panelMiniHeight');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -170,9 +177,9 @@ class ShowCloseIconModifier extends Modifier<boolean> {
   static identity: Symbol = Symbol('showCloseIcon');
   applyPeer(node: KNode, reset: boolean) {
     if (reset) {
-      GetUINativeModule().panel.resetShowCloseIconModifier(node);
+      GetUINativeModule().panel.resetShowCloseIcon(node);
     } else {
-      GetUINativeModule().panel.setShowCloseIconModifier(node, this.value);
+      GetUINativeModule().panel.setShowCloseIcon(node, this.value);
     }
   }
 }
@@ -192,9 +199,9 @@ class ShowModifier extends Modifier<boolean> {
   static identity: Symbol = Symbol('show');
   applyPeer(node: KNode, reset: boolean) {
     if (reset) {
-      GetUINativeModule().panel.resetDragBar(node);
+      GetUINativeModule().panel.resetShow(node);
     } else {
-      GetUINativeModule().panel.setDragBar(node, this.value);
+      GetUINativeModule().panel.setShow(node, this.value);
     }
   }
 }

@@ -19,15 +19,6 @@
 
 #include "gtest/gtest.h"
 
-#include "base/geometry/dimension.h"
-#include "base/geometry/ng/size_t.h"
-#include "base/geometry/offset.h"
-#include "base/memory/ace_type.h"
-#include "base/utils/utils.h"
-#include "core/components/common/layout/constants.h"
-#include "core/components/scroll/scrollable.h"
-#include "core/components_ng/pattern/linear_layout/row_model_ng.h"
-#include "core/components_ng/pattern/pattern.h"
 #define protected public
 #define private public
 #include "test/mock/base/mock_task_executor.h"
@@ -37,11 +28,20 @@
 #include "test/mock/core/render/mock_render_context.h"
 #include "test/unittest/core/pattern/test_ng.h"
 
+#include "base/geometry/dimension.h"
+#include "base/geometry/ng/size_t.h"
+#include "base/geometry/offset.h"
+#include "base/memory/ace_type.h"
+#include "base/utils/utils.h"
 #include "core/components/button/button_theme.h"
+#include "core/components/common/layout/constants.h"
+#include "core/components/scroll/scrollable.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/button/button_layout_property.h"
 #include "core/components_ng/pattern/button/button_model_ng.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
+#include "core/components_ng/pattern/linear_layout/row_model_ng.h"
+#include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/waterflow/water_flow_accessibility_property.h"
 #include "core/components_ng/pattern/waterflow/water_flow_event_hub.h"
 #include "core/components_ng/pattern/waterflow/water_flow_item_model_ng.h"
@@ -53,6 +53,8 @@
 #include "core/components_ng/property/measure_property.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline/base/constants.h"
+#undef private
+#undef protected
 
 using namespace testing;
 using namespace testing::ext;
@@ -1476,4 +1478,46 @@ HWTEST_F(WaterFlowTestNg, WaterFlowGetItemRectTest001, TestSize.Level1)
     EXPECT_TRUE(IsEqual(pattern_->GetItemRect(5), Rect(WATERFLOW_WIDTH / 4, ITEM_HEIGHT, itemWidth, ITEM_HEIGHT)));
     EXPECT_TRUE(IsEqual(pattern_->GetItemRect(10), Rect(WATERFLOW_WIDTH / 2, ITEM_HEIGHT * 2, itemWidth, ITEM_HEIGHT)));
 }
+
+/**
+ * @tc.name: MeasureForAnimation001
+ * @tc.desc: Test WaterFlow MeasureForAnimation function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, MeasureForAnimation001, TestSize.Level1)
+{
+     /**
+     * @tc.steps: step1. Create WithItem to test MeaseForAnimation for node creation .
+     * @tc.expected: pattern_->layoutInfo_ There is corresponding index information in it.
+     */
+    Create([](WaterFlowModelNG model) {
+        model.SetColumnsTemplate("1fr 1fr");
+        CreateItem(TOTAL_LINE_NUMBER * 2);
+    });
+    pattern_->ScrollToIndex(15, true);
+    
+    /**
+     * @tc.steps: step2. Get value from  pattern_ -> LayoutInfo_ .
+     * @tc.expected: return value(crossIndex) is not -1.
+     */
+    auto crossIndex = pattern_->layoutInfo_.GetCrossIndex(10);
+    EXPECT_FALSE(IsEqual(crossIndex, -1));
+}
+
+/**
+ * @tc.name: ScrollToIndex001
+ * @tc.desc: Test WaterFlow ScrollToIndex function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, ScrollToIndex001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Calling the ScrollToIndex interface to set values to 20 and true.
+     * @tc.expected: pattern_->targetIndex_ is 20
+     */
+    CreateWithItem([](WaterFlowModelNG model) {});
+    pattern_->ScrollToIndex(20, true);
+    EXPECT_EQ(pattern_->targetIndex_, 20);
+}
+
 } // namespace OHOS::Ace::NG

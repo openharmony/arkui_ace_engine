@@ -16,12 +16,12 @@
 #include "ui_service_mgr_client.h"
 
 #include "dialog_callback.h"
-#include "hilog_wrapper.h"
 #include "if_system_ability_manager.h"
 #include "ipc_skeleton.h"
 #include "iservice_registry.h"
 #include "string_ex.h"
 #include "system_ability_definition.h"
+#include "ui_service_hilog.h"
 
 namespace OHOS {
 namespace Ace {
@@ -49,7 +49,7 @@ ErrCode UIServiceMgrClient::RegisterCallBack(const AAFwk::Want& want, const sptr
     if (remoteObject_ == nullptr) {
         ErrCode err = Connect();
         if (err != ERR_OK) {
-            HILOG_ERROR("%{private}s:fail to connect UIMgrService", __func__);
+            HILOG_WARN("%{private}s:fail to connect UIMgrService", __func__);
             return UI_SERVICE_NOT_CONNECTED;
         }
     }
@@ -62,7 +62,7 @@ ErrCode UIServiceMgrClient::UnregisterCallBack(const AAFwk::Want& want)
     if (remoteObject_ == nullptr) {
         ErrCode err = Connect();
         if (err != ERR_OK) {
-            HILOG_ERROR("%{private}s:fail to connect UIMgrService", __func__);
+            HILOG_WARN("%{private}s:fail to connect UIMgrService", __func__);
             return UI_SERVICE_NOT_CONNECTED;
         }
     }
@@ -76,7 +76,7 @@ ErrCode UIServiceMgrClient::Push(const AAFwk::Want& want, const std::string& nam
     if (remoteObject_ == nullptr) {
         ErrCode err = Connect();
         if (err != ERR_OK) {
-            HILOG_ERROR("%{private}s:fail to connect UIMgrService", __func__);
+            HILOG_WARN("%{private}s:fail to connect UIMgrService", __func__);
             return UI_SERVICE_NOT_CONNECTED;
         }
     }
@@ -89,7 +89,7 @@ ErrCode UIServiceMgrClient::Request(const AAFwk::Want& want, const std::string& 
     if (remoteObject_ == nullptr) {
         ErrCode err = Connect();
         if (err != ERR_OK) {
-            HILOG_ERROR("%{private}s:fail to connect UIMgrService", __func__);
+            HILOG_WARN("%{private}s:fail to connect UIMgrService", __func__);
             return UI_SERVICE_NOT_CONNECTED;
         }
     }
@@ -103,7 +103,7 @@ ErrCode UIServiceMgrClient::ReturnRequest(const AAFwk::Want& want, const std::st
     if (remoteObject_ == nullptr) {
         ErrCode err = Connect();
         if (err != ERR_OK) {
-            HILOG_ERROR("%{private}s:fail to connect UIMgrService", __func__);
+            HILOG_WARN("%{private}s:fail to connect UIMgrService", __func__);
             return UI_SERVICE_NOT_CONNECTED;
         }
     }
@@ -121,19 +121,16 @@ ErrCode UIServiceMgrClient::ShowDialog(const std::string& name,
                                        DialogCallback callback,
                                        int32_t* id)
 {
-    HILOG_ERROR("Ui Service show dialog deprecated!");
     return GET_UI_SERVICE_FAILED;
 }
 
 ErrCode UIServiceMgrClient::CancelDialog(int32_t id)
 {
-    HILOG_ERROR("Ui Service cancel dialog deprecated!");
     return GET_UI_SERVICE_FAILED;
 }
 
 ErrCode UIServiceMgrClient::UpdateDialog(int32_t id, const std::string& data)
 {
-    HILOG_ERROR("Ui Service update dialog deprecated!");
     return GET_UI_SERVICE_FAILED;
 }
 
@@ -150,15 +147,14 @@ ErrCode UIServiceMgrClient::Connect()
     }
     sptr<ISystemAbilityManager> systemManager = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
     if (systemManager == nullptr) {
-        HILOG_ERROR("%{private}s:fail to get Registry", __func__);
+        HILOG_WARN("%{private}s:fail to get Registry", __func__);
         return GET_UI_SERVICE_FAILED;
     }
     remoteObject_ = systemManager->GetSystemAbility(UI_MGR_SERVICE_SA_ID);
     if (remoteObject_ == nullptr) {
-        HILOG_ERROR("%{private}s:fail to connect UIMgrService", __func__);
+        HILOG_WARN("%{private}s:fail to connect UIMgrService", __func__);
         return GET_UI_SERVICE_FAILED;
     }
-    HILOG_DEBUG("connect UIMgrService success");
     return ERR_OK;
 }
 }  // namespace Ace

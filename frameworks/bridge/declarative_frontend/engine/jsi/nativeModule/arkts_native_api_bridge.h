@@ -41,7 +41,11 @@ private:
     static void RegisterImageAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterNavRouterAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterNavigatorAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
+    static void RegisterNodeContainerAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterPanelAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
+    static void RegisterLineAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
+    static void RegisterPathAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
+    static void RegisterPolylineAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterSideBarContainerAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterCalendarPickerAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterTabAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
@@ -50,15 +54,33 @@ private:
     static void RegisterFormAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterMenuItemAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterMenuAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
+    static void RegisterMarqueeAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterDatePickerAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterAlphabetIndexerAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
+    static void RegisterGaugeAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterSelectAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterRadioAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterSliderAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterRatingAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterTimepickerAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterTextpickerAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
+    static void RegisterWaterFlowAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterCheckboxAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
+    static void RegisterDataPanelAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
+    static void RegisterScrollAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
+    static void RegisterGridItemAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
+    static void RegisterCommonShapeAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
+    static void RegisterShapeAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
+    static void RegisterRectAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
+    static void RegisterSwiperAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
+    static void RegisterListAttributes(Local<panda::ObjectRef> object, EcmaVM* vm); 
+    static void RegisterGridAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
+    static void RegisterLisitItemGroupAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
+    static void RegisterQRCodeAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
+    static void RegisterLoadingProgressAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
+    static void RegisterTextClockAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
+    static void RegisterListItemAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
+    static void RegisterTextTimerAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
 };
 } // namespace OHOS::Ace::NG
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_ENGINE_JSI_NATIVEMODULE_ARKTS_NATIVE_API_BRIDGE_H

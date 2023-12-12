@@ -319,6 +319,11 @@ public:
         const RefPtr<ListLayoutProperty>& layoutProperty, int32_t indexInGroup, int32_t judgeIndex,
         int32_t startIndex, int32_t endIndex);
 
+    virtual LayoutConstraintF& GetGroupLayoutConstraint()
+    {
+        return childLayoutConstraint_;
+    }
+
 protected:
     virtual void UpdateListItemConstraint(
         Axis axis, const OptionalSizeF& selfIdealSize, LayoutConstraintF& contentConstraint);
@@ -376,7 +381,7 @@ private:
     bool IsScrollSnapAlignCenter(LayoutWrapper* layoutWrapper);
     virtual std::list<int32_t> LayoutCachedItem(LayoutWrapper* layoutWrapper, int32_t cacheCount);
     static void PostIdleTask(RefPtr<FrameNode> frameNode, const ListPredictLayoutParam& param);
-    static void PredictBuildItem(RefPtr<LayoutWrapper> wrapper, const LayoutConstraintF& constraint);
+    static bool PredictBuildItem(RefPtr<LayoutWrapper> wrapper, const LayoutConstraintF& constraint);
 
     float GetStopOnScreenOffset(V2::ScrollSnapAlign scrollSnapAlign);
     int32_t FindPredictSnapEndIndexInItemPositions(float predictEndPos, V2::ScrollSnapAlign scrollSnapAlign);

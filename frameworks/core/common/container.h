@@ -330,6 +330,11 @@ public:
         return false;
     }
 
+    virtual float GetSmallWindowScale() const
+    {
+        return 1.0f;
+    }
+
     virtual void NotifyConfigurationChange(bool, const OnConfigurationChange& configurationChange = { false, false }) {}
     virtual void HotReload() {}
 

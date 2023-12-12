@@ -60,6 +60,7 @@ public:
     void SetOnCopy(std::function<void(const std::string&)>&& func) override;
     void SetOnCut(std::function<void(const std::string&)>&& func) override;
     void SetOnPaste(std::function<void(const std::string&)>&& func) override;
+    void SetOnPasteWithEvent(std::function<void(const std::string&, NG::TextCommonEvent&)>&& func) override;
     void SetCopyOption(CopyOptions copyOption) override;
     void SetMenuOptionItems(std::vector<MenuOptionsParam>&& menuOptionsItems) override;
     void ProcessDefaultPadding(PaddingProperty& paddings);
@@ -74,6 +75,7 @@ public:
     void SetShowUnderline(bool showUnderLine) override;
     void SetShowCounter(bool value) override;
     void SetCounterType(int32_t value) override;
+    void SetShowCounterBorder(bool value) override;
     void SetOnChangeEvent(std::function<void(const std::string&)>&& func) override;
     void SetBackgroundColor(const Color& color, bool tmp) override;
     void SetHeight(const Dimension& value) override;

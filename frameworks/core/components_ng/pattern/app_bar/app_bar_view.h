@@ -66,6 +66,8 @@ private:
     static void SetEachIconColor(
         RefPtr<FrameNode> icon, const std::optional<Color>& color, InternalResource::ResourceId image);
     RefPtr<FrameNode> atom_;
+    RefPtr<FrameNode> GetFaButton();
+    
     bool isVisibleSetted = false;
     bool isRowColorSetted = false;
     bool isIconColorSetted = false;

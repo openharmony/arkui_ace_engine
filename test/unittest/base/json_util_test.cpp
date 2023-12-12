@@ -14,6 +14,7 @@
  */
 
 #include <memory>
+#include <sys/types.h>
 
 #include "gtest/gtest.h"
 
@@ -105,7 +106,7 @@ HWTEST_F(JsonUtilTest, JsonUtilTest003, TestSize.Level1)
     EXPECT_FALSE(intValue->IsNull());
     EXPECT_TRUE(intValue->IsNumber());
     EXPECT_TRUE(intValue->GetInt() == intNum);
-    EXPECT_TRUE(intValue->GetUInt() == uintNum);
+    EXPECT_TRUE(intValue->GetUInt() == uintNum) << "Actual:" << intValue->GetUInt() << " Expected: " << uintNum;
     EXPECT_TRUE(NearEqual(intValue->GetDouble(), doubleNum));
 }
 

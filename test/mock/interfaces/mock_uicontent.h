@@ -100,6 +100,9 @@ public:
         int32_t baseParent, Accessibility::AccessibilityElementInfo& output));
 #endif
     MOCK_METHOD1(GetAppPaintSize, void(OHOS::Rosen::Rect&));
+    MOCK_METHOD3(CreateCustomPopupUIExtension, int32_t(const AAFwk::Want& want,
+        const ModalUIExtensionCallbacks& callbacks, const CustomPopupUIExtensionConfig& config));
+    MOCK_METHOD1(DestroyCustomPopupUIExtension, void(int32_t nodeId));
 };
 } // namespace Ace
 } // namespace OHOS

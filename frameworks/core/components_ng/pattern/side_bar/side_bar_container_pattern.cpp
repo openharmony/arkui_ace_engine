@@ -17,6 +17,7 @@
 
 #include <optional>
 
+#include "base/log/log_wrapper.h"
 #include "base/mousestyle/mouse_style.h"
 #include "base/resource/internal_resource.h"
 #include "core/common/recorder/event_recorder.h"
@@ -116,13 +117,11 @@ void SideBarContainerPattern::OnUpdateShowControlButton(
 
     auto children = host->GetChildren();
     if (children.empty()) {
-        LOGE("OnUpdateShowControlButton: children is empty.");
         return;
     }
 
     auto controlButtonNode = children.back();
     if (controlButtonNode->GetTag() != V2::BUTTON_ETS_TAG || !AceType::InstanceOf<FrameNode>(controlButtonNode)) {
-        LOGE("OnUpdateShowControlButton: Get control button failed.");
         return;
     }
 
@@ -131,7 +130,6 @@ void SideBarContainerPattern::OnUpdateShowControlButton(
     auto imageNode = controlButtonNode->GetFirstChild();
     auto imageFrameNode = AceType::DynamicCast<FrameNode>(imageNode);
     if (!imageFrameNode || imageFrameNode ->GetTag() != V2::IMAGE_ETS_TAG) {
-        LOGW("OnUpdateShowControlButton: Get control image node failed.");
         return;
     }
     auto imageLayoutProperty = imageFrameNode->GetLayoutProperty<ImageLayoutProperty>();
@@ -158,7 +156,6 @@ void SideBarContainerPattern::OnUpdateShowDivider(
 
     auto children = host->GetChildren();
     if (children.size() < DEFAULT_MIN_CHILDREN_SIZE) {
-        LOGE("OnUpdateShowDivider: children's size is less than 3.");
         return;
     }
 
@@ -166,7 +163,6 @@ void SideBarContainerPattern::OnUpdateShowDivider(
     auto dividerNode = *(++begin);
     CHECK_NULL_VOID(dividerNode);
     if (dividerNode->GetTag() != V2::DIVIDER_ETS_TAG || !AceType::InstanceOf<FrameNode>(dividerNode)) {
-        LOGE("OnUpdateShowDivider: Get divider failed.");
         return;
     }
 
@@ -306,7 +302,6 @@ RefPtr<FrameNode> SideBarContainerPattern::GetDividerNode() const
     CHECK_NULL_RETURN(host, nullptr);
     auto children = host->GetChildren();
     if (children.size() < DEFAULT_MIN_CHILDREN_SIZE) {
-        LOGE("GetDividerNode: children's size is less than 3.");
         return nullptr;
     }
 
@@ -314,7 +309,6 @@ RefPtr<FrameNode> SideBarContainerPattern::GetDividerNode() const
     auto dividerNode = *(++begin);
     CHECK_NULL_RETURN(dividerNode, nullptr);
     if (dividerNode->GetTag() != V2::DIVIDER_ETS_TAG || !AceType::InstanceOf<FrameNode>(dividerNode)) {
-        LOGE("GetDividerNode: Get divider failed.");
         return nullptr;
     }
 
@@ -1056,6 +1050,7 @@ void SideBarContainerPattern::InitDividerMouseEvent(const RefPtr<InputEventHub>&
 
 void SideBarContainerPattern::OnHover(bool isHover)
 {
+    TAG_LOGD(AceLogTag::ACE_SIDEBAR, "sideBarContainer onHover, ID: %{public}d", host.GetId);
     auto layoutProperty = GetLayoutProperty<SideBarContainerLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     auto dividerStrokeWidth = layoutProperty->GetDividerStrokeWidth().value_or(DEFAULT_DIVIDER_STROKE_WIDTH);

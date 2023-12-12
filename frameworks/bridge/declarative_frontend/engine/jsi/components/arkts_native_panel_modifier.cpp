@@ -78,7 +78,7 @@ void ResetPanelMiniHeight(NodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    SlidingPanelModelNG::SetPanelMiniHeight(frameNode, Dimension(DEFAULT_HEIGHT, DimensionUnit::PX));
+    SlidingPanelModelNG::SetPanelMiniHeight(frameNode, Dimension(DEFAULT_HEIGHT, DimensionUnit::VP));
 }
 
 void SetPanelBackgroundMask(NodeHandle node, uint32_t color)

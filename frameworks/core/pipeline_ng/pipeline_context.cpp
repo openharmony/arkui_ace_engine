@@ -1557,6 +1557,14 @@ bool PipelineContext::CheckNeedAutoSave()
     return pageNode->NeedRequestAutoSave();
 }
 
+bool PipelineContext::CheckPageFocus()
+{
+    CHECK_NULL_RETURN(stageManager_, true);
+    auto pageNode = stageManager_->GetLastPage();
+    CHECK_NULL_RETURN(pageNode, true);
+    return pageNode->GetFocusHub() && pageNode->GetFocusHub()->IsCurrentFocus();
+}
+
 void PipelineContext::NotifyFillRequestSuccess(AceAutoFillType autoFillType, RefPtr<ViewDataWrap> viewDataWrap)
 {
     CHECK_NULL_VOID(viewDataWrap);
@@ -1967,12 +1975,16 @@ void PipelineContext::OnAxisEvent(const AxisEvent& event)
     auto dragManager = GetDragDropManager();
     if (dragManager && !dragManager->IsDragged()) {
         if (event.action == AxisAction::BEGIN) {
+            isBeforeDragHandleAxis_ = true;
             TouchRestrict touchRestrict { TouchRestrict::NONE };
             touchRestrict.sourceType = event.sourceType;
             touchRestrict.hitTestType = SourceType::TOUCH;
             eventManager_->TouchTest(scaleEvent, rootNode_, touchRestrict);
         }
         eventManager_->DispatchTouchEvent(scaleEvent);
+    } else if (isBeforeDragHandleAxis_ && event.action == AxisAction::END) {
+        eventManager_->DispatchTouchEvent(scaleEvent);
+        isBeforeDragHandleAxis_ = false;
     }
 
     if (event.action == AxisAction::BEGIN || event.action == AxisAction::UPDATE) {
@@ -2703,5 +2715,25 @@ void PipelineContext::CloseFrontendAnimation()
         pendingFrontendAnimation_.pop();
     }
     AnimationUtils::CloseImplicitAnimation();
+}
+
+bool PipelineContext::IsDragging() const
+{
+    if (!dragDropManager_) {
+        return false;
+    }
+    bool isDragging = dragDropManager_->IsDragging();
+#ifdef ENABLE_DRAG_FRAMEWORK
+    isDragging = (isDragging || dragDropManager_->IsMsdpDragging());
+#endif
+    return isDragging;
+}
+
+void PipelineContext::SetIsDragging(bool isDragging)
+{
+    if (!eventManager_) {
+        return;
+    }
+    eventManager_->SetIsDragging(isDragging);
 }
 } // namespace OHOS::Ace::NG

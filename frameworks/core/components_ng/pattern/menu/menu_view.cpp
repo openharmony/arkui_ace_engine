@@ -465,7 +465,9 @@ RefPtr<FrameNode> MenuView::Create(const RefPtr<UINode>& customNode, int32_t tar
     }
     scroll->MountToParent(menuNode);
     scroll->MarkModifyDone();
-    UpdateMenuBorderEffect(menuNode);
+    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+        UpdateMenuBorderEffect(menuNode);
+    }
     menuNode->MarkModifyDone();
 
     auto menuProperty = menuNode->GetLayoutProperty<MenuLayoutProperty>();

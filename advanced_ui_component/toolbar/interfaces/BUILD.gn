@@ -14,6 +14,8 @@
 import("//arkcompiler/ets_frontend/es2panda/es2abc_config.gni")
 import("//build/ohos.gni")
 import("//foundation/arkui/ace_engine/ace_config.gni")
+import("//foundation/arkui/ace_engine/adapter/preview/build/config.gni")
+import("//foundation/arkui/ace_engine/build/ace_gen_obj.gni")
 
 es2abc_gen_abc("gen_toolbar_abc") {
   src_js = rebase_path("toolbar.js")
@@ -29,10 +31,20 @@ gen_js_obj("toolbar_abc") {
   dep = ":gen_toolbar_abc"
 }
 
+gen_obj("toolbar_abc_preview") {
+  input = get_label_info(":gen_toolbar_abc", "target_out_dir") + "/toolbar.abc"
+  output = target_out_dir + "/toolbar_abc.c"
+  snapshot_dep = [ ":gen_toolbar_abc" ]
+}
+
 ohos_shared_library("toolbar") {
   sources = [ "toolbar.cpp" ]
 
-  deps = [ ":toolbar_abc" ]
+  if (use_mingw_win || use_mac || use_linux) {
+    deps = [ ":gen_obj_src_toolbar_abc_preview" ]
+  } else {
+    deps = [ ":toolbar_abc" ]
+  }
 
   external_deps = [
     "hilog:libhilog",

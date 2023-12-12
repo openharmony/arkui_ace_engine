@@ -17,31 +17,20 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_LIST_LIST_EVENT_HUB_H
 
 #include <stdint.h>
-#include "base/memory/ace_type.h"
+
 #include "core/components/hyperlink/hyperlink_resources.h"
 #include "core/components_ng/base/ui_node.h"
-#include "core/components_ng/event/event_hub.h"
-#include "core/components_ng/event/gesture_event_hub.h"
+#include "core/components_ng/pattern/scrollable/scrollable_event_hub.h"
 #include "core/components_v2/list/list_component.h"
 
 namespace OHOS::Ace::NG {
 constexpr int32_t INVALID_IDX = -1;
-class ListEventHub : public EventHub {
-    DECLARE_ACE_TYPE(ListEventHub, EventHub)
+class ListEventHub : public ScrollableEventHub {
+    DECLARE_ACE_TYPE(ListEventHub, ScrollableEventHub)
 
 public:
     ListEventHub() = default;
     ~ListEventHub() override = default;
-
-    void SetOnScroll(OnScrollEvent&& onScroll)
-    {
-        onScrollEvent_ = std::move(onScroll);
-    }
-
-    const OnScrollEvent& GetOnScroll() const
-    {
-        return onScrollEvent_;
-    }
 
     void SetOnScrollBegin(OnScrollBeginEvent&& onScrollBegin)
     {
@@ -53,36 +42,6 @@ public:
         return onScrollBeginEvent_;
     }
 
-    void SetOnScrollFrameBegin(OnScrollFrameBeginEvent&& onScrollFrameBegin)
-    {
-        onScrollFrameBeginEvent_ = std::move(onScrollFrameBegin);
-    }
-
-    const OnScrollFrameBeginEvent& GetOnScrollFrameBegin() const
-    {
-        return onScrollFrameBeginEvent_;
-    }
-
-    void SetOnScrollStart(OnScrollStartEvent&& onScrollStart)
-    {
-        onScrollStartEvent_ = std::move(onScrollStart);
-    }
-
-    const OnScrollStartEvent& GetOnScrollStart() const
-    {
-        return onScrollStartEvent_;
-    }
-
-    void SetOnScrollStop(OnScrollStopEvent&& onScrollStop)
-    {
-        onScrollStopEvent_ = std::move(onScrollStop);
-    }
-
-    const OnScrollStopEvent& GetOnScrollStop() const
-    {
-        return onScrollStopEvent_;
-    }
-
     void SetOnScrollIndex(OnScrollIndexEvent&& onScrollIndex)
     {
         onScrollIndexEvent_ = std::move(onScrollIndex);
@@ -91,26 +50,6 @@ public:
     const OnScrollIndexEvent& GetOnScrollIndex() const
     {
         return onScrollIndexEvent_;
-    }
-
-    void SetOnReachStart(OnReachEvent&& onReachStart)
-    {
-        onReachStartEvent_ = std::move(onReachStart);
-    }
-
-    const OnReachEvent& GetOnReachStart() const
-    {
-        return onReachStartEvent_;
-    }
-
-    void SetOnReachEnd(OnReachEvent&& onReachEnd)
-    {
-        onReachEndEvent_ = std::move(onReachEnd);
-    }
-
-    const OnReachEvent& GetOnReachEnd() const
-    {
-        return onReachEndEvent_;
     }
 
     void SetOnItemMove(OnItemMoveEvent&& onItemMove)
@@ -246,14 +185,8 @@ public:
 private:
     Axis GetDirection() const;
 
-    OnScrollEvent onScrollEvent_;
     OnScrollBeginEvent onScrollBeginEvent_;
-    OnScrollFrameBeginEvent onScrollFrameBeginEvent_;
-    OnScrollStartEvent onScrollStartEvent_;
-    OnScrollStopEvent onScrollStopEvent_;
     OnScrollIndexEvent onScrollIndexEvent_;
-    OnReachEvent onReachStartEvent_;
-    OnReachEvent onReachEndEvent_;
     OnItemMoveEvent onItemMoveEvent_;
     OnItemDragStartFunc onItemDragStartEvent_;
     OnItemDragEnterFunc onItemDragEnterEvent_;

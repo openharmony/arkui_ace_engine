@@ -78,6 +78,7 @@ TextDragData TextDragPattern::CalculateTextDragData(RefPtr<TextDragBase>& hostPa
     float rightHandleY = boxLast.Top() + textStartY;
     float lastLineHeight = boxLast.Height();
     bool oneLineSelected = (leftHandleY == rightHandleY);
+    float height = rightHandleY - leftHandleY + lastLineHeight;
     if (oneLineSelected) {
         if (leftHandleX < contentRect.Left()) {
             leftHandleX = contentRect.Left();
@@ -85,19 +86,23 @@ TextDragData TextDragPattern::CalculateTextDragData(RefPtr<TextDragBase>& hostPa
         if (rightHandleX > contentRect.Right()) {
             rightHandleX = contentRect.Right();
         }
+        if (lineHeight > contentRect.Height()) {
+            height = contentRect.Height();
+        }
     } else {
         if (leftHandleY < contentRect.Top() - BOX_EPSILON) {
+            height -= contentRect.Top() - leftHandleY;
             leftHandleX = contentRect.Left();
             leftHandleY = contentRect.Top();
         }
         if ((boxLast.Bottom() + textStartY) > contentRect.Bottom()) {
+            height -= rightHandleY + lastLineHeight - contentRect.Bottom();
             rightHandleX = contentRect.Right();
-            rightHandleY = contentRect.Bottom() - lineHeight;
+            rightHandleY = contentRect.Bottom() - lastLineHeight;
         }
     }
     auto hostGlobalOffset = hostPattern->GetParentGlobalOffset();
     float width = rightHandleX - leftHandleX;
-    float height = rightHandleY - leftHandleY + lastLineHeight;
     float globalX = leftHandleX + hostGlobalOffset.GetX() - TEXT_DRAG_OFFSET.ConvertToPx();
     float globalY = leftHandleY + hostGlobalOffset.GetY() - TEXT_DRAG_OFFSET.ConvertToPx();
     if (oneLineSelected) {

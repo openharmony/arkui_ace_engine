@@ -30,7 +30,7 @@ public:
     static void SetMatchTextDirection(bool value);
     static void SetFitOriginalSize(bool value);
     static void SetSourceSize(const JSCallbackInfo& info);
-    static void SetObjectFit(int32_t value);
+    static void SetObjectFit(const JSCallbackInfo& args);
     static void SetImageFill(const JSCallbackInfo& info);
     static void SetImageInterpolation(int32_t imageInterpolation);
     static void SetImageRenderMode(int32_t imageRenderMode);
@@ -55,6 +55,9 @@ public:
     static void JsSetDraggable(bool draggable);
     static void JsOnDragStart(const JSCallbackInfo& info);
     static void SetCopyOption(const JSCallbackInfo& info);
+
+    static void EnableAnalyzer(bool isEnableAnalyzer);
+    static void AnalyzerConfig(const JSCallbackInfo &info);
 
 protected:
     static void SetBorder(const Border& border);

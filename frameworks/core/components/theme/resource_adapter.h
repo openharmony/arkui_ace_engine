@@ -42,7 +42,7 @@ public:
 
     virtual void Init(const ResourceInfo& resourceInfo) {}
 
-    virtual void UpdateConfig(const ResourceConfiguration& config) {}
+    virtual void UpdateConfig(const ResourceConfiguration& config, bool themeFlag = false) {}
 
     virtual RefPtr<ThemeStyle> GetTheme(int32_t themeId)
     {

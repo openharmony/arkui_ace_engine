@@ -65,4 +65,23 @@ void QRCodeModelNG::SetContentOpacity(const double opacity)
 {
     ACE_UPDATE_PAINT_PROPERTY(QRCodePaintProperty, Opacity, opacity);
 }
+
+void QRCodeModelNG::SetQRCodeColor(FrameNode* frameNode, const Color& color)
+{
+    ACE_UPDATE_NODE_PAINT_PROPERTY(QRCodePaintProperty, Color, color, frameNode);
+    ACE_UPDATE_NODE_RENDER_CONTEXT(ForegroundColor, color, frameNode);
+    ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, ForegroundColorStrategy, frameNode);
+    ACE_UPDATE_NODE_RENDER_CONTEXT(ForegroundColorFlag, true, frameNode);
+}
+
+void QRCodeModelNG::SetQRBackgroundColor(FrameNode* frameNode, const Color& color)
+{
+    ACE_UPDATE_NODE_PAINT_PROPERTY(QRCodePaintProperty, BackgroundColor, color, frameNode);
+    ACE_UPDATE_NODE_RENDER_CONTEXT(BackgroundColor, color, frameNode);
+}
+
+void QRCodeModelNG::SetContentOpacity(FrameNode* frameNode, const double opacity)
+{
+    ACE_UPDATE_NODE_PAINT_PROPERTY(QRCodePaintProperty, Opacity, opacity, frameNode);
+}
 } // namespace OHOS::Ace::NG

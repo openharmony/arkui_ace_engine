@@ -74,6 +74,27 @@ public:
 
     DisplayMode GetDisplayMode() const override;
 
+    static void SetColumnsTemplate(FrameNode* frameNode, const std::string& columnsTemplate);
+    static void SetRowsTemplate(FrameNode* frameNode, const std::string& rowsTemplate);
+    static void SetColumnsGap(FrameNode* frameNode, const Dimension& columnsGap);
+    static void SetRowsGap(FrameNode* frameNode, const Dimension& rowsGap);
+    static void SetScrollBarMode(FrameNode* frameNode, DisplayMode scrollBarMode);
+    static void SetScrollBarWidth(FrameNode* frameNode, const Dimension& scrollBarWidth);
+    static void SetScrollBarColor(FrameNode* frameNode, const Color& scrollBarColor);
+    static void SetCachedCount(FrameNode* frameNode, int32_t cachedCount);
+    static void SetLayoutDirection(FrameNode* frameNode, FlexDirection layoutDirection);
+    static void SetMaxCount(FrameNode* frameNode, int32_t maxCount);
+    static void SetMinCount(FrameNode* frameNode, int32_t minCount);
+    static void SetCellLength(FrameNode* frameNode, int32_t cellLength);
+    static void SetEditable(FrameNode* frameNode, bool editMode);
+    static void SetMultiSelectable(FrameNode* frameNode, bool multiSelectable);
+    static void SetSupportAnimation(FrameNode* frameNode, bool supportAnimation);
+
+    static void SetEdgeEffect(FrameNode* frameNode, EdgeEffect edgeEffect, bool alwaysEnabled);
+    static void SetNestedScroll(FrameNode* frameNode, const NestedScrollOptions& nestedOpt);
+    static void SetScrollEnabled(FrameNode* frameNode, bool scrollEnabled);
+    static void SetFriction(FrameNode* frameNode, double friction);
+
 private:
     void AddDragFrameNodeToManager() const;
 };

@@ -69,7 +69,6 @@ void ParseGridItemSize(const JSRef<JSVal>& value, GridItemSize& gridItemSize)
         JSRef<JSArray> array = JSRef<JSArray>::Cast(value);
         auto length = array->Length();
         if (length != GRID_ITEM_SIZE_RESULT_LENGTH) {
-            LOGW("size is invalid");
             return;
         }
         JSRef<JSVal> rows = array->GetValueAt(0);
@@ -90,7 +89,6 @@ void ParseGridItemRect(const JSRef<JSVal>& value, GridItemRect& gridItemRect)
         JSRef<JSArray> array = JSRef<JSArray>::Cast(value);
         auto length = array->Length();
         if (length != GRID_ITEM_RECT_RESULT_LENGTH) {
-            LOGW("rect is invalid");
             return;
         }
         JSRef<JSVal> rowStart = array->GetValueAt(GridItemRect::ROW_START);
@@ -180,7 +178,6 @@ void SetGridLayoutOptions(const JSCallbackInfo& info)
             if (indexNum >= 0) {
                 option.irregularIndexes.emplace(indexNum);
             }
-            LOGD("irregularIndexes emplace_back:%{public}d", indexNum);
         }
     }
 
@@ -267,7 +264,6 @@ void JSGrid::SetRowsTemplate(const std::string& value)
 void JSGrid::SetColumnsGap(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have at least 1 argument");
         return;
     }
     CalcDimension colGap;
@@ -282,7 +278,6 @@ void JSGrid::SetColumnsGap(const JSCallbackInfo& info)
 void JSGrid::SetRowsGap(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have at least 1 argument");
         return;
     }
     CalcDimension rowGap;
@@ -297,13 +292,11 @@ void JSGrid::SetRowsGap(const JSCallbackInfo& info)
 void JSGrid::JsGridHeight(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have at least 1 argument");
         return;
     }
 
     CalcDimension value;
     if (!ParseJsDimensionVp(info[0], value)) {
-        LOGE("parse height fail for grid, please check.");
         return;
     }
     if (LessNotEqual(value.Value(), 0.0)) {
@@ -348,7 +341,6 @@ void JSGrid::SetScrollEnabled(const JSCallbackInfo& args)
 
 void JSGrid::JSBind(BindingTarget globalObj)
 {
-    LOGD("JSGrid:Bind");
     JSClass<JSGrid>::Declare("Grid");
 
     MethodOptions opt = MethodOptions::NONE;
@@ -501,7 +493,6 @@ void JSGrid::SetEdgeEffect(const JSCallbackInfo& info)
 void JSGrid::SetLayoutDirection(int32_t value)
 {
     if (value < 0 || value >= static_cast<int32_t>(LAYOUT_DIRECTION.size())) {
-        LOGE("Param is not valid");
         return;
     }
     GridModel::GetInstance()->SetLayoutDirection(LAYOUT_DIRECTION[value]);
@@ -523,7 +514,6 @@ void JSGrid::SetDirection(const std::string& dir)
 void JSGrid::JsOnGridDragEnter(const JSCallbackInfo& info)
 {
     if (!info[0]->IsFunction()) {
-        LOGE("fail to bind onItemDragEnter event due to info is not function");
         return;
     }
 
@@ -540,7 +530,6 @@ void JSGrid::JsOnGridDragEnter(const JSCallbackInfo& info)
 void JSGrid::JsOnGridDragMove(const JSCallbackInfo& info)
 {
     if (!info[0]->IsFunction()) {
-        LOGE("fail to bind onItemDragMove event due to info is not function");
         return;
     }
 
@@ -557,7 +546,6 @@ void JSGrid::JsOnGridDragMove(const JSCallbackInfo& info)
 void JSGrid::JsOnGridDragLeave(const JSCallbackInfo& info)
 {
     if (!info[0]->IsFunction()) {
-        LOGE("fail to bind onItemDragLeave event due to info is not function");
         return;
     }
 
@@ -574,7 +562,6 @@ void JSGrid::JsOnGridDragLeave(const JSCallbackInfo& info)
 void JSGrid::JsOnGridDragStart(const JSCallbackInfo& info)
 {
     if (!info[0]->IsFunction()) {
-        LOGE("fail to bind onItemDragStart event due to info is not function");
         return;
     }
 
@@ -586,14 +573,12 @@ void JSGrid::JsOnGridDragStart(const JSCallbackInfo& info)
         ACE_SCORING_EVENT("Grid.onItemDragStart");
         auto ret = func->ItemDragStartExecute(dragInfo, itemIndex);
         if (!ret->IsObject()) {
-            LOGE("builder param is not an object.");
             return;
         }
 
         auto builderObj = JSRef<JSObject>::Cast(ret);
         auto builder = builderObj->GetProperty("builder");
         if (!builder->IsFunction()) {
-            LOGE("builder param is not a function.");
             return;
         }
         auto builderFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(builder));
@@ -607,7 +592,6 @@ void JSGrid::JsOnGridDragStart(const JSCallbackInfo& info)
 void JSGrid::JsOnGridDrop(const JSCallbackInfo& info)
 {
     if (!info[0]->IsFunction()) {
-        LOGE("fail to bind onItemDrop event due to info is not function");
         return;
     }
 
@@ -634,7 +618,6 @@ void JSGrid::SetNestedScroll(const JSCallbackInfo& args)
     };
     if (args.Length() < 1 || !args[0]->IsObject()) {
         GridModel::GetInstance()->SetNestedScroll(nestedOpt);
-        LOGW("Invalid params");
         return;
     }
     JSRef<JSObject> obj = JSRef<JSObject>::Cast(args[0]);
@@ -642,14 +625,12 @@ void JSGrid::SetNestedScroll(const JSCallbackInfo& args)
     JSViewAbstract::ParseJsInt32(obj->GetProperty("scrollForward"), froward);
     if (froward < static_cast<int32_t>(NestedScrollMode::SELF_ONLY) ||
         froward > static_cast<int32_t>(NestedScrollMode::PARALLEL)) {
-        LOGW("ScrollFroward params invalid");
         froward = 0;
     }
     int32_t backward = 0;
     JSViewAbstract::ParseJsInt32(obj->GetProperty("scrollBackward"), backward);
     if (backward < static_cast<int32_t>(NestedScrollMode::SELF_ONLY) ||
         backward > static_cast<int32_t>(NestedScrollMode::PARALLEL)) {
-        LOGW("ScrollFroward params invalid");
         backward = 0;
     }
     nestedOpt.forward = static_cast<NestedScrollMode>(froward);
@@ -662,7 +643,6 @@ void JSGrid::SetFriction(const JSCallbackInfo& info)
 {
     double friction = -1.0;
     if (!JSViewAbstract::ParseJsDouble(info[0], friction)) {
-        LOGW("Friction params invalid,can not convert to double");
         friction = -1.0;
     }
     GridModel::GetInstance()->SetFriction(friction);
@@ -736,12 +716,10 @@ void JSGrid::JsOnScrollFrameBegin(const JSCallbackInfo& args)
             auto params = ConvertToJSValues(offset, state);
             auto result = func->Call(JSRef<JSObject>(), params.size(), params.data());
             if (result.IsEmpty()) {
-                LOGE("Error calling onScrollFrameBegin, result is empty.");
                 return scrollRes;
             }
 
             if (!result->IsObject()) {
-                LOGE("Error calling onScrollFrameBegin, result is not object.");
                 return scrollRes;
             }
 

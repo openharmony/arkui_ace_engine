@@ -57,6 +57,8 @@ MMI::Direction ConvertDegreeToMMIRotation(float degree)
 }
 } // namespace
 
+float ScreenPattern::screenMaxWidth_;
+float ScreenPattern::screenMaxHeight_;
 
 ScreenPattern::ScreenPattern(const sptr<Rosen::ScreenSession>& screenSession)
 {
@@ -119,12 +121,14 @@ void ScreenPattern::UpdateToInputManager(float rotation)
         tempWidth = tempHeight;
         tempHeight = temp;
     }
+    screenMaxWidth_ = std::max(screenMaxWidth_, tempWidth);
+    screenMaxHeight_ = std::max(screenMaxHeight_, tempHeight);
 
     MMI::Rect screenRect = {
         paintRect.Left(),
         paintRect.Top(),
-        tempWidth,
-        tempHeight,
+        screenMaxWidth_,
+        screenMaxHeight_,
     };
     MMI::WindowInfo windowInfo = {
         .id = 0,    // root scene id 0
@@ -189,7 +193,7 @@ bool ScreenPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     CHECK_NULL_RETURN(window, false);
     auto rootScene = static_cast<Rosen::RootScene*>(window->GetRSWindow().GetRefPtr());
     CHECK_NULL_RETURN(rootScene, false);
-    auto screenBounds = screenSession_->GetScreenProperty().GetPhyBounds();
+    auto screenBounds = screenSession_->GetScreenProperty().GetBounds();
     Rosen::Rect rect = { screenBounds.rect_.left_, screenBounds.rect_.top_,
         screenBounds.rect_.width_, screenBounds.rect_.height_ };
     float density = screenSession_->GetScreenProperty().GetDefaultDensity();

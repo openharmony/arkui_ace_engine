@@ -79,7 +79,7 @@ private:
 
     bool hasVisibleChangeRegistered_ = false;
     bool enableLoading_ = true;
-    bool isVisibleArea_ = true;
+    bool isVisibleArea_ = false;
     bool isVisible_ = true;
     bool isShow_ = true;
     RefPtr<LoadingProgressModifier> loadingProgressModifier_;

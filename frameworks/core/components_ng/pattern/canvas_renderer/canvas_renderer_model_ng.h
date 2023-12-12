@@ -16,8 +16,8 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_CANVAS_RENDERER_CANVAS_RENDERER_MODEL_NG_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_CANVAS_RENDERER_CANVAS_RENDERER_MODEL_NG_H
 
+#include "base/utils/macros.h"
 #include "core/components_ng/pattern/canvas_renderer/canvas_renderer_model.h"
-#include "frameworks/base/utils/macros.h"
 
 namespace OHOS::Ace::NG {
 class ACE_EXPORT CanvasRendererModelNG : public OHOS::Ace::CanvasRendererModel {
@@ -66,14 +66,14 @@ public:
     void Arc(const BaseInfo& baseInfo, const ArcParam& param) override;
     void Ellipse(const BaseInfo& baseInfo, const EllipseParam& param) override;
     void SetFillRuleForPath(const BaseInfo& baseInfo, const CanvasFillRule& fillRule) override;
-    void SetFillRuleForPath2D(const BaseInfo& baseInfo, const CanvasFillRule& fillRule,
-        const RefPtr<CanvasPath2D>& path) override;
-    void SetStrokeRuleForPath2D(const BaseInfo& baseInfo, const CanvasFillRule& fillRule,
-        const RefPtr<CanvasPath2D>& path) override;
+    void SetFillRuleForPath2D(
+        const BaseInfo& baseInfo, const CanvasFillRule& fillRule, const RefPtr<CanvasPath2D>& path) override;
+    void SetStrokeRuleForPath2D(
+        const BaseInfo& baseInfo, const CanvasFillRule& fillRule, const RefPtr<CanvasPath2D>& path) override;
     void SetStrokeRuleForPath(const BaseInfo& baseInfo, const CanvasFillRule& fillRule) override;
     void SetClipRuleForPath(const BaseInfo& baseInfo, const CanvasFillRule& fillRule) override;
-    void SetClipRuleForPath2D(const BaseInfo& baseInfo, const CanvasFillRule& fillRule,
-        const RefPtr<CanvasPath2D>& path) override;
+    void SetClipRuleForPath2D(
+        const BaseInfo& baseInfo, const CanvasFillRule& fillRule, const RefPtr<CanvasPath2D>& path) override;
     void AddRect(const BaseInfo& baseInfo, const Rect& rect) override;
     void BeginPath(const BaseInfo& baseInfo) override;
     void ClosePath(const BaseInfo& baseInfo) override;

@@ -980,15 +980,16 @@ void JsiDeclarativeEngine::RegisterInitWorkerFunc()
             return;
         }
 #ifdef OHOS_PLATFORM
-        ConnectServerManager::Get().AddInstance(gettid(), "ets");
+        auto tid = gettid();
+        ConnectServerManager::Get().AddInstance(tid, "ets");
         auto vm = const_cast<EcmaVM*>(arkNativeEngine->GetEcmaVm());
         auto workerPostTask = [nativeEngine](std::function<void()>&& callback) {
             nativeEngine->CallDebuggerPostTaskFunc(std::move(callback));
         };
         bool debugMode = AceApplicationInfo::GetInstance().IsNeedDebugBreakPoint();
         panda::JSNApi::DebugOption debugOption = { libraryPath.c_str(), debugMode };
-        JSNApi::NotifyDebugMode(gettid(), vm, libraryPath.c_str(), debugOption, instanceId, workerPostTask,
-            debugVersion, debugMode);
+        JSNApi::NotifyDebugMode(
+            tid, vm, libraryPath.c_str(), debugOption, tid, workerPostTask, debugVersion, debugMode);
 #endif
         instance->InitConsoleModule(arkNativeEngine);
 

@@ -38,12 +38,14 @@ void SetSpace(NodeHandle node, float value, int unit)
     Dimension space = Dimension(value, static_cast<DimensionUnit>(unit));
     SelectModelNG::SetSpace(frameNode, space);
 }
+
 void SetValue(NodeHandle node, const char* value)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     SelectModelNG::SetValue(frameNode, value);
 }
+
 void SetSelected(NodeHandle node, int32_t idx)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -53,42 +55,49 @@ void SetSelected(NodeHandle node, int32_t idx)
     }
     SelectModelNG::SetSelected(frameNode, idx);
 }
+
 void SetSelectFontColor(NodeHandle node, const uint32_t color)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     SelectModelNG::SetFontColor(frameNode, Color(color));
 }
+
 void SetSelectedOptionBgColor(NodeHandle node, const uint32_t color)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     SelectModelNG::SetSelectedOptionBgColor(frameNode, Color(color));
 }
+
 void SetOptionBgColor(NodeHandle node, const uint32_t color)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     SelectModelNG::SetOptionBgColor(frameNode, Color(color));
 }
+
 void SetOptionFontColor(NodeHandle node, const uint32_t color)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     SelectModelNG::SetOptionFontColor(frameNode, Color(color));
 }
+
 void SetSelectedOptionFontColor(NodeHandle node, const uint32_t color)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     SelectModelNG::SetSelectedOptionFontColor(frameNode, Color(color));
 }
+
 void SetArrowPosition(NodeHandle node, const int32_t arrowPosition)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     SelectModelNG::SetArrowPosition(frameNode, static_cast<ArrowPosition>(arrowPosition));
 }
+
 void SetMenuAlign(
     NodeHandle node, const int32_t alignType, const float* values, const int* units, const int32_t size)
 {
@@ -117,20 +126,33 @@ void SetFont(NodeHandle node, const char* fontInfo, int32_t styleVal)
         return;
     }
 
+    auto context = frameNode->GetContext();
+    CHECK_NULL_VOID(context);
+    auto themeManager = context->GetThemeManager();
+    CHECK_NULL_VOID(themeManager);
+
+    auto selectTheme = themeManager->GetTheme<SelectTheme>();
+    CHECK_NULL_VOID(selectTheme);
+    auto textTheme = themeManager->GetTheme<TextTheme>();
+    CHECK_NULL_VOID(textTheme);
+
+    CalcDimension fontSize = selectTheme->GetFontSize();
     if (res[POS_0] != ERR_CODE) {
-        CalcDimension fontSize = StringUtils::StringToCalcDimension(res[POS_0], false);
-        SelectModelNG::SetFontSize(frameNode, fontSize);
+        fontSize = StringUtils::StringToCalcDimension(res[POS_0], false, DimensionUnit::FP);
     }
-
+    SelectModelNG::SetFontSize(frameNode, fontSize);
+   
+    FontWeight weight = FontWeight::MEDIUM;
     if (res[POS_1] != ERR_CODE) {
-        std::string weight;
-        SelectModelNG::SetFontWeight(
-            frameNode, StringUtils::StringToFontWeight(res[POS_1], FontWeight::NORMAL));
+        weight = StringUtils::StringToFontWeight(res[POS_1], FontWeight::MEDIUM);
     }
+    SelectModelNG::SetFontWeight(frameNode, weight);
 
+    std::vector<std::string> fontFamilies = textTheme->GetTextStyle().GetFontFamilies();
     if (res[POS_2] != ERR_CODE) {
-        SelectModelNG::SetFontFamily(frameNode, Framework::ConvertStrToFontFamilies(res[POS_2]));
+        fontFamilies = Framework::ConvertStrToFontFamilies(res[POS_2]);
     }
+    SelectModelNG::SetFontFamily(frameNode, fontFamilies);
 
     auto style = static_cast<Ace::FontStyle>(styleVal);
     SelectModelNG::SetItalicFontStyle(frameNode, style);
@@ -140,7 +162,6 @@ void SetOptionFont(NodeHandle node, const char* fontInfo, int32_t styleVal)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    
     std::vector<std::string> res;
     std::string fontValues = std::string(fontInfo);
     StringUtils::StringSplitter(fontValues, DELIMITER, res);
@@ -148,20 +169,33 @@ void SetOptionFont(NodeHandle node, const char* fontInfo, int32_t styleVal)
         return;
     }
 
+    auto context = frameNode->GetContext();
+    CHECK_NULL_VOID(context);
+    auto themeManager = context->GetThemeManager();
+    CHECK_NULL_VOID(themeManager);
+
+    auto selectTheme = themeManager->GetTheme<SelectTheme>();
+    CHECK_NULL_VOID(selectTheme);
+    auto textTheme = themeManager->GetTheme<TextTheme>();
+    CHECK_NULL_VOID(textTheme);
+
+    CalcDimension fontSize = selectTheme->GetMenuFontSize();
     if (res[POS_0] != ERR_CODE) {
-        CalcDimension fontSize = StringUtils::StringToCalcDimension(res[POS_0], false);
-        SelectModelNG::SetOptionFontSize(frameNode, fontSize);
+        fontSize = StringUtils::StringToCalcDimension(res[POS_0], false, DimensionUnit::FP);
     }
+    SelectModelNG::SetOptionFontSize(frameNode, fontSize);
 
+    FontWeight weight = textTheme->GetTextStyle().GetFontWeight();
     if (res[POS_1] != ERR_CODE) {
-        std::string weight;
-        SelectModelNG::SetOptionFontWeight(
-            frameNode, StringUtils::StringToFontWeight(res[POS_1], FontWeight::NORMAL));
+        weight = StringUtils::StringToFontWeight(res[POS_1], FontWeight::REGULAR);
     }
-
+    SelectModelNG::SetOptionFontWeight(frameNode, weight);
+    
+    std::vector<std::string> fontFamilies = textTheme->GetTextStyle().GetFontFamilies();
     if (res[POS_2] != ERR_CODE) {
-        SelectModelNG::SetOptionFontFamily(frameNode, Framework::ConvertStrToFontFamilies(res[POS_2]));
+        fontFamilies = Framework::ConvertStrToFontFamilies(res[POS_2]);
     }
+    SelectModelNG::SetOptionFontFamily(frameNode, fontFamilies);
 
     auto style = static_cast<Ace::FontStyle>(styleVal);
     SelectModelNG::SetOptionItalicFontStyle(frameNode, style);
@@ -171,32 +205,45 @@ void SetSelectedOptionFont(NodeHandle node, const char* fontInfo, int32_t styleV
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-
     std::vector<std::string> res;
     std::string fontValues = std::string(fontInfo);
     StringUtils::StringSplitter(fontValues, DELIMITER, res);
     if (res.size() != SIZE_OF_FONT_INFO) {
         return;
     }
+    
+    auto context = frameNode->GetContext();
+    CHECK_NULL_VOID(context);
+    auto themeManager = context->GetThemeManager();
+    CHECK_NULL_VOID(themeManager);
 
+    auto selectTheme = themeManager->GetTheme<SelectTheme>();
+    CHECK_NULL_VOID(selectTheme);
+    auto textTheme = themeManager->GetTheme<TextTheme>();
+    CHECK_NULL_VOID(textTheme);
+
+    CalcDimension fontSize = selectTheme->GetFontSize();
     if (res[POS_0] != ERR_CODE) {
-        CalcDimension fontSize = StringUtils::StringToCalcDimension(res[POS_0], false);
-        SelectModelNG::SetSelectedOptionFontSize(frameNode, fontSize);
+        fontSize = StringUtils::StringToCalcDimension(res[POS_0], false, DimensionUnit::FP);
     }
+    SelectModelNG::SetSelectedOptionFontSize(frameNode, fontSize);
 
+    FontWeight weight = textTheme->GetTextStyle().GetFontWeight();
     if (res[POS_1] != ERR_CODE) {
-        std::string weight;
-        SelectModelNG::SetOptionFontWeight(
-            frameNode, StringUtils::StringToFontWeight(res[POS_1], FontWeight::NORMAL));
+        weight = StringUtils::StringToFontWeight(res[POS_1], FontWeight::REGULAR);
     }
+    SelectModelNG::SetSelectedOptionFontWeight(frameNode, weight);
 
+    std::vector<std::string> fontFamilies = textTheme->GetTextStyle().GetFontFamilies();
     if (res[POS_2] != ERR_CODE) {
-        SelectModelNG::SetSelectedOptionFontFamily(frameNode, Framework::ConvertStrToFontFamilies(res[POS_2]));
+        fontFamilies = Framework::ConvertStrToFontFamilies(res[POS_2]);
     }
+    SelectModelNG::SetSelectedOptionFontFamily(frameNode, fontFamilies);
 
     auto style = static_cast<Ace::FontStyle>(styleVal);
     SelectModelNG::SetSelectedOptionItalicFontStyle(frameNode, style);
 }
+
 void ResetSpace(NodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -210,18 +257,21 @@ void ResetSpace(NodeHandle node)
     Dimension space = selectTheme->GetContentSpinnerPadding();
     SelectModelNG::SetSpace(frameNode, space);
 }
+
 void ResetValue(NodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     SelectModelNG::SetValue(frameNode, "");
 }
+
 void ResetSelected(NodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     SelectModelNG::SetSelected(frameNode, DEFAULT_SELECT);
 }
+
 void ResetSelectFontColor(NodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -234,6 +284,7 @@ void ResetSelectFontColor(NodeHandle node)
     CHECK_NULL_VOID(selectTheme);
     SelectModelNG::SetFontColor(frameNode, selectTheme->GetFontColor());
 }
+
 void ResetSelectedOptionBgColor(NodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -246,6 +297,7 @@ void ResetSelectedOptionBgColor(NodeHandle node)
     CHECK_NULL_VOID(selectTheme);
     SelectModelNG::SetSelectedOptionBgColor(frameNode, selectTheme->GetSelectedColor());
 }
+
 void ResetOptionBgColor(NodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -258,6 +310,7 @@ void ResetOptionBgColor(NodeHandle node)
     CHECK_NULL_VOID(selectTheme);
     SelectModelNG::SetOptionBgColor(frameNode, selectTheme->GetBackgroundColor());
 }
+
 void ResetOptionFontColor(NodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -270,6 +323,7 @@ void ResetOptionFontColor(NodeHandle node)
     CHECK_NULL_VOID(selectTheme);
     SelectModelNG::SetOptionFontColor(frameNode, selectTheme->GetMenuFontColor());
 }
+
 void ResetSelectedOptionFontColor(NodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -282,6 +336,7 @@ void ResetSelectedOptionFontColor(NodeHandle node)
     CHECK_NULL_VOID(selectTheme);
     SelectModelNG::SetSelectedOptionFontColor(frameNode, selectTheme->GetSelectedColorText());
 }
+
 void ResetArrowPosition (NodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);

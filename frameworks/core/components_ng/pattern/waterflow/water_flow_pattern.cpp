@@ -153,6 +153,9 @@ void WaterFlowPattern::UpdateScrollBarOffset()
 
 RefPtr<LayoutAlgorithm> WaterFlowPattern::CreateLayoutAlgorithm()
 {
+    if (targetIndex_.has_value()) {
+        layoutInfo_.targetIndex_ = targetIndex_;
+    }
     auto algorithm = AceType::MakeRefPtr<WaterFlowLayoutAlgorithm>(layoutInfo_);
     algorithm->SetCanOverScroll(CanOverScroll(GetScrollSource()));
     return algorithm;
@@ -194,6 +197,7 @@ void WaterFlowPattern::OnModifyDone()
         SetScrollBar(paintProperty->GetScrollBarProperty());
     }
     SetAccessibilityAction();
+    Register2DragDropManager();
 }
 
 bool WaterFlowPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
@@ -230,9 +234,13 @@ bool WaterFlowPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
     if (onReachEnd && layoutInfo.ReachEnd(prevOffset_)) {
         onReachEnd();
     }
-    OnScrollStop(eventHub->GetOnScrollStop(), false);
+    OnScrollStop(eventHub->GetOnScrollStop());
 
     layoutInfo_ = std::move(layoutInfo);
+    if (targetIndex_.has_value()) {
+        ScrollToTargrtIndex(targetIndex_.value());
+        targetIndex_.reset();
+    }
     layoutInfo_.UpdateStartIndex();
     prevOffset_ = layoutInfo_.currentOffset_;
     UpdateScrollBarOffset();
@@ -242,6 +250,24 @@ bool WaterFlowPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
     auto property = host->GetLayoutProperty();
     CHECK_NULL_RETURN(host, false);
     return property->GetPaddingProperty() != nullptr;
+}
+
+bool WaterFlowPattern::ScrollToTargrtIndex(int32_t index)
+{
+    if (index == LAST_ITEM) {
+        auto host = GetHost();
+        CHECK_NULL_RETURN(host, false);
+        auto totalItemCount = host->TotalChildCount();
+        index = totalItemCount - 1;
+    }
+    auto crossIndex = layoutInfo_.GetCrossIndex(index);
+    if (crossIndex == -1) {
+        return false;
+    } else {
+        float targetPosition = layoutInfo_.waterFlowItems_[crossIndex][index].first;
+        ScrollablePattern::AnimateTo(targetPosition, -1, nullptr, true);
+    }
+    return true;
 }
 
 void WaterFlowPattern::CheckScrollable()
@@ -366,14 +392,22 @@ Rect WaterFlowPattern::GetItemRect(int32_t index) const
         itemGeometry->GetFrameRect().Width(), itemGeometry->GetFrameRect().Height());
 }
 
-void WaterFlowPattern::ScrollToIndex(int32_t index, bool /* smooth */, ScrollAlign /* align */)
+void WaterFlowPattern::ScrollToIndex(int32_t index, bool smooth, ScrollAlign /* align */)
 {
-    // move to layout algorithm
-    if (index == LAST_ITEM) {
-        index = layoutInfo_.childrenCount_ - 1;
-    }
+    SetScrollSource(SCROLL_FROM_JUMP);
     StopAnimate();
-    UpdateStartIndex(index);
+    if ((index >= 0) || (index == LAST_ITEM)) {
+        if (smooth) {
+            if (!ScrollToTargrtIndex(index)) {
+                targetIndex_ = index;
+                auto host = GetHost();
+                CHECK_NULL_VOID(host);
+                host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+            }
+        } else {
+            UpdateStartIndex(index);
+        }
+    }
     FireAndCleanScrollingListener();
 }
 

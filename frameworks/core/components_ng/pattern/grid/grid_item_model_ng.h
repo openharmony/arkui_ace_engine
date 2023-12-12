@@ -35,6 +35,14 @@ public:
     void SetSelected(bool selected) override;
     void SetSelectChangeEvent(std::function<void(bool)>&& changeEvent) override;
     void SetOnSelect(SelectFunc&& onSelect) override;
+
+    static void SetGridItemSelectable(FrameNode* frameNode, bool selectable);
+    static void SetGridItemSelected(FrameNode* frameNode, bool selected);
+    static void SetGridItemRowStart(FrameNode* frameNode, int32_t rowStart);
+    static void SetGridItemRowEnd(FrameNode* frameNode, int32_t rowEnd);
+    static void SetGridItemColumnStart(FrameNode* frameNode, int32_t columnStart);
+    static void SetGridItemColumnEnd(FrameNode* frameNode, int32_t columnEnd);
+
 };
 
 } // namespace OHOS::Ace::NG

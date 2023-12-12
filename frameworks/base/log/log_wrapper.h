@@ -73,79 +73,66 @@
 namespace OHOS::Ace {
 
 enum class AceLogTag : uint8_t {
-    DEFAULT = 0,
-    ACE_ALPHABET_INDEXER,
-    ACE_COUNTER,
-    ACE_SUB_WINDOW,
-    ACE_FORM,
-    ACE_DRAG,
-    ACE_VIDEO,
-    ACE_COMPONENT_SNAPSHOT,
-    ACE_CANVAS,
-    ACE_REFRESH,
-    ACE_SCROLL,
-    ACE_SCROLLABLE,
-    ACE_INNER_SCROLL_BAR,
-    ACE_OUTER_SCROLL_BAR,
-    ACE_FONT,
-    ACE_OVERLAY,
-    ACE_PROMPT_ACTION_TOAST,
-    ACE_PROMPT_ACTION_MENU,
-    ACE_DIALOG_ALERT,
-    ACE_DIALOG_TEXTPICKER,
-    ACE_DIALOG_TIMEPICKER,
-    ACE_DIALOG_DATEPICKER,
-    ACE_DIALOG,
-    ACE_PANEL,
-    ACE_MENU,
-    ACE_TEXTINPUT,
-    ACE_TEXT,
-    ACE_TEXTAREA,
-    ACE_TEXT_FIELD,
-    ACE_TEXT_CLOCK,
-    ACE_TEXT_TIMER,
-    ACE_SWIPER,
-    ACE_TABS,
-    ACE_DIVIDER,
-    ACE_BLANK,
-    ACE_GRIDROW,
-    ACE_INPUTTRACKING,
-    ACE_RICH_TEXT,
-    ACE_WEB,
-    ACE_FOCUS,
-    ACE_MOUSE,
-    ACE_GESTURE,
-    ACE_IMAGE,
-    ACE_RATING,
-    ACE_LIST,
-    ACE_NAVIGATION,
-    ACE_WATERFLOW,
-    ACE_LOADINGPROGRESS,
-    ACE_PATTERNLOCK,
-    ACE_PROGRESS,
-    ACE_QRCODE,
-    ACE_ACCESSIBILITY,
-    ACE_ROUTER,
-    ACE_THEME,
-    ACE_BORDER,
-    ACE_BORDER_IMAGE,
-    ACE_LINEAR_SPLIT,
-    ACE_GRID,
-    ACE_PLUGIN_COMPONENT,
-    ACE_UIEXTENSIONCOMPONENT,
-    ACE_IF,
-    ACE_FOREACH,
-    ACE_LAZYFOREACH,
-    ACE_GAUGE,
-    ACE_HYPERLINK,
-    ACE_ANIMATION,
-    ACE_DATE_PICKER,
-    ACE_TEXT_PICKER,
-    ACE_XCOMPONENT,
-    ACE_AUTO_FILL,
-    ACE_KEYBOARD,
-    ACE_UIEVENT,
-    ACE_DISPLAY_SYNC,
+    DEFAULT = 0,              // C03900
+    ACE_ALPHABET_INDEXER,     // C03901
+    ACE_COUNTER,              // C03902
+    ACE_SUB_WINDOW,           // C03903
+    ACE_FORM,                 // C03904
+    ACE_DRAG,                 // C03905
+    ACE_VIDEO,                // C03906
+    ACE_COMPONENT_SNAPSHOT,   // C03907
+    ACE_CANVAS,               // C03908
+    ACE_REFRESH,              // C03909
+    ACE_SCROLL,               // C0390A
+    ACE_SCROLLABLE,           // C0390B
+    ACE_FONT,                 // C0390C
+    ACE_OVERLAY,              // C0390D
+    ACE_DIALOG_TIMEPICKER,    // C0390E
+    ACE_DIALOG,               // C0390F
+    ACE_PANEL,                // C03910
+    ACE_MENU,                 // C03911
+    ACE_TEXTINPUT,            // C03912
+    ACE_TEXT,                 // C03913
+    ACE_TEXT_FIELD,           // C03914
+    ACE_SWIPER,               // C03915
+    ACE_TABS,                 // C03916
+    ACE_BLANK,                // C03917
+    ACE_GRIDROW,              // C03918
+    ACE_INPUTTRACKING,        // C03919
+    ACE_RICH_TEXT,            // C0391A
+    ACE_WEB,                  // C0391B
+    ACE_FOCUS,                // C0391C
+    ACE_MOUSE,                // C0391D
+    ACE_GESTURE,              // C0391E
+    ACE_IMAGE,                // C0391F
+    ACE_RATING,               // C03920
+    ACE_LIST,                 // C03921
+    ACE_NAVIGATION,           // C03922
+    ACE_WATERFLOW,            // C03923
+    ACE_ACCESSIBILITY,        // C03924
+    ACE_ROUTER,               // C03925
+    ACE_THEME,                // C03926
+    ACE_BORDER_IMAGE,         // C03927
+    ACE_GRID,                 // C03928
+    ACE_PLUGIN_COMPONENT,     // C03929
+    ACE_UIEXTENSIONCOMPONENT, // C0392A
+    ACE_IF,                   // C0392B
+    ACE_FOREACH,              // C0392C
+    ACE_LAZY_FOREACH,         // C0392D
+    ACE_GAUGE,                // C0392E
+    ACE_HYPERLINK,            // C0392F
+    ACE_ANIMATION,            // C03930
+    ACE_XCOMPONENT,           // C03931
+    ACE_AUTO_FILL,            // C03932
+    ACE_KEYBOARD,             // C03933
+    ACE_UIEVENT,              // C03934
+    ACE_UI_SERVICE,           // C03935 ace_engine/adapter/ohos/services/uiservice/src/ui_service_hilog.h
+    ACE_DISPLAY_SYNC,         // C03936
+    ACE_RESOURCE,             // C03937
+    ACE_SIDEBAR,              // C03938
+
+    FORM_RENDER = 255, // C039FF FormRenderer
+    END = 256,         // Last one, do not use
 };
 
 enum class LogDomain : uint32_t {

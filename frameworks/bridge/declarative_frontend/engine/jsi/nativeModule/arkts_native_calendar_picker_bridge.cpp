@@ -24,6 +24,7 @@ constexpr int NUM_1 = 1;
 constexpr int NUM_2 = 2;
 constexpr int NUM_3 = 3;
 constexpr int SIZE_OF_TWO = 2;
+constexpr Dimension DEFAULT_TEXTSTYLE_FONTSIZE = 16.0_fp;
 
 ArkUINativeModuleValue CalendarPickerBridge::SetTextStyle(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
@@ -38,21 +39,22 @@ ArkUINativeModuleValue CalendarPickerBridge::SetTextStyle(ArkUIRuntimeCallInfo* 
     Local<JSValueRef> fontSizeArg = runtimeCallInfo->GetCallArgRef(NUM_2);
     Local<JSValueRef> fontWeightArg = runtimeCallInfo->GetCallArgRef(NUM_3);
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    std::string fontSize = "16fp";
     Color textColor = calendarTheme->GetEntryFontColor();
+    if (!colorArg->IsUndefined()) {
+        ArkTSUtils::ParseJsColorAlpha(vm, colorArg, textColor);
+    }
+    CalcDimension fontSizeData(DEFAULT_TEXTSTYLE_FONTSIZE);
+    std::string fontSize = fontSizeData.ToString();
+    if (ArkTSUtils::ParseJsDimensionFp(vm, fontSizeArg, fontSizeData) && !fontSizeData.IsNegative() &&
+        fontSizeData.Unit() != DimensionUnit::PERCENT) {
+        fontSize = fontSizeData.ToString();
+    }
     std::string fontWeight = "regular";
-    uint32_t color = textColor.GetValue();
-    if (colorArg->IsNumber()) {
-        color = colorArg->Uint32Value(vm);
-    }
-    if (fontSizeArg->IsString()) {
-        fontSize = fontSizeArg->ToString(vm)->ToString();
-    }
-    if (fontWeightArg->IsString()) {
+    if (fontWeightArg->IsString() || fontWeightArg->IsNumber()) {
         fontWeight = fontWeightArg->ToString(vm)->ToString();
     }
     GetArkUIInternalNodeAPI()->GetCalendarPickerModifier().SetTextStyle(
-        nativeNode, color, fontSize.c_str(), fontWeight.c_str());
+        nativeNode, textColor.GetValue(), fontSize.c_str(), fontWeight.c_str());
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -75,14 +77,14 @@ ArkUINativeModuleValue CalendarPickerBridge::SetEdgeAlign(ArkUIRuntimeCallInfo* 
     Local<JSValueRef> dxArg = runtimeCallInfo->GetCallArgRef(NUM_2);
     Local<JSValueRef> dyArg = runtimeCallInfo->GetCallArgRef(NUM_3);
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    if (alignTypeArg->IsNumber()) {
-        auto alignType = alignTypeArg->ToNumber(vm)->Value();
+    if (!alignTypeArg->IsNull() && !alignTypeArg->IsUndefined() && alignTypeArg->IsNumber()) {
+        int alignType = alignTypeArg->ToNumber(vm)->Value();
         CalcDimension dx;
         CalcDimension dy;
-        if (dxArg->IsNumber() || dxArg->IsString()) {
+        if (!dxArg->IsNull() && !dxArg->IsUndefined()) {
             ArkTSUtils::ParseJsDimensionVp(vm, dxArg, dx);
         }
-        if (dyArg->IsNumber() || dyArg->IsString()) {
+        if (!dyArg->IsNull() && !dyArg->IsUndefined()) {
             ArkTSUtils::ParseJsDimensionVp(vm, dyArg, dy);
         }
 

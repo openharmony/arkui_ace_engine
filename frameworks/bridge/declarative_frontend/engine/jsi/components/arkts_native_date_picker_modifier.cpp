@@ -22,14 +22,16 @@
 #include "core/components/picker/picker_theme.h"
 #include "core/components_ng/pattern/picker/datepicker_model_ng.h"
 #include "core/components_ng/pattern/picker/picker_type_define.h"
+#include "core/pipeline/base/element_register.h"
 
 namespace OHOS::Ace::NG {
-constexpr int NUM_0 = 0;
-constexpr int NUM_1 = 1;
-constexpr int NUM_2 = 2;
+constexpr int POS_0 = 0;
+constexpr int POS_1 = 1;
+constexpr int POS_2 = 2;
+const char DEFAULT_DELIMITER = '|';
 const std::vector<OHOS::Ace::FontStyle> FONT_STYLES = { OHOS::Ace::FontStyle::NORMAL, OHOS::Ace::FontStyle::ITALIC };
 void SetSelectedTextStyle(
-    NodeHandle node, const char* weightChar, const char* familiesChar, const int* values, double size)
+    NodeHandle node, const char* fontInfo, uint32_t color, int32_t style)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -39,13 +41,19 @@ void SetSelectedTextStyle(
     CHECK_NULL_VOID(theme);
 
     NG::PickerTextStyle textStyle;
-    textStyle.textColor = Color(values[NUM_0]);
-    textStyle.fontSize = Dimension(size, static_cast<OHOS::Ace::DimensionUnit>(values[NUM_1]));
-    textStyle.fontStyle = FONT_STYLES[values[NUM_2]];
-    std::string weight = weightChar;
-    std::string families = familiesChar;
-    textStyle.fontWeight = Framework::ConvertStrToFontWeight(weight);
-    textStyle.fontFamily = Framework::ConvertStrToFontFamilies(families);
+    std::vector<std::string> res;
+    std::string fontValues = std::string(fontInfo);
+    StringUtils::StringSplitter(fontValues, DEFAULT_DELIMITER, res);
+    textStyle.fontSize =
+        StringUtils::StringToCalcDimension(res[POS_0], false, DimensionUnit::FP);
+    if (style >= 0 && style < static_cast<int32_t>(FONT_STYLES.size())) {
+        textStyle.fontStyle = FONT_STYLES[style];
+    } else {
+        textStyle.fontStyle = FONT_STYLES[0];
+    }
+    textStyle.fontFamily = Framework::ConvertStrToFontFamilies(res[POS_2]);
+    textStyle.fontWeight = StringUtils::StringToFontWeight(res[POS_1]);
+    textStyle.textColor = Color(color);
     DatePickerModelNG::SetSelectedTextStyle(frameNode, theme, textStyle);
 }
 
@@ -67,7 +75,7 @@ void ResetSelectedTextStyle(NodeHandle node)
 }
 
 void SetDatePickerTextStyle(
-    NodeHandle node, const char* weightChar, const char* familiesChar, const int* values, double size)
+    NodeHandle node, const char* fontInfo, uint32_t color, int32_t style)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -77,14 +85,20 @@ void SetDatePickerTextStyle(
     CHECK_NULL_VOID(theme);
 
     NG::PickerTextStyle textStyle;
-    textStyle.textColor = Color(values[NUM_0]);
-    textStyle.fontSize = Dimension(size, static_cast<OHOS::Ace::DimensionUnit>(values[NUM_1]));
-    textStyle.fontStyle = FONT_STYLES[values[NUM_2]];
-    std::string weight = weightChar;
-    std::string families = familiesChar;
-    textStyle.fontWeight = Framework::ConvertStrToFontWeight(weight);
-    textStyle.fontFamily = Framework::ConvertStrToFontFamilies(families);
-
+    std::vector<std::string> res;
+    std::string fontValues = std::string(fontInfo);
+    StringUtils::StringSplitter(fontValues, DEFAULT_DELIMITER, res);
+    
+    textStyle.fontSize =
+        StringUtils::StringToCalcDimension(res[POS_0], false, DimensionUnit::FP);
+    if (style >= 0 && style < static_cast<int32_t>(FONT_STYLES.size())) {
+        textStyle.fontStyle = FONT_STYLES[style];
+    } else {
+        textStyle.fontStyle = FONT_STYLES[0];
+    }
+    textStyle.fontFamily = Framework::ConvertStrToFontFamilies(res[POS_2]);
+    textStyle.fontWeight=StringUtils::StringToFontWeight(res[POS_1]);
+    textStyle.textColor = Color(color);
     DatePickerModelNG::SetNormalTextStyle(frameNode, theme, textStyle);
 }
 
@@ -106,7 +120,7 @@ void ResetDatePickerTextStyle(NodeHandle node)
 }
 
 void SetDisappearTextStyle(
-    NodeHandle node, const char* weightChar, const char* familiesChar, const int* values, double size)
+    NodeHandle node, const char* fontInfo, uint32_t color, int32_t style)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -116,13 +130,20 @@ void SetDisappearTextStyle(
     CHECK_NULL_VOID(theme);
 
     NG::PickerTextStyle textStyle;
-    textStyle.textColor = Color(values[NUM_0]);
-    textStyle.fontSize = Dimension(size, static_cast<OHOS::Ace::DimensionUnit>(values[NUM_1]));
-    textStyle.fontStyle = FONT_STYLES[values[NUM_2]];
-    std::string weight = weightChar;
-    std::string families = familiesChar;
-    textStyle.fontWeight = Framework::ConvertStrToFontWeight(weight);
-    textStyle.fontFamily = Framework::ConvertStrToFontFamilies(families);
+    std::vector<std::string> res;
+    std::string fontValues = std::string(fontInfo);
+    StringUtils::StringSplitter(fontValues, DEFAULT_DELIMITER, res);
+    
+    textStyle.fontSize =
+        StringUtils::StringToCalcDimension(res[POS_0], false, DimensionUnit::FP);
+    if (style >= 0 && style < static_cast<int32_t>(FONT_STYLES.size())) {
+        textStyle.fontStyle = FONT_STYLES[style];
+    } else {
+        textStyle.fontStyle = FONT_STYLES[0];
+    }
+    textStyle.fontFamily = Framework::ConvertStrToFontFamilies(res[POS_2]);
+    textStyle.fontWeight=StringUtils::StringToFontWeight(res[POS_1]);
+    textStyle.textColor = Color(color);
     DatePickerModelNG::SetDisappearTextStyle(frameNode, theme, textStyle);
 }
 

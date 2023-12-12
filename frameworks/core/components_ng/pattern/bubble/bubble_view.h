@@ -20,6 +20,7 @@
 
 #include "base/geometry/dimension.h"
 #include "base/memory/referenced.h"
+#include "base/utils/device_config.h"
 #include "base/utils/macros.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/popup_param.h"
@@ -45,6 +46,7 @@ public:
     static void UpdatePopupParam(int32_t popupId, const RefPtr<PopupParam>& param, const RefPtr<FrameNode>& targetNode);
     static void UpdateCustomPopupParam(int32_t popupId, const RefPtr<PopupParam>& param);
     static void UpdateCommonParam(int32_t popupId, const RefPtr<PopupParam>& param);
+    static void GetPopupMaxWidthAndHeight(const RefPtr<PopupParam>& param, float& popupMaxWidth, float& popupMaxHeight);
 };
 } // namespace OHOS::Ace::NG
 

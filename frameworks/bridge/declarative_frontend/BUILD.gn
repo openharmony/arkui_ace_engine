@@ -12,6 +12,7 @@
 # limitations under the License.
 
 import("//build/ohos.gni")
+import("//build/templates/abc/ohos_abc.gni")
 import("//foundation/arkui/ace_engine/ace_config.gni")
 import("//foundation/arkui/ace_engine/build/ace_ext.gni")
 import("//foundation/arkui/ace_engine/build/ace_gen_obj.gni")
@@ -25,6 +26,7 @@ template("declarative_frontend") {
     subsystem_name = ace_engine_subsystem
     part_name = ace_engine_part
     defines += invoker.defines
+    defines += [ "USE_ARK_ENGINE" ]
     configs = [ "$ace_root:ace_config" ]
 
     if (platform == "ohos_ng" || is_arkui_x) {
@@ -154,6 +156,7 @@ template("declarative_js_engine") {
       "engine/functions/js_key_function.cpp",
       "engine/functions/js_mouse_function.cpp",
       "engine/functions/js_on_area_change_function.cpp",
+      "engine/functions/js_on_child_touch_test_function.cpp",
       "engine/functions/js_page_transition_function.cpp",
       "engine/functions/js_pan_function.cpp",
       "engine/functions/js_swiper_function.cpp",
@@ -166,6 +169,7 @@ template("declarative_js_engine") {
       "jsview/dialog/js_custom_dialog_controller.cpp",
       "jsview/js_animator.cpp",
       "jsview/js_badge.cpp",
+      "jsview/js_base_node.cpp",
       "jsview/js_blank.cpp",
       "jsview/js_button.cpp",
       "jsview/js_calendar.cpp",
@@ -231,6 +235,7 @@ template("declarative_js_engine") {
       "jsview/js_navigation_stack.cpp",
       "jsview/js_navigator.cpp",
       "jsview/js_navrouter.cpp",
+      "jsview/js_node_container.cpp",
       "jsview/js_offscreen_canvas.cpp",
       "jsview/js_offscreen_rendering_context.cpp",
       "jsview/js_page_transition.cpp",
@@ -540,6 +545,8 @@ template("declarative_js_engine") {
       ":gen_obj_src_js_uicontext",
     ]
 
+    deps += [ ":x_node" ]
+
     include_dirs = [ "//foundation/window/window_manager/interfaces/innerkits" ]
 
     # add for cross_platfrom_build temporarily, shall be removed after external_deps is supported
@@ -622,6 +629,7 @@ template("declarative_js_engine_ng") {
       "engine/functions/js_key_function.cpp",
       "engine/functions/js_mouse_function.cpp",
       "engine/functions/js_on_area_change_function.cpp",
+      "engine/functions/js_on_child_touch_test_function.cpp",
       "engine/functions/js_page_transition_function.cpp",
       "engine/functions/js_pan_function.cpp",
       "engine/functions/js_swiper_function.cpp",
@@ -645,6 +653,7 @@ template("declarative_js_engine_ng") {
       "jsview/dialog/js_custom_dialog_controller.cpp",
       "jsview/js_animator.cpp",
       "jsview/js_badge.cpp",
+      "jsview/js_base_node.cpp",
       "jsview/js_blank.cpp",
       "jsview/js_button.cpp",
       "jsview/js_calendar.cpp",
@@ -707,6 +716,7 @@ template("declarative_js_engine_ng") {
       "jsview/js_navigation_stack.cpp",
       "jsview/js_navigator.cpp",
       "jsview/js_navrouter.cpp",
+      "jsview/js_node_container.cpp",
       "jsview/js_offscreen_canvas.cpp",
       "jsview/js_offscreen_rendering_context.cpp",
       "jsview/js_page_transition.cpp",
@@ -825,15 +835,11 @@ template("declarative_js_engine_ng") {
 
     if (defined(config.web_components_support) &&
         config.web_components_support) {
-      if (!is_arkui_x) {
-        sources += [
-          "jsview/js_richtext.cpp",
-          "jsview/js_web.cpp",
-          "jsview/js_web_controller.cpp",
-        ]
-      } else {
-        sources += [ "jsview/js_web.cpp" ]
-      }
+      sources += [
+        "jsview/js_richtext.cpp",
+        "jsview/js_web.cpp",
+        "jsview/js_web_controller.cpp",
+      ]
     }
 
     if (defined(config.remote_window_support) && config.remote_window_support) {
@@ -910,6 +916,8 @@ template("declarative_js_engine_ng") {
       ":gen_obj_src_js_uicontext",
     ]
 
+    deps += [ ":x_node" ]
+
     if (defined(config.enable_drag_framework) && config.enable_drag_framework &&
         defined(global_parts_info.distributeddatamgr_udmf)) {
       external_deps += [
@@ -970,4 +978,13 @@ foreach(item, ace_platforms) {
       }
     }
   }
+}
+
+ohos_abc("x_node") {
+  sources = [ "engine/jsXNode.js" ]
+  output_name = "node"
+  install_images = [ "system" ]
+  module_install_dir = "etc/abc/arkui"
+  subsystem_name = ace_engine_subsystem
+  part_name = ace_engine_part
 }

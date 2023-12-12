@@ -262,6 +262,7 @@ void SubwindowOhos::ShowPopupNG(int32_t targetId, const NG::PopupInfo& popupInfo
     auto overlayManager = context->GetOverlayManager();
     CHECK_NULL_VOID(overlayManager);
     ShowWindow(false);
+    window_->SetTouchable(true);
     ResizeWindow();
     ContainerScope scope(childContainerId_);
     overlayManager->ShowPopup(targetId, popupInfo);
@@ -505,6 +506,7 @@ void SubwindowOhos::ShowMenuNG(const RefPtr<NG::FrameNode> menuNode, int32_t tar
     CHECK_NULL_VOID(overlay);
     ShowWindow();
     ResizeWindow();
+    window_->SetTouchable(true);
     overlay->ShowMenuInSubWindow(targetId, offset, menuNode);
 }
 
@@ -709,6 +711,7 @@ RefPtr<NG::FrameNode> SubwindowOhos::ShowDialogNG(
         SubwindowManager::GetInstance()->GetDialogSubwindowInstanceId(GetSubwindowId()));
     ShowWindow();
     window_->SetFullScreen(true);
+    window_->SetTouchable(true);
     ResizeWindow();
     ContainerScope scope(childContainerId_);
     auto dialog = overlay->ShowDialog(dialogProps, std::move(buildFunc));

@@ -60,6 +60,7 @@ RefPtr<OHOS::Ace::WantWrap> CreateWantWrapFromNapiValue(JSRef<JSVal> obj);
 
 #ifdef PIXEL_MAP_SUPPORTED
 JSRef<JSVal> ConvertPixmap(const RefPtr<PixelMap>& pixelMap);
+napi_value ConvertPixmapNapi(const RefPtr<PixelMap>& pixelMap);
 #endif
 
 bool IsDisableEventVersion();

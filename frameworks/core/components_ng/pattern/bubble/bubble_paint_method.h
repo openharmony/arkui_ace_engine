@@ -106,8 +106,7 @@ private:
     void BuildBottomLinePath(RSPath& path, float arrowOffset, float radius);
     void BuildLeftLinePath(RSPath& path, float arrowOffset, float radius);
     void PaintShadow(const RSPath& path, const Shadow& shadow, RSCanvas& canvas);
-    void ClipArrowBubble(const RefPtr<FrameNode>& frameNode);
-    void ClipArrowlessBubble(const RefPtr<FrameNode>& frameNode);
+    void ClipBubbleWithPath(const RefPtr<FrameNode>& frameNode);
 
     float GetInnerBorderOffset();
     float outerBorderWidth_ = Dimension(1.0_vp).ConvertToPx();

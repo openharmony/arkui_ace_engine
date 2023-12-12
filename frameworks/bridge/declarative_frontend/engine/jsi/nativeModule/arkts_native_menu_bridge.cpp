@@ -23,7 +23,8 @@ constexpr int NUM_2 = 2;
 constexpr int NUM_3 = 3;
 constexpr int NUM_4 = 4;
 const std::string FORMAT_FONT = "%s|%s|%s";
-const int SIZE_OF_FOUR = 4;
+const std::string DEFAULT_ERR_CODE = "-1";
+const std::string DEFAULT_FAMILY = "HarmonyOS Sans";
 
 ArkUINativeModuleValue MenuBridge::SetMenuFontColor(ArkUIRuntimeCallInfo *runtimeCallInfo)
 {
@@ -38,6 +39,7 @@ ArkUINativeModuleValue MenuBridge::SetMenuFontColor(ArkUIRuntimeCallInfo *runtim
     } else {
         GetArkUIInternalNodeAPI()->GetMenuModifier().SetMenuFontColor(nativeNode, color.GetValue());
     }
+
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -56,25 +58,37 @@ ArkUINativeModuleValue MenuBridge::SetFont(ArkUIRuntimeCallInfo* runtimeCallInfo
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
-    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
-    Local<JSValueRef> thirdArg = runtimeCallInfo->GetCallArgRef(NUM_2);
-    Local<JSValueRef> fourthArg = runtimeCallInfo->GetCallArgRef(NUM_3);
-    Local<JSValueRef> fifthArg = runtimeCallInfo->GetCallArgRef(NUM_4);
+    Local<JSValueRef> sizeArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    Local<JSValueRef> weightArg = runtimeCallInfo->GetCallArgRef(NUM_2);
+    Local<JSValueRef> familyArg = runtimeCallInfo->GetCallArgRef(NUM_3);
+    Local<JSValueRef> styleArg = runtimeCallInfo->GetCallArgRef(NUM_4);
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
 
-    std::string fontSize = ArkTSUtils::GetStringFromJS(vm, secondArg);
-    std::string weight = ArkTSUtils::GetStringFromJS(vm, thirdArg);
-    std::string fontFamily = ArkTSUtils::GetStringFromJS(vm, fourthArg);
-    
-    int32_t styleVal = 0;
-    if (!fifthArg->IsNull()) {
-        styleVal = fifthArg->Int32Value(vm);
+    CalcDimension fontSize = Dimension(-1.0);
+    ArkTSUtils::ParseJsDimensionFp(vm, sizeArg, fontSize, false);
+
+    std::string weight = DEFAULT_ERR_CODE;
+    if (weightArg->IsNumber()) {
+        weight = std::to_string(weightArg->Int32Value(vm));
+    } else {
+        ArkTSUtils::ParseJsString(vm, weightArg, weight);
     }
-    
-    std::string fontInfo = StringUtils::FormatString(
-        FORMAT_FONT.c_str(), fontSize.c_str(), weight.c_str(), fontFamily.c_str());
- 
-    GetArkUIInternalNodeAPI()->GetMenuModifier().SetFont(nativeNode, fontInfo.c_str(), styleVal);
+
+    int32_t style = 0;
+    if (styleArg->IsNumber()) {
+        style = styleArg->Int32Value(vm);
+    }
+
+    std::string family = DEFAULT_FAMILY;
+    if (familyArg->IsString()) {
+        family = familyArg->ToString(vm)->ToString();
+    }
+
+    std::string fontInfo = StringUtils::FormatString(FORMAT_FONT.c_str(),
+        StringUtils::DoubleToString(fontSize.Value()).c_str(), weight.c_str(), family.c_str());
+
+    GetArkUIInternalNodeAPI()->GetMenuModifier().SetFont(
+        nativeNode, fontInfo.c_str(), style);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -98,9 +112,8 @@ ArkUINativeModuleValue MenuBridge::SetRadius(ArkUIRuntimeCallInfo* runtimeCallIn
     Local<JSValueRef> topRightArgs = runtimeCallInfo->GetCallArgRef(NUM_2);
     Local<JSValueRef> bottomLeftArgs = runtimeCallInfo->GetCallArgRef(NUM_3);
     Local<JSValueRef> bottomRightArgs = runtimeCallInfo->GetCallArgRef(NUM_4);
-    if (!topLeftArgs->IsString() && !topLeftArgs->IsNumber() && !topRightArgs->IsString() &&
-        !topRightArgs->IsNumber() && !bottomLeftArgs->IsString() && !bottomLeftArgs->IsNumber() &&
-        !bottomRightArgs->IsString() && !bottomRightArgs->IsNumber()) {
+    if (topLeftArgs->IsUndefined() && topRightArgs->IsUndefined() && bottomLeftArgs->IsUndefined() &&
+        bottomRightArgs->IsUndefined()) {
         GetArkUIInternalNodeAPI()->GetMenuModifier().ResetRadius(nativeNode);
         return panda::JSValueRef::Undefined(vm);
     }
@@ -109,27 +122,33 @@ ArkUINativeModuleValue MenuBridge::SetRadius(ArkUIRuntimeCallInfo* runtimeCallIn
     CalcDimension topRight;
     CalcDimension bottomLeft;
     CalcDimension bottomRight;
+    if (!ArkTSUtils::ParseJsDimensionVpNG(vm, topLeftArgs, topLeft, true)) {
+        topLeft = CalcDimension(0.0, DimensionUnit::VP);
+    }
 
-    ArkTSUtils::ParseJsDimensionVp(vm, topLeftArgs, topLeft);
-    ArkTSUtils::ParseJsDimensionVp(vm, topRightArgs, topRight);
-    ArkTSUtils::ParseJsDimensionVp(vm, bottomLeftArgs, bottomLeft);
-    ArkTSUtils::ParseJsDimensionVp(vm, bottomRightArgs, bottomRight);
+    if (!ArkTSUtils::ParseJsDimensionVpNG(vm, topRightArgs, topRight, true)) {
+        topRight = CalcDimension(0.0, DimensionUnit::VP);
+    }
 
-    uint32_t size = SIZE_OF_FOUR;
-    double values[size];
-    int units[size];
+    if (!ArkTSUtils::ParseJsDimensionVpNG(vm, bottomLeftArgs, bottomLeft, true)) {
+        bottomLeft = CalcDimension(0.0, DimensionUnit::VP);
+    }
 
-    values[NUM_0] = topLeft.Value();
-    units[NUM_0] = static_cast<int>(topLeft.Unit());
-    values[NUM_1] = topRight.Value();
-    units[NUM_1] = static_cast<int>(topRight.Unit());
-    values[NUM_2] = bottomLeft.Value();
-    units[NUM_2] = static_cast<int>(bottomLeft.Unit());
-    values[NUM_3] = bottomRight.Value();
-    units[NUM_3] = static_cast<int>(bottomRight.Unit());
-
-    GetArkUIInternalNodeAPI()->GetMenuModifier().SetRadius(nativeNode, values, units, SIZE_OF_FOUR);
-
+    if (!ArkTSUtils::ParseJsDimensionVpNG(vm, bottomRightArgs, bottomRight, true)) {
+        bottomRight = CalcDimension(0.0, DimensionUnit::VP);
+    }
+  
+    std::vector<double> radiusValues;
+    std::vector<int32_t> radiusUnits;
+    radiusUnits.push_back(static_cast<int>(topLeft.Unit()));
+    radiusUnits.push_back(static_cast<int>(topRight.Unit()));
+    radiusUnits.push_back(static_cast<int>(bottomLeft.Unit()));
+    radiusUnits.push_back(static_cast<int>(bottomRight.Unit()));
+    radiusValues.push_back(topLeft.Value());
+    radiusValues.push_back(topRight.Value());
+    radiusValues.push_back(bottomLeft.Value());
+    radiusValues.push_back(bottomRight.Value());
+    GetArkUIInternalNodeAPI()->GetMenuModifier().SetRadius(nativeNode, radiusValues.data(), radiusUnits.data());
     return panda::JSValueRef::Undefined(vm);
 }
 

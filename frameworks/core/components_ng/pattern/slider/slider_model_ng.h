@@ -74,22 +74,16 @@ public:
     static void SetBlockImage(
         FrameNode* frameNode, const std::string& value, const std::string& bundleName, const std::string& moduleName);
 
-    static void ResetShowTips(FrameNode* frameNode);
-    static void ResetThickness(FrameNode* frameNode);
-    static void ResetStepSize(FrameNode* frameNode);
-    static void ResetBlockType(FrameNode* frameNode);
-    static void ResetBlockShape(FrameNode* frameNode);
-    static void ResetBlockSize(FrameNode* frameNode);
-    static void ResetTrackBorderRadius(FrameNode* frameNode);
-    static void ResetStepColor(FrameNode* frameNode);
     static void ResetBlockBorderColor(FrameNode* frameNode);
     static void ResetBlockBorderWidth(FrameNode* frameNode);
-    static void ResetBlockColor(FrameNode* frameNode);
-    static void ResetTrackBackgroundColor(FrameNode* frameNode);
-    static void ResetSelectColor(FrameNode* frameNode);
-    static void ResetShowSteps(FrameNode* frameNode);
-    static void ResetBlockStyle(FrameNode* frameNode);
+    static void ResetStepColor(FrameNode* frameNode);
+    static void ResetTrackBorderRadius(FrameNode* frameNode);
+    static void ResetBlockSize(FrameNode* frameNode);
+    static void ResetBlockType(FrameNode* frameNode);
     static void ResetBlockImage(FrameNode* frameNode);
+    static void ResetBlockShape(FrameNode* frameNode);
+    static void ResetStepSize(FrameNode* frameNode);
+    static void ResetBlockColor(FrameNode* frameNode);
 
 private:
     void SetSliderValue(float value);
