@@ -711,7 +711,7 @@ void GestureEventHub::HandleOnDragStart(const GestureEvent& info)
     auto dragPreviewInfo = frameNode->GetDragPreview();
     if (info.GetSourceDevice() != SourceType::MOUSE) {
         if (dragPreviewInfo.pixelMap != nullptr || dragPreviewInfo.customNode != nullptr) {
-            dragDropInfo.pixelMap = pixelMap_;
+            dragDropInfo.pixelMap = dragPreviewPixelMap_;
             OnDragStart(info, pipeline, frameNode, dragDropInfo, event);
             return;
         }
