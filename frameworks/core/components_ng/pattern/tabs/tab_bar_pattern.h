@@ -278,6 +278,26 @@ public:
         isMaskAnimationByCreate_ = isMaskAnimationByCreate;
     }
 
+    bool IsMaskAnimationExecuted()
+    {
+        return isMaskAnimationExecuted_;
+    }
+
+    void SetMaskAnimationExecuted(bool isMaskAnimationExecuted)
+    {
+        isMaskAnimationExecuted_ = isMaskAnimationExecuted;
+    }
+
+    void SetImageColorOnIndex(int32_t index)
+    {
+        imageColorOnIndex_ = index;
+    }
+
+    std::optional<int32_t> GetImageColorOnIndex()
+    {
+        return imageColorOnIndex_;
+    }
+
     int32_t GetIndicator()
     {
         return indicator_;
@@ -324,6 +344,8 @@ public:
     }
 
     void DumpAdvanceInfo() override;
+
+    std::optional<int32_t> GetAnimationDuration();
     
 private:
     void OnModifyDone() override;
@@ -387,7 +409,7 @@ private:
     void InitTurnPageRateEvent();
     void GetIndicatorStyle(IndicatorStyle& indicatorStyle);
     float GetLeftPadding() const;
-    void SetDefaultAnimationDuration();
+    void HandleBottomTabBarAnimation(int32_t index);
 
     RefPtr<ClickEvent> clickEvent_;
     RefPtr<TouchEventImpl> touchEvent_;
@@ -396,6 +418,7 @@ private:
     RefPtr<InputEvent> hoverEvent_;
     RefPtr<SwiperController> swiperController_;
     RefPtr<ScrollEdgeEffect> scrollEffect_;
+    AnimationStartEventPtr animationStartEvent_;
     AnimationEndEventPtr animationEndEvent_;
 
     float currentOffset_ = 0.0f;
@@ -420,6 +443,8 @@ private:
     bool touching_ = false; // whether the item is in touching
     bool isHover_ = false;
     bool isMaskAnimationByCreate_ = false;
+    bool isMaskAnimationExecuted_ = false;
+    std::optional<int32_t> imageColorOnIndex_;
     std::optional<int32_t> touchingIndex_;
     std::optional<int32_t> hoverIndex_;
     TabBarStyle tabBarStyle_;

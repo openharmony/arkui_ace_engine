@@ -336,11 +336,7 @@ void JSTabs::SetIndex(int32_t index)
 void JSTabs::SetAnimationDuration(float value)
 {
     if (std::isnan(value)) {
-        auto pipelineContext = PipelineContext::GetCurrentContext();
-        CHECK_NULL_VOID(pipelineContext);
-        auto tabTheme = pipelineContext->GetTheme<TabTheme>();
-        CHECK_NULL_VOID(tabTheme);
-        TabsModel::GetInstance()->SetAnimationDuration(static_cast<float>(tabTheme->GetTabContentAnimationDuration()));
+        TabsModel::GetInstance()->SetAnimationDuration(-1);
         return;
     }
     TabsModel::GetInstance()->SetAnimationDuration(value);

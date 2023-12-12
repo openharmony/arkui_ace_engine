@@ -63,6 +63,9 @@ void TabsPattern::SetOnChangeEvent(std::function<void(const BaseEventInfo*)>&& e
 
     ChangeEvent changeEvent([weak = WeakClaim(this), tabBarNode, tabBarPattern, jsEvent = std::move(event)](
                                 int32_t index) {
+        if (tabBarPattern->IsMaskAnimationExecuted()) {
+            return;
+        }
         auto tabsNode = AceType::DynamicCast<TabsNode>(tabBarNode->GetParent());
         CHECK_NULL_VOID(tabsNode);
         auto tabsLayoutProperty = tabsNode->GetLayoutProperty<TabsLayoutProperty>();
@@ -154,6 +157,24 @@ void TabsPattern::SetOnTabBarClickEvent(std::function<void(const BaseEventInfo*)
     }
 }
 
+void TabsPattern::SetAnimationStartEvent(AnimationStartEvent&& event)
+{
+    if (animationStartEvent_) {
+        (*animationStartEvent_).swap(event);
+    } else {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto tabsNode = AceType::DynamicCast<TabsNode>(host);
+        CHECK_NULL_VOID(tabsNode);
+        auto swiperNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabs());
+        CHECK_NULL_VOID(swiperNode);
+        auto eventHub = swiperNode->GetEventHub<SwiperEventHub>();
+        CHECK_NULL_VOID(eventHub);
+        animationStartEvent_ = std::make_shared<AnimationStartEvent>(std::move(event));
+        eventHub->AddAnimationStartEvent(animationStartEvent_);
+    }
+}
+
 void TabsPattern::SetAnimationEndEvent(AnimationEndEvent&& event)
 {
     if (animationEndEvent_) {
@@ -225,10 +246,18 @@ void TabsPattern::SetOnIndexChangeEvent(std::function<void(const BaseEventInfo*)
 {
     auto tabsNode = AceType::DynamicCast<TabsNode>(GetHost());
     CHECK_NULL_VOID(tabsNode);
+    auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabBar());
+    CHECK_NULL_VOID(tabBarNode);
+    auto tabBarPattern = tabBarNode->GetPattern<TabBarPattern>();
+    CHECK_NULL_VOID(tabBarPattern);
     auto swiperNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabs());
     CHECK_NULL_VOID(swiperNode);
 
-    ChangeEvent changeEvent([jsEvent = std::move(event)](int32_t index) {
+    ChangeEvent changeEvent([tabBarPattern, jsEvent = std::move(event)](int32_t index) {
+        if (tabBarPattern->IsMaskAnimationExecuted()) {
+            return;
+        }
+
         /* js callback */
         if (jsEvent) {
             TabContentChangeEvent eventInfo(index);
@@ -364,14 +393,16 @@ void TabsPattern::BeforeCreateLayoutWrapper()
 
     auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabBar());
     CHECK_NULL_VOID(tabBarNode);
+    auto tabBarPattern = tabBarNode->GetPattern<TabBarPattern>();
+    CHECK_NULL_VOID(tabBarPattern);
+    if (!tabBarPattern->IsMaskAnimationByCreate()) {
+        return;
+    }
     auto tabBarLayoutProperty = tabBarNode->GetLayoutProperty<TabBarLayoutProperty>();
     CHECK_NULL_VOID(tabBarLayoutProperty);
     tabBarLayoutProperty->UpdateIndicator(index);
-
-    auto tabBarPattern = tabBarNode->GetPattern<TabBarPattern>();
-    CHECK_NULL_VOID(tabBarPattern);
     tabBarPattern->UpdateTextColor(index);
-
+    tabBarPattern->UpdateImageColor(index);
     auto swiperLayoutProperty = swiperNode->GetLayoutProperty<SwiperLayoutProperty>();
     CHECK_NULL_VOID(swiperLayoutProperty);
     swiperLayoutProperty->UpdateIndex(index);
