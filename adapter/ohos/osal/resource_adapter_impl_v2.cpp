@@ -185,16 +185,22 @@ bool ResourceAdapterImplV2::NeedUpdateResConfig(const std::shared_ptr<Global::Re
     }
     auto oldLocaleInfo = oldResConfig->GetLocaleInfo();
     auto newLocaleInfo = newResConfig->GetLocaleInfo();
-    auto isLocaleChange = std::string(oldLocaleInfo->getLanguage()) != std::string(newLocaleInfo->getLanguage()) ||
-        std::string(oldLocaleInfo->getScript()) != std::string(newLocaleInfo->getScript()) ||
-        std::string(oldLocaleInfo->getCountry()) != std::string(newLocaleInfo->getCountry());
+    bool isLocaleChange = false;
+    if (newLocaleInfo == nullptr) {
+        isLocaleChange = false;
+    } else if (oldLocaleInfo == nullptr) {
+        isLocaleChange = true;
+    } else {
+        isLocaleChange = std::string(oldLocaleInfo->getLanguage()) != std::string(newLocaleInfo->getLanguage()) ||
+                         std::string(oldLocaleInfo->getScript()) != std::string(newLocaleInfo->getScript()) ||
+                         std::string(oldLocaleInfo->getCountry()) != std::string(newLocaleInfo->getCountry());
+    }
 
     return oldResConfig->GetDeviceType() != newResConfig->GetDeviceType() ||
            oldResConfig->GetDirection() != newResConfig->GetDirection() ||
            oldResConfig->GetScreenDensity() != newResConfig->GetScreenDensity() ||
            oldResConfig->GetColorMode() != newResConfig->GetColorMode() ||
-           oldResConfig->GetInputDevice() != newResConfig->GetInputDevice() ||
-           isLocaleChange;
+           oldResConfig->GetInputDevice() != newResConfig->GetInputDevice() || isLocaleChange;
 }
 
 void ResourceAdapterImplV2::UpdateConfig(const ResourceConfiguration& config, bool themeFlag)
