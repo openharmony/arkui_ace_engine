@@ -691,7 +691,9 @@ void DragDropManager::FireOnDragEvent(
     CHECK_NULL_VOID(eventHub);
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
-
+    if (!eventHub->HasOnDrop() && !eventHub->HasOnItemDrop() && !eventHub->HasCustomerOnDrop()) {
+        return;
+    }
     auto extraParams = eventHub->GetDragExtraParams(extraInfo_.empty() ? extraInfo : extraInfo_, point, type);
     RefPtr<OHOS::Ace::DragEvent> event = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
     event->SetX((double)point.GetX());
