@@ -4,38 +4,30 @@ class ArkFormComponentComponent extends ArkComponent implements FormComponentAtt
     super(nativePtr);
   }
   size(value: { width: Length; height: Length }): this {
-    modifierWithKey(this._modifiersWithKeys, FormComponentSizeModifier.identity, FormComponentSizeModifier, value);
+    modifierWithKey(this._modifiersWithKeys,
+      FormComponentSizeModifier.identity, FormComponentSizeModifier, value);
     return this;
   }
 
   visibility(value: Visibility): this {
-    if (isNumber(value)) {
-      modifier(this._modifiers, FormComponentVisibilityModifier, value);
-    } else {
-      modifier(this._modifiers, FormComponentVisibilityModifier, undefined);
-    }
+    modifierWithKey(this._modifiersWithKeys,
+      FormComponentVisibilityModifier.identity, FormComponentVisibilityModifier, value);
     return this;
   }
 
   moduleName(value: string): this {
-    if (isString(value)) {
-      modifier(this._modifiers, FormComponentModuleNameModifier, value);
-    } else {
-      modifier(this._modifiers, FormComponentModuleNameModifier, undefined);
-    }
+    modifierWithKey(this._modifiersWithKeys,
+      FormComponentModuleNameModifier.identity, FormComponentModuleNameModifier, value);
     return this;
   }
   dimension(value: FormDimension): this {
-    modifierWithKey(this._modifiersWithKeys, FormComponentDimensionModifier.identity,
-      FormComponentDimensionModifier, value);
+    modifierWithKey(this._modifiersWithKeys,
+      FormComponentDimensionModifier.identity, FormComponentDimensionModifier, value);
     return this;
   }
   allowUpdate(value: boolean): this {
-    if (isBoolean(value)) {
-      modifier(this._modifiers, FormComponentAllowUpdateModifier, value);
-    } else {
-      modifier(this._modifiers, FormComponentAllowUpdateModifier, undefined);
-    }
+    modifierWithKey(this._modifiersWithKeys,
+      FormComponentAllowUpdateModifier.identity, FormComponentAllowUpdateModifier, value);
     return this;
   }
   onAcquired(callback: (info: { id: number; }) => void): this {
@@ -55,7 +47,7 @@ class ArkFormComponentComponent extends ArkComponent implements FormComponentAtt
   }
 }
 
-class FormComponentModuleNameModifier extends Modifier<string> {
+class FormComponentModuleNameModifier extends ModifierWithKey<string> {
   constructor(value: string) {
     super(value);
   }
@@ -87,7 +79,7 @@ class FormComponentDimensionModifier extends ModifierWithKey<FormDimension> {
   }
 }
 
-class FormComponentAllowUpdateModifier extends Modifier<boolean> {
+class FormComponentAllowUpdateModifier extends ModifierWithKey<boolean> {
   constructor(value: boolean) {
     super(value);
   }
@@ -121,8 +113,8 @@ class FormComponentSizeModifier extends ModifierWithKey<{ width: Length; height:
   }
 }
 
-class FormComponentVisibilityModifier extends Modifier<number> {
-  constructor(value: number) {
+class FormComponentVisibilityModifier extends ModifierWithKey<Visibility> {
+  constructor(value: Visibility) {
     super(value);
   }
   static identity: Symbol = Symbol('formComponentVisibility');

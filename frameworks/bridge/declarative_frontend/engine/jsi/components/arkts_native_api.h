@@ -596,14 +596,13 @@ struct ArkUITextpickerModifierAPI {
     void (*SetTextpickerBackgroundColor)(NodeHandle node, uint32_t color);
     void (*SetTextpickerCanLoop)(NodeHandle node, bool value);
     void (*SetTextpickerSelected)(NodeHandle node, uint32_t index);
-    void (*SetTextpickerSelectedIndex)(NodeHandle node, uint32_t *values, int size);
+    void (*SetTextpickerSelectedIndex)(NodeHandle node, uint32_t *values, int32_t size);
     void (*SetTextpickerTextStyle)(NodeHandle node, uint32_t color, const char *fontInfo, int32_t styleVal);
     void (*SetTextpickerSelectedTextStyle)(NodeHandle node, uint32_t color, const char *fontInfo, int32_t styleVal);
     void (*SetTextpickerDisappearTextStyle)(NodeHandle node, uint32_t color, const char *fontInfo, int32_t styleVal);
-    void (*SetTextpickerDefaultPickerItemHeight)(NodeHandle node, float dVal, int dUnit);
+    void (*SetTextpickerDefaultPickerItemHeight)(NodeHandle node, double dVal, int32_t dUnit);
     void (*ResetTextpickerCanLoop)(NodeHandle node);
     void (*ResetTextpickerSelected)(NodeHandle node);
-    void (*ResetTextpickerSelectedIndex)(NodeHandle node);
     void (*ResetTextpickerTextStyle)(NodeHandle node);
     void (*ResetTextpickerSelectedTextStyle)(NodeHandle node);
     void (*ResetTextpickerDisappearTextStyle)(NodeHandle node);
@@ -1408,7 +1407,8 @@ struct ArkUIFormComponentModifierAPI {
     void (*AllowUpdate)(NodeHandle node, bool value);
     void (*SetDimension)(NodeHandle node, int32_t dimension);
     void (*SetModuleName)(NodeHandle node, const char* value);
-    void (*SetFormSize)(NodeHandle node, double widthValue, int widthUnit, double heightValue, int heightUnit);
+    void (*SetFormSize)(
+        NodeHandle node, double widthValue, int32_t widthUnit, double heightValue, int32_t heightUnit);
     void (*ResetFormVisibility)(NodeHandle node);
     void (*DisallowUpdate)(NodeHandle node);
     void (*ResetDimension)(NodeHandle node);

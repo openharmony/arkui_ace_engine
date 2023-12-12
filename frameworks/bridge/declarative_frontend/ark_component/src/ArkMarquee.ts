@@ -24,11 +24,11 @@ class ArkMarqueeComponent extends ArkComponent implements MarqueeAttribute {
   onGestureJudgeBegin(callback: (gestureInfo: GestureInfo, event: BaseGestureEvent) => GestureJudgeResult): this {
     throw new Error('Method not implemented.');
   }
-  fontSize(value: Length): MarqueeAttribute {
+  fontSize(value: Length): this {
     modifierWithKey(this._modifiersWithKeys, MarqueeFontSizeModifier.identity, MarqueeFontSizeModifier, value);
     return this;
   }
-  fontColor(value: ResourceColor): MarqueeAttribute {
+  fontColor(value: ResourceColor): this {
     modifierWithKey(this._modifiersWithKeys, MarqueeFontColorModifier.identity, MarqueeFontColorModifier, value);
     return this;
   }
@@ -50,9 +50,15 @@ class ArkMarqueeComponent extends ArkComponent implements MarqueeAttribute {
   onBounce(event: () => void): this {
     throw new Error('Method not implemented.');
   }
+  onFinish(event: () => void): this {
+    throw new Error('Method not implemented.');
+  }
 }
 
 class MarqueeFontColorModifier extends ModifierWithKey<ResourceColor> {
+  constructor(value: ResourceColor) {
+    super(value);
+  }
   static identity: Symbol = Symbol('fontColor');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -71,6 +77,9 @@ class MarqueeFontColorModifier extends ModifierWithKey<ResourceColor> {
   }
 }
 class MarqueeFontSizeModifier extends ModifierWithKey<Length> {
+  constructor(value: Length) {
+    super(value);
+  }
   static identity: Symbol = Symbol("fontSize");
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -90,6 +99,9 @@ class MarqueeFontSizeModifier extends ModifierWithKey<Length> {
   }
 }
 class MarqueeAllowScaleModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
   static identity: Symbol = Symbol('allowScale');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -99,12 +111,11 @@ class MarqueeAllowScaleModifier extends ModifierWithKey<boolean> {
       GetUINativeModule().marquee.setAllowScale(node, this.value);
     }
   }
-
-  checkObjectDiff(): boolean {
-    return this.stageValue !== this.value;
-  }
 }
 class MarqueeFontWeightModifier extends ModifierWithKey<string | number | FontWeight> {
+  constructor(value: string | number | FontWeight) {
+    super(value);
+  }
   static identity: Symbol = Symbol('fontWeight');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -122,12 +133,11 @@ class MarqueeFontWeightModifier extends ModifierWithKey<string | number | FontWe
       GetUINativeModule().marquee.setFontWeight(node, fontWeightStr);
     }
   }
-
-  checkObjectDiff(): boolean {
-    return this.stageValue !== this.value;
-  }
 }
 class MarqueeFontFamilyModifier extends ModifierWithKey<string> {
+  constructor(value: string) {
+    super(value);
+  }
   static identity: Symbol = Symbol('fontFamily');
   applyPeer(node: KNode, reset: boolean): void {
       if (reset) {
@@ -136,10 +146,6 @@ class MarqueeFontFamilyModifier extends ModifierWithKey<string> {
       else {
         GetUINativeModule().marquee.setFontFamily(node, this.value);
       }
-  }
-
-  checkObjectDiff(): boolean {
-    return this.stageValue !== this.value;
   }
 }
 // @ts-ignore
