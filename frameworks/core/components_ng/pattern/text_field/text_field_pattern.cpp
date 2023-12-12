@@ -126,10 +126,6 @@ const std::string NEWLINE = "\n";
 const std::wstring WIDE_NEWLINE = StringUtils::ToWstring(NEWLINE);
 constexpr int32_t AUTO_FILL_FAILED = 1;
 
-#ifdef ENABLE_DRAG_FRAMEWORK
-constexpr Dimension INSERT_CURSOR_OFFSET = 8.0_vp;
-#endif // ENABLE_DRAG_FRAMEWORK
-
 // need to be moved to formatter
 const std::string DIGIT_WHITE_LIST = "[0-9]";
 const std::string PHONE_WHITE_LIST = "[\\d\\-\\+\\*\\#]+";
@@ -1501,18 +1497,19 @@ void TextFieldPattern::InitDragDropEvent()
                           const RefPtr<OHOS::Ace::DragEvent>& event, const std::string& extraParams) {
         auto pattern = weakPtr.Upgrade();
         CHECK_NULL_VOID(pattern);
+        auto pipeline = PipelineBase::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
+        auto theme = pipeline->GetTheme<TextFieldTheme>();
+        CHECK_NULL_VOID(theme);
         auto touchX = event->GetX();
         auto touchY = event->GetY();
         Offset offset = Offset(touchX, touchY) - Offset(pattern->textRect_.GetX(), pattern->textRect_.GetY()) -
                         Offset(pattern->parentGlobalOffset_.GetX(), pattern->parentGlobalOffset_.GetY()) -
-                        Offset(0, INSERT_CURSOR_OFFSET.ConvertToPx());
+                        Offset(0, theme->GetInsertCursorOffset().ConvertToPx());
         auto position = pattern->ConvertTouchOffsetToCaretPosition(offset);
         auto host = pattern->GetHost();
         CHECK_NULL_VOID(host);
-        auto focusHub = pattern->GetFocusHub();
-        focusHub->RequestFocusImmediately();
         pattern->SetCaretPosition(position);
-        pattern->StartTwinkling();
     };
     eventHub->SetOnDragMove(std::move(onDragMove));
 
@@ -1521,7 +1518,6 @@ void TextFieldPattern::InitDragDropEvent()
         auto pattern = weakPtr.Upgrade();
         CHECK_NULL_VOID(pattern);
         pattern->showSelect_ = false;
-        pattern->StopTwinkling();
     };
     eventHub->SetOnDragLeave(std::move(onDragLeave));
 
@@ -1746,6 +1742,10 @@ void TextFieldPattern::ScheduleCursorTwinkling()
         return;
     }
 
+    if (isCursorAlwaysDisplayed_) {
+        return;
+    }
+
     auto weak = WeakClaim(this);
     cursorTwinklingTask_.Reset([weak] {
         auto client = weak.Upgrade();
@@ -1874,6 +1874,7 @@ void TextFieldPattern::OnModifyDone()
     ProcessResponseArea();
 #ifdef ENABLE_DRAG_FRAMEWORK
     InitDragEvent();
+    Register2DragDropManager();
 #endif
     context->AddOnAreaChangeNode(host->GetId());
     if (!clipboard_ && context) {
@@ -5990,4 +5991,78 @@ void TextFieldPattern::ShowMenu()
     SetIsSingleHandle(false);
     ProcessOverlay(true, true, true);
 }
+
+#ifdef ENABLE_DRAG_FRAMEWORK
+void TextFieldPattern::HandleCursorOnDragMoved(const RefPtr<NotifyDragEvent>& notifyDragEvent)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    if (isCursorAlwaysDisplayed_) {
+        if (SystemProperties::GetDebugEnabled()) {
+            TAG_LOGI(AceLogTag::ACE_TEXT_FIELD,
+                "In OnDragMoved, the cursor has always Displayed in the textField, id:%{public}d", host->GetId());
+        }
+        return;
+    }
+    TAG_LOGI(AceLogTag::ACE_TEXT_FIELD,
+        "In OnDragMoved, the dragging node is moving in the textField, id:%{public}d", host->GetId());
+    auto focusHub = GetFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    focusHub->RequestFocusImmediately();
+    isCursorAlwaysDisplayed_ = true;
+    StartTwinkling();
+};
+
+void TextFieldPattern::HandleCursorOnDragLeaved(const RefPtr<NotifyDragEvent>& notifyDragEvent)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    TAG_LOGI(AceLogTag::ACE_TEXT_FIELD,
+        "In OnDragLeaved, the dragging node has left from the textField, id:%{public}d", host->GetId());
+    auto focusHub = GetFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    focusHub->LostFocus();
+    isCursorAlwaysDisplayed_ = false;
+    StopTwinkling();
+};
+
+void TextFieldPattern::HandleCursorOnDragEnded(const RefPtr<NotifyDragEvent>& notifyDragEvent)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto focusHub = GetFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    if (!isCursorAlwaysDisplayed_) {
+        TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "In OnDragEnded,"
+            " the released location is not in the current textField, id:%{public}d", host->GetId());
+        focusHub->LostFocus();
+        StopTwinkling();
+        return;
+    }
+    TAG_LOGI(AceLogTag::ACE_TEXT_FIELD,
+        "In OnDragEnded, the released location is in the current TextField, id:%{public}d", host->GetId());
+    focusHub->RequestFocusImmediately();
+    isCursorAlwaysDisplayed_ = false;
+    StartTwinkling();
+};
+
+void TextFieldPattern::HandleOnDragStatusCallback(
+    const DragEventType& dragEventType, const RefPtr<NotifyDragEvent>& notifyDragEvent)
+{
+    ScrollablePattern::HandleOnDragStatusCallback(dragEventType, notifyDragEvent);
+    switch (dragEventType) {
+        case DragEventType::MOVE:
+            HandleCursorOnDragMoved(notifyDragEvent);
+            break;
+        case DragEventType::LEAVE:
+            HandleCursorOnDragLeaved(notifyDragEvent);
+            break;
+        case DragEventType::DROP:
+            HandleCursorOnDragEnded(notifyDragEvent);
+            break;
+        default:
+            break;
+    }
+}
+#endif // ENABLE_DRAG_FRAMEWORK
 } // namespace OHOS::Ace::NG

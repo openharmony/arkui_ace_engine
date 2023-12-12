@@ -95,10 +95,6 @@ constexpr float DOUBLE_CLICK_INTERVAL_MS = 300.0f;
 constexpr float BOX_EPSILON = 0.5f;
 constexpr uint32_t RECORD_MAX_LENGTH = 20;
 
-#ifdef ENABLE_DRAG_FRAMEWORK
-constexpr Dimension INSERT_CURSOR_OFFSET = 8.0_vp;
-#endif // ENABLE_DRAG_FRAMEWORK
-
 const std::wstring lineSeparator = L"\n";
 // hen do ai anaylsis, we should limit the left an right limit of the string
 constexpr static int32_t AI_TEXT_RANGE_LEFT = 50;
@@ -148,6 +144,7 @@ void RichEditorPattern::OnModifyDone()
         ClearDragDropEvent();
         RemoveDragFrameNodeFromManager(host);
     }
+    Register2DragDropManager();
 #endif // ENABLE_DRAG_FRAMEWORK
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
@@ -1170,6 +1167,10 @@ void RichEditorPattern::ScheduleCaretTwinkling()
         return;
     }
 
+    if (isCursorAlwaysDisplayed_) {
+        return;
+    }
+
     auto weak = WeakClaim(this);
     caretTwinklingTask_.Reset([weak] {
         auto client = weak.Upgrade();
@@ -1784,28 +1785,27 @@ void RichEditorPattern::OnDragEnd()
     ClearRedoOperationRecords();
     UpdateSpanItemDragStatus(dragResultObjects_, false);
     dragResultObjects_.clear();
-    StartTwinkling();
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 }
 
 void RichEditorPattern::OnDragMove(const RefPtr<OHOS::Ace::DragEvent>& event)
 {
-    auto focusHub = GetHost()->GetOrCreateFocusHub();
-    CHECK_NULL_VOID(focusHub);
-    focusHub->RequestFocusImmediately();
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetTheme<RichEditorTheme>();
+    CHECK_NULL_VOID(theme);
     auto touchX = event->GetX();
     auto touchY = event->GetY();
     auto textRect = GetTextRect();
     textRect.SetTop(textRect.GetY() - std::min(baselineOffset_, 0.0f));
     Offset textOffset = { touchX - textRect.GetX() - GetParentGlobalOffset().GetX(),
-        touchY - textRect.GetY() - GetParentGlobalOffset().GetY() - INSERT_CURSOR_OFFSET.ConvertToPx() };
+        touchY - textRect.GetY() - GetParentGlobalOffset().GetY() - theme->GetInsertCursorOffset().ConvertToPx() };
     auto position = paragraphs_.GetIndex(textOffset);
     float caretHeight = 0.0f;
     SetCaretPosition(position);
     OffsetF caretOffset = CalcCursorOffsetByPosition(GetCaretPosition(), caretHeight);
     CHECK_NULL_VOID(overlayMod_);
     DynamicCast<RichEditorOverlayModifier>(overlayMod_)->SetCaretOffsetAndHeight(caretOffset, caretHeight);
-    StartTwinkling();
 
     AutoScrollParam param = { .autoScrollEvent = AutoScrollEvent::DRAG, .showScrollbar = true };
     auto localOffset = OffsetF(touchX, touchY) - parentGlobalOffset_;
@@ -5039,6 +5039,88 @@ bool RichEditorPattern::IsShowSelectMenuUsingMouse()
     CHECK_NULL_RETURN(selectOverlayManager, false);
     return selectOverlayManager->GetSelectOverlayInfo().isUsingMouse;
 }
+
+RefPtr<FocusHub> RichEditorPattern::GetFocusHub() const
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, nullptr);
+    auto focusHub = host->GetOrCreateFocusHub();
+    return focusHub;
+}
+
+#ifdef ENABLE_DRAG_FRAMEWORK
+void RichEditorPattern::HandleCursorOnDragMoved(const RefPtr<NotifyDragEvent>& notifyDragEvent)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    if (isCursorAlwaysDisplayed_) {
+        if (SystemProperties::GetDebugEnabled()) {
+            TAG_LOGI(AceLogTag::ACE_TEXT_FIELD,
+                "In OnDragMoved, the cursor has always Displayed in the textField, id:%{public}d", host->GetId());
+        }
+        return;
+    }
+    TAG_LOGI(AceLogTag::ACE_RICH_TEXT,
+        "In OnDragMoved, the dragging node is moving in the richEditor, id:%{public}d", host->GetId());
+    auto focusHub = GetFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    focusHub->RequestFocusImmediately();
+    isCursorAlwaysDisplayed_ = true;
+    StartTwinkling();
+};
+
+void RichEditorPattern::HandleCursorOnDragLeaved(const RefPtr<NotifyDragEvent>& notifyDragEvent)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    TAG_LOGI(AceLogTag::ACE_RICH_TEXT,
+        "In OnDragLeaved, the dragging node has left from richEditor, id:%{public}d", host->GetId());
+    auto focusHub = GetFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    focusHub->LostFocus();
+    isCursorAlwaysDisplayed_ = false;
+    StopTwinkling();
+};
+
+void RichEditorPattern::HandleCursorOnDragEnded(const RefPtr<NotifyDragEvent>& notifyDragEvent)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto focusHub = GetFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    if (!isCursorAlwaysDisplayed_) {
+        TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "In OnDragEnded,"
+            " the released location is not in the current richEditor, id:%{public}d", host->GetId());
+        focusHub->LostFocus();
+        StopTwinkling();
+        return;
+    }
+    TAG_LOGI(AceLogTag::ACE_RICH_TEXT,
+        "In OnDragEnded, the released location is in the current richEditor, id:%{public}d", host->GetId());
+    focusHub->RequestFocusImmediately();
+    isCursorAlwaysDisplayed_ = false;
+    StartTwinkling();
+};
+
+void RichEditorPattern::HandleOnDragStatusCallback(
+    const DragEventType& dragEventType, const RefPtr<NotifyDragEvent>& notifyDragEvent)
+{
+    ScrollablePattern::HandleOnDragStatusCallback(dragEventType, notifyDragEvent);
+    switch (dragEventType) {
+        case DragEventType::MOVE:
+            HandleCursorOnDragMoved(notifyDragEvent);
+            break;
+        case DragEventType::LEAVE:
+            HandleCursorOnDragLeaved(notifyDragEvent);
+            break;
+        case DragEventType::DROP:
+            HandleCursorOnDragEnded(notifyDragEvent);
+            break;
+        default:
+            break;
+    }
+}
+#endif // ENABLE_DRAG_FRAMEWORK
 
 void RichEditorPattern::HandleOnCameraInput()
 {

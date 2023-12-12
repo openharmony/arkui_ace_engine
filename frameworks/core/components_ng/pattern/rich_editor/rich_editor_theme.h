@@ -93,6 +93,11 @@ public:
         return padding_;
     }
 
+    const Dimension& GetInsertCursorOffset() const
+    {
+        return insertCursorOffset_;
+    }
+
 protected:
     RichEditorTheme() = default;
 
@@ -102,6 +107,9 @@ private:
     Dimension defaultCaretHeight_ = 18.5_vp;
     Dimension scrollbarMinHeight_ = 4.0_vp;
     Edge padding_;
+
+    // UX::insert cursor offset up by 8vp
+    Dimension insertCursorOffset_ = 8.0_vp;
 };
 } // namespace OHOS::Ace::NG
 
