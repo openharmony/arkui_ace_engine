@@ -107,6 +107,11 @@ int32_t InteractionImpl::EnterTextEditorArea(bool enable)
     return InteractionManager::GetInstance()->EnterTextEditorArea(enable);
 }
 
+int32_t InteractionImpl::AddPrivilege()
+{
+    return InteractionManager::GetInstance()->AddPrivilege();
+}
+
 Msdp::DeviceStatus::DragCursorStyle TranslateDragCursorStyle(OHOS::Ace::DragCursorStyleCore style)
 {
     switch (style) {
