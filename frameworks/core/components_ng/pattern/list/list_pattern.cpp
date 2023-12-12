@@ -602,7 +602,8 @@ void ListPattern::GetListItemGroupEdge(bool& groupAtStart, bool& groupAtEnd) con
     if (lastIsGroup) {
         auto itemGroup = (*childrens.rbegin())->GetPattern<ListItemGroupPattern>();
         if (itemGroup) {
-            groupAtEnd = itemGroup->GetDisplayEndIndexInGroup() == itemGroup->GetEndIndexInGroup();
+            groupAtEnd = itemGroup->GetDisplayEndIndexInGroup() == itemGroup->GetEndIndexInGroup() ||
+                         LessOrEqual(itemPosition_.rbegin()->second.endPos, contentMainSize_);
         }
     }
 }
