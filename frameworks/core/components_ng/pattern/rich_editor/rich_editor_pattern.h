@@ -196,7 +196,6 @@ public:
     void HandleSelect(CaretMoveIntent direction) override;
     bool SetCaretPosition(int32_t pos);
     int32_t GetCaretPosition();
-    int32_t GetTextContentLength();
     bool GetCaretVisible() const;
     OffsetF CalcCursorOffsetByPosition(int32_t position, float& selectLineHeight,
         bool downStreamFirst = false, bool needLineHighest = true);
@@ -223,7 +222,6 @@ public:
     int32_t AddTextSpanOperation(const TextSpanOptions& options, bool isPaste = false, int32_t index = -1);
     void AddSpanItem(const RefPtr<SpanItem>& item, int32_t offset);
     int32_t AddPlaceholderSpan(const RefPtr<UINode>& customNode, const SpanOptionBase& options);
-    RichEditorSelection GetSpansInfo(int32_t start, int32_t end, GetSpansMethod method);
     void SetSelection(int32_t start, int32_t end);
     void OnHandleMoveDone(const RectF& handleRect, bool isFirstHandle) override;
     std::u16string GetLeftTextOfCursor(int32_t number) override;
@@ -410,10 +408,8 @@ private:
     void ScrollToSafeArea() const override;
 #ifdef ENABLE_DRAG_FRAMEWORK
     void InitDragDropEvent();
+    void onDragDropAndLeave();
     void ClearDragDropEvent();
-    void UpdateSpanItemDragStatus(const std::list<ResultObject>& resultObjects, bool IsDragging);
-    NG::DragDropInfo OnDragStart(const RefPtr<OHOS::Ace::DragEvent>& event);
-    void OnDragEnd();
     void OnDragMove(const RefPtr<OHOS::Ace::DragEvent>& event);
 
     void AddDragFrameNodeToManager(const RefPtr<FrameNode>& frameNode)
@@ -442,12 +438,6 @@ private:
     int32_t GetParagraphLength(const std::list<RefPtr<UINode>>& spans) const;
     // REQUIRES: 0 <= start < end
     std::vector<RefPtr<SpanNode>> GetParagraphNodes(int32_t start, int32_t end) const;
-    RefPtr<UINode> GetChildByIndex(int32_t index) const;
-    RefPtr<SpanItem> GetSpanItemByIndex(int32_t index) const;
-    std::string GetSelectedSpanText(std::wstring value, int32_t start, int32_t end) const;
-    TextStyleResult GetTextStyleObject(const RefPtr<SpanNode>& node);
-    ResultObject GetTextResultObject(RefPtr<UINode> uinode, int32_t index, int32_t start, int32_t end);
-    ResultObject GetImageResultObject(RefPtr<UINode> uinode, int32_t index, int32_t start, int32_t end);
     void OnHover(bool isHover);
     bool RequestKeyboard(bool isFocusViewChanged, bool needStartTwinkling, bool needShowSoftKeyboard);
     void UpdateCaretInfoToController();

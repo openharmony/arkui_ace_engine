@@ -43,6 +43,8 @@
 #include "core/components_ng/pattern/text_field/text_selector.h"
 #include "core/components_ng/property/property.h"
 #include "core/pipeline_ng/ui_task_scheduler.h"
+#include "core/components_ng/pattern/rich_editor/rich_editor_selection.h"
+#include "core/components_ng/pattern/rich_editor/paragraph_manager.h"
 
 namespace OHOS::Ace::NG {
 enum class Status {DRAGGING, ON_DROP, NONE };
@@ -55,6 +57,10 @@ class TextPattern : public ScrollablePattern, public TextDragBase, public TextBa
 public:
     TextPattern() = default;
     ~TextPattern() override = default;
+
+    RichEditorSelection GetSpansInfo(int32_t start, int32_t end, GetSpansMethod method);
+
+    int32_t GetTextContentLength();
 
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override;
 
@@ -289,11 +295,23 @@ public:
     virtual void OnColorConfigurationUpdate() override;
 
 #ifdef ENABLE_DRAG_FRAMEWORK
-    DragDropInfo OnDragStart(const RefPtr<Ace::DragEvent>& event, const std::string& extraParams);
-    void OnDragMove(const RefPtr<Ace::DragEvent>& event);
+    NG::DragDropInfo OnDragStart(const RefPtr<Ace::DragEvent>& event, const std::string& extraParams);
+    DragDropInfo OnDragStartNoChild(const RefPtr<Ace::DragEvent>& event, const std::string& extraParams);
     void InitDragEvent();
+    void UpdateSpanItemDragStatus(const std::list<ResultObject>& resultObjects, bool IsDragging);
     virtual std::function<void(Offset)> GetThumbnailCallback();
+    std::list<ResultObject> dragResultObjects_;
+    void OnDragEnd();
+    void OnDragEndNoChild();
+    void CloseOperate();
+    void OnDragMove(const RefPtr<Ace::DragEvent>& event);
 #endif
+    std::string GetSelectedSpanText(std::wstring value, int32_t start, int32_t end) const;
+    TextStyleResult GetTextStyleObject(const RefPtr<SpanNode>& node);
+    RefPtr<UINode> GetChildByIndex(int32_t index) const;
+    RefPtr<SpanItem> GetSpanItemByIndex(int32_t index) const;
+    ResultObject GetTextResultObject(RefPtr<UINode> uinode, int32_t index, int32_t start, int32_t end);
+    ResultObject GetImageResultObject(RefPtr<UINode> uinode, int32_t index, int32_t start, int32_t end);
 
     const std::vector<std::string>& GetDragContents() const
     {
