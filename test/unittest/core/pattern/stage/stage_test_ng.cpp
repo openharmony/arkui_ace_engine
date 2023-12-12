@@ -597,11 +597,12 @@ HWTEST_F(StageTestNg, StageManagerTest006, TestSize.Level1)
 
     /**
      * @tc.steps: step4. Call StartTransition.
+     * @tc.expected: Start Successful.
      */
-    if (needTransition) {
-        stageManager.StartTransition(outPageNode, inPageNode, RouteType::NONE);
-        inPageNode->OnAccessibilityEvent(AccessibilityEventType::CHANGE);
-    }
+    stageManager.StartTransition(outPageNode, inPageNode, RouteType::NONE);
+    inPageNode->OnAccessibilityEvent(AccessibilityEventType::CHANGE);
+    EXPECT_EQ(stageManager.srcPageNode_, outPageNode);
+    EXPECT_EQ(stageManager.destPageNode_, inPageNode);
 }
 
 /**
