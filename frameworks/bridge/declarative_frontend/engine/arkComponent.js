@@ -14802,47 +14802,12 @@ globalThis.WaterFlow.attributeModifier = function (modifier) {
   component.applyModifierPatch();
 };
 /// <reference path='./import.ts' />
-class ArkCircleComponent extends ArkComponent {
-  constructor(nativePtr) {
-    super(nativePtr);
-  }
-  stroke(value) {
-    throw new Error('Method not implemented.');
-  }
-  fill(value) {
-    throw new Error('Method not implemented.');
-  }
-  strokeDashOffset(value) {
-    throw new Error('Method not implemented.');
-  }
-  strokeLineCap(value) {
-    throw new Error('Method not implemented.');
-  }
-  strokeLineJoin(value) {
-    throw new Error('Method not implemented.');
-  }
-  strokeMiterLimit(value) {
-    throw new Error('Method not implemented.');
-  }
-  strokeOpacity(value) {
-    throw new Error('Method not implemented.');
-  }
-  fillOpacity(value) {
-    throw new Error('Method not implemented.');
-  }
-  strokeWidth(value) {
-    throw new Error('Method not implemented.');
-  }
-  antiAlias(value) {
-    throw new Error('Method not implemented.');
-  }
-  strokeDashArray(value) {
-    throw new Error('Method not implemented.');
-  }
+class ArkCircleComponent extends ArkCommonShapeComponent {
   monopolizeEvents(monopolize) {
-    throw new Error('Method not implemented.');
+    throw new Error("Method not implemented.");
   }
 }
+
 // @ts-ignore
 globalThis.Circle.attributeModifier = function (modifier) {
   const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
@@ -14854,47 +14819,12 @@ globalThis.Circle.attributeModifier = function (modifier) {
   component.applyModifierPatch();
 };
 /// <reference path='./import.ts' />
-class ArkEllipseComponent extends ArkComponent {
-  constructor(nativePtr) {
-    super(nativePtr);
-  }
-  stroke(value) {
-    throw new Error('Method not implemented.');
-  }
-  fill(value) {
-    throw new Error('Method not implemented.');
-  }
-  strokeDashOffset(value) {
-    throw new Error('Method not implemented.');
-  }
-  strokeLineCap(value) {
-    throw new Error('Method not implemented.');
-  }
-  strokeLineJoin(value) {
-    throw new Error('Method not implemented.');
-  }
-  strokeMiterLimit(value) {
-    throw new Error('Method not implemented.');
-  }
-  strokeOpacity(value) {
-    throw new Error('Method not implemented.');
-  }
-  fillOpacity(value) {
-    throw new Error('Method not implemented.');
-  }
-  strokeWidth(value) {
-    throw new Error('Method not implemented.');
-  }
-  antiAlias(value) {
-    throw new Error('Method not implemented.');
-  }
-  strokeDashArray(value) {
-    throw new Error('Method not implemented.');
-  }
+class ArkEllipseComponent extends ArkCommonShapeComponent {
   monopolizeEvents(monopolize) {
-    throw new Error('Method not implemented.');
+    throw new Error("Method not implemented.");
   }
 }
+
 // @ts-ignore
 globalThis.Ellipse.attributeModifier = function (modifier) {
   const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
@@ -14905,6 +14835,7 @@ globalThis.Ellipse.attributeModifier = function (modifier) {
   modifier.applyNormalAttribute(component);
   component.applyModifierPatch();
 };
+
 /*
  * Copyright (c) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the 'License');
@@ -15295,50 +15226,15 @@ globalThis.Polyline.attributeModifier = function (modifier) {
   component.applyModifierPatch();
 };
 /// <reference path='./import.ts' />
-class ArkPolygonComponent extends ArkComponent {
-  constructor(nativePtr) {
-    super(nativePtr);
-  }
+class ArkPolygonComponent extends ArkCommonShapeComponent {
   points(value) {
-    throw new Error('Method not implemented.');
-  }
-  stroke(value) {
-    throw new Error('Method not implemented.');
-  }
-  fill(value) {
-    throw new Error('Method not implemented.');
-  }
-  strokeDashOffset(value) {
-    throw new Error('Method not implemented.');
-  }
-  strokeLineCap(value) {
-    throw new Error('Method not implemented.');
-  }
-  strokeLineJoin(value) {
-    throw new Error('Method not implemented.');
-  }
-  strokeMiterLimit(value) {
-    throw new Error('Method not implemented.');
-  }
-  strokeOpacity(value) {
-    throw new Error('Method not implemented.');
-  }
-  fillOpacity(value) {
-    throw new Error('Method not implemented.');
-  }
-  strokeWidth(value) {
-    throw new Error('Method not implemented.');
-  }
-  antiAlias(value) {
-    throw new Error('Method not implemented.');
-  }
-  strokeDashArray(value) {
     throw new Error('Method not implemented.');
   }
   monopolizeEvents(monopolize) {
     throw new Error('Method not implemented.');
   }
 }
+
 // @ts-ignore
 globalThis.Polygon.attributeModifier = function (modifier) {
   const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
