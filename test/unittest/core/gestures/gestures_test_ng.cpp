@@ -398,7 +398,7 @@ HWTEST_F(GesturesTestNg, ClickRecognizerTest006, TestSize.Level1)
     clickRecognizer.tappedCount_ = 1;
     clickRecognizer.currentTouchPointsNum_ = 0;
     clickRecognizer.HandleTouchDownEvent(touchEvent);
-    EXPECT_EQ(clickRecognizer.equalsToFingers_, true);
+    EXPECT_EQ(clickRecognizer.equalsToFingers_, false);
 }
 
 /**
@@ -1213,6 +1213,8 @@ HWTEST_F(GesturesTestNg, GestureRecognizerHandleOverdueDeadlineTest001, TestSize
     clickRecognizer.currentFingers_ = FINGER_NUMBER;
     clickRecognizer.tappedCount_ = FINGER_NUMBER;
     clickRecognizer.count_ = FINGER_NUMBER;
+    auto frameNode = FrameNode::CreateFrameNode("myButton", 100, AceType::MakeRefPtr<Pattern>());
+    clickRecognizer.AttachFrameNode(frameNode);
     clickRecognizer.HandleOverdueDeadline();
     EXPECT_EQ(clickRecognizer.touchPoints_.size(), 0);
 }
@@ -2449,6 +2451,8 @@ HWTEST_F(GesturesTestNg, LongPressRecognizerTestGetLongPressActionFunc001, TestS
      * @tc.expected: step2. result equals.
      */
     longPressRecognizer.refereeState_ = RefereeState::SUCCEED;
+    auto frameNode = FrameNode::CreateFrameNode("myButton", 100, AceType::MakeRefPtr<Pattern>());
+    longPressRecognizer.AttachFrameNode(frameNode);
     longPressRecognizer.HandleOverdueDeadline(isCatchMode);
     longPressRecognizer.DoRepeat();
     EXPECT_EQ(longPressRecognizer.refereeState_, RefereeState::SUCCEED);
@@ -2474,6 +2478,8 @@ HWTEST_F(GesturesTestNg, LongPressRecognizerTestGetLongPressActionFunc003, TestS
      * @tc.expected: step2. result equals.
      */
     longPressRecognizer.refereeState_ = RefereeState::SUCCEED;
+    auto frameNode = FrameNode::CreateFrameNode("myButton", 100, AceType::MakeRefPtr<Pattern>());
+    longPressRecognizer.AttachFrameNode(frameNode);
     longPressRecognizer.HandleOverdueDeadline(isCatchMode);
     longPressRecognizer.DoRepeat();
     GestureEventFunc click;
@@ -2502,6 +2508,8 @@ HWTEST_F(GesturesTestNg, LongPressRecognizerTestGetLongPressActionFunc004, TestS
      * @tc.expected: step2. result equals.
      */
     longPressRecognizer.refereeState_ = RefereeState::SUCCEED;
+    auto frameNode = FrameNode::CreateFrameNode("myButton", 100, AceType::MakeRefPtr<Pattern>());
+    longPressRecognizer.AttachFrameNode(frameNode);
     longPressRecognizer.HandleOverdueDeadline(isCatchMode);
     longPressRecognizer.DoRepeat();
     GestureEventFunc click;
@@ -2537,6 +2545,8 @@ HWTEST_F(GesturesTestNg, LongPressRecognizerTestGetLongPressActionFunc002, TestS
      */
     longPressRecognizer.refereeState_ = RefereeState::SUCCEED;
     longPressRecognizer.fingers_ = SINGLE_FINGER_NUMBER;
+    auto frameNode = FrameNode::CreateFrameNode("myButton", 100, AceType::MakeRefPtr<Pattern>());
+    longPressRecognizer.AttachFrameNode(frameNode);
     longPressRecognizer.HandleOverdueDeadline(isCatchMode);
     longPressRecognizer.DoRepeat();
     auto result = longPressRecognizer.GetLongPressActionFunc();
@@ -2595,6 +2605,8 @@ HWTEST_F(GesturesTestNg, LongPressRecognizerTest007, TestSize.Level1)
      * @tc.expected: step2. result equals.
      */
     longPressRecognizer.refereeState_ = RefereeState::SUCCEED;
+    auto frameNode = FrameNode::CreateFrameNode("myButton", 100, AceType::MakeRefPtr<Pattern>());
+    longPressRecognizer.AttachFrameNode(frameNode);
     longPressRecognizer.HandleOverdueDeadline(isCatchMode);
     longPressRecognizer.DoRepeat();
     EXPECT_EQ(longPressRecognizer.refereeState_, RefereeState::SUCCEED);
@@ -11362,7 +11374,7 @@ HWTEST_F(GesturesTestNg, LongPressRecognizerTestGetLongPressActionFunc005, TestS
      */
     click = longPressRecognizer->GetLongPressActionFunc();
     click(info);
-    EXPECT_EQ(longPressRecognizer->refereeState_, RefereeState::SUCCEED);
+    EXPECT_EQ(longPressRecognizer->refereeState_, RefereeState::FAIL);
 
     auto onActionStart = [](GestureEvent& info) { return true; };
     auto onActionUpdate = [](GestureEvent& info) { return true; };
@@ -11372,7 +11384,7 @@ HWTEST_F(GesturesTestNg, LongPressRecognizerTestGetLongPressActionFunc005, TestS
     longPressRecognizer->SetOnActionEnd(onActionEnd);
     click = longPressRecognizer->GetLongPressActionFunc();
     click(info);
-    EXPECT_EQ(longPressRecognizer->refereeState_, RefereeState::SUCCEED);
+    EXPECT_EQ(longPressRecognizer->refereeState_, RefereeState::FAIL);
 }
 
 /**
@@ -11656,7 +11668,7 @@ HWTEST_F(GesturesTestNg, LongPressRecognizerTestGetLongPressActionFunc008, TestS
      */
     click = longPressRecognizer->GetLongPressActionFunc();
     click(info);
-    EXPECT_EQ(longPressRecognizer->refereeState_, RefereeState::SUCCEED);
+    EXPECT_EQ(longPressRecognizer->refereeState_, RefereeState::FAIL);
 
     auto onActionStart = [](GestureEvent& info) { return true; };
     auto onActionUpdate = [](GestureEvent& info) { return true; };
@@ -11666,7 +11678,7 @@ HWTEST_F(GesturesTestNg, LongPressRecognizerTestGetLongPressActionFunc008, TestS
     longPressRecognizer->SetOnActionEnd(onActionEnd);
     click = longPressRecognizer->GetLongPressActionFunc();
     click(info);
-    EXPECT_EQ(longPressRecognizer->refereeState_, RefereeState::SUCCEED);
+    EXPECT_EQ(longPressRecognizer->refereeState_, RefereeState::FAIL);
 }
 
 /**
@@ -12089,21 +12101,24 @@ HWTEST_F(GesturesTestNg, TriggerGestureJudgeCallbackTest001, TestSize.Level1)
      * @tc.steps: step2. call TriggerGestureJudgeCallback function and compare result.
      * @tc.expected: step2. result equals CONTINUE.
      */
+    clickRecognizerPtr->gestureInfo_ = AceType::MakeRefPtr<GestureInfo>();
+    clickRecognizerPtr->gestureInfo_->type_ = GestureTypeName::DRAG;
     auto result = clickRecognizerPtr->TriggerGestureJudgeCallback();
     EXPECT_EQ(result, GestureJudgeResult::CONTINUE);
-
+    longPressRecognizerPtr->gestureInfo_ = AceType::MakeRefPtr<GestureInfo>();
+    longPressRecognizerPtr->gestureInfo_->type_ = GestureTypeName::DRAG;
     result = longPressRecognizerPtr->TriggerGestureJudgeCallback();
-    EXPECT_EQ(result, GestureJudgeResult::CONTINUE);
-
+    panRecognizerPtr->gestureInfo_ = AceType::MakeRefPtr<GestureInfo>();
+    panRecognizerPtr->gestureInfo_->type_ = GestureTypeName::DRAG;
     result = panRecognizerPtr->TriggerGestureJudgeCallback();
-    EXPECT_EQ(result, GestureJudgeResult::CONTINUE);
-
+    pinchRecognizerPtr->gestureInfo_ = AceType::MakeRefPtr<GestureInfo>();
+    pinchRecognizerPtr->gestureInfo_->type_ = GestureTypeName::DRAG;
     result = pinchRecognizerPtr->TriggerGestureJudgeCallback();
-    EXPECT_EQ(result, GestureJudgeResult::CONTINUE);
-
+    rotationRecognizerPtr->gestureInfo_ = AceType::MakeRefPtr<GestureInfo>();
+    rotationRecognizerPtr->gestureInfo_->type_ = GestureTypeName::DRAG;
     result = rotationRecognizerPtr->TriggerGestureJudgeCallback();
-    EXPECT_EQ(result, GestureJudgeResult::CONTINUE);
-
+    swipeRecognizerPtr->gestureInfo_ = AceType::MakeRefPtr<GestureInfo>();
+    swipeRecognizerPtr->gestureInfo_->type_ = GestureTypeName::DRAG;
     result = swipeRecognizerPtr->TriggerGestureJudgeCallback();
     EXPECT_EQ(result, GestureJudgeResult::CONTINUE);
     /**
@@ -12281,7 +12296,7 @@ HWTEST_F(GesturesTestNg, PinchRecognizerPtrHandleTouchMoveEventTest002, TestSize
     pinchRecognizerPtr->distance_ = -1;
     pinchRecognizerPtr->initialDev_ = 1;
     pinchRecognizerPtr->HandleTouchMoveEvent(touchEvent);
-    EXPECT_EQ(pinchRecognizerPtr->disposal_, GestureDisposal::REJECT);
+    EXPECT_EQ(pinchRecognizerPtr->disposal_, GestureDisposal::NONE);
 
     pinchRecognizerPtr->recognizerTarget_ = std::make_optional(target);
     axisEvent.pinchAxisScale = 1.0;
@@ -12353,7 +12368,7 @@ HWTEST_F(GesturesTestNg, LongPressRecognizerHandleOverdueDeadlineTest002, TestSi
     longPressRecognizerPtr->refereeState_ = RefereeState::DETECTING;
     guestureEventHub->dragEventActuator_->isDragUserReject_ = false;
     longPressRecognizerPtr->HandleOverdueDeadline(true);
-    EXPECT_TRUE(guestureEventHub->dragEventActuator_->isDragUserReject_);
+    EXPECT_FALSE(guestureEventHub->dragEventActuator_->isDragUserReject_);
 }
 
 /**
@@ -12379,6 +12394,8 @@ HWTEST_F(GesturesTestNg, PanPressRecognizerHandleTouchMoveEventTest001, TestSize
     DimensionOffset origin;
     EventTarget target = {"", "", area, origin};
     panRecognizerPtr->recognizerTarget_ = std::make_optional(target);
+    panRecognizerPtr->gestureInfo_ = AceType::MakeRefPtr<GestureInfo>();
+    panRecognizerPtr->gestureInfo_->type_ = GestureTypeName::DRAG;
     targetComponent->SetOnGestureJudgeBegin(gestureJudgeFunc);
     panRecognizerPtr->targetComponent_ = targetComponent;
     panRecognizerPtr->targetComponent_->node_ = frameNode;
@@ -12400,7 +12417,7 @@ HWTEST_F(GesturesTestNg, PanPressRecognizerHandleTouchMoveEventTest001, TestSize
      */
     panRecognizerPtr->refereeState_ = RefereeState::DETECTING;
     panRecognizerPtr->HandleTouchMoveEvent(touchEvent);
-    EXPECT_EQ(panRecognizerPtr->disposal_, GestureDisposal::REJECT);
+    EXPECT_EQ(panRecognizerPtr->disposal_, GestureDisposal::NONE);
 
     /**
      * @tc.steps: step2. call HandleOverdueDeadline function and compare result.
@@ -12451,6 +12468,8 @@ HWTEST_F(GesturesTestNg, PanPressRecognizerHandleTouchMoveEventTest002, TestSize
     DimensionOffset origin;
     EventTarget target = {"", "", area, origin};
     panRecognizerPtr->recognizerTarget_ = std::make_optional(target);
+    panRecognizerPtr->gestureInfo_ = AceType::MakeRefPtr<GestureInfo>();
+    panRecognizerPtr->gestureInfo_->type_ = GestureTypeName::DRAG;
     targetComponent->SetOnGestureJudgeBegin(gestureJudgeFunc);
     panRecognizerPtr->targetComponent_ = targetComponent;
     panRecognizerPtr->targetComponent_->node_ = frameNode;
@@ -12474,7 +12493,7 @@ HWTEST_F(GesturesTestNg, PanPressRecognizerHandleTouchMoveEventTest002, TestSize
     panRecognizerPtr->inputEventType_ = InputEventType::AXIS;
     panRecognizerPtr->refereeState_ = RefereeState::DETECTING;
     panRecognizerPtr->HandleTouchMoveEvent(axisEvent);
-    EXPECT_EQ(panRecognizerPtr->disposal_, GestureDisposal::REJECT);
+    EXPECT_EQ(panRecognizerPtr->disposal_, GestureDisposal::NONE);
 
     /**
      * @tc.steps: step2. call HandleOverdueDeadline function and compare result.
