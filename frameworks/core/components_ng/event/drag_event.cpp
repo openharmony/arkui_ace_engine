@@ -160,6 +160,13 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
         auto renderContext = frameNode->GetRenderContext();
         if (info.GetSourceDevice() != SourceType::MOUSE) {
             if (gestureHub->GetTextDraggable()) {
+                auto pattern = frameNode->GetPattern<TextBase>();
+                CHECK_NULL_VOID(pattern);
+                if (!pattern->IsSelected()) {
+                    dragDropManager->ResetDragging();
+                    gestureHub->SetIsTextDraggable(false);
+                    return;
+                }
                 if (gestureHub->GetIsTextDraggable()) {
                     SetTextPixelMap(gestureHub);
                 }
