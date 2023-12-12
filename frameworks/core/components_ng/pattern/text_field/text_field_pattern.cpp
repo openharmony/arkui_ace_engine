@@ -3131,7 +3131,7 @@ void TextFieldPattern::UpdateCounterTextColor()
     CHECK_NULL_VOID(textFieldLayoutProperty);
     auto textLayoutProperty = DynamicCast<TextLayoutProperty>(counterNode->GetLayoutProperty());
     CHECK_NULL_VOID(textLayoutProperty);
-    auto showBorder = textFieldLayoutProperty->GetShowHighlightBorderValue();
+    auto showBorder = textFieldLayoutProperty->GetShowHighlightBorderValue(true);
     TextStyle countTextStyle = theme->GetOverCountTextStyle();
     countTextStyle = theme->GetOverCountTextStyle();
     countTextStyle.SetTextColor(theme->GetOverCounterColor());
@@ -3162,7 +3162,7 @@ void TextFieldPattern::UpdateCounterBorderStyle(uint32_t& textLength, uint32_t& 
     auto textFieldLayoutProperty = pattern->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(textFieldLayoutProperty);
     counterChange_ = true;
-    auto showBorder = textFieldLayoutProperty->GetShowHighlightBorderValue();
+    auto showBorder = textFieldLayoutProperty->GetShowHighlightBorderValue(true);
     auto counterText = std::to_string(textLength) + "/" + std::to_string(maxLength);
     if ((textLength + ONE_CHARACTER) == maxLength && !IsTextArea() && showBorder == true) {
         SetUnderlineColor(theme->GetErrorUnderlineColor());
@@ -3242,12 +3242,10 @@ void TextFieldPattern::CleanCounterNode()
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
     auto textFieldLayoutProperty = pattern->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(textFieldLayoutProperty);
-    auto counterType = textFieldLayoutProperty->GetSetCounterValue(INVAILD_VALUE);
-    if (counterType == ILLEGAL_VALUE) {
-        auto counterNode = DynamicCast<UINode>(counterTextNode_.Upgrade());
-        CHECK_NULL_VOID(counterNode);
-        frameNode->RemoveChild(counterNode);
-    }
+    auto counterNode = DynamicCast<UINode>(counterTextNode_.Upgrade());
+    CHECK_NULL_VOID(counterNode);
+    frameNode->RemoveChild(counterNode);
+    frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
 }
 
 void TextFieldPattern::UpdateEditingValueToRecord()
@@ -3779,7 +3777,7 @@ void TextFieldPattern::UpdateAreaBorderStyle(BorderWidthProperty& currentBorderW
     CHECK_NULL_VOID(renderContext);
     auto maxLength = GetMaxLength();
     auto currentLength = static_cast<uint32_t>(contentController_->GetWideText().length());
-    auto showBorder = layoutProperty->GetShowHighlightBorderValue();
+    auto showBorder = layoutProperty->GetShowHighlightBorderValue(true);
     if ((currentLength + ONE_CHARACTER) == maxLength && showBorder == true && counterChange_ == true) {
         if (!(currentBorderWidth == overCountBorderWidth)) {
             lastDiffBorderWidth_ = currentBorderWidth;
@@ -4729,17 +4727,15 @@ void TextFieldPattern::AddCounterNode()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    if (!host->GetChildren().empty()) {
-        auto counterNode = DynamicCast<UINode>(counterTextNode_.Upgrade());
-        CHECK_NULL_VOID(counterNode);
-        host->RemoveChild(counterNode);
+    auto counterNode = DynamicCast<UINode>(counterTextNode_.Upgrade());
+    if (!counterNode) {
+        auto counterTextNode = FrameNode::GetOrCreateFrameNode(V2::TEXT_ETS_TAG,
+            ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextPattern>(); });
+        counterTextNode_ = counterTextNode;
+        counterTextNode->MountToParent(host);
+        counterTextNode->MarkModifyDone();
+        counterTextNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
     }
-    auto counterTextNode = FrameNode::GetOrCreateFrameNode(V2::TEXT_ETS_TAG,
-        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextPattern>(); });
-    counterTextNode_ = counterTextNode;
-    counterTextNode->MountToParent(host);
-    counterTextNode->MarkModifyDone();
-    counterTextNode->MarkDirtyNode();
 }
 
 void TextFieldPattern::ClearCounterNode()
@@ -5171,9 +5167,6 @@ void TextFieldPattern::RestorePreInlineStates()
     if (inlineState_.hasBorderColor) {
         renderContext->UpdateBorderColor(inlineState_.borderColor);
     }
-    if (layoutProperty->HasMaxLength()) {
-        HandleCounterBorder();
-    }
     ProcessInnerPadding();
     if (layoutProperty->GetShowUnderlineValue(false) && IsUnspecifiedOrTextType()) {
         ApplyUnderlineStates();
@@ -5240,7 +5233,7 @@ void TextFieldPattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const
     jsonShowCounter->Put("value", layoutProperty->GetShowCounterValue(false));
     auto jsonShowCounterOptions = JsonUtil::Create(true);
     auto counterType = layoutProperty->GetSetCounterValue(INVAILD_VALUE);
-    auto showBorder = layoutProperty->GetShowHighlightBorderValue();
+    auto showBorder = layoutProperty->GetShowHighlightBorderValue(true);
     jsonShowCounterOptions->Put("thresholdPercentage", counterType);
     jsonShowCounterOptions->Put("highlightBorder", showBorder);
     jsonShowCounter->Put("options", jsonShowCounterOptions);

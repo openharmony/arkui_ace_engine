@@ -214,13 +214,14 @@ void TextInputLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     if (cleanNodeResponseArea) {
         auto childIndex = frameNode->GetChildIndex(cleanNodeResponseArea->GetFrameNode());
         cleanNodeResponseArea->Layout(layoutWrapper, childIndex, unitNodeWidth);
-        // CounterNode Layout.
-        auto isInlineStyle = pattern->IsNormalInlineState();
-        if (layoutProperty->GetShowCounterValue(false) && layoutProperty->HasMaxLength() && !isInlineStyle) {
-            TextFieldLayoutAlgorithm::CounterLayout(layoutWrapper);
-        }
+    }
+    // CounterNode Layout.
+    auto isInlineStyle = pattern->IsNormalInlineState();
+    if (layoutProperty->GetShowCounterValue(false) && layoutProperty->HasMaxLength() && !isInlineStyle) {
+        TextFieldLayoutAlgorithm::CounterLayout(layoutWrapper);
     }
 }
+
 float TextInputLayoutAlgorithm::GetDefaultHeightByType(LayoutWrapper* layoutWrapper)
 {
     auto pipeline = PipelineBase::GetCurrentContext();
