@@ -39,6 +39,15 @@ public:
         return false;
     }
 
+    void OnAttachToFrameNode() override
+    {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        host->GetRenderContext()->SetClipToBounds(true);
+        SafeAreaExpandOpts opts = {.edges = SAFE_AREA_EDGE_BOTTOM, .type = SAFE_AREA_TYPE_SYSTEM };
+        host->GetLayoutProperty()->UpdateSafeAreaExpandOpts(opts);
+    }
+
     ACE_DISALLOW_COPY_AND_MOVE(NavigationContentPattern);
 };
 } // namespace OHOS::Ace::NG

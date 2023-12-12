@@ -61,7 +61,6 @@ public:
 private:
     void AddNavDestinationToNavigation(const RefPtr<UINode>& parent);
     void SetDestinationChangeEvent(const RefPtr<UINode>& parent);
-    bool CleanNodeInNavigation(const RefPtr<UINode>& parent);
 
     void ProcessDestinationChangeEvent();
 
