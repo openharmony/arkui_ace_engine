@@ -3752,7 +3752,7 @@ globalThis.GridCol.attributeModifier = function (modifier) {
   component.applyModifierPatch();
 };
 /// <reference path='./import.ts' />
-class ImageColorFilterModifier extends Modifier {
+class ImageColorFilterModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
   }
@@ -3761,8 +3761,11 @@ class ImageColorFilterModifier extends Modifier {
       GetUINativeModule().image.resetColorFilter(node);
     }
     else {
-      GetUINativeModule().image.setColorFilter(node, JSON.parse(this.value));
+      GetUINativeModule().image.setColorFilter(node, this.value);
     }
+  }
+  checkObjectDiff() {
+    return true;
   }
 }
 ImageColorFilterModifier.identity = Symbol('imageColorFilter');
@@ -4044,18 +4047,7 @@ class ArkImageComponent extends ArkComponent {
     return this;
   }
   colorFilter(value) {
-    if (isUndefined(value) || Object.prototype.toString.call(value) !== '[object Array]') {
-      modifier(this._modifiers, ImageColorFilterModifier, undefined);
-      return this;
-    }
-    if (Object.prototype.toString.call(value) === '[object Array]') {
-      let _value = value;
-      if (_value.length !== 20) {
-        modifier(this._modifiers, ImageColorFilterModifier, undefined);
-        return this;
-      }
-    }
-    modifier(this._modifiers, ImageColorFilterModifier, JSON.stringify(value));
+    modifierWithKey(this._modifiersWithKeys, ImageColorFilterModifier.identity, ImageColorFilterModifier, value);
     return this;
   }
   copyOption(value) {

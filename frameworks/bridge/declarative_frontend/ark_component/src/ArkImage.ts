@@ -1,6 +1,6 @@
 /// <reference path="./import.ts" />
-class ImageColorFilterModifier extends Modifier<string> {
-  constructor(value: string) {
+class ImageColorFilterModifier extends ModifierWithKey<ColorFilter> {
+  constructor(value: ColorFilter) {
     super(value);
   }
   static identity: Symbol = Symbol('imageColorFilter');
@@ -8,8 +8,11 @@ class ImageColorFilterModifier extends Modifier<string> {
     if (reset) {
       GetUINativeModule().image.resetColorFilter(node);
     } else {
-      GetUINativeModule().image.setColorFilter(node, JSON.parse(this.value!));
+      GetUINativeModule().image.setColorFilter(node, this.value!);
     }
+  }
+  checkObjectDiff(): boolean {
+    return true;
   }
 }
 
@@ -300,18 +303,8 @@ class ArkImageComponent extends ArkComponent implements ImageAttribute {
   }
 
   colorFilter(value: ColorFilter): this {
-    if (isUndefined(value) || Object.prototype.toString.call(value) !== '[object Array]') {
-      modifier(this._modifiers, ImageColorFilterModifier, undefined);
-      return this;
-    }
-    if (Object.prototype.toString.call(value) === '[object Array]') {
-      let _value: number[] = <number[]>value;
-      if (_value.length !== 20) {
-        modifier(this._modifiers, ImageColorFilterModifier, undefined);
-        return this;
-      }
-    }
-    modifier(this._modifiers, ImageColorFilterModifier, JSON.stringify(value));
+    modifierWithKey(this._modifiersWithKeys, ImageColorFilterModifier.identity,
+      ImageColorFilterModifier, value);
     return this;
   }
   copyOption(value: CopyOptions): this {

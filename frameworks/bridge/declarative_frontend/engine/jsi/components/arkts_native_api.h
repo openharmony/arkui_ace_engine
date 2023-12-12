@@ -852,7 +852,7 @@ struct ArkUIImageModifierAPI {
     void (*ResetAlt)(NodeHandle node);
     void (*SetImageInterpolation)(NodeHandle node, int32_t value);
     void (*ResetImageInterpolation)(NodeHandle node);
-    void (*SetColorFilter)(NodeHandle node, float *array, int length);
+    void (*SetColorFilter)(NodeHandle node, const float *array, int length);
     void (*ResetColorFilter)(NodeHandle node);
     void (*SetImageSyncLoad)(NodeHandle node, bool syncLoadValue);
     void (*ResetImageSyncLoad)(NodeHandle node);
