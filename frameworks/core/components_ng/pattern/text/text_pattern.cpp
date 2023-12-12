@@ -1333,7 +1333,6 @@ void TextPattern::OnModifyDone()
         SetAccessibilityAction();
     } else {
         if (host->IsDraggable() || gestureEventHub->GetTextDraggable()) {
-            host->SetDraggable(false);
             gestureEventHub->SetTextDraggable(false);
         }
     }
