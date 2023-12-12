@@ -355,14 +355,16 @@ bool IsExecutingWithDragAction(DragControllerAsyncCtx* asyncCtx)
     return (asyncCtx->isArray && asyncCtx->argc == 2);
 }
 
-napi_value CreateCallbackErrorValue(napi_env env, int32_t errCode)
+napi_value CreateCallbackErrorValue(napi_env env, int32_t errCode, const std::string& errMsg = "")
 {
-    napi_value jsObject = nullptr;
-    napi_value jsValue = nullptr;
-    NAPI_CALL(env, napi_create_int32(env, errCode, &jsValue));
-    NAPI_CALL(env, napi_create_object(env, &jsObject));
-    NAPI_CALL(env, napi_set_named_property(env, jsObject, "code", jsValue));
-    return jsObject;
+    napi_value code = nullptr;
+    std::string strCode = std::to_string(errCode);
+    napi_create_string_utf8(env, strCode.c_str(), strCode.length(), &code);
+    napi_value msg = nullptr;
+    napi_create_string_utf8(env, errMsg.c_str(), errMsg.length(), &msg);
+    napi_value error = nullptr;
+    napi_create_error(env, code, msg, &error);
+    return error;
 }
 
 double ConvertToPx(DragControllerAsyncCtx* asyncCtx, const Dimension& dimension, double size)
@@ -528,7 +530,7 @@ void HandleSuccess(DragControllerAsyncCtx* asyncCtx, const DragNotifyMsg& dragNo
         TaskExecutor::TaskType::JS);
 }
 
-void HandleFail(DragControllerAsyncCtx* asyncCtx, int32_t errorCode)
+void HandleFail(DragControllerAsyncCtx* asyncCtx, int32_t errorCode, const std::string& errMsg = "")
 {
     CHECK_NULL_VOID(asyncCtx);
     bool hasHandle = false;
@@ -541,7 +543,7 @@ void HandleFail(DragControllerAsyncCtx* asyncCtx, int32_t errorCode)
         return;
     }
     napi_value result[2] = { nullptr };
-    result[0] = CreateCallbackErrorValue(asyncCtx->env, errorCode);
+    result[0] = CreateCallbackErrorValue(asyncCtx->env, errorCode, errMsg);
     if (asyncCtx->callbackRef) {
         napi_value ret = nullptr;
         napi_value napiCallback = nullptr;
@@ -742,6 +744,9 @@ void OnComplete(DragControllerAsyncCtx* asyncCtx)
             if (!asyncCtx->hasTouchPoint) {
                 x = -width * PIXELMAP_WIDTH_RATE;
                 y = -height * PIXELMAP_HEIGHT_RATE;
+            } else if (x < 0 || y < 0 || x > static_cast<double>(width) || y > static_cast<double>(height)) {
+                HandleFail(asyncCtx, Framework::ERROR_CODE_PARAM_INVALID, "touchPoint's coordinate out of range");
+                return;
             }
             Msdp::DeviceStatus::ShadowInfo shadowInfo { asyncCtx->pixelMap, -x, -y  };
             Msdp::DeviceStatus::DragData dragData { { shadowInfo }, {}, udKey, "", "",
