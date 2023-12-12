@@ -42,15 +42,12 @@ namespace {
 
 constexpr int32_t ROTATION_DIVISOR = 64;
 
-bool IsMMIMouseScrollBegin(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
+bool IsMMIMouseScrollBegin(const AxisEvent& event)
 {
-    if (pointerEvent->GetPointerAction() != OHOS::MMI::PointerEvent::POINTER_ACTION_AXIS_BEGIN ||
-        pointerEvent->GetSourceType() != OHOS::MMI::PointerEvent::SOURCE_TYPE_MOUSE) {
+    if (event.sourceType != SourceType::MOUSE || event.sourceTool != SourceTool::MOUSE) {
         return false;
     }
-    double x = pointerEvent->GetAxisValue(MMI::PointerEvent::AxisType::AXIS_TYPE_SCROLL_HORIZONTAL);
-    double y = pointerEvent->GetAxisValue(MMI::PointerEvent::AxisType::AXIS_TYPE_SCROLL_VERTICAL);
-    return !(NearZero(x) && NearZero(y));
+    return !(NearZero(event.horizontalAxis) && NearZero(event.verticalAxis));
 }
 } // namespace
 
@@ -393,12 +390,13 @@ void AceViewOhos::ProcessAxisEvent(const std::shared_ptr<MMI::PointerEvent>& poi
         LOGD("Mark %{public}d id Axis Event Processed", pointerEvent->GetPointerId());
         pointerEvent->MarkProcessed();
     };
+    ConvertAxisEvent(pointerEvent, event);
     
     /* The first step of axis event of mouse is equivalent to touch event START + UPDATE.
      * Create a fake UPDATE event here to adapt to axis event of mouse.
      * e.g {START, END} turns into {START, UPDATE, END}.
      */
-    if (IsMMIMouseScrollBegin(pointerEvent)) {
+    if (IsMMIMouseScrollBegin(event)) {
         auto fakeAxisStart = std::make_shared<MMI::PointerEvent>(*pointerEvent);
         fakeAxisStart->SetAxisValue(MMI::PointerEvent::AxisType::AXIS_TYPE_SCROLL_VERTICAL, 0.0);
         fakeAxisStart->SetAxisValue(MMI::PointerEvent::AxisType::AXIS_TYPE_SCROLL_HORIZONTAL, 0.0);
@@ -408,11 +406,8 @@ void AceViewOhos::ProcessAxisEvent(const std::shared_ptr<MMI::PointerEvent>& poi
         auto fakeAxisUpdate = std::make_shared<MMI::PointerEvent>(*pointerEvent);
         fakeAxisUpdate->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_AXIS_UPDATE);
         ConvertAxisEvent(fakeAxisUpdate, event);
-        axisEventCallback_(event, markProcess);
-    } else {
-        ConvertAxisEvent(pointerEvent, event);
-        axisEventCallback_(event, markProcess);
     }
+    axisEventCallback_(event, markProcess);
 }
 
 bool AceViewOhos::ProcessKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent)
