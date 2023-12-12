@@ -227,7 +227,6 @@ void OptionPattern::OnPress(const TouchEventInfo& info)
     auto theme = pipeline->GetTheme<SelectTheme>();
     // enter press status
     if (touchType == TouchType::DOWN) {
-        LOGD("triggers option press");
         // change background color, update press status
         SetBgBlendColor(theme->GetClickedColor());
         PlayBgColorAnimation(false);

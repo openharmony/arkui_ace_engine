@@ -47,7 +47,6 @@ void IndexerListComponent::AppendChild(const RefPtr<Component>& child)
         RefPtr<ListItemComponent> listItem = AceType::DynamicCast<ListItemComponent>(composedItem->GetChild());
         if (listItem) {
             int32_t itemIndex = indexer_->AddItemIndexKey(listItem->GetIndexKey(), listItem->GetType());
-            LOGD("[indexer] AppendChild key:%{public}s, index:%{public}d", listItem->GetIndexKey().c_str(), itemIndex);
             list_->InsertChild(itemIndex, child);
         }
     }
@@ -75,7 +74,6 @@ void IndexerListComponent::BuildChildren()
     children.emplace_back(list_);
     children.emplace_back(indexer_);
 
-    LOGD("[indexer] SetRightToLeft: %d", isRightToLeft_);
     if (isRightToLeft_) {
         stack_ = AceType::MakeRefPtr<StackComponent>(Alignment::CENTER_LEFT, StackFit::KEEP, Overflow::CLIP, children);
     } else {

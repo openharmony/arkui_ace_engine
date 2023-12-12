@@ -235,15 +235,9 @@ void CounterModelNG::SetWidth(const Dimension& value)
     layoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(value), std::nullopt));
 }
 
-void CounterModelNG::SetControlWidth(const Dimension& value)
-{
-    TAG_LOGD(AceLogTag::ACE_COUNTER, "Counter is not support SetControlWidth");
-}
+void CounterModelNG::SetControlWidth(const Dimension& value) {}
 
-void CounterModelNG::SetStateChange(bool value)
-{
-    TAG_LOGD(AceLogTag::ACE_COUNTER, "Counter is not support SetStateChange");
-}
+void CounterModelNG::SetStateChange(bool value) {}
 
 void CounterModelNG::SetBackgroundColor(const Color& value)
 {

@@ -72,7 +72,6 @@ void ActionSheetComponent::BuildMenu(const RefPtr<ColumnComponent>& column)
 {
     auto sheetsInfo = properties_.sheetsInfo;
     if (sheetsInfo.empty()) {
-        LOGD("sheet info is empty");
         return;
     }
 

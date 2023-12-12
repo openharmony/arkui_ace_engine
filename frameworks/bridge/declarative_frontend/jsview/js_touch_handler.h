@@ -36,10 +36,7 @@ private:
 
 public:
     JSTouchHandler() = default;
-    virtual ~JSTouchHandler()
-    {
-        LOGD("Destroy: JSTouchHandler");
-    }
+    virtual ~JSTouchHandler() {}
 
     virtual RefPtr<OHOS::Ace::SingleChild> CreateComponent(const JSCallbackInfo& args);
 

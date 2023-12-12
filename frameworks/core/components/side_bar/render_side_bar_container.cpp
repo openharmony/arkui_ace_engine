@@ -338,7 +338,6 @@ void RenderSideBarContainer::PerformLayout()
     Size maxSize = GetLayoutParam().GetMaxSize();
     auto children = GetChildren();
     if (children.empty()) {
-        LOGD("RenderSideBarContainer: No child in SideBarContainer. Use max size of LayoutParam.");
         SetLayoutSize(maxSize);
         return;
     }

@@ -33,7 +33,6 @@ void RosenRenderGridScroll::Update(const RefPtr<Component>& component)
 
 void RosenRenderGridScroll::Paint(RenderContext& context, const Offset& offset)
 {
-    LOGD("Paint %{public}lf  %{public}lf", GetLayoutSize().Width(), GetLayoutSize().Height());
     RenderNode::Paint(context, offset);
 
     // Notify scroll bar to update.

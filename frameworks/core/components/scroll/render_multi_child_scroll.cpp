@@ -70,7 +70,6 @@ void RenderMultiChildScroll::ProcessScrollExtent()
     }
 
     if (mainScrollExtent_ - scrollBarExtent_ > MIN_EXTENT && !scrollBarExtentFlag_) {
-        LOGD("ScrollBar is animating.");
         scrollBarExtentFlag_ = true;
         auto animation =
             AceType::MakeRefPtr<CurveAnimation<double>>(scrollBarExtent_, mainScrollExtent_, Curves::SHARP);
@@ -313,7 +312,6 @@ void RenderMultiChildScroll::Update(const RefPtr<Component>& component)
                 AceAsyncEvent<void(std::shared_ptr<ScrollEventInfo>&)>::Create(listComponent->GetOnScroll(),
                 GetContext()));
             positionController_->SetScrollNode(AceType::WeakClaim(this));
-            LOGD("initial position: %{public}lf, %{public}lf", currentOffset_.GetX(), currentOffset_.GetY());
         }
     }
     if (positionController_) {
@@ -374,9 +372,6 @@ void RenderMultiChildScroll::OnPredictLayout(int64_t deadline)
         double mainExtent = GetMainSize(viewPort_);
         double layoutHead = 0.0;
         double layoutTail = mainExtent;
-        LOGD("RenderMultiChildScroll OnPredictLayout:cacheExtent_: %{public}lf, mainOffset is: %{public}lf, layoutTail "
-             "is: %{public}lf",
-            cacheExtent_, mainOffset, layoutTail);
         if (IsRowReverse() || IsColReverse()) {
             layoutHead = layoutHead - cacheExtent_ + mainOffset;
             layoutTail = layoutTail + cacheExtent_ + mainOffset;
@@ -427,9 +422,6 @@ bool RenderMultiChildScroll::LayoutChild(
     double layoutHead = 0.0;
     double layoutTail = mainExtent;
 
-    LOGD("RenderMultiChildScroll ayoutChild:cacheExtent_: %{public}lf, mainOffset is: %{public}lf, layoutTail is: "
-         "%{public}lf",
-        cacheExtent_, mainOffset, layoutTail);
     if (IsRowReverse() || IsColReverse()) {
         layoutHead = layoutHead - cacheExtent_ + mainOffset;
         layoutTail = layoutTail + cacheExtent_ + mainOffset;
@@ -485,7 +477,6 @@ void RenderMultiChildScroll::PerformLayout()
         }
     }
 
-    LOGD("ViewPort:%{public}s Offset:%{public}s", viewPort_.ToString().c_str(), currentOffset_.ToString().c_str());
     offsetBeforeLayout_ = GetMainOffset(currentOffset_);
     LayoutChild();
     CalculateMainScrollExtent();
@@ -586,12 +577,10 @@ bool RenderMultiChildScroll::IsReadyToJump() const
 void RenderMultiChildScroll::ApplyGradientColor()
 {
     if (scrollable_ && !scrollable_->Available()) {
-        LOGD("list not scrollable");
         return;
     }
 
     if (!gradientWidth_.IsValid()) {
-        LOGD("not config gradient width");
         return;
     }
 
@@ -620,7 +609,6 @@ void RenderMultiChildScroll::ApplyGradientColor()
     }
 
     if (!IsAtTop()) {
-        LOGD("apply top");
         GradientColor start;
         start.SetColor(backgroundColor_);
         start.SetDimension(Dimension(0.0));
@@ -636,7 +624,6 @@ void RenderMultiChildScroll::ApplyGradientColor()
     }
 
     if (!IsAtBottom()) {
-        LOGD("apply bottom");
         GradientColor start;
         Color startColor = backgroundColor_;
         startColor = startColor.ChangeAlpha(0);
@@ -877,10 +864,6 @@ void RenderMultiChildScroll::NotifyDragUpdate(double dragOffset, int32_t source)
         } else {
             currentOffset_ += Offset(0.0, -delta);
         }
-        if (!NearZero(delta)) {
-            LOGD("Fix offset when drag update. currentOffset: %{public}s, delta: %{public}.1lf",
-                currentOffset_.ToString().c_str(), delta);
-        }
     }
 }
 
@@ -900,10 +883,6 @@ void RenderMultiChildScroll::ProcessScrollOverCallback(double velocity)
         } else {
             currentOffset_ += Offset(0.0, -delta);
         }
-        if (!NearZero(delta)) {
-            LOGD("Fix offset when scroll over. currentOffset: %{public}s, delta: %{public}.1lf",
-                currentOffset_.ToString().c_str(), delta);
-        }
     }
 }
 
@@ -921,8 +900,6 @@ double RenderMultiChildScroll::GetMainScrollExtent() const
 
 double RenderMultiChildScroll::GetFixPositionOnWatch(double destination, double current)
 {
-    LOGD("current(%{public}lf), distance(%{public}lf), viewport(%{public}lf)",
-        GetMainOffset(currentOffset_), destination - current, GetMainSize(viewPort_));
     auto listBase = AceType::DynamicCast<RenderList>(GetLastChild());
     if (!listBase) {
         return destination;
@@ -979,9 +956,6 @@ bool RenderMultiChildScroll::IsOutOfBottomBoundary()
     auto listBase = AceType::DynamicCast<RenderList>(child);
     if (listBase) {
         tailOffset = mainScrollExtent_ + listBase->GetTailAnimationValue();
-        LOGD("IsOutOfBottomBoundary. offset_: %{public}.3lf, tailOffset: %{public}.3lf, viewPort: %{public}.3lf, "
-             "mainScrollExtent_: %{public}.3lf, ReachMaxCount: %{public}d",
-            GetMainOffset(currentOffset_), tailOffset, GetMainSize(viewPort_), mainScrollExtent_, ReachMaxCount());
     }
     if (IsRowReverse() || IsColReverse()) {
         return headOffset <= (GetMainSize(viewPort_) - tailOffset) && ReachMaxCount();
@@ -997,8 +971,6 @@ bool RenderMultiChildScroll::IsOutOfTopBoundary()
     auto listBase = AceType::DynamicCast<RenderList>(child);
     if (listBase) {
         headOffset = GetMainOffset(currentOffset_) - listBase->GetHeadAnimationValue();
-        LOGD("IsOutOfTopBoundary. offset_: %{public}.3lf, headOffset: %{public}.3lf", GetMainOffset(currentOffset_),
-            headOffset);
     }
     if (IsRowReverse() || IsColReverse()) {
         return headOffset >= 0.0;

@@ -444,7 +444,6 @@ bool IndexerComponent::RemoveSectionHead(int32_t index)
 {
     bool ret = false;
     if (GetCircleMode()) {
-        LOGD("[indexer] RemoveSectionHead Circle Mode, cancel section head Delete");
         return ret;
     }
 

@@ -45,7 +45,6 @@ bool DataDetectorLoader::Init(std::string libPath)
         Close();
         return false;
     }
-    LOGD("Loaded engine from %s", libPath.c_str());
     return true;
 }
 

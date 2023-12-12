@@ -57,8 +57,6 @@ int32_t LazyLayoutWrapperBuilder::OnGetTotalCount()
 
 RefPtr<LayoutWrapper> LazyLayoutWrapperBuilder::OnGetOrCreateWrapperByIndex(int32_t index)
 {
-    LOGD("OnGetOrCreateWrapperByIndex index: %{private}d startIndex: %{private}d endIndex: %{private}d", index,
-        startIndex_.value_or(-1), endIndex_.value_or(-1));
     auto totalCount = GetTotalCount();
     if ((index < 0) || (index >= totalCount)) {
         LOGE("index is illegal: %{public}d", index);

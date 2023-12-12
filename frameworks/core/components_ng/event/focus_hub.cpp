@@ -417,8 +417,6 @@ void FocusHub::RemoveChild(const RefPtr<FocusHub>& focusNode, BlurReason reason)
 
 void FocusHub::SetParentFocusable(bool parentFocusable)
 {
-    TAG_LOGD(AceLogTag::ACE_FOCUS, "Set node: %{public}s/%{public}d parentFocusable from %{public}d to %{public}d",
-        GetFrameName().c_str(), GetFrameId(), parentFocusable_, parentFocusable);
     parentFocusable_ = parentFocusable;
     auto focusableNode = IsFocusableNode();
     if (focusableNode) {
@@ -458,8 +456,6 @@ bool FocusHub::IsFocusableNode()
 
 void FocusHub::SetFocusable(bool focusable)
 {
-    TAG_LOGD(AceLogTag::ACE_FOCUS, "Set node: %{public}s/%{public}d focusable from %{public}d to %{public}d",
-        GetFrameName().c_str(), GetFrameId(), focusable_, focusable);
     if (focusable_ == focusable) {
         return;
     }
@@ -478,8 +474,6 @@ bool FocusHub::IsEnabled() const
 
 void FocusHub::SetEnabled(bool enabled)
 {
-    TAG_LOGD(AceLogTag::ACE_FOCUS, "Set node: %{public}s/%{public}d enabled to %{public}d", GetFrameName().c_str(),
-        GetFrameId(), enabled);
     if (!enabled) {
         RemoveSelf(BlurReason::FOCUS_SWITCH);
     }
@@ -518,8 +512,6 @@ bool FocusHub::IsShow() const
 
 void FocusHub::SetShow(bool show)
 {
-    TAG_LOGD(AceLogTag::ACE_FOCUS, "Set node: %{public}s/%{public}d show to %{public}d", GetFrameName().c_str(),
-        GetFrameId(), show);
     if (!show) {
         RemoveSelf(BlurReason::FOCUS_SWITCH);
     }
@@ -562,8 +554,6 @@ bool FocusHub::IsCurrentFocusWholePath()
 
 void FocusHub::SetIsFocusOnTouch(bool isFocusOnTouch)
 {
-    TAG_LOGD(AceLogTag::ACE_FOCUS, "Set node: %{public}s/%{public}d focusOnTouch to %{public}d", GetFrameName().c_str(),
-        GetFrameId(), isFocusOnTouch);
     if (!focusCallbackEvents_) {
         focusCallbackEvents_ = MakeRefPtr<FocusCallbackEvents>();
     }
@@ -599,8 +589,6 @@ void FocusHub::SetIsFocusOnTouch(bool isFocusOnTouch)
 
 void FocusHub::SetIsDefaultFocus(bool isDefaultFocus)
 {
-    TAG_LOGD(AceLogTag::ACE_FOCUS, "Set node: %{public}s/%{public}d defaultFocus to %{public}d", GetFrameName().c_str(),
-        GetFrameId(), isDefaultFocus);
     if (!focusCallbackEvents_) {
         focusCallbackEvents_ = MakeRefPtr<FocusCallbackEvents>();
     }
@@ -661,11 +649,10 @@ bool FocusHub::OnKeyEventNode(const KeyEvent& keyEvent)
     bool isBypassInner = keyEvent.IsKey({ KeyCode::KEY_TAB }) && pipeline && pipeline->IsTabJustTriggerOnKeyEvent();
     if (!isBypassInner && !onKeyEventsInternal_.empty()) {
         retInternal = ProcessOnKeyEventInternal(keyEvent);
+        TAG_LOGI(AceLogTag::ACE_FOCUS,
+            "OnKeyEventInteral: Node %{public}s/%{public}d handle KeyEvent(%{public}d, %{public}d) return: %{public}d",
+            GetFrameName().c_str(), GetFrameId(), keyEvent.code, keyEvent.action, retInternal);
     }
-    TAG_LOGD(AceLogTag::ACE_FOCUS,
-        "OnKeyEventInteral: Node %{public}s/%{public}d consume KeyEvent(code:%{public}d, action:%{public}d) return: "
-        "%{public}d",
-        GetFrameName().c_str(), GetFrameId(), keyEvent.code, keyEvent.action, retInternal);
 
     auto info = KeyEventInfo(keyEvent);
     if (pipeline &&
@@ -677,11 +664,10 @@ bool FocusHub::OnKeyEventNode(const KeyEvent& keyEvent)
     if (onKeyEventCallback) {
         onKeyEventCallback(info);
         retCallback = info.IsStopPropagation();
+        TAG_LOGI(AceLogTag::ACE_FOCUS,
+            "OnKeyEventUser: Node %{public}s/%{public}d handle KeyEvent(%{public}d, %{public}d) return: %{public}d",
+            GetFrameName().c_str(), GetFrameId(), keyEvent.code, keyEvent.action, retCallback);
     }
-    TAG_LOGD(AceLogTag::ACE_FOCUS,
-        "OnKeyEventUser: Node %{public}s/%{public}d consume KeyEvent(code:%{public}d, action:%{public}d) return: "
-        "%{public}d",
-        GetFrameName().c_str(), GetFrameId(), keyEvent.code, keyEvent.action, retCallback);
 
     if (!retInternal && !retCallback && keyEvent.action == KeyAction::DOWN) {
         auto ret = false;
@@ -690,13 +676,12 @@ bool FocusHub::OnKeyEventNode(const KeyEvent& keyEvent)
             case KeyCode::KEY_ENTER:
             case KeyCode::KEY_NUMPAD_ENTER:
                 ret = OnClick(keyEvent);
+                TAG_LOGI(AceLogTag::ACE_FOCUS,
+                    "OnClick: Node %{public}s/%{public}d handle KeyEvent(%{public}d, %{public}d) return: %{public}d",
+                    GetFrameName().c_str(), GetFrameId(), keyEvent.code, keyEvent.action, ret);
                 break;
             default:;
         }
-        TAG_LOGD(AceLogTag::ACE_FOCUS,
-            "OnClick: Node %{public}s/%{public}d consume KeyEvent(code:%{public}d, action:%{public}d) return: "
-            "%{public}d",
-            GetFrameName().c_str(), GetFrameId(), keyEvent.code, keyEvent.action, ret);
         return ret;
     }
     return retInternal || retCallback;
@@ -708,7 +693,7 @@ bool FocusHub::OnKeyEventScope(const KeyEvent& keyEvent)
     std::list<RefPtr<FocusHub>> focusNodes;
     auto lastFocusNode = lastWeakFocusNode_.Upgrade();
     if (lastFocusNode && lastFocusNode->HandleKeyEvent(keyEvent)) {
-        TAG_LOGI(AceLogTag::ACE_FOCUS,
+        TAG_LOGD(AceLogTag::ACE_FOCUS,
             "OnKeyEvent: Node %{public}s/%{public}d will not handle KeyEvent(code:%{public}d, action:%{public}d). "
             "Because its child %{public}s/%{public}d already has consumed this event.",
             GetFrameName().c_str(), GetFrameId(), keyEvent.code, keyEvent.action,
@@ -792,7 +777,7 @@ void FocusHub::RequestFocus() const
 
 void FocusHub::RequestFocusWithDefaultFocusFirstly()
 {
-    TAG_LOGI(AceLogTag::ACE_FOCUS, "Request focus with default focus on node: %{public}s/%{public}d.",
+    TAG_LOGD(AceLogTag::ACE_FOCUS, "Request focus with default focus on node: %{public}s/%{public}d.",
         GetFrameName().c_str(), GetFrameId());
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
@@ -934,8 +919,6 @@ bool FocusHub::OnClick(const KeyEvent& event)
         info.SetLocalLocation(Offset((rect.Right() - rect.Left()) / 2, (rect.Bottom() - rect.Top()) / 2));
         info.SetSourceDevice(event.sourceType);
         info.SetDeviceId(event.deviceId);
-        TAG_LOGD(AceLogTag::ACE_FOCUS, "Do click callback on %{public}s/%{public}d with key event",
-            GetFrameName().c_str(), GetFrameId());
         onClickCallback(info);
         return true;
     }
@@ -1945,7 +1928,7 @@ RefPtr<FocusHub> FocusHub::GetNearestNodeByProjectArea(const std::list<RefPtr<Fo
         }
     }
     TAG_LOGD(AceLogTag::ACE_FOCUS, "Next focus node is %{public}s/%{public}d. Min distance is %{public}f.",
-        nextNode ? nextNode->GetFrameName().c_str() : "NULL", nextNode ? nextNode->GetFrameId() : -1, minDistance);
+        nextNode ? nextNode->GetFrameName().c_str() : "NULL", nextNode ? nextNode->GetFrameId() : -1, resDistance);
     return nextNode;
 }
 

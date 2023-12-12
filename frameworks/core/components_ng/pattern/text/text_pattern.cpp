@@ -1167,8 +1167,6 @@ void TextPattern::InitDragEvent()
         ContainerScope scope(id);
         auto pattern = weakPtr.Upgrade();
         CHECK_NULL_VOID(pattern);
-        TAG_LOGD(AceLogTag::ACE_TEXT_FIELD, "TextFieldPattern  onDragEnd result: %{public}d dragStatus: %{public}d",
-            event->GetResult(), pattern->dragStatus_);
         if (pattern->status_ == Status::DRAGGING) {
             pattern->status_ = Status::NONE;
             pattern->MarkContentChange();
@@ -2129,7 +2127,6 @@ void TextPattern::RemoveAreaChangeInner()
     auto eventHub = host->GetEventHub<TextEventHub>();
     CHECK_NULL_VOID(eventHub);
     if (eventHub->HasOnAreaChanged()) {
-        LOGD("RemoveAreaChangeInner do not remove external area change callback");
         return;
     }
     pipeline->RemoveOnAreaChangeNode(host->GetId());

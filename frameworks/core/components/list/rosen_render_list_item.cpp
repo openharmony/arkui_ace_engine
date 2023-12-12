@@ -339,7 +339,6 @@ void RosenRenderListItem::PaintStickyEffectNoTransparent(RenderContext& context,
         childNode = childNode->GetChildren().front();
     }
 
-    LOGD("[indexer] offset:%{public}lf %{public}s", offset.GetY(), itemSize.ToString().c_str());
     if (box) {
         RefPtr<Decoration> background = AceType::MakeRefPtr<Decoration>();
         auto backgroundOld = box->GetBackDecoration();
@@ -428,7 +427,6 @@ void RosenRenderListItem::PaintFadeOutEffect(const RefPtr<RenderNode>& node, con
     }
     scaleNode->ResetTransform();
     scaleNode->Scale(scale);
-    LOGD("Sticky opacity:%lf scale:%lf %s", opacity, scale, offset.ToString().c_str());
 }
 
 } // namespace OHOS::Ace

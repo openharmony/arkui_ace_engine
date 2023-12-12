@@ -28,7 +28,6 @@ RefPtr<RenderNode> RenderIndexerCircle::Create()
 
 void RenderIndexerCircle::Update(const RefPtr<Component>& component)
 {
-    LOGD("[indexer] Update");
     RenderIndexer::Update(component);
 
     auto context = GetContext().Upgrade();
@@ -55,7 +54,6 @@ void RenderIndexerCircle::Update(const RefPtr<Component>& component)
 
 void RenderIndexerCircle::PerformLayout()
 {
-    LOGD("[indexer] PerformLayout RenderIndexerCircle");
     if (GetChildren().empty()) {
         return;
     }
@@ -197,8 +195,6 @@ void RenderIndexerCircle::HandleTouchDown(const TouchEventInfo& info)
         return;
     }
     Offset position = info.GetTouches().front().GetLocalLocation();
-    LOGD("[indexer] x:%{public}lf, y:%{public}lf, curStatus_:%{public}d, nextStatus_:%{public}d", position.GetX(),
-        position.GetY(), curStatus_, nextStatus_);
 
     if (CollapseItemHitTest(position)) {
         curStatus_ == IndexerItemStatus::EXPAND ? CollapseItems() : ExpandItems();
@@ -252,7 +248,6 @@ void RenderIndexerCircle::HandleTouchUp(const TouchEventInfo& info)
 void RenderIndexerCircle::HandleTouchMove(const TouchEventInfo& info)
 {
     if (!touching_) {
-        LOGD("[indexer] not in touching.");
         return;
     }
     if (info.GetTouches().empty()) {
@@ -312,7 +307,6 @@ void RenderIndexerCircle::HandleListMoveItems(int32_t curHeadIndex)
     if (lastHeadIndex_ != curHeadIndex) {
         CollapseItems();
     }
-    LOGD("[indexer] HandleListMoveItems focusedItem_:%{public}d,  curHeadIndex:%{public}d", focusedItem_, curHeadIndex);
 }
 
 void RenderIndexerCircle::InitBubbleBox(const Size& size)
@@ -410,9 +404,6 @@ void RenderIndexerCircle::UpdateCurrentSectionItem(int32_t curSection)
         }
     }
 
-    LOGD("[indexer] UpdateCurrentSectionItem curSection:%{public}d, offsetAngle:%{public}lf itemCount_:%{public}d, "
-         "collapseItemCount_:%{public}d arcHeadPosition_:%{public}lf, collapseItemCount_:%{public}lf",
-        curSection, offsetAngle, itemCount_, collapseItemCount_, arcHeadPosition_, arcTailPosition_);
     if (!NearEqual(offsetAngle, arcHeadOffset_)) {
         BeginCollapseScrollAnimation(arcHeadOffset_, offsetAngle);
     }
@@ -422,7 +413,6 @@ void RenderIndexerCircle::CollapseItems()
 {
     LOGI("[indexer] CollapseItems");
     if (currentCount_ <= collapseItemCount_) {
-        LOGD("[indexer] current show item count(%{public}d), no need to collapse", currentCount_);
         return;
     }
 
@@ -673,8 +663,6 @@ void RenderIndexerCircle::UpdateArcTail(double value)
         LOGE("[indexer] UpdateArcTail arc render node is invalid");
         return;
     }
-    LOGD("[indexer] UpdateArcTail value:%{public}lf, arcHeadPosition_:%{public}lf, sweepAngle(%{public}lf)", value,
-        arcHeadPosition_, arc_->GetSweepAngle());
     if (focusedItem_ >= itemCount_ - 1) {
         LOGE("[indexer] UpdateArcTail. Invalid focusedItem:%{public}d", focusedItem_);
         return;
@@ -689,8 +677,6 @@ void RenderIndexerCircle::UpdateArcTail(double value)
     double expectFocusAngle = arcTailPosition_ - perItemExtent_;
     double offsetAngle = expectFocusAngle - focusAngle;
 
-    LOGD("[indexer]focusItem(%{public}d), index(%{public}d), focusAngle(%{public}lf), expectAngle(%{public}lf)",
-        focusedItem_, index, focusAngle, expectFocusAngle);
     if (focusAngle > expectFocusAngle) {
         // items need move
         RotateItems(offsetAngle); // update items position
@@ -715,7 +701,6 @@ void RenderIndexerCircle::SetCollapseItemPosition(double position)
     }
 
     double finalPosition = position;
-    LOGD("[indexer] SetCollapseItemPosition position:%{public}lf", finalPosition);
     if (itemCount_ <= collapseItemCount_) {
         item->SetVisible(false);
         return;
@@ -766,11 +751,9 @@ bool RenderIndexerCircle::CollapseItemHitTest(const Offset& position)
     if (collapse && !collapse->GetVisible()) {
         return false;
     }
-
     double hotRgnRadius = hotRgnSize_ * HALF;
     double touchAngle = GetPositionAngle(position);
     double touchRadiusTail = hotRgnRadius / (outerRadius_ - itemSize_ * HALF);
-
     if (touchAngle < collapseItemPosition_ - perItemExtent_ * HALF ||
         touchAngle > collapseItemPosition_ + touchRadiusTail) {
         LOGI("[indexer] CollapseItemHitTest, NOT HIT");
@@ -780,10 +763,6 @@ bool RenderIndexerCircle::CollapseItemHitTest(const Offset& position)
     double centerX = outerRadius_ + (outerRadius_ - itemSize_ * HALF) * sin(M_PI_2 + collapseItemPosition_);
     double centerY = outerRadius_ - (outerRadius_ - itemSize_ * HALF) * cos(M_PI_2 + collapseItemPosition_);
     double distance = pow(position.GetX() - centerX, 2) + pow(position.GetY() - centerY, 2);
-
-    LOGD("[indexer] HitTest %s cx:%{public}lf cy:%{public}lf dis:%{public}lf pos:%{public}lf hotRgnRadius:%{public}lf",
-        position.ToString().c_str(), centerX, centerY, distance, collapseItemPosition_, hotRgnRadius);
-
     if (distance > hotRgnRadius * hotRgnRadius) {
         LOGI("[indexer] CollapseItemHitTest, NOT HIT");
         return false;
@@ -795,17 +774,12 @@ bool RenderIndexerCircle::CollapseItemHitTest(const Offset& position)
 
 void RenderIndexerCircle::TouchOnCollapseArc(const Offset& position)
 {
-    LOGD("[indexer] TouchOnCollapseArc item is curStatus_:%{public}d", curStatus_);
     if (curStatus_ != IndexerItemStatus::COLLAPSE) {
         return;
     }
 
     double touchAngle = GetPositionAngle(position);
     double touchRadius = hotRgnSize_ / (outerRadius_ - itemSize_ * HALF) * HALF;
-
-    LOGD("[indexer] TouchOnCollapseArc item is touchAngle:%{public}lf, touchRadius:%{public}lf, "
-         "arcHeadPosition_:%{public}lf, arcTailPosition_:%{public}lf",
-        touchAngle, touchRadius, arcHeadPosition_, arcTailPosition_);
     if (touchAngle < arcHeadPosition_ - touchRadius || touchAngle > arcTailPosition_ - perItemExtent_ + touchRadius) {
         return;
     }
@@ -813,7 +787,6 @@ void RenderIndexerCircle::TouchOnCollapseArc(const Offset& position)
     // focus
     int32_t curItem = GetNearestItem(touchAngle);
     curItem = GetActualItemIndex(curItem);
-    LOGD("[indexer] TouchOnCollapseArc item is curItem:%{public}d, itemCount_:%{public}d", curItem, itemCount_);
     // to except collapse item
     if (curItem == INVALID_INDEX || curItem >= itemCount_ - 1) {
         return;
@@ -828,7 +801,6 @@ void RenderIndexerCircle::TouchOnCollapseArc(const Offset& position)
 
 void RenderIndexerCircle::RotateItems(double arcOffset)
 {
-    LOGD("[indexer] RotateItems arcOffset:%{public}lf", arcOffset);
     int32_t count = 0;
     for (auto item : items_) {
         // to except collapse item
@@ -946,8 +918,6 @@ int32_t RenderIndexerCircle::GetNearestItem(const Offset& position, bool move)
 
     // calculate actual index of indexer by position
     int32_t ret = GetActualItemIndex(positionIndex);
-    LOGD("[indexer] ExpandItems touchAngle:%{public}lf, arcHeadPosition_:%{public}lf, arcHeadOffset_:%{public}lf",
-        touchAngle, arcHeadPosition_, arcHeadOffset_);
     if (ret < 0 || ret >= itemCount_) {
         LOGW("[indexer] GetNearestItem failed, ret:%{public}d", ret);
         return INVALID_INDEX;
@@ -964,7 +934,6 @@ int32_t RenderIndexerCircle::GetNearestItem(const Offset& position, bool move)
             return INVALID_INDEX;
         }
     }
-    LOGD("[indexer] GetNearestItem ret:%{public}d", ret);
     return ret;
 }
 

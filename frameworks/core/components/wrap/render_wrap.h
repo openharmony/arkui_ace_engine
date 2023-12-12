@@ -75,7 +75,6 @@ public:
             wrapSize.SetHeight(GetLayoutParam().GetMaxSize().Height());
         }
         SetLayoutSize(wrapSize);
-        LOGD("wrap::wrap layout size width:%lf, height:%lf", GetLayoutSize().Width(), GetLayoutSize().Height());
     }
 
     WrapDirection GetDialogDirection() const

@@ -234,8 +234,6 @@ void RenderSlidingPanel::SetDragBarCallBack()
             panel->mode_ = panel->type_ == PanelType::MINI_BAR ? PanelMode::FULL : PanelMode::HALF;
         } else if (panel->mode_ == PanelMode::FULL) {
             panel->mode_ = panel->type_ == PanelType::MINI_BAR ? PanelMode::MINI : PanelMode::HALF;
-        } else {
-            LOGD("not support click in half mode");
         }
         panel->AnimateTo(panel->defaultBlankHeights_[panel->mode_], panel->mode_);
         if (panel->previousMode_ != panel->mode_) {

@@ -79,8 +79,6 @@ void RefreshModelNG::Pop()
     CHECK_NULL_VOID(pattern);
     if (!pattern->GetIsCustomBuilderExist()) {
         if (refreshNode->TotalChildCount() >= CHILD_COUNT) {
-            TAG_LOGD(AceLogTag::ACE_REFRESH, "%{public}s have %{public}d child", refreshNode->GetTag().c_str(),
-                refreshNode->TotalChildCount());
             return;
         }
         auto textChild = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, -1, AceType::MakeRefPtr<TextPattern>());

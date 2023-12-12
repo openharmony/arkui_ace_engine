@@ -29,7 +29,6 @@ const char ON_TOUCH_CANCEL_EVENT[] = "onTouchCancel";
 
 void RawRecognizer::HandleRawEvent(const TouchEvent& point, uint32_t stage)
 {
-    LOGD("raw recognizer handle event, event type is %{public}zu stage=%u", point.type, stage);
     switch (point.type) {
         case TouchType::MOVE: {
             auto callback = onEventCallbacks_[stage][EventType::TOUCH_MOVE];

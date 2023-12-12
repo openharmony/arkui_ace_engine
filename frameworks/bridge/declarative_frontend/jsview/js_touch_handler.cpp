@@ -21,7 +21,6 @@ namespace OHOS::Ace::Framework {
 
 RefPtr<OHOS::Ace::SingleChild> JSTouchHandler::CreateComponent(const JSCallbackInfo& args)
 {
-    LOGD("JSTouchHandler wrapComponent");
         auto touchComponent = ViewStackProcessor::GetInstance()->GetTouchListenerComponent();
 
     if (jsOnDownFunc_) {
@@ -89,7 +88,6 @@ RefPtr<OHOS::Ace::SingleChild> JSTouchHandler::CreateComponent(const JSCallbackI
 
 void JSTouchHandler::JsHandlerOnTouch(TouchEvent action, const JSCallbackInfo& args)
 {
-    LOGD("JSTouchHandler JsHandlerOnTouch");
     if (args[0]->IsFunction()) {
         JSRef<JSFunc> jsFunction = JSRef<JSFunc>::Cast(args[0]);
         RefPtr<JsTouchFunction> handlerFunc = AceType::MakeRefPtr<JsTouchFunction>(jsFunction);

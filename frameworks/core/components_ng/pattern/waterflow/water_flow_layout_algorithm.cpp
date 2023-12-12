@@ -94,7 +94,6 @@ void WaterFlowLayoutAlgorithm::InitialItemsCrossSize(
     // cross count changed by auto-fill and cross size change
     if (!layoutInfo_.waterFlowItems_.empty() && crossLens.size() != layoutInfo_.waterFlowItems_.size()) {
         layoutInfo_.Reset();
-        TAG_LOGD(AceLogTag::ACE_WATERFLOW, "cross count changed");
     }
 
     int32_t index = 0;
@@ -148,7 +147,6 @@ void WaterFlowLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
                 // out of viewport
                 layoutInfo_.currentOffset_ = -item.first;
             }
-            TAG_LOGD(AceLogTag::ACE_WATERFLOW, "scroll to index:%{public}d", layoutInfo_.jumpIndex_);
             layoutInfo_.jumpIndex_ = -1;
         }
     } else {
@@ -384,7 +382,6 @@ void WaterFlowLayoutAlgorithm::FillViewport(float mainSize, LayoutWrapper* layou
             if (item->second.second != itemHeight) {
                 item->second.second = itemHeight;
                 layoutInfo_.ClearCacheAfterIndex(currentIndex);
-                TAG_LOGD(AceLogTag::ACE_WATERFLOW, "item size changed");
             }
         }
         if (layoutInfo_.jumpIndex_ == currentIndex) {

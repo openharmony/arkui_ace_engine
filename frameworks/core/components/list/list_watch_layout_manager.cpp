@@ -31,7 +31,6 @@ ListWatchLayoutManager::ListWatchLayoutManager(RenderList& renderList)
 
 void ListWatchLayoutManager::PerformLayout()
 {
-    LOGD("PerformLayout head:%{public}lf tail:%{public}lf", head_, tail_);
     renderList_.SetCenterIndex(INVALID_INDEX);
     if (renderList_.GetAddDeleteEffect()) {
         AnimationForItemUpdate();
@@ -52,7 +51,6 @@ void ListWatchLayoutManager::PerformLayout()
             firstChildSize_ = renderList_.GetMainSize(itemChild->GetLayoutSize());
         }
         lastChildSize_ = renderList_.GetMainSize(itemChild->GetLayoutSize());
-        LOGD("Index:%{public}d mainSize:%{public}lf", itemIndex, curMainSize);
 
         SetChildPosition(itemChild, itemIndex, curMainSize);
         itemPosition_[itemIndex] = curMainSize;
@@ -132,7 +130,6 @@ void ListWatchLayoutManager::SetChildPosition(const RefPtr<RenderNode>& child, i
         }
         child->SetPosition(Offset(mainAxis, crossAxis) + position_);
     }
-    LOGD("Child:%{public}lf %{public}lf %{public}s", mainAxis, crossAxis, position_.ToString().c_str());
 }
 
 void ListWatchLayoutManager::HandleItemStateAndEffect()

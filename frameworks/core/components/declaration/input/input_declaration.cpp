@@ -142,7 +142,6 @@ void InputDeclaration::CreateSpecializedDeclaration()
     if (specializedAttr.IsValid()) {
         type = specializedAttr.type;
         if (!type.second) {
-            LOGD("type of input is not changed.");
             return;
         }
         specializedAttr.type.second = true;

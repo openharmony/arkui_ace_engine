@@ -107,19 +107,14 @@ public:
     void SetTopLeftRadius(const Radius& topLeftRadius)
     {
         if (!topLeftRadius.IsValid()) {
-            LOGD("Invalid radius x:%{public}lf, y:%{public}lf", topLeftRadius.GetX().Value(),
-                topLeftRadius.GetY().Value());
             return;
         }
         topLeftRadius_ = topLeftRadius;
-        LOGD("[Focus] SetTopLeftRadius, radius: %{public}lf", topLeftRadius_.GetX().Value());
     }
 
     void SetTopRightRadius(const Radius& topRightRadius)
     {
         if (!topRightRadius.IsValid()) {
-            LOGD("Invalid radius x:%{public}lf, y:%{public}lf", topRightRadius.GetX().Value(),
-                topRightRadius.GetY().Value());
             return;
         }
         topRightRadius_ = topRightRadius;
@@ -128,8 +123,6 @@ public:
     void SetBottomLeftRadius(const Radius& bottomLeftRadius)
     {
         if (!bottomLeftRadius.IsValid()) {
-            LOGD("Invalid radius x:%{public}f, y:%{public}f", bottomLeftRadius.GetX().Value(),
-                bottomLeftRadius.GetY().Value());
             return;
         }
         bottomLeftRadius_ = bottomLeftRadius;
@@ -138,8 +131,6 @@ public:
     void SetBottomRightRadius(const Radius& bottomRightRadius)
     {
         if (!bottomRightRadius.IsValid()) {
-            LOGD("Invalid radius x:%{public}f, y:%{public}f", bottomRightRadius.GetX().Value(),
-                bottomRightRadius.GetY().Value());
             return;
         }
         bottomRightRadius_ = bottomRightRadius;

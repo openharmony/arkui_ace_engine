@@ -54,7 +54,6 @@ void JsFunctionBase::Execute(const JSRef<JSObject>& jsParamsObject)
 
 void JsFunctionBase::Execute(const std::vector<std::string>& keys, const std::string& param)
 {
-    LOGD("param : %{private}s", param.c_str());
     std::unique_ptr<JsonValue> argsPtr = JsonUtil::ParseJsonString(param);
     if (!argsPtr) {
         return;

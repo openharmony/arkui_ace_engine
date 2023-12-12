@@ -158,12 +158,9 @@ RenderTextField::~RenderTextField()
         fontManager->RemoveVariationNode(WeakClaim(this));
     }
     if (HasSurfaceChangedCallback()) {
-        LOGD("Unregister surface change callback with id %{public}d", surfaceChangedCallbackId_.value_or(-1));
         pipelineContext->UnregisterSurfaceChangedCallback(surfaceChangedCallbackId_.value_or(-1));
     }
     if (HasSurfacePositionChangedCallback()) {
-        LOGD("Unregister surface position change callback with id %{public}d",
-            surfacePositionChangedCallbackId_.value_or(-1));
         pipelineContext->UnregisterSurfacePositionChangedCallback(surfacePositionChangedCallbackId_.value_or(-1));
     }
     // If soft keyboard is still exist, close it.
@@ -486,15 +483,11 @@ void RenderTextField::CalculateMainScrollExtent()
 
 void RenderTextField::HandleSurfaceChanged(int32_t newWidth, int32_t newHeight, int32_t prevWidth, int32_t prevHeight)
 {
-    LOGD("Textfield handle surface change, new width %{public}d, new height %{public}d, prev width %{public}d, prev "
-         "height %{public}d",
-        newWidth, newHeight, prevWidth, prevHeight);
     UpdateCaretInfoToController();
 }
 
 void RenderTextField::HandleSurfacePositionChanged(int32_t posX, int32_t posY)
 {
-    LOGD("Textfield handle surface position change, posX %{public}d, posY %{public}d", posX, posY);
     UpdateCaretInfoToController();
 }
 
@@ -518,8 +511,6 @@ void RenderTextField::UpdateCaretInfoToController()
         .top = caretRect_.Top() + globalOffset.GetY() + windowOffset.GetY(),
         .width = caretRect_.Width(),
         .height = caretRect_.Height() };
-    LOGD("UpdateCaretInfoToController, left %{public}f, top %{public}f, width %{public}f, height %{public}f",
-        cursorInfo.left, cursorInfo.top, cursorInfo.width, cursorInfo.height);
     MiscServices::InputMethodController::GetInstance()->OnCursorUpdate(cursorInfo);
     auto value = GetEditingValue();
     MiscServices::InputMethodController::GetInstance()->OnSelectionChange(
@@ -627,8 +618,6 @@ bool RenderTextField::HandleMouseEvent(const MouseEvent& event)
             int32_t end = GetCursorPositionForClick(event.GetOffset());
             UpdateSelection(start, end);
             MarkNeedRender();
-        } else {
-            LOGD("on left button release");
         }
     }
 
@@ -748,7 +737,6 @@ void RenderTextField::OnTouchTestHit(
 
 void RenderTextField::InitScrollBar(const RefPtr<TextFieldComponent>& component)
 {
-    LOGD("Enter function RenderTextField::InitScrollBar:");
     if (scrollBar_) {
         scrollBar_->Reset();
         return;
@@ -1128,7 +1116,6 @@ void RenderTextField::InitAnimation()
     });
 
     // Add the animation
-    LOGD("Add animation to animator");
     animator_ = CREATE_ANIMATOR(context_);
     animator_->AddInterpolator(diameterAnimation);
     animator_->AddInterpolator(diameterInnerAnimation);
@@ -1633,7 +1620,6 @@ std::wstring WstringSearch(std::wstring wideText, const std::wregex& regex)
 bool RenderTextField::FilterWithRegex(std::string& valueToUpdate, const std::string& filter, bool needToEscape)
 {
     if (filter.empty() || valueToUpdate.empty()) {
-        LOGD("Text is empty or filter is empty");
         return false;
     }
     std::string escapeFilter;

@@ -102,11 +102,8 @@ void AceDataAbility::OnStart(const OHOS::AAFwk::Want& want, sptr<AAFwk::SessionI
 
     AceEngine::InitJsDumpHeadSignal();
     if (abilityInfo != nullptr && !abilityInfo->srcPath.empty()) {
-        LOGD("AceDataAbility OnStart assetBasePathStr: %{public}s, parsedUrl: %{public}s",
-            abilityInfo->srcPath.c_str(), parsedUrl.c_str());
         assetBasePathStr = { "assets/js/" + abilityInfo->srcPath + "/", std::string("assets/js/") };
     } else {
-        LOGD("AceDataAbility OnStart parsedUrl: %{public}s", parsedUrl.c_str());
         assetBasePathStr = { std::string("assets/js/default/"), std::string("assets/js/share/") };
     }
     workerPath->assetBasePathStr = assetBasePathStr;
@@ -215,7 +212,6 @@ Uri AceDataAbility::DenormalizeUri(const Uri& uri)
 std::shared_ptr<AppExecFwk::PacMap> AceDataAbility::Call(const Uri& uri,
     const std::string& method, const std::string& arg, const AppExecFwk::PacMap& pacMap)
 {
-    LOGD("AceDataAbility Call called");
     std::shared_ptr<AppExecFwk::PacMap> ret = Platform::PaContainer::Call(abilityId_, uri, method, arg, pacMap);
     return ret;
 }

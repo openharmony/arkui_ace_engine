@@ -71,7 +71,6 @@ void ParseIndicatorProperty(const JsonValue& componentJson, const RefPtr<SwiperC
 
 RefPtr<Component> SwiperCreator::CreateFromJson(const JsonValue& componentJson, const JsonComponentFactory& factory)
 {
-    LOGD("CreateFromJson swiper");
     std::string classType = componentJson.GetValue(CLASS_NAME)->GetString();
     if (classType != SWIPER_NAME) {
         LOGE("Create Swiper error: not a swiper json.");

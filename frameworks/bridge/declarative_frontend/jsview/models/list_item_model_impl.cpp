@@ -40,11 +40,9 @@ void ListItemModelImpl::Create(std::function<void(int32_t)>&& deepRenderFunc, V2
                                                     elmtId = listItemComponent->GetElementId()]() -> RefPtr<Component> {
         ACE_SCOPED_TRACE("JSListItem::ExecuteDeepRender");
 
-        LOGD("ListItem elmtId %{public}d DeepRender JS function execution start ....", elmtId);
         jsDeepRenderFunc(elmtId);
         RefPtr<Component> component = ViewStackProcessor::GetInstance()->Finish();
         ACE_DCHECK(AceType::DynamicCast<V2::ListItemComponent>(component) != nullptr);
-        LOGD("ListItem elmtId %{public}d DeepRender JS function execution - done ", elmtId);
         return component;
     }; // listItemDeepRenderFunc lambda
 

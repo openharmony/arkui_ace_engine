@@ -89,7 +89,6 @@ void OptionLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         rowChild->GetLayoutProperty()->UpdatePropertyChangeFlag(PROPERTY_UPDATE_MEASURE);
         rowChild->Measure(childConstraint);
     }
-    LOGD("option frame size set to %{public}s", idealSize.ToString().c_str());
     layoutWrapper->GetGeometryNode()->SetFrameSize(idealSize);
 }
 

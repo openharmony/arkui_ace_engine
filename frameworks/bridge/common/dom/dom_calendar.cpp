@@ -178,12 +178,10 @@ void DomCalendar::HandleGoTo(const std::string& args)
 {
     std::unique_ptr<JsonValue> argsValue = JsonUtil::ParseJsonString(args);
     if (!argsValue || !argsValue->IsArray() || argsValue->GetArraySize() != METHOD_GO_TO_ARGS_SIZE) {
-        LOGD("parse args error: %{private}s", args.c_str());
         return;
     }
     auto gotoArg = argsValue->GetArrayItem(0);
     if (!gotoArg || !gotoArg->Contains(GO_TO_ARG_KEY_YEAR) || !gotoArg->Contains(GO_TO_ARG_KEY_MONTH)) {
-        LOGD("calendar goto arg no year or month");
         return;
     }
 

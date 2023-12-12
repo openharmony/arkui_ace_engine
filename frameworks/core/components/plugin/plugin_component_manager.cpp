@@ -45,14 +45,12 @@ std::shared_ptr<PluginComponentManager> PluginComponentManager::GetInstance()
 int PluginComponentManager::Push(const AAFwk::Want& want, const std::string& name, const std::string& jsonPath,
     const std::string& data, const std::string& extraData)
 {
-    LOGD("PluginComponentManager::Push");
     return Ace::UIServiceMgrClient::GetInstance()->Push(want, name, jsonPath, data, extraData);
 }
 
 int PluginComponentManager::Request(
     const AAFwk::Want& want, const std::string& name, const std::string& jsonPath, const std::string& data)
 {
-    LOGD("PluginComponentManager::Request: jsonPath=%{public}s", jsonPath.c_str());
     if (jsonPath.empty()) {
         return Ace::UIServiceMgrClient::GetInstance()->Request(want, name, data);
     } else {
@@ -73,14 +71,12 @@ int PluginComponentManager::Request(
 int PluginComponentManager::ReturnRequest(
     const AAFwk::Want& want, const std::string& pluginName, const std::string& data, const std::string& extraData)
 {
-    LOGD("PluginComponentManager::ReturnRequest");
     return Ace::UIServiceMgrClient::GetInstance()->ReturnRequest(want, pluginName, data, extraData);
 }
 
 void PluginComponentManager::RegisterCallBack(
     const AAFwk::Want& want, const std::shared_ptr<PluginComponentCallBack>& callback, CallBackType callBackType)
 {
-    LOGD("PluginComponentManager::RegisterCallBack");
     if (listener_) {
         listener_->ResgisterListener(callback, callBackType);
         Ace::UIServiceMgrClient::GetInstance()->RegisterCallBack(want, listener_);
@@ -89,7 +85,6 @@ void PluginComponentManager::RegisterCallBack(
 
 void PluginComponentManager::UnregisterCallBack(const std::shared_ptr<PluginComponentCallBack>& callback)
 {
-    LOGD("PluginComponentManager::UnregisterCallBack");
     if (listener_) {
         listener_->UnresgisterListener(callback);
     }
@@ -120,7 +115,6 @@ sptr<AppExecFwk::IBundleMgr> PluginComponentManager::GetBundleManager()
 void PluginComponentManager::UIServiceListener::UnresgisterListener(
     const std::shared_ptr<PluginComponentCallBack>& callback)
 {
-    LOGD("PluginComponentManager::UIServiceListener::UnresgisterListener");
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     auto iter = callbacks_.find(callback);
     if (iter != callbacks_.end()) {
@@ -131,7 +125,6 @@ void PluginComponentManager::UIServiceListener::UnresgisterListener(
 void PluginComponentManager::UIServiceListener::ResgisterListener(
     const std::shared_ptr<PluginComponentCallBack>& callback, CallBackType callBackType)
 {
-    LOGD("PluginComponentManager::UIServiceListener::ResgisterListener");
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     callbackVec_.try_emplace(callback, callBackType);
 }
@@ -139,7 +132,6 @@ void PluginComponentManager::UIServiceListener::ResgisterListener(
 void PluginComponentManager::UIServiceListener::OnPushCallBack(const AAFwk::Want& want,
     const std::string& name, const std::string& jsonPath, const std::string& data, const std::string& extraData)
 {
-    LOGD("PluginComponentManager::UIServiceListener::OnPushCallBack");
     PluginComponentTemplate pluginTemplate;
     if (!jsonPath.empty()) {
         std::string jsonStr;
@@ -165,7 +157,6 @@ void PluginComponentManager::UIServiceListener::OnPushCallBack(const AAFwk::Want
 void PluginComponentManager::UIServiceListener::OnRequestCallBack(
     const AAFwk::Want& want, const std::string& name,  const std::string& data)
 {
-    LOGD("PluginComponentManager::UIServiceListener::OnRequestCallBack");
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     for (auto &callback : callbackVec_) {
         if (callback.second == CallBackType::RequestEvent && callback.first != nullptr) {
@@ -177,7 +168,6 @@ void PluginComponentManager::UIServiceListener::OnRequestCallBack(
 void PluginComponentManager::UIServiceListener::OnReturnRequest(
     const AAFwk::Want& want, const std::string& source, const std::string& data, const std::string& extraData)
 {
-    LOGD("PluginComponentManager::UIServiceListener::OnReturnRequest");
     {
         std::lock_guard<std::recursive_mutex> lock(mutex_);
         for (auto iter = callbackVec_.begin(); iter != callbackVec_.end();) {

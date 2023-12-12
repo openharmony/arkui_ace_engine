@@ -65,10 +65,6 @@ RefPtr<FrameNode> CreateBlankFrameNode(const RefPtr<FrameNode>& node)
     // set size so the node will keep its size
     newNode->GetLayoutProperty()->UpdateUserDefinedIdealSize(
         CalcSize(CalcLength(frameSize.Width()), CalcLength(frameSize.Height())));
-    TAG_LOGD(AceLogTag::ACE_ANIMATION,
-        "create blank node, tag:%{public}s, id:%{public}d, frameSize:%{public}s, pre node globalOffset:%{public}s",
-        node->GetTag().c_str(), nodeId, newNode->GetGeometryNode()->GetFrameSize().ToString().c_str(),
-        node->GetOffsetRelativeToWindow().ToString().c_str());
     return newNode;
 }
 

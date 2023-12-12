@@ -120,7 +120,6 @@ public:
             LOGE("Invalid TotalCount %{public}d", totalCount);
             return;
         }
-        LOGD("SetTotalCount to %{public}d.", totalCount);
         totalCount_ = totalCount;
     }
 
@@ -165,7 +164,6 @@ public:
             LOGE("Invalid CachedCount %{public}d", cachedCount);
             return;
         }
-        LOGD("SetCachedCount to %{public}d.", cachedCount);
         cachedCount_ = cachedCount;
     }
 
@@ -247,7 +245,6 @@ public:
             LOGE("Invalid GradientWidth %{public}lf", gradientWidth_.Value());
             return;
         }
-        LOGD("SetGradientWidth to %{public}lf.", gradientWidth_.Value());
         gradientWidth_ = gradientWidth;
     }
 

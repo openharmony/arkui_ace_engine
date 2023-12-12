@@ -172,9 +172,7 @@ void SetStyleFromJson(
         }
     }
     std::string type = domJson->GetValue(DOM_TAG)->GetString();
-    if (DOMSTYLELIST.find(type) == DOMSTYLELIST.end()) {
-        LOGD("json file not define style for %s", type.c_str());
-    } else {
+    if (DOMSTYLELIST.find(type) != DOMSTYLELIST.end()) {
         const std::vector<std::string> styleList = DOMSTYLELIST.find(type)->second;
         if (domJson->Contains(DOM_STYLE)) {
             const auto styleValue = domJson->GetValue(DOM_STYLE);
@@ -202,7 +200,6 @@ void SetAttrFromJson(const std::string& jsonStr, const RefPtr<DOMNode>& domNode,
     auto domJson = ParseJsonString(jsonStr);
     std::string type = domJson->GetValue(DOM_TAG)->GetString();
     if (DOMATTRLIST.find(type) == DOMATTRLIST.end()) {
-        LOGD("json file not define attribute for %s", type.c_str());
         return;
     }
     const std::vector<std::string> attrList = DOMATTRLIST.find(type)->second;
@@ -245,9 +242,7 @@ void SetEventFromJson(
         }
     }
     std::string type = domJson->GetValue(DOM_TAG)->GetString();
-    if (DOMEVENTLIST.find(type) == DOMEVENTLIST.end()) {
-        LOGD("json file not define event for %s", type.c_str());
-    } else {
+    if (DOMEVENTLIST.find(type) != DOMEVENTLIST.end()) {
         const std::vector<std::string> eventList = DOMEVENTLIST.find(type)->second;
         if (domJson->Contains(DOM_EVENT)) {
             const auto eventValue = domJson->GetValue(DOM_EVENT);

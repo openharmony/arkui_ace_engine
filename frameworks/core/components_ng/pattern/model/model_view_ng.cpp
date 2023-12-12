@@ -40,7 +40,6 @@ ModelViewNG::ModelViewNG()
 void ModelViewNG::Create(const std::string& src, const std::string& bundleName,
     const std::string& moduleName, Render3D::SurfaceType surfaceType)
 {
-    LOGD("MODEL_NG: Create-> src: %s %hhu", src.c_str(), surfaceType);
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
     static int staticKey = 0;
@@ -68,27 +67,22 @@ void ModelViewNG::Create(const std::string& src, const std::string& bundleName,
 
 void ModelViewNG::SetBackground(const std::string& value)
 {
-    LOGD("MODEL_NG: background: %s", value.c_str());
     ACE_UPDATE_PAINT_PROPERTY(ModelPaintProperty, ModelBackground, value);
 }
 
 void ModelViewNG::SetHandleCameraMove(bool value)
 {
-    LOGD("MODEL_NG: cameraMode: %s", value ? "true" : "false");
     ACE_UPDATE_PAINT_PROPERTY(ModelPaintProperty, ModelCameraMove, value);
 }
 
 void ModelViewNG::SetTransparent(bool value)
 {
-    LOGD("MODEL_NG: transparent: %s", value ? "true" : "false");
     ACE_UPDATE_PAINT_PROPERTY(ModelPaintProperty, ModelTransparent, value);
 }
 
 void ModelViewNG::SetCameraPosition(AnimatableFloat x, AnimatableFloat y, AnimatableFloat z,
     AnimatableFloat distance, bool isAngular)
 {
-    LOGD("MODEL_NG: cameraPosition: [%.2f, %.2f %.2f], distance: %.2f",
-        x.GetValue(), y.GetValue(), z.GetValue(), distance.GetValue());
     if (NearEqual(cameraPosition_.GetDistance().GetValue(), std::numeric_limits<float>::max())) {
         // Initial update. Set the values directly without the animation if any.
         cameraPosition_.SetDistance(AnimatableFloat(distance.GetValue()));
@@ -99,19 +93,16 @@ void ModelViewNG::SetCameraPosition(AnimatableFloat x, AnimatableFloat y, Animat
         cameraPosition_.SetDistance(distance);
         cameraPosition_.SetPosition(Vec3(x, y, z));
     }
-    LOGD("MODEL_NG: cameraIsAngular: %s", isAngular ? "true" : "false");
     ACE_UPDATE_PAINT_PROPERTY(ModelPaintProperty, CameraIsAngular, isAngular);
 }
 
 void ModelViewNG::SetCameraRotation(Quaternion quat)
 {
-    LOGD("MODEL_NG: cameraRotation: @quat");
     ACE_UPDATE_PAINT_PROPERTY(ModelPaintProperty, CameraRotation, quat);
 }
 
 void ModelViewNG::SetCameraFrustum(float zNear, float zFar, float fovDegrees)
 {
-    LOGD("MODEL_NG: cameraFrustum");
     ACE_UPDATE_PAINT_PROPERTY(ModelPaintProperty, CameraZNear, zNear);
     ACE_UPDATE_PAINT_PROPERTY(ModelPaintProperty, CameraZFar, zFar);
     ACE_UPDATE_PAINT_PROPERTY(ModelPaintProperty, CameraFOV, fovDegrees);
@@ -119,19 +110,16 @@ void ModelViewNG::SetCameraFrustum(float zNear, float zFar, float fovDegrees)
 
 void ModelViewNG::SetCameraLookAt(Vec3 lookAtVec)
 {
-    LOGD("MODEL_NG: cameraLookAt: @Vec3");
     ACE_UPDATE_PAINT_PROPERTY(ModelPaintProperty, CameraLookAt, lookAtVec);
 }
 
 void ModelViewNG::SetCameraUp(Vec3 upVec)
 {
-    LOGD("MODEL_NG: cameraUp: @Vec3");
     ACE_UPDATE_PAINT_PROPERTY(ModelPaintProperty, CameraUp, upVec);
 }
 
 void ModelViewNG::AddLight(const RefPtr<ModelLight>& light)
 {
-    LOGD("MODEL_NG: light: @light");
     if (!light) {
         LOGE("Add light invalid light");
         return;
@@ -155,19 +143,16 @@ void ModelViewNG::AddLight(const RefPtr<ModelLight>& light)
 
 void ModelViewNG::AddGeometry(const std::shared_ptr<Render3D::Geometry>& shape)
 {
-    LOGD("MODEL_NG: AddGeometry @shape %s", shape->GetName().c_str());
     ACE_UPDATE_PAINT_PROPERTY(ModelPaintProperty, ModelSingleGeometry, shape);
 }
 
 void ModelViewNG::AddGLTFAnimation(const std::shared_ptr<Render3D::GLTFAnimation>& animation)
 {
-    LOGD("MODEL_NG: AddGLTFAnimation @animation");
     ACE_UPDATE_PAINT_PROPERTY(ModelPaintProperty, ModelSingleAnimation, animation);
 }
 
 void ModelViewNG::AddCustomRender(const std::shared_ptr<Render3D::CustomRenderDescriptor>& customRender)
 {
-    LOGD("MODEL_NG: AddCustomRender");
     if (!customRender) {
         return;
     }
@@ -191,7 +176,6 @@ void ModelViewNG::AddCustomRender(const std::shared_ptr<Render3D::CustomRenderDe
 
 void ModelViewNG::SetWidth(Dimension& width)
 {
-    LOGD("MODEL_NG: ModelViewNG::SetWidth() %f", width.Value());
     if (LessNotEqual(width.Value(), 0.0)) {
         width.SetValue(0.0);
     }
@@ -200,7 +184,6 @@ void ModelViewNG::SetWidth(Dimension& width)
 
 void ModelViewNG::SetHeight(Dimension& height)
 {
-    LOGD("MODEL_NG: ModelViewNG::SetHeight() %f", height.Value());
     if (LessNotEqual(height.Value(), 0.0)) {
         height.SetValue(0.0);
     }
@@ -209,7 +192,6 @@ void ModelViewNG::SetHeight(Dimension& height)
 
 void ModelViewNG::SetRenderHeight(Dimension& height)
 {
-    LOGD("MODEL_NG: ModelViewNG::SetRenderHeight() %f", height.Value());
     if (LessNotEqual(height.Value(), 0.0)) {
         height.SetValue(1.0);
         LOGE("MODEL_NG: ModelViewNG::SetRenderHeight() heigtScale set default 1.0");
@@ -219,7 +201,6 @@ void ModelViewNG::SetRenderHeight(Dimension& height)
 
 void ModelViewNG::SetRenderWidth(Dimension& width)
 {
-    LOGD("MODEL_NG: ModelViewNG::SetRenderWidth() %f", width.Value());
     if (LessNotEqual(width.Value(), 0.0)) {
         width.SetValue(1.0);
         LOGE("MODEL_NG: ModelViewNG::SetRenderHeight() heigtScale set default 1.0");
@@ -229,19 +210,16 @@ void ModelViewNG::SetRenderWidth(Dimension& width)
 
 void ModelViewNG::SetRenderFrameRate(float rate)
 {
-    LOGD("MODEL_NG: ModelViewGN::SetRenderFrameRate() %f", rate);
     ACE_UPDATE_PAINT_PROPERTY(ModelPaintProperty, RenderFrameRate, rate);
 }
 
 void ModelViewNG::SetShader(const std::string& path)
 {
-    LOGD("ModelViewNG::SetShader() path: %s", path.c_str());
     ACE_UPDATE_PAINT_PROPERTY(ModelPaintProperty, ShaderPath, path);
 }
 
 void ModelViewNG::AddShaderImageTexture(const std::string& path)
 {
-    LOGD("ModelViewNG::AddShaderImageTexture() path: %s", path.c_str());
     auto frameNode = frameNode_.Upgrade();
     if (!frameNode) {
         LOGE("frameNode is null!");
@@ -266,14 +244,11 @@ void ModelViewNG::AddShaderImageTexture(const std::string& path)
 
 void ModelViewNG::AddShaderInputBuffer(const std::shared_ptr<Render3D::ShaderInputBuffer>& buffer)
 {
-    LOGD("ModelViewNG::AddShaderInputBuffer() size: %d", buffer->GetSize());
     ACE_UPDATE_PAINT_PROPERTY(ModelPaintProperty, ModelShaderInputBuffer, buffer);
 }
 
 void ModelViewNG::PerformCameraUpdate()
 {
-    LOGD("ModelViewNG::PerformCameraUpdate() position: %f, %f, %f, distance: %f", cameraPosition_.GetX(),
-        cameraPosition_.GetY(), cameraPosition_.GetZ(), cameraPosition_.GetDistance().GetValue());
     auto frameNode = frameNode_.Upgrade();
     if (!frameNode) {
         LOGE("frameNode is null!");

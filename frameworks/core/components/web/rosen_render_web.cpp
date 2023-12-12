@@ -68,8 +68,6 @@ void RosenRenderWeb::Paint(RenderContext& context, const Offset& offset)
         return;
     }
     if (delegate_) {
-        TAG_LOGD(AceLogTag::ACE_WEB,
-            "Web paint drawSize width = %{public}f, height = %{public}f", drawSize_.Width(), drawSize_.Height());
         delegate_->SetBoundsOrResize(drawSize_, GetGlobalOffset());
         if (!isUrlLoaded_) {
             if (!delegate_->LoadDataWithRichText()) {

@@ -22,7 +22,6 @@ namespace OHOS::Ace {
 
 Offset OffsetCreator::CreateFromJson(const JsonValue& componentJson)
 {
-    LOGD("CreateFromJson Offset");
     double dx = 0.0;
     double dy = 0.0;
     if (componentJson.Contains(HORIZONTAL_OFFSET) && componentJson.GetValue(HORIZONTAL_OFFSET)->IsNumber()) {

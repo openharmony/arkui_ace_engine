@@ -106,7 +106,6 @@ bool ButtonDeclaration::SetSpecializedAttr(const std::pair<std::string, std::str
     };
     auto operatorIter = BinarySearchFindIndex(buttonAttrOperators, ArraySize(buttonAttrOperators), attr.first.c_str());
     if (operatorIter != -1) {
-        LOGD("Button attrs : %{public}s = %{public}s", attr.first.c_str(), attr.second.c_str());
         buttonAttrOperators[operatorIter].value(*this, attr.second);
         return true;
     }
@@ -222,7 +221,6 @@ bool ButtonDeclaration::SetSpecializedStyle(const std::pair<std::string, std::st
     auto operatorIter =
         BinarySearchFindIndex(buttonStyleOperators, ArraySize(buttonStyleOperators), style.first.c_str());
     if (operatorIter != -1) {
-        LOGD("Button styles : %{public}s = %{public}s", style.first.c_str(), style.second.c_str());
         buttonStyleOperators[operatorIter].value(*this, style.second);
         return true;
     }

@@ -154,7 +154,6 @@ void CalendarController::GoTo(int32_t year, int32_t month, int32_t day)
         return;
     }
 
-    LOGD("go to: year=%{private}d, month=%{private}d, day=%{private}d", year, month, day);
     CalendarMonth calendarMonth { year, month };
     auto nextMonth = CalendarMonth::GetNextMonth(currentCalendarMonth_);
     auto lastMonth = CalendarMonth::GetLastMonth(currentCalendarMonth_);

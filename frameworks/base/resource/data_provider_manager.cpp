@@ -26,7 +26,6 @@ namespace OHOS::Ace {
 
 std::unique_ptr<DataProviderRes> DataProviderManager::GetDataProviderResFromUri(const std::string& uriStr)
 {
-    LOGD("DataProviderManager::GetDataProviderResFromUri start uri: %{private}s", uriStr.c_str());
     if (platformImpl_) {
         return platformImpl_(uriStr);
     }
@@ -45,7 +44,6 @@ void* DataProviderManagerStandard::GetDataProviderThumbnailResFromUri(const std:
 
 std::unique_ptr<DataProviderRes> DataProviderManagerStandard::GetDataProviderResFromUri(const std::string& uriStr)
 {
-    LOGD("DataProviderManagerStandard::GetDataProviderResFromUri start uri: %{private}s", uriStr.c_str());
     InitHelper();
     std::shared_lock lock(helperMutex_);
     if (!helper_) {

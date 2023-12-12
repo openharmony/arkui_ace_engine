@@ -90,7 +90,6 @@ public:
 
     void SetClicked(bool clicked)
     {
-        LOGD("[indexer] SetClicked clicked:%d", clicked);
         bool preClicked = clicked_;
         clicked_ = (clicked && keyCount_ > 0);
         if (clicked_ != preClicked) {

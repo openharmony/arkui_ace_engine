@@ -4253,7 +4253,6 @@ bool JSViewAbstract::ParseJsString(const JSRef<JSVal>& jsValue, std::string& res
         auto originStr = resourceWrapper->GetString(resId->ToNumber<uint32_t>());
         ReplaceHolder(originStr, params, 0);
         result = originStr;
-        LOGD("Get resource string %{public}s", result.c_str());
     } else if (resourceObject->GetType() == static_cast<uint32_t>(ResourceType::PLURAL)) {
         auto countJsVal = params->GetValueAt(0);
         int count = 0;
@@ -4264,7 +4263,6 @@ bool JSViewAbstract::ParseJsString(const JSRef<JSVal>& jsValue, std::string& res
         auto pluralStr = resourceWrapper->GetPluralString(resId->ToNumber<uint32_t>(), count);
         ReplaceHolder(pluralStr, params, 1);
         result = pluralStr;
-        LOGD("Get resource PLURAL %{public}s", result.c_str());
     } else if (resourceObject->GetType() == static_cast<uint32_t>(ResourceType::FLOAT)) {
         result = std::to_string(resourceWrapper->GetDouble(resId->ToNumber<uint32_t>()));
     } else if (resourceObject->GetType() == static_cast<uint32_t>(ResourceType::INTEGER)) {
@@ -4571,8 +4569,6 @@ std::pair<CalcDimension, CalcDimension> JSViewAbstract::ParseSize(const JSCallba
         !ParseJsDimensionVp(jsObj->GetProperty("height"), height)) {
         return std::pair<CalcDimension, CalcDimension>();
     }
-    LOGD("Js parse size width = %lf unit = %d, height = %lf unit = %d", width.Value(), width.Unit(), height.Value(),
-        height.Unit());
     info.SetReturnValue(info.This());
     return std::pair<CalcDimension, CalcDimension>(width, height);
 }
@@ -5664,7 +5660,6 @@ void JSViewAbstract::JsBindContextMenu(const JSCallbackInfo& info)
     ResponseType responseType = ResponseType::LONG_PRESS;
     if (info.Length() >= PARAMETER_LENGTH_SECOND && info[1]->IsNumber()) {
         auto response = info[1]->ToNumber<int32_t>();
-        LOGD("Set the responseType is %{public}d.", response);
         responseType = static_cast<ResponseType>(response);
     }
     WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();

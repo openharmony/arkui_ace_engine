@@ -28,7 +28,6 @@ constexpr int32_t SEQUENCE_GESTURE_TIMEOUT = 300;
 
 void SequencedRecognizer::OnAccepted()
 {
-    LOGD("the sequenced gesture recognizer has been accepted.");
     if (activeIndex >= recognizers_.size()) {
         return;
     }
@@ -42,7 +41,6 @@ void SequencedRecognizer::OnAccepted()
 
 void SequencedRecognizer::OnRejected()
 {
-    LOGD("the sequenced gesture recognizer has been rejected!");
     if (activeIndex >= recognizers_.size()) {
         return;
     }
@@ -65,7 +63,6 @@ void SequencedRecognizer::OnRejected()
 
 void SequencedRecognizer::OnPending(size_t touchId)
 {
-    LOGD("the sequenced gesture recognizer is in pending! the touch id is %{public}zu", touchId);
     if (activeIndex >= recognizers_.size()) {
         return;
     }
@@ -80,7 +77,6 @@ void SequencedRecognizer::OnPending(size_t touchId)
 bool SequencedRecognizer::HandleEvent(const TouchEvent& point)
 {
     RefPtr<GestureRecognizer> curRecognizer = recognizers_[activeIndex];
-    LOGD("dispatch to the %{public}zu gesture recognizer, event type is %{public}zu", activeIndex, point.type);
     switch (point.type) {
         case TouchType::MOVE:
             curPoints_[point.id] = point;
@@ -112,7 +108,6 @@ bool SequencedRecognizer::HandleEvent(const TouchEvent& point)
         // Should pass the touch point to the next recognizer.
         activeIndex++;
         if (activeIndex >= recognizers_.size()) {
-            LOGD("gesture reset to the initial state ");
             Reset();
             return true;
         }
@@ -149,7 +144,6 @@ void SequencedRecognizer::BatchAdjudicate(
     const std::set<size_t>& touchIds, const RefPtr<GestureRecognizer>& recognizer, GestureDisposal disposal)
 {
     if (disposal == GestureDisposal::ACCEPT) {
-        LOGD("the sub recognizer %{public}s ask for accept", AceType::TypeName(recognizer));
         if (activeIndex == (recognizers_.size() - 1)) {
             state_ = DetectState::DETECTED;
             Adjudicate(AceType::Claim(this), GestureDisposal::ACCEPT);

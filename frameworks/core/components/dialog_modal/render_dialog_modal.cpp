@@ -211,7 +211,6 @@ void RenderDialogModal::PerformClip()
         lastAnimateFrame_ = false;
     } else {
         if (!CanRouterPage()) {
-            LOGD("Stage in page transition, do nothing.");
             return;
         }
         pageHeight = GetTopPageLayoutSize().Height();

@@ -154,7 +154,6 @@ void RenderTabContent::FireContentChangeEvent() const
         return;
     }
     if (changeEvent_) {
-        LOGD("FireChangeEvent, index = %{public}d.", currentIndex_);
         std::string param = std::string(R"("change",{"index":)").append(std::to_string(currentIndex_).append("},null"));
         changeEvent_(param);
     }
@@ -162,7 +161,6 @@ void RenderTabContent::FireContentChangeEvent() const
 
 void RenderTabContent::FireDomChangeEvent(int32_t index) const
 {
-    LOGD("FireDomChangeEvent, index is %{public}d", index);
     if (domChangeEvent_) {
         domChangeEvent_(index);
     }
@@ -177,7 +175,6 @@ void RenderTabContent::HandContentIndicatorEvent(int32_t newIndex, bool needChan
 
 void RenderTabContent::HandleDragStart()
 {
-    LOGD("HandleDragStart");
     if (isInAnimation_) {
         return;
     }
@@ -191,7 +188,6 @@ void RenderTabContent::HandleDragUpdate(double offset)
     }
     UpdateScrollPosition(offset);
     if (NearZero(scrollOffset_)) {
-        LOGD("ScrollOffset near equals 0.");
         return;
     }
     
@@ -202,13 +198,11 @@ void RenderTabContent::HandleDragUpdate(double offset)
 
 void RenderTabContent::HandleDragEnd()
 {
-    LOGD("HandleDragEnd");
     if (isInAnimation_) {
         return;
     }
     isDragging_ = false;
     if (NearZero(scrollOffset_)) {
-        LOGD("ScrollOffset near equals 0.");
         return;
     }
     int32_t newIndex = IsRightToLeft() ? (scrollOffset_ < 0.0 ? GetPrevIndex() : GetNextIndex())
@@ -218,13 +212,11 @@ void RenderTabContent::HandleDragEnd()
 
 void RenderTabContent::ChangeScroll(int32_t index, bool fromController)
 {
-    LOGD("Change scroll index is %{public}d", index);
     if (Container::IsCurrentUsePartialUpdate() && contentMap_.find(currentIndex_) == contentMap_.end()) {
         // That happens in case we just updated index only
         // so we needed to keep content as is.
         // There might be a better way to update index via controller
         // without triggering of a scrolling
-        LOGD("currentIndex_, state is missing, update index only");
         currentIndex_ = index;
         return;
     }
@@ -233,15 +225,11 @@ void RenderTabContent::ChangeScroll(int32_t index, bool fromController)
 
 void RenderTabContent::ScrollContents(int32_t newIndex, bool isLinkBar, bool fromController)
 {
-    LOGD("ScrollContents from %{public}d to %{public}d", currentIndex_, newIndex);
     if (!animator_->IsStopped()) {
-        LOGD("Animationis not stopped, clear stop listener.");
         // clear stop listener and stop
         if (isInAnimation_) {
-            LOGD("In animation,controller end");
             animator_->Finish();
         } else {
-            LOGD("Not in animation,controller stop");
             animator_->Stop();
         }
     }
@@ -268,7 +256,6 @@ void RenderTabContent::ScrollContents(int32_t newIndex, bool isLinkBar, bool fro
             minOffset = MIN_SCROLL_OFFSET * contentWidth_;
         }
         if (!NearZero(scrollOffset_) && std::abs(scrollOffset_) < minOffset) {
-            LOGD("ScrollOffset less than min scroll offset.");
             end = 0.0;
         }
     }
@@ -276,7 +263,6 @@ void RenderTabContent::ScrollContents(int32_t newIndex, bool isLinkBar, bool fro
     if (!NearZero(end) || NearZero(scrollOffset_)) {
         needChange = true;
     }
-    LOGD("Translate animation, start=%{public}lf, end=%{public}lf", start, end);
     translate_ = AceType::MakeRefPtr<CurveAnimation<double>>(start, end, Curves::FRICTION);
     auto weak = AceType::WeakClaim(this);
     translate_->AddListener(Animation<double>::ValueCallback([weak, index, newIndex, needChange](double value) {
@@ -330,7 +316,6 @@ void RenderTabContent::HandleStartListener(int32_t newIndex, bool needChange, bo
 
 void RenderTabContent::HandleStopListener(int32_t newIndex, bool needChange, bool fromController)
 {
-    LOGD("HandleStopListener start, newIndex is %{public}d,needChange is %{public}d", newIndex, needChange);
     // callback used to notify the change of index
     if (newIndex >= 0 && newIndex < contentCount_ && needChange) {
         if (!fromController) {
@@ -414,8 +399,6 @@ void RenderTabContent::UpdateDragPosition(int32_t index)
 void RenderTabContent::UpdateChildPosition(double offset, int32_t currentIndex, int32_t newIndex, bool needChange)
 {
     scrollOffset_ = offset;
-    LOGD("UpdateChildPosition start offset = %{public}lf, from = %{public}d, to = %{public}d", offset, currentIndex,
-        newIndex);
     if (currentIndex < 0 || currentIndex >= contentCount_) {
         LOGE("currentIndex out of range, currentIndex is %{public}d, %{public}d", currentIndex, contentCount_);
         return;
@@ -438,7 +421,6 @@ void RenderTabContent::UpdateChildPosition(double offset, int32_t currentIndex, 
     }
     // at the first one item or the last one item, no more switching
     if (newIndex < 0 || newIndex >= contentCount_) {
-        LOGD("exit animation newIndex %{public}d  contentCount_ %{public}d", newIndex, contentCount_);
         return;
     }
 
@@ -454,8 +436,6 @@ void RenderTabContent::UpdateChildPosition(double offset, int32_t currentIndex, 
     toItem->SetPosition(toItemPos);
     toItem->MarkNeedRender();
     MarkNeedRender();
-    LOGD("update position from(%{public}lf in %{public}u) to(%{public}lf in %{public}u)", offset, currentIndex,
-        toItemPosValue, newIndex);
 }
 
 inline int32_t RenderTabContent::GetPrevIndex() const

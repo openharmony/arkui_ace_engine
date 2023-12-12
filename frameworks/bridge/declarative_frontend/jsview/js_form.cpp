@@ -72,13 +72,6 @@ void JSForm::Create(const JSCallbackInfo& info)
     JSRef<JSVal> temporary = obj->GetProperty("temporary");
     JSRef<JSVal> wantValue = obj->GetProperty("want");
     JSRef<JSVal> renderingMode = obj->GetProperty("renderingMode");
-
-    TAG_LOGD(AceLogTag::ACE_FORM,
-        "js form create id:%{public}d, name:%{public}s, bundle:%{public}s, ability:%{public}s, module:%{public}s, "
-         "temporary:%{public}s, renderingMode:%{public}s",
-        id->ToNumber<int32_t>(), name->ToString().c_str(), bundle->ToString().c_str(), ability->ToString().c_str(),
-        module->ToString().c_str(), temporary->ToString().c_str(), renderingMode->ToString().c_str());
-
     RequestFormInfo fomInfo;
     fomInfo.id = id->ToNumber<int32_t>();
     fomInfo.cardName = name->ToString();

@@ -32,7 +32,6 @@ RefPtr<AceType> ViewPartialUpdateModelImpl::CreateNode(NodeInfoPU&& info)
     // create component, return new something, need to set proper ID
 
     const auto reservedElementId = ViewStackProcessor::GetInstance()->ClaimElementId();
-    LOGD("Creating ComposedComponent with claimed elmtId %{public}d.", reservedElementId);
     const std::string key = std::to_string(reservedElementId);
     auto composedComponent = AceType::MakeRefPtr<ComposedComponent>(key, "view");
     composedComponent->SetElementId(reservedElementId);
@@ -80,7 +79,6 @@ RefPtr<AceType> ViewPartialUpdateModelImpl::CreateNode(NodeInfoPU&& info)
     composedComponent->SetElementFunction(std::move(elementFunction));
 
     if (isStatic) {
-        LOGD("will mark composedComponent as static");
         composedComponent->SetStatic();
     }
 
@@ -97,7 +95,6 @@ bool ViewPartialUpdateModelImpl::MarkNeedUpdate(const WeakPtr<AceType>& node)
     }
     auto element = weakElement.Upgrade();
     if (element) {
-        LOGD("Element %{public}d MarkDirty", element->GetElementId());
         element->MarkDirty();
     }
     return true;
@@ -114,8 +111,6 @@ void ViewPartialUpdateModelImpl::FlushUpdateTask(const UpdateTask& task)
 
     RefPtr<Element> element = ElementRegister::GetInstance()->GetElementById(elmtId);
     if (element != nullptr) {
-        LOGD("Searching for localized update for %{public}s elmtId: %{public}d ...", AceType::TypeName(element),
-            element->GetElementId());
         // special case, because new IfElement will be created
         if (AceType::DynamicCast<IfElseElement>(element) != nullptr) {
             IfElseElement::ComponentToElementLocalizedUpdate(mainComponent, element);
@@ -152,11 +147,6 @@ void ViewPartialUpdateModelImpl::FinishUpdate(
     }
     // chk main component componentsPair.second elmtId
     ACE_DCHECK(componentsPair.second->GetElementId() == id);
-
-    LOGD("Obtained %{public}s from ViewStackProcessor, to-be update Element has elmtId %{public}d. Adding to "
-         "List of Component -> Element updates on next FlushBuild",
-        AceType::TypeName(componentsPair.second), id);
-
     // push the result of the update function with elmtId added on the list of pending updates, triple:
     // 0: elmtId
     // 1: outmost wrapping Component (most keep reference until localized updates done to avoid smart pointer auto

@@ -230,7 +230,6 @@ RefPtr<V2::BreakPoints> ParserBreakpoints(const JSRef<JSVal>& jsValue)
                 CalcDimension valueDimension;
                 JSContainerBase::ParseJsDimensionVp(threshold, valueDimension);
                 if (GreatNotEqual(width, valueDimension.Value())) {
-                    TAG_LOGD(AceLogTag::ACE_GRIDROW, "Array data must be sorted in ascending order");
                     return breakpoint;
                 }
                 width = valueDimension.Value();

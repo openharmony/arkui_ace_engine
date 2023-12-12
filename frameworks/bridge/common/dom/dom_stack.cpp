@@ -36,7 +36,6 @@ DOMStack::DOMStack(NodeId nodeId, const std::string& nodeName) : DOMNode(nodeId,
 void DOMStack::OnChildNodeAdded(const RefPtr<DOMNode>& child, int32_t slot)
 {
     ACE_DCHECK(child);
-    LOGD("DOMStack Add Child");
     // If child has absolute position, the stack should be as large as the box component, so that the position is
     // correct in front-end.
     auto childDeclaration = child->GetDeclaration();
@@ -50,7 +49,6 @@ void DOMStack::OnChildNodeAdded(const RefPtr<DOMNode>& child, int32_t slot)
 void DOMStack::OnChildNodeRemoved(const RefPtr<DOMNode>& child)
 {
     ACE_DCHECK(child);
-    LOGD("DOMStack remove child");
     stackChild_->RemoveChild(child->GetRootComponent());
 }
 
@@ -110,8 +108,6 @@ void DOMStack::PrepareSpecializedComponent()
     } else {
         alignment_ = AlignArray[crossAxisAlign_][mainAxisAlign_];
     }
-    LOGD("DOMStack Vertical:%{private}lf ,Horizontal:%{private}lf", alignment_.GetVertical(),
-         alignment_.GetHorizontal());
     if (boxComponent_->GetWidthDimension().IsValid() && boxComponent_->GetHeightDimension().IsValid()) {
         stackChild_->SetMainStackSize(MainStackSize::MAX);
     } else if (boxComponent_->GetWidthDimension().IsValid()) {

@@ -98,8 +98,6 @@ void BlankPattern::BeforeCreateLayoutWrapper()
         crossAxisHasSize = (isParentRow && calcConstraint->selfIdealSize.value().Height().has_value()) ||
                            (!isParentRow && calcConstraint->selfIdealSize.value().Width().has_value());
     }
-    TAG_LOGD(AceLogTag::ACE_BLANK, "Main axis has size %{public}d, cross has size %{public}d", mainAxisHasSize,
-        crossAxisHasSize);
     if (!crossAxisHasSize) {
         layoutProp->UpdateAlignSelf(FlexAlign::STRETCH);
     }

@@ -891,7 +891,6 @@ void RefreshPattern::UpdateRefreshStatus(RefreshStatus newStatus)
         FireChangeEvent("false");
     }
     FireStateChange(static_cast<int>(refreshStatus_));
-    TAG_LOGD(AceLogTag::ACE_REFRESH, "refresh status changed %{public}d", static_cast<int32_t>(refreshStatus_));
 }
 
 void RefreshPattern::SwitchToFinish()

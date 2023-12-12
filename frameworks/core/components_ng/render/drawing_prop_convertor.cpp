@@ -322,7 +322,6 @@ RSTextStyle ToRSTextStyle(const RefPtr<PipelineBase>& context, const TextStyle& 
             rsTextStyle.heightScale = lineHeight / fontSize;
 #endif
         } else {
-            LOGD("use default text style height value.");
 #ifndef USE_GRAPHIC_TEXT_GINE
             rsTextStyle.height_ = 1;
 #else

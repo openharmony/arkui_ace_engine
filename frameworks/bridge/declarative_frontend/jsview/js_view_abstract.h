@@ -404,7 +404,6 @@ public:
         }
 
         if (jsValue->IsNumber()) {
-            LOGD("jsValue->IsNumber()");
             result = jsValue->ToNumber<T>();
             return true;
         }
@@ -412,7 +411,6 @@ public:
         JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsValue);
         JSRef<JSVal> type = jsObj->GetProperty("type");
         if (!type->IsNumber()) {
-            LOGD("type is not number");
             return false;
         }
 

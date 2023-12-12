@@ -48,16 +48,10 @@ void SoleChildElement::LocalizedUpdateWithItemComponent(
                    (AceType::DynamicCast<GridLayoutItemComponent>(mainComponent) != nullptr)) &&
                CanUpdate(mainComponent));
 
-    LOGD("%{public}s elmtId %{public}d  updating with %{public}s elmtId %{public}d, canUpdate(): %{public}s",
-        AceType::TypeName(this), GetElementId(),
-        AceType::TypeName(mainComponent), mainComponent->GetElementId(), CanUpdate(mainComponent) ? "yes" : "no");
-
     RefPtr<Element> updateElement = AceType::Claim(this);
     auto updateComponent = mainComponent;
 
     for (;;) {
-        LOGD("   ... localizedUpdate %{public}s <- %{public}s",
-            AceType::TypeName(updateElement), AceType::TypeName(updateComponent));
         updateElement->SetNewComponent(updateComponent);
         updateElement->LocalizedUpdate(); // virtual
         updateElement->SetNewComponent(nullptr);

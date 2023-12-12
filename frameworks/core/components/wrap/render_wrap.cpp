@@ -532,7 +532,6 @@ void RenderWrap::TraverseContent(const Offset& startPosition, const Offset& betw
         }
         auto contentSpace = NormalizeToPx(contentSpace_);
         startItemIndex += itemNum;
-        LOGD("Wrap::mainAlignment startItemIndex=%{public}d", startItemIndex);
         accumulateOffset += betweenPosition;
         accumulateOffset += (direction_ == WrapDirection::HORIZONTAL || direction_ == WrapDirection::HORIZONTAL_REVERSE)
                                 ? Offset(0.0, content.crossLength_ + contentSpace)
@@ -625,7 +624,6 @@ void RenderWrap::PositionedItem(
 void RenderWrap::PlaceItemAndLog(const RefPtr<RenderNode>& node, const Offset& position, const std::string& align) const
 {
     node->SetPosition(position);
-    LOGD("Wrap::PositionedItem %s item position x:%lf, y:%lf", align.c_str(), position.GetX(), position.GetY());
 }
 
 void RenderWrap::HandleCenterAlignment(double totalCrossSpace, const RefPtr<RenderNode>& item, const Offset& position,

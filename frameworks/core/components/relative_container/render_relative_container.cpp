@@ -341,7 +341,6 @@ void RenderRelativeContainer::PerformLayout()
         SetLayoutSize(containerSize);
     }
     if (GetChildren().empty()) {
-        LOGD("RenderRelativeContainer: No child in Relative container");
         return;
     }
     idNodeMap_.clear();

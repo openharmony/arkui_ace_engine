@@ -44,7 +44,6 @@ constexpr uint32_t PRESS_BORDER_COLOR = 0x19000000;
 
 void RosenRenderCircleBlock::Update(const RefPtr<Component>& component)
 {
-    LOGD("Slider::Update");
     RenderBlock::Update(component);
 }
 
@@ -140,8 +139,6 @@ void RosenRenderCircleBlock::SyncGeometryProperties()
 
 void RosenRenderCircleBlock::Paint(RenderContext& context, const Offset& offset)
 {
-    LOGD("Slider::Paint_offset position x:%{public}lf, y:%{public}lf radiusScale:%{public}lf", offset.GetX(),
-        offset.GetY(), radiusScale_);
     auto canvas = static_cast<RosenRenderContext*>(&context)->GetCanvas();
     if (!canvas) {
         LOGE("canvas fetch failed");

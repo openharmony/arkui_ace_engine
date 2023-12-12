@@ -680,12 +680,6 @@ void AceContainer::InitializeCallback()
         ContainerScope scope(id);
         context->GetTaskExecutor()->PostTask(
             [context, event, markProcess]() {
-                if (event.type != TouchType::MOVE) {
-                    TAG_LOGD(AceLogTag::ACE_INPUTTRACKING, "TouchEvent Process in ace_container: "
-                        "eventInfo: id:%{public}d, pointX=%{public}f pointY=%{public}f "
-                        "type=%{public}d timeStamp=%{public}lld", event.pointerEvent->GetId(),
-                        event.x, event.y, (int)event.type, event.time.time_since_epoch().count());
-                }
                 context->OnTouchEvent(event);
                 CHECK_NULL_VOID(markProcess);
                 markProcess();
@@ -725,8 +719,6 @@ void AceContainer::InitializeCallback()
         bool result = false;
         context->GetTaskExecutor()->PostSyncTask(
             [context, event, &result]() {
-                TAG_LOGD(AceLogTag::ACE_INPUTTRACKING, "Process KeyEvent in ace_container, eventInfo:"
-                    "code:%{public}d, action%{public}d", event.code, event.action);
                 result = context->OnKeyEvent(event);
             },
             TaskExecutor::TaskType::UI);
@@ -938,7 +930,6 @@ bool AceContainer::RunPage(
     ContainerScope scope(instanceId);
     auto front = container->GetFrontend();
     CHECK_NULL_RETURN(front, false);
-    LOGD("RunPage content=[%{private}s]", content.c_str());
     if (isNamedRouter) {
         front->RunPageByNamedRouter(content);
     } else {
@@ -955,7 +946,6 @@ bool AceContainer::RunPage(
     ContainerScope scope(instanceId);
     auto front = container->GetFrontend();
     CHECK_NULL_RETURN(front, false);
-    LOGD("RunPage by buffer size:%{public}d", size);
     front->RunPage(content, params);
     return true;
 }
@@ -1529,7 +1519,6 @@ void AceContainer::AttachView(std::shared_ptr<Window> window, AceView* view, dou
                                     colorScheme = colorScheme_, resourceInfo = resourceInfo_,
                                     context = runtimeContext_.lock(), abilityInfo = abilityInfo_.lock()]() {
         ACE_SCOPED_TRACE("OHOS::LoadThemes()");
-        LOGD("UIContent load theme, Resource decoupling: %{public}d", SystemProperties::GetResourceDecoupling());
 
         if (SystemProperties::GetResourceDecoupling()) {
             InitResourceAndThemeManager(pipelineContext, assetManager, colorScheme, resourceInfo, context, abilityInfo);
@@ -1724,7 +1713,6 @@ void AceContainer::InitializeSubContainer(int32_t parentContainerId)
 
 void AceContainer::InitWindowCallback()
 {
-    LOGD("AceContainer InitWindowCallback");
     if (!pipelineContext_ || !uiWindow_) {
         return;
     }

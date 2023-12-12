@@ -61,7 +61,6 @@ void GestureScope::DelMember(const RefPtr<GestureRecognizer>& recognizer)
         return;
     }
 
-    LOGD("gesture referee ready to delete member of %{public}s", AceType::TypeName(recognizer));
     RefereeState prevState = recognizer->GetRefereeState();
     recognizer->SetRefereeState(RefereeState::DETECTING);
 
@@ -222,7 +221,6 @@ const std::list<WeakPtr<GestureRecognizer>>& GestureScope::GetMembersByRecognize
 bool GestureScope::CheckNeedBlocked(const RefPtr<GestureRecognizer>& recognizer)
 {
     if (recognizer->GetPriority() == GesturePriority::Low && !highRecognizers_.empty()) {
-        LOGD("self is low priority, high recognizers are not processed");
         return true;
     }
 
@@ -294,7 +292,6 @@ void GestureScope::UnBlockGesture(std::list<WeakPtr<GestureRecognizer>>& members
             return member.Upgrade() && member.Upgrade()->GetRefereeState() == RefereeState::BLOCKED;
         });
     if (weakBlockedMember == members.end()) {
-        LOGD("no blocked gesture in recognizers");
         return;
     }
     auto blockedMember = (*weakBlockedMember).Upgrade();
@@ -304,19 +301,16 @@ void GestureScope::UnBlockGesture(std::list<WeakPtr<GestureRecognizer>>& members
     }
 
     if ((blockedMember)->GetDetectState() == DetectState::DETECTED) {
-        LOGD("unblock and accept this gesture");
         AcceptGesture(blockedMember);
         return;
     }
 
-    LOGD("set the gesture %{public}s to be pending", AceType::TypeName((*blockedMember)));
     (blockedMember)->SetRefereeState(RefereeState::PENDING);
     (blockedMember)->OnPending(touchId_);
 }
 
 void GestureScope::ForceClose()
 {
-    LOGD("force close gesture scope of id %{public}zu", touchId_);
     for (const auto& weakRejectedItem : lowRecognizers_) {
         auto rejectedItem = weakRejectedItem.Upgrade();
         if (rejectedItem) {
@@ -373,7 +367,6 @@ void GestureReferee::AddGestureRecognizer(size_t touchId, const RefPtr<GestureRe
         LOGE("recognizer is null, AddGestureRecognizer failed.");
         return;
     }
-    LOGD("add gesture recognizer %{public}s into scope %{public}zu,", AceType::TypeName(recognizer), touchId);
     const auto iter = gestureScopes_.find(touchId);
     if (iter != gestureScopes_.end()) {
         iter->second.AddMember(recognizer);
@@ -391,7 +384,6 @@ void GestureReferee::DelGestureRecognizer(size_t touchId, const RefPtr<GestureRe
         LOGE("recognizer is null, DelGestureRecognizer failed.");
         return;
     }
-    LOGD("delete gesture recognizer %{public}s from scope %{public}zu ", AceType::TypeName(recognizer), touchId);
     const auto iter = gestureScopes_.find(touchId);
     if (iter == gestureScopes_.end()) {
         return;
@@ -427,7 +419,6 @@ void GestureReferee::Adjudicate(size_t touchId, const RefPtr<GestureRecognizer>&
     if (iter != gestureScopes_.end()) {
         iter->second.HandleGestureDisposal(recognizer, disposal);
         if (iter->second.IsEmpty()) {
-            LOGD("clean the gesture referee of %{public}zu", touchId);
             gestureScopes_.erase(iter);
         }
     } else {

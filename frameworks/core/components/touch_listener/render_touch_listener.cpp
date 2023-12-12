@@ -87,7 +87,6 @@ void RenderTouchListener::Update(const RefPtr<Component>& component)
 void RenderTouchListener::OnTouchTestHit(
     const Offset& coordinateOffset, const TouchRestrict& touchRestrict, TouchTestResult& result)
 {
-    LOGD("render touch listener: on touch test hit!");
     auto context = context_.Upgrade();
     if (context && context->GetIsDeclarative()) {
         coordinateOffset_ = coordinateOffset;
@@ -198,7 +197,6 @@ bool RenderTouchListener::TriggerTouchCallBack(const TouchEvent& changedPoint)
     if (onTouchFocusEventCallback_ && changedPoint.type == TouchType::DOWN) {
         onTouchFocusEventCallback_();
     }
-    LOGD("IsStopPropagation = %{public}d", event->IsStopPropagation());
     return event->IsStopPropagation() ? false : true;
 }
 

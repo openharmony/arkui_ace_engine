@@ -140,7 +140,6 @@ void RenderGestureListener::SetDragCallBack(RefPtr<FreeDragRecognizer>& recogniz
         auto& onDragCancelId = component->GetOn##type##CancelId();                                                     \
         if (!(onDragStartId.IsEmpty() && onDragUpdateId.IsEmpty() && onDragEndId.IsEmpty() &&                          \
                 onDragCancelId.IsEmpty())) {                                                                           \
-            LOGD("RenderGestureListener: add %{public}s recognizer", #type);                                           \
             recognizer = AceType::MakeRefPtr<type##Recognizer>();                                                      \
             recognizer->SetOnDragStart(AceAsyncEvent<void(const DragStartInfo&)>::Create(onDragStartId, context_));    \
             recognizer->SetOnDragUpdate(AceAsyncEvent<void(const DragUpdateInfo&)>::Create(onDragUpdateId, context_)); \
@@ -181,7 +180,6 @@ void RenderGestureListener::Update(const RefPtr<Component>& component)
 #endif
     if (!freeDragRecognizer_) {
         // Horizontal and vertical gestures can only be enabled in the absence of free gesture.
-        LOGD("No free drag, update corresponding horizontal and vertical drag!");
         SET_DRAG_CALLBACK(horizontalDragRecognizer_, HorizontalDrag, gestureComponent);
         SET_DRAG_CALLBACK(verticalDragRecognizer_, VerticalDrag, gestureComponent);
         return;
@@ -289,7 +287,6 @@ void RenderGestureListener::SetRemoteMessageCallback(const RefPtr<GestureListene
 {
     const auto& remoteMessageId = component->GetRemoteMessageId();
     if (remoteMessageId.IsEmpty()) {
-        LOGD("RenderGestureListener::SetRemoteMessageCallback remoteMessageId IsEmpty");
         return;
     }
     SetRemoteMessageCallback(AceAsyncEvent<void(const ClickInfo&)>::Create(remoteMessageId, context_));

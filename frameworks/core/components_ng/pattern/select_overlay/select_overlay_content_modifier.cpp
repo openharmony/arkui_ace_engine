@@ -66,7 +66,6 @@ void SelectOverlayContentModifier::onDraw(DrawingContext& drawingContext)
     }
 
     if (!inShowArea_->Get()) {
-        LOGD("hide handles due to handle is out of show area");
         return;
     }
 

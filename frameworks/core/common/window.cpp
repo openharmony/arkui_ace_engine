@@ -33,11 +33,9 @@ Window::Window(std::unique_ptr<PlatformWindow> platformWindow) : platformWindow_
 void Window::RequestFrame()
 {
     if (!onShow_) {
-        LOGD("window is not show, stop request frame");
         return;
     }
     if (!isRequestVsync_ && platformWindow_ != nullptr) {
-        LOGD("request next vsync");
         platformWindow_->RequestFrame();
         isRequestVsync_ = true;
     }

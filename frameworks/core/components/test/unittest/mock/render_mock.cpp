@@ -30,10 +30,8 @@ MockRenderDropFilter::HookRenderDropFilter g_hookRenderDropfilter;
 
 RefPtr<RenderNode> RenderDisplay::Create()
 {
-    LOGD("Mock RenderDisplay Create");
     const auto& display = AceType::MakeRefPtr<MockRenderDisplay>();
     if (g_hookRenderDisplay) {
-        LOGD("execute hook");
         g_hookRenderDisplay(display);
     }
     return display;
@@ -41,7 +39,6 @@ RefPtr<RenderNode> RenderDisplay::Create()
 
 void MockRenderDisplay::SetMockHook(const HookRenderDisplay& hook)
 {
-    LOGD("set hook");
     g_hookRenderDisplay = hook;
 }
 
@@ -79,10 +76,8 @@ void ImageCache::Purge() {}
 
 RefPtr<RenderNode> RenderDropFilter::Create()
 {
-    LOGD("Mock RenderDropFilter Create");
     const auto& dropFilter = AceType::MakeRefPtr<MockRenderDropFilter>();
     if (g_hookRenderDropfilter) {
-        LOGD("execute hook");
         g_hookRenderDropfilter(dropFilter);
     }
     return dropFilter;
@@ -90,7 +85,6 @@ RefPtr<RenderNode> RenderDropFilter::Create()
 
 void MockRenderDropFilter::SetMockHook(const HookRenderDropFilter& hook)
 {
-    LOGD("set hook");
     g_hookRenderDropfilter = hook;
 }
 

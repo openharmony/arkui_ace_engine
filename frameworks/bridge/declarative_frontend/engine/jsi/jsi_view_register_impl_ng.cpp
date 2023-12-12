@@ -371,7 +371,6 @@ void JsUINodeRegisterCleanUp(BindingTarget globalObj)
 
     const JSRef<JSVal> cleanUpIdleTask = globalObject->GetProperty("uiNodeCleanUpIdleTask");
     if (cleanUpIdleTask->IsFunction()) {
-        LOGD("CleanUpIdleTask NG is a valid function");
         const auto globalFunc = JSRef<JSFunc>::Cast(cleanUpIdleTask);
         const std::function<void(void)> callback = [jsFunc = globalFunc, globalObject = globalObject]() {
             jsFunc->Call(globalObject);

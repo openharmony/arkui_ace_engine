@@ -77,7 +77,6 @@ const std::unordered_map<int, TextCase> textCaseMap {
 
 TextStyle TextStyleCreator::CreateFromJson(const JsonValue& json)
 {
-    LOGD("CreateFromJson TextStyle");
     TextStyle textStyle;
     std::string classType = json.GetValue(CLASS_NAME)->GetString();
     if (classType != TEXT_STYLE_NAME) {

@@ -169,7 +169,6 @@ void IndexerPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
 void IndexerPattern::OnHover(bool isHover)
 {
     if (itemCount_ <= 0) {
-        TAG_LOGD(AceLogTag::ACE_ALPHABET_INDEXER, "AlphabetIndexer arrayValue size is less than 0");
         return;
     }
     if (isHover_ == isHover) {
@@ -236,7 +235,6 @@ void IndexerPattern::InitChildInputEvent()
 void IndexerPattern::OnTouchDown(const TouchEventInfo& info)
 {
     if (itemCount_ <= 0) {
-        TAG_LOGD(AceLogTag::ACE_ALPHABET_INDEXER, "AlphabetIndexer arrayValue size is less than 0");
         return;
     }
     MoveIndexByOffset(info.GetTouches().front().GetLocalLocation());

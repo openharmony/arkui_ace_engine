@@ -156,7 +156,6 @@ RefPtr<RenderNode> SelectComponent::CreateRenderNode()
 
 RefPtr<Element> SelectComponent::CreateElement()
 {
-    LOGD("select: create element.");
     auto refPtr = AceType::MakeRefPtr<SelectElement>();
     flushRefreshCallback_ = [weakPtr = WeakPtr<SelectElement>(refPtr)]() {
         auto element = weakPtr.Upgrade();

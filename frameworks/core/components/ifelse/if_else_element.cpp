@@ -35,8 +35,6 @@ void IfElseElement::Update()
 
     MultiComposedElement::Update();
     branchId_ = ifElseComponent->GetBranchId();
-
-    LOGD("update, branchId: %d", branchId_);
 }
 
 void IfElseElement::ComponentToElementLocalizedUpdate(const RefPtr<Component>& component, RefPtr<Element>& element)
@@ -53,11 +51,7 @@ void IfElseElement::ComponentToElementLocalizedUpdate(const RefPtr<Component>& c
         return;
     }
 
-    LOGD("Component branch id %d, Element branch id %d", 
-        ifElseComponent->GetBranchId(), ifElseElement->GetBranchId());
-
     if (ifElseComponent->GetBranchId() == ifElseElement->GetBranchId()) {
-        LOGD("Unchanged branchId. No updates to be done.");
         return;
     }
 
@@ -67,16 +61,10 @@ void IfElseElement::ComponentToElementLocalizedUpdate(const RefPtr<Component>& c
     ifElseElement->UnregisterChildrenForPartialUpdates();
 
     auto ifElseParentElement = ifElseElement->GetElementParent().Upgrade();
-    LOGD("Doing a deep update IfElseElement <- %{public}s ...", AceType::TypeName(ifElseComponent));
-    LOGD("IfElse element slot: %{public}d, renderSlot: %{public}d", ifElseElement->GetSlot(),
-        ifElseElement->GetRenderSlot());
-    LOGD("   IfElseElement parent Element is %{public}s", AceType::TypeName(ifElseParentElement));
 
     ifElseParentElement->UpdateChildWithSlot(
         ifElseElement, ifElseComponent, ifElseElement->GetSlot(), ifElseElement->GetRenderSlot());
 
     ifElseElement->branchId_ = ifElseComponent->GetBranchId();
-
-    LOGD("Doing a deep update on IfElseElement - DONE");
 }
 } // namespace OHOS::Ace

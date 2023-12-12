@@ -164,7 +164,6 @@ public:
 
     void RegisterObjectEvent(const std::string& eventId, const EventObJectCallback&& eventCallback)
     {
-        TAG_LOGD(AceLogTag::ACE_WEB, "Web Register Object Event, %{public}s", eventId.c_str());
         eventObjectMap_[eventId] = std::move(eventCallback);
     }
 

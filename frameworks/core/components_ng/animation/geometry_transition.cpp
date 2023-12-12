@@ -192,7 +192,6 @@ bool GeometryTransition::Update(const WeakPtr<FrameNode>& which, const WeakPtr<F
     str += which.Upgrade() ? std::to_string(which.Upgrade()->GetId()) : "null";
     str += ", new value: ";
     str += value.Upgrade() ? std::to_string(value.Upgrade()->GetId()) : "null";
-    LOGD("GeometryTransition: %{public}s", str.c_str());
     return ret;
 }
 
@@ -224,7 +223,6 @@ void GeometryTransition::DidLayout(const RefPtr<LayoutWrapper>& layoutWrapper)
     std::optional<bool> direction = std::nullopt;
 
     if (isRoot && IsNodeInAndActive(node)) {
-        LOGD("GeometryTransition: node: %{public}d in and active", node->GetId());
         state_ = State::IDENTITY;
         auto geometryNode = node->GetGeometryNode();
         CHECK_NULL_VOID(geometryNode);
@@ -233,13 +231,11 @@ void GeometryTransition::DidLayout(const RefPtr<LayoutWrapper>& layoutWrapper)
         node->SetLayoutProperty(layoutPropertyIn_);
         layoutPropertyIn_.Reset();
     } else if (IsNodeInAndIdentity(node)) {
-        LOGD("GeometryTransition: node: %{public}d in and identity", node->GetId());
         state_ = State::IDLE;
         node->SetLayoutPriority(0);
         direction = true;
         hasInAnim_ = false;
     } else if (isRoot && IsNodeOutAndActive(node)) {
-        LOGD("GeometryTransition: node: %{public}d out and active", node->GetId());
         hasOutAnim_ = false;
         CHECK_NULL_VOID(!hasInAnim_);
         direction = false;
@@ -290,8 +286,6 @@ void GeometryTransition::ModifyLayoutConstraint(const RefPtr<LayoutWrapper>& lay
     auto layoutProperty = layoutWrapper->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);
     layoutProperty->UpdateUserDefinedIdealSize(targetSize);
-    LOGD("GeometryTransition: node: %{public}d modify size to: %{public}s",
-        self->GetId(), targetSize.ToString().c_str());
     // if node has aspect ratio we'll ignore it in active state
     const auto& magicItemProperty = layoutProperty->GetMagicItemProperty();
     if (magicItemProperty && magicItemProperty->HasAspectRatio()) {
@@ -520,8 +514,6 @@ bool GeometryTransition::OnAdditionalLayout(const WeakPtr<FrameNode>& frameNode)
             MarkLayoutDirty(node);
             MarkLayoutDirty(parentNode);
             ret = true;
-            LOGD("GeometryTransition: node: %{public}d, parent node: %{public}d is marked dirty",
-                node->GetId(), parentNode->GetId());
         }
     } else if (IsNodeOutAndActive(frameNode)) {
         MarkLayoutDirty(node);

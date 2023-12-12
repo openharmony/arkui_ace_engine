@@ -58,7 +58,6 @@ bool DOMTabs::SetSpecializedAttr(const std::pair<std::string, std::string>& attr
 {
     if (attr.first == TAB_INDEX) {
         tabIndex_ = std::max(0, StringToInt(attr.second));
-        LOGD("DOMTabs Index: %{public}u ControllerId: %{public}u", tabIndex_, tabControllerId_);
         if (tabController_) {
             tabController_->SetIndexByController(tabIndex_);
         }
@@ -97,8 +96,6 @@ bool DOMTabs::AddSpecializedEvent(int32_t pageId, const std::string& event)
         tabPageId_ = static_cast<uint32_t>(pageId);
         tabEventId_ = GetNodeIdForEvent();
         tabEventType_ = event;
-        LOGD("DOMTabs AddEvent pageId:%{private}u EventId:%{private}s EventType:%{private}s",
-            tabPageId_, tabEventId_.c_str(), tabEventType_.c_str());
         return true;
     }
     return false;

@@ -27,7 +27,6 @@ void FocusAnimationManager::SetFocusAnimationProperties(
     const RRect& rrect, const Color& color, const Offset& offset, bool isIndented) const
 {
     if (focusAnimationStack_.empty() || (useRoot_ && rootFocusAnimationStack_.empty())) {
-        LOGD("focus animation stack is empty");
         return;
     }
     auto focusAnimation = useRoot_ ? rootFocusAnimationStack_.top().Upgrade() : focusAnimationStack_.top().Upgrade();
@@ -49,7 +48,6 @@ void FocusAnimationManager::SetAvailableRect(const Rect& paintRect)
 void FocusAnimationManager::CancelFocusAnimation() const
 {
     if (focusAnimationStack_.empty() || (useRoot_ && rootFocusAnimationStack_.empty())) {
-        LOGD("focus animation stack is empty");
         return;
     }
     auto focusAnimation = useRoot_ ? rootFocusAnimationStack_.top().Upgrade() : focusAnimationStack_.top().Upgrade();
@@ -86,7 +84,6 @@ void FocusAnimationManager::PushFocusAnimationElement(const RefPtr<Element>& ele
 void FocusAnimationManager::PopFocusAnimationElement()
 {
     if (focusAnimationStack_.empty()) {
-        LOGD("focus animation stack is empty");
         return;
     }
     focusAnimationStack_.pop();
@@ -101,7 +98,6 @@ void FocusAnimationManager::PopFocusAnimationElement()
 void FocusAnimationManager::PopRootFocusAnimationElement()
 {
     if (rootFocusAnimationStack_.empty()) {
-        LOGD("focus animation stack is empty");
         return;
     }
     rootFocusAnimationStack_.pop();
@@ -110,7 +106,6 @@ void FocusAnimationManager::PopRootFocusAnimationElement()
 void FocusAnimationManager::StartFocusAnimation() const
 {
     if (focusAnimationStack_.empty()) {
-        LOGD("focus animation stack is empty");
         return;
     }
     auto focusAnimation = focusAnimationStack_.top().Upgrade();
@@ -121,7 +116,6 @@ void FocusAnimationManager::StartFocusAnimation() const
 void FocusAnimationManager::StopFocusAnimation() const
 {
     if (focusAnimationStack_.empty()) {
-        LOGD("focus animation stack is empty");
         return;
     }
     auto focusAnimation = focusAnimationStack_.top().Upgrade();
@@ -133,7 +127,6 @@ void FocusAnimationManager::SetFocusAnimationProperties(
     const RRect& rrect, const Color& color, const Offset& offset, const Rect& clipRect) const
 {
     if (focusAnimationStack_.empty()) {
-        LOGD("focus animation stack is empty");
         return;
     }
     auto focusAnimation = focusAnimationStack_.top().Upgrade();
@@ -216,7 +209,6 @@ void FocusAnimationManager::SetUseRoot(bool useRoot)
 void FocusAnimationManager::SetIsKeyEvent(bool isKeyEvent)
 {
     if (focusAnimationStack_.empty() || (useRoot_ && rootFocusAnimationStack_.empty())) {
-        LOGD("focus animation stack is empty");
         return;
     }
     auto focusAnimation = useRoot_ ? rootFocusAnimationStack_.top().Upgrade() : focusAnimationStack_.top().Upgrade();

@@ -118,7 +118,6 @@ void ListElement::RetrieveListData(int32_t beginIndex, int32_t endIndex)
 
     if (endIndex > 0) {
         std::string param = BuildEventParam(beginIndex, endIndex);
-        LOGD("RetrieveListData [begin = %{public}d, end = %{public}d)", beginIndex, endIndex);
         std::string result;
         if (requestItem_) {
             requestItem_(param, result);
@@ -357,7 +356,6 @@ bool ListElement::BuildListComponent(const RefPtr<Component>& component)
         }
     }
 
-    LOGD("build item index:%{public}d type:%{public}s", index, itemComponent->GetType().c_str());
     element = UpdateChild(element, component);
     if (itemComponent->TestFlag(LIST_ITEM_FLAG_DYNAMIC)) {
         RemoveComposedChildFromMap(element);
@@ -420,7 +418,6 @@ void ListElement::PreBuildListItems(int32_t index, const std::list<RefPtr<Compon
         }
         index++;
     }
-    LOGD("PreBuildListItems: index:%{public}d, count:%{public}d", index, preBuildCount_);
     preBuildCount_ = index;
 }
 
@@ -518,7 +515,6 @@ void ListElement::RecycleByRange(int32_t& from, int32_t& to)
 {
     int32_t firstRecycled = -1;
     int32_t lastRecycled = to;
-    LOGD("[recycle] recycle list items from: %{public}d, to: %{public}d", from, to);
 
     if (!itemElements_.empty()) {
         int32_t start = std::max(itemElements_.begin()->first, from);
@@ -658,14 +654,12 @@ void ListElement::UpdateListElement()
 
     GetRefreshItems(rebuild, tailIndex);
     if (rebuild) {
-        LOGD("rebuild elements");
         ResetStickyItem();
         RebuildElements(tailIndex);
         PatchElements(true);
         renderList_->MarkNeedRefresh();
         needRefresh_ = true;
     } else {
-        LOGD("patch elements");
         PatchElements(false);
     }
 }
@@ -682,8 +676,6 @@ void ListElement::GetRefreshItems(bool& rebuild, int32_t& tailIndex)
     int32_t currentMax = renderList_->GetCurrentMaxIndex() + 1;
     const auto& components = group->GetChildren();
 
-    LOGD("currentMin: %{public}d, currentMax: %{public}d, components.size(): %{public}d", currentMin, currentMax,
-        static_cast<int>(components.size()));
     int32_t head = 0;
     bool needRefresh = true;
     bool inRange = false;
@@ -740,7 +732,6 @@ void ListElement::GetRefreshItems(bool& rebuild, int32_t& tailIndex)
 
 void ListElement::RebuildElements(int32_t tailIndex)
 {
-    LOGD("tailIndex: %{public}d", tailIndex);
     listComponent_ = component_;
     auto items = itemElements_;
     renderList_->RecycleAllChild();
@@ -842,16 +833,13 @@ void ListElement::PatchElements(bool rebuild)
 void ListElement::PerformBuild()
 {
     building_ = false;
-    LOGD("pre max: %{public}d, cur max: %{public}d", renderList_->GetMaxCount(), maxCount_);
     renderList_->SetMaxCount(maxCount_);
     if (beginIndex_ != LIST_PARAM_INVAID && endIndex_ != LIST_PARAM_INVAID) {
         if (endIndex_ == 0 && repeatedLength_ != LIST_PARAM_INVAID && repeatedLength_ != 0) {
-            LOGD("request initial children, cacheCount: %{public}d", cachedCount_);
             RetrieveListData(0, cachedCount_);
         }
     } else {
         if (maxCount_ == 0) {
-            LOGD("request initial children, cacheCount: %{public}d", cachedCount_);
             RetrieveListData(0, cachedCount_);
         }
     }
@@ -883,11 +871,9 @@ void ListElement::Update()
     } else {
         ComponentGroupElement::Update();
         if (list->NeedUpdateElement() || isJsCard_) {
-            LOGD("update list element");
             UpdateListElement();
             list->MarkNeedUpdateElement(false);
         } else if (list->NeedPreBuild() && newListItemsMap_.empty()) {
-            LOGD("update from json");
             RefPtr<ComponentGroup> group = AceType::DynamicCast<ComponentGroup>(component_);
             if (group) {
                 const auto& children = group->GetChildren();
@@ -926,7 +912,6 @@ void ListElement::ApplyRenderChild(const RefPtr<RenderElement>& renderChild)
 
 bool ListElement::RequestNextFocus(bool vertical, bool reverse, const Rect& rect)
 {
-    LOGD("[ListFocus]RequestNextFocus Vertical:%{public}d, Reverse:%{public}d.", vertical, reverse);
     bool ret = false;
     while (!ret) {
         int32_t focusIndex = renderList_->RequestNextFocus(vertical, reverse);
@@ -955,7 +940,6 @@ void ListElement::MoveItemToViewPort(double position)
     if (!needMoveFocusItem_) {
         return;
     }
-    LOGD("[ListFocus]MoveItemToViewPort position:%{public}.1lf.", position);
     renderList_->MoveItemToViewPort(position);
     needMoveFocusItem_ = false;
 }
@@ -965,7 +949,6 @@ void ListElement::MoveItemGroupToViewPort(double position, double size)
     if (!needMoveFocusItem_) {
         return;
     }
-    LOGD("[ListFocus]MoveItemGroupToViewPort position:%{public}.1lf.", position);
     renderList_->MoveItemGroupToViewPort(position, size);
     needMoveFocusItem_ = false;
 }

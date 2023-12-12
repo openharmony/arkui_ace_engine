@@ -320,7 +320,6 @@ public:
             privateKeyFile = args[0]->ToString();
             certChainFile = args[1]->ToString();
         } else {
-            TAG_LOGD(AceLogTag::ACE_WEB, "Web certificate information processing handle, obtaining information failed");
             return;
         }
 
@@ -966,7 +965,6 @@ public:
             auto np = resourceUrl.find_first_of("/");
             url = (np == std::string::npos) ? resourceUrl : resourceUrl.erase(np, 1);
             response_->SetResourceUrl(url);
-            TAG_LOGD(AceLogTag::ACE_WEB, "intercept set data url %{public}s", url.c_str());
             return;
         }
     }
@@ -1025,7 +1023,6 @@ public:
             }
             auto keystr = headerKey->ToString();
             auto valstr = headerValue->ToString();
-            TAG_LOGD(AceLogTag::ACE_WEB, "Set Response Header %{public}s:%{public}s", keystr.c_str(), valstr.c_str());
             response_->SetHeadersVal(keystr, valstr);
         }
     }
@@ -1917,8 +1914,6 @@ void JSWeb::Create(const JSCallbackInfo& info)
     if (!dstSrc) {
         return;
     }
-    TAG_LOGD(AceLogTag::ACE_WEB, "Web Create src:%{public}s", dstSrc->c_str());
-
     auto controllerObj = paramObject->GetProperty("controller");
     if (!controllerObj->IsObject()) {
         return;
@@ -1976,10 +1971,7 @@ void JSWeb::Create(const JSCallbackInfo& info)
     WebModel::GetInstance()->SetFocusNode(true);
 }
 
-void JSWeb::WebRotate(const JSCallbackInfo& args)
-{
-    TAG_LOGD(AceLogTag::ACE_WEB, "Web rotate is not supported.");
-}
+void JSWeb::WebRotate(const JSCallbackInfo& args) {}
 
 void JSWeb::OnAlert(const JSCallbackInfo& args)
 {
@@ -2536,7 +2528,7 @@ void JSWeb::OnLoadIntercept(const JSCallbackInfo& args)
     auto jsFunc = AceType::MakeRefPtr<JsEventFunction<LoadInterceptEvent, 1>>(
         JSRef<JSFunc>::Cast(args[0]), LoadInterceptEventToJSValue);
     auto instanceId = Container::CurrentId();
-    
+
     WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
     auto uiCallback = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), instanceId, node = frameNode](
                           const BaseEventInfo* info) -> bool {
@@ -3077,35 +3069,17 @@ void JSWeb::BackgroundColor(const JSCallbackInfo& info)
     WebModel::GetInstance()->SetBackgroundColor(backgroundColor);
 }
 
-void JSWeb::InitialScale(float scale)
-{
-    WebModel::GetInstance()->InitialScale(scale);
-}
+void JSWeb::InitialScale(float scale) {}
 
-void JSWeb::Password(bool password)
-{
-    TAG_LOGD(AceLogTag::ACE_WEB, "Sets the Web should save the password.");
-}
+void JSWeb::Password(bool password) {}
 
-void JSWeb::TableData(bool tableData)
-{
-    TAG_LOGD(AceLogTag::ACE_WEB, "Sets the Web should save the table data.");
-}
+void JSWeb::TableData(bool tableData) {}
 
-void JSWeb::OnFileSelectorShowAbandoned(const JSCallbackInfo& args)
-{
-    TAG_LOGD(AceLogTag::ACE_WEB, "Set whether to discard the file abandoned.");
-}
+void JSWeb::OnFileSelectorShowAbandoned(const JSCallbackInfo& args) {}
 
-void JSWeb::WideViewModeAccess(const JSCallbackInfo& args)
-{
-    TAG_LOGD(AceLogTag::ACE_WEB, "Sets the Web access meta 'viewport' in HTML.");
-}
+void JSWeb::WideViewModeAccess(const JSCallbackInfo& args) {}
 
-void JSWeb::WebDebuggingAccess(const JSCallbackInfo& args)
-{
-    TAG_LOGD(AceLogTag::ACE_WEB, "Set up web debugging access.");
-}
+void JSWeb::WebDebuggingAccess(const JSCallbackInfo& args) {}
 
 void JSWeb::OnSearchResultReceive(const JSCallbackInfo& args)
 {
@@ -3698,7 +3672,6 @@ JSRef<JSVal> AudioStateChangedEventToJSValue(const AudioStateChangedEvent& event
 
 void JSWeb::OnAudioStateChanged(const JSCallbackInfo& args)
 {
-    TAG_LOGD(AceLogTag::ACE_WEB, "Web Audio State Changed.");
     if (!args[0]->IsFunction()) {
         return;
     }
@@ -3781,8 +3754,7 @@ void JSWeb::OnControllerAttached(const JSCallbackInfo& args)
     WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
     auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(args[0]));
     auto instanceId = Container::CurrentId();
-    auto uiCallback = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), instanceId,
-                          node = frameNode]() {
+    auto uiCallback = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), instanceId, node = frameNode]() {
         ContainerScope scope(instanceId);
         auto context = PipelineBase::GetCurrentContext();
         CHECK_NULL_VOID(context);

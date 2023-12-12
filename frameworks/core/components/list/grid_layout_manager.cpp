@@ -149,9 +149,6 @@ void GridLayoutManager::SetChildPosition(
         }
         child->SetPosition(Offset(mainSize, crossAxis) + position_);
     }
-    LOGD("GridLayoutManager Child:%{public}d %{public}d %{public}lf %{public}lf %{public}lf %{public}lf",
-        child->GetDisplayIndex(), columnSpan, crossAxis, mainSize, mainSize_,
-        renderList_.GetMainSize(child->GetLayoutSize()));
 }
 
 void GridLayoutManager::CalculateCachedRange(
@@ -283,7 +280,6 @@ void GridLayoutManager::RefreshLayout()
 
 void GridLayoutManager::PerformLayout()
 {
-    LOGD("PerformLayout head:%{public}lf tail:%{public}lf", head_, tail_);
     CalculateAxisSize();
     RefreshLayout();
     int32_t itemIndex = GetIndexByPosition(head_);
@@ -307,7 +303,6 @@ void GridLayoutManager::PerformLayout()
         int32_t span = std::min(listItem->GetColumnSpan(), columnCount_ - curGrid);
         LayoutParam innerLayout = MakeInnerLayoutParam(span);
         itemChild->Layout(innerLayout);
-        LOGD("Index:%{public}d mainSize:%{public}lf grid:%{public}d", itemIndex, curMainSize, curGrid);
         SetChildPosition(itemChild, curMainSize, curGrid, span);
         itemGrid_[itemIndex] = curGrid;
         itemPosition_[itemIndex] = curMainSize;
@@ -402,7 +397,6 @@ void GridLayoutManager::LayoutToItem(int32_t toIndex)
         int32_t span = std::min(listItem->GetColumnSpan(), columnCount_ - curGrid);
         LayoutParam innerLayout = MakeInnerLayoutParam(span);
         itemChild->Layout(innerLayout);
-        LOGD("Index:%{public}d mainSize:%{public}lf grid:%{public}d", curTailIndex, curMainSize, curGrid);
         SetChildPosition(itemChild, curMainSize, curGrid, span);
         itemGrid_[curTailIndex] = curGrid;
         itemPosition_[curTailIndex] = curMainSize;
@@ -442,7 +436,6 @@ void GridLayoutManager::LayoutMore(double incDistance)
         int32_t span = std::min(listItem->GetColumnSpan(), columnCount_ - curGrid);
         LayoutParam innerLayout = MakeInnerLayoutParam(span);
         itemChild->Layout(innerLayout);
-        LOGD("Index:%{public}d mainSize:%{public}lf grid:%{public}d", curTailIndex, curMainSize, curGrid);
         SetChildPosition(itemChild, curMainSize, curGrid, span);
         itemGrid_[curTailIndex] = curGrid;
         itemPosition_[curTailIndex] = curMainSize;
@@ -485,7 +478,6 @@ void GridLayoutManager::MoveItemToViewPort(double position)
     double focusEffectWidth = size * (TV_ITEM_SCALE - DEFAULT_SCALE) * HALF_ITEM_SIZE;
     double animationOffset = scroll->NormalizeToPx(FOCUS_BOUNDARY);
     scroll->MoveItemToViewPort(position, size, animationOffset + focusEffectWidth);
-    LOGD("[ListFocus][list] Direction:%{public}d, Item position:%{public}.1lf.", direction_, position);
 }
 
 void GridLayoutManager::ShowItemFocusAnimation()

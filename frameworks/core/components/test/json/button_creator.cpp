@@ -40,7 +40,6 @@ Color GetColorFromJson(const JsonValue& componentJson, std::string color)
 
 RefPtr<Component> ButtonCreator::CreateFromJson(const JsonValue& componentJson, const JsonComponentFactory& factory)
 {
-    LOGD("CreateFromJson button");
     std::string classType = componentJson.GetValue(CLASS_NAME)->GetString();
     if (classType != BUTTON_NAME) {
         LOGE("Create button err: not a button json.");

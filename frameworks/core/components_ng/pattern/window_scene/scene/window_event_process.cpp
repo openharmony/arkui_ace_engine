@@ -48,8 +48,6 @@ void WindowEventProcess::ProcessEnterLeaveEvent(int32_t nodeId,
     }
 
     if (lastWindowNodeId_ != nodeId) {
-        LOGD("Window switching, enter window:%{public}d, leave window:%{public}d",
-            nodeId, lastWindowNodeId_);
         if (lastPointEvent_ != nullptr) {
             lastPointEvent_->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_LEAVE_WINDOW);
             lastPointEvent_->SetId(pointerEvent->GetId());
@@ -98,8 +96,6 @@ void WindowEventProcess::ProcessWindowDragEvent(int32_t nodeId,
     }
     std::shared_ptr<MMI::PointerEvent> event = std::make_shared<MMI::PointerEvent>(*pointerEvent);
     if ((lastDragWindowNodeId_ != -1) && (nodeId != lastDragWindowNodeId_)) {
-        LOGD("Window switching, pull in window:%{public}d, pull out window:%{public}d",
-            nodeId, lastDragWindowNodeId_);
         if (lastDragPointEvent_ != nullptr) {
             lastDragPointEvent_->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_PULL_OUT_WINDOW);
             lastDragPointEvent_->SetId(pointerEvent->GetId());

@@ -26,7 +26,6 @@ const char ON_MOUSE_EVENT[] = "onMouse";
 
 void MouseRawRecognizer::HandleEvent(const MouseEvent& event)
 {
-    LOGD("raw mouse recognizer handle event, action is %{public}d, button is %{public}d", event.action, event.button);
     if (onMouse_) {
         onMouse_(CreateMouseEventInfo(event));
     }

@@ -313,8 +313,6 @@ void TabContentModelNG::RemoveTabBarItem(const RefPtr<TabContentNode>& tabConten
     }
 
     auto tabBarItemId = tabContentNode->GetTabBarItemId();
-    TAG_LOGD(AceLogTag::ACE_TABS, "Start remove item, tab ID: %{public}d, Bar item ID: %{public}d",
-        tabContentNode->GetId(), tabBarItemId);
     auto tabBarItemNode = ElementRegister::GetInstance()->GetUINodeById(tabBarItemId);
     CHECK_NULL_VOID(tabBarItemNode);
     auto tabBarNode = tabBarItemNode->GetParent();

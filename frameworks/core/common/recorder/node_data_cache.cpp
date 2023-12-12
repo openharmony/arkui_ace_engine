@@ -85,8 +85,6 @@ bool NodeDataCache::PutString(const std::string& id, const std::string& value)
     if (id.empty() || value.empty() || value.length() > MAX_DATA_LENGTH) {
         return false;
     }
-    TAG_LOGD(
-        AceLogTag::ACE_UIEVENT, "NodeDataCache PutValue id:%{public}s, value:%{public}s", id.c_str(), value.c_str());
     std::unique_lock<std::mutex> lock(cacheLock_);
     if (pageUrl_.empty()) {
         pageUrl_ = GetCurrentPageUrl();

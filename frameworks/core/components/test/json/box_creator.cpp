@@ -27,7 +27,6 @@ namespace OHOS::Ace {
 
 RefPtr<Component> BoxCreator::CreateFromJson(const JsonValue& componentJson, const JsonComponentFactory& factory)
 {
-    LOGD("CreateFromJson box");
     std::string classType = componentJson.GetValue(CLASS_NAME)->GetString();
     if (classType != BOX_NAME) {
         LOGE("Create BoxComponent err: not a box json.");

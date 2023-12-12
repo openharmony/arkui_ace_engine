@@ -497,8 +497,6 @@ void RenderDialogTween::UpdateTouchRegion(const Offset& topLeftPoint, const Size
     dragBottomRight.SetY(touchTopLeft.GetY() + DRAG_BAR_HEIGHT);
 
     maskTouchRegion_ = TouchRegion(touchTopLeft, touchBottomRight);
-    LOGD("top: %{public}lf, bottom:%{public}lf, left: %{public}lf, right:%{public}lf isSetMargin:%{public}d",
-        touchTopLeft.GetY(), touchBottomRight.GetY(), touchTopLeft.GetX(), touchBottomRight.GetX(), isSetMargin_);
     maskDragRegion_ = TouchRegion(touchTopLeft, dragBottomRight);
 }
 

@@ -134,7 +134,6 @@ void WindowExtensionConnectionAdapterOhos::ConnectExtension(
 {
     LOGI("ConnectExtension rect: %{public}s", rect.ToString().c_str());
 #if defined(ENABLE_ROSEN_BACKEND) && defined(OS_ACCOUNT_EXISTS)
-    LOGD("connect to windows extension begin");
     if (!windowExtension_) {
         windowExtension_ = std::make_unique<Rosen::WindowExtensionConnection>();
     }

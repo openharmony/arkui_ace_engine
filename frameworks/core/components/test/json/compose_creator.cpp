@@ -23,7 +23,6 @@ namespace OHOS::Ace {
 
 RefPtr<Component> ComposeCreator::CreateFromJson(const JsonValue& componentJson, const JsonComponentFactory& factory)
 {
-    LOGD("CreateFromJson compose");
     std::string classType = componentJson.GetValue(CLASS_NAME)->GetString();
     if (classType != COMPOSE_NAME) {
         LOGE("Create ComposedComponent err: not a compose json.");

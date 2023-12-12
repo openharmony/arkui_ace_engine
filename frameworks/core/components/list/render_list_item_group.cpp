@@ -56,23 +56,19 @@ void RenderListItemGroup::HandleClicked()
     SetAnimationStop();
 
     if (onClicked_) {
-        LOGD("list item group: onclicked");
         onClicked_(MakeEventParam(LIST_ITEM_GROUP_EVENT_GROUPCLICK));
     }
     FireExpandEvent();
     MarkNeedLayout();
-    LOGD("expand_: %{public}d", expand_);
 }
 
 void RenderListItemGroup::FireExpandEvent()
 {
     if (expand_ && onExpand_) {
-        LOGD("list item group: onexpand");
         onExpand_(MakeEventParam(LIST_ITEM_GROUP_EVENT_GROUPEXPAND));
     }
 
     if (!expand_ && onCollapse_) {
-        LOGD("list item group: oncollapse");
         onCollapse_(MakeEventParam(LIST_ITEM_GROUP_EVENT_GROUPCOLLAPSE));
     }
 }
@@ -143,9 +139,6 @@ void RenderListItemGroup::AddArrowImage(double mainSize)
         } else {
             offsetY = std::max((primarySize.Height() - width) * FACTOR_HALF, 0.0);
         }
-        LOGD("RenderListItemGroup::AddArrowImage:offsetX: %{public}lf, offsetY: %{public}lf, mainSize: "
-             "%{public}lf,primarySizeW: %{public}lf,primarySizeH: %{public}lf",
-            offsetX, offsetY, mainSize, primarySize.Width(), primarySize.Height());
         arrowImage_->SetPosition(Offset(offsetX, offsetY));
         double rotateAngle = GetRotateAngle(expand_);
         arrowImage_->SetRotate(rotateAngle);
@@ -269,7 +262,6 @@ void RenderListItemGroup::SetAnimationStop()
 
 void RenderListItemGroup::PerformLayout()
 {
-    LOGD("RenderListItemGroup::PerformLayout: %{public}d", animating_);
     if (animating_) {
         return;
     }
@@ -320,7 +312,6 @@ void RenderListItemGroup::PerformLayout()
 
     double startPosition = curMainSize;
     double endPosition = mainSize;
-    LOGD("startPosition: %{public}lf, endPosition: %{public}lf", startPosition, endPosition);
     if (!NearZero(startPosition) && !forceLayout) {
         if (NearEqual(startPosition, endPosition)) {
             ResetChildVisibleState();
@@ -332,7 +323,6 @@ void RenderListItemGroup::PerformLayout()
     } else {
         LayoutExpandableList(endPosition);
         SetLayoutSize(MakeValue<Size>(endPosition, crossSize));
-        LOGD("layoutSize(no animation): %{public}s", GetLayoutSize().ToString().c_str());
     }
 }
 
@@ -378,7 +368,6 @@ void RenderListItemGroup::AnimationPerformLayout(double crossSize, double startP
         auto itemGroup = weakItemGroup.Upgrade();
         itemGroup->SetAnimationStop();
         itemGroup->SetChildStretch(false);
-        LOGD("layoutSize(animation): %{public}s", itemGroup->GetLayoutSize().ToString().c_str());
     });
 }
 
@@ -517,7 +506,6 @@ void RenderListItemGroup::Update(const RefPtr<Component>& component)
         SetAnimationStop();
         MarkNeedLayout();
     }
-    LOGD("RenderListItemGroup::Update");
     RenderListItem::Update(component);
     InitAccessibilityEventListener();
 }
@@ -556,7 +544,6 @@ void RenderListItemGroup::InitialImage()
 void RenderListItemGroup::ChangeDirection(FlexDirection direction)
 {
     if (direction_ != direction) {
-        LOGD("direction has change, reset item group layoutSize and primary position direction:%{public}d", direction);
         direction_ = direction;
         expand_ = false;
         UpdateExpandStatusInList();
@@ -578,7 +565,6 @@ void RenderListItemGroup::UpdateExpandStatusInList()
     while (parentNode) {
         RefPtr<RenderList> listNode = AceType::DynamicCast<RenderList>(parentNode);
         if (listNode) {
-            LOGD("UpdateExpandStatusInList, expand_:%{public}d", expand_);
             listNode->SetGroupState(GetIndex(), expand_);
             break;
         }

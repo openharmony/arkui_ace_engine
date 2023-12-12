@@ -41,7 +41,6 @@ void IterativeAddToSharedMap(const RefPtr<UINode>& node, SharedTransitionMap& ma
         }
         auto id = frameChild->GetRenderContext()->GetShareId();
         if (!id.empty()) {
-            LOGD("add id:%{public}s", id.c_str());
             map[id] = frameChild;
         }
         IterativeAddToSharedMap(frameChild, map);

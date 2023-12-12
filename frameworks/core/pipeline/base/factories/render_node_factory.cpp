@@ -35,7 +35,6 @@ RefPtr<RenderNode> RenderNodeFactory::Get()
 bool RenderNodeFactory::Recycle(RenderNode* node)
 {
     if (USE_CACHE && nodeCache_.size() < cacheSize_) {
-        LOGD("Recycle add in cache");
         nodeCache_.emplace_back(node);
         return true;
     }
@@ -47,7 +46,6 @@ RefPtr<RenderNode> RenderNodeFactory::GetNodeFromCache()
     if (!nodeCache_.empty()) {
         auto node = *(nodeCache_.rbegin());
         nodeCache_.pop_back();
-        LOGD("GetNodeFromCache get node");
         return Referenced::Claim(node);
     }
     return nullptr;

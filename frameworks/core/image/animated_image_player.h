@@ -41,7 +41,6 @@ public:
           frameCount_(codec_->getFrameCount()), repetitionCount_(codec_->getRepetitionCount()),
           frameInfos_(codec_->getFrameInfo()), dstWidth_(dstWidth), dstHeight_(dstHeight)
     {
-        LOGD("animated image frameCount_ : %{public}d, repetitionCount_ : %{public}d", frameCount_, repetitionCount_);
         auto context = context_.Upgrade();
         if (context) {
             animator_ = CREATE_ANIMATOR(context);
@@ -49,7 +48,6 @@ public:
             float totalFrameDuration = 0.0f;
             int32_t lastRequiredIndex = -1;
             for (int32_t index = 0; index < frameCount_; index++) {
-                LOGD("frame[%{public}d] duration is %{public}d", index, frameInfos_[index].fDuration);
                 // if frame duration is 0, set this frame duration as 100ms
                 if (frameInfos_[index].fDuration <= 0) {
                     frameInfos_[index].fDuration = 100;
@@ -60,17 +58,13 @@ public:
                 int32_t requiredIndex = frameInfos_[index].fRequiredFrame;
                 // if requiredIndex is valid
                 if (requiredIndex >= 0 && requiredIndex < frameCount_) {
-                    LOGD("now index: %{private}d require prior frame: %{private}d", index, requiredIndex);
                     // if require prior frame before last frame, cache it after first loop.
                     if (requiredIndex < lastRequiredIndex) {
-                        LOGD("requiredIndex < lastRequiredIndex, lastRequiredIndex: %{private}d ", lastRequiredIndex);
                         cachedFrame_.emplace(requiredIndex, nullptr);
                     }
                     lastRequiredIndex = requiredIndex;
                 }
             }
-            LOGD("frame cached size: %{private}d", static_cast<int32_t>(cachedFrame_.size()));
-            LOGD("animated image total duration: %{public}f", totalFrameDuration);
             for (int32_t index = 0; index < frameCount_; index++) {
                 pictureAnimation->AddPicture(
                     static_cast<float>(frameInfos_[index].fDuration) / totalFrameDuration, index);

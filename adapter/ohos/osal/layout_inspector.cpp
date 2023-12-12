@@ -243,9 +243,6 @@ void LayoutInspector::GetSnapshotJson(int32_t containerId, std::unique_ptr<JsonV
     SkString info(encodeLength);
     SkBase64::Encode(data->data(), data->size(), info.writable_str());
     message->Put("pixelMapBase64", info.c_str());
-    TAG_LOGD(AceLogTag::ACE_ACCESSIBILITY,
-        "GetSnapshotJson: deviceWidth: %{public}d, deviceHeight: %{public}d, dpi: %{public}d", deviceWidth,
-        deviceHeight, deviceDpi);
 }
 
 } // namespace OHOS::Ace

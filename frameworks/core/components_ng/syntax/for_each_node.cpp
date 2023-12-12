@@ -61,7 +61,6 @@ void ForEachNode::CreateTempItems()
 void ForEachNode::CompareAndUpdateChildren()
 {
     ACE_SCOPED_TRACE("ForEachNode::CompareAndUpdateChildren");
-    TAG_LOGD(AceLogTag::ACE_FOREACH, "Local update for ForEachNode nodeId: %{public}d ....", GetId());
 
     // result of id gen function of most re-recent render
     // create a map for quicker find/search

@@ -65,8 +65,6 @@ bool WindowNode::IsOutOfTouchTestRegion(const PointF& parentLocalPoint, int32_t 
     const auto& rect = GetPaintRectWithTransform();
     const auto& hotRect = ConvertHotRect(rect, sourceType);
     if (!hotRect.IsInRegion(parentLocalPoint)) {
-        LOGD("Point %{public}s is out of region in %{public}s",
-            parentLocalPoint.ToString().c_str(), GetTag().c_str());
         return true;
     }
     return false;

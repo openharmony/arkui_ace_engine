@@ -100,7 +100,6 @@ int32_t PaBackend::Insert(const Uri& uri, const OHOS::NativeRdb::ValuesBucket& v
     int32_t ret = 0;
     CallingInfo callingInfo;
     NAPI_RemoteObject_getCallingInfo(callingInfo);
-    LOGD("Calling token id is %{public}u.", callingInfo.callingTokenId);
     CHECK_NULL_RETURN(jsBackendEngine_, ret);
     jsBackendEngine_->PostSyncTask(
         [weakEngine = WeakPtr<JsBackendEngine>(jsBackendEngine_), &ret, uri, value, callingInfo] {
@@ -118,7 +117,6 @@ std::shared_ptr<AppExecFwk::PacMap> PaBackend::Call(
     std::shared_ptr<AppExecFwk::PacMap> ret = nullptr;
     CallingInfo callingInfo;
     NAPI_RemoteObject_getCallingInfo(callingInfo);
-    LOGD("Calling token id is %{public}u.", callingInfo.callingTokenId);
     CHECK_NULL_RETURN(jsBackendEngine_, ret);
     jsBackendEngine_->PostSyncTask(
         [weakEngine = WeakPtr<JsBackendEngine>(jsBackendEngine_), &ret, method, arg, pacMap, callingInfo] {
@@ -136,7 +134,6 @@ std::shared_ptr<OHOS::NativeRdb::AbsSharedResultSet> PaBackend::Query(
     std::shared_ptr<OHOS::NativeRdb::AbsSharedResultSet> ret = nullptr;
     CallingInfo callingInfo;
     NAPI_RemoteObject_getCallingInfo(callingInfo);
-    LOGD("Calling token id is %{public}u.", callingInfo.callingTokenId);
     CHECK_NULL_RETURN(jsBackendEngine_, ret);
     jsBackendEngine_->PostSyncTask(
         [weakEngine = WeakPtr<JsBackendEngine>(jsBackendEngine_), &ret, uri, columns, predicates, callingInfo] {
@@ -154,7 +151,6 @@ int32_t PaBackend::Update(const Uri& uri, const OHOS::NativeRdb::ValuesBucket& v
     int32_t ret = 0;
     CallingInfo callingInfo;
     NAPI_RemoteObject_getCallingInfo(callingInfo);
-    LOGD("Calling token id is %{public}u.", callingInfo.callingTokenId);
     CHECK_NULL_RETURN(jsBackendEngine_, ret);
     jsBackendEngine_->PostSyncTask(
         [weakEngine = WeakPtr<JsBackendEngine>(jsBackendEngine_), &ret, uri, value, predicates, callingInfo] {
@@ -171,7 +167,6 @@ int32_t PaBackend::Delete(const Uri& uri, const OHOS::NativeRdb::DataAbilityPred
     int32_t ret = 0;
     CallingInfo callingInfo;
     NAPI_RemoteObject_getCallingInfo(callingInfo);
-    LOGD("Calling token id is %{public}u.", callingInfo.callingTokenId);
     CHECK_NULL_RETURN(jsBackendEngine_, ret);
     jsBackendEngine_->PostSyncTask(
         [weakEngine = WeakPtr<JsBackendEngine>(jsBackendEngine_), &ret, uri, predicates, callingInfo] {
@@ -188,7 +183,6 @@ int32_t PaBackend::BatchInsert(const Uri& uri, const std::vector<OHOS::NativeRdb
     int32_t ret = 0;
     CallingInfo callingInfo;
     NAPI_RemoteObject_getCallingInfo(callingInfo);
-    LOGD("Calling token id is %{public}u.", callingInfo.callingTokenId);
     CHECK_NULL_RETURN(jsBackendEngine_, ret);
     jsBackendEngine_->PostSyncTask(
         [weakEngine = WeakPtr<JsBackendEngine>(jsBackendEngine_), &ret, uri, values, callingInfo] {
@@ -205,7 +199,6 @@ std::string PaBackend::GetType(const Uri& uri)
     std::string ret;
     CallingInfo callingInfo;
     NAPI_RemoteObject_getCallingInfo(callingInfo);
-    LOGD("Calling token id is %{public}u.", callingInfo.callingTokenId);
     CHECK_NULL_RETURN(jsBackendEngine_, ret);
     jsBackendEngine_->PostSyncTask(
         [weakEngine = WeakPtr<JsBackendEngine>(jsBackendEngine_), &ret, uri, callingInfo] {
@@ -222,7 +215,6 @@ std::vector<std::string> PaBackend::GetFileTypes(const Uri& uri, const std::stri
     std::vector<std::string> ret;
     CallingInfo callingInfo;
     NAPI_RemoteObject_getCallingInfo(callingInfo);
-    LOGD("Calling token id is %{public}u.", callingInfo.callingTokenId);
     CHECK_NULL_RETURN(jsBackendEngine_, ret);
     jsBackendEngine_->PostSyncTask(
         [weakEngine = WeakPtr<JsBackendEngine>(jsBackendEngine_), &ret, uri, mimeTypeFilter, callingInfo] {
@@ -239,7 +231,6 @@ int32_t PaBackend::OpenFile(const Uri& uri, const std::string& mode)
     int32_t ret = 0;
     CallingInfo callingInfo;
     NAPI_RemoteObject_getCallingInfo(callingInfo);
-    LOGD("Calling token id is %{public}u.", callingInfo.callingTokenId);
     CHECK_NULL_RETURN(jsBackendEngine_, ret);
     jsBackendEngine_->PostSyncTask(
         [weakEngine = WeakPtr<JsBackendEngine>(jsBackendEngine_), &ret, uri, mode, callingInfo] {
@@ -256,7 +247,6 @@ int32_t PaBackend::OpenRawFile(const Uri& uri, const std::string& mode)
     int32_t ret = 0;
     CallingInfo callingInfo;
     NAPI_RemoteObject_getCallingInfo(callingInfo);
-    LOGD("Calling token id is %{public}u.", callingInfo.callingTokenId);
     CHECK_NULL_RETURN(jsBackendEngine_, ret);
     jsBackendEngine_->PostSyncTask(
         [weakEngine = WeakPtr<JsBackendEngine>(jsBackendEngine_), &ret, uri, mode, callingInfo] {
@@ -273,7 +263,6 @@ Uri PaBackend::NormalizeUri(const Uri& uri)
     Uri ret("");
     CallingInfo callingInfo;
     NAPI_RemoteObject_getCallingInfo(callingInfo);
-    LOGD("Calling token id is %{public}u.", callingInfo.callingTokenId);
     CHECK_NULL_RETURN(jsBackendEngine_, ret);
     jsBackendEngine_->PostSyncTask(
         [weakEngine = WeakPtr<JsBackendEngine>(jsBackendEngine_), &ret, uri, callingInfo] {
@@ -290,7 +279,6 @@ Uri PaBackend::DenormalizeUri(const Uri& uri)
     Uri ret("");
     CallingInfo callingInfo;
     NAPI_RemoteObject_getCallingInfo(callingInfo);
-    LOGD("Calling token id is %{public}u.", callingInfo.callingTokenId);
     CHECK_NULL_RETURN(jsBackendEngine_, ret);
     jsBackendEngine_->PostSyncTask(
         [weakEngine = WeakPtr<JsBackendEngine>(jsBackendEngine_), &ret, uri, callingInfo] {
@@ -320,7 +308,6 @@ void PaBackend::ParseManifest()
 
 void PaBackend::LoadPa(const std::string& url, const OHOS::AAFwk::Want& want)
 {
-    LOGD("LoadPa: %{private}s.", url.c_str());
     CHECK_NULL_VOID(jsBackendEngine_);
 
     std::unique_lock<std::mutex> lock(LoadPaMutex_);
@@ -353,7 +340,6 @@ void PaBackend::LoadPa(const std::string& url, const OHOS::AAFwk::Want& want)
 void PaBackend::RunPa(const std::string& url, const OHOS::AAFwk::Want& want)
 {
     ACE_SCOPED_TRACE("PaBackend::RunPa");
-    LOGD("RunPa url=%{private}s.", url.c_str());
     ParseManifest();
     // if mutli pa in one hap should parse manifest get right url
     LoadPa(url, want);

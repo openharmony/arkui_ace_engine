@@ -140,9 +140,7 @@ FrontendDelegateDeclarative::FrontendDelegateDeclarative(const RefPtr<TaskExecut
       onRestoreDataCallBack_(onRestoreDataCallBack), manifestParser_(AceType::MakeRefPtr<ManifestParser>()),
       jsAccessibilityManager_(AccessibilityNodeManager::Create()),
       mediaQueryInfo_(AceType::MakeRefPtr<MediaQueryInfo>()), taskExecutor_(taskExecutor)
-{
-    LOGD("FrontendDelegateDeclarative create");
-}
+{}
 
 FrontendDelegateDeclarative::~FrontendDelegateDeclarative()
 {
@@ -227,7 +225,6 @@ void FrontendDelegateDeclarative::RunPage(
 
 void FrontendDelegateDeclarative::ChangeLocale(const std::string& language, const std::string& countryOrRegion)
 {
-    LOGD("JSFrontend ChangeLocale");
     taskExecutor_->PostTask(
         [language, countryOrRegion]() { AceApplicationInfo::GetInstance().ChangeLocale(language, countryOrRegion); },
         TaskExecutor::TaskType::PLATFORM);
@@ -361,7 +358,6 @@ void FrontendDelegateDeclarative::OnJSCallback(const std::string& callbackId, co
 
 void FrontendDelegateDeclarative::SetJsMessageDispatcher(const RefPtr<JsMessageDispatcher>& dispatcher) const
 {
-    LOGD("FrontendDelegateDeclarative SetJsMessageDispatcher");
     taskExecutor_->PostTask([dispatcherCallback = dispatcherCallback_, dispatcher] { dispatcherCallback(dispatcher); },
         TaskExecutor::TaskType::JS);
 }
@@ -369,7 +365,6 @@ void FrontendDelegateDeclarative::SetJsMessageDispatcher(const RefPtr<JsMessageD
 void FrontendDelegateDeclarative::TransferComponentResponseData(
     int32_t callbackId, int32_t /*code*/, std::vector<uint8_t>&& data)
 {
-    LOGD("FrontendDelegateDeclarative TransferComponentResponseData");
     auto pipelineContext = pipelineContextHolder_.Get();
     WeakPtr<PipelineBase> contextWeak(pipelineContext);
     taskExecutor_->PostTask(
@@ -389,9 +384,7 @@ void FrontendDelegateDeclarative::TransferComponentResponseData(
 void FrontendDelegateDeclarative::TransferJsResponseData(
     int32_t callbackId, int32_t code, std::vector<uint8_t>&& data) const
 {
-    LOGD("FrontendDelegateDeclarative TransferJsResponseData");
     if (groupJsBridge_ && groupJsBridge_->ForwardToWorker(callbackId)) {
-        LOGD("FrontendDelegateDeclarative Forward to worker.");
         groupJsBridge_->TriggerModuleJsCallback(callbackId, code, std::move(data));
         return;
     }
@@ -423,7 +416,6 @@ void FrontendDelegateDeclarative::TransferJsResponseDataPreview(
 void FrontendDelegateDeclarative::TransferJsPluginGetError(
     int32_t callbackId, int32_t errorCode, std::string&& errorMessage) const
 {
-    LOGD("FrontendDelegateDeclarative TransferJsPluginGetError");
     taskExecutor_->PostTask(
         [callbackId, errorCode, errorMessage = std::move(errorMessage), groupJsBridge = groupJsBridge_]() mutable {
             if (groupJsBridge) {
@@ -447,7 +439,6 @@ void FrontendDelegateDeclarative::TransferJsEventData(
 
 void FrontendDelegateDeclarative::LoadPluginJsCode(std::string&& jsCode) const
 {
-    LOGD("FrontendDelegateDeclarative LoadPluginJsCode");
     taskExecutor_->PostTask(
         [jsCode = std::move(jsCode), groupJsBridge = groupJsBridge_]() mutable {
             if (groupJsBridge) {
@@ -460,7 +451,6 @@ void FrontendDelegateDeclarative::LoadPluginJsCode(std::string&& jsCode) const
 void FrontendDelegateDeclarative::LoadPluginJsByteCode(
     std::vector<uint8_t>&& jsCode, std::vector<int32_t>&& jsCodeLen) const
 {
-    LOGD("FrontendDelegateDeclarative LoadPluginJsByteCode");
     if (groupJsBridge_ == nullptr) {
         LOGE("groupJsBridge_ is nullptr");
         return;
@@ -687,7 +677,6 @@ void FrontendDelegateDeclarative::OnNewWant(const std::string& data)
 void FrontendDelegateDeclarative::FireAsyncEvent(
     const std::string& eventId, const std::string& param, const std::string& jsonArgs)
 {
-    LOGD("FireAsyncEvent eventId: %{public}s", eventId.c_str());
     std::string args = param;
     args.append(",null").append(",null"); // callback and dom changes
     if (!jsonArgs.empty()) {
@@ -743,7 +732,6 @@ void FrontendDelegateDeclarative::FireSyncEvent(
         TaskExecutor::TaskType::JS);
 
     result = jsCallBackResult_[callbackId];
-    LOGD("FireSyncEvent eventId: %{public}s, callbackId: %{public}d", eventId.c_str(), callbackId);
     jsCallBackResult_.erase(callbackId);
 }
 
@@ -812,8 +800,7 @@ void FrontendDelegateDeclarative::GetStageSourceMap(
 }
 
 void FrontendDelegateDeclarative::InitializeRouterManager(NG::LoadPageCallback&& loadPageCallback,
-    NG::LoadPageByBufferCallback&& loadPageByBufferCallback,
-    NG::LoadNamedRouterCallback&& loadNamedRouterCallback,
+    NG::LoadPageByBufferCallback&& loadPageByBufferCallback, NG::LoadNamedRouterCallback&& loadNamedRouterCallback,
     NG::UpdateRootComponentCallback&& updateRootComponentCallback)
 {
     pageRouterManager_ = AceType::MakeRefPtr<NG::PageRouterManager>();
@@ -1004,8 +991,6 @@ void FrontendDelegateDeclarative::AddRouterTask(const RouterTask& task)
 {
     if (routerQueue_.size() < MAX_ROUTER_STACK) {
         routerQueue_.emplace(task);
-        LOGD("router queue's size = %{public}zu, action = %{public}d, url = %{public}s", routerQueue_.size(),
-            static_cast<uint32_t>(task.action), task.target.url.c_str());
     }
 }
 
@@ -1089,7 +1074,6 @@ void FrontendDelegateDeclarative::StartPush(const PageTarget& target, const std:
     }
 
     std::string pagePath = manifestParser_->GetRouter()->GetPagePath(target.url);
-    LOGD("router.Push pagePath = %{private}s", pagePath.c_str());
     if (!pagePath.empty()) {
         LoadPage(GenerateNextPageId(), PageTarget(target, pagePath), false, params);
         if (errorCallback != nullptr) {
@@ -1132,7 +1116,6 @@ void FrontendDelegateDeclarative::StartReplace(const PageTarget& target, const s
     }
 
     std::string pagePath = manifestParser_->GetRouter()->GetPagePath(target.url);
-    LOGD("router.Replace pagePath = %{private}s", pagePath.c_str());
     if (!pagePath.empty()) {
         LoadReplacePage(GenerateNextPageId(), PageTarget(target, pagePath), params);
         if (errorCallback != nullptr) {
@@ -1205,7 +1188,6 @@ void FrontendDelegateDeclarative::BackCheckAlert(const PageTarget& target, const
 
 void FrontendDelegateDeclarative::BackWithTarget(const PageTarget& target, const std::string& params)
 {
-    LOGD("router.Back path = %{private}s", target.url.c_str());
     if (IsNavigationStage(target)) {
         BackCheckAlert(target, params);
         return;
@@ -1247,7 +1229,6 @@ void FrontendDelegateDeclarative::StartBack(const PageTarget& target, const std:
         PopPage();
     } else {
         std::string pagePath = manifestParser_->GetRouter()->GetPagePath(target.url, ".js");
-        LOGD("router.Back pagePath = %{private}s", pagePath.c_str());
         if (!pagePath.empty()) {
             bool isRestore = false;
             pageId_ = GetPageIdByUrl(pagePath, isRestore);
@@ -1387,8 +1368,6 @@ void FrontendDelegateDeclarative::ShowToast(
                         const RefPtr<NG::OverlayManager>& overlayManager) {
             CHECK_NULL_VOID(overlayManager);
             ContainerScope scope(containerId);
-            TAG_LOGD(AceLogTag::ACE_OVERLAY, "Begin to show toast message %{public}s,duration is %{public}d",
-                message.c_str(), durationTime);
             overlayManager->ShowToast(message, durationTime, bottom, isRightToLeft, showMode);
         };
         MainWindowOverlay(std::move(task));
@@ -2082,7 +2061,6 @@ void FrontendDelegateDeclarative::RecycleSinglePage()
 
 void FrontendDelegateDeclarative::OnPrePageChange(const RefPtr<JsAcePage>& page)
 {
-    LOGD("FrontendDelegateDeclarative OnPrePageChange");
     if (page && page->GetDomDocument() && jsAccessibilityManager_) {
         jsAccessibilityManager_->SetRootNodeId(page->GetDomDocument()->GetRootNodeId());
     }
@@ -2095,7 +2073,6 @@ void FrontendDelegateDeclarative::FlushPageCommand(
         ProcessRouterTask();
         return;
     }
-    LOGD("FlushPageCommand FragmentCount(%{public}d)", page->FragmentCount());
     if (page->FragmentCount() == 1) {
         OnPageReady(page, url, isMainPage, isRestore);
     } else {
@@ -2113,7 +2090,6 @@ void FrontendDelegateDeclarative::AddPageLocked(const RefPtr<JsAcePage>& page)
 
 void FrontendDelegateDeclarative::SetCurrentPage(int32_t pageId)
 {
-    LOGD("FrontendDelegateDeclarative SetCurrentPage pageId=%{private}d", pageId);
     auto page = GetPage(pageId);
     if (page != nullptr) {
         jsAccessibilityManager_->SetVersion(AccessibilityVersion::JS_DECLARATIVE_VERSION);
@@ -2126,7 +2102,6 @@ void FrontendDelegateDeclarative::SetCurrentPage(int32_t pageId)
 
 void FrontendDelegateDeclarative::PopToPage(const std::string& url)
 {
-    LOGD("FrontendDelegateDeclarative PopToPage url = %{private}s", url.c_str());
     taskExecutor_->PostTask(
         [weak = AceType::WeakClaim(this), url] {
             auto delegate = weak.Upgrade();
@@ -2697,7 +2672,6 @@ int32_t FrontendDelegateDeclarative::GetPageIdByUrl(const std::string& url, bool
     auto pageIter = std::find_if(std::rbegin(pageRouteStack_), std::rend(pageRouteStack_),
         [&url](const PageInfo& pageRoute) { return url == pageRoute.url; });
     if (pageIter != std::rend(pageRouteStack_)) {
-        LOGD("GetPageIdByUrl pageId=%{private}d url=%{private}s", pageIter->pageId, url.c_str());
         isRestore = pageIter->isRestore;
         return pageIter->pageId;
     }
