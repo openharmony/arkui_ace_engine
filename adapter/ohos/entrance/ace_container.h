@@ -281,6 +281,10 @@ public:
 
     void DumpHeapSnapshot(bool isPrivate) override;
 
+    void DestroyHeapProfiler() override;
+
+    void ForceFullGC() override;
+
     void SetLocalStorage(NativeReference* storage, NativeReference* context);
 
     bool ParseThemeConfig(const std::string& themeConfig);

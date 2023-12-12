@@ -114,6 +114,10 @@ public:
 
     virtual void DumpHeapSnapshot(bool isPrivate) {}
 
+    virtual void DestroyHeapProfiler() {}
+
+    virtual void ForceFullGC() {}
+
     virtual void NotifyFontNodes() {}
 
     virtual void NotifyAppStorage(const std::string& key, const std::string& value) {}

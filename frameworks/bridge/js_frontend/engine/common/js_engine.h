@@ -255,6 +255,10 @@ public:
 
     virtual void DumpHeapSnapshot(bool isPrivate) {}
 
+    virtual void DestroyHeapProfiler() {}
+
+    virtual void ForceFullGC() {}
+
     virtual std::string GetStacktraceMessage()
     {
         return "";
