@@ -14,7 +14,6 @@
  */
 const START_TIME = 250
 const END_TIME = 200
-const HEIGHT = 80
 const BORDER_RADIUS = 12
 const OPACITY_NUM = 0.18
 const DEFAULT_HEIGHT = 48
@@ -31,118 +30,27 @@ export enum MarginType {
   FIT_MARGIN = 1,
 }
 
-export enum PromptType {
-  DEFAULT_HIDE = 0,
-  NETWORK_NOT_CONNECTED = 1,
-  NETWORK_CONNECTED_UNSTABLE = 2,
-  UNSTABLE_CONNECT_SERVER = 3,
-  CUSTOM_NETWORK_TIPS = 4,
-  CUSTOM_TIPS = 5,
-}
-
 export interface PromptOptions {
   hardwareStatus: HardwareStatus,
   icon?: ResourceStr,
   tip?: ResourceStr,
-  networkTip?: ResourceStr,
-  marginState: MarginType
-}
-
-interface ErrorTipsInfoType {
-  networkConnected: ResourceStr;
-  networkConnectedUnstable: ResourceStr;
-  unstableConnectServer: ResourceStr;
-  customNetwork: ResourceStr;
-  customTips?: ResourceStr;
+  marginState: MarginType,
+  touchText?: ResourceStr,
+  isTouchShow?: boolean,
+  positionTop: number,
+  isShow?: boolean
 }
 
 @Component
 export struct ExceptionPrompt {
-  @Prop @Watch('typeStatusChange') type: PromptType
   @Prop options: PromptOptions
-  @State isShowStatus: boolean = false
-  @State isState: boolean = false
   tipText: ResourceStr = ''
   touchBackgroundColor: Resource = $r('sys.color.ohos_id_color_sub_background_transparent')
-  setNetwork: ResourceStr = $r('sys.string.ohos_set_network')
-  @State errorDefaultObj: ErrorTipsInfoType = {
-    networkConnected: $r('sys.string.ohos_network_not_connected'),
-    networkConnectedUnstable: $r('sys.string.ohos_network_connected_unstable'),
-    unstableConnectServer: $r('sys.string.ohos_unstable_connect_server'),
-    customNetwork: $r('sys.string.ohos_custom_network_tips_left'),
-    customTips:''
-  }
   onReconnectionCallback: () => void = () => {
     // Click the text on the left to change into the connecting state
   }
   onConfigureCallback: () => void = () => {
     // Click Set Network to open the Set network pop-up interface
-  }
-
-  setText() {
-    if (this.type === PromptType.NETWORK_NOT_CONNECTED) {
-      this.tipText = this.errorDefaultObj.networkConnected
-    }
-    if (this.type === PromptType.NETWORK_CONNECTED_UNSTABLE) {
-      this.tipText = this.errorDefaultObj.networkConnectedUnstable
-    }
-    if (this.type === PromptType.UNSTABLE_CONNECT_SERVER) {
-      this.tipText = this.errorDefaultObj.unstableConnectServer
-    }
-    if (this.type === PromptType.CUSTOM_NETWORK_TIPS) {
-      this.tipText = this.options.networkTip || this.errorDefaultObj.customNetwork
-    }
-    if (this.type === PromptType.CUSTOM_TIPS) {
-      this.tipText = this.options.tip || this.errorDefaultObj.customTips
-    }
-  }
-
-  typeStatusChange(propName: string): void {
-    if (this.type !== PromptType.DEFAULT_HIDE) {
-      if (this.isState && this.type !== PromptType.NETWORK_NOT_CONNECTED && this.type !== PromptType.NETWORK_CONNECTED_UNSTABLE) {
-        setTimeout(() => {
-          this.isState = false
-        }, END_TIME)
-      }
-      if (this.type === PromptType.NETWORK_NOT_CONNECTED || this.type === PromptType.NETWORK_CONNECTED_UNSTABLE) {
-        if (!this.isShowStatus) {
-          this.isState = true
-        } else {
-          setTimeout(() => {
-            this.isState = true
-          }, START_TIME)
-        }
-      }
-      if (this.isShowStatus) {
-        this.isShowStatus = false
-        setTimeout(() => {
-          this.setText()
-          this.isShowStatus = true
-        }, START_TIME)
-      } else {
-        this.setText()
-        this.isShowStatus = true
-      }
-    } else {
-      this.isShowStatus = false
-      setTimeout(() => {
-        this.isState = false
-      }, START_TIME)
-    }
-  }
-
-  aboutToAppear() {
-    if (this.type !== PromptType.DEFAULT_HIDE) {
-      this.isShowStatus = true
-      this.setText()
-    }
-    if (this.type === PromptType.NETWORK_NOT_CONNECTED || this.type === PromptType.NETWORK_CONNECTED_UNSTABLE) {
-      this.isState = true
-    }
-  }
-
-  isOneColum() {
-    return (this.type === PromptType.UNSTABLE_CONNECT_SERVER || this.type === PromptType.CUSTOM_NETWORK_TIPS)
   }
 
   @Builder FirstBuilder() {
@@ -168,33 +76,31 @@ export struct ExceptionPrompt {
 
   @Builder TextBuilder() {
     Flex({ justifyContent: FlexAlign.SpaceBetween, alignItems: ItemAlign.Center }) {
-      if (this.isShowStatus) {
-        Flex({ alignItems: ItemAlign.Center }) {
-          Image(this.options.icon??$r('sys.media.ohos_ic_public_fail'))
-            .width("24vp")
-            .height('24vp')
-            .objectFit(ImageFit.Contain)
-            .fillColor($r('sys.color.ohos_id_color_warning'))
-          Text(this.tipText)
-            .fontSize($r('sys.float.ohos_id_text_size_body1'))
-            .fontColor($r('sys.color.ohos_id_color_warning'))
-            .textOverflow({ overflow: TextOverflow.Ellipsis })
-            .maxLines(2)
-            .margin({ left: 16, right: 16 })
-        }
-        .width('100%')
-        .height('100%')
-        .onClick(() => {
-          if (this.options.hardwareStatus === HardwareStatus.ON) {
-            this.onReconnectionCallback() //Click the text on the left to change into the connecting state
-          }
-        })
+      Flex({ alignItems: ItemAlign.Center }) {
+        Image(this.options.icon??$r('sys.media.ohos_ic_public_fail'))
+          .width("24vp")
+          .height('24vp')
+          .objectFit(ImageFit.Contain)
+          .fillColor($r('sys.color.ohos_id_color_warning'))
+        Text(this.options.tip)
+          .fontSize($r('sys.float.ohos_id_text_size_body1'))
+          .fontColor($r('sys.color.ohos_id_color_warning'))
+          .textOverflow({ overflow: TextOverflow.Ellipsis })
+          .maxLines(2)
+          .margin({ left: 16, right: 16 })
       }
+      .width('100%')
+      .height('100%')
+      .onClick(() => {
+        if (this.options.hardwareStatus === HardwareStatus.ON) {
+          this.onReconnectionCallback() //Click the text on the left to change into the connecting state
+        }
+      })
 
-      if (this.isState) {
+      if (this.options.isTouchShow) {
         Button({ stateEffect: true, type: ButtonType.Normal }) {
           Row() {
-            Text(this.setNetwork)
+            Text(this.options.touchText)
               .fontSize($r('sys.float.ohos_id_text_size_body2'))
               .fontColor($r('sys.color.ohos_id_color_text_secondary'))
               .maxLines(1)
@@ -208,16 +114,18 @@ export struct ExceptionPrompt {
           }
         }
         .backgroundColor(this.touchBackgroundColor)
-        .width(this.isState ? 120 : 0)
+        .width(this.options.isTouchShow ? 120 : 0)
         .height(32)
         .borderRadius($r('sys.float.ohos_id_corner_radius_subtab'))
         .padding({ right: 8, left: 8 })
         .onTouch((event) => {
-          this.onConfigureCallback() //Click Set Network to open the Set network pop-up interface
+
           if (event.type === TouchType.Down) {
             this.touchBackgroundColor = $r('sys.color.ohos_id_color_click_effect')
+            this.onConfigureCallback() //Click Set Network to open the Set network pop-up interface
           } else if (event.type === TouchType.Up) {
             this.touchBackgroundColor = $r('sys.color.ohos_id_color_sub_background_transparent')
+
           }
 
         })
@@ -241,14 +149,14 @@ export struct ExceptionPrompt {
       .padding(this.options.marginState === MarginType.DEFAULT_MARGIN ? { left: $r('sys.float.ohos_id_card_margin_start'), right: $r('sys.float.ohos_id_card_margin_end') } : { left: $r('sys.float.ohos_id_max_padding_start'), right: $r('sys.float.ohos_id_max_padding_end') })
       .transition(
         TransitionEffect.OPACITY.animation({
-          duration: this.isShowStatus ? START_TIME : END_TIME
+          duration: this.options.isShow ? START_TIME : END_TIME
         })
       )
-      .visibility(this.isShowStatus ? Visibility.Visible : Visibility.None)
+      .visibility(this.options.isShow ? Visibility.Visible : Visibility.None)
     }
     .width('100%')
-    .height(this.isOneColum() ? DEFAULT_HEIGHT : FIT_HEIGHT)
-    .position({ y: HEIGHT })
+    .height(this.options.isTouchShow ? FIT_HEIGHT : DEFAULT_HEIGHT)
+    .position({ y: this.options.positionTop })
     .zIndex(ZINDEX_NUM)
   }
 }
