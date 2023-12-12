@@ -60,7 +60,6 @@ void LayoutWrapperNode::AppendChild(const RefPtr<LayoutWrapperNode>& child, bool
 RefPtr<LayoutWrapper> LayoutWrapperNode::GetOrCreateChildByIndex(uint32_t index, bool addToRenderTree)
 {
     if ((index >= static_cast<uint32_t>(currentChildCount_)) || (index < 0)) {
-        LOGD("index is of out boundary, total count: %{public}d, target index: %{public}d", currentChildCount_, index);
         return nullptr;
     }
     auto iter = childrenMap_.find(index);
@@ -166,8 +165,6 @@ void LayoutWrapperNode::Measure(const std::optional<LayoutConstraintF>& parentCo
 
     CHECK_NULL_VOID(layoutAlgorithm_);
     if (layoutAlgorithm_->SkipMeasure()) {
-        LOGD("%{public}s, depth: %{public}d: the layoutAlgorithm skip measure", host->GetTag().c_str(),
-            host->GetDepth());
         return;
     }
 
@@ -194,12 +191,8 @@ void LayoutWrapperNode::Measure(const std::optional<LayoutConstraintF>& parentCo
             contentConstraint ? contentConstraint == layoutProperty_->GetContentLayoutConstraint() : false;
     }
 
-    LOGD("Measure: %{public}s, depth: %{public}d, Constraint: %{public}s", host->GetTag().c_str(), host->GetDepth(),
-        layoutProperty_->GetLayoutConstraint()->ToString().c_str());
-
     if (isConstraintNotChanged_ && !skipMeasureContent_) {
         if (!CheckNeedForceMeasureAndLayout()) {
-            LOGD("%{public}s (depth: %{public}d) skip measure content", host->GetTag().c_str(), host->GetDepth());
             skipMeasureContent_ = true;
         }
     }
@@ -224,16 +217,10 @@ void LayoutWrapperNode::Measure(const std::optional<LayoutConstraintF>& parentCo
             // Adjust by aspect ratio, firstly pick height based on width. It means that when width, height and
             // aspectRatio are all set, the height is not used.
             auto width = geometryNode_->GetFrameSize().Width();
-            LOGD("aspect ratio affects, origin width: %{public}f, height: %{public}f", width,
-                geometryNode_->GetFrameSize().Height());
             auto height = width / aspectRatio;
-            LOGD("aspect ratio affects, new width: %{public}f, height: %{public}f", width, height);
             geometryNode_->SetFrameSize(SizeF({ width, height }));
         }
     }
-
-    LOGD("on Measure Done: type: %{public}s, depth: %{public}d, Size: %{public}s", host->GetTag().c_str(),
-        host->GetDepth(), geometryNode_->GetFrameSize().ToString().c_str());
 }
 
 // Called to perform layout children.
@@ -249,18 +236,10 @@ void LayoutWrapperNode::Layout()
     OffsetNodeToSafeArea();
 
     if (layoutAlgorithm_->SkipLayout()) {
-        LOGD(
-            "%{public}s, depth: %{public}d: the layoutAlgorithm skip layout", host->GetTag().c_str(), host->GetDepth());
         return;
     }
 
-    LOGD("On Layout begin: type: %{public}s, depth: %{public}d", host->GetTag().c_str(), host->GetDepth());
-
     if ((skipMeasureContent_ == true)) {
-        LOGD(
-            "%{public}s (depth: %{public}d) skip measure content and layout", host->GetTag().c_str(), host->GetDepth());
-        LOGD("On Layout Done: type: %{public}s, depth: %{public}d, Offset: %{public}s", host->GetTag().c_str(),
-            host->GetDepth(), geometryNode_->GetFrameOffset().ToString().c_str());
         return;
     }
 
@@ -282,8 +261,6 @@ void LayoutWrapperNode::Layout()
     time = GetSysTimestamp() - time;
     AddNodeFlexLayouts();
     AddNodeLayoutTime(time);
-    LOGD("On Layout Done: type: %{public}s, depth: %{public}d, Offset: %{public}s", host->GetTag().c_str(),
-        host->GetDepth(), geometryNode_->GetFrameOffset().ToString().c_str());
 }
 
 bool LayoutWrapperNode::SkipMeasureContent() const

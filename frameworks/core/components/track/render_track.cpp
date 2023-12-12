@@ -32,7 +32,6 @@ constexpr double ONE_CYCLE_ANGLE = 360.0;
 
 void RenderTrack::Update(const RefPtr<Component>& component)
 {
-    LOGD("Slider/Progress::RenderTrack Update");
     const RefPtr<TrackComponent> track = AceType::DynamicCast<TrackComponent>(component);
     if (track == nullptr) {
         LOGE("Slider/Progress::RenderTrack track updata with nullptr");

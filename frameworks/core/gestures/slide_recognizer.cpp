@@ -48,7 +48,6 @@ double ChangeValueRange(double value)
 void SlideRecognizer::OnAccepted()
 {
     if (slidingEnd_) {
-        LOGD("slide gesture recognizer has sliding end event when waiting to be accepted");
         Reset();
     } else if (slidingCancel_) {
         SendCancelMsg();
@@ -58,13 +57,11 @@ void SlideRecognizer::OnAccepted()
 
 void SlideRecognizer::OnRejected()
 {
-    LOGD("slide gesture has been rejected!");
     Reset();
 }
 
 void SlideRecognizer::HandleTouchDownEvent(const TouchEvent& event)
 {
-    LOGD("slide recognizer receives touch down event, begin to detect slide event");
     fingers_ = newFingers_;
     speed_ = newSpeed_;
     direction_ = newDirection_;
@@ -93,7 +90,6 @@ void SlideRecognizer::HandleTouchDownEvent(const TouchEvent& event)
 
 void SlideRecognizer::HandleTouchDownEvent(const AxisEvent& event)
 {
-    LOGD("slide recognizer receives touch down event, begin to detect slide event");
     fingers_ = newFingers_;
     speed_ = newSpeed_;
     direction_ = newDirection_;
@@ -119,7 +115,6 @@ void SlideRecognizer::HandleTouchDownEvent(const AxisEvent& event)
 
 void SlideRecognizer::HandleTouchUpEvent(const TouchEvent& event)
 {
-    LOGD("slide recognizer receives touch up event");
     auto itr = touchPoints_.find(event.id);
     if (itr == touchPoints_.end()) {
         return;
@@ -147,7 +142,6 @@ void SlideRecognizer::HandleTouchUpEvent(const TouchEvent& event)
         }
 
         if (static_cast<int32_t>(touchPoints_.size()) < fingers_ || inRefereeNum < 1) {
-            LOGD("this gesture is not slide, try to reject it");
             Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
             return;
         }
@@ -197,7 +191,6 @@ void SlideRecognizer::HandleTouchUpEvent(const TouchEvent& event)
 
 void SlideRecognizer::HandleTouchUpEvent(const AxisEvent& event)
 {
-    LOGD("slide recognizer receives touch up event");
     if (fingers_ != AXIS_SLIDE_FINGERS) {
         return;
     }
@@ -225,7 +218,6 @@ void SlideRecognizer::HandleTouchUpEvent(const AxisEvent& event)
 
 void SlideRecognizer::HandleTouchMoveEvent(const TouchEvent& event)
 {
-    LOGD("slide recognizer receives touch move event");
     auto itr = touchPoints_.find(event.id);
     if (itr == touchPoints_.end()) {
         return;
@@ -266,7 +258,6 @@ void SlideRecognizer::HandleTouchMoveEvent(const TouchEvent& event)
 
 void SlideRecognizer::HandleTouchMoveEvent(const AxisEvent& event)
 {
-    LOGD("slide recognizer receives touch move event");
     if (fingers_ != AXIS_SLIDE_FINGERS) {
         return;
     }
@@ -299,9 +290,7 @@ void SlideRecognizer::HandleTouchMoveEvent(const AxisEvent& event)
 
 void SlideRecognizer::HandleTouchCancelEvent(const TouchEvent& event)
 {
-    LOGD("slide recognizer receives touch cancel event");
     if (state_ == DetectState::READY || state_ == DetectState::DETECTING) {
-        LOGD("cancel slide gesture detect, try to reject it");
         Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
         return;
     }

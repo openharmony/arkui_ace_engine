@@ -87,7 +87,6 @@ void PasswordResponseArea::InitResponseArea()
     auto host = pattern->GetHost();
     CHECK_NULL_VOID(host);
     if (!IsShowPasswordIcon()) {
-        LOGD("show password icon is false");
         return;
     }
     auto passwordNode = CreateNode();
@@ -176,7 +175,6 @@ void PasswordResponseArea::Refresh()
 {
     auto imageNode = passwordNode_.Upgrade();
     if (!imageNode) {
-        LOGD("password node has not been added to the parent");
         InitResponseArea();
         return;
     }
@@ -186,7 +184,6 @@ void PasswordResponseArea::Refresh()
     LoadImageSourceInfo();
     auto src = isObscured_ ? hideIcon_->GetSrc() : showIcon_->GetSrc();
     if (currentSrc != src) {
-        LOGD("image src is changed, reload it.");
         UpdateImageSource();
     }
 }
@@ -203,7 +200,6 @@ void PasswordResponseArea::OnPasswordIconClicked()
 SizeF PasswordResponseArea::Measure(LayoutWrapper* layoutWrapper, int32_t index)
 {
     if (!IsShowPasswordIcon()) {
-        LOGD("show password icon is false");
         return SizeF(0, 0);
     }
     return TextInputResponseArea::Measure(layoutWrapper, index);
@@ -212,7 +208,6 @@ SizeF PasswordResponseArea::Measure(LayoutWrapper* layoutWrapper, int32_t index)
 void PasswordResponseArea::Layout(LayoutWrapper* layoutWrapper, int32_t index, float& nodeWidth)
 {
     if (!IsShowPasswordIcon()) {
-        LOGD("show password icon is false");
         return;
     }
     LayoutChild(layoutWrapper, index, nodeWidth);
@@ -345,7 +340,6 @@ const RefPtr<FrameNode> UnitResponseArea::GetFrameNode()
 SizeF UnitResponseArea::Measure(LayoutWrapper* layoutWrapper, int32_t index)
 {
     if (!IsShowUnit()) {
-        LOGD("not show unit");
         return SizeF(0, 0);
     }
     return TextInputResponseArea::Measure(layoutWrapper, index);
@@ -354,7 +348,6 @@ SizeF UnitResponseArea::Measure(LayoutWrapper* layoutWrapper, int32_t index)
 void UnitResponseArea::Layout(LayoutWrapper* layoutWrapper, int32_t index, float& nodeWidth)
 {
     if (!IsShowUnit()) {
-        LOGD("not show unit");
         return;
     }
     LayoutChild(layoutWrapper, index, nodeWidth);

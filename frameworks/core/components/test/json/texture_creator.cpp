@@ -23,7 +23,6 @@ namespace OHOS::Ace {
 
 RefPtr<Component> TextureCreator::CreateFromJson(const JsonValue& componentJson, const JsonComponentFactory& factory)
 {
-    LOGD("CreateFromJson texture");
     std::string classType = componentJson.GetValue(CLASS_NAME)->GetString();
     if (classType != TEXTURE_NAME) {
         LOGE("Create texture err: not a texture json.");

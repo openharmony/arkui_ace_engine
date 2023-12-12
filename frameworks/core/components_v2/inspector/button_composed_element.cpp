@@ -158,7 +158,7 @@ std::string ButtonComposedElement::ConvertButtonTypeToString(ButtonType buttonTy
             result = "ButtonType.Arc";
             break;
         default:
-            LOGD("input do not match any ButtonType");
+            break;
     }
     return result;
 }

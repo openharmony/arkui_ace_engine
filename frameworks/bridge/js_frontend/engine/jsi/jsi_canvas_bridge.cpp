@@ -259,7 +259,6 @@ JsiCanvasBridge::~JsiCanvasBridge()
 
 void JsiCanvasBridge::HandleJsContext(const shared_ptr<JsRuntime>& runtime, NodeId id, const std::string& args)
 {
-    LOGD("JsiCanvasBridge::HandleJsContext");
     std::unique_ptr<JsonValue> argsValue = JsonUtil::ParseJsonString(args);
     if (argsValue && argsValue->IsArray() && argsValue->GetArraySize() > 0) {
         auto typeArg = argsValue->GetArrayItem(0);
@@ -367,7 +366,6 @@ void JsiCanvasBridge::HandleWebglContext(const shared_ptr<JsRuntime>& runtime,
     return;
 #endif
 
-    LOGD("JsiCanvasBridge::HandleWebglContext");
     renderContext_ = runtime->NewUndefined();
     auto engine = static_cast<JsiEngineInstance*>(runtime->GetEmbedderData());
     if (!engine) {
@@ -533,7 +531,6 @@ void JsiCanvasBridge::JsSetAntiAlias(const shared_ptr<JsRuntime>& runtime, NodeI
 shared_ptr<JsValue> JsiCanvasBridge::JsCreateLinearGradient(const shared_ptr<JsRuntime>& runtime,
     const shared_ptr<JsValue>& value, const std::vector<shared_ptr<JsValue>>& argv, int32_t argc)
 {
-    LOGD("JsiCanvasBridge::JsCreateLinearGradient");
     if (argc != 4) {
         LOGE("argc error, argc = %{private}d", argc);
         return runtime->NewUndefined();
@@ -555,7 +552,6 @@ shared_ptr<JsValue> JsiCanvasBridge::JsCreateLinearGradient(const shared_ptr<JsR
 shared_ptr<JsValue> JsiCanvasBridge::JsCreateRadialGradient(const shared_ptr<JsRuntime>& runtime,
     const shared_ptr<JsValue>& value, const std::vector<shared_ptr<JsValue>>& argv, int32_t argc)
 {
-    LOGD("JsiCanvasBridge::CreateRadialGradient");
     // 6 parameters: createRadialGradient(x0, y0, r0, x1, y1, r1)
     if (argc != 6) {
         LOGE("argc error, argc = %{private}d", argc);
@@ -618,7 +614,6 @@ Gradient JsiCanvasBridge::GetGradient(const shared_ptr<JsRuntime>& runtime, cons
 shared_ptr<JsValue> JsiCanvasBridge::JsFillRect(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& value,
     const std::vector<shared_ptr<JsValue>>& argv, int32_t argc)
 {
-    LOGD("JsiCanvasBridge::JsFillRect");
     if (argc != 4) {
         LOGE("argc error, argc = %{private}d", argc);
         return runtime->NewUndefined();
@@ -632,7 +627,6 @@ shared_ptr<JsValue> JsiCanvasBridge::JsFillRect(const shared_ptr<JsRuntime>& run
 shared_ptr<JsValue> JsiCanvasBridge::JsStrokeRect(const shared_ptr<JsRuntime>& runtime,
     const shared_ptr<JsValue>& value, const std::vector<shared_ptr<JsValue>>& argv, int32_t argc)
 {
-    LOGD("JsiCanvasBridge::JsStrokeRect");
     if (argc != 4) {
         LOGE("argc error, argc = %{private}d", argc);
         return runtime->NewUndefined();
@@ -646,7 +640,6 @@ shared_ptr<JsValue> JsiCanvasBridge::JsStrokeRect(const shared_ptr<JsRuntime>& r
 shared_ptr<JsValue> JsiCanvasBridge::JsClearRect(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& value,
     const std::vector<shared_ptr<JsValue>>& argv, int32_t argc)
 {
-    LOGD("JsiCanvasBridge::JsClearRect");
     if (argc != 4) {
         LOGE("argc error, argc = %{private}d", argc);
         return runtime->NewUndefined();
@@ -660,7 +653,6 @@ shared_ptr<JsValue> JsiCanvasBridge::JsClearRect(const shared_ptr<JsRuntime>& ru
 shared_ptr<JsValue> JsiCanvasBridge::JsFillText(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& value,
     const std::vector<shared_ptr<JsValue>>& argv, int32_t argc)
 {
-    LOGD("JsiCanvasBridge::JsFillText");
     if (argc != 3) {
         LOGE("argc error, argc = %{private}d", argc);
         return runtime->NewUndefined();
@@ -679,7 +671,6 @@ shared_ptr<JsValue> JsiCanvasBridge::JsFillText(const shared_ptr<JsRuntime>& run
 shared_ptr<JsValue> JsiCanvasBridge::JsStrokeText(const shared_ptr<JsRuntime>& runtime,
     const shared_ptr<JsValue>& value, const std::vector<shared_ptr<JsValue>>& argv, int32_t argc)
 {
-    LOGD("JsStrokeText");
     if (argc != 3) {
         LOGE("argc error, argc = %{private}d", argc);
         return runtime->NewUndefined();
@@ -699,7 +690,6 @@ shared_ptr<JsValue> JsiCanvasBridge::JsMeasureText(const shared_ptr<JsRuntime>& 
     const shared_ptr<JsValue>& value, const std::vector<shared_ptr<JsValue>>& argv, int32_t argc)
 {
     // this func should return TextMetrics, including the width of the text
-    LOGD("Js Measure Text");
     if (argc != 1) {
         LOGE("argc error, argc = %{private}d", argc);
         return runtime->NewUndefined();
@@ -750,7 +740,6 @@ shared_ptr<JsValue> JsiCanvasBridge::JsMeasureText(const shared_ptr<JsRuntime>& 
 shared_ptr<JsValue> JsiCanvasBridge::JsBeginPath(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& value,
     const std::vector<shared_ptr<JsValue>>& argv, int32_t argc)
 {
-    LOGD("Js Begin path");
     if (argc != 0) {
         LOGE("argc error, argc = %{private}d", argc);
         return runtime->NewUndefined();
@@ -763,7 +752,6 @@ shared_ptr<JsValue> JsiCanvasBridge::JsBeginPath(const shared_ptr<JsRuntime>& ru
 shared_ptr<JsValue> JsiCanvasBridge::JsClosePath(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& value,
     const std::vector<shared_ptr<JsValue>>& argv, int32_t argc)
 {
-    LOGD("js close path");
     if (argc != 0) {
         LOGE("argc error, argc = %{private}d", argc);
         return runtime->NewUndefined();
@@ -776,7 +764,6 @@ shared_ptr<JsValue> JsiCanvasBridge::JsClosePath(const shared_ptr<JsRuntime>& ru
 shared_ptr<JsValue> JsiCanvasBridge::JsMoveTo(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& value,
     const std::vector<shared_ptr<JsValue>>& argv, int32_t argc)
 {
-    LOGD("JsiCanvasBridge::JsMoveTo");
     if (argc != 2) {
         LOGE("argc error, argc = %{private}d", argc);
         return runtime->NewUndefined();
@@ -791,7 +778,6 @@ shared_ptr<JsValue> JsiCanvasBridge::JsMoveTo(const shared_ptr<JsRuntime>& runti
 shared_ptr<JsValue> JsiCanvasBridge::JsLineTo(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& value,
     const std::vector<shared_ptr<JsValue>>& argv, int32_t argc)
 {
-    LOGD("JsiCanvasBridge::JsLineTo");
     if (argc != 2) {
         LOGE("argc error, argc = %{private}d", argc);
         return runtime->NewUndefined();
@@ -806,7 +792,6 @@ shared_ptr<JsValue> JsiCanvasBridge::JsLineTo(const shared_ptr<JsRuntime>& runti
 shared_ptr<JsValue> JsiCanvasBridge::JsBezierCurveTo(const shared_ptr<JsRuntime>& runtime,
     const shared_ptr<JsValue>& value, const std::vector<shared_ptr<JsValue>>& argv, int32_t argc)
 {
-    LOGD("JsBezierCurveTo");
     if (argc != 6) {
         LOGE("argc error, argc = %{private}d", argc);
         return runtime->NewUndefined();
@@ -826,7 +811,6 @@ shared_ptr<JsValue> JsiCanvasBridge::JsBezierCurveTo(const shared_ptr<JsRuntime>
 shared_ptr<JsValue> JsiCanvasBridge::JsQuadraticCurveTo(const shared_ptr<JsRuntime>& runtime,
     const shared_ptr<JsValue>& value, const std::vector<shared_ptr<JsValue>>& argv, int32_t argc)
 {
-    LOGD("JsQuadraticCurveTo");
     if (argc != 4) {
         LOGE("argc error, argc = %{private}d", argc);
         return runtime->NewUndefined();
@@ -844,7 +828,6 @@ shared_ptr<JsValue> JsiCanvasBridge::JsQuadraticCurveTo(const shared_ptr<JsRunti
 shared_ptr<JsValue> JsiCanvasBridge::JsArc(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& value,
     const std::vector<shared_ptr<JsValue>>& argv, int32_t argc)
 {
-    LOGD("JsArc");
     if (argc < 5 || argc > 6) {
         LOGE("argc error, argc = %{private}d", argc);
         return runtime->NewUndefined();
@@ -873,7 +856,6 @@ shared_ptr<JsValue> JsiCanvasBridge::JsArc(const shared_ptr<JsRuntime>& runtime,
 shared_ptr<JsValue> JsiCanvasBridge::JsArcTo(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& value,
     const std::vector<shared_ptr<JsValue>>& argv, int32_t argc)
 {
-    LOGD("JsArcTo");
     if (argc != 5) {
         LOGE("argc error, argc = %{private}d", argc);
         return runtime->NewUndefined();
@@ -917,7 +899,6 @@ shared_ptr<JsValue> JsiCanvasBridge::JsEllipse(const shared_ptr<JsRuntime>& runt
 shared_ptr<JsValue> JsiCanvasBridge::JsRect(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& value,
     const std::vector<shared_ptr<JsValue>>& argv, int32_t argc)
 {
-    LOGD("JsRect");
     Rect rect = GetJsRectParam(runtime, argc, argv);
     auto task = [rect](const RefPtr<CanvasTaskPool>& pool) { pool->AddRect(rect); };
     PushTaskToPage(runtime, value, std::move(task));
@@ -927,7 +908,6 @@ shared_ptr<JsValue> JsiCanvasBridge::JsRect(const shared_ptr<JsRuntime>& runtime
 shared_ptr<JsValue> JsiCanvasBridge::JsFill(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& value,
     const std::vector<shared_ptr<JsValue>>& argv, int32_t argc)
 {
-    LOGD("JsFill");
     auto task = [](const RefPtr<CanvasTaskPool>& pool) { pool->Fill(); };
     PushTaskToPage(runtime, value, task);
     return runtime->NewUndefined();
@@ -936,7 +916,6 @@ shared_ptr<JsValue> JsiCanvasBridge::JsFill(const shared_ptr<JsRuntime>& runtime
 shared_ptr<JsValue> JsiCanvasBridge::JsStroke(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& value,
     const std::vector<shared_ptr<JsValue>>& argv, int32_t argc)
 {
-    LOGD("JsStroke");
     // 0 or 1 parameter: ctx.stroke() / ctx.stroke(path)
     if (argc == 1) {
         auto typeVal = argv[0]->GetProperty(runtime, "__type");
@@ -962,7 +941,6 @@ shared_ptr<JsValue> JsiCanvasBridge::JsStroke(const shared_ptr<JsRuntime>& runti
 shared_ptr<JsValue> JsiCanvasBridge::JsClip(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& value,
     const std::vector<shared_ptr<JsValue>>& argv, int32_t argc)
 {
-    LOGD("JsClip");
     auto task = [](const RefPtr<CanvasTaskPool>& pool) { pool->Clip(); };
     PushTaskToPage(runtime, value, task);
     return runtime->NewUndefined();
@@ -971,7 +949,6 @@ shared_ptr<JsValue> JsiCanvasBridge::JsClip(const shared_ptr<JsRuntime>& runtime
 shared_ptr<JsValue> JsiCanvasBridge::JsRestore(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& value,
     const std::vector<shared_ptr<JsValue>>& argv, int32_t argc)
 {
-    LOGD("JsiCanvasBridge::JsRestore");
     if (argc != 0) {
         LOGE("argc error, argc = %{private}d", argc);
         return runtime->NewUndefined();
@@ -996,7 +973,6 @@ shared_ptr<JsValue> JsiCanvasBridge::JsSave(const shared_ptr<JsRuntime>& runtime
 shared_ptr<JsValue> JsiCanvasBridge::JsRotate(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& value,
     const std::vector<shared_ptr<JsValue>>& argv, int32_t argc)
 {
-    LOGD("JsiCanvasBridge::JsRotate");
     double angle = GetJsDoubleVal(runtime, argv[0]);
     auto task = [angle](const RefPtr<CanvasTaskPool>& pool) { pool->Rotate(angle); };
     PushTaskToPage(runtime, value, task);
@@ -1006,7 +982,6 @@ shared_ptr<JsValue> JsiCanvasBridge::JsRotate(const shared_ptr<JsRuntime>& runti
 shared_ptr<JsValue> JsiCanvasBridge::JsScale(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& value,
     const std::vector<shared_ptr<JsValue>>& argv, int32_t argc)
 {
-    LOGD("JsiCanvasBridge::JsScale");
     if (argc != 2) {
         LOGE("argc error, argc = %{private}d", argc);
         return runtime->NewUndefined();
@@ -1021,7 +996,6 @@ shared_ptr<JsValue> JsiCanvasBridge::JsScale(const shared_ptr<JsRuntime>& runtim
 shared_ptr<JsValue> JsiCanvasBridge::JsSetTransform(const shared_ptr<JsRuntime>& runtime,
     const shared_ptr<JsValue>& value, const std::vector<shared_ptr<JsValue>>& argv, int32_t argc)
 {
-    LOGD("JsiCanvasBridge::JsSetTransform");
     if (argc != 6) {
         LOGE("argc error, argc = %{private}d", argc);
         return runtime->NewUndefined();
@@ -1041,7 +1015,6 @@ shared_ptr<JsValue> JsiCanvasBridge::JsSetTransform(const shared_ptr<JsRuntime>&
 shared_ptr<JsValue> JsiCanvasBridge::JsTransform(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& value,
     const std::vector<shared_ptr<JsValue>>& argv, int32_t argc)
 {
-    LOGD("JsiCanvasBridge::JsTransform");
     if (argc != 6) {
         LOGE("argc error, argc = %{private}d", argc);
         return runtime->NewUndefined();
@@ -1061,7 +1034,6 @@ shared_ptr<JsValue> JsiCanvasBridge::JsTransform(const shared_ptr<JsRuntime>& ru
 shared_ptr<JsValue> JsiCanvasBridge::JsTranslate(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& value,
     const std::vector<shared_ptr<JsValue>>& argv, int32_t argc)
 {
-    LOGD("JsiCanvasBridge::JsTranslate");
     if (argc != 2) {
         LOGE("argc error, argc = %{private}d", argc);
         return runtime->NewUndefined();
@@ -1076,7 +1048,6 @@ shared_ptr<JsValue> JsiCanvasBridge::JsTranslate(const shared_ptr<JsRuntime>& ru
 shared_ptr<JsValue> JsiCanvasBridge::JsSetLineDash(const shared_ptr<JsRuntime>& runtime,
     const shared_ptr<JsValue>& value, const std::vector<shared_ptr<JsValue>>& argv, int32_t argc)
 {
-    LOGD("JsiCanvasBridge::JsSetLineDash");
     if (argc != 1) {
         LOGE("argc error, argc = %{private}d", argc);
         return runtime->NewUndefined();
@@ -1561,7 +1532,6 @@ RefPtr<CanvasPath2D> JsiCanvasBridge::GetPath2D(const shared_ptr<JsRuntime>& run
 shared_ptr<JsValue> JsiCanvasBridge::JsCreatePattern(const shared_ptr<JsRuntime>& runtime,
     const shared_ptr<JsValue>& value, const std::vector<shared_ptr<JsValue>>& argv, int32_t argc)
 {
-    LOGD("JsiCanvasBridge::JsCreatePattern");
     if (argc != 2) {
         LOGE("argc error, argc = %{private}d", argc);
         return runtime->NewUndefined();

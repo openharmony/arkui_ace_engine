@@ -117,7 +117,7 @@ std::string ImageComposedElement::GetObjectFit() const
             result = "ImageFit.ScaleDown";
             break;
         default:
-            LOGD("input do not match any ImageFit");
+            break;
     }
     return result;
 }
@@ -144,7 +144,7 @@ std::string ImageComposedElement::GetObjectRepeat() const
             result = "ImageRepeat.Y";
             break;
         default:
-            LOGD("input do not match any ImageRepeat");
+            break;
     }
     return result;
 }

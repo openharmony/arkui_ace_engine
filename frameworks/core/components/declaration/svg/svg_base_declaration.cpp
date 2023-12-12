@@ -444,7 +444,6 @@ void SvgBaseDeclaration::Inherit(const RefPtr<Declaration>& parent)
 {
     auto svgDeclaration = AceType::DynamicCast<SvgBaseDeclaration>(parent);
     if (!svgDeclaration) {
-        LOGD("parent declaration is null");
         return;
     }
     auto& attrs = MaybeResetAttribute<SvgBaseAttribute>(AttributeTag::SPECIALIZED_ATTR);

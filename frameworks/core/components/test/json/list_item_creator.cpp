@@ -23,7 +23,6 @@ namespace OHOS::Ace {
 
 RefPtr<Component> ListItemCreator::CreateFromJson(const JsonValue& componentJson, const JsonComponentFactory& factory)
 {
-    LOGD("CreateFromJson ListItem");
     std::string classType = componentJson.GetValue(CLASS_NAME)->GetString();
     if (classType != LIST_ITEM_NAME) {
         LOGE("Create ListItem err: not a list item json.");
@@ -39,7 +38,6 @@ RefPtr<Component> ListItemCreator::CreateFromJson(const JsonValue& componentJson
     std::string type;
     if (componentJson.Contains(LIST_ITEM_TYPE) && componentJson.GetValue(LIST_ITEM_TYPE)->IsString()) {
         type = componentJson.GetValue(LIST_ITEM_TYPE)->GetString();
-        LOGD("Create ListItem type: %{public}s", type.c_str());
     }
 
     return AceType::MakeRefPtr<ListItemComponent>(type, child);

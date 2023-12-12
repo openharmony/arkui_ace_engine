@@ -2646,7 +2646,6 @@ ArkUINativeModuleValue CommonBridge::SetClip(ArkUIRuntimeCallInfo *runtimeCallIn
         Framework::JSShapeAbstract *clipShape =
             Framework::JSRef<Framework::JSObject>::Cast(info[NUM_1])->Unwrap<Framework::JSShapeAbstract>();
         if (clipShape == nullptr) {
-            LOGD("clipShape is null");
             return panda::JSValueRef::Undefined(vm);
         }
         ViewAbstract::SetClipShape(frameNode, clipShape->GetBasicShape());

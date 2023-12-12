@@ -115,7 +115,6 @@ AnimatedImage::AnimatedImage(const std::unique_ptr<SkCodec>& codec, std::string 
     });
     animator_->AddInterpolator(picAnimation);
 
-    LOGD("animated image setup: duration = %{public}d", totalDuration);
     animator_->Play();
 }
 
@@ -178,7 +177,6 @@ bool AnimatedImage::GetCachedFrame(uint32_t idx)
     UseCachedFrame(std::move(image));
 
     decodeMtx_.unlock();
-    LOGD("frame cache found src = %{public}s, frame = %{public}d", cacheKey_.c_str(), idx);
 
     if (redraw_) {
         redraw_();

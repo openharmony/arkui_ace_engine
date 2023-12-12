@@ -1210,7 +1210,6 @@ bool SelectOverlayNode::IsInSelectedOrSelectOverlayArea(const PointF& point)
 
     for (const auto& rect : rects) {
         if (rect.IsInRegion(point)) {
-            LOGD("point is in select overlay rects");
             return true;
         }
     }

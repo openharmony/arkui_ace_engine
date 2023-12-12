@@ -178,8 +178,6 @@ RefPtr<ThemeStyle> ResourceAdapterImpl::GetTheme(int32_t themeId)
             std::string patternTag = PATTERN_MAP[i];
             std::string patternName = std::string(OHFlag) + PATTERN_MAP[i];
             ret = resourceManager_->GetPatternByName(patternName.c_str(), attrMap);
-            LOGD("theme pattern[%{public}s, %{public}s], attr size=%{public}zu", patternTag.c_str(),
-                patternName.c_str(), attrMap.size());
             if (attrMap.empty()) {
                 continue;
             }

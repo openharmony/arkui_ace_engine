@@ -261,7 +261,6 @@ float TxtParagraph::GetCharacterWidth(int32_t index)
         index, next, Rosen::TextRectHeightStyle::COVER_TOP_AND_BOTTOM, Rosen::TextRectWidthStyle::TIGHT);
 #endif
     if (boxes.empty()) {
-        LOGD("boxes is empty.");
         return 0.0f;
     }
     const auto& textBox = *boxes.begin();
@@ -386,7 +385,6 @@ bool TxtParagraph::ComputeOffsetForCaretUpstream(int32_t extent, CaretMetricsF& 
 #endif
     }
     if (boxes.empty()) {
-        LOGD("boxes is empty.");
         return false;
     }
 
@@ -550,7 +548,6 @@ bool TxtParagraph::CalcCaretMetricsByPosition(
     if (computeSuccess) {
         if (metrics.height <= 0 || std::isnan(metrics.height)) {
             // The reason may be text lines is exceed the paragraph maxline.
-            LOGD("Illegal caret height. Consider release restriction of paragraph max_line.");
             return false;
         }
         caretCaretMetric = metrics;

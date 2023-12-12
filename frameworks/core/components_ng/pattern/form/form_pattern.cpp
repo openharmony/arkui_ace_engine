@@ -196,8 +196,6 @@ void FormPattern::HandleStaticFormEvent(const PointF& touchPoint)
         auto action = linkInfo->GetValue("action")->GetString();
         auto rectStr = linkInfo->GetValue("formLinkRect")->GetString();
         RectF linkRect = RectF::FromString(rectStr);
-        TAG_LOGD(AceLogTag::ACE_FORM, "touchPoint: %{public}s, action: %{public}s, linkRect: %{public}s",
-            touchPoint.ToString().c_str(), action.c_str(), linkRect.ToString().c_str());
         if (linkRect.IsInRegion(touchPoint)) {
             OnActionEvent(action);
             break;
@@ -1000,7 +998,6 @@ void FormPattern::DispatchPointerEvent(const std::shared_ptr<MMI::PointerEvent>&
     CHECK_NULL_VOID(formManagerBridge_);
 
     if (!isVisible_) {
-        TAG_LOGD(AceLogTag::ACE_FORM, "The form is invisible, stop to dispatch pointEvent");
         auto pointerAction = pointerEvent->GetPointerAction();
         if (pointerAction == OHOS::MMI::PointerEvent::POINTER_ACTION_UP ||
             pointerAction == OHOS::MMI::PointerEvent::POINTER_ACTION_PULL_UP ||

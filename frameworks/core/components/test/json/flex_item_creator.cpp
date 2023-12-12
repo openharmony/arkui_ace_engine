@@ -38,7 +38,6 @@ inline double GetDoubleVal(const JsonValue& componentJson, const std::string& ke
 
 RefPtr<Component> FlexItemCreator::CreateFromJson(const JsonValue& componentJson, const JsonComponentFactory& factory)
 {
-    LOGD("CreateFromJson FlexItem");
     auto children = factory.CreateChildComponent(componentJson);
     auto child = children.empty() ? nullptr : children.front();
     double flexGrow = GetDoubleVal(componentJson, FLEX_GROW);

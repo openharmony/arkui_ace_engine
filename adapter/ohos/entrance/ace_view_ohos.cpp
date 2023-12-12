@@ -124,10 +124,6 @@ void AceViewOhos::DispatchTouchEvent(AceViewOhos* view, const std::shared_ptr<MM
     LogPointInfo(pointerEvent);
     DispatchEventToPerf(pointerEvent);
     int32_t pointerAction = pointerEvent->GetPointerAction();
-    if (pointerAction != MMI::PointerEvent::POINTER_ACTION_MOVE) {
-        TAG_LOGD(AceLogTag::ACE_INPUTTRACKING, "touchEvent dispatched in ace_view, eventInfo: id:%{public}d ",
-            pointerEvent->GetId());
-    }
 
     if (pointerEvent->GetSourceType() == MMI::PointerEvent::SOURCE_TYPE_MOUSE) {
         // mouse event
@@ -291,12 +287,6 @@ void AceViewOhos::ProcessTouchEvent(const std::shared_ptr<MMI::PointerEvent>& po
         ACE_SCOPED_TRACE("ProcessTouchEvent pointX=%f pointY=%f type=%d timeStamp=%lld id=%d", touchPoint.x,
             touchPoint.y, (int)touchPoint.type, touchPoint.time.time_since_epoch().count(), touchPoint.id);
     }
-    if (pointerEvent->GetPointerAction() != MMI::PointerEvent::POINTER_ACTION_MOVE) {
-        TAG_LOGD(AceLogTag::ACE_INPUTTRACKING, "touchEvent processed in ace_view, eventInfo: id:%{public}d, "
-            "pointX=%{public}f pointY=%{public}f type=%{public}d timeStamp=%{public}lld",
-            pointerEvent->GetId(), touchPoint.x, touchPoint.y,
-            (int)touchPoint.type, touchPoint.time.time_since_epoch().count());
-    }
     auto markProcess = [pointerEvent]() {
         CHECK_NULL_VOID(pointerEvent);
         if (pointerEvent->GetPointerAction() != MMI::PointerEvent::POINTER_ACTION_MOVE) {
@@ -357,7 +347,6 @@ void AceViewOhos::ProcessDragEvent(const std::shared_ptr<MMI::PointerEvent>& poi
 
 void AceViewOhos::ProcessDragEvent(int32_t x, int32_t y, const DragEventAction& action)
 {
-    TAG_LOGD(AceLogTag::ACE_DRAG, "Process drag event");
     CHECK_NULL_VOID(dragEventCallback_);
     dragEventCallback_(PointerEvent(x, y), action);
 }
@@ -372,7 +361,6 @@ void AceViewOhos::ProcessMouseEvent(const std::shared_ptr<MMI::PointerEvent>& po
     }
     auto markProcess = [pointerEvent]() {
         CHECK_NULL_VOID(pointerEvent);
-        LOGD("Mark %{public}d id Mouse Event Processed", pointerEvent->GetPointerId());
         pointerEvent->MarkProcessed();
     };
 
@@ -390,7 +378,6 @@ void AceViewOhos::ProcessAxisEvent(const std::shared_ptr<MMI::PointerEvent>& poi
     }
 
     auto markProcess = [pointerEvent]() {
-        LOGD("Mark %{public}d id Axis Event Processed", pointerEvent->GetPointerId());
         pointerEvent->MarkProcessed();
     };
     

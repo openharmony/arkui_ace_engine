@@ -199,7 +199,6 @@ void ConnectServerManager::SetDebugMode()
 
 void ConnectServerManager::StopConnectServer()
 {
-    LOGD("Stop connect server");
 #if !defined(IOS_PLATFORM)
     CHECK_NULL_VOID(handlerConnectServerSo_);
     StopServer stopServer = reinterpret_cast<StopServer>(dlsym(handlerConnectServerSo_, "StopServer"));
@@ -219,12 +218,10 @@ void ConnectServerManager::AddInstance(
     if (!CheckDebugVersion()) {
         return;
     }
-    LOGD("AddInstance %{public}d", instanceId);
     {
         std::lock_guard<std::mutex> lock(mutex_);
         const auto result = instanceMap_.try_emplace(instanceId, instanceName);
         if (!result.second) {
-            LOGD("Already have instance name of this instance id: %{public}d", instanceId);
             return;
         }
     }
@@ -258,7 +255,6 @@ void ConnectServerManager::RemoveInstance(int32_t instanceId)
     if (!CheckDebugVersion()) {
         return;
     }
-    LOGD("RemoveInstance %{public}d", instanceId);
 
     // Get the message including information of deleted instance, which will be send to IDE.
     std::string message = GetInstanceMapMessage("destroyInstance", instanceId);

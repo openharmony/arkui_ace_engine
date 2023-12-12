@@ -250,13 +250,10 @@ void RenderRefresh::HandleDragUpdate(double delta)
     if (isRefresh_) {
         return;
     }
-    LOGD("RenderRefresh HandleDragUpdate delta is %{public}lf, offset is %{public}lf", delta, scrollableOffset_.GetY());
     if (NearZero(delta)) {
-        LOGD("Delta is near zero!");
         return;
     }
     if (refreshStatus_ == RefreshStatus::REFRESH && delta > 0.0) {
-        LOGD("The refresh status is refreshing!");
         return;
     }
     Offset deltaOffset(0, delta);
@@ -271,7 +268,6 @@ void RenderRefresh::HandleDragUpdate(double delta)
 
 void RenderRefresh::HandleDragEnd()
 {
-    LOGD("RenderRefresh HandleDragEnd");
     if (NearEqual(scrollableOffset_.GetY(), 0.0f)) {
         ResetStatus();
         return;
@@ -295,7 +291,6 @@ void RenderRefresh::HandleDragEnd()
 
 void RenderRefresh::HandleDragCancel()
 {
-    LOGD("RenderRefresh HandleDragCancel");
     ResetStatus();
 }
 
@@ -573,13 +568,11 @@ std::string RenderRefresh::GetFormatDateTime()
     dateTime.hour = static_cast<uint32_t>(local->tm_hour);
     dateTime.minute = static_cast<uint32_t>(local->tm_min);
     std::string time = Localization::GetInstance()->FormatDateTime(dateTime, LAST_UPDATE_FORMAT);
-    LOGD("Last update refresh time is %{public}s", time.c_str());
     return time;
 }
 
 void RenderRefresh::UpdateScrollableOffset(double delta)
 {
-    LOGD("Update offset is %{public}lf", delta);
     if (NearZero(delta)) {
         LOGW("Delta is near zero!");
         return;

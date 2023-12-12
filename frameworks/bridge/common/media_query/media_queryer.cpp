@@ -372,7 +372,6 @@ std::unique_ptr<JsonValue> MediaQueryer::GetMediaFeature() const
     json->Replace("aspect-ratio", aspectRatio);
     json->Replace("dark-mode", colorMode_ == ColorMode::DARK);
     json->Put("device-brand", SystemProperties::GetBrand().c_str());
-    LOGD("current media info %{public}s", json->ToString().c_str());
     return json;
 }
 

@@ -23,7 +23,6 @@ namespace OHOS::Ace {
 
 RefPtr<Component> TweenCreator::CreateFromJson(const JsonValue& json, const JsonComponentFactory& factory)
 {
-    LOGD("CreateFromJson Tween");
     TweenOption option;
     if (json.Contains(TWEEN_OPTION) && json.GetValue(TWEEN_OPTION)->IsObject()) {
         option = TweenOptionCreator::CreateFromJson(*(json.GetValue(TWEEN_OPTION)));

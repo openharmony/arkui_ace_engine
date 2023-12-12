@@ -33,7 +33,6 @@ constexpr double DELTA_DURATION = 15.0;
 
 void DragRecognizer::OnAccepted(size_t touchId)
 {
-    LOGD("drag gesture has been accepted! the touch id is %{public}zu", touchId);
     auto iter = dragFingers_.find(touchId);
     if (iter == dragFingers_.end()) {
         LOGE("the dragFingers_ is not ready to receive accepted, id is %{public}zu", touchId);
@@ -66,7 +65,6 @@ void DragRecognizer::OnAccepted(size_t touchId)
 
 void DragRecognizer::OnRejected(size_t touchId)
 {
-    LOGD("drag gesture has been rejected! the touch id is %{public}zu", touchId);
     auto iter = dragFingers_.find(touchId);
     if (iter == dragFingers_.end()) {
         LOGE("the dragFingers_ is not ready to receive rejected, id is %{public}zu", touchId);
@@ -78,19 +76,15 @@ void DragRecognizer::OnRejected(size_t touchId)
 
 void DragRecognizer::HandleTouchDownEvent(const TouchEvent& event)
 {
-    LOGD("drag recognizer receives touch down event, detecting drag event");
     if ((touchRestrict_.forbiddenType & TouchRestrict::SWIPE) == TouchRestrict::SWIPE) {
-        LOGD("drag recognizer forbid swipe");
         return;
     }
     if (((touchRestrict_.forbiddenType & TouchRestrict::SWIPE_HORIZONTAL) == TouchRestrict::SWIPE_HORIZONTAL) &&
         axis_ == Axis::HORIZONTAL) {
-        LOGD("horizontal drag recognizer forbid swipe");
         return;
     }
     if (((touchRestrict_.forbiddenType & TouchRestrict::SWIPE_VERTICAL) == TouchRestrict::SWIPE_VERTICAL) &&
         axis_ == Axis::VERTICAL) {
-        LOGD("vertical drag recognizer forbid swipe");
         return;
     }
     DragFingersInfo dragFingerInfo(axis_);
@@ -111,7 +105,6 @@ void DragRecognizer::HandleTouchDownEvent(const TouchEvent& event)
 
 void DragRecognizer::HandleTouchMoveEvent(const TouchEvent& event)
 {
-    LOGD("drag recognizer receives touch move event");
     auto iter = dragFingers_.find(event.id);
     if (iter == dragFingers_.end()) {
         LOGE("the dragFingers_ is not ready to receive touch move event, id is %{public}d", event.id);
@@ -145,19 +138,14 @@ void DragRecognizer::HandleTouchMoveEvent(const TouchEvent& event)
         } else {
             dragOffsetInMainAxis = dragInfo.dragOffset_.GetX();
         }
-        LOGD("handle move event, the drag offset is %{public}lf, axis is %{public}d", dragOffsetInMainAxis, axis_);
         if (IsDragGestureAccept(dragOffsetInMainAxis)) {
-            LOGD("this gesture is drag, try to accept it");
             Accept(event.id);
         }
-    } else {
-        LOGD("state is ready, need to use touch down event to trigger, state is %{public}d", dragInfo.states_);
     }
 }
 
 void DragRecognizer::HandleTouchUpEvent(const TouchEvent& event)
 {
-    LOGD("drag recognizer receives touch up event");
     auto iter = dragFingers_.find(event.id);
     if (iter == dragFingers_.end()) {
         LOGE("the dragFingers_ is not ready to receive touch up event, id is %{public}d", event.id);
@@ -178,7 +166,6 @@ void DragRecognizer::HandleTouchUpEvent(const TouchEvent& event)
             }
         }
         if (upSuccess) {
-            LOGD("use animation to end drag");
             if (onDragEnd_) {
                 DragEndInfo endInfo(event.id);
                 endInfo.SetVelocity(dragInfo.velocityTracker_.GetVelocity())
@@ -204,7 +191,6 @@ void DragRecognizer::HandleTouchUpEvent(const TouchEvent& event)
             }
         }
     } else if (dragInfo.states_ == DetectState::DETECTING) {
-        LOGD("this gesture is not drag, try to reject it");
         Reject(event.id);
     }
     dragInfo.states_ = DetectState::READY;
@@ -212,7 +198,6 @@ void DragRecognizer::HandleTouchUpEvent(const TouchEvent& event)
 
 void DragRecognizer::HandleTouchCancelEvent(const TouchEvent& event)
 {
-    LOGD("drag recognizer receives touch cancel event");
     auto iter = dragFingers_.find(event.id);
     if (iter == dragFingers_.end()) {
         LOGE("the dragFingers_ is not ready to receive touch cancel event, id is %{public}d", event.id);
@@ -225,7 +210,6 @@ void DragRecognizer::HandleTouchCancelEvent(const TouchEvent& event)
             AsyncCallback(onDragCancel_);
         }
     } else if (dragInfo.states_ == DetectState::DETECTING) {
-        LOGD("cancel drag gesture detect, try to reject it");
         Reject(event.id);
     }
     dragInfo.states_ = DetectState::READY;

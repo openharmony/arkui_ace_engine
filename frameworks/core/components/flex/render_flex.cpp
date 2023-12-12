@@ -114,7 +114,6 @@ void RenderFlex::UpdateAccessibilityAttr()
     refPtr->SetActionScrollForward([weakScroll = AceType::WeakClaim(RawPtr(scroll))]() {
         auto scroll = weakScroll.Upgrade();
         if (scroll) {
-            LOGD("Trigger ScrollForward by Accessibility.");
             scroll->ScrollPage(false, true);
             return true;
         }
@@ -123,7 +122,6 @@ void RenderFlex::UpdateAccessibilityAttr()
     refPtr->SetActionScrollBackward([weakScroll = AceType::WeakClaim(RawPtr(scroll))]() {
         auto scroll = weakScroll.Upgrade();
         if (scroll) {
-            LOGD("Trigger ScrollBackward by Accessibility.");
             scroll->ScrollPage(true, true);
             return true;
         }

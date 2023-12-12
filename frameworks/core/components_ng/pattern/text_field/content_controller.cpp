@@ -224,7 +224,6 @@ bool ContentController::FilterWithEmail(std::string& result)
 bool ContentController::FilterWithAscii(std::string& result)
 {
     if (result.empty()) {
-        LOGD("Text is empty or filter is empty");
         return false;
     }
     auto valueToUpdate = result;

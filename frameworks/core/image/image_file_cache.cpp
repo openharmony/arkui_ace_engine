@@ -81,7 +81,6 @@ RefPtr<NG::ImageData> ImageFileCache::GetDataFromCacheFile(const std::string& fi
 {
     std::lock_guard<std::mutex> lock(cacheFileInfoMutex_);
     if (!GetFromCacheFileInner(filePath)) {
-        TAG_LOGD(AceLogTag::ACE_IMAGE, "file not cached, return nullptr");
         return nullptr;
     }
     auto cacheFileLoader = AceType::MakeRefPtr<FileImageLoader>();
@@ -148,7 +147,6 @@ void ImageFileCache::WriteCacheFile(
 
 void ImageFileCache::ClearCacheFile(const std::vector<std::string>& removeFiles)
 {
-    TAG_LOGD(AceLogTag::ACE_IMAGE, "begin to clear %{public}zu files: ", removeFiles.size());
     for (auto&& iter : removeFiles) {
         if (remove(iter.c_str()) != 0) {
             TAG_LOGW(AceLogTag::ACE_IMAGE, "remove file %{private}s failed.", iter.c_str());

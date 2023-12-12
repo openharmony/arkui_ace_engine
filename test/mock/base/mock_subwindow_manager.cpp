@@ -32,10 +32,7 @@ std::shared_ptr<SubwindowManager> SubwindowManager::GetInstance()
     return instance_;
 }
 
-void SubwindowManager::HidePopupNG(int32_t targetId, int32_t instanceId)
-{
-    TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "SubwindowManager::HidePopupNG MOCK");
-}
+void SubwindowManager::HidePopupNG(int32_t targetId, int32_t instanceId) {}
 
 void SubwindowManager::ShowPopupNG(int32_t targetId, const NG::PopupInfo& popupInfo) {}
 

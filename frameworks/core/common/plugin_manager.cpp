@@ -134,7 +134,6 @@ int32_t PluginManager::GetPluginParentContainerId(int64_t pluginId)
     if (result != parentContainerMap_.end()) {
         return result->second;
     } else {
-        TAG_LOGD(AceLogTag::ACE_PLUGIN_COMPONENT, "Parent Container Id is empty.");
         return 0;
     }
 }

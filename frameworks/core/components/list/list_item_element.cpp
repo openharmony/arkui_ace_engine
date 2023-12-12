@@ -58,7 +58,6 @@ void ListItemElement::Update()
         topRightRadius_ = item->GetTopRightRadius();
         bottomLeftRadius_ = item->GetBottomLeftRadius();
         bottomRightRadius_ = item->GetBottomRightRadius();
-        LOGD("[Focus] Update: radius: %{public}.1lf", topLeftRadius_.GetX().Value());
         SoleChildElement::Update();
     }
 }
@@ -75,7 +74,6 @@ void ListItemElement::PerformBuild()
 
 bool ListItemElement::RequestNextFocus(bool vertical, bool reverse, const Rect& rect)
 {
-    LOGD("[ListFocus]RequestNextFocus, index:%{public}d.", index_);
     return false;
 }
 

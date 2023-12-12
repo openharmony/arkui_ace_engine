@@ -28,7 +28,6 @@ MockOverlayElement::HookOverlay g_hookOverlay;
 
 void MockOverlayElement::SetMockHook(const HookOverlay& hook)
 {
-    LOGD("set hook.");
     g_hookOverlay = std::move(hook);
 }
 
@@ -36,7 +35,6 @@ RefPtr<Element> OverlayComponent::CreateElement()
 {
     auto overlay = AceType::MakeRefPtr<MockOverlayElement>();
     if (g_hookOverlay) {
-        LOGD("execute hook.");
         g_hookOverlay(overlay);
     }
     return overlay;

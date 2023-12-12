@@ -100,7 +100,6 @@ public:
             return;
         }
         if ((currentState_ & state) != state) {
-            LOGD("current %{public}d state is not set yet.", static_cast<int32_t>(state));
             return;
         }
         auto temp = currentState_ ^ state;

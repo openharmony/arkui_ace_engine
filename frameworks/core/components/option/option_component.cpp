@@ -155,7 +155,6 @@ void OptionComponent::CheckOptionModify()
         return;
     }
     if (!modifiedCallback_) {
-        LOGD("modify callback of option component is null.");
         return;
     }
     if (text_->GetData() == lastText_) {

@@ -36,7 +36,6 @@ APngImagePlayer::APngImagePlayer(
     : imageSource_(source), successCallback_(successCallback), context_(weakContext),
       apngDecoder_(decoder), dstWidth_(dstWidth), dstHeight_(dstHeight)
 {
-    LOGD("animated image frameCount_ : %{public}d, repetitionCount_ : %{public}d", frameCount_, repetitionCount_);
     auto context = context_.Upgrade();
     if (context) {
         // decode apng
@@ -55,7 +54,6 @@ APngImagePlayer::APngImagePlayer(
         float totalFrameDuration = 0.0f;
 
         for (int32_t index = 0; index < frameCount_; index++) {
-            LOGD("frame[%{public}d] duration is %{public}f", index, frameInfos_[index].duration);
             // if frame duration is 0, set this frame duration as 100ms
             if (frameInfos_[index].duration <= 0) {
                 frameInfos_[index].duration = 0;
@@ -63,8 +61,6 @@ APngImagePlayer::APngImagePlayer(
 
             totalFrameDuration += frameInfos_[index].duration;
         }
-
-        LOGD("frame cached size: %{private}d", static_cast<int32_t>(cachedFrame_.size()));
 
         for (int32_t index = 0; index < frameCount_; index++) {
             pictureAnimation->AddPicture(frameInfos_[index].duration, index);
@@ -723,7 +719,6 @@ APngAnimatedFrameInfo *APngImagePlayer::DecodeFrameImage(const int32_t& index)
     // first seek in cache
     auto iterator = cachedFrame_.find(index);
     if (iterator != cachedFrame_.end() && iterator->second != nullptr) {
-        LOGD("index %{private}d found in cache.", index);
         APngAnimatedFrameInfo *frameInfo = (APngAnimatedFrameInfo *) *iterator->second;
         return frameInfo;
     }
@@ -917,11 +912,5 @@ bool APngImagePlayer::CopyTo(RSBitmap *dst, const RSBitmap &src)
  * @param canvas
  * @param paintRect
  */
-void Paint(const flutter::Paint& paint,
-           const Offset& offset,
-           const ScopedCanvas& canvas,
-           const Rect& paintRect)
-{
-    LOGD("TODO:apng player Paint wait to implement");
-}
+void Paint(const flutter::Paint& paint, const Offset& offset, const ScopedCanvas& canvas, const Rect& paintRect) {}
 } // namespace OHOS::Ace

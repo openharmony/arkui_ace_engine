@@ -21,7 +21,6 @@ namespace OHOS::Ace {
 
 void RefreshElement::PerformBuild()
 {
-    LOGD("RefreshElement::PerformBuild");
     RefPtr<RefreshComponent> component = AceType::DynamicCast<RefreshComponent>(component_);
     if (!component) {
         LOGE("Component is null");

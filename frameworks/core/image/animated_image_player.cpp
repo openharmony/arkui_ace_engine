@@ -98,7 +98,6 @@ sk_sp<SkImage> AnimatedImagePlayer::DecodeFrameImage(const int32_t& index)
     // first seek in cache
     auto iterator = cachedFrame_.find(index);
     if (iterator != cachedFrame_.end() && iterator->second != nullptr) {
-        LOGD("index %{private}d found in cache.", index);
         return SkImage::MakeFromBitmap(*iterator->second);
     }
 
@@ -133,7 +132,6 @@ sk_sp<SkImage> AnimatedImagePlayer::DecodeFrameImage(const int32_t& index)
     }
 
     if (iterator != cachedFrame_.end() && iterator->second == nullptr) {
-        LOGD("index %{private}d cached.", index);
         iterator->second = std::make_unique<SkBitmap>(bitmap);
     }
     return SkImage::MakeFromBitmap(bitmap);
@@ -169,7 +167,6 @@ std::shared_ptr<RSImage> AnimatedImagePlayer::DecodeFrameImage(const int32_t& in
     // first seek in cache
     auto iterator = cachedFrame_.find(index);
     if (iterator != cachedFrame_.end() && iterator->second != nullptr) {
-        LOGD("index %{private}d found in cache.", index);
         auto image = std::shared_ptr<RSImage>();
         image->BuildFromBitmap(*iterator->second);
         return image;
@@ -207,7 +204,6 @@ std::shared_ptr<RSImage> AnimatedImagePlayer::DecodeFrameImage(const int32_t& in
     }
 
     if (iterator != cachedFrame_.end() && iterator->second == nullptr) {
-        LOGD("index %{private}d cached.", index);
         iterator->second = std::make_unique<RSBitmap>(bitmap);
     }
     auto image = std::shared_ptr<RSImage>();

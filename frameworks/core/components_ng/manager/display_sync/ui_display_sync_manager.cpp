@@ -52,7 +52,6 @@ bool UIDisplaySyncManager::AddDisplaySync(const RefPtr<UIDisplaySync>& displaySy
     if (HasDisplaySync(displaySync)) {
         return false;
     }
-    TAG_LOGD(AceLogTag::ACE_DISPLAY_SYNC, "DisplaySyncId: %{public}d", static_cast<int32_t>(displaySync->GetId()));
     uiDisplaySyncMap_[displaySync->GetId()] = displaySync;
     return true;
 }
@@ -60,7 +59,6 @@ bool UIDisplaySyncManager::AddDisplaySync(const RefPtr<UIDisplaySync>& displaySy
 bool UIDisplaySyncManager::RemoveDisplaySync(const RefPtr<UIDisplaySync>& displaySync)
 {
     if (HasDisplaySync(displaySync)) {
-        TAG_LOGD(AceLogTag::ACE_DISPLAY_SYNC, "DisplaySyncId: %{public}d", static_cast<int32_t>(displaySync->GetId()));
         uiDisplaySyncMap_.erase(displaySync->GetId());
         return true;
     }
@@ -113,7 +111,6 @@ UIDisplaySyncManager::UIDisplaySyncManager() {}
 
 UIDisplaySyncManager::~UIDisplaySyncManager() noexcept
 {
-    TAG_LOGD(AceLogTag::ACE_DISPLAY_SYNC, "MapSize[%{public}d]", static_cast<int32_t>(uiDisplaySyncMap_.size()));
     for (const auto& [Id, weakDisplaySync] : uiDisplaySyncMap_) {
         auto displaySync = weakDisplaySync.Upgrade();
         if (displaySync) {

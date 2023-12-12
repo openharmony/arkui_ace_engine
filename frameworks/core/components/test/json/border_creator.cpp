@@ -26,7 +26,6 @@ namespace OHOS::Ace {
 
 std::unique_ptr<Border> BorderCreator::CreateFromJson(const JsonValue& json)
 {
-    LOGD("CreateFromJson Border");
     std::string classType = json.GetValue(CLASS_NAME)->GetString();
     if (classType != BORDER_NAME) {
         LOGE("Create border err: not a border json.");

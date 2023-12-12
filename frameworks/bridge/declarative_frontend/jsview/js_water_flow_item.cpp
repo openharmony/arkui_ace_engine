@@ -50,7 +50,6 @@ void JSWaterFlowItem::Create()
 
 void JSWaterFlowItem::JSBind(BindingTarget globalObj)
 {
-    LOGD("JSWaterFlowItem:JSBind");
     JSClass<JSWaterFlowItem>::Declare("FlowItem");
 
     MethodOptions opt = MethodOptions::NONE;

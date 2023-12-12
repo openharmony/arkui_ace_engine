@@ -129,7 +129,6 @@ void GestureRecognizer::BatchAdjudicate(
         return;
     }
     for (auto pointerId : copyIds) {
-        LOGD("Adjudicate gesture recognizer, touch id %{public}zu, disposal %{public}d", pointerId, disposal);
         referee->Adjudicate(pointerId, recognizer, disposal);
     }
 }

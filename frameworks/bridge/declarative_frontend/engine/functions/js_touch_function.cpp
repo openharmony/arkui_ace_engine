@@ -91,7 +91,6 @@ JSRef<JSObject> JsTouchFunction::CreateJSEventInfo(TouchEventInfo& info)
 
 void JsTouchFunction::Execute(TouchEventInfo& info)
 {
-    LOGD("JsTouchFunction: eventType[%s]", info.GetType().c_str());
     JSRef<JSVal> param = JSRef<JSObject>::Cast(CreateJSEventInfo(info));
     JsFunction::ExecuteJS(1, &param);
 }

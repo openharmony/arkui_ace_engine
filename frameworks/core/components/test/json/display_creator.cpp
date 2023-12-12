@@ -23,7 +23,6 @@ namespace OHOS::Ace {
 
 RefPtr<Component> DisplayCreator::CreateFromJson(const JsonValue& componentJson, const JsonComponentFactory& factory)
 {
-    LOGD("CreateFromJson display");
     std::string classType = componentJson.GetValue(CLASS_NAME)->GetString();
     if (classType != DISPLAY_NAME || !componentJson.Contains(CHILD) || !componentJson.GetValue(CHILD)->IsObject()) {
         LOGE("Create DisplayComponent err: not a display json or not contain child.");

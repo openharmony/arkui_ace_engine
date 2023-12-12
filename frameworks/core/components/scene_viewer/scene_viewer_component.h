@@ -57,7 +57,6 @@ public:
 
     void SetGltfSrc(const std::string& src)
     {
-        LOGD("ACE-3D SceneViewerComponent::SetGltfSrc() %s", src.c_str());
         gltfSrc_ = src;
     }
 

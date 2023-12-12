@@ -82,7 +82,6 @@ void ModelAdapterWrapper::Deinit()
 void ModelAdapterWrapper::CreateTextureLayer()
 {
     Render3D::GraphicsTask::GetInstance().PushSyncMessage([weak = WeakClaim(this)] {
-        LOGD("CreateTexture layer Register key %d", key);
         auto adapter = weak.Upgrade();
         CHECK_NULL_VOID(adapter);
 
@@ -95,7 +94,6 @@ void ModelAdapterWrapper::CreateTextureLayer()
 
 void ModelAdapterWrapper::CreateWidgetAdapter()
 {
-    LOGD("ModelAdapterWrapper::CreateWidgetAdapter key %d", GetKey());
     auto key = GetKey();
     Render3D::HapInfo hapInfo = SetHapInfo();
     // init engine in async manager sometimes crash on screen rotation
@@ -158,7 +156,6 @@ void ModelAdapterWrapper::OnDirtyLayoutWrapperSwap(const Render3D::WindowChangeI
 
 void ModelAdapterWrapper::OnRebuildFrame(RefPtr<RenderContext>& context)
 {
-    LOGD("adapter OnRebuildFrame with context");
     CHECK_NULL_VOID(textureLayer_);
 
 #ifdef ENABLE_ROSEN_BACKEND
@@ -265,7 +262,6 @@ void ModelAdapterWrapper::UnloadSceneAndBackground()
 
         adapter->widgetAdapter_->UnloadSceneModel();
         adapter->widgetAdapter_->UnloadEnvModel();
-        LOGD("MODEL_NG: UnloadScene -> Unload model GetKey() %d", adapter->GetKey());
     });
 }
 
@@ -413,7 +409,6 @@ void ExtractCameraProperty(const RefPtr<ModelPaintProperty>& modelPaintProperty,
 
 void ModelAdapterWrapper::UpdateCamera(const RefPtr<ModelPaintProperty>& modelPaintProperty)
 {
-    LOGD("MODEL_NG: ModelAdapterWrapper::UpdateCamera()");
     CameraProperty camera;
     ExtractCameraProperty(modelPaintProperty, camera);
     Render3D::GraphicsTask::GetInstance().PushSyncMessage([weak = WeakClaim(this), &camera] {

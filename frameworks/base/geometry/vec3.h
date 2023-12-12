@@ -100,8 +100,6 @@ public:
     Vec3& operator=(const Vec3& newValue)
     {
         animationOption_ = newValue.GetAnimationOption();
-        LOGD("Vec3 operator=() animation duration: %d, %f %f %f", animationOption_.GetDuration(),
-            newValue.GetX(), newValue.GetY(), newValue.GetZ());
         x_ = AnimatableFloat(newValue.GetX(), animationOption_);
         y_ = AnimatableFloat(newValue.GetY(), animationOption_);
         z_ = AnimatableFloat(newValue.GetZ(), animationOption_);

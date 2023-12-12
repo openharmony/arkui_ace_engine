@@ -152,7 +152,6 @@ bool FormModulePreloader::ParseComponentCollectionJson(
             }
             std::lock_guard<std::mutex> lock(gMapLock_);
             if (gFormModuleMap_[bundleName].find(componentName) == gFormModuleMap_[bundleName].end()) {
-                LOGD("Add new module: %{public}s", componentName.c_str());
                 formModuleList.emplace(componentName);
                 gFormModuleMap_[bundleName].emplace(bundleName);
             }

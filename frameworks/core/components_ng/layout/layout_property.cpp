@@ -241,8 +241,6 @@ void LayoutProperty::UpdateLayoutConstraint(const LayoutConstraintF& parentConst
                 parentConstraint.scaleProperty, parentConstraint.percentReference));
         }
         if (calcLayoutConstraint_->selfIdealSize.has_value()) {
-            LOGD("CalcLayoutConstraint->selfIdealSize = %{public}s",
-                calcLayoutConstraint_->selfIdealSize.value().ToString().c_str());
             layoutConstraint_->UpdateIllegalSelfIdealSizeWithCheck(
                 ConvertToOptionalSize(calcLayoutConstraint_->selfIdealSize.value(), parentConstraint.scaleProperty,
                     parentConstraint.percentReference));

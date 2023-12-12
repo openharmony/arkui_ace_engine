@@ -354,7 +354,6 @@ public:
     static RectT FromString(const std::string& str)
     {
         static const int32_t valueSize = 4;
-        LOGD("UITree str=%{public}s", str.c_str());
 
         std::vector<T> vals;
         std::string val;

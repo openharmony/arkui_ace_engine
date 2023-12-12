@@ -480,8 +480,6 @@ void RenderScroll::ResetEdgeEffect()
 
         SetEdgeEffectAttribute();
         scrollEffect_->InitialEdgeEffect();
-    } else {
-        LOGD("scrollEffect_ is null");
     }
 }
 
@@ -726,7 +724,6 @@ void RenderScroll::JumpToPosition(double position, int32_t source)
 
 void RenderScroll::DoJump(double position, int32_t source)
 {
-    LOGD("jump to position: %{public}lf", position);
     if (!NearEqual(GetCurrentPosition(), position)) {
         Offset delta;
         if (axis_ == Axis::VERTICAL) {
@@ -742,8 +739,6 @@ void RenderScroll::DoJump(double position, int32_t source)
 void RenderScroll::AnimateTo(double position, float duration, const RefPtr<Curve>& curve, bool limitDuration,
     const std::function<void()>& onFinish)
 {
-    LOGD("animate from position %{public}lf to %{public}lf, duration: %{public}f", GetCurrentPosition(), position,
-        duration);
     if (!animator_) {
         animator_ = CREATE_ANIMATOR(GetContext());
         CHECK_NULL_VOID(animator_);

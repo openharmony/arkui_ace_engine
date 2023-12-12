@@ -509,21 +509,18 @@ void PaContainer::OnCommand(const OHOS::AAFwk::Want &want, int startId, int32_t 
 
 bool PaContainer::OnShare(int32_t instanceId, int64_t formId, OHOS::AAFwk::WantParams &wantParams)
 {
-    LOGD("PA: PaContainer::OnShare start with id %{private}d", instanceId);
     auto container = AceEngine::Get().GetContainer(instanceId);
     CHECK_NULL_RETURN(container, false);
     auto aceContainer = AceType::DynamicCast<PaContainer>(container);
     CHECK_NULL_RETURN(aceContainer, false);
     auto paBackend = AceType::DynamicCast<PaBackend>(aceContainer->GetBackend());
     CHECK_NULL_RETURN(paBackend, false);
-    LOGD("PA: PaContainer::OnCreate end");
     return paBackend->OnShare(formId, wantParams);
 }
 
 std::shared_ptr<AppExecFwk::PacMap> PaContainer::Call(int32_t instanceId, const Uri& uri,
     const std::string& method, const std::string& arg, const AppExecFwk::PacMap& pacMap)
 {
-    LOGD("Call with id %{public}d", instanceId);
     std::shared_ptr<AppExecFwk::PacMap> ret = nullptr;
     auto container = AceEngine::Get().GetContainer(instanceId);
     CHECK_NULL_RETURN(container, ret);

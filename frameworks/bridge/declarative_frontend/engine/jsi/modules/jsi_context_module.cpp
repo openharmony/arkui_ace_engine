@@ -47,7 +47,6 @@ std::shared_ptr<JsValue> JsiContextModule::GetContext(const std::shared_ptr<JsRu
         currentInstance = PluginManager::GetInstance().GetPluginParentContainerId(currentInstance);
     }
 #endif
-    LOGD("Current ID is %{public}d", currentInstance);
     auto it = contexts_.find(currentInstance);
     if (it == contexts_.end()) {
         return runtime->NewUndefined();

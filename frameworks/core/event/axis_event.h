@@ -327,10 +327,6 @@ public:
         Offset localLocation = Offset(
             event.GetOffset().GetX() - coordinateOffset_.GetX(), event.GetOffset().GetY() - coordinateOffset_.GetY());
         AxisInfo info = AxisInfo(event, localLocation, GetEventTarget().value_or(EventTarget()));
-        LOGD("HandleAxisEvent: Node: %{public}s, Action: %{public}d, HorizontalAxis: %{public}f, VeriticalAxis: "
-             "%{public}f, PinchAxis: %{public}f",
-            frameName_.c_str(), info.GetAction(), info.GetHorizontalAxis(), info.GetVerticalAxis(),
-            info.GetPinchAxisScale());
         onAxisCallback_(info);
         return true;
     }

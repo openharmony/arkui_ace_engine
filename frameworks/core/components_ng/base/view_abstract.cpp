@@ -1484,7 +1484,6 @@ void ViewAbstract::SetBackShadow(FrameNode *frameNode, const Shadow &shadow)
 void ViewAbstract::SetBlendMode(BlendMode blendMode)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
-        LOGD("current state is not processed, return");
         return;
     }
     ACE_UPDATE_RENDER_CONTEXT(BackBlendMode, blendMode);

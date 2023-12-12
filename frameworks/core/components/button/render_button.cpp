@@ -881,14 +881,10 @@ void RenderButton::OnStatusStyleChanged(const VisualState state)
                 auto colorState =
                     AceType::DynamicCast<StateAttributeValue<ButtonStateAttribute, AnimatableColor>>(attribute);
                 if (state == VisualState::PRESSED) {
-                    LOGD("Click color start %{public}x  end %{public}x", backgroundColor_.GetValue(),
-                        colorState->value_.GetValue());
                     SetClickedColor(backgroundColor_);  // starting animation color
                     clickedColor_ = colorState->value_; // End color
                     setClickColor_ = true;
                 } else {
-                    LOGD("background color start %{public}x  end %{public}x", clickedColor_.GetValue(),
-                        colorState->value_.GetValue());
                     backgroundColor_.SetValue(clickedColor_.GetValue()); // Start value
                     backgroundColor_ = colorState->value_;               // End value and animate
                 }

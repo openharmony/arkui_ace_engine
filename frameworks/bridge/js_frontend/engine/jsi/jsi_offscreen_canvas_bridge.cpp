@@ -318,7 +318,6 @@ shared_ptr<JsValue> JsiOffscreenCanvasBridge::JsGetContext(const shared_ptr<JsRu
 shared_ptr<JsValue> JsiOffscreenCanvasBridge::JsCreateLinearGradient(const shared_ptr<JsRuntime>& runtime,
     const shared_ptr<JsValue>& value, const std::vector<shared_ptr<JsValue>>& argv, int32_t argc)
 {
-    LOGD("JsiOffscreenCanvasBridge::JsCreateLinearGradient");
     if (argc != 4) {
         LOGE("argc error, argc = %{private}d", argc);
         return runtime->NewUndefined();
@@ -340,7 +339,6 @@ shared_ptr<JsValue> JsiOffscreenCanvasBridge::JsCreateLinearGradient(const share
 shared_ptr<JsValue> JsiOffscreenCanvasBridge::JsCreateRadialGradient(const shared_ptr<JsRuntime>& runtime,
     const shared_ptr<JsValue>& value, const std::vector<shared_ptr<JsValue>>& argv, int32_t argc)
 {
-    LOGD("JsiOffscreenCanvasBridge::CreateRadialGradient");
     // 6 parameters: createRadialGradient(x0, y0, r0, x1, y1, r1)
     if (argc != 6) {
         LOGE("argc error, argc = %{private}d", argc);
@@ -403,7 +401,6 @@ Gradient JsiOffscreenCanvasBridge::GetGradient(const shared_ptr<JsRuntime>& runt
 shared_ptr<JsValue> JsiOffscreenCanvasBridge::JsFillRect(const shared_ptr<JsRuntime>& runtime,
     const shared_ptr<JsValue>& value, const std::vector<shared_ptr<JsValue>>& argv, int32_t argc)
 {
-    LOGD("JsiOffscreenCanvasBridge::JsFillRect");
     if (argc != 4) {
         LOGE("argc error, argc = %{private}d", argc);
         return runtime->NewUndefined();
@@ -419,7 +416,6 @@ shared_ptr<JsValue> JsiOffscreenCanvasBridge::JsFillRect(const shared_ptr<JsRunt
 shared_ptr<JsValue> JsiOffscreenCanvasBridge::JsStrokeRect(const shared_ptr<JsRuntime>& runtime,
     const shared_ptr<JsValue>& value, const std::vector<shared_ptr<JsValue>>& argv, int32_t argc)
 {
-    LOGD("JsiOffscreenCanvasBridge::JsStrokeRect");
     if (argc != 4) {
         LOGE("argc error, argc = %{private}d", argc);
         return runtime->NewUndefined();
@@ -435,7 +431,6 @@ shared_ptr<JsValue> JsiOffscreenCanvasBridge::JsStrokeRect(const shared_ptr<JsRu
 shared_ptr<JsValue> JsiOffscreenCanvasBridge::JsClearRect(const shared_ptr<JsRuntime>& runtime,
     const shared_ptr<JsValue>& value, const std::vector<shared_ptr<JsValue>>& argv, int32_t argc)
 {
-    LOGD("JsiOffscreenCanvasBridge::JsClearRect");
     if (argc != 4) {
         LOGE("argc error, argc = %{private}d", argc);
         return runtime->NewUndefined();
@@ -451,7 +446,6 @@ shared_ptr<JsValue> JsiOffscreenCanvasBridge::JsClearRect(const shared_ptr<JsRun
 shared_ptr<JsValue> JsiOffscreenCanvasBridge::JsFillText(const shared_ptr<JsRuntime>& runtime,
     const shared_ptr<JsValue>& value, const std::vector<shared_ptr<JsValue>>& argv, int32_t argc)
 {
-    LOGD("JsiOffscreenCanvasBridge::JsFillText");
     if (argc != 3) {
         LOGE("argc error, argc = %{private}d", argc);
         return runtime->NewUndefined();
@@ -473,7 +467,6 @@ shared_ptr<JsValue> JsiOffscreenCanvasBridge::JsFillText(const shared_ptr<JsRunt
 shared_ptr<JsValue> JsiOffscreenCanvasBridge::JsStrokeText(const shared_ptr<JsRuntime>& runtime,
     const shared_ptr<JsValue>& value, const std::vector<shared_ptr<JsValue>>& argv, int32_t argc)
 {
-    LOGD("JsStrokeText");
     if (argc != 3) {
         LOGE("argc error, argc = %{private}d", argc);
         return runtime->NewUndefined();
@@ -496,7 +489,6 @@ shared_ptr<JsValue> JsiOffscreenCanvasBridge::JsMeasureText(const shared_ptr<JsR
     const shared_ptr<JsValue>& value, const std::vector<shared_ptr<JsValue>>& argv, int32_t argc)
 {
     // this func should return TextMetrics, including the width of the text
-    LOGD("Js Measure Text");
     if (argc != 1) {
         LOGE("argc error, argc = %{private}d", argc);
         return runtime->NewUndefined();
@@ -522,7 +514,6 @@ shared_ptr<JsValue> JsiOffscreenCanvasBridge::JsMeasureText(const shared_ptr<JsR
 shared_ptr<JsValue> JsiOffscreenCanvasBridge::JsBeginPath(const shared_ptr<JsRuntime>& runtime,
     const shared_ptr<JsValue>& value, const std::vector<shared_ptr<JsValue>>& argv, int32_t argc)
 {
-    LOGD("Js Begin path");
     if (argc != 0) {
         LOGE("argc error, argc = %{private}d", argc);
         return runtime->NewUndefined();
@@ -537,7 +528,6 @@ shared_ptr<JsValue> JsiOffscreenCanvasBridge::JsBeginPath(const shared_ptr<JsRun
 shared_ptr<JsValue> JsiOffscreenCanvasBridge::JsClosePath(const shared_ptr<JsRuntime>& runtime,
     const shared_ptr<JsValue>& value, const std::vector<shared_ptr<JsValue>>& argv, int32_t argc)
 {
-    LOGD("js close path");
     if (argc != 0) {
         LOGE("argc error, argc = %{private}d", argc);
         return runtime->NewUndefined();
@@ -552,7 +542,6 @@ shared_ptr<JsValue> JsiOffscreenCanvasBridge::JsClosePath(const shared_ptr<JsRun
 shared_ptr<JsValue> JsiOffscreenCanvasBridge::JsMoveTo(const shared_ptr<JsRuntime>& runtime,
     const shared_ptr<JsValue>& value, const std::vector<shared_ptr<JsValue>>& argv, int32_t argc)
 {
-    LOGD("JsiOffscreenCanvasBridge::JsMoveTo");
     if (argc != 2) {
         LOGE("argc error, argc = %{private}d", argc);
         return runtime->NewUndefined();
@@ -569,7 +558,6 @@ shared_ptr<JsValue> JsiOffscreenCanvasBridge::JsMoveTo(const shared_ptr<JsRuntim
 shared_ptr<JsValue> JsiOffscreenCanvasBridge::JsLineTo(const shared_ptr<JsRuntime>& runtime,
     const shared_ptr<JsValue>& value, const std::vector<shared_ptr<JsValue>>& argv, int32_t argc)
 {
-    LOGD("JsiOffscreenCanvasBridge::JsLineTo");
     if (argc != 2) {
         LOGE("argc error, argc = %{private}d", argc);
         return runtime->NewUndefined();
@@ -586,7 +574,6 @@ shared_ptr<JsValue> JsiOffscreenCanvasBridge::JsLineTo(const shared_ptr<JsRuntim
 shared_ptr<JsValue> JsiOffscreenCanvasBridge::JsBezierCurveTo(const shared_ptr<JsRuntime>& runtime,
     const shared_ptr<JsValue>& value, const std::vector<shared_ptr<JsValue>>& argv, int32_t argc)
 {
-    LOGD("JsBezierCurveTo");
     if (argc != 6) {
         LOGE("argc error, argc = %{private}d", argc);
         return runtime->NewUndefined();
@@ -608,7 +595,6 @@ shared_ptr<JsValue> JsiOffscreenCanvasBridge::JsBezierCurveTo(const shared_ptr<J
 shared_ptr<JsValue> JsiOffscreenCanvasBridge::JsQuadraticCurveTo(const shared_ptr<JsRuntime>& runtime,
     const shared_ptr<JsValue>& value, const std::vector<shared_ptr<JsValue>>& argv, int32_t argc)
 {
-    LOGD("JsQuadraticCurveTo");
     if (argc != 4) {
         LOGE("argc error, argc = %{private}d", argc);
         return runtime->NewUndefined();
@@ -628,7 +614,6 @@ shared_ptr<JsValue> JsiOffscreenCanvasBridge::JsQuadraticCurveTo(const shared_pt
 shared_ptr<JsValue> JsiOffscreenCanvasBridge::JsArc(const shared_ptr<JsRuntime>& runtime,
     const shared_ptr<JsValue>& value, const std::vector<shared_ptr<JsValue>>& argv, int32_t argc)
 {
-    LOGD("JsArc");
     if (argc < 5 || argc > 6) {
         LOGE("argc error, argc = %{private}d", argc);
         return runtime->NewUndefined();
@@ -659,7 +644,6 @@ shared_ptr<JsValue> JsiOffscreenCanvasBridge::JsArc(const shared_ptr<JsRuntime>&
 shared_ptr<JsValue> JsiOffscreenCanvasBridge::JsArcTo(const shared_ptr<JsRuntime>& runtime,
     const shared_ptr<JsValue>& value, const std::vector<shared_ptr<JsValue>>& argv, int32_t argc)
 {
-    LOGD("JsArcTo");
     if (argc != 5) {
         LOGE("argc error, argc = %{private}d", argc);
         return runtime->NewUndefined();
@@ -707,7 +691,6 @@ shared_ptr<JsValue> JsiOffscreenCanvasBridge::JsEllipse(const shared_ptr<JsRunti
 shared_ptr<JsValue> JsiOffscreenCanvasBridge::JsRect(const shared_ptr<JsRuntime>& runtime,
     const shared_ptr<JsValue>& value, const std::vector<shared_ptr<JsValue>>& argv, int32_t argc)
 {
-    LOGD("JsRect");
     Rect rect = GetJsRectParam(runtime, argc, argv);
     auto offscreenCanvas = GlobalGetOffscreenCanvas(runtime, value);
     if (offscreenCanvas) {
@@ -719,7 +702,6 @@ shared_ptr<JsValue> JsiOffscreenCanvasBridge::JsRect(const shared_ptr<JsRuntime>
 shared_ptr<JsValue> JsiOffscreenCanvasBridge::JsFill(const shared_ptr<JsRuntime>& runtime,
     const shared_ptr<JsValue>& value, const std::vector<shared_ptr<JsValue>>& argv, int32_t argc)
 {
-    LOGD("JsFill");
     auto offscreenCanvas = GlobalGetOffscreenCanvas(runtime, value);
     if (offscreenCanvas) {
         offscreenCanvas->Fill();
@@ -730,7 +712,6 @@ shared_ptr<JsValue> JsiOffscreenCanvasBridge::JsFill(const shared_ptr<JsRuntime>
 shared_ptr<JsValue> JsiOffscreenCanvasBridge::JsStroke(const shared_ptr<JsRuntime>& runtime,
     const shared_ptr<JsValue>& value, const std::vector<shared_ptr<JsValue>>& argv, int32_t argc)
 {
-    LOGD("JsStroke");
     // 0 or 1 parameter: ctx.stroke() / ctx.stroke(path)
     if (argc == 1) {
         auto typeVal = argv[0]->GetProperty(runtime, "__type");
@@ -760,7 +741,6 @@ shared_ptr<JsValue> JsiOffscreenCanvasBridge::JsStroke(const shared_ptr<JsRuntim
 shared_ptr<JsValue> JsiOffscreenCanvasBridge::JsClip(const shared_ptr<JsRuntime>& runtime,
     const shared_ptr<JsValue>& value, const std::vector<shared_ptr<JsValue>>& argv, int32_t argc)
 {
-    LOGD("JsClip");
     auto offscreenCanvas = GlobalGetOffscreenCanvas(runtime, value);
     if (offscreenCanvas) {
         offscreenCanvas->Clip();
@@ -771,7 +751,6 @@ shared_ptr<JsValue> JsiOffscreenCanvasBridge::JsClip(const shared_ptr<JsRuntime>
 shared_ptr<JsValue> JsiOffscreenCanvasBridge::JsRestore(const shared_ptr<JsRuntime>& runtime,
     const shared_ptr<JsValue>& value, const std::vector<shared_ptr<JsValue>>& argv, int32_t argc)
 {
-    LOGD("JsiOffscreenCanvasBridge::JsRestore");
     if (argc != 0) {
         LOGE("argc error, argc = %{private}d", argc);
         return runtime->NewUndefined();
@@ -800,7 +779,6 @@ shared_ptr<JsValue> JsiOffscreenCanvasBridge::JsSave(const shared_ptr<JsRuntime>
 shared_ptr<JsValue> JsiOffscreenCanvasBridge::JsRotate(const shared_ptr<JsRuntime>& runtime,
     const shared_ptr<JsValue>& value, const std::vector<shared_ptr<JsValue>>& argv, int32_t argc)
 {
-    LOGD("JsiOffscreenCanvasBridge::JsRotate");
     double angle = GetJsDoubleVal(runtime, argv[0]);
     auto offscreenCanvas = GlobalGetOffscreenCanvas(runtime, value);
     if (offscreenCanvas) {
@@ -812,7 +790,6 @@ shared_ptr<JsValue> JsiOffscreenCanvasBridge::JsRotate(const shared_ptr<JsRuntim
 shared_ptr<JsValue> JsiOffscreenCanvasBridge::JsScale(const shared_ptr<JsRuntime>& runtime,
     const shared_ptr<JsValue>& value, const std::vector<shared_ptr<JsValue>>& argv, int32_t argc)
 {
-    LOGD("JsiOffscreenCanvasBridge::JsScale");
     if (argc != 2) {
         LOGE("argc error, argc = %{private}d", argc);
         return runtime->NewUndefined();
@@ -829,7 +806,6 @@ shared_ptr<JsValue> JsiOffscreenCanvasBridge::JsScale(const shared_ptr<JsRuntime
 shared_ptr<JsValue> JsiOffscreenCanvasBridge::JsSetTransform(const shared_ptr<JsRuntime>& runtime,
     const shared_ptr<JsValue>& value, const std::vector<shared_ptr<JsValue>>& argv, int32_t argc)
 {
-    LOGD("JsiOffscreenCanvasBridge::JsSetTransform");
     if (argc != 6) {
         LOGE("argc error, argc = %{private}d", argc);
         return runtime->NewUndefined();
@@ -851,7 +827,6 @@ shared_ptr<JsValue> JsiOffscreenCanvasBridge::JsSetTransform(const shared_ptr<Js
 shared_ptr<JsValue> JsiOffscreenCanvasBridge::JsTransform(const shared_ptr<JsRuntime>& runtime,
     const shared_ptr<JsValue>& value, const std::vector<shared_ptr<JsValue>>& argv, int32_t argc)
 {
-    LOGD("JsiOffscreenCanvasBridge::JsTransform");
     if (argc != 6) {
         LOGE("argc error, argc = %{private}d", argc);
         return runtime->NewUndefined();
@@ -873,7 +848,6 @@ shared_ptr<JsValue> JsiOffscreenCanvasBridge::JsTransform(const shared_ptr<JsRun
 shared_ptr<JsValue> JsiOffscreenCanvasBridge::JsTranslate(const shared_ptr<JsRuntime>& runtime,
     const shared_ptr<JsValue>& value, const std::vector<shared_ptr<JsValue>>& argv, int32_t argc)
 {
-    LOGD("JsiOffscreenCanvasBridge::JsTranslate");
     if (argc != 2) {
         LOGE("argc error, argc = %{private}d", argc);
         return runtime->NewUndefined();
@@ -890,7 +864,6 @@ shared_ptr<JsValue> JsiOffscreenCanvasBridge::JsTranslate(const shared_ptr<JsRun
 shared_ptr<JsValue> JsiOffscreenCanvasBridge::JsSetLineDash(const shared_ptr<JsRuntime>& runtime,
     const shared_ptr<JsValue>& value, const std::vector<shared_ptr<JsValue>>& argv, int32_t argc)
 {
-    LOGD("JsiOffscreenCanvasBridge::JsSetLineDash");
     if (argc != 1) {
         LOGE("argc error, argc = %{private}d", argc);
         return runtime->NewUndefined();
@@ -1392,7 +1365,6 @@ shared_ptr<JsValue> JsiOffscreenCanvasBridge::JsToDataURL(const shared_ptr<JsRun
 shared_ptr<JsValue> JsiOffscreenCanvasBridge::JsCreatePattern(const shared_ptr<JsRuntime>& runtime,
     const shared_ptr<JsValue>& value, const std::vector<shared_ptr<JsValue>>& argv, int32_t argc)
 {
-    LOGD("JsiOffscreenCanvasBridge::JsCreatePattern");
     if (argc != 2) {
         LOGE("argc error, argc = %{private}d", argc);
         return runtime->NewUndefined();

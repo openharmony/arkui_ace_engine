@@ -36,7 +36,6 @@ public:
 
     void SetContextAndCallback(const WeakPtr<PipelineBase>& context, RenderNodeAnimationCallback&& callback)
     {
-        LOGD("AnimatableFloat SetContextAndCallback()");
         context_ = context;
         animationCallback_ = std::move(callback);
     }
@@ -73,7 +72,6 @@ public:
 
     AnimatableFloat& operator=(const AnimatableFloat& newValue)
     {
-        LOGD("AnimatableFloat operator=() current value: %f, new value: %f", value_, newValue.GetValue());
         SetAnimationOption(newValue.GetAnimationOption());
         auto pipelineContext = context_.Upgrade();
         if (NearEqual(value_, std::numeric_limits<float>::max()) || NearEqual(value_, newValue.GetValue())
@@ -107,7 +105,6 @@ public:
 private:
     void AnimateTo(float endValue)
     {
-        LOGD("AnimateTo: %{public}f", endValue);
         animateToEndValue_ = endValue;
         ResetController();
         if (!animationController_) {
@@ -136,7 +133,6 @@ private:
 
     void OnAnimationCallback(float value)
     {
-        LOGD("OnAnimationCallback() value: %f", value);
         SetValue(value);
         if (animationCallback_) {
             animationCallback_();

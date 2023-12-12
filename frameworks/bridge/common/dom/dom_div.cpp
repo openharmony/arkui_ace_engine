@@ -163,8 +163,6 @@ void DOMDiv::CreateOrUpdateFlex()
     if (alignItems != FlexAlignItemsMap.end()) {
         flexCrossAlign = alignItems->second;
     }
-    LOGD("DOMDiv GetFlexAlign end ,Direction:%{public}d, flexMainAlign:%{public}d, flexCrossAlign:%{public}d",
-        flexDirection_, flexMainAlign, flexCrossAlign);
     if (!flexChild_) {
         flexChild_ = AceType::MakeRefPtr<FlexComponent>(
             flexDirection_, flexMainAlign, flexCrossAlign, std::list<RefPtr<Component>>());
@@ -249,9 +247,6 @@ void DOMDiv::CreateOrUpdateWrap()
     }
     wrapChild_->SetTextDirection(textDirection_);
 
-    LOGD("DOMDiv GetWrapAlign end ,Direction:%{public}d, flexMainAlign:%{public}d, flexCrossAlign:%{public}d, "
-         "AlignContent :%{public}d",
-        wrapDirection, wrapMainAlign, wrapCrossAlign, wrapAlignContent);
     // final set box default alignment.
     boxComponent_->SetAlignment(IsRightToLeft() ? Alignment::TOP_RIGHT : Alignment::TOP_LEFT);
 }

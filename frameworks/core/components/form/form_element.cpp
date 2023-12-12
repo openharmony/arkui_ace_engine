@@ -133,8 +133,6 @@ void FormElement::UpdateInner(const RequestFormInfo& info)
 
 void FormElement::HandleOnAcquireEvent(int64_t id)
 {
-    LOGD("HandleOnAcquireEvent acquire event id:%{public}d", static_cast<int32_t>(id));
-
     if (!onAcquireEvent_) {
         LOGE("could not find available event handle");
         return;

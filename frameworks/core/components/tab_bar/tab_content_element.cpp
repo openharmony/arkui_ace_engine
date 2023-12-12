@@ -88,7 +88,6 @@ void TabContentElement::ChangeByContent(int32_t index)
 
 void TabContentElement::ChangeByBar(int32_t index, bool isFromController)
 {
-    LOGD("change content by tab bar index:%{public}d", index);
     newBarIndex_ = index;
     fromController_ = isFromController;
     MarkDirty();
@@ -96,7 +95,6 @@ void TabContentElement::ChangeByBar(int32_t index, bool isFromController)
 
 void TabContentElement::ChangeDispatch(int32_t index)
 {
-    LOGD("change content by tab bar index:%{public}d", index);
     auto content = AceType::DynamicCast<RenderTabContent>(GetRenderNode());
     if (content) {
         content->FireDomChangeEvent(index);
@@ -105,7 +103,6 @@ void TabContentElement::ChangeDispatch(int32_t index)
 
 void TabContentElement::PrepareContent(int32_t index)
 {
-    LOGD("request prepareContent new index:%{public}d", index);
     newIndex_ = index;
     MarkDirty();
 }
@@ -144,7 +141,6 @@ void TabContentElement::Update()
 void TabContentElement::PerformBuild()
 {
     if (contents_.empty()) {
-        LOGD("contents is empty");
         ComponentGroupElement::PerformBuild();
         return;
     }
@@ -157,7 +153,6 @@ void TabContentElement::PerformBuild()
     auto it = contents_.begin();
     // if have new content requested by drag, build the new child, else build current child
     int32_t target = newIndex_ >= 0 ? newIndex_ : controller_->GetIndex();
-    LOGD("TabContentElement::PerformBuild: target: %{public}d", target);
     std::advance(it, target);
     if (it == contents_.end()) {
         LOGE("no content at index %{public}d.", target);

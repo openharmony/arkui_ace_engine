@@ -21,8 +21,6 @@ namespace OHOS::Ace {
 
 RefPtr<GestureRecognizer> LongPressGesture::CreateRecognizer(WeakPtr<PipelineBase> context)
 {
-    LOGD("create long press gesture, fingers %{public}d, duration %{public}d, isRepeat %{public}d", fingers_, duration_,
-        repeat_);
     auto longPressRecognizer = AceType::MakeRefPtr<OHOS::Ace::LongPressRecognizer>(
         context, duration_, fingers_, repeat_, isForDrag_, isDisableMouseLeft_);
     longPressRecognizer->SetPriority(priority_);

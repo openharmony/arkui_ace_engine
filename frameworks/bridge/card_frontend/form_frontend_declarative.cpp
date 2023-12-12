@@ -67,7 +67,6 @@ void FormFrontendDeclarative::RunPage(const std::string& url, const std::string&
 
 void FormFrontendDeclarative::UpdateData(const std::string& dataList)
 {
-    TAG_LOGD(AceLogTag::ACE_FORM, "FormFrontendDeclarative updateData dataList = %{public}s", dataList.c_str());
     CHECK_NULL_VOID(taskExecutor_);
     taskExecutor_->PostTask(
         [weak = AceType::WeakClaim(this), dataList] {

@@ -388,22 +388,18 @@ double ListLayoutManager::FlushChainAnimation()
     if (renderList_.GetDragStartIndexPending() != renderList_.GetDragStartIndex()) {
         deltaDistance =
             chainAdapter_->ResetControl(renderList_.GetDragStartIndexPending() - renderList_.GetDragStartIndex());
-        LOGD("Switch chain control node. %{public}d -> %{public}d, deltaDistance: %{public}.1f",
-            renderList_.GetDragStartIndex(), renderList_.GetDragStartIndexPending(), deltaDistance);
         renderList_.SetDragStartIndex(renderList_.GetDragStartIndexPending());
         chainAdapter_->SetDeltaValue(-deltaDistance);
         chainOffset_ += -deltaDistance;
         needSetValue = true;
     }
     if (!NearZero(renderList_.GetCurrentDelta())) {
-        LOGD("Set delta chain value. delta: %{public}.1f", renderList_.GetCurrentDelta());
         chainAdapter_->SetDeltaValue(renderList_.GetCurrentDelta());
         chainOffset_ += renderList_.GetCurrentDelta();
         renderList_.ResetCurrentDelta();
         needSetValue = true;
     }
     if (needSetValue) {
-        LOGD("FlushChainAnimation: %{public}s", chainAdapter_->DumpNodes().c_str());
         chain_->SetValue(0.0);
     }
     return deltaDistance;
@@ -411,7 +407,6 @@ double ListLayoutManager::FlushChainAnimation()
 
 void ListLayoutManager::PerformLayout()
 {
-    LOGD("PerformLayout head:%{public}lf tail:%{public}lf", head_, tail_);
     if (renderList_.GetAddDeleteEffect()) {
         AnimationForItemUpdate();
     } else {
@@ -483,7 +478,6 @@ void ListLayoutManager::MoveItemToViewPort(double position)
     double focusEffectWidth = size * (TV_ITEM_SCALE - DEFAULT_SCALE) * HALF_ITEM_SIZE;
     double animationOffset = scroll->NormalizeToPx(FOCUS_BOUNDARY);
     scroll->MoveItemToViewPort(position, size, animationOffset + focusEffectWidth);
-    LOGD("[ListFocus][list] Direction:%{public}d, Item position:%{public}.1lf.", direction_, position);
 }
 
 void ListLayoutManager::MoveItemGroupToViewPort(double position, double size)
@@ -498,7 +492,6 @@ void ListLayoutManager::MoveItemGroupToViewPort(double position, double size)
     double focusEffectWidth = size * (TV_ITEM_SCALE - DEFAULT_SCALE) * HALF_ITEM_SIZE;
     double animationOffset = scroll->NormalizeToPx(FOCUS_BOUNDARY);
     scroll->MoveItemToViewPort(position, size, animationOffset + focusEffectWidth);
-    LOGD("[ListFocus][list] Direction:%{public}d, Item position:%{public}.1lf.", direction_, position);
 }
 
 void ListLayoutManager::ShowItemFocusAnimation()
@@ -698,8 +691,6 @@ void ListLayoutManager::SetChildPosition(const RefPtr<RenderNode>& child, int32_
         }
         child->SetPosition(Offset(mainAxis, crossAxis) + position_);
     }
-    LOGD("Child[%{public}d]:%{public}lf %{public}lf %{public}s %{public}s", index, mainAxis, mainSize,
-        position_.ToString().c_str(), child->GetPosition().ToString().c_str());
 }
 
 void ListLayoutManager::UpdateItemGroupAttr(RefPtr<RenderNode>& itemChild)
@@ -738,7 +729,6 @@ double ListLayoutManager::GetChainDelta(int32_t index) const
     if (node) {
         value = node->GetValue();
     }
-    LOGD("ChainDelta. controlIndex: %{public}d, index: %{public}d, value: %{public}.3lf", controlIndex, index, value);
     return value;
 }
 

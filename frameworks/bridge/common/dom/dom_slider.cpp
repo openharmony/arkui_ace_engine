@@ -55,7 +55,6 @@ void DOMSlider::InitializeStyle()
 void DOMSlider::CallSpecializedMethod(const std::string& method, const std::string& args)
 {
     if (method == DOM_ROTATION) {
-        LOGD("Rotation focus slider");
         auto controller = (SystemProperties::GetDeviceType() == DeviceType::WATCH)
                               ? watchSliderChild_->GetRotationController()
                               : sliderChild_->GetRotationController();
@@ -140,7 +139,6 @@ bool DOMSlider::SetSpecializedStyle(const std::pair<std::string, std::string>& s
 
 bool DOMSlider::AddSpecializedEvent(int32_t pageId, const std::string& event)
 {
-    LOGD("DOMSlider AddEvent");
     if (event == DOM_CHANGE) {
         onMoveEndEventId_ = EventMarker(GetNodeIdForEvent(), event, pageId);
         sliderChild_->SetOnMovingEventId(onMoveEndEventId_);

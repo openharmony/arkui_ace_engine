@@ -233,7 +233,6 @@ void RenderSvg::UpdateTransform()
         parent = parent->GetParent().Upgrade();
     }
     if (!transform) {
-        LOGD("transform is null, just return");
         return;
     }
     if (!isRoot_ && (GreatNotEqual(x_.Value(), 0.0) || GreatNotEqual(y_.Value(), 0.0))) {

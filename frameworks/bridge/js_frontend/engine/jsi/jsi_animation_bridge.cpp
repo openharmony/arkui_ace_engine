@@ -48,7 +48,6 @@ RefPtr<FrontendDelegate> GetFrontendDelegate(std::weak_ptr<JsRuntime> weakRuntim
 
 RefPtr<JsAcePage> GetPageById(const shared_ptr<JsRuntime>& runtime, int32_t pageId)
 {
-    LOGD("Enter GetPageById");
     if (!runtime) {
         LOGE("Get page by id failed, runtime is null");
         return nullptr;
@@ -150,7 +149,6 @@ void CallAnimationFinishJs(const WeakPtr<JsiAnimationBridge>& bridgeWeak, shared
     }
     shared_ptr<JsValue> jsFunc = animationObject->GetProperty(runtime, "onfinish");
     if (!jsFunc || !jsFunc->IsFunction(runtime)) {
-        LOGD("cannot find 'CallAnimationFinishJs' function from animation object, maybe no callback at all.");
         return;
     }
     jsFunc->Call(runtime, runtime->GetGlobal(), {}, 0);
@@ -177,11 +175,9 @@ void CallAnimationCancelJs(const WeakPtr<JsiAnimationBridge>& bridgeWeak, shared
     }
     shared_ptr<JsValue> jsFunc = animationObject->GetProperty(runtime, "oncancel");
     if (!jsFunc || !jsFunc->IsFunction(runtime)) {
-        LOGD("cannot find 'CallAnimationCancelJs' function from animation object, maybe no callback at all.");
         return;
     }
 
-    LOGD("animation oncancel event call");
     jsFunc->Call(runtime, runtime->GetGlobal(), {}, 0);
 }
 
@@ -462,7 +458,6 @@ void JsiAnimationBridge::JsCreateAnimation(const RefPtr<JsAcePage>& page, const 
             BaseAnimationBridgeUtils::COMPONENT_PREFIX + std::to_string(nodeId_), domNode->GetTag());
         domNode->SetTweenComponent(tweenComponent);
     }
-    LOGD("parse animate parameters for nodeId: %{public}d", nodeId_);
     tweenComponent->SetAnimator(animator);
     BaseAnimationBridgeUtils::SetTweenComponentParams(nullptr, animationFrames, tweenComponent, tweenOption);
     AddListenerForEventCallback(AceType::WeakClaim(this), animator, runtime_, page);

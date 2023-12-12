@@ -29,7 +29,6 @@ RefPtr<GestureRecognizer> Ace::SwipeGesture::CreateRecognizer(WeakPtr<PipelineBa
     }
     double speed = newContext->NormalizeToPx(Dimension(speed_, DimensionUnit::VP));
     RefPtr<OHOS::Ace::SlideRecognizer> slideRecognizer;
-    LOGD("AceType::MakeRefPtr<SlideRecognizer>(context, fingers_, direction_, speed)");
     slideRecognizer = AceType::MakeRefPtr<SlideRecognizer>(context, fingers_, direction_, speed);
     if (onActionId_) {
         slideRecognizer->SetOnAction(*onActionId_);

@@ -137,7 +137,6 @@ RefPtr<CanvasImage> DrawingImage::QueryFromCache(const std::string& key)
     CHECK_NULL_RETURN(cache, nullptr);
     auto cacheImage = cache->GetCacheImage(key);
     CHECK_NULL_RETURN(cacheImage, nullptr);
-    LOGD("rsImage found in cache: %{public}s", key.c_str());
 
     auto rosenImage = MakeRefPtr<DrawingImage>(cacheImage->imagePtr);
     rosenImage->SetUniqueID(cacheImage->uniqueId);

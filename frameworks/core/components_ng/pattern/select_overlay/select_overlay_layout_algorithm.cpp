@@ -172,7 +172,6 @@ OffsetF SelectOverlayLayoutAlgorithm::ComputeSelectMenuPosition(LayoutWrapper* l
             viewPort = viewPortOption.value();
         }
     }
-    LOGD("select_overlay viewPort Rect: %{public}s", viewPort.ToString().c_str());
 
     // Adjust position of overlay.
     if (LessOrEqual(menuPosition.GetX(), viewPort.GetX())) {
@@ -224,7 +223,6 @@ OffsetF SelectOverlayLayoutAlgorithm::ComputeSelectMenuPosition(LayoutWrapper* l
     }
     auto menuRect = RectF(menuPosition, SizeF(menuWidth, menuHeight));
     menuPosition = AdjustSelectMenuOffset(layoutWrapper, menuRect, menuSpacingBetweenText, menuSpacingBetweenHandle);
-    LOGD("select_overlay menuPosition: %{public}s", menuPosition.ToString().c_str());
     defaultMenuEndOffset_ = menuPosition + OffsetF(menuWidth, 0.0f);
     if (isExtension) {
         return defaultMenuEndOffset_ - OffsetF(width, 0);

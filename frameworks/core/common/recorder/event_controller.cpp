@@ -30,7 +30,6 @@ EventController& EventController::Get()
 
 void EventController::Register(const std::string& config, const std::shared_ptr<UIEventObserver>& observer)
 {
-    TAG_LOGD(AceLogTag::ACE_UIEVENT, "Register config %{public}s", config->c_str());
     UIEventClient client;
     client.config.Init(config);
     if (!client.config.IsEnable()) {

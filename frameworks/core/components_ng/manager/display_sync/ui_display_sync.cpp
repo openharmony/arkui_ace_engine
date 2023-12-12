@@ -61,17 +61,14 @@ void UIDisplaySync::OnFrame()
                      GetId(), data_->timestamp_, data_->targetTimestamp_,
                      data_->rateRange_->preferred_, sourceVsyncRate_, data_->rate_, data_->noSkip_);
     if (data_->noSkip_ && data_->onFrame_) {
-        TAG_LOGD(AceLogTag::ACE_DISPLAY_SYNC, "OnFrame");
         data_->onFrame_();
     }
 
     if (data_->noSkip_ && data_->onFrameWithData_) {
-        TAG_LOGD(AceLogTag::ACE_DISPLAY_SYNC, "OnFrameWithData");
         data_->onFrameWithData_(data_);
     }
 
     if (data_->noSkip_ && data_->onFrameWithTimestamp_) {
-        TAG_LOGD(AceLogTag::ACE_DISPLAY_SYNC, "OnFrameWithTimestamp");
         data_->onFrameWithTimestamp_(data_->timestamp_);
     }
 
@@ -220,7 +217,6 @@ RefPtr<DisplaySyncData> UIDisplaySync::GetDisplaySyncData() const
 bool UIDisplaySync::IsCommonDivisor(int32_t expectedRate, int32_t vsyncRate)
 {
     if (expectedRate == 0) {
-        TAG_LOGD(AceLogTag::ACE_DISPLAY_SYNC, "Divisor expectedRate is Zero.");
         return false;
     }
 

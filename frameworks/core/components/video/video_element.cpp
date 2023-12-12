@@ -259,7 +259,6 @@ void VideoElement::RegisterMediaPlayerEvent()
         uiTaskExecutor.PostSyncTask([&videoElement, status] {
             auto video = videoElement.Upgrade();
             if (video) {
-                LOGD("OnPlayerStatus");
                 video->OnPlayerStatus(status);
             }
         });
@@ -269,7 +268,6 @@ void VideoElement::RegisterMediaPlayerEvent()
         uiTaskExecutor.PostTask([&videoElement] {
             auto video = videoElement.Upgrade();
             if (video) {
-                LOGD("OnError");
                 video->OnError("", "");
             }
         });

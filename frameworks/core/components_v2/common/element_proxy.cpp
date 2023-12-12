@@ -88,8 +88,6 @@ public:
 
     void UpdateForPartialUpdate(const RefPtr<Component>& component, size_t startIndex)
     {
-        LOGD("RenderElementProxy::Update with Component elmtId %{public}d ....", component->GetElementId());
-
         auto composedComponent = AceType::DynamicCast<ComposedComponent>(component);
         auto inspectorComposedComponent = AceType::DynamicCast<InspectorComposedComponent>(component);
         SetComposedId(composedComponent ? composedComponent->GetId() : "");
@@ -112,8 +110,6 @@ public:
         startIndex_ = startIndex;
         count_ = component_ ? 1 : 0;
 
-        LOGD("RenderElementProxy my id: %{public}d ", GetElementId());
-
         if (GetElementId() == ElementRegister::UndefinedElementId) {
             // first render case, add the ElementRegistry
             ACE_DCHECK(element_ == nullptr);
@@ -121,12 +117,9 @@ public:
             SetElementId(component_->GetElementId());
             AddSelfToElementRegistry();
             realElmtId_ = ElementRegister::GetInstance()->MakeUniqueId();
-            LOGD("   ... initial render case, setting elmtId %{public}d, realelmtId will be %{public}d",
-                component_->GetElementId(), realElmtId_);
         }
 
         if (element_) {
-            LOGD("   ... _element exists, update it with new component");
             element_ = CreateElement();
         }
     }
@@ -134,8 +127,6 @@ public:
     void LocalizedUpdate(
         const RefPtr<Component>& inwardWrappingComponent, const RefPtr<Component>& newListItemComponent) override
     {
-        LOGD("RenderElementProxy (own elmtId %{public}d)::LocalizedUpdate with %{public}s, wrapComponent is %{public}s",
-            GetElementId(), AceType::TypeName(newListItemComponent), AceType::TypeName(inwardWrappingComponent));
         ACE_DCHECK(
             (component_ != nullptr) && (GetElementId() != ElementRegister::UndefinedElementId) && "Is re-render");
 
@@ -149,10 +140,7 @@ public:
             auto updateElement = element_;
             auto updateComponent = newListItemComponent;
 
-            LOGD("   ... localizedUpdate on main Component and 'wrapping' children ...");
             for (;;) {
-                LOGD("   ... localizedUpdate %{public}s <- %{public}s", AceType::TypeName(updateElement),
-                    AceType::TypeName(updateComponent));
                 updateElement->SetNewComponent(updateComponent);
                 updateElement->LocalizedUpdate(); // virtual
                 updateElement->SetNewComponent(nullptr);
@@ -169,9 +157,6 @@ public:
 
     RefPtr<Element> CreateElement()
     {
-        LOGD("real %{public}d current  %{public}d   comp  %{public}d, %{public}s %{public}s  %{public}s",
-            realElmtId_, GetElementId(), component_->GetElementId(), AceType::TypeName(component_),
-            AceType::TypeName(element_), AceType::TypeName(this));
         auto host = host_.Upgrade();
         if (!host) {
             return nullptr;
@@ -183,7 +168,6 @@ public:
         } else {
             component_->SetElementId(realElmtId_);
         }
-        LOGD("   ...creating/updating Element with elmtId %{public}d", realElmtId_);
         auto element = host->OnUpdateElement(element_, component_);
         if (tabContentItemComponent) {
             tabContentItemComponent->SetElementId(GetElementId());
@@ -256,10 +240,7 @@ public:
         ReleaseElement(true);
     }
 
-    void ReleaseElementById(const ComposeId& id) override
-    {
-        LOGD("RenderElementProxy can not release Id. id: %{public}s", id.c_str());
-    }
+    void ReleaseElementById(const ComposeId& id) override {}
 
     void Dump(const std::string& prefix) const override
     {
@@ -308,8 +289,6 @@ public:
     {
         auto tabContentItemComponent = TabsHelper::TraverseComponentTo<TabContentItemComponent>(component_);
         if (tabContentItemComponent) {
-            LOGD("Removing tab bar item TabContentItemElementProxy DTOR");
-
             TabsHelper::RemoveTabBarItemById(tabContentItemComponent->GetBarElementId());
 
             if (!host_.Upgrade()) {
@@ -327,20 +306,14 @@ public:
 
     void Update(const RefPtr<Component>& component, size_t startIndex) override
     {
-        LOGD("TabContentItemElementProxy::Update START with Component elmtId %{public}d",
-            component->GetElementId());
-
         if (GetElementId() == ElementRegister::UndefinedElementId) {
             // first render case, add the ElementRegistry
             ACE_DCHECK(element_ == nullptr);
 
             auto tabContentItemComponent = TabsHelper::TraverseComponentTo<TabContentItemComponent>(component);
             if (tabContentItemComponent) {
-                LOGD("TabContentItemComponent %{public}d  %{public}s",
-                    tabContentItemComponent->GetElementId(), AceType::TypeName(tabContentItemComponent));
                 SetElementId(tabContentItemComponent->GetElementId());
             }
-            LOGD("TabContentItemElementProxy NEW my id, adding: %{public}d ", GetElementId());
             AddSelfToElementRegistry();
             realElmtId_ = ElementRegister::GetInstance()->MakeUniqueId();
         }
@@ -349,25 +322,18 @@ public:
         auto tabContentProxyElement = AceType::DynamicCast<TabContentProxyElement>(host_.Upgrade());
         if (tabContentProxyElement && !element_) {
             auto tabContentItemComponent = TabsHelper::TraverseComponentTo<TabContentItemComponent>(component);
-            LOGD("TabContentItemElementProxy -- found tabContentProxyElement and %{public}s will create TBI",
-                AceType::TypeName(tabContentItemComponent));
             TabsHelper::AddTabBarElement(tabContentProxyElement, tabContentItemComponent);
             TabsHelper::IncTabContentRenderCount(tabContentProxyElement);
         }
 
         RenderElementProxy::Update(component, startIndex);
-        LOGD("TabContentItemElementProxy::Update END with Component elmtId %{public}d", component->GetElementId());
     }
 
     void LocalizedUpdate(
         const RefPtr<Component>& inwardWrappingComponent, const RefPtr<Component>& newTabContentItemComponent) override
     {
-        LOGD("RenderItemElementProxy (own elmtId %{public}d)::LocalizedUpdate with %{public}s, "
-            "wrapComponent is %{public}s",
-            GetElementId(), AceType::TypeName(newTabContentItemComponent), AceType::TypeName(inwardWrappingComponent));
         ACE_DCHECK(
             (component_ != nullptr) && (GetElementId() != ElementRegister::UndefinedElementId) && "Is re-render");
-
 
         // Update TabBar element
         auto tabContentProxyElement = AceType::DynamicCast<TabContentProxyElement>(host_.Upgrade());
@@ -376,8 +342,6 @@ public:
                 inwardWrappingComponent);
             auto oldComponent = TabsHelper::TraverseComponentTo<TabContentItemComponent>(component_);
             tabContentItemComponent->SetBarElementId(oldComponent->GetBarElementId());
-            LOGD("TabContentItemElementProxy -- found TabContentItemComponent and %{public}s will update TBI",
-                AceType::TypeName(tabContentItemComponent));
             TabsHelper::UpdateTabBarElement(tabContentProxyElement, element_, inwardWrappingComponent);
         }
 
@@ -387,7 +351,6 @@ public:
     void UpdateIndex(size_t startIndex) override
     {
         startIndex_ = startIndex;
-        LOGD("TabContentItemElementProxy startIndex_ %{public}d", static_cast<int32_t>(startIndex));
         TabsHelper::SetTabBarElementIndex(element_,
             TabsHelper::TraverseComponentTo<TabContentItemComponent>(component_), startIndex);
         RenderElementProxy::UpdateIndex(startIndex);
@@ -403,7 +366,6 @@ public:
 
     RefPtr<Element> GetElementByIndex(size_t index) override
     {
-        LOGD("ListItemElementProxy (own elmtId %{public}d)::GetElementByIndex ....", GetElementId());
         if (element_) {
             return element_;
         }
@@ -439,8 +401,6 @@ public:
 
     void Update(const RefPtr<Component>& component, size_t startIndex) override
     {
-        LOGD("ListItemElementProxy (own elmtId %{public}d)::Update ....", component->GetElementId());
-
         auto composedComponent = AceType::DynamicCast<ComposedComponent>(component);
         auto inspectorComposedComponent = AceType::DynamicCast<InspectorComposedComponent>(component);
         SetComposedId(composedComponent ? composedComponent->GetId() : "");
@@ -466,28 +426,21 @@ public:
             SetElementId(component_->GetElementId());
             AddSelfToElementRegistry();
             realElmtId_ = ElementRegister::GetInstance()->MakeUniqueId();
-            LOGD("   ... initial render case, setting elmtId %{public}d, realelmtId will be %{public}d",
-                component_->GetElementId(), realElmtId_);
 
             auto listItemComponent = AceType::DynamicCast<V2::ListItemComponent>(component_);
             if (listItemComponent->GetIsLazyCreating()) {
-                LOGD("   ... the component is from shallow render");
                 deepRenderignState_ = DeepRenderingState::shallowTree;
                 // continue later when GetElementByIndex is called
                 return;
             } else {
-                LOGD("   ... the initial component is from deep render");
                 deepRenderignState_ = DeepRenderingState::deepTree;
                 element_ = CreateElement();
                 return;
             }
         }
 
-        LOGD("   ... not initial call to Update");
         if (element_) {
-            LOGD("   ... ListElement exists and needs updating with new ListComponent - start");
             element_ = CreateElement();
-            LOGD("   ... ListElement exists and needs updating with new ListComponent - done");
         }
     }
 
@@ -513,8 +466,6 @@ public:
 
     void ReleaseElementByIndex(size_t index) override
     {
-        LOGD("ListItemElementProxy (own elmtId %{public}d)::ReleaseElementByIndex, release deepRender component....",
-            GetElementId());
         deepRenderignState_ = DeepRenderingState::shallowTree;
 
         RenderElementProxy::ReleaseElementByIndex(index);
@@ -541,8 +492,6 @@ public:
 
     void Update(const RefPtr<Component>& component, size_t startIndex) override
     {
-        LOGD("GridItemElementProxy (own elmtId %{public}d)::Update ....", component->GetElementId());
-
         auto composedComponent = AceType::DynamicCast<ComposedComponent>(component);
         auto inspectorComposedComponent = AceType::DynamicCast<InspectorComposedComponent>(component);
         SetComposedId(composedComponent ? composedComponent->GetId() : "");
@@ -568,28 +517,20 @@ public:
             SetElementId(component_->GetElementId());
             AddSelfToElementRegistry();
             realElmtId_ = ElementRegister::GetInstance()->MakeUniqueId();
-            LOGD("   ... initial render case, setting elmtId %{public}d, realelmtId will be %{public}d",
-                component_->GetElementId(), realElmtId_);
-
             auto gridItemComponent = AceType::DynamicCast<GridLayoutItemComponent>(component_);
             if (gridItemComponent->GetIsLazyCreating()) {
-                LOGD("   ... the component is from shallow render");
                 deepRenderignState_ = DeepRenderingState::shallowTree;
                 // continue later when GetElementByIndex is called
                 return;
             } else {
-                LOGD("   ... the initial component is from deep render");
                 deepRenderignState_ = DeepRenderingState::deepTree;
                 element_ = CreateElement();
                 return;
             }
         }
 
-        LOGD("   ... not initial call to Update");
         if (element_) {
-            LOGD("   ... ListElement exists and needs updating with new ListComponent - start");
             element_ = CreateElement();
-            LOGD("   ... ListElement exists and needs updating with new ListComponent - done");
         }
     }
 
@@ -611,17 +552,11 @@ public:
             composedComponent = AceType::DynamicCast<ComposedComponent>(component_);
         }
 
-        LOGD("GridIemElementProxy::GetDeepRenderComponent, own elmtId %{public}d, "
-             "deep render result Component %{public}s elmtId %{public}d",
-            GetElementId(), AceType::TypeName(component_), component_->GetElementId());
-
         ACE_DCHECK(GetElementId() == component_->GetElementId());
     }
 
     void ReleaseElementByIndex(size_t index) override
     {
-        LOGD("GridItemElementProxy (own elmtId %{public}d)::ReleaseElementByIndex, release deepRender component....",
-            GetElementId());
         deepRenderignState_ = DeepRenderingState::shallowTree;
 
         RenderElementProxy::ReleaseElementByIndex(index);
@@ -679,7 +614,6 @@ public:
     void LocalizedUpdate(
         const RefPtr<Component>& newComponent, const RefPtr<Component>& outmostWrappingComponent) override
     {
-        LOGD("LazyForEachElementProxy::LocalizedUpdate uses Update ....");
         Update(newComponent, startIndex_);
     }
 
@@ -1251,10 +1185,6 @@ public:
         auto forEachComponent = AceType::DynamicCast<OHOS::Ace::PartUpd::ForEachComponent>(component);
         ACE_DCHECK(forEachComponent);
 
-        LOGD("ForEachElementProxy::Update: first render: Creating ForEachElementProxy "
-             "with %{public}s elmtId %{public}d, startIndex_ %{public}d",
-            AceType::TypeName(forEachComponent), forEachComponent->GetElementId(), (int)startIndex);
-
         SetElementId(forEachComponent->GetElementId());
         AddSelfToElementRegistry();
 
@@ -1347,10 +1277,6 @@ public:
             idS += newId + ", ";
         }
         idS += "]";
-
-        LOGD("ForEachElementProxy::Update done, result:");
-        LOGD("  ... new Ids %{public}s .", idS.c_str());
-        LOGD("  ... children_ size: %{public}d .", static_cast<int32_t>(children_.size()));
 #endif
     }
 
@@ -1377,8 +1303,6 @@ public:
 
     void Append(const RefPtr<ElementProxy>& existingProxyChild)
     {
-        LOGD("ForEachElementProxy::LocalizedUpdate: Append existing %{public}s , count_ %{public}zu",
-            AceType::TypeName(existingProxyChild), count_);
         children_.emplace_back(existingProxyChild);
         existingProxyChild->UpdateIndex(startIndex_ + count_);
         count_ += existingProxyChild->RenderCount();
@@ -1386,9 +1310,6 @@ public:
 
     void AppendNewComponent(const RefPtr<Component>& newComponent)
     {
-        LOGD("ForEachElementProxy::LocalizedUpdate: Append new %{public}s , "
-             "count_ %{public}zu",
-            AceType::TypeName(newComponent), count_);
         auto proxyChild = ElementProxy::Create(host_, newComponent);
         children_.emplace_back(proxyChild);
         proxyChild->Update(newComponent, startIndex_ + count_);
@@ -1399,9 +1320,6 @@ public:
     void LocalizedUpdate(
         const RefPtr<Component>& newComponent, const RefPtr<Component>& outmostWrappingComponent) override
     {
-        LOGD("ForEachElementProxy::LocalizedUpdate with %{public}s elmtId %{public}d", AceType::TypeName(newComponent),
-            newComponent->GetElementId());
-
         auto forEachComponent = AceType::DynamicCast<OHOS::Ace::PartUpd::ForEachComponent>(newComponent);
         ACE_DCHECK(forEachComponent);
 
@@ -1427,17 +1345,12 @@ public:
             idS += oldId + ", ";
         }
         idS += "]";
-        LOGD("  ... old Ids %{public}s .", idS.c_str());
 
         idS = "[";
         for (const auto& newId : newIds) {
             idS += newId + ", ";
         }
         idS += "]";
-        LOGD("  ... new Ids %{public}s .", idS.c_str());
-
-        LOGD("  ... previous render child element: %{public}d .", static_cast<int32_t>(children_.size()));
-        LOGD("  ... newly added child Components: %{public}d .", static_cast<int32_t>(newChildComponents.size()));
 #endif
 
         size_t newChildIndex = 0;
@@ -1465,10 +1378,7 @@ public:
         auto host = host_.Upgrade();
         if (host) {
             host->UpdateIndex();
-            LOGD("ForEachElementProxy::LocalizedUpdate: Updated startIndex_ %{public}zu, count_: %{public}zu",
-                startIndex_, count_);
             host->OnDataSourceUpdated(startIndex_);
-            LOGD("ForEachElementProxy::LocalizedUpdate: All done!");
         }
     }
 
@@ -1512,7 +1422,6 @@ public:
     void LocalizedUpdate(
         const RefPtr<Component>& newComponent, const RefPtr<Component>& outmostWrappingComponent) override
     {
-        LOGD("MultiComposedElementProxy::LocalizedUpdate uses Update ....");
         Update(newComponent, startIndex_);
     }
 };
@@ -1558,10 +1467,6 @@ public:
         auto ifElseComponent = AceType::DynamicCast<IfElseComponent>(component);
         ACE_DCHECK(ifElseComponent);
 
-        LOGD("IfElseElementProxy::Update: First render: Creating IfElseElementProxy "
-             "with %{public}s elmtId %{public}d, startIndex_  %{public}d",
-            AceType::TypeName(ifElseComponent), ifElseComponent->GetElementId(), (int)startIndex);
-
         SetElementId(ifElseComponent->GetElementId());
         AddSelfToElementRegistry();
 
@@ -1579,17 +1484,11 @@ public:
         ACE_DCHECK(ifElseComponent && "Must supply IfElseComponent");
         ACE_DCHECK(branchId_ >= 0 && "branchId_ must initial during frst render");
 
-        LOGD("IfElseElementProxy::LocalizedUpdate with %{public}s elmtId %{public}d, branchId %{public}d->%{public}d",
-            AceType::TypeName(ifElseComponent), ifElseComponent->GetElementId(), branchId_,
-            ifElseComponent->GetBranchId());
-
         if (ifElseComponent->GetBranchId() == branchId_) {
-            LOGD("IfElseElementProxy::LocalizedUpdat: branchId unchanged, nothing to do.");
             return;
         }
 
         // Clear old children while branch id mismatched
-        LOGD("Clearing children...");
         children_.clear();
 
         UpdateInternal(ifElseComponent, 0);
@@ -1598,7 +1497,6 @@ public:
         auto host = host_.Upgrade();
         if (host) {
             host->UpdateIndex();
-            LOGD("Updated startIndex_ %{public}d", (int)startIndex_);
             host->OnDataSourceUpdated(startIndex_);
         }
     }
@@ -1627,15 +1525,12 @@ RefPtr<ElementProxy> ElementProxy::Create(const WeakPtr<ElementProxyHost>& host,
         }
     } else {
         if (AceType::InstanceOf<OHOS::Ace::PartUpd::ForEachComponent>(component)) {
-            LOGD("creating ForEachElementProxy for %{public}s .", AceType::TypeName(component));
             return AceType::MakeRefPtr<ForEachElementProxy>(host);
         }
         if (AceType::InstanceOf<ListItemComponent>(component)) {
-            LOGD("creating ListItemElementProxy for %{public}s .", AceType::TypeName(component));
             return AceType::MakeRefPtr<ListItemElementProxy>(host);
         }
         if (AceType::InstanceOf<GridLayoutItemComponent>(component)) {
-            LOGD("creating GridItemElementProxy for %{public}s .", AceType::TypeName(component));
             return AceType::MakeRefPtr<GridItemElementProxy>(host);
         }
     }
@@ -1649,12 +1544,9 @@ RefPtr<ElementProxy> ElementProxy::Create(const WeakPtr<ElementProxyHost>& host,
     if (Container::IsCurrentUsePartialUpdate()) {
         auto tabContentItemComponent = TabsHelper::TraverseComponentTo<TabContentItemComponent>(component);
         if (tabContentItemComponent) {
-            LOGD("creating TabContentItemElementProxy for %{public}s.", AceType::TypeName(component));
             return AceType::MakeRefPtr<TabContentItemElementProxy>(host);
         }
     }
-    LOGD("Default case: creating RenderElementProxy for %{public}s.", AceType::TypeName(component));
-    LOGD("creating RenderElementProxy");
 
     return AceType::MakeRefPtr<RenderElementProxy>(host);
 }
@@ -1668,10 +1560,8 @@ void ElementProxyHost::UpdateChildren(const std::list<RefPtr<Component>>& compon
 {
     auto component = AceType::MakeRefPtr<MultiComposedComponent>("", "", components);
     if (!proxy_) {
-        LOGD("%{public}s/ElementProxyHost::UpdateChildren: not proxy, components", AceType::TypeName(this));
         proxy_ = ElementProxy::Create(AceType::WeakClaim(this), component);
     }
-    LOGD("%{public}s/ElementProxyHost::UpdateChildren: update component", AceType::TypeName(this));
     proxy_->Update(component, 0);
 }
 
@@ -1752,13 +1642,11 @@ void ElementProxyHost::ReleaseRedundantComposeIds()
 
 void ElementProxy::AddSelfToElementRegistry()
 {
-    LOGD(" ElementProxy::AddSelfToElementRegistry() elmtId %{public}d", GetElementId());
     ElementRegister::GetInstance()->AddElementProxy(AceType::WeakClaim(this));
 }
 
 void ElementProxy::RemoveSelfFromElementRegistry()
 {
-    LOGD(" ElementProxy::RemoveSelfFromElementRegistry() elmtId %{public}d", GetElementId());
     ElementRegister::GetInstance()->RemoveItem(GetElementId());
 }
 

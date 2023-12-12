@@ -23,13 +23,11 @@ namespace OHOS::Ace {
 
 RefPtr<Element> SceneViewerComponent::CreateElement()
 {
-    LOGD("ACE-3D SceneViewerComponent::CreateElement()");
     return AceType::MakeRefPtr<SceneViewerElement>();
 }
 
 RefPtr<RenderNode> SceneViewerComponent::CreateRenderNode()
 {
-    LOGD("ACE-3D SceneViewerComponent::CreateRenderNode()");
     return RenderSceneViewer::Create(GetRetakeId());
 }
 

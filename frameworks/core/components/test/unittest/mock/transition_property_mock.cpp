@@ -25,7 +25,6 @@ MockTransitionPropertyComponent::HookTransitionElement g_hookTransitionElement;
 
 RefPtr<Element> MockTransitionPropertyComponent::CreateElement()
 {
-    LOGD("MockTransitionComponent CreateElement");
     auto transitionElement = AceType::MakeRefPtr<TransitionElement>(GetId());
     if (g_hookTransitionElement) {
         g_hookTransitionElement(transitionElement);
@@ -35,7 +34,6 @@ RefPtr<Element> MockTransitionPropertyComponent::CreateElement()
 
 void MockTransitionPropertyComponent::SetMockHook(const HookTransitionElement& hook)
 {
-    LOGD("set hook.");
     g_hookTransitionElement = hook;
 }
 

@@ -535,7 +535,6 @@ void NavigationPattern::OnNavBarStateChange(bool modeChange)
 void NavigationPattern::OnNavigationModeChange(bool modeChange)
 {
     if (!modeChange) {
-        TAG_LOGD(AceLogTag::ACE_NAVIGATION, "navigation mode doesn't change");
         return;
     }
     auto hostNode = AceType::DynamicCast<NavigationGroupNode>(GetHost());

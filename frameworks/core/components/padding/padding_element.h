@@ -28,7 +28,6 @@ class PaddingElement : public RenderElement {
 public:
     void PerformBuild() override
     {
-        LOGD("PaddingElement::PerformBuild");
         RefPtr<PaddingComponent> padding = AceType::DynamicCast<PaddingComponent>(component_);
         if (padding) {
             const auto& child = children_.empty() ? nullptr : children_.front();

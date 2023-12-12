@@ -293,11 +293,9 @@ void RenderCalendar::FocusChanged(int32_t oldIndex, int32_t newIndex)
 
     auto& onFocusDay = calendarDays_[newIndex];
     if (onFocusDay.month < currentMonth_) {
-        LOGD("focus move to last month");
         calendarController_->GoToPrevMonth(onFocusDay.day);
         return;
     } else if (calendarDays_[newIndex].month > currentMonth_) {
-        LOGD("focus move to next month");
         calendarController_->GoToNextMonth(onFocusDay.day);
         return;
     }

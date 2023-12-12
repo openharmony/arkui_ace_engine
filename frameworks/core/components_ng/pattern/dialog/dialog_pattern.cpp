@@ -148,7 +148,6 @@ void DialogPattern::HandleClick(const GestureEvent& info)
 
 void DialogPattern::PopDialog(int32_t buttonIdx = -1)
 {
-    TAG_LOGD(AceLogTag::ACE_DIALOG, "DialogPattern::PopDialog from click");
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto overlayManager = pipeline->GetOverlayManager();

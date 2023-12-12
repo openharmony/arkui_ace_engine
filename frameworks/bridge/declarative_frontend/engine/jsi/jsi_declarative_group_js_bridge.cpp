@@ -117,9 +117,6 @@ shared_ptr<JsValue> JsiDeclarativeGroupJsBridge::ProcessJsRequest(const shared_p
         return res;
     }
 
-    LOGD("send message, groupName:%{private}s functionName:%{private}s callbackId:%{private}d", strGroupName.c_str(),
-        strFunctionName.c_str(), callbackId);
-
     std::vector<CodecData> arguments;
     ParseJsDataResult parseJsResult =
         groupJsBridge->ParseJsPara(runtime, argv, PLUGIN_REQUEST_ARG_APP_PARAMS_INDEX, callbackId, arguments);
@@ -176,9 +173,6 @@ shared_ptr<JsValue> JsiDeclarativeGroupJsBridge::ProcessJsRequestSync(const shar
     if (strGroupName.empty()) {
         return res;
     }
-
-    LOGD("send message, groupName:%{private}s functionName:%{private}s", strGroupName.c_str(), strFunctionName.c_str());
-
     std::vector<CodecData> arguments;
     ParseJsDataResult parseJsResult =
         groupJsBridge->ParseJsPara(runtime, argv, PLUGIN_REQUEST_ARG_APP_PARAMS_INDEX_SYNC, 0, arguments);

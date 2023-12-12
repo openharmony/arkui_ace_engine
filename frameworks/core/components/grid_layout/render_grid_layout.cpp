@@ -126,9 +126,6 @@ void RenderGridLayout::Update(const RefPtr<Component>& component)
         (mainCountMax_ >= mainCountMin_) && (mainCountMin_ >= 1) && (cellLength_ > 0) && (editMode_ == true)) {
         isDynamicGrid_ = true;
     }
-    LOGD("editMode: %{public}d, isDynamicGrid: %{public}d, cellLength: %{public}d, mainCountMin: %{public}d, "
-         "mainCountMax: %{public}d .",
-        editMode_, isDynamicGrid_, cellLength_, mainCountMin_, mainCountMax_);
 
     CalIsVertical();
 
@@ -155,7 +152,6 @@ void RenderGridLayout::UpdateFocusInfo(int32_t focusIndex)
         return;
     }
     if (focusIndex != focusIndex_) {
-        LOGD("Update focus index from %{public}d to %{public}d", focusIndex_, focusIndex);
         focusIndex_ = focusIndex;
         for (const auto& gridMap : gridMatrix_) {
             for (const auto& grid : gridMap.second) {
@@ -206,7 +202,6 @@ int32_t RenderGridLayout::focusMove(KeyDirection direction)
         }
         next = GetIndexByGrid(nextRow, nextCol);
     }
-    LOGD("PreFocus:%{public}d CurrentFocus:%{public}d", focusIndex_, next);
     focusRow_ = nextRow;
     focusCol_ = nextCol;
     focusIndex_ = next;
@@ -215,7 +210,6 @@ int32_t RenderGridLayout::focusMove(KeyDirection direction)
 
 int32_t RenderGridLayout::GetIndexByGrid(int32_t row, int32_t column) const
 {
-    LOGD("%{public}s begin. row: %{public}d, column: %{public}d", __PRETTY_FUNCTION__, row, column);
     auto rowIter = gridMatrix_.find(row);
     if (rowIter != gridMatrix_.end()) {
         auto colIter = rowIter->second.find(column);
@@ -229,7 +223,6 @@ int32_t RenderGridLayout::GetIndexByGrid(int32_t row, int32_t column) const
 LayoutParam RenderGridLayout::MakeInnerLayoutParam(
     int32_t row, int32_t col, int32_t rowSpan, int32_t colSpan, bool itemIsPercentUnit) const
 {
-    LOGD("%{public}d %{public}d %{public}d %{public}d", row, col, rowSpan, colSpan);
     LayoutParam innerLayout;
     double rowLen = 0.0;
     double colLen = 0.0;
@@ -253,8 +246,6 @@ LayoutParam RenderGridLayout::MakeInnerLayoutParam(
 void RenderGridLayout::SetChildPosition(
     const RefPtr<RenderNode>& child, int32_t row, int32_t col, int32_t rowSpan, int32_t colSpan)
 {
-    LOGD("%{public}s begin. row: %{public}d, col: %{public}d, rowSpan: %{public}d, colSpan: %{public}d",
-        __PRETTY_FUNCTION__, row, col, rowSpan, colSpan);
     if (focusRow_ < 0 && focusCol_ < 0) {
         // Make the first item obtain focus.
         focusRow_ = row;
@@ -303,8 +294,6 @@ void RenderGridLayout::SetChildPosition(
 Point RenderGridLayout::CalcChildPosition(
     const RefPtr<RenderNode>& child, int32_t row, int32_t col, int32_t rowSpan, int32_t colSpan)
 {
-    LOGD("%{public}s begin. row: %{public}d, col: %{public}d, rowSpan: %{public}d, colSpan: %{public}d",
-        __PRETTY_FUNCTION__, row, col, rowSpan, colSpan);
     if (focusRow_ < 0 && focusCol_ < 0) {
         // Make the first item obtain focus.
         focusRow_ = row;
@@ -356,7 +345,6 @@ Point RenderGridLayout::CalcDragChildStartPosition(const ItemDragInfo& info)
 
 Point RenderGridLayout::CalcDragChildEndPosition(int32_t rowIndex, int32_t colIndex)
 {
-    LOGD("CalcDragChildEndPosition>>>>>>rowIndex=%{public}d, colIndex=%{public}d", rowIndex, colIndex);
     double positionX = 0.0;
     double positionY = 0.0;
     for (int32_t i = 0; i < rowIndex; ++i) {
@@ -379,7 +367,6 @@ Point RenderGridLayout::CalcDragChildEndPosition(int32_t rowIndex, int32_t colIn
 
 void RenderGridLayout::DisableChild(const RefPtr<RenderNode>& child, int32_t index)
 {
-    LOGD("No grid space for this item[%{public}d]", index);
     LayoutParam zeroLayout;
     zeroLayout.SetMinSize(Size(0.0, 0.0));
     zeroLayout.SetMaxSize(Size(0.0, 0.0));
@@ -552,7 +539,6 @@ void RenderGridLayout::InitialGridProp()
         ++row;
     }
     UpdateAccessibilityAttr();
-    LOGD("GridLayout: %{public}lf %{public}lf %{public}d %{public}d", colSize_, rowSize_, colCount_, rowCount_);
 }
 
 void RenderGridLayout::UpdateAccessibilityAttr()
@@ -677,8 +663,6 @@ std::vector<double> RenderGridLayout::ParseAutoFill(const std::vector<std::strin
             peSum += num;
             pxSum += num / FULL_PERCENT * size;
             lens.emplace_back(num / FULL_PERCENT * size);
-        } else {
-            LOGD("Unsupported type: %{public}s, and use 0.0", str.c_str());
         }
     }
     allocatedSize -= pxSum;
@@ -782,7 +766,6 @@ int32_t RenderGridLayout::GetItemSpan(const RefPtr<RenderNode>& child, bool isRo
 
 void RenderGridLayout::GetNextGrid(int32_t& curRow, int32_t& curCol) const
 {
-    LOGD("%{public}s begin. curRow: %{public}d, curCol: %{public}d", __PRETTY_FUNCTION__, curRow, curCol);
     if (isVertical_) {
         ++curCol;
         if (curCol >= colCount_) {
@@ -800,7 +783,6 @@ void RenderGridLayout::GetNextGrid(int32_t& curRow, int32_t& curCol) const
 
 void RenderGridLayout::GetPreviousGird(int32_t& curRow, int32_t& curCol) const
 {
-    LOGD("%{public}s begin. curRow: %{public}d, curCol: %{public}d", __PRETTY_FUNCTION__, curRow, curCol);
     if (isVertical_) {
         --curCol;
         if (curCol < 0) {
@@ -863,7 +845,6 @@ bool RenderGridLayout::CheckGridPlaced(int32_t index, int32_t row, int32_t col, 
         }
         gridMatrix_[i] = rowMap;
     }
-    LOGD("%{public}d %{public}d %{public}d %{public}d %{public}d", index, row, col, rowSpan, colSpan);
     return true;
 }
 
@@ -997,7 +978,6 @@ void RenderGridLayout::OnTouchTestHit(
 
 void RenderGridLayout::ClearPartDragInfo()
 {
-    LOGD("%{public}s begin.", __PRETTY_FUNCTION__);
     curInsertRowIndex_ = -1;
     curInsertColumnIndex_ = -1;
     dragPosRowIndex_ = -1;
@@ -1240,9 +1220,6 @@ void RenderGridLayout::PanOnActionEnd(const GestureEvent& info)
 
 void RenderGridLayout::OnDragEnter(const ItemDragInfo& info)
 {
-    LOGD("%{public}s begin. itemDragStarted_ %{public}d, itemDragEntered_ %{public}d, itemLongPressed_ %{public}d, "
-         "isInMainGrid_ %{public}d, isMainGrid_ %{public}d",
-         __PRETTY_FUNCTION__, itemDragStarted_, itemDragEntered_, itemLongPressed_, isInMainGrid_, isMainGrid_);
     if (!editMode_) {
         LOGW("%{public}s no editMode no dragevent.", __PRETTY_FUNCTION__);
         return;
@@ -1262,9 +1239,6 @@ void RenderGridLayout::OnDragEnter(const ItemDragInfo& info)
 
 void RenderGridLayout::OnDragLeave(const ItemDragInfo& info)
 {
-    LOGD("%{public}s begin. itemDragStarted_ %{public}d, itemDragEntered_ %{public}d, itemLongPressed_ %{public}d, "
-         "isInMainGrid_ %{public}d, isMainGrid_ %{public}d",
-         __PRETTY_FUNCTION__, itemDragStarted_, itemDragEntered_, itemLongPressed_, isInMainGrid_, isMainGrid_);
     if (!editMode_) {
         LOGW("%{public}s no editMode no dragevent.", __PRETTY_FUNCTION__);
         return;
@@ -1283,9 +1257,6 @@ void RenderGridLayout::OnDragLeave(const ItemDragInfo& info)
 
 void RenderGridLayout::OnDragMove(const ItemDragInfo& info)
 {
-    LOGD("%{public}s begin. itemDragStarted_ %{public}d, itemDragEntered_ %{public}d, itemLongPressed_ %{public}d, "
-         "isInMainGrid_ %{public}d, isMainGrid_ %{public}d",
-         __PRETTY_FUNCTION__, itemDragStarted_, itemDragEntered_, itemLongPressed_, isInMainGrid_, isMainGrid_);
     if (!editMode_) {
         LOGW("%{public}s no editMode no dragevent.", __PRETTY_FUNCTION__);
         return;
@@ -1358,9 +1329,7 @@ bool RenderGridLayout::ImpDropInGrid(const ItemDragInfo& info)
 
 void RenderGridLayout::ImpDragMove(const ItemDragInfo& info)
 {
-    LOGD("%{public}s begin.", __PRETTY_FUNCTION__);
     if (CouldBeInserted() || itemDragStarted_) {
-        LOGD("%{public}s couldn be inserted.", __PRETTY_FUNCTION__);
         if (CalDragCell(info)) {
             MoveItems();
             if (needRunAnimation_.load()) {
@@ -1375,10 +1344,7 @@ void RenderGridLayout::ImpDragMove(const ItemDragInfo& info)
             MarkNeedLayout();
         }
     } else {
-        LOGD("%{public}s couldn't be inserted.", __PRETTY_FUNCTION__);
         if (component_->GetOnGridDragMoveId()) {
-            LOGD("%{public}s. could not be insert. InsertIndex: %{public}d ,ItemIndex: %{public}d", __PRETTY_FUNCTION__,
-                -1, draggingItemIndex_);
             component_->GetOnGridDragMoveId()(info, draggingItemIndex_, -1);
         } else {
             LOGE("%{public}s no onGridDragMove registered.", __PRETTY_FUNCTION__);
@@ -1388,10 +1354,8 @@ void RenderGridLayout::ImpDragMove(const ItemDragInfo& info)
 
 void RenderGridLayout::ImpDragLeaveMainGrid(const ItemDragInfo& info)
 {
-    LOGD("%{public}s begin.", __PRETTY_FUNCTION__);
     isInMainGrid_ = false;
     if (component_->GetOnGridDragLeaveId()) {
-        LOGD("%{public}s. from dragstart ItemIndex: %{public}d", __PRETTY_FUNCTION__, draggingItemIndex_);
         component_->GetOnGridDragLeaveId()(info, draggingItemIndex_);
     } else {
         LOGE("%{public}s no onGridDragLeave registered.", __PRETTY_FUNCTION__);
@@ -1414,10 +1378,8 @@ void RenderGridLayout::ImpDragLeaveMainGrid(const ItemDragInfo& info)
 
 void RenderGridLayout::ImpDragLeaveSubGrid(const ItemDragInfo& info)
 {
-    LOGD("%{public}s begin.", __PRETTY_FUNCTION__);
     ClearAllDragInfo();
     if (component_->GetOnGridDragLeaveId()) {
-        LOGD("%{public}s. from dragenter ItemIndex: %{public}d", __PRETTY_FUNCTION__, -1);
         component_->GetOnGridDragLeaveId()(info, -1);
     } else {
         LOGE("%{public}s no onGridDragLeave registered.", __PRETTY_FUNCTION__);
@@ -1436,8 +1398,6 @@ void RenderGridLayout::ImpDragLeaveSubGrid(const ItemDragInfo& info)
 
 void RenderGridLayout::ImpDragEnterMainGrid(const ItemDragInfo& info)
 {
-    LOGD("%{public}s begin.", __PRETTY_FUNCTION__);
-    LOGD("%{public}s drag reEnter_ the maingrid.", __PRETTY_FUNCTION__);
     isInMainGrid_ = true;
     reEnter_ = true;
     if ((supportAnimation_ || dragAnimation_) && needRunAnimation_.load()) {
@@ -1468,10 +1428,8 @@ void RenderGridLayout::ImpDragEnterMainGridUpdate()
 
 void RenderGridLayout::ImpDragEnterSubGrid(const ItemDragInfo& info)
 {
-    LOGD("%{public}s begin.", __PRETTY_FUNCTION__);
     itemDragEntered_ = true;
     if (CouldBeInserted()) {
-        LOGD("%{public}s could be inserted.", __PRETTY_FUNCTION__);
         BackGridMatrix();
         if (isDynamicGrid_ && NeedBeLarger()) {
             // BeLager and render
@@ -1483,16 +1441,11 @@ void RenderGridLayout::ImpDragEnterSubGrid(const ItemDragInfo& info)
             }
             MarkNeedLayout();
         }
-    } else {
-        LOGD("%{public}s couldn't be inserted.", __PRETTY_FUNCTION__);
     }
 }
 
 bool RenderGridLayout::OnDrop(const ItemDragInfo& info)
 {
-    LOGD("%{public}s begin. itemDragStarted_ %{public}d, itemDragEntered_ %{public}d, itemLongPressed_ %{public}d, "
-         "isInMainGrid_ %{public}d, isMainGrid_ %{public}d",
-         __PRETTY_FUNCTION__, itemDragStarted_, itemDragEntered_, itemLongPressed_, isInMainGrid_, isMainGrid_);
     if (!editMode_) {
         LOGW("%{public}s no editMode no dragevent.", __PRETTY_FUNCTION__);
         return false;
@@ -1583,7 +1536,6 @@ int32_t RenderGridLayout::CountItemInGrid()
 
 int32_t RenderGridLayout::CountItemInRow(const std::map<int32_t, std::map<int32_t, int32_t>>::iterator& rowGrid)
 {
-    LOGD("%{public}s begin.", __PRETTY_FUNCTION__);
     int32_t count = 0;
     for (int cross = 0; cross < colCount_; cross++) {
         auto crossIter = rowGrid->second.find(cross);
@@ -1594,13 +1546,11 @@ int32_t RenderGridLayout::CountItemInRow(const std::map<int32_t, std::map<int32_
             }
         }
     }
-    LOGD("RenderGridLayout CountItemInRow the count is %{public}d ", count);
     return count;
 }
 
 void RenderGridLayout::ResetItemPosition()
 {
-    LOGD("%{public}s begin.", __PRETTY_FUNCTION__);
     for (const auto& gridMap : gridMatrix_) {
         int32_t row = gridMap.first;
         for (const auto& grid : gridMap.second) {
@@ -1632,7 +1582,6 @@ void RenderGridLayout::InitialDynamicGridProp(int32_t dragLeaveOrEnter)
     curItemCountMax_ = colCount_ * rowCount_;
 
     UpdateCollectionInfo(cols, rows);
-    LOGD("GridLayout: %{public}lf %{public}lf %{public}d %{public}d", colSize_, rowSize_, colCount_, rowCount_);
 }
 
 void RenderGridLayout::SetGridLayoutParam()
@@ -1744,14 +1693,12 @@ void RenderGridLayout::PerformLayoutForEditGrid()
             RefreshAllocatedRowSizes(rowIndex, itemRowSpan, item);
             SetItemIndex(item, itemIndex); // Set index for focus adjust.
             ++itemIndex;
-            LOGD("%{public}d %{public}d %{public}d %{public}d", rowIndex, colIndex, itemRowSpan, itemColSpan);
         }
     }
 }
 
 void RenderGridLayout::PerformLayoutForStaticGrid()
 {
-    LOGD("%{public}s begin.", __PRETTY_FUNCTION__);
     int32_t rowIndex = 0;
     int32_t colIndex = 0;
     int32_t itemIndex = 0;
@@ -1781,7 +1728,6 @@ void RenderGridLayout::PerformLayoutForStaticGrid()
         RefreshAllocatedRowSizes(rowIndex, itemRowSpan, item);
         SetItemIndex(item, itemIndex); // Set index for focus adjust.
         ++itemIndex;
-        LOGD("%{public}d %{public}d %{public}d %{public}d", rowIndex, colIndex, itemRowSpan, itemColSpan);
     }
 }
 
@@ -2368,9 +2314,7 @@ void RenderGridLayout::AddNodeAnimationToControllerForDrop(
 
 void RenderGridLayout::PrepareAnimationController(const std::string& key)
 {
-    LOGD("%{public}s called.", __FUNCTION__);
     if (animationAct_ != GridLayoutAnimationAct::ANIMATION_NONE) {
-        LOGD("%{public}s indicator animation is processing.", __FUNCTION__);
         return;
     }
 
@@ -2387,7 +2331,6 @@ void RenderGridLayout::PrepareAnimationController(const std::string& key)
 
 void RenderGridLayout::StartAnimationController(GridLayoutAnimationAct animationAct, const OnAnimationCallJSFunc& func)
 {
-    LOGD("%{public}s called.", __FUNCTION__);
     if (needRunAnimation_) {
         animationAct_ = animationAct;
         needRunAnimation_.store(false);
@@ -2417,7 +2360,6 @@ void RenderGridLayout::StartAnimationController(GridLayoutAnimationAct animation
 
 void RenderGridLayout::StopAnimationController()
 {
-    LOGD("%{public}s called.", __FUNCTION__);
     if (animationController_ && !animationController_->IsStopped()) {
         animationController_->ClearStopListeners();
         animationController_->Stop();
@@ -2427,7 +2369,6 @@ void RenderGridLayout::StopAnimationController()
 
 void RenderGridLayout::FinishedAnimationController(const std::string& key)
 {
-    LOGD("%{public}s called.", __FUNCTION__);
     {
         std::lock_guard<std::mutex> funLock(animationLock_);
         auto iter = animationFinishedFuncList_.find(key);
@@ -2471,8 +2412,6 @@ void RenderGridLayout::TriggerMoveEventForJS(const ItemDragInfo& info)
 {
     int32_t insertIndex = CalIndexForItemByRowAndColum(curInsertRowIndex_, curInsertColumnIndex_);
     if (component_->GetOnGridDragMoveId()) {
-        LOGD("%{public}s. could be insert. InsertIndex: %{public}d ,ItemIndex: %{public}d", __PRETTY_FUNCTION__,
-            insertIndex, draggingItemIndex_);
         component_->GetOnGridDragMoveId()(info, draggingItemIndex_, insertIndex);
     } else {
         LOGE("%{public}s no onGridDragMove registered.", __PRETTY_FUNCTION__);
@@ -2482,8 +2421,6 @@ void RenderGridLayout::TriggerMoveEventForJS(const ItemDragInfo& info)
 void RenderGridLayout::TriggerDropEventForJS(const ItemDragInfo& info, int32_t insertIndex, bool success)
 {
     if (component_->GetOnGridDropId()) {
-        LOGD("%{public}s. could be insert. ItemIndex: %{public}d, InsertIndex: %{public}d ", __PRETTY_FUNCTION__,
-            draggingItemIndex_, insertIndex);
         component_->GetOnGridDropId()(info, draggingItemIndex_, insertIndex, success);
     } else {
         LOGE("%{public}s no onGridDrop registered.", __PRETTY_FUNCTION__);
@@ -2661,7 +2598,6 @@ void RenderGridLayout::CloseFlexComponent()
 {
     auto pipelineContext = GetContext().Upgrade();
     if (pipelineContext && isExistComponent_) {
-        LOGD("RenderGridLayout::PanOnActionEnd PopComponent");
         auto stackElement = pipelineContext->GetLastStack();
         stackElement->PopComponent();
         isExistComponent_ = false;
@@ -2672,7 +2608,6 @@ void RenderGridLayout::CloseFlexComponent()
 void RenderGridLayout::UpdateFlexComponentPosition(const Point& pos)
 {
     if (GetUpdatePositionId() && isExistComponent_) {
-        LOGD("RenderGridLayout::PanOnActionUpdate move x=%{public}f, y=%{public}f.", pos.GetX(), pos.GetY());
         auto eventInfo = ItemDragInfo();
         eventInfo.SetX(pos.GetX());
         eventInfo.SetY(pos.GetY());
@@ -2908,8 +2843,6 @@ void RenderGridLayout::FinishedSpringAnimation()
 
 void RenderGridLayout::UpdateSprintAnimationPosition(double position)
 {
-    LOGD("UpdateSprintAnimationPosition: distance(%{public}f,%{public}f), offset=%{public}f",
-        slideDistance_.GetX(), slideDistance_.GetY(), position);
     size_t index = 0;
     for (auto& item : itemsInGrid_) {
         auto& itemPos = springStartPosition_[index];

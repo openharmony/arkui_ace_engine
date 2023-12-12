@@ -319,7 +319,6 @@ static void ConvertAxisEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEv
 bool EventDispatcher::DispatchTouchEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
 {
     ACE_SCOPED_TRACE("DispatchTouchEvent");
-    LOGD("Dispatch touch event");
     auto container = AceContainer::GetContainerInstance(ACE_INSTANCE_ID);
     CHECK_NULL_RETURN(container, false);
     auto aceView = container->GetAceView();
@@ -345,7 +344,6 @@ bool EventDispatcher::DispatchTouchEvent(const std::shared_ptr<MMI::PointerEvent
 bool EventDispatcher::DispatchBackPressedEvent()
 {
     ACE_SCOPED_TRACE("DispatchBackPressedEvent");
-    LOGD("Dispatch back pressed event");
     auto container = AceContainer::GetContainerInstance(ACE_INSTANCE_ID);
     CHECK_NULL_RETURN(container, false);
     auto context = container->GetPipelineContext();
@@ -361,9 +359,7 @@ bool EventDispatcher::DispatchBackPressedEvent()
                 return;
             }
             bool canBack = false;
-            if (context->IsLastPage()) {
-                LOGD("Can't back because this is the last page!");
-            } else {
+            if (!context->IsLastPage()) {
                 canBack = context->CallRouterBackToPopPage();
             }
             backPromise.set_value(canBack);
@@ -375,16 +371,13 @@ bool EventDispatcher::DispatchBackPressedEvent()
 bool EventDispatcher::DispatchInputMethodEvent(unsigned int codePoint)
 {
     ACE_SCOPED_TRACE("DispatchInputMethodEvent");
-    LOGD("Dispatch input method event");
     return TextInputClientMgr::GetInstance().AddCharacter(static_cast<wchar_t>(codePoint));
 }
 
 bool EventDispatcher::DispatchKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent)
 {
     ACE_SCOPED_TRACE("DispatchKeyEvent");
-    LOGD("Dispatch key event");
     if (HandleTextKeyEvent(keyEvent)) {
-        LOGD("The event is related to the input component and has been handled successfully.");
         return true;
     }
     auto container = AceContainer::GetContainerInstance(ACE_INSTANCE_ID);
