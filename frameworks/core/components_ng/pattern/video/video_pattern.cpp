@@ -808,6 +808,12 @@ void VideoPattern::OnModifyDone()
         pipelineContext->AddOnAreaChangeNode(host->GetId());
     }
     EnableDrag();
+    auto eventHub = GetEventHub<VideoEventHub>();
+    if (!AceType::InstanceOf<VideoFullScreenPattern>(this)) {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        eventHub->SetInspectorId(host->GetInspectorIdValue(""));
+    }
 }
 
 void VideoPattern::UpdatePreviewImage()

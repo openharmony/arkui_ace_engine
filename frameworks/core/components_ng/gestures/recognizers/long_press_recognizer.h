@@ -118,7 +118,7 @@ private:
     void DeadlineTimer(int32_t time, bool isCatchMode);
     void DoRepeat();
     void StartRepeatTimer();
-    void SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& callback, bool isRepeat);
+    void SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& callback, bool isRepeat, bool isOnAction = false);
     GestureJudgeResult TriggerGestureJudgeCallback();
     void OnResetStatus() override;
     double ConvertPxToVp(double offset) const;

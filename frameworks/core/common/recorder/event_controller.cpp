@@ -20,6 +20,7 @@
 #include "base/log/log_wrapper.h"
 #include "base/thread/background_task_executor.h"
 #include "core/common/recorder/node_data_cache.h"
+#include "core/common/recorder/event_recorder.h"
 
 namespace OHOS::Ace::Recorder {
 EventController& EventController::Get()
@@ -44,10 +45,16 @@ void EventController::Register(const std::string& config, const std::shared_ptr<
 void EventController::NotifyConfigChange()
 {
     auto mergedConfig = std::make_shared<MergedConfig>();
+    EventSwitch eventSwitch;
     for (auto&& client : clientList_) {
         if (!client.config.IsEnable()) {
             continue;
         }
+        eventSwitch.pageEnable = eventSwitch.pageEnable || client.config.IsCategoryEnable(EventCategory::CATEGORY_PAGE);
+        eventSwitch.exposureEnable =
+            eventSwitch.exposureEnable || client.config.IsCategoryEnable(EventCategory::CATEGORY_EXPOSURE);
+        eventSwitch.componentEnable =
+            eventSwitch.componentEnable || client.config.IsCategoryEnable(EventCategory::CATEGORY_COMPONENT);
         for (auto iter = client.config.GetConfig()->begin(); iter != client.config.GetConfig()->end(); iter++) {
             auto nodeIt = mergedConfig->shareNodes.find(iter->first);
             if (nodeIt != mergedConfig->shareNodes.end()) {
@@ -74,6 +81,7 @@ void EventController::NotifyConfigChange()
         }
     }
     NodeDataCache::Get().UpdateConfig(std::move(mergedConfig));
+    EventRecorder::Get().UpdateEventSwitch(eventSwitch);
 }
 
 void EventController::Unregister(const std::shared_ptr<UIEventObserver>& observer)

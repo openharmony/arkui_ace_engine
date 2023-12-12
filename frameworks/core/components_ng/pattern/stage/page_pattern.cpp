@@ -215,7 +215,7 @@ void PagePattern::OnHide()
     if (Recorder::EventRecorder::Get().IsPageRecordEnable()) {
         auto entryPageInfo = DynamicCast<EntryPageInfo>(pageInfo_);
         int64_t duration = 0;
-        if (entryPageInfo) {
+        if (entryPageInfo && entryPageInfo->GetShowTime() > 0) {
             duration = GetCurrentTimestamp() - entryPageInfo->GetShowTime();
         }
         Recorder::EventRecorder::Get().OnPageHide(pageInfo_->GetPageUrl(), duration);
