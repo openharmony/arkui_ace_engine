@@ -1190,6 +1190,43 @@ struct ArkUIAlphabetIndexerModifierAPI {
     void (*ResetPopupPosition)(NodeHandle node);
 };
 
+struct ArkUISwiperModifierAPI {
+    void (*SetSwiperNextMargin)(NodeHandle node, double nextMarginValue, int32_t nextMarginUnit);
+    void (*ResetSwiperNextMargin)(NodeHandle node);
+    void (*SetSwiperPrevMargin)(NodeHandle node, double prevMarginValue, int32_t prevMarginUnit);
+    void (*ResetSwiperPrevMargin)(NodeHandle node);
+    void (*SetSwiperDisplayCount)(NodeHandle node, const char* displayCountChar, int32_t displayCountUnit);
+    void (*ResetSwiperDisplayCount)(NodeHandle node);
+    void (*SetSwiperDisplayArrow)(NodeHandle node, const char* displayArrowStr);
+    void (*ResetSwiperDisplayArrow)(NodeHandle node);
+    void (*SetSwiperCurve)(NodeHandle node, const char* curveChar);
+    void (*ResetSwiperCurve)(NodeHandle node);
+    void (*SetSwiperDisableSwipe)(NodeHandle node, bool disableSwipe);
+    void (*ResetSwiperDisableSwipe)(NodeHandle node);
+    void (*SetSwiperEffectMode)(NodeHandle node, int32_t edgeEffect);
+    void (*ResetSwiperEffectMode)(NodeHandle node);
+    void (*SetSwiperCachedCount)(NodeHandle node, int32_t cachedCount);
+    void (*ResetSwiperCachedCount)(NodeHandle node);
+    void (*SetSwiperDisplayMode)(NodeHandle node, int32_t displayMode);
+    void (*ResetSwiperDisplayMode)(NodeHandle node);
+    void (*SetSwiperItemSpace)(NodeHandle node, double itemSpaceValue, int32_t itemSpaceUnit);
+    void (*ResetSwiperItemSpace)(NodeHandle node);
+    void (*SetSwiperVertical)(NodeHandle node, bool isVertical);
+    void (*ResetSwiperVertical)(NodeHandle node);
+    void (*SetSwiperLoop)(NodeHandle node, bool loop);
+    void (*ResetSwiperLoop)(NodeHandle node);
+    void (*SetSwiperInterval)(NodeHandle node, int32_t interval);
+    void (*ResetSwiperInterval)(NodeHandle node);
+    void (*SetSwiperAutoPlay)(NodeHandle node, bool autoPlay);
+    void (*ResetSwiperAutoPlay)(NodeHandle node);
+    void (*SetSwiperIndex)(NodeHandle node, int32_t index);
+    void (*ResetSwiperIndex)(NodeHandle node);
+    void (*SetSwiperIndicator)(NodeHandle node, const char* indicatorStr);
+    void (*ResetSwiperIndicator)(NodeHandle node);
+    void (*SetSwiperDuration)(NodeHandle node, int32_t duration);
+    void (*ResetSwiperDuration)(NodeHandle node);
+};
+
 struct ArkUIDataPanelModifierAPI {
     void (*SetCloseEffect)(NodeHandle node, bool value);
     void (*ResetCloseEffect)(NodeHandle node);
@@ -1441,6 +1478,7 @@ struct ArkUINodeAPI {
     ArkUICommonShapeModifierAPI(*GetCommonShapeModifier)();
     ArkUIShapeModifierAPI(*GetShapeModifier)();
     ArkUIRectModifierAPI (*GetRectModifier)();
+    ArkUISwiperModifierAPI (*GetSwiperModifier)();
     ArkUIListItemModifierAPI (*GetListItemModifier)();
     ArkUIListModifierAPI (*GetListModifier)();
     ArkUIListItemGroupModifierAPI(*GetListItemGroupModifier)();

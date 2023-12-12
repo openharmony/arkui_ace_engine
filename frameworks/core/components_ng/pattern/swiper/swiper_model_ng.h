@@ -27,7 +27,6 @@
 #include "core/components_ng/pattern/swiper/swiper_model.h"
 
 namespace OHOS::Ace::NG {
-
 class ACE_EXPORT SwiperModelNG : public OHOS::Ace::SwiperModel {
 public:
     RefPtr<SwiperController> Create() override;
@@ -72,6 +71,33 @@ public:
     void SetDisplayArrow(bool displayArrow) override;
     void SetHoverShow(bool hoverShow) override;
     void SetNestedScroll(const NestedScrollOptions& nestedOpt) override;
+    static void SetNextMargin(FrameNode* frameNode, const Dimension& nextMargin);
+    static void SetPreviousMargin(FrameNode* frameNode, const Dimension& prevMargin);
+    static void SetIndex(FrameNode* frameNode, uint32_t index);
+    static void SetAutoPlayInterval(FrameNode* frameNode, uint32_t interval);
+    static void SetDuration(FrameNode* frameNode, uint32_t duration);
+    static void SetCachedCount(FrameNode* frameNode, int32_t cachedCount);
+    static void SetAutoPlay(FrameNode* frameNode, bool autoPlay);
+    static void SetLoop(FrameNode* frameNode, bool loop);
+    static void SetDirection(FrameNode* frameNode, Axis axis);
+    static void SetDisableSwipe(FrameNode* frameNode, bool disableSwipe);
+    static void SetItemSpace(FrameNode* frameNode, const Dimension& itemSpace);
+    static void SetDisplayMode(FrameNode* frameNode, SwiperDisplayMode displayMode);
+    static void ResetDisplayMode(FrameNode* frameNode);
+    static void SetEdgeEffect(FrameNode* frameNode, EdgeEffect EdgeEffect);
+    static void SetMinSize(FrameNode* frameNode, const Dimension& minSize);
+    static void SetDisplayCount(FrameNode* frameNode, int32_t displayCount);
+    static void ResetDisplayCount(FrameNode* frameNode);
+    static void SetCurve(FrameNode* frameNode, const RefPtr<Curve>& curve);
+    static void SetArrowStyle(FrameNode* frameNode, const SwiperArrowParameters& swiperArrowParameters);
+    static void SetDisplayArrow(FrameNode* frameNode, bool displayArrow);
+    static void SetHoverShow(FrameNode* frameNode, bool hoverShow);
+    static void SetShowIndicator(FrameNode* frameNode, bool showIndicator);
+    static void SetIndicatorIsBoolean(FrameNode* frameNode, bool isBoolean);
+    static void SetDigitIndicatorStyle(FrameNode* frameNode, const SwiperDigitalParameters& swiperDigitalParameters);
+    static void SetDotIndicatorStyle(FrameNode* frameNode, const SwiperParameters& swiperParameters);
+    static void SetIndicatorType(FrameNode* frameNode, SwiperIndicatorType indicatorType);
+    static void SetIsIndicatorCustomSize(FrameNode* frameNode, bool isCustomSize);
 };
 
 } // namespace OHOS::Ace::NG
