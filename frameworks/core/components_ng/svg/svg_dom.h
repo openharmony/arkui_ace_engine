@@ -47,6 +47,7 @@ public:
     bool ParseSvg(SkStream& svgStream);
 
     void SetFillColor(const std::optional<Color>& color) override;
+    void SetSmoothEdge(float value) override;
 
     void DrawImage(
         RSCanvas& canvas, const ImageFit& imageFit, const Size& layout) override;
@@ -73,6 +74,7 @@ private:
     Rect viewBox_;
     PushAttr attrCallback_;
     std::optional<Color> fillColor_;
+    float smoothEdge_ = 0.0f;
 };
 } // namespace OHOS::Ace::NG
 

@@ -66,6 +66,7 @@ public:
     virtual bool UpdateDragItemInfo(DragItemInfo &itemInfo) = 0;
     virtual void EnableAnalyzer(bool isEnableAnalyzer) = 0;
     virtual void SetImageAnalyzerConfig(const ImageAnalyzerConfig& config) = 0;
+    virtual void SetSmoothEdge(float value) = 0;
 
 private:
     static std::unique_ptr<ImageModel> instance_;
