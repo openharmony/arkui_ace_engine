@@ -434,6 +434,11 @@ std::optional<Color> JSIndexer::PaseColor(const JSCallbackInfo& args)
     return colorOpt;
 }
 
+void JSIndexer::SetAutoCollapse(bool state)
+{
+    IndexerModel::GetInstance()->SetAutoCollapse(state);
+}
+
 void JSIndexer::JSBind(BindingTarget globalObj)
 {
     MethodOptions opt = MethodOptions::NONE;
@@ -460,6 +465,7 @@ void JSIndexer::JSBind(BindingTarget globalObj)
     JSClass<JSIndexer>::StaticMethod("popupUnselectedColor", &JSIndexer::SetPopupUnselectedColor, opt);
     JSClass<JSIndexer>::StaticMethod("popupItemFont", &JSIndexer::SetPopupItemFont);
     JSClass<JSIndexer>::StaticMethod("popupItemBackgroundColor", &JSIndexer::SetPopupItemBackgroundColor, opt);
+    JSClass<JSIndexer>::StaticMethod("autoCollapse", &JSIndexer::SetAutoCollapse, opt);
     // keep compatible, need remove after
     JSClass<JSIndexer>::StaticMethod("onPopupSelected", &JSIndexer::JsOnPopupSelected, opt);
     JSClass<JSIndexer>::StaticMethod("onPopupSelect", &JSIndexer::JsOnPopupSelected, opt);

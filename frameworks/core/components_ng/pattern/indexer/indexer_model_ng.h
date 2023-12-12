@@ -51,6 +51,7 @@ public:
     void SetOnPopupSelected(std::function<void(const int32_t selected)>&& onPopupSelected) override;
     void SetChangeEvent(std::function<void(const int32_t selected)>&& changeEvent) override;
     void SetCreatChangeEvent(std::function<void(const int32_t selected)>&& changeEvent) override;
+    void SetAutoCollapse(bool state) override;
 
     static void SetFontSize(FrameNode* frameNode, const Dimension& fontSize);
     static void SetFontWeight(FrameNode* frameNode, const FontWeight weight);

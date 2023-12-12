@@ -53,6 +53,7 @@ public:
         value->propPopupPositionY_ = ClonePopupPositionY();
         value->propFontSize_ = CloneFontSize();
         value->propFontWeight_ = CloneFontWeight();
+        value->propAutoCollapse_ = CloneAutoCollapse();
         return value;
     }
 
@@ -74,6 +75,7 @@ public:
         ResetPopupPositionY();
         ResetFontSize();
         ResetFontWeight();
+        ResetAutoCollapse();
     }
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
@@ -93,6 +95,7 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(PopupPositionY, Dimension, PROPERTY_UPDATE_NORMAL);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(FontSize, Dimension, PROPERTY_UPDATE_NORMAL);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(FontWeight, FontWeight, PROPERTY_UPDATE_NORMAL);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(AutoCollapse, bool, PROPERTY_UPDATE_MEASURE);
 
 private:
     static std::unique_ptr<JsonValue> ToJsonObjectValue(const TextStyle& textStyle);

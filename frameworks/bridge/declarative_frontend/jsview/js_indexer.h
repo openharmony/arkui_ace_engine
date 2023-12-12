@@ -49,6 +49,7 @@ public:
     static void SetPopupUnselectedColor(const JSCallbackInfo& args);
     static void SetPopupItemFont(const JSCallbackInfo& args);
     static void SetPopupItemBackgroundColor(const JSCallbackInfo& args);
+    static void SetAutoCollapse(bool state);
     static std::optional<Color> PaseColor(const JSCallbackInfo& args);
 };
 } // namespace OHOS::Ace::Framework
