@@ -1973,16 +1973,6 @@ void ScrollablePattern::HandleLeaveHotzoneEvent()
 }
 
 /**
- * @description: Set drag status listener
- * @param {DragStatusListener} dragStatusListener  drag status listener
- * @return None
- */
-void ScrollablePattern::SetDragStatusListener(RefPtr<DragStatusListener> listener)
-{
-    dragStatusListener_ = listener;
-}
-
-/**
  * @description: This is the entry point for handling drag events
  * @return None
  */
@@ -1990,28 +1980,6 @@ void ScrollablePattern::HandleOnDragStatusCallback(
     const DragEventType& dragEventType, const RefPtr<NotifyDragEvent>& notifyDragEvent)
 {
     HandleHotZone(dragEventType, notifyDragEvent);
-    CHECK_NULL_VOID(dragStatusListener_.has_value());
-
-    auto dragStatusListener = dragStatusListener_.value();
-    switch (dragEventType) {
-        case DragEventType::START:
-            dragStatusListener->OnDragStarted(notifyDragEvent);
-            break;
-        case DragEventType::ENTER:
-            dragStatusListener->OnDragEntered(notifyDragEvent);
-            break;
-        case DragEventType::MOVE:
-            dragStatusListener->OnDragMoved(notifyDragEvent);
-            break;
-        case DragEventType::LEAVE:
-            dragStatusListener->OnDragLeaved(notifyDragEvent);
-            break;
-        case DragEventType::DROP:
-            dragStatusListener->OnDragEnded(notifyDragEvent);
-            break;
-        default:
-            break;
-    }
 }
 
 /**

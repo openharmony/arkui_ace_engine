@@ -22,7 +22,6 @@
 #include "core/common/container.h"
 #include "core/common/recorder/event_recorder.h"
 #include "core/components/common/layout/constants.h"
-#include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/navigation/nav_bar_layout_property.h"
 #include "core/components_ng/pattern/navigation/nav_bar_node.h"
 #include "core/components_ng/pattern/navigation/navigation_declaration.h"
@@ -33,9 +32,7 @@
 #include "core/components_ng/pattern/navigation/title_bar_pattern.h"
 #include "core/components_ng/pattern/navrouter/navdestination_event_hub.h"
 #include "core/components_ng/pattern/navrouter/navdestination_group_node.h"
-#include "core/components_ng/pattern/navrouter/navdestination_layout_property.h"
 #include "core/components_ng/pattern/navrouter/navdestination_pattern.h"
-#include "core/components_ng/pattern/navrouter/navrouter_group_node.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
 #include "core/components_ng/property/property.h"
 #include "core/pipeline_ng/pipeline_context.h"
@@ -295,19 +292,28 @@ void NavigationPattern::CheckTopNavPathChange(
         focusHub->SetParentFocusable(true);
         focusHub->RequestFocus();
     }
-    context->AddAfterLayoutTask([preTopNavDestination, newTopNavDestination, isPopPage,
-        weakNavigationPattern = WeakClaim(this)]() {
-        auto navigationPattern = weakNavigationPattern.Upgrade();
-        CHECK_NULL_VOID(navigationPattern);
-        auto mode = navigationPattern->GetNavigationMode();
-        if (mode == NavigationMode::STACK) {
-            navigationPattern->DoStackModeTransitionAnimation(preTopNavDestination, newTopNavDestination, isPopPage);
-        } else if (mode == NavigationMode::SPLIT) {
-            navigationPattern->DoSplitModeTransitionAnimation(preTopNavDestination, newTopNavDestination, isPopPage);
-        } else {
-            TAG_LOGE(AceLogTag::ACE_NAVIGATION, "current navigation mode is invalid");
-        }
-    });
+
+    bool disableAllAnimation = navigationStack_->GetDisableAnimation();
+    bool animated = navigationStack_->GetAnimatedValue();
+    TAG_LOGI(AceLogTag::ACE_NAVIGATION,
+        "transition start, disableAllAnimation: %{public}d, animated: %{public}d, isPopPage: %{public}d",
+        disableAllAnimation, animated, isPopPage);
+    if (disableAllAnimation) {
+        TransitionWithOutAnimation(preTopNavDestination, newTopNavDestination, isPopPage);
+        return;
+    }
+    if (animated) {
+        // animation need to run after layout task
+        context->AddAfterLayoutTask(
+            [preTopNavDestination, newTopNavDestination, isPopPage, weakNavigationPattern = WeakClaim(this)]() {
+                auto navigationPattern = weakNavigationPattern.Upgrade();
+                CHECK_NULL_VOID(navigationPattern);
+                navigationPattern->TransitionWithAnimation(preTopNavDestination, newTopNavDestination, isPopPage);
+            });
+    } else {
+        TransitionWithOutAnimation(preTopNavDestination, newTopNavDestination, isPopPage);
+        navigationStack_->UpdateAnimatedValue(true);
+    }
     hostNode->GetLayoutProperty()->UpdatePropertyChangeFlag(PROPERTY_UPDATE_MEASURE);
 }
 
@@ -397,23 +403,85 @@ void NavigationPattern::NotifyPageShow(const std::string& pageName)
     pageUrlChecker->NotifyPageShow(pageName);
 }
 
-void NavigationPattern::DoStackModeTransitionAnimation(const RefPtr<NavDestinationGroupNode>& preTopNavDestination,
+void NavigationPattern::TransitionWithOutAnimation(const RefPtr<NavDestinationGroupNode>& preTopNavDestination,
     const RefPtr<NavDestinationGroupNode>& newTopNavDestination, bool isPopPage)
 {
     auto navigationNode = AceType::DynamicCast<NavigationGroupNode>(GetHost());
     CHECK_NULL_VOID(navigationNode);
     auto navBarNode = AceType::DynamicCast<NavBarNode>(navigationNode->GetNavBarNode());
     CHECK_NULL_VOID(navBarNode);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+
+    // replace
     auto replaceVal = navigationStack_->GetReplaceValue();
     if (replaceVal != 0) {
         if (newTopNavDestination && preTopNavDestination) {
+            navigationNode->DealNavigationExit(preTopNavDestination, false);
+        } else if (newTopNavDestination && navigationMode_ == NavigationMode::STACK) {
+            navigationNode->DealNavigationExit(navBarNode, true);
+        }
+        navigationNode->OnAccessibilityEvent(AccessibilityEventType::PAGE_CHANGE);
+        navigationStack_->UpdateReplaceValue(0);
+        return;
+    }
+
+    // navDestination push/pop navDestination
+    if (newTopNavDestination && preTopNavDestination) {
+        if (isPopPage) {
+            auto parent = preTopNavDestination->GetParent();
+            CHECK_NULL_VOID(parent);
+            parent->RemoveChild(preTopNavDestination);
+            parent->RebuildRenderContextTree();
+            pipeline->RequestFrame();
+        } else {
+            auto layoutProperty = preTopNavDestination->GetLayoutProperty();
+            CHECK_NULL_VOID(layoutProperty);
+            layoutProperty->UpdateVisibility(VisibleType::INVISIBLE);
+        }
+        navigationNode->OnAccessibilityEvent(AccessibilityEventType::PAGE_CHANGE);
+        return;
+    }
+
+    // navBar push navDestination
+    if (newTopNavDestination) {
+        auto layoutProperty = navBarNode->GetLayoutProperty();
+        CHECK_NULL_VOID(layoutProperty);
+        layoutProperty->UpdateVisibility(VisibleType::INVISIBLE);
+    }
+
+    // navDestination pop to navBar
+    if (preTopNavDestination) {
+        auto parent = preTopNavDestination->GetParent();
+        CHECK_NULL_VOID(parent);
+        parent->RemoveChild(preTopNavDestination);
+        parent->RebuildRenderContextTree();
+        pipeline->RequestFrame();
+    }
+    navigationNode->OnAccessibilityEvent(AccessibilityEventType::PAGE_CHANGE);
+}
+
+void NavigationPattern::TransitionWithAnimation(const RefPtr<NavDestinationGroupNode>& preTopNavDestination,
+    const RefPtr<NavDestinationGroupNode>& newTopNavDestination, bool isPopPage)
+{
+    auto navigationNode = AceType::DynamicCast<NavigationGroupNode>(GetHost());
+    CHECK_NULL_VOID(navigationNode);
+    auto navBarNode = AceType::DynamicCast<NavBarNode>(navigationNode->GetNavBarNode());
+    CHECK_NULL_VOID(navBarNode);
+
+    // replace
+    auto replaceValue = navigationStack_->GetReplaceValue();
+    if (replaceValue != 0) {
+        if (newTopNavDestination && preTopNavDestination) {
             navigationNode->TransitionWithReplace(preTopNavDestination, newTopNavDestination, false);
-        } else if (newTopNavDestination) {
+        } else if (newTopNavDestination && navigationMode_ == NavigationMode::STACK) {
             navigationNode->TransitionWithReplace(navBarNode, newTopNavDestination, true);
         }
         navigationStack_->UpdateReplaceValue(0);
         return;
     }
+
+    // navDestination push/pop navDestination
     if (newTopNavDestination && preTopNavDestination) {
         if (isPopPage) {
             navigationNode->ExitTransitionWithPop(preTopNavDestination);
@@ -424,51 +492,26 @@ void NavigationPattern::DoStackModeTransitionAnimation(const RefPtr<NavDestinati
         }
         return;
     }
-    auto layoutProperty = AceType::DynamicCast<NavigationLayoutProperty>(navigationNode->GetLayoutProperty());
+
+    auto layoutProperty = navigationNode->GetLayoutProperty<NavigationLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
-    // navBar push new destination page
-    if (newTopNavDestination && !layoutProperty->GetHideNavBarValue(false)) {
+    if (layoutProperty->GetHideNavBarValue(false)) {
+        return;
+    }
+
+    // navBar push navDestination
+    if (newTopNavDestination && navigationMode_ == NavigationMode::STACK) {
         navigationNode->ExitTransitionWithPush(navBarNode, true);
         navigationNode->EnterTransitionWithPush(newTopNavDestination);
         return;
     }
 
-    // pop to navBar
-    if (preTopNavDestination && !layoutProperty->GetHideNavBarValue(false)) {
-        navigationNode->ExitTransitionWithPop(preTopNavDestination);
-        navigationNode->EnterTransitionWithPop(navBarNode, true);
-    }
-}
-
-void NavigationPattern::DoSplitModeTransitionAnimation(const RefPtr<NavDestinationGroupNode>& preTopNavDestination,
-    const RefPtr<NavDestinationGroupNode>& newTopNavDestination, bool isPopPage)
-{
-    auto navigationNode = AceType::DynamicCast<NavigationGroupNode>(GetHost());
-    CHECK_NULL_VOID(navigationNode);
-    auto navBarNode = AceType::DynamicCast<NavBarNode>(navigationNode->GetNavBarNode());
-    CHECK_NULL_VOID(navBarNode);
-    auto replaceValue = navigationStack_->GetReplaceValue();
-    if (replaceValue != 0) {
-        if (newTopNavDestination && preTopNavDestination) {
-            navigationNode->TransitionWithReplace(preTopNavDestination, newTopNavDestination, false);
-        }
-        navigationStack_->UpdateReplaceValue(0);
-        return;
-    }
-    if (newTopNavDestination && preTopNavDestination) {
-        if (isPopPage) {
-            navigationNode->ExitTransitionWithPop(preTopNavDestination);
-            navigationNode->EnterTransitionWithPop(newTopNavDestination);
-        } else {
-            navigationNode->ExitTransitionWithPush(preTopNavDestination);
-            navigationNode->EnterTransitionWithPush(newTopNavDestination);
-        }
-        return;
-    }
-
-    // pop to navBar
+    // navDestination pop to navBar
     if (preTopNavDestination) {
         navigationNode->ExitTransitionWithPop(preTopNavDestination);
+        if (navigationMode_ == NavigationMode::STACK) {
+            navigationNode->EnterTransitionWithPop(navBarNode, true);
+        }
     }
 }
 

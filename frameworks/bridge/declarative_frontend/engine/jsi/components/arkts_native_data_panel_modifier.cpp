@@ -68,11 +68,112 @@ void ResetDataPanelStrokeWidth(NodeHandle node)
     DataPanelModelNG::SetStrokeWidth(frameNode, Dimension(DEFAULT_STROKE_WIDTH, DimensionUnit::VP));
 }
 
+void ConvertThemeColor(std::vector<OHOS::Ace::NG::Gradient>& colors)
+{
+    auto container = Container::Current();
+    CHECK_NULL_VOID(container);
+    auto pipelineContext = container->GetPipelineContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto themeManager = pipelineContext->GetThemeManager();
+    CHECK_NULL_VOID(themeManager);
+    RefPtr<DataPanelTheme> theme = themeManager->GetTheme<DataPanelTheme>();
+    auto themeColors = theme->GetColorsArray();
+    for (const auto& item : themeColors) {
+        OHOS::Ace::NG::Gradient gradient;
+        OHOS::Ace::NG::GradientColor gradientColorStart;
+        gradientColorStart.SetLinearColor(LinearColor(item.first));
+        gradientColorStart.SetDimension(Dimension(0.0));
+        gradient.AddColor(gradientColorStart);
+        OHOS::Ace::NG::GradientColor gradientColorEnd;
+        gradientColorEnd.SetLinearColor(LinearColor(item.second));
+        gradientColorEnd.SetDimension(Dimension(1.0));
+        gradient.AddColor(gradientColorEnd);
+        colors.emplace_back(gradient);
+    }
+}
+
+void SetValueColors(NodeHandle node, const struct ArkUIGradientType* gradient)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    std::vector<OHOS::Ace::NG::Gradient> shadowColors(gradient->length);
+    uint32_t pos = 0;
+    for (uint32_t i = 0; i < gradient->length; i++) {
+        if (gradient->gradientLength[i] == 0) {
+            shadowColors.clear();
+            ConvertThemeColor(shadowColors);
+            break;
+        }
+        OHOS::Ace::NG::Gradient tempGradient;
+        for (uint32_t j = 0; j < gradient->gradientLength[i]; j++, pos++) {
+            OHOS::Ace::NG::GradientColor gradientColor;
+            gradientColor.SetLinearColor(LinearColor(Color(gradient->color[pos])));
+            gradientColor.SetDimension(
+                Dimension(gradient->offset[pos].number, static_cast<DimensionUnit>(gradient->offset[pos].unit)));
+            tempGradient.AddColor(gradientColor);
+        }
+        shadowColors.at(i) = tempGradient;
+    }
+    DataPanelModelNG::SetValueColors(frameNode, shadowColors);
+}
+
+void ResetValueColors(NodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    std::vector<OHOS::Ace::NG::Gradient> colors;
+    ConvertThemeColor(colors);
+    DataPanelModelNG::SetValueColors(frameNode, colors);
+}
+
+void SetTrackShadow(
+    NodeHandle node, const struct ArkUIGradientType* gradient, double radius, double offsetX, double offsetY)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    OHOS::Ace::NG::DataPanelShadow shadow;
+
+    std::vector<OHOS::Ace::NG::Gradient> shadowColors(gradient->length);
+    uint32_t pos = 0;
+    for (uint32_t i = 0; i < gradient->length; i++) {
+        if (gradient->gradientLength[i] == 0) {
+            shadowColors.clear();
+            ConvertThemeColor(shadowColors);
+            break;
+        }
+        OHOS::Ace::NG::Gradient tempGradient;
+        for (uint32_t j = 0; j < gradient->gradientLength[i]; j++, pos++) {
+            OHOS::Ace::NG::GradientColor gradientColor;
+            gradientColor.SetLinearColor(LinearColor(Color(gradient->color[pos])));
+            gradientColor.SetDimension(
+                Dimension(gradient->offset[pos].number, static_cast<DimensionUnit>(gradient->offset[pos].unit)));
+            tempGradient.AddColor(gradientColor);
+        }
+        shadowColors.at(i) = tempGradient;
+    }
+
+    shadow.radius = radius;
+    shadow.offsetX = offsetX;
+    shadow.offsetY = offsetY;
+    shadow.colors = shadowColors;
+    DataPanelModelNG::SetShadowOption(frameNode, shadow);
+}
+
+void ResetTrackShadow(NodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    DataPanelShadow shadow;
+    shadow.isShadowVisible = false;
+    DataPanelModelNG::SetShadowOption(frameNode, shadow);
+}
+
 ArkUIDataPanelModifierAPI GetDataPanelModifier()
 {
     static const ArkUIDataPanelModifierAPI modifier = { SetCloseEffect, ResetCloseEffect,
         SetDataPanelTrackBackgroundColor, ResetDataPanelTrackBackgroundColor, SetDataPanelStrokeWidth,
-        ResetDataPanelStrokeWidth };
+        ResetDataPanelStrokeWidth, SetValueColors, ResetValueColors, SetTrackShadow,
+        ResetTrackShadow };
 
     return modifier;
 }

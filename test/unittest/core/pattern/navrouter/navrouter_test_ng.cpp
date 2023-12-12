@@ -951,7 +951,7 @@ HWTEST_F(NavrouterTestNg, NavrouterTestNg0017, TestSize.Level1)
 
 /**
  * @tc.name: NavrouterTestNg0021
- * @tc.desc: Test NavigationPattern::DoStackModeTransitionAnimation with pop.
+ * @tc.desc: Test NavigationPattern::TransitionWithAnimation with pop.
  * @tc.type: FUNC
  */
 HWTEST_F(NavrouterTestNg, NavrouterTestNg0021, TestSize.Level1)
@@ -1001,12 +1001,12 @@ HWTEST_F(NavrouterTestNg, NavrouterTestNg0021, TestSize.Level1)
     parent->CheckCanHandleBack();
     bool isPop = true;
     EXPECT_TRUE(parent->isOnAnimation_);
-    pattern->DoStackModeTransitionAnimation(preNavDestination, navDestination, isPop);
+    pattern->TransitionWithAnimation(preNavDestination, navDestination, isPop);
 }
 
 /**
  * @tc.name: NavrouterTestNg0022
- * @tc.desc: Test NavigationPattern::DoStackModeTransitionAnimation with push.
+ * @tc.desc: Test NavigationPattern::TransitionWithAnimation with push.
  * @tc.type: FUNC
  */
 HWTEST_F(NavrouterTestNg, NavrouterTestNg0022, TestSize.Level1)
@@ -1051,7 +1051,7 @@ HWTEST_F(NavrouterTestNg, NavrouterTestNg0022, TestSize.Level1)
     stack->navPathList_.push_back(p2);
     bool isPop = false;
     EXPECT_TRUE(parent->isOnAnimation_);
-    pattern->DoStackModeTransitionAnimation(preNavDestination, navDestination, isPop);
+    pattern->TransitionWithAnimation(preNavDestination, navDestination, isPop);
 }
 
 /**

@@ -114,6 +114,15 @@ public:
     virtual int32_t GetReplaceValue() const;
     virtual RefPtr<UINode> CreateNodeByIndex(int32_t index);
     virtual RefPtr<UINode> CreateNodeByRouteInfo(const RefPtr<RouteInfo>& routeInfo);
+    virtual bool GetDisableAnimation() const
+    {
+        return false;
+    }
+    virtual bool GetAnimatedValue() const
+    {
+        return true;
+    }
+    virtual void UpdateAnimatedValue(bool animated) {}
     int32_t FindIndex(const std::string& name, const RefPtr<UINode>& navDestinationNode, bool isNavPathList);
     virtual std::string GetRouteParam() const
     {

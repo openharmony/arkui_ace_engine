@@ -68,19 +68,6 @@ private:
     GestureEventFunc actionEnd_;
     GestureEventNoParameter actionCancel_;
 };
-class DragStatusListener : public AceType {
-    DECLARE_ACE_TYPE(DragStatusListener, AceType);
-
-public:
-    DragStatusListener() = default;
-    ~DragStatusListener() = default;
-
-    virtual void OnDragStarted(const RefPtr<NotifyDragEvent>& notifyDragEvent) {};
-    virtual void OnDragEntered(const RefPtr<NotifyDragEvent>& notifyDragEvent) {};
-    virtual void OnDragMoved(const RefPtr<NotifyDragEvent>& notifyDragEvent) {};
-    virtual void OnDragLeaved(const RefPtr<NotifyDragEvent>& notifyDragEvent) {};
-    virtual void OnDragEnded(const RefPtr<NotifyDragEvent>& notifyDragEvent) {};
-};
 
 class ACE_EXPORT DragEventActuator : public GestureEventActuator {
     DECLARE_ACE_TYPE(DragEventActuator, GestureEventActuator)

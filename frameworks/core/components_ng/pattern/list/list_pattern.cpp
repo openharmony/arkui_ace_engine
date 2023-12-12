@@ -87,9 +87,6 @@ void ListPattern::OnModifyDone()
     auto focusHub = host->GetFocusHub();
     CHECK_NULL_VOID(focusHub);
     InitOnKeyEvent(focusHub);
-    if (!listDragStatusListener_.has_value()) {
-        InitNotifyDragEvent();
-    }
     Register2DragDropManager();
     SetAccessibilityAction();
 }
@@ -1960,14 +1957,6 @@ bool ListPattern::IsListItemGroup(int32_t listIndex, RefPtr<FrameNode>& node)
         }
     }
     return false;
-}
-
-void ListPattern::InitNotifyDragEvent()
-{
-    if (!listDragStatusListener_.has_value()) {
-        listDragStatusListener_ = AceType::MakeRefPtr<ListDragStatusListener>();
-        SetDragStatusListener(listDragStatusListener_.value());
-    }
 }
 
 void ListPattern::RefreshLanesItemRange()
