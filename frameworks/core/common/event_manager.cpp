@@ -34,7 +34,7 @@
 
 namespace OHOS::Ace {
 constexpr uint8_t KEYS_MAX_VALUE = 3;
-constexpr int64_t EVENT_CLEAR_DURATION = 3000;
+constexpr int64_t EVENT_CLEAR_DURATION = 1000;
 constexpr int64_t TRANSLATE_NS_TO_MS = 1000000;
 const std::string SHORT_CUT_VALUE_X = "X";
 const std::string SHORT_CUT_VALUE_Y = "Y";
@@ -342,6 +342,26 @@ void EventManager::FlushTouchEventsEnd(const std::list<TouchEvent>& touchEvents)
     }
 }
 
+void EventManager::CheckTouchEvent(TouchEvent touchEvent)
+{
+    auto touchEventFindResult = downFingerIds_.find(touchEvent.id);
+    if (touchEvent.type == TouchType::DOWN) {
+        if (touchEventFindResult == downFingerIds_.end()) {
+            downFingerIds_.insert(touchEvent.id);
+        } else {
+            TAG_LOGW(AceLogTag::ACE_INPUTTRACKING, "EventManager receive DOWN event twice,"
+                " touchEvent id is %{public}d", touchEvent.id);
+        }
+    } else if (touchEvent.type == TouchType::UP) {
+        if (touchEventFindResult == downFingerIds_.end()) {
+            TAG_LOGW(AceLogTag::ACE_INPUTTRACKING, "EventManager receive UP event without receive DOWN event,"
+                " touchEvent id is %{public}d", touchEvent.id);
+        } else {
+            downFingerIds_.erase(touchEvent.id);
+        }
+    }
+}
+
 bool EventManager::DispatchTouchEvent(const TouchEvent& event)
 {
     if (event.type != TouchType::MOVE) {
@@ -351,6 +371,7 @@ bool EventManager::DispatchTouchEvent(const TouchEvent& event)
             "type=%{public}d",
             event.id, event.x, event.y, (int)event.type);
     }
+    CheckTouchEvent(event);
     ContainerScope scope(instanceId_);
     TouchEvent point = event;
 #ifdef ENABLE_DRAG_FRAMEWORK
@@ -375,7 +396,13 @@ bool EventManager::DispatchTouchEvent(const TouchEvent& event)
         int64_t currentEventTime = static_cast<int64_t>(point.time.time_since_epoch().count());
         int64_t lastEventTime = static_cast<int64_t>(lastEventTime_.time_since_epoch().count());
         int64_t duration = static_cast<int64_t>((currentEventTime - lastEventTime) / TRANSLATE_NS_TO_MS);
-        if (duration >= EVENT_CLEAR_DURATION) {
+        if (duration >= EVENT_CLEAR_DURATION && !refereeNG_->CheckGestureRefereeState()) {
+            TAG_LOGW(AceLogTag::ACE_INPUTTRACKING, "GestureReferee check state fail, force clean gestureReferee.");
+            std::list<std::pair<int32_t, std::string>> dumpList;
+            eventTree_.Dump(dumpList, 0);
+            for (auto& item : dumpList) {
+                TAG_LOGI(AceLogTag::ACE_INPUTTRACKING, "EventTreeDumpInfo: %{public}s", item.second.c_str());
+            }
             refereeNG_->ForceCleanGestureReferee();
         }
         // first collect gesture into gesture referee.
@@ -473,6 +500,7 @@ bool EventManager::DispatchTouchEvent(const AxisEvent& event)
         }
         axisTouchTestResults_.erase(event.id);
     }
+    lastEventTime_ = event.time;
     return true;
 }
 

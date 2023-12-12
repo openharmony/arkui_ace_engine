@@ -190,6 +190,17 @@ bool GestureScope::CheckRecognizerState()
     return false;
 }
 
+bool GestureScope::CheckGestureScopeState()
+{
+    for (const auto& weak : recognizers_) {
+        auto recognizer = weak.Upgrade();
+        if (recognizer && recognizer->IsPending()) {
+            return false;
+        }
+    }
+    return true;
+}
+
 void GestureScope::ForceCleanGestureScope()
 {
     for (const auto& weak : recognizers_) {
@@ -283,6 +294,16 @@ void GestureReferee::CleanRedundanceScope()
         }
         iter->second->Close();
     }
+}
+
+bool GestureReferee::CheckGestureRefereeState()
+{
+    for (auto iter = gestureScopes_.begin(); iter != gestureScopes_.end(); iter++) {
+        if (!iter->second->CheckGestureScopeState()) {
+            return false;
+        }
+    }
+    return true;
 }
 
 void GestureReferee::ForceCleanGestureReferee()
