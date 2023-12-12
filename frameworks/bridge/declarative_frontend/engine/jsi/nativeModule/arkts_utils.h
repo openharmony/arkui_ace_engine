@@ -48,10 +48,11 @@ public:
     static bool ParseJsFontFamiliesFromResource(
         const EcmaVM *vm, const Local<JSValueRef> &jsValue, std::vector<std::string> &result);
     static bool ParseJsDimension(const EcmaVM *vm, const Local<JSValueRef> &jsValue, CalcDimension &result,
-        DimensionUnit defaultUnit, bool isSupportPercent = true);
-    static bool ParseJsDimensionFp(
-        const EcmaVM *vm, const Local<JSValueRef> &jsValue, CalcDimension &result, bool isSupportPercent = true);
-    static bool ParseJsDimensionVp(const EcmaVM *vm, const Local<JSValueRef> &value, CalcDimension &result);
+        DimensionUnit defaultUnit, bool isSupportPercent = true, bool enableCheckInvalidvalue = true);
+    static bool ParseJsDimensionFp(const EcmaVM *vm, const Local<JSValueRef> &jsValue, CalcDimension &result,
+        bool isSupportPercent = true, bool enableCheckInvalidvalue = true);
+    static bool ParseJsDimensionVp(
+        const EcmaVM *vm, const Local<JSValueRef> &value, CalcDimension &result, bool enableCheckInvalidvalue = true);
     static bool ParseJsDimensionNG(const EcmaVM *vm, const Local<JSValueRef> &jsValue, CalcDimension &result,
         DimensionUnit defaultUnit, bool isSupportPercent = true);
     static bool ParseJsDimensionVpNG(const EcmaVM *vm, const Local<JSValueRef> &jsValue, CalcDimension &result,
