@@ -613,4 +613,210 @@ HWTEST_F(BoxLayoutAlgorithmTestNg, BoxLayoutAlgorithmTest_PerformMeasureSelfWith
     boxLayoutAlgorithm.PerformMeasureSelfWithChildList(AccessibilityManager::RawPtr(layoutWrapper), childList);
     EXPECT_NE(&childList, nullptr);
 }
+
+/**
+ * @tc.name: BoxLayoutAlgorithmTest_PerformMeasureSelfWithChildList010
+ * @tc.desc: Set one index value into BoxLayoutAlgorithmTestNg and get it.
+ * @tc.type: FUNC
+ */
+HWTEST_F(BoxLayoutAlgorithmTestNg, BoxLayoutAlgorithmTest_PerformMeasureSelfWithChildList010, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. creat a layoutwrapper and SetLayoutAlgorithm for it.
+     */
+    auto layoutWrapper = CreatlayoutWrapper();
+
+    auto rowFrameNode = FrameNode::CreateFrameNode("test", 0, AceType::MakeRefPtr<LinearLayoutPattern>(false));
+    auto rowLayoutPattern = rowFrameNode->GetPattern<LinearLayoutPattern>();
+    auto rowLayoutAlgorithm = rowLayoutPattern->CreateLayoutAlgorithm();
+    layoutWrapper->SetLayoutAlgorithm(AccessibilityManager::MakeRefPtr<LayoutAlgorithmWrapper>(rowLayoutAlgorithm));
+
+    /**
+     * @tc.steps: step2. layout parameter initialization.
+     */
+    LayoutConstraintF parentLayoutConstraint;
+    parentLayoutConstraint.parentIdealSize.SetSize(SizeF(RK356_WIDTH, ROW_HEIGHT));
+
+    PaddingProperty noPadding;
+    noPadding.left = CalcLength(NOPADDING);
+    noPadding.right = CalcLength(NOPADDING);
+    noPadding.top = CalcLength(NOPADDING);
+    noPadding.bottom = CalcLength(NOPADDING);
+
+    /**
+     * @tc.steps: step3. Perform element updates.
+     */
+    layoutWrapper->GetLayoutProperty()->UpdatePadding(noPadding);
+    layoutWrapper->GetLayoutProperty()->UpdateLayoutConstraint(parentLayoutConstraint);
+    layoutWrapper->GetLayoutProperty()->UpdateContentConstraint();
+
+    /**
+     * @tc.steps: step4. parentIdealSize is Valid.
+     * @tc.expected: expect the size is same with parentIdealSize .
+     */
+    BoxLayoutAlgorithm boxLayoutAlgorithm;
+    std::list<RefPtr<LayoutWrapper>> childList;
+    layoutWrapper->GetLayoutProperty()->UpdateMeasureType(MeasureType::MATCH_PARENT);
+    auto type = layoutWrapper->GetLayoutProperty()->measureType_;
+    boxLayoutAlgorithm.PerformMeasureSelfWithChildList(AccessibilityManager::RawPtr(layoutWrapper), childList);
+    EXPECT_EQ(type, MeasureType::MATCH_PARENT);
+}
+
+/**
+ * @tc.name: BoxLayoutAlgorithmTest_MeasureContent011
+ * @tc.desc: Set one index value into BoxLayoutAlgorithmTestNg and get it.
+ * @tc.type: FUNC
+ */
+HWTEST_F(BoxLayoutAlgorithmTestNg, BoxLayoutAlgorithmTest_MeasureContent011, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. creat a layoutwrapper and SetLayoutAlgorithm for it.
+     */
+    auto layoutWrapper = CreatlayoutWrapper();
+    auto rowFrameNode = FrameNode::CreateFrameNode("test", 0, AceType::MakeRefPtr<Pattern>());
+
+    /**
+     * @tc.steps: step2. layout parameter initialization.
+     */
+    LayoutConstraintF parentLayoutConstraint;
+    parentLayoutConstraint.maxSize = CONTAINER_SIZE;
+    parentLayoutConstraint.percentReference = CONTAINER_SIZE;
+    PaddingProperty noPadding;
+    noPadding.left = CalcLength(NOPADDING);
+    noPadding.right = CalcLength(NOPADDING);
+    noPadding.top = CalcLength(NOPADDING);
+    noPadding.bottom = CalcLength(NOPADDING);
+
+    /**
+     * @tc.steps: step3. Perform element updates.
+     */
+    layoutWrapper->GetLayoutProperty()->UpdatePadding(noPadding);
+    layoutWrapper->GetLayoutProperty()->UpdateLayoutConstraint(parentLayoutConstraint);
+    layoutWrapper->GetLayoutProperty()->UpdateContentConstraint();
+
+    /**
+     * @tc.steps: step5. call MeasureContent.
+     * @tc.expected: expect the host is null.
+     */
+    BoxLayoutAlgorithm boxLayoutAlgorithm;
+    auto host = layoutWrapper->GetHostNode();
+    boxLayoutAlgorithm.MeasureContent(parentLayoutConstraint, AccessibilityManager::RawPtr(layoutWrapper));
+    EXPECT_EQ(host, nullptr);
+
+    /**
+     * @tc.steps: step6. call MeasureContent and set measureType_ = MeasureType::MATCH_PARENT.
+     * @tc.expected: expect the host1 is not null.
+     */
+    layoutWrapper->hostNode_ = rowFrameNode;
+    const auto& layoutProperty = layoutWrapper->GetLayoutProperty();
+    layoutProperty->measureType_ = MeasureType::MATCH_PARENT;
+    boxLayoutAlgorithm.MeasureContent(parentLayoutConstraint, AccessibilityManager::RawPtr(layoutWrapper));
+    auto host1 = layoutWrapper->GetHostNode();
+    EXPECT_TRUE(host1->IsAtomicNode());
+
+    /**
+     * @tc.steps: step7. selfIdealSize is not Valid.
+     * expected: return percentReference.
+     */
+    parentLayoutConstraint.percentReference.SetSizeT(SizeF(RK356_WIDTH, ROW_HEIGHT));
+    std::optional<SizeF> sizeTemp =
+        boxLayoutAlgorithm.MeasureContent(parentLayoutConstraint, AccessibilityManager::RawPtr(layoutWrapper));
+
+    EXPECT_EQ(sizeTemp.value().width_, parentLayoutConstraint.percentReference.width_);
+    EXPECT_EQ(sizeTemp.value().height_, parentLayoutConstraint.percentReference.height_);
+
+    /**
+     * @tc.steps: step8. set measureType_ other.
+     * expected: return minSize.
+     */
+    parentLayoutConstraint.minSize.SetSizeT(SizeF(RK356_WIDTH + 1, ROW_HEIGHT + 1));
+    layoutProperty->measureType_ = MeasureType::MATCH_CONTENT;
+    sizeTemp = boxLayoutAlgorithm.MeasureContent(parentLayoutConstraint, AccessibilityManager::RawPtr(layoutWrapper));
+    EXPECT_EQ(sizeTemp.value().width_, parentLayoutConstraint.minSize.width_);
+    EXPECT_EQ(sizeTemp.value().height_, parentLayoutConstraint.minSize.height_);
+
+    /**
+     * @tc.steps: step9. set selfIdealSize valid.
+     * expected: return selfIdealSize.
+     */
+    parentLayoutConstraint.selfIdealSize.SetSize(SizeF(RK356_WIDTH - 1, ROW_HEIGHT - 1));
+    sizeTemp = boxLayoutAlgorithm.MeasureContent(parentLayoutConstraint, AccessibilityManager::RawPtr(layoutWrapper));
+    EXPECT_EQ(sizeTemp.value().width_, parentLayoutConstraint.selfIdealSize.width_);
+    EXPECT_EQ(sizeTemp.value().height_, parentLayoutConstraint.selfIdealSize.height_);
+}
+
+/**
+ * @tc.name: BoxLayoutAlgorithmTest_PerformMeasureSelfWithChildList012
+ * @tc.desc: Set one index value into BoxLayoutAlgorithmTestNg and get it.
+ * @tc.type: FUNC
+ */
+HWTEST_F(BoxLayoutAlgorithmTestNg, BoxLayoutAlgorithmTest_PerformMeasureSelfWithChildList012, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. creat a layoutwrapper and SetLayoutAlgorithm for it.
+     */
+    auto layoutWrapper = CreatlayoutWrapper();
+
+    auto rowFrameNode = FrameNode::CreateFrameNode("test", 0, AceType::MakeRefPtr<LinearLayoutPattern>(false));
+    auto rowLayoutPattern = rowFrameNode->GetPattern<LinearLayoutPattern>();
+    auto rowLayoutAlgorithm = rowLayoutPattern->CreateLayoutAlgorithm();
+    layoutWrapper->SetLayoutAlgorithm(AccessibilityManager::MakeRefPtr<LayoutAlgorithmWrapper>(rowLayoutAlgorithm));
+
+    /**
+     * @tc.steps: step2. layout parameter initialization.
+     */
+    PaddingProperty noPadding;
+    noPadding.left = CalcLength(NOPADDING);
+    noPadding.right = CalcLength(NOPADDING);
+    noPadding.top = CalcLength(NOPADDING);
+    noPadding.bottom = CalcLength(NOPADDING);
+
+    /**
+     * @tc.steps: step3. Perform element updates.
+     */
+    LayoutConstraintF parentLayoutConstraint;
+    layoutWrapper->GetLayoutProperty()->UpdatePadding(noPadding);
+    layoutWrapper->GetLayoutProperty()->UpdateLayoutConstraint(parentLayoutConstraint);
+    layoutWrapper->GetLayoutProperty()->UpdateContentConstraint();
+
+    /**
+     * @tc.steps: step4. parentIdealSize is Valid.
+     * @tc.expected: expect the size is same with layoutWrapper3 .
+     */
+    BoxLayoutAlgorithm boxLayoutAlgorithm;
+    std::list<RefPtr<LayoutWrapper>> childList;
+    childList = layoutWrapper->GetAllChildrenWithBuild();
+    childList.push_front(nullptr);
+    auto layoutWrapper2 = CreatlayoutWrapper();
+    layoutWrapper2->GetLayoutProperty()->propVisibility_ = VisibleType::GONE;
+    childList.push_front(layoutWrapper2);
+    auto layoutWrapper3 = CreatChildlayoutWrapper();
+    layoutWrapper3->GetGeometryNode()->frame_.rect_.SetSize(SizeF(RK356_WIDTH, ROW_HEIGHT));
+    childList.push_front(layoutWrapper3);
+    boxLayoutAlgorithm.PerformMeasureSelfWithChildList(AccessibilityManager::RawPtr(layoutWrapper), childList);
+    EXPECT_FALSE(layoutWrapper->GetGeometryNode()->content_);
+    EXPECT_EQ(layoutWrapper->GetGeometryNode()->frame_.rect_.height_, ROW_HEIGHT);
+    EXPECT_EQ(layoutWrapper->GetGeometryNode()->frame_.rect_.width_, RK356_WIDTH);
+
+    /**
+     * @tc.steps: step4. selfIdealSize isn't Valid and height is true.
+     * @tc.expected: expect the size is same with layoutWrapper3 .
+     */
+    parentLayoutConstraint.selfIdealSize.SetSize(SizeF(0.0, ROW_HEIGHT));
+    layoutWrapper->GetLayoutProperty()->calcLayoutConstraint_ = nullptr;
+    layoutWrapper->GetLayoutProperty()->UpdateLayoutConstraint(parentLayoutConstraint);
+    boxLayoutAlgorithm.PerformMeasureSelfWithChildList(AccessibilityManager::RawPtr(layoutWrapper), childList);
+    EXPECT_EQ(layoutWrapper->GetGeometryNode()->frame_.rect_.height_, ROW_HEIGHT);
+    EXPECT_EQ(layoutWrapper->GetGeometryNode()->frame_.rect_.width_, 0);
+
+    /**
+     * @tc.steps: step4. parentIdealSize isn't Valid and width is true.
+     * @tc.expected: expect the size is same with layoutWrapper3 .
+     */
+    parentLayoutConstraint.selfIdealSize.SetSize(SizeF(RK356_WIDTH, 0.0));
+    layoutWrapper->GetLayoutProperty()->UpdateLayoutConstraint(parentLayoutConstraint);
+    boxLayoutAlgorithm.PerformMeasureSelfWithChildList(AccessibilityManager::RawPtr(layoutWrapper), childList);
+    EXPECT_EQ(layoutWrapper->GetGeometryNode()->frame_.rect_.height_, 0);
+    EXPECT_EQ(layoutWrapper->GetGeometryNode()->frame_.rect_.width_, RK356_WIDTH);
+}
 } // namespace OHOS::Ace::NG
