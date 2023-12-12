@@ -1040,6 +1040,8 @@ public:
         return lastClickTimeStamp_;
     }
 #ifdef ENABLE_DRAG_FRAMEWORK
+    void HandleOnDragStatusCallback(
+        const DragEventType& dragEventType, const RefPtr<NotifyDragEvent>& notifyDragEvent) override;
 protected:
     virtual void InitDragEvent();
 #endif
@@ -1063,6 +1065,9 @@ private:
     std::function<void(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)> OnDragDrop();
     void ClearDragDropEvent();
     std::function<void(Offset)> GetThumbnailCallback();
+    void HandleCursorOnDragMoved(const RefPtr<NotifyDragEvent>& notifyDragEvent);
+    void HandleCursorOnDragLeaved(const RefPtr<NotifyDragEvent>& notifyDragEvent);
+    void HandleCursorOnDragEnded(const RefPtr<NotifyDragEvent>& notifyDragEvent);
 #endif
     int32_t UpdateCaretPositionOnHandleMove(const OffsetF& localOffset);
     bool HasStateStyle(UIState state) const;
@@ -1247,6 +1252,7 @@ private:
     bool counterChange_ = false;
     WeakPtr<LayoutWrapper> counterTextNode_;
     bool hasCounterMargin_ = false;
+    bool isCursorAlwaysDisplayed_ = false;
     std::optional<int32_t> surfaceChangedCallbackId_;
     std::optional<int32_t> surfacePositionChangedCallbackId_;
 

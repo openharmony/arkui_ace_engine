@@ -285,6 +285,8 @@ public:
     void CopySelectionMenuParams(SelectOverlayInfo& selectInfo, RichEditorResponseType responseType);
 #ifdef ENABLE_DRAG_FRAMEWORK
     std::function<void(Offset)> GetThumbnailCallback() override;
+    void HandleOnDragStatusCallback(
+        const DragEventType& dragEventType, const RefPtr<NotifyDragEvent>& notifyDragEvent) override;
 #endif
     void ResetSelection();
     bool BetweenSelectedPosition(const Offset& globalOffset) override;
@@ -363,6 +365,8 @@ public:
 
     void HandleOnCameraInput() override;
 
+    RefPtr<FocusHub> GetFocusHub() const;
+
 private:
     void UpdateSelectMenuInfo(bool hasData, SelectOverlayInfo& selectInfo, bool isCopyAll);
     void UpdateSelectionType(RichEditorSelection& selection);
@@ -429,6 +433,10 @@ private:
         CHECK_NULL_VOID(dragDropManager);
         dragDropManager->RemoveDragFrameNode(frameNode->GetId());
     }
+
+    void HandleCursorOnDragMoved(const RefPtr<NotifyDragEvent>& notifyDragEvent);
+    void HandleCursorOnDragLeaved(const RefPtr<NotifyDragEvent>& notifyDragEvent);
+    void HandleCursorOnDragEnded(const RefPtr<NotifyDragEvent>& notifyDragEvent);
 #endif // ENABLE_DRAG_FRAMEWORK
 
     int32_t GetParagraphLength(const std::list<RefPtr<UINode>>& spans) const;
@@ -517,6 +525,7 @@ private:
     bool blockPress_ = false;
     bool isCustomKeyboardAttached_ = false;
     bool usingMouseRightButton_ = false;
+    bool isCursorAlwaysDisplayed_ = false;
 
     int32_t moveLength_ = 0;
     int32_t caretPosition_ = 0;

@@ -455,6 +455,11 @@ public:
         return overCounterColor_;
     }
 
+    const Dimension& GetInsertCursorOffset() const
+    {
+        return insertCursorOffset_;
+    }
+
     const Dimension& GetPasswordTypeHeight() const
     {
         return passwordTypeHeight_;
@@ -529,6 +534,9 @@ private:
     Dimension iconHotZoneSize_;
     Dimension inlineBorderWidth_ = 2.0_vp;
     Dimension errorTextCapsuleMargin_ = 22.0_vp;
+
+    // UX::insert cursor offset up by 8vp
+    Dimension insertCursorOffset_ = 8.0_vp;
 
     bool showEllipsis_ = true;
     bool draggable_ = false;

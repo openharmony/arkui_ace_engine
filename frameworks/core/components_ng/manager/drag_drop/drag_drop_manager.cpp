@@ -1182,6 +1182,7 @@ void DragDropManager::FireOnEditableTextComponent(const RefPtr<FrameNode>& frame
     auto ret = InteractionInterface::GetInstance()->EnterTextEditorArea(true);
     if (ret != 0) {
         TAG_LOGI(AceLogTag::ACE_DRAG, "Fail to notify entering text editor erea.");
+        return;
     }
 #endif // ENABLE_DRAG_FRAMEWORK
     hasNotifiedTransformation_ = true;
