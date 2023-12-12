@@ -78,6 +78,13 @@ RefPtr<NavigationGroupNode> NavigationGroupNode::GetOrCreateGroupNode(
     return navigationGroupNode;
 }
 
+NavigationGroupNode::~NavigationGroupNode()
+{
+    auto context = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    context->DeleteNavigationNode(curId_);
+}
+
 void NavigationGroupNode::AddChildToGroup(const RefPtr<UINode>& child, int32_t slot)
 {
     auto pattern = AceType::DynamicCast<NavigationPattern>(GetPattern());
@@ -380,9 +387,6 @@ void NavigationGroupNode::ExitTransitionWithPop(const RefPtr<FrameNode>& node)
                 auto shallowBuilder = navDestinationPattern->GetShallowBuilder();
                 if (shallowBuilder) {
                     shallowBuilder->MarkIsExecuteDeepRenderDone(false);
-                }
-                if (node->GetContentNode()) {
-                    node->GetContentNode()->Clean();
                 }
                 auto parent = node->GetParent();
                 CHECK_NULL_VOID(parent);
@@ -760,6 +764,14 @@ void NavigationGroupNode::TransitionWithReplace(
         },
         option.GetOnFinishEvent());
     isOnAnimation_ = true;
+}
+
+void NavigationGroupNode::OnInspectorIdUpdate(const std::string& id)
+{
+    auto context = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    context->AddOrReplaceNavigationNode(id, WeakClaim(this));
+    curId_ = id;
 }
 
 void NavigationGroupNode::DealNavigationExit(const RefPtr<FrameNode>& preNode, bool isNavBar)

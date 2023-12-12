@@ -1086,6 +1086,13 @@ bool AceContainer::RequestAutoSave(const RefPtr<NG::FrameNode>& node)
     return true;
 }
 
+std::shared_ptr<NavigationController> AceContainer::GetNavigationController(
+    const std::string& navigationId)
+{
+    CHECK_NULL_RETURN(pipelineContext_, nullptr);
+    return pipelineContext_->GetNavigationController(navigationId);
+}
+
 void AceContainer::SetHapPath(const std::string& hapPath)
 {
     if (hapPath.empty()) {

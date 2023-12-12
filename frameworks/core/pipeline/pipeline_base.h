@@ -87,6 +87,7 @@ class OffscreenCanvas;
 class Window;
 class FontManager;
 class ManagerInterface;
+class NavigationController;
 enum class FrontendType;
 using SharePanelCallback = std::function<void(const std::string& bundleName, const std::string& abilityName)>;
 using AceVsyncCallback = std::function<void(uint64_t, uint32_t)>;
@@ -298,6 +299,11 @@ public:
     virtual void GetBoundingRectData(int32_t nodeId, Rect& rect) {}
 
     virtual RefPtr<AccessibilityManager> GetAccessibilityManager() const;
+
+    virtual std::shared_ptr<NavigationController> GetNavigationController(const std::string& id)
+    {
+        return nullptr;
+    }
 
     void SetRootSize(double density, int32_t width, int32_t height);
 

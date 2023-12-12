@@ -22,6 +22,7 @@
 #include <atomic>
 
 #include "interfaces/inner_api/ace/ace_forward_compatibility.h"
+#include "interfaces/inner_api/ace/navigation_controller.h"
 
 #include "base/memory/ace_type.h"
 #include "base/resource/asset_manager.h"
@@ -387,6 +388,11 @@ public:
     virtual bool RequestAutoSave(const RefPtr<NG::FrameNode>& node)
     {
         return false;
+    }
+
+    virtual std::shared_ptr<NavigationController> GetNavigationController(const std::string& navigationId)
+    {
+        return nullptr;
     }
 
     static bool LessThanAPIVersion(PlatformVersion version)

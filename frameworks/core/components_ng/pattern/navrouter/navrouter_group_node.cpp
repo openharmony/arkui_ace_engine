@@ -163,7 +163,11 @@ void NavRouterGroupNode::AddNavDestinationToNavigation(const RefPtr<UINode>& par
     if (!navDestination && routeInfo) {
         // create navDestination with routeInfo
         name = routeInfo->GetName();
-        auto uiNode = navigationStack->CreateNodeByRouteInfo(routeInfo);
+        RefPtr<UINode> uiNode = navigationStack->GetFromCacheNode(name);
+        if (uiNode == nullptr) {
+            uiNode = navigationStack->CreateNodeByRouteInfo(routeInfo);
+        }
+
         navigationPattern->AddNavDestinationNode(name, uiNode, navRouteMode, routeInfo);
         auto navRouterEventHub = GetEventHub<NavRouterEventHub>();
         CHECK_NULL_VOID(navRouterEventHub);
