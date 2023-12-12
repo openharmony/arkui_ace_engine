@@ -752,27 +752,6 @@ void FindText(const RefPtr<NG::UINode>& node, const std::string& text, std::list
     }
 }
 
-void FindText(const RefPtr<NG::UINode>& node, const std::string& text, std::list<RefPtr<NG::FrameNode>>& nodeList,
-    std::list<RefPtr<NG::FrameNode>>& uiExtensionNodes)
-{
-    CHECK_NULL_VOID(node);
-    auto frameNode = AceType::DynamicCast<NG::FrameNode>(node);
-    if (frameNode && !frameNode->IsInternal()) {
-        if (frameNode->GetAccessibilityProperty<NG::AccessibilityProperty>()->GetAccessibilityText().find(text) !=
-            std::string::npos) {
-            nodeList.push_back(frameNode);
-        }
-    }
-    if (frameNode && (frameNode->GetTag() == V2::UI_EXTENSION_COMPONENT_TAG)) {
-        uiExtensionNodes.push_back(frameNode);
-    }
-    if (!node->GetChildren().empty()) {
-        for (const auto& child : node->GetChildren()) {
-            FindText(child, text, nodeList, uiExtensionNodes);
-        }
-    }
-}
-
 #ifdef WEB_SUPPORTED
 std::vector<RefPtr<NG::FrameNode>> GetWebs(const RefPtr<NG::FrameNode>& root)
 {
@@ -2616,34 +2595,14 @@ void JsAccessibilityManager::SearchElementInfosByTextNG(int32_t elementId, const
     }
     auto node = GetInspectorById(rootNode, elementId);
     CHECK_NULL_VOID(node);
-    std::list<RefPtr<NG::FrameNode>> frameNodesWithText;
-    std::list<RefPtr<NG::FrameNode>> uiExtensionsNodes;
-    FindText(node, text, frameNodesWithText, uiExtensionsNodes);
-    for (const auto& node : uiExtensionsNodes) {
-        auto infosByIPC = SearchElementInfosByTextNG(NG::UI_EXTENSION_ROOT_ID, text,
-            node, uiExtensionOffset / NG::UI_EXTENSION_ID_FACTOR);
-        if (!infosByIPC.empty()) {
-            AccessibilityElementInfo nodeInfo;
-            CommonProperty commonProperty;
-            GenerateCommonProperty(ngPipeline, commonProperty);
-            UpdateAccessibilityElementInfo(node, commonProperty, nodeInfo, ngPipeline);
-            ConvertExtensionAccessibilityNodeId(infosByIPC, node, uiExtensionOffset, nodeInfo);
-            for (auto& info : infosByIPC) {
-                infos.emplace_back(info);
-            }
-        }
-    }
     CommonProperty commonProperty;
     GenerateCommonProperty(ngPipeline, commonProperty);
     if (context->GetWindowId() != mainContext->GetWindowId()) {
         commonProperty.pageId = 0;
         commonProperty.pagePath = "";
     }
-    for (const auto& node : frameNodesWithText) {
-        AccessibilityElementInfo nodeInfo;
-        UpdateAccessibilityElementInfo(node, commonProperty, nodeInfo, ngPipeline);
-        infos.emplace_back(nodeInfo);
-    }
+    SearchParameter param {0, text, 0, uiExtensionOffset};
+    FindText(node, infos, ngPipeline, commonProperty, param);
 }
 
 void JsAccessibilityManager::JsInteractionOperation::SearchElementInfosByText(const int32_t elementId,
@@ -2696,7 +2655,7 @@ void JsAccessibilityManager::SearchElementInfosByText(const int32_t elementId, c
     auto node = jsAccessibilityManager->GetAccessibilityNodeFromPage(nodeId);
     CHECK_NULL_VOID(node);
     std::list<RefPtr<AccessibilityNode>> nodeList;
-    FindText(node, text, nodeList);
+    OHOS::Ace::Framework::FindText(node, text, nodeList);
     if (!nodeList.empty()) {
         for (const auto& node : nodeList) {
             AccessibilityElementInfo nodeInfo;
@@ -3831,6 +3790,39 @@ void JsAccessibilityManager::GenerateCommonProperty(const RefPtr<PipelineBase>& 
     output.windowTop = GetWindowTop(ngPipeline->GetWindowId());
     output.pageId = page->GetPageId();
     output.pagePath = GetPagePath();
+}
+
+void JsAccessibilityManager::FindText(const RefPtr<NG::UINode>& node,
+    std::list<Accessibility::AccessibilityElementInfo>& infos, const RefPtr<NG::PipelineContext>& context,
+    const CommonProperty& commonProperty, const SearchParameter& searchParam)
+{
+    CHECK_NULL_VOID(node);
+    auto frameNode = AceType::DynamicCast<NG::FrameNode>(node);
+    if (frameNode && !frameNode->IsInternal()) {
+        if (frameNode->GetAccessibilityProperty<NG::AccessibilityProperty>()->GetAccessibilityText().find(
+            searchParam.text) != std::string::npos) {
+            AccessibilityElementInfo nodeInfo;
+            UpdateAccessibilityElementInfo(frameNode, commonProperty, nodeInfo, context);
+            infos.emplace_back(nodeInfo);
+        }
+    }
+    if (frameNode && (frameNode->GetTag() == V2::UI_EXTENSION_COMPONENT_TAG)) {
+        auto infosByIPC = SearchElementInfosByTextNG(NG::UI_EXTENSION_ROOT_ID, searchParam.text,
+            frameNode, searchParam.uiExtensionOffset / NG::UI_EXTENSION_ID_FACTOR);
+        if (!infosByIPC.empty()) {
+            AccessibilityElementInfo nodeInfo;
+            UpdateAccessibilityElementInfo(frameNode, commonProperty, nodeInfo, context);
+            ConvertExtensionAccessibilityNodeId(infosByIPC, frameNode, searchParam.uiExtensionOffset, nodeInfo);
+            for (auto& info : infosByIPC) {
+                infos.emplace_back(info);
+            }
+        }
+    }
+    if (!node->GetChildren().empty()) {
+        for (const auto& child : node->GetChildren()) {
+            FindText(child, infos, context, commonProperty, searchParam);
+        }
+    }
 }
 
 } // namespace OHOS::Ace::Framework
