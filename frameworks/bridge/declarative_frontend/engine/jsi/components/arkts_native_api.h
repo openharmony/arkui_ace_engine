@@ -20,6 +20,7 @@
 #include "interfaces/inner_api/ace/macros.h"
 #include "base/memory/ace_type.h"
 #include "core/components_ng/pattern/navigation/navigation_declaration.h"
+#include "core/components_ng/pattern/progress/progress_date.h"
 #include "core/components_ng/pattern/tabs/tabs_model.h"
 #include "core/event/mouse_event.h"
 #include "core/components/common/properties/decoration.h"
@@ -145,6 +146,27 @@ struct ArkUIPlaceholderFontType {
     const char** fontFamilies;
     uint32_t length;
     int32_t style;
+};
+
+struct ArkUIProgressStyle {
+    double strokeWidthValue;
+    int8_t strokeWidthUnit;
+    double borderWidthValue;
+    int8_t borderWidthUnit;
+    int32_t scaleCount;
+    int8_t status;
+    double scaleWidthValue;
+    int8_t scaleWidthUnit;
+    double strokeRadiusValue;
+    int8_t strokeRadiusUnit;
+    bool enableSmoothEffect;
+    double borderColor;
+    const char* content;
+    double fontColor;
+    bool enableScanEffect;
+    bool shadow;
+    bool showDefaultPercentage;
+    ArkUIFontStruct fontInfo;
 };
 
 struct ArkUIGradientType {
@@ -1302,6 +1324,16 @@ struct ArkUIListItemModifierAPI {
     void (*ResetSelectable)(NodeHandle node);
 };
 
+struct ArkUIProgressModifierAPI {
+    void (*SetProgressValue)(NodeHandle node, double value);
+    void (*ResetProgressValue)(NodeHandle node);
+    void (*SetProgressColorWithArray)(NodeHandle node, double *colors, int32_t colorslength);
+    void (*SetProgressColorWithValue)(NodeHandle node, uint32_t color);
+    void (*ResetProgressColor)(NodeHandle node);
+    void (*SetProgressStyle)(NodeHandle node, ArkUIProgressStyle *value);
+    void (*ResetProgressStyle)(NodeHandle node);
+};
+
 struct ArkUIListModifierAPI {
     void (*SetListLanes)(NodeHandle node, int32_t lanesNum, OHOS::Ace::Dimension minLength,
         OHOS::Ace::Dimension maxLength, OHOS::Ace::Dimension gutter);
@@ -1524,6 +1556,7 @@ struct ArkUINodeAPI {
     ArkUIGaugeModifierAPI (*GetGaugeModifier)();
     ArkUIScrollModifierAPI (*GetScrollModifier)();
     ArkUIGridItemModifierAPI (*GetGridItemModifier)();
+    ArkUIProgressModifierAPI (*GetProgressModifier)();
     ArkUICommonShapeModifierAPI(*GetCommonShapeModifier)();
     ArkUIShapeModifierAPI(*GetShapeModifier)();
     ArkUIRectModifierAPI (*GetRectModifier)();
