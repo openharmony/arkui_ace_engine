@@ -21,7 +21,9 @@
 
 namespace OHOS::Ace {
 
-constexpr int32_t DIRECTION_RANGE = 3;
+constexpr int32_t HORIZONTAL_DIRECTION_RANGE = 3;
+constexpr int32_t VERTICAL_DIRECTION_RANGE = 6;
+
 struct PositionParam {
     std::pair<AnimatableDimension, bool> left = { AnimatableDimension(0.0, DimensionUnit::PX), false };
     std::pair<AnimatableDimension, bool> right = { AnimatableDimension(0.0, DimensionUnit::PX), false };
