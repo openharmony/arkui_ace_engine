@@ -49,7 +49,7 @@ export struct ExceptionPrompt {
     // Click the text on the left to change into the connecting state
   }
   onConfigureCallback: () => void = () => {
-    // Click Set Network to open the Set network pop-up interface
+    // Click the icon button on the right for the callback
   }
 
   @Builder FirstBuilder() {
