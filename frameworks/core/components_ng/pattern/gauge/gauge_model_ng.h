@@ -43,6 +43,19 @@ public:
     void ResetShadowOptions() override;
     void ResetIndicatorIconPath() override;
     void ResetIndicatorSpace() override;
+
+    static void SetValue(FrameNode* frameNode, float value);
+    static void SetStartAngle(FrameNode* frameNode, float value);
+    static void SetEndAngle(FrameNode* frameNode, float value);
+    static void SetGaugeStrokeWidth(FrameNode* frameNode, const Dimension& strokeWidth);
+    static void SetShadowOptions(FrameNode* frameNode, const GaugeShadowOptions& shadowOptions);
+    static void ResetShadowOptions(FrameNode* frameNode);
+    static void SetIsShowIndicator(FrameNode* frameNode, bool isShowIndicator);
+    static void SetIndicatorIconPath(FrameNode* frameNode,
+        const std::string& iconPath, const std::string& bundleName, const std::string& moduleName);
+    static void ResetIndicatorIconPath(FrameNode* frameNode);
+    static void SetIndicatorSpace(FrameNode* frameNode, const Dimension& space);
+    static void ResetIndicatorSpace(FrameNode* frameNode);
 };
 } // namespace OHOS::Ace::NG
 

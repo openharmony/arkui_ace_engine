@@ -141,4 +141,65 @@ void GaugeModelNG::ResetIndicatorSpace()
 {
     ACE_RESET_PAINT_PROPERTY_WITH_FLAG(GaugePaintProperty, IndicatorSpace, PROPERTY_UPDATE_RENDER);
 }
+
+void GaugeModelNG::SetValue(FrameNode* frameNode, float value)
+{
+    ACE_UPDATE_NODE_PAINT_PROPERTY(GaugePaintProperty, Value, value, frameNode);
+}
+
+void GaugeModelNG::SetStartAngle(FrameNode* frameNode, float value)
+{
+    ACE_UPDATE_NODE_PAINT_PROPERTY(GaugePaintProperty, StartAngle, value, frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(GaugeLayoutProperty, StartAngle, value, frameNode);
+}
+
+void GaugeModelNG::SetEndAngle(FrameNode* frameNode, float value)
+{
+    ACE_UPDATE_NODE_PAINT_PROPERTY(GaugePaintProperty, EndAngle, value, frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(GaugeLayoutProperty, EndAngle, value, frameNode);
+}
+
+void GaugeModelNG::SetGaugeStrokeWidth(FrameNode* frameNode, const Dimension& strokeWidth)
+{
+    ACE_UPDATE_NODE_PAINT_PROPERTY(GaugePaintProperty, StrokeWidth, strokeWidth, frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(GaugeLayoutProperty, StrokeWidth, strokeWidth, frameNode);
+}
+
+void GaugeModelNG::SetShadowOptions(FrameNode* frameNode, const GaugeShadowOptions& shadowOptions)
+{
+    ACE_UPDATE_NODE_PAINT_PROPERTY(GaugePaintProperty, ShadowOptions, shadowOptions, frameNode);
+}
+
+void GaugeModelNG::ResetShadowOptions(FrameNode* frameNode)
+{
+    ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(GaugePaintProperty, ShadowOptions, PROPERTY_UPDATE_RENDER, frameNode);
+}
+
+void GaugeModelNG::SetIsShowIndicator(FrameNode* frameNode, bool isShowIndicator)
+{
+    ACE_UPDATE_NODE_PAINT_PROPERTY(GaugePaintProperty, IsShowIndicator, isShowIndicator, frameNode);
+}
+
+void GaugeModelNG::SetIndicatorIconPath(FrameNode* frameNode,
+    const std::string& iconPath, const std::string& bundleName, const std::string& moduleName)
+{
+    ACE_UPDATE_NODE_PAINT_PROPERTY(
+        GaugePaintProperty, IndicatorIconSourceInfo, ImageSourceInfo(iconPath, bundleName, moduleName), frameNode);
+}
+
+void GaugeModelNG::ResetIndicatorIconPath(FrameNode* frameNode)
+{
+    ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(GaugePaintProperty, IndicatorIconSourceInfo,
+        PROPERTY_UPDATE_RENDER, frameNode);
+}
+
+void GaugeModelNG::SetIndicatorSpace(FrameNode* frameNode, const Dimension& space)
+{
+    ACE_UPDATE_NODE_PAINT_PROPERTY(GaugePaintProperty, IndicatorSpace, space, frameNode);
+}
+
+void GaugeModelNG::ResetIndicatorSpace(FrameNode* frameNode)
+{
+    ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(GaugePaintProperty, IndicatorSpace, PROPERTY_UPDATE_RENDER, frameNode);
+}
 } // namespace OHOS::Ace::NG
