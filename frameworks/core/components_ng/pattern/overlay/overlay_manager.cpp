@@ -2351,7 +2351,7 @@ void OverlayManager::BindSheet(bool isShow, std::function<void(const std::string
 
 void OverlayManager::CloseSheet(int32_t targetId)
 {
-    if (!modalStack_.empty()) {
+    if (modalStack_.empty()) {
         return;
     }
     if (sheetMap_.empty() || !sheetMap_.count(targetId)) {

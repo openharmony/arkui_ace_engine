@@ -271,6 +271,9 @@ public:
 
     void ProcessColumnRect(float height = 0.0f, bool isLargeHeight = false);
 
+protected:
+    void OnDetachFromFrameNode(FrameNode* frameNode) override;
+
 private:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
@@ -284,7 +287,6 @@ private:
     void UpdateSheetTitle();
     RefPtr<RenderContext> GetRenderContext();
     bool PostTask(const TaskExecutor::Task& task);
-    OffsetT<Dimension> GetInvisibleOffset();
     void CheckSheetHeightChange();
     void InitSheetDetents();
     void HandleFitContontChange(float height);
@@ -326,6 +328,7 @@ private:
     float sheetOffsetY_ = 0.0f;
     bool isFirstInit_ = true;
     SheetType sheetType_ = SheetType::SHEET_BOTTOM;
+    bool windowChanged_ = false;
 
     std::string sheetThemeType_ = "auto";
 

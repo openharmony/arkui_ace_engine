@@ -151,9 +151,6 @@ OffsetF SheetPresentationLayoutAlgorithm::GetPopupStyleSheetOffset()
     auto targetSize = geometryNode->GetFrameSize();
     auto targetOffset = targetNode->GetPaintRectOffset();
     auto targetSpace = SHEET_TARGET_SPACE.ConvertToPx();
-    CHECK_NULL_RETURN(targetSpace, OffsetF());
-    auto sheetArrowHeight = SHEET_ARROW_HEIGHT.ConvertToPx();
-    CHECK_NULL_RETURN(sheetArrowHeight, OffsetF());
     float offsetX = targetOffset.GetX() + (targetSize.Width() - sheetWidth_) / SHEET_HALF_SIZE;
     float offsetY = targetOffset.GetY() + targetSize.Height() + targetSpace;
     sheetOffset.SetX(offsetX);
