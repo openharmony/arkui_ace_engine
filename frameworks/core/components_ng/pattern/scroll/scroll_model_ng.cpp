@@ -164,6 +164,47 @@ void ScrollModelNG::SetDisplayMode(int value)
     ACE_UPDATE_PAINT_PROPERTY(ScrollablePaintProperty, ScrollBarMode, displayMode);
 }
 
+void ScrollModelNG::SetScrollBar(FrameNode* frameNode, DisplayMode barState)
+{
+    ACE_UPDATE_NODE_PAINT_PROPERTY(ScrollablePaintProperty, ScrollBarMode, barState, frameNode);
+}
+
+void ScrollModelNG::SetNestedScroll(FrameNode* frameNode, const NestedScrollOptions& nestedOpt)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<ScrollPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetNestedScroll(nestedOpt);
+}
+
+void ScrollModelNG::SetFriction(FrameNode* frameNode, double friction)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<ScrollPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetFriction(friction);
+}
+
+void ScrollModelNG::SetScrollSnap(FrameNode* frameNode, ScrollSnapAlign scrollSnapAlign, const Dimension& intervalSize,
+    const std::vector<Dimension>& snapPaginations, const std::pair<bool, bool>& enableSnapToSide)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<ScrollPattern>();
+    CHECK_NULL_VOID(pattern);
+    if (pattern->GetScrollSnapAlign() != scrollSnapAlign) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(ScrollLayoutProperty, ScrollSnapAlign, scrollSnapAlign, frameNode);
+        pattern->SetScrollSnapUpdate(true);
+    }
+    pattern->SetIntervalSize(intervalSize);
+    pattern->SetSnapPaginations(snapPaginations);
+    pattern->SetEnableSnapToSide(enableSnapToSide);
+}
+
+void ScrollModelNG::SetScrollEnabled(FrameNode* frameNode, bool scrollEnabled)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(ScrollLayoutProperty, ScrollEnabled, scrollEnabled, frameNode);
+}
+
 void ScrollModelNG::SetScrollBarWidth(const Dimension& dimension)
 {
     ACE_UPDATE_PAINT_PROPERTY(ScrollablePaintProperty, ScrollBarWidth, dimension);
@@ -218,9 +259,9 @@ void ScrollModelNG::SetScrollSnap(ScrollSnapAlign scrollSnapAlign, const Dimensi
     pattern->SetEnableSnapToSide(enableSnapToSide);
 }
 
-void ScrollModelNG::SetScrollable(FrameNode* frameNode, uint32_t scrollDirection)
+void ScrollModelNG::SetAxis(FrameNode* frameNode, Axis axis)
 {
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(ScrollLayoutProperty, Axis, static_cast<Axis>(scrollDirection), frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(ScrollLayoutProperty, Axis, axis, frameNode);
 }
 
 void ScrollModelNG::SetScrollBarColor(FrameNode* frameNode, const Color& color)
@@ -235,10 +276,6 @@ void ScrollModelNG::SetScrollBarWidth(FrameNode* frameNode, const Dimension& dim
 
 void ScrollModelNG::SetEdgeEffect(FrameNode* frameNode, const EdgeEffect& edgeEffect, bool alwaysEnabled)
 {
-    CHECK_NULL_VOID(frameNode);
-    auto pattern = frameNode->GetPattern<ScrollablePattern>();
-    CHECK_NULL_VOID(pattern);
-    pattern->SetEdgeEffect(edgeEffect, alwaysEnabled);
-    frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    ScrollableModelNG::SetEdgeEffect(frameNode, edgeEffect, alwaysEnabled);
 }
 } // namespace OHOS::Ace::NG
