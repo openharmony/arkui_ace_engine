@@ -14,7 +14,6 @@
  */
 const START_TIME = 250;
 const END_TIME = 200;
-const HEIGHT = 80;
 const BORDER_RADIUS = 12;
 const OPACITY_NUM = .18;
 const DEFAULT_HEIGHT = 48;
@@ -33,23 +32,10 @@ export var MarginType;
     e[e.FIT_MARGIN=1] = "FIT_MARGIN"
 }(MarginType || (MarginType = {}));
 
-export var PromptType;
-!function(e){
-    e[e.DEFAULT_HIDE=0] = "DEFAULT_HIDE";
-    e[e.NETWORK_NOT_CONNECTED=1] = "NETWORK_NOT_CONNECTED";
-    e[e.NETWORK_CONNECTED_UNSTABLE=2] = "NETWORK_CONNECTED_UNSTABLE";
-    e[e.UNSTABLE_CONNECT_SERVER=3] = "UNSTABLE_CONNECT_SERVER";
-    e[e.CUSTOM_NETWORK_TIPS=4] = "CUSTOM_NETWORK_TIPS";
-    e[e.CUSTOM_TIPS=5] = "CUSTOM_TIPS"
-}(PromptType || (PromptType = {}));
-
 export class ExceptionPrompt extends ViewPU {
-    constructor(e, t, o, s = -1) {
-        super(e, o, s);
-        this.__type = new SynchedPropertySimpleOneWayPU(t.type, this, "type");
-        this.__options = new SynchedPropertyObjectOneWayPU(t.options, this, "options");
-        this.__isShowStatus = new ObservedPropertySimplePU(!1, this, "isShowStatus");
-        this.__isState = new ObservedPropertySimplePU(!1, this, "isState");
+    constructor(e, o, t, i = -1) {
+        super(e, t, i);
+        this.__options = new SynchedPropertyObjectOneWayPU(o.options, this, "options");
         this.tipText = "";
         this.touchBackgroundColor = {
             id: -1,
@@ -58,92 +44,32 @@ export class ExceptionPrompt extends ViewPU {
             bundleName: "",
             moduleName: ""
         };
-        this.setNetwork = {
-            id: -1,
-            type: 10003,
-            params: ["sys.string.ohos_set_network"],
-            bundleName: "",
-            moduleName: ""
-        };
-        this.__errorDefaultObj = new ObservedPropertyObjectPU({
-            networkConnected: {
-                id: -1,
-                type: 10003,
-                params: ["sys.string.ohos_network_not_connected"],
-                bundleName: "",
-                moduleName: ""
-            },
-            networkConnectedUnstable: {
-                id: -1,
-                type: 10003,
-                params: ["sys.string.ohos_network_connected_unstable"],
-                bundleName: "",
-                moduleName: ""
-            },
-            unstableConnectServer: {
-                id: -1,
-                type: 10003,
-                params: ["sys.string.ohos_unstable_connect_server"],
-                bundleName: "",
-                moduleName: ""
-            },
-            customNetwork: {
-                id: -1,
-                type: 10003,
-                params: ["sys.string.ohos_custom_network_tips_left"],
-                bundleName: "",
-                moduleName: ""
-            },
-            customTips: ""
-        }, this, "errorDefaultObj");
         this.onReconnectionCallback = () => {
         };
         this.onConfigureCallback = () => {
         };
-        this.setInitiallyProvidedValue(t);
-        this.declareWatch("type", this.typeStatusChange)
+        this.setInitiallyProvidedValue(o)
     }
 
     setInitiallyProvidedValue(e) {
-        void 0 !== e.isShowStatus && (this.isShowStatus = e.isShowStatus);
-        void 0 !== e.isState && (this.isState = e.isState);
         void 0 !== e.tipText && (this.tipText = e.tipText);
         void 0 !== e.touchBackgroundColor && (this.touchBackgroundColor = e.touchBackgroundColor);
-        void 0 !== e.setNetwork && (this.setNetwork = e.setNetwork);
-        void 0 !== e.errorDefaultObj && (this.errorDefaultObj = e.errorDefaultObj);
         void 0 !== e.onReconnectionCallback && (this.onReconnectionCallback = e.onReconnectionCallback);
         void 0 !== e.onConfigureCallback && (this.onConfigureCallback = e.onConfigureCallback)
     }
 
     updateStateVars(e) {
-        this.__type.reset(e.type);
         this.__options.reset(e.options)
     }
 
     purgeVariableDependenciesOnElmtId(e) {
-        this.__type.purgeDependencyOnElmtId(e);
-        this.__options.purgeDependencyOnElmtId(e);
-        this.__isShowStatus.purgeDependencyOnElmtId(e);
-        this.__isState.purgeDependencyOnElmtId(e);
-        this.__errorDefaultObj.purgeDependencyOnElmtId(e)
+        this.__options.purgeDependencyOnElmtId(e)
     }
 
     aboutToBeDeleted() {
-        this.__type.aboutToBeDeleted();
         this.__options.aboutToBeDeleted();
-        this.__isShowStatus.aboutToBeDeleted();
-        this.__isState.aboutToBeDeleted();
-        this.__errorDefaultObj.aboutToBeDeleted();
         SubscriberManager.Get().delete(this.id__());
         this.aboutToBeDeletedInternal()
-    }
-
-    get type() {
-        return this.__type.get()
-    }
-
-    set type(e) {
-        this.__type.set(e)
     }
 
     get options() {
@@ -154,78 +80,8 @@ export class ExceptionPrompt extends ViewPU {
         this.__options.set(e)
     }
 
-    get isShowStatus() {
-        return this.__isShowStatus.get()
-    }
-
-    set isShowStatus(e) {
-        this.__isShowStatus.set(e)
-    }
-
-    get isState() {
-        return this.__isState.get()
-    }
-
-    set isState(e) {
-        this.__isState.set(e)
-    }
-
-    get errorDefaultObj() {
-        return this.__errorDefaultObj.get()
-    }
-
-    set errorDefaultObj(e) {
-        this.__errorDefaultObj.set(e)
-    }
-
-    setText() {
-        this.type === PromptType.NETWORK_NOT_CONNECTED && (this.tipText = this.errorDefaultObj.networkConnected);
-        this.type === PromptType.NETWORK_CONNECTED_UNSTABLE && (this.tipText = this.errorDefaultObj.networkConnectedUnstable);
-        this.type === PromptType.UNSTABLE_CONNECT_SERVER && (this.tipText = this.errorDefaultObj.unstableConnectServer);
-        this.type === PromptType.CUSTOM_NETWORK_TIPS && (this.tipText = this.options.networkTip || this.errorDefaultObj.customNetwork);
-        this.type === PromptType.CUSTOM_TIPS && (this.tipText = this.options.tip || this.errorDefaultObj.customTips)
-    }
-
-    typeStatusChange(e) {
-        if (this.type !== PromptType.DEFAULT_HIDE) {
-            this.isState && this.type !== PromptType.NETWORK_NOT_CONNECTED && this.type !== PromptType.NETWORK_CONNECTED_UNSTABLE && setTimeout((() => {
-                this.isState = !1
-            }), 200);
-            this.type !== PromptType.NETWORK_NOT_CONNECTED && this.type !== PromptType.NETWORK_CONNECTED_UNSTABLE || (this.isShowStatus ? setTimeout((() => {
-                this.isState = !0
-            }), 250) : this.isState = !0);
-            if (this.isShowStatus) {
-                this.isShowStatus = !1;
-                setTimeout((() => {
-                    this.setText();
-                    this.isShowStatus = !0
-                }), 250)
-            } else {
-                this.setText();
-                this.isShowStatus = !0
-            }
-        } else {
-            this.isShowStatus = !1;
-            setTimeout((() => {
-                this.isState = !1
-            }), 250)
-        }
-    }
-
-    aboutToAppear() {
-        if (this.type !== PromptType.DEFAULT_HIDE) {
-            this.isShowStatus = !0;
-            this.setText()
-        }
-        this.type !== PromptType.NETWORK_NOT_CONNECTED && this.type !== PromptType.NETWORK_CONNECTED_UNSTABLE || (this.isState = !0)
-    }
-
-    isOneColum() {
-        return this.type === PromptType.UNSTABLE_CONNECT_SERVER || this.type === PromptType.CUSTOM_NETWORK_TIPS
-    }
-
     FirstBuilder(e = null) {
-        this.observeComponentCreation(((e, t) => {
+        this.observeComponentCreation(((e, o) => {
             ViewStackProcessor.StartGetAccessRecordingFor(e);
             Column.create();
             Column.height("100%");
@@ -238,14 +94,14 @@ export class ExceptionPrompt extends ViewPU {
                 bundleName: "",
                 moduleName: ""
             });
-            t || Column.pop();
+            o || Column.pop();
             ViewStackProcessor.StopGetAccessRecording()
         }));
         Column.pop()
     }
 
     SecondBuilder(e = null) {
-        this.observeComponentCreation(((e, t) => {
+        this.observeComponentCreation(((e, o) => {
             ViewStackProcessor.StartGetAccessRecordingFor(e);
             Column.create();
             Column.height("100%");
@@ -261,14 +117,14 @@ export class ExceptionPrompt extends ViewPU {
             Column.opacity(.18);
             Column.position({});
             Column.zIndex(999);
-            t || Column.pop();
+            o || Column.pop();
             ViewStackProcessor.StopGetAccessRecording()
         }));
         Column.pop()
     }
 
     TextBuilder(e = null) {
-        this.observeComponentCreation(((e, t) => {
+        this.observeComponentCreation(((e, o) => {
             ViewStackProcessor.StartGetAccessRecordingFor(e);
             Flex.create({ justifyContent: FlexAlign.SpaceBetween, alignItems: ItemAlign.Center });
             Flex.padding({ left: 12, right: 4 });
@@ -276,86 +132,77 @@ export class ExceptionPrompt extends ViewPU {
             Flex.zIndex(999);
             Flex.width("100%");
             Flex.height("100%");
-            t || Flex.pop();
+            o || Flex.pop();
             ViewStackProcessor.StopGetAccessRecording()
         }));
-        this.observeComponentCreation(((e, t) => {
+        this.observeComponentCreation(((e, o) => {
             ViewStackProcessor.StartGetAccessRecordingFor(e);
-            If.create();
-            this.isShowStatus ? this.ifElseBranchUpdateFunction(0, (() => {
-                this.observeComponentCreation(((e, t) => {
-                    ViewStackProcessor.StartGetAccessRecordingFor(e);
-                    Flex.create({ alignItems: ItemAlign.Center });
-                    Flex.width("100%");
-                    Flex.height("100%");
-                    Flex.onClick((() => {
-                        this.options.hardwareStatus === HardwareStatus.ON && this.onReconnectionCallback()
-                    }));
-                    t || Flex.pop();
-                    ViewStackProcessor.StopGetAccessRecording()
-                }));
-                this.observeComponentCreation(((e, t) => {
-                    var o;
-                    ViewStackProcessor.StartGetAccessRecordingFor(e);
-                    Image.create(null !== (o = this.options.icon) && void 0 !== o ? o : {
-                                                                                            id: -1,
-                                                                                            type: 2e4,
-                                                                                            params: ["sys.media.ohos_ic_public_fail"],
-                                                                                            bundleName: "",
-                                                                                            moduleName: ""
-                                                                                        });
-                    Image.width("24vp");
-                    Image.height("24vp");
-                    Image.objectFit(ImageFit.Contain);
-                    Image.fillColor({
-                        id: -1,
-                        type: 10001,
-                        params: ["sys.color.ohos_id_color_warning"],
-                        bundleName: "",
-                        moduleName: ""
-                    });
-                    t || Image.pop();
-                    ViewStackProcessor.StopGetAccessRecording()
-                }));
-                this.observeComponentCreation(((e, t) => {
-                    ViewStackProcessor.StartGetAccessRecordingFor(e);
-                    Text.create(this.tipText);
-                    Text.fontSize({
-                        id: -1,
-                        type: 10002,
-                        params: ["sys.float.ohos_id_text_size_body1"],
-                        bundleName: "",
-                        moduleName: ""
-                    });
-                    Text.fontColor({
-                        id: -1,
-                        type: 10001,
-                        params: ["sys.color.ohos_id_color_warning"],
-                        bundleName: "",
-                        moduleName: ""
-                    });
-                    Text.textOverflow({ overflow: TextOverflow.Ellipsis });
-                    Text.maxLines(2);
-                    Text.margin({ left: 16, right: 16 });
-                    t || Text.pop();
-                    ViewStackProcessor.StopGetAccessRecording()
-                }));
-                Text.pop();
-                Flex.pop()
-            })) : If.branchId(1);
-            t || If.pop();
+            Flex.create({ alignItems: ItemAlign.Center });
+            Flex.width("100%");
+            Flex.height("100%");
+            Flex.onClick((() => {
+                this.options.hardwareStatus === HardwareStatus.ON && this.onReconnectionCallback()
+            }));
+            o || Flex.pop();
             ViewStackProcessor.StopGetAccessRecording()
         }));
-        If.pop();
-        this.observeComponentCreation(((e, t) => {
+        this.observeComponentCreation(((e, o) => {
+            var t;
+            ViewStackProcessor.StartGetAccessRecordingFor(e);
+            Image.create(null !== (t = this.options.icon) && void 0 !== t ? t : {
+                                                                                    id: -1,
+                                                                                    type: 2e4,
+                                                                                    params: ["sys.media.ohos_ic_public_fail"],
+                                                                                    bundleName: "",
+                                                                                    moduleName: ""
+                                                                                });
+            Image.width("24vp");
+            Image.height("24vp");
+            Image.objectFit(ImageFit.Contain);
+            Image.fillColor({
+                id: -1,
+                type: 10001,
+                params: ["sys.color.ohos_id_color_warning"],
+                bundleName: "",
+                moduleName: ""
+            });
+            o || Image.pop();
+            ViewStackProcessor.StopGetAccessRecording()
+        }));
+        this.observeComponentCreation(((e, o) => {
+            ViewStackProcessor.StartGetAccessRecordingFor(e);
+            Text.create(this.options.tip);
+            Text.fontSize({
+                id: -1,
+                type: 10002,
+                params: ["sys.float.ohos_id_text_size_body1"],
+                bundleName: "",
+                moduleName: ""
+            });
+            Text.fontColor({
+                id: -1,
+                type: 10001,
+                params: ["sys.color.ohos_id_color_warning"],
+                bundleName: "",
+                moduleName: ""
+            });
+            Text.textOverflow({ overflow: TextOverflow.Ellipsis });
+            Text.maxLines(2);
+            Text.margin({ left: 16, right: 16 });
+            o || Text.pop();
+            ViewStackProcessor.StopGetAccessRecording()
+        }));
+        Text.pop();
+        Flex.pop();
+        this.observeComponentCreation(((e, o) => {
             ViewStackProcessor.StartGetAccessRecordingFor(e);
             If.create();
-            this.isState ? this.ifElseBranchUpdateFunction(0, (() => {
-                this.observeComponentCreation(((e, t) => {
+            this.options.isTouchShow ? this.ifElseBranchUpdateFunction(0, (() => {
+                this.observeComponentCreation(((e, o) => {
                     ViewStackProcessor.StartGetAccessRecordingFor(e);
                     Button.createWithChild({ stateEffect: !0, type: ButtonType.Normal });
                     Button.backgroundColor(this.touchBackgroundColor);
-                    Button.width(this.isState ? 120 : 0);
+                    Button.width(this.options.isTouchShow ? 120 : 0);
                     Button.height(32);
                     Button.borderRadius({
                         id: -1,
@@ -366,14 +213,16 @@ export class ExceptionPrompt extends ViewPU {
                     });
                     Button.padding({ right: 8, left: 8 });
                     Button.onTouch((e => {
-                        this.onConfigureCallback();
-                            e.type === TouchType.Down ? this.touchBackgroundColor = {
-                            id: -1,
-                            type: 10001,
-                            params: ["sys.color.ohos_id_color_click_effect"],
-                            bundleName: "",
-                            moduleName: ""
-                        } : e.type === TouchType.Up && (this.touchBackgroundColor = {
+                        if (e.type === TouchType.Down) {
+                            this.touchBackgroundColor = {
+                                id: -1,
+                                type: 10001,
+                                params: ["sys.color.ohos_id_color_click_effect"],
+                                bundleName: "",
+                                moduleName: ""
+                            };
+                            this.onConfigureCallback()
+                        } else e.type === TouchType.Up && (this.touchBackgroundColor = {
                             id: -1,
                             type: 10001,
                             params: ["sys.color.ohos_id_color_sub_background_transparent"],
@@ -381,18 +230,18 @@ export class ExceptionPrompt extends ViewPU {
                             moduleName: ""
                         })
                     }));
-                    t || Button.pop();
+                    o || Button.pop();
                     ViewStackProcessor.StopGetAccessRecording()
                 }));
-                this.observeComponentCreation(((e, t) => {
+                this.observeComponentCreation(((e, o) => {
                     ViewStackProcessor.StartGetAccessRecordingFor(e);
                     Row.create();
-                    t || Row.pop();
+                    o || Row.pop();
                     ViewStackProcessor.StopGetAccessRecording()
                 }));
-                this.observeComponentCreation(((e, t) => {
+                this.observeComponentCreation(((e, o) => {
                     ViewStackProcessor.StartGetAccessRecordingFor(e);
-                    Text.create(this.setNetwork);
+                    Text.create(this.options.touchText);
                     Text.fontSize({
                         id: -1,
                         type: 10002,
@@ -411,11 +260,11 @@ export class ExceptionPrompt extends ViewPU {
                     Text.padding(0);
                     Text.margin({ right: 4 });
                     Text.textAlign(TextAlign.End);
-                    t || Text.pop();
+                    o || Text.pop();
                     ViewStackProcessor.StopGetAccessRecording()
                 }));
                 Text.pop();
-                this.observeComponentCreation(((e, t) => {
+                this.observeComponentCreation(((e, o) => {
                     ViewStackProcessor.StartGetAccessRecordingFor(e);
                     Image.create({
                         id: -1,
@@ -433,13 +282,13 @@ export class ExceptionPrompt extends ViewPU {
                         bundleName: "",
                         moduleName: ""
                     });
-                    t || Image.pop();
+                    o || Image.pop();
                     ViewStackProcessor.StopGetAccessRecording()
                 }));
                 Row.pop();
                 Button.pop()
             })) : If.branchId(1);
-            t || If.pop();
+            o || If.pop();
             ViewStackProcessor.StopGetAccessRecording()
         }));
         If.pop();
@@ -447,17 +296,17 @@ export class ExceptionPrompt extends ViewPU {
     }
 
     initialRender() {
-        this.observeComponentCreation(((e, t) => {
+        this.observeComponentCreation(((e, o) => {
             ViewStackProcessor.StartGetAccessRecordingFor(e);
             Column.create();
             Column.width("100%");
-            Column.height(this.isOneColum() ? 48 : 58);
-            Column.position({ y: 80 });
+            Column.height(this.options.isTouchShow ? 58 : 48);
+            Column.position({ y: this.options.positionTop });
             Column.zIndex(999);
-            t || Column.pop();
+            o || Column.pop();
             ViewStackProcessor.StopGetAccessRecording()
         }));
-        this.observeComponentCreation(((e, t) => {
+        this.observeComponentCreation(((e, o) => {
             ViewStackProcessor.StartGetAccessRecordingFor(e);
             Stack.create();
             Stack.padding(this.options.marginState === MarginType.DEFAULT_MARGIN ? {
@@ -491,9 +340,9 @@ export class ExceptionPrompt extends ViewPU {
                                                                                                moduleName: ""
                                                                                            }
                                                                                        });
-            Stack.transition(TransitionEffect.OPACITY.animation({ duration: this.isShowStatus ? 250 : 200 }));
-            Stack.visibility(this.isShowStatus ? Visibility.Visible : Visibility.None);
-            t || Stack.pop();
+            Stack.transition(TransitionEffect.OPACITY.animation({ duration: this.options.isShow ? 250 : 200 }));
+            Stack.visibility(this.options.isShow ? Visibility.Visible : Visibility.None);
+            o || Stack.pop();
             ViewStackProcessor.StopGetAccessRecording()
         }));
         this.FirstBuilder.bind(this)();
