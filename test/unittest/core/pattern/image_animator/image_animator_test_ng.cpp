@@ -355,7 +355,6 @@ HWTEST_F(ImageAnimatorTestNg, ImageAnimatorTest004, TestSize.Level1)
     ImageAnimatorModelNG.SetOnStart(std::move(startEvent));
     auto element = ViewStackProcessor::GetInstance()->Finish();
     auto frameNode = AceType::DynamicCast<FrameNode>(element);
-    EXPECT_NE(frameNode, nullptr);
     EXPECT_EQ(frameNode->GetTag(), V2::IMAGE_ANIMATOR_ETS_TAG);
     auto eventHub = frameNode->GetEventHub<NG::ImageAnimatorEventHub>();
     EXPECT_NE(eventHub, nullptr);
@@ -367,7 +366,6 @@ HWTEST_F(ImageAnimatorTestNg, ImageAnimatorTest004, TestSize.Level1)
 
     RefPtr<ImageAnimatorPattern> imageAnimatorPattern =
         AceType::DynamicCast<OHOS::Ace::NG::ImageAnimatorPattern>(frameNode->GetPattern());
-    EXPECT_NE(imageAnimatorPattern, nullptr);
     imageAnimatorPattern->AttachToFrameNode(frameNode);
     imageAnimatorPattern->OnModifyDone();
     EXPECT_FALSE(startFlag);
@@ -396,6 +394,17 @@ HWTEST_F(ImageAnimatorTestNg, ImageAnimatorTest004, TestSize.Level1)
     size_t cacheImageNum = iTemp >= 50 ? 1 : 2;
     cacheImageNum = std::min(imageAnimatorPattern->images_.size() - 1, cacheImageNum);
     EXPECT_TRUE(imageAnimatorPattern->cacheImages_.size() >= cacheImageNum);
+
+    /**
+     * @tc.steps: step7. status_ is Running and isFormAnimationEnd_ is true
+     * @tc.expected: step7. formAnimationRemainder_ is DEFAULT_DURATION
+     */
+    auto pipeline = MockPipelineContext::GetCurrentContext();
+    pipeline->SetIsFormRender(true);
+    imageAnimatorPattern->status_ = Animator::Status::RUNNING;
+    imageAnimatorPattern->isFormAnimationEnd_ = true;
+    imageAnimatorPattern->OnModifyDone();
+    EXPECT_EQ(imageAnimatorPattern->formAnimationRemainder_, 1000);
 }
 
 /**
@@ -1121,5 +1130,156 @@ HWTEST_F(ImageAnimatorTestNg, ImageAnimatorTest018, TestSize.Level1)
     int32_t iIndex = 2;
     pattern_->UpdateCacheImageInfo(cTemp, iIndex);
     EXPECT_TRUE(iIndex >= static_cast<int32_t>(pattern_->images_.size()));
+}
+
+/**
+ * @tc.name: ImageAnimatorTest019
+ * @tc.desc: OnDirtyLayoutWrapperSwap
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageAnimatorTestNg, ImageAnimatorTest019, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create paramater
+     */
+    auto element = ViewStackProcessor::GetInstance()->Finish();
+    auto frameNode = AceType::DynamicCast<FrameNode>(element);
+    RefPtr<ImageAnimatorPattern> imageAnimatorPattern =
+        AceType::DynamicCast<OHOS::Ace::NG::ImageAnimatorPattern>(frameNode->GetPattern());
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(nullptr, nullptr, nullptr);
+    DirtySwapConfig config;
+
+    /**
+     * @tc.steps: step2. set isLayouted_ true
+     */
+    imageAnimatorPattern->isLayouted_ = true;
+
+    /**
+     * @tc.steps: step3. call OnDirtyLayoutWrapperSwap
+     * @tc.expected: false
+     */
+    bool bResult = imageAnimatorPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
+    EXPECT_FALSE(bResult);
+
+    // fixedSize and images_.size() both are false
+    imageAnimatorPattern->isLayouted_ = false;
+    imageAnimatorPattern->fixedSize_ = false;
+    imageAnimatorPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
+
+    /**
+     * @tc.steps: step4. Create ImageAnimator
+     * @tc.expected: Create Success
+     */
+    CreateImageAnimator(1);
+    EXPECT_EQ(imageAnimatorPattern->images_.size(), 1);
+    imageAnimatorPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
+
+    /**
+     * @tc.steps: step5. fixedSize and is Reverse both ture
+     * @tc.expected: GetNextIndex(0) is 0
+     */
+    imageAnimatorPattern->fixedSize_ = true;
+    imageAnimatorPattern->isReverse_ = true;
+    imageAnimatorPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
+    EXPECT_EQ(imageAnimatorPattern->GetNextIndex(0), 0);
+    EXPECT_EQ(imageAnimatorPattern->GetNextIndex(1), 0);
+}
+
+/**
+ * @tc.name: ImageAnimatorTest020
+ * @tc.desc: Update duration By Remainder and check duration is correct assign
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageAnimatorTestNg, ImageAnimatorTest020, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create imageAnimator
+     * @tc.expected: pipeline and animator is not nullptr
+     */
+    CreateImageAnimator(0);
+    auto pipeline = MockPipelineContext::GetCurrentContext();
+    auto animator = pattern_->animator_;
+
+    /**
+     * @tc.steps: step2. set is form render and set duration
+     * @tc.expected: check duration is correct assign
+     */
+    pipeline->SetIsFormRender(true);
+    pattern_->isFormAnimationStart_ = true;
+    pattern_->formAnimationRemainder_ = 1;
+    pattern_->SetDuration(DURATION_DEFAULT);
+    pattern_->UpdateFormDurationByRemainder();
+    EXPECT_EQ(animator->GetDuration(), pattern_->formAnimationRemainder_);
+
+    /**
+     * @tc.steps: step3. formAnimationRemainder_ is 0
+     * @tc.expected: isFormAnimationEnd_ is true
+     */
+    pattern_->formAnimationRemainder_ = 0;
+    pattern_->UpdateFormDurationByRemainder();
+    EXPECT_TRUE(pattern_->isFormAnimationEnd_);
+}
+
+/**
+ * @tc.name: ImageAnimatorTest021
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageAnimatorTestNg, ImageAnimatorTest021, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. images size is 0.
+     * @tc.expected: do nothing
+     */
+    CreateImageAnimator(0);
+
+    /**
+     * @tc.steps: step2. SetShowingIndex() greater than images size-1.
+     * @tc.expected: nowImageIndex_ not change
+     */
+    CreateImageAnimator(1);
+    pattern_->SetShowingIndex(1);
+    EXPECT_EQ(pattern_->nowImageIndex_, 0);
+
+    /**
+     * @tc.steps: step3. set calcLayoutConstraint_ null
+     */
+    auto host = pattern_->GetHost();
+    auto& layoutProperty = host->layoutProperty_;
+    if (layoutProperty->GetCalcLayoutConstraint()) {
+        layoutProperty->calcLayoutConstraint_ = nullptr;
+    }
+
+    /**
+     * @tc.steps: step4. set images width not valid
+     * @tc.expected: maxWidth and maxHeight are not valid
+     */
+    for (auto& image : pattern_->images_) {
+        image.width = Dimension(0);
+    }
+    pattern_->AdaptSelfSize();
+
+    Dimension maxWidth;
+    Dimension maxHeight;
+    double maxWidthPx = 0.0;
+    double maxHeightPx = 0.0;
+    for (const auto& image : pattern_->images_) {
+        if (image.width.Unit() != DimensionUnit::PERCENT) {
+            auto widthPx = image.width.ConvertToPx();
+            if (widthPx > maxWidthPx) {
+                maxWidthPx = widthPx;
+                maxWidth = image.width;
+            }
+        }
+        if (image.height.Unit() != DimensionUnit::PERCENT) {
+            auto heightPx = image.height.ConvertToPx();
+            if (heightPx > maxHeightPx) {
+                maxHeightPx = heightPx;
+                maxHeight = image.height;
+            }
+        }
+    }
+    EXPECT_FALSE(maxWidth.IsValid());
+    EXPECT_TRUE(maxHeight.IsValid());
 }
 } // namespace OHOS::Ace::NG
