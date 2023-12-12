@@ -4780,8 +4780,7 @@ void RichEditorPattern::UpdateChildrenOffset()
         if (!child) {
             continue;
         }
-        auto imageSpanItem = AceType::DynamicCast<ImageSpanItem>(child);
-        if (imageSpanItem) {
+        if (AceType::InstanceOf<ImageSpanItem>(child) || AceType::InstanceOf<PlaceholderSpanItem>(child)) {
             placeholderIndex.emplace_back(child->placeholderIndex);
         }
     }
@@ -4797,8 +4796,7 @@ void RichEditorPattern::UpdateChildrenOffset()
         if (!childNode) {
             continue;
         }
-        auto pattern = childNode->GetPattern<ImagePattern>();
-        if (!pattern) {
+        if (!(childNode->GetPattern<ImagePattern>() || childNode->GetPattern<PlaceholderSpanPattern>())) {
             continue;
         }
         if (index >= rectsForPlaceholders.size()) {
