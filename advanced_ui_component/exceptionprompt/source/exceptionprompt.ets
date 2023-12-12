@@ -44,9 +44,8 @@ export interface PromptOptions {
 @Component
 export struct ExceptionPrompt {
   @Prop options: PromptOptions
-  tipText: ResourceStr = ''
   touchBackgroundColor: Resource = $r('sys.color.ohos_id_color_sub_background_transparent')
-  onReconnectionCallback: () => void = () => {
+  onClickTextCallback: () => void = () => {
     // Click the text on the left to change into the connecting state
   }
   onConfigureCallback: () => void = () => {
@@ -92,7 +91,7 @@ export struct ExceptionPrompt {
       .height('100%')
       .onClick(() => {
         if (this.options.hardwareStatus === HardwareStatus.ON) {
-          this.onReconnectionCallback() //Click the text on the left to change into the connecting state
+          this.onClickTextCallback() //Click the callback of the prompt text
         }
       })
 
@@ -124,7 +123,7 @@ export struct ExceptionPrompt {
 
           if (event.type === TouchType.Down) {
             this.touchBackgroundColor = $r('sys.color.ohos_id_color_click_effect')
-            this.onConfigureCallback() //Click Set Network to open the Set network pop-up interface
+            this.onConfigureCallback() //Click the icon button on the right for the callback
           } else if (event.type === TouchType.Up) {
             this.touchBackgroundColor = $r('sys.color.ohos_id_color_sub_background_transparent')
 
@@ -134,10 +133,7 @@ export struct ExceptionPrompt {
       }
 
     }
-    .padding({
-      left: $r('sys.float.ohos_id_notification_margin_start'),
-      right: $r('sys.float.ohos_id_text_paragraph_margin_s')
-    })
+    .padding({ left: $r('sys.float.ohos_id_notification_margin_start'), right: $r('sys.float.ohos_id_text_paragraph_margin_s') })
     .position({})
     .zIndex(ZINDEX_NUM)
     .width('100%')
@@ -151,13 +147,7 @@ export struct ExceptionPrompt {
         this.SecondBuilder()
         this.TextBuilder()
       }
-      .padding(this.options.marginState === MarginType.DEFAULT_MARGIN ? {
-                                                                          left: $r('sys.float.ohos_id_card_margin_start'),
-                                                                          right: $r('sys.float.ohos_id_card_margin_end')
-                                                                        } : {
-                                                                              left: $r('sys.float.ohos_id_max_padding_start'),
-                                                                              right: $r('sys.float.ohos_id_max_padding_end')
-                                                                            })
+      .padding(this.options.marginState === MarginType.DEFAULT_MARGIN ? { left: $r('sys.float.ohos_id_card_margin_start'), right: $r('sys.float.ohos_id_card_margin_end') } : { left: $r('sys.float.ohos_id_max_padding_start'), right: $r('sys.float.ohos_id_max_padding_end') })
       .transition(
         TransitionEffect.OPACITY.animation({
           duration: this.options.isShow ? START_TIME : END_TIME
