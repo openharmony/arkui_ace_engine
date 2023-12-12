@@ -898,6 +898,7 @@ HWTEST_F(StageTestNg, PagePatternTest001, TestSize.Level1)
      * @tc.expected: The callback won't be executed.
      */
     pattern.SetFirstBuildCallback(nullptr);
+    EXPECT_EQ(flag, 2);
 }
 
 /**
