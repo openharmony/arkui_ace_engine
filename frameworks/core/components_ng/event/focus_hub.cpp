@@ -190,17 +190,15 @@ bool FocusHub::RequestFocusImmediately(bool isJudgeRootTree)
 
     auto parent = GetParentFocusHub();
     if (parent) {
+        auto mainView = GetCurrentMainView();
+        auto mainViewRootScope = mainView ? mainView->GetMainViewRootScope() : nullptr;
+        if (mainViewRootScope && parent == mainViewRootScope) {
+            mainView->SetIsViewRootScopeFocused(mainViewRootScope, false);
+        }
         parent->SwitchFocus(AceType::Claim(this));
     }
 
     HandleFocus();
-    auto mainView = GetCurrentMainView();
-    if (mainView && parent) {
-        auto mainViewRootScope = mainView->GetMainViewRootScope();
-        if (mainViewRootScope && parent == mainViewRootScope) {
-            mainView->SetIsViewRootScopeFocused(mainViewRootScope, false);
-        }
-    }
     return true;
 }
 
