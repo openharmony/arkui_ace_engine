@@ -631,7 +631,7 @@ void Scrollable::HandleDragEnd(const GestureEvent& info)
     double mainPosition = GetMainOffset(Offset(info.GetGlobalPoint().GetX(), info.GetGlobalPoint().GetY()));
     if (!moved_ || info.GetInputEventType() == InputEventType::AXIS) {
         if (calePredictSnapOffsetCallback_) {
-            std::optional<float> predictSnapOffset = calePredictSnapOffsetCallback_(0.0f);
+            std::optional<float> predictSnapOffset = calePredictSnapOffsetCallback_(0.0f, 0.0, 0.0);
             if (predictSnapOffset.has_value() && !NearZero(predictSnapOffset.value())) {
                 currentPos_ = mainPosition;
                 ProcessScrollSnapSpringMotion(predictSnapOffset.value(), correctVelocity);
@@ -682,26 +682,22 @@ void Scrollable::StartScrollAnimation(float mainPosition, float correctVelocity)
     }
     if (calePredictSnapOffsetCallback_) {
         std::optional<float> predictSnapOffset =
-            calePredictSnapOffsetCallback_(motion_->GetFinalPosition() - mainPosition);
+          calePredictSnapOffsetCallback_(motion_->GetFinalPosition() - mainPosition, GetDragOffset(), correctVelocity);
         if (predictSnapOffset.has_value() && !NearZero(predictSnapOffset.value())) {
             currentPos_ = mainPosition;
             ProcessScrollSnapSpringMotion(predictSnapOffset.value(), correctVelocity);
             return;
         }
     }
-
     if (scrollSnapCallback_ && scrollSnapCallback_(motion_->GetFinalPosition() - mainPosition, correctVelocity)) {
         currentVelocity_ = 0.0;
         return;
     }
-
     // change motion param when list item need to be center of screen on watch
     FixScrollMotion(mainPosition);
-
     // Resets values.
     currentPos_ = mainPosition;
     currentVelocity_ = 0.0;
-
     // Starts motion.
     controller_->ClearStopListeners();
     controller_->AddStopListener([weak = AceType::WeakClaim(this)]() {
@@ -999,7 +995,7 @@ void Scrollable::ProcessScrollMotionStop()
 {
     if (needScrollSnapChange_ && calePredictSnapOffsetCallback_ && motion_) {
         needScrollSnapChange_ = false;
-        auto predictSnapOffset = calePredictSnapOffsetCallback_(motion_->GetFinalPosition() - currentPos_);
+        auto predictSnapOffset = calePredictSnapOffsetCallback_(motion_->GetFinalPosition() - currentPos_, 0.0, 0.0);
         if (predictSnapOffset.has_value() && !NearZero(predictSnapOffset.value())) {
             ProcessScrollSnapSpringMotion(predictSnapOffset.value(), currentVelocity_);
             return;

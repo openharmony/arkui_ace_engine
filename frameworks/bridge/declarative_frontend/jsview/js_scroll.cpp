@@ -312,6 +312,7 @@ void JSScroll::JSBind(BindingTarget globalObj)
     JSClass<JSScroll>::StaticMethod("friction", &JSScroll::SetFriction);
     JSClass<JSScroll>::StaticMethod("scrollSnap", &JSScroll::SetScrollSnap);
     JSClass<JSScroll>::StaticMethod("clip", &JSScrollable::JsClip);
+    JSClass<JSScroll>::StaticMethod("enablePaging", &JSScroll::SetEnablePaging);
     JSClass<JSScroll>::InheritAndBind<JSContainerBase>(globalObj);
 }
 
@@ -447,5 +448,13 @@ void JSScroll::SetScrollSnap(const JSCallbackInfo& args)
     std::pair<bool, bool> enableSnapToSide = { enableSnapToStart, enableSnapToEnd };
     ScrollModel::GetInstance()->SetScrollSnap(
         static_cast<ScrollSnapAlign>(snapAlign), intervalSize, snapPaginations, enableSnapToSide);
+}
+
+void JSScroll::SetEnablePaging(const JSCallbackInfo& args)
+{
+    if (args.Length() < 1 || !args[0]->IsBoolean()) {
+        return;
+    }
+    ScrollModel::GetInstance()->SetEnablePaging(args[0]->ToBoolean());
 }
 } // namespace OHOS::Ace::Framework

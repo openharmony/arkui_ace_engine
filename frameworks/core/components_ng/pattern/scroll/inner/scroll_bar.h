@@ -472,6 +472,26 @@ public:
         dragFRCSceneCallback_ = std::move(dragFRCSceneCallback);
     }
 
+    double GetMainOffset(const Offset& offset) const
+    {
+        return positionMode_ == PositionMode::BOTTOM ? offset.GetX() : offset.GetY();
+    }
+
+    void SetDragStartPosition(double position)
+    {
+        dragStartPosition_ = position;
+    }
+
+    void SetDragEndPosition(double position)
+    {
+        dragEndPosition_ = position;
+    }
+
+    double GetDragOffset()
+    {
+        return dragEndPosition_ - dragStartPosition_;
+    }
+
 protected:
     void InitTheme();
 
@@ -523,6 +543,8 @@ private:
     double barRegionSize_ = 0.0;
     double friction_ = BAR_FRICTION;
     double frictionPosition_ = 0.0;
+    double dragStartPosition_ = 0.0;
+    double dragEndPosition_ = 0.0;
 
     bool isScrollable_ = false;
 

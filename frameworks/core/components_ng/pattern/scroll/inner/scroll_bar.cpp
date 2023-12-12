@@ -498,6 +498,7 @@ void ScrollBar::HandleDragStart(const GestureEvent& info)
             dragFRCSceneCallback_(0, NG::SceneStatus::START);
         }
     }
+    SetDragStartPosition(GetMainOffset(Offset(info.GetGlobalPoint().GetX(), info.GetGlobalPoint().GetY())));
     isDriving_ = true;
 }
 
@@ -529,6 +530,7 @@ void ScrollBar::HandleDragEnd(const GestureEvent& info)
         isDriving_ = false;
         return;
     }
+    SetDragEndPosition(GetMainOffset(Offset(info.GetGlobalPoint().GetX(), info.GetGlobalPoint().GetY())));
     frictionPosition_ = 0.0;
     if (frictionMotion_) {
         frictionMotion_->Reset(friction_, 0, velocity);
@@ -541,7 +543,8 @@ void ScrollBar::HandleDragEnd(const GestureEvent& info)
         });
     }
     if (calePredictSnapOffsetCallback_ && startScrollSnapMotionCallback_) {
-        auto predictSnapOffset = calePredictSnapOffsetCallback_(CalcPatternOffset(frictionMotion_->GetFinalPosition()));
+        auto predictSnapOffset = calePredictSnapOffsetCallback_(CalcPatternOffset(frictionMotion_->GetFinalPosition()),
+                                                                CalcPatternOffset(GetDragOffset()), -velocity);
         // If snap scrolling, predictSnapOffset will has a value.
         if (predictSnapOffset.has_value() && !NearZero(predictSnapOffset.value())) {
             LOGD("ScrollBar::HandleDragEnd predictSnapOffset:%{public}f", predictSnapOffset.value());

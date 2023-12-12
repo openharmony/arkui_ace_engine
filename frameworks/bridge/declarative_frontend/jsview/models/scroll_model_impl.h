@@ -52,6 +52,7 @@ public:
     void SetFriction(double friction) override {};
     void SetScrollSnap(ScrollSnapAlign scrollSnapAlign, const Dimension& intervalSize,
         const std::vector<Dimension>& snapPaginations, const std::pair<bool, bool>& enableSnapToSide) override {};
+    void SetEnablePaging(bool enablePaging) override {};
 };
 
 } // namespace OHOS::Ace::Framework

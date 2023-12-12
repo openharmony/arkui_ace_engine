@@ -49,6 +49,12 @@ enum class ScrollSnapAlign {
     END,
 };
 
+enum class ScrollPagingStatus {
+    NONE = 0,
+    INVALID,
+    VALID,
+};
+
 struct ScrollInfo {
     Dimension dx;
     Dimension dy;
@@ -118,7 +124,8 @@ using OnScrollIndexEvent = std::function<void(int32_t, int32_t, int32_t)>;
 
 using ScrollPositionCallback = std::function<bool(double, int32_t source)>;
 using ScrollEndCallback = std::function<void()>;
-using CalePredictSnapOffsetCallback = std::function<std::optional<float>(float delta)>;
+using CalePredictSnapOffsetCallback =
+                std::function<std::optional<float>(float delta, double dragDistance, double velocity)>;
 using StartScrollSnapMotionCallback = std::function<void(float scrollSnapDelta, float scrollSnapVelocity)>;
 } // namespace OHOS::Ace
 

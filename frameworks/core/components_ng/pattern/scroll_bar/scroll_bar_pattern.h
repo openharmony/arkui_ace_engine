@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SCROLL_BAR_SCROLL_BAR_PATTERN_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SCROLL_BAR_SCROLL_BAR_PATTERN_H
 
+#include "base/geometry/axis.h"
 #include "base/utils/utils.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/pattern/pattern.h"
@@ -160,6 +161,26 @@ public:
     void OnCollectTouchTarget(const OffsetF& coordinateOffset,
         const GetEventTargetImpl& getEventTargetImpl, TouchTestResult& result);
 
+    double GetMainOffset(const Offset& offset) const
+    {
+        return axis_ == Axis::HORIZONTAL ? offset.GetX() : offset.GetY();
+    }
+
+    void SetDragStartPosition(double position)
+    {
+        dragStartPosition_ = position;
+    }
+
+    void SetDragEndPosition(double position)
+    {
+        dragEndPosition_ = position;
+    }
+
+    double GetDragOffset()
+    {
+        return dragEndPosition_ - dragStartPosition_;
+    }
+
 private:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
@@ -185,6 +206,8 @@ private:
     float scrollOffset_ = 0.0f;
     float friction_ = BAR_FRICTION;
     float frictionPosition_ = 0.0;
+    double dragStartPosition_ = 0.0;
+    double dragEndPosition_ = 0.0;
 
     float childOffset_ = 0.0f;
     RefPtr<PanRecognizer> panRecognizer_;
