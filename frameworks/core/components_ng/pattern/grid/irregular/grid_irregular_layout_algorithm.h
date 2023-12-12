@@ -36,11 +36,14 @@ private:
     void Init(const RefPtr<GridLayoutProperty>& props);
     void LoadChild(LayoutWrapper* wrapper,int32_t index);
 
+    void RemoveOutOfBoundChildren();
+    std::vector<float> CalculateCrossPositions();
+
     LayoutWrapper* wrapper_ = nullptr;
 
     std::vector<float> crossLens_;
     float crossGap_ = 0.0f;
-    float mainGap_ = 0.0f;
+    float mainGap_= 0.0f;
 
     ACE_DISALLOW_COPY_AND_MOVE(GridIrregularLayout);
 };

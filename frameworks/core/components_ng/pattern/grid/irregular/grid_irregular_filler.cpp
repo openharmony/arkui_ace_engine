@@ -29,18 +29,16 @@ bool GridIrregularFiller::IsFull(float targetLen)
     return length_ > targetLen || info_->endIndex_ < wrapper_->GetTotalChildCount() - 1;
 }
 
-float GridIrregularFiller::Fill(float targetLength, const std::vector<float>& crossLens)
+float GridIrregularFiller::Fill(float targetLength, const std::vector<float>& crossLens, float crossGap)
 {
     while (!IsFull(targetLength)) {
         auto [row, col] = LoadOne();
-        MeasureNewItem(crossLens, col);
+        MeasureNewItem(crossLens, col, crossGap);
     }
     return length_;
-    // GridItemFiller filler(&gridLayoutInfo_, wrapper);
-    // filler.Fill(targetLength);
 }
 
-bool GridIrregularFiller::ItemCanFit(const std::map<int, std::map<int, int>>::iterator& it, int32_t itemWidth)
+bool GridIrregularFiller::ItemCanFit(const decltype(GridLayoutInfo::gridMatrix_)::iterator& it, int32_t itemWidth)
 {
     return it == info_->gridMatrix_.end() || it->second.size() + itemWidth <= info_->crossCount_;
 }
@@ -76,13 +74,13 @@ std::pair<int32_t, int32_t> GridIrregularFiller::LoadOne()
     }
     if (it == info_->gridMatrix_.end()) {
         // create a new line
-        info_->gridMatrix_[row] = std::map<int, int>();
+        info_->gridMatrix_[row] = {};
     }
 
     int32_t col = it->second.size();
     // top left square should be set to [idx], the rest to -1
-    for (int r = 0; r < size.rows; ++r) {
-        for (int c = 0; c < size.columns; ++c) {
+    for (int32_t r = 0; r < size.rows; ++r) {
+        for (int32_t c = 0; c < size.columns; ++c) {
             info_->gridMatrix_[row + r][col + c] = -1;
         }
     }
@@ -92,21 +90,20 @@ std::pair<int32_t, int32_t> GridIrregularFiller::LoadOne()
     return { row, col };
 }
 
-void GridIrregularFiller::MeasureNewItem(const std::vector<float>& crossLens, int32_t col)
+void GridIrregularFiller::MeasureNewItem(const std::vector<float>& crossLens, int32_t col, float crossGap)
 {
     auto child = wrapper_->GetOrCreateChildByIndex(info_->endIndex_);
-    auto props = wrapper_->GetLayoutProperty();
+    auto props = AceType::DynamicCast<GridLayoutProperty>(wrapper_->GetLayoutProperty());
     auto constraint = props->CreateChildConstraint();
 
     auto mainLen = Infinity<float>();
 
     auto itemSize = GetItemSize(info_->endIndex_);
     float crossLen = 0.0f;
-    for (int i = 0; i < itemSize.columns; ++i) {
+    for (int32_t i = 0; i < itemSize.columns; ++i) {
         crossLen += crossLens[i + col];
     }
-    crossLen += GridUtils::GetCrossGap(props, wrapper_->GetGeometryNode()->GetContentSize(), info_->axis_) *
-                (itemSize.columns - 1);
+    crossLen += crossGap * (itemSize.columns - 1);
 
     constraint.percentReference.SetCrossSize(crossLen, info_->axis_);
     if (info_->axis_ == Axis::VERTICAL) {
@@ -118,13 +115,14 @@ void GridIrregularFiller::MeasureNewItem(const std::vector<float>& crossLens, in
     }
 
     child->Measure(constraint);
+    child->Layout();
 
     float childHeight = child->GetGeometryNode()->GetMarginFrameSize().MainSize(info_->axis_);
     float mainGap = GridUtils::GetMainGap(props, wrapper_->GetGeometryNode()->GetContentSize(), info_->axis_);
     // spread height to each row. May be buggy?
     float heightPerRow = (childHeight - (mainGap * (itemSize.rows - 1))) / itemSize.rows;
     const int32_t& row = info_->endMainLineIndex_;
-    for (int i = 0; i < itemSize.rows; ++i) {
+    for (int32_t i = 0; i < itemSize.rows; ++i) {
         info_->lineHeightMap_[row] = std::max(info_->lineHeightMap_[row], heightPerRow);
         // increase length_ when current line is filled
         if (info_->gridMatrix_[row].size() == info_->crossCount_) {
