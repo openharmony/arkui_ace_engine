@@ -1819,24 +1819,20 @@ bool JsAccessibilityManager::SendAccessibilitySyncEvent(
     auto uiExtensionManager = ngPipeline->GetUIExtensionManager();
     CHECK_NULL_RETURN(uiExtensionManager, client->SendEvent(eventInfo));
     if (uiExtensionManager->IsWindowTypeUIExtension(pipeline)) {
-        std::vector<int32_t> uiExtensionIdLevelList;
-        return uiExtensionManager->SendAccessibilityEventInfo(eventInfo, uiExtensionIdLevelList, pipeline);
+        return uiExtensionManager->SendAccessibilityEventInfo(eventInfo, NG::UI_EXTENSION_UNKNOW_ID, pipeline);
     }
 #endif
     return client->SendEvent(eventInfo);
 }
 
 bool JsAccessibilityManager::TransferAccessibilityAsyncEvent(
-    const AccessibilityEventInfo& eventInfo, const std::vector<int32_t>& uiExtensionIdLevelList)
+    const AccessibilityEventInfo& eventInfo, int32_t uiExtensionOffset)
 {
 #ifdef WINDOW_SCENE_SUPPORTED
     if (!IsRegister()) {
         return false;
     }
 
-    if (uiExtensionIdLevelList.size() > NG::UI_EXTENSION_LEVEL_MAX) {
-        return false;
-    }
     auto client = AccessibilitySystemAbilityClient::GetInstance();
     CHECK_NULL_RETURN(client, false);
     bool isEnabled = false;
@@ -1853,28 +1849,19 @@ bool JsAccessibilityManager::TransferAccessibilityAsyncEvent(
     auto uiExtensionManager = ngPipeline->GetUIExtensionManager();
     CHECK_NULL_RETURN(uiExtensionManager, false);
     if (uiExtensionManager->IsWindowTypeUIExtension(pipeline)) {
-        return uiExtensionManager->SendAccessibilityEventInfo(eventInfo, uiExtensionIdLevelList, pipeline);
-    }
-    int32_t wrapLevelid = 0;
-    int32_t startLevelOffset = NG::UI_EXTENSION_OFFSET_MAX;
-    for (auto uiExtensionId : uiExtensionIdLevelList) {
-        if ((startLevelOffset == NG::UI_EXTENSION_OFFSET_MAX && uiExtensionId >= NG::UI_EXTENSION_ID_FIRST_MAX) ||
-            (startLevelOffset != NG::UI_EXTENSION_OFFSET_MAX && uiExtensionId >= NG::UI_EXTENSION_ID_FACTOR)) {
-            return false;
-        }
-        wrapLevelid = wrapLevelid + uiExtensionId * startLevelOffset;
-        startLevelOffset = startLevelOffset / NG::UI_EXTENSION_ID_FACTOR;
+        return uiExtensionManager->SendAccessibilityEventInfo(eventInfo,
+            uiExtensionOffset / NG::UI_EXTENSION_ID_FACTOR, pipeline);
     }
     AccessibilityEventInfo eventInfoNew = eventInfo;
-    eventInfoNew.SetSource(wrapLevelid + eventInfo.GetViewId());
+    eventInfoNew.SetSource(uiExtensionOffset + eventInfo.GetViewId());
 #endif
     return client->SendEvent(eventInfoNew);
 }
 
 void JsAccessibilityManager::SendExtensionAccessibilityEvent(
-    const AccessibilityEventInfo& eventInfo, const std::vector<int32_t>& uiExtensionIdLevelList)
+    const AccessibilityEventInfo& eventInfo, int32_t uiExtensionOffset)
 {
-    TransferAccessibilityAsyncEvent(eventInfo, uiExtensionIdLevelList);
+    TransferAccessibilityAsyncEvent(eventInfo, uiExtensionOffset);
 }
 
 void JsAccessibilityManager::SendAccessibilityAsyncEvent(const AccessibilityEvent& accessibilityEvent)

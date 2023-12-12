@@ -67,13 +67,13 @@ bool UIExtensionManager::IsWindowTypeUIExtension(const RefPtr<PipelineBase>& pip
 }
 
 bool UIExtensionManager::SendAccessibilityEventInfo(const Accessibility::AccessibilityEventInfo& eventInfo,
-    const std::vector<int32_t>& uiExtensionIdLevelList, const RefPtr<PipelineBase>& pipeline)
+    int32_t uiExtensionOffset, const RefPtr<PipelineBase>& pipeline)
 {
     CHECK_NULL_RETURN(pipeline, false);
     auto instanceId = pipeline->GetInstanceId();
     auto window = Platform::AceContainer::GetUIWindow(instanceId);
     CHECK_NULL_RETURN(window, false);
-    OHOS::Rosen::WMError ret = window->TransferAccessibilityEvent(eventInfo, uiExtensionIdLevelList);
+    OHOS::Rosen::WMError ret = window->TransferAccessibilityEvent(eventInfo, uiExtensionOffset);
     return ret == OHOS::Rosen::WMError::WM_OK;
 }
 

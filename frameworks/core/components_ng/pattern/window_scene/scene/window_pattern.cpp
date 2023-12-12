@@ -75,7 +75,7 @@ public:
     void OnExtensionDied() override {}
 
     void OnAccessibilityEvent(const Accessibility::AccessibilityEventInfo& info,
-        const std::vector<int32_t>& uiExtensionIdLevelVec) override {};
+        int32_t uiExtensionIdLevelVec) override {};
 
 private:
     WeakPtr<WindowPattern> windowPattern_;
