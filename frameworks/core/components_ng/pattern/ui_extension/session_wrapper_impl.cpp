@@ -365,11 +365,7 @@ void SessionWrapperImpl::NotifyDestroy()
         session_, std::move(destructionCallback_));
 }
 
-void SessionWrapperImpl::NotifyConfigurationUpdate()
-{
-    CHECK_NULL_VOID(session_);
-    session_->UpdateConfiguration();
-}
+void SessionWrapperImpl::NotifyConfigurationUpdate() {}
 /************************************************ End: The lifecycle interface ****************************************/
 
 /************************************************ Begin: The interface about the accessibility ************************/

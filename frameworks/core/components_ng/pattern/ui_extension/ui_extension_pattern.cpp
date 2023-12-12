@@ -15,7 +15,6 @@
 
 #include "core/components_ng/pattern/ui_extension/ui_extension_pattern.h"
 
-#include "configuration.h"
 #include "key_event.h"
 #include "pointer_event.h"
 #include "session/host/include/extension_session.h"
