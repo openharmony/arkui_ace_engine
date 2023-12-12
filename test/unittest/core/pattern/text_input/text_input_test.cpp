@@ -1537,6 +1537,7 @@ HWTEST_F(TextFieldKeyEventTest, KeyEvent001, TestSize.Level1)
      * @tc.expected: return as expected
      */
     KeyEvent event;
+    event.action = KeyAction::DOWN;
     std::vector<KeyCode> eventCodes = {
         KeyCode::KEY_DPAD_UP,
         KeyCode::KEY_DPAD_DOWN,
@@ -1550,6 +1551,7 @@ HWTEST_F(TextFieldKeyEventTest, KeyEvent001, TestSize.Level1)
     for (auto eventCode : eventCodes) {
         event.pressedCodes.emplace_back(KeyCode::KEY_SHIFT_LEFT);
         event.pressedCodes.emplace_back(eventCode);
+        event.code = eventCode;
         auto ret = pattern_->OnKeyEvent(event);
         EXPECT_TRUE(ret);
     }
@@ -1558,11 +1560,13 @@ HWTEST_F(TextFieldKeyEventTest, KeyEvent001, TestSize.Level1)
         event.pressedCodes.emplace_back(KeyCode::KEY_CTRL_LEFT);
         event.pressedCodes.emplace_back(KeyCode::KEY_SHIFT_LEFT);
         event.pressedCodes.emplace_back(eventCode);
+        event.code = eventCode;
         auto ret = pattern_->OnKeyEvent(event);
         EXPECT_TRUE(ret);
     }
     event.pressedCodes.clear();
     event.pressedCodes.emplace_back(KeyCode::KEY_BACK);
+    event.code = KeyCode::KEY_BACK;
     auto ret = pattern_->OnKeyEvent(event);
     EXPECT_FALSE(ret);
 }
@@ -1584,6 +1588,7 @@ HWTEST_F(TextFieldKeyEventTest, KeyEvent002, TestSize.Level1)
      * @tc.expected: return as expected
      */
     KeyEvent event;
+    event.action = KeyAction::DOWN;
     std::vector<KeyCode> eventCodes = {
         KeyCode::KEY_DPAD_LEFT,
         KeyCode::KEY_DPAD_UP,
@@ -1597,18 +1602,16 @@ HWTEST_F(TextFieldKeyEventTest, KeyEvent002, TestSize.Level1)
     for (auto eventCode : eventCodes) {
         event.pressedCodes.emplace_back(KeyCode::KEY_CTRL_LEFT);
         event.pressedCodes.emplace_back(eventCode);
+        event.code = eventCode;
         auto ret = pattern_->OnKeyEvent(event);
         EXPECT_TRUE(ret) << "KeyCode: " + std::to_string(static_cast<int>(eventCode));
     }
     event.pressedCodes.clear();
-    std::array<bool, 6> results = { true, false, true, true, false, true };
-    int index = 0;
     for (auto eventCode : eventCodes) {
         event.pressedCodes.emplace_back(eventCode);
         event.code = eventCode;
         auto ret = pattern_->OnKeyEvent(event);
-        EXPECT_EQ(results[index], ret) << "KeyCode: " + std::to_string(static_cast<int>(eventCode));
-        index++;
+        EXPECT_TRUE(ret) << "KeyCode: " + std::to_string(static_cast<int>(eventCode));
     }
     event.code = KeyCode::KEY_DPAD_CENTER;
     event.pressedCodes.clear();
@@ -1664,6 +1667,91 @@ HWTEST_F(TextFieldKeyEventTest, KeyEvent003, TestSize.Level1)
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(pattern_->GetTextValue(), expectStr + DEFAULT_TEXT);
     EXPECT_TRUE(ret);
+}
+
+/**
+ * @tc.name: KeyEvent004
+ * @tc.desc: Test KeyEvent ctrl + a
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldKeyEventTest, KeyEvent004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize textInput
+     */
+    CreateTextField(DEFAULT_TEXT);
+
+    /**
+     * @tc.steps: step2. Create keyboard events
+     */
+    KeyEvent event;
+    event.action = KeyAction::DOWN;
+    std::vector<KeyCode> presscodes = {};
+    event.pressedCodes = presscodes;
+
+    /**
+     * @tc.expected: shift + a to input
+     */
+    event.pressedCodes.clear();
+    event.pressedCodes.push_back(KeyCode::KEY_CTRL_LEFT);
+    event.pressedCodes.push_back(KeyCode::KEY_A);
+    event.code = KeyCode::KEY_A;
+    pattern_->HandleSetSelection(5, 10, false);
+    auto ret = pattern_->OnKeyEvent(event);
+    FlushLayoutTask(frameNode_);
+    EXPECT_TRUE(ret);
+    EXPECT_EQ(pattern_->selectController_->GetFirstHandleInfo().index, 0);
+    EXPECT_EQ(pattern_->selectController_->GetSecondHandleInfo().index, 26)
+        << "Second index is " + std::to_string(pattern_->selectController_->GetSecondHandleInfo().index);
+}
+
+/**
+ * @tc.name: KeyEvent005
+ * @tc.desc: Test KeyEvent ctrl + x
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldKeyEventTest, KeyEvent005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: steps1. Initialize text input and Move the handles and then cut text snippet.
+     */
+    int32_t start = 5;
+    int32_t end = 10;
+    std::string expectStr = "fghij";
+    std::vector<std::int32_t> action = {
+        ACTION_SELECT_ALL,
+        ACTION_CUT,
+        ACTION_COPY,
+        ACTION_PASTE,
+    };
+    auto callback = [expectStr](const std::string& str) { EXPECT_EQ(expectStr, str); };
+    CreateTextField(DEFAULT_TEXT, DEFAULT_PLACE_HOLDER, [&](TextFieldModel& model) {
+        model.SetOnCut(callback); });
+
+    /**
+     * @tc.steps: step2. Create keyboard events
+     */
+    KeyEvent event;
+    event.action = KeyAction::DOWN;
+    std::vector<KeyCode> presscodes = {};
+    event.pressedCodes = presscodes;
+
+    /**
+     * @tc.expected: shift + x to input
+     */
+    event.pressedCodes.clear();
+    event.pressedCodes.push_back(KeyCode::KEY_CTRL_LEFT);
+    event.pressedCodes.push_back(KeyCode::KEY_X);
+    event.code = KeyCode::KEY_X;
+    pattern_->HandleSetSelection(start, end, false);
+    auto ret = pattern_->OnKeyEvent(event);
+    FlushLayoutTask(frameNode_);
+    EXPECT_TRUE(ret);
+    EXPECT_EQ(pattern_->selectController_->GetFirstHandleInfo().index, start);
+    EXPECT_EQ(pattern_->selectController_->GetSecondHandleInfo().index, start)
+        << "Second index is " + std::to_string(pattern_->selectController_->GetSecondHandleInfo().index);
+    EXPECT_EQ(pattern_->GetTextSelectController()->GetCaretIndex(), start);
+    EXPECT_EQ(pattern_->contentController_->GetTextValue().compare("abcdeklmnopqrstuvwxyz"), 0);
 }
 
 /**
