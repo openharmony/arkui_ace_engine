@@ -147,6 +147,15 @@ struct ArkUIPlaceholderFontType {
     int32_t style;
 };
 
+struct ArkUIGradientType {
+    const uint32_t* color;
+    const ArkUILengthType* offset;
+    const float* weight;
+    const uint32_t* gradientLength;
+    uint32_t length;
+    uint32_t type;
+};
+
 typedef void* NodeHandle;
 struct ArkUICommonModifierAPI {
     void (*SetBackgroundColor)(NodeHandle node, uint32_t color);
@@ -1234,6 +1243,11 @@ struct ArkUIDataPanelModifierAPI {
     void (*ResetDataPanelTrackBackgroundColor)(NodeHandle node);
     void (*SetDataPanelStrokeWidth)(NodeHandle node, double value, int32_t unit);
     void (*ResetDataPanelStrokeWidth)(NodeHandle node);
+    void (*SetValueColors)(NodeHandle node, const struct ArkUIGradientType* gradient);
+    void (*ResetValueColors)(NodeHandle node);
+    void (*SetTrackShadow)(
+        NodeHandle node, const struct ArkUIGradientType* gradient, double radius, double offsetX, double offsetY);
+    void (*ResetTrackShadow)(NodeHandle node);
 };
 
 struct ArkUIGaugeModifierAPI {
@@ -1253,6 +1267,10 @@ struct ArkUIGaugeModifierAPI {
     void (*ResetIndicatorIconPath)(NodeHandle node);
     void (*SetIndicatorSpace)(NodeHandle node, const char* spaceStrValue, double spaceValue, int32_t spaceUnit);
     void (*ResetIndicatorSpace)(NodeHandle node);
+    void (*SetColors)(NodeHandle node, const uint32_t* colors, const float* weight, uint32_t length);
+    void (*ResetColors)(NodeHandle node);
+    void (*SetGradientColors)(NodeHandle node, const struct ArkUIGradientType* gradient, uint32_t weightLength);
+    void (*ResetGradientColors)(NodeHandle node);
 };
 
 struct ArkUIScrollModifierAPI {

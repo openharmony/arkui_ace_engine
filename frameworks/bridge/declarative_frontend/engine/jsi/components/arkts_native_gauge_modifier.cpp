@@ -157,12 +157,76 @@ void ResetIndicatorSpace(NodeHandle node)
     GaugeModelNG::ResetIndicatorSpace(frameNode);
 }
 
+void SetColors(NodeHandle node, const uint32_t* colors, const float* weight, uint32_t length)
+{
+    CHECK_NULL_VOID(colors);
+    CHECK_NULL_VOID(weight);
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    std::vector<Color> inputColor(length);
+    std::vector<float> weights(length);
+    for (uint32_t i = 0; i < length; i++) {
+        inputColor.at(i) = Color(colors[i]);
+        weights.at(i) = weight[i];
+    }
+    GaugeModelNG::SetColors(frameNode, inputColor, weights);
+}
+
+void ResetColors(NodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    std::vector<Color> inputColor;
+    std::vector<float> weights;
+    GaugeModelNG::SetColors(frameNode, inputColor, weights);
+}
+
+void SetGradientColors(NodeHandle node, const struct ArkUIGradientType* gradient, uint32_t weightLength)
+{
+    CHECK_NULL_VOID(gradient->gradientLength);
+    CHECK_NULL_VOID(gradient->color);
+    CHECK_NULL_VOID(gradient->offset);
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    std::vector<float> weight;
+    if (weightLength > 0 && gradient->weight != nullptr) {
+        weight = std::vector<float>(gradient->weight, gradient->weight + weightLength);
+    }
+    std::vector<ColorStopArray> colors(gradient->length);
+    uint32_t pos = 0;
+    for (uint32_t i = 0; i < gradient->length; i++) {
+        if (static_cast<int32_t>(i) >= NG::COLORS_MAX_COUNT) {
+            break;
+        }
+        if (gradient->gradientLength[i] == 0) {
+            colors.at(i) = NG::ColorStopArray { std::make_pair(Color(gradient->color[pos]), Dimension(0.0)) };
+            continue;
+        }
+        ColorStopArray colorStop(gradient->gradientLength[i]);
+        for (uint32_t j = 0; j < gradient->gradientLength[i]; j++, pos++) {
+            colorStop.at(j) = std::make_pair(Color(gradient->color[pos]),
+                Dimension(gradient->offset[pos].number, static_cast<DimensionUnit>(gradient->offset[pos].unit)));
+        }
+        colors.at(i) = colorStop;
+    }
+    GaugeType type = static_cast<GaugeType>(gradient->type);
+    GaugeModelNG::SetGradientColors(frameNode, colors, weight, type);
+}
+
+void ResetGradientColors(NodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    GaugeModelNG::ResetGradientColors(frameNode);
+}
+
 ArkUIGaugeModifierAPI GetGaugeModifier()
 {
     static const ArkUIGaugeModifierAPI modifier = { SetGaugeVaule, ResetGaugeVaule, SetGaugeStartAngle,
         ResetGaugeStartAngle, SetGaugeEndAngle, ResetGaugeEndAngle, SetGaugeStrokeWidth, ResetGaugeStrokeWidth,
         SetShadowOptions, ResetShadowOptions, SetIsShowIndicator,
         SetIndicatorIconPath, ResetIndicatorIconPath, SetIndicatorSpace, ResetIndicatorSpace,
+        SetColors, ResetColors, SetGradientColors, ResetGradientColors
     };
 
     return modifier;

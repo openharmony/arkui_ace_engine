@@ -56,6 +56,10 @@ public:
     static void ResetIndicatorIconPath(FrameNode* frameNode);
     static void SetIndicatorSpace(FrameNode* frameNode, const Dimension& space);
     static void ResetIndicatorSpace(FrameNode* frameNode);
+    static void SetColors(FrameNode* frameNode, const std::vector<Color>& colors, const std::vector<float>& values);
+    static void SetGradientColors(FrameNode* frameNode, const std::vector<ColorStopArray>& colors,
+        const std::vector<float>& values, const GaugeType& type);
+    static void ResetGradientColors(FrameNode* frameNode);
 };
 } // namespace OHOS::Ace::NG
 

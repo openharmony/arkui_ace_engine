@@ -202,4 +202,25 @@ void GaugeModelNG::ResetIndicatorSpace(FrameNode* frameNode)
 {
     ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(GaugePaintProperty, IndicatorSpace, PROPERTY_UPDATE_RENDER, frameNode);
 }
+
+void GaugeModelNG::SetColors(FrameNode* frameNode, const std::vector<Color>& colors, const std::vector<float>& values)
+{
+    ACE_UPDATE_NODE_PAINT_PROPERTY(GaugePaintProperty, Colors, colors, frameNode);
+    ACE_UPDATE_NODE_PAINT_PROPERTY(GaugePaintProperty, Values, values, frameNode);
+}
+
+void GaugeModelNG::SetGradientColors(FrameNode* frameNode, const std::vector<ColorStopArray>& colors,
+    const std::vector<float>& values, const GaugeType& type)
+{
+    ACE_UPDATE_NODE_PAINT_PROPERTY(GaugePaintProperty, GradientColors, colors, frameNode);
+    ACE_UPDATE_NODE_PAINT_PROPERTY(GaugePaintProperty, Values, values, frameNode);
+    ACE_UPDATE_NODE_PAINT_PROPERTY(GaugePaintProperty, GaugeType, type, frameNode);
+}
+
+void GaugeModelNG::ResetGradientColors(FrameNode* frameNode)
+{
+    ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(GaugePaintProperty, GradientColors, PROPERTY_UPDATE_RENDER, frameNode);
+    ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(GaugePaintProperty, Values, PROPERTY_UPDATE_RENDER, frameNode);
+    ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(GaugePaintProperty, GaugeType, PROPERTY_UPDATE_RENDER, frameNode);
+}
 } // namespace OHOS::Ace::NG
