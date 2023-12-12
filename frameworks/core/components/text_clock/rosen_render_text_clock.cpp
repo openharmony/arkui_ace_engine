@@ -16,10 +16,8 @@
 #include "core/components/text_clock/rosen_render_text_clock.h"
 
 #include "base/json/json_util.h"
-#include "core/components/text/flutter_render_text.h"
 #include "core/components/text/text_component.h"
 #include "core/pipeline/base/constants.h"
-#include "flutter/common/task_runners.h"
 
 namespace OHOS::Ace {
 namespace {
