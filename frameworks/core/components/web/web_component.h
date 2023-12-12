@@ -495,6 +495,16 @@ public:
         OverScrollMode_ = mode;
     }
 
+    CopyOptions GetCopyOptionMode() const
+    {
+        return CopyOptionMode_;
+    }
+
+    void SetCopyOptionMode(CopyOptions mode)
+    {
+        CopyOptionMode_ = mode;
+    }
+
     bool GetOverviewModeAccessEnabled() const
     {
         return isOverviewModeAccessEnabled_;
@@ -1023,6 +1033,7 @@ private:
     bool isPopup_ = false;
     int32_t parentNWebId_ = -1;
     OverScrollMode OverScrollMode_ = OverScrollMode::NEVER;
+    CopyOptions CopyOptionMode_ = CopyOptions::Distributed;
 };
 
 } // namespace OHOS::Ace

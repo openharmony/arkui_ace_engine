@@ -361,6 +361,13 @@ void WebModelImpl::SetOverScrollMode(OverScrollMode mode)
     webComponent->SetOverScrollMode(mode);
 }
 
+void WebModelImpl::SetCopyOptionMode(CopyOptions mode)
+{
+    auto webComponent = AceType::DynamicCast<WebComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    CHECK_NULL_VOID(webComponent);
+    webComponent->SetCopyOptionMode(mode);
+}
+
 void WebModelImpl::SetOverviewModeAccessEnabled(bool isOverviewModeAccessEnabled)
 {
     auto webComponent = AceType::DynamicCast<WebComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());

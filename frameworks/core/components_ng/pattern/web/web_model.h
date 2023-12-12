@@ -147,6 +147,7 @@ public:
     virtual void SetLayoutMode(WebLayoutMode mode) {}
     virtual void SetOverScrollMode(OverScrollMode mode) {}
     virtual void JavaScriptOnDocumentStart(const ScriptItems& scriptItems) {};
+    virtual void SetCopyOptionMode(CopyOptions mode) {};
 
 private:
     static std::unique_ptr<WebModel> instance_;
