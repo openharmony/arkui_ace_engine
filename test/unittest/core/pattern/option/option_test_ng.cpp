@@ -34,6 +34,10 @@
 #include "core/components_ng/pattern/option/option_accessibility_property.h"
 #include "core/components_ng/pattern/option/option_layout_algorithm.h"
 #include "core/components_ng/pattern/option/option_pattern.h"
+#include "core/components_ng/pattern/option/option_view.h"
+#include "core/components_ng/pattern/security_component/paste_button/paste_button_common.h"
+#include "core/components_ng/pattern/security_component/paste_button/paste_button_model_ng.h"
+#include "core/components_ng/pattern/security_component/security_component_pattern.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/property/geometry_property.h"
@@ -598,5 +602,35 @@ HWTEST_F(OptionTestNg, OptionLayoutTest004, TestSize.Level1)
     ASSERT_NE(optionPattern_, nullptr);
     auto OptionWidth = optionPattern_->GetSelectOptionWidth();
     ASSERT_NE(OptionWidth, 0.0);
+}
+
+/**
+* @tc.name: CreatePasteButton001
+* @tc.desc: Test OptionView whether the created node tag is a pastebutton
+* @tc.type: FUNC
+*/
+HWTEST_F(OptionTestNg, CreatePasteButton001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create option node.
+     * @tc.expected: Option node created success.
+     */
+    auto Id = ElementRegister::GetInstance()->MakeUniqueId();
+    auto option = FrameNode::CreateFrameNode(V2::OPTION_ETS_TAG, Id, AceType::MakeRefPtr<OptionPattern>(0));
+
+    /**
+     * @tc.steps: step2. Create row node.
+     * @tc.expected: Row node created success.
+     */
+    auto row = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<LinearLayoutPattern>(false));
+
+    /**
+     * @tc.steps: step3. Create pasteButton node.
+     * @tc.expected: The child node pastebutton can be obtained through the parent node option.
+     */
+    OptionView::CreatePasteButton(option, row, []() {});
+    auto PasteButtonNode = option->GetChildAtIndex(0)->GetChildren();
+    EXPECT_FALSE(PasteButtonNode.empty());
 }
 } // namespace OHOS::Ace::NG
