@@ -1,5 +1,8 @@
 /// <reference path='./import.ts' />
 class ArkDataPanelComponent extends ArkComponent implements DataPanelAttribute {
+  constructor(nativePtr: KNode) {
+    super(nativePtr);
+  }
   closeEffect(value: boolean): this {
     modifierWithKey(this._modifiersWithKeys, DataPanelCloseEffectModifier.identity, DataPanelCloseEffectModifier, value);
     return this;

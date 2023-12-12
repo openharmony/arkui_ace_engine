@@ -1,6 +1,9 @@
 /// <reference path="./import.ts" />
 
 class RichEditorCopyOptionsModifier extends ModifierWithKey<CopyOptions> {
+  constructor(value: CopyOptions) {
+    super(value);
+  }
   static identity: Symbol = Symbol('richEditorCopyOptions');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -15,6 +18,9 @@ class RichEditorCopyOptionsModifier extends ModifierWithKey<CopyOptions> {
 }
 
 class ArkRichEditorComponent extends ArkComponent implements CommonMethod<RichEditorAttribute>{
+  constructor(nativePtr: KNode) {
+    super(nativePtr);
+  }
   enableDataDetector(enable: boolean): RichEditorAttribute {
     throw new Error('Method not implemented.');
   }

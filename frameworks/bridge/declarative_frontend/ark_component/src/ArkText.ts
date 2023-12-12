@@ -1,5 +1,8 @@
 /// <reference path="./import.ts" />
 class FontColorModifier extends ModifierWithKey<ResourceColor> {
+  constructor(value: ResourceColor) {
+    super(value);
+  }
   static identity: Symbol = Symbol('fontColor');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -19,6 +22,9 @@ class FontColorModifier extends ModifierWithKey<ResourceColor> {
 }
 
 class FontSizeModifier extends ModifierWithKey<number | string | Resource> {
+  constructor(value: number | string | Resource) {
+    super(value);
+  }
   static identity: Symbol = Symbol('fontSize');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -38,6 +44,9 @@ class FontSizeModifier extends ModifierWithKey<number | string | Resource> {
 }
 
 class FontWeightModifier extends Modifier<string> {
+  constructor(value: string) {
+    super(value);
+  }
   static identity: Symbol = Symbol('fontWeight');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -49,6 +58,9 @@ class FontWeightModifier extends Modifier<string> {
 }
 
 class FontStyleModifier extends Modifier<number> {
+  constructor(value: number) {
+    super(value);
+  }
   static identity: Symbol = Symbol('fontStyle');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -60,6 +72,9 @@ class FontStyleModifier extends Modifier<number> {
 }
 
 class TextAlignModifier extends Modifier<number> {
+  constructor(value: number) {
+    super(value);
+  }
   static identity: Symbol = Symbol('textAlign');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -71,6 +86,9 @@ class TextAlignModifier extends Modifier<number> {
 }
 
 class TextHeightAdaptivePolicyModifier extends ModifierWithKey<TextHeightAdaptivePolicy> {
+  constructor(value: TextHeightAdaptivePolicy) {
+    super(value);
+  }
   static identity: Symbol = Symbol('textHeightAdaptivePolicy');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -85,6 +103,9 @@ class TextHeightAdaptivePolicyModifier extends ModifierWithKey<TextHeightAdaptiv
 }
 
 class TextDraggableModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
   static identity: Symbol = Symbol('textDraggable');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -99,6 +120,9 @@ class TextDraggableModifier extends ModifierWithKey<boolean> {
 }
 
 class TextMinFontSizeModifier extends ModifierWithKey<number | string | Resource> {
+  constructor(value: number | string | Resource) {
+    super(value);
+  }
   static identity: Symbol = Symbol('textMinFontSize');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -116,6 +140,9 @@ class TextMinFontSizeModifier extends ModifierWithKey<number | string | Resource
 }
 
 class TextMaxFontSizeModifier extends ModifierWithKey<number | string | Resource> {
+  constructor(value: number | string | Resource) {
+    super(value);
+  }
   static identity: Symbol = Symbol('textMaxFontSize');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -133,6 +160,9 @@ class TextMaxFontSizeModifier extends ModifierWithKey<number | string | Resource
 }
 
 class TextLineHeightModifier extends ModifierWithKey<number | string | Resource> {
+  constructor(value: number | string | Resource) {
+    super(value);
+  }
   static identity: Symbol = Symbol('textLineHeight');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -150,6 +180,9 @@ class TextLineHeightModifier extends ModifierWithKey<number | string | Resource>
 }
 
 class TextCopyOptionModifier extends ModifierWithKey<CopyOptions> {
+  constructor(value: CopyOptions) {
+    super(value);
+  }
   static identity: Symbol = Symbol('textCopyOption');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -164,6 +197,9 @@ class TextCopyOptionModifier extends ModifierWithKey<CopyOptions> {
 }
 
 class TextFontFamilyModifier extends ModifierWithKey<string | Resource> {
+  constructor(value: string | Resource) {
+    super(value);
+  }
   static identity: Symbol = Symbol('textFontFamily');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -181,6 +217,9 @@ class TextFontFamilyModifier extends ModifierWithKey<string | Resource> {
 }
 
 class TextMaxLinesModifier extends ModifierWithKey<number> {
+  constructor(value: number) {
+    super(value);
+  }
   static identity: Symbol = Symbol('textMaxLines');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -197,6 +236,9 @@ class TextMaxLinesModifier extends ModifierWithKey<number> {
 }
 
 class TextLetterSpacingModifier extends ModifierWithKey<number | string> {
+  constructor(value: number | string) {
+    super(value);
+  }
   static identity: Symbol = Symbol('textLetterSpacing');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -213,6 +255,9 @@ class TextLetterSpacingModifier extends ModifierWithKey<number | string> {
 }
 
 class TextTextOverflowModifier extends ModifierWithKey<{ overflow: TextOverflow }> {
+  constructor(value: { overflow: TextOverflow }) {
+    super(value);
+  }
   static identity: Symbol = Symbol('textTextOverflow');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -227,6 +272,9 @@ class TextTextOverflowModifier extends ModifierWithKey<{ overflow: TextOverflow 
 }
 
 class TextBaselineOffsetModifier extends ModifierWithKey<number | string> {
+  constructor(value: number | string) {
+    super(value);
+  }
   static identity: symbol = Symbol('textBaselineOffset');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -243,6 +291,9 @@ class TextBaselineOffsetModifier extends ModifierWithKey<number | string> {
 }
 
 class TextTextCaseModifier extends ModifierWithKey<TextCase> {
+  constructor(value: TextCase) {
+    super(value);
+  }
   static identity: symbol = Symbol('textTextCase');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -257,6 +308,9 @@ class TextTextCaseModifier extends ModifierWithKey<TextCase> {
 }
 
 class TextTextIndentModifier extends ModifierWithKey<Length> {
+  constructor(value: Length) {
+    super(value);
+  }
   static identity: symbol = Symbol('textTextIndent');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -274,6 +328,9 @@ class TextTextIndentModifier extends ModifierWithKey<Length> {
 }
 
 class TextTextShadowModifier extends ModifierWithKey<ShadowOptions | Array<ShadowOptions>> {
+  constructor(value: ShadowOptions | Array<ShadowOptions>) {
+    super(value);
+  }
   static identity: Symbol = Symbol('textTextShadow');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -314,6 +371,9 @@ class TextTextShadowModifier extends ModifierWithKey<ShadowOptions | Array<Shado
 }
 
 class TextDecorationModifier extends ModifierWithKey<{ type: TextDecorationType; color?: ResourceColor }> {
+  constructor(value: { type: TextDecorationType; color?: ResourceColor }) {
+    super(value);
+  }
   static identity: Symbol = Symbol('textDecoration');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -338,6 +398,9 @@ class TextDecorationModifier extends ModifierWithKey<{ type: TextDecorationType;
 }
 
 class TextFontModifier extends ModifierWithKey<Font> {
+  constructor(value: Font) {
+    super(value);
+  }
   static identity: Symbol = Symbol('textFont');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -366,6 +429,9 @@ class TextFontModifier extends ModifierWithKey<Font> {
   }
 }
 class ArkTextComponent extends ArkComponent implements TextAttribute {
+  constructor(nativePtr: KNode) {
+    super(nativePtr);
+  }
   enableDataDetector(enable: boolean): this {
     throw new Error('Method not implemented.');
   }

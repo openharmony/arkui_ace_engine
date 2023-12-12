@@ -1,6 +1,9 @@
 
 /// <reference path='./import.ts' />
 class ArkLoadingProgressComponent extends ArkComponent implements LoadingProgressAttribute {
+  constructor(nativePtr: KNode) {
+    super(nativePtr);
+  }
   onGestureJudgeBegin(callback: (gestureInfo: GestureInfo, event: BaseGestureEvent) => GestureJudgeResult): this {
     throw new Error('Method not implemented.');
   }
@@ -15,6 +18,9 @@ class ArkLoadingProgressComponent extends ArkComponent implements LoadingProgres
 }
 
 class LoadingProgressColorModifier extends ModifierWithKey<ResourceColor> {
+  constructor(value: ResourceColor) {
+    super(value);
+  }
   static identity: Symbol = Symbol('loadingProgressColor');
   applyPeer(node: KNode, reset: boolean) {
     if (reset) {
@@ -31,6 +37,9 @@ class LoadingProgressColorModifier extends ModifierWithKey<ResourceColor> {
 }
 
 class LoadingProgressEnableLoadingModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
   static identity: Symbol = Symbol('loadingProgressEnableLoading');
   applyPeer(node: KNode, reset: boolean) {
     if (reset) {

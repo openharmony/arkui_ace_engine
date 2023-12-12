@@ -1,5 +1,8 @@
 /// <reference path="./import.ts" />
 class PatternLockActiveColorModifier extends ModifierWithKey<ResourceColor> {
+  constructor(value: ResourceColor) {
+    super(value);
+  }
   static identity: Symbol = Symbol('patternLockActiveColor');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -14,6 +17,9 @@ class PatternLockActiveColorModifier extends ModifierWithKey<ResourceColor> {
 }
 
 class PatternLockSelectedColorModifier extends ModifierWithKey<ResourceColor> {
+  constructor(value: ResourceColor) {
+    super(value);
+  }
   static identity: Symbol = Symbol('patternLockSelectedColor');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -28,6 +34,9 @@ class PatternLockSelectedColorModifier extends ModifierWithKey<ResourceColor> {
 }
 
 class PatternLockPathColorModifier extends ModifierWithKey<ResourceColor> {
+  constructor(value: ResourceColor) {
+    super(value);
+  }
   static identity: Symbol = Symbol('patternLockPathColor');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -42,6 +51,9 @@ class PatternLockPathColorModifier extends ModifierWithKey<ResourceColor> {
 }
 
 class PatternLockRegularColorModifier extends ModifierWithKey<ResourceColor> {
+  constructor(value: ResourceColor) {
+    super(value);
+  }
   static identity: Symbol = Symbol('patternLockRegularColor');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -56,6 +68,9 @@ class PatternLockRegularColorModifier extends ModifierWithKey<ResourceColor> {
 }
 
 class PatternLockSideLengthModifier extends ModifierWithKey<Length> {
+  constructor(value: Length) {
+    super(value);
+  }
   static identity: Symbol = Symbol('patternLockSideLength');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -70,6 +85,9 @@ class PatternLockSideLengthModifier extends ModifierWithKey<Length> {
 }
 
 class PatternLockPathStrokeModifier extends ModifierWithKey<number | string> {
+  constructor(value: number | string) {
+    super(value);
+  }
   static identity: Symbol = Symbol('patternLockPathStroke');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -84,6 +102,9 @@ class PatternLockPathStrokeModifier extends ModifierWithKey<number | string> {
 }
 
 class PatternLockCircleRadiusModifier extends ModifierWithKey<Length> {
+  constructor(value: Length) {
+    super(value);
+  }
   static identity: Symbol = Symbol('patternLockCircleRadius');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -98,6 +119,9 @@ class PatternLockCircleRadiusModifier extends ModifierWithKey<Length> {
 }
 
 class PatternLockAutoResetModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
   static identity: Symbol = Symbol('patternlockautoreset');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -112,6 +136,9 @@ class PatternLockAutoResetModifier extends ModifierWithKey<boolean> {
 }
 
 class ArkPatternLockComponent extends ArkComponent implements PatternLockAttribute {
+  constructor(nativePtr: KNode) {
+    super(nativePtr);
+  }
   sideLength(value: Length): PatternLockAttribute {
     modifierWithKey(this._modifiersWithKeys, PatternLockSideLengthModifier.identity,
       PatternLockSideLengthModifier, value);

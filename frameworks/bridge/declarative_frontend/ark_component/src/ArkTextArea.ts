@@ -1,5 +1,8 @@
 /// <reference path="./import.ts" />
 class TextAreaFontStyleModifier extends ModifierWithKey<FontStyle> {
+  constructor(value: FontStyle) {
+    super(value);
+  }
   static identity: Symbol = Symbol('textAreaFontStyle');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -14,6 +17,9 @@ class TextAreaFontStyleModifier extends ModifierWithKey<FontStyle> {
 }
 
 class TextAreaCopyOptionModifier extends ModifierWithKey<CopyOptions> {
+  constructor(value: CopyOptions) {
+    super(value);
+  }
   static identity: Symbol = Symbol('textAreaCopyOption');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -28,6 +34,9 @@ class TextAreaCopyOptionModifier extends ModifierWithKey<CopyOptions> {
 }
 
 class TextAreaMaxLinesModifier extends ModifierWithKey<number | undefined> {
+  constructor(value: number | undefined) {
+    super(value);
+  }
   static identity: Symbol = Symbol('textAreaMaxLines');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -42,6 +51,9 @@ class TextAreaMaxLinesModifier extends ModifierWithKey<number | undefined> {
 }
 
 class TextAreaFontSizeModifier extends ModifierWithKey<string | number> {
+  constructor(value: string | number) {
+    super(value);
+  }
   static identity: Symbol = Symbol('textAreaFontSize');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -56,6 +68,9 @@ class TextAreaFontSizeModifier extends ModifierWithKey<string | number> {
 }
 
 class TextAreaPlaceholderColorModifier extends ModifierWithKey<ResourceColor> {
+  constructor(value: ResourceColor) {
+    super(value);
+  }
   static identity: Symbol = Symbol('textAreaPlaceholderColor');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -74,6 +89,9 @@ class TextAreaPlaceholderColorModifier extends ModifierWithKey<ResourceColor> {
 }
 
 class TextAreaFontColorModifier extends ModifierWithKey<ResourceColor> {
+  constructor(value: ResourceColor) {
+    super(value);
+  }
   static identity: Symbol = Symbol('textAreaFontColor');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -92,6 +110,9 @@ class TextAreaFontColorModifier extends ModifierWithKey<ResourceColor> {
 }
 
 class TextAreaFontWeightModifier extends ModifierWithKey<number | FontWeight | string> {
+  constructor(value: number | FontWeight | string) {
+    super(value);
+  }
   static identity: Symbol = Symbol('textAreaFontWeight');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -106,6 +127,9 @@ class TextAreaFontWeightModifier extends ModifierWithKey<number | FontWeight | s
 }
 
 class TextAreaBarStateModifier extends ModifierWithKey<BarState> {
+  constructor(value: BarState) {
+    super(value);
+  }
   static identity: Symbol = Symbol('textAreaBarState');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -120,6 +144,9 @@ class TextAreaBarStateModifier extends ModifierWithKey<BarState> {
 }
 
 class TextAreaEnableKeyboardOnFocusModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
   static identity: Symbol = Symbol('textAreaEnableKeyboardOnFocus');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -134,6 +161,9 @@ class TextAreaEnableKeyboardOnFocusModifier extends ModifierWithKey<boolean> {
 }
 
 class TextAreaFontFamilyModifier extends ModifierWithKey<ResourceColor | string> {
+  constructor(value: ResourceColor | string) {
+    super(value);
+  }
   static identity: Symbol = Symbol('textAreaFontFamily');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -149,6 +179,9 @@ class TextAreaFontFamilyModifier extends ModifierWithKey<ResourceColor | string>
 }
 
 class TextAreaCaretColorModifier extends ModifierWithKey<ResourceColor> {
+  constructor(value: ResourceColor) {
+    super(value);
+  }
   static identity: Symbol = Symbol('textAreaCaretColor');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -167,6 +200,9 @@ class TextAreaCaretColorModifier extends ModifierWithKey<ResourceColor> {
 }
 
 class TextAreaMaxLengthModifier extends ModifierWithKey<number> {
+  constructor(value: number) {
+    super(value);
+  }
   static identity: Symbol = Symbol('textAreaMaxLength');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -181,6 +217,9 @@ class TextAreaMaxLengthModifier extends ModifierWithKey<number> {
 }
 
 class TextAreaStyleModifier extends ModifierWithKey<TextContentStyle> {
+  constructor(value: TextContentStyle) {
+    super(value);
+  }
   static identity: Symbol = Symbol('textAreaStyle');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -195,6 +234,9 @@ class TextAreaStyleModifier extends ModifierWithKey<TextContentStyle> {
 }
 
 class TextAreaSelectionMenuHiddenModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
   static identity: Symbol = Symbol('textAreaSelectionMenuHidden');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -209,6 +251,9 @@ class TextAreaSelectionMenuHiddenModifier extends ModifierWithKey<boolean> {
 }
 
 class TextAreaPlaceholderFontModifier extends ModifierWithKey<Font> {
+  constructor(value: Font) {
+    super(value);
+  }
   static identity: Symbol = Symbol('textAreaPlaceholderFont');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -231,6 +276,9 @@ class TextAreaPlaceholderFontModifier extends ModifierWithKey<Font> {
 }
 
 class TextAreaTextAlignModifier extends Modifier<TextAlign> {
+  constructor(value: TextAlign) {
+    super(value);
+  }
   static identity: Symbol = Symbol('textAreaTextAlign');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -245,6 +293,9 @@ class TextAreaTextAlignModifier extends Modifier<TextAlign> {
 }
 
 class TextAreaShowCounterModifier extends ModifierWithKey<ArkTextAreaShowCounter> {
+  constructor(value: ArkTextAreaShowCounter) {
+    super(value);
+  }
   static identity: Symbol = Symbol('textAreaShowCounter');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -260,6 +311,9 @@ class TextAreaShowCounterModifier extends ModifierWithKey<ArkTextAreaShowCounter
 }
 
 class ArkTextAreaComponent extends ArkComponent implements CommonMethod<TextAreaAttribute> {
+  constructor(nativePtr: KNode) {
+    super(nativePtr);
+  }
   type(value: TextAreaType): TextAreaAttribute {
     throw new Error('Method not implemented.');
   }

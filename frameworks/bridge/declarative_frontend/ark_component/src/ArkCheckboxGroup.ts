@@ -1,5 +1,8 @@
 /// <reference path='./import.ts' />
 class CheckboxGroupSelectAllModifier extends Modifier<boolean> {
+    constructor(value: boolean) {
+        super(value);
+    }
     static identity: Symbol = Symbol('checkboxgroupSelectAll');
     applyPeer(node: KNode, reset: boolean) {
         if (reset) {
@@ -12,6 +15,9 @@ class CheckboxGroupSelectAllModifier extends Modifier<boolean> {
 }
 
 class CheckboxGroupSelectedColorModifier extends ModifierWithKey<ResourceColor> {
+    constructor(value: ResourceColor) {
+        super(value);
+    }
     static identity: Symbol = Symbol('checkboxgroupSelectedColor');
     applyPeer(node: KNode, reset: boolean) {
         if (reset) {
@@ -33,6 +39,9 @@ class CheckboxGroupSelectedColorModifier extends ModifierWithKey<ResourceColor> 
 }
 
 class CheckboxGroupUnselectedColorModifier extends ModifierWithKey<ResourceColor> {
+    constructor(value: ResourceColor) {
+        super(value);
+    }
     static identity: Symbol = Symbol('checkboxgroupUnselectedColor');
     applyPeer(node: KNode, reset: boolean) {
         if (reset) {
@@ -53,6 +62,9 @@ class CheckboxGroupUnselectedColorModifier extends ModifierWithKey<ResourceColor
     }
 }
 class CheckboxGroupMarkModifier extends ModifierWithKey<MarkStyle> {
+    constructor(value: MarkStyle) {
+        super(value);
+    }
     static identity: Symbol = Symbol('checkboxgroupMark');
     applyPeer(node: KNode, reset: boolean): void {
         if (reset) {
@@ -71,6 +83,9 @@ class CheckboxGroupMarkModifier extends ModifierWithKey<MarkStyle> {
     }
 }
 class ArkCheckboxGroupComponent extends ArkComponent implements CheckboxGroupAttribute {
+    constructor(nativePtr: KNode) {
+      super(nativePtr);
+    }
     selectAll(value: boolean): this {
         if (isBoolean(value)) {
             modifier(this._modifiers, CheckboxGroupSelectAllModifier, value);

@@ -1,5 +1,8 @@
 /// <reference path='./import.ts' />
 class ArkSwiperComponent extends ArkComponent implements SwiperAttribute {
+  constructor(nativePtr: KNode) {
+    super(nativePtr);
+  }
   index(value: number): this {
     if (typeof value === 'number') {
       modifier(this._modifiers, SwiperIndexModifier, value);

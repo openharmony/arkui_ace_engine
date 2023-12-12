@@ -1,5 +1,8 @@
 /// <reference path="./import.ts" />
 class SideBarContainerPositionModifier extends ModifierWithKey<number> {
+  constructor(value: number) {
+    super(value);
+  }
   static identity: Symbol = Symbol('sideBarContainerPosition');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -14,6 +17,9 @@ class SideBarContainerPositionModifier extends ModifierWithKey<number> {
 }
 
 class SideBarContainerAutoHideModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
   static identity: Symbol = Symbol('sideBarContainerautoHide');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -28,6 +34,9 @@ class SideBarContainerAutoHideModifier extends ModifierWithKey<boolean> {
 }
 
 class SideBarContainerShowSideBarModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
   static identity: Symbol = Symbol('sideBarContainerShowSideBar');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -42,6 +51,9 @@ class SideBarContainerShowSideBarModifier extends ModifierWithKey<boolean> {
 }
 
 class SideBarContainerMaxSideBarWidthModifier extends ModifierWithKey<number | Length> {
+  constructor(value: number | Length) {
+    super(value);
+  }
   static identity: Symbol = Symbol('sideBarContainerMaxSideBarWidth');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -56,6 +68,9 @@ class SideBarContainerMaxSideBarWidthModifier extends ModifierWithKey<number | L
 }
 
 class SideBarContainerWidthModifier extends ModifierWithKey<number | Length> {
+  constructor(value: number | Length) {
+    super(value);
+  }
   static identity: Symbol = Symbol('sideBarContainerWidth');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -70,6 +85,9 @@ class SideBarContainerWidthModifier extends ModifierWithKey<number | Length> {
 }
 
 class SideBarContainerMinContentWidthModifier extends ModifierWithKey<Dimension> {
+  constructor(value: Dimension) {
+    super(value);
+  }
   static identity: Symbol = Symbol('sideBarContainerMinContentWidth');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -84,6 +102,9 @@ class SideBarContainerMinContentWidthModifier extends ModifierWithKey<Dimension>
 }
 
 class SideBarContainerShowControlButtonModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
   static identity: Symbol = Symbol('sideBarContainerShowControlButton');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -98,6 +119,9 @@ class SideBarContainerShowControlButtonModifier extends ModifierWithKey<boolean>
 }
 
 class SideBarContainerMinSideBarWidthModifier extends ModifierWithKey<number | Length> {
+  constructor(value: number | Length) {
+    super(value);
+  }
   static identity: Symbol = Symbol('sideBarContainerMinSideBarWidth');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -112,6 +136,9 @@ class SideBarContainerMinSideBarWidthModifier extends ModifierWithKey<number | L
 }
 
 class SideBarContainerControlButtonModifier extends ModifierWithKey<ButtonStyle> {
+  constructor(value: ButtonStyle) {
+    super(value);
+  }
   static identity: Symbol = Symbol('sideBarContainercontrolButton');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -139,6 +166,9 @@ class SideBarContainerControlButtonModifier extends ModifierWithKey<ButtonStyle>
 }
 
 class SideBarContainerDividerModifier extends ModifierWithKey<DividerStyle> {
+  constructor(value: DividerStyle) {
+    super(value);
+  }
   static identity: Symbol = Symbol('sideBarContainerdivider');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -162,6 +192,9 @@ class SideBarContainerDividerModifier extends ModifierWithKey<DividerStyle> {
 }
 
 class ArkSideBarContainerComponent extends ArkComponent implements SideBarContainerAttribute {
+  constructor(nativePtr: KNode) {
+    super(nativePtr);
+  }
   onChange(callback: (value: boolean) => void): SideBarContainerAttribute {
     throw new Error("Method not implemented.");
   }

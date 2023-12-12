@@ -1,5 +1,8 @@
 /// <reference path='./import.ts' />
 class ArkCheckboxComponent extends ArkComponent implements CheckboxAttribute {
+  constructor(nativePtr: KNode) {
+    super(nativePtr);
+  }
   shape(value: CheckBoxShape): this {
     throw new Error('Method not implemented.');
   }
@@ -40,6 +43,9 @@ class ArkCheckboxComponent extends ArkComponent implements CheckboxAttribute {
 }
 
 class CheckboxMarkModifier extends ModifierWithKey<MarkStyle> {
+  constructor(value: MarkStyle) {
+    super(value);
+  }
   static identity: Symbol = Symbol('checkboxMark');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -59,6 +65,9 @@ class CheckboxMarkModifier extends ModifierWithKey<MarkStyle> {
 }
 
 class CheckboxSelectModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
   static identity: Symbol = Symbol('checkboxSelect');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -75,6 +84,9 @@ class CheckboxSelectModifier extends ModifierWithKey<boolean> {
 }
 
 class CheckboxHeightModifier extends ModifierWithKey<ResourceColor> {
+  constructor(value: ResourceColor) {
+    super(value);
+  }
   static identity: Symbol = Symbol('checkboxHeight');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -91,6 +103,9 @@ class CheckboxHeightModifier extends ModifierWithKey<ResourceColor> {
 }
 
 class CheckboxWidthModifier extends ModifierWithKey<Length> {
+  constructor(value: Length) {
+    super(value);
+  }
   static identity: Symbol = Symbol('checkboxWidth');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -107,6 +122,9 @@ class CheckboxWidthModifier extends ModifierWithKey<Length> {
 }
 
 class CheckboxSelectedColorModifier extends ModifierWithKey<ResourceColor> {
+  constructor(value: ResourceColor) {
+    super(value);
+  }
   static identity: Symbol = Symbol('checkboxSelectedColor');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -123,6 +141,9 @@ class CheckboxSelectedColorModifier extends ModifierWithKey<ResourceColor> {
 }
 
 class CheckboxUnselectedColorModifier extends ModifierWithKey<ResourceColor> {
+  constructor(value: ResourceColor) {
+    super(value);
+  }
   static identity: Symbol = Symbol('checkboxUnselectedColor');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {

@@ -1,5 +1,8 @@
 /// <reference path='./import.ts' />
 class ArkFormComponentComponent extends ArkComponent implements FormComponentAttribute {
+  constructor(nativePtr: KNode) {
+    super(nativePtr);
+  }
   size(value: { width: Length; height: Length }): this {
     modifierWithKey(this._modifiersWithKeys, FormComponentSizeModifier.identity, FormComponentSizeModifier, value);
     return this;
@@ -53,6 +56,9 @@ class ArkFormComponentComponent extends ArkComponent implements FormComponentAtt
 }
 
 class FormComponentModuleNameModifier extends Modifier<string> {
+  constructor(value: string) {
+    super(value);
+  }
   static identity: Symbol = Symbol('formComponentModuleName');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -64,6 +70,9 @@ class FormComponentModuleNameModifier extends Modifier<string> {
 }
 
 class FormComponentDimensionModifier extends ModifierWithKey<FormDimension> {
+  constructor(value: FormDimension) {
+    super(value);
+  }
   static identity: Symbol = Symbol('formComponentDimension');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -79,6 +88,9 @@ class FormComponentDimensionModifier extends ModifierWithKey<FormDimension> {
 }
 
 class FormComponentAllowUpdateModifier extends Modifier<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
   static identity: Symbol = Symbol('formComponentAllowUpdate');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -90,6 +102,9 @@ class FormComponentAllowUpdateModifier extends Modifier<boolean> {
 }
 
 class FormComponentSizeModifier extends ModifierWithKey<{ width: Length; height: Length }> {
+  constructor(value: { width: Length; height: Length }) {
+    super(value);
+  }
   static identity: Symbol = Symbol('formComponentSize');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -107,6 +122,9 @@ class FormComponentSizeModifier extends ModifierWithKey<{ width: Length; height:
 }
 
 class FormComponentVisibilityModifier extends Modifier<number> {
+  constructor(value: number) {
+    super(value);
+  }
   static identity: Symbol = Symbol('formComponentVisibility');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {

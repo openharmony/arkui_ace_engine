@@ -1,5 +1,8 @@
 /// <reference path='./import.ts' />
 class ArkProgressComponent extends ArkComponent implements ProgressAttribute {
+  constructor(nativePtr: KNode) {
+    super(nativePtr);
+  }
   value(value: number): ProgressAttribute<keyof ProgressStyleMap, LinearStyleOptions | ProgressStyleOptions | RingStyleOptions | EclipseStyleOptions | ScaleRingStyleOptions | CapsuleStyleOptions> {
     throw new Error('Method not implemented.');
   }

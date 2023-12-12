@@ -1,5 +1,8 @@
 /// <reference path="./import.ts" />
 class ArkEllipseComponent extends ArkComponent implements EllipseAttribute {
+  constructor(nativePtr: KNode) {
+    super(nativePtr);
+  }
   stroke(value: any): this {
     throw new Error("Method not implemented.");
   }

@@ -1,5 +1,8 @@
 /// <reference path="./import.ts" />
 class ArkCounterComponent extends ArkComponent implements CounterAttribute {
+    constructor(nativePtr: KNode) {
+      super(nativePtr);
+    }
     onInc(event: () => void): this {
         throw new Error("Method not implemented.");
     }
@@ -24,6 +27,9 @@ class ArkCounterComponent extends ArkComponent implements CounterAttribute {
     }
 }
 class EnableIncModifier extends Modifier<boolean> {
+    constructor(value: boolean) {
+      super(value);
+    }
     static identity = Symbol("enableInc");
     applyPeer(node: KNode, reset: boolean) {
         if (reset) {
@@ -35,6 +41,9 @@ class EnableIncModifier extends Modifier<boolean> {
     }
 }
 class EnableDecModifier extends Modifier<boolean> {
+    constructor(value: boolean) {
+      super(value);
+    }
     static identity = Symbol("enableDec");
     applyPeer(node: KNode, reset: boolean) {
         if (reset) {

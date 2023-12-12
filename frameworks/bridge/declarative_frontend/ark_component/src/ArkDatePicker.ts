@@ -1,5 +1,8 @@
 /// <reference path='./import.ts' />
 class ArkDatePickerComponent extends ArkComponent implements DatePickerAttribute {
+  constructor(nativePtr: KNode) {
+    super(nativePtr);
+  }
   lunar(value: boolean): DatePickerAttribute {
     modifier(this._modifiers, DatePickerLunarModifier, isBoolean(value) ? value : false);
     return this;
@@ -28,6 +31,9 @@ class ArkDatePickerComponent extends ArkComponent implements DatePickerAttribute
 }
 
 class DatePickerLunarModifier extends Modifier<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
   static identity: Symbol = Symbol('lunar');
   applyPeer(node: KNode, reset: boolean) {
     if (reset) {
@@ -40,6 +46,9 @@ class DatePickerLunarModifier extends Modifier<boolean> {
 }
 
 class DatePickerTextStyleModifier extends ModifierWithKey<PickerTextStyle> {
+  constructor(value: PickerTextStyle) {
+    super(value);
+  }
   static identity: Symbol = Symbol('textStyle');
   applyPeer(node: KNode, reset: boolean) {
     if (reset) {
@@ -67,6 +76,9 @@ class DatePickerTextStyleModifier extends ModifierWithKey<PickerTextStyle> {
 }
 
 class DatePickerSelectedTextStyleModifier extends ModifierWithKey<PickerTextStyle> {
+  constructor(value: PickerTextStyle) {
+    super(value);
+  }
   static identity: Symbol = Symbol('selectedTextStyle');
   applyPeer(node: KNode, reset: boolean) {
     if (reset) {
@@ -94,6 +106,9 @@ class DatePickerSelectedTextStyleModifier extends ModifierWithKey<PickerTextStyl
 }
 
 class DatePickerDisappearTextStyleModifier extends ModifierWithKey<PickerTextStyle> {
+  constructor(value: PickerTextStyle) {
+    super(value);
+  }
   static identity: Symbol = Symbol('disappearTextStyle');
   applyPeer(node: KNode, reset: boolean) {
     if (reset) {

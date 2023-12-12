@@ -1,5 +1,8 @@
 /// <reference path='./import.ts' />
 class ArkTimePickerComponent extends ArkComponent implements TimePickerAttribute {
+  constructor(nativePtr: KNode) {
+    super(nativePtr);
+  }
   onGestureJudgeBegin(callback: (gestureInfo: GestureInfo, event: BaseGestureEvent) => GestureJudgeResult): this {
     throw new Error('Method not implemented.');
   }
@@ -30,6 +33,9 @@ class ArkTimePickerComponent extends ArkComponent implements TimePickerAttribute
 }
 
 class TimepickerTextStyleModifier extends ModifierWithKey<PickerTextStyle> {
+  constructor(value: PickerTextStyle) {
+    super(value);
+  }
   static identity: Symbol = Symbol('textStyle');
 
   applyPeer(node: KNode, reset: boolean): void {
@@ -58,6 +64,9 @@ class TimepickerTextStyleModifier extends ModifierWithKey<PickerTextStyle> {
 }
 
 class TimepickerSelectedTextStyleModifier extends ModifierWithKey<PickerTextStyle> {
+  constructor(value: PickerTextStyle) {
+    super(value);
+  }
   static identity: Symbol = Symbol('selectedTextStyle');
 
   applyPeer(node: KNode, reset: boolean): void {
@@ -86,6 +95,9 @@ class TimepickerSelectedTextStyleModifier extends ModifierWithKey<PickerTextStyl
 }
 
 class TimepickerDisappearTextStyleModifier extends ModifierWithKey<PickerTextStyle> {
+  constructor(value: PickerTextStyle) {
+    super(value);
+  }
   static identity: Symbol = Symbol('disappearTextStyle');
 
   applyPeer(node: KNode, reset: boolean): void {

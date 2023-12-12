@@ -1,5 +1,8 @@
 /// <reference path='./import.ts' />
 class ArkGaugeComponent extends ArkComponent implements GaugeAttribute {
+  constructor(nativePtr: KNode) {
+    super(nativePtr);
+  }
   value(value: number): this {
     modifierWithKey(this._modifiersWithKeys, GaugeVauleModifier.identity, GaugeVauleModifier, value);
     return this;

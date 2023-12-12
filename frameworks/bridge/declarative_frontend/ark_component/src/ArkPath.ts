@@ -1,5 +1,8 @@
 /// <reference path='./import.ts' />
 class ArkPathComponent extends ArkCommonShapeComponent implements PathAttribute {
+  constructor(nativePtr: KNode) {
+    super(nativePtr);
+  }
   commands(value: string): this {
     modifierWithKey(this._modifiersWithKeys, CommandsModifier.identity, CommandsModifier, value);
     return this;
@@ -7,6 +10,9 @@ class ArkPathComponent extends ArkCommonShapeComponent implements PathAttribute 
 }
 
 class CommandsModifier extends ModifierWithKey<string> {
+  constructor(value: string) {
+    super(value);
+  }
   static identity: Symbol = Symbol('commands');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {

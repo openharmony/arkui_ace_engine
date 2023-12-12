@@ -1,6 +1,9 @@
 /// <reference path="./import.ts" />
 
 class SearchSelectionMenuHiddenModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
   static identity = Symbol('searchSelectionMenuHidden');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -15,6 +18,9 @@ class SearchSelectionMenuHiddenModifier extends ModifierWithKey<boolean> {
 }
 
 class SearchCaretStyleModifier extends ModifierWithKey<CaretStyle> {
+  constructor(value: CaretStyle) {
+    super(value);
+  }
   static identity = Symbol('searchCaretStyle');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -31,6 +37,9 @@ class SearchCaretStyleModifier extends ModifierWithKey<CaretStyle> {
 }
 
 class SearchEnableKeyboardOnFocusModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
   static identity = Symbol('searchEnableKeyboardOnFocus');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -45,6 +54,9 @@ class SearchEnableKeyboardOnFocusModifier extends ModifierWithKey<boolean> {
 }
 
 class SearchSearchIconModifier extends ModifierWithKey<IconOptions> {
+  constructor(value: IconOptions) {
+    super(value);
+  }
   static identity = Symbol('searchSearchIcon');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -62,6 +74,9 @@ class SearchSearchIconModifier extends ModifierWithKey<IconOptions> {
 }
 
 class SearchPlaceholderFontModifier extends ModifierWithKey<Font> {
+  constructor(value: Font) {
+    super(value);
+  }
   static identity = Symbol('searchPlaceholderFont');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -80,6 +95,9 @@ class SearchPlaceholderFontModifier extends ModifierWithKey<Font> {
 }
 
 class SearchSearchButtonModifier extends ModifierWithKey<ArkSearchButton> {
+  constructor(value: ArkSearchButton) {
+    super(value);
+  }
   static identity = Symbol('searchSearchButton');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -97,6 +115,9 @@ class SearchSearchButtonModifier extends ModifierWithKey<ArkSearchButton> {
 }
 
 class SearchFontColorModifier extends ModifierWithKey<ResourceColor> {
+  constructor(value: ResourceColor) {
+    super(value);
+  }
   static identity = Symbol('searchFontColor');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -111,6 +132,9 @@ class SearchFontColorModifier extends ModifierWithKey<ResourceColor> {
 }
 
 class SearchCopyOptionModifier extends ModifierWithKey<CopyOptions> {
+  constructor(value: CopyOptions) {
+    super(value);
+  }
   static identity = Symbol('searchCopyOption');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -125,6 +149,9 @@ class SearchCopyOptionModifier extends ModifierWithKey<CopyOptions> {
 }
 
 class SearchTextFontModifier extends ModifierWithKey<Font> {
+  constructor(value: Font) {
+    super(value);
+  }
   static identity = Symbol('searchTextFont');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -142,6 +169,9 @@ class SearchTextFontModifier extends ModifierWithKey<Font> {
 }
 
 class SearchPlaceholderColorModifier extends ModifierWithKey<ResourceColor> {
+  constructor(value: ResourceColor) {
+    super(value);
+  }
   static identity = Symbol('searchPlaceholderColor');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -156,6 +186,9 @@ class SearchPlaceholderColorModifier extends ModifierWithKey<ResourceColor> {
 }
 
 class SearchCancelButtonModifier extends ModifierWithKey<{ style?: CancelButtonStyle, icon?: IconOptions }> {
+  constructor(value: { style?: CancelButtonStyle, icon?: IconOptions }) {
+    super(value);
+  }
   static identity = Symbol('searchCancelButton');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -174,6 +207,9 @@ class SearchCancelButtonModifier extends ModifierWithKey<{ style?: CancelButtonS
 }
 
 class SearchTextAlignModifier extends ModifierWithKey<TextAlign> {
+  constructor(value: TextAlign) {
+    super(value);
+  }
   static identity = Symbol('searchTextAlign');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -188,6 +224,9 @@ class SearchTextAlignModifier extends ModifierWithKey<TextAlign> {
 }
 
 class ArkSearchComponent extends ArkComponent implements CommonMethod<SearchAttribute>{
+  constructor(nativePtr: KNode) {
+    super(nativePtr);
+  }
   onEditChange(callback: (isEditing: boolean) => void): SearchAttribute {
     throw new Error('Method not implemented.');
   }

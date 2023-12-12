@@ -1,5 +1,8 @@
 /// <reference path="./import.ts" />
 class BlankColorModifier extends ModifierWithKey<ResourceColor> {
+  constructor(value: ResourceColor) {
+    super(value);
+  }
   static identity: Symbol = Symbol('blankColor');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -18,6 +21,9 @@ class BlankColorModifier extends ModifierWithKey<ResourceColor> {
 }
 
 class ArkBlankComponent extends ArkComponent implements CommonMethod<BlankAttribute> {
+  constructor(nativePtr: KNode) {
+    super(nativePtr);
+  }
   color(value: ResourceColor): BlankAttribute {
     modifierWithKey(this._modifiersWithKeys, BlankColorModifier.identity, BlankColorModifier, value);
     return this;

@@ -1,5 +1,8 @@
 /// <reference path='./import.ts' />
 class ArkWebComponent extends ArkComponent implements WebAttribute {
+  constructor(nativePtr: KNode) {
+    super(nativePtr);
+  }
   javaScriptAccess(javaScriptAccess: boolean): this {
     throw new Error('Method not implemented.');
   }

@@ -9,6 +9,9 @@ const NAVIGATION_TITLE_MODE_DEFAULT = 0
 const DEFAULT_UNIT = 'vp';
 
 class ArkNavigationComponent extends ArkComponent implements NavigationAttribute {
+  constructor(nativePtr: KNode) {
+    super(nativePtr);
+  }
   navBarWidth(value: Length): NavigationAttribute {
     modifierWithKey(this._modifiersWithKeys, NavBarWidthModifier.identity, NavBarWidthModifier, value);
     return this;
@@ -85,6 +88,9 @@ class ArkNavigationComponent extends ArkComponent implements NavigationAttribute
 }
 
 class BackButtonIconModifier extends ModifierWithKey<boolean | object> {
+  constructor(value: boolean | object) {
+    super(value);
+  }
   static identity: Symbol = Symbol('backButtonIcon');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -105,6 +111,9 @@ class BackButtonIconModifier extends ModifierWithKey<boolean | object> {
 }
 
 class NavBarWidthRangeModifier extends ModifierWithKey<[Dimension, Dimension]> {
+  constructor(value: [Dimension, Dimension]) {
+    super(value);
+  }
   static identity: Symbol = Symbol('navBarWidthRange');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -124,6 +133,9 @@ class NavBarWidthRangeModifier extends ModifierWithKey<[Dimension, Dimension]> {
 }
 
 class MinContentWidthModifier extends ModifierWithKey<Dimension> {
+  constructor(value: Dimension) {
+    super(value);
+  }
   static identity: Symbol = Symbol('minContentWidth');
 
   applyPeer(node: KNode, reset: boolean): void {
@@ -144,6 +156,9 @@ class MinContentWidthModifier extends ModifierWithKey<Dimension> {
 }
 
 class NavBarWidthModifier extends ModifierWithKey<Length> {
+  constructor(value: Length) {
+    super(value);
+  }
   static identity: Symbol = Symbol('navBarWidth');
 
   applyPeer(node: KNode, reset: boolean): void {
@@ -164,6 +179,9 @@ class NavBarWidthModifier extends ModifierWithKey<Length> {
 }
 
 class NavBarPositionModifier extends Modifier<number> {
+  constructor(value: number) {
+    super(value);
+  }
   static identity: Symbol = Symbol('navBarPosition');
 
   applyPeer(node: KNode, reset: boolean): void {
@@ -176,6 +194,9 @@ class NavBarPositionModifier extends Modifier<number> {
 }
 
 class ModeModifier extends Modifier<number> {
+  constructor(value: number) {
+    super(value);
+  }
   static identity: Symbol = Symbol('mode');
 
   applyPeer(node: KNode, reset: boolean): void {
@@ -188,6 +209,9 @@ class ModeModifier extends Modifier<number> {
 }
 
 class HideToolBarModifier extends Modifier<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
   static identity: Symbol = Symbol('hideToolBar');
 
   applyPeer(node: KNode, reset: boolean): void {
@@ -200,6 +224,9 @@ class HideToolBarModifier extends Modifier<boolean> {
 }
 
 class TitleModeModifier extends Modifier<number> {
+  constructor(value: number) {
+    super(value);
+  }
   static identity: Symbol = Symbol('titleMode');
 
   applyPeer(node: KNode, reset: boolean): void {
@@ -212,6 +239,9 @@ class TitleModeModifier extends Modifier<number> {
 }
 
 class HideBackButtonModifier extends Modifier<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
   static identity: Symbol = Symbol('hideBackButton');
 
   applyPeer(node: KNode, reset: boolean): void {
@@ -224,6 +254,9 @@ class HideBackButtonModifier extends Modifier<boolean> {
 }
 
 class SubTitleModifier extends Modifier<string> {
+  constructor(value: string) {
+    super(value);
+  }
   static identity: Symbol = Symbol('subTitle');
 
   applyPeer(node: KNode, reset: boolean): void {
@@ -236,6 +269,9 @@ class SubTitleModifier extends Modifier<string> {
 }
 
 class NavigationHideTitleBarModifier extends Modifier<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
   static identity: Symbol = Symbol('hideTitleBar');
 
   applyPeer(node: KNode, reset: boolean): void {
@@ -248,6 +284,9 @@ class NavigationHideTitleBarModifier extends Modifier<boolean> {
 }
 
 class HideNavBarModifier extends Modifier<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
   static identity: Symbol = Symbol('hideNavBar');
 
   applyPeer(node: KNode, reset: boolean): void {

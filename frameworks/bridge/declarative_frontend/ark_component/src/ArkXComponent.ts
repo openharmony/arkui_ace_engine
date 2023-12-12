@@ -1,5 +1,8 @@
 /// <reference path='./import.ts' />
 class ArkXComponentComponent extends ArkComponent implements XComponentAttribute {
+  constructor(nativePtr: KNode) {
+    super(nativePtr);
+  }
   onLoad(callback: (event?: object | undefined) => void): this {
     throw new Error('Method not implemented.');
   }

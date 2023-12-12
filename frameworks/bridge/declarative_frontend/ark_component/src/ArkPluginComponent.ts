@@ -1,5 +1,8 @@
 /// <reference path='./import.ts' />
 class ArkPluginComponentComponent extends ArkComponent implements PluginComponentAttribute {
+  constructor(nativePtr: KNode) {
+    super(nativePtr);
+  }
   onComplete(callback: () => void): this {
     throw new Error('Method not implemented.');
   }

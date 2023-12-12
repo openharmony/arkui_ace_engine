@@ -1,6 +1,9 @@
 /// <reference path='./import.ts' />
 
 class ArkHyperlinkComponent extends ArkComponent implements HyperlinkAttribute {
+  constructor(nativePtr: KNode) {
+    super(nativePtr);
+  }
   color(value: ResourceColor): this {
     modifierWithKey(this._modifiersWithKeys, HyperlinkColorModifier.identity, HyperlinkColorModifier, value);
     return this;
@@ -8,6 +11,9 @@ class ArkHyperlinkComponent extends ArkComponent implements HyperlinkAttribute {
 }
 
 class HyperlinkColorModifier extends ModifierWithKey<ResourceColor> {
+  constructor(value: ResourceColor) {
+    super(value);
+  }
   static identity: Symbol = Symbol('hyperlinkColor');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {

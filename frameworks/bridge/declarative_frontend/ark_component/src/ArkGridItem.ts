@@ -66,6 +66,9 @@ class GridItemColumnEndModifier extends ModifierWithKey<number> {
 }
 
 class ArkGridItemComponent extends ArkComponent implements GridItemAttribute {
+  constructor(nativePtr: KNode) {
+    super(nativePtr);
+  }
   rowStart(value: number): this {
     modifierWithKey(this._modifiersWithKeys, GridItemRowStartModifier.identity, GridItemRowStartModifier, value);
     return this;

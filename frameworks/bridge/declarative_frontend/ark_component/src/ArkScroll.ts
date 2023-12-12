@@ -1,5 +1,8 @@
 /// <reference path='./import.ts' />
 class ArkScrollComponent extends ArkComponent implements ScrollAttribute {
+  constructor(nativePtr: KNode) {
+    super(nativePtr);
+  }
   onGestureJudgeBegin(callback: (gestureInfo: GestureInfo, event: BaseGestureEvent) => GestureJudgeResult): this {
     throw new Error('Method not implemented.');
   }
@@ -54,6 +57,9 @@ class ArkScrollComponent extends ArkComponent implements ScrollAttribute {
   }
 }
 class ScrollScrollableModifier extends ModifierWithKey<number> {
+  constructor(value: number) {
+    super(value);
+  }
   static identity: Symbol = Symbol('scrollable');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -69,6 +75,9 @@ class ScrollScrollableModifier extends ModifierWithKey<number> {
   }
 }
 class ScrollEdgeEffectModifier extends ModifierWithKey<number> {
+  constructor(value: number) {
+    super(value);
+  }
   static identity: Symbol = Symbol("edgeEffect");
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -84,6 +93,9 @@ class ScrollEdgeEffectModifier extends ModifierWithKey<number> {
   }
 }
 class ScrollScrollBarWidthModifier extends ModifierWithKey<string | number> {
+  constructor(value: string | number) {
+    super(value);
+  }
   static identity: Symbol = Symbol('scrollBarWidth');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -105,6 +117,9 @@ class ScrollScrollBarWidthModifier extends ModifierWithKey<string | number> {
   }
 }
 class ScrollScrollBarColorModifier extends ModifierWithKey<number | undefined> {
+  constructor(value: number | undefined) {
+    super(value);
+  }
   static identity: Symbol = Symbol('scrollBarColor');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {

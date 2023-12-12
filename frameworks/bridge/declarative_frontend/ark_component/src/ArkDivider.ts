@@ -1,5 +1,8 @@
 /// <reference path="./import.ts" />
 class DividerVerticalModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
   static identity: Symbol = Symbol('dividerVertical');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -13,6 +16,9 @@ class DividerVerticalModifier extends ModifierWithKey<boolean> {
   }
 }
 class DividerLineCapModifier extends ModifierWithKey<LineCapStyle> {
+  constructor(value: LineCapStyle) {
+    super(value);
+  }
   static identity: Symbol = Symbol('dividerLineCap');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -26,6 +32,9 @@ class DividerLineCapModifier extends ModifierWithKey<LineCapStyle> {
   }
 }
 class DividerColorModifier extends ModifierWithKey<ResourceColor> {
+  constructor(value: ResourceColor) {
+    super(value);
+  }
   static identity: Symbol = Symbol('dividerColor');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -39,6 +48,9 @@ class DividerColorModifier extends ModifierWithKey<ResourceColor> {
   }
 }
 class DividerStrokeWidthModifier extends ModifierWithKey<number | string> {
+  constructor(value: number | string) {
+    super(value);
+  }
   static identity: Symbol = Symbol('dividerStrokeWidth');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -52,6 +64,9 @@ class DividerStrokeWidthModifier extends ModifierWithKey<number | string> {
   }
 }
 class ArkDividerComponent extends ArkComponent implements DividerAttribute {
+  constructor(nativePtr: KNode) {
+    super(nativePtr);
+  }
   vertical(value: boolean): DividerAttribute {
     modifierWithKey(this._modifiersWithKeys, DividerVerticalModifier.identity, DividerVerticalModifier, value);
     return this;

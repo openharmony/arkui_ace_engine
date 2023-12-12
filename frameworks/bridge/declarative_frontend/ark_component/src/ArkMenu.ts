@@ -1,5 +1,8 @@
 /// <reference path='./import.ts' />
 class MenuFontColorModifier extends ModifierWithKey<ResourceColor> {
+  constructor(value: ResourceColor) {
+    super(value);
+  }
   static identity: Symbol = Symbol('fontColor');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -19,6 +22,9 @@ class MenuFontColorModifier extends ModifierWithKey<ResourceColor> {
 }
 
 class MenuFontModifier extends ModifierWithKey<Font> {
+  constructor(value: Font) {
+    super(value);
+  }
   static identity: Symbol = Symbol('font');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -45,6 +51,9 @@ class MenuFontModifier extends ModifierWithKey<Font> {
 }
 
 class RadiusModifier extends ModifierWithKey<Dimension | BorderRadiuses> {
+  constructor(value: Dimension | BorderRadiuses) {
+    super(value);
+  }
   static identity: Symbol = Symbol('radius');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -78,6 +87,9 @@ class RadiusModifier extends ModifierWithKey<Dimension | BorderRadiuses> {
 }
 
 class ArkMenuComponent extends ArkComponent implements MenuAttribute {
+  constructor(nativePtr: KNode) {
+    super(nativePtr);
+  }
   fontSize(value: any): this {
     throw new Error('Method not implemented.');
   }

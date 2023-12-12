@@ -14,6 +14,9 @@
  */
 /// <reference path="./import.ts" />
 class ArkCommonShapeComponent extends ArkComponent implements CommonShapeMethod<ShapeAttribute> {
+    constructor(nativePtr: KNode) {
+        super(nativePtr);
+    }
     viewPort(value: { x?: string | number | undefined; y?: string | number | undefined; width?: string | number | undefined; height?: string | number | undefined; }): this {
         throw new Error('Method not implemented.');
     }
@@ -69,6 +72,9 @@ class ArkCommonShapeComponent extends ArkComponent implements CommonShapeMethod<
 }
 
 class StrokeDashArrayModifier extends ModifierWithKey<object> {
+    constructor(value: object) {
+        super(value);
+    }
     static identity: Symbol = Symbol('strokeDashArray');
     applyPeer(node: KNode, reset: boolean): void {
         if (reset) {
@@ -89,6 +95,9 @@ class StrokeDashArrayModifier extends ModifierWithKey<object> {
 }
 
 class StrokeModifier extends ModifierWithKey<ResourceColor> {
+    constructor(value: ResourceColor) {
+        super(value);
+    }
     static identity: Symbol = Symbol('stroke');
     applyPeer(node: KNode, reset: boolean): void {
         if (reset) {
@@ -108,6 +117,9 @@ class StrokeModifier extends ModifierWithKey<ResourceColor> {
 }
 
 class FillModifier extends Modifier<ResourceColor> {
+    constructor(value: ResourceColor) {
+        super(value);
+    }
     static identity: Symbol = Symbol('fill');
     applyPeer(node: KNode, reset: boolean): void {
         if (reset) {
@@ -127,6 +139,9 @@ class FillModifier extends Modifier<ResourceColor> {
 }
 
 class StrokeDashOffsetModifier extends ModifierWithKey<number | string> {
+    constructor(value: number | string) {
+        super(value);
+    }
     static identity: Symbol = Symbol('strokeDashOffset');
     applyPeer(node: KNode, reset: boolean): void {
         if (reset) {
@@ -146,6 +161,9 @@ class StrokeDashOffsetModifier extends ModifierWithKey<number | string> {
 }
 
 class StrokeLineCapModifier extends ModifierWithKey<number> {
+    constructor(value: number) {
+        super(value);
+    }
     static identity: Symbol = Symbol('strokeLineCap');
     applyPeer(node: KNode, reset: boolean): void {
         if (reset) {
@@ -157,6 +175,9 @@ class StrokeLineCapModifier extends ModifierWithKey<number> {
 }
 
 class StrokeLineJoinModifier extends ModifierWithKey<number> {
+    constructor(value: number) {
+        super(value);
+    }
     static identity: Symbol = Symbol('strokeLineJoin');
     applyPeer(node: KNode, reset: boolean): void {
         if (reset) {
@@ -168,6 +189,9 @@ class StrokeLineJoinModifier extends ModifierWithKey<number> {
 }
 
 class StrokeMiterLimitModifier extends ModifierWithKey<number | string> {
+    constructor(value: number | string) {
+        super(value);
+    }
     static identity: Symbol = Symbol('strokeMiterLimit');
     applyPeer(node: KNode, reset: boolean): void {
         if (reset) {
@@ -179,6 +203,9 @@ class StrokeMiterLimitModifier extends ModifierWithKey<number | string> {
 }
 
 class FillOpacityModifier extends ModifierWithKey<number | string | Resource> {
+    constructor(value: number | string | Resource) {
+        super(value);
+    }
     static identity: Symbol = Symbol('FillOpacity');
     applyPeer(node: KNode, reset: boolean): void {
         if (reset) {
@@ -197,6 +224,9 @@ class FillOpacityModifier extends ModifierWithKey<number | string | Resource> {
 }
 
 class StrokeOpacityModifier extends ModifierWithKey<number | string | Resource> {
+    constructor(value: number | string | Resource) {
+        super(value);
+    }
     static identity: Symbol = Symbol('StrokeOpacity');
     applyPeer(node: KNode, reset: boolean): void {
         if (reset) {
@@ -215,6 +245,9 @@ class StrokeOpacityModifier extends ModifierWithKey<number | string | Resource> 
 }
 
 class StrokeWidthModifier extends ModifierWithKey<number | string> {
+    constructor(value: number | string) {
+        super(value);
+    }
     static identity: Symbol = Symbol('strokeWidth');
     applyPeer(node: KNode, reset: boolean): void {
         if (reset) {
@@ -226,6 +259,9 @@ class StrokeWidthModifier extends ModifierWithKey<number | string> {
 }
 
 class AntiAliasModifier extends ModifierWithKey<boolean> {
+    constructor(value: boolean) {
+        super(value);
+    }
     static identity: Symbol = Symbol('antiAlias');
     applyPeer(node: KNode, reset: boolean): void {
         if (reset) {

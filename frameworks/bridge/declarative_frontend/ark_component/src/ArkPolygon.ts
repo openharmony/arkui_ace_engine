@@ -1,5 +1,8 @@
 /// <reference path='./import.ts' />
 class ArkPolygonComponent extends ArkComponent implements PolygonAttribute {
+  constructor(nativePtr: KNode) {
+    super(nativePtr);
+  }
   points(value: any[]): this {
     throw new Error('Method not implemented.');
   }

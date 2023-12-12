@@ -1,5 +1,8 @@
 /// <reference path="./import.ts" />
 class TextInputStyleModifier extends ModifierWithKey<number> {
+  constructor(value: number) {
+    super(value);
+  }
   static identity: Symbol = Symbol('textInputStyle');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -13,6 +16,9 @@ class TextInputStyleModifier extends ModifierWithKey<number> {
   }
 }
 class TextInputMaxLengthModifier extends ModifierWithKey<number> {
+  constructor(value: number) {
+    super(value);
+  }
   static identity: Symbol = Symbol('textInputMaxLength');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -26,6 +32,9 @@ class TextInputMaxLengthModifier extends ModifierWithKey<number> {
   }
 }
 class TextInputMaxLinesModifier extends ModifierWithKey<number> {
+  constructor(value: number) {
+    super(value);
+  }
   static identity: Symbol = Symbol('textInputMaxLines');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -39,6 +48,9 @@ class TextInputMaxLinesModifier extends ModifierWithKey<number> {
   }
 }
 class TextInputShowPasswordIconModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
   static identity: Symbol = Symbol('textInputShowPasswordIcon');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -52,6 +64,9 @@ class TextInputShowPasswordIconModifier extends ModifierWithKey<boolean> {
   }
 }
 class TextInputTextAlignModifier extends ModifierWithKey<number> {
+  constructor(value: number) {
+    super(value);
+  }
   static identity: Symbol = Symbol('textInputTextAlign');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -66,6 +81,9 @@ class TextInputTextAlignModifier extends ModifierWithKey<number> {
 }
 
 class TextInputPlaceholderFontModifier extends ModifierWithKey<Font> {
+  constructor(value: Font) {
+    super(value);
+  }
   static identity: Symbol = Symbol('textInputPlaceholderFont');
 
   applyPeer(node: KNode, reset: boolean): void {
@@ -99,6 +117,9 @@ class TextInputPlaceholderFontModifier extends ModifierWithKey<Font> {
 }
 
 class TextInputPlaceholderColorModifier extends ModifierWithKey<ResourceColor> {
+  constructor(value: ResourceColor) {
+    super(value);
+  }
   static identity: Symbol = Symbol('textInputPlaceholderColor');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -113,6 +134,9 @@ class TextInputPlaceholderColorModifier extends ModifierWithKey<ResourceColor> {
 }
 
 class TextInputPasswordIconModifier extends ModifierWithKey<PasswordIcon> {
+  constructor(value: PasswordIcon) {
+    super(value);
+  }
   static identity: Symbol = Symbol('textInputPasswordIcon');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -128,6 +152,9 @@ class TextInputPasswordIconModifier extends ModifierWithKey<PasswordIcon> {
 }
 
 class TextInputSelectedBackgroundColorModifier extends ModifierWithKey<ResourceColor> {
+  constructor(value: ResourceColor) {
+    super(value);
+  }
   static identity: Symbol = Symbol('textInputSelectedBackgroundColor');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -142,6 +169,9 @@ class TextInputSelectedBackgroundColorModifier extends ModifierWithKey<ResourceC
 }
 
 class TextInputSelectionMenuHiddenModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
   static identity: Symbol = Symbol('textInputSelectionMenuHidden');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -155,6 +185,9 @@ class TextInputSelectionMenuHiddenModifier extends ModifierWithKey<boolean> {
   }
 }
 class TextInputShowUnderlineModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
   static identity: Symbol = Symbol('textInputShowUnderLine');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -168,6 +201,9 @@ class TextInputShowUnderlineModifier extends ModifierWithKey<boolean> {
   }
 }
 class TextInputShowErrorModifier extends ModifierWithKey<string | undefined> {
+  constructor(value: string | undefined) {
+    super(value);
+  }
   static identity: Symbol = Symbol('textInputShowError');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -181,6 +217,9 @@ class TextInputShowErrorModifier extends ModifierWithKey<string | undefined> {
   }
 }
 class TextInputTypeModifier extends ModifierWithKey<number> {
+  constructor(value: number) {
+    super(value);
+  }
   static identity: Symbol = Symbol('textInputType');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -195,6 +234,9 @@ class TextInputTypeModifier extends ModifierWithKey<number> {
 }
 
 class TextInputCaretPositionModifier extends ModifierWithKey<number> {
+  constructor(value: number) {
+    super(value);
+  }
   static identity: Symbol = Symbol('textInputCaretPosition');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -209,6 +251,9 @@ class TextInputCaretPositionModifier extends ModifierWithKey<number> {
 }
 
 class TextInputCopyOptionModifier extends ModifierWithKey<number> {
+  constructor(value: number) {
+    super(value);
+  }
   static identity: Symbol = Symbol('textInputCopyOption');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -223,6 +268,9 @@ class TextInputCopyOptionModifier extends ModifierWithKey<number> {
 }
 
 class TextInputEnableKeyboardOnFocusModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
   static identity: Symbol = Symbol('textInputEnableKeyboardOnFocus');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -237,6 +285,9 @@ class TextInputEnableKeyboardOnFocusModifier extends ModifierWithKey<boolean> {
 }
 
 class TextInputCaretStyleModifier extends ModifierWithKey<CaretStyle> {
+  constructor(value: CaretStyle) {
+    super(value);
+  }
   static identity: Symbol = Symbol('textInputCaretStyle');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -256,6 +307,9 @@ class TextInputCaretStyleModifier extends ModifierWithKey<CaretStyle> {
 }
 
 class TextInputEnterKeyTypeModifier extends ModifierWithKey<number> {
+  constructor(value: number) {
+    super(value);
+  }
   static identity: Symbol = Symbol('textInputEnterKeyType');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -270,6 +324,9 @@ class TextInputEnterKeyTypeModifier extends ModifierWithKey<number> {
 }
 
 class TextInputBarStateModifier extends ModifierWithKey<number> {
+  constructor(value: number) {
+    super(value);
+  }
   static identity: Symbol = Symbol('textInputBarState');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -284,6 +341,9 @@ class TextInputBarStateModifier extends ModifierWithKey<number> {
 }
 
 class TextInputCaretColorModifier extends ModifierWithKey<ResourceColor> {
+  constructor(value: ResourceColor) {
+    super(value);
+  }
   static identity: Symbol = Symbol('textinputCaretColor');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -297,6 +357,9 @@ class TextInputCaretColorModifier extends ModifierWithKey<ResourceColor> {
   }
 }
 class TextInputFontColorModifier extends ModifierWithKey<ResourceColor> {
+  constructor(value: ResourceColor) {
+    super(value);
+  }
   static identity: Symbol = Symbol('textInputFontColor');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -312,6 +375,9 @@ class TextInputFontColorModifier extends ModifierWithKey<ResourceColor> {
 
 
 class TextInputFontSizeModifier extends ModifierWithKey<Length> {
+  constructor(value: Length) {
+    super(value);
+  }
   static identity: Symbol = Symbol('textInputFontSize');
 
   applyPeer(node: KNode, reset: boolean): void {
@@ -327,6 +393,9 @@ class TextInputFontSizeModifier extends ModifierWithKey<Length> {
   }
 }
 class TextInputFontStyleModifier extends ModifierWithKey<number> {
+  constructor(value: number) {
+    super(value);
+  }
   static identity: Symbol = Symbol('textInputFontStyle');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -341,6 +410,9 @@ class TextInputFontStyleModifier extends ModifierWithKey<number> {
 }
 
 class TextInputFontWeightModifier extends ModifierWithKey<number | string> {
+  constructor(value: number | string) {
+    super(value);
+  }
   static identity: Symbol = Symbol('textInputFontWeight');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -355,6 +427,9 @@ class TextInputFontWeightModifier extends ModifierWithKey<number | string> {
 }
 
 class TextInputFontFamilyModifier extends ModifierWithKey<ResourceStr> {
+  constructor(value: ResourceStr) {
+    super(value);
+  }
   static identity: Symbol = Symbol('textInputFontFamily');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -369,6 +444,9 @@ class TextInputFontFamilyModifier extends ModifierWithKey<ResourceStr> {
   }
 }
 class ArkTextInputComponent extends ArkComponent implements CommonMethod<TextInputAttribute>{
+  constructor(nativePtr: KNode) {
+    super(nativePtr);
+  }
   cancelButton(value: { style?: CancelButtonStyle, icon?: IconOptions }): TextInputAttribute {
     throw new Error('Method not implemented.');
   }

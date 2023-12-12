@@ -1,6 +1,9 @@
 /// <reference path='./import.ts' />
 
 class ArkRadioComponent extends ArkComponent implements RadioAttribute {
+  constructor(nativePtr: KNode) {
+    super(nativePtr);
+  }
   onGestureJudgeBegin(callback: (gestureInfo: GestureInfo, event: BaseGestureEvent) => GestureJudgeResult): this {
     throw new Error('Method not implemented.');
   }
@@ -22,6 +25,9 @@ class ArkRadioComponent extends ArkComponent implements RadioAttribute {
 }
 
 class RadioCheckedModifier extends Modifier<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
   static identity: Symbol = Symbol('radioChecked');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -33,6 +39,9 @@ class RadioCheckedModifier extends Modifier<boolean> {
 }
 
 class RadioStyleModifier extends ModifierWithKey<RadioStyle> {
+  constructor(value: RadioStyle) {
+    super(value);
+  }
   static identity: Symbol = Symbol('radioStyle');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {

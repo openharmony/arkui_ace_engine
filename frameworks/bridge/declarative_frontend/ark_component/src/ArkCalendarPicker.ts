@@ -1,5 +1,8 @@
 /// <reference path='./import.ts' />
 class TextStyleModifier extends ModifierWithKey<PickerTextStyle> {
+  constructor(value: PickerTextStyle) {
+    super(value);
+  }
   static identity: Symbol = Symbol('textStyle');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -23,6 +26,9 @@ class TextStyleModifier extends ModifierWithKey<PickerTextStyle> {
 }
 
 class EdgeAlignModifier extends ModifierWithKey<ArkEdgeAlign> {
+  constructor(value: ArkEdgeAlign) {
+    super(value);
+  }
   static identity: Symbol = Symbol('edgeAlign');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -46,6 +52,9 @@ class EdgeAlignModifier extends ModifierWithKey<ArkEdgeAlign> {
 }
 
 class ArkCalendarPickerComponent extends ArkComponent implements CalendarPickerAttribute {
+  constructor(nativePtr: KNode) {
+    super(nativePtr);
+  }
   edgeAlign(alignType: CalendarAlign, offset?: Offset | undefined): this {
     let arkEdgeAlign = new ArkEdgeAlign();
     arkEdgeAlign.alignType = alignType;

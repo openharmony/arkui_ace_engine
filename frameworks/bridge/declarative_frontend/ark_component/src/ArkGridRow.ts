@@ -1,5 +1,8 @@
 /// <reference path="./import.ts" />
 class GridRowAlignItemsModifier extends ModifierWithKey<number> {
+  constructor(value: number) {
+    super(value);
+  }
   static identity: Symbol = Symbol('gridRowAlignItems');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -13,6 +16,9 @@ class GridRowAlignItemsModifier extends ModifierWithKey<number> {
   }
 }
 class ArkGridRowComponent extends ArkComponent implements CommonMethod<GridRowAttribute>{
+  constructor(nativePtr: KNode) {
+    super(nativePtr);
+  }
   onBreakpointChange(callback: (breakpoints: string) => void): GridRowAttribute {
     throw new Error("Method not implemented.");
   }
