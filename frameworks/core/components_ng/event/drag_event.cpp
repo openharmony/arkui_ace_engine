@@ -415,6 +415,7 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
             auto dragPreviewInfo = frameNode->GetDragPreview();
             if (dragPreviewInfo.pixelMap != nullptr) {
                 gestureHub->SetPixelMap(dragPreviewInfo.pixelMap);
+                gestureHub->SetDragPreviewPixelMap(dragPreviewInfo.pixelMap);
             } else if (dragPreviewInfo.customNode != nullptr) {
 #if defined(ENABLE_DRAG_FRAMEWORK) && defined(ENABLE_ROSEN_BACKEND) && defined(PIXEL_MAP_SUPPORTED)
                 auto callback = [id = Container::CurrentId(), pipeline, gestureHub]
@@ -427,6 +428,7 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
                         taskScheduler->PostTask([gestureHub, customPixelMap]() {
                             CHECK_NULL_VOID(gestureHub);
                             gestureHub->SetPixelMap(customPixelMap);
+                            gestureHub->SetDragPreviewPixelMap(customPixelMap);
                             }, TaskExecutor::TaskType::UI);
                     }
                 };
