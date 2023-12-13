@@ -178,6 +178,23 @@ struct ArkUIGradientType {
     uint32_t type;
 };
 
+struct ArkUIDimensionType {
+    double value;
+    int32_t units;
+};
+
+struct ArkUIChainAnimationOptionsType {
+    double minSpace;
+    double maxSpace;
+    double conductivity;
+    double intensity;
+    double stiffness;
+    double damping;
+    int32_t edgeEffect;
+    int32_t minSpaceUnits;
+    int32_t maxSpaceUnits;
+};
+
 typedef void* NodeHandle;
 struct ArkUICommonModifierAPI {
     void (*SetBackgroundColor)(NodeHandle node, uint32_t color);
@@ -683,7 +700,7 @@ struct ArkUIGridModifierAPI {
     void (*ResetGridRowsGap)(NodeHandle node);
     void (*SetGridScrollBar)(NodeHandle node, const int32_t scrollBar);
     void (*ResetGridScrollBar)(NodeHandle node);
-    void (*SetGridScrollBarWidth)(NodeHandle node, OHOS::Ace::Dimension& scrollBarWidth);
+    void (*SetGridScrollBarWidth)(NodeHandle node, const struct ArkUIDimensionType *scrollBarWidth);
     void (*ResetGridScrollBarWidth)(NodeHandle node);
     void (*SetGridScrollBarColor)(NodeHandle node, uint32_t scrollBarColor);
     void (*ResetGridScrollBarColor)(NodeHandle node);
@@ -1335,8 +1352,8 @@ struct ArkUIProgressModifierAPI {
 };
 
 struct ArkUIListModifierAPI {
-    void (*SetListLanes)(NodeHandle node, int32_t lanesNum, OHOS::Ace::Dimension minLength,
-        OHOS::Ace::Dimension maxLength, OHOS::Ace::Dimension gutter);
+    void (*SetListLanes)(NodeHandle node, int32_t lanesNum, const struct ArkUIDimensionType *minLength,
+        const struct ArkUIDimensionType *maxLength, const struct ArkUIDimensionType *gutter);
     void (*ResetListLanes)(NodeHandle node);
     void (*SetEditMode)(NodeHandle node, bool editMode);
     void (*ResetEditMode)(NodeHandle node);
@@ -1364,12 +1381,10 @@ struct ArkUIListModifierAPI {
     void (*ResetAlignListItem)(NodeHandle node);
     void (*SetScrollSnapAlign)(NodeHandle node, int32_t scrollSnapAlign);
     void (*ResetScrollSnapAlign)(NodeHandle node);
-    void (*ListSetDivider)(NodeHandle node, double strokeWidth, const uint32_t color, double startMargin,
-        double endMargin, int32_t strokeWidth_size, int32_t startMargin_size, int32_t endMargin_size);
+    void (*ListSetDivider)(NodeHandle node, const uint32_t color, const double *values, const int *units);
     void (*ListResetDivider)(NodeHandle node);
-    void (*SetChainAnimationOptions)(NodeHandle node, double minSpace, double maxSpace, 
-        double conductivity, double intensity, int32_t edgeEffect, double stiffness, double damping, 
-        int32_t minSpace_size, int32_t maxSpace_size);
+    void (*SetChainAnimationOptions)(
+        NodeHandle node, const struct ArkUIChainAnimationOptionsType *chainAnimationOptions);
     void (*ResetChainAnimationOptions)(NodeHandle node);
 };
 
