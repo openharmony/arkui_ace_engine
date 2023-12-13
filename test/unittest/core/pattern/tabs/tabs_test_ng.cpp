@@ -8754,7 +8754,7 @@ HWTEST_F(TabsTestNg, TabsModelSetAnimationDuration003, TestSize.Level1)
      * @tc.expected: Related function runs ok.
      */
     pipeline->SetMinPlatformVersion(PLATFORM_VERSION_10);
-    EXPECT_FLOAT_EQ(tabBarPattern->GetAnimationDuration().value_or(-1), 0);
+    ASSERT_FALSE(tabBarPattern->GetAnimationDuration().has_value());
     tabBarPattern->animationDuration_.reset();
     tabsModel.SetAnimationDuration(1);
     EXPECT_FLOAT_EQ(tabBarPattern->GetAnimationDuration().value_or(-1), 1);
@@ -9928,6 +9928,43 @@ HWTEST_F(TabsTestNg, TabBarLayoutAlgorithmUpdateChildConstraint002, TestSize.Lev
     tabBarProperty->UpdateTabBarMode(TabBarMode::SCROLLABLE);
     tabBarLayoutAlgorithm->UpdateChildConstraint(childConstraint, tabBarProperty, ideaSize, childCount, axis);
     EXPECT_EQ(tabBarProperty->GetTabBarMode().value(), TabBarMode::SCROLLABLE);
+}
+
+/**
+ * @tc.name: TabBarBlurStyle001
+ * @tc.desc: test TabBarBlurStyle
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsTestNg, TabBarBlurStyle001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. build tabsModel.
+     */
+
+    TabsModelNG tabsModel;
+    tabsModel.Create(BarPosition::START, 0, nullptr, nullptr);
+    auto tabsFrameNode = AceType::DynamicCast<TabsNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+    ASSERT_NE(tabsFrameNode, nullptr);
+    auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsFrameNode->GetChildAtIndex(TEST_TAB_BAR_INDEX));
+    ASSERT_NE(tabBarNode, nullptr);
+    auto tabBarPattern = tabBarNode->GetPattern<TabBarPattern>();
+    auto pipeline = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+
+    /**
+     * @tc.steps: step2. update blurstyle
+     * @tc.expected: step2. expect The blurstyle is COMPONENT_THICK.
+     */
+    pipeline->SetMinPlatformVersion(PLATFORM_VERSION_11);
+
+    BlurStyleOption styleOption;
+    styleOption.blurStyle = BlurStyle::COMPONENT_THICK;
+    auto tabBarRenderContext = tabBarNode->GetRenderContext();
+    ASSERT_NE(tabBarRenderContext, nullptr);
+    if (!Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+        tabBarRenderContext->UpdateBackBlurStyle(styleOption);
+    }
+    EXPECT_EQ(tabBarRenderContext->GetBackBlurStyle()->blurStyle, BlurStyle::COMPONENT_THICK);
 }
 
 /**
