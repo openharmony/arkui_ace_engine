@@ -425,6 +425,7 @@ void JSImage::SetColorFilter(const JSCallbackInfo& info)
         }
         if (colorFilter && colorFilter->GetColorFilterMatrix().size() == COLOR_FILTER_MATRIX_SIZE) {
             ImageModel::GetInstance()->SetColorFilterMatrix(colorFilter->GetColorFilterMatrix());
+            return;
         }
         ImageModel::GetInstance()->SetColorFilterMatrix(DEFAULT_COLORFILTER_MATRIX);
         return;
