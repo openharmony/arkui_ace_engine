@@ -25,6 +25,7 @@
 #include "bridge/declarative_frontend/jsview/models/gauge_model_impl.h"
 #include "core/components_ng/base/view_stack_model.h"
 #include "core/components_ng/pattern/gauge/gauge_model_ng.h"
+#include "core/components_ng/pattern/gauge/gauge_theme.h"
 
 namespace OHOS::Ace {
 
@@ -52,7 +53,6 @@ GaugeModel* GaugeModel::GetInstance()
 
 } // namespace OHOS::Ace
 namespace OHOS::Ace::Framework {
-    constexpr Color ERROR_COLOR = Color(0xFFE84026);
 
 void JSGauge::JSBind(BindingTarget globalObj)
 {
@@ -145,6 +145,7 @@ void JSGauge::SetColors(const JSCallbackInfo& info)
     std::vector<Color> colors;
     std::vector<double> values;
     std::vector<float> weights;
+    auto theme = GetTheme<ProgressTheme>();
     auto jsColor = JSRef<JSArray>::Cast(info[0]);
     for (size_t i = 0; i < jsColor->Length(); ++i) {
         JSRef<JSVal> jsValue = jsColor->GetValueAt(i);
@@ -156,7 +157,7 @@ void JSGauge::SetColors(const JSCallbackInfo& info)
         float weight = tempColors->GetValueAt(1)->ToNumber<float>();
         Color selectedColor;
         if (!ParseJsColor(tempColors->GetValueAt(0), selectedColor)) {
-            selectedColor = ERROR_COLOR;
+            selectedColor = Color::BLACK;
         }
         colors.push_back(selectedColor);
         values.push_back(value);
@@ -248,7 +249,7 @@ void JSGauge::ConvertGradientColor(
     type = NG::GaugeType::TYPE_CIRCULAR_SINGLE_SEGMENT_GRADIENT;
     if (jsLinearGradient->GetGradient().size() == 0) {
         NG::ColorStopArray colorStopArray;
-        colorStopArray.emplace_back(std::make_pair(ERROR_COLOR, Dimension(0.0)));
+        colorStopArray.emplace_back(std::make_pair(Color::BLACK, Dimension(0.0)));
         colors.emplace_back(colorStopArray);
     } else {
         colors.emplace_back(jsLinearGradient->GetGradient());
@@ -259,7 +260,7 @@ void JSGauge::ConvertResourceColor(const JsiRef<JsiValue>& itemParam, std::vecto
 {
     Color color;
     if (!ParseJsColor(itemParam, color)) {
-        color = ERROR_COLOR;
+        color = Color::BLACK;
     }
     NG::ColorStopArray colorStopArray;
     colorStopArray.emplace_back(std::make_pair(color, Dimension(0.0)));
