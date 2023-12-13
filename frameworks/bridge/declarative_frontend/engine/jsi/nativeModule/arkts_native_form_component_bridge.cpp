@@ -22,11 +22,11 @@ ArkUINativeModuleValue FormComponentBridge::SetVisibility(ArkUIRuntimeCallInfo* 
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
-    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
-    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    int32_t type = secondArg->Int32Value(vm);
-    GetArkUIInternalNodeAPI()->GetFormComponentModifier().SetFormVisibility(nativeNode, type);
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0);
+    Local<JSValueRef> visibilityArg = runtimeCallInfo->GetCallArgRef(1);
+    void* nativeNode = nodeArg->ToNativePointer(vm)->Value();
+    int32_t visibility = visibilityArg->Int32Value(vm);
+    GetArkUIInternalNodeAPI()->GetFormComponentModifier().SetFormVisibility(nativeNode, visibility);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -34,8 +34,8 @@ ArkUINativeModuleValue FormComponentBridge::ResetVisibility(ArkUIRuntimeCallInfo
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
-    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0);
+    void* nativeNode = nodeArg->ToNativePointer(vm)->Value();
     GetArkUIInternalNodeAPI()->GetFormComponentModifier().ResetFormVisibility(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
@@ -44,10 +44,10 @@ ArkUINativeModuleValue FormComponentBridge::AllowUpdate(ArkUIRuntimeCallInfo* ru
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
-    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
-    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    bool allowUpdate = secondArg->ToBoolean(vm)->Value();
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0);
+    Local<JSValueRef> allowUpdateArg = runtimeCallInfo->GetCallArgRef(1);
+    void* nativeNode = nodeArg->ToNativePointer(vm)->Value();
+    bool allowUpdate = allowUpdateArg->ToBoolean(vm)->Value();
     GetArkUIInternalNodeAPI()->GetFormComponentModifier().AllowUpdate(nativeNode, allowUpdate);
     return panda::JSValueRef::Undefined(vm);
 }
@@ -56,8 +56,8 @@ ArkUINativeModuleValue FormComponentBridge::DisallowUpdate(ArkUIRuntimeCallInfo*
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
-    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0);
+    void* nativeNode = nodeArg->ToNativePointer(vm)->Value();
     GetArkUIInternalNodeAPI()->GetFormComponentModifier().DisallowUpdate(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
@@ -66,13 +66,13 @@ ArkUINativeModuleValue FormComponentBridge::SetDimension(ArkUIRuntimeCallInfo* r
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
-    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
-    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    if (secondArg->IsNull() || secondArg->IsUndefined()) {
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0);
+    Local<JSValueRef> dimensionArg = runtimeCallInfo->GetCallArgRef(1);
+    void* nativeNode = nodeArg->ToNativePointer(vm)->Value();
+    if (dimensionArg->IsNull() || dimensionArg->IsUndefined()) {
         GetArkUIInternalNodeAPI()->GetFormComponentModifier().ResetDimension(nativeNode);
     } else {
-        int32_t dimension = secondArg->Int32Value(vm);
+        int32_t dimension = dimensionArg->Int32Value(vm);
         GetArkUIInternalNodeAPI()->GetFormComponentModifier().SetDimension(nativeNode, dimension);
     }
     return panda::JSValueRef::Undefined(vm);
@@ -82,8 +82,8 @@ ArkUINativeModuleValue FormComponentBridge::ResetDimension(ArkUIRuntimeCallInfo*
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
-    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0);
+    void* nativeNode = nodeArg->ToNativePointer(vm)->Value();
     GetArkUIInternalNodeAPI()->GetFormComponentModifier().ResetDimension(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
@@ -92,11 +92,15 @@ ArkUINativeModuleValue FormComponentBridge::SetModuleName(ArkUIRuntimeCallInfo* 
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
-    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
-    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    std::string moduleName = secondArg->ToString(vm)->ToString();
-    GetArkUIInternalNodeAPI()->GetFormComponentModifier().SetModuleName(nativeNode, moduleName.c_str());
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0);
+    Local<JSValueRef> moduleNameArg = runtimeCallInfo->GetCallArgRef(1);
+    void* nativeNode = nodeArg->ToNativePointer(vm)->Value();
+    if (moduleNameArg->IsNull() || moduleNameArg->IsUndefined()) {
+        GetArkUIInternalNodeAPI()->GetFormComponentModifier().ResetModuleName(nativeNode);
+    } else {
+        std::string moduleName = moduleNameArg->ToString(vm)->ToString();
+        GetArkUIInternalNodeAPI()->GetFormComponentModifier().SetModuleName(nativeNode, moduleName.c_str());
+    }
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -104,8 +108,8 @@ ArkUINativeModuleValue FormComponentBridge::ResetModuleName(ArkUIRuntimeCallInfo
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
-    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0);
+    void* nativeNode = nodeArg->ToNativePointer(vm)->Value();
     GetArkUIInternalNodeAPI()->GetFormComponentModifier().ResetModuleName(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
@@ -114,10 +118,10 @@ ArkUINativeModuleValue FormComponentBridge::SetSize(ArkUIRuntimeCallInfo* runtim
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
-    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0);
     Local<JSValueRef> widthValue = runtimeCallInfo->GetCallArgRef(1);
     Local<JSValueRef> heightValue = runtimeCallInfo->GetCallArgRef(2);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+    void* nativeNode = nodeArg->ToNativePointer(vm)->Value();
     CalcDimension width = 0.0_vp;
     CalcDimension height = 0.0_vp;
     bool hasWidth = (!widthValue->IsNull() && !widthValue->IsUndefined() &&
@@ -137,8 +141,8 @@ ArkUINativeModuleValue FormComponentBridge::ResetSize(ArkUIRuntimeCallInfo* runt
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
-    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0);
+    void* nativeNode = nodeArg->ToNativePointer(vm)->Value();
     GetArkUIInternalNodeAPI()->GetFormComponentModifier().ResetFormSize(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }

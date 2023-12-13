@@ -42,7 +42,8 @@ void SetTimepickerTextStyle(NodeHandle node, uint32_t color, const char* fontInf
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
 
-    NG::PickerTextStyle pickerTextStyle = GetPickerTextStyle(color, fontInfo, styleVal);
+    NG::PickerTextStyle pickerTextStyle;
+    GetPickerTextStyle(color, fontInfo, styleVal, pickerTextStyle);
     auto context = frameNode->GetContext();
     CHECK_NULL_VOID(context);
     auto themeManager = context->GetThemeManager();
@@ -70,7 +71,8 @@ void SetTimepickerSelectedTextStyle(NodeHandle node, uint32_t color, const char*
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
 
-    NG::PickerTextStyle pickerTextStyle = GetPickerTextStyle(color, fontInfo, styleVal);
+    NG::PickerTextStyle pickerTextStyle;
+    GetPickerTextStyle(color, fontInfo, styleVal, pickerTextStyle);
     auto context = frameNode->GetContext();
     CHECK_NULL_VOID(context);
     auto themeManager = context->GetThemeManager();
@@ -98,7 +100,8 @@ void SetTimepickerDisappearTextStyle(NodeHandle node, uint32_t color, const char
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
 
-    NG::PickerTextStyle pickerTextStyle = GetPickerTextStyle(color, fontInfo, styleVal);
+    NG::PickerTextStyle pickerTextStyle;
+    GetPickerTextStyle(color, fontInfo, styleVal, pickerTextStyle);
     auto context = frameNode->GetContext();
     CHECK_NULL_VOID(context);
     auto themeManager = context->GetThemeManager();

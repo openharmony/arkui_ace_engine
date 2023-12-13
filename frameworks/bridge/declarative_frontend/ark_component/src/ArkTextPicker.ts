@@ -105,23 +105,23 @@ class TextpickerTextStyleModifier extends ModifierWithKey<PickerTextStyle> {
       GetUINativeModule().textpicker.resetTextStyle(node);
     }
     else {
-      GetUINativeModule().textpicker.setTextStyle(node,
-        this.value.color, this.value.font?.size, this.value.font?.weight, this.value.font?.family, this.value.font?.style);
+      GetUINativeModule().textpicker.setTextStyle(node, this.value?.color ?? undefined,
+        this.value?.font?.size ?? undefined,
+        this.value?.font?.weight ?? undefined,
+        this.value?.font?.family ?? undefined,
+        this.value?.font?.style ?? undefined);
     }
   }
 
   checkObjectDiff(): boolean {
-    let colorEQ = isBaseOrResourceEqual((this.stageValue as PickerTextStyle).color,
-      (this.value as PickerTextStyle).color);
-    let sizeEQ = isBaseOrResourceEqual((this.stageValue as PickerTextStyle).font?.size,
-      (this.value as PickerTextStyle).font?.size);
-    let weightEQ = isBaseOrResourceEqual((this.stageValue as PickerTextStyle).font?.weight,
-      (this.value as PickerTextStyle).font?.weight);
-    let familyEQ = isBaseOrResourceEqual((this.stageValue as PickerTextStyle).font?.family,
-      (this.value as PickerTextStyle).font?.family);
-    let styleEQ = isBaseOrResourceEqual((this.stageValue as PickerTextStyle).font?.style,
-      (this.value as PickerTextStyle).font?.style);
-    return !colorEQ || !sizeEQ || !weightEQ || !familyEQ || !styleEQ;
+    if (!(this.stageValue?.font?.weight === this.value?.font?.weight &&
+      this.stageValue?.font?.style === this.value?.font?.style)) {
+      return true;
+    } else {
+      return !isBaseOrResourceEqual(this.stageValue?.color, this.value?.color) ||
+        !isBaseOrResourceEqual(this.stageValue?.font?.size, this.value?.font?.size) ||
+        !isBaseOrResourceEqual(this.stageValue?.font?.family, this.value?.font?.family);
+    }
   }
 }
 
@@ -135,23 +135,23 @@ class TextpickerSelectedTextStyleModifier extends ModifierWithKey<PickerTextStyl
       GetUINativeModule().textpicker.resetSelectedTextStyle(node);
     }
     else {
-      GetUINativeModule().textpicker.setSelectedTextStyle(node,
-        this.value.color, this.value.font?.size, this.value.font?.weight, this.value.font?.family, this.value.font?.style);
+      GetUINativeModule().textpicker.setSelectedTextStyle(node, this.value?.color ?? undefined,
+        this.value?.font?.size ?? undefined,
+        this.value?.font?.weight ?? undefined,
+        this.value?.font?.family ?? undefined,
+        this.value?.font?.style ?? undefined);
     }
   }
 
   checkObjectDiff(): boolean {
-    let colorEQ = isBaseOrResourceEqual((this.stageValue as PickerTextStyle).color,
-      (this.value as PickerTextStyle).color);
-    let sizeEQ = isBaseOrResourceEqual((this.stageValue as PickerTextStyle).font?.size,
-      (this.value as PickerTextStyle).font?.size);
-    let weightEQ = isBaseOrResourceEqual((this.stageValue as PickerTextStyle).font?.weight,
-      (this.value as PickerTextStyle).font?.weight);
-    let familyEQ = isBaseOrResourceEqual((this.stageValue as PickerTextStyle).font?.family,
-      (this.value as PickerTextStyle).font?.family);
-    let styleEQ = isBaseOrResourceEqual((this.stageValue as PickerTextStyle).font?.style,
-      (this.value as PickerTextStyle).font?.style);
-    return !colorEQ || !sizeEQ || !weightEQ || !familyEQ || !styleEQ;
+    if (!(this.stageValue?.font?.weight === this.value?.font?.weight &&
+      this.stageValue?.font?.style === this.value?.font?.style)) {
+      return true;
+    } else {
+      return !isBaseOrResourceEqual(this.stageValue?.color, this.value?.color) ||
+        !isBaseOrResourceEqual(this.stageValue?.font?.size, this.value?.font?.size) ||
+        !isBaseOrResourceEqual(this.stageValue?.font?.family, this.value?.font?.family);
+    }
   }
 }
 
@@ -165,23 +165,23 @@ class TextpickerDisappearTextStyleModifier extends ModifierWithKey<PickerTextSty
       GetUINativeModule().textpicker.resetDisappearTextStyle(node);
     }
     else {
-      GetUINativeModule().textpicker.setDisappearTextStyle(node,
-        this.value.color, this.value.font?.size, this.value.font?.weight, this.value.font?.family, this.value.font?.style);
+      GetUINativeModule().textpicker.setDisappearTextStyle(node, this.value?.color ?? undefined,
+        this.value?.font?.size ?? undefined,
+        this.value?.font?.weight ?? undefined,
+        this.value?.font?.family ?? undefined,
+        this.value?.font?.style ?? undefined);
     }
   }
 
   checkObjectDiff(): boolean {
-    let colorEQ = isBaseOrResourceEqual((this.stageValue as PickerTextStyle).color,
-      (this.value as PickerTextStyle).color);
-    let sizeEQ = isBaseOrResourceEqual((this.stageValue as PickerTextStyle).font?.size,
-      (this.value as PickerTextStyle).font?.size);
-    let weightEQ = isBaseOrResourceEqual((this.stageValue as PickerTextStyle).font?.weight,
-      (this.value as PickerTextStyle).font?.weight);
-    let familyEQ = isBaseOrResourceEqual((this.stageValue as PickerTextStyle).font?.family,
-      (this.value as PickerTextStyle).font?.family);
-    let styleEQ = isBaseOrResourceEqual((this.stageValue as PickerTextStyle).font?.style,
-      (this.value as PickerTextStyle).font?.style);
-    return !colorEQ || !sizeEQ || !weightEQ || !familyEQ || !styleEQ;
+    if (!(this.stageValue?.font?.weight === this.value?.font?.weight &&
+      this.stageValue?.font?.style === this.value?.font?.style)) {
+      return true;
+    } else {
+      return !isBaseOrResourceEqual(this.stageValue?.color, this.value?.color) ||
+        !isBaseOrResourceEqual(this.stageValue?.font?.size, this.value?.font?.size) ||
+        !isBaseOrResourceEqual(this.stageValue?.font?.family, this.value?.font?.family);
+    }
   }
 }
 
