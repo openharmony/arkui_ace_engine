@@ -293,27 +293,27 @@ void NavigationPattern::CheckTopNavPathChange(
         focusHub->RequestFocus();
     }
 
-    bool disableAllAnimation = navigationStack_->GetDisableAnimation();
-    bool animated = navigationStack_->GetAnimatedValue();
-    TAG_LOGI(AceLogTag::ACE_NAVIGATION,
-        "transition start, disableAllAnimation: %{public}d, animated: %{public}d, isPopPage: %{public}d",
-        disableAllAnimation, animated, isPopPage);
-    if (disableAllAnimation) {
-        TransitionWithOutAnimation(preTopNavDestination, newTopNavDestination, isPopPage);
-        return;
-    }
-    if (animated) {
-        // animation need to run after layout task
-        context->AddAfterLayoutTask(
-            [preTopNavDestination, newTopNavDestination, isPopPage, weakNavigationPattern = WeakClaim(this)]() {
-                auto navigationPattern = weakNavigationPattern.Upgrade();
-                CHECK_NULL_VOID(navigationPattern);
+    // transition need to run after layout task
+    context->AddAfterLayoutTask(
+        [preTopNavDestination, newTopNavDestination, isPopPage, weakNavigationPattern = WeakClaim(this)]() {
+            auto navigationPattern = weakNavigationPattern.Upgrade();
+            CHECK_NULL_VOID(navigationPattern);
+            bool disableAllAnimation = navigationPattern->navigationStack_->GetDisableAnimation();
+            bool animated = navigationPattern->navigationStack_->GetAnimatedValue();
+            TAG_LOGI(AceLogTag::ACE_NAVIGATION,
+                "transition start, disableAllAnimation: %{public}d, animated: %{public}d, isPopPage: %{public}d",
+                disableAllAnimation, animated, isPopPage);
+            if (disableAllAnimation) {
+                navigationPattern->TransitionWithOutAnimation(preTopNavDestination, newTopNavDestination, isPopPage);
+                return;
+            }
+            if (animated) {
                 navigationPattern->TransitionWithAnimation(preTopNavDestination, newTopNavDestination, isPopPage);
-            });
-    } else {
-        TransitionWithOutAnimation(preTopNavDestination, newTopNavDestination, isPopPage);
-        navigationStack_->UpdateAnimatedValue(true);
-    }
+                return;
+            }
+            navigationPattern->TransitionWithOutAnimation(preTopNavDestination, newTopNavDestination, isPopPage);
+            navigationPattern->navigationStack_->UpdateAnimatedValue(true);
+        });
     hostNode->GetLayoutProperty()->UpdatePropertyChangeFlag(PROPERTY_UPDATE_MEASURE);
 }
 
@@ -437,7 +437,7 @@ void NavigationPattern::TransitionWithOutAnimation(const RefPtr<NavDestinationGr
         } else {
             auto layoutProperty = preTopNavDestination->GetLayoutProperty();
             CHECK_NULL_VOID(layoutProperty);
-            layoutProperty->UpdateVisibility(VisibleType::INVISIBLE);
+            layoutProperty->UpdateVisibility(VisibleType::INVISIBLE, true);
         }
         navigationNode->OnAccessibilityEvent(AccessibilityEventType::PAGE_CHANGE);
         return;
@@ -447,7 +447,7 @@ void NavigationPattern::TransitionWithOutAnimation(const RefPtr<NavDestinationGr
     if (newTopNavDestination) {
         auto layoutProperty = navBarNode->GetLayoutProperty();
         CHECK_NULL_VOID(layoutProperty);
-        layoutProperty->UpdateVisibility(VisibleType::INVISIBLE);
+        layoutProperty->UpdateVisibility(VisibleType::INVISIBLE, true);
     }
 
     // navDestination pop to navBar
