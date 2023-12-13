@@ -201,15 +201,13 @@ ArkUINativeModuleValue ButtonBridge::SetFontFamily(ArkUIRuntimeCallInfo* runtime
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_1);
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    std::string src;
-    if (secondArg->IsString()) {
-        src = secondArg->ToString(vm)->ToString();
-    } else if (secondArg->IsObject()) {
-        ArkTSUtils::ParseJsMedia(vm, secondArg, src);
-    } else {
+    std::string fontFamily;
+    if (!ArkTSUtils::ParseJsFontFamiliesToString(vm, secondArg, fontFamily)) {
+        GetArkUIInternalNodeAPI()->GetButtonModifier().ResetButtonFontFamily(nativeNode);
         return panda::JSValueRef::Undefined(vm);
     }
-    GetArkUIInternalNodeAPI()->GetButtonModifier().SetButtonFontFamily(nativeNode, src.c_str());
+
+    GetArkUIInternalNodeAPI()->GetButtonModifier().SetButtonFontFamily(nativeNode, fontFamily.c_str());
     return panda::JSValueRef::Undefined(vm);
 }
 

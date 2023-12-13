@@ -573,6 +573,30 @@ bool ArkTSUtils::ParseJsDimensionFp(const EcmaVM* vm, const Local<JSValueRef>& j
         vm, jsValue, result, DimensionUnit::FP, isSupportPercent, enableCheckInvalidvalue);
 }
 
+bool ArkTSUtils::ParseJsFontFamiliesToString(const EcmaVM* vm, const Local<JSValueRef>& jsValue, std::string& result)
+{
+    if (jsValue->IsNull() || jsValue->IsUndefined()) {
+        return false;
+    }
+
+    std::vector<std::string> fontFamilies;
+    if (!ParseJsFontFamilies(vm, jsValue, fontFamilies)) {
+        return false;
+    }
+    if (fontFamilies.size() > 0) {
+        result = "";
+        for (uint32_t i = 0; i < fontFamilies.size(); i++) {
+            result += fontFamilies.at(i);
+            if (&fontFamilies.at(i) != &fontFamilies.back()) {
+                result += ",";
+            }
+        }
+        return true;
+    }
+
+    return true;
+}
+
 bool ArkTSUtils::ParseJsFontFamilies(
     const EcmaVM *vm, const Local<JSValueRef> &jsValue, std::vector<std::string> &result)
 {
