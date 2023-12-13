@@ -471,6 +471,15 @@ bool PerfMonitor::IsExceptResponseTime(int64_t time, const std::string& sceneId)
         || sceneId == PerfConstants::VOLUME_BAR_SHOW) {
         return true;
     }
+    if (sceneId == PerfConstants::PC_APP_CENTER_GESTURE_OPERATION ||
+        sceneId == PerfConstants::PC_GESTURE_TO_RECENT ||
+        sceneId == PerfConstants::PC_SHORTCUT_SHOW_DESKTOP ||
+        sceneId == PerfConstants::PC_SHORTCUT_RESTORE_DESKTOP ||
+        sceneId == PerfConstants::PC_SHOW_DESKTOP_GESTURE_OPERATION ||
+        sceneId == PerfConstants::PC_ALT_TAB_TO_RECENT ||
+        sceneId == PerfConstants::PC_SHORTCUT_TO_RECENT) {
+        return true;
+    }
     return false;
 }
 } // namespace OHOS::Ace

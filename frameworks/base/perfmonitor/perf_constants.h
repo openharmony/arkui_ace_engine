@@ -35,6 +35,27 @@ public:
 
     // volume bar show
     static constexpr char VOLUME_BAR_SHOW[] = "VOLUME_BAR_SHOW";
+
+    // PC app center gesture operation
+    static constexpr char PC_APP_CENTER_GESTURE_OPERATION[] = "PC_APP_CENTER_GESTURE_OPERATION";
+
+    // PC gesture to recent
+    static constexpr char PC_GESTURE_TO_RECENT[] = "PC_GESTURE_TO_RECENT";
+
+    // PC shortcut show desktop
+    static constexpr char PC_SHORTCUT_SHOW_DESKTOP[] = "PC_SHORTCUT_SHOW_DESKTOP";
+
+    // PC shortcut restore desktop
+    static constexpr char PC_SHORTCUT_RESTORE_DESKTOP[] = "PC_SHORTCUT_RESTORE_DESKTOP";
+
+    // PC show desktop gesture operation
+    static constexpr char PC_SHOW_DESKTOP_GESTURE_OPERATION[] = "PC_SHOW_DESKTOP_GESTURE_OPERATION";
+
+    // PC alt + tab to recent
+    static constexpr char PC_ALT_TAB_TO_RECENT[] = "PC_ALT_TAB_TO_RECENT";
+
+    // PC shortcut to recent
+    static constexpr char PC_SHORTCUT_TO_RECENT[] = "PC_SHORTCUT_TO_RECENT";
 };
 } // namespace OHOS::Ace
 #endif // ARKUI_PERF_SCENE_ID_H
