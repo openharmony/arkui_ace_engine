@@ -1004,7 +1004,6 @@ void JSTextField::SetShowCounter(const JSCallbackInfo& info)
         TextFieldModel::GetInstance()->SetShowCounter(false);
         return;
     }
-    TextFieldModel::GetInstance()->SetShowCounter(info[0]->ToBoolean());
     if (info[1]->IsObject()) {
         auto paramObject = JSRef<JSObject>::Cast(info[1]);
         auto param = paramObject->GetProperty("highlightBorder");
@@ -1016,18 +1015,22 @@ void JSTextField::SetShowCounter(const JSCallbackInfo& info)
         }
         auto parameter = paramObject->GetProperty("thresholdPercentage");
         auto inputNumber = parameter->ToNumber<int32_t>();
-        if (!parameter->IsNumber() || parameter->IsNull()) {
+        TextFieldModel::GetInstance()->SetCounterType(inputNumber);
+        if (parameter->IsNull() || parameter->IsUndefined()) {
+            TextFieldModel::GetInstance()->SetShowCounter(true);
             TextFieldModel::GetInstance()->SetCounterType(INVAILD_VALUE);
             return;
         }
         if (inputNumber < MINI_VAILD_VALUE || inputNumber > MAX_VAILD_VALUE) {
             LOGI("The info is wrong, it is supposed to be a right number");
             TextFieldModel::GetInstance()->SetCounterType(ILLEGAL_VALUE);
+            TextFieldModel::GetInstance()->SetShowCounter(false);
             return;
         }
-        TextFieldModel::GetInstance()->SetCounterType(inputNumber);
+        TextFieldModel::GetInstance()->SetShowCounter(info[0]->ToBoolean());
         return;
     }
+    TextFieldModel::GetInstance()->SetShowCounter(info[0]->ToBoolean());
     TextFieldModel::GetInstance()->SetCounterType(INVAILD_VALUE);
     TextFieldModel::GetInstance()->SetShowCounterBorder(true);
 }

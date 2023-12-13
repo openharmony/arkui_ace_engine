@@ -460,7 +460,7 @@ void TextFieldModelNG::SetShowCounter(bool value)
     if (value) {
         pattern->AddCounterNode();
     } else {
-        pattern->ClearCounterNode();
+        pattern->CleanCounterNode();
     }
 }
 
@@ -836,7 +836,7 @@ void TextFieldModelNG::SetShowCounter(FrameNode* frameNode, bool value)
     if (value) {
         pattern->AddCounterNode();
     } else {
-        pattern->ClearCounterNode();
+        pattern->CleanCounterNode();
     }
 }
 
