@@ -526,6 +526,7 @@ private:
     bool isCustomKeyboardAttached_ = false;
     bool usingMouseRightButton_ = false;
     bool isCursorAlwaysDisplayed_ = false;
+    bool isClickOnAISpan_ = false;
 
     int32_t moveLength_ = 0;
     int32_t caretPosition_ = 0;

@@ -1219,7 +1219,7 @@ void RichEditorPattern::StartTwinkling()
     caretVisible_ = true;
     auto tmpHost = GetHost();
     CHECK_NULL_VOID(tmpHost);
-    tmpHost->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    tmpHost->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     ScheduleCaretTwinkling();
 }
 
@@ -1236,8 +1236,8 @@ void RichEditorPattern::StopTwinkling()
     caretTwinklingTask_.Cancel();
     if (caretVisible_) {
         caretVisible_ = false;
+        GetHost()->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     }
-    GetHost()->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
 void RichEditorPattern::HandleClickEvent(GestureEvent& info)
@@ -1263,6 +1263,10 @@ void RichEditorPattern::HandleSingleClickEvent(OHOS::Ace::GestureEvent& info)
     lastClickTimeStamp_ = info.GetTimeStamp();
 
     HandleClickAISpanEvent(info);
+    if (isClickOnAISpan_ && selectOverlayProxy_ && !selectOverlayProxy_->IsClosed()) {
+        selectOverlayProxy_->DisableMenu(true);
+        return;
+    }
     HandleUserClickEvent(info);
     if (textSelector_.IsValid() && !isMouseSelect_) {
         CloseSelectOverlay();
@@ -1283,7 +1287,7 @@ void RichEditorPattern::HandleSingleClickEvent(OHOS::Ace::GestureEvent& info)
 
     auto focusHub = GetHost()->GetOrCreateFocusHub();
     if (focusHub) {
-        if (focusHub->RequestFocusImmediately()) {
+        if (!isClickOnAISpan_ && focusHub->RequestFocusImmediately()) {
             float caretHeight = 0.0f;
             SetCaretPosition(position);
             OffsetF caretOffset = CalcCursorOffsetByPosition(GetCaretPosition(), caretHeight, false, false);
@@ -1357,18 +1361,18 @@ bool RichEditorPattern::HandleUserGestureEvent(
 
 void RichEditorPattern::HandleClickAISpanEvent(GestureEvent& info)
 {
+    isClickOnAISpan_ = false;
     if (!textDetectEnable_ || aiSpanMap_.empty()) {
         return;
     }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    bool isClickOnAISpan = false;
     PointF textOffset = { info.GetLocalLocation().GetX() - GetTextRect().GetX(),
         info.GetLocalLocation().GetY() - GetTextRect().GetY() };
     for (const auto& kv : aiSpanMap_) {
         auto& aiSpan = kv.second;
-        isClickOnAISpan = ClickAISpan(textOffset, aiSpan);
-        if (isClickOnAISpan) {
+        isClickOnAISpan_ = ClickAISpan(textOffset, aiSpan);
+        if (isClickOnAISpan_) {
             return;
         }
     }
@@ -3829,6 +3833,15 @@ void RichEditorPattern::ShowSelectOverlay(const RectF& firstHandle, const RectF&
             pattern->HandleOnCameraInput();
         };
 
+        if (pattern->GetTextDetectEnable()) {
+            selectInfo.onClose = [weak](bool closedByGlobalEvent) {
+                auto pattern = weak.Upgrade();
+                CHECK_NULL_VOID(pattern);
+                if (closedByGlobalEvent) {
+                    pattern->ResetSelection();
+                }
+            };
+        }
         selectInfo.callerFrameNode = host;
         pattern->CopySelectionMenuParams(selectInfo, responseType);
         pattern->UpdateSelectOverlayOrCreate(selectInfo);
