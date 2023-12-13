@@ -94,10 +94,10 @@ public:
         const AccessibilityEvent& accessibilityEvent, Accessibility::AccessibilityEventInfo eventInfo);
     bool TransferAccessibilityAsyncEvent(
         const Accessibility::AccessibilityEventInfo& eventInfo,
-        const std::vector<int32_t>& uiExtensionIdLevelList) override;
+        int32_t uiExtensionOffset) override;
     void SendExtensionAccessibilityEvent(
         const Accessibility::AccessibilityEventInfo& eventInfo,
-        const std::vector<int32_t>& uiExtensionIdLevelList) override;
+        int32_t uiExtensionOffset) override;
     void SearchElementInfoByAccessibilityId(const int32_t elementId, const int32_t requestId,
         Accessibility::AccessibilityElementOperatorCallback& callback, const int32_t mode, const int32_t windowId);
     void SearchElementInfosByText(const int32_t elementId, const std::string& text, const int32_t requestId,

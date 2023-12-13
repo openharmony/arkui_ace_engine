@@ -146,28 +146,18 @@ void UIExtensionPattern::OnConnect()
 }
 
 void UIExtensionPattern::OnAccessibilityEvent(
-    const Accessibility::AccessibilityEventInfo& info, const std::vector<int32_t>& uiExtensionIdLevelList)
+    const Accessibility::AccessibilityEventInfo& info, int32_t uiExtensionOffset)
 {
     TAG_LOGI(AceLogTag::ACE_UIEXTENSIONCOMPONENT, "The accessibility event is reported.");
     ContainerScope scope(instanceId_);
-    auto container = AceType::DynamicCast<Platform::AceContainer>(Container::Current());
-    CHECK_NULL_VOID(container);
-    auto pipelineContext = container->GetPipelineContext();
-    auto ngPipeline = AceType::DynamicCast<NG::PipelineContext>(pipelineContext);
-    if (ngPipeline) {
-        auto window = container->GetUIWindow(instanceId_);
-        CHECK_NULL_VOID(window);
-        std::vector<int32_t> uiExtensionIdLevelListNew;
-        uiExtensionIdLevelListNew.assign(uiExtensionIdLevelList.begin(), uiExtensionIdLevelList.end());
-        uiExtensionIdLevelListNew.insert(uiExtensionIdLevelListNew.begin(), uiExtensionId_);
-        auto frontend = container->GetFrontend();
-        CHECK_NULL_VOID(frontend);
-        auto accessibilityManager = frontend->GetAccessibilityManager();
-        CHECK_NULL_VOID(accessibilityManager);
-        if (accessibilityManager) {
-            accessibilityManager->SendExtensionAccessibilityEvent(info, uiExtensionIdLevelListNew);
-        }
-    }
+    auto ngPipeline = NG::PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(ngPipeline);
+    uiExtensionOffset = uiExtensionId_ * NG::UI_EXTENSION_OFFSET_MAX + uiExtensionOffset;
+    auto frontend = ngPipeline->GetFrontend();
+    CHECK_NULL_VOID(frontend);
+    auto accessibilityManager = frontend->GetAccessibilityManager();
+    CHECK_NULL_VOID(accessibilityManager);
+    accessibilityManager->SendExtensionAccessibilityEvent(info, uiExtensionOffset);
 }
 
 void UIExtensionPattern::OnDisconnect()
