@@ -1155,34 +1155,49 @@ void JSTextField::SetCancelButton(const JSCallbackInfo& info)
         return;
     }
     auto param = JSRef<JSObject>::Cast(info[0]);
+    auto theme = GetTheme<TextFieldTheme>();
     std::string styleStr;
     CleanNodeStyle cleanNodeStyle;
     auto styleProp = param->GetProperty("style");
-    if (!styleProp->IsUndefined() && !styleProp->IsNull() && ParseJsString(styleProp, styleStr)) {
+    if (!styleProp->IsNull() && ParseJsString(styleProp, styleStr)) {
         cleanNodeStyle = ConvertStrToCleanNodeStyle(styleStr);
     } else {
         cleanNodeStyle = CleanNodeStyle::INPUT;
     }
     TextFieldModel::GetInstance()->SetCleanNodeStyle(cleanNodeStyle);
+    TextFieldModel::GetInstance()->SetIsShowCancelButton(true);
     auto iconJsVal = param->GetProperty("icon");
     if (iconJsVal->IsUndefined() || iconJsVal->IsNull() || !iconJsVal->IsObject()) {
+        TextFieldModel::GetInstance()->SetCancelIconColor(Color());
+        TextFieldModel::GetInstance()->SetCancelIconSize(theme->GetIconSize());
+        TextFieldModel::GetInstance()->SetCanacelIconSrc(std::string());
         return;
     }
     auto iconParam = JSRef<JSObject>::Cast(iconJsVal);
+    // set icon size
     CalcDimension iconSize;
     auto iconSizeProp = iconParam->GetProperty("size");
-    if (!iconSizeProp->IsUndefined() && !iconSizeProp->IsNull() && ParseJsDimensionVpNG(iconSizeProp, iconSize) &&
-        iconSize.Unit() != DimensionUnit::PERCENT) {
-        TextFieldModel::GetInstance()->SetCancelIconSize(iconSize);
+    if (!iconSizeProp->IsUndefined() && !iconSizeProp->IsNull() && ParseJsDimensionVpNG(iconSizeProp, iconSize)) {
+        if (LessNotEqual(iconSize.Value(), 0.0) || iconSize.Unit() == DimensionUnit::PERCENT) {
+            iconSize = theme->GetIconSize();
+        }
+    } else {
+        iconSize = theme->GetIconSize();
     }
+    TextFieldModel::GetInstance()->SetCancelIconSize(iconSize);
+    // set icon src
     std::string iconSrc;
     auto iconSrcProp = iconParam->GetProperty("src");
-    if (!iconSrcProp->IsUndefined() && !iconSrcProp->IsNull() && ParseJsMedia(iconSrcProp, iconSrc)) {
-        TextFieldModel::GetInstance()->SetCanacelIconSrc(iconSrc);
+    if (iconSrcProp->IsUndefined() || iconSrcProp->IsNull() || !ParseJsMedia(iconSrcProp, iconSrc)) {
+        iconSrc = "";
     }
+    TextFieldModel::GetInstance()->SetCanacelIconSrc(iconSrc);
+    // set icon color
     Color iconColor;
     auto iconColorProp = iconParam->GetProperty("color");
     if (!iconColorProp->IsUndefined() && !iconColorProp->IsNull() && ParseJsColor(iconColorProp, iconColor)) {
+        TextFieldModel::GetInstance()->SetCancelIconColor(iconColor);
+    } else {
         TextFieldModel::GetInstance()->SetCancelIconColor(iconColor);
     }
 }

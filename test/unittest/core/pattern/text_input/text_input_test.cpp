@@ -1954,18 +1954,15 @@ HWTEST_F(TextFieldUXTest, UpdateFocusForward002, TestSize.Level1)
     /**
      * @tc.steps: step1. Initialize text input.
      */
-    CreateTextField(DEFAULT_TEXT);
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetCleanNodeStyle(CleanNodeStyle::CONSTANT);
+        model.SetIsShowCancelButton(true);
+    });
 
     /**
      * @tc.steps: step2. Text input request focus.
      */
     GetFocus();
-
-    /**
-     * @tc.steps: step3. show cancel image.
-     */
-    pattern_->cleanNodeStyle_ = CleanNodeStyle::CONSTANT;
-    FlushLayoutTask(frameNode_);
 
     /**
      * @tc.steps: step4. Test update focus forward when focus index = CANCEL.
@@ -1987,6 +1984,8 @@ HWTEST_F(TextFieldUXTest, UpdateFocusForward003, TestSize.Level1)
     CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
         model.SetType(TextInputType::VISIBLE_PASSWORD);
         model.SetShowPasswordIcon(true);
+        model.SetCleanNodeStyle(CleanNodeStyle::CONSTANT);
+        model.SetIsShowCancelButton(true);
     });
 
     /**
@@ -1995,13 +1994,7 @@ HWTEST_F(TextFieldUXTest, UpdateFocusForward003, TestSize.Level1)
     GetFocus();
 
     /**
-     * @tc.steps: step3. show cancel image.
-     */
-    pattern_->cleanNodeStyle_ = CleanNodeStyle::CONSTANT;
-    FlushLayoutTask(frameNode_);
-
-    /**
-     * @tc.steps: step4. Test update focus forward, focus index = CANCEL.
+     * @tc.steps: step3. Test update focus forward, focus index = CANCEL.
      */
     pattern_->focusIndex_ = FocuseIndex::CANCEL;
     EXPECT_TRUE(pattern_->UpdateFocusForward());
@@ -2068,7 +2061,10 @@ HWTEST_F(TextFieldUXTest, UpdateFocusBackward002, TestSize.Level1)
     /**
      * @tc.steps: step1. Initialize text input.
      */
-    CreateTextField(DEFAULT_TEXT);
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetCleanNodeStyle(CleanNodeStyle::CONSTANT);
+        model.SetIsShowCancelButton(true);
+    });
 
     /**
      * @tc.steps: step2. Text input request focus.
@@ -2076,13 +2072,7 @@ HWTEST_F(TextFieldUXTest, UpdateFocusBackward002, TestSize.Level1)
     GetFocus();
 
     /**
-     * @tc.steps: step3. show cancel image.
-     */
-    pattern_->cleanNodeStyle_ = CleanNodeStyle::CONSTANT;
-    FlushLayoutTask(frameNode_);
-
-    /**
-     * @tc.steps: step4. Test update focus backward when focus index = CANCEL.
+     * @tc.steps: step3. Test update focus backward when focus index = CANCEL.
      */
     pattern_->focusIndex_ = FocuseIndex::CANCEL;
     EXPECT_TRUE(pattern_->UpdateFocusBackward());
@@ -2128,6 +2118,7 @@ HWTEST_F(TextFieldUXTest, UpdateFocusBackward004, TestSize.Level1)
     CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
         model.SetType(TextInputType::VISIBLE_PASSWORD);
         model.SetShowPasswordIcon(true);
+        model.SetCleanNodeStyle(CleanNodeStyle::CONSTANT);
     });
 
     /**
@@ -2136,13 +2127,7 @@ HWTEST_F(TextFieldUXTest, UpdateFocusBackward004, TestSize.Level1)
     GetFocus();
 
     /**
-     * @tc.steps: step3. show cancel image.
-     */
-    pattern_->cleanNodeStyle_ = CleanNodeStyle::CONSTANT;
-    FlushLayoutTask(frameNode_);
-
-    /**
-     * @tc.steps: step4. Test update focus backward when focus index = UNIT.
+     * @tc.steps: step3. Test update focus backward when focus index = UNIT.
      */
     pattern_->focusIndex_ = FocuseIndex::UNIT;
     EXPECT_TRUE(pattern_->UpdateFocusBackward());
