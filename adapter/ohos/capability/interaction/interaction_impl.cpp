@@ -61,7 +61,7 @@ int32_t InteractionImpl::StartDrag(const DragDataCore& dragData,
     Msdp::DeviceStatus::DragData msdpDragData { { shadowInfo },
         dragData.buffer, dragData.udKey, dragData.filterInfo, dragData.extraInfo,
         dragData.sourceType, dragData.dragNum, dragData.pointerId, dragData.displayX, dragData.displayY,
-        dragData.displayId, dragData.hasCanceledAnimation, dragData.summary };
+        dragData.displayId, dragData.hasCanceledAnimation, false, dragData.summary };
     return InteractionManager::GetInstance()->StartDrag(msdpDragData,
         std::make_shared<StartDragListenerImpl>(callbackCore));
 }
