@@ -7036,9 +7036,9 @@ void JSViewAbstract::NewGetJsGradientColorStops(NG::Gradient& gradient, const JS
         if (ParseJsDouble(subArray->GetValueAt(1), value)) {
             value = std::clamp(value, 0.0, 1.0);
             gradientColor.SetHasValue(true);
-            //  [0, 1] -> [0, 100.0];
-            gradientColor.SetDimension(CalcDimension(value * 100.0, DimensionUnit::PERCENT));
         }
+        //  [0, 1] -> [0, 100.0];
+        gradientColor.SetDimension(CalcDimension(value * 100.0, DimensionUnit::PERCENT));
         gradient.AddColor(gradientColor);
     }
 }
