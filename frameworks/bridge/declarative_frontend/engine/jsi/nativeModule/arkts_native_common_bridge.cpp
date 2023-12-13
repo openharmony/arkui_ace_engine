@@ -175,7 +175,7 @@ bool ParseCalcDimensions(ArkUIRuntimeCallInfo* runtimeCallInfo, uint32_t offset,
         auto arg = runtimeCallInfo->GetCallArgRef(index);
         std::optional<CalcDimension> optCalcDimension;
         CalcDimension dimension(defValue);
-        if (ArkTSUtils::ParseJsDimensionVp(vm, arg, dimension)) {
+        if (ArkTSUtils::ParseJsDimensionVp(vm, arg, dimension, false)) {
             optCalcDimension = dimension;
             hasValue = true;
         }
@@ -748,8 +748,10 @@ void ParseGradientCenter(const EcmaVM* vm, const Local<JSValueRef>& value, std::
         auto array = panda::Local<panda::ArrayRef>(value);
         auto length = array->Length(vm);
         if (length == NUM_2) {
-            hasValueX = ArkTSUtils::ParseJsDimensionVp(vm, panda::ArrayRef::GetValueAt(vm, array, NUM_0), valueX);
-            hasValueY = ArkTSUtils::ParseJsDimensionVp(vm, panda::ArrayRef::GetValueAt(vm, array, NUM_1), valueY);
+            hasValueX =
+                ArkTSUtils::ParseJsDimensionVp(vm, panda::ArrayRef::GetValueAt(vm, array, NUM_0), valueX, false);
+            hasValueY =
+                ArkTSUtils::ParseJsDimensionVp(vm, panda::ArrayRef::GetValueAt(vm, array, NUM_1), valueY, false);
         }
     }
     values.push_back(static_cast<double>(hasValueX));
@@ -775,7 +777,8 @@ void PushOuterBordeDimensionVector(const std::optional<CalcDimension>& valueDime
 void ParseOuterBorder(EcmaVM* vm, const Local<JSValueRef>& args, std::optional<CalcDimension>& optionalDimention)
 {
     CalcDimension valueDimen;
-    if (!args->IsUndefined() && ArkTSUtils::ParseJsDimensionVp(vm, args, valueDimen) && valueDimen.IsNonNegative()) {
+    if (!args->IsUndefined() && ArkTSUtils::ParseJsDimensionVp(vm, args, valueDimen, false) &&
+        valueDimen.IsNonNegative()) {
         if (valueDimen.Unit() == DimensionUnit::PERCENT) {
             valueDimen.Reset();
         }
@@ -1191,9 +1194,14 @@ ArkUINativeModuleValue CommonBridge::ResetBackgroundColor(ArkUIRuntimeCallInfo *
 void SetBorderWidthArray(const EcmaVM* vm, const Local<JSValueRef>& args, double values[], int units[], int index)
 {
     CalcDimension borderDimension;
-    if (ArkTSUtils::ParseAllBorder(vm, args, borderDimension)) {
-        values[index] = borderDimension.Value();
-        units[index] = static_cast<int>(borderDimension.Unit());
+    if (!args->IsUndefined()) {
+        if (ArkTSUtils::ParseAllBorder(vm, args, borderDimension)) {
+            values[index] = borderDimension.Value();
+            units[index] = static_cast<int>(borderDimension.Unit());
+        } else {
+            values[index] = 0;
+            units[index] = static_cast<int>(DimensionUnit::VP);
+        }
     } else {
         values[index] = -1;
         units[index] = static_cast<int>(DimensionUnit::INVALID);
@@ -2025,7 +2033,7 @@ ArkUINativeModuleValue CommonBridge::SetRadialGradient(ArkUIRuntimeCallInfo *run
     std::vector<double> values;
     ParseGradientCenter(vm, centerArg, values);
     CalcDimension radius;
-    auto hasRadius = ArkTSUtils::ParseJsDimensionVp(vm, radiusArg, radius);
+    auto hasRadius = ArkTSUtils::ParseJsDimensionVp(vm, radiusArg, radius, false);
     values.push_back(static_cast<double>(hasRadius));
     values.push_back(static_cast<double>(radius.Value()));
     values.push_back(static_cast<double>(radius.Unit()));
@@ -2070,11 +2078,11 @@ ArkUINativeModuleValue CommonBridge::SetOverlay(ArkUIRuntimeCallInfo* runtimeCal
     std::optional<CalcDimension> offsetX = CalcDimension(0);
     std::optional<CalcDimension> offsetY = CalcDimension(0);
     CalcDimension dimensionX;
-    if (ArkTSUtils::ParseJsDimensionVp(vm, offsetXArg, dimensionX)) {
+    if (ArkTSUtils::ParseJsDimensionVp(vm, offsetXArg, dimensionX, false)) {
         offsetX = dimensionX;
     }
     CalcDimension dimensionY;
-    if (ArkTSUtils::ParseJsDimensionVp(vm, offsetYArg, dimensionY)) {
+    if (ArkTSUtils::ParseJsDimensionVp(vm, offsetYArg, dimensionY, false)) {
         offsetY = dimensionY;
     }
     auto hasOptions = (hasOptionsArg->IsBoolean()) ? hasOptionsArg->ToBoolean(vm)->Value(): false;
