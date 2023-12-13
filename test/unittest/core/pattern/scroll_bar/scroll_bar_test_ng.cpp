@@ -18,6 +18,7 @@
 #define protected public
 #include "test/mock/base/mock_task_executor.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/unittest/core/pattern/test_ng.h"
 
 #include "base/geometry/ng/point_t.h"
 #include "base/geometry/ng/size_t.h"
@@ -51,10 +52,10 @@ const SizeF SCROLL_BAR_CHILD_SIZE(SCROLL_BAR_CHILD_WIDTH, SCROLL_BAR_CHILD_HEIGH
 const SizeF SCROLL_BAR_SELF_SIZE(30.0f, DEVICE_HEIGHT);
 } // namespace
 
-class ScrollBarTestNg : public testing::Test {
+class ScrollBarTestNg : public TestNG {
 protected:
-    static void SetUpTestCase();
-    static void TearDownTestCase();
+    static void SetUpTestSuite();
+    static void TearDownTestSuite();
     void SetUp() override;
     void TearDown() override;
     void GetInstance();
@@ -71,14 +72,14 @@ protected:
     RefPtr<LayoutWrapperNode> layoutWrapper_;
 };
 
-void ScrollBarTestNg::SetUpTestCase()
+void ScrollBarTestNg::SetUpTestSuite()
 {
-    MockPipelineContext::SetUp();
+    TestNG::SetUpTestSuite();
 }
 
-void ScrollBarTestNg::TearDownTestCase()
+void ScrollBarTestNg::TearDownTestSuite()
 {
-    MockPipelineContext::TearDown();
+    TestNG::TearDownTestSuite();
 }
 
 void ScrollBarTestNg::SetUp() {}
@@ -932,5 +933,32 @@ HWTEST_F(ScrollBarTestNg, ScrollBarTest014, TestSize.Level1)
     EXPECT_NE(pattern_->scrollEndCallback_, nullptr);
     EXPECT_NE(pattern_->scrollPositionCallback_, nullptr);
     EXPECT_NE(pattern_->scrollableEvent_, nullptr);
+}
+
+/**
+ * @tc.name: ScrollBarTest015
+ * @tc.desc: Test scrollbar opacity
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollBarTestNg, ScrollBarTest015, TestSize.Level1)
+{
+    /**
+     * @tc.steps: case1. controlDistance_ is 0
+     * @tc.expected: opacity_ is 0
+     */
+    CreateScrollBarWithoutChild(true, false, static_cast<int>(Axis::VERTICAL), static_cast<int>(DisplayMode::ON));
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->controlDistance_, 0);
+    EXPECT_EQ(pattern_->opacity_, 0);
+
+    /**
+     * @tc.steps: case2. controlDistance_ > 0
+     * @tc.expected: opacity_ is UINT8_MAX
+     */
+    pattern_->controlDistanceChanged_ = true;
+    pattern_->controlDistance_ = 10;
+    frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->opacity_, UINT8_MAX);
 }
 } // namespace OHOS::Ace::NG
