@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+import mediaquery from '@ohos.mediaquery'
+
 interface IconTheme {
   size: SizeOptions;
   margin: Margin;
@@ -169,7 +171,9 @@ export struct PopupComponent {
   @State applyHeight: number = 0;
   @State buttonHeight: number = 0;
   @State scrollHeight: number = 0;
-  @State scrollMaxHeight: number = 0;
+  @State beforeScreenStatus: boolean = true;
+  @State currentScreenStatus: boolean = true;
+  private listener = mediaquery.matchMediaSync('(orientation: landscape)')
 
   private getIconWidth(): Dimension {
     return this.icon?.width ?? this.theme.icon.size.width as number
@@ -328,18 +332,35 @@ export struct PopupComponent {
     }
   }
 
+  aboutToAppear() {
+    this.listener.on("change", (mediaQueryResult: mediaquery.MediaQueryResult) => {
+      this.currentScreenStatus = mediaQueryResult.matches
+    })
+  }
+
+  aboutToDisappear() {
+    this.listener.off("change")
+  }
+
   getScrollMaxHeight(): number {
-    if(this.textHeight > this.scrollHeight){
-      this.scrollMaxHeight = this.applyHeight
+    let scrollMaxHeight: number = undefined
+    if (this.currentScreenStatus !== this.beforeScreenStatus) {
+      this.beforeScreenStatus = this.currentScreenStatus
+      return scrollMaxHeight;
     }
-    let scrollMaxHeight: number = this.scrollMaxHeight
+    scrollMaxHeight = this.applyHeight
     scrollMaxHeight -= this.titleHeight
     scrollMaxHeight -= this.buttonHeight
     scrollMaxHeight -= this.theme.windows.padding.top as number
     scrollMaxHeight -= (this.theme.button.textMargin.bottom as number / 2)
     scrollMaxHeight -= this.theme.title.margin.bottom as number
     scrollMaxHeight -= (this.theme.windows.padding.bottom as number - (this.theme.button.textMargin.bottom as number / 2))
-    return scrollMaxHeight
+    if(Math.floor(this.textHeight) > Math.floor(scrollMaxHeight + 1)){
+      return scrollMaxHeight
+    } else {
+      scrollMaxHeight = undefined
+      return scrollMaxHeight
+    }
   }
 
   private getLayoutWeight(): number {
@@ -414,9 +435,7 @@ export struct PopupComponent {
               .fontSize(this.getMessageFontSize())
               .fontColor(this.getMessageFontColor())
               .onAreaChange((_, rect) => {
-                if(this.textHeight !== rect.height as number){
                   this.textHeight = rect.height as number
-                }
               })
           }
           .width("100%")
@@ -426,9 +445,7 @@ export struct PopupComponent {
           .scrollable(ScrollDirection.Vertical)
           .constraintSize({ maxHeight: this.getScrollMaxHeight() })
           .onAreaChange((_, rect) => {
-            if(this.scrollHeight !== rect.height as number){
               this.scrollHeight = rect.height as number
-            }
           })
 
           Flex({ wrap: FlexWrap.Wrap }) {
@@ -501,9 +518,7 @@ export struct PopupComponent {
                 .fontSize(this.getMessageFontSize())
                 .fontColor(this.getMessageFontColor())
                 .onAreaChange((_, rect) => {
-                  if(this.textHeight !== rect.height as number){
                     this.textHeight = rect.height as number
-                  }
                 })
             }
             .layoutWeight(this.getLayoutWeight())
@@ -513,9 +528,7 @@ export struct PopupComponent {
             .scrollable(ScrollDirection.Vertical)
             .constraintSize({ maxHeight: this.getScrollMaxHeight() })
             .onAreaChange((_, rect) => {
-              if(this.scrollHeight !== rect.height as number){
                 this.scrollHeight = rect.height as number
-              }
             })
 
             if (this.showClose || this.showClose === void (0)) {
@@ -611,9 +624,7 @@ export struct PopupComponent {
     .alignItems(VerticalAlign.Top)
     .padding(this.getWindowsPadding())
     .onAreaChange((_, rect) => {
-      if(this.applyHeight !== rect.height as number){
         this.applyHeight = rect.height as number
-      }
     })
   }
 }
