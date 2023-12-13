@@ -1086,8 +1086,12 @@ void DragDropManager::UpdateDragEvent(RefPtr<OHOS::Ace::DragEvent>& event, const
     } else {
         event->SetUdKey(udKey);
     }
+    int ret = InteractionInterface::GetInstance()->AddPrivilege();
+    if (ret != 0 && SystemProperties::GetDebugEnabled()) {
+        TAG_LOGI(AceLogTag::ACE_DRAG, "Interaction AddPrivilege in DragEnd with code:%{public}d", ret);
+    }
     RefPtr<UnifiedData> udData = UdmfClient::GetInstance()->CreateUnifiedData();
-    int ret = UdmfClient::GetInstance()->GetData(udData, udKey);
+    ret = UdmfClient::GetInstance()->GetData(udData, udKey);
     if (ret != 0) {
         event->SetIsGetDataSuccess(false);
     } else {

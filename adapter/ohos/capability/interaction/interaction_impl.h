@@ -45,6 +45,8 @@ public:
     int32_t GetDragExtraInfo(std::string& extraInfo) override;
 
     int32_t EnterTextEditorArea(bool enable) override;
+
+    int32_t AddPrivilege() override;
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_ACE_ENGINE_ADAPTER_OHOS_CAPABILITY_INTERACTION_IMPL_H
