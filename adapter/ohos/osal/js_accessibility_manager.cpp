@@ -1057,7 +1057,7 @@ static void UpdateAccessibilityElementInfo(const RefPtr<NG::FrameNode>& node, Ac
     auto accessibilityProperty = node->GetAccessibilityProperty<NG::AccessibilityProperty>();
     CHECK_NULL_VOID(accessibilityProperty);
 
-    nodeInfo.SetContent(accessibilityProperty->GetText());
+    nodeInfo.SetContent(accessibilityProperty->GetAccessibilityText());
     if (accessibilityProperty->HasRange()) {
         RangeInfo rangeInfo = ConvertAccessibilityValue(accessibilityProperty->GetAccessibilityValue());
         nodeInfo.SetRange(rangeInfo);
