@@ -97,6 +97,11 @@ public:
 
     int64_t GetVSyncPeriod() const override;
 
+    int32_t GetCurrentRefreshRateMode() const override
+    {
+        return rsUIDirector_->GetCurrentRefreshRateMode();
+    }
+
 private:
     OHOS::sptr<OHOS::Rosen::Window> rsWindow_;
     WeakPtr<TaskExecutor> taskExecutor_;

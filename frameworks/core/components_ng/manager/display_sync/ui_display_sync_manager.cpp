@@ -24,12 +24,18 @@ void UIDisplaySyncManager::DispatchFunc(uint64_t nanoTimestamp)
     }
 
     IdToDisplaySyncMap backupedMap(uiDisplaySyncMap_);
+    displaySyncRange_->Reset();
 
     int32_t VSyncPeriod = GetVsyncPeriod();
     for (const auto& [Id, weakDisplaySync] : backupedMap) {
         auto displaySync = weakDisplaySync.Upgrade();
         if (displaySync) {
-            displaySync->CheckRate(sourceVsyncRate_);
+            auto rateRange = displaySync->GetDisplaySyncData()->rateRange_;
+            if (rateRange->IsValid()) {
+                displaySyncRange_->Merge(*rateRange);
+            }
+
+            displaySync->CheckRate(sourceVsyncRate_, refreshRateMode_);
             displaySync->UpdateData(nanoTimestamp, VSyncPeriod);
             displaySync->JudgeWhetherSkip();
             displaySync->OnFrame();
@@ -100,6 +106,22 @@ bool UIDisplaySyncManager::SetVsyncPeriod(int64_t vsyncPeriod)
 int64_t UIDisplaySyncManager::GetVsyncPeriod() const
 {
     return vsyncPeriod_;
+}
+
+void UIDisplaySyncManager::SetRefreshRateMode(int32_t refreshRateMode)
+{
+    refreshRateMode_ = refreshRateMode;
+}
+
+int32_t UIDisplaySyncManager::GetRefreshRateMode() const
+{
+    return refreshRateMode_;
+}
+
+int32_t UIDisplaySyncManager::GetDisplaySyncRate() const
+{
+    int32_t displaySyncRate = displaySyncRange_->preferred_;
+    return displaySyncRate;
 }
 
 IdToDisplaySyncMap UIDisplaySyncManager::GetUIDisplaySyncMap() const
