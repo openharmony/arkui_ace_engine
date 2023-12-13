@@ -397,6 +397,16 @@ public:
         return customTitleNode_;
     }
 
+    void SetIsBuilderNode(bool isBuilderNode)
+    {
+        isBuilderNode_ = isBuilderNode;
+    }
+
+    bool IsBuilderNode() const
+    {
+        return isBuilderNode_;
+    }
+
 private:
     ViewStackProcessor();
 
@@ -422,6 +432,7 @@ private:
     std::stack<int32_t> parentIdStack_;
 
     std::optional<UIState> visualState_ = std::nullopt;
+    bool isBuilderNode_ = false;
 
     // elmtId reserved for next component creation
     ElementIdType reservedNodeId_ = ElementRegister::UndefinedElementId;

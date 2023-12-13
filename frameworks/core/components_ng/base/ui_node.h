@@ -41,6 +41,12 @@ struct ExtraInfo {
     int32_t line = 0;
 };
 
+enum class NodeStatus : char {
+    NORMAL_NODE = 0,               // Indicates it is a normal node;
+    BUILDER_NODE_OFF_MAINTREE = 1, // Indicates it is a BuilderNode and is detach from the maintreee;
+    BUILDER_NODE_ON_MAINTREE = 2   // Indicates it is a BuilderNode and is attach to the maintreee;
+};
+
 class PipelineContext;
 constexpr int32_t DEFAULT_NODE_SLOT = -1;
 
@@ -492,6 +498,7 @@ public:
     std::string GetCurrentCustomNodeInfo();
     static int32_t GenerateAccessibilityId();
 
+    NodeStatus GetNodeStatus() const;
 protected:
     std::list<RefPtr<UINode>>& ModifyChildren()
     {
@@ -562,6 +569,7 @@ private:
     bool isInDestroying_ = false;
     bool isDisappearing_ = false;
     bool isBuildByJS_ = false;
+    NodeStatus nodeStatus_ = NodeStatus::NORMAL_NODE;
 
     int32_t childrenUpdatedFrom_ = -1;
     static thread_local int32_t currentAccessibilityId_;
