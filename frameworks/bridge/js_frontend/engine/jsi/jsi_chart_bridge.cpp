@@ -61,7 +61,11 @@ void GetAttrOptionsAxis(
             auto iter = BinarySearchFindIndex(chartOptionsAxisMap, ArraySize(chartOptionsAxisMap), keyStr.c_str());
             if (iter != -1) {
                 chartOptionsAxisMap[iter].value(valStr, axisOption);
+            } else {
+                LOGD("key : %{public}s unsupported. Ignoring!", keyStr.c_str());
             }
+        } else {
+            LOGD("value of unsupported type. Ignoring!");
         }
     }
 }
@@ -115,7 +119,11 @@ void GetAttrOptionsSeriesPoint(
             auto iter = BinarySearchFindIndex(chartOptionsPointMap, ArraySize(chartOptionsPointMap), keyStr.c_str());
             if (iter != -1) {
                 chartOptionsPointMap[iter].value(valStr, pointInfo);
+            } else {
+                LOGD("key : %{public}s unsupported. Ignoring!", keyStr.c_str());
             }
+        } else {
+            LOGD("value of unsupported type. Ignoring!");
         }
     }
 }
@@ -158,7 +166,11 @@ void GetChartAttrOptionsSeriesLineStyle(
                 chartOptionsSeriesLineStyleMap, ArraySize(chartOptionsSeriesLineStyleMap), keyStr.c_str());
             if (iter != -1) {
                 chartOptionsSeriesLineStyleMap[iter].value(valStr, chartOptions);
+            } else {
+                LOGD("key : %{public}s unsupported. Ignoring!", keyStr.c_str());
             }
+        } else {
+            LOGD("value of unsupported type. Ignoring!");
         }
     }
 }
@@ -200,7 +212,11 @@ void GetChartAttrOptionsSeriesLoop(
                 BinarySearchFindIndex(chartOptionsSeriesLoopMap, ArraySize(chartOptionsSeriesLoopMap), keyStr.c_str());
             if (iter != -1) {
                 chartOptionsSeriesLoopMap[iter].value(valStr, chartOptions);
+            } else {
+                LOGD("key : %{public}s unsupported. Ignoring!", keyStr.c_str());
             }
+        } else {
+            LOGD("value of unsupported type. Ignoring!");
         }
     }
 }
@@ -267,7 +283,11 @@ void GetChartAttrOptionsSeries(
             auto iter = BinarySearchFindIndex(chartOptionsSeriesMap, ArraySize(chartOptionsSeriesMap), keyStr.c_str());
             if (iter != -1) {
                 chartOptionsSeriesMap[iter].value(runtime, val, chartOptions);
+            } else {
+                LOGD("key : %{public}s unsupported. Ignoring!", keyStr.c_str());
             }
+        } else {
+            LOGD("value of unsupported type. Ignoring!");
         }
     }
 }
@@ -426,9 +446,13 @@ void GetAttrDataset(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsVal
                 dataSet.SetStrokeColor(Color::FromString(valStr));
             } else if (keyStr == "fillColor") {
                 dataSet.SetFillColor(Color::FromString(valStr));
+            } else {
+                LOGD("key : %{public}s unsupported. Ignoring!", keyStr.c_str());
             }
         } else if (val->IsArray(runtime) && keyStr == "data") {
             GetAttrDataSetData(runtime, val, dataSet);
+        } else {
+            LOGD("value of unsupported type. Ignoring!");
         }
     }
 }
@@ -466,7 +490,11 @@ void ParseAttrSegment(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsV
                 segment.SetColorType(SegmentStyleType::USE_COLOR);
             } else if (keyStr == "name") {
                 segment.SetSegmentName(valStr);
+            } else {
+                LOGD("key : %{public}s unsupported. Ignoring!", keyStr.c_str());
             }
+        } else {
+            LOGD("value of unsupported type. Ignoring!");
         }
     }
 }
@@ -517,7 +545,11 @@ void JsiChartBridge::GetAttrOptionsObject(const shared_ptr<JsRuntime>& runtime, 
             auto iter = BinarySearchFindIndex(chartOptionsMap, ArraySize(chartOptionsMap), keyStr.c_str());
             if (iter != -1) {
                 chartOptionsMap[iter].value(runtime, val, chartOptions_);
+            } else {
+                LOGD("key : %{public}s unsupported. Ignoring!", keyStr.c_str());
             }
+        } else {
+            LOGD("value of unsupported type. Ignoring!");
         }
     }
 }

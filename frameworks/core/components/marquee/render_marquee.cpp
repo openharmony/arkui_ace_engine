@@ -36,8 +36,10 @@ bool IsPlayingAnimation(const RefPtr<Animator>& controller)
 void RenderMarquee::Start()
 {
     if (!NeedMarquee()) {
+        LOGD("Needn't marquee");
         return;
     }
+    LOGD("StartAnimation called.");
     if ((!childText_) || (!controller_)) {
         startAfterLayout_ = true;
         LOGW("Node has not built yet, animation will start after layout.");
@@ -57,11 +59,14 @@ void RenderMarquee::Start()
         if (needAnimation_) {
             controller_->Play();
         }
+    } else {
+        LOGD("Animation already started.");
     }
 }
 
 void RenderMarquee::Stop()
 {
+    LOGD("StopAnimation called.");
     startAfterLayout_ = false;
     startAfterShowed_ = false;
     if (!controller_) {
@@ -69,6 +74,7 @@ void RenderMarquee::Stop()
         return;
     }
     if (!IsPlayingAnimation(controller_)) {
+        LOGD("Animation is not playing, status=%{public}d", controller_->GetStatus());
         return;
     }
     controller_->Pause();
@@ -76,6 +82,7 @@ void RenderMarquee::Stop()
 
 void RenderMarquee::OnHiddenChanged(bool hidden)
 {
+    LOGD("OnHiddenChanged hidden=%{public}d. startAfterShowed_=%{public}d", hidden, startAfterShowed_);
     isHidden_ = hidden;
     if (!controller_) {
         return;
@@ -83,6 +90,7 @@ void RenderMarquee::OnHiddenChanged(bool hidden)
     if (hidden) {
         if (IsPlayingAnimation(controller_)) {
             startAfterShowed_ = true;
+            LOGD("OnHiddenChanged pause animation. startAfterShowed_=%{public}d", startAfterShowed_);
             controller_->Pause();
         }
     } else {
@@ -123,6 +131,8 @@ void RenderMarquee::UpdateAnimation()
             marquee->UpdateChildPosition(value);
         }
     }));
+    LOGD("UpdateAnimation, from:%{public}lf, to:%{public}lf, scrollAmount:%{public}lf, duration:%{public}u", from, to,
+        scrollAmount_, duration);
     controller_->SetDuration(duration);
     controller_->AddInterpolator(translate_);
 }
@@ -136,6 +146,7 @@ void RenderMarquee::UpdateChildPosition(double position)
 
 void RenderMarquee::OnAnimationStart()
 {
+    LOGD("OnAnimationStart");
     if (startEvent_) {
         startEvent_();
     }
@@ -146,6 +157,7 @@ void RenderMarquee::OnAnimationStart()
 
 void RenderMarquee::OnAnimationStop()
 {
+    LOGD("OnBounce");
     if (bounceEvent_) {
         bounceEvent_();
     }
@@ -162,6 +174,7 @@ void RenderMarquee::OnAnimationStop()
             continueAnimation = true;
         } else {
             // All loop finished
+            LOGD("OnFinish");
             if (finishEvent_) {
                 finishEvent_();
             }
@@ -290,6 +303,8 @@ void RenderMarquee::PerformLayout()
     }
     childText_->SetPosition(childPosition_);
     SetLayoutSize(layoutSize);
+    LOGD("layoutSize: %{public}s, child: %{public}s", layoutSize.ToString().c_str(),
+        childText_->GetLayoutSize().ToString().c_str());
     if (!NeedMarquee()) {
         Stop();
         childText_->SetPosition(GetTextPosition());

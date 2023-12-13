@@ -319,6 +319,8 @@ void ListItemGroupLayoutAlgorithm::MeasureListItem(
         itemPosition_.clear();
         return;
     }
+    TAG_LOGD(AceLogTag::ACE_LIST, "List measure item, referencePos_ is %{public}f, startPos_: %{public}f, "
+        "endPos_: %{public}f, forward:%{public}d", referencePos_, startPos_, endPos_, forwardLayout_);
     if (scrollAlign_ == ScrollAlign::CENTER) {
         startIndex = GetLanesFloor(startIndex);
         MeasureCenter(layoutWrapper, layoutConstraint, startIndex);
@@ -333,9 +335,11 @@ void ListItemGroupLayoutAlgorithm::MeasureListItem(
         MeasureAuto(layoutWrapper, layoutConstraint, startIndex);
     } else if (forwardLayout_) {
         startIndex = GetLanesFloor(startIndex);
+        TAG_LOGD(AceLogTag::ACE_LIST, "ListItem startIndex:%{public}d, startPos:%{public}f", startIndex, startPos);
         MeasureForward(layoutWrapper, layoutConstraint, startIndex, startPos);
     } else {
         endIndex = GetLanesCeil(endIndex);
+        TAG_LOGD(AceLogTag::ACE_LIST, "ListItem endIndex:%{public}d, endPos:%{public}f", endIndex, endPos);
         MeasureBackward(layoutWrapper, layoutConstraint, endIndex, endPos);
     }
 }
@@ -718,6 +722,7 @@ void ListItemGroupLayoutAlgorithm::CheckRecycle(
             if (GreatOrEqual(pos->second.second, startPos - referencePos)) {
                 break;
             }
+            TAG_LOGD(AceLogTag::ACE_LIST, "recycle item:%{public}d", pos->first);
             RecycleListItem(layoutWrapper, pos->first);
             itemPosition_.erase(pos++);
         }

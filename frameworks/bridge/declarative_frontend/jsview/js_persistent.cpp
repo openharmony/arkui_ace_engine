@@ -78,6 +78,7 @@ void JSPersistent::Set(const JSCallbackInfo& args)
         return;
     }
     StorageProxy::GetInstance()->GetStorage(executor)->SetString(key, value);
+    LOGD("cross window notify, containerId=%{private}d", container->GetInstanceId());
     AceEngine::Get().NotifyContainers(
         [currInstanceId = container->GetInstanceId(), key, value](const RefPtr<Container>& container) {
         if (container && container->GetInstanceId() != currInstanceId) {

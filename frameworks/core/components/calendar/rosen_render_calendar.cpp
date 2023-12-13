@@ -247,6 +247,7 @@ void RosenRenderCalendar::DrawWeekAndDates(RSCanvas* canvas, Offset offset)
     uint32_t totalWeek = weekNumbers_.size();
     uint32_t daysCount = rowCount_ * totalWeek;
     if (calendarDays_.size() < daysCount) {
+        LOGD("not full data");
         return;
     }
 

@@ -1470,6 +1470,7 @@ void Declaration::SetCurrentStyle(const std::pair<std::string, std::string>& sty
                 auto& animationStyle =
                     declaration.MaybeResetStyle<CommonAnimationStyle>(StyleTag::COMMON_ANIMATION_STYLE);
                 if (!animationStyle.IsValid()) {
+                    LOGD("don't support animation style");
                     return;
                 }
 
@@ -2033,6 +2034,7 @@ void Declaration::SetPaddingOverall(const std::string& value, Declaration& decla
 {
     auto& paddingStyle = declaration.MaybeResetStyle<CommonPaddingStyle>(StyleTag::COMMON_PADDING_STYLE);
     if (!paddingStyle.IsValid()) {
+        LOGD("don't support padding");
         return;
     }
 
@@ -2073,6 +2075,7 @@ void Declaration::SetMarginOverall(const std::string& value, Declaration& declar
 {
     auto& marginStyle = declaration.MaybeResetStyle<CommonMarginStyle>(StyleTag::COMMON_MARGIN_STYLE);
     if (!marginStyle.IsValid()) {
+        LOGD("don't support margin");
         return;
     }
 
@@ -2497,6 +2500,7 @@ void Declaration::SetBorderOverall(const std::string& value, Declaration& declar
 {
     auto& borderStyle = declaration.MaybeResetStyle<CommonBorderStyle>(StyleTag::COMMON_BORDER_STYLE);
     if (!borderStyle.IsValid()) {
+        LOGD("don't support border");
         return;
     }
 
@@ -2565,9 +2569,11 @@ void Declaration::SetBackground(const std::string& value, Declaration& declarati
 {
     auto& backgroundStyle = declaration.MaybeResetStyle<CommonBackgroundStyle>(StyleTag::COMMON_BACKGROUND_STYLE);
     if (!backgroundStyle.IsValid()) {
+        LOGD("don't support background style");
         return;
     }
 
+    LOGD("Declaration::SetBackground value:%{private}s", value.c_str());
     auto backgroundJson = JsonUtil::ParseJsonString(value);
     if (!backgroundJson->IsObject()) {
         LOGE("background json is not Object");
@@ -2897,6 +2903,7 @@ void Declaration::SetBackgroundImageSize(const std::string& value, Declaration& 
 {
     auto& backgroundStyle = declaration.MaybeResetStyle<CommonBackgroundStyle>(StyleTag::COMMON_BACKGROUND_STYLE);
     if (!backgroundStyle.IsValid()) {
+        LOGD("don't support background");
         return;
     }
 
@@ -2999,6 +3006,7 @@ void Declaration::SetBackgroundImagePosition(const std::string& value, Declarati
 {
     auto& backgroundStyle = declaration.MaybeResetStyle<CommonBackgroundStyle>(StyleTag::COMMON_BACKGROUND_STYLE);
     if (!backgroundStyle.IsValid()) {
+        LOGD("don't support background");
         return;
     }
 

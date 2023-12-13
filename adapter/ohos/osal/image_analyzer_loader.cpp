@@ -46,6 +46,7 @@ bool ImageAnalyzerLoader::Init(std::string libPath)
         Close();
         return false;
     }
+    TAG_LOGD(AceLogTag::ACE_IMAGE, " Loaded engine from %s", libraryPath.c_str());
     return true;
 }
 

@@ -61,6 +61,7 @@ bool GridProperty::UpdateContainer(const RefPtr<Property>& container, const RefP
 
 bool GridProperty::UpdateSpan(int32_t span, GridSizeType type)
 {
+    LOGD("Update grid span. (span=%i, type=%i)", span, type);
     if (span < 0) {
         LOGE("Span value is illegal.");
         return false;
@@ -79,6 +80,7 @@ bool GridProperty::UpdateSpan(int32_t span, GridSizeType type)
 
 bool GridProperty::UpdateOffset(int32_t offset, GridSizeType type)
 {
+    LOGD("Update grid span. (offset=%u, type=%i)", offset, type);
     if (!container_) {
         SetOffset(type, offset);
         return true;

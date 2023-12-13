@@ -44,6 +44,7 @@ public:                                                                         
     void On##name##Update(const type& value)                                                  \
     {                                                                                         \
         do {                                                                                  \
+            LOGD("MODEL_NG On%sUpdate() -> update Needs%sSetup property.", #name, #trigger);  \
             UpdateNeeds##trigger##Setup(true);                                                \
         } while (false);                                                                      \
     }

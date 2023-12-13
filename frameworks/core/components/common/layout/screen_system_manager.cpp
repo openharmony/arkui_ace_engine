@@ -37,6 +37,7 @@ void ScreenSystemManager::OnSurfaceChanged(double width)
     } else {
         currentSize_ = ScreenSizeType::XL;
     }
+    LOGD("OnSurfaceChanged: %{public}f", width);
 }
 
 ScreenSizeType ScreenSystemManager::GetSize(double width) const

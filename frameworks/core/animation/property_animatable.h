@@ -70,6 +70,7 @@ public:
             LOGE("Create property animation failed. animation is null.");
             return false;
         }
+        LOGD("Create Property Animation. property: %{public}d.", property);
         typename U::SetterMap setterMap = propertyAnimatable->GetPropertySetterMap(u);
         typename U::GetterMap getterMap = propertyAnimatable->GetPropertyGetterMap(u);
 

@@ -33,5 +33,6 @@ void WebContentModifier::onDraw(DrawingContext& drawingContext)
         surface->DrawBuffer();
         return;
     }
+    TAG_LOGD(AceLogTag::ACE_WEB, "surface is nullptr");
 }
 } // namespace OHOS::Ace::NG

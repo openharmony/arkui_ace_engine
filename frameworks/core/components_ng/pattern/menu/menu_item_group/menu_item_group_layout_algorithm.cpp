@@ -108,6 +108,8 @@ void MenuItemGroupLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     totalHeight += footerPadding;
     menuItemGroupSize.SetHeight(totalHeight);
 
+    TAG_LOGD(AceLogTag::ACE_MENU, "finish measure, menuItemGroup size = %{public}f x %{public}f",
+        menuItemGroupSize.Width(), menuItemGroupSize.Height());
     layoutWrapper->GetGeometryNode()->SetFrameSize(menuItemGroupSize);
 }
 

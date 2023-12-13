@@ -42,6 +42,7 @@ void RenderRadio::Update(const RefPtr<Component>& component)
         return;
     }
     radio->SetGroupValueUpdateHandler([weak = AceType::WeakClaim(this)](const std::string& groupValue) {
+        LOGD("group value changed");
         auto renderRadio = weak.Upgrade();
         if (renderRadio && renderRadio->UpdateGroupValue(groupValue)) {
             renderRadio->MarkNeedRender();
@@ -114,6 +115,7 @@ void RenderRadio::UpdateAccessibilityAttr() const
 
 bool RenderRadio::UpdateGroupValue(const std::string& groupValue)
 {
+    LOGD("update group value");
     groupValue_ = groupValue;
 
     bool needRender = false;

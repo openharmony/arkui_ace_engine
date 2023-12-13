@@ -34,6 +34,7 @@ const BackgroundImagePositionType IMAGE_POSITION_TYPE[] = { BackgroundImagePosit
 
 RefPtr<BackgroundImage> BackgroundImageCreator::CreateFromJson(const JsonValue& json)
 {
+    LOGD("BackgroundImage creator");
     std::string classType = json.GetValue(CLASS_NAME)->GetString();
     if (classType != BACKGROUND_IMAGE_NAME) {
         LOGE("Create BackgroundImage err: not a BackgroundImage json.");

@@ -1050,7 +1050,7 @@ void SideBarContainerPattern::InitDividerMouseEvent(const RefPtr<InputEventHub>&
 
 void SideBarContainerPattern::OnHover(bool isHover)
 {
-    TAG_LOGD(AceLogTag::ACE_SIDEBAR, "sideBarContainer onHover");
+    TAG_LOGD(AceLogTag::ACE_SIDEBAR, "sideBarContainer onHover, ID: %{public}d", host.GetId);
     auto layoutProperty = GetLayoutProperty<SideBarContainerLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     auto dividerStrokeWidth = layoutProperty->GetDividerStrokeWidth().value_or(DEFAULT_DIVIDER_STROKE_WIDTH);

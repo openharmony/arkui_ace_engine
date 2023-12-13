@@ -39,6 +39,7 @@ public:
     // Request next vsync.
     void RequestFrame() override
     {
+        LOGD("MockPlatformWindow RequestFrame");
         requestFrameCnt_++;
     }
 

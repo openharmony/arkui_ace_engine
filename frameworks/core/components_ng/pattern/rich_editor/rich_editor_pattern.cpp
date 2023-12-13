@@ -1475,6 +1475,7 @@ void RichEditorPattern::HandleBlurEvent()
     StopTwinkling();
     // The pattern handles blurevent, Need to close the softkeyboard first.
     if (customKeyboardBuilder_ && isCustomKeyboardAttached_) {
+        TAG_LOGD(AceLogTag::ACE_KEYBOARD, "RichEditorPattern Blur, Close SoftKeyBoard.");
         CloseKeyboard(true);
     }
 
@@ -1974,6 +1975,7 @@ uint32_t RichEditorPattern::GetSCBSystemWindowId()
     RefPtr<FrameNode> frameNode = GetHost();
     CHECK_NULL_RETURN(frameNode, {});
     auto focusSystemWindowId = WindowSceneHelper::GetFocusSystemWindowId(frameNode);
+    TAG_LOGD(AceLogTag::ACE_KEYBOARD, "RichEditor Find SCBSystemWindowId End, (%{public}d).", focusSystemWindowId);
     return focusSystemWindowId;
 }
 #endif
@@ -2000,6 +2002,7 @@ bool RichEditorPattern::EnableStandardInput(bool needShowSoftKeyboard)
 #ifdef WINDOW_SCENE_SUPPORTED
     auto systemWindowId = GetSCBSystemWindowId();
     if (systemWindowId) {
+        TAG_LOGD(AceLogTag::ACE_KEYBOARD, "windowid(%{public}u->%{public}u.", miscTextConfig->windowId, systemWindowId);
         miscTextConfig->windowId = systemWindowId;
     }
 #endif
@@ -2154,6 +2157,7 @@ bool RichEditorPattern::RequestCustomKeyboard()
     auto inputMethod = MiscServices::InputMethodController::GetInstance();
     if (inputMethod) {
         inputMethod->Close();
+        TAG_LOGD(AceLogTag::ACE_KEYBOARD, "RichEditor Request CustomKeyboard, Close Softkeyboard Successfully.");
     }
 #else
     if (HasConnection()) {
@@ -3930,6 +3934,9 @@ void RichEditorPattern::InsertValueByPaste(const std::string& insertValue)
     RefPtr<UINode> child;
     TextInsertValueInfo info;
     CalcInsertValueObj(info);
+    TAG_LOGD(AceLogTag::ACE_RICH_TEXT,
+        "InsertValueByPaste spanIndex: %{public}d,  offset inspan:  %{public}d, caretPosition: %{public}d",
+        info.GetSpanIndex(), info.GetOffsetInSpan(), caretPosition_);
     TextSpanOptions options;
     options.value = insertValue;
     if (typingStyle_.has_value() && typingTextStyle_.has_value()) {
@@ -4709,6 +4716,8 @@ bool RichEditorPattern::MoveCaretToContentRect()
     auto contentRect = GetTextContentRect();
     auto textRect = GetTextRect();
     if (LessOrEqual(textRect.Height(), contentRect.Height())) {
+        TAG_LOGD(AceLogTag::ACE_RICH_TEXT,
+            "MoveCaretToContentRect text height is smaller than content height, no need to move caret");
         return true;
     }
     float caretHeight = 0.0f;

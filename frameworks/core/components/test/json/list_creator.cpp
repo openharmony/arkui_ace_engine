@@ -70,6 +70,11 @@ RefPtr<Component> ListCreator::CreateFromJson(const JsonValue& componentJson, co
         controller->SetInitialOffset(initPosition);
     }
     list->SetPositionController(controller);
+
+    LOGD("Create list component: totalCount = %{public}d, requestItemEvent = \"%{private}s\", direction = %{public}d, "
+         "cachedCount_ = %{public}d, scrollPage = %{public}d",
+        totalCount, requestItemEvent.c_str(), direction, cachedCount, scrollPage);
+
     return list;
 }
 

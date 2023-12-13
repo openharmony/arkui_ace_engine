@@ -31,6 +31,7 @@ void RelatedChild::InitRelatedParent(const WeakPtr<RenderNode>& weakParent)
     while (searchDeep++ < MAX_DEEP_SEARCH && parent) {
         auto relatedContainer = AceType::DynamicCast<RelatedContainer>(parent);
         if (relatedContainer) {
+            LOGD("has related container parent");
             relatedParent_ = AceType::WeakClaim(AceType::RawPtr(relatedContainer));
             return;
         } else {

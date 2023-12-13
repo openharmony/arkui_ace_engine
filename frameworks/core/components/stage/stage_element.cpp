@@ -258,6 +258,7 @@ void StageElement::SetSinglePageId(int32_t pageId)
 
 void StageElement::PerformBuild()
 {
+    LOGD("StageElement: PerformBuild, operation: %{public}d", operation_);
     switch (operation_) {
         case StackOperation::NONE:
             break;
@@ -364,6 +365,7 @@ bool StageElement::PerformPushPageTransition(const RefPtr<Element>& elementIn, c
         LOGE("push page failed. page in / out is null.");
         return false;
     }
+    LOGD("notify push page event. page id: in: %{public}d, out: %{public}d", pageIn->GetPageId(), pageOut->GetPageId());
     NotifyPageTransitionListeners(TransitionEvent::PUSH_START, pageIn, pageOut);
     ACE_SCOPED_TRACE("PUSH_START");
     if (!InitTransition(transitionIn, transitionOut, TransitionEvent::PUSH_START)) {
@@ -389,6 +391,7 @@ bool StageElement::PerformPushPageTransition(const RefPtr<Element>& elementIn, c
     });
     // make stage untouchable when push page.
     PerformPushPageInStage(pageOut);
+    LOGD("start push transition.");
     controllerIn_->Forward();
     controllerOut_->Forward();
     StartSharedController(context_, TransitionEvent::PUSH_START, controllerIn_->GetDuration());
@@ -453,6 +456,7 @@ bool StageElement::PerformPopPageTransition(const RefPtr<Element>& elementIn, co
 #ifndef WEARABLE_PRODUCT
     PerformPopMultimodalScene(pageIn->GetPageId(), pageOut->GetPageId());
 #endif
+    LOGD("start pop transition.");
     RRect cardRRect = GetCardRect(context_, pageIn->GetCardComposeId());
     if (cardRRect.GetRect().IsValid()) {
         controllerIn_->Forward();
@@ -485,6 +489,7 @@ bool StageElement::PerformPopPageTransition(const RefPtr<Element>& elementIn, co
 
 void StageElement::PerformPushPage()
 {
+    LOGD("start to push page.");
 #ifndef WEARABLE_PRODUCT
     auto pageComponent = DynamicCast<PageComponent>(newComponent_);
     if (pageComponent) {
@@ -495,6 +500,7 @@ void StageElement::PerformPushPage()
 #endif
     RefPtr<Element> topElement;
     if (children_.empty()) {
+        LOGD("push first page, just update child, no transition.");
         NotifyPageTransitionListeners(TransitionEvent::PUSH_START, nullptr, nullptr);
         auto newElement = UpdateChild(nullptr, newComponent_);
         auto pageIn = AceType::DynamicCast<PageElement>(newElement);
@@ -502,6 +508,7 @@ void StageElement::PerformPushPage()
             LOGE("no page element found, do not notify page transition event.");
             return;
         }
+        LOGD("notify push first page event. page id: in: %{public}d.", pageIn->GetPageId());
         NotifyPageTransitionListeners(TransitionEvent::PUSH_END, pageIn, nullptr);
         return;
     } else {
@@ -515,6 +522,7 @@ void StageElement::PerformPushPage()
         LOGE("check page transition failed, skip push transition.");
         return;
     }
+    LOGD("set transition in hidden.");
     transitionIn->SetWrapHidden(true);
     transitionIn->SkipPostFlush();
     transitionOut->SkipPostFlush();
@@ -531,6 +539,7 @@ void StageElement::PerformPushPage()
 void StageElement::PerformPop()
 {
     if (children_.size() <= 1) {
+        LOGD("no enough element left in stage.");
         return;
     }
     auto context = context_.Upgrade();
@@ -631,6 +640,7 @@ void StageElement::PerformClear()
 bool StageElement::IsTransitionStop() const
 {
     if ((!controllerIn_) || (!controllerOut_)) {
+        LOGD("controllerIn or controllerOut are null.");
         return true;
     }
     return ((controllerIn_->IsStopped()) && (controllerOut_->IsStopped()));
@@ -783,6 +793,7 @@ void StageElement::PerformPopPageInStage(
 
 void StageElement::OnPostFlush()
 {
+    LOGD("StageElement: PostFlush, pending operation: %{public}d", pendingOperation_);
     if (children_.size() < POP_TO_LEAST_COUNT) {
         LOGE("Can not handle less than two pages.");
         return;

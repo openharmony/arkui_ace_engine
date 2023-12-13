@@ -132,6 +132,7 @@ void TabContentProxyElement::PerformBuild()
 // In ChangeByBar function the controller has already set index.
 void TabContentProxyElement::ChangeByBar(int32_t index, bool isFromController)
 {
+    LOGD("change content by tab bar index: %{public}d", index);
     newBarIndex_ = index;
     fromController_ = isFromController;
     PerformBuild();
@@ -139,6 +140,7 @@ void TabContentProxyElement::ChangeByBar(int32_t index, bool isFromController)
 
 void TabContentProxyElement::PrepareContent(int32_t index)
 {
+    LOGD("request prepareContent new index: %{public}d", index);
     newIndex_ = index;
     PerformBuild();
 }

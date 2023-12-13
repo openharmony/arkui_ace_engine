@@ -110,11 +110,13 @@ public:
         if (isBackground) {
             if (!backDecoration_) {
                 backDecoration_ = AceType::MakeRefPtr<Decoration>();
+                LOGD("[BOX][Dep:%{public}d][LAYOUT]Add backDecoration automatically.", this->GetDepth());
             }
             backDecoration_->SetBackgroundColor(color);
         } else {
             if (!frontDecoration_) {
                 frontDecoration_ = AceType::MakeRefPtr<Decoration>();
+                LOGD("[BOX][Dep:%{public}d][LAYOUT]Add frontDecoration automatically.", this->GetDepth());
             }
             frontDecoration_->SetBackgroundColor(color);
         }

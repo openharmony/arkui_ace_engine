@@ -23,6 +23,7 @@ namespace OHOS::Ace {
 
 RefPtr<Component> VideoCreator::CreateFromJson(const JsonValue& componentJson, const JsonComponentFactory& factory)
 {
+    LOGD("CreateFromJson video");
     std::string classType = componentJson.GetValue(CLASS_NAME)->GetString();
     if (classType != VIDEO_NAME) {
         LOGE("Create video err: not a video json.");

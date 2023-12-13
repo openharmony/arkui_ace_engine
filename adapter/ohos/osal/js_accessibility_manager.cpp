@@ -1742,6 +1742,7 @@ bool JsAccessibilityManager::UnsubscribeStateObserver(int eventType)
     std::shared_ptr<AccessibilitySystemAbilityClient> instance = AccessibilitySystemAbilityClient::GetInstance();
     CHECK_NULL_RETURN(instance, false);
     Accessibility::RetError ret = instance->UnsubscribeStateObserver(stateObserver_, eventType);
+    TAG_LOGD(AceLogTag::ACE_ACCESSIBILITY, "the result of UnsubscribeStateObserver:%{public}d", ret);
     return ret == RET_OK;
 }
 
@@ -2397,6 +2398,8 @@ RefPtr<PipelineBase> JsAccessibilityManager::GetPipelineByWindowId(const int32_t
 void JsAccessibilityManager::JsInteractionOperation::SearchElementInfoByAccessibilityId(const int32_t elementId,
     const int32_t requestId, AccessibilityElementOperatorCallback& callback, const int32_t mode)
 {
+    TAG_LOGD(AceLogTag::ACE_ACCESSIBILITY, "elementId(%{public}d) requestId(%{public}d) mode(%{public}d)", elementId,
+        requestId, mode);
     auto jsAccessibilityManager = GetHandler().Upgrade();
     CHECK_NULL_VOID(jsAccessibilityManager);
     auto context = jsAccessibilityManager->GetPipelineContext().Upgrade();
@@ -2708,6 +2711,7 @@ void JsAccessibilityManager::SearchElementInfosByText(const int32_t elementId, c
 void JsAccessibilityManager::JsInteractionOperation::FindFocusedElementInfo(const int32_t elementId,
     const int32_t focusType, const int32_t requestId, AccessibilityElementOperatorCallback& callback)
 {
+    TAG_LOGD(AceLogTag::ACE_ACCESSIBILITY, "elementId(%{public}d) focusType(%{public}d)", elementId, focusType);
     auto jsAccessibilityManager = GetHandler().Upgrade();
     CHECK_NULL_VOID(jsAccessibilityManager);
     auto context = jsAccessibilityManager->GetPipelineContext().Upgrade();
@@ -2889,6 +2893,8 @@ void JsAccessibilityManager::JsInteractionOperation::ExecuteAction(const int32_t
     const std::map<std::string, std::string>& actionArguments, const int32_t requestId,
     AccessibilityElementOperatorCallback& callback)
 {
+    TAG_LOGD(AceLogTag::ACE_ACCESSIBILITY, "id:%{public}d, action:%{public}d, request:%{public}d.", elementId, action,
+        requestId);
     auto jsAccessibilityManager = GetHandler().Upgrade();
     CHECK_NULL_VOID(jsAccessibilityManager);
     auto context = jsAccessibilityManager->GetPipelineContext().Upgrade();
@@ -3305,6 +3311,8 @@ void JsAccessibilityManager::JsAccessibilityStateObserver::OnStateChanged(const 
 void JsAccessibilityManager::JsInteractionOperation::FocusMoveSearch(
     int32_t elementId, const int32_t direction, const int32_t requestId, AccessibilityElementOperatorCallback& callback)
 {
+    TAG_LOGD(AceLogTag::ACE_ACCESSIBILITY, "elementId:%{public}d,direction:%{public}d,requestId:%{public}d", elementId,
+        direction, requestId);
     auto jsAccessibilityManager = GetHandler().Upgrade();
     CHECK_NULL_VOID(jsAccessibilityManager);
     auto context = jsAccessibilityManager->GetPipelineContext().Upgrade();

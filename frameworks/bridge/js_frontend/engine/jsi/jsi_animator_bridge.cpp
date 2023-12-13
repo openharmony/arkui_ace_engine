@@ -132,6 +132,7 @@ void CallAnimationStartJs(const WeakPtr<JsiAnimatorBridge>& bridgeWeak, shared_p
     }
     shared_ptr<JsValue> jsFunc = animationObject->GetProperty(runtime, "onstart");
     if (!jsFunc || !jsFunc->IsFunction(runtime)) {
+        LOGD("cannot find 'CallAnimationStartJs' function from animation object, maybe no callback at all.");
         return;
     }
     jsFunc->Call(runtime, runtime->GetGlobal(), {}, 0);
@@ -157,6 +158,7 @@ void CallAnimationFinishJs(const WeakPtr<JsiAnimatorBridge>& bridgeWeak, shared_
     }
     shared_ptr<JsValue> jsFunc = animationObject->GetProperty(runtime, "onfinish");
     if (!jsFunc || !jsFunc->IsFunction(runtime)) {
+        LOGD("cannot find 'CallAnimationFinishJs' function from animation object, maybe no callback at all.");
         return;
     }
     jsFunc->Call(runtime, runtime->GetGlobal(), {}, 0);
@@ -182,6 +184,7 @@ void CallAnimationCancelJs(const WeakPtr<JsiAnimatorBridge>& bridgeWeak, shared_
     }
     shared_ptr<JsValue> jsFunc = animationObject->GetProperty(runtime, "oncancel");
     if (!jsFunc || !jsFunc->IsFunction(runtime)) {
+        LOGD("cannot find 'CallAnimationCancelJs' function from animation object, maybe no callback at all.");
         return;
     }
     jsFunc->Call(runtime, runtime->GetGlobal(), {}, 0);
@@ -207,6 +210,7 @@ void CallAnimationRepeatJs(const WeakPtr<JsiAnimatorBridge>& bridgeWeak, shared_
     }
     shared_ptr<JsValue> jsFunc = animationObject->GetProperty(runtime, "onrepeat");
     if (!jsFunc || !jsFunc->IsFunction(runtime)) {
+        LOGD("cannot find 'CallAnimationRepeatJs' function from animation object, maybe no callback at all.");
         return;
     }
     jsFunc->Call(runtime, runtime->GetGlobal(), {}, 0);
@@ -232,6 +236,7 @@ void CallAnimationFrameJs(const WeakPtr<JsiAnimatorBridge>& bridgeWeak, shared_p
     }
     shared_ptr<JsValue> jsFunc = animationObject->GetProperty(runtime, "onframe");
     if (!jsFunc || !jsFunc->IsFunction(runtime)) {
+        LOGD("cannot find 'CallAnimationFrameJs' function from animation object, maybe no callback at all.");
         return;
     }
     std::vector<shared_ptr<JsValue>> argv = { runtime->NewNumber(value) };

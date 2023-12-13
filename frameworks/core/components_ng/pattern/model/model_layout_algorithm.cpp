@@ -30,6 +30,7 @@ std::optional<SizeF> ModelLayoutAlgorithm::MeasureContent(
     // 1. Width and height are set properly - return content constraint as component size
     if (contentConstraint.selfIdealSize.IsValid()) {
         auto size = contentConstraint.selfIdealSize.ConvertToSizeT();
+        LOGD("MODEL_NG: Size => width: %f, height: %f ", size.Width(), size.Height());
         return size;
     }
 
@@ -63,6 +64,7 @@ std::optional<SizeF> ModelLayoutAlgorithm::MeasureContent(
     } while (false);
 
     auto size = contentConstraint.Constrain(componentSize);
+    LOGD("MODEL_NG: Size => width: %f, height: %f ", size.Width(), size.Height());
     return size;
 }
 } // namespace OHOS::Ace::NG

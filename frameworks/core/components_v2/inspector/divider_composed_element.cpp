@@ -104,7 +104,7 @@ std::string DividerComposedElement::ConvertLineCapToString(LineCap cap) const
             result = "LineCapStyle.Square";
             break;
         default:
-            break;
+            LOGD("input do not match any ButtonType");
     }
     return result;
 }

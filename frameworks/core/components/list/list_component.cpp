@@ -53,6 +53,7 @@ void ListComponent::SetFlexAlign(FlexAlign flexAlign)
         LOGW("Invalid flexAlign %{public}d", flexAlign);
         return;
     }
+    LOGD("SetFlexAlign to %{public}d.", flexAlign);
     flexAlign_ = flexAlign;
 }
 
@@ -62,6 +63,7 @@ void ListComponent::SetColumnCount(int32_t count)
         LOGW("Invalid ColumnCount %{public}d", count);
         return;
     }
+    LOGD("SetColumnCount to %{public}d.", count);
     columnCount_ = count;
 }
 
@@ -70,6 +72,7 @@ void ListComponent::SetColumnExtent(int32_t extent)
     if (extent <= 0) {
         return;
     }
+    LOGD("SetColumnExtent to %{public}d.", extent);
     columnExtent_ = extent;
 }
 
@@ -78,6 +81,7 @@ void ListComponent::SetItemExtent(const Dimension& itemExtent)
     if (!itemExtent.IsValid()) {
         return;
     }
+    LOGD("SetItemExtent to [%{public}d:%{public}lf].", itemExtent.Unit(), itemExtent.Value());
     itemExtent_ = itemExtent;
 }
 
@@ -138,6 +142,8 @@ void ListComponent::InsertChild(int32_t position, const RefPtr<Component>& child
         ++it;
     }
 
+    LOGD("InsertChild: position: %{public}d, index: %{public}d, type: %{public}s", pos, item->GetIndex(),
+        item->GetType().c_str());
     item->SetOperation(LIST_ITEM_OP_ADD);
     needUpdateElement_ = true;
     ComponentGroup::InsertChild(std::distance(children.begin(), it), child);
@@ -166,6 +172,7 @@ void ListComponent::AppendChild(const RefPtr<Component>& child)
     }
 
     item->SetIndex(GetChildren().size());
+    LOGD("AppendChild: index: %{public}d, type: %{public}s", item->GetIndex(), item->GetType().c_str());
     item->SetOperation(LIST_ITEM_OP_ADD);
 
     needUpdateElement_ = true;
@@ -186,11 +193,13 @@ void ListComponent::RemoveChild(const RefPtr<Component>& child)
         return;
     }
 
+    LOGD("RemoveChild: index: %{public}d, type: %{public}s", item->GetIndex(), item->GetType().c_str());
     if (beginIndex_ != LIST_PARAM_INVAID && endIndex_ != LIST_PARAM_INVAID) {
         ComponentGroup::RemoveChild(child);
         needUpdateElement_ = true;
     } else {
         if (item->GetOperation() == LIST_ITEM_OP_ADD) {
+            LOGD("RemoveChild: this child is added just before");
             ComponentGroup::RemoveChild(child);
             return;
         }

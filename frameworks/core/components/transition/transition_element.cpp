@@ -47,6 +47,7 @@ void TransitionElement::Update()
     if (pipelineContext) {
         if (!controller_) {
             controller_ = CREATE_ANIMATOR(context_);
+            LOGD("set simulation controller to transition component when update.");
         } else {
             controller_->Stop();
             controller_->ClearInterpolators();
@@ -178,7 +179,9 @@ void TransitionElement::ApplyAnimation(TweenOption& transitionOption)
     }
 
     tween->SetOption(transitionOption);
-    tween->ApplyKeyframes();
+    if (!tween->ApplyKeyframes()) {
+        LOGD("Apply transition option failed. tween apply option fail.");
+    }
     tween->ApplyOptions();
 }
 

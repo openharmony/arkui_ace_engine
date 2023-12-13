@@ -225,7 +225,9 @@ void JSImage::Create(const JSCallbackInfo& info)
     // input is PixelMap / Drawable
     if (!srcValid) {
 #if defined(PIXEL_MAP_SUPPORTED)
-        if (!isCard) {
+        if (isCard) {
+            TAG_LOGD(AceLogTag::ACE_IMAGE, "Not supported pixmap when form render");
+        } else {
             if (IsDrawable(info[0])) {
                 pixmap = GetDrawablePixmap(info[0]);
             } else {

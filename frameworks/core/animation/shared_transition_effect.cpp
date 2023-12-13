@@ -56,6 +56,8 @@ bool SharedTransitionEffect::CheckIn(
     controller_->AddStopListener([sharedWeak, shareId = shareId_]() {
         auto shared = sharedWeak.Upgrade();
         if (!shared) {
+            // In Pop Scene, target page may be removed, and will reach this branch.
+            LOGD("Passenger missing return shuttle. shared element is null. shareId: %{public}s", shareId.c_str());
             return;
         }
         shared->GetOffShuttle();
@@ -99,6 +101,8 @@ bool SharedTransitionEffect::TakeOff(TransitionEvent event, RefPtr<OverlayElemen
     // Find Seat.
     auto seat = AceType::MakeRefPtr<PositionedComponent>(tweenSeat);
     Component::MergeRSNode(seat);
+    LOGD("TakeOff. event: %{public}d, share id: %{public}s. x: %{public}lf, y: %{public}lf", event, shareId_.c_str(),
+        ticket.GetX(), ticket.GetY());
     seat->SetLeft(Dimension(ticket.GetX(), DimensionUnit::PX));
     seat->SetTop(Dimension(ticket.GetY(), DimensionUnit::PX));
     // set zIndex
@@ -156,6 +160,7 @@ bool SharedTransitionEffect::TakeOffTween(const RefPtr<Element>& tweenElement,
 RefPtr<SharedTransitionEffect> SharedTransitionEffect::GetSharedTransitionEffect(
     SharedTransitionEffectType effect, const ShareId& shareId)
 {
+    LOGD("Get shared transition effect. effect: %{public}d, share id: %{public}s", effect, shareId.c_str());
     switch (effect) {
         case SharedTransitionEffectType::SHARED_EFFECT_EXCHANGE: {
             return AceType::MakeRefPtr<SharedTransitionExchange>(shareId);
@@ -183,6 +188,8 @@ bool SharedTransitionExchange::Allow(TransitionEvent event)
     auto dest = dest_.Upgrade();
     auto src = src_.Upgrade();
     if (!dest || !src) {
+        LOGD("Check allow exchange failed. dest or src is null. event: %{public}d, share id: %{public}s", event,
+            shareId_.c_str());
         return false;
     }
     bool allow = false;
@@ -193,6 +200,7 @@ bool SharedTransitionExchange::Allow(TransitionEvent event)
         // In Pop Scene, dest means Enter and Source means Exit
         allow = dest->IsEnablePopEnter() && src->IsEnablePopExit();
     }
+    LOGD("Exchange Allow status: %{public}d, event: %{public}d, share id: %{public}s", allow, event, shareId_.c_str());
     return allow;
 }
 
@@ -208,6 +216,7 @@ void SharedTransitionExchange::AddLazyLoadCallback(TransitionEvent event)
     // Lazy load child size. make width and height animation later.
     auto effectWeak = AceType::WeakClaim(this);
     dest->SetSizeModified([effectWeak, event, shareId = shareId_]() {
+        LOGD("Lazy load size callback. event: %{public}d, share id: %{public}s", event, shareId.c_str());
         auto effect = effectWeak.Upgrade();
         if (!effect) {
             LOGE("Create Lazy load animation failed. effect is null.");
@@ -247,6 +256,9 @@ bool SharedTransitionExchange::CreateTranslateAnimation(
         // if no custom translate animation, add exchange translate animation.
         auto destOffset = dest->GetGlobalOffset();
         auto srcOffset = src->GetGlobalOffset();
+        LOGD("Get Offset for event: %{public}d, share id: %{public}s. dest: x: %{public}lf, y: %{public}lf; "
+             "src: x: %{public}lf, y: %{public}lf",
+            event, shareId_.c_str(), destOffset.GetX(), destOffset.GetY(), srcOffset.GetX(), srcOffset.GetY());
         if (destOffset != srcOffset) {
             auto translateAnimation = AceType::MakeRefPtr<CurveAnimation<DimensionOffset>>(
                 Offset(0, 0), destOffset - srcOffset, Curves::FRICTION);
@@ -263,6 +275,8 @@ bool SharedTransitionExchange::CreateTranslateAnimation(
             }
             option.SetTranslateAnimations(AnimationType::TRANSLATE, translateAnimation);
             autoTranslate_ = true;
+            LOGD("Create shared exchange animation for translate. event: %{public}d, share id: %{public}s", event,
+                shareId_.c_str());
         }
     }
     return true;
@@ -279,6 +293,9 @@ bool SharedTransitionExchange::CreateSizeAnimation(TweenOption& option, Transiti
     }
     auto destSize = dest->GetSuitSize();
     auto srcSize = src->GetSuitSize();
+    LOGD("Get Size for event: %{public}d, share id: %{public}s. dest: w: %{public}lf, h: %{public}lf; "
+         "srcSize: w: %{public}lf, h: %{public}lf",
+        event, shareId_.c_str(), destSize.Width(), destSize.Height(), srcSize.Width(), srcSize.Height());
 
     // add width shared transition
     auto& propertyMap = option.GetFloatPropertyAnimation();
@@ -288,6 +305,7 @@ bool SharedTransitionExchange::CreateSizeAnimation(TweenOption& option, Transiti
             AceType::MakeRefPtr<CurveAnimation<float>>(srcSize.Width(), destSize.Width(), Curves::FRICTION);
         option.SetPropertyAnimationFloat(PropertyAnimatableType::PROPERTY_WIDTH, widthAnimation);
         autoWidth_ = true;
+        LOGD("Create shared exchange animation for width. share id: %{public}s", shareId_.c_str());
     }
 
     // add scaleY shared transition
@@ -297,6 +315,7 @@ bool SharedTransitionExchange::CreateSizeAnimation(TweenOption& option, Transiti
         auto heightAnimation =
             AceType::MakeRefPtr<CurveAnimation<float>>(srcSize.Height(), destSize.Height(), Curves::FRICTION);
         option.SetPropertyAnimationFloat(PropertyAnimatableType::PROPERTY_HEIGHT, heightAnimation);
+        LOGD("Create shared exchange animation for height. share id: %{public}s", shareId_.c_str());
         autoHeight_ = true;
     }
     return true;
@@ -313,6 +332,9 @@ bool SharedTransitionExchange::CreateOpacityAnimation(TweenOption& option, Trans
     }
     auto destOpacity = dest->GetOpacity();
     auto srcOpacity = src->GetOpacity();
+
+    LOGD("Get Opacity for event: %{public}d, share id: %{public}s. dest: %{public}f; src: %{public}f", event,
+        shareId_.c_str(), destOpacity, srcOpacity);
 
     if (!NearEqual(destOpacity, srcOpacity) && !option.GetOpacityAnimation()) {
         auto opacityAnimation = AceType::MakeRefPtr<CurveAnimation<float>>(srcOpacity, destOpacity, Curves::FRICTION);
@@ -369,6 +391,8 @@ bool SharedTransitionStatic::Allow(TransitionEvent event)
 {
     auto current = GetCurrentSharedElement().Upgrade();
     if (!current) {
+        LOGD("Check allow static failed. current null. event: %{public}d, share id: %{public}s", event,
+            shareId_.c_str());
         return false;
     }
     bool allow = false;
@@ -379,6 +403,7 @@ bool SharedTransitionStatic::Allow(TransitionEvent event)
         // In Pop Scene, dest means Enter and Source means Exit
         allow = current->IsEnablePopEnter();
     }
+    LOGD("Static Allow status: %{public}d, event: %{public}d, share id: %{public}s", allow, event, shareId_.c_str());
     return allow;
 }
 

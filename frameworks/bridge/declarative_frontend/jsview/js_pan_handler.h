@@ -36,7 +36,10 @@ private:
 
 public:
     JSPanHandler() = default;
-    virtual ~JSPanHandler() {}
+    virtual ~JSPanHandler()
+    {
+        LOGD("Destroy: JSPanHandler");
+    }
 
     virtual RefPtr<OHOS::Ace::SingleChild> CreateComponent(const JSCallbackInfo& args);
 

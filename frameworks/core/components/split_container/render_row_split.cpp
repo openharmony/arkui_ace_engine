@@ -43,6 +43,7 @@ void RenderRowSplit::HandleDragStart(const Offset& startPoint)
                 mouseStyle->SetPointerStyle(windowId, leftRightStyle);
             }
             dragedSplitIndex_ = i;
+            LOGD("dragedSplitIndex_ = %zu", dragedSplitIndex_);
             break;
         }
     }

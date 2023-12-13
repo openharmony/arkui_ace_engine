@@ -66,6 +66,8 @@ RefPtr<V2::ElementProxy> ElementRegister::GetElementProxyById(ElementIdType elem
 
 bool ElementRegister::Exists(ElementIdType elementId)
 {
+    LOGD("ElementRegister::Exists(%{public}d) returns %{public}s", elementId,
+        (itemMap_.find(elementId) != itemMap_.end()) ? "true" : "false");
     return (itemMap_.find(elementId) != itemMap_.end());
 }
 
@@ -96,6 +98,7 @@ bool ElementRegister::AddElement(const RefPtr<Element>& element)
         return false;
     }
 
+    LOGD("Add %{public}s with elmtId %{public}d", AceType::TypeName(element), element->GetElementId());
     return AddReferenced(element->GetElementId(), element);
 }
 
@@ -112,6 +115,7 @@ bool ElementRegister::AddElementProxy(const WeakPtr<V2::ElementProxy>& elementPr
         return false;
     }
 
+    LOGD("Add %{public}s with elmtId %{public}d", AceType::TypeName(elmt), elmt->GetElementId());
     return AddReferenced(elmt->GetElementId(), elementProxy);
 }
 
@@ -130,6 +134,7 @@ bool ElementRegister::AddUINode(const RefPtr<NG::UINode>& node)
         return false;
     }
 
+    LOGD("Add %{public}s with elmtId %{public}d", AceType::TypeName(node), node->GetId());
     return AddReferenced(node->GetId(), node);
 }
 
@@ -140,7 +145,11 @@ bool ElementRegister::RemoveItem(ElementIdType elementId, const std::string& tag
     }
     auto removed = itemMap_.erase(elementId);
     if (removed) {
+        LOGD("ElmtId %{public}d successfully removed from registry, added to list of removed Elements.", elementId);
         removedItems_.insert(std::pair(elementId, tag));
+        LOGD("Size of removedItems_ removedItems_ %{public}d", static_cast<int32_t>(removedItems_.size()));
+    } else {
+        LOGD("ElmtId %{public}d not found. Cannot be removed.", elementId);
     }
     return removed;
 }
@@ -152,17 +161,25 @@ bool ElementRegister::RemoveItemSilently(ElementIdType elementId)
     }
 
     auto removed = itemMap_.erase(elementId);
+    if (removed) {
+        LOGD("ElmtId %{public}d successfully removed from registry, NOT added to list of removed Elements.", elementId);
+    } else {
+        LOGD("ElmtId %{public}d not found. Cannot be removed.", elementId);
+    }
+
     return removed;
 }
 
 void ElementRegister::MoveRemovedItems(RemovedElementsType& removedItems)
 {
+    LOGD("MoveRemovedItems return set of %{public}d elmtIds", static_cast<int32_t>(removedItems_.size()));
     removedItems = removedItems_;
     removedItems_.clear();
 }
 
 void ElementRegister::Clear()
 {
+    LOGD("Empty the ElementRegister");
     itemMap_.clear();
     removedItems_.clear();
     geometryTransitionMap_.clear();
@@ -218,6 +235,7 @@ void ElementRegister::AddPendingRemoveNode(const RefPtr<NG::UINode>& node)
 
 void ElementRegister::ClearPendingRemoveNodes()
 {
+    LOGD("ElementRegister::ClearPendingRemoveNodes()");
     pendingRemoveNodes_.clear();
 }
 

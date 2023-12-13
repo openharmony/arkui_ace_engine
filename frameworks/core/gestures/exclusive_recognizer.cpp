@@ -27,6 +27,7 @@ namespace OHOS::Ace {
 
 void ExclusiveRecognizer::OnAccepted(size_t touchId)
 {
+    LOGD("the exclusive gesture recognizer has been accepted, touch id %{public}zu", touchId);
     if (refereePointers_.find(touchId) == refereePointers_.end()) {
         return;
     }
@@ -43,6 +44,7 @@ void ExclusiveRecognizer::OnAccepted(size_t touchId)
 
     for (auto& recognizer : recognizers_) {
         if (recognizer != activeRecognizer_) {
+            LOGD("the sub gesture %{public}s is rejected because one is accepted", AceType::TypeName(recognizer));
             recognizer->OnRejected(touchId);
             recognizer->SetRefereeState(RefereeState::FAIL);
         }
@@ -61,6 +63,7 @@ void ExclusiveRecognizer::OnRejected(size_t touchId)
 
     refereePointers_.erase(touchId);
 
+    LOGD("the exclusive gesture recognizer has been rejected! the touch id is %{public}zu", touchId);
     for (auto& recognizer : recognizers_) {
         if (recognizer->GetRefereeState() == RefereeState::FAIL) {
             continue;
@@ -79,6 +82,7 @@ void ExclusiveRecognizer::OnPending(size_t touchId)
         return;
     }
 
+    LOGD("the exclusive gesture recognizer is pending! the touch id is %{public}zu", touchId);
     for (auto& recognizer : recognizers_) {
         if (recognizer->GetRefereeState() == RefereeState::PENDING) {
             recognizer->OnPending(touchId);
@@ -107,6 +111,7 @@ bool ExclusiveRecognizer::HandleEvent(const TouchEvent& point)
     }
 
     if (activeRecognizer_ && activeRecognizer_->GetDetectState() != DetectState::DETECTED) {
+        LOGD("sub detected gesture has finished, change the exclusive recognizer to be ready");
         Reset();
     }
 
@@ -132,6 +137,7 @@ void ExclusiveRecognizer::BatchAdjudicate(
 {
     // any sub recognizer accept itself will drive to detected state
     if (state_ == DetectState::DETECTED) {
+        LOGD("exclusive gesture recognizer is in detected state, do not process disposal");
         return;
     }
 
@@ -151,6 +157,7 @@ void ExclusiveRecognizer::BatchAdjudicate(
     }
 
     // process reject disposal
+    LOGD("sub gesture recognizer %{public}s ask for reject", AceType::TypeName(recognizer));
     RefereeState prevState = recognizer->GetRefereeState();
     for (auto touchId : touchIds) {
         recognizer->OnRejected(touchId);
@@ -170,6 +177,7 @@ void ExclusiveRecognizer::BatchAdjudicate(
     }
 
     if (CheckAllFailed()) {
+        LOGD("all gesture recognizers are rejected, adjudicate reject");
         MultiFingersRecognizer::Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
         Reset();
     }
@@ -195,6 +203,7 @@ bool ExclusiveRecognizer::CheckNeedBlocked(const RefPtr<GestureRecognizer>& reco
             return (member != recognizer) && (member->GetRefereeState() == RefereeState::PENDING);
         });
     if (pendingMember != recognizers_.end()) {
+        LOGD("exclusive gesture recognizer detected pending gesture in members");
         return true;
     }
 
@@ -203,6 +212,7 @@ bool ExclusiveRecognizer::CheckNeedBlocked(const RefPtr<GestureRecognizer>& reco
 
 void ExclusiveRecognizer::AcceptSubGesture(const RefPtr<GestureRecognizer>& recognizer)
 {
+    LOGD("sub gesture recognizer %{public}s ask for accept", AceType::TypeName(recognizer));
     if (CheckNeedBlocked(recognizer)) {
         recognizer->SetRefereeState(RefereeState::BLOCKED);
         return;

@@ -398,6 +398,7 @@ RefPtr<AssetManager> PluginSubContainer::GetDecompressedAssetManager(
             assetManager_ = assetManagerImpl;
             auto assetProvider = AceType::MakeRefPtr<Plugin::HapAssetProviderImpl>();
             if (assetProvider->Initialize(hapPath, basePaths)) {
+                LOGD("push plugin asset provider to queue");
                 assetManagerImpl->PushBack(std::move(assetProvider));
             }
         }
@@ -409,6 +410,7 @@ RefPtr<AssetManager> PluginSubContainer::GetDecompressedAssetManager(
             assetManager_ = flutterAssetManager;
             auto assetProvider = AceType::MakeRefPtr<Plugin::HapAssetProvider>();
             if (assetProvider->Initialize(hapPath, basePaths)) {
+                LOGD("push plugin asset provider to queue");
                 flutterAssetManager->PushBack(std::move(assetProvider));
             }
         }
@@ -431,6 +433,7 @@ RefPtr<AssetManager> PluginSubContainer::SetAssetManager(const std::string& path
             assetManager_ = assetManagerImpl;
             auto assetProvider = AceType::MakeRefPtr<FileAssetProviderImpl>();
             if (assetProvider->Initialize(path, basePaths)) {
+                LOGD("push plugin asset provider to queue.");
                 assetManagerImpl->PushBack(std::move(assetProvider));
             }
         }
@@ -442,6 +445,7 @@ RefPtr<AssetManager> PluginSubContainer::SetAssetManager(const std::string& path
             assetManager_ = flutterAssetManager;
             auto assetProvider = AceType::MakeRefPtr<Plugin::FileAssetProvider>();
             if (assetProvider->Initialize(path, basePaths)) {
+                LOGD("push plugin asset provider to queue.");
                 flutterAssetManager->PushBack(std::move(assetProvider));
             }
         }

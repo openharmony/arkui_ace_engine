@@ -142,6 +142,7 @@ bool AceResKeyParser::ParseMatch(const std::vector<std::string>& keys, std::vect
             if (*iter == "res") {
                 continue;
             } else {
+                LOGD("Invalid first key part:%{private}s", iter->c_str());
                 return false;
             }
         }
@@ -153,6 +154,7 @@ bool AceResKeyParser::ParseMatch(const std::vector<std::string>& keys, std::vect
             }
         }
         if (!parseRet) {
+            LOGD("Invalid key:%{private}s", iter->c_str());
             return false;
         }
     }

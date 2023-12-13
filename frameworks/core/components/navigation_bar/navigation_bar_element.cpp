@@ -52,6 +52,7 @@ void NavigationBarElement::BindMoreButtonClickEvent(const RefPtr<NavigationBarCo
     moreClickMarker_ = BackEndEventManager<void()>::GetInstance().GetAvailableMarker();
     BackEndEventManager<void()>::GetInstance().BindBackendEvent(
         moreClickMarker_, [weak = WeakClaim(this), navigationBar]() {
+            LOGD("click collapse icon");
             auto menu = navigationBar->GetMenu();
             if (!menu) {
                 LOGW("navigation bar not menu");
@@ -104,6 +105,7 @@ void NavigationBarElement::BindClickEventToOptions(const RefPtr<NavigationBarCom
         auto weak = AceType::WeakClaim(this);
         BackEndEventManager<void()>::GetInstance().BindBackendEvent(
             menuItem.second.clickEvent, [navigationBar, eventId, weak]() {
+                LOGD("click menuItem %{public}s in bar", eventId.c_str());
                 auto navigationBarElement = weak.Upgrade();
                 if (!navigationBarElement) {
                     LOGE("get navigation bar element failed");

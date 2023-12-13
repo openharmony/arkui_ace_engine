@@ -42,6 +42,7 @@ void ScrollFadeEffect::ResetFadeEffect(const Color& color)
 double ScrollFadeEffect::CalculateOverScroll(double oldPosition, bool isReachMax)
 {
     if (!currentPositionCallback_ || !leadingCallback_ || !trailingCallback_) {
+        LOGD("position callback is null");
         return 0.0;
     }
 
@@ -61,11 +62,13 @@ double ScrollFadeEffect::CalculateOverScroll(double oldPosition, bool isReachMax
 
     // crash the top
     if (newPosition < minExtent && oldPosition > minExtent) {
+        LOGD("crash the top");
         return newPosition;
     }
 
     // crash the bottom
     if (newPosition > maxExtent && maxExtent > oldPosition && isReachMax) {
+        LOGD("crash the bottom");
         return newPosition - maxExtent;
     }
 

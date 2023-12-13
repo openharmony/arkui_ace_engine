@@ -210,6 +210,7 @@ void RosenRenderLinearTrack::Paint(RenderContext& context, const Offset& offset)
 void RosenRenderLinearTrack::PaintSliderSteps(RenderContext& context, const Offset& offset)
 {
     if (NearZero(GetSliderSteps()) || NearEqual(GetSliderSteps(), GetLayoutSize().Width())) {
+        LOGD("slider steps invalid");
         return;
     }
     auto canvas = static_cast<RosenRenderContext*>(&context)->GetCanvas();

@@ -36,6 +36,8 @@ void RosenRenderSvgFeComposite::OnAsImageFilter(const std::shared_ptr<RSImageFil
         imageFilter =
             RSRecordingImageFilter::CreateArithmeticImageFilter(coefficients, true, backImageFilter, foreImageFilter);
 #endif
+    } else {
+        LOGD("this version skia not support SkBlendImageFilters");
     }
 }
 

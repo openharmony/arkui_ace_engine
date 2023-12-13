@@ -300,6 +300,7 @@ void PipelineBase::HyperlinkStartAbility(const std::string& address) const
 void PipelineBase::NotifyStatusBarBgColor(const Color& color) const
 {
     CHECK_RUN_ON(UI);
+    LOGD("Notify StatusBar BgColor, color: %{public}x", color.GetValue());
     if (statusBarBgColorEventHandler_) {
         statusBarBgColorEventHandler_(color);
     }

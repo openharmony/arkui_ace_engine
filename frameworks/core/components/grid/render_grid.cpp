@@ -330,6 +330,7 @@ Offset RenderGrid::GetChildOffset(const RefPtr<RenderNode>& child) const
 
 void RenderGrid::JumpTo(int32_t index)
 {
+    LOGD("Jump to index: %{public}d.", index);
     int32_t size = static_cast<int32_t>(GetChildren().size());
     if (index < 0 || index >= size) {
         LOGW("Invalid index: %{public}d.", index);
@@ -347,6 +348,7 @@ void RenderGrid::JumpTo(int32_t index)
 
 void RenderGrid::AnimateTo(int32_t index, float duration, const RefPtr<Curve>& curve)
 {
+    LOGD("Animate to index: %{public}d.", index);
     int32_t size = static_cast<int32_t>(GetChildren().size());
     if (index < 0 || index >= size) {
         LOGW("Invalid index: %{public}d.", index);
@@ -368,6 +370,7 @@ void RenderGrid::JumpTo(double position)
         LOGW("Already at position: %{public}lf.", position);
         return;
     }
+    LOGD("Jump from %{public}lf to %{public}lf.", GetCurrentPosition(), position);
     Offset offset;
     if (isVertical_) {
         offset.SetY(position);
@@ -384,6 +387,7 @@ void RenderGrid::AnimateTo(double position, float duration, const RefPtr<Curve>&
         LOGW("Already at position: %{public}lf.", position);
         return;
     }
+    LOGD("Animate from %{public}lf to %{public}lf", GetCurrentPosition(), position);
     if (!animator_->IsStopped()) {
         animator_->Stop();
     }
@@ -418,6 +422,7 @@ int32_t RenderGrid::RequestNextFocus(bool vertical, bool reverse, Offset positio
 {
     int32_t focusIndex = FOCUS_LOST;
     if (GetChildren().empty()) {
+        LOGD("No Child, can not obtain focus.");
         return focusIndex;
     }
     // (false false)->RIGHT   (false true)->LEFT   (true false)->DOWN   (true true)->UP
@@ -445,6 +450,7 @@ int32_t RenderGrid::RequestNextFocus(bool vertical, bool reverse, Offset positio
                 break;
         }
     }
+    LOGD("Current focusIndex:%{public}d focused:%{public}d", focusIndex, focused_);
     if (focusIndex >= 0) {
         focusIndex_ = focusIndex;
         MoveChildToViewPort(focusIndex);
@@ -454,6 +460,7 @@ int32_t RenderGrid::RequestNextFocus(bool vertical, bool reverse, Offset positio
 
 void RenderGrid::HandleOnFocus(int32_t focusIndex)
 {
+    LOGD("OnFocus current focusIndex : %{public}d", focusIndex);
     focusIndex_ = focusIndex;
     focused_ = true;
     MoveChildToViewPort(focusIndex);
@@ -461,6 +468,7 @@ void RenderGrid::HandleOnFocus(int32_t focusIndex)
 
 void RenderGrid::HandleOnBlur()
 {
+    LOGD("OnBlur previous focusIndex : %{public}d", focusIndex_);
     focused_ = false;
 }
 
@@ -766,6 +774,7 @@ int32_t RenderGrid::GetChildSpan(const RefPtr<RenderNode>& child) const
 void RenderGrid::PerformLayout()
 {
     const auto& children = GetChildren();
+    LOGD("Grid Perform layout with %{public}zu children", children.size());
 
     posOfChildren_.clear();
 
@@ -876,6 +885,7 @@ void RenderGrid::Traverse()
     for (const auto& item : GetChildren()) {
         int32_t columnSpan = GetChildSpan(item);
         columnSpan = std::min(columnSpan, columnCount_ - (gridPos % columnCount_));
+        LOGD("GridPos %{private}d Span: %{private}d", gridPos, columnSpan);
         SetChildPosition(item, posOfChildren_[gridPos], gridPos, columnSpan);
         if (childrenChanged_) {
             BuildPositionRelations(gridPos, columnSpan, index);
@@ -941,6 +951,7 @@ void RenderGrid::HandleTouchCancel()
 
 void RenderGrid::HandleScrollEnd()
 {
+    LOGD("HandleScrollEnd");
     if (NearZero(offset_.GetX()) && NearZero(offset_.GetY())) {
         reachTop_ = true;
     }
@@ -998,6 +1009,7 @@ void RenderGrid::OnScroll(double scrollX, double scrollY, int32_t scrollState) c
 
 void RenderGrid::OnScrollBottom() const
 {
+    LOGD("OnScrollBottom");
     if (onScrollBottom_) {
         onScrollBottom_(std::string("\"scrollbottom\",null"));
     }
@@ -1005,6 +1017,7 @@ void RenderGrid::OnScrollBottom() const
 
 void RenderGrid::OnScrollTop() const
 {
+    LOGD("OnScrollTop");
     if (onScrollTop_) {
         onScrollTop_(std::string("\"scrolltop\",null"));
     }
@@ -1012,6 +1025,7 @@ void RenderGrid::OnScrollTop() const
 
 void RenderGrid::OnScrollEnd() const
 {
+    LOGD("OnScrollEnd");
     if (onScrollEnd_) {
         onScrollEnd_(std::string("\"scrollend\",null"));
     }
@@ -1019,6 +1033,7 @@ void RenderGrid::OnScrollEnd() const
 
 void RenderGrid::OnScrollTouchUp() const
 {
+    LOGD("OnScrollTouchUp");
     if (onScrollTouchUp_) {
         onScrollTouchUp_(std::string("\"scrolltouchup\",null"));
     }

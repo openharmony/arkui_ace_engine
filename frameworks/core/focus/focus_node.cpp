@@ -677,6 +677,9 @@ bool FocusGroup::OnKeyEvent(const KeyEvent& keyEvent)
         return false;
     }
 
+    LOGD("Position information: Node is %{public}s, X: %{public}lf Y: %{public}lf W: %{public}lf H: %{public}lf",
+        AceType::TypeName(this), GetRect().Left(), GetRect().Top(), GetRect().Width(), GetRect().Height());
+
     OnFocusMove(keyEvent.code);
     switch (keyEvent.code) {
         case KeyCode::TV_CONTROL_UP:
@@ -889,6 +892,7 @@ void FocusGroup::RebuildChild(std::list<RefPtr<FocusNode>>&& rebuildFocusNodes)
 int32_t FocusGroup::GetFocusingTabNodeIdx(TabIndexNodeList& tabIndexNodes)
 {
     if (tabIndexNodes.empty()) {
+        LOGD("No tabIndex node exist in this page.");
         return NONE_TAB_FOCUSED_INDEX;
     }
     if (isFirstFocusInPage_) {

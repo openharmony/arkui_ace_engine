@@ -72,6 +72,7 @@ bool TossAnimationController::Play()
         return false;
     }
 
+    LOGD("toss play speed: %{public}lf, time: %{public}lf", speed, time);
     speed_ = speed;
     int nTime = static_cast<int>(time);
     auto weak = AceType::WeakClaim(this);

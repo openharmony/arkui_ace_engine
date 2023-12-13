@@ -42,11 +42,13 @@ void RotationRecognizer::OnAccepted()
 
 void RotationRecognizer::OnRejected()
 {
+    LOGD("rotation gesture has been rejected!");
     Reset();
 }
 
 void RotationRecognizer::HandleTouchDownEvent(const TouchEvent& event)
 {
+    LOGD("rotation recognizer receives touch down event, begin to detect rotation event");
     if (fingers_ > MAX_ROTATION_FINGERS) {
         return;
     }
@@ -63,6 +65,7 @@ void RotationRecognizer::HandleTouchDownEvent(const TouchEvent& event)
 
 void RotationRecognizer::HandleTouchUpEvent(const TouchEvent& event)
 {
+    LOGD("rotation recognizer receives touch up event");
     auto itr = touchPoints_.find(event.id);
     if (itr == touchPoints_.end()) {
         return;
@@ -88,6 +91,7 @@ void RotationRecognizer::HandleTouchUpEvent(const TouchEvent& event)
 
 void RotationRecognizer::HandleTouchMoveEvent(const TouchEvent& event)
 {
+    LOGD("rotation recognizer receives touch move event");
     auto itr = touchPoints_.find(event.id);
     if (itr == touchPoints_.end()) {
         return;
@@ -117,7 +121,9 @@ void RotationRecognizer::HandleTouchMoveEvent(const TouchEvent& event)
 
 void RotationRecognizer::HandleTouchCancelEvent(const TouchEvent& event)
 {
+    LOGD("rotation recognizer receives touch cancel event");
     if (state_ == DetectState::READY || state_ == DetectState::DETECTING) {
+        LOGD("cancel rotation gesture detect, try to reject it");
         Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
         return;
     }

@@ -109,12 +109,14 @@ void ClickRecognizer::OnAccepted()
 
 void ClickRecognizer::OnRejected()
 {
+    LOGD("click gesture has been rejected!");
     Reset();
 }
 
 void ClickRecognizer::HandleTouchDownEvent(const TouchEvent& event)
 {
     InitGlobalValue(event.sourceType);
+    LOGD("click recognizer receives touch down event, begin to detect click event");
     if (fingers_ > MAX_TAP_FINGERS) {
         return;
     }
@@ -159,6 +161,7 @@ void ClickRecognizer::HandleTouchDownEvent(const TouchEvent& event)
 void ClickRecognizer::HandleTouchUpEvent(const TouchEvent& event)
 {
     InitGlobalValue(event.sourceType);
+    LOGD("click recognizer receives touch up event");
     if (pointsCount_ > fingers_) {
         Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
         return;
@@ -214,6 +217,7 @@ void ClickRecognizer::HandleTouchUpEvent(const TouchEvent& event)
 void ClickRecognizer::HandleTouchMoveEvent(const TouchEvent& event)
 {
     InitGlobalValue(event.sourceType);
+    LOGD("click recognizer receives touch move event");
     auto itr = touchPoints_.find(event.id);
     if (itr == touchPoints_.end()) {
         return;
@@ -221,6 +225,7 @@ void ClickRecognizer::HandleTouchMoveEvent(const TouchEvent& event)
 
     Offset offset = event.GetOffset() - touchPoints_[event.id].GetOffset();
     if (offset.GetDistance() > MAX_THRESHOLD) {
+        LOGD("this gesture is not click, try to reject it");
         Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
     }
 }
@@ -228,12 +233,14 @@ void ClickRecognizer::HandleTouchMoveEvent(const TouchEvent& event)
 void ClickRecognizer::HandleTouchCancelEvent(const TouchEvent& event)
 {
     InitGlobalValue(event.sourceType);
+    LOGD("click recognizer receives touch cancel event");
     Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
 }
 
 void ClickRecognizer::HandleOverdueDeadline()
 {
     if (pointsCount_ < fingers_ || tappedCount_ < count_) {
+        LOGD("the state is not detecting for accept multi-finger tap gesture");
         Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
     }
 }

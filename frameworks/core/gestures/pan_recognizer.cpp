@@ -36,6 +36,7 @@ void PanRecognizer::OnAccepted()
     SendCallbackMsg(onActionUpdate_);
 
     if (pendingEnd_) {
+        LOGD("pan gesture recognizer has pending end event when waiting to be accepted");
         SendCallbackMsg(onActionEnd_);
         Reset();
     } else if (pendingCancel_) {
@@ -46,11 +47,13 @@ void PanRecognizer::OnAccepted()
 
 void PanRecognizer::OnRejected()
 {
+    LOGD("pan gesture has been rejected!");
     Reset();
 }
 
 void PanRecognizer::HandleTouchDownEvent(const TouchEvent& event)
 {
+    LOGD("pan recognizer receives touch down event, begin to detect pan event");
     fingers_ = newFingers_;
     distance_ = newDistance_;
     direction_ = newDirection_;
@@ -81,6 +84,7 @@ void PanRecognizer::HandleTouchDownEvent(const TouchEvent& event)
 
 void PanRecognizer::HandleTouchDownEvent(const AxisEvent& event)
 {
+    LOGD("pan recognizer receives axis start event, begin to detect pan event");
     if (fingers_ != AXIS_PAN_FINGERS) {
         return;
     }
@@ -103,6 +107,7 @@ void PanRecognizer::HandleTouchDownEvent(const AxisEvent& event)
 
 void PanRecognizer::HandleTouchUpEvent(const TouchEvent& event)
 {
+    LOGD("pan recognizer receives touch up event");
     auto itr = touchPoints_.find(event.id);
     if (itr == touchPoints_.end()) {
         return;
@@ -126,6 +131,7 @@ void PanRecognizer::HandleTouchUpEvent(const TouchEvent& event)
         }
 
         if (static_cast<int32_t>(touchPoints_.size()) < fingers_ || inRefereeNum < 1) {
+            LOGD("this gesture is not pan, try to reject it");
             Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
             return;
         }
@@ -148,6 +154,7 @@ void PanRecognizer::HandleTouchUpEvent(const TouchEvent& event)
 
 void PanRecognizer::HandleTouchUpEvent(const AxisEvent& event)
 {
+    LOGD("pan recognizer receives axis end event");
     if (fingers_ != AXIS_PAN_FINGERS) {
         return;
     }
@@ -165,6 +172,7 @@ void PanRecognizer::HandleTouchUpEvent(const AxisEvent& event)
 
 void PanRecognizer::HandleTouchMoveEvent(const TouchEvent& event)
 {
+    LOGD("pan recognizer receives touch move event");
     auto itr = touchPoints_.find(event.id);
     if (itr == touchPoints_.end()) {
         return;
@@ -200,6 +208,7 @@ void PanRecognizer::HandleTouchMoveEvent(const TouchEvent& event)
             averageDistance_.SetX(0.0);
         }
 
+        LOGD("pan recognizer detected successful");
         if (isFlushTouchEventsEnd_) {
             SendCallbackMsg(onActionUpdate_);
         }
@@ -218,6 +227,7 @@ void PanRecognizer::OnFlushTouchEventsEnd()
 
 void PanRecognizer::HandleTouchMoveEvent(const AxisEvent& event)
 {
+    LOGD("pan recognizer receives axis update event");
     if (fingers_ != AXIS_PAN_FINGERS) {
         return;
     }
@@ -261,13 +271,16 @@ void PanRecognizer::HandleTouchMoveEvent(const AxisEvent& event)
             averageDistance_.SetX(0.0);
         }
 
+        LOGD("pan recognizer detected successful");
         SendCallbackMsg(onActionUpdate_);
     }
 }
 
 void PanRecognizer::HandleTouchCancelEvent(const TouchEvent& event)
 {
+    LOGD("pan recognizer receives touch cancel event");
     if (state_ == DetectState::READY || state_ == DetectState::DETECTING) {
+        LOGD("cancel pan gesture detect, try to reject it");
         Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
         return;
     }

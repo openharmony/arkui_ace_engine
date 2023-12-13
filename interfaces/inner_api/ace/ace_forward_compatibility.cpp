@@ -95,6 +95,7 @@ const char* AceForwardCompatibility::GetAceLibName()
     } else {
         libName = ARKUI_LIB_NAME_COMPATIBLE;
     }
+    LOGD("AceForwardCompatibility cur libName [%{public}s]", libName);
     return libName;
 }
 

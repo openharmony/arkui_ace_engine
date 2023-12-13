@@ -31,6 +31,7 @@ namespace OHOS::Ace {
 
 void SelectElement::PerformBuild()
 {
+    LOGD("SelectElement::PerformBuild");
     RefPtr<ClickRecognizer> clickRecognizer = AceType::MakeRefPtr<ClickRecognizer>();
     clickRecognizer->SetOnClick([weak = AceType::WeakClaim(this)](const ClickInfo&) {
         auto element = weak.Upgrade();
@@ -154,6 +155,7 @@ void SelectElement::HandleClickedEvent()
         LOGE("OnClick can not request SelectElement's focus successfully");
     }
 
+    LOGD("SelectElement::HandleClickedEvent");
     if (selectPopup->GetDialogShowed()) {
         // hide
         selectPopup->HideDialog(SELECT_INVALID_INDEX);
@@ -168,6 +170,7 @@ void SelectElement::HandleClickedEvent()
 
 void SelectElement::HandleTouchEvent(bool isDown)
 {
+    LOGD("SelectElement::HandleTouchEvent");
     auto component = AceType::DynamicCast<SelectComponent>(dataComponent_);
     if (!component) {
         LOGE("select: the component of select is null now.");

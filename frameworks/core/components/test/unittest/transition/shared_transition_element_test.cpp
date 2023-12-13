@@ -376,6 +376,7 @@ HWTEST_F(SharedTransitionElementTest, SharedTransitionTest001, TestSize.Level1)
      * @tc.steps: step3. trigger frame to make shared transition work.
      * @tc.expected: step3. check passenger in overlay
      */
+    LOGD("trigger frame for stage's transition build and prepare animation");
     platformWindowRaw_->TriggerOneFrame();
     auto& children = overlay_->GetChildren();
     EXPECT_EQ(1UL, children.size()); // SharedElement.
@@ -417,6 +418,7 @@ HWTEST_F(SharedTransitionElementTest, SharedTransitionTest002, TestSize.Level1)
      * @tc.expected: step3. check passenger in overlay
      */
     context_->PopPage();
+    LOGD("trigger frame for stage's transition build and prepare animation");
     platformWindowRaw_->TriggerOneFrame();
     auto& children = overlay_->GetChildren();
     EXPECT_EQ(1UL, children.size()); // SharedElement.
@@ -456,6 +458,7 @@ HWTEST_F(SharedTransitionElementTest, SharedTransitionTest003, TestSize.Level1)
      * @tc.steps: step3. trigger frame to make shared transition work.
      * @tc.expected: step3. check passenger in overlay
      */
+    LOGD("trigger frame for stage's transition build and prepare animation");
     platformWindowRaw_->TriggerOneFrame();
     auto& children = overlay_->GetChildren();
     EXPECT_EQ(1UL, children.size()); // SharedElement.
@@ -496,6 +499,7 @@ HWTEST_F(SharedTransitionElementTest, SharedTransitionTest004, TestSize.Level1)
      * @tc.steps: step3. trigger frame to make shared transition work.
      * @tc.expected: step3. no passenger in overlay
      */
+    LOGD("trigger frame for stage's transition build and prepare animation");
     context_->PopPage();
     auto& children = overlay_->GetChildren();
     EXPECT_EQ(0UL, children.size()); // Null.
@@ -553,6 +557,7 @@ HWTEST_F(SharedTransitionElementTest, SharedTransitionTest005, TestSize.Level1)
      * @tc.steps: step3. trigger frame to make shared transition work.
      * @tc.expected: step3. check passenger in overlay
      */
+    LOGD("trigger frame for stage's transition build and prepare animation");
     platformWindowRaw_->TriggerOneFrame();
     auto& children = overlay_->GetChildren();
     EXPECT_EQ(1UL, children.size()); // SharedElement.
@@ -593,6 +598,7 @@ HWTEST_F(SharedTransitionElementTest, SharedTransitionTest006, TestSize.Level1)
      * @tc.steps: step3. trigger frame to make shared transition work.
      * @tc.expected: step3. check passenger in overlay
      */
+    LOGD("trigger frame for stage's transition build and prepare animation");
     platformWindowRaw_->TriggerOneFrame();
     auto& children = overlay_->GetChildren();
     EXPECT_EQ(1UL, children.size()); // SharedElement.

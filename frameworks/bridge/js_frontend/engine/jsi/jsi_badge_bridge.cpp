@@ -67,7 +67,11 @@ void JsiBadgeBridge::ParseBadgeConfig(const shared_ptr<JsRuntime>& runtime, cons
                 BinarySearchFindIndex(badgeConfigOperators, ArraySize(badgeConfigOperators), keyStr.c_str());
             if (operatorIter != -1) {
                 badgeConfigOperators[operatorIter].value(valStr, *this);
+            } else {
+                LOGD("key : %{public}s unsupported. Ignoring!", keyStr.c_str());
             }
+        } else {
+            LOGD("value of unsupported type. Ignoring!");
         }
     }
 }

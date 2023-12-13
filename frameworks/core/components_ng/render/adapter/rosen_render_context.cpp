@@ -1954,6 +1954,7 @@ DataReadyNotifyTask RosenRenderContext::CreateBorderImageDataReadyCallback()
         if (imageSourceInfo != sourceInfo) {
             return;
         }
+        TAG_LOGD(AceLogTag::ACE_BORDER_IMAGE, "borderImage data ready %{public}s", sourceInfo.ToString().c_str());
         rosenRenderContext->bdImageLoadingCtx_->MakeCanvasImage(SizeF(), true, ImageFit::NONE);
     };
 }
@@ -1969,6 +1970,7 @@ LoadSuccessNotifyTask RosenRenderContext::CreateBorderImageLoadSuccessCallback()
         }
         ctx->bdImage_ = ctx->bdImageLoadingCtx_->MoveCanvasImage();
         CHECK_NULL_VOID(ctx->bdImage_);
+        TAG_LOGD(AceLogTag::ACE_BORDER_IMAGE, "borderImage load success %{public}s", sourceInfo.ToString().c_str());
         if (ctx->GetHost()->GetGeometryNode()->GetFrameSize().IsPositive()) {
             ctx->PaintBorderImage();
             ctx->RequestNextFrame();

@@ -120,6 +120,7 @@ bool MouseStyleOhos::ChangePointerStyle(int32_t windowId, MouseFormat mouseForma
         return true;
     }
 
+    LOGD("ChangePointerStyle do SetPointerStyle: %{public}d", mouseFormat);
     return SetPointerStyle(windowId, mouseFormat);
 }
 

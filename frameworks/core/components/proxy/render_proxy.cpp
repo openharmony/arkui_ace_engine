@@ -24,6 +24,7 @@ void RenderProxy::Update(const RefPtr<Component>& component)
 {
     auto proxy = AceType::DynamicCast<ProxyComponent>(component);
     if (!proxy) {
+        LOGD("Not proxy component, no need to update");
         return;
     }
     passMinSize_ = proxy->GetPassMinSize();

@@ -90,6 +90,7 @@ void WaterFlowModelNG::SetRowsTemplate(const std::string& value)
 void WaterFlowModelNG::SetItemMinWidth(const Dimension& minWidth)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        TAG_LOGD(AceLogTag::ACE_WATERFLOW, "current state is not processed, return");
         return;
     }
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -102,6 +103,7 @@ void WaterFlowModelNG::SetItemMinWidth(const Dimension& minWidth)
 void WaterFlowModelNG::SetItemMinHeight(const Dimension& minHeight)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        TAG_LOGD(AceLogTag::ACE_WATERFLOW, "current state is not processed, return");
         return;
     }
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -114,6 +116,7 @@ void WaterFlowModelNG::SetItemMinHeight(const Dimension& minHeight)
 void WaterFlowModelNG::SetItemMaxWidth(const Dimension& maxWidth)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        TAG_LOGD(AceLogTag::ACE_WATERFLOW, "current state is not processed, return");
         return;
     }
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -126,6 +129,7 @@ void WaterFlowModelNG::SetItemMaxWidth(const Dimension& maxWidth)
 void WaterFlowModelNG::SetItemMaxHeight(const Dimension& maxHeight)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        TAG_LOGD(AceLogTag::ACE_WATERFLOW, "current state is not processed, return");
         return;
     }
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();

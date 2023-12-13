@@ -74,6 +74,7 @@ void GridElement::BuildGridData(int32_t index, int32_t count)
         return;
     }
 
+    LOGD("BuildGridData(index = %{public}d, count = %{public}d)", index, count);
     std::string result;
     if (requestItem_) {
         requestItem_(BuildEventParam(index, count), result);
@@ -94,6 +95,7 @@ void GridElement::PerformBuild()
         return;
     }
 
+    LOGD("GridElement::PerformBuild");
     for (const auto& child : newGridItems_) {
         UpdateChild(nullptr, child);
     }
@@ -124,6 +126,8 @@ bool GridElement::RequestNextFocus(bool vertical, bool reverse, const Rect& rect
     }
     Offset center = Offset(rect.Left() + rect.Width() / DOUBLE_FACTOR,
         rect.Top() + rect.Height() / DOUBLE_FACTOR);
+    LOGD("RequestNextFocus vertical:%{public}d reverse:%{public}d pos:%{public}lf %{public}lf.",
+        vertical, reverse, center.GetX(), center.GetY());
     bool ret = false;
     while (!ret) {
         int32_t focusIndex = grid->RequestNextFocus(vertical, reverse, center);

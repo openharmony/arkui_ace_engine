@@ -47,6 +47,7 @@ void Scheduler::Start()
 void Scheduler::Stop()
 {
     if (!isRunning_) {
+        LOGD("Already stopped, no need to stop again.");
         return;
     }
     auto context = context_.Upgrade();
@@ -63,6 +64,7 @@ void Scheduler::Stop()
 void Scheduler::OnFrame(uint64_t nanoTimestamp)
 {
     if (!isRunning_) {
+        LOGD("Already stopped, no need to send frame event.");
         return;
     }
 

@@ -100,6 +100,8 @@ void RenderTabBar::FlushIndex(const RefPtr<TabController>& controller)
 	
     ApplyRestoreInfo(controller);
 
+    LOGD("focus index_ %{public}d tabsSize_ %{public}d, index %{public}d, initial %{public}d, pending %{public}d",
+        index_, tabsSize_, index, controller->GetInitialIndex(), controller->GetIndex());
     controller->SetIndexWithoutChangeContent(index_);
 }
 
@@ -135,6 +137,7 @@ void RenderTabBar::PerformLayout()
     LayoutChildren();
     UpdatePosition();
     Size layoutSize = GetLayoutParam().Constrain(GetLayoutParam().GetMaxSize());
+    LOGD("RenderTabBar layoutSize: (%{public}s)", layoutSize.ToString().c_str());
     SetLayoutSize(layoutSize);
     ApplyGradientColor();
     if (isFirstLayout_) {
@@ -485,6 +488,7 @@ void RenderTabBar::HandleClickedEvent(const ClickInfo& info)
         int32_t index = IsRightToLeft() ? std::distance(tabItemOffsets_.begin(), pos)
                                         : std::distance(tabItemOffsets_.begin(), pos) - 1;
         if (index >= 0 && index < tabsSize_ && index != index_) {
+            LOGD("selected tab bar index :%{public}d, current index :%{public}d", index, index_);
             if (callback_) {
                 callback_(index);
             }
@@ -670,6 +674,7 @@ void RenderTabBar::UpdateIndicatorStyle(const RefPtr<Component>& component)
 
 void RenderTabBar::HandleFocusEvent(bool focus)
 {
+    LOGD("RenderTabBar HandleFocusEvent, focus is %{public}d", focus);
     onFocused_ = focus;
     if (!onFocused_) {
         auto context = context_.Upgrade();

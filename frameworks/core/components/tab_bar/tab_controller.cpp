@@ -54,6 +54,7 @@ void TabController::SetIndex(int32_t index)
 {
     // There can be different tab at the same index
     if ((index_ == index && !Container::IsCurrentUsePartialUpdate()) ||  index < 0) {
+        LOGD("SetIndex: Input index is not valid, %{public}d, %{public}d", index_, index);
         return;
     }
     indexDefined_ = true;
@@ -70,6 +71,7 @@ void TabController::SetIndex(int32_t index)
 void TabController::SetInitialIndex(int32_t index)
 {
     if (initialIndex_ == index || index < 0) {
+        LOGD("SetInitialIndex: Input index is not valid, %{public}d, %{public}d", initialIndex_, index);
         return;
     }
     initialIndex_ = index;
@@ -78,6 +80,7 @@ void TabController::SetInitialIndex(int32_t index)
 void TabController::SetIndexWithoutChangeContent(int32_t index)
 {
     if (index_ == index || index < 0) {
+        LOGD("SetIndexWithoutChangeContent: Input index is not valid, %{public}d, %{public}d", index_, index);
         return;
     }
     indexDefined_ = true;
@@ -87,6 +90,7 @@ void TabController::SetIndexWithoutChangeContent(int32_t index)
 void TabController::SetPendingIndex(int32_t index)
 {
     if (pendingIndex_ == index || index < 0) {
+        LOGD("SetPendingIndex: Input index is not valid, %{public}d, %{public}d", pendingIndex_, index);
         return;
     }
     pendingIndex_ = index;
@@ -96,9 +100,11 @@ void TabController::SetPendingIndex(int32_t index)
 void TabController::SetIndexByController(int32_t index, bool blockEvent)
 {
     if (index_ == index || index < 0) {
+        LOGD("SetIndexByController: Input index is not valid, %{public}d, %{public}d", index_, index);
         return;
     }
     if (index >= totalCount_) {
+        LOGD("index is large than total, %{public}d, %{public}d", index, totalCount_);
         SetPendingIndex(index);
         return;
     }
@@ -127,6 +133,7 @@ void TabController::SetIndexByController(int32_t index, bool blockEvent)
 void TabController::ChangeDispatch(int32_t index)
 {
     if (contentElement_.Upgrade()) {
+        LOGD("tab controller dispatch domChange event");
         auto tabContent = AceType::DynamicCast<TabContentElement>(contentElement_.Upgrade());
         if (tabContent) {
             tabContent->ChangeDispatch(index);
@@ -147,6 +154,7 @@ void TabController::SetIndicatorByScrollContent(double percent, int32_t newIndex
 void TabController::SetIndexByScrollContent(int32_t index)
 {
     if (index_ == index || index < 0) {
+        LOGD("SetIndexByScrollContent: Input index is not valid, %{public}d, %{public}d", index_, index);
         return;
     }
     indexDefined_ = true;

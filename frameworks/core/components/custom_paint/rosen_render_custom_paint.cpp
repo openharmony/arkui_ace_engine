@@ -2814,6 +2814,7 @@ void RosenRenderCustomPaint::WebGLInit(CanvasRenderContextBase* context)
 
 void RosenRenderCustomPaint::WebGLUpdate()
 {
+    LOGD("RosenRenderCustomPaint::WebGLUpdate");
 #ifndef USE_ROSEN_DRAWING
     if (skCanvas_ && webglBitmap_.readyToDraw()) {
         skCanvas_->save();
@@ -2881,6 +2882,7 @@ void RosenRenderCustomPaint::DrawBitmapMesh(
 #endif
         delete[] data;
     }
+    LOGD("RosenRenderCustomPaint::DrawBitmapMesh");
 }
 
 #ifndef USE_ROSEN_DRAWING

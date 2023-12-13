@@ -348,6 +348,7 @@ static napi_value JSPlay(napi_env env, napi_callback_info info)
 static napi_value JSFinish(napi_env env, napi_callback_info info)
 {
     auto animator = GetAnimatorInResult(env, info);
+    LOGD("JsAnimator: JSFinish, id:%{public}d", animator ? animator->GetId() : -1);
     if (!animator) {
         return nullptr;
     }
@@ -360,6 +361,7 @@ static napi_value JSFinish(napi_env env, napi_callback_info info)
 static napi_value JSPause(napi_env env, napi_callback_info info)
 {
     auto animator = GetAnimatorInResult(env, info);
+    LOGD("JsAnimator: JSPause, id:%{public}d", animator ? animator->GetId() : -1);
     if (!animator) {
         return nullptr;
     }
@@ -372,6 +374,7 @@ static napi_value JSPause(napi_env env, napi_callback_info info)
 static napi_value JSCancel(napi_env env, napi_callback_info info)
 {
     auto animator = GetAnimatorInResult(env, info);
+    LOGD("JsAnimator: JSCancel, id:%{public}d", animator ? animator->GetId() : -1);
     if (!animator) {
         return nullptr;
     }

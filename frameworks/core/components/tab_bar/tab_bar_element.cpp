@@ -44,6 +44,7 @@ void TabBarElement::UpdateElement(int32_t index)
         controller_->SetIndex(index);
         int32_t curIndex = controller_->GetIndex();
         if (preIndex != curIndex) {
+            LOGD("TabBar change from %{public}d to %{public}d", preIndex, curIndex);
             controller_->ChangeDispatch(curIndex);
         }
         controller_->OnTabBarChanged(index);
@@ -118,6 +119,7 @@ void TabBarElement::UpdateIndex(int32_t index)
 void TabBarElement::PerformBuild()
 {
     if (tabs_.empty()) {
+        LOGD("tabs is empty");
         ComponentGroupElement::PerformBuild();
         return;
     }
@@ -142,6 +144,7 @@ void TabBarElement::PerformBuild()
 
 void TabBarElement::OnFocus()
 {
+    LOGD("TabBar element OnFocus");
     RefPtr<RenderTabBar> tabBar = AceType::DynamicCast<RenderTabBar>(renderNode_);
     if (tabBar) {
         tabBar->HandleFocusEvent(true);
@@ -165,6 +168,7 @@ void TabBarElement::OnFocus()
 
 void TabBarElement::OnBlur()
 {
+    LOGD("TabBar element Onblur");
     RefPtr<RenderTabBar> tabBar = AceType::DynamicCast<RenderTabBar>(renderNode_);
     if (tabBar) {
         tabBar->HandleFocusEvent(false);

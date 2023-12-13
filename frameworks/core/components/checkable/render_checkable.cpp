@@ -262,6 +262,7 @@ void RenderCheckable::OnHandleChangedResult(const std::string& result)
 
 std::string RenderCheckable::UpdateChangedResult()
 {
+    LOGD("handle click");
     checked_ = !checked_;
     UpdateUIStatus();
 
@@ -271,6 +272,7 @@ std::string RenderCheckable::UpdateChangedResult()
 void RenderCheckable::OnTouchTestHit(
     const Offset& coordinateOffset, const TouchRestrict& touchRestrict, TouchTestResult& result)
 {
+    LOGD("on touch test hit");
     if (dragRecognizer_) {
         dragRecognizer_->SetCoordinateOffset(coordinateOffset);
         result.emplace_back(dragRecognizer_);

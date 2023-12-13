@@ -93,6 +93,7 @@ void MultiModalManager::SetMultimodalSubscriber(const RefPtr<MultimodalSubscribe
 void MultiModalManager::OpenChannel(const RefPtr<PipelineContext>& context)
 {
     if (!subscriber_) {
+        LOGD("fail to get subscriber to register callback");
         return;
     }
     if (isRegistered_) {

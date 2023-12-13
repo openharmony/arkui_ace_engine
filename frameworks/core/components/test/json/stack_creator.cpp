@@ -31,6 +31,7 @@ const MainStackSize MAIN_STACK_SIZES[] = { MainStackSize::MAX, MainStackSize::MI
 
 RefPtr<Component> StackCreator::CreateFromJson(const JsonValue& componentJson, const JsonComponentFactory& factory)
 {
+    LOGD("CreateFromJson Stack");
     std::string classType = componentJson.GetValue(CLASS_NAME)->GetString();
     if (classType != STACK_NAME) {
         LOGE("Create stack err: not an stack json.");

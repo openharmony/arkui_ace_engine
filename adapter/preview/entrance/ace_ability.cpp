@@ -59,6 +59,8 @@ void SetFontMgrConfig(const std::string& containerSdkPath)
         runtimeOS = "OHOS";
         containerFontBasePath = "";
     }
+    LOGD("Runtime OS is %{public}s, and the container fontBasePath is %{public}s", runtimeOS.c_str(),
+        containerFontBasePath.c_str());
     SkFontMgr::SetFontMgrConfig(runtimeOS, containerFontBasePath);
 }
 
@@ -105,6 +107,7 @@ AceAbility::AceAbility(const AceRunArgs& runArgs) : runArgs_(runArgs)
 {
     static std::once_flag onceFlag;
     std::call_once(onceFlag, []() {
+        LOGD("Initialize for current process.");
         Container::UpdateCurrent(INSTANCE_ID_PLATFORM);
     });
     SystemProperties::SetExtSurfaceEnabled(!runArgs.containerSdkPath.empty());
@@ -273,21 +276,25 @@ void AceAbility::OnBackPressed() const
 
 bool AceAbility::OnInputEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) const
 {
+    LOGD("Process MMI::PointerEvent");
     return EventDispatcher::GetInstance().DispatchTouchEvent(pointerEvent);
 }
 
 bool AceAbility::OnInputEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent) const
 {
+    LOGD("Process MMI::KeyEvent");
     return EventDispatcher::GetInstance().DispatchKeyEvent(keyEvent);
 }
 
 bool AceAbility::OnInputEvent(const std::shared_ptr<MMI::AxisEvent>& axisEvent) const
 {
+    LOGD("Process MMI::AxisEvent");
     return false;
 }
 
 bool AceAbility::OnInputMethodEvent(const unsigned int codePoint) const
 {
+    LOGD("Process Input Method Event");
     return EventDispatcher::GetInstance().DispatchInputMethodEvent(codePoint);
 }
 

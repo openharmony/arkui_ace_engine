@@ -348,6 +348,8 @@ void MenuLayoutAlgorithm::Initialize(LayoutWrapper* layoutWrapper)
     auto targetSize = props->GetTargetSizeValue(SizeF());
     position_ = props->GetMenuOffset().value_or(OffsetF());
     positionOffset_ = props->GetPositionOffset().value_or(OffsetF());
+    TAG_LOGD(AceLogTag::ACE_MENU, "menu position_ = %{public}s, targetSize = %{public}s", position_.ToString().c_str(),
+        targetSize.ToString().c_str());
     InitializePadding(layoutWrapper);
     auto constraint = props->GetLayoutConstraint();
     auto wrapperIdealSize =
@@ -507,6 +509,8 @@ void MenuLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     for (const auto& child : layoutWrapper->GetAllChildrenWithBuild()) {
         child->Measure(childConstraint);
         auto childSize = child->GetGeometryNode()->GetMarginFrameSize();
+        TAG_LOGD(AceLogTag::ACE_MENU, "child finish measure, child %{public}s size = %{public}s",
+            child->GetHostTag().c_str(), child->GetGeometryNode()->GetMarginFrameSize().ToString().c_str());
         idealHeight += childSize.Height();
         auto childWidth = childSize.Width();
         if (childWidth < MIN_MENU_WIDTH.ConvertToPx()) {
@@ -514,6 +518,7 @@ void MenuLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
             columnInfo = GridSystemManager::GetInstance().GetInfoByType(GridColumnType::MENU);
             columnInfo->GetParent()->BuildColumnWidth(wrapperSize_.Width());
             idealWidth = static_cast<float>(columnInfo->GetWidth(MIN_GRID_COUNTS));
+            TAG_LOGD(AceLogTag::ACE_MENU, "menu width defaults to 2c value is %{public}f", idealWidth);
             menuLayoutProperty->UpdateMenuWidth(Dimension((double)idealWidth, DimensionUnit::VP));
         }
         idealWidth = std::max(idealWidth, childSize.Width());

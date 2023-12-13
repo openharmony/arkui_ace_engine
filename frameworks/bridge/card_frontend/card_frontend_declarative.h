@@ -126,6 +126,8 @@ public:
 
     void HandleAsyncEvent(const EventMarker& eventMarker) override
     {
+        TAG_LOGD(AceLogTag::ACE_FORM, "HandleAsyncEvent cardId: %{public}d, eventId: %{public}s",
+            eventMarker.GetData().pageId, eventMarker.GetData().eventId.c_str());
         delegate_->FireCardEvent(eventMarker);
     }
 
@@ -133,6 +135,8 @@ public:
 
     void HandleAsyncEvent(const EventMarker& eventMarker, const BaseEventInfo& info) override
     {
+        TAG_LOGD(AceLogTag::ACE_FORM, "HandleAsyncEvent cardId: %{public}d, eventId: %{public}s",
+            eventMarker.GetData().pageId, eventMarker.GetData().eventId.c_str());
         delegate_->FireCardEvent(eventMarker);
     }
 
@@ -140,6 +144,8 @@ public:
 
     void HandleAsyncEvent(const EventMarker& eventMarker, const std::string& param) override
     {
+        TAG_LOGD(AceLogTag::ACE_FORM, "HandleAsyncEvent cardId: %{public}d, eventId: %{public}s",
+            eventMarker.GetData().pageId, eventMarker.GetData().eventId.c_str());
         delegate_->FireCardEvent(eventMarker, param);
     }
 

@@ -53,6 +53,7 @@ constexpr int32_t HOVER_ANIMATION_DURATION = 250;
 
 void RenderBox::HandleAccessibilityFocusEvent(bool isAccessibilityFocus)
 {
+    LOGD("ACE: RenderAccessibilityFocus::HandleAccessibilityFocusEvent, isFocus:%{public}d", isAccessibilityFocus);
     isAccessibilityFocus_ = isAccessibilityFocus;
     std::string accessibilityEventType;
     if (isAccessibilityFocus) {
@@ -539,6 +540,7 @@ void RenderBox::UpdateBackDecoration(const RefPtr<Decoration>& newDecoration)
     }
 
     if (!backDecoration_) {
+        LOGD("backDecoration_ is null.");
         backDecoration_ = AceType::MakeRefPtr<Decoration>();
     }
     OnAttachContext();
@@ -585,6 +587,7 @@ void RenderBox::UpdateFrontDecoration(const RefPtr<Decoration>& newDecoration)
     }
 
     if (!frontDecoration_) {
+        LOGD("frontDecoration_ is null.");
         frontDecoration_ = AceType::MakeRefPtr<Decoration>();
     }
     frontDecoration_->SetBlurRadius(newDecoration->GetBlurRadius());
@@ -788,6 +791,7 @@ void RenderBox::SetBackgroundPosition(const BackgroundImagePosition& position)
     RefPtr<BackgroundImage> backgroundImage = backDecoration_->GetImage();
     if (!backgroundImage) {
         // Suppress error logs when do animation.
+        LOGD("set background position failed. no background image.");
         return;
     }
     if (backgroundImage->GetImagePosition() == position) {
@@ -965,6 +969,7 @@ void RenderBox::CreateColorAnimation(
         }
         box->hoverColor_ = value;
         if (box->GetBackDecoration()) {
+            LOGD("RenderBox::CreateColorAnimation box->hoverColor_ = %{public}x", box->hoverColor_.GetValue());
             box->GetBackDecoration()->SetBackgroundColor(box->hoverColor_);
             box->GetBackDecoration()->SetAnimationColor(box->hoverColor_);
         }
@@ -979,6 +984,7 @@ void RenderBox::AnimateMouseHoverEnter()
 
 void RenderBox::MouseHoverEnterTest()
 {
+    LOGD("RenderBox::MouseHoverEnterTest in. hoverAnimationType_ = %{public}d", hoverAnimationType_);
     ResetController(controllerExit_);
     if (!controllerEnter_) {
         controllerEnter_ = CREATE_ANIMATOR(context_);
@@ -1027,6 +1033,7 @@ void RenderBox::AnimateMouseHoverExit()
 
 void RenderBox::MouseHoverExitTest()
 {
+    LOGD("RenderBox::MouseHoverExitTest in. hoverAnimationType_ = %{public}d", hoverAnimationType_);
     ResetController(controllerEnter_);
     if (!controllerExit_) {
         controllerExit_ = CREATE_ANIMATOR(context_);
@@ -1045,6 +1052,8 @@ void RenderBox::MouseHoverExitTest()
         if (!colorAnimationExit_) {
             colorAnimationExit_ = AceType::MakeRefPtr<KeyframeAnimation<Color>>();
         }
+        LOGD("MouseHoverExitTest hoverColor_.GetValue() = %{public}x, hoverColorBegin_.GetValue() = %{public}x",
+            hoverColor_.GetValue(), hoverColorBegin_.GetValue());
         CreateColorAnimation(colorAnimationExit_, hoverColor_, hoverColorBegin_);
         controllerExit_->ClearInterpolators();
         controllerExit_->AddInterpolator(colorAnimationExit_);
@@ -1556,6 +1565,7 @@ void RenderBox::AddRecognizerToResult(
 
     for (int i = MAX_GESTURE_SIZE - 1; i >= 0; i--) {
         if (recognizers_[i]) {
+            LOGD("OnTouchTestHit add recognizer to result %{public}s", AceType::TypeName(recognizers_[i]));
             recognizers_[i]->SetCoordinateOffset(coordinateOffset);
             result.emplace_back(recognizers_[i]);
         }
@@ -1646,29 +1656,35 @@ void RenderBox::OnStatusStyleChanged(const VisualState state)
         return;
     }
 
+    LOGD("state %{public}d  attr count %{public}d", state,
+        static_cast<int32_t>(stateAttributeList_->GetAttributesForState(state).size()));
     bool updated = false;
     for (auto& attribute : stateAttributeList_->GetAttributesForState(state)) {
         updated = true;
         switch (attribute->id_) {
             case BoxStateAttribute::COLOR: {
+                LOGD("Setting COLOR for state %{public}d", attribute->id_);
                 auto colorState =
                     AceType::DynamicCast<StateAttributeValue<BoxStateAttribute, AnimatableColor>>(attribute);
                 GetBackDecoration()->SetBackgroundColor(colorState->value_);
             } break;
 
             case BoxStateAttribute::BORDER_COLOR: {
+                LOGD("Setting BORDER_COLOR for state %{public}d", attribute->id_);
                 auto colorState =
                     AceType::DynamicCast<StateAttributeValue<BoxStateAttribute, AnimatableColor>>(attribute);
                 BoxComponentHelper::SetBorderColor(GetBackDecoration(), colorState->value_);
             } break;
 
             case BoxStateAttribute::BORDER_RADIUS: {
+                LOGD("Setting BORDER_RADIUS for state %{public}d", attribute->id_);
                 auto radiusState =
                     AceType::DynamicCast<StateAttributeValue<BoxStateAttribute, AnimatableDimension>>(attribute);
                 BoxComponentHelper::SetBorderRadius(GetBackDecoration(), radiusState->value_);
             } break;
 
             case BoxStateAttribute::BORDER_STYLE: {
+                LOGD("Setting BORDER_STYLE for state %{public}d", attribute->id_);
                 auto attributeStateValue =
                     AceType::DynamicCast<StateAttributeValue<BoxStateAttribute, BorderStyle>>(attribute);
                 BoxComponentHelper::SetBorderStyle(GetBackDecoration(), attributeStateValue->value_);
@@ -1677,21 +1693,26 @@ void RenderBox::OnStatusStyleChanged(const VisualState state)
             case BoxStateAttribute::BORDER_WIDTH: {
                 auto widthState =
                     AceType::DynamicCast<StateAttributeValue<BoxStateAttribute, AnimatableDimension>>(attribute);
+                LOGD("Setting BORDER_WIDTH for state %{public}d to %{public}lf", state, widthState->value_.Value());
                 BoxComponentHelper::SetBorderWidth(GetBackDecoration(), widthState->value_);
             } break;
 
             case BoxStateAttribute::HEIGHT: {
                 auto valueState = AceType::DynamicCast<StateAttributeValue<BoxStateAttribute, Dimension>>(attribute);
+                LOGD("Setting BORDER_WIDTH for state %{public}d to %{public}lf", attribute->id_,
+                    valueState->value_.Value());
                 height_ = valueState->value_;
             } break;
 
             case BoxStateAttribute::WIDTH: {
                 auto valueState =
                     AceType::DynamicCast<StateAttributeValue<BoxStateAttribute, AnimatableDimension>>(attribute);
+                LOGD("Setting BORDER_WIDTH for state %{public}d to %{public}lf", state, valueState->value_.Value());
                 width_ = valueState->value_;
             } break;
 
             case BoxStateAttribute::ASPECT_RATIO: {
+                LOGD("Setting ASPECT Ration state %{public}d", attribute->id_);
                 auto valueState =
                     AceType::DynamicCast<StateAttributeValue<BoxStateAttribute, AnimatableDimension>>(attribute);
                 SetAspectRatio(valueState->value_);
@@ -1707,6 +1728,7 @@ void RenderBox::OnStatusStyleChanged(const VisualState state)
 
             case BoxStateAttribute::GRADIENT: {
                 auto gradientState = AceType::DynamicCast<StateAttributeValue<BoxStateAttribute, Gradient>>(attribute);
+                LOGD("Setting Gradient state %{public}d", state);
                 GetBackDecoration()->SetGradient(gradientState->value_);
             } break;
             default:

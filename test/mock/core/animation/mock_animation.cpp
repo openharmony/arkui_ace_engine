@@ -23,6 +23,7 @@
 namespace OHOS::Ace {
 void MockAnimation::OnPostFlush()
 {
+    LOGD("MockAnimation PostFlush start");
     postFlushCallTimes_++;
     CreateInterpolators();
     AddListeners();
@@ -30,6 +31,7 @@ void MockAnimation::OnPostFlush()
     setRepeatSucc_ = animator_->SetIteration(iteration_);
     animator_->SetStartDelay(startDelay_);
     ExecuteOperation();
+    LOGD("MockAnimation PostFlush end");
 }
 
 void MockAnimation::ExecuteOperation()
@@ -62,12 +64,14 @@ void MockAnimation::AddListeners()
     animator_->AddStartListener([weak]() {
         auto simulator = weak.Upgrade();
         if (simulator) {
+            LOGD("MockAnimation vsync triggered. start listener called.");
             simulator->animationStartStatus_ = true;
         }
     });
     animator_->AddStopListener([weak]() {
         auto simulator = weak.Upgrade();
         if (simulator) {
+            LOGD("MockAnimation vsync triggered. stop listener called.");
             simulator->animationStopStatus_ = true;
             simulator->animationIntStopValue_ = simulator->animationIntValue_;
         }
@@ -75,18 +79,21 @@ void MockAnimation::AddListeners()
     animator_->AddRepeatListener([weak]() {
         auto simulator = weak.Upgrade();
         if (simulator) {
+            LOGD("MockAnimation vsync triggered. repeat listener called.");
             ++(simulator->repeatDoneTimes_);
         }
     });
     animator_->AddIdleListener([weak]() {
         auto simulator = weak.Upgrade();
         if (simulator) {
+            LOGD("MockAnimation vsync triggered. idle listener called.");
             simulator->animationIdleStatus_ = true;
         }
     });
     animator_->AddPauseListener([weak]() {
         auto simulator = weak.Upgrade();
         if (simulator) {
+            LOGD("MockAnimation vsync triggered. resume listener called.");
             simulator->animationPauseStatus_ = true;
         }
     });
@@ -99,6 +106,7 @@ void MockAnimation::CreatePictureInterpolators()
         pictureInt_->AddListener([weak](const int& value) {
             auto simulator = weak.Upgrade();
             if (simulator) {
+                LOGD("MockAnimation vsync triggered. pictureIntValue_ int value: %{public}d", value);
                 simulator->pictureIntValue_ = value;
             }
         });
@@ -108,6 +116,7 @@ void MockAnimation::CreatePictureInterpolators()
         pictureString_->AddListener([weak](const std::string& value) {
             auto simulator = weak.Upgrade();
             if (simulator) {
+                LOGD("MockAnimation vsync triggered. pictureStringValue_ int value: %{public}s", value.data());
                 simulator->pictureStringValue_ = value;
             }
         });
@@ -122,27 +131,33 @@ void MockAnimation::CreateInterpolators()
         animationInt_->AddListener([weak](const int& value) {
             auto simulator = weak.Upgrade();
             if (simulator) {
+                LOGD("MockAnimation vsync triggered. int value: %{public}d", value);
                 simulator->animationIntValue_ = value;
             }
         });
+        LOGD("MockAnimation PostFlush. animationInt_ has been added.");
         animator_->AddInterpolator(animationInt_);
     }
     if (animationFloat_) {
         animationFloat_->AddListener([weak](const float& value) {
             auto simulator = weak.Upgrade();
             if (simulator) {
+                LOGD("MockAnimation vsync triggered. float value: %{public}f", value);
                 simulator->animationFloatValue_ = value;
             }
         });
+        LOGD("MockAnimation PostFlush. animationFloat_ has been add.");
         animator_->AddInterpolator(animationFloat_);
     }
     if (keyframeAnimation_) {
         keyframeAnimation_->AddListener([weak](const float& value) {
             auto simulator = weak.Upgrade();
             if (simulator) {
+                LOGD("MockAnimation vsync triggered. keyframeAnimation_ float value: %{public}f", value);
                 simulator->keyframeAnimationValue_ = value;
             }
         });
+        LOGD("MockAnimation PostFlush. keyframeAnimation_ has been added.");
         animator_->AddInterpolator(keyframeAnimation_);
     }
     if (animationColor_) {

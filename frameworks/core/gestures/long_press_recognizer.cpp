@@ -72,6 +72,7 @@ void LongPressRecognizer::HandleTouchDownEvent(const TouchEvent& event)
     if (fingers_ > MAX_FINGERS) {
         return;
     }
+    LOGD("long press recognizer receives touch down event, begin to detect long press event");
     int32_t curDuration = duration_;
     if (isForDrag_ && event.sourceType == SourceType::MOUSE) {
         curDuration = 0;
@@ -102,6 +103,7 @@ void LongPressRecognizer::HandleTouchDownEvent(const TouchEvent& event)
 
 void LongPressRecognizer::HandleTouchUpEvent(const TouchEvent& event)
 {
+    LOGD("long press recognizer receives touch up event");
     auto it = touchMap_.find(event.id);
     if (it == touchMap_.end()) {
         return;
@@ -123,6 +125,7 @@ void LongPressRecognizer::HandleTouchUpEvent(const TouchEvent& event)
 
 void LongPressRecognizer::HandleTouchMoveEvent(const TouchEvent& event)
 {
+    LOGD("long press recognizer receives touch move event");
     auto it = touchMap_.find(event.id);
     if (it == touchMap_.end()) {
         return;
@@ -136,6 +139,7 @@ void LongPressRecognizer::HandleTouchMoveEvent(const TouchEvent& event)
             return;
         }
 
+        LOGD("this gesture is not long press, try to reject it");
         Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
         return;
     }
@@ -145,7 +149,9 @@ void LongPressRecognizer::HandleTouchMoveEvent(const TouchEvent& event)
 
 void LongPressRecognizer::HandleTouchCancelEvent(const TouchEvent& event)
 {
+    LOGD("long press recognizer receives touch cancel event");
     if (state_ == DetectState::READY || state_ == DetectState::DETECTING) {
+        LOGD("cancel long press gesture detect, try to reject it");
         Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
         SendCancelMsg();
         return;

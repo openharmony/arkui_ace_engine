@@ -181,6 +181,7 @@ void TextFieldPaintMethod::UpdateScrollBar()
 {
     auto scrollBar = scrollBar_.Upgrade();
     if (!scrollBar || !scrollBar->NeedPaint()) {
+        LOGD("UpdateOverlayModifier no need paint scroll bar.");
         return;
     }
     if (scrollBar->GetPositionModeUpdate()) {

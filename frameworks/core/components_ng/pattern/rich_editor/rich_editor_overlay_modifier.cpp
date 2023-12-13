@@ -177,6 +177,7 @@ void RichEditorOverlayModifier::UpdateScrollBar(PaintWrapper* paintWrapper)
     CHECK_NULL_VOID(richEditorPattern);
     auto scrollBar = richEditorPattern->GetScrollControllerBar();
     if (!scrollBar || !scrollBar->NeedPaint()) {
+        TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "no need paint scroll bar.");
         return;
     }
     auto scrollBarOverlayModifier = scrollBarOverlayModifier_.Upgrade();

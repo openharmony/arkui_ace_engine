@@ -79,6 +79,7 @@ void ParseGridItemSize(const JSRef<JSVal>& value, GridItemSize& gridItemSize)
         if (columns->IsNumber()) {
             gridItemSize.columns = columns->ToNumber<int32_t>();
         }
+        LOGD("regularSize type: rows:%{public}d, columns:%{public}d", gridItemSize.rows, gridItemSize.columns);
     }
 }
 
@@ -106,6 +107,7 @@ void ParseGridItemRect(const JSRef<JSVal>& value, GridItemRect& gridItemRect)
         if (columnSpan->IsNumber()) {
             gridItemRect.columnSpan = columnSpan->ToNumber<int32_t>();
         }
+        LOGD("rowStart:%{public}d, columnStart:%{public}d", gridItemRect.rowStart, gridItemRect.columnStart);
     }
 }
 
@@ -243,6 +245,8 @@ void JSGrid::UseProxy(const JSCallbackInfo& args)
     // return true if code path for GridElement and its children will rely on
     // ElementProxy. Only in this case shallow render functionality can be used
     // see also GridLayoutComponent::CreateElement() and GridItemElementProxy class
+    LOGD("parent Grid uses proxied code path %{public}s.",
+        (parentGrid ? !parentGrid->UseNonProxiedCodePath() ? "yes" : "false" : "no parent grid (error)"));
     args.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(parentGrid ? !parentGrid->UseNonProxiedCodePath() : false)));
 #endif
 }

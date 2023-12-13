@@ -345,6 +345,7 @@ bool ParseParticleObject(JSRef<JSObject>& particleJsObject, OHOS::Ace::NG::Parti
         if (srcJsValue->IsString()) {
             src = srcJsValue->ToString();
         } else if (!JSParticle::ParseJsMedia(srcJsValue, src)) {
+            LOGD("particle can not parse image src.");
             return false;
         }
         imageParameter.SetImageSource(src);

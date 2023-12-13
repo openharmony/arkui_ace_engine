@@ -137,6 +137,7 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
     if (dragDropManager->IsDragging() ||
         dragDropManager->IsMsdpDragging() ||
         (!frameNode->IsDraggable() && frameNode->IsCustomerSet())) {
+        LOGD("not handle because of dragging now.");
         return;
     }
 #endif

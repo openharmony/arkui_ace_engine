@@ -298,6 +298,7 @@ void RevSourceMap::MergeInit(const std::string& sourceMap,
             return;
         }
         if (ans.size() == 0) {
+            LOGD("Decode sourcemap fail, mapping: %{public}s is empty", mapping.c_str());
             break;
         }
         if (ans.size() == 1) {

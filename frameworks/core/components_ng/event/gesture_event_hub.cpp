@@ -850,12 +850,19 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
     eventManager->DoMouseActionRelease();
     eventManager->SetIsDragging(true);
     if (info.GetInputEventType() != InputEventType::MOUSE_BUTTON && dragEventActuator_->GetIsNotInPreviewState()) {
+        if (SystemProperties::GetDebugEnabled()) {
+            TAG_LOGD(AceLogTag::ACE_GESTURE, "Drag window start for not in previewState, set DragWindowVisible true.");
+        }
         overlayManager->RemovePixelMap();
         pipeline->FlushPipelineImmediately();
         InteractionInterface::GetInstance()->SetDragWindowVisible(true);
         dragDropManager->FireOnEditableTextComponent(frameNode, DragEventType::ENTER);
     } else if (info.GetInputEventType() == InputEventType::MOUSE_BUTTON &&
                (dragDropInfo.pixelMap || dragDropInfo.customNode)) {
+        if (SystemProperties::GetDebugEnabled()) {
+            TAG_LOGD(AceLogTag::ACE_GESTURE,
+                "Drag window start for Mouse with custom pixelMap, set DragWindowVisible true.");
+        }
         InteractionInterface::GetInstance()->SetDragWindowVisible(true);
         dragDropManager->SetIsDragWindowShow(true);
     }

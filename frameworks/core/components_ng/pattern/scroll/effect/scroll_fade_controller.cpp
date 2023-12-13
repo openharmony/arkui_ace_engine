@@ -86,6 +86,7 @@ void ScrollFadeController::DecelerateListener(double value)
 
 void ScrollFadeController::ProcessAbsorb(double velocity)
 {
+    LOGD("ProcessAbsorb enter: velocity(%{public}lf)", velocity);
     if (velocity < 0.0 || state_ == OverScrollState::PULL) {
         return;
     }
@@ -104,6 +105,8 @@ void ScrollFadeController::ProcessAbsorb(double velocity)
 
 void ScrollFadeController::ProcessPull(double overDistance, double mainAxisExtent, double crossAxisExtent)
 {
+    LOGD("ProcessPull enter:overDistance(%{public}lf), mainAxisExtent(%{public}lf), crossAxisExtent(%{public}lf)",
+        overDistance, mainAxisExtent, crossAxisExtent);
     pullTask_.Cancel();
     opacityFloor_ = std::min(MIN_OPACITY + opacity_, DEFAULT_OPACITY);
     opacityCeil_ = NearZero(mainAxisExtent)
@@ -115,6 +118,8 @@ void ScrollFadeController::ProcessPull(double overDistance, double mainAxisExten
     double scaleByPullDistance = SCALE_CALCULATOR_FACTOR * std::sqrt(pullDistance_ * height);
     scaleSizeCeil_ = NearZero(scaleSize_) ? MAX_SCALE_SIZE
                                           : std::max(MAX_SCALE_SIZE - MAX_SCALE_SIZE / scaleByPullDistance, scaleSize_);
+    LOGD("opacityFloor_(%{public}lf), opacityCeil_(%{public}lf)", opacityFloor_, opacityCeil_);
+    LOGD("scaleSizeFloor_(%{public}lf), scaleSizeCeil_(%{public}lf)", scaleSizeFloor_, scaleSizeCeil_);
     if (controller_) {
         controller_->SetDuration(PULL_TIME);
         if (state_ != OverScrollState::PULL) {
@@ -131,7 +136,9 @@ void ScrollFadeController::ProcessPull(double overDistance, double mainAxisExten
 
 void ScrollFadeController::ProcessRecede(int32_t duration)
 {
+    LOGD("ProcessRecede enter:duration(%{public}d)", duration);
     if (state_ == OverScrollState::RECEDE || state_ == OverScrollState::IDLE) {
+        LOGD("current state do not support recede:state_(%{public}d)", state_);
         return;
     }
     pullTask_.Cancel();
@@ -148,6 +155,7 @@ void ScrollFadeController::ProcessRecede(int32_t duration)
 
 void ScrollFadeController::ChangeState()
 {
+    LOGD("ChangeState enter: old(%{public}d)", state_);
     switch (state_) {
         case OverScrollState::RECEDE:
             state_ = OverScrollState::IDLE;

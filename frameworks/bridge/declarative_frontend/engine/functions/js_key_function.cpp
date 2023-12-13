@@ -37,6 +37,7 @@ JSRef<JSObject> JsKeyFunction::createKeyEvent(KeyEventInfo& event)
 
 void JsKeyFunction::Execute(OHOS::Ace::KeyEventInfo& event)
 {
+    LOGD("JsKeyFunction: eventType[%{public}d]", event.GetKeyType());
     JSRef<JSVal> param = JSRef<JSObject>::Cast(createKeyEvent(event));
     JsFunction::ExecuteJS(1, &param);
 }

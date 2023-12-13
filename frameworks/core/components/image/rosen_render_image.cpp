@@ -925,6 +925,8 @@ void RosenRenderImage::CanvasDrawImageRect(
     canvas->DrawImageRect(*rsImage->GetImage(), srcRect, dstRect, options_);
     canvas->DetachBrush();
 #endif
+    LOGD("dstRect params: %{public}s", realDstRect.ToString().c_str());
+    LOGD("scaledSrcRect params: %{public}s", scaledSrcRect.ToString().c_str());
 }
 
 #ifndef USE_ROSEN_DRAWING

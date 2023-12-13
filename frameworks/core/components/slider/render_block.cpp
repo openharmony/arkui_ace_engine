@@ -40,6 +40,7 @@ Size RenderBlock::Measure()
 {
     double rawWidth = NormalizeToPx(hotRegionWidth_);
     double rawHeight = NormalizeToPx(hotRegionHeight_);
+    LOGD("Slider::RenderBlock Measure width: %{public}lf, height: %{public}lf", rawWidth, rawHeight);
     return Size(rawWidth, rawHeight);
 }
 

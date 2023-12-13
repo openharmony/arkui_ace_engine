@@ -45,11 +45,13 @@ void PinchRecognizer::OnAccepted()
 
 void PinchRecognizer::OnRejected()
 {
+    LOGD("pinch gesture has been rejected!");
     Reset();
 }
 
 void PinchRecognizer::HandleTouchDownEvent(const TouchEvent& event)
 {
+    LOGD("pinch recognizer receives touch down event, begin to detect pinch event");
     if (fingers_ > MAX_PINCH_FINGERS) {
         return;
     }
@@ -68,6 +70,7 @@ void PinchRecognizer::HandleTouchDownEvent(const TouchEvent& event)
 
 void PinchRecognizer::HandleTouchDownEvent(const AxisEvent& event)
 {
+    LOGD("pinch recognizer receives touch down event, begin to detect pinch event");
     if (fingers_ != AXIS_PINCH_FINGERS) {
         return;
     }
@@ -80,6 +83,7 @@ void PinchRecognizer::HandleTouchDownEvent(const AxisEvent& event)
 
 void PinchRecognizer::HandleTouchUpEvent(const TouchEvent& event)
 {
+    LOGD("pinch recognizer receives touch up event");
     auto itr = touchPoints_.find(event.id);
     if (itr == touchPoints_.end()) {
         return;
@@ -103,6 +107,7 @@ void PinchRecognizer::HandleTouchUpEvent(const TouchEvent& event)
 
 void PinchRecognizer::HandleTouchUpEvent(const AxisEvent& event)
 {
+    LOGD("pinch recognizer receives touch up event");
     if (fingers_ != AXIS_PINCH_FINGERS) {
         return;
     }
@@ -118,6 +123,7 @@ void PinchRecognizer::HandleTouchUpEvent(const AxisEvent& event)
 
 void PinchRecognizer::HandleTouchMoveEvent(const TouchEvent& event)
 {
+    LOGD("pinch recognizer receives touch move event");
     auto itr = touchPoints_.find(event.id);
     if (itr == touchPoints_.end()) {
         return;
@@ -159,6 +165,7 @@ void PinchRecognizer::OnFlushTouchEventsEnd()
 
 void PinchRecognizer::HandleTouchMoveEvent(const AxisEvent& event)
 {
+    LOGD("pinch recognizer receives touch move event");
     if (fingers_ != AXIS_PINCH_FINGERS) {
         return;
     }
@@ -180,7 +187,9 @@ void PinchRecognizer::HandleTouchMoveEvent(const AxisEvent& event)
 
 void PinchRecognizer::HandleTouchCancelEvent(const TouchEvent& event)
 {
+    LOGD("pinch recognizer receives touch cancel event");
     if (state_ == DetectState::READY || state_ == DetectState::DETECTING) {
+        LOGD("cancel pinch gesture detect, try to reject it");
         Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
         return;
     }

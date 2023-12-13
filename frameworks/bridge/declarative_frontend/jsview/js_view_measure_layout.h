@@ -29,7 +29,10 @@ class ACE_EXPORT ViewMeasureLayout : AceType {
 
 public:
     ViewMeasureLayout() = default;
-    ~ViewMeasureLayout() override {}
+    ~ViewMeasureLayout() override
+    {
+        LOGD("Destroy: ViewMeasureLayout");
+    }
 
 #ifdef USE_ARK_ENGINE
     static panda::Local<panda::JSValueRef> JSMeasure(panda::JsiRuntimeCallInfo* info);

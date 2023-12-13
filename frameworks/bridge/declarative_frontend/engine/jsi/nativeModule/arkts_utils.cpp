@@ -849,6 +849,7 @@ bool ArkTSUtils::ParseJsStringFromResource(const EcmaVM* vm, const Local<JSValue
         auto originStr = resourceWrapper->GetString(resId->Uint32Value(vm));
         ReplaceHolder(vm, originStr, params, 0);
         result = originStr;
+        LOGD("Get resource string %{public}s", result.c_str());
     } else if (resourceObject->GetType() == static_cast<uint32_t>(ResourceType::PLURAL)) {
         auto countJsVal = panda::ArrayRef::GetValueAt(vm, params, 0);
         int count = 0;
@@ -859,6 +860,7 @@ bool ArkTSUtils::ParseJsStringFromResource(const EcmaVM* vm, const Local<JSValue
         auto pluralStr = resourceWrapper->GetPluralString(resId->ToNumber(vm)->Value(), count);
         ReplaceHolder(vm, pluralStr, params, 1);
         result = pluralStr;
+        LOGD("Get resource PLURAL %{public}s", result.c_str());
     } else if (resourceObject->GetType() == static_cast<uint32_t>(ResourceType::FLOAT)) {
         result = std::to_string(resourceWrapper->GetDouble(resId->Uint32Value(vm)));
     } else if (resourceObject->GetType() == static_cast<uint32_t>(ResourceType::INTEGER)) {

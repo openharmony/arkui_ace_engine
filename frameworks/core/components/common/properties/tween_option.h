@@ -252,6 +252,7 @@ public:
             LOGE("Set float property animation failed. animation is null. property: %{public}d", property);
             return;
         }
+        LOGD("set float property animation. property: %{public}d", property);
         floatAnimationMap_[property] = animation;
     }
 

@@ -37,6 +37,7 @@ public:
     // Request next vsync.
     void RequestFrame() override
     {
+        LOGD("MockPlatformWindow RequestFrame");
         ++requestFrameCnt_;
     }
 
@@ -58,6 +59,7 @@ public:
     void TriggerFrames(int32_t frames)
     {
         for (int32_t frameIdx = 0; frameIdx < frames; ++frameIdx) {
+            LOGD("start to trigger frame. loop: %{public}d", frameIdx);
             TriggerFrame(nanoFrameTime_, 1);
         }
     }

@@ -406,6 +406,7 @@ void NavigationGroupNode::ExitTransitionWithPop(const RefPtr<FrameNode>& node)
         option,
         [node, titleNode, nodeWidth, nodeHeight]() {
             PerfMonitor::GetPerfMonitor()->Start(PerfConstants::ABILITY_OR_PAGE_SWITCH, PerfActionType::LAST_UP, "");
+            TAG_LOGD(AceLogTag::ACE_NAVIGATION, "navigation animation start");
             // content
             node->GetRenderContext()->ClipWithRRect(
                 RectF(nodeWidth * HALF, 0.0f, nodeWidth, nodeHeight), RadiusF(EdgeF(0.0f, 0.0f)));
@@ -456,6 +457,7 @@ void NavigationGroupNode::ExitTransitionWithPush(const RefPtr<FrameNode>& node, 
         taskExecutor->PostTask(
             [weakNode, weakTitle, weakNavigation, isNavBar]() {
                 PerfMonitor::GetPerfMonitor()->End(PerfConstants::ABILITY_OR_PAGE_SWITCH, true);
+                TAG_LOGD(AceLogTag::ACE_NAVIGATION, "navigation animation end");
                 auto navigation = weakNavigation.Upgrade();
                 if (navigation) {
                     navigation->isOnAnimation_ = false;
@@ -538,6 +540,7 @@ void NavigationGroupNode::EnterTransitionWithPush(const RefPtr<FrameNode>& node,
         taskExecutor->PostTask(
             [weakNode, weakNavigation]() {
                 PerfMonitor::GetPerfMonitor()->End(PerfConstants::ABILITY_OR_PAGE_SWITCH, true);
+                TAG_LOGD(AceLogTag::ACE_NAVIGATION, "navigation animation end");
                 auto navigation = weakNavigation.Upgrade();
                 CHECK_NULL_VOID(navigation);
                 navigation->isOnAnimation_ = false;
@@ -560,6 +563,7 @@ void NavigationGroupNode::EnterTransitionWithPush(const RefPtr<FrameNode>& node,
         option,
         [node, titleNode, nodeWidth, nodeHeight]() {
             PerfMonitor::GetPerfMonitor()->Start(PerfConstants::ABILITY_OR_PAGE_SWITCH, PerfActionType::LAST_UP, "");
+            TAG_LOGD(AceLogTag::ACE_NAVIGATION, "navigation animation start");
             // content
             node->GetRenderContext()->ClipWithRRect(
                 RectF(0.0f, 0.0f, nodeWidth, nodeHeight), RadiusF(EdgeF(0.0f, 0.0f)));
@@ -616,6 +620,7 @@ void NavigationGroupNode::EnterTransitionWithPop(const RefPtr<FrameNode>& node, 
         taskExecutor->PostTask(
             [weakNavigation]() {
                 PerfMonitor::GetPerfMonitor()->End(PerfConstants::ABILITY_OR_PAGE_SWITCH, true);
+                TAG_LOGD(AceLogTag::ACE_NAVIGATION, "navigation animation end");
                 auto navigation = weakNavigation.Upgrade();
                 CHECK_NULL_VOID(navigation);
                 navigation->isOnAnimation_ = false;

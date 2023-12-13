@@ -25,6 +25,7 @@ namespace OHOS::Ace {
 
 RefPtr<Component> GridItemCreator::CreateFromJson(const JsonValue& componentJson, const JsonComponentFactory& factory)
 {
+    LOGD("CreateFromJson GridItem");
     auto children = factory.CreateChildComponent(componentJson);
     auto child = children.empty() ? nullptr : children.front();
     auto gridItem = AceType::MakeRefPtr<GridItemComponent>(child);

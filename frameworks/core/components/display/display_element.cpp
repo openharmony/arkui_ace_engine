@@ -37,8 +37,10 @@ void DisplayElement::Update()
     if (renderDisplay && tween) {
         if (displayComponent->GetVisible() != renderDisplay->GetVisibleType() &&
             renderDisplay->GetVisibleType() == VisibleType::GONE) {
+            LOGD("SetIsFirstFrameShow false");
             tween->SetIsFirstFrameShow(false);
         } else {
+            LOGD("SetIsFirstFrameShow true");
             tween->SetIsFirstFrameShow(true);
         }
     }

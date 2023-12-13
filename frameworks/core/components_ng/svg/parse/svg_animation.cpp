@@ -44,6 +44,7 @@ void SvgAnimation::OnInitStyle() {}
 
 RefPtr<SvgNode> SvgAnimation::Create()
 {
+    LOGD("svgAnimate create");
     return MakeRefPtr<SvgAnimation>(SvgAnimateType::ANIMATE);
 }
 

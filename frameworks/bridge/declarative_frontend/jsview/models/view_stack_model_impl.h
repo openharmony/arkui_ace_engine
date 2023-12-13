@@ -108,7 +108,13 @@ public:
     {
         if ((ViewStackProcessor::GetInstance()->Size() > 1) &&
             ViewStackProcessor::GetInstance()->ShouldPopImmediately()) {
+            LOGD("Implicit Pop before continue.");
             ViewStackProcessor::GetInstance()->Pop();
+            LOGD("Implicit Pop done, top component is %{public}s",
+                AceType::TypeName(ViewStackProcessor::GetInstance()->GetMainComponent()));
+        } else {
+            LOGD("NO Implicit Pop before continue. top component is %{public}s",
+                AceType::TypeName(ViewStackProcessor::GetInstance()->GetMainComponent()));
         }
     }
 

@@ -131,6 +131,7 @@ void RenderIndexer::PerformLayout()
 
 void RenderIndexer::Update(const RefPtr<Component>& component)
 {
+    LOGD("[indexer] Update RenderIndexer");
     RefPtr<IndexerComponent> indexerComponent = AceType::DynamicCast<IndexerComponent>(component);
     if (!indexerComponent) {
         LOGE("[indexer] Update Get component failed");
@@ -146,6 +147,7 @@ void RenderIndexer::Update(const RefPtr<Component>& component)
         controller_->AddFirstChangedCallback([weakIndex = AceType::WeakClaim(this)](int32_t index) {
             auto indexer = weakIndex.Upgrade();
             if (indexer) {
+                LOGD("FirstItem index changed to:%{public}d", index);
                 indexer->UpdateSection(index);
             }
         });
@@ -202,6 +204,7 @@ void RenderIndexer::InitIndexTable()
 void RenderIndexer::UpdateItems()
 {
     if (static_cast<uint32_t>(nonItemCount_) + items_.size() == GetChildren().size()) {
+        LOGD("[indexer] no need update Items");
         return;
     }
     items_.clear();
@@ -210,6 +213,7 @@ void RenderIndexer::UpdateItems()
             items_.push_back(item);
         }
     }
+    LOGD("[indexer] items nums : %{public}u", static_cast<int32_t>(items_.size()));
 }
 
 void RenderIndexer::InitFocusedItem()
@@ -241,6 +245,7 @@ void RenderIndexer::HandleTouchDown(const TouchEventInfo& info)
         return;
     }
     touchPostion_ = info.GetTouches().front().GetLocalLocation();
+    LOGD("[indexer] item is HandleTouchDown x:%{public}lf, y:%{public}lf", touchPostion_.GetX(), touchPostion_.GetY());
     HandleTouched(touchPostion_);
     clicked_ = true;
     MarkNeedLayout();
@@ -251,6 +256,7 @@ void RenderIndexer::HandleTouchUp(const TouchEventInfo& info)
     if (!info.GetTouches().empty()) {
         touchPostion_ = info.GetTouches().front().GetLocalLocation();
     }
+    LOGD("[indexer] item is HandleTouchUp x:%{public}lf, y:%{public}lf", touchPostion_.GetX(), touchPostion_.GetY());
     HandleTouched(touchPostion_);
     if (clicked_) {
         clicked_ = false;
@@ -264,6 +270,7 @@ void RenderIndexer::HandleTouchMove(const TouchEventInfo& info)
         return;
     }
     touchPostion_ = info.GetTouches().front().GetLocalLocation();
+    LOGD("[indexer] item is HandleTouchMove x:%{public}lf, y:%{public}lf", touchPostion_.GetX(), touchPostion_.GetY());
     HandleTouched(touchPostion_);
     if (clicked_) {
         clicked_ = true;
@@ -271,9 +278,15 @@ void RenderIndexer::HandleTouchMove(const TouchEventInfo& info)
     }
 }
 
-void RenderIndexer::HandleDragStart() {}
+void RenderIndexer::HandleDragStart()
+{
+    LOGD("[indexer] HandleDragstart");
+}
 
-void RenderIndexer::HandleDragEnd() {}
+void RenderIndexer::HandleDragEnd()
+{
+    LOGD("[indexer] HandleDragEnd");
+}
 
 bool RenderIndexer::TouchTest(const Point& globalPoint, const Point& parentLocalPoint,
     const TouchRestrict& touchRestrict, TouchTestResult& result)
@@ -357,6 +370,7 @@ void RenderIndexer::UpdateBubbleText()
 void RenderIndexer::BuildBubbleAnimation()
 {
     if (!IsValidBubbleBox()) {
+        LOGD("bubble box is invalid");
         return;
     }
     if (!bubbleController_) {
@@ -396,6 +410,7 @@ void RenderIndexer::BuildBubbleAnimation()
 void RenderIndexer::BeginBubbleAnimation()
 {
     if (!IsValidBubbleBox()) {
+        LOGD("bubble box is invalid");
         return;
     }
     if (!bubbleController_) {
@@ -473,6 +488,7 @@ void RenderIndexer::MoveSection(int32_t index)
     }
 
     if (focusedItem_ == curSection) {
+        LOGD("Current focused item already is:%{public}d", curSection);
         return;
     }
 
@@ -518,6 +534,7 @@ void RenderIndexer::HandleFocusAnimation(const Size& size, const Offset& offset)
 void RenderIndexer::MoveSectionWithIndexer(int32_t curSection)
 {
     if (focusedItem_ == curSection) {
+        LOGD("Current focused item already is:%{public}d", curSection);
         return;
     }
 

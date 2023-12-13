@@ -645,6 +645,8 @@ double RosenSvgPainter::UpdateTextPath(
         auto width = font.measureText(&temp, sizeof(wchar_t), SkTextEncoding::kUTF16);
 #endif
         if (length < offset + width + space) {
+            LOGD("path length is not enough, length:%{public}lf, next offset:%{public}lf", length,
+                offset + width + space);
             break;
         }
         if (offset < 0) {
@@ -709,6 +711,8 @@ double RosenSvgPainter::UpdateTextPath(
         }
         auto width = font.MeasureText(&temp, sizeof(wchar_t), RSTextEncoding::UTF16);
         if (length < offset + width + space) {
+            LOGD("path length is not enough, length:%{public}lf, next offset:%{public}lf", length,
+                offset + width + space);
             break;
         }
         if (offset < 0) {
@@ -834,6 +838,8 @@ double RosenSvgPainter::MeasureTextPathBounds(
         }
         auto width = font.measureText(&temp, sizeof(temp), SkTextEncoding::kUTF16);
         if (length < offset + width + space) {
+            LOGD("path length is not enough, length:%{public}lf, next offset:%{public}lf", length,
+                offset + width + space);
             break;
         }
         offset = offset + width + space;
@@ -870,6 +876,8 @@ double RosenSvgPainter::MeasureTextPathBounds(
         }
         auto width = font.MeasureText(&temp, sizeof(temp), RSTextEncoding::UTF16);
         if (length < offset + width + space) {
+            LOGD("path length is not enough, length:%{public}lf, next offset:%{public}lf", length,
+                offset + width + space);
             break;
         }
         offset = offset + width + space;

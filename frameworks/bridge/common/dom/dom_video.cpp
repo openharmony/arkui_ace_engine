@@ -310,7 +310,9 @@ ImageFit DOMVideo::ConvertStrToFit(const std::string& fit)
 ImageObjectPosition DOMVideo::ConvertStrToPosition(const std::string& position)
 {
     ImageObjectPosition objectPosition;
-    ParseBackgroundImagePosition(position, objectPosition);
+    if (!ParseBackgroundImagePosition(position, objectPosition)) {
+        LOGD("ConvertStrToPosition failed");
+    }
     return objectPosition;
 }
 

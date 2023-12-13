@@ -18,6 +18,7 @@
 namespace OHOS::Ace {
 void OverlayElement::Clear()
 {
+    LOGD("Clear Overlay. current child size: %zu", children_.size());
     while (children_.size() > 0) {
         PopInstant();
     }

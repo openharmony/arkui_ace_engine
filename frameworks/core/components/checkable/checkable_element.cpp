@@ -35,6 +35,7 @@ void CheckableElement::Update()
     auto labelTarget = AceType::DynamicCast<LabelTarget>(component_);
     if (!labelTarget) {
         // switch is not label target, radio and checkbox are label target
+        LOGD("not find label target");
         return;
     }
     auto trigger = labelTarget->GetTrigger();

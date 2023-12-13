@@ -79,6 +79,7 @@ void SubwindowOhos::InitContainer()
     auto parentContainer = Platform::AceContainer::GetContainer(parentContainerId_);
     CHECK_NULL_VOID(parentContainer);
     if (!window_) {
+        TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "Window is null, need create a new window");
         OHOS::sptr<OHOS::Rosen::WindowOption> windowOption = new OHOS::Rosen::WindowOption();
         auto parentWindowName = parentContainer->GetWindowName();
         auto parentWindowId = parentContainer->GetWindowId();
@@ -87,6 +88,9 @@ void SubwindowOhos::InitContainer()
         CHECK_NULL_VOID(parentWindow);
         parentWindow_ = parentWindow;
         auto windowType = parentWindow->GetType();
+        TAG_LOGD(AceLogTag::ACE_SUB_WINDOW,
+            "Find parent window success, name: %{public}s, windowId: %{public}u, type: %{public}u",
+            parentWindow->GetWindowName().c_str(), parentWindow->GetWindowId(), static_cast<uint32_t>(windowType));
         if (parentContainer->IsScenceBoardWindow() || windowType == Rosen::WindowType::WINDOW_TYPE_DESKTOP) {
             windowOption->SetWindowType(Rosen::WindowType::WINDOW_TYPE_SYSTEM_FLOAT);
         } else if (GetAboveApps()) {
@@ -335,6 +339,7 @@ void SubwindowOhos::ShowWindow(bool needFocus)
     if (needFocus) {
         RequestFocus();
     }
+    TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "Show subwindow id:%{public}u successfully.", window_->GetWindowId());
 
     auto aceContainer = Platform::AceContainer::GetContainer(childContainerId_);
     CHECK_NULL_VOID(aceContainer);
@@ -363,6 +368,7 @@ void SubwindowOhos::HideWindow()
     auto rootNode = context->GetRootElement();
     CHECK_NULL_VOID(rootNode);
     if (!rootNode->GetChildren().empty()) {
+        TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "there are still nodes mounted on root in subwindow");
         auto lastChildId = rootNode->GetLastChild()->GetId();
         if (hotAreasMap_.find(lastChildId) != hotAreasMap_.end()) {
             auto hotAreaRect = hotAreasMap_[lastChildId];
@@ -384,6 +390,7 @@ void SubwindowOhos::HideWindow()
         auto rootNode = context->GetRootElement();
         CHECK_NULL_VOID(rootNode);
         if (!rootNode->GetChildren().empty()) {
+            TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "there are still nodes mounted on root in subwindow");
             auto lastChildId = rootNode->GetLastChild()->GetId();
             if (hotAreasMap_.find(lastChildId) != hotAreasMap_.end()) {
                 auto hotAreaRect = hotAreasMap_[lastChildId];

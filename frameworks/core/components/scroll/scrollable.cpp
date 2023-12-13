@@ -371,6 +371,8 @@ void Scrollable::HandleDragStart(const OHOS::Ace::GestureEvent& info)
     SetDragStartPosition(GetMainOffset(Offset(info.GetGlobalPoint().GetX(), info.GetGlobalPoint().GetY())));
     const auto dragPositionInMainAxis =
         axis_ == Axis::VERTICAL ? info.GetGlobalLocation().GetY() : info.GetGlobalLocation().GetX();
+    TAG_LOGD(AceLogTag::ACE_SCROLLABLE, "Scroll drag start, localLocation: %{public}s, globalLocation: %{public}s",
+        info.GetLocalLocation().ToString().c_str(), info.GetGlobalLocation().ToString().c_str());
 #ifdef OHOS_PLATFORM
     // Increase the cpu frequency when sliding start.
     auto currentTime = GetSysTimestamp();
@@ -601,6 +603,9 @@ void Scrollable::HandleDragUpdate(const GestureEvent& info)
 
 void Scrollable::HandleDragEnd(const GestureEvent& info)
 {
+    TAG_LOGD(AceLogTag::ACE_SCROLLABLE, "Scroll drag end, position is %{public}lf and %{public}lf, "
+        "velocity is %{public}lf",
+        info.GetGlobalPoint().GetX(), info.GetGlobalPoint().GetY(), info.GetMainVelocity());
     if (dragFRCSceneCallback_) {
         dragFRCSceneCallback_(info.GetMainVelocity(), NG::SceneStatus::END);
     }
@@ -660,6 +665,8 @@ void Scrollable::StartScrollAnimation(float mainPosition, float correctVelocity)
         springController_->Stop();
     }
     StopSnapController();
+    TAG_LOGD(AceLogTag::ACE_SCROLLABLE, "The position of scroll motion is %{public}lf, velocity is %{public}lf",
+        mainPosition, correctVelocity);
     double friction = friction_ > 0 ? friction_ : sFriction_;
     if (motion_) {
         motion_->Reset(friction, mainPosition, correctVelocity);
@@ -842,6 +849,9 @@ void Scrollable::StartScrollSnapMotion(float predictSnapOffset, float scrollSnap
 
 void Scrollable::ProcessScrollSnapSpringMotion(float scrollSnapDelta, float scrollSnapVelocity)
 {
+    TAG_LOGD(AceLogTag::ACE_SCROLLABLE, "The snap delta of scroll motion is %{public}f, "
+        "The snap velocity of scroll motion is %{public}f",
+        scrollSnapDelta, scrollSnapVelocity);
     if (!snapController_) {
         snapController_ = AceType::MakeRefPtr<Animator>(PipelineBase::GetCurrentContext());
         snapController_->AddStopListener([weakScroll = AceType::WeakClaim(this)]() {
@@ -892,6 +902,8 @@ void Scrollable::UpdateScrollSnapStartOffset(double offset)
 
 void Scrollable::ProcessScrollSnapMotion(double position)
 {
+    TAG_LOGD(AceLogTag::ACE_SCROLLABLE, "Current Pos is %{public}lf, position is %{public}lf",
+        currentPos_, position);
     currentVelocity_ = scrollSnapMotion_->GetCurrentVelocity();
     if (NearEqual(currentPos_, position)) {
         UpdateScrollPosition(0.0, SCROLL_FROM_ANIMATION_SPRING);
@@ -959,6 +971,10 @@ void Scrollable::OnAnimateStop()
 void Scrollable::StartSpringMotion(
     double mainPosition, double mainVelocity, const ExtentPair& extent, const ExtentPair& initExtent)
 {
+    TAG_LOGD(AceLogTag::ACE_SCROLLABLE, "position is %{public}lf, mainVelocity is %{public}lf, "
+        "minExtent is %{public}lf, maxExtent is %{public}lf, initMinExtent is %{public}lf, "
+        "initMaxExtent is %{public}lf",
+        mainPosition, mainVelocity, extent.Leading(), extent.Trailing(), initExtent.Leading(), initExtent.Trailing());
     scrollMotion_ = AceType::MakeRefPtr<ScrollMotion>(mainPosition, mainVelocity, extent, initExtent, spring_);
     if (!scrollMotion_->IsValid()) {
         return;
@@ -1017,6 +1033,8 @@ void Scrollable::ProcessScrollMotionStop()
 
 void Scrollable::ProcessSpringMotion(double position)
 {
+    TAG_LOGD(AceLogTag::ACE_SCROLLABLE, "Current Pos is %{public}lf, position is %{public}lf",
+        currentPos_, position);
     currentVelocity_ = scrollMotion_->GetCurrentVelocity();
     if (NearEqual(currentPos_, position)) {
         UpdateScrollPosition(0.0, SCROLL_FROM_ANIMATION_SPRING);
@@ -1042,6 +1060,9 @@ void Scrollable::ProcessScrollMotion(double position)
     if (needScrollSnapToSideCallback_) {
         needScrollSnapChange_ = needScrollSnapToSideCallback_(position - currentPos_);
     }
+    TAG_LOGD(AceLogTag::ACE_SCROLLABLE, "position is %{public}lf, currentVelocity_ is %{public}lf, "
+        "needScrollSnapChange_ is %{public}u",
+        position, currentVelocity_, needScrollSnapChange_);
     if ((NearEqual(currentPos_, position))) {
         UpdateScrollPosition(0.0, SCROLL_FROM_ANIMATION);
     } else {

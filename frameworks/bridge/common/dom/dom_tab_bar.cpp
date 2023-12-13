@@ -146,6 +146,7 @@ void DOMTabBar::OnChildNodeRemoved(const RefPtr<DOMNode>& child)
         return;
     }
     if (tabBarChild_) {
+        LOGD("DOMTabBar remove child");
         tabBarChild_->RemoveChild(child->GetRootComponent());
     }
 }

@@ -50,6 +50,7 @@ void RenderGridLayoutItem::PerformLayout()
     if (GetChildren().empty()) {
         LOGE("RenderGridLayoutItem: no child found in RenderGridLayoutItem!");
     } else {
+        LOGD("PerformLayout column:%{public}d row:%{public}d", columnIndex_, rowIndex_);
         auto child = GetChildren().front();
         child->Layout(GetLayoutParam());
         child->SetPosition(Offset::Zero());
@@ -73,6 +74,7 @@ void RenderGridLayoutItem::HandleOnFocus()
 void RenderGridLayoutItem::SetColumnIndex(int32_t columnIndex)
 {
     if (columnIndex < 0) {
+        LOGD("Invalid columnIndex %{public}d, use default", columnIndex);
         return;
     }
     columnIndex_ = columnIndex;
@@ -81,6 +83,7 @@ void RenderGridLayoutItem::SetColumnIndex(int32_t columnIndex)
 void RenderGridLayoutItem::SetRowIndex(int32_t rowIndex)
 {
     if (rowIndex < 0) {
+        LOGD("Invalid rowIndex %{public}d, use default", rowIndex);
         return;
     }
     rowIndex_ = rowIndex;
@@ -143,6 +146,7 @@ RefPtr<Animator> RenderGridLayoutItem::GetAnimationController()
 
 bool RenderGridLayoutItem::AnimationAddInterpolator(const RefPtr<Animation<Point>>& animation)
 {
+    LOGD("%{public}s begin.", __PRETTY_FUNCTION__);
     if (animationController_) {
         if (animationController_->IsRunning()) {
             animationController_->ClearInterpolators();
@@ -157,6 +161,7 @@ bool RenderGridLayoutItem::AnimationAddInterpolator(const RefPtr<Animation<Point
 
 void RenderGridLayoutItem::AnimationPlay()
 {
+    LOGD("%{public}s begin.", __PRETTY_FUNCTION__);
     if (animationController_) {
         animationController_->Play();
     }

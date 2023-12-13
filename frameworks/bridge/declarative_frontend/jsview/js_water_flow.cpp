@@ -93,6 +93,7 @@ void JSWaterFlow::Create(const JSCallbackInfo& args)
 
 void JSWaterFlow::JSBind(BindingTarget globalObj)
 {
+    LOGD("JSWaterFlow:JSBind");
     JSClass<JSWaterFlow>::Declare("WaterFlow");
 
     MethodOptions opt = MethodOptions::NONE;

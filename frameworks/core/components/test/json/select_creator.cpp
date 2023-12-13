@@ -35,6 +35,7 @@ RefPtr<SelectTheme> SelectCreator::theme_ = nullptr;
 
 RefPtr<Component> SelectCreator::CreateFromJson(const JsonValue& componentJson, const JsonComponentFactory& factory)
 {
+    LOGD("SelectCreator::CreateFromJson");
     std::string strValue;
     if (!GetStringValue(componentJson, CLASS_NAME, strValue)) {
         return nullptr;
@@ -45,6 +46,7 @@ RefPtr<Component> SelectCreator::CreateFromJson(const JsonValue& componentJson, 
         return nullptr;
     }
 
+    LOGD("Create object of className[%{public}s].", strValue.c_str());
     auto themeManager = AceType::MakeRefPtr<ThemeManagerImpl>();
     theme_ = themeManager->GetTheme<SelectTheme>();
     auto select = AceType::MakeRefPtr<SelectComponent>();
@@ -195,11 +197,13 @@ void SelectCreator::CreateOptionsAttribute(
     }
 
     if (!componentJson.Contains(SELECT_OPTIONS)) {
+        LOGD("select: json do not contains select options.");
         return;
     }
 
     auto optionJsonArray = componentJson.GetValue(SELECT_OPTIONS);
     if (!optionJsonArray->IsArray()) {
+        LOGD("select: select options of json is not array.");
         return;
     }
 

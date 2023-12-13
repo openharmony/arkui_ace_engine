@@ -70,6 +70,7 @@ RefPtr<Component> CreateFlexFromJson(
 
 RefPtr<Component> RowCreator::CreateFromJson(const JsonValue& componentJson, const JsonComponentFactory& factory)
 {
+    LOGD("CreateFromJson Row");
     std::string classType = componentJson.GetValue(CLASS_NAME)->GetString();
     if (classType != ROW_NAME) {
         LOGE("Create row err: not a row json.");
@@ -80,6 +81,7 @@ RefPtr<Component> RowCreator::CreateFromJson(const JsonValue& componentJson, con
 
 RefPtr<Component> ColumnCreator::CreateFromJson(const JsonValue& componentJson, const JsonComponentFactory& factory)
 {
+    LOGD("CreateFromJson Column");
     std::string classType = componentJson.GetValue(CLASS_NAME)->GetString();
     if (classType != COLUMN_NAME) {
         LOGE("Create column err: not a column json.");

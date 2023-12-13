@@ -24,18 +24,21 @@
 
 namespace OHOS::Ace::Framework {
 
-#define GET_COMPONENT_OR_RETURN()                                                  \
-    auto top = ViewStackProcessor::GetInstance()->GetMainComponent();              \
-    auto svComponent = AceType::DynamicCast<OHOS::Ace::SceneViewerComponent>(top); \
-    if (!svComponent) {                                                            \
-        LOGE("%s Component is not SceneViewComponent", __func__);                  \
-        return;                                                                    \
-    }                                                                              \
+#define GET_COMPONENT_OR_RETURN()                                                       \
+    auto top = ViewStackProcessor::GetInstance()->GetMainComponent();                   \
+    auto svComponent = AceType::DynamicCast<OHOS::Ace::SceneViewerComponent>(top);      \
+    if (!svComponent) {                                                                 \
+        LOGE("%s Component is not SceneViewComponent", __func__);                       \
+        return;                                                                         \
+    }                                                                                   \
     svComponent
 
 void ModelViewImpl::Create(const std::string& src)
 {
+    LOGD("ModelViewImpl::Create()");
     auto svComponent = AceType::MakeRefPtr<OHOS::Ace::SceneViewerComponent>();
+
+    LOGD("fullSrcPath: %s", src.c_str());
     svComponent->SetGltfSrc(src);
 
     ViewStackProcessor::GetInstance()->Push(svComponent);
@@ -43,6 +46,7 @@ void ModelViewImpl::Create(const std::string& src)
 
 void ModelViewImpl::SetBackground(const std::string& value)
 {
+    LOGD("fullBgPath: %s", value.c_str());
     GET_COMPONENT_OR_RETURN()->SetBackgroundSrc(value);
 }
 
@@ -56,8 +60,8 @@ void ModelViewImpl::SetTransparent(const bool value)
     GET_COMPONENT_OR_RETURN()->SetTransparent(value);
 }
 
-void ModelViewImpl::SetCameraPosition(
-    AnimatableFloat x, AnimatableFloat y, AnimatableFloat z, AnimatableFloat distance, bool isAngular)
+void ModelViewImpl::SetCameraPosition(AnimatableFloat x, AnimatableFloat y, AnimatableFloat z,
+    AnimatableFloat distance, bool isAngular)
 {
     GET_COMPONENT_OR_RETURN()->SetCameraPosition(x, y, z, distance, isAngular);
 }
@@ -104,6 +108,7 @@ void ModelViewImpl::AddCustomRender(const RefPtr<OHOS::Render3D::SVCustomRenderD
 
 void ModelViewImpl::SetWidth(Dimension& width)
 {
+    LOGD("ModelViewImpl::SetWidth() %f", width.Value());
     /*
     Model's texture width & height to be updated in the backend during animation via RenderNode.
     So Async animation shall be disabled.
@@ -120,6 +125,7 @@ void ModelViewImpl::SetWidth(Dimension& width)
 
 void ModelViewImpl::SetHeight(Dimension& height)
 {
+    LOGD("ModelViewImpl::SetHeight() %f", height.Value());
     auto* stack = ViewStackProcessor::GetInstance();
     auto option = stack->GetImplicitAnimationOption();
     option.SetAllowRunningAsynchronously(false);
@@ -130,16 +136,34 @@ void ModelViewImpl::SetHeight(Dimension& height)
     ViewAbstractModel::GetInstance()->SetHeight(height);
 }
 
-void ModelViewImpl::SetRenderHeight(Dimension& height) {}
+void ModelViewImpl::SetRenderHeight(Dimension& height)
+{
+    LOGD("ModelViewImpl::SetRenderHeight() %f", height.Value());
+}
 
-void ModelViewImpl::SetRenderWidth(Dimension& width) {}
+void ModelViewImpl::SetRenderWidth(Dimension& width)
+{
+    LOGD("ModelViewImpl::SetRenderWidth() %f", width.Value());
+}
 
-void ModelViewImpl::SetRenderFrameRate(float rate) {}
+void ModelViewImpl::SetRenderFrameRate(float rate)
+{
+    LOGD("ModelViewImpl::SetRenderFeameRate() %f", rate);
+}
 
-void ModelViewImpl::SetShader(const std::string& path) {}
+void ModelViewImpl::SetShader(const std::string& path)
+{
+    LOGD("ModelViewImpl::SetShader() NOT IMPLEMENTED YET");
+}
 
-void ModelViewImpl::AddShaderImageTexture(const std::string& path) {}
+void ModelViewImpl::AddShaderImageTexture(const std::string& path)
+{
+    LOGD("ModelViewImpl::AddShaderImageTexture() NOT IMPLEMENTED YET");
+}
 
-void ModelViewImpl::AddShaderInputBuffer(const RefPtr<OHOS::Render3D::ShaderInputBuffer>& buffer) {}
+void ModelViewImpl::AddShaderInputBuffer(const RefPtr<OHOS::Render3D::ShaderInputBuffer>& buffer)
+{
+    LOGD("ModelViewImpl::AddShaderInputBuffer() NOT IMPLEMENTED YET");
+}
 
 } // namespace OHOS::Ace::Framework

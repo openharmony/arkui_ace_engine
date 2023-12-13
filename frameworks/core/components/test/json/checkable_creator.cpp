@@ -67,6 +67,7 @@ void ParseProperty(const JsonValue& componentJson, const RefPtr<CheckableCompone
 
 RefPtr<Component> CheckableCreator::CreateFromJson(const JsonValue& componentJson, const JsonComponentFactory& factory)
 {
+    LOGD("CreateFromJson checkable");
     std::string classType = componentJson.GetValue(CLASS_NAME)->GetString();
     auto themeManager = AceType::MakeRefPtr<ThemeManagerImpl>();
     if (classType == CHECKBOX_NAME) {
@@ -100,6 +101,7 @@ RefPtr<Component> CheckableCreator::CreateFromJson(const JsonValue& componentJso
         ParseProperty(componentJson, component);
         return component;
     } else {
+        LOGD("unknown class name: %{public}s", classType.c_str());
         return nullptr;
     }
 }

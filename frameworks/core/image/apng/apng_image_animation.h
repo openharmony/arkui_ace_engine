@@ -61,6 +61,7 @@ public:
             picture->UpdateDurationWithScale(this->duration_);
         }
 
+        LOGD("auto scale. scale: %{public}f", this->duration_);
         this->duration_ = NORMALIZED_DURATION_MAX;
     }
 

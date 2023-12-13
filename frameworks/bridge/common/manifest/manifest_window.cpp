@@ -27,6 +27,7 @@ void ManifestWindow::WindowParse(const std::unique_ptr<JsonValue>& root)
     }
     auto window = root->GetObject("window");
     if (!window || window->IsNull()) {
+        LOGD("No window config found.");
         return;
     }
     auto designWidth = window->GetInt("designWidth", DEFAULT_DESIGN_WIDTH);
@@ -37,6 +38,12 @@ void ManifestWindow::WindowParse(const std::unique_ptr<JsonValue>& root)
     windowConfig_.autoDesignWidth = window->GetBool("autoDesignWidth", false);
 }
 
-void ManifestWindow::PrintInfo() {}
+void ManifestWindow::PrintInfo()
+{
+    LOGD("window: {");
+    LOGD("  designWidth: %{private}d", windowConfig_.designWidth);
+    LOGD("  autoDesignWidth: %{private}d", windowConfig_.autoDesignWidth);
+    LOGD("}");
+}
 
 } // namespace OHOS::Ace::Framework

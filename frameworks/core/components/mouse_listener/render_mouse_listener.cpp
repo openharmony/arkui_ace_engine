@@ -40,6 +40,7 @@ void RenderMouseListener::Update(const RefPtr<Component>& component)
 
 void RenderMouseListener::OnMouseTestHit(const Offset& coordinateOffset, MouseRawResult& result)
 {
+    LOGD("render touch listener: on touch test hit!");
     recognizer_->SetCoordinateOffset(coordinateOffset);
     result.emplace_back(recognizer_);
 }

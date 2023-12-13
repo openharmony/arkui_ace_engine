@@ -45,6 +45,7 @@ void CardTransitionController::RegisterTransitionListener()
     pipelineContext->AddPageTransitionListener(
         [weak](const TransitionEvent& event, const WeakPtr<PageElement>& in, const WeakPtr<PageElement>& out) {
             if ((event != TransitionEvent::POP_START) && (event != TransitionEvent::PUSH_START)) {
+                LOGD("handle event: %{public}d failed. unknown event.", event);
                 return;
             }
             auto controller = weak.Upgrade();
@@ -79,6 +80,7 @@ void CardTransitionController::PrepareTransition()
     }
     auto pageDest = (event_ == TransitionEvent::PUSH_START) ? pageDest_.Upgrade() : pageSrc_.Upgrade();
     if (!pageDest || pageDest->GetCardComposeId().empty()) {
+        LOGD("prepare card transition failed. page dest is null. event: %{public}d", event_);
         return;
     }
     auto composeId = pageDest->GetCardComposeId();
@@ -222,6 +224,7 @@ void CardTransitionController::CreateCardListAnimation(const RefPtr<RenderNode>&
 {
     auto renderListItem = AceType::DynamicCast<RenderListItem>(renderNode);
     if (!renderListItem) {
+        LOGD("list item is null");
         return;
     }
     auto height = renderListItem->GetLayoutSize().Height();
@@ -350,6 +353,7 @@ RRect CardTransitionController::GetCardRect(const ComposeId& composeId) const
     }
     auto renderListItem = AceType::DynamicCast<RenderListItem>(cardComposeElement->GetRenderNode());
     if (!renderListItem) {
+        LOGD("list item is null");
         return RRect();
     }
     return renderListItem->GetRRect();

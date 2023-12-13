@@ -106,6 +106,7 @@ void RosenRenderButton::Paint(RenderContext& context, const Offset& offset)
     if (!buttonComponent_) {
         return;
     }
+    LOGD("Paint button type : %{public}d", buttonComponent_->GetType());
     if (isHover_) {
         UpdateLayer();
         isHover_ = false;

@@ -21,6 +21,7 @@ namespace OHOS::Ace {
 
 RefPtr<RenderNode> RenderIndexerList::Create()
 {
+    LOGD("[indexer] Create RenderIndexerList");
     return AceType::MakeRefPtr<RenderIndexerList>();
 }
 
@@ -35,6 +36,7 @@ void RenderIndexerList::Update(const RefPtr<Component>& component)
 
 void RenderIndexerList::PerformLayout()
 {
+    LOGD("[indexer] PerformLayout RenderIndexerList");
     if (GetChildren().empty()) {
         LOGE("RenderIndexerList: no child found in RenderIndexerList!");
     } else {

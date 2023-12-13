@@ -305,6 +305,7 @@ void JsCommandDomElementCreator::MountDomNode(
         if (rootStack && !rootStack->HasNavigationBar()) {
             node->GenerateComponentNode();
             rootStack->SetNavigationBar(node->GetRootComponent());
+            LOGD("added navigation bar node");
             useProxyNode = true;
             isIgnored = true;
         }
@@ -318,6 +319,7 @@ void JsCommandDomElementCreator::MountDomNode(
             useProxyNode = true;
         }
     }
+    LOGD("parent(=%{private}d) add child(=%{private}d) in slot(=%{private}d)", parentNodeId, nodeId_, itemIndex_);
     if (useProxyNode) {
         // mount proxy dom node to replace the position of original node
         auto proxy = CreateDomProxy(domDocument, parentNodeId);
@@ -399,6 +401,7 @@ void JsCommandCreateDomBody::Execute(const RefPtr<JsAcePage>& page) const
     accessibilityManager->SetRootNodeId(domDocument->GetRootNodeId());
     auto accessibilityNode = accessibilityManager->CreateAccessibilityNode(tagName_, nodeId_, -1, itemIndex_);
     if (!accessibilityNode) {
+        LOGD("Failed to create accessibility node %{public}s", tagName_.c_str());
         return;
     }
     accessibilityManager->TrySaveTargetAndIdNode(id_, target_, accessibilityNode);
@@ -462,6 +465,7 @@ void JsCommandAddDomElement::Execute(const RefPtr<JsAcePage>& page) const
     auto accessibilityNode =
         accessibilityManager->CreateAccessibilityNode(tagName_, nodeId_, parentNodeId_, itemIndex_);
     if (!accessibilityNode) {
+        LOGD("Failed to create accessibility node %{public}s", tagName_.c_str());
         return;
     }
     accessibilityManager->TrySaveTargetAndIdNode(id_, target_, accessibilityNode);

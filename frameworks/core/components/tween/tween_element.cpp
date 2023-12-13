@@ -209,6 +209,7 @@ void CreateOpacityAnimation(
 {
     auto& opacityAnimation = option.GetOpacityAnimation();
     if (!opacityAnimation) {
+        LOGD("create opacity animation with null. skip it.");
         return;
     }
     if (!opacityAnimation->HasInitValue()) {
@@ -364,8 +365,10 @@ void TweenElement::Update()
             isDelegatedController_ = false;
             controller_ = CREATE_ANIMATOR(context_);
             tweenComponent->SetAnimator(controller_);
+            LOGD("set animator to component when update.");
         }
 
+        LOGD("add request to pipeline context.");
         // If transform component exists, it also plays animation. RenderTransform can get correct value from component
         // when Update(component).
         if ((operation_ != AnimationOperation::NONE || operationCustom_ != AnimationOperation::NONE) &&
@@ -387,6 +390,7 @@ TweenElement::~TweenElement()
 
 void TweenElement::ApplyOperation(RefPtr<Animator>& controller, AnimationOperation& operation)
 {
+    LOGD("apply operation: %{public}d", operation);
     switch (operation) {
         case AnimationOperation::PLAY:
             controller->Play();
@@ -434,10 +438,12 @@ void TweenElement::OnPostAnimationFlush()
 void TweenElement::OnPreFlush()
 {
     if (!controller_ && !controllerCustom_) {
+        LOGD("empty controller, skip start tween.");
         return;
     }
     SetWrapHidden(false);
     if (isDelegatedController_ && !isComponentController_) {
+        LOGD("controller is set from outside. skip prepare animation.");
         return;
     }
 
@@ -464,6 +470,7 @@ void TweenElement::OnPreFlush()
         }
     }
 
+    LOGD("Start tween animation with operation: %{public}d, operationCustom: %{public}d", operation_, operationCustom_);
     if (controller_) {
         ApplyOperation(controller_, operation_);
     }
@@ -487,6 +494,7 @@ bool TweenElement::IsNeedAnimation(RefPtr<Animator>& controller, TweenOption& op
     for (auto&& [translate, animation] : transformOffsetAnimations) {
         if (animation) {
             needAnimation = true;
+            LOGD("add translate animation.");
             controller->AddInterpolator(animation);
         }
     }
@@ -494,6 +502,7 @@ bool TweenElement::IsNeedAnimation(RefPtr<Animator>& controller, TweenOption& op
     for (auto&& [transformFloat, animation] : transformFloatAnimations) {
         if (animation) {
             needAnimation = true;
+            LOGD("add transform float animation.");
             controller->AddInterpolator(animation);
         }
     }
@@ -507,11 +516,13 @@ bool TweenElement::IsNeedAnimation(RefPtr<Animator>& controller, TweenOption& op
     }
     auto& opacityAnimation = option.GetOpacityAnimation();
     if (opacityAnimation) {
+        LOGD("add opacity animation.");
         controller->AddInterpolator(opacityAnimation);
         needAnimation = true;
     }
     auto& colorAnimation = option.GetColorAnimation();
     if (colorAnimation) {
+        LOGD("add color animation.");
         controller->AddInterpolator(colorAnimation);
         needAnimation = true;
     }
@@ -584,6 +595,7 @@ bool TweenElement::CanUpdate(const RefPtr<Component>& newComponent)
 void TweenElement::CreateTranslateAnimation(const RefPtr<RenderTransform>& renderTransformNode, TweenOption& option)
 {
     if (!option.HasTransformOffsetChanged()) {
+        LOGD("create translate animation with null. skip it.");
         return;
     }
     auto& transformOffsetAnimations = option.GetTranslateAnimations();
@@ -660,6 +672,7 @@ void TweenElement::CreateTranslateAnimation(const RefPtr<RenderTransform>& rende
 void TweenElement::CreateScaleAnimation(const RefPtr<RenderTransform>& renderTransformNode, TweenOption& option)
 {
     if (!option.HasTransformFloatChanged()) {
+        LOGD("create scale animation with null. skip it.");
         return;
     }
     auto& transformFloatAnimations = option.GetTransformFloatAnimation();
@@ -719,6 +732,7 @@ void TweenElement::CreateTransformOriginAnimation(
 void TweenElement::CreateRotateAnimation(const RefPtr<RenderTransform>& renderTransformNode, TweenOption& option)
 {
     if (!option.HasTransformFloatChanged()) {
+        LOGD("create rotate animation with null. skip it.");
         return;
     }
     auto& transformFloatAnimations = option.GetTransformFloatAnimation();
@@ -763,6 +777,7 @@ void TweenElement::CreateColorAnimation(const RefPtr<PropertyAnimatable>& animat
     }
     auto& colorAnimation = option.GetColorAnimation();
     if (!colorAnimation) {
+        LOGD("create color animation with null. skip it.");
         return;
     }
     PropertyAnimatableType propertyType;
@@ -806,6 +821,7 @@ bool TweenElement::AddToAnimator(
     for (auto&& [property, animation] : animations) {
         if (animation) {
             needAnimation = true;
+            LOGD("add property animation. property: %{public}d", property);
             controller->AddInterpolator(animation);
         }
     }
@@ -818,6 +834,7 @@ void TweenElement::SetController(const RefPtr<Animator>& controller)
         LOGE("set controller failed. controller is empty.");
         return;
     }
+    LOGD("set controller");
     if (!controller_->IsStopped()) {
         controller_->Stop();
     }
@@ -832,6 +849,7 @@ const TweenOption& TweenElement::GetOption() const
 
 void TweenElement::SetOption(const TweenOption& option)
 {
+    LOGD("set tween option");
     option_ = option;
 }
 
@@ -861,6 +879,7 @@ void TweenElement::SetOpacity(uint8_t opacity)
         LOGE("no display render node found.");
         return;
     }
+    LOGD("set Opacity. Opacity: %{public}d", opacity);
     displayRenderNode->UpdateOpacity(opacity);
 }
 
@@ -904,6 +923,8 @@ void TweenElement::SetWrapHidden(bool hidden)
 
 void TweenElement::SetTouchable(bool enable)
 {
+    LOGD("set tween touchable status: %{public}d", enable);
+
     if (children_.empty()) {
         LOGW("get content child failed. no child yet.");
         return;
@@ -981,6 +1002,8 @@ bool TweenElement::ApplyKeyframes(RefPtr<Animator>& controller, TweenOption& opt
         LOGW("apply option failed. null child or not render child.");
         return false;
     }
+    LOGD("TweenElement: ApplyKeyframes.");
+
     const auto& displayRenderNode =
         AceType::DynamicCast<RenderDisplay>(AceType::DynamicCast<RenderElement>(child)->GetRenderNode());
     if (!displayRenderNode) {
@@ -1026,6 +1049,7 @@ void TweenElement::ApplyOptions(RefPtr<Animator>& controller, TweenOption& optio
         LOGE("Apply Options failed. Controller is null.");
         return;
     }
+    LOGD("apply options.");
     controller->SetDuration(option.GetDuration());
     controller->SetIteration(option.GetIteration());
     controller->SetStartDelay(option.GetDelay());
@@ -1091,9 +1115,11 @@ void TweenElement::CreatePropertyAnimationFloat(const RefPtr<PropertyAnimatable>
     }
     auto& propertyFloatMap = option.GetFloatPropertyAnimation();
     if (propertyFloatMap.empty()) {
+        LOGD("No property animation float found. skip it.");
         return;
     }
     for (auto&& [property, animation] : propertyFloatMap) {
+        LOGD("Create animation float for property: %{public}d", property);
         CreatePropertyAnimation<FloatPropertyAnimatable, float>(animatable, property, option, animation);
     }
 }

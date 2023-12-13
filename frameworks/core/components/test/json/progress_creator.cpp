@@ -25,6 +25,7 @@ namespace OHOS::Ace {
 
 RefPtr<Component> ProgressCreator::CreateFromJson(const JsonValue& componentJson, const JsonComponentFactory& factory)
 {
+    LOGD("CreateFromJson progress");
     std::string classType = componentJson.GetValue(CLASS_NAME)->GetString();
     if (classType != PROGRESS_NAME) {
         LOGE("Create progress error: not progress json");

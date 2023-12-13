@@ -80,6 +80,8 @@ void PickerColumnElement::OnBlur()
 
 bool PickerColumnElement::OnKeyEvent(const KeyEvent& keyEvent)
 {
+    LOGD("key.event.action=%{private}d, key.event.code=%{private}d.", keyEvent.action, keyEvent.code);
+
     auto render = AceType::DynamicCast<RenderPickerColumn>(renderNode_);
     if (!render) {
         LOGE("render node is null.");

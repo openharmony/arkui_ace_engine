@@ -1931,6 +1931,9 @@ ListItemGroupPara ListPattern::GetListItemGroupParameter(const RefPtr<FrameNode>
         listItemGroupPara.displayStartIndex = itemGroupPattern->GetDisplayStartIndexInGroup();
         listItemGroupPara.lanes = itemGroupPattern->GetLanesInGroup();
         listItemGroupPara.itemEndIndex = itemGroupPattern->GetEndIndexInGroup();
+        TAG_LOGD(AceLogTag::ACE_LIST, "Get ListItem group parameter(%{public}d,"
+            "%{public}d,%{public}d,%{public}d).", listItemGroupPara.displayEndIndex,
+            listItemGroupPara.displayStartIndex, listItemGroupPara.lanes, listItemGroupPara.itemEndIndex);
     }
     return listItemGroupPara;
 }

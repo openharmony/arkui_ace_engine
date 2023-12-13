@@ -65,6 +65,8 @@ void SelectOverlayPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
             viewPort = viewPortOption.value();
         }
     }
+    LOGD("select_overlay ClipRect viewPort: %{public}s ", viewPort.ToString().c_str());
+
     CheckHandleIsShown();
 
     selectOverlayContentModifier_->SetHandleColor(textOverlayTheme->GetHandleColor());

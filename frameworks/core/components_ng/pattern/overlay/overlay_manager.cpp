@@ -684,6 +684,7 @@ void OverlayManager::ShowToast(const std::string& message, int32_t duration, con
 
 void OverlayManager::PopToast(int32_t toastId)
 {
+    TAG_LOGD(AceLogTag::ACE_OVERLAY, "Overlay starts to pop Toast");
     AnimationOption option;
     auto curve = AceType::MakeRefPtr<CubicCurve>(0.2f, 0.0f, 0.1f, 1.0f);
     option.SetCurve(curve);

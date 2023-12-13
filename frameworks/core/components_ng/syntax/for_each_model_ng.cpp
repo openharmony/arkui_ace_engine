@@ -64,6 +64,7 @@ void ForEachModelNG::SetNewIds(std::list<std::string>&& newIds)
 
 void ForEachModelNG::CreateNewChildStart(const std::string& id)
 {
+    TAG_LOGD(AceLogTag::ACE_FOREACH, "Start create child with array id %{public}s.", id.c_str());
     auto* stack = NG::ViewStackProcessor::GetInstance();
     stack->PushKey(id);
     const auto stacksKey = stack->GetKey();
@@ -74,6 +75,7 @@ void ForEachModelNG::CreateNewChildStart(const std::string& id)
 
 void ForEachModelNG::CreateNewChildFinish(const std::string& id)
 {
+    TAG_LOGD(AceLogTag::ACE_FOREACH, "Finish create child with array id %{public}s.", id.c_str());
     auto* stack = ViewStackProcessor::GetInstance();
     stack->PopKey();
     stack->PopContainer();

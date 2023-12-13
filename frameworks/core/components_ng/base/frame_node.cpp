@@ -1216,6 +1216,8 @@ RefPtr<LayoutWrapperNode> FrameNode::UpdateLayoutWrapper(
     } else {
         layoutWrapper->Update(WeakClaim(this), geometryNode_->Clone(), layoutProperty_->Clone());
     }
+    LOGD("%{public}s create layout wrapper: flag = %{public}x, forceMeasure = %{public}d, forceLayout = %{public}d",
+        GetTag().c_str(), flag, forceMeasure, forceLayout);
     do {
         if (CheckNeedMeasure(flag) || forceMeasure) {
             layoutWrapper->SetLayoutAlgorithm(MakeRefPtr<LayoutAlgorithmWrapper>(pattern_->CreateLayoutAlgorithm()));
@@ -1895,6 +1897,8 @@ HitTestResult FrameNode::AxisTest(
     const PointF& globalPoint, const PointF& parentLocalPoint, AxisTestResult& onAxisResult)
 {
     const auto& rect = renderContext_->GetPaintRectWithTransform();
+    LOGD("AxisTest: type is %{public}s, the region is %{public}lf, %{public}lf, %{public}lf, %{public}lf",
+        GetTag().c_str(), rect.Left(), rect.Top(), rect.Width(), rect.Height());
     // TODO: disableTouchEvent || disabled_ need handle
 
     // TODO: Region need change to RectList
@@ -2560,6 +2564,7 @@ void FrameNode::Measure(const std::optional<LayoutConstraintF>& parentConstraint
     }
 
     if (layoutAlgorithm_->SkipMeasure()) {
+        LOGD("%{public}s, depth: %{public}d: the layoutAlgorithm skip measure", GetTag().c_str(), GetDepth());
         isLayoutDirtyMarked_ = false;
         return;
     }
@@ -2584,11 +2589,15 @@ void FrameNode::Measure(const std::optional<LayoutConstraintF>& parentConstraint
 
     isConstraintNotChanged_ = layoutProperty_->ConstraintEqual(preConstraint, contentConstraint);
 
+    LOGD("Measure: %{public}s, depth: %{public}d, Constraint: %{public}s", GetTag().c_str(), GetDepth(),
+        layoutProperty_->GetLayoutConstraint()->ToString().c_str());
+
     isLayoutDirtyMarked_ = false;
 
     if (isConstraintNotChanged_) {
         if (!CheckNeedForceMeasureAndLayout()) {
             ACE_SCOPED_TRACE("SkipMeasure");
+            LOGD("%{public}s (depth: %{public}d) skip measure content", GetTag().c_str(), GetDepth());
             layoutAlgorithm_->SetSkipMeasure();
             return;
         }
@@ -2611,9 +2620,15 @@ void FrameNode::Measure(const std::optional<LayoutConstraintF>& parentConstraint
         // Adjust by aspect ratio, firstly pick height based on width. It means that when width, height and
         // aspectRatio are all set, the height is not used.
         auto width = geometryNode_->GetFrameSize().Width();
+        LOGD("aspect ratio affects, origin width: %{public}f, height: %{public}f", width,
+            geometryNode_->GetFrameSize().Height());
         auto height = width / aspectRatio;
+        LOGD("aspect ratio affects, new width: %{public}f, height: %{public}f", width, height);
         geometryNode_->SetFrameSize(SizeF({ width, height }));
     }
+
+    LOGD("on Measure Done: type: %{public}s, depth: %{public}d, Size: %{public}s", GetTag().c_str(), GetDepth(),
+        geometryNode_->GetFrameSize().ToString().c_str());
 
     layoutProperty_->UpdatePropertyChangeFlag(PROPERTY_UPDATE_LAYOUT);
 }
@@ -2661,6 +2676,9 @@ void FrameNode::Layout()
     SaveGeoState();
     AvoidKeyboard(isFocusOnPage);
     ExpandSafeArea(isFocusOnPage);
+
+    LOGD("On Layout Done: type: %{public}s, depth: %{public}d, Offset: %{public}s", GetTag().c_str(), GetDepth(),
+        geometryNode_->GetFrameOffset().ToString().c_str());
     SyncGeometryNode();
 
     UpdateParentAbsoluteOffset();

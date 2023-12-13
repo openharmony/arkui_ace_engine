@@ -570,6 +570,7 @@ void RenderOption::InitTouchEvent()
 void RenderOption::OnTouchTestHit(
     const Offset& coordinateOffset, const TouchRestrict& touchRestrict, TouchTestResult& result)
 {
+    LOGD("RenderOption::OnTouchTestHit(%{public}lf, %{public}lf).", coordinateOffset.GetX(), coordinateOffset.GetY());
     InitClickEvent();
     InitTouchEvent();
     click_->SetCoordinateOffset(coordinateOffset);

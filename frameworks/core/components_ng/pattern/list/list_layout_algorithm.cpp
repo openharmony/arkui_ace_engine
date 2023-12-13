@@ -159,6 +159,10 @@ void ListLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 
     // set list cache info.
     layoutWrapper->SetCacheCount(listLayoutProperty->GetCachedCountValue(1) * GetLanes());
+
+    TAG_LOGD(AceLogTag::ACE_LIST, "List position changed, new start index is %{public}d, "
+        "new end index is %{public}d, offset is %{public}f,  mainSize is %{public}f",
+        GetStartIndex(), GetEndIndex(), currentOffset_, contentMainSize_);
 }
 
 float ListLayoutAlgorithm::GetChildMaxCrossSize(LayoutWrapper* layoutWrapper, Axis axis) const
@@ -748,6 +752,8 @@ void ListLayoutAlgorithm::MeasureList(LayoutWrapper* layoutWrapper)
         targetIndex_.reset();
     }
     if (jumpIndex_) {
+        TAG_LOGD(AceLogTag::ACE_LIST, "Jump index: %{public}d, offset is %{public}f, startMainPos: %{public}f,"
+            " endMainPos: %{public}f", jumpIndex_.value(), currentOffset_, startMainPos_, endMainPos_);
         switch (scrollAlign_) {
             case ScrollAlign::START:
             case ScrollAlign::NONE:
@@ -778,6 +784,8 @@ void ListLayoutAlgorithm::MeasureList(LayoutWrapper* layoutWrapper)
         }
     } else {
         jumpIndexInGroup_.reset();
+        TAG_LOGD(AceLogTag::ACE_LIST, "StartIndex index: %{public}d, offset is %{public}f, "
+            "startMainPos: %{public}f, endMainPos: %{public}f", startIndex, currentOffset_, startMainPos_, endMainPos_);
         bool overScrollTop = startIndex == 0 && GreatNotEqual(startPos, startMainPos_);
         float midItemHeight = 0.0f;
         if (IsScrollSnapAlignCenter(layoutWrapper)) {
@@ -883,6 +891,8 @@ void ListLayoutAlgorithm::LayoutForward(LayoutWrapper* layoutWrapper, int32_t st
         if (currentIndex >= 0 && currentIndex < (totalItemCount_ - 1)) {
             currentEndPos += spaceWidth_;
         }
+        TAG_LOGD(AceLogTag::ACE_LIST, "LayoutForward: %{public}d current start pos: %{public}f, "
+            "current end pos: %{public}f", currentIndex, currentStartPos, currentEndPos);
         chainOffset = chainOffsetFunc_ ? chainOffsetFunc_(currentIndex) : 0.0f;
         // reach the valid target index
         if (forwardFeature_ && targetIndex_ && GreatNotEqual(currentIndex, targetIndex_.value())) {
@@ -937,6 +947,7 @@ void ListLayoutAlgorithm::LayoutForward(LayoutWrapper* layoutWrapper, int32_t st
             }
             break;
         }
+        TAG_LOGD(AceLogTag::ACE_LIST, "List recycle item:%{public}d", pos->first);
         layoutWrapper->RemoveChildInRenderTree(pos->first);
         itemPosition_.erase(pos++);
     }
@@ -1290,6 +1301,7 @@ void ListLayoutAlgorithm::OnSurfaceChanged(LayoutWrapper* layoutWrapper)
     if (LessOrEqual(offset, 0.0)) {
         // negative offset to scroll down
         currentDelta_ -= static_cast<float>(offset);
+        TAG_LOGD(AceLogTag::ACE_LIST, "update offset on virtual keyboard height change, %{public}f", offset);
     }
 }
 

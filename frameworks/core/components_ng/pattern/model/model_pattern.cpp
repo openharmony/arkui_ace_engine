@@ -31,6 +31,7 @@ void ModelPattern::OnRebuildFrame()
 ModelPattern::ModelPattern(uint32_t key, Render3D::SurfaceType surfaceType, const std::string& bundleName,
     const std::string& moduleName) : key_(key)
 {
+    LOGD("MODEL_NG: ModelPattern::ModelPattern(%d)", key);
     modelAdapter_ = MakeRefPtr<ModelAdapterWrapper>(key_, surfaceType, bundleName, moduleName);
     modelAdapter_->SetPaintFinishCallback([weak = WeakClaim(this)]() {
             auto model = weak.Upgrade();
@@ -46,6 +47,7 @@ ModelPattern::ModelPattern(uint32_t key, Render3D::SurfaceType surfaceType, cons
 void ModelPattern::OnModifyDone()
 {
     Pattern::OnModifyDone();
+    LOGD("MODEL_NG: ModelPattern::OnModifyDone()");
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto hub = host->GetEventHub<EventHub>();
@@ -96,6 +98,7 @@ bool ModelPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, 
         scale, widthScale, heightScale,
         config.contentSizeChange, modelAdapter_->GetSurfaceType()
     };
+    LOGD("MODEL_NG: ModelPattern::OnDirtyLayoutWrapperSwap: %f, %f", widthScale, heightScale);
     modelAdapter_->OnDirtyLayoutWrapperSwap(windowChangeInfo);
     host->MarkNeedSyncRenderTree();
 
@@ -110,7 +113,10 @@ void ModelPattern::OnAttachToFrameNode()
     modelAdapter_->OnAttachToFrameNode(host->GetRenderContext());
 }
 
-void ModelPattern::OnDetachFromFrameNode(FrameNode* node) {}
+void ModelPattern::OnDetachFromFrameNode(FrameNode* node)
+{
+    LOGD("MODEL_NG: ModelPattern::OnDetachFromFrameNode(FrameNode* node)");
+}
 
 void ModelPattern::HandleTouchEvent(const TouchEventInfo& info)
 {

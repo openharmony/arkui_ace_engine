@@ -407,6 +407,7 @@ void ScrollBar::CalcReservedHeight()
         CHECK_NULL_VOID(theme);
         startReservedHeight_ = Dimension(0.0, DimensionUnit::PX);
         endReservedHeight_ = theme->GetReservedHeight();
+        LOGD("scrollBar set reservedHeight by theme");
         FlushBarWidth();
         return;
     }
@@ -455,6 +456,8 @@ void ScrollBar::CalcReservedHeight()
         endRadiusHeight = endRadius - std::sqrt(2 * padding * endRadius - padding * padding);
         endReservedHeight_ = Dimension(endRadiusHeight + (endRadius / barMargin), DimensionUnit::PX);
     }
+    LOGD("scrollBar calculate reservedHeight, startReservedHeight_:%{public}f, endReservedHeight_:%{public}f",
+        startReservedHeight_.Value(), endReservedHeight_.Value());
     FlushBarWidth();
 }
 
@@ -541,6 +544,7 @@ void ScrollBar::HandleDragEnd(const GestureEvent& info)
         auto predictSnapOffset = calePredictSnapOffsetCallback_(CalcPatternOffset(frictionMotion_->GetFinalPosition()));
         // If snap scrolling, predictSnapOffset will has a value.
         if (predictSnapOffset.has_value() && !NearZero(predictSnapOffset.value())) {
+            LOGD("ScrollBar::HandleDragEnd predictSnapOffset:%{public}f", predictSnapOffset.value());
             startScrollSnapMotionCallback_(predictSnapOffset.value(), velocity);
             return;
         }

@@ -68,6 +68,7 @@ void SpringAnimation::UpdatePosition(float normalized)
         currentPosition_ = endPosition_;
         currentVelocity_ = 0.0f;
     }
+    LOGD("Time:%{public}f Position:%{public}f Velocity:%{public}f", normalized, currentPosition_, currentVelocity_);
 }
 
 void SpringAnimation::InitEstimateDuration()

@@ -533,6 +533,8 @@ void TextFieldPattern::CalcCaretMetricsByPosition(
     int32_t extent, CaretMetricsF& caretCaretMetric, TextAffinity textAffinity)
 {
     paragraph_->CalcCaretMetricsByPosition(extent, caretCaretMetric, textAffinity);
+    TAG_LOGD(AceLogTag::ACE_TEXT_FIELD, "Metric caret position, stream : %{public}s , textAffinity: %{public}d",
+        result.ToString().c_str(), textAffinity);
     caretCaretMetric.offset.AddX(textRect_.GetX());
     caretCaretMetric.offset.AddY(textRect_.GetY());
 }
@@ -569,6 +571,7 @@ void TextFieldPattern::OnScrollEndCallback()
 
 void TextFieldPattern::OnTextAreaScroll(float offset)
 {
+    TAG_LOGD(AceLogTag::ACE_TEXT_FIELD, "OnTextAreaScroll with offset %{public}f", offset);
     if (!IsTextArea() || textRect_.Height() <= contentRect_.Height()) {
         return;
     }
@@ -921,6 +924,7 @@ void TextFieldPattern::HandleBlurEvent()
     StopTwinkling();
     if (customKeyboardBuilder_ && isCustomKeyboardAttached_) {
         CloseKeyboard(true);
+        TAG_LOGD(AceLogTag::ACE_KEYBOARD, "TextFieldPattern Blur, Close CustomKeyboard.");
     }
     selectController_->UpdateCaretIndex(selectController_->GetCaretIndex());
     NotifyOnEditChanged(false);
@@ -1559,6 +1563,8 @@ void TextFieldPattern::InitDragDropEvent()
         ContainerScope scope(id);
         auto pattern = weakPtr.Upgrade();
         CHECK_NULL_VOID(pattern);
+        TAG_LOGD(AceLogTag::ACE_TEXT_FIELD, "TextFieldPattern  onDragEnd result: %{public}d dragStatus: %{public}d",
+            event->GetResult(), pattern->dragStatus_);
         if (pattern->dragStatus_ == DragStatus::DRAGGING) {
             pattern->dragStatus_ = DragStatus::NONE;
             pattern->MarkContentChange();
@@ -2841,6 +2847,7 @@ uint32_t TextFieldPattern::GetSCBSystemWindowId()
     RefPtr<FrameNode> frameNode = GetHost();
     CHECK_NULL_RETURN(frameNode, {});
     auto focusSystemWindowId = WindowSceneHelper::GetFocusSystemWindowId(frameNode);
+    TAG_LOGD(AceLogTag::ACE_KEYBOARD, "TextField Find SCBSystemWindowId End,(%{public}u).", focusSystemWindowId);
     return focusSystemWindowId;
 }
 #endif
@@ -2983,6 +2990,7 @@ bool TextFieldPattern::RequestCustomKeyboard()
     auto inputMethod = MiscServices::InputMethodController::GetInstance();
     if (inputMethod) {
         inputMethod->Close();
+        TAG_LOGD(AceLogTag::ACE_KEYBOARD, "TextField Request CustomKeyboard, Close Softkeyboard Successfully.");
     }
 #else
     if (HasConnection()) {

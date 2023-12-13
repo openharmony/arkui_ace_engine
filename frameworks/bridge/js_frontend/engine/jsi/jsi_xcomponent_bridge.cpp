@@ -43,6 +43,7 @@ JsiXComponentBridge::~JsiXComponentBridge()
         auto taskExecutor = currentContainer->GetTaskExecutor();
         if (taskExecutor) {
             taskExecutor->PostTask([ renderContext = std::move(renderContext_) ] () mutable {
+                LOGD("render context must be release on js thread.");
                 renderContext.reset();
             },
             TaskExecutor::TaskType::JS);

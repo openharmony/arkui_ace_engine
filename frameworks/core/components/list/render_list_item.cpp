@@ -186,6 +186,8 @@ void RenderListItem::Update(const RefPtr<Component>& component)
         // update focus animation corner radius
         focusAnimationRRect_.SetCorner({ item->GetTopLeftRadius(), item->GetTopRightRadius(),
             item->GetBottomRightRadius(), item->GetBottomLeftRadius() });
+        LOGD("[Focus][Dep:%{public}d] Update: focusAnimationRRect top left radius: %{public}.1lf", GetDepth(),
+            focusAnimationRRect_.GetCorner().topLeftRadius.GetX().Value());
 
         needVibrate_ = item->NeedVibrate();
         auto context = context_.Upgrade();
@@ -317,11 +319,13 @@ void RenderListItem::HandleItemEffect(bool isFromRotate)
             vibrator_->Vibrate(VIBRATOR_TYPE_WATCH_CROWN_STRENGTH1);
         }
 #endif
+        LOGD("item (%{public}d) change from %{public}d to %{public}d.", index_, lastState_, currentState_);
         lastState_ = currentState_;
         if (currentState_ != ItemState::NONE && currentState_ != ItemState::CLICK) {
             focusController_->ShowAnimation(currentState_);
         } else {
             // invalid focus
+            LOGD("focus state invalid.");
         }
     }
     MarkNeedRender();
@@ -504,6 +508,7 @@ void RenderListItem::ShowFocusAnimation(bool focus, const Rect& listRect, double
         return;
     }
 
+    LOGD("Index:%{public}d focus:%{public}d %{public}s", index_, focus, GetPaintOffset().ToString().c_str());
     if (focus) {
         Size size = GetPaintSize();
         auto globalOffset = GetPaintOffset() + (size * (DEFAULT_SCALE - scale) * HALF_SIZE);
@@ -524,6 +529,7 @@ void RenderListItem::UpdateAccessibilityAttr()
 {
     auto refPtr = accessibilityNode_.Upgrade();
     if (!refPtr) {
+        LOGD("Get accessibility node failed.");
         return;
     }
 

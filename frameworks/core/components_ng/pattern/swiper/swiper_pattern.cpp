@@ -1578,6 +1578,7 @@ void SwiperPattern::HandleTouchUp()
 
 void SwiperPattern::HandleDragStart(const GestureEvent& info)
 {
+    TAG_LOGD(AceLogTag::ACE_SWIPER, "Swiper drag start.");
     UpdateDragFRCSceneInfo(info.GetMainVelocity(), SceneStatus::START);
 
     StopAnimationOnScrollStart(
@@ -1622,6 +1623,7 @@ void SwiperPattern::StopAnimationOnScrollStart(bool flushImmediately)
 
 void SwiperPattern::HandleDragUpdate(const GestureEvent& info)
 {
+    TAG_LOGD(AceLogTag::ACE_SWIPER, "Swiper drag update.");
     UpdateDragFRCSceneInfo(info.GetMainVelocity(), SceneStatus::RUNNING);
     auto mainDelta = static_cast<float>(info.GetMainDelta());
     if (info.GetInputEventType() == InputEventType::AXIS && info.GetSourceTool() == SourceTool::TOUCHPAD) {
@@ -1658,6 +1660,7 @@ void SwiperPattern::HandleDragUpdate(const GestureEvent& info)
 
 void SwiperPattern::HandleDragEnd(double dragVelocity)
 {
+    TAG_LOGD(AceLogTag::ACE_SWIPER, "Swiper drag end.");
     UpdateDragFRCSceneInfo(dragVelocity, SceneStatus::END);
     if (IsVisibleChildrenSizeLessThanSwiper()) {
         UpdateItemRenderGroup(false);

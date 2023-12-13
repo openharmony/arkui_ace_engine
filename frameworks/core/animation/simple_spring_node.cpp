@@ -82,6 +82,8 @@ void SimpleSpringNode::EndToValue(double endValue, double velocity)
     }
     SpringNode::EndToValue(endValue, velocity);
     if (isRunning_) {
+        LOGD("EndToValue when running. index: %{public}d, endValue: %{public}.3lf, velocity: %{public}.3lf", index_,
+            endValue, velocity);
         auto controlNode = adapter_->GetControlNode();
         if (!controlNode) {
             LOGE("End to value failed. control node is null. index: %{public}d", index_);
@@ -95,6 +97,8 @@ void SimpleSpringNode::EndToValue(double endValue, double velocity)
         spring_->SetAccuracy(valueAccuracy_);
         spring_->Reset(value_, endValue, velocity_, springProperty_);
     } else {
+        LOGD("EndToValue first time. index: %{public}d, endValue: %{public}.3lf, velocity: %{public}.3lf", index_,
+            endValue, velocity);
         startTime_ = context->GetTimeFromExternalTimer();
         isRunning_ = true;
         spring_->SetAccuracy(valueAccuracy_);
@@ -148,6 +152,7 @@ void SimpleSpringNode::Cancel()
 
 void SimpleSpringNode::ResetNode(double value, double velocity)
 {
+    LOGD("ResetNode. value: %{public}.3lf, velocity: %{public}.3lf", value, velocity);
     value_ = value;
     velocity_ = velocity;
     OnUpdate(value_, velocity_);

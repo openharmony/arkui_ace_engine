@@ -115,7 +115,9 @@ void RenderPickerValue::HandleAnimation(const RefPtr<RenderBox>& box)
     }
 
     box_ = box;
-    if (focus_) {
+    if (!focus_) {
+        LOGD("cancel focus of picker value.");
+    } else {
         auto width = box->GetLayoutSize().Width();
         auto height = box->GetLayoutSize().Height();
         RRect rrect;

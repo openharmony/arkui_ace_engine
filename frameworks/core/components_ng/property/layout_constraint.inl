@@ -20,6 +20,7 @@ void LayoutConstraintT<T>::ApplyAspectRatio(
 {
     if (!Positive(ratio)) {
         // just in case ratio is illegal value
+        LOGD("Aspect ratio value is not positive");
         return;
     }
     std::optional<bool> useDefinedWidth;

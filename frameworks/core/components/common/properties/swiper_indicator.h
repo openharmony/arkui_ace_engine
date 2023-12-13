@@ -28,6 +28,7 @@ public:
     void InitStyle(const RefPtr<SwiperIndicatorTheme>& theme)
     {
         if (!theme) {
+            LOGD("param theme is nullptr");
             return;
         }
         color_ = theme->GetColor();

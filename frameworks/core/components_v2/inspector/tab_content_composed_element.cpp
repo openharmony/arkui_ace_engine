@@ -62,6 +62,7 @@ std::string TabContentComposedElement::GetTabBar() const
 {
     auto element = GetTabContentItemElement();
     if (!element) {
+        LOGD("GetTabContentItemElement is null");
         return "";
     }
     if (!element->GetIcon().empty()) {

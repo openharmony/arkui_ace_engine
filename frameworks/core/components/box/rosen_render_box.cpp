@@ -245,6 +245,7 @@ void RosenRenderBox::PerformLayout()
     bool childOverflow = flex ? isChildOverflow_ || flex->IsChildOverflow() : isChildOverflow_;
     if ((overflow_ != Overflow::CLIP || !childOverflow) && mask_ == nullptr && !boxClipFlag_ &&
         overflow_ != Overflow::FORCE_CLIP && (clipPath_ == nullptr || !clipPath_->NeedClip())) {
+        LOGD("do not need to clip.");
         return;
     }
     if (backDecoration_ &&
@@ -1633,6 +1634,7 @@ void RosenRenderBox::OnAttachContext()
 
 void RosenRenderBox::AnimateMouseHoverEnter()
 {
+    LOGD("RosenRenderBox::AnimateMouseHoverEnter in. hoverAnimationType_ = %{public}d", hoverAnimationType_);
     if (hoverAnimationType_ == HoverAnimationType::SCALE) {
         auto rsNode = GetRSNode();
         if (!rsNode) {
@@ -1704,6 +1706,8 @@ void RosenRenderBox::AnimateMouseHoverExit()
         if (!colorAnimationExit_) {
             colorAnimationExit_ = AceType::MakeRefPtr<KeyframeAnimation<Color>>();
         }
+        LOGD("AnimateMouseHoverExit hoverColor_.GetValue() = %{public}x, hoverColorBegin_.GetValue() = %{public}x",
+            hoverColor_.GetValue(), hoverColorBegin_.GetValue());
         CreateColorAnimation(colorAnimationExit_, hoverColor_, hoverColorBegin_);
         controllerExit_->ClearInterpolators();
         controllerExit_->AddInterpolator(colorAnimationExit_);

@@ -30,6 +30,7 @@ void ParallelRecognizer::OnAccepted(size_t touchId)
     }
     refereePointers_.erase(touchId);
 
+    LOGD("the parallel gesture recognizer has been accepted, touch id %{public}zu", touchId);
     for (auto& recognizer : recognizers_) {
         if (recognizer->GetDetectState() == DetectState::DETECTED) {
             recognizer->SetCoordinateOffset(coordinateOffset_);
@@ -46,6 +47,7 @@ void ParallelRecognizer::OnRejected(size_t touchId)
     }
     refereePointers_.erase(touchId);
 
+    LOGD("the parallel gesture recognizer has been rejected! the touch id is %{public}zu", touchId);
     for (auto& recognizer : recognizers_) {
         recognizer->OnRejected(touchId);
         if (recognizer->GetDetectState() == DetectState::READY) {
@@ -60,6 +62,7 @@ void ParallelRecognizer::OnPending(size_t touchId)
         return;
     }
 
+    LOGD("the parallel gesture recognizer is pending! the touch id is %{public}zu", touchId);
     for (auto& recognizer : recognizers_) {
         if (recognizer->GetRefereeState() == RefereeState::PENDING) {
             recognizer->OnPending(touchId);
@@ -84,6 +87,7 @@ bool ParallelRecognizer::HandleEvent(const TouchEvent& point)
         }
 
         if (allRecognizeEnd) {
+            LOGD("all sub gestures recognize finish, change the parallel state to be ready");
             Reset();
         }
     }
@@ -124,9 +128,12 @@ void ParallelRecognizer::BatchAdjudicate(
 {
     if (disposal == GestureDisposal::ACCEPT) {
         if (state_ == DetectState::DETECTING) {
+            LOGD("the sub gesture recognizer %{public}s ask for accept", AceType::TypeName(recognizer));
             state_ = DetectState::DETECTED;
             Adjudicate(AceType::Claim(this), GestureDisposal::ACCEPT);
         } else if (refereeState_ == RefereeState::SUCCEED) {
+            LOGD("the sub gesture recognizer %{public}s is accepted because referee succeed",
+                AceType::TypeName(recognizer));
             for (auto touchId : touchIds) {
                 recognizer->OnAccepted(touchId);
             }
@@ -138,6 +145,7 @@ void ParallelRecognizer::BatchAdjudicate(
         }
         recognizer->SetRefereeState(RefereeState::FAIL);
 
+        LOGD("the sub gesture recognizer %{public}s ask for reject", AceType::TypeName(recognizer));
         bool needReject = true;
         for (auto& tmpRecognizer : recognizers_) {
             if (tmpRecognizer->GetRefereeState() != RefereeState::FAIL) {
@@ -147,6 +155,7 @@ void ParallelRecognizer::BatchAdjudicate(
         }
 
         if (needReject) {
+            LOGD("all gesture recognizers are rejected, adjudicate reject");
             Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
         }
     } else {

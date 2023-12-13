@@ -21,6 +21,7 @@ namespace OHOS::Ace {
 
 void SceneViewerElement::PerformBuild()
 {
+    LOGD("ACE-3D SceneViewerElement::PerformBuild() RetakeId = %d", GetRetakeId());
     RefPtr<SceneViewerComponent> svComponent = AceType::DynamicCast<SceneViewerComponent>(component_);
     if (svComponent) {
         RenderElement::PerformBuild();
