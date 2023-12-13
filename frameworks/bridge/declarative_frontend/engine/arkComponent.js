@@ -13844,6 +13844,10 @@ class ArkProgressComponent extends ArkComponent {
   monopolizeEvents(monopolize) {
     throw new Error('Method not implemented.');
   }
+  backgroundColor(value) {
+    modifierWithKey(this._modifiersWithKeys, ProgressBackgroundColorModifier.identity, ProgressBackgroundColorModifier, value);
+    return this;
+  }
 }
 class ProgressValueModifier extends ModifierWithKey {
   applyPeer(node, reset) {
@@ -13911,6 +13915,25 @@ class ProgressStyleModifier extends ModifierWithKey {
   }
 }
 ProgressStyleModifier.identity = Symbol('style');
+class ProgressBackgroundColorModifier extends ModifierWithKey {
+  applyPeer(node, reset) {
+    if (reset) {
+      GetUINativeModule().progress.resetProgressBackgroundColor(node);
+    }
+    else {
+      GetUINativeModule().progress.setProgressBackgroundColor(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    if (isResource(this.stageValue) && isResource(this.value)) {
+      return !isResourceEqual(this.stageValue, this.value);
+    }
+    else {
+      return true;
+    }
+  }
+}
+ProgressBackgroundColorModifier.identity = Symbol('progressBackgroundColor');
 // @ts-ignore
 globalThis.Progress.attributeModifier = function (modifier) {
   const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();

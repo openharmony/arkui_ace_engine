@@ -515,4 +515,9 @@ void ProgressModelNG::ResetStrokeRadius(FrameNode* frameNode)
     ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(ProgressPaintProperty, StrokeRadius, PROPERTY_UPDATE_RENDER, frameNode);
 }
 
+void ProgressModelNG::SetBackgroundColor(FrameNode* frameNode, const Color& value)
+{
+    ACE_UPDATE_NODE_PAINT_PROPERTY(ProgressPaintProperty, BackgroundColor, value, frameNode);
+}
+
 } // namespace OHOS::Ace::NG

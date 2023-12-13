@@ -1353,6 +1353,8 @@ struct ArkUIProgressModifierAPI {
     void (*ResetProgressColor)(NodeHandle node);
     void (*SetProgressStyle)(NodeHandle node, ArkUIProgressStyle *value);
     void (*ResetProgressStyle)(NodeHandle node);
+    void (*SetProgressBackgroundColor)(NodeHandle node, uint32_t color);
+    void (*ResetProgressBackgroundColor)(NodeHandle node);
 };
 
 struct ArkUIListModifierAPI {

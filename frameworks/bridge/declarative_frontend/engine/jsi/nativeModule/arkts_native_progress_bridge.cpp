@@ -538,4 +538,31 @@ ArkUINativeModuleValue ProgressBridge::SetProgressStyle(ArkUIRuntimeCallInfo* ru
     GetArkUIInternalNodeAPI()->GetProgressModifier().SetProgressStyle(nativeNode, &progressStyle);
     return panda::JSValueRef::Undefined(vm);
 }
+
+ArkUINativeModuleValue ProgressBridge::SetProgressBackgroundColor(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM *vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> nativeNodeArg = runtimeCallInfo->GetCallArgRef(0);
+    Local<JSValueRef> colorArg = runtimeCallInfo->GetCallArgRef(1);
+    void* nativeNode = nativeNodeArg->ToNativePointer(vm)->Value();
+    Color color;
+    if (!ArkTSUtils::ParseJsColorAlpha(vm, colorArg, color)) {
+        GetArkUIInternalNodeAPI()->GetProgressModifier().ResetProgressBackgroundColor(nativeNode);
+    } else {
+        GetArkUIInternalNodeAPI()->GetProgressModifier().SetProgressBackgroundColor(nativeNode, color.GetValue());
+    }
+
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue ProgressBridge::ResetProgressBackgroundColor(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> nativeNodeArg = runtimeCallInfo->GetCallArgRef(0);
+    void* nativeNode = nativeNodeArg->ToNativePointer(vm)->Value();
+    GetArkUIInternalNodeAPI()->GetProgressModifier().ResetProgressBackgroundColor(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
 } // namespace OHOS::Ace::NG
