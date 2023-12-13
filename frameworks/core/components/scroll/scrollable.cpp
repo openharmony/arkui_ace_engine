@@ -711,6 +711,9 @@ void Scrollable::StartScrollAnimation(float mainPosition, float correctVelocity)
             }
         }
     });
+    if (scrollMotionFRCSceneCallback_) {
+        scrollMotionFRCSceneCallback_(motion_->GetCurrentVelocity(), NG::SceneStatus::START);
+    }
     controller_->PlayMotion(motion_);
 }
 
@@ -837,6 +840,9 @@ void Scrollable::StartScrollSnapMotion(float predictSnapOffset, float scrollSnap
         CHECK_NULL_VOID(scroll);
         scroll->ProcessScrollSnapStop();
     });
+    if (scrollMotionFRCSceneCallback_) {
+        scrollMotionFRCSceneCallback_(scrollSnapMotion_->GetCurrentVelocity(), NG::SceneStatus::START);
+    }
     scrollSnapController_->PlayMotion(scrollSnapMotion_);
 }
 
@@ -869,6 +875,9 @@ void Scrollable::ProcessScrollSnapSpringMotion(float scrollSnapDelta, float scro
     } else {
         snapMotion_->Reset(currentPos_, scrollSnapDelta + currentPos_, scrollSnapVelocity, DEFAULT_OVER_SPRING_PROPERTY);
     }
+    if (scrollMotionFRCSceneCallback_) {
+        scrollMotionFRCSceneCallback_(snapMotion_->GetCurrentVelocity(), NG::SceneStatus::START);
+    }
     snapController_->PlayMotion(snapMotion_);
 }
 
@@ -893,6 +902,9 @@ void Scrollable::UpdateScrollSnapStartOffset(double offset)
 void Scrollable::ProcessScrollSnapMotion(double position)
 {
     currentVelocity_ = scrollSnapMotion_->GetCurrentVelocity();
+    if (scrollMotionFRCSceneCallback_) {
+        scrollMotionFRCSceneCallback_(currentVelocity_, NG::SceneStatus::RUNNING);
+    }
     if (NearEqual(currentPos_, position)) {
         UpdateScrollPosition(0.0, SCROLL_FROM_ANIMATION_SPRING);
     } else {
@@ -916,6 +928,9 @@ void Scrollable::ProcessScrollSnapMotion(double position)
 
 void Scrollable::ProcessScrollSnapStop()
 {
+    if (scrollSnapMotion_ && scrollMotionFRCSceneCallback_) {
+        scrollMotionFRCSceneCallback_(scrollSnapMotion_->GetCurrentVelocity(), NG::SceneStatus::END);
+    }
     if (scrollPause_) {
         scrollPause_ = false;
         HandleOverScroll(currentVelocity_);
@@ -926,6 +941,9 @@ void Scrollable::ProcessScrollSnapStop()
 
 void Scrollable::OnAnimateStop()
 {
+    if (scrollMotionFRCSceneCallback_) {
+        scrollMotionFRCSceneCallback_(scrollMotion_->GetCurrentVelocity(), NG::SceneStatus::END);
+    }
     if (moved_) {
         HandleScrollEnd();
     }
@@ -971,6 +989,9 @@ void Scrollable::StartSpringMotion(
     });
     currentPos_ = mainPosition;
     springController_->ClearStopListeners();
+    if (scrollMotionFRCSceneCallback_) {
+        scrollMotionFRCSceneCallback_(scrollMotion_->GetCurrentVelocity(), NG::SceneStatus::START);
+    }
     springController_->PlayMotion(scrollMotion_);
     springController_->AddStopListener([weak = AceType::WeakClaim(this)]() {
         auto scroll = weak.Upgrade();
@@ -981,6 +1002,12 @@ void Scrollable::StartSpringMotion(
 
 void Scrollable::ProcessScrollMotionStop()
 {
+    if (motion_ && scrollMotionFRCSceneCallback_) {
+        scrollMotionFRCSceneCallback_(motion_->GetCurrentVelocity(), NG::SceneStatus::END);
+    }
+    if (snapMotion_ && scrollMotionFRCSceneCallback_) {
+        scrollMotionFRCSceneCallback_(snapMotion_->GetCurrentVelocity(), NG::SceneStatus::END);
+    }
     if (needScrollSnapChange_ && calePredictSnapOffsetCallback_ && motion_) {
         needScrollSnapChange_ = false;
         auto predictSnapOffset = calePredictSnapOffsetCallback_(motion_->GetFinalPosition() - currentPos_);
@@ -1018,6 +1045,9 @@ void Scrollable::ProcessScrollMotionStop()
 void Scrollable::ProcessSpringMotion(double position)
 {
     currentVelocity_ = scrollMotion_->GetCurrentVelocity();
+    if (scrollMotionFRCSceneCallback_) {
+        scrollMotionFRCSceneCallback_(currentVelocity_, NG::SceneStatus::RUNNING);
+    }
     if (NearEqual(currentPos_, position)) {
         UpdateScrollPosition(0.0, SCROLL_FROM_ANIMATION_SPRING);
     } else {
@@ -1038,6 +1068,12 @@ void Scrollable::ProcessScrollMotion(double position)
 {
     if (motion_) {
         currentVelocity_ = motion_->GetCurrentVelocity();
+    }
+    if (scrollMotionFRCSceneCallback_) {
+        scrollMotionFRCSceneCallback_(currentVelocity_, NG::SceneStatus::RUNNING);
+    }
+    if (snapMotion_ && scrollMotionFRCSceneCallback_) {
+        scrollMotionFRCSceneCallback_(snapMotion_->GetCurrentVelocity(), NG::SceneStatus::RUNNING);
     }
     if (needScrollSnapToSideCallback_) {
         needScrollSnapChange_ = needScrollSnapToSideCallback_(position - currentPos_);

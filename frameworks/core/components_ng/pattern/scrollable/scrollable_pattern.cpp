@@ -35,6 +35,8 @@ constexpr Color SELECT_FILL_COLOR = Color(0x1A000000);
 constexpr Color SELECT_STROKE_COLOR = Color(0x33FFFFFF);
 const std::string SCROLLABLE_DRAG_SCENE = "scrollable_drag_scene";
 const std::string SCROLL_BAR_DRAG_SCENE = "scrollBar_drag_scene";
+const std::string SCROLLABLE_MOTION_SCENE = "scrollable_motion_scene";
+const std::string SCROLLABLE_MULTI_TASK_SCENE = "scrollable_multi_task_scene";
 } // namespace
 
 RefPtr<PaintProperty> ScrollablePattern::CreatePaintProperty()
@@ -409,6 +411,13 @@ void ScrollablePattern::AddScrollEvent()
         return pattern->NotifyFRCSceneInfo(SCROLLABLE_DRAG_SCENE, velocity, sceneStatus);
     };
     scrollable->SetDragFRCSceneCallback(std::move(dragFRCSceneCallback));
+
+    auto scrollMotionFRCSceneCallback = [weak = WeakClaim(this)](double velocity, SceneStatus sceneStatus) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        return pattern->NotifyFRCSceneInfo(SCROLLABLE_MOTION_SCENE, velocity, sceneStatus);
+    };
+    scrollable->SetScrollMotionFRCSceneCallback(std::move(scrollMotionFRCSceneCallback));
 
     scrollableEvent_ = MakeRefPtr<ScrollableEvent>(GetAxis());
     scrollableEvent_->SetScrollable(scrollable);
@@ -840,6 +849,10 @@ void ScrollablePattern::AnimateTo(float position, float duration, const RefPtr<C
         animator_->AddStopListener([weak = AceType::WeakClaim(this)]() {
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
+            if (pattern->springMotion_) {
+                pattern->NotifyFRCSceneInfo(SCROLLABLE_MULTI_TASK_SCENE, pattern->springMotion_->GetCurrentVelocity(),
+                    SceneStatus::END);
+            }
             pattern->OnAnimateStop();
         });
     } else if (!animator_->IsStopped()) {
@@ -912,10 +925,13 @@ void ScrollablePattern::PlaySpringAnimation(float position, float velocity, floa
     springMotion_->AddListener([weakScroll = AceType::WeakClaim(this)](double position) {
         auto pattern = weakScroll.Upgrade();
         CHECK_NULL_VOID(pattern);
+        pattern->NotifyFRCSceneInfo(SCROLLABLE_MULTI_TASK_SCENE, pattern->springMotion_->GetCurrentVelocity(),
+            SceneStatus::RUNNING);
         if (!pattern->UpdateCurrentOffset(pattern->GetTotalOffset() - position, SCROLL_FROM_ANIMATION_CONTROLLER)) {
             pattern->animator_->Stop();
         }
     });
+    NotifyFRCSceneInfo(SCROLLABLE_MULTI_TASK_SCENE, springMotion_->GetCurrentVelocity(), SceneStatus::START);
     animator_->PlayMotion(springMotion_);
 }
 
