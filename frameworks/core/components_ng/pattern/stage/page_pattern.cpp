@@ -173,7 +173,7 @@ void PagePattern::OnShow()
     CHECK_NULL_VOID(host);
     host->SetJSViewActive(true);
     isOnShow_ = true;
-    JankFrameReport::StartRecord(pageInfo_->GetPageUrl());
+    JankFrameReport::GetInstance().StartRecord(pageInfo_->GetPageUrl());
     PerfMonitor::GetPerfMonitor()->SetPageUrl(pageInfo_->GetPageUrl());
     auto pageUrlChecker = container->GetPageUrlChecker();
     if (pageUrlChecker != nullptr) {
@@ -196,7 +196,7 @@ void PagePattern::OnShow()
 void PagePattern::OnHide()
 {
     CHECK_NULL_VOID(isOnShow_);
-    JankFrameReport::FlushRecord();
+    JankFrameReport::GetInstance().FlushRecord();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->SetJSViewActive(false);

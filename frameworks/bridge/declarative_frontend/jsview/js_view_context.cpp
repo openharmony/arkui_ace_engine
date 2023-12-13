@@ -310,7 +310,7 @@ void JSViewContext::JSAnimation(const JSCallbackInfo& info)
         option.SetAllowRunningAsynchronously(true);
     }
     ViewContextModel::GetInstance()->openAnimation(option);
-    JankFrameReport::ReportJSAnimation();
+    JankFrameReport::GetInstance().ReportJSAnimation();
 }
 
 void JSViewContext::JSAnimateTo(const JSCallbackInfo& info)

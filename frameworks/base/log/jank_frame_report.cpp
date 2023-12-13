@@ -95,19 +95,27 @@ public:
 steady_clock::time_point SteadyTimeRecorder::begin {};
 } // namespace
 
-std::vector<uint16_t> JankFrameReport::frameJankRecord_(JANK_SIZE, 0);
-int32_t JankFrameReport::jankFrameCount_ = 0;
-int32_t JankFrameReport::prevFrameUpdateCount_ = 0;
-int32_t JankFrameReport::currentFrameUpdateCount_ = 0;
-JankFrameFlag JankFrameReport::recordStatus_ = JANK_IDLE;
-int64_t JankFrameReport::startTime_ = 0;
-int64_t JankFrameReport::prevEndTimeStamp_ = 0;
-int64_t JankFrameReport::refreshPeriod_ = 16666666;
-std::string JankFrameReport::pageUrl_;
-bool JankFrameReport::needReport_ = false;
-bool JankFrameReport::hasJsAnimation_ = false;
-int64_t JankFrameReport::animatorEndTime_ = 0;
-double JankFrameReport::jsAnimationDelayJank_ = 0;
+JankFrameReport& JankFrameReport::GetInstance()
+{
+    static thread_local JankFrameReport instance;
+    return instance;
+}
+
+JankFrameReport::JankFrameReport()
+{
+    frameJankRecord_ = std::vector<uint16_t>(JANK_SIZE, 0);
+    jankFrameCount_ = 0;
+    prevFrameUpdateCount_ = 0;
+    currentFrameUpdateCount_ = 0;
+    recordStatus_ = JANK_IDLE;
+    startTime_ = 0;
+    prevEndTimeStamp_ = 0;
+    refreshPeriod_ = 16666666;
+    needReport_ = false;
+    hasJsAnimation_ = false;
+    animatorEndTime_ = 0;
+    jsAnimationDelayJank_ = 0;
+}
 
 void JankFrameReport::JankFrameRecord(int64_t timeStampNanos)
 {

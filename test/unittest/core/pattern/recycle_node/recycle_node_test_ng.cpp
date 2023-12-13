@@ -19,6 +19,7 @@
 #include "base/memory/ace_type.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/pattern/custom/custom_node.h"
 #include "core/components_ng/pattern/recycle_view/recycle_dummy_node.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 

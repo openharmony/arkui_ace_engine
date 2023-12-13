@@ -31,34 +31,37 @@ inline constexpr JankFrameFlag JANK_RUNNING_SWIPER = 1 << 2;
 
 class ACE_FORCE_EXPORT JankFrameReport {
 public:
-    static void JankFrameRecord(int64_t timeStampNanos);
-    static void SetFrameJankFlag(JankFrameFlag flag);
-    static void ClearFrameJankFlag(JankFrameFlag flag);
-    static void StartRecord(const std::string& pageUrl);
-    static void FlushRecord();
-    static void RecordFrameUpdate();
-    static void ReportJSAnimation();
-    static void JsAnimationToRsRecord();
+    static JankFrameReport& GetInstance();
+    JankFrameReport();
+    ~JankFrameReport() = default;
+    void JankFrameRecord(int64_t timeStampNanos);
+    void SetFrameJankFlag(JankFrameFlag flag);
+    void ClearFrameJankFlag(JankFrameFlag flag);
+    void StartRecord(const std::string& pageUrl);
+    void FlushRecord();
+    void RecordFrameUpdate();
+    void ReportJSAnimation();
+    void JsAnimationToRsRecord();
 
 private:
-    static void ClearFrameJankRecord();
-    static void ResetFrameJankClock();
-    static void RecordPreviousEnd();
-    static void RecordJankStatus(double jank);
+    void ClearFrameJankRecord();
+    void ResetFrameJankClock();
+    void RecordPreviousEnd();
+    void RecordJankStatus(double jank);
 
-    static std::vector<uint16_t> frameJankRecord_;
-    static int32_t jankFrameCount_;
-    static int32_t prevFrameUpdateCount_;
-    static int32_t currentFrameUpdateCount_;
-    static JankFrameFlag recordStatus_;
-    static int64_t startTime_;
-    static int64_t prevEndTimeStamp_;
-    static int64_t refreshPeriod_;
-    static std::string pageUrl_;
-    static bool needReport_;
-    static bool hasJsAnimation_;
-    static int64_t animatorEndTime_;
-    static double jsAnimationDelayJank_;
+    std::vector<uint16_t> frameJankRecord_;
+    int32_t jankFrameCount_;
+    int32_t prevFrameUpdateCount_;
+    int32_t currentFrameUpdateCount_;
+    JankFrameFlag recordStatus_;
+    int64_t startTime_;
+    int64_t prevEndTimeStamp_;
+    int64_t refreshPeriod_;
+    std::string pageUrl_;
+    bool needReport_;
+    bool hasJsAnimation_;
+    int64_t animatorEndTime_;
+    double jsAnimationDelayJank_;
 };
 } // namespace OHOS::Ace
 
