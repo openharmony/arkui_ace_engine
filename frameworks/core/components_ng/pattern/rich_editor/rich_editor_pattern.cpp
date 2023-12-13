@@ -731,6 +731,11 @@ void RichEditorPattern::CopyTextSpanStyle(RefPtr<SpanNode>& source, RefPtr<SpanN
         target->UpdateLineHeight(source->GetLineHeightValue(Dimension()));
         target->AddPropertyInfo(PropertyInfo::LINEHEIGHT);
     }
+
+    if (source->HasTextShadow()) {
+        target->UpdateTextShadow(source->GetTextShadowValue({Shadow()}));
+        target->AddPropertyInfo(PropertyInfo::TEXTSHADOW);
+    }
 }
 
 int32_t RichEditorPattern::TextSpanSplit(int32_t position)
