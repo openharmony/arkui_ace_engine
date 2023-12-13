@@ -16,9 +16,10 @@
 #include "core/components_ng/manager/display_sync/ui_display_sync.h"
 
 namespace OHOS::Ace {
-void UIDisplaySync::CheckRate(int32_t vsyncRate)
+void UIDisplaySync::CheckRate(int32_t vsyncRate, int32_t refreshRateMode)
 {
     SetVsyncRate(vsyncRate);
+    SetRefreshRateMode(refreshRateMode);
 
     if (IsCommonDivisor(data_->rateRange_->preferred_, vsyncRate)) {
         int32_t curRate = vsyncRate / data_->rateRange_->preferred_;
@@ -60,11 +61,11 @@ void UIDisplaySync::OnFrame()
                      "Preferred[%d] VSyncRate[%d] Rate[%d] noSkip[%d]",
                      GetId(), data_->timestamp_, data_->targetTimestamp_,
                      data_->rateRange_->preferred_, sourceVsyncRate_, data_->rate_, data_->noSkip_);
-    if (data_->noSkip_ && data_->onFrame_) {
+    if (IsEnabled() && data_->noSkip_ && data_->onFrame_) {
         data_->onFrame_();
     }
 
-    if (data_->noSkip_ && data_->onFrameWithData_) {
+    if (IsEnabled() && data_->noSkip_ && data_->onFrameWithData_) {
         data_->onFrameWithData_(data_);
     }
 
@@ -189,6 +190,26 @@ void UIDisplaySync::SetTargetTimestampData(uint64_t targetTimestamp)
 uint64_t UIDisplaySync::GetTargetTimestampData() const
 {
     return data_->GetTargetTimestamp();
+}
+
+void UIDisplaySync::SetRefreshRateMode(int32_t refreshRateMode)
+{
+    refreshRateMode_ = refreshRateMode;
+}
+
+int32_t UIDisplaySync::GetRefreshRateMode() const
+{
+    return refreshRateMode_;
+}
+
+bool UIDisplaySync::IsEnabled() const
+{
+    return refreshRateMode_ == static_cast<int32_t>(RefreshRateMode::REFRESHRATE_MODE_AUTO);
+}
+
+bool UIDisplaySync::IsDisabled() const
+{
+    return refreshRateMode_ != static_cast<int32_t>(RefreshRateMode::REFRESHRATE_MODE_AUTO);
 }
 
 UIDisplaySync::UIDisplaySync() {}
