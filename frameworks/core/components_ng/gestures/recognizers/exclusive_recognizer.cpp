@@ -139,7 +139,8 @@ bool ExclusiveRecognizer::HandleEvent(const TouchEvent& point)
                 blockRecognizer->HandleEvent(point);
                 AddGestureProcedure(point, blockRecognizer);
             } else {
-                for (const auto& recognizer : recognizers_) {
+                auto copyRecognizers = recognizers_;
+                for (const auto& recognizer : copyRecognizers) {
                     if (recognizer && recognizer->CheckTouchId(point.id)) {
                         auto saveRecognizer = recognizer;
                         recognizer->HandleEvent(point);
@@ -166,7 +167,8 @@ bool ExclusiveRecognizer::HandleEvent(const AxisEvent& event)
             if (activeRecognizer_) {
                 activeRecognizer_->HandleEvent(event);
             } else {
-                for (const auto& recognizer : recognizers_) {
+                auto copyRecognizers = recognizers_;
+                for (const auto& recognizer : copyRecognizers) {
                     if (recognizer) {
                         recognizer->HandleEvent(event);
                     }
