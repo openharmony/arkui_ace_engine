@@ -1336,6 +1336,10 @@ class SubTabBarStyle {
     this.padding = arg;
     return this;
   }
+  id(arg) {
+    this.id = arg;
+    return this;
+  }
 }
 
 
@@ -1385,6 +1389,10 @@ class BottomTabBarStyle {
   }
   labelStyle(arg) {
     this.labelStyle = arg;
+    return this;
+  }
+  id(arg) {
+    this.id = arg;
     return this;
   }
 }

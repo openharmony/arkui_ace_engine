@@ -126,6 +126,7 @@ public:
     virtual void SetLayoutMode(LayoutMode layoutMode) = 0;
     virtual void SetVerticalAlign(FlexAlign verticalAlign) = 0;
     virtual void SetSymmetricExtensible(bool isExtensible) = 0;
+    virtual void SetId(const std::string& id) = 0;
 
 private:
     static std::unique_ptr<TabContentModel> instance_;

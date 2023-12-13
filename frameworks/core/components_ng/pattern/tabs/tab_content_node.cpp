@@ -107,7 +107,6 @@ void TabContentNode::ToJsonValue(std::unique_ptr<JsonValue>& json) const
 {
     FrameNode::ToJsonValue(json);
     auto tabBar = JsonUtil::Create(true);
-
     auto tabContentPattern = GetPattern<TabContentPattern>();
     CHECK_NULL_VOID(tabContentPattern);
 
@@ -161,6 +160,7 @@ void TabContentNode::ToJsonValue(std::unique_ptr<JsonValue>& json) const
     tabBar->Put("layoutMode", ConvertLayoutModeToString(tabContentPattern->GetBottomTabBarStyle().layoutMode).c_str());
     tabBar->Put(
         "symmetricExtensible", tabContentPattern->GetBottomTabBarStyle().symmetricExtensible ? "true" : "false");
+    tabBar->Put("id", tabContentPattern->GetId().c_str());
 
     json->Put("tabBar", tabBar);
 }
