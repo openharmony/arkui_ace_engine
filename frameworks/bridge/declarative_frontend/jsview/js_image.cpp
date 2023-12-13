@@ -483,14 +483,14 @@ void JSImage::JSBind(BindingTarget globalObj)
     JSClass<JSImage>::StaticMethod("draggable", &JSImage::JsSetDraggable);
     JSClass<JSImage>::StaticMethod("onDragStart", &JSImage::JsOnDragStart);
     JSClass<JSImage>::StaticMethod("copyOption", &JSImage::SetCopyOption);
+    JSClass<JSImage>::StaticMethod("enableAnalyzer", &JSImage::EnableAnalyzer);
+    JSClass<JSImage>::StaticMethod("analyzerConfig", &JSImage::AnalyzerConfig);
+
     // override method
     JSClass<JSImage>::StaticMethod("opacity", &JSImage::JsOpacity);
     JSClass<JSImage>::StaticMethod("blur", &JSImage::JsBlur);
     JSClass<JSImage>::StaticMethod("transition", &JSImage::JsTransition);
     JSClass<JSImage>::InheritAndBind<JSViewAbstract>(globalObj);
-
-    JSClass<JSImage>::StaticMethod("enableAnalyzer", &JSImage::EnableAnalyzer);
-    JSClass<JSImage>::StaticMethod("analyzerConfig", &JSImage::AnalyzerConfig);
 
     JSClass<JSColorFilter>::Declare("ColorFilter");
     JSClass<JSColorFilter>::Bind(globalObj, JSColorFilter::ConstructorCallback, JSColorFilter::DestructorCallback);
