@@ -2118,21 +2118,23 @@ OffsetF FrameNode::GetParentGlobalOffsetDuringLayout() const
     return offset;
 }
 
-OffsetF FrameNode::GetPaintRectGlobalOffsetWithTranslate(bool excludeSelf) const
+std::pair<OffsetF, bool> FrameNode::GetPaintRectGlobalOffsetWithTranslate(bool excludeSelf) const
 {
+    bool error = false;
     auto context = GetRenderContext();
-    CHECK_NULL_RETURN(context, OffsetF());
-    OffsetF offset = excludeSelf ? OffsetF() : context->GetPaintRectWithTranslate().GetOffset();
+    CHECK_NULL_RETURN(context, std::make_pair(OffsetF(), error));
+    OffsetF offset = excludeSelf ? OffsetF() : context->GetPaintRectWithTranslate().first.GetOffset();
     auto parent = GetAncestorNodeOfFrame();
     while (parent) {
         auto renderContext = parent->GetRenderContext();
-        CHECK_NULL_RETURN(renderContext, OffsetF());
-        auto rect = renderContext->GetPaintRectWithTranslate();
-        CHECK_NULL_RETURN(rect.IsValid(), offset + parent->GetPaintRectOffset());
+        CHECK_NULL_RETURN(renderContext, std::make_pair(OffsetF(), error));
+        auto [rect, err] = renderContext->GetPaintRectWithTranslate();
+        error = error || err;
+        CHECK_NULL_RETURN(rect.IsValid(), std::make_pair(offset + parent->GetPaintRectOffset(), error));
         offset += rect.GetOffset();
         parent = parent->GetAncestorNodeOfFrame();
     }
-    return offset;
+    return std::make_pair(offset, error);
 }
 
 OffsetF FrameNode::GetPaintRectOffsetToPage() const

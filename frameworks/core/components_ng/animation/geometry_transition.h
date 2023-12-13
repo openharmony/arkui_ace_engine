@@ -69,17 +69,21 @@ private:
     void RecordAnimationOption(const WeakPtr<FrameNode>& trigger, const AnimationOption& option);
     RectF GetNodeAbsFrameRect(const RefPtr<FrameNode>& node, std::optional<OffsetF> parentPos = std::nullopt) const;
 
+    static constexpr int32_t RESYNC_DURATION = 1;
     std::string id_;
     WeakPtr<FrameNode> inNode_;
     WeakPtr<FrameNode> outNode_;
     State state_ = State::IDLE;
     bool hasInAnim_ = false;
     bool hasOutAnim_ = false;
+    bool isSynced_ = false;
     SizeF inNodeActiveFrameSize_;
+    std::optional<RectF> inNodeAbsRect_;
     std::optional<RectF> outNodeTargetAbsRect_;
     OffsetF outNodePos_;
     SizeF outNodeSize_;
     OffsetF outNodeParentPos_;
+    bool outNodeParentHasScales_ = false;
     RefPtr<FrameNode> holder_;
     bool followWithoutTransition_ = false;
     // static node means the node on the tree without transition

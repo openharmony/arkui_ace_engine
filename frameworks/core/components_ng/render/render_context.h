@@ -253,7 +253,7 @@ public:
         return {};
     }
 
-    virtual RectF GetPaintRectWithTranslate()
+    virtual std::pair<RectF, bool> GetPaintRectWithTranslate()
     {
         return {};
     }
