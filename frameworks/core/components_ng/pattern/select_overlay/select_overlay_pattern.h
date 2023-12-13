@@ -158,8 +158,6 @@ public:
         return info_ && info_->menuInfo.menuBuilder != nullptr;
     }
 
-    void BeforeCreateLayoutWrapper() override;
-
     void StartHiddenHandleTask(bool isDelay = true);
 
 private:

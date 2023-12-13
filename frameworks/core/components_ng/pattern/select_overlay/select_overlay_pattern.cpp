@@ -105,40 +105,6 @@ void SelectOverlayPattern::OnDetachFromFrameNode(FrameNode* /*frameNode*/)
     }
 }
 
-void SelectOverlayPattern::BeforeCreateLayoutWrapper()
-{
-    if (!IsCustomMenu()) {
-        return;
-    }
-    auto menu = DynamicCast<FrameNode>(GetHost()->GetFirstChild());
-    CHECK_NULL_VOID(menu);
-    auto layoutProperty = menu->GetLayoutProperty<MenuLayoutProperty>();
-    CHECK_NULL_VOID(layoutProperty);
-
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto theme = pipeline->GetTheme<TextOverlayTheme>();
-    CHECK_NULL_VOID(theme);
-
-    if (info_->menuInfo.menuOffset.has_value()) {
-        layoutProperty->UpdateMenuOffset(info_->menuInfo.menuOffset.value());
-        return;
-    }
-
-    // Calculate the spacing with text and handle, menu is fixed up the handle and text.
-    double menuSpacing = theme->GetMenuSpacingWithText().ConvertToPx() + theme->GetHandleDiameter().ConvertToPx();
-    // Get bound rect of handles
-    RectF handleBound = info_->firstHandle.paintRect.CombineRectT(info_->secondHandle.paintRect);
-    // Bound rect plus top and bottom padding
-    RectF safeArea(handleBound.GetX(), handleBound.GetY() - menuSpacing, handleBound.Width(),
-        handleBound.Height() + menuSpacing * 2);
-
-    layoutProperty->UpdateTargetSize(safeArea.GetSize());
-    OffsetF offset(safeArea.GetX(), safeArea.Bottom());
-    layoutProperty->UpdateMenuOffset(offset);
-    layoutProperty->UpdateAlignType(MenuAlignType::CENTER);
-}
-
 void SelectOverlayPattern::AddMenuResponseRegion(std::vector<DimensionRect>& responseRegion)
 {
     auto layoutProps = GetLayoutProperty<LayoutProperty>();

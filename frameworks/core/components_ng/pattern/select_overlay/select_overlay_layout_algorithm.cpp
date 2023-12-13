@@ -16,7 +16,6 @@
 #include "core/components_ng/pattern/select_overlay/select_overlay_layout_algorithm.h"
 
 #include <cmath>
-
 #include <optional>
 
 #include "base/geometry/ng/offset_t.h"
@@ -31,17 +30,77 @@ namespace OHOS::Ace::NG {
 namespace {
 constexpr Dimension MORE_MENU_INTERVAL = 8.0_vp;
 }
+
+void SelectOverlayLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
+{
+    auto layoutProperty = layoutWrapper->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    auto layoutConstraint = layoutProperty->CreateChildConstraint();
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto safeAreaManager = pipeline->GetSafeAreaManager();
+    CHECK_NULL_VOID(safeAreaManager);
+    auto keyboardTop = safeAreaManager->GetKeyboardInset().start;
+    auto maxSize =
+        SizeF(layoutConstraint.maxSize.Width(), layoutConstraint.maxSize.Height() - keyboardTop -
+                                                    (info_->isUsingMouse ? info_->rightClickOffset.GetY() : 0.0f));
+    layoutConstraint.maxSize = maxSize;
+    bool isMouseCustomMenu = false;
+    if (info_->menuInfo.menuBuilder) {
+        auto customMenuLayoutWrapper = layoutWrapper->GetChildByIndex(0);
+        CHECK_NULL_VOID(customMenuLayoutWrapper);
+        auto customMenuLayoutConstraint = layoutConstraint;
+        customMenuLayoutConstraint.selfIdealSize = OptionalSizeF(std::nullopt, maxSize.Height());
+        customMenuLayoutWrapper->Measure(customMenuLayoutConstraint);
+        isMouseCustomMenu = true;
+    }
+    auto childIndex = -1;
+    for (auto&& child : layoutWrapper->GetAllChildrenWithBuild()) {
+        childIndex++;
+        if (childIndex == 0 && isMouseCustomMenu) {
+            continue;
+        }
+        child->Measure(layoutConstraint);
+    }
+    PerformMeasureSelf(layoutWrapper);
+}
+
+OffsetF SelectOverlayLayoutAlgorithm::CalculateCustomMenuByMouseOffset(LayoutWrapper* layoutWrapper)
+{
+    auto menuOffset = info_->rightClickOffset;
+    auto layoutProperty = layoutWrapper->GetLayoutProperty();
+    CHECK_NULL_RETURN(layoutProperty, menuOffset);
+    auto layoutConstraint = layoutProperty->GetLayoutConstraint();
+    CHECK_NULL_RETURN(layoutConstraint, menuOffset);
+    auto menu = layoutWrapper->GetOrCreateChildByIndex(0);
+    CHECK_NULL_RETURN(menu, menuOffset);
+    auto maxWidth = layoutConstraint->selfIdealSize.Width().value_or(0.0f);
+    auto menuSize = menu->GetGeometryNode()->GetFrameSize();
+    if (menuOffset.GetX() + menuSize.Width() > maxWidth && menuOffset.GetX() >= menuSize.Width()) {
+        menuOffset.SetX(menuOffset.GetX() - menuSize.Width());
+    }
+    return menuOffset;
+}
+
 void SelectOverlayLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 {
     auto menu = layoutWrapper->GetOrCreateChildByIndex(0);
     CHECK_NULL_VOID(menu);
-    if (!CheckInShowArea(*info_) ||
-        (!info_->firstHandle.isShow && !info_->secondHandle.isShow && !info_->isSelectRegionVisible)) {
+    if ((!CheckInShowArea(*info_) ||
+            (!info_->firstHandle.isShow && !info_->secondHandle.isShow && !info_->isSelectRegionVisible)) &&
+        !info_->isUsingMouse) {
         menu->SetActive(false);
         return;
     } else {
         menu->SetActive(true);
     }
+    OffsetF menuOffset;
+    if (info_->isUsingMouse) {
+        menuOffset = CalculateCustomMenuByMouseOffset(layoutWrapper);
+    } else {
+        menuOffset = ComputeSelectMenuPosition(layoutWrapper);
+    }
+    menu->GetGeometryNode()->SetMarginFrameOffset(menuOffset);
 
     // custom menu need to layout all menu and submenu
     if (info_->menuInfo.menuBuilder) {
@@ -50,9 +109,6 @@ void SelectOverlayLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         }
         return;
     }
-
-    auto menuOffset = ComputeSelectMenuPosition(layoutWrapper);
-    menu->GetGeometryNode()->SetMarginFrameOffset(menuOffset);
     menu->Layout();
     auto button = layoutWrapper->GetOrCreateChildByIndex(1);
     CHECK_NULL_VOID(button);
@@ -277,9 +333,10 @@ OffsetF SelectOverlayLayoutAlgorithm::AdjustSelectMenuOffset(
             GreatNotEqual(keyboardInsert.Length(), 0.0f) && GreatNotEqual(menuRect.Bottom(), keyboardInsert.start);
         auto rootRect = layoutWrapper->GetGeometryNode()->GetFrameRect();
         auto shouldAvoidBottom = GreatNotEqual(menuRect.Bottom(), rootRect.Height());
-        if (shouldAvoidKeyboard || shouldAvoidBottom) {
-            auto menuSpace = NearEqual(upPaint.Top(), downPaint.Top()) ? spaceBetweenHandle : spaceBetweenText;
-            menuOffset.SetY(downPaint.GetY() - menuSpace - menuRect.Height());
+        auto menuSpace = NearEqual(upPaint.Top(), downPaint.Top()) ? spaceBetweenHandle : spaceBetweenText;
+        auto offsetY = downPaint.GetY() - menuSpace - menuRect.Height();
+        if ((shouldAvoidKeyboard || shouldAvoidBottom) && offsetY > 0) {
+            menuOffset.SetY(offsetY);
         }
     }
     return menuOffset;
