@@ -598,7 +598,7 @@ void PipelineContext::FlushFocus()
         auto focusScopeHub = focusScope->GetFocusHub();
         if (focusScopeHub && !focusScopeHub->RequestFocusImmediately()) {
             TAG_LOGI(AceLogTag::ACE_FOCUS, "Request focus on scope: %{public}s/%{public}d return false",
-                focusNode->GetTag().c_str(), focusNode->GetId());
+                focusScope->GetTag().c_str(), focusScope->GetId());
         }
         dirtyFocusNode_.Reset();
         dirtyFocusScope_.Reset();
