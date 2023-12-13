@@ -334,7 +334,7 @@ struct OH_NativeXComponent {
     int32_t SetExpectedFrameRateRange(OH_NativeXComponent_ExpectedRateRange* range);
     int32_t RegisterOnFrameCallback(
         void (*callback)(OH_NativeXComponent* component, uint64_t timestamp, uint64_t targetTimestamp));
-    int32_t UnRegisterOnFrameCallback();
+    int32_t UnregisterOnFrameCallback();
 
 private:
     OHOS::Ace::NativeXComponentImpl* xcomponentImpl_ = nullptr;
