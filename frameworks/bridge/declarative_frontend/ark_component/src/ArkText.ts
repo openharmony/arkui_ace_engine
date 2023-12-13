@@ -3,7 +3,7 @@ class FontColorModifier extends ModifierWithKey<ResourceColor> {
   constructor(value: ResourceColor) {
     super(value);
   }
-  static identity: Symbol = Symbol('fontColor');
+  static identity: Symbol = Symbol('textFontColor');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
       GetUINativeModule().text.resetFontColor(node);
@@ -25,7 +25,7 @@ class FontSizeModifier extends ModifierWithKey<number | string | Resource> {
   constructor(value: number | string | Resource) {
     super(value);
   }
-  static identity: Symbol = Symbol('fontSize');
+  static identity: Symbol = Symbol('textFontSize');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
       GetUINativeModule().text.resetFontSize(node);
@@ -43,11 +43,11 @@ class FontSizeModifier extends ModifierWithKey<number | string | Resource> {
   }
 }
 
-class FontWeightModifier extends Modifier<string> {
+class FontWeightModifier extends ModifierWithKey<string> {
   constructor(value: string) {
     super(value);
   }
-  static identity: Symbol = Symbol('fontWeight');
+  static identity: Symbol = Symbol('textFontWeight');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
       GetUINativeModule().text.resetFontWeight(node);
@@ -57,11 +57,11 @@ class FontWeightModifier extends Modifier<string> {
   }
 }
 
-class FontStyleModifier extends Modifier<number> {
+class FontStyleModifier extends ModifierWithKey<number> {
   constructor(value: number) {
     super(value);
   }
-  static identity: Symbol = Symbol('fontStyle');
+  static identity: Symbol = Symbol('textFontStyle');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
       GetUINativeModule().text.resetFontStyle(node);
@@ -71,7 +71,7 @@ class FontStyleModifier extends Modifier<number> {
   }
 }
 
-class TextAlignModifier extends Modifier<number> {
+class TextAlignModifier extends ModifierWithKey<number> {
   constructor(value: number) {
     super(value);
   }
@@ -462,9 +462,7 @@ class ArkTextComponent extends ArkComponent implements TextAttribute {
     return this;
   }
   fontStyle(value: FontStyle): TextAttribute {
-    if (isNumber(value)) {
-      modifier(this._modifiers, FontStyleModifier, value);
-    }
+    modifierWithKey(this._modifiersWithKeys, FontStyleModifier.identity, FontStyleModifier, value);
     return this;
   }
   fontWeight(value: number | FontWeight | string): TextAttribute {
@@ -488,15 +486,11 @@ class ArkTextComponent extends ArkComponent implements TextAttribute {
     } else if (isString(value)) {
       fontWeightStr = String(value);
     }
-    modifier(this._modifiers, FontWeightModifier, fontWeightStr);
+    modifierWithKey(this._modifiersWithKeys, FontWeightModifier.identity, FontWeightModifier, fontWeightStr);
     return this;
   }
   textAlign(value: TextAlign): TextAttribute {
-    let textAlignNum = 0;
-    if (isNumber(value)) {
-      textAlignNum = value;
-    }
-    modifier(this._modifiers, TextAlignModifier, textAlignNum);
+    modifierWithKey(this._modifiersWithKeys, TextAlignModifier.identity, TextAlignModifier, value);
     return this;
   }
   lineHeight(value: number | string | Resource): TextAttribute {
