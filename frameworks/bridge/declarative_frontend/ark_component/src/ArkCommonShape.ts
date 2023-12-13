@@ -116,7 +116,7 @@ class StrokeModifier extends ModifierWithKey<ResourceColor> {
     }
 }
 
-class FillModifier extends Modifier<ResourceColor> {
+class FillModifier extends ModifierWithKey<ResourceColor> {
     constructor(value: ResourceColor) {
         super(value);
     }
