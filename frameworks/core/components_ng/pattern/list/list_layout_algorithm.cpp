@@ -1315,6 +1315,10 @@ void ListLayoutAlgorithm::SetListItemGroupParam(const RefPtr<LayoutWrapper>& lay
     if (jumpIndexInGroup_.has_value() && scrollAlign_ == ScrollAlign::CENTER) {
         referencePos = (startMainPos_ + endMainPos_) / 2; // 2:average
     }
+    if (jumpIndex_) {
+        auto wrapper = layoutWrapper;
+        itemGroup->ClearItemPosition(&(*wrapper));
+    }
     itemGroup->SetListMainSize(startMainPos_, endMainPos_, referencePos, forwardLayout);
     itemGroup->SetListLayoutProperty(layoutProperty);
     itemGroup->SetContentOffset(contentStartOffset_, contentEndOffset_);
