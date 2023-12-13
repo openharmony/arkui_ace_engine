@@ -440,7 +440,7 @@ void Animator::Pause()
         scheduler_->Stop();
     }
     if (needFrameJankReport_) {
-        JankFrameReport::ClearFrameJankFlag(JANK_RUNNING_ANIMATOR);
+        JankFrameReport::GetInstance().ClearFrameJankFlag(JANK_RUNNING_ANIMATOR);
     }
     status_ = Status::PAUSED;
     asyncTrace_ = nullptr;
@@ -464,7 +464,7 @@ void Animator::Resume()
         scheduler_->Start();
     }
     if (needFrameJankReport_) {
-        JankFrameReport::SetFrameJankFlag(JANK_RUNNING_ANIMATOR);
+        JankFrameReport::GetInstance().SetFrameJankFlag(JANK_RUNNING_ANIMATOR);
     }
     status_ = Status::RUNNING;
     if (!motion_) {
@@ -495,7 +495,7 @@ void Animator::Stop()
         return;
     }
     if (needFrameJankReport_) {
-        JankFrameReport::ClearFrameJankFlag(JANK_RUNNING_ANIMATOR);
+        JankFrameReport::GetInstance().ClearFrameJankFlag(JANK_RUNNING_ANIMATOR);
     }
 
     elapsedTime_ = 0;
@@ -595,7 +595,7 @@ void Animator::OnFrame(int64_t duration)
         }
         return;
     }
-    JankFrameReport::RecordFrameUpdate();
+    JankFrameReport::GetInstance().RecordFrameUpdate();
     NotifyPrepareListener();
     // get playedTime
     auto playedTime = elapsedTime_ - scaledStartDelay_;
@@ -700,7 +700,7 @@ void Animator::StartInner(bool alwaysNotify)
     }
     StatusListenable::NotifyStartListener();
     if (needFrameJankReport_) {
-        JankFrameReport::SetFrameJankFlag(JANK_RUNNING_ANIMATOR);
+        JankFrameReport::GetInstance().SetFrameJankFlag(JANK_RUNNING_ANIMATOR);
     }
     status_ = Status::RUNNING;
     if (!motion_) {

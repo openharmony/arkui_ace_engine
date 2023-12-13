@@ -23,6 +23,7 @@
 #include "base/memory/ace_type.h"
 #include "base/utils/macros.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/custom/custom_node_pattern.h"
 #include "core/pipeline/base/element_register.h"
 
@@ -116,7 +117,10 @@ public:
     {
         if (recycleRenderFunc_) {
             ACE_SCOPED_TRACE("CustomNode:BuildRecycle %s", GetJSViewName().c_str());
-            recycleRenderFunc_();
+            {
+                ScopedViewStackProcessor scopedViewStackProcessor;
+                recycleRenderFunc_();
+            }
             for (const auto& weak : recyclePatterns_) {
                 auto pattern = weak.Upgrade();
                 if (pattern) {

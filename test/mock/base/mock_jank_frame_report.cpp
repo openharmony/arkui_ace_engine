@@ -17,6 +17,14 @@
 #include "base/perfmonitor/perf_monitor.h"
 
 namespace OHOS::Ace {
+JankFrameReport& JankFrameReport::GetInstance()
+{
+    static thread_local JankFrameReport instance;
+    return instance;
+}
+
+JankFrameReport::JankFrameReport() {}
+
 void JankFrameReport::JankFrameRecord(int64_t timeStampNanos) {}
 
 void JankFrameReport::SetFrameJankFlag(JankFrameFlag flag) {}

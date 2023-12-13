@@ -383,7 +383,7 @@ void Scrollable::HandleDragStart(const OHOS::Ace::GestureEvent& info)
         }
     }
 #endif
-    JankFrameReport::SetFrameJankFlag(JANK_RUNNING_SCROLL);
+    JankFrameReport::GetInstance().SetFrameJankFlag(JANK_RUNNING_SCROLL);
     if (onScrollStartRec_) {
         onScrollStartRec_(static_cast<float>(dragPositionInMainAxis));
     }
@@ -594,7 +594,7 @@ void Scrollable::HandleDragUpdate(const GestureEvent& info)
     if (RelatedScrollEventPrepare(Offset(0.0, mainDelta))) {
         return;
     }
-    JankFrameReport::RecordFrameUpdate();
+    JankFrameReport::GetInstance().RecordFrameUpdate();
     auto source = info.GetInputEventType() == InputEventType::AXIS ? SCROLL_FROM_AXIS : SCROLL_FROM_UPDATE;
     HandleScroll(mainDelta, source, NestedState::GESTURE);
 }
@@ -618,7 +618,7 @@ void Scrollable::HandleDragEnd(const GestureEvent& info)
     currentVelocity_ = correctVelocity;
 
     lastPos_ = GetDragOffset();
-    JankFrameReport::ClearFrameJankFlag(JANK_RUNNING_SCROLL);
+    JankFrameReport::GetInstance().ClearFrameJankFlag(JANK_RUNNING_SCROLL);
     if (dragEndCallback_) {
         dragEndCallback_();
     }
