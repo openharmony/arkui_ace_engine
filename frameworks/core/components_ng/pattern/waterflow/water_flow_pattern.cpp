@@ -267,14 +267,14 @@ bool WaterFlowPattern::ScrollToTargrtIndex(int32_t index)
     auto item = layoutInfo_.waterFlowItems_[crossIndex][index];
     float targetPosition = 0.0;
     // first line
-    if (layoutInfo_.currentOffset_ + item.first < 0 && layoutInfo_.currentOffset_ + item.first + item.second > 0) {
+    if ((layoutInfo_.currentOffset_ + item.first < 0) && (layoutInfo_.currentOffset_ + item.first + item.second > 0)) {
         targetPosition = item.first;
-    } else if (layoutInfo_.currentOffset_ + item.first < layoutInfo_.lastMainSize_ &&
-               layoutInfo_.currentOffset_ + item.first + item.second > layoutInfo_.lastMainSize_) {
+    } else if ((layoutInfo_.currentOffset_ + item.first < layoutInfo_.lastMainSize_) &&
+               (layoutInfo_.currentOffset_ + item.first + item.second > layoutInfo_.lastMainSize_)) {
         // last line
         targetPosition = -(layoutInfo_.lastMainSize_ - (item.first + item.second));
-    } else if (layoutInfo_.currentOffset_ + item.first + item.second < 0 ||
-               layoutInfo_.currentOffset_ + item.first > layoutInfo_.lastMainSize_) {
+    } else if ((layoutInfo_.currentOffset_ + item.first + item.second < 0) ||
+               (layoutInfo_.currentOffset_ + item.first > layoutInfo_.lastMainSize_)) {
         // out of viewport
         targetPosition = item.first;
     } else {
