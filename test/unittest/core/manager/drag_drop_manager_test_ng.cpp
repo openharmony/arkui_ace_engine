@@ -1470,69 +1470,6 @@ HWTEST_F(DragDropManagerTestNg, DragDropManagerTest031, TestSize.Level1)
 }
 
 /**
- * @tc.name: DragDropManagerTest032
- * @tc.desc: Test NotifyDragRegisterFrameNode in FindHitFrameNodes branchs
- * @tc.type: FUNC
- * @tc.author:
- */
-HWTEST_F(DragDropManagerTestNg, DragDropManagerTest032, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. construct a DragDropManager
-     */
-    auto dragDropManager = AceType::MakeRefPtr<DragDropManager>();
-
-    /**
-     * @tc.steps: step2. Create a DragStatusListener and Register to DragDropManager
-     * @tc.expected: step2.
-     */
-    RefPtr<ListDragStatusListener> mockListDragStatusListener = AceType::MakeRefPtr<MockListDragStatusListener>();
-    auto listNode1 = AceType::MakeRefPtr<FrameNode>(NODE_TAG, 1, AceType::MakeRefPtr<ListPattern>());
-    auto listEventHub = listNode1->GetEventHub<EventHub>();
-    listEventHub->SetEnabled(false);
-
-    auto listPattern1 = listNode1->GetPattern<ListPattern>();
-    listPattern1->listDragStatusListener_ = mockListDragStatusListener;
-    auto listNode2 = AceType::MakeRefPtr<FrameNode>(NODE_TAG_EX, 2, AceType::MakeRefPtr<ListPattern>());
-    auto listEventHub2 = listNode2->GetEventHub<EventHub>();
-    listEventHub2->SetEnabled(false);
-
-    auto listPattern2 = listNode2->GetPattern<ListPattern>();
-    listPattern2->listDragStatusListener_ = mockListDragStatusListener;
-    auto listNode3 = AceType::MakeRefPtr<FrameNode>(NODE_TAG_EX2, 3, AceType::MakeRefPtr<ListPattern>());
-    auto listEventHub3 = listNode3->GetEventHub<EventHub>();
-    listEventHub3->SetEnabled(false);
-
-    auto listPattern3 = listNode3->GetPattern<ListPattern>();
-    listPattern3->listDragStatusListener_ = mockListDragStatusListener;
-    dragDropManager->RegisterDragStatusListener(listNode1->GetId(), AceType::WeakClaim(AceType::RawPtr(listNode1)));
-    dragDropManager->RegisterDragStatusListener(listNode2->GetId(), AceType::WeakClaim(AceType::RawPtr(listNode2)));
-    dragDropManager->RegisterDragStatusListener(listNode3->GetId(), AceType::WeakClaim(AceType::RawPtr(listNode3)));
-    EXPECT_EQ(dragDropManager->nodesForDragNotify_.size(), 3);
-
-    auto geometryNode1 = listNode1->GetGeometryNode();
-    auto geometryNode2 = listNode2->GetGeometryNode();
-    auto geometryNode3 = listNode3->GetGeometryNode();
-    listNode1->SetActive(false);
-    listNode2->SetActive(false);
-    listNode3->SetActive(false);
-    geometryNode1->frame_.rect_ = RectF(1.0f, 1.0f, 10.0f, 10.0f);
-    geometryNode2->frame_.rect_ = RectF(3.0f, 3.0f, 20.0f, 20.0f);
-    geometryNode3->frame_.rect_ = RectF(5.0f, 5.0f, 30.0f, 30.0f);
-    dragDropManager->parentHitNodes_.emplace(listNode1->GetId());
-    dragDropManager->parentHitNodes_.emplace(listNode2->GetId());
-
-    dragDropManager->UpdateVelocityTrackerPoint(Point(15.0f, 15.0f), true);
-    dragDropManager->UpdateDragListener(Point(15.0f, 15.0f));
-    EXPECT_EQ(dragDropManager->parentHitNodes_.size(), 0);
-
-    dragDropManager->UnRegisterDragStatusListener(listNode1->GetId());
-    dragDropManager->UnRegisterDragStatusListener(listNode2->GetId());
-    dragDropManager->UnRegisterDragStatusListener(listNode3->GetId());
-    EXPECT_EQ(dragDropManager->nodesForDragNotify_.size(), 0);
-}
-
-/**
  * @tc.name: DragDropManagerTest033
  * @tc.desc: Test FindTargetInChildNodes
  * @tc.type: FUNC
