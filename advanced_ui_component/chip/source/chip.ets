@@ -486,6 +486,7 @@ export struct ChipComponent {
   private deleteChipNodeAnimate() {
     animateTo({ duration: 150, curve: Curve.Sharp }, () => {
       this.chipOpacity = 0
+      this.chipBlendColor = Color.Transparent
     })
     animateTo({ duration: 150, curve: Curve.FastOutLinearIn, onFinish: () => {
       this.deleteChip = true
