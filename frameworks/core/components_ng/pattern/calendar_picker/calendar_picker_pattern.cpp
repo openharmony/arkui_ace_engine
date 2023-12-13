@@ -71,6 +71,9 @@ void CalendarPickerPattern::UpdateEntryButtonColor()
         if (child->GetTag() == V2::BUTTON_ETS_TAG) {
             auto buttonNode = AceType::DynamicCast<FrameNode>(child);
             CHECK_NULL_VOID(buttonNode);
+            BorderColorProperty borderColor;
+            borderColor.SetColor(theme->GetEntryBorderColor());
+            buttonNode->GetRenderContext()->UpdateBorderColor(borderColor);
             buttonNode->GetRenderContext()->UpdateBackgroundColor(Color::TRANSPARENT);
             buttonNode->MarkModifyDone();
 
