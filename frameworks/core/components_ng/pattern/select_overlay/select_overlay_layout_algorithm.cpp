@@ -172,13 +172,15 @@ OffsetF SelectOverlayLayoutAlgorithm::ComputeSelectMenuPosition(LayoutWrapper* l
             viewPort = viewPortOption.value();
         }
     }
-
     // Adjust position of overlay.
-    if (LessOrEqual(menuPosition.GetX(), viewPort.GetX())) {
-        menuPosition.SetX(theme->GetDefaultMenuPositionX());
-    } else if (GreatOrEqual(menuPosition.GetX() + menuWidth, viewPort.GetX() + viewPort.Width())) {
-        menuPosition.SetX(overlayWidth - menuWidth - theme->GetDefaultMenuPositionX());
-    }
+    auto adjustPositionXWithViewPort = [&](OffsetF& menuPosition) {
+        if (LessOrEqual(menuPosition.GetX(), viewPort.GetX())) {
+            menuPosition.SetX(theme->GetDefaultMenuPositionX());
+        } else if (GreatOrEqual(menuPosition.GetX() + menuWidth, viewPort.GetX() + viewPort.Width())) {
+            menuPosition.SetX(overlayWidth - menuWidth - theme->GetDefaultMenuPositionX());
+        }
+    };
+    adjustPositionXWithViewPort(menuPosition);
     if (LessNotEqual(menuPosition.GetY(), menuHeight)) {
         if (IsTextAreaSelectAll()) {
             menuPosition.SetY(singleHandle.Top());
@@ -223,6 +225,7 @@ OffsetF SelectOverlayLayoutAlgorithm::ComputeSelectMenuPosition(LayoutWrapper* l
     }
     auto menuRect = RectF(menuPosition, SizeF(menuWidth, menuHeight));
     menuPosition = AdjustSelectMenuOffset(layoutWrapper, menuRect, menuSpacingBetweenText, menuSpacingBetweenHandle);
+    adjustPositionXWithViewPort(menuPosition);
     defaultMenuEndOffset_ = menuPosition + OffsetF(menuWidth, 0.0f);
     if (isExtension) {
         return defaultMenuEndOffset_ - OffsetF(width, 0);
