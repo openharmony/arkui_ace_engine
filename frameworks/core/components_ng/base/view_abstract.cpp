@@ -67,6 +67,8 @@ void RegisterMenuCallback(const RefPtr<FrameNode> &menuWrapperNode, const MenuPa
     CHECK_NULL_VOID(pattern);
     pattern->RegisterMenuAppearCallback(menuParam.onAppear);
     pattern->RegisterMenuDisappearCallback(menuParam.onDisappear);
+    pattern->RegisterMenuAboutToAppearCallback(menuParam.aboutToAppear);
+    pattern->RegisterMenuAboutToDisappearCallback(menuParam.aboutToDisappear);
     pattern->RegisterMenuStateChangeCallback(menuParam.onStateChange);
 }
 } // namespace
