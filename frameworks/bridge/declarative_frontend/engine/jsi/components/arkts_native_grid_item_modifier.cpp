@@ -21,90 +21,90 @@
 
 namespace OHOS::Ace::NG {
 
-constexpr int32_t DEFAULT_GRID_ITEM_VALUE = -1;
+constexpr int32_t DEFAULT_GRID_ITEM_VALUE = 0;
 
 void SetGridItemSelectable(NodeHandle node, bool selectable)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    GridItemModelNG::SetGridItemSelectable(frameNode, selectable);
+    GridItemModelNG::SetSelectable(frameNode, selectable);
 }
 
 void ResetGridItemSelectable(NodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    GridItemModelNG::SetGridItemSelectable(frameNode, true);
+    GridItemModelNG::SetSelectable(frameNode, true);
 }
 
 void SetGridItemSelected(NodeHandle node, bool selected)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    GridItemModelNG::SetGridItemSelected(frameNode, selected);
+    GridItemModelNG::SetSelected(frameNode, selected);
 }
 
 void ResetGridItemSelected(NodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    GridItemModelNG::SetGridItemSelected(frameNode, false);
+    GridItemModelNG::SetSelected(frameNode, false);
 }
 
 void SetGridItemRowStart(NodeHandle node, int32_t rowStart)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    GridItemModelNG::SetGridItemRowStart(frameNode, rowStart);
+    GridItemModelNG::SetRowStart(frameNode, rowStart);
 }
 
 void ResetGridItemRowStart(NodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    GridItemModelNG::SetGridItemRowStart(frameNode, DEFAULT_GRID_ITEM_VALUE);
+    GridItemModelNG::SetRowStart(frameNode, DEFAULT_GRID_ITEM_VALUE);
 }
 
 void SetGridItemRowEnd(NodeHandle node, int32_t rowEnd)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    GridItemModelNG::SetGridItemRowEnd(frameNode, rowEnd);
+    GridItemModelNG::SetRowEnd(frameNode, rowEnd);
 }
 
 void ResetGridItemRowEnd(NodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    GridItemModelNG::SetGridItemRowEnd(frameNode, DEFAULT_GRID_ITEM_VALUE);
+    GridItemModelNG::SetRowEnd(frameNode, DEFAULT_GRID_ITEM_VALUE);
 }
 
 void SetGridItemColumnStart(NodeHandle node, int32_t columnStart)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    GridItemModelNG::SetGridItemColumnStart(frameNode, columnStart);
+    GridItemModelNG::SetColumnStart(frameNode, columnStart);
 }
 
 void ResetGridItemColumnStart(NodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    GridItemModelNG::SetGridItemColumnStart(frameNode, DEFAULT_GRID_ITEM_VALUE);
+    GridItemModelNG::SetColumnStart(frameNode, DEFAULT_GRID_ITEM_VALUE);
 }
 
 void SetGridItemColumnEnd(NodeHandle node, int32_t columnEnd)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    GridItemModelNG::SetGridItemColumnEnd(frameNode, columnEnd);
+    GridItemModelNG::SetColumnEnd(frameNode, columnEnd);
 }
 
 void ResetGridItemColumnEnd(NodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    GridItemModelNG::SetGridItemColumnEnd(frameNode, DEFAULT_GRID_ITEM_VALUE);
+    GridItemModelNG::SetColumnEnd(frameNode, DEFAULT_GRID_ITEM_VALUE);
 }
 
 ArkUIGridItemModifierAPI GetGridItemModifier()

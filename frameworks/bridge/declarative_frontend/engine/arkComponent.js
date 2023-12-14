@@ -7836,16 +7836,7 @@ class ArkScrollEdgeEffect {
       (this.options === another.options);
   }
 }
-class ArkListNestedScrollOptions {
-  constructor() {
-    this.scrollForward = undefined;
-    this.scrollBackward = undefined;
-  }
-  isEqual(another) {
-    return (this.scrollForward === another.scrollForward &&
-      this.scrollBackward === another.scrollBackward);
-  }
-}
+
 class ArkFont {
   constructor() {
     this.size = undefined;
@@ -14656,9 +14647,6 @@ class ListChainAnimationModifier extends ModifierWithKey {
       GetUINativeModule().list.setChainAnimation(node, this.value);
     }
   }
-  checkObjectDiff() {
-    return false;
-  }
 }
 ListChainAnimationModifier.identity = Symbol('listChainAnimation');
 class ListCachedCountModifier extends ModifierWithKey {
@@ -14771,11 +14759,13 @@ class ListNestedScrollModifier extends ModifierWithKey {
     super(value);
   }
   applyPeer(node, reset) {
+    let _a, _b;
     if (reset) {
       GetUINativeModule().list.resetListNestedScroll(node);
     }
     else {
-      GetUINativeModule().list.setListNestedScroll(node, this.value.scrollForward, this.value.scrollBackward);
+      GetUINativeModule().list.setListNestedScroll(node, (_a = this.value) === null || _a === void 0 ? void 0 : _a.scrollForward,
+        (_b = this.value) === null || _b === void 0 ? void 0 : _b.scrollBackward);
     }
   }
 }
@@ -14883,10 +14873,7 @@ class ArkListComponent extends ArkComponent {
     return this;
   }
   nestedScroll(value) {
-    let opt = new ArkListNestedScrollOptions();
-    opt.scrollBackward = value.scrollBackward;
-    opt.scrollForward = value.scrollForward;
-    modifierWithKey(this._modifiersWithKeys, ListNestedScrollModifier.identity, ListNestedScrollModifier, opt);
+    modifierWithKey(this._modifiersWithKeys, ListNestedScrollModifier.idsentity, ListNestedScrollModifier, value);
     return this;
   }
   enableScrollInteraction(value) {
@@ -14963,9 +14950,6 @@ class ListItemSelectedModifier extends ModifierWithKey {
       GetUINativeModule().listItem.setListItemSelected(node, this.value);
     }
   }
-  checkObjectDiff() {
-    return false;
-  }
 }
 ListItemSelectedModifier.identity = Symbol('listItemSelected');
 class ListItemSelectableModifier extends ModifierWithKey {
@@ -14976,9 +14960,6 @@ class ListItemSelectableModifier extends ModifierWithKey {
     else {
       GetUINativeModule().listItem.setSelectable(node, this.value);
     }
-  }
-  checkObjectDiff() {
-    return false;
   }
 }
 ListItemSelectableModifier.identity = Symbol('listItemSelectable');
