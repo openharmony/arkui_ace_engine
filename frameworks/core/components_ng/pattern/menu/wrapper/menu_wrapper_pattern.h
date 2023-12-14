@@ -146,6 +146,16 @@ public:
         onDisappearCallback_ = onDisappear;
     }
 
+    void RegisterMenuAboutToAppearCallback(const std::function<void()>& aboutToAppear)
+    {
+        aboutToAppearCallback_ = aboutToAppear;
+    }
+
+    void RegisterMenuAboutToDisappearCallback(const std::function<void()>& aboutToDisappear)
+    {
+        aboutToDisappearCallback_ = aboutToDisappear;
+    }
+
     void RegisterMenuStateChangeCallback(const std::function<void(const std::string&)>& callback)
     {
         onStateChangeCallback_ = callback;
@@ -162,6 +172,20 @@ public:
     {
         if (onDisappearCallback_) {
             onDisappearCallback_();
+        }
+    }
+
+    void CallMenuAboutToAppearCallback()
+    {
+        if (aboutToAppearCallback_) {
+            aboutToAppearCallback_();
+        }
+    }
+
+    void CallMenuAboutToDisappearCallback()
+    {
+        if (aboutToDisappearCallback_) {
+            aboutToDisappearCallback_();
         }
     }
 
@@ -208,6 +232,8 @@ private:
 
     std::function<void()> onAppearCallback_ = nullptr;
     std::function<void()> onDisappearCallback_ = nullptr;
+    std::function<void()> aboutToAppearCallback_ = nullptr;
+    std::function<void()> aboutToDisappearCallback_ = nullptr;
     std::function<void(const std::string&)> onStateChangeCallback_ = nullptr;
     RefPtr<TouchEventImpl> onTouch_;
     // menuId in OverlayManager's map

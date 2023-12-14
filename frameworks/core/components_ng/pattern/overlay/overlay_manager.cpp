@@ -419,7 +419,9 @@ void OverlayManager::SetContainerButtonEnable(bool isEnabled)
 void OverlayManager::SetShowMenuAnimation(const RefPtr<FrameNode>& menu, bool isInSubWindow)
 {
     BlurLowerNode(menu);
-
+    auto menuWrapper = menu->GetPattern<MenuWrapperPattern>();
+    CHECK_NULL_VOID(menuWrapper);
+    menuWrapper->CallMenuAboutToAppearCallback();
     AnimationOption option;
     option.SetCurve(Curves::FAST_OUT_SLOW_IN);
     option.SetDuration(MENU_ANIMATION_DURATION);
@@ -475,7 +477,9 @@ void OverlayManager::SetShowMenuAnimation(const RefPtr<FrameNode>& menu, bool is
 void OverlayManager::PopMenuAnimation(const RefPtr<FrameNode>& menu, bool showPreviewAnimation, bool startDrag)
 {
     ResetLowerNodeFocusable(menu);
-
+    auto menuWrapper = menu->GetPattern<MenuWrapperPattern>();
+    CHECK_NULL_VOID(menuWrapper);
+    menuWrapper->CallMenuAboutToDisappearCallback();
     AnimationOption option;
     option.SetCurve(Curves::FAST_OUT_SLOW_IN);
     option.SetDuration(MENU_ANIMATION_DURATION);
