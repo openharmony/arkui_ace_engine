@@ -17,6 +17,8 @@ import pasteboard from '@ohos.pasteboard'
 import { BusinessError } from '@ohos.base';
 import hilog from '@ohos.hilog';
 
+const WITHOUT_BUILDER = -2
+
 export interface EditorMenuOptions {
   icon: ResourceStr
   action?: () => void
@@ -136,8 +138,16 @@ struct SelectionMenuComponent {
       if (this.editorMenuOptions && this.editorMenuOptions.length > 0) {
         this.IconPanel()
       }
-      this.SystemMenu()
+      Scroll() {
+        this.SystemMenu()
+      }
+      .backgroundColor(this.theme.backGroundColor)
+      .flexShrink(1)
+      .shadow(this.theme.iconPanelShadowStyle)
+      .borderRadius(this.theme.containerBorderRadius)
     }
+    .flexShrink(1)
+    .height("100%")
   }
 
   pushDataToPasteboard(richEditorSelection: RichEditorSelection) {
@@ -266,6 +276,7 @@ struct SelectionMenuComponent {
               .focusable(true)
               .draggable(false)
           }
+          .enabled(!(!item.action && !item.builder))
           .type(ButtonType.Normal)
           .margin(this.theme.editorOptionMargin)
           .backgroundColor(this.theme.backGroundColor)
@@ -276,7 +287,7 @@ struct SelectionMenuComponent {
               this.showExpandedMenuOptions = false
               this.customerChange = !this.customerChange
             } else {
-              this.showCustomerIndex = -1
+              this.showCustomerIndex = WITHOUT_BUILDER
               if (!this.controller) {
                 this.showExpandedMenuOptions = true
               }
@@ -415,7 +426,7 @@ struct SelectionMenuComponent {
         })
         .radius(this.theme.containerBorderRadius)
         .clip(true)
-        .width('100%')
+        .width(this.theme.defaultMenuWidth)
       } else if (this.showCustomerIndex > -1 && this.builder) {
         if (this.customerChange) {
           this.builder()

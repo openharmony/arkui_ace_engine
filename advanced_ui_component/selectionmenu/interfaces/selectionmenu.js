@@ -16,6 +16,8 @@
 const pasteboard = requireNapi("pasteboard");
 const hilog = requireNapi("hilog");
 
+const WITHOUT_BUILDER = -2;
+
 const defaultTheme = {
     imageSize: 24,
     buttonSize: 48,
@@ -243,7 +245,9 @@ class SelectionMenuComponent extends ViewPU {
 
     initialRender() {
         this.observeComponentCreation2(((e, t) => {
-            Column.create()
+            Column.create();
+            Column.flexShrink(1);
+            Column.height("100%")
         }), Column);
         this.observeComponentCreation2(((e, t) => {
             If.create();
@@ -253,7 +257,15 @@ class SelectionMenuComponent extends ViewPU {
             }))
         }), If);
         If.pop();
+        this.observeComponentCreation2(((e, t) => {
+            Scroll.create();
+            Scroll.backgroundColor(this.theme.backGroundColor);
+            Scroll.flexShrink(1);
+            Scroll.shadow(this.theme.iconPanelShadowStyle);
+            Scroll.borderRadius(this.theme.containerBorderRadius)
+        }), Scroll);
         this.SystemMenu.bind(this)();
+        Scroll.pop();
         Column.pop()
     }
 
@@ -360,6 +372,7 @@ class SelectionMenuComponent extends ViewPU {
                         const o = e;
                         this.observeComponentCreation2(((e, n) => {
                             Button.createWithChild();
+                            Button.enabled(!(!o.action && !o.builder));
                             Button.type(ButtonType.Normal);
                             Button.margin(this.theme.editorOptionMargin);
                             Button.backgroundColor(this.theme.backGroundColor);
@@ -370,7 +383,7 @@ class SelectionMenuComponent extends ViewPU {
                                     this.showExpandedMenuOptions = !1;
                                     this.customerChange = !this.customerChange
                                 } else {
-                                    this.showCustomerIndex = -1;
+                                    this.showCustomerIndex = -2;
                                     this.controller || (this.showExpandedMenuOptions = !0)
                                 }
                                 o.action && o.action()
@@ -421,7 +434,7 @@ class SelectionMenuComponent extends ViewPU {
                     }));
                     Menu.radius(this.theme.containerBorderRadius);
                     Menu.clip(!0);
-                    Menu.width("100%")
+                    Menu.width(this.theme.defaultMenuWidth)
                 }), Menu);
                 this.observeComponentCreation2(((e, t) => {
                     If.create();
