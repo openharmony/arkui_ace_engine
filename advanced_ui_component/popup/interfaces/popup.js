@@ -42,7 +42,7 @@ export const defaultTheme = {
         fontColor: {
             id: -1,
             type: 10001,
-            params: ["sys.color.ohos_fa_text_primary"],
+            params: ["sys.color.ohos_id_color_text_primary"],
             bundleName: "",
             moduleName: ""
         }
@@ -59,7 +59,7 @@ export const defaultTheme = {
         fontColor: {
             id: -1,
             type: 10001,
-            params: ["sys.color.ohos_fa_text_activated"],
+            params: ["sys.color.ohos_id_color_text_primary_activated"],
             bundleName: "",
             moduleName: ""
         },
@@ -91,14 +91,23 @@ export const defaultTheme = {
         fontColor: {
             id: -1,
             type: 10001,
-            params: ["sys.color.ohos_fa_text_secondary"],
+            params: ["sys.color.ohos_id_color_text_secondary"],
+            bundleName: "",
+            moduleName: ""
+        },
+        plainFontColor: {
+            id: -1,
+            type: 10001,
+            params: ["sys.color.ohos_id_color_text_primary"],
             bundleName: "",
             moduleName: ""
         }
     },
     windows: { padding: { top: 12, bottom: 12, left: 12, right: 12 } },
     closeButton: {
-        size: { width: 20, height: 20 },
+        size: { width: 28, height: 28 },
+        imageSize: { width: 18, height: 18 },
+        padding: { top: 5, bottom: 5, left: 5, right: 5 },
         margin: { top: 12, bottom: 12, left: 12, right: 12 },
         image: {
             id: -1,
@@ -110,7 +119,7 @@ export const defaultTheme = {
         fillColor: {
             id: -1,
             type: 10001,
-            params: ["sys.color.ohos_fa_icon_secondary"],
+            params: ["sys.color.ohos_id_color_secondary"],
             bundleName: "",
             moduleName: ""
         },
@@ -480,6 +489,18 @@ export class PopupComponent extends ViewPU {
         return this.theme.closeButton.backgroundColor
     }
 
+    getCloseButtonPadding() {
+        return this.theme.closeButton.padding
+    }
+
+    getCloseButtonImageWidth() {
+        return this.theme.closeButton.imageSize.width
+    }
+
+    getCloseButtonImageHeight() {
+        return this.theme.closeButton.imageSize.height
+    }
+
     getMessageText() {
         return this.message.text
     }
@@ -490,8 +511,10 @@ export class PopupComponent extends ViewPU {
     }
 
     getMessageFontColor() {
-        var t;
-        return null !== (t = this.message.fontColor) && void 0 !== t ? t : this.theme.message.fontColor
+        var t, e, o, i, n, s, r, l;
+        let h;
+        h = this.message.fontColor ? this.message.fontColor : "" !== this.icon.image && void 0 !== this.icon.image || "" !== this.title.text && void 0 !== this.title.text || "" !== (null === (e = null === (t = this.buttons) || void 0 === t ? void 0 : t[0]) || void 0 === e ? void 0 : e.text) && void 0 !== (null === (i = null === (o = this.buttons) || void 0 === o ? void 0 : o[0]) || void 0 === i ? void 0 : i.text) || "" !== (null === (s = null === (n = this.buttons) || void 0 === n ? void 0 : n[1]) || void 0 === s ? void 0 : s.text) && void 0 !== (null === (l = null === (r = this.buttons) || void 0 === r ? void 0 : r[1]) || void 0 === l ? void 0 : l.text) ? this.theme.message.plainFontColor : this.theme.message.fontColor;
+        return h
     }
 
     getMessagePadding() {
@@ -598,7 +621,7 @@ export class PopupComponent extends ViewPU {
     getLayoutWeight() {
         var t, e, o, i, n, s, r, l;
         let h;
-        h = "" !== this.icon.image && void 0 !== this.icon.image || "" !== this.title.text && void 0 !== this.title.text || this.showClose || void 0 === this.showClose || "" !== (null === (e = null === (t = this.buttons) || void 0 === t ? void 0 : t[0]) || void 0 === e ? void 0 : e.text) && void 0 !== (null === (i = null === (o = this.buttons) || void 0 === o ? void 0 : o[0]) || void 0 === i ? void 0 : i.text) || "" !== (null === (s = null === (n = this.buttons) || void 0 === n ? void 0 : n[1]) || void 0 === s ? void 0 : s.text) && void 0 !== (null === (l = null === (r = this.buttons) || void 0 === r ? void 0 : r[1]) || void 0 === l ? void 0 : l.text) ? 1 : 0;
+        h = "" !== this.icon.image && void 0 !== this.icon.image || "" !== this.title.text && void 0 !== this.title.text || "" !== (null === (e = null === (t = this.buttons) || void 0 === t ? void 0 : t[0]) || void 0 === e ? void 0 : e.text) && void 0 !== (null === (i = null === (o = this.buttons) || void 0 === o ? void 0 : o[0]) || void 0 === i ? void 0 : i.text) || "" !== (null === (s = null === (n = this.buttons) || void 0 === n ? void 0 : n[1]) || void 0 === s ? void 0 : s.text) && void 0 !== (null === (l = null === (r = this.buttons) || void 0 === r ? void 0 : r[1]) || void 0 === l ? void 0 : l.text) ? 1 : 0;
         return h
     }
 
@@ -661,6 +684,7 @@ export class PopupComponent extends ViewPU {
                             Button.createWithChild();
                             Button.width(this.getCloseButtonWidth());
                             Button.height(this.getCloseButtonHeight());
+                            Button.padding(this.getCloseButtonPadding());
                             Button.backgroundColor(ObservedObject.GetRawObject(this.closeButtonBackgroundColor));
                             Button.onHover((t => {
                                 this.closeButtonBackgroundColor = t ? this.getCloseButtonHoverColor() : this.getCloseButtonBackgroundColor()
@@ -672,6 +696,8 @@ export class PopupComponent extends ViewPU {
                         this.observeComponentCreation2(((t, e) => {
                             Image.create(this.getCloseButtonImage());
                             Image.focusable(!0);
+                            Image.width(this.getCloseButtonImageWidth());
+                            Image.height(this.getCloseButtonImageHeight());
                             Image.fillColor(this.getCloseButtonFillColor())
                         }), Image);
                         Button.pop()
@@ -813,6 +839,7 @@ export class PopupComponent extends ViewPU {
                             Button.createWithChild();
                             Button.width(this.getCloseButtonWidth());
                             Button.height(this.getCloseButtonHeight());
+                            Button.padding(this.getCloseButtonPadding());
                             Button.backgroundColor(ObservedObject.GetRawObject(this.closeButtonBackgroundColor));
                             Button.onHover((t => {
                                 this.closeButtonBackgroundColor = t ? this.getCloseButtonHoverColor() : this.getCloseButtonBackgroundColor()
@@ -824,6 +851,8 @@ export class PopupComponent extends ViewPU {
                         this.observeComponentCreation2(((t, e) => {
                             Image.create(this.getCloseButtonImage());
                             Image.focusable(!0);
+                            Image.width(this.getCloseButtonImageWidth());
+                            Image.height(this.getCloseButtonImageHeight());
                             Image.fillColor(this.getCloseButtonFillColor())
                         }), Image);
                         Button.pop()

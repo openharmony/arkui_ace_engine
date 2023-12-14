@@ -47,6 +47,7 @@ namespace OHOS::Ace::NG {
 namespace {
 constexpr double DOUBLENESS = 2.0;
 constexpr Dimension BUBBLE_MAX_HEIGHT = 480.0_vp;
+constexpr Dimension BUBBLE_MAX_WIDTH = 400.0_vp;
 constexpr Dimension OUT_RANGE_SPACE = 40.0_vp;
 OffsetF GetDisplayWindowRectOffset()
 {
@@ -207,6 +208,7 @@ RefPtr<FrameNode> BubbleView::CreateBubbleNode(
         renderContext->UpdateBackBlurStyle(styleOption);
         auto backgroundColor = popupPaintProp->GetBackgroundColor().value_or(GetPopupTheme()->GetBackgroundColor());
         renderContext->UpdateBackgroundColor(backgroundColor);
+        renderContext->UpdateBackShadow(ShadowConfig::DefaultShadowM);
     }
     child->MountToParent(popupNode);
     return popupNode;
@@ -277,6 +279,7 @@ RefPtr<FrameNode> BubbleView::CreateCustomBubbleNode(
             columnRenderContext->UpdateBackgroundColor(backgroundColor);
         }
         columnRenderContext->UpdateBackBlurStyle(styleOption);
+        columnRenderContext->UpdateBackShadow(ShadowConfig::DefaultShadowM);
     }
     if (customRenderContext) {
         if (customRenderContext->HasBackgroundColor()) {
@@ -396,8 +399,8 @@ void BubbleView::GetPopupMaxWidthAndHeight(const RefPtr<PopupParam>& param, floa
     } else {
         popupMaxHeight = maxHeight - OUT_RANGE_SPACE.ConvertToPx() - OUT_RANGE_SPACE.ConvertToPx() - bottom - top;
     }
-    if (maxWidth > BUBBLE_MAX_HEIGHT.ConvertToPx()) {
-        popupMaxWidth = BUBBLE_MAX_HEIGHT.ConvertToPx();
+    if (maxWidth > BUBBLE_MAX_WIDTH.ConvertToPx()) {
+        popupMaxWidth = BUBBLE_MAX_WIDTH.ConvertToPx();
     } else {
         popupMaxWidth = maxWidth - OUT_RANGE_SPACE.ConvertToPx() - OUT_RANGE_SPACE.ConvertToPx();
     }
@@ -487,6 +490,7 @@ RefPtr<FrameNode> BubbleView::CreateCombinedChild(
     textPadding.top = CalcLength(padding.Top());
     textLayoutProps->UpdatePadding(textPadding);
     textLayoutProps->UpdateAlignSelf(FlexAlign::FLEX_START);
+    textLayoutProps->UpdateTextColor(popupTheme->GetFontSecondaryColor());
     UpdateTextProperties(param, textLayoutProps);
     message->MarkModifyDone();
     auto pipelineContext = PipelineBase::GetCurrentContext();
@@ -576,6 +580,7 @@ RefPtr<FrameNode> BubbleView::CreateButton(
     auto buttonTextNode = BubbleView::CreateMessage(buttonParam.value, isUseCustom);
     auto textLayoutProperty = buttonTextNode->GetLayoutProperty<TextLayoutProperty>();
     textLayoutProperty->UpdateFontSize(popupTheme->GetButtonFontSize());
+    textLayoutProperty->UpdateTextColor(popupTheme->GetButtonFontColor());
     auto buttonTextInsideMargin = popupTheme->GetButtonTextInsideMargin();
     buttonTextNode->MountToParent(buttonNode);
 

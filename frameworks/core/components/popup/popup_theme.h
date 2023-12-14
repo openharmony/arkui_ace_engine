@@ -76,7 +76,7 @@ public:
             theme->backgroundColor_ = pattern->GetAttr<Color>(PATTERN_BG_COLOR, theme->backgroundColor_);
             theme->fontSize_ = pattern->GetAttr<Dimension>(PATTERN_TEXT_SIZE, 14.0_fp);
             theme->buttonFontSize_ = pattern->GetAttr<Dimension>(POPUP_BUTTON_TEXT_FONT_SIZE, 14.0_fp);
-            theme->fontColor_ = pattern->GetAttr<Color>(PATTERN_TEXT_COLOR, Color::WHITE);
+            theme->fontColor_ = pattern->GetAttr<Color>("text_primary_color", Color::WHITE);
             theme->buttonHoverColor_ = pattern->GetAttr<Color>(PATTERN_BG_COLOR_HOVERED, Color());
             theme->buttonPressColor_ = pattern->GetAttr<Color>(PATTERN_BG_COLOR_PRESSED, Color());
             theme->focusColor_ = pattern->GetAttr<Color>(PATTERN_BG_COLOR_FOCUSED, Color());
@@ -90,6 +90,8 @@ public:
             theme->popupDoubleBorderEnable_ = StringUtils::StringToInt(popupDoubleBorderEnable);
             theme->popupOuterBorderColor_ = pattern->GetAttr<Color>("popup_outer_border_color", Color::TRANSPARENT);
             theme->popupInnerBorderColor_ = pattern->GetAttr<Color>("popup_inner_border_color", Color::TRANSPARENT);
+            theme->buttonFontColor_ = pattern->GetAttr<Color>("text_primary_activated_color", Color::WHITE);
+            theme->fontSecondaryColor_ = pattern->GetAttr<Color>("text_secondary_color", Color::WHITE);
         }
     };
 
@@ -268,6 +270,16 @@ public:
         return popupInnerBorderColor_;
     }
 
+    Color GetButtonFontColor() const
+    {
+        return buttonFontColor_;
+    }
+
+    Color GetFontSecondaryColor() const
+    {
+        return fontSecondaryColor_;
+    }
+
 protected:
     PopupTheme() = default;
 
@@ -308,6 +320,8 @@ private:
     float opacityEnd_ = 1.0f;
     float opacityHover_ = 0.05f;
     float opacityPress_ = 0.1f;
+    Color buttonFontColor_;
+    Color fontSecondaryColor_;
 };
 
 } // namespace OHOS::Ace
