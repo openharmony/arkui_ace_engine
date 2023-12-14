@@ -210,11 +210,74 @@ class SubscribableHandler {
   }
 }
 
+class SubscribableMapSetHandler extends SubscribableHandler {
+  constructor(owningProperty: IPropertySubscriber) {
+      super(owningProperty);
+  }
+
+  // In-place Map/Set modification functions
+  mutatingFunctions = new Set([
+    /*Map functions*/
+    "set", "clear", "delete",
+    /*Set functions*/
+    "add", "clear", "delete",
+  ]);
+  proxiedFunctions = new Set([
+    /*Map functions*/
+    "set",
+    /*Set functions*/
+    "add"
+  ]);
+
+  /**
+   * Get trap for Map/Set type proxy
+   * Functions that modify Map/Set in-place are intercepted and replaced with a function
+   * that executes the original function and notifies the handler of a change.
+   * @param target Original Map/Set object
+   * @param property
+   * @param receiver Proxied Map/Set object
+   * @returns
+   */
+  get(target, property, receiver) {
+      if (property === ObservedObject.__OBSERVED_OBJECT_RAW_OBJECT) {
+        return target;
+      }
+
+      //receiver will fail for internal slot methods of Set and Map
+      //So assign the target as receiver in this case.
+      if (property === Symbol.iterator || property === 'size') {
+        receiver = target;
+      }
+
+      let ret = super.get(target, property, receiver);
+      if (ret && typeof ret === 'function') {
+        const self = this;
+        return function () {
+          // execute original function with given arguments
+          const result = ret.apply(target, arguments);
+          if (self.mutatingFunctions.has(property)) {
+            self.notifyObjectPropertyHasChanged(property, target);
+          }
+          // Only calls to inserting items can be chained, so returning the 'proxiedObject'
+          // ensures that when chain calls also 2nd function call operates on the proxied object.
+          // Otherwise return the original result of the function.
+          return self.proxiedFunctions.has(property) ? receiver: result;
+        }.bind(receiver);
+      }
+
+      return ret;
+  }
+}
+
 class SubscribableDateHandler extends SubscribableHandler {
 
   constructor(owningProperty: IPropertySubscriber) {
     super(owningProperty);
   }
+
+  dateSetFunctions = new Set(["setFullYear", "setMonth", "setDate", "setHours", "setMinutes", "setSeconds",
+      "setMilliseconds", "setTime", "setUTCFullYear", "setUTCMonth", "setUTCDate", "setUTCHours", "setUTCMinutes",
+      "setUTCSeconds", "setUTCMilliseconds"]);
 
   /**
    * Get trap for Date type proxy
@@ -224,24 +287,70 @@ class SubscribableDateHandler extends SubscribableHandler {
    * @param property
    * @returns
    */
-  public get(target: Object, property: PropertyKey): any {
-
-    const dateSetFunctions = new Set(["setFullYear", "setMonth", "setDate", "setHours", "setMinutes", "setSeconds",
-      "setMilliseconds", "setTime", "setUTCFullYear", "setUTCMonth", "setUTCDate", "setUTCHours", "setUTCMinutes",
-      "setUTCSeconds", "setUTCMilliseconds"]);
-
+  public get(target, property): any {
     let ret = super.get(target, property);
 
-    if (typeof ret === "function" && property.toString() && dateSetFunctions.has(property.toString())) {
+    if (typeof ret === "function") {
+      if(this.dateSetFunctions.has(property)) {
+        const self = this;
+        return function () {
+          // execute original function with given arguments
+          let result = ret.apply(this, arguments);
+          self.notifyObjectPropertyHasChanged(property.toString(), this);
+          return result;
+          // bind "this" to target inside the function
+        }.bind(target)
+      }
+      return ret.bind(target);
+    }
+    return ret;
+  }
+}
+
+class SubscribableArrayHandler extends SubscribableHandler {
+  constructor(owningProperty: IPropertySubscriber) {
+    super(owningProperty);
+  }
+
+  // In-place array modification functions
+  mutatingFunctions = new Set(["splice", "copyWithin", "fill", "reverse", "sort"]);
+  // 'splice' and 'pop' self modifies the array, returns deleted array items
+  // means, alike other self-modifying functions, splice does not return the array itself.
+  specialFunctions = new Set(["splice", "pop"]);
+
+  /**
+   * Get trap for Array type proxy
+   * Functions that modify Array in-place are intercepted and replaced with a function
+   * that executes the original function and notifies the handler of a change.
+   * @param target Original Array object
+   * @param property
+   * @param receiver Proxied Array object
+   * @returns
+   */
+  get(target, property, receiver) {
+    if (property === ObservedObject.__OBSERVED_OBJECT_RAW_OBJECT) {
+      return target;
+    }
+
+    let ret = super.get(target, property, receiver);
+    if (ret && typeof ret === "function") {
       const self = this;
-      return function () {
-        // execute original function with given arguments
-        let result = ret.apply(this, arguments);
-        self.notifyObjectPropertyHasChanged(property.toString(), this);
-        return result;
-      }.bind(target) // bind "this" to target inside the function
-    } else if (typeof ret === "function") {
-      ret = ret.bind(target);
+      const prop = property.toString();
+      if (self.mutatingFunctions.has(prop)) {
+        return function () {
+          const result = ret.apply(target, arguments);
+          // prop is the function name here
+          // and result is the function return value
+          // function modifies none or more properties
+          self.notifyObjectPropertyHasChanged(prop, self.specialFunctions.has(prop)? target: result);
+          // returning the 'receiver(proxied object)' ensures that when chain calls also 2nd function call
+          // operates on the proxied object.
+          return self.specialFunctions.has(prop)? result: receiver;
+        }.bind(receiver);
+      }
+      // binding the proxiedObject ensures that modifying functions like push() operate on the
+      // proxied array and each array change is notified.
+      return ret.bind(receiver);
     }
     return ret;
   }
@@ -284,65 +393,19 @@ class ObservedObject<T extends Object> extends ExtendableProxy {
 
   public static createNewInternal<T extends Object>(rawObject: T,
     owningProperty: IPropertySubscriber): T {
-
-    let proxiedObject = new ObservedObject<T>(rawObject,
-      Array.isArray(rawObject) ? new class extends SubscribableHandler {
-        // In-place array modification functions
-        // splice is also in-place modifying function, but we need to handle separately
-        private readonly inPlaceModifications: Set<string> = new Set(["copyWithin", "fill", "reverse", "sort"]);
-
-        constructor(owningProperty: IPropertySubscriber) {
-          super(owningProperty);
-        }
-
-        public get(target: Object, property: PropertyKey, receiver: any): any {
-          let ret = super.get(target, property, receiver);
-          if (ret && typeof ret === "function") {
-            const self = this;
-            const prop = property.toString();
-            // prop is the function name here
-            if (prop == "splice" || prop == "pop") {
-              // 'splice' self modifies the array, returns deleted array items
-              // means, alike other self-modifying functions, splice does not return the array itself.
-              return function () {
-                const result = ret.apply(target, arguments);
-                // prop is the function name here
-                // and result is the function return value
-                // functinon modifies none or more properties
-                self.notifyObjectPropertyHasChanged(prop, target);
-                return result;
-              }.bind(proxiedObject);
-            }
-
-            if (self.inPlaceModifications.has(prop)) {
-              // in place modfication function result == target, the raw array modified
-              stateMgmtConsole.debug("return self mod function");
-              return function () {
-                const result = ret.apply(target, arguments);
-
-                // 'result' is the unproxied object               
-                // functinon modifies none or more properties
-                self.notifyObjectPropertyHasChanged(prop, result);
-
-                // returning the 'proxiedObject' ensures that when chain calls also 2nd function call
-                // operates on the proxied object.
-                return proxiedObject;
-              }.bind(proxiedObject);
-            }
-
-            // binding the proxiedObject ensures that modifying functions like push() operate on the 
-            // proxied array and each array change is notified.
-            return ret.bind(proxiedObject);
-          }
-
-          return ret;
-        }       
-      }(owningProperty) // SubscribableArrayHandlerAnonymous
-        : (rawObject instanceof Date)
-          ? new SubscribableDateHandler(owningProperty)
-          : new SubscribableHandler(owningProperty),
-      owningProperty);
-
+    let proxiedObject;
+    if(rawObject instanceof Map || rawObject instanceof Set) {
+      proxiedObject = new ObservedObject<T>(rawObject, new SubscribableMapSetHandler(owningProperty), owningProperty);
+    }
+    else if (rawObject instanceof Date) {
+      proxiedObject = new ObservedObject<T>(rawObject, new SubscribableDateHandler(owningProperty), owningProperty);
+    }
+    else if (Array.isArray(rawObject)) {
+      proxiedObject = new ObservedObject<T>(rawObject, new SubscribableArrayHandler(owningProperty), owningProperty);
+    }
+    else {
+      proxiedObject = new ObservedObject(rawObject, new SubscribableHandler(owningProperty), owningProperty);
+    }
     return proxiedObject as T;
   }
 
