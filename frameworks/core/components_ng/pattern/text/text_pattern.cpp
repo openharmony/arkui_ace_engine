@@ -1156,6 +1156,7 @@ NG::DragDropInfo TextPattern::OnDragStart(const RefPtr<Ace::DragEvent>& event, c
     recoverEnd_ = selectEnd;
     auto textSelectInfo = GetSpansInfo(selectStart, selectEnd, GetSpansMethod::ONSELECT);
     dragResultObjects_ = textSelectInfo.GetSelection().resultObjects;
+    ResetDragRecordSize(dragResultObjects_.empty() ? -1 : 1);
     if (dragResultObjects_.empty()) {
         return itemInfo;
     }
@@ -1274,6 +1275,7 @@ void TextPattern::UpdateSpanItemDragStatus(const std::list<ResultObject>& result
 
 void TextPattern::OnDragEnd()
 {
+    ResetDragRecordSize(-1);
     auto wk = WeakClaim(this);
     auto pattern = wk.Upgrade();
     CHECK_NULL_VOID(pattern);

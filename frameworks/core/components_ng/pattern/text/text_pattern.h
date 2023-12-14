@@ -470,6 +470,16 @@ public:
         ResetSelection();
     }
 
+    int32_t GetDragRecordSize() override
+    {
+        return dragRecordSize_;
+    }
+
+    void ResetDragRecordSize(int32_t size)
+    {
+        dragRecordSize_ = size;
+    }
+
 protected:
     void OnAfterModifyDone() override;
     virtual void HandleOnCopy();
@@ -596,6 +606,7 @@ private:
     RefPtr<DragDropProxy> dragDropProxy_;
     std::optional<int32_t> surfaceChangedCallbackId_;
     std::optional<int32_t> surfacePositionChangedCallbackId_;
+    int32_t dragRecordSize_ = -1;
     ACE_DISALLOW_COPY_AND_MOVE(TextPattern);
 };
 } // namespace OHOS::Ace::NG
