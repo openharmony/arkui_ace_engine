@@ -25,10 +25,12 @@ public:
     static void JSBind(BindingTarget globalObj);
     static void JSAnimation(const JSCallbackInfo& info);
     static void JSAnimateTo(const JSCallbackInfo& info);
+    static void JSAnimateToImmediately(const JSCallbackInfo& info);
     static const AnimationOption CreateAnimation(const JSRef<JSObject>& animationArgs,
          const std::function<float(float)>& jsFunc, bool isForm = false);
-  
 
+private:
+    static void AnimateToInner(const JSCallbackInfo& info, bool immediately);
 };
 
 } // namespace OHOS::Ace::Framework
