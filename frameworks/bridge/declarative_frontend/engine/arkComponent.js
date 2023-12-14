@@ -8686,7 +8686,10 @@ class ArkScrollSnapOptions {
     this.enableSnapToEnd = undefined;
   }
   isEqual(another) {
-    return ((this.snapAlign === another.snapAlign) && (this.snapPagination === another.snapPagination) && (this.enableSnapToStart === another.enableSnapToStart) && (this.enableSnapToEnd === another.enableSnapToEnd));
+    return ((this.snapAlign === another.snapAlign)
+      && (this.snapPagination === another.snapPagination)
+      && (this.enableSnapToStart === another.enableSnapToStart)
+      && (this.enableSnapToEnd === another.enableSnapToEnd));
   }
 }
 /// <reference path='./import.ts' />
@@ -9122,25 +9125,34 @@ class ScrollFrictionModifier extends ModifierWithKey {
 ScrollFrictionModifier.identity = Symbol('friction');
 class ScrollScrollSnapModifier extends ModifierWithKey {
   applyPeer(node, reset) {
-    let snapPagination = [];
-    if (Array.isArray(this.value.snapPagination)) {
-      for (let i = 0; i <= this.value.snapPagination.length; i++) {
-        let item = this.value.snapPagination[i];
-        snapPagination.push(item);
-      }
-    }
-    else {
-      snapPagination.push(this.value.snapPagination);
-    }
     if (reset) {
       GetUINativeModule().scroll.resetScrollSnap(node);
     }
     else {
-      GetUINativeModule().scroll.setScrollSnap(node, this.value.snapAlign, snapPagination, this.value.enableSnapToStart, this.value.enableSnapToEnd);
+      let snapPagination = [];
+      let isArray = true;
+      if (Array.isArray(this.value.snapPagination)) {
+        for (let i = 0; i <= this.value.snapPagination.length; i++) {
+          let item = this.value.snapPagination[i];
+          snapPagination.push(item);
+        }
+      }
+      else {
+        isArray = false;
+      }
+      if (isArray) {
+        GetUINativeModule().scroll.setScrollSnap(node, this.value.snapAlign, snapPagination, this.value.enableSnapToStart, this.value.enableSnapToEnd);
+      }
+      else {
+        GetUINativeModule().scroll.setScrollSnap(node, this.value.snapAlign, this.value.snapPagination, this.value.enableSnapToStart, this.value.enableSnapToEnd);
+      }
     }
   }
   checkObjectDiff() {
-    return !isBaseOrResourceEqual(this.stageValue, this.value);
+    return !((this.stageValue.snapAlign === this.value.snapAlign) &&
+      (this.stageValue.enableSnapToStart === this.value.enableSnapToStart) &&
+      (this.stageValue.enableSnapToEnd === this.value.enableSnapToEnd) &&
+      (this.stageValue.snapPagination === this.value.snapPagination));
   }
 }
 ScrollScrollSnapModifier.identity = Symbol('scrollSnap');
@@ -9300,7 +9312,8 @@ class ArkScrollComponent extends ArkComponent {
     return this;
   }
   enableScrollInteraction(value) {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, ScrollEnableScrollInteractionModifier.identity, ScrollEnableScrollInteractionModifier, value);
+    return this;
   }
   friction(value) {
     modifierWithKey(this._modifiersWithKeys, ScrollFrictionModifier.identity, ScrollFrictionModifier, value);

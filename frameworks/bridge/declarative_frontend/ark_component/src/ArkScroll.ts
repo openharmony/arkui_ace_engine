@@ -68,25 +68,33 @@ class ScrollFrictionModifier extends ModifierWithKey<number | Resource> {
 class ScrollScrollSnapModifier extends ModifierWithKey<ArkScrollSnapOptions> {
   static identity: symbol = Symbol('scrollSnap');
   applyPeer(node: KNode, reset: boolean): void {
-    let snapPagination = [];
-    if (Array.isArray(this.value.snapPagination)) {
-      for (let i = 0; i <= this.value.snapPagination.length; i++) {
-        let item = this.value.snapPagination[i];
-        snapPagination.push(item);
-      }
-    } else {
-      snapPagination.push(this.value.snapPagination);
-    }
-
     if (reset) {
       GetUINativeModule().scroll.resetScrollSnap(node);
     } else {
-      GetUINativeModule().scroll.setScrollSnap(node, this.value.snapAlign, snapPagination, this.value.enableSnapToStart, this.value.enableSnapToEnd);
+      let snapPagination = [];
+      let isArray = true;
+      if (Array.isArray(this.value.snapPagination)) {
+        for (let i = 0; i <= this.value.snapPagination.length; i++) {
+          let item = this.value.snapPagination[i];
+          snapPagination.push(item);
+        }
+      } else {
+        isArray = false;
+      }
+
+      if (isArray) {
+        GetUINativeModule().scroll.setScrollSnap(node, this.value.snapAlign, snapPagination, this.value.enableSnapToStart, this.value.enableSnapToEnd);
+      } else {
+        GetUINativeModule().scroll.setScrollSnap(node, this.value.snapAlign, this.value.snapPagination, this.value.enableSnapToStart, this.value.enableSnapToEnd);
+      }
     }
   }
 
   checkObjectDiff(): boolean {
-    return !isBaseOrResourceEqual(this.stageValue, this.value);
+    return !((this.stageValue.snapAlign === this.value.snapAlign) &&
+      (this.stageValue.enableSnapToStart === this.value.enableSnapToStart) &&
+      (this.stageValue.enableSnapToEnd === this.value.enableSnapToEnd) &&
+      (this.stageValue.snapPagination === this.value.snapPagination));
   }
 }
 
@@ -246,9 +254,9 @@ class ArkScrollComponent extends ArkComponent implements ScrollAttribute {
     }
     return this;
   }
-
-  enableScrollInteraction(value: boolean): this {
-    throw new Error('Method not implemented.');
+  enableScrollInteraction(value: boolean): ScrollAttribute {
+    modifierWithKey(this._modifiersWithKeys, ScrollEnableScrollInteractionModifier.identity, ScrollEnableScrollInteractionModifier, value);
+    return this;
   }
   friction(value: number | Resource): ScrollAttribute {
     modifierWithKey(this._modifiersWithKeys, ScrollFrictionModifier.identity, ScrollFrictionModifier, value);

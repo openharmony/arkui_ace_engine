@@ -92,7 +92,7 @@ ArkUINativeModuleValue TextClockBridge::SetFontSize(ArkUIRuntimeCallInfo* runtim
     Local<JSValueRef> fontSizeArg = runtimeCallInfo->GetCallArgRef(NUM_1);
     void* nativeNode = nodeArg->ToNativePointer(vm)->Value();
     CalcDimension fontSize;
-    if (!ArkTSUtils::ParseJsDimensionFp(vm, fontSizeArg, fontSize)) {
+    if (!ArkTSUtils::ParseJsDimensionFp(vm, fontSizeArg, fontSize) || fontSize.Value() < 0) {
         GetArkUIInternalNodeAPI()->GetTextClockModifier().ResetFontSize(nativeNode);
     } else {
         GetArkUIInternalNodeAPI()->GetTextClockModifier().SetFontSize(
