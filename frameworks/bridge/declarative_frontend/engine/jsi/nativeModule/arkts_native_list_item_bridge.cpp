@@ -17,8 +17,8 @@
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_api.h"
 
 namespace OHOS::Ace::NG {
-constexpr int NUM_0 = 0;
-constexpr int NUM_1 = 1;
+constexpr int32_t NUM_0 = 0;
+constexpr int32_t NUM_1 = 1;
 
 ArkUINativeModuleValue ListItemBridge::SetListItemSelected(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {

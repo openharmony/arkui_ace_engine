@@ -492,19 +492,6 @@ class ArkScrollEdgeEffect implements Equable {
   }
 }
 
-class ArkListNestedScrollOptions implements Equable {
-  scrollForward: number;
-  scrollBackward: number;
-  constructor() {
-    this.scrollForward = undefined;
-    this.scrollBackward = undefined;
-  }
-  isEqual(another: ArkListNestedScrollOptions): boolean {
-    return (this.scrollForward === another.scrollForward &&
-      this.scrollBackward === another.scrollBackward)
-  }
-}
-
 class ArkFont implements Equable {
   size: Length;
   weight: number | string;

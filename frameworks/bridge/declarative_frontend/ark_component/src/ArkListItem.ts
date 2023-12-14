@@ -22,10 +22,7 @@ class ListItemSelectedModifier extends ModifierWithKey<boolean> {
     } else {
       GetUINativeModule().listItem.setListItemSelected(node, this.value!);
     }
-  }
-  checkObjectDiff(): boolean {
-    return false;
-  }
+  }  
 }
 
 class ListItemSelectableModifier extends ModifierWithKey<boolean> {
@@ -36,9 +33,6 @@ class ListItemSelectableModifier extends ModifierWithKey<boolean> {
     } else {
       GetUINativeModule().listItem.setSelectable(node, this.value!);
     }
-  }
-  checkObjectDiff(): boolean {
-    return false;
   }
 }
 class ArkListItemComponent extends ArkComponent implements ListItemAttribute {
