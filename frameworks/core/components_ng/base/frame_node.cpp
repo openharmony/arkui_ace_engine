@@ -1709,6 +1709,8 @@ HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& pare
 
     auto childNode = GetDispatchFrameNode(touchRes);
     if (childNode != nullptr) {
+        TAG_LOGD(AceLogTag::ACE_UIEVENT, "%{public}s do TouchTest, parameter isDispatch is true.",
+            childNode->GetInspectorId()->c_str());
         auto hitResult = childNode->TouchTest(
             globalPoint, localPoint, subRevertPoint, touchRestrict, newComingTargets, touchId, true);
         if (hitResult == HitTestResult::STOP_BUBBLING) {
