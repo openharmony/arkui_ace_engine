@@ -27,15 +27,15 @@ class MenuFontModifier extends ModifierWithKey<Font> {
   }
   static identity: Symbol = Symbol('font');
   applyPeer(node: KNode, reset: boolean): void {
-    if (reset) {
+    if (reset || !this.value) {
       GetUINativeModule().menu.resetFont(node);
     }
     else {
       GetUINativeModule().menu.setFont(node,
-        this.value?.size ?? undefined,
-        this.value?.weight ?? undefined,
-        this.value?.family ?? undefined,
-        this.value?.style ?? undefined);
+        this.value.size,
+        this.value.weight,
+        this.value.family,
+        this.value.style);
     }
   }
 

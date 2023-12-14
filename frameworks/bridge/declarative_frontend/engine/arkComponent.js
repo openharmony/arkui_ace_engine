@@ -13031,12 +13031,11 @@ class MenuFontModifier extends ModifierWithKey {
     super(value);
   }
   applyPeer(node, reset) {
-    let _a, _b, _c, _d, _e, _f, _g, _h;
-    if (reset) {
+    if (reset || !this.value) {
       GetUINativeModule().menu.resetFont(node);
     }
     else {
-      GetUINativeModule().menu.setFont(node, (_b = (_a = this.value) === null || _a === void 0 ? void 0 : _a.size) !== null && _b !== void 0 ? _b : undefined, (_d = (_c = this.value) === null || _c === void 0 ? void 0 : _c.weight) !== null && _d !== void 0 ? _d : undefined, (_f = (_e = this.value) === null || _e === void 0 ? void 0 : _e.family) !== null && _f !== void 0 ? _f : undefined, (_h = (_g = this.value) === null || _g === void 0 ? void 0 : _g.style) !== null && _h !== void 0 ? _h : undefined);
+      GetUINativeModule().menu.setFont(node, this.value.size, this.value.weight, this.value.family, this.value.style);
     }
   }
   checkObjectDiff() {

@@ -63,6 +63,10 @@ ArkUINativeModuleValue MenuBridge::SetFont(ArkUIRuntimeCallInfo* runtimeCallInfo
     Local<JSValueRef> familyArg = runtimeCallInfo->GetCallArgRef(NUM_3);
     Local<JSValueRef> styleArg = runtimeCallInfo->GetCallArgRef(NUM_4);
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+    if (sizeArg->IsUndefined() && weightArg->IsUndefined() && familyArg->IsUndefined() && styleArg->IsUndefined()) {
+        GetArkUIInternalNodeAPI()->GetMenuModifier().ResetFont(nativeNode);
+        return panda::JSValueRef::Undefined(vm);
+    }
 
     CalcDimension fontSize = Dimension(-1.0);
     ArkTSUtils::ParseJsDimensionFp(vm, sizeArg, fontSize, false);
