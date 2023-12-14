@@ -1852,6 +1852,12 @@ void OverlayManager::ResetLowerNodeFocusable(const RefPtr<FrameNode>& currentOve
             pageFocusHub->SetParentFocusable(true);
             return;
         }
+        if (node->GetTag() == V2::ATOMIC_SERVICE_ETS_TAG) {
+            auto serviceFocusHub = node->GetFocusHub();
+            CHECK_NULL_VOID(serviceFocusHub);
+            serviceFocusHub->SetParentFocusable(true);
+            return;
+        }
         auto focusHub = node->GetOrCreateFocusHub();
         if (focusHub->IsCurrentFocus()) {
             focusHub->SetParentFocusable(true);
