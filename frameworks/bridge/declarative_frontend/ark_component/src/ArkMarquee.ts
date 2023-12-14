@@ -33,15 +33,15 @@ class ArkMarqueeComponent extends ArkComponent implements MarqueeAttribute {
     return this;
   }
   allowScale(value: boolean): this {
-    modifierWithKey(this._modifiersWithKeys,MarqueeAllowScaleModifier.identity,MarqueeAllowScaleModifier, value);
+    modifierWithKey(this._modifiersWithKeys, MarqueeAllowScaleModifier.identity, MarqueeAllowScaleModifier, value);
     return this;
   }
   fontWeight(value: string | number | FontWeight): this {
-    modifierWithKey(this._modifiersWithKeys, MarqueeFontWeightModifier.identity,MarqueeFontWeightModifier, value);
+    modifierWithKey(this._modifiersWithKeys, MarqueeFontWeightModifier.identity, MarqueeFontWeightModifier, value);
     return this;
   }
   fontFamily(value: any): this {
-    modifierWithKey(this._modifiersWithKeys, MarqueeFontFamilyModifier.identity,MarqueeFontFamilyModifier, value as string);
+    modifierWithKey(this._modifiersWithKeys, MarqueeFontFamilyModifier.identity, MarqueeFontFamilyModifier, value as string);
     return this;
   }
   onStart(event: () => void): this {

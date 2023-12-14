@@ -162,8 +162,8 @@ void SetTextTextOverflow(NodeHandle node, int32_t value)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    TextOverflow value_textOverflow = static_cast<TextOverflow>(value);
-    TextModelNG::SetTextOverflow(frameNode, value_textOverflow);
+    TextOverflow valueTextOverflow = static_cast<TextOverflow>(value);
+    TextModelNG::SetTextOverflow(frameNode, valueTextOverflow);
 }
 
 void ResetTextTextOverflow(NodeHandle node)
