@@ -215,4 +215,236 @@ HWTEST_F(LayoutWrapperNodeTestNg, LayoutWrapperNodeTestNg007, TestSize.Level1)
     wrapper->LayoutOverlay();
     EXPECT_EQ(childWrapper->GetGeometryNode()->GetFrameRect().GetOffset(), OffsetF(1, 1));
 }
+
+/**
+ * @tc.name: LayoutWrapperNodeTestNg008
+ * @tc.desc: Test SwapDirtyLayoutWrapperOnMainThread child is an empty branch .
+ * @tc.type: FUNC
+ */
+HWTEST_F(LayoutWrapperNodeTestNg, LayoutWrapperNodeTestNg008, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create frameNode.
+     */
+    RefPtr<FrameNode> frameNode = FrameNode::CreateFrameNode(ROW_FRAME_NODE, NODE_ID_0, AceType::MakeRefPtr<Pattern>());
+
+    /**
+     * @tc.steps: step2. Create geometryNode.
+     */
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+
+    /**
+     * @tc.steps: step3. Create layoutWrapper.
+     */
+    RefPtr<LayoutWrapperNode> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, frameNode->GetLayoutProperty());
+
+    /**
+     * @tc.steps: step4. Call SwapDirtyLayoutWrapperOnMainThread.
+     * @tc.expected: child is an null.
+     */
+    layoutWrapper->AppendChild(nullptr, true);
+    layoutWrapper->isActive_ = true;
+    layoutWrapper->SwapDirtyLayoutWrapperOnMainThread();
+    RefPtr<LayoutWrapperNode> child = layoutWrapper->children_.front();
+    EXPECT_EQ(child, nullptr);
+}
+
+/**
+ * @tc.name: LayoutWrapperNodeTestNg009
+ * @tc.desc: Test SwapDirtyLayoutWrapperOnMainThreadForChild child is an empty branch .
+ * @tc.type: FUNC
+ */
+HWTEST_F(LayoutWrapperNodeTestNg, LayoutWrapperNodeTestNg009, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create frameNode.
+     */
+    RefPtr<FrameNode> frameNode = FrameNode::CreateFrameNode(ROW_FRAME_NODE, NODE_ID_0, AceType::MakeRefPtr<Pattern>());
+
+    /**
+     * @tc.steps: step2. Create geometryNode.
+     */
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+
+    /**
+     * @tc.steps: step3. Create layoutWrapper.
+     */
+    RefPtr<LayoutWrapperNode> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, frameNode->GetLayoutProperty());
+
+    /**
+     * @tc.steps: step4. Call SwapDirtyLayoutWrapperOnMainThreadForChild.
+     * @tc.expected: child is an null.
+     */
+    RefPtr<LayoutWrapperNode> child = nullptr;
+    layoutWrapper->SwapDirtyLayoutWrapperOnMainThreadForChild(child);
+    EXPECT_EQ(child, nullptr);
+}
+
+/**
+ * @tc.name: LayoutWrapperNodeTestNg010
+ * @tc.desc: Test SwapDirtyLayoutWrapperOnMainThreadForChild geometryTransition is not empty branch .
+ * @tc.type: FUNC
+ */
+HWTEST_F(LayoutWrapperNodeTestNg, LayoutWrapperNodeTestNg010, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create frameNode.
+     */
+    RefPtr<FrameNode> frameNode = FrameNode::CreateFrameNode(ROW_FRAME_NODE, NODE_ID_0, AceType::MakeRefPtr<Pattern>());
+
+    /**
+     * @tc.steps: step2. Create geometryNode.
+     */
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+
+    /**
+     * @tc.steps: step3. Create GeometryTransition.
+     */
+    RefPtr<GeometryTransition> geometryTransition = AceType::MakeRefPtr<GeometryTransition>("test", true);
+    geometryTransition->state_ = GeometryTransition::State::ACTIVE;
+    geometryTransition->inNode_ = frameNode;
+    geometryTransition->outNode_ = frameNode;
+    geometryTransition->hasInAnim_ = true;
+
+    /**
+     * @tc.steps: step4. Create layoutWrapper.
+     */
+    RefPtr<LayoutWrapperNode> childWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, frameNode->GetLayoutProperty());
+    childWrapper->layoutProperty_->geometryTransition_ = geometryTransition;
+    childWrapper->isActive_ = true;
+    childWrapper->layoutProperty_->UpdateGridProperty(DEFAULT_GRID_SPAN, DEFAULT_GRID_OFFSET, GridSizeType::UNDEFINED);
+
+    RefPtr<LayoutWrapperNode> wrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, frameNode->GetLayoutProperty());
+    wrapper->AppendChild(childWrapper, true);
+    wrapper->isActive_ = true;
+    wrapper->SwapDirtyLayoutWrapperOnMainThreadForChild(childWrapper);
+}
+
+/**
+ * @tc.name: LayoutWrapperNodeTestNg011
+ * @tc.desc: Test GetAllChildrenWithBuild .
+ * @tc.type: FUNC
+ */
+HWTEST_F(LayoutWrapperNodeTestNg, LayoutWrapperNodeTestNg011, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create frameNode.
+     */
+    RefPtr<FrameNode> frameNode = FrameNode::CreateFrameNode(ROW_FRAME_NODE, NODE_ID_0, AceType::MakeRefPtr<Pattern>());
+
+    /**
+     * @tc.steps: step2. Create geometryNode.
+     */
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+
+    /**
+     * @tc.steps: step3. Create layoutWrapper.
+     */
+    RefPtr<LayoutWrapperNode> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, frameNode->GetLayoutProperty());
+
+    /**
+     * @tc.steps: step4. Add Children.
+     * @tc.expected: Children add successful.
+     */
+    RefPtr<LayoutWrapperNode> layoutWrapper1 =
+        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, frameNode->GetLayoutProperty());
+    layoutWrapper->AppendChild(layoutWrapper1, false);
+    EXPECT_EQ(layoutWrapper->children_.size(), 1);
+
+    RefPtr<LayoutWrapperNode> layoutWrapper2 =
+        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, frameNode->GetLayoutProperty());
+    layoutWrapper->AppendChild(layoutWrapper2, false);
+    EXPECT_EQ(layoutWrapper->children_.size(), 2);
+
+    /**
+     * @tc.steps: step5. set overlayChild_.
+     * @tc.expected: overlayChild_ is not null.
+     */
+    RefPtr<LayoutWrapperNode> layoutWrapper3 =
+        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, frameNode->GetLayoutProperty());
+    layoutWrapper->AppendChild(layoutWrapper3, true);
+    EXPECT_EQ(layoutWrapper->children_.size(), 2);
+    EXPECT_TRUE(layoutWrapper->overlayChild_);
+
+    /**
+     * @tc.steps: step6. GetAllChildrenWithBuild.
+     * @tc.expected: cachedList_ is same with children.
+     */
+    layoutWrapper->overlayChild_->isActive_ = true;
+    layoutWrapper->GetAllChildrenWithBuild();
+    EXPECT_EQ(layoutWrapper->cachedList_.size(), layoutWrapper->children_.size());
+}
+
+/**
+ * @tc.name: LayoutWrapperNodeTestNg012
+ * @tc.desc: Test Measure .
+ * @tc.type: FUNC
+ */
+HWTEST_F(LayoutWrapperNodeTestNg, LayoutWrapperNodeTestNg012, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create frameNode.
+     */
+    RefPtr<FrameNode> frameNode = FrameNode::CreateFrameNode(ROW_FRAME_NODE, NODE_ID_0, AceType::MakeRefPtr<Pattern>());
+    frameNode->layoutPriority_ = 1;
+
+    /**
+     * @tc.steps: step2. Create geometryNode.
+     */
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+
+    /**
+     * @tc.steps: step3. Create layoutWrapper.
+     */
+    RefPtr<LayoutWrapperNode> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, frameNode->GetLayoutProperty());
+
+    /**
+     * @tc.steps: step4. Create LayoutAlgorithmWrapper.
+     * @tc.expected: layoutAlgorithm is not null.
+     */
+    auto layoutAlgorithmT = AceType::MakeRefPtr<LayoutAlgorithm>();
+    auto layoutAlgorithm = AceType::MakeRefPtr<LayoutAlgorithmWrapper>(layoutAlgorithmT, false, false);
+    layoutWrapper->layoutAlgorithm_ = layoutAlgorithm;
+    layoutAlgorithm->skipMeasure_ = false;
+
+    /**
+     * @tc.steps: step5. Create GeometryTransition.
+     */
+    RefPtr<FrameNode> frameNode1 =
+        FrameNode::CreateFrameNode(ROW_FRAME_NODE, NODE_ID_1, AceType::MakeRefPtr<Pattern>());
+    RefPtr<GeometryTransition> geometryTransition = AceType::MakeRefPtr<GeometryTransition>("test", true);
+    geometryTransition->state_ = GeometryTransition::State::ACTIVE;
+    geometryTransition->inNode_ = frameNode;
+    geometryTransition->outNode_ = frameNode1;
+    geometryTransition->hasInAnim_ = true;
+    layoutWrapper->layoutProperty_->geometryTransition_ = geometryTransition;
+
+    /**
+     * @tc.steps: step6. Create LayoutConstraintF and Call Measure.
+     * @tc.expected: IsRunning and IsNodeInAndActive is true.
+     */
+    layoutWrapper->SetRootMeasureNode();
+    EXPECT_TRUE(layoutWrapper->IsRootMeasureNode());
+    LayoutConstraintF parentLayoutConstraint;
+    layoutWrapper->Measure(parentLayoutConstraint);
+    EXPECT_TRUE(geometryTransition->IsRunning(layoutWrapper->GetHostNode()));
+    EXPECT_TRUE(geometryTransition->IsNodeInAndActive(layoutWrapper->GetHostNode()));
+
+    /**
+     * @tc.steps: step7. set overlayChild_.
+     * @tc.expected: IsRunning and IsNodeInAndActive is true.
+     */
+    RefPtr<LayoutWrapperNode> layoutWrapper1 =
+        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, frameNode->GetLayoutProperty());
+    layoutWrapper->overlayChild_ = layoutWrapper1;
+    layoutWrapper->Measure(parentLayoutConstraint);
+    EXPECT_TRUE(geometryTransition->IsRunning(layoutWrapper->GetHostNode()));
+    EXPECT_TRUE(geometryTransition->IsNodeInAndActive(layoutWrapper->GetHostNode()));
+}
 } // namespace OHOS::Ace::NG
