@@ -58,8 +58,6 @@ public:
                 return;
             }
             const double defaultCachedAlpha = 0.4;
-            const double defaultLoadBGAlpha = 0.6;
-            const double defaultRingBackgroundOpacity = 0.03;
             Color defaultColor = Color::FromRGBO(18, 24, 31, 1.0);
             theme->trackThickness_ = pattern->GetAttr<Dimension>("progress_thickness", 0.0_vp);
             theme->trackWidth_ = pattern->GetAttr<Dimension>("progress_default_width", 0.0_vp);
@@ -78,19 +76,19 @@ public:
             theme->bubbleRadius_ = pattern->GetAttr<Dimension>("progress_bubble_radius", 0.0_vp);
             theme->bubbleDiameter_ = pattern->GetAttr<Dimension>("progress_bubble_diameter", 0.0_vp);
             theme->progressHeight_ = pattern->GetAttr<Dimension>("progress_button_download_height", 0.0_vp);
-            theme->trackBgColor_ = pattern->GetAttr<Color>(PATTERN_BG_COLOR, Color::RED);
-            theme->trackSelectedColor_ = pattern->GetAttr<Color>(PATTERN_FG_COLOR, Color::RED);
+            theme->trackBgColor_ = pattern->GetAttr<Color>("bg_color", Color::RED);
+            theme->trackSelectedColor_ = pattern->GetAttr<Color>("fg_color", Color::RED);
             theme->trackCachedColor_ = theme->trackSelectedColor_
                 .BlendOpacity(pattern->GetAttr<double>("fg_color_cached_alpha", defaultCachedAlpha));
             theme->progressColor_ = pattern->GetAttr<Color>("fg_progress_color", Color::RED);
-            theme->loadingColor_ = theme->progressColor_
-                .BlendOpacity(pattern->GetAttr<double>("loading_progress_bg_color_alpha", defaultLoadBGAlpha));
+            theme->loadingColor_ = pattern->GetAttr<Color>("fg_progress_color", Color::RED);
             theme->moonFrontColor_ = pattern->GetAttr<Color>("moon_progress_fg_color", Color::RED)
                 .BlendOpacity(pattern->GetAttr<double>("moon_progress_fg_color_alpha", 1.0));
             theme->moonTrackBackgroundColor_ = pattern->GetAttr<Color>("moon_progress_bg_color", Color::RED)
                 .BlendOpacity(pattern->GetAttr<double>("moon_progress_bg_color_alpha", 1.0))
                 .BlendOpacity(pattern->GetAttr<double>("moon_progress_bg_color_alpha_ex", 1.0));
-            theme->borderColor_ = pattern->GetAttr<Color>("progress_border_color", Color::RED);
+            theme->borderColor_ = pattern->GetAttr<Color>("progress_border_color", Color::RED)
+                .BlendOpacity(pattern->GetAttr<double>("progress_border_color_alpha", 1.0));
             theme->maskColor_ = pattern->GetAttr<Color>("progress_mask_color", Color::RED);
             theme->borderWidth_ = pattern->GetAttr<Dimension>("progress_border_width", 1.0_vp);
 
@@ -99,7 +97,6 @@ public:
             theme->capsuleSelectColor_ = pattern->GetAttr<Color>("capsule_progress_select_color", Color::RED);
             theme->selectColorAlpha_ = pattern->GetAttr<double>("capsule_progress_default_alpha", 1.0);
             theme->capsuleSelectColor_ = theme->capsuleSelectColor_.BlendOpacity(theme->selectColorAlpha_);
-            theme->borderColor_ = theme->capsuleSelectColor_;
             theme->progressDisable_ = pattern->GetAttr<double>("progress_disabled_alpha", 1.0);
             theme->clickEffect_ = pattern->GetAttr<Color>("progress_click_effect", Color::RED);
             theme->capsuleBgColor_ = pattern->GetAttr<Color>("capsule_progress_bg_color", Color::RED)
@@ -109,7 +106,7 @@ public:
             theme->ringProgressBeginSideColor_ =
                 pattern->GetAttr<Color>("ring_progress_fg_color_begin", theme->trackSelectedColor_);
             theme->ringProgressBackgroundColor_ =
-                theme->trackBgColor_.ChangeOpacity(defaultRingBackgroundOpacity);
+                pattern->GetAttr<Color>("ring_progress_bg_color", Color::GRAY);
         }
     };
 

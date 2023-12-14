@@ -1233,7 +1233,7 @@ void IndexerPattern::IndexerHoverInAnimation()
         auto indexerTheme = pipeline->GetTheme<IndexerTheme>();
         CHECK_NULL_VOID(indexerTheme);
         renderContext->UpdateBackgroundColor(
-            indexerTheme->GetSlipHoverBackgroundColor().ChangeOpacity(IndexerTheme::SLIP_BACKGROUND_OPACITY));
+            indexerTheme->GetSlipHoverBackgroundColor());
     });
 }
 
@@ -1272,7 +1272,7 @@ void IndexerPattern::IndexerPressInAnimation()
         auto indexerTheme = pipeline->GetTheme<IndexerTheme>();
         CHECK_NULL_VOID(indexerTheme);
         renderContext->UpdateBackgroundColor(
-            indexerTheme->GetSlipHoverBackgroundColor().ChangeOpacity(IndexerTheme::SLIP_PRESS_BACKGROUND_OPACITY));
+            indexerTheme->GetSlipHoverBackgroundColor());
     });
 }
 
@@ -1292,7 +1292,7 @@ void IndexerPattern::IndexerPressOutAnimation()
         auto indexerTheme = pipeline->GetTheme<IndexerTheme>();
         CHECK_NULL_VOID(indexerTheme);
         renderContext->UpdateBackgroundColor(
-            indexerTheme->GetSlipHoverBackgroundColor().ChangeOpacity(IndexerTheme::SLIP_BACKGROUND_OPACITY));
+            indexerTheme->GetSlipHoverBackgroundColor());
     });
 }
 
