@@ -149,6 +149,11 @@ struct BlurStyleOption {
     }
 };
 
+struct MenuPreviewAnimationOptions {
+    float scaleFrom { -1.0f };
+    float scaleTo { -1.0f };
+};
+
 struct EffectOption {
     Dimension radius;
     double saturation { 1.0f };
