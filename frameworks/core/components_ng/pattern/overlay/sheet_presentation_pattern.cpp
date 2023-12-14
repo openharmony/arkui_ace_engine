@@ -132,6 +132,31 @@ void SheetPresentationPattern::OnAttachToFrameNode()
     pipelineContext->AddWindowSizeChangeCallback(host->GetId());
     host->GetLayoutProperty()->UpdateMeasureType(MeasureType::MATCH_PARENT);
     host->GetLayoutProperty()->UpdateAlignment(Alignment::TOP_LEFT);
+    auto targetNode = FrameNode::GetFrameNode(targetTag_, targetId_);
+    CHECK_NULL_VOID(targetNode);
+    pipelineContext->AddOnAreaChangeNode(targetNode->GetId());
+    OnAreaChangedFunc onAreaChangedFunc = [sheetNodeWk = WeakPtr<FrameNode>(host)](const RectF& /* oldRect */,
+                                              const OffsetF& /* oldOrigin */, const RectF& /* rect */,
+                                              const OffsetF& /* origin */) {
+        auto sheetNode = sheetNodeWk.Upgrade();
+        CHECK_NULL_VOID(sheetNode);
+        auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+        CHECK_NULL_VOID(sheetPattern);
+        if (sheetPattern->GetSheetType() == SheetType::SHEET_POPUP) {
+            sheetNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        }
+    };
+    targetNode->SetOnAreaChangeCallback(std::move(onAreaChangedFunc));
+}
+
+void SheetPresentationPattern::OnDetachFromFrameNode(FrameNode* frameNode)
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->RemoveWindowSizeChangeCallback(frameNode->GetId());
+    auto targetNode = FrameNode::GetFrameNode(targetTag_, targetId_);
+    CHECK_NULL_VOID(targetNode);
+    pipeline->RemoveOnAreaChangeNode(targetNode->GetId());
 }
 
 // initial drag gesture event
@@ -655,7 +680,8 @@ void SheetPresentationPattern::CheckSheetHeightChange()
         sheetType_ = GetSheetType();
         isFirstInit_ = false;
     } else {
-        if ((sheetGeometryNode->GetFrameSize().Height() != sheetHeight_) || (sheetType_ != GetSheetType())) {
+        if ((!NearEqual(sheetGeometryNode->GetFrameSize().Height(), sheetHeight_)) || (sheetType_ != GetSheetType()) ||
+            windowChanged_) {
             sheetType_ = GetSheetType();
             sheetHeight_ = sheetGeometryNode->GetFrameSize().Height();
             auto pipelineContext = PipelineContext::GetCurrentContext();
@@ -667,7 +693,14 @@ void SheetPresentationPattern::CheckSheetHeightChange()
             pipelineContext->FlushUITasks();
             auto sheetStyle = layoutProperty->GetSheetStyleValue();
             overlayManager->ComputeSheetOffset(sheetStyle, host);
+            if (sheetType_ == SheetType::SHEET_POPUP) {
+                auto renderContext = GetRenderContext();
+                CHECK_NULL_VOID(renderContext);
+                renderContext->OnTransformTranslateUpdate({ 0.0f, 0.0f, 0.0f });
+                renderContext->UpdateOpacity(SHEET_VISIABLE_ALPHA);
+            }
             overlayManager->PlaySheetTransition(host, true, false, true);
+            windowChanged_ = false;
         }
     }
 }
@@ -831,8 +864,7 @@ void SheetPresentationPattern::StartOffsetEnteringAnimation()
             CHECK_NULL_VOID(pattern);
             auto renderContext = pattern->GetRenderContext();
             CHECK_NULL_VOID(renderContext);
-            renderContext->UpdateOffset(OffsetT<Dimension>());
-            renderContext->SyncGeometryProperties(nullptr);
+            renderContext->OnTransformTranslateUpdate({ 0.0f, 0.0f, 0.0f });
         },
         nullptr);
 }
@@ -876,8 +908,7 @@ void SheetPresentationPattern::StartOffsetExitingAnimation()
             CHECK_NULL_VOID(pattern);
             auto renderContext = pattern->GetRenderContext();
             CHECK_NULL_VOID(renderContext);
-            renderContext->UpdateOffset(pattern->GetInvisibleOffset());
-            renderContext->SyncGeometryProperties(nullptr);
+            renderContext->OnTransformTranslateUpdate({ 0.0f, -SHEET_INVISIABLE_OFFSET, 0.0f });
         },
         nullptr);
 }
@@ -925,20 +956,12 @@ bool SheetPresentationPattern::PostTask(const TaskExecutor::Task& task)
     return taskExecutor->PostTask(task, TaskExecutor::TaskType::UI);
 }
 
-OffsetT<Dimension> SheetPresentationPattern::GetInvisibleOffset()
-{
-    OffsetT<Dimension> offset;
-    offset.AddY(SHEET_INVISIABLE_OFFSET * -1);
-    return offset;
-}
-
 void SheetPresentationPattern::ResetToInvisible()
 {
     auto renderContext = GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     renderContext->UpdateOpacity(SHEET_INVISIABLE_ALPHA);
-    renderContext->UpdateOffset(GetInvisibleOffset());
-    renderContext->SyncGeometryProperties(nullptr);
+    renderContext->OnTransformTranslateUpdate({ 0.0f, -SHEET_INVISIABLE_OFFSET, 0.0f });
 }
 
 bool SheetPresentationPattern::IsFold()
@@ -1033,6 +1056,9 @@ void SheetPresentationPattern::OnWindowSizeChanged(int32_t width, int32_t height
             ScrollTo(-scrollHeight_);
         }
         TranslateTo(height_);
+    }
+    if (type == WindowSizeChangeReason::ROTATION) {
+        windowChanged_ = true;
     }
 }
 
