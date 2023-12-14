@@ -426,6 +426,27 @@ void DragDropManager::PrintDragFrameNode(const Point& point, const RefPtr<FrameN
     }
 }
 
+void DragDropManager::OnDragMoveOut(const PointerEvent& pointerEvent, const std::string& extraInfo)
+{
+    Point point  = pointerEvent.GetPoint();
+#ifdef ENABLE_DRAG_FRAMEWORK
+    auto container = Container::Current();
+    if (container && container->IsScenceBoardWindow()) {
+        if (IsDragged() && IsWindowConsumed()) {
+            SetIsWindowConsumed(false);
+            return;
+        }
+    }
+    SetIsWindowConsumed(false);
+#endif // ENABLE_DRAG_FRAMEWORK
+    UpdateVelocityTrackerPoint(point, false);
+    UpdateDragListener(Point(-1, -1));
+    if (preTargetFrameNode_) {
+        FireOnDragEvent(preTargetFrameNode_, point, DragEventType::LEAVE, extraInfo_);
+        preTargetFrameNode_ = nullptr;
+    }
+}
+
 void DragDropManager::OnDragMove(const PointerEvent& pointerEvent, const std::string& extraInfo)
 {
     Point point  = pointerEvent.GetPoint();

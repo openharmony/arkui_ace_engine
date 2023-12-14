@@ -68,6 +68,8 @@ void DragDropManager::OnDragMove(const PointerEvent& pointerEvent, const std::st
     currentId_ = static_cast<int32_t>(point.GetX());
 }
 
+void DragDropManager::OnDragMoveOut(const PointerEvent& pointerEvent, const std::string& extraInfo) {}
+
 void DragDropManager::OnDragEnd(const PointerEvent& pointerEvent, const std::string& extraInfo) {}
 
 void DragDropManager::OnTextDragEnd(float globalX, float globalY, const std::string& extraInfo) {}

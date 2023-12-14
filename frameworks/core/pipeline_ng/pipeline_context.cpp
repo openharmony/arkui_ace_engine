@@ -2387,6 +2387,7 @@ void PipelineContext::OnDragEvent(const PointerEvent& pointerEvent, DragEventAct
 {
     auto manager = GetDragDropManager();
     CHECK_NULL_VOID(manager);
+    std::string extraInfo;
 #ifdef ENABLE_DRAG_FRAMEWORK
     auto container = Container::Current();
     if (container && container->IsScenceBoardWindow()) {
@@ -2400,12 +2401,12 @@ void PipelineContext::OnDragEvent(const PointerEvent& pointerEvent, DragEventAct
         return;
     }
     if (action == DragEventAction::DRAG_EVENT_OUT) {
+        manager->OnDragMoveOut(pointerEvent, extraInfo);
         manager->ClearSummary();
         manager->ClearExtraInfo();
+        return;
     }
 #endif // ENABLE_DRAG_FRAMEWORK
-
-    std::string extraInfo;
 
 #ifdef ENABLE_DRAG_FRAMEWORK
     if (action == DragEventAction::DRAG_EVENT_START) {
