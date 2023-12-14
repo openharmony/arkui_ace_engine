@@ -1242,7 +1242,7 @@ struct ArkUISwiperModifierAPI {
     void (*ResetSwiperNextMargin)(NodeHandle node);
     void (*SetSwiperPrevMargin)(NodeHandle node, double prevMarginValue, int32_t prevMarginUnit);
     void (*ResetSwiperPrevMargin)(NodeHandle node);
-    void (*SetSwiperDisplayCount)(NodeHandle node, const char* displayCountChar, int32_t displayCountUnit);
+    void (*SetSwiperDisplayCount)(NodeHandle node, const char* displayCountChar, const char* displayCountType);
     void (*ResetSwiperDisplayCount)(NodeHandle node);
     void (*SetSwiperDisplayArrow)(NodeHandle node, const char* displayArrowStr);
     void (*ResetSwiperDisplayArrow)(NodeHandle node);
