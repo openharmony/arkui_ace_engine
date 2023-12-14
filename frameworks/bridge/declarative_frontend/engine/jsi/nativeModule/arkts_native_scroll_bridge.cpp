@@ -289,7 +289,7 @@ ArkUINativeModuleValue ScrollBridge::SetScrollBarWidth(ArkUIRuntimeCallInfo* run
     if (!ArkTSUtils::ParseJsDimensionVpNG(vm, scrollBarArg, scrollBarWidth, false)) {
         GetArkUIInternalNodeAPI()->GetScrollModifier().ResetScrollScrollBarWidth(nativeNode);
     } else {
-        if (LessNotEqual(scrollBarWidth.Value(), 0.0f)) {
+        if (LessNotEqual(scrollBarWidth.Value(), 0.0)) {
             GetArkUIInternalNodeAPI()->GetScrollModifier().ResetScrollScrollBarWidth(nativeNode);
         } else {
             GetArkUIInternalNodeAPI()->GetScrollModifier().SetScrollScrollBarWidth(

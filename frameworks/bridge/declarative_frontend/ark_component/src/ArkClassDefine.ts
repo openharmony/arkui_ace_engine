@@ -1686,6 +1686,9 @@ class ArkScrollSnapOptions {
     this.enableSnapToEnd = undefined;
   }
   isEqual(another: ArkScrollSnapOptions): boolean {
-    return ((this.snapAlign === another.snapAlign) && (this.snapPagination === another.snapPagination) && (this.enableSnapToStart === another.enableSnapToStart) && (this.enableSnapToEnd === another.enableSnapToEnd));
+    return ((this.snapAlign === another.snapAlign)
+      && (this.snapPagination === another.snapPagination)
+      && (this.enableSnapToStart === another.enableSnapToStart)
+      && (this.enableSnapToEnd === another.enableSnapToEnd));
   }
 }

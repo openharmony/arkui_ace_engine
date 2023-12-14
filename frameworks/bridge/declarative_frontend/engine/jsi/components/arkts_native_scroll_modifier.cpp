@@ -118,7 +118,7 @@ void SetScrollScrollSnap(NodeHandle node, const double* paginationValue, int32_t
     }
     std::pair<bool, bool> enableSnapToSide = { snapToStart, snapToEnd };
 
-    std::vector<Dimension> snapPaginations(paginationSize);
+    std::vector<Dimension> snapPaginations;
     CalcDimension intervalSize;
     if (isArray) {
         for (auto i = 0; i < paginationSize; i++) {
@@ -149,8 +149,8 @@ void ResetScrollScrollSnap(NodeHandle node)
 
     int32_t snapAlign = DEFAULT_SNAP_ALIGN_VALUE;
     CalcDimension intervalSize = CalcDimension(DEFAULT_DIMENSION_VALUE);
-    std::vector<Dimension> snapPaginations(SNAP_START_INDEX);
-    std::pair<bool, bool> enableSnapToSide = { false, false };
+    std::vector<Dimension> snapPaginations;
+    std::pair<bool, bool> enableSnapToSide = {true, true};
     ScrollModelNG::SetScrollSnap(
         frameNode, static_cast<ScrollSnapAlign>(snapAlign), intervalSize, snapPaginations, enableSnapToSide);
 }
