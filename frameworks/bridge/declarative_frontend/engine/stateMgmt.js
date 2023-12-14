@@ -4439,62 +4439,52 @@ class ViewPU extends NativeViewPartialUpdate {
     */
     constructor(parent, localStorage, elmtId = -1, extraInfo = undefined) {
         super();
-        try {
-            this.parent_ = undefined;
-            this.childrenWeakrefMap_ = new Map();
-            // flag for initgial rendering or re-render on-going.
-            this.isRenderInProgress = false;
-            // flag if active of inActive
-            // inActive means updates are delayed
-            this.isActive_ = true;
-            this.runReuse_ = false;
-            // flag if {aboutToBeDeletedInternal} is called and the instance of ViewPU has not been GC.
-            this.isDeleting_ = false;
-            this.watchedProps = new Map();
-            this.recycleManager = undefined;
-            this.isCompFreezeAllowed = false;
-            this.extraInfo_ = undefined;
-            // Set of dependent elmtIds that need partial update
-            // during next re-render
-            this.dirtDescendantElementIds_ = new Set();
-            // registry of update functions
-            // the key is the elementId of the Component/Element that's the result of this function
-            this.updateFuncByElmtId = new Map();
-            // my LocalStorage instance, shared with ancestor Views.
-            // create a default instance on demand if none is initialized
-            this.localStoragebackStore_ = undefined;
-            // if set use the elmtId also as the ViewPU object's subscribable id.
-            // these matching is requiremrnt for updateChildViewById(elmtId) being able to
-            // find the child ViewPU object by given elmtId
-            this.id_ = elmtId == -1 ? SubscriberManager.MakeId() : elmtId;
-            this.providedVars_ = parent ? new Map(parent.providedVars_)
-                : new Map();
-            this.localStoragebackStore_ = undefined;
-            
-            if (extraInfo) {
-                this.extraInfo_ = extraInfo;
-            }
-            if (parent) {
-                // this View is not a top-level View
-                this.setCardId(parent.getCardId());
-                // Call below will set this.parent_ to parent as well
-                parent.addChild(this);
-            }
-            else if (localStorage) {
-                this.localStorage_ = localStorage;
-
-            }
-            SubscriberManager.Add(this);
-        } catch (error) {
-            let o = this;
-            let count = 0;
-            while (o) {
-                ArkTools.print("viewpu proto " + count.toString(), o);
-                o = Reflect.getPrototypeOf(o);
-                count++;
-            }
-            throw error;
+        this.parent_ = undefined;
+        this.childrenWeakrefMap_ = new Map();
+        // flag for initgial rendering or re-render on-going.
+        this.isRenderInProgress = false;
+        // flag if active of inActive
+        // inActive means updates are delayed
+        this.isActive_ = true;
+        this.runReuse_ = false;
+        // flag if {aboutToBeDeletedInternal} is called and the instance of ViewPU has not been GC.
+        this.isDeleting_ = false;
+        this.watchedProps = new Map();
+        this.recycleManager = undefined;
+        this.isCompFreezeAllowed = false;
+        this.extraInfo_ = undefined;
+        // Set of dependent elmtIds that need partial update
+        // during next re-render
+        this.dirtDescendantElementIds_ = new Set();
+        // registry of update functions
+        // the key is the elementId of the Component/Element that's the result of this function
+        this.updateFuncByElmtId = new Map();
+        // my LocalStorage instance, shared with ancestor Views.
+        // create a default instance on demand if none is initialized
+        this.localStoragebackStore_ = undefined;
+        // if set use the elmtId also as the ViewPU object's subscribable id.
+        // these matching is requiremrnt for updateChildViewById(elmtId) being able to
+        // find the child ViewPU object by given elmtId
+        this.id_ = elmtId == -1 ? SubscriberManager.MakeId() : elmtId;
+        this.providedVars_ = parent ? new Map(parent.providedVars_)
+            : new Map();
+        this.localStoragebackStore_ = undefined;
+        
+        if (extraInfo) {
+            this.extraInfo_ = extraInfo;
         }
+        if (parent) {
+            // this View is not a top-level View
+            this.setCardId(parent.getCardId());
+            // Call below will set this.parent_ to parent as well
+            parent.addChild(this);
+        }
+        else if (localStorage) {
+            this.localStorage_ = localStorage;
+            
+        }
+        SubscriberManager.Add(this);
+        
     }
     // globally unique id, this is different from compilerAssignedUniqueChildId!
     id__() {
@@ -4741,12 +4731,8 @@ class ViewPU extends NativeViewPartialUpdate {
             
             this.isRenderInProgress = true;
             
-            try {
-                updateFunc(elmtId, /* isFirstRender */ false);
-            } catch (error) {
-                stateMgmtConsole.applicationError(`${this.debugInfo()} has error in update func: ${error.message}`);
-                throw error;
-            }
+            updateFunc(elmtId, /* isFirstRender */ false);
+            
             
             this.finishUpdateFunc(elmtId);
             
@@ -4995,12 +4981,8 @@ class ViewPU extends NativeViewPartialUpdate {
             return;
         }
         const elmtId = ViewStackProcessor.AllocateNewElmetIdForNextComponent();
-        try {
-            compilerAssignedUpdateFunc(elmtId, /* is first render */ true);
-        } catch (error) {
-            stateMgmtConsole.applicationError(`${this.debugInfo()} has error in update func: ${error.message}`);
-            throw error;
-        }
+        
+        compilerAssignedUpdateFunc(elmtId, /* is first render */ true);
         // in observeComponentCreation function we do not get info about the component name, in 
         // observeComponentCreation2 we do.
         this.updateFuncByElmtId.set(elmtId, { updateFunc: compilerAssignedUpdateFunc, componentName: "unknown" });
