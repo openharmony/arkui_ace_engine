@@ -159,6 +159,10 @@ void FormRendererGroup::DeleteForm(const std::string& compId)
     FormRequest request = formRequests_.back();
     currentCompId_ = request.compId;
     HILOG_INFO("RestoreForm compId is %{public}s.", currentCompId_.c_str());
+    if (formRenderer_ == nullptr) {
+        HILOG_INFO("FormRenderer has destory");
+        return;
+    }
     formRenderer_->AttachForm(request.want, request.formJsInfo);
 }
 
