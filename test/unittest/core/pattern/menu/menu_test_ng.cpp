@@ -1669,6 +1669,33 @@ HWTEST_F(MenuTestNg, MenuPatternTestNg027, TestSize.Level1)
 }
 
 /**
+ * @tc.name: MenuPatternTestNg028
+ * @tc.desc: Verify some condition in api 11.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuTestNg, MenuPatternTestNg028, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. set current api 11, create menu wrapper and menu
+     * @tc.expected: menu blurStyle meet expectations
+     */
+    MockPipelineContext::GetCurrent()->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_ELEVEN));
+    std::vector<SelectParam> selectParams;
+    selectParams.emplace_back(std::make_pair("MenuItem1", "Icon1"));
+    auto menuWrapperNode = MenuView::Create(std::move(selectParams), 1, EMPTY_TEXT);
+    auto menuNode = AceType::DynamicCast<FrameNode>(menuWrapperNode->GetChildAtIndex(0));
+    ASSERT_NE(menuNode, nullptr);
+    auto renderContext = menuNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    /**
+     * @tc.steps: step2. create option pattern.
+     * @tc.expected: option bg color meet expectations
+     */
+    auto optionPattern = AceType::MakeRefPtr<OptionPattern>(0);
+    EXPECT_EQ(optionPattern->GetBgColor(), Color::TRANSPARENT);
+}
+
+/**
  * @tc.name: MenuLayoutAlgorithmTestNg0
  * @tc.desc: Verify positionOffset of Layout.
  * @tc.type: FUNC
