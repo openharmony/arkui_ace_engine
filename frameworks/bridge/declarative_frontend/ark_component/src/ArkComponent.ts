@@ -22,6 +22,47 @@ function GetUINativeModule() {
   return arkUINativeModule;
 }
 
+const UI_STATE_NORMAL = 0;
+const UI_STATE_PRESSED = 1;
+const UI_STATE_FOCUSED = 1 << 1;
+const UI_STATE_DISABLED = 1 << 2;
+const UI_STATE_SELECTED = 1 << 3;
+
+function applyUIAttributes(modifier: AttributeModifier, nativeNode: KNode, component: ArkComponent) {
+  let state = 0;
+  if (modifier.applyPressedAttribute !== undefined) {
+    state |= UI_STATE_PRESSED;
+  }
+  if (modifier.applyFocusedAttribute !== undefined) {
+    state |= UI_STATE_FOCUSED;
+  }
+  if (modifier.applyDisabledAttribute !== undefined) {
+    state |= UI_STATE_DISABLED;
+  }
+  if (modifier.applySelectedAttribute !== undefined) {
+    state |= UI_STATE_SELECTED;
+  }
+
+  GetUINativeModule().setSupportedUIState(nativeNode, state);
+  const currentUIState = GetUINativeModule().getUIState(nativeNode);
+
+  if (modifier.applyNormalAttribute !== undefined) {
+    modifier.applyNormalAttribute(component);
+  }
+  if (currentUIState & UI_STATE_PRESSED) {
+    modifier.applyPressedAttribute(component);
+  }
+  if (currentUIState & UI_STATE_FOCUSED) {
+    modifier.applyFocusedAttribute(component);
+  }
+  if (currentUIState & UI_STATE_DISABLED) {
+    modifier.applyDisabledAttribute(component);
+  }
+  if (currentUIState & UI_STATE_SELECTED) {
+    modifier.applySelectedAttribute(component);
+  }
+}
+
 function isResource(variable: any): variable is Resource {
   return (variable as Resource)?.bundleName !== undefined;
 }
