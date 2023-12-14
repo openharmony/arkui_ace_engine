@@ -271,6 +271,9 @@ void DotIndicatorPaintMethod::CalculateNormalMargin(const LinearVector<float>& i
 std::pair<float, float> DotIndicatorPaintMethod::CalculatePointCenterX(
     const LinearVector<float>& itemHalfSizes, float margin, float padding, float space, int32_t index)
 {
+    if (itemCount_ == 0) {
+        return { 0, 0 };
+    }
     float startCenterX = margin + padding;
     float endCenterX = margin + padding;
     if (Positive(turnPageRate_)) {
