@@ -165,7 +165,7 @@ public:
     Rect GetItemRect(int32_t index) const override;
 
     // scrollSnap
-    std::optional<float> CalePredictSnapOffset(float delta, double dragDistance = 0.0, double velocity = 0.0) override;
+    std::optional<float> CalePredictSnapOffset(float delta, float dragDistance = 0.f, float velocity = 0.f) override;
     bool NeedScrollSnapToSide(float delta) override;
     void CaleSnapOffsets();
     void CaleSnapOffsetsByInterval(ScrollSnapAlign scrollSnapAlign);
@@ -307,7 +307,7 @@ private:
     void ScrollSnapTrigger();
     void CheckScrollable();
     OffsetF GetOffsetToScroll(const RefPtr<FrameNode>& childFrame) const;
-    float GetPagingDelta(double dragDistance, double velocity) const;
+    float GetPagingDelta(float dragDistance, float velocity) const;
 
     float currentOffset_ = 0.0f;
     float lastOffset_ = 0.0f;

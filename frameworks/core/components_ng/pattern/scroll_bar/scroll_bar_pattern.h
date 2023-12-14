@@ -161,22 +161,22 @@ public:
     void OnCollectTouchTarget(const OffsetF& coordinateOffset,
         const GetEventTargetImpl& getEventTargetImpl, TouchTestResult& result);
 
-    double GetMainOffset(const Offset& offset) const
+    float GetMainOffset(const Offset& offset) const
     {
         return axis_ == Axis::HORIZONTAL ? offset.GetX() : offset.GetY();
     }
 
-    void SetDragStartPosition(double position)
+    void SetDragStartPosition(float position)
     {
         dragStartPosition_ = position;
     }
 
-    void SetDragEndPosition(double position)
+    void SetDragEndPosition(float position)
     {
         dragEndPosition_ = position;
     }
 
-    double GetDragOffset()
+    float GetDragOffset()
     {
         return dragEndPosition_ - dragStartPosition_;
     }
@@ -206,8 +206,8 @@ private:
     float scrollOffset_ = 0.0f;
     float friction_ = BAR_FRICTION;
     float frictionPosition_ = 0.0;
-    double dragStartPosition_ = 0.0;
-    double dragEndPosition_ = 0.0;
+    float dragStartPosition_ = 0.0f;
+    float dragEndPosition_ = 0.0f;
 
     float childOffset_ = 0.0f;
     RefPtr<PanRecognizer> panRecognizer_;

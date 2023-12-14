@@ -631,7 +631,7 @@ void Scrollable::HandleDragEnd(const GestureEvent& info)
     double mainPosition = GetMainOffset(Offset(info.GetGlobalPoint().GetX(), info.GetGlobalPoint().GetY()));
     if (!moved_ || info.GetInputEventType() == InputEventType::AXIS) {
         if (calePredictSnapOffsetCallback_) {
-            std::optional<float> predictSnapOffset = calePredictSnapOffsetCallback_(0.0f, 0.0, 0.0);
+            std::optional<float> predictSnapOffset = calePredictSnapOffsetCallback_(0.0f, 0.0f, 0.0f);
             if (predictSnapOffset.has_value() && !NearZero(predictSnapOffset.value())) {
                 currentPos_ = mainPosition;
                 ProcessScrollSnapSpringMotion(predictSnapOffset.value(), correctVelocity);
@@ -995,7 +995,7 @@ void Scrollable::ProcessScrollMotionStop()
 {
     if (needScrollSnapChange_ && calePredictSnapOffsetCallback_ && motion_) {
         needScrollSnapChange_ = false;
-        auto predictSnapOffset = calePredictSnapOffsetCallback_(motion_->GetFinalPosition() - currentPos_, 0.0, 0.0);
+        auto predictSnapOffset = calePredictSnapOffsetCallback_(motion_->GetFinalPosition() - currentPos_, 0.0f, 0.0f);
         if (predictSnapOffset.has_value() && !NearZero(predictSnapOffset.value())) {
             ProcessScrollSnapSpringMotion(predictSnapOffset.value(), currentVelocity_);
             return;

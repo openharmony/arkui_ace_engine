@@ -39,7 +39,7 @@ constexpr float SCROLL_BY_SPEED = 250.0f; // move 250 pixels per second
 constexpr float UNIT_CONVERT = 1000.0f;   // 1s convert to 1000ms
 constexpr Dimension SELECT_SCROLL_MIN_WIDTH = 64.0_vp;
 constexpr int32_t COLUMN_NUM = 2;
-constexpr double SCROLL_PAGING_SPEED_THRESHOLD = 1200.0;
+constexpr float SCROLL_PAGING_SPEED_THRESHOLD = 1200.0f;
 
 float CalculateOffsetByFriction(float extentOffset, float delta, float friction)
 {
@@ -668,7 +668,7 @@ bool ScrollPattern::ScrollToNode(const RefPtr<FrameNode>& focusFrameNode)
     return false;
 }
 
-std::optional<float> ScrollPattern::CalePredictSnapOffset(float delta, double dragDistance, double velocity)
+std::optional<float> ScrollPattern::CalePredictSnapOffset(float delta, float dragDistance, float velocity)
 {
     std::optional<float> predictSnapOffset;
     CHECK_NULL_RETURN(!snapOffsets_.empty(), predictSnapOffset);
@@ -886,18 +886,19 @@ float ScrollPattern::GetSelectScrollWidth()
     return finalWidth;
 }
 
-float ScrollPattern::GetPagingDelta(double dragDistance, double velocity)  const
+float ScrollPattern::GetPagingDelta(float dragDistance, float velocity)  const
 {
-    auto dragDistanceThreshold = viewPortLength_ * 0.5;
+    auto dragDistanceThreshold = viewPortLength_ * 0.5f;
     dragDistance = fmod(dragDistance, viewPortLength_);
     // dragDistance and velocity have not reached the threshold
-    if (std::abs(dragDistance) < dragDistanceThreshold && std::abs(velocity) < SCROLL_PAGING_SPEED_THRESHOLD) {
+    if (LessNotEqual(std::abs(dragDistance), dragDistanceThreshold) &&
+        LessNotEqual(std::abs(velocity), SCROLL_PAGING_SPEED_THRESHOLD)) {
         return - dragDistance;
     }
     // The direction of dragDistance is the same as the direction of velocity
-    if (dragDistance * velocity >= 0) {
+    if (GreatOrEqual(dragDistance * velocity, 0.f)) {
         auto direction = NearZero(dragDistance) ? velocity : dragDistance;
-        return - dragDistance + static_cast<float>(direction > 0 ? viewPortLength_ : -viewPortLength_);
+        return - dragDistance + (GreatNotEqual(direction, 0.f) ? viewPortLength_ : -viewPortLength_);
     }
     // The direction of dragDistance is opposite to the direction of velocity
     return - dragDistance;

@@ -389,7 +389,7 @@ void ScrollablePattern::AddScrollEvent()
     scrollable->SetOnScrollSnapCallback(scrollSnap);
 
     auto calePredictSnapOffsetCallback =
-            [weak = WeakClaim(this)](float delta, double dragDistance, double velocity) -> std::optional<float> {
+            [weak = WeakClaim(this)](float delta, float dragDistance, float velocity) -> std::optional<float> {
         auto pattern = weak.Upgrade();
         std::optional<float> predictSnapOffset;
         CHECK_NULL_RETURN(pattern, predictSnapOffset);
@@ -515,7 +515,7 @@ void ScrollablePattern::RegisterScrollBarEventTask()
     };
     scrollBar_->SetScrollEndCallback(std::move(scrollEnd));
     auto calePredictSnapOffsetCallback =
-            [weak = WeakClaim(this)](float delta, double dragDistance, double velocity) -> std::optional<float> {
+            [weak = WeakClaim(this)](float delta, float dragDistance, float velocity) -> std::optional<float> {
         auto pattern = weak.Upgrade();
         CHECK_NULL_RETURN(pattern, std::optional<float>());
         return pattern->CalePredictSnapOffset(delta, dragDistance, velocity);
@@ -697,7 +697,7 @@ void ScrollablePattern::SetScrollBarProxy(const RefPtr<ScrollBarProxy>& scrollBa
         pattern->OnScrollEnd();
     };
     auto calePredictSnapOffsetCallback =
-            [weak = WeakClaim(this)](float delta, double dragDistance, double velocity) -> std::optional<float> {
+            [weak = WeakClaim(this)](float delta, float dragDistance, float velocity) -> std::optional<float> {
         auto pattern = weak.Upgrade();
         CHECK_NULL_RETURN(pattern, std::optional<float>());
         return pattern->CalePredictSnapOffset(delta, dragDistance, velocity);
