@@ -69,6 +69,17 @@ float PipelineContext::GetCurrentRootHeight()
     return static_cast<float>(MockPipelineContext::GetCurrent()->rootHeight_);
 }
 
+std::shared_ptr<NavigationController> PipelineContext::GetNavigationController(
+    const std::string& id)
+{
+    return nullptr;
+}
+
+void PipelineContext::AddOrReplaceNavigationNode(
+    const std::string &id, const WeakPtr<FrameNode>& node) {}
+
+void PipelineContext::DeleteNavigationNode(const std::string &id) {}
+
 RefPtr<PipelineContext> PipelineContext::GetCurrentContext()
 {
     return MockPipelineContext::GetCurrent();

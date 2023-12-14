@@ -53,6 +53,11 @@ constexpr static int32_t PLATFORM_VERSION_TEN = 10;
 
 } // namespace
 
+NavigationPattern::NavigationPattern()
+{
+    navigationController_ = std::make_shared<InnerNavigationController>(WeakClaim(this));
+}
+
 RefPtr<RenderContext> NavigationPattern::GetTitleBarRenderContext()
 {
     auto hostNode = AceType::DynamicCast<NavigationGroupNode>(GetHost());
@@ -148,6 +153,7 @@ void NavigationPattern::OnModifyDone()
     auto preTopNavPath = navigationStack_->GetPreTopNavPath();
     auto pathNames = navigationStack_->GetAllPathName();
     auto preSize = navigationStack_->PreSize();
+    auto cacheNodes = navigationStack_->GetAllCacheNodes();
     NavPathList navPathList;
     auto replaceValue = navigationStack_->GetReplaceValue();
     for (size_t i = 0; i < pathNames.size(); ++i) {
@@ -171,6 +177,12 @@ void NavigationPattern::OnModifyDone()
                 uiNode = GenerateUINodeByIndex(static_cast<int32_t>(i));
             }
             navPathList.emplace_back(std::make_pair(pathName, uiNode));
+            continue;
+        }
+        uiNode = navigationStack_->GetFromCacheNode(cacheNodes, pathName);
+        if (uiNode) {
+            navPathList.emplace_back(std::make_pair(pathName, uiNode));
+            navigationStack_->RemoveCacheNode(cacheNodes, pathName, uiNode);
             continue;
         }
         uiNode = GenerateUINodeByIndex(static_cast<int32_t>(i));

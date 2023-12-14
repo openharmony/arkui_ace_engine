@@ -225,6 +225,7 @@ build_component_ng("pattern_ng") {
     "navigation/bar_item_layout_algorithm.cpp",
     "navigation/bar_item_node.cpp",
     "navigation/bar_item_pattern.cpp",
+    "navigation/inner_navigation_controller.cpp",
     "navigation/nav_bar_layout_algorithm.cpp",
     "navigation/nav_bar_node.cpp",
     "navigation/nav_bar_pattern.cpp",

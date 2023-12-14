@@ -2637,6 +2637,49 @@ void PipelineContext::RemoveIsFocusActiveUpdateEvent(const RefPtr<FrameNode>& no
     }
 }
 
+std::shared_ptr<NavigationController> PipelineContext::GetNavigationController(
+    const std::string& id)
+{
+    std::lock_guard lock(navigationMutex_);
+    auto iter = navigationNodes_.find(id);
+    if (iter == navigationNodes_.end()) {
+        return nullptr;
+    }
+
+    auto navigationGroupNode = iter->second.Upgrade();
+    CHECK_NULL_RETURN(navigationGroupNode, nullptr);
+
+    auto navigationPattern = navigationGroupNode->GetPattern<NavigationPattern>();
+    CHECK_NULL_RETURN(navigationPattern, nullptr);
+    return navigationPattern->GetNavigationController();
+}
+
+void PipelineContext::AddOrReplaceNavigationNode(
+    const std::string& id, const WeakPtr<FrameNode>& node)
+{
+    std::lock_guard lock(navigationMutex_);
+    auto frameNode = node.Upgrade();
+    CHECK_NULL_VOID(frameNode);
+    auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    CHECK_NULL_VOID(navigationGroupNode);
+    auto oldId = navigationGroupNode->GetCurId();
+    if (!oldId.empty() && navigationNodes_.find(oldId) != navigationNodes_.end()) {
+        navigationNodes_.erase(oldId);
+    }
+
+    if (!id.empty()) {
+        navigationNodes_[id] = node;
+    }
+}
+
+void PipelineContext::DeleteNavigationNode(const std::string& id)
+{
+    std::lock_guard lock(navigationMutex_);
+    if (!id.empty() && navigationNodes_.find(id) != navigationNodes_.end()) {
+        navigationNodes_.erase(id);
+    }
+}
+
 void PipelineContext::SetJSViewActive(bool active, WeakPtr<CustomNode> custom)
 {
     taskScheduler_->SetJSViewActive(active, custom);

@@ -471,6 +471,10 @@ public:
     void NotifyFillRequestSuccess(AceAutoFillType autoFillType, RefPtr<ViewDataWrap> viewDataWrap);
     void NotifyFillRequestFailed(RefPtr<FrameNode> node, int32_t errCode);
 
+    std::shared_ptr<NavigationController> GetNavigationController(const std::string& id) override;
+    void AddOrReplaceNavigationNode(const std::string& id, const WeakPtr<FrameNode>& node);
+    void DeleteNavigationNode(const std::string& id);
+
     void SetDragCleanTask(std::function<void()>&& task)
     {
         dragCleanTask_ = std::move(task);
@@ -691,6 +695,8 @@ private:
 
     std::map<int32_t, std::function<void(bool)>> isFocusActiveUpdateEvents_;
     std::map<int32_t, std::function<void(bool)>> onFormVisibleChangeEvents_;
+    mutable std::mutex navigationMutex_;
+    std::map<std::string, WeakPtr<FrameNode>> navigationNodes_;
     std::list<DelayedTask> delayedTasks_;
 
     ACE_DISALLOW_COPY_AND_MOVE(PipelineContext);
