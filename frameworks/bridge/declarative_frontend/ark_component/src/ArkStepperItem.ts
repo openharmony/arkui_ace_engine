@@ -55,6 +55,6 @@ globalThis.StepperItem.attributeModifier = function (modifier) {
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkStepperItemComponent(nativeNode);
   });
-  modifier.applyNormalAttribute(component);
+  applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
 }

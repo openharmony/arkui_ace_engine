@@ -414,6 +414,6 @@ globalThis.List.attributeModifier = function (modifier) {
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkListComponent(nativeNode);
   });
-  modifier.applyNormalAttribute(component);
+  applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
 }

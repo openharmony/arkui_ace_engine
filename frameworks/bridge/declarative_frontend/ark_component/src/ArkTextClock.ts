@@ -158,6 +158,6 @@ globalThis.TextClock.attributeModifier = function (modifier) {
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkTextClockComponent(nativeNode);
   });
-  modifier.applyNormalAttribute(component);
+  applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
 }

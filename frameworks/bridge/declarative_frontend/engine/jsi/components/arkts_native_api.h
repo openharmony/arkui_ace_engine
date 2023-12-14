@@ -1514,6 +1514,8 @@ struct ArkUITextClockModifierAPI {
 
 struct ArkUINodeAPI {
     NodeHandle (*GetFrameNodeById)(int nodeId);
+    int64_t (*GetUIState)(NodeHandle node);
+    void (*SetSupportedUIState)(NodeHandle node, uint64_t state);
     ArkUICommonModifierAPI (*GetCommonModifier)();
     ArkUICheckboxGroupModifierAPI (*GetCheckboxGroupModifier)();
     ArkUICounterModifierAPI (*GetCounterModifier)();

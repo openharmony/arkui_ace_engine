@@ -104,6 +104,6 @@ globalThis.Navigator.attributeModifier = function (modifier) {
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkNavigatorComponent(nativeNode);
   });
-  modifier.applyNormalAttribute(component);
+  applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
 }

@@ -170,6 +170,6 @@ globalThis.Marquee.attributeModifier = function (modifier) {
   let component = this.createOrGetNode(elmtId, ()=> {
     return new ArkMarqueeComponent(nativeNode);
   });
-  modifier.applyNormalAttribute(component);
+  applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
 }

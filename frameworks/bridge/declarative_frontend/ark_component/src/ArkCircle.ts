@@ -27,6 +27,6 @@ globalThis.Circle.attributeModifier = function (modifier) {
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkCircleComponent(nativeNode);
   });
-  modifier.applyNormalAttribute(component);
+  applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
 }

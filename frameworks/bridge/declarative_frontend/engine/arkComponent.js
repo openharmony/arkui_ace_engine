@@ -21,6 +21,48 @@ function GetUINativeModule() {
   }
   return arkUINativeModule;
 }
+const UI_STATE_NORMAL = 0;
+const UI_STATE_PRESSED = 1;
+const UI_STATE_FOCUSED = 1 << 1;
+const UI_STATE_DISABLED = 1 << 2;
+const UI_STATE_SELECTED = 1 << 3;
+
+function applyUIAttributes(modifier, nativeNode, component) {
+  let state = 0;
+
+  if (modifier.applyPressedAttribute !== undefined) {
+    state |= UI_STATE_PRESSED;
+  }
+  if (modifier.applyFocusedAttribute !== undefined) {
+    state |= UI_STATE_FOCUSED;
+  }
+  if (modifier.applyDisabledAttribute !== undefined) {
+    state |= UI_STATE_DISABLED;
+  }
+  if (modifier.applySelectedAttribute !== undefined) {
+    state |= UI_STATE_SELECTED;
+  }
+
+  GetUINativeModule().setSupportedUIState(nativeNode, state);
+  const currentUIState = GetUINativeModule().getUIState(nativeNode);
+
+  if (modifier.applyNormalAttribute !== undefined) {
+    modifier.applyNormalAttribute(component);
+  }
+  if (currentUIState & UI_STATE_PRESSED) {
+    modifier.applyPressedAttribute(component);
+  }
+  if (currentUIState & UI_STATE_FOCUSED) {
+    modifier.applyFocusedAttribute(component);
+  }
+  if (currentUIState & UI_STATE_DISABLED) {
+    modifier.applyDisabledAttribute(component);
+  }
+  if (currentUIState & UI_STATE_SELECTED) {
+    modifier.applySelectedAttribute(component);
+  }
+}
+
 function isResource(variable) {
   let _a;
   return ((_a = variable) === null || _a === void 0 ? void 0 : _a.bundleName) !== undefined;
@@ -2952,7 +2994,7 @@ globalThis.Blank.attributeModifier = function (modifier) {
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkBlankComponent(nativeNode);
   });
-  modifier.applyNormalAttribute(component);
+  applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
 };
 /// <reference path='./import.ts' />
@@ -3016,7 +3058,7 @@ globalThis.Column.attributeModifier = function (modifier) {
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkColumnComponent(nativeNode);
   });
-  modifier.applyNormalAttribute(component);
+  applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
 };
 /// <reference path='./import.ts' />
@@ -3078,7 +3120,7 @@ globalThis.ColumnSplit.attributeModifier = function (modifier) {
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkColumnSplitComponent(nativeNode);
   });
-  modifier.applyNormalAttribute(component);
+  applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
 };
 /// <reference path='./import.ts' />
@@ -3178,7 +3220,7 @@ globalThis.Divider.attributeModifier = function (modifier) {
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkDividerComponent(nativeNode);
   });
-  modifier.applyNormalAttribute(component);
+  applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
 };
 /// <reference path='./import.ts' />
@@ -3200,7 +3242,7 @@ globalThis.Flex.attributeModifier = function (modifier) {
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkFlexComponent(nativeNode);
   });
-  modifier.applyNormalAttribute(component);
+  applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
 };
 /// <reference path='./import.ts' />
@@ -3243,7 +3285,7 @@ globalThis.GridRow.attributeModifier = function (modifier) {
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkGridRowComponent(nativeNode);
   });
-  modifier.applyNormalAttribute(component);
+  applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
 };
 /// <reference path='./import.ts' />
@@ -3681,7 +3723,7 @@ globalThis.Grid.attributeModifier = function (modifier) {
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkGridComponent(nativeNode);
   });
-  modifier.applyNormalAttribute(component);
+  applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
 };
 /// <reference path='./import.ts' />
@@ -3814,7 +3856,7 @@ globalThis.GridCol.attributeModifier = function (modifier) {
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkGridColComponent(nativeNode);
   });
-  modifier.applyNormalAttribute(component);
+  applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
 };
 /// <reference path='./import.ts' />
@@ -4137,7 +4179,7 @@ globalThis.Image.attributeModifier = function (modifier) {
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkImageComponent(nativeNode);
   });
-  modifier.applyNormalAttribute(component);
+  applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
 };
 /// <reference path='./import.ts' />
@@ -4381,7 +4423,7 @@ globalThis.ImageAnimator.attributeModifier = function (modifier) {
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkImageAnimatorComponent(nativeNode);
   });
-  modifier.applyNormalAttribute(component);
+  applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
 };
 /// <reference path='./import.ts' />
@@ -4439,7 +4481,7 @@ globalThis.ImageSpan.attributeModifier = function (modifier) {
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkImageSpanComponent(nativeNode);
   });
-  modifier.applyNormalAttribute(component);
+  applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
 };
 /// <reference path='./import.ts' />
@@ -4632,7 +4674,7 @@ globalThis.PatternLock.attributeModifier = function (modifier) {
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkPatternLockComponent(nativeNode);
   });
-  modifier.applyNormalAttribute(component);
+  applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
 };
 /// <reference path='./import.ts' />
@@ -4702,7 +4744,7 @@ globalThis.RichEditor.attributeModifier = function (modifier) {
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkRichEditorComponent(nativeNode);
   });
-  modifier.applyNormalAttribute(component);
+  applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
 };
 /// <reference path='./import.ts' />
@@ -4766,7 +4808,7 @@ globalThis.Row.attributeModifier = function (modifier) {
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkRowComponent(nativeNode);
   });
-  modifier.applyNormalAttribute(component);
+  applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
 };
 /// <reference path='./import.ts' />
@@ -4803,7 +4845,7 @@ globalThis.RowSplit.attributeModifier = function (modifier) {
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkRowSplitComponent(nativeNode);
   });
-  modifier.applyNormalAttribute(component);
+  applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
 };
 /// <reference path='./import.ts' />
@@ -5133,7 +5175,7 @@ globalThis.Search.attributeModifier = function (modifier) {
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkSearchComponent(nativeNode);
   });
-  modifier.applyNormalAttribute(component);
+  applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
 };
 /// <reference path='./import.ts' />
@@ -5379,7 +5421,7 @@ globalThis.Span.attributeModifier = function (modifier) {
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkSpanComponent(nativeNode);
   });
-  modifier.applyNormalAttribute(component);
+  applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
 };
 /// <reference path='./import.ts' />
@@ -5628,7 +5670,7 @@ globalThis.SideBarContainer.attributeModifier = function (modifier) {
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkSideBarContainerComponent(nativeNode);
   });
-  modifier.applyNormalAttribute(component);
+  applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
 };
 /// <reference path='./import.ts' />
@@ -5668,7 +5710,7 @@ globalThis.Stack.attributeModifier = function (modifier) {
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkStackComponent(nativeNode);
   });
-  modifier.applyNormalAttribute(component);
+  applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
 };
 /// <reference path='./import.ts' />
@@ -6250,7 +6292,7 @@ globalThis.Text.attributeModifier = function (modifier) {
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkTextComponent(nativeNode);
   });
-  modifier.applyNormalAttribute(component);
+  applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
 };
 /// <reference path='./import.ts' />
@@ -6679,7 +6721,7 @@ globalThis.TextArea.attributeModifier = function (modifier) {
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkTextAreaComponent(nativeNode);
   });
-  modifier.applyNormalAttribute(component);
+  applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
 };
 /// <reference path='./import.ts' />
@@ -7298,7 +7340,7 @@ globalThis.TextInput.attributeModifier = function (modifier) {
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkTextInputComponent(nativeNode);
   });
-  modifier.applyNormalAttribute(component);
+  applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
 };
 /// <reference path='./import.ts' />
@@ -7449,7 +7491,7 @@ globalThis.Video.attributeModifier = function (modifier) {
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkVideoComponent(nativeNode);
   });
-  modifier.applyNormalAttribute(component);
+  applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
 };
 /*
@@ -8952,7 +8994,7 @@ globalThis.Button.attributeModifier = function (modifier) {
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkButtonComponent(nativeNode);
   });
-  modifier.applyNormalAttribute(component);
+  applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
 };
 /// <reference path='./import.ts' />
@@ -9010,7 +9052,7 @@ globalThis.LoadingProgress.attributeModifier = function (modifier) {
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkLoadingProgressComponent(nativeNode);
   });
-  modifier.applyNormalAttribute(component);
+  applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
 };
 /// <reference path='./import.ts' />
@@ -9035,7 +9077,7 @@ globalThis.Refresh.attributeModifier = function (modifier) {
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkRefreshComponent(nativeNode);
   });
-  modifier.applyNormalAttribute(component);
+  applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
 };
 /// <reference path='./import.ts' />
@@ -9300,7 +9342,7 @@ globalThis.Scroll.attributeModifier = function (modifier) {
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkScrollComponent(nativeNode);
   });
-  modifier.applyNormalAttribute(component);
+  applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
 };
 /// <reference path='./import.ts' />
@@ -9370,7 +9412,7 @@ globalThis.Toggle.attributeModifier = function (modifier) {
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkToggleComponent(nativeNode);
   });
-  modifier.applyNormalAttribute(component);
+  applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
 };
 /// <reference path='./import.ts' />
@@ -9696,7 +9738,7 @@ globalThis.Select.attributeModifier = function (modifier) {
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkSelectComponent(nativeNode);
   });
-  modifier.applyNormalAttribute(component);
+  applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
 };
 /// <reference path='./import.ts' />
@@ -9767,7 +9809,7 @@ globalThis.Radio.attributeModifier = function (modifier) {
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkRadioComponent(nativeNode);
   });
-  modifier.applyNormalAttribute(component);
+  applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
 };
 /// <reference path='./import.ts' />
@@ -9888,7 +9930,7 @@ globalThis.TimePicker.attributeModifier = function (modifier) {
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkTimePickerComponent(nativeNode);
   });
-  modifier.applyNormalAttribute(component);
+  applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
 };
 /// <reference path='./import.ts' />
@@ -10084,7 +10126,7 @@ globalThis.TextPicker.attributeModifier = function (modifier) {
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkTextPickerComponent(nativeNode);
   });
-  modifier.applyNormalAttribute(component);
+  applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
 };
 /// <reference path='./import.ts' />
@@ -10441,7 +10483,7 @@ globalThis.Slider.attributeModifier = function (modifier) {
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkSliderComponent(nativeNode);
   });
-  modifier.applyNormalAttribute(component);
+  applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
 };
 /// <reference path='./import.ts' />
@@ -10537,7 +10579,7 @@ globalThis.Rating.attributeModifier = function (modifier) {
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkRatingComponent(nativeNode);
   });
-  modifier.applyNormalAttribute(component);
+  applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
 };
 /// <reference path='./import.ts' />
@@ -10689,7 +10731,7 @@ globalThis.Checkbox.attributeModifier = function (modifier) {
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkCheckboxComponent(nativeNode);
   });
-  modifier.applyNormalAttribute(component);
+  applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
 };
 /// <reference path='./import.ts' />
@@ -10735,7 +10777,7 @@ globalThis.NavDestination.attributeModifier = function (modifier) {
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkNavDestinationComponent(nativeNode);
   });
-  modifier.applyNormalAttribute(component);
+  applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
 };
 /// <reference path='./import.ts' />
@@ -10803,7 +10845,7 @@ globalThis.Counter.attributeModifier = function (modifier) {
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkCounterComponent(nativeNode);
   });
-  modifier.applyNormalAttribute(component);
+  applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
 };
 /// <reference path='./import.ts' />
@@ -10922,7 +10964,7 @@ globalThis.CheckboxGroup.attributeModifier = function (modifier) {
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkCheckboxGroupComponent(nativeNode);
   });
-  modifier.applyNormalAttribute(component);
+  applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
 };
 /// <reference path='./import.ts' />
@@ -11330,7 +11372,7 @@ globalThis.Panel.attributeModifier = function (modifier) {
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkPanelComponent(nativeNode);
   });
-  modifier.applyNormalAttribute(component);
+  applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
 };
 /// <reference path='./import.ts' />
@@ -11626,7 +11668,7 @@ globalThis.Navigation.attributeModifier = function (modifier) {
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkNavigationComponent(nativeNode);
   });
-  modifier.applyNormalAttribute(component);
+  applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
 };
 /// <reference path='./import.ts' />
@@ -11670,7 +11712,7 @@ globalThis.NavRouter.attributeModifier = function (modifier) {
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkNavRouterComponent(nativeNode);
   });
-  modifier.applyNormalAttribute(component);
+  applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
 };
 /// <reference path='./import.ts' />
@@ -11758,7 +11800,7 @@ globalThis.Navigator.attributeModifier = function (modifier) {
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkNavigatorComponent(nativeNode);
   });
-  modifier.applyNormalAttribute(component);
+  applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
 };
 /// <reference path='./import.ts' />
@@ -11872,7 +11914,7 @@ globalThis.AlphabetIndexer.attributeModifier = function (modifier) {
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkAlphabetIndexerComponent(nativeNode);
   });
-  modifier.applyNormalAttribute(component);
+  applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
 };
 class PopupItemFontModifier extends ModifierWithKey {
@@ -12295,7 +12337,7 @@ globalThis.CalendarPicker.attributeModifier = function (modifier) {
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkCalendarPickerComponent(nativeNode);
   });
-  modifier.applyNormalAttribute(component);
+  applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
 };
 /// <reference path='./import.ts' />
@@ -12419,7 +12461,7 @@ globalThis.DataPanel.attributeModifier = function (modifier) {
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkDataPanelComponent(nativeNode);
   });
-  modifier.applyNormalAttribute(component);
+  applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
 };
 /// <reference path='./import.ts' />
@@ -12552,7 +12594,7 @@ globalThis.DatePicker.attributeModifier = function (modifier) {
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkDatePickerComponent(nativeNode);
   });
-  modifier.applyNormalAttribute(component);
+  applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
 };
 /// <reference path='./import.ts' />
@@ -12681,7 +12723,7 @@ globalThis.FormComponent.attributeModifier = function (modifier) {
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkFormComponentComponent(nativeNode);
   });
-  modifier.applyNormalAttribute(component);
+  applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
 };
 /// <reference path='./import.ts' />
@@ -12855,7 +12897,7 @@ globalThis.Gauge.attributeModifier = function (modifier) {
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkGaugeComponent(nativeNode);
   });
-  modifier.applyNormalAttribute(component);
+  applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
 };
 /// <reference path='./import.ts' />
@@ -13015,7 +13057,7 @@ globalThis.Marquee.attributeModifier = function (modifier) {
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkMarqueeComponent(nativeNode);
   });
-  modifier.applyNormalAttribute(component);
+  applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
 };
 /// <reference path='./import.ts' />
@@ -13129,7 +13171,7 @@ globalThis.Menu.attributeModifier = function (modifier) {
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkMenuComponent(nativeNode);
   });
-  modifier.applyNormalAttribute(component);
+  applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
 };
 /// <reference path='./import.ts' />
@@ -13288,7 +13330,7 @@ globalThis.MenuItem.attributeModifier = function (modifier) {
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkMenuItemComponent(nativeNode);
   });
-  modifier.applyNormalAttribute(component);
+  applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
 };
 /// <reference path='./import.ts' />
@@ -13307,7 +13349,7 @@ globalThis.MenuItemGroup.attributeModifier = function (modifier) {
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkMenuItemGroupComponent(nativeNode);
   });
-  modifier.applyNormalAttribute(component);
+  applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
 };
 /// <reference path='./import.ts' />
@@ -13332,7 +13374,7 @@ globalThis.PluginComponent.attributeModifier = function (modifier) {
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkPluginComponentComponent(nativeNode);
   });
-  modifier.applyNormalAttribute(component);
+  applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
 };
 /// <reference path='./import.ts' />
@@ -13490,7 +13532,7 @@ globalThis.Progress.attributeModifier = function (modifier) {
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkProgressComponent(nativeNode);
   });
-  modifier.applyNormalAttribute(component);
+  applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
 };
 /// <reference path='./import.ts' />
@@ -13582,7 +13624,7 @@ globalThis.QRCode.attributeModifier = function (modifier) {
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkQRCodeComponent(nativeNode);
   });
-  modifier.applyNormalAttribute(component);
+  applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
 };
 /// <reference path='./import.ts' />
@@ -13607,7 +13649,7 @@ globalThis.RichText.attributeModifier = function (modifier) {
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkRichTextComponent(nativeNode);
   });
-  modifier.applyNormalAttribute(component);
+  applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
 };
 /// <reference path='./import.ts' />
@@ -13626,7 +13668,7 @@ globalThis.ScrollBar.attributeModifier = function (modifier) {
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkScrollBarComponent(nativeNode);
   });
-  modifier.applyNormalAttribute(component);
+  applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
 };
 /// <reference path='./import.ts' />
@@ -13660,7 +13702,7 @@ globalThis.Stepper.attributeModifier = function (modifier) {
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkStepperComponent(nativeNode);
   });
-  modifier.applyNormalAttribute(component);
+  applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
 };
 /// <reference path='./import.ts' />
@@ -13703,7 +13745,7 @@ globalThis.StepperItem.attributeModifier = function (modifier) {
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkStepperItemComponent(nativeNode);
   });
-  modifier.applyNormalAttribute(component);
+  applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
 };
 /// <reference path='./import.ts' />
@@ -13848,7 +13890,7 @@ globalThis.TextClock.attributeModifier = function (modifier) {
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkTextClockComponent(nativeNode);
   });
-  modifier.applyNormalAttribute(component);
+  applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
 };
 /// <reference path='./import.ts' />
@@ -13978,7 +14020,7 @@ globalThis.TextTimer.attributeModifier = function (modifier) {
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkTextTimerComponent(nativeNode);
   });
-  modifier.applyNormalAttribute(component);
+  applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
 };
 /// <reference path='./import.ts' />
@@ -14264,7 +14306,7 @@ globalThis.Web.attributeModifier = function (modifier) {
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkWebComponent(nativeNode);
   });
-  modifier.applyNormalAttribute(component);
+  applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
 };
 /// <reference path='./import.ts' />
@@ -14289,7 +14331,7 @@ globalThis.XComponent.attributeModifier = function (modifier) {
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkXComponentComponent(nativeNode);
   });
-  modifier.applyNormalAttribute(component);
+  applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
 };
 /// <reference path='./import.ts' />
@@ -14308,7 +14350,7 @@ globalThis.Badge.attributeModifier = function (modifier) {
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkBadgeComponent(nativeNode);
   });
-  modifier.applyNormalAttribute(component);
+  applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
 };
 /// <reference path='./import.ts' />
@@ -14327,7 +14369,7 @@ globalThis.FlowItem.attributeModifier = function (modifier) {
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkFlowItemComponent(nativeNode);
   });
-  modifier.applyNormalAttribute(component);
+  applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
 };
 /// <reference path='./import.ts' />
@@ -14346,7 +14388,7 @@ globalThis.FormLink.attributeModifier = function (modifier) {
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkFormLinkComponent(nativeNode);
   });
-  modifier.applyNormalAttribute(component);
+  applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
 };
 /// <reference path='./import.ts' />
@@ -14461,7 +14503,7 @@ globalThis.GridItem.attributeModifier = function (modifier) {
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkGridItemComponent(nativeNode);
   });
-  modifier.applyNormalAttribute(component);
+  applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
 };
 /// <reference path='./import.ts' />
@@ -14503,7 +14545,7 @@ globalThis.Hyperlink.attributeModifier = function (modifier) {
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkHyperlinkComponent(nativeNode);
   });
-  modifier.applyNormalAttribute(component);
+  applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
 };
 /// <reference path='./import.ts' />
@@ -14908,7 +14950,7 @@ globalThis.List.attributeModifier = function (modifier) {
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkListComponent(nativeNode);
   });
-  modifier.applyNormalAttribute(component);
+  applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
 };
 /// <reference path='./import.ts' />
@@ -14975,7 +15017,7 @@ globalThis.ListItem.attributeModifier = function (modifier) {
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkListItemComponent(nativeNode);
   });
-  modifier.applyNormalAttribute(component);
+  applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
 };
 /// <reference path='./import.ts' />
@@ -15020,7 +15062,7 @@ globalThis.ListItemGroup.attributeModifier = function (modifier) {
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkListItemGroupComponent(nativeNode);
   });
-  modifier.applyNormalAttribute(component);
+  applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
 };
 /// <reference path='./import.ts' />
@@ -15039,7 +15081,7 @@ globalThis.RelativeContainer.attributeModifier = function (modifier) {
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkRelativeContainerComponent(nativeNode);
   });
-  modifier.applyNormalAttribute(component);
+  applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
 };
 /// <reference path='./import.ts' />
@@ -15602,7 +15644,7 @@ globalThis.Swiper.attributeModifier = function (modifier) {
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkSwiperComponent(nativeNode);
   });
-  modifier.applyNormalAttribute(component);
+  applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
 };
 /// <reference path='./import.ts' />
@@ -15937,7 +15979,7 @@ globalThis.Tabs.attributeModifier = function (modifier) {
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkTabsComponent(nativeNode);
   });
-  modifier.applyNormalAttribute(component);
+  applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
 };
 /// <reference path='./import.ts' />
@@ -15959,7 +16001,7 @@ globalThis.TabContent.attributeModifier = function (modifier) {
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkTabContentComponent(nativeNode);
   });
-  modifier.applyNormalAttribute(component);
+  applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
 };
 /// <reference path='./import.ts' />
@@ -15990,7 +16032,7 @@ globalThis.UIExtensionComponent.attributeModifier = function (modifier) {
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkUIExtensionComponentComponent(nativeNode);
   });
-  modifier.applyNormalAttribute(component);
+  applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
 };
 /// <reference path='./import.ts' />
@@ -16231,7 +16273,7 @@ globalThis.WaterFlow.attributeModifier = function (modifier) {
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkWaterFlowComponent(nativeNode);
   });
-  modifier.applyNormalAttribute(component);
+  applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
 };
 /*
@@ -16519,7 +16561,7 @@ globalThis.Circle.attributeModifier = function (modifier) {
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkCircleComponent(nativeNode);
   });
-  modifier.applyNormalAttribute(component);
+  applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
 };
 /// <reference path='./import.ts' />
@@ -16535,7 +16577,7 @@ globalThis.Ellipse.attributeModifier = function (modifier) {
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkEllipseComponent(nativeNode);
   });
-  modifier.applyNormalAttribute(component);
+  applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
 };
 /// <reference path='./import.ts' />
@@ -16594,7 +16636,7 @@ globalThis.Line.attributeModifier = function (modifier) {
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkLineComponent(nativeNode);
   });
-  modifier.applyNormalAttribute(component);
+  applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
 };
 /// <reference path='./import.ts' />
@@ -16652,7 +16694,7 @@ globalThis.Polyline.attributeModifier = function (modifier) {
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkPolylineComponent(nativeNode);
   });
-  modifier.applyNormalAttribute(component);
+  applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
 };
 /// <reference path='./import.ts' />
@@ -16671,7 +16713,7 @@ globalThis.Polygon.attributeModifier = function (modifier) {
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkPolygonComponent(nativeNode);
   });
-  modifier.applyNormalAttribute(component);
+  applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
 };
 /// <reference path='./import.ts' />
@@ -16713,7 +16755,7 @@ globalThis.Path.attributeModifier = function (modifier) {
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkPathComponent(nativeNode);
   });
-  modifier.applyNormalAttribute(component);
+  applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
 };
 /*
@@ -16801,7 +16843,7 @@ globalThis.Rect.attributeModifier = function (modifier) {
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkRectComponent(nativeNode);
   });
-  modifier.applyNormalAttribute(component);
+  applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
 };
 /*
@@ -16884,7 +16926,7 @@ globalThis.Shape.attributeModifier = function (modifier) {
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkShapeComponent(nativeNode);
   });
-  modifier.applyNormalAttribute(component);
+  applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
 };
 /// <reference path='./import.ts' />
@@ -16906,7 +16948,7 @@ globalThis.Canvas.attributeModifier = function (modifier) {
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkCanvasComponent(nativeNode);
   });
-  modifier.applyNormalAttribute(component);
+  applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
 };
 /// <reference path='./import.ts' />
@@ -16931,6 +16973,6 @@ globalThis.GridContainer.attributeModifier = function (modifier) {
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkGridContainerComponent(nativeNode);
   });
-  modifier.applyNormalAttribute(component);
+  applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
 };

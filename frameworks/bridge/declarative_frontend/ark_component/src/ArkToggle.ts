@@ -80,7 +80,7 @@ globalThis.Toggle.attributeModifier = function (modifier) {
     let component = this.createOrGetNode(elmtId, () => {
         return new ArkToggleComponent(nativeNode);
     });
-    modifier.applyNormalAttribute(component);
+    applyUIAttributes(modifier, nativeNode, component);
     component.applyModifierPatch();
 }
 
