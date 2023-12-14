@@ -71,7 +71,9 @@ ArkUINativeModuleValue MenuBridge::SetFont(ArkUIRuntimeCallInfo* runtimeCallInfo
     if (weightArg->IsNumber()) {
         weight = std::to_string(weightArg->Int32Value(vm));
     } else {
-        ArkTSUtils::ParseJsString(vm, weightArg, weight);
+        if (ArkTSUtils::ParseJsString(vm, weightArg, weight) || weight.empty()) {
+            weight = DEFAULT_ERR_CODE;
+        }
     }
 
     int32_t style = 0;

@@ -487,7 +487,7 @@ class SaturateModifier extends Modifier {
   }
 }
 SaturateModifier.identity = Symbol('saturate');
-class ColorBlendModifier extends Modifier {
+class ColorBlendModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
   }

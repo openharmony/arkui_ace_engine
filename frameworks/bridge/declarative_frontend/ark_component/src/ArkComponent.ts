@@ -537,7 +537,7 @@ class SaturateModifier extends Modifier<number> {
   }
 }
 
-class ColorBlendModifier extends Modifier<Color | string | Resource> {
+class ColorBlendModifier extends ModifierWithKey<Color | string | Resource> {
   constructor(value: Color | string | Resource) {
     super(value);
   }

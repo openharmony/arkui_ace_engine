@@ -179,11 +179,7 @@ ArkUINativeModuleValue TextClockBridge::SetFontFamily(ArkUIRuntimeCallInfo* runt
     void* nativeNode = nodeArg->ToNativePointer(vm)->Value();
 
     std::string fontFamilyStr;
-    if (fontFamilyArg->IsString()) {
-        fontFamilyStr = fontFamilyArg->ToString(vm)->ToString();
-    } else if (fontFamilyArg->IsObject()) {
-        ArkTSUtils::ParseJsMedia(vm, fontFamilyArg, fontFamilyStr);
-    } else {
+    if (!ArkTSUtils::ParseJsFontFamiliesToString(vm, fontFamilyArg, fontFamilyStr)) {
         GetArkUIInternalNodeAPI()->GetTextClockModifier().ResetFontFamily(nativeNode);
         return panda::JSValueRef::Undefined(vm);
     }
