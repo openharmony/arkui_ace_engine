@@ -619,12 +619,31 @@ static void SetIsDragging(const RefPtr<Container>& container, bool isDragging)
     pipelineContext->SetIsDragging(isDragging);
 }
 
+bool JudgeCoordinateCanDrag(Msdp::DeviceStatus::ShadowInfo& shadowInfo)
+{
+    if (!shadowInfo.pixelMap) {
+        return false;
+    }
+    int32_t x = -shadowInfo.x;
+    int32_t y = -shadowInfo.y;
+    int32_t width = shadowInfo.pixelMap->GetWidth();
+    int32_t height = shadowInfo.pixelMap->GetHeight();
+    if (x < 0 || y < 0 || x > width || y > height) {
+        return false;
+    }
+    return true;
+}
+
 void EnvelopedDragData(DragControllerAsyncCtx* asyncCtx, std::optional<Msdp::DeviceStatus::DragData>& dragData)
 {
     std::vector<Msdp::DeviceStatus::ShadowInfo> shadowInfos;
     GetShadowInfoArray(asyncCtx, shadowInfos);
     if (shadowInfos.empty()) {
         LOGE("shadowInfo array is empty");
+        return;
+    }
+    if (!JudgeCoordinateCanDrag(shadowInfos[0])) {
+        HandleFail(asyncCtx, Framework::ERROR_CODE_PARAM_INVALID, "touchPoint's coordinate out of range");
         return;
     }
     auto pointerId = asyncCtx->pointerId;
