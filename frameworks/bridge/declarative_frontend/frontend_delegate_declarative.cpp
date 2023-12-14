@@ -1410,6 +1410,7 @@ void FrontendDelegateDeclarative::ShowDialogInner(DialogProperties& dialogProper
                     Maskarg.autoCancel = dialogProperties.autoCancel;
                     auto mask = overlayManager->ShowDialog(Maskarg, nullptr, false);
                     CHECK_NULL_VOID(mask);
+                    overlayManager->SetMaskNodeId(dialog->GetId(), mask->GetId());
                 }
             } else {
                 dialog = overlayManager->ShowDialog(
@@ -1554,6 +1555,7 @@ void FrontendDelegateDeclarative::ShowActionMenuInner(DialogProperties& dialogPr
                         Maskarg.autoCancel = dialogProperties.autoCancel;
                         auto mask = overlayManager->ShowDialog(Maskarg, nullptr, false);
                         CHECK_NULL_VOID(mask);
+                        overlayManager->SetMaskNodeId(dialog->GetId(), mask->GetId());
                     }
                 } else {
                     dialog = overlayManager->ShowDialog(

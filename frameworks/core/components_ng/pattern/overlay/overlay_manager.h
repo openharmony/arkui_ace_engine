@@ -141,20 +141,40 @@ public:
     void ShowCalendarDialog(const DialogProperties& dialogProps, const CalendarSettingData& settingData,
         std::map<std::string, NG::DialogEvent> dialogEvent,
         std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent);
-    void PopModalDialog();
-	
+    void PopModalDialog(int32_t maskId);
+
     void CloseDialog(const RefPtr<FrameNode>& dialogNode);
     void SetSubWindowId(int32_t subWindowId)
     {
-        subWindowId_=subWindowId;
+        subWindowId_ = subWindowId;
     }
     int32_t GetSubwindowId()
     {
         return subWindowId_;
     }
-    int32_t GetMaskNodeId()
+    void SetMaskNodeId(int32_t dialogId, int32_t maskId)
     {
-        return maskNodeId_;
+        maskNodeIdMap_[dialogId] = maskId;
+    }
+    bool isMaskNode(int32_t maskId)
+    {
+        for (auto it = maskNodeIdMap_.begin(); it != maskNodeIdMap_.end(); it++) {
+            if (it->second == maskId) {
+                return true;
+            }
+        }
+        return false;
+    }
+    int32_t GetMaskNodeIdWithDialogId(int32_t dialogId)
+    {
+        int32_t maskNodeId = -1;
+        for (auto it = maskNodeIdMap_.begin(); it != maskNodeIdMap_.end(); it++) {
+            if (it->first == dialogId) {
+                maskNodeId = it->second;
+                break;
+            }
+        }
+        return maskNodeId;
     }
     /**  pop overlays (if any) on back press
      *
@@ -383,7 +403,7 @@ private:
     float sheetHeight_ { 0.0 };
     WeakPtr<UINode> rootNodeWeak_;
     int32_t dialogCount_ = 0;
-    int32_t maskNodeId_ = -1;
+    std::unordered_map<int32_t, int32_t> maskNodeIdMap_;
     int32_t subWindowId_;
 #ifdef ENABLE_DRAG_FRAMEWORK
     bool hasPixelMap_ { false };

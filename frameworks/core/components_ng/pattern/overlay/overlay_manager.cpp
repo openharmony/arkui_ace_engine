@@ -1322,9 +1322,6 @@ RefPtr<FrameNode> OverlayManager::ShowDialog(
 
     auto dialog = DialogView::CreateDialogNode(dialogProps, customNode);
     CHECK_NULL_RETURN(dialog, nullptr);
-    if (dialogProps.isMask) {
-        maskNodeId_ = dialog->GetId();
-    }
     BeforeShowDialog(dialog);
     OpenDialogAnimation(dialog);
     dialogCount_++;
@@ -1391,8 +1388,15 @@ void OverlayManager::ShowCalendarDialog(const DialogProperties& dialogProps, con
     OpenDialogAnimation(dialogNode);
 }
 
-void OverlayManager::PopModalDialog()
+void OverlayManager::PopModalDialog(int32_t maskId)
 {
+    int32_t dialogId = -1;
+    for (auto it = maskNodeIdMap_.begin(); it != maskNodeIdMap_.end(); it++) {
+        if (maskId == it->second) {
+            dialogId = it->first;
+            break;
+        }
+    }
     auto subWindow = SubwindowManager::GetInstance()->GetSubwindow(subWindowId_);
     CHECK_NULL_VOID(subWindow);
     auto subOverlayManager = subWindow->GetOverlayManager();
@@ -1401,8 +1405,7 @@ void OverlayManager::PopModalDialog()
         subOverlayManager->GetDialogMap().begin(), subOverlayManager->GetDialogMap().end());
     for (auto it = DialogMap.begin(); it != DialogMap.end(); it++) {
         auto dialogProp = DynamicCast<DialogLayoutProperty>(it->second->GetLayoutProperty());
-        if (dialogProp->GetIsModal().value_or(true) && dialogProp->GetAutoCancel().value_or(true) &&
-            dialogProp->GetShowInSubWindowValue(false)) {
+        if (dialogId == it->first) {
             subOverlayManager->CloseDialog(it->second);
         }
     }
@@ -1452,7 +1455,8 @@ void OverlayManager::CloseDialog(const RefPtr<FrameNode>& dialogNode)
         CHECK_NULL_VOID(parentPipelineContext);
         auto parentOverlayManager = parentPipelineContext->GetOverlayManager();
         CHECK_NULL_VOID(parentOverlayManager);
-        RefPtr<FrameNode> maskNode = parentOverlayManager->GetDialog(parentOverlayManager->GetMaskNodeId());
+        RefPtr<FrameNode> maskNode =
+            parentOverlayManager->GetDialog(parentOverlayManager->GetMaskNodeIdWithDialogId(dialogNode->GetId()));
         if (maskNode) {
             parentOverlayManager->CloseDialog(maskNode);
         }
