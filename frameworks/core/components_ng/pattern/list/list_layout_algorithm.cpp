@@ -689,11 +689,9 @@ void ListLayoutAlgorithm::MeasureList(LayoutWrapper* layoutWrapper)
     float jumpIndexStartPos = 0.0f;
     int32_t jumpIndex = 0;
 
-    if ((jumpIndex_ || targetIndex_) && scrollAlign_ == ScrollAlign::AUTO) {
+    if (jumpIndex_ && scrollAlign_ == ScrollAlign::AUTO) {
         if (jumpIndex_.has_value()) {
             jumpIndex = jumpIndex_.value();
-        } else {
-            jumpIndex = targetIndex_.value();
         }
         auto it = itemPosition_.find(jumpIndex);
         if (it != itemPosition_.end()) {
@@ -741,11 +739,10 @@ void ListLayoutAlgorithm::MeasureList(LayoutWrapper* layoutWrapper)
         itemPosition_.clear();
         layoutWrapper->RemoveAllChildInRenderTree();
     }
-    if ((jumpIndex_ || targetIndex_) && scrollAlign_ == ScrollAlign::AUTO &&
+    if (jumpIndex_ && scrollAlign_ == ScrollAlign::AUTO &&
         NoNeedJump(layoutWrapper, startPos, endPos, startIndex, endIndex, jumpIndex, jumpIndexStartPos)) {
         jumpIndex_.reset();
         jumpIndexInGroup_.reset();
-        targetIndex_.reset();
     }
     if (jumpIndex_) {
         switch (scrollAlign_) {
