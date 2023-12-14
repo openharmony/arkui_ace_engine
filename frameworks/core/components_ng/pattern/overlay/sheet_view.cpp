@@ -81,7 +81,12 @@ RefPtr<FrameNode> SheetView::CreateOperationColumnNode(
 
     layoutProps->UpdateMeasureType(MeasureType::MATCH_PARENT_CROSS_AXIS);
     if (sheetStyle.isTitleBuilder.has_value()) {
-        layoutProps->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(SHEET_OPERATION_AREA_HEIGHT)));
+        layoutProps->UpdateUserDefinedIdealSize(
+            CalcSize(std::nullopt, CalcLength(SHEET_OPERATION_AREA_HEIGHT - SHEET_TITLE_AERA_MARGIN)));
+        if (sheetStyle.sheetTitle.has_value() && sheetStyle.sheetSubtitle.has_value()) {
+            layoutProps->UpdateUserDefinedIdealSize(
+                CalcSize(std::nullopt, CalcLength(SHEET_OPERATION_AREA_HEIGHT_DOUBLE - SHEET_TITLE_AERA_MARGIN)));
+        }
     }
 
     bool isShow = sheetStyle.showDragBar.value_or(true);
@@ -109,6 +114,8 @@ RefPtr<FrameNode> SheetView::CreateOperationColumnNode(
                 titleBuilder->MarkModifyDone();
             }
             titleColumn->MountToParent(operationColumn);
+            titleColumn->GetRenderContext()->SetClipToBounds(true);
+            titleColumn->GetRenderContext()->UpdateClipEdge(true);
         }
     }
     return operationColumn;
@@ -121,7 +128,13 @@ void SheetView::CreateCloseIconButtonNode(RefPtr<FrameNode> sheetNode, NG::Sheet
     CHECK_NULL_VOID(buttonNode);
     auto buttonLayoutProperty = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
     CHECK_NULL_VOID(buttonLayoutProperty);
-    buttonNode->GetRenderContext()->UpdateBackgroundColor(Color::TRANSPARENT);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto sheetTheme = pipeline->GetTheme<SheetTheme>();
+    CHECK_NULL_VOID(sheetTheme);
+    buttonNode->GetRenderContext()->UpdateBackgroundColor(sheetTheme->GetCloseIconColor());
+    buttonLayoutProperty->UpdateBorderRadius(
+        { SHEET_CLOSE_ICON_RADIUS, SHEET_CLOSE_ICON_RADIUS, SHEET_CLOSE_ICON_RADIUS, SHEET_CLOSE_ICON_RADIUS });
     buttonLayoutProperty->UpdateUserDefinedIdealSize(
         CalcSize(CalcLength(SHEET_CLOSE_ICON_WIDTH), CalcLength(SHEET_CLOSE_ICON_HEIGHT)));
     buttonLayoutProperty->UpdateVisibility(VisibleType::GONE);
@@ -142,10 +155,11 @@ void SheetView::CreateCloseIconButtonNode(RefPtr<FrameNode> sheetNode, NG::Sheet
     auto imageLayoutProperty = imageNode->GetLayoutProperty<ImageLayoutProperty>();
     CHECK_NULL_VOID(imageLayoutProperty);
     imageLayoutProperty->UpdateUserDefinedIdealSize(
-        CalcSize(CalcLength(SHEET_CLOSE_ICON_WIDTH), CalcLength(SHEET_CLOSE_ICON_HEIGHT)));
+        CalcSize(CalcLength(SHEET_CLOSE_ICON_IMAGE_HEIGHT), CalcLength(SHEET_CLOSE_ICON_IMAGE_HEIGHT)));
     imageLayoutProperty->UpdateImageFit(ImageFit::FILL);
     ImageSourceInfo imageSourceInfo;
-    imageSourceInfo.SetResourceId(InternalResource::ResourceId::IC_BOTTOMSHEET_CLOSE_SVG);
+    imageSourceInfo.SetResourceId(InternalResource::ResourceId::IC_CANCEL_SVG);
+    imageSourceInfo.SetFillColor(sheetTheme->GetCloseIconImageColor());
     imageLayoutProperty->UpdateImageSourceInfo(imageSourceInfo);
     imageNode->MarkModifyDone();
 
@@ -237,7 +251,6 @@ RefPtr<FrameNode> SheetView::BuildSubTitle(RefPtr<FrameNode> sheetNode, NG::Shee
     titleProp->UpdateTextColor(sheetTheme->GetSubtitleTextFontColor());
     PaddingProperty titlePadding;
     titlePadding.top = CalcLength(sheetTheme->GetSubtitleTextMargin());
-    titlePadding.bottom = CalcLength(sheetTheme->GetSubtitleTextMargin());
     titleProp->UpdatePadding(titlePadding);
 
     auto subtitleRow = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
@@ -260,8 +273,10 @@ RefPtr<FrameNode> SheetView::BuildTitleColumn(RefPtr<FrameNode> sheetNode, NG::S
     auto layoutProperty = titleColumn->GetLayoutProperty();
     CHECK_NULL_RETURN(layoutProperty, nullptr);
     layoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT_CROSS_AXIS);
-    layoutProperty->UpdateUserDefinedIdealSize(
-        CalcSize(std::nullopt, CalcLength(SHEET_OPERATION_AREA_HEIGHT - SHEET_DRAG_BAR_HEIGHT)));
+    layoutProperty->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(SHEET_OPERATION_AREA_HEIGHT)));
+    MarginProperty margin;
+    margin.top = CalcLength(SHEET_TITLE_AERA_MARGIN);
+    layoutProperty->UpdateMargin(margin);
     PaddingProperty padding;
     padding.right = CalcLength(SHEET_CLOSE_ICON_TITLE_SPACE + SHEET_CLOSE_ICON_WIDTH);
     layoutProperty->UpdatePadding(padding);
@@ -277,6 +292,16 @@ RefPtr<FrameNode> SheetView::BuildTitleColumn(RefPtr<FrameNode> sheetNode, NG::S
             auto subtitleRow = BuildSubTitle(sheetNode, sheetStyle);
             CHECK_NULL_RETURN(subtitleRow, nullptr);
             subtitleRow->MountToParent(titleColumn);
+            layoutProperty->UpdateUserDefinedIdealSize(
+                CalcSize(std::nullopt, CalcLength(SHEET_OPERATION_AREA_HEIGHT_DOUBLE - SHEET_DRAG_BAR_HEIGHT)));
+            MarginProperty margin;
+            margin.bottom = CalcLength(SHEET_DOUBLE_TITLE_BOTTON_PADDING);
+            layoutProperty->UpdateMargin(margin);
+            MarginProperty titleMargin;
+            titleMargin.top = CalcLength(SHEET_DOUBLE_TITLE_TOP_PADDING + SHEET_TITLE_AERA_MARGIN);
+            auto titleProp = titleRow->GetLayoutProperty();
+            CHECK_NULL_RETURN(titleProp, nullptr);
+            titleProp->UpdateMargin(titleMargin);
         }
     }
     return titleColumn;

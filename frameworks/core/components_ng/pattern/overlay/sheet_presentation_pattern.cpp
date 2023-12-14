@@ -206,7 +206,7 @@ void SheetPresentationPattern::InitPanEvent()
     PanDirection panDirection;
     panDirection.type = PanDirection::VERTICAL;
     panEvent_ = MakeRefPtr<PanEvent>(
-        nullptr, std::move(actionUpdateTask), std::move(actionEndTask), std::move(actionCancelTask));
+        std::move(actionStartTask), std::move(actionUpdateTask), std::move(actionEndTask), std::move(actionCancelTask));
     gestureHub->AddPanEvent(panEvent_, panDirection, 1, DEFAULT_PAN_DISTANCE);
 }
 
@@ -993,7 +993,7 @@ void SheetPresentationPattern::StartSheetTransitionAnimation(
     CHECK_NULL_VOID(context);
     isAnimationProcess_ = true;
     if (isTransitionIn) {
-        AnimationUtils::Animate(
+        animation_ = AnimationUtils::StartAnimation(
             option,
             [context, offset]() {
                 if (context) {
@@ -1002,7 +1002,7 @@ void SheetPresentationPattern::StartSheetTransitionAnimation(
             },
             option.GetOnFinishEvent());
     } else {
-        AnimationUtils::Animate(
+        animation_ = AnimationUtils::StartAnimation(
             option,
             [context, this]() {
                 if (context) {

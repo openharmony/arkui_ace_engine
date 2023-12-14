@@ -33,19 +33,15 @@ constexpr Dimension MAX_DRAG_X = 12.0_vp;
 // Maximum displacement of the control bar in the y direction when dragging the control bar.
 constexpr Dimension MAX_DRAG_Y = 5.0_vp;
 
-// For every 1 unit distance the finger moves in the x direction, the control bar moves 0.1 unit distance.
-constexpr float DRAG_X_RATIO = 0.1;
-
 // For every 1 unit distance the finger moves in the y direction, the control bar moves 0.04 unit distance.
-constexpr float DRAG_Y_RATIO = 0.04;
 constexpr float SCALE = 1.5;
 constexpr int32_t DOWN_DURATION = 150;
 constexpr int32_t RESET_DURATION = 250;
 
 // For DragBar Initial State Point.
-const OffsetT<Dimension> POINT_L_INITIAL = OffsetT<Dimension>(18.0_vp, 12.0_vp); // Left Point position.
+const OffsetT<Dimension> POINT_L_INITIAL = OffsetT<Dimension>(8.0_vp, 12.0_vp);  // Left Point position.
 const OffsetT<Dimension> POINT_C_INITIAL = OffsetT<Dimension>(32.0_vp, 12.0_vp); // Center Point position.
-const OffsetT<Dimension> POINT_R_INITIAL = OffsetT<Dimension>(46.0_vp, 12.0_vp); // Right Point position.
+const OffsetT<Dimension> POINT_R_INITIAL = OffsetT<Dimension>(56.0_vp, 12.0_vp); // Right Point position.
 } // namespace
 
 void SheetDragBarPattern::OnModifyDone()
@@ -150,9 +146,6 @@ void SheetDragBarPattern::HandleTouchEvent(const TouchEventInfo& info)
     if (touchType == TouchType::DOWN) {
         HandleTouchDown(frontInfo);
     }
-    if (touchType == TouchType::MOVE) {
-        HandleTouchMove(frontInfo);
-    }
     if (touchType == TouchType::UP || touchType == TouchType::CANCEL) {
         HandleTouchUp();
     }
@@ -165,67 +158,10 @@ void SheetDragBarPattern::HandleTouchDown(const TouchLocationInfo& info)
     ScaleAnimation(true);
 }
 
-void SheetDragBarPattern::HandleTouchMove(const TouchLocationInfo& info)
-{
-    auto movePoint = OffsetF(info.GetGlobalLocation().GetX(), info.GetGlobalLocation().GetY());
-    // Display the dragging offset effect.
-    OffsetF distance = movePoint - downPoint_;
-    OffsetF dragOffset;
-    dragOffset.SetX(std::clamp(distance.GetX() * DRAG_X_RATIO, -dragOffsetX_, dragOffsetX_));
-    dragOffset.SetY(std::clamp(distance.GetY() * DRAG_Y_RATIO, -dragOffsetY_, dragOffsetY_));
-    auto paintProperty = GetPaintProperty<SheetDragBarPaintProperty>();
-    CHECK_NULL_VOID(paintProperty);
-    if (paintProperty->GetDragOffset().value_or(OffsetF()) != dragOffset) {
-        paintProperty->UpdateDragOffset(dragOffset);
-        auto host = GetHost();
-        CHECK_NULL_VOID(host);
-        host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
-    }
-}
-
 void SheetDragBarPattern::HandleTouchUp()
 {
     // Restore the click-to-magnify effect.
     ScaleAnimation(false);
-
-    // Restore the dragging offset effect.
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto context = host->GetRenderContext();
-    CHECK_NULL_VOID(context);
-    auto paintProperty = GetPaintProperty<SheetDragBarPaintProperty>();
-    CHECK_NULL_VOID(paintProperty);
-    auto dragOffset = paintProperty->GetDragOffset().value_or(OffsetF());
-    if (dragOffset == OffsetF()) {
-        return; // No need to back to center with animation.
-    }
-    AnimationOption option;
-    option.SetCurve(Curves::SHARP);
-    option.SetDuration(RESET_DURATION);
-    option.SetFillMode(FillMode::FORWARDS);
-    option.SetOnFinishEvent([weak = AceType::WeakClaim(this), id = Container::CurrentId()]() {
-        ContainerScope scope(id);
-        auto context = PipelineContext::GetCurrentContext();
-        CHECK_NULL_VOID(context);
-        auto taskExecutor = context->GetTaskExecutor();
-        CHECK_NULL_VOID(taskExecutor);
-        taskExecutor->PostTask([weak, id]() {
-            ContainerScope scope(id);
-            auto dragBarPattern = weak.Upgrade();
-            auto dragBarNode = dragBarPattern->GetHost();
-            CHECK_NULL_VOID(dragBarNode);
-            dragBarNode->GetPaintProperty<SheetDragBarPaintProperty>()->UpdateDragOffset(OffsetF());
-            dragBarNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
-            }, TaskExecutor::TaskType::UI);
-        });
-    context->OnTransformTranslateUpdate({ dragOffset.GetX(), dragOffset.GetY(), 0.0f });
-    AnimationUtils::Animate(
-        option,
-        [context, this]() {
-            if (context) {
-                context->OnTransformTranslateUpdate({ 0.0f, 0.0f, 0.0f });
-            }
-        }, option.GetOnFinishEvent());
 }
 
 void SheetDragBarPattern::MarkDirtyNode(PropertyChangeFlag extraFlag)
