@@ -33,6 +33,7 @@ group("core_pattern_unittest") {
     "dialog:dialog_test_ng",
     "divider:divider_test_ng",
     "flex:flex_test_ng",
+    "folder_stack:folder_stack_test_ng",
     "form:form_test_ng",
     "gauge:gauge_test_ng",
     "grid:grid_test_ng",
