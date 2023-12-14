@@ -13,6 +13,7 @@
 
 import("//build/ohos.gni")
 import("//foundation/arkui/ace_engine/ace_config.gni")
+import("//foundation/arkui/ace_engine/build/ace_ext.gni")
 import("../../../build/uicast.gni")
 
 template("build_component_ng") {
@@ -131,6 +132,9 @@ template("build_component_ng") {
         external_deps += [ "graphic_2d:2d_graphics" ]
         if (enable_graphic_text_gine) {
           external_deps += [ "graphic_2d:rosen_text" ]
+        }
+        if (defined(vendor_configs.ace_engine_advanced)) {
+          include_dirs += vendor_configs.ace_advance_dirs
         }
       } else {
         if (!is_arkui_x && defined(use_rosen_drawing) && use_rosen_drawing) {
