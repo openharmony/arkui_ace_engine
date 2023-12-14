@@ -84,8 +84,8 @@ interface CommonSegmentButtonOptions {
   backgroundColor?: ResourceColor
   selectedBackgroundColor?: ResourceColor
   imageSize?: SizeOptions
-  buttonMargin?: Margin | Dimension
-  textMargin?: Margin | Dimension
+  buttonPadding?: Padding | Dimension
+  textPadding?: Padding | Dimension
   backgroundBlurStyle?: BlurStyle
 }
 
@@ -230,8 +230,8 @@ export class SegmentButtonOptions {
   backgroundColor: ResourceColor
   selectedBackgroundColor: ResourceColor
   imageSize: SizeOptions
-  buttonMargin: Margin | Dimension
-  textMargin: Margin | Dimension
+  buttonPadding: Padding | Dimension
+  textPadding: Padding | Dimension
   componentPadding: Padding | Dimension
   showText: boolean = false
   showIcon: boolean = false
@@ -263,8 +263,8 @@ export class SegmentButtonOptions {
     this.backgroundColor = options.backgroundColor ?? SegmentButtonTheme.BACKGROUND_COLOR
     this.selectedBackgroundColor = options.selectedBackgroundColor ?? SegmentButtonTheme.TAB_SELECTED_BACKGROUND_COLOR
     this.imageSize = options.imageSize ?? { width: 24, height: 24 }
-    this.buttonMargin = options.buttonMargin ?? { top: 4, right: 8, bottom: 4, left: 8 }
-    this.textMargin = options.textMargin ?? 0
+    this.buttonPadding = options.buttonPadding ?? { top: 4, right: 8, bottom: 4, left: 8 }
+    this.textPadding = options.textPadding ?? 0
     this.type = options.type
     this.backgroundBlurStyle = options.backgroundBlurStyle ?? SegmentButtonTheme.BACKGROUND_BLUR_STYLE
     this.buttons = new SegmentButtonItemOptionsArray(options.buttons)
@@ -276,7 +276,7 @@ export class SegmentButtonOptions {
       })
       if (this.showText && this.showIcon) {
         this.iconTextRadius = 12
-        this.buttonMargin = options.buttonMargin ?? { top: 6, right: 8, bottom: 6, left: 8 }
+        this.buttonPadding = options.buttonPadding ?? { top: 6, right: 8, bottom: 6, left: 8 }
         this.iconTextBackgroundRadius = 14
       }
       this.selectedFontColor = options.selectedFontColor ?? SegmentButtonTheme.CAPSULE_SELECTED_FONT_COLOR
@@ -300,8 +300,8 @@ export class SegmentButtonOptions {
       backgroundColor: options.backgroundColor,
       selectedBackgroundColor: options.selectedBackgroundColor,
       imageSize: options.imageSize,
-      buttonMargin: options.buttonMargin,
-      textMargin: options.textMargin,
+      buttonPadding: options.buttonPadding,
+      textPadding: options.textPadding,
       backgroundBlurStyle: options.backgroundBlurStyle
     })
   }
@@ -320,8 +320,8 @@ export class SegmentButtonOptions {
       backgroundColor: options.backgroundColor,
       selectedBackgroundColor: options.selectedBackgroundColor,
       imageSize: options.imageSize,
-      buttonMargin: options.buttonMargin,
-      textMargin: options.textMargin,
+      buttonPadding: options.buttonPadding,
+      textPadding: options.textPadding,
       backgroundBlurStyle: options.backgroundBlurStyle
     })
   }
@@ -451,11 +451,11 @@ struct SegmentButtonItem {
           .maxLines(1)
           .textAlign(TextAlign.Center)
           .focusable(this.index == 0 && !this.options.showIcon)
-          .padding(this.options.textMargin ?? 0)
+          .padding(this.options.textPadding ?? 0)
       }
     }
     .justifyContent(FlexAlign.Center)
-    .padding(this.options.buttonMargin ?? ((this.options.type === 'capsule' && this.options.showText && this.options.showIcon) ?
+    .padding(this.options.buttonPadding ?? ((this.options.type === 'capsule' && this.options.showText && this.options.showIcon) ?
       { top: 6, right: 8, bottom: 6, left: 8 } : { top: 4, right: 8, bottom: 4, left: 8 }))
     .constraintSize({ minHeight: 28 })
   }
