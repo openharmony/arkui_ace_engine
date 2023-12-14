@@ -171,7 +171,15 @@ void TextSelectController::UpdateSelectByOffset(const Offset& localOffset)
         pos -= 1;
     }
 
-    bool smartSelect = AdjustWordSelection(pos, start, end, localOffset);
+    auto pattern = pattern_.Upgrade();
+    CHECK_NULL_VOID(pattern);
+    auto textFiled = DynamicCast<TextFieldPattern>(pattern);
+    CHECK_NULL_VOID(textFiled);
+    bool smartSelect = false;
+    if (!textFiled->IsUsingMouse()) {
+        smartSelect = AdjustWordSelection(pos, start, end, localOffset);
+    }
+    
     if (!smartSelect && !paragraph_->GetWordBoundary(pos, start, end)) {
         start = pos;
         end = std::min(static_cast<int32_t>(contentController_->GetWideText().length()),
