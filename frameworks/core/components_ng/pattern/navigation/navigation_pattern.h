@@ -244,6 +244,12 @@ public:
     void SetInitNavBarWidth(const Dimension& initNavBarWidth)
     {
         realNavBarWidth_ = static_cast<float>(initNavBarWidth.ConvertToPx());
+        initNavBarWidthValue_ = initNavBarWidth;
+    }
+
+    Dimension GetInitNavBarWidth() const
+    {
+        return initNavBarWidthValue_;
     }
     
     void SetIfNeedInit(bool ifNeedInit)
@@ -322,6 +328,7 @@ private:
     bool userSetMinContentFlag_ = false;
     bool userSetNavBarWidthFlag_ = false;
     bool isChanged_ = false; // check navigation top page is change
+    Dimension initNavBarWidthValue_ = DEFAULT_NAV_BAR_WIDTH;
     Dimension minNavBarWidthValue_ = 0.0_vp;
     Dimension maxNavBarWidthValue_ = 0.0_vp;
     Dimension minContentWidthValue_ = 0.0_vp;
