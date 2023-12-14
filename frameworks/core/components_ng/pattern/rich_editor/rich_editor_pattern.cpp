@@ -1301,8 +1301,9 @@ void RichEditorPattern::HandleSingleClickEvent(OHOS::Ace::GestureEvent& info)
 
 void RichEditorPattern::HandleDoubleClickEvent(OHOS::Ace::GestureEvent& info)
 {
-    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "in double HandleDoubleClickEvent");
-    if (!IsUsingMouse()) {
+    bool isUsingMouse = info.GetSourceDevice() == SourceType::MOUSE;
+    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "in double HandleDoubleClickEvent,use mouse:%{public}d", info.GetSourceDevice());
+    if (!isUsingMouse) {
         caretUpdateType_ = CaretUpdateType::DOUBLE_CLICK;
         HandleDoubleClickOrLongPress(info);
     }
