@@ -140,11 +140,10 @@ export class SegmentButtonItemOptionsArray extends Array<SegmentButtonItemOption
   constructor(elements: SegmentButtonItemTuple)
 
   constructor(elementsOrLength: SegmentButtonItemTuple | number) {
-    super()
-    if (typeof elementsOrLength === "number") {
-      super(elementsOrLength)
-    }
-    else if (elementsOrLength !== void 0) {
+
+    super(typeof elementsOrLength === "number" ? elementsOrLength : 0);
+
+    if (typeof elementsOrLength !== "number" && elementsOrLength !== void 0) {
       super.push(...elementsOrLength.map((element?: SegmentButtonTextItem | SegmentButtonIconItem | SegmentButtonIconTextItem) => new SegmentButtonItemOptions(element as SegmentButtonItemOptionsConstructorOptions)))
     }
   }
