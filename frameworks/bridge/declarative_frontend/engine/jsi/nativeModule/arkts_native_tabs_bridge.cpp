@@ -378,11 +378,18 @@ ArkUINativeModuleValue TabsBridge::SetScrollable(ArkUIRuntimeCallInfo* runtimeCa
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
-    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
+    Local<JSValueRef> scrollableArg = runtimeCallInfo->GetCallArgRef(1);
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    bool scrollable = secondArg->ToBoolean(vm)->Value();
+    ArkUINativeModuleValue undefinedRes = panda::JSValueRef::Undefined(vm);
+
+    if (scrollableArg->IsNull() || scrollableArg->IsUndefined()) {
+        GetArkUIInternalNodeAPI()->GetTabsModifier().ResetScrollable(nativeNode);
+        return undefinedRes;
+    }
+
+    bool scrollable = scrollableArg->ToBoolean(vm)->Value();
     GetArkUIInternalNodeAPI()->GetTabsModifier().SetScrollable(nativeNode, scrollable);
-    return panda::JSValueRef::Undefined(vm);
+    return undefinedRes;
 }
 
 ArkUINativeModuleValue TabsBridge::ResetScrollable(ArkUIRuntimeCallInfo* runtimeCallInfo)
