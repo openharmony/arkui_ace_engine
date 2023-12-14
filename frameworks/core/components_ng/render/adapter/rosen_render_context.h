@@ -227,7 +227,7 @@ public:
 
     RectF GetPaintRectWithTransform() override;
 
-    RectF GetPaintRectWithTranslate() override;
+    std::pair<RectF, bool> GetPaintRectWithTranslate() override;
 
     RectF GetPaintRectWithoutTransform() override;
 
@@ -499,7 +499,7 @@ private:
     bool hasDefaultTransition_ = false;
     bool measureTriggered_ = false;
     bool particleAnimationPlaying_ = false;
-    bool allowSandBox_ = true;
+    bool hasScales_ = false;
     int appearingTransitionCount_ = 0;
     int disappearingTransitionCount_ = 0;
     int sandBoxCount_ = 0;

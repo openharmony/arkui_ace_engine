@@ -359,12 +359,6 @@ void RosenRenderContext::SetSandBox(const std::optional<OffsetF>& parentPosition
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     if (parentPosition.has_value()) {
-        RefPtr<FrameNode> parent = sandBoxCount_ == 0 ? host->GetAncestorNodeOfFrame() : nullptr;
-        while (parent) {
-            auto rosenRenderContext = DynamicCast<RosenRenderContext>(parent->GetRenderContext());
-            CHECK_NULL_VOID(rosenRenderContext && rosenRenderContext->allowSandBox_);
-            parent = parent->GetAncestorNodeOfFrame();
-        }
         if (!force) {
             sandBoxCount_++;
         }
@@ -377,6 +371,7 @@ void RosenRenderContext::SetSandBox(const std::optional<OffsetF>& parentPosition
                 return;
             }
             sandBoxCount_ = 0;
+            CHECK_NULL_VOID(!host->IsRemoving());
         }
         rsNode_->SetSandBox(std::nullopt);
     }
@@ -1303,9 +1298,7 @@ void RosenRenderContext::OnTransformScaleUpdate(const VectorF& scale)
 {
     CHECK_NULL_VOID(rsNode_);
     auto curScale = rsNode_->GetStagingProperties().GetScale();
-    if (!NearEqual(curScale, Vector2f(1.0f, 1.0f)) && !NearEqual(scale, VectorF(1.0f, 1.0f))) {
-        allowSandBox_ = false;
-    }
+    hasScales_ = !NearEqual(curScale, Vector2f(1.0f, 1.0f)) && !NearEqual(scale, VectorF(1.0f, 1.0f));
     rsNode_->SetScale(scale.x, scale.y);
     RequestNextFrame();
 }
@@ -1479,17 +1472,18 @@ std::vector<double> RosenRenderContext::GetTrans()
     return transInfo_;
 }
 
-RectF RosenRenderContext::GetPaintRectWithTranslate()
+std::pair<RectF, bool> RosenRenderContext::GetPaintRectWithTranslate()
 {
     RectF rect;
-    CHECK_NULL_RETURN(rsNode_, rect);
+    bool error = hasScales_;
+    CHECK_NULL_RETURN(rsNode_, std::make_pair(rect, error));
     if (rsNode_->GetStagingProperties().GetRotation()) {
-        return RectF(0, 0, -1, -1);
+        return std::make_pair(RectF(0, 0, -1, -1), error);
     }
     rect = GetPaintRectWithoutTransform();
     auto translate = rsNode_->GetStagingProperties().GetTranslate();
     rect.SetOffset(rect.GetOffset() + OffsetF(translate[0], translate[1]));
-    return rect;
+    return std::make_pair(rect, error);
 }
 
 Matrix4 RosenRenderContext::GetRevertMatrix()
