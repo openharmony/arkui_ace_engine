@@ -584,7 +584,7 @@ private:
     CaretUpdateType caretUpdateType_ = CaretUpdateType::NONE;
     TimeStamp lastClickTimeStamp_;
     TimeStamp lastAiPosTimeStamp_;
-
+    bool adjusted_ = false;
     ACE_DISALLOW_COPY_AND_MOVE(RichEditorPattern);
 };
 } // namespace OHOS::Ace::NG

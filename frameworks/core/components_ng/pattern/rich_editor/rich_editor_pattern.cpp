@@ -1601,7 +1601,7 @@ void RichEditorPattern::HandleDoubleClickOrLongPress(GestureEvent& info)
     InitSelection(textOffset);
     auto selectEnd = std::max(textSelector_.baseOffset, textSelector_.destinationOffset);
     auto selectStart = std::min(textSelector_.baseOffset, textSelector_.destinationOffset);
-    if (!BetweenSelectedPosition(info.GetGlobalLocation()) && caretUpdateType_ == CaretUpdateType::LONG_PRESSED) {
+    if (!BetweenSelectedPosition(info.GetGlobalLocation()) && !adjusted_) {
         if (selectStart == 0) {
             textSelector_.Update(selectStart, selectStart);
         } else {
@@ -1609,6 +1609,7 @@ void RichEditorPattern::HandleDoubleClickOrLongPress(GestureEvent& info)
             selectStart = selectEnd;
         }
     }
+
     auto textSelectInfo = GetSpansInfo(selectStart, selectEnd, GetSpansMethod::ONSELECT);
     UpdateSelectionType(textSelectInfo);
     CalculateHandleOffsetAndShowOverlay();
@@ -4314,7 +4315,7 @@ void RichEditorPattern::InitSelection(const Offset& pos)
         std::swap(currentPosition, nextPosition);
     }
     nextPosition = std::min(nextPosition, GetTextContentLength());
-    bool adjusted = AdjustWordSelection(currentPosition, nextPosition);
+    adjusted_ = AdjustWordSelection(currentPosition, nextPosition);
     textSelector_.Update(currentPosition, nextPosition);
     auto selectedRects = paragraphs_.GetRects(currentPosition, nextPosition);
     if (selectedRects.empty() && !spans_.empty()) {
@@ -4333,7 +4334,7 @@ void RichEditorPattern::InitSelection(const Offset& pos)
         }
     }
 
-    if (adjusted) {
+    if (adjusted_) {
         return;
     }
 
