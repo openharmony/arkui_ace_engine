@@ -3112,13 +3112,12 @@ ArkUINativeModuleValue CommonBridge::ResetOffset(ArkUIRuntimeCallInfo *runtimeCa
     return panda::JSValueRef::Undefined(vm);
 }
 
-void ParsePadding(const EcmaVM* vm, const Local<JSValueRef>& value, ArkUISizeType& result)
+void ParsePadding(const EcmaVM* vm, const Local<JSValueRef>& value, CalcDimension& dimen, ArkUISizeType& result)
 {
-    CalcDimension dimen(0, DimensionUnit::VP);
     if (ArkTSUtils::ParseJsDimensionVp(vm, value, dimen)) {
         if (LessOrEqual(dimen.Value(), 0.0)) {
             dimen.SetValue(0.0);
-            dimen.SetUnit(DimensionUnit::PX);
+            dimen.SetUnit(DimensionUnit::VP);
         }
         result.unit = static_cast<int8_t>(dimen.Unit());
         if (dimen.CalcValue() != "") {
@@ -3145,10 +3144,14 @@ ArkUINativeModuleValue CommonBridge::SetPadding(ArkUIRuntimeCallInfo *runtimeCal
     struct ArkUISizeType bottom = { 0.0, static_cast<int8_t>(DimensionUnit::VP) };
     struct ArkUISizeType left = { 0.0, static_cast<int8_t>(DimensionUnit::VP) };
 
-    ParsePadding(vm, secondArg, top);
-    ParsePadding(vm, thirdArg, right);
-    ParsePadding(vm, forthArg, bottom);
-    ParsePadding(vm, fifthArg, left);
+    CalcDimension topDimen(0, DimensionUnit::VP);
+    CalcDimension rightDimen(0, DimensionUnit::VP);
+    CalcDimension bottomDimen(0, DimensionUnit::VP);
+    CalcDimension leftDimen(0, DimensionUnit::VP);
+    ParsePadding(vm, secondArg, topDimen, top);
+    ParsePadding(vm, thirdArg, rightDimen, right);
+    ParsePadding(vm, forthArg, bottomDimen, bottom);
+    ParsePadding(vm, fifthArg, leftDimen, left);
     GetArkUIInternalNodeAPI()->GetCommonModifier().SetPadding(nativeNode, &top, &right, &bottom, &left);
 
     return panda::JSValueRef::Undefined(vm);
