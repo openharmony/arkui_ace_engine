@@ -12387,6 +12387,10 @@ DataPanelTrackBackgroundColorModifier.identity = Symbol('dataPanelTrackBackgroun
 class DataPanelTrackShadowModifier extends ModifierWithKey {
   applyPeer(node, reset) {
     if (reset) {
+      if (this.value === null) {
+        GetUINativeModule().dataPanel.setDataPanelTrackShadow(node, null);
+        return;
+      }
       GetUINativeModule().dataPanel.resetDataPanelTrackShadow(node);
     }
     else {

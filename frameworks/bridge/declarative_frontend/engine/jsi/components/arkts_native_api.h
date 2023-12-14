@@ -1285,6 +1285,7 @@ struct ArkUIDataPanelModifierAPI {
     void (*ResetValueColors)(NodeHandle node);
     void (*SetTrackShadow)(
         NodeHandle node, const struct ArkUIGradientType* gradient, double radius, double offsetX, double offsetY);
+    void (*SetNullTrackShadow)(NodeHandle node);
     void (*ResetTrackShadow)(NodeHandle node);
 };
 

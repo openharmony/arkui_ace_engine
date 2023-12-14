@@ -23,6 +23,9 @@ namespace OHOS::Ace::NG {
 namespace {
 constexpr bool IS_CLOSE_EFFECT = false;
 constexpr double DEFAULT_STROKE_WIDTH = 24.0;
+constexpr double DEFAULT_RADIUS = 5.0;
+constexpr double DEFAULT_OFFSET_X = 5.0;
+constexpr double DEFAULT_OFFSET_Y = 5.0;
 const std::string DEFAULT_TRACK_BACKGROUND = "#08182431";
 }
 void SetCloseEffect(NodeHandle node, bool value)
@@ -159,7 +162,7 @@ void SetTrackShadow(
     DataPanelModelNG::SetShadowOption(frameNode, shadow);
 }
 
-void ResetTrackShadow(NodeHandle node)
+void SetNullTrackShadow(NodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -168,11 +171,26 @@ void ResetTrackShadow(NodeHandle node)
     DataPanelModelNG::SetShadowOption(frameNode, shadow);
 }
 
+void ResetTrackShadow(NodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    DataPanelShadow shadow;
+    shadow.isShadowVisible = true;
+    shadow.radius = DEFAULT_RADIUS;
+    shadow.offsetX = DEFAULT_OFFSET_X;
+    shadow.offsetY = DEFAULT_OFFSET_Y;
+    std::vector<OHOS::Ace::NG::Gradient> colors;
+    ConvertThemeColor(colors);
+    shadow.colors = colors;
+    DataPanelModelNG::SetShadowOption(frameNode, shadow);
+}
+
 ArkUIDataPanelModifierAPI GetDataPanelModifier()
 {
     static const ArkUIDataPanelModifierAPI modifier = { SetCloseEffect, ResetCloseEffect,
         SetDataPanelTrackBackgroundColor, ResetDataPanelTrackBackgroundColor, SetDataPanelStrokeWidth,
-        ResetDataPanelStrokeWidth, SetValueColors, ResetValueColors, SetTrackShadow,
+        ResetDataPanelStrokeWidth, SetValueColors, ResetValueColors, SetTrackShadow, SetNullTrackShadow,
         ResetTrackShadow };
 
     return modifier;
