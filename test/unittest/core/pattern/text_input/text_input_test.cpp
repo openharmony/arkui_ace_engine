@@ -1908,7 +1908,11 @@ HWTEST_F(TextFieldUXTest, CleanNode001, TestSize.Level1)
     /**
      * @tc.steps: step1. Initialize text input
      */
-    CreateTextField(DEFAULT_TEXT);
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetCleanNodeStyle(CleanNodeStyle::CONSTANT);
+        model.SetIsShowCancelButton(true);
+        model.SetCancelIconSize(Dimension(ICON_SIZE, DimensionUnit::PX));
+    });
 
     /**
      * @tc.steps: step2. Get clear node response area
@@ -1947,7 +1951,11 @@ HWTEST_F(TextFieldUXTest, CleanNode002, TestSize.Level1)
     /**
      * @tc.steps: step1. Initialize text input
      */
-    CreateTextField(DEFAULT_TEXT);
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetCleanNodeStyle(CleanNodeStyle::CONSTANT);
+        model.SetIsShowCancelButton(true);
+        model.SetCancelIconSize(Dimension(ICON_SIZE, DimensionUnit::PX));
+    });
 
     /**
      * @tc.steps: step2. Get clean node response area
