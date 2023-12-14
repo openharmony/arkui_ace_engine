@@ -261,7 +261,8 @@ void ListLayoutAlgorithm::ClearAllItemPosition(LayoutWrapper* layoutWrapper)
 
 void ListLayoutAlgorithm::BeginLayoutForward(float startPos, LayoutWrapper* layoutWrapper)
 {
-    LayoutForward(layoutWrapper, jumpIndex_.value(), startPos);
+    int32_t index = GetLanesFloor(layoutWrapper, jumpIndex_.value());
+    LayoutForward(layoutWrapper, index, startPos);
     if ((GetStartIndex() > 0) && GreatNotEqual(GetStartPosition(), startMainPos_)) {
         LayoutBackward(layoutWrapper, GetStartIndex() - 1, GetStartPosition());
         if ((GetEndIndex() < totalItemCount_ - 1) && LessNotEqual(GetEndPosition(), endMainPos_)) {
@@ -272,7 +273,8 @@ void ListLayoutAlgorithm::BeginLayoutForward(float startPos, LayoutWrapper* layo
 
 void ListLayoutAlgorithm::BeginLayoutBackward(float startPos, LayoutWrapper* layoutWrapper)
 {
-    LayoutBackward(layoutWrapper, jumpIndex_.value(), startPos);
+    int32_t index = GetLanesCeil(layoutWrapper, jumpIndex_.value());
+    LayoutBackward(layoutWrapper, index, startPos);
     if (LessOrEqual(GetEndIndex(), totalItemCount_ - 1) && LessNotEqual(GetEndPosition(), endMainPos_)) {
         LayoutForward(layoutWrapper, GetEndIndex() + 1, GetEndPosition());
         if ((GetStartIndex() > 0) && GreatNotEqual(GetStartPosition(), startMainPos_)) {
@@ -377,15 +379,15 @@ void ListLayoutAlgorithm::HandleJumpCenter(LayoutWrapper* layoutWrapper)
         SetListItemGroupParam(wrapper, 0.0f, true, listLayoutProperty, false);
         wrapper->Measure(GetGroupLayoutConstraint());
         itemPosition_[index] = GetListItemGroupPosition(wrapper, indexInGroup);
+        if (LessNotEqual(GetEndPosition(), endMainPos_)) {
+            LayoutForward(layoutWrapper, index + 1, GetEndPosition());
+        }
     } else {
         float mainLen = MeasureAndGetChildHeight(layoutWrapper, index);
         float startPos = (contentMainSize_ - mainLen) / 2.0f;
-        float endPos = startPos + mainLen;
-        itemPosition_[index] = { startPos, endPos, isGroup };
-    }
-
-    if (LessNotEqual(GetEndPosition(), endMainPos_)) {
-        LayoutForward(layoutWrapper, index + 1, GetEndPosition());
+        if (LessNotEqual(startPos, endMainPos_)) {
+            LayoutForward(layoutWrapper, index, startPos);
+        }
     }
     if (GreatNotEqual(GetStartPosition(), startMainPos_)) {
         LayoutBackward(layoutWrapper, index - 1, GetStartPosition());
