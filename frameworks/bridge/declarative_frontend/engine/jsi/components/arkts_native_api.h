@@ -1085,7 +1085,7 @@ struct ArkUITabsModifierAPI {
     void (*SetScrollableBarModeOptions)(NodeHandle node, const double value, const int unit, const int layoutStyle);
     void (*SetBarGridAlign)(
         NodeHandle node, const double* values, int32_t valuesLength, const int* units, int32_t unitsLength);
-    void (*SetDivider)(NodeHandle node, uint32_t color, const double* values, const int* units, int32_t length);
+    void (*SetDivider)(NodeHandle node, uint32_t color, const double* values, const int32_t* units, int32_t length);
     void (*SetFadingEdge)(NodeHandle node, bool fadingEdge);
     void (*SetBarBackgroundColor)(NodeHandle node, uint32_t color);
     void (*SetBarOverlap)(NodeHandle node, bool overlap);
@@ -1380,7 +1380,8 @@ struct ArkUIListModifierAPI {
     void (*ResetAlignListItem)(NodeHandle node);
     void (*SetScrollSnapAlign)(NodeHandle node, int32_t scrollSnapAlign);
     void (*ResetScrollSnapAlign)(NodeHandle node);
-    void (*ListSetDivider)(NodeHandle node, const uint32_t color, const double *values, const int *units);
+    void (*ListSetDivider)(
+        NodeHandle node, const uint32_t color, const double* values, const int32_t* units, int32_t length);
     void (*ListResetDivider)(NodeHandle node);
     void (*SetChainAnimationOptions)(
         NodeHandle node, const struct ArkUIChainAnimationOptionsType *chainAnimationOptions);

@@ -25,6 +25,7 @@ constexpr bool DEFAULT_SCROLL_ENABLE = true;
 constexpr int32_t DEFAULT_STICKY_STYLE = 0;
 constexpr int32_t DEFAULT_DIRECTION = 0;
 constexpr int32_t DEFAULT_SCROLL_BAR = 1;
+constexpr int32_t DEFAULT_DIVIDER_VALUES_COUNT = 3;
 
 constexpr int32_t DEFAULT_EDGE_EFFECT = 0;
 
@@ -253,10 +254,15 @@ void ResetScrollSnapAlign(NodeHandle node)
     ListModelNG::SetScrollSnapAlign(frameNode, V2::ScrollSnapAlign::NONE);
 }
 
-void ListSetDivider(NodeHandle node, uint32_t color, const double* values, const int* units)
+void ListSetDivider(NodeHandle node, uint32_t color, const double* values, const int32_t* units, int32_t length)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
+
+    if (length != DEFAULT_DIVIDER_VALUES_COUNT) {
+        return;
+    }
+    
     V2::ItemDivider divider;
     divider.color = Color(color);
     divider.strokeWidth =

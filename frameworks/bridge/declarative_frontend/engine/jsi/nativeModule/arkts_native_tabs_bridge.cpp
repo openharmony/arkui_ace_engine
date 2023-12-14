@@ -28,12 +28,12 @@ namespace OHOS::Ace::NG {
 constexpr int SIZE_OF_FIVE = 5;
 constexpr int SIZE_OF_THREE = 3;
 constexpr int SIZE_OF_VALUES = 2;
-constexpr int NUM_0 = 0;
-constexpr int NUM_1 = 1;
-constexpr int NUM_2 = 2;
-constexpr int NUM_3 = 3;
-constexpr int NUM_4 = 4;
-constexpr int NUM_5 = 5;
+constexpr int TABS_ARG_INDEX_0 = 0;
+constexpr int TABS_ARG_INDEX_1 = 1;
+constexpr int TABS_ARG_INDEX_2 = 2;
+constexpr int TABS_ARG_INDEX_3 = 3;
+constexpr int TABS_ARG_INDEX_4 = 4;
+constexpr int TABS_ARG_INDEX_5 = 5;
 constexpr int32_t SM_COLUMN_NUM = 4;
 constexpr int32_t MD_COLUMN_NUM = 8;
 constexpr int32_t LG_COLUMN_NUM = 12;
@@ -44,11 +44,11 @@ ArkUINativeModuleValue TabsBridge::SetTabBarMode(ArkUIRuntimeCallInfo* runtimeCa
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
-    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(TABS_ARG_INDEX_0);
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    Local<JSValueRef> barModeArg = runtimeCallInfo->GetCallArgRef(NUM_1);
-    Local<JSValueRef> marginArg = runtimeCallInfo->GetCallArgRef(NUM_2);
-    Local<JSValueRef> nonScrollableLayoutStyleArg = runtimeCallInfo->GetCallArgRef(NUM_3);
+    Local<JSValueRef> barModeArg = runtimeCallInfo->GetCallArgRef(TABS_ARG_INDEX_1);
+    Local<JSValueRef> marginArg = runtimeCallInfo->GetCallArgRef(TABS_ARG_INDEX_2);
+    Local<JSValueRef> nonScrollableLayoutStyleArg = runtimeCallInfo->GetCallArgRef(TABS_ARG_INDEX_3);
 
     if (barModeArg->IsNull() || barModeArg->IsUndefined()) {
         GetArkUIInternalNodeAPI()->GetTabsModifier().ResetTabBarMode(nativeNode);
@@ -91,9 +91,9 @@ ArkUINativeModuleValue TabsBridge::SetScrollableBarModeOptions(ArkUIRuntimeCallI
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
-    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
-    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
-    Local<JSValueRef> thirdArg = runtimeCallInfo->GetCallArgRef(NUM_2);
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(TABS_ARG_INDEX_0);
+    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(TABS_ARG_INDEX_1);
+    Local<JSValueRef> thirdArg = runtimeCallInfo->GetCallArgRef(TABS_ARG_INDEX_2);
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
 
     if (thirdArg->IsUndefined()) {
@@ -126,12 +126,12 @@ ArkUINativeModuleValue TabsBridge::SetBarGridAlign(ArkUIRuntimeCallInfo* runtime
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
-    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
-    Local<JSValueRef> smArg = runtimeCallInfo->GetCallArgRef(NUM_1);
-    Local<JSValueRef> mdArg = runtimeCallInfo->GetCallArgRef(NUM_2);
-    Local<JSValueRef> lgArg = runtimeCallInfo->GetCallArgRef(NUM_3);
-    Local<JSValueRef> gutterArg = runtimeCallInfo->GetCallArgRef(NUM_4);
-    Local<JSValueRef> marginArg = runtimeCallInfo->GetCallArgRef(NUM_5);
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(TABS_ARG_INDEX_0);
+    Local<JSValueRef> smArg = runtimeCallInfo->GetCallArgRef(TABS_ARG_INDEX_1);
+    Local<JSValueRef> mdArg = runtimeCallInfo->GetCallArgRef(TABS_ARG_INDEX_2);
+    Local<JSValueRef> lgArg = runtimeCallInfo->GetCallArgRef(TABS_ARG_INDEX_3);
+    Local<JSValueRef> gutterArg = runtimeCallInfo->GetCallArgRef(TABS_ARG_INDEX_4);
+    Local<JSValueRef> marginArg = runtimeCallInfo->GetCallArgRef(TABS_ARG_INDEX_5);
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
 
     int32_t sm = DEFAULT_COLUMN;
@@ -164,13 +164,13 @@ ArkUINativeModuleValue TabsBridge::SetBarGridAlign(ArkUIRuntimeCallInfo* runtime
     int unitsAndColumn[SIZE_OF_FIVE];
     double values[SIZE_OF_VALUES];
 
-    values[NUM_0] = columnGutter.Value();
-    values[NUM_1] = columnMargin.Value();
-    unitsAndColumn[NUM_0] = static_cast<int>(columnGutter.Unit());
-    unitsAndColumn[NUM_1] = static_cast<int>(columnMargin.Unit());
-    unitsAndColumn[NUM_2] = sm;
-    unitsAndColumn[NUM_3] = md;
-    unitsAndColumn[NUM_4] = lg;
+    values[TABS_ARG_INDEX_0] = columnGutter.Value();
+    values[TABS_ARG_INDEX_1] = columnMargin.Value();
+    unitsAndColumn[TABS_ARG_INDEX_0] = static_cast<int>(columnGutter.Unit());
+    unitsAndColumn[TABS_ARG_INDEX_1] = static_cast<int>(columnMargin.Unit());
+    unitsAndColumn[TABS_ARG_INDEX_2] = sm;
+    unitsAndColumn[TABS_ARG_INDEX_3] = md;
+    unitsAndColumn[TABS_ARG_INDEX_4] = lg;
 
     GetArkUIInternalNodeAPI()->GetTabsModifier().SetBarGridAlign(
         nativeNode, values, SIZE_OF_VALUES, unitsAndColumn, SIZE_OF_FIVE);
@@ -193,10 +193,10 @@ ArkUINativeModuleValue TabsBridge::SetDivider(ArkUIRuntimeCallInfo* runtimeCallI
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    Local<JSValueRef> dividerStrokeWidthArgs = runtimeCallInfo->GetCallArgRef(NUM_1);
-    Local<JSValueRef> colorArg = runtimeCallInfo->GetCallArgRef(NUM_2);
-    Local<JSValueRef> dividerStartMarginArgs = runtimeCallInfo->GetCallArgRef(NUM_3);
-    Local<JSValueRef> dividerEndMarginArgs = runtimeCallInfo->GetCallArgRef(NUM_4);
+    Local<JSValueRef> dividerStrokeWidthArgs = runtimeCallInfo->GetCallArgRef(TABS_ARG_INDEX_1);
+    Local<JSValueRef> colorArg = runtimeCallInfo->GetCallArgRef(TABS_ARG_INDEX_2);
+    Local<JSValueRef> dividerStartMarginArgs = runtimeCallInfo->GetCallArgRef(TABS_ARG_INDEX_3);
+    Local<JSValueRef> dividerEndMarginArgs = runtimeCallInfo->GetCallArgRef(TABS_ARG_INDEX_4);
     if (dividerStrokeWidthArgs->IsUndefined() && dividerStartMarginArgs->IsUndefined() &&
         dividerEndMarginArgs->IsUndefined() && colorArg->IsUndefined()) {
         GetArkUIInternalNodeAPI()->GetTabsModifier().ResetDivider(nativeNode);
@@ -215,32 +215,32 @@ ArkUINativeModuleValue TabsBridge::SetDivider(ArkUIRuntimeCallInfo* runtimeCallI
     CHECK_NULL_RETURN(tabTheme, panda::NativePointerRef::New(vm, nullptr));
 
     if (!ArkTSUtils::ParseJsDimensionVp(vm, dividerStrokeWidthArgs, dividerStrokeWidth) ||
-        dividerStrokeWidth.Value() < 0.0f || dividerStrokeWidth.Unit() == DimensionUnit::PERCENT) {
+        LessNotEqual(dividerStrokeWidth.Value(), 0.0f) || dividerStrokeWidth.Unit() == DimensionUnit::PERCENT) {
         dividerStrokeWidth.Reset();
     }
     Color colorObj;
-    if (!ArkTSUtils::ParseJsColor(vm, colorArg, colorObj)) {
+    if (!ArkTSUtils::ParseJsColorAlpha(vm, colorArg, colorObj)) {
         color = tabTheme->GetDividerColor().GetValue();
     } else {
         color = colorObj.GetValue();
     }
     if (!ArkTSUtils::ParseJsDimensionVp(vm, dividerStartMarginArgs, dividerStartMargin) ||
-        dividerStartMargin.Value() < 0.0f || dividerStartMargin.Unit() == DimensionUnit::PERCENT) {
+        LessNotEqual(dividerStartMargin.Value(), 0.0f) || dividerStartMargin.Unit() == DimensionUnit::PERCENT) {
         dividerStartMargin.Reset();
     }
     if (!ArkTSUtils::ParseJsDimensionVp(vm, dividerEndMarginArgs, dividerEndMargin) ||
-        dividerEndMargin.Value() < 0.0f || dividerEndMargin.Unit() == DimensionUnit::PERCENT) {
+        LessNotEqual(dividerEndMargin.Value(), 0.0f) || dividerEndMargin.Unit() == DimensionUnit::PERCENT) {
         dividerEndMargin.Reset();
     }
     uint32_t size = SIZE_OF_THREE;
     double values[size];
-    int units[size];
-    values[NUM_0] = dividerStrokeWidth.Value();
-    values[NUM_1] = dividerStartMargin.Value();
-    values[NUM_2] = dividerEndMargin.Value();
-    units[NUM_0] = static_cast<int>(dividerStrokeWidth.Unit());
-    units[NUM_1] = static_cast<int>(dividerStartMargin.Unit());
-    units[NUM_2] = static_cast<int>(dividerEndMargin.Unit());
+    int32_t units[size];
+    values[TABS_ARG_INDEX_0] = dividerStrokeWidth.Value();
+    values[TABS_ARG_INDEX_1] = dividerStartMargin.Value();
+    values[TABS_ARG_INDEX_2] = dividerEndMargin.Value();
+    units[TABS_ARG_INDEX_0] = static_cast<int32_t>(dividerStrokeWidth.Unit());
+    units[TABS_ARG_INDEX_1] = static_cast<int32_t>(dividerStartMargin.Unit());
+    units[TABS_ARG_INDEX_2] = static_cast<int32_t>(dividerEndMargin.Unit());
     GetArkUIInternalNodeAPI()->GetTabsModifier().SetDivider(nativeNode, color, values, units, size);
     return panda::JSValueRef::Undefined(vm);
 }

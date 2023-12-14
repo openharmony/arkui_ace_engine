@@ -70,8 +70,8 @@ class ListScrollSnapAlignModifier extends ModifierWithKey<ScrollSnapAlign> {
   }
 }
 
-class ListDividerModifier extends ModifierWithKey<{ strokeWidth: any; color?: any; startMargin?: any; endMargin?: any; } | null> {
-  constructor(value: { strokeWidth: any; color?: any; startMargin?: any; endMargin?: any; } | null) {
+class ListDividerModifier extends ModifierWithKey<DividerStyle> {
+  constructor(value: DividerStyle) {
     super(value);
   }
   static identity: Symbol = Symbol('listDivider');
@@ -84,7 +84,10 @@ class ListDividerModifier extends ModifierWithKey<{ strokeWidth: any; color?: an
   }
 
   checkObjectDiff(): boolean {
-    return !isBaseOrResourceEqual(this.stageValue.strokeWidth, this.value.strokeWidth);
+    return !(this.stageValue?.strokeWidth === this.value?.strokeWidth &&
+      this.stageValue?.color === this.value?.color &&
+      this.stageValue?.startMargin === this.value?.startMargin &&
+      this.stageValue?.endMargin === this.value?.endMargin);
   }
 }
 
