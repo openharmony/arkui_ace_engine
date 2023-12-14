@@ -499,6 +499,9 @@ void CleanNodeResponseArea::UpdateCleanNode(bool isShow)
         CHECK_NULL_VOID(geometryNode);
         auto frameSize = geometryNode->GetFrameSize();
         auto iconSize = std::min(iconSize_.ConvertToPx(), static_cast<double>(frameSize.Height()));
+        if (NearZero(iconSize)) {
+            isShow_ = false;
+        }
         auto hotZoneSize = iconSize + rightOffset;
         stackLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(hotZoneSize), std::nullopt));
         imageLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(iconSize), CalcLength(iconSize)));
