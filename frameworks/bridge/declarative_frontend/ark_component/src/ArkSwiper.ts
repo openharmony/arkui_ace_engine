@@ -221,19 +221,21 @@ class SwiperDisplayCountModifier extends ModifierWithKey<string | number | Swipe
     if (reset) {
       GetUINativeModule().swiper.resetSwiperDisplayCount(node);
     } else {
-      if (!isNull(this.value) && typeof this.value === 'object') {
+      if (isNull(this.value)) {
+        GetUINativeModule().swiper.resetSwiperDisplayCount(node);
+      } else if (typeof this.value === 'object') {
         let minSize = (this.value as SwiperAutoFill).minSize.toString();
-        GetUINativeModule().swiper.setSwiperDisplayCount(node, minSize);
+        GetUINativeModule().swiper.setSwiperDisplayCount(node, minSize, typeof this.value);
       } else {
-        GetUINativeModule().swiper.setSwiperDisplayCount(node, this.value);
+        GetUINativeModule().swiper.setSwiperDisplayCount(node, this.value, typeof this.value);
       }
     }
   }
   checkObjectDiff(): boolean {
     if (typeof this.stageValue !== typeof this.value) {
-      return false;
+      return true;
     } else if (typeof this.stageValue === 'object' && typeof this.stageValue === 'object') {
-      return (this.stageValue as SwiperAutoFill).minSize === (this.value as SwiperAutoFill).minSize;
+      return (this.stageValue as SwiperAutoFill).minSize !== (this.value as SwiperAutoFill).minSize;
     } else {
       return !isBaseOrResourceEqual(this.stageValue, this.value);
     }
@@ -428,14 +430,10 @@ class SwiperIndicatorModifier extends ModifierWithKey<boolean | DotIndicator | D
   }
   checkObjectDiff(): boolean {
     if (typeof this.stageValue !== typeof this.value) {
-      return false;
+      return true;
     }
     if (typeof this.stageValue === 'boolean' && typeof this.value === 'boolean') {
-      if (this.stageValue === this.value) {
-        return true;
-      } else {
-        return false;
-      }
+      return this.stageValue !== this.value;
     }
     if (this.stageValue instanceof ArkDotIndicator && this.value instanceof ArkDotIndicator) {
       return (

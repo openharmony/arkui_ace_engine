@@ -15254,21 +15254,23 @@ class SwiperDisplayCountModifier extends ModifierWithKey {
       GetUINativeModule().swiper.resetSwiperDisplayCount(node);
     }
     else {
-      if (!isNull(this.value) && typeof this.value === 'object') {
+      if (isNull(this.value)) {
+        GetUINativeModule().swiper.resetSwiperDisplayCount(node);
+      } else if (typeof this.value === 'object') {
         let minSize = this.value.minSize.toString();
-        GetUINativeModule().swiper.setSwiperDisplayCount(node, minSize);
+        GetUINativeModule().swiper.setSwiperDisplayCount(node, minSize, typeof this.value);
       }
       else {
-        GetUINativeModule().swiper.setSwiperDisplayCount(node, this.value);
+        GetUINativeModule().swiper.setSwiperDisplayCount(node, this.value, typeof this.value);
       }
     }
   }
   checkObjectDiff() {
     if (typeof this.stageValue !== typeof this.value) {
-      return false;
+      return true;
     }
     else if (typeof this.stageValue === 'object' && typeof this.stageValue === 'object') {
-      return this.stageValue.minSize === this.value.minSize;
+      return this.stageValue.minSize !== this.value.minSize;
     }
     else {
       return !isBaseOrResourceEqual(this.stageValue, this.value);
@@ -15407,15 +15409,10 @@ class SwiperIndicatorModifier extends ModifierWithKey {
   }
   checkObjectDiff() {
     if (typeof this.stageValue !== typeof this.value) {
-      return false;
+      return true;
     }
     if (typeof this.stageValue === 'boolean' && typeof this.value === 'boolean') {
-      if (this.stageValue === this.value) {
-        return true;
-      }
-      else {
-        return false;
-      }
+      return this.stageValue !== this.value;
     }
     if (this.stageValue instanceof ArkDotIndicator && this.value instanceof ArkDotIndicator) {
       return (!isBaseOrResourceEqual(this.stageValue.itemWidth, this.value.itemWidth) ||

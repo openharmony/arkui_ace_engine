@@ -189,16 +189,16 @@ SwiperParameters GetDotIndicatorInfo(FrameNode* frameNode, const std::vector<std
     SetIndicatorInfo(swiperParameters, dotIndicatorInfo);
     CalcDimension dimPosition = StringUtils::StringToCalcDimension(itemWidthValue, false, DimensionUnit::VP);
     auto defaultSize = swiperIndicatorTheme->GetSize();
-    bool parseItemWOk = dimPosition.Unit() != DimensionUnit::PERCENT;
+    bool parseItemWOk = !itemWidthValue.empty() && dimPosition.Unit() != DimensionUnit::PERCENT;
     swiperParameters.itemWidth = (parseItemWOk && (dimPosition > 0.0_vp)) ? dimPosition : defaultSize;
     dimPosition = StringUtils::StringToCalcDimension(itemHeightValue, false, DimensionUnit::VP);
-    bool parseItemHOk = dimPosition.Unit() != DimensionUnit::PERCENT;
+    bool parseItemHOk = !itemHeightValue.empty() && dimPosition.Unit() != DimensionUnit::PERCENT;
     swiperParameters.itemHeight = (parseItemHOk && (dimPosition > 0.0_vp)) ? dimPosition : defaultSize;
     dimPosition = StringUtils::StringToCalcDimension(selectedItemWidthValue, false, DimensionUnit::VP);
-    bool parseSeleItemWOk = dimPosition.Unit() != DimensionUnit::PERCENT;
+    bool parseSeleItemWOk = !selectedItemWidthValue.empty() && dimPosition.Unit() != DimensionUnit::PERCENT;
     swiperParameters.selectedItemWidth = (parseSeleItemWOk && (dimPosition > 0.0_vp)) ? dimPosition : defaultSize;
     dimPosition = StringUtils::StringToCalcDimension(selectedItemHeightValue, false, DimensionUnit::VP);
-    bool parseSeleItemHOk = dimPosition.Unit() != DimensionUnit::PERCENT;
+    bool parseSeleItemHOk = !selectedItemHeightValue.empty() && dimPosition.Unit() != DimensionUnit::PERCENT;
     swiperParameters.selectedItemHeight = (parseSeleItemHOk && (dimPosition > 0.0_vp)) ? dimPosition : defaultSize;
     if (!parseSeleItemWOk && !parseSeleItemHOk && !parseItemWOk && !parseItemHOk) {
         SwiperModelNG::SetIsIndicatorCustomSize(frameNode, false);
@@ -323,24 +323,28 @@ void ResetSwiperPrevMargin(NodeHandle node)
     SwiperModelNG::SetPreviousMargin(frameNode, value);
 }
 
-void SetSwiperDisplayCount(NodeHandle node, const char* displayCountChar, int32_t displayCountUnit)
+void SetSwiperDisplayCount(NodeHandle node, const char* displayCountChar, const char* displayCountType)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     std::string displayCountValue = std::string(displayCountChar);
-    if (displayCountValue == "auto") {
+    std::string type = std::string(displayCountType);
+    if (type == "string" && displayCountValue == "auto") {
         SwiperModelNG::SetDisplayMode(frameNode, SwiperDisplayMode::AUTO_LINEAR);
         SwiperModelNG::ResetDisplayCount(frameNode);
-    } else if (displayCountValue != "auto" && displayCountUnit == -1) {
-        int32_t displayCount = StringUtils::StringToInt(displayCountValue);
-        if (displayCount > 0) {
-            SwiperModelNG::SetDisplayCount(frameNode, displayCount);
-        } else {
-            SwiperModelNG::SetDisplayCount(frameNode, DEFAULT_DISPLAY_COUNT);
+    } else if (type == "number" && StringUtils::StringToInt(displayCountValue) > 0) {
+        SwiperModelNG::SetDisplayCount(frameNode, StringUtils::StringToInt(displayCountValue));
+    } else if (type == "object") {
+        if (displayCountValue.empty()) {
+            return;
         }
+        CalcDimension minSizeValue = StringUtils::StringToCalcDimension(displayCountValue, false, DimensionUnit::VP);
+        if (LessNotEqual(minSizeValue.Value(), 0.0)) {
+            minSizeValue.SetValue(0.0);
+        }
+        SwiperModelNG::SetMinSize(frameNode, minSizeValue);
     } else {
-        double minSizeValue = StringUtils::StringToInt(displayCountValue);
-        SwiperModelNG::SetMinSize(frameNode, CalcDimension(minSizeValue, (DimensionUnit)displayCountUnit));
+        SwiperModelNG::SetDisplayCount(frameNode, DEFAULT_DISPLAY_COUNT);
     }
 }
 
@@ -348,7 +352,7 @@ void ResetSwiperDisplayCount(NodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    SwiperModelNG::ResetDisplayCount(frameNode);
+    SwiperModelNG::SetDisplayCount(frameNode, DEFAULT_DISPLAY_COUNT);
 }
 
 void SetSwiperDisplayArrow(NodeHandle node, const char* displayArrowStr)
@@ -486,7 +490,7 @@ void ResetSwiperDisplayMode(NodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    SwiperModelNG::ResetDisplayMode(frameNode);
+    SwiperModelNG::SetDisplayMode(frameNode, SwiperDisplayMode::STRETCH);
 }
 
 void SetSwiperItemSpace(NodeHandle node, double itemSpaceValue, int32_t itemSpaceUnit)
