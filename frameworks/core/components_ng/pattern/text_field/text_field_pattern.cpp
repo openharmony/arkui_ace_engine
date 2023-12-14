@@ -2023,7 +2023,7 @@ void TextFieldPattern::OnAfterModifyDone()
                                               TextInputType::VISIBLE_PASSWORD
                                         : false;
         if (!isPwdType) {
-            Recorder::NodeDataCache::Get().PutString(inspectorId, textEditingValue_.text);
+            Recorder::NodeDataCache::Get().PutString(inspectorId, contentController_->GetTextValue());
         }
     }
 }
@@ -3849,7 +3849,7 @@ void TextFieldPattern::RecordSubmitEvent() const
     Recorder::EventParamsBuilder builder;
     builder.SetId(inspectorId).SetType(host->GetTag()).SetEventType(Recorder::EventType::SEARCH_SUBMIT);
     if (!isPwdType) {
-        builder.SetText(textEditingValue_.text);
+        builder.SetText(contentController_->GetTextValue());
     }
     Recorder::EventRecorder::Get().OnEvent(std::move(builder));
 }
