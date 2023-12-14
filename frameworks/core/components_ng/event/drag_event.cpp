@@ -134,8 +134,7 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
     CHECK_NULL_VOID(pipeline);
     auto dragDropManager = pipeline->GetDragDropManager();
     CHECK_NULL_VOID(dragDropManager);
-    if (dragDropManager->IsDragging() ||
-        dragDropManager->IsMsdpDragging() ||
+    if (dragDropManager->IsDragging() || dragDropManager->IsMsdpDragging() ||
         (!frameNode->IsDraggable() && frameNode->IsCustomerSet())) {
         return;
     }
@@ -168,6 +167,8 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
                 }
                 if (gestureHub->GetIsTextDraggable()) {
                     SetTextPixelMap(gestureHub);
+                } else {
+                    gestureHub->SetPixelMap(nullptr);
                 }
             } else if (!isNotInPreviewState_) {
                 if (gestureHub->GetTextDraggable()) {
