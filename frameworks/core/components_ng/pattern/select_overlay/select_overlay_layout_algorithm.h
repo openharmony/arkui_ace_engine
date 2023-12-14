@@ -67,6 +67,7 @@ private:
     OffsetF AdjustSelectMenuOffset(
         LayoutWrapper* layoutWrapper, const RectF& menuRect, double spaceBetweenText, double spaceBetweenHandle);
     OffsetF CalculateCustomMenuByMouseOffset(LayoutWrapper* layoutWrapper);
+    void CalculateCustomMenuLayoutConstraint(LayoutWrapper* layoutWrapper, LayoutConstraintF& layoutConstraint);
     bool IsTextAreaSelectAll();
 
     std::shared_ptr<SelectOverlayInfo> info_;
