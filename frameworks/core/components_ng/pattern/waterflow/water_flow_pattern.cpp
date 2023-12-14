@@ -263,10 +263,24 @@ bool WaterFlowPattern::ScrollToTargrtIndex(int32_t index)
     auto crossIndex = layoutInfo_.GetCrossIndex(index);
     if (crossIndex == -1) {
         return false;
-    } else {
-        float targetPosition = layoutInfo_.waterFlowItems_[crossIndex][index].first;
-        ScrollablePattern::AnimateTo(targetPosition, -1, nullptr, true);
     }
+    auto item = layoutInfo_.waterFlowItems_[crossIndex][index];
+    float targetPosition = 0.0;
+    // first line
+    if ((layoutInfo_.currentOffset_ + item.first < 0) && (layoutInfo_.currentOffset_ + item.first + item.second > 0)) {
+        targetPosition = item.first;
+    } else if ((layoutInfo_.currentOffset_ + item.first < layoutInfo_.lastMainSize_) &&
+               (layoutInfo_.currentOffset_ + item.first + item.second > layoutInfo_.lastMainSize_)) {
+        // last line
+        targetPosition = -(layoutInfo_.lastMainSize_ - (item.first + item.second));
+    } else if ((layoutInfo_.currentOffset_ + item.first + item.second < 0) ||
+               (layoutInfo_.currentOffset_ + item.first > layoutInfo_.lastMainSize_)) {
+        // out of viewport
+        targetPosition = item.first;
+    } else {
+        return true;
+    }
+    ScrollablePattern::AnimateTo(targetPosition, -1, nullptr, true);
     return true;
 }
 
