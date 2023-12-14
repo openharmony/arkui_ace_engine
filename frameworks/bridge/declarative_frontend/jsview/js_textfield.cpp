@@ -1017,7 +1017,7 @@ void JSTextField::SetShowCounter(const JSCallbackInfo& info)
         auto inputNumber = parameter->ToNumber<int32_t>();
         TextFieldModel::GetInstance()->SetCounterType(inputNumber);
         if (parameter->IsNull() || parameter->IsUndefined()) {
-            TextFieldModel::GetInstance()->SetShowCounter(true);
+            TextFieldModel::GetInstance()->SetShowCounter(info[0]->ToBoolean());
             TextFieldModel::GetInstance()->SetCounterType(INVAILD_VALUE);
             return;
         }

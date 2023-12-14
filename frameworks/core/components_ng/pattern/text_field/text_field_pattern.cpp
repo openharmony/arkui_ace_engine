@@ -3091,7 +3091,6 @@ void TextFieldPattern::InsertValue(const std::string& insertValue)
     auto textFieldLayoutProperty = host->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(textFieldLayoutProperty);
     auto inputValue = textFieldLayoutProperty->GetSetCounterValue(INVAILD_VALUE);
-    auto passwordResponse = DynamicCast<PasswordResponseArea>(pattern->GetResponseArea());
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<TextFieldTheme>();
@@ -3100,9 +3099,8 @@ void TextFieldPattern::InsertValue(const std::string& insertValue)
         inputValue == INVAILD_VALUE) {
         UpdateCounterBorderStyle(originLength, maxlength);
     }
-    
     bool noDeleteOperation = deleteBackwardOperations_.empty() && deleteForwardOperations_.empty();
-    if (!passwordResponse && originLength == maxlength && noDeleteOperation && !IsSelected() &&
+    if (!IsShowPasswordIcon() && originLength == maxlength && noDeleteOperation && !IsSelected() &&
         textFieldLayoutProperty->GetShowCounterValue(false) && inputValue != INVAILD_VALUE &&
         inputValue != ILLEGAL_VALUE && !IsNormalInlineState()) {
         counterChange_ = true;
@@ -3202,7 +3200,8 @@ void TextFieldPattern::UpdateCounterMargin()
     CHECK_NULL_VOID(host);
     auto layoutProperty = host->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
-    if (!IsTextArea() && layoutProperty->GetShowCounterValue(false) && !IsNormalInlineState()) {
+    if (!IsTextArea() && layoutProperty->GetShowCounterValue(false) && !IsNormalInlineState() &&
+        !IsShowPasswordIcon()) {
         MarginProperty margin;
         hasCounterMargin_ = true;
         const auto& getMargin = layoutProperty->GetMarginProperty();
@@ -3219,7 +3218,7 @@ void TextFieldPattern::UpdateCounterMargin()
         layoutProperty->UpdateMargin(margin);
     }
     if (!IsTextArea() && hasCounterMargin_ && !layoutProperty->GetShowCounterValue(false) &&
-            !IsNormalInlineState()) {
+        !IsNormalInlineState() && !IsShowPasswordIcon()) {
         MarginProperty margin;
         hasCounterMargin_ = false;
         const auto& getMargin = layoutProperty->GetMarginProperty();
@@ -3778,7 +3777,7 @@ void TextFieldPattern::UpdateAreaBorderStyle(BorderWidthProperty& currentBorderW
     auto maxLength = GetMaxLength();
     auto currentLength = static_cast<uint32_t>(contentController_->GetWideText().length());
     auto showBorder = layoutProperty->GetShowHighlightBorderValue(true);
-    if ((currentLength + ONE_CHARACTER) == maxLength && showBorder == true && counterChange_ == true) {
+    if ((currentLength + ONE_CHARACTER) == maxLength && showBorder == true && counterChange_ == true && IsTextArea()) {
         if (!(currentBorderWidth == overCountBorderWidth)) {
             lastDiffBorderWidth_ = currentBorderWidth;
             layoutProperty->UpdateBorderWidth(overCountBorderWidth);
@@ -4728,6 +4727,10 @@ void TextFieldPattern::AddCounterNode()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto counterNode = DynamicCast<UINode>(counterTextNode_.Upgrade());
+    if (counterNode && (IsShowPasswordIcon() || IsNormalInlineState())) {
+        CleanCounterNode();
+        return;
+    }
     if (!counterNode) {
         auto counterTextNode = FrameNode::GetOrCreateFrameNode(V2::TEXT_ETS_TAG,
             ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextPattern>(); });
