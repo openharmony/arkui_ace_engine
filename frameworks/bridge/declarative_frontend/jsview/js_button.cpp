@@ -640,7 +640,6 @@ CreateWithPara JSButton::ParseCreatePara(const JSCallbackInfo& info, bool hasLab
             } else if (info[0]->IsString()) {
                 optionIndex++;
             }
-            optionIndex++;
         }
         para.label = label;
     }
