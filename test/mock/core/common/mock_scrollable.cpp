@@ -42,7 +42,10 @@ void Scrollable::StartSpringMotion(
 
 void Scrollable::UpdateScrollSnapStartOffset(double offset) {}
 
-void Scrollable::StartScrollSnapMotion(float predictSnapOffset, float scrollSnapVelocity) {}
+void Scrollable::StartScrollSnapMotion(float predictSnapOffset, float scrollSnapVelocity)
+{
+    scrollSnapMotion_ = AceType::MakeRefPtr<SpringMotion>(0, predictSnapOffset, scrollSnapVelocity, nullptr);
+}
 
 void Scrollable::UpdateScrollSnapEndWithOffset(double offset) {}
 
