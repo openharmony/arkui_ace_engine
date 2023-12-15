@@ -167,7 +167,7 @@ void ScrollBarProxy::StopScrollBarAnimator() const
     }
 }
 
-bool ScrollBarProxy::NotifySnapScroll(float delta, float velocity, float controlDistance) const
+bool ScrollBarProxy::NotifySnapScroll(float delta, float velocity, float controlDistance, float dragDistance) const
 {
     for (const auto& node : scrollableNodes_) {
         auto scrollable = node.scrollableNode.Upgrade();
@@ -176,7 +176,8 @@ bool ScrollBarProxy::NotifySnapScroll(float delta, float velocity, float control
             continue;
         }
         auto patternOffset = CalcPatternOffset(GetScrollableDistance(scrollable), controlDistance, delta);
-        auto predictSnapOffset = node.calePredictSnapOffsetCallback(patternOffset);
+        dragDistance = CalcPatternOffset(GetScrollableDistance(scrollable), controlDistance, dragDistance);
+        auto predictSnapOffset = node.calePredictSnapOffsetCallback(patternOffset, dragDistance, -velocity);
         // If snap scrolling, predictSnapOffset will has a value.
         if (predictSnapOffset.has_value() && !NearZero(predictSnapOffset.value())) {
             node.startScrollSnapMotionCallback(predictSnapOffset.value(), velocity);

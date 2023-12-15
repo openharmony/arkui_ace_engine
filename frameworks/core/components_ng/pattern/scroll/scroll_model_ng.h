@@ -63,6 +63,7 @@ public:
     static void SetScrollBarColor(FrameNode* frameNode, const Color& color);
     static void SetScrollBarWidth(FrameNode* frameNode, const Dimension& dimension);
     static void SetEdgeEffect(FrameNode* frameNode, const EdgeEffect& edgeEffect, bool alwaysEnabled);
+    void SetEnablePaging(bool enablePaging) override;
 };
 
 } // namespace OHOS::Ace::NG

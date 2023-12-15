@@ -61,7 +61,8 @@ using DragCancelRefreshCallback = std::function<void()>;
 using MouseLeftButtonScroll = std::function<bool()>;
 using ScrollSnapCallback = std::function<bool(double targetOffset, double velocity)>;
 using ContinuousSlidingCallback = std::function<double()>;
-using CalePredictSnapOffsetCallback = std::function<std::optional<float>(float delta)>;
+using CalePredictSnapOffsetCallback =
+                std::function<std::optional<float>(float delta, float dragDistance, float velocity)>;
 using NeedScrollSnapToSideCallback = std::function<bool(float delta)>;
 using NestableScrollCallback = std::function<ScrollResult(float, int32_t, NestedState)>;
 using DragFRCSceneCallback = std::function<void(double velocity, NG::SceneStatus sceneStatus)>;

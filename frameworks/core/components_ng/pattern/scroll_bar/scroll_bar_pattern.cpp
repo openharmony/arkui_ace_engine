@@ -307,6 +307,7 @@ void ScrollBarPattern::InitPanRecognizer()
 void ScrollBarPattern::HandleDragStart(const GestureEvent& info)
 {
     StopMotion();
+    SetDragStartPosition(GetMainOffset(Offset(info.GetGlobalPoint().GetX(), info.GetGlobalPoint().GetY())));
     if (scrollPositionCallback_) {
         if (scrollBarProxy_) {
             scrollBarProxy_->NotifyScrollStart();
@@ -331,10 +332,12 @@ void ScrollBarPattern::HandleDragUpdate(const GestureEvent& info)
 void ScrollBarPattern::HandleDragEnd(const GestureEvent& info)
 {
     auto velocity = info.GetMainVelocity();
+    SetDragEndPosition(GetMainOffset(Offset(info.GetGlobalPoint().GetX(), info.GetGlobalPoint().GetY())));
     if (NearZero(velocity) || info.GetInputEventType() == InputEventType::AXIS) {
         if (scrollEndCallback_) {
             if (scrollBarProxy_) {
                 scrollBarProxy_->NotifyScrollStop();
+                scrollBarProxy_->SetScrollSnapTrigger_(false);
             }
             scrollEndCallback_();
         }
@@ -352,7 +355,7 @@ void ScrollBarPattern::HandleDragEnd(const GestureEvent& info)
         });
     }
     CHECK_NULL_VOID(!scrollBarProxy_ || !scrollBarProxy_->NotifySnapScroll(-(frictionMotion_->GetFinalPosition()),
-        velocity, GetScrollableDistance()));
+        velocity, GetScrollableDistance(), static_cast<float>(GetDragOffset())));
     scrollBarProxy_->SetScrollSnapTrigger_(false);
     if (!frictionController_) {
         frictionController_ = CREATE_ANIMATOR(PipelineContext::GetCurrentContext());
