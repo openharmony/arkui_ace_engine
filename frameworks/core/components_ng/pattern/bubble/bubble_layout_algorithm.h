@@ -93,6 +93,10 @@ public:
     {
         return clipFrameNode_;
     }
+    const std::vector<float>& GetArrowOffsetsFromClip() const
+    {
+        return arrowOffsetsFromClip_;
+    }
 
 protected:
     OffsetF positionOffset_;
@@ -209,6 +213,8 @@ private:
     std::string clipPath_;
     RefPtr<FrameNode> clipFrameNode_;
     ACE_DISALLOW_COPY_AND_MOVE(BubbleLayoutAlgorithm);
+    // top right bottom left
+    std::vector<float> arrowOffsetsFromClip_ = { 0.0f, 0.0f, 0.0f, 0.0f };
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_BUBBLE_BUBBLE_LAYOUT_ALGORITHM_H

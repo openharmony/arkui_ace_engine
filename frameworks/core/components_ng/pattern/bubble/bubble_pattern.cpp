@@ -68,6 +68,7 @@ bool BubblePattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     arrowPlacement_ = bubbleLayoutAlgorithm->GetArrowPlacement();
     clipPath_ = bubbleLayoutAlgorithm->GetClipPath();
     clipFrameNode_ = bubbleLayoutAlgorithm->GetClipFrameNode();
+    arrowOffsetsFromClip_ = bubbleLayoutAlgorithm->GetArrowOffsetsFromClip();
     paintProperty->UpdatePlacement(bubbleLayoutAlgorithm->GetArrowPlacement());
     if (delayShow_) {
         delayShow_ = false;
