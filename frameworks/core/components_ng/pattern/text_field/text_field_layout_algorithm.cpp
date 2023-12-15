@@ -298,12 +298,10 @@ void TextFieldLayoutAlgorithm::CounterLayout(LayoutWrapper* layoutWrapper)
     auto frameNode = layoutWrapper->GetHostNode();
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
-    auto passwordResponse = DynamicCast<PasswordResponseArea>(pattern->GetResponseArea());
-    if (passwordResponse) {
-        return;
-    }
     auto counterNode = pattern->GetCounterNode().Upgrade();
-    if (counterNode) {
+    auto isInlineStyle = pattern->IsNormalInlineState();
+    auto isShowPassword = pattern->IsShowPasswordIcon();
+    if (counterNode && !isShowPassword && !isInlineStyle) {
         auto frameNode = layoutWrapper->GetHostNode();
         CHECK_NULL_VOID(frameNode);
         auto pattern = frameNode->GetPattern<TextFieldPattern>();
@@ -335,15 +333,12 @@ float TextFieldLayoutAlgorithm::CounterNodeMeasure(float contentWidth, LayoutWra
     CHECK_NULL_RETURN(frameNode, 0.0f);
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
     CHECK_NULL_RETURN(pattern, 0.0f);
-    auto passwordResponse = DynamicCast<PasswordResponseArea>(pattern->GetResponseArea());
-    if (passwordResponse) {
-        return 0.0f;
-    }
     auto textFieldLayoutProperty = pattern->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_RETURN(textFieldLayoutProperty, 0.0f);
     auto isInlineStyle = pattern->IsNormalInlineState();
+    auto isShowPassword = pattern->IsShowPasswordIcon();
     if (textFieldLayoutProperty->GetShowCounterValue(false) && textFieldLayoutProperty->HasMaxLength() &&
-        !isInlineStyle) {
+        !isInlineStyle && !isShowPassword) {
         auto counterNode = DynamicCast<UINode>(pattern->GetCounterNode().Upgrade());
         CHECK_NULL_RETURN(counterNode, 0.0f);
         auto counterNodeLayoutWrapper = layoutWrapper->GetOrCreateChildByIndex(frameNode->GetChildIndex(counterNode));

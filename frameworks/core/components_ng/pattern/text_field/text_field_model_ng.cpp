@@ -479,6 +479,7 @@ void TextFieldModelNG::SetShowCounterBorder(bool value)
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
     CHECK_NULL_VOID(pattern);
+    pattern->SetCounterState(false);
     ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, ShowHighlightBorder, value);
 }
 
