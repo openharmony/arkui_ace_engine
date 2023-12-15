@@ -22,6 +22,7 @@
 
 #include "base/memory/ace_type.h"
 #include "core/accessibility/accessibility_utils.h"
+#include "core/components_ng/base/ui_node.h"
 
 namespace OHOS::Ace::NG {
 using ActionNoParam = std::function<void()>;
@@ -370,6 +371,19 @@ public:
         return accessibilityGroup_;
     }
 
+    void SaveAccessibilityVirtualNode(const RefPtr<UINode>& node)
+    {
+        accessibilityVirtualNodes_.push_back(node);
+    }
+
+    RefPtr<UINode> GetAccessibilityVirtualNode()
+    {
+        if (!accessibilityVirtualNodes_.empty()) {
+            return accessibilityVirtualNodes_.back();
+        }
+        return nullptr;
+    }
+
     std::string GetAccessibilityText(bool isParentGroup = false);
 
     std::string GetAccessibilityDescription()
@@ -402,6 +416,7 @@ protected:
     ActionSelectImpl actionSelectImpl_;
     ActionClearSelectionImpl actionClearSelectionImpl_;
     bool accessibilityGroup_ = false;
+    std::list<RefPtr<UINode>> accessibilityVirtualNodes_;
     std::optional<std::string> accessibilityText_;
     std::optional<std::string> accessibilityDescription_;
     std::optional<std::string> accessibilityLevel_;

@@ -1609,6 +1609,8 @@ void ViewAbstractModelImpl::SetAccessibilityText(const std::string& text)
     inspector->SetAccessibilitytext(text);
 }
 
+void ViewAbstractModelImpl::SetAccessibilityVirtualNode(std::function<void()>&& buildFunc) {}
+
 void ViewAbstractModelImpl::SetAccessibilityDescription(const std::string& description)
 {
     auto inspector = ViewStackProcessor::GetInstance()->GetInspectorComposedComponent();

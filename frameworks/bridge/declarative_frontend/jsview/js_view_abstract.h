@@ -327,6 +327,7 @@ public:
     static void JsAccessibilityLevel(const std::string& level);
     static void JsAllowDrop(const JSCallbackInfo& info);
     static void JsDragPreview(const JSCallbackInfo& info);
+    static void JsAccessibilityVirtualNode(const JSCallbackInfo& info);
 
     static void JSCreateAnimatableProperty(const JSCallbackInfo& info);
     static void JSUpdateAnimatableProperty(const JSCallbackInfo& info);

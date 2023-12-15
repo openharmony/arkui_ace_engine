@@ -2920,7 +2920,7 @@ void JSViewAbstract::JsBorder(const JSCallbackInfo& info)
         return;
     }
     JSRef<JSObject> object = JSRef<JSObject>::Cast(info[0]);
-    
+
     auto valueWidth = object->GetProperty("width");
     if (!valueWidth->IsUndefined()) {
         ParseBorderWidth(valueWidth);
@@ -4876,7 +4876,7 @@ void JSViewAbstract::JsOnDragEnd(const JSCallbackInfo& info)
         PipelineContext::SetCallBackNode(node);
         func->Execute(info, extraParams->ToString());
     };
-    
+
     ViewAbstractModel::GetInstance()->SetOnDragEnd(std::move(onDragEnd));
 }
 
@@ -5677,6 +5677,25 @@ void JSViewAbstract::JsAccessibilityLevel(const std::string& level)
     ViewAbstractModel::GetInstance()->SetAccessibilityImportance(level);
 }
 
+void JSViewAbstract::JsAccessibilityVirtualNode(const JSCallbackInfo& info)
+{
+    // parse builder
+    if (!info[0]->IsObject()) {
+        return;
+    }
+    JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
+    auto builder = obj->GetProperty("builder");
+
+    auto builderFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(builder));
+    CHECK_NULL_VOID(builderFunc);
+    auto buildFunc = [execCtx = info.GetExecutionContext(), func = std::move(builderFunc)]() {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        ACE_SCORING_EVENT("AccessibilityVirtualNode");
+        func->Execute();
+    };
+    NG::ViewAbstractModelNG::GetInstance()->SetAccessibilityVirtualNode(std::move(buildFunc));
+}
+
 void JSViewAbstract::JsBackground(const JSCallbackInfo& info)
 {
     // Check the parameters
@@ -6277,7 +6296,7 @@ void JSViewAbstract::JsPointLight(const JSCallbackInfo& info)
         ViewAbstractModel::GetInstance()->SetLightIlluminated(illuminatedValue);
         ViewAbstractModel::GetInstance()->SetIlluminatedBorderWidth(illuminatedBorderWidth);
     }
-    
+
     JSRef<JSVal> bloom = object->GetProperty("bloom");
     if (bloom->IsNumber()) {
         float bloomValue = bloom->ToNumber<float>();
@@ -6447,6 +6466,7 @@ void JSViewAbstract::JSBind(BindingTarget globalObj)
     JSClass<JSViewAbstract>::StaticMethod("accessibilityDescription", &JSViewAbstract::JsAccessibilityDescription);
     JSClass<JSViewAbstract>::StaticMethod("accessibilityImportance", &JSViewAbstract::JsAccessibilityImportance);
     JSClass<JSViewAbstract>::StaticMethod("accessibilityLevel", &JSViewAbstract::JsAccessibilityLevel);
+    JSClass<JSViewAbstract>::StaticMethod("accessibilityVirtualNode", &JSViewAbstract::JsAccessibilityVirtualNode);
     JSClass<JSViewAbstract>::StaticMethod("onAccessibility", &JSInteractableView::JsOnAccessibility);
     JSClass<JSViewAbstract>::StaticMethod("alignRules", &JSViewAbstract::JsAlignRules);
     JSClass<JSViewAbstract>::StaticMethod("onVisibleAreaChange", &JSViewAbstract::JsOnVisibleAreaChange);
