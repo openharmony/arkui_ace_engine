@@ -400,7 +400,11 @@ protected:
     bool forceResize_ = false;
     bool forceReload_ = false;
     Size imageSizeForEvent_;
+#ifndef USE_ROSEN_DRAWING
     bool useSkiaSvg_ = true;
+#else
+    bool useSkiaSvg_ = false;
+#endif
     bool directPaint_ = false;
     int32_t retryCnt_ = 0;
     std::list<std::function<void()>> imageLayoutCallbacks_;
