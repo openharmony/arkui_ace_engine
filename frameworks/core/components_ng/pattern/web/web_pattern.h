@@ -85,6 +85,7 @@ public:
     using SetHapPathCallback = std::function<void(const std::string&)>;
     using JsProxyCallback = std::function<void()>;
     using OnControllerAttachedCallback = std::function<void()>;
+    using PermissionClipboardCallback = std::function<void(const std::shared_ptr<BaseEventInfo>&)>;
     WebPattern();
     WebPattern(std::string webSrc, const RefPtr<WebController>& webController, WebType type = WebType::SURFACE);
     WebPattern(std::string webSrc, const SetWebIdCallback& setWebIdCallback, WebType type = WebType::SURFACE);
@@ -200,6 +201,16 @@ public:
     SetWebIdCallback GetSetWebIdCallback() const
     {
         return setWebIdCallback_;
+    }
+
+    void SetPermissionClipboardCallback(PermissionClipboardCallback&& Callback)
+    {
+        permissionClipboardCallback_ = std::move(Callback);
+    }
+
+    PermissionClipboardCallback GetPermissionClipboardCallback() const
+    {
+        return permissionClipboardCallback_;
     }
 
     void SetWebType(WebType type)
@@ -588,6 +599,7 @@ private:
     std::optional<std::string> customScheme_;
     RefPtr<WebController> webController_;
     SetWebIdCallback setWebIdCallback_ = nullptr;
+    PermissionClipboardCallback permissionClipboardCallback_ = nullptr;
     WebType type_;
     SetHapPathCallback setHapPathCallback_ = nullptr;
     JsProxyCallback jsProxyCallback_ = nullptr;

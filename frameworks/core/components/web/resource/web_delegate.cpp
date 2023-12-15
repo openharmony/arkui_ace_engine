@@ -94,6 +94,7 @@ const std::string RESOURCE_VIDEO_CAPTURE = "TYPE_VIDEO_CAPTURE";
 const std::string RESOURCE_AUDIO_CAPTURE = "TYPE_AUDIO_CAPTURE";
 const std::string RESOURCE_PROTECTED_MEDIA_ID = "TYPE_PROTECTED_MEDIA_ID";
 const std::string RESOURCE_MIDI_SYSEX = "TYPE_MIDI_SYSEX";
+const std::string RESOURCE_CLIPBOARD_READ_WRITE = "TYPE_CLIPBOARD_READ_WRITE";
 
 constexpr uint32_t DESTRUCT_DELAY_MILLISECONDS = 1000;
 
@@ -353,6 +354,9 @@ std::vector<std::string> WebPermissionRequestOhos::GetResources() const
         if (resourcesId & OHOS::NWeb::NWebAccessRequest::Resources::MIDI_SYSEX) {
             resources.push_back(RESOURCE_MIDI_SYSEX);
         }
+        if (resourcesId & OHOS::NWeb::NWebAccessRequest::Resources::CLIPBOARD_READ_WRITE) {
+            resources.push_back(RESOURCE_CLIPBOARD_READ_WRITE);
+        }
     }
     return resources;
 }
@@ -370,6 +374,8 @@ void WebPermissionRequestOhos::Grant(std::vector<std::string>& resources) const
                 resourcesId |= OHOS::NWeb::NWebAccessRequest::Resources::PROTECTED_MEDIA_ID;
             } else if (res == RESOURCE_MIDI_SYSEX) {
                 resourcesId |= OHOS::NWeb::NWebAccessRequest::Resources::MIDI_SYSEX;
+            } else if (res == RESOURCE_CLIPBOARD_READ_WRITE) {
+                resourcesId |= OHOS::NWeb::NWebAccessRequest::Resources::CLIPBOARD_READ_WRITE;
             }
         }
         request_->Agree(resourcesId);
@@ -4050,6 +4056,15 @@ void WebDelegate::OnPermissionRequestPrompt(const std::shared_ptr<OHOS::NWeb::NW
         [weak = WeakClaim(this), request]() {
             auto delegate = weak.Upgrade();
             CHECK_NULL_VOID(delegate);
+            if (request->ResourceAcessId() & OHOS::NWeb::NWebAccessRequest::Resources::CLIPBOARD_READ_WRITE) {
+                auto webPattern = delegate->webPattern_.Upgrade();
+                CHECK_NULL_VOID(webPattern);
+                auto clipboardCallback = webPattern->GetPermissionClipboardCallback();
+                CHECK_NULL_VOID(clipboardCallback);
+                clipboardCallback(std::make_shared<WebPermissionRequestEvent>(
+                    AceType::MakeRefPtr<WebPermissionRequestOhos>(request)));
+                return;
+            }
             // ace 2.0
             auto onPermissionRequestV2 = delegate->onPermissionRequestV2_;
             if (onPermissionRequestV2) {

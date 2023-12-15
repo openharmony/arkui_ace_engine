@@ -873,4 +873,12 @@ void WebModelNG::JavaScriptOnDocumentStart(const ScriptItems& scriptItems)
     CHECK_NULL_VOID(webPattern);
     webPattern->JavaScriptOnDocumentStart(scriptItems);
 }
+
+void WebModelNG::SetPermissionClipboard(std::function<void(const std::shared_ptr<BaseEventInfo>&)>&& jsCallback)
+{
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    
+    webPattern->SetPermissionClipboardCallback(std::move(jsCallback));
+}
 } // namespace OHOS::Ace::NG

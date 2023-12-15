@@ -148,6 +148,7 @@ public:
     virtual void SetOverScrollMode(OverScrollMode mode) {}
     virtual void JavaScriptOnDocumentStart(const ScriptItems& scriptItems) {};
 
+    virtual void SetPermissionClipboard(std::function<void(const std::shared_ptr<BaseEventInfo>&)>&& jsCallback) {};
 private:
     static std::unique_ptr<WebModel> instance_;
     static std::mutex mutex_;

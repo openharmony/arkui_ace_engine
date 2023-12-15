@@ -28,6 +28,7 @@ using OnWebAsyncFunc = std::function<void(const std::shared_ptr<BaseEventInfo>& 
 using SetWebIdCallback = std::function<void(int32_t)>;
 using SetHapPathCallback = std::function<void(const std::string&)>;
 using JsProxyCallback = std::function<void()>;
+using setPermissionClipboardCallback = std::function<void(const std::shared_ptr<BaseEventInfo>&)>;
 
 class ACE_EXPORT WebModelNG : public OHOS::Ace::WebModel {
 public:
@@ -148,6 +149,8 @@ public:
     void SetLayoutMode(WebLayoutMode mode) override;
     void SetNestedScroll(const NestedScrollOptions& nestedOpt) override;
     void JavaScriptOnDocumentStart(const ScriptItems& scriptItems) override;
+    
+    void SetPermissionClipboard(std::function<void(const std::shared_ptr<BaseEventInfo>&)>&& jsCallback) override;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_WEB_WEB_MODEL_NG_H
