@@ -5825,10 +5825,14 @@ void TextFieldPattern::UpdateCancelNode()
     auto cleanNodeStyle = layoutProperty->GetCleanNodeStyle().value_or(CleanNodeStyle::INPUT);
     if (cleanNodeStyle == CleanNodeStyle::CONSTANT ||
         (cleanNodeStyle == CleanNodeStyle::INPUT && !contentController_->IsEmpty())) {
-        cleanNodeResponseArea->UpdateCleanNode(true);
+        if (!cleanNodeResponseArea->IsShow()) {
+            cleanNodeResponseArea->UpdateCleanNode(true);
+        }
     } else if (cleanNodeStyle == CleanNodeStyle::INVISIBLE ||
                (cleanNodeStyle == CleanNodeStyle::INPUT && contentController_->IsEmpty())) {
-        cleanNodeResponseArea->UpdateCleanNode(false);
+        if (cleanNodeResponseArea->IsShow()) {
+            cleanNodeResponseArea->UpdateCleanNode(false);
+        }
     }
 }
 
