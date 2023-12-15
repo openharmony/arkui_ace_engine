@@ -1655,6 +1655,48 @@ static void DumpCommonPropertyNG(const AccessibilityElementInfo& nodeInfo)
     DumpLog::GetInstance().AddDesc("long clickable: ", BoolToString(nodeInfo.IsLongClickable()));
     DumpLog::GetInstance().AddDesc("popup supported: ", BoolToString(nodeInfo.IsPopupSupported()));
 }
+
+bool IsExtensionSendAccessibilitySyncEvent()
+{
+    bool isEnabled = false;
+#ifdef WINDOW_SCENE_SUPPORTED
+    auto ngPipeline = NG::PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(ngPipeline, isEnabled);
+    auto uiExtensionManager = ngPipeline->GetUIExtensionManager();
+    CHECK_NULL_RETURN(uiExtensionManager, isEnabled);
+    if (uiExtensionManager->IsWindowTypeUIExtension(ngPipeline)) {
+        isEnabled = true;
+    }
+#endif
+    return isEnabled;
+}
+
+void GenerateAccessibilityEventInfo(const AccessibilityEvent& accessibilityEvent, AccessibilityEventInfo& eventInfo)
+{
+    Accessibility::EventType type = Accessibility::EventType::TYPE_VIEW_INVALID;
+    if (accessibilityEvent.type != AccessibilityEventType::UNKNOWN) {
+        type = ConvertAceEventType(accessibilityEvent.type);
+    } else {
+        type = ConvertStrToEventType(accessibilityEvent.eventType);
+    }
+
+    if (type == Accessibility::EventType::TYPE_VIEW_INVALID) {
+        return;
+    }
+
+    eventInfo.SetTimeStamp(GetMicroTickCount());
+    eventInfo.SetBeforeText(accessibilityEvent.beforeText);
+    eventInfo.SetLatestContent(accessibilityEvent.latestContent);
+    eventInfo.SetWindowChangeTypes(static_cast<Accessibility::WindowUpdateType>(accessibilityEvent.windowChangeTypes));
+    eventInfo.SetWindowContentChangeTypes(
+        static_cast<Accessibility::WindowsContentChangeTypes>(accessibilityEvent.windowContentChangeTypes));
+    eventInfo.SetSource(accessibilityEvent.nodeId);
+    eventInfo.SetEventType(type);
+    eventInfo.SetCurrentIndex(static_cast<int>(accessibilityEvent.currentItemIndex));
+    eventInfo.SetItemCounts(static_cast<int>(accessibilityEvent.itemCount));
+    eventInfo.SetBundleName(AceApplicationInfo::GetInstance().GetPackageName());
+}
+
 } // namespace
 
 JsAccessibilityManager::~JsAccessibilityManager()
@@ -1751,8 +1793,8 @@ void JsAccessibilityManager::InitializeCallback()
     }
 }
 
-bool JsAccessibilityManager::SendAccessibilitySyncEvent(
-    const AccessibilityEvent& accessibilityEvent, AccessibilityEventInfo eventInfo)
+bool JsAccessibilityManager::SendExtensionAccessibilitySyncEvent(
+    const AccessibilityEvent& accessibilityEvent, const Accessibility::AccessibilityEventInfo& eventInfo)
 {
     if (!IsRegister()) {
         return false;
@@ -1765,41 +1807,30 @@ bool JsAccessibilityManager::SendAccessibilitySyncEvent(
     if (!isEnabled) {
         return false;
     }
-
-    Accessibility::EventType type = Accessibility::EventType::TYPE_VIEW_INVALID;
-    if (accessibilityEvent.type != AccessibilityEventType::UNKNOWN) {
-        type = ConvertAceEventType(accessibilityEvent.type);
-    } else {
-        type = ConvertStrToEventType(accessibilityEvent.eventType);
-    }
-
-    if (type == Accessibility::EventType::TYPE_VIEW_INVALID) {
-        return false;
-    }
-
-    eventInfo.SetTimeStamp(GetMicroTickCount());
-    eventInfo.SetBeforeText(accessibilityEvent.beforeText);
-    eventInfo.SetLatestContent(accessibilityEvent.latestContent);
-    eventInfo.SetWindowChangeTypes(static_cast<Accessibility::WindowUpdateType>(accessibilityEvent.windowChangeTypes));
-    eventInfo.SetWindowContentChangeTypes(
-        static_cast<Accessibility::WindowsContentChangeTypes>(accessibilityEvent.windowContentChangeTypes));
-    eventInfo.SetSource(accessibilityEvent.nodeId);
-    eventInfo.SetEventType(type);
-    eventInfo.SetCurrentIndex(static_cast<int>(accessibilityEvent.currentItemIndex));
-    eventInfo.SetItemCounts(static_cast<int>(accessibilityEvent.itemCount));
-    eventInfo.SetBundleName(AceApplicationInfo::GetInstance().GetPackageName());
-
 #ifdef WINDOW_SCENE_SUPPORTED
-    auto pipeline = context_.Upgrade();
-    CHECK_NULL_RETURN(pipeline, client->SendEvent(eventInfo));
-    auto ngPipeline = AceType::DynamicCast<NG::PipelineContext>(pipeline);
-    CHECK_NULL_RETURN(ngPipeline, client->SendEvent(eventInfo));
+    auto ngPipeline = NG::PipelineContext::GetCurrentContext();
     auto uiExtensionManager = ngPipeline->GetUIExtensionManager();
-    CHECK_NULL_RETURN(uiExtensionManager, client->SendEvent(eventInfo));
-    if (uiExtensionManager->IsWindowTypeUIExtension(pipeline)) {
-        return uiExtensionManager->SendAccessibilityEventInfo(eventInfo, NG::UI_EXTENSION_UNKNOW_ID, pipeline);
+    CHECK_NULL_RETURN(uiExtensionManager, false);
+    if (uiExtensionManager->IsWindowTypeUIExtension(ngPipeline)) {
+        return uiExtensionManager->SendAccessibilityEventInfo(eventInfo, NG::UI_EXTENSION_UNKNOW_ID, ngPipeline);
     }
 #endif
+    return false;
+}
+
+bool JsAccessibilityManager::SendAccessibilitySyncEvent(
+    const AccessibilityEvent& accessibilityEvent, AccessibilityEventInfo eventInfo)
+{
+    if (!IsRegister()) {
+        return false;
+    }
+    auto client = AccessibilitySystemAbilityClient::GetInstance();
+    CHECK_NULL_RETURN(client, false);
+    bool isEnabled = false;
+    client->IsEnabled(isEnabled);
+    if (!isEnabled) {
+        return false;
+    }
     return client->SendEvent(eventInfo);
 }
 
@@ -1868,13 +1899,20 @@ void JsAccessibilityManager::SendAccessibilityAsyncEvent(const AccessibilityEven
     } else {
         eventInfo.SetWindowId(accessibilityEvent.windowId);
     }
-    context->GetTaskExecutor()->PostTask(
-        [weak = WeakClaim(this), accessibilityEvent, eventInfo] {
-            auto jsAccessibilityManager = weak.Upgrade();
-            CHECK_NULL_VOID(jsAccessibilityManager);
-            jsAccessibilityManager->SendAccessibilitySyncEvent(accessibilityEvent, eventInfo);
-        },
-        TaskExecutor::TaskType::BACKGROUND);
+
+    GenerateAccessibilityEventInfo(accessibilityEvent, eventInfo);
+
+    if (IsExtensionSendAccessibilitySyncEvent()) {
+        SendExtensionAccessibilitySyncEvent(accessibilityEvent, eventInfo);
+    } else {
+        context->GetTaskExecutor()->PostTask(
+            [weak = WeakClaim(this), accessibilityEvent, eventInfo] {
+                auto jsAccessibilityManager = weak.Upgrade();
+                CHECK_NULL_VOID(jsAccessibilityManager);
+                jsAccessibilityManager->SendAccessibilitySyncEvent(accessibilityEvent, eventInfo);
+            },
+            TaskExecutor::TaskType::BACKGROUND);
+    }
 }
 
 void JsAccessibilityManager::UpdateNodeChildIds(const RefPtr<AccessibilityNode>& node)
