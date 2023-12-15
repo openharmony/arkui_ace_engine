@@ -17,7 +17,7 @@
 #include "base/geometry/dimension.h"
 #include "base/utils/utils.h"
 #include "bridge/common/utils/utils.h"
-#include "bridge/declarative_frontend/jsview/js_view_abstract.h"
+#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/text_style.h"
 #include "core/components/text_field/textfield_theme.h"
@@ -121,7 +121,7 @@ void ResetSearchCaretStyle(NodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    auto textFieldTheme = Framework::JSViewAbstract::GetTheme<TextFieldTheme>();
+    auto textFieldTheme = ArkTSUtils::GetTheme<TextFieldTheme>();
     CHECK_NULL_VOID(textFieldTheme);
     CalcDimension caretWidth = textFieldTheme->GetCursorWidth();
     uint32_t caretColor = textFieldTheme->GetCursorColor().GetValue();

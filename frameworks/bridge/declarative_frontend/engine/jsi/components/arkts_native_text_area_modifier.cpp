@@ -14,7 +14,7 @@
  */
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_text_area_modifier.h"
 #include "bridge/common/utils/utils.h"
-#include "bridge/declarative_frontend/jsview/js_view_abstract.h"
+#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/alignment.h"
 #include "core/components/common/properties/text_style.h"
@@ -30,7 +30,6 @@ constexpr InputStyle DEFAULT_TEXT_AREA_STYLE = InputStyle::DEFAULT;
 constexpr bool DEFAULT_SELECTION_MENU_HIDDEN = false;
 constexpr uint32_t DEFAULT_MAX_VIEW_LINE = 3;
 constexpr CopyOptions DEFAULT_COPY_OPTIONS_VALUE = CopyOptions::Local;
-constexpr Dimension DEFAULT_FONT_SIZE = 16.0_fp;
 constexpr FontWeight DEFAULT_FONT_WEIGHT = FontWeight::NORMAL;
 constexpr Ace::FontStyle DEFAULT_FONT_STYLE = Ace::FontStyle::NORMAL;
 constexpr DisplayMode DEFAULT_BAR_STATE_VALUE = DisplayMode::AUTO;
@@ -105,7 +104,7 @@ void ResetTextAreaPlaceholderColor(NodeHandle node)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto theme = Framework::JSViewAbstract::GetTheme<TextFieldTheme>();
+    auto theme = ArkTSUtils::GetTheme<TextFieldTheme>();
     CHECK_NULL_VOID(theme);
     uint32_t color = theme->GetPlaceholderColor().GetValue();
     TextFieldModelNG::SetPlaceholderColor(frameNode, Color(color));
@@ -140,7 +139,9 @@ void SetTextAreaPlaceholderFont(NodeHandle node, const struct ArkUIResourceLengt
             font.fontSize = CalcDimension(size->value, unitEnum);
         }
     } else {
-        font.fontSize = DEFAULT_FONT_SIZE;
+        auto theme = ArkTSUtils::GetTheme<TextFieldTheme>();
+        CHECK_NULL_VOID(theme);
+        font.fontSize = theme->GetFontSize();
     }
 
     if (weight != nullptr) {
@@ -169,8 +170,10 @@ void ResetTextAreaPlaceholderFont(NodeHandle node)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    auto theme = ArkTSUtils::GetTheme<TextFieldTheme>();
+    CHECK_NULL_VOID(theme);
     Font font;
-    font.fontSize = DEFAULT_FONT_SIZE;
+    font.fontSize = theme->GetFontSize();
     font.fontWeight = DEFAULT_FONT_WEIGHT;
     font.fontStyle = DEFAULT_FONT_STYLE;
     std::vector<std::string> fontFamilies;
@@ -280,7 +283,7 @@ void ResetTextAreaFontColor(NodeHandle node)
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     int32_t textColor = 0;
-    auto theme = Framework::JSViewAbstract::GetTheme<TextFieldTheme>();
+    auto theme = ArkTSUtils::GetTheme<TextFieldTheme>();
     textColor = theme->GetTextColor().GetValue();
     TextFieldModelNG::SetTextColor(frameNode, Color(textColor));
 }
@@ -329,7 +332,7 @@ void ResetTextAreaFontSize(NodeHandle node)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto theme = Framework::JSViewAbstract::GetTheme<TextFieldTheme>();
+    auto theme = ArkTSUtils::GetTheme<TextFieldTheme>();
     CHECK_NULL_VOID(theme);
     TextFieldModelNG::SetFontSize(frameNode, Dimension(theme->GetFontSize()));
 }
