@@ -255,7 +255,7 @@ static void SetContextProperty(
         if (jsValueType != napi_undefined) {
             int32_t wordBreak = HandleIntStyle(contextParamMap["wordBreakNApi"], env);
             context.wordBreak = static_cast<WordBreak>(wordBreak);
-        }        
+        }
     }
 
     std::string textContent = HandleStringType(contextParamMap["textContentNApi"], env);
