@@ -720,6 +720,8 @@ void GridScrollLayoutAlgorithm::UpdateGridMatrix(LayoutWrapper* layoutWrapper, i
     if (indexCount % crossCount_ != 0) {
         mainCount++;
     }
+    float mainSize = gridLayoutInfo_.lastMainSize_;
+    auto frameSize = axis_ == Axis::VERTICAL ? SizeF(crossSize, mainSize) : SizeF(mainSize, crossSize);
     int32_t currentIndex = 0;
     for (int32_t currentMainIndex = 0; (currentMainIndex < mainCount) && (currentIndex < totalItemCount);
          ++currentMainIndex) {
@@ -737,11 +739,11 @@ void GridScrollLayoutAlgorithm::UpdateGridMatrix(LayoutWrapper* layoutWrapper, i
                 CheckGridPlacedState(currentIndex, currentMainIndex, currentCrossIndex, mainSpan, crossSpan);
             float lineHeight = 0.0;
             if (state == SUCCESSFULLY) { // This position can correctly place the current index
-                lineHeight = CalculateNodeHeight(layoutWrapper, childLayoutWrapper, crossSize, currentCrossIndex);
+                lineHeight = CalculateNodeHeight(layoutWrapper, childLayoutWrapper, frameSize, currentCrossIndex);
                 currentIndex++;
             } else if (state == currentIndex) {
                 // This position is already occupied by the current index,
-                lineHeight = CalculateNodeHeight(layoutWrapper, childLayoutWrapper, crossSize, currentCrossIndex);
+                lineHeight = CalculateNodeHeight(layoutWrapper, childLayoutWrapper, frameSize, currentCrossIndex);
                 indexCount++;
                 currentIndex++;
             } else { // The current position cannot be placed
@@ -758,12 +760,10 @@ void GridScrollLayoutAlgorithm::UpdateGridMatrix(LayoutWrapper* layoutWrapper, i
 }
 
 float GridScrollLayoutAlgorithm::CalculateNodeHeight(LayoutWrapper* layoutWrapper,
-    const RefPtr<LayoutWrapper>& childLayoutWrapper, float crossSize, int currentCrossIndex)
+    const RefPtr<LayoutWrapper>& childLayoutWrapper, const SizeF& frameSize, int currentCrossIndex)
 {
-    float mainSize = gridLayoutInfo_.lastMainSize_;
     auto mainSpan = axis_ == Axis::VERTICAL ? currentItemRowSpan_ : currentItemColSpan_;
     auto crossSpan = axis_ == Axis::VERTICAL ? currentItemColSpan_ : currentItemRowSpan_;
-    auto frameSize = axis_ == Axis::VERTICAL ? SizeF(crossSize, mainSize) : SizeF(mainSize, crossSize);
     MeasureChild(layoutWrapper, frameSize, childLayoutWrapper, currentCrossIndex, crossSpan);
     auto itemSize = childLayoutWrapper->GetGeometryNode()->GetMarginFrameSize();
     float lineHeight = 0.0;
