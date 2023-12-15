@@ -36,5 +36,7 @@ if (enable_player_framework) {
       "//drivers/peripheral/display/interfaces/include",
       "//foundation/multimedia/player_framework/interfaces/inner_api/native",
     ]
+
+    external_deps = [ "player_framework:media_client" ]
   }
 }
