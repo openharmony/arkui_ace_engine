@@ -148,11 +148,10 @@ void ResetCheckboxGroupMark(NodeHandle node)
 
     CheckBoxGroupModelNG::SetCheckMarkColor(frameNode, checkBoxTheme->GetPointColor());
 
-    Dimension size = Dimension(0.0, DEFAULT_UNIT);
+    Dimension size = Dimension(-1.0f);
     CheckBoxGroupModelNG::SetCheckMarkSize(frameNode, size);
 
-    Dimension width = Dimension(2.0, DEFAULT_UNIT);
-    CheckBoxGroupModelNG::SetCheckMarkWidth(frameNode, width);
+    CheckBoxGroupModelNG::SetCheckMarkWidth(frameNode, checkBoxTheme->GetCheckStroke());
 }
 
 ArkUICheckboxGroupModifierAPI GetCheckboxGroupModifier()
