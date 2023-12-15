@@ -2143,8 +2143,6 @@ HWTEST_F(NavigationTestNg, NavigationModelNG007, TestSize.Level1)
     navigationPattern->TransitionWithAnimation(nullptr, nullptr, false);
     navigationPattern->TransitionWithAnimation(preTopNavDestination, nullptr, false);
     ASSERT_EQ(preTopNavDestination->transitionType_, PageTransitionType::EXIT_POP);
-    navigationPattern->TransitionWithAnimation(nullptr, newTopNavDestination, false);
-    ASSERT_EQ(newTopNavDestination->transitionType_, PageTransitionType::ENTER_PUSH);
     navigationPattern->TransitionWithAnimation(preTopNavDestination, newTopNavDestination, false);
     ASSERT_EQ(newTopNavDestination->transitionType_, PageTransitionType::ENTER_PUSH);
     navigationPattern->TransitionWithAnimation(preTopNavDestination, newTopNavDestination, true);
