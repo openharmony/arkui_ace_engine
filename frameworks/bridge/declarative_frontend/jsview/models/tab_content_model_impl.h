@@ -37,6 +37,7 @@ public:
     void SetLayoutMode(LayoutMode layoutMode) override {}
     void SetVerticalAlign(FlexAlign verticalAlign) override {}
     void SetSymmetricExtensible(bool isExtensible) override {}
+    void SetId(const std::string& id) override {}
 
 private:
     RefPtr<Component> ProcessTabBarBuilderFunction(
