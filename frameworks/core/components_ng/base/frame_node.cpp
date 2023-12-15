@@ -438,24 +438,8 @@ void FrameNode::InitializePatternAndContext()
 
 void FrameNode::DumpCommonInfo()
 {
-    auto transInfo = renderContext_->GetTrans();
-    if (!geometryNode_->GetFrameRect().ToString().compare(renderContext_->GetPaintRectWithTransform().ToString())) {
+    if (!geometryNode_->GetFrameRect().ToString().compare(renderContext_->GetPaintRectWithoutTransform().ToString())) {
         DumpLog::GetInstance().AddDesc(std::string("FrameRect: ").append(geometryNode_->GetFrameRect().ToString()));
-    }
-    // transInfo is a one-dimensional expansion of the affine transformation matrix
-    if (!transInfo.empty()) {
-        if (!(NearEqual(transInfo[0], 1) && NearEqual(transInfo[0], 1))) {
-            DumpLog::GetInstance().AddDesc(std::string("scale: ").append(
-                std::to_string(transInfo[0]).append(",").append(std::to_string(transInfo[1]))));
-        }
-        if (!(NearZero(transInfo[6]) && NearZero(transInfo[7]))) {
-            DumpLog::GetInstance().AddDesc(
-                std::string("translate: ")
-                    .append(std::to_string(transInfo[6]).append(",").append(std::to_string(transInfo[7]))));
-        }
-        if (!(NearZero(transInfo[8]))) {
-            DumpLog::GetInstance().AddDesc(std::string("degree: ").append(std::to_string(transInfo[8])));
-        }
     }
     if (renderContext_->GetBackgroundColor()->ColorToString().compare("#00000000") != 0) {
         DumpLog::GetInstance().AddDesc(
