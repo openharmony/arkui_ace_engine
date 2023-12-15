@@ -937,7 +937,7 @@ void Scrollable::ProcessScrollSnapStop()
 
 void Scrollable::OnAnimateStop()
 {
-    if (scrollMotionFRCSceneCallback_) {
+    if (scrollMotion_ && scrollMotion_->IsValid() && scrollMotionFRCSceneCallback_) {
         scrollMotionFRCSceneCallback_(scrollMotion_->GetCurrentVelocity(), NG::SceneStatus::END);
     }
     if (moved_) {
