@@ -174,11 +174,8 @@ public:
                 .c_str());
         labelJsValue->Put("font", fontJsValue->ToString().c_str());
         json->Put("labelStyle", labelJsValue->ToString().c_str());
-        auto defaultButtonStyle = Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)
-                                      ? ButtonStyleMode::NORMAL
-                                      : ButtonStyleMode::EMPHASIZE;
         json->Put("buttonStyle",
-            ConvertButtonStyleToString(layoutProperty->GetButtonStyle().value_or(defaultButtonStyle)).c_str());
+            ConvertButtonStyleToString(layoutProperty->GetButtonStyle().value_or(ButtonStyleMode::EMPHASIZE)).c_str());
         json->Put("controlSize",
             ConvertControlSizeToString(layoutProperty->GetControlSize().value_or(ControlSize::NORMAL)).c_str());
     }
