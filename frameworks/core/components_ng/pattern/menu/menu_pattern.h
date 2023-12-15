@@ -294,6 +294,16 @@ public:
     {
         return targetSize_;
     }
+	
+    void SetIsHeightModifiedBySelect(bool isModified)
+    {
+        isHeightModifiedBySelect_ = isModified;
+    }
+    
+    bool IsHeightModifiedBySelect() const
+    {
+        return isHeightModifiedBySelect_;
+    }
 protected:
     void UpdateMenuItemChildren(RefPtr<FrameNode>& host);
     void SetMenuAttribute(RefPtr<FrameNode>& host);
@@ -347,6 +357,7 @@ private:
     OffsetF previewOriginOffset_;
 	
     bool isWidthModifiedBySelect_ = false;
+    bool isHeightModifiedBySelect_ = false;
     bool hasLaid_ = false;
     SizeF targetSize_;
 
