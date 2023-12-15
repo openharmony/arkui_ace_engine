@@ -429,6 +429,8 @@ public:
         return focusStyleType_;
     }
 
+    static void IsCloseKeyboard(RefPtr<FrameNode> frameNode);
+
     void SetFocusPaintParamsPtr(const std::unique_ptr<FocusPaintParam>& paramsPtr)
     {
         CHECK_NULL_VOID(paramsPtr);

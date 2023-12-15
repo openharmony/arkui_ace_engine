@@ -2162,7 +2162,7 @@ bool RichEditorPattern::RequestCustomKeyboard()
 #if defined(ENABLE_STANDARD_INPUT)
     auto inputMethod = MiscServices::InputMethodController::GetInstance();
     if (inputMethod) {
-        inputMethod->Close();
+        inputMethod->RequestHideInput();
     }
 #else
     if (HasConnection()) {

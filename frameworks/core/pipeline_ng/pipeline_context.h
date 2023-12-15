@@ -76,6 +76,9 @@ public:
 
     static float GetCurrentRootHeight();
 
+    RefPtr<FrameNode> HandleFocusNode();
+    void IsCloseSCBKeyboard();
+
     void SetupRootElement() override;
 
     void SetupSubRootElement();
