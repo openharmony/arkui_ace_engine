@@ -299,19 +299,6 @@ TextFieldPattern::~TextFieldPattern()
         textEditingController_->RemoveObserver(WeakClaim(this));
     }
     CloseSelectOverlay();
-    // If soft keyboard is still exist, close it.
-    if (HasConnection()) {
-#if defined(ENABLE_STANDARD_INPUT)
-        TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "Destruction of text field, close input method.");
-        MiscServices::InputMethodController::GetInstance()->Close();
-#else
-        connection_->Close(GetInstanceId());
-        connection_ = nullptr;
-#endif
-    }
-    if (isCustomKeyboardAttached_) {
-        CloseCustomKeyboard();
-    }
 }
 
 void TextFieldPattern::BeforeCreateLayoutWrapper()
@@ -929,6 +916,7 @@ void TextFieldPattern::HandleBlurEvent()
     CloseSelectOverlay(true);
     StopTwinkling();
     if (customKeyboardBuilder_ && isCustomKeyboardAttached_) {
+        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "FrameNode Close CustomKeyboard.");
         CloseKeyboard(true);
     }
     selectController_->UpdateCaretIndex(selectController_->GetCaretIndex());
@@ -2900,10 +2888,10 @@ bool TextFieldPattern::RequestKeyboard(bool isFocusViewChanged, bool needStartTw
             textConfig.windowId = systemWindowId;
         }
 #endif
-        TAG_LOGI(AceLogTag::ACE_KEYBOARD,
-            "RequestKeyboard set calling window id:%{public}u"
-            "inputType: %{public}d",
-            textConfig.windowId, textConfig.inputAttribute.inputPattern);
+        if (customKeyboardBuilder_ && isCustomKeyboardAttached_) {
+            TAG_LOGI(AceLogTag::ACE_KEYBOARD, "Request Softkeyboard,Close CustomKeyboard.");
+            CloseCustomKeyboard();
+        }
         inputMethod->Attach(textChangeListener_, needShowSoftKeyboard, textConfig);
 #else
         if (!HasConnection()) {
@@ -3003,7 +2991,7 @@ bool TextFieldPattern::RequestCustomKeyboard()
 #if defined(ENABLE_STANDARD_INPUT)
     auto inputMethod = MiscServices::InputMethodController::GetInstance();
     if (inputMethod) {
-        inputMethod->Close();
+        inputMethod->RequestHideInput();
     }
 #else
     if (HasConnection()) {
