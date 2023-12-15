@@ -18,7 +18,6 @@
 #include "base/geometry/ng/size_t.h"
 #include "core/components_ng/pattern/grid/grid_layout_options.h"
 #include "core/components_ng/pattern/grid/grid_layout_property.h"
-#include "core/components_ng/pattern/grid/grid_utils.h"
 
 namespace OHOS::Ace::NG {
 GridIrregularFiller::GridIrregularFiller(GridLayoutInfo* info, LayoutWrapper* wrapper) : info_(info), wrapper_(wrapper)
@@ -29,26 +28,20 @@ GridIrregularFiller::GridIrregularFiller(GridLayoutInfo* info, LayoutWrapper* wr
 
 void GridIrregularFiller::InitPos()
 {
-    for (auto& [k, v] : info_->gridMatrix_) {
-        LOGI("initial ZTE row %d:", k);
-        for (auto& [k2, v2] : v) {
-            LOGI("ZTE col %d, idx %d", k2, v2);
-        }
-    }
-    const auto& row = info_->gridMatrix_.find(info_->endMainLineIndex_);
+    const auto& row = info_->gridMatrix_.find(info_->startMainLineIndex_);
     if (row == info_->gridMatrix_.end()) {
         // implies empty matrix
         return;
     }
     for (auto& [col, idx] : row->second) {
-        if (idx == info_->endIndex_) {
-            posY_ = info_->endMainLineIndex_;
-            posX_ = col;
+        if (idx == info_->startIndex_) {
+            posY_ = info_->startMainLineIndex_;
+            // to land on the first item after advancing once
+            posX_ = col - 1;
             return;
         }
     }
-    LOGW("ZTE pos not determined, index %d not found at endLine %d in matrix", info_->endIndex_,
-        info_->endMainLineIndex_);
+    // LOGW("pos not determined, index %d not found at endLine %d in matrix", info_->endIndex_, info_->endMainLineIndex_);
 }
 
 bool GridIrregularFiller::IsFull(float targetLen)
@@ -58,17 +51,10 @@ bool GridIrregularFiller::IsFull(float targetLen)
 
 float GridIrregularFiller::Fill(const FillParameters& params)
 {
-    LOGI("ZTE total children count = %d", wrapper_->GetTotalChildCount());
-    // reset endIndex_
-    info_->endIndex_ = info_->startIndex_ - 1;
-
     while (!IsFull(params.targetLen)) {
         int32_t prevRow = posY_;
         if (!FindNextItem(++info_->endIndex_)) {
-            // already recorded in matrix
-            FitOne();
-        } else {
-            LOGI("ZTE item %d found at [%d, %d]", info_->endIndex_, posX_, posY_);
+            FillOne();
         }
 
         if (posY_ > prevRow) {
@@ -77,15 +63,14 @@ float GridIrregularFiller::Fill(const FillParameters& params)
         }
 
         if (!wrapper_->GetChildByIndex(info_->endIndex_)) {
-            MeasureNewItem(params, posX_);
+        MeasureNewItem(params, posX_);
         }
     }
-    // print info of gridMatrix_
-    for (auto& [k, v] : info_->gridMatrix_) {
-        LOGI("ZTE row %d:", k);
-        for (auto& [k2, v2] : v) {
-            LOGI("ZTE col %d, idx %d", k2, v2);
-        }
+    info_->endMainLineIndex_ = posY_;
+    LOGI("ZTE fill result: startIndex = %d, endIndex = %d, startLine = %d, endLine = %d", info_->startIndex_,
+        info_->endIndex_, info_->startMainLineIndex_, info_->endMainLineIndex_);
+    for (auto&& [idx, line] : info_->lineHeightMap_) {
+        LOGI("ZTE line %d height = %f", idx, line);
     }
     return length_;
 }
@@ -103,7 +88,6 @@ GridItemSize GridIrregularFiller::GetItemSize(int32_t idx)
     if (opts.irregularIndexes.find(idx) != opts.irregularIndexes.end()) {
         if (!opts.getSizeByIndex) {
             // default irregular size = [1, full cross length]
-            LOGI("ZTE irregular width = %d", info_->crossCount_);
             return { 1, info_->crossCount_ };
         }
 
@@ -118,19 +102,17 @@ GridItemSize GridIrregularFiller::GetItemSize(int32_t idx)
     return size;
 }
 
-void GridIrregularFiller::FitOne()
+void GridIrregularFiller::FillOne()
 {
     /* alias */
     const int32_t idx = info_->endIndex_;
-    int32_t& row = info_->endMainLineIndex_;
-    LOGI("ZTE start fitting idx %d", idx);
+    int32_t row = posY_;
 
     auto size = GetItemSize(idx);
 
     auto it = info_->gridMatrix_.find(row);
     while (!ItemCanFit(it, size.columns)) {
         // can't fill at end, find the next available line
-        LOGI("ZTE can't fill at end, columns = %d, go to next row", size.columns);
         it = info_->gridMatrix_.find(++row);
     }
     if (it == info_->gridMatrix_.end()) {
@@ -142,7 +124,6 @@ void GridIrregularFiller::FitOne()
     // top left square should be set to [idx], the rest to -1
     for (int32_t r = 0; r < size.rows; ++r) {
         for (int32_t c = 0; c < size.columns; ++c) {
-            LOGI("ZTE assign row %d, col %d to -1", row + r, col + c);
             info_->gridMatrix_[row + r][col + c] = -1;
         }
     }
@@ -155,8 +136,8 @@ void GridIrregularFiller::FitOne()
 
 bool GridIrregularFiller::FindNextItem(int32_t target)
 {
+    const auto& mat = info_->gridMatrix_;
     while (AdvancePos()) {
-        const auto& mat = info_->gridMatrix_;
         if (mat.at(posY_).at(posX_) == target) {
             return true;
         }
@@ -220,9 +201,9 @@ void GridIrregularFiller::MeasureNewItem(const FillParameters& params, int32_t c
     float childHeight = child->GetGeometryNode()->GetMarginFrameSize().MainSize(info_->axis_);
     // spread height to each row. May be buggy?
     float heightPerRow = (childHeight - (params.mainGap * (itemSize.rows - 1))) / itemSize.rows;
-    const int32_t& row = info_->endMainLineIndex_;
     for (int32_t i = 0; i < itemSize.rows; ++i) {
-        info_->lineHeightMap_[row] = std::max(info_->lineHeightMap_[row], heightPerRow);
+        LOGI("ZTE update lineHeight %d, height = %f", posY_, heightPerRow);
+        info_->lineHeightMap_[posY_] = std::max(info_->lineHeightMap_[posY_], heightPerRow);
     }
 }
 } // namespace OHOS::Ace::NG

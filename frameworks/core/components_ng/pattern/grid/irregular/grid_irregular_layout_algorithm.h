@@ -35,7 +35,8 @@ public:
 private:
     float MeasureSelf(const RefPtr<GridLayoutProperty>& props);
     void Init(const RefPtr<GridLayoutProperty>& props);
-    void LoadChild(LayoutWrapper* wrapper,int32_t index);
+
+    void FillWithItems(float targetLen);
 
     void LayoutChildren(float mainOffset);
 

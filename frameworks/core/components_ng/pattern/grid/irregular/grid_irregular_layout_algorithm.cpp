@@ -41,13 +41,14 @@ void GridIrregularLayout::Measure(LayoutWrapper* layoutWrapper)
 
     firstRowPos_ = res.pos;
     info.startMainLineIndex_ = res.row;
-    info.startIndex_ = info.gridMatrix_[res.row][0];
-    float targetLen = mainSize + res.height;
+    // on init, gridMatrix_ is empty
+    if (info.gridMatrix_.find(res.row) != info.gridMatrix_.end()) {
+        info.startIndex_ = info.gridMatrix_[res.row][0];
+    }
 
-    GridIrregularFiller filler(&gridLayoutInfo_, wrapper_);
-    filler.Fill({ crossLens_, targetLen, crossGap_, mainGap_ });
+    FillWithItems(mainSize + res.height);
 
-    wrapper_->SetCacheCount(static_cast<int32_t>(props->GetCachedCountValue(1) * gridLayoutInfo_.crossCount_));
+    wrapper_->SetCacheCount(static_cast<int32_t>(props->GetCachedCountValue(1) * info.crossCount_));
 }
 
 void GridIrregularLayout::Layout(LayoutWrapper* layoutWrapper)
@@ -57,8 +58,6 @@ void GridIrregularLayout::Layout(LayoutWrapper* layoutWrapper)
     RemoveOutOfBoundChildren();
 
     float mainOffset = firstRowPos_ + gridLayoutInfo_.currentOffset_;
-    LOGI("ZTE layout from %d to %d, line from %d to %d", gridLayoutInfo_.startIndex_, gridLayoutInfo_.endIndex_,
-        gridLayoutInfo_.startMainLineIndex_, gridLayoutInfo_.endMainLineIndex_);
     LayoutChildren(mainOffset);
 
     UpdateLayoutInfo();
@@ -111,6 +110,16 @@ void GridIrregularLayout::Init(const RefPtr<GridLayoutProperty>& props)
     gridLayoutInfo_.crossCount_ = crossLens_.size();
 }
 
+void GridIrregularLayout::FillWithItems(float targetLen)
+{
+    // reset endIndex
+    gridLayoutInfo_.endIndex_ = gridLayoutInfo_.startIndex_ - 1;
+    gridLayoutInfo_.endMainLineIndex_ = gridLayoutInfo_.startMainLineIndex_;
+
+    GridIrregularFiller filler(&gridLayoutInfo_, wrapper_);
+    filler.Fill({ crossLens_, targetLen, crossGap_, mainGap_ });
+}
+
 bool GridIrregularLayout::ReachedEnd() const
 {
     const auto& info = gridLayoutInfo_;
@@ -146,6 +155,7 @@ void GridIrregularLayout::UpdateLayoutInfo()
 
 void GridIrregularLayout::RemoveOutOfBoundChildren()
 {
+    wrapper_->RemoveAllChildInRenderTree();
     int32_t idx = gridLayoutInfo_.startIndex_;
     // remove above
     while (idx > 0) {
@@ -162,15 +172,11 @@ void GridIrregularLayout::RemoveOutOfBoundChildren()
     idx = gridLayoutInfo_.endIndex_;
     while (idx < wrapper_->GetTotalChildCount() - 1) {
         auto child = wrapper_->GetChildByIndex(++idx);
-        bool skipFlag = false;
         if (!child || !child->IsActive()) {
-            skipFlag = true;
             // no more children to remove
-            continue;
+            break;
         }
-        if (skipFlag) {
-            LOGI("ZTE remove child %d after skip", idx);
-        }
+        LOGI("ZTE remove child %d", idx);
         wrapper_->RemoveChildInRenderTree(idx);
     }
 }
@@ -198,10 +204,15 @@ void GridIrregularLayout::LayoutChildren(float mainOffset)
             auto offset = info.axis_ == Axis::HORIZONTAL ? OffsetF { mainOffset, crossPos[c] }
                                                          : OffsetF { crossPos[c], mainOffset };
             child->GetGeometryNode()->SetMarginFrameOffset(offset);
+            LOGI("ZTE layout child %d, offset = %s", row.at(c), offset.ToString().c_str());
             // re-layout previously hidden nodes
             child->Layout();
         }
         // add mainGap below the item
+        if (info.lineHeightMap_.find(r) == info.lineHeightMap_.end()) {
+            LOGW("ZTE row %d not in map", r);
+            continue;
+        }
         mainOffset += info.lineHeightMap_.at(r) + mainGap_;
     }
 }

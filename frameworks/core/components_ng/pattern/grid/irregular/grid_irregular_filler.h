@@ -39,7 +39,7 @@ public:
     float Fill(const FillParameters& params);
 
 private:
-    void FitOne();
+    void FillOne();
     void UpdateLength(int32_t prevRow, float mainGap);
     void MeasureNewItem(const FillParameters& params, int32_t col);
 
