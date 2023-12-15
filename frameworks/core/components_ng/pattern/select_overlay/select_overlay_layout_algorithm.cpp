@@ -40,9 +40,9 @@ void SelectOverlayLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(pipeline);
     auto safeAreaManager = pipeline->GetSafeAreaManager();
     CHECK_NULL_VOID(safeAreaManager);
-    auto keyboardTop = safeAreaManager->GetKeyboardInset().start;
+    auto keyboardHeight = safeAreaManager->GetKeyboardInset().Length();
     auto maxSize =
-        SizeF(layoutConstraint.maxSize.Width(), layoutConstraint.maxSize.Height() - keyboardTop -
+        SizeF(layoutConstraint.maxSize.Width(), layoutConstraint.maxSize.Height() - keyboardHeight -
                                                     (info_->isUsingMouse ? info_->rightClickOffset.GetY() : 0.0f));
     layoutConstraint.maxSize = maxSize;
     bool isMouseCustomMenu = false;
