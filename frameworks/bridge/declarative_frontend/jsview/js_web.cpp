@@ -3907,7 +3907,7 @@ void JSWeb::SetNestedScroll(const JSCallbackInfo& args)
     args.ReturnSelf();
 }
 
-void ParseScriptItems(const JSCallbackInfo& args, ScriptItems& scriptItems)
+void JSWeb::ParseScriptItems(const JSCallbackInfo& args, ScriptItems& scriptItems)
 {
     if (args.Length() != 1 || args[0]->IsUndefined() || args[0]->IsNull() || !args[0]->IsArray()) {
         return;
