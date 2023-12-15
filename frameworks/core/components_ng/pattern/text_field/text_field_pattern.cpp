@@ -879,6 +879,14 @@ void TextFieldPattern::InitFocusEvent()
         return pattern->OnKeyEvent(keyEvent);
     };
     focusHub->SetOnKeyEventInternal(keyTask);
+
+    auto getInnerPaintRectCallback = [weak = WeakClaim(this)](RoundRect& paintRect) {
+        auto pattern = weak.Upgrade();
+        if (pattern) {
+            pattern->GetInnerFocusPaintRect(paintRect);
+        }
+    };
+    focusHub->SetInnerFocusPaintRectCallback(getInnerPaintRectCallback);
     focusEventInitialized_ = true;
 }
 
@@ -5912,10 +5920,9 @@ void TextFieldPattern::PaintTextRect()
     focusHub->PaintInnerFocusState(focusRect);
 }
 
-void TextFieldPattern::PaintCancelRect()
+void TextFieldPattern::GetIconPaintRect(const RefPtr<TextInputResponseArea>& responseArea, RoundRect& paintRect)
 {
-    CHECK_NULL_VOID(cleanNodeResponseArea_);
-    auto stackNode = cleanNodeResponseArea_->GetFrameNode();
+    auto stackNode = responseArea->GetFrameNode();
     CHECK_NULL_VOID(stackNode);
     auto stackRect = stackNode->GetGeometryNode()->GetFrameRect();
     auto imageNode = stackNode->GetFirstChild();
@@ -5924,8 +5931,35 @@ void TextFieldPattern::PaintCancelRect()
     CHECK_NULL_VOID(imageFrameNode);
     auto imageRect = imageFrameNode->GetGeometryNode()->GetFrameRect();
     RectF rect(stackRect.GetX(), imageRect.GetY(), imageRect.Width(), imageRect.Height());
+    paintRect.SetRect(rect);
+}
+
+void TextFieldPattern::GetInnerFocusPaintRect(RoundRect& paintRect)
+{
+    if (focusIndex_ == FocuseIndex::CANCEL) {
+        CHECK_NULL_VOID(cleanNodeResponseArea_);
+        GetIconPaintRect(cleanNodeResponseArea_, paintRect);
+    } else if (focusIndex_ == FocuseIndex::UNIT) {
+        if (IsShowPasswordIcon()) {
+            CHECK_NULL_VOID(responseArea_);
+            GetIconPaintRect(responseArea_, paintRect);
+        }
+        if (IsShowUnit()) {
+            CHECK_NULL_VOID(responseArea_);
+            auto unitResponseArea = AceType::DynamicCast<UnitResponseArea>(responseArea_);
+            CHECK_NULL_VOID(unitResponseArea);
+            auto unitNode = unitResponseArea->GetFrameNode();
+            CHECK_NULL_VOID(unitNode);
+            auto unitRect = unitNode->GetGeometryNode()->GetFrameRect();
+            paintRect.SetRect(unitRect);
+        }
+    }
+}
+
+void TextFieldPattern::PaintCancelRect()
+{
     RoundRect focusRect;
-    focusRect.SetRect(rect);
+    GetInnerFocusPaintRect(focusRect);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto focusHub = host->GetFocusHub();
@@ -5945,20 +5979,8 @@ void TextFieldPattern::PaintResponseAreaRect()
 
 void TextFieldPattern::PaintPasswordRect()
 {
-    CHECK_NULL_VOID(responseArea_);
-    auto passwordResponseArea = AceType::DynamicCast<PasswordResponseArea>(responseArea_);
-    CHECK_NULL_VOID(passwordResponseArea);
-    auto stackNode = passwordResponseArea->GetFrameNode();
-    CHECK_NULL_VOID(stackNode);
-    auto stackRect = stackNode->GetGeometryNode()->GetFrameRect();
-    auto imageNode = stackNode->GetFirstChild();
-    CHECK_NULL_VOID(imageNode);
-    auto imageFrameNode = AceType::DynamicCast<FrameNode>(imageNode);
-    CHECK_NULL_VOID(imageFrameNode);
-    auto imageRect = imageFrameNode->GetGeometryNode()->GetFrameRect();
-    RectF rect(stackRect.GetX(), imageRect.GetY(), imageRect.Width(), imageRect.Height());
     RoundRect focusRect;
-    focusRect.SetRect(rect);
+    GetInnerFocusPaintRect(focusRect);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto focusHub = host->GetFocusHub();
@@ -5968,14 +5990,8 @@ void TextFieldPattern::PaintPasswordRect()
 
 void TextFieldPattern::PaintUnitRect()
 {
-    CHECK_NULL_VOID(responseArea_);
-    auto unitResponseArea = AceType::DynamicCast<UnitResponseArea>(responseArea_);
-    CHECK_NULL_VOID(unitResponseArea);
-    auto unitNode = unitResponseArea->GetFrameNode();
-    CHECK_NULL_VOID(unitNode);
-    auto unitRect = unitNode->GetGeometryNode()->GetFrameRect();
     RoundRect focusRect;
-    focusRect.SetRect(unitRect);
+    GetInnerFocusPaintRect(focusRect);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto focusHub = host->GetFocusHub();
