@@ -248,13 +248,14 @@ static void SetContextProperty(
     int32_t textOverFlow = HandleIntStyle(contextParamMap["textOverFlowNApi"], env);
     int32_t maxlines = HandleIntStyle(contextParamMap["maxLinesNApi"], env);
     int32_t textCase = HandleIntStyle(contextParamMap["textCaseNApi"], env);
-
-    napi_valuetype jsValueType = napi_undefined;
-    napi_typeof(env, contextParamMap["wordBreakNApi"], &jsValueType);
     
-    if (contextParamMap["wordBreakNApi"] != nullptr && jsValueType != napi_undefined) {
-        int32_t wordBreak = HandleIntStyle(contextParamMap["wordBreakNApi"], env);
-        context.wordBreak = static_cast<WordBreak>(wordBreak);
+    if (contextParamMap["wordBreakNApi"] != nullptr) {
+        napi_valuetype jsValueType = napi_undefined;
+        napi_typeof(env, contextParamMap["wordBreakNApi"], &jsValueType);
+        if (jsValueType != napi_undefined) {
+            int32_t wordBreak = HandleIntStyle(contextParamMap["wordBreakNApi"], env);
+            context.wordBreak = static_cast<WordBreak>(wordBreak);
+        }        
     }
 
     std::string textContent = HandleStringType(contextParamMap["textContentNApi"], env);
