@@ -90,7 +90,7 @@ void JSSpan::SetFontSize(const JSCallbackInfo& info)
     if (!ParseJsDimensionFp(info[0], fontSize)) {
         return;
     }
-    if (fontSize.IsNegative()) {
+    if (fontSize.IsNonPositive()) {
         auto theme = GetTheme<TextTheme>();
         CHECK_NULL_VOID(theme);
         fontSize = theme->GetTextStyle().GetFontSize();
