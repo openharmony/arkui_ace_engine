@@ -1674,6 +1674,7 @@ void TextFieldPattern::HandleSingleClickEvent(GestureEvent& info)
     SetIsSingleHandle(true);
     CloseSelectOverlay(true);
 
+    auto isSelectAll = layoutProperty->GetSelectAllValueValue(false);
     if (RepeatClickCaret(info.GetLocalLocation(), lastCaretIndex) && info.GetSourceDevice() != SourceType::MOUSE) {
         if (contentController_->IsEmpty()) {
             ProcessOverlay(true, true, true, true);
@@ -1684,6 +1685,9 @@ void TextFieldPattern::HandleSingleClickEvent(GestureEvent& info)
         && !IsNormalInlineState()) {
         if (GetNakedCharPosition() >= 0) {
             DelayProcessOverlay(true, true, false);
+        } else if (isSelectAll && !contentController_->IsEmpty() && isFocusedBeforeClick_) {
+            isFocusedBeforeClick_ = false;
+            HandleOnSelectAll(true);
         } else {
             ProcessOverlay(true, true, false);
         }
@@ -1694,7 +1698,6 @@ void TextFieldPattern::HandleSingleClickEvent(GestureEvent& info)
     }
     // emulate clicking bottom of the textField
     UpdateTextFieldManager(Offset(parentGlobalOffset_.GetX(), parentGlobalOffset_.GetY()), frameRect_.Height());
-    auto isSelectAll = layoutProperty->GetSelectAllValueValue(false);
     if (isSelectAll && !contentController_->IsEmpty() && isFocusedBeforeClick_) {
         isFocusedBeforeClick_ = false;
         HandleOnSelectAll(true);
@@ -2207,6 +2210,7 @@ void TextFieldPattern::HandleLongPress(GestureEvent& info)
         ProcessOverlay(true, true);
         UpdateSelectMenuVisibility(true);
     }
+    isFocusedBeforeClick_ = false;
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
@@ -2561,6 +2565,7 @@ void TextFieldPattern::OnHandleClosed(bool closedByGlobalEvent)
     if (closedByGlobalEvent) {
         UpdateSelectMenuVisibility(false);
     }
+    UpdateShowMagnifier();
 }
 
 void TextFieldPattern::InitEditingValueText(std::string content)
@@ -6034,6 +6039,72 @@ void TextFieldPattern::ShowMenu()
     }
     SetIsSingleHandle(false);
     ProcessOverlay(true, true, true);
+}
+
+void TextFieldPattern::MakeHighZIndex()
+{
+    auto pattern = GetHost();
+    CHECK_NULL_VOID(pattern);
+    auto parent = pattern->GetParent();
+    CHECK_NULL_VOID(parent);
+
+    MakeZIndexRollBack();
+    GetMaxZIndex(parent, pattern);
+    while (!parent->IsRootNode()) {
+        auto parentNode = parent->GetParent();
+        CHECK_NULL_VOID(parentNode);
+        GetMaxZIndex(parentNode, AceType::DynamicCast<FrameNode>(parent));
+        parent = parentNode;
+    }
+}
+
+void TextFieldPattern::MakeZIndexRollBack()
+{
+    if (zIndexRollBack_.empty()) {
+        return;
+    }
+
+    auto pattern = GetHost();
+    CHECK_NULL_VOID(pattern);
+    auto context = pattern->GetRenderContext();
+    CHECK_NULL_VOID(context);
+    auto rollBackZIndex = zIndexRollBack_.front();
+    zIndexRollBack_.pop_front();
+    context->UpdateZIndex(rollBackZIndex);
+
+    auto parent = pattern->GetParent();
+    CHECK_NULL_VOID(parent);
+    while (!parent->IsRootNode()) {
+        context = AceType::DynamicCast<FrameNode>(parent)->GetRenderContext();
+        CHECK_NULL_VOID(context);
+        if (zIndexRollBack_.empty()) {
+            return;
+        }
+        rollBackZIndex = zIndexRollBack_.front();
+        zIndexRollBack_.pop_front();
+        context->UpdateZIndex(rollBackZIndex);
+        parent = parent->GetParent();
+    }
+}
+
+void TextFieldPattern::GetMaxZIndex(const RefPtr<UINode>& parent, const RefPtr<FrameNode>& pattern)
+{
+    auto childContext = pattern->GetRenderContext();
+    CHECK_NULL_VOID(childContext);
+    auto rollBackZIndex = childContext->GetZIndexValue(ZINDEX_DEFAULT_VALUE);
+    zIndexRollBack_.push_back(rollBackZIndex);
+
+    int32_t maxZIndex = 0;
+    auto children = parent->GetChildren();
+    if (children.empty()) {
+        return;
+    }
+    for (const auto& child : children) {
+        auto context = AceType::DynamicCast<FrameNode>(child)->GetRenderContext();
+        CHECK_NULL_VOID(context);
+        maxZIndex = std::max(maxZIndex, context->GetZIndexValue(ZINDEX_DEFAULT_VALUE));
+    }
+    childContext->UpdateZIndex(++maxZIndex);
 }
 
 #ifdef ENABLE_DRAG_FRAMEWORK
