@@ -406,7 +406,8 @@ void SideBarContainerPattern::CreateAndMountNodes()
             Color bgColor = sideBarTheme->GetSideBarBackgroundColor();
             renderContext->UpdateBackgroundColor(bgColor);
         }
-        if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+        if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN) &&
+            !renderContext->GetBackBlurStyle().has_value()) {
             BlurStyleOption blurStyleOption;
             blurStyleOption.blurStyle = BlurStyle::COMPONENT_THICK;
             renderContext->UpdateBackBlurStyle(blurStyleOption);
