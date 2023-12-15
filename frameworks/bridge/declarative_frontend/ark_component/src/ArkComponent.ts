@@ -28,7 +28,7 @@ const UI_STATE_FOCUSED = 1 << 1;
 const UI_STATE_DISABLED = 1 << 2;
 const UI_STATE_SELECTED = 1 << 3;
 
-function applyUIAttributes(modifier: AttributeModifier, nativeNode: KNode, component: ArkComponent) {
+function applyUIAttributes(modifier: AttributeModifier<CommonAttribute>, nativeNode: KNode, component: ArkComponent): void {
   let state = 0;
   if (modifier.applyPressedAttribute !== undefined) {
     state |= UI_STATE_PRESSED;
@@ -49,16 +49,16 @@ function applyUIAttributes(modifier: AttributeModifier, nativeNode: KNode, compo
   if (modifier.applyNormalAttribute !== undefined) {
     modifier.applyNormalAttribute(component);
   }
-  if (currentUIState & UI_STATE_PRESSED) {
+  if ((currentUIState & UI_STATE_PRESSED) && (modifier.applyPressedAttribute !== undefined)) {
     modifier.applyPressedAttribute(component);
   }
-  if (currentUIState & UI_STATE_FOCUSED) {
+  if ((currentUIState & UI_STATE_FOCUSED) && (modifier.applyFocusedAttribute !== undefined)) {
     modifier.applyFocusedAttribute(component);
   }
-  if (currentUIState & UI_STATE_DISABLED) {
+  if ((currentUIState & UI_STATE_DISABLED) && (modifier.applyDisabledAttribute !== undefined)) {
     modifier.applyDisabledAttribute(component);
   }
-  if (currentUIState & UI_STATE_SELECTED) {
+  if ((currentUIState & UI_STATE_SELECTED) && (modifier.applySelectedAttribute !== undefined)) {
     modifier.applySelectedAttribute(component);
   }
 }
