@@ -176,9 +176,9 @@ void BubbleLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         return;
     }
     auto child = children.front();
+    CHECK_NULL_VOID(child);
     // childSize_ and childOffset_ is used in Layout.
     child->Measure(childLayoutConstraint);
-
     if (useCustom && !showInSubWindow && (Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN))) {
         auto context = PipelineBase::GetCurrentContext();
         CHECK_NULL_VOID(context);
@@ -235,13 +235,8 @@ void BubbleLayoutAlgorithm::BubbleAvoidanceRule(RefPtr<LayoutWrapper> child, Ref
         auto overlayGlobalOffset = bubbleNode->GetPaintRectOffset();
         targetOffset_ -= overlayGlobalOffset;
     }
-
-    auto bubbleRendProperty = bubbleNode->GetPaintProperty<BubbleRenderProperty>();
-    CHECK_NULL_VOID(bubbleRendProperty);
-    bool useArrowOffset = bubbleRendProperty->GetArrowOffset().has_value();
     childSize_ = child->GetGeometryNode()->GetMarginFrameSize(); // bubble's size
-    bool didNeedArrow = GetIfNeedArrow(bubbleProp, childSize_);
-    childOffset_ = GetChildPosition(childSize_, didNeedArrow, useArrowOffset); // bubble's offset
+    childOffset_ = GetChildPosition(childSize_, bubbleProp);     // bubble's offset
 }
 
 void BubbleLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
@@ -350,7 +345,7 @@ void BubbleLayoutAlgorithm::InitProps(const RefPtr<BubbleLayoutProperty>& layout
     showArrow_ = false;
 }
 
-OffsetF BubbleLayoutAlgorithm::GetChildPosition(const SizeF& childSize, bool didNeedArrow, bool useArrowOffset)
+OffsetF BubbleLayoutAlgorithm::GetChildPosition(const SizeF& childSize, const RefPtr<BubbleLayoutProperty>& bubbleProp)
 {
     static std::map<Placement, std::vector<Placement>> PLACEMENT_STATES = {
         { Placement::BOTTOM_LEFT,
@@ -524,6 +519,7 @@ OffsetF BubbleLayoutAlgorithm::GetChildPosition(const SizeF& childSize, bool did
     OffsetF ArrowOffset;
     OffsetF position = defaultPosition;
     auto positionOffset = positionOffset_;
+    bool didNeedArrow = false;
     std::vector<Placement> currentPlacementStates = PLACEMENT_STATES.find(Placement::BOTTOM)->second;
     if (PLACEMENT_STATES.find(placement_) != PLACEMENT_STATES.end()) {
         currentPlacementStates = PLACEMENT_STATES.find(placement_)->second;
@@ -562,6 +558,7 @@ OffsetF BubbleLayoutAlgorithm::GetChildPosition(const SizeF& childSize, bool did
         }
         childPosition = GetPositionWithPlacement(childSize, topPosition, bottomPosition, ArrowOffset);
         UpdateChildPosition(childPosition);
+        didNeedArrow = GetIfNeedArrow(bubbleProp, childSize_);
         position = FitToScreen(childPosition, step, i, childSize, didNeedArrow);
         if (NearEqual(position, OffsetF(0.0f, 0.0f))) {
             continue;

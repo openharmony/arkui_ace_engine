@@ -319,6 +319,7 @@ void BubbleView::UpdatePopupParam(int32_t popupId, const RefPtr<PopupParam>& par
         for (const auto& uinode : children) {
             if (uinode->GetTag() == V2::SCROLL_ETS_TAG) {
                 auto scrollNode = AceType::DynamicCast<FrameNode>(uinode);
+                CHECK_NULL_VOID(scrollNode);
                 auto scrollProps = scrollNode->GetLayoutProperty<ScrollLayoutProperty>();
                 scrollProps->UpdateCalcMaxSize(CalcSize(
                     std::nullopt, CalcLength(Dimension(popupMaxHeight) - buttonTheme->GetHeight() * DOUBLENESS)));
@@ -339,6 +340,7 @@ void BubbleView::UpdatePopupParam(int32_t popupId, const RefPtr<PopupParam>& par
         popupPaintProp->UpdateBackgroundColor(param->GetBackgroundColor());
     }
     auto childNode = AceType::DynamicCast<FrameNode>(popupNode->GetFirstChild());
+    CHECK_NULL_VOID(childNode);
     auto renderContext = childNode->GetRenderContext();
     if (renderContext) {
         auto backgroundColor = popupPaintProp->GetBackgroundColor().value_or(GetPopupTheme()->GetBackgroundColor());
@@ -362,6 +364,7 @@ void BubbleView::UpdateCustomPopupParam(int32_t popupId, const RefPtr<PopupParam
     popupPaintProp->UpdateEnableArrow(param->EnableArrow());
     auto backgroundColor = popupPaintProp->GetBackgroundColor().value_or(GetPopupTheme()->GetBackgroundColor());
     auto childNode = AceType::DynamicCast<FrameNode>(popupNode->GetFirstChild());
+    CHECK_NULL_VOID(childNode);
     auto customFrameNode = AceType::DynamicCast<FrameNode>(childNode->GetFirstChild());
     auto columnRenderContext = childNode->GetRenderContext();
     RefPtr<RenderContext> customRenderContext;
@@ -437,6 +440,7 @@ void BubbleView::UpdateCommonParam(int32_t popupId, const RefPtr<PopupParam>& pa
         popupPaintProp->UpdateBackgroundColor(param->GetBackgroundColor());
     }
     auto childNode = AceType::DynamicCast<FrameNode>(popupNode->GetFirstChild());
+    CHECK_NULL_VOID(childNode);
     auto childLayoutProperty = childNode->GetLayoutProperty();
     CHECK_NULL_VOID(childLayoutProperty);
     float popupMaxWidth = 0.0f;
@@ -511,7 +515,6 @@ RefPtr<FrameNode> BubbleView::CreateCombinedChild(
     scrollNode->MarkModifyDone();
     message->MountToParent(scrollNode);
     scrollNode->MountToParent(columnNode);
-
     auto buttonFlex = BubbleView::CreateButtons(param, popupId, targetId);
     auto buttonFlexLayoutProperty = buttonFlex->GetLayoutProperty<FlexLayoutProperty>();
     buttonFlexLayoutProperty->UpdateAlignSelf(FlexAlign::FLEX_END);
@@ -521,7 +524,6 @@ RefPtr<FrameNode> BubbleView::CreateCombinedChild(
     childLayoutProperty->UpdateCalcMaxSize(
         CalcSize(NG::CalcLength(Dimension(popupMaxWidth)), NG::CalcLength(Dimension(popupMaxHeight))));
     buttonFlex->MountToParent(columnNode);
-
     columnNode->MarkModifyDone();
     return columnNode;
 }
