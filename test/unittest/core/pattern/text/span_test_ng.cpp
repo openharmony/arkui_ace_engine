@@ -37,6 +37,7 @@
 #undef protected
 #include "core/components_ng/pattern/image/image_model_ng.h"
 #include "frameworks/core/components_ng/pattern/image/image_layout_property.h"
+#include "frameworks/core/common/ai/data_detector_mgr.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -60,6 +61,13 @@ const std::string FONT_DEFAULT_VALUE = "{\"style\":\"FontStyle.Normal\",\"size\"
                                        "\"FontWeight.Normal\",\"family\":\"HarmonyOS Sans\"}";
 const std::string FONT_EQUALS_VALUE =
     R"({"style":"FontStyle.Italic","size":"20.10px","weight":"FontWeight.Bold","family":"cursive"})";
+const std::string TEXT_FOR_AI = "phone: 12345678900,url: www.baidu.com";
+const std::string SPAN_PHONE = "12345678900";
+const std::string SPAN_URL = "www.baidu.com";
+constexpr int32_t AI_SPAN_START = 7;
+constexpr int32_t AI_SPAN_END = 18;
+constexpr int32_t AI_SPAN_START_II = 24;
+constexpr int32_t AI_SPAN_END_II = 37;
 } // namespace
 
 class SpanTestNg : public testing::Test {};
@@ -697,5 +705,103 @@ HWTEST_F(SpanTestNg, SpanDecorationToJsonValue003, TestSize.Level1)
     EXPECT_TRUE(json->Contains("content"));
     EXPECT_TRUE(json->GetValue("content")->GetString() == CREATE_VALUE);
     EXPECT_TRUE(json->Contains("decoration"));
+}
+
+/**
+ * @tc.name: SpanItemUpdateParagraph006
+ * @tc.desc: Test SpanItem UpdateParagraph when with ai span.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanTestNg, SpanItemUpdateParagraph006, TestSize.Level1)
+{
+    SpanModelNG spanModelNG;
+    spanModelNG.Create(CREATE_VALUE);
+    auto spanNode = AceType::DynamicCast<SpanNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+    
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    pattern->SetTextDetectEnable(true);
+    auto node = FrameNode::CreateFrameNode("Test", 1, pattern);
+    spanNode->SetParent(node);
+    spanNode->MountToParagraph();
+    ASSERT_NE(spanNode->GetParent(), nullptr);
+
+    auto json = std::make_unique<JsonValue>();
+    AISpan aiSpan1;
+    aiSpan1.start = AI_SPAN_START;
+    aiSpan1.end = AI_SPAN_END;
+    aiSpan1.content = SPAN_PHONE;
+    aiSpan1.type = TextDataDetectType::PHONE_NUMBER;
+    AISpan aiSpan2;
+    aiSpan2.start = AI_SPAN_START_II;
+    aiSpan2.end = AI_SPAN_END_II;
+    aiSpan2.content = SPAN_URL;
+    aiSpan2.type = TextDataDetectType::URL;
+    std::map<int32_t, AISpan> aiSpanMap;
+    aiSpanMap[AI_SPAN_START] = aiSpan1;
+    aiSpanMap[AI_SPAN_START_II] = aiSpan2;
+    spanNode->spanItem_->aiSpanMap = aiSpanMap;
+    spanNode->spanItem_->content = TEXT_FOR_AI;
+    spanNode->spanItem_->fontStyle = nullptr;
+    RefPtr<SpanItem> spanItem = AceType::MakeRefPtr<SpanItem>();
+    spanNode->spanItem_->children.push_back(spanItem);
+    TextStyle textStyle;
+    ParagraphStyle paraStyle = { .direction = TextDirection::LTR,
+        .align = textStyle.GetTextAlign(),
+        .maxLines = textStyle.GetMaxLines(),
+        .fontLocale = "zh-CN",
+        .wordBreak = textStyle.GetWordBreak(),
+        .textOverflow = textStyle.GetTextOverflow() };
+    auto paragraph = Paragraph::Create(paraStyle, FontCollection::Current());
+    spanNode->spanItem_->UpdateParagraph(nullptr, paragraph);
+    EXPECT_EQ(spanNode->spanItem_->fontStyle, nullptr);
+}
+
+/**
+ * @tc.name: UpdateTextStyleForAISpan001
+ * @tc.desc: Test SpanItem UpdateTextStyleForAISpan when children is not empty.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanTestNg, UpdateTextStyleForAISpan001, TestSize.Level1)
+{
+    SpanModelNG spanModelNG;
+    spanModelNG.Create(CREATE_VALUE);
+    auto spanNode = AceType::DynamicCast<SpanNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+    
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    pattern->SetTextDetectEnable(true);
+    auto node = FrameNode::CreateFrameNode("Test", 1, pattern);
+    spanNode->SetParent(node);
+    spanNode->MountToParagraph();
+    ASSERT_NE(spanNode->GetParent(), nullptr);
+
+    Ace::AISpan aiSpan1;
+    aiSpan1.start = AI_SPAN_START;
+    aiSpan1.end = AI_SPAN_END;
+    aiSpan1.content = SPAN_PHONE;
+    aiSpan1.type = TextDataDetectType::PHONE_NUMBER;
+    Ace::AISpan aiSpan2;
+    aiSpan2.start = AI_SPAN_START_II;
+    aiSpan2.end = AI_SPAN_END_II;
+    aiSpan2.content = SPAN_URL;
+    aiSpan2.type = TextDataDetectType::URL;
+    std::map<int32_t, Ace::AISpan> aiSpanMap;
+    aiSpanMap[AI_SPAN_START] = aiSpan1;
+    aiSpanMap[AI_SPAN_START_II] = aiSpan2;
+    spanNode->spanItem_->aiSpanMap = aiSpanMap;
+    spanNode->spanItem_->fontStyle = nullptr;
+
+    std::string spanContent = TEXT_FOR_AI;
+    spanNode->spanItem_->position = StringUtils::ToWstring(spanContent).length();
+    TextStyle textStyle;
+    ParagraphStyle paraStyle = { .direction = TextDirection::LTR,
+        .align = textStyle.GetTextAlign(),
+        .maxLines = textStyle.GetMaxLines(),
+        .fontLocale = "zh-CN",
+        .wordBreak = textStyle.GetWordBreak(),
+        .textOverflow = textStyle.GetTextOverflow() };
+    auto paragraph= MockParagraph::GetOrCreateMockParagraph();
+
+    spanNode->spanItem_->UpdateTextStyleForAISpan(spanContent, paragraph, textStyle);
+    EXPECT_EQ(spanNode->spanItem_->fontStyle, nullptr);
 }
 } // namespace OHOS::Ace::NG
