@@ -642,7 +642,7 @@ ArkUINativeModuleValue TextInputBridge::SetPlaceholderFont(ArkUIRuntimeCallInfo 
     ArkUILengthType length{ nullptr, DEFAULT_FONT_SIZE, static_cast<int8_t>(DimensionUnit::FP) };
     CalcDimension size(DEFAULT_FONT_SIZE, DimensionUnit::FP);
     if (!ArkTSUtils::ParseJsDimensionFp(vm, jsSize, size) || size.Unit() == DimensionUnit::PERCENT) {
-        auto theme = Framework::JSViewAbstract::GetTheme<TextFieldTheme>();
+        auto theme = ArkTSUtils::GetTheme<TextFieldTheme>();
         if (theme != nullptr) {
             size = theme->GetFontSize();
         }

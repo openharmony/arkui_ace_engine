@@ -90,6 +90,15 @@ public:
         const EcmaVM* vm, const Local<JSValueRef>& jsValue, std::string& bundleName, std::string& moduleName);
     static bool GetJsPasswordIcon(const EcmaVM *vm, const Local<JSValueRef> &jsOnIconSrc,
         const Local<JSValueRef> &jsOffIconSrc, PasswordIcon& result);
+    template<typename T>
+    static RefPtr<T> GetTheme()
+    {
+        auto pipelineContext = PipelineBase::GetCurrentContext();
+        CHECK_NULL_RETURN(pipelineContext, nullptr);
+        auto themeManager = pipelineContext->GetThemeManager();
+        CHECK_NULL_RETURN(themeManager, nullptr);
+        return themeManager->GetTheme<T>();
+    }
 };
 } // namespace OHOS::Ace::NG
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_ENGINE_JSI_NATIVEMODULE_ARKTS_UTILS_H
