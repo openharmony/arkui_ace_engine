@@ -93,6 +93,10 @@ class ArkButtonComponent extends ArkComponent implements ButtonAttribute {
     modifierWithKey(this._modifiersWithKeys, ButtonLabelStyleModifier.identity,ButtonLabelStyleModifier, value);
     return this;
   }
+  borderRadius(value: Length | BorderRadiuses): this {
+    modifierWithKey(this._modifiersWithKeys, ButtonBorderRadiusModifier.identity, ButtonBorderRadiusModifier, value);
+    return this;
+  }
 }
 class ButtonBackgroundColorModifier extends ModifierWithKey<ResourceColor> {
   constructor(value: ResourceColor) {
@@ -297,6 +301,41 @@ class ButtonFontWeightModifier extends Modifier<string | number | FontWeight> {
         }
       }
       GetUINativeModule().button.setFontWeight(node, fontWeightStr);
+    }
+  }
+}
+
+class ButtonBorderRadiusModifier extends ModifierWithKey<Length | BorderRadiuses> {
+  constructor(value: Length | BorderRadiuses) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('buttonBorderRadius');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      GetUINativeModule().button.resetButtonBorderRadius(node);
+    } else {
+      if (isNumber(this.value) || isString(this.value) || isResource(this.value)) {
+        GetUINativeModule().button.setButtonBorderRadius(node, this.value, this.value, this.value, this.value);
+      } else {
+        GetUINativeModule().button.setButtonBorderRadius(node,
+          (this.value as BorderRadiuses).topLeft,
+          (this.value as BorderRadiuses).topRight,
+          (this.value as BorderRadiuses).bottomLeft,
+          (this.value as BorderRadiuses).bottomRight);
+      }
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    if (isResource(this.stageValue) && isResource(this.value)) {
+      return !isResourceEqual(this.stageValue, this.value);
+    } else if (!isResource(this.stageValue) && !isResource(this.value)) {
+      return !((this.stageValue as BorderRadiuses).topLeft === (this.value as BorderRadiuses).topLeft &&
+        (this.stageValue as BorderRadiuses).topRight === (this.value as BorderRadiuses).topRight &&
+        (this.stageValue as BorderRadiuses).bottomLeft === (this.value as BorderRadiuses).bottomLeft &&
+        (this.stageValue as BorderRadiuses).bottomRight === (this.value as BorderRadiuses).bottomRight);
+    } else {
+      return true;
     }
   }
 }

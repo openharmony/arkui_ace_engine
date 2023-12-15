@@ -39,6 +39,8 @@ public:
     static ArkUINativeModuleValue ResetLabelStyle(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetBackgroundColor(ArkUIRuntimeCallInfo *runtimeCallInfo);
     static ArkUINativeModuleValue ResetBackgroundColor(ArkUIRuntimeCallInfo *runtimeCallInfo);
+    static ArkUINativeModuleValue SetButtonBorderRadius(ArkUIRuntimeCallInfo *runtimeCallInfo);
+    static ArkUINativeModuleValue ResetButtonBorderRadius(ArkUIRuntimeCallInfo *runtimeCallInfo);
 
 private:
     static bool ButtonParseJsDimensionFp(const EcmaVM* vm, const Local<JSValueRef>& value, CalcDimension& result);

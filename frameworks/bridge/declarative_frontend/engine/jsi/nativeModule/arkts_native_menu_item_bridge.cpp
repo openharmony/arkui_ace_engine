@@ -125,7 +125,7 @@ ArkUINativeModuleValue MenuItemBridge::SetLabelFont(ArkUIRuntimeCallInfo* runtim
     if (weightArg->IsNumber()) {
         weight = std::to_string(weightArg->Int32Value(vm));
     } else {
-        if (ArkTSUtils::ParseJsString(vm, weightArg, weight) || weight.empty()) {
+        if (!ArkTSUtils::ParseJsString(vm, weightArg, weight) || weight.empty()) {
             weight = DEFAULT_ERR_CODE;
         }
     }
@@ -178,7 +178,7 @@ ArkUINativeModuleValue MenuItemBridge::SetContentFont(ArkUIRuntimeCallInfo* runt
     if (weightArg->IsNumber()) {
         weight = std::to_string(weightArg->Int32Value(vm));
     } else {
-        if (ArkTSUtils::ParseJsString(vm, weightArg, weight) || weight.empty()) {
+        if (!ArkTSUtils::ParseJsString(vm, weightArg, weight) || weight.empty()) {
             weight = DEFAULT_ERR_CODE;
         }
     }

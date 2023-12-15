@@ -464,6 +464,8 @@ struct ArkUIButtonModifierAPI {
     void (*ResetButtonLabelStyle)(NodeHandle node);
     void (*SetButtonBackgroundColor)(NodeHandle node, uint32_t color);
     void (*ResetButtonBackgroundColor)(NodeHandle node);
+    void (*SetButtonBorderRadius)(NodeHandle node, const double* values, int32_t valuesSize);
+    void (*ResetButtonBorderRadius)(NodeHandle node);
 };
 
 struct ArkUIToggleModifierAPI {
@@ -900,6 +902,8 @@ struct ArkUIImageModifierAPI {
     void (*ResetImageFitOriginalSize)(NodeHandle node);
     void (*SetImageDraggable)(NodeHandle node, bool value);
     void (*ResetImageDraggable)(NodeHandle node);
+    void (*SetImageBorderRadius)(NodeHandle node, const double* values, const int* units, int32_t length);
+    void (*ResetImageBorderRadius)(NodeHandle node);
 };
 
 struct ArkUIVideoModifierAPI {

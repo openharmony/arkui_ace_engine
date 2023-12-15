@@ -345,4 +345,71 @@ bool ButtonBridge::ButtonParseJsDimensionFp(const EcmaVM* vm, const Local<JSValu
     }
     return false;
 }
+
+void ParseBorderRadius(EcmaVM* vm, const Local<JSValueRef>& args, std::optional<CalcDimension>& optionalDimention)
+{
+    CalcDimension valueDimen;
+    if (!args->IsUndefined() && ArkTSUtils::ParseJsDimensionVp(vm, args, valueDimen, false)) {
+        optionalDimention = valueDimen;
+    }
+}
+
+void PushBorderRadiusVector(const std::optional<CalcDimension>& valueDimen, std::vector<double> &options)
+{
+    options.push_back(static_cast<double>(valueDimen.has_value()));
+    if (valueDimen.has_value()) {
+        options.push_back(static_cast<double>(valueDimen.value().Value()));
+        options.push_back(static_cast<double>(valueDimen.value().Unit()));
+    } else {
+        options.push_back(0);
+        options.push_back(0);
+    }
+}
+
+ArkUINativeModuleValue ButtonBridge::SetButtonBorderRadius(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+    Local<JSValueRef> topLeftArgs = runtimeCallInfo->GetCallArgRef(CALL_ARG_1);     // topLeft value
+    Local<JSValueRef> topRightArgs = runtimeCallInfo->GetCallArgRef(CALL_ARG_2);    // topRight value
+    Local<JSValueRef> bottomLeftArgs = runtimeCallInfo->GetCallArgRef(CALL_ARG_3);  // bottomLeft value
+    Local<JSValueRef> bottomRightArgs = runtimeCallInfo->GetCallArgRef(CALL_ARG_4); // bottomRight value
+
+    if (topLeftArgs->IsUndefined() && topRightArgs->IsUndefined() && bottomLeftArgs->IsUndefined() &&
+        bottomRightArgs->IsUndefined()) {
+        GetArkUIInternalNodeAPI()->GetButtonModifier().ResetButtonBorderRadius(nativeNode);
+        return panda::JSValueRef::Undefined(vm);
+    }
+
+    std::optional<CalcDimension> radiusTopLeft;
+    std::optional<CalcDimension> radiusTopRight;
+    std::optional<CalcDimension> radiusBottomLeft;
+    std::optional<CalcDimension> radiusBottomRight;
+
+    ParseBorderRadius(vm, topLeftArgs, radiusTopLeft);
+    ParseBorderRadius(vm, topRightArgs, radiusTopRight);
+    ParseBorderRadius(vm, bottomLeftArgs, radiusBottomLeft);
+    ParseBorderRadius(vm, bottomRightArgs, radiusBottomRight);
+
+    std::vector<double> options;
+    PushBorderRadiusVector(radiusTopLeft, options);
+    PushBorderRadiusVector(radiusTopRight, options);
+    PushBorderRadiusVector(radiusBottomLeft, options);
+    PushBorderRadiusVector(radiusBottomRight, options);
+
+    GetArkUIInternalNodeAPI()->GetButtonModifier().SetButtonBorderRadius(nativeNode, options.data(), options.size());
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue ButtonBridge::ResetButtonBorderRadius(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+    GetArkUIInternalNodeAPI()->GetButtonModifier().ResetButtonBorderRadius(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
 } // namespace OHOS::Ace::NG

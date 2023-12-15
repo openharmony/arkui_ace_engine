@@ -78,6 +78,11 @@ void ImageModelNG::SetBackBorder()
     ACE_UPDATE_PAINT_PROPERTY(ImageRenderProperty, NeedBorderRadius, true);
 }
 
+void ImageModelNG::SetBackBorder(FrameNode *frameNode)
+{
+    ACE_UPDATE_NODE_PAINT_PROPERTY(ImageRenderProperty, NeedBorderRadius, true, frameNode);
+}
+
 void ImageModelNG::SetBlur(double blur) {}
 
 void ImageModelNG::SetImageFit(ImageFit value)
