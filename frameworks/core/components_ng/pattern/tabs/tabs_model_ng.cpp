@@ -272,6 +272,11 @@ void TabsModelNG::SetScrollable(bool scrollable)
     auto swiperPaintProperty = GetSwiperPaintProperty();
     CHECK_NULL_VOID(swiperPaintProperty);
     swiperPaintProperty->UpdateDisableSwipe(!scrollable);
+    auto tabsNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(tabsNode);
+    auto tabPattern = tabsNode->GetPattern<TabsPattern>();
+    CHECK_NULL_VOID(tabPattern);
+    tabPattern->SetIsDisableSwipe(!scrollable);
 }
 
 void TabsModelNG::SetAnimationDuration(float duration)
@@ -835,5 +840,28 @@ void TabsModelNG::SetBarAdaptiveHeight(FrameNode* frameNode, bool barAdaptiveHei
     auto tabBarLayoutProperty = GetTabBarLayoutProperty(frameNode);
     CHECK_NULL_VOID(tabBarLayoutProperty);
     tabBarLayoutProperty->UpdateBarAdaptiveHeight(barAdaptiveHeight);
+}
+
+void TabsModelNG::SetIsCustomAnimation(bool isCustom)
+{
+    auto swiperLayoutProperty = GetSwiperLayoutProperty();
+    CHECK_NULL_VOID(swiperLayoutProperty);
+    swiperLayoutProperty->UpdateIsCustomAnimation(isCustom);
+    auto tabsNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(tabsNode);
+    auto tabPattern = tabsNode->GetPattern<TabsPattern>();
+    CHECK_NULL_VOID(tabPattern);
+    tabPattern->SetIsCustomAnimation(isCustom);
+}
+
+void TabsModelNG::SetOnCustomAnimation(TabsCustomAnimationEvent&& onCustomAnimation)
+{
+    auto tabsNode = AceType::DynamicCast<TabsNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    CHECK_NULL_VOID(tabsNode);
+    auto swiperNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabs());
+    CHECK_NULL_VOID(swiperNode);
+    auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_VOID(swiperPattern);
+    swiperPattern->SetCustomContentTransition(std::move(onCustomAnimation));
 }
 } // namespace OHOS::Ace::NG

@@ -106,9 +106,18 @@ RefPtr<LayoutAlgorithm> SwiperPattern::CreateLayoutAlgorithm()
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, nullptr);
-    auto swiperPaintProperty = host->GetPaintProperty<SwiperPaintProperty>();
     auto swiperLayoutProperty = host->GetLayoutProperty<SwiperLayoutProperty>();
+    CHECK_NULL_RETURN(swiperLayoutProperty, nullptr);
+
     auto swiperLayoutAlgorithm = MakeRefPtr<SwiperLayoutAlgorithm>();
+    if (swiperLayoutProperty->GetIsCustomAnimation().value_or(false)) {
+        swiperLayoutAlgorithm->SetUseCustomAnimation(true);
+        swiperLayoutAlgorithm->SetCustomAnimationToIndex(customAnimationToIndex_);
+        swiperLayoutAlgorithm->SetIndexsInAnimation(indexsInAnimation_);
+        swiperLayoutAlgorithm->SetNeedUnmountIndexs(needUnmountIndexs_);
+        return swiperLayoutAlgorithm;
+    }
+
     if (jumpIndex_) {
         swiperLayoutAlgorithm->SetJumpIndex(jumpIndex_.value());
     } else if (targetIndex_) {
@@ -125,6 +134,9 @@ RefPtr<LayoutAlgorithm> SwiperPattern::CreateLayoutAlgorithm()
     }
     swiperLayoutAlgorithm->SetTotalItemCount(TotalCount());
     swiperLayoutAlgorithm->SetIsLoop(IsLoop());
+
+    auto swiperPaintProperty = host->GetPaintProperty<SwiperPaintProperty>();
+    CHECK_NULL_RETURN(host, nullptr);
     auto effect = swiperPaintProperty->GetEdgeEffect().value_or(EdgeEffect::SPRING);
     bool canOverScroll = effect == EdgeEffect::SPRING;
     swiperLayoutAlgorithm->SetCanOverScroll(canOverScroll);
@@ -226,48 +238,15 @@ void SwiperPattern::OnModifyDone()
             }
         }
     }
-    if (!IsDisableSwipe()) {
-        InitPanEvent(gestureHub);
-    } else if (panEvent_) {
-        gestureHub->RemovePanEvent(panEvent_);
-        panEvent_.Reset();
-    }
+
+    UpdateSwiperPanEvent(IsDisableSwipe());
 
     auto focusHub = host->GetFocusHub();
     if (focusHub) {
         InitOnKeyEvent(focusHub);
     }
-    auto removeSwiperEventCallback = [weak = WeakClaim(this)]() {
-        auto swiperPattern = weak.Upgrade();
-        CHECK_NULL_VOID(swiperPattern);
-        auto host = swiperPattern->GetHost();
-        CHECK_NULL_VOID(host);
-        auto hub = host->GetEventHub<EventHub>();
-        CHECK_NULL_VOID(hub);
-        auto gestureHub = hub->GetOrCreateGestureEventHub();
-        CHECK_NULL_VOID(gestureHub);
-        gestureHub->RemoveTouchEvent(swiperPattern->touchEvent_);
-        if (!swiperPattern->IsDisableSwipe()) {
-            gestureHub->RemovePanEvent(swiperPattern->panEvent_);
-        }
-    };
-    swiperController_->SetRemoveSwiperEventCallback(std::move(removeSwiperEventCallback));
 
-    auto addSwiperEventCallback = [weak = WeakClaim(this)]() {
-        auto swiperPattern = weak.Upgrade();
-        CHECK_NULL_VOID(swiperPattern);
-        auto host = swiperPattern->GetHost();
-        CHECK_NULL_VOID(host);
-        auto hub = host->GetEventHub<EventHub>();
-        CHECK_NULL_VOID(hub);
-        auto gestureHub = hub->GetOrCreateGestureEventHub();
-        CHECK_NULL_VOID(gestureHub);
-        gestureHub->AddTouchEvent(swiperPattern->touchEvent_);
-        if (!swiperPattern->IsDisableSwipe()) {
-            gestureHub->AddPanEvent(swiperPattern->panEvent_, swiperPattern->panDirection_, 1, DEFAULT_PAN_DISTANCE);
-        }
-    };
-    swiperController_->SetAddSwiperEventCallback(std::move(addSwiperEventCallback));
+    SetSwiperEventCallback(IsDisableSwipe());
 
     auto updateCubicCurveCallback = [weak = WeakClaim(this)]() {
         auto swiperPattern = weak.Upgrade();
@@ -616,12 +595,21 @@ bool SwiperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     if (!IsAutoPlay() && config.skipMeasure && config.skipLayout) {
         return false;
     }
-    autoLinearReachBoundary = false;
-    bool isJump = false;
+
+    auto layoutProperty = GetLayoutProperty<SwiperLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, false);
     auto layoutAlgorithmWrapper = dirty->GetLayoutAlgorithm();
     CHECK_NULL_RETURN(layoutAlgorithmWrapper, false);
     auto swiperLayoutAlgorithm = DynamicCast<SwiperLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
     CHECK_NULL_RETURN(swiperLayoutAlgorithm, false);
+
+    if (layoutProperty->GetIsCustomAnimation().value_or(false)) {
+        needUnmountIndexs_ = swiperLayoutAlgorithm->GetNeedUnmountIndexs();
+        return false;
+    }
+
+    autoLinearReachBoundary = false;
+    bool isJump = false;
     itemPosition_ = std::move(swiperLayoutAlgorithm->GetItemPosition());
     currentOffset_ -= swiperLayoutAlgorithm->GetCurrentOffset();
     if (!itemPosition_.empty()) {
@@ -636,8 +624,7 @@ bool SwiperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     if (!targetIndex_) {
         CheckMarkDirtyNodeForRenderIndicator();
     }
-    auto layoutProperty = GetLayoutProperty<SwiperLayoutProperty>();
-    CHECK_NULL_RETURN(layoutProperty, false);
+
     if (jumpIndex_) {
         isJump = true;
         UpdateCurrentIndex(swiperLayoutAlgorithm->GetCurrentIndex());
@@ -832,13 +819,28 @@ void SwiperPattern::StopSpringAnimationAndFlushImmediately()
     }
 }
 
+bool SwiperPattern::IsUseCustomAnimation() const
+{
+    auto swiperLayoutProperty = GetLayoutProperty<SwiperLayoutProperty>();
+    CHECK_NULL_RETURN(swiperLayoutProperty, false);
+    return swiperLayoutProperty->GetIsCustomAnimation().value_or(false);
+}
+
 void SwiperPattern::SwipeTo(int32_t index)
 {
+    auto targetIndex = IsLoop() ? index : (index < 0 || index > (TotalCount() - 1)) ? 0 : index;
+    targetIndex = IsLoop() ? targetIndex : std::clamp(targetIndex, 0, TotalCount() - GetDisplayCount());
+
+    if (IsUseCustomAnimation()) {
+        OnCustomContentTransition(targetIndex);
+        MarkDirtyNodeSelf();
+        return;
+    }
+
     if (IsVisibleChildrenSizeLessThanSwiper()) {
         return;
     }
-    auto targetIndex = IsLoop() ? index : (index < 0 || index > (TotalCount() - 1)) ? 0 : index;
-    targetIndex = IsLoop() ? targetIndex : std::clamp(targetIndex, 0, TotalCount() - GetDisplayCount());
+
     // If targetIndex_ has a value, means animation is still running, stop it before play new animation.
     if (currentIndex_ == targetIndex && !targetIndex_.has_value()) {
         return;
@@ -3761,6 +3763,163 @@ void SwiperPattern::StopIndicatorAnimation()
 
     if (stopIndicatorAnimationFunc_) {
         stopIndicatorAnimationFunc_();
+    }
+}
+
+void SwiperPattern::OnCustomContentTransition(int32_t toIndex)
+{
+    if (!currentProxyInAnimation_ && toIndex == CurrentIndex()) {
+        return;
+    }
+
+    customAnimationToIndex_ = toIndex;
+    indexsInAnimation_.insert(toIndex);
+    auto fromIndex = CurrentIndex();
+    if (currentProxyInAnimation_) {
+        fromIndex = currentProxyInAnimation_->GetToIndex();
+
+        auto swiperEventHub = GetEventHub<SwiperEventHub>();
+        CHECK_NULL_VOID(swiperEventHub);
+        swiperEventHub->FireChangeEvent(fromIndex);
+        swiperEventHub->FireIndicatorChangeEvent(fromIndex);
+        swiperEventHub->FireChangeDoneEvent(moveDirection_);
+
+        UpdateCurrentIndex(fromIndex);
+        oldIndex_ = fromIndex;
+
+        currentProxyInAnimation_->SetHasOnChanged(true);
+    }
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+
+    pipelineContext->AddAfterLayoutTask([weak = WeakClaim(this), fromIndex, toIndex]() {
+        auto swiperPattern = weak.Upgrade();
+        CHECK_NULL_VOID(swiperPattern);
+        swiperPattern->TriggerCustomContentTransitionEvent(fromIndex, toIndex);
+    });
+
+    MarkDirtyNodeSelf();
+}
+
+void SwiperPattern::TriggerCustomContentTransitionEvent(int32_t fromIndex, int32_t toIndex)
+{
+    CHECK_NULL_VOID(onCustomContentTransition_);
+
+    auto tabContentAnimatedTransition = (*onCustomContentTransition_)(fromIndex, toIndex);
+    auto transition = tabContentAnimatedTransition.transition;
+    auto proxy = AceType::MakeRefPtr<TabContentTransitionProxy>();
+    proxy->SetFromIndex(fromIndex);
+    proxy->SetToIndex(toIndex);
+    proxy->SetFinishTransitionEvent([weak = WeakClaim(this), fromIndex, toIndex](bool hasOnChanged) {
+        auto swiperPattern = weak.Upgrade();
+        CHECK_NULL_VOID(swiperPattern);
+        swiperPattern->OnCustomAnimationFinish(fromIndex, toIndex, hasOnChanged);
+    });
+
+    transition(proxy);
+    currentProxyInAnimation_ = proxy;
+
+    AnimationCallbackInfo info;
+    info.currentOffset = GetCustomPropertyOffset();
+    info.targetOffset = GetCustomPropertyOffset();
+    FireAnimationStartEvent(fromIndex, toIndex, info);
+
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto taskExecutor = pipeline->GetTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+
+    auto timeout = tabContentAnimatedTransition.timeout;
+    auto timeoutTask = [weak = AceType::WeakClaim(AceType::RawPtr(proxy)), fromIndex, toIndex] {
+        auto transitionProxy = weak.Upgrade();
+        CHECK_NULL_VOID(transitionProxy);
+        transitionProxy->FinishTransition();
+    };
+
+    taskExecutor->PostDelayedTask(timeoutTask, TaskExecutor::TaskType::UI, timeout);
+}
+
+void SwiperPattern::OnCustomAnimationFinish(int32_t fromIndex, int32_t toIndex, bool hasOnChanged)
+{
+    customAnimationToIndex_.reset();
+    needUnmountIndexs_.insert(fromIndex);
+    indexsInAnimation_.erase(toIndex);
+
+    if (!hasOnChanged) {
+        auto layoutProperty = GetLayoutProperty<SwiperLayoutProperty>();
+        CHECK_NULL_VOID(layoutProperty);
+        layoutProperty->UpdateIndexWithoutMeasure(GetLoopIndex(toIndex));
+        oldIndex_ = fromIndex;
+
+        AnimationCallbackInfo info;
+        info.currentOffset = GetCustomPropertyOffset();
+        FireAnimationEndEvent(toIndex, info);
+    }
+
+    if (indexsInAnimation_.empty()) {
+        currentProxyInAnimation_ = nullptr;
+    }
+
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    if (pipeline) {
+        pipeline->FlushUITasks();
+        pipeline->FlushMessages();
+    }
+}
+
+void SwiperPattern::SetSwiperEventCallback(bool disableSwipe)
+{
+    CHECK_NULL_VOID(swiperController_);
+    auto removeSwiperEventCallback = [weak = WeakClaim(this), disableSwipe]() {
+        auto swiperPattern = weak.Upgrade();
+        CHECK_NULL_VOID(swiperPattern);
+        auto host = swiperPattern->GetHost();
+        CHECK_NULL_VOID(host);
+        auto hub = host->GetEventHub<EventHub>();
+        CHECK_NULL_VOID(hub);
+        auto gestureHub = hub->GetOrCreateGestureEventHub();
+        CHECK_NULL_VOID(gestureHub);
+        gestureHub->RemoveTouchEvent(swiperPattern->touchEvent_);
+        if (!disableSwipe) {
+            gestureHub->RemovePanEvent(swiperPattern->panEvent_);
+        }
+    };
+    swiperController_->SetRemoveSwiperEventCallback(std::move(removeSwiperEventCallback));
+
+    auto addSwiperEventCallback = [weak = WeakClaim(this), disableSwipe]() {
+        auto swiperPattern = weak.Upgrade();
+        CHECK_NULL_VOID(swiperPattern);
+        auto host = swiperPattern->GetHost();
+        CHECK_NULL_VOID(host);
+        auto hub = host->GetEventHub<EventHub>();
+        CHECK_NULL_VOID(hub);
+        auto gestureHub = hub->GetOrCreateGestureEventHub();
+        CHECK_NULL_VOID(gestureHub);
+        gestureHub->AddTouchEvent(swiperPattern->touchEvent_);
+        if (!disableSwipe) {
+            gestureHub->AddPanEvent(swiperPattern->panEvent_, swiperPattern->panDirection_, 1, DEFAULT_PAN_DISTANCE);
+        }
+    };
+    swiperController_->SetAddSwiperEventCallback(std::move(addSwiperEventCallback));
+}
+
+void SwiperPattern::UpdateSwiperPanEvent(bool disableSwipe)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto hub = host->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(hub);
+    auto gestureHub = hub->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
+
+    if (!disableSwipe) {
+        InitPanEvent(gestureHub);
+    } else if (panEvent_) {
+        gestureHub->RemovePanEvent(panEvent_);
+        panEvent_.Reset();
     }
 }
 } // namespace OHOS::Ace::NG

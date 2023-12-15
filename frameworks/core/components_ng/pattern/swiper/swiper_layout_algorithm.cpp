@@ -58,7 +58,11 @@ void SwiperLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto swiperLayoutProperty = AceType::DynamicCast<SwiperLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(swiperLayoutProperty);
 
-    // calculate idealSize and set FrameSize
+    if (swiperLayoutProperty->GetIsCustomAnimation().value_or(false)) {
+        MeasureCustomAnimation(layoutWrapper);
+        return;
+    }
+
     auto axis = swiperLayoutProperty->GetDirection().value_or(Axis::HORIZONTAL);
 
     // calculate main size.
@@ -212,6 +216,44 @@ void SwiperLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
                 MeasureArrow(rightArrowWrapper, swiperLayoutProperty);
             }
         }
+    }
+}
+
+void SwiperLayoutAlgorithm::MeasureCustomAnimation(
+    LayoutWrapper* layoutWrapper)
+{
+    auto layoutProperty = AceType::DynamicCast<SwiperLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    CHECK_NULL_VOID(layoutProperty);
+    auto axis = layoutProperty->GetDirection().value_or(Axis::HORIZONTAL);
+    auto contentConstraint = layoutProperty->GetContentLayoutConstraint().value();
+    auto contentIdealSize = CreateIdealSize(contentConstraint, axis, MeasureType::MATCH_PARENT_MAIN_AXIS);
+    auto childLayoutConstraint = SwiperUtils::CreateChildConstraint(layoutProperty, contentIdealSize, false);
+
+    auto currentIndex = layoutProperty->GetIndex().value_or(0);
+    auto currentIndexWrapper = layoutWrapper->GetOrCreateChildByIndex(currentIndex);
+    CHECK_NULL_VOID(currentIndexWrapper);
+    currentIndexWrapper->Measure(childLayoutConstraint);
+
+    if (customAnimationToIndex_) {
+        auto toIndexWrapper = layoutWrapper->GetOrCreateChildByIndex(customAnimationToIndex_.value());
+        CHECK_NULL_VOID(toIndexWrapper);
+        toIndexWrapper->Measure(childLayoutConstraint);
+    }
+
+    layoutWrapper->GetGeometryNode()->SetFrameSize(contentIdealSize.ConvertToSizeT());
+
+    std::set<int32_t> removeIndexs;
+    for (const auto& index : needUnmountIndexs_) {
+        if (indexsInAnimation_.find(index) != indexsInAnimation_.end()) {
+            continue;
+        }
+
+        layoutWrapper->RemoveChildInRenderTree(index);
+        removeIndexs.insert(index);
+    }
+
+    for (const auto& index : removeIndexs) {
+        needUnmountIndexs_.erase(index);
     }
 }
 
@@ -613,10 +655,42 @@ void SwiperLayoutAlgorithm::LayoutBackward(
     }
 }
 
+void SwiperLayoutAlgorithm::LayoutCustomAnimation(LayoutWrapper* layoutWrapper) const
+{
+    auto layoutProperty = AceType::DynamicCast<SwiperLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    CHECK_NULL_VOID(layoutProperty);
+
+    auto size = layoutWrapper->GetGeometryNode()->GetFrameSize();
+    auto padding = layoutWrapper->GetLayoutProperty()->CreatePaddingAndBorder();
+    MinusPaddingToSize(padding, size);
+    auto paddingOffset = padding.Offset();
+
+    if (customAnimationToIndex_) {
+        auto toIndexWrapper = layoutWrapper->GetOrCreateChildByIndex(customAnimationToIndex_.value());
+        CHECK_NULL_VOID(toIndexWrapper);
+
+        toIndexWrapper->GetGeometryNode()->SetMarginFrameOffset(paddingOffset);
+        toIndexWrapper->Layout();
+    }
+
+    auto currentIndex = layoutProperty->GetIndex().value_or(0);
+    auto currentIndexWrapper = layoutWrapper->GetOrCreateChildByIndex(currentIndex);
+    CHECK_NULL_VOID(currentIndexWrapper);
+
+    currentIndexWrapper->GetGeometryNode()->SetMarginFrameOffset(paddingOffset);
+    currentIndexWrapper->Layout();
+}
+
 void SwiperLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 {
     auto swiperLayoutProperty = AceType::DynamicCast<SwiperLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(swiperLayoutProperty);
+
+    if (swiperLayoutProperty->GetIsCustomAnimation().value_or(false)) {
+        LayoutCustomAnimation(layoutWrapper);
+        return;
+    }
+
     auto axis = swiperLayoutProperty->GetDirection().value_or(Axis::HORIZONTAL);
     auto size = layoutWrapper->GetGeometryNode()->GetFrameSize();
     auto padding = layoutWrapper->GetLayoutProperty()->CreatePaddingAndBorder();
