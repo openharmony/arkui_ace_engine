@@ -561,7 +561,8 @@ void ScrollPattern::UpdateScrollBarOffset()
     auto layoutProperty = host->GetLayoutProperty<ScrollLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     auto padding = layoutProperty->CreatePaddingAndBorder();
-    Size size(viewSize_.Width(), viewSize_.Height());
+    auto contentEndOffset = layoutProperty->GetScrollContentEndOffsetValue(.0f);
+    Size size(viewSize_.Width(), viewSize_.Height() - contentEndOffset);
     auto viewPortExtent = viewPortExtent_;
     AddPaddingToSize(padding, viewPortExtent);
     auto estimatedHeight = (GetAxis() == Axis::HORIZONTAL) ? viewPortExtent.Width() : viewPortExtent.Height();
