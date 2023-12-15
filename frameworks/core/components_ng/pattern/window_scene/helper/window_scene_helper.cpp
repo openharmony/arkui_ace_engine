@@ -180,8 +180,10 @@ void CaculatePoint(const RefPtr<FrameNode>& node, const std::shared_ptr<OHOS::MM
     auto rect = renderContext->GetPaintRectWithoutTransform();
     MMI::PointerEvent::PointerItem item;
     if (pointerEvent->GetPointerItem(pointerId, item)) {
-        item.SetWindowX(static_cast<int32_t>(item.GetWindowX() + rect.GetX()));
-        item.SetWindowY(static_cast<int32_t>(item.GetWindowY() + rect.GetY()));
+        PointF tmp(item.GetWindowX() + rect.GetX(), item.GetWindowY() + rect.GetY());
+        renderContext->GetPointTransform(tmp);
+        item.SetWindowX(static_cast<int32_t>(std::round(tmp.GetX())));
+        item.SetWindowY(static_cast<int32_t>(std::round(tmp.GetY())));
         pointerEvent->UpdatePointerItem(pointerId, item);
     }
 }

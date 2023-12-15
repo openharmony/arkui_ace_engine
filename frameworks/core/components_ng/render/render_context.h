@@ -267,6 +267,8 @@ public:
 
     virtual void GetPointWithTransform(PointF& point) {}
 
+    virtual void GetPointTransform(PointF& point) {}
+
     virtual RectF GetPaintRectWithoutTransform()
     {
         return {};

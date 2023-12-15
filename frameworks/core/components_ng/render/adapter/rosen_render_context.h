@@ -242,6 +242,8 @@ public:
 
     void GetPointWithRevert(PointF& point) override;
 
+    void GetPointTransform(PointF& point) override;
+
     void GetPointWithTransform(PointF& point) override;
 
     void ClearDrawCommands() override;
@@ -483,6 +485,7 @@ private:
     float RoundValueToPixelGrid(float value, bool forceCeil, bool forceFloor);
     void RoundToPixelGrid(float absoluteLeft, float absoluteTop);
     Matrix4 GetRevertMatrix();
+    Matrix4 GetMatrix();
     bool IsUniRenderEnabled() override;
 
     RefPtr<ImageLoadingContext> bgLoadingCtx_;
