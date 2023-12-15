@@ -1840,7 +1840,7 @@ HWTEST_F(TextFieldKeyEventTest, KeyEvent007, TestSize.Level1)
      */
     auto onSubmit = [](int32_t textFieldKey, NG::TextFieldCommonEvent& commonEvent) {
         commonEvent.SetKeepEditable(true);
-        EXPECT_TRUE(commonEvent.keepEditable_); 
+        EXPECT_TRUE(commonEvent.keepEditable_);
     };
     CreateTextField(DEFAULT_TEXT, DEFAULT_PLACE_HOLDER, [&](TextFieldModel& model) -> void {
         model.SetOnSubmit(onSubmit);
@@ -1862,7 +1862,7 @@ HWTEST_F(TextFieldKeyEventTest, KeyEvent008, TestSize.Level1)
      * @tc.steps: step1. Initialize textInput and get focus
      */
     auto onSubmit = [](int32_t textFieldKey, NG::TextFieldCommonEvent& commonEvent) {
-        EXPECT_FALSE(commonEvent.keepEditable_); 
+        EXPECT_FALSE(commonEvent.keepEditable_);
         EXPECT_EQ(commonEvent.text_, "abcdefghijklmnopqrstuvwxyz");
     };
     CreateTextField(DEFAULT_TEXT, DEFAULT_PLACE_HOLDER, [&](TextFieldModel& model) -> void {
