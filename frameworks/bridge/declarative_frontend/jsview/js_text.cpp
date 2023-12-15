@@ -446,6 +446,10 @@ void JSText::JsOnClick(const JSCallbackInfo& info)
             func->Execute(*clickInfo);
         };
         TextModel::GetInstance()->SetOnClick(std::move(onClick));
+
+        auto focusHub = NG::ViewStackProcessor::GetInstance()->GetOrCreateMainFrameNodeFocusHub();
+        CHECK_NULL_VOID(focusHub);
+        focusHub->SetFocusable(true, false);
     } else {
 #ifndef NG_BUILD
         if (info[0]->IsFunction()) {

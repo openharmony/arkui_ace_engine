@@ -454,8 +454,20 @@ bool FocusHub::IsFocusableNode()
     return IsEnabled() && IsShow() && focusable_ && parentFocusable_;
 }
 
-void FocusHub::SetFocusable(bool focusable)
+void FocusHub::SetFocusable(bool focusable, bool isExplicit)
 {
+    if (isExplicit) {
+        isFocusableExplicit_ = true;
+    } else if (isFocusableExplicit_) {
+        LOGI("Current focusHub cannot be set to focusable implicitly.");
+        return;
+    } else {
+        implicitFocusable_ = focusable;
+    }
+    if (IsImplicitFocusableScope() && focusDepend_ == FocusDependence::CHILD) {
+        focusDepend_ = FocusDependence::AUTO;
+    }
+
     if (focusable_ == focusable) {
         return;
     }

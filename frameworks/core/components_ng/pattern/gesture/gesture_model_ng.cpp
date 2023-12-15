@@ -26,6 +26,14 @@
 #include "core/gestures/gesture_processor.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+bool IsTapClick(const RefPtr<NG::Gesture>& gesture)
+{
+    auto tap = AceType::DynamicCast<NG::TapGesture>(gesture);
+    return tap && (tap->GetTapCount() == 1) && (tap->GetFingers() == 1);
+}
+} // namespace
+
 void GestureModelNG::Create(int32_t priorityNum, int32_t gestureMaskNum)
 {
     RefPtr<GestureProcessor> gestureProcessor;
@@ -59,8 +67,13 @@ void GestureModelNG::Finish()
     gesture->SetGestureMask(gestureProcessor->GetGestureMask());
     gesture->SetPriority(gestureProcessor->GetPriority());
     auto gestureEventHub = NG::ViewStackProcessor::GetInstance()->GetMainFrameNodeGestureEventHub();
-    if (gestureEventHub) {
-        gestureEventHub->AddGesture(gesture);
+    CHECK_NULL_VOID(gestureEventHub);
+    gestureEventHub->AddGesture(gesture);
+
+    if (IsTapClick(gesture)) {
+        auto focusHub = NG::ViewStackProcessor::GetInstance()->GetOrCreateMainFrameNodeFocusHub();
+        CHECK_NULL_VOID(focusHub);
+        focusHub->SetFocusable(true, false);
     }
 }
 
