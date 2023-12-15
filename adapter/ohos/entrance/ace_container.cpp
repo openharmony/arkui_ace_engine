@@ -676,11 +676,16 @@ void AceContainer::InitializeCallback()
 
     ACE_DCHECK(aceView_ && taskExecutor_ && pipelineContext_);
     auto&& touchEventCallback = [context = pipelineContext_, id = instanceId_](
-                                    const TouchEvent& event, const std::function<void()>& markProcess) {
+                                    const TouchEvent& event, const std::function<void()>& markProcess,
+                                    const RefPtr<OHOS::Ace::NG::FrameNode>& node) {
         ContainerScope scope(id);
         context->GetTaskExecutor()->PostTask(
-            [context, event, markProcess]() {
-                context->OnTouchEvent(event);
+            [context, event, markProcess, node]() {
+                if (node) {
+                    context->OnTouchEvent(event, node);
+                } else {
+                    context->OnTouchEvent(event);
+                }
                 CHECK_NULL_VOID(markProcess);
                 markProcess();
             },
@@ -689,11 +694,16 @@ void AceContainer::InitializeCallback()
     aceView_->RegisterTouchEventCallback(touchEventCallback);
 
     auto&& mouseEventCallback = [context = pipelineContext_, id = instanceId_](
-                                    const MouseEvent& event, const std::function<void()>& markProcess) {
+                                    const MouseEvent& event, const std::function<void()>& markProcess,
+                                    const RefPtr<OHOS::Ace::NG::FrameNode>& node) {
         ContainerScope scope(id);
         context->GetTaskExecutor()->PostTask(
-            [context, event, markProcess]() {
-                context->OnMouseEvent(event);
+            [context, event, markProcess, node]() {
+                if (node) {
+                    context->OnMouseEvent(event, node);
+                } else {
+                    context->OnMouseEvent(event);
+                }
                 CHECK_NULL_VOID(markProcess);
                 markProcess();
             },
@@ -702,11 +712,16 @@ void AceContainer::InitializeCallback()
     aceView_->RegisterMouseEventCallback(mouseEventCallback);
 
     auto&& axisEventCallback = [context = pipelineContext_, id = instanceId_](
-                                   const AxisEvent& event, const std::function<void()>& markProcess) {
+                                   const AxisEvent& event, const std::function<void()>& markProcess,
+                                   const RefPtr<OHOS::Ace::NG::FrameNode>& node) {
         ContainerScope scope(id);
         context->GetTaskExecutor()->PostTask(
-            [context, event, markProcess]() {
-                context->OnAxisEvent(event);
+            [context, event, markProcess, node]() {
+                if (node) {
+                    context->OnAxisEvent(event, node);
+                } else {
+                    context->OnAxisEvent(event);
+                }
                 CHECK_NULL_VOID(markProcess);
                 markProcess();
             },

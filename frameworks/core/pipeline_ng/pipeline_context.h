@@ -113,6 +113,12 @@ public:
     // remove schedule task by id.
     void RemoveScheduleTask(uint32_t id) override;
 
+    void OnTouchEvent(const TouchEvent& point, const RefPtr<NG::FrameNode>& node, bool isSubPipe = false) override;
+
+    void OnMouseEvent(const MouseEvent& event, const RefPtr<NG::FrameNode>& node) override;
+
+    void OnAxisEvent(const AxisEvent& event, const RefPtr<NG::FrameNode>& node) override;
+
     // Called by view when touch event received.
     void OnTouchEvent(const TouchEvent& point, bool isSubPipe = false) override;
 

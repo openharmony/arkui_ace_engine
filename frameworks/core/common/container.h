@@ -49,10 +49,13 @@
 namespace OHOS::Ace {
 
 using PageTask = std::function<void()>;
-using TouchEventCallback = std::function<void(const TouchEvent&, const std::function<void()>&)>;
+using TouchEventCallback = std::function<void(const TouchEvent&, const std::function<void()>&,
+    const RefPtr<NG::FrameNode>&)>;
 using KeyEventCallback = std::function<bool(const KeyEvent&)>;
-using MouseEventCallback = std::function<void(const MouseEvent&, const std::function<void()>&)>;
-using AxisEventCallback = std::function<void(const AxisEvent&, const std::function<void()>&)>;
+using MouseEventCallback = std::function<void(const MouseEvent&, const std::function<void()>&,
+    const RefPtr<NG::FrameNode>&)>;
+using AxisEventCallback = std::function<void(const AxisEvent&, const std::function<void()>&,
+    const RefPtr<NG::FrameNode>&)>;
 using RotationEventCallBack = std::function<bool(const RotationEvent&)>;
 using CardViewPositionCallBack = std::function<void(int id, float offsetX, float offsetY)>;
 using DragEventCallBack = std::function<void(const PointerEvent& pointerEvent, const DragEventAction& action)>;

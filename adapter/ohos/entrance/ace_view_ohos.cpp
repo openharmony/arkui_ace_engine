@@ -114,7 +114,8 @@ void AceViewOhos::SetViewportMetrics(AceViewOhos* view, const ViewportConfig& co
     view->NotifyDensityChanged(config.Density());
 }
 
-void AceViewOhos::DispatchTouchEvent(AceViewOhos* view, const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
+void AceViewOhos::DispatchTouchEvent(AceViewOhos* view, const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
+    const RefPtr<OHOS::Ace::NG::FrameNode>& node)
 {
     CHECK_NULL_VOID(view);
     CHECK_NULL_VOID(pointerEvent);
@@ -126,12 +127,12 @@ void AceViewOhos::DispatchTouchEvent(AceViewOhos* view, const std::shared_ptr<MM
         // mouse event
         if (pointerAction >= MMI::PointerEvent::POINTER_ACTION_AXIS_BEGIN &&
             pointerAction <= MMI::PointerEvent::POINTER_ACTION_AXIS_END) {
-            view->ProcessAxisEvent(pointerEvent);
+            view->ProcessAxisEvent(pointerEvent, node);
         } else {
 #ifdef ENABLE_DRAG_FRAMEWORK
             view->ProcessDragEvent(pointerEvent);
 #endif // ENABLE_DRAG_FRAMEWORK
-            view->ProcessMouseEvent(pointerEvent);
+            view->ProcessMouseEvent(pointerEvent, node);
         }
     } else {
         // touch event
@@ -144,9 +145,9 @@ void AceViewOhos::DispatchTouchEvent(AceViewOhos* view, const std::shared_ptr<MM
         if (container->IsScenceBoardWindow() &&
             (pointerAction == MMI::PointerEvent::POINTER_ACTION_PULL_MOVE ||
             pointerAction == MMI::PointerEvent::POINTER_ACTION_PULL_UP)) {
-            view->ProcessMouseEvent(pointerEvent);
+            view->ProcessMouseEvent(pointerEvent, node);
         } else {
-            view->ProcessTouchEvent(pointerEvent);
+            view->ProcessTouchEvent(pointerEvent, node);
         }
     }
 }
@@ -276,7 +277,8 @@ void AceViewOhos::Launch()
 {
 }
 
-void AceViewOhos::ProcessTouchEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
+void AceViewOhos::ProcessTouchEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
+    const RefPtr<OHOS::Ace::NG::FrameNode>& node)
 {
     CHECK_NULL_VOID(pointerEvent);
     TouchEvent touchPoint = ConvertTouchEvent(pointerEvent);
@@ -294,7 +296,7 @@ void AceViewOhos::ProcessTouchEvent(const std::shared_ptr<MMI::PointerEvent>& po
     };
     if (touchPoint.type != TouchType::UNKNOWN) {
         if (touchEventCallback_) {
-            touchEventCallback_(touchPoint, markProcess);
+            touchEventCallback_(touchPoint, markProcess, node);
         }
     }
 }
@@ -348,7 +350,8 @@ void AceViewOhos::ProcessDragEvent(int32_t x, int32_t y, const DragEventAction& 
     dragEventCallback_(PointerEvent(x, y), action);
 }
 
-void AceViewOhos::ProcessMouseEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
+void AceViewOhos::ProcessMouseEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
+    const RefPtr<OHOS::Ace::NG::FrameNode>& node)
 {
     MouseEvent event;
     if (pointerEvent) {
@@ -362,15 +365,16 @@ void AceViewOhos::ProcessMouseEvent(const std::shared_ptr<MMI::PointerEvent>& po
     };
 
     CHECK_NULL_VOID(mouseEventCallback_);
-    mouseEventCallback_(event, markProcess);
+    mouseEventCallback_(event, markProcess, node);
 }
 
-void AceViewOhos::ProcessAxisEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
+void AceViewOhos::ProcessAxisEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
+    const RefPtr<OHOS::Ace::NG::FrameNode>& node)
 {
     CHECK_NULL_VOID(axisEventCallback_);
     AxisEvent event;
     if (!pointerEvent) {
-        axisEventCallback_(event, nullptr);
+        axisEventCallback_(event, nullptr, node);
         return;
     }
 
@@ -388,13 +392,13 @@ void AceViewOhos::ProcessAxisEvent(const std::shared_ptr<MMI::PointerEvent>& poi
         fakeAxisStart->SetAxisValue(MMI::PointerEvent::AxisType::AXIS_TYPE_SCROLL_VERTICAL, 0.0);
         fakeAxisStart->SetAxisValue(MMI::PointerEvent::AxisType::AXIS_TYPE_SCROLL_HORIZONTAL, 0.0);
         ConvertAxisEvent(fakeAxisStart, event);
-        axisEventCallback_(event, nullptr);
+        axisEventCallback_(event, nullptr, node);
 
         auto fakeAxisUpdate = std::make_shared<MMI::PointerEvent>(*pointerEvent);
         fakeAxisUpdate->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_AXIS_UPDATE);
         ConvertAxisEvent(fakeAxisUpdate, event);
     }
-    axisEventCallback_(event, markProcess);
+    axisEventCallback_(event, markProcess, node);
 }
 
 bool AceViewOhos::ProcessKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent)

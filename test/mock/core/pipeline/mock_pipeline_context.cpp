@@ -124,6 +124,12 @@ void PipelineContext::SetupRootElement()
     sharedTransitionManager_ = MakeRefPtr<SharedOverlayManager>(rootNode_);
 }
 
+void PipelineContext::OnTouchEvent(const TouchEvent& point, const RefPtr<FrameNode>& node, bool isSubPipe) {}
+
+void PipelineContext::OnMouseEvent(const MouseEvent& event, const RefPtr<FrameNode>& node) {}
+
+void PipelineContext::OnAxisEvent(const AxisEvent& event, const RefPtr<FrameNode>& node) {}
+
 void PipelineContext::OnTouchEvent(const TouchEvent& point, bool isSubPipe) {}
 
 void PipelineContext::OnMouseEvent(const MouseEvent& event) {}

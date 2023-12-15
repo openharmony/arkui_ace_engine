@@ -320,7 +320,8 @@ void AceContainer::InitializeCallback()
 
     auto weak = AceType::WeakClaim(AceType::RawPtr(pipelineContext_));
     auto&& touchEventCallback = [weak, id = instanceId_](
-                                    const TouchEvent& event, const std::function<void()>& ignoreMark) {
+                                    const TouchEvent& event, const std::function<void()>& ignoreMark,
+                                    const RefPtr<OHOS::Ace::NG::FrameNode>& node) {
         ContainerScope scope(id);
         auto context = weak.Upgrade();
         if (context == nullptr) {
@@ -345,7 +346,8 @@ void AceContainer::InitializeCallback()
     aceView_->RegisterKeyEventCallback(keyEventCallback);
 
     auto&& mouseEventCallback = [weak, id = instanceId_](
-                                    const MouseEvent& event, const std::function<void()>& ignoreMark) {
+                                    const MouseEvent& event, const std::function<void()>& ignoreMark,
+                                    const RefPtr<OHOS::Ace::NG::FrameNode>& node) {
         ContainerScope scope(id);
         auto context = weak.Upgrade();
         if (context == nullptr) {
@@ -357,7 +359,8 @@ void AceContainer::InitializeCallback()
     aceView_->RegisterMouseEventCallback(mouseEventCallback);
 
     auto&& axisEventCallback = [weak, id = instanceId_](
-                                   const AxisEvent& event, const std::function<void()>& ignoreMark) {
+                                   const AxisEvent& event, const std::function<void()>& ignoreMark,
+                                   const RefPtr<OHOS::Ace::NG::FrameNode>& node) {
         ContainerScope scope(id);
         auto context = weak.Upgrade();
         if (context == nullptr) {

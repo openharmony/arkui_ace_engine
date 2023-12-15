@@ -57,7 +57,8 @@ void DialogContainer::InitializeTouchEventCallback()
 {
     ACE_DCHECK(aceView_ && taskExecutor_ && pipelineContext_);
     auto&& touchEventCallback = [context = pipelineContext_, id = instanceId_](
-                                    const TouchEvent& event, const std::function<void()>& markProcess) {
+                                    const TouchEvent& event, const std::function<void()>& markProcess,
+                                    const RefPtr<OHOS::Ace::NG::FrameNode>& node) {
         ContainerScope scope(id);
         context->GetTaskExecutor()->PostTask(
             [context, event, markProcess, id]() {
@@ -75,7 +76,8 @@ void DialogContainer::InitializeMouseEventCallback()
 {
     ACE_DCHECK(aceView_ && taskExecutor_ && pipelineContext_);
     auto&& mouseEventCallback = [context = pipelineContext_, id = instanceId_](
-                                    const MouseEvent& event, const std::function<void()>& markProcess) {
+                                    const MouseEvent& event, const std::function<void()>& markProcess,
+                                    const RefPtr<OHOS::Ace::NG::FrameNode>& node) {
         ContainerScope scope(id);
         context->GetTaskExecutor()->PostTask(
             [context, event, markProcess, id]() {
@@ -92,7 +94,8 @@ void DialogContainer::InitializeAxisEventCallback()
 {
     ACE_DCHECK(aceView_ && taskExecutor_ && pipelineContext_);
     auto&& axisEventCallback = [context = pipelineContext_, id = instanceId_](
-                                   const AxisEvent& event, const std::function<void()>& markProcess) {
+                                   const AxisEvent& event, const std::function<void()>& markProcess,
+                                   const RefPtr<OHOS::Ace::NG::FrameNode>& node) {
         ContainerScope scope(id);
         context->GetTaskExecutor()->PostTask(
             [context, event, markProcess, id]() {
