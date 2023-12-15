@@ -35,6 +35,7 @@
 #include "core/common/container_scope.h"
 #include "core/components_ng/base/inspector.h"
 #include "core/components_v2/inspector/inspector.h"
+#include "core/pipeline_ng/pipeline_context.h"
 #include "dm/display_manager.h"
 #include "foundation/ability/ability_runtime/frameworks/native/runtime/connect_server_manager.h"
 
@@ -165,24 +166,28 @@ void LayoutInspector::SetCallback(int32_t instanceId)
 
 void LayoutInspector::CreateLayoutInfo(int32_t containerId)
 {
-    auto  container = Container::GetFoucsed();
+    auto container = Container::GetFoucsed();
     CHECK_NULL_VOID(container);
     containerId = container->GetInstanceId();
     ContainerScope socpe(containerId);
-    std::string treeJsonStr;
-    GetInspectorTreeJsonStr(treeJsonStr, containerId);
-    auto message = JsonUtil::Create(true);
-    GetSnapshotJson(containerId, message);
-    CHECK_NULL_VOID(message);
-
-    auto sendTask = [treeJsonStr, jsonSnapshotStr = message->ToString(), container]() {
-        if (container->IsUseStageModel()) {
-            OHOS::AbilityRuntime::ConnectServerManager::Get().SendInspector(treeJsonStr, jsonSnapshotStr);
-        } else {
-            OHOS::Ace::ConnectServerManager::Get().SendInspector(treeJsonStr, jsonSnapshotStr);
-        }
+    auto context = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    auto getInspectorTask = [container, containerId]() {
+        std::string treeJson;
+        GetInspectorTreeJsonStr(treeJson, containerId);
+        auto message = JsonUtil::Create(true);
+        GetSnapshotJson(containerId, message);
+        CHECK_NULL_VOID(message);
+        auto sendResultTask = [treeJsonStr = std::move(treeJson), jsonSnapshotStr = message->ToString(), container]() {
+            if (container->IsUseStageModel()) {
+                OHOS::AbilityRuntime::ConnectServerManager::Get().SendInspector(treeJsonStr, jsonSnapshotStr);
+            } else {
+                OHOS::Ace::ConnectServerManager::Get().SendInspector(treeJsonStr, jsonSnapshotStr);
+            }
+        };
+        BackgroundTaskExecutor::GetInstance().PostTask(std::move(sendResultTask));
     };
-    BackgroundTaskExecutor::GetInstance().PostTask(std::move(sendTask));
+    context->GetTaskExecutor()->PostTask(std::move(getInspectorTask), TaskExecutor::TaskType::UI);
 }
 
 void LayoutInspector::GetInspectorTreeJsonStr(std::string& treeJsonStr, int32_t containerId)
