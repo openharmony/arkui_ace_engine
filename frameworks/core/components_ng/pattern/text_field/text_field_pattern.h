@@ -1173,6 +1173,8 @@ private:
     void CloseHandleAndSelect() override;
     bool RepeatClickCaret(const Offset& offset, int32_t lastCaretIndex);
     void PaintTextRect();
+    void GetIconPaintRect(const RefPtr<TextInputResponseArea>& responseArea, RoundRect& paintRect);
+    void GetInnerFocusPaintRect(RoundRect& paintRect);
     void PaintResponseAreaRect();
     void PaintCancelRect();
     void PaintUnitRect();
