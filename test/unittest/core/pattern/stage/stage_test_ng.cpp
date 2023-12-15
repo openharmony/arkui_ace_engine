@@ -235,6 +235,64 @@ HWTEST_F(StageTestNg, PageEventHubTest002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: PageEventHubTest003
+ * @tc.desc: Testing CheckBox Correlation Functions of PageEventHub work correctly.
+ * @tc.type: FUNC
+ */
+HWTEST_F(StageTestNg, PageEventHubTest003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Build a PageEventHub.
+     * @tc.expected: The CheckBoxGroupMap size meets expectations .
+     */
+    PageEventHub pageEventHub;
+    EXPECT_EQ(pageEventHub.GetCheckBoxGroupMap().size(), 0);
+
+    /**
+     * @tc.steps: step2. add real checkBoxGroup and add to the group.
+     * @tc.expected: add success.
+     */
+    auto checkBoxGroup = AceType::MakeRefPtr<CheckBoxGroupPattern>();
+    auto checkBoxGroupNode = FrameNode::CreateFrameNode("CheckboxGroup2", CHECK_BOX_ID_FIRST, checkBoxGroup);
+    ElementRegister::GetInstance()->AddReferenced(CHECK_BOX_ID_FIRST, checkBoxGroupNode);
+    pageEventHub.AddCheckBoxToGroup(TEST_GROUP_NAME, CHECK_BOX_ID_FIRST);
+    EXPECT_EQ(pageEventHub.GetCheckBoxGroupMap()[TEST_GROUP_NAME].size(), 1);
+
+    /**
+     * @tc.steps: step3. add checkBox to group
+     * @tc.expected: add success.
+     */
+    pageEventHub.AddCheckBoxToGroup(TEST_GROUP_NAME, CHECK_BOX_ID_SECOND);
+    EXPECT_EQ(pageEventHub.GetCheckBoxGroupMap()[TEST_GROUP_NAME].size(), 2);
+
+    /**
+     * @tc.steps: step4. add checkBoxGroup to group
+     * @tc.expected: add success.
+     */
+    auto checkBoxGroupNode2 = FrameNode::CreateFrameNode(V2::CHECKBOXGROUP_ETS_TAG, CHECK_BOX_ID_FIRST, checkBoxGroup);
+    ElementRegister::GetInstance()->AddReferenced(12, checkBoxGroupNode2);
+    pageEventHub.AddCheckBoxGroupToGroup(TEST_GROUP_NAME, 12);
+    EXPECT_EQ(pageEventHub.GetCheckBoxGroupMap()[TEST_GROUP_NAME].size(), 3);
+    auto framenode = AccessibilityManager::DynamicCast<FrameNode>(checkBoxGroupNode);
+    EXPECT_NE(framenode->GetTag(), V2::CHECKBOXGROUP_ETS_TAG);
+
+    /**
+     * @tc.steps: step5. add checkBoxGroup to group
+     * @tc.expected: add success.
+     */
+    pageEventHub.AddCheckBoxGroupToGroup(TEST_GROUP_NAME, CHECK_BOX_ID_FIRST);
+    EXPECT_EQ(pageEventHub.GetCheckBoxGroupMap()[TEST_GROUP_NAME].size(), 3);
+
+    /**
+     * @tc.steps: step6. add checkBoxGroup to group
+     * @tc.expected: add fail.
+     */
+    ElementRegister::GetInstance()->AddReferenced(CHECK_BOX_ID_SECOND, checkBoxGroupNode2);
+    pageEventHub.AddCheckBoxGroupToGroup(TEST_GROUP_NAME, 12);
+    EXPECT_EQ(pageEventHub.GetCheckBoxGroupMap()[TEST_GROUP_NAME].size(), 3);
+}
+
+/**
  * @tc.name: StageManagerTest001
  * @tc.desc: Testing PushPage and PopPage Function of StageManager work correctly.
  * @tc.type: FUNC
@@ -294,6 +352,12 @@ HWTEST_F(StageTestNg, StageManagerTest001, TestSize.Level1)
      */
     stageManager.PopPage(false, false);
     EXPECT_EQ(stageNode->GetChildren().size(), 3);
+    stageManager.PopPage(false, false);
+    EXPECT_EQ(stageNode->GetChildren().size(), 2);
+
+    // children.size() < 2
+    stageManager.PopPage(false, false);
+    EXPECT_EQ(stageNode->GetChildren().size(), 1);
 }
 
 /**
@@ -477,6 +541,325 @@ HWTEST_F(StageTestNg, StageManagerTest005, TestSize.Level1)
     stageManager.ReloadStage();
     EXPECT_EQ(stageNode->GetChildren().size(), 2);
 }
+
+/**
+ * @tc.name: StageManagerTest006
+ * @tc.desc: Testing PushPage and PopPage Function of StageManager work correctly.
+ * @tc.type: FUNC
+ */
+HWTEST_F(StageTestNg, StageManagerTest006, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create StagePattern and some PagePattern.
+     */
+    auto stageNode = FrameNode::CreateFrameNode(FRAME_NODE_TAG, 0, AceType::MakeRefPtr<StagePattern>());
+    auto firstNode =
+        FrameNode::CreateFrameNode("1", 1, AceType::MakeRefPtr<PagePattern>(AceType::MakeRefPtr<PageInfo>()));
+    auto secondNode =
+        FrameNode::CreateFrameNode("2", 2, AceType::MakeRefPtr<PagePattern>(AceType::MakeRefPtr<PageInfo>()));
+    auto thirdNode =
+        FrameNode::CreateFrameNode("3", 3, AceType::MakeRefPtr<PagePattern>(AceType::MakeRefPtr<PageInfo>()));
+    auto fourthNode =
+        FrameNode::CreateFrameNode("4", 4, AceType::MakeRefPtr<PagePattern>(AceType::MakeRefPtr<PageInfo>()));
+
+    /**
+     * @tc.steps: step2. Create a StageManager based on stageNode.
+     */
+    StageManager stageManager(stageNode);
+    stageManager.PushPage(firstNode);
+    stageManager.PushPage(secondNode);
+    stageManager.PushPage(thirdNode);
+    stageManager.PushPage(fourthNode);
+    EXPECT_EQ(stageNode->GetChildren().size(), 4);
+
+    /**
+     * @tc.steps: step3. Create outPageNode and inPageNode.
+     */
+    auto pipeline = PipelineContext::GetCurrentContext();
+    stageManager.StopPageTransition();
+    const auto& children = stageManager.stageNode_->GetChildren();
+    bool needTransition = true;
+    auto pageNode = children.back();
+    const size_t transitionPageSize = 2;
+    needTransition &= (children.size() >= transitionPageSize);
+    if (needTransition) {
+        pipeline->FlushPipelineImmediately();
+    }
+    stageManager.FirePageHide(pageNode, needTransition ? PageTransitionType::EXIT_POP : PageTransitionType::NONE);
+    RefPtr<FrameNode> inPageNode;
+    if (children.size() >= transitionPageSize) {
+        auto newPageNode = *(++children.rbegin());
+        stageManager.FirePageShow(
+            newPageNode, needTransition ? PageTransitionType::ENTER_POP : PageTransitionType::NONE);
+        inPageNode = AceType::DynamicCast<FrameNode>(newPageNode);
+    }
+    auto outPageNode = AceType::DynamicCast<FrameNode>(pageNode);
+
+    /**
+     * @tc.steps: step4. Call StartTransition.
+     * @tc.expected: Start Successful.
+     */
+    stageManager.StartTransition(outPageNode, inPageNode, RouteType::NONE);
+    inPageNode->OnAccessibilityEvent(AccessibilityEventType::CHANGE);
+    EXPECT_EQ(stageManager.srcPageNode_, outPageNode);
+    EXPECT_EQ(stageManager.destPageNode_, inPageNode);
+}
+
+/**
+ * @tc.name: StageManagerTest007
+ * @tc.desc: Testing PushPage and PopPage Function of StageManager work correctly.
+ * @tc.type: FUNC
+ */
+HWTEST_F(StageTestNg, StageManagerTest007, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create StagePattern and some PagePattern.
+     */
+    auto stageNode = FrameNode::CreateFrameNode(FRAME_NODE_TAG, 0, AceType::MakeRefPtr<StagePattern>());
+    auto firstNode =
+        FrameNode::CreateFrameNode("1", 1, AceType::MakeRefPtr<PagePattern>(AceType::MakeRefPtr<PageInfo>()));
+    auto secondNode =
+        FrameNode::CreateFrameNode("2", 2, AceType::MakeRefPtr<PagePattern>(AceType::MakeRefPtr<PageInfo>()));
+    auto thirdNode =
+        FrameNode::CreateFrameNode("3", 3, AceType::MakeRefPtr<PagePattern>(AceType::MakeRefPtr<PageInfo>()));
+    auto fourthNode =
+        FrameNode::CreateFrameNode("4", 4, AceType::MakeRefPtr<PagePattern>(AceType::MakeRefPtr<PageInfo>()));
+
+    /**
+     * @tc.steps: step2. Create a StageManager based on stageNode.
+     */
+    StageManager stageManager(stageNode);
+
+    /**
+     * @tc.steps: step3. PopPage.
+     * @tc.expected: Expected no child failed.
+     */
+    EXPECT_FALSE(stageManager.PopPage());
+
+    /**
+     * @tc.steps: step4. Push a Page into StageManager.
+     * @tc.expected: Push successfully.
+     */
+    EXPECT_TRUE(stageManager.PushPage(firstNode));
+
+    /**
+     * @tc.steps: step5. Push another three Page with different parameters into StageManager.
+     * @tc.expected: Push successfully.
+     */
+    stageManager.PushPage(secondNode, false, false);
+    stageManager.PushPage(thirdNode, true, false);
+    stageManager.stageNode_->GetGeometryNode()->SetFrameSize(SizeF(1.0f, 1.0f));
+    stageManager.PushPage(fourthNode, false, true);
+    EXPECT_EQ(stageNode->GetChildren().size(), 4);
+
+    /**
+     * @tc.steps: step6. Push an exist page.
+     * @tc.expected: StageNode size not changed.
+     */
+    stageManager.PushPage(secondNode);
+    EXPECT_EQ(stageNode->GetChildren().size(), 4);
+
+    /**
+     * @tc.steps: step7. PopPage with different parameters.
+     * @tc.expected: removeChild meets expectations .
+     */
+    bool bResult = stageManager.PopPage(true, true);
+    EXPECT_EQ(stageNode->GetChildren().size(), 4);
+    EXPECT_TRUE(bResult);
+}
+
+/**
+ * @tc.name: StageManagerTest008
+ * @tc.desc: Testing PushPage and PopPage Function of StageManager work correctly.
+ * @tc.type: FUNC
+ */
+HWTEST_F(StageTestNg, StageManagerTest008, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create StagePattern and some PagePattern.
+     */
+    auto stageNode = FrameNode::CreateFrameNode(FRAME_NODE_TAG, 0, AceType::MakeRefPtr<StagePattern>());
+    auto firstNode =
+        FrameNode::CreateFrameNode("1", 1, AceType::MakeRefPtr<PagePattern>(AceType::MakeRefPtr<PageInfo>()));
+    auto secondNode =
+        FrameNode::CreateFrameNode("2", 2, AceType::MakeRefPtr<PagePattern>(AceType::MakeRefPtr<PageInfo>()));
+    auto thirdNode =
+        FrameNode::CreateFrameNode("3", 3, AceType::MakeRefPtr<PagePattern>(AceType::MakeRefPtr<PageInfo>()));
+    auto fourthNode =
+        FrameNode::CreateFrameNode("4", 4, AceType::MakeRefPtr<PagePattern>(AceType::MakeRefPtr<PageInfo>()));
+
+    /**
+     * @tc.steps: step2. Create a StageManager based on stageNode.
+     */
+    StageManager stageManager(stageNode);
+
+    /**
+     * @tc.steps: step3. PopPage.
+     * @tc.expected: Expected no child failed.
+     */
+    EXPECT_FALSE(stageManager.PopPage());
+
+    /**
+     * @tc.steps: step4. Push a Page into StageManager.
+     * @tc.expected: Push successfully.
+     */
+    EXPECT_TRUE(stageManager.PushPage(firstNode));
+
+    /**
+     * @tc.steps: step5. Push another three Page with different parameters into StageManager.
+     * @tc.expected: Push successfully.
+     */
+    stageManager.PushPage(secondNode, false, false);
+    stageManager.PushPage(thirdNode, true, false);
+    stageManager.stageNode_->GetGeometryNode()->SetFrameSize(SizeF(10.0f, 10.0f));
+    stageManager.PushPage(fourthNode, false, true);
+    EXPECT_EQ(stageNode->GetChildren().size(), 4);
+
+    /**
+     * @tc.steps: step6. Push an exist page.
+     * @tc.expected: StageNode size not changed.
+     */
+    stageManager.PushPage(secondNode);
+    EXPECT_EQ(stageNode->GetChildren().size(), 4);
+
+    /**
+     * @tc.steps: step7. PopPage with different parameters.
+     * @tc.expected: removeChild meets expectations .
+     */
+    bool bResult = stageManager.PopPage(true, true);
+    EXPECT_EQ(stageNode->GetChildren().size(), 4);
+    EXPECT_TRUE(bResult);
+
+    stageManager.PopPage(true, false);
+    EXPECT_EQ(stageNode->GetChildren().size(), 3);
+}
+
+/**
+ * @tc.name: StageManagerTest009
+ * @tc.desc: Testing PushPage and PopPage Function of StageManager work correctly.
+ * @tc.type: FUNC
+ */
+HWTEST_F(StageTestNg, StageManagerTest009, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create StagePattern and some PagePattern.
+     */
+    auto stageNode = FrameNode::CreateFrameNode(FRAME_NODE_TAG, 0, AceType::MakeRefPtr<StagePattern>());
+    auto firstNode =
+        FrameNode::CreateFrameNode("1", 1, AceType::MakeRefPtr<PagePattern>(AceType::MakeRefPtr<PageInfo>()));
+    auto secondNode =
+        FrameNode::CreateFrameNode("2", 2, AceType::MakeRefPtr<PagePattern>(AceType::MakeRefPtr<PageInfo>()));
+    auto thirdNode =
+        FrameNode::CreateFrameNode("3", 3, AceType::MakeRefPtr<PagePattern>(AceType::MakeRefPtr<PageInfo>()));
+    auto fourthNode =
+        FrameNode::CreateFrameNode("4", 4, AceType::MakeRefPtr<PagePattern>(AceType::MakeRefPtr<PageInfo>()));
+
+    /**
+     * @tc.steps: step2. Create a StageManager based on stageNode.
+     */
+    StageManager stageManager(stageNode);
+
+    /**
+     * @tc.steps: step3. PopPage.
+     * @tc.expected: Expected no child failed.
+     */
+    EXPECT_FALSE(stageManager.PopPage());
+
+    /**
+     * @tc.steps: step4. Push a Page into StageManager.
+     * @tc.expected: Push successfully.
+     */
+    EXPECT_TRUE(stageManager.PushPage(firstNode));
+
+    /**
+     * @tc.steps: step5. Push another three Page with different parameters into StageManager.
+     * @tc.expected: Push successfully.
+     */
+    stageManager.PushPage(secondNode, false, false);
+    stageManager.PushPage(thirdNode, true, false);
+    stageManager.stageNode_->GetGeometryNode()->SetFrameSize(SizeF(1.0f, 1.0f));
+    stageManager.PushPage(fourthNode, false, true);
+    EXPECT_EQ(stageNode->GetChildren().size(), 4);
+
+    /**
+     * @tc.steps: step6. Push an exist page.
+     * @tc.expected: StageNode size not changed.
+     */
+    stageManager.PushPage(secondNode);
+    EXPECT_EQ(stageNode->GetChildren().size(), 4);
+
+    /**
+     * @tc.steps: step7. PopPage with different parameters.
+     * @tc.expected: removeChild meets expectations .
+     */
+    bool bResult = stageManager.PopPage(true, false);
+    EXPECT_EQ(stageNode->GetChildren().size(), 3);
+    EXPECT_TRUE(bResult);
+}
+
+/**
+ * @tc.name: StageManagerTest010
+ * @tc.desc: Testing GetPageById Function of StageManager work correctly.
+ * @tc.type: FUNC
+ */
+HWTEST_F(StageTestNg, StageManagerTest010, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create StagePattern and some PagePattern.
+     */
+    auto stageNode = FrameNode::CreateFrameNode(FRAME_NODE_TAG, 0, AceType::MakeRefPtr<StagePattern>());
+    auto firstNode =
+        FrameNode::CreateFrameNode("1", 1, AceType::MakeRefPtr<PagePattern>(AceType::MakeRefPtr<PageInfo>()));
+    auto secondNode =
+        FrameNode::CreateFrameNode("2", 2, AceType::MakeRefPtr<PagePattern>(AceType::MakeRefPtr<PageInfo>()));
+    auto thirdNode =
+        FrameNode::CreateFrameNode("3", 3, AceType::MakeRefPtr<PagePattern>(AceType::MakeRefPtr<PageInfo>()));
+    auto fourthNode =
+        FrameNode::CreateFrameNode("4", 4, AceType::MakeRefPtr<PagePattern>(AceType::MakeRefPtr<PageInfo>()));
+
+    /**
+     * @tc.steps: step2. Create a StageManager based on stageNode.
+     */
+    StageManager stageManager(stageNode);
+
+    /**
+     * @tc.steps: step3. PopPage.
+     * @tc.expected: Expected no child failed.
+     */
+    EXPECT_FALSE(stageManager.PopPage());
+
+    /**
+     * @tc.steps: step4. Push a Page into StageManager.
+     * @tc.expected: Push successfully.
+     */
+    EXPECT_TRUE(stageManager.PushPage(firstNode));
+
+    /**
+     * @tc.steps: step5. Push another three Page with different parameters into StageManager.
+     * @tc.expected: Push successfully.
+     */
+    stageManager.PushPage(secondNode, false, false);
+    stageManager.PushPage(thirdNode, true, false);
+    stageManager.stageNode_->GetGeometryNode()->SetFrameSize(SizeF(1.0f, 1.0f));
+    stageManager.PushPage(fourthNode, false, true);
+    EXPECT_EQ(stageNode->GetChildren().size(), 4);
+
+    /**
+     * @tc.steps: step6. GetPageById(0).
+     * @tc.expected: Get successfully.
+     */
+    auto pageNode = stageManager.GetPageById(0);
+
+    EXPECT_EQ(pageNode->tag_, firstNode->tag_);
+
+    /**
+     * @tc.steps: step6. GetPageById(other).
+     * @tc.expected: Get nullptr.
+     */
+    pageNode = stageManager.GetPageById(5);
+    EXPECT_FALSE(pageNode);
+}
+
 /**
  * @tc.name: PagePatternTest001
  * @tc.desc: Testing OnDirtyLayoutWrapperSwap of PagePattern work correctly.
@@ -509,6 +892,12 @@ HWTEST_F(StageTestNg, PagePatternTest001, TestSize.Level1)
      * @tc.expected: The callback will be executed immediately.
      */
     pattern.SetFirstBuildCallback(std::move(FLAG_FUNC));
+    EXPECT_EQ(flag, 2);
+    /**
+     * @tc.steps: step4. Call SetFirstBuildCallback again and don's set func.
+     * @tc.expected: The callback won't be executed.
+     */
+    pattern.SetFirstBuildCallback(nullptr);
     EXPECT_EQ(flag, 2);
 }
 
@@ -774,6 +1163,81 @@ HWTEST_F(StageTestNg, PagePatternTest007, TestSize.Level1)
     bool bResult = pattern->AvoidKeyboard();
     EXPECT_TRUE(bResult);
 }
+
+/**
+ * @tc.name: PagePatternTest008
+ * @tc.desc: Test the PagePattern related functions in the PagePattern work correctly.
+ * @tc.type: FUNC
+ */
+HWTEST_F(StageTestNg, PagePatternTest008, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create some node and PagePattern.
+     */
+    auto parent = FrameNode::CreateFrameNode(FRAME_NODE_TAG, 0, AceType::MakeRefPtr<StagePattern>());
+    auto node = FrameNode::CreateFrameNode(FRAME_NODE_TAG, 1, AceType::MakeRefPtr<StagePattern>());
+    auto child = CustomMeasureLayoutNode::CreateCustomMeasureLayoutNode(2, "child");
+    parent->AddChild(node);
+    node->AddChild(child);
+    auto pattern = AceType::MakeRefPtr<PagePattern>(AceType::MakeRefPtr<PageInfo>());
+    pattern->AttachToFrameNode(node);
+    pattern->ReloadPage();
+
+    /**
+     * @tc.steps: step2. add Element to nodeAnimatablePropertyMap_.
+     * @tc.expected: GetAnimatablePropertyFloat seccuess.
+     */
+    auto FRAME_NODE = FrameNode::CreateFrameNode(FRAME_NODE_TAG, 0, AceType::MakeRefPtr<Pattern>());
+    FRAME_NODE->nodeAnimatablePropertyMap_.emplace(
+        "pageTransitionProperty", AceType::MakeRefPtr<NodeAnimatablePropertyBase>());
+    pattern->frameNode_ = FRAME_NODE;
+    pattern->StopPageTransition();
+    EXPECT_TRUE(FRAME_NODE->GetAnimatablePropertyFloat("pageTransitionProperty"));
+
+    /**
+     * @tc.steps: step3. create safeAreaInsets_ .
+     * @tc.expected: create seccuessful.
+     */
+    auto pipeline = MockPipelineContext::GetCurrentContext();
+    pipeline->SetInstallationFree(0);
+    SafeAreaInsets::Inset insetleft;
+    insetleft.end = 5;
+    SafeAreaInsets::Inset insetTop;
+    insetTop.end = 1;
+    SafeAreaInsets::Inset insetRight;
+    SafeAreaInsets::Inset insetBottom;
+    insetBottom.start = RK356_HEIGHT - 1;
+    insetBottom.end = RK356_HEIGHT;
+    pipeline->safeAreaManager_->cutoutSafeArea_ = SafeAreaInsets(insetleft, insetTop, insetRight, insetBottom);
+    auto host = pattern->GetHost();
+    auto props = host->GetLayoutProperty();
+    props->UpdateSafeAreaInsets(pipeline->safeAreaManager_->cutoutSafeArea_);
+    EXPECT_TRUE(props->GetSafeAreaInsets());
+
+    /**
+     * @tc.steps: step4. test BeforeCreateLayoutWrapper .
+     * @tc.expected: GetInstallationFree is true.
+     */
+    pattern->BeforeCreateLayoutWrapper();
+    EXPECT_FALSE(pipeline->GetInstallationFree());
+
+    /**
+     * @tc.steps: step5. coverage AvoidKeyboard.
+     * @tc.expected: true.
+     */
+    pipeline->safeAreaManager_->keyboardSafeAreaEnabled_ = true;
+    bool bResult = pattern->AvoidKeyboard();
+    EXPECT_TRUE(bResult);
+
+    /**
+     * @tc.steps: step5. set keyboardInset_ to button.
+     * @tc.expected: set success and Valid().
+     */
+    pipeline->GetSafeAreaManager()->keyboardInset_ = SafeAreaInsets::Inset(insetBottom);
+    pattern->BeforeCreateLayoutWrapper();
+    EXPECT_TRUE(pipeline->GetSafeAreaManager()->GetKeyboardInset().IsValid());
+}
+
 /**
  * @tc.name: PageTransitionModelTest001
  * @tc.desc: Testing .
