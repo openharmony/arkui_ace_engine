@@ -164,6 +164,28 @@ private:
 };
 
 template<class T, int32_t ARGC = 0>
+class ACE_EXPORT JsCommonEventFunction : public JsFunction {
+    DECLARE_ACE_TYPE(JsCommonEventFunction, JsFunction);
+
+public:
+    JsCommonEventFunction() = delete;
+    JsCommonEventFunction(const JSRef<JSFunc>& jsFunction)
+        : JsFunction(JSRef<JSObject>(), jsFunction)
+    {}
+    ~JsCommonEventFunction() override = default;
+
+    void Execute() override
+    {
+        JsFunction::ExecuteJS();
+    }
+
+    void Execute(JSRef<JSVal>* argv)
+    {
+        JsFunction::ExecuteJS(ARGC, argv);
+    }
+};
+
+template<class T, int32_t ARGC = 0>
 class ACE_EXPORT JsEventFunction : public JsFunction {
     DECLARE_ACE_TYPE(JsEventFunction, JsFunction);
 
