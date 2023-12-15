@@ -2599,7 +2599,7 @@ HWTEST_F(RichEditorTestNg, AutoScrollByEdgeDetection001, TestSize.Level1)
     ASSERT_NE(richEditorPattern, nullptr);
     auto pipeline = PipelineContext::GetCurrentContext();
     pipeline->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
-    richEditorPattern->richTextRect_ = RectF(0, 0, 100, 140);
+    richEditorPattern->richTextRect_ = RectF(0, -10, 100, 140);
     richEditorPattern->contentRect_ = RectF(0, 0, 100, 100);
 
     AutoScrollParam param = { .autoScrollEvent = AutoScrollEvent::HANDLE };
@@ -2617,7 +2617,7 @@ HWTEST_F(RichEditorTestNg, AutoScrollByEdgeDetection001, TestSize.Level1)
     param.handleRect = RectF(50, richEditorPattern->contentRect_.GetY() + edgeDistance - 1, 20, 20);
     richEditorPattern->AutoScrollByEdgeDetection(
         param, param.handleRect.GetOffset(), EdgeDetectionStrategy::OUT_BOUNDARY);
-    EXPECT_TRUE(richEditorPattern->autoScrollTask_) << "handle reach top edge";
+    EXPECT_TRUE(richEditorPattern->IsReachTop()) << "handle reach top edge";
     richEditorPattern->StopAutoScroll();
 
     auto handleHeight = 20;
@@ -2634,7 +2634,7 @@ HWTEST_F(RichEditorTestNg, AutoScrollByEdgeDetection001, TestSize.Level1)
         RectF(50, richEditorPattern->contentRect_.Bottom() - edgeDistance - handleHeight + 1, 20, handleHeight);
     richEditorPattern->AutoScrollByEdgeDetection(
         param, param.handleRect.GetOffset(), EdgeDetectionStrategy::OUT_BOUNDARY);
-    EXPECT_TRUE(richEditorPattern->autoScrollTask_) << "handle reach bottom edge";
+    EXPECT_TRUE(richEditorPattern->IsReachBottom()) << "handle reach bottom edge";
     richEditorPattern->StopAutoScroll();
 
     pipeline->taskExecutor_.Reset();
@@ -2652,7 +2652,7 @@ HWTEST_F(RichEditorTestNg, AutoScrollByEdgeDetection002, TestSize.Level1)
     ASSERT_NE(richEditorPattern, nullptr);
     auto pipeline = PipelineContext::GetCurrentContext();
     pipeline->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
-    richEditorPattern->richTextRect_ = RectF(0, 0, 100, 140);
+    richEditorPattern->richTextRect_ = RectF(0, -10, 100, 140);
     richEditorPattern->contentRect_ = RectF(0, 0, 100, 100);
 
     richEditorPattern->prevAutoScrollOffset_ = OffsetF(0, 0);
@@ -2668,7 +2668,7 @@ HWTEST_F(RichEditorTestNg, AutoScrollByEdgeDetection002, TestSize.Level1)
     richEditorPattern->prevAutoScrollOffset_ = OffsetF(0, 0);
     richEditorPattern->AutoScrollByEdgeDetection(param,
         OffsetF(50, richEditorPattern->contentRect_.GetY() + edgeDistance - 1), EdgeDetectionStrategy::OUT_BOUNDARY);
-    EXPECT_TRUE(richEditorPattern->autoScrollTask_) << "mouse reach top edge";
+    EXPECT_TRUE(richEditorPattern->IsReachTop()) << "mouse reach top edge";
     richEditorPattern->StopAutoScroll();
 
     richEditorPattern->prevAutoScrollOffset_ = OffsetF(0, 0);
@@ -2680,7 +2680,7 @@ HWTEST_F(RichEditorTestNg, AutoScrollByEdgeDetection002, TestSize.Level1)
     richEditorPattern->prevAutoScrollOffset_ = OffsetF(0, 0);
     richEditorPattern->AutoScrollByEdgeDetection(param,
         OffsetF(50, richEditorPattern->contentRect_.Bottom() - edgeDistance + 1), EdgeDetectionStrategy::OUT_BOUNDARY);
-    EXPECT_TRUE(richEditorPattern->autoScrollTask_) << "mouse reach bottom edge";
+    EXPECT_TRUE(richEditorPattern->IsReachBottom()) << "mouse reach bottom edge";
     richEditorPattern->StopAutoScroll();
 
     pipeline->taskExecutor_.Reset();
@@ -2698,41 +2698,41 @@ HWTEST_F(RichEditorTestNg, AutoScrollByEdgeDetection003, TestSize.Level1)
     ASSERT_NE(richEditorPattern, nullptr);
     auto pipeline = PipelineContext::GetCurrentContext();
     pipeline->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
-    richEditorPattern->richTextRect_ = RectF(0, 0, 100, 140);
-    richEditorPattern->contentRect_ = RectF(0, 0, 100, 100);
+    richEditorPattern->richTextRect_ = RectF(0, -10, 100, 540);
+    richEditorPattern->contentRect_ = RectF(0, 0, 100, 500);
+    richEditorPattern->frameRect_ = RectF(0, 0, 100, 500);
 
     AutoScrollParam param = { .autoScrollEvent = AutoScrollEvent::DRAG };
-    Dimension AUTO_SCROLL_DRAG_EDGE_DISTANCE = 25.0_vp;
+    Dimension AUTO_SCROLL_DRAG_EDGE_DISTANCE = 58.0_vp;
     auto dragDistance = AUTO_SCROLL_DRAG_EDGE_DISTANCE.ConvertToPx();
 
     richEditorPattern->prevAutoScrollOffset_ = OffsetF(0, 0);
     richEditorPattern->AutoScrollByEdgeDetection(param,
-        OffsetF(50, richEditorPattern->contentRect_.GetY() + dragDistance + 1), EdgeDetectionStrategy::OUT_BOUNDARY);
+        OffsetF(50, dragDistance + 1), EdgeDetectionStrategy::OUT_BOUNDARY);
     EXPECT_FALSE(richEditorPattern->autoScrollTask_) << "drag move up but not reach top edge";
     richEditorPattern->StopAutoScroll();
 
     richEditorPattern->prevAutoScrollOffset_ = OffsetF(0, 0);
     richEditorPattern->AutoScrollByEdgeDetection(param,
-        OffsetF(50, richEditorPattern->contentRect_.GetY() + dragDistance - 1), EdgeDetectionStrategy::OUT_BOUNDARY);
-    EXPECT_TRUE(richEditorPattern->autoScrollTask_) << "drag reach top edge";
+        OffsetF(50, dragDistance - 10), EdgeDetectionStrategy::OUT_BOUNDARY);
+    EXPECT_TRUE(richEditorPattern->IsReachTop()) << "drag reach top edge";
+    auto speed = richEditorPattern->CalcDragSpeed(dragDistance, 0, dragDistance - 10);
+    EXPECT_EQ(richEditorPattern->currentScrollParam_.offset, speed) << "darg speed move up";
     richEditorPattern->StopAutoScroll();
 
     richEditorPattern->prevAutoScrollOffset_ = OffsetF(0, 0);
     richEditorPattern->AutoScrollByEdgeDetection(param,
-        OffsetF(50, richEditorPattern->contentRect_.Bottom() - dragDistance - 1), EdgeDetectionStrategy::OUT_BOUNDARY);
+        OffsetF(50, richEditorPattern->frameRect_.Bottom() - dragDistance - 1), EdgeDetectionStrategy::OUT_BOUNDARY);
     EXPECT_FALSE(richEditorPattern->autoScrollTask_) << "drag move down but not reach bottom edge";
     richEditorPattern->StopAutoScroll();
 
     richEditorPattern->prevAutoScrollOffset_ = OffsetF(0, 0);
-    richEditorPattern->AutoScrollByEdgeDetection(param,
-        OffsetF(50, richEditorPattern->contentRect_.Bottom() - dragDistance + 1), EdgeDetectionStrategy::OUT_BOUNDARY);
-    EXPECT_TRUE(richEditorPattern->autoScrollTask_) << "drag reach bottom edge";
-    richEditorPattern->StopAutoScroll();
-
-    richEditorPattern->prevAutoScrollOffset_ = OffsetF(0, 0);
-    richEditorPattern->contentRect_ = RectF(0, 0, 100, dragDistance - 1);
-    richEditorPattern->AutoScrollByEdgeDetection(param, OffsetF(50, 50), EdgeDetectionStrategy::OUT_BOUNDARY);
-    EXPECT_FALSE(richEditorPattern->autoScrollTask_) << "content height is too small.";
+    auto pointY = richEditorPattern->frameRect_.Bottom() - dragDistance + 10;
+    richEditorPattern->AutoScrollByEdgeDetection(param, OffsetF(50, pointY), EdgeDetectionStrategy::OUT_BOUNDARY);
+    EXPECT_TRUE(richEditorPattern->IsReachBottom()) << "drag reach bottom edge";
+    speed = richEditorPattern->CalcDragSpeed(
+        richEditorPattern->frameRect_.Bottom() - dragDistance, richEditorPattern->frameRect_.Bottom(), pointY);
+    EXPECT_EQ(richEditorPattern->currentScrollParam_.offset, -speed) << "darg speed move down";
     richEditorPattern->StopAutoScroll();
 
     pipeline->taskExecutor_.Reset();
@@ -2757,13 +2757,10 @@ HWTEST_F(RichEditorTestNg, AutoScrollByEdgeDetection004, TestSize.Level1)
     auto edgeDistance = AUTO_SCROLL_EDGE_DISTANCE.ConvertToPx();
 
     richEditorPattern->prevAutoScrollOffset_ = OffsetF(50, 50);
-    Dimension AUTO_THRESHOLD = 2.0_vp;
-    auto thresholdDistance = AUTO_THRESHOLD.ConvertToPx();
     AutoScrollParam param = { .autoScrollEvent = AutoScrollEvent::HANDLE,
-        .handleRect = RectF(50, 50 + thresholdDistance / 2, 20, 20) };
-    richEditorPattern->AutoScrollByEdgeDetection(
-        param, OffsetF(50, 50 + thresholdDistance / 2), EdgeDetectionStrategy::OUT_BOUNDARY);
-    EXPECT_FALSE(richEditorPattern->autoScrollTask_) << "moving distance less than minimum distance";
+        .handleRect = RectF(50, 50, 20, 20) };
+    richEditorPattern->AutoScrollByEdgeDetection(param, OffsetF(50, 50), EdgeDetectionStrategy::OUT_BOUNDARY);
+    EXPECT_FALSE(richEditorPattern->autoScrollTask_) << "the touch point is the same as the last time";
     richEditorPattern->StopAutoScroll();
 
     richEditorPattern->prevAutoScrollOffset_ = OffsetF(0, 0);
