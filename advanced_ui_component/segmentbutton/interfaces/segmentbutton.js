@@ -118,11 +118,11 @@ let SegmentButtonItemOptions = class {
 SegmentButtonItemOptions = __decorate([Observed], SegmentButtonItemOptions);
 let SegmentButtonItemOptionsArray = SegmentButtonItemOptionsArray_1 = class extends Array {
     constructor(t) {
-        super();
+        super("number" == typeof t ? t : 0);
         this.changeStartIndex = void 0;
         this.deleteCount = void 0;
         this.addLength = void 0;
-        "number" == typeof t ? super(t) : void 0 !== t && super.push(...t.map((t => new SegmentButtonItemOptions(t))))
+        "number" != typeof t && void 0 !== t && super.push(...t.map((t => new SegmentButtonItemOptions(t))))
     }
 
     push(...t) {
