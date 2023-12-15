@@ -208,6 +208,8 @@ void ImageLoadingContext::DownloadImage()
     downloadCallback.failCallback = [weak = AceType::WeakClaim(this)](std::string errorMsg) {
         auto ctx = weak.Upgrade();
         CHECK_NULL_VOID(ctx);
+        TAG_LOGI(AceLogTag::ACE_DOWNLOAD_MANAGER,
+            "Download image failed! The error Message is %{public}s", errorMsg.c_str());
         ctx->FailCallback(errorMsg);
     };
     downloadCallback.cancelCallback = downloadCallback.failCallback;
