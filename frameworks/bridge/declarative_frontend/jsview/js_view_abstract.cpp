@@ -3684,7 +3684,6 @@ void JSViewAbstract::JsLinearGradientBlur(const JSCallbackInfo& info)
     }
     double blurRadius = 0.0;
     ParseJsDouble(info[0], blurRadius);
-    blurRadius = std::clamp(blurRadius, 0.0, 60.0); // 60.0 represents largest blur radius;
 
     std::vector<std::pair<float, float>> fractionStops;
     auto direction = GradientDirection::BOTTOM;
