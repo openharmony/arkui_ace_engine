@@ -498,10 +498,7 @@ void CleanNodeResponseArea::UpdateCleanNode(bool isShow)
         auto geometryNode = host->GetGeometryNode();
         CHECK_NULL_VOID(geometryNode);
         auto frameSize = geometryNode->GetFrameSize();
-        auto iconSize =
-            std::min(iconSize_.ConvertToPx() != 0.0f ? iconSize_.ConvertToPx()
-                                                     : static_cast<float>(textFieldTheme->GetIconSize().ConvertToPx()),
-                static_cast<double>(frameSize.Height()));
+        auto iconSize = std::min(iconSize_.ConvertToPx(), static_cast<double>(frameSize.Height()));
         auto hotZoneSize = iconSize + rightOffset;
         stackLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(hotZoneSize), std::nullopt));
         imageLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(iconSize), CalcLength(iconSize)));
