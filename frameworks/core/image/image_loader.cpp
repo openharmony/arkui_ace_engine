@@ -166,8 +166,8 @@ std::shared_ptr<RSData> ImageLoader::LoadDataFromCachedFile(const std::string& u
             AceLogTag::ACE_IMAGE, "cache file path is too long, cacheFilePath: %{private}s", cacheFilePath.c_str());
         return nullptr;
     }
-    bool cacheFileFound = ImageFileCache::GetInstance().GetFromCacheFile(cacheFilePath);
-    if (!cacheFileFound) {
+    cacheFilePath = ImageFileCache::GetInstance().GetCacheFilePath(uri);
+    if (cacheFilePath == "") {
         return nullptr;
     }
     char realPath[PATH_MAX] = { 0x00 };
@@ -225,10 +225,7 @@ void ImageLoader::CacheImageData(const std::string& key, const RefPtr<NG::ImageD
 RefPtr<NG::ImageData> ImageLoader::LoadImageDataFromFileCache(const std::string& key, const std::string& suffix)
 {
     ACE_FUNCTION_TRACE();
-    auto* fileCache = &ImageFileCache::GetInstance();
-    std::string filePath = fileCache->GetImageCacheFilePath(key) + suffix;
-    auto data = fileCache->GetDataFromCacheFile(filePath);
-    return data;
+    return ImageFileCache::GetInstance().GetDataFromCacheFile(key, suffix);
 }
 
 // NG ImageLoader entrance
