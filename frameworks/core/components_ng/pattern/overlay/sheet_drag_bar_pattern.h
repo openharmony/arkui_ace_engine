@@ -61,7 +61,6 @@ public:
     void ScaleAnimation(bool isDown);
     void HandleTouchEvent(const TouchEventInfo& info);
     void HandleTouchDown(const TouchLocationInfo& info);
-    void HandleTouchMove(const TouchLocationInfo& info);
     void HandleTouchUp();
     void MarkDirtyNode(PropertyChangeFlag extraFlag);
 
