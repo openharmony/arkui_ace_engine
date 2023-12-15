@@ -291,6 +291,9 @@ public:
 
     static void FireNavigationStateChange(const RefPtr<UINode>& node, bool show);
 
+    void NotifyDialogChange(bool isShow);
+    void NotifyPageHide(const std::string& pageName);
+
 private:
     void CheckTopNavPathChange(const std::optional<std::pair<std::string, RefPtr<UINode>>>& preTopNavPath,
         const std::optional<std::pair<std::string, RefPtr<UINode>>>& newTopNavPath, bool isPopPage);
@@ -298,7 +301,7 @@ private:
         const RefPtr<NavDestinationGroupNode>& newTopNavDestination, bool isPopPage);
 
     void TransitionWithOutAnimation(const RefPtr<NavDestinationGroupNode>& preTopNavDestination,
-        const RefPtr<NavDestinationGroupNode>& newTopNavDestination, bool isPopPage);
+        const RefPtr<NavDestinationGroupNode>& newTopNavDestination, bool isPopPage, bool needVisible = false);
     RefPtr<RenderContext> GetTitleBarRenderContext();
     void DoAnimation(NavigationMode usrNavigationMode);
     RefPtr<UINode> GenerateUINodeByIndex(int32_t index);
@@ -335,7 +338,6 @@ private:
     bool navigationModeChange_ = false;
     std::shared_ptr<NavigationController> navigationController_;
     std::map<int32_t, std::function<void(bool)>> onStateChangeMap_;
-    void NotifyPageHide(const std::string& pageName);
     void NotifyPageShow(const std::string& pageName);
     RefPtr<UINode> FireNavDestinationStateChange(bool show);
 };

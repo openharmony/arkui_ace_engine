@@ -37,6 +37,7 @@ public:
     virtual void SetOnShown(std::function<void()>&& onShow) = 0;
     virtual void SetOnHidden(std::function<void()>&& onHidden) = 0;
     virtual void SetOnBackPressed(std::function<bool()>&& onBackPressed) = 0;
+    virtual void SetNavDestinationMode(NG::NavDestinationMode mode);
     virtual RefPtr<AceType> CreateEmpty()
     {
         return nullptr;
