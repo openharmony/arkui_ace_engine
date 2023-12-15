@@ -152,10 +152,10 @@ struct GridLayoutInfo {
     // rect of grid item dragged in
     RectF currentRect_;
 
-    bool reachEnd_ = false;
+    bool reachEnd_ = false; // true if last GridItem appears in the viewPort
     bool reachStart_ = false;
 
-    bool offsetEnd_ = false;
+    bool offsetEnd_ = false; // true if last GridItem is fully within the viewport
 
     // Grid has GridItem whose columnEnd - columnStart > 0
     bool hasBigItem_;

@@ -62,16 +62,9 @@ float GridIrregularFiller::Fill(const FillParameters& params)
             UpdateLength(prevRow, params.mainGap);
         }
 
-        if (!wrapper_->GetChildByIndex(info_->endIndex_)) {
         MeasureNewItem(params, posX_);
-        }
     }
     info_->endMainLineIndex_ = posY_;
-    LOGI("ZTE fill result: startIndex = %d, endIndex = %d, startLine = %d, endLine = %d", info_->startIndex_,
-        info_->endIndex_, info_->startMainLineIndex_, info_->endMainLineIndex_);
-    for (auto&& [idx, line] : info_->lineHeightMap_) {
-        LOGI("ZTE line %d height = %f", idx, line);
-    }
     return length_;
 }
 
@@ -202,7 +195,6 @@ void GridIrregularFiller::MeasureNewItem(const FillParameters& params, int32_t c
     // spread height to each row. May be buggy?
     float heightPerRow = (childHeight - (params.mainGap * (itemSize.rows - 1))) / itemSize.rows;
     for (int32_t i = 0; i < itemSize.rows; ++i) {
-        LOGI("ZTE update lineHeight %d, height = %f", posY_, heightPerRow);
         info_->lineHeightMap_[posY_] = std::max(info_->lineHeightMap_[posY_], heightPerRow);
     }
 }

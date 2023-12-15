@@ -24,12 +24,6 @@ GridLayoutRangeSolver::GridLayoutRangeSolver(GridLayoutInfo* info, LayoutWrapper
     opts_ = &props->GetLayoutOptions().value();
 };
 
-// float mainSize = wrapper_->GetGeometryNode()->GetContentSize().MainSize(info_->axis_);
-// if (start + mainSize > *info_->totalHeight_) {
-//     // reached bottom and over-scrolled, still layout at least a full contentSize
-//     start = *info_->totalHeight_ - mainSize;
-// }
-
 using Result = GridLayoutRangeSolver::StartingRowInfo;
 Result GridLayoutRangeSolver::FindStartingRow(float mainGap)
 {
@@ -40,7 +34,7 @@ Result GridLayoutRangeSolver::FindStartingRow(float mainGap)
     int32_t idx = 0;
     float rowHeight = 0.0f;
     while (len < start) {
-        auto [newRows, addLen] = AddNextRow(mainGap, idx);
+        auto [newRows, addLen] = AddNextRows(mainGap, idx);
         if (len + addLen > start) {
             rowHeight = addLen - mainGap;
             break;
@@ -56,14 +50,7 @@ Result GridLayoutRangeSolver::FindStartingRow(float mainGap)
     return StartingRowInfo { idx, len, rowHeight };
 }
 
-// // find ending row
-// float end = start + mainSize;
-// while (len < end) {
-//     len += info_->lineHeightMap_[idx++] + mainGap;
-// }
-// info_->endMainLineIndex_ = idx - 1;
-
-std::pair<int32_t, float> GridLayoutRangeSolver::AddNextRow(float mainGap, int32_t row)
+std::pair<int32_t, float> GridLayoutRangeSolver::AddNextRows(float mainGap, int32_t row)
 {
     int32_t maxRowCnt = 1;
 
