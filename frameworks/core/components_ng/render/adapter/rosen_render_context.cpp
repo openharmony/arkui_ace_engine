@@ -1789,10 +1789,10 @@ void RosenRenderContext::SetOuterBorderWidth(const BorderWidthProperty& value)
 {
     CHECK_NULL_VOID(rsNode_);
     Rosen::Vector4f cornerBorderWidth;
-    cornerBorderWidth.SetValues(static_cast<float>((value.leftDimen.value()).ConvertToPx()),
-        static_cast<float>((value.topDimen.value()).ConvertToPx()),
-        static_cast<float>((value.rightDimen.value()).ConvertToPx()),
-        static_cast<float>((value.bottomDimen.value()).ConvertToPx()));
+    cornerBorderWidth.SetValues(static_cast<float>((value.leftDimen.value_or(Dimension(0.0))).ConvertToPx()),
+        static_cast<float>((value.topDimen.value_or(Dimension(0.0))).ConvertToPx()),
+        static_cast<float>((value.rightDimen.value_or(Dimension(0.0))).ConvertToPx()),
+        static_cast<float>((value.bottomDimen.value_or(Dimension(0.0))).ConvertToPx()));
     rsNode_->SetOuterBorderWidth(cornerBorderWidth);
     RequestNextFrame();
 }
