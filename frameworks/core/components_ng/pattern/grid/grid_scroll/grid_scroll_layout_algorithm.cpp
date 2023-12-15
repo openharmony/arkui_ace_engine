@@ -737,30 +737,34 @@ void GridScrollLayoutAlgorithm::UpdateGridMatrix(LayoutWrapper* layoutWrapper, i
             auto crossSpan = axis_ == Axis::VERTICAL ? currentItemColSpan_ : currentItemRowSpan_;
             int32_t state =
                 CheckGridPlacedState(currentIndex, currentMainIndex, currentCrossIndex, mainSpan, crossSpan);
+            float lineHeight = 0.0;
             if (state == SUCCESSFULLY) { // This position can correctly place the current index
-                MeasureChild(layoutWrapper, frameSize, childLayoutWrapper, currentCrossIndex, crossSpan);
-                float lineHeight = CalculateNodeHeight(childLayoutWrapper, mainSpan);
-                mainLength = std::max(lineHeight, mainLength);
+                lineHeight = CalculateNodeHeight(layoutWrapper, childLayoutWrapper, frameSize, currentCrossIndex);
                 currentIndex++;
-            } else if (state == currentIndex) { // This position is already occupied by the current index
+            } else if (state == currentIndex) {
+                // This position is already occupied by the current index,
+                lineHeight = CalculateNodeHeight(layoutWrapper, childLayoutWrapper, frameSize, currentCrossIndex);
                 indexCount++;
                 currentIndex++;
-                continue;
             } else { // The current position cannot be placed
                 indexCount++;
-                continue;
             }
+            mainLength = std::max(lineHeight, mainLength);
         }
         mainCount = indexCount / crossCount_;
         if (indexCount % crossCount_ != 0) {
             mainCount++;
         }
-        gridLayoutInfo_.lineHeightMap_.insert(std::make_pair(currentMainIndex, mainLength));
+        gridLayoutInfo_.lineHeightMap_[currentMainIndex] = mainLength;
     }
 }
 
-float GridScrollLayoutAlgorithm::CalculateNodeHeight(const RefPtr<LayoutWrapper>& childLayoutWrapper, int32_t mainSpan)
+float GridScrollLayoutAlgorithm::CalculateNodeHeight(LayoutWrapper* layoutWrapper,
+    const RefPtr<LayoutWrapper>& childLayoutWrapper, const SizeF& frameSize, int currentCrossIndex)
 {
+    auto mainSpan = axis_ == Axis::VERTICAL ? currentItemRowSpan_ : currentItemColSpan_;
+    auto crossSpan = axis_ == Axis::VERTICAL ? currentItemColSpan_ : currentItemRowSpan_;
+    MeasureChild(layoutWrapper, frameSize, childLayoutWrapper, currentCrossIndex, crossSpan);
     auto itemSize = childLayoutWrapper->GetGeometryNode()->GetMarginFrameSize();
     float lineHeight = 0.0;
     if (mainSpan == 1) {

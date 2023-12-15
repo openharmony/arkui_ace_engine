@@ -124,7 +124,8 @@ private:
     void UpdateCurrentOffsetForJumpTo(LayoutWrapper* layoutWrapper, float mainSize);
     void SkipRegularLines(bool forward);
     void UpdateGridMatrix(LayoutWrapper* layoutWrapper, int32_t index, float crossSize);
-    float CalculateNodeHeight(const RefPtr<LayoutWrapper>& childLayoutWrapper, int32_t mainSpan);
+    float CalculateNodeHeight(LayoutWrapper* layoutWrapper, const RefPtr<LayoutWrapper>& childLayoutWrapper,
+        const SizeF& frameSize, int currentCrossIndex);
     int32_t CheckGridPlacedState(int32_t index, int32_t main, int32_t cross, int32_t mainSpan, int32_t crossSpan);
 
 protected:
