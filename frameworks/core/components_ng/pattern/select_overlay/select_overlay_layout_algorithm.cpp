@@ -50,7 +50,7 @@ void SelectOverlayLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         auto customMenuLayoutWrapper = layoutWrapper->GetChildByIndex(0);
         CHECK_NULL_VOID(customMenuLayoutWrapper);
         auto customMenuLayoutConstraint = layoutConstraint;
-        customMenuLayoutConstraint.selfIdealSize = OptionalSizeF(std::nullopt, maxSize.Height());
+        CalculateCustomMenuLayoutConstraint(layoutWrapper, customMenuLayoutConstraint);
         customMenuLayoutWrapper->Measure(customMenuLayoutConstraint);
         isMouseCustomMenu = true;
     }
@@ -63,6 +63,32 @@ void SelectOverlayLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         child->Measure(layoutConstraint);
     }
     PerformMeasureSelf(layoutWrapper);
+}
+
+void SelectOverlayLayoutAlgorithm::CalculateCustomMenuLayoutConstraint(
+    LayoutWrapper* layoutWrapper, LayoutConstraintF& layoutConstraint)
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetTheme<TextOverlayTheme>();
+    CHECK_NULL_VOID(theme);
+    // Calculate the spacing with text and handle, menu is fixed up the handle and text.
+    double menuSpacingBetweenText = theme->GetMenuSpacingWithText().ConvertToPx();
+    double menuSpacingBetweenHandle = theme->GetHandleDiameter().ConvertToPx();
+
+    // paint rect is in global position, need to convert to local position
+    auto offset = layoutWrapper->GetGeometryNode()->GetFrameOffset();
+    const auto firstHandleRect = info_->firstHandle.paintRect - offset;
+    const auto secondHandleRect = info_->secondHandle.paintRect - offset;
+
+    auto topSpace = firstHandleRect.Top() - menuSpacingBetweenText - menuSpacingBetweenHandle;
+    auto bottomSpace = layoutConstraint.maxSize.Height() -
+                       (secondHandleRect.Bottom() + menuSpacingBetweenText + menuSpacingBetweenHandle);
+    if (info_->isUsingMouse) {
+        layoutConstraint.selfIdealSize = OptionalSizeF(std::nullopt, layoutConstraint.maxSize.Height());
+    } else {
+        layoutConstraint.selfIdealSize = OptionalSizeF(std::nullopt, std::max(topSpace, bottomSpace));
+    }
 }
 
 OffsetF SelectOverlayLayoutAlgorithm::CalculateCustomMenuByMouseOffset(LayoutWrapper* layoutWrapper)

@@ -109,6 +109,8 @@ struct SelectionMenuComponent {
   @State cutAndCopyEnable: boolean = false
   @State pasteEnable: boolean = false
   @State visibilityValue: Visibility = Visibility.Visible
+  @State customMenuSize: string | number = '100%'
+  private customMenuHeight: number = this.theme.menuSpacing
   private fontWeightTable: string[] = ["100", "200", "300", "400", "500", "600", "700", "800", "900", "bold", "normal", "bolder", "lighter", "medium", "regular"]
 
   aboutToAppear() {
@@ -145,9 +147,15 @@ struct SelectionMenuComponent {
       .flexShrink(1)
       .shadow(this.theme.iconPanelShadowStyle)
       .borderRadius(this.theme.containerBorderRadius)
+      .onAreaChange((oldValue: Area, newValue: Area) => {
+        let newValueHeight = newValue.height as number
+        let oldValueHeight = oldValue.height as number
+        this.customMenuHeight += newValueHeight - oldValueHeight
+        this.customMenuSize = this.customMenuHeight
+      })
     }
     .flexShrink(1)
-    .height("100%")
+    .height(this.customMenuSize)
   }
 
   pushDataToPasteboard(richEditorSelection: RichEditorSelection) {
@@ -302,6 +310,12 @@ struct SelectionMenuComponent {
         })
       }
     }
+    .onAreaChange((oldValue: Area, newValue: Area) => {
+      let newValueHeight = newValue.height as number
+      let oldValueHeight = oldValue.height as number
+      this.customMenuHeight += newValueHeight - oldValueHeight
+      this.customMenuSize = this.customMenuHeight
+    })
     .clip(true)
     .width(this.theme.defaultMenuWidth)
     .padding(this.theme.expandedOptionPadding)
@@ -390,6 +404,8 @@ struct SelectionMenuComponent {
             MenuItem({ content: "更多", endIcon: this.theme.arrowDownIcon })
               .onClick(() => {
                 this.showExpandedMenuOptions = true
+                this.customMenuHeight = this.theme.menuSpacing
+                this.customMenuSize = '100%'
               })
           } else if (this.showExpandedMenuOptions && this.expandedMenuOptions && this.expandedMenuOptions.length > 0) {
             ForEach(this.expandedMenuOptions, (expandedMenuOptionItem: ExpandedMenuOptions, index) => {
