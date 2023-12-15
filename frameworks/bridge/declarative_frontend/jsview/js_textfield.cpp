@@ -1004,7 +1004,6 @@ void JSTextField::SetShowCounter(const JSCallbackInfo& info)
         TextFieldModel::GetInstance()->SetShowCounter(false);
         return;
     }
-    TextFieldModel::GetInstance()->SetShowCounter(info[0]->ToBoolean());
     if (info[1]->IsObject()) {
         auto paramObject = JSRef<JSObject>::Cast(info[1]);
         auto param = paramObject->GetProperty("highlightBorder");
@@ -1016,18 +1015,22 @@ void JSTextField::SetShowCounter(const JSCallbackInfo& info)
         }
         auto parameter = paramObject->GetProperty("thresholdPercentage");
         auto inputNumber = parameter->ToNumber<int32_t>();
-        if (!parameter->IsNumber() || parameter->IsNull()) {
+        TextFieldModel::GetInstance()->SetCounterType(inputNumber);
+        if (parameter->IsNull() || parameter->IsUndefined()) {
+            TextFieldModel::GetInstance()->SetShowCounter(info[0]->ToBoolean());
             TextFieldModel::GetInstance()->SetCounterType(INVAILD_VALUE);
             return;
         }
         if (inputNumber < MINI_VAILD_VALUE || inputNumber > MAX_VAILD_VALUE) {
             LOGI("The info is wrong, it is supposed to be a right number");
             TextFieldModel::GetInstance()->SetCounterType(ILLEGAL_VALUE);
+            TextFieldModel::GetInstance()->SetShowCounter(false);
             return;
         }
-        TextFieldModel::GetInstance()->SetCounterType(inputNumber);
+        TextFieldModel::GetInstance()->SetShowCounter(info[0]->ToBoolean());
         return;
     }
+    TextFieldModel::GetInstance()->SetShowCounter(info[0]->ToBoolean());
     TextFieldModel::GetInstance()->SetCounterType(INVAILD_VALUE);
     TextFieldModel::GetInstance()->SetShowCounterBorder(true);
 }
@@ -1152,34 +1155,49 @@ void JSTextField::SetCancelButton(const JSCallbackInfo& info)
         return;
     }
     auto param = JSRef<JSObject>::Cast(info[0]);
+    auto theme = GetTheme<TextFieldTheme>();
     std::string styleStr;
     CleanNodeStyle cleanNodeStyle;
     auto styleProp = param->GetProperty("style");
-    if (!styleProp->IsUndefined() && !styleProp->IsNull() && ParseJsString(styleProp, styleStr)) {
+    if (!styleProp->IsNull() && ParseJsString(styleProp, styleStr)) {
         cleanNodeStyle = ConvertStrToCleanNodeStyle(styleStr);
     } else {
         cleanNodeStyle = CleanNodeStyle::INPUT;
     }
     TextFieldModel::GetInstance()->SetCleanNodeStyle(cleanNodeStyle);
+    TextFieldModel::GetInstance()->SetIsShowCancelButton(true);
     auto iconJsVal = param->GetProperty("icon");
     if (iconJsVal->IsUndefined() || iconJsVal->IsNull() || !iconJsVal->IsObject()) {
+        TextFieldModel::GetInstance()->SetCancelIconColor(Color());
+        TextFieldModel::GetInstance()->SetCancelIconSize(theme->GetIconSize());
+        TextFieldModel::GetInstance()->SetCanacelIconSrc(std::string());
         return;
     }
     auto iconParam = JSRef<JSObject>::Cast(iconJsVal);
+    // set icon size
     CalcDimension iconSize;
     auto iconSizeProp = iconParam->GetProperty("size");
-    if (!iconSizeProp->IsUndefined() && !iconSizeProp->IsNull() && ParseJsDimensionVpNG(iconSizeProp, iconSize) &&
-        iconSize.Unit() != DimensionUnit::PERCENT) {
-        TextFieldModel::GetInstance()->SetCancelIconSize(iconSize);
+    if (!iconSizeProp->IsUndefined() && !iconSizeProp->IsNull() && ParseJsDimensionVpNG(iconSizeProp, iconSize)) {
+        if (LessNotEqual(iconSize.Value(), 0.0) || iconSize.Unit() == DimensionUnit::PERCENT) {
+            iconSize = theme->GetIconSize();
+        }
+    } else {
+        iconSize = theme->GetIconSize();
     }
+    TextFieldModel::GetInstance()->SetCancelIconSize(iconSize);
+    // set icon src
     std::string iconSrc;
     auto iconSrcProp = iconParam->GetProperty("src");
-    if (!iconSrcProp->IsUndefined() && !iconSrcProp->IsNull() && ParseJsMedia(iconSrcProp, iconSrc)) {
-        TextFieldModel::GetInstance()->SetCanacelIconSrc(iconSrc);
+    if (iconSrcProp->IsUndefined() || iconSrcProp->IsNull() || !ParseJsMedia(iconSrcProp, iconSrc)) {
+        iconSrc = "";
     }
+    TextFieldModel::GetInstance()->SetCanacelIconSrc(iconSrc);
+    // set icon color
     Color iconColor;
     auto iconColorProp = iconParam->GetProperty("color");
     if (!iconColorProp->IsUndefined() && !iconColorProp->IsNull() && ParseJsColor(iconColorProp, iconColor)) {
+        TextFieldModel::GetInstance()->SetCancelIconColor(iconColor);
+    } else {
         TextFieldModel::GetInstance()->SetCancelIconColor(iconColor);
     }
 }

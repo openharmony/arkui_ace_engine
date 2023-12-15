@@ -1651,7 +1651,6 @@ void TextPattern::OnModifyDone()
         SetAccessibilityAction();
     } else {
         if (host->IsDraggable() || gestureEventHub->GetTextDraggable()) {
-            host->SetDraggable(false);
             gestureEventHub->SetTextDraggable(false);
         }
     }
@@ -2448,7 +2447,6 @@ void TextPattern::RemoveAreaChangeInner()
     auto eventHub = host->GetEventHub<TextEventHub>();
     CHECK_NULL_VOID(eventHub);
     if (eventHub->HasOnAreaChanged()) {
-        LOGD("RemoveAreaChangeInner do not remove external area change callback");
         return;
     }
     pipeline->RemoveOnAreaChangeNode(host->GetId());

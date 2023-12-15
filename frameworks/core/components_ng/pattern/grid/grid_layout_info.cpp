@@ -167,6 +167,7 @@ float GridLayoutInfo::GetContentOffset(float mainGap) const
     float heightSum = 0;
     int32_t itemCount = 0;
     float height = 0;
+    auto fromStart = false;
     for (const auto& item : lineHeightMap_) {
         auto line = gridMatrix_.find(item.first);
         if (line == gridMatrix_.end()) {
@@ -179,13 +180,14 @@ float GridLayoutInfo::GetContentOffset(float mainGap) const
         auto lineEnd = line->second.rbegin()->second;
         itemCount += (lineEnd - lineStart + 1);
         heightSum += item.second + mainGap;
+        fromStart = item.first == 0 ? true : fromStart;
     }
     if (itemCount == 0) {
         return 0;
     }
     auto averageHeight = heightSum / itemCount;
     height = startIndex_ * averageHeight - currentOffset_;
-    if (itemCount >= (childrenCount_ - 1)) {
+    if (itemCount >= (childrenCount_ - 1) || (fromStart && itemCount >= startIndex_)) {
         height = GetStartLineOffset(mainGap);
     }
     return height;

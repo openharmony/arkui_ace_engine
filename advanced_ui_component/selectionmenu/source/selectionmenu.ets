@@ -17,6 +17,8 @@ import pasteboard from '@ohos.pasteboard'
 import { BusinessError } from '@ohos.base';
 import hilog from '@ohos.hilog';
 
+const WITHOUT_BUILDER = -2
+
 export interface EditorMenuOptions {
   icon: ResourceStr
   action?: () => void
@@ -107,6 +109,8 @@ struct SelectionMenuComponent {
   @State cutAndCopyEnable: boolean = false
   @State pasteEnable: boolean = false
   @State visibilityValue: Visibility = Visibility.Visible
+  @State customMenuSize: string | number = '100%'
+  private customMenuHeight: number = this.theme.menuSpacing
   private fontWeightTable: string[] = ["100", "200", "300", "400", "500", "600", "700", "800", "900", "bold", "normal", "bolder", "lighter", "medium", "regular"]
 
   aboutToAppear() {
@@ -136,8 +140,22 @@ struct SelectionMenuComponent {
       if (this.editorMenuOptions && this.editorMenuOptions.length > 0) {
         this.IconPanel()
       }
-      this.SystemMenu()
+      Scroll() {
+        this.SystemMenu()
+      }
+      .backgroundColor(this.theme.backGroundColor)
+      .flexShrink(1)
+      .shadow(this.theme.iconPanelShadowStyle)
+      .borderRadius(this.theme.containerBorderRadius)
+      .onAreaChange((oldValue: Area, newValue: Area) => {
+        let newValueHeight = newValue.height as number
+        let oldValueHeight = oldValue.height as number
+        this.customMenuHeight += newValueHeight - oldValueHeight
+        this.customMenuSize = this.customMenuHeight
+      })
     }
+    .flexShrink(1)
+    .height(this.customMenuSize)
   }
 
   pushDataToPasteboard(richEditorSelection: RichEditorSelection) {
@@ -266,6 +284,7 @@ struct SelectionMenuComponent {
               .focusable(true)
               .draggable(false)
           }
+          .enabled(!(!item.action && !item.builder))
           .type(ButtonType.Normal)
           .margin(this.theme.editorOptionMargin)
           .backgroundColor(this.theme.backGroundColor)
@@ -276,7 +295,7 @@ struct SelectionMenuComponent {
               this.showExpandedMenuOptions = false
               this.customerChange = !this.customerChange
             } else {
-              this.showCustomerIndex = -1
+              this.showCustomerIndex = WITHOUT_BUILDER
               if (!this.controller) {
                 this.showExpandedMenuOptions = true
               }
@@ -291,6 +310,12 @@ struct SelectionMenuComponent {
         })
       }
     }
+    .onAreaChange((oldValue: Area, newValue: Area) => {
+      let newValueHeight = newValue.height as number
+      let oldValueHeight = oldValue.height as number
+      this.customMenuHeight += newValueHeight - oldValueHeight
+      this.customMenuSize = this.customMenuHeight
+    })
     .clip(true)
     .width(this.theme.defaultMenuWidth)
     .padding(this.theme.expandedOptionPadding)
@@ -379,6 +404,8 @@ struct SelectionMenuComponent {
             MenuItem({ content: "更多", endIcon: this.theme.arrowDownIcon })
               .onClick(() => {
                 this.showExpandedMenuOptions = true
+                this.customMenuHeight = this.theme.menuSpacing
+                this.customMenuSize = '100%'
               })
           } else if (this.showExpandedMenuOptions && this.expandedMenuOptions && this.expandedMenuOptions.length > 0) {
             ForEach(this.expandedMenuOptions, (expandedMenuOptionItem: ExpandedMenuOptions, index) => {
@@ -415,7 +442,7 @@ struct SelectionMenuComponent {
         })
         .radius(this.theme.containerBorderRadius)
         .clip(true)
-        .width('100%')
+        .width(this.theme.defaultMenuWidth)
       } else if (this.showCustomerIndex > -1 && this.builder) {
         if (this.customerChange) {
           this.builder()

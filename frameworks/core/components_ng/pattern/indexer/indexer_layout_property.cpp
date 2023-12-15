@@ -70,6 +70,7 @@ void IndexerLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
     json->Put("popupItemFontSize", propFontSize_.value_or(defaultFontSize).ToString().c_str());
     json->Put("popupItemFontWeight",
         V2::ConvertWrapFontWeightToStirng(propFontWeight_.value_or(defaultFontWeight)).c_str());
+    json->Put("autoCollapse", propAutoCollapse_.value_or(false) ? "true" : "false");
 }
 
 std::unique_ptr<JsonValue> IndexerLayoutProperty::ToJsonObjectValue(const TextStyle& textStyle)

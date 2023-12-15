@@ -577,7 +577,8 @@ void ListPattern::GetListItemGroupEdge(bool& groupAtStart, bool& groupAtEnd) con
     if (lastIsGroup) {
         auto itemGroup = (*childrens.rbegin())->GetPattern<ListItemGroupPattern>();
         if (itemGroup) {
-            groupAtEnd = itemGroup->GetDisplayEndIndexInGroup() == itemGroup->GetEndIndexInGroup();
+            groupAtEnd = itemGroup->GetDisplayEndIndexInGroup() == itemGroup->GetEndIndexInGroup() ||
+                         LessOrEqual(itemPosition_.rbegin()->second.endPos, contentMainSize_);
         }
     }
 }
@@ -1931,9 +1932,6 @@ ListItemGroupPara ListPattern::GetListItemGroupParameter(const RefPtr<FrameNode>
         listItemGroupPara.displayStartIndex = itemGroupPattern->GetDisplayStartIndexInGroup();
         listItemGroupPara.lanes = itemGroupPattern->GetLanesInGroup();
         listItemGroupPara.itemEndIndex = itemGroupPattern->GetEndIndexInGroup();
-        TAG_LOGD(AceLogTag::ACE_LIST, "Get ListItem group parameter(%{public}d,"
-            "%{public}d,%{public}d,%{public}d).", listItemGroupPara.displayEndIndex,
-            listItemGroupPara.displayStartIndex, listItemGroupPara.lanes, listItemGroupPara.itemEndIndex);
     }
     return listItemGroupPara;
 }

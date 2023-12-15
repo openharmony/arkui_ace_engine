@@ -63,6 +63,10 @@ ArkUINativeModuleValue MenuBridge::SetFont(ArkUIRuntimeCallInfo* runtimeCallInfo
     Local<JSValueRef> familyArg = runtimeCallInfo->GetCallArgRef(NUM_3);
     Local<JSValueRef> styleArg = runtimeCallInfo->GetCallArgRef(NUM_4);
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+    if (sizeArg->IsUndefined() && weightArg->IsUndefined() && familyArg->IsUndefined() && styleArg->IsUndefined()) {
+        GetArkUIInternalNodeAPI()->GetMenuModifier().ResetFont(nativeNode);
+        return panda::JSValueRef::Undefined(vm);
+    }
 
     CalcDimension fontSize = Dimension(-1.0);
     ArkTSUtils::ParseJsDimensionFp(vm, sizeArg, fontSize, false);
@@ -71,7 +75,9 @@ ArkUINativeModuleValue MenuBridge::SetFont(ArkUIRuntimeCallInfo* runtimeCallInfo
     if (weightArg->IsNumber()) {
         weight = std::to_string(weightArg->Int32Value(vm));
     } else {
-        ArkTSUtils::ParseJsString(vm, weightArg, weight);
+        if (ArkTSUtils::ParseJsString(vm, weightArg, weight) || weight.empty()) {
+            weight = DEFAULT_ERR_CODE;
+        }
     }
 
     int32_t style = 0;

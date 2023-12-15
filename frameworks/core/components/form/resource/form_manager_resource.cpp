@@ -155,9 +155,6 @@ std::string FormManagerResource::MakeEventHash(const std::string& event) const
     eventHash += std::string(FORM_MANAGER_PARAM_EQUALS);
     eventHash += event;
     eventHash += std::string(FORM_MANAGER_PARAM_BEGIN);
-
-    LOGD("MakeEventHash  hash:%{public}s", eventHash.c_str());
-
     return eventHash;
 }
 

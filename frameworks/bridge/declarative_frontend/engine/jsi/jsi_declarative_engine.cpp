@@ -1082,11 +1082,8 @@ bool JsiDeclarativeEngine::ExecuteCardAbc(const std::string& fileName, int64_t c
 {
     auto runtime = engineInstance_->GetJsRuntime();
     CHECK_NULL_RETURN(runtime, false);
-
     auto container = Container::Current();
     CHECK_NULL_RETURN(container, false);
-
-    LOGD("JsiDeclarativeEngine ExecuteCardAbc fileName = %{public}s", fileName.c_str());
     CardScope cardScope(cardId);
     std::string abcPath;
     std::vector<uint8_t> content;
@@ -1128,7 +1125,6 @@ bool JsiDeclarativeEngine::ExecuteCardAbc(const std::string& fileName, int64_t c
 #else
         abcPath = moduleName.append("/").append(fileName);
 #endif
-        LOGD("JsiDeclarativeEngine ExecuteCardAbc abcPath = %{public}s", abcPath.c_str());
         {
             if (!arkRuntime->ExecuteModuleBuffer(content.data(), content.size(), abcPath, true)) {
                 return false;
@@ -1145,8 +1141,6 @@ bool JsiDeclarativeEngine::ExecuteCardAbc(const std::string& fileName, int64_t c
         }
         abcPath = delegate->GetAssetPath(fileName).append(fileName);
     }
-
-    LOGD("JsiDeclarativeEngine ExecuteCardAbc abcPath = %{public}s", abcPath.c_str());
     if (!runtime->EvaluateJsCode(content.data(), content.size(), abcPath)) {
         return false;
     }
@@ -1228,9 +1222,7 @@ void JsiDeclarativeEngine::LoadJs(const std::string& url, const RefPtr<JsAcePage
             if (delegate->GetAssetContent("app.js.map", appMap)) {
                 page->SetAppMap(appMap);
             }
-            if (!ExecuteAbc("app.abc")) {
-                LOGD("ExecuteJsBin \"app.js\" failed.");
-            } else {
+            if (ExecuteAbc("app.abc")) {
                 CallAppFunc("onCreate");
             }
         }
@@ -1273,7 +1265,6 @@ void JsiDeclarativeEngine::LoadPluginJsWithModule(std::string& urlName)
     auto runtime = std::static_pointer_cast<ArkJSRuntime>(engineInstance_->GetJsRuntime());
     auto delegate = engineInstance_->GetDelegate();
     auto pluginUrlName = "@bundle:" + pluginBundleName_ + "/" + pluginModuleName_ + "/ets/" + urlName;
-    LOGD("the url of loading plugin is %{private}s", pluginUrlName.c_str());
     std::vector<uint8_t> content;
     if (!delegate->GetAssetContent("ets/modules.abc", content)) {
         return;
@@ -1320,7 +1311,6 @@ bool JsiDeclarativeEngine::LoadPageSource(
     const std::string& url, const std::function<void(const std::string&, int32_t)>& errorCallback)
 {
     ACE_SCOPED_TRACE("JsiDeclarativeEngine::LoadPageSource");
-    LOGD("JsiDeclarativeEngine LoadJs %{private}s page", url.c_str());
     ACE_DCHECK(engineInstance_);
     // get js bundle content
     const char jsExt[] = ".js";
@@ -1468,7 +1458,6 @@ bool JsiDeclarativeEngine::LoadNamedRouterSource(const std::string& namedRoute, 
 #endif
     Framework::UpdateRootComponent(ret->ToObject(vm));
     JSViewStackProcessor::JsStopGetAccessRecording();
-    LOGD("Load named router source, name = %{public}s", namedRoute.c_str());
     return true;
 }
 
@@ -1808,7 +1797,6 @@ void JsiDeclarativeEngine::TimerCallJs(const std::string& callbackId) const
 
 void JsiDeclarativeEngine::DestroyPageInstance(int32_t pageId)
 {
-    LOGD("Destroy page, pageId is %{public}d", pageId);
     ACE_DCHECK(engineInstance_);
 
     engineInstance_->DestroyRootViewHandle(pageId);
@@ -1816,7 +1804,6 @@ void JsiDeclarativeEngine::DestroyPageInstance(int32_t pageId)
 
 void JsiDeclarativeEngine::DestroyApplication(const std::string& packageName)
 {
-    LOGD("Destroy application, packageName is %{public}s", packageName.c_str());
     if (engineInstance_) {
         shared_ptr<JsRuntime> runtime = engineInstance_->GetJsRuntime();
         CallAppFunc("onDestroy");
@@ -1960,7 +1947,6 @@ void JsiDeclarativeEngine::SetLocalStorage(int32_t instanceId, NativeReference* 
         auto storage = JSRef<JSObject>::Cast(jsValue);
         JSLocalStorage::AddStorage(instanceId, storage);
     } else {
-        LOGD("SetLocalStorage instanceId:%{public}d invalid storage", instanceId);
         delete nativeValue;
         nativeValue = nullptr;
     }

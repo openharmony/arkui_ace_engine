@@ -134,10 +134,8 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
     CHECK_NULL_VOID(pipeline);
     auto dragDropManager = pipeline->GetDragDropManager();
     CHECK_NULL_VOID(dragDropManager);
-    if (dragDropManager->IsDragging() ||
-        dragDropManager->IsMsdpDragging() ||
+    if (dragDropManager->IsDragging() || dragDropManager->IsMsdpDragging() ||
         (!frameNode->IsDraggable() && frameNode->IsCustomerSet())) {
-        LOGD("not handle because of dragging now.");
         return;
     }
 #endif
@@ -169,6 +167,8 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
                 }
                 if (gestureHub->GetIsTextDraggable()) {
                     SetTextPixelMap(gestureHub);
+                } else {
+                    gestureHub->SetPixelMap(nullptr);
                 }
             } else if (!isNotInPreviewState_) {
                 if (gestureHub->GetTextDraggable()) {
@@ -416,6 +416,7 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
             auto dragPreviewInfo = frameNode->GetDragPreview();
             if (dragPreviewInfo.pixelMap != nullptr) {
                 gestureHub->SetPixelMap(dragPreviewInfo.pixelMap);
+                gestureHub->SetDragPreviewPixelMap(dragPreviewInfo.pixelMap);
             } else if (dragPreviewInfo.customNode != nullptr) {
 #if defined(ENABLE_DRAG_FRAMEWORK) && defined(ENABLE_ROSEN_BACKEND) && defined(PIXEL_MAP_SUPPORTED)
                 auto callback = [id = Container::CurrentId(), pipeline, gestureHub]
@@ -428,6 +429,7 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
                         taskScheduler->PostTask([gestureHub, customPixelMap]() {
                             CHECK_NULL_VOID(gestureHub);
                             gestureHub->SetPixelMap(customPixelMap);
+                            gestureHub->SetDragPreviewPixelMap(customPixelMap);
                             }, TaskExecutor::TaskType::UI);
                     }
                 };

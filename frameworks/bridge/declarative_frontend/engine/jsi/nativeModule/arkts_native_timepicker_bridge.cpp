@@ -51,7 +51,7 @@ ArkUINativeModuleValue TimepickerBridge::ResetTimepickerBackgroundColor(ArkUIRun
     return panda::JSValueRef::Undefined(vm);
 }
 
-ArkUINativeModuleValue TimepickerBridge::SetTextStyle(ArkUIRuntimeCallInfo*runtimeCallInfo)
+ArkUINativeModuleValue TimepickerBridge::SetTextStyle(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
@@ -79,19 +79,14 @@ ArkUINativeModuleValue TimepickerBridge::SetTextStyle(ArkUIRuntimeCallInfo*runti
         if (fontWeightArg->IsNumber()) {
             weight = std::to_string(fontWeightArg->Int32Value(vm));
         } else {
-            ArkTSUtils::ParseJsString(vm, fontWeightArg, weight);
-        }
-    }
-    std::string families = DEFAULT_ERR_CODE;
-    std::vector<std::string> fontFamilies;
-    if (!fontFamilyArg->IsNull() && !fontFamilyArg->IsUndefined()) {
-        ArkTSUtils::ParseJsFontFamilies(vm, fontFamilyArg, fontFamilies);
-        if (fontFamilies.size() > 0) {
-            families = "";
-            for (uint32_t i = 0; i < fontFamilies.size(); i++) {
-                families += fontFamilies.at(i);
+            if (!ArkTSUtils::ParseJsString(vm, fontWeightArg, weight) || weight.empty()) {
+                weight = DEFAULT_ERR_CODE;
             }
         }
+    }
+    std::string fontFamily;
+    if (!ArkTSUtils::ParseJsFontFamiliesToString(vm, fontFamilyArg, fontFamily) || fontFamily.empty()) {
+        fontFamily = DEFAULT_ERR_CODE;
     }
     int32_t styleVal = 0;
     if (!fontStyleArg->IsNull() && !fontStyleArg->IsUndefined()) {
@@ -99,14 +94,13 @@ ArkUINativeModuleValue TimepickerBridge::SetTextStyle(ArkUIRuntimeCallInfo*runti
     }
     std::string fontSizeStr = size.ToString();
     std::string fontInfo = StringUtils::FormatString(
-        FORMAT_FONT.c_str(), fontSizeStr.c_str(), weight.c_str(), families.c_str());
-
+        FORMAT_FONT.c_str(), fontSizeStr.c_str(), weight.c_str(), fontFamily.c_str());
     GetArkUIInternalNodeAPI()->GetTimepickerModifier().SetTimepickerTextStyle(
         nativeNode, color.GetValue(), fontInfo.c_str(), styleVal);
     return panda::JSValueRef::Undefined(vm);
 }
 
-ArkUINativeModuleValue TimepickerBridge::SetSelectedTextStyle(ArkUIRuntimeCallInfo*runtimeCallInfo)
+ArkUINativeModuleValue TimepickerBridge::SetSelectedTextStyle(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
@@ -134,19 +128,14 @@ ArkUINativeModuleValue TimepickerBridge::SetSelectedTextStyle(ArkUIRuntimeCallIn
         if (fontWeightArg->IsNumber()) {
             weight = std::to_string(fontWeightArg->Int32Value(vm));
         } else {
-            ArkTSUtils::ParseJsString(vm, fontWeightArg, weight);
-        }
-    }
-    std::string families = DEFAULT_ERR_CODE;
-    std::vector<std::string> fontFamilies;
-    if (!fontFamilyArg->IsNull() && !fontFamilyArg->IsUndefined()) {
-        ArkTSUtils::ParseJsFontFamilies(vm, fontFamilyArg, fontFamilies);
-        if (fontFamilies.size() > 0) {
-            families = "";
-            for (uint32_t i = 0; i < fontFamilies.size(); i++) {
-                families += fontFamilies.at(i);
+            if (!ArkTSUtils::ParseJsString(vm, fontWeightArg, weight) || weight.empty()) {
+                weight = DEFAULT_ERR_CODE;
             }
         }
+    }
+    std::string fontFamily;
+    if (!ArkTSUtils::ParseJsFontFamiliesToString(vm, fontFamilyArg, fontFamily) || fontFamily.empty()) {
+        fontFamily = DEFAULT_ERR_CODE;
     }
     int32_t styleVal = 0;
     if (!fontStyleArg->IsNull() && !fontStyleArg->IsUndefined()) {
@@ -154,14 +143,13 @@ ArkUINativeModuleValue TimepickerBridge::SetSelectedTextStyle(ArkUIRuntimeCallIn
     }
     std::string fontSizeStr = size.ToString();
     std::string fontInfo = StringUtils::FormatString(
-        FORMAT_FONT.c_str(), fontSizeStr.c_str(), weight.c_str(), families.c_str());
-
+        FORMAT_FONT.c_str(), fontSizeStr.c_str(), weight.c_str(), fontFamily.c_str());
     GetArkUIInternalNodeAPI()->GetTimepickerModifier().SetTimepickerSelectedTextStyle(
         nativeNode, color.GetValue(), fontInfo.c_str(), styleVal);
     return panda::JSValueRef::Undefined(vm);
 }
 
-ArkUINativeModuleValue TimepickerBridge::SetDisappearTextStyle(ArkUIRuntimeCallInfo*runtimeCallInfo)
+ArkUINativeModuleValue TimepickerBridge::SetDisappearTextStyle(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
@@ -189,19 +177,14 @@ ArkUINativeModuleValue TimepickerBridge::SetDisappearTextStyle(ArkUIRuntimeCallI
         if (fontWeightArg->IsNumber()) {
             weight = std::to_string(fontWeightArg->Int32Value(vm));
         } else {
-            ArkTSUtils::ParseJsString(vm, fontWeightArg, weight);
-        }
-    }
-    std::string families = DEFAULT_ERR_CODE;
-    std::vector<std::string> fontFamilies;
-    if (!fontFamilyArg->IsNull() && !fontFamilyArg->IsUndefined()) {
-        ArkTSUtils::ParseJsFontFamilies(vm, fontFamilyArg, fontFamilies);
-        if (fontFamilies.size() > 0) {
-            families = "";
-            for (uint32_t i = 0; i < fontFamilies.size(); i++) {
-                families += fontFamilies.at(i);
+            if (!ArkTSUtils::ParseJsString(vm, fontWeightArg, weight) || weight.empty()) {
+                weight = DEFAULT_ERR_CODE;
             }
         }
+    }
+    std::string fontFamily;
+    if (!ArkTSUtils::ParseJsFontFamiliesToString(vm, fontFamilyArg, fontFamily) || fontFamily.empty()) {
+        fontFamily = DEFAULT_ERR_CODE;
     }
     int32_t styleVal = 0;
     if (!fontStyleArg->IsNull() && !fontStyleArg->IsUndefined()) {
@@ -209,14 +192,13 @@ ArkUINativeModuleValue TimepickerBridge::SetDisappearTextStyle(ArkUIRuntimeCallI
     }
     std::string fontSizeStr = size.ToString();
     std::string fontInfo = StringUtils::FormatString(
-        FORMAT_FONT.c_str(), fontSizeStr.c_str(), weight.c_str(), families.c_str());
-
+        FORMAT_FONT.c_str(), fontSizeStr.c_str(), weight.c_str(), fontFamily.c_str());
     GetArkUIInternalNodeAPI()->GetTimepickerModifier().SetTimepickerDisappearTextStyle(
         nativeNode, color.GetValue(), fontInfo.c_str(), styleVal);
     return panda::JSValueRef::Undefined(vm);
 }
 
-ArkUINativeModuleValue TimepickerBridge::ResetTextStyle(ArkUIRuntimeCallInfo*runtimeCallInfo)
+ArkUINativeModuleValue TimepickerBridge::ResetTextStyle(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
@@ -226,7 +208,7 @@ ArkUINativeModuleValue TimepickerBridge::ResetTextStyle(ArkUIRuntimeCallInfo*run
     return panda::JSValueRef::Undefined(vm);
 }
 
-ArkUINativeModuleValue TimepickerBridge::ResetSelectedTextStyle(ArkUIRuntimeCallInfo*runtimeCallInfo)
+ArkUINativeModuleValue TimepickerBridge::ResetSelectedTextStyle(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
@@ -236,7 +218,7 @@ ArkUINativeModuleValue TimepickerBridge::ResetSelectedTextStyle(ArkUIRuntimeCall
     return panda::JSValueRef::Undefined(vm);
 }
 
-ArkUINativeModuleValue TimepickerBridge::ResetDisappearTextStyle(ArkUIRuntimeCallInfo*runtimeCallInfo)
+ArkUINativeModuleValue TimepickerBridge::ResetDisappearTextStyle(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
@@ -245,4 +227,4 @@ ArkUINativeModuleValue TimepickerBridge::ResetDisappearTextStyle(ArkUIRuntimeCal
     GetArkUIInternalNodeAPI()->GetTimepickerModifier().ResetTimepickerDisappearTextStyle(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
-}
+} // namespace OHOS::Ace::NG

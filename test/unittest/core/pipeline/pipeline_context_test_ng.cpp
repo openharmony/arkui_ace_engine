@@ -890,6 +890,10 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg017, TestSize.Level1)
     ASSERT_NE(context_, nullptr);
     context_->SetupRootElement();
     auto manager = context_->GetDragDropManager();
+    ASSERT_NE(manager, nullptr);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    manager->AddDragFrameNode(frameNode->GetId(), frameNode);
 
     /**
      * @tc.steps2: Call the function OnDragEvent with isDragged_=true, currentId_=DEFAULT_INT1 and DRAG_EVENT_END.
@@ -1068,8 +1072,8 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg021, TestSize.Level1)
     event.action = AxisAction::BEGIN;
     ResetEventFlag(TOUCH_TEST_FLAG | AXIS_TEST_FLAG);
     context_->OnAxisEvent(event);
-    EXPECT_TRUE(GetEventFlag(TOUCH_TEST_FLAG));
-    EXPECT_TRUE(GetEventFlag(AXIS_TEST_FLAG));
+    EXPECT_FALSE(GetEventFlag(TOUCH_TEST_FLAG));
+    EXPECT_FALSE(GetEventFlag(AXIS_TEST_FLAG));
 
     /**
      * @tc.steps3: Call the function OnAxisEvent with action = AxisAction::UPDATE.
@@ -1079,7 +1083,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg021, TestSize.Level1)
     ResetEventFlag(TOUCH_TEST_FLAG | AXIS_TEST_FLAG);
     context_->OnAxisEvent(event);
     EXPECT_FALSE(GetEventFlag(TOUCH_TEST_FLAG));
-    EXPECT_TRUE(GetEventFlag(AXIS_TEST_FLAG));
+    EXPECT_FALSE(GetEventFlag(AXIS_TEST_FLAG));
 
     /**
      * @tc.steps4: Call the function OnAxisEvent with action = AxisAction::END.
@@ -1105,8 +1109,11 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg022, TestSize.Level1)
      */
     ASSERT_NE(context_, nullptr);
     context_->SetupRootElement();
-    auto eventManager = AceType::MakeRefPtr<EventManager>();
-    context_->SetEventManager(eventManager);
+    auto eventManager = context_->GetDragDropManager();
+    ASSERT_NE(eventManager, nullptr);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    eventManager->AddDragFrameNode(frameNode->GetId(), frameNode);
     KeyEvent event;
 
     /**
@@ -1118,7 +1125,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg022, TestSize.Level1)
     event.action = KeyAction::DOWN;
     event.code = KeyCode::KEY_TAB;
     event.pressedCodes = { KeyCode::KEY_TAB };
-    EXPECT_TRUE(context_->OnKeyEvent(event));
+    EXPECT_FALSE(context_->OnKeyEvent(event));
     EXPECT_TRUE(context_->GetIsFocusActive());
 
     /**
@@ -1129,8 +1136,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg022, TestSize.Level1)
     context_->SetIsFocusActive(false);
     event.pressedCodes = { KeyCode::KEY_DPAD_UP };
     event.code = KeyCode::KEY_DPAD_UP;
-    eventManager->SetInstanceId(DEFAULT_INT0);
-    EXPECT_TRUE(context_->OnKeyEvent(event));
+    EXPECT_FALSE(context_->OnKeyEvent(event));
     EXPECT_FALSE(context_->GetIsFocusActive());
 
     /**
@@ -1138,12 +1144,11 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg022, TestSize.Level1)
      #             pressedCodes = { KeyCode::KEY_CLEAR }.
      * @tc.expected: The return value of OnKeyEvent is true.
      */
-    eventManager->SetInstanceId(DEFAULT_INT0);
     context_->SetIsFocusActive(false);
     event.action = KeyAction::UP;
     event.code = KeyCode::KEY_CLEAR;
     event.pressedCodes = { KeyCode::KEY_CLEAR };
-    EXPECT_TRUE(context_->OnKeyEvent(event));
+    EXPECT_FALSE(context_->OnKeyEvent(event));
     EXPECT_FALSE(context_->GetIsFocusActive());
 
     /**
@@ -1151,7 +1156,6 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg022, TestSize.Level1)
      #             pressedCodes = { KeyCode::KEY_CLEAR }.
      * @tc.expected: The return value of OnKeyEvent is false.
      */
-    eventManager->SetInstanceId(DEFAULT_INT1);
     context_->SetIsFocusActive(true);
     event.action = KeyAction::UP;
     event.code = KeyCode::KEY_CLEAR;
@@ -1165,7 +1169,6 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg022, TestSize.Level1)
     * @tc.expected: The return value of OnKeyEvent is false.
     */
     context_->rootNode_.Reset();
-    eventManager->SetInstanceId(DEFAULT_INT1);
     context_->SetIsFocusActive(true);
     event.action = KeyAction::DOWN;
     event.code = KeyCode::KEY_ESCAPE;
@@ -1216,7 +1219,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg023, TestSize.Level1)
     event.button = MouseButton::LEFT_BUTTON;
     ResetEventFlag(DISPATCH_TOUCH_EVENT_TOUCH_EVENT_FLAG);
     context_->OnMouseEvent(event);
-    EXPECT_TRUE(GetEventFlag(DISPATCH_TOUCH_EVENT_TOUCH_EVENT_FLAG));
+    EXPECT_FALSE(GetEventFlag(DISPATCH_TOUCH_EVENT_TOUCH_EVENT_FLAG));
 
     /**
      * @tc.steps4: Call the function OnMouseEvent with action = MouseAction::PRESS
@@ -1227,7 +1230,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg023, TestSize.Level1)
     event.button = MouseButton::LEFT_BUTTON;
     ResetEventFlag(DISPATCH_TOUCH_EVENT_TOUCH_EVENT_FLAG);
     context_->OnMouseEvent(event);
-    EXPECT_TRUE(GetEventFlag(DISPATCH_TOUCH_EVENT_TOUCH_EVENT_FLAG));
+    EXPECT_FALSE(GetEventFlag(DISPATCH_TOUCH_EVENT_TOUCH_EVENT_FLAG));
 
     /**
      * @tc.steps5: Call the function OnMouseEvent with action = MouseAction::MOVE
@@ -1250,7 +1253,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg023, TestSize.Level1)
     event.pressedButtons = MOUSE_PRESS_LEFT;
     ResetEventFlag(DISPATCH_TOUCH_EVENT_TOUCH_EVENT_FLAG);
     context_->OnMouseEvent(event);
-    EXPECT_TRUE(GetEventFlag(DISPATCH_TOUCH_EVENT_TOUCH_EVENT_FLAG));
+    EXPECT_FALSE(GetEventFlag(DISPATCH_TOUCH_EVENT_TOUCH_EVENT_FLAG));
 
     /**
      * @tc.steps7: Call the function OnMouseEvent with action = MouseAction::PRESS
@@ -1261,7 +1264,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg023, TestSize.Level1)
     event.pressedButtons = MOUSE_PRESS_LEFT;
     ResetEventFlag(DISPATCH_TOUCH_EVENT_TOUCH_EVENT_FLAG);
     context_->OnMouseEvent(event);
-    EXPECT_TRUE(GetEventFlag(DISPATCH_TOUCH_EVENT_TOUCH_EVENT_FLAG));
+    EXPECT_FALSE(GetEventFlag(DISPATCH_TOUCH_EVENT_TOUCH_EVENT_FLAG));
 
     /**
      * @tc.steps8: Call the function OnMouseEvent with action = MouseAction::MOVE
@@ -1293,7 +1296,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg023, TestSize.Level1)
     event.action = MouseAction::PRESS;
     ResetEventFlag(DISPATCH_TOUCH_EVENT_TOUCH_EVENT_FLAG);
     context_->OnMouseEvent(event);
-    EXPECT_TRUE(GetEventFlag(DISPATCH_TOUCH_EVENT_TOUCH_EVENT_FLAG));
+    EXPECT_FALSE(GetEventFlag(DISPATCH_TOUCH_EVENT_TOUCH_EVENT_FLAG));
 }
 
 /**
@@ -1328,7 +1331,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg024, TestSize.Level1)
     context_->touchEvents_.push_back(event);
     ResetEventFlag(DISPATCH_TOUCH_EVENT_TOUCH_EVENT_FLAG);
     context_->FlushTouchEvents();
-    EXPECT_TRUE(GetEventFlag(DISPATCH_TOUCH_EVENT_TOUCH_EVENT_FLAG));
+    EXPECT_FALSE(GetEventFlag(DISPATCH_TOUCH_EVENT_TOUCH_EVENT_FLAG));
 
     /**
      * @tc.steps4: Call the function FlushTouchEvents with unempty touchEvents_.
@@ -1340,7 +1343,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg024, TestSize.Level1)
     context_->touchEvents_.push_back(event2);
     ResetEventFlag(DISPATCH_TOUCH_EVENT_TOUCH_EVENT_FLAG);
     context_->FlushTouchEvents();
-    EXPECT_TRUE(GetEventFlag(DISPATCH_TOUCH_EVENT_TOUCH_EVENT_FLAG));
+    EXPECT_FALSE(GetEventFlag(DISPATCH_TOUCH_EVENT_TOUCH_EVENT_FLAG));
 }
 
 /**

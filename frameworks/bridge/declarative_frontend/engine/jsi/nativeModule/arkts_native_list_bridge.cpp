@@ -16,18 +16,21 @@
 
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_api.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
-#include "frameworks/core/components/list/list_theme.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_abstract.h"
+#include "frameworks/core/components/list/list_theme.h"
 
 namespace OHOS::Ace::NG {
-constexpr int NUM_0 = 0;
-constexpr int NUM_1 = 1;
-constexpr int NUM_2 = 2;
-constexpr int NUM_3 = 3;
-constexpr int NUM_4 = 4;
-constexpr int NUM_5 = 5;
-constexpr int NUM_6 = 6;
-constexpr int NUM_7 = 7;
+constexpr int32_t NUM_0 = 0;
+constexpr int32_t NUM_1 = 1;
+constexpr int32_t NUM_2 = 2;
+constexpr int32_t NUM_3 = 3;
+constexpr int32_t NUM_4 = 4;
+constexpr int32_t NUM_5 = 5;
+constexpr int32_t NUM_6 = 6;
+constexpr int32_t NUM_7 = 7;
+
+constexpr int32_t ARG_LENGTH = 3;
+
 ArkUINativeModuleValue ListBridge::SetListLanes(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
@@ -38,23 +41,37 @@ ArkUINativeModuleValue ListBridge::SetListLanes(ArkUIRuntimeCallInfo* runtimeCal
     Local<JSValueRef> fourthArg = runtimeCallInfo->GetCallArgRef(NUM_3);
     Local<JSValueRef> fifthArg = runtimeCallInfo->GetCallArgRef(NUM_4);
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+    ArkUIDimensionType gutterType;
+    ArkUIDimensionType minLengthType;
+    ArkUIDimensionType maxLengthType;
 
     CalcDimension gutter;
     if (fifthArg->IsUndefined() || !ArkTSUtils::ParseJsDimension(vm, fifthArg, gutter, DimensionUnit::VP)) {
         gutter = Dimension(0);
+        gutterType.value = gutter.Value();
+        gutterType.units = static_cast<int32_t>(gutter.Unit());
     }
 
     if (!secondArg->IsUndefined()) {
         CalcDimension minLength = 0.0_vp;
         CalcDimension maxLength = 0.0_vp;
+        minLengthType.value = minLength.Value();
+        minLengthType.units = static_cast<int32_t>(minLength.Unit());
+        maxLengthType.value = maxLength.Value();
+        maxLengthType.units = static_cast<int32_t>(maxLength.Unit());
         GetArkUIInternalNodeAPI()->GetListModifier().SetListLanes(
-            nativeNode, secondArg->ToNumber(vm)->Value(), minLength, maxLength, gutter);
+            nativeNode, secondArg->ToNumber(vm)->Value(), &minLengthType, &maxLengthType, &gutterType);
     } else {
         CalcDimension minLength;
         CalcDimension maxLength;
         ArkTSUtils::ParseJsDimension(vm, thirdArg, minLength, DimensionUnit::VP);
         ArkTSUtils::ParseJsDimension(vm, fourthArg, maxLength, DimensionUnit::VP);
-        GetArkUIInternalNodeAPI()->GetListModifier().SetListLanes(nativeNode, -1, minLength, maxLength, gutter);
+        minLengthType.value = minLength.Value();
+        minLengthType.units = static_cast<int32_t>(minLength.Unit());
+        maxLengthType.value = maxLength.Value();
+        maxLengthType.units = static_cast<int32_t>(maxLength.Unit());
+        GetArkUIInternalNodeAPI()->GetListModifier().SetListLanes(
+            nativeNode, -1, &minLengthType, &maxLengthType, &gutterType); // invild value .
     }
 
     return panda::JSValueRef::Undefined(vm);
@@ -238,7 +255,7 @@ ArkUINativeModuleValue ListBridge::SetListEdgeEffect(ArkUIRuntimeCallInfo* runti
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
     Local<JSValueRef> thirdArg = runtimeCallInfo->GetCallArgRef(NUM_2);
-    
+
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
     int32_t effect = static_cast<int32_t>(EdgeEffect::SPRING);
 
@@ -476,9 +493,15 @@ ArkUINativeModuleValue ListBridge::SetDivider(ArkUIRuntimeCallInfo* runtimeCallI
         !ArkTSUtils::ParseJsDimension(vm, fifthArg, endMargin, DimensionUnit::VP)) {
         endMargin = 0.0_vp;
     };
-    GetArkUIInternalNodeAPI()->GetListModifier().ListSetDivider(nativeNode, strokeWidth.Value(), color.GetValue(),
-        startMargin.Value(), endMargin.Value(), static_cast<int>(strokeWidth.Unit()),
-        static_cast<int>(startMargin.Unit()), static_cast<int>(endMargin.Unit()));
+    double values[ARG_LENGTH];
+    int32_t units[ARG_LENGTH];
+    values[NUM_0] = strokeWidth.Value();
+    values[NUM_1] = startMargin.Value();
+    values[NUM_2] = endMargin.Value();
+    units[NUM_0] = static_cast<int32_t>(strokeWidth.Unit());
+    units[NUM_1] = static_cast<int32_t>(startMargin.Unit());
+    units[NUM_2] = static_cast<int32_t>(endMargin.Unit());
+    GetArkUIInternalNodeAPI()->GetListModifier().ListSetDivider(nativeNode, color.GetValue(), values, units);
 
     return panda::JSValueRef::Undefined(vm);
 }
@@ -508,11 +531,6 @@ ArkUINativeModuleValue ListBridge::SetChainAnimationOptions(ArkUIRuntimeCallInfo
 
     CalcDimension minSpace;
     CalcDimension maxSpace;
-    double conductivity = 0;
-    double intensity = 0;
-    int32_t edgeEffect = 0;
-    double stiffness = 0;
-    double damping = 0;
 
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
     if (secondArg->IsUndefined() || thirdArg->IsUndefined()) {
@@ -521,23 +539,26 @@ ArkUINativeModuleValue ListBridge::SetChainAnimationOptions(ArkUIRuntimeCallInfo
 
         minSpace = listTheme->GetChainMinSpace();
         maxSpace = listTheme->GetChainMaxSpace();
-        conductivity = listTheme->GetChainConductivity();
-        intensity = listTheme->GetChainIntensity();
-        edgeEffect = 0;
-        stiffness = listTheme->GetChainStiffness();
-        damping = listTheme->GetChainDamping();
+        ArkUIChainAnimationOptionsType chainAnimationOptions;
+        chainAnimationOptions.conductivity = listTheme->GetChainConductivity();
+        chainAnimationOptions.intensity = listTheme->GetChainIntensity();
+        chainAnimationOptions.edgeEffect = 0;
+        chainAnimationOptions.stiffness = listTheme->GetChainStiffness();
+        chainAnimationOptions.damping = listTheme->GetChainDamping();
 
         ArkTSUtils::ParseJsDimension(vm, secondArg, minSpace, DimensionUnit::VP);
         ArkTSUtils::ParseJsDimension(vm, thirdArg, maxSpace, DimensionUnit::VP);
-        ArkTSUtils::ParseJsDouble(vm, fourthArg, conductivity);
-        ArkTSUtils::ParseJsDouble(vm, fifthArg, intensity);
-        edgeEffect = sixthArg->ToNumber(vm)->Value();
-        ArkTSUtils::ParseJsDouble(vm, seventhArg, stiffness);
-        ArkTSUtils::ParseJsDouble(vm, eighthArg, damping);
+        ArkTSUtils::ParseJsDouble(vm, fourthArg, chainAnimationOptions.conductivity);
+        ArkTSUtils::ParseJsDouble(vm, fifthArg, chainAnimationOptions.intensity);
+        chainAnimationOptions.edgeEffect = sixthArg->ToNumber(vm)->Value();
+        ArkTSUtils::ParseJsDouble(vm, seventhArg, chainAnimationOptions.stiffness);
+        ArkTSUtils::ParseJsDouble(vm, eighthArg, chainAnimationOptions.damping);
+        chainAnimationOptions.minSpace = minSpace.Value();
+        chainAnimationOptions.minSpaceUnits = static_cast<int32_t>(minSpace.Unit());
+        chainAnimationOptions.maxSpace = maxSpace.Value();
+        chainAnimationOptions.maxSpaceUnits = static_cast<int32_t>(maxSpace.Unit());
 
-        GetArkUIInternalNodeAPI()->GetListModifier().SetChainAnimationOptions(nativeNode, minSpace.Value(),
-            maxSpace.Value(), conductivity, intensity, edgeEffect, stiffness, damping,
-            static_cast<int>(minSpace.Unit()), static_cast<int>(maxSpace.Unit()));
+        GetArkUIInternalNodeAPI()->GetListModifier().SetChainAnimationOptions(nativeNode, &chainAnimationOptions);
     }
 
     return panda::JSValueRef::Undefined(vm);

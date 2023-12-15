@@ -72,14 +72,12 @@ void JSGridItem::CreateForPartialUpdate(const JSCallbackInfo& args)
     auto gridItemDeepRenderFunc = [execCtx = args.GetExecutionContext(), jsDeepRenderFunc = std::move(jsDeepRender)](
                                       int32_t elmtId) {
         ACE_SCOPED_TRACE("JSGridItem::ExecuteDeepRender");
-        LOGD("GridItem elmtId %{public}d DeepRender JS function execution start ....", elmtId);
         ACE_DCHECK(componentsStack_.empty());
         JAVASCRIPT_EXECUTION_SCOPE(execCtx);
         JSRef<JSVal> jsParams[2];
         jsParams[0] = JSRef<JSVal>::Make(ToJSValue(elmtId));
         jsParams[1] = JSRef<JSVal>::Make(ToJSValue(true));
         jsDeepRenderFunc->ExecuteJS(2, jsParams);
-        LOGD("GridItem elmtId %{public}d DeepRender JS function execution - done ", elmtId);
     };
 
     NG::GridItemStyle gridItemStyle = NG::GridItemStyle::NONE;

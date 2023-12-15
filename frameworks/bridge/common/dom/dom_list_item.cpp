@@ -224,7 +224,6 @@ bool DOMListItem::SetSpecializedStyle(const std::pair<std::string, std::string>&
 
 bool DOMListItem::AddSpecializedEvent(int32_t pageId, const std::string& event)
 {
-    LOGD("DOMListItem AddEvent");
     if (event == DOM_LIST_ITEM_EVENT_STICKY) {
         stickyEventId_ = EventMarker(GetNodeIdForEvent(), event, pageId);
         listItemComponent_->SetStickyEventId(stickyEventId_);

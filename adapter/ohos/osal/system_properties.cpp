@@ -347,7 +347,6 @@ void SystemProperties::InitDeviceTypeBySystemProperty()
 
     auto deviceProp = system::GetParameter(PROPERTY_DEVICE_TYPE, PROPERTY_DEVICE_TYPE_DEFAULT);
     // Properties: "default", "tv", "tablet", "watch", "car"
-    LOGD("GetDeviceType, deviceProp=%{private}s.", deviceProp.c_str());
     if (deviceProp == PROPERTY_DEVICE_TYPE_TV) {
         deviceType_ = DeviceType::TV;
     } else if (deviceProp == PROPERTY_DEVICE_TYPE_CAR) {

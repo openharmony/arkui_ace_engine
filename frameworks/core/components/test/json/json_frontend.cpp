@@ -128,16 +128,12 @@ void JsonFrontend::UpdateState(Frontend::State state)
 {
     switch (state) {
         case Frontend::State::ON_CREATE:
-            LOGD("update state in JsonFrontend with state ON_CREATE");
             break;
         case Frontend::State::ON_DESTROY:
-            LOGD("update state in JsonFrontend with state ON_DESTROY");
             break;
         case Frontend::State::ON_SHOW:
-            LOGD("update state in JsonFrontend with state ON_SHOW");
             break;
         case Frontend::State::ON_HIDE:
-            LOGD("update state in JsonFrontend with state ON_HIDE");
             break;
         default:
             LOGE("error State: %{public}d", state);
@@ -160,53 +156,32 @@ bool JsonFrontend::OnBackPressed()
     return false;
 }
 
-void JsonFrontend::OnShow()
-{
-    LOGD("JsonFrontend OnShow");
-}
+void JsonFrontend::OnShow() {}
 
-void JsonFrontend::OnHide()
-{
-    LOGD("JsonFrontend OnHide");
-}
+void JsonFrontend::OnHide() {}
 
-void JsonFrontend::OnActive()
-{
-    LOGD("JsonFrontend OnActive");
-}
+void JsonFrontend::OnActive() {}
 
-void JsonFrontend::OnInactive()
-{
-    LOGD("JsonFrontend OnInactive");
-}
+void JsonFrontend::OnInactive() {}
 
 bool JsonFrontend::OnStartContinuation()
 {
-    LOGD("JsonFrontend OnStartContinuation");
     return false;
 }
 
-void JsonFrontend::OnCompleteContinuation(int32_t code)
-{
-    LOGD("JsonFrontend OnCompleteContinuation");
-}
+void JsonFrontend::OnCompleteContinuation(int32_t code) {}
 
 void JsonFrontend::OnSaveData(std::string& data)
 {
     data = "";
-    LOGD("JsonFrontend OnSaveData %{private}s", data.c_str());
 }
 
 bool JsonFrontend::OnRestoreData(const std::string& data)
 {
-    LOGD("JsonFrontend OnRestoreData");
     return false;
 }
 
-void JsonFrontend::OnNewRequest(const std::string& data)
-{
-    LOGD("JsonFrontend OnNewRequest");
-}
+void JsonFrontend::OnNewRequest(const std::string& data) {}
 
 void JsonFrontend::CallRouterBack() {}
 

@@ -1,3 +1,18 @@
+/*
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 /// <reference path="./import.ts" />
 const arkUINativeModule = globalThis.getArkUINativeModule();
 function GetUINativeModule() {
@@ -5,6 +20,47 @@ function GetUINativeModule() {
     return arkUINativeModule;
   }
   return arkUINativeModule;
+}
+
+const UI_STATE_NORMAL = 0;
+const UI_STATE_PRESSED = 1;
+const UI_STATE_FOCUSED = 1 << 1;
+const UI_STATE_DISABLED = 1 << 2;
+const UI_STATE_SELECTED = 1 << 3;
+
+function applyUIAttributes(modifier: AttributeModifier, nativeNode: KNode, component: ArkComponent) {
+  let state = 0;
+  if (modifier.applyPressedAttribute !== undefined) {
+    state |= UI_STATE_PRESSED;
+  }
+  if (modifier.applyFocusedAttribute !== undefined) {
+    state |= UI_STATE_FOCUSED;
+  }
+  if (modifier.applyDisabledAttribute !== undefined) {
+    state |= UI_STATE_DISABLED;
+  }
+  if (modifier.applySelectedAttribute !== undefined) {
+    state |= UI_STATE_SELECTED;
+  }
+
+  GetUINativeModule().setSupportedUIState(nativeNode, state);
+  const currentUIState = GetUINativeModule().getUIState(nativeNode);
+
+  if (modifier.applyNormalAttribute !== undefined) {
+    modifier.applyNormalAttribute(component);
+  }
+  if (currentUIState & UI_STATE_PRESSED) {
+    modifier.applyPressedAttribute(component);
+  }
+  if (currentUIState & UI_STATE_FOCUSED) {
+    modifier.applyFocusedAttribute(component);
+  }
+  if (currentUIState & UI_STATE_DISABLED) {
+    modifier.applyDisabledAttribute(component);
+  }
+  if (currentUIState & UI_STATE_SELECTED) {
+    modifier.applySelectedAttribute(component);
+  }
 }
 
 function isResource(variable: any): variable is Resource {
@@ -522,7 +578,7 @@ class SaturateModifier extends Modifier<number> {
   }
 }
 
-class ColorBlendModifier extends Modifier<Color | string | Resource> {
+class ColorBlendModifier extends ModifierWithKey<Color | string | Resource> {
   constructor(value: Color | string | Resource) {
     super(value);
   }

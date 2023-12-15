@@ -131,11 +131,6 @@ public:
 
     void MarkIsSelected(bool isSelected);
 
-    void SetSelected(bool isSelected)
-    {
-        preCheck_ = isSelected;
-    }
-
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
     {
         Pattern::ToJsonValue(json);

@@ -1216,8 +1216,6 @@ RefPtr<LayoutWrapperNode> FrameNode::UpdateLayoutWrapper(
     } else {
         layoutWrapper->Update(WeakClaim(this), geometryNode_->Clone(), layoutProperty_->Clone());
     }
-    LOGD("%{public}s create layout wrapper: flag = %{public}x, forceMeasure = %{public}d, forceLayout = %{public}d",
-        GetTag().c_str(), flag, forceMeasure, forceLayout);
     do {
         if (CheckNeedMeasure(flag) || forceMeasure) {
             layoutWrapper->SetLayoutAlgorithm(MakeRefPtr<LayoutAlgorithmWrapper>(pattern_->CreateLayoutAlgorithm()));
@@ -1711,6 +1709,8 @@ HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& pare
 
     auto childNode = GetDispatchFrameNode(touchRes);
     if (childNode != nullptr) {
+        TAG_LOGD(AceLogTag::ACE_UIEVENT, "%{public}s do TouchTest, parameter isDispatch is true.",
+            childNode->GetInspectorId()->c_str());
         auto hitResult = childNode->TouchTest(
             globalPoint, localPoint, subRevertPoint, touchRestrict, newComingTargets, touchId, true);
         if (hitResult == HitTestResult::STOP_BUBBLING) {
@@ -1897,8 +1897,6 @@ HitTestResult FrameNode::AxisTest(
     const PointF& globalPoint, const PointF& parentLocalPoint, AxisTestResult& onAxisResult)
 {
     const auto& rect = renderContext_->GetPaintRectWithTransform();
-    LOGD("AxisTest: type is %{public}s, the region is %{public}lf, %{public}lf, %{public}lf, %{public}lf",
-        GetTag().c_str(), rect.Left(), rect.Top(), rect.Width(), rect.Height());
     // TODO: disableTouchEvent || disabled_ need handle
 
     // TODO: Region need change to RectList
@@ -2122,21 +2120,23 @@ OffsetF FrameNode::GetParentGlobalOffsetDuringLayout() const
     return offset;
 }
 
-OffsetF FrameNode::GetPaintRectGlobalOffsetWithTranslate(bool excludeSelf) const
+std::pair<OffsetF, bool> FrameNode::GetPaintRectGlobalOffsetWithTranslate(bool excludeSelf) const
 {
+    bool error = false;
     auto context = GetRenderContext();
-    CHECK_NULL_RETURN(context, OffsetF());
-    OffsetF offset = excludeSelf ? OffsetF() : context->GetPaintRectWithTranslate().GetOffset();
+    CHECK_NULL_RETURN(context, std::make_pair(OffsetF(), error));
+    OffsetF offset = excludeSelf ? OffsetF() : context->GetPaintRectWithTranslate().first.GetOffset();
     auto parent = GetAncestorNodeOfFrame();
     while (parent) {
         auto renderContext = parent->GetRenderContext();
-        CHECK_NULL_RETURN(renderContext, OffsetF());
-        auto rect = renderContext->GetPaintRectWithTranslate();
-        CHECK_NULL_RETURN(rect.IsValid(), offset + parent->GetPaintRectOffset());
+        CHECK_NULL_RETURN(renderContext, std::make_pair(OffsetF(), error));
+        auto [rect, err] = renderContext->GetPaintRectWithTranslate();
+        error = error || err;
+        CHECK_NULL_RETURN(rect.IsValid(), std::make_pair(offset + parent->GetPaintRectOffset(), error));
         offset += rect.GetOffset();
         parent = parent->GetAncestorNodeOfFrame();
     }
-    return offset;
+    return std::make_pair(offset, error);
 }
 
 OffsetF FrameNode::GetPaintRectOffsetToPage() const
@@ -2302,6 +2302,23 @@ RefPtr<NodeAnimatablePropertyBase> FrameNode::GetAnimatablePropertyFloat(const s
         return nullptr;
     }
     return iter->second;
+}
+
+RefPtr<FrameNode> FrameNode::FindChildByName(const RefPtr<FrameNode>& parentNode, const std::string& nodeName)
+{
+    CHECK_NULL_RETURN(parentNode, nullptr);
+    const auto& children = parentNode->GetChildren();
+    for (const auto& child : children) {
+        auto childFrameNode = AceType::DynamicCast<FrameNode>(child);
+        if (childFrameNode && childFrameNode->GetInspectorId().value_or("") == nodeName) {
+            return childFrameNode;
+        }
+        auto childFindResult = FindChildByName(childFrameNode, nodeName);
+        if (childFindResult) {
+            return childFindResult;
+        }
+    }
+    return nullptr;
 }
 
 void FrameNode::CreateAnimatablePropertyFloat(
@@ -2564,7 +2581,6 @@ void FrameNode::Measure(const std::optional<LayoutConstraintF>& parentConstraint
     }
 
     if (layoutAlgorithm_->SkipMeasure()) {
-        LOGD("%{public}s, depth: %{public}d: the layoutAlgorithm skip measure", GetTag().c_str(), GetDepth());
         isLayoutDirtyMarked_ = false;
         return;
     }
@@ -2589,15 +2605,11 @@ void FrameNode::Measure(const std::optional<LayoutConstraintF>& parentConstraint
 
     isConstraintNotChanged_ = layoutProperty_->ConstraintEqual(preConstraint, contentConstraint);
 
-    LOGD("Measure: %{public}s, depth: %{public}d, Constraint: %{public}s", GetTag().c_str(), GetDepth(),
-        layoutProperty_->GetLayoutConstraint()->ToString().c_str());
-
     isLayoutDirtyMarked_ = false;
 
     if (isConstraintNotChanged_) {
         if (!CheckNeedForceMeasureAndLayout()) {
             ACE_SCOPED_TRACE("SkipMeasure");
-            LOGD("%{public}s (depth: %{public}d) skip measure content", GetTag().c_str(), GetDepth());
             layoutAlgorithm_->SetSkipMeasure();
             return;
         }
@@ -2620,15 +2632,9 @@ void FrameNode::Measure(const std::optional<LayoutConstraintF>& parentConstraint
         // Adjust by aspect ratio, firstly pick height based on width. It means that when width, height and
         // aspectRatio are all set, the height is not used.
         auto width = geometryNode_->GetFrameSize().Width();
-        LOGD("aspect ratio affects, origin width: %{public}f, height: %{public}f", width,
-            geometryNode_->GetFrameSize().Height());
         auto height = width / aspectRatio;
-        LOGD("aspect ratio affects, new width: %{public}f, height: %{public}f", width, height);
         geometryNode_->SetFrameSize(SizeF({ width, height }));
     }
-
-    LOGD("on Measure Done: type: %{public}s, depth: %{public}d, Size: %{public}s", GetTag().c_str(), GetDepth(),
-        geometryNode_->GetFrameSize().ToString().c_str());
 
     layoutProperty_->UpdatePropertyChangeFlag(PROPERTY_UPDATE_LAYOUT);
 }
@@ -2676,9 +2682,6 @@ void FrameNode::Layout()
     SaveGeoState();
     AvoidKeyboard(isFocusOnPage);
     ExpandSafeArea(isFocusOnPage);
-
-    LOGD("On Layout Done: type: %{public}s, depth: %{public}d, Offset: %{public}s", GetTag().c_str(), GetDepth(),
-        geometryNode_->GetFrameOffset().ToString().c_str());
     SyncGeometryNode();
 
     UpdateParentAbsoluteOffset();

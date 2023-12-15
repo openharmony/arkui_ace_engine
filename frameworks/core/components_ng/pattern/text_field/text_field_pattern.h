@@ -981,11 +981,6 @@ public:
         return cleanNodeResponseArea_;
     }
 
-    void SetCleanNodeStyle(CleanNodeStyle cleanNodeStyle)
-    {
-        cleanNodeStyle_ = cleanNodeStyle;
-    }
-
     bool IsShowUnit() const;
     bool IsShowPasswordIcon() const;
     bool IsInPasswordMode() const;
@@ -1006,7 +1001,15 @@ public:
 
     void UpdateShowMagnifier(bool isShowMagnifier = false)
     {
+        if (isShowMagnifier_ == isShowMagnifier) {
+            return;
+        }
         isShowMagnifier_ = isShowMagnifier;
+        if (isShowMagnifier_) {
+            MakeHighZIndex();
+        } else {
+            MakeZIndexRollBack();
+        }
     }
 
     bool GetShowMagnifier() const
@@ -1018,7 +1021,7 @@ public:
     {
         localOffset_.SetX(localOffset.GetX());
         localOffset_.SetY(localOffset.GetY());
-        isShowMagnifier_ = true;
+        UpdateShowMagnifier(true);
     }
 
     OffsetF GetLocalOffset() const
@@ -1200,7 +1203,10 @@ private:
     bool ProcessAutoFill();
     void ScrollToSafeArea() const override;
     void RecordSubmitEvent() const;
-    void UpdateCancelNode(bool isShow);
+    void UpdateCancelNode();
+    void MakeHighZIndex();
+    void MakeZIndexRollBack();
+    void GetMaxZIndex(const RefPtr<UINode>& parent, const RefPtr<FrameNode>& pattern);
 
     RectF frameRect_;
     RectF contentRect_;
@@ -1350,11 +1356,11 @@ private:
     std::string lastAutoFillPasswordTextValue_;
     bool isSupportCameraInput_ = false;
     std::function<void()> processOverlayDelayTask_;
-    CleanNodeStyle cleanNodeStyle_ = CleanNodeStyle::INVISIBLE;
     FocuseIndex focusIndex_ = FocuseIndex::TEXT;
     bool isShowMagnifier_ = false;
     OffsetF localOffset_;
     bool isTouchCaret_ = false;
+    std::list<int32_t> zIndexRollBack_;
 };
 } // namespace OHOS::Ace::NG
 

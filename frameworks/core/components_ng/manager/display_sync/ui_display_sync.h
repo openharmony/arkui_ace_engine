@@ -30,6 +30,13 @@
 #include "base/log/ace_trace.h"
 
 namespace OHOS::Ace {
+enum class RefreshRateMode : int32_t {
+    REFRESHRATE_MODE_AUTO = -1,
+    REFRESHRATE_MODE_NULL = 0,
+    REFRESHRATE_MODE_LOW = 1,
+    REFRESHRATE_MODE_MEDIUM,
+    REFRESHRATE_MODE_HIGH,
+};
 class PipelineBase;
 
 class FrameRateRange : public AceType {
@@ -152,7 +159,7 @@ public:
 
     void UnRegisterOnFrame();
 
-    void CheckRate(int32_t vsyncRate);
+    void CheckRate(int32_t vsyncRate, int32_t refreshRateMode);
     void UpdateData(uint64_t nanoTimestamp, int32_t vsyncPeriod);
     void JudgeWhetherSkip();
     void OnFrame();
@@ -168,6 +175,11 @@ public:
 
     RefPtr<DisplaySyncData> GetDisplaySyncData() const;
 
+    void SetRefreshRateMode(int32_t refreshRateMode);
+    int32_t GetRefreshRateMode() const;
+    bool IsEnabled() const;
+    bool IsDisabled() const;
+
     UIDisplaySync();
     ~UIDisplaySync() noexcept override;
 
@@ -175,6 +187,7 @@ private:
     RefPtr<DisplaySyncData> data_ = AceType::MakeRefPtr<DisplaySyncData>();
     int32_t sourceVsyncRate_ = 0;
     bool rateChanged_ = true;
+    int32_t refreshRateMode_ = 0;
 };
 } // namespace OHOS::Ace
 

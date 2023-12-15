@@ -596,7 +596,6 @@ void JsFrontend::UpdateState(Frontend::State state)
 RefPtr<AccessibilityManager> JsFrontend::GetAccessibilityManager() const
 {
     if (!delegate_) {
-        LOGD("GetAccessibilityManager delegate is null");
         return nullptr;
     }
     return delegate_->GetJsAccessibilityManager();
@@ -777,6 +776,20 @@ void JsFrontend::DumpHeapSnapshot(bool isPrivate)
     }
 }
 
+void JsFrontend::DestroyHeapProfiler()
+{
+    if (jsEngine_) {
+        jsEngine_->DestroyHeapProfiler();
+    }
+}
+
+void JsFrontend::ForceFullGC()
+{
+    if (jsEngine_) {
+        jsEngine_->ForceFullGC();
+    }
+}
+
 void JsFrontend::RebuildAllPages()
 {
     if (delegate_) {
@@ -805,8 +818,6 @@ void JsFrontend::SetColorMode(ColorMode colorMode)
 
 void JsEventHandler::HandleAsyncEvent(const EventMarker& eventMarker)
 {
-    LOGD("HandleAsyncEvent pageId: %{private}d, eventId: %{private}s, eventType: %{private}s",
-        eventMarker.GetData().pageId, eventMarker.GetData().eventId.c_str(), eventMarker.GetData().eventType.c_str());
     std::string param = eventMarker.GetData().GetEventParam();
     delegate_->FireAsyncEvent(eventMarker.GetData().eventId, param.append("null"), std::string(""));
 
@@ -840,15 +851,9 @@ void JsEventHandler::HandleAsyncEvent(const EventMarker& eventMarker, const Base
     } else if (eventMarker.GetData().eventType == "drop") {
         DragDropInfoToString(info, eventParam);
     }
-
-    LOGD("HandleAsyncEvent pageId: %{public}d, eventId: %{public}s, eventType: %{public}s, eventParam: %{public}s",
-        eventMarker.GetData().pageId, eventMarker.GetData().eventId.c_str(), eventMarker.GetData().eventType.c_str(),
-        eventParam.c_str());
     std::string param;
     auto adapter = TypeInfoHelper::DynamicCast<EventToJSONStringAdapter>(&info);
     if (adapter) {
-        LOGD("HandleAsyncEvent pageId: %{public}d, eventId: %{public}s", eventMarker.GetData().pageId,
-            eventMarker.GetData().eventId.c_str());
         param = adapter->ToJSONString();
     } else {
         param = eventMarker.GetData().GetEventParam();
@@ -868,8 +873,6 @@ void JsEventHandler::HandleAsyncEvent(const EventMarker& eventMarker, const Base
 
 void JsEventHandler::HandleSyncEvent(const EventMarker& eventMarker, const KeyEvent& info, bool& result)
 {
-    LOGD("HandleSyncEvent pageId: %{public}d, eventId: %{public}s, eventType: %{public}s", eventMarker.GetData().pageId,
-        eventMarker.GetData().eventId.c_str(), eventMarker.GetData().eventType.c_str());
     std::string param = std::string("\"")
                             .append(eventMarker.GetData().eventType)
                             .append("\",{\"code\":")
@@ -894,8 +897,6 @@ void JsEventHandler::HandleSyncEvent(const EventMarker& eventMarker, const KeyEv
 
 void JsEventHandler::HandleAsyncEvent(const EventMarker& eventMarker, const GestureEvent& info)
 {
-    LOGD("HandleASyncEvent pageId: %{public}d, eventId: %{public}s, eventType: %{public}s",
-        eventMarker.GetData().pageId, eventMarker.GetData().eventId.c_str(), eventMarker.GetData().eventType.c_str());
     std::string eventParam = std::string("");
     if (eventMarker.GetData().eventType.find("pinch") != std::string::npos) {
         eventParam.append("\"")
@@ -919,8 +920,6 @@ void JsEventHandler::HandleAsyncEvent(const EventMarker& eventMarker, const Gest
 
 void JsEventHandler::HandleAsyncEvent(const EventMarker& eventMarker, const RotationEvent& info)
 {
-    LOGD("HandleAsyncEvent pageId: %{public}d, eventId: %{public}s, eventType: %{public}s",
-        eventMarker.GetData().pageId, eventMarker.GetData().eventId.c_str(), eventMarker.GetData().eventType.c_str());
     std::string eventParam = std::string("");
     if (eventMarker.GetData().eventType == "rotate") {
         eventParam.append("\"")
@@ -958,8 +957,6 @@ void JsEventHandler::HandleAsyncEvent(const EventMarker& eventMarker, const KeyE
 
 void JsEventHandler::HandleAsyncEvent(const EventMarker& eventMarker, const std::string& param)
 {
-    LOGD("HandleAsyncEvent pageId: %{public}d, eventId: %{public}s", eventMarker.GetData().pageId,
-        eventMarker.GetData().eventId.c_str());
     delegate_->FireAsyncEvent(eventMarker.GetData().eventId, param, "");
 
     AccessibilityEvent accessibilityEvent;

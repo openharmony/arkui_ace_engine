@@ -197,9 +197,6 @@ void MenuPattern::OnModifyDone()
         // multiple inner menus, reset outer container's shadow for desktop UX
         ResetTheme(host, true);
     }
-    if (IsSelectOverlayCustomMenu()) {
-        ResetScrollTheme(host);
-    }
     auto menuFirstNode = GetFirstInnerMenu();
     if (menuFirstNode) {
         CopyMenuAttr(menuFirstNode);
@@ -460,7 +457,7 @@ RefPtr<FrameNode> MenuPattern::GetMenuWrapper() const
 // search for inner <Menu> node, once found a <Menu> node, count the number of sibling <Menu>
 uint32_t MenuPattern::GetInnerMenuCount() const
 {
-    if (type_ == MenuType::MULTI_MENU || type_ == MenuType::DESKTOP_MENU) {
+    if (type_ == MenuType::MULTI_MENU || type_ == MenuType::DESKTOP_MENU || IsSelectOverlayCustomMenu()) {
         return 0;
     }
 
@@ -1004,7 +1001,7 @@ float MenuPattern::GetSelectMenuWidth()
     parent->BuildColumnWidth();
     auto defaultWidth = static_cast<float>(columnInfo->GetWidth(COLUMN_NUM));
     float finalWidth = MIN_SELECT_MENU_WIDTH.ConvertToPx();
-    
+
     if (IsWidthModifiedBySelect()) {
         auto menuLayoutProperty = GetLayoutProperty<MenuLayoutProperty>();
         auto selectmodifiedwidth = menuLayoutProperty->GetSelectMenuModifiedWidth();

@@ -97,7 +97,6 @@ bool SafeAreaManager::SetKeyBoardAvoidMode(bool value)
         return false;
     }
     keyboardSafeAreaEnabled_ = value;
-    LOGD("setKeyBoardAvoidMode %{public}d", value);
     return true;
 }
 

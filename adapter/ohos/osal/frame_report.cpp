@@ -86,7 +86,6 @@ bool FrameReport::LoadLibrary()
         CHECK_NULL_RETURN(flushEndFunc_, false);
         frameSchedSoLoaded_ = true;
     }
-    LOGD("frame-ace:[LoadLibrary]dlopen libframe_ui_intf.so success");
     return true;
 }
 
@@ -98,7 +97,6 @@ void FrameReport::CloseLibrary()
     }
     frameSchedHandle_ = nullptr;
     frameSchedSoLoaded_ = false;
-    LOGD("frame-ace:[CloseLibrary]libframe_ui_intf.so close success!\n");
 }
 
 void* FrameReport::LoadSymbol(const char* symName)

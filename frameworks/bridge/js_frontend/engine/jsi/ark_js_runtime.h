@@ -97,6 +97,7 @@ public:
     bool HasPendingException() override;
     void ExecutePendingJob() override;
     void DumpHeapSnapshot(bool isPrivate) override;
+    void DestroyHeapProfiler() override;
     bool ExecuteModuleBuffer(const uint8_t *data, int32_t size, const std::string &filename, bool needUpdate = false);
 
     const EcmaVM* GetEcmaVm() const

@@ -144,6 +144,8 @@ void UITaskScheduler::FlushTask()
     if (!afterLayoutTasks_.empty()) {
         FlushAfterLayoutTask();
     }
+    // flush correct rect again
+    FlushPersistAfterLayoutTask();
     FlushDelayJsActive();
     ElementRegister::GetInstance()->ClearPendingRemoveNodes();
     FlushRenderTask();

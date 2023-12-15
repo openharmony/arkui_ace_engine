@@ -48,6 +48,30 @@ public:
     void SetStrokeRadius(const Dimension& value) override;
     void ResetStrokeRadius() override;
 
+    static void SetValue(FrameNode* frameNode, double value);
+    static void SetColor(FrameNode* frameNode, const Color& value);
+    static void SetGradientColor(FrameNode* frameNode, const Gradient& value);
+    static void SetSmoothEffect(FrameNode* frameNode, bool value);
+    static void SetStrokeWidth(FrameNode* frameNode, const Dimension& value);
+    static void SetLinearSweepingEffect(FrameNode* frameNode, bool value);
+    static void SetRingSweepingEffect(FrameNode* frameNode, bool value);
+    static void SetPaintShadow(FrameNode* frameNode, bool value);
+    static void SetProgressStatus(FrameNode* frameNode, ProgressStatus status);
+    static void SetScaleCount(FrameNode* frameNode, int32_t value);
+    static void SetScaleWidth(FrameNode* frameNode, const Dimension& value);
+    static void SetBorderWidth(FrameNode* frameNode, const Dimension& value);
+    static void SetBorderColor(FrameNode* frameNode, const Color& value);
+    static void SetSweepingEffect(FrameNode* frameNode, bool value);
+    static void SetShowText(FrameNode* frameNode, bool value);
+    static void SetText(FrameNode* frameNode, const std::optional<std::string>& value);
+    static void SetFontColor(FrameNode* frameNode, const Color& value);
+    static void SetFontSize(FrameNode* frameNode, const Dimension& value);
+    static void SetFontWeight(FrameNode* frameNode, const FontWeight& value);
+    static void SetFontFamily(FrameNode* frameNode, const std::vector<std::string>& value);
+    static void SetItalicFontStyle(FrameNode* frameNode, const Ace::FontStyle& value);
+    static void SetStrokeRadius(FrameNode* frameNode, const Dimension& value);
+    static void ResetStrokeRadius(FrameNode* frameNode);
+
 private:
     static void SetTextDefaultStyle(const RefPtr<FrameNode>& textNode, double value, double maxValue);
 };

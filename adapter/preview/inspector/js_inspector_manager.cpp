@@ -210,14 +210,12 @@ bool JsInspectorManager::OperateComponent(const std::string& jsCode)
     auto root = JsonUtil::ParseJsonString(jsCode);
     auto parentID = root->GetInt("parentID", -1);
     auto slot = root->GetInt("slot", -1);
-    LOGD("parentID = %{public}d, slot = %{public}d", parentID, slot);
     if (Container::IsCurrentUseNewPipeline()) {
         static RefPtr<NG::UINode> parent = nullptr;
         auto newChild = GetNewFrameNodeWithJsCode(root);
         CHECK_NULL_RETURN(newChild, false); // newChild should not be nullptr
         NG::Inspector::HideAllMenus();
         if (!root->Contains("id")) {
-            LOGD("Component Preview: parentNode is rootNode");
             parent = (parentID <= 0) ? GetRootUINode() : ElementRegister::GetInstance()->GetUINodeById(parentID);
             return OperateGeneralUINode(parent, slot, newChild);
         }

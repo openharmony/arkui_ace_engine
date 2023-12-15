@@ -426,6 +426,27 @@ void DragDropManager::PrintDragFrameNode(const Point& point, const RefPtr<FrameN
     }
 }
 
+void DragDropManager::OnDragMoveOut(const PointerEvent& pointerEvent, const std::string& extraInfo)
+{
+    Point point  = pointerEvent.GetPoint();
+#ifdef ENABLE_DRAG_FRAMEWORK
+    auto container = Container::Current();
+    if (container && container->IsScenceBoardWindow()) {
+        if (IsDragged() && IsWindowConsumed()) {
+            SetIsWindowConsumed(false);
+            return;
+        }
+    }
+    SetIsWindowConsumed(false);
+#endif // ENABLE_DRAG_FRAMEWORK
+    UpdateVelocityTrackerPoint(point, false);
+    UpdateDragListener(Point(-1, -1));
+    if (preTargetFrameNode_) {
+        FireOnDragEvent(preTargetFrameNode_, point, DragEventType::LEAVE, extraInfo_);
+        preTargetFrameNode_ = nullptr;
+    }
+}
+
 void DragDropManager::OnDragMove(const PointerEvent& pointerEvent, const std::string& extraInfo)
 {
     Point point  = pointerEvent.GetPoint();
@@ -1086,8 +1107,12 @@ void DragDropManager::UpdateDragEvent(RefPtr<OHOS::Ace::DragEvent>& event, const
     } else {
         event->SetUdKey(udKey);
     }
+    int ret = InteractionInterface::GetInstance()->AddPrivilege();
+    if (ret != 0 && SystemProperties::GetDebugEnabled()) {
+        TAG_LOGI(AceLogTag::ACE_DRAG, "Interaction AddPrivilege in DragEnd with code:%{public}d", ret);
+    }
     RefPtr<UnifiedData> udData = UdmfClient::GetInstance()->CreateUnifiedData();
-    int ret = UdmfClient::GetInstance()->GetData(udData, udKey);
+    ret = UdmfClient::GetInstance()->GetData(udData, udKey);
     if (ret != 0) {
         event->SetIsGetDataSuccess(false);
     } else {

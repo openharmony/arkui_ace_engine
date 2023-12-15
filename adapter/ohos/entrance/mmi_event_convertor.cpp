@@ -270,10 +270,6 @@ void ConvertMouseEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
     if (events.sourceType == SourceType::TOUCH && sourceTool == SourceTool::PEN) {
         events.id = TOUCH_TOOL_BASE_ID + static_cast<int32_t>(sourceTool);
     }
-    LOGD("ConvertMouseEvent: id: %{public}d (x,y): (%{public}f,%{public}f). Button: %{public}d. Action: %{public}d. "
-         "DeviceType: %{public}d. PressedButton: %{public}d. Time: %{public}lld",
-        events.id, events.x, events.y, events.button, events.action, events.sourceType, events.pressedButtons,
-        (long long)pointerEvent->GetActionTime());
 }
 
 void GetAxisEventAction(int32_t action, AxisEvent& event)
@@ -322,11 +318,6 @@ void ConvertAxisEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, Ax
     std::chrono::microseconds microseconds(pointerEvent->GetActionTime());
     TimeStamp time(microseconds);
     event.time = time;
-    LOGD("ConvertAxisEvent: id: %{public}d, (x,y): (%{public}f,%{public}f). HorizontalAxis: %{public}f. VerticalAxis: "
-         "%{public}f. "
-         "Action: %{public}d. SourceType: %{public}d. ToolType: %{public}d. Time: %{public}lld",
-        event.id, event.x, event.y, event.horizontalAxis, event.verticalAxis, event.action, event.sourceType,
-        event.sourceTool, (long long)pointerEvent->GetActionTime());
 }
 
 void ConvertKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent, KeyEvent& event)
@@ -355,8 +346,6 @@ void ConvertKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent, KeyEvent& e
         pressedKeyStr += (std::to_string(curCode) + " ");
         event.pressedCodes.emplace_back(static_cast<KeyCode>(curCode));
     }
-    LOGD("ConvertKeyEvent: KeyCode: %{private}d. KeyAction: %{public}d. PressedCodes: %{private}s. Time: %{public}lld",
-        event.code, event.action, pressedKeyStr.c_str(), (long long)(keyEvent->GetActionTime()));
 }
 
 void ConvertPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, PointerEvent& event)

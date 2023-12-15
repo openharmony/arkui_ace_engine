@@ -178,6 +178,7 @@ void SearchPattern::OnModifyDone()
     InitButtonAndImageClickEvent();
     InitCancelButtonClickEvent();
     InitTextFieldValueChangeEvent();
+    InitTextFieldDragEvent();
     InitButtonMouseEvent(searchButtonMouseEvent_, BUTTON_INDEX);
     InitButtonMouseEvent(cancelButtonMouseEvent_, CANCEL_BUTTON_INDEX);
     InitButtonTouchEvent(searchButtonTouchListener_, BUTTON_INDEX);
@@ -204,6 +205,62 @@ void SearchPattern::InitTextFieldValueChangeEvent()
         };
         eventHub->SetOnChange(std::move(searchChangeFunc));
     }
+}
+
+void SearchPattern::InitTextFieldDragEvent()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto searchEventHub = host->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(searchEventHub);
+    auto textFieldFrameNode = AceType::DynamicCast<FrameNode>(host->GetChildren().front());
+    CHECK_NULL_VOID(textFieldFrameNode);
+    auto textFieldEventHub = textFieldFrameNode->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(textFieldEventHub);
+
+    auto dragStart = searchEventHub->GetOnDragStart();
+    if (dragStart != nullptr) {
+        textFieldEventHub->SetOnDragStart(std::move(dragStart));
+    }
+
+    auto customerDragEnter = searchEventHub->GetCustomerOnDragFunc(DragFuncType::DRAG_ENTER);
+    if (customerDragEnter != nullptr) {
+        textFieldEventHub->SetCustomerOnDragFunc(DragFuncType::DRAG_ENTER, std::move(customerDragEnter));
+    }
+
+    auto customerDragLeave = searchEventHub->GetCustomerOnDragFunc(DragFuncType::DRAG_LEAVE);
+    if (customerDragLeave != nullptr) {
+        textFieldEventHub->SetCustomerOnDragFunc(DragFuncType::DRAG_LEAVE, std::move(customerDragLeave));
+    }
+
+    auto customerDragMove = searchEventHub->GetCustomerOnDragFunc(DragFuncType::DRAG_MOVE);
+    if (customerDragMove != nullptr) {
+        textFieldEventHub->SetCustomerOnDragFunc(DragFuncType::DRAG_MOVE, std::move(customerDragMove));
+    }
+
+    auto customerDragDrop = searchEventHub->GetCustomerOnDragFunc(DragFuncType::DRAG_DROP);
+    if (customerDragDrop != nullptr) {
+        textFieldEventHub->SetCustomerOnDragFunc(DragFuncType::DRAG_DROP, std::move(customerDragDrop));
+    }
+
+    auto customerDragEnd = searchEventHub->GetCustomerOnDragEndFunc();
+    if (customerDragEnd != nullptr) {
+        textFieldEventHub->SetCustomerOnDragFunc(DragFuncType::DRAG_END, std::move(customerDragEnd));
+    }
+
+    searchEventHub->ClearCustomerOnDragFunc();
+    RemoveDragFrameNodeFromManager();
+}
+
+void SearchPattern::RemoveDragFrameNodeFromManager()
+{
+    auto frameNode = GetHost();
+    CHECK_NULL_VOID(frameNode);
+    auto context = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    auto dragDropManager = context->GetDragDropManager();
+    CHECK_NULL_VOID(dragDropManager);
+    dragDropManager->RemoveDragFrameNode(frameNode->GetId());
 }
 
 void SearchPattern::OnAfterModifyDone()
@@ -1039,7 +1096,7 @@ uint32_t SearchPattern::GetMaxLength() const
     auto textFieldLayoutProperty = textFieldFrameNode->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_RETURN(textFieldLayoutProperty, Infinity<uint32_t>());
     return textFieldLayoutProperty->HasMaxLength() ? textFieldLayoutProperty->GetMaxLengthValue(Infinity<uint32_t>())
-                                          : Infinity<uint32_t>();
+                                                   : Infinity<uint32_t>();
 }
 
 } // namespace OHOS::Ace::NG

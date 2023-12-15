@@ -20,6 +20,7 @@
 
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
+#include "core/common/container.h"
 #include "core/components/button/button_theme.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/event/event_hub.h"
@@ -173,6 +174,13 @@ public:
                 .c_str());
         labelJsValue->Put("font", fontJsValue->ToString().c_str());
         json->Put("labelStyle", labelJsValue->ToString().c_str());
+        auto defaultButtonStyle = Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)
+                                      ? ButtonStyleMode::NORMAL
+                                      : ButtonStyleMode::EMPHASIZE;
+        json->Put("buttonStyle",
+            ConvertButtonStyleToString(layoutProperty->GetButtonStyle().value_or(defaultButtonStyle)).c_str());
+        json->Put("controlSize",
+            ConvertControlSizeToString(layoutProperty->GetControlSize().value_or(ControlSize::NORMAL)).c_str());
     }
 
     static std::string ConvertButtonTypeToString(ButtonType buttonType)
@@ -187,6 +195,41 @@ public:
                 break;
             case ButtonType::CIRCLE:
                 result = "ButtonType.Circle";
+                break;
+            default:
+                break;
+        }
+        return result;
+    }
+
+    static std::string ConvertButtonStyleToString(ButtonStyleMode buttonStyle)
+    {
+        std::string result;
+        switch (buttonStyle) {
+            case ButtonStyleMode::NORMAL:
+                result = "ButtonStyleMode.NORMAL";
+                break;
+            case ButtonStyleMode::EMPHASIZE:
+                result = "ButtonStyleMode.EMPHASIZED";
+                break;
+            case ButtonStyleMode::TEXT:
+                result = "ButtonStyleMode.TEXTUAL";
+                break;
+            default:
+                break;
+        }
+        return result;
+    }
+
+    static std::string ConvertControlSizeToString(ControlSize controlSize)
+    {
+        std::string result;
+        switch (controlSize) {
+            case ControlSize::SMALL:
+                result = "ControlSize.SMALL";
+                break;
+            case ControlSize::NORMAL:
+                result = "ControlSize.NORMAL";
                 break;
             default:
                 break;
@@ -254,6 +297,8 @@ protected:
 
 private:
     static void UpdateTextLayoutProperty(
+        RefPtr<ButtonLayoutProperty>& layoutProperty, RefPtr<TextLayoutProperty>& textLayoutProperty);
+    static void UpdateTextStyle(
         RefPtr<ButtonLayoutProperty>& layoutProperty, RefPtr<TextLayoutProperty>& textLayoutProperty);
     bool IsNeedToHandleHoverOpacity();
     Color backgroundColor_;

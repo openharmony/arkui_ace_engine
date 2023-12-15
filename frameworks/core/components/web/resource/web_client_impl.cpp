@@ -116,7 +116,6 @@ bool OnJsCommonDialog(
         }
         },
         OHOS::Ace::TaskExecutor::TaskType::JS);
-    TAG_LOGD(AceLogTag::ACE_WEB, "Web Common Dialogs, result:%{public}d", jsResult);
     return jsResult;
 }
 
@@ -354,9 +353,6 @@ std::shared_ptr<OHOS::NWeb::NWebUrlResourceResponse> WebClientImpl::OnHandleInte
         return nullptr;
     }
     std::string data = webResponse->GetData();
-    TAG_LOGD(AceLogTag::ACE_WEB,
-        "Web intercept request, Encoding %{public}s, StatusCode %{public}d, DataType %{public}d",
-        webResponse->GetMimeType().c_str(), webResponse->GetStatusCode(), webResponse->GetDataType());
     std::shared_ptr<OHOS::NWeb::NWebUrlResourceResponse> nwebResponse =
         std::make_shared<OHOS::NWeb::NWebUrlResourceResponse>(webResponse->GetMimeType(), webResponse->GetEncoding(),
         webResponse->GetStatusCode(), webResponse->GetReason(), webResponse->GetHeaders(),  data);
@@ -736,7 +732,6 @@ void WebClientImpl::OnDesktopIconUrl(const std::string& icon_url, bool precompos
 
 bool WebClientImpl::OnCursorChange(const NWeb::CursorType& type, const NWeb::NWebCursorInfo& info)
 {
-    TAG_LOGD(AceLogTag::ACE_WEB, "web cursor change");
     ContainerScope scope(instanceId_);
     auto delegate = webDelegate_.Upgrade();
     CHECK_NULL_RETURN(delegate, false);
@@ -764,7 +759,6 @@ void ReleaseSurfaceImpl::ReleaseSurface()
 
 void WebClientImpl::OnAudioStateChanged(bool playing)
 {
-    TAG_LOGD(AceLogTag::ACE_WEB, "web audio state changed, playing: %{public}s", (playing ? "true" : "false"));
     ContainerScope scope(instanceId_);
     auto delegate = webDelegate_.Upgrade();
     CHECK_NULL_VOID(delegate);

@@ -24,10 +24,8 @@ MockTweenComponent::HookTweenElement g_hookTweenElement;
 
 RefPtr<Element> MockTweenComponent::CreateElement()
 {
-    LOGD("MockTweenComponent CreateElement");
     auto tweenElement = AceType::MakeRefPtr<TweenElement>(GetId());
     if (g_hookTweenElement) {
-        LOGD("execute hook.");
         g_hookTweenElement(tweenElement);
     }
     return tweenElement;
@@ -35,7 +33,6 @@ RefPtr<Element> MockTweenComponent::CreateElement()
 
 void MockTweenComponent::SetMockHook(const HookTweenElement& hook)
 {
-    LOGD("set hook.");
     g_hookTweenElement = hook;
 }
 

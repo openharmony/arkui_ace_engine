@@ -23,7 +23,6 @@ namespace OHOS::Ace::Framework {
 
 RefPtr<OHOS::Ace::SingleChild> JSPanHandler::CreateComponent(const JSCallbackInfo& args)
 {
-    LOGD("JSPanHandler wrapComponent");
     auto gestureComponent = ViewStackProcessor::GetInstance()->GetPanGestureListenerComponent();
     WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
     if (jsOnStartFunc_) {
@@ -101,7 +100,6 @@ RefPtr<OHOS::Ace::SingleChild> JSPanHandler::CreateComponent(const JSCallbackInf
 
 void JSPanHandler::JsHandlerOnPan(PanEvent action, const JSCallbackInfo& args)
 {
-    LOGD("JSPanHandler JsHandlerOnPan");
     if (args[0]->IsFunction()) {
         JSRef<JSFunc> jsFunction = JSRef<JSFunc>::Cast(args[0]);
         RefPtr<JsPanFunction> handlerFunc = AceType::MakeRefPtr<JsPanFunction>(jsFunction);

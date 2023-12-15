@@ -280,7 +280,6 @@ public:
          */
         float scale = 0.0f;
         for (int32_t idx = 1; idx < 5; idx++) {
-            LOGD("trigger frame for verify transition. frame idx: %{public}d", idx);
             platformWindowRaw_->TriggerOneFrame();
             EXPECT_EQ(VisibleType::VISIBLE, transitionB_.displayRenderContent_.Upgrade()->GetVisibleType());
             transitionB_.transformRenderContent_.Upgrade()->GetScaleSetting(scale);
@@ -295,7 +294,6 @@ public:
          * @tc.steps: step2. trigger last frame to check transition is done
          * @tc.expected: step2. check final scale value is right, and transition is stopped.
          */
-        LOGD("trigger last frame for verify transition.");
         platformWindowRaw_->TriggerOneFrame();
         transitionB_.transformRenderContent_.Upgrade()->GetScaleSetting(scale);
         EXPECT_NEAR(scale, 6.0f, TRANSITION_EPSILON);
@@ -317,7 +315,6 @@ public:
         Dimension offsetX;
         Dimension offsetY;
         for (int32_t idx = 1; idx < 5; idx++) {
-            LOGD("trigger frame for verify transition. frame idx: %{public}d", idx);
             platformWindowRaw_->TriggerOneFrame();
             transitionB_.transformRenderContent_.Upgrade()->GetTranslateSetting(offsetX, offsetY);
             EXPECT_NEAR(offsetX.Value(), 1.0f * (idx + 1), TRANSITION_EPSILON);
@@ -504,7 +501,6 @@ public:
          * @tc.steps: step2. trigger last frame to check transition is done
          * @tc.expected: step2. check final scale value is right, and transition is stopped.
          */
-        LOGD("trigger last frame for verify transition.");
         platformWindowRaw_->TriggerOneFrame();
         transitionB_.transformRenderContent_.Upgrade()->GetScaleSetting(scale);
         EXPECT_NEAR(scale, 1.0f, TRANSITION_EPSILON);
@@ -536,7 +532,6 @@ public:
          * @tc.steps: step2. trigger last frame to check transition is done
          * @tc.expected: step2. check final offset value is right, and transition is stopped.
          */
-        LOGD("trigger last frame for verify transition.");
         platformWindowRaw_->TriggerOneFrame();
         transitionB_.transformRenderContent_.Upgrade()->GetTranslateSetting(offsetX, offsetY);
         EXPECT_NEAR(offsetX.Value(), 0.0f, TRANSITION_EPSILON);
@@ -679,7 +674,6 @@ public:
          * @tc.steps: step2. trigger last frame to check transition is done
          * @tc.expected: step2. check final offset value is right, and transition is stopped.
          */
-        LOGD("trigger last frame for verify transition.");
         platformWindowRaw_->TriggerOneFrame();
         transitionB_.transformRenderContent_.Upgrade()->GetTranslateSetting(offsetX, offsetY);
         EXPECT_NEAR(offsetX.Value(), 0.0f, TRANSITION_EPSILON);
@@ -713,7 +707,6 @@ public:
          * @tc.steps: step2. trigger last frame to check transition is done
          * @tc.expected: step2. check final offset value is right, and transition is stopped.
          */
-        LOGD("trigger last frame for verify transition.");
         platformWindowRaw_->TriggerOneFrame();
         // page B has been pop and destroyed
         EXPECT_FALSE(transitionB_.transformRenderContent_.Upgrade());
@@ -727,7 +720,6 @@ public:
 
     static RefPtr<Component> CreatePushPage()
     {
-        LOGD("start create push page.");
         auto boxComponent = AceType::MakeRefPtr<BoxComponent>();
         boxComponent->SetWidth(TEST_SURFACE_WIDTH / 2.0f);
         boxComponent->SetHeight(TEST_SURFACE_HEIGHT / 2.0f);
@@ -739,7 +731,6 @@ public:
             g_configPushTransition(transitionComponent);
         }
         auto pageComponent = AceType::MakeRefPtr<PageComponent>(++g_pageId, "", transitionComponent);
-        LOGD("end create push page.");
         return AceType::DynamicCast<Component>(pageComponent);
     }
 
@@ -783,7 +774,6 @@ public:
     static void SwitchHookToTransition(TransitionGroup& transitionGroup)
     {
         MockTransitionElement::SetMockHook([&transitionGroup](const RefPtr<PageTransitionElement>& transitionElement) {
-            LOGD("Switch Hook To transition group: %{public}s", transitionGroup.name_);
             transitionGroup.pageTransitionElement_ = transitionElement;
         });
     }
@@ -823,13 +813,11 @@ public:
         controller->AddStartListener([&transitionGroup]() {
             auto transition = transitionGroup.pageTransitionElement_.Upgrade();
             EXPECT_TRUE(transition);
-            LOGD("transition start. transition name: %{public}s", transitionGroup.name_);
             transitionGroup.startCounter_++;
         });
         controller->AddStopListener([&transitionGroup]() {
             auto transition = transitionGroup.pageTransitionElement_.Upgrade();
             EXPECT_TRUE(transition);
-            LOGD("transition stop. transition name: %{public}s", transitionGroup.name_);
             transitionGroup.stopCounter_++;
         });
     }
@@ -884,7 +872,6 @@ HWTEST_F(TransitionElementTest, PushPageTest001, TestSize.Level1)
      * @tc.steps: step3. trigger first frame to let transition go
      * @tc.expected: step3. check all transition is visible
      */
-    LOGD("trigger frame for stage's transition build and prepare animation");
     platformWindowRaw_->TriggerOneFrame();
     EXPECT_EQ(1, g_transitionRecord.eventCount_);
     EXPECT_EQ(TransitionEvent::PUSH_START, g_transitionRecord.event_);
@@ -976,15 +963,10 @@ HWTEST_F(TransitionElementTest, TransitionUIStandardTest001, TestSize.Level1)
      * @tc.steps: step3. trigger first frame to let transition go
      * @tc.expected: step3. check all transition is visible
      */
-    LOGD("trigger frame for stage's transition build and prepare animation");
     platformWindowRaw_->TriggerOneFrame();
     GetTransitionGroupFromTransition(transitionB_);
     GetTransitionGroupFromTransition(transitionA_);
     EXPECT_NE(transitionA_.pageTransitionElement_, transitionB_.pageTransitionElement_);
-    LOGD("transition in: content display render %p, transform render %p",
-        &(*transitionB_.displayRenderContent_.Upgrade()), &(*transitionB_.transformRenderContent_.Upgrade()));
-    LOGD("transition out: content display render %p, transform render %p",
-        &(*transitionA_.displayRenderContent_.Upgrade()), &(*transitionA_.transformRenderContent_.Upgrade()));
     EXPECT_TRUE(transitionB_.displayRenderContent_.Upgrade()->GetHidden());
     EXPECT_EQ(VisibleType::VISIBLE, transitionA_.displayRenderContent_.Upgrade()->GetVisibleType());
 
@@ -1031,7 +1013,6 @@ HWTEST_F(TransitionElementTest, TransitionUIStandardTest002, TestSize.Level1)
      * @tc.steps: step3. trigger first frame to let transition go
      * @tc.expected: step3. check all transition is visible
      */
-    LOGD("trigger frame for stage's transition build and prepare animation");
     platformWindowRaw_->TriggerOneFrame();
     GetTransitionGroupFromTransition(transitionB_);
     GetTransitionGroupFromTransition(transitionA_);
@@ -1082,7 +1063,6 @@ HWTEST_F(TransitionElementTest, TransitionUIStandardTest003, TestSize.Level1)
      * @tc.steps: step3. trigger first frame to let transition go
      * @tc.expected: step3. check all transition is visible
      */
-    LOGD("trigger frame for stage's transition build and prepare animation");
     platformWindowRaw_->TriggerOneFrame();
     GetTransitionGroupFromTransition(transitionB_);
     GetTransitionGroupFromTransition(transitionA_);
@@ -1180,7 +1160,6 @@ HWTEST_F(TransitionElementTest, OneShotTransitionTest001, TestSize.Level1)
      * @tc.steps: step3. trigger first frame to let transition go
      * @tc.expected: step3. check shared element in overlay
      */
-    LOGD("trigger frame for stage's transition build and prepare animation");
     platformWindowRaw_->TriggerOneFrame();
     GetTransitionGroupFromTransition(transitionB_);
     GetTransitionGroupFromTransition(transitionA_);

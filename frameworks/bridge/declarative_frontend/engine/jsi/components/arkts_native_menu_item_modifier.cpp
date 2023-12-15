@@ -23,15 +23,13 @@
 #include "frameworks/bridge/common/utils/utils.h"
 
 namespace OHOS::Ace::NG {
-constexpr uint32_t DEFAULT_MENUITEM_LABELFONTCOLOR_COLOR = 0xFF182431;
-constexpr uint32_t DEFAULT_MENUITEM_FONTCOLOR_COLOR = 0xFF182431;
 const char DELIMITER = '|';
 constexpr int32_t SIZE_OF_FONT_INFO = 3;
 const int POS_0 = 0;
 const int POS_1 = 1;
 const int POS_2 = 2;
 static const char* ERR_CODE = "-1";
-const std::string DEFAULT_SIZE = "24.0vp";
+const std::string DEFAULT_SIZE = "16.0vp";
 const std::string DEFAULT_FONT_WEIGHT = "normal";
 const std::string DEFAULT_FONT_FAMILY = "HarmonyOS Sans";
 const std::vector<OHOS::Ace::FontStyle> FONT_STYLES = { OHOS::Ace::FontStyle::NORMAL, OHOS::Ace::FontStyle::ITALIC };
@@ -57,7 +55,8 @@ void ResetLabelFontColor(NodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    MenuItemModelNG::SetLabelFontColor(frameNode, Color(DEFAULT_MENUITEM_LABELFONTCOLOR_COLOR));
+    std::optional<Color> color = std::nullopt;
+    MenuItemModelNG::SetLabelFontColor(frameNode, color);
 }
 void SetContentFontColor(NodeHandle node, const uint32_t color)
 {
@@ -69,7 +68,8 @@ void ResetContentFontColor(NodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    MenuItemModelNG::SetFontColor(frameNode, Color(DEFAULT_MENUITEM_FONTCOLOR_COLOR));
+    std::optional<Color> color = std::nullopt;
+    MenuItemModelNG::SetFontColor(frameNode, color);
 }
 void SetLabelFont(NodeHandle node, const char* fontInfo, int32_t styleVal)
 {

@@ -99,12 +99,12 @@ public:
     virtual bool ExecuteExtensionActionNG(int32_t elementId, const std::map<std::string, std::string>& actionArguments,
         int32_t action, const RefPtr<PipelineBase>& context, int32_t uiExtensionOffset) = 0;
     virtual bool TransferAccessibilityAsyncEvent(
-        const Accessibility::AccessibilityEventInfo& eventInfo, const std::vector<int32_t>& uiExtensionIdLevelList)
+        const Accessibility::AccessibilityEventInfo& eventInfo, int32_t uiExtensionOffset)
     {
         return false;
     }
     virtual void SendExtensionAccessibilityEvent(
-        const Accessibility::AccessibilityEventInfo& eventInfo, const std::vector<int32_t>& uiExtensionIdLevelList) {}
+        const Accessibility::AccessibilityEventInfo& eventInfo, int32_t uiExtensionOffset) {}
 #endif
     void SetVersion(AccessibilityVersion version)
     {

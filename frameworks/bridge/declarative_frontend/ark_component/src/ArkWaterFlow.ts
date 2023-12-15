@@ -1,3 +1,18 @@
+/*
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 /// <reference path='./import.ts' />
 
 class ItemConstraintSizeModifier extends ModifierWithKey<ArkConstraintSizeOptions> {
@@ -17,11 +32,11 @@ class ItemConstraintSizeModifier extends ModifierWithKey<ArkConstraintSizeOption
     return !isBaseOrResourceEqual(this.stageValue.minWidth, this.value.minWidth) ||
       !isBaseOrResourceEqual(this.stageValue.maxWidth, this.value.maxWidth) ||
       !isBaseOrResourceEqual(this.stageValue.minHeight, this.value.minHeight) ||
-      !isBaseOrResourceEqual(this.stageValue.maxHeight, this.value.maxHeight)
+      !isBaseOrResourceEqual(this.stageValue.maxHeight, this.value.maxHeight);
   }
 }
 
-class ColumnsTemplateModifier extends Modifier<string> {
+class ColumnsTemplateModifier extends ModifierWithKey<string> {
   constructor(value: string) {
     super(value);
   }
@@ -35,7 +50,7 @@ class ColumnsTemplateModifier extends Modifier<string> {
   }
 }
 
-class RowsTemplateModifier extends Modifier<string> {
+class RowsTemplateModifier extends ModifierWithKey<string> {
   constructor(value: string) {
     super(value);
   }
@@ -49,7 +64,7 @@ class RowsTemplateModifier extends Modifier<string> {
   }
 }
 
-class EnableScrollInteractionModifier extends Modifier<boolean> {
+class EnableScrollInteractionModifier extends ModifierWithKey<boolean> {
   constructor(value: boolean) {
     super(value);
   }
@@ -108,7 +123,7 @@ class ColumnsGapModifier extends ModifierWithKey<number | string> {
   }
 }
 
-class LayoutDirectionModifier extends Modifier<number> {
+class LayoutDirectionModifier extends ModifierWithKey<number> {
   constructor(value: number) {
     super(value);
   }
@@ -123,7 +138,7 @@ class LayoutDirectionModifier extends Modifier<number> {
   }
 }
 
-class NestedScrollModifier extends Modifier<ArkNestedScrollOptions> {
+class NestedScrollModifier extends ModifierWithKey<ArkNestedScrollOptions> {
   constructor(value: ArkNestedScrollOptions) {
     super(value);
   }
@@ -165,19 +180,11 @@ class ArkWaterFlowComponent extends ArkComponent implements WaterFlowAttribute {
     super(nativePtr);
   }
   columnsTemplate(value: string): this {
-    if (isString(value)) {
-      modifier(this._modifiers, ColumnsTemplateModifier, value);
-    } else {
-      modifier(this._modifiers, ColumnsTemplateModifier, undefined);
-    }
+    modifierWithKey(this._modifiersWithKeys, ColumnsTemplateModifier.identity, ColumnsTemplateModifier, value);
     return this;
   }
   rowsTemplate(value: string): this {
-    if (isString(value)) {
-      modifier(this._modifiers, RowsTemplateModifier, value);
-    } else {
-      modifier(this._modifiers, RowsTemplateModifier, undefined);
-    }
+    modifierWithKey(this._modifiersWithKeys, RowsTemplateModifier.identity, RowsTemplateModifier, value);
     return this;
   }
   itemConstraintSize(value: ConstraintSizeOptions): this {
@@ -203,11 +210,7 @@ class ArkWaterFlowComponent extends ArkComponent implements WaterFlowAttribute {
     return this;
   }
   layoutDirection(value: FlexDirection): this {
-    if (value in FlexDirection) {
-      modifier(this._modifiers, LayoutDirectionModifier, value);
-    } else {
-      modifier(this._modifiers, LayoutDirectionModifier, undefined);
-    }
+    modifierWithKey(this._modifiersWithKeys, LayoutDirectionModifier.identity, LayoutDirectionModifier, value);
     return this;
   }
   nestedScroll(value: NestedScrollOptions): this {
@@ -219,18 +222,13 @@ class ArkWaterFlowComponent extends ArkComponent implements WaterFlowAttribute {
       if (value.scrollBackward) {
         options.scrollBackward = value.scrollBackward;
       }
-      modifier(this._modifiers, NestedScrollModifier, options);
+      modifierWithKey(this._modifiersWithKeys, NestedScrollModifier.identity, NestedScrollModifier, options);
     }
     return this;
   }
   enableScrollInteraction(value: boolean): this {
-    if (typeof value === 'boolean') {
-      modifier(
-        this._modifiers, EnableScrollInteractionModifier, value);
-    } else {
-      modifier(
-        this._modifiers, EnableScrollInteractionModifier, undefined);
-    }
+    modifierWithKey(
+      this._modifiersWithKeys, EnableScrollInteractionModifier.identity, EnableScrollInteractionModifier, value);
     return this;
   }
   friction(value: number | Resource): this {
@@ -261,6 +259,6 @@ globalThis.WaterFlow.attributeModifier = function (modifier) {
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkWaterFlowComponent(nativeNode);
   });
-  modifier.applyNormalAttribute(component);
+  applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
 }

@@ -112,13 +112,11 @@ void DOMRefresh::OnChildNodeRemoved(const RefPtr<DOMNode>& child)
 bool DOMRefresh::AddSpecializedEvent(int32_t pageId, const std::string& event)
 {
     if (event == DOM_REFRESH) {
-        LOGD("DOMRefresh Add refresh Event");
         refreshEventId_ = EventMarker(GetNodeIdForEvent(), event, pageId);
         refreshChild_->SetRefreshEventId(refreshEventId_);
         return true;
     }
     if (event == DOM_REFRESH_EVENT_PULL_DOWN) {
-        LOGD("DOMRefresh Add pulldown Event");
         pullDownEventId_ = EventMarker(GetNodeIdForEvent(), event, pageId);
         refreshChild_->SetPulldownEventId(pullDownEventId_);
         return true;

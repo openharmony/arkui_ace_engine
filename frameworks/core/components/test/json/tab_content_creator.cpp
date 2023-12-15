@@ -23,7 +23,6 @@ namespace OHOS::Ace {
 
 RefPtr<Component> TabContentCreator::CreateFromJson(const JsonValue& componentJson, const JsonComponentFactory& factory)
 {
-    LOGD("CreateFromJson Tabcontent");
     std::string classType = componentJson.GetValue(CLASS_NAME)->GetString();
     if (classType != TAB_CONTENT_NAME) {
         LOGE("Create Tabcontent err: not a tabcontent json.");

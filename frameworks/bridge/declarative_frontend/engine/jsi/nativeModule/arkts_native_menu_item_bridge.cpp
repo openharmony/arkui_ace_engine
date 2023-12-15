@@ -59,7 +59,7 @@ ArkUINativeModuleValue MenuItemBridge::SetLabelFontColor(ArkUIRuntimeCallInfo* r
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
     Color color;
-    if (!ArkTSUtils::ParseJsColor(vm, secondArg, color)) {
+    if (!ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color)) {
         GetArkUIInternalNodeAPI()->GetMenuItemModifier().ResetLabelFontColor(nativeNode);
     } else {
         GetArkUIInternalNodeAPI()->GetMenuItemModifier().SetLabelFontColor(nativeNode, color.GetValue());
@@ -85,7 +85,7 @@ ArkUINativeModuleValue MenuItemBridge::SetContentFontColor(ArkUIRuntimeCallInfo*
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
     Color color;
-    if (!ArkTSUtils::ParseJsColor(vm, secondArg, color)) {
+    if (!ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color)) {
         GetArkUIInternalNodeAPI()->GetMenuItemModifier().ResetContentFontColor(nativeNode);
     } else {
         GetArkUIInternalNodeAPI()->GetMenuItemModifier().SetContentFontColor(nativeNode, color.GetValue());
@@ -125,7 +125,9 @@ ArkUINativeModuleValue MenuItemBridge::SetLabelFont(ArkUIRuntimeCallInfo* runtim
     if (weightArg->IsNumber()) {
         weight = std::to_string(weightArg->Int32Value(vm));
     } else {
-        ArkTSUtils::ParseJsString(vm, weightArg, weight);
+        if (ArkTSUtils::ParseJsString(vm, weightArg, weight) || weight.empty()) {
+            weight = DEFAULT_ERR_CODE;
+        }
     }
 
     int32_t style = 0;
@@ -176,7 +178,9 @@ ArkUINativeModuleValue MenuItemBridge::SetContentFont(ArkUIRuntimeCallInfo* runt
     if (weightArg->IsNumber()) {
         weight = std::to_string(weightArg->Int32Value(vm));
     } else {
-        ArkTSUtils::ParseJsString(vm, weightArg, weight);
+        if (ArkTSUtils::ParseJsString(vm, weightArg, weight) || weight.empty()) {
+            weight = DEFAULT_ERR_CODE;
+        }
     }
 
     int32_t style = 0;

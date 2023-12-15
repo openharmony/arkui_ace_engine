@@ -67,29 +67,6 @@ void ManifestParser::Parse(const std::string& contents)
     }
 }
 
-void ManifestParser::Printer()
-{
-#ifdef ACE_DEBUG_LOG
-    LOGD("appinfo:{");
-    LOGD("  Icon:%{private}s", manifestAppInfo_->GetIcon().c_str());
-    LOGD("  LogLevel:%{public}s", manifestAppInfo_->GetLogLevel().c_str());
-    LOGD("  Name:%{public}s", manifestAppInfo_->GetAppName().c_str());
-    LOGD("  AppID:%{public}s", manifestAppInfo_->GetAppID().c_str());
-    LOGD("  VersionCode:%{public}d", manifestAppInfo_->GetVersionCode());
-    LOGD("  VersionName:%{public}s", manifestAppInfo_->GetVersionName().c_str());
-    LOGD("  minPlatformVersion:%{public}d", manifestAppInfo_->GetMinPlatformVersion());
-    LOGD("}");
-
-    LOGD("router:{");
-    LOGD("  entry:%{private}s", manifestRouter_->GetEntry().c_str());
-    LOGD("  pages:{");
-    for (const auto& page : manifestRouter_->GetPageList()) {
-        LOGD("    %{private}s", page.c_str());
-    }
-    LOGD("}");
-
-    manifestWindow_->PrintInfo();
-#endif
-}
+void ManifestParser::Printer() {}
 
 } // namespace OHOS::Ace::Framework

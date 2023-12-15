@@ -38,7 +38,7 @@ public:
     NavigationGroupNode(const std::string& tag, int32_t nodeId, const RefPtr<Pattern>& pattern)
         : GroupNode(tag, nodeId, pattern)
     {}
-    ~NavigationGroupNode() override = default;
+    ~NavigationGroupNode() override;
     void AddChildToGroup(const RefPtr<UINode>& child, int32_t slot = DEFAULT_NODE_SLOT) override;
 
     // remain child needs to keep to use pop animation
@@ -81,6 +81,11 @@ public:
         return dividerNode_;
     }
 
+    const std::string& GetCurId() const
+    {
+        return curId_;
+    }
+
     bool GetIsModeChange() const
     {
         return isModeChange_;
@@ -102,6 +107,8 @@ public:
     }
 
     bool CheckCanHandleBack();
+
+    void OnInspectorIdUpdate(const std::string& id) override;
 
     bool HandleBack(const RefPtr<FrameNode>& node, bool isLastChild, bool isOverride);
 
@@ -129,6 +136,7 @@ private:
     bool isOnAnimation_ { false };
     bool isModeChange_ { false };
     bool needSetInvisible_ { false };
+    std::string curId_;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_NAVIGATION_GROUP_NODE_H

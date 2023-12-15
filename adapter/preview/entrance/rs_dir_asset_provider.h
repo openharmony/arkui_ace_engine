@@ -63,44 +63,37 @@ public:
         std::string fileName = basePath_ + assetName;
         char realPath[PATH_MAX] = { 0x00 };
         if (!RealPath(fileName, realPath)) {
-            LOGD("[%{private}s] RealPath error %{public}s", fileName.c_str(), strerror(errno));
             return nullptr;
         }
         auto fp = std::fopen(realPath, "rb");
         if (!fp) {
-            LOGD("[%{private}s] open file error %{public}s", fileName.c_str(), strerror(errno));
             return nullptr;
         }
 
         if (std::fseek(fp, 0, SEEK_END) != 0) {
-            LOGD("[%{private}s] seek file tail error %{public}s", fileName.c_str(), strerror(errno));
             std::fclose(fp);
             return nullptr;
         }
 
         size_t size = std::ftell(fp);
         if (size < 0) {
-            LOGD("[%{private}s] tell file error %{public}s", fileName.c_str(), strerror(errno));
             std::fclose(fp);
             return nullptr;
         }
 
         auto data = std::make_unique<char[]>(size);
         if (data == nullptr) {
-            LOGD("[%{private}s] new uint8_t array failed", fileName.c_str());
             std::fclose(fp);
             return nullptr;
         }
 
         if (std::fseek(fp, 0, SEEK_SET) != 0) {
-            LOGD("[%{private}s] seek file begin error %{public}s", fileName.c_str(), strerror(errno));
             std::fclose(fp);
             return nullptr;
         }
 
         auto rsize = std::fread(data.get(), 1, size, fp);
         if (rsize <= 0) {
-            LOGD("[%{private}s] read file failed, %{public}s", fileName.c_str(), strerror(errno));
             std::fclose(fp);
             return nullptr;
         }

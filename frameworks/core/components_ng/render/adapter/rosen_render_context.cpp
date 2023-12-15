@@ -359,12 +359,6 @@ void RosenRenderContext::SetSandBox(const std::optional<OffsetF>& parentPosition
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     if (parentPosition.has_value()) {
-        RefPtr<FrameNode> parent = sandBoxCount_ == 0 ? host->GetAncestorNodeOfFrame() : nullptr;
-        while (parent) {
-            auto rosenRenderContext = DynamicCast<RosenRenderContext>(parent->GetRenderContext());
-            CHECK_NULL_VOID(rosenRenderContext && rosenRenderContext->allowSandBox_);
-            parent = parent->GetAncestorNodeOfFrame();
-        }
         if (!force) {
             sandBoxCount_++;
         }
@@ -377,6 +371,7 @@ void RosenRenderContext::SetSandBox(const std::optional<OffsetF>& parentPosition
                 return;
             }
             sandBoxCount_ = 0;
+            CHECK_NULL_VOID(!host->IsRemoving());
         }
         rsNode_->SetSandBox(std::nullopt);
     }
@@ -1303,9 +1298,7 @@ void RosenRenderContext::OnTransformScaleUpdate(const VectorF& scale)
 {
     CHECK_NULL_VOID(rsNode_);
     auto curScale = rsNode_->GetStagingProperties().GetScale();
-    if (!NearEqual(curScale, Vector2f(1.0f, 1.0f)) && !NearEqual(scale, VectorF(1.0f, 1.0f))) {
-        allowSandBox_ = false;
-    }
+    hasScales_ = !NearEqual(curScale, Vector2f(1.0f, 1.0f)) && !NearEqual(scale, VectorF(1.0f, 1.0f));
     rsNode_->SetScale(scale.x, scale.y);
     RequestNextFrame();
 }
@@ -1479,17 +1472,18 @@ std::vector<double> RosenRenderContext::GetTrans()
     return transInfo_;
 }
 
-RectF RosenRenderContext::GetPaintRectWithTranslate()
+std::pair<RectF, bool> RosenRenderContext::GetPaintRectWithTranslate()
 {
     RectF rect;
-    CHECK_NULL_RETURN(rsNode_, rect);
+    bool error = hasScales_;
+    CHECK_NULL_RETURN(rsNode_, std::make_pair(rect, error));
     if (rsNode_->GetStagingProperties().GetRotation()) {
-        return RectF(0, 0, -1, -1);
+        return std::make_pair(RectF(0, 0, -1, -1), error);
     }
     rect = GetPaintRectWithoutTransform();
     auto translate = rsNode_->GetStagingProperties().GetTranslate();
     rect.SetOffset(rect.GetOffset() + OffsetF(translate[0], translate[1]));
-    return rect;
+    return std::make_pair(rect, error);
 }
 
 Matrix4 RosenRenderContext::GetRevertMatrix()
@@ -1795,10 +1789,10 @@ void RosenRenderContext::SetOuterBorderWidth(const BorderWidthProperty& value)
 {
     CHECK_NULL_VOID(rsNode_);
     Rosen::Vector4f cornerBorderWidth;
-    cornerBorderWidth.SetValues(static_cast<float>((value.leftDimen.value()).ConvertToPx()),
-        static_cast<float>((value.topDimen.value()).ConvertToPx()),
-        static_cast<float>((value.rightDimen.value()).ConvertToPx()),
-        static_cast<float>((value.bottomDimen.value()).ConvertToPx()));
+    cornerBorderWidth.SetValues(static_cast<float>((value.leftDimen.value_or(Dimension(0.0))).ConvertToPx()),
+        static_cast<float>((value.topDimen.value_or(Dimension(0.0))).ConvertToPx()),
+        static_cast<float>((value.rightDimen.value_or(Dimension(0.0))).ConvertToPx()),
+        static_cast<float>((value.bottomDimen.value_or(Dimension(0.0))).ConvertToPx()));
     rsNode_->SetOuterBorderWidth(cornerBorderWidth);
     RequestNextFrame();
 }
@@ -1954,7 +1948,6 @@ DataReadyNotifyTask RosenRenderContext::CreateBorderImageDataReadyCallback()
         if (imageSourceInfo != sourceInfo) {
             return;
         }
-        TAG_LOGD(AceLogTag::ACE_BORDER_IMAGE, "borderImage data ready %{public}s", sourceInfo.ToString().c_str());
         rosenRenderContext->bdImageLoadingCtx_->MakeCanvasImage(SizeF(), true, ImageFit::NONE);
     };
 }
@@ -1970,7 +1963,6 @@ LoadSuccessNotifyTask RosenRenderContext::CreateBorderImageLoadSuccessCallback()
         }
         ctx->bdImage_ = ctx->bdImageLoadingCtx_->MoveCanvasImage();
         CHECK_NULL_VOID(ctx->bdImage_);
-        TAG_LOGD(AceLogTag::ACE_BORDER_IMAGE, "borderImage load success %{public}s", sourceInfo.ToString().c_str());
         if (ctx->GetHost()->GetGeometryNode()->GetFrameSize().IsPositive()) {
             ctx->PaintBorderImage();
             ctx->RequestNextFrame();
@@ -3541,16 +3533,20 @@ void RosenRenderContext::PaintOverlayText()
         if (modifier_) {
             modifier_->SetCustomData(NG::OverlayTextData(overlayText));
             auto overlayOffset = modifier_->GetOverlayOffset();
-            overlayRect = std::make_shared<Rosen::RectF>(paintRect.GetX(), paintRect.GetY(),
-                paintRect.Width() + overlayOffset.GetX(), paintRect.Height() + overlayOffset.GetY());
+            auto paragraphSize = modifier_->GetParagraphSize(paintRect.Width());
+            overlayRect = std::make_shared<Rosen::RectF>(overlayOffset.GetX(), overlayOffset.GetY(),
+                std::max(paragraphSize.Width(), paintRect.Width()),
+                std::max(paragraphSize.Height(), paintRect.Height()));
             rsNode_->SetDrawRegion(overlayRect);
         } else {
             modifier_ = std::make_shared<OverlayTextModifier>();
             rsNode_->AddModifier(modifier_);
             modifier_->SetCustomData(NG::OverlayTextData(overlayText));
             auto overlayOffset = modifier_->GetOverlayOffset();
-            overlayRect = std::make_shared<Rosen::RectF>(paintRect.GetX(), paintRect.GetY(),
-                paintRect.Width() + overlayOffset.GetX(), paintRect.Height() + overlayOffset.GetY());
+            auto paragraphSize = modifier_->GetParagraphSize(paintRect.Width());
+            overlayRect = std::make_shared<Rosen::RectF>(overlayOffset.GetX(), overlayOffset.GetY(),
+                std::max(paragraphSize.Width(), paintRect.Width()),
+                std::max(paragraphSize.Height(), paintRect.Height()));
             rsNode_->SetDrawRegion(overlayRect);
         }
     }

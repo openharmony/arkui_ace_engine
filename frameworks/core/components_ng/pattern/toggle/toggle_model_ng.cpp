@@ -155,9 +155,6 @@ void ToggleModelNG::SetSwitchSelected(RefPtr<FrameNode>& childFrameNode, bool is
         CHECK_NULL_VOID(frameNode);
         childFrameNode = frameNode;
     }
-    auto childPattern = childFrameNode->GetPattern<SwitchPattern>();
-    CHECK_NULL_VOID(childPattern);
-    childPattern->SetSelect(isOn);
     auto eventHub = childFrameNode->GetEventHub<SwitchEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetCurrentUIState(UI_STATE_SELECTED, isOn);

@@ -18,6 +18,7 @@
 
 #include "base/memory/referenced.h"
 #include "core/components_ng/base/ui_node.h"
+#include "core/components_ng/pattern/navigation/inner_navigation_controller.h"
 #include "core/components_ng/pattern/navigation/navigation_declaration.h"
 #include "core/components_ng/pattern/navigation/navigation_event_hub.h"
 #include "core/components_ng/pattern/navigation/navigation_group_node.h"
@@ -36,7 +37,7 @@ class NavigationPattern : public Pattern {
     DECLARE_ACE_TYPE(NavigationPattern, Pattern);
 
 public:
-    NavigationPattern() = default;
+    NavigationPattern();
     ~NavigationPattern() override = default;
 
     bool IsAtomicNode() const override
@@ -276,6 +277,11 @@ public:
         onStateChangeMap_.erase(nodeId);
     }
 
+    const std::shared_ptr<NavigationController>& GetNavigationController() const
+    {
+        return navigationController_;
+    }
+
     const std::map<int32_t, std::function<void(bool)>>& GetOnStateChangeMap()
     {
         return onStateChangeMap_;
@@ -327,6 +333,7 @@ private:
     Dimension minContentWidthValue_ = 0.0_vp;
     NavigationTitleMode titleMode_ = NavigationTitleMode::FREE;
     bool navigationModeChange_ = false;
+    std::shared_ptr<NavigationController> navigationController_;
     std::map<int32_t, std::function<void(bool)>> onStateChangeMap_;
     void NotifyPageHide(const std::string& pageName);
     void NotifyPageShow(const std::string& pageName);

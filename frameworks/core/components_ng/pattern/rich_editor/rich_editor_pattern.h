@@ -66,6 +66,7 @@ struct AutoScrollParam {
     float offset = 0.0f;
     bool showScrollbar = false;
     Offset eventOffset;
+    bool isFirstRun_ = true;
 };
 
 struct SelectionMenuParams {
@@ -478,6 +479,7 @@ private:
     void OnAutoScroll(AutoScrollParam param);
     void StopAutoScroll();
     void AutoScrollByEdgeDetection(AutoScrollParam param, OffsetF offset, EdgeDetectionStrategy strategy);
+    float CalcDragSpeed(float hotAreaStart, float hotAreaEnd, float point);
     float MoveTextRect(float offset);
     bool MoveCaretToContentRect();
     bool IsTextArea() const override
@@ -485,6 +487,15 @@ private:
         return true;
     }
     void ProcessInnerPadding();
+    bool IsReachTop()
+    {
+        return NearEqual(richTextRect_.GetY(), contentRect_.GetY());
+    }
+
+    bool IsReachBottom()
+    {
+        return NearEqual(richTextRect_.Bottom(), contentRect_.Bottom());
+    }
 
     // ai analysis fun
     bool NeedAiAnalysis(
@@ -516,6 +527,7 @@ private:
     bool isCustomKeyboardAttached_ = false;
     bool usingMouseRightButton_ = false;
     bool isCursorAlwaysDisplayed_ = false;
+    bool isClickOnAISpan_ = false;
 
     int32_t moveLength_ = 0;
     int32_t caretPosition_ = 0;
@@ -555,12 +567,14 @@ private:
     bool scrollable_ = true;
     CancelableCallback<void()> autoScrollTask_;
     OffsetF prevAutoScrollOffset_;
+    AutoScrollParam currentScrollParam_;
+    bool isAutoScrollRunning_ = false;
     // add for ai input analysis
     bool hasClicked_ = false;
     CaretUpdateType caretUpdateType_ = CaretUpdateType::NONE;
     TimeStamp lastClickTimeStamp_;
     TimeStamp lastAiPosTimeStamp_;
-
+    bool adjusted_ = false;
     ACE_DISALLOW_COPY_AND_MOVE(RichEditorPattern);
 };
 } // namespace OHOS::Ace::NG

@@ -36,6 +36,7 @@
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
+#include "core/components_ng/pattern/menu/menu_layout_property.h"
 #include "core/components_ng/pattern/menu/menu_pattern.h"
 #include "core/components_ng/pattern/menu/menu_view.h"
 #include "core/components_ng/pattern/security_component/paste_button/paste_button_common.h"
@@ -515,29 +516,20 @@ void SelectOverlayNode::DispatchGoneToVisibleState(FrameNodeType type, FrameNode
     }
 }
 
-RefPtr<FrameNode> CreateCustomSelectMenu(const std::shared_ptr<SelectOverlayInfo>& info)
+RefPtr<UINode> CreateCustomSelectMenu(const std::shared_ptr<SelectOverlayInfo>& info)
 {
     CHECK_NULL_RETURN(info, nullptr);
     CHECK_NULL_RETURN(info->menuInfo.menuBuilder, nullptr);
     NG::ScopedViewStackProcessor builderViewStackProcessor;
     info->menuInfo.menuBuilder();
     auto customNode = NG::ViewStackProcessor::GetInstance()->Finish();
-    MenuParam menuParam;
-    menuParam.type = MenuType::SELECT_OVERLAY_CUSTOM_MENU;
-    auto menuNode = MenuView::Create(customNode, -1, "", menuParam, info->isUsingMouse);
-    auto eventHub = menuNode->GetEventHub<EventHub>();
-    if (eventHub && info->menuCallback.onAppear) {
-        eventHub->SetOnAppear(std::move(info->menuCallback.onAppear));
-    }
-    if (eventHub && info->menuCallback.onDisappear) {
-        eventHub->SetOnDisappear(std::move(info->menuCallback.onDisappear));
-    }
-    return menuNode;
+    CHECK_NULL_RETURN(customNode, nullptr);
+    return customNode;
 }
 
 RefPtr<FrameNode> SelectOverlayNode::CreateSelectOverlayNode(const std::shared_ptr<SelectOverlayInfo>& info)
 {
-    if (info->isUsingMouse) {
+    if (info->isUsingMouse && !info->menuInfo.menuBuilder) {
         return CreateMenuNode(info);
     }
     auto selectOverlayNode = AceType::MakeRefPtr<SelectOverlayNode>(info);
@@ -548,6 +540,34 @@ RefPtr<FrameNode> SelectOverlayNode::CreateSelectOverlayNode(const std::shared_p
     auto selectContext = selectOverlayNode->GetRenderContext();
     selectContext->UpdateUseShadowBatching(true);
     return selectOverlayNode;
+}
+
+void SelectOverlayNode::CreateCustomSelectOverlay(const std::shared_ptr<SelectOverlayInfo>& info)
+{
+    selectMenu_ = FrameNode::GetOrCreateFrameNode(
+        V2::MENU_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), [id = GetId()]() {
+            return AceType::MakeRefPtr<MenuPattern>(id, V2::MENU_ETS_TAG, MenuType::SELECT_OVERLAY_CUSTOM_MENU);
+        });
+    selectMenu_->MountToParent(Claim(this));
+    auto pattern = selectMenu_->GetPattern<MenuPattern>();
+    auto renderContext = selectMenu_->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    renderContext->UpdateClipEdge(false);
+    renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
+    renderContext->UpdateBackShadow(ShadowConfig::NoneShadow);
+    auto layoutProperty = selectMenu_->GetLayoutProperty<MenuLayoutProperty>();
+    auto customMenu = CreateCustomSelectMenu(info);
+    CHECK_NULL_VOID(selectMenu_);
+    CHECK_NULL_VOID(customMenu);
+    customMenu->MountToParent(selectMenu_);
+    if (info->menuInfo.menuIsShow) {
+        selectMenu_->GetLayoutProperty()->UpdateVisibility(VisibleType::VISIBLE);
+        selectMenuStatus_ = FrameNodeStatus::VISIBLE;
+    } else {
+        selectMenu_->GetLayoutProperty()->UpdateVisibility(VisibleType::GONE);
+        selectMenuStatus_ = FrameNodeStatus::GONE;
+    }
+    selectMenu_->MarkModifyDone();
 }
 
 void SelectOverlayNode::MoreOrBackAnimation(bool isMore)
@@ -842,16 +862,7 @@ void SelectOverlayNode::CreateToolBar()
 {
     auto info = GetPattern<SelectOverlayPattern>()->GetSelectOverlayInfo();
     if (info->menuInfo.menuBuilder) {
-        selectMenu_ = CreateCustomSelectMenu(info);
-        if (info->menuInfo.menuIsShow) {
-            selectMenu_->GetLayoutProperty()->UpdateVisibility(VisibleType::VISIBLE);
-            selectMenuStatus_ = FrameNodeStatus::VISIBLE;
-        } else {
-            selectMenu_->GetLayoutProperty()->UpdateVisibility(VisibleType::GONE);
-            selectMenuStatus_ = FrameNodeStatus::GONE;
-        }
-        selectMenu_->MountToParent(Claim(this));
-        selectMenu_->MarkModifyDone();
+        CreateCustomSelectOverlay(info);
         return;
     }
 
@@ -1144,12 +1155,8 @@ void SelectOverlayNode::UpdateToolBar(bool menuItemChanged)
 RefPtr<FrameNode> SelectOverlayNode::CreateMenuNode(const std::shared_ptr<SelectOverlayInfo>& info)
 {
     RefPtr<FrameNode> menuWrapper;
-    if (info->menuInfo.menuBuilder) {
-        menuWrapper = CreateCustomSelectMenu(info);
-    } else {
-        std::vector<OptionParam> params = GetOptionsParams(info);
-        menuWrapper = MenuView::Create(std::move(params), -1);
-    }
+    std::vector<OptionParam> params = GetOptionsParams(info);
+    menuWrapper = MenuView::Create(std::move(params), -1);
     CHECK_NULL_RETURN(menuWrapper, nullptr);
     auto menu = DynamicCast<FrameNode>(menuWrapper->GetChildAtIndex(0));
     // set click position to menu
@@ -1210,7 +1217,6 @@ bool SelectOverlayNode::IsInSelectedOrSelectOverlayArea(const PointF& point)
 
     for (const auto& rect : rects) {
         if (rect.IsInRegion(point)) {
-            LOGD("point is in select overlay rects");
             return true;
         }
     }

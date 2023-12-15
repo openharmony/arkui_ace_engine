@@ -133,6 +133,7 @@ ArkUINativeModuleValue SpanBridge::SetFontStyle(ArkUIRuntimeCallInfo *runtimeCal
         if (value >= 0 && value < static_cast<int32_t>(FONT_STYLES.size())) {
             GetArkUIInternalNodeAPI()->GetSpanModifier().SetSpanFontStyle(nativeNode, value);
         } else {
+            GetArkUIInternalNodeAPI()->GetSpanModifier().ReSetSpanFontStyle(nativeNode);
             return panda::JSValueRef::Undefined(vm);
         }
     } else {

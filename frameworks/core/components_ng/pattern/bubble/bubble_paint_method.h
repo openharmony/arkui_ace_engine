@@ -80,13 +80,21 @@ public:
         clipFrameNode_ = clipFrameNode;
     }
 
+    void SetArrowOffsetsFromClip(std::vector<float>& arrowOffsetsFromClip)
+    {
+        arrowOffsetsFromClip_ = arrowOffsetsFromClip;
+    }
+
     void PaintBubble(RSCanvas& canvas, PaintWrapper* paintWrapper);
     void PaintMask(RSCanvas& canvas, PaintWrapper* paintWrapper);
     void PaintBorder(RSCanvas& canvas, PaintWrapper* paintWrapper);
     void ClipBubble(PaintWrapper* paintWrapper);
+    void PaintDoubleBorder(RSCanvas& canvas, PaintWrapper* paintWrapper);
+    
 
 private:
     void PaintBubbleWithArrow(RSCanvas& canvas, PaintWrapper* paintWrapper);
+    void PaintDoubleBorderWithArrow(RSCanvas& canvas, PaintWrapper* paintWrapper);
     void PaintNonCustomPopup(RSCanvas& canvas, PaintWrapper* wrapper);
 
     void PaintTopBubble(RSCanvas& canvas);
@@ -108,10 +116,21 @@ private:
     void PaintShadow(const RSPath& path, const Shadow& shadow, RSCanvas& canvas);
     void ClipBubbleWithPath(const RefPtr<FrameNode>& frameNode);
 
+    void BuildDoubleBorderPath(RSPath& path);
+    void BuildTopDoubleBorderPath(RSPath& path, float arrowOffset, float radius);
+    void BuildRightDoubleBorderPath(RSPath& path, float arrowOffset, float radius);
+    void BuildBottomDoubleBorderPath(RSPath& path, float arrowOffset, float radius);
+    void BuildLeftDoubleBorderPath(RSPath& path, float arrowOffset, float radius);
+
     float GetInnerBorderOffset();
-    float outerBorderWidth_ = Dimension(1.0_vp).ConvertToPx();
-    float innerBorderWidth_ = Dimension(1.0_vp).ConvertToPx();
+    float GetBorderOffset();
+    float outerBorderWidth_ = Dimension(0.8_vp).ConvertToPx();
+    float innerBorderWidth_ = Dimension(0.5_vp).ConvertToPx();
     bool needPaintInnerBorder_ = false;
+    bool isFillTheGap_ = false;
+    bool isPaintBubble_ = false;
+    // top right bottom left
+    std::vector<float> arrowOffsetsFromClip_ = { 0.0f, 0.0f, 0.0f, 0.0f };
 
     // Get from RenderProp
     bool useCustom_ = false;

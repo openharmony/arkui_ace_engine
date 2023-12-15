@@ -89,7 +89,7 @@ public:
     /*
      * Notify scrollable node to snap scroll, called by scroll bar.
      */
-    bool NotifySnapScroll(float delta, float velocity, float controlDistance) const;
+    bool NotifySnapScroll(float delta, float velocity, float controlDistance, float dragDistance) const;
 
     float CalcPatternOffset(float scrollableDistance, float controlDistance, float delta) const;
 

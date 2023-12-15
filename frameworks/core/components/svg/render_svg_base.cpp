@@ -760,7 +760,6 @@ RefPtr<RenderSvgBase> RenderSvgBase::GetFilterFromRoot(const std::string& id)
 void RenderSvgBase::Inherit(const RefPtr<SvgBaseDeclaration>& parent, const RefPtr<SvgBaseDeclaration>& self)
 {
     if (!parent || !self) {
-        LOGD("parent or self declaration is null");
         return;
     }
     if (!self->HasOpacity()) {

@@ -44,13 +44,11 @@ RefPtr<UINode> ContainerModalPatternEnhance::GetTitleItemByIndex(
 
 void ContainerModalPatternEnhance::OnWindowFocused()
 {
-    LOGD("windowOnFocus refresh window");
     ContainerModalPattern::OnWindowFocused();
 }
 
 void ContainerModalPatternEnhance::OnWindowUnfocused()
 {
-    LOGD("OnWindowUnfocused refresh window");
     if (SubwindowManager::GetInstance()->GetCurrentWindow() &&
         SubwindowManager::GetInstance()->GetCurrentWindow()->GetShown()) {
         SetIsFocus(false);
@@ -143,8 +141,6 @@ void ContainerModalPatternEnhance::ChangeTitleButtonIcon(
 
 void ContainerModalPatternEnhance::SetContainerButtonHide(bool hideSplit, bool hideMaximize, bool hideMinimize)
 {
-    LOGD("hideBtn hideSplit:%{public}d hideMaximize:%{public}d hideMinimize:%{public}d ", hideSplit, hideMaximize,
-        hideMinimize);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto controlButtonsNode = AceType::DynamicCast<FrameNode>(host->GetChildren().back());

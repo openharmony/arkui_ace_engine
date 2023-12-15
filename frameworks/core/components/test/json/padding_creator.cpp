@@ -24,7 +24,6 @@ namespace OHOS::Ace {
 
 RefPtr<Component> PaddingCreator::CreateFromJson(const JsonValue& jsonValue, const JsonComponentFactory& factory)
 {
-    LOGD("CreateFromJson padding");
     std::string classType = jsonValue.GetValue(CLASS_NAME)->GetString();
     if (classType != PADDING_NAME) {
         LOGE("Create PaddingComponent err: not a padding json.");

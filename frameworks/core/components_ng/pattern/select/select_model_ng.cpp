@@ -39,7 +39,7 @@ void SetSelectDefaultSize(const RefPtr<FrameNode>& select)
     layoutProperty->UpdateCalcMinSize(CalcSize(CalcLength(theme->GetSelectMinWidth()), std::nullopt));
 }
 
-static constexpr Dimension SELECT_MARGIN_VP = 4.0_vp;
+static constexpr Dimension SELECT_MARGIN_VP = 8.0_vp;
 static constexpr Dimension SELECT_MIN_SPACE = 8.0_vp;
 static constexpr Dimension SELECT_HORIZONTAL_GAP = 24.0_vp;
 } // namespace
@@ -254,6 +254,10 @@ void SelectModelNG::SetWidth(Dimension& value)
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(theme);
+    
+    if (value.Unit() == DimensionUnit::PERCENT) {
+        ViewAbstract::SetWidth(NG::CalcLength(value));
+    }
     
     double minWidth = 2 * pattern->GetFontSize().ConvertToVp() + SELECT_HORIZONTAL_GAP.ConvertToVp() +
         theme->GetSpinnerWidth().ConvertToVp() + SELECT_MIN_SPACE.ConvertToVp();

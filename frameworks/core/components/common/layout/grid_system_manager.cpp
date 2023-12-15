@@ -156,7 +156,6 @@ const SystemGridInfo& GridSystemManager::GetCurrentGridInfo()
 {
     GridSizeType sizeType = ScreenSystemManager::GetInstance().GetCurrentSize();
     systemGridInfo_ = GetSystemGridInfo(sizeType);
-    LOGD("GetCurrentGridInfo: %{public}f: sizeType = %{public}d", GetScreenWidth(), systemGridInfo_.sizeType);
     return systemGridInfo_;
 }
 

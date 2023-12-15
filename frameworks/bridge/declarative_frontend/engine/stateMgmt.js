@@ -117,15 +117,6 @@ stateMgmtProfiler.instance = undefined;
  * @since 9
  */
 class LocalStorage extends NativeLocalStorage {
-    /*
-      get access to provded LocalStorage instance thru Stake model
-      @StageModelOnly
-      @form
-      @since 10
-    */
-    static getShared() {
-        return LocalStorage.GetShared();
-    }
     /**
      * Construct new instance of LocalStorage
      * initialzie with all properties and their values that Object.keys(params) returns
@@ -141,6 +132,15 @@ class LocalStorage extends NativeLocalStorage {
         if (Object.keys(initializingProperties).length) {
             this.initializeProps(initializingProperties);
         }
+    }
+    /*
+      get access to provded LocalStorage instance thru Stake model
+      @StageModelOnly
+      @form
+      @since 10
+    */
+    static getShared() {
+        return LocalStorage.GetShared();
     }
     /**
      * clear storage and init with given properties
@@ -545,6 +545,13 @@ class LocalStorage extends NativeLocalStorage {
  * @since 7
  */
 class AppStorage extends LocalStorage {
+    /** singleton class, app can not create instances
+    *
+    * not a public / sdk function
+    */
+    constructor(initializingProperties) {
+        super(initializingProperties);
+    }
     /**
     * create and initialize singleton
     * initialzie with all properties and their values that Object.keys(params) returns
@@ -946,13 +953,6 @@ class AppStorage extends LocalStorage {
         }
         return AppStorage.instance_;
     }
-    /** singleton class, app can not create instances
-    *
-    * not a public / sdk function
-    */
-    constructor(initializingProperties) {
-        super(initializingProperties);
-    }
 }
 // instance functions below:
 // Should all be protected, but TS lang does not allow access from static member to protected member
@@ -976,6 +976,16 @@ AppStorage.instance_ = undefined;
  * public API to manage IPropertySubscriber
  */
 class SubscriberManager {
+    /**
+     * SubscriberManager is a singleton created by the framework
+     * do not use
+     *
+     * internal method
+     */
+    constructor() {
+        this.subscriberById_ = new Map();
+        
+    }
     /**
       * check subscriber is known
       * same as ES6 Map.prototype.has()
@@ -1152,16 +1162,6 @@ class SubscriberManager {
      */
     makeId() {
         return ViewStackProcessor.MakeUniqueId();
-    }
-    /**
-     * SubscriberManager is a singleton created by the framework
-     * do not use
-     *
-     * internal method
-     */
-    constructor() {
-        this.subscriberById_ = new Map();
-        
     }
 }
 /*
@@ -1391,6 +1391,14 @@ class SubscribaleAbstract extends SubscribableAbstract {
  */
 class PersistentStorage {
     /**
+     * all following methods are framework internal
+     */
+    constructor() {
+        this.links_ = new Map();
+        this.id_ = SubscriberManager.MakeId();
+        SubscriberManager.Add(this);
+    }
+    /**
      *
      * @param storage method to be used by the framework to set the backend
      * this is to be done during startup
@@ -1529,14 +1537,6 @@ class PersistentStorage {
         
         PersistentStorage.storage_.set(propName, PersistentStorage.getOrCreate().links_.get(propName).get());
     }
-    /**
-     * all following methods are framework internal
-     */
-    constructor() {
-        this.links_ = new Map();
-        this.id_ = SubscriberManager.MakeId();
-        SubscriberManager.Add(this);
-    }
     keys() {
         return this.links_.keys();
     }
@@ -1650,6 +1650,10 @@ PersistentStorage.instance_ = undefined;
  *
  */
 class Environment {
+    constructor() {
+        this.props_ = new Map();
+        Environment.envBackend_.onValueChanged(this.onValueChanged.bind(this));
+    }
     static getOrCreate() {
         if (Environment.instance_) {
             // already initialized
@@ -1711,10 +1715,6 @@ class Environment {
      */
     static Keys() {
         return Environment.getOrCreate().keys();
-    }
-    constructor() {
-        this.props_ = new Map();
-        Environment.envBackend_.onValueChanged(this.onValueChanged.bind(this));
     }
     envProp(key, value) {
         let prop = AppStorage.prop(key);
@@ -2067,9 +2067,65 @@ class SubscribableHandler {
 }
 SubscribableHandler.SUBSCRIBE = Symbol("_____subscribe__");
 SubscribableHandler.UNSUBSCRIBE = Symbol("_____unsubscribe__");
+class SubscribableMapSetHandler extends SubscribableHandler {
+    constructor(owningProperty) {
+        super(owningProperty);
+        // In-place Map/Set modification functions
+        this.mutatingFunctions = new Set([
+            /*Map functions*/
+            "set", "clear", "delete",
+            /*Set functions*/
+            "add", "clear", "delete",
+        ]);
+        this.proxiedFunctions = new Set([
+            /*Map functions*/
+            "set",
+            /*Set functions*/
+            "add"
+        ]);
+    }
+    /**
+     * Get trap for Map/Set type proxy
+     * Functions that modify Map/Set in-place are intercepted and replaced with a function
+     * that executes the original function and notifies the handler of a change.
+     * @param target Original Map/Set object
+     * @param property
+     * @param receiver Proxied Map/Set object
+     * @returns
+     */
+    get(target, property, receiver) {
+        if (property === ObservedObject.__OBSERVED_OBJECT_RAW_OBJECT) {
+            return target;
+        }
+        //receiver will fail for internal slot methods of Set and Map
+        //So assign the target as receiver in this case.
+        if (property === Symbol.iterator || property === 'size') {
+            receiver = target;
+        }
+        let ret = super.get(target, property, receiver);
+        if (ret && typeof ret === 'function') {
+            const self = this;
+            return function () {
+                // execute original function with given arguments
+                const result = ret.apply(target, arguments);
+                if (self.mutatingFunctions.has(property)) {
+                    self.notifyObjectPropertyHasChanged(property, target);
+                }
+                // Only calls to inserting items can be chained, so returning the 'proxiedObject'
+                // ensures that when chain calls also 2nd function call operates on the proxied object.
+                // Otherwise return the original result of the function.
+                return self.proxiedFunctions.has(property) ? receiver : result;
+            }.bind(receiver);
+        }
+        return ret;
+    }
+}
 class SubscribableDateHandler extends SubscribableHandler {
     constructor(owningProperty) {
         super(owningProperty);
+        this.dateSetFunctions = new Set(["setFullYear", "setMonth", "setDate", "setHours", "setMinutes", "setSeconds",
+            "setMilliseconds", "setTime", "setUTCFullYear", "setUTCMonth", "setUTCDate", "setUTCHours", "setUTCMinutes",
+            "setUTCSeconds", "setUTCMilliseconds"]);
     }
     /**
      * Get trap for Date type proxy
@@ -2080,21 +2136,64 @@ class SubscribableDateHandler extends SubscribableHandler {
      * @returns
      */
     get(target, property) {
-        const dateSetFunctions = new Set(["setFullYear", "setMonth", "setDate", "setHours", "setMinutes", "setSeconds",
-            "setMilliseconds", "setTime", "setUTCFullYear", "setUTCMonth", "setUTCDate", "setUTCHours", "setUTCMinutes",
-            "setUTCSeconds", "setUTCMilliseconds"]);
         let ret = super.get(target, property);
-        if (typeof ret === "function" && property.toString() && dateSetFunctions.has(property.toString())) {
-            const self = this;
-            return function () {
-                // execute original function with given arguments
-                let result = ret.apply(this, arguments);
-                self.notifyObjectPropertyHasChanged(property.toString(), this);
-                return result;
-            }.bind(target); // bind "this" to target inside the function
+        if (typeof ret === "function") {
+            if (this.dateSetFunctions.has(property)) {
+                const self = this;
+                return function () {
+                    // execute original function with given arguments
+                    let result = ret.apply(this, arguments);
+                    self.notifyObjectPropertyHasChanged(property.toString(), this);
+                    return result;
+                    // bind "this" to target inside the function
+                }.bind(target);
+            }
+            return ret.bind(target);
         }
-        else if (typeof ret === "function") {
-            ret = ret.bind(target);
+        return ret;
+    }
+}
+class SubscribableArrayHandler extends SubscribableHandler {
+    constructor(owningProperty) {
+        super(owningProperty);
+        // In-place array modification functions
+        this.mutatingFunctions = new Set(["splice", "copyWithin", "fill", "reverse", "sort"]);
+        // 'splice' and 'pop' self modifies the array, returns deleted array items
+        // means, alike other self-modifying functions, splice does not return the array itself.
+        this.specialFunctions = new Set(["splice", "pop"]);
+    }
+    /**
+     * Get trap for Array type proxy
+     * Functions that modify Array in-place are intercepted and replaced with a function
+     * that executes the original function and notifies the handler of a change.
+     * @param target Original Array object
+     * @param property
+     * @param receiver Proxied Array object
+     * @returns
+     */
+    get(target, property, receiver) {
+        if (property === ObservedObject.__OBSERVED_OBJECT_RAW_OBJECT) {
+            return target;
+        }
+        let ret = super.get(target, property, receiver);
+        if (ret && typeof ret === "function") {
+            const self = this;
+            const prop = property.toString();
+            if (self.mutatingFunctions.has(prop)) {
+                return function () {
+                    const result = ret.apply(target, arguments);
+                    // prop is the function name here
+                    // and result is the function return value
+                    // function modifies none or more properties
+                    self.notifyObjectPropertyHasChanged(prop, self.specialFunctions.has(prop) ? target : result);
+                    // returning the 'receiver(proxied object)' ensures that when chain calls also 2nd function call
+                    // operates on the proxied object.
+                    return self.specialFunctions.has(prop) ? result : receiver;
+                }.bind(receiver);
+            }
+            // binding the proxiedObject ensures that modifying functions like push() operate on the
+            // proxied array and each array change is notified.
+            return ret.bind(receiver);
         }
         return ret;
     }
@@ -2105,6 +2204,23 @@ class ExtendableProxy {
     }
 }
 class ObservedObject extends ExtendableProxy {
+    /**
+     * To create a new ObservableObject use CreateNew function
+     *
+     * constructor create a new ObservableObject and subscribe its owner to propertyHasChanged
+     * notifications
+     * @param obj  raw Object, if obj is a ObservableOject throws an error
+     * @param objectOwner
+     */
+    constructor(obj, handler, objectOwningProperty) {
+        super(obj, handler);
+        if (ObservedObject.IsObservedObject(obj)) {
+            stateMgmtConsole.error("ObservableOject constructor: INTERNAL ERROR: after jsObj is observedObject already");
+        }
+        if (objectOwningProperty != undefined) {
+            this[SubscribableHandler.SUBSCRIBE] = objectOwningProperty;
+        }
+    } // end of constructor
     /**
      * Factory function for ObservedObjects /
      *  wrapping of objects for proxying
@@ -2127,54 +2243,19 @@ class ObservedObject extends ExtendableProxy {
         return ObservedObject.createNewInternal(rawObject, owningProperty);
     }
     static createNewInternal(rawObject, owningProperty) {
-        let proxiedObject = new ObservedObject(rawObject, Array.isArray(rawObject) ? new class extends SubscribableHandler {
-            constructor(owningProperty) {
-                super(owningProperty);
-                // In-place array modification functions
-                // splice is also in-place modifying function, but we need to handle separately
-                this.inPlaceModifications = new Set(["copyWithin", "fill", "reverse", "sort"]);
-            }
-            get(target, property, receiver) {
-                let ret = super.get(target, property, receiver);
-                if (ret && typeof ret === "function") {
-                    const self = this;
-                    const prop = property.toString();
-                    // prop is the function name here
-                    if (prop == "splice" || prop == "pop") {
-                        // 'splice' self modifies the array, returns deleted array items
-                        // means, alike other self-modifying functions, splice does not return the array itself.
-                        return function () {
-                            const result = ret.apply(target, arguments);
-                            // prop is the function name here
-                            // and result is the function return value
-                            // functinon modifies none or more properties
-                            self.notifyObjectPropertyHasChanged(prop, target);
-                            return result;
-                        }.bind(proxiedObject);
-                    }
-                    if (self.inPlaceModifications.has(prop)) {
-                        // in place modfication function result == target, the raw array modified
-                        
-                        return function () {
-                            const result = ret.apply(target, arguments);
-                            // 'result' is the unproxied object               
-                            // functinon modifies none or more properties
-                            self.notifyObjectPropertyHasChanged(prop, result);
-                            // returning the 'proxiedObject' ensures that when chain calls also 2nd function call
-                            // operates on the proxied object.
-                            return proxiedObject;
-                        }.bind(proxiedObject);
-                    }
-                    // binding the proxiedObject ensures that modifying functions like push() operate on the 
-                    // proxied array and each array change is notified.
-                    return ret.bind(proxiedObject);
-                }
-                return ret;
-            }
-        }(owningProperty) // SubscribableArrayHandlerAnonymous
-            : (rawObject instanceof Date)
-                ? new SubscribableDateHandler(owningProperty)
-                : new SubscribableHandler(owningProperty), owningProperty);
+        let proxiedObject;
+        if (rawObject instanceof Map || rawObject instanceof Set) {
+            proxiedObject = new ObservedObject(rawObject, new SubscribableMapSetHandler(owningProperty), owningProperty);
+        }
+        else if (rawObject instanceof Date) {
+            proxiedObject = new ObservedObject(rawObject, new SubscribableDateHandler(owningProperty), owningProperty);
+        }
+        else if (Array.isArray(rawObject)) {
+            proxiedObject = new ObservedObject(rawObject, new SubscribableArrayHandler(owningProperty), owningProperty);
+        }
+        else {
+            proxiedObject = new ObservedObject(rawObject, new SubscribableHandler(owningProperty), owningProperty);
+        }
         return proxiedObject;
     }
     /*
@@ -2270,23 +2351,6 @@ class ObservedObject extends ExtendableProxy {
             ? Object.getPrototypeOf(proto.constructor.prototype)
             : proto;
     }
-    /**
-     * To create a new ObservableObject use CreateNew function
-     *
-     * constructor create a new ObservableObject and subscribe its owner to propertyHasChanged
-     * notifications
-     * @param obj  raw Object, if obj is a ObservableOject throws an error
-     * @param objectOwner
-     */
-    constructor(obj, handler, objectOwningProperty) {
-        super(obj, handler);
-        if (ObservedObject.IsObservedObject(obj)) {
-            stateMgmtConsole.error("ObservableOject constructor: INTERNAL ERROR: after jsObj is observedObject already");
-        }
-        if (objectOwningProperty != undefined) {
-            this[SubscribableHandler.SUBSCRIBE] = objectOwningProperty;
-        }
-    } // end of constructor
 }
 ObservedObject.__IS_OBSERVED_OBJECT = Symbol("_____is_observed_object__");
 ObservedObject.__OBSERVED_OBJECT_RAW_OBJECT = Symbol("_____raw_object__");
@@ -3072,23 +3136,6 @@ class SynchedPropertyNesedObject extends ObservedPropertyObjectAbstract {
 // implemented in C++  for release
 // and in utest/view_native_mock.ts for testing
 class View extends NativeViewFullUpdate {
-    get localStorage_() {
-        if (!this.localStoragebackStore_) {
-            
-            this.localStoragebackStore_ = new LocalStorage({ /* emty */});
-        }
-        return this.localStoragebackStore_;
-    }
-    set localStorage_(instance) {
-        if (!instance) {
-            // setting to undefined not allowed
-            return;
-        }
-        if (this.localStoragebackStore_) {
-            stateMgmtConsole.error(`${this.constructor.name} is setting LocalStorage instance twice`);
-        }
-        this.localStoragebackStore_ = instance;
-    }
     /**
      * Create a View
      *
@@ -3131,6 +3178,23 @@ class View extends NativeViewFullUpdate {
         }
         SubscriberManager.Add(this);
         
+    }
+    get localStorage_() {
+        if (!this.localStoragebackStore_) {
+            
+            this.localStoragebackStore_ = new LocalStorage({ /* emty */});
+        }
+        return this.localStoragebackStore_;
+    }
+    set localStorage_(instance) {
+        if (!instance) {
+            // setting to undefined not allowed
+            return;
+        }
+        if (this.localStoragebackStore_) {
+            stateMgmtConsole.error(`${this.constructor.name} is setting LocalStorage instance twice`);
+        }
+        this.localStoragebackStore_ = instance;
     }
     // globally unique id, this is different from compilerAssignedUniqueChildId!
     id__() {
@@ -4001,18 +4065,20 @@ class SynchedPropertyOneWayPU extends ObservedPropertyAbstractPU {
             let copy;
             if (obj instanceof Set) {
                 copy = new Set();
+                Object.setPrototypeOf(copy, Object.getPrototypeOf(obj));
+                copiedObjects.set(obj, copy);
                 for (const setKey of obj.keys()) {
                     stack.push({ name: setKey });
-                    copiedObjects.set(obj, copy);
                     copy.add(getDeepCopyOfObjectRecursive(setKey));
                     stack.pop();
                 }
             }
             else if (obj instanceof Map) {
                 copy = new Map();
+                Object.setPrototypeOf(copy, Object.getPrototypeOf(obj));
+                copiedObjects.set(obj, copy);
                 for (const mapKey of obj.keys()) {
                     stack.push({ name: mapKey });
-                    copiedObjects.set(obj, copy);
                     copy.set(mapKey, getDeepCopyOfObjectRecursive(obj.get(mapKey)));
                     stack.pop();
                 }
@@ -4020,16 +4086,18 @@ class SynchedPropertyOneWayPU extends ObservedPropertyAbstractPU {
             else if (obj instanceof Date) {
                 copy = new Date();
                 copy.setTime(obj.getTime());
+                Object.setPrototypeOf(copy, Object.getPrototypeOf(obj));
+                copiedObjects.set(obj, copy);
             }
             else if (obj instanceof Object) {
                 copy = Array.isArray(obj) ? [] : {};
                 Object.setPrototypeOf(copy, Object.getPrototypeOf(obj));
-                for (const objKey of Object.keys(obj)) {
-                    stack.push({ name: objKey });
-                    copiedObjects.set(obj, copy);
-                    Reflect.set(copy, objKey, getDeepCopyOfObjectRecursive(obj[objKey]));
-                    stack.pop();
-                }
+                copiedObjects.set(obj, copy);
+            }
+            for (const objKey of Object.keys(obj)) {
+                stack.push({ name: objKey });
+                Reflect.set(copy, objKey, getDeepCopyOfObjectRecursive(obj[objKey]));
+                stack.pop();
             }
             return ObservedObject.IsObservedObject(obj) ? ObservedObject.createNew(copy, null) : copy;
         }
@@ -4311,8 +4379,9 @@ class UINodeRegisterProxy {
     static obtainDeletedElmtIds() {
         
         if ((!UINodeRegisterProxy.instance_.obtainDeletedElmtIds) || typeof UINodeRegisterProxy.instance_.obtainDeletedElmtIds != "function") {
-            stateMgmtConsole.error(`UINodeRegisterProxy obtainDeletedElmtIds is not a function: ${UINodeRegisterProxy.instance_.obtainDeletedElmtIds}.` );
-        } else {
+            stateMgmtConsole.error(`UINodeRegisterProxy obtainDeletedElmtIds is not a function: ${UINodeRegisterProxy.instance_.obtainDeletedElmtIds}.`);
+        }
+        else {
             UINodeRegisterProxy.instance_.obtainDeletedElmtIds();
         }
     }
@@ -4380,48 +4449,6 @@ const UndefinedElmtId = -1;
 // implemented in C++  for release
 // and in utest/view_native_mock.ts for testing
 class ViewPU extends NativeViewPartialUpdate {
-    get ownObservedPropertiesStore_() {
-        if (!this.ownObservedPropertiesStore__) {
-            // lazy init
-            this.ownObservedPropertiesStore__ = new Set();
-            this.obtainOwnObservedProperties();
-        }
-        return this.ownObservedPropertiesStore__;
-    }
-    obtainOwnObservedProperties() {
-        Object.getOwnPropertyNames(this)
-            .filter((propName) => {
-            return propName.startsWith("__");
-        })
-            .forEach((propName) => {
-            const stateVar = Reflect.get(this, propName);
-            if ("notifyPropertyHasChangedPU" in stateVar) {
-                
-                this.ownObservedPropertiesStore_.add(stateVar);
-            }
-        });
-    }
-    get localStorage_() {
-        if (!this.localStoragebackStore_ && this.parent_) {
-            
-            this.localStoragebackStore_ = this.parent_.localStorage_;
-        }
-        if (!this.localStoragebackStore_) {
-            
-            this.localStoragebackStore_ = new LocalStorage({ /* empty */});
-        }
-        return this.localStoragebackStore_;
-    }
-    set localStorage_(instance) {
-        if (!instance) {
-            // setting to undefined not allowed
-            return;
-        }
-        if (this.localStoragebackStore_) {
-            stateMgmtConsole.applicationError(`${this.debugInfo()}: constructor: is setting LocalStorage instance twice. Application error.`);
-        }
-        this.localStoragebackStore_ = instance;
-    }
     /**
      * Create a View
      *
@@ -4485,6 +4512,48 @@ class ViewPU extends NativeViewPartialUpdate {
         }
         SubscriberManager.Add(this);
         
+    }
+    get ownObservedPropertiesStore_() {
+        if (!this.ownObservedPropertiesStore__) {
+            // lazy init
+            this.ownObservedPropertiesStore__ = new Set();
+            this.obtainOwnObservedProperties();
+        }
+        return this.ownObservedPropertiesStore__;
+    }
+    obtainOwnObservedProperties() {
+        Object.getOwnPropertyNames(this)
+            .filter((propName) => {
+            return propName.startsWith("__");
+        })
+            .forEach((propName) => {
+            const stateVar = Reflect.get(this, propName);
+            if ("notifyPropertyHasChangedPU" in stateVar) {
+                
+                this.ownObservedPropertiesStore_.add(stateVar);
+            }
+        });
+    }
+    get localStorage_() {
+        if (!this.localStoragebackStore_ && this.parent_) {
+            
+            this.localStoragebackStore_ = this.parent_.localStorage_;
+        }
+        if (!this.localStoragebackStore_) {
+            
+            this.localStoragebackStore_ = new LocalStorage({ /* empty */});
+        }
+        return this.localStoragebackStore_;
+    }
+    set localStorage_(instance) {
+        if (!instance) {
+            // setting to undefined not allowed
+            return;
+        }
+        if (this.localStoragebackStore_) {
+            stateMgmtConsole.applicationError(`${this.debugInfo()}: constructor: is setting LocalStorage instance twice. Application error.`);
+        }
+        this.localStoragebackStore_ = instance;
     }
     // globally unique id, this is different from compilerAssignedUniqueChildId!
     id__() {

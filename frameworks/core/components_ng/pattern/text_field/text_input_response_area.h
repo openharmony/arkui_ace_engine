@@ -167,12 +167,13 @@ public:
 
     void UpdateCleanNode(bool isShow);
 
-    void Refresh() override;
-
     bool IsShow() const
     {
         return isShow_;
     }
+
+    void ClearArea() override;
+
 private:
     void InitClickEvent(const RefPtr<FrameNode>& frameNode);
     void OnCleanNodeClicked();

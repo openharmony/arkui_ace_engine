@@ -126,7 +126,6 @@ bool RenderDisplay::GetVisible() const
 
 void RenderDisplay::OnOpacityDisappearingCallback()
 {
-    LOGD("OnOpacityDisappearingCallback");
     RefPtr<RenderNode> child = AceType::Claim(this);
     while (child && !child->IsDisappearing()) {
         child = child->GetParent().Upgrade();
@@ -157,7 +156,6 @@ bool RenderDisplay::HasDisappearingTransition(int32_t nodeId)
 
 void RenderDisplay::OnTransition(TransitionType type, int32_t id)
 {
-    LOGD("OnTransition. type: %{public}d, id: %{public}d", type, id);
     if (type == TransitionType::APPEARING) {
         pendingAppearing_ = true;
         MarkNeedLayout();

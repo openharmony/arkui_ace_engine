@@ -64,7 +64,7 @@ void SetWaterFlowEnableScrollInteraction(NodeHandle node, bool value)
     WaterFlowModelNG::SetScrollEnabled(frameNode, value);
 }
 
-void SetColumnsGap(NodeHandle node, double value, int unit, const char* calcValue)
+void SetColumnsGap(NodeHandle node, double value, int32_t unit, const char* calcValue)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -85,7 +85,7 @@ void ResetColumnsGap(NodeHandle node)
     WaterFlowModelNG::SetColumnsGap(frameNode, CalcDimension(DIMENSION_DEFAULT));
 }
 
-void SetRowsGap(NodeHandle node, double value, int unit, const char* calcValue)
+void SetRowsGap(NodeHandle node, double value, int32_t unit, const char* calcValue)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -106,7 +106,7 @@ void ResetRowsGap(NodeHandle node)
     WaterFlowModelNG::SetRowsGap(frameNode, CalcDimension(DIMENSION_DEFAULT));
 }
 
-void SetItemMinWidth(NodeHandle node, double value, int unit, const char* calcValue)
+void SetItemMinWidth(NodeHandle node, double value, int32_t unit, const char* calcValue)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -122,7 +122,7 @@ void SetItemMinWidth(NodeHandle node, double value, int unit, const char* calcVa
 
 void ResetItemMinWidth(NodeHandle node) {}
 
-void SetItemMinHeight(NodeHandle node, double value, int unit, const char* calcValue)
+void SetItemMinHeight(NodeHandle node, double value, int32_t unit, const char* calcValue)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -138,7 +138,7 @@ void SetItemMinHeight(NodeHandle node, double value, int unit, const char* calcV
 
 void ResetItemMinHeight(NodeHandle node) {}
 
-void SetItemMaxWidth(NodeHandle node, double value, int unit, const char* calcValue)
+void SetItemMaxWidth(NodeHandle node, double value, int32_t unit, const char* calcValue)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -154,7 +154,7 @@ void SetItemMaxWidth(NodeHandle node, double value, int unit, const char* calcVa
 
 void ResetItemMaxWidth(NodeHandle node) {}
 
-void SetItemMaxHeight(NodeHandle node, double value, int unit, const char* calcValue)
+void SetItemMaxHeight(NodeHandle node, double value, int32_t unit, const char* calcValue)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);

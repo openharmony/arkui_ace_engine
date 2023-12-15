@@ -264,7 +264,6 @@ bool RosenRenderText::CheckMeasureFlag()
             }
         }
         if (!constrainsAffect) {
-            LOGD("Text content and constrains not affect, no need measure.");
             return true;
         }
     }
@@ -658,7 +657,6 @@ bool RosenRenderText::MaybeRelease()
 void RosenRenderText::ClearRenderObject()
 {
     RenderText::ClearRenderObject();
-    LOGD("RosenRenderText ClearRenderObject");
     paragraph_ = nullptr;
     paragraphNewWidth_ = 0.0;
     lastLayoutMaxWidth_ = 0.0;

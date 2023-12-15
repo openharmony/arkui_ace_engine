@@ -460,7 +460,7 @@ void TextFieldModelNG::SetShowCounter(bool value)
     if (value) {
         pattern->AddCounterNode();
     } else {
-        pattern->ClearCounterNode();
+        pattern->CleanCounterNode();
     }
 }
 
@@ -479,6 +479,7 @@ void TextFieldModelNG::SetShowCounterBorder(bool value)
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
     CHECK_NULL_VOID(pattern);
+    pattern->SetCounterState(false);
     ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, ShowHighlightBorder, value);
 }
 
@@ -601,11 +602,6 @@ void TextFieldModelNG::SetEnableAutoFill(bool enableAutoFill)
 
 void TextFieldModelNG::SetCleanNodeStyle(CleanNodeStyle cleanNodeStyle)
 {
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    CHECK_NULL_VOID(frameNode);
-    auto pattern = frameNode->GetPattern<TextFieldPattern>();
-    CHECK_NULL_VOID(pattern);
-    pattern->SetCleanNodeStyle(cleanNodeStyle);
     ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, CleanNodeStyle, cleanNodeStyle);
 }
 
@@ -622,6 +618,11 @@ void TextFieldModelNG::SetCanacelIconSrc(const std::string& iconSrc)
 void TextFieldModelNG::SetCancelIconColor(const Color& iconColor)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, IconColor, iconColor);
+}
+
+void TextFieldModelNG::SetIsShowCancelButton(bool isShowCancelButton)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, IsShowCancelButton, isShowCancelButton);
 }
 
 void TextFieldModelNG::SetSelectAllValue(bool isSelectAllValue)
@@ -836,7 +837,7 @@ void TextFieldModelNG::SetShowCounter(FrameNode* frameNode, bool value)
     if (value) {
         pattern->AddCounterNode();
     } else {
-        pattern->ClearCounterNode();
+        pattern->CleanCounterNode();
     }
 }
 

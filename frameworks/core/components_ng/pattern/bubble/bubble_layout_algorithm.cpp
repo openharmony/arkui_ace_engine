@@ -98,6 +98,11 @@ constexpr Dimension BUBBLE_ARROW_ZERO_PERCENT_VALUE = 0.0_pct;
 constexpr Dimension BUBBLE_ARROW_HALF_PERCENT_VALUE = 0.5_pct;
 constexpr Dimension BUBBLE_ARROW_ONE_HUNDRED_PERCENT_VALUE = 1.0_pct;
 
+constexpr int16_t ARROW_OFFSETS_INDEX_ZERO = 0;
+constexpr int16_t ARROW_OFFSETS_INDEX_ONE = 1;
+constexpr int16_t ARROW_OFFSETS_INDEX_TWO = 2;
+constexpr int16_t ARROW_OFFSETS_INDEX_THREE = 3;
+
 // get main window's pipeline
 RefPtr<PipelineContext> GetMainPipelineContext()
 {
@@ -1564,6 +1569,8 @@ std::string BubbleLayoutAlgorithm::BuildTopLinePath(float arrowOffset, float rad
                     arrowTopOffset + ARROW_VERTICAL_P4_OFFSET_X.ConvertToPx(),
                     childOffsetY - ARROW_VERTICAL_P4_OFFSET_Y.ConvertToPx());                            // P4
                 path += LineTo(arrowTopOffset + ARROW_VERTICAL_P5_OFFSET_X.ConvertToPx(), childOffsetY); // P5
+                arrowOffsetsFromClip_[ARROW_OFFSETS_INDEX_ZERO]
+                    = arrowTopOffset - ARROW_VERTICAL_P1_OFFSET_X.ConvertToPx();
             }
             break;
         default:
@@ -1612,6 +1619,8 @@ std::string BubbleLayoutAlgorithm::BuildRightLinePath(float arrowOffset, float r
                     arrowRightOffset + ARROW_HORIZON_P4_OFFSET_Y.ConvertToPx()); // P4
                 path += LineTo(childOffset_.GetX() + childSize_.Width(),
                     arrowRightOffset + ARROW_HORIZON_P5_OFFSET_Y.ConvertToPx()); // P5
+                arrowOffsetsFromClip_[ARROW_OFFSETS_INDEX_ONE]
+                    = arrowRightOffset - ARROW_HORIZON_P1_OFFSET_Y.ConvertToPx();
             }
             break;
         default:
@@ -1660,6 +1669,8 @@ std::string BubbleLayoutAlgorithm::BuildBottomLinePath(float arrowOffset, float 
                     childOffsetY + childSize_.Height() + ARROW_VERTICAL_P4_OFFSET_Y.ConvertToPx()); // P4
                 path += LineTo(arrowBottomOffset - ARROW_VERTICAL_P5_OFFSET_X.ConvertToPx(),
                     childOffsetY + childSize_.Height()); // P5
+                arrowOffsetsFromClip_[ARROW_OFFSETS_INDEX_TWO]
+                    = arrowBottomOffset + ARROW_VERTICAL_P1_OFFSET_X.ConvertToPx();
             }
             break;
         default:
@@ -1706,6 +1717,8 @@ std::string BubbleLayoutAlgorithm::BuildLeftLinePath(float arrowOffset, float ra
                     childOffset_.GetX() - ARROW_HORIZON_P4_OFFSET_X.ConvertToPx(),
                     arrowLeftOffset - ARROW_HORIZON_P4_OFFSET_Y.ConvertToPx());                                 // P4
                 path += LineTo(childOffset_.GetX(), arrowLeftOffset - ARROW_HORIZON_P5_OFFSET_Y.ConvertToPx()); // P5
+                arrowOffsetsFromClip_[ARROW_OFFSETS_INDEX_THREE]
+                    = arrowLeftOffset + ARROW_HORIZON_P1_OFFSET_Y.ConvertToPx();
             }
             break;
         default:
@@ -1727,6 +1740,8 @@ std::string BubbleLayoutAlgorithm::ReplaceArrowTopLeft(const float arrowOffset, 
         arrowOffset - ARROW_REPLACE_START_VERTICAL_P4_OFFSET_X.ConvertToPx(),
         childOffset - ARROW_REPLACE_START_VERTICAL_P4_OFFSET_Y.ConvertToPx());                         // P4
     path += LineTo(arrowOffset + ARROW_REPLACE_START_VERTICAL_P5_OFFSET_X.ConvertToPx(), childOffset); // P5
+    arrowOffsetsFromClip_[ARROW_OFFSETS_INDEX_ZERO]
+        = arrowOffset - ARROW_REPLACE_START_VERTICAL_P1_OFFSET_X.ConvertToPx();
     return path;
 }
 
@@ -1741,6 +1756,8 @@ std::string BubbleLayoutAlgorithm::ReplaceArrowTopRight(const float arrowOffset,
         arrowOffset + ARROW_REPLACE_END_VERTICAL_P4_OFFSET_X.ConvertToPx(),
         childOffset - ARROW_REPLACE_END_VERTICAL_P4_OFFSET_Y.ConvertToPx());                         // P4
     path += LineTo(arrowOffset + ARROW_REPLACE_END_VERTICAL_P5_OFFSET_X.ConvertToPx(), childOffset); // P5
+    arrowOffsetsFromClip_[ARROW_OFFSETS_INDEX_ZERO]
+        = (arrowOffset - ARROW_REPLACE_END_VERTICAL_P1_OFFSET_X.ConvertToPx()) / HALF;
     return path;
 }
 
@@ -1754,6 +1771,8 @@ std::string BubbleLayoutAlgorithm::ReplaceArrowRightTop(const float arrowOffset,
         childOffset + ARROW_REPLACE_START_HORIZON_P4_OFFSET_X.ConvertToPx(),
         arrowOffset - ARROW_REPLACE_START_HORIZON_P4_OFFSET_Y.ConvertToPx());                         // P4
     path += LineTo(childOffset, arrowOffset + ARROW_REPLACE_START_HORIZON_P5_OFFSET_Y.ConvertToPx()); // P5
+    arrowOffsetsFromClip_[ARROW_OFFSETS_INDEX_ONE]
+        = arrowOffset - ARROW_REPLACE_START_HORIZON_P1_OFFSET_Y.ConvertToPx();
     return path;
 }
 
@@ -1767,6 +1786,8 @@ std::string BubbleLayoutAlgorithm::ReplaceArrowRightBottom(const float arrowOffs
         childOffset + ARROW_REPLACE_END_HORIZON_P4_OFFSET_X.ConvertToPx(),
         arrowOffset + ARROW_REPLACE_END_HORIZON_P4_OFFSET_Y.ConvertToPx());                         // P4
     path += LineTo(childOffset, arrowOffset + ARROW_REPLACE_END_HORIZON_P5_OFFSET_Y.ConvertToPx()); // P5
+    arrowOffsetsFromClip_[ARROW_OFFSETS_INDEX_ONE]
+        = arrowOffset - ARROW_REPLACE_START_HORIZON_P1_OFFSET_Y.ConvertToPx();
     return path;
 }
 
@@ -1780,6 +1801,8 @@ std::string BubbleLayoutAlgorithm::ReplaceArrowBottomLeft(const float arrowOffse
         arrowOffset - ARROW_REPLACE_START_VERTICAL_P2_OFFSET_X.ConvertToPx(),
         childOffset + ARROW_REPLACE_START_VERTICAL_P2_OFFSET_Y.ConvertToPx());                         // P4
     path += LineTo(arrowOffset - ARROW_REPLACE_START_VERTICAL_P5_OFFSET_X.ConvertToPx(), childOffset); // P5
+    arrowOffsetsFromClip_[ARROW_OFFSETS_INDEX_TWO]
+        = arrowOffset + ARROW_REPLACE_START_VERTICAL_P1_OFFSET_X.ConvertToPx();
     return path;
 }
 
@@ -1793,6 +1816,8 @@ std::string BubbleLayoutAlgorithm::ReplaceArrowBottomRight(const float arrowOffs
         arrowOffset + ARROW_REPLACE_END_VERTICAL_P2_OFFSET_X.ConvertToPx(),
         childOffset + ARROW_REPLACE_END_VERTICAL_P2_OFFSET_Y.ConvertToPx());                         // P4
     path += LineTo(arrowOffset - ARROW_REPLACE_END_VERTICAL_P5_OFFSET_X.ConvertToPx(), childOffset); // P5
+    arrowOffsetsFromClip_[ARROW_OFFSETS_INDEX_TWO]
+        = arrowOffset + ARROW_REPLACE_END_VERTICAL_P1_OFFSET_X.ConvertToPx();
     return path;
 }
 
@@ -1806,6 +1831,8 @@ std::string BubbleLayoutAlgorithm::ReplaceArrowLeftTop(const float arrowOffset, 
         childOffset - ARROW_REPLACE_START_HORIZON_P2_OFFSET_X.ConvertToPx(),
         arrowOffset - ARROW_REPLACE_START_HORIZON_P2_OFFSET_Y.ConvertToPx());                         // P4
     path += LineTo(childOffset, arrowOffset - ARROW_REPLACE_START_HORIZON_P5_OFFSET_Y.ConvertToPx()); // P5
+    arrowOffsetsFromClip_[ARROW_OFFSETS_INDEX_THREE]
+        = arrowOffset + ARROW_REPLACE_START_HORIZON_P1_OFFSET_Y.ConvertToPx();
     return path;
 }
 
@@ -1819,6 +1846,8 @@ std::string BubbleLayoutAlgorithm::ReplaceArrowLeftBottom(const float arrowOffse
         childOffset - ARROW_REPLACE_END_HORIZON_P2_OFFSET_X.ConvertToPx(),
         arrowOffset + ARROW_REPLACE_END_HORIZON_P2_OFFSET_Y.ConvertToPx());                         // P4
     path += LineTo(childOffset, arrowOffset - ARROW_REPLACE_END_HORIZON_P5_OFFSET_Y.ConvertToPx()); // P5
+    arrowOffsetsFromClip_[ARROW_OFFSETS_INDEX_THREE]
+        = arrowOffset + ARROW_REPLACE_END_HORIZON_P1_OFFSET_Y.ConvertToPx();
     return path;
 }
 

@@ -179,7 +179,6 @@ void RenderNode::RemoveChild(const RefPtr<RenderNode>& child)
     auto context = context_.Upgrade();
     if (context && context->GetExplicitAnimationOption().IsValid() &&
         child->HasDisappearingTransition(child->GetNodeId())) {
-        LOGD("RemoveChild with transition. [child]: tag: %s, nodeId: %d", child->GetTypeName(), child->GetNodeId());
         disappearingNodes_.emplace_back(child);
         child->SetParent(AceType::WeakClaim(this));
         child->NotifyTransition(TransitionType::DISAPPEARING, child->GetNodeId());
@@ -194,7 +193,6 @@ void RenderNode::RemoveChild(const RefPtr<RenderNode>& child)
         child->OnRemove();
     }
 #endif
-    LOGD("RenderNode RemoveChild %{public}zu", children_.size());
 }
 
 void RenderNode::MovePosition(int32_t slot)
@@ -718,10 +716,6 @@ void RenderNode::SetVisible(bool visible, bool inRecursion)
 bool RenderNode::TouchTest(const Point& globalPoint, const Point& parentLocalPoint, const TouchRestrict& touchRestrict,
     TouchTestResult& result)
 {
-    LOGD("OnTouchTest: type is %{public}s, the region is %{public}lf, %{public}lf, %{public}lf, %{public}lf",
-        GetTypeName(), GetTouchRect().Left(), GetTouchRect().Top(), GetTouchRect().Width(), GetTouchRect().Height());
-    LOGD("OnTouchTest: the local point refer to parent is %{public}lf, %{public}lf, ", parentLocalPoint.GetX(),
-        parentLocalPoint.GetY());
     if (disableTouchEvent_ || disabled_) {
         return false;
     }
@@ -834,11 +828,6 @@ RefPtr<RenderNode> RenderNode::FindDropChild(const Point& globalPoint, const Poi
 
 void RenderNode::MouseTest(const Point& globalPoint, const Point& parentLocalPoint, MouseRawResult& result)
 {
-    LOGD("MouseTest: type is %{public}s, the region is %{public}lf, %{public}lf, %{public}lf, %{public}lf",
-        GetTypeName(), GetTouchRect().Left(), GetTouchRect().Top(), GetTouchRect().Width(), GetTouchRect().Height());
-    LOGD("MouseTest: the local point refer to parent is %{public}lf, %{public}lf, ", parentLocalPoint.GetX(),
-        parentLocalPoint.GetY());
-
     if (!InTouchRectList(parentLocalPoint, GetTouchRectList())) {
         return;
     }
@@ -860,8 +849,6 @@ void RenderNode::MouseTest(const Point& globalPoint, const Point& parentLocalPoi
 bool RenderNode::MouseDetect(const Point& globalPoint, const Point& parentLocalPoint, MouseHoverTestList& hoverList,
     WeakPtr<RenderNode>& hoverNode)
 {
-    LOGD("MouseDetect: type is %{public}s, the region is %{public}lf, %{public}lf, %{public}lf, %{public}lf",
-        GetTypeName(), GetTouchRect().Left(), GetTouchRect().Top(), GetTouchRect().Width(), GetTouchRect().Height());
     if (disableTouchEvent_ || disabled_) {
         return false;
     }
@@ -905,8 +892,6 @@ bool RenderNode::MouseDetect(const Point& globalPoint, const Point& parentLocalP
 bool RenderNode::AxisDetect(const Point& globalPoint, const Point& parentLocalPoint, WeakPtr<RenderNode>& axisNode,
     const AxisDirection direction)
 {
-    LOGD("AxisDetect: type is %{public}s, the region is %{public}lf, %{public}lf, %{public}lf, %{public}lf",
-        GetTypeName(), GetTouchRect().Left(), GetTouchRect().Top(), GetTouchRect().Width(), GetTouchRect().Height());
     if (disabled_) {
         return false;
     }
@@ -946,10 +931,6 @@ bool RenderNode::AxisDetect(const Point& globalPoint, const Point& parentLocalPo
 
 bool RenderNode::MouseHoverTest(const Point& parentLocalPoint)
 {
-    LOGD("OnMouseHoverTest: type is %{public}s, the region is %{public}lf, %{public}lf, %{public}lf, %{public}lf",
-        GetTypeName(), GetTouchRect().Left(), GetTouchRect().Top(), GetTouchRect().Width(), GetTouchRect().Height());
-    LOGD("OnMouseHoverTest: the local point refer to parent is %{public}lf, %{public}lf, ", parentLocalPoint.GetX(),
-        parentLocalPoint.GetY());
     if (disabled_) {
         return false;
     }
@@ -1079,7 +1060,6 @@ bool RenderNode::RotationMatchTest(const RefPtr<RenderNode>& requestRenderNode)
 {
     RotationNode* rotationNode = AceType::DynamicCast<RotationNode>(this);
     if ((rotationNode != nullptr) && requestRenderNode == this) {
-        LOGD("RotationMatchTest: match rotation focus node %{public}s.", GetTypeName());
         return true;
     }
     const auto& children = GetChildren();
@@ -1109,7 +1089,6 @@ bool RenderNode::RotationTest(const RotationEvent& event)
 
     RotationNode* rotationNode = AceType::DynamicCast<RotationNode>(this);
     if ((rotationNode != nullptr) && rotationNode->OnRotation(event)) {
-        LOGD("RotationTest: type is %{public}s accept", GetTypeName());
         return true;
     }
 
@@ -1120,7 +1099,6 @@ bool RenderNode::RotationTestForward(const RotationEvent& event)
 {
     RotationNode* rotationNode = AceType::DynamicCast<RotationNode>(this);
     if ((rotationNode != nullptr) && rotationNode->OnRotation(event)) {
-        LOGD("RotationTestForward: type is %{public}s accept", GetTypeName());
         return true;
     }
     const auto& children = GetChildren();
@@ -2183,13 +2161,11 @@ void RenderNode::RSNodeAddChild(const RefPtr<RenderNode>& child)
 #ifdef ENABLE_ROSEN_BACKEND
     if (!rsNode_) {
         // workaround if parent have no RSNode while it should
-        LOGD("Parent render_node has no RSNode, creating now.");
         SyncRSNodeBoundary(true, true);
     }
     if (IsTailRenderNode()) {
         if (!child->GetRSNode()) {
             // workaround if child have no RSNode while it should
-            LOGD("Child render_node has no RSNode, creating now.");
             child->SyncRSNodeBoundary(true, true);
         }
     } else {
@@ -2226,7 +2202,6 @@ std::shared_ptr<RSNode> RenderNode::CreateRSNode() const
 
 void RenderNode::OnStatusStyleChanged(VisualState state)
 {
-    LOGD("start %{public}s", AceType::TypeName(this));
     if (isHeadRenderNode_) {
         return;
     }

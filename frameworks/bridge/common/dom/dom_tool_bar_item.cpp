@@ -96,7 +96,6 @@ bool DOMToolBarItem::SetSpecializedAttr(const std::pair<std::string, std::string
     };
     auto operatorIter = BinarySearchFindIndex(attrOperators, ArraySize(attrOperators), attr.first.c_str());
     if (operatorIter != -1) {
-        LOGD("ToolBarItem attrs : %{public}s = %{public}s", attr.first.c_str(), attr.second.c_str());
         attrOperators[operatorIter].value(*this, attr.second);
         return true;
     }
@@ -142,7 +141,6 @@ bool DOMToolBarItem::SetSpecializedStyle(const std::pair<std::string, std::strin
     };
     auto operatorIter = BinarySearchFindIndex(styleOperators, ArraySize(styleOperators), style.first.c_str());
     if (operatorIter != -1) {
-        LOGD("ToolBarItem styles : %{public}s = %{public}s", style.first.c_str(), style.second.c_str());
         styleOperators[operatorIter].value(*this, style.second);
         return true;
     }
@@ -168,7 +166,6 @@ bool DOMToolBarItem::AddSpecializedEvent(int32_t pageId, const std::string& even
     auto operatorIter =
         BinarySearchFindIndex(toolBarItemEventOperators, ArraySize(toolBarItemEventOperators), event.c_str());
     if (operatorIter != -1) {
-        LOGD("ToolBarItem events : %{public}s", event.c_str());
         toolBarItemEventOperators[operatorIter].value(*this, EventMarker(GetNodeIdForEvent(), event, pageId));
         return true;
     }

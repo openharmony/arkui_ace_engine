@@ -24,14 +24,13 @@
 
 namespace OHOS::Ace {
 struct CreateWithPara {
-    std::optional<bool> labelSetInfoFirst;
-    std::optional<bool> labelSetInfoSecond;
-    std::optional<bool> stateEffectFirst;
-    std::optional<bool> stateEffectSecond;
     std::optional<bool> parseSuccess;
-    std::optional<ButtonType> typeFirst;
-    std::optional<ButtonType> typeSecond;
     std::optional<std::string> label;
+    std::optional<bool> optionSetFirst;
+    std::optional<ButtonType> type;
+    std::optional<bool> stateEffect;
+    std::optional<ButtonStyleMode> buttonStyleMode;
+    std::optional<ControlSize> controlSize;
 };
 
 struct ButtonParameters {

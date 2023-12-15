@@ -72,8 +72,6 @@ public:
 
     void SetPosition(const ModelPosition& position)
     {
-        LOGD("SetPosition() %f, %f, %f, duration: %d", position.GetX(), position.GetY(), position.GetZ(),
-            position.GetPosition().GetAnimationOption().GetDuration());
         position_.SetPosition(position.GetPosition());
         position_.SetDistance(position.GetDistance());
         position_.SetIsAngular(position.GetIsAngular());
@@ -114,13 +112,7 @@ public:
         return rotation_;
     }
 
-    void Print()
-    {
-        LOGD("type: %d, intensity: %f", type_, intensity_.GetValue());
-        LOGD("color: %f, %f, %f", color_.GetX(), color_.GetY(), color_.GetZ());
-        LOGD("position: %f, %f, %f, anim duration: %d", position_.GetX(), position_.GetY(),
-            position_.GetZ(), position_.GetPosition().GetAnimationOption().GetDuration());
-    }
+    void Print() {}
 
 private:
     ModelLightType type_ = ModelLightType::DIRECTIONAL_LIGHT;

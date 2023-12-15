@@ -86,7 +86,6 @@ public:
         } else if (method == HttpConstant::HTTP_METHOD_POST || method == HttpConstant::HTTP_METHOD_PUT) {
             SetOptionForPost(requestData, handle.get());
         } else {
-            LOGD("No method match!");
             responseData.SetCode(HttpConstant::ERROR);
             responseData.SetData(responseBody);
             return true;
@@ -102,10 +101,7 @@ public:
         }
 
         char* ct = nullptr;
-        CURLcode res = curl_easy_getinfo(handle.get(), CURLINFO_CONTENT_TYPE, &ct);
-        if ((CURLE_OK == res) && ct) {
-            LOGD("fetch-preview content_type: %{public}s", ct);
-        }
+        curl_easy_getinfo(handle.get(), CURLINFO_CONTENT_TYPE, &ct);
 
         int32_t responseCode = HttpConstant::ERROR;
         curl_easy_getinfo(handle.get(), CURLINFO_RESPONSE_CODE, &responseCode);
@@ -121,7 +117,6 @@ public:
     bool SetOptionForGet(const RequestData requestData, CURL* curl) const
     {
         // refer to function buildConnectionWithParam() in HttpFetchImpl.java
-        LOGD("begin to set option for get and encode final url");
         std::string url = requestData.GetUrl();
         if (requestData.GetData() != "") {
             std::size_t index = url.find(HttpConstant::URL_PARAM_SEPARATOR);
@@ -142,7 +137,6 @@ public:
                 }
             }
         }
-        LOGD("final url : %{public}s", url.c_str());
         ACE_CURL_EASY_SET_OPTION(curl, CURLOPT_URL, url.c_str());
         return true;
     }
@@ -151,7 +145,6 @@ public:
     {
         // refer to function buildConnectionWithStream() in HttpFetchImpl.java
         std::string url = requestData.GetUrl();
-        LOGD("begin to set option for post, final url : %{public}s", url.c_str());
         ACE_CURL_EASY_SET_OPTION(curl, CURLOPT_URL, url.c_str());
         ACE_CURL_EASY_SET_OPTION(curl, CURLOPT_POSTFIELDS, requestData.GetData().c_str());
         return true;

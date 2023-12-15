@@ -411,9 +411,6 @@ RefPtr<AccessibilityNode> AccessibilityNodeManager::CreateAccessibilityNode(
 RefPtr<AccessibilityNode> AccessibilityNodeManager::CreateDeclarativeAccessibilityNode(
     const std::string& tag, int32_t nodeId, int32_t parentNodeId, int32_t itemIndex)
 {
-    TAG_LOGD(AceLogTag::ACE_ACCESSIBILITY,
-        "create AccessibilityNode %{public}s, id %{public}d, parent id %{public}d, itemIndex %{public}d", tag.c_str(),
-        nodeId, parentNodeId, itemIndex);
     RefPtr<AccessibilityNode> parentNode;
     if (parentNodeId != -1) {
         parentNode = GetAccessibilityNodeById(parentNodeId);
@@ -452,9 +449,6 @@ RefPtr<AccessibilityNode> AccessibilityNodeManager::CreateDeclarativeAccessibili
 RefPtr<AccessibilityNode> AccessibilityNodeManager::CreateCommonAccessibilityNode(
     const std::string& tag, int32_t nodeId, int32_t parentNodeId, int32_t itemIndex)
 {
-    TAG_LOGD(AceLogTag::ACE_ACCESSIBILITY,
-        "create AccessibilityNode %{public}s, id %{public}d, parent id %{public}d, itemIndex %{public}d", tag.c_str(),
-        nodeId, parentNodeId, itemIndex);
     RefPtr<AccessibilityNode> parentNode;
     if (parentNodeId != -1) {
         parentNode = GetAccessibilityNodeById(parentNodeId);

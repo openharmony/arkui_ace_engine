@@ -921,7 +921,6 @@ void RenderText::SetTextData(const std::string& textData)
 void RenderText::ClearRenderObject()
 {
     RenderNode::ClearRenderObject();
-    LOGD("TextNode ClearRenderObject");
     text_.Reset();
     textStyle_ = TextStyle();
     defaultTextDirection_ = TextDirection::LTR;

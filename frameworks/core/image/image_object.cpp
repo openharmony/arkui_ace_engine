@@ -214,7 +214,6 @@ void StaticImageObject::UploadToGpuForRender(const WeakPtr<PipelineBase>& contex
 
         // found cached image obj (can be rendered)
         if (cachedFlutterImage) {
-            LOGD("get cached image success: %{public}s", key.c_str());
             ImageProvider::ProccessUploadResult(taskExecutor, imageSource, imageSize, cachedFlutterImage);
             return;
         }
@@ -244,7 +243,6 @@ void StaticImageObject::UploadToGpuForRender(const WeakPtr<PipelineBase>& contex
             canvasImage->SetRawCompressData(&compressData, width, height);
 
             if (imageCache) {
-                LOGD("cache image key: %{public}s", key.c_str());
 #ifndef USE_ROSEN_DRAWING
                 imageCache->CacheImage(key, std::make_shared<CachedImage>(skImage));
 #else
@@ -278,12 +276,10 @@ void StaticImageObject::UploadToGpuForRender(const WeakPtr<PipelineBase>& contex
 
 #ifndef USE_ROSEN_DRAWING
         if (!skData) {
-            LOGD("reload sk data");
             skData = ImageProvider::LoadImageRawData(imageSource, pipelineContext);
             if (!skData) {
 #else
         if (!rsData) {
-            LOGD("reload rs data");
             rsData = ImageProvider::LoadImageRawData(imageSource, pipelineContext);
             if (!rsData) {
 #endif

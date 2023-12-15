@@ -28,16 +28,26 @@ constexpr int32_t DEFAULT_SCROLL_BAR = 1;
 
 constexpr int32_t DEFAULT_EDGE_EFFECT = 0;
 
-void SetListLanes(NodeHandle node, int32_t lanesNum, Dimension minLength, Dimension maxLength, Dimension gutter)
+constexpr int32_t CALL_STROKE_WIDTH = 0;
+constexpr int32_t CALL_START_MARGIN = 1;
+constexpr int32_t CALL_END_MARGIN = 2;
+
+void SetListLanes(NodeHandle node, int32_t lanesNum, const struct ArkUIDimensionType* minLengthType,
+    const struct ArkUIDimensionType* maxLengthType, const struct ArkUIDimensionType* gutterType)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     if (lanesNum > 0) {
         ListModelNG::SetLanes(frameNode, lanesNum);
     } else {
+        Dimension minLength =
+            Dimension(minLengthType->value, static_cast<OHOS::Ace::DimensionUnit>(minLengthType->units));
+        Dimension maxLength =
+            Dimension(maxLengthType->value, static_cast<OHOS::Ace::DimensionUnit>(maxLengthType->units));
         ListModelNG::SetLaneConstrain(frameNode, minLength, maxLength);
     }
 
+    Dimension gutter = Dimension(gutterType->value, static_cast<OHOS::Ace::DimensionUnit>(gutterType->units));
     ListModelNG::SetLaneGutter(frameNode, gutter);
 }
 
@@ -243,16 +253,18 @@ void ResetScrollSnapAlign(NodeHandle node)
     ListModelNG::SetScrollSnapAlign(frameNode, V2::ScrollSnapAlign::NONE);
 }
 
-void ListSetDivider(NodeHandle node, double strokeWidth, const uint32_t color, double startMargin,
-    double endMargin, int32_t strokeWidth_size, int32_t startMargin_size, int32_t endMargin_size)
+void ListSetDivider(NodeHandle node, uint32_t color, const double* values, const int* units)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     V2::ItemDivider divider;
     divider.color = Color(color);
-    divider.strokeWidth = Dimension(strokeWidth, static_cast<OHOS::Ace::DimensionUnit>(strokeWidth_size));
-    divider.startMargin = Dimension(startMargin, static_cast<OHOS::Ace::DimensionUnit>(startMargin_size));
-    divider.endMargin = Dimension(endMargin, static_cast<OHOS::Ace::DimensionUnit>(endMargin_size));
+    divider.strokeWidth =
+        Dimension(values[CALL_STROKE_WIDTH], static_cast<OHOS::Ace::DimensionUnit>(units[CALL_STROKE_WIDTH]));
+    divider.startMargin =
+        Dimension(values[CALL_START_MARGIN], static_cast<OHOS::Ace::DimensionUnit>(units[CALL_START_MARGIN]));
+    divider.endMargin =
+        Dimension(values[CALL_END_MARGIN], static_cast<OHOS::Ace::DimensionUnit>(units[CALL_END_MARGIN]));
 
     ListModelNG::SetDivider(frameNode, divider);
 }
@@ -266,21 +278,21 @@ void ListResetDivider(NodeHandle node)
     ListModelNG::SetDivider(frameNode, divider);
 }
 
-void SetChainAnimationOptions(NodeHandle node, double minSpace, double maxSpace,
-    double conductivity, double intensity, int32_t edgeEffect, double stiffness, double damping,
-    int32_t minSpace_size, int32_t maxSpace_size)
+void SetChainAnimationOptions(NodeHandle node, const struct ArkUIChainAnimationOptionsType* chainAnimationOptions)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
 
     ChainAnimationOptions options;
-    options.minSpace = CalcDimension(minSpace, static_cast<OHOS::Ace::DimensionUnit>(minSpace_size));
-    options.maxSpace = CalcDimension(minSpace, static_cast<OHOS::Ace::DimensionUnit>(maxSpace_size));
-    options.conductivity = conductivity;
-    options.intensity = intensity;
-    options.edgeEffect = edgeEffect;
-    options.stiffness = stiffness;
-    options.damping = damping;
+    options.minSpace = CalcDimension(
+        chainAnimationOptions->minSpace, static_cast<OHOS::Ace::DimensionUnit>(chainAnimationOptions->minSpaceUnits));
+    options.maxSpace = CalcDimension(
+        chainAnimationOptions->maxSpace, static_cast<OHOS::Ace::DimensionUnit>(chainAnimationOptions->maxSpaceUnits));
+    options.conductivity = chainAnimationOptions->conductivity;
+    options.intensity = chainAnimationOptions->intensity;
+    options.edgeEffect = chainAnimationOptions->edgeEffect;
+    options.stiffness = chainAnimationOptions->stiffness;
+    options.damping = chainAnimationOptions->damping;
     ListModelNG::SetChainAnimationOptions(frameNode, options);
 }
 
@@ -304,14 +316,13 @@ void ResetChainAnimationOptions(NodeHandle node)
 
 ArkUIListModifierAPI GetListModifier()
 {
-    static const ArkUIListModifierAPI modifier = { SetListLanes, ResetListLanes, SetEditMode,
-        ResetEditMode, SetMultiSelectable, ResetMultiSelectable, SetChainAnimation, ResetChainAnimation,
-        SetCachedCount, ResetCachedCount, SetEnableScrollInteraction, ResetEnableScrollInteraction, SetSticky,
-        ResetSticky, SetListEdgeEffect, ResetListEdgeEffect, SetListDirection,
-        ResetListDirection, SetListFriction, ResetListFriction, SetListNestedScroll, ResetListNestedScroll,
-        SetListScrollBar, ResetListScrollBar, SetAlignListItem, ResetAlignListItem, SetScrollSnapAlign,
-        ResetScrollSnapAlign, ListSetDivider, ListResetDivider, SetChainAnimationOptions,
-        ResetChainAnimationOptions };
+    static const ArkUIListModifierAPI modifier = { SetListLanes, ResetListLanes, SetEditMode, ResetEditMode,
+        SetMultiSelectable, ResetMultiSelectable, SetChainAnimation, ResetChainAnimation, SetCachedCount,
+        ResetCachedCount, SetEnableScrollInteraction, ResetEnableScrollInteraction, SetSticky, ResetSticky,
+        SetListEdgeEffect, ResetListEdgeEffect, SetListDirection, ResetListDirection, SetListFriction,
+        ResetListFriction, SetListNestedScroll, ResetListNestedScroll, SetListScrollBar, ResetListScrollBar,
+        SetAlignListItem, ResetAlignListItem, SetScrollSnapAlign, ResetScrollSnapAlign, ListSetDivider,
+        ListResetDivider, SetChainAnimationOptions, ResetChainAnimationOptions };
     return modifier;
 }
 } // namespace OHOS::Ace::NG

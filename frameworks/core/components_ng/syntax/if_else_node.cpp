@@ -30,12 +30,10 @@ RefPtr<IfElseNode> IfElseNode::GetOrCreateIfElseNode(int32_t nodeId)
 {
     auto node = ElementRegister::GetInstance()->GetSpecificItemById<IfElseNode>(nodeId);
     if (node) {
-        TAG_LOGD(AceLogTag::ACE_IF, "Returning existing IfElseNode with nodeId %{public}d", nodeId);
         return node;
     }
     node = MakeRefPtr<IfElseNode>(nodeId);
     ElementRegister::GetInstance()->AddUINode(node);
-    TAG_LOGD(AceLogTag::ACE_IF, "Created new IfElseNode with nodeId %{public}d", nodeId);
     return node;
 }
 
@@ -81,7 +79,6 @@ void IfElseNode::SetBranchId(int32_t value, std::list<int32_t>& removedElmtId)
 {
     branchIdChanged_ = (branchId_ != value);
     if (branchIdChanged_) {
-        TAG_LOGD(AceLogTag::ACE_IF, "%{public}s id %{public}d, branchId changed to %{public}d", AceType::TypeName(this), GetId(), value);
         // collect elmtIds of all children and their children up to CustomNode object
         // these will be removed, but possibly with a delay if their is an animation
         // list of elmtIds is sent back to calling TS ViewPU.ifElseBranchUpdateFunction()
@@ -100,7 +97,6 @@ void IfElseNode::CollectRemovedChildren(const std::list<RefPtr<UINode>>& childre
 
 void IfElseNode::CollectRemovedChild(const RefPtr<UINode>& child, std::list<int32_t>& removedElmtId)
 {
-    TAG_LOGD(AceLogTag::ACE_IF, "add %{public}s elmtId %{public}d", child->GetTag().c_str(), (int32_t)child->GetId());
     removedElmtId.emplace_back(child->GetId());
     if (child->GetTag() != V2::JS_VIEW_ETS_TAG) {
         // add CustomNode but do not recurse into its children
@@ -111,8 +107,6 @@ void IfElseNode::CollectRemovedChild(const RefPtr<UINode>& child, std::list<int3
 void IfElseNode::FlushUpdateAndMarkDirty()
 {
     if (branchIdChanged_) {
-        TAG_LOGD(AceLogTag::ACE_IF, "%{public}s id %{public}d, branchId changed, resetting with %{public}d new children",
-            AceType::TypeName(this), GetId(), static_cast<int32_t>(GetChildren().size()));
         // mark parent dirty to flush measure.
         MarkNeedFrameFlushDirty(PROPERTY_UPDATE_BY_CHILD_REQUEST);
     }

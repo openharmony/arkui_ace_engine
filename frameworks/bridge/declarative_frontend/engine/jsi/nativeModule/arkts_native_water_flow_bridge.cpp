@@ -47,8 +47,8 @@ ArkUINativeModuleValue WaterFlowBridge::ResetColumnsTemplate(ArkUIRuntimeCallInf
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
-    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    void* nativeNode = nodeArg->ToNativePointer(vm)->Value();
     GetArkUIInternalNodeAPI()->GetWaterFlowModifier().ResetColumnsTemplate(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
@@ -57,14 +57,11 @@ ArkUINativeModuleValue WaterFlowBridge::SetColumnsTemplate(ArkUIRuntimeCallInfo*
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
-    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
-    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    std::string value = secondArg->ToString(vm)->ToString();
-    int32_t charLength = strlen(value.c_str()) + NUM_1;
-    char* val = new char[charLength];
-    std::strcpy(val, value.c_str());
-    GetArkUIInternalNodeAPI()->GetWaterFlowModifier().SetColumnsTemplate(nativeNode, val);
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    Local<JSValueRef> columnsTemplateArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    void* nativeNode = nodeArg->ToNativePointer(vm)->Value();
+    std::string columnsTemplateValue = columnsTemplateArg->ToString(vm)->ToString();
+    GetArkUIInternalNodeAPI()->GetWaterFlowModifier().SetColumnsTemplate(nativeNode, columnsTemplateValue.c_str());
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -72,8 +69,8 @@ ArkUINativeModuleValue WaterFlowBridge::ResetRowsTemplate(ArkUIRuntimeCallInfo* 
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
-    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    void* nativeNode = nodeArg->ToNativePointer(vm)->Value();
     GetArkUIInternalNodeAPI()->GetWaterFlowModifier().ResetRowsTemplate(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
@@ -82,14 +79,11 @@ ArkUINativeModuleValue WaterFlowBridge::SetRowsTemplate(ArkUIRuntimeCallInfo* ru
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
-    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
-    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    std::string value = secondArg->ToString(vm)->ToString();
-    int32_t charLength = strlen(value.c_str()) + NUM_1;
-    char* val = new char[charLength];
-    std::strcpy(val, value.c_str());
-    GetArkUIInternalNodeAPI()->GetWaterFlowModifier().SetRowsTemplate(nativeNode, val);
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    Local<JSValueRef> rowsTemplateArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    void* nativeNode = nodeArg->ToNativePointer(vm)->Value();
+    std::string rowsTemplateValue = rowsTemplateArg->ToString(vm)->ToString();
+    GetArkUIInternalNodeAPI()->GetWaterFlowModifier().SetRowsTemplate(nativeNode, rowsTemplateValue.c_str());
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -97,14 +91,14 @@ ArkUINativeModuleValue WaterFlowBridge::SetEnableScrollInteraction(ArkUIRuntimeC
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
-    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
-    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    if (secondArg->IsUndefined() || !secondArg->IsBoolean()) {
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    Local<JSValueRef> enableScrollInteractionArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    void* nativeNode = nodeArg->ToNativePointer(vm)->Value();
+    if (enableScrollInteractionArg->IsUndefined() || !enableScrollInteractionArg->IsBoolean()) {
         GetArkUIInternalNodeAPI()->GetWaterFlowModifier().SetWaterFlowEnableScrollInteraction(nativeNode, true);
         return panda::JSValueRef::Undefined(vm);
     }
-    bool flag = secondArg->ToBoolean(vm)->Value();
+    bool flag = enableScrollInteractionArg->ToBoolean(vm)->Value();
     GetArkUIInternalNodeAPI()->GetWaterFlowModifier().SetWaterFlowEnableScrollInteraction(nativeNode, flag);
     return panda::JSValueRef::Undefined(vm);
 }
@@ -113,8 +107,8 @@ ArkUINativeModuleValue WaterFlowBridge::ResetEnableScrollInteraction(ArkUIRuntim
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
-    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    void* nativeNode = nodeArg->ToNativePointer(vm)->Value();
     GetArkUIInternalNodeAPI()->GetWaterFlowModifier().ResetWaterFlowEnableScrollInteraction(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
@@ -123,8 +117,8 @@ ArkUINativeModuleValue WaterFlowBridge::ResetColumnsGap(ArkUIRuntimeCallInfo* ru
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
-    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    void* nativeNode = nodeArg->ToNativePointer(vm)->Value();
     GetArkUIInternalNodeAPI()->GetWaterFlowModifier().ResetColumnsGap(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
@@ -133,13 +127,13 @@ ArkUINativeModuleValue WaterFlowBridge::SetColumnsGap(ArkUIRuntimeCallInfo* runt
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
-    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    Local<JSValueRef> jsValue = runtimeCallInfo->GetCallArgRef(NUM_1);
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    void* nativeNode = nodeArg->ToNativePointer(vm)->Value();
+    Local<JSValueRef> columnsGapArg = runtimeCallInfo->GetCallArgRef(NUM_1);
 
     CalcDimension columnsGap;
     std::string calcStr;
-    if (jsValue->IsUndefined() || !ArkTSUtils::ParseJsDimensionVpNG(vm, jsValue, columnsGap)) {
+    if (columnsGapArg->IsUndefined() || !ArkTSUtils::ParseJsDimensionVpNG(vm, columnsGapArg, columnsGap)) {
         GetArkUIInternalNodeAPI()->GetWaterFlowModifier().ResetColumnsGap(nativeNode);
     } else {
         if (LessNotEqual(columnsGap.Value(), DIMENSION_DEFAULT)) {
@@ -148,10 +142,10 @@ ArkUINativeModuleValue WaterFlowBridge::SetColumnsGap(ArkUIRuntimeCallInfo* runt
 
         if (columnsGap.Unit() == DimensionUnit::CALC) {
             GetArkUIInternalNodeAPI()->GetWaterFlowModifier().SetColumnsGap(
-                nativeNode, NUM_0, static_cast<int>(columnsGap.Unit()), columnsGap.CalcValue().c_str());
+                nativeNode, NUM_0, static_cast<int32_t>(columnsGap.Unit()), columnsGap.CalcValue().c_str());
         } else {
             GetArkUIInternalNodeAPI()->GetWaterFlowModifier().SetColumnsGap(
-                nativeNode, columnsGap.Value(), static_cast<int>(columnsGap.Unit()), calcStr.c_str());
+                nativeNode, columnsGap.Value(), static_cast<int32_t>(columnsGap.Unit()), calcStr.c_str());
         }
     }
     return panda::JSValueRef::Undefined(vm);
@@ -161,8 +155,8 @@ ArkUINativeModuleValue WaterFlowBridge::ResetRowsGap(ArkUIRuntimeCallInfo* runti
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
-    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    void* nativeNode = nodeArg->ToNativePointer(vm)->Value();
     GetArkUIInternalNodeAPI()->GetWaterFlowModifier().ResetRowsGap(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
@@ -171,13 +165,13 @@ ArkUINativeModuleValue WaterFlowBridge::SetRowsGap(ArkUIRuntimeCallInfo* runtime
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
-    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    Local<JSValueRef> jsValue = runtimeCallInfo->GetCallArgRef(NUM_1);
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    void* nativeNode = nodeArg->ToNativePointer(vm)->Value();
+    Local<JSValueRef> rowsGapArg = runtimeCallInfo->GetCallArgRef(NUM_1);
 
     CalcDimension rowGap;
     std::string calcStr;
-    if (jsValue->IsUndefined() || !ArkTSUtils::ParseJsDimensionVpNG(vm, jsValue, rowGap)) {
+    if (rowsGapArg->IsUndefined() || !ArkTSUtils::ParseJsDimensionVpNG(vm, rowsGapArg, rowGap)) {
         GetArkUIInternalNodeAPI()->GetWaterFlowModifier().ResetRowsGap(nativeNode);
     } else {
         if (LessNotEqual(rowGap.Value(), DIMENSION_DEFAULT)) {
@@ -185,10 +179,10 @@ ArkUINativeModuleValue WaterFlowBridge::SetRowsGap(ArkUIRuntimeCallInfo* runtime
         }
         if (rowGap.Unit() == DimensionUnit::CALC) {
             GetArkUIInternalNodeAPI()->GetWaterFlowModifier().SetRowsGap(
-                nativeNode, 0, static_cast<int>(rowGap.Unit()), rowGap.CalcValue().c_str());
+                nativeNode, 0, static_cast<int32_t>(rowGap.Unit()), rowGap.CalcValue().c_str());
         } else {
             GetArkUIInternalNodeAPI()->GetWaterFlowModifier().SetRowsGap(
-                nativeNode, rowGap.Value(), static_cast<int>(rowGap.Unit()), calcStr.c_str());
+                nativeNode, rowGap.Value(), static_cast<int32_t>(rowGap.Unit()), calcStr.c_str());
         }
     }
     return panda::JSValueRef::Undefined(vm);
@@ -198,8 +192,8 @@ ArkUINativeModuleValue WaterFlowBridge::SetItemConstraintSize(ArkUIRuntimeCallIn
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
-    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    void* nativeNode = nodeArg->ToNativePointer(vm)->Value();
     Local<JSValueRef> minWidthValue = runtimeCallInfo->GetCallArgRef(NUM_1);
     Local<JSValueRef> maxWidthValue = runtimeCallInfo->GetCallArgRef(NUM_2);
     Local<JSValueRef> minHeightValue = runtimeCallInfo->GetCallArgRef(NUM_3);
@@ -217,28 +211,28 @@ ArkUINativeModuleValue WaterFlowBridge::SetItemConstraintSize(ArkUIRuntimeCallIn
     } else {
         SetItemConstraintSizeSendParams(minWidth, calcMinWidthStr);
         GetArkUIInternalNodeAPI()->GetWaterFlowModifier().SetItemMinWidth(
-            nativeNode, minWidth.Value(), static_cast<int>(minWidth.Unit()), calcMinWidthStr.c_str());
+            nativeNode, minWidth.Value(), static_cast<int32_t>(minWidth.Unit()), calcMinWidthStr.c_str());
     }
     if (maxWidthValue->IsUndefined() || !ArkTSUtils::ParseJsDimensionVpNG(vm, maxWidthValue, maxWidth)) {
         GetArkUIInternalNodeAPI()->GetWaterFlowModifier().ResetItemMaxWidth(nativeNode);
     } else {
         SetItemConstraintSizeSendParams(maxWidth, calcMaxWidthStr);
         GetArkUIInternalNodeAPI()->GetWaterFlowModifier().SetItemMaxWidth(
-            nativeNode, maxWidth.Value(), static_cast<int>(maxWidth.Unit()), calcMaxWidthStr.c_str());
+            nativeNode, maxWidth.Value(), static_cast<int32_t>(maxWidth.Unit()), calcMaxWidthStr.c_str());
     }
     if (minHeightValue->IsUndefined() || !ArkTSUtils::ParseJsDimensionVpNG(vm, minHeightValue, minHeight)) {
         GetArkUIInternalNodeAPI()->GetWaterFlowModifier().ResetItemMinHeight(nativeNode);
     } else {
         SetItemConstraintSizeSendParams(minHeight, calcMinHeightStr);
         GetArkUIInternalNodeAPI()->GetWaterFlowModifier().SetItemMinHeight(
-            nativeNode, minHeight.Value(), static_cast<int>(minHeight.Unit()), calcMinHeightStr.c_str());
+            nativeNode, minHeight.Value(), static_cast<int32_t>(minHeight.Unit()), calcMinHeightStr.c_str());
     }
     if (maxHeightValue->IsUndefined() || !ArkTSUtils::ParseJsDimensionVpNG(vm, maxHeightValue, maxHeight)) {
         GetArkUIInternalNodeAPI()->GetWaterFlowModifier().ResetItemMaxHeight(nativeNode);
     } else {
         SetItemConstraintSizeSendParams(maxHeight, calcMaxHeightStr);
         GetArkUIInternalNodeAPI()->GetWaterFlowModifier().SetItemMaxHeight(
-            nativeNode, maxHeight.Value(), static_cast<int>(maxHeight.Unit()), calcMaxHeightStr.c_str());
+            nativeNode, maxHeight.Value(), static_cast<int32_t>(maxHeight.Unit()), calcMaxHeightStr.c_str());
     }
     return panda::JSValueRef::Undefined(vm);
 }
@@ -247,8 +241,8 @@ ArkUINativeModuleValue WaterFlowBridge::ResetItemConstraintSize(ArkUIRuntimeCall
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
-    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    void* nativeNode = nodeArg->ToNativePointer(vm)->Value();
     GetArkUIInternalNodeAPI()->GetWaterFlowModifier().ResetItemMaxHeight(nativeNode);
     GetArkUIInternalNodeAPI()->GetWaterFlowModifier().ResetItemMaxWidth(nativeNode);
     GetArkUIInternalNodeAPI()->GetWaterFlowModifier().ResetItemMinHeight(nativeNode);
@@ -260,12 +254,12 @@ ArkUINativeModuleValue WaterFlowBridge::SetLayoutDirection(ArkUIRuntimeCallInfo*
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
-    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
-    Local<JSValueRef> jsValue = runtimeCallInfo->GetCallArgRef(NUM_1);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    Local<JSValueRef> layoutDirectionArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    void* nativeNode = nodeArg->ToNativePointer(vm)->Value();
     auto value = static_cast<int32_t>(FlexDirection::COLUMN);
-    if (!jsValue->IsUndefined()) {
-        ArkTSUtils::ParseJsInteger(vm, jsValue, value);
+    if (!layoutDirectionArg->IsUndefined()) {
+        ArkTSUtils::ParseJsInteger(vm, layoutDirectionArg, value);
     }
     if (value >= NUM_0 && value < static_cast<int32_t>(LAYOUT_DIRECTION.size())) {
         GetArkUIInternalNodeAPI()->GetWaterFlowModifier().SetLayoutDirection(nativeNode, value);
@@ -279,8 +273,8 @@ ArkUINativeModuleValue WaterFlowBridge::ResetLayoutDirection(ArkUIRuntimeCallInf
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
-    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    void* nativeNode = nodeArg->ToNativePointer(vm)->Value();
     GetArkUIInternalNodeAPI()->GetWaterFlowModifier().ResetLayoutDirection(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
@@ -289,10 +283,10 @@ ArkUINativeModuleValue WaterFlowBridge::SetNestedScroll(ArkUIRuntimeCallInfo* ru
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
-    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     Local<JSValueRef> scrollForwardValue = runtimeCallInfo->GetCallArgRef(NUM_1);
     Local<JSValueRef> scrollBackwardValue = runtimeCallInfo->GetCallArgRef(NUM_2);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+    void* nativeNode = nodeArg->ToNativePointer(vm)->Value();
     int32_t froward = NUM_0;
     int32_t backward = NUM_0;
     ArkTSUtils::ParseJsInteger(vm, scrollForwardValue, froward);
@@ -313,8 +307,8 @@ ArkUINativeModuleValue WaterFlowBridge::ResetNestedScroll(ArkUIRuntimeCallInfo* 
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
-    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    void* nativeNode = nodeArg->ToNativePointer(vm)->Value();
     GetArkUIInternalNodeAPI()->GetWaterFlowModifier().ResetWaterFlowNestedScroll(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
@@ -323,11 +317,11 @@ ArkUINativeModuleValue WaterFlowBridge::SetFriction(ArkUIRuntimeCallInfo *runtim
 {
     EcmaVM *vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
-    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
-    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
-    void *nativeNode = firstArg->ToNativePointer(vm)->Value();
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    Local<JSValueRef> frictionArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    void *nativeNode = nodeArg->ToNativePointer(vm)->Value();
     double friction = FRICTION_DEFAULT;
-    if (!ArkTSUtils::ParseJsDouble(vm, secondArg, friction)) {
+    if (!ArkTSUtils::ParseJsDouble(vm, frictionArg, friction)) {
         GetArkUIInternalNodeAPI()->GetWaterFlowModifier().ResetWaterFlowFriction(nativeNode);
     } else {
         GetArkUIInternalNodeAPI()->GetWaterFlowModifier().SetWaterFlowFriction(nativeNode, friction);
@@ -339,8 +333,8 @@ ArkUINativeModuleValue WaterFlowBridge::ResetFriction(ArkUIRuntimeCallInfo *runt
 {
     EcmaVM *vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
-    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
-    void *nativeNode = firstArg->ToNativePointer(vm)->Value();
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    void *nativeNode = nodeArg->ToNativePointer(vm)->Value();
     GetArkUIInternalNodeAPI()->GetWaterFlowModifier().ResetWaterFlowFriction(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }

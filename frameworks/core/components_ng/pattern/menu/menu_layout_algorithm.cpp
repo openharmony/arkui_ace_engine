@@ -257,7 +257,7 @@ MenuLayoutAlgorithm::MenuLayoutAlgorithm(int32_t id, const std::string& tag) : t
         Placement::RIGHT, Placement::RIGHT_BOTTOM, Placement::RIGHT_TOP };
     setVertical_ = { Placement::TOP, Placement::TOP_LEFT, Placement::TOP_RIGHT,
         Placement::BOTTOM, Placement::BOTTOM_LEFT, Placement::BOTTOM_RIGHT };
-    
+
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto menuTheme = pipeline->GetTheme<NG::MenuTheme>();
@@ -348,8 +348,6 @@ void MenuLayoutAlgorithm::Initialize(LayoutWrapper* layoutWrapper)
     auto targetSize = props->GetTargetSizeValue(SizeF());
     position_ = props->GetMenuOffset().value_or(OffsetF());
     positionOffset_ = props->GetPositionOffset().value_or(OffsetF());
-    TAG_LOGD(AceLogTag::ACE_MENU, "menu position_ = %{public}s, targetSize = %{public}s", position_.ToString().c_str(),
-        targetSize.ToString().c_str());
     InitializePadding(layoutWrapper);
     auto constraint = props->GetLayoutConstraint();
     auto wrapperIdealSize =
@@ -436,7 +434,6 @@ void MenuLayoutAlgorithm::InitializePadding(LayoutWrapper* layoutWrapper)
     }
 }
 
-
 void MenuLayoutAlgorithm::ModifyPositionToWrapper(LayoutWrapper* layoutWrapper, OffsetF& position)
 {
     auto menu = layoutWrapper->GetHostNode();
@@ -509,8 +506,6 @@ void MenuLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     for (const auto& child : layoutWrapper->GetAllChildrenWithBuild()) {
         child->Measure(childConstraint);
         auto childSize = child->GetGeometryNode()->GetMarginFrameSize();
-        TAG_LOGD(AceLogTag::ACE_MENU, "child finish measure, child %{public}s size = %{public}s",
-            child->GetHostTag().c_str(), child->GetGeometryNode()->GetMarginFrameSize().ToString().c_str());
         idealHeight += childSize.Height();
         auto childWidth = childSize.Width();
         if (childWidth < MIN_MENU_WIDTH.ConvertToPx()) {
@@ -518,7 +513,6 @@ void MenuLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
             columnInfo = GridSystemManager::GetInstance().GetInfoByType(GridColumnType::MENU);
             columnInfo->GetParent()->BuildColumnWidth(wrapperSize_.Width());
             idealWidth = static_cast<float>(columnInfo->GetWidth(MIN_GRID_COUNTS));
-            TAG_LOGD(AceLogTag::ACE_MENU, "menu width defaults to 2c value is %{public}f", idealWidth);
             menuLayoutProperty->UpdateMenuWidth(Dimension((double)idealWidth, DimensionUnit::VP));
         }
         idealWidth = std::max(idealWidth, childSize.Width());
@@ -1219,12 +1213,12 @@ void MenuLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     if (menuPattern->GetPreviewMode() != MenuPreviewMode::NONE) {
         LayoutPreviewMenu(layoutWrapper);
     }
-    if (!menuPattern->IsSelectOverlayExtensionMenu()) {
+    if (!menuPattern->IsSelectOverlayExtensionMenu() && !menuPattern->IsSelectOverlayCustomMenu()) {
         auto geometryNode = layoutWrapper->GetGeometryNode();
         CHECK_NULL_VOID(geometryNode);
         auto size = geometryNode->GetMarginFrameSize();
         bool didNeedArrow = GetIfNeedArrow(layoutWrapper, size);
-        if (menuPattern->IsSelectMenu() || menuPattern->IsSelectOverlayCustomMenu()) {
+        if (menuPattern->IsSelectMenu()) {
             ComputeMenuPositionByAlignType(menuProp, size);
             auto offset = ComputeMenuPositionByOffset(menuProp, geometryNode);
             position_ += offset;
@@ -1459,7 +1453,7 @@ OffsetF MenuLayoutAlgorithm::MenuLayoutAvoidAlgorithm(const RefPtr<MenuLayoutPro
     if (hierarchicalParameters_) {
         windowsOffsetY = 0.0f;
     }
-    
+
     CHECK_NULL_RETURN(menuProp, OffsetF(0, 0));
     CHECK_NULL_RETURN(menuPattern, OffsetF(0, 0));
     float x = 0.0f;
@@ -1523,6 +1517,15 @@ void MenuLayoutAlgorithm::UpdateConstraintHeight(LayoutWrapper* layoutWrapper, L
         maxAvailableHeight = windowGlobalRect.Height() - top - bottom;
     }
     float maxSpaceHeight = maxAvailableHeight * HEIGHT_CONSTRAINT_FACTOR;
+	
+    auto menuPattern = layoutWrapper->GetHostNode()->GetPattern<MenuPattern>();
+    if (menuPattern->IsHeightModifiedBySelect()) {
+        auto menuLayoutProps = AceType::DynamicCast<MenuLayoutProperty>(layoutWrapper->GetLayoutProperty());
+        auto selectModifiedHeight = menuLayoutProps->GetSelectModifiedHeight().value();
+        if (selectModifiedHeight < maxSpaceHeight) {
+            maxSpaceHeight = selectModifiedHeight;
+        }
+    }
     constraint.maxSize.SetHeight(maxSpaceHeight);
 }
 

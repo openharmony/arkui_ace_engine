@@ -84,13 +84,12 @@ void RenderImage::Update(const RefPtr<Component>& component)
     matchTextDirection_ = image->IsMatchTextDirection();
     SetRadius(image->GetBorder());
     if (context && context->GetIsDeclarative()) {
-        loadImgSuccessEvent_ = AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
-            image->GetLoadSuccessEvent(), context_);
-        loadImgFailEvent_ = AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
-            image->GetLoadFailEvent(), context_);
+        loadImgSuccessEvent_ =
+            AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(image->GetLoadSuccessEvent(), context_);
+        loadImgFailEvent_ =
+            AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(image->GetLoadFailEvent(), context_);
     } else {
-        loadSuccessEvent_ =
-            AceAsyncEvent<void(const std::string&)>::Create(image->GetLoadSuccessEvent(), context_);
+        loadSuccessEvent_ = AceAsyncEvent<void(const std::string&)>::Create(image->GetLoadSuccessEvent(), context_);
         loadFailEvent_ = AceAsyncEvent<void(const std::string&)>::Create(image->GetLoadFailEvent(), context_);
     }
     svgAnimatorFinishEvent_ = image->GetSvgAnimatorFinishEvent();
@@ -99,18 +98,17 @@ void RenderImage::Update(const RefPtr<Component>& component)
     imageRenderMode_ = image->GetImageRenderMode();
     imageRepeat_ = image->GetImageRepeat();
 
+#ifndef USE_ROSEN_DRAWING
     useSkiaSvg_ = image->GetUseSkiaSvg();
+#else
+    useSkiaSvg_ = false;
+#endif
     autoResize_ = image->GetAutoResize();
     imageAlt_ = image->GetAlt();
     auto inComingSrc = image->GetSrc();
-    ImageSourceInfo inComingSource(
-        inComingSrc,
-        image->GetBundleName(),
-        image->GetModuleName(),
-        image->GetImageSourceSize().first,
-        image->GetImageSourceSize().second,
-        inComingSrc.empty() ? image->GetResourceId() : InternalResource::ResourceId::NO_ID,
-        image->GetPixmap());
+    ImageSourceInfo inComingSource(inComingSrc, image->GetBundleName(), image->GetModuleName(),
+        image->GetImageSourceSize().first, image->GetImageSourceSize().second,
+        inComingSrc.empty() ? image->GetResourceId() : InternalResource::ResourceId::NO_ID, image->GetPixmap());
     UpdateThemeIcon(inComingSource);
     auto fillColor = image->GetImageFill();
     if (fillColor.has_value()) {
@@ -130,9 +128,6 @@ void RenderImage::Update(const RefPtr<Component>& component)
     copyOption_ = image->GetCopyOption();
 
     // this value is used for update frequency with same image source info.
-    LOGD("sourceInfo %{public}s", sourceInfo_.ToString().c_str());
-    LOGD("inComingSource %{public}s", inComingSource.ToString().c_str());
-    LOGD("imageLoadingStatus_: %{public}d", static_cast<int32_t>(imageLoadingStatus_));
     proceedPreviousLoading_ = sourceInfo_.IsValid() && sourceInfo_ == inComingSource;
     // perform layout only if loading new image
     if (!proceedPreviousLoading_) {
@@ -168,8 +163,8 @@ void RenderImage::OnTouchTestHit(
         result.emplace_back(dragDropGesture_);
     }
 
-    if (copyOption_ != CopyOptions::None && imageLoadingStatus_ == ImageLoadingStatus::LOAD_SUCCESS
-        && !sourceInfo_.IsSvg()) {
+    if (copyOption_ != CopyOptions::None && imageLoadingStatus_ == ImageLoadingStatus::LOAD_SUCCESS &&
+        !sourceInfo_.IsSvg()) {
         if (!textOverlayRecognizer_) {
             textOverlayRecognizer_ = AceType::MakeRefPtr<LongPressRecognizer>(context_);
             textOverlayRecognizer_->SetOnLongPress([weak = WeakClaim(this)](const LongPressInfo& info) {
@@ -208,8 +203,8 @@ void RenderImage::OnLongPress(const LongPressInfo& longPressInfo)
 
 bool RenderImage::HandleMouseEvent(const MouseEvent& event)
 {
-    if (copyOption_ == CopyOptions::None || imageLoadingStatus_ != ImageLoadingStatus::LOAD_SUCCESS
-        || sourceInfo_.IsSvg()) {
+    if (copyOption_ == CopyOptions::None || imageLoadingStatus_ != ImageLoadingStatus::LOAD_SUCCESS ||
+        sourceInfo_.IsSvg()) {
         return false;
     }
     if (event.button == MouseButton::RIGHT_BUTTON && event.action == MouseAction::PRESS) {
@@ -254,7 +249,7 @@ void RenderImage::ShowTextOverlay(const Offset& showOffset)
         OverlayShowOption option { .showMenu = isOverlayShowed_,
             .updateOverlayType = UpdateOverlayType::LONG_PRESS,
             .startHandleOffset = startHandleOffset,
-            .endHandleOffset = endHandleOffset};
+            .endHandleOffset = endHandleOffset };
         updateHandlePosition_(option);
         if (!animator_) {
             LOGE("Show textOverlay error, animator is nullptr");
@@ -668,17 +663,16 @@ void RenderImage::ApplyObjectPosition()
     if (imageObjectPosition_.GetSizeTypeX() == BackgroundImagePositionType::PX) {
         offset.SetX((layoutSize.Width() - dstRect_.Width()) / 2 - imageObjectPosition_.GetSizeValueX());
     } else {
-        offset.SetX(
-            (layoutSize.Width() - dstRect_.Width()) / 2 - imageObjectPosition_.GetSizeValueX() *
-            (layoutSize.Width() - dstRect_.Width()) / PERCENT_TRANSLATE);
+        offset.SetX((layoutSize.Width() - dstRect_.Width()) / 2 -
+                    imageObjectPosition_.GetSizeValueX() * (layoutSize.Width() - dstRect_.Width()) / PERCENT_TRANSLATE);
     }
 
     if (imageObjectPosition_.GetSizeTypeY() == BackgroundImagePositionType::PX) {
         offset.SetY((layoutSize.Height() - dstRect_.Height()) / 2 - imageObjectPosition_.GetSizeValueY());
     } else {
-        offset.SetY(
-            (layoutSize.Height() - dstRect_.Height()) / 2 - imageObjectPosition_.GetSizeValueY() *
-            (layoutSize.Height() - dstRect_.Height()) / PERCENT_TRANSLATE);
+        offset.SetY((layoutSize.Height() - dstRect_.Height()) / 2 - imageObjectPosition_.GetSizeValueY() *
+                                                                        (layoutSize.Height() - dstRect_.Height()) /
+                                                                        PERCENT_TRANSLATE);
     }
     imageRenderPosition_ = offset;
 }
@@ -736,8 +730,6 @@ void RenderImage::GenerateImageRects(const Size& srcSize, const BackgroundImageS
     if (imageLoadingStatus_ == ImageLoadingStatus::LOAD_SUCCESS) {
         currentDstRectList_ = rectList_;
     }
-    LOGD("[BOX][Dep:%{public}d][IMAGE] Result: X:%{public}d-%{public}d, Y:%{public}d-%{public}d",
-        GetDepth(), minX, maxX, minY, maxY);
 }
 
 Size RenderImage::CalculateImageRenderSize(const Size& srcSize, const BackgroundImageSize& imageSize) const
@@ -912,19 +904,7 @@ void RenderImage::ClearRenderObject()
 
 void RenderImage::PrintImageLog(const Size& srcSize, const BackgroundImageSize& imageSize, ImageRepeat imageRepeat,
     const BackgroundImagePosition& imagePosition) const
-{
-    LOGD("[BOX][IMAGE][Dep:%{public}d] Param:Src W:%{public}.1lf, H:%{public}.1lf, Size:%{public}.1lf|%{public}d, "
-         "%{public}.1lf|%{public}d, Rep:%{public}u, Pos X:%{public}.1lf|%{public}d, Y:%{public}.1lf|%{public}d, "
-         "BoxPaint:%{public}.1lf * %{public}.1lf, MarginOffset: %{public}.1lf * %{public}.1lf",
-        GetDepth(), srcSize.Width(), srcSize.Height(), imageSize.GetSizeValueX(), imageSize.GetSizeTypeX(),
-        imageSize.GetSizeValueY(), imageSize.GetSizeTypeY(), imageRepeat, imagePosition.GetSizeValueX(),
-        imagePosition.GetSizeTypeX(), imagePosition.GetSizeValueY(), imagePosition.GetSizeTypeY(),
-        boxPaintSize_.Width(), boxPaintSize_.Height(), boxMarginOffset_.GetX(), boxMarginOffset_.GetY());
-    LOGD("[BOX][IMAGE][Dep:%{public}d] Result: Size:(%{public}.1lf*%{public}.1lf), Pos(%{public}.1lf,%{public}.1lf), "
-         "rect:%{public}s",
-        GetDepth(), imageRenderSize_.Width(), imageRenderSize_.Height(), imageRenderPosition_.GetX(),
-        imageRenderPosition_.GetY(), rectList_.front().ToString().c_str());
-}
+{}
 
 void RenderImage::Dump()
 {

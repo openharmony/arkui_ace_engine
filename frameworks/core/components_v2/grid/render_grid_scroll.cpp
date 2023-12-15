@@ -354,7 +354,6 @@ double RenderGridScroll::GetSize(const Size& src, bool isMain) const
 
 void RenderGridScroll::SizeChangeOffset(double newWindowHeight)
 {
-    LOGD("list newWindowHeight = %{public}f", newWindowHeight);
     auto context = context_.Upgrade();
     if (!context) {
         return;
@@ -371,7 +370,6 @@ void RenderGridScroll::SizeChangeOffset(double newWindowHeight)
         if (LessOrEqual(offset, 0.0)) {
             // negative offset to scroll down
             textFieldOffset_ = offset;
-            LOGD("size change offset applied, %{public}f", offset);
         }
     }
 }
@@ -404,7 +402,6 @@ bool RenderGridScroll::GetGridSize()
         crossGap_ = &rowGap_;
         mainGap_ = &colGap_;
     }
-    LOGD("GetGridSize %lf, %lf   [%lf- %lf]", rowSize, colSize, rowSize_, colSize_);
     if (rowSize != rowSize_ || colSize != colSize_) {
         rowSize_ = rowSize;
         colSize_ = colSize;
@@ -504,7 +501,6 @@ double RenderGridScroll::BuildLazyGridLayout(int32_t index, double sizeNeed)
     if (!buildChildByIndex_ || index < 0 || NearZero(sizeNeed)) {
         return 0.0;
     }
-    LOGD("BuildLazyGridLayout index = %d sizeNeed = %lf", index, sizeNeed);
     double size = 0.0;
     int32_t startIndex = index;
     while (size < sizeNeed) {
@@ -521,8 +517,6 @@ double RenderGridScroll::BuildLazyGridLayout(int32_t index, double sizeNeed)
 bool RenderGridScroll::CheckGridPlaced(
     int32_t index, int32_t main, int32_t cross, int32_t& mainSpan, int32_t& crossSpan)
 {
-    LOGD("CheckGridPlaced %{public}d %{public}d %{public}d %{public}d %{public}d", index, main, cross, mainSpan,
-        crossSpan);
     auto mainIter = gridMatrix_.find(main);
     if (mainIter != gridMatrix_.end()) {
         auto crossIter = mainIter->second.find(cross);
@@ -556,8 +550,6 @@ bool RenderGridScroll::CheckGridPlaced(
         }
         gridMatrix_[i] = mainMap;
     }
-    LOGD("CheckGridPlaced done %{public}d %{public}d %{public}d %{public}d %{public}d", index, main, cross, mainSpan,
-        crossSpan);
     return true;
 }
 
@@ -919,7 +911,6 @@ void RenderGridScroll::PerformLayout()
     childrenInRect_.clear();
     double drawLength = 0.0 - firstItemOffset_;
     int32_t main = startIndex_ > 0 ? startIndex_ - 1 : startIndex_;
-    LOGD("startIndex_=[%d], firstItemOffset_=[%lf]", startIndex_, firstItemOffset_);
     for (; main < *mainCount_; main++) {
         if (gridCells_.find(main) == gridCells_.end()) {
             continue;
@@ -1114,7 +1105,6 @@ int32_t RenderGridScroll::GetStartingItem(int32_t first)
     while (index > 0) {
         if (getChildSpanByIndex_(
                 index, useScrollable_ == SCROLLABLE::HORIZONTAL, itemMain, itemCross, itemMainSpan, itemCrossSpan)) {
-            LOGD("index %d %d,  %d,  %d,  %d", index, itemMain, itemCross, itemMainSpan, itemCrossSpan);
             if (itemCross == 0) {
                 firstIndex = index;
                 break;
@@ -1315,7 +1305,6 @@ void RenderGridScroll::SetScrollBarCallback()
             LOGE("render grid is released");
             return;
         }
-        LOGD("trigger scroll end callback");
     };
     auto&& scrollCallback = [weakScroll = AceType::WeakClaim(this)](double value, int32_t source) {
         auto grid = weakScroll.Upgrade();

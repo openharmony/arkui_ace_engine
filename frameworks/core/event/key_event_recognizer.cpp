@@ -524,7 +524,6 @@ std::vector<KeyEvent> KeyEventRecognizer::GetKeyEvents(int32_t keyCode, int32_t 
     // Recognize long press event.
     if ((keyAction == static_cast<int32_t>(KeyAction::DOWN)) && (repeatTime >= LONG_PRESS_DURATION) &&
         (!iter->second)) {
-        LOGD("this event is long press, key code is %{public}d", keyCode);
         iter->second = true;
         keyEvents.emplace_back(KeyEvent(static_cast<KeyCode>(keyCode), KeyAction::LONG_PRESS, repeatTime, timeStamp,
             deviceId, static_cast<SourceType>(keySource)));
@@ -534,7 +533,6 @@ std::vector<KeyEvent> KeyEventRecognizer::GetKeyEvents(int32_t keyCode, int32_t 
         if (iter->second) {
             iter->second = false;
         } else {
-            LOGD("this event is click, key code is %{public}d", keyCode);
             keyEvents.emplace_back(KeyEvent(static_cast<KeyCode>(keyCode), KeyAction::CLICK, repeatTime, timeStamp,
                 deviceId, static_cast<SourceType>(keySource)));
         }

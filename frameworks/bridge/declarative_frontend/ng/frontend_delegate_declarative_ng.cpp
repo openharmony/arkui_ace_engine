@@ -175,10 +175,8 @@ void FrontendDelegateDeclarativeNG::RunPage(
         manifestParser_->Parse(jsonContent);
         manifestParser_->Printer();
     } else if (!profile.empty() && GetAssetContent(profile, jsonContent)) {
-        LOGD("Parse profile %{public}s", profile.c_str());
         manifestParser_->Parse(jsonContent);
     } else if (GetAssetContent(PAGES_JSON, jsonContent)) {
-        LOGD("Parse main_pages.json");
         manifestParser_->Parse(jsonContent);
     }
     std::string mainPagePath;
@@ -863,8 +861,6 @@ void FrontendDelegateDeclarativeNG::ShowToast(
                     const RefPtr<NG::OverlayManager>& overlayManager) {
         CHECK_NULL_VOID(overlayManager);
         ContainerScope scope(containerId);
-        TAG_LOGD(AceLogTag::ACE_OVERLAY, "Begin to show toast message %{public}s, duration is %{public}d",
-            message.c_str(), durationTime);
         overlayManager->ShowToast(message, durationTime, bottom, isRightToLeft, showMode);
     };
     MainWindowOverlay(std::move(task));

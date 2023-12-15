@@ -25,7 +25,6 @@ namespace OHOS::Ace::Framework {
 
 void IfElseModelImpl::Create()
 {
-    LOGD("IfElse::Create with OG");
     auto component = AceType::MakeRefPtr<IfElseComponent>(std::string(), "IfElse");
     ViewStackProcessor::GetInstance()->ClaimElementId(component);
     ViewStackProcessor::GetInstance()->Push(component);

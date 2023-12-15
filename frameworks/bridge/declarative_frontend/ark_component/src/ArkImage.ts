@@ -1,6 +1,21 @@
+/*
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 /// <reference path="./import.ts" />
-class ImageColorFilterModifier extends Modifier<string> {
-  constructor(value: string) {
+class ImageColorFilterModifier extends ModifierWithKey<ColorFilter> {
+  constructor(value: ColorFilter) {
     super(value);
   }
   static identity: Symbol = Symbol('imageColorFilter');
@@ -8,8 +23,11 @@ class ImageColorFilterModifier extends Modifier<string> {
     if (reset) {
       GetUINativeModule().image.resetColorFilter(node);
     } else {
-      GetUINativeModule().image.setColorFilter(node, JSON.parse(this.value!));
+      GetUINativeModule().image.setColorFilter(node, this.value!);
     }
+  }
+  checkObjectDiff(): boolean {
+    return true;
   }
 }
 
@@ -300,18 +318,8 @@ class ArkImageComponent extends ArkComponent implements ImageAttribute {
   }
 
   colorFilter(value: ColorFilter): this {
-    if (isUndefined(value) || Object.prototype.toString.call(value) !== '[object Array]') {
-      modifier(this._modifiers, ImageColorFilterModifier, undefined);
-      return this;
-    }
-    if (Object.prototype.toString.call(value) === '[object Array]') {
-      let _value: number[] = <number[]>value;
-      if (_value.length !== 20) {
-        modifier(this._modifiers, ImageColorFilterModifier, undefined);
-        return this;
-      }
-    }
-    modifier(this._modifiers, ImageColorFilterModifier, JSON.stringify(value));
+    modifierWithKey(this._modifiersWithKeys, ImageColorFilterModifier.identity,
+      ImageColorFilterModifier, value);
     return this;
   }
   copyOption(value: CopyOptions): this {
@@ -353,6 +361,6 @@ globalThis.Image.attributeModifier = function (modifier) {
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkImageComponent(nativeNode);
   });
-  modifier.applyNormalAttribute(component);
+  applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
 }

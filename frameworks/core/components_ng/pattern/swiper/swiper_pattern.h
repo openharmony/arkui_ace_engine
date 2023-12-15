@@ -731,7 +731,7 @@ private:
     RefPtr<Animator> controller_;
 
     // Control spring animation when drag beyond boundary and drag end.
-    RefPtr<Animator> springController_;
+    std::shared_ptr<AnimationUtils::Animation> springAnimation_;
 
     // Control fade animation when drag beyond boundary and drag end.
     std::shared_ptr<AnimationUtils::Animation> fadeAnimation_;
@@ -824,6 +824,8 @@ private:
     bool mainSizeIsMeasured_ = false;
     bool isNeedResetPrevMarginAndNextMargin_ = false;
     bool usePropertyAnimation_ = false;
+    bool springAnimationIsRunning_ = false;
+    bool isTouchDownSpringAnimation_ = false;
     int32_t propertyAnimationIndex_ = -1;
     bool isUserFinish_ = true;
     bool isVoluntarilyClear_ = false;
@@ -831,6 +833,7 @@ private:
     bool stopIndicatorAnimation_ = true;
     bool isTouchPad_ = false;
     bool fadeAnimationIsRunning_ = false;
+    bool autoLinearReachBoundary = false;
 
     float mainDeltaSum_ = 0.0f;
     std::optional<int32_t> cachedCount_;

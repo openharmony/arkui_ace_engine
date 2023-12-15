@@ -319,8 +319,6 @@ void ListItemGroupLayoutAlgorithm::MeasureListItem(
         itemPosition_.clear();
         return;
     }
-    TAG_LOGD(AceLogTag::ACE_LIST, "List measure item, referencePos_ is %{public}f, startPos_: %{public}f, "
-        "endPos_: %{public}f, forward:%{public}d", referencePos_, startPos_, endPos_, forwardLayout_);
     if (scrollAlign_ == ScrollAlign::CENTER) {
         startIndex = GetLanesFloor(startIndex);
         MeasureCenter(layoutWrapper, layoutConstraint, startIndex);
@@ -335,11 +333,9 @@ void ListItemGroupLayoutAlgorithm::MeasureListItem(
         MeasureAuto(layoutWrapper, layoutConstraint, startIndex);
     } else if (forwardLayout_) {
         startIndex = GetLanesFloor(startIndex);
-        TAG_LOGD(AceLogTag::ACE_LIST, "ListItem startIndex:%{public}d, startPos:%{public}f", startIndex, startPos);
         MeasureForward(layoutWrapper, layoutConstraint, startIndex, startPos);
     } else {
         endIndex = GetLanesCeil(endIndex);
-        TAG_LOGD(AceLogTag::ACE_LIST, "ListItem endIndex:%{public}d, endPos:%{public}f", endIndex, endPos);
         MeasureBackward(layoutWrapper, layoutConstraint, endIndex, endPos);
     }
 }
@@ -498,18 +494,22 @@ int32_t ListItemGroupLayoutAlgorithm::MeasureALineBackward(LayoutWrapper* layout
 void ListItemGroupLayoutAlgorithm::MeasureCenter(LayoutWrapper* layoutWrapper,
     const LayoutConstraintF& layoutConstraint, int32_t startIndex)
 {
-    startIndex = GetLanesFloor(startIndex);
     MeasureALineCenter(layoutWrapper, layoutConstraint, startIndex);
     MeasureJumpToItemForward(layoutWrapper, layoutConstraint, GetEndIndex() + 1, GetEndPosition());
     MeasureJumpToItemBackward(layoutWrapper, layoutConstraint, GetStartIndex() - 1, GetStartPosition());
 
     totalMainSize_ = GetEndPosition() - GetStartPosition() + headerMainSize_ + footerMainSize_;
     float currentStartPos = headerMainSize_;
+    int32_t i = 0;
+    int32_t lanes = lanes_ > 1 ? lanes_ : 1;
     for (auto& pos : itemPosition_) {
         float len = pos.second.second - pos.second.first;
         pos.second.first = currentStartPos;
         pos.second.second = currentStartPos + len;
-        currentStartPos = pos.second.second + spaceWidth_;
+        i++;
+        if (i % lanes == 0) {
+            currentStartPos = pos.second.second + spaceWidth_;
+        }
     }
 }
 
@@ -718,7 +718,6 @@ void ListItemGroupLayoutAlgorithm::CheckRecycle(
             if (GreatOrEqual(pos->second.second, startPos - referencePos)) {
                 break;
             }
-            TAG_LOGD(AceLogTag::ACE_LIST, "recycle item:%{public}d", pos->first);
             RecycleListItem(layoutWrapper, pos->first);
             itemPosition_.erase(pos++);
         }

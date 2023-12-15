@@ -241,8 +241,6 @@ void LayoutProperty::UpdateLayoutConstraint(const LayoutConstraintF& parentConst
                 parentConstraint.scaleProperty, parentConstraint.percentReference));
         }
         if (calcLayoutConstraint_->selfIdealSize.has_value()) {
-            LOGD("CalcLayoutConstraint->selfIdealSize = %{public}s",
-                calcLayoutConstraint_->selfIdealSize.value().ToString().c_str());
             layoutConstraint_->UpdateIllegalSelfIdealSizeWithCheck(
                 ConvertToOptionalSize(calcLayoutConstraint_->selfIdealSize.value(), parentConstraint.scaleProperty,
                     parentConstraint.percentReference));
@@ -648,11 +646,9 @@ void LayoutProperty::UpdateGeometryTransition(const std::string& id, bool follow
     }
     geometryTransition_ = geometryTransitionNew;
 
-    if (SystemProperties::GetDebugEnabled()) {
-        LOGI("GeometryTransition: node: %{public}d update id, old id: %{public}s, new id: %{public}s", host->GetId(),
-            geometryTransitionOld ? geometryTransitionOld->GetId().c_str() : "empty",
-            geometryTransitionNew ? id.c_str() : "empty");
-    }
+    TAG_LOGD(AceLogTag::ACE_GEOMETRY_TRANSITION, "node: %{public}d update id, old id: %{public}s, new id: %{public}s",
+        host->GetId(), geometryTransitionOld ? geometryTransitionOld->GetId().c_str() : "empty",
+        geometryTransitionNew ? id.c_str() : "empty");
     ElementRegister::GetInstance()->DumpGeometryTransition();
     propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_LAYOUT | PROPERTY_UPDATE_MEASURE;
 }

@@ -29,9 +29,8 @@
 #include "core/components_ng/pattern/overlay/sheet_presentation_pattern.h"
 #include "core/components_ng/pattern/overlay/sheet_presentation_property.h"
 #include "core/components_ng/pattern/overlay/sheet_style.h"
-#include "core/components_ng/pattern/scroll/scroll_layout_property.h"
 #include "core/components_ng/pattern/scroll/scroll_pattern.h"
-#include "core/components_ng/pattern/scroll/scroll_paint_property.h"
+#include "core/components_ng/pattern/scrollable/scrollable_paint_property.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/property/measure_property.h"
@@ -71,6 +70,15 @@ RefPtr<FrameNode> SheetView::CreateOperationColumnNode(
     CHECK_NULL_RETURN(operationColumn, nullptr);
     auto layoutProps = operationColumn->GetLayoutProperty<LinearLayoutProperty>();
     CHECK_NULL_RETURN(layoutProps, nullptr);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, nullptr);
+    auto sheetTheme = pipeline->GetTheme<SheetTheme>();
+    CHECK_NULL_RETURN(sheetTheme, nullptr);
+    MarginProperty margin;
+    margin.right = CalcLength(sheetTheme->GetTitleTextMargin());
+    margin.left = CalcLength(sheetTheme->GetTitleTextMargin());
+    layoutProps->UpdateMargin(margin);
+
     layoutProps->UpdateMeasureType(MeasureType::MATCH_PARENT_CROSS_AXIS);
     if (sheetStyle.isTitleBuilder.has_value()) {
         layoutProps->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(SHEET_OPERATION_AREA_HEIGHT)));
@@ -154,6 +162,9 @@ RefPtr<FrameNode> SheetView::CreateScrollNode()
     CHECK_NULL_RETURN(props, nullptr);
     props->UpdateScrollEnabled(true);
     props->UpdateAxis(Axis::VERTICAL);
+    auto paintProps = scroll->GetPaintProperty<ScrollablePaintProperty>();
+    CHECK_NULL_RETURN(paintProps, nullptr);
+    paintProps->UpdateScrollBarMode(DisplayMode::OFF);
     auto pattern = scroll->GetPattern<ScrollablePattern>();
     CHECK_NULL_RETURN(pattern, nullptr);
     pattern->SetEdgeEffect(EdgeEffect::SPRING, pattern->GetAlwaysEnabled());

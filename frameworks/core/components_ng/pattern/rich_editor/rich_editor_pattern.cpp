@@ -87,10 +87,11 @@ constexpr float DEFAULT_CARET_HEIGHT = 18.5f;
 constexpr int32_t IMAGE_SPAN_LENGTH = 1;
 constexpr int32_t RICH_EDITOR_TWINKLING_INTERVAL_MS = 500;
 constexpr float DEFAULT_TEXT_SIZE = 16.0f;
-constexpr int32_t AUTO_SCROLL_INTERVAL = 20;
-constexpr Dimension AUTO_SCROLL_MOVE_THRESHOLD = 2.0_vp;
+constexpr int32_t AUTO_SCROLL_INTERVAL = 15;
 constexpr Dimension AUTO_SCROLL_EDGE_DISTANCE = 15.0_vp;
-constexpr Dimension AUTO_SCROLL_DRAG_EDGE_DISTANCE = 25.0_vp;
+constexpr Dimension AUTO_SCROLL_DRAG_EDGE_DISTANCE = 58.0_vp;
+constexpr float MAX_DRAG_SCROLL_SPEED = 2400.0f;
+constexpr float TIME_UNIT = 1000.0f;
 constexpr float DOUBLE_CLICK_INTERVAL_MS = 300.0f;
 constexpr float BOX_EPSILON = 0.5f;
 constexpr uint32_t RECORD_MAX_LENGTH = 20;
@@ -759,6 +760,11 @@ void RichEditorPattern::CopyTextSpanStyle(RefPtr<SpanNode>& source, RefPtr<SpanN
         target->UpdateLineHeight(source->GetLineHeightValue(Dimension()));
         target->AddPropertyInfo(PropertyInfo::LINEHEIGHT);
     }
+
+    if (source->HasTextShadow()) {
+        target->UpdateTextShadow(source->GetTextShadowValue({Shadow()}));
+        target->AddPropertyInfo(PropertyInfo::TEXTSHADOW);
+    }
 }
 
 int32_t RichEditorPattern::TextSpanSplit(int32_t position)
@@ -1210,7 +1216,7 @@ void RichEditorPattern::StartTwinkling()
     caretVisible_ = true;
     auto tmpHost = GetHost();
     CHECK_NULL_VOID(tmpHost);
-    tmpHost->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    tmpHost->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     ScheduleCaretTwinkling();
 }
 
@@ -1227,8 +1233,8 @@ void RichEditorPattern::StopTwinkling()
     caretTwinklingTask_.Cancel();
     if (caretVisible_) {
         caretVisible_ = false;
+        GetHost()->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     }
-    GetHost()->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
 void RichEditorPattern::HandleClickEvent(GestureEvent& info)
@@ -1254,6 +1260,10 @@ void RichEditorPattern::HandleSingleClickEvent(OHOS::Ace::GestureEvent& info)
     lastClickTimeStamp_ = info.GetTimeStamp();
 
     HandleClickAISpanEvent(info);
+    if (isClickOnAISpan_ && selectOverlayProxy_ && !selectOverlayProxy_->IsClosed()) {
+        selectOverlayProxy_->DisableMenu(true);
+        return;
+    }
     HandleUserClickEvent(info);
     if (textSelector_.IsValid() && !isMouseSelect_) {
         CloseSelectOverlay();
@@ -1274,7 +1284,7 @@ void RichEditorPattern::HandleSingleClickEvent(OHOS::Ace::GestureEvent& info)
 
     auto focusHub = GetHost()->GetOrCreateFocusHub();
     if (focusHub) {
-        if (focusHub->RequestFocusImmediately()) {
+        if (!isClickOnAISpan_ && focusHub->RequestFocusImmediately()) {
             float caretHeight = 0.0f;
             SetCaretPosition(position);
             OffsetF caretOffset = CalcCursorOffsetByPosition(GetCaretPosition(), caretHeight, false, false);
@@ -1348,18 +1358,18 @@ bool RichEditorPattern::HandleUserGestureEvent(
 
 void RichEditorPattern::HandleClickAISpanEvent(GestureEvent& info)
 {
+    isClickOnAISpan_ = false;
     if (!textDetectEnable_ || aiSpanMap_.empty()) {
         return;
     }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    bool isClickOnAISpan = false;
     PointF textOffset = { info.GetLocalLocation().GetX() - GetTextRect().GetX(),
         info.GetLocalLocation().GetY() - GetTextRect().GetY() };
     for (const auto& kv : aiSpanMap_) {
         auto& aiSpan = kv.second;
-        isClickOnAISpan = ClickAISpan(textOffset, aiSpan);
-        if (isClickOnAISpan) {
+        isClickOnAISpan_ = ClickAISpan(textOffset, aiSpan);
+        if (isClickOnAISpan_) {
             return;
         }
     }
@@ -1466,7 +1476,6 @@ void RichEditorPattern::HandleBlurEvent()
     StopTwinkling();
     // The pattern handles blurevent, Need to close the softkeyboard first.
     if (customKeyboardBuilder_ && isCustomKeyboardAttached_) {
-        TAG_LOGD(AceLogTag::ACE_KEYBOARD, "RichEditorPattern Blur, Close SoftKeyBoard.");
         CloseKeyboard(true);
     }
 
@@ -1583,14 +1592,13 @@ void RichEditorPattern::HandleDoubleClickOrLongPress(GestureEvent& info)
     InitSelection(textOffset);
     auto selectEnd = std::max(textSelector_.baseOffset, textSelector_.destinationOffset);
     auto selectStart = std::min(textSelector_.baseOffset, textSelector_.destinationOffset);
-    if (!BetweenSelectedPosition(info.GetGlobalLocation()) && caretUpdateType_ == CaretUpdateType::LONG_PRESSED) {
-        if (selectStart == 0) {
-            textSelector_.Update(selectStart, selectStart);
-        } else {
-            textSelector_.Update(selectEnd, selectEnd);
-            selectStart = selectEnd;
-        }
+    if (!BetweenSelectedPosition(info.GetGlobalLocation()) && !adjusted_) {
+        auto position = paragraphs_.GetIndex(textOffset);
+        textSelector_.Update(position, position);
+        selectStart = position;
+        selectEnd = position;
     }
+
     auto textSelectInfo = GetSpansInfo(selectStart, selectEnd, GetSpansMethod::ONSELECT);
     UpdateSelectionType(textSelectInfo);
     CalculateHandleOffsetAndShowOverlay();
@@ -1872,7 +1880,6 @@ uint32_t RichEditorPattern::GetSCBSystemWindowId()
     RefPtr<FrameNode> frameNode = GetHost();
     CHECK_NULL_RETURN(frameNode, {});
     auto focusSystemWindowId = WindowSceneHelper::GetFocusSystemWindowId(frameNode);
-    TAG_LOGD(AceLogTag::ACE_KEYBOARD, "RichEditor Find SCBSystemWindowId End, (%{public}d).", focusSystemWindowId);
     return focusSystemWindowId;
 }
 #endif
@@ -1899,7 +1906,6 @@ bool RichEditorPattern::EnableStandardInput(bool needShowSoftKeyboard)
 #ifdef WINDOW_SCENE_SUPPORTED
     auto systemWindowId = GetSCBSystemWindowId();
     if (systemWindowId) {
-        TAG_LOGD(AceLogTag::ACE_KEYBOARD, "windowid(%{public}u->%{public}u.", miscTextConfig->windowId, systemWindowId);
         miscTextConfig->windowId = systemWindowId;
     }
 #endif
@@ -2054,7 +2060,6 @@ bool RichEditorPattern::RequestCustomKeyboard()
     auto inputMethod = MiscServices::InputMethodController::GetInstance();
     if (inputMethod) {
         inputMethod->Close();
-        TAG_LOGD(AceLogTag::ACE_KEYBOARD, "RichEditor Request CustomKeyboard, Close Softkeyboard Successfully.");
     }
 #else
     if (HasConnection()) {
@@ -3562,6 +3567,15 @@ void RichEditorPattern::ShowSelectOverlay(const RectF& firstHandle, const RectF&
             pattern->HandleOnCameraInput();
         };
 
+        if (pattern->GetTextDetectEnable()) {
+            selectInfo.onClose = [weak](bool closedByGlobalEvent) {
+                auto pattern = weak.Upgrade();
+                CHECK_NULL_VOID(pattern);
+                if (closedByGlobalEvent) {
+                    pattern->ResetSelection();
+                }
+            };
+        }
         selectInfo.callerFrameNode = host;
         pattern->CopySelectionMenuParams(selectInfo, responseType);
         pattern->UpdateSelectOverlayOrCreate(selectInfo);
@@ -3663,9 +3677,6 @@ void RichEditorPattern::InsertValueByPaste(const std::string& insertValue)
     RefPtr<UINode> child;
     TextInsertValueInfo info;
     CalcInsertValueObj(info);
-    TAG_LOGD(AceLogTag::ACE_RICH_TEXT,
-        "InsertValueByPaste spanIndex: %{public}d,  offset inspan:  %{public}d, caretPosition: %{public}d",
-        info.GetSpanIndex(), info.GetOffsetInSpan(), caretPosition_);
     TextSpanOptions options;
     options.value = insertValue;
     if (typingStyle_.has_value() && typingTextStyle_.has_value()) {
@@ -4020,7 +4031,7 @@ void RichEditorPattern::InitSelection(const Offset& pos)
         std::swap(currentPosition, nextPosition);
     }
     nextPosition = std::min(nextPosition, GetTextContentLength());
-    bool adjusted = AdjustWordSelection(currentPosition, nextPosition);
+    adjusted_ = AdjustWordSelection(currentPosition, nextPosition);
     textSelector_.Update(currentPosition, nextPosition);
     auto selectedRects = paragraphs_.GetRects(currentPosition, nextPosition);
     if (selectedRects.empty() && !spans_.empty()) {
@@ -4039,7 +4050,7 @@ void RichEditorPattern::InitSelection(const Offset& pos)
         }
     }
 
-    if (adjusted) {
+    if (adjusted_) {
         return;
     }
 
@@ -4434,8 +4445,6 @@ bool RichEditorPattern::MoveCaretToContentRect()
     auto contentRect = GetTextContentRect();
     auto textRect = GetTextRect();
     if (LessOrEqual(textRect.Height(), contentRect.Height())) {
-        TAG_LOGD(AceLogTag::ACE_RICH_TEXT,
-            "MoveCaretToContentRect text height is smaller than content height, no need to move caret");
         return true;
     }
     float caretHeight = 0.0f;
@@ -4536,22 +4545,20 @@ void RichEditorPattern::UpdateChildrenOffset()
 
 void RichEditorPattern::AutoScrollByEdgeDetection(AutoScrollParam param, OffsetF offset, EdgeDetectionStrategy strategy)
 {
-    auto deltaOffset = offset - prevAutoScrollOffset_;
-    auto thresholdDistance = AUTO_SCROLL_MOVE_THRESHOLD.ConvertToPx();
-    if (std::abs(deltaOffset.GetY()) < thresholdDistance) {
+    if (NearEqual(prevAutoScrollOffset_.GetY(), offset.GetY())) {
         return;
     }
     prevAutoScrollOffset_ = offset;
     auto contentRect = GetTextContentRect();
-    float edgeThreshold = param.autoScrollEvent == AutoScrollEvent::DRAG ? AUTO_SCROLL_DRAG_EDGE_DISTANCE.ConvertToPx()
-                                                                         : AUTO_SCROLL_EDGE_DISTANCE.ConvertToPx();
+    auto isDragging = param.autoScrollEvent == AutoScrollEvent::DRAG;
+    float edgeThreshold = isDragging ? AUTO_SCROLL_DRAG_EDGE_DISTANCE.ConvertToPx()
+                                     : AUTO_SCROLL_EDGE_DISTANCE.ConvertToPx();
     if (GreatOrEqual(edgeThreshold, contentRect.Height())) {
         TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "AutoScrollByEdgeDetection: Content height is too small.");
         return;
     }
-    float topEdgeThreshold = edgeThreshold + contentRect.GetY();
-    float bottomThreshold = contentRect.Bottom() - edgeThreshold;
-
+    float topEdgeThreshold = isDragging ? edgeThreshold : edgeThreshold + contentRect.GetY();
+    float bottomThreshold = isDragging ? frameRect_.Bottom() - edgeThreshold : contentRect.Bottom() - edgeThreshold;
     if (param.autoScrollEvent == AutoScrollEvent::HANDLE) {
         auto handleTopOffset = offset;
         auto handleBottomOffset = OffsetF(offset.GetX(), offset.GetY() + param.handleRect.Height());
@@ -4566,34 +4573,55 @@ void RichEditorPattern::AutoScrollByEdgeDetection(AutoScrollParam param, OffsetF
         }
         return;
     }
-
     // drag and mouse
     if (GreatNotEqual(offset.GetY(), bottomThreshold)) {
-        param.offset = bottomThreshold - offset.GetY();
+        param.offset = isDragging ? -CalcDragSpeed(bottomThreshold, frameRect_.Bottom(), offset.GetY())
+                                  : bottomThreshold - offset.GetY();
         ScheduleAutoScroll(param);
     } else if (LessNotEqual(offset.GetY(), topEdgeThreshold)) {
-        param.offset = topEdgeThreshold - offset.GetY();
+        param.offset = isDragging ? CalcDragSpeed(topEdgeThreshold, 0, offset.GetY())
+                                  : topEdgeThreshold - offset.GetY();
         ScheduleAutoScroll(param);
     } else {
         StopAutoScroll();
     }
 }
 
+float RichEditorPattern::CalcDragSpeed(float hotAreaStart, float hotAreaEnd, float point)
+{
+    auto distanceRatio = (point - hotAreaStart) / (hotAreaEnd - hotAreaStart);
+    auto speedFactor = Curves::SHARP->MoveInternal(distanceRatio);
+    return ((MAX_DRAG_SCROLL_SPEED * speedFactor) / TIME_UNIT) * AUTO_SCROLL_INTERVAL;
+}
+
 void RichEditorPattern::ScheduleAutoScroll(AutoScrollParam param)
 {
-    auto context = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(context);
-    if (!context->GetTaskExecutor()) {
+    if (GreatNotEqual(param.offset, 0.0f) && IsReachTop()) {
         return;
     }
-    autoScrollTask_.Reset([weak = WeakClaim(this), param]() {
-        auto client = weak.Upgrade();
-        CHECK_NULL_VOID(client);
-        client->OnAutoScroll(param);
-    });
-
+    if (LessNotEqual(param.offset, 0.0f) && IsReachBottom()) {
+        return;
+    }
+    auto context = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(context);
     auto taskExecutor = context->GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
+    if (param.isFirstRun_) {
+        param.isFirstRun_ = false;
+        currentScrollParam_ = param;
+        if (isAutoScrollRunning_) {
+            return;
+        }
+    }
+    autoScrollTask_.Reset([weak = WeakClaim(this)]() {
+        auto client = weak.Upgrade();
+        CHECK_NULL_VOID(client);
+        client->OnAutoScroll(client->currentScrollParam_);
+        if (client->IsReachTop() || client->IsReachBottom()) {
+            client->StopAutoScroll();
+        }
+    });
+    isAutoScrollRunning_ = true;
     taskExecutor->PostDelayedTask(autoScrollTask_, TaskExecutor::TaskType::UI, AUTO_SCROLL_INTERVAL);
 }
 
@@ -4647,6 +4675,7 @@ void RichEditorPattern::OnAutoScroll(AutoScrollParam param)
 
 void RichEditorPattern::StopAutoScroll()
 {
+    isAutoScrollRunning_ = false;
     autoScrollTask_.Cancel();
     prevAutoScrollOffset_ = OffsetF(0.0f, 0.0f);
     auto scrollBar = GetScrollBar();

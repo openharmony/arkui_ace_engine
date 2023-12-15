@@ -236,6 +236,10 @@ public:
 
     virtual void DumpHeapSnapshot(bool isPrivate) {}
 
+    virtual void DestroyHeapProfiler() {}
+
+    virtual void ForceFullGC() {}
+
     virtual void RebuildAllPages() {}
 
     virtual void SetColorMode(ColorMode colorMode) {}

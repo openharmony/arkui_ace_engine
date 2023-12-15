@@ -17,9 +17,9 @@
 #include "frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 
 namespace OHOS::Ace::NG {
-constexpr int CALL_ARG_0 = 0;
-constexpr int CALL_ARG_1 = 1;
-constexpr int CALL_ARG_2 = 2;
+constexpr int32_t CALL_ARG_0 = 0;
+constexpr int32_t CALL_ARG_1 = 1;
+constexpr int32_t CALL_ARG_2 = 2;
 
 ArkUINativeModuleValue GridBridge::SetColumnsTemplate(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
@@ -80,7 +80,7 @@ ArkUINativeModuleValue GridBridge::SetColumnsGap(ArkUIRuntimeCallInfo* runtimeCa
     Local<JSValueRef> node = runtimeCallInfo->GetCallArgRef(CALL_ARG_0);
     Local<JSValueRef> arg_size = runtimeCallInfo->GetCallArgRef(CALL_ARG_1);
     void* nativeNode = node->ToNativePointer(vm)->Value();
-    
+
     CalcDimension size;
     std::string calcStr;
     struct ArkUIResourceLength columnGap = { 0.0, 0, nullptr };
@@ -119,7 +119,7 @@ ArkUINativeModuleValue GridBridge::SetRowsGap(ArkUIRuntimeCallInfo* runtimeCallI
     Local<JSValueRef> node = runtimeCallInfo->GetCallArgRef(CALL_ARG_0);
     Local<JSValueRef> arg_size = runtimeCallInfo->GetCallArgRef(CALL_ARG_1);
     void* nativeNode = node->ToNativePointer(vm)->Value();
-    
+
     CalcDimension size;
     std::string calcStr;
     struct ArkUIResourceLength rowsGap = { 0.0, 0, nullptr };
@@ -193,7 +193,10 @@ ArkUINativeModuleValue GridBridge::SetScrollBarWidth(ArkUIRuntimeCallInfo* runti
         } else if (arg_width->IsString()) {
             width = StringUtils::StringToDimension(arg_width->ToString(vm)->ToString(), true);
         }
-        GetArkUIInternalNodeAPI()->GetGridModifier().SetGridScrollBarWidth(nativeNode, width);
+        ArkUIDimensionType widthType;
+        widthType.value = width.Value();
+        widthType.units = static_cast<int32_t>(width.Unit());
+        GetArkUIInternalNodeAPI()->GetGridModifier().SetGridScrollBarWidth(nativeNode, &widthType);
     }
     return panda::JSValueRef::Undefined(vm);
 }

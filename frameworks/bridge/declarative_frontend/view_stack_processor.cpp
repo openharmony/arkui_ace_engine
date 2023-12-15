@@ -488,7 +488,6 @@ void ViewStackProcessor::Pop()
             singleChild->SetChild(component);
         }
     }
-    LOGD("ViewStackProcessor Pop size %{public}zu", componentsStack_.size());
 }
 
 RefPtr<Component> ViewStackProcessor::GetNewComponent()
@@ -539,19 +538,11 @@ void ViewStackProcessor::PopContainer()
 #ifdef ACE_DEBUG_LOG
 void ViewStackProcessor::DumpStack()
 {
-    LOGD("| stack size: \033[0;33m %{public}d \033[0m", (int)componentsStack_.size());
     if (componentsStack_.empty()) {
         return;
     }
-    LOGD("| stack top size: \033[0;33m %{public}d \033[0m", (int)componentsStack_.top().size());
     std::stack<std::unordered_map<std::string, RefPtr<Component>>> tmp;
-    int count = 0;
     while (!componentsStack_.empty()) {
-        LOGD("| stack level: \033[0;33m %{public}d \033[0m", count++);
-        auto& wrappingComponentsMap = componentsStack_.top();
-        for (const auto& j : wrappingComponentsMap) {
-            LOGD("|\033[0;36m %{public}s - %{public}s \033[0m", j.first.c_str(), AceType::TypeName(j.second));
-        }
         tmp.push(componentsStack_.top());
         componentsStack_.pop();
     }
@@ -731,15 +722,6 @@ std::pair<RefPtr<Component>, RefPtr<Component>> ViewStackProcessor::WrapComponen
     for (auto&& component : components) {
         component->SetDisabledStatus(mainComponent->IsDisabledStatus());
     }
-
-#ifdef ACE_DEBUG_LOG
-    LOGD("Unwrap result: components size %{public}d (outmost child first, inner most Component last)",
-        static_cast<int32_t>(components.size()));
-    for (int32_t idx = static_cast<int32_t>(components.size()) - 1; idx >= 0; idx--) {
-        LOGD("   %{public}s elmtId: %{public}u", AceType::TypeName(components[idx]), components[idx]->GetElementId());
-    }
-#endif
-
     return std::pair<RefPtr<Component>, RefPtr<Component>>(components[0], components[components.size() - 1]);
 }
 
@@ -781,12 +763,6 @@ std::pair<RefPtr<Component>, RefPtr<Component>> ViewStackProcessor::FinishReturn
         SetZIndex(component);
     }
     componentsStack_.pop();
-
-    LOGD("Done with processing on ViewStackProcessor, returning main Component %{public}s elmtId %{public}d, "
-        "outmost wrapping %{public}s. Remaining stack size %{public}d (should be zero).",
-        AceType::TypeName(componentsPair.second), componentsPair.second->GetElementId(),
-        AceType::TypeName(componentsPair.first), static_cast<int32_t>(componentsStack_.size()));
-
     return componentsPair;
 }
 
@@ -924,7 +900,6 @@ void ViewStackProcessor::SetIsPercentSize(RefPtr<Component>& component)
 
 void ViewStackProcessor::ClaimElementId(const RefPtr<Component>& component)
 {
-    LOGD("Assigning elmtId %{public}u to new %{public}s .", reservedElementId_, AceType::TypeName(component));
     component->AssignUniqueElementId(reservedElementId_);
     reservedElementId_ = ElementRegister::UndefinedElementId;
 }

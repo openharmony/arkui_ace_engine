@@ -15,9 +15,14 @@
 
 #include "core/components_ng/pattern/window_scene/helper/window_scene_helper.h"
 
+#include "key_event.h"
+#include "pointer_event.h"
+
+#include "adapter/ohos/entrance/ace_view_ohos.h"
 #include "core/common/container.h"
 #include "core/components_ng/pattern/window_scene/scene/system_window_scene.h"
 #include "core/components_v2/inspector/inspector_constants.h"
+#include "core/pipeline_ng/pipeline_context.h"
 #include "session/host/include/session.h"
 
 #if not defined(ACE_UNITTEST)
@@ -160,5 +165,63 @@ void WindowSceneHelper::IsCloseKeyboard(RefPtr<FrameNode> frameNode)
         }
     }
 #endif
+}
+
+void WindowSceneHelper::InjectPointerEvent(const std::string& targetNodeName,
+    const std::shared_ptr<OHOS::MMI::PointerEvent>& pointerEvent)
+{
+    CHECK_NULL_VOID(pointerEvent);
+    if (targetNodeName == "") {
+        return;
+    }
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+
+    auto rootNode = pipelineContext->GetRootElement();
+    CHECK_NULL_VOID(rootNode);
+    auto targetNode = FrameNode::FindChildByName(rootNode, targetNodeName);
+    if (!targetNode && pointerEvent->GetPointerAction() != MMI::PointerEvent::POINTER_ACTION_MOVE) {
+        TAG_LOGW(AceLogTag::ACE_INPUTTRACKING,
+            "PointerEvent Process to inject, targetNode is null. targetNodeName:%{public}s",
+            targetNodeName.c_str());
+    }
+    InjectPointerEvent(targetNode, pointerEvent);
+}
+
+void WindowSceneHelper::InjectPointerEvent(RefPtr<FrameNode> node,
+    const std::shared_ptr<OHOS::MMI::PointerEvent>& pointerEvent)
+{
+    CHECK_NULL_VOID(node);
+    CHECK_NULL_VOID(pointerEvent);
+
+    auto container = Container::Current();
+    CHECK_NULL_VOID(container);
+    if (pointerEvent->GetPointerAction() != MMI::PointerEvent::POINTER_ACTION_MOVE) {
+        TAG_LOGI(AceLogTag::ACE_INPUTTRACKING,
+            "PointerEvent Process to inject, eventInfo: id:%{public}d, "
+            "WindowId = %{public}d, ViewWidth = %{public}d, ViewHeight = %{public}d, "
+            "ViewPosX = %{public}d, ViewPosY = %{public}d",
+            pointerEvent->GetId(), container->GetWindowId(), container->GetViewWidth(),
+            container->GetViewHeight(), container->GetViewPosX(), container->GetViewPosY());
+    }
+    auto aceView = static_cast<OHOS::Ace::Platform::AceViewOhos*>(container->GetView());
+    CHECK_NULL_VOID(aceView);
+    OHOS::Ace::Platform::AceViewOhos::DispatchTouchEvent(aceView, pointerEvent, node);
+}
+
+void WindowSceneHelper::InjectKeyEvent(const std::shared_ptr<OHOS::MMI::KeyEvent>& keyEvent)
+{
+    CHECK_NULL_VOID(keyEvent);
+    TAG_LOGI(AceLogTag::ACE_INPUTTRACKING,
+        "KeyEvent Process to inject, eventInfo: id:%{public}d, "
+        "keyEvent info: keyCode is %{public}d, "
+        "keyAction is %{public}d, keyActionTime is %{public}" PRId64,
+        keyEvent->GetId(), keyEvent->GetKeyCode(), keyEvent->GetKeyAction(), keyEvent->GetActionTime());
+
+    auto container = Container::Current();
+    CHECK_NULL_VOID(container);
+    auto aceView = static_cast<OHOS::Ace::Platform::AceViewOhos*>(container->GetView());
+    CHECK_NULL_VOID(aceView);
+    OHOS::Ace::Platform::AceViewOhos::DispatchKeyEvent(aceView, keyEvent);
 }
 } // namespace OHOS::Ace::NG

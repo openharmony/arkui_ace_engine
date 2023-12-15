@@ -24,7 +24,6 @@ namespace OHOS::Ace {
 
 Edge EdgeCreator::CreateFromJson(const JsonValue& json)
 {
-    LOGD("CreateFromJson Edge");
     std::string classType = json.GetValue(CLASS_NAME)->GetString();
     if (classType != EDGE_NAME) {
         LOGE("Create Edge err: not an edge json.");

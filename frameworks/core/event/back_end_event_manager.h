@@ -58,8 +58,6 @@ public:
 
     void BindBackendEvent(const EventMarker& marker, const std::function<void(Args...)>& event)
     {
-        LOGD("the bind event id is %{public}s", marker.GetData().eventId.c_str());
-
         bool isSuccess = false;
         {
             std::lock_guard<std::mutex> lock(mutex_);
@@ -73,7 +71,6 @@ public:
 
     void FireBackEndEvent(const EventMarker& marker, Args&&... args)
     {
-        LOGD("the Fire event id is %{public}s", marker.GetData().eventId.c_str());
         std::function<void(Args...)> func;
         {
             std::lock_guard<std::mutex> lock(mutex_);

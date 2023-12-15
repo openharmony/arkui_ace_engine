@@ -37,6 +37,7 @@ public:
     ~SelectOverlayLayoutAlgorithm() override = default;
 
     void Layout(LayoutWrapper* layoutWrapper) override;
+    void Measure(LayoutWrapper* layoutWrapper) override;
 
     static bool CheckInShowArea(const SelectOverlayInfo& info);
 
@@ -63,9 +64,11 @@ public:
 private:
     OffsetF ComputeSelectMenuPosition(LayoutWrapper* layoutWrapper);
     OffsetF ComputeExtensionMenuPosition(LayoutWrapper* layoutWrapper, const OffsetF& offset);
-    bool IsTextAreaSelectAll();
     OffsetF AdjustSelectMenuOffset(
         LayoutWrapper* layoutWrapper, const RectF& menuRect, double spaceBetweenText, double spaceBetweenHandle);
+    OffsetF CalculateCustomMenuByMouseOffset(LayoutWrapper* layoutWrapper);
+    void CalculateCustomMenuLayoutConstraint(LayoutWrapper* layoutWrapper, LayoutConstraintF& layoutConstraint);
+    bool IsTextAreaSelectAll();
 
     std::shared_ptr<SelectOverlayInfo> info_;
 

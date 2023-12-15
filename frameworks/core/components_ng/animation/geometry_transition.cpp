@@ -85,7 +85,7 @@ RectF GeometryTransition::GetNodeAbsFrameRect(const RefPtr<FrameNode>& node, std
     CHECK_NULL_RETURN(node, RectF());
     auto renderContext = node->GetRenderContext();
     CHECK_NULL_RETURN(renderContext, RectF());
-    auto parentGlobalOffset = parentPos.value_or(node->GetPaintRectGlobalOffsetWithTranslate(true));
+    auto parentGlobalOffset = parentPos.value_or(node->GetPaintRectGlobalOffsetWithTranslate(true).first);
     auto paintRect = renderContext->GetPaintRectWithTransform();
     return RectF(parentGlobalOffset + paintRect.GetOffset(), paintRect.GetSize());
 }
@@ -94,7 +94,9 @@ void GeometryTransition::RecordOutNodeFrame()
 {
     auto outNode = outNode_.Upgrade();
     CHECK_NULL_VOID(outNode);
-    outNodeParentPos_ = outNode->GetPaintRectGlobalOffsetWithTranslate(true);
+    auto [val, err] = outNode->GetPaintRectGlobalOffsetWithTranslate(true);
+    outNodeParentPos_ = val;
+    outNodeParentHasScales_ = err;
     auto outNodeAbsRect = GetNodeAbsFrameRect(outNode_.Upgrade(), outNodeParentPos_);
     outNodePos_ = outNodeAbsRect.GetOffset();
     outNodeSize_ = outNodeAbsRect.GetSize();
@@ -115,6 +117,7 @@ void GeometryTransition::Build(const WeakPtr<FrameNode>& frameNode, bool isNodeI
 {
     state_ = State::IDLE;
     outNodeTargetAbsRect_ = std::nullopt;
+    isSynced_ = false;
     if (IsInAndOutEmpty()) {
         hasInAnim_ = false;
         hasOutAnim_ = false;
@@ -122,8 +125,9 @@ void GeometryTransition::Build(const WeakPtr<FrameNode>& frameNode, bool isNodeI
     auto node = frameNode.Upgrade();
     CHECK_NULL_VOID(node && node->GetRenderContext() && !id_.empty());
     std::string id = node->GetInspectorId().value_or("");
-    LOGI("GeometryTransition: build node: %{public}d, direction: %{public}d, onTree: %{public}d, removing: %{public}d"
-        ", compid: %{public}s .", node->GetId(), isNodeIn, node->IsOnMainTree(), node->IsRemoving(), id.c_str());
+    TAG_LOGI(AceLogTag::ACE_GEOMETRY_TRANSITION, "build node: %{public}d, direction: %{public}d, onTree: %{public}d, "
+        "removing: %{public}d, compid: %{public}s .", node->GetId(), isNodeIn, node->IsOnMainTree(),
+        node->IsRemoving(), id.c_str());
     if (!isNodeIn && (frameNode == inNode_ || frameNode == outNode_)) {
         SwapInAndOut(frameNode == inNode_);
         RecordOutNodeFrame();
@@ -150,7 +154,7 @@ void GeometryTransition::Build(const WeakPtr<FrameNode>& frameNode, bool isNodeI
         if (!hasInAnim_) {
             follow = OnFollowWithoutTransition(false);
         }
-        hasOutAnim_ = (!isImplicitAnimationOpen && !follow) ? false : true;
+        hasOutAnim_ = isImplicitAnimationOpen || follow;
         if (hasOutAnim_) {
             MarkLayoutDirty(outNode, -1);
         }
@@ -167,7 +171,7 @@ void GeometryTransition::Build(const WeakPtr<FrameNode>& frameNode, bool isNodeI
         }
     }
 
-    LOGI("GeometryTransition: inAnim: %{public}d, outAnim: %{public}d, follow: %{public}d, "
+    TAG_LOGI(AceLogTag::ACE_GEOMETRY_TRANSITION, "inAnim: %{public}d, outAnim: %{public}d, follow: %{public}d, "
         "inNode: %{public}d, %{public}s, outNode: %{public}d, %{public}s", hasInAnim_, hasOutAnim_, follow,
         inNode->GetId(), inNode->GetTag().c_str(), outNode->GetId(), outNode->GetTag().c_str());
 }
@@ -192,7 +196,6 @@ bool GeometryTransition::Update(const WeakPtr<FrameNode>& which, const WeakPtr<F
     str += which.Upgrade() ? std::to_string(which.Upgrade()->GetId()) : "null";
     str += ", new value: ";
     str += value.Upgrade() ? std::to_string(value.Upgrade()->GetId()) : "null";
-    LOGD("GeometryTransition: %{public}s", str.c_str());
     return ret;
 }
 
@@ -224,7 +227,6 @@ void GeometryTransition::DidLayout(const RefPtr<LayoutWrapper>& layoutWrapper)
     std::optional<bool> direction = std::nullopt;
 
     if (isRoot && IsNodeInAndActive(node)) {
-        LOGD("GeometryTransition: node: %{public}d in and active", node->GetId());
         state_ = State::IDENTITY;
         auto geometryNode = node->GetGeometryNode();
         CHECK_NULL_VOID(geometryNode);
@@ -233,13 +235,13 @@ void GeometryTransition::DidLayout(const RefPtr<LayoutWrapper>& layoutWrapper)
         node->SetLayoutProperty(layoutPropertyIn_);
         layoutPropertyIn_.Reset();
     } else if (IsNodeInAndIdentity(node)) {
-        LOGD("GeometryTransition: node: %{public}d in and identity", node->GetId());
         state_ = State::IDLE;
         node->SetLayoutPriority(0);
         direction = true;
         hasInAnim_ = false;
     } else if (isRoot && IsNodeOutAndActive(node)) {
-        LOGD("GeometryTransition: node: %{public}d out and active", node->GetId());
+        TAG_LOGI(AceLogTag::ACE_GEOMETRY_TRANSITION, "node: %{public}d out and active, dependency check: %{public}d",
+            node->GetId(), !hasInAnim_);
         hasOutAnim_ = false;
         CHECK_NULL_VOID(!hasInAnim_);
         direction = false;
@@ -284,14 +286,13 @@ void GeometryTransition::ModifyLayoutConstraint(const RefPtr<LayoutWrapper>& lay
     } else {
         staticNodeAbsRect_ =
             !staticNodeAbsRect_ ? std::nullopt : std::optional<RectF>(target->GetTransformRectRelativeToWindow());
-        size = !staticNodeAbsRect_ ? targetGeometryNode->GetFrameSize() : staticNodeAbsRect_->GetSize();
+        size = staticNodeAbsRect_ ? staticNodeAbsRect_->GetSize() :
+            (inNodeAbsRect_ ? inNodeAbsRect_->GetSize() : targetGeometryNode->GetFrameSize());
     }
     auto targetSize = CalcSize(NG::CalcLength(size.Width()), NG::CalcLength(size.Height()));
     auto layoutProperty = layoutWrapper->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);
     layoutProperty->UpdateUserDefinedIdealSize(targetSize);
-    LOGD("GeometryTransition: node: %{public}d modify size to: %{public}s",
-        self->GetId(), targetSize.ToString().c_str());
     // if node has aspect ratio we'll ignore it in active state
     const auto& magicItemProperty = layoutProperty->GetMagicItemProperty();
     if (magicItemProperty && magicItemProperty->HasAspectRatio()) {
@@ -306,13 +307,14 @@ void GeometryTransition::SyncGeometry(bool isNodeIn)
     auto renderContext = self->GetRenderContext();
     auto targetRenderContext = target->GetRenderContext();
     auto geometryNode = self->GetGeometryNode();
-    CHECK_NULL_VOID(renderContext && targetRenderContext && geometryNode);
-
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(renderContext && targetRenderContext && geometryNode && pipeline);
+    auto taskExecutor = pipeline->GetTaskExecutor();
     // get own parent's global position, parent's transform is not taken into account other than translate
-    auto parentPos = self->IsRemoving() ? outNodeParentPos_ : self->GetPaintRectGlobalOffsetWithTranslate(true);
+    auto parentPos = self->IsRemoving() ? outNodeParentPos_ : self->GetPaintRectGlobalOffsetWithTranslate(true).first;
     // get target's global position, target own transform is taken into account
     auto targetRect = target->IsRemoving() ? RectF(outNodePos_, outNodeSize_) :
-                                             staticNodeAbsRect_.value_or(GetNodeAbsFrameRect(target));
+        staticNodeAbsRect_.value_or(inNodeAbsRect_.value_or(GetNodeAbsFrameRect(target)));
     auto targetPos = targetRect.GetOffset();
     // adjust self's position to match with target's position, here we only need to adjust node self,
     // its children's positions are still determined by layout process.
@@ -320,7 +322,6 @@ void GeometryTransition::SyncGeometry(bool isNodeIn)
                                       RectF(targetPos - parentPos, geometryNode->GetFrameSize());
     auto activeCornerRadius = targetRenderContext->GetBorderRadius().value_or(BorderRadiusProperty());
     auto cornerRadius = renderContext->GetBorderRadius().value_or(BorderRadiusProperty());
-
     if (isNodeIn) {
         renderContext->SetFrameWithoutAnimation(activeFrameRect);
         if (target->IsRemoving()) {
@@ -328,39 +329,57 @@ void GeometryTransition::SyncGeometry(bool isNodeIn)
         }
     } else {
         outNodeTargetAbsRect_ = targetRect;
-    }
-    AnimationUtils::AnimateWithCurrentOptions(
-        [&]() {
-            // sync geometry in active state
-            renderContext->SetBorderRadius(activeCornerRadius);
-            renderContext->SyncGeometryProperties(activeFrameRect);
-            // sync geometry in identity state for inNode
-            if (isNodeIn) {
-                renderContext->SetBorderRadius(cornerRadius);
-                renderContext->SyncGeometryProperties(RawPtr(geometryNode));
-            }
-            // draw self and children in sandbox which will not be affected by parent's transition
-            renderContext->SetSandBox(parentPos);
-        },
-        [id = Container::CurrentId(), nodeWeak = WeakClaim(RawPtr(self))]() {
-            ContainerScope scope(id);
-            auto context = PipelineBase::GetCurrentContext();
-            CHECK_NULL_VOID(context);
-            auto taskExecutor = context->GetTaskExecutor();
-            CHECK_NULL_VOID(taskExecutor);
+        if (staticNodeAbsRect_ && targetRenderContext->HasSandBox()) {
+            staticNodeAbsRect_ = std::nullopt;
+            targetRenderContext->RegisterSharedTransition(renderContext);
+        }
+        if (taskExecutor) {
             taskExecutor->PostTask(
-                [id, nodeWeak]() {
-                    ContainerScope scope(id);
-                    auto node = nodeWeak.Upgrade();
-                    CHECK_NULL_VOID(node);
-                    auto renderContext = node->GetRenderContext();
-                    CHECK_NULL_VOID(renderContext);
-                    renderContext->SetSandBox(std::nullopt);
-                    LOGI("GeometryTransition: node %{public}d animation completed", node->GetId());
+                [weakGT = WeakClaim(this)]() {
+                    auto geometryTransition = weakGT.Upgrade();
+                    CHECK_NULL_VOID(geometryTransition);
+                    geometryTransition->isSynced_ = true;
                 }, TaskExecutor::TaskType::UI);
-        }, false);
+        }
+    }
+    auto propertyCallback = [&]() {
+        // sync geometry in active state
+        renderContext->SetBorderRadius(activeCornerRadius);
+        renderContext->SyncGeometryProperties(activeFrameRect);
+        // sync geometry in identity state for inNode
+        if (isNodeIn) {
+            renderContext->SetBorderRadius(cornerRadius);
+            renderContext->SyncGeometryProperties(RawPtr(geometryNode));
+        }
+        CHECK_NULL_VOID(isNodeIn || !outNodeParentHasScales_);
+        // draw self and children in sandbox which will not be affected by parent's transition
+        renderContext->SetSandBox(parentPos);
+    };
+    auto finishCallback = [id = Container::CurrentId(), nodeWeak = WeakClaim(RawPtr(self)),
+        executorWeak = WeakClaim(RawPtr(taskExecutor))]() {
+        ContainerScope scope(id);
+        auto taskExecutor = executorWeak.Upgrade();
+        CHECK_NULL_VOID(taskExecutor);
+        taskExecutor->PostTask(
+            [id, nodeWeak]() {
+                ContainerScope scope(id);
+                auto node = nodeWeak.Upgrade();
+                CHECK_NULL_VOID(node);
+                auto renderContext = node->GetRenderContext();
+                CHECK_NULL_VOID(renderContext);
+                renderContext->SetSandBox(std::nullopt);
+                TAG_LOGI(AceLogTag::ACE_GEOMETRY_TRANSITION, "node %{public}d animation completed", node->GetId());
+            }, TaskExecutor::TaskType::UI);
+    };
+    if (!isNodeIn && inNodeAbsRect_) {
+        AnimationUtils::Animate(animationOption_, propertyCallback, finishCallback);
+        inNodeAbsRect_ = std::nullopt;
+        animationOption_ = AnimationOption();
+    } else {
+        AnimationUtils::AnimateWithCurrentOptions(propertyCallback, finishCallback, false);
+    }
 
-    LOGI("GeometryTransition: node: %{public}d, parent: %{public}s, target: %{public}s, "
+    TAG_LOGI(AceLogTag::ACE_GEOMETRY_TRANSITION, "node: %{public}d, parent: %{public}s, target: %{public}s, "
         "active frame: %{public}s, identity frame: %{public}s",
         self->GetId(), parentPos.ToString().c_str(), targetPos.ToString().c_str(),
         activeFrameRect.ToString().c_str(), isNodeIn ? geometryNode->GetFrameRect().ToString().c_str() : "no log");
@@ -396,7 +415,8 @@ bool GeometryTransition::OnFollowWithoutTransition(std::optional<bool> direction
         parent->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
         inRenderContext->UnregisterSharedTransition(outRenderContext);
         hasOutAnim_ = false;
-        LOGI("GeometryTransition: follow cancelled, node %{public}d to %{public}d", holder_->GetId(), outNode->GetId());
+        TAG_LOGI(AceLogTag::ACE_GEOMETRY_TRANSITION, "follow cancelled, node %{public}d to %{public}d",
+            holder_->GetId(), outNode->GetId());
         holder_ = nullptr;
         return false;
     }
@@ -413,7 +433,8 @@ bool GeometryTransition::OnFollowWithoutTransition(std::optional<bool> direction
         parent->AddDisappearingChild(outNode, idx);
         MarkLayoutDirty(outNode, -1);
         hasOutAnim_ = true;
-        LOGI("GeometryTransition: follow started, node %{public}d to %{public}d", outNode->GetId(), holder_->GetId());
+        TAG_LOGI(AceLogTag::ACE_GEOMETRY_TRANSITION, "follow started, node %{public}d to %{public}d",
+            outNode->GetId(), holder_->GetId());
     } else {
         auto inNode = inNode_.Upgrade();
         CHECK_NULL_RETURN(inNode && inNode->GetGeometryNode() && holder_, false);
@@ -425,7 +446,8 @@ bool GeometryTransition::OnFollowWithoutTransition(std::optional<bool> direction
         inNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         inNode->GetGeometryNode()->SetFrameSize(SizeF());
         hasInAnim_ = false;
-        LOGI("GeometryTransition: follow ended, node %{public}d to %{public}d", holder_->GetId(), inNode->GetId());
+        TAG_LOGI(AceLogTag::ACE_GEOMETRY_TRANSITION, "follow ended, node %{public}d to %{public}d",
+            holder_->GetId(), inNode->GetId());
         holder_ = nullptr;
     }
     return true;
@@ -468,44 +490,54 @@ void GeometryTransition::OnReSync(const WeakPtr<FrameNode>& trigger, const Anima
 {
     auto inNode = inNode_.Upgrade();
     auto outNode = outNode_.Upgrade();
-    CHECK_NULL_VOID(!staticNodeAbsRect_ && inNode && inNode->IsOnMainTree() &&
-        outNode && outNode->IsRemoving() && outNodeTargetAbsRect_ && outNodeTargetAbsRect_->IsValid());
+    CHECK_NULL_VOID(isSynced_ && outNode && outNode->IsRemoving() && outNodeTargetAbsRect_ &&
+        outNodeTargetAbsRect_->IsValid() && inNode && inNode->IsOnMainTree());
     auto inRenderContext = inNode->GetRenderContext();
     auto outRenderContext = outNode->GetRenderContext();
-    CHECK_NULL_VOID(inRenderContext && outRenderContext && inRenderContext->IsSynced() &&
-        (holder_ || inRenderContext->HasSandBox()));
+    CHECK_NULL_VOID(inRenderContext && outRenderContext);
     if (trigger.Upgrade()) {
         RecordAnimationOption(trigger, option);
         return;
     }
-    auto inNodeParentPos = inNode->GetPaintRectGlobalOffsetWithTranslate(true);
-    auto inNodeAbsRect = GetNodeAbsFrameRect(inNode, inNodeParentPos);
+    OffsetF inNodeParentPos;
+    bool inNodeParentHasScales = false;
+    if (!staticNodeAbsRect_) {
+        auto [val, err] = inNode->GetPaintRectGlobalOffsetWithTranslate(true);
+        inNodeParentPos = val;
+        inNodeParentHasScales = err;
+    }
+    auto inNodeAbsRect = staticNodeAbsRect_ || inNodeParentHasScales ?
+        inNode->GetTransformRectRelativeToWindow() : GetNodeAbsFrameRect(inNode, inNodeParentPos);
     auto inNodeAbsRectOld = outNodeTargetAbsRect_.value();
     bool sizeChanged = GreatNotEqual(std::fabs(inNodeAbsRect.Width() - inNodeAbsRectOld.Width()), 1.0f) ||
         GreatNotEqual(std::fabs(inNodeAbsRect.Height() - inNodeAbsRectOld.Height()), 1.0f);
     bool posChanged = GreatNotEqual(std::fabs(inNodeAbsRect.GetX() - inNodeAbsRectOld.GetX()), 1.0f) ||
         GreatNotEqual(std::fabs(inNodeAbsRect.GetY() - inNodeAbsRectOld.GetY()), 1.0f);
     CHECK_NULL_VOID(sizeChanged || posChanged);
-    static constexpr int32_t defaultDuration = 1;
-    auto animOption = animationOption_.IsValid() ? animationOption_ : AnimationOption(Curves::LINEAR, defaultDuration);
-    AnimationUtils::Animate(animOption,
-        [&]() {
+    auto animOption = animationOption_.IsValid() ? animationOption_ : AnimationOption(Curves::LINEAR, RESYNC_DURATION);
+    AnimationUtils::Animate(animOption, [&]() {
+        if (inRenderContext->HasSandBox()) {
+            auto parent = inNode->GetAncestorNodeOfFrame();
+            inNodeParentPos = inNodeParentHasScales && parent ?
+                parent->GetTransformRectRelativeToWindow().GetOffset() : inNodeParentPos;
             inRenderContext->SetSandBox(inNodeParentPos, true);
-            if (!sizeChanged) {
-                auto activeFrameRect = RectF(inNodeAbsRect.GetOffset() - outNodeParentPos_, inNodeAbsRect.GetSize());
-                outRenderContext->SyncGeometryProperties(activeFrameRect);
-                outNodeTargetAbsRect_ = inNodeAbsRect;
-            } else {
-                hasOutAnim_ = true;
-                outNodeTargetAbsRect_.reset();
-                MarkLayoutDirty(outNode);
-            }
-        },
-        nullptr);
-    LOGI("GeometryTransition: outNode: %{public}d %{public}s resyncs to inNode: %{public}d %{public}s, "
-        "outAnim: %{public}d, option: %{public}d", outNode->GetId(), inNodeAbsRectOld.ToString().c_str(),
-        inNode->GetId(), inNodeAbsRect.ToString().c_str(), hasOutAnim_, animationOption_.IsValid());
-    animationOption_ = AnimationOption();
+        }
+        if (!sizeChanged) {
+            auto activeFrameRect = RectF(inNodeAbsRect.GetOffset() - outNodeParentPos_, inNodeAbsRect.GetSize());
+            outRenderContext->SyncGeometryProperties(activeFrameRect);
+            outNodeTargetAbsRect_ = inNodeAbsRect;
+            animationOption_ = AnimationOption();
+        } else {
+            hasOutAnim_ = true;
+            inNodeAbsRect_ = inNodeAbsRect;
+            outNodeTargetAbsRect_.reset();
+            MarkLayoutDirty(outNode);
+            animationOption_ = animOption;
+        }
+    }, nullptr);
+    TAG_LOGI(AceLogTag::ACE_GEOMETRY_TRANSITION, "outNode: %{public}d %{public}s resyncs to inNode: %{public}d "
+        "%{public}s, option: %{public}d, hasScales: %{public}d", outNode->GetId(), inNodeAbsRectOld.ToString().c_str(),
+        inNode->GetId(), inNodeAbsRect.ToString().c_str(), animOption.GetDuration(), inNodeParentHasScales);
 }
 
 // if nodes with geometry transitions are added during layout, we need to execute additional layout in current frame
@@ -520,8 +552,6 @@ bool GeometryTransition::OnAdditionalLayout(const WeakPtr<FrameNode>& frameNode)
             MarkLayoutDirty(node);
             MarkLayoutDirty(parentNode);
             ret = true;
-            LOGD("GeometryTransition: node: %{public}d, parent node: %{public}d is marked dirty",
-                node->GetId(), parentNode->GetId());
         }
     } else if (IsNodeOutAndActive(frameNode)) {
         MarkLayoutDirty(node);

@@ -16,6 +16,7 @@
 const pasteboard = requireNapi("pasteboard");
 const hilog = requireNapi("hilog");
 
+const WITHOUT_BUILDER = -2;
 const defaultTheme = {
     imageSize: 24,
     buttonSize: 48,
@@ -129,6 +130,8 @@ class SelectionMenuComponent extends ViewPU {
         this.__cutAndCopyEnable = new ObservedPropertySimplePU(!1, this, "cutAndCopyEnable");
         this.__pasteEnable = new ObservedPropertySimplePU(!1, this, "pasteEnable");
         this.__visibilityValue = new ObservedPropertySimplePU(Visibility.Visible, this, "visibilityValue");
+        this.__customMenuSize = new ObservedPropertySimplePU("100%", this, "customMenuSize");
+        this.customMenuHeight = this.theme.menuSpacing;
         this.fontWeightTable = ["100", "200", "300", "400", "500", "600", "700", "800", "900", "bold", "normal", "bolder", "lighter", "medium", "regular"];
         this.setInitiallyProvidedValue(t)
     }
@@ -149,6 +152,8 @@ class SelectionMenuComponent extends ViewPU {
         void 0 !== e.cutAndCopyEnable && (this.cutAndCopyEnable = e.cutAndCopyEnable);
         void 0 !== e.pasteEnable && (this.pasteEnable = e.pasteEnable);
         void 0 !== e.visibilityValue && (this.visibilityValue = e.visibilityValue);
+        void 0 !== e.customMenuSize && (this.customMenuSize = e.customMenuSize);
+        void 0 !== e.customMenuHeight && (this.customMenuHeight = e.customMenuHeight);
         void 0 !== e.fontWeightTable && (this.fontWeightTable = e.fontWeightTable)
     }
 
@@ -161,7 +166,8 @@ class SelectionMenuComponent extends ViewPU {
         this.__customerChange.purgeDependencyOnElmtId(e);
         this.__cutAndCopyEnable.purgeDependencyOnElmtId(e);
         this.__pasteEnable.purgeDependencyOnElmtId(e);
-        this.__visibilityValue.purgeDependencyOnElmtId(e)
+        this.__visibilityValue.purgeDependencyOnElmtId(e);
+        this.__customMenuSize.purgeDependencyOnElmtId(e)
     }
 
     aboutToBeDeleted() {
@@ -171,6 +177,7 @@ class SelectionMenuComponent extends ViewPU {
         this.__cutAndCopyEnable.aboutToBeDeleted();
         this.__pasteEnable.aboutToBeDeleted();
         this.__visibilityValue.aboutToBeDeleted();
+        this.__customMenuSize.aboutToBeDeleted();
         SubscriberManager.Get().delete(this.id__());
         this.aboutToBeDeletedInternal()
     }
@@ -226,6 +233,14 @@ class SelectionMenuComponent extends ViewPU {
         this.__visibilityValue.set(e)
     }
 
+    get customMenuSize() {
+        return this.__customMenuSize.get()
+    }
+
+    set customMenuSize(e) {
+        this.__customMenuSize.set(e)
+    }
+
     aboutToAppear() {
         if (this.controller) {
             let e = this.controller.getSelection();
@@ -243,7 +258,9 @@ class SelectionMenuComponent extends ViewPU {
 
     initialRender() {
         this.observeComponentCreation2(((e, t) => {
-            Column.create()
+            Column.create();
+            Column.flexShrink(1);
+            Column.height(this.customMenuSize)
         }), Column);
         this.observeComponentCreation2(((e, t) => {
             If.create();
@@ -253,7 +270,21 @@ class SelectionMenuComponent extends ViewPU {
             }))
         }), If);
         If.pop();
+        this.observeComponentCreation2(((e, t) => {
+            Scroll.create();
+            Scroll.backgroundColor(this.theme.backGroundColor);
+            Scroll.flexShrink(1);
+            Scroll.shadow(this.theme.iconPanelShadowStyle);
+            Scroll.borderRadius(this.theme.containerBorderRadius);
+            Scroll.onAreaChange(((e, t) => {
+                let o = t.height;
+                let n = e.height;
+                this.customMenuHeight += o - n;
+                this.customMenuSize = this.customMenuHeight
+            }))
+        }), Scroll);
         this.SystemMenu.bind(this)();
+        Scroll.pop();
         Column.pop()
     }
 
@@ -343,6 +374,12 @@ class SelectionMenuComponent extends ViewPU {
     IconPanel(e = null) {
         this.observeComponentCreation2(((e, t) => {
             Flex.create({ wrap: FlexWrap.Wrap });
+            Flex.onAreaChange(((e, t) => {
+                let o = t.height;
+                let n = e.height;
+                this.customMenuHeight += o - n;
+                this.customMenuSize = this.customMenuHeight
+            }));
             Flex.clip(!0);
             Flex.width(this.theme.defaultMenuWidth);
             Flex.padding(this.theme.expandedOptionPadding);
@@ -360,6 +397,7 @@ class SelectionMenuComponent extends ViewPU {
                         const o = e;
                         this.observeComponentCreation2(((e, n) => {
                             Button.createWithChild();
+                            Button.enabled(!(!o.action && !o.builder));
                             Button.type(ButtonType.Normal);
                             Button.margin(this.theme.editorOptionMargin);
                             Button.backgroundColor(this.theme.backGroundColor);
@@ -370,7 +408,7 @@ class SelectionMenuComponent extends ViewPU {
                                     this.showExpandedMenuOptions = !1;
                                     this.customerChange = !this.customerChange
                                 } else {
-                                    this.showCustomerIndex = -1;
+                                    this.showCustomerIndex = -2;
                                     this.controller || (this.showExpandedMenuOptions = !0)
                                 }
                                 o.action && o.action()
@@ -421,7 +459,7 @@ class SelectionMenuComponent extends ViewPU {
                     }));
                     Menu.radius(this.theme.containerBorderRadius);
                     Menu.clip(!0);
-                    Menu.width("100%")
+                    Menu.width(this.theme.defaultMenuWidth)
                 }), Menu);
                 this.observeComponentCreation2(((e, t) => {
                     If.create();
@@ -528,7 +566,8 @@ class SelectionMenuComponent extends ViewPU {
                         this.observeComponentCreation2(((e, t) => {
                             MenuItem.create({ content: "更多", endIcon: this.theme.arrowDownIcon });
                             MenuItem.onClick((() => {
-                                this.showExpandedMenuOptions = !0
+                                this.showExpandedMenuOptions = !0;
+                                this.customMenuSize = "100%"
                             }))
                         }), MenuItem);
                         MenuItem.pop()

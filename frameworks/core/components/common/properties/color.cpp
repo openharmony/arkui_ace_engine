@@ -182,7 +182,6 @@ Color Color::ColorFromString(const std::string& str)
     static const int32_t colorStrLen = 9;
     static const int32_t offset = 4;
 
-    LOGD("UITree str=%{public}s", str.c_str());
     if (str.length() != colorStrLen || str.find('#') != 0) {
         LOGE("UITree |ERROR| invalid %{public}s", str.c_str());
         return Color::BLACK;
@@ -195,7 +194,6 @@ Color Color::ColorFromString(const std::string& str)
         value += it < 'A' ? it - '0' : it - '7';
     }
 
-    LOGD("UITree [%{public}s, #%{public}08X]", str.c_str(), value);
     return Color(value);
 }
 

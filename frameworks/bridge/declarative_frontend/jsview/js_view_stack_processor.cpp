@@ -148,7 +148,6 @@ void JSViewStackProcessor::JSMakeUniqueId(const JSCallbackInfo& info)
 }
 void JSViewStackProcessor::JsMoveDeletedElmtIds(const JSCallbackInfo& info)
 {
-    LOGD("JSViewStackProcessor, moving elmtIds of all deleted Elements from ElementRegister to JS caller:");
     if (!info[0]->IsArray()) {
         return;
     }

@@ -141,6 +141,11 @@ public:
 
     void SetFormBackgroundColor(const std::string& color) override;
 
+    int32_t GetInstanceId()
+    {
+        return instanceId_;
+    }
+
     SerializeableObjectArray DumpUITree() override
     {
         CHECK_NULL_RETURN(uiManager_, SerializeableObjectArray());

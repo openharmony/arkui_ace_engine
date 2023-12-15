@@ -87,7 +87,6 @@ void PasswordResponseArea::InitResponseArea()
     auto host = pattern->GetHost();
     CHECK_NULL_VOID(host);
     if (!IsShowPasswordIcon()) {
-        LOGD("show password icon is false");
         return;
     }
     auto passwordNode = CreateNode();
@@ -176,7 +175,6 @@ void PasswordResponseArea::Refresh()
 {
     auto imageNode = passwordNode_.Upgrade();
     if (!imageNode) {
-        LOGD("password node has not been added to the parent");
         InitResponseArea();
         return;
     }
@@ -186,7 +184,6 @@ void PasswordResponseArea::Refresh()
     LoadImageSourceInfo();
     auto src = isObscured_ ? hideIcon_->GetSrc() : showIcon_->GetSrc();
     if (currentSrc != src) {
-        LOGD("image src is changed, reload it.");
         UpdateImageSource();
     }
 }
@@ -203,7 +200,6 @@ void PasswordResponseArea::OnPasswordIconClicked()
 SizeF PasswordResponseArea::Measure(LayoutWrapper* layoutWrapper, int32_t index)
 {
     if (!IsShowPasswordIcon()) {
-        LOGD("show password icon is false");
         return SizeF(0, 0);
     }
     return TextInputResponseArea::Measure(layoutWrapper, index);
@@ -212,7 +208,6 @@ SizeF PasswordResponseArea::Measure(LayoutWrapper* layoutWrapper, int32_t index)
 void PasswordResponseArea::Layout(LayoutWrapper* layoutWrapper, int32_t index, float& nodeWidth)
 {
     if (!IsShowPasswordIcon()) {
-        LOGD("show password icon is false");
         return;
     }
     LayoutChild(layoutWrapper, index, nodeWidth);
@@ -345,7 +340,6 @@ const RefPtr<FrameNode> UnitResponseArea::GetFrameNode()
 SizeF UnitResponseArea::Measure(LayoutWrapper* layoutWrapper, int32_t index)
 {
     if (!IsShowUnit()) {
-        LOGD("not show unit");
         return SizeF(0, 0);
     }
     return TextInputResponseArea::Measure(layoutWrapper, index);
@@ -354,7 +348,6 @@ SizeF UnitResponseArea::Measure(LayoutWrapper* layoutWrapper, int32_t index)
 void UnitResponseArea::Layout(LayoutWrapper* layoutWrapper, int32_t index, float& nodeWidth)
 {
     if (!IsShowUnit()) {
-        LOGD("not show unit");
         return;
     }
     LayoutChild(layoutWrapper, index, nodeWidth);
@@ -446,7 +439,7 @@ RefPtr<FrameNode> CleanNodeResponseArea::CreateNode()
     auto imageLayoutProperty = cleanNode->GetLayoutProperty<ImageLayoutProperty>();
     CHECK_NULL_RETURN(imageLayoutProperty, nullptr);
     imageLayoutProperty->UpdateImageSourceInfo(info);
-    imageLayoutProperty->UpdateImageFit(ImageFit::FILL);
+    imageLayoutProperty->UpdateImageFit(ImageFit::COVER);
     imageLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(0.0f), CalcLength(0.0f)));
     cleanNode->MarkModifyDone();
     cleanNode->MountToParent(stackNode);
@@ -465,6 +458,8 @@ void CleanNodeResponseArea::InitClickEvent(const RefPtr<FrameNode>& frameNode)
         CHECK_NULL_VOID(cleanNode);
         cleanNode->OnCleanNodeClicked();
     };
+    auto longPressCallback = [](GestureEvent& info) { LOGI("CleanNodeResponseArea long press"); };
+    gesture->SetLongPressEvent(MakeRefPtr<LongPressEvent>(std::move(longPressCallback)));
     gesture->AddClickEvent(MakeRefPtr<ClickEvent>(std::move(clickCallback)));
 }
 
@@ -500,57 +495,32 @@ void CleanNodeResponseArea::UpdateCleanNode(bool isShow)
         CHECK_NULL_VOID(textFieldTheme);
         auto themePadding = textFieldTheme->GetPadding();
         auto rightOffset = static_cast<float>(themePadding.Left().ConvertToPx());
-        auto iconSize = iconSize_.ConvertToPx() != 0.0f ? iconSize_.ConvertToPx()
-                                                   : static_cast<float>(textFieldTheme->GetIconSize().ConvertToPx());
+        auto geometryNode = host->GetGeometryNode();
+        CHECK_NULL_VOID(geometryNode);
+        auto frameSize = geometryNode->GetFrameSize();
+        auto iconSize = std::min(iconSize_.ConvertToPx(), static_cast<double>(frameSize.Height()));
+        if (NearZero(iconSize)) {
+            isShow_ = false;
+        }
         auto hotZoneSize = iconSize + rightOffset;
-        imageLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(iconSize), CalcLength(iconSize)));
         stackLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(hotZoneSize), std::nullopt));
+        imageLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(iconSize), CalcLength(iconSize)));
     } else {
-        imageLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(0.0f), CalcLength(0.0f)));
         stackLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(0.0f), std::nullopt));
+        imageLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(0.0f), CalcLength(0.0f)));
     }
     imageFrameNode->MarkModifyDone();
-    imageFrameNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    imageFrameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 }
 
-void CleanNodeResponseArea::Refresh()
+void CleanNodeResponseArea::ClearArea()
 {
-    CHECK_NULL_VOID(cleanNode_);
-    auto imageNode = AceType::DynamicCast<FrameNode>(cleanNode_->GetFirstChild());
-    CHECK_NULL_VOID(imageNode);
-    auto pattern = hostPattern_.Upgrade();
-    CHECK_NULL_VOID(pattern);
-    auto host = pattern->GetHost();
+    auto hostPattern = hostPattern_.Upgrade();
+    CHECK_NULL_VOID(hostPattern);
+    auto host = hostPattern->GetHost();
     CHECK_NULL_VOID(host);
-    auto textFieldLayoutProperty = host->GetLayoutProperty<TextFieldLayoutProperty>();
-    CHECK_NULL_VOID(textFieldLayoutProperty);
-    if (textFieldLayoutProperty->HasIconSize()) {
-        iconSize_ = textFieldLayoutProperty->GetIconSizeValue();
-    }
-    if (textFieldLayoutProperty->HasIconSrc()) {
-        iconSrc_ = textFieldLayoutProperty->GetIconSrcValue();
-    }
-    if (textFieldLayoutProperty->HasIconColor()) {
-        iconColor_ = textFieldLayoutProperty->GetIconColorValue();
-    }
-    ImageSourceInfo info;
-    if (iconSrc_.empty()) {
-        info.SetResourceId(InternalResource::ResourceId::CLOSE_SVG);
-    } else {
-        info.SetSrc(iconSrc_);
-    }
-    if (info.IsSvg()) {
-        info.SetFillColor(iconColor_);
-        auto imageRenderProperty = imageNode->GetPaintProperty<ImageRenderProperty>();
-        CHECK_NULL_VOID(imageRenderProperty);
-        imageRenderProperty->UpdateSvgFillColor(iconColor_);
-    }
-    auto imageLayoutProperty = imageNode->GetLayoutProperty<ImageLayoutProperty>();
-    CHECK_NULL_VOID(imageLayoutProperty);
-    imageLayoutProperty->UpdateImageSourceInfo(info);
-    imageLayoutProperty->UpdateImageFit(ImageFit::FILL);
-    imageLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(0.0f), CalcLength(0.0f)));
-    imageNode->MarkModifyDone();
-    imageNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    CHECK_NULL_VOID(cleanNode_);
+    host->RemoveChildAndReturnIndex(cleanNode_);
+    cleanNode_.Reset();
 }
 } // namespace OHOS::Ace::NG

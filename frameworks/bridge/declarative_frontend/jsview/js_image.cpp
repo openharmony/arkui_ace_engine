@@ -225,9 +225,7 @@ void JSImage::Create(const JSCallbackInfo& info)
     // input is PixelMap / Drawable
     if (!srcValid) {
 #if defined(PIXEL_MAP_SUPPORTED)
-        if (isCard) {
-            TAG_LOGD(AceLogTag::ACE_IMAGE, "Not supported pixmap when form render");
-        } else {
+        if (!isCard) {
             if (IsDrawable(info[0])) {
                 pixmap = GetDrawablePixmap(info[0]);
             } else {
@@ -427,6 +425,7 @@ void JSImage::SetColorFilter(const JSCallbackInfo& info)
         }
         if (colorFilter && colorFilter->GetColorFilterMatrix().size() == COLOR_FILTER_MATRIX_SIZE) {
             ImageModel::GetInstance()->SetColorFilterMatrix(colorFilter->GetColorFilterMatrix());
+            return;
         }
         ImageModel::GetInstance()->SetColorFilterMatrix(DEFAULT_COLORFILTER_MATRIX);
         return;
@@ -484,14 +483,14 @@ void JSImage::JSBind(BindingTarget globalObj)
     JSClass<JSImage>::StaticMethod("draggable", &JSImage::JsSetDraggable);
     JSClass<JSImage>::StaticMethod("onDragStart", &JSImage::JsOnDragStart);
     JSClass<JSImage>::StaticMethod("copyOption", &JSImage::SetCopyOption);
+    JSClass<JSImage>::StaticMethod("enableAnalyzer", &JSImage::EnableAnalyzer);
+    JSClass<JSImage>::StaticMethod("analyzerConfig", &JSImage::AnalyzerConfig);
+
     // override method
     JSClass<JSImage>::StaticMethod("opacity", &JSImage::JsOpacity);
     JSClass<JSImage>::StaticMethod("blur", &JSImage::JsBlur);
     JSClass<JSImage>::StaticMethod("transition", &JSImage::JsTransition);
     JSClass<JSImage>::InheritAndBind<JSViewAbstract>(globalObj);
-
-    JSClass<JSImage>::StaticMethod("enableAnalyzer", &JSImage::EnableAnalyzer);
-    JSClass<JSImage>::StaticMethod("analyzerConfig", &JSImage::AnalyzerConfig);
 
     JSClass<JSColorFilter>::Declare("ColorFilter");
     JSClass<JSColorFilter>::Bind(globalObj, JSColorFilter::ConstructorCallback, JSColorFilter::DestructorCallback);

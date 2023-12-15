@@ -234,8 +234,6 @@ void XComponentPattern::SetMethodCall()
         });
 
     xcomponentController_->SetSurfaceId(renderSurface_->GetUniqueId());
-    TAG_LOGD(AceLogTag::ACE_XCOMPONENT, "XComponent set surfaceId = %{public}s",
-        xcomponentController_->GetSurfaceId().c_str());
 }
 
 void XComponentPattern::ConfigSurface(uint32_t surfaceWidth, uint32_t surfaceHeight)
@@ -380,7 +378,6 @@ void XComponentPattern::InitNativeWindow(float textureWidth, float textureHeight
 
 void XComponentPattern::XComponentSizeInit()
 {
-    TAG_LOGD(AceLogTag::ACE_XCOMPONENT, "XComponent ready to invoke OnSurfaceCreated and onLoad");
     CHECK_RUN_ON(UI);
     ContainerScope scope(instanceId_);
     auto context = PipelineContext::GetCurrentContext();

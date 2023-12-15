@@ -61,7 +61,7 @@ ArkUINativeModuleValue TextTimerBridge::SetFontSize(ArkUIRuntimeCallInfo* runtim
     Local<JSValueRef> paramArg = runtimeCallInfo->GetCallArgRef(NUM_1);
     void* nativeNode = nodeArg->ToNativePointer(vm)->Value();
     CalcDimension fontSize;
-    if (!ArkTSUtils::ParseJsDimensionFp(vm, paramArg, fontSize)) {
+    if (!ArkTSUtils::ParseJsDimensionFp(vm, paramArg, fontSize) || fontSize.Value() < 0) {
         GetArkUIInternalNodeAPI()->GetTextTimerModifier().ResetFontSize(nativeNode);
     } else {
         GetArkUIInternalNodeAPI()->GetTextTimerModifier().SetFontSize(
@@ -141,11 +141,7 @@ ArkUINativeModuleValue TextTimerBridge::SetFontFamily(ArkUIRuntimeCallInfo* runt
     void* nativeNode = nodeArg->ToNativePointer(vm)->Value();
 
     std::string fontFamilyStr;
-    if (fontFamilyArg->IsString()) {
-        fontFamilyStr = fontFamilyArg->ToString(vm)->ToString();
-    } else if (fontFamilyArg->IsObject()) {
-        ArkTSUtils::ParseJsMedia(vm, fontFamilyArg, fontFamilyStr);
-    } else {
+    if (!ArkTSUtils::ParseJsFontFamiliesToString(vm, fontFamilyArg, fontFamilyStr)) {
         GetArkUIInternalNodeAPI()->GetTextTimerModifier().ResetFontFamily(nativeNode);
         return panda::JSValueRef::Undefined(vm);
     }

@@ -27,14 +27,11 @@ RefPtr<Element> GridLayoutComponent::CreateElement()
 {
     // judge to create GridLayoutElement for dynamic grid
     if (UseNonProxiedCodePath()) {
-        LOGD("Use non-proxied code path, creaitng GridLayoutElement");
         return AceType::MakeRefPtr<GridLayoutElement>();
     }
     if (isDeclarative_ && useScroll_ && (rowsArgs_.empty() || columnsArgs_.empty())) {
-        LOGD("Use proxied code path, creaitng V2::GridElement");
         return AceType::MakeRefPtr<V2::GridElement>();
     }
-    LOGD("Use non-proxied code path, creaitng GridLayoutElement");
     return AceType::MakeRefPtr<GridLayoutElement>();
 }
 

@@ -278,12 +278,6 @@ void ViewAbstractModelNG::SetPivot(const Dimension& x, const Dimension& y, const
 
 void ViewAbstractModelNG::SetScale(float x, float y, float z)
 {
-    if (x < 0) {
-        x = 1;
-    }
-    if (y < 0) {
-        y = 1;
-    }
     VectorF scale(x, y);
     ViewAbstract::SetScale(scale);
 }

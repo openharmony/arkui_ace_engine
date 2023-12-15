@@ -50,7 +50,6 @@ public:
 
     void OnAttachContext() override
     {
-        LOGD("RenderSceneViewer OnAttachContext()");
         cameraPosition_.SetContextAndCallbacks(
             context_, std::bind(&RenderSceneViewer::PerformCameraUpdate, this));
         // Lights animation callbacks are added when lights are added.

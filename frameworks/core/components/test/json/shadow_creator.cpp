@@ -24,7 +24,6 @@ namespace OHOS::Ace {
 
 Shadow ShadowCreator::CreateFromJson(const JsonValue& componentJson)
 {
-    LOGD("CreateFromJson Shadow");
     Shadow shadow;
     if (componentJson.Contains(OFFSET) && componentJson.GetValue(OFFSET)->IsObject()) {
         auto offset = OffsetCreator::CreateFromJson(*(componentJson.GetValue(OFFSET)));

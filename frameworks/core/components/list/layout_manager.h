@@ -81,7 +81,6 @@ public:
     {
         KeyDirection key = DIRECTION_MAP.at(rightToLeft_).at(direction_).at(vertical).at(reverse);
         int32_t index = focusMove(key);
-        LOGD("Focus move from %{public}d to %{public}d", focusIndex_, index);
         if (index < 0) {
             focusMove_ = focusIndex_;
             return index;

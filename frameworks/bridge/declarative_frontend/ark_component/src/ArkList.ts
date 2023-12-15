@@ -1,3 +1,18 @@
+/*
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 /// <reference path='./import.ts' />
 class ListEditModeModifier extends ModifierWithKey<boolean> {
   constructor(value: boolean) {
@@ -106,9 +121,6 @@ class ListChainAnimationModifier extends ModifierWithKey<boolean> {
       GetUINativeModule().list.setChainAnimation(node, this.value!);
     }
   }
-  checkObjectDiff(): boolean {
-    return false;
-  }
 }
 
 class ListCachedCountModifier extends ModifierWithKey<number> {
@@ -213,8 +225,8 @@ class ListFrictionModifier extends ModifierWithKey<number | Resource> {
   }
 }
 
-class ListNestedScrollModifier extends ModifierWithKey<ArkListNestedScrollOptions> {
-  constructor(value: ArkListNestedScrollOptions) {
+class ListNestedScrollModifier extends ModifierWithKey<NestedScrollOptions> {
+  constructor(value: NestedScrollOptions) {
     super(value);
   }
   static identity: Symbol = Symbol('listNestedScroll');
@@ -222,7 +234,7 @@ class ListNestedScrollModifier extends ModifierWithKey<ArkListNestedScrollOption
     if (reset) {
       GetUINativeModule().list.resetListNestedScroll(node);
     } else {
-      GetUINativeModule().list.setListNestedScroll(node, this.value.scrollForward, this.value.scrollBackward);
+      GetUINativeModule().list.setListNestedScroll(node, this.value?.scrollForward, this.value?.scrollBackward);
     }
   }
 }
@@ -331,10 +343,7 @@ class ArkListComponent extends ArkComponent implements ListAttribute {
     return this;
   }
   nestedScroll(value: NestedScrollOptions): this {
-    let opt: ArkListNestedScrollOptions = new ArkListNestedScrollOptions();
-    opt.scrollBackward = value.scrollBackward;
-    opt.scrollForward = value.scrollForward;
-    modifierWithKey(this._modifiersWithKeys, ListNestedScrollModifier.identity, ListNestedScrollModifier, opt);
+    modifierWithKey(this._modifiersWithKeys, ListNestedScrollModifier.identity, ListNestedScrollModifier, value);
     return this;
   }
   enableScrollInteraction(value: boolean): this {
@@ -399,6 +408,6 @@ globalThis.List.attributeModifier = function (modifier) {
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkListComponent(nativeNode);
   });
-  modifier.applyNormalAttribute(component);
+  applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
 }

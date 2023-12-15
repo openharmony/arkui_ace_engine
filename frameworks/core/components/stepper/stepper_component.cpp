@@ -76,7 +76,6 @@ void StepperComponent::InsertChild(int32_t position, const RefPtr<Component>& ch
         return;
     }
     item->SetIndex(pos);
-    LOGD("InsertChild: position: %{public}d, index: %{public}d", pos, item->GetIndex());
     ComponentGroup::InsertChild(position, child);
     auto labelIter = stepperLabels_.begin();
     std::advance(labelIter, position);
@@ -106,7 +105,6 @@ void StepperComponent::AppendChild(const RefPtr<Component>& child)
         return;
     }
     item->SetIndex(GetChildren().size());
-    LOGD("AppendChild: index: %{public}d", item->GetIndex());
     ComponentGroup::AppendChild(child);
     AppendLabel(item->GetLabel());
     AppendTextStyle(item->GetTextStyle());

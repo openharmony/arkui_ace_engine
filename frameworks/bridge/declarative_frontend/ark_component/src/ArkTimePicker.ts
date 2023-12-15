@@ -1,3 +1,18 @@
+/*
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 /// <reference path='./import.ts' />
 class ArkTimePickerComponent extends ArkComponent implements TimePickerAttribute {
   constructor(nativePtr: KNode) {
@@ -43,23 +58,23 @@ class TimepickerTextStyleModifier extends ModifierWithKey<PickerTextStyle> {
       GetUINativeModule().timepicker.resetTextStyle(node);
     }
     else {
-      GetUINativeModule().timepicker.setTextStyle(node,
-        this.value.color, this.value.font?.size, this.value.font?.weight, this.value.font?.family, this.value.font?.style);
+      GetUINativeModule().timepicker.setTextStyle(node, this.value?.color ?? undefined,
+        this.value?.font?.size ?? undefined,
+        this.value?.font?.weight ?? undefined,
+        this.value?.font?.family ?? undefined,
+        this.value?.font?.style ?? undefined);
     }
   }
 
   checkObjectDiff(): boolean {
-    let colorEQ = isBaseOrResourceEqual((this.stageValue as PickerTextStyle).color,
-      (this.value as PickerTextStyle).color);
-    let sizeEQ = isBaseOrResourceEqual((this.stageValue as PickerTextStyle).font?.size,
-      (this.value as PickerTextStyle).font?.size);
-    let weightEQ = isBaseOrResourceEqual((this.stageValue as PickerTextStyle).font?.weight,
-      (this.value as PickerTextStyle).font?.weight);
-    let familyEQ = isBaseOrResourceEqual((this.stageValue as PickerTextStyle).font?.family,
-      (this.value as PickerTextStyle).font?.family);
-    let styleEQ = isBaseOrResourceEqual((this.stageValue as PickerTextStyle).font?.style,
-      (this.value as PickerTextStyle).font?.style);
-    return !colorEQ || !sizeEQ || !weightEQ || !familyEQ || !styleEQ;
+    if (!(this.stageValue?.font?.weight === this.value?.font?.weight &&
+      this.stageValue?.font?.style === this.value?.font?.style)) {
+      return true;
+    } else {
+      return !isBaseOrResourceEqual(this.stageValue?.color, this.value?.color) ||
+        !isBaseOrResourceEqual(this.stageValue?.font?.size, this.value?.font?.size) ||
+        !isBaseOrResourceEqual(this.stageValue?.font?.family, this.value?.font?.family);
+    }
   }
 }
 
@@ -74,23 +89,23 @@ class TimepickerSelectedTextStyleModifier extends ModifierWithKey<PickerTextStyl
       GetUINativeModule().timepicker.resetSelectedTextStyle(node);
     }
     else {
-      GetUINativeModule().timepicker.setSelectedTextStyle(node,
-        this.value.color, this.value.font?.size, this.value.font?.weight, this.value.font?.family, this.value.font?.style);
+      GetUINativeModule().timepicker.setSelectedTextStyle(node, this.value?.color ?? undefined,
+        this.value?.font?.size ?? undefined,
+        this.value?.font?.weight ?? undefined,
+        this.value?.font?.family ?? undefined,
+        this.value?.font?.style ?? undefined);
     }
   }
 
   checkObjectDiff(): boolean {
-    let colorEQ = isBaseOrResourceEqual((this.stageValue as PickerTextStyle).color,
-      (this.value as PickerTextStyle).color);
-    let sizeEQ = isBaseOrResourceEqual((this.stageValue as PickerTextStyle).font?.size,
-      (this.value as PickerTextStyle).font?.size);
-    let weightEQ = isBaseOrResourceEqual((this.stageValue as PickerTextStyle).font?.weight,
-      (this.value as PickerTextStyle).font?.weight);
-    let familyEQ = isBaseOrResourceEqual((this.stageValue as PickerTextStyle).font?.family,
-      (this.value as PickerTextStyle).font?.family);
-    let styleEQ = isBaseOrResourceEqual((this.stageValue as PickerTextStyle).font?.style,
-      (this.value as PickerTextStyle).font?.style);
-    return !colorEQ || !sizeEQ || !weightEQ || !familyEQ || !styleEQ;
+    if (!(this.stageValue?.font?.weight === this.value?.font?.weight &&
+      this.stageValue?.font?.style === this.value?.font?.style)) {
+      return true;
+    } else {
+      return !isBaseOrResourceEqual(this.stageValue?.color, this.value?.color) ||
+        !isBaseOrResourceEqual(this.stageValue?.font?.size, this.value?.font?.size) ||
+        !isBaseOrResourceEqual(this.stageValue?.font?.family, this.value?.font?.family);
+    }
   }
 }
 
@@ -105,23 +120,23 @@ class TimepickerDisappearTextStyleModifier extends ModifierWithKey<PickerTextSty
       GetUINativeModule().timepicker.resetDisappearTextStyle(node);
     }
     else {
-      GetUINativeModule().timepicker.setDisappearTextStyle(node,
-        this.value.color, this.value.font?.size, this.value.font?.weight, this.value.font?.family, this.value.font?.style);
+      GetUINativeModule().timepicker.setDisappearTextStyle(node, this.value?.color ?? undefined,
+        this.value?.font?.size ?? undefined,
+        this.value?.font?.weight ?? undefined,
+        this.value?.font?.family ?? undefined,
+        this.value?.font?.style ?? undefined);
     }
   }
 
   checkObjectDiff(): boolean {
-    let colorEQ = isBaseOrResourceEqual((this.stageValue as PickerTextStyle).color,
-      (this.value as PickerTextStyle).color);
-    let sizeEQ = isBaseOrResourceEqual((this.stageValue as PickerTextStyle).font?.size,
-      (this.value as PickerTextStyle).font?.size);
-    let weightEQ = isBaseOrResourceEqual((this.stageValue as PickerTextStyle).font?.weight,
-      (this.value as PickerTextStyle).font?.weight);
-    let familyEQ = isBaseOrResourceEqual((this.stageValue as PickerTextStyle).font?.family,
-      (this.value as PickerTextStyle).font?.family);
-    let styleEQ = isBaseOrResourceEqual((this.stageValue as PickerTextStyle).font?.style,
-      (this.value as PickerTextStyle).font?.style);
-    return !colorEQ || !sizeEQ || !weightEQ || !familyEQ || !styleEQ;
+    if (!(this.stageValue?.font?.weight === this.value?.font?.weight &&
+      this.stageValue?.font?.style === this.value?.font?.style)) {
+      return true;
+    } else {
+      return !isBaseOrResourceEqual(this.stageValue?.color, this.value?.color) ||
+        !isBaseOrResourceEqual(this.stageValue?.font?.size, this.value?.font?.size) ||
+        !isBaseOrResourceEqual(this.stageValue?.font?.family, this.value?.font?.family);
+    }
   }
 }
 
@@ -132,6 +147,6 @@ globalThis.TimePicker.attributeModifier = function (modifier) {
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkTimePickerComponent(nativeNode);
   });
-  modifier.applyNormalAttribute(component);
+  applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
 };

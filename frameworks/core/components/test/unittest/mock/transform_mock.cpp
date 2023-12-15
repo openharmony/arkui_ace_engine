@@ -44,7 +44,6 @@ Offset RenderTransform::GetGlobalOffsetExternal() const
 
 void RenderTransform::Translate(const Dimension& x, const Dimension& y)
 {
-    LOGD("TransformMock Translate. x: %{public}lf, y: %{public}lf", x.Value(), y.Value());
     auto mock = AceType::DynamicCast<MockRenderTransform>(this);
     if (mock) {
         mock->MockTranslate(x, y);
@@ -53,7 +52,6 @@ void RenderTransform::Translate(const Dimension& x, const Dimension& y)
 
 void RenderTransform::Scale(float value)
 {
-    LOGD("TransformMock Scale. scale: %{public}f", value);
     auto mock = AceType::DynamicCast<MockRenderTransform>(this);
     if (mock) {
         mock->MockScale(value);
@@ -62,7 +60,6 @@ void RenderTransform::Scale(float value)
 
 void RenderTransform::Scale(float x, float y)
 {
-    LOGD("TransformMock Scale. scaleX: %{public}f, scaleY: %{public}f", x, y);
     auto mock = AceType::DynamicCast<MockRenderTransform>(this);
     if (mock) {
         mock->MockScale(x, y);
@@ -71,8 +68,6 @@ void RenderTransform::Scale(float x, float y)
 
 void RenderTransform::Rotate(float angle, float x, float y, float z)
 {
-    LOGD("TransformMock Rotate. angle: %{public}f, rotateX: %{public}f, rotateY: %{public}f, rotateZ: %{public}f",
-        angle, x, y, z);
     auto mock = AceType::DynamicCast<MockRenderTransform>(this);
     if (mock) {
         mock->MockRotate(angle, x, y, z);
@@ -81,7 +76,6 @@ void RenderTransform::Rotate(float angle, float x, float y, float z)
 
 void RenderTransform::RotateX(float angle)
 {
-    LOGD("TransformMock RotateX. angle: %{public}f ", angle);
     auto mock = AceType::DynamicCast<MockRenderTransform>(this);
     if (mock) {
         mock->MockRotateX(angle);
@@ -90,7 +84,6 @@ void RenderTransform::RotateX(float angle)
 
 void RenderTransform::RotateY(float angle)
 {
-    LOGD("TransformMock RotateY. angle: %{public}f ", angle);
     auto mock = AceType::DynamicCast<MockRenderTransform>(this);
     if (mock) {
         mock->MockRotateY(angle);
@@ -99,7 +92,6 @@ void RenderTransform::RotateY(float angle)
 
 void RenderTransform::RotateZ(float angle)
 {
-    LOGD("TransformMock RotateZ. angle: %{public}f ", angle);
     auto mock = AceType::DynamicCast<MockRenderTransform>(this);
     if (mock) {
         mock->MockRotateZ(angle);
@@ -108,7 +100,6 @@ void RenderTransform::RotateZ(float angle)
 
 void RenderTransform::Update(const RefPtr<Component>& component)
 {
-    LOGD("TransformMock Update.");
     const RefPtr<TransformComponent> transform = AceType::DynamicCast<TransformComponent>(component);
     if (transform) {
         transform_ = transform->GetTransform();
@@ -124,7 +115,6 @@ void RenderTransform::ResetTransform() {}
 
 void RenderTransform::PerformLayout()
 {
-    LOGD("TransformMock PerformLayout");
     Size layoutSize;
     if (!GetChildren().empty()) {
         auto child = GetChildren().front();
@@ -152,22 +142,18 @@ void RenderTransform::ClearRenderObject() {}
 
 void RenderTransform::SetTouchable(bool enable)
 {
-    LOGD("Mock RenderTransform enable touch test: %{public}d", enable);
     enableTouchTest_ = enable;
 }
 
 void MockRenderTransform::SetMockHook(const MockRenderTransform::HookRenderTransform& hook)
 {
-    LOGD("set hook.");
     g_hookRenderTransform = std::move(hook);
 }
 
 RefPtr<RenderNode> RenderTransform::Create()
 {
-    LOGD("Mock RenderTransform Create");
     const auto& transform = AceType::MakeRefPtr<MockRenderTransform>();
     if (g_hookRenderTransform) {
-        LOGD("execute hook.");
         g_hookRenderTransform(transform);
     }
     return transform;
@@ -175,28 +161,23 @@ RefPtr<RenderNode> RenderTransform::Create()
 
 void MockRenderTransform::MockTranslate(Dimension x, Dimension y)
 {
-    LOGD("translate in MockRenderTransform. x: %{public}f, y: %{public}f", x.Value(), y.Value());
     translateX_ = x;
     translateY_ = y;
 }
 
 void MockRenderTransform::MockScale(float value)
 {
-    LOGD("scale in MockRenderTransform, value: %{public}f", value);
     scaleXY_ = value;
 }
 
 void MockRenderTransform::MockScale(float x, float y)
 {
-    LOGD("scale in MockRenderTransform, x: %{public}f, y: %{public}f", x, y);
     scaleX_ = x;
     scaleY_ = y;
 }
 
 void MockRenderTransform::MockRotate(float angle, float x, float y, float z)
 {
-    LOGD("rotate in MockRenderTransform, angle: %{public}f, x: %{public}f, y: %{public}f, z: %{public}f", angle, x, y,
-        z);
     rotateAngle_ = angle;
     rotateAxisX_ = x;
     rotateAxisY_ = y;
@@ -205,19 +186,16 @@ void MockRenderTransform::MockRotate(float angle, float x, float y, float z)
 
 void MockRenderTransform::MockRotateX(float angle)
 {
-    LOGD("rotateX in MockRenderTransform, angle: %{public}f", angle);
     rotateAxisX_ = angle;
 }
 
 void MockRenderTransform::MockRotateY(float angle)
 {
-    LOGD("rotateY in MockRenderTransform, angle: %{public}f", angle);
     rotateAxisY_ = angle;
 }
 
 void MockRenderTransform::MockRotateZ(float angle)
 {
-    LOGD("rotateZ in MockRenderTransform, angle: %{public}f", angle);
     rotateAxisZ_ = angle;
 }
 

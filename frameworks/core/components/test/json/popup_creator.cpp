@@ -39,7 +39,6 @@ const std::unordered_map<std::string, Placement> PLACEMENT_MAP = {
 
 RefPtr<Component> PopupCreator::CreateFromJson(const JsonValue& componentJson, const JsonComponentFactory& factory)
 {
-    LOGD("CreateFromJson popup");
     std::string classType = componentJson.GetValue(CLASS_NAME)->GetString();
     if (classType != POPUP_NAME || !componentJson.Contains(CHILD) || !componentJson.GetValue(CHILD)->IsObject()) {
         LOGE("Create PopupComponent err: not a popup json or not contain child.");

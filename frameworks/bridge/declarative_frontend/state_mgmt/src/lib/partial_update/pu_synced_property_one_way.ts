@@ -347,32 +347,36 @@ class SynchedPropertyOneWayPU<C> extends ObservedPropertyAbstractPU<C>
       let copy;
       if (obj instanceof Set) {
         copy = new Set<any>();
+        Object.setPrototypeOf(copy, Object.getPrototypeOf(obj));
+        copiedObjects.set(obj, copy);
         for (const setKey of obj.keys()) {
           stack.push({ name: setKey });
-          copiedObjects.set(obj, copy);
           copy.add(getDeepCopyOfObjectRecursive(setKey));
           stack.pop();
         }
       } else if (obj instanceof Map) {
         copy = new Map<any, any>();
+        Object.setPrototypeOf(copy, Object.getPrototypeOf(obj));
+        copiedObjects.set(obj, copy);
         for (const mapKey of obj.keys()) {
           stack.push({ name: mapKey });
-          copiedObjects.set(obj, copy);
           copy.set(mapKey, getDeepCopyOfObjectRecursive(obj.get(mapKey)));
           stack.pop();
         }
       } else if (obj instanceof Date) {
         copy = new Date()
         copy.setTime(obj.getTime());
+        Object.setPrototypeOf(copy, Object.getPrototypeOf(obj));
+        copiedObjects.set(obj, copy);
       } else if (obj instanceof Object) {
         copy = Array.isArray(obj) ? [] : {};
         Object.setPrototypeOf(copy, Object.getPrototypeOf(obj));
-        for (const objKey of Object.keys(obj)) {
-          stack.push({ name: objKey });
-          copiedObjects.set(obj, copy);
-          Reflect.set(copy, objKey, getDeepCopyOfObjectRecursive(obj[objKey]));
-          stack.pop();
-        }
+        copiedObjects.set(obj, copy);
+      }
+      for (const objKey of Object.keys(obj)) {
+        stack.push({ name: objKey });
+        Reflect.set(copy, objKey, getDeepCopyOfObjectRecursive(obj[objKey]));
+        stack.pop();
       }
       return ObservedObject.IsObservedObject(obj) ? ObservedObject.createNew(copy, null) : copy;
     }

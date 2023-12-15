@@ -262,7 +262,6 @@ void CanvasTaskPool::ClosePath()
 void CanvasTaskPool::Save()
 {
     auto task = [](RenderCustomPaint& interface, const Offset& offset) { interface.Save(); };
-    LOGD("In save pushtask");
     PushTask(task);
 }
 

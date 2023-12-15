@@ -148,7 +148,6 @@ void DialogPattern::HandleClick(const GestureEvent& info)
 
 void DialogPattern::PopDialog(int32_t buttonIdx = -1)
 {
-    TAG_LOGD(AceLogTag::ACE_DIALOG, "DialogPattern::PopDialog from click");
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto overlayManager = pipeline->GetOverlayManager();
@@ -186,8 +185,11 @@ void DialogPattern::PopDialog(int32_t buttonIdx = -1)
 
 void DialogPattern::RecordEvent(int32_t btnIndex) const
 {
+    if (!Recorder::EventRecorder::Get().IsComponentRecordEnable()) {
+        return;
+    }
     std::string btnText;
-    if (btnIndex >= 0 && (size_t) btnIndex < dialogProperties_.buttons.size()) {
+    if (btnIndex >= 0 && static_cast<size_t>(btnIndex) < dialogProperties_.buttons.size()) {
         btnText = dialogProperties_.buttons.at(btnIndex).text;
     }
     Recorder::EventType eventType;
@@ -196,14 +198,12 @@ void DialogPattern::RecordEvent(int32_t btnIndex) const
     } else {
         eventType = Recorder::EventType::DIALOG_ACTION;
     }
-    if (Recorder::EventRecorder::Get().IsComponentRecordEnable()) {
-        Recorder::EventParamsBuilder builder;
-        builder.SetEventType(eventType)
-            .SetText(btnText)
-            .SetExtra(Recorder::KEY_TITLE, title_)
-            .SetExtra(Recorder::KEY_SUB_TITLE, subtitle_);
-        Recorder::EventRecorder::Get().OnEvent(std::move(builder));
-    }
+    Recorder::EventParamsBuilder builder;
+    builder.SetEventType(eventType)
+        .SetText(btnText)
+        .SetExtra(Recorder::KEY_TITLE, title_)
+        .SetExtra(Recorder::KEY_SUB_TITLE, subtitle_);
+    Recorder::EventRecorder::Get().OnEvent(std::move(builder));
 }
 
 // set render context properties of content frame

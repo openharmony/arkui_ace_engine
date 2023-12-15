@@ -30,7 +30,6 @@ namespace OHOS::Ace {
 
 void OptionElement::PerformBuild()
 {
-    LOGD("OptionElement::PerformBuild");
     RefPtr<OptionComponent> component = AceType::DynamicCast<OptionComponent>(component_);
     auto context = context_.Upgrade();
     if (!component || !context || !context->GetAccessibilityManager()) {

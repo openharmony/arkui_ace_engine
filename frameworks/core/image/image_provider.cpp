@@ -241,11 +241,9 @@ std::shared_ptr<RSData> ImageProvider::LoadImageRawData(
         auto cacheData = imageCache->GetCacheImageData(imageInfo.GetSrc());
         if (cacheData) {
 #ifndef USE_ROSEN_DRAWING
-            LOGD("sk data from memory cache.");
             const auto* skData = reinterpret_cast<const sk_sp<SkData>*>(cacheData->GetDataWrapper());
             return *skData;
 #else
-            LOGD("drawing data from memory cache.");
             return AceType::DynamicCast<NG::DrawingImageData>(cacheData)->GetRSData();
 #endif
         }

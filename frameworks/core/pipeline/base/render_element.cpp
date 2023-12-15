@@ -145,7 +145,6 @@ void RenderElement::UpdateAccessibilityNode()
         return;
     }
     if (context->GetIsDeclarative()) {
-        LOGD("UpdateAccessibilityNode context is declarative");
         return;
     }
     // fetch new composedId from component.
@@ -163,7 +162,6 @@ void RenderElement::UpdateAccessibilityNode()
     // Update new composedId to renderNode.
     if (!updateId.empty() && updateId != composeId_) {
         SetAccessibilityNodeById(updateId);
-        LOGD("Update ComposeId from %s to %s", composeId_.c_str(), updateId.c_str());
         composeId_ = updateId;
     }
 }
@@ -235,7 +233,6 @@ RefPtr<RenderNode> RenderElement::CreateRenderNode()
     if (renderComponent) {
         auto renderNode = GetCachedRenderNode();
         if (renderNode) {
-            LOGD("RenderElement Using Cache RenderNode");
             return renderNode;
         } else {
             return renderComponent->CreateRenderNode();

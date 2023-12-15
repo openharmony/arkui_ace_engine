@@ -69,8 +69,6 @@ void SetFontMgrConfig(const std::string& containerSdkPath)
         runtimeOS = "OHOS";
         containerFontBasePath = "";
     }
-    LOGD("Runtime OS is %{public}s, and the container fontBasePath is %{public}s", runtimeOS.c_str(),
-        containerFontBasePath.c_str());
     SkFontMgr::SetFontMgrConfig(runtimeOS, containerFontBasePath);
 }
 
@@ -354,7 +352,6 @@ uint32_t UIContentImpl::GetBackgroundColor()
         },
         TaskExecutor::TaskType::UI);
 
-    LOGD("UIContentImpl::GetBackgroundColor, value is %{public}u", bgColor);
     return bgColor;
 }
 

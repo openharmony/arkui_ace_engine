@@ -157,6 +157,10 @@ public:
 
     void DumpHeapSnapshot(bool isPrivate) override;
 
+    void DestroyHeapProfiler() override;
+
+    void ForceFullGC() override;
+
     std::string GetStacktraceMessage() override;
 
     RefPtr<GroupJsBridge> GetGroupJsBridge() override;

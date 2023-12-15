@@ -47,11 +47,7 @@
 #define LOGE(fmt, ...) TAG_LOGE(OHOS::Ace::AceLogTag::DEFAULT, fmt, ##__VA_ARGS__)
 #define LOGF(fmt, ...) TAG_LOGF(OHOS::Ace::AceLogTag::DEFAULT, fmt, ##__VA_ARGS__)
 
-#ifdef ACE_DEBUG_LOG
 #define TAG_LOGD(tag, fmt, ...) PRINT_LOG(DEBUG, tag, fmt, ##__VA_ARGS__)
-#else
-#define TAG_LOGD(tag, fmt, ...) ((void)0)
-#endif
 #define TAG_LOGI(tag, fmt, ...) PRINT_LOG(INFO, tag, fmt, ##__VA_ARGS__)
 #define TAG_LOGW(tag, fmt, ...) PRINT_LOG(WARN, tag, fmt, ##__VA_ARGS__)
 #define TAG_LOGE(tag, fmt, ...) PRINT_LOG(ERROR, tag, fmt, ##__VA_ARGS__)
@@ -130,6 +126,7 @@ enum class AceLogTag : uint8_t {
     ACE_DISPLAY_SYNC,         // C03936
     ACE_RESOURCE,             // C03937
     ACE_SIDEBAR,              // C03938
+    ACE_GEOMETRY_TRANSITION,  // C03939
 
     FORM_RENDER = 255, // C039FF FormRenderer
     END = 256,         // Last one, do not use

@@ -78,6 +78,13 @@ RefPtr<NavigationGroupNode> NavigationGroupNode::GetOrCreateGroupNode(
     return navigationGroupNode;
 }
 
+NavigationGroupNode::~NavigationGroupNode()
+{
+    auto context = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    context->DeleteNavigationNode(curId_);
+}
+
 void NavigationGroupNode::AddChildToGroup(const RefPtr<UINode>& child, int32_t slot)
 {
     auto pattern = AceType::DynamicCast<NavigationPattern>(GetPattern());
@@ -381,9 +388,6 @@ void NavigationGroupNode::ExitTransitionWithPop(const RefPtr<FrameNode>& node)
                 if (shallowBuilder) {
                     shallowBuilder->MarkIsExecuteDeepRenderDone(false);
                 }
-                if (node->GetContentNode()) {
-                    node->GetContentNode()->Clean();
-                }
                 auto parent = node->GetParent();
                 CHECK_NULL_VOID(parent);
                 parent->RemoveChild(node);
@@ -406,7 +410,6 @@ void NavigationGroupNode::ExitTransitionWithPop(const RefPtr<FrameNode>& node)
         option,
         [node, titleNode, nodeWidth, nodeHeight]() {
             PerfMonitor::GetPerfMonitor()->Start(PerfConstants::ABILITY_OR_PAGE_SWITCH, PerfActionType::LAST_UP, "");
-            TAG_LOGD(AceLogTag::ACE_NAVIGATION, "navigation animation start");
             // content
             node->GetRenderContext()->ClipWithRRect(
                 RectF(nodeWidth * HALF, 0.0f, nodeWidth, nodeHeight), RadiusF(EdgeF(0.0f, 0.0f)));
@@ -457,7 +460,6 @@ void NavigationGroupNode::ExitTransitionWithPush(const RefPtr<FrameNode>& node, 
         taskExecutor->PostTask(
             [weakNode, weakTitle, weakNavigation, isNavBar]() {
                 PerfMonitor::GetPerfMonitor()->End(PerfConstants::ABILITY_OR_PAGE_SWITCH, true);
-                TAG_LOGD(AceLogTag::ACE_NAVIGATION, "navigation animation end");
                 auto navigation = weakNavigation.Upgrade();
                 if (navigation) {
                     navigation->isOnAnimation_ = false;
@@ -540,7 +542,6 @@ void NavigationGroupNode::EnterTransitionWithPush(const RefPtr<FrameNode>& node,
         taskExecutor->PostTask(
             [weakNode, weakNavigation]() {
                 PerfMonitor::GetPerfMonitor()->End(PerfConstants::ABILITY_OR_PAGE_SWITCH, true);
-                TAG_LOGD(AceLogTag::ACE_NAVIGATION, "navigation animation end");
                 auto navigation = weakNavigation.Upgrade();
                 CHECK_NULL_VOID(navigation);
                 navigation->isOnAnimation_ = false;
@@ -563,7 +564,6 @@ void NavigationGroupNode::EnterTransitionWithPush(const RefPtr<FrameNode>& node,
         option,
         [node, titleNode, nodeWidth, nodeHeight]() {
             PerfMonitor::GetPerfMonitor()->Start(PerfConstants::ABILITY_OR_PAGE_SWITCH, PerfActionType::LAST_UP, "");
-            TAG_LOGD(AceLogTag::ACE_NAVIGATION, "navigation animation start");
             // content
             node->GetRenderContext()->ClipWithRRect(
                 RectF(0.0f, 0.0f, nodeWidth, nodeHeight), RadiusF(EdgeF(0.0f, 0.0f)));
@@ -620,7 +620,6 @@ void NavigationGroupNode::EnterTransitionWithPop(const RefPtr<FrameNode>& node, 
         taskExecutor->PostTask(
             [weakNavigation]() {
                 PerfMonitor::GetPerfMonitor()->End(PerfConstants::ABILITY_OR_PAGE_SWITCH, true);
-                TAG_LOGD(AceLogTag::ACE_NAVIGATION, "navigation animation end");
                 auto navigation = weakNavigation.Upgrade();
                 CHECK_NULL_VOID(navigation);
                 navigation->isOnAnimation_ = false;
@@ -760,6 +759,14 @@ void NavigationGroupNode::TransitionWithReplace(
         },
         option.GetOnFinishEvent());
     isOnAnimation_ = true;
+}
+
+void NavigationGroupNode::OnInspectorIdUpdate(const std::string& id)
+{
+    auto context = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    context->AddOrReplaceNavigationNode(id, WeakClaim(this));
+    curId_ = id;
 }
 
 void NavigationGroupNode::DealNavigationExit(const RefPtr<FrameNode>& preNode, bool isNavBar)

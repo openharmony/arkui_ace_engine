@@ -24,7 +24,6 @@ double BilateralSpringAdapter::ResetControl(int32_t delta)
         return 0.0;
     }
     double lastValue = controlNode->GetValue();
-    LOGD("BeforeReset: %{public}s", DumpNodes().c_str());
     RefPtr<SpringNode> srcNode;
     int32_t nodeSize = static_cast<int32_t>(nodes_.size());
     if (delta < 0) {
@@ -48,7 +47,6 @@ double BilateralSpringAdapter::ResetControl(int32_t delta)
     }
     double ret = controlNode->GetValue() - lastValue;
     controlNode->ResetNode(0.0, controlNode->GetVelocity());
-    LOGD("AfterReset: %{public}s", DumpNodes().c_str());
     return ret;
 }
 
@@ -81,7 +79,6 @@ void BilateralSpringAdapter::MoveNode(const RefPtr<SpringNode>& srcNode, int32_t
             dstNode->ResetNode(srcNode->GetValue(), srcNode->GetVelocity());
         }
     } else {
-        LOGD("Move node. index: %{public}d, control: %{public}d", dstIndex, GetControlIndex());
         dstNode = nodes_[dstIndex];
         if (dstNode) {
             dstNode->ResetNode(0.0, 0.0);

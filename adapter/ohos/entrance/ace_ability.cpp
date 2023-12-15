@@ -82,12 +82,10 @@ FrontendType GetFrontendTypeFromManifest(const std::string& packagePath, const s
     }
     std::string jsonStr = isHap ? GetStringFromHap(packagePath, manifest) : GetStringFromFile(packagePath, manifest);
     if (jsonStr.empty()) {
-        LOGD("return default frontend: JS frontend.");
         return FrontendType::JS;
     }
     auto rootJson = JsonUtil::ParseJsonString(jsonStr);
     if (rootJson == nullptr) {
-        LOGD("return default frontend: JS frontend.");
         return FrontendType::JS;
     }
     auto mode = rootJson->GetObject("mode");
@@ -216,7 +214,6 @@ void AceAbility::OnStart(const Want& want, sptr<AAFwk::SessionInfo> sessionInfo)
     auto abilityContext = GetAbilityContext();
     auto cacheDir = abilityContext->GetCacheDir();
     std::call_once(onceFlag, [abilityContext, cacheDir]() {
-        LOGD("Initialize for current process.");
         SetHwIcuDirectory();
         Container::UpdateCurrent(INSTANCE_ID_PLATFORM);
         CapabilityRegistry::Register();
@@ -510,7 +507,6 @@ void AceAbility::OnStart(const Want& want, sptr<AAFwk::SessionInfo> sessionInfo)
         Platform::AceContainer::OnRestoreData(abilityId_, remoteData_);
     }
     LayoutInspector::SetCallback(abilityId_);
-    LOGD("AceAbility OnStart called End");
 }
 
 void AceAbility::OnStop()
@@ -815,18 +811,14 @@ bool AceAbility::OnInputEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent) co
     if (keyCode == MMI::KeyEvent::KEYCODE_BACK && keyAction == MMI::KeyEvent::KEY_ACTION_UP) {
         LOGI("OnInputEvent: Platform AceContainer OnBackPressed called");
         if (Platform::AceContainer::OnBackPressed(abilityId_)) {
-            LOGD("OnInputEvent: Platform AceContainer OnBackPressed return true");
             return true;
         }
-        LOGD("OnInputEvent: Platform AceContainer OnBackPressed return false");
         return false;
     }
     LOGI("OnInputEvent: dispatch key to arkui");
     if (aceView->DispatchKeyEvent(aceView, keyEvent)) {
-        LOGD("OnInputEvent: arkui consumed this key event");
         return true;
     }
-    LOGD("OnInputEvent: arkui do not consumed this key event");
     return false;
 }
 

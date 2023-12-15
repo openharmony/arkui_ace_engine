@@ -128,12 +128,7 @@ void ButtonModelImpl::Create(const CreateWithPara& para, std::list<RefPtr<Compon
     buttonComponent->SetHasCustomChild(false);
     buttonComponent->SetCatchMode(false);
     SetDefaultAttributes(buttonComponent);
-    if (para.labelSetInfoFirst.value()) {
-        SetTypeAndStateEffect(para.typeFirst, para.stateEffectFirst, buttonComponent);
-    }
-    if (para.labelSetInfoSecond.value()) {
-        SetTypeAndStateEffect(para.typeSecond, para.stateEffectSecond, buttonComponent);
-    }
+    SetTypeAndStateEffect(para.type, para.stateEffect, buttonComponent);
     ViewStackProcessor::GetInstance()->Push(buttonComponent);
     auto focusableComponent = ViewStackProcessor::GetInstance()->GetFocusableComponent();
     if (focusableComponent) {
@@ -155,12 +150,7 @@ void ButtonModelImpl::CreateWithChild(const CreateWithPara& para)
     buttonComponent->SetHasCustomChild(true);
     buttonComponent->SetCatchMode(false);
     SetDefaultAttributes(buttonComponent);
-    if (para.labelSetInfoFirst.value()) {
-        SetTypeAndStateEffect(para.typeFirst, para.stateEffectFirst, buttonComponent);
-    }
-    if (para.labelSetInfoSecond.value()) {
-        SetTypeAndStateEffect(para.typeSecond, para.stateEffectSecond, buttonComponent);
-    }
+    SetTypeAndStateEffect(para.type, para.stateEffect, buttonComponent);
     ViewStackProcessor::GetInstance()->Push(buttonComponent);
     JSInteractableView::SetFocusable(true);
     JSInteractableView::SetFocusNode(true);

@@ -41,7 +41,6 @@ void RenderStack::PerformLayout()
     Size maxSize = GetLayoutParam().GetMaxSize();
     bool hasNonPositionedItem = false;
     if (GetChildren().empty()) {
-        LOGD("RenderStack: No child in Stack. Use max size of LayoutParam.");
         SetLayoutSize(maxSize);
         return;
     }
@@ -199,7 +198,6 @@ LayoutParam RenderStack::MakeNonPositionedInnerLayoutParam(const RefPtr<RenderNo
             }
             break;
         default:
-            LOGD("RenderStack: No such StackFit support. Use KEEP.");
             innerLayout.SetMaxSize(GetLayoutParam().GetMaxSize());
             break;
     }
@@ -221,7 +219,6 @@ LayoutParam RenderStack::MakePositionedInnerLayoutParam(
         innerLayout.SetMinSize(Size(innerLayout.GetMinSize().Width(), height));
         innerLayout.SetMaxSize(Size(innerLayout.GetMaxSize().Width(), height));
     } else {
-        LOGD("RenderStack: No width or height set in positioned component. Make NonpositionedInnerLayoutParam.");
         innerLayout = MakeNonPositionedInnerLayoutParam(firstChild);
     }
     return innerLayout;

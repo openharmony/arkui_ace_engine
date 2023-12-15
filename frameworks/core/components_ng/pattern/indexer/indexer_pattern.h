@@ -70,11 +70,6 @@ public:
         isTouch_ = isTouch;
     }
 
-    const std::vector<std::string>& GetArrayValue()
-    {
-        return arrayValue_;
-    }
-
     FocusPattern GetFocusPattern() const override
     {
         return { FocusType::NODE, true };
@@ -91,6 +86,12 @@ public:
 private:
     void OnModifyDone() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
+
+    void BuildArrayValueItems();
+    void BuildFullArrayValue();
+    void CollapseArrayValue();
+    void ApplySevenPlusOneMode(int fullArraySize);
+    void ApplyFivePlusOneMode(int fullArraySize);
 
     void OnTouchDown(const TouchEventInfo& info);
     void OnTouchUp(const TouchEventInfo& info);
@@ -158,7 +159,14 @@ private:
     bool isHover_ = false;
     bool isPopup_ = false;
 
-    std::vector<std::string> arrayValue_;
+     // the array of displayed items, ths second param in the pair
+     // indicates whether the item should be hidden and displayed as dot
+    std::vector<std::pair<std::string, bool>> arrayValue_;
+    // full array of items, used in auto-collapse mode
+    std::vector<std::string> fullArrayValue_;
+    // sharp item count is 0 or 1, indicates whether the first item is # in
+    // original array, used in auto-collapse mode
+    int32_t sharpItemCount_ = 0;
     int32_t itemCount_ = 0;
     int32_t selected_ = 0;
     int32_t animateSelected_ = -1;
@@ -178,6 +186,7 @@ private:
     float lastItemSize_ = -1.0f;
     bool lastIndexFromPress_ = false;
     bool selectChanged_ = false;
+    bool autoCollapse_ = false;
 };
 } // namespace OHOS::Ace::NG
 

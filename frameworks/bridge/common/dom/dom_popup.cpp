@@ -87,7 +87,6 @@ void DOMPopup::OnChildNodeRemoved(const RefPtr<DOMNode>& child)
 
 bool DOMPopup::SetSpecializedAttr(const std::pair<std::string, std::string>& attr)
 {
-    LOGD("DOMPopup SetChildAttr");
     // static linear map must be sorted by key.
     static const LinearMapNode<Placement> placeMap[] = {
         { "bottom", Placement::BOTTOM },
@@ -120,7 +119,6 @@ bool DOMPopup::SetSpecializedAttr(const std::pair<std::string, std::string>& att
 
 bool DOMPopup::SetSpecializedStyle(const std::pair<std::string, std::string>& style)
 {
-    LOGD("DOMPopup SetSpecializedStyle");
     if (style.first == DOM_BACKGROUND_COLOR || style.first == DOM_BACKGROUND || style.first == DOM_BACKGROUND_IMAGE) {
         hasBackground_ = true;
     }

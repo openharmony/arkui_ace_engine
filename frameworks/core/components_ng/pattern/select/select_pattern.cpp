@@ -59,6 +59,10 @@ constexpr uint32_t SELECT_ITSELF_TEXT_LINES = 1;
 
 constexpr Dimension OPTION_MARGIN = 8.0_vp;
 
+constexpr Dimension CALIBERATE_X = 4.0_vp;
+
+constexpr Dimension CALIBERATE_Y = 4.0_vp;
+
 } // namespace
 
 void SelectPattern::OnAttachToFrameNode()
@@ -148,7 +152,9 @@ void SelectPattern::ShowSelectMenu()
     }
     
     auto offset = GetHost()->GetPaintRectOffset();
-    offset.AddY(selectSize_.Height());
+    offset.AddY(selectSize_.Height() + CALIBERATE_Y.ConvertToPx());
+    offset.AddX(-CALIBERATE_X.ConvertToPx());
+    
     overlayManager->ShowMenu(GetHost()->GetId(), offset, menuWrapper_);
 }
 
@@ -860,9 +866,14 @@ void SelectPattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const
         CHECK_NULL_VOID(optionPaintProperty);
         std::string optionWidth = std::to_string(optionPaintProperty->GetSelectModifiedWidthValue(0.0f));
         json->Put("optionWidth", optionWidth.c_str());
-        std::string optionHeight = std::to_string(optionPaintProperty->GetSelectModifiedHeightValue(0.0f));
-        json->Put("optionHeight", optionHeight.c_str());
     }
+    
+    auto menu = GetMenuNode();
+    CHECK_NULL_VOID(menu);
+    auto menuLayoutProps = menu->GetLayoutProperty<MenuLayoutProperty>();
+    CHECK_NULL_VOID(menuLayoutProps);
+    std::string optionHeight =  std::to_string(menuLayoutProps->GetSelectModifiedHeightValue(0.0f));
+    json->Put("optionHeight", optionHeight.c_str());
 }
 
 void SelectPattern::ToJsonOptionAlign(std::unique_ptr<JsonValue>& json) const
@@ -1125,14 +1136,14 @@ void SelectPattern::SetOptionWidthFitTrigger(bool isFitTrigger)
 
 void SelectPattern::SetOptionHeight(const Dimension& value)
 {
-    for (size_t i = 0; i < options_.size(); ++i) {
-        auto optionHeight = value.ConvertToPx();
-        auto optionPattern = options_[i]->GetPattern<OptionPattern>();
-        CHECK_NULL_VOID(optionPattern);
-        optionPattern->SetIsHeightModifiedBySelect(true);
-        auto optionPaintProperty = options_[i]->GetPaintProperty<OptionPaintProperty>();
-        CHECK_NULL_VOID(optionPaintProperty);
-        optionPaintProperty->UpdateSelectModifiedHeight(optionHeight);
-    }
+    auto menuMaxHeight = value.ConvertToPx();
+    auto menu = GetMenuNode();
+    CHECK_NULL_VOID(menu);
+    auto menuPattern = menu->GetPattern<MenuPattern>();
+    CHECK_NULL_VOID(menuPattern);
+    menuPattern->SetIsHeightModifiedBySelect(true);
+    auto menuLayoutProps = menu->GetLayoutProperty<MenuLayoutProperty>();
+    CHECK_NULL_VOID(menuLayoutProps);
+    menuLayoutProps->UpdateSelectModifiedHeight(menuMaxHeight);
 }
 } // namespace OHOS::Ace::NG

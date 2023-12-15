@@ -23,6 +23,9 @@
 #include "core/components/common/layout/constants.h"
 
 namespace OHOS::Ace::NG {
+const std::vector<float> DEFAULT_COLORFILTER_MATRIX = {
+    1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0
+};
 ArkUINativeModuleValue ImageBridge::SetCopyOption(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
@@ -348,28 +351,64 @@ ArkUINativeModuleValue ImageBridge::ResetImageInterpolation(ArkUIRuntimeCallInfo
     return panda::JSValueRef::Undefined(vm);
 }
 
+void SetColorFilterObject(const EcmaVM* vm, const Local<JSValueRef>& jsObjArg, NodeHandle nativeNode)
+{
+    Framework::JSColorFilter* colorFilter;
+    if (!jsObjArg->IsUndefined() && !jsObjArg->IsNull()) {
+        colorFilter = static_cast<Framework::JSColorFilter*>(jsObjArg->ToObject(vm)->GetNativePointerField(0));
+    } else {
+        GetArkUIInternalNodeAPI()->GetImageModifier().SetColorFilter(
+            nativeNode, &(*DEFAULT_COLORFILTER_MATRIX.begin()), COLOR_FILTER_MATRIX_SIZE);
+        return;
+    }
+    if (colorFilter && colorFilter->GetColorFilterMatrix().size() == COLOR_FILTER_MATRIX_SIZE) {
+        GetArkUIInternalNodeAPI()->GetImageModifier().SetColorFilter(
+            nativeNode, &(*colorFilter->GetColorFilterMatrix().begin()), COLOR_FILTER_MATRIX_SIZE);
+    } else {
+        GetArkUIInternalNodeAPI()->GetImageModifier().SetColorFilter(
+            nativeNode, &(*DEFAULT_COLORFILTER_MATRIX.begin()), COLOR_FILTER_MATRIX_SIZE);
+        return;
+    }
+    GetArkUIInternalNodeAPI()->GetImageModifier().SetColorFilter(
+        nativeNode, &(*DEFAULT_COLORFILTER_MATRIX.begin()), COLOR_FILTER_MATRIX_SIZE);
+}
+
 ArkUINativeModuleValue ImageBridge::SetColorFilter(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
-    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
+    Local<JSValueRef> jsObjArg = runtimeCallInfo->GetCallArgRef(1);
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    auto array = std::make_unique<float[]>(COLOR_FILTER_MATRIX_SIZE);
-    int32_t colorFilterCount = 0;
-    auto getValue = [&colorFilterCount](const EcmaVM* vm, const Local<JSValueRef>& args) mutable {
-        if (args->IsNumber()) {
-            colorFilterCount++;
-            return (float)args->ToNumber(vm)->Value();
-        }
-        return 0.0f;
-    };
-    if (ArkTSUtils::ParseArray<float>(vm, secondArg, array.get(), COLOR_FILTER_MATRIX_SIZE, getValue) &&
-        colorFilterCount == COLOR_FILTER_MATRIX_SIZE) {
-        GetArkUIInternalNodeAPI()->GetImageModifier().SetColorFilter(nativeNode, array.get(), COLOR_FILTER_MATRIX_SIZE);
-    } else {
-        GetArkUIInternalNodeAPI()->GetImageModifier().ResetColorFilter(nativeNode);
+
+    if (!jsObjArg->IsArray(vm) && !jsObjArg->IsObject()) {
+        GetArkUIInternalNodeAPI()->GetImageModifier().SetColorFilter(
+            nativeNode, &(*DEFAULT_COLORFILTER_MATRIX.begin()), COLOR_FILTER_MATRIX_SIZE);
+        return panda::JSValueRef::Undefined(vm);
     }
+    if (jsObjArg->IsObject() && !jsObjArg->IsArray(vm)) {
+        SetColorFilterObject(vm, jsObjArg, nativeNode);
+        return panda::JSValueRef::Undefined(vm);
+    }
+    auto array = panda::CopyableGlobal<panda::ArrayRef>(vm, jsObjArg);
+    if (array->Length(vm) != COLOR_FILTER_MATRIX_SIZE) {
+        GetArkUIInternalNodeAPI()->GetImageModifier().SetColorFilter(
+            nativeNode, &(*DEFAULT_COLORFILTER_MATRIX.begin()), COLOR_FILTER_MATRIX_SIZE);
+        return panda::JSValueRef::Undefined(vm);
+    }
+    std::vector<float> colorfilter;
+    for (size_t i = 0; i < array->Length(vm); i++) {
+        auto value = array->GetValueAt(vm, jsObjArg, i);
+        if (value->IsNumber()) {
+            colorfilter.emplace_back(value->ToNumber(vm)->Value());
+        } else {
+            GetArkUIInternalNodeAPI()->GetImageModifier().SetColorFilter(
+                nativeNode, &(*DEFAULT_COLORFILTER_MATRIX.begin()), COLOR_FILTER_MATRIX_SIZE);
+            return panda::JSValueRef::Undefined(vm);
+        }
+    }
+    GetArkUIInternalNodeAPI()->GetImageModifier().SetColorFilter(
+        nativeNode, &(*colorfilter.begin()), COLOR_FILTER_MATRIX_SIZE);
     return panda::JSValueRef::Undefined(vm);
 }
 

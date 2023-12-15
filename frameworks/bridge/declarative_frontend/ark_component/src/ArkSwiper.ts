@@ -1,3 +1,18 @@
+/*
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 /// <reference path='./import.ts' />
 class ArkSwiperComponent extends ArkComponent implements SwiperAttribute {
   constructor(nativePtr: KNode) {
@@ -206,19 +221,21 @@ class SwiperDisplayCountModifier extends ModifierWithKey<string | number | Swipe
     if (reset) {
       GetUINativeModule().swiper.resetSwiperDisplayCount(node);
     } else {
-      if (!isNull(this.value) && typeof this.value === 'object') {
+      if (isNull(this.value)) {
+        GetUINativeModule().swiper.resetSwiperDisplayCount(node);
+      } else if (typeof this.value === 'object') {
         let minSize = (this.value as SwiperAutoFill).minSize.toString();
-        GetUINativeModule().swiper.setSwiperDisplayCount(node, minSize);
+        GetUINativeModule().swiper.setSwiperDisplayCount(node, minSize, typeof this.value);
       } else {
-        GetUINativeModule().swiper.setSwiperDisplayCount(node, this.value);
+        GetUINativeModule().swiper.setSwiperDisplayCount(node, this.value, typeof this.value);
       }
     }
   }
   checkObjectDiff(): boolean {
     if (typeof this.stageValue !== typeof this.value) {
-      return false;
+      return true;
     } else if (typeof this.stageValue === 'object' && typeof this.stageValue === 'object') {
-      return (this.stageValue as SwiperAutoFill).minSize === (this.value as SwiperAutoFill).minSize;
+      return (this.stageValue as SwiperAutoFill).minSize !== (this.value as SwiperAutoFill).minSize;
     } else {
       return !isBaseOrResourceEqual(this.stageValue, this.value);
     }
@@ -413,14 +430,10 @@ class SwiperIndicatorModifier extends ModifierWithKey<boolean | DotIndicator | D
   }
   checkObjectDiff(): boolean {
     if (typeof this.stageValue !== typeof this.value) {
-      return false;
+      return true;
     }
     if (typeof this.stageValue === 'boolean' && typeof this.value === 'boolean') {
-      if (this.stageValue === this.value) {
-        return true;
-      } else {
-        return false;
-      }
+      return this.stageValue !== this.value;
     }
     if (this.stageValue instanceof ArkDotIndicator && this.value instanceof ArkDotIndicator) {
       return (
@@ -623,6 +636,6 @@ globalThis.Swiper.attributeModifier = function (modifier) {
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkSwiperComponent(nativeNode);
   });
-  modifier.applyNormalAttribute(component);
+  applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
 };

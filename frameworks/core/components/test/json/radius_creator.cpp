@@ -24,7 +24,6 @@ namespace OHOS::Ace {
 
 Radius RadiusCreator::CreateFromJson(const JsonValue& json)
 {
-    LOGD("CreateFromJson Radius");
     std::string classType = json.GetValue(CLASS_NAME)->GetString();
     if (classType != RADIUS_NAME) {
         LOGE("Create Radius err: not a radius json.");

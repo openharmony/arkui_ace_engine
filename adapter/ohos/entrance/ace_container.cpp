@@ -676,17 +676,16 @@ void AceContainer::InitializeCallback()
 
     ACE_DCHECK(aceView_ && taskExecutor_ && pipelineContext_);
     auto&& touchEventCallback = [context = pipelineContext_, id = instanceId_](
-                                    const TouchEvent& event, const std::function<void()>& markProcess) {
+                                    const TouchEvent& event, const std::function<void()>& markProcess,
+                                    const RefPtr<OHOS::Ace::NG::FrameNode>& node) {
         ContainerScope scope(id);
         context->GetTaskExecutor()->PostTask(
-            [context, event, markProcess]() {
-                if (event.type != TouchType::MOVE) {
-                    TAG_LOGD(AceLogTag::ACE_INPUTTRACKING, "TouchEvent Process in ace_container: "
-                        "eventInfo: id:%{public}d, pointX=%{public}f pointY=%{public}f "
-                        "type=%{public}d timeStamp=%{public}lld", event.pointerEvent->GetId(),
-                        event.x, event.y, (int)event.type, event.time.time_since_epoch().count());
+            [context, event, markProcess, node]() {
+                if (node) {
+                    context->OnTouchEvent(event, node);
+                } else {
+                    context->OnTouchEvent(event);
                 }
-                context->OnTouchEvent(event);
                 CHECK_NULL_VOID(markProcess);
                 markProcess();
             },
@@ -695,11 +694,16 @@ void AceContainer::InitializeCallback()
     aceView_->RegisterTouchEventCallback(touchEventCallback);
 
     auto&& mouseEventCallback = [context = pipelineContext_, id = instanceId_](
-                                    const MouseEvent& event, const std::function<void()>& markProcess) {
+                                    const MouseEvent& event, const std::function<void()>& markProcess,
+                                    const RefPtr<OHOS::Ace::NG::FrameNode>& node) {
         ContainerScope scope(id);
         context->GetTaskExecutor()->PostTask(
-            [context, event, markProcess]() {
-                context->OnMouseEvent(event);
+            [context, event, markProcess, node]() {
+                if (node) {
+                    context->OnMouseEvent(event, node);
+                } else {
+                    context->OnMouseEvent(event);
+                }
                 CHECK_NULL_VOID(markProcess);
                 markProcess();
             },
@@ -708,11 +712,16 @@ void AceContainer::InitializeCallback()
     aceView_->RegisterMouseEventCallback(mouseEventCallback);
 
     auto&& axisEventCallback = [context = pipelineContext_, id = instanceId_](
-                                   const AxisEvent& event, const std::function<void()>& markProcess) {
+                                   const AxisEvent& event, const std::function<void()>& markProcess,
+                                   const RefPtr<OHOS::Ace::NG::FrameNode>& node) {
         ContainerScope scope(id);
         context->GetTaskExecutor()->PostTask(
-            [context, event, markProcess]() {
-                context->OnAxisEvent(event);
+            [context, event, markProcess, node]() {
+                if (node) {
+                    context->OnAxisEvent(event, node);
+                } else {
+                    context->OnAxisEvent(event);
+                }
                 CHECK_NULL_VOID(markProcess);
                 markProcess();
             },
@@ -725,8 +734,6 @@ void AceContainer::InitializeCallback()
         bool result = false;
         context->GetTaskExecutor()->PostSyncTask(
             [context, event, &result]() {
-                TAG_LOGD(AceLogTag::ACE_INPUTTRACKING, "Process KeyEvent in ace_container, eventInfo:"
-                    "code:%{public}d, action%{public}d", event.code, event.action);
                 result = context->OnKeyEvent(event);
             },
             TaskExecutor::TaskType::UI);
@@ -938,7 +945,6 @@ bool AceContainer::RunPage(
     ContainerScope scope(instanceId);
     auto front = container->GetFrontend();
     CHECK_NULL_RETURN(front, false);
-    LOGD("RunPage content=[%{private}s]", content.c_str());
     if (isNamedRouter) {
         front->RunPageByNamedRouter(content);
     } else {
@@ -955,7 +961,6 @@ bool AceContainer::RunPage(
     ContainerScope scope(instanceId);
     auto front = container->GetFrontend();
     CHECK_NULL_RETURN(front, false);
-    LOGD("RunPage by buffer size:%{public}d", size);
     front->RunPage(content, params);
     return true;
 }
@@ -1084,6 +1089,13 @@ bool AceContainer::RequestAutoSave(const RefPtr<NG::FrameNode>& node)
         return false;
     }
     return true;
+}
+
+std::shared_ptr<NavigationController> AceContainer::GetNavigationController(
+    const std::string& navigationId)
+{
+    CHECK_NULL_RETURN(pipelineContext_, nullptr);
+    return pipelineContext_->GetNavigationController(navigationId);
 }
 
 void AceContainer::SetHapPath(const std::string& hapPath)
@@ -1219,6 +1231,28 @@ void AceContainer::DumpHeapSnapshot(bool isPrivate)
             auto sp = frontend.Upgrade();
             CHECK_NULL_VOID(sp);
             sp->DumpHeapSnapshot(isPrivate);
+        },
+        TaskExecutor::TaskType::JS);
+}
+
+void AceContainer::DestroyHeapProfiler()
+{
+    taskExecutor_->PostTask(
+        [frontend = WeakPtr<Frontend>(frontend_)] {
+            auto sp = frontend.Upgrade();
+            CHECK_NULL_VOID(sp);
+            sp->DestroyHeapProfiler();
+        },
+        TaskExecutor::TaskType::JS);
+}
+
+void AceContainer::ForceFullGC()
+{
+    taskExecutor_->PostTask(
+        [frontend = WeakPtr<Frontend>(frontend_)] {
+            auto sp = frontend.Upgrade();
+            CHECK_NULL_VOID(sp);
+            sp->ForceFullGC();
         },
         TaskExecutor::TaskType::JS);
 }
@@ -1507,7 +1541,6 @@ void AceContainer::AttachView(std::shared_ptr<Window> window, AceView* view, dou
                                     colorScheme = colorScheme_, resourceInfo = resourceInfo_,
                                     context = runtimeContext_.lock(), abilityInfo = abilityInfo_.lock()]() {
         ACE_SCOPED_TRACE("OHOS::LoadThemes()");
-        LOGD("UIContent load theme, Resource decoupling: %{public}d", SystemProperties::GetResourceDecoupling());
 
         if (SystemProperties::GetResourceDecoupling()) {
             InitResourceAndThemeManager(pipelineContext, assetManager, colorScheme, resourceInfo, context, abilityInfo);
@@ -1702,7 +1735,6 @@ void AceContainer::InitializeSubContainer(int32_t parentContainerId)
 
 void AceContainer::InitWindowCallback()
 {
-    LOGD("AceContainer InitWindowCallback");
     if (!pipelineContext_ || !uiWindow_) {
         return;
     }

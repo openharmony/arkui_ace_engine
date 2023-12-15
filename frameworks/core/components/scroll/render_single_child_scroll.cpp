@@ -58,7 +58,6 @@ void RenderSingleChildScroll::Update(const RefPtr<Component>& component)
         positionController_->SetScrollEvent(ScrollEvent::SCROLL_POSITION,
             AceAsyncEvent<void(std::shared_ptr<ScrollEventInfo>&)>::Create(scroll->GetOnScroll(), GetContext()));
         positionController_->SetScrollNode(AceType::WeakClaim(this));
-        LOGD("initial position: %{public}lf, %{public}lf", currentOffset_.GetX(), currentOffset_.GetY());
     }
     // In dialog, scroll is not takeBoundary, use this flag to determine.
     TakeBoundary(scroll->IsTakeBoundary());
@@ -120,7 +119,6 @@ bool RenderSingleChildScroll::CalculateMainScrollExtent(const Size& itemSize)
         if (scrollable_) {
             scrollable_->MarkAvailable(false);
             if (scrollable_->Idle() && GetMainOffset(currentOffset_) > 0.0) {
-                LOGD("jump to top");
                 JumpToPosition(0.0);
             }
         }
@@ -128,7 +126,6 @@ bool RenderSingleChildScroll::CalculateMainScrollExtent(const Size& itemSize)
         if (scrollable_ && scrollable_->Available()) {
             if (scrollable_->Idle() && GetMainOffset(currentOffset_) > mainScrollExtent_ - GetMainSize(viewPort_)) {
                 // scroll to bottom
-                LOGD("jump to bottom");
                 JumpToPosition(mainScrollExtent_ - GetMainSize(viewPort_));
             }
         } else {
@@ -152,7 +149,6 @@ bool RenderSingleChildScroll::CalculateMainScrollExtent(const Size& itemSize)
 void RenderSingleChildScroll::MoveChildToViewPort(
     const Size& size, const Offset& childOffset, const Offset& effectOffset)
 {
-    LOGD("MoveChildToViewPort %{public}s %{public}s", size.ToString().c_str(), childOffset.ToString().c_str());
     auto selfOffset = GetGlobalOffset();
     auto itemActualRect = Rect(childOffset, size);
     auto viewRect = Rect(selfOffset, viewPort_);
@@ -224,7 +220,6 @@ void RenderSingleChildScroll::PerformLayout()
         child->Layout(layout);
     }
     itemSize = child->GetLayoutSize();
-    LOGD("child size after padding: %{public}lf, %{public}lf", itemSize.Width(), itemSize.Height());
     auto left = child->GetLeft().ConvertToPx();
     auto top = child->GetTop().ConvertToPx();
 
@@ -299,7 +294,6 @@ void RenderSingleChildScroll::PerformLayout()
         }
     }
     child->SetPosition(childOffset);
-    LOGD("child position:%{public}s", child->GetPosition().ToString().c_str());
 
     currentBottomOffset_ = axis_ == Axis::VERTICAL ? currentOffset_ + Offset(0.0, viewPort_.Height())
                                                    : currentOffset_ + Offset(viewPort_.Width(), 0.0);

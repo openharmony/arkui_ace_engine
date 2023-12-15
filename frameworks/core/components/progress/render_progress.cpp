@@ -34,8 +34,6 @@ void RenderProgress::Update(const RefPtr<Component>& component)
         LOGE("Progress::RenderProgress update min, max, value, step, cachedValue error");
         return;
     }
-    LOGD("Progress::RenderProgress update Min: %{private}lf max: %{private}lf value: %{private}lf, cachedValue: "
-         "%{private}lf", min_, max_, value_, cachedValue_);
     totalRatio_ = (value_ - min_) / (max_ - min_);
     cachedRatio_ = (cachedValue_ - min_) / (max_ - min_);
     MarkNeedLayout();
