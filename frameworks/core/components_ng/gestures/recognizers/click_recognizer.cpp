@@ -181,6 +181,7 @@ void ClickRecognizer::HandleTouchDownEvent(const TouchEvent& event)
             Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
         }
     }
+    focusPoint_ = ComputeFocusPoint();
 }
 
 void ClickRecognizer::HandleTouchUpEvent(const TouchEvent& event)
@@ -216,7 +217,6 @@ void ClickRecognizer::HandleTouchUpEvent(const TouchEvent& event)
     if (equalsToFingers_ && (currentTouchPointsNum_ == 0) && isUpInRegion) {
         // Turn off the multi-finger lift deadline timer
         fingerDeadlineTimer_.Cancel();
-        focusPoint_ = ComputeFocusPoint();
         tappedCount_++;
 
         if (tappedCount_ == count_) {
