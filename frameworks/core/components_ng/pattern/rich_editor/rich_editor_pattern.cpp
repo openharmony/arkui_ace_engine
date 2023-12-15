@@ -1602,12 +1602,10 @@ void RichEditorPattern::HandleDoubleClickOrLongPress(GestureEvent& info)
     auto selectEnd = std::max(textSelector_.baseOffset, textSelector_.destinationOffset);
     auto selectStart = std::min(textSelector_.baseOffset, textSelector_.destinationOffset);
     if (!BetweenSelectedPosition(info.GetGlobalLocation()) && !adjusted_) {
-        if (selectStart == 0) {
-            textSelector_.Update(selectStart, selectStart);
-        } else {
-            textSelector_.Update(selectEnd, selectEnd);
-            selectStart = selectEnd;
-        }
+        auto position = paragraphs_.GetIndex(textOffset);
+        textSelector_.Update(position, position);
+        selectStart = position;
+        selectEnd = position;
     }
 
     auto textSelectInfo = GetSpansInfo(selectStart, selectEnd, GetSpansMethod::ONSELECT);
