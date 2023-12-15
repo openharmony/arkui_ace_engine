@@ -227,6 +227,8 @@ void RelativeContainerLayoutAlgorithm::MeasureSelf(LayoutWrapper* layoutWrapper)
         relativeContainerRect = relativeContainerRect.CombineRectT(tempRect);
     }
 
+    relativeContainerRect = relativeContainerRect.IntersectRectT(RectF(0.0f, 0.0f, Infinity<float>(),
+                                                                 Infinity<float>()));
     if (selfIdealSize->Width()->GetDimension().Unit() == DimensionUnit::AUTO && !isHorizontalRelyOnContainer_) {
         layoutWrapper->GetGeometryNode()->SetFrameSize(SizeF(relativeContainerRect.Width() + padding_.Width(),
             layoutWrapper->GetGeometryNode()->GetFrameSize().Height()));
