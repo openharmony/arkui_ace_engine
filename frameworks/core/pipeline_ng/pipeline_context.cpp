@@ -390,7 +390,7 @@ RefPtr<FrameNode> PipelineContext::HandleFocusNode()
     CHECK_NULL_RETURN(curRootNode, nullptr);
     auto rootFocusHub = curRootNode->GetFocusHub();
     CHECK_NULL_RETURN(rootFocusHub, nullptr);
-    RefPtr<FrameNode> lastFocusNode;
+    RefPtr<FocusHub> lastFocusNode;
     std::list<RefPtr<FocusHub>> focusNodes = rootFocusHub->GetChildren();
     for (const auto& item : focusNodes) {
         if (item->IsCurrentFocus()) {
