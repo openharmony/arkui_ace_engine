@@ -93,8 +93,7 @@ void SetMarqueeFontWeight(NodeHandle node, const char* fontWeight)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    std::string fontWeightStr = fontWeight;
-    MarqueeModelNG::SetFontWeight(frameNode, Framework::ConvertStrToFontWeight(fontWeightStr));
+    MarqueeModelNG::SetFontWeight(frameNode, Framework::ConvertStrToFontWeight(fontWeight));
 }
 
 void ResetMarqueeFontWeight(NodeHandle node)

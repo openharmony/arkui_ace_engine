@@ -19,6 +19,8 @@
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 #include "core/components/common/properties/text_style.h"
 
+static const std::string DEFAULT_FONT_WEIGHT = "400";
+
 namespace OHOS::Ace::NG {
 ArkUINativeModuleValue MarqueeBridge::SetAllowScale(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
@@ -47,10 +49,17 @@ ArkUINativeModuleValue MarqueeBridge::SetFontWeight(ArkUIRuntimeCallInfo* runtim
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
-    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
+    Local<JSValueRef> weightArg = runtimeCallInfo->GetCallArgRef(1);
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    std::string fontWeight = secondArg->ToString(vm)->ToString();
-    GetArkUIInternalNodeAPI()->GetMarqueeModifier().SetMarqueeFontWeight(nativeNode, fontWeight.c_str());
+    std::string weight = DEFAULT_FONT_WEIGHT;
+    if (!weightArg->IsNull()) {
+        if (weightArg->IsNumber()) {
+            weight = std::to_string(weightArg->Int32Value(vm));
+        } else if (weightArg->IsString()) {
+            weight = weightArg->ToString(vm)->ToString();
+        }
+    }
+    GetArkUIInternalNodeAPI()->GetMarqueeModifier().SetMarqueeFontWeight(nativeNode, weight.c_str());
     return panda::JSValueRef::Undefined(vm);
 }
 
