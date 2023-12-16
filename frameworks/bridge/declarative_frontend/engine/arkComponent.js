@@ -13881,90 +13881,35 @@ class ProgressColorModifier extends ModifierWithKey {
 ProgressColorModifier.identity = Symbol('color');
 class ProgressStyleModifier extends ModifierWithKey {
   applyPeer(node, reset) {
-    let _a, _b, _c, _d;
     if (reset) {
       GetUINativeModule().progress.ResetProgressStyle(node);
     }
     else {
-      let valueProgressStyle = this.value;
-      let valueCapsuleStyle = this.value;
-      let valueRingStyle = this.value;
-      let valueLinearStyle = this.value;
-      let valueScaleRingStyle = this.value;
-      let strokeWidth = undefined;
-      let scaleCount = undefined;
-      let scaleWidth = undefined;
+      let strokeWidth = this.value.strokeWidth;
+      let scaleCount = this.value.scaleCount;
+      let scaleWidth = this.value.scaleWidth;
       let enableSmoothEffect = this.value.enableSmoothEffect;
-      let enableScanEffect = undefined;
-      let shadow = undefined;
-      if (isUndefined(strokeWidth) && !isNull(valueProgressStyle.strokeWidth) &&
-        !isUndefined(valueProgressStyle.strokeWidth)) {
-        strokeWidth = valueProgressStyle.strokeWidth;
+      let borderColor = this.value.borderColor;
+      let borderWidth = this.value.borderWidth;
+      let content = this.value.content;
+      let fontSize = undefined;
+      let fontWeight = undefined;
+      let fontFamily = undefined;
+      let fontStyle = undefined;
+      if (this.value.font) {
+        fontSize = this.value.font.size;
+        fontWeight = this.value.font.weight;
+        fontFamily = this.value.font.family;
+        fontStyle = this.value.font.style;
       }
-      if (isUndefined(strokeWidth) && !isNull(valueRingStyle.strokeWidth) &&
-        !isUndefined(valueRingStyle.strokeWidth)) {
-        strokeWidth = valueRingStyle.strokeWidth;
-      }
-      if (isUndefined(strokeWidth) && !isNull(valueLinearStyle.strokeWidth) &&
-        !isUndefined(valueLinearStyle.strokeWidth)) {
-        strokeWidth = valueLinearStyle.strokeWidth;
-      }
-      if (isUndefined(strokeWidth) && !isNull(valueScaleRingStyle.strokeWidth) &&
-        !isUndefined(valueScaleRingStyle.strokeWidth)) {
-        strokeWidth = valueScaleRingStyle.strokeWidth;
-      }
-      if (isUndefined(strokeWidth) && !isNull(valueCapsuleStyle.borderWidth) &&
-        !isUndefined(valueCapsuleStyle.borderWidth)) {
-        strokeWidth = valueCapsuleStyle.borderWidth;
-      }
-      if (isUndefined(scaleCount) && !isNull(valueProgressStyle.scaleCount) &&
-        !isUndefined(valueProgressStyle.scaleCount)) {
-        scaleCount = valueProgressStyle.scaleCount;
-      }
-      if (isUndefined(scaleCount) && !isNull(valueRingStyle.status) &&
-        !isUndefined(valueRingStyle.status)) {
-        scaleCount = valueRingStyle.status;
-      }
-      if (isUndefined(scaleCount) && !isNull(valueScaleRingStyle.scaleCount) &&
-        !isUndefined(valueScaleRingStyle.scaleCount)) {
-        scaleCount = valueScaleRingStyle.scaleCount;
-      }
-      if (isUndefined(scaleCount) && !isNull(valueCapsuleStyle.font) &&
-        !isUndefined(valueCapsuleStyle.font)) {
-        scaleCount = (_a = valueCapsuleStyle.font) === null || _a === void 0 ? void 0 : _a.style;
-      }
-      if (isUndefined(scaleWidth) && !isNull(valueProgressStyle.scaleWidth) &&
-        !isUndefined(valueProgressStyle.scaleWidth)) {
-        scaleWidth = valueProgressStyle.scaleWidth;
-      }
-      if (isUndefined(scaleWidth) && !isNull(valueScaleRingStyle.scaleWidth) &&
-        !isUndefined(valueScaleRingStyle.scaleWidth)) {
-        scaleWidth = valueScaleRingStyle.scaleWidth;
-      }
-      if (isUndefined(scaleWidth) && !isNull(valueCapsuleStyle.font) &&
-        !isUndefined(valueCapsuleStyle.font)) {
-        scaleWidth = (_b = valueCapsuleStyle.font) === null || _b === void 0 ? void 0 : _b.size;
-      }
-      if (isUndefined(enableScanEffect) && !isNull(valueRingStyle.enableScanEffect) &&
-        !isUndefined(valueRingStyle.enableScanEffect)) {
-        enableScanEffect = valueRingStyle.enableScanEffect;
-      }
-      if (isUndefined(enableScanEffect) && !isNull(valueLinearStyle.enableScanEffect) &&
-        !isUndefined(valueLinearStyle.enableScanEffect)) {
-        enableScanEffect = valueLinearStyle.enableScanEffect;
-      }
-      if (isUndefined(enableScanEffect) && !isNull(valueCapsuleStyle.enableScanEffect) &&
-        !isUndefined(valueCapsuleStyle.enableScanEffect)) {
-        enableScanEffect = valueCapsuleStyle.enableScanEffect;
-      }
-      if (isUndefined(shadow) && !isNull(valueRingStyle.shadow) && !isUndefined(valueRingStyle.shadow)) {
-        shadow = valueRingStyle.shadow;
-      }
-      if (isUndefined(shadow) && !isNull(valueCapsuleStyle.showDefaultPercentage) &&
-        !isUndefined(valueCapsuleStyle.showDefaultPercentage)) {
-        shadow = valueCapsuleStyle.showDefaultPercentage;
-      }
-      GetUINativeModule().progress.SetProgressStyle(node, strokeWidth, scaleCount, scaleWidth, enableSmoothEffect, valueCapsuleStyle.borderColor, valueCapsuleStyle.content, (_c = valueCapsuleStyle.font) === null || _c === void 0 ? void 0 : _c.weight, valueCapsuleStyle.fontColor, enableScanEffect, shadow, (_d = valueCapsuleStyle.font) === null || _d === void 0 ? void 0 : _d.family, valueLinearStyle.strokeRadius);
+      let fontColor = this.value.fontColor;
+      let enableScanEffect = this.value.enableScanEffect;
+      let showDefaultPercentage = this.value.showDefaultPercentage;
+      let shadow = this.value.shadow;
+      let status = this.value.status;
+      let strokeRadius = this.value.strokeRadius;
+      GetUINativeModule().progress.SetProgressStyle(node, strokeWidth, scaleCount, scaleWidth, enableSmoothEffect, borderColor, borderWidth,
+        content, fontSize, fontWeight, fontFamily, fontStyle, fontColor, enableScanEffect, showDefaultPercentage, shadow, status, strokeRadius);
     }
   }
   checkObjectDiff() {
