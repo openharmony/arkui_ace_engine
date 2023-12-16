@@ -182,6 +182,10 @@ ArkUINativeModuleValue DataPanelBridge::SetTrackShadow(ArkUIRuntimeCallInfo* run
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+    if (secondArg->IsNull()) {
+        GetArkUIInternalNodeAPI()->GetDataPanelModifier().SetNullTrackShadow(nativeNode);
+        return panda::JSValueRef::Undefined(vm);
+    }
     if (!secondArg->IsObject()) {
         GetArkUIInternalNodeAPI()->GetDataPanelModifier().ResetTrackShadow(nativeNode);
         return panda::JSValueRef::Undefined(vm);

@@ -103,6 +103,9 @@ class DataPanelTrackShadowModifier extends ModifierWithKey<DataPanelShadowOption
   static identity = Symbol('dataPanelTrackShadow');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
+      if (this.value === null) {
+        GetUINativeModule().dataPanel.setDataPanelTrackShadow(node, null);
+      }
       GetUINativeModule().dataPanel.resetDataPanelTrackShadow(node);
     } else {
       GetUINativeModule().dataPanel.setDataPanelTrackShadow(node, this.value!);
