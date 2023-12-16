@@ -2137,7 +2137,7 @@ void SetAllowDrop(NodeHandle node, const char** allowDropCharArray, int32_t leng
     std::set<std::string> allowDropSet;
     allowDropSet.clear();
     std::string allowDropStr;
-    for (size_t i = 0; i < length; i++) {
+    for (int32_t i = 0; i < length; i++) {
         allowDropStr = allowDropCharArray[i];
         allowDropSet.insert(allowDropStr);
     }

@@ -472,7 +472,7 @@ ArkUINativeModuleValue ListBridge::SetDivider(ArkUIRuntimeCallInfo* runtimeCallI
     Local<JSValueRef> dividerEndMarginArgs = runtimeCallInfo->GetCallArgRef(LIST_ARG_INDEX_4);
     if (dividerStrokeWidthArgs->IsUndefined() && dividerStartMarginArgs->IsUndefined() &&
         dividerEndMarginArgs->IsUndefined() && colorArg->IsUndefined()) {
-        GetArkUIInternalNodeAPI()->GetTabsModifier().ResetDivider(nativeNode);
+        GetArkUIInternalNodeAPI()->GetListModifier().ListResetDivider(nativeNode);
         return panda::JSValueRef::Undefined(vm);
     }
 
