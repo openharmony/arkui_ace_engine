@@ -67,6 +67,8 @@ const float CONTAINER_HEIGHT = 1000.0f;
 const SizeF CONTAINER_SIZE(CONTAINER_WIDTH, CONTAINER_HEIGHT);
 
 const OffsetF OFFSETF { 1.0, 1.0 };
+const float DEFAULT_X = 10;
+const float DEFAULT_Y = 10;
 
 constexpr uint64_t TIMESTAMP_1 = 100;
 constexpr uint64_t TIMESTAMP_2 = 101;
@@ -2244,5 +2246,103 @@ HWTEST_F(FrameNodeTestNg, CollectTouchInfos003, TestSize.Level1)
      */
     GET_PARENT->CollectTouchInfos(globalPoint, parentRevertPoint, touchInfos);
     EXPECT_EQ(touchInfos.size(), 0);
+}
+
+/**
+ * @tc.name: FrameNodeTestNg_IsPreviewNeedScale001
+ * @tc.desc: Test frame node method IsPreviewNeedScale
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, IsPreviewNeedScale001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. initialize parameters.
+     */
+    FRAME_NODE->isActive_ = true;
+    FRAME_NODE->eventHub_->SetEnabled(true);
+    SystemProperties::debugEnabled_ = true;
+
+    /**
+     * @tc.steps: step2. call IsPreviewNeedScale
+     * @tc.expected: expect IsPreviewNeedScale return false.
+     */
+    EXPECT_FALSE(FRAME_NODE->IsPreviewNeedScale());
+
+    /**
+     * @tc.steps: step2. set a large size and call IsPreviewNeedScale.
+     * @tc.expected: expect IsPreviewNeedScale return true.
+     */
+    auto geometryNode = FRAME_NODE->GetGeometryNode();
+    geometryNode->SetFrameSize(CONTAINER_SIZE);
+    EXPECT_TRUE(FRAME_NODE->IsPreviewNeedScale());
+}
+
+/**
+ * @tc.name: FrameNodeTestNg_GetGlobalOffset001
+ * @tc.desc: Test frame node method GetGlobalOffset
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, GetGlobalOffset001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. initialize parameters.
+     */
+    FRAME_NODE->isActive_ = true;
+    FRAME_NODE->eventHub_->SetEnabled(true);
+    SystemProperties::debugEnabled_ = true;
+    auto mockRenderContext = AceType::MakeRefPtr<MockRenderContext>();
+    ASSERT_NE(mockRenderContext, nullptr);
+    mockRenderContext->rect_ = RectF(DEFAULT_X, DEFAULT_Y, DEFAULT_X, DEFAULT_Y);
+    FRAME_NODE->renderContext_ = mockRenderContext;
+
+    /**
+     * @tc.steps: step2. call GetGlobalOffset.
+     * @tc.expected: expect GetGlobalOffset return the result which is not (0, 0).
+     */
+    EXPECT_NE(FRAME_NODE->GetGlobalOffset(), OffsetF(0.0f, 0.0f));
+}
+
+/**
+ * @tc.name: FrameNodeTestNg_GetPixelMap001
+ * @tc.desc: Test frame node method GetPixelMap
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, GetPixelMap001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. initialize parameters.
+     */
+    FRAME_NODE->isActive_ = true;
+    FRAME_NODE->eventHub_->SetEnabled(true);
+    SystemProperties::debugEnabled_ = true;
+    auto gestureHub = FRAME_NODE->GetOrCreateGestureEventHub();
+    ASSERT_NE(gestureHub, nullptr);
+    auto mockRenderContext = AceType::MakeRefPtr<MockRenderContext>();
+    ASSERT_NE(mockRenderContext, nullptr);
+    FRAME_NODE->renderContext_ = mockRenderContext;
+
+    /**
+     * @tc.steps: step2. Don't initialize pixelMap and rosenNode.
+     * @tc.expected: expect GetPixelMap() == nullptr.
+     */
+    EXPECT_EQ(FRAME_NODE->GetPixelMap(), nullptr);
+
+    /**
+     * @tc.steps: step3. set a pixelMap of gestureHub, and call GetPixelMap.
+     * @tc.expected: expect GetPixelMap() != nullptr.
+     */
+    void* voidPtr = static_cast<void*>(new char[0]);
+    RefPtr<PixelMap> pixelMap = PixelMap::CreatePixelMap(voidPtr);
+    ASSERT_NE(pixelMap, nullptr);
+    gestureHub->SetPixelMap(pixelMap);
+    EXPECT_NE(FRAME_NODE->GetPixelMap(), nullptr);
+
+    /**
+     * @tc.steps: step4. set a pixelMap of the renderContext, and call GetPixelMap.
+     * @tc.expected: expect GetPixelMap() != nullptr.
+     */
+    gestureHub->SetPixelMap(nullptr);
+    // mockRenderContext->pixelMap_ = pixelMap;
+    EXPECT_EQ(FRAME_NODE->GetPixelMap(), nullptr);
 }
 } // namespace OHOS::Ace::NG

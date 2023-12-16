@@ -3070,9 +3070,13 @@ void OverlayManager::RemovePixelMapAnimation(bool startDrag, double x, double y)
 
     scaleOption.SetOnFinishEvent([this, id = Container::CurrentId()] {
         ContainerScope scope(id);
-        InteractionInterface::GetInstance()->SetDragWindowVisible(true);
         auto pipeline = PipelineContext::GetCurrentContext();
         CHECK_NULL_VOID(pipeline);
+        auto dragDropManager = pipeline->GetDragDropManager();
+        CHECK_NULL_VOID(dragDropManager);
+        if (!dragDropManager->IsNeedScaleDragPreview()) {
+            InteractionInterface::GetInstance()->SetDragWindowVisible(true);
+        }
         auto taskScheduler = pipeline->GetTaskExecutor();
         CHECK_NULL_VOID(taskScheduler);
         taskScheduler->PostTask(

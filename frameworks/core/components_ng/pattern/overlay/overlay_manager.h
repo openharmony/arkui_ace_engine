@@ -229,6 +229,16 @@ public:
         return pixmapColumnNodeWeak_.Upgrade();
     }
 
+    RefPtr<FrameNode> GetPixelMapContentNode() const
+    {
+        auto column = pixmapColumnNodeWeak_.Upgrade();
+        if (!column) {
+            return nullptr;
+        }
+        auto imageNode = AceType::DynamicCast<FrameNode>(column->GetFirstChild());
+        return imageNode;
+    }
+
     bool GetHasFilter()
     {
         return hasFilter_;
