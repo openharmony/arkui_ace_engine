@@ -713,8 +713,6 @@ void PipelineContext::FlushBuild()
     FlushDirtyNodeUpdate();
     isRebuildFinished_ = true;
     FlushBuildFinishCallbacks();
-    // need notify after flush dirty node
-    taskScheduler_->FlushPersistAfterLayoutTask();
 }
 
 void PipelineContext::AddAnimationClosure(std::function<void()>&& animation)

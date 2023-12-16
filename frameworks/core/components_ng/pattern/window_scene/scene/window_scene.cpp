@@ -49,7 +49,7 @@ WindowScene::WindowScene(const sptr<Rosen::Session>& session)
     session_->SetNeedSnapshot(true);
     RegisterLifecycleListener();
     callback_ = [weakThis = WeakClaim(this), weakSession = wptr(session_)]() {
-        LOGI("RSSurfaceNode buffer available callback");
+        LOGI("[WMSMain]RSSurfaceNode buffer available callback");
         auto session = weakSession.promote();
         CHECK_NULL_VOID(session);
         session->SetBufferAvailable(true);
@@ -164,7 +164,7 @@ void WindowScene::OnBoundsChanged(const Rosen::Vector4f& bounds)
 
 void WindowScene::BufferAvailableCallback()
 {
-    auto uiTask = [weakThis = WeakClaim(this)]() {
+    auto uiTask = [weakThis = WeakClaim(this), weakSession = wptr(session_)]() {
         auto self = weakThis.Upgrade();
         CHECK_NULL_VOID(self);
 
@@ -193,6 +193,10 @@ void WindowScene::BufferAvailableCallback()
         host->RemoveChild(self->startingNode_);
         self->startingNode_.Reset();
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        auto session = weakSession.promote();
+        CHECK_NULL_VOID(session);
+        LOGI("[WMSMain]Remove starting Window node finished id:%{public}d name:%{public}s",
+            session->GetPersistentId(), session->GetSessionInfo().bundleName_.c_str());
     };
 
     ContainerScope scope(instanceId_);
