@@ -1176,7 +1176,7 @@ void ListPattern::ScrollToIndex(int32_t index, bool smooth, ScrollAlign align)
 {
     SetScrollSource(SCROLL_FROM_JUMP);
     StopAnimate();
-    if ((index >= 0 || index == ListLayoutAlgorithm::LAST_ITEM)) {
+    if (index >= 0 || index == ListLayoutAlgorithm::LAST_ITEM) {
         currentDelta_ = 0.0f;
         smooth_ = smooth;
         if (smooth_) {
