@@ -777,13 +777,16 @@ void ListLayoutAlgorithm::MeasureList(LayoutWrapper* layoutWrapper)
         }
     } else {
         jumpIndexInGroup_.reset();
-        bool overScrollTop = startIndex == 0 && GreatNotEqual(startPos, startMainPos_);
+        bool overScrollTop = startIndex == 0 && GreatNotEqual(startPos, startMainPos_ + contentStartOffset_);
         float midItemHeight = 0.0f;
         if (IsScrollSnapAlignCenter(layoutWrapper)) {
             midItemHeight = MeasureAndGetChildHeight(layoutWrapper, midIndex);
         }
         if (NearZero(currentOffset_) || (!overScrollFeature_ && NonNegative(currentOffset_)) ||
             (overScrollFeature_ && overScrollTop)) {
+            if (overScrollTop && !canOverScroll_) {
+                startPos = startMainPos_ + contentStartOffset_;
+            }
             if (IsScrollSnapAlignCenter(layoutWrapper)) {
                 midIndex = GetLanesFloor(layoutWrapper, midIndex);
                 LayoutForward(layoutWrapper, midIndex, midItemMidPos - midItemHeight / 2.0f);
