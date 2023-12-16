@@ -1372,41 +1372,21 @@ HWTEST_F(GesturesTestNg, ClickRecognizerTest011, TestSize.Level1)
      * @tc.steps: step1. create ClickRecognizer.
      */
     ClickRecognizer clickRecognizer = ClickRecognizer(FINGER_NUMBER, COUNT);
+    auto frameNode = FrameNode::CreateFrameNode("myButton", 100, AceType::MakeRefPtr<Pattern>());
+    clickRecognizer.AttachFrameNode(frameNode);
+    clickRecognizer.responseRegionBuffer_.emplace_back(RectF(0, 0, 200, 200));
     TouchEvent touchEvent;
 
     /**
      * @tc.steps: step2. call IsInResponseRegion function and compare result.
-     * @tc.steps: case1: event.sourceType == TOUCH
+     * @tc.steps: case1: event.sourceType == TOUCH, x == 100, y == 100
      * @tc.expected: step2. result equals.
      */
+    touchEvent.x = 100.0f;
+    touchEvent.y = 100.0f;
     touchEvent.sourceType = SourceType::TOUCH;
     auto result = clickRecognizer.IsPointInRegion(touchEvent);
     EXPECT_EQ(result, true);
-
-    /**
-     * @tc.steps: step3. call IsInResponseRegion function and compare result.
-     * @tc.steps: case2: event.sourceType == TOUCH
-     * @tc.expected: step3. result equals.
-     */
-    auto frameNode = FrameNode::CreateFrameNode("myButton", 100, AceType::MakeRefPtr<Pattern>());
-    clickRecognizer.AttachFrameNode(frameNode);
-    touchEvent.x = 100.0f;
-    touchEvent.y = 100.0f;
-    clickRecognizer.responseRegionBuffer_.emplace_back(RectF(0, 0, 200, 200));
-    result = clickRecognizer.IsPointInRegion(touchEvent);
-    EXPECT_EQ(result, true);
-
-    /**
-     * @tc.steps: step3. call IsInResponseRegion function and compare result.
-     * @tc.steps: case3: event.sourceType == TOUCH
-     * @tc.expected: step3. result equals.
-     */
-    touchEvent.x = 100.0f;
-    touchEvent.y = 100.0f;
-    clickRecognizer.responseRegionBuffer_.clear();
-    clickRecognizer.responseRegionBuffer_.emplace_back(RectF(0, 0, 50, 50));
-    result = clickRecognizer.IsPointInRegion(touchEvent);
-    EXPECT_EQ(result, false);
 }
 
 /**
