@@ -36,8 +36,12 @@ ArkUINativeModuleValue MenuItemBridge::SetMenuItemSelected(ArkUIRuntimeCallInfo*
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    auto isSelected = secondArg->IsBoolean() ? secondArg->BooleaValue() : false;
-    GetArkUIInternalNodeAPI()->GetMenuItemModifier().SetMenuItemSelected(nativeNode, isSelected);
+    if (secondArg->IsBoolean()) {
+        bool selected = secondArg->ToBoolean(vm)->Value();
+        GetArkUIInternalNodeAPI()->GetMenuItemModifier().SetMenuItemSelected(nativeNode, selected);
+    } else {
+        GetArkUIInternalNodeAPI()->GetMenuItemModifier().ResetMenuItemSelected(nativeNode);
+    }
     return panda::JSValueRef::Undefined(vm);
 }
 

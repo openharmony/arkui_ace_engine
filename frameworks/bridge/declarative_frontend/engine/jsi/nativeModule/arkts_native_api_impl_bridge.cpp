@@ -1868,9 +1868,9 @@ void ArkUINativeModule::RegisterCalendarPickerAttributes(Local<panda::ObjectRef>
 void ArkUINativeModule::RegisterMenuItemAttributes(Local<panda::ObjectRef> object, EcmaVM* vm)
 {
     auto menuitem = panda::ObjectRef::New(vm);
-    menuitem->Set(vm, panda::StringRef::NewFromUtf8(vm, "setSelected"),
+    menuitem->Set(vm, panda::StringRef::NewFromUtf8(vm, "setMenuItemSelected"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), MenuItemBridge::SetMenuItemSelected));
-    menuitem->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetSelected"),
+    menuitem->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetMenuItemSelected"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), MenuItemBridge::ResetMenuItemSelected));
     menuitem->Set(vm, panda::StringRef::NewFromUtf8(vm, "setLabelFontColor"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), MenuItemBridge::SetLabelFontColor));

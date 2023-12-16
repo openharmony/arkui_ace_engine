@@ -18,17 +18,17 @@ class MenuItemSelectedModifier extends ModifierWithKey<boolean> {
   constructor(value: boolean) {
     super(value);
   }
-  static identity: Symbol = Symbol('selected');
+  static identity: Symbol = Symbol('menuItemSelected');
   applyPeer(node: KNode, reset: boolean) {
     if (reset) {
-      GetUINativeModule().menuitem.resetSelected(node);
+      GetUINativeModule().menuitem.resetMenuItemSelected(node);
     } else {
-      GetUINativeModule().menuitem.setSelected(node, this.value);
+      GetUINativeModule().menuitem.setMenuItemSelected(node, this.value);
     }
   }
 
   checkObjectDiff(): boolean {
-    return this.stageValue !== this.value;
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
 

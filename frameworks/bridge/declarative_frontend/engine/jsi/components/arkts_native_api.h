@@ -699,7 +699,7 @@ struct ArkUIGridModifierAPI {
     void (*ResetGridRowsGap)(NodeHandle node);
     void (*SetGridScrollBar)(NodeHandle node, const int32_t scrollBar);
     void (*ResetGridScrollBar)(NodeHandle node);
-    void (*SetGridScrollBarWidth)(NodeHandle node, const struct ArkUIDimensionType *scrollBarWidth);
+    void (*SetGridScrollBarWidth)(NodeHandle node, double value, int32_t unit);
     void (*ResetGridScrollBarWidth)(NodeHandle node);
     void (*SetGridScrollBarColor)(NodeHandle node, uint32_t scrollBarColor);
     void (*ResetGridScrollBarColor)(NodeHandle node);
