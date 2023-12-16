@@ -122,6 +122,8 @@ public:
         std::function<void(const std::shared_ptr<BaseEventInfo>& info)>&& audioStateChanged) {};
     virtual void SetFirstContentfulPaintId(
         std::function<void(const std::shared_ptr<BaseEventInfo>& info)>&& firstContentfulPaintId) {};
+    virtual void SetNavigationEntryCommittedId(
+        std::function<void(const std::shared_ptr<BaseEventInfo>& info)>&& navigationEntryCommittedId) {};
     virtual void SetOnInterceptKeyEventCallback(std::function<bool(KeyEventInfo& keyEventInfo)>&& keyEventInfo) = 0;
     virtual void SetOnDataResubmitted(
         std::function<void(const std::shared_ptr<BaseEventInfo>& info)>&& dataResubmittedId) {};

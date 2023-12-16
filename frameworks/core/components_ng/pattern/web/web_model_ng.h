@@ -134,6 +134,8 @@ public:
         std::function<void(const std::shared_ptr<BaseEventInfo>& info)>&& audioStateChanged) override;
     void SetFirstContentfulPaintId(
         std::function<void(const std::shared_ptr<BaseEventInfo>& info)>&& firstContentfulPaintId) override;
+    void SetNavigationEntryCommittedId(
+        std::function<void(const std::shared_ptr<BaseEventInfo>& info)>&& navigationEntryCommittedId) override;
     void SetTouchIconUrlId(std::function<void(const std::shared_ptr<BaseEventInfo>& info)>&& touchIconUrlId) override;
 
     void SetDarkMode(WebDarkMode mode) override;

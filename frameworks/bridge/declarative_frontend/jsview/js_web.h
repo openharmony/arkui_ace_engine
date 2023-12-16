@@ -127,6 +127,7 @@ public:
     static void OnAudioStateChanged(const JSCallbackInfo& args);
     static void MediaOptions(const JSCallbackInfo& args);
     static void OnFirstContentfulPaint(const JSCallbackInfo& args);
+    static void OnNavigationEntryCommitted(const JSCallbackInfo& args);
     static void OnControllerAttached(const JSCallbackInfo& args);
     static void OnOverScroll(const JSCallbackInfo& args);
     static void SetLayoutMode(int32_t layoutMode);

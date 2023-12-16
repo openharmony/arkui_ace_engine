@@ -1686,6 +1686,7 @@ bool WebDelegate::PrepareInitOHOSWeb(const WeakPtr<PipelineBase>& context)
                                      : AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
                                            webCom->GetOverScrollId(), oldContext);
         onScreenCaptureRequestV2_ = useNewPipe ? eventHub->GetOnScreenCaptureRequestEvent() : nullptr;
+        onNavigationEntryCommittedV2_ = useNewPipe ? eventHub->GetOnNavigationEntryCommittedEvent() : nullptr;
     }
     return true;
 }
@@ -4907,6 +4908,16 @@ void WebDelegate::OnDataResubmitted(std::shared_ptr<OHOS::NWeb::NWebDataResubmis
         CHECK_NULL_VOID(propOnDataResubmittedEvent);
         propOnDataResubmittedEvent(param);
         return;
+    }
+}
+
+void WebDelegate::OnNavigationEntryCommitted(std::shared_ptr<OHOS::NWeb::NWebLoadCommittedDetails> details)
+{
+    if (onNavigationEntryCommittedV2_) {
+        NavigationType type = static_cast<NavigationType>(details->GetNavigationType());
+        onNavigationEntryCommittedV2_(std::make_shared<NavigationEntryCommittedEvent>(details->GetURL(),
+            type, details->IsMainFrame(), details->IsSameDocument(),
+            details->DidReplaceEntry()));
     }
 }
 

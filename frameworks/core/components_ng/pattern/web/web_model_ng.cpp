@@ -772,6 +772,14 @@ void WebModelNG::SetFirstContentfulPaintId(
     webEventHub->SetOnFirstContentfulPaintEvent(std::move(firstContentfulPaintId));
 }
 
+void WebModelNG::SetNavigationEntryCommittedId(
+    std::function<void(const std::shared_ptr<BaseEventInfo>& info)>&& navigationEntryCommittedId)
+{
+    auto webEventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>();
+    CHECK_NULL_VOID(webEventHub);
+    webEventHub->SetOnNavigationEntryCommittedEvent(std::move(navigationEntryCommittedId));
+}
+
 void WebModelNG::SetTouchIconUrlId(OnWebAsyncFunc&& touchIconUrlId)
 {
     auto webEventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>();
