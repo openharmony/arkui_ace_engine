@@ -69,7 +69,7 @@ void SetBarGridAlign(NodeHandle node, const double* values, int32_t valuesLength
 
     TabsModelNG::SetBarGridAlign(frameNode, columnOption);
 }
-void SetDivider(NodeHandle node, uint32_t color, const double* values, const int* units, int32_t length)
+void SetDivider(NodeHandle node, uint32_t color, const double* values, const int32_t* units, int32_t length)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
