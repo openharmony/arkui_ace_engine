@@ -227,7 +227,9 @@ RichEditorSelection TextPattern::GetSpansInfo(int32_t start, int32_t end, GetSpa
     }
     selection.SetSelectionEnd(realEnd);
     selection.SetSelectionStart(realStart);
-    if (realStart > length || realEnd < 0 || spans_.empty() || (start > length && end > length)) {
+    // Verify that realStart, realEnd, and spans_ are valid
+    if (realStart > length || realEnd < 0 || spans_.empty() || (start > length && end > length) ||
+        realStart == realEnd) {
         selection.SetResultObjectList(resultObjects);
         return selection;
     }
