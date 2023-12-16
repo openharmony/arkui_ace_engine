@@ -152,7 +152,7 @@ bool ListPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     }
     currentDelta_ = 0.0f;
     float prevStartOffset = startMainPos_;
-    float prevEndOffset = endMainPos_ - contentMainSize_;
+    float prevEndOffset = endMainPos_ - contentMainSize_ + contentEndOffset_;
     contentMainSize_ = listLayoutAlgorithm->GetContentMainSize();
     contentStartOffset_ = listLayoutAlgorithm->GetContentStartOffset();
     contentEndOffset_ = listLayoutAlgorithm->GetContentEndOffset();
@@ -333,15 +333,17 @@ void ListPattern::ProcessEvent(
 
     auto onReachStart = listEventHub->GetOnReachStart();
     if (onReachStart && (startIndex_ == 0)) {
-        bool scrollUpToStart = Positive(prevStartOffset) && NonPositive(startMainPos_);
-        bool scrollDownToStart = (Negative(prevStartOffset) || !isInitialized_) && NonNegative(startMainPos_);
+        bool scrollUpToStart = GreatNotEqual(prevStartOffset, contentStartOffset_) &&
+            LessOrEqual(startMainPos_, contentStartOffset_);
+        bool scrollDownToStart = (LessNotEqual(prevStartOffset, contentStartOffset_) || !isInitialized_) &&
+            GreatOrEqual(startMainPos_, contentStartOffset_);
         if (scrollUpToStart || scrollDownToStart) {
             onReachStart();
         }
     }
     auto onReachEnd = listEventHub->GetOnReachEnd();
     if (onReachEnd && (endIndex_ == maxListItemIndex_)) {
-        float endOffset = endMainPos_ - contentMainSize_;
+        float endOffset = endMainPos_ - contentMainSize_ + contentEndOffset_;
         bool scrollUpToEnd = (Positive(prevEndOffset) || !isInitialized_) && NonPositive(endOffset);
         bool scrollDownToEnd = Negative(prevEndOffset) && NonNegative(endOffset);
         if (scrollUpToEnd || (scrollDownToEnd && GetScrollSource() != SCROLL_FROM_NONE)) {
@@ -1533,6 +1535,10 @@ void ListPattern::UpdateScrollBarOffset()
     auto estimatedHeight = itemsSize / itemPosition_.size() * (maxListItemIndex_ + 1) - spaceWidth_;
     if (GetAlwaysEnabled()) {
         estimatedHeight = estimatedHeight - spaceWidth_;
+    }
+    if (!IsScrollSnapAlignCenter()) {
+        currentOffset += contentStartOffset_;
+        estimatedHeight += contentStartOffset_ + contentEndOffset_;
     }
 
     // calculate padding offset of list
