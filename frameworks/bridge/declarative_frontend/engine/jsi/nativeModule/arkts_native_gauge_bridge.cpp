@@ -424,16 +424,6 @@ ArkUINativeModuleValue GaugeBridge::SetGaugeIndicator(ArkUIRuntimeCallInfo* runt
     auto iconArg = runtimeCallInfo->GetCallArgRef(1);
     auto spaceArg = runtimeCallInfo->GetCallArgRef(2);
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    if (iconArg->IsNull() && iconArg->IsNull()) {
-        GetArkUIInternalNodeAPI()->GetGaugeModifier().SetIsShowIndicator(nativeNode, false);
-        return panda::JSValueRef::Undefined(vm);
-    }
-    if (iconArg->IsUndefined() && iconArg->IsUndefined()) {
-        GetArkUIInternalNodeAPI()->GetGaugeModifier().ResetIndicatorIconPath(nativeNode);
-        GetArkUIInternalNodeAPI()->GetGaugeModifier().ResetIndicatorSpace(nativeNode);
-        GetArkUIInternalNodeAPI()->GetGaugeModifier().SetIsShowIndicator(nativeNode, true);
-        return panda::JSValueRef::Undefined(vm);
-    }
     GetArkUIInternalNodeAPI()->GetGaugeModifier().SetIsShowIndicator(nativeNode, true);
     std::string iconPath;
     if (ArkTSUtils::ParseJsMedia(vm, iconArg, iconPath)) {
