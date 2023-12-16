@@ -330,7 +330,7 @@ void ListLayoutAlgorithm::HandleJumpAuto(LayoutWrapper* layoutWrapper,
         }
     } else if (jumpIndex <= tempStartIndex) {
         auto listLayoutProperty = AceType::DynamicCast<ListLayoutProperty>(layoutWrapper->GetLayoutProperty());
-        SetListItemGroupParam(wrapper, contentMainSize_, false, listLayoutProperty, false);
+        SetListItemGroupParam(wrapper, jumpIndex, contentMainSize_, false, listLayoutProperty, false);
         wrapper->Measure(childLayoutConstraint_);
         float mainLen = GetMainAxisSize(wrapper->GetGeometryNode()->GetMarginFrameSize(), axis_);
         if (GreatNotEqual(contentMainSize_, mainLen)) {
@@ -348,7 +348,7 @@ void ListLayoutAlgorithm::HandleJumpAuto(LayoutWrapper* layoutWrapper,
         }
     } else if (jumpIndex >= tempEndIndex) {
         auto listLayoutProperty = AceType::DynamicCast<ListLayoutProperty>(layoutWrapper->GetLayoutProperty());
-        SetListItemGroupParam(wrapper, 0.0f, false, listLayoutProperty, false);
+        SetListItemGroupParam(wrapper, jumpIndex, 0.0f, false, listLayoutProperty, false);
         wrapper->Measure(childLayoutConstraint_);
         float mainLen = GetMainAxisSize(wrapper->GetGeometryNode()->GetMarginFrameSize(), axis_);
         if (GreatOrEqual(mainLen, contentMainSize_)) {
@@ -376,7 +376,7 @@ void ListLayoutAlgorithm::HandleJumpCenter(LayoutWrapper* layoutWrapper)
         int32_t indexInGroup = jumpIndexInGroup_.value();
         auto listLayoutProperty =
             AceType::DynamicCast<ListLayoutProperty>(layoutWrapper->GetLayoutProperty());
-        SetListItemGroupParam(wrapper, 0.0f, true, listLayoutProperty, false);
+        SetListItemGroupParam(wrapper, index, 0.0f, true, listLayoutProperty, false);
         wrapper->Measure(GetGroupLayoutConstraint());
         itemPosition_[index] = GetListItemGroupPosition(wrapper, indexInGroup);
         if (LessNotEqual(GetEndPosition(), endMainPos_)) {
@@ -406,7 +406,7 @@ void ListLayoutAlgorithm::HandleJumpStart(LayoutWrapper* layoutWrapper)
         int32_t indexInGroup = jumpIndexInGroup_.value();
         auto listLayoutProperty =
             AceType::DynamicCast<ListLayoutProperty>(layoutWrapper->GetLayoutProperty());
-        SetListItemGroupParam(wrapper, 0.0f, true, listLayoutProperty, false);
+        SetListItemGroupParam(wrapper, index, 0.0f, true, listLayoutProperty, false);
         wrapper->Measure(GetGroupLayoutConstraint());
         itemPosition_[index] = GetListItemGroupPosition(wrapper, indexInGroup);
         if (LessNotEqual(GetEndPosition(), endMainPos_)) {
@@ -429,7 +429,7 @@ void ListLayoutAlgorithm::HandleJumpEnd(LayoutWrapper* layoutWrapper)
         int32_t indexInGroup = jumpIndexInGroup_.value();
         auto listLayoutProperty =
             AceType::DynamicCast<ListLayoutProperty>(layoutWrapper->GetLayoutProperty());
-        SetListItemGroupParam(wrapper, contentMainSize_, true, listLayoutProperty, false);
+        SetListItemGroupParam(wrapper, index, contentMainSize_, true, listLayoutProperty, false);
         wrapper->Measure(GetGroupLayoutConstraint());
         itemPosition_[index] = GetListItemGroupPosition(wrapper, indexInGroup);
         if (GreatNotEqual(GetStartPosition(), startMainPos_)) {
@@ -502,14 +502,14 @@ bool ListLayoutAlgorithm::CheckNoNeedJumpListItemGroup(LayoutWrapper* layoutWrap
                 return true;
             }
         } else if (groupItemPosition.size() > 0) {
-            JudgeOutOfScreenScrollAutoType(wrapper, listLayoutProperty, jumpIndexInGroup, jumpIndexInGroup,
+            JudgeOutOfScreenScrollAutoType(wrapper, jumpIndex, listLayoutProperty, jumpIndexInGroup, jumpIndexInGroup,
                 groupItemPosition.begin()->first, groupItemPosition.rbegin()->first);
         } else {
             scrollAutoType_ = ScrollAutoType::NOT_CHANGE;
             return true;
         }
     } else  {
-        JudgeOutOfScreenScrollAutoType(wrapper, listLayoutProperty, jumpIndexInGroup, jumpIndex,
+        JudgeOutOfScreenScrollAutoType(wrapper, jumpIndex, listLayoutProperty, jumpIndexInGroup, jumpIndex,
             startIndex, endIndex);
     }
     return false;
@@ -550,11 +550,11 @@ bool ListLayoutAlgorithm::JudgeInOfScreenScrollAutoType(const RefPtr<LayoutWrapp
     return false;
 }
 
-void ListLayoutAlgorithm::JudgeOutOfScreenScrollAutoType(const RefPtr<LayoutWrapper>& layoutWrapper,
+void ListLayoutAlgorithm::JudgeOutOfScreenScrollAutoType(const RefPtr<LayoutWrapper>& layoutWrapper, int32_t index,
     const RefPtr<ListLayoutProperty>& layoutProperty, int32_t indexInGroup, int32_t judgeIndex,
     int32_t startIndex, int32_t endIndex)
 {
-    SetListItemGroupParam(layoutWrapper, 0.0f, true, layoutProperty, false);
+    SetListItemGroupParam(layoutWrapper, index, 0.0f, true, layoutProperty, false);
     layoutWrapper->Measure(childLayoutConstraint_);
     auto jumpItemHeight = GetListGroupItemHeight(layoutWrapper, indexInGroup);
     jumpIndexInGroup_ = indexInGroup;
@@ -600,7 +600,7 @@ float ListLayoutAlgorithm::MeasureAndGetChildHeight(LayoutWrapper* layoutWrapper
         auto listLayoutProperty =
             AceType::DynamicCast<ListLayoutProperty>(layoutWrapper->GetLayoutProperty());
         // true: layout forward, true: layout all group items.
-        SetListItemGroupParam(wrapper, 0.0f, true, listLayoutProperty, true);
+        SetListItemGroupParam(wrapper, childIndex, 0.0f, true, listLayoutProperty, true);
     }
     wrapper->Measure(childLayoutConstraint_);
     float mainLen = GetMainAxisSize(wrapper->GetGeometryNode()->GetMarginFrameSize(), axis_);
@@ -823,7 +823,7 @@ int32_t ListLayoutAlgorithm::LayoutALineForward(LayoutWrapper* layoutWrapper,
     bool isGroup = wrapper->GetHostTag() == V2::LIST_ITEM_GROUP_ETS_TAG;
     if (isGroup) {
         auto listLayoutProperty = AceType::DynamicCast<ListLayoutProperty>(layoutWrapper->GetLayoutProperty());
-        SetListItemGroupParam(wrapper, startPos, true, listLayoutProperty, false);
+        SetListItemGroupParam(wrapper, currentIndex, startPos, true, listLayoutProperty, false);
     }
     {
         ACE_SCOPED_TRACE("ListLayoutAlgorithm::MeasureListItem:%d", currentIndex);
@@ -848,7 +848,7 @@ int32_t ListLayoutAlgorithm::LayoutALineBackward(LayoutWrapper* layoutWrapper,
     bool isGroup = wrapper->GetHostTag() == V2::LIST_ITEM_GROUP_ETS_TAG;
     if (isGroup) {
         auto listLayoutProperty = AceType::DynamicCast<ListLayoutProperty>(layoutWrapper->GetLayoutProperty());
-        SetListItemGroupParam(wrapper, endPos, false, listLayoutProperty, false);
+        SetListItemGroupParam(wrapper, currentIndex, endPos, false, listLayoutProperty, false);
     }
     {
         ACE_SCOPED_TRACE("ListLayoutAlgorithm::MeasureListItem:%d", currentIndex);
@@ -1292,8 +1292,8 @@ void ListLayoutAlgorithm::OnSurfaceChanged(LayoutWrapper* layoutWrapper)
     }
 }
 
-void ListLayoutAlgorithm::SetListItemGroupParam(const RefPtr<LayoutWrapper>& layoutWrapper, float referencePos,
-    bool forwardLayout, const RefPtr<ListLayoutProperty>& layoutProperty, bool groupNeedAllLayout)
+void ListLayoutAlgorithm::SetListItemGroupParam(const RefPtr<LayoutWrapper>& layoutWrapper, int32_t index,
+    float referencePos, bool forwardLayout, const RefPtr<ListLayoutProperty>& layoutProperty, bool groupNeedAllLayout)
 {
     auto layoutAlgorithmWrapper = layoutWrapper->GetLayoutAlgorithm(true);
     CHECK_NULL_VOID(layoutAlgorithmWrapper);
@@ -1316,7 +1316,16 @@ void ListLayoutAlgorithm::SetListItemGroupParam(const RefPtr<LayoutWrapper>& lay
     }
 
     if (groupNeedAllLayout || targetIndex_) {
-        itemGroup->SetNeedAllLayout();
+        auto groupItemPosition = itemGroup->GetItemPosition();
+        int32_t groupTotalItemCount = layoutWrapper->GetTotalChildCount() - itemGroup->GetItemStartIndex();
+        if (groupNeedAllLayout ||
+            (targetIndex_ && targetIndex_.value() == index) ||
+            (!(forwardLayout && !groupItemPosition.empty() &&
+            groupItemPosition.rbegin()->first == groupTotalItemCount - 1) &&
+            !(!forwardLayout && !groupItemPosition.empty() &&
+            groupItemPosition.begin()->first == 0))) {
+            itemGroup->SetNeedAllLayout();
+        }
     }
 
     if (jumpIndexInGroup_.has_value()) {

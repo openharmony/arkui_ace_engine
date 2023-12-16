@@ -58,7 +58,7 @@ float ListLanesLayoutAlgorithm::MeasureAndGetChildHeight(LayoutWrapper* layoutWr
         auto listLayoutProperty =
             AceType::DynamicCast<ListLayoutProperty>(layoutWrapper->GetLayoutProperty());
         // true: layout forward, true: layout all group items.
-        SetListItemGroupParam(wrapper, 0.0f, true, listLayoutProperty, true);
+        SetListItemGroupParam(wrapper, childIndex, 0.0f, true, listLayoutProperty, true);
         wrapper->Measure(groupLayoutConstraint_);
     } else {
         wrapper->Measure(childLayoutConstraint_);
@@ -94,7 +94,7 @@ int32_t ListLanesLayoutAlgorithm::LayoutALineForward(LayoutWrapper* layoutWrappe
                         wrapper->GetHostNode()->GetParent()->GetId() : 0);
             }
             auto listLayoutProperty = AceType::DynamicCast<ListLayoutProperty>(layoutWrapper->GetLayoutProperty());
-            SetListItemGroupParam(wrapper, startPos, true, listLayoutProperty, GroupNeedAllLayout());
+            SetListItemGroupParam(wrapper, currentIndex, startPos, true, listLayoutProperty, false);
             wrapper->Measure(groupLayoutConstraint_);
         } else {
             if (wrapper->GetHostNode()) {
@@ -150,7 +150,7 @@ int32_t ListLanesLayoutAlgorithm::LayoutALineBackward(LayoutWrapper* layoutWrapp
                         wrapper->GetHostNode()->GetParent()->GetId() : 0);
             }
             auto listLayoutProperty = AceType::DynamicCast<ListLayoutProperty>(layoutWrapper->GetLayoutProperty());
-            SetListItemGroupParam(wrapper, endPos, false, listLayoutProperty, GroupNeedAllLayout());
+            SetListItemGroupParam(wrapper, currentIndex, endPos, false, listLayoutProperty, false);
             wrapper->Measure(groupLayoutConstraint_);
         } else {
             if (wrapper->GetHostNode()) {
