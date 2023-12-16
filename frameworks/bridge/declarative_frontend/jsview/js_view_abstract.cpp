@@ -5681,6 +5681,25 @@ void JSViewAbstract::JsAccessibilityLevel(const std::string& level)
     ViewAbstractModel::GetInstance()->SetAccessibilityImportance(level);
 }
 
+void JSViewAbstract::JsAccessibilityVirtualNode(const JSCallbackInfo& info)
+{
+    // parse builder
+    if (!info[0]->IsObject()) {
+        return;
+    }
+    JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
+    auto builder = obj->GetProperty("builder");
+
+    auto builderFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(builder));
+    CHECK_NULL_VOID(builderFunc);
+    auto buildFunc = [execCtx = info.GetExecutionContext(), func = std::move(builderFunc)]() {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        ACE_SCORING_EVENT("AccessibilityVirtualNode");
+        func->Execute();
+    };
+    NG::ViewAbstractModelNG::GetInstance()->SetAccessibilityVirtualNode(std::move(buildFunc));
+}
+
 void JSViewAbstract::JsBackground(const JSCallbackInfo& info)
 {
     // Check the parameters
@@ -6451,6 +6470,7 @@ void JSViewAbstract::JSBind(BindingTarget globalObj)
     JSClass<JSViewAbstract>::StaticMethod("accessibilityDescription", &JSViewAbstract::JsAccessibilityDescription);
     JSClass<JSViewAbstract>::StaticMethod("accessibilityImportance", &JSViewAbstract::JsAccessibilityImportance);
     JSClass<JSViewAbstract>::StaticMethod("accessibilityLevel", &JSViewAbstract::JsAccessibilityLevel);
+    JSClass<JSViewAbstract>::StaticMethod("accessibilityVirtualNode", &JSViewAbstract::JsAccessibilityVirtualNode);
     JSClass<JSViewAbstract>::StaticMethod("onAccessibility", &JSInteractableView::JsOnAccessibility);
     JSClass<JSViewAbstract>::StaticMethod("alignRules", &JSViewAbstract::JsAlignRules);
     JSClass<JSViewAbstract>::StaticMethod("onVisibleAreaChange", &JSViewAbstract::JsOnVisibleAreaChange);
