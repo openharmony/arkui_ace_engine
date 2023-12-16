@@ -481,7 +481,7 @@ private:
     void AutoScrollByEdgeDetection(AutoScrollParam param, OffsetF offset, EdgeDetectionStrategy strategy);
     float CalcDragSpeed(float hotAreaStart, float hotAreaEnd, float point);
     float MoveTextRect(float offset);
-    bool MoveCaretToContentRect();
+    void MoveCaretToContentRect();
     bool IsTextArea() const override
     {
         return true;

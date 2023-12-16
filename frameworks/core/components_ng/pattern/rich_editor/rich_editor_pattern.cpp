@@ -4421,24 +4421,20 @@ void RichEditorPattern::MoveSecondHandle(float offset)
     }
 }
 
-bool RichEditorPattern::MoveCaretToContentRect()
+void RichEditorPattern::MoveCaretToContentRect()
 {
     auto contentRect = GetTextContentRect();
     auto textRect = GetTextRect();
     if (LessOrEqual(textRect.Height(), contentRect.Height())) {
-        return true;
+        return;
     }
     float caretHeight = 0.0f;
     auto caretOffset = CalcCursorOffsetByPosition(GetCaretPosition(), caretHeight, true);
     if (LessNotEqual(caretOffset.GetY(), contentRect.GetY())) {
-        MoveTextRect(contentRect.GetY() - caretOffset.GetY());
-        return true;
+        OnScrollCallback(contentRect.GetY() - caretOffset.GetY(), SCROLL_FROM_NONE);
+    } else if (GreatNotEqual(caretOffset.GetY() + caretHeight, contentRect.Bottom())) {
+        OnScrollCallback(contentRect.Bottom() - caretOffset.GetY() - caretHeight, SCROLL_FROM_NONE);
     }
-    if (GreatNotEqual(caretOffset.GetY() + caretHeight, contentRect.Bottom())) {
-        MoveTextRect(contentRect.Bottom() - caretOffset.GetY() - caretHeight);
-        return true;
-    }
-    return false;
 }
 
 void RichEditorPattern::UpdateScrollBarOffset()
