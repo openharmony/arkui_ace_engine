@@ -21,23 +21,28 @@
 namespace OHOS::Ace::Framework {
 namespace {
 const char* DIRTY_FLAG[] = { "UPDATE_PROPERTY", "UPDATE_CONTENT" };
-constexpr int32_t NUMBER_OF_PARAMETERS = 2;
 }
 
 void JSBaseNode::BuildNode(const JSCallbackInfo& info)
 {
-    if (info.Length() < NUMBER_OF_PARAMETERS || !info[0]->IsFunction() || !info[1]->IsObject()) {
+    if (info.Length() >= 1 && !info[0]->IsFunction()) {
         return;
     }
     auto builder = info[0];
     auto buildFunc = AceType::MakeRefPtr<JsFunction>(info.This(), JSRef<JSFunc>::Cast(builder));
     CHECK_NULL_VOID(buildFunc);
-
-    JSRef<JSVal> param = info[1];
+    if ((info.Length() >= 2 && !(info[1]->IsObject() || info[1]->IsUndefined() || info[1]->IsNull()))) {
+        return;
+    }
     {
         NG::ScopedViewStackProcessor builderViewStackProcessor;
         NG::ViewStackProcessor::GetInstance()->SetIsBuilderNode(true);
-        buildFunc->ExecuteJS(1, &param);
+        if (info.Length() >= 2 && info[1]->IsObject()) {
+            JSRef<JSVal> param = info[1];
+            buildFunc->ExecuteJS(1, &param);
+        } else {
+            buildFunc->ExecuteJS();
+        }
         viewNode_ = NG::ViewStackProcessor::GetInstance()->Finish();
     }
 }
