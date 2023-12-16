@@ -284,6 +284,7 @@ void NavigationPattern::CheckTopNavPathChange(
         auto navBarNode = AceType::DynamicCast<NavBarNode>(hostNode->GetNavBarNode());
         CHECK_NULL_VOID(navBarNode);
         navBarNode->GetLayoutProperty()->UpdateVisibility(VisibleType::VISIBLE);
+        navBarNode->SetActive(true);
         auto stageManager = context->GetStageManager();
         if (stageManager != nullptr) {
             RefPtr<FrameNode> pageNode = stageManager->GetLastPage();
@@ -317,6 +318,7 @@ void NavigationPattern::CheckTopNavPathChange(
             NotifyPageHide(preTopNavPath->first);
             eventHub->FireOnHiddenEvent(navDestinationPattern->GetName());
             navDestinationPattern->SetIsOnShow(false);
+            preTopNavDestination->SetActive(false);
             // The navigations in NavDestination should be fired the hidden event
             NavigationPattern::FireNavigationStateChange(preTopNavDestination, false);
         }
@@ -383,6 +385,7 @@ RefPtr<UINode> NavigationPattern::FireNavDestinationStateChange(bool show)
         auto param = Recorder::EventRecorder::Get().IsPageRecordEnable() ? navigationStack_->GetRouteParam() : "";
         eventHub->FireOnShownEvent(navDestinationPattern->GetName(), param);
         navDestinationPattern->SetIsOnShow(true);
+        navDestinationGroupNode->SetActive(true);
         // The change from hiding to showing of top page means the navigation return to screen,
         // so add window state callback again.
         pipeline->AddWindowStateChangedCallback(id);
@@ -390,6 +393,7 @@ RefPtr<UINode> NavigationPattern::FireNavDestinationStateChange(bool show)
         NotifyPageHide(topNavPath->first);
         eventHub->FireOnHiddenEvent(navDestinationPattern->GetName());
         navDestinationPattern->SetIsOnShow(false);
+        navDestinationGroupNode->SetActive(false);
         // The change from showing to hiding of top page means the navigation leaves from screen,
         // so remove window state callback.
         pipeline->RemoveWindowStateChangedCallback(id);
@@ -472,6 +476,7 @@ void NavigationPattern::TransitionWithOutAnimation(const RefPtr<NavDestinationGr
             auto layoutProperty = preTopNavDestination->GetLayoutProperty();
             CHECK_NULL_VOID(layoutProperty);
             layoutProperty->UpdateVisibility(needVisible ? VisibleType::VISIBLE : VisibleType::INVISIBLE, true);
+            preTopNavDestination->SetActive(needVisible ? true : false);
         }
         navigationNode->OnAccessibilityEvent(AccessibilityEventType::PAGE_CHANGE);
         return;
@@ -482,6 +487,7 @@ void NavigationPattern::TransitionWithOutAnimation(const RefPtr<NavDestinationGr
         auto layoutProperty = navBarNode->GetLayoutProperty();
         CHECK_NULL_VOID(layoutProperty);
         layoutProperty->UpdateVisibility(VisibleType::INVISIBLE, true);
+        navBarNode->SetActive(false);
     }
 
     // navDestination pop to navBar
@@ -678,9 +684,11 @@ bool NavigationPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
                 if (navigationLayoutProperty->GetHideNavBar().value_or(false) ||
                     (pattern->GetNavigationMode() == NavigationMode::STACK && isSetInvisible)) {
                     navBarLayoutProperty->UpdateVisibility(VisibleType::INVISIBLE);
+                    navBarNode->SetActive(false);
                 } else {
                     navBarNode->GetRenderContext()->UpdateOpacity(1.0f);
                     navBarLayoutProperty->UpdateVisibility(VisibleType::VISIBLE);
+                    navBarNode->SetActive(true);
                 }
                 if (navDestinationNode->GetChildren().size() <= EMPTY_DESTINATION_CHILD_SIZE &&
                     navDestinationPattern->GetBackButtonState()) {
@@ -724,6 +732,8 @@ void NavigationPattern::UpdateContextRect(
     CHECK_NULL_VOID(navigationLayoutProperty);
     auto navBarProperty = navBarNode->GetLayoutProperty();
     navBarProperty->UpdateVisibility(navigationLayoutProperty->GetVisibilityValue(VisibleType::VISIBLE));
+    navBarNode->SetActive(navigationLayoutProperty->GetVisibilityValue(VisibleType::VISIBLE) == VisibleType::VISIBLE ?
+        true : false);
     curDestination->GetRenderContext()->UpdateTranslateInXY(OffsetF { 0.0f, 0.0f });
     curDestination->GetRenderContext()->SetActualForegroundColor(DEFAULT_MASK_COLOR);
     navBarNode->GetEventHub<EventHub>()->SetEnabledInternal(true);
@@ -1009,6 +1019,7 @@ void NavigationPattern::NotifyDialogChange(bool isShow)
             eventHub->FireOnHiddenEvent(navDestinationPattern->GetName());
         }
         navDestinationPattern->SetIsOnShow(isShow);
+        curDestination->SetActive(isShow);
     }
 }
 } // namespace OHOS::Ace::NG

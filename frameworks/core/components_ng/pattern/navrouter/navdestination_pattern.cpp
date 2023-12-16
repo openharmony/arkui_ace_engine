@@ -173,8 +173,10 @@ void NavDestinationPattern::OnModifyDone()
     CHECK_NULL_VOID(titleBarLayoutProperty);
     if (navDestinationLayoutProperty->GetHideTitleBar().value_or(false)) {
         titleBarLayoutProperty->UpdateVisibility(VisibleType::GONE);
+        titleBarNode->SetActive(false);
     } else {
         titleBarLayoutProperty->UpdateVisibility(VisibleType::VISIBLE);
+        titleBarNode->SetActive(true);
         MountTitleBar(hostNode);
     }
 }
