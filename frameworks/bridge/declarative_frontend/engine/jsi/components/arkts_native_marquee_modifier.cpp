@@ -67,13 +67,8 @@ void ResetMarqueeFontColor(NodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    Color textColor;
-    auto pipelineContext = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipelineContext);
-    auto theme = pipelineContext->GetTheme<TextTheme>();
-    CHECK_NULL_VOID(theme);
-    textColor = theme->GetTextStyle().GetTextColor();
-    MarqueeModelNG::SetTextColor(frameNode, textColor);
+    std::optional<Color> colorOpt;
+    MarqueeModelNG::SetTextColor(frameNode, colorOpt);
 }
 void SetMarqueeAllowScale(NodeHandle node, bool allowScale)
 {
