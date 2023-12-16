@@ -1631,7 +1631,7 @@ bool RichEditorPattern::HandleUserLongPressEvent(GestureEvent& info)
     return HandleUserGestureEvent(info, std::move(longPressFunc));
 }
 
-void RichEditorPattern::HandleMenuOnSelectAll()
+void RichEditorPattern::HandleMenuCallbackOnSelectAll()
 {
     auto textSize = static_cast<int32_t>(GetWideText().length()) + imageCount_;
     textSelector_.Update(0, textSize);
@@ -3571,7 +3571,7 @@ void RichEditorPattern::ShowSelectOverlay(const RectF& firstHandle, const RectF&
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
             pattern->isMousePressed_ = usingMouse;
-            pattern->HandleMenuOnSelectAll();
+            pattern->HandleMenuCallbackOnSelectAll();
         };
 
         selectInfo.menuCallback.onCameraInput = [weak, usingMouse]() {

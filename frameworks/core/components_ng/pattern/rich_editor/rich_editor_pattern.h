@@ -234,7 +234,7 @@ public:
     int32_t GetHandleIndex(const Offset& offset) const override;
     void OnAreaChangedInner() override;
     void CreateHandles() override;
-    void HandleMenuOnSelectAll();
+    void HandleMenuCallbackOnSelectAll();
     void HandleOnSelectAll() override;
     void HandleOnCopy() override;
     bool JudgeDraggable(GestureEvent& info);
