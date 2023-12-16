@@ -18,56 +18,71 @@
 #include "frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 
 namespace OHOS::Ace::NG {
-constexpr int CALL_ARG_0 = 0;
-constexpr int CALL_ARG_1 = 1;
-constexpr int CALL_ARG_2 = 2;
-constexpr int CALL_ARG_3 = 3;
-constexpr int CALL_ARG_4 = 4;
-constexpr int ARG_LENGTH = 3;
+constexpr int32_t NODE_INDEX = 0;
+constexpr int32_t STROKE_WIDTH_INDEX = 1;
+constexpr int32_t COLOR_INDEX = 2;
+constexpr int32_t START_MARGIN_INDEX = 3;
+constexpr int32_t END_MARGIN_INDEX = 4;
+
+constexpr int32_t ARG_GROUP_LENGTH = 3;
 
 ArkUINativeModuleValue ListeItemGroupBridege::SetDivider(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
-    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_0);
-    Local<JSValueRef> strokeWidthArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_1);
-    Local<JSValueRef> colorArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_2);
-    Local<JSValueRef> startMarginArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_3);
-    Local<JSValueRef> endMarginArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_4);
-
-    CalcDimension strokeWidth;
-    Color color;
-    CalcDimension startMargin;
-    CalcDimension endMargin;
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(NODE_INDEX);
     void* nativeNode = nodeArg->ToNativePointer(vm)->Value();
-    if (strokeWidthArg->IsNull() || strokeWidthArg->IsUndefined() ||
-        !ArkTSUtils::ParseJsDimension(vm, strokeWidthArg, strokeWidth, DimensionUnit::VP)) {
-        strokeWidth = 0.0_vp;
-    };
-    if (!ArkTSUtils::ParseJsColorAlpha(vm, colorArg, color)) {
-        RefPtr<ListTheme> listTheme = Framework::JSViewAbstract::GetTheme<ListTheme>();
-        if (listTheme) {
-            color = listTheme->GetDividerColor();
-        }
-    };
-    if (startMarginArg->IsNull() || startMarginArg->IsUndefined() ||
-        !ArkTSUtils::ParseJsDimension(vm, startMarginArg, startMargin, DimensionUnit::VP)) {
-        startMargin = 0.0_vp;
-    };
-    if (endMarginArg->IsNull() || endMarginArg->IsUndefined() ||
-        !ArkTSUtils::ParseJsDimension(vm, endMarginArg, endMargin, DimensionUnit::VP)) {
-        endMargin = 0.0_vp;
-    };
-    double values[ARG_LENGTH];
-    int units[ARG_LENGTH];
-    values[CALL_ARG_0] = strokeWidth.Value();
-    values[CALL_ARG_1] = startMargin.Value();
-    values[CALL_ARG_2] = endMargin.Value();
-    units[CALL_ARG_0] = static_cast<int>(strokeWidth.Unit());
-    units[CALL_ARG_1] = static_cast<int>(startMargin.Unit());
-    units[CALL_ARG_2] = static_cast<int>(endMargin.Unit());
+    Local<JSValueRef> dividerStrokeWidthArgs = runtimeCallInfo->GetCallArgRef(STROKE_WIDTH_INDEX);
+    Local<JSValueRef> colorArg = runtimeCallInfo->GetCallArgRef(COLOR_INDEX);
+    Local<JSValueRef> dividerStartMarginArgs = runtimeCallInfo->GetCallArgRef(START_MARGIN_INDEX);
+    Local<JSValueRef> dividerEndMarginArgs = runtimeCallInfo->GetCallArgRef(END_MARGIN_INDEX);
+    if (dividerStrokeWidthArgs->IsUndefined() && dividerStartMarginArgs->IsUndefined() &&
+        dividerEndMarginArgs->IsUndefined() && colorArg->IsUndefined()) {
+        GetArkUIInternalNodeAPI()->GetListItemGroupModifier().ListItemGroupResetDivider(nativeNode);
+        return panda::JSValueRef::Undefined(vm);
+    }
+
+    CalcDimension dividerStrokeWidth;
+    CalcDimension dividerStartMargin;
+    CalcDimension dividerEndMargin;
+    uint32_t color;
+    auto* frameNode = reinterpret_cast<FrameNode*>(nativeNode);
+    auto context = frameNode->GetContext();
+    auto themeManager = context->GetThemeManager();
+    CHECK_NULL_RETURN(themeManager, panda::NativePointerRef::New(vm, nullptr));
+    auto listTheme = themeManager->GetTheme<ListTheme>();
+    CHECK_NULL_RETURN(listTheme, panda::NativePointerRef::New(vm, nullptr));
+
+    if (!ArkTSUtils::ParseJsDimensionVp(vm, dividerStrokeWidthArgs, dividerStrokeWidth) ||
+        LessNotEqual(dividerStrokeWidth.Value(), 0.0f) || dividerStrokeWidth.Unit() == DimensionUnit::PERCENT) {
+        dividerStrokeWidth.Reset();
+    }
+
+    Color colorObj;
+    if (!ArkTSUtils::ParseJsColorAlpha(vm, colorArg, colorObj)) {
+        color = listTheme->GetDividerColor().GetValue();
+    } else {
+        color = colorObj.GetValue();
+    }
+    if (!ArkTSUtils::ParseJsDimensionVp(vm, dividerStartMarginArgs, dividerStartMargin) ||
+        LessNotEqual(dividerStartMargin.Value(), 0.0f) || dividerStartMargin.Unit() == DimensionUnit::PERCENT) {
+        dividerStartMargin.Reset();
+    }
+    if (!ArkTSUtils::ParseJsDimensionVp(vm, dividerEndMarginArgs, dividerEndMargin) ||
+        LessNotEqual(dividerEndMargin.Value(), 0.0f) || dividerEndMargin.Unit() == DimensionUnit::PERCENT) {
+        dividerEndMargin.Reset();
+    }
+    uint32_t size = ARG_GROUP_LENGTH;
+    double values[size];
+    int32_t units[size];
+    values[NODE_INDEX] = dividerStrokeWidth.Value();
+    values[STROKE_WIDTH_INDEX] = dividerStartMargin.Value();
+    values[COLOR_INDEX] = dividerEndMargin.Value();
+    units[NODE_INDEX] = static_cast<int32_t>(dividerStrokeWidth.Unit());
+    units[STROKE_WIDTH_INDEX] = static_cast<int32_t>(dividerStartMargin.Unit());
+    units[COLOR_INDEX] = static_cast<int32_t>(dividerEndMargin.Unit());
     GetArkUIInternalNodeAPI()->GetListItemGroupModifier().ListItemGroupSetDivider(
-        nativeNode, color.GetValue(), values, units);
+        nativeNode, color, values, units, size);
 
     return panda::JSValueRef::Undefined(vm);
 }
@@ -75,7 +90,7 @@ ArkUINativeModuleValue ListeItemGroupBridege::ResetDivider(ArkUIRuntimeCallInfo*
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
-    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_0);
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(NODE_INDEX);
     void* nativeNode = nodeArg->ToNativePointer(vm)->Value();
     GetArkUIInternalNodeAPI()->GetListItemGroupModifier().ListItemGroupResetDivider(nativeNode);
     return panda::JSValueRef::Undefined(vm);

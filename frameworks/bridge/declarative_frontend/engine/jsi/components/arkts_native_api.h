@@ -1409,7 +1409,8 @@ struct ArkUIGridItemModifierAPI {
 };
 
 struct ArkUIListItemGroupModifierAPI {
-    void (*ListItemGroupSetDivider)(NodeHandle node, uint32_t color, const double* values, const int* units);
+    void (*ListItemGroupSetDivider)(
+        NodeHandle node, uint32_t color, const double* values, const int* units, int32_t length);
     void (*ListItemGroupResetDivider)(NodeHandle node);
 };
 
