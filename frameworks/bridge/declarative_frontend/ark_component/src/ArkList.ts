@@ -105,11 +105,11 @@ class ChainAnimationOptionsModifier extends ModifierWithKey<ChainAnimationOption
   }
 
   checkObjectDiff(): boolean {
-    return !isBaseOrResourceEqual(this.stageValue.minSpace, this.value.minSpace) || !isBaseOrResourceEqual(this.stageValue.maxSpace, this.value.maxSpace) ||
-    !isBaseOrResourceEqual(this.stageValue.conductivity, this.value.conductivity) || !isBaseOrResourceEqual(this.stageValue.intensity, this.value.intensity) ||
-    !isBaseOrResourceEqual(this.stageValue.edgeEffect, this.value.edgeEffect) || !isBaseOrResourceEqual(this.stageValue.stiffness, this.value.stiffness) ||
-    !isBaseOrResourceEqual(this.stageValue.damping, this.value.damping);
-}
+    return !(this.stageValue.minSpace === this.value.minSpace && this.stageValue.maxSpace === this.value.maxSpace &&
+      this.stageValue.conductivity === this.value.conductivity && this.stageValue.intensity === this.value.intensity &&
+      this.stageValue.edgeEffect === this.value.edgeEffect && this.stageValue.stiffness === this.value.stiffness &&
+      this.stageValue.damping === this.value.damping);
+  }
 }
 
 class ListChainAnimationModifier extends ModifierWithKey<boolean> {

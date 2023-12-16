@@ -534,19 +534,24 @@ ArkUINativeModuleValue ListBridge::SetChainAnimationOptions(ArkUIRuntimeCallInfo
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(LIST_ARG_INDEX_0);
-    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(LIST_ARG_INDEX_1);
-    Local<JSValueRef> thirdArg = runtimeCallInfo->GetCallArgRef(LIST_ARG_INDEX_2);
-    Local<JSValueRef> fourthArg = runtimeCallInfo->GetCallArgRef(LIST_ARG_INDEX_3);
-    Local<JSValueRef> fifthArg = runtimeCallInfo->GetCallArgRef(LIST_ARG_INDEX_4);
-    Local<JSValueRef> sixthArg = runtimeCallInfo->GetCallArgRef(LIST_ARG_INDEX_5);
-    Local<JSValueRef> seventhArg = runtimeCallInfo->GetCallArgRef(LIST_ARG_INDEX_6);
-    Local<JSValueRef> eighthArg = runtimeCallInfo->GetCallArgRef(LIST_ARG_INDEX_7);
+    Local<JSValueRef> minSpaceArgs = runtimeCallInfo->GetCallArgRef(LIST_ARG_INDEX_1);
+    Local<JSValueRef> maxSpaceArgs = runtimeCallInfo->GetCallArgRef(LIST_ARG_INDEX_2);
+    Local<JSValueRef> conductivityArgs = runtimeCallInfo->GetCallArgRef(LIST_ARG_INDEX_3);
+    Local<JSValueRef> intensityArgs = runtimeCallInfo->GetCallArgRef(LIST_ARG_INDEX_4);
+    Local<JSValueRef> edgeEffectArgs = runtimeCallInfo->GetCallArgRef(LIST_ARG_INDEX_5);
+    Local<JSValueRef> stiffnessArgs = runtimeCallInfo->GetCallArgRef(LIST_ARG_INDEX_6);
+    Local<JSValueRef> dampingArgs = runtimeCallInfo->GetCallArgRef(LIST_ARG_INDEX_7);
 
     CalcDimension minSpace;
     CalcDimension maxSpace;
 
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    if (secondArg->IsUndefined() || thirdArg->IsUndefined()) {
+    if (minSpaceArgs->IsUndefined() && maxSpaceArgs->IsUndefined() && conductivityArgs->IsUndefined() &&
+        intensityArgs->IsUndefined() && edgeEffectArgs->IsUndefined() && stiffnessArgs->IsUndefined() &&
+        dampingArgs->IsUndefined()) {
+        GetArkUIInternalNodeAPI()->GetListModifier().ResetChainAnimationOptions(nativeNode);
+        return panda::JSValueRef::Undefined(vm);
+    } else {
         RefPtr<ListTheme> listTheme = Framework::JSViewAbstract::GetTheme<ListTheme>();
         CHECK_NULL_RETURN(listTheme, panda::NativePointerRef::New(vm, nullptr));
 
@@ -559,13 +564,13 @@ ArkUINativeModuleValue ListBridge::SetChainAnimationOptions(ArkUIRuntimeCallInfo
         chainAnimationOptions.stiffness = listTheme->GetChainStiffness();
         chainAnimationOptions.damping = listTheme->GetChainDamping();
 
-        ArkTSUtils::ParseJsDimension(vm, secondArg, minSpace, DimensionUnit::VP);
-        ArkTSUtils::ParseJsDimension(vm, thirdArg, maxSpace, DimensionUnit::VP);
-        ArkTSUtils::ParseJsDouble(vm, fourthArg, chainAnimationOptions.conductivity);
-        ArkTSUtils::ParseJsDouble(vm, fifthArg, chainAnimationOptions.intensity);
-        chainAnimationOptions.edgeEffect = sixthArg->ToNumber(vm)->Value();
-        ArkTSUtils::ParseJsDouble(vm, seventhArg, chainAnimationOptions.stiffness);
-        ArkTSUtils::ParseJsDouble(vm, eighthArg, chainAnimationOptions.damping);
+        ArkTSUtils::ParseJsDimension(vm, minSpaceArgs, minSpace, DimensionUnit::VP);
+        ArkTSUtils::ParseJsDimension(vm, maxSpaceArgs, maxSpace, DimensionUnit::VP);
+        ArkTSUtils::ParseJsDouble(vm, conductivityArgs, chainAnimationOptions.conductivity);
+        ArkTSUtils::ParseJsDouble(vm, intensityArgs, chainAnimationOptions.intensity);
+        chainAnimationOptions.edgeEffect = edgeEffectArgs->ToNumber(vm)->Value();
+        ArkTSUtils::ParseJsDouble(vm, stiffnessArgs, chainAnimationOptions.stiffness);
+        ArkTSUtils::ParseJsDouble(vm, dampingArgs, chainAnimationOptions.damping);
         chainAnimationOptions.minSpace = minSpace.Value();
         chainAnimationOptions.minSpaceUnits = static_cast<int32_t>(minSpace.Unit());
         chainAnimationOptions.maxSpace = maxSpace.Value();

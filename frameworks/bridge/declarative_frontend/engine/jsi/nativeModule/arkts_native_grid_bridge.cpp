@@ -86,7 +86,7 @@ ArkUINativeModuleValue GridBridge::SetColumnsGap(ArkUIRuntimeCallInfo* runtimeCa
     CalcDimension size;
     std::string calcStr;
     struct ArkUIResourceLength columnGap = { 0.0, 0, nullptr };
-    if (arg_size->IsUndefined() || !ArkTSUtils::ParseJsDimensionVpNG(vm, arg_size, size, false)) {
+    if (arg_size->IsUndefined() || !ArkTSUtils::ParseJsDimensionVpNG(vm, arg_size, size, true)) {
         GetArkUIInternalNodeAPI()->GetGridModifier().ResetGridColumnsGap(nativeNode);
     } else {
         if (size.Unit() == DimensionUnit::CALC) {
