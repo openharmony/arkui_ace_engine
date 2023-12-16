@@ -1691,14 +1691,8 @@ bool PipelineContext::OnDumpInfo(const std::vector<std::string>& params) const
                     "There is no id matching the ID in the parameter,please check whether the id is correct");
             }
         } else {
-            if (params.size() == USED_ID_FIND_FLAG && !rootNode_->DumpTreeById(0, params[2])) {
-                DumpLog::GetInstance().Print(
-                    "There is no id matching the ID in the parameter,please check whether the id is correct");
-            }
-            if (params.size() < USED_ID_FIND_FLAG) {
-                rootNode_->DumpTree(0);
-                DumpLog::GetInstance().OutPutBySize();
-            }
+            rootNode_->DumpTree(0);
+            DumpLog::GetInstance().OutPutBySize();
         }
     } else if (params[0] == "-focus") {
         if (rootNode_->GetFocusHub()) {
