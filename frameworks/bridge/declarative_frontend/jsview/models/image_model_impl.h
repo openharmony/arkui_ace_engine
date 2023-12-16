@@ -57,6 +57,7 @@ public:
     bool UpdateDragItemInfo(DragItemInfo& itemInfo) override;
     void EnableAnalyzer(bool isEnableAnalyzer) override {}
     void SetImageAnalyzerConfig(const ImageAnalyzerConfig& config) override {}
+    void SetSmoothEdge(float value)  override {}
 };
 
 } // namespace OHOS::Ace::Framework

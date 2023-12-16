@@ -71,6 +71,16 @@ void ImageModelNG::SetAlt(const ImageSourceInfo &src)
     ACE_UPDATE_LAYOUT_PROPERTY(ImageLayoutProperty, Alt, src);
 }
 
+void ImageModelNG::SetSmoothEdge(float value)
+{
+    ACE_UPDATE_PAINT_PROPERTY(ImageRenderProperty, SmoothEdge, value);
+}
+
+void ImageModelNG::SetSmoothEdge(FrameNode *frameNode, float value)
+{
+    ACE_UPDATE_NODE_PAINT_PROPERTY(ImageRenderProperty, SmoothEdge, value, frameNode);
+}
+
 void ImageModelNG::SetBorder(const Border &border) {}
 
 void ImageModelNG::SetBackBorder()
