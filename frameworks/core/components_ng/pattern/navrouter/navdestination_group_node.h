@@ -133,6 +133,16 @@ public:
 
     RefPtr<CustomNodeBase> GetNavDestinationCustomNode();
 
+    void SetNavDestinationMode(NavDestinationMode mode)
+    {
+        mode_ = mode;
+    }
+
+    NavDestinationMode GetNavDestinationMode() const
+    {
+        return mode_;
+    }
+
 private:
     RefPtr<UINode> title_;
     RefPtr<UINode> subtitle_;
@@ -142,6 +152,7 @@ private:
     bool isOnAnimation_ = false;
 
     PageTransitionType transitionType_ = PageTransitionType::NONE;
+    NavDestinationMode mode_ = NavDestinationMode::STANDARD;
 };
 
 } // namespace OHOS::Ace::NG

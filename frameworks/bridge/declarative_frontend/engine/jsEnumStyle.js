@@ -870,6 +870,12 @@ var TitleHeight;
   TitleHeight["MainWithSub"] = "MainWithSub";
 })(TitleHeight || (TitleHeight = {}));
 
+var NavDestinationMode;
+(function(NavDestinationMode) {
+  NavDestinationMode[NavDestinationMode["STANDARD"] = 0] = "STANDARD";
+  NavDestinationMode[NavDestinationMode["DIALOG"] = 1] = "DIALOG";
+}(NavDestinationMode || (NavDestinationMode = {})));
+
 var ResponseType;
 (function (ResponseType) {
   ResponseType[ResponseType["RightClick"] = 0] = "RightClick";
