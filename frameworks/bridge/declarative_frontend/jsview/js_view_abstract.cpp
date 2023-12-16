@@ -3810,28 +3810,34 @@ void JSViewAbstract::CompleteResourceObject(JSRef<JSObject>& jsObj)
         return;
     }
     JSRef<JSArray> params = JSRef<JSArray>::Cast(args);
-    if (resType != ResourceType::PLURAL) {
-        JSRef<JSVal> name = JSRef<JSVal>::Make(ToJSValue(resName));
-        params->SetValueAt(0, name);
-    } else {
-        JSRef<JSVal> pluralMode = jsObj->GetProperty("type");
-        if (pluralMode->IsNull() || !pluralMode->IsNumber()) {
-            return;
+    auto paramCount = params->Length();
+    JSRef<JSVal> name = JSRef<JSVal>::Make(ToJSValue(resName));
+    if (resType == ResourceType::PLURAL || resType == ResourceType::STRING) {
+        std::vector<JSRef<JSVal>> tmpParams;
+        for (uint32_t i = 0; i < paramCount; i++) {
+            auto param = params->GetValueAt(i);
+            tmpParams.insert(tmpParams.end(), param);
         }
-        JSRef<JSVal> pluralCount = params->GetValueAt(0);
-        JSRef<JSVal> name = JSRef<JSVal>::Make(ToJSValue(resName));
-        params->SetValueAt(0, name);        // plural params format is
-        params->SetValueAt(1, pluralMode);  // [name, pluralMode, pluralCount]
-        params->SetValueAt(2, pluralCount); // pluralCount in index 2
+        params->SetValueAt(0, name);
+        uint32_t paramIndex = 1;
+        if (jsObj->HasProperty("type")) {
+            auto firstParam = jsObj->GetProperty("type");
+            params->SetValueAt(paramIndex, firstParam);
+            paramIndex++;
+        }
+        for (auto tmpParam : tmpParams) {
+            params->SetValueAt(paramIndex, tmpParam);
+            paramIndex++;
+        }
+    } else {
+        params->SetValueAt(0, name);
     }
     jsObj->SetProperty<int32_t>("id", UNKNOWN_RESOURCE_ID);
     jsObj->SetProperty<int32_t>("type", static_cast<int32_t>(resType));
-    JSRef<JSVal> bundleName = jsObj->GetProperty("bundleName");
-    JSRef<JSVal> moduleName = jsObj->GetProperty("moduleName");
-    if (!bundleName->IsString()) {
+    if (!jsObj->HasProperty("bundleName")) {
         jsObj->SetProperty<std::string>("bundleName", "");
     }
-    if (!moduleName->IsString()) {
+    if (!jsObj->HasProperty("moduleName")) {
         jsObj->SetProperty<std::string>("moduleName", "");
     }
 }
@@ -4300,7 +4306,7 @@ bool JSViewAbstract::ParseJsString(const JSRef<JSVal>& jsValue, std::string& res
         auto param = params->GetValueAt(0);
         if (type->ToNumber<uint32_t>() == static_cast<uint32_t>(ResourceType::STRING)) {
             auto originStr = resourceWrapper->GetStringByName(param->ToString());
-            ReplaceHolder(originStr, params, 0);
+            ReplaceHolder(originStr, params, 1);
             result = originStr;
         } else if (type->ToNumber<uint32_t>() == static_cast<uint32_t>(ResourceType::PLURAL)) {
             auto countJsVal = params->GetValueAt(1);
