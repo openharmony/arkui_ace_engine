@@ -2153,8 +2153,13 @@ void JSViewAbstract::JsGeometryTransition(const JSCallbackInfo& info)
     auto id = info[0]->ToString();
     // follow flag
     bool followWithOutTransition = false;
-    if (info.Length() >= PARAMETER_LENGTH_SECOND && info[1]->IsBoolean()) {
-        followWithOutTransition = info[1]->ToBoolean();
+    if (info.Length() >= PARAMETER_LENGTH_SECOND) {
+        if (info[1]->IsBoolean()) {
+            followWithOutTransition = info[1]->ToBoolean();
+        } else if (info[1]->IsObject()) {
+            JSRef<JSObject> jsOption = JSRef<JSObject>::Cast(info[1]);
+            ParseJsBool(jsOption->GetProperty("follow"), followWithOutTransition);
+        }
     }
     ViewAbstractModel::GetInstance()->SetGeometryTransition(id, followWithOutTransition);
 }
@@ -2920,7 +2925,7 @@ void JSViewAbstract::JsBorder(const JSCallbackInfo& info)
         return;
     }
     JSRef<JSObject> object = JSRef<JSObject>::Cast(info[0]);
-    
+
     auto valueWidth = object->GetProperty("width");
     if (!valueWidth->IsUndefined()) {
         ParseBorderWidth(valueWidth);
@@ -4875,7 +4880,7 @@ void JSViewAbstract::JsOnDragEnd(const JSCallbackInfo& info)
         PipelineContext::SetCallBackNode(node);
         func->Execute(info, extraParams->ToString());
     };
-    
+
     ViewAbstractModel::GetInstance()->SetOnDragEnd(std::move(onDragEnd));
 }
 
@@ -6276,7 +6281,7 @@ void JSViewAbstract::JsPointLight(const JSCallbackInfo& info)
         ViewAbstractModel::GetInstance()->SetLightIlluminated(illuminatedValue);
         ViewAbstractModel::GetInstance()->SetIlluminatedBorderWidth(illuminatedBorderWidth);
     }
-    
+
     JSRef<JSVal> bloom = object->GetProperty("bloom");
     if (bloom->IsNumber()) {
         float bloomValue = bloom->ToNumber<float>();
