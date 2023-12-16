@@ -28,7 +28,6 @@ constexpr int NUM_3 = 3;
 constexpr int NUM_4 = 4;
 const std::string FORMAT_FONT = "%s|%s|%s";
 const std::string DEFAULT_ERR_CODE = "-1";
-const std::string DEFAULT_FAMILY = "HarmonyOS Sans";
 ArkUINativeModuleValue MenuItemBridge::SetMenuItemSelected(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
@@ -134,12 +133,12 @@ ArkUINativeModuleValue MenuItemBridge::SetLabelFont(ArkUIRuntimeCallInfo* runtim
         }
     }
 
-    int32_t style = 0;
+    int32_t style = -1;
     if (styleArg->IsNumber()) {
         style = styleArg->Int32Value(vm);
     }
 
-    std::string family = DEFAULT_FAMILY;
+    std::string family = DEFAULT_ERR_CODE;
     if (familyArg->IsString()) {
         family = familyArg->ToString(vm)->ToString();
     }
@@ -187,12 +186,12 @@ ArkUINativeModuleValue MenuItemBridge::SetContentFont(ArkUIRuntimeCallInfo* runt
         }
     }
 
-    int32_t style = 0;
+    int32_t style = -1;
     if (styleArg->IsNumber()) {
         style = styleArg->Int32Value(vm);
     }
 
-    std::string family = DEFAULT_FAMILY;
+    std::string family = DEFAULT_ERR_CODE;
     if (familyArg->IsString()) {
         family = familyArg->ToString(vm)->ToString();
     }
