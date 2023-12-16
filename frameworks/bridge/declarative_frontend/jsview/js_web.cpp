@@ -1942,11 +1942,29 @@ void JSWeb::Create(const JSCallbackInfo& info)
             };
         }
 
+        auto setRequestPermissionsFromUserFunction = controller->GetProperty("requestPermissionsFromUserWeb");
+        std::function<void(const std::shared_ptr<BaseEventInfo>&)> requestPermissionsFromUserCallback = nullptr;
+        if (setRequestPermissionsFromUserFunction->IsFunction()) {
+            requestPermissionsFromUserCallback = [webviewController = controller,
+                func = JSRef<JSFunc>::Cast(setRequestPermissionsFromUserFunction)]
+                (const std::shared_ptr<BaseEventInfo>& info) {
+                    auto* eventInfo = TypeInfoHelper::DynamicCast<WebPermissionRequestEvent>(info.get());
+                    JSRef<JSObject> obj = JSRef<JSObject>::New();
+                    JSRef<JSObject> permissionObj = JSClass<JSWebPermissionRequest>::NewInstance();
+                    auto permissionEvent = Referenced::Claim(permissionObj->Unwrap<JSWebPermissionRequest>());
+                    permissionEvent->SetEvent(*eventInfo);
+                    obj->SetPropertyObject("request", permissionObj);
+                    JSRef<JSVal> argv[] = { JSRef<JSVal>::Cast(obj) };
+                    auto result = func->Call(webviewController, 1, argv);
+            };
+        }
+        
         int32_t parentNWebId = -1;
         bool isPopup = JSWebWindowNewHandler::ExistController(controller, parentNWebId);
         WebModel::GetInstance()->Create(
             dstSrc.value(), std::move(setIdCallback), std::move(setHapPathCallback), parentNWebId, isPopup, webType);
 
+        WebModel::GetInstance()->SetPermissionClipboard(std::move(requestPermissionsFromUserCallback));
         auto getCmdLineFunction = controller->GetProperty("getCustomeSchemeCmdLine");
         std::string cmdLine = JSRef<JSFunc>::Cast(getCmdLineFunction)->Call(controller, 0, {})->ToString();
         if (!cmdLine.empty()) {
