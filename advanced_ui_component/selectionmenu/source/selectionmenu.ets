@@ -133,6 +133,9 @@ struct SelectionMenuComponent {
     if (sysBoard && sysBoard.hasDataSync()) {
       this.pasteEnable = true
     }
+    if (!(this.editorMenuOptions && this.editorMenuOptions.length > 0)) {
+      this.customMenuHeight = 0
+    }
   }
 
   build() {
@@ -389,6 +392,7 @@ struct SelectionMenuComponent {
                     this.controller.setSelection(-1, -1)
                     this.visibilityValue = Visibility.None
                   }
+                  this.controller.closeSelectionMenu()
                 })
               if (this.showExpandedMenuOptions) {
                 MenuItem({ startIcon: this.theme.shareIcon, content: "分享", labelInfo: "" })
@@ -404,7 +408,6 @@ struct SelectionMenuComponent {
             MenuItem({ content: "更多", endIcon: this.theme.arrowDownIcon })
               .onClick(() => {
                 this.showExpandedMenuOptions = true
-                this.customMenuHeight = this.theme.menuSpacing
                 this.customMenuSize = '100%'
               })
           } else if (this.showExpandedMenuOptions && this.expandedMenuOptions && this.expandedMenuOptions.length > 0) {
