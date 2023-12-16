@@ -62,7 +62,7 @@ void ConvertThemeColor(std::vector<OHOS::Ace::NG::Gradient>& colors)
 bool ConvertResourceColor(const EcmaVM* vm, const Local<JSValueRef>& item, OHOS::Ace::NG::Gradient& gradient)
 {
     Color color;
-    if (!ArkTSUtils::ParseJsColor(vm, item, color)) {
+    if (!ArkTSUtils::ParseJsColorAlpha(vm, item, color)) {
         return false;
     }
     OHOS::Ace::NG::GradientColor gradientColorStart;
