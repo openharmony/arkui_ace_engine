@@ -3204,9 +3204,9 @@ void TextFieldPattern::UpdateCounterMargin()
     if (!IsTextArea() && layoutProperty->GetShowCounterValue(false) && !IsNormalInlineState() &&
         !IsShowPasswordIcon()) {
         MarginProperty margin;
-        hasCounterMargin_ = true;
         const auto& getMargin = layoutProperty->GetMarginProperty();
-        if (getMargin) {
+        if (getMargin && !hasCounterMargin_) {
+            hasCounterMargin_ = true;
             auto systemMargin = getMargin->bottom->GetDimension();
             Dimension marginProperty { BOTTOM_MARGIN, DimensionUnit::VP };
             margin.bottom = CalcLength(marginProperty + systemMargin);
@@ -3215,15 +3215,18 @@ void TextFieldPattern::UpdateCounterMargin()
             margin.right = CalcLength(getMargin->right->GetDimension());
             layoutProperty->UpdateMargin(margin);
         }
-        margin.bottom = CalcLength(COUNTER_BOTTOM);
-        layoutProperty->UpdateMargin(margin);
+        if (!hasCounterMargin_ && !getMargin) {
+            hasCounterMargin_ = true;
+            margin.bottom = CalcLength(COUNTER_BOTTOM);
+            layoutProperty->UpdateMargin(margin);
+        }
     }
     if (!IsTextArea() && hasCounterMargin_ && !layoutProperty->GetShowCounterValue(false) &&
         !IsNormalInlineState() && !IsShowPasswordIcon()) {
         MarginProperty margin;
-        hasCounterMargin_ = false;
         const auto& getMargin = layoutProperty->GetMarginProperty();
         if (getMargin) {
+            hasCounterMargin_ = false;
             auto marginProperty = getMargin->bottom->GetDimension();
             Dimension counterMargin { BOTTOM_MARGIN, DimensionUnit::VP };
             margin.bottom = CalcLength(marginProperty - counterMargin);
