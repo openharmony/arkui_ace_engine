@@ -10765,4 +10765,293 @@ HWTEST_F(SwiperTestNg, SwiperDragScene001, TestSize.Level1)
     pattern_->HandleDragUpdate(info);
     pattern_->HandleDragEnd(info.GetMainVelocity());
 }
+
+/**
+ * @tc.name: HandleTouchBottomLoop001
+ * @tc.desc: test Swiper indicator no touch bottom in loop
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, HandleTouchBottomLoop001, TestSize.Level1)
+{
+    CreateWithItem([](SwiperModelNG model) {});
+    EXPECT_EQ(pattern_->TotalCount(), 4);
+    pattern_->currentFirstIndex_ = 1;
+    pattern_->currentIndex_ = 1;
+    pattern_->gestureState_ = GestureState::GESTURE_STATE_FOLLOW_RIGHT;
+    pattern_->HandleTouchBottomLoop();
+    EXPECT_EQ(pattern_->touchBottomType_, TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_NONE);
+}
+
+/**
+ * @tc.name: HandleTouchBottomLoop002
+ * @tc.desc: test Swiper indicator touch left bottom in loop
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, HandleTouchBottomLoop002, TestSize.Level1)
+{
+    CreateWithItem([](SwiperModelNG model) {});
+    EXPECT_EQ(pattern_->TotalCount(), 4);
+    pattern_->currentFirstIndex_ = pattern_->TotalCount() - 1;
+    pattern_->currentIndex_ = 0;
+    pattern_->gestureState_ = GestureState::GESTURE_STATE_FOLLOW_LEFT;
+    pattern_->HandleTouchBottomLoop();
+    EXPECT_EQ(pattern_->touchBottomType_, TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_LEFT);
+
+    pattern_->gestureState_ = GestureState::GESTURE_STATE_FOLLOW_RIGHT;
+    pattern_->HandleTouchBottomLoop();
+    EXPECT_EQ(pattern_->touchBottomType_, TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_LEFT);
+
+    pattern_->gestureState_ = GestureState::GESTURE_STATE_RELEASE_LEFT;
+    pattern_->HandleTouchBottomLoop();
+    EXPECT_EQ(pattern_->touchBottomType_, TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_LEFT);
+}
+
+/**
+ * @tc.name: HandleTouchBottomLoop003
+ * @tc.desc: test Swiper indicator touch right bottom in loop
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, HandleTouchBottomLoop003, TestSize.Level1)
+{
+    CreateWithItem([](SwiperModelNG model) {});
+    EXPECT_EQ(pattern_->TotalCount(), 4);
+    pattern_->currentFirstIndex_ = 0;
+    pattern_->currentIndex_ = pattern_->TotalCount() - 1;
+    pattern_->gestureState_ = GestureState::GESTURE_STATE_RELEASE_RIGHT;
+    pattern_->HandleTouchBottomLoop();
+    EXPECT_EQ(pattern_->touchBottomType_, TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_RIGHT);
+
+    pattern_->currentFirstIndex_ = pattern_->TotalCount() - 1;
+    pattern_->currentIndex_ = pattern_->TotalCount() - 1;
+    pattern_->gestureState_ = GestureState::GESTURE_STATE_FOLLOW_LEFT;
+    pattern_->HandleTouchBottomLoop();
+    EXPECT_EQ(pattern_->touchBottomType_, TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_RIGHT);
+
+    pattern_->currentFirstIndex_ = pattern_->TotalCount() - 1;
+    pattern_->currentIndex_ = pattern_->TotalCount() - 1;
+    pattern_->gestureState_ = GestureState::GESTURE_STATE_FOLLOW_RIGHT;
+    pattern_->HandleTouchBottomLoop();
+    EXPECT_EQ(pattern_->touchBottomType_, TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_RIGHT);
+}
+
+/**
+ * @tc.name: CalculateGestureState001
+ * @tc.desc: test Swiper indicator gesture state
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, CalculateGestureState001, TestSize.Level1)
+{
+    CreateWithItem([](SwiperModelNG model) {});
+    EXPECT_EQ(pattern_->TotalCount(), 4);
+    pattern_->CalculateGestureState(1.0f, 0.0f);
+    EXPECT_EQ(pattern_->gestureState_, GestureState::GESTURE_STATE_RELEASE_LEFT);
+
+    pattern_->CalculateGestureState(-1.0f, 0.0f);
+    EXPECT_EQ(pattern_->gestureState_, GestureState::GESTURE_STATE_RELEASE_RIGHT);
+
+    pattern_->currentFirstIndex_ = 0;
+    pattern_->currentIndex_ = 0;
+    pattern_->turnPageRate_ = -1.0f;
+    pattern_->CalculateGestureState(0.0f, -1.1f);
+    EXPECT_EQ(pattern_->gestureState_, GestureState::GESTURE_STATE_FOLLOW_RIGHT);
+
+    pattern_->currentFirstIndex_ = 0;
+    pattern_->currentIndex_ = 1;
+    pattern_->turnPageRate_ = -1.0f;
+    pattern_->CalculateGestureState(0.0f, -1.1f);
+    EXPECT_EQ(pattern_->gestureState_, GestureState::GESTURE_STATE_FOLLOW_LEFT);
+
+    pattern_->currentFirstIndex_ = 0;
+    pattern_->currentIndex_ = 0;
+    pattern_->turnPageRate_ = -1.0f;
+    pattern_->CalculateGestureState(0.0f, -0.9f);
+    EXPECT_EQ(pattern_->gestureState_, GestureState::GESTURE_STATE_FOLLOW_LEFT);
+}
+
+/**
+ * @tc.name: GetStartAndEndIndex001
+ * @tc.desc: get long point start and end index
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, GetStartAndEndIndex001, TestSize.Level1)
+{
+    CreateWithItem([](SwiperModelNG model) {});
+    EXPECT_EQ(pattern_->TotalCount(), 4);
+    RefPtr<DotIndicatorModifier> modifier = AceType::MakeRefPtr<DotIndicatorModifier>();
+    RefPtr<DotIndicatorPaintMethod> paintMethod = AceType::MakeRefPtr<DotIndicatorPaintMethod>(modifier);
+
+    paintMethod->itemCount_ = pattern_->TotalCount();
+    paintMethod->turnPageRate_ = -0.9f;
+
+    // expand to long point
+    paintMethod->pointAnimationStage_ = PointAnimationStage::STATE_EXPAND_TO_LONG_POINT;
+    paintMethod->gestureState_ = GestureState::GESTURE_STATE_RELEASE_LEFT;
+    paintMethod->touchBottomTypeLoop_ = TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_LEFT;
+    auto index = pattern_->TotalCount() - 1;
+    auto expectVal = std::pair<int32_t, int32_t>(index, index);
+    EXPECT_EQ(paintMethod->GetStartAndEndIndex(index), expectVal);
+
+    paintMethod->gestureState_ = GestureState::GESTURE_STATE_RELEASE_RIGHT;
+    paintMethod->touchBottomTypeLoop_ = TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_RIGHT;
+    expectVal = std::pair<int32_t, int32_t>(0, 0);
+    EXPECT_EQ(paintMethod->GetStartAndEndIndex(index), expectVal);
+}
+
+/**
+ * @tc.name: GetStartAndEndIndex002
+ * @tc.desc: get long point start and end index
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, GetStartAndEndIndex002, TestSize.Level1)
+{
+    CreateWithItem([](SwiperModelNG model) {});
+    EXPECT_EQ(pattern_->TotalCount(), 4);
+    RefPtr<DotIndicatorModifier> modifier = AceType::MakeRefPtr<DotIndicatorModifier>();
+    RefPtr<DotIndicatorPaintMethod> paintMethod = AceType::MakeRefPtr<DotIndicatorPaintMethod>(modifier);
+
+    paintMethod->itemCount_ = pattern_->TotalCount();
+    paintMethod->turnPageRate_ = -0.8f;
+
+    // shrink to black point
+    paintMethod->pointAnimationStage_ = PointAnimationStage::STATE_SHRINKT_TO_BLACK_POINT;
+    paintMethod->touchBottomTypeLoop_ = TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_LEFT;
+    auto expectVal = std::pair<int32_t, int32_t>(0, 0);
+    auto index = pattern_->TotalCount() - 1;
+    EXPECT_EQ(paintMethod->GetStartAndEndIndex(index), expectVal);
+
+    paintMethod->gestureState_ = GestureState::GESTURE_STATE_RELEASE_RIGHT;
+    paintMethod->touchBottomTypeLoop_ = TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_RIGHT;
+    expectVal = std::pair<int32_t, int32_t>(index, index);
+    EXPECT_EQ(paintMethod->GetStartAndEndIndex(1), expectVal);
+
+    paintMethod->gestureState_ = GestureState::GESTURE_STATE_RELEASE_LEFT;
+    expectVal = std::pair<int32_t, int32_t>(index, index);
+    EXPECT_EQ(paintMethod->GetStartAndEndIndex(index), expectVal);
+}
+
+/**
+ * @tc.name: AdjustPointCenterXForTouchBottom
+ * @tc.desc: adjust long point centerX for touch bottom
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, AdjustPointCenterXForTouchBottom001, TestSize.Level1)
+{
+    CreateWithItem([](SwiperModelNG model) {});
+    auto totalCount = pattern_->TotalCount();
+    EXPECT_EQ(totalCount, 4);
+    RefPtr<DotIndicatorModifier> modifier = AceType::MakeRefPtr<DotIndicatorModifier>();
+    RefPtr<DotIndicatorPaintMethod> paintMethod = AceType::MakeRefPtr<DotIndicatorPaintMethod>(modifier);
+    DotIndicatorPaintMethod::StarAndEndPointCenter pointCenter;
+    LinearVector<float> endVectorBlackPointCenterX;
+    for (int32_t i = 0; i < totalCount; ++i) {
+        endVectorBlackPointCenterX.emplace_back(static_cast<float>(i + 1));
+    }
+
+    int32_t startCurrentIndex = 0;
+    int32_t endCurrentIndex = totalCount - 1;
+
+    // shrink to black point
+    paintMethod->pointAnimationStage_ = PointAnimationStage::STATE_SHRINKT_TO_BLACK_POINT;
+    paintMethod->touchBottomTypeLoop_ = TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_LEFT;
+    paintMethod->AdjustPointCenterXForTouchBottom(
+        pointCenter, endVectorBlackPointCenterX, startCurrentIndex, endCurrentIndex);
+    EXPECT_EQ(pointCenter.endLongPointRightCenterX, endVectorBlackPointCenterX[0]);
+    EXPECT_EQ(pointCenter.endLongPointLeftCenterX, endVectorBlackPointCenterX[0]);
+
+    paintMethod->pointAnimationStage_ = PointAnimationStage::STATE_SHRINKT_TO_BLACK_POINT;
+    paintMethod->touchBottomTypeLoop_ = TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_RIGHT;
+    pointCenter = { 0.0f, 0.0f, 0.0f, 0.0f };
+    paintMethod->AdjustPointCenterXForTouchBottom(
+        pointCenter, endVectorBlackPointCenterX, startCurrentIndex, endCurrentIndex);
+    EXPECT_EQ(pointCenter.endLongPointRightCenterX, endVectorBlackPointCenterX[startCurrentIndex]);
+    EXPECT_EQ(pointCenter.endLongPointLeftCenterX, endVectorBlackPointCenterX[startCurrentIndex]);
+
+    // expand to long point
+    paintMethod->pointAnimationStage_ = PointAnimationStage::STATE_EXPAND_TO_LONG_POINT;
+    paintMethod->gestureState_ = GestureState::GESTURE_STATE_RELEASE_LEFT;
+    paintMethod->touchBottomTypeLoop_ = TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_LEFT;
+    pointCenter = { 0.0f, 0.0f, 0.0f, 0.0f };
+    paintMethod->AdjustPointCenterXForTouchBottom(
+        pointCenter, endVectorBlackPointCenterX, startCurrentIndex, endCurrentIndex);
+    EXPECT_EQ(pointCenter.startLongPointRightCenterX, endVectorBlackPointCenterX[endCurrentIndex]);
+    EXPECT_EQ(pointCenter.endLongPointLeftCenterX, endVectorBlackPointCenterX[endCurrentIndex]);
+
+    paintMethod->pointAnimationStage_ = PointAnimationStage::STATE_EXPAND_TO_LONG_POINT;
+    paintMethod->gestureState_ = GestureState::GESTURE_STATE_RELEASE_RIGHT;
+    paintMethod->touchBottomTypeLoop_ = TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_RIGHT;
+    pointCenter = { 0.0f, 0.0f, 0.0f, 0.0f };
+    paintMethod->AdjustPointCenterXForTouchBottom(
+        pointCenter, endVectorBlackPointCenterX, startCurrentIndex, endCurrentIndex);
+    EXPECT_EQ(pointCenter.startLongPointRightCenterX, endVectorBlackPointCenterX[0]);
+    EXPECT_EQ(pointCenter.endLongPointLeftCenterX, endVectorBlackPointCenterX[0]);
+}
+
+/**
+ * @tc.name: GetLongPointAnimationStateSecondCenter
+ * @tc.desc: get long point animation state second center
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, GetLongPointAnimationStateSecondCenter001, TestSize.Level1)
+{
+    CreateWithItem([](SwiperModelNG model) {});
+    RefPtr<DotIndicatorModifier> modifier = AceType::MakeRefPtr<DotIndicatorModifier>();
+    RefPtr<DotIndicatorPaintMethod> paintMethod = AceType::MakeRefPtr<DotIndicatorPaintMethod>(modifier);
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    auto paintProperty = AceType::MakeRefPtr<DotIndicatorPaintProperty>();
+    auto renderContext = frameNode_->GetRenderContext();
+
+    PaintWrapper paintWrapper(renderContext, geometryNode, paintProperty);
+    std::vector<std::pair<float, float>> pointCenterX;
+    paintMethod->turnPageRate_ = -1.0f;
+
+    paintMethod->gestureState_ = GestureState::GESTURE_STATE_RELEASE_LEFT;
+    paintMethod->touchBottomTypeLoop_ = TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_LEFT;
+    paintMethod->GetLongPointAnimationStateSecondCenter(&paintWrapper, pointCenterX);
+    EXPECT_EQ(pointCenterX.size(), 1);
+
+    paintMethod->gestureState_ = GestureState::GESTURE_STATE_RELEASE_RIGHT;
+    paintMethod->touchBottomTypeLoop_ = TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_RIGHT;
+    pointCenterX.clear();
+    paintMethod->GetLongPointAnimationStateSecondCenter(&paintWrapper, pointCenterX);
+    EXPECT_EQ(pointCenterX.size(), 1);
+
+    paintMethod->gestureState_ = GestureState::GESTURE_STATE_RELEASE_LEFT;
+    paintMethod->touchBottomTypeLoop_ = TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_RIGHT;
+    pointCenterX.clear();
+    paintMethod->GetLongPointAnimationStateSecondCenter(&paintWrapper, pointCenterX);
+    EXPECT_EQ(pointCenterX.size(), 0);
+
+    paintMethod->gestureState_ = GestureState::GESTURE_STATE_RELEASE_LEFT;
+    paintMethod->touchBottomTypeLoop_ = TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_RIGHT;
+    pointCenterX.clear();
+    paintMethod->GetLongPointAnimationStateSecondCenter(&paintWrapper, pointCenterX);
+    EXPECT_EQ(pointCenterX.size(), 0);
+}
+
+/**
+ * @tc.name: PlayLongPointAnimation
+ * @tc.desc: play long point animation
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, PlayLongPointAnimation001, TestSize.Level1)
+{
+    CreateWithItem([](SwiperModelNG model) {});
+    auto totalCount = pattern_->TotalCount();
+    EXPECT_EQ(totalCount, 4);
+    RefPtr<DotIndicatorModifier> modifier = AceType::MakeRefPtr<DotIndicatorModifier>();
+    LinearVector<float> endVectorBlackPointCenterX;
+    for (int32_t i = 0; i < totalCount; ++i) {
+        endVectorBlackPointCenterX.emplace_back(static_cast<float>(i + 1));
+    }
+    std::vector<std::pair<float, float>> longPointCenterX = { { 0.0f, 0.0f } };
+
+    modifier->PlayLongPointAnimation(longPointCenterX, GestureState::GESTURE_STATE_RELEASE_RIGHT,
+        TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_NONE, endVectorBlackPointCenterX);
+    EXPECT_FALSE(modifier->isTouchBottomLoop_);
+
+    longPointCenterX.emplace_back(1.0f, 1.0f);
+    modifier->PlayLongPointAnimation(longPointCenterX, GestureState::GESTURE_STATE_RELEASE_RIGHT,
+        TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_RIGHT, endVectorBlackPointCenterX);
+    EXPECT_FALSE(modifier->isTouchBottomLoop_);
+}
 } // namespace OHOS::Ace::NG

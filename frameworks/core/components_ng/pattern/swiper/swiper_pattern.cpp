@@ -2005,16 +2005,16 @@ void SwiperPattern::PlayIndicatorTranslateAnimation(float translate)
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto weak = AceType::WeakClaim(this);
-    host->CreateAnimatablePropertyFloat(INDICATOR_PROPERTY_NAME, 0,
-        Animation<double>::ValueCallback([weak, currentContentOffset = -itemPosition_.begin()->second.startPos,
-                                             index = itemPosition_.begin()->first](double value) {
+    host->CreateAnimatablePropertyFloat(INDICATOR_PROPERTY_NAME, 0, [weak](float value) {
             auto swiper = weak.Upgrade();
             CHECK_NULL_VOID(swiper);
+            auto currentContentOffset = -(swiper->itemPosition_.begin()->second.startPos);
+            auto index = swiper->itemPosition_.begin()->first;
             const auto& turnPageRateCallback = swiper->swiperController_->GetTurnPageRateCallback();
             if (turnPageRateCallback && !NearZero(swiper->GetTranslateLength())) {
                 turnPageRateCallback(index, (currentContentOffset - value) / swiper->GetTranslateLength());
             }
-        }));
+        });
 
     AnimationOption option;
     option.SetDuration(GetDuration());
