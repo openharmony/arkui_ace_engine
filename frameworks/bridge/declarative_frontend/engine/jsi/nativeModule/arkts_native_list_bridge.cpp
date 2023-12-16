@@ -35,45 +35,44 @@ ArkUINativeModuleValue ListBridge::SetListLanes(ArkUIRuntimeCallInfo* runtimeCal
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
-    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(LIST_ARG_INDEX_0);
-    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(LIST_ARG_INDEX_1);
-    Local<JSValueRef> thirdArg = runtimeCallInfo->GetCallArgRef(LIST_ARG_INDEX_2);
-    Local<JSValueRef> fourthArg = runtimeCallInfo->GetCallArgRef(LIST_ARG_INDEX_3);
-    Local<JSValueRef> fifthArg = runtimeCallInfo->GetCallArgRef(LIST_ARG_INDEX_4);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+    Local<JSValueRef> frameNodeArg = runtimeCallInfo->GetCallArgRef(0); // 0: index of parameter frameNode
+    Local<JSValueRef> laneNumArg = runtimeCallInfo->GetCallArgRef(1);   // 1: index of parameter laneNum
+    Local<JSValueRef> minLengthArg = runtimeCallInfo->GetCallArgRef(2); // 2: index of parameter minLength
+    Local<JSValueRef> maxLengthArg = runtimeCallInfo->GetCallArgRef(3); // 3: index of parameter maxLength
+    Local<JSValueRef> gutterArg = runtimeCallInfo->GetCallArgRef(4);    // 4: index of parameter gutter
+    void* nativeNode = frameNodeArg->ToNativePointer(vm)->Value();
     ArkUIDimensionType gutterType;
     ArkUIDimensionType minLengthType;
     ArkUIDimensionType maxLengthType;
 
-    CalcDimension gutter;
-    if (fifthArg->IsUndefined() || !ArkTSUtils::ParseJsDimension(vm, fifthArg, gutter, DimensionUnit::VP)) {
-        gutter = Dimension(0);
+    CalcDimension gutter = Dimension(0.0);
+    int32_t laneNum = 1;
+    CalcDimension minLength = -1.0_vp;
+    CalcDimension maxLength = -1.0_vp;
+    if (!gutterArg->IsUndefined() && ArkTSUtils::ParseJsDimensionVp(vm, gutterArg, gutter)) {
+        if (gutter.IsNegative()) {
+            gutter.Reset();
+        }
         gutterType.value = gutter.Value();
         gutterType.units = static_cast<int32_t>(gutter.Unit());
     }
-
-    if (!secondArg->IsUndefined()) {
-        CalcDimension minLength = 0.0_vp;
-        CalcDimension maxLength = 0.0_vp;
+    if (!laneNumArg->IsUndefined() && ArkTSUtils::ParseJsInteger(vm, laneNumArg, laneNum)) {
         minLengthType.value = minLength.Value();
         minLengthType.units = static_cast<int32_t>(minLength.Unit());
         maxLengthType.value = maxLength.Value();
         maxLengthType.units = static_cast<int32_t>(maxLength.Unit());
-        GetArkUIInternalNodeAPI()->GetListModifier().SetListLanes(
-            nativeNode, secondArg->ToNumber(vm)->Value(), &minLengthType, &maxLengthType, &gutterType);
-    } else {
-        CalcDimension minLength;
-        CalcDimension maxLength;
-        ArkTSUtils::ParseJsDimension(vm, thirdArg, minLength, DimensionUnit::VP);
-        ArkTSUtils::ParseJsDimension(vm, fourthArg, maxLength, DimensionUnit::VP);
-        minLengthType.value = minLength.Value();
-        minLengthType.units = static_cast<int32_t>(minLength.Unit());
-        maxLengthType.value = maxLength.Value();
-        maxLengthType.units = static_cast<int32_t>(maxLength.Unit());
-        GetArkUIInternalNodeAPI()->GetListModifier().SetListLanes(
-            nativeNode, -1, &minLengthType, &maxLengthType, &gutterType); // invild value .
     }
-
+    if (!minLengthArg->IsUndefined() && !maxLengthArg->IsUndefined() &&
+        ArkTSUtils::ParseJsDimensionVp(vm, minLengthArg, minLength) &&
+        ArkTSUtils::ParseJsDimensionVp(vm, maxLengthArg, maxLength)) {
+        laneNum = -1;
+        minLengthType.value = minLength.Value();
+        minLengthType.units = static_cast<int32_t>(minLength.Unit());
+        maxLengthType.value = maxLength.Value();
+        maxLengthType.units = static_cast<int32_t>(maxLength.Unit());
+    }
+    GetArkUIInternalNodeAPI()->GetListModifier().SetListLanes(
+        nativeNode, laneNum, &minLengthType, &maxLengthType, &gutterType);
     return panda::JSValueRef::Undefined(vm);
 }
 

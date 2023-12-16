@@ -15265,10 +15265,17 @@ class ArkListComponent extends ArkComponent {
   lanes(value, gutter) {
     let opt = new ArkLanesOpt();
     opt.gutter = gutter;
-    opt.lanesNum = value;
-    const lc = value;
-    opt.minLength = lc.minLength;
-    opt.maxLength = lc.maxLength;
+    if (isUndefined(value)) {
+      opt.lanesNum = undefined;
+    }
+    else if (isNumber(value)) {
+      opt.lanesNum = value;
+    }
+    else {
+      const lc = value;
+      opt.minLength = lc.minLength;
+      opt.maxLength = lc.maxLength;
+    }
     modifierWithKey(this._modifiersWithKeys, ListLanesModifier.identity, ListLanesModifier, opt);
     return this;
   }
