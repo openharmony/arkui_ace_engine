@@ -1361,6 +1361,55 @@ HWTEST_F(GesturesTestNg, ClickRecognizerTest010, TestSize.Level1)
     EXPECT_EQ(clickRecognizer.touchPoints_[touchEvent.id].id, touchEvent.id);
 }
 
+/*
+ * @tc.name: GestureRecognizerTest011
+ * @tc.desc: Test ClickRecognizer function: IsPointInRegion
+ * @tc.type: FUNC
+ */
+HWTEST_F(GesturesTestNg, ClickRecognizerTest011, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create ClickRecognizer.
+     */
+    ClickRecognizer clickRecognizer = ClickRecognizer(FINGER_NUMBER, COUNT);
+    TouchEvent touchEvent;
+
+    /**
+     * @tc.steps: step2. call IsInResponseRegion function and compare result.
+     * @tc.steps: case1: event.sourceType == TOUCH
+     * @tc.expected: step2. result equals.
+     */
+    touchEvent.sourceType = SourceType::TOUCH;
+    auto result = clickRecognizer.IsPointInRegion(touchEvent);
+    EXPECT_EQ(result, true);
+
+    /**
+     * @tc.steps: step3. call IsInResponseRegion function and compare result.
+     * @tc.steps: case2: event.sourceType == TOUCH
+     * @tc.expected: step3. result equals.
+     */
+    auto frameNode = FrameNode::CreateFrameNode("myButton", 100, AceType::MakeRefPtr<Pattern>());
+    clickRecognizer.AttachFrameNode(frameNode);
+    event.x = 100.0f;
+    event.y = 100.0f;
+    touchEvent.responseRegionBuffer_.emplace_back(RectF(0, 0, 200, 200));
+    auto result = clickRecognizer.IsPointInRegion(touchEvent);
+    EXPECT_EQ(result, true);
+
+    /**
+     * @tc.steps: step3. call IsInResponseRegion function and compare result.
+     * @tc.steps: case3: event.sourceType == TOUCH
+     * @tc.expected: step3. result equals.
+     */
+    auto frameNode = FrameNode::CreateFrameNode("myButton", 100, AceType::MakeRefPtr<Pattern>());
+    clickRecognizer.AttachFrameNode(frameNode);
+    event.x = 100.0f;
+    event.y = 100.0f;
+    touchEvent.responseRegionBuffer_.emplace_back(RectF(0, 0, 50, 50));
+    auto result = clickRecognizer.IsPointInRegion(touchEvent);
+    EXPECT_EQ(result, false);
+}
+
 /**
  * @tc.name: ExclusiveRecognizerTest001
  * @tc.desc: Test ExclusiveRecognizer function: OnAccepted OnRejected OnPending OnBlocked
