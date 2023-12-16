@@ -300,6 +300,9 @@ void ImageModelNG::SetAlt(FrameNode *frameNode, const ImageSourceInfo &src)
 void ImageModelNG::SetImageInterpolation(FrameNode *frameNode, ImageInterpolation interpolation)
 {
     ACE_UPDATE_NODE_PAINT_PROPERTY(ImageRenderProperty, ImageInterpolation, interpolation, frameNode);
+    auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<ImagePattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetImageInterpolation(interpolation);
 }
 
 void ImageModelNG::SetColorFilterMatrix(FrameNode *frameNode, const std::vector<float> &matrix)
