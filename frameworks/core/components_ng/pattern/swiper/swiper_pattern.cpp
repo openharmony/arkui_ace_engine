@@ -1400,16 +1400,18 @@ void SwiperPattern::HandleTouchBottomLoop()
 
 void SwiperPattern::CalculateGestureState(float additionalOffset, float currentTurnPageRate)
 {
-    gestureState_ = GestureState::GESTURE_STATE_FOLLOW;
+    gestureState_ = GestureState::GESTURE_STATE_FOLLOW_RIGHT;
     if (GreatNotEqual(additionalOffset, 0.0f)) {
         gestureState_ = GestureState::GESTURE_STATE_RELEASE_LEFT;
     } else if (LessNotEqual(additionalOffset, 0.0f)) {
         gestureState_ = GestureState::GESTURE_STATE_RELEASE_RIGHT;
     } else if ((GetLoopIndex(currentFirstIndex_) == GetLoopIndex(currentIndex_)) &&
-               (std::abs(currentTurnPageRate) > std::abs(turnPageRate_))) {
+               GreatNotEqual(std::abs(currentTurnPageRate), std::abs(turnPageRate_))) {
         gestureState_ = GestureState::GESTURE_STATE_FOLLOW_RIGHT;
-    } else {
+    } else if (GetLoopIndex(currentFirstIndex_) != GetLoopIndex(currentIndex_)) {
         gestureState_ = GestureState::GESTURE_STATE_FOLLOW_LEFT;
+    } else if (currentTurnPageRate == 0 && turnPageRate_ == 0) {
+        gestureState_ = GestureState::GESTURE_STATE_FOLLOW;
     }
     return;
 }
@@ -1454,7 +1456,7 @@ void SwiperPattern::CheckMarkDirtyNodeForRenderIndicator(float additionalOffset)
 
     touchBottomType_ = TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_NONE;
     if (!IsLoop() && ((currentFirstIndex_ == 0 && GreatNotEqual(turnPageRate_, 0.0f)) ||
-                         (currentFirstIndex_ == TotalCount() - 1 && LessNotEqual(turnPageRate_, 0.0f)))) {
+                        (currentFirstIndex_ == TotalCount() - 1 && LessNotEqual(turnPageRate_, 0.0f)))) {
         return;
     }
     HandleTouchBottomLoop();
