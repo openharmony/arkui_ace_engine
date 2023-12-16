@@ -1390,10 +1390,10 @@ HWTEST_F(GesturesTestNg, ClickRecognizerTest011, TestSize.Level1)
      */
     auto frameNode = FrameNode::CreateFrameNode("myButton", 100, AceType::MakeRefPtr<Pattern>());
     clickRecognizer.AttachFrameNode(frameNode);
-    event.x = 100.0f;
-    event.y = 100.0f;
-    touchEvent.responseRegionBuffer_.emplace_back(RectF(0, 0, 200, 200));
-    auto result = clickRecognizer.IsPointInRegion(touchEvent);
+    touchEvent.x = 100.0f;
+    touchEvent.y = 100.0f;
+    clickRecognizer.responseRegionBuffer_.emplace_back(RectF(0, 0, 200, 200));
+    result = clickRecognizer.IsPointInRegion(touchEvent);
     EXPECT_EQ(result, true);
 
     /**
@@ -1401,12 +1401,11 @@ HWTEST_F(GesturesTestNg, ClickRecognizerTest011, TestSize.Level1)
      * @tc.steps: case3: event.sourceType == TOUCH
      * @tc.expected: step3. result equals.
      */
-    auto frameNode = FrameNode::CreateFrameNode("myButton", 100, AceType::MakeRefPtr<Pattern>());
-    clickRecognizer.AttachFrameNode(frameNode);
-    event.x = 100.0f;
-    event.y = 100.0f;
-    touchEvent.responseRegionBuffer_.emplace_back(RectF(0, 0, 50, 50));
-    auto result = clickRecognizer.IsPointInRegion(touchEvent);
+    touchEvent.x = 100.0f;
+    touchEvent.y = 100.0f;
+    clickRecognizer.responseRegionBuffer_.clear();
+    clickRecognizer.responseRegionBuffer_.emplace_back(RectF(0, 0, 50, 50));
+    result = clickRecognizer.IsPointInRegion(touchEvent);
     EXPECT_EQ(result, false);
 }
 
