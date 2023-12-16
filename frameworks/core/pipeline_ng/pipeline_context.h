@@ -170,7 +170,7 @@ public:
 
     void RemoveOnAreaChangeNode(int32_t nodeId);
 
-    void HandleOnAreaChangeEvent();
+    void HandleOnAreaChangeEvent(uint64_t nanoTimestamp);
 
     void AddVisibleAreaChangeNode(
         const RefPtr<FrameNode>& node, double ratio, const VisibleRatioCallback& callback, bool isUserCallback = true);

@@ -67,6 +67,11 @@ const float CONTAINER_HEIGHT = 1000.0f;
 const SizeF CONTAINER_SIZE(CONTAINER_WIDTH, CONTAINER_HEIGHT);
 
 const OffsetF OFFSETF { 1.0, 1.0 };
+
+constexpr uint64_t TIMESTAMP_1 = 100;
+constexpr uint64_t TIMESTAMP_2 = 101;
+constexpr uint64_t TIMESTAMP_3 = 102;
+constexpr uint64_t TIMESTAMP_4 = 103;
 } // namespace
 class FrameNodeTestNg : public testing::Test {
 public:
@@ -742,7 +747,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTriggerOnAreaChangeCallback0013, TestSize.Lev
      * @tc.steps: step2. call TriggerOnAreaChangeCallback before set callback
      * @tc.expected: expect flag is still false
      */
-    FRAME_NODE2->TriggerOnAreaChangeCallback();
+    FRAME_NODE2->TriggerOnAreaChangeCallback(TIMESTAMP_1);
     EXPECT_FALSE(flag);
 
     /**
@@ -751,7 +756,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTriggerOnAreaChangeCallback0013, TestSize.Lev
      */
     FRAME_NODE2->eventHub_->SetOnAreaChanged(std::move(onAreaChanged));
     FRAME_NODE2->lastParentOffsetToWindow_ = nullptr;
-    FRAME_NODE2->TriggerOnAreaChangeCallback();
+    FRAME_NODE2->TriggerOnAreaChangeCallback(TIMESTAMP_2);
     EXPECT_FALSE(flag);
 
     /**
@@ -759,7 +764,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTriggerOnAreaChangeCallback0013, TestSize.Lev
      * @tc.expected: expect flag is still false
      */
     FRAME_NODE2->lastFrameRect_ = nullptr;
-    FRAME_NODE2->TriggerOnAreaChangeCallback();
+    FRAME_NODE2->TriggerOnAreaChangeCallback(TIMESTAMP_3);
     EXPECT_FALSE(flag);
 
     /**
@@ -768,7 +773,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTriggerOnAreaChangeCallback0013, TestSize.Lev
      */
     FRAME_NODE2->lastParentOffsetToWindow_ = std::make_unique<OffsetF>();
     FRAME_NODE2->lastFrameRect_ = std::make_unique<RectF>();
-    FRAME_NODE2->TriggerOnAreaChangeCallback();
+    FRAME_NODE2->TriggerOnAreaChangeCallback(TIMESTAMP_4);
     EXPECT_FALSE(flag);
 }
 
