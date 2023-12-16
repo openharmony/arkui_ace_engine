@@ -505,6 +505,7 @@ void JSTextField::SetInputFilter(const JSCallbackInfo& info)
 void JSTextField::SetShowPasswordIcon(const JSCallbackInfo& info)
 {
     if (!info[0]->IsBoolean()) {
+        TextFieldModel::GetInstance()->SetShowPasswordIcon(true);
         return;
     }
 

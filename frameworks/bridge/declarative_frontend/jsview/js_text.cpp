@@ -158,7 +158,7 @@ void JSText::SetFontSize(const JSCallbackInfo& info)
     CHECK_NULL_VOID(theme);
     CalcDimension fontSize = theme->GetTextStyle().GetFontSize();
     ParseJsDimensionFp(info[0], fontSize);
-    if (fontSize.IsNegative() || fontSize.Unit() == DimensionUnit::PERCENT) {
+    if (fontSize.IsNonPositive() || fontSize.Unit() == DimensionUnit::PERCENT) {
         fontSize = theme->GetTextStyle().GetFontSize();
     }
     TextModel::GetInstance()->SetFontSize(fontSize);
