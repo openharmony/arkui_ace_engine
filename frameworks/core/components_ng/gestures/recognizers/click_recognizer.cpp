@@ -51,6 +51,7 @@ bool ClickRecognizer::IsPointInRegion(const TouchEvent& event)
         NGGestureRecognizer::Transform(localPoint, frameNode);
         auto host = frameNode.Upgrade();
         auto renderContext = host->GetRenderContext();
+        CHECK_NULL_RETURN(renderContext, true);
         auto paintRect = renderContext->GetPaintRectWithoutTransform();
         localPoint = localPoint + paintRect.GetOffset();
         if (!host->InResponseRegionList(localPoint, responseRegionBuffer_)) {
