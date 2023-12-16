@@ -403,9 +403,11 @@ void JSCanvasRenderer::JsSetFont(const JSCallbackInfo& info)
 
     std::vector<std::string> fontProps;
     StringUtils::StringSplitter(fontStr.c_str(), ' ', fontProps);
+    bool updateFontweight = false;
     bool updateFontStyle = false;
     for (const auto& fontProp : fontProps) {
         if (FONT_WEIGHTS.find(fontProp) != FONT_WEIGHTS.end()) {
+            updateFontweight = true;
             auto weight = ConvertStrToFontWeight(fontProp);
             style_.SetFontWeight(weight);
             CanvasRendererModel::GetInstance()->SetFontWeight(baseInfo, weight);
@@ -432,6 +434,9 @@ void JSCanvasRenderer::JsSetFont(const JSCallbackInfo& info)
     }
     if (!updateFontStyle) {
         CanvasRendererModel::GetInstance()->SetFontStyle(baseInfo, FontStyle::NORMAL);
+    }
+    if (!updateFontweight) {
+        CanvasRendererModel::GetInstance()->SetFontWeight(baseInfo, FontWeight::NORMAL);
     }
 }
 
