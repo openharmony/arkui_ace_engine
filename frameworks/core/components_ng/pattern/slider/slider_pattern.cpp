@@ -969,26 +969,33 @@ void SliderPattern::CloseTranslateAnimation()
     sliderContentModifier_->SetNotAnimated();
 }
 
-OffsetF SliderPattern::GetBubbleVertexPosition(const OffsetF& blockCenter, float trackThickness, const SizeF& blockSize)
+std::pair<OffsetF, float> SliderPattern::GetBubbleVertexPosition(
+    const OffsetF& blockCenter, float trackThickness, const SizeF& blockSize)
 {
     OffsetF bubbleVertex = blockCenter;
     auto sliderLayoutProperty = GetLayoutProperty<SliderLayoutProperty>();
-    CHECK_NULL_RETURN(sliderLayoutProperty, bubbleVertex);
+    float vertexOffsetFromBlock = 0;
+    if (!sliderLayoutProperty) {
+        return std::pair<OffsetF, float>();
+    }
     auto sliderMode = sliderLayoutProperty->GetSliderModeValue(SliderModel::SliderMode::OUTSET);
     if (sliderMode == SliderModel::SliderMode::OUTSET) {
         if (direction_ == Axis::HORIZONTAL) {
-            bubbleVertex.AddY(0 - blockSize.Height() * HALF - BUBBLE_TO_SLIDER_DISTANCE.ConvertToPx());
+            vertexOffsetFromBlock = blockSize.Height() * HALF + BUBBLE_TO_SLIDER_DISTANCE.ConvertToPx();
+            bubbleVertex.AddY(0 - vertexOffsetFromBlock);
         } else {
-            bubbleVertex.AddX(0 - blockSize.Width() * HALF - BUBBLE_TO_SLIDER_DISTANCE.ConvertToPx());
+            vertexOffsetFromBlock = blockSize.Width() * HALF + BUBBLE_TO_SLIDER_DISTANCE.ConvertToPx();
+            bubbleVertex.AddX(0 - vertexOffsetFromBlock);
         }
     } else {
+        vertexOffsetFromBlock = trackThickness * HALF + BUBBLE_TO_SLIDER_DISTANCE.ConvertToPx();
         if (direction_ == Axis::HORIZONTAL) {
-            bubbleVertex.AddY(0 - trackThickness * HALF - BUBBLE_TO_SLIDER_DISTANCE.ConvertToPx());
+            bubbleVertex.AddY(0 - vertexOffsetFromBlock);
         } else {
-            bubbleVertex.AddX(0 - trackThickness * HALF - BUBBLE_TO_SLIDER_DISTANCE.ConvertToPx());
+            bubbleVertex.AddX(0 - vertexOffsetFromBlock);
         }
     }
-    return bubbleVertex;
+    return std::pair<OffsetF, float>(bubbleVertex, vertexOffsetFromBlock);
 }
 
 void SliderPattern::SetAccessibilityAction()

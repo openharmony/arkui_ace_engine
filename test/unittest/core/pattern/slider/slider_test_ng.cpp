@@ -2121,17 +2121,17 @@ HWTEST_F(SliderTestNg, SliderPatternTest007, TestSize.Level1)
      */
     auto offset = BUBBLE_TO_SLIDER_DISTANCE.ConvertToPx();
     sliderPattern->direction_ = Axis::HORIZONTAL;
-    ASSERT_EQ(sliderPattern->GetBubbleVertexPosition(OffsetF(), 0.0f, SizeF()), OffsetF(0, -offset));
+    ASSERT_EQ(sliderPattern->GetBubbleVertexPosition(OffsetF(), 0.0f, SizeF()).first, OffsetF(0, -offset));
     sliderPattern->direction_ = Axis::VERTICAL;
-    ASSERT_EQ(sliderPattern->GetBubbleVertexPosition(OffsetF(), 0.0f, SizeF()), OffsetF(-offset, 0));
+    ASSERT_EQ(sliderPattern->GetBubbleVertexPosition(OffsetF(), 0.0f, SizeF()).first, OffsetF(-offset, 0));
 
     sliderPattern->sliderContentModifier_ =
         AceType::MakeRefPtr<SliderContentModifier>(SliderContentModifier::Parameters(), nullptr, nullptr);
     sliderLayoutProperty->UpdateSliderMode(SliderModelNG::SliderMode::INSET);
     sliderPattern->direction_ = Axis::HORIZONTAL;
-    ASSERT_EQ(sliderPattern->GetBubbleVertexPosition(OffsetF(), 0.0f, SizeF()), OffsetF(0, -offset));
+    ASSERT_EQ(sliderPattern->GetBubbleVertexPosition(OffsetF(), 0.0f, SizeF()).first, OffsetF(0, -offset));
     sliderPattern->direction_ = Axis::VERTICAL;
-    ASSERT_EQ(sliderPattern->GetBubbleVertexPosition(OffsetF(), 0.0f, SizeF()), OffsetF(-offset, 0));
+    ASSERT_EQ(sliderPattern->GetBubbleVertexPosition(OffsetF(), 0.0f, SizeF()).first, OffsetF(-offset, 0));
 }
 
 /**

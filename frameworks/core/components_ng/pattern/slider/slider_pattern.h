@@ -19,6 +19,7 @@
 #include <cstddef>
 #include <optional>
 
+#include "core/components/container_modal/container_modal_constants.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/slider/slider_content_modifier.h"
 #include "core/components_ng/pattern/slider/slider_event_hub.h"
@@ -55,12 +56,31 @@ public:
                     pattern->UpdateImagePositionY(y);
                 });
         }
-        SliderPaintMethod::TipParameters tipParameters { bubbleFlag_,
-            GetBubbleVertexPosition(circleCenter_, trackThickness_, blockSize_) };
+        auto host = GetHost();
+        CHECK_NULL_RETURN(host, nullptr);
+        auto overlayGlobalOffset = host->GetPaintRectOffset();
+        auto pipelineContext = PipelineContext::GetCurrentContext();
+        CHECK_NULL_RETURN(pipelineContext, nullptr);
+        auto safeAreaManger = pipelineContext->GetSafeAreaManager();
+        CHECK_NULL_RETURN(safeAreaManger, nullptr);
+        auto top = safeAreaManger->GetSystemSafeArea().top_.Length();
+        overlayGlobalOffset.SetY(overlayGlobalOffset.GetY() - top);
+        auto windowManager = pipelineContext->GetWindowManager();
+        auto isContainerModal = pipelineContext->GetWindowModal() == WindowModal::CONTAINER_MODAL && windowManager &&
+                                windowManager->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING;
+        if (isContainerModal) {
+            auto wrapperOffset = OffsetF(static_cast<float>((CONTAINER_BORDER_WIDTH + CONTENT_PADDING).ConvertToPx()),
+                static_cast<float>((CONTAINER_TITLE_HEIGHT + CONTAINER_BORDER_WIDTH).ConvertToPx()));
+            overlayGlobalOffset -= wrapperOffset;
+        }
+        std::pair<OffsetF, float> BubbleVertex = GetBubbleVertexPosition(circleCenter_, trackThickness_, blockSize_);
+        SliderPaintMethod::TipParameters tipParameters { bubbleFlag_, BubbleVertex.first, overlayGlobalOffset };
         if (!sliderTipModifier_ && bubbleFlag_) {
             sliderTipModifier_ = AceType::MakeRefPtr<SliderTipModifier>([weak = WeakClaim(this)]() {
                 auto pattern = weak.Upgrade();
-                CHECK_NULL_RETURN(pattern, OffsetF());
+                if (!pattern) {
+                    return std::pair<OffsetF, float>();
+                }
                 auto blockCenter = pattern->GetBlockCenter();
                 auto trackThickness = pattern->sliderContentModifier_->GetTrackThickness();
                 auto blockSize = pattern->sliderContentModifier_->GetBlockSize();
@@ -116,12 +136,13 @@ public:
     {
         return valueRatio_;
     }
-    
+
     std::string ProvideRestoreInfo() override;
     void OnRestoreInfo(const std::string& restoreInfo) override;
 
     void UpdateValue(float value);
     void OnVisibleChange(bool isVisible) override;
+
 private:
     void OnAttachToFrameNode() override;
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
@@ -185,7 +206,8 @@ private:
     void LayoutImageNode();
     void UpdateImagePositionX(float centerX);
     void UpdateImagePositionY(float centerY);
-    OffsetF GetBubbleVertexPosition(const OffsetF& blockCenter, float trackThickness, const SizeF& blockSize);
+    std::pair<OffsetF, float> GetBubbleVertexPosition(
+        const OffsetF& blockCenter, float trackThickness, const SizeF& blockSize);
     void SetAccessibilityAction();
     void UpdateTipState();
     void OnIsFocusActiveUpdate(bool isFocusActive);
