@@ -459,8 +459,8 @@ struct ArkUIButtonModifierAPI {
     void (*ResetButtonFontStyle)(NodeHandle node);
     void (*SetButtonFontFamily)(NodeHandle node, const char *fontFamily);
     void (*ResetButtonFontFamily)(NodeHandle node);
-    void (*SetButtonLabelStyle)(NodeHandle node, const char *fontFamily, const double *valueArray,
-        const double *dimensionValueArray, const int *dimensionUnitArray);
+    void (*SetButtonLabelStyle)(NodeHandle node, const char** stringParameters, const int32_t* valueArray,
+        const double* dimensionArray, const size_t* dataCountArray);
     void (*ResetButtonLabelStyle)(NodeHandle node);
     void (*SetButtonBackgroundColor)(NodeHandle node, uint32_t color);
     void (*ResetButtonBackgroundColor)(NodeHandle node);

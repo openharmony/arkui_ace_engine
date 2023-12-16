@@ -579,6 +579,10 @@ bool ArkTSUtils::ParseJsFontFamiliesToString(const EcmaVM* vm, const Local<JSVal
         return false;
     }
 
+    if (jsValue->IsString() && jsValue->ToString(vm)->ToString().empty()) {
+        return false;
+    }
+
     std::vector<std::string> fontFamilies;
     if (!ParseJsFontFamilies(vm, jsValue, fontFamilies)) {
         return false;

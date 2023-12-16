@@ -79,7 +79,7 @@ void ResetScrollEnableScroll(NodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    ScrollModelNG::SetScrollEnabled(frameNode, false);
+    ScrollModelNG::SetScrollEnabled(frameNode, true);
 }
 
 void SetScrollFriction(NodeHandle node, double friction)

@@ -32,25 +32,29 @@ constexpr int32_t DEFAULT_BUTTON_TYPE = (int32_t)ButtonType::CAPSULE;
 constexpr bool DEFAULT_STATE_EFFECT = true;
 constexpr Ace::FontWeight DEFAULT_FONT_WEIGHT = Ace::FontWeight::NORMAL;
 constexpr Ace::FontStyle DEFAULT_FONT_STYLE = Ace::FontStyle::NORMAL;
-constexpr int32_t INDEX_TEXT_OVERFLOW_0 = 0;
-constexpr int32_t INDEX_MAX_LINES_1 = 1;
-constexpr int32_t INDEX_ADAPT_HEIGHT_2 = 2;
-constexpr int32_t INDEX_FONT_WEIGHT_3 = 3;
-constexpr int32_t INDEX_FONT_STYLE_4 = 4;
-constexpr int32_t INDEX_MIN_FONT_SIZE_0 = 0;
-constexpr int32_t INDEX_MAX_FONT_SIZE_1 = 1;
-constexpr int32_t INDEX_FONT_SIZE_2 = 2;
+constexpr uint32_t INDEX_STRING_FONT_WEIGHT_0 = 0;
+constexpr uint32_t INDEX_STRING_FONT_FAMILY_1 = 1;
+constexpr uint32_t INDEX_VALUE_TEXT_OVERFLOW_0 = 0;
+constexpr uint32_t INDEX_VALUE_MAX_LINES_1 = 1;
+constexpr uint32_t INDEX_VALUE_ADAPT_HEIGHT_2 = 2;
+constexpr uint32_t INDEX_VALUE_FONT_STYLE_3 = 3;
+constexpr uint32_t INDEX_DIMENSION_MIN_FONT_SIZE_0 = 0;
+constexpr uint32_t INDEX_DIMENSION_MAX_FONT_SIZE_1 = 1;
+constexpr uint32_t INDEX_DIMENSION_FONT_SIZE_2 = 2;
+constexpr uint32_t INDEX_STRING_ARRAY_COUNT = 0;
+constexpr uint32_t INDEX_VALUE_ARRAY_COUNT = 1;
+constexpr uint32_t INDEX_DIMENSION_ARRAY_COUNT = 2;
+const std::string DEFAULT_FONT_FAMILY = "HarmonyOS Sans";
 constexpr int32_t OFFSET_1 = 1;
 constexpr int32_t OFFSET_2 = 2;
 constexpr int32_t OFFSET_3 = 3;
 constexpr int32_t BORDERRADIUS_SIZE = 12; // BorderRaius arry size
-const std::string DEFAULT_FONT_FAMILY = "cursive";
 const std::vector<TextOverflow> TEXT_OVERFLOWS = { TextOverflow::NONE, TextOverflow::CLIP, TextOverflow::ELLIPSIS,
     TextOverflow::MARQUEE };
 const std::vector<Ace::FontStyle> FONT_STYLES = { Ace::FontStyle::NORMAL, Ace::FontStyle::ITALIC };
 const std::vector<TextHeightAdaptivePolicy> HEIGHT_ADAPTIVE_POLICY = { TextHeightAdaptivePolicy::MAX_LINES_FIRST,
     TextHeightAdaptivePolicy::MIN_FONT_SIZE_FIRST, TextHeightAdaptivePolicy::LAYOUT_CONSTRAINT_FIRST };
-const double PLACE_HOLDER_ARRAY = -10001;
+const std::string NONE_FONT_FAMILY = "NoneFontFamily";
 
 const std::unordered_map<int, DimensionUnit> DIMENSION_UNIT_MAP = {
     { -2, DimensionUnit::INVALID },
@@ -144,14 +148,7 @@ void ResetButtonFontColor(NodeHandle node)
     ButtonModelNG::SetFontColor(frameNode, textColor);
 }
 
-void SetButtonFontSize(NodeHandle node, double fontSizeValue, int fontSizeUnit)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    ButtonModelNG::SetFontSize(frameNode, CalcDimension(fontSizeValue, (DimensionUnit)fontSizeUnit));
-}
-
-void ResetButtonFontSize(NodeHandle node)
+void ResetButtonFontSizeInternal(NodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -161,6 +158,22 @@ void ResetButtonFontSize(NodeHandle node)
     CHECK_NULL_VOID(buttonTheme);
     CalcDimension fontSize = buttonTheme->GetTextStyle().GetFontSize();
     ButtonModelNG::SetFontSize(frameNode, fontSize);
+}
+
+void SetButtonFontSize(NodeHandle node, double fontSizeValue, int fontSizeUnit)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (LessNotEqual(fontSizeValue, 0.0)) {
+        ResetButtonFontSizeInternal(node);
+    } else {
+        ButtonModelNG::SetFontSize(frameNode, CalcDimension(fontSizeValue, (DimensionUnit)fontSizeUnit));
+    }
+}
+
+void ResetButtonFontSize(NodeHandle node)
+{
+    ResetButtonFontSizeInternal(node);
 }
 
 void SetButtonFontWeight(NodeHandle node, const char* fontWeight)
@@ -182,7 +195,11 @@ void SetButtonFontStyle(NodeHandle node, int32_t fontStyle)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    ButtonModelNG::SetFontStyle(frameNode, FONT_STYLES[fontStyle]);
+    if (fontStyle < 0 || fontStyle >= static_cast<int32_t>(FONT_STYLES.size())) {
+        ButtonModelNG::SetFontStyle(frameNode, DEFAULT_FONT_STYLE);
+    } else {
+        ButtonModelNG::SetFontStyle(frameNode, FONT_STYLES[fontStyle]);
+    }
 }
 
 void ResetButtonFontStyle(NodeHandle node)
@@ -245,49 +262,120 @@ void ButtonCompleteParameters(ButtonParameters& buttonParameters)
     }
 }
 
-void SetButtonLabelStyle(NodeHandle node, const char* fontFamily, const double* valueArray,
-    const double* dimensionValueArray, const int* dimensionUnitArray)
+bool SetButtonDimension(
+    const double* dimensionArray, uint32_t offset, const size_t dataCount, std::optional<CalcDimension>& optDimension)
+{
+    CHECK_NULL_RETURN(dimensionArray, false);
+    auto hasValue = dimensionArray[offset];
+    if (!static_cast<bool>(hasValue)) {
+        return false;
+    }
+    uint32_t valueIndex = offset + 1;
+    uint32_t unitIndex = offset + 2;
+    if (unitIndex >= dataCount) {
+        return false;
+    }
+    auto value = dimensionArray[valueIndex];
+    auto unit = dimensionArray[unitIndex];
+    DimensionUnit unitValue = static_cast<DimensionUnit>(unit);
+    CalcDimension dimensionValue = CalcDimension(value, unitValue);
+    optDimension = dimensionValue;
+    return true;
+}
+
+void SetButtonDimensionParameters(
+    const double* dimensionArray, const size_t dataCount, ButtonParameters& buttonParameters)
+{
+    CHECK_NULL_VOID(dimensionArray);
+    uint32_t step = 3;
+    uint32_t minFontSizeIndex = INDEX_DIMENSION_MIN_FONT_SIZE_0;
+    std::optional<CalcDimension> minFontSizeOptional = std::nullopt;
+    if (SetButtonDimension(dimensionArray, minFontSizeIndex, dataCount, minFontSizeOptional)) {
+        buttonParameters.minFontSize = minFontSizeOptional;
+    }
+    uint32_t maxFontSizeIndex = INDEX_DIMENSION_MAX_FONT_SIZE_1 * step;
+    std::optional<CalcDimension> maxFontSizeOptional = std::nullopt;
+    if (SetButtonDimension(dimensionArray, maxFontSizeIndex, dataCount, maxFontSizeOptional)) {
+        buttonParameters.maxFontSize = maxFontSizeOptional;
+    }
+    uint32_t fontSizeIndex = INDEX_DIMENSION_FONT_SIZE_2 * step;
+    std::optional<CalcDimension> fontSizeOptional = std::nullopt;
+    if (SetButtonDimension(dimensionArray, fontSizeIndex, dataCount, fontSizeOptional)) {
+        buttonParameters.fontSize = fontSizeOptional;
+    }
+}
+
+bool SetButtonValue(const int32_t* valueArray, uint32_t index, const size_t dataCount, int32_t& result)
+{
+    CHECK_NULL_RETURN(valueArray, false);
+    uint32_t step = 2;
+    auto hasValueIndex = index * step;
+    auto valueIndex = hasValueIndex + 1;
+    if (valueIndex >= dataCount) {
+        return false;
+    }
+    if (static_cast<bool>(valueArray[hasValueIndex])) {
+        result = valueArray[valueIndex];
+        return true;
+    }
+    return false;
+}
+
+void SetButtonValueParameters(const int32_t* valueArray, const size_t dataCount, ButtonParameters& buttonParameters)
+{
+    CHECK_NULL_VOID(valueArray);
+    int32_t result = 0;
+    buttonParameters.textOverflow = TextOverflow::ELLIPSIS;
+    if (SetButtonValue(valueArray, INDEX_VALUE_TEXT_OVERFLOW_0, dataCount, result) && result >= 0 &&
+        result < static_cast<int32_t>(TEXT_OVERFLOWS.size())) {
+        buttonParameters.textOverflow = TEXT_OVERFLOWS[result];
+    }
+    buttonParameters.maxLines = std::nullopt;
+    if (SetButtonValue(valueArray, INDEX_VALUE_MAX_LINES_1, dataCount, result) && result >= 0) {
+        buttonParameters.maxLines = Positive(result) ? result : 1;
+    }
+    buttonParameters.heightAdaptivePolicy = std::nullopt;
+    if (SetButtonValue(valueArray, INDEX_VALUE_ADAPT_HEIGHT_2, dataCount, result) && result >= 0 &&
+        result < static_cast<int32_t>(HEIGHT_ADAPTIVE_POLICY.size())) {
+        buttonParameters.heightAdaptivePolicy = HEIGHT_ADAPTIVE_POLICY[result];
+    }
+    buttonParameters.fontStyle = std::nullopt;
+    if (SetButtonValue(valueArray, INDEX_VALUE_FONT_STYLE_3, dataCount, result) && result >= 0 &&
+        result < static_cast<int32_t>(FONT_STYLES.size())) {
+        buttonParameters.fontStyle = FONT_STYLES[result];
+    }
+}
+
+void SetButtonStringParameters(
+    const char** stringParameters, const size_t dataCount, ButtonParameters& buttonParameters)
+{
+    CHECK_NULL_VOID(stringParameters);
+    buttonParameters.fontWeight = std::nullopt;
+    if (stringParameters[INDEX_STRING_FONT_WEIGHT_0] != nullptr && INDEX_STRING_FONT_WEIGHT_0 < dataCount) {
+        std::string fontWeightStr = stringParameters[INDEX_STRING_FONT_WEIGHT_0];
+        buttonParameters.fontWeight = Framework::ConvertStrToFontWeight(fontWeightStr);
+    }
+    buttonParameters.fontFamily = std::nullopt;
+    if (stringParameters[INDEX_STRING_FONT_FAMILY_1] != nullptr && INDEX_STRING_FONT_FAMILY_1 < dataCount) {
+        std::string familiesStr = stringParameters[INDEX_STRING_FONT_FAMILY_1];
+        std::vector<std::string> fontFamilyResult = Framework::ConvertStrToFontFamilies(familiesStr);
+        if (fontFamilyResult.size() == 1 && fontFamilyResult[0].compare(NONE_FONT_FAMILY) == 0) {
+            return;
+        }
+        buttonParameters.fontFamily = fontFamilyResult;
+    }
+}
+
+void SetButtonLabelStyle(NodeHandle node, const char** stringParameters, const int32_t* valueArray,
+    const double* dimensionArray, const size_t* dataCountArray)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     ButtonParameters buttonParameters;
-    if (valueArray != nullptr) {
-        if (valueArray[INDEX_TEXT_OVERFLOW_0] != PLACE_HOLDER_ARRAY) {
-            int index = valueArray[INDEX_TEXT_OVERFLOW_0];
-            buttonParameters.textOverflow = TEXT_OVERFLOWS[index];
-        }
-        if (valueArray[INDEX_MAX_LINES_1] != PLACE_HOLDER_ARRAY) {
-            buttonParameters.maxLines = valueArray[INDEX_MAX_LINES_1];
-        }
-        if (valueArray[INDEX_ADAPT_HEIGHT_2] != PLACE_HOLDER_ARRAY) {
-            int index = valueArray[INDEX_ADAPT_HEIGHT_2];
-            buttonParameters.heightAdaptivePolicy = HEIGHT_ADAPTIVE_POLICY[index];
-        }
-        if (valueArray[INDEX_FONT_WEIGHT_3] != PLACE_HOLDER_ARRAY) {
-            int index = valueArray[INDEX_FONT_WEIGHT_3];
-            buttonParameters.fontWeight = BUTTON_FONT_WEIGHTS[index];
-        }
-        if (valueArray[INDEX_FONT_STYLE_4] != PLACE_HOLDER_ARRAY) {
-            int index = valueArray[INDEX_FONT_STYLE_4];
-            buttonParameters.fontStyle = FONT_STYLES[index];
-        }
-    }
-    if (dimensionValueArray != nullptr && dimensionUnitArray != nullptr) {
-        if (dimensionValueArray[INDEX_MIN_FONT_SIZE_0] != PLACE_HOLDER_ARRAY) {
-            buttonParameters.minFontSize = Dimension(dimensionValueArray[INDEX_MIN_FONT_SIZE_0],
-                DIMENSION_UNIT_MAP.find(dimensionUnitArray[INDEX_MIN_FONT_SIZE_0])->second);
-        }
-        if (dimensionValueArray[INDEX_MAX_FONT_SIZE_1] != PLACE_HOLDER_ARRAY) {
-            buttonParameters.maxFontSize = Dimension(dimensionValueArray[INDEX_MAX_FONT_SIZE_1],
-                DIMENSION_UNIT_MAP.find(dimensionUnitArray[INDEX_MAX_FONT_SIZE_1])->second);
-        }
-        if (dimensionValueArray[INDEX_FONT_SIZE_2] != PLACE_HOLDER_ARRAY) {
-            buttonParameters.fontSize = Dimension(dimensionValueArray[INDEX_FONT_SIZE_2],
-                DIMENSION_UNIT_MAP.find(dimensionUnitArray[INDEX_FONT_SIZE_2])->second);
-        }
-    }
-    std::string familiesStr = fontFamily;
-    buttonParameters.fontFamily = Framework::ConvertStrToFontFamilies(familiesStr);
+    SetButtonStringParameters(stringParameters, dataCountArray[INDEX_STRING_ARRAY_COUNT], buttonParameters);
+    SetButtonValueParameters(valueArray, dataCountArray[INDEX_VALUE_ARRAY_COUNT], buttonParameters);
+    SetButtonDimensionParameters(dimensionArray, dataCountArray[INDEX_DIMENSION_ARRAY_COUNT], buttonParameters);
+    ButtonCompleteParameters(buttonParameters);
     ButtonModelNG::SetLableStyle(frameNode, buttonParameters);
 }
 
@@ -358,10 +446,8 @@ ArkUIButtonModifierAPI GetButtonModifier()
     static const ArkUIButtonModifierAPI modifier = { SetButtonType, ResetButtonType, SetButtonStateEffect,
         ResetButtonStateEffect, SetButtonFontColor, ResetButtonFontColor, SetButtonFontSize, ResetButtonFontSize,
         SetButtonFontWeight, ResetButtonFontWeight, SetButtonFontStyle, ResetButtonFontStyle, SetButtonFontFamily,
-        ResetButtonFontFamily, SetButtonLabelStyle, ResetButtonLabelStyle,
-        SetButtonBackgroundColor, ResetButtonBackgroundColor,
-        SetButtonBorderRadius, ResetButtonBorderRadius
-        };
+        ResetButtonFontFamily, SetButtonLabelStyle, ResetButtonLabelStyle, SetButtonBackgroundColor,
+        ResetButtonBackgroundColor, SetButtonBorderRadius, ResetButtonBorderRadius };
 
     return modifier;
 }

@@ -45,20 +45,11 @@ class ArkButtonComponent extends ArkComponent implements ButtonAttribute {
     return this;
   }
   type (value: ButtonType): this {
-    if (isNumber(value)) {
-      modifier(this._modifiers, ButtonTypeModifier, value);
-    }
-    else {
-      modifier(this._modifiers, ButtonTypeModifier, undefined);
-    }
+    modifierWithKey(this._modifiersWithKeys, ButtonTypeModifier.identity, ButtonTypeModifier, value);
     return this;
   }
   stateEffect(value: boolean): this {
-    if (isBoolean(value)) {
-      modifier(this._modifiers, ButtonStateEffectModifier, value);
-    } else {
-      modifier(this._modifiers, ButtonStateEffectModifier, undefined);
-    }
+    modifierWithKey(this._modifiersWithKeys, ButtonStateEffectModifier.identity, ButtonStateEffectModifier, value);
     return this;
   }
   fontColor(value: ResourceColor): this {
@@ -70,19 +61,11 @@ class ArkButtonComponent extends ArkComponent implements ButtonAttribute {
     return this;
   }
   fontWeight(value: string | number | FontWeight): this {
-    if (typeof value === "string" || typeof value === "number") {
-      modifier(this._modifiers, ButtonFontWeightModifier, value);
-    } else {
-      modifier(this._modifiers, ButtonFontWeightModifier, undefined);
-    }
+    modifierWithKey(this._modifiersWithKeys, ButtonFontWeightModifier.identity, ButtonFontWeightModifier, value);
     return this;
   }
   fontStyle(value: FontStyle): this {
-    if (typeof value === 'number' && value >= 0 && value < 2) {
-      modifier(this._modifiers, ButtonFontStyleModifier, value);
-    } else {
-      modifier(this._modifiers, ButtonFontStyleModifier, undefined);
-    }
+    modifierWithKey(this._modifiersWithKeys, ButtonFontStyleModifier.identity, ButtonFontStyleModifier, value);
     return this;
   }
   fontFamily(value: string | Resource): this {
@@ -119,7 +102,7 @@ class ButtonBackgroundColorModifier extends ModifierWithKey<ResourceColor> {
     }
   }
 }
-class ButtonStateEffectModifier extends Modifier<boolean> {
+class ButtonStateEffectModifier extends ModifierWithKey<boolean> {
   constructor(value: boolean) {
     super(value);
   }
@@ -133,7 +116,7 @@ class ButtonStateEffectModifier extends Modifier<boolean> {
     }
   }
 }
-class ButtonFontStyleModifier extends Modifier<number> {
+class ButtonFontStyleModifier extends ModifierWithKey<number> {
   constructor(value: number) {
     super(value);
   }
@@ -179,31 +162,24 @@ class ButtonLabelStyleModifier extends ModifierWithKey<LabelStyle> {
         GetUINativeModule().button.resetLabelStyle(node);
     }
     else {
-      let textOverflow = this.value.overflow; // number -> Ace::TextOverflow
+      let textOverflow = this.value.overflow; // number(enum) -> Ace::TextOverflow
       let maxLines = this.value.maxLines; // number -> uint32_t
-      let minFontSize = this.value.minFontSize; // number/string -> Dimension
-      let maxFontSize = this.value.maxFontSize; // number/string -> Dimension
-      let heightAdaptivePolicy = this.value.heightAdaptivePolicy; // number -> Ace::TextHeightAdaptivePolicy
-      let fontSize = undefined; // number/string ->Dimension
-      let fontWeight = undefined; // string -> Ace::FontWeight
-      let fontStyle = undefined; // number -> Ace::FontStyle
-      let fontFamily = undefined; // string ->std::vector<std::string>
+      let minFontSize = this.value.minFontSize; // number | string | Resource -> Dimension
+      let maxFontSize = this.value.maxFontSize; // number | string | Resource -> Dimension
+      let heightAdaptivePolicy = this.value.heightAdaptivePolicy; // number(enum) -> Ace::TextHeightAdaptivePolicy
+      let fontSize = undefined; // number | string | Resource -> Dimension
+      let fontWeight = undefined; // number | string | Ace::FontWeight -> string -> Ace::FontWeight
+      let fontStyle = undefined; // number(enum) -> Ace::FontStyle
+      let fontFamily = undefined; // string -> std::vector<std::string>
       if (isObject(this.value.font))
       {
         fontSize = this.value.font.size;
-        fontWeight = 'normal';
         fontStyle = this.value.font.style;
         fontFamily = this.value.font.family;
-        if (typeof this.value.font.weight === "string") {
-          fontWeight = this.value.font.weight;
-        } else {
-          if (this.value.font.weight in FontWeightMap) {
-            fontWeight = FontWeightMap[this.value.font.weight];
-          }
+        fontWeight = this.value.font.weight;
       }
       GetUINativeModule().button.setLabelStyle(node, textOverflow, maxLines, minFontSize, maxFontSize,
         heightAdaptivePolicy, fontSize, fontWeight, fontStyle, fontFamily);
-      }
     }
   }
   checkObjectDiff(): boolean {
@@ -222,7 +198,7 @@ class ButtonLabelStyleModifier extends ModifierWithKey<LabelStyle> {
     }
   }
 }
-class ButtonTypeModifier extends Modifier<number> {
+class ButtonTypeModifier extends ModifierWithKey<number> {
   constructor(value: number) {
     super(value);
   }
@@ -282,7 +258,7 @@ class ButtonFontSizeModifier extends ModifierWithKey<Length> {
     }
   }
 }
-class ButtonFontWeightModifier extends Modifier<string | number | FontWeight> {
+class ButtonFontWeightModifier extends ModifierWithKey<string | number | FontWeight> {
   constructor(value: string | number | FontWeight) {
     super(value);
   }
@@ -292,15 +268,7 @@ class ButtonFontWeightModifier extends Modifier<string | number | FontWeight> {
       GetUINativeModule().button.resetFontWeight(node);
     }
     else {
-      let fontWeightStr = 'normal';
-      if (typeof this.value === "string") {
-        fontWeightStr = this.value;
-      } else {
-        if (this.value in FontWeightMap) {
-          fontWeightStr = FontWeightMap[this.value];
-        }
-      }
-      GetUINativeModule().button.setFontWeight(node, fontWeightStr);
+      GetUINativeModule().button.setFontWeight(node, this.value);
     }
   }
 }

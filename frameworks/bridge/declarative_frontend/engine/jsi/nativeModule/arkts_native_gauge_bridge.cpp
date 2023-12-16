@@ -24,6 +24,7 @@
 
 namespace OHOS::Ace::NG {
 namespace {
+constexpr Color ERROR_COLOR = Color(0xFFE84026);
 constexpr int NUM_0 = 0;
 constexpr int NUM_1 = 1;
 void ResetColor(void* nativeNode)
@@ -68,7 +69,7 @@ void ConvertResourceColor(const EcmaVM* vm, const Local<JSValueRef>& item, std::
 {
     Color color;
     if (!ArkTSUtils::ParseJsColor(vm, item, color)) {
-        color = Color::BLACK;
+        color = ERROR_COLOR;
     }
     NG::ColorStopArray colorStopArray;
     colorStopArray.emplace_back(std::make_pair(color, Dimension(0.0)));
@@ -92,7 +93,7 @@ void ConvertGradientColor(
     type = NG::GaugeType::TYPE_CIRCULAR_SINGLE_SEGMENT_GRADIENT;
     if (jsLinearGradient->GetGradient().size() == 0) {
         NG::ColorStopArray colorStopArray;
-        colorStopArray.emplace_back(std::make_pair(Color::BLACK, Dimension(0.0)));
+        colorStopArray.emplace_back(std::make_pair(ERROR_COLOR, Dimension(0.0)));
         colors.emplace_back(colorStopArray);
     } else {
         colors.emplace_back(jsLinearGradient->GetGradient());
@@ -226,7 +227,7 @@ ArkUINativeModuleValue GaugeBridge::SetColors(ArkUIRuntimeCallInfo* runtimeCallI
         float weight = handle->GetValueAt(vm, jsValue, 1)->ToNumber(vm)->Value();
         Color selectedColor;
         if (!ArkTSUtils::ParseJsColor(vm, handle->GetValueAt(vm, jsValue, 1), selectedColor)) {
-            selectedColor = Color::BLACK;
+            selectedColor = ERROR_COLOR;
         }
         colors[i] = selectedColor.GetValue();
         if (weight > 0) {

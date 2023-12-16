@@ -9149,21 +9149,11 @@ class ArkButtonComponent extends ArkComponent {
     return this;
   }
   type(value) {
-    if (isNumber(value)) {
-      modifier(this._modifiers, ButtonTypeModifier, value);
-    }
-    else {
-      modifier(this._modifiers, ButtonTypeModifier, undefined);
-    }
+    modifierWithKey(this._modifiersWithKeys, ButtonTypeModifier.identity, ButtonTypeModifier, value);
     return this;
   }
   stateEffect(value) {
-    if (isBoolean(value)) {
-      modifier(this._modifiers, ButtonStateEffectModifier, value);
-    }
-    else {
-      modifier(this._modifiers, ButtonStateEffectModifier, undefined);
-    }
+    modifierWithKey(this._modifiersWithKeys, ButtonStateEffectModifier.identity, ButtonStateEffectModifier, value);
     return this;
   }
   fontColor(value) {
@@ -9175,21 +9165,11 @@ class ArkButtonComponent extends ArkComponent {
     return this;
   }
   fontWeight(value) {
-    if (typeof value === 'string' || typeof value === 'number') {
-      modifier(this._modifiers, ButtonFontWeightModifier, value);
-    }
-    else {
-      modifier(this._modifiers, ButtonFontWeightModifier, undefined);
-    }
+    modifierWithKey(this._modifiersWithKeys, ButtonFontWeightModifier.identity, ButtonFontWeightModifier, value);
     return this;
   }
   fontStyle(value) {
-    if (typeof value === 'number' && value >= 0 && value < 2) {
-      modifier(this._modifiers, ButtonFontStyleModifier, value);
-    }
-    else {
-      modifier(this._modifiers, ButtonFontStyleModifier, undefined);
-    }
+    modifierWithKey(this._modifiersWithKeys, ButtonFontStyleModifier.identity, ButtonFontStyleModifier, value);
     return this;
   }
   fontFamily(value) {
@@ -9227,7 +9207,7 @@ class ButtonBackgroundColorModifier extends ModifierWithKey {
   }
 }
 ButtonBackgroundColorModifier.identity = Symbol('buttonBackgroundColor');
-class ButtonStateEffectModifier extends Modifier {
+class ButtonStateEffectModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
   }
@@ -9241,7 +9221,7 @@ class ButtonStateEffectModifier extends Modifier {
   }
 }
 ButtonStateEffectModifier.identity = Symbol('buttonStateEffect');
-class ButtonFontStyleModifier extends Modifier {
+class ButtonFontStyleModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
   }
@@ -9286,30 +9266,23 @@ class ButtonLabelStyleModifier extends ModifierWithKey {
       GetUINativeModule().button.resetLabelStyle(node);
     }
     else {
-      let textOverflow = this.value.overflow; // number -> Ace::TextOverflow
+      let textOverflow = this.value.overflow; // number(enum) -> Ace::TextOverflow
       let maxLines = this.value.maxLines; // number -> uint32_t
-      let minFontSize = this.value.minFontSize; // number/string -> Dimension
-      let maxFontSize = this.value.maxFontSize; // number/string -> Dimension
-      let heightAdaptivePolicy = this.value.heightAdaptivePolicy; // number -> Ace::TextHeightAdaptivePolicy
-      let fontSize = undefined; // number/string ->Dimension
-      let fontWeight = undefined; // string -> Ace::FontWeight
-      let fontStyle = undefined; // number -> Ace::FontStyle
-      let fontFamily = undefined; // string ->std::vector<std::string>
+      let minFontSize = this.value.minFontSize; // number | string | Resource -> Dimension
+      let maxFontSize = this.value.maxFontSize; // number | string | Resource -> Dimension
+      let heightAdaptivePolicy = this.value.heightAdaptivePolicy; // number(enum) -> Ace::TextHeightAdaptivePolicy
+      let fontSize = undefined; // number | string | Resource -> Dimension
+      let fontWeight = undefined; // number | string | Ace::FontWeight -> string -> Ace::FontWeight
+      let fontStyle = undefined; // number(enum) -> Ace::FontStyle
+      let fontFamily = undefined; // string -> std::vector<std::string>
       if (isObject(this.value.font)) {
         fontSize = this.value.font.size;
-        fontWeight = 'normal';
         fontStyle = this.value.font.style;
         fontFamily = this.value.font.family;
-        if (typeof this.value.font.weight === 'string') {
-          fontWeight = this.value.font.weight;
-        }
-        else {
-          if (this.value.font.weight in FontWeightMap) {
-            fontWeight = FontWeightMap[this.value.font.weight];
-          }
-        }
-        GetUINativeModule().button.setLabelStyle(node, textOverflow, maxLines, minFontSize, maxFontSize, heightAdaptivePolicy, fontSize, fontWeight, fontStyle, fontFamily);
+        fontWeight = this.value.font.weight;
       }
+      GetUINativeModule().button.setLabelStyle(node, textOverflow, maxLines, minFontSize, maxFontSize,
+        heightAdaptivePolicy, fontSize, fontWeight, fontStyle, fontFamily);
     }
   }
   checkObjectDiff() {
@@ -9330,7 +9303,7 @@ class ButtonLabelStyleModifier extends ModifierWithKey {
   }
 }
 ButtonLabelStyleModifier.identity = Symbol('buttonLabelStyle');
-class ButtonTypeModifier extends Modifier {
+class ButtonTypeModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
   }
@@ -9388,7 +9361,7 @@ class ButtonFontSizeModifier extends ModifierWithKey {
   }
 }
 ButtonFontSizeModifier.identity = Symbol('buttonFontSize');
-class ButtonFontWeightModifier extends Modifier {
+class ButtonFontWeightModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
   }
@@ -9397,16 +9370,7 @@ class ButtonFontWeightModifier extends Modifier {
       GetUINativeModule().button.resetFontWeight(node);
     }
     else {
-      let fontWeightStr = 'normal';
-      if (typeof this.value === 'string') {
-        fontWeightStr = this.value;
-      }
-      else {
-        if (this.value in FontWeightMap) {
-          fontWeightStr = FontWeightMap[this.value];
-        }
-      }
-      GetUINativeModule().button.setFontWeight(node, fontWeightStr);
+      GetUINativeModule().button.setFontWeight(node, this.value);
     }
   }
 }
@@ -15425,7 +15389,7 @@ class ListItemGroupDividerModifier extends ModifierWithKey {
     }
   }
   checkObjectDiff() {
-    var _a, _b, _c, _d, _e, _f, _g, _h;
+    let _a, _b, _c, _d, _e, _f, _g, _h;
     return !(((_a = this.stageValue) === null || _a === void 0 ? void 0 : _a.strokeWidth) === ((_b = this.value) === null || _b === void 0 ? void 0 : _b.strokeWidth) &&
       ((_c = this.stageValue) === null || _c === void 0 ? void 0 : _c.color) === ((_d = this.value) === null || _d === void 0 ? void 0 : _d.color) &&
       ((_e = this.stageValue) === null || _e === void 0 ? void 0 : _e.startMargin) === ((_f = this.value) === null || _f === void 0 ? void 0 : _f.startMargin) &&
