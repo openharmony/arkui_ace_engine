@@ -1523,7 +1523,7 @@ void TextFieldPattern::InitDragDropEvent()
                            const RefPtr<OHOS::Ace::DragEvent>& event, const std::string& extraParams) {
         auto pattern = weakPtr.Upgrade();
         CHECK_NULL_VOID(pattern);
-        pattern->showSelect_ = true;
+        pattern->showSelect_ = false;
         if (pattern->dragStatus_ == DragStatus::ON_DROP) {
             pattern->dragStatus_ = DragStatus::NONE;
         }
@@ -1544,9 +1544,10 @@ void TextFieldPattern::InitDragDropEvent()
                         Offset(pattern->parentGlobalOffset_.GetX(), pattern->parentGlobalOffset_.GetY()) -
                         Offset(0, theme->GetInsertCursorOffset().ConvertToPx());
         auto position = pattern->ConvertTouchOffsetToCaretPosition(offset);
+        CHECK_NULL_VOID(position);
         auto host = pattern->GetHost();
         CHECK_NULL_VOID(host);
-        pattern->SetCaretPosition(position);
+        pattern->CloseSelectOverlay();
     };
     eventHub->SetOnDragMove(std::move(onDragMove));
 
@@ -1576,7 +1577,6 @@ void TextFieldPattern::InitDragDropEvent()
             pattern->ShowSelectOverlayAfterDrag();
             host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
         }
-        pattern->selectController_->ResetHandles();
     };
     eventHub->SetOnDragEnd(std::move(onDragEnd));
 
