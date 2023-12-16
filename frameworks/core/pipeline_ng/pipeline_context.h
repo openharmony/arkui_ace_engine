@@ -543,6 +543,14 @@ public:
 
     bool IsDragging() const override;
     void SetIsDragging(bool isDragging) override;
+
+    void SetContainerModalTitleVisible(bool customTitleSettedShow, bool floatingTitleSettedShow);
+    void SetContainerModalTitleHeight(int32_t height);
+    int32_t GetContainerModalTitleHeight();
+    bool GetContainerModalButtonsRect(RectF& containerModal, RectF& buttons);
+    void SubscribeContainerModalButtonsRectChange(
+        std::function<void(RectF& containerModal, RectF& buttons)>&& callback);
+
 protected:
     void StartWindowSizeChangeAnimate(int32_t width, int32_t height, WindowSizeChangeReason type,
         const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr);
