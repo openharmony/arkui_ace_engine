@@ -721,12 +721,20 @@ void SideBarContainerPattern::DoAnimation()
     context->OpenImplicitAnimation(option, option.GetCurve(), [weak, sideBarStatus]() {
         auto pattern = weak.Upgrade();
         if (pattern) {
+            auto sideBarContainerNode = pattern->GetHost();
+            auto sideBarNode = sideBarContainerNode->GetChildByIndex(1);
             if (sideBarStatus == SideBarStatus::HIDDEN) {
                 pattern->SetSideBarStatus(SideBarStatus::SHOW);
                 pattern->UpdateControlButtonIcon();
+                if (sideBarNode) {
+                    sideBarNode->SetActive(true);
+                }
             } else {
                 pattern->SetSideBarStatus(SideBarStatus::HIDDEN);
                 pattern->UpdateControlButtonIcon();
+                if (sideBarNode) {
+                    sideBarNode->SetActive(false);
+                }
             }
             pattern->inAnimation_ = false;
         }

@@ -472,6 +472,7 @@ void NavigationGroupNode::ExitTransitionWithPush(const RefPtr<FrameNode>& node, 
                 // for the case, the navBar form EXIT_PUSH to push during animation
                 if (needSetInvisible) {
                     node->GetLayoutProperty()->UpdateVisibility(VisibleType::INVISIBLE);
+                    node->SetActive(false);
                     if (isNavBar) {
                         navigation->NotifyPageHide();
                     }
@@ -839,6 +840,7 @@ bool NavigationGroupNode::UpdateNavDestinationVisibility(const RefPtr<NavDestina
         // process shallow builder
         navDestination->ProcessShallowBuilder();
         navDestination->GetLayoutProperty()->UpdateVisibility(VisibleType::VISIBLE);
+        navDestination->SetActive(true);
         navDestination->GetEventHub<EventHub>()->SetEnabledInternal(true);
         // for the navDestination at the top, FireChangeEvent
         eventHub->FireChangeEvent(true);
@@ -860,6 +862,7 @@ bool NavigationGroupNode::UpdateNavDestinationVisibility(const RefPtr<NavDestina
                 NavigationPattern::FireNavigationStateChange(navDestination, false);
             }
             navDestination->GetLayoutProperty()->UpdateVisibility(VisibleType::INVISIBLE);
+            navDestination->SetActive(false);
         }
         return false;
     }
@@ -867,6 +870,7 @@ bool NavigationGroupNode::UpdateNavDestinationVisibility(const RefPtr<NavDestina
     if (navDestination->GetPattern<NavDestinationPattern>()->GetNavDestinationNode() != remainChild &&
         !navDestination->IsOnAnimation()) {
         navDestination->GetLayoutProperty()->UpdateVisibility(VisibleType::VISIBLE);
+        navDestination->SetActive(true);
     }
     return false;
 }

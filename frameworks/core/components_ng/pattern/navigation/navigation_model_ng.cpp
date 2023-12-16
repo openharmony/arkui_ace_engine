@@ -581,6 +581,7 @@ void NavigationModelNG::Create()
         ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::NAVBAR_ETS_TAG, navBarNodeId);
         auto navBarNode = NavBarNode::GetOrCreateNavBarNode(
             V2::NAVBAR_ETS_TAG, navBarNodeId, []() { return AceType::MakeRefPtr<NavBarPattern>(); });
+        navBarNode->SetActive(true);
         auto navBarRenderContext = navBarNode->GetRenderContext();
         CHECK_NULL_VOID(navBarRenderContext);
         navBarRenderContext->UpdateClipEdge(true);

@@ -50,7 +50,7 @@ void SideBarContainerLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
     autoHide_ = false;
     UpdateDefaultValueByVersion();
-    const auto& children = layoutWrapper->GetAllChildrenWithBuild();
+    const auto& children = layoutWrapper->GetAllChildrenWithBuild(layoutWrapper->IsActive());
     if (children.size() < DEFAULT_MIN_CHILDREN_SIZE) {
         return;
     }
@@ -152,7 +152,7 @@ void SideBarContainerLayoutAlgorithm::UpdateDefaultValueByVersion()
 RefPtr<LayoutWrapper> SideBarContainerLayoutAlgorithm::GetSideBarLayoutWrapper(LayoutWrapper* layoutWrapper) const
 {
     CHECK_NULL_RETURN(layoutWrapper, nullptr);
-    const auto& children = layoutWrapper->GetAllChildrenWithBuild();
+    const auto& children = layoutWrapper->GetAllChildrenWithBuild(layoutWrapper->IsActive());
     if (children.size() < DEFAULT_MIN_CHILDREN_SIZE) {
         return nullptr;
     }
@@ -537,7 +537,7 @@ void SideBarContainerLayoutAlgorithm::MeasureControlButton(const RefPtr<SideBarC
 
 void SideBarContainerLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 {
-    const auto& children = layoutWrapper->GetAllChildrenWithBuild();
+    const auto& children = layoutWrapper->GetAllChildrenWithBuild(layoutWrapper->IsActive());
     if (children.size() < DEFAULT_MIN_CHILDREN_SIZE) {
         return;
     }
