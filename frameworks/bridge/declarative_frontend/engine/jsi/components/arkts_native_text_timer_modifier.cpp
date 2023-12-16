@@ -26,6 +26,7 @@ namespace OHOS::Ace::NG {
 constexpr Dimension DEFAULT_FONT_SIZE = Dimension(16.0, DimensionUnit::FP);
 const std::vector<std::string> DEFAULT_FONT_FAMILY = { "HarmonyOS Sans" };
 const std::string DEFAULT_FORMAT = "HH:mm:ss.SS";
+constexpr Ace::FontWeight DEFAULT_FONT_WEIGHT = Ace::FontWeight::NORMAL;
 
 void SetTextTimerFontColor(NodeHandle node, uint32_t color)
 {
@@ -77,14 +78,15 @@ void SetTextTimerFontWeight(NodeHandle node, const char *fontWeight)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    TextTimerModelNG::SetFontWeight(frameNode, Framework::ConvertStrToFontWeight(fontWeight));
+    std::string fontWeightStr = fontWeight;
+    TextTimerModelNG::SetFontWeight(frameNode, Framework::ConvertStrToFontWeight(fontWeightStr));
 }
 
 void ResetTextTimerFontWeight(NodeHandle node)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    TextTimerModelNG::SetFontWeight(frameNode, OHOS::Ace::FontWeight::NORMAL);
+    TextTimerModelNG::SetFontWeight(frameNode, DEFAULT_FONT_WEIGHT);
 }
 
 void SetTextTimerFontFamily(NodeHandle node, const char* fontFamily)
