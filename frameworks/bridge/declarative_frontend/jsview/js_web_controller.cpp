@@ -530,6 +530,7 @@ void JSWebController::JSBind(BindingTarget globalObj)
     JSClass<JSWebController>::CustomMethod("clearMatches", &JSWebController::ClearMatches);
     JSClass<JSWebController>::CustomMethod("searchNext", &JSWebController::SearchNext);
     JSClass<JSWebController>::CustomMethod("getUrl", &JSWebController::GetUrl);
+    JSClass<JSWebController>::CustomMethod("isIncognitoMode", &JSWebController::IsIncognitoMode);
     JSClass<JSWebController>::Bind(globalObj, JSWebController::Constructor, JSWebController::Destructor);
     JSWebCookie::JSBind(globalObj);
     JSHitTestValue::JSBind(globalObj);
@@ -1127,6 +1128,15 @@ void JSWebController::GetUrl(const JSCallbackInfo& args)
     ContainerScope scope(instanceId_);
     if (webController_) {
         std::string result = webController_->GetUrl();
+        args.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(result)));
+    }
+}
+
+void JSWebController::IsIncognitoMode(const JSCallbackInfo& args)
+{
+    ContainerScope scope(instanceId_);
+    if (webController_) {
+        bool result = webController_->IsIncognitoMode();
         args.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(result)));
     }
 }

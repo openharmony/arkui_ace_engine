@@ -68,6 +68,16 @@ public:
         return type_;
     }
 
+    void SetIncognitoMode(const bool incognitoMode)
+    {
+        incognitoMode_ = incognitoMode;
+    }
+
+    bool GetIncognitoMode() const
+    {
+        return incognitoMode_;
+    }
+
     void SetSrc(const std::string& src)
     {
         CHECK_NULL_VOID(declaration_);
@@ -986,6 +996,7 @@ private:
     OnWindowNewImpl onWindowNewImpl_ = nullptr;
 
     std::string type_;
+    bool incognitoMode_ = false;
     bool isJsEnabled_ = true;
     bool isContentAccessEnabled_ = true;
     bool isFileAccessEnabled_ = true;

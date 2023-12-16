@@ -167,13 +167,20 @@ const std::vector<int32_t> DEFAULT_ORIGN_GEAR {0, 2000, 4000, 6000, 8000};
 
 WebPattern::WebPattern() = default;
 
-WebPattern::WebPattern(std::string webSrc, const RefPtr<WebController>& webController, WebType type)
-    : webSrc_(std::move(webSrc)), webController_(webController), type_(type)
+WebPattern::WebPattern(const std::string& webSrc,
+                       const RefPtr<WebController>& webController,
+                       WebType type,
+                       bool incognitoMode)
+    : webSrc_(std::move(webSrc)), webController_(webController), type_(type),
+      incognitoMode_(incognitoMode)
 {}
 
-WebPattern::WebPattern(std::string webSrc, const SetWebIdCallback& setWebIdCallback, WebType type)
-    : webSrc_(std::move(webSrc)), setWebIdCallback_(setWebIdCallback), type_(type)
-{}
+WebPattern::WebPattern(const std::string& webSrc,
+                       const SetWebIdCallback& setWebIdCallback,
+                       WebType type,
+                       bool incognitoMode)
+    : webSrc_(std::move(webSrc)), setWebIdCallback_(setWebIdCallback), type_(type),
+      incognitoMode_(incognitoMode) {}
 
 WebPattern::~WebPattern()
 {

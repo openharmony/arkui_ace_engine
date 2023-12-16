@@ -87,8 +87,10 @@ public:
     using OnControllerAttachedCallback = std::function<void()>;
     using PermissionClipboardCallback = std::function<void(const std::shared_ptr<BaseEventInfo>&)>;
     WebPattern();
-    WebPattern(std::string webSrc, const RefPtr<WebController>& webController, WebType type = WebType::SURFACE);
-    WebPattern(std::string webSrc, const SetWebIdCallback& setWebIdCallback, WebType type = WebType::SURFACE);
+    WebPattern(const std::string& webSrc, const RefPtr<WebController>& webController, WebType type = WebType::SURFACE,
+               bool incognitoMode = false);
+    WebPattern(const std::string& webSrc, const SetWebIdCallback& setWebIdCallback, WebType type = WebType::SURFACE,
+               bool incognitoMode = false);
 
     ~WebPattern() override;
 
@@ -221,6 +223,16 @@ public:
     WebType GetWebType()
     {
         return type_;
+    }
+
+    void SetIncognitoMode(bool incognitoMode)
+    {
+        incognitoMode_ = incognitoMode;
+    }
+
+    bool GetIncognitoMode() const
+    {
+        return incognitoMode_;
     }
 
     void SetOnControllerAttachedCallback(OnControllerAttachedCallback&& callback)
@@ -601,6 +613,7 @@ private:
     SetWebIdCallback setWebIdCallback_ = nullptr;
     PermissionClipboardCallback permissionClipboardCallback_ = nullptr;
     WebType type_;
+    bool incognitoMode_ = false;
     SetHapPathCallback setHapPathCallback_ = nullptr;
     JsProxyCallback jsProxyCallback_ = nullptr;
     OnControllerAttachedCallback onControllerAttachedCallback_ = nullptr;

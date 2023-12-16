@@ -33,10 +33,10 @@ using setPermissionClipboardCallback = std::function<void(const std::shared_ptr<
 class ACE_EXPORT WebModelNG : public OHOS::Ace::WebModel {
 public:
     void Create(const std::string& src, const RefPtr<WebController>& webController,
-        WebType type = WebType::SURFACE) override;
+        WebType type = WebType::SURFACE, bool incognitoMode = false) override;
     void Create(const std::string& src, std::function<void(int32_t)>&& setWebIdCallback,
         std::function<void(const std::string&)>&& setHapPathCallback,
-        int32_t parentWebId, bool popup, WebType type = WebType::SURFACE) override;
+        int32_t parentWebId, bool popup, WebType type = WebType::SURFACE, bool incognitoMode = false) override;
     void SetCustomScheme(const std::string& cmdLine) override;
     void SetOnCommonDialog(std::function<bool(const BaseEventInfo* info)>&& jsCallback, int dialogEventType) override;
     void SetOnConsoleLog(std::function<bool(const BaseEventInfo* info)>&& jsCallback) override;
