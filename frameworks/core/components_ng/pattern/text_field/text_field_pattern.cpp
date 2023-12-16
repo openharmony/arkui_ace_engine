@@ -926,6 +926,10 @@ void TextFieldPattern::HandleBlurEvent()
 
 bool TextFieldPattern::OnKeyEvent(const KeyEvent& event)
 {
+    if (event.code == KeyCode::KEY_TAB && isFocusedBeforeClick_ && !contentController_->IsEmpty()) {
+        isFocusedBeforeClick_ = false;
+        HandleOnSelectAll(true);
+    }
     return TextInputClient::HandleKeyEvent(event);
 }
 
@@ -937,10 +941,6 @@ bool TextFieldPattern::HandleOnEscape()
 
 bool TextFieldPattern::HandleOnTab(bool backward)
 {
-    if (isFocusedBeforeClick_ && !contentController_->IsEmpty()) {
-        isFocusedBeforeClick_ = false;
-        HandleOnSelectAll(true);
-    }
     return backward ? UpdateFocusBackward() : UpdateFocusForward();
 }
 
