@@ -61,7 +61,8 @@ ArkUINativeModuleValue TextTimerBridge::SetFontSize(ArkUIRuntimeCallInfo* runtim
     Local<JSValueRef> paramArg = runtimeCallInfo->GetCallArgRef(NUM_1);
     void* nativeNode = nodeArg->ToNativePointer(vm)->Value();
     CalcDimension fontSize;
-    if (!ArkTSUtils::ParseJsDimensionFp(vm, paramArg, fontSize) || fontSize.Value() < 0) {
+    if (!ArkTSUtils::ParseJsDimensionFp(vm, paramArg, fontSize) || fontSize.Value() < 0 ||
+        fontSize.Unit() == DimensionUnit::PERCENT) {
         GetArkUIInternalNodeAPI()->GetTextTimerModifier().ResetFontSize(nativeNode);
     } else {
         GetArkUIInternalNodeAPI()->GetTextTimerModifier().SetFontSize(

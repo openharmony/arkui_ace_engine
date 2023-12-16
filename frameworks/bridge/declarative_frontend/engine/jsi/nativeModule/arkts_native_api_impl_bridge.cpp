@@ -1482,6 +1482,10 @@ void ArkUINativeModule::RegisterButtonAttributes(Local<panda::ObjectRef> object,
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ButtonBridge::SetBackgroundColor));
     button->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetBackgroundColor"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ButtonBridge::ResetBackgroundColor));
+    button->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetButtonBorderRadius"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ButtonBridge::ResetButtonBorderRadius));
+    button->Set(vm, panda::StringRef::NewFromUtf8(vm, "setButtonBorderRadius"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ButtonBridge::SetButtonBorderRadius));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "button"), button);
 }
 
@@ -1728,6 +1732,10 @@ void ArkUINativeModule::RegisterImageAttributes(Local<panda::ObjectRef> object, 
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ImageBridge::SetDraggable));
     image->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetDraggable"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ImageBridge::ResetDraggable));
+    image->Set(vm, panda::StringRef::NewFromUtf8(vm, "setBorderRadius"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ImageBridge::SetBorderRadius));
+    image->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetBorderRadius"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ImageBridge::ResetBorderRadius));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "image"), image);
 }
 

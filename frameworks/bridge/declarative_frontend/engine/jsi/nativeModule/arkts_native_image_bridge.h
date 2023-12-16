@@ -49,6 +49,8 @@ public:
     static ArkUINativeModuleValue ResetColorFilter(ArkUIRuntimeCallInfo *runtimeCallInfo);
     static ArkUINativeModuleValue SetDraggable(ArkUIRuntimeCallInfo *runtimeCallInfo);
     static ArkUINativeModuleValue ResetDraggable(ArkUIRuntimeCallInfo *runtimeCallInfo);
+    static ArkUINativeModuleValue SetBorderRadius(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue ResetBorderRadius(ArkUIRuntimeCallInfo* runtimeCallInfo);
 };
 }
 

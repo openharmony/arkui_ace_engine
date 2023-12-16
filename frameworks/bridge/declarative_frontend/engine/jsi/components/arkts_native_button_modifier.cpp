@@ -28,18 +28,22 @@
 #include "frameworks/core/components/button/button_theme.h"
 
 namespace OHOS::Ace::NG {
-constexpr int DEFAULT_BUTTON_TYPE = (int)ButtonType::CAPSULE;
+constexpr int32_t DEFAULT_BUTTON_TYPE = (int32_t)ButtonType::CAPSULE;
 constexpr bool DEFAULT_STATE_EFFECT = true;
 constexpr Ace::FontWeight DEFAULT_FONT_WEIGHT = Ace::FontWeight::NORMAL;
 constexpr Ace::FontStyle DEFAULT_FONT_STYLE = Ace::FontStyle::NORMAL;
-constexpr int INDEX_TEXT_OVERFLOW_0 = 0;
-constexpr int INDEX_MAX_LINES_1 = 1;
-constexpr int INDEX_ADAPT_HEIGHT_2 = 2;
-constexpr int INDEX_FONT_WEIGHT_3 = 3;
-constexpr int INDEX_FONT_STYLE_4 = 4;
-constexpr int INDEX_MIN_FONT_SIZE_0 = 0;
-constexpr int INDEX_MAX_FONT_SIZE_1 = 1;
-constexpr int INDEX_FONT_SIZE_2 = 2;
+constexpr int32_t INDEX_TEXT_OVERFLOW_0 = 0;
+constexpr int32_t INDEX_MAX_LINES_1 = 1;
+constexpr int32_t INDEX_ADAPT_HEIGHT_2 = 2;
+constexpr int32_t INDEX_FONT_WEIGHT_3 = 3;
+constexpr int32_t INDEX_FONT_STYLE_4 = 4;
+constexpr int32_t INDEX_MIN_FONT_SIZE_0 = 0;
+constexpr int32_t INDEX_MAX_FONT_SIZE_1 = 1;
+constexpr int32_t INDEX_FONT_SIZE_2 = 2;
+constexpr int32_t OFFSET_1 = 1;
+constexpr int32_t OFFSET_2 = 2;
+constexpr int32_t OFFSET_3 = 3;
+constexpr int32_t BORDERRADIUS_SIZE = 12; // BorderRaius arry size
 const std::string DEFAULT_FONT_FAMILY = "cursive";
 const std::vector<TextOverflow> TEXT_OVERFLOWS = { TextOverflow::NONE, TextOverflow::CLIP, TextOverflow::ELLIPSIS,
     TextOverflow::MARQUEE };
@@ -77,6 +81,17 @@ const std::vector<FontWeight> BUTTON_FONT_WEIGHTS = {
     FontWeight::NORMAL,
     FontWeight::REGULAR,
 };
+
+void SetOptionalBorderRadius(
+    std::optional<Dimension>& optioalDimension, const double* values, int32_t valuesSize, int32_t& offset)
+{
+    bool hasValue = static_cast<bool>(values[offset]);
+    if (hasValue) {
+        optioalDimension =
+            Dimension(values[offset + OFFSET_1], static_cast<OHOS::Ace::DimensionUnit>(values[offset + OFFSET_2]));
+    }
+    offset = offset + OFFSET_3;
+}
 
 void SetButtonType(NodeHandle node, int type)
 {
@@ -301,13 +316,51 @@ void ResetButtonBackgroundColor(NodeHandle node)
     ButtonModelNG::BackgroundColor(frameNode, backgroundColor, false);
 }
 
+/**
+ * @param src source borderRadius
+ * @param options option value
+ * values[offset + 0], option[offset + 1], option[offset + 2]: borderRadius topLeft(hasValue, value, unit)
+ * values[offset + 3], option[offset + 4], option[offset + 5]: borderRadius topRight(hasValue, value, unit)
+ * values[offset + 6], option[offset + 7], option[offset + 8]: borderRadius bottomLeft(hasValue, value, unit)
+ * values[offset + 9], option[offset + 10], option[offset + 11]: borderRadius bottomRight(hasValue, value, unit)
+ * @param optionsLength options valuesSize
+ */
+void SetButtonBorderRadius(NodeHandle node, const double* values, int32_t valuesSize)
+{
+    if ((values == nullptr) || (valuesSize != BORDERRADIUS_SIZE)) {
+        return;
+    }
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    int32_t offset = 0;
+    std::optional<Dimension> radiusTopLeft;
+    std::optional<Dimension> radiusTopRight;
+    std::optional<Dimension> radiusBottomLeft;
+    std::optional<Dimension> radiusBottomRight;
+
+    SetOptionalBorderRadius(radiusTopLeft, values, valuesSize, offset);
+    SetOptionalBorderRadius(radiusTopRight, values, valuesSize, offset);
+    SetOptionalBorderRadius(radiusBottomLeft, values, valuesSize, offset);
+    SetOptionalBorderRadius(radiusBottomRight, values, valuesSize, offset);
+    ButtonModelNG::SetBorderRadius(frameNode, radiusTopLeft, radiusTopRight, radiusBottomLeft, radiusBottomRight);
+}
+
+void ResetButtonBorderRadius(NodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    OHOS::Ace::Dimension reset;
+    ButtonModelNG::SetBorderRadius(frameNode, reset);
+}
+
 ArkUIButtonModifierAPI GetButtonModifier()
 {
     static const ArkUIButtonModifierAPI modifier = { SetButtonType, ResetButtonType, SetButtonStateEffect,
         ResetButtonStateEffect, SetButtonFontColor, ResetButtonFontColor, SetButtonFontSize, ResetButtonFontSize,
         SetButtonFontWeight, ResetButtonFontWeight, SetButtonFontStyle, ResetButtonFontStyle, SetButtonFontFamily,
         ResetButtonFontFamily, SetButtonLabelStyle, ResetButtonLabelStyle,
-        SetButtonBackgroundColor, ResetButtonBackgroundColor
+        SetButtonBackgroundColor, ResetButtonBackgroundColor,
+        SetButtonBorderRadius, ResetButtonBorderRadius
         };
 
     return modifier;
