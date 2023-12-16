@@ -1631,7 +1631,7 @@ bool RichEditorPattern::HandleUserLongPressEvent(GestureEvent& info)
     return HandleUserGestureEvent(info, std::move(longPressFunc));
 }
 
-void RichEditorPattern::HandleOnSelectAll()
+void RichEditorPattern::HandleMenuCallbackOnSelectAll()
 {
     auto textSize = static_cast<int32_t>(GetWideText().length()) + imageCount_;
     textSelector_.Update(0, textSize);
@@ -2862,8 +2862,23 @@ int32_t RichEditorPattern::GetParagraphEndPosition(int32_t caretPosition)
     return std::clamp(caretPosition + offset, 0, static_cast<int32_t>(GetTextContentLength()));
 }
 
+void RichEditorPattern::HandleOnSelectAll()
+{
+    CloseSelectOverlay();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    int32_t newPos = static_cast<int32_t>(GetTextContentLength());
+    textSelector_.Update(0, newPos);
+    FireOnSelect(textSelector_.GetTextStart(), textSelector_.GetTextEnd());
+    SetCaretPosition(newPos);
+    MoveCaretToContentRect();
+    StartTwinkling();
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
 void RichEditorPattern::HandleSelect(CaretMoveIntent direction)
 {
+    CloseSelectOverlay();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     int32_t newPos, fixedPos = caretPosition_;
@@ -3556,7 +3571,7 @@ void RichEditorPattern::ShowSelectOverlay(const RectF& firstHandle, const RectF&
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
             pattern->isMousePressed_ = usingMouse;
-            pattern->HandleOnSelectAll();
+            pattern->HandleMenuCallbackOnSelectAll();
         };
 
         selectInfo.menuCallback.onCameraInput = [weak, usingMouse]() {
@@ -3585,6 +3600,9 @@ void RichEditorPattern::ShowSelectOverlay(const RectF& firstHandle, const RectF&
 void RichEditorPattern::HandleOnCopy()
 {
     CHECK_NULL_VOID(clipboard_);
+    if (copyOption_ == CopyOptions::None) {
+        return;
+    }
     auto selectStart = textSelector_.GetTextStart();
     auto selectEnd = textSelector_.GetTextEnd();
     auto textSelectInfo = GetSpansInfo(selectStart, selectEnd, GetSpansMethod::ONSELECT);
@@ -3756,6 +3774,12 @@ void RichEditorPattern::SetCaretSpanIndex(int32_t index)
 
 void RichEditorPattern::HandleOnCut()
 {
+    if (copyOption_ == CopyOptions::None) {
+        return;
+    }
+    if (!textSelector_.IsValid()) {
+        return;
+    }
     caretUpdateType_ = CaretUpdateType::NONE;
     HandleOnCopy();
     DeleteBackward();
