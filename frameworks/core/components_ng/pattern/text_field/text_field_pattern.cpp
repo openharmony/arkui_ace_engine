@@ -3812,12 +3812,14 @@ void TextFieldPattern::PerformAction(TextInputAction action, bool forceCloseKeyb
     auto paintProperty = GetPaintProperty<TextFieldPaintProperty>();
     CHECK_NULL_VOID(paintProperty);
     auto eventHub = host->GetEventHub<TextFieldEventHub>();
+    TextFieldCommonEvent event;
+    event.SetText(contentController_->GetTextValue());
     if (IsNormalInlineState()) {
         auto host = GetHost();
         CHECK_NULL_VOID(host);
         auto focusHub = host->GetOrCreateFocusHub();
         focusHub->LostFocus();
-        eventHub->FireOnSubmit(static_cast<int32_t>(action));
+        eventHub->FireOnSubmit(static_cast<int32_t>(action), event);
         RecordSubmitEvent();
         return;
     }
@@ -3828,8 +3830,11 @@ void TextFieldPattern::PerformAction(TextInputAction action, bool forceCloseKeyb
         }
         return;
     }
-    eventHub->FireOnSubmit(static_cast<int32_t>(action));
+    eventHub->FireOnSubmit(static_cast<int32_t>(action), event);
     RecordSubmitEvent();
+    if (event.IsKeepEditable()) {
+        return;
+    }
     CloseKeyboard(forceCloseKeyboard);
     FocusHub::LostFocusToViewRoot();
 }

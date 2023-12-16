@@ -22,6 +22,7 @@
 #include "frameworks/core/components/text_field/text_field_component.h"
 #include "frameworks/core/components/text_field/textfield_theme.h"
 #include "frameworks/core/components_ng/pattern/text_field/text_field_model.h"
+#include "frameworks/core/components_ng/pattern/text_field/text_field_event_hub.h"
 
 namespace OHOS::Ace::Framework {
 
@@ -55,6 +56,7 @@ public:
     void SetShowPasswordIcon(bool value) override;
     void SetOnEditChanged(std::function<void(bool)>&& func) override;
     void SetOnSubmit(std::function<void(int32_t)>&& func) override;
+    void SetOnSubmit(std::function<void(int32_t, NG::TextFieldCommonEvent&)>&& func) override {};
     void SetOnChange(std::function<void(const std::string&)>&& func) override;
     void SetOnTextSelectionChange(std::function<void(int32_t, int32_t)>&& func) override {};
     void SetOnContentScroll(std::function<void(float, float)>&& func) override {};
