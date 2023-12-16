@@ -256,6 +256,12 @@ ArkUINativeModuleValue GaugeBridge::SetGaugeVaule(ArkUIRuntimeCallInfo* runtimeC
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+
+    if (!secondArg->IsNumber()) {
+        GetArkUIInternalNodeAPI()->GetGaugeModifier().ResetGaugeVaule(nativeNode);
+        return panda::JSValueRef::Undefined(vm);
+    }
+
     float vaule = static_cast<float>(secondArg->ToNumber(vm)->Value());
     GetArkUIInternalNodeAPI()->GetGaugeModifier().SetGaugeVaule(nativeNode, vaule);
     return panda::JSValueRef::Undefined(vm);
@@ -278,6 +284,12 @@ ArkUINativeModuleValue GaugeBridge::SetGaugeStartAngle(ArkUIRuntimeCallInfo* run
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+
+    if (!secondArg->IsNumber()) {
+        GetArkUIInternalNodeAPI()->GetGaugeModifier().ResetGaugeStartAngle(nativeNode);
+        return panda::JSValueRef::Undefined(vm);
+    }
+
     float vaule = static_cast<float>(secondArg->ToNumber(vm)->Value());
     GetArkUIInternalNodeAPI()->GetGaugeModifier().SetGaugeStartAngle(nativeNode, vaule);
     return panda::JSValueRef::Undefined(vm);
@@ -300,6 +312,12 @@ ArkUINativeModuleValue GaugeBridge::SetGaugeEndAngle(ArkUIRuntimeCallInfo* runti
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+
+    if (!secondArg->IsNumber()) {
+        GetArkUIInternalNodeAPI()->GetGaugeModifier().ResetGaugeEndAngle(nativeNode);
+        return panda::JSValueRef::Undefined(vm);
+    }
+
     float vaule = static_cast<float>(secondArg->ToNumber(vm)->Value());
     GetArkUIInternalNodeAPI()->GetGaugeModifier().SetGaugeEndAngle(nativeNode, vaule);
     return panda::JSValueRef::Undefined(vm);
