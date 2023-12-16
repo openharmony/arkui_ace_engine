@@ -1644,9 +1644,9 @@ class ArkMesh {
 }
 
 class ArkLanesOpt {
-  lanesNum: number;
-  minLength: Length;
-  maxLength: Length;
+  lanesNum: number | undefined;
+  minLength: Length | undefined;
+  maxLength: Length | undefined;
   gutter?: undefined;
   constructor() {
     this.lanesNum = undefined;

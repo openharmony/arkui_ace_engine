@@ -281,10 +281,15 @@ class ArkListComponent extends ArkComponent implements ListAttribute {
   lanes(value: number | LengthConstrain, gutter?: any): this {
     let opt: ArkLanesOpt = new ArkLanesOpt();
     opt.gutter = gutter;
-    opt.lanesNum = value as number;
-    const lc = value as LengthConstrain;
-    opt.minLength = lc.minLength;
-    opt.maxLength = lc.maxLength;
+    if (isUndefined(value)) {
+      opt.lanesNum = undefined;
+    } else if (isNumber(value)) {
+      opt.lanesNum = value as number;
+    } else {
+      const lc = value as LengthConstrain;
+      opt.minLength = lc.minLength;
+      opt.maxLength = lc.maxLength;
+    }
     modifierWithKey(this._modifiersWithKeys, ListLanesModifier.identity, ListLanesModifier, opt);
     return this;
   }

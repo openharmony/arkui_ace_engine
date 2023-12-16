@@ -40,12 +40,18 @@ void SetListLanes(NodeHandle node, int32_t lanesNum, const struct ArkUIDimension
     CHECK_NULL_VOID(frameNode);
     if (lanesNum > 0) {
         ListModelNG::SetLanes(frameNode, lanesNum);
+        Dimension minLength =
+            Dimension(minLengthType->value, static_cast<OHOS::Ace::DimensionUnit>(minLengthType->units));
+        Dimension maxLength =
+            Dimension(maxLengthType->value, static_cast<OHOS::Ace::DimensionUnit>(maxLengthType->units));
+        ListModelNG::SetLaneConstrain(frameNode, minLength, maxLength);
     } else {
         Dimension minLength =
             Dimension(minLengthType->value, static_cast<OHOS::Ace::DimensionUnit>(minLengthType->units));
         Dimension maxLength =
             Dimension(maxLengthType->value, static_cast<OHOS::Ace::DimensionUnit>(maxLengthType->units));
         ListModelNG::SetLaneConstrain(frameNode, minLength, maxLength);
+        ListModelNG::SetLanes(frameNode, 1);
     }
 
     Dimension gutter = Dimension(gutterType->value, static_cast<OHOS::Ace::DimensionUnit>(gutterType->units));
