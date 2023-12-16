@@ -61,6 +61,8 @@ public:
     const RefPtr<Subwindow>& GetCurrentWindow();
     Rect GetParentWindowRect();
 
+    RefPtr<Subwindow> ShowPreviewNG();
+    void HidePreviewNG();
     void ShowMenu(const RefPtr<Component>& newComponent);
     void ShowMenuNG(
         const RefPtr<NG::FrameNode>& menuNode, int32_t targetId, const NG::OffsetF& offset, bool isAboveApps = false);

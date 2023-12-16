@@ -370,6 +370,11 @@ public:
         return isLayoutDirtyMarked_;
     }
 
+    void SetLayoutDirtyMarked(bool marked)
+    {
+        isLayoutDirtyMarked_ = marked;
+    }
+
     bool HasPositionProp() const
     {
         CHECK_NULL_RETURN(renderContext_, false);
@@ -495,6 +500,12 @@ public:
     std::string ProvideRestoreInfo();
 
     static std::vector<RefPtr<FrameNode>> GetNodesById(const std::unordered_set<int32_t>& set);
+
+    static double GetMaxWidthWithColumnType(GridColumnType gridColumnType);
+
+    double GetPreviewScaleVal() const;
+
+    bool IsPreviewNeedScale() const;
 
     void SetViewPort(RectF viewPort)
     {
@@ -626,7 +637,8 @@ public:
     {
         return localMat_;
     }
-
+    OffsetF GetGlobalOffset();
+    RefPtr<PixelMap> GetPixelMap();
     RefPtr<FrameNode> GetPageNode();
     void NotifyFillRequestSuccess(RefPtr<PageNodeInfoWrap> nodeWrap, AceAutoFillType autoFillType);
     void NotifyFillRequestFailed(int32_t errCode);

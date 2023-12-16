@@ -489,6 +489,27 @@ void SubwindowOhos::ClearMenu()
 #endif
 }
 
+void SubwindowOhos::ShowPreviewNG()
+{
+    ShowWindow();
+    ResizeWindow();
+    window_->SetTouchable(false);
+}
+
+void SubwindowOhos::HidePreviewNG()
+{
+    auto overlayManager = GetOverlayManager();
+    CHECK_NULL_VOID(overlayManager);
+    overlayManager->RemovePixelMap();
+    overlayManager->RemoveEventColumn();
+    auto aceContainer = Platform::AceContainer::GetContainer(childContainerId_);
+    CHECK_NULL_VOID(aceContainer);
+    auto pipeline = DynamicCast<NG::PipelineContext>(aceContainer->GetPipelineContext());
+    CHECK_NULL_VOID(pipeline);
+    pipeline->FlushPipelineImmediately();
+    HideSubWindowNG();
+}
+
 void SubwindowOhos::ShowMenuNG(const RefPtr<NG::FrameNode> menuNode, int32_t targetId, const NG::OffsetF& offset)
 {
     auto aceContainer = Platform::AceContainer::GetContainer(childContainerId_);

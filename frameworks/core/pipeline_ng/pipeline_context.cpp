@@ -2493,6 +2493,7 @@ void PipelineContext::OnDragEvent(const PointerEvent& pointerEvent, DragEventAct
         manager->OnDragMoveOut(pointerEvent, extraInfo);
         manager->ClearSummary();
         manager->ClearExtraInfo();
+        manager->OnDragOut();
         return;
     }
 #endif // ENABLE_DRAG_FRAMEWORK
@@ -2510,8 +2511,19 @@ void PipelineContext::OnDragEvent(const PointerEvent& pointerEvent, DragEventAct
 #ifndef ENABLE_DRAG_FRAMEWORK
         manager->RestoreClipboardData();
 #endif // ENABLE_DRAG_FRAMEWORK
+#ifdef ENABLE_DRAG_FRAMEWORK
+        SubwindowManager::GetInstance()->HidePreviewNG();
+        auto overlayManager = GetOverlayManager();
+        CHECK_NULL_VOID(overlayManager);
+        overlayManager->RemovePixelMap();
+#endif
         return;
     }
+#ifdef ENABLE_DRAG_FRAMEWORK
+    if (action == DragEventAction::DRAG_EVENT_MOVE) {
+        manager->DoDragMoveAnimate(pointerEvent);
+    }
+#endif
     manager->OnDragMove(pointerEvent, extraInfo);
 }
 

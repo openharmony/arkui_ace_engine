@@ -178,6 +178,19 @@ Rect SubwindowManager::GetParentWindowRect()
     return currentSubwindow_->GetParentWindowRect();
 }
 
+RefPtr<Subwindow> SubwindowManager::ShowPreviewNG()
+{
+    auto containerId = Container::CurrentId();
+    auto subwindow = GetSubwindow(containerId);
+    if (!subwindow) {
+        subwindow = Subwindow::CreateSubwindow(containerId);
+        subwindow->InitContainer();
+        AddSubwindow(containerId, subwindow);
+    }
+    subwindow->ShowPreviewNG();
+    return subwindow;
+}
+
 void SubwindowManager::ShowMenuNG(
     const RefPtr<NG::FrameNode>& menuNode, int32_t targetId, const NG::OffsetF& offset, bool isAboveApps)
 {
@@ -189,6 +202,14 @@ void SubwindowManager::ShowMenuNG(
         AddSubwindow(containerId, subwindow);
     }
     subwindow->ShowMenuNG(menuNode, targetId, offset);
+}
+
+void SubwindowManager::HidePreviewNG()
+{
+    auto subwindow = GetCurrentWindow();
+    if (subwindow) {
+        subwindow->HidePreviewNG();
+    }
 }
 
 void SubwindowManager::HideMenuNG(const RefPtr<NG::FrameNode>& menu, int32_t targetId)

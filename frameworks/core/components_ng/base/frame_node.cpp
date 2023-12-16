@@ -30,6 +30,7 @@
 #include "core/common/ace_application_info.h"
 #include "core/common/container.h"
 #include "core/components/common/layout/constants.h"
+#include "core/components/common/layout/grid_system_manager.h"
 #include "core/components_ng/base/frame_scene_status.h"
 #include "core/components_ng/base/inspector.h"
 #include "core/components_ng/base/ui_node.h"
@@ -2397,6 +2398,39 @@ std::vector<RefPtr<FrameNode>> FrameNode::GetNodesById(const std::unordered_set<
     return nodes;
 }
 
+double FrameNode::GetMaxWidthWithColumnType(GridColumnType gridColumnType)
+{
+    RefPtr<GridColumnInfo> columnInfo = GridSystemManager::GetInstance().GetInfoByType(gridColumnType);
+    if (columnInfo->GetParent()) {
+        columnInfo->GetParent()->BuildColumnWidth();
+    }
+    auto gridSizeType = GridSystemManager::GetInstance().GetCurrentSize();
+    if (gridSizeType > GridSizeType::LG) {
+        gridSizeType = GridSizeType::LG;
+    }
+    auto columns = columnInfo->GetColumns(gridSizeType);
+    return columnInfo->GetWidth(columns);
+}
+
+double FrameNode::GetPreviewScaleVal() const
+{
+    double scale = 1.0;
+    auto maxWidth = GetMaxWidthWithColumnType(GridColumnType::DRAG_PANEL);
+    auto geometryNode = GetGeometryNode();
+    CHECK_NULL_RETURN(geometryNode, scale);
+    auto width = geometryNode->GetFrameRect().Width();
+    if (GetTag() != V2::WEB_ETS_TAG && width != 0 && width > maxWidth &&
+        previewOption_.mode != DragPreviewMode::DISABLE_SCALE) {
+        scale = maxWidth / width;
+    }
+    return scale;
+}
+
+bool FrameNode::IsPreviewNeedScale() const
+{
+    return GetPreviewScaleVal() < 1.0f;
+}
+
 int32_t FrameNode::GetNodeExpectedRate()
 {
     if (sceneRateMap_.empty()) {
@@ -2845,6 +2879,31 @@ bool FrameNode::CheckNeedForceMeasureAndLayout()
 {
     PropertyChangeFlag flag = layoutProperty_->GetPropertyChangeFlag();
     return CheckNeedMeasure(flag) || CheckNeedLayout(flag);
+}
+
+OffsetF FrameNode::GetGlobalOffset()
+{
+    auto frameOffset = GetPaintRectOffset();
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipelineContext, OffsetF(0.0f, 0.0f));
+    auto windowOffset = pipelineContext->GetWindow()->GetCurrentWindowRect().GetOffset();
+    frameOffset += OffsetT<float> { windowOffset.GetX(), windowOffset.GetY() };
+    return frameOffset;
+}
+
+RefPtr<PixelMap> FrameNode::GetPixelMap()
+{
+    auto gestureHub = GetOrCreateGestureEventHub();
+    CHECK_NULL_RETURN(gestureHub, nullptr);
+    RefPtr<PixelMap> pixelMap = gestureHub->GetPixelMap();
+    // if gesture already have pixel map return directly
+    if (pixelMap) {
+        return pixelMap;
+    }
+    CHECK_NULL_RETURN(renderContext_, nullptr);
+    pixelMap = renderContext_->GetThumbnailPixelMap();
+    gestureHub->SetPixelMap(pixelMap);
+    return pixelMap;
 }
 
 float FrameNode::GetBaselineDistance() const
