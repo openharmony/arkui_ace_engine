@@ -88,38 +88,36 @@ void ResetProgressValue(NodeHandle node)
     ProgressModelNG::SetValue(frameNode, DEFAULT_PROGRESS_VALUE);
 }
 
-void SetProgressColorWithArray(NodeHandle node, double* colors, int32_t colorslength)
+void SetProgressGradientColor(NodeHandle node, const struct ArkUIGradientType* gradient, int32_t length)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-
-    if (((colorslength % MIN_COLOR_STOPS_LENGTH) != 0)) {
-        return;
+    OHOS::Ace::NG::Gradient tempGradient;
+    for (int32_t j = 0; j < length; j++) {
+        OHOS::Ace::NG::GradientColor gradientColor;
+        gradientColor.SetLinearColor(LinearColor(Color(gradient->color[j])));
+        gradientColor.SetDimension(
+            Dimension(gradient->offset[j].number, static_cast<DimensionUnit>(gradient->offset[j].unit)));
+        tempGradient.AddColor(gradientColor);
     }
-    NG::Gradient gradient;
-    gradient.CreateGradientWithType(NG::GradientType::LINEAR);
-    SetGradientColors(gradient, colors, colorslength);
-    ProgressModelNG::SetGradientColor(frameNode, Gradient(gradient));
+
+    ProgressModelNG::SetGradientColor(frameNode, tempGradient);
 }
 
-void SetProgressColorWithValue(NodeHandle node, uint32_t color)
+void SetProgressColor(NodeHandle node, uint32_t color)
 {
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     NG::Gradient gradient;
-    Color endColor;
-    Color beginColor;
-    endColor = Color(color);
-    beginColor = Color(color);
     NG::GradientColor endSideColor;
     NG::GradientColor beginSideColor;
-    endSideColor.SetLinearColor(LinearColor(endColor));
-    endSideColor.SetDimension(Dimension(0));
-    beginSideColor.SetLinearColor(LinearColor(beginColor));
-    beginSideColor.SetDimension(Dimension(1));
+    endSideColor.SetLinearColor(LinearColor(Color(color)));
+    endSideColor.SetDimension(Dimension(0.0));
+    beginSideColor.SetLinearColor(LinearColor(Color(color)));
+    beginSideColor.SetDimension(Dimension(1.0));
     gradient.AddColor(endSideColor);
     gradient.AddColor(beginSideColor);
-    ProgressModelNG::SetGradientColor(frameNode, Gradient(gradient));
+    ProgressModelNG::SetGradientColor(frameNode, gradient);
     ProgressModelNG::SetColor(frameNode, Color(color));
 }
 
@@ -127,31 +125,36 @@ void ResetProgressColor(NodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
+    Color endColor;
+    Color beginColor;
+    Color colorVal;
     auto progressLayoutProperty = frameNode->GetLayoutProperty<ProgressLayoutProperty>();
     CHECK_NULL_VOID(progressLayoutProperty);
     auto progresstype = progressLayoutProperty->GetType();
-    Color colorVal;
-    NG::Gradient gradient;
-    Color endColor;
-    Color beginColor;
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto progressTheme = pipeline->GetTheme<ProgressTheme>();
+    CHECK_NULL_VOID(progressTheme);
     if (progresstype == ProgressType::RING) {
-        endColor = Color(0xff6591bf);
-        beginColor = Color(0xff3b61f7);
+        endColor = progressTheme->GetRingProgressEndSideColor();
+        beginColor = progressTheme->GetRingProgressBeginSideColor();
     } else if (progresstype == ProgressType::CAPSULE) {
-        colorVal = Color(0x33006cde);
+        colorVal = progressTheme->GetCapsuleSelectColor();
     } else {
-        colorVal = Color(0xff007dff);
+        colorVal = progressTheme->GetTrackSelectedColor();
     }
-    NG::GradientColor endSideColor;
-    NG::GradientColor beginSideColor;
+
+    OHOS::Ace::NG::Gradient gradient;
+    OHOS::Ace::NG::GradientColor endSideColor;
+    OHOS::Ace::NG::GradientColor beginSideColor;
     endSideColor.SetLinearColor(LinearColor(endColor));
-    endSideColor.SetDimension(Dimension(0));
+    endSideColor.SetDimension(Dimension(0.0f));
     beginSideColor.SetLinearColor(LinearColor(beginColor));
-    beginSideColor.SetDimension(Dimension(1));
+    beginSideColor.SetDimension(Dimension(1.0f));
     gradient.AddColor(endSideColor);
     gradient.AddColor(beginSideColor);
-    ProgressModelNG::SetGradientColor(frameNode, Gradient(gradient));
-    ProgressModelNG::SetColor(frameNode, Color(colorVal));
+    ProgressModelNG::SetGradientColor(frameNode, gradient);
+    ProgressModelNG::SetColor(frameNode, colorVal);
 }
 
 void SetLinearStyleOptions(FrameNode* node, ArkUIProgressStyle* value)
@@ -332,8 +335,8 @@ void ResetProgressStyle(NodeHandle node)
 
 ArkUIProgressModifierAPI GetProgressModifier()
 {
-    static const ArkUIProgressModifierAPI modifier = { SetProgressValue, ResetProgressValue, SetProgressColorWithArray,
-        SetProgressColorWithValue, ResetProgressColor, SetProgressStyle, ResetProgressStyle };
+    static const ArkUIProgressModifierAPI modifier = { SetProgressValue, ResetProgressValue, SetProgressGradientColor,
+        SetProgressColor, ResetProgressColor, SetProgressStyle, ResetProgressStyle };
     return modifier;
 }
 

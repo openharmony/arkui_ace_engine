@@ -2333,12 +2333,10 @@ void ArkUINativeModule::RegisterProgressAttributes(Local<panda::ObjectRef> objec
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ProgressBridge::SetProgressValue));
     progress->Set(vm, panda::StringRef::NewFromUtf8(vm, "ResetProgressValue"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ProgressBridge::ResetProgressValue));
-    progress->Set(vm, panda::StringRef::NewFromUtf8(vm, "SetProgressColor"),
+    progress->Set(vm, panda::StringRef::NewFromUtf8(vm, "setProgressColor"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ProgressBridge::SetProgressColor));
-    progress->Set(vm, panda::StringRef::NewFromUtf8(vm, "ResetProgressColor"),
+    progress->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetProgressColor"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ProgressBridge::ResetProgressColor));
-    progress->Set(vm, panda::StringRef::NewFromUtf8(vm, "SetProgressColorWithLinearGradient"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ProgressBridge::SetProgressColorWithLinearGradient));
     progress->Set(vm, panda::StringRef::NewFromUtf8(vm, "ResetProgressStyle"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ProgressBridge::ResetProgressStyle));
     progress->Set(vm, panda::StringRef::NewFromUtf8(vm, "SetProgressStyle"),

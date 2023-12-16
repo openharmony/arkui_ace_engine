@@ -21,15 +21,12 @@
 #include "core/components/progress/progress_theme.h"
 #include "core/components_ng/pattern/progress/progress_layout_property.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
+#include "bridge/declarative_frontend/jsview/js_linear_gradient.h"
 
 namespace OHOS::Ace::NG {
 constexpr int32_t ARG_NUM_NATIVE_NODE = 0;
 constexpr int32_t ARG_NUM_VALUE = 1;
-constexpr int32_t ARG_NUM_COLOR_RESOURCE_COLOR = 1;
-constexpr int32_t ARG_NUM_COLOR_ANGLE = 1;
-constexpr int32_t ARG_NUM_COLOR_DIRECTION = 2;
-constexpr int32_t ARG_NUM_COLOR_COLOR_STOPS = 3;
-constexpr int32_t ARG_NUM_COLOR_REPEATING = 4;
+constexpr int32_t ARG_COLOR_INDEX_VALUE = 1;
 constexpr int32_t ARG_NUM_STYLE_STROKE_WIDHT = 1;
 constexpr int32_t ARG_NUM_STYLE_BORDER_WIDHT = 6;
 constexpr int32_t ARG_NUM_STYLE_PROGRESS_STATUS = 16;
@@ -47,11 +44,7 @@ constexpr int32_t ARG_NUM_STYLE_SHADOW = 15;
 constexpr int32_t ARG_NUM_STYLE_SHOW_DEFAULT_PERCENTAHE = 14;
 constexpr int32_t ARG_NUM_STYLE_FONT_FAMILY = 10;
 constexpr int32_t ARG_NUM_STYLE_STROKE_RADIUS = 17;
-constexpr int32_t COLOR_STOPS_MIN_LENGTH = 1;
-constexpr int32_t ARRAY_MIN_INDEX = 0;
 constexpr double DEFAULT_PROGRESS_VALUE = 0;
-constexpr double DEFAULT_COLOR_STOPS_DIMENSION = 0;
-constexpr double DEFAULT_GRADIENT_ANGLE = 0;
 constexpr double DEFAULT_STROKE_WIDTH = 4;
 constexpr double DEFAULT_BORDER_WIDTH = 1;
 constexpr double DEFAULT_SCALE_WIDTH = 2;
@@ -64,6 +57,50 @@ constexpr NG::ProgressStatus DEFAULT_PROGRESS_STATUS = NG::ProgressStatus::PROGR
 constexpr DimensionUnit DEFAULT_CAPSULE_FONT_UNIT = DimensionUnit::FP;
 const std::vector<Ace::FontStyle> FONT_STYLES = { Ace::FontStyle::NORMAL, Ace::FontStyle::ITALIC };
 const std::vector<NG::ProgressStatus> STATUS_STYLES = { NG::ProgressStatus::PROGRESSING, NG::ProgressStatus::LOADING };
+
+namespace {
+bool ConvertProgressRResourceColor(const EcmaVM* vm, const Local<JSValueRef>& item, OHOS::Ace::NG::Gradient& gradient)
+{
+    Color color;
+    if (!ArkTSUtils::ParseJsColor(vm, item, color)) {
+        return false;
+    }
+    OHOS::Ace::NG::GradientColor gradientColorStart;
+    gradientColorStart.SetLinearColor(LinearColor(color));
+    gradientColorStart.SetDimension(Dimension(0.0));
+    gradient.AddColor(gradientColorStart);
+    OHOS::Ace::NG::GradientColor gradientColorEnd;
+    gradientColorEnd.SetLinearColor(LinearColor(color));
+    gradientColorEnd.SetDimension(Dimension(1.0));
+    gradient.AddColor(gradientColorEnd);
+    return true;
+}
+
+bool ConvertProgressResourceColor(
+    const EcmaVM* vm, const Local<JSValueRef>& itemParam, OHOS::Ace::NG::Gradient& gradient)
+{
+    if (!itemParam->IsObject()) {
+        return ConvertProgressRResourceColor(vm, itemParam, gradient);
+    }
+    Framework::JSLinearGradient* jsLinearGradient =
+        static_cast<Framework::JSLinearGradient*>(itemParam->ToObject(vm)->GetNativePointerField(0));
+    if (!jsLinearGradient) {
+        return ConvertProgressRResourceColor(vm, itemParam, gradient);
+    }
+
+    size_t colorLength = jsLinearGradient->GetGradient().size();
+    if (colorLength == 0) {
+        return false;
+    }
+    for (size_t colorIndex = 0; colorIndex < colorLength; ++colorIndex) {
+        OHOS::Ace::NG::GradientColor gradientColor;
+        gradientColor.SetLinearColor(LinearColor(jsLinearGradient->GetGradient().at(colorIndex).first));
+        gradientColor.SetDimension(jsLinearGradient->GetGradient().at(colorIndex).second);
+        gradient.AddColor(gradientColor);
+    }
+    return true;
+}
+} // namespace
 
 ArkUINativeModuleValue ProgressBridge::ResetProgressValue(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
@@ -104,118 +141,37 @@ ArkUINativeModuleValue ProgressBridge::ResetProgressColor(ArkUIRuntimeCallInfo* 
     return panda::JSValueRef::Undefined(vm);
 }
 
-void ParseGradientColorStops(const EcmaVM* vm, const Local<JSValueRef>& value, std::vector<double>& colors)
-{
-    if (!value->IsArray(vm)) {
-        return;
-    }
-    auto array = panda::Local<panda::ArrayRef>(value);
-    auto length = array->Length(vm);
-    for (uint32_t index = 0; index < length; index++) {
-        auto item = panda::ArrayRef::GetValueAt(vm, array, index);
-        if (!item->IsArray(vm)) {
-            continue;
-        }
-        auto itemArray = panda::Local<panda::ArrayRef>(item);
-        auto itemLength = itemArray->Length(vm);
-        if (itemLength < COLOR_STOPS_MIN_LENGTH) {
-            continue;
-        }
-        Color color;
-        auto colorParams = panda::ArrayRef::GetValueAt(vm, itemArray, ARRAY_MIN_INDEX);
-        if (!ArkTSUtils::ParseJsColorAlpha(vm, colorParams, color)) {
-            continue;
-        }
-        bool hasDimension = false;
-        double dimension = DEFAULT_COLOR_STOPS_DIMENSION;
-        if (itemLength > COLOR_STOPS_MIN_LENGTH) {
-            auto stopDimension = panda::ArrayRef::GetValueAt(vm, itemArray, COLOR_STOPS_MIN_LENGTH);
-            if (ArkTSUtils::ParseJsDouble(vm, stopDimension, dimension)) {
-                hasDimension = true;
-            }
-        }
-        colors.push_back(static_cast<double>(color.GetValue()));
-        colors.push_back(static_cast<double>(hasDimension));
-        colors.push_back(dimension);
-    }
-}
-
-bool ParseJsInt32(const EcmaVM* vm, const Local<JSValueRef>& value, int32_t& result)
-{
-    if (value->IsNumber()) {
-        result = value->Int32Value(vm);
-        return true;
-    }
-    if (value->IsString()) {
-        result = StringUtils::StringToInt(value->ToString(vm)->ToString());
-        return true;
-    }
-
-    return false;
-}
-
-void ParseJsAngle(const EcmaVM* vm, const Local<JSValueRef>& value, std::optional<float>& angle)
-{
-    if (value->IsNumber()) {
-        angle = static_cast<float>(value->ToNumber(vm)->Value());
-        return;
-    }
-    if (value->IsString()) {
-        angle = static_cast<float>(StringUtils::StringToDegree(value->ToString(vm)->ToString()));
-        return;
-    }
-    return;
-}
-
-void ParseGradientAngle(const EcmaVM* vm, const Local<JSValueRef>& value, std::vector<double>& values)
-{
-    std::optional<float> degree;
-    ParseJsAngle(vm, value, degree);
-    auto angleHasValue = degree.has_value();
-    auto angleValue = angleHasValue ? degree.value() : DEFAULT_GRADIENT_ANGLE;
-    degree.reset();
-    values.push_back(static_cast<double>(angleHasValue));
-    values.push_back(static_cast<double>(angleValue));
-}
-
-ArkUINativeModuleValue ProgressBridge::SetProgressColorWithLinearGradient(ArkUIRuntimeCallInfo* runtimeCallInfo)
-{
-    EcmaVM* vm = runtimeCallInfo->GetVM();
-    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
-    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(ARG_NUM_NATIVE_NODE);
-    Local<JSValueRef> angleArg = runtimeCallInfo->GetCallArgRef(ARG_NUM_COLOR_ANGLE);
-    Local<JSValueRef> directionArg = runtimeCallInfo->GetCallArgRef(ARG_NUM_COLOR_DIRECTION);
-    Local<JSValueRef> colorsArg = runtimeCallInfo->GetCallArgRef(ARG_NUM_COLOR_COLOR_STOPS);
-    Local<JSValueRef> repeatingArg = runtimeCallInfo->GetCallArgRef(ARG_NUM_COLOR_REPEATING);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-
-    std::vector<double> values;
-    ParseGradientAngle(vm, angleArg, values);
-    int32_t direction = static_cast<int32_t>(GradientDirection::NONE);
-    ParseJsInt32(vm, directionArg, direction);
-    values.push_back(static_cast<double>(direction));
-    auto repeating = repeatingArg->IsBoolean() ? repeatingArg->BooleaValue() : false;
-    values.push_back(static_cast<double>(repeating));
-
-    std::vector<double> colors;
-    ParseGradientColorStops(vm, colorsArg, colors);
-    GetArkUIInternalNodeAPI()->GetProgressModifier().SetProgressColorWithArray(
-        nativeNode, colors.data(), colors.size());
-
-    return panda::JSValueRef::Undefined(vm);
-}
-
 ArkUINativeModuleValue ProgressBridge::SetProgressColor(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
-    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(ARG_NUM_NATIVE_NODE);
-    Local<JSValueRef> colorArg = runtimeCallInfo->GetCallArgRef(ARG_NUM_COLOR_RESOURCE_COLOR);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-
+    Local<JSValueRef> nativeArg = runtimeCallInfo->GetCallArgRef(ARG_NUM_NATIVE_NODE);
+    Local<JSValueRef> colorArg = runtimeCallInfo->GetCallArgRef(ARG_COLOR_INDEX_VALUE);
+    void* nativeNode = nativeArg->ToNativePointer(vm)->Value();
     Color color;
+    OHOS::Ace::NG::Gradient gradient;
     if (ArkTSUtils::ParseJsColorAlpha(vm, colorArg, color)) {
-        GetArkUIInternalNodeAPI()->GetProgressModifier().SetProgressColorWithValue(nativeNode, color.GetValue());
+        GetArkUIInternalNodeAPI()->GetProgressModifier().SetProgressColor(nativeNode, color.GetValue());
+    } else if (ConvertProgressResourceColor(vm, colorArg, gradient)) {
+        ArkUIGradientType gradientObj;
+        int32_t colorlength = gradient.GetColors().size();
+        std::vector<uint32_t> colorValues;
+        std::vector<ArkUILengthType> offsetValues;
+        if (colorlength <= 0) {
+            GetArkUIInternalNodeAPI()->GetProgressModifier().ResetProgressColor(nativeNode);
+            return panda::JSValueRef::Undefined(vm);
+        }
+
+        for (int32_t i = 0; i < colorlength; i++) {
+            colorValues.push_back(gradient.GetColors()[i].GetLinearColor().GetValue());
+            offsetValues.push_back(ArkUILengthType { .number = gradient.GetColors()[i].GetDimension().Value(),
+                .unit = static_cast<int8_t>(gradient.GetColors()[i].GetDimension().Unit()) });
+        }
+
+        gradientObj.color = &(*colorValues.begin());
+        gradientObj.offset = &(*offsetValues.begin());
+        GetArkUIInternalNodeAPI()->GetProgressModifier().SetProgressGradientColor(
+            nativeNode, &gradientObj, colorlength);
     } else {
         GetArkUIInternalNodeAPI()->GetProgressModifier().ResetProgressColor(nativeNode);
     }

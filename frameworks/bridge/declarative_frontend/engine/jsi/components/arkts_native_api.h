@@ -1348,8 +1348,8 @@ struct ArkUIListItemModifierAPI {
 struct ArkUIProgressModifierAPI {
     void (*SetProgressValue)(NodeHandle node, double value);
     void (*ResetProgressValue)(NodeHandle node);
-    void (*SetProgressColorWithArray)(NodeHandle node, double *colors, int32_t colorslength);
-    void (*SetProgressColorWithValue)(NodeHandle node, uint32_t color);
+    void (*SetProgressGradientColor)(NodeHandle node, const struct ArkUIGradientType* gradient, int32_t length);
+    void (*SetProgressColor)(NodeHandle node, uint32_t color);
     void (*ResetProgressColor)(NodeHandle node);
     void (*SetProgressStyle)(NodeHandle node, ArkUIProgressStyle *value);
     void (*ResetProgressStyle)(NodeHandle node);
