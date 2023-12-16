@@ -157,7 +157,9 @@ public:
 
     void SetOnAreaChangeCallback(OnAreaChangedFunc&& callback);
 
-    void TriggerOnAreaChangeCallback();
+    void TriggerOnAreaChangeCallback(uint64_t nanoTimestamp);
+
+    OffsetF CalculateOffsetRelativeToWindow(uint64_t nanoTimestamp);
 
     void OnConfigurationUpdate(const OnConfigurationChange& configurationChange) override;
 
@@ -646,6 +648,16 @@ public:
 
     bool GetMonopolizeEvents() const;
 
+    const std::pair<uint64_t, OffsetF>& GetCachedGlobalOffset() const
+    {
+        return cachedGlobalOffset_;
+    }
+
+    void SetCachedGlobalOffset(const std::pair<uint64_t, OffsetF>& timestampOffset)
+    {
+        cachedGlobalOffset_ = timestampOffset;
+    }
+
 private:
     void MarkNeedRender(bool isRenderBoundary);
     std::pair<float, float> ContextPositionConvertToPX(
@@ -778,6 +790,8 @@ private:
     DragPreviewOption previewOption_ { DragPreviewMode::AUTO };
 
     RefPtr<Recorder::ExposureProcessor> exposureProcessor_;
+
+    std::pair<uint64_t, OffsetF> cachedGlobalOffset_ = {0, OffsetF()};
 
     friend class RosenRenderContext;
     friend class RenderContext;

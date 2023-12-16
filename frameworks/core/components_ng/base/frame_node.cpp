@@ -898,11 +898,11 @@ void FrameNode::SetOnAreaChangeCallback(OnAreaChangedFunc&& callback)
     eventHub_->SetOnAreaChanged(std::move(callback));
 }
 
-void FrameNode::TriggerOnAreaChangeCallback()
+void FrameNode::TriggerOnAreaChangeCallback(uint64_t nanoTimestamp)
 {
     if (eventHub_->HasOnAreaChanged() && lastFrameRect_ && lastParentOffsetToWindow_) {
         auto currFrameRect = geometryNode_->GetFrameRect();
-        auto currParentOffsetToWindow = GetOffsetRelativeToWindow() - currFrameRect.GetOffset();
+        auto currParentOffsetToWindow = CalculateOffsetRelativeToWindow(nanoTimestamp) - currFrameRect.GetOffset();
         if (currFrameRect != *lastFrameRect_ || currParentOffsetToWindow != *lastParentOffsetToWindow_) {
             eventHub_->FireOnAreaChanged(
                 *lastFrameRect_, *lastParentOffsetToWindow_, currFrameRect, currParentOffsetToWindow);
@@ -3107,6 +3107,36 @@ RefPtr<FrameNode> FrameNode::GetDispatchFrameNode(const TouchResult& touchRes)
         }
     }
     return nullptr;
+}
+
+OffsetF FrameNode::CalculateOffsetRelativeToWindow(uint64_t nanoTimestamp)
+{
+    auto currOffset = geometryNode_->GetFrameOffset();
+    if (renderContext_ && renderContext_->GetPositionProperty()) {
+        if (renderContext_->GetPositionProperty()->HasPosition()) {
+            auto renderPosition =
+                ContextPositionConvertToPX(renderContext_, layoutProperty_->GetLayoutConstraint()->percentReference);
+            currOffset.SetX(static_cast<float>(renderPosition.first));
+            currOffset.SetY(static_cast<float>(renderPosition.second));
+        }
+    }
+
+    auto parent = GetAncestorNodeOfFrame();
+    if (parent) {
+        auto parentTimestampOffset = parent->GetCachedGlobalOffset();
+        if (parentTimestampOffset.first == nanoTimestamp) {
+            auto result = currOffset + parentTimestampOffset.second;
+            SetCachedGlobalOffset({ nanoTimestamp, result });
+            return result;
+        } else {
+            auto result = currOffset + parent->CalculateOffsetRelativeToWindow(nanoTimestamp);
+            SetCachedGlobalOffset({ nanoTimestamp, result });
+            return result;
+        }
+    } else {
+        SetCachedGlobalOffset({ nanoTimestamp, currOffset });
+        return currOffset;
+    }
 }
 
 } // namespace OHOS::Ace::NG
