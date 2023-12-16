@@ -13467,6 +13467,9 @@ class MarqueeAllowScaleModifier extends ModifierWithKey {
 }
 MarqueeAllowScaleModifier.identity = Symbol('allowScale');
 class MarqueeFontWeightModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
     applyPeer(node, reset) {
       if (reset) {
         GetUINativeModule().marquee.resetFontWeight(node);
