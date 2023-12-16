@@ -1219,6 +1219,10 @@ void OverlayManager::CleanMenuInSubWindowWithAnimation()
     auto menuWrapperPattern = menu->GetPattern<MenuWrapperPattern>();
     CHECK_NULL_VOID(menuWrapperPattern);
     menuWrapperPattern->SetMenuHide();
+    if (menuWrapperPattern->GetPreviewMode() == MenuPreviewMode::NONE) {
+        CleanMenuInSubWindow();
+        return;
+    }
     ClearMenuAnimation(menu);
 }
 
