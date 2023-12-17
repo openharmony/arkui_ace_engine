@@ -191,7 +191,7 @@ inline bool PreloadArkComponent(const shared_ptr<JsRuntime>& runtime)
         (uint8_t*)_binary_arkComponent_abc_start, _binary_arkComponent_abc_end - _binary_arkComponent_abc_start);
 }
 
-bool PreloadConsole(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& global) 
+bool PreloadConsole(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& global)
 {
     shared_ptr<JsValue> consoleObj = runtime->NewObject();
     consoleObj->SetProperty(runtime, "log", runtime->NewFunction(JsiBaseUtils::AppInfoLogPrint));
@@ -202,7 +202,7 @@ bool PreloadConsole(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsVal
     return global->SetProperty(runtime, "console", consoleObj);
 }
 
-bool PreloadAceConsole(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& global) 
+bool PreloadAceConsole(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& global)
 {
     shared_ptr<JsValue> aceConsoleObj = runtime->NewObject();
     aceConsoleObj->SetProperty(runtime, "log", runtime->NewFunction(JsiBaseUtils::JsInfoLogPrint));

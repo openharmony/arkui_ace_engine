@@ -37,7 +37,7 @@ public:
     explicit FlutterTaskExecutor(const RefPtr<FlutterTaskExecutor>& taskExecutors);
     explicit FlutterTaskExecutor(const flutter::TaskRunners& taskRunners);
     FlutterTaskExecutor() = default;
-    explicit FlutterTaskExecutor(std::shared_ptr<TaskWrapper> caller);
+    explicit FlutterTaskExecutor(std::shared_ptr<TaskWrapper> taskWrapper) : taskWrapper_(taskWrapper) {}
     ~FlutterTaskExecutor() final;
     // Must call this method on platform thread
     void InitPlatformThread(bool useCurrentEventRunner = false, bool isStageModel = false);

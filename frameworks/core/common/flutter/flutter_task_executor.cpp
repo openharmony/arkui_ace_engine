@@ -76,18 +76,18 @@ TaskExecutor::Task WrapTaskWithContainer(
     return wrappedTask;
 }
 
-TaskExecutor::Task WrapTaskWithContainerNapi(
-    std::shared_ptr<TaskWrapper> caller,
+TaskExecutor::Task WrapTaskWithContainerAndNapi(
+    std::shared_ptr<TaskWrapper> taskWrapper,
     TaskExecutor::Task&& task, int32_t id, std::function<void()>&& traceIdFunc = nullptr)
 {
-    auto wrappedTask = [caller, originTask = std::move(task), id, traceId = TraceId::CreateTraceId(),
+    auto wrappedTask = [taskWrapper, originTask = std::move(task), id, traceId = TraceId::CreateTraceId(),
                            traceIdFunc = std::move(traceIdFunc)]() {
         ContainerScope scope(id);
         std::unique_ptr<TraceId> traceIdPtr(traceId);
         if (originTask && traceIdPtr) {
             traceIdPtr->SetTraceId();
 
-            caller->Call(originTask);
+            taskWrapper->Call(originTask);
 
             traceIdPtr->ClearTraceId();
         } else {
@@ -149,10 +149,6 @@ FlutterTaskExecutor::FlutterTaskExecutor(const flutter::TaskRunners& taskRunners
 #else
     gpuRunner_ = taskRunners.GetGPUTaskRunner();
 #endif
-}
-
-FlutterTaskExecutor::FlutterTaskExecutor(std::shared_ptr<TaskWrapper> caller): taskWrapper_(caller)
-{
 }
 
 FlutterTaskExecutor::~FlutterTaskExecutor()
@@ -247,7 +243,7 @@ bool FlutterTaskExecutor::OnPostTask(
             case TaskType::UI:
             case TaskType::JS:
                 LOGD("wrap npi task, currentId = %{public}d", currentId);
-                wrappedTask = WrapTaskWithContainerNapi(
+                wrappedTask = WrapTaskWithContainerAndNapi(
                     taskWrapper_, std::move(task), currentId, std::move(traceIdFunc));
                 break;
             case TaskType::IO:
