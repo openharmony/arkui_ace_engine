@@ -1071,17 +1071,19 @@ void ListLayoutAlgorithm::FixPredictSnapOffsetAlignStart()
     }
     auto predictEndPos = totalOffset_ - predictSnapOffset_.value();
     auto itemHeight = itemPosition_.begin()->second.endPos - itemPosition_.begin()->second.startPos + spaceWidth_;
+    float startPos = contentStartOffset_;
+    float endPos = contentMainSize_ - contentEndOffset_;
 
-    if (LessNotEqual(predictEndPos, 0.0f)) {
+    if (LessNotEqual(predictEndPos, -startPos)) {
         if (isSpringEffect_) {
             return;
         }
-        predictEndPos = 0.0f;
+        predictEndPos = -startPos;
     } else if (GreatNotEqual(predictEndPos, itemHeight * GetMaxListItemIndex() + spaceWidth_)) {
         if (isSpringEffect_) {
             return;
         }
-        predictEndPos = itemHeight * totalItemCount_ - spaceWidth_ - contentMainSize_;
+        predictEndPos = itemHeight * totalItemCount_ - spaceWidth_ - endPos;
     } else {
         int32_t index;
         for (index = 0; index <= GetMaxListItemIndex(); index++) {
@@ -1089,11 +1091,11 @@ void ListLayoutAlgorithm::FixPredictSnapOffsetAlignStart()
                 break;
             }
         }
-        predictEndPos = index * itemHeight;
-        if (LessNotEqual(predictEndPos, 0.0f)) {
-            predictEndPos = 0.0f;
+        predictEndPos = index * itemHeight - startPos;
+        if (LessNotEqual(predictEndPos, -startPos)) {
+            predictEndPos = -startPos;
         } else if (GreatNotEqual(predictEndPos, itemHeight * GetMaxListItemIndex() + spaceWidth_)) {
-            predictEndPos = itemHeight * totalItemCount_ - spaceWidth_ - contentMainSize_;
+            predictEndPos = itemHeight * totalItemCount_ - spaceWidth_ - endPos;
         }
     }
 
@@ -1149,29 +1151,31 @@ void ListLayoutAlgorithm::FixPredictSnapOffsetAlignEnd()
     }
     auto predictEndPos = totalOffset_ - predictSnapOffset_.value();
     auto itemHeight = itemPosition_.begin()->second.endPos - itemPosition_.begin()->second.startPos + spaceWidth_;
+    float startPos = contentStartOffset_;
+    float endPos = contentMainSize_ - contentEndOffset_;
 
-    if (LessNotEqual(predictEndPos, 0.0f)) {
+    if (LessNotEqual(predictEndPos, -startPos)) {
         if (isSpringEffect_) {
             return;
         }
-        predictEndPos = 0.0f;
+        predictEndPos = -startPos;
     } else if (GreatNotEqual(predictEndPos, itemHeight * GetMaxListItemIndex() + spaceWidth_)) {
         if (isSpringEffect_) {
             return;
         }
-        predictEndPos = itemHeight * totalItemCount_ - spaceWidth_ - contentMainSize_;
+        predictEndPos = itemHeight * totalItemCount_ - spaceWidth_ - endPos;
     } else {
         int32_t index;
         for (index = 0; index <= GetMaxListItemIndex(); index++) {
-            if (std::abs(predictEndPos + contentMainSize_ - index * itemHeight) < itemHeight / 2.0f) {
+            if (std::abs(predictEndPos + endPos - index * itemHeight) < itemHeight / 2.0f) {
                 break;
             }
         }
-        predictEndPos = index * itemHeight - contentMainSize_ - spaceWidth_;
-        if (LessNotEqual(predictEndPos, 0.0f)) {
-            predictEndPos = 0.0f;
+        predictEndPos = index * itemHeight - endPos - spaceWidth_;
+        if (LessNotEqual(predictEndPos, -startPos)) {
+            predictEndPos = -startPos;
         } else if (GreatNotEqual(predictEndPos, itemHeight * GetMaxListItemIndex() + spaceWidth_)) {
-            predictEndPos = itemHeight * totalItemCount_ - spaceWidth_ - contentMainSize_;
+            predictEndPos = itemHeight * totalItemCount_ - spaceWidth_ - endPos;
         }
     }
 
