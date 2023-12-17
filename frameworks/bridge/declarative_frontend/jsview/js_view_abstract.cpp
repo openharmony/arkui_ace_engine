@@ -2684,6 +2684,39 @@ void ParseBindOptionParam(const JSCallbackInfo& info, NG::MenuParam& menuParam, 
     ParseMenuParam(info, menuOptions, menuParam);
 }
 
+void ParseAnimationScaleArray(const JSRef<JSArray>& scaleArray, NG::MenuParam& menuParam)
+{
+    constexpr int scaleArraySize = 2;
+    if (scaleArray->Length() == scaleArraySize) {
+        auto scalePropertyFrom = scaleArray->GetValueAt(0);
+        if (scalePropertyFrom->IsNumber()) {
+            auto scaleFrom = scalePropertyFrom->ToNumber<float>();
+            menuParam.previewAnimationOptions.scaleFrom = LessOrEqual(scaleFrom, 0.0) ? -1.0f : scaleFrom;
+        }
+        auto scalePropertyTo = scaleArray->GetValueAt(1);
+        if (scalePropertyTo->IsNumber()) {
+            auto scaleTo = scalePropertyTo->ToNumber<float>();
+            menuParam.previewAnimationOptions.scaleTo = LessOrEqual(scaleTo, 0.0) ? -1.0f : scaleTo;
+        }
+    }
+}
+
+void ParseContentPreviewAnimationOptionsParam(const JSRef<JSObject>& menuContentOptions, NG::MenuParam& menuParam)
+{
+    menuParam.previewAnimationOptions.scaleFrom = -1.0f;
+    menuParam.previewAnimationOptions.scaleTo = -1.0f;
+
+    auto animationOptions = menuContentOptions->GetProperty("previewAnimationOptions");
+    if (!animationOptions->IsEmpty() && animationOptions->IsObject()) {
+        auto animationOptionsObj = JSRef<JSObject>::Cast(animationOptions);
+        auto scaleProperty = animationOptionsObj->GetProperty("scale");
+        if (!scaleProperty->IsEmpty() && scaleProperty->IsArray()) {
+            JSRef<JSArray> scaleArray = JSRef<JSArray>::Cast(scaleProperty);
+            ParseAnimationScaleArray(scaleArray, menuParam);
+        }
+    }
+}
+
 void ParseBindContentOptionParam(const JSCallbackInfo& info, const JSRef<JSVal>& args, NG::MenuParam& menuParam,
     std::function<void()>& previewBuildFunc)
 {
@@ -2698,6 +2731,7 @@ void ParseBindContentOptionParam(const JSCallbackInfo& info, const JSRef<JSVal>&
     if (preview->IsNumber()) {
         if (preview->ToNumber<int32_t>() == 1) {
             menuParam.previewMode = MenuPreviewMode::IMAGE;
+            ParseContentPreviewAnimationOptionsParam(menuContentOptions, menuParam);
         }
     } else {
         previewBuilderFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(preview));
