@@ -598,10 +598,10 @@ OverScrollOffset ListPattern::GetOverScrollOffset(double delta) const
             offset.start = delta;
         }
         if (startPos > contentStartOffset_ && newStartPos <= contentStartOffset_) {
-            offset.start = -startPos;
+            offset.start = contentStartOffset_ - startPos;
         }
         if (startPos <= contentStartOffset_ && newStartPos > contentStartOffset_) {
-            offset.start = newStartPos;
+            offset.start = newStartPos - contentStartOffset_;
         }
         if (IsScrollSnapAlignCenter() && !itemPosition_.empty()) {
             float startItemHeight = itemPosition_.begin()->second.endPos - itemPosition_.begin()->second.startPos;
