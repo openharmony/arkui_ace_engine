@@ -839,7 +839,7 @@ bool NavigationGroupNode::UpdateNavDestinationVisibility(const RefPtr<NavDestina
     if (index == destinationSize - 1) {
         // process shallow builder
         navDestination->ProcessShallowBuilder();
-        navDestination->GetLayoutProperty()->UpdateVisibility(VisibleType::VISIBLE);
+        navDestination->GetLayoutProperty()->UpdateVisibility(VisibleType::VISIBLE, true);
         navDestination->SetActive(true);
         navDestination->GetEventHub<EventHub>()->SetEnabledInternal(true);
         // for the navDestination at the top, FireChangeEvent
@@ -869,8 +869,8 @@ bool NavigationGroupNode::UpdateNavDestinationVisibility(const RefPtr<NavDestina
     auto pattern = AceType::DynamicCast<NavDestinationPattern>(navDestination->GetPattern());
     if (navDestination->GetPattern<NavDestinationPattern>()->GetNavDestinationNode() != remainChild &&
         !navDestination->IsOnAnimation()) {
-        navDestination->GetLayoutProperty()->UpdateVisibility(VisibleType::VISIBLE);
-        navDestination->SetActive(true);
+        navDestination->GetLayoutProperty()->UpdateVisibility(VisibleType::INVISIBLE);
+        navDestination->SetActive(false);
     }
     return false;
 }
