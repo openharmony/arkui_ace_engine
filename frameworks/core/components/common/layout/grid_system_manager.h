@@ -75,6 +75,8 @@ public:
         return ScreenSystemManager::GetInstance().GetDensity();
     }
 
+    double GetMaxWidthWithColumnType(GridColumnType gridColumnType);
+
 private:
     GridSystemManager() = default;
 

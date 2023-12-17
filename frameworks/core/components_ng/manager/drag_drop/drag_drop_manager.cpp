@@ -20,6 +20,7 @@
 #include "base/utils/utils.h"
 #include "core/common/interaction/interaction_data.h"
 #include "core/common/interaction/interaction_interface.h"
+#include "core/components/common/layout/grid_system_manager.h"
 #include "core/components_ng/pattern/grid/grid_event_hub.h"
 #include "core/components_ng/pattern/list/list_event_hub.h"
 #include "core/components_ng/pattern/root/root_pattern.h"
@@ -1193,7 +1194,7 @@ void DragDropManager::UpdateVelocityTrackerPoint(const Point& point, bool isEnd)
 }
 
 #ifdef ENABLE_DRAG_FRAMEWORK
-bool DragDropManager::GetDragPreviewInfo(const RefPtr<OverlayManager> overlayManager,
+bool DragDropManager::GetDragPreviewInfo(const RefPtr<OverlayManager>& overlayManager,
     DragPreviewInfo& dragPreviewInfo)
 {
     if (!overlayManager->GetHasPixelMap()) {
@@ -1203,7 +1204,7 @@ bool DragDropManager::GetDragPreviewInfo(const RefPtr<OverlayManager> overlayMan
     if (!imageNode) {
         return false;
     }
-    double maxWidth = FrameNode::GetMaxWidthWithColumnType(GridColumnType::DRAG_PANEL);
+    double maxWidth = GridSystemManager::GetInstance().GetMaxWidthWithColumnType(GridColumnType::DRAG_PANEL);
     auto width = imageNode->GetGeometryNode()->GetFrameRect().Width();
     dragPreviewInfo.scale = static_cast<float>(imageNode->GetPreviewScaleVal());
     dragPreviewInfo.height = imageNode->GetGeometryNode()->GetFrameRect().Height();
@@ -1297,7 +1298,7 @@ void DragDropManager::DoDragMoveAnimate(const PointerEvent& pointerEvent)
         option.GetOnFinishEvent());
 }
 
-void DragDropManager::DoDragStartAnimation(const RefPtr<OverlayManager> overlayManager, const GestureEvent& event)
+void DragDropManager::DoDragStartAnimation(const RefPtr<OverlayManager>& overlayManager, const GestureEvent& event)
 {
     CHECK_NULL_VOID(overlayManager);
     if (!(GetDragPreviewInfo(overlayManager, info_)) || !IsNeedScaleDragPreview()) {

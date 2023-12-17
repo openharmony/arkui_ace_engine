@@ -25,6 +25,7 @@
 #include "core/common/container.h"
 #include "core/common/interaction/interaction_data.h"
 #include "core/common/interaction/interaction_interface.h"
+#include "core/components/common/layout/grid_system_manager.h"
 #include "core/components/container_modal/container_modal_constants.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/event/click_event.h"
@@ -394,7 +395,7 @@ bool GestureEventHub::IsPixelMapNeedScale() const
     auto frameNode = GetFrameNode();
     CHECK_NULL_RETURN(frameNode, false);
     auto width = pixelMap_->GetWidth();
-    auto maxWidth = FrameNode::GetMaxWidthWithColumnType(GridColumnType::DRAG_PANEL);
+    auto maxWidth = GridSystemManager::GetInstance().GetMaxWidthWithColumnType(GridColumnType::DRAG_PANEL);
     if (frameNode->GetTag() == V2::WEB_ETS_TAG ||
         frameNode->GetDragPreviewOption().mode == DragPreviewMode::DISABLE_SCALE || width == 0 || width < maxWidth) {
         return false;
@@ -575,13 +576,9 @@ OffsetF GestureEventHub::GetPixelMapOffset(
     return result;
 }
 
-float GestureEventHub::GetPixelMapScale(
-    const DragPreviewOption& option, const int32_t height, const int32_t width) const
+float GestureEventHub::GetPixelMapScale(const int32_t height, const int32_t width) const
 {
     float scale = 1.0f;
-    if (option.mode == DragPreviewMode::DISABLE_SCALE) {
-        return scale;
-    }
     int32_t deviceHeight = SystemProperties::GetDevicePhysicalHeight();
     int32_t deviceWidth = SystemProperties::GetDevicePhysicalWidth();
     int32_t maxDeviceLength = std::max(deviceHeight, deviceWidth);
@@ -805,7 +802,7 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
     }
     float defaultPixelMapScale =
         info.GetInputEventType() == InputEventType::MOUSE_BUTTON ? 1.0f : DEFALUT_DRAG_PPIXELMAP_SCALE;
-    float scale = GetPixelMapScale(frameNode->GetDragPreviewOption(), pixelMap->GetHeight(), pixelMap->GetWidth()) *
+    float scale = GetPixelMapScale(pixelMap->GetHeight(), pixelMap->GetWidth()) *
                   defaultPixelMapScale;
     auto overlayManager = pipeline->GetOverlayManager();
     if (IsPixelMapNeedScale()) {
