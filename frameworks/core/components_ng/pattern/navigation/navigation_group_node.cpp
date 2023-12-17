@@ -869,8 +869,8 @@ bool NavigationGroupNode::UpdateNavDestinationVisibility(const RefPtr<NavDestina
     auto pattern = AceType::DynamicCast<NavDestinationPattern>(navDestination->GetPattern());
     if (navDestination->GetPattern<NavDestinationPattern>()->GetNavDestinationNode() != remainChild &&
         !navDestination->IsOnAnimation()) {
-        navDestination->GetLayoutProperty()->UpdateVisibility(VisibleType::INVISIBLE);
-        navDestination->SetActive(false);
+        navDestination->GetLayoutProperty()->UpdateVisibility(VisibleType::VISIBLE);
+        navDestination->SetActive(true);
     }
     return false;
 }
