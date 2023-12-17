@@ -1003,13 +1003,6 @@ void RefreshPattern::UpdateRefreshDraw()
         return;
     }
     UpdateFirstChildPlacement(scrollOffset_.GetY());
-    if (!isRefreshing_) {
-        if (LessNotEqual(scrollOffset_.GetY(), static_cast<float>(TRIGGER_REFRESH_DISTANCE.ConvertToPx()))) {
-            UpdateRefreshStatus(RefreshStatus::DRAG);
-        } else {
-            UpdateRefreshStatus(RefreshStatus::OVER_DRAG);
-        }
-    }
 }
 
 void RefreshPattern::UpdateFirstChildPlacement(float offset)
