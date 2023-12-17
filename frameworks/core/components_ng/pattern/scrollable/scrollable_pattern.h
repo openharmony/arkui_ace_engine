@@ -140,8 +140,6 @@ public:
     {
         return scrollEffect_;
     }
-    void SetEdgeEffect(EdgeEffect edgeEffect);
-    void AddScrollEdgeEffect(RefPtr<ScrollEdgeEffect> edgeEffect);
     bool HandleEdgeEffect(float offset, int32_t source, const SizeF& size, bool reverse = false);
     virtual void SetEdgeEffectCallback(const RefPtr<ScrollEdgeEffect>& scrollEffect) {}
     bool IsRestrictBoundary()
@@ -378,11 +376,6 @@ public:
         return Rect();
     };
 
-    void SetEdgeEffect()
-    {
-        SetEdgeEffect(edgeEffect_);
-    }
-
     void SetEdgeEffect(EdgeEffect edgeEffect, bool alwaysEnabled)
     {
         edgeEffect_ = edgeEffect;
@@ -418,6 +411,10 @@ protected:
     void UpdateScrollBarRegion(float offset, float estimatedHeight, Size viewPort, Offset viewOffset);
 
     EdgeEffect GetEdgeEffect() const;
+    void SetEdgeEffect()
+    {
+        SetEdgeEffect(edgeEffect_);
+    }
 
     virtual void FireOnScroll(float finalOffset, OnScrollEvent& onScroll) const;
 
@@ -527,6 +524,7 @@ private:
 
     void OnScrollEnd();
     void ProcessSpringEffect(float velocity);
+    void SetEdgeEffect(EdgeEffect edgeEffect);
 
     // Scrollable::UpdateScrollPosition
     bool HandleScrollImpl(float offset, int32_t source);

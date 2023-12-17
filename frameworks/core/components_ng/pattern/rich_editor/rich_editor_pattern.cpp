@@ -4161,7 +4161,8 @@ RefPtr<NodePaintMethod> RichEditorPattern::CreateNodePaintMethod()
             scrollBarModifier->SetPositionMode(scrollBar->GetPositionMode());
             SetScrollBarOverlayModifier(scrollBarModifier);
         }
-        SetEdgeEffect(EdgeEffect::FADE);
+        SetEdgeEffect(EdgeEffect::FADE, GetAlwaysEnabled());
+        SetEdgeEffect();
         overlayMod_ = AceType::MakeRefPtr<RichEditorOverlayModifier>(
             WeakClaim(this), GetScrollBarOverlayModifier(), GetScrollEdgeEffect());
     }

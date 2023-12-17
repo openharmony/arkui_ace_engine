@@ -328,14 +328,6 @@ void ScrollPattern::ValidateOffset(int32_t source)
         } else {
             currentOffset_ = std::clamp(currentOffset_, -scrollableDistance_, 0.0f);
         }
-    } else {
-        float scrollBarOutBoundaryExtent = 0.0f;
-        if (currentOffset_ > 0) {
-            scrollBarOutBoundaryExtent = currentOffset_;
-        } else if ((-currentOffset_) >= (GetMainSize(viewPortExtent_) - GetMainSize(viewPort_))) {
-            scrollBarOutBoundaryExtent = -currentOffset_ - (GetMainSize(viewPortExtent_) - GetMainSize(viewPort_));
-        }
-        HandleScrollBarOutBoundary(scrollBarOutBoundaryExtent);
     }
 }
 
@@ -568,6 +560,15 @@ void ScrollPattern::UpdateScrollBarOffset()
     if (!GetScrollBar() && !GetScrollBarProxy()) {
         return;
     }
+
+    float scrollBarOutBoundaryExtent = 0.0f;
+    if (currentOffset_ > 0) {
+        scrollBarOutBoundaryExtent = currentOffset_;
+    } else if ((-currentOffset_) >= (GetMainSize(viewPortExtent_) - GetMainSize(viewPort_))) {
+        scrollBarOutBoundaryExtent = -currentOffset_ - (GetMainSize(viewPortExtent_) - GetMainSize(viewPort_));
+    }
+    HandleScrollBarOutBoundary(scrollBarOutBoundaryExtent);
+
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto layoutProperty = host->GetLayoutProperty<ScrollLayoutProperty>();
