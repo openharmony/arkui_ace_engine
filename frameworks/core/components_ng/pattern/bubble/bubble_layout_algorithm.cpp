@@ -270,14 +270,14 @@ void BubbleLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         child->Measure(childLayoutConstraint);
     }
     auto childSize = child->GetGeometryNode()->GetMarginFrameSize();
-    auto litterSide = childSize.Height() > childSize.Width() ? childSize.Width() : childSize.Height();
-    // the half length of the litter side
-    auto litterSideHalf = litterSide / 2;
-    if (borderRadius_.Value() > litterSideHalf) {
-        borderRadius_.SetValue(litterSideHalf);
+    auto littleSide = childSize.Height() > childSize.Width() ? childSize.Width() : childSize.Height();
+    // 2: the half length of the little side
+    auto littleSideHalf = littleSide / 2;
+    if (borderRadius_.Value() > littleSideHalf) {
+        borderRadius_.SetValue(littleSideHalf);
         border_.SetBorderRadius(Radius(borderRadius_));
     }
-    // the max width of arrow is the bubble width - double of borderRadius   
+    // 2: the max width of arrow is the bubble width - double of borderRadius
     auto arrowMaxWidth = childSize.Width() - 2 * borderRadius_.ConvertToPx();
     auto pipeline = PipelineBase::GetCurrentContext();
     arrowMaxWidth /= pipeline->GetDipScale();
