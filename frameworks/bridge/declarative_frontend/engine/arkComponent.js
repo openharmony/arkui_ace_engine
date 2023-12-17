@@ -15678,8 +15678,7 @@ class SwiperDisplayArrowModifier extends ModifierWithKey {
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().swiper.resetSwiperDisplayArrow(node);
-    }
-    else {
+    } else {
       if (!isNull(this.value.value) && typeof this.value === 'object') {
         let displayArrowValue = 3;
         let showBackground = undefined;
@@ -15695,8 +15694,7 @@ class SwiperDisplayArrowModifier extends ModifierWithKey {
           else {
             displayArrowValue = 0;
           }
-        }
-        else if (typeof this.value.value === 'object') {
+        } else if (typeof this.value.value === 'object') {
           displayArrowValue = 2;
           showBackground = this.value.value.showBackground;
           isSidebarMiddle = this.value.value.isSidebarMiddle;
@@ -17327,3 +17325,41 @@ globalThis.GridContainer.attributeModifier = function (modifier) {
   applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
 };
+/// <reference path='./import.ts' />
+class ArkEffectComponentComponent extends ArkComponent {
+  monopolizeEvents(monopolize) {
+      throw new Error('Method not implemented.');
+  }
+}
+// @ts-ignore
+if (globalThis.EffectComponent !== undefined) {
+  // @ts-ignore
+  globalThis.EffectComponent.attributeModifier = function (modifier) {
+    const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
+    let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+    let component = this.createOrGetNode(elmtId, () => {
+      return new ArkEffectComponentComponent(nativeNode);
+    });
+    modifier.applyNormalAttribute(component);
+    component.applyModifierPatch();
+  };
+}
+/// <reference path='./import.ts' />
+class ArkRemoteWindowComponent extends ArkComponent {
+  monopolizeEvents(monopolize) {
+    throw new Error('Method not implemented.');
+  }
+}
+// @ts-ignore
+if (globalThis.RemoteWindow !== undefined) {
+  // @ts-ignore
+  globalThis.RemoteWindow.attributeModifier = function (modifier) {
+    const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
+    let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+    let component = this.createOrGetNode(elmtId, () => {
+      return new ArkRemoteWindowComponent(nativeNode);
+    });
+    modifier.applyNormalAttribute(component);
+    component.applyModifierPatch();
+  };
+}
