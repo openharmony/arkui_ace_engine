@@ -61,12 +61,22 @@ void IndexerPattern::OnModifyDone()
     CHECK_NULL_VOID(layoutProperty);
 
     auto itemCountChanged = false;
-    auto autoCollapse = layoutProperty->GetAutoCollapse().value_or(false);
-    bool autoCollapseModeChanged = autoCollapse != autoCollapse_;
-    autoCollapse_ = autoCollapse;
+    bool autoCollapseModeChanged = true;
+    if (!isNewHeightCalculated_) {
+        auto autoCollapse = layoutProperty->GetAutoCollapse().value_or(false);
+        autoCollapseModeChanged = autoCollapse != autoCollapse_;
+        autoCollapse_ = autoCollapse;
 
-    if (layoutProperty->GetArrayValue().has_value()) {
-        fullArrayValue_ = layoutProperty->GetArrayValue().value();
+        auto newArray = layoutProperty->GetArrayValue().value_or(std::vector<std::string>());
+        bool arrayValueChanged = newArray.size() != fullArrayValue_.size() || newArray != fullArrayValue_;
+        if (arrayValueChanged || autoCollapseModeChanged) {
+            lastCollapsingMode_ = IndexerCollapsingMode::INVALID;
+        }
+        fullArrayValue_ = newArray;
+    }
+    isNewHeightCalculated_ = false;
+
+    if (fullArrayValue_.size() > 0) {
         if (autoCollapse_) {
             sharpItemCount_ = fullArrayValue_.at(0) == StringUtils::Str16ToStr8(INDEXER_STR_SHARP) ? 1 : 0;
             CollapseArrayValue();
@@ -97,7 +107,10 @@ void IndexerPattern::OnModifyDone()
     }
 
     auto propSelect = layoutProperty->GetSelected().value();
-    propSelect = (propSelect >= 0 && propSelect < itemCount_) ? propSelect : 0;
+    if (propSelect < 0 || propSelect >= itemCount_) {
+        propSelect = 0;
+        layoutProperty->UpdateSelected(propSelect);
+    }
     if (propSelect != lastSelectProp_) {
         selected_ = propSelect;
         lastSelectProp_ = propSelect;
@@ -109,8 +122,7 @@ void IndexerPattern::OnModifyDone()
     auto indexerSizeChanged = (itemCountChanged || !NearEqual(itemSize, lastItemSize_));
     lastItemSize_ = itemSize;
     auto needMarkDirty = (layoutProperty->GetPropertyChangeFlag() == PROPERTY_UPDATE_NORMAL);
-    ApplyIndexChanged(needMarkDirty,
-        initialized_ && selectChanged_, false, indexerSizeChanged);
+    ApplyIndexChanged(needMarkDirty, initialized_ && selectChanged_, false, indexerSizeChanged);
     auto gesture = host->GetOrCreateGestureEventHub();
     if (gesture) {
         InitPanEvent(gesture);
@@ -144,6 +156,13 @@ bool IndexerPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty
     auto indexerLayoutAlgorithm = DynamicCast<IndexerLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
     CHECK_NULL_RETURN(indexerLayoutAlgorithm, false);
     itemSizeRender_ = indexerLayoutAlgorithm->GetItemSizeRender();
+    auto height = indexerLayoutAlgorithm->GetActualHeight();
+    if (actualIndexerHeight_ != height && autoCollapse_) {
+        actualIndexerHeight_ = height;
+        isNewHeightCalculated_ = true;
+        dirty->GetHostNode()->MarkModifyDone();
+        dirty->GetHostNode()->MarkDirtyNode();
+    }
     return true;
 }
 
@@ -166,8 +185,8 @@ void IndexerPattern::BuildArrayValueItems()
         }
     }
     std::vector<std::string> arrayValueStrs;
-    for (auto i : arrayValue_) {
-        arrayValueStrs.push_back(i.first);
+    for (auto indexerItem : arrayValue_) {
+        arrayValueStrs.push_back(indexerItem.first);
     }
     layoutProperty->UpdateArrayValue(arrayValueStrs);
 }
@@ -189,43 +208,49 @@ void IndexerPattern::CollapseArrayValue()
     CHECK_NULL_VOID(layoutProperty);
     auto geometryNode = host->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
-    auto itemSize = layoutProperty->GetItemSize().value_or(
-        Dimension(INDEXER_ITEM_SIZE, DimensionUnit::VP)).ConvertToVp();
+    auto itemSize =
+        layoutProperty->GetItemSize().value_or(Dimension(INDEXER_ITEM_SIZE, DimensionUnit::VP)).ConvertToVp();
     int32_t maxItemsCount = 0;
-    float height = 0.0f;
-    auto idealSize = layoutProperty->GetCalcLayoutConstraint()
-        ? layoutProperty->GetCalcLayoutConstraint()->selfIdealSize
-        : std::nullopt;
-    if (idealSize.has_value()) {
-        auto heightDimension = idealSize->Height().has_value() ?
-            idealSize->Height()->GetDimension() : Dimension(0.0f, DimensionUnit::VP);
-        height = heightDimension.ConvertToVp();
-    }
-    if (GreatNotEqual(height, 0.0f) && itemSize > 0) {
+    auto height = Dimension(actualIndexerHeight_, DimensionUnit::PX).ConvertToVp();
+    if (height > 0 && itemSize > 0) {
         maxItemsCount = static_cast<int32_t>(height / itemSize);
     }
-    arrayValue_.clear();
-    int fullArraySize = static_cast<int32_t>(fullArrayValue_.size());
-    if (fullArraySize - sharpItemCount_ <= INDEXER_NINE_CHARACTERS_CHECK || maxItemsCount == 0) {
-        BuildFullArrayValue();
-    } else if (fullArraySize - sharpItemCount_ <= INDEXER_THIRTEEN_CHARACTERS_CHECK) {
-        // check if maximum items count greater or equal full array size + # item if exists
-        if (maxItemsCount >= fullArraySize + sharpItemCount_) {
+    int32_t fullArraySize = static_cast<int32_t>(fullArrayValue_.size());
+    if (fullArraySize - sharpItemCount_ <= INDEXER_NINE_CHARACTERS_CHECK) {
+        if (lastCollapsingMode_ != IndexerCollapsingMode::NONE) {
+            lastCollapsingMode_ = IndexerCollapsingMode::NONE;
             BuildFullArrayValue();
+        }
+    } else if (fullArraySize - sharpItemCount_ <= INDEXER_THIRTEEN_CHARACTERS_CHECK) {
+        // check if maximum items count greater or equal full array size
+        if (maxItemsCount >= fullArraySize) {
+            if (lastCollapsingMode_ != IndexerCollapsingMode::NONE) {
+                lastCollapsingMode_ = IndexerCollapsingMode::NONE;
+                BuildFullArrayValue();
+            }
         } else {
-            ApplyFivePlusOneMode(fullArraySize);
+            if (lastCollapsingMode_ != IndexerCollapsingMode::FIVE) {
+                lastCollapsingMode_ = IndexerCollapsingMode::FIVE;
+                ApplyFivePlusOneMode(fullArraySize);
+            }
         }
     } else {
-        // 13 here is count of visible items in 7 + 1 mode (e.g. 7 characters 6 dots and # item if exists)
+        // 13 here is count of visible items in 7 + 1 mode (i.e. 7 characters 6 dots and # item if exists)
         if (maxItemsCount >= INDEXER_THIRTEEN_CHARACTERS_CHECK + sharpItemCount_) {
-            ApplySevenPlusOneMode(fullArraySize);
+            if (lastCollapsingMode_ != IndexerCollapsingMode::SEVEN) {
+                lastCollapsingMode_ = IndexerCollapsingMode::SEVEN;
+                ApplySevenPlusOneMode(fullArraySize);
+            }
         } else {
-            ApplyFivePlusOneMode(fullArraySize);
+            if (lastCollapsingMode_ != IndexerCollapsingMode::FIVE) {
+                lastCollapsingMode_ = IndexerCollapsingMode::FIVE;
+                ApplyFivePlusOneMode(fullArraySize);
+            }
         }
     }
 }
 
-void IndexerPattern::ApplySevenPlusOneMode(int fullArraySize)
+void IndexerPattern::ApplySevenPlusOneMode(int32_t fullArraySize)
 {
     // 7 + # mode
     // minimum items in one group (totally 6 groups) including
@@ -235,6 +260,7 @@ void IndexerPattern::ApplySevenPlusOneMode(int fullArraySize)
     auto cmax = cmin + 1; // maximum items in one group including visible character in the group
     auto gmin = 6 - gmax; // number of groups with minimum items count
 
+    arrayValue_.clear();
     arrayValue_.push_back(std::pair(fullArrayValue_.at(0), false)); // push the first item
     if (sharpItemCount_ > 0) {
         arrayValue_.push_back(std::pair(fullArrayValue_.at(1), false)); // push the second item if the first is #
@@ -259,7 +285,7 @@ void IndexerPattern::ApplySevenPlusOneMode(int fullArraySize)
     }
 }
 
-void IndexerPattern::ApplyFivePlusOneMode(int fullArraySize)
+void IndexerPattern::ApplyFivePlusOneMode(int32_t fullArraySize)
 {
     // 5 + # mode
     // minimum items in one group (totally 4 groups) including
@@ -269,6 +295,7 @@ void IndexerPattern::ApplyFivePlusOneMode(int fullArraySize)
     auto cmax = cmin + 1; // maximum items in one group including visible character in the group
     auto gmin = 4 - gmax; // number of groups with minimum items count
 
+    arrayValue_.clear();
     arrayValue_.push_back(std::pair(fullArrayValue_.at(0), false)); // push the first item
     if (sharpItemCount_ > 0) {
         arrayValue_.push_back(std::pair(fullArrayValue_.at(1), false)); // push the second item if the first is #

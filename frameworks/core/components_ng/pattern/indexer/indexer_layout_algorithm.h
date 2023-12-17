@@ -36,6 +36,11 @@ public:
         return itemSizeRender_;
     }
 
+    float GetActualHeight() const
+    {
+        return actualHeight_;
+    }
+
     void Measure(LayoutWrapper* layoutWrapper) override;
 
     void Layout(LayoutWrapper* layoutWrapper) override;
@@ -48,6 +53,7 @@ private:
     float itemSize_ = 0.0f;
     float itemWidth_ = 0.0f;
     float itemSizeRender_ = 0.0f;
+    float actualHeight_ = 0.0f;
 };
 } // namespace OHOS::Ace::NG
 
