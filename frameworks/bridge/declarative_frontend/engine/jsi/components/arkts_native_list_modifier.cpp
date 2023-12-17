@@ -14,7 +14,9 @@
  */
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_list_modifier.h"
 
+#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 #include "core/components/common/layout/constants.h"
+#include "core/components/list/list_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/list/list_model_ng.h"
 #include "core/pipeline/base/element_register.h"
@@ -312,16 +314,17 @@ void ResetChainAnimationOptions(NodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    CalcDimension minSpace;
-    CalcDimension maxSpace;
-    ChainAnimationOptions options;
-    options.minSpace = minSpace;
-    options.maxSpace = maxSpace;
-    options.conductivity = 0;
-    options.intensity = 0;
-    options.edgeEffect = 0;
-    options.stiffness = 0;
-    options.damping = 0;
+    RefPtr<ListTheme> listTheme = ArkTSUtils::GetTheme<ListTheme>();
+    CHECK_NULL_VOID(listTheme);
+    ChainAnimationOptions options = {
+        .minSpace = listTheme->GetChainMinSpace(),
+        .maxSpace = listTheme->GetChainMaxSpace(),
+        .conductivity = listTheme->GetChainConductivity(),
+        .intensity = listTheme->GetChainIntensity(),
+        .edgeEffect = 0,
+        .stiffness = listTheme->GetChainStiffness(),
+        .damping = listTheme->GetChainDamping(),
+    };
 
     ListModelNG::SetChainAnimationOptions(frameNode, options);
 }

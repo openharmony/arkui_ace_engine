@@ -551,7 +551,7 @@ ArkUINativeModuleValue ListBridge::SetChainAnimationOptions(ArkUIRuntimeCallInfo
         GetArkUIInternalNodeAPI()->GetListModifier().ResetChainAnimationOptions(nativeNode);
         return panda::JSValueRef::Undefined(vm);
     } else {
-        RefPtr<ListTheme> listTheme = Framework::JSViewAbstract::GetTheme<ListTheme>();
+        RefPtr<ListTheme> listTheme = ArkTSUtils::GetTheme<ListTheme>();
         CHECK_NULL_RETURN(listTheme, panda::NativePointerRef::New(vm, nullptr));
 
         minSpace = listTheme->GetChainMinSpace();
@@ -567,7 +567,9 @@ ArkUINativeModuleValue ListBridge::SetChainAnimationOptions(ArkUIRuntimeCallInfo
         ArkTSUtils::ParseJsDimension(vm, maxSpaceArgs, maxSpace, DimensionUnit::VP);
         ArkTSUtils::ParseJsDouble(vm, conductivityArgs, chainAnimationOptions.conductivity);
         ArkTSUtils::ParseJsDouble(vm, intensityArgs, chainAnimationOptions.intensity);
-        chainAnimationOptions.edgeEffect = edgeEffectArgs->ToNumber(vm)->Value();
+        if (edgeEffectArgs->IsNumber()) {
+            chainAnimationOptions.edgeEffect = edgeEffectArgs->ToNumber(vm)->Value();
+        }
         ArkTSUtils::ParseJsDouble(vm, stiffnessArgs, chainAnimationOptions.stiffness);
         ArkTSUtils::ParseJsDouble(vm, dampingArgs, chainAnimationOptions.damping);
         chainAnimationOptions.minSpace = minSpace.Value();
