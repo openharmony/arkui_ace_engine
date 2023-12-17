@@ -1303,7 +1303,6 @@ void TextPattern::OnDragEndNoChild()
         pattern->contentMod_->ChangeDragStatus();
         pattern->showSelect_ = true;
         auto layoutProperty = host->GetLayoutProperty<TextLayoutProperty>();
-        pattern->ShowSelectOverlay(pattern->textSelector_.firstHandle, pattern->textSelector_.secondHandle, false);
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     }
 }
