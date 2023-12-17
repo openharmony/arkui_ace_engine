@@ -323,21 +323,21 @@ void NavigationPattern::CheckTopNavPathChange(
             NavigationPattern::FireNavigationStateChange(preTopNavDestination, false);
         }
     }
-    bool disableAllAnimation = navigationPattern->navigationStack_->GetDisableAnimation();
-    bool animated = navigationPattern->navigationStack_->GetAnimatedValue();
+    bool disableAllAnimation = navigationStack_->GetDisableAnimation();
+    bool animated = navigationStack_->GetAnimatedValue();
     TAG_LOGI(AceLogTag::ACE_NAVIGATION,
         "transition start, disableAllAnimation: %{public}d, animated: %{public}d, isPopPage: %{public}d",
         disableAllAnimation, animated, isPopPage);
     if (isDialog) {
         // dialog navDestination no need transition animation.
-        navigationPattern->TransitionWithOutAnimation(preTopNavDestination, newTopNavDestination, isPopPage, isShow);
+        TransitionWithOutAnimation(preTopNavDestination, newTopNavDestination, isPopPage, isShow);
         hostNode->GetLayoutProperty()->UpdatePropertyChangeFlag(PROPERTY_UPDATE_MEASURE);
         return;
     }
     if (disableAllAnimation || !animated) {
         // transition without animation need to run before layout for geometryTransition.
-        navigationPattern->TransitionWithOutAnimation(preTopNavDestination, newTopNavDestination, isPopPage);
-        navigationPattern->navigationStack_->UpdateAnimatedValue(true);
+        TransitionWithOutAnimation(preTopNavDestination, newTopNavDestination, isPopPage);
+        navigationStack_->UpdateAnimatedValue(true);
     } else {
         // transition with animation need to run after layout task
         context->AddAfterLayoutTask(
