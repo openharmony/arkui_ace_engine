@@ -110,6 +110,11 @@ constexpr int32_t WORD_LIMIT_LEN = 6;
 constexpr int32_t WORD_LIMIT_RETURN = 2;
 constexpr int32_t BEYOND_LIMIT_RETURN = 4;
 constexpr int32_t DEFAULT_RETURN_VALUE = -1;
+const float CONTAINER_WIDTH = 300.0f;
+const float CONTAINER_HEIGHT = 300.0f;
+const float BUILDER_WIDTH = 150.0f;
+const float BUILDER_HEIGHT = 75.0f;
+const SizeF BUILDER_SIZE(BUILDER_WIDTH, BUILDER_HEIGHT);
 } // namespace
 
 class RichEditorTestNg : public testing::Test {
@@ -257,7 +262,7 @@ HWTEST_F(RichEditorTestNg, RichEditorModel001, TestSize.Level1)
     ASSERT_NE(richEditorPattern, nullptr);
     RichEditorModelNG richEditorModel;
     richEditorModel.Create();
-    EXPECT_EQ(ViewStackProcessor::GetInstance()->elementsStack_.size(), 1);
+    EXPECT_EQ(static_cast<int32_t>(ViewStackProcessor::GetInstance()->elementsStack_.size()), 1);
     while (!ViewStackProcessor::GetInstance()->elementsStack_.empty()) {
         ViewStackProcessor::GetInstance()->elementsStack_.pop();
     }
@@ -579,12 +584,12 @@ HWTEST_F(RichEditorTestNg, RichEditorDelete001, TestSize.Level1)
     AddImageSpan();
     richEditorPattern->caretPosition_ = 0;
     richEditorPattern->DeleteForward(1);
-    EXPECT_EQ(richEditorNode_->GetChildren().size(), 0);
+    EXPECT_EQ(static_cast<int32_t>(richEditorNode_->GetChildren().size()), 0);
     ClearSpan();
     AddSpan(INIT_VALUE_1);
     richEditorPattern->caretPosition_ = 0;
     richEditorPattern->DeleteForward(7);
-    EXPECT_EQ(richEditorNode_->GetChildren().size(), 0);
+    EXPECT_EQ(static_cast<int32_t>(richEditorNode_->GetChildren().size()), 0);
 }
 
 /**
@@ -621,7 +626,7 @@ HWTEST_F(RichEditorTestNg, RichEditorDelete003, TestSize.Level1)
     AddImageSpan();
     richEditorPattern->caretPosition_ = 0;
     richEditorPattern->DeleteBackward(1);
-    EXPECT_NE(richEditorNode_->GetChildren().size(), 0);
+    EXPECT_NE(static_cast<int32_t>(richEditorNode_->GetChildren().size()), 0);
     richEditorPattern->textSelector_ = TextSelector(0, 1);
     richEditorPattern->caretPosition_ = 1;
     richEditorPattern->DeleteBackward(1);
@@ -2331,7 +2336,7 @@ HWTEST_F(RichEditorTestNg, HandleMouseLeftButton002, TestSize.Level1)
     std::vector<RichEditorType> selectType = { RichEditorType::TEXT, RichEditorType::IMAGE, RichEditorType::MIXED };
     SelectOverlayInfo selectInfo;
     selectInfo.isUsingMouse = true;
-    for (int32_t i = 0; i < selectType.size(); i++) {
+    for (int32_t i = 0; i < static_cast<int32_t>(selectType.size()); i++) {
         richEditorPattern->selectedType_ = selectType[i];
         richEditorPattern->HandleMouseLeftButton(mouseInfo);
         EXPECT_NE(richEditorPattern->selectionMenuOffsetByMouse_.GetX(),
@@ -2352,7 +2357,7 @@ HWTEST_F(RichEditorTestNg, HandleMouseLeftButton002, TestSize.Level1)
         return;
     };
     richEditorPattern->mouseStatus_ = MouseStatus::MOVE;
-    for (int32_t i = 0; i < selectType.size(); i++) {
+    for (int32_t i = 0; i < static_cast<int32_t>(selectType.size()); i++) {
         richEditorPattern->selectedType_ = selectType[i];
         auto key = std::make_pair(selectType[i], RichEditorResponseType::SELECTED_BY_MOUSE);
         std::shared_ptr<SelectionMenuParams> params1 = std::make_shared<SelectionMenuParams>(
@@ -2915,5 +2920,128 @@ HWTEST_F(RichEditorTestNg, AdjustWordCursorAndSelect01, TestSize.Level1)
     mockDataDetectorMgr.AdjustWordSelection(pos, content, start, end);
     EXPECT_EQ(start, -1);
     EXPECT_EQ(end, -1);
+}
+
+/**
+ * @tc.name: RichEditorController008
+ * @tc.desc: test add builder span
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorTestNg, RichEditorController008, TestSize.Level1)
+{
+    auto nodeId = ViewStackProcessor::GetInstance()->ClaimNodeId();
+    richEditorNode_ = FrameNode::GetOrCreateFrameNode(
+        V2::RICH_EDITOR_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<RichEditorPattern>(); });
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    richEditorPattern->SetRichEditorController(AceType::MakeRefPtr<RichEditorController>());
+    auto richEditorController = richEditorPattern->GetRichEditorController();
+    ASSERT_NE(richEditorController, nullptr);
+    richEditorPattern->GetRichEditorController()->SetPattern(AceType::WeakClaim(AceType::RawPtr(richEditorPattern)));
+    AddSpan("test");
+    auto builderId1 = ElementRegister::GetInstance()->MakeUniqueId();
+    auto builderNode1 = FrameNode::GetOrCreateFrameNode(
+        V2::ROW_ETS_TAG, builderId1, []() { return AceType::MakeRefPtr<LinearLayoutPattern>(false); });
+    auto index1 = richEditorController->AddPlaceholderSpan(builderNode1, {});
+    EXPECT_EQ(index1, 1);
+    EXPECT_EQ(static_cast<int32_t>(richEditorNode_->GetChildren().size()), 2);
+    auto builderSpanChildren = richEditorNode_->GetChildren();
+    ASSERT_NE(static_cast<int32_t>(builderSpanChildren.size()), 0);
+    auto builderSpanChild = builderSpanChildren.begin();
+    EXPECT_EQ((*builderSpanChild)->GetTag(), V2::PLACEHOLDER_SPAN_ETS_TAG);
+    ClearSpan();
+}
+
+/**
+ * @tc.name: RichEditorController009
+ * @tc.desc: test add builder span
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorTestNg, RichEditorController009, TestSize.Level1)
+{
+    auto nodeId = ViewStackProcessor::GetInstance()->ClaimNodeId();
+    richEditorNode_ = FrameNode::GetOrCreateFrameNode(
+        V2::RICH_EDITOR_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<RichEditorPattern>(); });
+    ASSERT_NE(richEditorNode_, nullptr);
+    RefPtr<GeometryNode> containerGeometryNode = AceType::MakeRefPtr<GeometryNode>();
+    EXPECT_FALSE(containerGeometryNode == nullptr);
+    containerGeometryNode->SetFrameSize(SizeF(CONTAINER_WIDTH, CONTAINER_HEIGHT));
+    ASSERT_NE(richEditorNode_->GetLayoutProperty(), nullptr);
+    LayoutWrapperNode layoutWrapper =
+        LayoutWrapperNode(richEditorNode_, containerGeometryNode, richEditorNode_->GetLayoutProperty());
+
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    richEditorPattern->SetRichEditorController(AceType::MakeRefPtr<RichEditorController>());
+    auto richEditorController = richEditorPattern->GetRichEditorController();
+    ASSERT_NE(richEditorController, nullptr);
+    richEditorPattern->GetRichEditorController()->SetPattern(AceType::WeakClaim(AceType::RawPtr(richEditorPattern)));
+
+    auto builderId1 = ElementRegister::GetInstance()->MakeUniqueId();
+    auto builderNode1 = FrameNode::GetOrCreateFrameNode(
+        V2::ROW_ETS_TAG, builderId1, []() { return AceType::MakeRefPtr<LinearLayoutPattern>(false); });
+    auto index1 = richEditorController->AddPlaceholderSpan(builderNode1, {});
+    EXPECT_EQ(index1, 0);
+    EXPECT_EQ(richEditorNode_->GetChildren().size(), 1);
+    auto builderSpanChildren = richEditorNode_->GetChildren();
+    ASSERT_NE(static_cast<int32_t>(builderSpanChildren.size()), 0);
+    auto builderSpan = builderSpanChildren.begin();
+    auto builderSpanChild = AceType::DynamicCast<FrameNode>(*builderSpan);
+    ASSERT_NE(builderSpanChild, nullptr);
+    EXPECT_EQ(builderSpanChild->GetTag(), V2::PLACEHOLDER_SPAN_ETS_TAG);
+
+    auto richEditorLayoutAlgorithm = richEditorPattern->CreateLayoutAlgorithm();
+    layoutWrapper.SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(richEditorLayoutAlgorithm));
+
+    auto childLayoutConstraint = layoutWrapper.GetLayoutProperty()->CreateChildConstraint();
+    childLayoutConstraint.selfIdealSize = OptionalSizeF(BUILDER_SIZE);
+
+    RefPtr<GeometryNode> builderGeometryNode = AceType::MakeRefPtr<GeometryNode>();
+    builderGeometryNode->Reset();
+    RefPtr<LayoutWrapperNode> builderLayoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
+        builderSpanChild, builderGeometryNode, builderSpanChild->GetLayoutProperty());
+    EXPECT_FALSE(builderLayoutWrapper == nullptr);
+    auto builderPattern = builderSpanChild->GetPattern();
+    builderLayoutWrapper->GetLayoutProperty()->UpdateLayoutConstraint(childLayoutConstraint);
+    auto firstItemLayoutAlgorithm = builderPattern->CreateLayoutAlgorithm();
+    EXPECT_FALSE(firstItemLayoutAlgorithm == nullptr);
+    builderLayoutWrapper->SetLayoutAlgorithm(
+        AccessibilityManager::MakeRefPtr<LayoutAlgorithmWrapper>(firstItemLayoutAlgorithm));
+    builderLayoutWrapper->GetLayoutProperty()->UpdateUserDefinedIdealSize(
+        CalcSize(CalcLength(BUILDER_WIDTH), CalcLength(BUILDER_HEIGHT)));
+    layoutWrapper.AppendChild(builderLayoutWrapper);
+
+    // mock process in flex layout algorithm
+    richEditorLayoutAlgorithm->Measure(&layoutWrapper);
+    richEditorLayoutAlgorithm->Layout(&layoutWrapper);
+    EXPECT_EQ(builderGeometryNode->GetMarginFrameSize().Width(), BUILDER_WIDTH);
+    EXPECT_EQ(builderGeometryNode->GetMarginFrameSize().Height(), BUILDER_HEIGHT);
+    ClearSpan();
+}
+
+/**
+ * @tc.name: RichEditorController010
+ * @tc.desc: test add builder span
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorTestNg, RichEditorController010, TestSize.Level1)
+{
+    auto nodeId = ViewStackProcessor::GetInstance()->ClaimNodeId();
+    richEditorNode_ = FrameNode::GetOrCreateFrameNode(
+        V2::RICH_EDITOR_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<RichEditorPattern>(); });
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    richEditorPattern->SetRichEditorController(AceType::MakeRefPtr<RichEditorController>());
+    auto richEditorController = richEditorPattern->GetRichEditorController();
+    ASSERT_NE(richEditorController, nullptr);
+    richEditorPattern->GetRichEditorController()->SetPattern(AceType::WeakClaim(AceType::RawPtr(richEditorPattern)));
+    AddSpan("test");
+    RefPtr<FrameNode> builderNode1 = nullptr;
+    auto index1 = richEditorController->AddPlaceholderSpan(builderNode1, {});
+    EXPECT_EQ(index1, 0);
+    EXPECT_EQ(static_cast<int32_t>(richEditorNode_->GetChildren().size()), 1);
+    ClearSpan();
 }
 } // namespace OHOS::Ace::NG
