@@ -53,24 +53,14 @@ class ProgressColorModifier extends ModifierWithKey<ResourceColor | LinearGradie
   static identity: Symbol = Symbol('color');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().progress.ResetProgressColor(node);
+      GetUINativeModule().progress.resetProgressColor(node);
     } else {
-      const valueType: string = typeof this.value;
-      if (valueType === "number" || valueType === "string" || isResource(this.value)) {
-        GetUINativeModule().progress.SetProgressColor(node, this.value);
-      } else {
-        GetUINativeModule().progress.SetProgressColorWithLinearGradient(
-          node,
-          (this.value as LinearGradient).angle,
-          (this.value as LinearGradient).direction,
-          (this.value as LinearGradient).colors,
-          (this.value as LinearGradient).repeating
-        );
-      }
+      GetUINativeModule().progress.setProgressColor(node, this.value!);
     }
   }
+
   checkObjectDiff(): boolean {
-    return true;
+    return this.stageValue !== this.value;
   }
 }
 

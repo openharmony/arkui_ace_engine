@@ -13862,20 +13862,14 @@ ProgressValueModifier.identity = Symbol('value');
 class ProgressColorModifier extends ModifierWithKey {
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().progress.ResetProgressColor(node);
+      GetUINativeModule().progress.resetProgressColor(node);
     }
     else {
-      const valueType = typeof this.value;
-      if (valueType === 'number' || valueType === 'string' || isResource(this.value)) {
-        GetUINativeModule().progress.SetProgressColor(node, this.value);
-      }
-      else {
-        GetUINativeModule().progress.SetProgressColorWithLinearGradient(node, this.value.angle, this.value.direction, this.value.colors, this.value.repeating);
-      }
+      GetUINativeModule().progress.setProgressColor(node, this.value);
     }
   }
   checkObjectDiff() {
-    return true;
+    return this.stageValue !== this.value;
   }
 }
 ProgressColorModifier.identity = Symbol('color');
