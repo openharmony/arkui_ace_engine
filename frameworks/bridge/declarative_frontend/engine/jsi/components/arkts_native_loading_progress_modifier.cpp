@@ -39,8 +39,6 @@ void ResetLoadingProgressColor(NodeHandle node)
         auto theme = pipelineContext->GetTheme<ProgressTheme>();
         CHECK_NULL_VOID(theme);
         LoadingProgressModelNG::SetColor(frameNode, theme->GetLoadingColor());
-    } else {
-        return;
     }
 }
 

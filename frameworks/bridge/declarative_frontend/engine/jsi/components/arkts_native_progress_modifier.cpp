@@ -333,10 +333,42 @@ void ResetProgressStyle(NodeHandle node)
     }
 }
 
+void SetProgressBackgroundColor(NodeHandle node, uint32_t color)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    ProgressModelNG::SetBackgroundColor(frameNode, Color(color));
+}
+
+void ResetProgressBackgroundColor(NodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto progressLayoutProperty = frameNode->GetLayoutProperty<ProgressLayoutProperty>();
+    CHECK_NULL_VOID(progressLayoutProperty);
+    auto progresstype = progressLayoutProperty->GetType();
+    auto pipelineContext = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto theme = pipelineContext->GetTheme<ProgressTheme>();
+    CHECK_NULL_VOID(theme);
+
+    Color backgroundColor;
+    if (progresstype == ProgressType::CAPSULE) {
+        backgroundColor = theme->GetCapsuleBgColor();
+    } else if (progresstype == ProgressType::RING) {
+        backgroundColor = theme->GetRingProgressBgColor();
+    } else {
+        backgroundColor = theme->GetTrackBgColor();
+    }
+
+    ProgressModelNG::SetBackgroundColor(frameNode, backgroundColor);
+}
+
 ArkUIProgressModifierAPI GetProgressModifier()
 {
     static const ArkUIProgressModifierAPI modifier = { SetProgressValue, ResetProgressValue, SetProgressGradientColor,
-        SetProgressColor, ResetProgressColor, SetProgressStyle, ResetProgressStyle };
+        SetProgressColor, ResetProgressColor, SetProgressStyle, ResetProgressStyle, SetProgressBackgroundColor,
+        ResetProgressBackgroundColor };
     return modifier;
 }
 

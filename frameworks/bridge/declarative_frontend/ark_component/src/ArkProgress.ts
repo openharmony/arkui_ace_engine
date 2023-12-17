@@ -33,6 +33,10 @@ class ArkProgressComponent extends ArkComponent implements ProgressAttribute {
   monopolizeEvents(monopolize: boolean): ProgressAttribute<keyof ProgressStyleMap, LinearStyleOptions | ProgressStyleOptions | RingStyleOptions | EclipseStyleOptions | ScaleRingStyleOptions | CapsuleStyleOptions> {
     throw new Error('Method not implemented.');
   }
+  backgroundColor(value: ResourceColor): this {
+    modifierWithKey(this._modifiersWithKeys, ProgressBackgroundColorModifier.identity, ProgressBackgroundColorModifier, value);
+    return this;
+  }
 }
 
 class ProgressValueModifier extends ModifierWithKey<number> {
@@ -103,6 +107,25 @@ class ProgressStyleModifier extends ModifierWithKey<ProgressStyleOptions | Capsu
   }
   checkObjectDiff(): boolean {
     return true;
+  }
+}
+
+class ProgressBackgroundColorModifier extends ModifierWithKey<ResourceColor> {
+  static identity: Symbol = Symbol('progressBackgroundColor');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      GetUINativeModule().progress.resetProgressBackgroundColor(node);
+    } else {
+      GetUINativeModule().progress.setProgressBackgroundColor(node, this.value);
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    if (isResource(this.stageValue) && isResource(this.value)) {
+      return !isResourceEqual(this.stageValue, this.value);
+    } else {
+      return true;
+    }
   }
 }
 
