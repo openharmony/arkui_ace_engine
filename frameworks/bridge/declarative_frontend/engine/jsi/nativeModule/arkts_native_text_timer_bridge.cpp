@@ -59,16 +59,15 @@ ArkUINativeModuleValue TextTimerBridge::SetFontSize(ArkUIRuntimeCallInfo* runtim
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(NUM_0);
-    Local<JSValueRef> fontWeightArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    Local<JSValueRef> fontSizeArg = runtimeCallInfo->GetCallArgRef(NUM_1);
     void* nativeNode = nodeArg->ToNativePointer(vm)->Value();
-    std::string fontWeight;
-    ArkTSUtils::GetStringFromJS(vm, fontWeightArg, fontWeight);
-    if (0 == fontWeight.length() || DEFAULT_STR == fontWeight) {
-        GetArkUIInternalNodeAPI()->GetTextTimerModifier().ResetFontWeight(nativeNode);
-    } else if (!StringUtils::IsAscii(fontWeight) && Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
-        GetArkUIInternalNodeAPI()->GetTextTimerModifier().ResetFontWeight(nativeNode);
+    CalcDimension fontSize;
+    if (!ArkTSUtils::ParseJsDimensionFp(vm, fontSizeArg, fontSize) || fontSize.Value() < 0 ||
+        fontSize.Unit() == DimensionUnit::PERCENT) {
+        GetArkUIInternalNodeAPI()->GetTextTimerModifier().ResetFontSize(nativeNode);
     } else {
-        GetArkUIInternalNodeAPI()->GetTextTimerModifier().SetFontWeight(nativeNode, fontWeight.c_str());
+        GetArkUIInternalNodeAPI()->GetTextTimerModifier().SetFontSize(
+            nativeNode, fontSize.Value(), static_cast<int>(fontSize.Unit()));
     }
     return panda::JSValueRef::Undefined(vm);
 }
@@ -117,11 +116,18 @@ ArkUINativeModuleValue TextTimerBridge::SetFontWeight(ArkUIRuntimeCallInfo* runt
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
-    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
-    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    std::string fontWeight = secondArg->ToString(vm)->ToString();
-    GetArkUIInternalNodeAPI()->GetTextTimerModifier().SetFontWeight(nativeNode, fontWeight.c_str());
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    Local<JSValueRef> fontWeightArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    void* nativeNode = nodeArg->ToNativePointer(vm)->Value();
+    std::string fontWeight;
+    ArkTSUtils::GetStringFromJS(vm, fontWeightArg, fontWeight);
+    if (0 == fontWeight.length() || DEFAULT_STR == fontWeight) {
+        GetArkUIInternalNodeAPI()->GetTextTimerModifier().ResetFontWeight(nativeNode);
+    } else if (!StringUtils::IsAscii(fontWeight) && Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+        GetArkUIInternalNodeAPI()->GetTextTimerModifier().ResetFontWeight(nativeNode);
+    } else {
+        GetArkUIInternalNodeAPI()->GetTextTimerModifier().SetFontWeight(nativeNode, fontWeight.c_str());
+    }
     return panda::JSValueRef::Undefined(vm);
 }
 
