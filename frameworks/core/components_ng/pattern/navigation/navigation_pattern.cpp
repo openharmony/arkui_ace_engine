@@ -323,33 +323,30 @@ void NavigationPattern::CheckTopNavPathChange(
             NavigationPattern::FireNavigationStateChange(preTopNavDestination, false);
         }
     }
-    // transition need to run after layout task
-    context->AddAfterLayoutTask(
-        [preTopNavDestination, newTopNavDestination, isPopPage, weakNavigationPattern = WeakClaim(this),
-            isShow, isDialog]() {
-            auto navigationPattern = weakNavigationPattern.Upgrade();
-            CHECK_NULL_VOID(navigationPattern);
-            if (isDialog) {
-                navigationPattern->TransitionWithOutAnimation(
-                    preTopNavDestination, newTopNavDestination, isPopPage, isShow);
-                return;
-            }
-            bool disableAllAnimation = navigationPattern->navigationStack_->GetDisableAnimation();
-            bool animated = navigationPattern->navigationStack_->GetAnimatedValue();
-            TAG_LOGI(AceLogTag::ACE_NAVIGATION,
-                "transition start, disableAllAnimation: %{public}d, animated: %{public}d, isPopPage: %{public}d",
-                disableAllAnimation, animated, isPopPage);
-            if (disableAllAnimation) {
-                navigationPattern->TransitionWithOutAnimation(preTopNavDestination, newTopNavDestination, isPopPage);
-                return;
-            }
-            if (animated) {
+    bool disableAllAnimation = navigationStack_->GetDisableAnimation();
+    bool animated = navigationStack_->GetAnimatedValue();
+    TAG_LOGI(AceLogTag::ACE_NAVIGATION,
+        "transition start, disableAllAnimation: %{public}d, animated: %{public}d, isPopPage: %{public}d",
+        disableAllAnimation, animated, isPopPage);
+    if (isDialog) {
+        // dialog navDestination no need transition animation.
+        TransitionWithOutAnimation(preTopNavDestination, newTopNavDestination, isPopPage, isShow);
+        hostNode->GetLayoutProperty()->UpdatePropertyChangeFlag(PROPERTY_UPDATE_MEASURE);
+        return;
+    }
+    if (disableAllAnimation || !animated) {
+        // transition without animation need to run before layout for geometryTransition.
+        TransitionWithOutAnimation(preTopNavDestination, newTopNavDestination, isPopPage);
+        navigationStack_->UpdateAnimatedValue(true);
+    } else {
+        // transition with animation need to run after layout task
+        context->AddAfterLayoutTask(
+            [preTopNavDestination, newTopNavDestination, isPopPage, weakNavigationPattern = WeakClaim(this)]() {
+                auto navigationPattern = weakNavigationPattern.Upgrade();
+                CHECK_NULL_VOID(navigationPattern);
                 navigationPattern->TransitionWithAnimation(preTopNavDestination, newTopNavDestination, isPopPage);
-                return;
-            }
-            navigationPattern->TransitionWithOutAnimation(preTopNavDestination, newTopNavDestination, isPopPage);
-            navigationPattern->navigationStack_->UpdateAnimatedValue(true);
-        });
+            });
+    }
     hostNode->GetLayoutProperty()->UpdatePropertyChangeFlag(PROPERTY_UPDATE_MEASURE);
 }
 
@@ -469,7 +466,10 @@ void NavigationPattern::TransitionWithOutAnimation(const RefPtr<NavDestinationGr
         if (isPopPage) {
             auto parent = preTopNavDestination->GetParent();
             CHECK_NULL_VOID(parent);
-            parent->RemoveChild(preTopNavDestination);
+            if (preTopNavDestination->GetContentNode()) {
+                preTopNavDestination->GetContentNode()->Clean(false, true);
+            }
+            parent->RemoveChild(preTopNavDestination, true);
             parent->RebuildRenderContextTree();
             pipeline->RequestFrame();
         } else {
@@ -494,7 +494,10 @@ void NavigationPattern::TransitionWithOutAnimation(const RefPtr<NavDestinationGr
     if (preTopNavDestination) {
         auto parent = preTopNavDestination->GetParent();
         CHECK_NULL_VOID(parent);
-        parent->RemoveChild(preTopNavDestination);
+        if (preTopNavDestination->GetContentNode()) {
+            preTopNavDestination->GetContentNode()->Clean(false, true);
+        }
+        parent->RemoveChild(preTopNavDestination, true);
         parent->RebuildRenderContextTree();
         pipeline->RequestFrame();
     }
