@@ -231,6 +231,7 @@ template("declarative_js_engine") {
       "jsview/js_menu.cpp",
       "jsview/js_menu_item.cpp",
       "jsview/js_menu_item_group.cpp",
+      "jsview/js_dynamic_component.cpp",
       "jsview/js_navdestination.cpp",
       "jsview/js_navigation.cpp",
       "jsview/js_navigation_stack.cpp",
@@ -551,8 +552,10 @@ template("declarative_js_engine") {
 
     deps += [ ":x_node" ]
 
-    include_dirs +=
-        [ "//foundation/window/window_manager/interfaces/innerkits" ]
+    include_dirs += [
+      "//foundation/window/window_manager/interfaces/innerkits",
+      "//commonlibrary/ets_utils/js_concurrent_module/common",
+    ]
 
     # add for cross_platfrom_build temporarily, shall be removed after external_deps is supported
     if (is_arkui_x) {
@@ -565,6 +568,7 @@ template("declarative_js_engine") {
       external_deps += [
         "ets_runtime:libark_jsruntime",
         "napi:ace_napi",
+        "ets_utils:worker",
       ]
     }
 

@@ -177,13 +177,34 @@ AceContainer::AceContainer(int32_t instanceId, FrontendType type,
     useStageModel_ = true;
 }
 
+// for DynamicComponent
+AceContainer::AceContainer(int32_t instanceId, FrontendType type,
+    std::weak_ptr<OHOS::AbilityRuntime::Context> runtimeContext,
+    std::weak_ptr<OHOS::AppExecFwk::AbilityInfo> abilityInfo, std::unique_ptr<PlatformEventCallback> callback,
+    std::shared_ptr<TaskWrapper> caller,
+    bool useCurrentEventRunner, bool isSubAceContainer, bool useNewPipeline)
+    : instanceId_(instanceId), type_(type), runtimeContext_(std::move(runtimeContext)),
+      abilityInfo_(std::move(abilityInfo)), useCurrentEventRunner_(useCurrentEventRunner),
+      isSubContainer_(isSubAceContainer)
+{
+    ACE_DCHECK(callback);
+    if (useNewPipeline) {
+        SetUseNewPipeline();
+    }
+    if (!isSubContainer_) {
+        InitializeTask(caller);
+    }
+    platformEventCallback_ = std::move(callback);
+    useStageModel_ = true;
+}
+
 AceContainer::~AceContainer()
 {
     std::lock_guard lock(destructMutex_);
     LOG_DESTROY();
 }
 
-void AceContainer::InitializeTask()
+void AceContainer::InitializeTask(std::shared_ptr<TaskWrapper> caller)
 {
     if (SystemProperties::GetFlutterDecouplingEnabled()) {
         auto taskExecutorImpl = Referenced::MakeRefPtr<TaskExecutorImpl>();
@@ -196,7 +217,12 @@ void AceContainer::InitializeTask()
             taskExecutorImpl->InitJsThread();
         }
     } else {
-        auto flutterTaskExecutor = Referenced::MakeRefPtr<FlutterTaskExecutor>();
+        RefPtr<FlutterTaskExecutor> flutterTaskExecutor;
+        if (caller != nullptr) {
+            flutterTaskExecutor = Referenced::MakeRefPtr<FlutterTaskExecutor>(caller);
+        } else {
+            flutterTaskExecutor = Referenced::MakeRefPtr<FlutterTaskExecutor>();
+        }
         flutterTaskExecutor->InitPlatformThread(useCurrentEventRunner_);
         taskExecutor_ = flutterTaskExecutor;
         // No need to create JS Thread for DECLARATIVE_JS
