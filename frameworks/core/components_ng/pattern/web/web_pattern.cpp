@@ -1224,6 +1224,13 @@ void WebPattern::OnOverScrollModeUpdate(int mode)
     }
 }
 
+void WebPattern::OnCopyOptionModeUpdate(int32_t mode)
+{
+    if (delegate_) {
+        delegate_->UpdateCopyOptionMode(mode);
+    }
+}
+
 void WebPattern::OnForceDarkAccessUpdate(bool access)
 {
     if (delegate_) {
@@ -1532,6 +1539,7 @@ void WebPattern::OnModifyDone()
         delegate_->UpdateVerticalScrollBarAccess(GetVerticalScrollBarAccessEnabledValue(true));
         delegate_->UpdateScrollBarColor(GetScrollBarColorValue(DEFAULT_SCROLLBAR_COLOR));
         delegate_->UpdateOverScrollMode(GetOverScrollModeValue(OverScrollMode::NEVER));
+        delegate_->UpdateCopyOptionMode(GetCopyOptionModeValue(static_cast<int32_t>(CopyOptions::Distributed)));
         if (GetBlockNetwork()) {
             delegate_->UpdateBlockNetwork(GetBlockNetwork().value());
         }

@@ -446,6 +446,13 @@ void WebModelNG::SetOverScrollMode(OverScrollMode mode)
     webPattern->UpdateOverScrollMode(mode);
 }
 
+void WebModelNG::SetCopyOptionMode(CopyOptions mode)
+{
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->UpdateCopyOptionMode(static_cast<int32_t>(mode));
+}
+
 void WebModelNG::SetOverviewModeAccessEnabled(bool isOverviewModeAccessEnabled)
 {
     auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();

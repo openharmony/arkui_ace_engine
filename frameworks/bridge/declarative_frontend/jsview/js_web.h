@@ -137,6 +137,7 @@ public:
     // Enable or disable debugging of web content
     static bool webDebuggingAccess_;
     static JSwebEventCallback OnControllerAttachedCallback_;
+    static void CopyOption(int32_t copyOption);
 
 protected:
     static void OnCommonDialog(const JSCallbackInfo& args, int dialogEventType);

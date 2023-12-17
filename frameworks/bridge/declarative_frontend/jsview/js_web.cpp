@@ -1648,6 +1648,7 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSClass<JSWeb>::StaticMethod("onNavigationEntryCommitted", &JSWeb::OnNavigationEntryCommitted);
     JSClass<JSWeb>::StaticMethod("onControllerAttached", &JSWeb::OnControllerAttached);
     JSClass<JSWeb>::StaticMethod("onOverScroll", &JSWeb::OnOverScroll);
+    JSClass<JSWeb>::StaticMethod("copyOptions", &JSWeb::CopyOption);
     JSClass<JSWeb>::StaticMethod("onScreenCaptureRequest", &JSWeb::OnScreenCaptureRequest);
     JSClass<JSWeb>::StaticMethod("layoutMode", &JSWeb::SetLayoutMode);
     JSClass<JSWeb>::StaticMethod("nestedScroll", &JSWeb::SetNestedScroll);
@@ -3941,5 +3942,28 @@ void JSWeb::JavaScriptOnDocumentStart(const JSCallbackInfo& args)
         }
     }
     WebModel::GetInstance()->JavaScriptOnDocumentStart(scriptItems);
+}
+
+void JSWeb::CopyOption(int32_t copyOption)
+{
+    auto mode = CopyOptions::Distributed;
+    switch (copyOption) {
+        case static_cast<int32_t>(CopyOptions::None):
+            mode = CopyOptions::None;
+            break;
+        case static_cast<int32_t>(CopyOptions::InApp):
+            mode = CopyOptions::InApp;
+            break;
+        case static_cast<int32_t>(CopyOptions::Local):
+            mode = CopyOptions::Local;
+            break;
+        case static_cast<int32_t>(CopyOptions::Distributed):
+            mode = CopyOptions::Distributed;
+            break;
+        default:
+            mode = CopyOptions::Distributed;
+            break;
+    }
+    WebModel::GetInstance()->SetCopyOptionMode(mode);
 }
 } // namespace OHOS::Ace::Framework
