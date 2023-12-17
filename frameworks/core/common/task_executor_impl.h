@@ -34,6 +34,7 @@ class ACE_EXPORT TaskExecutorImpl final : public TaskExecutor {
 public:
     explicit TaskExecutorImpl(const RefPtr<TaskExecutorImpl>& taskExecutors);
     explicit TaskExecutorImpl(const TaskRunners& taskRunners);
+    explicit TaskExecutorImpl(std::shared_ptr<TaskWrapper> taskWrapper) : taskWrapper_(taskWrapper) {}
     TaskExecutorImpl() = default;
     ~TaskExecutorImpl() override {};
     void InitPlatformThread(bool useCurrentEventRunner = false, bool isStageModel = false);
@@ -57,6 +58,8 @@ public:
 
 private:
     TaskExecutor::Task WrapTaskWithContainer(
+        TaskExecutor::Task&& task, int32_t id, std::function<void()>&& traceIdFunc = nullptr) const;
+    TaskExecutor::Task WrapTaskWithContainerAndNapi(
         TaskExecutor::Task&& task, int32_t id, std::function<void()>&& traceIdFunc = nullptr) const;
     bool PostTaskToTaskRunner(const RefPtr<TaskRunnerAdapter>& taskRunner, TaskExecutor::Task&& task,
         uint32_t delayTime, const std::string& callerInfo = {}) const;
@@ -92,6 +95,8 @@ private:
     RefPtr<TaskRunnerAdapter> ioRunner_;
     RefPtr<TaskRunnerAdapter> jsRunner_;
     RefPtr<TaskRunnerAdapter> gpuRunner_;
+
+    std::shared_ptr<TaskWrapper> taskWrapper_ = nullptr;
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_COMMON_TASK_EXECUTOR_IMPL_H

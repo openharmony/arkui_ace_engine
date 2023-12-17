@@ -67,6 +67,29 @@ TaskExecutor::Task TaskExecutorImpl::WrapTaskWithContainer(
     return wrappedTask;
 }
 
+TaskExecutor::Task TaskExecutorImpl::WrapTaskWithContainerAndNapi(
+    TaskExecutor::Task&& task, int32_t id, std::function<void()>&& traceIdFunc) const
+{
+    auto wrappedTask = [taskWrapper = taskWrapper_, originTask = std::move(task), id,
+                           traceId = TraceId::CreateTraceId(), traceIdFunc = std::move(traceIdFunc)]() {
+        ContainerScope scope(id);
+        std::unique_ptr<TraceId> traceIdPtr(traceId);
+        if (originTask && traceIdPtr) {
+            traceIdPtr->SetTraceId();
+
+            taskWrapper->Call(originTask);
+
+            traceIdPtr->ClearTraceId();
+        } else {
+            LOGW("WrapTaskWithContainer: originTask or traceIdPtr is null.");
+        }
+        if (traceIdFunc) {
+            traceIdFunc();
+        }
+    };
+    return wrappedTask;
+}
+
 bool TaskExecutorImpl::PostTaskToTaskRunner(const RefPtr<TaskRunnerAdapter>& taskRunner, TaskExecutor::Task&& task,
     uint32_t delayTime, const std::string& callerInfo) const
 {
@@ -162,8 +185,30 @@ bool TaskExecutorImpl::OnPostTask(Task&& task, TaskType type, uint32_t delayTime
             sp->taskIdTable_[static_cast<uint32_t>(type)]++;
         }
     };
-    TaskExecutor::Task wrappedTask =
-        currentId >= 0 ? WrapTaskWithContainer(std::move(task), currentId, std::move(traceIdFunc)) : std::move(task);
+
+    TaskExecutor::Task wrappedTask;
+    if (taskWrapper_ != nullptr) {
+        switch (type) {
+            case TaskType::PLATFORM:
+            case TaskType::UI:
+            case TaskType::JS:
+                LOGD("wrap npi task, currentId = %{public}d", currentId);
+                wrappedTask =
+                    WrapTaskWithContainerAndNapi(std::move(task), currentId, std::move(traceIdFunc));
+                break;
+            case TaskType::IO:
+            case TaskType::GPU:
+            case TaskType::BACKGROUND:
+                wrappedTask = currentId >= 0 ? WrapTaskWithContainer(std::move(task), currentId, std::move(traceIdFunc))
+                                             : std::move(task);
+                break;
+            default:
+                return false;
+        }
+    } else {
+        wrappedTask = currentId >= 0 ? WrapTaskWithContainer(std::move(task), currentId, std::move(traceIdFunc))
+                                     : std::move(task);
+    }
 
     switch (type) {
         case TaskType::PLATFORM:

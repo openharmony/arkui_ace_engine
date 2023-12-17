@@ -181,7 +181,7 @@ AceContainer::AceContainer(int32_t instanceId, FrontendType type,
 AceContainer::AceContainer(int32_t instanceId, FrontendType type,
     std::weak_ptr<OHOS::AbilityRuntime::Context> runtimeContext,
     std::weak_ptr<OHOS::AppExecFwk::AbilityInfo> abilityInfo, std::unique_ptr<PlatformEventCallback> callback,
-    std::shared_ptr<TaskWrapper> caller,
+    std::shared_ptr<TaskWrapper> taskWrapper,
     bool useCurrentEventRunner, bool isSubAceContainer, bool useNewPipeline)
     : instanceId_(instanceId), type_(type), runtimeContext_(std::move(runtimeContext)),
       abilityInfo_(std::move(abilityInfo)), useCurrentEventRunner_(useCurrentEventRunner),
@@ -192,7 +192,7 @@ AceContainer::AceContainer(int32_t instanceId, FrontendType type,
         SetUseNewPipeline();
     }
     if (!isSubContainer_) {
-        InitializeTask(caller);
+        InitializeTask(taskWrapper);
     }
     platformEventCallback_ = std::move(callback);
     useStageModel_ = true;
@@ -204,10 +204,15 @@ AceContainer::~AceContainer()
     LOG_DESTROY();
 }
 
-void AceContainer::InitializeTask(std::shared_ptr<TaskWrapper> caller)
+void AceContainer::InitializeTask(std::shared_ptr<TaskWrapper> taskWrapper)
 {
     if (SystemProperties::GetFlutterDecouplingEnabled()) {
-        auto taskExecutorImpl = Referenced::MakeRefPtr<TaskExecutorImpl>();
+        RefPtr<TaskExecutorImpl> taskExecutorImpl;
+        if (taskWrapper != nullptr) {
+            taskExecutorImpl = Referenced::MakeRefPtr<TaskExecutorImpl>(taskWrapper);
+        } else {
+            taskExecutorImpl = Referenced::MakeRefPtr<TaskExecutorImpl>();
+        }
         taskExecutorImpl->InitPlatformThread(useCurrentEventRunner_);
         taskExecutor_ = taskExecutorImpl;
         // No need to create JS Thread for DECLARATIVE_JS
@@ -218,8 +223,8 @@ void AceContainer::InitializeTask(std::shared_ptr<TaskWrapper> caller)
         }
     } else {
         RefPtr<FlutterTaskExecutor> flutterTaskExecutor;
-        if (caller != nullptr) {
-            flutterTaskExecutor = Referenced::MakeRefPtr<FlutterTaskExecutor>(caller);
+        if (taskWrapper != nullptr) {
+            flutterTaskExecutor = Referenced::MakeRefPtr<FlutterTaskExecutor>(taskWrapper);
         } else {
             flutterTaskExecutor = Referenced::MakeRefPtr<FlutterTaskExecutor>();
         }
