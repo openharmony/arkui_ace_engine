@@ -440,20 +440,17 @@ void ListTestNg::ScrollSnap(float offset, float velocity)
 {
     pattern_->OnScrollSnapCallback(offset, velocity);
     FlushLayoutTask(frameNode_);
-    auto motion = pattern_->scrollableEvent_->GetScrollable()->scrollSnapMotion_;
-    if (motion) {
-        float endValue = motion->GetEndValue();
-        pattern_->ScrollBy(-endValue);
-        FlushLayoutTask(frameNode_);
-    }
+    float endValue = pattern_->scrollableEvent_->GetScrollable()->GetSnapFinalPosition();
+    pattern_->ScrollBy(-endValue);
+    FlushLayoutTask(frameNode_);
 }
 
 void ListTestNg::ScrollToIndex(int32_t index, bool smooth, ScrollAlign align)
 {
     pattern_->ScrollToIndex(index, smooth, align);
     FlushLayoutTask(frameNode_);
-    if (smooth && pattern_->springMotion_) {
-        float endValue = pattern_->springMotion_->GetEndValue();
+    if (smooth) {
+        float endValue = pattern_->GetFinalPosition();
         pattern_->ScrollTo(endValue);
         FlushLayoutTask(frameNode_);
     }
@@ -463,8 +460,8 @@ void ListTestNg::ScrollToItemInGroup(int32_t index, int32_t indexInGroup, bool s
 {
     pattern_->ScrollToItemInGroup(index, indexInGroup, smooth, align);
     FlushLayoutTask(frameNode_);
-    if (smooth && pattern_->springMotion_) {
-        float endValue = pattern_->springMotion_->GetEndValue();
+    if (smooth) {
+        float endValue = pattern_->GetFinalPosition();
         pattern_->ScrollTo(endValue);
         FlushLayoutTask(frameNode_);
     }
@@ -637,10 +634,10 @@ AssertionResult ListTestNg::ScrollToIndex(int32_t index, bool smooth, ScrollAlig
     float startOffset = pattern_->GetTotalOffset();
     pattern_->ScrollToIndex(index, smooth, align);
     FlushLayoutTask(frameNode_);
-    if (smooth && pattern_->springMotion_) {
+    if (smooth) {
         // Straight to the end of the anmiation
         // can not exceed scrollableDistance if is not spring
-        float endValue = pattern_->springMotion_->GetEndValue();
+        float endValue = pattern_->GetFinalPosition();
         float scrollableDistance = pattern_->GetScrollableDistance();
         float two = 2.f;
         if (GreatNotEqual(endValue - startOffset * two, scrollableDistance)) {
@@ -649,7 +646,8 @@ AssertionResult ListTestNg::ScrollToIndex(int32_t index, bool smooth, ScrollAlig
         if (LessNotEqual(endValue, 0)) {
             endValue = 0;
         }
-        pattern_->springMotion_->NotifyListener(endValue);
+        pattern_->UpdateCurrentOffset(pattern_->GetTotalOffset() - endValue,
+            SCROLL_FROM_ANIMATION_CONTROLLER);
         FlushLayoutTask(frameNode_);
     }
     float currentOffset = pattern_->GetTotalOffset();
@@ -665,10 +663,10 @@ AssertionResult ListTestNg::ScrollToItemInGroup(
     float startOffset = pattern_->GetTotalOffset();
     pattern_->ScrollToItemInGroup(index, indexInGroup, smooth, align);
     FlushLayoutTask(frameNode_);
-    if (smooth && pattern_->springMotion_) {
+    if (smooth) {
         // Straight to the end of the anmiation
         // can not exceed scrollableDistance if is not spring
-        float endValue = pattern_->springMotion_->GetEndValue();
+        float endValue = pattern_->GetFinalPosition();
         float scrollableDistance = pattern_->GetScrollableDistance();
         float two = 2.f;
         if (GreatNotEqual(endValue - startOffset * two, scrollableDistance)) {
@@ -677,7 +675,8 @@ AssertionResult ListTestNg::ScrollToItemInGroup(
         if (LessNotEqual(endValue, 0)) {
             endValue = 0;
         }
-        pattern_->springMotion_->NotifyListener(endValue);
+        pattern_->UpdateCurrentOffset(pattern_->GetTotalOffset() - endValue,
+            SCROLL_FROM_ANIMATION_CONTROLLER);
         FlushLayoutTask(frameNode_);
     }
     float currentOffset = pattern_->GetTotalOffset();
@@ -5010,15 +5009,15 @@ HWTEST_F(ListTestNg, Pattern002, TestSize.Level1)
     CreateWithItem([](ListModelNG model) {});
 
     pattern_->AnimateTo(0, 0, nullptr, true);
-    EXPECT_NE(pattern_->animator_, nullptr);
+    EXPECT_NE(pattern_->springAnimation_, nullptr);
 
-    pattern_->animator_->Pause();
+    pattern_->StopAnimate();
     pattern_->AnimateTo(0, 0, nullptr, true);
-    EXPECT_NE(pattern_->animator_, nullptr);
+    EXPECT_NE(pattern_->springAnimation_, nullptr);
 
-    pattern_->animator_->Stop();
-    pattern_->AnimateTo(0, 0, nullptr, true);
-    EXPECT_NE(pattern_->animator_, nullptr);
+    pattern_->StopAnimate();
+    pattern_->AnimateTo(0, 0, nullptr, false);
+    EXPECT_NE(pattern_->curveAnimation_, nullptr);
 }
 
 /**
@@ -5649,14 +5648,13 @@ HWTEST_F(ListTestNg, Pattern005, TestSize.Level1)
      * @tc.expected: Would stop.
      */
     pattern_->AnimateTo(0, 0, nullptr, true);
-    pattern_->animator_->Resume();
-    EXPECT_TRUE(pattern_->animator_->IsRunning());
+    EXPECT_TRUE(pattern_->IsAnimationStop());
     pattern_->OnScrollPosition(100.f, SCROLL_FROM_START);
-    EXPECT_TRUE(pattern_->scrollAbort_);
+    EXPECT_FALSE(pattern_->scrollAbort_);
     pattern_->OnScrollCallback(100.f, SCROLL_FROM_START);
-    EXPECT_TRUE(pattern_->scrollAbort_);
+    EXPECT_FALSE(pattern_->scrollAbort_);
     EXPECT_TRUE(IsEqualTotalOffset(0));
-    EXPECT_TRUE(pattern_->animator_->IsStopped());
+    EXPECT_TRUE(pattern_->IsAnimationStop());
 
     /**
      * @tc.steps: step2. When has animator_ and stop, call OnScrollCallback.
@@ -6215,9 +6213,9 @@ HWTEST_F(ListTestNg, ListPattern_UpdateScrollSnap001, TestSize.Level1)
     CreateWithItem([](ListModelNG model) {});
     pattern_->AnimateTo(0, 0, nullptr, true);
     pattern_->UpdateScrollSnap();
-    EXPECT_FALSE(pattern_->predictSnapOffset_.has_value());
+    EXPECT_TRUE(pattern_->predictSnapOffset_.has_value());
 
-    pattern_->animator_->Stop();
+    pattern_->StopAnimate();
     pattern_->UpdateScrollSnap();
     EXPECT_EQ(pattern_->predictSnapOffset_.value(), 0.0);
 }

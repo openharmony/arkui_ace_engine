@@ -459,6 +459,7 @@ source_set("ace_components_mock") {
     "$ace_root/test/mock/core/common/mock_interaction.cpp",
     "$ace_root/test/mock/core/common/mock_motion_path_evaluator.cpp",
     "$ace_root/test/mock/core/common/mock_scrollable.cpp",
+    "$ace_root/test/mock/core/common/mock_scrollable_ng.cpp",
     "$ace_root/test/mock/core/common/mock_theme_constants.cpp",
     "$ace_root/test/mock/core/common/mock_theme_utils.cpp",
     "$ace_root/test/mock/core/event/mock_time_event_proxy.cpp",

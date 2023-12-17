@@ -18,7 +18,7 @@
 #include "base/geometry/axis.h"
 #include "base/geometry/dimension.h"
 #include "base/utils/utils.h"
-#include "core/components/scroll/scrollable.h"
+#include "core/components_ng/pattern/scrollable/scrollable.h"
 #include "core/components_ng/pattern/scroll/scroll_edge_effect.h"
 #include "core/components_ng/pattern/scroll/scroll_event_hub.h"
 #include "core/components_ng/pattern/scroll/scroll_layout_algorithm.h"
