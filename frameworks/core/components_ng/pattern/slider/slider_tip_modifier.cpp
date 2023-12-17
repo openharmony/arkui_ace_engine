@@ -107,123 +107,88 @@ void SliderTipModifier::PaintText(DrawingContext& context)
     paragraph_->Paint(context.canvas, textOffset_.GetX(), textOffset_.GetY());
 }
 
-void SliderTipModifier::CalculateHorizontalPoints(float vertexOffsetFromBlock, std::vector<OffsetF>& clockwisePoints)
+void SliderTipModifier::PaintHorizontalBubble(float vertexOffsetFromBlock, RSPath& path)
 {
+    float arrowRadius = static_cast<float>(ARROW_RADIUS.ConvertToPx());
     auto arrowSizeWidth = static_cast<float>(ARROW_WIDTH.ConvertToPx());
     auto arrowSizeHeight = static_cast<float>(ARROW_HEIGHT.ConvertToPx());
     auto arrowHorizonOffset = static_cast<float>(ARROW_HORIZON_OFFSET.ConvertToPx());
     auto arrowVerticalOffset = static_cast<float>(ARROW_VERTICAL_OFFSET.ConvertToPx());
+    float circularRadius = (bubbleSize_.Height() - arrowSizeHeight) * HALF;
     if (sliderGlobalOffset_.GetY() + vertex_.GetY() < bubbleSize_.Height()) {
         vertex_.AddY(vertexOffsetFromBlock / HALF);
         isMask_ = true;
-        clockwisePoints.emplace_back(vertex_.GetX() + arrowHorizonOffset, vertex_.GetY() + arrowVerticalOffset);
-        clockwisePoints.emplace_back(vertex_.GetX() + arrowSizeWidth * HALF, vertex_.GetY() + arrowSizeHeight);
-        clockwisePoints.emplace_back(vertex_.GetX() + arrowSizeWidth * HALF, vertex_.GetY() + bubbleSize_.Height());
-        clockwisePoints.emplace_back(vertex_.GetX() - arrowSizeWidth * HALF, vertex_.GetY() + bubbleSize_.Height());
-        clockwisePoints.emplace_back(vertex_.GetX() - arrowSizeWidth * HALF, vertex_.GetY() + arrowSizeHeight);
-        clockwisePoints.emplace_back(vertex_.GetX() - arrowHorizonOffset * HALF, vertex_.GetY() + arrowVerticalOffset);
+        path.MoveTo(vertex_.GetX(), vertex_.GetY());
+        path.ArcTo(arrowRadius, arrowRadius, 0.0f, RSPathDirection::CW_DIRECTION, vertex_.GetX() + arrowHorizonOffset,
+            vertex_.GetY() + arrowVerticalOffset);
+        path.LineTo(vertex_.GetX() + arrowSizeWidth * HALF, vertex_.GetY() + arrowSizeHeight);
+        path.ArcTo(circularRadius, circularRadius, 0.0f, RSPathDirection::CW_DIRECTION,
+            vertex_.GetX() + arrowSizeWidth * HALF, vertex_.GetY() + bubbleSize_.Height());
+        path.LineTo(vertex_.GetX() - arrowSizeWidth * HALF, vertex_.GetY() + bubbleSize_.Height());
+        path.ArcTo(circularRadius, circularRadius, 0.0f, RSPathDirection::CW_DIRECTION,
+            vertex_.GetX() - arrowSizeWidth * HALF, vertex_.GetY() + arrowSizeHeight);
+        path.LineTo(vertex_.GetX() - arrowHorizonOffset * HALF, vertex_.GetY() + arrowVerticalOffset);
     } else {
         isMask_ = false;
-        clockwisePoints.emplace_back(vertex_.GetX() - arrowHorizonOffset, vertex_.GetY() - arrowVerticalOffset);
-        clockwisePoints.emplace_back(vertex_.GetX() - arrowSizeWidth * HALF, vertex_.GetY() - arrowSizeHeight);
-        clockwisePoints.emplace_back(vertex_.GetX() - arrowSizeWidth * HALF, vertex_.GetY() - bubbleSize_.Height());
-        clockwisePoints.emplace_back(vertex_.GetX() + arrowSizeWidth * HALF, vertex_.GetY() - bubbleSize_.Height());
-        clockwisePoints.emplace_back(vertex_.GetX() + arrowSizeWidth * HALF, vertex_.GetY() - arrowSizeHeight);
-        clockwisePoints.emplace_back(vertex_.GetX() + arrowHorizonOffset * HALF, vertex_.GetY() - arrowVerticalOffset);
+        path.MoveTo(vertex_.GetX(), vertex_.GetY());
+        path.ArcTo(arrowRadius, arrowRadius, 0.0f, RSPathDirection::CW_DIRECTION, vertex_.GetX() - arrowHorizonOffset,
+            vertex_.GetY() - arrowVerticalOffset);
+        path.LineTo(vertex_.GetX() - arrowSizeWidth * HALF, vertex_.GetY() - arrowSizeHeight);
+        path.ArcTo(circularRadius, circularRadius, 0.0f, RSPathDirection::CW_DIRECTION,
+            vertex_.GetX() - arrowSizeWidth * HALF, vertex_.GetY() - bubbleSize_.Height());
+        path.LineTo(vertex_.GetX() + arrowSizeWidth * HALF, vertex_.GetY() - bubbleSize_.Height());
+        path.ArcTo(circularRadius, circularRadius, 0.0f, RSPathDirection::CW_DIRECTION,
+            vertex_.GetX() + arrowSizeWidth * HALF, vertex_.GetY() - arrowSizeHeight);
+        path.LineTo(vertex_.GetX() + arrowHorizonOffset * HALF, vertex_.GetY() - arrowVerticalOffset);
     }
+    path.ArcTo(arrowRadius, arrowRadius, 0.0f, RSPathDirection::CW_DIRECTION, vertex_.GetX(), vertex_.GetY());
 }
 
-void SliderTipModifier::CalculateVerticalPoints(float vertexOffsetFromBlock, std::vector<OffsetF>& clockwisePoints)
+void SliderTipModifier::PaintVerticalBubble(float vertexOffsetFromBlock, RSPath& path)
 {
     auto arrowWidth = static_cast<float>(ARROW_WIDTH.ConvertToPx());
     auto arrowHeight = static_cast<float>(ARROW_HEIGHT.ConvertToPx());
     auto circularOffset = static_cast<float>(CIRCULAR_HORIZON_OFFSET.ConvertToPx());
     auto arrowHorizonOffset = static_cast<float>(ARROW_HORIZON_OFFSET.ConvertToPx());
     auto arrowVerticalOffset = static_cast<float>(ARROW_VERTICAL_OFFSET.ConvertToPx());
+    float arrowRadius = static_cast<float>(ARROW_RADIUS.ConvertToPx());
+    float circularRadius = bubbleSize_.Height() * HALF;
     if (sliderGlobalOffset_.GetX() + vertex_.GetX() < bubbleSize_.Width()) {
         vertex_.AddX(vertexOffsetFromBlock / HALF);
         isMask_ = true;
-        clockwisePoints.emplace_back(vertex_.GetX() + arrowVerticalOffset, vertex_.GetY() - arrowHorizonOffset);
-        clockwisePoints.emplace_back(vertex_.GetX() + arrowHeight, vertex_.GetY() - arrowWidth * HALF);
-        clockwisePoints.emplace_back(
-            vertex_.GetX() + arrowHeight + circularOffset, vertex_.GetY() - bubbleSize_.Height() / 2);
-        clockwisePoints.emplace_back(
-            vertex_.GetX() + bubbleSize_.Width() - bubbleSize_.Height() / 2, vertex_.GetY() - bubbleSize_.Height() / 2);
-        clockwisePoints.emplace_back(
-            vertex_.GetX() + bubbleSize_.Width() - bubbleSize_.Height() / 2, vertex_.GetY() + bubbleSize_.Height() / 2);
-        clockwisePoints.emplace_back(
-            vertex_.GetX() + arrowHeight + circularOffset, vertex_.GetY() + bubbleSize_.Height() / 2);
-        clockwisePoints.emplace_back(vertex_.GetX() + arrowHeight, vertex_.GetY() + arrowWidth * HALF);
-        clockwisePoints.emplace_back(vertex_.GetX() + arrowVerticalOffset, vertex_.GetY() + arrowHorizonOffset);
+        path.MoveTo(vertex_.GetX(), vertex_.GetY());
+        path.ArcTo(arrowRadius, arrowRadius, 0.0f, RSPathDirection::CW_DIRECTION, vertex_.GetX() + arrowVerticalOffset,
+            vertex_.GetY() - arrowHorizonOffset);
+        path.LineTo(vertex_.GetX() + arrowHeight, vertex_.GetY() - arrowWidth * HALF);
+        path.ArcTo(circularRadius, circularRadius, 0.0f, RSPathDirection::CW_DIRECTION,
+            vertex_.GetX() + arrowHeight + circularOffset, vertex_.GetY() - bubbleSize_.Height() * HALF);
+        path.LineTo(vertex_.GetX() + bubbleSize_.Width() - bubbleSize_.Height() * HALF,
+            vertex_.GetY() - bubbleSize_.Height() * HALF);
+        path.ArcTo(circularRadius, circularRadius, 0.0f, RSPathDirection::CW_DIRECTION,
+            vertex_.GetX() + bubbleSize_.Width() - bubbleSize_.Height() * HALF,
+            vertex_.GetY() + bubbleSize_.Height() * HALF);
+        path.LineTo(vertex_.GetX() + arrowHeight + circularOffset, vertex_.GetY() + bubbleSize_.Height() * HALF);
+        path.ArcTo(circularRadius, circularRadius, 0.0f, RSPathDirection::CW_DIRECTION, vertex_.GetX() + arrowHeight,
+            vertex_.GetY() + arrowWidth * HALF);
+        path.LineTo(vertex_.GetX() + arrowVerticalOffset, vertex_.GetY() + arrowHorizonOffset);
     } else {
         isMask_ = false;
-        clockwisePoints.emplace_back(vertex_.GetX() - arrowVerticalOffset, vertex_.GetY() + arrowHorizonOffset);
-        clockwisePoints.emplace_back(vertex_.GetX() - arrowHeight, vertex_.GetY() + arrowWidth * HALF);
-        clockwisePoints.emplace_back(
-            vertex_.GetX() - arrowHeight - circularOffset, vertex_.GetY() + bubbleSize_.Height() / 2);
-        clockwisePoints.emplace_back(
-            vertex_.GetX() - bubbleSize_.Width() + bubbleSize_.Height() / 2, vertex_.GetY() + bubbleSize_.Height() / 2);
-        clockwisePoints.emplace_back(
-            vertex_.GetX() - bubbleSize_.Width() + bubbleSize_.Height() / 2, vertex_.GetY() - bubbleSize_.Height() / 2);
-        clockwisePoints.emplace_back(
-            vertex_.GetX() - arrowHeight - circularOffset, vertex_.GetY() - bubbleSize_.Height() / 2);
-        clockwisePoints.emplace_back(vertex_.GetX() - arrowHeight, vertex_.GetY() - arrowWidth * HALF);
-        clockwisePoints.emplace_back(vertex_.GetX() - arrowVerticalOffset, vertex_.GetY() - arrowHorizonOffset);
+        path.MoveTo(vertex_.GetX(), vertex_.GetY());
+        path.ArcTo(arrowRadius, arrowRadius, 0.0f, RSPathDirection::CW_DIRECTION, vertex_.GetX() - arrowVerticalOffset,
+            vertex_.GetY() + arrowHorizonOffset);
+        path.LineTo(vertex_.GetX() - arrowHeight, vertex_.GetY() + arrowWidth * HALF);
+        path.ArcTo(circularRadius, circularRadius, 0.0f, RSPathDirection::CW_DIRECTION,
+            vertex_.GetX() - arrowHeight - circularOffset, vertex_.GetY() + bubbleSize_.Height() * HALF);
+        path.LineTo(vertex_.GetX() - bubbleSize_.Width() + bubbleSize_.Height() * HALF,
+            vertex_.GetY() + bubbleSize_.Height() * HALF);
+        path.ArcTo(circularRadius, circularRadius, 0.0f, RSPathDirection::CW_DIRECTION,
+            vertex_.GetX() - bubbleSize_.Width() + bubbleSize_.Height() * HALF,
+            vertex_.GetY() - bubbleSize_.Height() * HALF);
+        path.LineTo(vertex_.GetX() - arrowHeight - circularOffset, vertex_.GetY() - bubbleSize_.Height() * HALF);
+        path.ArcTo(circularRadius, circularRadius, 0.0f, RSPathDirection::CW_DIRECTION, vertex_.GetX() - arrowHeight,
+            vertex_.GetY() - arrowWidth * HALF);
+        path.LineTo(vertex_.GetX() - arrowVerticalOffset, vertex_.GetY() - arrowHorizonOffset);
     }
-}
-
-void SliderTipModifier::PaintHorizontalBubble(float vertexOffsetFromBlock, RSPath& path)
-{
-    std::vector<OffsetF> clockwisePoints;
-    float circularRadius = (bubbleSize_.Height() - static_cast<float>(ARROW_HEIGHT.ConvertToPx())) * HALF;
-    float arrowRadius = static_cast<float>(ARROW_RADIUS.ConvertToPx());
-    int32_t index = 0;
-    CalculateHorizontalPoints(vertexOffsetFromBlock, clockwisePoints);
-    path.MoveTo(vertex_.GetX(), vertex_.GetY());
-    path.ArcTo(arrowRadius, arrowRadius, 0.0f, RSPathDirection::CW_DIRECTION, clockwisePoints[index].GetX(),
-        clockwisePoints[index].GetY());
-    index++;
-    path.LineTo(clockwisePoints[index].GetX(), clockwisePoints[index].GetY());
-    index++;
-    path.ArcTo(circularRadius, circularRadius, 0.0f, RSPathDirection::CW_DIRECTION, clockwisePoints[index].GetX(),
-        clockwisePoints[index].GetY());
-    index++;
-    path.LineTo(clockwisePoints[index].GetX(), clockwisePoints[index].GetY());
-    index++;
-    path.ArcTo(circularRadius, circularRadius, 0.0f, RSPathDirection::CW_DIRECTION, clockwisePoints[index].GetX(),
-        clockwisePoints[index].GetY());
-    index++;
-    path.LineTo(clockwisePoints[index].GetX(), clockwisePoints[index].GetY());
-    path.ArcTo(arrowRadius, arrowRadius, 0.0f, RSPathDirection::CW_DIRECTION, vertex_.GetX(), vertex_.GetY());
-}
-
-void SliderTipModifier::PaintVerticalBubble(float vertexOffsetFromBlock, RSPath& path)
-{
-    std::vector<OffsetF> clockwisePoints;
-    float circularRadius = bubbleSize_.Height() * HALF;
-    float arrowRadius = static_cast<float>(ARROW_RADIUS.ConvertToPx());
-    int32_t index = 0;
-    CalculateVerticalPoints(vertexOffsetFromBlock, clockwisePoints);
-    path.MoveTo(vertex_.GetX(), vertex_.GetY());
-    path.ArcTo(arrowRadius, arrowRadius, 0.0f, RSPathDirection::CW_DIRECTION, clockwisePoints[index].GetX(),
-        clockwisePoints[index].GetY());
-    index++;
-    path.LineTo(clockwisePoints[index].GetX(), clockwisePoints[index].GetY());
-    index++;
-    path.ArcTo(circularRadius, circularRadius, 0.0f, RSPathDirection::CW_DIRECTION, clockwisePoints[index].GetX(),
-        clockwisePoints[index].GetY());
-    index++;
-    path.LineTo(clockwisePoints[index].GetX(), clockwisePoints[index].GetY());
-    index++;
-    path.ArcTo(circularRadius, circularRadius, 0.0f, RSPathDirection::CW_DIRECTION, clockwisePoints[index].GetX(),
-        clockwisePoints[index].GetY());
-    index++;
-    path.LineTo(clockwisePoints[index].GetX(), clockwisePoints[index].GetY());
-    index++;
-    path.ArcTo(circularRadius, circularRadius, 0.0f, RSPathDirection::CW_DIRECTION, clockwisePoints[index].GetX(),
-        clockwisePoints[index].GetY());
-    index++;
-    path.LineTo(clockwisePoints[index].GetX(), clockwisePoints[index].GetY());
     path.ArcTo(arrowRadius, arrowRadius, 0.0f, RSPathDirection::CW_DIRECTION, vertex_.GetX(), vertex_.GetY());
 }
 

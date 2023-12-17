@@ -353,6 +353,22 @@ void SliderPattern::HandledGestureEvent()
     UpdateMarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
+OffsetF SliderPattern::CalculateGlobalSafeOffset()
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, OffsetF());
+    auto overlayGlobalOffset = host->GetPaintRectOffset();
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipelineContext, OffsetF());
+    auto safeAreaManger = pipelineContext->GetSafeAreaManager();
+    CHECK_NULL_RETURN(safeAreaManger, OffsetF());
+    auto top = safeAreaManger->GetSystemSafeArea().top_.Length();
+    overlayGlobalOffset.SetY(overlayGlobalOffset.GetY() - top);
+    auto windowWrapperOffset = safeAreaManger->GetWindowWrapperOffset();
+    overlayGlobalOffset -= windowWrapperOffset;
+    return overlayGlobalOffset;
+}
+
 void SliderPattern::UpdateValueByLocalLocation(const std::optional<Offset>& localLocation)
 {
     CHECK_NULL_VOID(localLocation.has_value());

@@ -123,8 +123,6 @@ public:
     bool UpdateOverlayRect(const SizeF& frameSize);
 
 private:
-    void CalculateHorizontalPoints(float vertexOffsetFromBlock, std::vector<OffsetF>& clockwisePoints);
-    void CalculateVerticalPoints(float vertexOffsetFromBlock, std::vector<OffsetF>& clockwisePoints);
     void PaintHorizontalBubble(float vertexOffsetFromBlock, RSPath& path);
     void PaintVerticalBubble(float vertexOffsetFromBlock, RSPath& path);
     void PaintText(DrawingContext& context);
