@@ -29,9 +29,7 @@ const int POS_0 = 0;
 const int POS_1 = 1;
 const int POS_2 = 2;
 static const char* ERR_CODE = "-1";
-const std::string DEFAULT_SIZE = "16.0vp";
 const std::string DEFAULT_FONT_WEIGHT = "normal";
-const std::string DEFAULT_FONT_FAMILY = "HarmonyOS Sans";
 const std::vector<OHOS::Ace::FontStyle> FONT_STYLES = { OHOS::Ace::FontStyle::NORMAL, OHOS::Ace::FontStyle::ITALIC };
 void SetMenuItemSelected(NodeHandle node, bool value)
 {
@@ -82,7 +80,7 @@ void SetLabelFont(NodeHandle node, const char* fontInfo, int32_t styleVal)
     if (res.empty() || res.size() != SIZE_OF_FONT_INFO) {
         return;
     }
-    CalcDimension fontSize = Dimension(-1.0);
+    CalcDimension fontSize;
     if (res[POS_0] != ERR_CODE) {
         fontSize = StringUtils::StringToCalcDimension(res[POS_0], false, DimensionUnit::FP);
     }
@@ -96,8 +94,6 @@ void SetLabelFont(NodeHandle node, const char* fontInfo, int32_t styleVal)
 
     if (styleVal >= 0 && styleVal < static_cast<int32_t>(FONT_STYLES.size())) {
         MenuItemModelNG::SetLabelFontStyle(frameNode, FONT_STYLES[styleVal]);
-    } else {
-        MenuItemModelNG::SetLabelFontStyle(frameNode, FONT_STYLES[0]);
     }
 
     if (res[POS_2] != ERR_CODE) {
@@ -108,17 +104,10 @@ void ResetLabelFont(NodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    CalcDimension fontSize =
-        StringUtils::StringToCalcDimension(DEFAULT_SIZE, false, DimensionUnit::FP);
+    CalcDimension fontSize;
     FontWeight fontWeight = StringUtils::StringToFontWeight(DEFAULT_FONT_WEIGHT);
-    std::vector<std::string> fontFamily =
-        Framework::ConvertStrToFontFamilies(std::string(DEFAULT_FONT_FAMILY));
-    OHOS::Ace::FontStyle fontStyle = FONT_STYLES[0];
-
     MenuItemModelNG::SetLabelFontSize(frameNode, fontSize);
     MenuItemModelNG::SetLabelFontWeight(frameNode, fontWeight);
-    MenuItemModelNG::SetLabelFontFamily(frameNode, fontFamily);
-    MenuItemModelNG::SetLabelFontStyle(frameNode, fontStyle);
 }
 void SetContentFont(NodeHandle node, const char* fontInfo, int32_t styleVal)
 {
@@ -132,7 +121,7 @@ void SetContentFont(NodeHandle node, const char* fontInfo, int32_t styleVal)
         return;
     }
 
-    CalcDimension fontSize = Dimension(-1.0);
+    CalcDimension fontSize;
     if (res[POS_0] != ERR_CODE) {
         fontSize = StringUtils::StringToCalcDimension(res[POS_0], false, DimensionUnit::FP);
     }
@@ -146,8 +135,6 @@ void SetContentFont(NodeHandle node, const char* fontInfo, int32_t styleVal)
 
     if (styleVal >= 0 && styleVal < static_cast<int32_t>(FONT_STYLES.size())) {
         MenuItemModelNG::SetFontStyle(frameNode, FONT_STYLES[styleVal]);
-    } else {
-        MenuItemModelNG::SetFontStyle(frameNode, FONT_STYLES[0]);
     }
 
     if (res[POS_2] != ERR_CODE) {
@@ -158,17 +145,10 @@ void ResetContentFont(NodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    CalcDimension fontSize =
-        StringUtils::StringToCalcDimension(DEFAULT_SIZE, false, DimensionUnit::FP);
+    CalcDimension fontSize;
     FontWeight fontWeight = StringUtils::StringToFontWeight(DEFAULT_FONT_WEIGHT);
-    std::vector<std::string> fontFamily =
-        Framework::ConvertStrToFontFamilies(std::string(DEFAULT_FONT_FAMILY));
-    OHOS::Ace::FontStyle fontStyle = FONT_STYLES[0];
-
     MenuItemModelNG::SetFontSize(frameNode, fontSize);
     MenuItemModelNG::SetFontWeight(frameNode, fontWeight);
-    MenuItemModelNG::SetFontFamily(frameNode, fontFamily);
-    MenuItemModelNG::SetFontStyle(frameNode, fontStyle);
 }
 
 ArkUIMenuItemModifierAPI GetMenuItemModifier()

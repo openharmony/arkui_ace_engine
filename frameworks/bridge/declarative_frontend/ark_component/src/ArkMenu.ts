@@ -55,13 +55,11 @@ class MenuFontModifier extends ModifierWithKey<Font> {
   }
 
   checkObjectDiff(): boolean {
-    if (!(this.stageValue.weight === this.value.weight &&
-      this.stageValue.style === this.value.style)) {
-      return true;
-    } else {
-      return !isBaseOrResourceEqual(this.stageValue.size, this.value.size) ||
-        !isBaseOrResourceEqual(this.stageValue.family, this.value.family);
-    }
+    let sizeEQ = isBaseOrResourceEqual(this.stageValue.size, this.value.size);
+    let weightEQ = this.stageValue.weight === this.value.weight;
+    let familyEQ = isBaseOrResourceEqual(this.stageValue.family, this.value.family);
+    let styleEQ = this.stageValue.style === this.value.style;
+    return !sizeEQ || !weightEQ || !familyEQ || !styleEQ;
   }
 }
 

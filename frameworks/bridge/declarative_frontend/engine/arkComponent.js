@@ -13544,14 +13544,11 @@ class MenuFontModifier extends ModifierWithKey {
     }
   }
   checkObjectDiff() {
-    if (!(this.stageValue.weight === this.value.weight &&
-      this.stageValue.style === this.value.style)) {
-      return true;
-    }
-    else {
-      return !isBaseOrResourceEqual(this.stageValue.size, this.value.size) ||
-        !isBaseOrResourceEqual(this.stageValue.family, this.value.family);
-    }
+    let sizeEQ = isBaseOrResourceEqual(this.stageValue.size, this.value.size);
+    let weightEQ = this.stageValue.weight === this.value.weight;
+    let familyEQ = isBaseOrResourceEqual(this.stageValue.family, this.value.family);
+    let styleEQ = this.stageValue.style === this.value.style;
+    return !sizeEQ || !weightEQ || !familyEQ || !styleEQ;
   }
 }
 MenuFontModifier.identity = Symbol('font');
@@ -13696,18 +13693,11 @@ class LabelFontModifier extends ModifierWithKey {
     }
   }
   checkObjectDiff() {
-    if (isResource(this.stageValue) && isResource(this.value)) {
-      return !isResourceEqual(this.stageValue, this.value);
-    }
-    else if (!isResource(this.stageValue) && !isResource(this.value)) {
-      return !(this.stageValue.size === this.value.size &&
-        this.stageValue.weight === this.value.weight &&
-        this.stageValue.family === this.value.family &&
-        this.stageValue.style === this.value.style);
-    }
-    else {
-      return true;
-    }
+    let sizeEQ = isBaseOrResourceEqual(this.stageValue.size, this.value.size);
+    let weightEQ = this.stageValue.weight === this.value.weight;
+    let familyEQ = isBaseOrResourceEqual(this.stageValue.family, this.value.family);
+    let styleEQ = this.stageValue.style === this.value.style;
+    return !sizeEQ || !weightEQ || !familyEQ || !styleEQ;
   }
 }
 LabelFontModifier.identity = Symbol('labelFont');
@@ -13724,18 +13714,11 @@ class ContentFontModifier extends ModifierWithKey {
     }
   }
   checkObjectDiff() {
-    if (isResource(this.stageValue) && isResource(this.value)) {
-      return !isResourceEqual(this.stageValue, this.value);
-    }
-    else if (!isResource(this.stageValue) && !isResource(this.value)) {
-      return !(this.stageValue.size === this.value.size &&
-        this.stageValue.weight === this.value.weight &&
-        this.stageValue.family === this.value.family &&
-        this.stageValue.style === this.value.style);
-    }
-    else {
-      return true;
-    }
+    let sizeEQ = isBaseOrResourceEqual(this.stageValue.size, this.value.size);
+    let weightEQ = this.stageValue.weight === this.value.weight;
+    let familyEQ = isBaseOrResourceEqual(this.stageValue.family, this.value.family);
+    let styleEQ = this.stageValue.style === this.value.style;
+    return !sizeEQ || !weightEQ || !familyEQ || !styleEQ;
   }
 }
 ContentFontModifier.identity = Symbol('contentFont');
