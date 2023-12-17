@@ -61,6 +61,7 @@
 #include "core/components_ng/pattern/overlay/sheet_presentation_pattern.h"
 #include "core/components_ng/pattern/overlay/sheet_style.h"
 #include "core/components_ng/pattern/overlay/sheet_theme.h"
+#include "core/components_ng/pattern/overlay/sheet_view.h"
 #include "core/components_ng/pattern/picker/picker_type_define.h"
 #include "core/components_ng/pattern/root/root_pattern.h"
 #include "core/components_ng/pattern/scroll/scroll_pattern.h"
@@ -2362,6 +2363,27 @@ HWTEST_F(OverlayManagerTestNg, TestSheetAvoidSafeArea2, TestSize.Level1)
     sheetPattern->OnWindowSizeChanged(800, 2000, WindowSizeChangeReason::RESIZE);
     sheetPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, DirtySwapConfig());
     EXPECT_FALSE(sheetPattern->windowRotate_);
+}
+
+/**
+ * @tc.name: TestBindSheet
+ * @tc.desc: Test Sheet avoids aiBar.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTestNg, TestSheetAvoidaiBar, TestSize.Level1)
+{
+    auto operationColumn = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    auto callback = [](const std::string&) {};
+    NG::SheetStyle style;
+    auto sheetNode = SheetView::CreateSheetPage(0, "", operationColumn, operationColumn, std::move(callback), style);
+    ASSERT_NE(sheetNode, nullptr);
+    auto scrollNode = AceType::DynamicCast<FrameNode>(sheetNode->GetChildAtIndex(1));
+    ASSERT_NE(scrollNode, nullptr);
+    auto scrollLayoutProperty = scrollNode->GetLayoutProperty<ScrollLayoutProperty>();
+    ASSERT_NE(scrollLayoutProperty, nullptr);
+    EXPECT_EQ(scrollLayoutProperty->GetScrollContentEndOffsetValue(.0f),
+        PipelineContext::GetCurrentContext()->GetSafeArea().bottom_.Length());
 }
 
 /**
