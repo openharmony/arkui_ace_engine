@@ -270,11 +270,14 @@ void BubbleLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         child->Measure(childLayoutConstraint);
     }
     auto childSize = child->GetGeometryNode()->GetMarginFrameSize();
-    auto litterSide = childSize.Height() > childSize.Width() ? childSize.Width() : childSize.Height();
-    if (borderRadius_.Value() > litterSide / 2) {
-        borderRadius_.SetValue(litterSide / 2);
+    auto littleSide = childSize.Height() > childSize.Width() ? childSize.Width() : childSize.Height();
+    // 2: the half length of the little side
+    auto littleSideHalf = littleSide / 2;
+    if (borderRadius_.Value() > littleSideHalf) {
+        borderRadius_.SetValue(littleSideHalf);
         border_.SetBorderRadius(Radius(borderRadius_));
     }
+    // 2: the max width of arrow is the bubble width - double of borderRadius
     auto arrowMaxWidth = childSize.Width() - 2 * borderRadius_.ConvertToPx();
     auto pipeline = PipelineBase::GetCurrentContext();
     arrowMaxWidth /= pipeline->GetDipScale();
@@ -383,9 +386,10 @@ void BubbleLayoutAlgorithm::InitProps(const RefPtr<BubbleLayoutProperty>& layout
     targetSpace_ = layoutProp->GetTargetSpace().value_or(popupTheme->GetTargetSpace());
     placement_ = layoutProp->GetPlacement().value_or(Placement::BOTTOM);
     scaledBubbleSpacing_ = static_cast<float>(popupTheme->GetBubbleSpacing().ConvertToPx());
-    auto height = layoutProp->GetArrowHeight().value_or(8.0_vp);
-    auto width = layoutProp->GetArrowWidth().value_or(16.0_vp);
+    auto height = layoutProp->GetArrowHeight().value_or(BUBBLE_ARROW_HEIGHT);
+    auto width = layoutProp->GetArrowWidth().value_or(BUBBLE_ARROW_WIDTH);
     calculateArrowPoint(height, width);
+    arrowHeight_ = height.ConvertToPx();
     positionOffset_ = layoutProp->GetPositionOffset().value_or(OffsetF());
     auto constraint = layoutProp->GetLayoutConstraint();
     enableArrow_ = layoutProp->GetEnableArrow().value_or(true);
