@@ -97,6 +97,7 @@ class SynchedPropertyOneWayPU<C> extends ObservedPropertyAbstractPU<C>
               it also lacks @Observed class decorator. Object property changes will not be observed. Application error!`);
         }
         stateMgmtConsole.debug(`${this.debugInfo()}: constructor: wrapping source in a new ObservedPropertyObjectPU`);
+        this.createSourceDependency(sourceValue);
         this.source_ = new ObservedPropertyObjectPU<C>(sourceValue, this, this.getPropSourceObservedPropertyFakeName());
         this.sourceIsOwnObject = true;
       }
@@ -130,7 +131,10 @@ class SynchedPropertyOneWayPU<C> extends ObservedPropertyAbstractPU<C>
     return `@Prop (class SynchedPropertyOneWayPU)`;
   }
 
-  public syncPeerHasChanged(eventSource: ObservedPropertyAbstractPU<C>) {
+  // sync peer can be 
+  // 1. the embedded ObservedPropertyPU, followed by a reset when the owning ViewPU received a local update in parent 
+  // 2. a @Link or @Consume that uses this @Prop as a source.  FIXME is this possible? - see the if (eventSource && this.source_ == eventSource) {
+  public syncPeerHasChanged(eventSource: ObservedPropertyAbstractPU<C>) : void{
     stateMgmtProfiler.begin("SyncedPropertyOneWayPU.syncPeerHasChanged");
     if (this.source_ == undefined) {
       stateMgmtConsole.error(`${this.debugInfo()}: syncPeerHasChanged from peer ${eventSource && eventSource.debugInfo && eventSource.debugInfo()}. source_ undefined. Internal error.`);
@@ -153,20 +157,30 @@ class SynchedPropertyOneWayPU<C> extends ObservedPropertyAbstractPU<C>
     stateMgmtProfiler.end();
   }
 
-  /**
-   * event emited by wrapped ObservedObject, when one of its property values changes
-   * @param souceObject 
-   * @param changedPropertyName 
-   */
-  public objectPropertyHasChangedPU(sourceObject: ObservedObject<C>, changedPropertyName: string) {
-    stateMgmtConsole.debug(`${this.debugInfo()}: objectPropertyHasChangedPU: property '${changedPropertyName}' of object value has changed.`);
-    this.notifyPropertyHasChangedPU();
+
+  public syncPeerTrackedPropertyHasChanged(eventSource: ObservedPropertyAbstractPU<C>, changedPropertyName) : void{
+    stateMgmtProfiler.begin("SyncedPropertyOneWayPU.syncPeerTrackedPropertyHasChanged");
+    if (this.source_ == undefined) {
+      stateMgmtConsole.error(`${this.debugInfo()}: syncPeerTrackedPropertyHasChanged from peer ${eventSource && eventSource.debugInfo && eventSource.debugInfo()}. source_ undefined. Internal error.`);
+      stateMgmtProfiler.end();
+      return;
+    }
+
+    if (eventSource && this.source_ == eventSource) {
+      // defensive programming: should always be the case!
+      const newValue = this.source_.getUnmonitored();
+      if (this.checkIsSupportedValue(newValue)) {
+        stateMgmtConsole.debug(`${this.debugInfo()}: syncPeerTrackedPropertyHasChanged: from peer '${eventSource && eventSource.debugInfo && eventSource.debugInfo()}', local value about to change.`);
+        if (this.resetLocalValue(newValue, /* needCopyObject */ true)) {
+          this.notifyTrackedObjectPropertyHasChanged(changedPropertyName);
+        }
+      }
+    } else {
+      stateMgmtConsole.warn(`${this.debugInfo()}: syncPeerTrackedPropertyHasChanged: from peer '${eventSource?.debugInfo()}', Unexpected situation. syncPeerHasChanged from different sender than source_. Ignoring event.`)
+    }
+    stateMgmtProfiler.end();
   }
 
-  public objectPropertyHasBeenReadPU(sourceObject: ObservedObject<C>, changedPropertyName : string) {
-    stateMgmtConsole.debug(`${this.debugInfo()}: objectPropertyHasBeenReadPU: property '${changedPropertyName}' of object value has been read.`);
-    this.notifyPropertyHasBeenReadPU();
-  }
 
   public getUnmonitored(): C {
     stateMgmtConsole.propertyAccess(`${this.debugInfo()}: getUnmonitored.`);
@@ -175,13 +189,21 @@ class SynchedPropertyOneWayPU<C> extends ObservedPropertyAbstractPU<C>
   }
 
   public get(): C {
+    stateMgmtProfiler.begin("SynchedPropertyOneWayPU.get");
     stateMgmtConsole.propertyAccess(`${this.debugInfo()}: get.`)
-    this.notifyPropertyHasBeenReadPU()
+    this.recordPropertyDependentUpdate();
+    if (this.shouldInstallTrackedObjectReadCb) {
+      stateMgmtConsole.propertyAccess(`${this.debugInfo()}: get: @Track optimised mode. Will install read cb func if value is an object`);
+      ObservedObject.registerPropertyReadCb(this.localCopyObservedObject_, this.onOptimisedObjectPropertyRead.bind(this));
+    } else {
+      stateMgmtConsole.propertyAccess(`${this.debugInfo()}: get: compatibility mode. `);
+    }
+
+    stateMgmtProfiler.end();
     return this.localCopyObservedObject_;
   }
 
   // assignment to local variable in the form of this.aProp = <object value>
-  // set 'writes through` to the ObservedObject
   public set(newValue: C): void {
     if (this.localCopyObservedObject_ === newValue) {
       stateMgmtConsole.debug(`SynchedPropertyObjectOneWayPU[${this.id__()}IP, '${this.info() || "unknown"}']: set with unchanged value  - nothing to do.`);
@@ -189,20 +211,52 @@ class SynchedPropertyOneWayPU<C> extends ObservedPropertyAbstractPU<C>
     }
 
     stateMgmtConsole.propertyAccess(`${this.debugInfo()}: set: value about to change.`);
+    const oldValue = this.localCopyObservedObject_;
     if (this.resetLocalValue(newValue, /* needCopyObject */ false)) {
-      this.notifyPropertyHasChangedPU();
+      TrackedObject.notifyObjectValueAssignment(/* old value */ oldValue, /* new value */ this.localCopyObservedObject_, 
+        this.notifyPropertyHasChangedPU.bind(this),
+        this.notifyTrackedObjectPropertyHasChanged.bind(this));
     }
   }
 
+  protected onOptimisedObjectPropertyRead(readObservedObject: C, readPropertyName: string, isTracked: boolean): void {
+    stateMgmtProfiler.begin("SynchedPropertyOneWayPU.onOptimisedObjectPropertyRead");
+    const renderingElmtId = this.getRenderingElmtId();
+    if (renderingElmtId >= 0) {
+      if (!isTracked) {
+        stateMgmtConsole.applicationError(`${this.debugInfo()}: onOptimisedObjectPropertyRead read NOT TRACKED property '${readPropertyName}' during rendering!`);
+        throw new Error(`Illegal usage of not @Track'ed property '${readPropertyName}' on UI!`);
+      } else {
+        stateMgmtConsole.debug(`${this.debugInfo()}: onOptimisedObjectPropertyRead: ObservedObject property '@Track ${readPropertyName}' read.`);
+        if (this.getUnmonitored() === readObservedObject) {
+          this.recordTrackObjectPropertyDependencyForElmtId(renderingElmtId, readPropertyName)
+        }
+      }
+    }
+    stateMgmtProfiler.end();
+  }
+
   // called when updated from parent
+  // during parent ViewPU rerender, calls update lambda of child ViewPU with @Prop variable
+  // this lambda generated code calls ViewPU.updateStateVarsOfChildByElmtId,
+  // calls inside app class updateStateVars()
+  // calls reset() for each @Prop
   public reset(sourceChangedValue: C): void {
     stateMgmtConsole.propertyAccess(`${this.debugInfo()}: reset (update from parent @Component).`);
     if (this.source_ !== undefined && this.checkIsSupportedValue(sourceChangedValue)) {
       // if this.source_.set causes an actual change, then, ObservedPropertyObject source_ will call syncPeerHasChanged method
+      this.createSourceDependency(sourceChangedValue);
       this.source_.set(sourceChangedValue);
     }
   }
-  
+
+  private createSourceDependency(sourceObject: C): void {
+    if (ObservedObject.IsObservedObject(sourceObject)) {
+      stateMgmtConsole.debug(`${this.debugInfo()} createSourceDependency: create dependency on source ObservedObject ...`);
+      const fake = (sourceObject as Object)[TrackedObject.___TRACKED_OPTI_ASSIGNMENT_FAKE_PROP_PROPERTY];
+    }
+  }
+
   /*
     unsubscribe from previous wrapped ObjectObject
     take a shallow or (TODO) deep copy
@@ -222,12 +276,22 @@ class SynchedPropertyOneWayPU<C> extends ObservedPropertyAbstractPU<C>
         (this.localCopyObservedObject_ as SubscribableAbstract).removeOwningProperty(this);
       } else {
         ObservedObject.removeOwningProperty(this.localCopyObservedObject_, this);
+
+        // make sure the ObservedObject no longer has a read callback function
+        // assigned to it
+        ObservedObject.unregisterPropertyReadCb(this.localCopyObservedObject_);
       }
 
       // shallow/deep copy value 
       // needed whenever newObservedObjectValue comes from source
       // not needed on a local set (aka when called from set() method)
-      this.localCopyObservedObject_ = needCopyObject ? this.copyObject(newObservedObjectValue, this.info_) : newObservedObjectValue;
+      if (needCopyObject) {
+        ViewPU.pauseRendering();
+        this.localCopyObservedObject_ = this.copyObject(newObservedObjectValue, this.info_);
+        ViewPU.restoreRendering();
+      } else {
+        this.localCopyObservedObject_ = newObservedObjectValue;
+      }
 
       if (typeof this.localCopyObservedObject_ == "object") {
         if (this.localCopyObservedObject_ instanceof SubscribableAbstract) {
@@ -238,11 +302,14 @@ class SynchedPropertyOneWayPU<C> extends ObservedPropertyAbstractPU<C>
         } else if (ObservedObject.IsObservedObject(this.localCopyObservedObject_)) {
           // case: new ObservedObject
           ObservedObject.addOwningProperty(this.localCopyObservedObject_, this);
+          this.shouldInstallTrackedObjectReadCb = TrackedObject.needsPropertyReadCb(this.localCopyObservedObject_);
         } else {
           // wrap newObservedObjectValue raw object as ObservedObject and subscribe to it
           stateMgmtConsole.propertyAccess(`${this.debugInfo()}: Provided source object's is not proxied (is not a ObservedObject). Wrapping it inside ObservedObject.`);
           this.localCopyObservedObject_ = ObservedObject.createNew(this.localCopyObservedObject_, this);
+          this.shouldInstallTrackedObjectReadCb = TrackedObject.needsPropertyReadCb(this.localCopyObservedObject_);
         }
+        stateMgmtConsole.propertyAccess("end of reset shouldInstallTrackedObjectReadCb=" + this.shouldInstallTrackedObjectReadCb);
       }
       return true;
   }
@@ -330,7 +397,7 @@ class SynchedPropertyOneWayPU<C> extends ObservedPropertyAbstractPU<C>
     let copiedObjects = new Map<Object, Object>();
 
     return getDeepCopyOfObjectRecursive(obj);
-    
+
     function getDeepCopyOfObjectRecursive(obj: any): any {
       if (!obj || typeof obj !== 'object') {
         return obj;
@@ -385,7 +452,7 @@ class SynchedPropertyOneWayPU<C> extends ObservedPropertyAbstractPU<C>
 
 // class definitions for backward compatibility
 class SynchedPropertySimpleOneWayPU<T> extends SynchedPropertyOneWayPU<T> {
-  
+
 }
 
 class SynchedPropertyObjectOneWayPU<T> extends SynchedPropertyOneWayPU<T> {
