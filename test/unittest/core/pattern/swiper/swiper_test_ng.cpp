@@ -11056,6 +11056,71 @@ HWTEST_F(SwiperTestNg, PlayLongPointAnimation001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SwiperDragScene001
+ * @tc.desc: test Swiper drag LTPO
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, SwiperDragScene001, TestSize.Level1)
+{
+    CreateWithItem([](SwiperModelNG model) {});
+    auto renderContext = AceType::DynamicCast<MockRenderContext>(frameNode_->GetRenderContext());
+    EXPECT_TRUE(!!renderContext);
+    EXPECT_CALL(*renderContext, CalcExpectedFrameRate(_, _)).Times(CALL_TIMES);
+    auto info = GestureEvent();
+    auto localLocation = Offset(DRAG_OFFSET_X, 0.0f);
+    info.SetLocalLocation(localLocation);
+    info.SetMainVelocity(DRAG_SPEED);
+    pattern_->HandleDragStart(info);
+    pattern_->HandleDragUpdate(info);
+    pattern_->HandleDragUpdate(info);
+    pattern_->HandleDragEnd(info.GetMainVelocity());
+}
+
+/**
+ * @tc.name: SwiperLayoutAlgorithmGetChildMaxSize002
+ * @tc.desc: GetChildMaxSize
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, SwiperLayoutAlgorithmGetChildMaxSize002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Default value
+     */
+    CreateWithItem([](SwiperModelNG model) {});
+    auto swiperLayoutAlgorithm = AceType::DynamicCast<SwiperLayoutAlgorithm>(pattern_->CreateLayoutAlgorithm());
+    
+    auto indicatorNode = FrameNode::GetOrCreateFrameNode(V2::SWIPER_INDICATOR_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<SwiperIndicatorPattern>(); });
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    auto layoutWrapper = LayoutWrapperNode(indicatorNode, geometryNode, indicatorNode->GetLayoutProperty());
+    
+    layoutWrapper.currentChildCount_ = 2;
+    layoutWrapper.childrenMap_.emplace(std::make_pair(
+        0, AceType::MakeRefPtr<LayoutWrapperNode>(indicatorNode, geometryNode, indicatorNode->GetLayoutProperty())));
+    layoutWrapper.childrenMap_.emplace(std::make_pair(
+        1, AceType::MakeRefPtr<LayoutWrapperNode>(indicatorNode, nullptr, indicatorNode->GetLayoutProperty())));
+        
+    LayoutConstraintF layoutConstraint;
+    layoutConstraint.maxSize = SizeF(720.f, 1136.f);
+    layoutConstraint.percentReference = SizeF(720.f, 1136.f);
+    layoutConstraint.parentIdealSize.SetSize(SizeF(720.f, 1136.f));
+    ASSERT_NE(layoutWrapper.layoutProperty_, nullptr);
+    
+    layoutWrapper.GetLayoutProperty()->UpdateLayoutConstraint(layoutConstraint);
+    Axis axis = Axis::HORIZONTAL;
+    bool isMainAxis = true;
+    swiperLayoutAlgorithm->totalItemCount_ = 3;
+
+    /**
+     * @tc.steps: step2. call GetChildMaxSize.
+     * @tc.expected: GetChildMaxSize->itemPosition_ not empty
+     */
+    swiperLayoutAlgorithm->itemPosition_.clear();
+    swiperLayoutAlgorithm->GetChildMaxSize(&layoutWrapper, axis, isMainAxis);
+    EXPECT_TRUE(swiperLayoutAlgorithm->itemPosition_.empty());
+} 
+
+/**
  * @tc.name: SwiperLayoutAlgorithmGetChildMaxSize004
  * @tc.desc: GetChildMaxSize
  * @tc.type: FUNC
