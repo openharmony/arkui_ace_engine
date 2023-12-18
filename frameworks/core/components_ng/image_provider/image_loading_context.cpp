@@ -152,7 +152,16 @@ void ImageLoadingContext::OnDataLoading()
         return;
     }
     if (src_.GetSrcType() == SrcType::NETWORK && SystemProperties::GetDownloadByNetworkEnabled()) {
-        DownloadImage();
+        if (syncLoad_) {
+            DownloadImage();
+        } else {
+            auto task = [weak = AceType::WeakClaim(this)]() {
+                auto ctx = weak.Upgrade();
+                CHECK_NULL_VOID(ctx);
+                ctx->DownloadImage();
+            };
+            NG::ImageUtils::PostToBg(task);
+        }
         return;
     }
     ImageProvider::CreateImageObject(src_, WeakClaim(this), syncLoad_);

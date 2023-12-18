@@ -109,7 +109,7 @@ frameworks/core/components_ng/pattern/refresh/  @aryawang
 frameworks/core/components_ng/pattern/relative_container/  @nickyjd
 frameworks/core/components_ng/pattern/remote_window/  @liuchao92
 frameworks/core/components_ng/pattern/rendering_context/  @keerecles
-frameworks/core/components_ng/pattern/rich_editor/  @wu-yinxiao
+frameworks/core/components_ng/pattern/rich_editor/  @xiexiyun
 frameworks/core/components_ng/pattern/root/  @zhoutianer
 frameworks/core/components_ng/pattern/scroll/  @rongShao-Z
 frameworks/core/components_ng/pattern/scroll_bar/  @rongShao-Z
@@ -208,7 +208,7 @@ frameworks/core/components/proxy/  @yan-shuifeng
 frameworks/core/components/qrcode/  @Zhang-Dong-hui
 frameworks/core/components/rating/  @luoying_ace_admin
 frameworks/core/components/refresh/  @aryawang
-frameworks/core/components/relative_container/  @nickyjd
+frameworks/core/components/relative_container/  @xiexiyun
 frameworks/core/components/remote_window/  @liuchao92
 frameworks/core/components/rich_text/  @LongLie
 frameworks/core/components/root/  @yan-shuifeng
