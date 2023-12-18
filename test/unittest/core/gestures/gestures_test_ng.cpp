@@ -433,6 +433,7 @@ HWTEST_F(GesturesTestNg, ClickRecognizerTest007, TestSize.Level1)
     clickRecognizer.equalsToFingers_ = true;
     clickRecognizer.useCatchMode_ = false;
     clickRecognizer.refereeState_ = RefereeState::PENDING;
+    clickRecognizer.fingersId_.insert(0);
     clickRecognizer.HandleTouchUpEvent(touchEvent);
     EXPECT_FALSE(clickRecognizer.equalsToFingers_);
     EXPECT_EQ(clickRecognizer.currentTouchPointsNum_, 0);
@@ -449,6 +450,7 @@ HWTEST_F(GesturesTestNg, ClickRecognizerTest007, TestSize.Level1)
     clickRecognizer.useCatchMode_ = false;
     clickRecognizer.tappedCount_ = 0;
     clickRecognizer.count_ = 0;
+    clickRecognizer.fingersId_.insert(0);
     clickRecognizer.HandleTouchUpEvent(touchEvent);
     EXPECT_FALSE(clickRecognizer.equalsToFingers_);
     EXPECT_EQ(clickRecognizer.currentTouchPointsNum_, 0);
@@ -496,6 +498,7 @@ HWTEST_F(GesturesTestNg, ClickRecognizerTest007, TestSize.Level1)
     clickRecognizer.useCatchMode_ = false;
     clickRecognizer.tappedCount_ = -1;
     clickRecognizer.count_ = 0;
+    clickRecognizer.fingersId_.insert(0);
     clickRecognizer.HandleTouchUpEvent(touchEvent);
     EXPECT_EQ(clickRecognizer.equalsToFingers_, true);
     EXPECT_EQ(clickRecognizer.currentTouchPointsNum_, 0);
@@ -12283,6 +12286,7 @@ HWTEST_F(GesturesTestNg, ClickRecognizerHandleTouchUpEvent001, TestSize.Level1)
     clickRecognizerPtr->useCatchMode_ = true;
     clickRecognizerPtr->tappedCount_ = -1;
     clickRecognizerPtr->count_ = 0;
+    clickRecognizerPtr->fingersId_.insert(0);
     clickRecognizerPtr->SetIsSystemGesture(false);
     clickRecognizerPtr->gestureInfo_->SetTag("test");
     clickRecognizerPtr->HandleTouchUpEvent(touchEvent);
