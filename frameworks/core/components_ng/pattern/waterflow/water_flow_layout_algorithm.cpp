@@ -147,10 +147,10 @@ void WaterFlowLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
                 // out of viewport
                 layoutInfo_.currentOffset_ = -item.first;
             }
-            layoutInfo_.jumpIndex_ = -1;
+            layoutInfo_.jumpIndex_ = EMPTY_JUMP_INDEX;
         }
     } else {
-        layoutInfo_.jumpIndex_ = -1;
+        layoutInfo_.jumpIndex_ = EMPTY_JUMP_INDEX;
     }
 
     FillViewport(mainSize_, layoutWrapper);
@@ -389,7 +389,7 @@ void WaterFlowLayoutAlgorithm::FillViewport(float mainSize, LayoutWrapper* layou
                 -(layoutInfo_.waterFlowItems_[position.crossIndex][currentIndex].first) + layoutInfo_.restoreOffset_;
             // restoreOffSet only be used once
             layoutInfo_.restoreOffset_ = 0.0f;
-            layoutInfo_.jumpIndex_ = -1;
+            layoutInfo_.jumpIndex_ = EMPTY_JUMP_INDEX;
             layoutInfo_.itemStart_ = false;
         }
         currentIndex++;
