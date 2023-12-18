@@ -34,6 +34,12 @@
 #include "core/components_ng/pattern/window_scene/helper/window_scene_helper.h"
 #endif
 
+#if not defined(ACE_UNITTEST)
+#if defined(ENABLE_STANDARD_INPUT)
+#include "core/components_ng/pattern/text_field/on_text_changed_listener_impl.h"
+#endif
+#endif
+
 namespace OHOS::Ace::NG {
 
 RefPtr<FrameNode> FocusHub::GetFrameNode() const
@@ -454,8 +460,20 @@ bool FocusHub::IsFocusableNode()
     return IsEnabled() && IsShow() && focusable_ && parentFocusable_;
 }
 
-void FocusHub::SetFocusable(bool focusable)
+void FocusHub::SetFocusable(bool focusable, bool isExplicit)
 {
+    if (isExplicit) {
+        isFocusableExplicit_ = true;
+    } else if (isFocusableExplicit_) {
+        LOGI("Current focusHub cannot be set to focusable implicitly.");
+        return;
+    } else {
+        implicitFocusable_ = focusable;
+    }
+    if (IsImplicitFocusableScope() && focusDepend_ == FocusDependence::CHILD) {
+        focusDepend_ = FocusDependence::AUTO;
+    }
+
     if (focusable_ == focusable) {
         return;
     }
@@ -1088,6 +1106,24 @@ void FocusHub::OnBlur()
     }
 }
 
+void FocusHub::IsCloseKeyboard(RefPtr<FrameNode> frameNode)
+{
+#if defined (ENABLE_STANDARD_INPUT)
+    // If focus pattern does not need softkeyboard, close it, not in windowScene.
+    auto curPattern = frameNode->GetPattern<NG::Pattern>();
+    CHECK_NULL_VOID(curPattern);
+    bool isNeedKeyBoard = curPattern->NeedSoftKeyboard();
+    if (!isNeedKeyBoard) {
+        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "FrameNode not NeedSoftKeyboard.");
+        auto inputMethod = MiscServices::InputMethodController::GetInstance();
+        if (inputMethod) {
+            inputMethod->Close();
+            TAG_LOGI(AceLogTag::ACE_KEYBOARD, "SoftKeyboard Closes Successfully.");
+        }
+    }
+#endif
+}
+
 void FocusHub::OnFocusNode()
 {
     TAG_LOGI(AceLogTag::ACE_FOCUS, "Node(%{public}s/%{public}d) on focus", GetFrameName().c_str(), GetFrameId());
@@ -1112,15 +1148,6 @@ void FocusHub::OnFocusNode()
     }
     auto frameNode = GetFrameNode();
     CHECK_NULL_VOID(frameNode);
-#if defined (ENABLE_STANDARD_INPUT)
-    // If focus pattern does not need softkeyboard, close it.
-#ifdef WINDOW_SCENE_SUPPORTED
-    WindowSceneHelper::IsWindowSceneCloseKeyboard(frameNode);
-#else
-    WindowSceneHelper::IsCloseKeyboard(frameNode);
-#endif
-#endif
-
     frameNode->OnAccessibilityEvent(AccessibilityEventType::FOCUS);
 
     CHECK_NULL_VOID(pipeline);
@@ -1128,7 +1155,27 @@ void FocusHub::OnFocusNode()
         pipeline->SetFocusNode(frameNode);
 #if defined (ENABLE_STANDARD_INPUT)
     // If in window,focus pattern does not need softkeyboard, close it.
-    WindowSceneHelper::IsCloseKeyboard(frameNode);
+        IsCloseKeyboard(frameNode);
+#endif
+    }
+
+    if (frameNode->GetFocusType() == FocusType::SCOPE) {
+#if defined (ENABLE_STANDARD_INPUT)
+        // If in window,focus pattern does not need softkeyboard, close it.
+        auto hadFocusChild = false;
+        std::list<RefPtr<FocusHub>> focusNodes = GetChildren();
+        for (const auto& item : focusNodes) {
+            if (item->IsCurrentFocus()) {
+                hadFocusChild = true;
+                break;
+            }
+        }
+        if (!hadFocusChild) {
+            auto isSystem_ = WindowSceneHelper::IsWindowScene(frameNode);
+            if (!isSystem_) {
+                IsCloseKeyboard(frameNode);
+            }
+        }
 #endif
     }
 }

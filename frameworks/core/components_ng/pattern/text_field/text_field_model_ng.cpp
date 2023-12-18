@@ -317,7 +317,7 @@ void TextFieldModelNG::SetOnEditChanged(std::function<void(bool)>&& func)
     eventHub->SetOnEditChanged(std::move(func));
 }
 
-void TextFieldModelNG::SetOnSubmit(std::function<void(int32_t)>&& func)
+void TextFieldModelNG::SetOnSubmit(std::function<void(int32_t, NG::TextFieldCommonEvent&)>&& func)
 {
     auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<TextFieldEventHub>();
     CHECK_NULL_VOID(eventHub);

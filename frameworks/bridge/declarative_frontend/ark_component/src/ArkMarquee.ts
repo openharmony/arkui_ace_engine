@@ -14,23 +14,6 @@
  */
 
 /// <reference path='./import.ts' />
-const MarqueeFontWeightMap = {
-  0: 'lighter',
-  1: 'normal',
-  2: 'regular',
-  3: 'medium',
-  4: 'bold',
-  5: 'bolder',
-  100: '100',
-  200: '200',
-  300: '300',
-  400: '400',
-  500: '500',
-  600: '600',
-  700: '700',
-  800: '800',
-  900: '900',
-}
 
 class ArkMarqueeComponent extends ArkComponent implements MarqueeAttribute {
   constructor(nativePtr: KNode) {
@@ -137,16 +120,11 @@ class MarqueeFontWeightModifier extends ModifierWithKey<string | number | FontWe
       GetUINativeModule().marquee.resetFontWeight(node);
     }
     else {
-      let fontWeightStr = 'normal';
-      if (typeof this.value === "string") {
-        fontWeightStr = this.value;
-      } else {
-        if (this.value in MarqueeFontWeightMap) {
-          fontWeightStr = MarqueeFontWeightMap[this.value];
-        }
-      }
-      GetUINativeModule().marquee.setFontWeight(node, fontWeightStr);
+      GetUINativeModule().marquee.setFontWeight(node, this.value);
     }
+  }
+  checkObjectDiff(): boolean {
+    return this.stageValue !== this.value;
   }
 }
 class MarqueeFontFamilyModifier extends ModifierWithKey<string> {

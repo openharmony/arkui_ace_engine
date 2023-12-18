@@ -157,6 +157,16 @@ public:
         bottomTabBarStyle_.verticalAlign = verticalAlign;
     }
 
+    void SetId(const std::string& id)
+    {
+        tabBarInspectorId_ = id;
+    }
+
+    const std::string& GetId() const
+    {
+        return tabBarInspectorId_;
+    }
+
     const BottomTabBarStyle& GetBottomTabBarStyle() const
     {
         return bottomTabBarStyle_;
@@ -187,6 +197,7 @@ private:
     BoardStyle boardStyle_;
     LabelStyle labelStyle_;
     PaddingProperty padding_;
+    std::string tabBarInspectorId_;
     BottomTabBarStyle bottomTabBarStyle_;
 
     ACE_DISALLOW_COPY_AND_MOVE(TabContentPattern);

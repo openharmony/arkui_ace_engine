@@ -351,7 +351,7 @@ OffsetF SelectOverlayLayoutAlgorithm::AdjustSelectMenuOffset(
         return menuOffset;
     }
     // avoid soft keyboard and root bottom
-    if (!upHandle.isShow && downHandle.isShow) {
+    if ((!upHandle.isShow && downHandle.isShow) || info_->menuInfo.menuBuilder) {
         CHECK_NULL_RETURN(pipeline, menuOffset);
         auto safeAreaManager = pipeline->GetSafeAreaManager();
         CHECK_NULL_RETURN(safeAreaManager, menuOffset);

@@ -98,7 +98,11 @@ void RenderImage::Update(const RefPtr<Component>& component)
     imageRenderMode_ = image->GetImageRenderMode();
     imageRepeat_ = image->GetImageRepeat();
 
+#ifndef USE_ROSEN_DRAWING
     useSkiaSvg_ = image->GetUseSkiaSvg();
+#else
+    useSkiaSvg_ = false;
+#endif
     autoResize_ = image->GetAutoResize();
     imageAlt_ = image->GetAlt();
     auto inComingSrc = image->GetSrc();

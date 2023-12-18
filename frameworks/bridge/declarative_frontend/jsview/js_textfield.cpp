@@ -505,6 +505,7 @@ void JSTextField::SetInputFilter(const JSCallbackInfo& info)
 void JSTextField::SetShowPasswordIcon(const JSCallbackInfo& info)
 {
     if (!info[0]->IsBoolean()) {
+        TextFieldModel::GetInstance()->SetShowPasswordIcon(true);
         return;
     }
 
@@ -776,11 +777,54 @@ void JSTextField::SetOnEditChanged(const JSCallbackInfo& info)
     TextFieldModel::GetInstance()->SetOnEditChanged(std::move(callback));
 }
 
+Local<JSValueRef> JSTextField::JsKeepEditableState(panda::JsiRuntimeCallInfo *info)
+{
+    Local<JSValueRef> thisObj = info->GetThisRef();
+    auto eventInfo = static_cast<NG::TextFieldCommonEvent*>(
+        panda::Local<panda::ObjectRef>(thisObj)->GetNativePointerField(0));
+    if (eventInfo) {
+        eventInfo->SetKeepEditable(true);
+    }
+    return JSValueRef::Undefined(info->GetVM());
+}
+
+void JSTextField::CreateJsTextFieldCommonEvent(const JSCallbackInfo &info)
+{
+    auto jsTextFunc = AceType::MakeRefPtr<JsCommonEventFunction<NG::TextFieldCommonEvent, 2>>(
+        JSRef<JSFunc>::Cast(info[0]));
+    auto targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto callback = [execCtx = info.GetExecutionContext(), func = std::move(jsTextFunc), node = targetNode](int32_t key,
+                       NG::TextFieldCommonEvent& event) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        ACE_SCORING_EVENT("onSubmit");
+        PipelineContext::SetCallBackNode(node);
+        JSRef<JSObjTemplate> objectTemplate = JSRef<JSObjTemplate>::New();
+        objectTemplate->SetInternalFieldCount(2);
+        JSRef<JSObject> object = objectTemplate->NewInstance();
+        object->SetProperty<std::string>("text", event.GetText());
+        object->SetPropertyObject("keepEditableState", JSRef<JSFunc>::New<FunctionCallback>(JsKeepEditableState));
+        object->Wrap<NG::TextFieldCommonEvent>(&event);
+        JSRef<JSVal> keyEvent = JSRef<JSVal>::Make(ToJSValue(key));
+        JSRef<JSVal> dataObject = JSRef<JSVal>::Cast(object);
+        JSRef<JSVal> param[2] = {keyEvent, dataObject};
+        func->Execute(param);
+    };
+    TextFieldModel::GetInstance()->SetOnSubmit(std::move(callback));
+}
+
 void JSTextField::SetOnSubmit(const JSCallbackInfo& info)
 {
     CHECK_NULL_VOID(info[0]->IsFunction());
-    JsEventCallback<void(int32_t)> callback(info.GetExecutionContext(), JSRef<JSFunc>::Cast(info[0]));
-    TextFieldModel::GetInstance()->SetOnSubmit(std::move(callback));
+#ifdef NG_BUILD
+    CreateJsTextFieldCommonEvent(info);
+#else
+    if (Container::IsCurrentUseNewPipeline()) {
+        CreateJsTextFieldCommonEvent(info);
+    } else {
+        JsEventCallback<void(int32_t)> callback(info.GetExecutionContext(), JSRef<JSFunc>::Cast(info[0]));
+        TextFieldModel::GetInstance()->SetOnSubmit(std::move(callback));
+    }
+#endif
 }
 
 void JSTextField::SetOnChange(const JSCallbackInfo& info)

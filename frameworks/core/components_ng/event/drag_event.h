@@ -31,6 +31,7 @@ class GestureEventHub;
 class PanRecognizer;
 class LongPressRecognizer;
 class FrameNode;
+class OverlayManager;
 
 class DragEvent : public AceType {
     DECLARE_ACE_TYPE(DragEvent, AceType)
@@ -107,6 +108,11 @@ public:
 #ifdef ENABLE_DRAG_FRAMEWORK
     void SetThumbnailCallback(std::function<void(Offset)>&& callback);
     void SetFilter(const RefPtr<DragEventActuator>& actuator);
+    static void UpdatePreviewPositionAndScale(const RefPtr<FrameNode> imageNode, const OffsetF& frameOffset);
+    static void CreatePreviewNode(const RefPtr<FrameNode> frameNode, OHOS::Ace::RefPtr<FrameNode>& imageNode);
+    static void SetPreviewDefaultAnimateProperty(const RefPtr<FrameNode> imageNode);
+    static void MountPixelMap(const RefPtr<OverlayManager> overlayManager, const RefPtr<GestureEventHub> manager,
+        const RefPtr<FrameNode> imageNode);
     void SetPixelMap(const RefPtr<DragEventActuator>& actuator);
     void SetEventColumn(const RefPtr<DragEventActuator>& actuator);
     void HideFilter();

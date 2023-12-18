@@ -433,6 +433,7 @@ HWTEST_F(GesturesTestNg, ClickRecognizerTest007, TestSize.Level1)
     clickRecognizer.equalsToFingers_ = true;
     clickRecognizer.useCatchMode_ = false;
     clickRecognizer.refereeState_ = RefereeState::PENDING;
+    clickRecognizer.fingersId_.insert(0);
     clickRecognizer.HandleTouchUpEvent(touchEvent);
     EXPECT_FALSE(clickRecognizer.equalsToFingers_);
     EXPECT_EQ(clickRecognizer.currentTouchPointsNum_, 0);
@@ -449,6 +450,7 @@ HWTEST_F(GesturesTestNg, ClickRecognizerTest007, TestSize.Level1)
     clickRecognizer.useCatchMode_ = false;
     clickRecognizer.tappedCount_ = 0;
     clickRecognizer.count_ = 0;
+    clickRecognizer.fingersId_.insert(0);
     clickRecognizer.HandleTouchUpEvent(touchEvent);
     EXPECT_FALSE(clickRecognizer.equalsToFingers_);
     EXPECT_EQ(clickRecognizer.currentTouchPointsNum_, 0);
@@ -496,6 +498,7 @@ HWTEST_F(GesturesTestNg, ClickRecognizerTest007, TestSize.Level1)
     clickRecognizer.useCatchMode_ = false;
     clickRecognizer.tappedCount_ = -1;
     clickRecognizer.count_ = 0;
+    clickRecognizer.fingersId_.insert(0);
     clickRecognizer.HandleTouchUpEvent(touchEvent);
     EXPECT_EQ(clickRecognizer.equalsToFingers_, true);
     EXPECT_EQ(clickRecognizer.currentTouchPointsNum_, 0);
@@ -1359,6 +1362,34 @@ HWTEST_F(GesturesTestNg, ClickRecognizerTest010, TestSize.Level1)
     touchEvent.sourceType = SourceType::KEYBOARD;
     clickRecognizer.HandleTouchDownEvent(touchEvent);
     EXPECT_EQ(clickRecognizer.touchPoints_[touchEvent.id].id, touchEvent.id);
+}
+
+/*
+ * @tc.name: GestureRecognizerTest011
+ * @tc.desc: Test ClickRecognizer function: IsPointInRegion
+ * @tc.type: FUNC
+ */
+HWTEST_F(GesturesTestNg, ClickRecognizerTest011, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create ClickRecognizer.
+     */
+    ClickRecognizer clickRecognizer = ClickRecognizer(FINGER_NUMBER, COUNT);
+    auto frameNode = FrameNode::CreateFrameNode("myButton", 100, AceType::MakeRefPtr<Pattern>());
+    clickRecognizer.AttachFrameNode(frameNode);
+    clickRecognizer.responseRegionBuffer_.emplace_back(RectF(0, 0, 200, 200));
+    TouchEvent touchEvent;
+
+    /**
+     * @tc.steps: step2. call IsInResponseRegion function and compare result.
+     * @tc.steps: case1: event.sourceType == TOUCH, x == 100, y == 100
+     * @tc.expected: step2. result equals.
+     */
+    touchEvent.x = 100.0f;
+    touchEvent.y = 100.0f;
+    touchEvent.sourceType = SourceType::TOUCH;
+    auto result = clickRecognizer.IsPointInRegion(touchEvent);
+    EXPECT_EQ(result, true);
 }
 
 /**
@@ -12255,6 +12286,7 @@ HWTEST_F(GesturesTestNg, ClickRecognizerHandleTouchUpEvent001, TestSize.Level1)
     clickRecognizerPtr->useCatchMode_ = true;
     clickRecognizerPtr->tappedCount_ = -1;
     clickRecognizerPtr->count_ = 0;
+    clickRecognizerPtr->fingersId_.insert(0);
     clickRecognizerPtr->SetIsSystemGesture(false);
     clickRecognizerPtr->gestureInfo_->SetTag("test");
     clickRecognizerPtr->HandleTouchUpEvent(touchEvent);

@@ -55,6 +55,7 @@ void MountBackButton(const RefPtr<TitleBarNode>& hostNode)
         auto backButtonLayoutProperty = AceType::DynamicCast<FrameNode>(backButtonNode)->GetLayoutProperty();
         CHECK_NULL_VOID(backButtonLayoutProperty);
         backButtonLayoutProperty->UpdateVisibility(hideBackButton ? VisibleType::GONE : VisibleType::VISIBLE);
+        backButtonNode->SetActive(hideBackButton ? false : true);
         backButtonImageNode->MarkModifyDone();
         return;
     }

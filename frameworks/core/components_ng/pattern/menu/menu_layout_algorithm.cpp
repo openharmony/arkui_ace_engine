@@ -345,6 +345,8 @@ void MenuLayoutAlgorithm::Initialize(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(menuNode);
     auto menuPattern = menuNode->GetPattern<MenuPattern>();
     CHECK_NULL_VOID(menuPattern);
+    float scale = menuPattern->GetPreviewAfterAnimationScale();
+    previewScale_ = LessOrEqual(scale, 0.0f) ? previewScale_ : scale;
     auto targetSize = props->GetTargetSizeValue(SizeF());
     position_ = props->GetMenuOffset().value_or(OffsetF());
     positionOffset_ = props->GetPositionOffset().value_or(OffsetF());
@@ -1517,6 +1519,15 @@ void MenuLayoutAlgorithm::UpdateConstraintHeight(LayoutWrapper* layoutWrapper, L
         maxAvailableHeight = windowGlobalRect.Height() - top - bottom;
     }
     float maxSpaceHeight = maxAvailableHeight * HEIGHT_CONSTRAINT_FACTOR;
+	
+    auto menuPattern = layoutWrapper->GetHostNode()->GetPattern<MenuPattern>();
+    if (menuPattern->IsHeightModifiedBySelect()) {
+        auto menuLayoutProps = AceType::DynamicCast<MenuLayoutProperty>(layoutWrapper->GetLayoutProperty());
+        auto selectModifiedHeight = menuLayoutProps->GetSelectModifiedHeight().value();
+        if (selectModifiedHeight < maxSpaceHeight) {
+            maxSpaceHeight = selectModifiedHeight;
+        }
+    }
     constraint.maxSize.SetHeight(maxSpaceHeight);
 }
 

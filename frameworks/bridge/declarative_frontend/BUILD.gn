@@ -160,6 +160,7 @@ template("declarative_js_engine") {
       "engine/functions/js_page_transition_function.cpp",
       "engine/functions/js_pan_function.cpp",
       "engine/functions/js_swiper_function.cpp",
+      "engine/functions/js_tabs_function.cpp",
       "engine/functions/js_touch_function.cpp",
       "engine/functions/js_webview_function.cpp",
       "engine/js_types.cpp",
@@ -431,7 +432,9 @@ template("declarative_js_engine") {
       }
     }
 
+    include_dirs = []
     if (defined(vendor_configs.ace_engine_advanced)) {
+      include_dirs += vendor_configs.ace_advance_dirs
       sources += vendor_configs.ace_engine_advanced_jsview
     }
 
@@ -547,7 +550,8 @@ template("declarative_js_engine") {
 
     deps += [ ":x_node" ]
 
-    include_dirs = [ "//foundation/window/window_manager/interfaces/innerkits" ]
+    include_dirs +=
+        [ "//foundation/window/window_manager/interfaces/innerkits" ]
 
     # add for cross_platfrom_build temporarily, shall be removed after external_deps is supported
     if (is_arkui_x) {
@@ -633,6 +637,7 @@ template("declarative_js_engine_ng") {
       "engine/functions/js_page_transition_function.cpp",
       "engine/functions/js_pan_function.cpp",
       "engine/functions/js_swiper_function.cpp",
+      "engine/functions/js_tabs_function.cpp",
       "engine/functions/js_touch_function.cpp",
       "engine/functions/js_webview_function.cpp",
       "engine/js_types.cpp",

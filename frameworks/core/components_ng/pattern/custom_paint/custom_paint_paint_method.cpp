@@ -734,10 +734,27 @@ void CustomPaintPaintMethod::DrawSvgImage(PaintWrapper* paintWrapper, const Ace:
 
     RSCanvas* rsCanvas = GetRawPtrOfRSCanvas();
     rsCanvas->Save();
-    rsCanvas->ClipRect(dstRect, RSClipOp::INTERSECT);
-    rsCanvas->Translate(startPoint.GetX(), startPoint.GetY());
-    rsCanvas->Scale(scaleX, scaleY);
-    rsCanvas->DrawSVGDOM(skiaDom_);
+    if (rsCanvas->GetDrawingType() == Rosen::Drawing::DrawingType::RECORDING) {
+        RSBitmap bitmap;
+        RSBrush brush;
+        RSBitmapFormat bitmapFormat = { RSColorType::COLORTYPE_RGBA_8888, RSAlphaType::ALPHATYPE_UNPREMUL };
+        bitmap.Build(rsCanvas->GetWidth(), rsCanvas->GetHeight(), bitmapFormat);
+        bitmap.ClearWithColor(RSColor::COLOR_TRANSPARENT);
+        auto rs_OffscreenCanvas = std::make_unique<RSCanvas>();
+        rs_OffscreenCanvas->Bind(bitmap);
+        rs_OffscreenCanvas->ClipRect(dstRect, RSClipOp::INTERSECT);
+        rs_OffscreenCanvas->Translate(startPoint.GetX(), startPoint.GetY());
+        rs_OffscreenCanvas->Scale(scaleX, scaleY);
+        rs_OffscreenCanvas->DrawSVGDOM(skiaDom_);
+        rsCanvas->AttachBrush(brush);
+        rsCanvas->DrawBitmap(bitmap, 0, 0);
+        rsCanvas->DetachBrush();
+    } else {
+        rsCanvas->ClipRect(dstRect, RSClipOp::INTERSECT);
+        rsCanvas->Translate(startPoint.GetX(), startPoint.GetY());
+        rsCanvas->Scale(scaleX, scaleY);
+        rsCanvas->DrawSVGDOM(skiaDom_);
+    }
     rsCanvas->Restore();
 #endif
 }

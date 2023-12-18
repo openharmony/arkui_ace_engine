@@ -19,6 +19,7 @@
 
 #include "base/log/ace_trace.h"
 #include "base/log/log.h"
+#include "base/log/log_wrapper.h"
 #include "base/network/download_manager_v2.h"
 #include "core/components_ng/image_provider/image_utils.h"
 #include "core/pipeline_ng/pipeline_context.h"
@@ -39,7 +40,8 @@ bool DownloadManagerV2::DownloadAsync(DownloadCallback&& downloadCallback, const
                         const NetStackRequest& request, const NetStackResponse& response) {
         ACE_SCOPED_TRACE("DownloadAsync success of %s", request.GetURL().c_str());
         ContainerScope scope(instanceId);
-        LOGI("Async http task of url %{private}s success", request.GetURL().c_str());
+        TAG_LOGI(
+            AceLogTag::ACE_DOWNLOAD_MANAGER, "Async http task of url %{private}s success", request.GetURL().c_str());
         NG::ImageUtils::PostToUI([data = std::move(response.GetResult()), successCallback = std::move(callback)]() {
             if (successCallback) {
                 successCallback(std::move(data));
@@ -49,7 +51,8 @@ bool DownloadManagerV2::DownloadAsync(DownloadCallback&& downloadCallback, const
     task->OnCancel([callback = std::move(downloadCallback.cancelCallback), instanceId](
                        const NetStackRequest& request, const NetStackResponse& response) {
         ContainerScope scope(instanceId);
-        LOGI("Async Http task of url %{private}s cancelled by netStack", request.GetURL().c_str());
+        TAG_LOGI(AceLogTag::ACE_DOWNLOAD_MANAGER, "Async Http task of url %{private}s cancelled by netStack",
+            request.GetURL().c_str());
         std::string errorMsg;
         errorMsg.append("Http task of url ");
         errorMsg.append(request.GetURL());
@@ -63,7 +66,8 @@ bool DownloadManagerV2::DownloadAsync(DownloadCallback&& downloadCallback, const
     task->OnFail([callback = std::move(downloadCallback.failCallback), instanceId](
                      const NetStackRequest& request, const NetStackResponse& response, const NetStackError& error) {
         ContainerScope scope(instanceId);
-        LOGI("Async http task of url %{private}s failed, response code %{public}d, msg from netStack: %{public}s",
+        TAG_LOGI(AceLogTag::ACE_DOWNLOAD_MANAGER,
+            "Async http task of url %{private}s failed, response code %{public}d, msg from netStack: %{public}s",
             request.GetURL().c_str(), response.GetResponseCode(), error.GetErrorMessage().c_str());
         std::string errorMsg;
         errorMsg.append("Http task of url ");
@@ -81,7 +85,7 @@ bool DownloadManagerV2::DownloadAsync(DownloadCallback&& downloadCallback, const
     });
     auto result = task->Start();
     ACE_SCOPED_TRACE("DownloadAsync start of %s", url.c_str());
-    LOGI("Task of netstack with src %{private}s %{public}s", url.c_str(),
+    TAG_LOGI(AceLogTag::ACE_DOWNLOAD_MANAGER, "Task of netstack with src %{private}s %{public}s", url.c_str(),
         result ? " started on another thread successfully"
                : " failed to start on another thread, please check netStack log");
     return result;
@@ -89,7 +93,7 @@ bool DownloadManagerV2::DownloadAsync(DownloadCallback&& downloadCallback, const
 
 bool DownloadManagerV2::DownloadSync(DownloadCallback&& downloadCallback, const std::string& url)
 {
-    LOGI("DownloadSync task of %{private}s start", url.c_str());
+    TAG_LOGI(AceLogTag::ACE_DOWNLOAD_MANAGER, "DownloadSync task of %{private}s start", url.c_str());
     ACE_SCOPED_TRACE("DownloadSync of %s", url.c_str());
     NetStackRequest httpReq;
     httpReq.SetURL(url);
@@ -97,7 +101,8 @@ bool DownloadManagerV2::DownloadSync(DownloadCallback&& downloadCallback, const 
     auto task = session.CreateTask(httpReq);
     std::shared_ptr<DownloadCondition> downloadCondition = std::make_shared<DownloadCondition>();
     task->OnSuccess([downloadCondition](const NetStackRequest& request, const NetStackResponse& response) {
-        LOGI("Sync Http task of url %{private}s success", request.GetURL().c_str());
+        TAG_LOGI(AceLogTag::ACE_DOWNLOAD_MANAGER,
+            "Sync Http task of url %{private}s success", request.GetURL().c_str());
         {
             CHECK_NULL_VOID(downloadCondition);
             std::unique_lock<std::mutex> taskLock(downloadCondition->downloadMutex);
@@ -107,7 +112,8 @@ bool DownloadManagerV2::DownloadSync(DownloadCallback&& downloadCallback, const 
         downloadCondition->cv.notify_all();
     });
     task->OnCancel([downloadCondition](const NetStackRequest& request, const NetStackResponse& response) {
-        LOGI("Sync Http task of url %{private}s cancelled", request.GetURL().c_str());
+        TAG_LOGI(AceLogTag::ACE_DOWNLOAD_MANAGER,
+            "Sync Http task of url %{private}s cancelled", request.GetURL().c_str());
         {
             CHECK_NULL_VOID(downloadCondition);
             std::unique_lock<std::mutex> taskLock(downloadCondition->downloadMutex);
@@ -119,7 +125,8 @@ bool DownloadManagerV2::DownloadSync(DownloadCallback&& downloadCallback, const 
     });
     task->OnFail([downloadCondition](
                      const NetStackRequest& request, const NetStackResponse& response, const NetStackError& error) {
-        LOGI("Sync Http task of url %{private}s failed, response code %{public}d, msg from netStack: %{public}s",
+        TAG_LOGI(AceLogTag::ACE_DOWNLOAD_MANAGER,
+            "Sync Http task of url %{private}s failed, response code %{public}d, msg from netStack: %{public}s",
             request.GetURL().c_str(), response.GetResponseCode(), error.GetErrorMessage().c_str());
         {
             CHECK_NULL_VOID(downloadCondition);
@@ -136,7 +143,8 @@ bool DownloadManagerV2::DownloadSync(DownloadCallback&& downloadCallback, const 
     });
     auto result = task->Start();
     if (!result) {
-        LOGI("Sync Task of netstack with url %{private}s failed to start on another thread, please check netStack log",
+        TAG_LOGI(AceLogTag::ACE_DOWNLOAD_MANAGER,
+            "Sync Task of netstack with url %{private}s failed to start on another thread, please check netStack log",
             url.c_str());
         return result;
     }

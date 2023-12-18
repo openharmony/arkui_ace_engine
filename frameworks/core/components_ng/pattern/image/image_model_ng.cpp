@@ -71,11 +71,26 @@ void ImageModelNG::SetAlt(const ImageSourceInfo &src)
     ACE_UPDATE_LAYOUT_PROPERTY(ImageLayoutProperty, Alt, src);
 }
 
+void ImageModelNG::SetSmoothEdge(float value)
+{
+    ACE_UPDATE_PAINT_PROPERTY(ImageRenderProperty, SmoothEdge, value);
+}
+
+void ImageModelNG::SetSmoothEdge(FrameNode *frameNode, float value)
+{
+    ACE_UPDATE_NODE_PAINT_PROPERTY(ImageRenderProperty, SmoothEdge, value, frameNode);
+}
+
 void ImageModelNG::SetBorder(const Border &border) {}
 
 void ImageModelNG::SetBackBorder()
 {
     ACE_UPDATE_PAINT_PROPERTY(ImageRenderProperty, NeedBorderRadius, true);
+}
+
+void ImageModelNG::SetBackBorder(FrameNode *frameNode)
+{
+    ACE_UPDATE_NODE_PAINT_PROPERTY(ImageRenderProperty, NeedBorderRadius, true, frameNode);
 }
 
 void ImageModelNG::SetBlur(double blur) {}
@@ -285,6 +300,9 @@ void ImageModelNG::SetAlt(FrameNode *frameNode, const ImageSourceInfo &src)
 void ImageModelNG::SetImageInterpolation(FrameNode *frameNode, ImageInterpolation interpolation)
 {
     ACE_UPDATE_NODE_PAINT_PROPERTY(ImageRenderProperty, ImageInterpolation, interpolation, frameNode);
+    auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<ImagePattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetImageInterpolation(interpolation);
 }
 
 void ImageModelNG::SetColorFilterMatrix(FrameNode *frameNode, const std::vector<float> &matrix)

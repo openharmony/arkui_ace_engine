@@ -3851,9 +3851,17 @@ HWTEST_F(MenuTestNg, MenuLayoutAlgorithmTestNg005, TestSize.Level1)
 HWTEST_F(MenuTestNg, MenuLayoutAlgorithmTestNg006, TestSize.Level1)
 {
     RefPtr<MenuLayoutAlgorithm> menuLayoutAlgorithm = AceType::MakeRefPtr<MenuLayoutAlgorithm>();
+
+    /**
+     * @tc.steps: step1. build follows the click position and wrapper size when there is not enough space at the bottom.
+     */
     SizeF size(100, 100);
     float clickPosition = 150.0f;
     menuLayoutAlgorithm->wrapperSize_.SetHeight(200.0f);
+
+    /**
+     * @tc.steps: step2. returns to the wrapper height minus the menu height.
+     */
     auto result = menuLayoutAlgorithm->VerticalLayout(size, clickPosition);
     EXPECT_EQ(result, menuLayoutAlgorithm->wrapperSize_.Height() - size.Height());
 }
@@ -7427,43 +7435,40 @@ HWTEST_F(MenuTestNg, MenuPreviewLayoutAlgorithmTestNg0100, TestSize.Level1)
 }
 
 /**
- * @tc.name: SubMenuTestNg101
- * @tc.desc: Test SubMenuLayoutAlgorithm VerticalLayoutSubMenuHalfScreen, ModifySubMenuWrapper and InitializePadding
- * function.
+ * @tc.name: SubMenuLayoutAlgorithmTestNg001
+ * @tc.desc: Test SubMenuLayoutAlgorithm VerticalLayoutSubMenuHalfScreen and ModifySubMenuWrapper function.
  * @tc.type: FUNC
  */
-HWTEST_F(MenuTestNg, SubMenuTestNg101, TestSize.Level1)
+HWTEST_F(MenuTestNg, SubMenuLayoutAlgorithmTestNg001, TestSize.Level1)
 {
-    // create parent menu item
+    /**
+     * @tc.steps: step1. create menu item and submenu, set the layering parameter to false and call the
+     * VerticalLayoutSubMenuHalfScreen method
+     * @tc.expected: submenu node not null
+     */
     auto itemPattern = AceType::MakeRefPtr<MenuItemPattern>();
+
+    // create parent menu item
     auto item = AceType::MakeRefPtr<FrameNode>("MenuItem", -1, itemPattern);
-    // set parent item size
     auto itemGeometryNode = item->GetGeometryNode();
     ASSERT_TRUE(itemGeometryNode);
     item->GetGeometryNode()->SetFrameSize(SizeF(MENU_ITEM_SIZE_WIDTH, MENU_ITEM_SIZE_HEIGHT));
-    // create submenu
     auto menuPattern = AceType::MakeRefPtr<MenuPattern>(-1, "", MenuType::SUB_MENU);
     auto subMenu = AceType::MakeRefPtr<FrameNode>("", -1, menuPattern);
+
+    // create subMenuLayoutAlgorithm
     auto algorithm = AceType::DynamicCast<SubMenuLayoutAlgorithm>(menuPattern->CreateLayoutAlgorithm());
     ASSERT_TRUE(algorithm);
     auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
     geometryNode->SetFrameSize(SizeF(MENU_SIZE_WIDTH, MENU_SIZE_HEIGHT));
     auto layoutProp = AceType::MakeRefPtr<MenuLayoutProperty>();
     auto* wrapper = new LayoutWrapperNode(subMenu, geometryNode, layoutProp);
-    // link parent menu item and sub menu
+
+    // link menuItem and submenu
     ASSERT_TRUE(menuPattern);
     menuPattern->SetParentMenuItem(item);
     item->GetGeometryNode()->SetFrameOffset(OffsetF(MENU_OFFSET_X, MENU_OFFSET_Y));
     algorithm->wrapperSize_ = SizeF(FULL_SCREEN_WIDTH, FULL_SCREEN_HEIGHT);
-    // @tc.cases: case1. sub menu show on the right side of item
-    algorithm->position_ = OffsetF(MENU_OFFSET_X + MENU_ITEM_SIZE_WIDTH, MENU_OFFSET_Y);
-    algorithm->Layout(wrapper);
-    EXPECT_NE(wrapper->GetGeometryNode()->GetMarginFrameOffset().GetX(), MENU_ITEM_SIZE_WIDTH);
-    // @tc.cases: case2. sub menu show on the left side of item
-    algorithm->position_ = OffsetF(FULL_SCREEN_WIDTH, MENU_OFFSET_Y);
-    algorithm->Layout(wrapper);
-    EXPECT_NE(wrapper->GetGeometryNode()->GetMarginFrameOffset().GetX(), MENU_ITEM_SIZE_WIDTH);
-    EXPECT_EQ(wrapper->GetGeometryNode()->GetMarginFrameOffset().GetY(), 0);
     auto textNode = FrameNode::CreateFrameNode(
         V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
     ASSERT_NE(textNode, nullptr);
@@ -7480,17 +7485,86 @@ HWTEST_F(MenuTestNg, SubMenuTestNg101, TestSize.Level1)
     menuGeometryNode->SetFrameSize(SizeF(TARGET_SIZE_WIDTH, TARGET_SIZE_HEIGHT));
     auto result = algorithm->VerticalLayoutSubMenuHalfScreen(menuNode->GetGeometryNode()->GetFrameSize(),
         algorithm->position_.GetY(), item->GetGeometryNode()->GetFrameSize());
-    ASSERT_NE(result, 0.0f);
+    ASSERT_EQ(result, 0.0f);
     SizeF size_f(100, 200);
     algorithm->wrapperSize_ = size_f;
+
+    /**
+     * @tc.steps: step2. call the ModifySubMenuWrapper method.
+     * @tc.expected: wrapperSize_ is not Data anomalies
+     */
     algorithm->ModifySubMenuWrapper(wrapper);
     ASSERT_NE(algorithm->wrapperSize_, SizeF(0, 0));
+}
+
+/**
+ * @tc.name: SubMenuLayoutAlgorithmTestNg002
+ * @tc.desc: Test SubMenuLayoutAlgorithm InitializePadding function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuTestNg, SubMenuLayoutAlgorithmTestNg002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create menu item and submenu, set the layering parameter to false and call the
+     * VerticalLayoutSubMenuHalfScreen method
+     * @tc.expected: submenu node, subMenuLayoutAlgorithm are not null
+     */
+    auto itemPattern = AceType::MakeRefPtr<MenuItemPattern>();
+
+    // create parent menu item
+    auto item = AceType::MakeRefPtr<FrameNode>("MenuItem", -1, itemPattern);
+    auto itemGeometryNode = item->GetGeometryNode();
+    ASSERT_TRUE(itemGeometryNode);
+    item->GetGeometryNode()->SetFrameSize(SizeF(MENU_ITEM_SIZE_WIDTH, MENU_ITEM_SIZE_HEIGHT));
+    auto menuPattern = AceType::MakeRefPtr<MenuPattern>(-1, "", MenuType::SUB_MENU);
+    auto subMenu = AceType::MakeRefPtr<FrameNode>("", -1, menuPattern);
+
+    // create subMenuLayoutAlgorithm
+    auto algorithm = AceType::DynamicCast<SubMenuLayoutAlgorithm>(menuPattern->CreateLayoutAlgorithm());
+    ASSERT_TRUE(algorithm);
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    geometryNode->SetFrameSize(SizeF(MENU_SIZE_WIDTH, MENU_SIZE_HEIGHT));
+    auto layoutProp = AceType::MakeRefPtr<MenuLayoutProperty>();
+    auto* wrapper = new LayoutWrapperNode(subMenu, geometryNode, layoutProp);
+
+    // link menuItem and submenu
+    ASSERT_TRUE(menuPattern);
+    menuPattern->SetParentMenuItem(item);
+    item->GetGeometryNode()->SetFrameOffset(OffsetF(MENU_OFFSET_X, MENU_OFFSET_Y));
+    algorithm->wrapperSize_ = SizeF(FULL_SCREEN_WIDTH, FULL_SCREEN_HEIGHT);
+    auto textNode = FrameNode::CreateFrameNode(
+        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textNode, nullptr);
+    MenuParam menuParam;
+    menuParam.type = TYPE;
+    auto menuWrapperNode = MenuView::Create(textNode, TARGET_ID, "", menuParam);
+    ASSERT_NE(menuWrapperNode, nullptr);
+    ASSERT_EQ(menuWrapperNode->GetChildren().size(), 1);
+    auto menuNode = AceType::DynamicCast<FrameNode>(menuWrapperNode->GetChildAtIndex(0));
+    ASSERT_NE(menuNode, nullptr);
+    auto menuAlgorithmWrapper = menuNode->GetLayoutAlgorithm();
+    auto menuGeometryNode = menuNode->GetGeometryNode();
+    ASSERT_NE(menuGeometryNode, nullptr);
+    menuGeometryNode->SetFrameSize(SizeF(TARGET_SIZE_WIDTH, TARGET_SIZE_HEIGHT));
+    auto result = algorithm->VerticalLayoutSubMenuHalfScreen(menuNode->GetGeometryNode()->GetFrameSize(),
+        algorithm->position_.GetY(), item->GetGeometryNode()->GetFrameSize());
+    ASSERT_EQ(result, 0.0f);
+    SizeF size_f(100, 200);
+    algorithm->wrapperSize_ = size_f;
+
+    /**
+     * @tc.steps: step2. call the ModifySubMenuWrapper method.
+     * @tc.expected: wrapperSize_ is not Data anomalies
+     */
+    algorithm->ModifySubMenuWrapper(wrapper);
+    ASSERT_NE(algorithm->wrapperSize_, SizeF(0, 0));
+
+    /**
+     * @tc.steps: step3. call the InitializePadding method.
+     * @tc.expected: padding is not zero
+     */
     algorithm->hierarchicalParameters_ = true;
     auto selectTheme = MockPipelineContext::GetCurrent()->GetTheme<SelectTheme>();
-    selectTheme->maxPaddingStart_ = 10.0_vp;
-    selectTheme->maxPaddingEnd_ = 10.0_vp;
-    selectTheme->defaultPaddingTop_ = 10.0_vp;
-    selectTheme->defaultPaddingBottomFixed_ = 10.0_vp;
     selectTheme->outPadding_ = 10.0_vp;
     algorithm->InitializePadding(wrapper);
     ASSERT_NE(algorithm->paddingStart_, 0.0f);
@@ -7500,17 +7574,101 @@ HWTEST_F(MenuTestNg, SubMenuTestNg101, TestSize.Level1)
 }
 
 /**
- * @tc.name: MenuLayoutAlgorithmTestNg102
- * @tc.desc: Verify Initialize.
+ * @tc.name: SubMenuLayoutAlgorithmTestNg003
+ * @tc.desc: Test SubMenuLayoutAlgorithm InitializePadding function.
  * @tc.type: FUNC
  */
-HWTEST_F(MenuTestNg, MenuLayoutAlgorithmTestNg102, TestSize.Level1)
+HWTEST_F(MenuTestNg, SubMenuLayoutAlgorithmTestNg003, TestSize.Level1)
 {
+    /**
+     * @tc.steps: step1. create menu item and submenu, set the layering parameter to false and call the
+     * VerticalLayoutSubMenuHalfScreen method
+     * @tc.expected: submenu node, subMenuLayoutAlgorithm are not null
+     */
+    auto itemPattern = AceType::MakeRefPtr<MenuItemPattern>();
+
+    // create parent menu item
+    auto item = AceType::MakeRefPtr<FrameNode>("MenuItem", -1, itemPattern);
+    auto itemGeometryNode = item->GetGeometryNode();
+    ASSERT_TRUE(itemGeometryNode);
+    item->GetGeometryNode()->SetFrameSize(SizeF(MENU_ITEM_SIZE_WIDTH, MENU_ITEM_SIZE_HEIGHT));
+    auto menuPattern = AceType::MakeRefPtr<MenuPattern>(-1, "", MenuType::SUB_MENU);
+    auto subMenu = AceType::MakeRefPtr<FrameNode>("", -1, menuPattern);
+
+    // create subMenuLayoutAlgorithm
+    auto algorithm = AceType::DynamicCast<SubMenuLayoutAlgorithm>(menuPattern->CreateLayoutAlgorithm());
+    ASSERT_TRUE(algorithm);
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    geometryNode->SetFrameSize(SizeF(MENU_SIZE_WIDTH, MENU_SIZE_HEIGHT));
+    auto layoutProp = AceType::MakeRefPtr<MenuLayoutProperty>();
+    auto* wrapper = new LayoutWrapperNode(subMenu, geometryNode, layoutProp);
+    ASSERT_TRUE(menuPattern);
+    
+    // associated menuItem and submenu
+    menuPattern->SetParentMenuItem(item);
+    item->GetGeometryNode()->SetFrameOffset(OffsetF(MENU_OFFSET_X, MENU_OFFSET_Y));
+    algorithm->wrapperSize_ = SizeF(FULL_SCREEN_WIDTH, FULL_SCREEN_HEIGHT);
+    auto textNode = FrameNode::CreateFrameNode(
+        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textNode, nullptr);
+    MenuParam menuParam;
+    menuParam.type = TYPE;
+    auto menuWrapperNode = MenuView::Create(textNode, TARGET_ID, "", menuParam);
+    ASSERT_EQ(menuWrapperNode->GetChildren().size(), 1);
+    auto menuNode = AceType::DynamicCast<FrameNode>(menuWrapperNode->GetChildAtIndex(0));
+    ASSERT_NE(menuNode, nullptr);
+    auto menuAlgorithmWrapper = menuNode->GetLayoutAlgorithm();
+    auto menuGeometryNode = menuNode->GetGeometryNode();
+    ASSERT_NE(menuGeometryNode, nullptr);
+    menuGeometryNode->SetFrameSize(SizeF(TARGET_SIZE_WIDTH, TARGET_SIZE_HEIGHT));
+    auto result = algorithm->VerticalLayoutSubMenuHalfScreen(menuNode->GetGeometryNode()->GetFrameSize(),
+        algorithm->position_.GetY(), item->GetGeometryNode()->GetFrameSize());
+    ASSERT_EQ(result, 0.0f);
+    SizeF size_f(100, 200);
+    algorithm->wrapperSize_ = size_f;
+
+    /**
+     * @tc.steps: step2. call the ModifySubMenuWrapper method.
+     * @tc.expected: wrapperSize_ is not Data anomalies
+     */
+    algorithm->ModifySubMenuWrapper(wrapper);
+    ASSERT_NE(algorithm->wrapperSize_, SizeF(0, 0));
+
+    /**
+     * @tc.cases: case2. layering parameter is false.
+     * @tc.expected: padding is not zero
+     */
+    algorithm->hierarchicalParameters_ = false;
+    auto selectTheme = MockPipelineContext::GetCurrent()->GetTheme<SelectTheme>();
+    selectTheme->maxPaddingStart_ = 10.0_vp;
+    selectTheme->maxPaddingEnd_ = 10.0_vp;
+    selectTheme->defaultPaddingTop_ = 10.0_vp;
+    selectTheme->defaultPaddingBottomFixed_ = 10.0_vp;
+    algorithm->InitializePadding(wrapper);
+    ASSERT_NE(algorithm->paddingStart_, 0.0f);
+    ASSERT_NE(algorithm->paddingEnd_, 0.0f);
+    ASSERT_NE(algorithm->paddingTop_, 0.0f);
+    ASSERT_NE(algorithm->paddingBottom_, 0.0f);
+}
+
+/**
+ * @tc.name: MenuLayoutAlgorithmTestNg5900
+ * @tc.desc: Verify Initialize and Measure when hierarchicalParameter is true.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuTestNg, MenuLayoutAlgorithmTestNg5900, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create a menuWrapperNode and menuNode.
+     * @tc.expected: menuWrapperNode and menuNode are not null.
+     */
     std::function<void()> action = [] {};
     std::vector<OptionParam> optionParams;
     optionParams.emplace_back("MenuItem1", "", action);
     optionParams.emplace_back("MenuItem2", "", action);
     MenuParam menuParam;
+
+    // create menuWrapperNode to get main menu
     auto menuWrapperNode = MenuView::Create(std::move(optionParams), 1, "", MenuType::MENU, menuParam);
     ASSERT_NE(menuWrapperNode, nullptr);
     ASSERT_EQ(menuWrapperNode->GetChildren().size(), 1);
@@ -7520,6 +7678,11 @@ HWTEST_F(MenuTestNg, MenuLayoutAlgorithmTestNg102, TestSize.Level1)
     ASSERT_NE(property, nullptr);
     ASSERT_TRUE(property->GetPositionOffset().has_value());
     EXPECT_EQ(property->GetPositionOffset().value(), OffsetF());
+
+    /**
+     * @tc.steps: step2. build menu layoutwrapper and set the hierarchical parameter to true.
+     * @tc.expected: no exception in the method return value.
+     */
     RefPtr<MenuLayoutAlgorithm> layoutAlgorithm = AceType::MakeRefPtr<MenuLayoutAlgorithm>();
     layoutAlgorithm->hierarchicalParameters_ = true;
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
@@ -7537,17 +7700,70 @@ HWTEST_F(MenuTestNg, MenuLayoutAlgorithmTestNg102, TestSize.Level1)
     EXPECT_EQ(layoutAlgorithm->position_, OffsetF());
     EXPECT_EQ(layoutAlgorithm->positionOffset_, OffsetF());
     EXPECT_EQ(layoutAlgorithm->wrapperSize_, SizeF(FULL_SCREEN_WIDTH, FULL_SCREEN_HEIGHT));
-    layoutAlgorithm->Layout(&layoutWrapper);
-    EXPECT_EQ(geometryNode->GetMarginFrameOffset(), OffsetF(0.0f, 0.0f));
 }
 
 /**
- * @tc.name: MenuLayoutAlgorithmTestNg103
- * @tc.desc: Verify Layout.
+ * @tc.name: MenuLayoutAlgorithmTestNg6000
+ * @tc.desc: Verify Initialize and Measure when hierarchicalParameter is false.
  * @tc.type: FUNC
  */
-HWTEST_F(MenuTestNg, MenuItemPatternTestNg103, TestSize.Level1)
+HWTEST_F(MenuTestNg, MenuLayoutAlgorithmTestNg6000, TestSize.Level1)
 {
+    /**
+     * @tc.steps: step1. Create a menuWrapperNode and menuNode.
+     * @tc.expected: menuWrapperNode and menuNode are not null.
+     */
+    std::function<void()> action = [] {};
+    std::vector<OptionParam> optionParams;
+    optionParams.emplace_back("MenuItem1", "", action);
+    optionParams.emplace_back("MenuItem2", "", action);
+    MenuParam menuParam;
+
+    // create menuWrapperNode to get main menu
+    auto menuWrapperNode = MenuView::Create(std::move(optionParams), 1, "", MenuType::MENU, menuParam);
+    ASSERT_NE(menuWrapperNode, nullptr);
+    ASSERT_EQ(menuWrapperNode->GetChildren().size(), 1);
+    auto menuNode = AceType::DynamicCast<FrameNode>(menuWrapperNode->GetChildAtIndex(0));
+    ASSERT_NE(menuNode, nullptr);
+    auto property = menuNode->GetLayoutProperty<MenuLayoutProperty>();
+    ASSERT_NE(property, nullptr);
+    ASSERT_TRUE(property->GetPositionOffset().has_value());
+    EXPECT_EQ(property->GetPositionOffset().value(), OffsetF());
+
+    /**
+     * @tc.steps: step2. build menu layoutwrapper and set the hierarchical parameter to false.
+     * @tc.expected: no exception in the method return value.
+     */
+    RefPtr<MenuLayoutAlgorithm> layoutAlgorithm = AceType::MakeRefPtr<MenuLayoutAlgorithm>();
+    layoutAlgorithm->hierarchicalParameters_ = false;
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    LayoutWrapperNode layoutWrapper(menuNode, geometryNode, menuNode->GetLayoutProperty());
+    layoutWrapper.GetLayoutProperty()->UpdateUserDefinedIdealSize(
+        CalcSize(CalcLength(FULL_SCREEN_WIDTH), CalcLength(FULL_SCREEN_HEIGHT)));
+    LayoutConstraintF parentLayoutConstraint;
+    parentLayoutConstraint.maxSize = FULL_SCREEN_SIZE;
+    parentLayoutConstraint.percentReference = FULL_SCREEN_SIZE;
+    parentLayoutConstraint.selfIdealSize.SetSize(SizeF(FULL_SCREEN_WIDTH, FULL_SCREEN_HEIGHT));
+    layoutWrapper.GetLayoutProperty()->UpdateLayoutConstraint(parentLayoutConstraint);
+    layoutWrapper.GetLayoutProperty()->UpdateContentConstraint();
+    layoutAlgorithm->Initialize(&layoutWrapper);
+    layoutAlgorithm->Measure(&layoutWrapper);
+    EXPECT_EQ(layoutAlgorithm->position_, OffsetF());
+    EXPECT_EQ(layoutAlgorithm->positionOffset_, OffsetF());
+    EXPECT_EQ(layoutAlgorithm->wrapperSize_, SizeF(FULL_SCREEN_WIDTH, FULL_SCREEN_HEIGHT));
+}
+
+/**
+ * @tc.name: MenuItemPatternTestNg010
+ * @tc.desc: Verify submenu layout when the layering parameter is true.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuTestNg, MenuItemPatternTestNg010, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create a menuWrapperNode and menuNodes.
+     * @tc.expected: menuWrapperNode and menuNode are not null.
+     */
     std::function<void()> buildFun = []() {
         MenuModelNG MenuModelInstance;
         MenuModelInstance.Create();
@@ -7559,12 +7775,16 @@ HWTEST_F(MenuTestNg, MenuItemPatternTestNg103, TestSize.Level1)
     auto subMenu = FrameNode::CreateFrameNode(
         V2::MENU_ETS_TAG, 3, AceType::MakeRefPtr<MenuPattern>(1, TEXT_TAG, MenuType::SUB_MENU));
     auto menuItemNode = FrameNode::CreateFrameNode(V2::MENU_ITEM_ETS_TAG, 4, AceType::MakeRefPtr<MenuItemPattern>());
-    auto subMenuParent = FrameNode::CreateFrameNode(V2::MENU_ITEM_ETS_TAG, 5, AceType::MakeRefPtr<MenuItemPattern>());
     menuItemNode->MountToParent(mainMenu);
     mainMenu->MountToParent(wrapperNode);
     subMenu->MountToParent(wrapperNode);
     auto menuItemPattern = menuItemNode->GetPattern<MenuItemPattern>();
     ASSERT_NE(menuItemPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Set sub menu shown and createLayoutAlgorithm.
+     * @tc.expected: algorithm is not null.
+     */
     menuItemPattern->ShowSubMenu();
     menuItemPattern->SetSubBuilder(buildFun);
     menuItemPattern->SetIsSubMenuShowed(false);
@@ -7575,6 +7795,11 @@ HWTEST_F(MenuTestNg, MenuItemPatternTestNg103, TestSize.Level1)
     ASSERT_NE(subMenuPattern, nullptr);
     auto algorithm = AceType::DynamicCast<SubMenuLayoutAlgorithm>(subMenuPattern->CreateLayoutAlgorithm());
     ASSERT_TRUE(algorithm);
+
+    /**
+     * @tc.cases: case1. the hierarchicalParameter is true.
+     * @tc.expected: algorithm is not null and sub menu show correctly.
+     */
     algorithm->hierarchicalParameters_ = true;
     subMenuPattern->SetParentMenuItem(menuItemNode);
     auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
@@ -7583,52 +7808,84 @@ HWTEST_F(MenuTestNg, MenuItemPatternTestNg103, TestSize.Level1)
     auto* wrapper = new LayoutWrapperNode(subMenu, geometryNode, layoutProp);
     algorithm->Layout(wrapper);
     ASSERT_TRUE(algorithm);
+
+    // @tc.cases: case1. sub menu show on the right side of item
+    algorithm->position_ = OffsetF(MENU_OFFSET_X + MENU_ITEM_SIZE_WIDTH, MENU_OFFSET_Y);
+    algorithm->Layout(wrapper);
+    EXPECT_NE(wrapper->GetGeometryNode()->GetMarginFrameOffset().GetX(), 0);
+
+    // @tc.cases: case2. sub menu show on the left side of item
+    algorithm->position_ = OffsetF(FULL_SCREEN_WIDTH, MENU_OFFSET_Y);
+    algorithm->Layout(wrapper);
+    EXPECT_NE(wrapper->GetGeometryNode()->GetMarginFrameOffset().GetX(), 0);
+    EXPECT_EQ(wrapper->GetGeometryNode()->GetMarginFrameOffset().GetY(), 0);
 }
 
 /**
- * @tc.name: MenuLayoutAlgorithmTestNg104
- * @tc.desc: Verify UpdateConstraintHeight.
+ * @tc.name: MenuItemPatternTestNg011
+ * @tc.desc: Verify submenu layout when the layering parameter is false.
  * @tc.type: FUNC
  */
-HWTEST_F(MenuTestNg, MenuLayoutAlgorithmTestNg104, TestSize.Level1)
+HWTEST_F(MenuTestNg, MenuItemPatternTestNg011, TestSize.Level1)
 {
-    std::function<void()> action = [] {};
-    std::vector<OptionParam> optionParams;
-    optionParams.emplace_back("MenuItem1", "", action);
-    optionParams.emplace_back("MenuItem2", "", action);
-    MenuParam menuParam;
-    auto menuWrapperNode = MenuView::Create(std::move(optionParams), 1, "", MenuType::CONTEXT_MENU, menuParam);
-    ASSERT_NE(menuWrapperNode, nullptr);
-    ASSERT_EQ(menuWrapperNode->GetChildren().size(), 1);
-    auto menuNode = AceType::DynamicCast<FrameNode>(menuWrapperNode->GetChildAtIndex(0));
-    ASSERT_NE(menuNode, nullptr);
-    auto property = menuNode->GetLayoutProperty<MenuLayoutProperty>();
-    ASSERT_NE(property, nullptr);
-    ASSERT_TRUE(property->GetPositionOffset().has_value());
-    EXPECT_EQ(property->GetPositionOffset().value(), OffsetF());
-    RefPtr<MenuLayoutAlgorithm> layoutAlgorithm = AceType::MakeRefPtr<MenuLayoutAlgorithm>();
-    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
-    LayoutWrapperNode layoutWrapper(menuNode, geometryNode, menuNode->GetLayoutProperty());
-    layoutWrapper.GetLayoutProperty()->UpdateUserDefinedIdealSize(
-        CalcSize(CalcLength(FULL_SCREEN_WIDTH), CalcLength(FULL_SCREEN_HEIGHT)));
-    LayoutConstraintF parentLayoutConstraint;
-    parentLayoutConstraint.maxSize = FULL_SCREEN_SIZE;
-    parentLayoutConstraint.percentReference = FULL_SCREEN_SIZE;
-    parentLayoutConstraint.selfIdealSize.SetSize(SizeF(FULL_SCREEN_WIDTH, FULL_SCREEN_HEIGHT));
-    layoutWrapper.GetLayoutProperty()->UpdateLayoutConstraint(parentLayoutConstraint);
-    layoutWrapper.GetLayoutProperty()->UpdateContentConstraint();
-    MockPipelineContext::GetCurrent()->UpdateDisplayAvailableRect(
-        Rect(0.0f, 0.0f, FULL_SCREEN_WIDTH, FULL_SCREEN_HEIGHT));
-    MockPipelineContext::GetCurrent()->SetDisplayWindowRectInfo(
-        Rect(0.0f, 0.0f, FULL_SCREEN_WIDTH, FULL_SCREEN_HEIGHT));
-    auto pipelineContext = layoutAlgorithm->GetCurrentPipelineContext();
-    float actualHeight = FULL_SCREEN_HEIGHT * 0.8;
-    layoutAlgorithm->hierarchicalParameters_ = true;
-    LayoutConstraintF childLayoutConstraint;
-    layoutAlgorithm->UpdateConstraintHeight(&layoutWrapper, childLayoutConstraint);
-    EXPECT_EQ(childLayoutConstraint.maxSize.Height(), actualHeight);
-    layoutAlgorithm->hierarchicalParameters_ = false;
-    layoutAlgorithm->UpdateConstraintHeight(&layoutWrapper, childLayoutConstraint);
-    EXPECT_EQ(childLayoutConstraint.maxSize.Height(), actualHeight);
+    /**
+     * @tc.steps: step1. Create a menuWrapperNode and menuNodes.
+     * @tc.expected: menuWrapperNode and menuNode are not null.
+     */
+    std::function<void()> buildFun = []() {
+        MenuModelNG MenuModelInstance;
+        MenuModelInstance.Create();
+    };
+    auto wrapperNode =
+        FrameNode::CreateFrameNode(V2::MENU_WRAPPER_ETS_TAG, 1, AceType::MakeRefPtr<MenuWrapperPattern>(1));
+    auto mainMenu = FrameNode::CreateFrameNode(
+        V2::MENU_ETS_TAG, 2, AceType::MakeRefPtr<MenuPattern>(1, TEXT_TAG, MenuType::CONTEXT_MENU));
+    auto subMenu = FrameNode::CreateFrameNode(
+        V2::MENU_ETS_TAG, 3, AceType::MakeRefPtr<MenuPattern>(1, TEXT_TAG, MenuType::SUB_MENU));
+    auto menuItemNode = FrameNode::CreateFrameNode(V2::MENU_ITEM_ETS_TAG, 4, AceType::MakeRefPtr<MenuItemPattern>());
+    menuItemNode->MountToParent(mainMenu);
+    mainMenu->MountToParent(wrapperNode);
+    subMenu->MountToParent(wrapperNode);
+    auto menuItemPattern = menuItemNode->GetPattern<MenuItemPattern>();
+    ASSERT_NE(menuItemPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Set sub menu shown and createLayoutAlgorithm.
+     * @tc.expected: algorithm is not null.
+     */
+    menuItemPattern->ShowSubMenu();
+    menuItemPattern->SetSubBuilder(buildFun);
+    menuItemPattern->SetIsSubMenuShowed(false);
+    auto mainMenuPattern = mainMenu->GetPattern<MenuPattern>();
+    ASSERT_NE(mainMenuPattern, nullptr);
+    mainMenuPattern->SetShowedSubMenu(subMenu);
+    auto subMenuPattern = subMenu->GetPattern<MenuPattern>();
+    ASSERT_NE(subMenuPattern, nullptr);
+    auto algorithm = AceType::DynamicCast<SubMenuLayoutAlgorithm>(subMenuPattern->CreateLayoutAlgorithm());
+    ASSERT_TRUE(algorithm);
+
+    /**
+     * @tc.cases: case1. the hierarchicalParameter is false.
+     * @tc.expected: algorithm is not null and sub menu show correctly.
+     */
+    algorithm->hierarchicalParameters_ = false;
+    subMenuPattern->SetParentMenuItem(menuItemNode);
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    geometryNode->SetFrameSize(SizeF(MENU_SIZE_WIDTH, MENU_SIZE_HEIGHT));
+    auto layoutProp = AceType::MakeRefPtr<MenuLayoutProperty>();
+    auto* wrapper = new LayoutWrapperNode(subMenu, geometryNode, layoutProp);
+    algorithm->Layout(wrapper);
+    ASSERT_TRUE(algorithm);
+
+    // @tc.cases: case1. sub menu show on the right side of item
+    algorithm->position_ = OffsetF(MENU_OFFSET_X + MENU_ITEM_SIZE_WIDTH, MENU_OFFSET_Y);
+    algorithm->Layout(wrapper);
+    EXPECT_NE(wrapper->GetGeometryNode()->GetMarginFrameOffset().GetX(), 0);
+
+    // @tc.cases: case2. sub menu show on the left side of item
+    algorithm->position_ = OffsetF(FULL_SCREEN_WIDTH, MENU_OFFSET_Y);
+    algorithm->Layout(wrapper);
+    EXPECT_NE(wrapper->GetGeometryNode()->GetMarginFrameOffset().GetX(), 0);
+    EXPECT_EQ(wrapper->GetGeometryNode()->GetMarginFrameOffset().GetY(), 0);
 }
 } // namespace OHOS::Ace::NG

@@ -85,6 +85,7 @@ struct MenuParam {
     bool isAboveApps = false;
     MenuType type = MenuType::MENU;
     MenuPreviewMode previewMode = MenuPreviewMode::NONE;
+    MenuPreviewAnimationOptions previewAnimationOptions;
     std::optional<EffectOption> backgroundEffectOption;
 };
 

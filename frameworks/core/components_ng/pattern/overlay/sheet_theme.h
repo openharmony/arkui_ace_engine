@@ -24,10 +24,15 @@
 namespace OHOS::Ace::NG {
 namespace {
 constexpr Dimension SHEET_BLANK_MINI_HEIGHT = 8.0_vp;
+constexpr Dimension SHEET_OPERATION_AREA_PADDING = 8.0_vp;
 constexpr Dimension SHEET_OPERATION_AREA_HEIGHT = 56.0_vp;
+constexpr Dimension SHEET_OPERATION_AREA_HEIGHT_DOUBLE = 72.0_vp;
 constexpr Dimension SHEET_CLOSE_ICON_WIDTH = 40.0_vp;
 constexpr Dimension SHEET_CLOSE_ICON_HEIGHT = 40.0_vp;
+constexpr Dimension SHEET_CLOSE_ICON_IMAGE_HEIGHT = 18.0_vp;
+constexpr Dimension SHEET_CLOSE_ICON_IMAGE_WIDTH = 18.0_vp;
 constexpr Dimension SHEET_CLOSE_ICON_TITLE_SPACE = 32.0_vp;
+constexpr Dimension SHEET_CLOSE_ICON_RADIUS = 20.0_vp;
 constexpr Dimension SHEET_DRAG_BAR_WIDTH = 64.0_vp;
 constexpr Dimension SHEET_DRAG_BAR_HEIGHT = 16.0_vp;
 constexpr Dimension SHEET_LANDSCAPE_WIDTH = 480.0_vp;
@@ -40,6 +45,9 @@ constexpr Dimension SHEET_ARROW_HEIGHT = 8.0_vp;
 constexpr Dimension SHEET_TARGET_SPACE = 8.0_vp;
 constexpr Dimension SHEET_DEVICE_WIDTH_BREAKPOINT = 600.0_vp;
 constexpr Dimension SHEET_PC_DEVICE_WIDTH_BREAKPOINT = 840.0_vp;
+constexpr Dimension SHEET_DOUBLE_TITLE_TOP_PADDING = 15.0_vp;
+constexpr Dimension SHEET_DOUBLE_TITLE_BOTTON_PADDING = 8.0_vp;
+constexpr Dimension SHEET_TITLE_AERA_MARGIN = -8.0_vp;
 } // namespace
 class SheetTheme : public virtual Theme {
     DECLARE_ACE_TYPE(SheetTheme, Theme);
@@ -81,10 +89,13 @@ public:
             theme->subtitleTextFontSize_ = sheetPattern->GetAttr<Dimension>("subtitle_text_font_size", 14.0_fp);
             theme->subtitleTextMargin_ = sheetPattern->GetAttr<Dimension>("subtitle_text_margin", 2.0_fp);
             theme->titleTextFontColor_ = sheetPattern->GetAttr<Color>("title_text_font_color", Color(0xff182431));
-            theme->subtitleTextFontColor_ = sheetPattern->GetAttr<Color>("subtitle_text_font_color", Color(0x66182431));
+            theme->subtitleTextFontColor_ = sheetPattern->GetAttr<Color>("subtitle_text_font_color", Color(0x99182431));
             theme->sheetBackgoundColor_ = sheetPattern->GetAttr<Color>("sheet_background_color", Color(0xfff1f3f5));
             theme->dragBarColor_ = sheetPattern->GetAttr<Color>("drag_bar_color", Color(0x33182431));
             theme->sheetType_ = sheetPattern->GetAttr<std::string>("sheet_type", "auto");
+            theme->maskColor_ = sheetPattern->GetAttr<Color>("mask_color", Color(0x33182431));
+            theme->closeIconColor_ = sheetPattern->GetAttr<Color>("close_icon_color", Color(0x0c182431));
+            theme->closeIconImageColor_ = sheetPattern->GetAttr<Color>("close_icon_image_color", Color(0xff182431));
         }
     };
     ~SheetTheme() override = default;
@@ -134,6 +145,21 @@ public:
         return dragBarColor_;
     }
 
+    const Color& GetMaskColor() const
+    {
+        return maskColor_;
+    }
+
+    const Color& GetCloseIconColor() const
+    {
+        return closeIconColor_;
+    }
+
+    const Color& GetCloseIconImageColor() const
+    {
+        return closeIconImageColor_;
+    }
+
     const std::string& GetSheetType() const
     {
         return sheetType_;
@@ -152,6 +178,9 @@ private:
     Color subtitleTextFontColor_;
     Color sheetBackgoundColor_;
     Color dragBarColor_;
+    Color maskColor_;
+    Color closeIconColor_;
+    Color closeIconImageColor_;
     std::string sheetType_;
 };
 } // namespace OHOS::Ace::NG

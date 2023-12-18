@@ -84,6 +84,9 @@ const std::map<GridColumnType, std::vector<SystemGridInfo>> SYSTEM_GRID_TYPES = 
     { GridColumnType::NAVIGATION_TOOLBAR, { SystemGridInfo(GridSizeType::SM, LARGE_GUTTER, LARGE_MARGIN, 4),
                                             SystemGridInfo(GridSizeType::MD, LARGE_GUTTER, LARGE_MARGIN, 8),
                                             SystemGridInfo(GridSizeType::LG, LARGE_GUTTER, LARGE_MARGIN, 12) } },
+    { GridColumnType::DRAG_PANEL, { SystemGridInfo(GridSizeType::SM, SMALL_GUTTER, SMALL_MARGIN, 3),
+                                    SystemGridInfo(GridSizeType::MD, SMALL_GUTTER, SMALL_GUTTER, 4),
+                                    SystemGridInfo(GridSizeType::LG, SMALL_GUTTER, SMALL_MARGIN, 5) } },
 };
 
 } // namespace

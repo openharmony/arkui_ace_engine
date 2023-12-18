@@ -16,39 +16,35 @@
  */
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_progress_bridge.h"
 
+#include "base/utils/utils.h"
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_api.h"
+#include "core/components/progress/progress_theme.h"
+#include "core/components_ng/pattern/progress/progress_layout_property.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
+#include "bridge/declarative_frontend/jsview/js_linear_gradient.h"
 
 namespace OHOS::Ace::NG {
 constexpr int32_t ARG_NUM_NATIVE_NODE = 0;
 constexpr int32_t ARG_NUM_VALUE = 1;
-constexpr int32_t ARG_NUM_COLOR_RESOURCE_COLOR = 1;
-constexpr int32_t ARG_NUM_COLOR_ANGLE = 1;
-constexpr int32_t ARG_NUM_COLOR_DIRECTION = 2;
-constexpr int32_t ARG_NUM_COLOR_COLOR_STOPS = 3;
-constexpr int32_t ARG_NUM_COLOR_REPEATING = 4;
+constexpr int32_t ARG_COLOR_INDEX_VALUE = 1;
 constexpr int32_t ARG_NUM_STYLE_STROKE_WIDHT = 1;
-constexpr int32_t ARG_NUM_STYLE_BORDER_WIDHT = 1;
-constexpr int32_t ARG_NUM_STYLE_PROGRESS_STATUS = 2;
-constexpr int32_t ARG_NUM_STYLE_FONT_STYLE = 2;
+constexpr int32_t ARG_NUM_STYLE_BORDER_WIDHT = 6;
+constexpr int32_t ARG_NUM_STYLE_PROGRESS_STATUS = 16;
+constexpr int32_t ARG_NUM_STYLE_FONT_STYLE = 11;
 constexpr int32_t ARG_NUM_STYLE_SCALE_COUNT = 2;
 constexpr int32_t ARG_NUM_STYLE_SCALE_WIDHT = 3;
-constexpr int32_t ARG_NUM_STYLE_FONT_SIZE = 3;
+constexpr int32_t ARG_NUM_STYLE_FONT_SIZE = 8;
 constexpr int32_t ARG_NUM_STYLE_ENABLE_SMOOTH_EFFECT = 4;
 constexpr int32_t ARG_NUM_STYLE_BORDER_COLOR = 5;
-constexpr int32_t ARG_NUM_STYLE_CONTENT = 6;
-constexpr int32_t ARG_NUM_STYLE_FONT_WEIGHT = 7;
-constexpr int32_t ARG_NUM_STYLE_FONT_COLOR = 8;
-constexpr int32_t ARG_NUM_STYLE_ENABLE_SCAN_EFFECT = 9;
-constexpr int32_t ARG_NUM_STYLE_SHADOW = 10;
-constexpr int32_t ARG_NUM_STYLE_SHOW_DEFAULT_PERCENTAHE = 10;
-constexpr int32_t ARG_NUM_STYLE_FONT_FAMILY = 11;
-constexpr int32_t ARG_NUM_STYLE_STROKE_RADIUS = 12;
-constexpr int32_t COLOR_STOPS_MIN_LENGTH = 1;
-constexpr int32_t ARRAY_MIN_INDEX = 0;
+constexpr int32_t ARG_NUM_STYLE_CONTENT = 7;
+constexpr int32_t ARG_NUM_STYLE_FONT_WEIGHT = 9;
+constexpr int32_t ARG_NUM_STYLE_FONT_COLOR = 12;
+constexpr int32_t ARG_NUM_STYLE_ENABLE_SCAN_EFFECT = 13;
+constexpr int32_t ARG_NUM_STYLE_SHADOW = 15;
+constexpr int32_t ARG_NUM_STYLE_SHOW_DEFAULT_PERCENTAHE = 14;
+constexpr int32_t ARG_NUM_STYLE_FONT_FAMILY = 10;
+constexpr int32_t ARG_NUM_STYLE_STROKE_RADIUS = 17;
 constexpr double DEFAULT_PROGRESS_VALUE = 0;
-constexpr double DEFAULT_COLOR_STOPS_DIMENSION = 0;
-constexpr double DEFAULT_GRADIENT_ANGLE = 0;
 constexpr double DEFAULT_STROKE_WIDTH = 4;
 constexpr double DEFAULT_BORDER_WIDTH = 1;
 constexpr double DEFAULT_SCALE_WIDTH = 2;
@@ -61,6 +57,50 @@ constexpr NG::ProgressStatus DEFAULT_PROGRESS_STATUS = NG::ProgressStatus::PROGR
 constexpr DimensionUnit DEFAULT_CAPSULE_FONT_UNIT = DimensionUnit::FP;
 const std::vector<Ace::FontStyle> FONT_STYLES = { Ace::FontStyle::NORMAL, Ace::FontStyle::ITALIC };
 const std::vector<NG::ProgressStatus> STATUS_STYLES = { NG::ProgressStatus::PROGRESSING, NG::ProgressStatus::LOADING };
+
+namespace {
+bool ConvertProgressRResourceColor(const EcmaVM* vm, const Local<JSValueRef>& item, OHOS::Ace::NG::Gradient& gradient)
+{
+    Color color;
+    if (!ArkTSUtils::ParseJsColor(vm, item, color)) {
+        return false;
+    }
+    OHOS::Ace::NG::GradientColor gradientColorStart;
+    gradientColorStart.SetLinearColor(LinearColor(color));
+    gradientColorStart.SetDimension(Dimension(0.0));
+    gradient.AddColor(gradientColorStart);
+    OHOS::Ace::NG::GradientColor gradientColorEnd;
+    gradientColorEnd.SetLinearColor(LinearColor(color));
+    gradientColorEnd.SetDimension(Dimension(1.0));
+    gradient.AddColor(gradientColorEnd);
+    return true;
+}
+
+bool ConvertProgressResourceColor(
+    const EcmaVM* vm, const Local<JSValueRef>& itemParam, OHOS::Ace::NG::Gradient& gradient)
+{
+    if (!itemParam->IsObject()) {
+        return ConvertProgressRResourceColor(vm, itemParam, gradient);
+    }
+    Framework::JSLinearGradient* jsLinearGradient =
+        static_cast<Framework::JSLinearGradient*>(itemParam->ToObject(vm)->GetNativePointerField(0));
+    if (!jsLinearGradient) {
+        return ConvertProgressRResourceColor(vm, itemParam, gradient);
+    }
+
+    size_t colorLength = jsLinearGradient->GetGradient().size();
+    if (colorLength == 0) {
+        return false;
+    }
+    for (size_t colorIndex = 0; colorIndex < colorLength; ++colorIndex) {
+        OHOS::Ace::NG::GradientColor gradientColor;
+        gradientColor.SetLinearColor(LinearColor(jsLinearGradient->GetGradient().at(colorIndex).first));
+        gradientColor.SetDimension(jsLinearGradient->GetGradient().at(colorIndex).second);
+        gradient.AddColor(gradientColor);
+    }
+    return true;
+}
+} // namespace
 
 ArkUINativeModuleValue ProgressBridge::ResetProgressValue(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
@@ -101,118 +141,37 @@ ArkUINativeModuleValue ProgressBridge::ResetProgressColor(ArkUIRuntimeCallInfo* 
     return panda::JSValueRef::Undefined(vm);
 }
 
-void ParseGradientColorStops(const EcmaVM* vm, const Local<JSValueRef>& value, std::vector<double>& colors)
-{
-    if (!value->IsArray(vm)) {
-        return;
-    }
-    auto array = panda::Local<panda::ArrayRef>(value);
-    auto length = array->Length(vm);
-    for (uint32_t index = 0; index < length; index++) {
-        auto item = panda::ArrayRef::GetValueAt(vm, array, index);
-        if (!item->IsArray(vm)) {
-            continue;
-        }
-        auto itemArray = panda::Local<panda::ArrayRef>(item);
-        auto itemLength = itemArray->Length(vm);
-        if (itemLength < COLOR_STOPS_MIN_LENGTH) {
-            continue;
-        }
-        Color color;
-        auto colorParams = panda::ArrayRef::GetValueAt(vm, itemArray, ARRAY_MIN_INDEX);
-        if (!ArkTSUtils::ParseJsColorAlpha(vm, colorParams, color)) {
-            continue;
-        }
-        bool hasDimension = false;
-        double dimension = DEFAULT_COLOR_STOPS_DIMENSION;
-        if (itemLength > COLOR_STOPS_MIN_LENGTH) {
-            auto stopDimension = panda::ArrayRef::GetValueAt(vm, itemArray, COLOR_STOPS_MIN_LENGTH);
-            if (ArkTSUtils::ParseJsDouble(vm, stopDimension, dimension)) {
-                hasDimension = true;
-            }
-        }
-        colors.push_back(static_cast<double>(color.GetValue()));
-        colors.push_back(static_cast<double>(hasDimension));
-        colors.push_back(dimension);
-    }
-}
-
-bool ParseJsInt32(const EcmaVM* vm, const Local<JSValueRef>& value, int32_t& result)
-{
-    if (value->IsNumber()) {
-        result = value->Int32Value(vm);
-        return true;
-    }
-    if (value->IsString()) {
-        result = StringUtils::StringToInt(value->ToString(vm)->ToString());
-        return true;
-    }
-
-    return false;
-}
-
-void ParseJsAngle(const EcmaVM* vm, const Local<JSValueRef>& value, std::optional<float>& angle)
-{
-    if (value->IsNumber()) {
-        angle = static_cast<float>(value->ToNumber(vm)->Value());
-        return;
-    }
-    if (value->IsString()) {
-        angle = static_cast<float>(StringUtils::StringToDegree(value->ToString(vm)->ToString()));
-        return;
-    }
-    return;
-}
-
-void ParseGradientAngle(const EcmaVM* vm, const Local<JSValueRef>& value, std::vector<double>& values)
-{
-    std::optional<float> degree;
-    ParseJsAngle(vm, value, degree);
-    auto angleHasValue = degree.has_value();
-    auto angleValue = angleHasValue ? degree.value() : DEFAULT_GRADIENT_ANGLE;
-    degree.reset();
-    values.push_back(static_cast<double>(angleHasValue));
-    values.push_back(static_cast<double>(angleValue));
-}
-
-ArkUINativeModuleValue ProgressBridge::SetProgressColorWithLinearGradient(ArkUIRuntimeCallInfo* runtimeCallInfo)
-{
-    EcmaVM* vm = runtimeCallInfo->GetVM();
-    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
-    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(ARG_NUM_NATIVE_NODE);
-    Local<JSValueRef> angleArg = runtimeCallInfo->GetCallArgRef(ARG_NUM_COLOR_ANGLE);
-    Local<JSValueRef> directionArg = runtimeCallInfo->GetCallArgRef(ARG_NUM_COLOR_DIRECTION);
-    Local<JSValueRef> colorsArg = runtimeCallInfo->GetCallArgRef(ARG_NUM_COLOR_COLOR_STOPS);
-    Local<JSValueRef> repeatingArg = runtimeCallInfo->GetCallArgRef(ARG_NUM_COLOR_REPEATING);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-
-    std::vector<double> values;
-    ParseGradientAngle(vm, angleArg, values);
-    int32_t direction = static_cast<int32_t>(GradientDirection::NONE);
-    ParseJsInt32(vm, directionArg, direction);
-    values.push_back(static_cast<double>(direction));
-    auto repeating = repeatingArg->IsBoolean() ? repeatingArg->BooleaValue() : false;
-    values.push_back(static_cast<double>(repeating));
-
-    std::vector<double> colors;
-    ParseGradientColorStops(vm, colorsArg, colors);
-    GetArkUIInternalNodeAPI()->GetProgressModifier().SetProgressColorWithArray(
-        nativeNode, colors.data(), colors.size());
-
-    return panda::JSValueRef::Undefined(vm);
-}
-
 ArkUINativeModuleValue ProgressBridge::SetProgressColor(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
-    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(ARG_NUM_NATIVE_NODE);
-    Local<JSValueRef> colorArg = runtimeCallInfo->GetCallArgRef(ARG_NUM_COLOR_RESOURCE_COLOR);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-
+    Local<JSValueRef> nativeArg = runtimeCallInfo->GetCallArgRef(ARG_NUM_NATIVE_NODE);
+    Local<JSValueRef> colorArg = runtimeCallInfo->GetCallArgRef(ARG_COLOR_INDEX_VALUE);
+    void* nativeNode = nativeArg->ToNativePointer(vm)->Value();
     Color color;
+    OHOS::Ace::NG::Gradient gradient;
     if (ArkTSUtils::ParseJsColorAlpha(vm, colorArg, color)) {
-        GetArkUIInternalNodeAPI()->GetProgressModifier().SetProgressColorWithValue(nativeNode, color.GetValue());
+        GetArkUIInternalNodeAPI()->GetProgressModifier().SetProgressColor(nativeNode, color.GetValue());
+    } else if (ConvertProgressResourceColor(vm, colorArg, gradient)) {
+        ArkUIGradientType gradientObj;
+        int32_t colorlength = gradient.GetColors().size();
+        std::vector<uint32_t> colorValues;
+        std::vector<ArkUILengthType> offsetValues;
+        if (colorlength <= 0) {
+            GetArkUIInternalNodeAPI()->GetProgressModifier().ResetProgressColor(nativeNode);
+            return panda::JSValueRef::Undefined(vm);
+        }
+
+        for (int32_t i = 0; i < colorlength; i++) {
+            colorValues.push_back(gradient.GetColors()[i].GetLinearColor().GetValue());
+            offsetValues.push_back(ArkUILengthType { .number = gradient.GetColors()[i].GetDimension().Value(),
+                .unit = static_cast<int8_t>(gradient.GetColors()[i].GetDimension().Unit()) });
+        }
+
+        gradientObj.color = &(*colorValues.begin());
+        gradientObj.offset = &(*offsetValues.begin());
+        GetArkUIInternalNodeAPI()->GetProgressModifier().SetProgressGradientColor(
+            nativeNode, &gradientObj, colorlength);
     } else {
         GetArkUIInternalNodeAPI()->GetProgressModifier().ResetProgressColor(nativeNode);
     }
@@ -230,16 +189,22 @@ ArkUINativeModuleValue ProgressBridge::ResetProgressStyle(ArkUIRuntimeCallInfo* 
     return panda::JSValueRef::Undefined(vm);
 }
 
-void ParseStrokeWidth(const EcmaVM* vm, ArkUIRuntimeCallInfo* runtimeCallInfo, ArkUIProgressStyle& progressStyle)
+void ParseStrokeWidth(
+    const EcmaVM* vm, ArkUIRuntimeCallInfo* runtimeCallInfo, ArkUIProgressStyle& progressStyle, int32_t index)
 {
-    Local<JSValueRef> strokeWidthArg = runtimeCallInfo->GetCallArgRef(ARG_NUM_STYLE_STROKE_WIDHT);
+    Local<JSValueRef> strokeWidthArg = runtimeCallInfo->GetCallArgRef(index);
     CalcDimension strokeWidth = CalcDimension(DEFAULT_STROKE_WIDTH, DimensionUnit::VP);
+    auto theme = ArkTSUtils::GetTheme<ProgressTheme>();
 
     if (strokeWidthArg->IsString()) {
         const std::string& value = strokeWidthArg->ToString(vm)->ToString();
         strokeWidth = StringUtils::StringToDimensionWithUnit(value, DimensionUnit::VP, DEFAULT_STROKE_WIDTH);
     } else {
         ArkTSUtils::ParseJsDimension(vm, strokeWidthArg, strokeWidth, DimensionUnit::VP, false);
+    }
+
+    if ((LessOrEqual(strokeWidth.Value(), 0.0f) || strokeWidth.Unit() == DimensionUnit::PERCENT) && theme) {
+        strokeWidth = theme->GetTrackThickness();
     }
     if (strokeWidth.IsNegative()) {
         progressStyle.strokeWidthValue = DEFAULT_STROKE_WIDTH;
@@ -250,9 +215,10 @@ void ParseStrokeWidth(const EcmaVM* vm, ArkUIRuntimeCallInfo* runtimeCallInfo, A
     }
 }
 
-void ParseBorderWidth(const EcmaVM* vm, ArkUIRuntimeCallInfo* runtimeCallInfo, ArkUIProgressStyle& progressStyle)
+void ParseBorderWidth(
+    const EcmaVM* vm, ArkUIRuntimeCallInfo* runtimeCallInfo, ArkUIProgressStyle& progressStyle, int32_t index)
 {
-    Local<JSValueRef> borderWidthArg = runtimeCallInfo->GetCallArgRef(ARG_NUM_STYLE_BORDER_WIDHT);
+    Local<JSValueRef> borderWidthArg = runtimeCallInfo->GetCallArgRef(index);
     CalcDimension borderWidth = CalcDimension(DEFAULT_BORDER_WIDTH, DimensionUnit::VP);
 
     if (borderWidthArg->IsString()) {
@@ -270,34 +236,49 @@ void ParseBorderWidth(const EcmaVM* vm, ArkUIRuntimeCallInfo* runtimeCallInfo, A
     }
 }
 
-void ParseScaleCount(const EcmaVM* vm, ArkUIRuntimeCallInfo* runtimeCallInfo, ArkUIProgressStyle& progressStyle)
+void ParseScaleCount(
+    const EcmaVM* vm, ArkUIRuntimeCallInfo* runtimeCallInfo, ArkUIProgressStyle& progressStyle, int32_t index)
 {
-    Local<JSValueRef> scaleCountArg = runtimeCallInfo->GetCallArgRef(ARG_NUM_STYLE_SCALE_COUNT);
+    Local<JSValueRef> scaleCountArg = runtimeCallInfo->GetCallArgRef(index);
     int32_t scaleCount = DEFAULT_SCALE_COUNT;
+    auto theme = ArkTSUtils::GetTheme<ProgressTheme>();
+    if (theme) {
+        scaleCount = theme->GetScaleNumber();
+    }
 
     if (scaleCountArg->IsNull() || !ArkTSUtils::ParseJsInteger(vm, scaleCountArg, scaleCount)) {
         scaleCount = DEFAULT_SCALE_COUNT;
     }
-
-    progressStyle.scaleCount = scaleCount;
-}
-
-void ParseProgressStatus(const EcmaVM* vm, ArkUIRuntimeCallInfo* runtimeCallInfo, ArkUIProgressStyle& progressStyle)
-{
-    Local<JSValueRef> ProgressStatusArg = runtimeCallInfo->GetCallArgRef(ARG_NUM_STYLE_PROGRESS_STATUS);
-    int32_t progressStatus = static_cast<int32_t>(DEFAULT_PROGRESS_STATUS);
-
-    if (ProgressStatusArg->IsNull() || !ArkTSUtils::ParseJsInteger(vm, ProgressStatusArg, progressStatus) ||
-        progressStatus < 0 || progressStatus >= STATUS_STYLES.size()) {
-        progressStyle.status = static_cast<uint8_t>(DEFAULT_PROGRESS_STATUS);
-    } else {
-        progressStyle.status = static_cast<uint8_t>(progressStatus);
+    if (scaleCount > 1) {
+        progressStyle.scaleCount = scaleCount;
+    } else if (theme) {
+        progressStyle.scaleCount = theme->GetScaleNumber();
     }
 }
 
-void ParseScaleWidth(const EcmaVM* vm, ArkUIRuntimeCallInfo* runtimeCallInfo, ArkUIProgressStyle& progressStyle)
+void ParseProgressStatus(
+    const EcmaVM* vm, ArkUIRuntimeCallInfo* runtimeCallInfo, ArkUIProgressStyle& progressStyle, int32_t index)
 {
-    Local<JSValueRef> scaleWidthArg = runtimeCallInfo->GetCallArgRef(ARG_NUM_STYLE_SCALE_WIDHT);
+    Local<JSValueRef> ProgressStatusArg = runtimeCallInfo->GetCallArgRef(index);
+    NG::ProgressStatus progressStatus = DEFAULT_PROGRESS_STATUS;
+    std::string statusStr;
+    if (ProgressStatusArg->IsUndefined() || ProgressStatusArg->IsNull() ||
+        !ArkTSUtils::ParseJsString(vm, ProgressStatusArg, statusStr)) {
+        progressStatus = DEFAULT_PROGRESS_STATUS;
+    } else {
+        if (statusStr.compare("LOADING") == 0) {
+            progressStatus = NG::ProgressStatus::LOADING;
+        } else {
+            progressStatus = NG::ProgressStatus::PROGRESSING;
+        }
+    }
+    progressStyle.status = static_cast<int8_t>(progressStatus);
+}
+
+void ParseScaleWidth(
+    const EcmaVM* vm, ArkUIRuntimeCallInfo* runtimeCallInfo, ArkUIProgressStyle& progressStyle, int32_t index)
+{
+    Local<JSValueRef> scaleWidthArg = runtimeCallInfo->GetCallArgRef(index);
     CalcDimension scaleWidth = CalcDimension(DEFAULT_SCALE_WIDTH, DimensionUnit::VP);
 
     if (scaleWidthArg->IsString()) {
@@ -314,9 +295,10 @@ void ParseScaleWidth(const EcmaVM* vm, ArkUIRuntimeCallInfo* runtimeCallInfo, Ar
     progressStyle.scaleWidthUnit = static_cast<uint8_t>(scaleWidth.Unit());
 }
 
-void ParseStrokeRadius(const EcmaVM* vm, ArkUIRuntimeCallInfo* runtimeCallInfo, ArkUIProgressStyle& progressStyle)
+void ParseStrokeRadius(
+    const EcmaVM* vm, ArkUIRuntimeCallInfo* runtimeCallInfo, ArkUIProgressStyle& progressStyle, int32_t index)
 {
-    Local<JSValueRef> strokeRadiusArg = runtimeCallInfo->GetCallArgRef(ARG_NUM_STYLE_STROKE_RADIUS);
+    Local<JSValueRef> strokeRadiusArg = runtimeCallInfo->GetCallArgRef(index);
     CalcDimension strokeRadius = CalcDimension(DEFAULT_STROKE_RADIUS, DimensionUnit::PERCENT);
     if (strokeRadiusArg->IsNull() ||
         !ArkTSUtils::ParseJsDimension(vm, strokeRadiusArg, strokeRadius, DimensionUnit::VP, true)) {
@@ -327,9 +309,10 @@ void ParseStrokeRadius(const EcmaVM* vm, ArkUIRuntimeCallInfo* runtimeCallInfo, 
     progressStyle.strokeRadiusUnit = static_cast<uint8_t>(strokeRadius.Unit());
 }
 
-void ParseBorderColor(const EcmaVM* vm, ArkUIRuntimeCallInfo* runtimeCallInfo, ArkUIProgressStyle& progressStyle)
+void ParseBorderColor(
+    const EcmaVM* vm, ArkUIRuntimeCallInfo* runtimeCallInfo, ArkUIProgressStyle& progressStyle, int32_t index)
 {
-    Local<JSValueRef> borderColorArg = runtimeCallInfo->GetCallArgRef(ARG_NUM_STYLE_BORDER_COLOR);
+    Local<JSValueRef> borderColorArg = runtimeCallInfo->GetCallArgRef(index);
     Color borderColor = DEFAULT_BORDER_COLOR;
 
     if (borderColorArg->IsNull() || !ArkTSUtils::ParseJsColorAlpha(vm, borderColorArg, borderColor)) {
@@ -339,9 +322,10 @@ void ParseBorderColor(const EcmaVM* vm, ArkUIRuntimeCallInfo* runtimeCallInfo, A
     progressStyle.borderColor = borderColor.GetValue();
 }
 
-void ParseFontColor(const EcmaVM* vm, ArkUIRuntimeCallInfo* runtimeCallInfo, ArkUIProgressStyle& progressStyle)
+void ParseFontColor(
+    const EcmaVM* vm, ArkUIRuntimeCallInfo* runtimeCallInfo, ArkUIProgressStyle& progressStyle, int32_t index)
 {
-    Local<JSValueRef> fontColorArg = runtimeCallInfo->GetCallArgRef(ARG_NUM_STYLE_FONT_COLOR);
+    Local<JSValueRef> fontColorArg = runtimeCallInfo->GetCallArgRef(index);
     Color fontColor = DEFAULT_FONT_COLOR;
 
     if (fontColorArg->IsNull() || !ArkTSUtils::ParseJsColorAlpha(vm, fontColorArg, fontColor)) {
@@ -351,44 +335,49 @@ void ParseFontColor(const EcmaVM* vm, ArkUIRuntimeCallInfo* runtimeCallInfo, Ark
     progressStyle.fontColor = fontColor.GetValue();
 }
 
-void ParseEnableSmoothEffect(const EcmaVM* vm, ArkUIRuntimeCallInfo* runtimeCallInfo, ArkUIProgressStyle& progressStyle)
+void ParseEnableSmoothEffect(
+    const EcmaVM* vm, ArkUIRuntimeCallInfo* runtimeCallInfo, ArkUIProgressStyle& progressStyle, int32_t index)
 {
-    Local<JSValueRef> enableSmoothEffectArg = runtimeCallInfo->GetCallArgRef(ARG_NUM_STYLE_ENABLE_SMOOTH_EFFECT);
+    Local<JSValueRef> enableSmoothEffectArg = runtimeCallInfo->GetCallArgRef(index);
     progressStyle.enableSmoothEffect =
         (enableSmoothEffectArg->IsBoolean()) ? enableSmoothEffectArg->ToBoolean(vm)->Value() : true;
 }
 
-void ParseContent(const EcmaVM* vm, ArkUIRuntimeCallInfo* runtimeCallInfo, ArkUIProgressStyle& progressStyle)
+void ParseContent(
+    const EcmaVM* vm, ArkUIRuntimeCallInfo* runtimeCallInfo, ArkUIProgressStyle& progressStyle, int32_t index)
 {
-    Local<JSValueRef> contentArg = runtimeCallInfo->GetCallArgRef(ARG_NUM_STYLE_CONTENT);
+    Local<JSValueRef> contentArg = runtimeCallInfo->GetCallArgRef(index);
     std::string contentstr = contentArg->ToString(vm)->ToString();
     progressStyle.content = (contentArg->IsString()) ? contentstr.c_str() : nullptr;
 }
 
-void ParseEnableScanEffect(const EcmaVM* vm, ArkUIRuntimeCallInfo* runtimeCallInfo, ArkUIProgressStyle& progressStyle)
+void ParseEnableScanEffect(
+    const EcmaVM* vm, ArkUIRuntimeCallInfo* runtimeCallInfo, ArkUIProgressStyle& progressStyle, int32_t index)
 {
-    Local<JSValueRef> enableScanEffectArg = runtimeCallInfo->GetCallArgRef(ARG_NUM_STYLE_ENABLE_SCAN_EFFECT);
+    Local<JSValueRef> enableScanEffectArg = runtimeCallInfo->GetCallArgRef(index);
     progressStyle.enableScanEffect =
         (enableScanEffectArg->IsBoolean()) ? enableScanEffectArg->ToBoolean(vm)->Value() : false;
 }
 
-void ParseShadow(const EcmaVM* vm, ArkUIRuntimeCallInfo* runtimeCallInfo, ArkUIProgressStyle& progressStyle)
+void ParseShadow(
+    const EcmaVM* vm, ArkUIRuntimeCallInfo* runtimeCallInfo, ArkUIProgressStyle& progressStyle, int32_t index)
 {
-    Local<JSValueRef> shadowArg = runtimeCallInfo->GetCallArgRef(ARG_NUM_STYLE_SHADOW);
+    Local<JSValueRef> shadowArg = runtimeCallInfo->GetCallArgRef(index);
     progressStyle.shadow = (shadowArg->IsBoolean()) ? shadowArg->ToBoolean(vm)->Value() : false;
 }
 
 void ParseShowDefaultPercentage(
-    const EcmaVM* vm, ArkUIRuntimeCallInfo* runtimeCallInfo, ArkUIProgressStyle& progressStyle)
+    const EcmaVM* vm, ArkUIRuntimeCallInfo* runtimeCallInfo, ArkUIProgressStyle& progressStyle, int32_t index)
 {
-    Local<JSValueRef> showDefaultPercentageArg = runtimeCallInfo->GetCallArgRef(ARG_NUM_STYLE_SHOW_DEFAULT_PERCENTAHE);
+    Local<JSValueRef> showDefaultPercentageArg = runtimeCallInfo->GetCallArgRef(index);
     progressStyle.showDefaultPercentage =
         (showDefaultPercentageArg->IsBoolean()) ? showDefaultPercentageArg->ToBoolean(vm)->Value() : false;
 }
 
-void ParseCapsuleFontSize(const EcmaVM* vm, ArkUIRuntimeCallInfo* runtimeCallInfo, ArkUIProgressStyle& progressStyle)
+void ParseCapsuleFontSize(
+    const EcmaVM* vm, ArkUIRuntimeCallInfo* runtimeCallInfo, ArkUIProgressStyle& progressStyle, int32_t index)
 {
-    Local<JSValueRef> sizeArg = runtimeCallInfo->GetCallArgRef(ARG_NUM_STYLE_FONT_SIZE);
+    Local<JSValueRef> sizeArg = runtimeCallInfo->GetCallArgRef(index);
 
     CalcDimension fontSize;
     if (sizeArg->IsNull() || !ArkTSUtils::ParseJsDimensionFp(vm, sizeArg, fontSize) || fontSize.IsNegative() ||
@@ -401,9 +390,10 @@ void ParseCapsuleFontSize(const EcmaVM* vm, ArkUIRuntimeCallInfo* runtimeCallInf
     }
 }
 
-void ParseCapsuleFontWeight(const EcmaVM* vm, ArkUIRuntimeCallInfo* runtimeCallInfo, ArkUIProgressStyle& progressStyle)
+void ParseCapsuleFontWeight(
+    const EcmaVM* vm, ArkUIRuntimeCallInfo* runtimeCallInfo, ArkUIProgressStyle& progressStyle, int32_t index)
 {
-    Local<JSValueRef> weightArg = runtimeCallInfo->GetCallArgRef(ARG_NUM_STYLE_FONT_WEIGHT);
+    Local<JSValueRef> weightArg = runtimeCallInfo->GetCallArgRef(index);
     auto pipelineContext = PipelineContext::GetCurrentContext();
     auto theme = pipelineContext->GetTheme<TextTheme>();
 
@@ -420,9 +410,10 @@ void ParseCapsuleFontWeight(const EcmaVM* vm, ArkUIRuntimeCallInfo* runtimeCallI
     }
 }
 
-void ParseCapsuleFontStyle(const EcmaVM* vm, ArkUIRuntimeCallInfo* runtimeCallInfo, ArkUIProgressStyle& progressStyle)
+void ParseCapsuleFontStyle(
+    const EcmaVM* vm, ArkUIRuntimeCallInfo* runtimeCallInfo, ArkUIProgressStyle& progressStyle, int32_t index)
 {
-    Local<JSValueRef> styleArg = runtimeCallInfo->GetCallArgRef(ARG_NUM_STYLE_FONT_STYLE);
+    Local<JSValueRef> styleArg = runtimeCallInfo->GetCallArgRef(index);
     auto pipelineContext = PipelineContext::GetCurrentContext();
     auto theme = pipelineContext->GetTheme<TextTheme>();
 
@@ -437,9 +428,10 @@ void ParseCapsuleFontStyle(const EcmaVM* vm, ArkUIRuntimeCallInfo* runtimeCallIn
     progressStyle.fontInfo.fontStyle = style;
 }
 
-void ParseCapsuleFontFamily(const EcmaVM* vm, ArkUIRuntimeCallInfo* runtimeCallInfo, ArkUIProgressStyle& progressStyle)
+void ParseCapsuleFontFamily(
+    const EcmaVM* vm, ArkUIRuntimeCallInfo* runtimeCallInfo, ArkUIProgressStyle& progressStyle, int32_t index)
 {
-    Local<JSValueRef> familyArg = runtimeCallInfo->GetCallArgRef(ARG_NUM_STYLE_FONT_FAMILY);
+    Local<JSValueRef> familyArg = runtimeCallInfo->GetCallArgRef(index);
     auto pipelineContext = PipelineContext::GetCurrentContext();
     auto theme = pipelineContext->GetTheme<TextTheme>();
 
@@ -455,6 +447,53 @@ void ParseCapsuleFontFamily(const EcmaVM* vm, ArkUIRuntimeCallInfo* runtimeCallI
 
     progressStyle.fontInfo.fontFamilies = families.get();
     progressStyle.fontInfo.familyLength = fontFamilies.size();
+}
+
+void ParseLinearStyle(const EcmaVM* vm, ArkUIRuntimeCallInfo* runtimeCallInfo, ArkUIProgressStyle& progressStyle)
+{
+    ParseStrokeWidth(vm, runtimeCallInfo, progressStyle, ARG_NUM_STYLE_STROKE_WIDHT);
+    ParseStrokeRadius(vm, runtimeCallInfo, progressStyle, ARG_NUM_STYLE_STROKE_RADIUS);
+    ParseEnableScanEffect(vm, runtimeCallInfo, progressStyle, ARG_NUM_STYLE_ENABLE_SCAN_EFFECT);
+    ParseEnableSmoothEffect(vm, runtimeCallInfo, progressStyle, ARG_NUM_STYLE_ENABLE_SMOOTH_EFFECT);
+}
+
+void ParseRingStyle(const EcmaVM* vm, ArkUIRuntimeCallInfo* runtimeCallInfo, ArkUIProgressStyle& progressStyle)
+{
+    ParseStrokeWidth(vm, runtimeCallInfo, progressStyle, ARG_NUM_STYLE_STROKE_WIDHT);
+    ParseShadow(vm, runtimeCallInfo, progressStyle, ARG_NUM_STYLE_SHADOW);
+    ParseProgressStatus(vm, runtimeCallInfo, progressStyle, ARG_NUM_STYLE_PROGRESS_STATUS);
+    ParseEnableScanEffect(vm, runtimeCallInfo, progressStyle, ARG_NUM_STYLE_ENABLE_SCAN_EFFECT);
+    ParseEnableSmoothEffect(vm, runtimeCallInfo, progressStyle, ARG_NUM_STYLE_ENABLE_SMOOTH_EFFECT);
+}
+
+void ParseCapsuleStyle(const EcmaVM* vm, ArkUIRuntimeCallInfo* runtimeCallInfo, ArkUIProgressStyle& progressStyle)
+{
+    ParseBorderColor(vm, runtimeCallInfo, progressStyle, ARG_NUM_STYLE_BORDER_COLOR);
+    ParseBorderWidth(vm, runtimeCallInfo, progressStyle, ARG_NUM_STYLE_BORDER_WIDHT);
+    ParseContent(vm, runtimeCallInfo, progressStyle, ARG_NUM_STYLE_CONTENT);
+    ParseFontColor(vm, runtimeCallInfo, progressStyle, ARG_NUM_STYLE_FONT_COLOR);
+    ParseCapsuleFontSize(vm, runtimeCallInfo, progressStyle, ARG_NUM_STYLE_FONT_SIZE);
+    ParseCapsuleFontWeight(vm, runtimeCallInfo, progressStyle, ARG_NUM_STYLE_FONT_WEIGHT);
+    ParseCapsuleFontStyle(vm, runtimeCallInfo, progressStyle, ARG_NUM_STYLE_FONT_STYLE);
+    ParseCapsuleFontFamily(vm, runtimeCallInfo, progressStyle, ARG_NUM_STYLE_FONT_FAMILY);
+    ParseEnableScanEffect(vm, runtimeCallInfo, progressStyle, ARG_NUM_STYLE_ENABLE_SCAN_EFFECT);
+    ParseShowDefaultPercentage(vm, runtimeCallInfo, progressStyle, ARG_NUM_STYLE_SHOW_DEFAULT_PERCENTAHE);
+    ParseEnableSmoothEffect(vm, runtimeCallInfo, progressStyle, ARG_NUM_STYLE_ENABLE_SMOOTH_EFFECT);
+}
+
+void ParseProgressStyle(const EcmaVM* vm, ArkUIRuntimeCallInfo* runtimeCallInfo, ArkUIProgressStyle& progressStyle)
+{
+    auto progressTheme = ArkTSUtils::GetTheme<ProgressTheme>();
+    CHECK_NULL_VOID(progressTheme);
+    ParseStrokeWidth(vm, runtimeCallInfo, progressStyle, ARG_NUM_STYLE_STROKE_WIDHT);
+    ParseScaleCount(vm, runtimeCallInfo, progressStyle, ARG_NUM_STYLE_SCALE_COUNT);
+    ParseScaleWidth(vm, runtimeCallInfo, progressStyle, ARG_NUM_STYLE_SCALE_WIDHT);
+    if ((progressStyle.scaleWidthValue <= 0.0) || (progressStyle.scaleWidthValue > progressStyle.strokeWidthValue) ||
+        progressStyle.scaleWidthUnit == static_cast<int8_t>(DimensionUnit::PERCENT)) {
+        progressStyle.scaleWidthValue = progressTheme->GetScaleWidth().Value();
+        progressStyle.scaleWidthUnit = static_cast<int8_t>(progressTheme->GetScaleWidth().Unit());
+    }
+    ParseEnableSmoothEffect(vm, runtimeCallInfo, progressStyle, ARG_NUM_STYLE_ENABLE_SMOOTH_EFFECT);
 }
 
 ArkUINativeModuleValue ProgressBridge::SetProgressStyle(ArkUIRuntimeCallInfo* runtimeCallInfo)
@@ -482,25 +521,48 @@ ArkUINativeModuleValue ProgressBridge::SetProgressStyle(ArkUIRuntimeCallInfo* ru
             static_cast<uint8_t>(theme->GetTextStyle().GetFontWeight()),
             static_cast<uint8_t>(theme->GetTextStyle().GetFontStyle()), families.get(), fontFamilies.size() } };
 
-    ParseStrokeWidth(vm, runtimeCallInfo, progressStyle);
-    ParseBorderWidth(vm, runtimeCallInfo, progressStyle);
-    ParseScaleCount(vm, runtimeCallInfo, progressStyle);
-    ParseProgressStatus(vm, runtimeCallInfo, progressStyle);
-    ParseScaleWidth(vm, runtimeCallInfo, progressStyle);
-    ParseStrokeRadius(vm, runtimeCallInfo, progressStyle);
-    ParseEnableSmoothEffect(vm, runtimeCallInfo, progressStyle);
-    ParseBorderColor(vm, runtimeCallInfo, progressStyle);
-    ParseContent(vm, runtimeCallInfo, progressStyle);
-    ParseFontColor(vm, runtimeCallInfo, progressStyle);
-    ParseEnableScanEffect(vm, runtimeCallInfo, progressStyle);
-    ParseShadow(vm, runtimeCallInfo, progressStyle);
-    ParseShowDefaultPercentage(vm, runtimeCallInfo, progressStyle);
-    ParseCapsuleFontSize(vm, runtimeCallInfo, progressStyle);
-    ParseCapsuleFontWeight(vm, runtimeCallInfo, progressStyle);
-    ParseCapsuleFontStyle(vm, runtimeCallInfo, progressStyle);
-    ParseCapsuleFontFamily(vm, runtimeCallInfo, progressStyle);
-
+    auto* frameNode = reinterpret_cast<FrameNode*>(nativeNode);
+    CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
+    auto progressLayoutProperty = frameNode->GetLayoutProperty<ProgressLayoutProperty>();
+    CHECK_NULL_RETURN(progressLayoutProperty, panda::JSValueRef::Undefined(vm));
+    auto progresstype = progressLayoutProperty->GetType();
+    if (progresstype == ProgressType::LINEAR) {
+        ParseLinearStyle(vm, runtimeCallInfo, progressStyle);
+    } else if (progresstype == ProgressType::RING) {
+        ParseRingStyle(vm, runtimeCallInfo, progressStyle);
+    } else if (progresstype == ProgressType::CAPSULE) {
+        ParseCapsuleStyle(vm, runtimeCallInfo, progressStyle);
+    } else {
+        ParseProgressStyle(vm, runtimeCallInfo, progressStyle);
+    }
     GetArkUIInternalNodeAPI()->GetProgressModifier().SetProgressStyle(nativeNode, &progressStyle);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue ProgressBridge::SetProgressBackgroundColor(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM *vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> nativeNodeArg = runtimeCallInfo->GetCallArgRef(0);
+    Local<JSValueRef> colorArg = runtimeCallInfo->GetCallArgRef(1);
+    void* nativeNode = nativeNodeArg->ToNativePointer(vm)->Value();
+    Color color;
+    if (!ArkTSUtils::ParseJsColorAlpha(vm, colorArg, color)) {
+        GetArkUIInternalNodeAPI()->GetProgressModifier().ResetProgressBackgroundColor(nativeNode);
+    } else {
+        GetArkUIInternalNodeAPI()->GetProgressModifier().SetProgressBackgroundColor(nativeNode, color.GetValue());
+    }
+
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue ProgressBridge::ResetProgressBackgroundColor(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> nativeNodeArg = runtimeCallInfo->GetCallArgRef(0);
+    void* nativeNode = nativeNodeArg->ToNativePointer(vm)->Value();
+    GetArkUIInternalNodeAPI()->GetProgressModifier().ResetProgressBackgroundColor(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 } // namespace OHOS::Ace::NG

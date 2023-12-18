@@ -18,9 +18,9 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/loading_progress/loading_progress_model_ng.h"
 #include "core/pipeline/base/element_register.h"
+#include "core/components/progress/progress_theme.h"
 
 namespace OHOS::Ace::NG {
-const std::string DEFAULT_LOADING_PROGRESS_COLOR = "#99666666";
 
 void SetLoadingProgressColor(NodeHandle node, uint32_t colorValue)
 {
@@ -33,7 +33,13 @@ void ResetLoadingProgressColor(NodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    LoadingProgressModelNG::SetColor(frameNode, Color::ColorFromString(DEFAULT_LOADING_PROGRESS_COLOR));
+    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)) {
+        auto pipelineContext = PipelineBase::GetCurrentContext();
+        CHECK_NULL_VOID(pipelineContext);
+        auto theme = pipelineContext->GetTheme<ProgressTheme>();
+        CHECK_NULL_VOID(theme);
+        LoadingProgressModelNG::SetColor(frameNode, theme->GetLoadingColor());
+    }
 }
 
 void SetEnableLoading(NodeHandle node, bool enableLoadingValue)

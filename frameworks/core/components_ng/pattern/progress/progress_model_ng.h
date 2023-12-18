@@ -71,6 +71,7 @@ public:
     static void SetItalicFontStyle(FrameNode* frameNode, const Ace::FontStyle& value);
     static void SetStrokeRadius(FrameNode* frameNode, const Dimension& value);
     static void ResetStrokeRadius(FrameNode* frameNode);
+    static void SetBackgroundColor(FrameNode* frameNode, const Color& value);
 
 private:
     static void SetTextDefaultStyle(const RefPtr<FrameNode>& textNode, double value, double maxValue);

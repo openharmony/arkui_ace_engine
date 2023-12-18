@@ -41,6 +41,7 @@ public:
     static void OnFinish(const JSCallbackInfo& info);
     static void SetSyncLoad(const JSCallbackInfo& info);
     static void SetColorFilter(const JSCallbackInfo& info);
+    static void SetSmoothEdge(const JSCallbackInfo& info);
 
     static void JsBorder(const JSCallbackInfo& info);
     static void JsBorderRadius(const JSCallbackInfo& info);

@@ -252,7 +252,40 @@ class ImageObjectFitModifier extends ModifierWithKey<ImageFit> {
     return this.stageValue !== this.value;
   }
 }
+class ImageBorderRadiusModifier extends ModifierWithKey<Length | BorderRadiuses> {
+  constructor(value: Length | BorderRadiuses) {
+    super(value);
+  }
+  static identity: Symbol = Symbol("imageBorderRadius");
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      GetUINativeModule().image.resetBorderRadius(node);
+    } else {
+      if (isNumber(this.value) || isString(this.value) || isResource(this.value)) {
+        GetUINativeModule().image.setBorderRadius(node, this.value, this.value, this.value, this.value);
+      } else {
+        GetUINativeModule().image.setBorderRadius(node,
+          (this.value as BorderRadiuses).topLeft,
+          (this.value as BorderRadiuses).topRight,
+          (this.value as BorderRadiuses).bottomLeft,
+          (this.value as BorderRadiuses).bottomRight);
+      }
+    }
+  }
 
+  checkObjectDiff(): boolean {
+    if (isResource(this.stageValue) && isResource(this.value)) {
+      return !isResourceEqual(this.stageValue, this.value);
+    } else if (!isResource(this.stageValue) && !isResource(this.value)) {
+      return !((this.stageValue as BorderRadiuses).topLeft === (this.value as BorderRadiuses).topLeft &&
+        (this.stageValue as BorderRadiuses).topRight === (this.value as BorderRadiuses).topRight &&
+        (this.stageValue as BorderRadiuses).bottomLeft === (this.value as BorderRadiuses).bottomLeft &&
+        (this.stageValue as BorderRadiuses).bottomRight === (this.value as BorderRadiuses).bottomRight);
+    } else {
+      return true;
+    }
+  }
+}
 class ArkImageComponent extends ArkComponent implements ImageAttribute {
   constructor(nativePtr: KNode) {
     super(nativePtr);
@@ -325,6 +358,10 @@ class ArkImageComponent extends ArkComponent implements ImageAttribute {
   copyOption(value: CopyOptions): this {
     modifierWithKey(this._modifiersWithKeys, ImageCopyOptionModifier.identity,
       ImageCopyOptionModifier, value);
+    return this;
+  }
+  borderRadius(value: Length | BorderRadiuses): this {
+    modifierWithKey(this._modifiersWithKeys, ImageBorderRadiusModifier.identity, ImageBorderRadiusModifier, value);
     return this;
   }
   onComplete(

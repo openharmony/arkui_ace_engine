@@ -94,6 +94,7 @@ const std::string RESOURCE_VIDEO_CAPTURE = "TYPE_VIDEO_CAPTURE";
 const std::string RESOURCE_AUDIO_CAPTURE = "TYPE_AUDIO_CAPTURE";
 const std::string RESOURCE_PROTECTED_MEDIA_ID = "TYPE_PROTECTED_MEDIA_ID";
 const std::string RESOURCE_MIDI_SYSEX = "TYPE_MIDI_SYSEX";
+const std::string RESOURCE_CLIPBOARD_READ_WRITE = "TYPE_CLIPBOARD_READ_WRITE";
 
 constexpr uint32_t DESTRUCT_DELAY_MILLISECONDS = 1000;
 
@@ -353,6 +354,9 @@ std::vector<std::string> WebPermissionRequestOhos::GetResources() const
         if (resourcesId & OHOS::NWeb::NWebAccessRequest::Resources::MIDI_SYSEX) {
             resources.push_back(RESOURCE_MIDI_SYSEX);
         }
+        if (resourcesId & OHOS::NWeb::NWebAccessRequest::Resources::CLIPBOARD_READ_WRITE) {
+            resources.push_back(RESOURCE_CLIPBOARD_READ_WRITE);
+        }
     }
     return resources;
 }
@@ -370,6 +374,8 @@ void WebPermissionRequestOhos::Grant(std::vector<std::string>& resources) const
                 resourcesId |= OHOS::NWeb::NWebAccessRequest::Resources::PROTECTED_MEDIA_ID;
             } else if (res == RESOURCE_MIDI_SYSEX) {
                 resourcesId |= OHOS::NWeb::NWebAccessRequest::Resources::MIDI_SYSEX;
+            } else if (res == RESOURCE_CLIPBOARD_READ_WRITE) {
+                resourcesId |= OHOS::NWeb::NWebAccessRequest::Resources::CLIPBOARD_READ_WRITE;
             }
         }
         request_->Agree(resourcesId);
@@ -654,7 +660,8 @@ void WebDelegate::ReleasePlatformResource()
 void WebGeolocationOhos::Invoke(const std::string& origin, const bool& allow, const bool& retain)
 {
     if (geolocationCallback_) {
-        geolocationCallback_->GeolocationCallbackInvoke(origin, allow, retain);
+        geolocationCallback_->GeolocationCallbackInvoke(origin, allow, retain,
+            incognito_);
     }
 }
 
@@ -1389,27 +1396,30 @@ bool WebDelegate::SaveCookieSync()
     return false;
 }
 
-bool WebDelegate::SetCookie(const std::string& url, const std::string& value)
+bool WebDelegate::SetCookie(const std::string& url,
+                            const std::string& value,
+                            bool incognitoMode)
 {
     if (cookieManager_) {
-        return cookieManager_->SetCookie(url, value);
+        return cookieManager_->SetCookie(url, value, incognitoMode);
     }
     return false;
 }
 
-std::string WebDelegate::GetCookie(const std::string& url) const
+std::string WebDelegate::GetCookie(const std::string& url,
+                                   bool incognitoMode) const
 {
     if (cookieManager_) {
         bool isValid = true;
-        return cookieManager_->ReturnCookie(url, isValid);
+        return cookieManager_->ReturnCookie(url, isValid, incognitoMode);
     }
     return "";
 }
 
-void WebDelegate::DeleteEntirelyCookie()
+void WebDelegate::DeleteEntirelyCookie(bool incognitoMode)
 {
     if (cookieManager_) {
-        cookieManager_->DeleteCookieEntirely(nullptr);
+        cookieManager_->DeleteCookieEntirely(nullptr, incognitoMode);
     }
 }
 
@@ -1598,6 +1608,8 @@ bool WebDelegate::PrepareInitOHOSWeb(const WeakPtr<PipelineBase>& context)
     if (!useNewPipe && !webCom) {
         return false;
     }
+    incognitoMode_ =
+        useNewPipe ? webPattern->GetIncognitoMode() : webCom->GetIncognitoMode();
     context_ = context;
     RegisterSurfacePositionChangedCallback();
     auto pipelineContext = context.Upgrade();
@@ -1674,6 +1686,7 @@ bool WebDelegate::PrepareInitOHOSWeb(const WeakPtr<PipelineBase>& context)
                                      : AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
                                            webCom->GetOverScrollId(), oldContext);
         onScreenCaptureRequestV2_ = useNewPipe ? eventHub->GetOnScreenCaptureRequestEvent() : nullptr;
+        onNavigationEntryCommittedV2_ = useNewPipe ? eventHub->GetOnNavigationEntryCommittedEvent() : nullptr;
     }
     return true;
 }
@@ -2154,21 +2167,21 @@ void WebDelegate::SetWebCallBack()
         webController->SetSetCookieImpl([weak = WeakClaim(this)](const std::string& url, const std::string& value) {
             auto delegate = weak.Upgrade();
             if (delegate) {
-                return delegate->SetCookie(url, value);
+                return delegate->SetCookie(url, value, delegate->incognitoMode_);
             }
             return false;
         });
         webController->SetGetCookieImpl([weak = WeakClaim(this)](const std::string& url) {
             auto delegate = weak.Upgrade();
             if (delegate) {
-                return delegate->GetCookie(url);
+                return delegate->GetCookie(url, delegate->incognitoMode_);
             }
             return std::string();
         });
         webController->SetDeleteEntirelyCookieImpl([weak = WeakClaim(this)]() {
             auto delegate = weak.Upgrade();
             if (delegate) {
-                delegate->DeleteEntirelyCookie();
+                delegate->DeleteEntirelyCookie(delegate->incognitoMode_);
             }
         });
         webController->SetWebViewJavaScriptResultCallBackImpl(
@@ -2283,7 +2296,13 @@ void WebDelegate::SetWebCallBack()
             }
             return std::string();
         });
-
+        webController->SetIsIncognitoModeImpl([weak = WeakClaim(this)]() {
+            auto delegate = weak.Upgrade();
+            if (delegate) {
+                return delegate->IsIncognitoMode();
+            }
+            return false;
+        });
     } else {
         TAG_LOGW(AceLogTag::ACE_WEB, "web controller is nullptr");
     }
@@ -2309,13 +2328,17 @@ void WebDelegate::InitWebViewWithWindow()
             if (!delegate->window_) {
                 return;
             }
+
             delegate->nweb_ =
-                OHOS::NWeb::NWebAdapterHelper::Instance().CreateNWeb(delegate->window_.GetRefPtr(), initArgs);
+                OHOS::NWeb::NWebAdapterHelper::Instance().CreateNWeb(
+                    delegate->window_.GetRefPtr(), initArgs,
+                    delegate->IsIncognitoMode());
             if (delegate->nweb_ == nullptr) {
                 delegate->window_ = nullptr;
                 return;
             }
             delegate->JavaScriptOnDocumentStart();
+            delegate->JavaScriptOnDocumentEnd();
             delegate->cookieManager_ = OHOS::NWeb::NWebHelper::Instance().GetCookieManager();
             if (delegate->cookieManager_ == nullptr) {
                 return;
@@ -2333,10 +2356,9 @@ void WebDelegate::InitWebViewWithWindow()
             findListenerImpl->SetWebDelegate(weak);
             delegate->nweb_->PutFindCallback(findListenerImpl);
 
+            std::optional<std::string> src;
             auto isNewPipe = Container::IsCurrentUseNewPipeline();
             delegate->UpdateSettting(isNewPipe);
-
-            std::optional<std::string> src;
             if (isNewPipe) {
                 auto webPattern = delegate->webPattern_.Upgrade();
                 if (webPattern) {
@@ -2614,17 +2636,28 @@ void WebDelegate::InitWebViewWithSurface()
                     std::string("--init-richtext-data=").append(delegate->richtextData_.value()));
             }
             if (isEnhanceSurface) {
-                delegate->nweb_ = OHOS::NWeb::NWebAdapterHelper::Instance().CreateNWeb((void*)(&delegate->surfaceInfo_),
-                    initArgs, delegate->drawSize_.Width(), delegate->drawSize_.Height());
+                TAG_LOGD(AceLogTag::ACE_WEB, "Create webview with isEnhanceSurface");
+                delegate->nweb_ = OHOS::NWeb::NWebAdapterHelper::Instance().CreateNWeb(
+                    (void *)(&delegate->surfaceInfo_),
+                    initArgs,
+                    delegate->drawSize_.Width(),
+                    delegate->drawSize_.Height(),
+                    delegate->incognitoMode_);
                 delegate->JavaScriptOnDocumentStart();
+                delegate->JavaScriptOnDocumentEnd();
             } else {
 #ifdef ENABLE_ROSEN_BACKEND
                 wptr<Surface> surfaceWeak(delegate->surface_);
                 sptr<Surface> surface = surfaceWeak.promote();
                 CHECK_NULL_VOID(surface);
                 delegate->nweb_ = OHOS::NWeb::NWebAdapterHelper::Instance().CreateNWeb(
-                    surface, initArgs, delegate->drawSize_.Width(), delegate->drawSize_.Height());
+                    surface,
+                    initArgs,
+                    delegate->drawSize_.Width(),
+                    delegate->drawSize_.Height(),
+                    delegate->incognitoMode_);
                 delegate->JavaScriptOnDocumentStart();
+                delegate->JavaScriptOnDocumentEnd();
 #endif
             }
             CHECK_NULL_VOID(delegate->nweb_);
@@ -4035,7 +4068,9 @@ void WebDelegate::OnGeolocationPermissionsShowPrompt(
             // ace 2.0
             auto onGeolocationShowV2 = delegate->onGeolocationShowV2_;
             if (onGeolocationShowV2) {
-                auto geolocation = AceType::MakeRefPtr<WebGeolocationOhos>(callback);
+                auto geolocation =
+                    AceType::MakeRefPtr<WebGeolocationOhos>(callback,
+                                                            delegate->incognitoMode_);
                 onGeolocationShowV2(std::make_shared<LoadWebGeolocationShowEvent>(origin, geolocation));
             }
         },
@@ -4050,6 +4085,15 @@ void WebDelegate::OnPermissionRequestPrompt(const std::shared_ptr<OHOS::NWeb::NW
         [weak = WeakClaim(this), request]() {
             auto delegate = weak.Upgrade();
             CHECK_NULL_VOID(delegate);
+            if (request->ResourceAcessId() & OHOS::NWeb::NWebAccessRequest::Resources::CLIPBOARD_READ_WRITE) {
+                auto webPattern = delegate->webPattern_.Upgrade();
+                CHECK_NULL_VOID(webPattern);
+                auto clipboardCallback = webPattern->GetPermissionClipboardCallback();
+                CHECK_NULL_VOID(clipboardCallback);
+                clipboardCallback(std::make_shared<WebPermissionRequestEvent>(
+                    AceType::MakeRefPtr<WebPermissionRequestOhos>(request)));
+                return;
+            }
             // ace 2.0
             auto onPermissionRequestV2 = delegate->onPermissionRequestV2_;
             if (onPermissionRequestV2) {
@@ -4870,6 +4914,16 @@ void WebDelegate::OnDataResubmitted(std::shared_ptr<OHOS::NWeb::NWebDataResubmis
     }
 }
 
+void WebDelegate::OnNavigationEntryCommitted(std::shared_ptr<OHOS::NWeb::NWebLoadCommittedDetails> details)
+{
+    if (onNavigationEntryCommittedV2_) {
+        NavigationType type = static_cast<NavigationType>(details->GetNavigationType());
+        onNavigationEntryCommittedV2_(std::make_shared<NavigationEntryCommittedEvent>(details->GetURL(),
+            type, details->IsMainFrame(), details->IsSameDocument(),
+            details->DidReplaceEntry()));
+    }
+}
+
 void WebDelegate::OnFaviconReceived(const void* data, size_t width, size_t height, OHOS::NWeb::ImageColorType colorType,
     OHOS::NWeb::ImageAlphaType alphaType)
 {
@@ -5139,6 +5193,14 @@ void WebDelegate::SetDrawRect(int32_t x, int32_t y, int32_t width, int32_t heigh
         nweb_->SetDrawRect(x, y, width, height);
     }
 }
+
+bool WebDelegate::IsIncognitoMode() const
+{
+    if (nweb_) {
+        return nweb_->IsIncognitoMode();
+    }
+    return false;
+}
 #endif
 
 std::string WebDelegate::GetUrlStringParam(const std::string& param, const std::string& name) const
@@ -5357,6 +5419,23 @@ void WebDelegate::UpdateOverScrollMode(const int overscrollModeValue)
         TaskExecutor::TaskType::PLATFORM);
 }
 
+void WebDelegate::UpdateCopyOptionMode(const int copyOptionModeValue)
+{
+    auto context = context_.Upgrade();
+    CHECK_NULL_VOID(context);
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), copyOptionModeValue]() {
+            auto delegate = weak.Upgrade();
+            CHECK_NULL_VOID(delegate);
+            CHECK_NULL_VOID(delegate->nweb_);
+            std::shared_ptr<OHOS::NWeb::NWebPreference> setting = delegate->nweb_->GetPreference();
+            CHECK_NULL_VOID(setting);
+            setting->PutCopyOptionMode(
+                static_cast<OHOS::NWeb::NWebPreference::CopyOptionMode>(copyOptionModeValue));
+        },
+        TaskExecutor::TaskType::PLATFORM);
+}
+
 void WebDelegate::RegisterSurfacePositionChangedCallback()
 {
 #ifdef NG_BUILD
@@ -5541,17 +5620,30 @@ void WebDelegate::ScrollBy(float deltaX, float deltaY)
     nweb_->ScrollBy(deltaX, deltaY);
 }
 
-void WebDelegate::SetJavaScriptItems(const ScriptItems& scriptItems)
+void WebDelegate::SetJavaScriptItems(const ScriptItems& scriptItems, const ScriptItemType& type)
 {
-    scriptItems_ = std::make_optional<ScriptItems>(scriptItems);
+    if (type == ScriptItemType::DOCUMENT_START) {
+        onDocumentStartScriptItems_ = std::make_optional<ScriptItems>(scriptItems);
+    } else {
+        onDocumentEndScriptItems_ = std::make_optional<ScriptItems>(scriptItems);
+    }
 }
 
 void WebDelegate::JavaScriptOnDocumentStart()
 {
     CHECK_NULL_VOID(nweb_);
-    if (scriptItems_.has_value()) {
-        nweb_->JavaScriptOnDocumentStart(scriptItems_.value());
-        scriptItems_ = std::nullopt;
+    if (onDocumentStartScriptItems_.has_value()) {
+        nweb_->JavaScriptOnDocumentStart(onDocumentStartScriptItems_.value());
+        onDocumentStartScriptItems_ = std::nullopt;
+    }
+}
+
+void WebDelegate::JavaScriptOnDocumentEnd()
+{
+    CHECK_NULL_VOID(nweb_);
+    if (onDocumentEndScriptItems_.has_value()) {
+        nweb_->JavaScriptOnDocumentEnd(onDocumentEndScriptItems_.value());
+        onDocumentEndScriptItems_ = std::nullopt;
     }
 }
 

@@ -18,17 +18,17 @@ class MenuItemSelectedModifier extends ModifierWithKey<boolean> {
   constructor(value: boolean) {
     super(value);
   }
-  static identity: Symbol = Symbol('selected');
+  static identity: Symbol = Symbol('menuItemSelected');
   applyPeer(node: KNode, reset: boolean) {
     if (reset) {
-      GetUINativeModule().menuitem.resetSelected(node);
+      GetUINativeModule().menuitem.resetMenuItemSelected(node);
     } else {
-      GetUINativeModule().menuitem.setSelected(node, this.value);
+      GetUINativeModule().menuitem.setMenuItemSelected(node, this.value);
     }
   }
 
   checkObjectDiff(): boolean {
-    return this.stageValue !== this.value;
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
 
@@ -93,16 +93,11 @@ class LabelFontModifier extends ModifierWithKey<Font> {
   }
 
   checkObjectDiff(): boolean {
-    if (isResource(this.stageValue) && isResource(this.value)) {
-      return !isResourceEqual(this.stageValue, this.value);
-    } else if (!isResource(this.stageValue) && !isResource(this.value)) {
-      return !((this.stageValue as Font).size === (this.value as Font).size &&
-        (this.stageValue as Font).weight === (this.value as Font).weight &&
-        (this.stageValue as Font).family === (this.value as Font).family &&
-        (this.stageValue as Font).style === (this.value as Font).style);
-    } else {
-      return true;
-    }
+    let sizeEQ = isBaseOrResourceEqual(this.stageValue.size, this.value.size);
+    let weightEQ = this.stageValue.weight === this.value.weight;
+    let familyEQ = isBaseOrResourceEqual(this.stageValue.family, this.value.family);
+    let styleEQ = this.stageValue.style === this.value.style;
+    return !sizeEQ || !weightEQ || !familyEQ || !styleEQ;
   }
 }
 
@@ -123,16 +118,11 @@ class ContentFontModifier extends ModifierWithKey<Font> {
   }
 
   checkObjectDiff(): boolean {
-    if (isResource(this.stageValue) && isResource(this.value)) {
-      return !isResourceEqual(this.stageValue, this.value);
-    } else if (!isResource(this.stageValue) && !isResource(this.value)) {
-      return !((this.stageValue as Font).size === (this.value as Font).size &&
-        (this.stageValue as Font).weight === (this.value as Font).weight &&
-        (this.stageValue as Font).family === (this.value as Font).family &&
-        (this.stageValue as Font).style === (this.value as Font).style);
-    } else {
-      return true;
-    }
+    let sizeEQ = isBaseOrResourceEqual(this.stageValue.size, this.value.size);
+    let weightEQ = this.stageValue.weight === this.value.weight;
+    let familyEQ = isBaseOrResourceEqual(this.stageValue.family, this.value.family);
+    let styleEQ = this.stageValue.style === this.value.style;
+    return !sizeEQ || !weightEQ || !familyEQ || !styleEQ;
   }
 }
 

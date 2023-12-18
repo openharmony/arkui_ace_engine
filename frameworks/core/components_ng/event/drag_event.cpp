@@ -546,6 +546,80 @@ OffsetF DragEventActuator::GetFloatImageOffset(const RefPtr<FrameNode>& frameNod
     return OffsetF(offsetX, offsetY);
 }
 
+void DragEventActuator::UpdatePreviewPositionAndScale(const RefPtr<FrameNode> imageNode, const OffsetF& frameOffset)
+{
+    auto imageContext = imageNode->GetRenderContext();
+    CHECK_NULL_VOID(imageContext);
+    imageContext->UpdatePosition(OffsetT<Dimension>(Dimension(frameOffset.GetX()), Dimension(frameOffset.GetY())));
+    ClickEffectInfo clickEffectInfo;
+    clickEffectInfo.level = ClickEffectLevel::LIGHT;
+    clickEffectInfo.scaleNumber = SCALE_NUMBER;
+    imageContext->UpdateClickEffectLevel(clickEffectInfo);
+}
+
+void DragEventActuator::CreatePreviewNode(const RefPtr<FrameNode> frameNode, OHOS::Ace::RefPtr<FrameNode>& imageNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pixelMap = frameNode->GetPixelMap();
+    CHECK_NULL_VOID(pixelMap);
+    auto frameOffset = frameNode->GetGlobalOffset();
+    imageNode = FrameNode::GetOrCreateFrameNode(V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() {return AceType::MakeRefPtr<ImagePattern>(); });
+    CHECK_NULL_VOID(imageNode);
+    imageNode->SetDragPreviewOptions(frameNode->GetDragPreviewOption());
+
+    auto renderProps = imageNode->GetPaintProperty<ImageRenderProperty>();
+    renderProps->UpdateImageInterpolation(ImageInterpolation::HIGH);
+    auto props = imageNode->GetLayoutProperty<ImageLayoutProperty>();
+    props->UpdateAutoResize(false);
+    props->UpdateImageSourceInfo(ImageSourceInfo(pixelMap));
+    auto targetSize = CalcSize(NG::CalcLength(pixelMap->GetWidth()), NG::CalcLength(pixelMap->GetHeight()));
+    props->UpdateUserDefinedIdealSize(targetSize);
+
+    UpdatePreviewPositionAndScale(imageNode, frameOffset);
+    imageNode->MarkDirtyNode(NG::PROPERTY_UPDATE_MEASURE);
+    imageNode->MarkModifyDone();
+    imageNode->SetLayoutDirtyMarked(true);
+    imageNode->CreateLayoutTask();
+}
+
+void DragEventActuator::SetPreviewDefaultAnimateProperty(const RefPtr<FrameNode> imageNode)
+{
+    if (imageNode->IsPreviewNeedScale()) {
+        auto imageContext = imageNode->GetRenderContext();
+        CHECK_NULL_VOID(imageContext);
+        imageContext->UpdateTransformScale({ 1.0f, 1.0f });
+        imageContext->UpdateTransformTranslate({ 0.0f, 0.0f, 0.0f });
+    }
+}
+
+void DragEventActuator::MountPixelMap(const RefPtr<OverlayManager> manager, const RefPtr<GestureEventHub> gestureHub,
+    const RefPtr<FrameNode> imageNode)
+{
+    CHECK_NULL_VOID(manager);
+    CHECK_NULL_VOID(imageNode);
+    CHECK_NULL_VOID(gestureHub);
+    auto columnNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    columnNode->AddChild(imageNode);
+    auto hub = columnNode->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(hub);
+    hub->SetPixelMap(gestureHub->GetPixelMap());
+    auto container = Container::Current();
+    if (container && container->IsScenceBoardWindow()) {
+        auto frameNode = gestureHub->GetFrameNode();
+        CHECK_NULL_VOID(frameNode);
+        auto windowScene = manager->FindWindowScene(frameNode);
+        manager->MountPixelMapToWindowScene(columnNode, windowScene);
+    } else {
+        manager->MountPixelMapToRootNode(columnNode);
+    }
+    SetPreviewDefaultAnimateProperty(imageNode);
+    columnNode->MarkDirtyNode(NG::PROPERTY_UPDATE_MEASURE);
+    columnNode->MarkModifyDone();
+    columnNode->CreateLayoutTask();
+}
+
 void DragEventActuator::SetPixelMap(const RefPtr<DragEventActuator>& actuator)
 {
     if (SystemProperties::GetDebugEnabled()) {
@@ -617,6 +691,7 @@ void DragEventActuator::SetPixelMap(const RefPtr<DragEventActuator>& actuator)
     if (SystemProperties::GetDebugEnabled()) {
         LOGI("DragEvent set pixelMap success.");
     }
+    SetPreviewDefaultAnimateProperty(imageNode);
 }
 
 void DragEventActuator::SetEventColumn(const RefPtr<DragEventActuator>& actuator)
@@ -786,6 +861,7 @@ void DragEventActuator::SetTextAnimation(const RefPtr<GestureEventHub>& gestureH
     pattern->CloseHandleAndSelect();
     auto dragNode = pattern->MoveDragNode();
     CHECK_NULL_VOID(dragNode);
+    dragNode->SetDragPreviewOptions(frameNode->GetDragPreviewOption());
     // create columnNode
     auto columnNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         AceType::MakeRefPtr<LinearLayoutPattern>(true));
@@ -833,9 +909,11 @@ void DragEventActuator::HideTextAnimation(bool startDrag, double globalX, double
         if (SystemProperties::GetDebugEnabled()) {
             LOGI("In removeColumnNode callback, set DragWindowVisible true.");
         }
-        InteractionInterface::GetInstance()->SetDragWindowVisible(true);
         auto gestureHub = weakEvent.Upgrade();
         CHECK_NULL_VOID(gestureHub);
+        if (!gestureHub->IsPixelMapNeedScale()) {
+            InteractionInterface::GetInstance()->SetDragWindowVisible(true);
+        }
         gestureHub->SetPixelMap(nullptr);
     };
     AnimationOption option;
@@ -854,8 +932,7 @@ void DragEventActuator::HideTextAnimation(bool startDrag, double globalX, double
     auto pixelMap = gestureHub->GetPixelMap();
     float scale = 1.0f;
     if (pixelMap) {
-        scale =
-            gestureHub->GetPixelMapScale(dragNode->GetDragPreviewOption(), pixelMap->GetHeight(), pixelMap->GetWidth());
+        scale = static_cast<float>(frameNode->GetPreviewScaleVal());
     }
     auto context = dragNode->GetRenderContext();
     CHECK_NULL_VOID(context);

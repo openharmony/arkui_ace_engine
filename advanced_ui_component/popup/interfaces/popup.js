@@ -31,7 +31,7 @@ export const defaultTheme = {
     title: {
         margin: { bottom: 2 },
         minFontSize: 12,
-        fontWeight: FontWeight.Normal,
+        fontWeight: FontWeight.Medium,
         fontSize: {
             id: -1,
             type: 10002,
@@ -65,6 +65,7 @@ export const defaultTheme = {
         },
         textMargin: { top: 8, bottom: 8, left: 8, right: 8 },
         minFontSize: 9,
+        fontWeight: FontWeight.Medium,
         hoverColor: {
             id: -1,
             type: 10001,
@@ -95,6 +96,7 @@ export const defaultTheme = {
             bundleName: "",
             moduleName: ""
         },
+        fontWeight: FontWeight.Regular,
         plainFontColor: {
             id: -1,
             type: 10001,
@@ -105,9 +107,9 @@ export const defaultTheme = {
     },
     windows: { padding: { top: 12, bottom: 12, left: 12, right: 12 } },
     closeButton: {
-        size: { width: 28, height: 28 },
+        size: { width: 22, height: 22 },
         imageSize: { width: 18, height: 18 },
-        padding: { top: 5, bottom: 5, left: 5, right: 5 },
+        padding: { top: 2, bottom: 2, left: 2, right: 2 },
         margin: { top: 12, bottom: 12, left: 12, right: 12 },
         image: {
             id: -1,
@@ -513,17 +515,33 @@ export class PopupComponent extends ViewPU {
     getMessageFontColor() {
         var t, e, o, i, n, s, r, l;
         let h;
-        h = this.message.fontColor ? this.message.fontColor : "" !== this.icon.image && void 0 !== this.icon.image || "" !== this.title.text && void 0 !== this.title.text || "" !== (null === (e = null === (t = this.buttons) || void 0 === t ? void 0 : t[0]) || void 0 === e ? void 0 : e.text) && void 0 !== (null === (i = null === (o = this.buttons) || void 0 === o ? void 0 : o[0]) || void 0 === i ? void 0 : i.text) || "" !== (null === (s = null === (n = this.buttons) || void 0 === n ? void 0 : n[1]) || void 0 === s ? void 0 : s.text) && void 0 !== (null === (l = null === (r = this.buttons) || void 0 === r ? void 0 : r[1]) || void 0 === l ? void 0 : l.text) ? this.theme.message.plainFontColor : this.theme.message.fontColor;
+        h = this.message.fontColor ? this.message.fontColor : "" !== this.icon.image && void 0 !== this.icon.image || "" !== this.title.text && void 0 !== this.title.text || "" !== (null === (e = null === (t = this.buttons) || void 0 === t ? void 0 : t[0]) || void 0 === e ? void 0 : e.text) && void 0 !== (null === (i = null === (o = this.buttons) || void 0 === o ? void 0 : o[0]) || void 0 === i ? void 0 : i.text) || "" !== (null === (s = null === (n = this.buttons) || void 0 === n ? void 0 : n[1]) || void 0 === s ? void 0 : s.text) && void 0 !== (null === (l = null === (r = this.buttons) || void 0 === r ? void 0 : r[1]) || void 0 === l ? void 0 : l.text) ? this.theme.message.fontColor : this.theme.message.plainFontColor;
         return h
     }
 
     getMessagePadding() {
         let t;
-        t = this.title ? { left: this.theme.button.margin.left / 2 } : {
+        t = "" !== this.title.text && void 0 !== this.title.text ? { left: this.theme.button.margin.left / 2 } : {
             left: this.theme.button.margin.left / 2,
             right: this.theme.closeButton.margin.right
         };
         return t
+    }
+
+    getMessageMaxWeight() {
+        let t;
+        if (this.showClose || void 0 === this.showClose) {
+            t = 400;
+            t -= this.theme.windows.padding.left - this.theme.button.margin.right / 2;
+            t -= this.theme.windows.padding.right;
+            t -= this.theme.button.margin.left / 2;
+            t -= this.getCloseButtonWidth()
+        }
+        return t
+    }
+
+    getMessageFontWeight() {
+        return this.theme.message.fontWeight
     }
 
     getButtonMargin() {
@@ -579,6 +597,10 @@ export class PopupComponent extends ViewPU {
 
     getButtonMinFontSize() {
         return this.theme.button.minFontSize
+    }
+
+    getButtonFontWeight() {
+        return this.theme.button.fontWeight
     }
 
     getWindowsPadding() {
@@ -722,6 +744,11 @@ export class PopupComponent extends ViewPU {
                     Text.create(this.getMessageText());
                     Text.fontSize(this.getMessageFontSize());
                     Text.fontColor(this.getMessageFontColor());
+                    Text.fontWeight(this.getMessageFontWeight());
+                    Text.constraintSize({
+                        maxWidth: this.getMessageMaxWeight(),
+                        minHeight: this.getCloseButtonHeight()
+                    });
                     Text.onAreaChange(((t, e) => {
                         this.textHeight = e.height
                     }))
@@ -758,6 +785,7 @@ export class PopupComponent extends ViewPU {
                             Text.focusable(!0);
                             Text.fontSize(this.getFirstButtonFontSize());
                             Text.fontColor(this.getFirstButtonFontColor());
+                            Text.fontWeight(this.getButtonFontWeight());
                             Text.minFontSize(this.getButtonMinFontSize());
                             Text.textOverflow({ overflow: TextOverflow.Ellipsis })
                         }), Text);
@@ -789,6 +817,7 @@ export class PopupComponent extends ViewPU {
                             Text.focusable(!0);
                             Text.fontSize(this.getSecondButtonFontSize());
                             Text.fontColor(this.getSecondButtonFontColor());
+                            Text.fontWeight(this.getButtonFontWeight());
                             Text.minFontSize(this.getButtonMinFontSize());
                             Text.textOverflow({ overflow: TextOverflow.Ellipsis })
                         }), Text);
@@ -826,6 +855,11 @@ export class PopupComponent extends ViewPU {
                     Text.create(this.getMessageText());
                     Text.fontSize(this.getMessageFontSize());
                     Text.fontColor(this.getMessageFontColor());
+                    Text.fontWeight(this.getMessageFontWeight());
+                    Text.constraintSize({
+                        maxWidth: this.getMessageMaxWeight(),
+                        minHeight: this.getCloseButtonHeight()
+                    });
                     Text.onAreaChange(((t, e) => {
                         this.textHeight = e.height
                     }))
@@ -891,6 +925,7 @@ export class PopupComponent extends ViewPU {
                             Text.focusable(!0);
                             Text.fontSize(this.getFirstButtonFontSize());
                             Text.fontColor(this.getFirstButtonFontColor());
+                            Text.fontWeight(this.getButtonFontWeight());
                             Text.minFontSize(this.getButtonMinFontSize());
                             Text.textOverflow({ overflow: TextOverflow.Ellipsis })
                         }), Text);
@@ -922,6 +957,7 @@ export class PopupComponent extends ViewPU {
                             Text.focusable(!0);
                             Text.fontSize(this.getSecondButtonFontSize());
                             Text.fontColor(this.getSecondButtonFontColor());
+                            Text.fontWeight(this.getButtonFontWeight());
                             Text.minFontSize(this.getButtonMinFontSize());
                             Text.textOverflow({ overflow: TextOverflow.Ellipsis })
                         }), Text);

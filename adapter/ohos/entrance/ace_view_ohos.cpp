@@ -44,7 +44,9 @@ constexpr int32_t ROTATION_DIVISOR = 64;
 
 bool IsMMIMouseScrollBegin(const AxisEvent& event)
 {
-    if (event.sourceType != SourceType::MOUSE || event.sourceTool != SourceTool::MOUSE) {
+    if (event.action != AxisAction::BEGIN ||
+        event.sourceType != SourceType::MOUSE ||
+        event.sourceTool != SourceTool::MOUSE) {
         return false;
     }
     return !(NearZero(event.horizontalAxis) && NearZero(event.verticalAxis));

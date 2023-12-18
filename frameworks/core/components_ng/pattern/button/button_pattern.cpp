@@ -99,10 +99,7 @@ void ButtonPattern::UpdateTextStyle(
     auto buttonTheme = pipeline->GetTheme<ButtonTheme>();
     CHECK_NULL_VOID(buttonTheme);
     if (!layoutProperty->GetFontColor().has_value()) {
-        ButtonStyleMode defaultButtonStyle = Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)
-                                                 ? ButtonStyleMode::NORMAL
-                                                 : ButtonStyleMode::EMPHASIZE;
-        ButtonStyleMode buttonStyle = layoutProperty->GetButtonStyle().value_or(defaultButtonStyle);
+        ButtonStyleMode buttonStyle = layoutProperty->GetButtonStyle().value_or(ButtonStyleMode::EMPHASIZE);
         Color fontColor = buttonTheme->GetTextColor(buttonStyle);
         textLayoutProperty->UpdateTextColor(fontColor);
     }
@@ -297,10 +294,7 @@ void ButtonPattern::HandleBackgroundColor()
     CHECK_NULL_VOID(layoutProperty);
     auto buttonTheme = pipeline->GetTheme<ButtonTheme>();
     CHECK_NULL_VOID(buttonTheme);
-    ButtonStyleMode defaultButtonStyle = Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)
-                                             ? ButtonStyleMode::NORMAL
-                                             : ButtonStyleMode::EMPHASIZE;
-    ButtonStyleMode buttonStyle = layoutProperty->GetButtonStyle().value_or(defaultButtonStyle);
+    ButtonStyleMode buttonStyle = layoutProperty->GetButtonStyle().value_or(ButtonStyleMode::EMPHASIZE);
     if (!renderContext->HasBackgroundColor()) {
         renderContext->UpdateBackgroundColor(buttonTheme->GetBgColor(buttonStyle));
     }
@@ -350,9 +344,7 @@ void ButtonPattern::OnColorConfigurationUpdate()
     CHECK_NULL_VOID(renderContext);
     auto buttonLayoutProperty = node->GetLayoutProperty<ButtonLayoutProperty>();
     CHECK_NULL_VOID(buttonLayoutProperty);
-    ButtonStyleMode defaultButtonStyle = Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)
-                                             ? ButtonStyleMode::NORMAL
-                                             : ButtonStyleMode::EMPHASIZE;
+    ButtonStyleMode defaultButtonStyle = ButtonStyleMode::EMPHASIZE;
     auto color = buttonTheme->GetBgColor(defaultButtonStyle);
     renderContext->UpdateBackgroundColor(color);
     auto textNode = DynamicCast<FrameNode>(node->GetFirstChild());

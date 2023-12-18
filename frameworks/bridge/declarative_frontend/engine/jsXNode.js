@@ -52,6 +52,12 @@ class BuilderNode extends BaseNode {
         this.instanceId_ = instanceId;
         this.updateFuncByElmtId = new Map();
     }
+    getCardId() {
+        return -1;
+    }
+    addChild(child) {
+        return false;
+    }
     build(builder, params) {
         __JSScopeUtil__.syncInstanceId(this.instanceId_);
         this.params = params;

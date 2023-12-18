@@ -16,6 +16,7 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_image.h"
 #include <cstdint>
 #include <vector>
+#include "base/utils/utils.h"
 
 #if !defined(PREVIEW)
 #include <dlfcn.h>
@@ -43,6 +44,9 @@ namespace {
     const std::vector<float> DEFAULT_COLORFILTER_MATRIX = {
         1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0
     };
+    constexpr float CEIL_SMOOTHEDGE_VALUE = 1.333f;
+    constexpr float FLOOR_SMOOTHEDGE_VALUE = 0.334f;
+    constexpr float DEFAULT_SMOOTHEDGE_VALUE = 0.0f;
 }
 
 namespace OHOS::Ace {
@@ -448,6 +452,22 @@ void JSImage::SetColorFilter(const JSCallbackInfo& info)
     ImageModel::GetInstance()->SetColorFilterMatrix(colorfilter);
 }
 
+void JSImage::SetSmoothEdge(const JSCallbackInfo& info)
+{
+    if (info.Length() != 1) {
+        ImageModel::GetInstance()->SetSmoothEdge(DEFAULT_SMOOTHEDGE_VALUE);
+        return;
+    }
+    double parseRes = DEFAULT_SMOOTHEDGE_VALUE;
+    ParseJsDouble(info[0], parseRes);
+    // Effective range : (FLOOR_SMOOTHEDGE_VALUE, CEIL_SMOOTHEDGE_VALUE]
+    // otherwise: DEFAULT_SMOOTHEDGE_VALUE
+    if (GreatNotEqual(parseRes, CEIL_SMOOTHEDGE_VALUE) || LessNotEqual(parseRes, FLOOR_SMOOTHEDGE_VALUE)) {
+        parseRes = DEFAULT_SMOOTHEDGE_VALUE;
+    }
+    ImageModel::GetInstance()->SetSmoothEdge(static_cast<float>(parseRes));
+}
+
 void JSImage::JSBind(BindingTarget globalObj)
 {
     JSClass<JSImage>::Declare("Image");
@@ -463,6 +483,7 @@ void JSImage::JSBind(BindingTarget globalObj)
     JSClass<JSImage>::StaticMethod("objectRepeat", &JSImage::SetImageRepeat, opt);
     JSClass<JSImage>::StaticMethod("interpolation", &JSImage::SetImageInterpolation, opt);
     JSClass<JSImage>::StaticMethod("colorFilter", &JSImage::SetColorFilter, opt);
+    JSClass<JSImage>::StaticMethod("edgeAntialiasing", &JSImage::SetSmoothEdge, opt);
 
     JSClass<JSImage>::StaticMethod("border", &JSImage::JsBorder);
     JSClass<JSImage>::StaticMethod("borderRadius", &JSImage::JsBorderRadius);

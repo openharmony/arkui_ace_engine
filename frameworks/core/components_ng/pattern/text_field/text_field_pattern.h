@@ -1001,7 +1001,15 @@ public:
 
     void UpdateShowMagnifier(bool isShowMagnifier = false)
     {
+        if (isShowMagnifier_ == isShowMagnifier) {
+            return;
+        }
         isShowMagnifier_ = isShowMagnifier;
+        if (isShowMagnifier_) {
+            MakeHighZIndex();
+        } else {
+            MakeZIndexRollBack();
+        }
     }
 
     bool GetShowMagnifier() const
@@ -1013,7 +1021,7 @@ public:
     {
         localOffset_.SetX(localOffset.GetX());
         localOffset_.SetY(localOffset.GetY());
-        isShowMagnifier_ = true;
+        UpdateShowMagnifier(true);
     }
 
     OffsetF GetLocalOffset() const
@@ -1158,6 +1166,7 @@ private:
 
     bool IsTouchAtLeftOffset(float currentOffsetX);
     void FilterExistText();
+    void CreateErrorParagraph(const std::string& content);
     void UpdateErrorTextMargin();
     OffsetF GetTextPaintOffset() const;
     void UpdateSelectController();
@@ -1165,6 +1174,8 @@ private:
     void CloseHandleAndSelect() override;
     bool RepeatClickCaret(const Offset& offset, int32_t lastCaretIndex);
     void PaintTextRect();
+    void GetIconPaintRect(const RefPtr<TextInputResponseArea>& responseArea, RoundRect& paintRect);
+    void GetInnerFocusPaintRect(RoundRect& paintRect);
     void PaintResponseAreaRect();
     void PaintCancelRect();
     void PaintUnitRect();
@@ -1196,6 +1207,9 @@ private:
     void ScrollToSafeArea() const override;
     void RecordSubmitEvent() const;
     void UpdateCancelNode();
+    void MakeHighZIndex();
+    void MakeZIndexRollBack();
+    void GetMaxZIndex(const RefPtr<UINode>& parent, const RefPtr<FrameNode>& pattern);
 
     RectF frameRect_;
     RectF contentRect_;
@@ -1349,6 +1363,7 @@ private:
     bool isShowMagnifier_ = false;
     OffsetF localOffset_;
     bool isTouchCaret_ = false;
+    std::list<int32_t> zIndexRollBack_;
 };
 } // namespace OHOS::Ace::NG
 

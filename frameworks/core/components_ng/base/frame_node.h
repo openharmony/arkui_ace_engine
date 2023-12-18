@@ -157,7 +157,9 @@ public:
 
     void SetOnAreaChangeCallback(OnAreaChangedFunc&& callback);
 
-    void TriggerOnAreaChangeCallback();
+    void TriggerOnAreaChangeCallback(uint64_t nanoTimestamp);
+
+    OffsetF CalculateOffsetRelativeToWindow(uint64_t nanoTimestamp);
 
     void OnConfigurationUpdate(const OnConfigurationChange& configurationChange) override;
 
@@ -368,6 +370,11 @@ public:
         return isLayoutDirtyMarked_;
     }
 
+    void SetLayoutDirtyMarked(bool marked)
+    {
+        isLayoutDirtyMarked_ = marked;
+    }
+
     bool HasPositionProp() const
     {
         CHECK_NULL_RETURN(renderContext_, false);
@@ -493,6 +500,12 @@ public:
     std::string ProvideRestoreInfo();
 
     static std::vector<RefPtr<FrameNode>> GetNodesById(const std::unordered_set<int32_t>& set);
+
+    static double GetMaxWidthWithColumnType(GridColumnType gridColumnType);
+
+    double GetPreviewScaleVal() const;
+
+    bool IsPreviewNeedScale() const;
 
     void SetViewPort(RectF viewPort)
     {
@@ -624,7 +637,8 @@ public:
     {
         return localMat_;
     }
-
+    OffsetF GetGlobalOffset();
+    RefPtr<PixelMap> GetPixelMap();
     RefPtr<FrameNode> GetPageNode();
     void NotifyFillRequestSuccess(RefPtr<PageNodeInfoWrap> nodeWrap, AceAutoFillType autoFillType);
     void NotifyFillRequestFailed(int32_t errCode);
@@ -645,6 +659,16 @@ public:
     bool InResponseRegionList(const PointF& parentLocalPoint, const std::vector<RectF>& responseRegionList) const;
 
     bool GetMonopolizeEvents() const;
+
+    const std::pair<uint64_t, OffsetF>& GetCachedGlobalOffset() const
+    {
+        return cachedGlobalOffset_;
+    }
+
+    void SetCachedGlobalOffset(const std::pair<uint64_t, OffsetF>& timestampOffset)
+    {
+        cachedGlobalOffset_ = timestampOffset;
+    }
 
 private:
     void MarkNeedRender(bool isRenderBoundary);
@@ -778,6 +802,8 @@ private:
     DragPreviewOption previewOption_ { DragPreviewMode::AUTO };
 
     RefPtr<Recorder::ExposureProcessor> exposureProcessor_;
+
+    std::pair<uint64_t, OffsetF> cachedGlobalOffset_ = {0, OffsetF()};
 
     friend class RosenRenderContext;
     friend class RenderContext;

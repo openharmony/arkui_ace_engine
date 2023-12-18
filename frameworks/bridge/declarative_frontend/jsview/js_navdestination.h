@@ -30,6 +30,7 @@ public:
     static void SetOnShown(const JSCallbackInfo& info);
     static void SetOnHidden(const JSCallbackInfo& info);
     static void SetOnBackPressed(const JSCallbackInfo& info);
+    static void SetMode(const JSCallbackInfo& info);
     static void JSBind(BindingTarget globalObj);
 
 private:

@@ -28,9 +28,9 @@
 namespace OHOS::Ace::NG {
 namespace {
 // For DragBar Initial State Point.
-const OffsetT<Dimension> POINT_L_INITIAL = OffsetT<Dimension>(18.0_vp, 12.0_vp);
+const OffsetT<Dimension> POINT_L_INITIAL = OffsetT<Dimension>(8.0_vp, 12.0_vp);
 const OffsetT<Dimension> POINT_C_INITIAL = OffsetT<Dimension>(32.0_vp, 12.0_vp);
-const OffsetT<Dimension> POINT_R_INITIAL = OffsetT<Dimension>(46.0_vp, 12.0_vp);
+const OffsetT<Dimension> POINT_R_INITIAL = OffsetT<Dimension>(56.0_vp, 12.0_vp);
 const float OPACITY = 1.0f;
 const Dimension BAR_WIDTH = 4.0_vp;
 } // namespace

@@ -205,6 +205,60 @@ OffsetF TextPattern::GetTextPaintOffset() const
     return textPaintOffset - rootOffset;
 }
 
+RichEditorSelection TextPattern::GetSpansInfo(int32_t start, int32_t end, GetSpansMethod method)
+{
+    int32_t index = 0;
+    std::int32_t realEnd = 0;
+    std::int32_t realStart = 0;
+    RichEditorSelection selection;
+    std::list<ResultObject> resultObjects;
+    auto length = GetTextContentLength();
+    if (method == GetSpansMethod::GETSPANS) {
+        realStart = (start == -1) ? 0 : start;
+        realEnd = (end == -1) ? length : end;
+        if (realStart > realEnd) {
+            std::swap(realStart, realEnd);
+        }
+        realStart = std::max(0, realStart);
+        realEnd = std::min(length, realEnd);
+    } else if (method == GetSpansMethod::ONSELECT) {
+        realEnd = std::min(length, end);
+        realStart = std::min(length, start);
+    }
+    selection.SetSelectionEnd(realEnd);
+    selection.SetSelectionStart(realStart);
+    if (realStart > length || realEnd < 0 || spans_.empty() || (start > length && end > length)) {
+        selection.SetResultObjectList(resultObjects);
+        return selection;
+    }
+    auto host = GetHost();
+    const auto& children = host->GetChildren();
+    for (const auto& uinode : children) {
+        if (uinode->GetTag() == V2::IMAGE_ETS_TAG) {
+            ResultObject resultObject = GetImageResultObject(uinode, index, realStart, realEnd);
+            if (!resultObject.valueString.empty() || resultObject.valuePixelMap) {
+                resultObjects.emplace_back(resultObject);
+            }
+        } else if (uinode->GetTag() == V2::SPAN_ETS_TAG) {
+            ResultObject resultObject = GetTextResultObject(uinode, index, realStart, realEnd);
+            if (!resultObject.valueString.empty()) {
+                resultObjects.emplace_back(resultObject);
+            }
+        }
+        index++;
+    }
+    selection.SetResultObjectList(resultObjects);
+    return selection;
+}
+
+int32_t TextPattern::GetTextContentLength()
+{
+    if (!spans_.empty()) {
+        return static_cast<int32_t>(GetWideText().length()) + imageCount_;
+    }
+    return 0;
+}
+
 void TextPattern::HandleLongPress(GestureEvent& info)
 {
     if (copyOption_ == CopyOptions::None || isMousePressed_) {
@@ -1091,7 +1145,64 @@ void TextPattern::HandlePanEnd(const GestureEvent& info)
 }
 
 #ifdef ENABLE_DRAG_FRAMEWORK
-DragDropInfo TextPattern::OnDragStart(const RefPtr<Ace::DragEvent>& event, const std::string& extraParams)
+NG::DragDropInfo TextPattern::OnDragStart(const RefPtr<Ace::DragEvent>& event, const std::string& extraParams)
+{
+    DragDropInfo itemInfo;
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, itemInfo);
+    auto selectStart = textSelector_.GetTextStart();
+    auto selectEnd = textSelector_.GetTextEnd();
+    recoverStart_ = selectStart;
+    recoverEnd_ = selectEnd;
+    auto textSelectInfo = GetSpansInfo(selectStart, selectEnd, GetSpansMethod::ONSELECT);
+    dragResultObjects_ = textSelectInfo.GetSelection().resultObjects;
+    if (dragResultObjects_.empty()) {
+        return itemInfo;
+    }
+    RefPtr<UnifiedData> unifiedData = UdmfClient::GetInstance()->CreateUnifiedData();
+    auto resultProcessor = [unifiedData, weak = WeakClaim(this)](const ResultObject& result) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        if (result.type == RichEditorSpanType::TYPESPAN) {
+            auto data = pattern->GetSelectedSpanText(StringUtils::ToWstring(result.valueString),
+                result.offsetInSpan[RichEditorSpanRange::RANGESTART],
+                result.offsetInSpan[RichEditorSpanRange::RANGEEND]);
+            UdmfClient::GetInstance()->AddPlainTextRecord(unifiedData, data);
+            return;
+        }
+        if (result.type == RichEditorSpanType::TYPEIMAGE) {
+            if (result.valuePixelMap) {
+                const uint8_t* pixels = result.valuePixelMap->GetPixels();
+                CHECK_NULL_VOID(pixels);
+                int32_t length = result.valuePixelMap->GetByteCount();
+                std::vector<uint8_t> data(pixels, pixels + length);
+                PixelMapRecordDetails details = { result.valuePixelMap->GetWidth(), result.valuePixelMap->GetHeight(),
+                    result.valuePixelMap->GetPixelFormat(), result.valuePixelMap->GetAlphaType() };
+                UdmfClient::GetInstance()->AddPixelMapRecord(unifiedData, data, details);
+            } else {
+                UdmfClient::GetInstance()->AddImageRecord(unifiedData, result.valueString);
+            }
+        }
+    };
+    for (const auto& resultObj : dragResultObjects_) {
+        resultProcessor(resultObj);
+    }
+    event->SetData(unifiedData);
+    CloseOperate();
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    return itemInfo;
+}
+
+void TextPattern::CloseOperate()
+{
+    UpdateSpanItemDragStatus(dragResultObjects_, true);
+    AceEngineExt::GetInstance().DragStartExt();
+    CloseKeyboard(true);
+    CloseSelectOverlay();
+    ResetSelection();
+}
+
+DragDropInfo TextPattern::OnDragStartNoChild(const RefPtr<Ace::DragEvent>& event, const std::string& extraParams)
 {
     auto weakPtr = WeakClaim(this);
     DragDropInfo itemInfo;
@@ -1111,18 +1222,89 @@ DragDropInfo TextPattern::OnDragStart(const RefPtr<Ace::DragEvent>& event, const
     auto beforeStr = GetSelectedText(0, start);
     auto selectedStr = GetSelectedText(textSelector_.GetTextStart(), textSelector_.GetTextEnd());
     auto afterStr = GetSelectedText(end, GetWideText().length());
-    pattern->dragContents_ = { beforeStr, selectedStr, afterStr };
+    pattern->dragContents_ = {beforeStr, selectedStr, afterStr};
 
     itemInfo.extraInfo = selectedStr;
     RefPtr<UnifiedData> unifiedData = UdmfClient::GetInstance()->CreateUnifiedData();
     UdmfClient::GetInstance()->AddPlainTextRecord(unifiedData, selectedStr);
     event->SetData(unifiedData);
     host->MarkDirtyNode(layoutProperty->GetMaxLinesValue(Infinity<float>()) <= 1 ? PROPERTY_UPDATE_MEASURE_SELF
-                                                                                 : PROPERTY_UPDATE_MEASURE);
+                                                                                        : PROPERTY_UPDATE_MEASURE);
 
     CloseSelectOverlay();
     ResetSelection();
     return itemInfo;
+}
+
+void TextPattern::UpdateSpanItemDragStatus(const std::list<ResultObject>& resultObjects, bool isDragging)
+{
+    if (resultObjects.empty()) {
+        return;
+    }
+    auto dragStatusUpdateAction = [weakPtr = WeakClaim(this), isDragging](const ResultObject& resultObj) {
+        auto pattern = weakPtr.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        auto it = pattern->spans_.begin();
+        std::advance(it, resultObj.spanPosition.spanIndex);
+        auto spanItem = *it;
+        CHECK_NULL_VOID(spanItem);
+        if (resultObj.type == RichEditorSpanType::TYPESPAN) {
+            if (isDragging) {
+                spanItem->StartDrag(resultObj.offsetInSpan[RichEditorSpanRange::RANGESTART],
+                    resultObj.offsetInSpan[RichEditorSpanRange::RANGEEND]);
+            } else {
+                spanItem->EndDrag();
+            }
+            return;
+        }
+
+        if (resultObj.type == RichEditorSpanType::TYPEIMAGE) {
+            auto imageNode = DynamicCast<FrameNode>(pattern->GetChildByIndex(resultObj.spanPosition.spanIndex));
+            CHECK_NULL_VOID(imageNode);
+            auto renderContext = imageNode->GetRenderContext();
+            CHECK_NULL_VOID(renderContext);
+            renderContext->UpdateOpacity(isDragging ? (double)DRAGGED_TEXT_OPACITY / 255 : 1);
+            imageNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+        }
+    };
+    for (const auto& resultObj : resultObjects) {
+        dragStatusUpdateAction(resultObj);
+    }
+}
+
+void TextPattern::OnDragEnd()
+{
+    auto wk = WeakClaim(this);
+    auto pattern = wk.Upgrade();
+    CHECK_NULL_VOID(pattern);
+    pattern->showSelect_ = true;
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    textSelector_.Update(recoverStart_, recoverEnd_);
+    if (dragResultObjects_.empty()) {
+        return;
+    }
+    UpdateSpanItemDragStatus(dragResultObjects_, false);
+    dragResultObjects_.clear();
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+}
+
+void TextPattern::OnDragEndNoChild()
+{
+    auto wk = WeakClaim(this);
+    auto pattern = wk.Upgrade();
+    CHECK_NULL_VOID(pattern);
+    auto host = pattern->GetHost();
+    CHECK_NULL_VOID(host);
+    textSelector_.Update(recoverStart_, recoverEnd_);
+    if (pattern->status_ == Status::DRAGGING) {
+        pattern->status_ = Status::NONE;
+        pattern->MarkContentChange();
+        pattern->contentMod_->ChangeDragStatus();
+        pattern->showSelect_ = true;
+        auto layoutProperty = host->GetLayoutProperty<TextLayoutProperty>();
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    }
 }
 
 void TextPattern::OnDragMove(const RefPtr<Ace::DragEvent>& event)
@@ -1143,40 +1325,43 @@ void TextPattern::InitDragEvent()
     CHECK_NULL_VOID(eventHub);
     auto gestureHub = host->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
+    if (eventHub->HasOnDragStart()) {
+        gestureHub->SetTextDraggable(false);
+        return;
+    }
     gestureHub->InitDragDropEvent();
     gestureHub->SetTextDraggable(true);
     gestureHub->SetThumbnailCallback(GetThumbnailCallback());
     auto onDragStart = [weakPtr = WeakClaim(this)](
-                           const RefPtr<Ace::DragEvent>& event, const std::string& extraParams) -> DragDropInfo {
+                           const RefPtr<OHOS::Ace::DragEvent>& event, const std::string& extraParams) -> DragDropInfo {
+        NG::DragDropInfo itemInfo;
         auto pattern = weakPtr.Upgrade();
-        CHECK_NULL_RETURN(pattern, {});
-        return pattern->OnDragStart(event, extraParams);
+        CHECK_NULL_RETURN(pattern, itemInfo);
+        auto eventHub = pattern->GetEventHub<EventHub>();
+        CHECK_NULL_RETURN(eventHub, itemInfo);
+        if (pattern->spans_.empty()) {
+            return pattern->OnDragStartNoChild(event, extraParams);
+        } else {
+            return pattern->OnDragStart(event, extraParams);
+        }
     };
-    if (!eventHub->HasOnDragStart()) {
-        eventHub->SetOnDragStart(std::move(onDragStart));
-    }
-    auto onDragMove = [weakPtr = WeakClaim(this)](const RefPtr<Ace::DragEvent>& event, const std::string& extraParams) {
+    eventHub->SetOnDragStart(std::move(onDragStart));
+    auto onDragMove = [weakPtr = WeakClaim(this)](
+                          const RefPtr<OHOS::Ace::DragEvent>& event, const std::string& extraParams) {
         auto pattern = weakPtr.Upgrade();
         CHECK_NULL_VOID(pattern);
         pattern->OnDragMove(event);
     };
     eventHub->SetOnDragMove(std::move(onDragMove));
-
-    auto onDragEnd = [weakPtr = WeakClaim(this), id = Container::CurrentId()](
+    auto onDragEnd = [weakPtr = WeakClaim(this), scopeId = Container::CurrentId()](
                          const RefPtr<OHOS::Ace::DragEvent>& event) {
-        ContainerScope scope(id);
+        ContainerScope scope(scopeId);
         auto pattern = weakPtr.Upgrade();
         CHECK_NULL_VOID(pattern);
-        if (pattern->status_ == Status::DRAGGING) {
-            pattern->status_ = Status::NONE;
-            pattern->MarkContentChange();
-            pattern->contentMod_->ChangeDragStatus();
-            pattern->showSelect_ = true;
-            pattern->textSelector_.Update(pattern->GetRecoverStart(), pattern->GetRecoverEnd());
-            auto host = pattern->GetHost();
-            auto layoutProperty = host->GetLayoutProperty<TextLayoutProperty>();
-            pattern->ShowSelectOverlay(pattern->textSelector_.firstHandle, pattern->textSelector_.secondHandle, false);
-            host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+        if (pattern->spans_.empty()) {
+            pattern->OnDragEndNoChild();
+        } else {
+            pattern->OnDragEnd();
         }
     };
     eventHub->SetOnDragEnd(std::move(onDragEnd));
@@ -1206,7 +1391,141 @@ std::function<void(Offset)> TextPattern::GetThumbnailCallback()
         }
     };
 }
+
 #endif // ENABLE_DRAG_FRAMEWORK
+
+std::string TextPattern::GetSelectedSpanText(std::wstring value, int32_t start, int32_t end) const
+{
+    if (start < 0 || end > static_cast<int32_t>(value.length()) || start >= end) {
+        return "";
+    }
+    auto min = std::min(start, end);
+    auto max = std::max(start, end);
+
+    return StringUtils::ToString(value.substr(min, max - min));
+}
+
+TextStyleResult TextPattern::GetTextStyleObject(const RefPtr<SpanNode>& node)
+{
+    TextStyleResult textStyle;
+    textStyle.fontColor = node->GetTextColorValue(Color::BLACK).ColorToString();
+    textStyle.fontSize = node->GetFontSizeValue(Dimension(16.0f, DimensionUnit::VP)).ConvertToVp();
+    textStyle.fontStyle = static_cast<int32_t>(node->GetItalicFontStyleValue(OHOS::Ace::FontStyle::NORMAL));
+    textStyle.fontWeight = static_cast<int32_t>(node->GetFontWeightValue(FontWeight::NORMAL));
+    std::string fontFamilyValue;
+    const std::vector<std::string> defaultFontFamily = { "HarmonyOS Sans" };
+    auto fontFamily = node->GetFontFamilyValue(defaultFontFamily);
+    for (const auto& str : fontFamily) {
+        fontFamilyValue += str;
+        fontFamilyValue += ",";
+    }
+    fontFamilyValue = fontFamilyValue.substr(0, fontFamilyValue.size() - 1);
+    textStyle.fontFamily = !fontFamilyValue.empty() ? fontFamilyValue : defaultFontFamily.front();
+    textStyle.decorationType = static_cast<int32_t>(node->GetTextDecorationValue(TextDecoration::NONE));
+    textStyle.decorationColor = node->GetTextDecorationColorValue(Color::BLACK).ColorToString();
+    return textStyle;
+}
+
+RefPtr<UINode> TextPattern::GetChildByIndex(int32_t index) const
+{
+    auto host = GetHost();
+    const auto& children = host->GetChildren();
+    int32_t size = static_cast<int32_t>(children.size());
+    if (index < 0 || index >= size) {
+        return nullptr;
+    }
+    auto pos = children.begin();
+    std::advance(pos, index);
+    return *pos;
+}
+
+RefPtr<SpanItem> TextPattern::GetSpanItemByIndex(int32_t index) const
+{
+    int32_t size = static_cast<int32_t>(spans_.size());
+    if (index < 0 || index >= size) {
+        return nullptr;
+    }
+    auto pos = spans_.begin();
+    std::advance(pos, index);
+    return *pos;
+}
+
+ResultObject TextPattern::GetTextResultObject(RefPtr<UINode> uinode, int32_t index, int32_t start, int32_t end)
+{
+    bool selectFlag = false;
+    ResultObject resultObject;
+    if (!DynamicCast<SpanNode>(uinode)) {
+        return resultObject;
+    }
+    auto spanItem = DynamicCast<SpanNode>(uinode)->GetSpanItem();
+    int32_t itemLength = StringUtils::ToWstring(spanItem->content).length();
+    int32_t endPosition = std::min(GetTextContentLength(), spanItem->position);
+    int32_t startPosition = endPosition - itemLength;
+
+    if (startPosition >= start && endPosition <= end) {
+        selectFlag = true;
+        resultObject.offsetInSpan[RichEditorSpanRange::RANGESTART] = 0;
+        resultObject.offsetInSpan[RichEditorSpanRange::RANGEEND] = itemLength;
+    } else if (startPosition < start && endPosition <= end && endPosition > start) {
+        selectFlag = true;
+        resultObject.offsetInSpan[RichEditorSpanRange::RANGESTART] = start - startPosition;
+        resultObject.offsetInSpan[RichEditorSpanRange::RANGEEND] = itemLength;
+    } else if (startPosition >= start && startPosition < end && endPosition >= end) {
+        selectFlag = true;
+        resultObject.offsetInSpan[RichEditorSpanRange::RANGESTART] = 0;
+        resultObject.offsetInSpan[RichEditorSpanRange::RANGEEND] = end - startPosition;
+    } else if (startPosition <= start && endPosition >= end) {
+        selectFlag = true;
+        resultObject.offsetInSpan[RichEditorSpanRange::RANGESTART] = start - startPosition;
+        resultObject.offsetInSpan[RichEditorSpanRange::RANGEEND] = end - startPosition;
+    }
+    if (selectFlag) {
+        resultObject.spanPosition.spanIndex = index;
+        resultObject.spanPosition.spanRange[RichEditorSpanRange::RANGESTART] = startPosition;
+        resultObject.spanPosition.spanRange[RichEditorSpanRange::RANGEEND] = endPosition;
+        resultObject.type = RichEditorSpanType::TYPESPAN;
+        resultObject.valueString = spanItem->content;
+        auto spanNode = DynamicCast<SpanNode>(uinode);
+        resultObject.textStyle = GetTextStyleObject(spanNode);
+    }
+    return resultObject;
+}
+
+ResultObject TextPattern::GetImageResultObject(RefPtr<UINode> uinode, int32_t index, int32_t start, int32_t end)
+{
+    int32_t itemLength = 1;
+    ResultObject resultObject;
+    if (!DynamicCast<FrameNode>(uinode) || !GetSpanItemByIndex(index)) {
+        return resultObject;
+    }
+    int32_t endPosition = std::min(GetTextContentLength(), GetSpanItemByIndex(index)->position);
+    int32_t startPosition = endPosition - itemLength;
+    if ((start <= startPosition) && (end >= endPosition)) {
+        auto imageNode = DynamicCast<FrameNode>(uinode);
+        auto imageLayoutProperty = DynamicCast<ImageLayoutProperty>(imageNode->GetLayoutProperty());
+        resultObject.spanPosition.spanIndex = index;
+        resultObject.spanPosition.spanRange[RichEditorSpanRange::RANGESTART] = startPosition;
+        resultObject.spanPosition.spanRange[RichEditorSpanRange::RANGEEND] = endPosition;
+        resultObject.offsetInSpan[RichEditorSpanRange::RANGESTART] = 0;
+        resultObject.offsetInSpan[RichEditorSpanRange::RANGEEND] = itemLength;
+        resultObject.type = RichEditorSpanType::TYPEIMAGE;
+        if (!imageLayoutProperty->GetImageSourceInfo()->GetPixmap()) {
+            resultObject.valueString = imageLayoutProperty->GetImageSourceInfo()->GetSrc();
+        } else {
+            resultObject.valuePixelMap = imageLayoutProperty->GetImageSourceInfo()->GetPixmap();
+        }
+        auto geometryNode = imageNode->GetGeometryNode();
+        resultObject.imageStyle.size[RichEditorImageSize::SIZEWIDTH] = geometryNode->GetMarginFrameSize().Width();
+        resultObject.imageStyle.size[RichEditorImageSize::SIZEHEIGHT] = geometryNode->GetMarginFrameSize().Height();
+        if (imageLayoutProperty->HasImageFit()) {
+            resultObject.imageStyle.verticalAlign = static_cast<int32_t>(imageLayoutProperty->GetImageFitValue());
+        }
+        if (imageLayoutProperty->HasVerticalAlign()) {
+            resultObject.imageStyle.objectFit = static_cast<int32_t>(imageLayoutProperty->GetVerticalAlignValue());
+        }
+    }
+    return resultObject;
+}
 
 // ===========================================================
 // TextDragBase implementations

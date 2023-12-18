@@ -480,12 +480,18 @@ void GridPattern::AdjustingTargetPos(float targetPos, int32_t rowIndex, float li
             targetPos = targetPos - gridLayoutInfo_.lastMainSize_ + lineHeight;
             break;
         case ScrollAlign::AUTO:
-            if (gridLayoutInfo_.startMainLineIndex_ >= rowIndex) {
-                // Scroll down from top and use ScrollAlign::START layout
-            } else if (rowIndex >= gridLayoutInfo_.endMainLineIndex_) {
-                targetPos = targetPos - gridLayoutInfo_.lastMainSize_ + lineHeight;
-            } else {
+            if ((rowIndex < gridLayoutInfo_.endMainLineIndex_) && (rowIndex > gridLayoutInfo_.startMainLineIndex_)) {
                 return;
+            }
+            if (rowIndex >= gridLayoutInfo_.endMainLineIndex_) {
+                float mainGap = GetMainGap();
+                auto totalViewHeight = gridLayoutInfo_.GetTotalHeightOfItemsInView(mainGap);
+                float tmpPos = gridLayoutInfo_.currentOffset_;
+                tmpPos = tmpPos - (totalViewHeight - gridLayoutInfo_.lastMainSize_ + tmpPos);
+                for (int32_t i = gridLayoutInfo_.endMainLineIndex_ + 1; i <= rowIndex; ++i) {
+                    tmpPos = tmpPos - (mainGap + gridLayoutInfo_.lineHeightMap_[i]);
+                }
+                targetPos = -tmpPos;
             }
             break;
     }

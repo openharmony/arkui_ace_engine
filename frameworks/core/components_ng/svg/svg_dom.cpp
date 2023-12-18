@@ -276,6 +276,9 @@ void SvgDom::DrawImage(
     FitImage(canvas, imageFit, layout);
     FitViewPort(layout);
     // draw svg tree
+    if (GreatNotEqual(smoothEdge_, 0.0f)) {
+        root_->SetSmoothEdge(smoothEdge_);
+    }
     root_->Draw(canvas, layout, fillColor_);
     canvas.Restore();
 }
@@ -357,5 +360,10 @@ SizeF SvgDom::GetContainerSize() const
 void SvgDom::SetFillColor(const std::optional<Color>& color)
 {
     fillColor_ = color;
+}
+
+void SvgDom::SetSmoothEdge(float value)
+{
+    smoothEdge_ = value;
 }
 } // namespace OHOS::Ace::NG

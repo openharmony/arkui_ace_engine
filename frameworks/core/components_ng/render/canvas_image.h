@@ -38,6 +38,7 @@ struct ImagePaintConfig {
     ImageInterpolation imageInterpolation_ = ImageInterpolation::NONE;
     ImageRepeat imageRepeat_ = ImageRepeat::NO_REPEAT;
     ImageFit imageFit_ = ImageFit::COVER;
+    float smoothEdge_ = 0.0f;
     bool flipHorizontally_ = false;
     bool isSvg_ = false;
     std::vector<ObscuredReasons> obscuredReasons_;

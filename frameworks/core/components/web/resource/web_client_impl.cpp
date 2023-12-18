@@ -710,6 +710,16 @@ void WebClientImpl::OnDataResubmission(std::shared_ptr<NWeb::NWebDataResubmissio
     delegate->OnDataResubmitted(handler);
 }
 
+void WebClientImpl::OnNavigationEntryCommitted(
+    std::shared_ptr<NWeb::NWebLoadCommittedDetails> details)
+{
+    ContainerScope scope(instanceId_);
+    auto delegate = webDelegate_.Upgrade();
+    CHECK_NULL_VOID(delegate);
+    CHECK_NULL_VOID(details);
+    delegate->OnNavigationEntryCommitted(details);
+}
+
 void WebClientImpl::OnPageIcon(const void* data,
                                size_t width,
                                size_t height,
@@ -857,4 +867,5 @@ bool WebClientImpl::FilterScrollEvent(const float x, const float y, const float 
     CHECK_NULL_RETURN(delegate, false);
     return delegate->FilterScrollEvent(x, y, xVelocity, yVelocity);
 }
+
 } // namespace OHOS::Ace

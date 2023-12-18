@@ -28,7 +28,6 @@ constexpr int NUM_3 = 3;
 constexpr int NUM_4 = 4;
 const std::string FORMAT_FONT = "%s|%s|%s";
 const std::string DEFAULT_ERR_CODE = "-1";
-const std::string DEFAULT_FAMILY = "HarmonyOS Sans";
 ArkUINativeModuleValue MenuItemBridge::SetMenuItemSelected(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
@@ -36,8 +35,12 @@ ArkUINativeModuleValue MenuItemBridge::SetMenuItemSelected(ArkUIRuntimeCallInfo*
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    auto isSelected = secondArg->IsBoolean() ? secondArg->BooleaValue() : false;
-    GetArkUIInternalNodeAPI()->GetMenuItemModifier().SetMenuItemSelected(nativeNode, isSelected);
+    if (secondArg->IsBoolean()) {
+        bool selected = secondArg->ToBoolean(vm)->Value();
+        GetArkUIInternalNodeAPI()->GetMenuItemModifier().SetMenuItemSelected(nativeNode, selected);
+    } else {
+        GetArkUIInternalNodeAPI()->GetMenuItemModifier().ResetMenuItemSelected(nativeNode);
+    }
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -125,17 +128,17 @@ ArkUINativeModuleValue MenuItemBridge::SetLabelFont(ArkUIRuntimeCallInfo* runtim
     if (weightArg->IsNumber()) {
         weight = std::to_string(weightArg->Int32Value(vm));
     } else {
-        if (ArkTSUtils::ParseJsString(vm, weightArg, weight) || weight.empty()) {
+        if (!ArkTSUtils::ParseJsString(vm, weightArg, weight) || weight.empty()) {
             weight = DEFAULT_ERR_CODE;
         }
     }
 
-    int32_t style = 0;
+    int32_t style = -1;
     if (styleArg->IsNumber()) {
         style = styleArg->Int32Value(vm);
     }
 
-    std::string family = DEFAULT_FAMILY;
+    std::string family = DEFAULT_ERR_CODE;
     if (familyArg->IsString()) {
         family = familyArg->ToString(vm)->ToString();
     }
@@ -178,17 +181,17 @@ ArkUINativeModuleValue MenuItemBridge::SetContentFont(ArkUIRuntimeCallInfo* runt
     if (weightArg->IsNumber()) {
         weight = std::to_string(weightArg->Int32Value(vm));
     } else {
-        if (ArkTSUtils::ParseJsString(vm, weightArg, weight) || weight.empty()) {
+        if (!ArkTSUtils::ParseJsString(vm, weightArg, weight) || weight.empty()) {
             weight = DEFAULT_ERR_CODE;
         }
     }
 
-    int32_t style = 0;
+    int32_t style = -1;
     if (styleArg->IsNumber()) {
         style = styleArg->Int32Value(vm);
     }
 
-    std::string family = DEFAULT_FAMILY;
+    std::string family = DEFAULT_ERR_CODE;
     if (familyArg->IsString()) {
         family = familyArg->ToString(vm)->ToString();
     }

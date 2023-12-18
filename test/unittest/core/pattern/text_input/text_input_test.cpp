@@ -62,6 +62,7 @@
 #include "core/components_ng/pattern/text_field/text_field_model.h"
 #include "core/components_ng/pattern/text_field/text_field_model_ng.h"
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
+#include "core/components_ng/pattern/text_field/text_field_event_hub.h"
 #include "core/event/key_event.h"
 #include "core/event/touch_event.h"
 #include "core/gestures/gesture_info.h"
@@ -1899,6 +1900,52 @@ HWTEST_F(TextFieldKeyEventTest, KeyEvent006, TestSize.Level1)
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(pattern_->GetTextValue(), expectStr + DEFAULT_TEXT);
     EXPECT_TRUE(ret);
+}
+
+/**
+ * @tc.name: KeyEvent007
+ * @tc.desc: Test KeyEvent enter
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldKeyEventTest, KeyEvent007, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize textInput and get focus
+     */
+    auto onSubmit = [](int32_t textFieldKey, NG::TextFieldCommonEvent& commonEvent) {
+        commonEvent.SetKeepEditable(true);
+        EXPECT_TRUE(commonEvent.keepEditable_);
+    };
+    CreateTextField(DEFAULT_TEXT, DEFAULT_PLACE_HOLDER, [&](TextFieldModel& model) -> void {
+        model.SetOnSubmit(onSubmit);
+    });
+    GetFocus();
+
+    pattern_->PerformAction(TextInputAction::DONE, true);
+    EXPECT_TRUE(pattern_->GetCursorVisible());
+}
+
+/**
+ * @tc.name: KeyEvent008
+ * @tc.desc: Test KeyEvent enter
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldKeyEventTest, KeyEvent008, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize textInput and get focus
+     */
+    auto onSubmit = [](int32_t textFieldKey, NG::TextFieldCommonEvent& commonEvent) {
+        EXPECT_FALSE(commonEvent.keepEditable_);
+        EXPECT_EQ(commonEvent.text_, "abcdefghijklmnopqrstuvwxyz");
+    };
+    CreateTextField(DEFAULT_TEXT, DEFAULT_PLACE_HOLDER, [&](TextFieldModel& model) -> void {
+        model.SetOnSubmit(onSubmit);
+    });
+    GetFocus();
+
+    pattern_->PerformAction(TextInputAction::DONE, true);
+    EXPECT_FALSE(pattern_->GetCursorVisible());
 }
 
 /**

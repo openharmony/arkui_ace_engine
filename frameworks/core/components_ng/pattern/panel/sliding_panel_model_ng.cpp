@@ -288,8 +288,7 @@ void SlidingPanelModelNG::ResetPanelHalfHeight(FrameNode* frameNode)
     CHECK_NULL_VOID(geometryNode);
     auto frameSize = geometryNode->GetFrameSize();
 
-    auto halfHeight = layoutProperty->GetHalfHeight().value_or(
-        Dimension((frameSize.Height() - BLANK_MIN_HEIGHT.ConvertToPx()) / HALF_VALUS));
+    auto halfHeight = Dimension(frameSize.Height() / HALF_VALUS);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(SlidingPanelLayoutProperty, HalfHeight, halfHeight, frameNode);
 }
 
@@ -301,8 +300,7 @@ void SlidingPanelModelNG::ResetPanelFullHeight(FrameNode* frameNode)
     CHECK_NULL_VOID(geometryNode);
     auto frameSize = geometryNode->GetFrameSize();
 
-    auto fullHeight =
-        layoutProperty->GetFullHeight().value_or(Dimension(frameSize.Height() - BLANK_MIN_HEIGHT.ConvertToPx()));
+    auto fullHeight = Dimension(frameSize.Height() - BLANK_MIN_HEIGHT.ConvertToPx());
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(SlidingPanelLayoutProperty, FullHeight, fullHeight, frameNode);
 }
 } // namespace OHOS::Ace::NG

@@ -93,6 +93,7 @@ void ImagePaintMethod::UpdatePaintConfig(const RefPtr<ImageRenderProperty>& rend
     config.renderMode_ = renderProps->GetImageRenderMode().value_or(ImageRenderMode::ORIGINAL);
     config.imageInterpolation_ = renderProps->GetImageInterpolation().value_or(ImageInterpolation::NONE);
     config.imageRepeat_ = renderProps->GetImageRepeat().value_or(ImageRepeat::NO_REPEAT);
+    config.smoothEdge_ = renderProps->GetSmoothEdge().value_or(0.0f);
     auto pipelineCtx = PipelineBase::GetCurrentContext();
     bool isRightToLeft = pipelineCtx && pipelineCtx->IsRightToLeft();
     config.flipHorizontally_ = isRightToLeft && renderProps->GetMatchTextDirection().value_or(false);
@@ -120,6 +121,7 @@ CanvasDrawFunction ImagePaintMethod::GetContentDrawFunction(PaintWrapper* paintW
     UpdatePaintConfig(props, paintWrapper);
     if (InstanceOf<SvgCanvasImage>(canvasImage_)) {
         DynamicCast<SvgCanvasImage>(canvasImage_)->SetFillColor(props->GetSvgFillColor());
+        DynamicCast<SvgCanvasImage>(canvasImage_)->SetSmoothEdge(props->GetSmoothEdge().value_or(0.0f));
     }
     ImagePainter imagePainter(canvasImage_);
     return [imagePainter, contentSize](RSCanvas& canvas) { imagePainter.DrawImage(canvas, {}, contentSize); };

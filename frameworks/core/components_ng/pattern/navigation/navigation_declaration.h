@@ -165,6 +165,11 @@ enum class NavBarPosition {
     END,
 };
 
+enum class NavDestinationMode {
+    STANDARD = 0,
+    DIALOG,
+};
+
 enum class ChildNodeOperation {
     ADD,
     // remove case only used for back button

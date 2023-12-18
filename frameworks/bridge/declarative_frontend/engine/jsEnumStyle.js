@@ -870,6 +870,12 @@ var TitleHeight;
   TitleHeight["MainWithSub"] = "MainWithSub";
 })(TitleHeight || (TitleHeight = {}));
 
+var NavDestinationMode;
+(function(NavDestinationMode) {
+  NavDestinationMode[NavDestinationMode["STANDARD"] = 0] = "STANDARD";
+  NavDestinationMode[NavDestinationMode["DIALOG"] = 1] = "DIALOG";
+}(NavDestinationMode || (NavDestinationMode = {})));
+
 var ResponseType;
 (function (ResponseType) {
   ResponseType[ResponseType["RightClick"] = 0] = "RightClick";
@@ -1336,6 +1342,10 @@ class SubTabBarStyle {
     this.padding = arg;
     return this;
   }
+  id(arg) {
+    this.id = arg;
+    return this;
+  }
 }
 
 
@@ -1385,6 +1395,10 @@ class BottomTabBarStyle {
   }
   labelStyle(arg) {
     this.labelStyle = arg;
+    return this;
+  }
+  id(arg) {
+    this.id = arg;
     return this;
   }
 }
@@ -2132,6 +2146,7 @@ var FinishCallbackType;
   FinishCallbackType["REMOVED"] = 0;
   FinishCallbackType["LOGICALLY"] = 1;
 })(FinishCallbackType || (FinishCallbackType = {}));
+
 var WebLayoutMode;
 (function (WebLayoutMode) {
   WebLayoutMode[WebLayoutMode["NONE"] = 0] = "NONE";
