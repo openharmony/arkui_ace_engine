@@ -568,7 +568,8 @@ void SheetPresentationPattern::ChangeScrollHeight(float height)
         auto sheetHeight = geometryNode->GetFrameSize().Height();
         scrollHeight = sheetHeight - operationHeight;
     }
-    scrollProps->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(scrollHeight)));
+    scrollProps->UpdateUserDefinedIdealSize(CalcSize(CalcLength(geometryNode->GetFrameSize().Width()),
+        CalcLength(scrollHeight)));
     scrollNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
