@@ -196,8 +196,40 @@ public:
         return crossMatchChild_;
     }
 
+    void SetUseCustomAnimation(bool useCustomAnimation)
+    {
+        useCustomAnimation_ = useCustomAnimation;
+    }
+
+    void SetCustomAnimationToIndex(std::optional<int32_t> customAnimationToIndex)
+    {
+        customAnimationToIndex_ = customAnimationToIndex;
+    }
+
+    void SetRemoveFromRSTreeIndex(std::optional<int32_t> removeFromRSTreeIndex)
+    {
+        removeFromRSTreeIndex_ = removeFromRSTreeIndex;
+    }
+
+    void SetIndexsInAnimation(const std::set<int32_t>& indexsInAnimation)
+    {
+        indexsInAnimation_ = indexsInAnimation;
+    }
+
+    void SetNeedUnmountIndexs(const std::set<int32_t>& needUnmountIndexs)
+    {
+        needUnmountIndexs_ = needUnmountIndexs;
+    }
+
+    std::set<int32_t> GetNeedUnmountIndexs() const
+    {
+        return needUnmountIndexs_;
+    }
+
 private:
     void MeasureSwiper(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint, Axis axis);
+    void MeasureCustomAnimation(LayoutWrapper* layoutWrapper);
+    void LayoutCustomAnimation(LayoutWrapper* layoutWrapper) const;
     void SetInactive(
         LayoutWrapper* layoutWrapper, float startMainPos, float endMainPos, std::optional<int32_t> targetIndex);
 
@@ -235,9 +267,14 @@ private:
     std::optional<int32_t> jumpIndex_;
     std::optional<int32_t> targetIndex_;
     std::optional<int32_t> currentTargetIndex_;
+    std::optional<int32_t> customAnimationToIndex_;
+    std::optional<int32_t> removeFromRSTreeIndex_;
     int32_t currentIndex_ = 0;
     bool targetIsSameWithStartFlag_ = false;
     bool isNeedResetPrevMarginAndNextMargin_ = false;
+    bool useCustomAnimation_ = false;
+    std::set<int32_t> indexsInAnimation_;
+    std::set<int32_t> needUnmountIndexs_;
 };
 
 } // namespace OHOS::Ace::NG

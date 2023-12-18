@@ -33,6 +33,7 @@
 #include "core/components_ng/pattern/tabs/tab_bar_paint_method.h"
 #include "core/components_ng/pattern/tabs/tab_bar_paint_property.h"
 #include "core/event/mouse_event.h"
+#include "core/components_ng/pattern/tabs/tab_content_transition_proxy.h"
 #include "frameworks/core/components/focus_animation/focus_animation_theme.h"
 #include "frameworks/core/components_ng/event/focus_hub.h"
 
@@ -402,6 +403,7 @@ private:
     void SetAccessibilityAction();
     void AdjustFocusPosition();
     void TabBarClickEvent(int32_t index) const;
+    void OnCustomContentTransition(int32_t fromIndex, int32_t toIndex);
     void ApplyTurnPageRateToIndicator(float turnPageRate);
     bool CheckSwiperDisable() const;
     void SetSwiperCurve(const RefPtr<Curve>& curve) const;
