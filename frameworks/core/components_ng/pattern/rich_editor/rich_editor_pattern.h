@@ -366,6 +366,10 @@ public:
     void HandleOnCameraInput() override;
 
     RefPtr<FocusHub> GetFocusHub() const;
+    bool NeedShowAIDetect() override;
+
+protected:
+    bool CanStartAITask() override;
 
 private:
     void UpdateSelectMenuInfo(bool hasData, SelectOverlayInfo& selectInfo, bool isCopyAll);
