@@ -527,11 +527,9 @@ void NavigationPattern::TransitionWithAnimation(const RefPtr<NavDestinationGroup
     // navDestination push/pop navDestination
     if (newTopNavDestination && preTopNavDestination) {
         if (isPopPage) {
-            navigationNode->ExitTransitionWithPop(preTopNavDestination);
-            navigationNode->EnterTransitionWithPop(newTopNavDestination);
+            navigationNode->TransitionWithPop(preTopNavDestination, newTopNavDestination);
         } else {
-            navigationNode->ExitTransitionWithPush(preTopNavDestination);
-            navigationNode->EnterTransitionWithPush(newTopNavDestination);
+            navigationNode->TransitionWithPush(preTopNavDestination, newTopNavDestination);
         }
         return;
     }
@@ -544,16 +542,17 @@ void NavigationPattern::TransitionWithAnimation(const RefPtr<NavDestinationGroup
 
     // navBar push navDestination
     if (newTopNavDestination && navigationMode_ == NavigationMode::STACK) {
-        navigationNode->ExitTransitionWithPush(navBarNode, true);
-        navigationNode->EnterTransitionWithPush(newTopNavDestination);
+        navigationNode->TransitionWithPush(navBarNode, newTopNavDestination, true);
         return;
     }
 
     // navDestination pop to navBar
     if (preTopNavDestination) {
-        navigationNode->ExitTransitionWithPop(preTopNavDestination);
+        if (navigationMode_ == NavigationMode::SPLIT) {
+            navigationNode->TransitionWithPop(preTopNavDestination, nullptr);
+        }
         if (navigationMode_ == NavigationMode::STACK) {
-            navigationNode->EnterTransitionWithPop(navBarNode, true);
+            navigationNode->TransitionWithPop(preTopNavDestination, navBarNode, true);
         }
     }
 }
@@ -737,12 +736,14 @@ void NavigationPattern::UpdateContextRect(
     navBarProperty->UpdateVisibility(navigationLayoutProperty->GetVisibilityValue(VisibleType::VISIBLE));
     navBarNode->SetActive(navigationLayoutProperty->GetVisibilityValue(VisibleType::VISIBLE) == VisibleType::VISIBLE ?
         true : false);
-    curDestination->GetRenderContext()->UpdateTranslateInXY(OffsetF { 0.0f, 0.0f });
-    curDestination->GetRenderContext()->SetActualForegroundColor(DEFAULT_MASK_COLOR);
-    navBarNode->GetEventHub<EventHub>()->SetEnabledInternal(true);
-    auto titleNode = AceType::DynamicCast<FrameNode>(navBarNode->GetTitle());
-    CHECK_NULL_VOID(titleNode);
-    titleNode->GetRenderContext()->UpdateTranslateInXY(OffsetF { 0.0f, 0.0f });
+    if (!curDestination->IsOnAnimation()) {
+        curDestination->GetRenderContext()->UpdateTranslateInXY(OffsetF { 0.0f, 0.0f });
+        curDestination->GetRenderContext()->SetActualForegroundColor(DEFAULT_MASK_COLOR);
+        navBarNode->GetEventHub<EventHub>()->SetEnabledInternal(true);
+        auto titleNode = AceType::DynamicCast<FrameNode>(navBarNode->GetTitle());
+        CHECK_NULL_VOID(titleNode);
+        titleNode->GetRenderContext()->UpdateTranslateInXY(OffsetF { 0.0f, 0.0f });
+    }
 }
 
 bool NavigationPattern::UpdateTitleModeChangeEventHub(const RefPtr<NavigationGroupNode>& hostNode)
