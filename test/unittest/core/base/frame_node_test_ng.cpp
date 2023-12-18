@@ -2345,4 +2345,102 @@ HWTEST_F(FrameNodeTestNg, GetPixelMap001, TestSize.Level1)
     // mockRenderContext->pixelMap_ = pixelMap;
     EXPECT_EQ(FRAME_NODE->GetPixelMap(), nullptr);
 }
+
+/**
+ * @tc.name: FindChildByNameTest001
+ * @tc.desc: Test FindChildByName with one tree
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FindChildByNameTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create frameNode and set the parent and children.
+     */
+    const std::string parentNodeName = "nodeParent";
+    const std::string thisNodeName = "nodeThis";
+    const std::string childrenNodeName = "nodeChildren";
+    const std::string testChildNodeName = "test";
+    auto nodeParent = FrameNode::CreateFrameNode(parentNodeName, 10, AceType::MakeRefPtr<Pattern>(), true);
+    auto nodeThis = FrameNode::CreateFrameNode(thisNodeName, 20, AceType::MakeRefPtr<Pattern>());
+    auto nodeChildren = FrameNode::CreateFrameNode(childrenNodeName, 30, AceType::MakeRefPtr<Pattern>());
+
+    /**
+     * @tc.steps: step1. Set the node's relation.
+     */
+    nodeParent->AddChild(nodeThis);
+    nodeParent->AddChild(nodeChildren);
+
+    /**
+     * @tc.steps: step3. Init inspectorId.
+     */
+    nodeParent->UpdateInspectorId(parentNodeName);
+    nodeChildren->UpdateInspectorId(childrenNodeName);
+    nodeThis->UpdateInspectorId(thisNodeName);
+
+    /**
+     * @tc.steps: step4. Traversal the frameNodeTree.
+     */
+    auto finalResult = FrameNode::FindChildByName(nodeParent, childrenNodeName);
+    EXPECT_EQ(finalResult, nodeChildren);
+
+    auto noChildResult = FrameNode::FindChildByName(nodeParent, testChildNodeName);
+    EXPECT_EQ(noChildResult, nullptr);
+
+    nodeParent->Clean();
+    auto noHaveResult = FrameNode::FindChildByName(nodeParent, childrenNodeName);
+    EXPECT_EQ(noHaveResult, nullptr);
+}
+
+/**
+ * @tc.name: FindChildByNameTest002
+ * @tc.desc: Test FindChildByName with two tree
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FindChildByNameTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create frameNode and set the parent and children.
+     */
+    const std::string parentNodeName = "nodeParent";
+    const std::string nodeOneName = "nodeOne";
+    const std::string nodeOneChildName = "nodeOneChildren";
+    const std::string nodeTwoName = "nodeTwo";
+    const std::string nodeTwoChildName = "nodeTwoChildren";
+    const std::string testChildNodeName = "test";
+    auto nodeParent = FrameNode::CreateFrameNode(parentNodeName, 10, AceType::MakeRefPtr<Pattern>(), true);
+    auto nodeOne = FrameNode::CreateFrameNode(nodeOneName, 20, AceType::MakeRefPtr<Pattern>());
+    auto nodeOneChildren = FrameNode::CreateFrameNode(nodeOneChildName, 30, AceType::MakeRefPtr<Pattern>());
+    auto nodeTwo = FrameNode::CreateFrameNode(nodeTwoName, 40, AceType::MakeRefPtr<Pattern>());
+    auto nodeTwoChildren = FrameNode::CreateFrameNode(nodeTwoChildName, 50, AceType::MakeRefPtr<Pattern>());
+
+    /**
+     * @tc.steps: step1. Set the node's relation.
+     */
+    nodeParent->AddChild(nodeOne);
+    nodeParent->AddChild(nodeTwo);
+    nodeOne->AddChild(nodeOneChildren);
+    nodeTwo->AddChild(nodeTwoChildren);
+
+    /**
+     * @tc.steps: step3. Init inspectorId.
+     */
+    nodeParent->UpdateInspectorId(parentNodeName);
+    nodeOne->UpdateInspectorId(nodeOneName);
+    nodeOneChildren->UpdateInspectorId(nodeOneChildName);
+    nodeTwo->UpdateInspectorId(nodeTwoName);
+    nodeTwoChildren->UpdateInspectorId(nodeTwoChildName);
+
+    /**
+     * @tc.steps: step4. Traversal the frameNodeTree.
+     */
+    auto finalResult = FrameNode::FindChildByName(nodeParent, nodeOneChildName);
+    EXPECT_EQ(finalResult, nodeOneChildren);
+
+    auto noChildResult = FrameNode::FindChildByName(nodeParent, testChildNodeName);
+    EXPECT_EQ(noChildResult, nullptr);
+
+    nodeParent->Clean();
+    auto noHaveResult = FrameNode::FindChildByName(nodeParent, nodeTwoChildName);
+    EXPECT_EQ(noHaveResult, nullptr);
+}
 } // namespace OHOS::Ace::NG
