@@ -328,7 +328,6 @@ struct MeasureProperty {
         MeasureProperty ans;
         auto width = json->GetString("width");
         auto height = json->GetString("height");
-        LOGD("UITree width=%{public}s height=%{public}s", width.c_str(), height.c_str());
         if (width != "-" || height != "-") {
             ans.selfIdealSize =
                 CalcSize(width != "-" ? std::optional<CalcLength>(Dimension::FromString(width)) : std::nullopt,
@@ -402,7 +401,6 @@ struct PaddingPropertyT {
 
     static PaddingPropertyT FromJsonString(const std::string& str)
     {
-        LOGD("UITree str=%{public}s", str.c_str());
         PaddingPropertyT property;
 
         if (str.empty()) {
@@ -411,13 +409,10 @@ struct PaddingPropertyT {
         }
 
         if (str[0] >= '0' && str[0] <= '9') {
-            LOGD("UITree decode number");
             property.top = property.right = property.bottom = property.left = T::FromString(str);
         } else if (str[0] == '{') {
-            LOGD("UITree decode json");
             auto json = JsonUtil::ParseJsonString(str);
             if (!json->IsValid()) {
-                LOGD("UITree invalid json [%{public}s]", json->ToString().c_str());
                 return property;
             }
             property.top = T::FromString(json->GetString("top"));

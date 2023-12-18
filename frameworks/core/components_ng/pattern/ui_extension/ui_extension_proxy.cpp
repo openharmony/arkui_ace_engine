@@ -15,35 +15,27 @@
 
 #include "core/components_ng/pattern/ui_extension/ui_extension_proxy.h"
 
-#include "session/host/include/extension_session.h"
-
 #include "adapter/ohos/osal/want_wrap_ohos.h"
+#include "base/utils/utils.h"
+#include "core/components_ng/pattern/ui_extension/session_wrapper.h"
 
 namespace OHOS::Ace::NG {
-UIExtensionProxy::UIExtensionProxy(const sptr<Rosen::Session>& session,
-    const RefPtr<UIExtensionPattern>& pattern): session_(session), pattern_(pattern) {}
+UIExtensionProxy::UIExtensionProxy(
+    const RefPtr<SessionWrapper>& sessionWrapper, const RefPtr<UIExtensionPattern>& pattern)
+    : sessionWrapper_(sessionWrapper), pattern_(pattern)
+{}
 
 void UIExtensionProxy::SendData(const RefPtr<WantParamsWrap>& wantParams)
 {
-    auto session = session_.promote();
-    if (session) {
-        sptr<Rosen::ExtensionSession> extensionSession(static_cast<Rosen::ExtensionSession*>(session.GetRefPtr()));
-        auto params = DynamicCast<WantParamsWrapOhos>(wantParams)->GetWantParams();
-        extensionSession->TransferComponentData(params);
-    }
+    CHECK_NULL_VOID(sessionWrapper_);
+    auto params = DynamicCast<WantParamsWrapOhos>(wantParams)->GetWantParams();
+    sessionWrapper_->SendDataAsync(params);
 }
 
-OHOS::Rosen::WSErrorCode UIExtensionProxy::SendDataSync(const RefPtr<WantParamsWrap>& wantParams,
-                                                        AAFwk::WantParams& reWantParams)
+int32_t UIExtensionProxy::SendDataSync(const RefPtr<WantParamsWrap>& wantParams, AAFwk::WantParams& reWantParams)
 {
-    Rosen::WSErrorCode transferCode = Rosen::WSErrorCode::WS_ERROR_TRANSFER_DATA_FAILED;
-    auto session = session_.promote();
-    if (session) {
-        sptr<Rosen::ExtensionSession> extensionSession(static_cast<Rosen::ExtensionSession*>(session.GetRefPtr()));
-        auto params = DynamicCast<WantParamsWrapOhos>(wantParams)->GetWantParams();
-        transferCode = extensionSession->TransferComponentDataSync(params, reWantParams);
-    }
-    return transferCode;
+    auto params = DynamicCast<WantParamsWrapOhos>(wantParams)->GetWantParams();
+    return sessionWrapper_ ? sessionWrapper_->SendDataSync(params, reWantParams) : 0;
 }
 
 RefPtr<UIExtensionPattern> UIExtensionProxy::GetPattern() const

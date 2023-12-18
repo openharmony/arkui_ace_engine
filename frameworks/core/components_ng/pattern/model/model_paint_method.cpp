@@ -45,7 +45,6 @@ void ModelPaintMethod::OnPaintFinish()
 
 void ModelPaintMethod::PerformPaint(RSCanvas& canvas, PaintWrapper* paintWrapper)
 {
-    LOGD("MODEL_NG PerformPaint()");
     auto adapter = modelAdapter_.Upgrade();
     CHECK_NULL_VOID(adapter);
     auto paintProperty = DynamicCast<ModelPaintProperty>(paintWrapper->GetPaintProperty());

@@ -171,7 +171,6 @@ common_module_files = [
   "$ace_root/frameworks/core/components/dialog_modal/render_dialog_modal.cpp",
   "$ace_root/frameworks/core/components/flex/render_flex.cpp",
   "$ace_root/frameworks/core/components/bubble/render_bubble.cpp",
-  "$ace_root/frameworks/core/components/test/unittest/mock/mock_flutter_font_manager.cpp",
   "$ace_root/frameworks/core/components/test/unittest/mock/mock_render_node_factory.cpp",
 
   # theme
@@ -183,7 +182,6 @@ common_module_files = [
   "$ace_root/frameworks/core/components/theme/theme_utils.cpp",
 
   # others
-  "$ace_root/frameworks/core/components/common/painter/flutter_svg_painter.cpp",
   "$ace_root/frameworks/core/components/common/properties/alignment.cpp",
   "$ace_root/frameworks/core/components/common/properties/color.cpp",
   "$ace_root/frameworks/core/components/common/properties/edge.cpp",

@@ -21,6 +21,8 @@
 #include "core/components_ng/gestures/gesture_referee.h"
 #include "core/components_ng/gestures/recognizers/gesture_recognizer.h"
 #include "core/components_ng/gestures/recognizers/multi_fingers_recognizer.h"
+#include "core/event/touch_event.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 
@@ -42,7 +44,9 @@ RotationRecognizer::RotationRecognizer(int32_t fingers, double angle) : MultiFin
 
 void RotationRecognizer::OnAccepted()
 {
-    TAG_LOGI(AceLogTag::ACE_GESTURE, "Rotation gesture has been accepted");
+    auto node = GetAttachedNode().Upgrade();
+    TAG_LOGI(AceLogTag::ACE_GESTURE, "Rotation gesture has been accepted, node tag = %{public}s, id = %{public}s",
+        node ? node->GetTag().c_str() : "null", node ? std::to_string(node->GetId()).c_str() : "invalid");
     refereeState_ = RefereeState::SUCCEED;
     SendCallbackMsg(onActionStart_);
 }
@@ -58,8 +62,7 @@ void RotationRecognizer::HandleTouchDownEvent(const TouchEvent& event)
     if (static_cast<int32_t>(activeFingers_.size()) >= DEFAULT_ROTATION_FINGERS) {
         return;
     }
-    TAG_LOGI(AceLogTag::ACE_GESTURE,
-        "Rotation recognizer receives touch down event, begin to detect rotation event");
+    TAG_LOGI(AceLogTag::ACE_GESTURE, "Rotation recognizer receives touch down event, begin to detect rotation event");
     if (fingers_ > MAX_ROTATION_FINGERS) {
         fingers_ = DEFAULT_ROTATION_FINGERS;
     }

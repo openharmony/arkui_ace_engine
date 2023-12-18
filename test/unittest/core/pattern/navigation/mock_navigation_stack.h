@@ -34,6 +34,11 @@ public:
         return mockReplace_->isReplace_;
     }
 
+    bool GetDisableAnimation() const override
+    {
+        return false;
+    }
+
 private:
     MockReplace *mockReplace_ = new MockReplace();
 };

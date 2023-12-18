@@ -212,7 +212,7 @@ void StackElement::PerformPopupChild(PopupComponentInfo& popupComponentInfo)
             PerformDirectPop();
             break;
         default:
-            LOGD("Don't need pop popup component");
+            break;
     }
 }
 
@@ -276,7 +276,6 @@ void StackElement::PerformPopToastById(int32_t toastId)
 
 void StackElement::PerformPopToast()
 {
-    LOGD("PerformPopToast");
     if (!toastStack_.empty()) {
         UpdateChild(toastStack_.back().child, nullptr);
         toastStack_.pop_back();

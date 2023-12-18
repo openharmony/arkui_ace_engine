@@ -1,5 +1,23 @@
+/*
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 /// <reference path='./import.ts' />
 class ArkCheckboxComponent extends ArkComponent implements CheckboxAttribute {
+  constructor(nativePtr: KNode) {
+    super(nativePtr);
+  }
   shape(value: CheckBoxShape): this {
     throw new Error('Method not implemented.');
   }
@@ -40,6 +58,9 @@ class ArkCheckboxComponent extends ArkComponent implements CheckboxAttribute {
 }
 
 class CheckboxMarkModifier extends ModifierWithKey<MarkStyle> {
+  constructor(value: MarkStyle) {
+    super(value);
+  }
   static identity: Symbol = Symbol('checkboxMark');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -59,6 +80,9 @@ class CheckboxMarkModifier extends ModifierWithKey<MarkStyle> {
 }
 
 class CheckboxSelectModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
   static identity: Symbol = Symbol('checkboxSelect');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -75,6 +99,9 @@ class CheckboxSelectModifier extends ModifierWithKey<boolean> {
 }
 
 class CheckboxHeightModifier extends ModifierWithKey<ResourceColor> {
+  constructor(value: ResourceColor) {
+    super(value);
+  }
   static identity: Symbol = Symbol('checkboxHeight');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -91,6 +118,9 @@ class CheckboxHeightModifier extends ModifierWithKey<ResourceColor> {
 }
 
 class CheckboxWidthModifier extends ModifierWithKey<Length> {
+  constructor(value: Length) {
+    super(value);
+  }
   static identity: Symbol = Symbol('checkboxWidth');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -107,6 +137,9 @@ class CheckboxWidthModifier extends ModifierWithKey<Length> {
 }
 
 class CheckboxSelectedColorModifier extends ModifierWithKey<ResourceColor> {
+  constructor(value: ResourceColor) {
+    super(value);
+  }
   static identity: Symbol = Symbol('checkboxSelectedColor');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -123,6 +156,9 @@ class CheckboxSelectedColorModifier extends ModifierWithKey<ResourceColor> {
 }
 
 class CheckboxUnselectedColorModifier extends ModifierWithKey<ResourceColor> {
+  constructor(value: ResourceColor) {
+    super(value);
+  }
   static identity: Symbol = Symbol('checkboxUnselectedColor');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -145,6 +181,6 @@ globalThis.Checkbox.attributeModifier = function (modifier) {
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkCheckboxComponent(nativeNode);
   });
-  modifier.applyNormalAttribute(component);
+  applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
 };

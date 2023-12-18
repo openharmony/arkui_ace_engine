@@ -61,7 +61,6 @@ std::vector<std::string> JsForEachFunction::ExecuteIdentityMapper()
 
 void JsForEachFunction::ExecuteBuilderForIndex(int32_t index)
 {
-    LOGD("ExecuteBuilderForIndex: start, index %{public}d", index);
     // indexed item
     JSRef<JSArray> jsArray = JSRef<JSArray>::Cast(jsThis_.Lock());
     JSRef<JSVal> params[2];

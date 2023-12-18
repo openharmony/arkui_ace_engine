@@ -73,6 +73,7 @@ struct AnimationCallbackInfo {
 };
 
 using AnimationStartEvent = std::function<void(int32_t index, int32_t targetIndex, const AnimationCallbackInfo& info)>;
+using AnimationStartEventPtr = std::shared_ptr<AnimationStartEvent>;
 using AnimationEndEvent = std::function<void(int32_t index, const AnimationCallbackInfo& info)>;
 using AnimationEndEventPtr = std::shared_ptr<AnimationEndEvent>;
 using GestureSwipeEvent = std::function<void(int32_t index, const AnimationCallbackInfo& info)>;

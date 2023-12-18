@@ -23,7 +23,6 @@ namespace OHOS::Ace {
 
 Color ColorCreator::CreateFromJson(const JsonValue& componentJson)
 {
-    LOGD("CreateFromJson color");
     std::string classType = componentJson.GetValue(CLASS_NAME)->GetString();
     if (classType != COLOR_NAME) {
         LOGE("Create color err: not a color json.");

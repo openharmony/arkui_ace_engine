@@ -28,6 +28,7 @@ const TITLE_ROW_HEIGHT: string = '37vp'
 @Component
 struct Index {
   @State appLabel: string = '';
+  @State appTitle: string = '';
   @State appLabelColor: Color = 0xff000000;
   @State appIcon: LayeredDrawableDescriptor = new LayeredDrawableDescriptor();
   @State pixelMap：image.PixelMap = undefined;
@@ -59,7 +60,7 @@ struct Index {
   }
 
   setAppTitle(content: string ) {
-    this.appLabel = content;
+    this.appTitle = content;
   }
 
   setAppIcon(pixelMap: image.PixelMap) {
@@ -76,7 +77,7 @@ struct Index {
         .focusable(false)
         .margin({ left: TITLE_PADDING_START, right: TITLE_ELEMENT_MARGIN_HORIZONTAL })
 
-      Text(this.appLabel)
+      Text(this.appTitle ? this.appTitle : this.appLabel)
         .id("enhanceAppLabel")
         .fontSize(TITLE_TEXT_FONT_SIZE)
         .fontColor(this.appLabelColor)

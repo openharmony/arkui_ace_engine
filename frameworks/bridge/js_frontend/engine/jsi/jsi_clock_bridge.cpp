@@ -99,11 +99,7 @@ void JsiClockBridge::ParseClockConfig(const shared_ptr<JsRuntime>& runtime, cons
                 BinarySearchFindIndex(clockConfigOperators, ArraySize(clockConfigOperators), keyStr.c_str());
             if (operatorIter != -1) {
                 clockConfigOperators[operatorIter].value(valStr, *this);
-            } else {
-                LOGD("key : %{public}s unsupported. Ignoring!", keyStr.c_str());
             }
-        } else {
-            LOGD("value of unsupported type. Ignoring!");
         }
     }
 }

@@ -127,6 +127,7 @@ public:
     static void OnAudioStateChanged(const JSCallbackInfo& args);
     static void MediaOptions(const JSCallbackInfo& args);
     static void OnFirstContentfulPaint(const JSCallbackInfo& args);
+    static void OnNavigationEntryCommitted(const JSCallbackInfo& args);
     static void OnControllerAttached(const JSCallbackInfo& args);
     static void OnOverScroll(const JSCallbackInfo& args);
     static void SetLayoutMode(int32_t layoutMode);
@@ -136,9 +137,11 @@ public:
     // Enable or disable debugging of web content
     static bool webDebuggingAccess_;
     static JSwebEventCallback OnControllerAttachedCallback_;
+    static void CopyOption(int32_t copyOption);
 
 protected:
     static void OnCommonDialog(const JSCallbackInfo& args, int dialogEventType);
+    static void ParseRawfileWebSrc(const JSRef<JSVal>& srcValue, std::string& webSrc);
 };
 } // namespace OHOS::Ace::Framework
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_WEB_H

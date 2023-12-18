@@ -85,6 +85,14 @@ public:
     MOCK_METHOD1(CloseModalUIExtension, void(int32_t sessionId));
     MOCK_METHOD1(SetParentToken, void(sptr<IRemoteObject> token));
     MOCK_METHOD0(GetParentToken, sptr<IRemoteObject>());
+
+    MOCK_METHOD2(SetContainerModalTitleVisible, void(bool customTitleSettedShow, bool floatingTitleSettedShow));
+    MOCK_METHOD1(SetContainerModalTitleHeight, void(int height));
+    MOCK_METHOD0(GetContainerModalTitleHeight, int());
+    MOCK_METHOD2(GetContainerModalButtonsRect, bool(Rosen::Rect& containerModal, Rosen::Rect& buttons));
+    MOCK_METHOD1(SubscribeContainerModalButtonsRectChange, void(
+        std::function<void(Rosen::Rect& containerModal, Rosen::Rect& buttons)>&& callback));
+
 #ifndef PREVIEW
     MOCK_METHOD4(
         SearchElementInfoByAccessibilityId, void(int32_t elementId,

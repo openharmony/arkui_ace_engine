@@ -26,7 +26,6 @@ namespace OHOS::Ace {
 
 RefPtr<Component> DialogCreator::CreateFromJson(const JsonValue& componentJson, const JsonComponentFactory& factory)
 {
-    LOGD("CreateFromJson dialog");
     std::string classType = componentJson.GetValue(CLASS_NAME)->GetString();
     if (classType != DIALOG_NAME) {
         LOGE("Create DialogComponent err: not a dialog json.");

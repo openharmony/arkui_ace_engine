@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 /// <reference path='./import.ts' />
 
 class ArkBorderStyle implements Equable {
@@ -478,16 +479,16 @@ class ArkListEdgeEffect implements Equable {
   }
 }
 
-class ArkListNestedScrollOptions implements Equable {
-  scrollForward: number;
-  scrollBackward: number;
+class ArkScrollEdgeEffect implements Equable {
+  value: EdgeEffect;
+  options?: EdgeEffectOptions | undefined;
   constructor() {
-    this.scrollForward = undefined;
-    this.scrollBackward = undefined;
+    this.value = undefined;
+    this.options = undefined;
   }
-  isEqual(another: ArkListNestedScrollOptions): boolean {
-    return (this.scrollForward === another.scrollForward &&
-      this.scrollBackward === another.scrollBackward)
+  isEqual(another: ArkScrollEdgeEffect): boolean {
+    return (this.value === another.value) &&
+      (this.options === another.options);
   }
 }
 
@@ -731,7 +732,7 @@ class ArkBorder implements Equable {
       this.arkStyle.isEqual(another.arkStyle)
     );
   }
-  
+
   checkObjectDiff(another: ArkBorder): boolean {
     return !this.isEqual(another);
   }
@@ -1430,6 +1431,41 @@ class ArkResourceColor {
   }
 }
 
+class ArkNestedScrollOptions {
+  scrollForward: NestedScrollMode | undefined;
+  scrollBackward: NestedScrollMode | undefined;
+  constructor() {
+    this.scrollForward = undefined;
+    this.scrollBackward = undefined;
+  }
+  isEqual(another: ArkNestedScrollOptions): boolean {
+    return ((this.scrollForward === another.scrollForward) && (this.scrollBackward === another.scrollBackward));
+  }
+}
+
+class ArkConstraintSizeOptions {
+  minWidth?: Length | undefined;
+  maxWidth?: Length | undefined;
+  minHeight?: Length | undefined;
+  maxHeight?: Length | undefined;
+
+  constructor() {
+    this.minWidth = undefined;
+    this.maxWidth = undefined;
+    this.minHeight = undefined;
+    this.maxHeight = undefined;
+  }
+
+  isEqual(another: ArkConstraintSizeOptions): boolean {
+    return (
+      this.minWidth === another.minWidth &&
+      this.maxWidth === another.maxWidth &&
+      this.minHeight === another.minHeight &&
+      this.maxHeight === another.maxHeight
+    );
+  }
+}
+
 class ArkTextAreaShowCounter implements Equable {
   value: boolean;
   options?: any;
@@ -1440,6 +1476,138 @@ class ArkTextAreaShowCounter implements Equable {
   isEqual(another: ArkTextAreaShowCounter): boolean {
     return (this.value === another.value) &&
       (this.options === another.options);
+  }
+}
+
+class ArkDotIndicator extends DotIndicator {
+  type: string | undefined;
+  leftValue: Length | undefined;
+  topValue: Length | undefined;
+  rightValue: Length | undefined;
+  bottomValue: Length | undefined;
+  itemWidthValue: Length | undefined;
+  itemHeightValue: Length | undefined;
+  selectedItemWidthValue: Length | undefined;
+  selectedItemHeightValue: Length | undefined;
+  maskValue: boolean | undefined;
+  colorValue: ResourceColor | undefined;
+  selectedColorValue: ResourceColor | undefined;
+
+  constructor() {
+    super();
+    this.type = undefined;
+    this.leftValue = undefined;
+    this.topValue = undefined;
+    this.rightValue = undefined;
+    this.bottomValue = undefined;
+    this.itemWidthValue = undefined;
+    this.itemHeightValue = undefined;
+    this.selectedItemWidthValue = undefined;
+    this.selectedItemHeightValue = undefined;
+    this.maskValue = undefined;
+    this.colorValue = undefined;
+    this.selectedColorValue = undefined;
+  }
+
+  isEqual(another: ArkDotIndicator): boolean {
+    return (
+      this.type === another.type &&
+      this.leftValue === another.leftValue &&
+      this.topValue === another.topValue &&
+      this.rightValue === another.rightValue &&
+      this.bottomValue === another.bottomValue &&
+      this.itemWidthValue === another.itemWidthValue &&
+      this.itemHeightValue === another.itemHeightValue &&
+      this.selectedItemWidthValue === another.selectedItemWidthValue &&
+      this.selectedItemHeightValue === another.selectedItemHeightValue &&
+      this.maskValue === another.maskValue &&
+      this.colorValue === another.colorValue &&
+      this.selectedColorValue === another.selectedColorValue
+    );
+  }
+}
+
+class ArkDigitIndicator extends DigitIndicator {
+  type: string | undefined;
+  leftValue: Length | undefined;
+  topValue: Length | undefined;
+  rightValue: Length | undefined;
+  bottomValue: Length | undefined;
+  fontColorValue: ResourceColor | undefined;
+  selectedFontColorValue: ResourceColor | undefined;
+  digitFontValue: ArkDigitFont | undefined;
+  selectedDigitFontValue: ArkDigitFont | undefined;
+
+  constructor() {
+    super();
+    this.type = undefined;
+    this.leftValue = undefined;
+    this.topValue = undefined;
+    this.rightValue = undefined;
+    this.bottomValue = undefined;
+    this.fontColorValue = undefined;
+    this.selectedFontColorValue = undefined;
+    this.digitFontValue = undefined;
+    this.selectedDigitFontValue = undefined;
+  }
+
+  isEqual(another: ArkDigitIndicator): boolean {
+    return (
+      this.type === another.type &&
+      this.leftValue === another.leftValue &&
+      this.topValue === another.topValue &&
+      this.rightValue === another.rightValue &&
+      this.bottomValue === another.bottomValue &&
+      this.digitFontValue === another.digitFontValue &&
+      this.selectedDigitFontValue === another.selectedDigitFontValue
+    );
+  }
+}
+
+class ArkDigitFont {
+  size: Length | undefined;
+  weight: number | FontWeight | string | undefined;
+
+  constructor() {
+    this.size = undefined;
+    this.weight = undefined;
+  }
+
+  isEqual(another: ArkDigitFont): boolean {
+    return this.size === another.size && this.weight === another.weight;
+  }
+
+  parseFontWeight(value: string | number | undefined) {
+    const valueWeightMap = {
+      [0]: 'lighter',
+      [1]: 'normal',
+      [2]: 'regular',
+      [3]: 'medium',
+      [4]: 'bold',
+      [5]: 'bolder'
+    };
+    if (isUndefined(value)) {
+      this.weight = '-';
+    } else if (value in valueWeightMap) {
+      this.weight = valueWeightMap[value];
+    } else {
+      this.weight = value.toString();
+    }
+    return this.weight;
+  }
+}
+
+class ArkDisplayArrow {
+  value: boolean | ArrowStyle;
+  isHoverShow: boolean | undefined;
+
+  constructor() {
+    this.value = undefined;
+    this.isHoverShow = undefined;
+  }
+
+  isEqual(another: ArkDisplayArrow): boolean {
+    return this.value === another.value && this.isHoverShow === another.isHoverShow;
   }
 }
 
@@ -1476,9 +1644,9 @@ class ArkMesh {
 }
 
 class ArkLanesOpt {
-  lanesNum: number;
-  minLength: Length;
-  maxLength: Length;
+  lanesNum: number | undefined;
+  minLength: Length | undefined;
+  maxLength: Length | undefined;
   gutter?: undefined;
   constructor() {
     this.lanesNum = undefined;
@@ -1490,5 +1658,24 @@ class ArkLanesOpt {
   isEqual(another: ArkLanesOpt): boolean {
     return (this.lanesNum === another.lanesNum && this.minLength === another.minLength
       && this.maxLength === another.maxLength && this.gutter === another.gutter);
+  }
+}
+
+class ArkScrollSnapOptions {
+  snapAlign: ScrollSnapAlign;
+  snapPagination: Dimension | Array<Dimension>;
+  enableSnapToStart: boolean;
+  enableSnapToEnd: boolean;
+  constructor() {
+    this.snapAlign = undefined;
+    this.snapPagination = undefined;
+    this.enableSnapToStart = undefined;
+    this.enableSnapToEnd = undefined;
+  }
+  isEqual(another: ArkScrollSnapOptions): boolean {
+    return ((this.snapAlign === another.snapAlign)
+      && (this.snapPagination === another.snapPagination)
+      && (this.enableSnapToStart === another.enableSnapToStart)
+      && (this.enableSnapToEnd === another.enableSnapToEnd));
   }
 }

@@ -16,6 +16,9 @@
 /// <reference path="./import.ts" />
 /// <reference path="./ArkCommonShape.ts" />
 class RectRadiusWidthModifier extends ModifierWithKey<string | number> {
+  constructor(value: string | number) {
+    super(value);
+  }
   static identity: Symbol = Symbol('rectRadiusWidth');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -26,6 +29,9 @@ class RectRadiusWidthModifier extends ModifierWithKey<string | number> {
   }
 }
 class RectRadiusHeightModifier extends ModifierWithKey<string | number> {
+  constructor(value: string | number) {
+    super(value);
+  }
   static identity: Symbol = Symbol('rectRadiusHeight');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -36,6 +42,9 @@ class RectRadiusHeightModifier extends ModifierWithKey<string | number> {
   }
 }
 class RectRadiusModifier extends ModifierWithKey<string | number | Array<any>> {
+  constructor(value: string | number | Array<any>) {
+    super(value);
+  }
   static identity: Symbol = Symbol('rectRadius');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -50,6 +59,9 @@ class RectRadiusModifier extends ModifierWithKey<string | number | Array<any>> {
   }
 }
 class ArkRectComponent extends ArkCommonShapeComponent implements RectAttribute {
+  constructor(nativePtr: KNode) {
+    super(nativePtr);
+  }
   radiusWidth(value: string | number): this {
     modifierWithKey(this._modifiersWithKeys, RectRadiusWidthModifier.identity, RectRadiusWidthModifier, value);
     return this;
@@ -71,6 +83,6 @@ globalThis.Rect.attributeModifier = function (modifier) {
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkRectComponent(nativeNode);
   });
-  modifier.applyNormalAttribute(component);
+  applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
 }

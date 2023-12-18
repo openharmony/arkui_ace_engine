@@ -46,11 +46,11 @@ void ResetShowTips(NodeHandle node)
     SliderModelNG::SetShowTips(frameNode, DEFAULT_SHOW_TIPS, content);
 }
 
-void SetSliderStepSize(NodeHandle node, const float value, const int unit)
+void SetSliderStepSize(NodeHandle node, double value, int unit)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    Dimension size = Dimension(value, static_cast<DimensionUnit>(unit));
+    Dimension size = Dimension(value, static_cast<OHOS::Ace::DimensionUnit>(unit));
     SliderModelNG::SetStepSize(frameNode, size);
 }
 
@@ -68,12 +68,12 @@ void ResetSliderStepSize(NodeHandle node)
     SliderModelNG::SetStepSize(frameNode, stepSize);
 }
 
-void SetBlockSize(NodeHandle node, float widthVal, int widthUnit, float heightVal, int heightUnit)
+void SetBlockSize(NodeHandle node, double widthVal, int widthUnit, double heightVal, int heightUnit)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    Dimension blockWidth = Dimension(widthVal, static_cast<DimensionUnit>(widthUnit));
-    Dimension blockHeight = Dimension(heightVal, static_cast<DimensionUnit>(heightUnit));
+    Dimension blockWidth = Dimension(widthVal, static_cast<OHOS::Ace::DimensionUnit>(widthUnit));
+    Dimension blockHeight = Dimension(heightVal, static_cast<OHOS::Ace::DimensionUnit>(heightUnit));
 
     if (LessNotEqual(blockWidth.Value(), 0.0)) {
         blockWidth.SetValue(0.0);
@@ -92,11 +92,11 @@ void ResetBlockSize(NodeHandle node)
     SliderModelNG::ResetBlockSize(frameNode);
 }
 
-void SetTrackBorderRadius(NodeHandle node, const float value, const int unit)
+void SetTrackBorderRadius(NodeHandle node, double value, int unit)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    Dimension radius = Dimension(value, static_cast<DimensionUnit>(unit));
+    Dimension radius = Dimension(value, static_cast<OHOS::Ace::DimensionUnit>(unit));
     SliderModelNG::SetTrackBorderRadius(frameNode, radius);
 }
 
@@ -135,11 +135,11 @@ void ResetBlockBorderColor(NodeHandle node)
     SliderModelNG::ResetBlockBorderColor(frameNode);
 }
 
-void SetBlockBorderWidth(NodeHandle node, const float value, const int unit)
+void SetBlockBorderWidth(NodeHandle node, double value, int unit)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    Dimension width = Dimension(value, static_cast<DimensionUnit>(unit));
+    Dimension width = Dimension(value, static_cast<OHOS::Ace::DimensionUnit>(unit));
     SliderModelNG::SetBlockBorderWidth(frameNode, width);
 }
 
@@ -221,11 +221,11 @@ void ResetShowSteps(NodeHandle node)
     SliderModelNG::SetShowSteps(frameNode, DEFAULT_SHOW_STEPS);
 }
 
-void SetThickness(NodeHandle node, const float value, const int unit)
+void SetThickness(NodeHandle node, double value, int unit)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    Dimension thickness = Dimension(value, static_cast<DimensionUnit>(unit));
+    Dimension thickness = Dimension(value, static_cast<OHOS::Ace::DimensionUnit>(unit));
     SliderModelNG::SetThickness(frameNode, thickness);
 }
 

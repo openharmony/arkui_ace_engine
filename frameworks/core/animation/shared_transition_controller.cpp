@@ -29,7 +29,6 @@ RefPtr<SharedTransitionEffect> GetSharedEffect(const ShareId& shareId, const Wea
     auto dest = destWeak.Upgrade();
     auto src = srcWeak.Upgrade();
     if ((!src) && (!dest)) {
-        LOGD("No Shared element found. share id: %{public}s", shareId.c_str());
         return nullptr;
     }
     RefPtr<SharedTransitionEffect> effect = dest ? dest->GetEffect() : nullptr;
@@ -61,7 +60,6 @@ void SharedTransitionController::RegisterTransitionListener()
     pipelineContext->AddPageTransitionListener(
         [weak](const TransitionEvent& event, const WeakPtr<PageElement>& in, const WeakPtr<PageElement>& out) {
             if ((event != TransitionEvent::POP_START) && (event != TransitionEvent::PUSH_START)) {
-                LOGD("handle event: %{public}d failed. unknown event.", event);
                 return;
             }
             auto controller = weak.Upgrade();
@@ -82,7 +80,6 @@ void SharedTransitionController::RegisterTransitionListener()
                 controller->pageSrc_ = in;
             }
             controller->event_ = event;
-            LOGD("Add shared transition controller to pipeline. event: %{public}d.", event);
 
             // when page pushed in, new pushed page's layout parameters is valid after perform layout.
             // And shared transition needs new pushed page's layout parameters.
@@ -121,7 +118,6 @@ void SharedTransitionController::KickoffSharedTransition(TransitionEvent event, 
 {
     auto pageDest = pageDest_.Upgrade();
     if (!pageDest) {
-        LOGD("Kickoff shared transition failed. page dest is null. event: %{public}d", event);
         return;
     }
     auto destTransition = PageTransitionElement::GetTransitionElement(pageDest);
@@ -132,7 +128,6 @@ void SharedTransitionController::KickoffSharedTransition(TransitionEvent event, 
     }
     hasSharedTransition_ = PrepareTransition(overlay);
     if (!hasSharedTransition_) {
-        LOGD("No shared elements found. event: %{public}d. dest page id: %{public}d", event_, pageId);
         return;
     }
 
@@ -200,11 +195,8 @@ bool SharedTransitionController::PrepareTransition(RefPtr<OverlayElement> overla
     auto pageDest = pageDest_.Upgrade();
     auto pageSrc = pageSrc_.Upgrade();
     if ((!pageSrc) || (!pageDest)) {
-        LOGD("Prepare shared transition failed. page src / dest is null. event: %{public}d", event_);
         return false;
     }
-    LOGD("Kickoff shared transition. event: %{public}d. src page id: %{public}d, dest page id: %{public}d", event_,
-        pageSrc->GetPageId(), pageDest->GetPageId());
     const auto& srcMap = pageSrc->GetSharedTransitionMap();
     const auto& destMap = pageDest->GetSharedTransitionMap();
     bool hasShared = false;
@@ -218,13 +210,11 @@ bool SharedTransitionController::PrepareTransition(RefPtr<OverlayElement> overla
         auto srcSharedIter = srcMap.find(shareId);
         WeakPtr<SharedTransitionElement> srcWeak;
         if (srcSharedIter == srcMap.end()) {
-            LOGD("Shared src not found, maybe the effect do not need it. share id: %{public}s", shareId.c_str());
         } else {
             srcWeak = srcSharedIter->second;
         }
         RefPtr<SharedTransitionEffect> effect = GetSharedEffect(shareId, destWeak, srcWeak);
         if (!effect) {
-            LOGD("Shared effect is null, maybe no shared element at all. share id: %{public}s", shareId.c_str());
             continue;
         }
         if (preCheck) {
@@ -274,11 +264,6 @@ bool SharedTransitionController::PrepareTransition(RefPtr<OverlayElement> overla
         // anchor effects only available when other effects are available
         hasShared = CheckAndCreateTransition(anchorEffects, overlay) || hasShared;
     }
-
-    if (!hasShared) {
-        LOGD("No shared elements found. event: %{public}d. Shared size: dest: %{public}zu, src: %{public}zu", event_,
-            destMap.size(), srcMap.size());
-    }
     return hasShared;
 }
 
@@ -301,8 +286,6 @@ bool SharedTransitionController::PrepareEachTransition(
         LOGE("Apply animation failed. event: %{public}d, share id: %{public}s", event_, shareId.c_str());
         return false;
     }
-    LOGD("Prepare Shared Transition. event: %{public}d, share id: %{public}s", event_, shareId.c_str());
-
     auto animator = effect->GetAnimator();
     if (!animator) {
         LOGE("GetAnimator failed. event: %{public}d, share id: %{public}s", event_, shareId.c_str());

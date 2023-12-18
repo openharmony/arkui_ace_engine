@@ -45,7 +45,7 @@ ArkUINativeModuleValue DatePickerBridge::SetSelectedTextStyle(ArkUIRuntimeCallIn
 
     CalcDimension fontSizeData;
     std::string fontSize;
-    if (!ArkTSUtils::ParseJsDimensionFp(vm, fontSizeArgs, fontSizeData) ||
+    if (!ArkTSUtils::ParseJsDimensionFp(vm, fontSizeArgs, fontSizeData, true, false) ||
         fontSizeData.Unit() == DimensionUnit::PERCENT) {
         fontSizeData = Dimension(-1);
     }
@@ -56,10 +56,9 @@ ArkUINativeModuleValue DatePickerBridge::SetSelectedTextStyle(ArkUIRuntimeCallIn
         weight = fontWeightArgs->ToString(vm)->ToString();
     }
 
-    std::string fontFamily = DEFAULT_FAMILY;
-    std::vector<std::string> fontFamilies;
-    if (ArkTSUtils::ParseJsFontFamilies(vm, fontFamilyArgs, fontFamilies)) {
-        fontFamily = fontFamilyArgs->ToString(vm)->ToString();
+    std::string fontFamily;
+    if (!ArkTSUtils::ParseJsFontFamiliesToString(vm, fontFamilyArgs, fontFamily) || fontFamily.empty()) {
+        fontFamily = DEFAULT_FAMILY;
     }
     int32_t fontStyle = 0;
     if (fontStyleArgs->IsNumber()) {
@@ -104,7 +103,7 @@ ArkUINativeModuleValue DatePickerBridge::SetTextStyle(ArkUIRuntimeCallInfo* runt
     }
     CalcDimension fontSizeData;
     std::string fontSize;
-    if (!ArkTSUtils::ParseJsDimensionFp(vm, fontSizeArgs, fontSizeData) ||
+    if (!ArkTSUtils::ParseJsDimensionFp(vm, fontSizeArgs, fontSizeData, true, false) ||
         fontSizeData.Unit() == DimensionUnit::PERCENT) {
         fontSizeData = Dimension(-1);
     }
@@ -115,10 +114,9 @@ ArkUINativeModuleValue DatePickerBridge::SetTextStyle(ArkUIRuntimeCallInfo* runt
         weight = fontWeightArgs->ToString(vm)->ToString();
     }
 
-    std::string fontFamily = DEFAULT_FAMILY;
-    std::vector<std::string> fontFamilies;
-    if (ArkTSUtils::ParseJsFontFamilies(vm, fontFamilyArgs, fontFamilies)) {
-        fontFamily = fontFamilyArgs->ToString(vm)->ToString();
+    std::string fontFamily;
+    if (!ArkTSUtils::ParseJsFontFamiliesToString(vm, fontFamilyArgs, fontFamily) || fontFamily.empty()) {
+        fontFamily = DEFAULT_FAMILY;
     }
     int32_t fontStyle = 0;
     if (fontStyleArgs->IsNumber()) {
@@ -163,7 +161,7 @@ ArkUINativeModuleValue DatePickerBridge::SetDisappearTextStyle(ArkUIRuntimeCallI
     }
     CalcDimension fontSizeData;
     std::string fontSize;
-    if (!ArkTSUtils::ParseJsDimensionFp(vm, fontSizeArgs, fontSizeData) ||
+    if (!ArkTSUtils::ParseJsDimensionFp(vm, fontSizeArgs, fontSizeData, true, false) ||
         fontSizeData.Unit() == DimensionUnit::PERCENT) {
         fontSizeData = Dimension(-1);
     }
@@ -174,10 +172,9 @@ ArkUINativeModuleValue DatePickerBridge::SetDisappearTextStyle(ArkUIRuntimeCallI
         weight = fontWeightArgs->ToString(vm)->ToString();
     }
 
-    std::string fontFamily = DEFAULT_FAMILY;
-    std::vector<std::string> fontFamilies;
-    if (ArkTSUtils::ParseJsFontFamilies(vm, fontFamilyArgs, fontFamilies)) {
-        fontFamily = fontFamilyArgs->ToString(vm)->ToString();
+    std::string fontFamily;
+    if (!ArkTSUtils::ParseJsFontFamiliesToString(vm, fontFamilyArgs, fontFamily) || fontFamily.empty()) {
+        fontFamily = DEFAULT_FAMILY;
     }
     int32_t fontStyle = 0;
     if (fontStyleArgs->IsNumber()) {

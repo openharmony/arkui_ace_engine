@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/texttimer/text_timer_model_ng.h"
 
+#include "core/components/common/properties/text_style.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
@@ -98,4 +99,38 @@ void TextTimerModelNG::SetOnTimer(std::function<void(const std::string, const st
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnTimer(std::move(onChange));
 }
+
+void TextTimerModelNG::SetFontColor(FrameNode* frameNode, const Color& value)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextTimerLayoutProperty, TextColor, value, frameNode);
+    ACE_UPDATE_NODE_RENDER_CONTEXT(ForegroundColor, value, frameNode);
+    ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, ForegroundColorStrategy, frameNode);
+    ACE_UPDATE_NODE_RENDER_CONTEXT(ForegroundColorFlag, true, frameNode);
+}
+
+void TextTimerModelNG::SetFontSize(FrameNode* frameNode, const Dimension& value)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextTimerLayoutProperty, FontSize, value, frameNode);
+}
+
+void TextTimerModelNG::SetFontStyle(FrameNode* frameNode, Ace::FontStyle value)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextTimerLayoutProperty, ItalicFontStyle, value, frameNode);
+}
+
+void TextTimerModelNG::SetFontWeight(FrameNode* frameNode, FontWeight value)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextTimerLayoutProperty, FontWeight, value, frameNode);
+}
+
+void TextTimerModelNG::SetFontFamily(FrameNode* frameNode, const std::vector<std::string>& value)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextTimerLayoutProperty, FontFamily, value, frameNode);
+}
+
+void TextTimerModelNG::SetFormat(FrameNode* frameNode, const std::string& format)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextTimerLayoutProperty, Format, format, frameNode);
+}
+
 } // namespace OHOS::Ace::NG

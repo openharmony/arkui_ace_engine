@@ -55,7 +55,7 @@ std::shared_ptr<NavDestinationInfo> UIObserverHandler::GetNavigationState(const 
     CHECK_NULL_RETURN(node, nullptr);
     auto current = AceType::DynamicCast<UINode>(node);
     while (current) {
-        if (current->GetTag() == V2::NAVDESTINATION_CONTENT_ETS_TAG) {
+        if (current->GetTag() == V2::NAVDESTINATION_VIEW_ETS_TAG) {
             break;
         }
         current = current->GetParent();

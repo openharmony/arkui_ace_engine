@@ -15,7 +15,6 @@
 
 #include "core/components/image/rosen_render_image.h"
 
-#include "flutter/common/task_runners.h"
 #include "render_service_client/core/ui/rs_node.h"
 #ifndef USE_ROSEN_DRAWING
 #include "include/core/SkClipOp.h"
@@ -926,8 +925,6 @@ void RosenRenderImage::CanvasDrawImageRect(
     canvas->DrawImageRect(*rsImage->GetImage(), srcRect, dstRect, options_);
     canvas->DetachBrush();
 #endif
-    LOGD("dstRect params: %{public}s", realDstRect.ToString().c_str());
-    LOGD("scaledSrcRect params: %{public}s", scaledSrcRect.ToString().c_str());
 }
 
 #ifndef USE_ROSEN_DRAWING

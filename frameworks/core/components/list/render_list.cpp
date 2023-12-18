@@ -415,7 +415,6 @@ RefPtr<RenderNode> RenderList::GetChildByIndex(int32_t index)
         return item->second;
     }
 
-    LOGD("build succ but get child failed, index: %{public}d", index);
     return nullptr;
 }
 
@@ -454,7 +453,6 @@ bool RenderList::RecycleByItems(const std::vector<int32_t>& needRemoveItems)
 
 bool RenderList::RecycleByRange(int32_t from, int32_t to)
 {
-    LOGD("RecycleChild: fromIndex: %{public}d, toIndex: %{public}d", from, to);
     if (!recycleByRange_ || from < 0 || from > to) {
         return false;
     }
@@ -464,7 +462,6 @@ bool RenderList::RecycleByRange(int32_t from, int32_t to)
         for (int32_t i = from; i <= to; i++) {
             auto iter = items_.find(i);
             if (iter != items_.end()) {
-                LOGD("Recycle index %{public}d success", i);
                 ResetGroupItem(iter->second);
                 items_.erase(iter);
                 recycleResult = true;
@@ -571,7 +568,6 @@ void RenderList::CalculateStickyItem(const Offset& position)
     }
 
     if (newStickyIndex != currentStickyIndex) {
-        LOGD("Sticky index change from %{public}d to %{public}d", currentStickyIndex, newStickyIndex);
         if (listItem) {
             listItem->HandleStickyEvent(false);
         }
@@ -763,8 +759,6 @@ void RenderList::NotifyDragStart(double startPosition)
     auto render = RenderListItem::GetRenderListItem(GetNearChildByPosition(position));
     if (render) {
         dragStartIndexPending_ = render->GetIndex();
-        LOGD("DragStart. startPosition: %{public}.1f, position: %{public}.1f, index: %{public}d", startPosition,
-            position, render->GetIndex());
     } else {
         LOGE("DragStart Mismatch. position: %{public}.1f, scrollPosition: %{public}.1f", position, scrollPosition);
     }
@@ -773,7 +767,6 @@ void RenderList::NotifyDragStart(double startPosition)
 // notify drag offset in global main axis
 void RenderList::NotifyDragUpdate(double dragOffset)
 {
-    LOGD("NotifyDragUpdate. dragOffset: %{public}.1lf.", dragOffset);
     currentDelta_ = dragOffset;
 }
 
@@ -783,7 +776,6 @@ void RenderList::NotifyScrollOver(double velocity, bool isCrashTop, bool isCrash
         return;
     }
     if (NearZero(velocity)) {
-        LOGD("velocity is zero, no need to handle in chain animation.");
         return;
     }
     // when scroll over head/tail, control node needs to switch to head/tail node.
@@ -794,7 +786,6 @@ void RenderList::NotifyScrollOver(double velocity, bool isCrashTop, bool isCrash
     } else {
         LOGW("ScrollOver but neither top nor bottom crashed. velocity: %{public}f", velocity);
     }
-    LOGD("NotifyScrollOver. velocity: %{public}.1lf, dragStartIndex_: %{public}d", velocity, dragStartIndexPending_);
 }
 
 void RenderList::SetOnRotateCallback(const RefPtr<ListComponent>& component)

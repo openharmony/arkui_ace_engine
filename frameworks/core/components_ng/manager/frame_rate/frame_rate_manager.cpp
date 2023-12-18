@@ -49,6 +49,19 @@ void FrameRateManager::UpdateNodeRate(int32_t nodeId, int32_t rate)
     }
 }
 
+void FrameRateManager::SetDisplaySyncRate(int32_t displaySyncRate)
+{
+    if (displaySyncRate_ != displaySyncRate) {
+        displaySyncRate_ = displaySyncRate;
+        isRateChanged_ = true;
+    }
+}
+
+int32_t FrameRateManager::GetDisplaySyncRate() const
+{
+    return displaySyncRate_;
+}
+
 int32_t FrameRateManager::GetExpectedRate()
 {
     int32_t expectedRate = 0;
@@ -57,6 +70,7 @@ int32_t FrameRateManager::GetExpectedRate()
             nodeRateMap_.begin(), nodeRateMap_.end(), [](auto a, auto b) { return a.second < b.second; });
         expectedRate = maxIter->second;
     }
+    expectedRate = std::max(expectedRate, displaySyncRate_);
     return expectedRate;
 }
 } // namespace OHOS::Ace::NG

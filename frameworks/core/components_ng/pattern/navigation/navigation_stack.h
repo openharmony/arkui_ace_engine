@@ -88,6 +88,16 @@ public:
         return preNavPathList_.back();
     }
 
+    NavPathList GetAllCacheNodes();
+    void AddCacheNode(const std::string& name, const RefPtr<UINode>& navDestinationNode);
+    RefPtr<UINode> GetFromCacheNode(NavPathList& cacheNodes, const std::string& name);
+    RefPtr<UINode> GetFromCacheNode(const std::string& name);
+    std::optional<std::pair<std::string, RefPtr<UINode>>> GetFromCacheNode(int32_t handle);
+    void RemoveCacheNode(
+        NavPathList& cacheNodes, const std::string& name, const RefPtr<UINode>& navDestinationNode);
+    void RemoveCacheNode(int32_t handle);
+    void ReOrderCache(const std::string& name, const RefPtr<UINode>& navDestinationNode);
+
     void Remove();
     void Remove(const std::string& name);
     void Remove(const std::string& name, const RefPtr<UINode>& navDestinationNode);
@@ -114,6 +124,15 @@ public:
     virtual int32_t GetReplaceValue() const;
     virtual RefPtr<UINode> CreateNodeByIndex(int32_t index);
     virtual RefPtr<UINode> CreateNodeByRouteInfo(const RefPtr<RouteInfo>& routeInfo);
+    virtual bool GetDisableAnimation() const
+    {
+        return false;
+    }
+    virtual bool GetAnimatedValue() const
+    {
+        return true;
+    }
+    virtual void UpdateAnimatedValue(bool animated) {}
     int32_t FindIndex(const std::string& name, const RefPtr<UINode>& navDestinationNode, bool isNavPathList);
     virtual std::string GetRouteParam() const
     {
@@ -130,6 +149,7 @@ private:
     NavPathList navPathList_;
     // prev backup NavPathList
     NavPathList preNavPathList_;
+    NavPathList cacheNodes_;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_NAVIGATION_NAVIGATION_STACK_H

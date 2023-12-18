@@ -66,6 +66,9 @@ public:
     void Clear() override;
     int32_t GetReplaceValue() const override;
     void UpdateReplaceValue(int32_t isReplace) const override;
+    bool GetAnimatedValue() const override;
+    void UpdateAnimatedValue(bool animated) override;
+    bool GetDisableAnimation() const override;
     std::vector<std::string> GetAllPathName() override;
     RefPtr<NG::UINode> CreateNodeByIndex(int32_t index) override;
     RefPtr<NG::UINode> CreateNodeByRouteInfo(const RefPtr<NG::RouteInfo>& routeInfo) override;

@@ -106,7 +106,6 @@ cl_program ImageCompressor::LoadShaderBin(cl_context context, cl_device_id devic
     if (err) {
         return nullptr;
     }
-    LOGD("load cl shader");
     return p;
 }
 
@@ -309,8 +308,6 @@ void ImageCompressor::WriteToFile(std::string srcKey, std::shared_ptr<RSData> co
             header.zsize[0] = 1;
             header.zsize[1] = 0;
             header.zsize[2] = 0;
-            LOGD("astc write file %{public}s size(%{public}d×%{public}d) (%{public}.2f×%{public}.2f)",
-                srcKey.c_str(), xsize, ysize, imgSize.Width(), imgSize.Height());
 
 #ifndef USE_ROSEN_DRAWING
             int32_t fileSize = compressedData->size() + sizeof(header);
@@ -546,7 +543,6 @@ void ImageCompressor::InitPartition()
         if (InitPartitionInfo(&p, partitions_[i], 2)) {
             p.partid = partitions_[i];
             parts_.push_back(p);
-            LOGD("part id:%d %d %d", p.partid, p.bitmaps[0], p.bitmaps[1]);
         }
     }
     compileOption_ = "-D PARTITION_SERACH_MAX=" + std::to_string(parts_.size());

@@ -188,8 +188,6 @@ void BackgroundTaskExecutor::StartNewThreads(size_t num)
 
 void BackgroundTaskExecutor::ThreadLoop(uint32_t threadNo)
 {
-    LOGD("Background thread is started");
-
     SetThreadName(threadNo);
 
     Task task;
@@ -203,7 +201,6 @@ void BackgroundTaskExecutor::ThreadLoop(uint32_t threadNo)
             }
 
             lock.unlock();
-            LOGD("Purge malloc cache for background thread %{public}u", threadNo);
             PurgeMallocCache();
             lock.lock();
             purgeFlags_ &= ~purgeFlag;
@@ -224,8 +221,6 @@ void BackgroundTaskExecutor::ThreadLoop(uint32_t threadNo)
         task = nullptr;
         lock.lock();
     }
-
-    LOGD("Background thread is stopped");
 }
 
 void BackgroundTaskExecutor::TriggerGarbageCollection()

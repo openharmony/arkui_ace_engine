@@ -215,9 +215,6 @@ public:
 
     JsiRef<T> Lock() const
     {
-        if (IsEmpty()) {
-            LOGD("trying to acquire a strong reference to an empty handle!");
-        }
         return JsiRef<T>(value_);
     }
 

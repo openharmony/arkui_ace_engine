@@ -22,6 +22,7 @@
 #include "core/pipeline/base/element_register.h"
 #include "frameworks/core/components/common/layout/constants.h"
 #include "core/components/common/properties/alignment.h"
+#include "core/components/image/image_theme.h"
 
 namespace OHOS::Ace::NG {
 constexpr CopyOptions DEFAULT_IMAGE_COPYOPTION = CopyOptions::None;
@@ -186,7 +187,13 @@ void SetFillColor(NodeHandle node, uint32_t value)
 
 void ResetFillColor(NodeHandle node)
 {
-    return;
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto pipelineContext = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto theme = pipelineContext->GetTheme<ImageTheme>();
+    CHECK_NULL_VOID(theme);
+    ImageModelNG::SetImageFill(frameNode, theme->GetFillColor());
 }
 
 void SetAlt(NodeHandle node, const char* src, const char* bundleName, const char* moduleName)
@@ -223,7 +230,7 @@ void ResetImageInterpolation(NodeHandle node)
     ImageModelNG::SetImageInterpolation(frameNode, DEFAULT_IMAGE_INTERPOLATION);
 }
 
-void SetColorFilter(NodeHandle node, float* array, int length)
+void SetColorFilter(NodeHandle node, const float* array, int length)
 {
     CHECK_NULL_VOID(array);
     if (length != COLOR_FILTER_MATRIX_SIZE) {
@@ -298,6 +305,30 @@ void ResetImageDraggable(NodeHandle node)
     ImageModelNG::SetDraggable(frameNode, DEFAULT_DRAGGABLE);
 }
 
+/**
+ * @param values radius values
+ * value[0] : radius value for TopLeft，value[1] : radius value for TopRight
+ * value[2] : radius value for BottomLeft，value[3] : radius value for BottomRight
+ * @param units adius units
+ * units[0]: radius unit for TopLeft ,units[1] : radius unit for TopRight
+ * units[2]: radius unit for BottomLeft, units[3] : radius unit for TopRight
+ */
+void SetImageBorderRadius(NodeHandle node, const double* values, const int* units, int32_t length)
+{
+    GetArkUIInternalNodeAPI()->GetCommonModifier().SetBorderRadius(node, values, units, length);
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ImageModelNG::SetBackBorder(frameNode);
+}
+
+void ResetImageBorderRadius(NodeHandle node)
+{
+    GetArkUIInternalNodeAPI()->GetCommonModifier().ResetBorderRadius(node);
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ImageModelNG::SetBackBorder(frameNode);
+}
+
 ArkUIImageModifierAPI GetImageModifier()
 {
     static const ArkUIImageModifierAPI modifier = { SetCopyOption, ResetCopyOption, SetAutoResize, ResetAutoResize,
@@ -306,8 +337,9 @@ ArkUIImageModifierAPI GetImageModifier()
         ResetMatchTextDirection, SetFillColor, ResetFillColor, SetAlt, ResetAlt, SetImageInterpolation,
         ResetImageInterpolation, SetColorFilter, ResetColorFilter, SetImageSyncLoad, ResetImageSyncLoad,
         SetImageObjectFit, ResetImageObjectFit, SetImageFitOriginalSize, ResetImageFitOriginalSize, SetImageDraggable,
-        ResetImageDraggable };
-
+        ResetImageDraggable,
+        SetImageBorderRadius, ResetImageBorderRadius
+        };
     return modifier;
 }
 } // namespace OHOS::Ace::NG

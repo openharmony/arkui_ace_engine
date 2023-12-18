@@ -1,17 +1,41 @@
+/*
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 /// <reference path='./import.ts' />
-class MenuItemSelectedModifier extends Modifier<boolean> {
-  static identity: Symbol = Symbol('selected');
+class MenuItemSelectedModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('menuItemSelected');
   applyPeer(node: KNode, reset: boolean) {
     if (reset) {
-      GetUINativeModule().menuitem.resetSelected(node);
+      GetUINativeModule().menuitem.resetMenuItemSelected(node);
+    } else {
+      GetUINativeModule().menuitem.setMenuItemSelected(node, this.value);
     }
-    else {
-      GetUINativeModule().menuitem.setSelected(node, this.value);
-    }
+  }
+
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
 
 class LabelFontColorModifier extends ModifierWithKey<ResourceColor> {
+  constructor(value: ResourceColor) {
+    super(value);
+  }
   static identity: Symbol = Symbol("labelfontColor");
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -31,6 +55,9 @@ class LabelFontColorModifier extends ModifierWithKey<ResourceColor> {
 }
 
 class ContentFontColorModifier extends ModifierWithKey<ResourceColor> {
+  constructor(value: ResourceColor) {
+    super(value);
+  }
   static identity: Symbol = Symbol("contentfontColor");
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -50,76 +77,61 @@ class ContentFontColorModifier extends ModifierWithKey<ResourceColor> {
 }
 
 class LabelFontModifier extends ModifierWithKey<Font> {
+  constructor(value: Font) {
+    super(value);
+  }
   static identity: Symbol = Symbol("labelFont");
   applyPeer(node: KNode, reset: boolean): void {
-    if (reset) {
+    if (reset || !this.value) {
       GetUINativeModule().menuitem.resetLabelFont(node);
     }
     else {
-      const valueType: string = typeof this.value;
-      if (valueType === "number" || valueType === "string" || isResource(this.value)) {
-        GetUINativeModule().menuitem.setLabelFont(node, this.value, this.value, this.value, this.value);
-      } else {
-        GetUINativeModule().menuitem.setLabelFont(node, (this.value as Font).size,
-          (this.value as Font).weight, (this.value as Font).family,
-          (this.value as Font).style);
-      }
+      GetUINativeModule().menuitem.setLabelFont(node, (this.value as Font).size,
+        (this.value as Font).weight, (this.value as Font).family,
+        (this.value as Font).style);
     }
   }
 
   checkObjectDiff(): boolean {
-    if (isResource(this.stageValue) && isResource(this.value)) {
-      return !isResourceEqual(this.stageValue, this.value);
-    } else if (!isResource(this.stageValue) && !isResource(this.value)) {
-      return !((this.stageValue as Font).size === (this.value as Font).size &&
-        (this.stageValue as Font).weight === (this.value as Font).weight &&
-        (this.stageValue as Font).family === (this.value as Font).family &&
-        (this.stageValue as Font).style === (this.value as Font).style);
-    } else {
-      return true;
-    }
+    let sizeEQ = isBaseOrResourceEqual(this.stageValue.size, this.value.size);
+    let weightEQ = this.stageValue.weight === this.value.weight;
+    let familyEQ = isBaseOrResourceEqual(this.stageValue.family, this.value.family);
+    let styleEQ = this.stageValue.style === this.value.style;
+    return !sizeEQ || !weightEQ || !familyEQ || !styleEQ;
   }
 }
 
 class ContentFontModifier extends ModifierWithKey<Font> {
+  constructor(value: Font) {
+    super(value);
+  }
   static identity: Symbol = Symbol("contentFont");
   applyPeer(node: KNode, reset: boolean): void {
-    if (reset) {
+    if (reset || !this.value) {
       GetUINativeModule().menuitem.resetContentFont(node);
     }
     else {
-      const valueType: string = typeof this.value;
-      if (valueType === "number" || valueType === "string" || isResource(this.value)) {
-        GetUINativeModule().menuitem.setContentFont(node, this.value, this.value, this.value, this.value);
-      } else {
-        GetUINativeModule().menuitem.setContentFont(node, (this.value as Font).size,
-          (this.value as Font).weight, (this.value as Font).family,
-          (this.value as Font).style);
-      }
+      GetUINativeModule().menuitem.setContentFont(node, (this.value as Font).size,
+        (this.value as Font).weight, (this.value as Font).family,
+        (this.value as Font).style);
     }
   }
 
   checkObjectDiff(): boolean {
-    if (isResource(this.stageValue) && isResource(this.value)) {
-      return !isResourceEqual(this.stageValue, this.value);
-    } else if (!isResource(this.stageValue) && !isResource(this.value)) {
-      return !((this.stageValue as Font).size === (this.value as Font).size &&
-        (this.stageValue as Font).weight === (this.value as Font).weight &&
-        (this.stageValue as Font).family === (this.value as Font).family &&
-        (this.stageValue as Font).style === (this.value as Font).style);
-    } else {
-      return true;
-    }
+    let sizeEQ = isBaseOrResourceEqual(this.stageValue.size, this.value.size);
+    let weightEQ = this.stageValue.weight === this.value.weight;
+    let familyEQ = isBaseOrResourceEqual(this.stageValue.family, this.value.family);
+    let styleEQ = this.stageValue.style === this.value.style;
+    return !sizeEQ || !weightEQ || !familyEQ || !styleEQ;
   }
 }
 
 class ArkMenuItemComponent extends ArkComponent implements MenuItemAttribute {
+  constructor(nativePtr: KNode) {
+    super(nativePtr);
+  }
   selected(value: boolean): this {
-    if (typeof value === 'boolean') {
-      modifier(this._modifiers, MenuItemSelectedModifier, value);
-    } else {
-      modifier(this._modifiers, MenuItemSelectedModifier, false);
-    }
+    modifierWithKey(this._modifiersWithKeys, MenuItemSelectedModifier.identity, MenuItemSelectedModifier, value);
     return this;
   }
   selectIcon(value: any): MenuItemAttribute {
@@ -152,6 +164,6 @@ globalThis.MenuItem.attributeModifier = function (modifier) {
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkMenuItemComponent(nativeNode);
   });
-  modifier.applyNormalAttribute(component);
+  applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
 }

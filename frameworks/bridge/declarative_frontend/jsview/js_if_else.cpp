@@ -92,7 +92,6 @@ void JSIfElse::SetBranchId(const JSCallbackInfo& info)
     JSRef<JSArray> jsArr = JSRef<JSArray>::Cast(info[1]);
     size_t index = jsArr->Length();
     for (const auto& rmElmtId : removedElmtIds) {
-        TAG_LOGD(AceLogTag::ACE_IF, "rmElmtId %{public}d", rmElmtId);
         jsArr->SetValueAt(index++, JSRef<JSVal>::Make(ToJSValue(rmElmtId)));
     }
 }

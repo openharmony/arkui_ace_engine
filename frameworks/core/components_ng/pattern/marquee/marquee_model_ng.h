@@ -35,6 +35,12 @@ public:
     void SetOnStart(std::function<void()>&& onChange) override;
     void SetOnBounce(std::function<void()>&& onChange) override;
     void SetOnFinish(std::function<void()>&& onChange) override;
+
+    static void SetAllowScale(FrameNode* frameNode, const bool allowScale);
+    static void SetFontWeight(FrameNode* frameNode, const std::optional<FontWeight>& fontWeight);
+    static void SetFontFamily(FrameNode* frameNode, const std::optional<std::vector<std::string>>& fontFamilies);
+    static void SetFontSize(FrameNode* frameNode, const std::optional<Dimension>& fontSize);
+    static void SetTextColor(FrameNode* frameNode, const std::optional<Color>& textColor);
 };
 } // namespace OHOS::Ace::NG
 

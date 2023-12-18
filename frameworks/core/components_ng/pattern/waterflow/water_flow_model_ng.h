@@ -59,6 +59,20 @@ public:
     void SetScrollBarMode(DisplayMode value) override;
     void SetScrollBarColor(const std::string& value) override;
     void SetScrollBarWidth(const std::string& value) override;
+
+    static void SetColumnsTemplate(FrameNode* frameNode, const std::string& value);
+    static void SetRowsTemplate(FrameNode* frameNode, const std::string& value);
+    static void SetScrollEnabled(FrameNode* frameNode, bool scrollEnabled);
+    static void SetColumnsGap(FrameNode* frameNode, const Dimension& value);
+    static void SetRowsGap(FrameNode* frameNode, const Dimension& value);
+    static void SetItemMinWidth(FrameNode* frameNode, const Dimension& minWidth);
+    static void SetItemMaxWidth(FrameNode* frameNode, const Dimension& maxWidth);
+    static void SetItemMinHeight(FrameNode* frameNode, const Dimension& minHeight);
+    static void SetItemMaxHeight(FrameNode* frameNode, const Dimension& maxHeight);
+    static void SetLayoutDirection(FrameNode* frameNode, FlexDirection value);
+    static void SetNestedScroll(FrameNode* frameNode, const NestedScrollOptions& nestedOpt);
+    static void SetFriction(FrameNode* frameNode, double friction);
+
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_WATERFLOW_WATER_FLOW_MODEL_NG_H

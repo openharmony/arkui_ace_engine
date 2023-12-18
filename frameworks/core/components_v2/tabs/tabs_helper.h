@@ -147,15 +147,12 @@ public:
     static void RemoveTabBarItemById(ElementIdType id)
     {
         auto tabBarItemChild = ElementRegister::GetInstance()->GetElementById(id);
-        LOGD("tabBarItemChild ID %{public}d, %{public}s", id, AceType::TypeName(tabBarItemChild));
-
         if (!tabBarItemChild) {
             return;
         }
 
         auto parent = FindFirstParentOfType<TabBarElement>(tabBarItemChild);
         if (std::get<0>(parent) && std::get<1>(parent)) {
-            LOGD("Deleting TabBar Item tabBarElement->UpdateChild");
             auto tabBarElement = std::get<0>(parent);
             auto tabBarItemElement = std::get<1>(parent);
 
@@ -196,7 +193,6 @@ public:
         const auto id = ElementRegister::GetInstance()->MakeUniqueId();
         newBarItemComponent->SetElementId(id);
 
-        LOGD("setting id on tabContentItemComponent to %{public}d", id);
         if (tabContentItemComponent) {
             tabContentItemComponent->SetBarElementId(id);
         }
@@ -213,12 +209,6 @@ public:
     static void UpdateTabBarElement(const RefPtr<Element>& host, const RefPtr<Element>& contentItemElement,
         const RefPtr<Component>& contentItemComponent)
     {
-        LOGD("element %{public}s component %{public}s, id %{public}d, id %{public}d",
-            AceType::TypeName(contentItemElement), AceType::TypeName(contentItemComponent),
-            contentItemElement ? contentItemElement->GetElementId(): ElementRegister::UndefinedElementId,
-            contentItemComponent ? contentItemComponent->GetElementId():ElementRegister::UndefinedElementId
-            );
-
         auto tabBar = TabsHelper::FindTabBarElement(host);
         if (!tabBar) {
             LOGE("TabBar missing");
@@ -266,8 +256,6 @@ public:
     static void SetTabBarElementIndex(const RefPtr<Element>& contentItemElement,
         const RefPtr<Component>& contentItemComponent, int target)
     {
-        LOGD("target: %{public}d, element: %{public}s, component: %{public}s",
-            target, AceType::TypeName(contentItemElement), AceType::TypeName(contentItemComponent));
         ElementIdType elementId = ElementRegister::UndefinedElementId;
 
         auto tabContentItemElement = AceType::DynamicCast<TabContentItemElement>(contentItemElement);
@@ -297,8 +285,6 @@ public:
             LOGE("renderTabBar is null");
             return;
         }
-
-        LOGD("moving to %{public}d - %{public}s", target, AceType::TypeName(renderNode));
         renderNode->MovePosition(renderTabBar->FirstItemOffset() + target);
     }
 
@@ -306,7 +292,6 @@ public:
     {
         auto tabBarElement = TabsHelper::FindTabBarElement(element);
         if (tabBarElement) {
-            LOGD("resetting to index %{public}d ", idx);
             tabBarElement->GetTabController()->SetIndex(idx);
             tabBarElement->UpdateIndex(idx);
         }
@@ -352,7 +337,6 @@ public:
             return INVALID_TAB_BAR_INDEX;
         }
         auto idx = renderTabBar->GetIndexForTabBarItem(child);
-        LOGD("current item idx %{public}d", idx);
         return idx;
     }
 
@@ -369,9 +353,6 @@ public:
         }
 
         auto controller = tabContent->GetTabController();
-#ifdef ACE_DEBUG_LOG
-        auto old = controller->GetTotalCount();
-#endif
         controller->SetTotalCount(controller->GetTotalCount() + count);
 
         auto tabContentRenderNode = AceType::DynamicCast<RenderTabContent>(tabContentProxyElement->GetRenderNode());
@@ -379,9 +360,6 @@ public:
             LOGE("GetRenderNode failed");
             return;
         }
-#ifdef ACE_DEBUG_LOG
-        LOGD("Count %{public}d --> %{public}d", old, controller->GetTotalCount());
-#endif
         tabContentRenderNode->UpdateContentCount(controller->GetTotalCount());
     }
 
@@ -406,15 +384,6 @@ public:
             LOGE("null component");
             return;
         }
-
-        if (!header.empty()) {
-            LOGD("Dumping tree for  %{public}s  %{public}s id: %{public}d",
-                AceType::TypeName(component), header.c_str(), component->GetElementId());
-        }
-
-        LOGD("%{public}s %{public}s  id: %{public}d",
-            shift.c_str(), AceType::TypeName(component), component->GetElementId());
-
         auto single = AceType::DynamicCast<SingleChild>(component);
 
         if (single) {
@@ -445,41 +414,12 @@ public:
                 AceType::TypeName(node), header.c_str(), node->GetElementId());
         }
 
-        auto element = AceType::DynamicCast<Element>(node);
-        auto renderNode = AceType::DynamicCast<RenderNode>(node);
-        if (element) {
-            LOGD("%{public}s %{public}s  slot %{public}d renderSlot %{public}d id: %{public}d",
-                shift.c_str(), AceType::TypeName(node), element->GetSlot(),
-                element->GetRenderSlot(), element->GetElementId());
-        }
-        if (renderNode) {
-            LOGD("%{public}s %{public}s ", shift.c_str(), AceType::TypeName(renderNode));
-        }
         for (const auto& child : node->GetChildren()) {
             TabsHelper::DumpElements(child, "", depth -1, shift + "  ");
         }
     }
 
-    static void PrintRenderNodes(const RefPtr<RenderNode>& renderNode, const std::string& text)
-    {
-        if (!renderNode) {
-            LOGE("Render node is nullptr");
-            return;
-        }
-        auto t1 = renderNode->GetChildren().front();
-        auto t2 = t1 ? t1->GetChildren().front() : nullptr;
-        auto t3 = t2 ? t2->GetChildren().front() : nullptr;
-        auto t4 = t3 ? t3->GetChildren().front() : nullptr;
-
-        LOGD("%{public}s, %{public}s, %{public}s, %{public}s, %{public}s, %{public}s",
-            text.c_str(),
-            AceType::TypeName(renderNode),
-            AceType::TypeName(t1),
-            AceType::TypeName(t2),
-            AceType::TypeName(t3),
-            AceType::TypeName(t4)
-        );
-    }
+    static void PrintRenderNodes(const RefPtr<RenderNode>& renderNode, const std::string& text) {}
 };
 
 } // namespace OHOS::Ace::V2

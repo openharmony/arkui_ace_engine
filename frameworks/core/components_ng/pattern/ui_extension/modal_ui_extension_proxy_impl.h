@@ -16,23 +16,19 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_UI_EXTENSION_MODAL_UI_EXTENSION_PROXY_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_UI_EXTENSION_MODAL_UI_EXTENSION_PROXY_H
 
-#include <refbase.h>
-
 #include "interfaces/inner_api/ace/modal_ui_extension_proxy.h"
 
-namespace OHOS::Rosen {
-class Session;
-} // namespace OHOS::Rosen
+#include "core/components_ng/pattern/ui_extension/session_wrapper.h"
 
 namespace OHOS::Ace::NG {
 class ModalUIExtensionProxyImpl : public ModalUIExtensionProxy {
 public:
-    explicit ModalUIExtensionProxyImpl(const sptr<Rosen::Session>& session);
+    explicit ModalUIExtensionProxyImpl(const RefPtr<SessionWrapper>& sessionWrapper);
     ~ModalUIExtensionProxyImpl() override = default;
     void SendData(const AAFwk::WantParams& params) override;
 
 private:
-    wptr<Rosen::Session> session_;
+    RefPtr<SessionWrapper> sessionWrapper_;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_UI_EXTENSION_MODAL_UI_EXTENSION_PROXY_H

@@ -152,10 +152,12 @@ bool ArkJSRuntime::StartDebugger()
         auto callback = [instanceId = instanceId_, weak = weak_from_this()](int socketFd, std::string option) {
             LOGI("HdcRegister callback socket %{public}d, option %{public}s.", socketFd, option.c_str());
             if (option.find(DEBUGGER) == std::string::npos) {
+                ConnectServerManager::Get().StopConnectServer();
                 ConnectServerManager::Get().StartConnectServerWithSocketPair(socketFd);
             } else {
                 auto runtime = weak.lock();
                 CHECK_NULL_VOID(runtime);
+                JSNApi::StopDebugger(ParseHdcRegisterOption(option));
                 runtime->StartDebuggerForSocketPair(option, socketFd);
             }
         };
@@ -164,8 +166,8 @@ bool ArkJSRuntime::StartDebugger()
         ConnectServerManager::Get().SetDebugMode();
         JSNApi::DebugOption debugOption = { libPath_.c_str(), isDebugMode_ };
 #if !defined(ANDROID_PLATFORM) && !defined(IOS_PLATFORM)
-        ConnectServerManager::Get().AddInstance(instanceId_, language_);
-        ret = JSNApi::NotifyDebugMode(getpid(), vm_, libPath_.c_str(), debugOption, instanceId_, debuggerPostTask_,
+        ConnectServerManager::Get().AddInstance(gettid(), language_);
+        ret = JSNApi::NotifyDebugMode(gettid(), vm_, libPath_.c_str(), debugOption, gettid(), debuggerPostTask_,
             AceApplicationInfo::GetInstance().IsDebugVersion(), isDebugMode_);
 #elif defined(ANDROID_PLATFORM)
         ret = JSNApi::StartDebugger(vm_, debugOption, instanceId_, debuggerPostTask_);
@@ -384,6 +386,19 @@ void ArkJSRuntime::DumpHeapSnapshot(bool isPrivate)
 void ArkJSRuntime::DumpHeapSnapshot(bool isPrivate)
 {
     LOGE("Do not support Ark DumpHeapSnapshot on Windows or MacOS");
+}
+#endif
+
+#if !defined(PREVIEW) && !defined(IOS_PLATFORM)
+void ArkJSRuntime::DestroyHeapProfiler()
+{
+    LocalScope scope(vm_);
+    panda::DFXJSNApi::DestroyHeapProfiler(vm_);
+}
+#else
+void ArkJSRuntime::DestroyHeapProfiler()
+{
+    LOGE("Do not support Ark DestroyHeapProfiler on Windows or MacOS");
 }
 #endif
 

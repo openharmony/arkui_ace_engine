@@ -38,6 +38,9 @@ public:
     MOCK_METHOD2(AddKeyFrame, void(float fraction, const std::function<void()>& propertyCallback));
     MOCK_METHOD1(AddScheduleTask, uint32_t(const RefPtr<ScheduleTask>& task));
     MOCK_METHOD1(RemoveScheduleTask, void(uint32_t id));
+    MOCK_METHOD3(OnTouchEvent, void(const TouchEvent& point, const RefPtr<FrameNode>& node, bool isSubPipe));
+    MOCK_METHOD2(OnMouseEvent, void(const MouseEvent& event, const RefPtr<FrameNode>& node));
+    MOCK_METHOD2(OnAxisEvent, void(const AxisEvent& event, const RefPtr<FrameNode>& node));
     MOCK_METHOD2(OnTouchEvent, void(const TouchEvent& point, bool isSubPipe));
     MOCK_METHOD1(OnKeyEvent, bool(const KeyEvent& event));
     MOCK_METHOD1(OnMouseEvent, void(const MouseEvent& event));
@@ -114,6 +117,7 @@ public:
     MOCK_METHOD1(SetIsFocusActive, bool(bool isFocusActive));
     MOCK_METHOD1(SetCursor, void(int32_t cursorValue));
     MOCK_METHOD0(RestoreDefault, void());
+    MOCK_METHOD0(GetOverlayManager, const RefPtr<NG::OverlayManager>());
     MOCK_CONST_METHOD0(IsDragging, bool());
     MOCK_METHOD1(SetIsDragging, void(bool isDragging));
 

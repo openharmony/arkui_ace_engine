@@ -61,7 +61,6 @@ void AnimatableMatrix4::MoveTo(const Matrix4& target)
 void AnimatableMatrix4::AnimateTo(const Matrix4& endValue)
 {
     if (isFirstAssign_) {
-        LOGD("AnimateTo with first assign. endValue: %{public}s", endValue.ToString().c_str());
         isFirstAssign_ = false;
         Matrix4& matrix4 = *this;
         matrix4 = endValue;

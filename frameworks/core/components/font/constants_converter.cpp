@@ -173,7 +173,6 @@ txt::TextBaseline ConvertTxtTextBaseline(TextBaseline textBaseline)
             convertValue = txt::TextBaseline::kIdeographic;
             break;
         default:
-            LOGD("TextBaseline setting error! Now using default TextBaseline");
             convertValue = txt::TextBaseline::kAlphabetic;
             break;
     }
@@ -191,7 +190,6 @@ Rosen::TextBaseline ConvertTxtTextBaseline(TextBaseline textBaseline)
             convertValue = Rosen::TextBaseline::IDEOGRAPHIC;
             break;
         default:
-            LOGD("TextBaseline setting error! Now using default TextBaseline");
             convertValue = Rosen::TextBaseline::ALPHABETIC;
             break;
     }
@@ -471,7 +469,6 @@ void ConvertTxtStyle(const TextStyle& textStyle, const WeakPtr<PipelineBase>& co
         if (!NearEqual(lineHeight, fontSize) && (lineHeight > 0.0) && (!NearZero(fontSize))) {
             txtStyle.height = lineHeight / fontSize;
         } else {
-            LOGD("use default text style height value.");
             txtStyle.height = 1;
             static const int32_t BEGIN_VERSION = 6;
             auto isBeginVersion = pipelineContext && pipelineContext->GetMinPlatformVersion() >= BEGIN_VERSION;
@@ -550,7 +547,6 @@ void ConvertTxtStyle(const TextStyle& textStyle, const WeakPtr<PipelineBase>& co
         if (!NearEqual(lineHeight, fontSize) && (lineHeight > 0.0) && (!NearZero(fontSize))) {
             txtStyle.heightScale = lineHeight / fontSize;
         } else {
-            LOGD("use default text style height value.");
             txtStyle.heightScale = 1;
             static const int32_t BEGIN_VERSION = 6;
             auto isBeginVersion = pipelineContext && pipelineContext->GetMinPlatformVersion() >= BEGIN_VERSION;

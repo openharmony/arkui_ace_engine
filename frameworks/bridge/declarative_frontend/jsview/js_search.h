@@ -58,6 +58,7 @@ public:
     static void SetCustomKeyboard(const JSCallbackInfo& info);
     static void SetMaxLength(const JSCallbackInfo& info);
     static void SetType(const JSCallbackInfo& info);
+    static JSRef<JSVal> CreateJSTextCommonEvent(NG::TextCommonEvent& event);
 };
 
 class JSSearchController final : public Referenced {

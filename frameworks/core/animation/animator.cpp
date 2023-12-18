@@ -79,7 +79,6 @@ Animator::Animator(const WeakPtr<PipelineBase>& context, const char* name)
 Animator::~Animator()
 {
     CHECK_RUN_ON(UI);
-    LOGD("Animator destructor. id:%{public}d", controllerId_);
     // Clear all listeners first to make its destruction silently.
     ClearAllListeners();
     ClearInterpolators();
@@ -197,7 +196,6 @@ void Animator::SetDuration(int32_t duration)
         LOGE("invalid duration time, keep the old. id: %{public}d", controllerId_);
         return;
     }
-    LOGD("set duration: %{public}d. id: %{public}d", duration, controllerId_);
     if ((status_ == Status::RUNNING || status_ == Status::PAUSED) && duration != 0) {
         // Need to update elapsedTime when animation running or paused.
         elapsedTime_ = (duration_ / duration) * elapsedTime_;
@@ -222,7 +220,6 @@ bool Animator::SetIteration(int32_t iteration)
     if (status_ != Status::IDLE) {
         Finish();
     }
-    LOGD("set iteration: %{public}d. id: %{public}d", iteration, controllerId_);
     UpdateIteration(iteration);
     repeatTimesLeft_ = repeatTimes_;
     for (auto& controller : proxyControllers_) {
@@ -243,7 +240,6 @@ void Animator::SetStartDelay(int32_t startDelay)
         LOGE("invalid startDelay time, keep the old. id: %{public}d", controllerId_);
         return;
     }
-    LOGD("set start delay: %{public}d. id: %{public}d", startDelay, controllerId_);
     startDelay_ = startDelay;
     for (auto& controller : proxyControllers_) {
         controller->SetStartDelay(startDelay);
@@ -298,7 +294,6 @@ void Animator::SetAnimationDirection(AnimationDirection direction)
 void Animator::SetAllowRunningAsynchronously(bool runAsync)
 {
     allowRunningAsynchronously_ = runAsync;
-    LOGD("Set allow running asynchronously. id: %{public}d, allow: %{public}d", controllerId_, runAsync);
 }
 
 bool Animator::GetAllowRunningAsynchronously()
@@ -387,10 +382,8 @@ void Animator::Play()
 {
     CHECK_RUN_ON(UI);
     if (iteration_ == 0) {
-        LOGD("no need to play animation, iteration is zero.");
         return;
     }
-    LOGD("Play animation in current direction, id: %{public}d", controllerId_);
     motion_ = nullptr;
     StartInner(false);
 }
@@ -399,10 +392,8 @@ void Animator::Reverse()
 {
     CHECK_RUN_ON(UI);
     if (iteration_ == 0) {
-        LOGD("no need to reverse animation, iteration is zero.");
         return;
     }
-    LOGD("Play animation in opposite direction, id: %{public}d", controllerId_);
     motion_ = nullptr;
     ToggleDirection();
     StartInner(true);
@@ -412,7 +403,6 @@ void Animator::Forward()
 {
     CHECK_RUN_ON(UI);
     if (iteration_ == 0) {
-        LOGD("no need to play animation forward, iteration is zero.");
         return;
     }
     if (isReverse_) {
@@ -425,7 +415,6 @@ void Animator::Backward()
 {
     CHECK_RUN_ON(UI);
     if (iteration_ == 0) {
-        LOGD("no need to play animation backward, iteration is zero.");
         return;
     }
     if (isReverse_) {
@@ -438,7 +427,6 @@ void Animator::Pause()
 {
     CHECK_RUN_ON(UI);
     if (iteration_ == 0) {
-        LOGD("no need to pause animation, iteration is zero.");
         return;
     }
     if (status_ == Status::PAUSED) {
@@ -448,12 +436,11 @@ void Animator::Pause()
     if (status_ == Status::IDLE) {
         Play();
     }
-    LOGD("animation pause. id: %{public}d", controllerId_);
     if (scheduler_ && scheduler_->IsActive()) {
         scheduler_->Stop();
     }
     if (needFrameJankReport_) {
-        JankFrameReport::ClearFrameJankFlag(JANK_RUNNING_ANIMATOR);
+        JankFrameReport::GetInstance().ClearFrameJankFlag(JANK_RUNNING_ANIMATOR);
     }
     status_ = Status::PAUSED;
     asyncTrace_ = nullptr;
@@ -467,19 +454,17 @@ void Animator::Resume()
 {
     CHECK_RUN_ON(UI);
     if (iteration_ == 0) {
-        LOGD("no need to resume animation, iteration is zero.");
         return;
     }
     if (status_ == Status::RUNNING) {
         LOGW("Already running, do not need resume again. id: %{public}d", controllerId_);
         return;
     }
-    LOGD("animation resume. id: %{public}d", controllerId_);
     if (scheduler_ && !scheduler_->IsActive()) {
         scheduler_->Start();
     }
     if (needFrameJankReport_) {
-        JankFrameReport::SetFrameJankFlag(JANK_RUNNING_ANIMATOR);
+        JankFrameReport::GetInstance().SetFrameJankFlag(JANK_RUNNING_ANIMATOR);
     }
     status_ = Status::RUNNING;
     if (!motion_) {
@@ -504,16 +489,13 @@ void Animator::Stop()
 {
     CHECK_RUN_ON(UI);
     if (iteration_ == 0) {
-        LOGD("no need to stop animation, iteration is zero.");
         return;
     }
     if (status_ == Status::STOPPED) {
-        LOGD("Already stop, do not need stop again. id: %{public}d", controllerId_);
         return;
     }
-    LOGD("animation stop. id: %{public}d", controllerId_);
     if (needFrameJankReport_) {
-        JankFrameReport::ClearFrameJankFlag(JANK_RUNNING_ANIMATOR);
+        JankFrameReport::GetInstance().ClearFrameJankFlag(JANK_RUNNING_ANIMATOR);
     }
 
     elapsedTime_ = 0;
@@ -535,14 +517,11 @@ void Animator::Finish()
 {
     CHECK_RUN_ON(UI);
     if (iteration_ == 0) {
-        LOGD("no need to finish animation, iteration is zero.");
         return;
     }
     if (status_ == Status::STOPPED) {
-        LOGD("Already stop, do not need finish again. id: %{public}d", controllerId_);
         return;
     }
-    LOGD("animation finish. id: %{public}d", controllerId_);
     if (motion_) {
         // Notify motion with big time to let motion end in final state.
         motion_->OnTimestampChanged(MAX_TIME, 0.0f, false);
@@ -558,7 +537,6 @@ void Animator::Cancel()
 {
     CHECK_RUN_ON(UI);
     if (iteration_ == 0) {
-        LOGD("no need to cancel animation, iteration is zero.");
         return;
     }
     if (status_ == Status::IDLE) {
@@ -617,7 +595,7 @@ void Animator::OnFrame(int64_t duration)
         }
         return;
     }
-    JankFrameReport::RecordFrameUpdate();
+    JankFrameReport::GetInstance().RecordFrameUpdate();
     NotifyPrepareListener();
     // get playedTime
     auto playedTime = elapsedTime_ - scaledStartDelay_;
@@ -646,8 +624,6 @@ void Animator::NotifyInterpolator(int32_t playedTime)
         }
         // make playedTime in range 0 ~ INTERPOLATE_DURATION_MAX
         if (repeatTimesLeft_ == 0 || (scaledDuration_ == 0 && repeatTimesLeft_ != ANIMATION_REPEAT_INFINITE)) {
-            LOGD("animation stop, repeatTimesLeft: %{public}d, duration: %{public}d, id: %{public}d", repeatTimesLeft_,
-                scaledDuration_, controllerId_);
             repeatTimesLeft_ = 0;
             needStop = true;
         } else {
@@ -658,8 +634,6 @@ void Animator::NotifyInterpolator(int32_t playedTime)
             if (isAlternateDirection) {
                 isCurDirection_ = !isCurDirection_;
             }
-            LOGD("animation next loop. repeat times remaining: %{public}d. id: %{public}d", repeatTimesLeft_,
-                controllerId_);
         }
 
         // after the above branches, playedTime in range 0 ~ INTERPOLATE_DURATION_MAX
@@ -686,7 +660,6 @@ void Animator::NotifyInterpolator(int32_t playedTime)
     }
     if (needStop && (!IsStopped())) {
         // notify stop after on timestamp changed.
-        LOGD("animation stop in tick callback.");
         Stop();
     }
 }
@@ -706,7 +679,6 @@ void Animator::StartInner(bool alwaysNotify)
 {
     CHECK_RUN_ON(UI);
     if (status_ == Status::RUNNING) {
-        LOGD("controller already running, do not need start again. skip it. id: %{public}d", controllerId_);
         if (toggleDirectionPending_) {
             toggleDirectionPending_ = false;
             isCurDirection_ = !isCurDirection_;
@@ -728,7 +700,7 @@ void Animator::StartInner(bool alwaysNotify)
     }
     StatusListenable::NotifyStartListener();
     if (needFrameJankReport_) {
-        JankFrameReport::SetFrameJankFlag(JANK_RUNNING_ANIMATOR);
+        JankFrameReport::GetInstance().SetFrameJankFlag(JANK_RUNNING_ANIMATOR);
     }
     status_ = Status::RUNNING;
     if (!motion_) {
@@ -804,7 +776,6 @@ bool Animator::StartAsync()
     }
 
     if (interpolators_.empty()) {
-        LOGD("interpolators_ is empty, controller id: %{public}d", controllerId_);
         return false;
     }
 
@@ -830,9 +801,6 @@ bool Animator::StartAsync()
 
 bool Animator::StartInnerAsync()
 {
-    LOGD("start inner async, controller id: %{public}d, interpolators size:%{public}zu", controllerId_,
-        interpolators_.size());
-
     auto prepareCallback = [weak = AceType::WeakClaim(this)]() -> void {
         auto controller = weak.Upgrade();
         if (controller != nullptr) {
@@ -858,23 +826,17 @@ bool Animator::StartInnerAsync()
             asyncRunningAnimationCount_++;
         }
     }
-
-    LOGD("start animations async. controller id: %{public}d, count: %{public}d", controllerId_,
-        asyncRunningAnimationCount_);
     return true;
 }
 
 void Animator::StopInnerAsync()
 {
     if (--asyncRunningAnimationCount_ > 0) {
-        LOGD("notify stop, controller id: %{public}d, running animations count %{public}d", controllerId_,
-            asyncRunningAnimationCount_);
         return;
     }
 
     if (status_ != Status::STOPPED && (!HasScheduler() || !scheduler_->IsActive())) {
         Stop();
-        LOGD("native animations stop. controller id: %{public}d", controllerId_);
     }
 }
 
@@ -899,7 +861,6 @@ bool Animator::UpdateRepeatTimesLeftAndCheckFinished(int32_t playedLoops)
             controllerId_);
     }
     if (repeatTimesLeft_ < 0) {
-        LOGD("elapse too long, no repeat remaining. Loop: %{public}d. id: %{public}d", playedLoops, controllerId_);
         return true;
     }
     return false;
@@ -908,11 +869,9 @@ bool Animator::UpdateRepeatTimesLeftAndCheckFinished(int32_t playedLoops)
 void Animator::ToggleDirection()
 {
     isReverse_ = !isReverse_;
-    LOGD("change direction. isReverse change to: %{public}d, id: %{public}d", isReverse_, controllerId_);
     // if toggleDirectionPending_ is true, it will be cleared in StartInner
     toggleDirectionPending_ = !toggleDirectionPending_;
     if (status_ == Status::IDLE || status_ == Status::STOPPED) {
-        LOGD("toggle an idle controller, do not change time related params. id: %{public}d", controllerId_);
         return;
     }
     if (repeatTimes_ == ANIMATION_REPEAT_INFINITE) {
@@ -921,7 +880,6 @@ void Animator::ToggleDirection()
         return;
     }
     repeatTimesLeft_ = repeatTimes_ - repeatTimesLeft_;
-    LOGD("change left repeat times: %{public}d. id: %{public}d", repeatTimesLeft_, controllerId_);
     elapsedTime_ = (scaledStartDelay_ + scaledDuration_ - elapsedTime_) + scaledStartDelay_;
 }
 
@@ -929,22 +887,18 @@ float Animator::GetNormalizedTime(float playedTime, bool needStop) const
 {
     float normalizedTime = 0.0f;
     if (needStop) {
-        LOGD("animation stop. set played time to the end value according to fill mode. id: %{public}d", controllerId_);
         switch (fillMode_) {
             case FillMode::FORWARDS:
                 // Fall through.
             case FillMode::BOTH:
-                LOGD("fill mode is FORWARDS or BOTH. id: %{public}d", controllerId_);
                 normalizedTime = 1.0f;
                 break;
             case FillMode::NONE:
                 // Fall through.
             case FillMode::BACKWARDS:
-                LOGD("fill mode is NONE or BACKWARDS. id: %{public}d", controllerId_);
                 normalizedTime = 0.0f;
                 break;
             default:
-                LOGD("unknown fill mode, use default mode. id: %{public}d", controllerId_);
                 normalizedTime = 1.0f;
                 break;
         }

@@ -33,6 +33,14 @@ public:
     void SetFontFamily(const std::vector<std::string>& value) override;
     void SetTextShadow(const std::vector<Shadow>& value) override;
     void SetFontFeature(const FONT_FEATURES_MAP& value) override;
+
+    static void SetFormat(FrameNode* frameNode, const std::string& format);
+    static void SetFontColor(FrameNode* frameNode, const Color& value);
+    static void SetFontSize(FrameNode* frameNode, const Dimension& value);
+    static void SetFontStyle(FrameNode* frameNode, Ace::FontStyle value);
+    static void SetFontWeight(FrameNode* frameNode, FontWeight value);
+    static void SetFontFamily(FrameNode* frameNode, const std::vector<std::string>& value);
+
 };
 } // namespace OHOS::Ace::NG
 

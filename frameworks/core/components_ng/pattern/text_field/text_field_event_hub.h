@@ -25,6 +25,33 @@
 #include "core/components_ng/pattern/scrollable/scrollable_properties.h"
 
 namespace OHOS::Ace::NG {
+class TextFieldCommonEvent : public BaseEventInfo {
+    DECLARE_RELATIONSHIP_OF_CLASSES(TextFieldCommonEvent, BaseEventInfo)
+public:
+    TextFieldCommonEvent() : BaseEventInfo("TextFieldCommonEvent") {}
+    ~TextFieldCommonEvent() override = default;
+
+    bool IsKeepEditable() const
+    {
+        return keepEditable_;
+    }
+    void SetKeepEditable(bool keepEditable)
+    {
+        keepEditable_ = keepEditable;
+    }
+    std::string GetText() const
+    {
+        return text_;
+    }
+    void SetText(std::string text)
+    {
+        text_ = text;
+    }
+private:
+    bool keepEditable_ = false;
+    std::string text_;
+};
+
 class TextFieldEventHub : public EventHub {
     DECLARE_ACE_TYPE(TextFieldEventHub, EventHub)
 
@@ -58,16 +85,16 @@ public:
         }
     }
 
-    void SetOnSubmit(std::function<void(int32_t)>&& func)
+    void SetOnSubmit(std::function<void(int32_t, NG::TextFieldCommonEvent&)>&& func)
     {
         onSubmit_ = std::move(func);
     }
 
-    void FireOnSubmit(int32_t value)
+    void FireOnSubmit(int32_t value, NG::TextFieldCommonEvent& event)
     {
         if (onSubmit_) {
             LOGI("On submit %{private}d", value);
-            onSubmit_(value);
+            onSubmit_(value, event);
         }
     }
 
@@ -146,6 +173,18 @@ public:
         if (onPaste_) {
             LOGI("On paste %{private}s", value.c_str());
             onPaste_(value);
+        }
+    }
+
+    void SetOnPasteWithEvent(std::function<void(const std::string&, NG::TextCommonEvent&)>&& func)
+    {
+        onPasteWithEvent_ = std::move(func);
+    }
+
+    void FireOnPasteWithEvent(const std::string& value, NG::TextCommonEvent& event)
+    {
+        if (onPasteWithEvent_) {
+            onPasteWithEvent_(value, event);
         }
     }
 
@@ -239,13 +278,14 @@ private:
 
     std::function<void(const std::string&)> onInputFilterError_;
     std::function<void(bool)> onEditChanged_;
-    std::function<void(int32_t)> onSubmit_;
+    std::function<void(int32_t, NG::TextFieldCommonEvent&)> onSubmit_;
     std::function<void(const std::string&)> onChange_;
     std::function<void(int32_t, int32_t)> onSelectionChange_;
 
     std::function<void(const std::string&)> onCopy_;
     std::function<void(const std::string&)> onCut_;
     std::function<void(const std::string&)> onPaste_;
+    std::function<void(const std::string&, NG::TextCommonEvent&)> onPasteWithEvent_;
     std::function<void(const std::string&)> onValueChangeEvent_;
     ACE_DISALLOW_COPY_AND_MOVE(TextFieldEventHub);
 };

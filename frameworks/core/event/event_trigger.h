@@ -34,38 +34,30 @@ public:
     void TriggerAsyncEvent(const EventMarker& marker, Args&&... args)
     {
         if (!marker.GetData().isFront) {
-            LOGD("begin to use back end event manager to fire async event");
             BackEndEventManager<void(Args...)>::GetInstance().FireBackEndEvent(marker, std::forward<Args>(args)...);
-            LOGD("finish to use back end event manager to fire async event");
             return;
         }
-        LOGD("begin to use event handler to fire async event");
         auto handler = handler_.Upgrade();
         if (!handler) {
             LOGE("fail to trigger async event due to event handler is nullptr");
             return;
         }
         handler->HandleAsyncEvent(marker, std::forward<Args>(args)...);
-        LOGD("finish to use event handler to fire async event");
     }
 
     template<class... Args>
     void TriggerSyncEvent(const EventMarker& marker, Args&&... args)
     {
         if (!marker.GetData().isFront) {
-            LOGD("begin to use back end event manager to fire sync event");
             BackEndEventManager<void(Args...)>::GetInstance().FireBackEndEvent(marker, std::forward<Args>(args)...);
-            LOGD("finish to use back end event manager to fire sync event");
             return;
         }
-        LOGD("begin to use event handler to fire sync event");
         auto handler = handler_.Upgrade();
         if (!handler) {
             LOGE("fail to trigger sync event due to event handler is nullptr");
             return;
         }
         handler->HandleSyncEvent(marker, std::forward<Args>(args)...);
-        LOGD("finish to use event handler to fire sync event");
     }
 
 private:

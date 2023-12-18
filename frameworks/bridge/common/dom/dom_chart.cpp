@@ -107,7 +107,6 @@ bool DOMChart::SetSpecializedAttr(const std::pair<std::string, std::string>& att
                 } else if (val == DOM_CHART_TYPE_LOADING) {
                     chart.chartType_ = ChartType::LOADING;
                 } else {
-                    LOGD("chart type error %{public}s, now using loading", val.c_str());
                     chart.chartType_ = ChartType::LINE;
                 }
             } },
@@ -404,7 +403,6 @@ void DOMChart::PrepareSpecializedComponent()
 void DOMChart::CallSpecializedMethod(const std::string& method, const std::string& args)
 {
     if (method != DOM_METHOD_APPEND) {
-        LOGD("Not support method %{private}s yet!", method.c_str());
         return;
     }
     std::unique_ptr<JsonValue> argsValue = JsonUtil::ParseJsonString(args);

@@ -54,7 +54,6 @@ RefPtr<SelectOverlayProxy> SelectOverlayManager::CreateAndShowSelectOverlay(
             CHECK_NULL_VOID(selectOverlayManager);
             CHECK_NULL_VOID(overlayNode);
             if (overlayNode != selectOverlayManager->GetSelectOverlayItem()) {
-                LOGD("current selectOverlayItem not is %{public}d", selectOverlayNode->GetId());
                 return;
             }
             auto rootNode = weakRoot.Upgrade();
@@ -143,7 +142,6 @@ void SelectOverlayManager::DestroyHelper(const RefPtr<FrameNode>& overlay, bool 
 {
     auto rootNode = rootNodeWeak_.Upgrade();
     CHECK_NULL_VOID(rootNode);
-    LOGD("destroy overlay, id is %{public}d.", overlay->GetId());
     if (animation && !selectOverlayInfo_.isUsingMouse) {
         selectOverlayItem_.Reset();
         host_.Reset();
@@ -287,7 +285,6 @@ void SelectOverlayManager::HandleGlobalEvent(const TouchEvent& touchPoint, const
         return;
     }
     if (!IsInSelectedOrSelectOverlayArea(point)) {
-        LOGD("[SelectOverlay] closed by global event %{public}d", touchPoint.sourceType);
         NotifyOverlayClosed(true);
         DestroySelectOverlay();
     }
@@ -338,7 +335,6 @@ void SelectOverlayManager::MarkDirty(PropertyChangeFlag flag)
 
 void SelectOverlayManager::NotifyOnScrollCallback(int32_t id, Axis axis, float offset, int32_t source)
 {
-    LOGD("Selected scroll id %{public}d", id);
     if (parentScrollCallbacks_.empty()) {
         return;
     }
@@ -359,7 +355,6 @@ void SelectOverlayManager::NotifyOnScrollCallback(int32_t id, Axis axis, float o
 void SelectOverlayManager::RegisterScrollCallback(
     int32_t scrollableParentId, int32_t callbackId, ScrollableParentCallback&& callback)
 {
-    LOGD("RegisterScrollCallback scroll parent id %{public}d, callbackId %{public}d", scrollableParentId, callbackId);
     auto it = parentScrollCallbacks_.find(scrollableParentId);
     if (it == parentScrollCallbacks_.end()) {
         std::map<int32_t, ScrollableParentCallback> callbackMap = { { callbackId, std::move(callback) } };
@@ -371,7 +366,6 @@ void SelectOverlayManager::RegisterScrollCallback(
 
 void SelectOverlayManager::RemoveScrollCallback(int32_t callbackId)
 {
-    LOGD("RemoveScrollCallback callbackId %{public}d", callbackId);
     if (parentScrollCallbacks_.empty()) {
         return;
     }

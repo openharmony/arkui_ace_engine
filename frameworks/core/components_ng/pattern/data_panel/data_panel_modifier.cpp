@@ -15,6 +15,8 @@
 
 #include "core/components_ng/pattern/data_panel/data_panel_modifier.h"
 
+#include <cmath>
+
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/point_t.h"
 #include "base/geometry/ng/rect_t.h"
@@ -37,11 +39,9 @@ constexpr float FIXED_WIDTH = 1.0f;
 constexpr float HALF_CIRCLE = 180.0f;
 constexpr float WHOLE_CIRCLE = 360.0f;
 constexpr float QUARTER_CIRCLE = 90.0f;
+constexpr float MIN_CIRCLE = 0.03f;
 constexpr float PERCENT_HALF = 0.5f;
 constexpr float DIAMETER_TO_THICKNESS_RATIO = 0.12f;
-constexpr float FIXED_ANGLE = 2.0f;
-constexpr float FIXED_DRAW_ANGLE = 4.0f;
-constexpr float SHADOW_FILTER = 20.0f;
 constexpr uint32_t SHADOW_ALPHA = 0.4 * 255;
 } // namespace
 
@@ -113,7 +113,7 @@ void DataPanelModifier::UpdateDate()
         option.SetDuration(0);
         option.SetDelay(ANIMATION_DELAY);
         option.SetIteration(ANIMATION_TIMES);
-        AnimationUtils::Animate(option, [&]() { date_->Set(OHOS::Ace::NG::ANIMATION_START); });
+        AnimationUtils::Animate(option, [&]() { date_->Set(ANIMATION_START); });
         RefPtr<Curve> curve = AceType::MakeRefPtr<SpringCurve>(
             ANIMATION_CURVE_VELOCITY, ANIMATION_CURVE_MASS, ANIMATION_CURVE_STIFFNESS, ANIMATION_CURVE_DAMPING);
         option.SetDuration(ANIMATION_DURATION);
@@ -124,101 +124,6 @@ void DataPanelModifier::UpdateDate()
     }
 }
 
-void DataPanelModifier::PaintRainbowFilterMask(RSCanvas& canvas, ArcData arcData) const
-{
-    float thickness = arcData.thickness;
-    float radius = arcData.radius;
-    double totalValue = arcData.totalValue;
-    float drawAngle = arcData.totalValue / arcData.maxValue * WHOLE_CIRCLE * date_->Get();
-    drawAngle = std::min(drawAngle, WHOLE_CIRCLE);
-    Offset center = arcData.center + Offset(shadowOffsetXFloat_->Get(), shadowOffsetYFloat_->Get());
-
-    std::vector<RSColorQuad> colors;
-    std::vector<float> pos;
-    float preItemPos = 0.0f;
-    float drawValue = 0.0f;
-
-    for (size_t i = 0; i < shadowColorsLastLength_; ++i) {
-        float itemPos = 0.0f;
-        drawValue += values_[i]->Get();
-        arcData.shadowColor = SortGradientColorsOffset(shadowColors_[i]->Get().GetGradient());
-        size_t length = arcData.shadowColor.GetColors().size();
-        for (size_t j = 0; j < length; ++j) {
-            itemPos = (values_[i]->Get() / totalValue) * arcData.shadowColor.GetColors().at(j).GetDimension().Value() +
-                      preItemPos;
-            pos.emplace_back(itemPos);
-            colors.emplace_back(arcData.shadowColor.GetColors().at(j).GetLinearColor().GetValue());
-        }
-        preItemPos = itemPos;
-    }
-
-    RSPen gradientPaint;
-    gradientPaint.SetWidth(thickness);
-    gradientPaint.SetAntiAlias(true);
-    gradientPaint.SetAlpha(SHADOW_ALPHA);
-    RSFilter filter;
-#ifndef USE_ROSEN_DRAWING
-    filter.SetImageFilter(
-        RSImageFilter::CreateBlurImageFilter(SHADOW_FILTER, SHADOW_FILTER, RSTileMode::DECAL, nullptr));
-    gradientPaint.SetFilter(filter);
-    RSPath path;
-#else
-    filter.SetImageFilter(
-        RSRecordingImageFilter::CreateBlurImageFilter(SHADOW_FILTER, SHADOW_FILTER, RSTileMode::DECAL, nullptr));
-    gradientPaint.SetFilter(filter);
-    RSRecordingPath path;
-#endif
-    RSRect rRect(center.GetX() - radius + thickness * PERCENT_HALF, center.GetY() - radius + thickness * PERCENT_HALF,
-        center.GetX() + radius - thickness * PERCENT_HALF, center.GetY() + radius - thickness * PERCENT_HALF);
-    path.AddArc(rRect, START_ANGLE, drawAngle);
-
-    RSBrush startCirclePaint;
-    startCirclePaint.SetAntiAlias(true);
-    startCirclePaint.SetColor(SortGradientColorsOffset(shadowColors_[0]->Get().GetGradient())
-                                  .GetColors()
-                                  .begin()
-                                  ->GetLinearColor()
-                                  .GetValue());
-    startCirclePaint.SetAlpha(SHADOW_ALPHA);
-    startCirclePaint.SetFilter(filter);
-
-    RSBrush endCirclePaint;
-    endCirclePaint.SetAntiAlias(true);
-    endCirclePaint.SetColor(arcData.shadowColor.GetColors().rbegin()->GetLinearColor().GetValue());
-    endCirclePaint.SetAlpha(SHADOW_ALPHA);
-    endCirclePaint.SetFilter(filter);
-
-#ifndef USE_ROSEN_DRAWING
-    gradientPaint.SetShaderEffect(RSShaderEffect::CreateSweepGradient(
-        ToRSPoint(PointF(center.GetX(), center.GetY())), colors, pos, RSTileMode::DECAL, 0, drawAngle, nullptr));
-#else
-    gradientPaint.SetShaderEffect(RSRecordingShaderEffect::CreateSweepGradient(
-        ToRSPoint(PointF(center.GetX(), center.GetY())), colors, pos, RSTileMode::DECAL, 0, drawAngle, nullptr));
-#endif
-    RSRect edgeRect(center.GetX() - thickness * PERCENT_HALF, center.GetY() - radius,
-        center.GetX() + thickness * PERCENT_HALF, center.GetY() - radius + thickness);
-
-    canvas.Save();
-    canvas.AttachBrush(startCirclePaint);
-    canvas.DrawArc(edgeRect, QUARTER_CIRCLE - FIXED_ANGLE, HALF_CIRCLE + FIXED_DRAW_ANGLE);
-    canvas.DetachBrush();
-    canvas.Restore();
-
-    canvas.Save();
-    canvas.Rotate(-QUARTER_CIRCLE, center.GetX(), center.GetY());
-    canvas.AttachPen(gradientPaint);
-    canvas.DrawPath(path);
-    canvas.DetachPen();
-    canvas.Restore();
-
-    canvas.Save();
-    canvas.Rotate(drawAngle, center.GetX(), center.GetY());
-    canvas.AttachBrush(endCirclePaint);
-    canvas.DrawArc(edgeRect, -QUARTER_CIRCLE - FIXED_ANGLE, HALF_CIRCLE + FIXED_DRAW_ANGLE);
-    canvas.DetachBrush();
-    canvas.Restore();
-}
-
 void DataPanelModifier::PaintCircle(DrawingContext& context, OffsetF offset) const
 {
     RSCanvas& canvas = context.canvas;
@@ -227,8 +132,8 @@ void DataPanelModifier::PaintCircle(DrawingContext& context, OffsetF offset) con
 
     auto defaultThickness = strokeWidth_->Get();
     ArcData arcData;
-    arcData.center = Offset(context.width * PERCENT_HALF, context.height * PERCENT_HALF);
-
+    Offset center = Offset(context.width * PERCENT_HALF, context.height * PERCENT_HALF);
+    arcData.center = center;
     // Here radius will minus defaultThickness, when there will be new api to set padding, use the new padding.
     arcData.radius = std::min(context.width, context.height) * PERCENT_HALF - defaultThickness;
     if (defaultThickness >= arcData.radius) {
@@ -239,31 +144,190 @@ void DataPanelModifier::PaintCircle(DrawingContext& context, OffsetF offset) con
     PaintTrackBackground(canvas, arcData, trackBackgroundColor_->Get().ToColor());
     arcData.maxValue = max_->Get();
     for (size_t i = 0; i < valuesLastLength_; ++i) {
-        arcData.totalValue += values_[i]->Get();
+        arcData.totalAllValue += values_[i]->Get();
     }
-    if (NonPositive(arcData.totalValue)) {
+    if (NonPositive(arcData.totalAllValue)) {
         // all values are invalid
         return;
     }
 
-    if ((isShadowVisible_ && (isHasShadowValue_ || isEffect_->Get()))) {
-        PaintRainbowFilterMask(canvas, arcData);
-    }
+    arcData.totalDrawAngle = (arcData.totalAllValue * date_->Get()) / arcData.maxValue * WHOLE_CIRCLE;
+    arcData.totalDrawAngle = std::min(arcData.totalDrawAngle, WHOLE_CIRCLE);
+    Offset shadowCenter = Offset(context.width * PERCENT_HALF + shadowOffsetXFloat_->Get(),
+        context.height * PERCENT_HALF + shadowOffsetYFloat_->Get());
 
-    for (int32_t i = valuesLastLength_ - 1; i >= 0; --i) {
+    // paint shadows
+    if ((isShadowVisible_ && (isHasShadowValue_ || isEffect_->Get()))) {
+        for (size_t i = 0; i < shadowColorsLastLength_; ++i) {
+            if (NearZero(values_[i]->Get())) {
+                continue;
+            }
+            arcData.shadowColor = SortGradientColorsOffset(shadowColors_[i]->Get().GetGradient());
+            auto totalValuePre = arcData.totalValue;
+            arcData.totalValue += values_[i]->Get();
+            if (GreatNotEqual(arcData.totalValue, arcData.maxValue)) {
+                continue;
+            }
+            arcData.progressValue = arcData.totalValue * date_->Get();
+            arcData.drawAngle = arcData.progressValue / arcData.maxValue * WHOLE_CIRCLE;
+            arcData.drawAngle = std::min(arcData.drawAngle, WHOLE_CIRCLE);
+            arcData.drawAngle = std::max(arcData.drawAngle, MIN_CIRCLE);
+
+            arcData.gradientPointBase = totalValuePre / arcData.totalValue;
+
+#ifndef USE_ROSEN_DRAWING
+            RSPath path;
+            RSPath endPath;
+#else
+            RSRecordingPath path;
+            RSRecordingPath endPath;
+#endif
+            arcData.center = shadowCenter;
+            GetPaintPath(arcData, path, endPath);
+            PaintProgress(canvas, arcData, path, endPath, true);
+            arcData.lastAngle = arcData.drawAngle;
+        }
+    }
+    arcData.lastAngle = 0.0f;
+    arcData.totalValue = 0.0f;
+    canvas.Restore();
+
+    for (size_t i = 0; i < valuesLastLength_; ++i) {
         if (NearZero(values_[i]->Get())) {
             continue;
         }
         arcData.progressColors = SortGradientColorsOffset(valueColors_[i]->Get().GetGradient());
         auto totalValuePre = arcData.totalValue;
+        arcData.totalValue += values_[i]->Get();
+        if (GreatNotEqual(arcData.totalValue, arcData.maxValue)) {
+            return;
+        }
         arcData.progressValue = arcData.totalValue * date_->Get();
         arcData.drawAngle = arcData.progressValue / arcData.maxValue * WHOLE_CIRCLE;
         arcData.drawAngle = std::min(arcData.drawAngle, WHOLE_CIRCLE);
-        arcData.totalValue -= values_[i]->Get();
-        arcData.gradientPointBase = arcData.totalValue / totalValuePre;
-        PaintProgress(canvas, arcData);
+        arcData.drawAngle = std::max(arcData.drawAngle, MIN_CIRCLE);
+
+        arcData.gradientPointBase = totalValuePre / arcData.totalValue;
+
+#ifndef USE_ROSEN_DRAWING
+        RSPath path;
+        RSPath endPath;
+#else
+        RSRecordingPath path;
+        RSRecordingPath endPath;
+#endif
+        arcData.center = center;
+        GetPaintPath(arcData, path, endPath);
+        PaintProgress(canvas, arcData, path, endPath, false);
+        arcData.lastAngle = arcData.drawAngle;
     }
     canvas.Restore();
+}
+
+void DataPanelModifier::GetPaintPath(ArcData& arcData, RSPath& path, RSPath& endPath) const
+{
+    float thickness = arcData.thickness;
+    float radius = arcData.radius;
+    float lastAngle = arcData.lastAngle;
+    float drawAngle = arcData.drawAngle;
+    float totalDrawAngle = arcData.totalDrawAngle;
+
+    Offset center = arcData.center;
+
+    float sine = thickness * PERCENT_HALF / (radius - (thickness * PERCENT_HALF));
+    float radian = asin(sine);
+    // the angle of center of start half circle to center and tangent of start half circle to center
+    arcData.circleAngle = radian * HALF_CIRCLE / M_PI;
+    float circleAngle = arcData.circleAngle;
+
+    float startAngle = 0.0f;
+    // first line and start half circle not cover end half circle
+    if (NearZero(lastAngle) && LessOrEqual(drawAngle, WHOLE_CIRCLE - circleAngle * 2.0f)) {
+        lastAngle += circleAngle;
+        drawAngle += circleAngle;
+        startAngle += circleAngle;
+        totalDrawAngle += circleAngle;
+    }
+    /*
+     * lastRadian: radian of last angle
+     * drawRadian: radian of this draw angle
+     * totalDrawRadian: radian of total draw angle
+     * startRadian: radian of draw start angle
+     * originDrawRadian: radian of total draw angle before rotate
+     * d: the distance between center of start half circle and end half circle
+     * midAngel: the angle of 0 angle and line of center of start half circle and center of end half circle
+     * tagAngle: the angle of line of center of start half circle and center of end half circle and
+                 line of intersection of start half circle and intersection of end half circle
+    */
+    float lastRadian = M_PI * lastAngle / HALF_CIRCLE;
+    float drawRadian = M_PI * drawAngle / HALF_CIRCLE;
+    float totalDrawRadian = M_PI * totalDrawAngle / HALF_CIRCLE;
+    float startRadian = M_PI * startAngle / HALF_CIRCLE;
+    float originDrawRadian = M_PI * arcData.totalDrawAngle / HALF_CIRCLE;
+    float d = std::sqrt(
+        std::pow(
+            (radius - thickness * PERCENT_HALF) - (radius - thickness * PERCENT_HALF) * std::cos(originDrawRadian), 2) +
+        std::pow((radius - thickness * PERCENT_HALF) * std::sin(originDrawRadian), 2));
+    float midAngle = QUARTER_CIRCLE;
+    float tagAngle = QUARTER_CIRCLE;
+    if (d > 0) {
+        midAngle = std::acos(std::abs((radius - thickness * PERCENT_HALF) -
+                                      (radius - thickness * PERCENT_HALF) * std::cos(originDrawRadian)) /
+                             d) *
+                   HALF_CIRCLE / M_PI;
+        tagAngle = std::acos((d / thickness)) * HALF_CIRCLE / M_PI;
+    }
+    /*
+     * path of start half circle:
+     * when it's not first line or total draw angle is a whole circle, path is a half circle inward
+     * when it's first line and end half circle not cover start cover circle, path is a half circle outword
+     * when it's first line and end half circle cover start cover circle, path is cut by end half circle
+     */
+    if (GreatNotEqual(arcData.lastAngle, START_ANGLE) || arcData.totalDrawAngle == WHOLE_CIRCLE) {
+        Path2DArc(path, center.GetX() + (radius - thickness * PERCENT_HALF) * std::cos(lastRadian),
+            center.GetY() + (radius - thickness * PERCENT_HALF) * std::sin(lastRadian), thickness * PERCENT_HALF,
+            lastAngle + HALF_CIRCLE, lastAngle, true);
+    } else if (LessOrEqual(arcData.totalDrawAngle, WHOLE_CIRCLE - circleAngle * 2.0f)) {
+        Path2DArc(path, center.GetX() + (radius - thickness * PERCENT_HALF) * std::cos(lastRadian),
+            center.GetY() + (radius - thickness * PERCENT_HALF) * std::sin(lastRadian), thickness * PERCENT_HALF,
+            lastAngle + HALF_CIRCLE, lastAngle, false);
+    } else {
+        Path2DArc(path, center.GetX() + (radius - thickness * PERCENT_HALF) * std::cos(startRadian),
+            center.GetY() + (radius - thickness * PERCENT_HALF) * std::sin(startRadian), thickness * PERCENT_HALF,
+            HALF_CIRCLE + startAngle, HALF_CIRCLE + midAngle - tagAngle + startAngle, false);
+        Path2DArc(path, center.GetX() + (radius - thickness * PERCENT_HALF) * std::cos(totalDrawRadian),
+            center.GetY() + (radius - thickness * PERCENT_HALF) * std::sin(totalDrawRadian), thickness * PERCENT_HALF,
+            arcData.totalDrawAngle - HALF_CIRCLE - midAngle + tagAngle + startAngle,
+            arcData.totalDrawAngle + HALF_CIRCLE - midAngle - tagAngle + startAngle, true);
+        Path2DArc(path, center.GetX() + (radius - thickness * PERCENT_HALF) * std::cos(startRadian),
+            center.GetY() + (radius - thickness * PERCENT_HALF) * std::sin(startRadian), thickness * PERCENT_HALF,
+            -HALF_CIRCLE + midAngle + tagAngle + startAngle, startAngle, false);
+    }
+
+    /* when it's end half circle not cover it's start angle draw whole outer circle and inner circle and draw path
+     * of end half circle else draw outer circle and inner circle to 180 angle */
+    if (LessOrEqual(drawAngle - lastAngle, WHOLE_CIRCLE - circleAngle * 2.0f)) {
+        // path of outer circle
+        Path2DArc(path, center.GetX(), center.GetY(), radius, lastAngle, drawAngle, false);
+        Path2DArc(path, center.GetX() + (radius - thickness * PERCENT_HALF) * std::cos(drawRadian),
+            center.GetY() + (radius - thickness * PERCENT_HALF) * std::sin(drawRadian), thickness * PERCENT_HALF,
+            drawAngle, drawAngle + HALF_CIRCLE, false);
+        // path of inner circle
+        Path2DArc(path, center.GetX(), center.GetY(), radius - thickness, drawAngle, lastAngle, true);
+    } else {
+        Path2DArc(path, center.GetX(), center.GetY(), radius, lastAngle, HALF_CIRCLE, false);
+        Path2DArc(path, center.GetX(), center.GetY(), radius - thickness, HALF_CIRCLE, lastAngle, true);
+    }
+    path.Close();
+
+    if (GreatNotEqual(drawAngle - lastAngle, WHOLE_CIRCLE - circleAngle * 2.0f)) {
+        Path2DArc(endPath, center.GetX(), center.GetY(), radius - thickness, HALF_CIRCLE, drawAngle, false);
+        Path2DArc(endPath, center.GetX() + (radius - thickness * PERCENT_HALF) * std::cos(drawRadian),
+            center.GetY() + (radius - thickness * PERCENT_HALF) * std::sin(drawRadian), thickness * PERCENT_HALF,
+            drawAngle + HALF_CIRCLE, drawAngle, true);
+        Path2DArc(endPath, center.GetX(), center.GetY(), radius, drawAngle, HALF_CIRCLE, true);
+        endPath.Close();
+    }
 }
 
 void DataPanelModifier::PaintLinearProgress(DrawingContext& context, OffsetF offset) const
@@ -442,19 +506,18 @@ void DataPanelModifier::PaintColorSegmentFilterMask(RSCanvas& canvas, const Line
     RSBrush brush;
     RSFilter filter;
 #ifndef USE_ROSEN_DRAWING
-    filter.SetMaskFilter(RSMaskFilter::CreateBlurMaskFilter(RSBlurType::NORMAL, shadowRadiusFloat_->Get()));
-#else
-    filter.SetMaskFilter(RSRecordingMaskFilter::CreateBlurMaskFilter(RSBlurType::NORMAL, shadowRadiusFloat_->Get()));
-#endif
-    brush.SetFilter(filter);
-    brush.SetAlpha(SHADOW_ALPHA);
-#ifndef USE_ROSEN_DRAWING
+    filter.SetImageFilter(RSImageFilter::CreateBlurImageFilter(
+        shadowRadiusFloat_->Get(), shadowRadiusFloat_->Get(), RSTileMode::DECAL, nullptr));
     brush.SetShaderEffect(
         RSShaderEffect::CreateLinearGradient(segmentStartPoint, segmentEndPoint, colors, pos, RSTileMode::CLAMP));
 #else
+    filter.SetImageFilter(RSRecordingImageFilter::CreateBlurImageFilter(
+        shadowRadiusFloat_->Get(), shadowRadiusFloat_->Get(), RSTileMode::DECAL, nullptr));
     brush.SetShaderEffect(RSRecordingShaderEffect::CreateLinearGradient(
         segmentStartPoint, segmentEndPoint, colors, pos, RSTileMode::CLAMP));
 #endif
+    brush.SetFilter(filter);
+    brush.SetAlpha(SHADOW_ALPHA);
     canvas.AttachBrush(brush);
     canvas.DrawRoundRect(paintRect);
     canvas.DetachBrush();
@@ -499,78 +562,151 @@ void DataPanelModifier::PaintTrackBackground(RSCanvas& canvas, ArcData arcData, 
     canvas.DetachPen();
 }
 
-void DataPanelModifier::PaintProgress(RSCanvas& canvas, ArcData arcData) const
+void DataPanelModifier::PaintProgress(
+    RSCanvas& canvas, ArcData arcData, RSPath& path, RSPath& endPath, bool isShadow) const
 {
-    float thickness = arcData.thickness;
-    float radius = arcData.radius;
-    float drawAngle = arcData.drawAngle;
-
-    Offset center = arcData.center;
-
     std::vector<RSColorQuad> colors;
     std::vector<float> pos;
-    size_t length = arcData.progressColors.GetColors().size();
+    Gradient sourceColors;
+    if (isShadow) {
+        sourceColors = arcData.shadowColor;
+    } else {
+        sourceColors = arcData.progressColors;
+    }
+    float circleAngle = arcData.circleAngle;
+    // add end half circle color
+    if (GreatNotEqual(arcData.gradientPointBase, 0.0f)) {
+        pos.emplace_back(circleAngle / WHOLE_CIRCLE);
+        colors.emplace_back(sourceColors.GetColors().rbegin()->GetLinearColor().GetValue());
+    }
+    size_t length = sourceColors.GetColors().size();
     for (size_t i = 0; i < length; ++i) {
-        colors.emplace_back(arcData.progressColors.GetColors().at(i).GetLinearColor().GetValue());
+        colors.emplace_back(sourceColors.GetColors().at(i).GetLinearColor().GetValue());
         if (NearZero(arcData.gradientPointBase)) {
-            pos.emplace_back(arcData.progressColors.GetColors().at(i).GetDimension().Value());
+            pos.emplace_back(sourceColors.GetColors().at(i).GetDimension().Value());
         } else {
-            auto itemPos =
-                (1.0f - arcData.gradientPointBase) * arcData.progressColors.GetColors().at(i).GetDimension().Value() +
-                arcData.gradientPointBase;
+            auto itemPos = (1.0f - arcData.gradientPointBase) * sourceColors.GetColors().at(i).GetDimension().Value() +
+                           arcData.gradientPointBase;
             pos.emplace_back(itemPos);
         }
     }
 
-    RSPen gradientPaint;
-    gradientPaint.SetWidth(thickness);
+    float lastAngle = arcData.lastAngle;
+    float drawAngle = arcData.drawAngle;
+    Offset center = arcData.center;
+
+    // first line and start half circle not cover end half circle
+    if (NearZero(lastAngle) && LessOrEqual(drawAngle, WHOLE_CIRCLE - circleAngle * 2.0f)) {
+        lastAngle += circleAngle;
+        drawAngle += circleAngle;
+    }
+    RSBrush gradientPaint;
     gradientPaint.SetAntiAlias(true);
+
+    /*
+     * when it's first line and end circle not cover start circle, use wide gradient
+     * when it's first line and end circle cover start circle, use default gradient and set start half circle color
+     * extra else paint line and use default gradient
+     */
+    if (NearZero(arcData.lastAngle) && LessOrEqual(arcData.drawAngle, WHOLE_CIRCLE - circleAngle * 2.0f)) {
+        drawAngle += circleAngle;
+        canvas.Save();
+        canvas.Rotate(-QUARTER_CIRCLE - circleAngle, center.GetX(), center.GetY());
+    } else if (NearZero(arcData.lastAngle) && GreatNotEqual(arcData.drawAngle, WHOLE_CIRCLE - circleAngle * 2.0f)) {
+        float startPos = (WHOLE_CIRCLE - circleAngle) / WHOLE_CIRCLE;
+        pos.emplace_back(startPos);
+        colors.emplace_back(sourceColors.GetColors().begin()->GetLinearColor().GetValue());
+        canvas.Save();
+        canvas.Rotate(-QUARTER_CIRCLE, center.GetX(), center.GetY());
+    } else {
+        canvas.Save();
+        canvas.Rotate(-QUARTER_CIRCLE, center.GetX(), center.GetY());
+    }
 #ifndef USE_ROSEN_DRAWING
-    RSPath path;
+    gradientPaint.SetShaderEffect(RSShaderEffect::CreateSweepGradient(ToRSPoint(PointF(center.GetX(), center.GetY())),
+        colors, pos, RSTileMode::CLAMP, START_ANGLE, drawAngle, nullptr));
 #else
-    RSRecordingPath path;
+    gradientPaint.SetShaderEffect(
+        RSRecordingShaderEffect::CreateSweepGradient(ToRSPoint(PointF(center.GetX(), center.GetY())), colors, pos,
+            RSTileMode::CLAMP, START_ANGLE, drawAngle, nullptr));
 #endif
-    RSRect rRect(center.GetX() - radius + thickness * PERCENT_HALF, center.GetY() - radius + thickness * PERCENT_HALF,
-        center.GetX() + radius - thickness * PERCENT_HALF, center.GetY() + radius - thickness * PERCENT_HALF);
-    path.AddArc(rRect, START_ANGLE, drawAngle);
-
-    RSBrush startCirclePaint;
-    startCirclePaint.SetAntiAlias(true);
-    startCirclePaint.SetColor(arcData.progressColors.GetColors().begin()->GetLinearColor().GetValue());
-
-    RSBrush endCirclePaint;
-    endCirclePaint.SetAntiAlias(true);
-    endCirclePaint.SetColor(arcData.progressColors.GetColors().rbegin()->GetLinearColor().GetValue());
-
+    RSFilter filter;
+    if (isShadow) {
+        gradientPaint.SetAlpha(SHADOW_ALPHA);
 #ifndef USE_ROSEN_DRAWING
-    gradientPaint.SetShaderEffect(RSShaderEffect::CreateSweepGradient(
-        ToRSPoint(PointF(center.GetX(), center.GetY())), colors, pos, RSTileMode::CLAMP, 0, drawAngle, nullptr));
+        filter.SetImageFilter(RSImageFilter::CreateBlurImageFilter(
+            shadowRadiusFloat_->Get(), shadowRadiusFloat_->Get(), RSTileMode::DECAL, nullptr));
+        gradientPaint.SetFilter(filter);
 #else
-    gradientPaint.SetShaderEffect(RSRecordingShaderEffect::CreateSweepGradient(
-        ToRSPoint(PointF(center.GetX(), center.GetY())), colors, pos, RSTileMode::CLAMP, 0, drawAngle, nullptr));
+        filter.SetImageFilter(RSRecordingImageFilter::CreateBlurImageFilter(
+            shadowRadiusFloat_->Get(), shadowRadiusFloat_->Get(), RSTileMode::DECAL, nullptr));
+        gradientPaint.SetFilter(filter);
 #endif
+    }
 
-    canvas.Save();
-    canvas.AttachBrush(startCirclePaint);
-    RSRect edgeRect(center.GetX() - thickness * PERCENT_HALF, center.GetY() - radius,
-        center.GetX() + thickness * PERCENT_HALF, center.GetY() - radius + thickness);
-    canvas.DrawArc(edgeRect, QUARTER_CIRCLE - FIXED_ANGLE, HALF_CIRCLE + FIXED_DRAW_ANGLE);
-    canvas.DetachBrush();
-    canvas.Restore();
-
-    canvas.Save();
-    canvas.Rotate(-QUARTER_CIRCLE, center.GetX(), center.GetY());
-    canvas.AttachPen(gradientPaint);
+    canvas.AttachBrush(gradientPaint);
     canvas.DrawPath(path);
-    canvas.DetachPen();
+    canvas.DetachBrush();
+    path.Reset();
     canvas.Restore();
 
-    canvas.Save();
-    canvas.Rotate(drawAngle, center.GetX(), center.GetY());
-    canvas.AttachBrush(endCirclePaint);
-    canvas.DrawArc(edgeRect, -QUARTER_CIRCLE - FIXED_ANGLE, HALF_CIRCLE + FIXED_DRAW_ANGLE);
-    canvas.DetachBrush();
-    canvas.Restore();
+    /* if path havn't end half circle, draw end circle extra. when draw is not whole circle, add fix angle to cover
+       gap between line and end half circle */
+    if (GreatNotEqual(drawAngle - lastAngle, WHOLE_CIRCLE - circleAngle * 2.0f)) {
+        RSBrush endCirclePaint;
+        endCirclePaint.SetAntiAlias(true);
+        if (NearZero(arcData.lastAngle)) {
+            pos.pop_back();
+            colors.pop_back();
+        }
+        pos.emplace(pos.begin(), circleAngle / WHOLE_CIRCLE);
+        colors.emplace(colors.begin(), sourceColors.GetColors().rbegin()->GetLinearColor().GetValue());
+#ifndef USE_ROSEN_DRAWING
+        endCirclePaint.SetShaderEffect(
+            RSShaderEffect::CreateSweepGradient(ToRSPoint(PointF(center.GetX(), center.GetY())), colors, pos,
+                RSTileMode::CLAMP, START_ANGLE, drawAngle, nullptr));
+#else
+        endCirclePaint.SetShaderEffect(
+            RSRecordingShaderEffect::CreateSweepGradient(ToRSPoint(PointF(center.GetX(), center.GetY())), colors, pos,
+                RSTileMode::CLAMP, START_ANGLE, drawAngle, nullptr));
+#endif
+        if (isShadow) {
+            endCirclePaint.SetAlpha(SHADOW_ALPHA);
+            endCirclePaint.SetFilter(filter);
+        }
+        canvas.Save();
+        canvas.Rotate(-QUARTER_CIRCLE, center.GetX(), center.GetY());
+        canvas.AttachBrush(endCirclePaint);
+        canvas.DrawPath(endPath);
+        canvas.DetachBrush();
+        endPath.Reset();
+        canvas.Restore();
+    }
+}
+
+void DataPanelModifier::Path2DArc(
+    RSPath& path, double x, double y, double r, double startAngle, double endAngle, bool counterclockwise) const
+{
+    RSPoint point1(x - r, y - r);
+    RSPoint point2(x + r, y + r);
+
+    double sweepAngle = endAngle - startAngle;
+    if (!NearZero(counterclockwise)) {
+        sweepAngle = endAngle > startAngle ? (std::fmod(sweepAngle, WHOLE_CIRCLE) - WHOLE_CIRCLE) : sweepAngle;
+    } else {
+        sweepAngle = endAngle > startAngle ? sweepAngle : (std::fmod(sweepAngle, WHOLE_CIRCLE) + WHOLE_CIRCLE);
+    }
+
+    if (NearEqual(std::fmod(sweepAngle, WHOLE_CIRCLE), 0.0) && !NearEqual(startAngle, endAngle)) {
+        path.ArcTo(point1, point2, startAngle, HALF_CIRCLE);
+        path.ArcTo(point1, point2, startAngle + HALF_CIRCLE, HALF_CIRCLE);
+    } else if (!NearEqual(std::fmod(sweepAngle, WHOLE_CIRCLE), 0.0) && std::abs(sweepAngle) > WHOLE_CIRCLE) {
+        path.ArcTo(point1, point2, startAngle, HALF_CIRCLE);
+        path.ArcTo(point1, point2, startAngle + HALF_CIRCLE, HALF_CIRCLE);
+        path.ArcTo(point1, point2, startAngle + HALF_CIRCLE + HALF_CIRCLE, sweepAngle);
+    } else {
+        path.ArcTo(point1, point2, startAngle, sweepAngle);
+    }
 }
 
 Gradient DataPanelModifier::SortGradientColorsOffset(const Gradient& srcGradient) const

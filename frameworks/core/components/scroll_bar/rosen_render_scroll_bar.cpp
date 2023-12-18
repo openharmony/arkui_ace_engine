@@ -23,7 +23,6 @@ namespace OHOS::Ace {
 void RosenRenderScrollBar::Paint(RenderContext& context, const Offset& offset)
 {
     if (displayMode_ == DisplayMode::OFF) {
-        LOGD("DisplayMode is off, or opacity is zero, needn't paint.");
         return;
     }
     for (auto& child : GetChildren()) {

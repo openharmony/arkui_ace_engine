@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+import mediaquery from '@ohos.mediaquery'
+
 interface IconTheme {
   size: SizeOptions;
   margin: Margin;
@@ -34,6 +36,7 @@ interface ButtonTheme {
   fontColor: ResourceColor;
   textMargin: Margin;
   minFontSize: number;
+  fontWeight: FontWeight;
   hoverColor: ResourceColor;
   backgroundColor: ResourceColor;
 }
@@ -41,12 +44,16 @@ interface ButtonTheme {
 interface MessageTheme {
   fontSize: Resource;
   fontColor: ResourceColor;
+  fontWeight: FontWeight;
+  plainFontColor: ResourceColor;
 }
 
 interface CloseButtonTheme {
   size: SizeOptions;
   image: ResourceStr;
+  imageSize: SizeOptions;
   margin: Margin;
+  padding: Padding;
   fillColor: ResourceColor;
   hoverColor: ResourceColor;
   backgroundColor: ResourceColor;
@@ -76,31 +83,36 @@ export const defaultTheme: PopupTheme = {
   title: {
     margin: { bottom: 2 },
     minFontSize: 12,
-    fontWeight: FontWeight.Normal,
+    fontWeight: FontWeight.Medium,
     fontSize: $r('sys.float.ohos_id_text_size_sub_title2'),
-    fontColor: $r('sys.color.ohos_fa_text_primary')
+    fontColor: $r('sys.color.ohos_id_color_text_primary')
   },
   button: {
     margin: { top: 16, bottom: 16, left: 16, right: 16 },
     fontSize: $r('sys.float.ohos_id_text_size_button2'),
-    fontColor: $r('sys.color.ohos_fa_text_activated'),
+    fontColor: $r('sys.color.ohos_id_color_text_primary_activated'),
     textMargin: { top: 8, bottom: 8, left: 8, right: 8 },
     minFontSize: 9,
+    fontWeight: FontWeight.Medium,
     hoverColor: $r('sys.color.ohos_id_color_hover'),
     backgroundColor: $r('sys.color.ohos_id_color_background_transparent')
   },
   message: {
     fontSize: $r('sys.float.ohos_id_text_size_body2'),
-    fontColor: $r('sys.color.ohos_fa_text_secondary')
+    fontColor: $r('sys.color.ohos_id_color_text_secondary'),
+    fontWeight: FontWeight.Regular,
+    plainFontColor: $r('sys.color.ohos_id_color_text_primary')
   },
   windows: {
     padding: { top: 12, bottom: 12, left: 12, right: 12 },
   },
   closeButton: {
-    size: { width: 20, height: 20 },
+    size: { width: 22, height: 22 },
+    imageSize: { width: 18, height: 18 },
+    padding: { top: 2, bottom: 2, left: 2, right: 2 },
     margin: { top: 12, bottom: 12, left: 12, right: 12 },
     image: $r('sys.media.ohos_ic_public_cancel'),
-    fillColor: $r('sys.color.ohos_fa_icon_secondary'),
+    fillColor: $r('sys.color.ohos_id_color_secondary'),
     hoverColor: $r('sys.color.ohos_id_color_hover'),
     backgroundColor: $r('sys.color.ohos_id_color_background_transparent')
   },
@@ -169,7 +181,9 @@ export struct PopupComponent {
   @State applyHeight: number = 0;
   @State buttonHeight: number = 0;
   @State scrollHeight: number = 0;
-  @State scrollMaxHeight: number = 0;
+  @State beforeScreenStatus: boolean = true;
+  @State currentScreenStatus: boolean = true;
+  private listener = mediaquery.matchMediaSync('(orientation: landscape)')
 
   private getIconWidth(): Dimension {
     return this.icon?.width ?? this.theme.icon.size.width as number
@@ -248,6 +262,18 @@ export struct PopupComponent {
     return this.theme.closeButton.backgroundColor
   }
 
+  private getCloseButtonPadding(): Padding {
+    return this.theme.closeButton.padding
+  }
+
+  private getCloseButtonImageWidth(): Length | undefined {
+    return this.theme.closeButton.imageSize.width
+  }
+
+  private getCloseButtonImageHeight(): Length | undefined {
+    return this.theme.closeButton.imageSize.height
+  }
+
   private getMessageText(): string | Resource {
     return this.message.text
   }
@@ -257,18 +283,47 @@ export struct PopupComponent {
   }
 
   private getMessageFontColor(): ResourceColor {
-    return this.message.fontColor ?? this.theme.message.fontColor
+    let fontColor: ResourceColor
+    if (this.message.fontColor) {
+      fontColor = this.message.fontColor
+    } else {
+      if ((this.icon.image !== '' && this.icon.image !== void (0)) ||
+        (this.title.text !== '' && this.title.text !== void (0)) ||
+        (this.buttons?.[0]?.text !== '' && this.buttons?.[0]?.text !== void (0)) ||
+        (this.buttons?.[1]?.text !== '' && this.buttons?.[1]?.text !== void (0))) {
+        fontColor = this.theme.message.fontColor
+      } else {
+        fontColor = this.theme.message.plainFontColor
+      }
+    }
+    return fontColor
   }
 
   private getMessagePadding(): Padding {
     let padding: Padding
-    if (this.title) {
+    if (this.title.text !== '' && this.title.text !== void (0)) {
       padding = { left: this.theme.button.margin.left as number / 2 }
     }
     else {
       padding = { left: this.theme.button.margin.left as number / 2, right: this.theme.closeButton.margin.right }
     }
     return padding
+  }
+
+  private getMessageMaxWeight(): number {
+    let textMaxWeight: number = undefined
+    if (this.showClose || this.showClose === void (0)) {
+      textMaxWeight = 400
+      textMaxWeight -= (this.theme.windows.padding.left as number - (this.theme.button.margin.right as number / 2))
+      textMaxWeight -= this.theme.windows.padding.right as number
+      textMaxWeight -= this.theme.button.margin.left as number / 2
+      textMaxWeight -= this.getCloseButtonWidth() as number
+    }
+    return textMaxWeight
+  }
+
+  private getMessageFontWeight(): number | FontWeight | string {
+    return this.theme.message.fontWeight
   }
 
   private getButtonMargin(): Margin {
@@ -319,6 +374,10 @@ export struct PopupComponent {
     return this.theme.button.minFontSize
   }
 
+  private getButtonFontWeight(): number | FontWeight | string {
+    return this.theme.button.fontWeight
+  }
+
   private getWindowsPadding(): Padding {
     return {
       top: this.theme.windows.padding.top,
@@ -328,25 +387,41 @@ export struct PopupComponent {
     }
   }
 
+  aboutToAppear() {
+    this.listener.on("change", (mediaQueryResult: mediaquery.MediaQueryResult) => {
+      this.currentScreenStatus = mediaQueryResult.matches
+    })
+  }
+
+  aboutToDisappear() {
+    this.listener.off("change")
+  }
+
   getScrollMaxHeight(): number {
-    if(this.textHeight > this.scrollHeight){
-      this.scrollMaxHeight = this.applyHeight
+    let scrollMaxHeight: number = undefined
+    if (this.currentScreenStatus !== this.beforeScreenStatus) {
+      this.beforeScreenStatus = this.currentScreenStatus
+      return scrollMaxHeight;
     }
-    let scrollMaxHeight: number = this.scrollMaxHeight
+    scrollMaxHeight = this.applyHeight
     scrollMaxHeight -= this.titleHeight
     scrollMaxHeight -= this.buttonHeight
     scrollMaxHeight -= this.theme.windows.padding.top as number
     scrollMaxHeight -= (this.theme.button.textMargin.bottom as number / 2)
     scrollMaxHeight -= this.theme.title.margin.bottom as number
     scrollMaxHeight -= (this.theme.windows.padding.bottom as number - (this.theme.button.textMargin.bottom as number / 2))
-    return scrollMaxHeight
+    if (Math.floor(this.textHeight) > Math.floor(scrollMaxHeight + 1)) {
+      return scrollMaxHeight
+    } else {
+      scrollMaxHeight = undefined
+      return scrollMaxHeight
+    }
   }
 
   private getLayoutWeight(): number {
     let layoutWeight: number
     if ((this.icon.image !== '' && this.icon.image !== void (0)) ||
       (this.title.text !== '' && this.title.text !== void (0)) ||
-      (this.showClose || this.showClose === void (0)) ||
       (this.buttons?.[0]?.text !== '' && this.buttons?.[0]?.text !== void (0)) ||
       (this.buttons?.[1]?.text !== '' && this.buttons?.[1]?.text !== void (0))) {
       layoutWeight = 1
@@ -383,10 +458,13 @@ export struct PopupComponent {
               Button() {
                 Image(this.getCloseButtonImage())
                   .focusable(true)
+                  .width(this.getCloseButtonImageWidth())
+                  .height(this.getCloseButtonImageHeight())
                   .fillColor(this.getCloseButtonFillColor())
               }
               .width(this.getCloseButtonWidth())
               .height(this.getCloseButtonHeight())
+              .padding(this.getCloseButtonPadding())
               .backgroundColor(this.closeButtonBackgroundColor)
               .onHover((isHover: boolean) => {
                 if (isHover) {
@@ -413,10 +491,10 @@ export struct PopupComponent {
             Text(this.getMessageText())
               .fontSize(this.getMessageFontSize())
               .fontColor(this.getMessageFontColor())
+              .fontWeight(this.getMessageFontWeight())
+              .constraintSize({ maxWidth: this.getMessageMaxWeight(), minHeight: this.getCloseButtonHeight() })
               .onAreaChange((_, rect) => {
-                if(this.textHeight !== rect.height as number){
-                  this.textHeight = rect.height as number
-                }
+                this.textHeight = rect.height as number
               })
           }
           .width("100%")
@@ -426,9 +504,7 @@ export struct PopupComponent {
           .scrollable(ScrollDirection.Vertical)
           .constraintSize({ maxHeight: this.getScrollMaxHeight() })
           .onAreaChange((_, rect) => {
-            if(this.scrollHeight !== rect.height as number){
-              this.scrollHeight = rect.height as number
-            }
+            this.scrollHeight = rect.height as number
           })
 
           Flex({ wrap: FlexWrap.Wrap }) {
@@ -439,6 +515,7 @@ export struct PopupComponent {
                   .focusable(true)
                   .fontSize(this.getFirstButtonFontSize())
                   .fontColor(this.getFirstButtonFontColor())
+                  .fontWeight(this.getButtonFontWeight())
                   .minFontSize(this.getButtonMinFontSize())
                   .textOverflow({ overflow: TextOverflow.Ellipsis })
               }
@@ -465,6 +542,7 @@ export struct PopupComponent {
                   .focusable(true)
                   .fontSize(this.getSecondButtonFontSize())
                   .fontColor(this.getSecondButtonFontColor())
+                  .fontWeight(this.getButtonFontWeight())
                   .minFontSize(this.getButtonMinFontSize())
                   .textOverflow({ overflow: TextOverflow.Ellipsis })
               }
@@ -500,10 +578,10 @@ export struct PopupComponent {
               Text(this.getMessageText())
                 .fontSize(this.getMessageFontSize())
                 .fontColor(this.getMessageFontColor())
+                .fontWeight(this.getMessageFontWeight())
+                .constraintSize({ maxWidth: this.getMessageMaxWeight(), minHeight: this.getCloseButtonHeight() })
                 .onAreaChange((_, rect) => {
-                  if(this.textHeight !== rect.height as number){
-                    this.textHeight = rect.height as number
-                  }
+                  this.textHeight = rect.height as number
                 })
             }
             .layoutWeight(this.getLayoutWeight())
@@ -513,19 +591,20 @@ export struct PopupComponent {
             .scrollable(ScrollDirection.Vertical)
             .constraintSize({ maxHeight: this.getScrollMaxHeight() })
             .onAreaChange((_, rect) => {
-              if(this.scrollHeight !== rect.height as number){
-                this.scrollHeight = rect.height as number
-              }
+              this.scrollHeight = rect.height as number
             })
 
             if (this.showClose || this.showClose === void (0)) {
               Button() {
                 Image(this.getCloseButtonImage())
                   .focusable(true)
+                  .width(this.getCloseButtonImageWidth())
+                  .height(this.getCloseButtonImageHeight())
                   .fillColor(this.getCloseButtonFillColor())
               }
               .width(this.getCloseButtonWidth())
               .height(this.getCloseButtonHeight())
+              .padding(this.getCloseButtonPadding())
               .backgroundColor(this.closeButtonBackgroundColor)
               .onHover((isHover: boolean) => {
                 if (isHover) {
@@ -553,6 +632,7 @@ export struct PopupComponent {
                   .focusable(true)
                   .fontSize(this.getFirstButtonFontSize())
                   .fontColor(this.getFirstButtonFontColor())
+                  .fontWeight(this.getButtonFontWeight())
                   .minFontSize(this.getButtonMinFontSize())
                   .textOverflow({ overflow: TextOverflow.Ellipsis })
               }
@@ -579,6 +659,7 @@ export struct PopupComponent {
                   .focusable(true)
                   .fontSize(this.getSecondButtonFontSize())
                   .fontColor(this.getSecondButtonFontColor())
+                  .fontWeight(this.getButtonFontWeight())
                   .minFontSize(this.getButtonMinFontSize())
                   .textOverflow({ overflow: TextOverflow.Ellipsis })
               }
@@ -611,9 +692,7 @@ export struct PopupComponent {
     .alignItems(VerticalAlign.Top)
     .padding(this.getWindowsPadding())
     .onAreaChange((_, rect) => {
-      if(this.applyHeight !== rect.height as number){
-        this.applyHeight = rect.height as number
-      }
+      this.applyHeight = rect.height as number
     })
   }
 }

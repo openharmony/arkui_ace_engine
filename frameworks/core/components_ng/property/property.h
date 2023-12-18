@@ -176,7 +176,6 @@ public:                                                                         
     {                                                                      \
         auto& groupProperty = GetOrCreate##group();                        \
         if (groupProperty->Check##name(value)) {                           \
-            LOGD("the %{public}s is same, just ignore", #name);            \
             return;                                                        \
         }                                                                  \
         groupProperty->Update##name(value);                                \
@@ -189,7 +188,6 @@ public:                                                                         
     {                                                                                      \
         auto& groupProperty = GetOrCreate##group();                                        \
         if (groupProperty->Check##groupItem(value)) {                                      \
-            LOGD("the %{public}s is same, just ignore", #name);                            \
             return;                                                                        \
         }                                                                                  \
         groupProperty->Update##groupItem(value);                                           \
@@ -202,7 +200,6 @@ public:                                                                         
     {                                                                                   \
         auto& groupProperty = GetOrCreate##group();                                     \
         if (groupProperty->Check##name(value)) {                                        \
-            LOGD("the %{public}s is same, just ignore", #name);                         \
             return;                                                                     \
         }                                                                               \
         groupProperty->Update##name(value);                                             \
@@ -216,7 +213,6 @@ public:                                                                         
     {                                                           \
         auto& groupProperty = GetOrCreate##group();             \
         if (groupProperty->Check##name(value)) {                \
-            LOGD("the %{public}s is same, just ignore", #name); \
             return;                                             \
         }                                                       \
         groupProperty->Update##name(value);                     \
@@ -263,7 +259,6 @@ public:                                                                \
     {                                                                  \
         if (prop##name##_.has_value()) {                               \
             if (NearEqual(prop##name##_.value(), value)) {             \
-                LOGD("the %{public}s is same, just ignore", #name);    \
                 return;                                                \
             }                                                          \
         }                                                              \
@@ -278,7 +273,6 @@ public:                                                                         
     {                                                                                     \
         if (prop##name##_.has_value()) {                                                  \
             if (NearEqual(prop##name##_.value(), value)) {                                \
-                LOGD("the %{public}s is same, just ignore", #name);                       \
                 return;                                                                   \
             }                                                                             \
         }                                                                                 \
@@ -294,7 +288,6 @@ public:                                                             \
     {                                                               \
         if (prop##name##_.has_value()) {                            \
             if (NearEqual(prop##name##_.value(), value)) {          \
-                LOGD("the %{public}s is same, just ignore", #name); \
                 return;                                             \
             }                                                       \
         }                                                           \

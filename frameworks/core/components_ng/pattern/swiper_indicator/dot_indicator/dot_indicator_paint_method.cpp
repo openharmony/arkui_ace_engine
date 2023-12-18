@@ -20,8 +20,8 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/swiper/render_swiper.h"
-#include "core/components_ng/pattern/swiper_indicator/indicator_common/swiper_indicator_utils.h"
 #include "core/components_ng/pattern/swiper/swiper_layout_property.h"
+#include "core/components_ng/pattern/swiper_indicator/indicator_common/swiper_indicator_utils.h"
 #include "core/components_ng/render/paint_property.h"
 #include "core/pipeline/pipeline_base.h"
 namespace OHOS::Ace::NG {
@@ -44,6 +44,8 @@ constexpr uint32_t SELECTED_ITEM_HALF_WIDTH = 2;
 constexpr uint32_t SELECTED_ITEM_HALF_HEIGHT = 3;
 constexpr float TOUCH_BOTTOM_BACKGROUND_WIDTH_MULTIPLE = 1.225f;
 constexpr float TOUCH_BOTTOM_DOT_WIDTH_MULTIPLE = 0.0125f;
+constexpr float TOUCH_BOTTOM_FOLLOW_THRESHOLD = 0.5f;
+constexpr float LONG_POINT_TAIL_RATIO = 0.5f;
 
 constexpr int TWOFOLD = 2;
 } // namespace
@@ -92,34 +94,41 @@ void DotIndicatorPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
     }
 }
 
+void DotIndicatorPaintMethod::GetLongPointAnimationStateSecondCenter(
+    const PaintWrapper* paintWrapper, std::vector<std::pair<float, float>>& pointCenterX)
+{
+    bool leftBottom = (gestureState_ == GestureState::GESTURE_STATE_RELEASE_LEFT &&
+                       touchBottomTypeLoop_ == TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_LEFT);
+    bool rightBottom = (gestureState_ == GestureState::GESTURE_STATE_RELEASE_RIGHT &&
+                        touchBottomTypeLoop_ == TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_RIGHT);
+
+    if (leftBottom || rightBottom) {
+        pointAnimationStage_ = PointAnimationStage::STATE_EXPAND_TO_LONG_POINT;
+        auto [longPointCenterX, _] = CalculateLongPointCenterX(paintWrapper);
+        pointAnimationStage_ = PointAnimationStage::STATE_SHRINKT_TO_BLACK_POINT;
+        pointCenterX.push_back(longPointCenterX);
+    }
+}
+
+void DotIndicatorPaintMethod::UpdateNormalIndicator(
+    LinearVector<float>& itemHalfSizes, const PaintWrapper* paintWrapper)
+{
+    if (gestureState_ == GestureState::GESTURE_STATE_RELEASE_LEFT ||
+        gestureState_ == GestureState::GESTURE_STATE_RELEASE_RIGHT) {
+        std::vector<std::pair<float, float>> pointCenterX({ longPointCenterX_ });
+        GetLongPointAnimationStateSecondCenter(paintWrapper, pointCenterX);
+        dotIndicatorModifier_->PlayIndicatorAnimation(
+            vectorBlackPointCenterX_, pointCenterX, gestureState_, touchBottomTypeLoop_);
+    } else {
+        dotIndicatorModifier_->UpdateNormalPaintProperty(
+            normalMargin_, itemHalfSizes, vectorBlackPointCenterX_, longPointCenterX_);
+    }
+}
+
 void DotIndicatorPaintMethod::PaintNormalIndicator(const PaintWrapper* paintWrapper)
 {
-    CHECK_NULL_VOID(paintWrapper);
-    const auto& geometryNode = paintWrapper->GetGeometryNode();
-    CHECK_NULL_VOID(geometryNode);
-    auto paintProperty = DynamicCast<DotIndicatorPaintProperty>(paintWrapper->GetPaintProperty());
-    CHECK_NULL_VOID(paintProperty);
-    auto swiperTheme = GetSwiperIndicatorTheme();
-    CHECK_NULL_VOID(swiperTheme);
-    SizeF frameSize = geometryNode->GetFrameSize();
-    // diameter calculation
-    auto itemWidth = static_cast<float>(paintProperty->GetItemWidthValue(swiperTheme->GetSize()).ConvertToPx());
-    auto itemHeight = static_cast<float>(paintProperty->GetItemHeightValue(swiperTheme->GetSize()).ConvertToPx());
-    auto selectedItemWidth = static_cast<float>(
-        paintProperty->GetSelectedItemWidthValue(swiperTheme->GetSize()).ConvertToPx());
-    auto selectedItemHeight = static_cast<float>(
-        paintProperty->GetSelectedItemHeightValue(swiperTheme->GetSize()).ConvertToPx());
-    // use radius calculation
-    LinearVector<float> itemHalfSizes;
-    itemHalfSizes.emplace_back(itemWidth * 0.5);
-    itemHalfSizes.emplace_back(itemHeight * 0.5);
-    itemHalfSizes.emplace_back(selectedItemWidth * 0.5);
-    itemHalfSizes.emplace_back(selectedItemHeight * 0.5);
-    CalculateNormalMargin(itemHalfSizes, frameSize);
-    CalculatePointCenterX(
-        itemHalfSizes, normalMargin_.GetX(), static_cast<float>(INDICATOR_PADDING_DEFAULT.ConvertToPx()),
-        static_cast<float>(INDICATOR_ITEM_SPACE.ConvertToPx()), currentIndex_);
-
+    auto [longPointCenterX, itemHalfSizes] = CalculateLongPointCenterX(paintWrapper);
+    longPointCenterX_ = longPointCenterX;
     if (dotIndicatorModifier_->GetIsHover()) {
         dotIndicatorModifier_->UpdateHoverToNormalPaintProperty(
             normalMargin_, itemHalfSizes, vectorBlackPointCenterX_, longPointCenterX_);
@@ -127,8 +136,7 @@ void DotIndicatorPaintMethod::PaintNormalIndicator(const PaintWrapper* paintWrap
         dotIndicatorModifier_->UpdatePressToNormalPaintProperty(
             normalMargin_, itemHalfSizes, vectorBlackPointCenterX_, longPointCenterX_);
     } else {
-        dotIndicatorModifier_->UpdateNormalPaintProperty(
-            normalMargin_, itemHalfSizes, vectorBlackPointCenterX_, longPointCenterX_);
+        UpdateNormalIndicator(itemHalfSizes, paintWrapper);
     }
 }
 
@@ -142,24 +150,27 @@ void DotIndicatorPaintMethod::PaintHoverIndicator(const PaintWrapper* paintWrapp
     // diameter calculation
     auto itemWidth = static_cast<float>(paintProperty->GetItemWidthValue(swiperTheme->GetSize()).ConvertToPx());
     auto itemHeight = static_cast<float>(paintProperty->GetItemHeightValue(swiperTheme->GetSize()).ConvertToPx());
-    auto selectedItemWidth = static_cast<float>(
-        paintProperty->GetSelectedItemWidthValue(swiperTheme->GetSize()).ConvertToPx());
-    auto selectedItemHeight = static_cast<float>(
-        paintProperty->GetSelectedItemHeightValue(swiperTheme->GetSize()).ConvertToPx());
+    auto selectedItemWidth =
+        static_cast<float>(paintProperty->GetSelectedItemWidthValue(swiperTheme->GetSize()).ConvertToPx());
+    auto selectedItemHeight =
+        static_cast<float>(paintProperty->GetSelectedItemHeightValue(swiperTheme->GetSize()).ConvertToPx());
     // use radius calculation
     LinearVector<float> itemHalfSizes;
     itemHalfSizes.emplace_back(itemWidth * 0.5 * INDICATOR_ZOOM_IN_SCALE);
     itemHalfSizes.emplace_back(itemHeight * 0.5 * INDICATOR_ZOOM_IN_SCALE);
     itemHalfSizes.emplace_back(selectedItemWidth * 0.5 * INDICATOR_ZOOM_IN_SCALE);
     itemHalfSizes.emplace_back(selectedItemHeight * 0.5 * INDICATOR_ZOOM_IN_SCALE);
-    CalculatePointCenterX(itemHalfSizes, 0, static_cast<float>(INDICATOR_PADDING_HOVER.ConvertToPx()),
-        static_cast<float>(INDICATOR_ITEM_SPACE.ConvertToPx()), currentIndex_);
+    longPointCenterX_ =
+        CalculatePointCenterX(itemHalfSizes, 0, static_cast<float>(INDICATOR_PADDING_HOVER.ConvertToPx()),
+            static_cast<float>(INDICATOR_ITEM_SPACE.ConvertToPx()), currentIndex_);
 
     if (dotIndicatorModifier_->GetIsPressed()) {
         dotIndicatorModifier_->SetIsPressed(false);
         dotIndicatorModifier_->UpdateHoverAndPressConversionPaintProperty();
     } else if (dotIndicatorModifier_->GetIsHover()) {
-        dotIndicatorModifier_->UpdateHoverPaintProperty(itemHalfSizes, vectorBlackPointCenterX_, longPointCenterX_);
+        if (!mouseClickIndex_.has_value()) {
+            dotIndicatorModifier_->UpdateHoverPaintProperty(itemHalfSizes, vectorBlackPointCenterX_, longPointCenterX_);
+        }
     } else {
         dotIndicatorModifier_->UpdateNormalToHoverPaintProperty(
             itemHalfSizes, vectorBlackPointCenterX_, longPointCenterX_);
@@ -172,17 +183,20 @@ void DotIndicatorPaintMethod::PaintHoverIndicator(const PaintWrapper* paintWrapp
         dotIndicatorModifier_->SetNormalToHoverIndex(hoverIndex_);
         dotIndicatorModifier_->UpdateNormalToHoverPointDilateRatio();
     }
-    if (mouseClickIndex_ && mouseClickIndex_ != currentIndex_) {
-        if (currentIndex_ == itemCount_ - displayCount_ && !isLoop_ &&
-            mouseClickIndex_ > currentIndex_ && mouseClickIndex_ < itemCount_) {
-            CalculatePointCenterX(itemHalfSizes, 0, static_cast<float>(INDICATOR_PADDING_HOVER.ConvertToPx()),
-                static_cast<float>(INDICATOR_ITEM_SPACE.ConvertToPx()), currentIndex_);
+
+    if (mouseClickIndex_) {
+        if (currentIndex_ == itemCount_ - displayCount_ && !isLoop_ && mouseClickIndex_ > currentIndex_ &&
+            mouseClickIndex_ < itemCount_) {
+            longPointCenterX_ =
+                CalculatePointCenterX(itemHalfSizes, 0, static_cast<float>(INDICATOR_PADDING_HOVER.ConvertToPx()),
+                    static_cast<float>(INDICATOR_ITEM_SPACE.ConvertToPx()), currentIndex_);
         } else {
-            CalculatePointCenterX(itemHalfSizes, 0, static_cast<float>(INDICATOR_PADDING_HOVER.ConvertToPx()),
-                static_cast<float>(INDICATOR_ITEM_SPACE.ConvertToPx()), mouseClickIndex_.value());
+            longPointCenterX_ =
+                CalculatePointCenterX(itemHalfSizes, 0, static_cast<float>(INDICATOR_PADDING_HOVER.ConvertToPx()),
+                    static_cast<float>(INDICATOR_ITEM_SPACE.ConvertToPx()), mouseClickIndex_.value());
         }
         dotIndicatorModifier_->UpdateAllPointCenterXAnimation(
-            mouseClickIndex_ > currentIndex_, vectorBlackPointCenterX_, longPointCenterX_);
+            gestureState_, vectorBlackPointCenterX_, longPointCenterX_);
         longPointIsHover_ = true;
         mouseClickIndex_ = std::nullopt;
     }
@@ -202,10 +216,10 @@ void DotIndicatorPaintMethod::PaintPressIndicator(const PaintWrapper* paintWrapp
     // diameter calculation
     auto itemWidth = static_cast<float>(paintProperty->GetItemWidthValue(swiperTheme->GetSize()).ConvertToPx());
     auto itemHeight = static_cast<float>(paintProperty->GetItemHeightValue(swiperTheme->GetSize()).ConvertToPx());
-    auto selectedItemWidth = static_cast<float>(
-        paintProperty->GetSelectedItemWidthValue(swiperTheme->GetSize()).ConvertToPx());
-    auto selectedItemHeight = static_cast<float>(
-        paintProperty->GetSelectedItemHeightValue(swiperTheme->GetSize()).ConvertToPx());
+    auto selectedItemWidth =
+        static_cast<float>(paintProperty->GetSelectedItemWidthValue(swiperTheme->GetSize()).ConvertToPx());
+    auto selectedItemHeight =
+        static_cast<float>(paintProperty->GetSelectedItemHeightValue(swiperTheme->GetSize()).ConvertToPx());
     // use radius calculation
     auto itemHalfWidth = itemWidth * 0.5 * INDICATOR_ZOOM_IN_SCALE;
     auto itemHalfHeight = itemHeight * 0.5 * INDICATOR_ZOOM_IN_SCALE;
@@ -216,8 +230,9 @@ void DotIndicatorPaintMethod::PaintPressIndicator(const PaintWrapper* paintWrapp
     itemHalfSizes.emplace_back(itemHalfHeight);
     itemHalfSizes.emplace_back(selectedItemHalfWidth);
     itemHalfSizes.emplace_back(selectedItemHalfHeight);
-    CalculatePointCenterX(itemHalfSizes, 0, static_cast<float>(INDICATOR_PADDING_HOVER.ConvertToPx()),
-        static_cast<float>(INDICATOR_ITEM_SPACE.ConvertToPx()), currentIndex_);
+    longPointCenterX_ =
+        CalculatePointCenterX(itemHalfSizes, 0, static_cast<float>(INDICATOR_PADDING_HOVER.ConvertToPx()),
+            static_cast<float>(INDICATOR_ITEM_SPACE.ConvertToPx()), currentIndex_);
     if (dotIndicatorModifier_->GetIsPressed()) {
         dotIndicatorModifier_->UpdatePressPaintProperty(itemHalfSizes, vectorBlackPointCenterX_, longPointCenterX_);
     } else if (dotIndicatorModifier_->GetIsHover()) {
@@ -253,9 +268,12 @@ void DotIndicatorPaintMethod::CalculateNormalMargin(const LinearVector<float>& i
     normalMargin_.SetY(marginY);
 }
 
-void DotIndicatorPaintMethod::CalculatePointCenterX(
+std::pair<float, float> DotIndicatorPaintMethod::CalculatePointCenterX(
     const LinearVector<float>& itemHalfSizes, float margin, float padding, float space, int32_t index)
 {
+    if (itemCount_ == 0) {
+        return { 0, 0 };
+    }
     float startCenterX = margin + padding;
     float endCenterX = margin + padding;
     if (Positive(turnPageRate_)) {
@@ -269,36 +287,105 @@ void DotIndicatorPaintMethod::CalculatePointCenterX(
         float rectWidth = padding + allPointDiameterSum + allPointSpaceSum + padding;
         startCenterX = rectWidth - startCenterX;
         endCenterX = rectWidth - endCenterX;
-        BackwardCalculation(itemHalfSizes, startCenterX, endCenterX, space, index);
-        return;
+        return BackwardCalculation(itemHalfSizes, startCenterX, endCenterX, space, index);
     }
-    ForwardCalculation(itemHalfSizes, startCenterX, endCenterX, space, index);
+    return ForwardCalculation(itemHalfSizes, startCenterX, endCenterX, space, index);
 }
 
-void DotIndicatorPaintMethod::CalculatePointCenterX(const StarAndEndPointCenter& starAndEndPointCenter,
-    const LinearVector<float>& startVectorBlackPointCenterX, const LinearVector<float>& endVectorBlackPointCenterX)
+std::tuple<std::pair<float, float>, LinearVector<float>> DotIndicatorPaintMethod::CalculateLongPointCenterX(
+    const PaintWrapper* paintWrapper)
+{
+    std::tuple<std::pair<float, float>, LinearVector<float>> tmp;
+    CHECK_NULL_RETURN(paintWrapper, tmp);
+    const auto& geometryNode = paintWrapper->GetGeometryNode();
+    CHECK_NULL_RETURN(geometryNode, tmp);
+    auto paintProperty = DynamicCast<DotIndicatorPaintProperty>(paintWrapper->GetPaintProperty());
+    CHECK_NULL_RETURN(paintProperty, tmp);
+    auto swiperTheme = GetSwiperIndicatorTheme();
+    CHECK_NULL_RETURN(swiperTheme, tmp);
+    SizeF frameSize = geometryNode->GetFrameSize();
+    // diameter calculation
+    auto itemWidth = static_cast<float>(paintProperty->GetItemWidthValue(swiperTheme->GetSize()).ConvertToPx());
+    auto itemHeight = static_cast<float>(paintProperty->GetItemHeightValue(swiperTheme->GetSize()).ConvertToPx());
+    auto selectedItemWidth =
+        static_cast<float>(paintProperty->GetSelectedItemWidthValue(swiperTheme->GetSize()).ConvertToPx());
+    auto selectedItemHeight =
+        static_cast<float>(paintProperty->GetSelectedItemHeightValue(swiperTheme->GetSize()).ConvertToPx());
+    // use radius calculation
+    LinearVector<float> itemHalfSizes;
+    itemHalfSizes.emplace_back(itemWidth * 0.5);
+    itemHalfSizes.emplace_back(itemHeight * 0.5);
+    itemHalfSizes.emplace_back(selectedItemWidth * 0.5);
+    itemHalfSizes.emplace_back(selectedItemHeight * 0.5);
+    CalculateNormalMargin(itemHalfSizes, frameSize);
+    auto longPointCenterX = CalculatePointCenterX(itemHalfSizes, normalMargin_.GetX(),
+        static_cast<float>(INDICATOR_PADDING_DEFAULT.ConvertToPx()),
+        static_cast<float>(INDICATOR_ITEM_SPACE.ConvertToPx()), currentIndex_);
+    return { longPointCenterX, itemHalfSizes };
+}
+
+std::tuple<float, float, float> DotIndicatorPaintMethod::GetMoveRate()
 {
     float blackPointCenterMoveRate = CubicCurve(BLACK_POINT_CENTER_BEZIER_CURVE_VELOCITY, CENTER_BEZIER_CURVE_MASS,
         CENTER_BEZIER_CURVE_STIFFNESS, CENTER_BEZIER_CURVE_DAMPING).MoveInternal(std::abs(turnPageRate_));
-    float longPointLeftCenterMoveRate = CubicCurve(turnPageRate_ > 0 ?
-        LONG_POINT_LEFT_CENTER_BEZIER_CURVE_VELOCITY : LONG_POINT_RIGHT_CENTER_BEZIER_CURVE_VELOCITY,
-        CENTER_BEZIER_CURVE_MASS, CENTER_BEZIER_CURVE_STIFFNESS,
-        CENTER_BEZIER_CURVE_DAMPING).MoveInternal(std::abs(turnPageRate_));
-    float longPointRightCenterMoveRate = CubicCurve(turnPageRate_ > 0 ?
-        LONG_POINT_RIGHT_CENTER_BEZIER_CURVE_VELOCITY : LONG_POINT_LEFT_CENTER_BEZIER_CURVE_VELOCITY,
-        CENTER_BEZIER_CURVE_MASS, CENTER_BEZIER_CURVE_STIFFNESS,
-        CENTER_BEZIER_CURVE_DAMPING).MoveInternal(std::abs(turnPageRate_));
+    float longPointLeftCenterMoveRate = 0.0f;
+    float longPointRightCenterMoveRate = 0.0f;
+
+    if (isPressed_ && touchBottomTypeLoop_ == TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_NONE) {
+        longPointLeftCenterMoveRate = CubicCurve(turnPageRate_ > 0 ? LONG_POINT_LEFT_CENTER_BEZIER_CURVE_VELOCITY :
+            LONG_POINT_RIGHT_CENTER_BEZIER_CURVE_VELOCITY, CENTER_BEZIER_CURVE_MASS, CENTER_BEZIER_CURVE_STIFFNESS,
+            CENTER_BEZIER_CURVE_DAMPING).MoveInternal(std::abs(turnPageRate_));
+        longPointRightCenterMoveRate = CubicCurve(turnPageRate_ > 0 ? LONG_POINT_RIGHT_CENTER_BEZIER_CURVE_VELOCITY :
+            LONG_POINT_LEFT_CENTER_BEZIER_CURVE_VELOCITY, CENTER_BEZIER_CURVE_MASS, CENTER_BEZIER_CURVE_STIFFNESS,
+            CENTER_BEZIER_CURVE_DAMPING).MoveInternal(std::abs(turnPageRate_));
+    } else if (gestureState_ == GestureState::GESTURE_STATE_RELEASE_LEFT ||
+               gestureState_ == GestureState::GESTURE_STATE_RELEASE_RIGHT) {
+        blackPointCenterMoveRate = 1;
+        longPointLeftCenterMoveRate = 1;
+        longPointRightCenterMoveRate = 1;
+    } else if (touchBottomTypeLoop_ == TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_LEFT) {
+        auto rateAbs = std::abs(turnPageRate_);
+        if (rateAbs < TOUCH_BOTTOM_FOLLOW_THRESHOLD) {
+            rateAbs = TOUCH_BOTTOM_FOLLOW_THRESHOLD;
+        }
+        longPointLeftCenterMoveRate = longPointRightCenterMoveRate = (1.0 - rateAbs);
+    } else if (touchBottomTypeLoop_ == TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_RIGHT) {
+        auto rateAbs = std::abs(turnPageRate_);
+        if (rateAbs > TOUCH_BOTTOM_FOLLOW_THRESHOLD) {
+            rateAbs = TOUCH_BOTTOM_FOLLOW_THRESHOLD;
+        }
+        longPointLeftCenterMoveRate = longPointRightCenterMoveRate = rateAbs;
+    } else if (gestureState_ == GestureState::GESTURE_STATE_FOLLOW_LEFT) {
+        longPointLeftCenterMoveRate = LinearCurve().MoveInternal(std::abs(turnPageRate_));
+        longPointRightCenterMoveRate = LinearCurve().MoveInternal(std::abs(turnPageRate_)) +
+                                       ((1 - longPointLeftCenterMoveRate) * LONG_POINT_TAIL_RATIO);
+    } else if (gestureState_ == GestureState::GESTURE_STATE_FOLLOW_RIGHT) {
+        longPointRightCenterMoveRate = LinearCurve().MoveInternal(std::abs(turnPageRate_));
+        longPointLeftCenterMoveRate = LinearCurve().MoveInternal(std::abs(turnPageRate_)) * LONG_POINT_TAIL_RATIO;
+    }
+    return { blackPointCenterMoveRate, longPointLeftCenterMoveRate, longPointRightCenterMoveRate };
+}
+
+std::pair<float, float> DotIndicatorPaintMethod::CalculatePointCenterX(
+    const StarAndEndPointCenter& starAndEndPointCenter, const LinearVector<float>& startVectorBlackPointCenterX,
+    const LinearVector<float>& endVectorBlackPointCenterX)
+{
+    const auto [blackPointCenterMoveRate, longPointLeftCenterMoveRate, longPointRightCenterMoveRate] = GetMoveRate();
+
     vectorBlackPointCenterX_.resize(itemCount_);
     for (int32_t i = 0; i < itemCount_; ++i) {
         vectorBlackPointCenterX_[i] = startVectorBlackPointCenterX[i] +
         (endVectorBlackPointCenterX[i] - startVectorBlackPointCenterX[i]) * blackPointCenterMoveRate;
     }
-    longPointCenterX_.first = starAndEndPointCenter.startLongPointLeftCenterX +
+
+    std::pair<float, float> longPointCenterX;
+    longPointCenterX.first = starAndEndPointCenter.startLongPointLeftCenterX +
         (starAndEndPointCenter.endLongPointLeftCenterX - starAndEndPointCenter.startLongPointLeftCenterX) *
-        longPointLeftCenterMoveRate;
-    longPointCenterX_.second = starAndEndPointCenter.startLongPointRightCenterX +
+            longPointLeftCenterMoveRate;
+    longPointCenterX.second = starAndEndPointCenter.startLongPointRightCenterX +
         (starAndEndPointCenter.endLongPointRightCenterX - starAndEndPointCenter.startLongPointRightCenterX) *
-        longPointRightCenterMoveRate;
+            longPointRightCenterMoveRate;
+    return longPointCenterX;
 }
 
 void DotIndicatorPaintMethod::CalculateHoverIndex(const LinearVector<float>& itemHalfSizes)
@@ -377,7 +464,7 @@ void DotIndicatorPaintMethod::UpdateBackground(const PaintWrapper* paintWrapper)
         if (itemCount_ > 1) {
             space = (rectWidth + changeValue - padding * 2 - allPointDiameterSum) / (itemCount_ - 1);
         }
-        CalculatePointCenterX(itemHalfSizes, 0, padding, space, currentIndex_);
+        longPointCenterX_ = CalculatePointCenterX(itemHalfSizes, 0, padding, space, currentIndex_);
         if (touchBottomType_ == TouchBottomType::START) {
             for (size_t index = 0; index < vectorBlackPointCenterX_.size(); index++) {
                 vectorBlackPointCenterX_[index] = vectorBlackPointCenterX_[index] - changeValue;
@@ -390,10 +477,69 @@ void DotIndicatorPaintMethod::UpdateBackground(const PaintWrapper* paintWrapper)
         touchBottomType_, vectorBlackPointCenterX_, longPointCenterX_, touchBottomRate_);
 }
 
-void DotIndicatorPaintMethod::ForwardCalculation(
-    const LinearVector<float>& itemHalfSizes, float startCenterX, float endCenterX, float space, int32_t index)
+std::pair<int32_t, int32_t> DotIndicatorPaintMethod::GetStartAndEndIndex(int32_t index)
 {
     int32_t startCurrentIndex = index;
+    int32_t endCurrentIndex = NearEqual(turnPageRate_, 0.0f) || LessOrEqual(turnPageRate_, -1.0f) ||
+        GreatOrEqual(turnPageRate_, 1.0f) ? endCurrentIndex = index :
+        (LessNotEqual(turnPageRate_, 0.0f) ? index + 1 : index - 1);
+    if (endCurrentIndex == -1) {
+        endCurrentIndex = itemCount_ - 1;
+    } else if (endCurrentIndex == itemCount_) {
+        endCurrentIndex = 0;
+    }
+
+    if (pointAnimationStage_ == PointAnimationStage::STATE_EXPAND_TO_LONG_POINT &&
+        gestureState_ == GestureState::GESTURE_STATE_RELEASE_LEFT &&
+        touchBottomTypeLoop_ == TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_LEFT) {
+        endCurrentIndex = startCurrentIndex;
+        return { startCurrentIndex, endCurrentIndex };
+    } else if (pointAnimationStage_ == PointAnimationStage::STATE_EXPAND_TO_LONG_POINT &&
+               gestureState_ == GestureState::GESTURE_STATE_RELEASE_RIGHT &&
+               touchBottomTypeLoop_ == TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_RIGHT) {
+        endCurrentIndex = startCurrentIndex = 0;
+        return { startCurrentIndex, endCurrentIndex };
+    }
+
+    if (touchBottomTypeLoop_ == TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_LEFT) {
+        startCurrentIndex = endCurrentIndex = 0;
+    } else if (gestureState_ == GestureState::GESTURE_STATE_RELEASE_RIGHT &&
+               touchBottomTypeLoop_ == TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_RIGHT) {
+        endCurrentIndex = startCurrentIndex = itemCount_ - 1;
+    } else if (touchBottomTypeLoop_ == TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_RIGHT) {
+        endCurrentIndex = startCurrentIndex;
+    }
+
+    return { startCurrentIndex, endCurrentIndex };
+}
+
+void DotIndicatorPaintMethod::AdjustPointCenterXForTouchBottom(StarAndEndPointCenter& pointCenter,
+    LinearVector<float>& endVectorBlackPointCenterX, int32_t startCurrentIndex, int32_t endCurrentIndex)
+{
+    if (touchBottomTypeLoop_ == TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_LEFT &&
+        pointAnimationStage_ != PointAnimationStage::STATE_EXPAND_TO_LONG_POINT) {
+        pointCenter.endLongPointRightCenterX = pointCenter.endLongPointLeftCenterX = endVectorBlackPointCenterX[0];
+    } else if (touchBottomTypeLoop_ == TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_RIGHT &&
+               pointAnimationStage_ != PointAnimationStage::STATE_EXPAND_TO_LONG_POINT) {
+        pointCenter.endLongPointRightCenterX = pointCenter.endLongPointLeftCenterX =
+            endVectorBlackPointCenterX[startCurrentIndex];
+    }
+
+    if (pointAnimationStage_ == PointAnimationStage::STATE_EXPAND_TO_LONG_POINT &&
+        gestureState_ == GestureState::GESTURE_STATE_RELEASE_LEFT &&
+        touchBottomTypeLoop_ == TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_LEFT) {
+        pointCenter.startLongPointRightCenterX = pointCenter.endLongPointLeftCenterX =
+            endVectorBlackPointCenterX[endCurrentIndex];
+    } else if (pointAnimationStage_ == PointAnimationStage::STATE_EXPAND_TO_LONG_POINT &&
+               gestureState_ == GestureState::GESTURE_STATE_RELEASE_RIGHT &&
+               touchBottomTypeLoop_ == TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_RIGHT) {
+        pointCenter.startLongPointRightCenterX = pointCenter.endLongPointLeftCenterX = endVectorBlackPointCenterX[0];
+    }
+}
+
+std::pair<float, float> DotIndicatorPaintMethod::ForwardCalculation(
+    const LinearVector<float>& itemHalfSizes, float startCenterX, float endCenterX, float space, int32_t index)
+{
     auto itemWidth = itemHalfSizes[ITEM_HALF_WIDTH] * TWOFOLD;
     auto selectedItemWidth = itemHalfSizes[SELECTED_ITEM_HALF_WIDTH] * TWOFOLD;
     StarAndEndPointCenter pointCenter;
@@ -401,13 +547,9 @@ void DotIndicatorPaintMethod::ForwardCalculation(
     LinearVector<float> startVectorBlackPointCenterX(itemCount_);
     // Calculate the data required for subsequent pages
     LinearVector<float> endVectorBlackPointCenterX(itemCount_);
-    int32_t endCurrentIndex = NearEqual(turnPageRate_, 0.0f) || turnPageRate_ <= -1.0f || turnPageRate_ >= 1.0f
-        ? endCurrentIndex = index : (turnPageRate_ < 0.0f ? index + 1 : index - 1);
-    if (endCurrentIndex == -1) {
-        endCurrentIndex = itemCount_ - 1;
-    } else if (endCurrentIndex == itemCount_) {
-        endCurrentIndex = 0;
-    }
+
+    auto [startCurrentIndex, endCurrentIndex] = GetStartAndEndIndex(index);
+
     for (int32_t i = 0; i < itemCount_; ++i) {
         if (i != startCurrentIndex) {
             startVectorBlackPointCenterX[i] = startCenterX + itemHalfSizes[ITEM_HALF_WIDTH];
@@ -444,10 +586,12 @@ void DotIndicatorPaintMethod::ForwardCalculation(
         startCenterX += space;
         endCenterX += space;
     }
-    CalculatePointCenterX(pointCenter, startVectorBlackPointCenterX, endVectorBlackPointCenterX);
+
+    AdjustPointCenterXForTouchBottom(pointCenter, endVectorBlackPointCenterX, startCurrentIndex, endCurrentIndex);
+    return CalculatePointCenterX(pointCenter, startVectorBlackPointCenterX, endVectorBlackPointCenterX);
 }
 
-void DotIndicatorPaintMethod::BackwardCalculation(
+std::pair<float, float> DotIndicatorPaintMethod::BackwardCalculation(
     const LinearVector<float>& itemHalfSizes, float startCenterX, float endCenterX, float space, int32_t index)
 {
     int32_t startCurrentIndex = index;
@@ -501,6 +645,6 @@ void DotIndicatorPaintMethod::BackwardCalculation(
         startCenterX -= space;
         endCenterX -= space;
     }
-    CalculatePointCenterX(pointCenter, startVectorBlackPointCenterX, endVectorBlackPointCenterX);
+    return CalculatePointCenterX(pointCenter, startVectorBlackPointCenterX, endVectorBlackPointCenterX);
 }
 } // namespace OHOS::Ace::NG

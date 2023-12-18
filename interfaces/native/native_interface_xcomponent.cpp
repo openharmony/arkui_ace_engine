@@ -220,12 +220,12 @@ int32_t OH_NativeXComponent_RegisterOnFrameCallback(OH_NativeXComponent* compone
     return component->RegisterOnFrameCallback(callback);
 }
 
-int32_t OH_NativeXComponent_UnRegisterOnFrameCallback(OH_NativeXComponent* component)
+int32_t OH_NativeXComponent_UnregisterOnFrameCallback(OH_NativeXComponent* component)
 {
     if (component == nullptr) {
         return OH_NATIVEXCOMPONENT_RESULT_BAD_PARAMETER;
     }
-    return component->UnRegisterOnFrameCallback();
+    return component->UnregisterOnFrameCallback();
 }
 
 #ifdef __cplusplus

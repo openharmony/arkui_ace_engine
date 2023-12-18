@@ -134,7 +134,6 @@ void AnimationUtil::KeyframesAddKeyFrame(
         keyFrameAddMap = {
             { DOM_BACKGROUND_COLOR,
                 [](const std::string& value, const double& time, const std::string& timeStr, AnimationUtil& util) {
-                    LOGD("DOM_BACKGROUND_COLOR:%{public}s time:%{public}lf", value.c_str(), time);
                     util.AddAnimatable(util.ParseColor(value), time, AnimatableType::PROPERTY_BG_COLOR);
                 } },
             { DOM_BACKGROUND_IMAGE_SIZE,
@@ -162,12 +161,10 @@ void AnimationUtil::KeyframesAddKeyFrame(
                 } },
             { DOM_HEIGHT,
                 [](const std::string& value, const double& time, const std::string& timeStr, AnimationUtil& util) {
-                    LOGD("DOM_HEIGHT:%{public}s time:%{public}lf", value.c_str(), time);
                     util.AddAnimatable(util.ParseDimension(value), time, AnimatableType::PROPERTY_HEIGHT);
                 } },
             { DOM_OPACITY,
                 [](const std::string& value, const double& time, const std::string& timeStr, AnimationUtil& util) {
-                    LOGD("DOM_OPACITY:%{public}s time:%{public}lf", value.c_str(), time);
                     util.AddAnimatable<float>(util.ParseDouble(value), time, AnimatableType::PROPERTY_OPACITY);
                 } },
             // margin

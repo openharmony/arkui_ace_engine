@@ -17,17 +17,18 @@
 
 #include "base/log/ace_scoring_log.h"
 #include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
+#include "core/components_ng/base/view_stack_processor.h"
 
 namespace OHOS::Ace::Framework {
 
 RefPtr<OHOS::Ace::SingleChild> JSPanHandler::CreateComponent(const JSCallbackInfo& args)
 {
-    LOGD("JSPanHandler wrapComponent");
     auto gestureComponent = ViewStackProcessor::GetInstance()->GetPanGestureListenerComponent();
-
+    WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
     if (jsOnStartFunc_) {
         auto dragStartId = EventMarker(
-            [execCtx = args.GetExecutionContext(), func = std::move(jsOnStartFunc_)](const BaseEventInfo* info) {
+            [execCtx = args.GetExecutionContext(), func = std::move(jsOnStartFunc_), node = frameNode](
+                const BaseEventInfo* info) {
                 JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
                 const DragStartInfo* dragStartInfo = static_cast<const DragStartInfo*>(info);
 
@@ -36,6 +37,7 @@ RefPtr<OHOS::Ace::SingleChild> JSPanHandler::CreateComponent(const JSCallbackInf
                     return;
                 }
                 ACE_SCORING_EVENT("PanHandler.onDragStart");
+                PipelineContext::SetCallBackNode(node);
                 func->Execute(*dragStartInfo);
             },
             "dragStart", 0);
@@ -44,7 +46,8 @@ RefPtr<OHOS::Ace::SingleChild> JSPanHandler::CreateComponent(const JSCallbackInf
 
     if (jsOnUpdateFunc_) {
         auto dragUpdateId = EventMarker(
-            [execCtx = args.GetExecutionContext(), func = std::move(jsOnUpdateFunc_)](const BaseEventInfo* info) {
+            [execCtx = args.GetExecutionContext(), func = std::move(jsOnUpdateFunc_), node = frameNode](
+                const BaseEventInfo* info) {
                 JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
                 const DragUpdateInfo* dragUpdateInfo = static_cast<const DragUpdateInfo*>(info);
 
@@ -53,6 +56,7 @@ RefPtr<OHOS::Ace::SingleChild> JSPanHandler::CreateComponent(const JSCallbackInf
                     return;
                 }
                 ACE_SCORING_EVENT("PanHandler.onDragUpdate");
+                PipelineContext::SetCallBackNode(node);
                 func->Execute(*dragUpdateInfo);
             },
             "dragUpdate", 0);
@@ -61,7 +65,8 @@ RefPtr<OHOS::Ace::SingleChild> JSPanHandler::CreateComponent(const JSCallbackInf
 
     if (jsOnEndFunc_) {
         auto dragEndId = EventMarker(
-            [execCtx = args.GetExecutionContext(), func = std::move(jsOnEndFunc_)](const BaseEventInfo* info) {
+            [execCtx = args.GetExecutionContext(), func = std::move(jsOnEndFunc_), node = frameNode](
+                const BaseEventInfo* info) {
                 JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
                 const DragEndInfo* dragEndInfo = static_cast<const DragEndInfo*>(info);
 
@@ -70,6 +75,7 @@ RefPtr<OHOS::Ace::SingleChild> JSPanHandler::CreateComponent(const JSCallbackInf
                     return;
                 }
                 ACE_SCORING_EVENT("PanHandler.onDragEnd");
+                PipelineContext::SetCallBackNode(node);
                 func->Execute(*dragEndInfo);
             },
             "dragEnd", 0);
@@ -78,11 +84,14 @@ RefPtr<OHOS::Ace::SingleChild> JSPanHandler::CreateComponent(const JSCallbackInf
 
     if (jsOnCancelFunc_) {
         auto dragCancelId = EventMarker(
-            [execCtx = args.GetExecutionContext(), func = std::move(jsOnCancelFunc_)](const BaseEventInfo* info) {
+            [execCtx = args.GetExecutionContext(), func = std::move(jsOnCancelFunc_), node = frameNode](
+                const BaseEventInfo* info) {
                 JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
                 ACE_SCORING_EVENT("PanHandler.onDragCancel");
+                PipelineContext::SetCallBackNode(node);
                 func->Execute();
-            }, "dragCancel", 0);
+            },
+            "dragCancel", 0);
         gestureComponent->SetOnVerticalDragCancelId(dragCancelId);
     }
 
@@ -91,7 +100,6 @@ RefPtr<OHOS::Ace::SingleChild> JSPanHandler::CreateComponent(const JSCallbackInf
 
 void JSPanHandler::JsHandlerOnPan(PanEvent action, const JSCallbackInfo& args)
 {
-    LOGD("JSPanHandler JsHandlerOnPan");
     if (args[0]->IsFunction()) {
         JSRef<JSFunc> jsFunction = JSRef<JSFunc>::Cast(args[0]);
         RefPtr<JsPanFunction> handlerFunc = AceType::MakeRefPtr<JsPanFunction>(jsFunction);

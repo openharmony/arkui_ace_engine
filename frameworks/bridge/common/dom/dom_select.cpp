@@ -191,7 +191,6 @@ void DOMSelect::OnChildNodeAdded(const RefPtr<DOMNode>& child, int32_t slot)
         } else {
             selectComponent_->InsertSelectOption(optionComponent, static_cast<uint32_t>(slot));
         }
-        LOGD("DOMSelect %{public}s, appendChild %{public}s", GetTag().c_str(), child->GetTag().c_str());
     }
 }
 

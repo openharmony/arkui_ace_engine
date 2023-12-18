@@ -108,6 +108,39 @@ public:
             theme->downloadFontSize_ = buttonPattern->GetAttr<Dimension>("button_download_font_size", 0.0_fp);
             theme->progressDiameter_ = buttonPattern->GetAttr<Dimension>("button_progress_diameter", 0.0_vp);
             theme->innerPadding_ = buttonPattern->GetAttr<Dimension>("button_inner_padding", 0.0_vp);
+            ParseSubStylePattern(buttonPattern, theme);
+        }
+
+        void ParseSubStylePattern(const RefPtr<ThemeStyle>& buttonPattern, const RefPtr<ButtonTheme>& theme) const
+        {
+            theme->bgColorMap_.insert(std::pair<ButtonStyleMode, Color>(ButtonStyleMode::EMPHASIZE, theme->bgColor_));
+            theme->bgColorMap_.insert(std::pair<ButtonStyleMode, Color>(
+                ButtonStyleMode::NORMAL, buttonPattern->GetAttr<Color>("bg_color_normal", Color())));
+            theme->bgColorMap_.insert(std::pair<ButtonStyleMode, Color>(ButtonStyleMode::TEXT, Color::TRANSPARENT));
+
+            theme->textColorMap_.insert(std::pair<ButtonStyleMode, Color>(
+                ButtonStyleMode::EMPHASIZE, buttonPattern->GetAttr<Color>("emphasize_button_text_color", Color())));
+            theme->textColorMap_.insert(
+                std::pair<ButtonStyleMode, Color>(ButtonStyleMode::NORMAL, theme->normalTextColor_));
+            theme->textColorMap_.insert(
+                std::pair<ButtonStyleMode, Color>(ButtonStyleMode::TEXT, theme->normalTextColor_));
+
+            theme->heightMap_.insert(std::pair<ControlSize, Dimension>(ControlSize::NORMAL, theme->height_));
+            theme->heightMap_.insert(std::pair<ControlSize, Dimension>(
+                ControlSize::SMALL, buttonPattern->GetAttr<Dimension>("small_button_height", 0.0_vp)));
+
+            theme->textSizeMap_.insert(std::pair<ControlSize, Dimension>(
+                ControlSize::NORMAL, buttonPattern->GetAttr<Dimension>("button_font_size", 0.0_fp)));
+            theme->textSizeMap_.insert(std::pair<ControlSize, Dimension>(
+                ControlSize::SMALL, buttonPattern->GetAttr<Dimension>("small_button_font_size", 0.0_fp)));
+
+            theme->paddingMap_.insert(std::pair<ControlSize, Edge>(ControlSize::NORMAL, theme->padding_));
+            theme->paddingMap_.insert(std::pair<ControlSize, Edge>(ControlSize::SMALL,
+                Edge(buttonPattern->GetAttr<Dimension>("small_button_horizontal_padding", 0.0_vp).Value(),
+                    buttonPattern->GetAttr<Dimension>("button_vertical_padding", 0.0_vp).Value(),
+                    buttonPattern->GetAttr<Dimension>("small_button_horizontal_padding", 0.0_vp).Value(),
+                    buttonPattern->GetAttr<Dimension>("button_vertical_padding", 0.0_vp).Value(),
+                    buttonPattern->GetAttr<Dimension>("button_vertical_padding", 0.0_vp).Unit())));
         }
     };
 
@@ -293,6 +326,51 @@ public:
         return innerPadding_;
     }
 
+    const Color& GetBgColor(ButtonStyleMode buttonStyle) const
+    {
+        auto result = bgColorMap_.find(buttonStyle);
+        if (result != bgColorMap_.end()) {
+            return result->second;
+        }
+        return bgColor_;
+    }
+
+    const Color& GetTextColor(ButtonStyleMode buttonStyle) const
+    {
+        auto result = textColorMap_.find(buttonStyle);
+        if (result != textColorMap_.end()) {
+            return result->second;
+        }
+        return normalTextColor_;
+    }
+
+    const Dimension& GetHeight(ControlSize controlSize) const
+    {
+        auto result = heightMap_.find(controlSize);
+        if (result != heightMap_.end()) {
+            return result->second;
+        }
+        return height_;
+    }
+
+    const Dimension& GetTextSize(ControlSize controlSize) const
+    {
+        auto result = textSizeMap_.find(controlSize);
+        if (result != textSizeMap_.end()) {
+            return result->second;
+        }
+        return textStyle_.GetFontSize();
+    }
+
+    const Edge& GetPadding(ControlSize controlSize) const
+    {
+        auto result = paddingMap_.find(controlSize);
+        if (result != paddingMap_.end()) {
+            return result->second;
+        }
+        return padding_;
+    }
+
 protected:
     ButtonTheme() = default;
 
@@ -332,6 +410,11 @@ private:
     Dimension borderWidth_;
     Dimension downloadHeight_;
 
+    std::unordered_map<ButtonStyleMode, Color> bgColorMap_;
+    std::unordered_map<ButtonStyleMode, Color> textColorMap_;
+    std::unordered_map<ControlSize, Dimension> heightMap_;
+    std::unordered_map<ControlSize, Dimension> textSizeMap_;
+    std::unordered_map<ControlSize, Edge> paddingMap_;
     double bgDisabledAlpha_ = 1.0;
     uint32_t textMaxLines_ = 1;
 };

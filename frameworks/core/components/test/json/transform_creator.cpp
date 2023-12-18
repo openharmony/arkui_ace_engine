@@ -24,7 +24,6 @@ namespace OHOS::Ace {
 
 RefPtr<Component> TransformCreator::CreateFromJson(const JsonValue& json, const JsonComponentFactory& factory)
 {
-    LOGD("CreateFromJson transform");
     if (!json.Contains(CLASS_NAME)) {
         LOGE("Create TransformComponent error: not a transform class.");
         return nullptr;

@@ -133,6 +133,7 @@ ArkUINativeModuleValue SpanBridge::SetFontStyle(ArkUIRuntimeCallInfo *runtimeCal
         if (value >= 0 && value < static_cast<int32_t>(FONT_STYLES.size())) {
             GetArkUIInternalNodeAPI()->GetSpanModifier().SetSpanFontStyle(nativeNode, value);
         } else {
+            GetArkUIInternalNodeAPI()->GetSpanModifier().ReSetSpanFontStyle(nativeNode);
             return panda::JSValueRef::Undefined(vm);
         }
     } else {
@@ -158,7 +159,7 @@ ArkUINativeModuleValue SpanBridge::SetFontSize(ArkUIRuntimeCallInfo *runtimeCall
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
     void *nativeNode = firstArg->ToNativePointer(vm)->Value();
-    auto theme = Framework::JSViewAbstract::GetTheme<TextTheme>();
+    auto theme = ArkTSUtils::GetTheme<TextTheme>();
 
     CalcDimension fontSize(DEFAULT_SPAN_FONT_SIZE, DEFAULT_SPAN_FONT_UNIT);
     if (!ArkTSUtils::ParseJsDimensionFp(vm, secondArg, fontSize)) {

@@ -278,12 +278,6 @@ void ViewAbstractModelNG::SetPivot(const Dimension& x, const Dimension& y, const
 
 void ViewAbstractModelNG::SetScale(float x, float y, float z)
 {
-    if (x < 0) {
-        x = 1;
-    }
-    if (y < 0) {
-        y = 1;
-    }
     VectorF scale(x, y);
     ViewAbstract::SetScale(scale);
 }
@@ -436,6 +430,24 @@ void ViewAbstractModelNG::SetAccessibilityImportance(FrameNode* frameNode, const
     auto accessibilityProperty = frameNode->GetAccessibilityProperty<AccessibilityProperty>();
     CHECK_NULL_VOID(accessibilityProperty);
     accessibilityProperty->SetAccessibilityLevel(importance);
+}
+
+void ViewAbstractModelNG::SetAccessibilityVirtualNode(std::function<void()>&& buildFunc)
+{
+    auto buildNodeFunc = [buildFunc = std::move(buildFunc)]() -> RefPtr<UINode> {
+        NG::ScopedViewStackProcessor builderViewStackProcessor;
+        buildFunc();
+        auto customNode = NG::ViewStackProcessor::GetInstance()->Finish();
+        return customNode;
+    };
+    auto frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto virtualNode = buildNodeFunc();
+    auto accessibilityProperty = frameNode->GetAccessibilityProperty<AccessibilityProperty>();
+    auto virtualFrameNode = AceType::DynamicCast<NG::FrameNode>(virtualNode);
+    CHECK_NULL_VOID(virtualFrameNode);
+    FrameNode::ProcessOffscreenNode(virtualFrameNode);
+    accessibilityProperty->SaveAccessibilityVirtualNode(virtualNode);
 }
 
 void ViewAbstractModelNG::SetAccessibilityDescription(FrameNode* frameNode, const std::string& description)

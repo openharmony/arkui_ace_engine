@@ -108,6 +108,7 @@
                     "header": {
                         "header_base": "//foundation/arkui/ace_engine/interfaces/inner_api/ace/",
                         "header_files": [
+                            "navigation_controller.h",
                             "ui_content.h",
                             "ui_event.h",
                             "ui_event_observer.h",

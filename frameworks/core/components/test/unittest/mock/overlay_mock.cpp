@@ -16,7 +16,7 @@
 #include "core/components/test/unittest/mock/overlay_mock.h"
 
 #include "core/components/overlay/overlay_component.h"
-#include "core/components/stack/flutter_render_stack.h"
+#include "core/components/stack/rosen_render_stack.h"
 
 namespace OHOS::Ace {
 
@@ -28,7 +28,6 @@ MockOverlayElement::HookOverlay g_hookOverlay;
 
 void MockOverlayElement::SetMockHook(const HookOverlay& hook)
 {
-    LOGD("set hook.");
     g_hookOverlay = std::move(hook);
 }
 
@@ -36,7 +35,6 @@ RefPtr<Element> OverlayComponent::CreateElement()
 {
     auto overlay = AceType::MakeRefPtr<MockOverlayElement>();
     if (g_hookOverlay) {
-        LOGD("execute hook.");
         g_hookOverlay(overlay);
     }
     return overlay;
@@ -44,7 +42,7 @@ RefPtr<Element> OverlayComponent::CreateElement()
 
 RefPtr<RenderNode> OverlayComponent::CreateRenderNode()
 {
-    auto renderNode = AceType::DynamicCast<FlutterRenderStack>(StackComponent::CreateRenderNode());
+    auto renderNode = AceType::DynamicCast<RosenRenderStack>(StackComponent::CreateRenderNode());
     if (renderNode) {
         renderNode->SetVisible(false);
         renderNode->SetBoundary();

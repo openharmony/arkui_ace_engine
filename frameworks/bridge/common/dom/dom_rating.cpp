@@ -99,7 +99,6 @@ bool DOMRating::SetSpecializedStyle(const std::pair<std::string, std::string>& s
 
 bool DOMRating::AddSpecializedEvent(int32_t pageId, const std::string& event)
 {
-    LOGD("DOMRating AddEvent");
     if (event == DOM_CHANGE) {
         changeEventId_ = EventMarker(GetNodeIdForEvent(), event, pageId);
         ratingChild_->SetChangeEventId(changeEventId_);

@@ -75,7 +75,7 @@ public:
     void OnExtensionDied() override {}
 
     void OnAccessibilityEvent(const Accessibility::AccessibilityEventInfo& info,
-        const std::vector<int32_t>& uiExtensionIdLevelVec) override {};
+        int32_t uiExtensionIdLevelVec) override {};
 
 private:
     WeakPtr<WindowPattern> windowPattern_;
@@ -312,7 +312,6 @@ int32_t WindowPattern::CalculateTranslateDegree(int32_t hostId)
 
 void WindowPattern::HandleTouchEvent(const TouchEventInfo& info)
 {
-    LOGD("WindowPattern HandleTouchEvent enter");
     const auto pointerEvent = info.GetPointerEvent();
     CHECK_NULL_VOID(pointerEvent);
     if (IsFilterTouchEvent(pointerEvent)) {
@@ -329,11 +328,7 @@ void WindowPattern::HandleTouchEvent(const TouchEventInfo& info)
     if (SystemProperties::GetDebugEnabled()) {
         int32_t pointerId = pointerEvent->GetPointerId();
         MMI::PointerEvent::PointerItem item;
-        bool ret = pointerEvent->GetPointerItem(pointerId, item);
-        if (ret) {
-            LOGI("WindowPattern AdapterRotation udegree:%{public}d, windowX:%{public}d, windowY:%{public}d", udegree,
-                item.GetWindowX(), item.GetWindowY());
-        }
+        pointerEvent->GetPointerItem(pointerId, item);
     }
 }
 
@@ -369,7 +364,6 @@ bool WindowPattern::IsFilterTouchEvent(const std::shared_ptr<MMI::PointerEvent>&
 
 void WindowPattern::HandleMouseEvent(const MouseInfo& info)
 {
-    LOGD("WindowPattern HandleMouseEvent enter");
     const auto pointerEvent = info.GetPointerEvent();
     CHECK_NULL_VOID(pointerEvent);
     if (IsFilterMouseEvent(pointerEvent)) {

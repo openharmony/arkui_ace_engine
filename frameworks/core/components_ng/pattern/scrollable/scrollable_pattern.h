@@ -308,7 +308,7 @@ public:
     void UpdateMouseStart(float offset);
 
     // scrollSnap
-    virtual std::optional<float> CalePredictSnapOffset(float delta)
+    virtual std::optional<float> CalePredictSnapOffset(float delta, float dragDistance, float velocity)
     {
         std::optional<float> predictSnapPosition;
         return predictSnapPosition;
@@ -399,6 +399,9 @@ public:
         edgeEffectAlwaysEnabled_ = alwaysEnabled;
     }
 
+    void HandleOnDragStatusCallback(
+        const DragEventType& dragEventType, const RefPtr<NotifyDragEvent>& notifyDragEvent) override;
+
 protected:
     virtual DisplayMode GetDefaultScrollBarDisplayMode() const
     {
@@ -468,7 +471,6 @@ protected:
     bool isInitialized_ = false;
 
     void Register2DragDropManager();
-    void SetDragStatusListener(RefPtr<DragStatusListener> dragStatusListener);
 
 private:
     virtual void OnScrollEndCallback() {};
@@ -600,14 +602,11 @@ private:
     RefPtr<Animator> hotzoneAnimator_;
     float lastHonezoneOffsetPct_ = 0.0f;
     RefPtr<BezierVariableVelocityMotion> velocityMotion_;
-    std::optional<RefPtr<DragStatusListener>> dragStatusListener_;
     void UnRegister2DragDropManager();
     float IsInHotZone(const PointF& point);
     void HotZoneScroll(const float offset);
     void StopHotzoneScroll();
     void HandleHotZone(const DragEventType& dragEventType, const RefPtr<NotifyDragEvent>& notifyDragEvent);
-    void HandleOnDragStatusCallback(
-        const DragEventType& dragEventType, const RefPtr<NotifyDragEvent>& notifyDragEvent) override;
     void HandleMoveEventInComp(const PointF& point);
     void HandleLeaveHotzoneEvent();
     bool isVertical() const;

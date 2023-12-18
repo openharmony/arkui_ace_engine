@@ -43,6 +43,9 @@ public:
     int32_t GetVsyncRate() const;
     bool SetVsyncPeriod(int64_t vsyncPeriod);
     int64_t GetVsyncPeriod() const;
+    void SetRefreshRateMode(int32_t refreshRateMode);
+    int32_t GetRefreshRateMode() const;
+    int32_t GetDisplaySyncRate() const;
     IdToDisplaySyncMap GetUIDisplaySyncMap() const;
 
     UIDisplaySyncManager();
@@ -55,6 +58,8 @@ private:
     
     int32_t sourceVsyncRate_ = 0;
     int64_t vsyncPeriod_ = 0;
+    int32_t refreshRateMode_ = 0;
+    RefPtr<FrameRateRange> displaySyncRange_ = AceType::MakeRefPtr<FrameRateRange>();
 
     IdToDisplaySyncMap uiDisplaySyncMap_;
 };

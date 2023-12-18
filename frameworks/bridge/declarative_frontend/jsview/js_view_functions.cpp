@@ -460,8 +460,6 @@ void ViewFunctions::InitViewFunctions(
         JSRef<JSVal> jsRecycleFunc = jsObject->GetProperty("recycleSelf");
         if (jsRecycleFunc->IsFunction()) {
             jsRecycleFunc_ = JSRef<JSFunc>::Cast(jsRecycleFunc);
-        } else {
-            LOGD("View is not a recycle node");
         }
 
         JSRef<JSVal> jsAboutToRecycleFunc = jsObject->GetProperty("aboutToRecycleInternal");
@@ -472,15 +470,11 @@ void ViewFunctions::InitViewFunctions(
         JSRef<JSVal> jsSetActive = jsObject->GetProperty("setActiveInternal");
         if (jsSetActive->IsFunction()) {
             jsSetActive_ = JSRef<JSFunc>::Cast(jsSetActive);
-        } else {
-            LOGD("View don't have the ability to prevent inactive update");
         }
 
         JSRef<JSVal> jsOnDumpInfo = jsObject->GetProperty("onDumpInfo");
         if (jsOnDumpInfo->IsFunction()) {
             jsOnDumpInfo_ = JSRef<JSFunc>::Cast(jsOnDumpInfo);
-        } else {
-            LOGD("View don't have the ability to dump info");
         }
     }
 
@@ -492,8 +486,6 @@ void ViewFunctions::InitViewFunctions(
     JSRef<JSVal> jsDisappearFunc = jsObject->GetProperty("aboutToDisappear");
     if (jsDisappearFunc->IsFunction()) {
         jsDisappearFunc_ = JSRef<JSFunc>::Cast(jsDisappearFunc);
-    } else {
-        LOGD("aboutToDisappear is not a function");
     }
 
     JSRef<JSVal> jsLayoutFunc = jsObject->GetProperty("onLayout");
@@ -519,64 +511,46 @@ void ViewFunctions::InitViewFunctions(
     JSRef<JSVal> jsAboutToBeDeletedFunc = jsObject->GetProperty("aboutToBeDeleted");
     if (jsAboutToBeDeletedFunc->IsFunction()) {
         jsAboutToBeDeletedFunc_ = JSRef<JSFunc>::Cast(jsAboutToBeDeletedFunc);
-    } else {
-        LOGD("aboutToBeDeleted is not a function");
     }
 
     JSRef<JSVal> jsAboutToRenderFunc = jsObject->GetProperty("aboutToRender");
     if (jsAboutToRenderFunc->IsFunction()) {
         jsAboutToRenderFunc_ = JSRef<JSFunc>::Cast(jsAboutToRenderFunc);
-    } else {
-        LOGD("aboutToRender is not a function");
     }
 
     JSRef<JSVal> jsRenderDoneFunc = jsObject->GetProperty("onRenderDone");
     if (jsRenderDoneFunc->IsFunction()) {
         jsRenderDoneFunc_ = JSRef<JSFunc>::Cast(jsRenderDoneFunc);
-    } else {
-        LOGD("onRenderDone is not a function");
     }
 
     JSRef<JSVal> jsAboutToBuildFunc = jsObject->GetProperty("aboutToBuild");
     if (jsAboutToBuildFunc->IsFunction()) {
         jsAboutToBuildFunc_ = JSRef<JSFunc>::Cast(jsAboutToBuildFunc);
-    } else {
-        LOGD("aboutToBuild is not a function");
     }
 
     JSRef<JSVal> jsBuildDoneFunc = jsObject->GetProperty("onBuildDone");
     if (jsBuildDoneFunc->IsFunction()) {
         jsBuildDoneFunc_ = JSRef<JSFunc>::Cast(jsBuildDoneFunc);
-    } else {
-        LOGD("onBuildDone is not a function");
     }
 
     JSRef<JSVal> jsTransitionFunc = jsObject->GetProperty("pageTransition");
     if (jsTransitionFunc->IsFunction()) {
         jsTransitionFunc_ = JSRef<JSFunc>::Cast(jsTransitionFunc);
-    } else {
-        LOGD("transition is not a function");
     }
 
     JSRef<JSVal> jsOnHideFunc = jsObject->GetProperty("onPageHide");
     if (jsOnHideFunc->IsFunction()) {
         jsOnHideFunc_ = JSRef<JSFunc>::Cast(jsOnHideFunc);
-    } else {
-        LOGD("onHide is not a function");
     }
 
     JSRef<JSVal> jsOnShowFunc = jsObject->GetProperty("onPageShow");
     if (jsOnShowFunc->IsFunction()) {
         jsOnShowFunc_ = JSRef<JSFunc>::Cast(jsOnShowFunc);
-    } else {
-        LOGD("onShow is not a function");
     }
 
     JSRef<JSVal> jsBackPressFunc = jsObject->GetProperty("onBackPress");
     if (jsBackPressFunc->IsFunction()) {
         jsBackPressFunc_ = JSRef<JSFunc>::Cast(jsBackPressFunc);
-    } else {
-        LOGD("onBackPress is not a function");
     }
 
     JSRef<JSVal> jsSetInitiallyProvidedValueFunc = jsObject->GetProperty("setInitiallyProvidedValue");
@@ -587,10 +561,7 @@ void ViewFunctions::InitViewFunctions(
     if (!partialUpdate) {
         JSRef<JSVal> jsUpdateWithValueParamsFunc = jsObject->GetProperty("updateWithValueParams");
         if (jsUpdateWithValueParamsFunc->IsFunction()) {
-            LOGD("updateWithValueParams is a function");
             jsUpdateWithValueParamsFunc_ = JSRef<JSFunc>::Cast(jsUpdateWithValueParamsFunc);
-        } else {
-            LOGD("updateWithValueParams is not a function");
         }
         jsRenderFunc_ = jsRenderFunction;
     }
@@ -598,15 +569,11 @@ void ViewFunctions::InitViewFunctions(
     JSRef<JSVal> jsOnFormRecycleFunc = jsObject->GetProperty("onFormRecycle");
     if (jsOnFormRecycleFunc->IsFunction()) {
         jsOnFormRecycleFunc_ = JSRef<JSFunc>::Cast(jsOnFormRecycleFunc);
-    } else {
-        LOGD("onFormRecycle is not a function");
     }
 
     JSRef<JSVal> jsOnFormRecoverFunc = jsObject->GetProperty("onFormRecover");
     if (jsOnFormRecoverFunc->IsFunction()) {
         jsOnFormRecoverFunc_ = JSRef<JSFunc>::Cast(jsOnFormRecoverFunc);
-    } else {
-        LOGD("onFormRecover is not a function");
     }
 }
 
@@ -642,7 +609,6 @@ void ViewFunctions::ExecuteDisappear()
 {
     JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(context_)
     if (jsDisappearFunc_.IsEmpty()) {
-        LOGD("View doesn't have %{public}s() method!", "aboutToDisappear");
         return;
     }
     ACE_SCOPED_TRACE("%s", "aboutToDisappear");
@@ -685,7 +651,6 @@ void ViewFunctions::ExecuteAboutToBeDeleted()
 {
     JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(context_)
     if (jsAboutToBeDeletedFunc_.IsEmpty()) {
-        LOGD("View doesn't have %{public}s() method!", "aboutToBeDeleted");
         return;
     }
     ACE_SCOPED_TRACE("%s", "aboutToBeDeleted");
@@ -759,7 +724,6 @@ void ViewFunctions::ExecuteFunction(JSWeak<JSFunc>& func, const char* debugInfo)
 {
     JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(context_)
     if (func.IsEmpty()) {
-        LOGD("View doesn't have %{public}s() method!", debugInfo);
         return;
     }
     ACE_SCOPED_TRACE("%s", debugInfo);
@@ -777,7 +741,6 @@ JSRef<JSVal> ViewFunctions::ExecuteFunctionWithReturn(JSWeak<JSFunc>& func, cons
 {
     JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(context_, JSRef<JSVal>::Make())
     if (func.IsEmpty()) {
-        LOGD("View doesn't have %{public}s() method!", debugInfo);
         return JSRef<JSVal>::Make();
     }
     ACE_SCOPED_TRACE("%s", debugInfo);
@@ -795,7 +758,6 @@ void ViewFunctions::ExecuteFunctionWithParams(JSWeak<JSFunc>& func, const char* 
 {
     JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(context_)
     if (func.IsEmpty()) {
-        LOGD("View doesn't have %{public}s() method!", debugInfo);
         return;
     }
 
@@ -812,16 +774,13 @@ void ViewFunctions::ExecuteFunctionWithParams(JSWeak<JSFunc>& func, const char* 
 // Baseline version of Destroy
 void ViewFunctions::Destroy(JSView* parentCustomView)
 {
-    LOGD("Destroy");
     // Might be called from parent view, before any result has been produced??
     if (jsRenderResult_.IsEmpty()) {
-        LOGD("ViewFunctions::Destroy() -> no previous render result to delete");
         return;
     }
 
     auto renderRes = jsRenderResult_.Lock();
     if (renderRes.IsEmpty() || !renderRes->IsObject()) {
-        LOGD("ViewFunctions::Destroy() -> result not an object");
         return;
     }
 
@@ -834,23 +793,18 @@ void ViewFunctions::Destroy(JSView* parentCustomView)
         }
     }
     jsRenderResult_.Reset();
-    LOGD("ViewFunctions::Destroy() end");
 }
 
 // PartialUpdate version of Destroy
 void ViewFunctions::Destroy()
 {
-    LOGD("Destroy");
-
     // Might be called from parent view, before any result has been produced??
     if (jsRenderResult_.IsEmpty()) {
-        LOGD("ViewFunctions::Destroy() -> no previous render result to delete");
         return;
     }
 
     auto renderRes = jsRenderResult_.Lock();
     if (renderRes.IsEmpty() || !renderRes->IsObject()) {
-        LOGD("ViewFunctions::Destroy() -> result not an object");
         return;
     }
 
@@ -865,8 +819,6 @@ void ViewFunctions::Destroy()
     }
     jsObject_.Reset();
     jsRenderResult_.Reset();
-
-    LOGD("ViewFunctions::Destroy() end");
 }
 
 // Partial update method

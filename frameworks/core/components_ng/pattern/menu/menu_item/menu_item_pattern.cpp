@@ -253,7 +253,6 @@ void MenuItemPattern::ShowSubMenu()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    TAG_LOGD(AceLogTag::ACE_MENU, fmt, "MenuItemPattern::ShowSubMenu menu item id is %{public}d", host->GetId());
     auto buildFunc = GetSubBuilder();
     if (!buildFunc || isSubMenuShowed_) {
         return;

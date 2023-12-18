@@ -34,7 +34,6 @@ const std::map<std::string, double> ALIGN_VALUE_MAP_VERTICAL = { { VERTICAL_VALU
 
 RefPtr<Component> AlignCreator::CreateFromJson(const JsonValue& componentJson, const JsonComponentFactory& factory)
 {
-    LOGD("CreateFromJson Align");
     std::string classType = componentJson.GetValue(CLASS_NAME)->GetString();
     if (classType != ALIGN_NAME) {
         LOGE("Create Align err: not an align json.");

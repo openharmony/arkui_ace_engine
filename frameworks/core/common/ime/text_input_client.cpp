@@ -104,14 +104,10 @@ bool TextInputClient::HandleKeyEvent(const KeyEvent& keyEvent)
         (keyEvent.HasKey(KeyCode::KEY_META_LEFT) || keyEvent.HasKey(KeyCode::KEY_META_RIGHT) ? KEY_META : KEY_NULL);
     auto iterFunctionKeys = functionKeys_.find(KeyComb(keyEvent.code, modKeyFlags));
     if (iterFunctionKeys != functionKeys_.end()) {
-        TAG_LOGD(AceLogTag::ACE_KEYBOARD, "find a function key, key code: %{public}d, modKeyFlags: %{public}d",
-            static_cast<int32_t>(keyEvent.code), modKeyFlags);
         return iterFunctionKeys->second(this);
     }
     auto iterKeyboardShortCuts = keyboardShortCuts_.find(KeyComb(keyEvent.code, modKeyFlags));
     if (iterKeyboardShortCuts != keyboardShortCuts_.end()) {
-        TAG_LOGD(AceLogTag::ACE_KEYBOARD, "find a keyboard shortcut, key code: %{public}d, modKeyFlags: %{public}d",
-            static_cast<int32_t>(keyEvent.code), modKeyFlags);
         iterKeyboardShortCuts->second(this);
         return true;
     }

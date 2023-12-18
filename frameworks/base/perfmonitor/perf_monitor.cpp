@@ -104,6 +104,7 @@ void ConvertToRsData(OHOS::Rosen::DataBaseRs &dataRs, DataBase& data)
     dataRs.pageUrl = data.baseInfo.pageUrl;
     dataRs.sourceType = GetSourceTypeName(data.sourceType);
     dataRs.note = data.baseInfo.note;
+    dataRs.isDisplayAnimator = data.isDisplayAnimator;
 }
 
 void ReportPerfEventToRS(DataBase& data)
@@ -468,6 +469,15 @@ bool PerfMonitor::IsExceptResponseTime(int64_t time, const std::string& sceneId)
     if ((sceneId == PerfConstants::ABILITY_OR_PAGE_SWITCH
         && GetCurrentRealTimeNs() - time > RESPONSE_TIMEOUT)
         || sceneId == PerfConstants::VOLUME_BAR_SHOW) {
+        return true;
+    }
+    if (sceneId == PerfConstants::PC_APP_CENTER_GESTURE_OPERATION ||
+        sceneId == PerfConstants::PC_GESTURE_TO_RECENT ||
+        sceneId == PerfConstants::PC_SHORTCUT_SHOW_DESKTOP ||
+        sceneId == PerfConstants::PC_SHORTCUT_RESTORE_DESKTOP ||
+        sceneId == PerfConstants::PC_SHOW_DESKTOP_GESTURE_OPERATION ||
+        sceneId == PerfConstants::PC_ALT_TAB_TO_RECENT ||
+        sceneId == PerfConstants::PC_SHORTCUT_TO_RECENT) {
         return true;
     }
     return false;

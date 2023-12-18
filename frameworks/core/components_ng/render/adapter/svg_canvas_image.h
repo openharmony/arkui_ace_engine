@@ -31,6 +31,11 @@ public:
         svgDom_->SetFillColor(color);
     }
 
+    void SetSmoothEdge(float value)
+    {
+        svgDom_->SetSmoothEdge(value);
+    }
+
     const RefPtr<SvgDomBase>& GetSVGDom() const;
 
     int32_t GetWidth() const override

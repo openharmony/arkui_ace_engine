@@ -17,6 +17,7 @@
 
 #include <utility>
 
+#include "core/components_ng/pattern/navrouter/navdestination_group_node.h"
 #include "core/components_ng/pattern/navrouter/navrouter_group_node.h"
 #include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
 
@@ -266,6 +267,7 @@ void NavigationStack::RemoveName(const std::string& name) {}
 void NavigationStack::Clear()
 {
     navPathList_.clear();
+    cacheNodes_.clear();
 }
 
 RefPtr<UINode> NavigationStack::CreateNodeByIndex(int32_t index)
@@ -283,5 +285,104 @@ void NavigationStack::UpdateReplaceValue(int32_t value) const {}
 int32_t NavigationStack::GetReplaceValue() const
 {
     return 0;
+}
+
+NavPathList NavigationStack::GetAllCacheNodes()
+{
+    return cacheNodes_;
+}
+
+void NavigationStack::AddCacheNode(
+    const std::string& name, const RefPtr<UINode>& navDestinationNode)
+{
+    if (name.empty() || navDestinationNode == nullptr) {
+        return;
+    }
+
+    cacheNodes_.emplace_back(std::make_pair(name, navDestinationNode));
+}
+
+void NavigationStack::RemoveCacheNode(int32_t handle)
+{
+    if (handle <= 0) {
+        return;
+    }
+
+    for (auto it = cacheNodes_.begin(); it != cacheNodes_.end(); ++it) {
+        if ((*it).second->GetId() == handle) {
+            cacheNodes_.erase(it);
+            return;
+        }
+    }
+}
+
+void NavigationStack::RemoveCacheNode(
+    NavPathList& cacheNodes, const std::string& name, const RefPtr<UINode>& navDestinationNode)
+{
+    if (cacheNodes.empty() || name.empty() || navDestinationNode == nullptr) {
+        return;
+    }
+
+    for (auto it = cacheNodes.begin(); it != cacheNodes.end(); ++it) {
+        if ((*it).first == name || (*it).second == navDestinationNode) {
+            cacheNodes.erase(it);
+            return;
+        }
+    }
+}
+
+void NavigationStack::ReOrderCache(const std::string& name, const RefPtr<UINode>& navDestinationNode)
+{
+    if (name.empty() || navDestinationNode == nullptr) {
+        return;
+    }
+
+    auto cacheNodes = cacheNodes_;
+    cacheNodes_.clear();
+    cacheNodes_.emplace_back(std::make_pair(name, navDestinationNode));
+    for (auto it = cacheNodes.begin(); it != cacheNodes.end(); ++it) {
+        if ((*it).first == name && (*it).second == navDestinationNode) {
+            continue;
+        }
+
+        cacheNodes_.emplace_back(std::make_pair((*it).first, (*it).second));
+    }
+}
+
+RefPtr<UINode> NavigationStack::GetFromCacheNode(
+    NavPathList& cacheNodes, const std::string& name)
+{
+    if (cacheNodes.empty() || name.empty()) {
+        return nullptr;
+    }
+    for (auto it = cacheNodes.begin(); it != cacheNodes.end(); ++it) {
+        if ((*it).first == name) {
+            return (*it).second;
+        }
+    }
+    return nullptr;
+}
+
+RefPtr<UINode> NavigationStack::GetFromCacheNode(const std::string& name)
+{
+    if (name.empty()) {
+        return nullptr;
+    }
+    for (auto it = cacheNodes_.begin(); it != cacheNodes_.end(); ++it) {
+        if ((*it).first == name) {
+            return (*it).second;
+        }
+    }
+    return nullptr;
+}
+
+std::optional<std::pair<std::string, RefPtr<UINode>>> NavigationStack::GetFromCacheNode(int32_t handle)
+{
+    for (auto it = cacheNodes_.begin(); it != cacheNodes_.end(); ++it) {
+        if ((*it).second || (*it).second->GetId() == handle) {
+            return std::make_pair((*it).first, (*it).second);
+        }
+    }
+    return std::nullopt;
 }
 } // namespace OHOS::Ace::NG

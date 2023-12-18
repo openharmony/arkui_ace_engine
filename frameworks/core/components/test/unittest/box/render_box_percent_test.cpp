@@ -32,7 +32,7 @@
 #include "core/components/list/render_list.h"
 #include "core/components/scroll/render_single_child_scroll.h"
 #include "core/components/stack/render_stack.h"
-#include "core/components/swiper/flutter_render_swiper.h"
+#include "core/components/swiper/rosen_render_swiper.h"
 #include "core/components/swiper/render_swiper.h"
 #include "core/components/swiper/swiper_component.h"
 #include "core/components/tab_bar/render_tab_bar.h"
@@ -148,11 +148,11 @@ void TestBoxInFlexItem(const RefPtr<PipelineContext>& context, double flexGrow, 
     }
 }
 
-RefPtr<FlutterRenderSwiper> TestSwiperIndicator(
+RefPtr<RosenRenderSwiper> TestSwiperIndicator(
     const RefPtr<PipelineContext>& context, const RefPtr<SwiperIndicator>& indicator)
 {
     auto parentRenderBox = ConstructRenderBox(context, PARENT_SIZE, PARENT_SIZE);
-    auto renderSwiper = AceType::DynamicCast<FlutterRenderSwiper>(RenderSwiper::Create());
+    auto renderSwiper = AceType::DynamicCast<RosenRenderSwiper>(RenderSwiper::Create());
     renderSwiper->Attach(context);
     std::list<RefPtr<Component>> swiperChildren;
     for (size_t i = 0; i < SWIPER_CHILD_SIZE; ++i) {

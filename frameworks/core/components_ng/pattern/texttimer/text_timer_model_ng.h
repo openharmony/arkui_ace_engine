@@ -32,6 +32,12 @@ public:
     void SetItalicFontStyle(Ace::FontStyle value) override;
     void SetFontWeight(FontWeight value) override;
     void SetFontFamily(const std::vector<std::string>& value) override;
+    static void SetFontColor(FrameNode* frameNode, const Color& value);
+    static void SetFontSize(FrameNode* frameNode, const Dimension& value);
+    static void SetFontStyle(FrameNode* frameNode, Ace::FontStyle value);
+    static void SetFontWeight(FrameNode* frameNode, FontWeight value);
+    static void SetFontFamily(FrameNode* frameNode, const std::vector<std::string>& value);
+    static void SetFormat(FrameNode* frameNode, const std::string& format);
 };
 } // namespace OHOS::Ace::NG
 

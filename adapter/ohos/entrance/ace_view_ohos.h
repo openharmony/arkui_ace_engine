@@ -29,6 +29,7 @@
 #include "core/common/flutter/flutter_thread_model.h"
 #include "core/common/platform_res_register.h"
 #include "core/common/thread_model_impl.h"
+#include "core/components_ng/base/frame_node.h"
 #include "core/event/key_event_recognizer.h"
 
 namespace OHOS::Ace::Platform {
@@ -49,7 +50,8 @@ public:
     static void SurfacePositionChanged(AceViewOhos* view, int32_t posX, int32_t posY);
     static void SetViewportMetrics(AceViewOhos* view, const ViewportConfig& config);
 
-    static void DispatchTouchEvent(AceViewOhos* view, const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
+    static void DispatchTouchEvent(AceViewOhos* view, const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
+        const RefPtr<OHOS::Ace::NG::FrameNode>& node = nullptr);
     static bool DispatchKeyEvent(AceViewOhos* view, const std::shared_ptr<MMI::KeyEvent>& keyEvent);
     static bool DispatchRotationEvent(AceViewOhos* view, float rotationValue);
     static void DispatchEventToPerf(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
@@ -69,11 +71,14 @@ public:
 
     void Launch() override;
 
-    void ProcessTouchEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
+    void ProcessTouchEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
+        const RefPtr<OHOS::Ace::NG::FrameNode>& node = nullptr);
 
-    void ProcessMouseEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
+    void ProcessMouseEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
+        const RefPtr<OHOS::Ace::NG::FrameNode>& node = nullptr);
 
-    void ProcessAxisEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
+    void ProcessAxisEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
+        const RefPtr<OHOS::Ace::NG::FrameNode>& node = nullptr);
 
     bool ProcessKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent);
 
@@ -167,7 +172,6 @@ private:
     void NotifySurfacePositionChanged(int32_t posX, int32_t posY)
     {
         if (posX_ == posX && posY_ == posY) {
-            LOGD("surface position not changed");
             return;
         }
         if (viewPositionChangeCallback_) {

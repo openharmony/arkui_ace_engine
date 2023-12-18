@@ -225,6 +225,7 @@ build_component_ng("pattern_ng") {
     "navigation/bar_item_layout_algorithm.cpp",
     "navigation/bar_item_node.cpp",
     "navigation/bar_item_pattern.cpp",
+    "navigation/inner_navigation_controller.cpp",
     "navigation/nav_bar_layout_algorithm.cpp",
     "navigation/nav_bar_node.cpp",
     "navigation/nav_bar_pattern.cpp",
@@ -494,14 +495,16 @@ build_component_ng("pattern_ng") {
     "waterflow/water_flow_pattern.cpp",
   ]
 
+  external_deps = []
   deps = [ "container_modal/interfaces:customtitle" ]
 
   if (defined(vendor_configs.ace_engine_advanced)) {
     sources += vendor_configs.ace_engine_advanced_pattern
+    external_deps += vendor_configs.ace_engine_ext_extra_deps
   }
 
   if (is_ohos_standard_system) {
-    external_deps = [
+    external_deps += [
       "graphic_2d:librender_service_client",
       "napi:ace_napi",
     ]

@@ -227,60 +227,47 @@ ArkUINativeModuleValue NavigationBridge::ResetNavBarWidth(ArkUIRuntimeCallInfo* 
     return panda::JSValueRef::Undefined(vm);
 }
 
-ArkUINativeModuleValue NavigationBridge::SetMinNavBarWidth(ArkUIRuntimeCallInfo* runtimeCallInfo)
+ArkUINativeModuleValue NavigationBridge::SetNavBarWidthRange(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
     Local<JSValueRef> jsValue = runtimeCallInfo->GetCallArgRef(1);
-
-    CalcDimension width;
-    if (jsValue->IsNull() || jsValue->IsUndefined() ||
-        !ArkTSUtils::ParseJsDimensionVp(vm, jsValue, width)) {
+    if (jsValue->IsNull() || jsValue->IsUndefined() || !jsValue->IsArray(vm)) {
+        GetArkUIInternalNodeAPI()->GetNavigationModifier().ResetMinNavBarWidth(nativeNode);
+        GetArkUIInternalNodeAPI()->GetNavigationModifier().ResetMaxNavBarWidth(nativeNode);
+        return panda::JSValueRef::Undefined(vm);
+    }
+    auto rangeArray = panda::Local<panda::ArrayRef>(jsValue);
+    auto minNavBarWidth = panda::ArrayRef::GetValueAt(vm, rangeArray, 0);
+    CalcDimension minWidth;
+    if (minNavBarWidth->IsNull() || minNavBarWidth->IsUndefined() ||
+        !ArkTSUtils::ParseJsDimensionVp(vm, minNavBarWidth, minWidth)) {
         GetArkUIInternalNodeAPI()->GetNavigationModifier().ResetMinNavBarWidth(nativeNode);
     } else {
         GetArkUIInternalNodeAPI()->GetNavigationModifier().SetMinNavBarWidth(
-            nativeNode, width.Value(), static_cast<int>(width.Unit()));
+            nativeNode, minWidth.Value(), static_cast<int>(minWidth.Unit()));
+    }
+    auto maxNavBarWidth = panda::ArrayRef::GetValueAt(vm, rangeArray, 1);
+    CalcDimension maxWidth;
+    if (maxNavBarWidth->IsNull() || maxNavBarWidth->IsUndefined() ||
+        !ArkTSUtils::ParseJsDimensionVp(vm, maxNavBarWidth, maxWidth)) {
+        GetArkUIInternalNodeAPI()->GetNavigationModifier().ResetMaxNavBarWidth(nativeNode);
+    } else {
+        GetArkUIInternalNodeAPI()->GetNavigationModifier().SetMaxNavBarWidth(
+            nativeNode, maxWidth.Value(), static_cast<int>(maxWidth.Unit()));
     }
     return panda::JSValueRef::Undefined(vm);
 }
 
-ArkUINativeModuleValue NavigationBridge::ResetMinNavBarWidth(ArkUIRuntimeCallInfo* runtimeCallInfo)
+ArkUINativeModuleValue NavigationBridge::ResetNavBarWidthRange(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
     GetArkUIInternalNodeAPI()->GetNavigationModifier().ResetMinNavBarWidth(nativeNode);
-    return panda::JSValueRef::Undefined(vm);
-}
-
-ArkUINativeModuleValue NavigationBridge::SetMaxNavBarWidth(ArkUIRuntimeCallInfo* runtimeCallInfo)
-{
-    EcmaVM* vm = runtimeCallInfo->GetVM();
-    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
-    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    Local<JSValueRef> jsValue = runtimeCallInfo->GetCallArgRef(1);
-
-    CalcDimension width;
-    if (jsValue->IsNull() || jsValue->IsUndefined() ||
-        !ArkTSUtils::ParseJsDimensionVp(vm, jsValue, width)) {
-        GetArkUIInternalNodeAPI()->GetNavigationModifier().ResetMaxNavBarWidth(nativeNode);
-    } else {
-        GetArkUIInternalNodeAPI()->GetNavigationModifier().SetMaxNavBarWidth(
-            nativeNode, width.Value(), static_cast<int>(width.Unit()));
-    }
-    return panda::JSValueRef::Undefined(vm);
-}
-
-ArkUINativeModuleValue NavigationBridge::ResetMaxNavBarWidth(ArkUIRuntimeCallInfo* runtimeCallInfo)
-{
-    EcmaVM* vm = runtimeCallInfo->GetVM();
-    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
-    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
     GetArkUIInternalNodeAPI()->GetNavigationModifier().ResetMaxNavBarWidth(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }

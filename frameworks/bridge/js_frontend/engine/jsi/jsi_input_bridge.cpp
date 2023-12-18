@@ -49,11 +49,7 @@ void GetInputOption(
                 inputOption.image = valStr;
             } else if (strcmp(keyStr.c_str(), DOM_INPUT_OPTION_CONTENT) == 0) {
                 inputOption.text = valStr;
-            } else {
-                LOGD("key : %{public}s unsupported. Ignoring!", keyStr.c_str());
             }
-        } else {
-            LOGD("value of unsupported type. Ignoring!");
         }
     }
 }

@@ -26,7 +26,6 @@ namespace OHOS::Ace {
 
 RefPtr<Component> SliderCreator::CreateFromJson(const JsonValue& componentJson, const JsonComponentFactory& factory)
 {
-    LOGD("CreateFromJson start");
     std::string classType = componentJson.GetValue(CLASS_NAME)->GetString();
     if (classType != SLIDER_NAME) {
         LOGE("Create Slider error: not a slider json");

@@ -95,6 +95,12 @@ public:
         forwardLayout_ = forwardLayout;
     }
 
+    void SetContentOffset(float contentStartOffset, float contentEndOffset)
+    {
+        contentStartOffset_ = contentStartOffset;
+        contentEndOffset_ = contentEndOffset;
+    }
+
     void SetListLayoutProperty(RefPtr<ListLayoutProperty> layoutProperty)
     {
         listLayoutProperty_ = std::move(layoutProperty);
@@ -208,6 +214,10 @@ private:
         int32_t startIndex, float startPos);
     void MeasureBackward(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint,
         int32_t endIndex, float endPos);
+    void MeasureJumpToItemForward(LayoutWrapper* layoutWrapper,
+        const LayoutConstraintF& layoutConstraint, int32_t startIndex, float startPos);
+    void MeasureJumpToItemBackward(LayoutWrapper* layoutWrapper,
+        const LayoutConstraintF& layoutConstraint, int32_t endIndex, float endPos);
     void MeasureCenter(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint, int32_t startIndex);
     void MeasureStart(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint, int32_t startIndex);
     void MeasureEnd(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint, int32_t startIndex);
@@ -249,6 +259,8 @@ private:
     float prevEndPos_ = 0.0f;
     float endPos_ = 0.0f;
     float referencePos_ = 0.0f;
+    float contentStartOffset_ = 0.0f;
+    float contentEndOffset_ = 0.0f;
     bool forwardLayout_ = true;
     bool needAllLayout_ = false;
 };

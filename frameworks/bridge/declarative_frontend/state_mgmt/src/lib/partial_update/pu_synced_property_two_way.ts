@@ -66,7 +66,6 @@ class SynchedPropertyTwoWayPU<C> extends ObservedPropertyAbstractPU<C>
     if (!this.source_) {
       throw new SyntaxError(`${this.debugInfo()}: setObject (assign a new value), no source variable in parent/ancestor \
                                                     @Component. Application error.`);
-
     }
 
     if (this.getUnmonitored() === newValue) {
@@ -77,8 +76,8 @@ class SynchedPropertyTwoWayPU<C> extends ObservedPropertyAbstractPU<C>
     stateMgmtConsole.propertyAccess(`${this.debugInfo()}: set: value has changed.`);
 
     if (this.checkIsSupportedValue(newValue)) {
-    // the source_ ObservedProperty will call: this.syncPeerHasChanged(newValue);
-    this.source_.set(newValue)
+      // the source_ ObservedProperty will call: this.syncPeerHasChanged(newValue);
+      this.source_.set(newValue)
     }
   }
 
@@ -89,7 +88,7 @@ class SynchedPropertyTwoWayPU<C> extends ObservedPropertyAbstractPU<C>
    * that peer can be in either ancestor or descendant component if 'this' is used for a @Consume
    * @param eventSource 
    */
-  syncPeerHasChanged(eventSource: ObservedPropertyAbstractPU<C>) {
+  public syncPeerHasChanged(eventSource: ObservedPropertyAbstractPU<C>) : void {
     stateMgmtProfiler.begin("SynchedPropertyTwoWayPU.syncPeerHasChanged");
     if (!this.changeNotificationIsOngoing_) {
       stateMgmtConsole.debug(`${this.debugInfo()}: syncPeerHasChanged: from peer '${eventSource && eventSource.debugInfo && eventSource.debugInfo()}' .`)
@@ -98,26 +97,17 @@ class SynchedPropertyTwoWayPU<C> extends ObservedPropertyAbstractPU<C>
     stateMgmtProfiler.end();
   }
 
-  /**
-   * called when wrapped ObservedObject has changed poperty
-   * @param souceObject 
-   * @param changedPropertyName 
-   */
-  public objectPropertyHasChangedPU(sourceObject: ObservedObject<C>, changedPropertyName : string) {
-    stateMgmtConsole.debug(`${this.debugInfo()}: objectPropertyHasChangedPU: property '${changedPropertyName}' of \
-    object value has changed.`)
-    
-    this.notifyPropertyHasChangedPU();
-  }
-
-  public objectPropertyHasBeenReadPU(sourceObject: ObservedObject<C>, changedPropertyName : string) {
-    stateMgmtConsole.debug(`${this.debugInfo()}: objectPropertyHasBeenReadPU: property '${changedPropertyName}' of object value has been read.`);
-    this.notifyPropertyHasBeenReadPU();
+  public syncPeerTrackedPropertyHasChanged(eventSource: ObservedPropertyAbstractPU<C>, changedTrackedObjectPropertyName: string): void { 
+    stateMgmtProfiler.begin("SynchedPropertyTwoWayPU.syncPeerTrackedPropertyHasChanged");
+    if (!this.changeNotificationIsOngoing_) {
+      stateMgmtConsole.debug(`${this.debugInfo()}: syncPeerTrackedPropertyHasChanged: from peer '${eventSource && eventSource.debugInfo && eventSource.debugInfo()}', changed property '${changedTrackedObjectPropertyName}'.`);
+      this.notifyTrackedObjectPropertyHasChanged(changedTrackedObjectPropertyName);
+    }
+    stateMgmtProfiler.end();
   }
 
   public getUnmonitored(): C {
     stateMgmtConsole.propertyAccess(`${this.debugInfo()}: getUnmonitored.`);
-    // unmonitored get access , no call to otifyPropertyRead !
     return (this.source_ ? this.source_.getUnmonitored() : undefined);
   }
 
@@ -125,8 +115,15 @@ class SynchedPropertyTwoWayPU<C> extends ObservedPropertyAbstractPU<C>
   public get(): C {
     stateMgmtProfiler.begin("SynchedPropertyTwoWayPU.get");
     stateMgmtConsole.propertyAccess(`${this.debugInfo()}: get`)
-    this.notifyPropertyHasBeenReadPU()
+    this.recordPropertyDependentUpdate();
     const result = this.getUnmonitored();
+    if (this.shouldInstallTrackedObjectReadCb) {
+      stateMgmtConsole.propertyAccess(`${this.debugInfo()}: get: @Track optimised mode. Will install read cb func if value is an object`);
+      ObservedObject.registerPropertyReadCb(result, this.onOptimisedObjectPropertyRead.bind(this));
+    } else {
+      stateMgmtConsole.propertyAccess(`${this.debugInfo()}: get: compatibility mode. `);
+    }
+
     stateMgmtProfiler.end();
     return result;
   }
@@ -144,9 +141,30 @@ class SynchedPropertyTwoWayPU<C> extends ObservedPropertyAbstractPU<C>
     
     // avoid circular notifications @Link -> source @State -> other but also back to same @Link
     this.changeNotificationIsOngoing_ = true;
+    let oldValue = this.getUnmonitored();
     this.setObject(newValue);
-    this.notifyPropertyHasChangedPU();
+    TrackedObject.notifyObjectValueAssignment(/* old value */ oldValue, /* new value */ newValue, 
+        this.notifyPropertyHasChangedPU.bind(this),
+        this.notifyTrackedObjectPropertyHasChanged.bind(this));
     this.changeNotificationIsOngoing_ = false;
+    stateMgmtProfiler.end();
+  }
+
+
+  protected onOptimisedObjectPropertyRead(readObservedObject: C, readPropertyName: string, isTracked: boolean): void {
+    stateMgmtProfiler.begin("SynchedPropertyTwoWayPU.onOptimisedObjectPropertyRead");
+    const renderingElmtId = this.getRenderingElmtId();
+    if (renderingElmtId >= 0) {
+      if (!isTracked) {
+        stateMgmtConsole.applicationError(`${this.debugInfo()}: onOptimisedObjectPropertyRead read NOT TRACKED property '${readPropertyName}' during rendering!`);
+        throw new Error(`Illegal usage of not @Track'ed property '${readPropertyName}' on UI!`);
+      } else {
+        stateMgmtConsole.debug(`${this.debugInfo()}: onOptimisedObjectPropertyRead: ObservedObject property '@Track ${readPropertyName}' read.`);
+        if (this.getUnmonitored() === readObservedObject) {
+          this.recordTrackObjectPropertyDependencyForElmtId(renderingElmtId, readPropertyName)
+        }
+      }
+    }
     stateMgmtProfiler.end();
   }
 }

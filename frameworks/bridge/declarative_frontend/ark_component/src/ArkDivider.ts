@@ -1,5 +1,23 @@
+/*
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 /// <reference path="./import.ts" />
 class DividerVerticalModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
   static identity: Symbol = Symbol('dividerVertical');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -13,6 +31,9 @@ class DividerVerticalModifier extends ModifierWithKey<boolean> {
   }
 }
 class DividerLineCapModifier extends ModifierWithKey<LineCapStyle> {
+  constructor(value: LineCapStyle) {
+    super(value);
+  }
   static identity: Symbol = Symbol('dividerLineCap');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -26,6 +47,9 @@ class DividerLineCapModifier extends ModifierWithKey<LineCapStyle> {
   }
 }
 class DividerColorModifier extends ModifierWithKey<ResourceColor> {
+  constructor(value: ResourceColor) {
+    super(value);
+  }
   static identity: Symbol = Symbol('dividerColor');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -39,6 +63,9 @@ class DividerColorModifier extends ModifierWithKey<ResourceColor> {
   }
 }
 class DividerStrokeWidthModifier extends ModifierWithKey<number | string> {
+  constructor(value: number | string) {
+    super(value);
+  }
   static identity: Symbol = Symbol('dividerStrokeWidth');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -52,6 +79,9 @@ class DividerStrokeWidthModifier extends ModifierWithKey<number | string> {
   }
 }
 class ArkDividerComponent extends ArkComponent implements DividerAttribute {
+  constructor(nativePtr: KNode) {
+    super(nativePtr);
+  }
   vertical(value: boolean): DividerAttribute {
     modifierWithKey(this._modifiersWithKeys, DividerVerticalModifier.identity, DividerVerticalModifier, value);
     return this;
@@ -77,6 +107,6 @@ globalThis.Divider.attributeModifier = function (modifier) {
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkDividerComponent(nativeNode);
   });
-  modifier.applyNormalAttribute(component);
+  applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
 }

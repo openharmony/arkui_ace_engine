@@ -56,9 +56,11 @@ std::optional<SizeF> TextAreaLayoutAlgorithm::MeasureContent(
         // Used for empty text.
         preferredHeight_ = pattern->PreferredLineHeight(true);
     }
+
     auto textFieldContentConstraint = CalculateContentMaxSizeWithCalculateConstraint(contentConstraint, layoutWrapper);
     // Paragraph layout.}
     if (isInlineStyle) {
+        CreateInlineParagraph(textStyle, textContent_, false, pattern->GetNakedCharPosition());
         return InlineMeasureContent(textFieldContentConstraint, layoutWrapper);
     } else if (showPlaceHolder_) {
         return PlaceHolderMeasureContent(textFieldContentConstraint, layoutWrapper);

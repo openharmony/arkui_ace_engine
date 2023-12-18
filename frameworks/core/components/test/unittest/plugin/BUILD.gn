@@ -20,23 +20,6 @@ if (is_ohos_standard_system) {
   module_output_path = "ace_engine_full/backenduicomponent/plugin"
 }
 
-ohos_unittest("FlutterRenderPluginTest") {
-  module_out_path = module_output_path
-
-  include_dirs = [ "//third_party/flutter/engine/" ]
-
-  sources = [ "flutter_render_plugin_test.cpp" ]
-
-  configs = [ "$ace_root:ace_test_config" ]
-
-  deps = [
-    "$ace_flutter_engine_root/skia:ace_skia_ohos",
-    "$ace_root/build:ace_ohos_unittest_base",
-  ]
-
-  part_name = ace_engine_part
-}
-
 ohos_unittest("PluginCallBackClientTest") {
   module_out_path = module_output_path
 
@@ -225,7 +208,6 @@ group("unittest") {
   testonly = true
 
   deps = [
-    ":FlutterRenderPluginTest",
     ":PluginCallBackClientTest",
     ":PluginComponentTest",
 

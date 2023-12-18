@@ -371,6 +371,7 @@ bool DialogLayoutAlgorithm::IsDialogTouchingBoundary(OffsetF topLeftPoint, SizeF
     } else if (topLeftPoint.GetX() + childSize.Width() >= width) {
         touchingBoundaryFlag_ = TouchingBoundaryType::TouchRightBoundary;
     } else {
+        touchingBoundaryFlag_ = TouchingBoundaryType::NotTouchBoundary;
         return false;
     }
     return true;
@@ -399,10 +400,8 @@ void DialogLayoutAlgorithm::MultipleDialog(const RefPtr<DialogLayoutProperty>& d
                 dialogProp->UpdateDialogOffset(
                     DimensionOffset(predialogProp->GetDialogOffset().value_or(DimensionOffset()).GetX(),
                         firstdialogProp->GetDialogOffset().value_or(DimensionOffset()).GetY()));
-                touchingBoundaryFlag_ = TouchingBoundaryType::NotTouchBoundary;
             } else if (touchingBoundaryFlag_ == TouchingBoundaryType::TouchRightBoundary) {
                 dialogProp->UpdateDialogOffset(firstdialogProp->GetDialogOffset().value_or(DimensionOffset()));
-                touchingBoundaryFlag_ = TouchingBoundaryType::NotTouchBoundary;
             }
         }
     }

@@ -25,7 +25,6 @@
 #include "core/components/checkable/render_checkable.h"
 #include "core/components/flex/flex_component.h"
 #include "core/components/test/json/json_frontend.h"
-#include "core/pipeline/base/flutter_render_context.h"
 #include "core/pipeline/base/rosen_render_context.h"
 #define protected public
 #include "core/components/checkable/render_switch.h"
@@ -108,11 +107,6 @@ private:
     const CheckableEventCallback eventCallback_;
 };
 } // namespace
-
-flutter::Canvas* FlutterRenderContext::GetCanvas()
-{
-    return nullptr;
-}
 
 SkCanvas* RosenRenderContext::GetCanvas()
 {

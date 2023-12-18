@@ -78,11 +78,14 @@ struct MenuParam {
     std::optional<Placement> placement;
     std::function<void()> onAppear;
     std::function<void()> onDisappear;
+    std::function<void()> aboutToAppear;
+    std::function<void()> aboutToDisappear;
     std::optional<bool> enableArrow;
     std::optional<Dimension> arrowOffset;
     bool isAboveApps = false;
     MenuType type = MenuType::MENU;
     MenuPreviewMode previewMode = MenuPreviewMode::NONE;
+    MenuPreviewAnimationOptions previewAnimationOptions;
     std::optional<EffectOption> backgroundEffectOption;
 };
 

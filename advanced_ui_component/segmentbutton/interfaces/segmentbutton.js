@@ -101,7 +101,7 @@ const SegmentButtonTheme = {
         bundleName: "",
         moduleName: ""
     },
-    BACKGROUND_BLUR_STYLE: BlurStyle.Thin
+    BACKGROUND_BLUR_STYLE: BlurStyle.NONE
 };
 
 function nearEqual(t, e) {
@@ -118,11 +118,11 @@ let SegmentButtonItemOptions = class {
 SegmentButtonItemOptions = __decorate([Observed], SegmentButtonItemOptions);
 let SegmentButtonItemOptionsArray = SegmentButtonItemOptionsArray_1 = class extends Array {
     constructor(t) {
-        super();
+        super("number" == typeof t ? t : 0);
         this.changeStartIndex = void 0;
         this.deleteCount = void 0;
         this.addLength = void 0;
-        void 0 !== t && super.push(...t.map((t => new SegmentButtonItemOptions(t))))
+        "number" != typeof t && void 0 !== t && super.push(...t.map((t => new SegmentButtonItemOptions(t))))
     }
 
     push(...t) {
@@ -208,13 +208,13 @@ let SegmentButtonOptions = SegmentButtonOptions_1 = class {
         this.backgroundColor = null !== (d = t.backgroundColor) && void 0 !== d ? d : SegmentButtonTheme.BACKGROUND_COLOR;
         this.selectedBackgroundColor = null !== (h = t.selectedBackgroundColor) && void 0 !== h ? h : SegmentButtonTheme.TAB_SELECTED_BACKGROUND_COLOR;
         this.imageSize = null !== (a = t.imageSize) && void 0 !== a ? a : { width: 24, height: 24 };
-        this.buttonMargin = null !== (c = t.buttonMargin) && void 0 !== c ? c : {
+        this.buttonPadding = null !== (c = t.buttonPadding) && void 0 !== c ? c : {
             top: 4,
             right: 8,
             bottom: 4,
             left: 8
         };
-        this.textMargin = null !== (u = t.textMargin) && void 0 !== u ? u : 0;
+        this.textPadding = null !== (u = t.textPadding) && void 0 !== u ? u : 0;
         this.type = t.type;
         this.backgroundBlurStyle = null !== (l = t.backgroundBlurStyle) && void 0 !== l ? l : SegmentButtonTheme.BACKGROUND_BLUR_STYLE;
         this.buttons = new SegmentButtonItemOptionsArray(t.buttons);
@@ -226,7 +226,7 @@ let SegmentButtonOptions = SegmentButtonOptions_1 = class {
             }));
             if (this.showText && this.showIcon) {
                 this.iconTextRadius = 12;
-                this.buttonMargin = null !== (m = t.buttonMargin) && void 0 !== m ? m : {
+                this.buttonPadding = null !== (m = t.buttonPadding) && void 0 !== m ? m : {
                     top: 6,
                     right: 8,
                     bottom: 6,
@@ -263,8 +263,8 @@ let SegmentButtonOptions = SegmentButtonOptions_1 = class {
             backgroundColor: t.backgroundColor,
             selectedBackgroundColor: t.selectedBackgroundColor,
             imageSize: t.imageSize,
-            buttonMargin: t.buttonMargin,
-            textMargin: t.textMargin,
+            buttonPadding: t.buttonPadding,
+            textPadding: t.textPadding,
             backgroundBlurStyle: t.backgroundBlurStyle
         })
     }
@@ -283,8 +283,8 @@ let SegmentButtonOptions = SegmentButtonOptions_1 = class {
             backgroundColor: t.backgroundColor,
             selectedBackgroundColor: t.selectedBackgroundColor,
             imageSize: t.imageSize,
-            buttonMargin: t.buttonMargin,
-            textMargin: t.textMargin,
+            buttonPadding: t.buttonPadding,
+            textPadding: t.textPadding,
             backgroundBlurStyle: t.backgroundBlurStyle
         })
     }
@@ -756,7 +756,7 @@ class SegmentButtonItem extends ViewPU {
             ViewStackProcessor.StartGetAccessRecordingFor(t);
             Column.create({ space: 2 });
             Column.justifyContent(FlexAlign.Center);
-            Column.padding(null !== (o = this.options.buttonMargin) && void 0 !== o ? o : "capsule" === this.options.type && this.options.showText && this.options.showIcon ? {
+            Column.padding(null !== (o = this.options.buttonPadding) && void 0 !== o ? o : "capsule" === this.options.type && this.options.showText && this.options.showIcon ? {
                 top: 6,
                 right: 8,
                 bottom: 6,
@@ -804,7 +804,7 @@ class SegmentButtonItem extends ViewPU {
                     Text.maxLines(1);
                     Text.textAlign(TextAlign.Center);
                     Text.focusable(0 == this.index && !this.options.showIcon);
-                    Text.padding(null !== (o = this.options.textMargin) && void 0 !== o ? o : 0);
+                    Text.padding(null !== (o = this.options.textPadding) && void 0 !== o ? o : 0);
                     e || Text.pop();
                     ViewStackProcessor.StopGetAccessRecording()
                 }));

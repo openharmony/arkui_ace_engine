@@ -34,6 +34,7 @@
 #include "core/components_ng/base/view_abstract_model_ng.h"
 #include "core/components_ng/pattern/text/text_menu_extension.h"
 #include "core/components_ng/property/measure_property.h"
+#include "core/components_ng/pattern/text_field/text_field_event_hub.h"
 
 namespace OHOS::Ace {
 
@@ -199,12 +200,14 @@ public:
     virtual void SetShowPasswordIcon(bool value) = 0;
     virtual void SetOnEditChanged(std::function<void(bool)>&& func) = 0;
     virtual void SetOnSubmit(std::function<void(int32_t)>&& func) = 0;
+    virtual void SetOnSubmit(std::function<void(int32_t, NG::TextFieldCommonEvent&)>&& func) = 0;
     virtual void SetOnChange(std::function<void(const std::string&)>&& func) = 0;
     virtual void SetOnTextSelectionChange(std::function<void(int32_t, int32_t)>&& func) = 0;
     virtual void SetOnContentScroll(std::function<void(float, float)>&& func) = 0;
     virtual void SetOnCopy(std::function<void(const std::string&)>&& func) = 0;
     virtual void SetOnCut(std::function<void(const std::string&)>&& func) = 0;
     virtual void SetOnPaste(std::function<void(const std::string&)>&& func) = 0;
+    virtual void SetOnPasteWithEvent(std::function<void(const std::string&, NG::TextCommonEvent&)>&& func) = 0;
     virtual void SetCopyOption(CopyOptions copyOption) = 0;
     virtual void ResetMaxLength() = 0;
     virtual void SetForegroundColor(const Color& value) = 0;
@@ -234,6 +237,7 @@ public:
     virtual void SetCancelIconSize(const CalcDimension& iconSize) = 0;
     virtual void SetCanacelIconSrc(const std::string& iconSrc) = 0;
     virtual void SetCancelIconColor(const Color& iconColor) = 0;
+    virtual void SetIsShowCancelButton(bool isShowCancelButton) = 0;
     virtual void SetPasswordRules(const std::string& passwordRules) = 0;
     virtual void SetEnableAutoFill(bool enableAutoFill) = 0;
 

@@ -38,7 +38,7 @@ public:
     NavigationGroupNode(const std::string& tag, int32_t nodeId, const RefPtr<Pattern>& pattern)
         : GroupNode(tag, nodeId, pattern)
     {}
-    ~NavigationGroupNode() override = default;
+    ~NavigationGroupNode() override;
     void AddChildToGroup(const RefPtr<UINode>& child, int32_t slot = DEFAULT_NODE_SLOT) override;
 
     // remain child needs to keep to use pop animation
@@ -81,6 +81,11 @@ public:
         return dividerNode_;
     }
 
+    const std::string& GetCurId() const
+    {
+        return curId_;
+    }
+
     bool GetIsModeChange() const
     {
         return isModeChange_;
@@ -103,6 +108,8 @@ public:
 
     bool CheckCanHandleBack();
 
+    void OnInspectorIdUpdate(const std::string& id) override;
+
     bool HandleBack(const RefPtr<FrameNode>& node, bool isLastChild, bool isOverride);
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
@@ -119,16 +126,25 @@ public:
     void MaskAnimation(const RefPtr<RenderContext>& transitionOutNodeContext);
     void TitleOpacityAnimationOut(const RefPtr<RenderContext>& transitionOutNodeContext);
     void TransitionWithReplace(const RefPtr<FrameNode>& preNode, const RefPtr<FrameNode>& curNode, bool isNavBar);
-    void DealNavigationExit(const RefPtr<FrameNode>& preNode, bool isNavBar);
+    void DealNavigationExit(const RefPtr<FrameNode>& preNode, bool isNavBar, bool isAnimated = true);
     void NotifyPageHide();
+    void UpdateLastStandardIndex();
+    int32_t GetLastStandardIndex() const
+    {
+        return lastStandardIndex_;
+    }
 
 private:
+    bool UpdateNavDestinationVisibility(const RefPtr<NavDestinationGroupNode>& navDestination,
+        const RefPtr<UINode>& remainChild, int32_t index, size_t destinationSize);
     RefPtr<UINode> navBarNode_;
     RefPtr<UINode> contentNode_;
     RefPtr<UINode> dividerNode_;
+    int32_t lastStandardIndex_ = -1;
     bool isOnAnimation_ { false };
     bool isModeChange_ { false };
     bool needSetInvisible_ { false };
+    std::string curId_;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_NAVIGATION_GROUP_NODE_H

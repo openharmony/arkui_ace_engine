@@ -338,13 +338,11 @@ bool TextOverlayBase::GetCaretRect(int32_t extent, Rect& caretRect, double caret
     if (computeSuccess && !textValue_.text.empty()) {
         if (metrics.height <= 0 || std::isnan(metrics.height)) {
             // The reason may be text lines is exceed the paragraph maxline.
-            LOGD("Illegal caret height. Consider release restriction of paragraph max_line.");
             return false;
         }
         caretRect.SetRect(metrics.offset.GetX(), metrics.offset.GetY() + caretHeightOffset, cursorWidth_,
             metrics.height - caretHeightOffset * 2.0);
     } else {
-        LOGD("Caret is at the begin of text. Make caret offset according to alignment.");
         // Use proto caret.
         caretRect = caretProto_ + MakeEmptyOffset();
     }
@@ -430,7 +428,6 @@ void TextOverlayBase::InitAnimation(const WeakPtr<PipelineContext>& pipelineCont
     });
 
     // Add the animation
-    LOGD("Add animation to animator");
     animator_ = CREATE_ANIMATOR(context);
     animator_->AddInterpolator(diameterAnimation);
     animator_->AddInterpolator(diameterInnerAnimation);

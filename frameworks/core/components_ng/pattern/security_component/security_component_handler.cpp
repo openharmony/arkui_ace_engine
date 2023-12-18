@@ -348,7 +348,7 @@ bool SecurityComponentHandler::InitBaseInfo(OHOS::Security::SecurityComponent::S
 
     auto container = AceType::DynamicCast<Platform::AceContainer>(Container::Current());
     CHECK_NULL_RETURN(container, false);
-    buttonInfo.windowId_ = container->GetWindowId();
+    buttonInfo.windowId_ = static_cast<int32_t>(container->GetWindowId());
 
     if (!GetDisplayOffset(node, buttonInfo.rect_.x_, buttonInfo.rect_.y_)) {
         LOGW("Get display offset failed");

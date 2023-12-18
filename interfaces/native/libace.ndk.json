@@ -89,6 +89,6 @@
     },
     {
         "first_introduced": "11",
-        "name": "OH_NativeXComponent_UnRegisterOnFrameCallback"
+        "name": "OH_NativeXComponent_UnregisterOnFrameCallback"
     }
 ]

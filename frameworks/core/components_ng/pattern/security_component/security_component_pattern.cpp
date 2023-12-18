@@ -348,6 +348,7 @@ void SecurityComponentPattern::InitAppearCallback(RefPtr<FrameNode>& frameNode)
         auto securityComponentPattern = weak.Upgrade();
         CHECK_NULL_VOID(securityComponentPattern);
         SecurityComponentHandler::UnregisterSecurityComponent(securityComponentPattern->scId_);
+        securityComponentPattern->scId_ = -1;
 #endif
     };
     eventHub->SetOnAppear(std::move(onAppear));

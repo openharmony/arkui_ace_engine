@@ -32,6 +32,13 @@
 #include "core/components_ng/pattern/pattern.h"
 
 namespace OHOS::Ace::NG {
+enum class IndexerCollapsingMode {
+    INVALID,
+    NONE, // all array should be displayed
+    FIVE, // 5 + 1 collapsing mode
+    SEVEN // 7 + 1 collapsing mode
+};
+
 class IndexerPattern : public Pattern {
     DECLARE_ACE_TYPE(IndexerPattern, Pattern);
 
@@ -70,11 +77,6 @@ public:
         isTouch_ = isTouch;
     }
 
-    const std::vector<std::string>& GetArrayValue()
-    {
-        return arrayValue_;
-    }
-
     FocusPattern GetFocusPattern() const override
     {
         return { FocusType::NODE, true };
@@ -91,6 +93,12 @@ public:
 private:
     void OnModifyDone() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
+
+    void BuildArrayValueItems();
+    void BuildFullArrayValue();
+    void CollapseArrayValue();
+    void ApplySevenPlusOneMode(int32_t fullArraySize);
+    void ApplyFivePlusOneMode(int32_t fullArraySize);
 
     void OnTouchDown(const TouchEventInfo& info);
     void OnTouchUp(const TouchEventInfo& info);
@@ -158,7 +166,14 @@ private:
     bool isHover_ = false;
     bool isPopup_ = false;
 
-    std::vector<std::string> arrayValue_;
+     // the array of displayed items, ths second param in the pair
+     // indicates whether the item should be hidden and displayed as dot
+    std::vector<std::pair<std::string, bool>> arrayValue_;
+    // full array of items, used in auto-collapse mode
+    std::vector<std::string> fullArrayValue_;
+    // sharp item count is 0 or 1, indicates whether the first item is # in
+    // original array, used in auto-collapse mode
+    int32_t sharpItemCount_ = 0;
     int32_t itemCount_ = 0;
     int32_t selected_ = 0;
     int32_t animateSelected_ = -1;
@@ -169,6 +184,7 @@ private:
     int32_t childPressIndex_ = -1;
     int32_t animationId_ = 0;
     int32_t lastPopupIndex_ = -1;
+    uint32_t lastPopupSize_ = 0;
     int32_t currentPopupIndex_ = -1;
     float itemSizeRender_ = 0.0f;
     int32_t lastSelectProp_ = -1;
@@ -177,6 +193,10 @@ private:
     float lastItemSize_ = -1.0f;
     bool lastIndexFromPress_ = false;
     bool selectChanged_ = false;
+    bool autoCollapse_ = false;
+    float actualIndexerHeight_ = 0.0f;
+    bool isNewHeightCalculated_ = false;
+    IndexerCollapsingMode lastCollapsingMode_ = IndexerCollapsingMode::INVALID;
 };
 } // namespace OHOS::Ace::NG
 

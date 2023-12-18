@@ -38,7 +38,6 @@ constexpr TextDirection TEXT_DIRECTION_METHODS[] = { TextDirection::LTR, TextDir
 
 RefPtr<Component> TextCreator::CreateFromJson(const JsonValue& componentJson, const JsonComponentFactory& factory)
 {
-    LOGD("CreateFromJson Text");
     auto data = componentJson.GetString(TEXT_DATA);
     auto text = AceType::MakeRefPtr<TextComponent>(data);
     TextStyle textStyle;

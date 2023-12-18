@@ -34,6 +34,7 @@ public:
     virtual SizeF GetContainerSize() const = 0;
     virtual void SetContainerSize(const SizeF& containerSize) = 0;
     virtual void SetFillColor(const std::optional<Color>& color) {}
+    virtual void SetSmoothEdge(float value) {}
 
     void SetRadius(const BorderRadiusArray& radiusXY)
     {

@@ -358,7 +358,6 @@ bool Localization::GetDateColumnFormatOrder(std::vector<std::string>& outOrder)
 
     std::string result;
     UnicodeString2String(pattern, result);
-    LOGD("order of date format is %{public}s", result.c_str());
 
     std::map<std::size_t, std::string> order;
     std::size_t position = result.find("yyyy");

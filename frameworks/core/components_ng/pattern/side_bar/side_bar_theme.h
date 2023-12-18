@@ -49,13 +49,11 @@ public:
         void ParsePattern(const RefPtr<ThemeStyle>& themeStyle, const RefPtr<SideBarTheme>& theme) const
         {
             if (!themeStyle) {
-                LOGE("themeStyle is null");
                 return;
             }
 
             auto sideBarPattern = themeStyle->GetAttr<RefPtr<ThemeStyle>>(THEME_PATTERN_SIDE_BAR, nullptr);
             if (!sideBarPattern) {
-                LOGE("sideBarPattern is null");
                 return;
             }
 

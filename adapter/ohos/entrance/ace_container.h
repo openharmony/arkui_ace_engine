@@ -281,6 +281,10 @@ public:
 
     void DumpHeapSnapshot(bool isPrivate) override;
 
+    void DestroyHeapProfiler() override;
+
+    void ForceFullGC() override;
+
     void SetLocalStorage(NativeReference* storage, NativeReference* context);
 
     bool ParseThemeConfig(const std::string& themeConfig);
@@ -496,6 +500,7 @@ public:
 
     bool RequestAutoFill(const RefPtr<NG::FrameNode>& node, AceAutoFillType autoFillType) override;
     bool RequestAutoSave(const RefPtr<NG::FrameNode>& node) override;
+    std::shared_ptr<NavigationController> GetNavigationController(const std::string& navigationId) override;
 
     void SearchElementInfoByAccessibilityIdNG(
         int32_t elementId, int32_t mode, int32_t baseParent,

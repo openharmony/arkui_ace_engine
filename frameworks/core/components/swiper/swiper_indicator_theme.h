@@ -37,6 +37,20 @@ constexpr Dimension SWIPER_INDICATOR_DIGIT_HEIGHT = 32.0_vp;
 constexpr Dimension SWIPER_INDICATOR_DOT_PADDING_DEFAULT = 12.0_vp;
 constexpr Dimension SWIPER_INDICATOR_DOT_ITEM_SPACE = 8.0_vp;
 } // namespace
+
+enum class GestureState {
+    GESTURE_STATE_FOLLOW,
+    GESTURE_STATE_FOLLOW_LEFT,
+    GESTURE_STATE_FOLLOW_RIGHT,
+    GESTURE_STATE_RELEASE_LEFT,
+    GESTURE_STATE_RELEASE_RIGHT
+};
+
+enum class TouchBottomTypeLoop {
+    TOUCH_BOTTOM_TYPE_LOOP_NONE,
+    TOUCH_BOTTOM_TYPE_LOOP_LEFT,
+    TOUCH_BOTTOM_TYPE_LOOP_RIGHT,
+};
 class SwiperIndicatorTheme : public virtual Theme {
     DECLARE_ACE_TYPE(SwiperIndicatorTheme, Theme);
 
@@ -69,8 +83,7 @@ public:
             theme->size_ = swiperPattern->GetAttr<Dimension>("swiper_indicator_size", 0.0_vp);
             theme->selectedSize_ = swiperPattern->GetAttr<Dimension>("swiper_indicator_selected_size", 0.0_vp);
             theme->isHasMask_ = static_cast<bool>(swiperPattern->GetAttr<double>("swiper_indicator_mask", 0.0));
-            theme->indicatorPointPadding_ =
-                swiperPattern->GetAttr<Dimension>("swiper_indicator_point_padding", 0.0_vp);
+            theme->indicatorPointPadding_ = swiperPattern->GetAttr<Dimension>("swiper_indicator_point_padding", 0.0_vp);
             theme->startEndPadding_ = swiperPattern->GetAttr<Dimension>("swiper_indicator_start_end_padding", 0.0_vp);
             theme->pressPadding_ = swiperPattern->GetAttr<Dimension>("swiper_indicator_press_padding", 0.0_vp);
             theme->pressPointPadding_ =
@@ -351,6 +364,7 @@ public:
     {
         return indicatorDotItemSpace_;
     }
+
 protected:
     SwiperIndicatorTheme() = default;
 

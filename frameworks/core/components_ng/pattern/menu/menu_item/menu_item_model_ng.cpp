@@ -224,9 +224,12 @@ void MenuItemModelNG::SetSelectedChangeEvent(std::function<void(bool)>&& selecte
 void MenuItemModelNG::SetSelected(FrameNode* frameNode, bool isSelected)
 {
     CHECK_NULL_VOID(frameNode);
-    auto pattern = AceType::DynamicCast<MenuItemPattern>(frameNode->GetPattern());
+    auto pattern = frameNode->GetPattern<MenuItemPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetSelected(isSelected);
+    auto eventHub = frameNode->GetEventHub<MenuItemEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetCurrentUIState(UI_STATE_SELECTED, isSelected);
 }
 
 void MenuItemModelNG::SetLabelFontColor(FrameNode* frameNode, const std::optional<Color>& color)

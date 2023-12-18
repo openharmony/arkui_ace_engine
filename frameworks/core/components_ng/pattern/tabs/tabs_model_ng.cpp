@@ -276,16 +276,6 @@ void TabsModelNG::SetScrollable(bool scrollable)
 
 void TabsModelNG::SetAnimationDuration(float duration)
 {
-    if (duration < 0) {
-        if (Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
-            return;
-        }
-        auto pipelineContext = PipelineContext::GetCurrentContext();
-        CHECK_NULL_VOID(pipelineContext);
-        auto tabTheme = pipelineContext->GetTheme<TabTheme>();
-        CHECK_NULL_VOID(tabTheme);
-        duration = tabTheme->GetTabContentAnimationDuration();
-    }
     auto tabsNode = AceType::DynamicCast<TabsNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
     CHECK_NULL_VOID(tabsNode);
     auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabBar());
@@ -293,6 +283,9 @@ void TabsModelNG::SetAnimationDuration(float duration)
     auto tabBarPattern = tabBarNode->GetPattern<TabBarPattern>();
     CHECK_NULL_VOID(tabBarPattern);
     tabBarPattern->SetAnimationDuration(static_cast<int32_t>(duration));
+    if (static_cast<int32_t>(duration) < 0) {
+        return;
+    }
     auto swiperPaintProperty = GetSwiperPaintProperty();
     CHECK_NULL_VOID(swiperPaintProperty);
     swiperPaintProperty->UpdateDuration(static_cast<int32_t>(duration));
@@ -357,13 +350,11 @@ void TabsModelNG::SetOnTabBarClick(std::function<void(const BaseEventInfo*)>&& o
 
 void TabsModelNG::SetOnAnimationStart(AnimationStartEvent&& onAnimationStart)
 {
-    auto tabsNode = AceType::DynamicCast<TabsNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto tabsNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(tabsNode);
-    auto swiperNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabs());
-    CHECK_NULL_VOID(swiperNode);
-    auto eventHub = swiperNode->GetEventHub<SwiperEventHub>();
-    CHECK_NULL_VOID(eventHub);
-    eventHub->SetAnimationStartEvent(std::move(onAnimationStart));
+    auto tabPattern = tabsNode->GetPattern<TabsPattern>();
+    CHECK_NULL_VOID(tabPattern);
+    tabPattern->SetAnimationStartEvent(std::move(onAnimationStart));
 }
 
 void TabsModelNG::SetOnAnimationEnd(AnimationEndEvent&& onAnimationEnd)
@@ -814,9 +805,6 @@ void TabsModelNG::SetTabBarHeight(FrameNode* frameNode, const Dimension& tabBarH
 
 void TabsModelNG::SetAnimationDuration(FrameNode* frameNode, float duration)
 {
-    if (duration < 0) {
-        return;
-    }
     CHECK_NULL_VOID(frameNode);
     auto tabsNode = AceType::DynamicCast<TabsNode>(frameNode);
     CHECK_NULL_VOID(tabsNode);
@@ -825,6 +813,9 @@ void TabsModelNG::SetAnimationDuration(FrameNode* frameNode, float duration)
     auto tabBarPattern = tabBarNode->GetPattern<TabBarPattern>();
     CHECK_NULL_VOID(tabBarPattern);
     tabBarPattern->SetAnimationDuration(static_cast<int32_t>(duration));
+    if (static_cast<int32_t>(duration) < 0) {
+        return;
+    }
     auto swiperPaintProperty = GetSwiperPaintProperty(frameNode);
     CHECK_NULL_VOID(swiperPaintProperty);
     swiperPaintProperty->UpdateDuration(static_cast<int32_t>(duration));

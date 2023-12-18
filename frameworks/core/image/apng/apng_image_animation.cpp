@@ -28,7 +28,6 @@ bool APngImageAnimation::AddPicture(float duration, const int32_t &pictureInfo)
         this->duration_ = 0.0f;
     }
 
-    LOGD("picture animation: add picture ref, duration: %{public}f", duration);
     pictures_.emplace_back(AceType::MakeRefPtr<Ace::PictureFrame<int32_t>>(duration, pictureInfo));
     this->duration_ += duration;
     return true;

@@ -87,6 +87,27 @@ void ButtonPattern::UpdateTextLayoutProperty(
     if (layoutProperty->GetHeightAdaptivePolicy().has_value()) {
         textLayoutProperty->UpdateHeightAdaptivePolicy(layoutProperty->GetHeightAdaptivePolicy().value());
     }
+    // update text style defined by buttonStyle and control size
+    UpdateTextStyle(layoutProperty, textLayoutProperty);
+}
+
+void ButtonPattern::UpdateTextStyle(
+    RefPtr<ButtonLayoutProperty>& layoutProperty, RefPtr<TextLayoutProperty>& textLayoutProperty)
+{
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto buttonTheme = pipeline->GetTheme<ButtonTheme>();
+    CHECK_NULL_VOID(buttonTheme);
+    if (!layoutProperty->GetFontColor().has_value()) {
+        ButtonStyleMode buttonStyle = layoutProperty->GetButtonStyle().value_or(ButtonStyleMode::EMPHASIZE);
+        Color fontColor = buttonTheme->GetTextColor(buttonStyle);
+        textLayoutProperty->UpdateTextColor(fontColor);
+    }
+    if (!layoutProperty->HasFontSize()) {
+        ControlSize controlSize = layoutProperty->GetControlSize().value_or(ControlSize::NORMAL);
+        Dimension fontSize = buttonTheme->GetTextSize(controlSize);
+        textLayoutProperty->UpdateFontSize(fontSize);
+    }
 }
 
 bool ButtonPattern::IsNeedToHandleHoverOpacity()
@@ -269,10 +290,13 @@ void ButtonPattern::HandleBackgroundColor()
     CHECK_NULL_VOID(pipeline);
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
+    auto layoutProperty = GetLayoutProperty<ButtonLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    auto buttonTheme = pipeline->GetTheme<ButtonTheme>();
+    CHECK_NULL_VOID(buttonTheme);
+    ButtonStyleMode buttonStyle = layoutProperty->GetButtonStyle().value_or(ButtonStyleMode::EMPHASIZE);
     if (!renderContext->HasBackgroundColor()) {
-        auto buttonTheme = pipeline->GetTheme<ButtonTheme>();
-        CHECK_NULL_VOID(buttonTheme);
-        renderContext->UpdateBackgroundColor(buttonTheme->GetBgColor());
+        renderContext->UpdateBackgroundColor(buttonTheme->GetBgColor(buttonStyle));
     }
 }
 
@@ -320,14 +344,14 @@ void ButtonPattern::OnColorConfigurationUpdate()
     CHECK_NULL_VOID(renderContext);
     auto buttonLayoutProperty = node->GetLayoutProperty<ButtonLayoutProperty>();
     CHECK_NULL_VOID(buttonLayoutProperty);
-    auto color = buttonTheme->GetBgColor();
+    ButtonStyleMode defaultButtonStyle = ButtonStyleMode::EMPHASIZE;
+    auto color = buttonTheme->GetBgColor(defaultButtonStyle);
     renderContext->UpdateBackgroundColor(color);
     auto textNode = DynamicCast<FrameNode>(node->GetFirstChild());
     CHECK_NULL_VOID(textNode);
     auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textLayoutProperty);
-    auto textStyle = buttonTheme->GetTextStyle();
-    textLayoutProperty->UpdateTextColor(textStyle.GetTextColor());
+    textLayoutProperty->UpdateTextColor(buttonTheme->GetTextColor(defaultButtonStyle));
     textNode->MarkDirtyNode();
 }
 } // namespace OHOS::Ace::NG

@@ -59,7 +59,6 @@ void RosenRenderSwiper::Paint(RenderContext& context, const Offset& offset)
     }
 
     if (!indicator_) {
-        LOGD("swiper has not default indicator");
         return;
     }
     // indicator style in tv is different.
@@ -183,7 +182,6 @@ void RosenRenderSwiper::PaintShadow(RSCanvas* canvas, const Offset& offset)
 void RosenRenderSwiper::UpdateIndicator()
 {
     if (!indicator_) {
-        LOGD("swiper has not default indicator");
         return;
     }
 
@@ -382,8 +380,6 @@ void RosenRenderSwiper::PaintMask(RenderContext& context, const Offset& offset) 
         pts[1] = SkPoint::Make(SkDoubleToScalar(offset.GetX() + indicatorPosition_.GetX() + NormalizeToPx(15.0_vp)),
             SkDoubleToScalar(offset.GetY()));
     }
-    LOGD("gradient--beginPoint x: %{public}f, y: %{public}f", pts[0].x(), pts[0].y());
-    LOGD("gradient--endPoint x: %{public}f, y: %{public}f", pts[1].x(), pts[1].y());
     SkColor colors[gradientColors.size()];
     for (uint32_t i = 0; i < gradientColors.size(); ++i) {
         const auto& gradientColor = gradientColors[i];
@@ -424,8 +420,6 @@ void RosenRenderSwiper::PaintMask(RenderContext& context, const Offset& offset) 
         pts.at(1) = RSPoint(static_cast<RSScalar>(offset.GetX() + indicatorPosition_.GetX() + NormalizeToPx(15.0_vp)),
             static_cast<RSScalar>(offset.GetY()));
     }
-    LOGD("gradient--beginPoint x: %{public}f, y: %{public}f", pts.at(0).GetX(), pts.at(0).GetY());
-    LOGD("gradient--endPoint x: %{public}f, y: %{public}f", pts.at(1).GetX(), pts.at(1).GetY());
     std::vector<RSColorQuad> colors;
     for (uint32_t i = 0; i < gradientColors.size(); ++i) {
         const auto& gradientColor = gradientColors[i];

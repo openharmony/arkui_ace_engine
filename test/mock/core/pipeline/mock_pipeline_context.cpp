@@ -69,6 +69,17 @@ float PipelineContext::GetCurrentRootHeight()
     return static_cast<float>(MockPipelineContext::GetCurrent()->rootHeight_);
 }
 
+std::shared_ptr<NavigationController> PipelineContext::GetNavigationController(
+    const std::string& id)
+{
+    return nullptr;
+}
+
+void PipelineContext::AddOrReplaceNavigationNode(
+    const std::string &id, const WeakPtr<FrameNode>& node) {}
+
+void PipelineContext::DeleteNavigationNode(const std::string &id) {}
+
 RefPtr<PipelineContext> PipelineContext::GetCurrentContext()
 {
     return MockPipelineContext::GetCurrent();
@@ -112,6 +123,12 @@ void PipelineContext::SetupRootElement()
     dragDropManager_ = MakeRefPtr<DragDropManager>();
     sharedTransitionManager_ = MakeRefPtr<SharedOverlayManager>(rootNode_);
 }
+
+void PipelineContext::OnTouchEvent(const TouchEvent& point, const RefPtr<FrameNode>& node, bool isSubPipe) {}
+
+void PipelineContext::OnMouseEvent(const MouseEvent& event, const RefPtr<FrameNode>& node) {}
+
+void PipelineContext::OnAxisEvent(const AxisEvent& event, const RefPtr<FrameNode>& node) {}
 
 void PipelineContext::OnTouchEvent(const TouchEvent& point, bool isSubPipe) {}
 

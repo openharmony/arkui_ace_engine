@@ -39,6 +39,7 @@
 #include "core/components/select/select_theme.h"
 #include "core/components/text_overlay/text_overlay_theme.h"
 #include "core/components/toast/toast_theme.h"
+#include "core/components_ng/animation/geometry_transition.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/base/view_abstract.h"
@@ -418,7 +419,9 @@ void OverlayManager::SetContainerButtonEnable(bool isEnabled)
 void OverlayManager::SetShowMenuAnimation(const RefPtr<FrameNode>& menu, bool isInSubWindow)
 {
     BlurLowerNode(menu);
-
+    auto menuWrapper = menu->GetPattern<MenuWrapperPattern>();
+    CHECK_NULL_VOID(menuWrapper);
+    menuWrapper->CallMenuAboutToAppearCallback();
     AnimationOption option;
     option.SetCurve(Curves::FAST_OUT_SLOW_IN);
     option.SetDuration(MENU_ANIMATION_DURATION);
@@ -474,7 +477,9 @@ void OverlayManager::SetShowMenuAnimation(const RefPtr<FrameNode>& menu, bool is
 void OverlayManager::PopMenuAnimation(const RefPtr<FrameNode>& menu, bool showPreviewAnimation, bool startDrag)
 {
     ResetLowerNodeFocusable(menu);
-
+    auto menuWrapper = menu->GetPattern<MenuWrapperPattern>();
+    CHECK_NULL_VOID(menuWrapper);
+    menuWrapper->CallMenuAboutToDisappearCallback();
     AnimationOption option;
     option.SetCurve(Curves::FAST_OUT_SLOW_IN);
     option.SetDuration(MENU_ANIMATION_DURATION);
@@ -489,15 +494,8 @@ void OverlayManager::PopMenuAnimation(const RefPtr<FrameNode>& menu, bool showPr
         taskExecutor->PostTask(
             [rootWeak, menuWK, id, weak]() {
                 auto menu = menuWK.Upgrade();
+                CHECK_NULL_VOID(menu);
                 auto root = rootWeak.Upgrade();
-                auto overlayManager = weak.Upgrade();
-                CHECK_NULL_VOID(menu && overlayManager);
-                ContainerScope scope(id);
-                auto container = Container::Current();
-                if (container && container->IsScenceBoardWindow()) {
-                    root = overlayManager->FindWindowScene(menu);
-                }
-                CHECK_NULL_VOID(root);
                 auto menuWrapperPattern = menu->GetPattern<MenuWrapperPattern>();
                 menuWrapperPattern->CallMenuDisappearCallback();
                 auto mainPipeline = PipelineContext::GetMainPipelineContext();
@@ -514,6 +512,14 @@ void OverlayManager::PopMenuAnimation(const RefPtr<FrameNode>& menu, bool showPr
                     SubwindowManager::GetInstance()->ClearMenuNG(id);
                     return;
                 }
+                ContainerScope scope(id);
+                auto container = Container::Current();
+                auto overlayManager = weak.Upgrade();
+                CHECK_NULL_VOID(overlayManager);
+                if (container && container->IsScenceBoardWindow()) {
+                    root = overlayManager->FindWindowScene(menu);
+                }
+                CHECK_NULL_VOID(root);
                 overlayManager->BlurOverlayNode(menu);
                 root->RemoveChild(menu);
                 root->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
@@ -683,7 +689,6 @@ void OverlayManager::ShowToast(const std::string& message, int32_t duration, con
 
 void OverlayManager::PopToast(int32_t toastId)
 {
-    TAG_LOGD(AceLogTag::ACE_OVERLAY, "Overlay starts to pop Toast");
     AnimationOption option;
     auto curve = AceType::MakeRefPtr<CubicCurve>(0.2f, 0.0f, 0.1f, 1.0f);
     option.SetCurve(curve);
@@ -1193,6 +1198,8 @@ void OverlayManager::DeleteMenu(int32_t targetId)
     if (it == menuMap_.end()) {
         return;
     }
+    HideAllMenus();
+    HideMenuInSubWindow(false);
     menuMap_.erase(it);
 }
 
@@ -1212,6 +1219,10 @@ void OverlayManager::CleanMenuInSubWindowWithAnimation()
     auto menuWrapperPattern = menu->GetPattern<MenuWrapperPattern>();
     CHECK_NULL_VOID(menuWrapperPattern);
     menuWrapperPattern->SetMenuHide();
+    if (menuWrapperPattern->GetPreviewMode() == MenuPreviewMode::NONE) {
+        CleanMenuInSubWindow();
+        return;
+    }
     ClearMenuAnimation(menu);
 }
 
@@ -1319,9 +1330,6 @@ RefPtr<FrameNode> OverlayManager::ShowDialog(
 
     auto dialog = DialogView::CreateDialogNode(dialogProps, customNode);
     CHECK_NULL_RETURN(dialog, nullptr);
-    if (dialogProps.isMask) {
-        maskNodeId_ = dialog->GetId();
-    }
     BeforeShowDialog(dialog);
     OpenDialogAnimation(dialog);
     dialogCount_++;
@@ -1388,8 +1396,15 @@ void OverlayManager::ShowCalendarDialog(const DialogProperties& dialogProps, con
     OpenDialogAnimation(dialogNode);
 }
 
-void OverlayManager::PopModalDialog()
+void OverlayManager::PopModalDialog(int32_t maskId)
 {
+    int32_t dialogId = -1;
+    for (auto it = maskNodeIdMap_.begin(); it != maskNodeIdMap_.end(); it++) {
+        if (maskId == it->second) {
+            dialogId = it->first;
+            break;
+        }
+    }
     auto subWindow = SubwindowManager::GetInstance()->GetSubwindow(subWindowId_);
     CHECK_NULL_VOID(subWindow);
     auto subOverlayManager = subWindow->GetOverlayManager();
@@ -1398,8 +1413,7 @@ void OverlayManager::PopModalDialog()
         subOverlayManager->GetDialogMap().begin(), subOverlayManager->GetDialogMap().end());
     for (auto it = DialogMap.begin(); it != DialogMap.end(); it++) {
         auto dialogProp = DynamicCast<DialogLayoutProperty>(it->second->GetLayoutProperty());
-        if (dialogProp->GetIsModal().value_or(true) && dialogProp->GetAutoCancel().value_or(true) &&
-            dialogProp->GetShowInSubWindowValue(false)) {
+        if (dialogId == it->first) {
             subOverlayManager->CloseDialog(it->second);
         }
     }
@@ -1449,7 +1463,8 @@ void OverlayManager::CloseDialog(const RefPtr<FrameNode>& dialogNode)
         CHECK_NULL_VOID(parentPipelineContext);
         auto parentOverlayManager = parentPipelineContext->GetOverlayManager();
         CHECK_NULL_VOID(parentOverlayManager);
-        RefPtr<FrameNode> maskNode = parentOverlayManager->GetDialog(parentOverlayManager->GetMaskNodeId());
+        RefPtr<FrameNode> maskNode =
+            parentOverlayManager->GetDialog(parentOverlayManager->GetMaskNodeIdWithDialogId(dialogNode->GetId()));
         if (maskNode) {
             parentOverlayManager->CloseDialog(maskNode);
         }
@@ -1867,6 +1882,12 @@ void OverlayManager::ResetLowerNodeFocusable(const RefPtr<FrameNode>& currentOve
             pageFocusHub->SetParentFocusable(true);
             return;
         }
+        if (node->GetTag() == V2::ATOMIC_SERVICE_ETS_TAG) {
+            auto serviceFocusHub = node->GetFocusHub();
+            CHECK_NULL_VOID(serviceFocusHub);
+            serviceFocusHub->SetParentFocusable(true);
+            return;
+        }
         auto focusHub = node->GetOrCreateFocusHub();
         if (focusHub->IsCurrentFocus()) {
             focusHub->SetParentFocusable(true);
@@ -1906,7 +1927,10 @@ void OverlayManager::FireNavigationStateChange(const RefPtr<UINode>& root, bool 
     }
 
     // Fire show event with non-empty stack. Only Check top modal node.
-    auto topModalNode = modalStack_.empty() ? nullptr : modalStack_.top().Upgrade();
+    RefPtr<FrameNode> topModalNode;
+    if (!modalStack_.empty()) {
+        topModalNode = GetModalNodeInStack(modalStack_);
+    }
     if (show && topModalNode) {
         // Modal always displays on top of stage. If it existed, only need to check the top of modal stack.
         NavigationPattern::FireNavigationStateChange(topModalNode, show);
@@ -1921,6 +1945,22 @@ void OverlayManager::FireNavigationStateChange(const RefPtr<UINode>& root, bool 
             continue;
         }
         NavigationPattern::FireNavigationStateChange(child, show);
+    }
+}
+
+RefPtr<FrameNode> OverlayManager::GetModalNodeInStack(std::stack<WeakPtr<FrameNode>>& stack)
+{
+    if (stack.empty()) {
+        return nullptr;
+    }
+    auto topModalNode = stack.top().Upgrade();
+    if (topModalNode->GetTag() == V2::MODAL_PAGE_TAG) {
+        return topModalNode;
+    } else {
+        stack.pop();
+        auto modalNode = GetModalNodeInStack(stack);
+        stack.push(topModalNode);
+        return modalNode;
     }
 }
 
@@ -2231,7 +2271,6 @@ void OverlayManager::BindSheet(bool isShow, std::function<void(const std::string
         CHECK_NULL_VOID(topModalNode);
         if (topModalNode->GetTag() == V2::SHEET_PAGE_TAG &&
             topModalNode->GetPattern<SheetPresentationPattern>()->GetTargetId() == targetId) {
-            CHECK_NULL_VOID(!pipeline->IsLayouting());
             if (sheetStyle.backgroundColor.has_value()) {
                 topModalNode->GetRenderContext()->UpdateBackgroundColor(sheetStyle.backgroundColor.value());
             }
@@ -2258,7 +2297,6 @@ void OverlayManager::BindSheet(bool isShow, std::function<void(const std::string
             return;
         }
     }
-    CHECK_NULL_VOID(!pipeline->IsLayouting());
     // builder content
     auto builder = AceType::DynamicCast<FrameNode>(buildNodeFunc());
     CHECK_NULL_VOID(builder);
@@ -2303,8 +2341,8 @@ void OverlayManager::BindSheet(bool isShow, std::function<void(const std::string
         eventConfirmHub->AddClickEvent(sheetMaskClickEvent_);
         PlaySheetMaskTransition(maskNode, true);
     }
-    auto columnNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
-        AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    auto columnNode = FrameNode::CreateFrameNode(V2::SHEET_WRAPPER_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<LinearLayoutPattern>(true));
     CHECK_NULL_VOID(columnNode);
     auto columnLayoutProps = columnNode->GetLayoutProperty();
     CHECK_NULL_VOID(columnLayoutProps);
@@ -2332,7 +2370,7 @@ void OverlayManager::BindSheet(bool isShow, std::function<void(const std::string
 
 void OverlayManager::CloseSheet(int32_t targetId)
 {
-    if (!modalStack_.empty()) {
+    if (modalStack_.empty()) {
         return;
     }
     if (sheetMap_.empty() || !sheetMap_.count(targetId)) {
@@ -2411,13 +2449,22 @@ void OverlayManager::PlaySheetTransition(
             option.SetDuration(0);
             option.SetCurve(Curves::LINEAR);
         }
+        option.SetOnFinishEvent(
+            [sheetWK = WeakClaim(RawPtr(sheetNode)), height = sheetHeight_] {
+                auto sheet = sheetWK.Upgrade();
+                CHECK_NULL_VOID(sheet);
+                auto sheetPattern = sheet->GetPattern<SheetPresentationPattern>();
+                CHECK_NULL_VOID(sheetPattern);
+                sheetPattern->ProcessColumnRect(height);
+        });
         AnimationUtils::Animate(
             option,
             [context, offset]() {
                 if (context) {
                     context->OnTransformTranslateUpdate({ 0.0f, offset, 0.0f });
                 }
-            });
+            },
+            option.GetOnFinishEvent());
     } else {
         option.SetOnFinishEvent(
             [rootWeak = rootNodeWeak_, sheetWK = WeakClaim(RawPtr(sheetNode)), id = Container::CurrentId(),
@@ -2461,11 +2508,17 @@ void OverlayManager::PlayBubbleStyleSheetTransition(RefPtr<FrameNode> sheetNode,
 {
     auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
     CHECK_NULL_VOID(sheetPattern);
-    sheetPattern->ResetToInvisible();
     if (isTransitionIn) {
+        sheetPattern->ResetToInvisible();
         sheetPattern->SetCurrentHeight(sheetHeight_);
         sheetPattern->StartOffsetEnteringAnimation();
-        sheetPattern->StartAlphaEnteringAnimation(nullptr);
+        sheetPattern->StartAlphaEnteringAnimation([sheetWK = WeakClaim(RawPtr(sheetNode))] {
+            auto sheet = sheetWK.Upgrade();
+            CHECK_NULL_VOID(sheet);
+            auto sheetPattern = sheet->GetPattern<SheetPresentationPattern>();
+            CHECK_NULL_VOID(sheetPattern);
+            sheetPattern->ProcessColumnRect();
+        });
     } else {
         sheetPattern->StartOffsetExitingAnimation();
         sheetPattern->StartAlphaExitingAnimation(
@@ -2791,6 +2844,7 @@ void OverlayManager::PlayKeyboardTransition(RefPtr<FrameNode> customKeyboard, bo
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto pageNode = pipeline->GetStageManager()->GetLastPage();
+    CHECK_NULL_VOID(pageNode);
     auto pageHeight = pageNode->GetGeometryNode()->GetFrameSize().Height();
     if (isTransitionIn) {
         context->OnTransformTranslateUpdate({ 0.0f, pageHeight, 0.0f });
@@ -3016,9 +3070,13 @@ void OverlayManager::RemovePixelMapAnimation(bool startDrag, double x, double y)
 
     scaleOption.SetOnFinishEvent([this, id = Container::CurrentId()] {
         ContainerScope scope(id);
-        InteractionInterface::GetInstance()->SetDragWindowVisible(true);
         auto pipeline = PipelineContext::GetCurrentContext();
         CHECK_NULL_VOID(pipeline);
+        auto dragDropManager = pipeline->GetDragDropManager();
+        CHECK_NULL_VOID(dragDropManager);
+        if (!dragDropManager->IsNeedScaleDragPreview()) {
+            InteractionInterface::GetInstance()->SetDragWindowVisible(true);
+        }
         auto taskScheduler = pipeline->GetTaskExecutor();
         CHECK_NULL_VOID(taskScheduler);
         taskScheduler->PostTask(

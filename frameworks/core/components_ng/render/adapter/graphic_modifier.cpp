@@ -40,7 +40,6 @@ void GraphicModifier::SetCustomData(float data)
         property_ = std::make_shared<Rosen::RSAnimatableProperty<float>>(data);
         AttachProperty(property_);
     } else {
-        LOGD("changing modifier property %f", data);
         property_->Set(data);
     }
 }

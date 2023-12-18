@@ -65,6 +65,8 @@ private:
     void UpdateVerticalTwoAlignValues(TwoAlignedValues& twoAlignedValues, AlignRule alignRule);
     void UpdateHorizontalTwoAlignValues(TwoAlignedValues& twoAlignedValues, AlignRule alignRule);
 
+    bool isHorizontalRelyOnContainer_ = false;
+    bool isVerticalRelyOnContainer_ = false;
     std::list<std::string> renderList_;
     std::map<std::string, RefPtr<LayoutWrapper>> idNodeMap_;
     std::map<std::string, uint32_t> incomingDegreeMap_;

@@ -188,8 +188,6 @@ RefPtr<ThemeStyle> ResourceAdapterImpl::GetTheme(int32_t themeId)
                 std::string patternTag = PATTERN_MAP[i];
                 std::string patternName = std::string(OHFlag) + PATTERN_MAP[i];
                 ret = manager->GetPatternByName(patternName.c_str(), attrMap);
-                LOGD("theme pattern[%{public}s, %{public}s], attr size=%{public}zu", patternTag.c_str(),
-                    patternName.c_str(), attrMap.size());
                 if (attrMap.empty()) {
                     continue;
                 }
@@ -290,10 +288,7 @@ std::string ResourceAdapterImpl::GetString(uint32_t resId)
     std::string strResult = "";
     auto manager = GetResourceManager();
     CHECK_NULL_RETURN(manager, strResult);
-    auto state = manager->GetStringById(resId, strResult);
-    if (state != Global::Resource::SUCCESS) {
-        LOGD("GetString error, id=%{public}u", resId);
-    }
+    manager->GetStringById(resId, strResult);
     return strResult;
 }
 
@@ -303,10 +298,7 @@ std::string ResourceAdapterImpl::GetStringByName(const std::string& resName)
     auto actualResName = GetActualResourceName(resName);
     auto manager = GetResourceManager();
     CHECK_NULL_RETURN(manager, strResult);
-    auto state = manager->GetStringByName(actualResName.c_str(), strResult);
-    if (state != Global::Resource::SUCCESS) {
-        LOGD("GetString error, resName=%{public}s", resName.c_str());
-    }
+    manager->GetStringByName(actualResName.c_str(), strResult);
     return strResult;
 }
 
@@ -340,10 +332,7 @@ std::vector<std::string> ResourceAdapterImpl::GetStringArray(uint32_t resId) con
     std::vector<std::string> strResults;
     auto manager = GetResourceManager();
     CHECK_NULL_RETURN(manager, strResults);
-    auto state = manager->GetStringArrayById(resId, strResults);
-    if (state != Global::Resource::SUCCESS) {
-        LOGD("GetStringArray error, id=%{public}u", resId);
-    }
+    manager->GetStringArrayById(resId, strResults);
     return strResults;
 }
 

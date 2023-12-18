@@ -26,11 +26,13 @@
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_divider_modifier.h"
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_grid_modifier.h"
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_grid_col_modifier.h"
+#include "bridge/declarative_frontend/engine/jsi/components/arkts_native_grid_item_modifier.h"
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_grid_row_modifier.h"
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_hyperlink_modifier.h"
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_image_animator_modifier.h"
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_image_modifier.h"
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_image_span_modifier.h"
+#include "bridge/declarative_frontend/engine/jsi/components/arkts_native_list_item_modifier.h"
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_menu_modifier.h"
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_menu_item_modifier.h"
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_nav_destination_modifier.h"
@@ -40,8 +42,10 @@
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_node_container_modifier.h"
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_panel_modifier.h"
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_pattern_lock_modifier.h"
+#include "bridge/declarative_frontend/engine/jsi/components/arkts_native_progress_modifier.h"
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_text_area_modifier.h"
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_text_input_modifier.h"
+#include "bridge/declarative_frontend/engine/jsi/components/arkts_native_swiper_modifier.h"
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_text_modifier.h"
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_toggle_modifier.h"
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_radio_modifier.h"
@@ -62,18 +66,27 @@
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_line_modifier.h"
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_path_modifier.h"
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_polyline_modifier.h"
+#include "bridge/declarative_frontend/engine/jsi/components/arkts_native_qrcode_modifier.h"
+#include "bridge/declarative_frontend/engine/jsi/components/arkts_native_water_flow_modifier.h"
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_side_bar_container_modifier.h"
+#include "bridge/declarative_frontend/engine/jsi/components/arkts_native_marquee_modifier.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/pipeline/base/element_register.h"
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_calendar_picker_modifier.h"
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_alphabet_indexer_modifier.h"
+#include "bridge/declarative_frontend/engine/jsi/components/arkts_native_data_panel_modifier.h"
+#include "bridge/declarative_frontend/engine/jsi/components/arkts_native_gauge_modifier.h"
+#include "bridge/declarative_frontend/engine/jsi/components/arkts_native_scroll_modifier.h"
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_common_shape_modifier.h"
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_shape_modifier.h"
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_rect_modifier.h"
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_list_modifier.h"
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_list_item_group_modifier.h"
+#include "bridge/declarative_frontend/engine/jsi/components/arkts_native_text_timer_modifier.h"
+#include "bridge/declarative_frontend/engine/jsi/components/arkts_native_loading_progress_modifier.h"
+#include "bridge/declarative_frontend/engine/jsi/components/arkts_native_text_clock_modifier.h"
 
 #ifdef FORM_SUPPORTED
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_form_component_modifier.h"
@@ -87,8 +100,28 @@ NodeHandle GetFrameNodeById(int nodeId)
     return OHOS::Ace::AceType::RawPtr(node);
 }
 
+int64_t GetUIState(NodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, 0);
+    auto eventHub = frameNode->GetEventHub<EventHub>();
+    CHECK_NULL_RETURN(eventHub, 0);
+    return eventHub->GetCurrentUIState();
+}
+
+void SetSupportedUIState(NodeHandle node, uint64_t state)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->AddSupportedState(static_cast<uint64_t>(state));
+}
+
 static struct ArkUINodeAPI impl = {
     GetFrameNodeById,
+    GetUIState,
+    SetSupportedUIState,
     GetCommonModifier,
     GetCheckboxGroupModifier,
     GetCounterModifier,
@@ -136,15 +169,28 @@ static struct ArkUINodeAPI impl = {
     GetTabsModifier,
     GetStepperItemModifier,
     GetHyperlinkModifier,
+    GetMarqueeModifier,
     GetMenuItemModifier,
     GetMenuModifier,
     GetDatePickerModifier,
+    GetWaterFlowModifier,
     GetAlphabetIndexerModifier,
+    GetDataPanelModifier,
+    GetGaugeModifier,
+    GetScrollModifier,
+    GetGridItemModifier,
+    GetProgressModifier,
     GetCommonShapeModifier,
     GetShapeModifier,
     GetRectModifier,
+    GetSwiperModifier,
+    GetListItemModifier,
     GetListModifier,
     GetListItemGroupModifier,
+    GetQRCodeModifier,
+    GetLoadingProgressModifier,
+    GetTextClockModifier,
+    GetTextTimerModifier,
 
 #ifdef FORM_SUPPORTED
     GetFormComponentModifier,

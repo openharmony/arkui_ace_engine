@@ -776,7 +776,6 @@ void JsCardParser::LoadResImageUrl(const std::string& jsonFile, const std::strin
         return;
     }
     // Path only print relative path
-    TAG_LOGD(AceLogTag::ACE_FORM, "load res image file is %{public}s", jsonFile.c_str());
     auto content = resourceJson_->GetValue(jsonFile);
     CHECK_NULL_VOID(content);
     if (!content->IsValid()) {
@@ -974,8 +973,6 @@ void JsCardParser::SelectMediaQueryStyle(
                 if (!SelectStyle(styleClass, mediaIter->second, styles)) {
                     continue;
                 }
-                TAG_LOGD(AceLogTag::ACE_FORM, "current condition is %{public}s, style class is %{public}s",
-                    mediaIter->first.c_str(), styleClass.c_str());
             }
         }
     }
@@ -1027,7 +1024,6 @@ void JsCardParser::PreUpdateMethodToAction(const std::unique_ptr<JsonValue>& roo
 void JsCardParser::ParseEvents(const std::unique_ptr<JsonValue>& rootJson, const std::unique_ptr<JsonValue>& eventJson,
     std::vector<std::string>& events, const RefPtr<Framework::JsAcePage>& page, int32_t nodeId)
 {
-    TAG_LOGD(AceLogTag::ACE_FORM, "ParseEvents json:%{public}s", eventJson->ToString().c_str());
     auto eventList = rootJson->GetValue("events");
     CHECK_NULL_VOID(eventList);
     if (!eventList->IsValid()) {
@@ -1156,8 +1152,6 @@ void JsCardParser::LoadImageInfo()
 
 void JsCardParser::UpdatePageData(const std::string& dataList, const RefPtr<JsAcePage>& page)
 {
-    TAG_LOGD(AceLogTag::ACE_FORM, "Update data is %{private}s card hap path %{public}s", dataList.c_str(),
-        cardHapPath_.c_str());
     CHECK_NULL_VOID(page);
     if (dataList.empty()) {
         return;
@@ -1268,7 +1262,6 @@ void JsCardParser::UpdateDomNode(const RefPtr<Framework::JsAcePage>& page, const
     int32_t parentId, const std::vector<int>& idArray, const std::unique_ptr<JsonValue>& dataJson,
     const std::unique_ptr<JsonValue>& styleJson, const std::unique_ptr<JsonValue>& propsJson)
 {
-    TAG_LOGD(AceLogTag::ACE_FORM, "UpdateDomNode root json: %{public}s", rootJson->ToString().c_str());
     CHECK_NULL_VOID(page);
     if (!rootJson->IsValid()) {
         TAG_LOGW(AceLogTag::ACE_FORM, "Fail to UpdateDomNode due to page or root is invalid");
@@ -1552,8 +1545,6 @@ bool JsCardParser::ParseSpecialVariable(std::string& value)
         // $t('value') --> value
         value = value.substr(4, value.size() - 6);
         auto result = GetI18nData(value);
-        TAG_LOGD(AceLogTag::ACE_FORM, "Get i18n data is %{public}s, card hap path %{public}s", value.c_str(),
-            cardHapPath_.c_str());
         return result;
     } else if (StartWith(value, "$tc(") && EndWith(value, ")")) {
         GetPlurals(value);
@@ -2046,7 +2037,6 @@ void JsCardParser::GetBoolValue(const std::unique_ptr<JsonValue>& rootJson, cons
 
 void JsCardParser::SetColorMode(ColorMode colorMode)
 {
-    TAG_LOGD(AceLogTag::ACE_FORM, "current color mode is %{public}d", colorMode);
     colorMode_ = colorMode;
     mediaQueryer_.SetColorMode(colorMode);
 }

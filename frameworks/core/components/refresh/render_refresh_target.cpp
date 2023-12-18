@@ -38,7 +38,6 @@ bool RenderRefreshTarget::HandleRefreshEffect(double delta, int32_t source, doub
 {
     auto refresh = refreshParent_.Upgrade();
     if (!refresh) {
-        LOGD("not support refresh");
         return false;
     }
     refresh->SetHasScrollableChild(true);

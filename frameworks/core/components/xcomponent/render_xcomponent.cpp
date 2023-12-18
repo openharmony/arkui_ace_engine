@@ -115,7 +115,6 @@ void RenderXComponent::HandleTouchEvent(const TouchEventInfo& info, const TouchT
         auto currentTime = GetSysTimestamp();
         auto increaseCpuTime = currentTime - startIncreaseTime_;
         if (increaseCpuTime >= INCREASE_CPU_TIME_ONCE) {
-            LOGD("HandleTouchEvent increase cpu frequency");
             startIncreaseTime_ = currentTime;
             ResSchedReport::GetInstance().ResSchedDataReport("slide_on");
         }

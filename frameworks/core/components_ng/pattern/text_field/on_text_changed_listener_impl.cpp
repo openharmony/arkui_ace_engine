@@ -148,9 +148,6 @@ void OnTextChangedListenerImpl::SendFunctionKey(const MiscServices::FunctionKey&
 void OnTextChangedListenerImpl::HandleKeyboardStatus(MiscServices::KeyboardStatus status)
 {
     TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "[OnTextChangedListenerImpl] HandleKeyboardStatus status: %{public}d", status);
-    if (status == MiscServices::KeyboardStatus::NONE) {
-        return;
-    }
     SetKeyboardStatus(status == MiscServices::KeyboardStatus::SHOW);
 }
 

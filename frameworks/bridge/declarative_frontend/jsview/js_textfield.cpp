@@ -505,6 +505,7 @@ void JSTextField::SetInputFilter(const JSCallbackInfo& info)
 void JSTextField::SetShowPasswordIcon(const JSCallbackInfo& info)
 {
     if (!info[0]->IsBoolean()) {
+        TextFieldModel::GetInstance()->SetShowPasswordIcon(true);
         return;
     }
 
@@ -776,11 +777,54 @@ void JSTextField::SetOnEditChanged(const JSCallbackInfo& info)
     TextFieldModel::GetInstance()->SetOnEditChanged(std::move(callback));
 }
 
+Local<JSValueRef> JSTextField::JsKeepEditableState(panda::JsiRuntimeCallInfo *info)
+{
+    Local<JSValueRef> thisObj = info->GetThisRef();
+    auto eventInfo = static_cast<NG::TextFieldCommonEvent*>(
+        panda::Local<panda::ObjectRef>(thisObj)->GetNativePointerField(0));
+    if (eventInfo) {
+        eventInfo->SetKeepEditable(true);
+    }
+    return JSValueRef::Undefined(info->GetVM());
+}
+
+void JSTextField::CreateJsTextFieldCommonEvent(const JSCallbackInfo &info)
+{
+    auto jsTextFunc = AceType::MakeRefPtr<JsCommonEventFunction<NG::TextFieldCommonEvent, 2>>(
+        JSRef<JSFunc>::Cast(info[0]));
+    auto targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto callback = [execCtx = info.GetExecutionContext(), func = std::move(jsTextFunc), node = targetNode](int32_t key,
+                       NG::TextFieldCommonEvent& event) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        ACE_SCORING_EVENT("onSubmit");
+        PipelineContext::SetCallBackNode(node);
+        JSRef<JSObjTemplate> objectTemplate = JSRef<JSObjTemplate>::New();
+        objectTemplate->SetInternalFieldCount(2);
+        JSRef<JSObject> object = objectTemplate->NewInstance();
+        object->SetProperty<std::string>("text", event.GetText());
+        object->SetPropertyObject("keepEditableState", JSRef<JSFunc>::New<FunctionCallback>(JsKeepEditableState));
+        object->Wrap<NG::TextFieldCommonEvent>(&event);
+        JSRef<JSVal> keyEvent = JSRef<JSVal>::Make(ToJSValue(key));
+        JSRef<JSVal> dataObject = JSRef<JSVal>::Cast(object);
+        JSRef<JSVal> param[2] = {keyEvent, dataObject};
+        func->Execute(param);
+    };
+    TextFieldModel::GetInstance()->SetOnSubmit(std::move(callback));
+}
+
 void JSTextField::SetOnSubmit(const JSCallbackInfo& info)
 {
     CHECK_NULL_VOID(info[0]->IsFunction());
-    JsEventCallback<void(int32_t)> callback(info.GetExecutionContext(), JSRef<JSFunc>::Cast(info[0]));
-    TextFieldModel::GetInstance()->SetOnSubmit(std::move(callback));
+#ifdef NG_BUILD
+    CreateJsTextFieldCommonEvent(info);
+#else
+    if (Container::IsCurrentUseNewPipeline()) {
+        CreateJsTextFieldCommonEvent(info);
+    } else {
+        JsEventCallback<void(int32_t)> callback(info.GetExecutionContext(), JSRef<JSFunc>::Cast(info[0]));
+        TextFieldModel::GetInstance()->SetOnSubmit(std::move(callback));
+    }
+#endif
 }
 
 void JSTextField::SetOnChange(const JSCallbackInfo& info)
@@ -818,11 +862,29 @@ void JSTextField::SetOnCut(const JSCallbackInfo& info)
     TextFieldModel::GetInstance()->SetOnCut(std::move(callback));
 }
 
+JSRef<JSVal> JSTextField::CreateJSTextCommonEvent(NG::TextCommonEvent& event)
+{
+    JSRef<JSObjTemplate> objectTemplate = JSRef<JSObjTemplate>::New();
+    objectTemplate->SetInternalFieldCount(1);
+    JSRef<JSObject> object = objectTemplate->NewInstance();
+    object->SetPropertyObject("preventDefault", JSRef<JSFunc>::New<FunctionCallback>(JsPreventDefault));
+    object->Wrap<NG::TextCommonEvent>(&event);
+    return JSRef<JSVal>::Cast(object);
+}
+
 void JSTextField::SetOnPaste(const JSCallbackInfo& info)
 {
     CHECK_NULL_VOID(info[0]->IsFunction());
-    JsEventCallback<void(const std::string&)> callback(info.GetExecutionContext(), JSRef<JSFunc>::Cast(info[0]));
-    TextFieldModel::GetInstance()->SetOnPaste(std::move(callback));
+    auto jsTextFunc = AceType::MakeRefPtr<JsCitedEventFunction<NG::TextCommonEvent, 2>>(
+        JSRef<JSFunc>::Cast(info[0]), CreateJSTextCommonEvent);
+
+    auto onPaste = [execCtx = info.GetExecutionContext(), func = std::move(jsTextFunc)](
+        const std::string& val, NG::TextCommonEvent& info) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        ACE_SCORING_EVENT("onPaste");
+        func->Execute(val, info);
+    };
+    TextFieldModel::GetInstance()->SetOnPasteWithEvent(std::move(onPaste));
 }
 
 void JSTextField::SetOnClick(const JSCallbackInfo& info)
@@ -986,7 +1048,6 @@ void JSTextField::SetShowCounter(const JSCallbackInfo& info)
         TextFieldModel::GetInstance()->SetShowCounter(false);
         return;
     }
-    TextFieldModel::GetInstance()->SetShowCounter(info[0]->ToBoolean());
     if (info[1]->IsObject()) {
         auto paramObject = JSRef<JSObject>::Cast(info[1]);
         auto param = paramObject->GetProperty("highlightBorder");
@@ -998,18 +1059,22 @@ void JSTextField::SetShowCounter(const JSCallbackInfo& info)
         }
         auto parameter = paramObject->GetProperty("thresholdPercentage");
         auto inputNumber = parameter->ToNumber<int32_t>();
-        if (!parameter->IsNumber() || parameter->IsNull()) {
+        TextFieldModel::GetInstance()->SetCounterType(inputNumber);
+        if (parameter->IsNull() || parameter->IsUndefined()) {
+            TextFieldModel::GetInstance()->SetShowCounter(info[0]->ToBoolean());
             TextFieldModel::GetInstance()->SetCounterType(INVAILD_VALUE);
             return;
         }
         if (inputNumber < MINI_VAILD_VALUE || inputNumber > MAX_VAILD_VALUE) {
             LOGI("The info is wrong, it is supposed to be a right number");
             TextFieldModel::GetInstance()->SetCounterType(ILLEGAL_VALUE);
+            TextFieldModel::GetInstance()->SetShowCounter(false);
             return;
         }
-        TextFieldModel::GetInstance()->SetCounterType(inputNumber);
+        TextFieldModel::GetInstance()->SetShowCounter(info[0]->ToBoolean());
         return;
     }
+    TextFieldModel::GetInstance()->SetShowCounter(info[0]->ToBoolean());
     TextFieldModel::GetInstance()->SetCounterType(INVAILD_VALUE);
     TextFieldModel::GetInstance()->SetShowCounterBorder(true);
 }
@@ -1134,34 +1199,49 @@ void JSTextField::SetCancelButton(const JSCallbackInfo& info)
         return;
     }
     auto param = JSRef<JSObject>::Cast(info[0]);
+    auto theme = GetTheme<TextFieldTheme>();
     std::string styleStr;
     CleanNodeStyle cleanNodeStyle;
     auto styleProp = param->GetProperty("style");
-    if (!styleProp->IsUndefined() && !styleProp->IsNull() && ParseJsString(styleProp, styleStr)) {
+    if (!styleProp->IsNull() && ParseJsString(styleProp, styleStr)) {
         cleanNodeStyle = ConvertStrToCleanNodeStyle(styleStr);
     } else {
         cleanNodeStyle = CleanNodeStyle::INPUT;
     }
     TextFieldModel::GetInstance()->SetCleanNodeStyle(cleanNodeStyle);
+    TextFieldModel::GetInstance()->SetIsShowCancelButton(true);
     auto iconJsVal = param->GetProperty("icon");
     if (iconJsVal->IsUndefined() || iconJsVal->IsNull() || !iconJsVal->IsObject()) {
+        TextFieldModel::GetInstance()->SetCancelIconColor(Color());
+        TextFieldModel::GetInstance()->SetCancelIconSize(theme->GetIconSize());
+        TextFieldModel::GetInstance()->SetCanacelIconSrc(std::string());
         return;
     }
     auto iconParam = JSRef<JSObject>::Cast(iconJsVal);
+    // set icon size
     CalcDimension iconSize;
     auto iconSizeProp = iconParam->GetProperty("size");
-    if (!iconSizeProp->IsUndefined() && !iconSizeProp->IsNull() && ParseJsDimensionVpNG(iconSizeProp, iconSize) &&
-        iconSize.Unit() != DimensionUnit::PERCENT) {
-        TextFieldModel::GetInstance()->SetCancelIconSize(iconSize);
+    if (!iconSizeProp->IsUndefined() && !iconSizeProp->IsNull() && ParseJsDimensionVpNG(iconSizeProp, iconSize)) {
+        if (LessNotEqual(iconSize.Value(), 0.0) || iconSize.Unit() == DimensionUnit::PERCENT) {
+            iconSize = theme->GetIconSize();
+        }
+    } else {
+        iconSize = theme->GetIconSize();
     }
+    TextFieldModel::GetInstance()->SetCancelIconSize(iconSize);
+    // set icon src
     std::string iconSrc;
     auto iconSrcProp = iconParam->GetProperty("src");
-    if (!iconSrcProp->IsUndefined() && !iconSrcProp->IsNull() && ParseJsMedia(iconSrcProp, iconSrc)) {
-        TextFieldModel::GetInstance()->SetCanacelIconSrc(iconSrc);
+    if (iconSrcProp->IsUndefined() || iconSrcProp->IsNull() || !ParseJsMedia(iconSrcProp, iconSrc)) {
+        iconSrc = "";
     }
+    TextFieldModel::GetInstance()->SetCanacelIconSrc(iconSrc);
+    // set icon color
     Color iconColor;
     auto iconColorProp = iconParam->GetProperty("color");
     if (!iconColorProp->IsUndefined() && !iconColorProp->IsNull() && ParseJsColor(iconColorProp, iconColor)) {
+        TextFieldModel::GetInstance()->SetCancelIconColor(iconColor);
+    } else {
         TextFieldModel::GetInstance()->SetCancelIconColor(iconColor);
     }
 }

@@ -322,7 +322,6 @@ void SvgDom::PaintDirectly(RenderContext& context, const Offset& offset, ImageFi
         return;
     }
     if (svgRoot == nullptr) {
-        LOGD("paint fail as svg root is null");
         return;
     }
     double scaleX = 1.0;

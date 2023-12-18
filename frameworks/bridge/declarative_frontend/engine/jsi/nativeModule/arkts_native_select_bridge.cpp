@@ -235,29 +235,22 @@ ArkUINativeModuleValue SelectBridge::SetFont(ArkUIRuntimeCallInfo* runtimeCallIn
         if (thirdArg->IsNumber()) {
             fontWeight = std::to_string(thirdArg->Int32Value(vm));
         } else {
-            ArkTSUtils::GetStringFromJS(vm, thirdArg, fontWeight);
-        }
-    }
-
-    std::vector<std::string> fontFamilies;
-    std::string families = DEFAULT_STR;
-    if (!fourthArg->IsNull() && !fourthArg->IsUndefined()) {
-        ArkTSUtils::ParseJsFontFamilies(vm, fourthArg, fontFamilies);
-        if (fontFamilies.size() > 0) {
-            families = "";
-            for (uint32_t i = 0; i < fontFamilies.size(); i++) {
-                families += fontFamilies.at(i);
+            if (!ArkTSUtils::ParseJsString(vm, thirdArg, fontWeight) || fontWeight.empty()) {
+                fontWeight = DEFAULT_STR;
             }
         }
     }
-
+    std::string fontFamily;
+    if (!ArkTSUtils::ParseJsFontFamiliesToString(vm, fourthArg, fontFamily) || fontFamily.empty()) {
+        fontFamily = DEFAULT_STR;
+    }
     int32_t styleVal = 0;
     if (!fifthArg->IsNull() && !fifthArg->IsUndefined() && fifthArg->IsNumber()) {
         styleVal = fifthArg->Int32Value(vm);
     }
 
     std::string fontInfo = StringUtils::FormatString(
-        FORMAT_FONT.c_str(), fontSizeStr.c_str(), fontWeight.c_str(), families.c_str());
+        FORMAT_FONT.c_str(), fontSizeStr.c_str(), fontWeight.c_str(), fontFamily.c_str());
 
     GetArkUIInternalNodeAPI()->GetSelectModifier().SetFont(nativeNode, fontInfo.c_str(), styleVal);
     return panda::JSValueRef::Undefined(vm);
@@ -288,29 +281,22 @@ ArkUINativeModuleValue SelectBridge::SetOptionFont(ArkUIRuntimeCallInfo* runtime
         if (thirdArg->IsNumber()) {
             fontWeight = std::to_string(thirdArg->Int32Value(vm));
         } else {
-            ArkTSUtils::GetStringFromJS(vm, thirdArg, fontWeight);
-        }
-    }
-
-    std::vector<std::string> fontFamilies;
-    std::string families = DEFAULT_STR;
-    if (!fourthArg->IsNull() && !fourthArg->IsUndefined()) {
-        ArkTSUtils::ParseJsFontFamilies(vm, fourthArg, fontFamilies);
-        if (fontFamilies.size() > 0) {
-            families = "";
-            for (uint32_t i = 0; i < fontFamilies.size(); i++) {
-                families += fontFamilies.at(i);
+            if (!ArkTSUtils::ParseJsString(vm, thirdArg, fontWeight) || fontWeight.empty()) {
+                fontWeight = DEFAULT_STR;
             }
         }
     }
-
+    std::string fontFamily;
+    if (!ArkTSUtils::ParseJsFontFamiliesToString(vm, fourthArg, fontFamily) || fontFamily.empty()) {
+        fontFamily = DEFAULT_STR;
+    }
     int32_t styleVal = 0;
     if (!fifthArg->IsNull() && !fifthArg->IsUndefined() && fifthArg->IsNumber()) {
         styleVal = fifthArg->Int32Value(vm);
     }
     std::string fontSizeStr = fontSize.ToString();
     std::string fontInfo = StringUtils::FormatString(
-        FORMAT_FONT.c_str(), fontSizeStr.c_str(), fontWeight.c_str(), families.c_str());
+        FORMAT_FONT.c_str(), fontSizeStr.c_str(), fontWeight.c_str(), fontFamily.c_str());
 
     GetArkUIInternalNodeAPI()->GetSelectModifier().SetOptionFont(nativeNode, fontInfo.c_str(), styleVal);
     return panda::JSValueRef::Undefined(vm);
@@ -342,29 +328,22 @@ ArkUINativeModuleValue SelectBridge::SetSelectedOptionFont(ArkUIRuntimeCallInfo*
         if (thirdArg->IsNumber()) {
             fontWeight = std::to_string(thirdArg->Int32Value(vm));
         } else {
-            ArkTSUtils::GetStringFromJS(vm, thirdArg, fontWeight);
-        }
-    }
-
-    std::vector<std::string> fontFamilies;
-    std::string families = DEFAULT_STR;
-    if (!fourthArg->IsNull() && !fourthArg->IsUndefined()) {
-        ArkTSUtils::ParseJsFontFamilies(vm, fourthArg, fontFamilies);
-        if (fontFamilies.size() > 0) {
-            families = "";
-            for (uint32_t i = 0; i < fontFamilies.size(); i++) {
-                families += fontFamilies.at(i);
+            if (!ArkTSUtils::ParseJsString(vm, thirdArg, fontWeight) || fontWeight.empty()) {
+                fontWeight = DEFAULT_STR;
             }
         }
     }
-
+    std::string fontFamily;
+    if (!ArkTSUtils::ParseJsFontFamiliesToString(vm, fourthArg, fontFamily) || fontFamily.empty()) {
+        fontFamily = DEFAULT_STR;
+    }
     int32_t styleVal = 0;
     if (!fifthArg->IsNull() && !fifthArg->IsUndefined() && fifthArg->IsNumber()) {
         styleVal = fifthArg->Int32Value(vm);
     }
     std::string fontSizeStr = fontSize.ToString();
     std::string fontInfo = StringUtils::FormatString(
-        FORMAT_FONT.c_str(), fontSizeStr.c_str(), fontWeight.c_str(), families.c_str());
+        FORMAT_FONT.c_str(), fontSizeStr.c_str(), fontWeight.c_str(), fontFamily.c_str());
 
     GetArkUIInternalNodeAPI()->GetSelectModifier().SetSelectedOptionFont(nativeNode, fontInfo.c_str(), styleVal);
     return panda::JSValueRef::Undefined(vm);

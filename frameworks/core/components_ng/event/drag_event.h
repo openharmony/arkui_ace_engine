@@ -31,6 +31,7 @@ class GestureEventHub;
 class PanRecognizer;
 class LongPressRecognizer;
 class FrameNode;
+class OverlayManager;
 
 class DragEvent : public AceType {
     DECLARE_ACE_TYPE(DragEvent, AceType)
@@ -67,19 +68,6 @@ private:
     GestureEventFunc actionUpdate_;
     GestureEventFunc actionEnd_;
     GestureEventNoParameter actionCancel_;
-};
-class DragStatusListener : public AceType {
-    DECLARE_ACE_TYPE(DragStatusListener, AceType);
-
-public:
-    DragStatusListener() = default;
-    ~DragStatusListener() = default;
-
-    virtual void OnDragStarted(const RefPtr<NotifyDragEvent>& notifyDragEvent) {};
-    virtual void OnDragEntered(const RefPtr<NotifyDragEvent>& notifyDragEvent) {};
-    virtual void OnDragMoved(const RefPtr<NotifyDragEvent>& notifyDragEvent) {};
-    virtual void OnDragLeaved(const RefPtr<NotifyDragEvent>& notifyDragEvent) {};
-    virtual void OnDragEnded(const RefPtr<NotifyDragEvent>& notifyDragEvent) {};
 };
 
 class ACE_EXPORT DragEventActuator : public GestureEventActuator {
@@ -120,6 +108,11 @@ public:
 #ifdef ENABLE_DRAG_FRAMEWORK
     void SetThumbnailCallback(std::function<void(Offset)>&& callback);
     void SetFilter(const RefPtr<DragEventActuator>& actuator);
+    static void UpdatePreviewPositionAndScale(const RefPtr<FrameNode> imageNode, const OffsetF& frameOffset);
+    static void CreatePreviewNode(const RefPtr<FrameNode> frameNode, OHOS::Ace::RefPtr<FrameNode>& imageNode);
+    static void SetPreviewDefaultAnimateProperty(const RefPtr<FrameNode> imageNode);
+    static void MountPixelMap(const RefPtr<OverlayManager> overlayManager, const RefPtr<GestureEventHub> manager,
+        const RefPtr<FrameNode> imageNode);
     void SetPixelMap(const RefPtr<DragEventActuator>& actuator);
     void SetEventColumn(const RefPtr<DragEventActuator>& actuator);
     void HideFilter();

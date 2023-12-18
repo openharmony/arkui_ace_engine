@@ -18,6 +18,7 @@
 
 #include "base/memory/referenced.h"
 #include "core/components_ng/base/ui_node.h"
+#include "core/components_ng/pattern/navigation/inner_navigation_controller.h"
 #include "core/components_ng/pattern/navigation/navigation_declaration.h"
 #include "core/components_ng/pattern/navigation/navigation_event_hub.h"
 #include "core/components_ng/pattern/navigation/navigation_group_node.h"
@@ -36,7 +37,7 @@ class NavigationPattern : public Pattern {
     DECLARE_ACE_TYPE(NavigationPattern, Pattern);
 
 public:
-    NavigationPattern() = default;
+    NavigationPattern();
     ~NavigationPattern() override = default;
 
     bool IsAtomicNode() const override
@@ -153,6 +154,11 @@ public:
         navigationStack_->RemoveAll();
     }
 
+    void DisableAnimation()
+    {
+        navigationStack_->UpdateAnimatedValue(false);
+    }
+
     void SetNavigationStackProvided(bool provided)
     {
         navigationStackProvided_ = provided;
@@ -239,6 +245,12 @@ public:
     void SetInitNavBarWidth(const Dimension& initNavBarWidth)
     {
         realNavBarWidth_ = static_cast<float>(initNavBarWidth.ConvertToPx());
+        initNavBarWidthValue_ = initNavBarWidth;
+    }
+
+    Dimension GetInitNavBarWidth() const
+    {
+        return initNavBarWidthValue_;
     }
     
     void SetIfNeedInit(bool ifNeedInit)
@@ -271,6 +283,11 @@ public:
         onStateChangeMap_.erase(nodeId);
     }
 
+    const std::shared_ptr<NavigationController>& GetNavigationController() const
+    {
+        return navigationController_;
+    }
+
     const std::map<int32_t, std::function<void(bool)>>& GetOnStateChangeMap()
     {
         return onStateChangeMap_;
@@ -280,13 +297,17 @@ public:
 
     static void FireNavigationStateChange(const RefPtr<UINode>& node, bool show);
 
+    void NotifyDialogChange(bool isShow);
+    void NotifyPageHide(const std::string& pageName);
+
 private:
     void CheckTopNavPathChange(const std::optional<std::pair<std::string, RefPtr<UINode>>>& preTopNavPath,
         const std::optional<std::pair<std::string, RefPtr<UINode>>>& newTopNavPath, bool isPopPage);
-    void DoStackModeTransitionAnimation(const RefPtr<NavDestinationGroupNode>& preTopNavDestination,
+    void TransitionWithAnimation(const RefPtr<NavDestinationGroupNode>& preTopNavDestination,
         const RefPtr<NavDestinationGroupNode>& newTopNavDestination, bool isPopPage);
-    void DoSplitModeTransitionAnimation(const RefPtr<NavDestinationGroupNode>& preTopNavDestination,
-        const RefPtr<NavDestinationGroupNode>& newTopNavDestination, bool isPopPage);
+
+    void TransitionWithOutAnimation(const RefPtr<NavDestinationGroupNode>& preTopNavDestination,
+        const RefPtr<NavDestinationGroupNode>& newTopNavDestination, bool isPopPage, bool needVisible = false);
     RefPtr<RenderContext> GetTitleBarRenderContext();
     void DoAnimation(NavigationMode usrNavigationMode);
     RefPtr<UINode> GenerateUINodeByIndex(int32_t index);
@@ -316,13 +337,14 @@ private:
     bool userSetMinContentFlag_ = false;
     bool userSetNavBarWidthFlag_ = false;
     bool isChanged_ = false; // check navigation top page is change
+    Dimension initNavBarWidthValue_ = DEFAULT_NAV_BAR_WIDTH;
     Dimension minNavBarWidthValue_ = 0.0_vp;
     Dimension maxNavBarWidthValue_ = 0.0_vp;
     Dimension minContentWidthValue_ = 0.0_vp;
     NavigationTitleMode titleMode_ = NavigationTitleMode::FREE;
     bool navigationModeChange_ = false;
+    std::shared_ptr<NavigationController> navigationController_;
     std::map<int32_t, std::function<void(bool)>> onStateChangeMap_;
-    void NotifyPageHide(const std::string& pageName);
     void NotifyPageShow(const std::string& pageName);
     RefPtr<UINode> FireNavDestinationStateChange(bool show);
 };

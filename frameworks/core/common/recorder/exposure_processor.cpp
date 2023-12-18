@@ -23,9 +23,7 @@ ExposureProcessor::ExposureProcessor(const std::string& inspectorId)
 {
     if (!inspectorId.empty()) {
         NodeDataCache::Get().GetExposureCfg(inspectorId, cfg_);
-        if (IsNeedRecord()) {
-            TAG_LOGD(AceLogTag::ACE_UIEVENT, "ExposureProcessor id %{public}s", cfg_.id.c_str());
-        }
+        IsNeedRecord();
     }
 }
 

@@ -78,8 +78,6 @@ RefPtr<CanvasImage> ImageDecoder::MakeDrawingImage()
     {
         auto image = QueryCompressedCache();
         if (image) {
-            TAG_LOGD(
-                AceLogTag::ACE_IMAGE, "QueryCompressedCache hit: %{public}s", obj_->GetSourceInfo().ToString().c_str());
             return image;
         }
     }

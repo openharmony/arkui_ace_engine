@@ -143,7 +143,6 @@ public:
     void OnModelSingleLightUpdate(const RefPtr<ModelLight>& light)
     {
         propModelLights_.value().push_back(light);
-        LOGD("MODEL_NG: propModelLights_.size() -> %zu", GetModelLightsValue().size());
         ResetModelSingleLight();
         UpdateNeedsLightsSetup(true);
     }
@@ -151,7 +150,6 @@ public:
     void OnModelSingleAnimationUpdate(const std::shared_ptr<Render3D::GLTFAnimation>& animation)
     {
         propModelAnimations_.value().push_back(animation);
-        LOGD("MODEL_NG: propModelAnimations_.size() -> %zu", GetModelAnimationsValue().size());
         ResetModelSingleAnimation();
         UpdateNeedsAnimationsSetup(true);
     }
@@ -159,7 +157,6 @@ public:
     void OnModelSingleGeometryUpdate(const std::shared_ptr<Render3D::Geometry>& geometry)
     {
         propModelGeometries_.value().push_back(geometry);
-        LOGD("MODEL_NG: propModelGeometries_.size() -> %zu", GetModelGeometriesValue().size());
         ResetModelSingleGeometry();
         UpdateNeedsGeometriesSetup(true);
     }
@@ -167,7 +164,6 @@ public:
     void OnModelSingleImageTexturePathUpdate(const std::string& path)
     {
         propModelImageTexturePaths_.value().push_back(path);
-        LOGD("MODEL_NG: propModelImageTexturePaths_: %zu", GetModelImageTexturePathsValue().size());
         ResetModelSingleImageTexturePath();
         UpdateNeedsImageTexturePathsSetup(true);
     }

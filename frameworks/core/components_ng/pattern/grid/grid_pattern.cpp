@@ -480,12 +480,18 @@ void GridPattern::AdjustingTargetPos(float targetPos, int32_t rowIndex, float li
             targetPos = targetPos - gridLayoutInfo_.lastMainSize_ + lineHeight;
             break;
         case ScrollAlign::AUTO:
-            if (gridLayoutInfo_.startMainLineIndex_ > rowIndex) {
-                // Scroll down from top and use ScrollAlign::START layout
-            } else if (rowIndex > gridLayoutInfo_.endMainLineIndex_) {
-                targetPos = targetPos - gridLayoutInfo_.lastMainSize_ + lineHeight;
-            } else {
+            if ((rowIndex < gridLayoutInfo_.endMainLineIndex_) && (rowIndex > gridLayoutInfo_.startMainLineIndex_)) {
                 return;
+            }
+            if (rowIndex >= gridLayoutInfo_.endMainLineIndex_) {
+                float mainGap = GetMainGap();
+                auto totalViewHeight = gridLayoutInfo_.GetTotalHeightOfItemsInView(mainGap);
+                float tmpPos = gridLayoutInfo_.currentOffset_;
+                tmpPos = tmpPos - (totalViewHeight - gridLayoutInfo_.lastMainSize_ + tmpPos);
+                for (int32_t i = gridLayoutInfo_.endMainLineIndex_ + 1; i <= rowIndex; ++i) {
+                    tmpPos = tmpPos - (mainGap + gridLayoutInfo_.lineHeightMap_[i]);
+                }
+                targetPos = -tmpPos;
             }
             break;
     }
@@ -766,13 +772,9 @@ std::pair<int32_t, int32_t> GridPattern::GetNextIndexByStep(
         return { -1, -1 };
     }
     if (curChildStartIndex == 0 && curMainIndex == 0 && nextMainIndex < curMainIndex) {
-        TAG_LOGD(AceLogTag::ACE_GRID,
-            "Item reach at grid top and next main index less than current main index. Reset next main index.");
         nextMainIndex = curMainIndex;
     }
     if (curChildEndIndex == childrenCount - 1 && curMainIndex == curMainEnd && nextMainIndex > curMainIndex) {
-        TAG_LOGD(AceLogTag::ACE_GRID,
-            "Item reach at grid top and next main index greater than current main index. Reset next main index.");
         nextMainIndex = curMainIndex;
     }
     if (nextMainIndex == curMainIndex && nextCrossIndex == curCrossIndex) {
@@ -784,9 +786,6 @@ std::pair<int32_t, int32_t> GridPattern::GetNextIndexByStep(
     }
     if (curChildStartIndex != 0 && curMainIndex == curMainStart && nextMainIndex < curMainIndex) {
         // Scroll item up.
-        TAG_LOGD(AceLogTag::ACE_GRID,
-            "Item donot reach top and next main index is less than current. Do UpdateStartIndex(%{public}d)",
-            curChildStartIndex - 1);
         UpdateStartIndex(curChildStartIndex - 1);
         auto pipeline = PipelineContext::GetCurrentContext();
         if (pipeline) {
@@ -794,9 +793,6 @@ std::pair<int32_t, int32_t> GridPattern::GetNextIndexByStep(
         }
     } else if (curChildEndIndex != childrenCount - 1 && curMainIndex == curMainEnd && nextMainIndex > curMainIndex) {
         // Scroll item down.
-        TAG_LOGD(AceLogTag::ACE_GRID,
-            "Item donot reach bottom and next main index is greater than current. Do UpdateStartIndex(%{public}d)",
-            curChildEndIndex + 1);
         UpdateStartIndex(curChildEndIndex + 1);
         auto pipeline = PipelineContext::GetCurrentContext();
         if (pipeline) {
@@ -840,9 +836,6 @@ std::pair<int32_t, int32_t> GridPattern::GetNextIndexByStep(
 WeakPtr<FocusHub> GridPattern::SearchFocusableChildInCross(
     int32_t tarMainIndex, int32_t tarCrossIndex, int32_t maxCrossCount, int32_t curMainIndex, int32_t curCrossIndex)
 {
-    TAG_LOGD(AceLogTag::ACE_GRID,
-        "Search child from index: (%{public}d,%{public}d). Current index: (%{public}d,%{public}d)", tarMainIndex,
-        tarCrossIndex, curMainIndex, curCrossIndex);
     bool isDirectionLeft = true;
     auto indexLeft = tarCrossIndex;
     auto indexRight = tarCrossIndex;
@@ -877,7 +870,6 @@ WeakPtr<FocusHub> GridPattern::SearchFocusableChildInCross(
             return weakChild;
         }
     }
-    TAG_LOGD(AceLogTag::ACE_GRID, "Child can not be found.");
     return nullptr;
 }
 
@@ -1122,8 +1114,6 @@ WeakPtr<FocusHub> GridPattern::GetChildFocusNodeByIndex(int32_t tarMainIndex, in
             }
         }
     }
-    TAG_LOGD(AceLogTag::ACE_GRID, "Item at location(%{public}d,%{public}d / %{public}d) can not found.", tarMainIndex,
-        tarCrossIndex, tarIndex);
     return nullptr;
 }
 
@@ -1172,8 +1162,6 @@ std::unordered_set<int32_t> GridPattern::GetFocusableChildCrossIndexesAt(int32_t
     for (const auto& index : result) {
         output += std::to_string(index);
     }
-    TAG_LOGD(AceLogTag::ACE_GRID, "Focusable child cross index list at main(%{public}d) is { %{public}s }",
-        tarMainIndex, output.c_str());
     return result;
 }
 
@@ -1304,10 +1292,8 @@ void GridPattern::ScrollPage(bool reverse)
         return;
     }
     if (!reverse) {
-        TAG_LOGD(AceLogTag::ACE_GRID, "PgDn. Scroll offset is %{public}f", -GetMainContentSize());
         UpdateCurrentOffset(-GetMainContentSize(), SCROLL_FROM_JUMP);
     } else {
-        TAG_LOGD(AceLogTag::ACE_GRID, "PgUp. Scroll offset is %{public}f", GetMainContentSize());
         UpdateCurrentOffset(GetMainContentSize(), SCROLL_FROM_JUMP);
     }
     auto host = GetHost();

@@ -46,7 +46,6 @@ std::function<void()> SharedImageManager::GenerateClearImageDataCallback(const s
             std::lock_guard<std::mutex> lockCancelableCallbackMap_(sharedImageManager->cancelableCallbackMapMutex_);
             sharedImageManager->cancelableCallbackMap_.erase(picName);
         }
-        LOGD("Done clean image data for %{private}s, data size is %{public}zu", picName.c_str(), dataSize);
     };
     return clearImageDataCallback;
 }
@@ -109,7 +108,6 @@ void SharedImageManager::AddSharedImage(const std::string& name, SharedImage&& s
                         }
                         provider->UpdateData(std::string(MEMORY_IMAGE_HEAD).append(name), imageDataIter->second);
                     }
-                    LOGD("done add image data for %{private}s, length of data is %{public}zu", name.c_str(), dataSize);
                 }
                 sharedImageManager->PostDelayedTaskToClearImageData(name, dataSize);
             },

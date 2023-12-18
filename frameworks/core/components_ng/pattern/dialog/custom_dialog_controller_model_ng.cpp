@@ -12,13 +12,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 #include "core/components_ng/pattern/dialog/custom_dialog_controller_model_ng.h"
 
 #include "base/memory/ace_type.h"
 #include "base/subwindow/subwindow_manager.h"
 #include "base/thread/task_executor.h"
 #include "core/common/container_scope.h"
+
 namespace OHOS::Ace::NG {
 void CustomDialogControllerModelNG::SetOpenDialog(DialogProperties& dialogProperties,
     std::vector<WeakPtr<AceType>>& dialogs, bool& pending, bool& isShown, std::function<void()>&& cancelTask,
@@ -63,6 +63,7 @@ void CustomDialogControllerModelNG::SetOpenDialog(DialogProperties& dialogProper
                 Maskarg.maskColor = dialogProperties.maskColor;
                 auto mask = overlayManager->ShowDialog(Maskarg, nullptr, false);
                 CHECK_NULL_VOID(mask);
+                overlayManager->SetMaskNodeId(dialog->GetId(), mask->GetId());
             }
         } else {
             dialog = overlayManager->ShowDialog(dialogProperties, std::move(func), false);
@@ -113,18 +114,12 @@ void CustomDialogControllerModelNG::SetCloseDialog(DialogProperties& dialogPrope
         if (dialogProperties.isShowInSubWindow) {
             SubwindowManager::GetInstance()->CloseDialogNG(dialog);
             dialogs.pop_back();
-
             auto parentContext = PipelineContext::GetMainPipelineContext();
             CHECK_NULL_VOID(parentContext);
             auto parentOverlay = parentContext->GetOverlayManager();
             CHECK_NULL_VOID(parentOverlay);
             SubwindowManager::GetInstance()->DeleteHotAreas(parentOverlay->GetSubwindowId(), dialog->GetId());
             SubwindowManager::GetInstance()->HideDialogSubWindow(parentOverlay->GetSubwindowId());
-            if (dialogProperties.isModal) {
-                auto maskNode = parentOverlay->GetDialog(parentOverlay->GetMaskNodeId());
-                CHECK_NULL_VOID(maskNode);
-                parentOverlay->CloseDialog(maskNode);
-            }
         } else {
             overlayManager->CloseDialog(dialog);
             dialogs.pop_back();

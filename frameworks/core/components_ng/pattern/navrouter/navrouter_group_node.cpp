@@ -163,7 +163,11 @@ void NavRouterGroupNode::AddNavDestinationToNavigation(const RefPtr<UINode>& par
     if (!navDestination && routeInfo) {
         // create navDestination with routeInfo
         name = routeInfo->GetName();
-        auto uiNode = navigationStack->CreateNodeByRouteInfo(routeInfo);
+        RefPtr<UINode> uiNode = navigationStack->GetFromCacheNode(name);
+        if (uiNode == nullptr) {
+            uiNode = navigationStack->CreateNodeByRouteInfo(routeInfo);
+        }
+
         navigationPattern->AddNavDestinationNode(name, uiNode, navRouteMode, routeInfo);
         auto navRouterEventHub = GetEventHub<NavRouterEventHub>();
         CHECK_NULL_VOID(navRouterEventHub);
@@ -198,32 +202,5 @@ void NavRouterGroupNode::AddNavDestinationToNavigation(const RefPtr<UINode>& par
         navigationNode->MarkModifyDone();
         navigationNode->MarkDirtyNode();
     }
-}
-
-bool NavRouterGroupNode::CleanNodeInNavigation(const RefPtr<UINode>& parent)
-{
-    auto navigationNode = AceType::DynamicCast<NavigationGroupNode>(parent);
-    CHECK_NULL_RETURN(navigationNode, false);
-
-    auto navRouterPattern = GetPattern<NavRouterPattern>();
-    CHECK_NULL_RETURN(navRouterPattern, false);
-    auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
-    CHECK_NULL_RETURN(navigationPattern, false);
-    auto navDestination = AceType::DynamicCast<NavDestinationGroupNode>(
-        navigationPattern->GetNavDestinationNode(navRouterPattern->GetNavDestination()));
-    CHECK_NULL_RETURN(navDestination, false);
-    auto navigationContentNode = navigationNode->GetContentNode();
-    CHECK_NULL_RETURN(navigationContentNode, false);
-
-    const auto& children = navigationContentNode->GetChildren();
-    for (auto iter = children.rbegin(); iter != children.rend(); ++iter) {
-        const auto& childNode = *iter;
-        auto navDestinationNode = AceType::DynamicCast<NavDestinationGroupNode>(childNode);
-        if (navDestinationNode == navDestination) {
-            navigationContentNode->RemoveChild(navDestinationNode);
-            return true;
-        }
-    }
-    return false;
 }
 } // namespace OHOS::Ace::NG

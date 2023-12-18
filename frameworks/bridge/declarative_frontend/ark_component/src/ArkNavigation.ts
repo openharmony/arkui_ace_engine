@@ -1,3 +1,18 @@
+/*
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 /// <reference path='./import.ts' />
 const TITLE_MODE_RANGE = 2;
 const NAV_BAR_POSITION_RANGE = 1;
@@ -9,6 +24,9 @@ const NAVIGATION_TITLE_MODE_DEFAULT = 0
 const DEFAULT_UNIT = 'vp';
 
 class ArkNavigationComponent extends ArkComponent implements NavigationAttribute {
+  constructor(nativePtr: KNode) {
+    super(nativePtr);
+  }
   navBarWidth(value: Length): NavigationAttribute {
     modifierWithKey(this._modifiersWithKeys, NavBarWidthModifier.identity, NavBarWidthModifier, value);
     return this;
@@ -18,18 +36,7 @@ class ArkNavigationComponent extends ArkComponent implements NavigationAttribute
     return this;
   }
   navBarWidthRange(value: [Dimension, Dimension]): NavigationAttribute {
-    if (!!value && value.length >= 1) {
-      modifierWithKey(this._modifiersWithKeys, MinNavBarWidthModifier.identity, MinNavBarWidthModifier, value[0].toString());
-    } else {
-      modifierWithKey(this._modifiersWithKeys, MinNavBarWidthModifier.identity, MinNavBarWidthModifier, undefined);
-    }
-
-    if (!!value && value.length >= 2) {
-      modifierWithKey(this._modifiersWithKeys, MaxNavBarWidthModifier.identity, MaxNavBarWidthModifier, value[1].toString());
-    } else {
-      modifierWithKey(this._modifiersWithKeys, MaxNavBarWidthModifier.identity, MaxNavBarWidthModifier, undefined);
-    }
-
+    modifierWithKey(this._modifiersWithKeys, NavBarWidthRangeModifier.identity, NavBarWidthRangeModifier, value);
     return this;
   }
   minContentWidth(value: Dimension): NavigationAttribute {
@@ -96,6 +103,9 @@ class ArkNavigationComponent extends ArkComponent implements NavigationAttribute
 }
 
 class BackButtonIconModifier extends ModifierWithKey<boolean | object> {
+  constructor(value: boolean | object) {
+    super(value);
+  }
   static identity: Symbol = Symbol('backButtonIcon');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -107,18 +117,24 @@ class BackButtonIconModifier extends ModifierWithKey<boolean | object> {
   }
 
   checkObjectDiff(): boolean {
-    return false;
+    if (isResource(this.stageValue) && isResource(this.value)) {
+      return !isResourceEqual(this.stageValue, this.value);
+    } else {
+      return true;
+    }
   }
 }
 
-class MinNavBarWidthModifier extends ModifierWithKey<string> {
-  static identity: Symbol = Symbol('minNavBarWidth');
-
+class NavBarWidthRangeModifier extends ModifierWithKey<[Dimension, Dimension]> {
+  constructor(value: [Dimension, Dimension]) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('navBarWidthRange');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().navigation.resetMinNavBarWidth(node);
+      GetUINativeModule().navigation.resetNavBarWidthRange(node);
     } else {
-      GetUINativeModule().navigation.setMinNavBarWidth(node, this.value);
+      GetUINativeModule().navigation.setNavBarWidthRange(node, this.value);
     }
   }
 
@@ -131,26 +147,10 @@ class MinNavBarWidthModifier extends ModifierWithKey<string> {
   }
 }
 
-class MaxNavBarWidthModifier extends ModifierWithKey<string> {
-  static identity: Symbol = Symbol('maxNavBarWidth');
-
-  applyPeer(node: KNode, reset: boolean): void {
-    if (reset) {
-      GetUINativeModule().navigation.resetMaxNavBarWidth(node);
-    } else {
-      GetUINativeModule().navigation.setMaxNavBarWidth(node, this.value);
-    }
-  }
-
-  checkObjectDiff(): boolean {
-    if (isResource(this.stageValue) && isResource(this.value)) {
-      return !isResourceEqual(this.stageValue, this.value);
-    } else {
-      return true;
-    }
-  }
-}
 class MinContentWidthModifier extends ModifierWithKey<Dimension> {
+  constructor(value: Dimension) {
+    super(value);
+  }
   static identity: Symbol = Symbol('minContentWidth');
 
   applyPeer(node: KNode, reset: boolean): void {
@@ -170,7 +170,10 @@ class MinContentWidthModifier extends ModifierWithKey<Dimension> {
   }
 }
 
-class NavBarWidthModifier extends ModifierWithKey<string> {
+class NavBarWidthModifier extends ModifierWithKey<Length> {
+  constructor(value: Length) {
+    super(value);
+  }
   static identity: Symbol = Symbol('navBarWidth');
 
   applyPeer(node: KNode, reset: boolean): void {
@@ -191,6 +194,9 @@ class NavBarWidthModifier extends ModifierWithKey<string> {
 }
 
 class NavBarPositionModifier extends Modifier<number> {
+  constructor(value: number) {
+    super(value);
+  }
   static identity: Symbol = Symbol('navBarPosition');
 
   applyPeer(node: KNode, reset: boolean): void {
@@ -203,6 +209,9 @@ class NavBarPositionModifier extends Modifier<number> {
 }
 
 class ModeModifier extends Modifier<number> {
+  constructor(value: number) {
+    super(value);
+  }
   static identity: Symbol = Symbol('mode');
 
   applyPeer(node: KNode, reset: boolean): void {
@@ -215,6 +224,9 @@ class ModeModifier extends Modifier<number> {
 }
 
 class HideToolBarModifier extends Modifier<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
   static identity: Symbol = Symbol('hideToolBar');
 
   applyPeer(node: KNode, reset: boolean): void {
@@ -227,6 +239,9 @@ class HideToolBarModifier extends Modifier<boolean> {
 }
 
 class TitleModeModifier extends Modifier<number> {
+  constructor(value: number) {
+    super(value);
+  }
   static identity: Symbol = Symbol('titleMode');
 
   applyPeer(node: KNode, reset: boolean): void {
@@ -239,6 +254,9 @@ class TitleModeModifier extends Modifier<number> {
 }
 
 class HideBackButtonModifier extends Modifier<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
   static identity: Symbol = Symbol('hideBackButton');
 
   applyPeer(node: KNode, reset: boolean): void {
@@ -251,6 +269,9 @@ class HideBackButtonModifier extends Modifier<boolean> {
 }
 
 class SubTitleModifier extends Modifier<string> {
+  constructor(value: string) {
+    super(value);
+  }
   static identity: Symbol = Symbol('subTitle');
 
   applyPeer(node: KNode, reset: boolean): void {
@@ -263,6 +284,9 @@ class SubTitleModifier extends Modifier<string> {
 }
 
 class NavigationHideTitleBarModifier extends Modifier<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
   static identity: Symbol = Symbol('hideTitleBar');
 
   applyPeer(node: KNode, reset: boolean): void {
@@ -275,6 +299,9 @@ class NavigationHideTitleBarModifier extends Modifier<boolean> {
 }
 
 class HideNavBarModifier extends Modifier<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
   static identity: Symbol = Symbol('hideNavBar');
 
   applyPeer(node: KNode, reset: boolean): void {
@@ -293,6 +320,6 @@ globalThis.Navigation.attributeModifier = function (modifier) {
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkNavigationComponent(nativeNode);
   });
-  modifier.applyNormalAttribute(component);
+  applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
 }

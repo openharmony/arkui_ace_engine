@@ -72,7 +72,6 @@ void PageTransitionElement::PerformBuild()
     SetElementId(pageTransitionComponent->GetElementId());
 
     if (!controller_) {
-        LOGD("create animator.");
         controller_ = CREATE_ANIMATOR(context_);
     }
     UpdateTransitionOption();
@@ -152,15 +151,12 @@ void PageTransitionElement::SetTransitionDirection(TransitionEvent event, Transi
         optionType = GetOptionType(hasShared, direction);
     }
     if (contentTransition_) {
-        LOGD("set content transition option type: %{public}d", optionType);
         contentTransition_->SwitchTransitionOption(optionType);
     }
     if (frontDecorationTransition_) {
-        LOGD("set front transition option type: %{public}d", direction);
         frontDecorationTransition_->SwitchTransitionOption(optionType);
     }
     if (backgroundTransition_) {
-        LOGD("set background transition option type: %{public}d", optionType);
         backgroundTransition_->SwitchTransitionOption(optionType);
     }
     if (context && context->GetIsDeclarative()) {
@@ -191,7 +187,6 @@ void PageTransitionElement::UpdateTransitionOption()
     }
     isRightToLeft_ = transitionComponent->GetTextDirection() == TextDirection::RTL;
 
-    LOGD("Use user-defined transition parameters.");
     contentInOption_ = transitionComponent->GetContentTransitionInOption();
     contentOutOption_ = transitionComponent->GetContentTransitionOutOption();
     pageTransitions_ = transitionComponent->GetPageTransitions();
@@ -209,7 +204,6 @@ RefPtr<PageTransitionElement> PageTransitionElement::GetTransitionElement(const 
     if (!page) {
         return nullptr;
     }
-    LOGD("try to get transition element from page element.");
     auto child = page->GetFirstChild();
     return AceType::DynamicCast<PageTransitionElement>(child);
 }
@@ -253,19 +247,15 @@ void PageTransitionElement::InitController(TransitionDirection direction, Transi
     }
     SetTouchable(false);
     if ((direction == TransitionDirection::TRANSITION_OUT) && (event == TransitionEvent::PUSH_START)) {
-        LOGD("No need to make it touchable after transition done, because page will not on the top of the stage.");
         return;
     }
     if ((direction == TransitionDirection::TRANSITION_IN) && (event == TransitionEvent::POP_START)) {
-        LOGD("No need to make it touchable after transition done, because page will be destroyed.");
         return;
     }
     auto weak = AceType::WeakClaim(this);
     controller_->AddStopListener([weak]() {
-        LOGD("transition complete, prepare to clear it");
         auto transition = weak.Upgrade();
         if (transition) {
-            LOGD("transition complete, clear it");
             transition->SetTouchable(true);
         }
     });

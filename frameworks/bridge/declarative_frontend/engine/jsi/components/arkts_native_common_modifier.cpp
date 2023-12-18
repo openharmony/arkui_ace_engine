@@ -1724,29 +1724,29 @@ void SetPadding(NodeHandle node, const struct ArkUISizeType *top, const struct A
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CalcDimension topDimen;
-    CalcDimension rightDimen;
-    CalcDimension bottomDimen;
-    CalcDimension leftDimen;
+    CalcLength topDimen;
+    CalcLength rightDimen;
+    CalcLength bottomDimen;
+    CalcLength leftDimen;
     if (top->string != nullptr) {
-        topDimen = CalcDimension(top->string, DimensionUnit::CALC);
+        topDimen = CalcLength(top->string);
     } else {
-        topDimen = CalcDimension(top->value, static_cast<DimensionUnit>(top->unit));
+        topDimen = CalcLength(top->value, static_cast<DimensionUnit>(top->unit));
     }
     if (right->string != nullptr) {
-        rightDimen = CalcDimension(right->string, DimensionUnit::CALC);
+        rightDimen = CalcLength(right->string);
     } else {
-        rightDimen = CalcDimension(right->value, static_cast<DimensionUnit>(right->unit));
+        rightDimen = CalcLength(right->value, static_cast<DimensionUnit>(right->unit));
     }
     if (bottom->string != nullptr) {
-        bottomDimen = CalcDimension(bottom->string, DimensionUnit::CALC);
+        bottomDimen = CalcLength(bottom->string);
     } else {
-        bottomDimen = CalcDimension(bottom->value, static_cast<DimensionUnit>(bottom->unit));
+        bottomDimen = CalcLength(bottom->value, static_cast<DimensionUnit>(bottom->unit));
     }
     if (left->string != nullptr) {
-        leftDimen = CalcDimension(left->string, DimensionUnit::CALC);
+        leftDimen = CalcLength(left->string);
     } else {
-        leftDimen = CalcDimension(left->value, static_cast<DimensionUnit>(left->unit));
+        leftDimen = CalcLength(left->value, static_cast<DimensionUnit>(left->unit));
     }
     NG::PaddingProperty paddings;
     paddings.top = std::optional<CalcLength>(topDimen);
@@ -2044,29 +2044,29 @@ void SetMargin(NodeHandle node, const struct ArkUISizeType *top, const struct Ar
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CalcDimension topDimen;
-    CalcDimension rightDimen;
-    CalcDimension bottomDimen;
-    CalcDimension leftDimen;
+    CalcLength topDimen;
+    CalcLength rightDimen;
+    CalcLength bottomDimen;
+    CalcLength leftDimen;
     if (top->string != nullptr) {
-        topDimen = CalcDimension(top->string, DimensionUnit::CALC);
+        topDimen = CalcLength(top->string);
     } else {
-        topDimen = CalcDimension(top->value, static_cast<DimensionUnit>(top->unit));
+        topDimen = CalcLength(top->value, static_cast<DimensionUnit>(top->unit));
     }
     if (right->string != nullptr) {
-        rightDimen = CalcDimension(right->string, DimensionUnit::CALC);
+        rightDimen = CalcLength(right->string);
     } else {
-        rightDimen = CalcDimension(right->value, static_cast<DimensionUnit>(right->unit));
+        rightDimen = CalcLength(right->value, static_cast<DimensionUnit>(right->unit));
     }
     if (bottom->string != nullptr) {
-        bottomDimen = CalcDimension(bottom->string, DimensionUnit::CALC);
+        bottomDimen = CalcLength(bottom->string);
     } else {
-        bottomDimen = CalcDimension(bottom->value, static_cast<DimensionUnit>(bottom->unit));
+        bottomDimen = CalcLength(bottom->value, static_cast<DimensionUnit>(bottom->unit));
     }
     if (left->string != nullptr) {
-        leftDimen = CalcDimension(left->string, DimensionUnit::CALC);
+        leftDimen = CalcLength(left->string);
     } else {
-        leftDimen = CalcDimension(left->value, static_cast<DimensionUnit>(left->unit));
+        leftDimen = CalcLength(left->value, static_cast<DimensionUnit>(left->unit));
     }
     NG::PaddingProperty paddings;
     paddings.top = std::optional<CalcLength>(topDimen);
@@ -2137,7 +2137,7 @@ void SetAllowDrop(NodeHandle node, const char** allowDropCharArray, int32_t leng
     std::set<std::string> allowDropSet;
     allowDropSet.clear();
     std::string allowDropStr;
-    for (size_t i = 0; i < length; i++) {
+    for (int32_t i = 0; i < length; i++) {
         allowDropStr = allowDropCharArray[i];
         allowDropSet.insert(allowDropStr);
     }
@@ -2492,7 +2492,7 @@ void SetAlignRules(NodeHandle node, char** anchors, int8_t* direction, int32_t l
     for (int index = 0; index < length; index++) {
         AlignRule alignRule;
         alignRule.anchor = std::string(*(anchors + index) == nullptr ? "" : *(anchors + index));
-        if (index < DIRECTION_RANGE) {
+        if (index < HORIZONTAL_DIRECTION_RANGE) {
             alignRule.horizontal = static_cast<HorizontalAlign>(*(direction + index));
         } else {
             alignRule.vertical = static_cast<VerticalAlign>(*(direction + index));

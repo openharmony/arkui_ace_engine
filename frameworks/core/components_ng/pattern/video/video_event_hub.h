@@ -159,6 +159,11 @@ public:
         RecorderOnEvent(Recorder::EventType::VIDEO_SCREEN_CHANGE, param);
     }
 
+    void SetInspectorId(const std::string& inspectorId)
+    {
+        inspectorId_ = inspectorId;
+    }
+
 private:
     void RecorderOnEvent(Recorder::EventType eventType, const std::string& param) const
     {
@@ -166,10 +171,10 @@ private:
             return;
         }
         Recorder::EventParamsBuilder builder;
+        builder.SetId(inspectorId_);
         auto host = GetFrameNode();
         if (host) {
-            auto id = host->GetInspectorIdValue("");
-            builder.SetId(id).SetType(host->GetHostTag());
+            builder.SetType(host->GetHostTag());
         }
         builder.SetEventType(eventType).SetText(param);
         Recorder::EventRecorder::Get().OnEvent(std::move(builder));
@@ -184,6 +189,7 @@ private:
     VideoEventCallback onSeeked_;
     VideoEventCallback onUpdate_;
     VideoEventCallback onFullScreenChange_;
+    std::string inspectorId_;
 };
 
 } // namespace OHOS::Ace::NG

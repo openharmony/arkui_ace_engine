@@ -212,6 +212,7 @@ public:
         return responseCtrl_;
     }
 
+    void CheckTouchEvent(TouchEvent touchEvent);
 private:
     std::unordered_map<size_t, TouchTestResult> touchTestResults_;
     std::unordered_map<size_t, MouseTestResult> mouseTestResults_;
@@ -240,6 +241,7 @@ private:
     NG::EventTreeRecord eventTree_;
     RefPtr<NG::ResponseCtrl> responseCtrl_;
     TimeStamp lastEventTime_;
+    std::set<int32_t> downFingerIds_;
 };
 
 } // namespace OHOS::Ace

@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_INTERFACE_INNERKITS_UI_EXTENSION_PROXY_H
 #define FOUNDATION_ACE_INTERFACE_INNERKITS_UI_EXTENSION_PROXY_H
 
+#include <cstdint>
 #include "macros.h"
 
 namespace OHOS::AAFwk {

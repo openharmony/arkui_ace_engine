@@ -112,7 +112,6 @@ SizeF ImageLoadingContext::CalculateTargetSize(const SizeF& srcSize, const SizeF
 
 void ImageLoadingContext::OnUnloaded()
 {
-    TAG_LOGD(AceLogTag::ACE_IMAGE, "ImageLoadingContext: OnUnloaded, reset params");
     imageObj_ = nullptr;
     canvasImage_ = nullptr;
     srcRect_ = RectF();
@@ -218,6 +217,8 @@ void ImageLoadingContext::DownloadImage()
     downloadCallback.failCallback = [weak = AceType::WeakClaim(this)](std::string errorMsg) {
         auto ctx = weak.Upgrade();
         CHECK_NULL_VOID(ctx);
+        TAG_LOGI(AceLogTag::ACE_DOWNLOAD_MANAGER,
+            "Download image failed! The error Message is %{public}s", errorMsg.c_str());
         ctx->FailCallback(errorMsg);
     };
     downloadCallback.cancelCallback = downloadCallback.failCallback;
@@ -256,8 +257,6 @@ void ImageLoadingContext::OnMakeCanvasImage()
         }
     }
 
-    TAG_LOGD(AceLogTag::ACE_IMAGE, "start MakeCanvasImage: %{public}s, size = %{public}s",
-        imageObj_->GetSourceInfo().ToString().c_str(), targetSize.ToString().c_str());
     // step4: [MakeCanvasImage] according to [targetSize]
     canvasKey_ = ImageUtils::GenerateImageKey(src_, targetSize);
     imageObj_->MakeCanvasImage(Claim(this), targetSize, userDefinedSize.has_value(), syncLoad_);

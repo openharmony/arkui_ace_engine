@@ -244,7 +244,7 @@ void RenderRelativeContainer::CalcLayoutParam(std::map<AlignDirection, AlignRule
             !IsAnchorContainer(alignRule.second.anchor)) {
             continue;
         }
-        if (static_cast<uint32_t>(alignRule.first) < DIRECTION_RANGE) {
+        if (static_cast<uint32_t>(alignRule.first) < HORIZONTAL_DIRECTION_RANGE) {
             if (!flexItem->GetTwoHorizontalDirectionAligned()) {
                 CalcHorizontalLayoutParam(alignRule.first, alignRule.second, nodeName);
             }
@@ -341,7 +341,6 @@ void RenderRelativeContainer::PerformLayout()
         SetLayoutSize(containerSize);
     }
     if (GetChildren().empty()) {
-        LOGD("RenderRelativeContainer: No child in Relative container");
         return;
     }
     idNodeMap_.clear();
@@ -381,7 +380,7 @@ void RenderRelativeContainer::PerformLayout()
                     alignRule.second.anchor.c_str(), nodeName.c_str());
                 continue;
             }
-            if (static_cast<uint32_t>(alignRule.first) < DIRECTION_RANGE) {
+            if (static_cast<uint32_t>(alignRule.first) < HORIZONTAL_DIRECTION_RANGE) {
                 if (!offsetXCalculated) {
                     offsetX = CalcHorizontalOffset(alignRule.first, alignRule.second, containerSize.Width(), nodeName);
                     offsetXCalculated = true;

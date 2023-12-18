@@ -253,7 +253,7 @@ public:
         return {};
     }
 
-    virtual RectF GetPaintRectWithTranslate()
+    virtual std::pair<RectF, bool> GetPaintRectWithTranslate()
     {
         return {};
     }
@@ -292,7 +292,7 @@ public:
 
     virtual void ClearDrawCommands() {}
 
-    virtual void DumpInfo() const {}
+    virtual void DumpInfo() {}
 
     void ObscuredToJsonValue(std::unique_ptr<JsonValue>& json) const;
 

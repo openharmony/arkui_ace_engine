@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SWIPER_SWIPER_PATTERN_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SWIPER_SWIPER_PATTERN_H
 
+#include <functional>
 #include <optional>
 #include <vector>
 
@@ -225,9 +226,19 @@ public:
         return turnPageRate_;
     }
 
+    GestureState GetGestureState() const
+    {
+        return gestureState_;
+    }
+
+    TouchBottomTypeLoop GetTouchBottomTypeLoop() const
+    {
+        return touchBottomType_;
+    }
+
     bool IsIndicatorAnimatorRunning() const
     {
-        return indicatorController_ ? indicatorController_->IsRunning() : false;
+        return indicatorAnimationIsRunning_;
     }
 
     void SetTurnPageRate(float turnPageRate)
@@ -316,6 +327,18 @@ public:
             eventHub->AddOnChangeEvent(onIndexChangeEvent_);
         } else {
             (*onIndexChangeEvent_).swap(event);
+        }
+    }
+
+    void UpdateAnimationStartEvent(AnimationStartEvent&& event)
+    {
+        if (!animationStartEvent_) {
+            animationStartEvent_ = std::make_shared<AnimationStartEvent>(event);
+            auto eventHub = GetEventHub<SwiperEventHub>();
+            CHECK_NULL_VOID(eventHub);
+            eventHub->AddAnimationStartEvent(animationStartEvent_);
+        } else {
+            (*animationStartEvent_).swap(event);
         }
     }
 
@@ -482,6 +505,11 @@ public:
         return finishCallbackType_;
     }
 
+    void SetStopIndicatorAnimationCb(const std::function<void(void)>& stopCallback)
+    {
+        stopIndicatorAnimationFunc_ = std::move(stopCallback);
+    }
+
     std::shared_ptr<SwiperParameters> GetSwiperParameters() const;
     std::shared_ptr<SwiperDigitalParameters> GetSwiperDigitalParameters() const;
 
@@ -502,6 +530,7 @@ public:
     void DumpAdvanceInfo() override;
     int32_t GetLoopIndex(int32_t originalIndex) const;
     int32_t GetDuration() const;
+    RefPtr<Curve> GetCurveIncludeMotion() const;
 
 private:
     void OnModifyDone() override;
@@ -550,7 +579,6 @@ private:
     void StopPropertyTranslateAnimation(bool isBeforeCreateLayoutWrapper = false);
     void UpdateOffsetAfterPropertyAnimation(float offset);
     void OnPropertyTranslateAnimationFinish(const OffsetF& offset);
-    RefPtr<Curve> GetCurveIncludeMotion(float velocity = 0.0f) const;
     void PlayIndicatorTranslateAnimation(float translate);
 
     // Implement of swiper controller
@@ -685,6 +713,9 @@ private:
     void NotifyParentScrollEnd();
 
     inline bool ChildFirst(NestedState state);
+    void HandleTouchBottomLoop();
+    void CalculateGestureState(float additionalOffset, float currentTurnPageRate);
+    void StopIndicatorAnimation();
 
     WeakPtr<NestableScrollContainer> parent_;
     /**
@@ -700,13 +731,18 @@ private:
     RefPtr<Animator> controller_;
 
     // Control spring animation when drag beyond boundary and drag end.
-    RefPtr<Animator> springController_;
+    std::shared_ptr<AnimationUtils::Animation> springAnimation_;
 
     // Control fade animation when drag beyond boundary and drag end.
     std::shared_ptr<AnimationUtils::Animation> fadeAnimation_;
 
     // Control translate animation for indicator.
-    RefPtr<Animator> indicatorController_;
+    std::shared_ptr<AnimationUtils::Animation> indicatorAnimation_;
+
+    bool indicatorAnimationIsRunning_ = false;
+
+    // stop indicator animation callback
+    std::function<void(void)> stopIndicatorAnimationFunc_;
 
     RefPtr<SwiperController> swiperController_;
     RefPtr<InputEvent> mouseEvent_;
@@ -724,6 +760,8 @@ private:
     float currentOffset_ = 0.0f;
     float fadeOffset_ = 0.0f;
     float turnPageRate_ = 0.0f;
+    GestureState gestureState_ = GestureState::GESTURE_STATE_FOLLOW;
+    TouchBottomTypeLoop touchBottomType_ = TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_NONE;
     float touchBottomRate_ = 1.0f;
     float currentIndexOffset_ = 0.0f;
     int32_t gestureSwipeIndex_ = 0;
@@ -751,6 +789,7 @@ private:
 
     ChangeEventPtr changeEvent_;
     ChangeEventPtr onIndexChangeEvent_;
+    AnimationStartEventPtr animationStartEvent_;
     AnimationEndEventPtr animationEndEvent_;
 
     mutable std::shared_ptr<SwiperParameters> swiperParameters_;
@@ -780,10 +819,13 @@ private:
     float currentDelta_ = 0.0f;
     SwiperLayoutAlgorithm::PositionMap itemPosition_;
     std::optional<float> velocity_;
+    float motionVelocity_ = 0.0f;
     bool isFinishAnimation_ = false;
     bool mainSizeIsMeasured_ = false;
     bool isNeedResetPrevMarginAndNextMargin_ = false;
     bool usePropertyAnimation_ = false;
+    bool springAnimationIsRunning_ = false;
+    bool isTouchDownSpringAnimation_ = false;
     int32_t propertyAnimationIndex_ = -1;
     bool isUserFinish_ = true;
     bool isVoluntarilyClear_ = false;
@@ -791,6 +833,7 @@ private:
     bool stopIndicatorAnimation_ = true;
     bool isTouchPad_ = false;
     bool fadeAnimationIsRunning_ = false;
+    bool autoLinearReachBoundary = false;
 
     float mainDeltaSum_ = 0.0f;
     std::optional<int32_t> cachedCount_;

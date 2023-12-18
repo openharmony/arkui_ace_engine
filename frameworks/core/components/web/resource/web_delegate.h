@@ -237,13 +237,16 @@ class WebGeolocationOhos : public WebGeolocation {
     DECLARE_ACE_TYPE(WebGeolocationOhos, WebGeolocation)
 
 public:
-    WebGeolocationOhos(const std::shared_ptr<OHOS::NWeb::NWebGeolocationCallbackInterface>& callback)
-        : geolocationCallback_(callback) {}
+    WebGeolocationOhos(
+        const std::shared_ptr<OHOS::NWeb::NWebGeolocationCallbackInterface>&
+            callback, bool incognito)
+        : geolocationCallback_(callback), incognito_(incognito) {}
 
     void Invoke(const std::string& origin, const bool& allow, const bool& retain) override;
 
 private:
     std::shared_ptr<OHOS::NWeb::NWebGeolocationCallbackInterface> geolocationCallback_;
+    bool incognito_ = false;
 };
 
 class WebPermissionRequestOhos : public WebPermissionRequest {
@@ -485,6 +488,7 @@ public:
     void UpdateVerticalScrollBarAccess(bool isVerticalScrollBarAccessEnabled);
     void UpdateScrollBarColor(const std::string& colorValue);
     void UpdateOverScrollMode(const int32_t overscrollModeValue);
+    void UpdateCopyOptionMode(const int32_t copyOptionModeValue);
     void LoadUrl();
     void CreateWebMessagePorts(std::vector<RefPtr<WebMessagePort>>& ports);
     void PostWebMessage(std::string& message, std::vector<RefPtr<WebMessagePort>>& ports, std::string& uri);
@@ -602,6 +606,7 @@ public:
     void OnWindowExit();
     void OnPageVisible(const std::string& url);
     void OnDataResubmitted(std::shared_ptr<OHOS::NWeb::NWebDataResubmissionCallback> handler);
+    void OnNavigationEntryCommitted(std::shared_ptr<OHOS::NWeb::NWebLoadCommittedDetails> details);
     void OnFaviconReceived(const void* data, size_t width, size_t height, OHOS::NWeb::ImageColorType colorType,
         OHOS::NWeb::ImageAlphaType alphaType);
     void OnTouchIconUrl(const std::string& iconUrl, bool precomposed);
@@ -698,15 +703,18 @@ private:
     std::string GetTitle();
     std::string GetDefaultUserAgent();
     bool SaveCookieSync();
-    bool SetCookie(const std::string& url, const std::string& value);
-    std::string GetCookie(const std::string& url) const;
-    void DeleteEntirelyCookie();
+    bool SetCookie(const std::string& url,
+                   const std::string& value,
+                   bool incognito_mode);
+    std::string GetCookie(const std::string& url, bool incognito_mode) const;
+    void DeleteEntirelyCookie(bool incognito_mode);
     void RegisterOHOSWebEventAndMethord();
     void SetWebCallBack();
     void RunSetWebIdAndHapPathCallback();
     void RunJsProxyCallback();
     void RegisterConfigObserver();
     void UnRegisterConfigObserver();
+    bool IsIncognitoMode() const;
 
     // Backward and forward
     void Backward();
@@ -789,6 +797,7 @@ private:
     EventCallbackV2 onFirstContentfulPaintV2_;
     EventCallbackV2 onOverScrollV2_;
     EventCallbackV2 onScreenCaptureRequestV2_;
+    EventCallbackV2 onNavigationEntryCommittedV2_;
 
     int32_t webType_;
     std::string bundlePath_;
@@ -825,6 +834,7 @@ private:
     std::optional<ScriptItems> scriptItems_;
     bool accessibilityState_ = false;
     std::optional<std::string> richtextData_;
+    bool incognitoMode_ = false;
 #endif
 };
 

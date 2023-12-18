@@ -981,11 +981,6 @@ public:
         return cleanNodeResponseArea_;
     }
 
-    void SetCleanNodeStyle(CleanNodeStyle cleanNodeStyle)
-    {
-        cleanNodeStyle_ = cleanNodeStyle;
-    }
-
     bool IsShowUnit() const;
     bool IsShowPasswordIcon() const;
     bool IsInPasswordMode() const;
@@ -1006,7 +1001,15 @@ public:
 
     void UpdateShowMagnifier(bool isShowMagnifier = false)
     {
+        if (isShowMagnifier_ == isShowMagnifier) {
+            return;
+        }
         isShowMagnifier_ = isShowMagnifier;
+        if (isShowMagnifier_) {
+            MakeHighZIndex();
+        } else {
+            MakeZIndexRollBack();
+        }
     }
 
     bool GetShowMagnifier() const
@@ -1018,7 +1021,7 @@ public:
     {
         localOffset_.SetX(localOffset.GetX());
         localOffset_.SetY(localOffset.GetY());
-        isShowMagnifier_ = true;
+        UpdateShowMagnifier(true);
     }
 
     OffsetF GetLocalOffset() const
@@ -1040,6 +1043,8 @@ public:
         return lastClickTimeStamp_;
     }
 #ifdef ENABLE_DRAG_FRAMEWORK
+    void HandleOnDragStatusCallback(
+        const DragEventType& dragEventType, const RefPtr<NotifyDragEvent>& notifyDragEvent) override;
 protected:
     virtual void InitDragEvent();
 #endif
@@ -1063,6 +1068,9 @@ private:
     std::function<void(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)> OnDragDrop();
     void ClearDragDropEvent();
     std::function<void(Offset)> GetThumbnailCallback();
+    void HandleCursorOnDragMoved(const RefPtr<NotifyDragEvent>& notifyDragEvent);
+    void HandleCursorOnDragLeaved(const RefPtr<NotifyDragEvent>& notifyDragEvent);
+    void HandleCursorOnDragEnded(const RefPtr<NotifyDragEvent>& notifyDragEvent);
 #endif
     int32_t UpdateCaretPositionOnHandleMove(const OffsetF& localOffset);
     bool HasStateStyle(UIState state) const;
@@ -1152,6 +1160,7 @@ private:
     void SaveInlineStates();
     void ApplyInlineStates(bool focusStatus);
     void RestorePreInlineStates();
+    void CalcInlineScrollRect(Rect& inlineScrollRect);
 
     bool ResetObscureTickCountDown();
 
@@ -1164,6 +1173,8 @@ private:
     void CloseHandleAndSelect() override;
     bool RepeatClickCaret(const Offset& offset, int32_t lastCaretIndex);
     void PaintTextRect();
+    void GetIconPaintRect(const RefPtr<TextInputResponseArea>& responseArea, RoundRect& paintRect);
+    void GetInnerFocusPaintRect(RoundRect& paintRect);
     void PaintResponseAreaRect();
     void PaintCancelRect();
     void PaintUnitRect();
@@ -1194,7 +1205,10 @@ private:
     bool ProcessAutoFill();
     void ScrollToSafeArea() const override;
     void RecordSubmitEvent() const;
-    void UpdateCancelNode(bool isShow);
+    void UpdateCancelNode();
+    void MakeHighZIndex();
+    void MakeZIndexRollBack();
+    void GetMaxZIndex(const RefPtr<UINode>& parent, const RefPtr<FrameNode>& pattern);
 
     RectF frameRect_;
     RectF contentRect_;
@@ -1202,6 +1216,7 @@ private:
     RefPtr<Paragraph> paragraph_;
     RefPtr<Paragraph> errorParagraph_;
     RefPtr<Paragraph> dragParagraph_;
+    InlineMeasureItem inlineMeasureItem_;
     TextStyle nextLineUtilTextStyle_;
 
     RefPtr<ClickEvent> clickListener_;
@@ -1245,6 +1260,7 @@ private:
     bool counterChange_ = false;
     WeakPtr<LayoutWrapper> counterTextNode_;
     bool hasCounterMargin_ = false;
+    bool isCursorAlwaysDisplayed_ = false;
     std::optional<int32_t> surfaceChangedCallbackId_;
     std::optional<int32_t> surfacePositionChangedCallbackId_;
 
@@ -1342,11 +1358,11 @@ private:
     std::string lastAutoFillPasswordTextValue_;
     bool isSupportCameraInput_ = false;
     std::function<void()> processOverlayDelayTask_;
-    CleanNodeStyle cleanNodeStyle_ = CleanNodeStyle::INVISIBLE;
     FocuseIndex focusIndex_ = FocuseIndex::TEXT;
     bool isShowMagnifier_ = false;
     OffsetF localOffset_;
     bool isTouchCaret_ = false;
+    std::list<int32_t> zIndexRollBack_;
 };
 } // namespace OHOS::Ace::NG
 

@@ -16,6 +16,9 @@
 /// <reference path="./import.ts" />
 /// <reference path="./ArkCommonShape.ts" />
 class ShapeViewPortModifier extends ModifierWithKey<{ x?: string | number | undefined; y?: string | number | undefined; width?: string | number | undefined; height?: string | number | undefined; }> {
+  constructor(value: { x?: string | number | undefined; y?: string | number | undefined; width?: string | number | undefined; height?: string | number | undefined; }) {
+    super(value);
+  }
   static identity: Symbol = Symbol('shapeViewPort');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -30,6 +33,9 @@ class ShapeViewPortModifier extends ModifierWithKey<{ x?: string | number | unde
   }
 }
 class ShapeMeshModifier extends ModifierWithKey<ArkMesh> {
+  constructor(value: ArkMesh) {
+    super(value);
+  }
   static identity: Symbol = Symbol('shapeMesh');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -43,6 +49,9 @@ class ShapeMeshModifier extends ModifierWithKey<ArkMesh> {
   }
 }
 class ArkShapeComponent extends ArkCommonShapeComponent implements ShapeAttribute {
+  constructor(nativePtr: KNode) {
+    super(nativePtr);
+  }
   viewPort(value: { x?: string | number | undefined; y?: string | number | undefined; width?: string | number | undefined; height?: string | number | undefined; }): this {
     if (value === null) {
       value = undefined;
@@ -69,6 +78,6 @@ globalThis.Shape.attributeModifier = function (modifier) {
   let component = this.createOrGetNode(elmtId, ()=> {
     return new ArkShapeComponent(nativeNode);
   });
-  modifier.applyNormalAttribute(component);
+  applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
 }

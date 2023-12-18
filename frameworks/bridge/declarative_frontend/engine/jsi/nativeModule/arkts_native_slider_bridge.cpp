@@ -64,15 +64,18 @@ ArkUINativeModuleValue SliderBridge::SetSliderStepSize(ArkUIRuntimeCallInfo* run
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    
     CalcDimension stepSize;
-    std::string calcStr;
-    if (!ArkTSUtils::ParseJsDimensionVp(vm, secondArg, stepSize) || LessNotEqual(stepSize.Value(), 0.0)) {
+    if (!ArkTSUtils::ParseJsDimensionVpNG(vm, secondArg, stepSize, false)) {
         GetArkUIInternalNodeAPI()->GetSliderModifier().ResetSliderStepSize(nativeNode);
         return panda::JSValueRef::Undefined(vm);
     } else {
-        GetArkUIInternalNodeAPI()->GetSliderModifier().SetSliderStepSize(nativeNode,
-            stepSize.Value(), static_cast<int>(stepSize.Unit()));
+        if (LessNotEqual(stepSize.Value(), 0.0)) {
+            GetArkUIInternalNodeAPI()->GetSliderModifier().ResetSliderStepSize(nativeNode);
+            return panda::JSValueRef::Undefined(vm);
+        }
+
+        GetArkUIInternalNodeAPI()->GetSliderModifier().SetSliderStepSize(
+            nativeNode, stepSize.Value(), static_cast<int>(stepSize.Unit()));
     }
 
     return panda::JSValueRef::Undefined(vm);

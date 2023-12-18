@@ -69,13 +69,6 @@ private:
     std::string insertValue_;
 };
 
-class TextCommonEvent : public BaseEventInfo {
-    DECLARE_RELATIONSHIP_OF_CLASSES(TextCommonEvent, BaseEventInfo)
-public:
-    TextCommonEvent() : BaseEventInfo("TextCommonEvent") {}
-    ~TextCommonEvent() override = default;
-};
-
 enum class SpanResultType { TEXT, IMAGE };
 
 class RichEditorAbstractSpanResult {

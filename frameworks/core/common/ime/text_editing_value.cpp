@@ -84,7 +84,6 @@ void TextEditingValue::MoveRight()
 {
     auto utf16Text = StringUtils::Str8ToStr16(text);
     if (utf16Text.length() < 1) {
-        TAG_LOGD(AceLogTag::ACE_TEXT_FIELD, "Text get utf16Text length is 0");
         return;
     }
     if (static_cast<size_t>(selection.extentOffset) >= utf16Text.length() - 1) {

@@ -47,3 +47,5 @@ declare interface Size {
     width: number
     height: number
 }
+
+declare abstract class ViewPU {}

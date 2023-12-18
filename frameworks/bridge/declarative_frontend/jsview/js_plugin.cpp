@@ -71,8 +71,6 @@ void JSPlugin::Create(const JSCallbackInfo& info)
         if (!bundleValue->IsEmpty() && bundleValue->IsString()) {
             pluginInfo.bundleName = bundleValue->ToString();
         }
-        TAG_LOGD(AceLogTag::ACE_PLUGIN_COMPONENT, "Create plugin source=%{public}s bundleName=%{public}s",
-            pluginInfo.pluginName.c_str(), pluginInfo.bundleName.c_str());
     }
     if (pluginInfo.bundleName.size() > PATH_MAX || pluginInfo.pluginName.size() > PATH_MAX) {
         return;
@@ -143,7 +141,6 @@ void JSPlugin::JsOnComplete(const JSCallbackInfo& info)
         auto OnComplete = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = frameNode](
                               const std::string& param) {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-            TAG_LOGD(AceLogTag::ACE_PLUGIN_COMPONENT, "plugin send onComplete event.");
             ACE_SCORING_EVENT("Plugin.OnComplete");
             PipelineContext::SetCallBackNode(node);
             func->Execute();
@@ -162,7 +159,6 @@ void JSPlugin::JsOnError(const JSCallbackInfo& info)
         auto onError = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = frameNode](
                            const std::string& param) {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-            TAG_LOGD(AceLogTag::ACE_PLUGIN_COMPONENT, "plugin send onError event.");
             ACE_SCORING_EVENT("Plugin.OnComplete");
             std::vector<std::string> keys = { "errcode", "msg" };
             PipelineContext::SetCallBackNode(node);

@@ -25,7 +25,6 @@ namespace OHOS::Ace {
 
 BorderEdge BorderEdgeCreator::CreateFromJson(const JsonValue& json)
 {
-    LOGD("CreateFromJson BorderEdge");
     std::string classType = json.GetValue(CLASS_NAME)->GetString();
     if (classType != BORDER_EDGE_NAME) {
         LOGE("Create borderEdge err: not a borderEdge json.");

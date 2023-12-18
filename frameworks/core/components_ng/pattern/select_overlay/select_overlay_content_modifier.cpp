@@ -61,12 +61,12 @@ SelectOverlayContentModifier::SelectOverlayContentModifier()
 
 void SelectOverlayContentModifier::onDraw(DrawingContext& drawingContext)
 {
+    CHECK_NULL_VOID(!isUsingMouse_);
     if (isHiddenHandle_->Get()) {
         return;
     }
 
     if (!inShowArea_->Get()) {
-        LOGD("hide handles due to handle is out of show area");
         return;
     }
 

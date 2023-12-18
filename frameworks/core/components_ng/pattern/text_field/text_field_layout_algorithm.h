@@ -27,6 +27,13 @@
 
 namespace OHOS::Ace::NG {
 
+struct InlineMeasureItem {
+    float inlineScrollRectOffsetX = 0.0f;
+    float inlineLastOffsetY = 0.0f;
+    float inlineContentRectHeight = 0.0f;
+    float inlineSizeHeight = 0.0f;
+};
+
 class TextFieldContentModifier;
 class ACE_EXPORT TextFieldLayoutAlgorithm : public LayoutAlgorithm {
     DECLARE_ACE_TYPE(TextFieldLayoutAlgorithm, LayoutAlgorithm);
@@ -60,6 +67,11 @@ public:
         return unitWidth_;
     }
 
+    InlineMeasureItem GetInlineMeasureItem() const
+    {
+        return inlineMeasureItem_;
+    }
+
     static TextDirection GetTextDirection(const std::string& content);
 
     static void UpdateTextStyle(const RefPtr<FrameNode>& frameNode,
@@ -81,6 +93,8 @@ protected:
         int32_t nakedCharPosition, bool disableTextAlign = false);
     void CreateParagraph(const TextStyle& textStyle, const std::vector<std::string>& contents,
         const std::string& content, bool needObscureText, bool disableTextAlign = false);
+    void CreateInlineParagraph(const TextStyle& textStyle, std::string content, bool needObscureText,
+        int32_t nakedCharPosition, bool disableTextAlign = false);
     void CreateErrorParagraph(const std::string& content, const RefPtr<TextFieldTheme>& theme);
     bool CreateParagraphAndLayout(
         const TextStyle& textStyle, const std::string& content, const LayoutConstraintF& contentConstraint);
@@ -101,7 +115,8 @@ protected:
     void UpdateUnitLayout(LayoutWrapper* layoutWrapper);
     ParagraphStyle GetParagraphStyle(const TextStyle& textStyle, const std::string& content) const;
     float ConstraintWithMinWidth(
-        const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper, float removeValue = 0.0f);
+        const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper,
+        RefPtr<Paragraph>& paragraph, float removeValue = 0.0f);
     SizeF GetConstraintSize(const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper);
     std::optional<SizeF> InlineMeasureContent(const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper);
     SizeF PlaceHolderMeasureContent(
@@ -111,6 +126,9 @@ protected:
     SizeF TextAreaMeasureContent(const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper);
     RefPtr<Paragraph> paragraph_;
     RefPtr<Paragraph> errorParagraph_;
+    RefPtr<Paragraph> inlineParagraph_;
+    InlineMeasureItem inlineMeasureItem_;
+
     RectF textRect_;
     OffsetF parentGlobalOffset_;
     std::string textContent_;

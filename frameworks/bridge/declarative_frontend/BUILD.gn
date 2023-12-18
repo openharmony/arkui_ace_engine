@@ -431,7 +431,9 @@ template("declarative_js_engine") {
       }
     }
 
+    include_dirs = []
     if (defined(vendor_configs.ace_engine_advanced)) {
+      include_dirs += vendor_configs.ace_advance_dirs
       sources += vendor_configs.ace_engine_advanced_jsview
     }
 
@@ -547,7 +549,8 @@ template("declarative_js_engine") {
 
     deps += [ ":x_node" ]
 
-    include_dirs = [ "//foundation/window/window_manager/interfaces/innerkits" ]
+    include_dirs +=
+        [ "//foundation/window/window_manager/interfaces/innerkits" ]
 
     # add for cross_platfrom_build temporarily, shall be removed after external_deps is supported
     if (is_arkui_x) {

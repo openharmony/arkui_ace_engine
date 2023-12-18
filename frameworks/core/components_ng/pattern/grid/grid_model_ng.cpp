@@ -451,10 +451,7 @@ void GridModelNG::SetSupportAnimation(FrameNode* frameNode, bool supportAnimatio
 
 void GridModelNG::SetEdgeEffect(FrameNode* frameNode, EdgeEffect edgeEffect, bool alwaysEnabled)
 {
-    auto pattern = frameNode->GetPattern<ScrollablePattern>();
-    CHECK_NULL_VOID(pattern);
-    pattern->SetEdgeEffect(edgeEffect, alwaysEnabled);
-    frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    ScrollableModelNG::SetEdgeEffect(frameNode, edgeEffect, alwaysEnabled);
 }
 
 void GridModelNG::SetNestedScroll(FrameNode* frameNode, const NestedScrollOptions& nestedOpt)

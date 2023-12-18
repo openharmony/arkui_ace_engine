@@ -118,14 +118,6 @@ void NavDestinationPattern::OnActive()
     CHECK_NULL_VOID(hostNode);
     auto navDestinationContext = hostNode->GetRenderContext();
     CHECK_NULL_VOID(navDestinationContext);
-    if (!(navDestinationContext->GetBackgroundColor().has_value())) {
-        auto pipelineContext = PipelineContext::GetCurrentContext();
-        CHECK_NULL_VOID(pipelineContext);
-        auto theme = pipelineContext->GetTheme<AppTheme>();
-        if (theme) {
-            navDestinationContext->UpdateBackgroundColor(theme->GetBackgroundColor());
-        }
-    }
     auto navDestinationLayoutProperty = hostNode->GetLayoutProperty<NavDestinationLayoutProperty>();
     CHECK_NULL_VOID(navDestinationLayoutProperty);
     auto titleBarNode = AceType::DynamicCast<TitleBarNode>(hostNode->GetTitleBarNode());
@@ -154,6 +146,25 @@ void NavDestinationPattern::OnModifyDone()
             navDestinationPattern->SetName(std::to_string(id));
         }
     }
+    auto renderContext = hostNode->GetRenderContext();
+    do {
+        if (renderContext->GetBackgroundColor().has_value()) {
+            break;
+        }
+        if (hostNode->GetNavDestinationMode() == NavDestinationMode::DIALOG) {
+            renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
+            break;
+        }
+        auto pipelineContext = PipelineContext::GetCurrentContext();
+        if (!pipelineContext) {
+            break;
+        }
+        auto theme = pipelineContext->GetTheme<AppTheme>();
+        if (!theme) {
+            break;
+        }
+        renderContext->UpdateBackgroundColor(theme->GetBackgroundColor());
+    } while (0);
     auto navDestinationLayoutProperty = hostNode->GetLayoutProperty<NavDestinationLayoutProperty>();
     CHECK_NULL_VOID(navDestinationLayoutProperty);
     auto titleBarNode = AceType::DynamicCast<TitleBarNode>(hostNode->GetTitleBarNode());
@@ -162,8 +173,10 @@ void NavDestinationPattern::OnModifyDone()
     CHECK_NULL_VOID(titleBarLayoutProperty);
     if (navDestinationLayoutProperty->GetHideTitleBar().value_or(false)) {
         titleBarLayoutProperty->UpdateVisibility(VisibleType::GONE);
+        titleBarNode->SetActive(false);
     } else {
         titleBarLayoutProperty->UpdateVisibility(VisibleType::VISIBLE);
+        titleBarNode->SetActive(true);
         MountTitleBar(hostNode);
     }
 }

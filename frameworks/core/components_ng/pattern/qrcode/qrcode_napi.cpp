@@ -133,7 +133,6 @@ extern "C" __attribute__((visibility("default"))) void NAPI_arkui_qrcode_GetJSCo
 // arkui_qrcode JS register
 extern "C" __attribute__((visibility("default"))) void NAPI_arkui_qrcode_GetABCCode(const char** buf, int* buflen)
 {
-    LOGD("QRCodeModelNapi:: NAPI_arkui_qrcode_GetABCCode start");
     if (buf != nullptr) {
         *buf = _binary_arkui_qrcode_abc_start;
     }

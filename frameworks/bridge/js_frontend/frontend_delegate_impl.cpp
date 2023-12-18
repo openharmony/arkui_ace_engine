@@ -158,7 +158,6 @@ void FrontendDelegateImpl::RunPage(const std::string& url, const std::string& pa
     };
     DelegateClient::GetInstance().RegisterIsPagePathInvalidCallback(isPagePathInvalidCallback);
 
-    LOGD("FrontendDelegateImpl RunPage url=%{private}s", url.c_str());
     ParseManifest();
     if (!url.empty()) {
         mainPagePath_ = manifestParser_->GetRouter()->GetPagePath(url);
@@ -173,7 +172,6 @@ void FrontendDelegateImpl::RunPage(const std::string& url, const std::string& pa
 
 void FrontendDelegateImpl::ChangeLocale(const std::string& language, const std::string& countryOrRegion)
 {
-    LOGD("JsFrontend ChangeLocale");
     taskExecutor_->PostTask(
         [language, countryOrRegion]() { AceApplicationInfo::GetInstance().ChangeLocale(language, countryOrRegion); },
         TaskExecutor::TaskType::PLATFORM);
@@ -248,14 +246,12 @@ void FrontendDelegateImpl::OnJsCallback(const std::string& callbackId, const std
 
 void FrontendDelegateImpl::SetJsMessageDispatcher(const RefPtr<JsMessageDispatcher>& dispatcher) const
 {
-    LOGD("JsFrontend SetJsMessageDispatcher");
     taskExecutor_->PostTask([dispatcherCallback = dispatcherCallback_, dispatcher] { dispatcherCallback(dispatcher); },
         TaskExecutor::TaskType::JS);
 }
 
 void FrontendDelegateImpl::TransferComponentResponseData(int32_t callbackId, int32_t code, std::vector<uint8_t>&& data)
 {
-    LOGD("JsFrontend TransferComponentResponseData");
     WeakPtr<PipelineBase> contextWeak(pipelineContextHolder_.Get());
     taskExecutor_->PostTask(
         [callbackId, data = std::move(data), contextWeak]() mutable {
@@ -273,7 +269,6 @@ void FrontendDelegateImpl::TransferComponentResponseData(int32_t callbackId, int
 
 void FrontendDelegateImpl::TransferJsResponseData(int32_t callbackId, int32_t code, std::vector<uint8_t>&& data) const
 {
-    LOGD("JsFrontend TransferJsResponseData");
     auto weak = AceType::WeakClaim(AceType::RawPtr(groupJsBridge_));
     taskExecutor_->PostTask([callbackId, code, data = std::move(data), weak]() mutable {
         auto groupJsBridge = weak.Upgrade();
@@ -301,7 +296,6 @@ void FrontendDelegateImpl::TransferJsResponseDataPreview(
 void FrontendDelegateImpl::TransferJsPluginGetError(
     int32_t callbackId, int32_t errorCode, std::string&& errorMessage) const
 {
-    LOGD("JsFrontend TransferJsPluginGetError");
     auto weak = AceType::WeakClaim(AceType::RawPtr(groupJsBridge_));
     taskExecutor_->PostTask([callbackId, errorCode, errorMessage = std::move(errorMessage), weak]() mutable {
         auto groupJsBridge = weak.Upgrade();
@@ -335,7 +329,6 @@ void FrontendDelegateImpl::LoadPluginJsCode(std::string&& jsCode) const
 
 void FrontendDelegateImpl::LoadPluginJsByteCode(std::vector<uint8_t>&& jsCode, std::vector<int32_t>&& jsCodeLen) const
 {
-    LOGD("JsFrontend LoadPluginJsByteCode");
     auto weak = AceType::WeakClaim(AceType::RawPtr(groupJsBridge_));
     taskExecutor_->PostTask([jsCode = std::move(jsCode), jsCodeLen = std::move(jsCodeLen), weak]() mutable {
         auto groupJsBridge = weak.Upgrade();
@@ -348,19 +341,16 @@ void FrontendDelegateImpl::LoadPluginJsByteCode(std::vector<uint8_t>&& jsCode, s
 bool FrontendDelegateImpl::OnPageBackPress()
 {
     bool result = FireSyncEvent("_root", std::string("\"clickbackitem\","), std::string(""));
-    LOGD("OnPageBackPress: jsframework callback result: %{public}d", result);
     return result;
 }
 
 void FrontendDelegateImpl::OnActive()
 {
-    LOGD("JsFrontend onActive");
     FireAsyncEvent("_root", std::string("\"viewactive\",null,null"), std::string(""));
 }
 
 void FrontendDelegateImpl::OnInactive()
 {
-    LOGD("JsFrontend OnInactive");
     FireAsyncEvent("_root", std::string("\"viewinactive\",null,null"), std::string(""));
     FireAsyncEvent("_root", std::string("\"viewsuspended\",null,null"), std::string(""));
 }
@@ -491,7 +481,6 @@ void FrontendDelegateImpl::OnApplicationUpdateState(const std::string& packageNa
 void FrontendDelegateImpl::FireAsyncEvent(
     const std::string& eventId, const std::string& param, const std::string& jsonArgs)
 {
-    LOGD("FireAsyncEvent eventId: %{public}s", eventId.c_str());
     std::string args = param;
     args.append(",null").append(",null"); // callback and dom changes
     if (!jsonArgs.empty()) {
@@ -534,7 +523,6 @@ void FrontendDelegateImpl::FireSyncEvent(
         TaskExecutor::TaskType::JS);
 
     result = jsCallBackResult_[callbackId];
-    LOGD("FireSyncEvent eventId: %{public}s, callbackId: %{public}d", eventId.c_str(), callbackId);
     jsCallBackResult_.erase(callbackId);
 }
 
@@ -589,7 +577,6 @@ void FrontendDelegateImpl::Push(const std::string& uri, const std::string& param
         return;
     }
     std::string pagePath = manifestParser_->GetRouter()->GetPagePath(uri);
-    LOGD("router.Push pagePath = %{private}s", pagePath.c_str());
     if (!pagePath.empty()) {
         isPagePathInvalid_ = true;
         LoadPage(GenerateNextPageId(), pagePath, false, params);
@@ -635,7 +622,6 @@ void FrontendDelegateImpl::Replace(const std::string& uri, const std::string& pa
     }
 
     std::string pagePath = manifestParser_->GetRouter()->GetPagePath(uri);
-    LOGD("router.Replace pagePath = %{private}s", pagePath.c_str());
     if (!pagePath.empty()) {
         LoadReplacePage(GenerateNextPageId(), pagePath, params);
         if (errorCallback != nullptr) {
@@ -675,13 +661,11 @@ void FrontendDelegateImpl::Back(const std::string& uri, const std::string& param
 
 void FrontendDelegateImpl::BackImplement(const std::string& uri, const std::string& params)
 {
-    LOGD("router.Back path = %{private}s", uri.c_str());
     if (uri.empty()) {
         PopPage();
     } else {
         std::string pagePath = manifestParser_->GetRouter()->GetPagePath(uri);
         pageId_ = GetPageIdByUrl(pagePath);
-        LOGD("router.Back pagePath = %{private}s", pagePath.c_str());
         if (!pagePath.empty()) {
             if (!params.empty()) {
                 std::lock_guard<std::mutex> lock(mutex_);
@@ -903,13 +887,11 @@ bool FrontendDelegateImpl::IsWebFeature()
 
 double FrontendDelegateImpl::MeasureText(const MeasureContext& context)
 {
-    LOGD("FrontendDelegateImpl MeasureTxt.");
     return MeasureUtil::MeasureText(context);
 }
 
 Size FrontendDelegateImpl::MeasureTextSize(const MeasureContext& context)
 {
-    LOGD("FrontendDelegateImpl MeasureTxtSize.");
     return MeasureUtil::MeasureTextSize(context);
 }
 
@@ -1188,7 +1170,6 @@ std::string FrontendDelegateImpl::GetAssetPath(const std::string& url)
 
 void FrontendDelegateImpl::LoadPage(int32_t pageId, const std::string& url, bool isMainPage, const std::string& params)
 {
-    LOGD("FrontendDelegateImpl LoadPage[%{private}d]: %{private}s.", pageId, url.c_str());
     {
         std::lock_guard<std::mutex> lock(mutex_);
         pageId_ = pageId;
@@ -1382,7 +1363,6 @@ void FrontendDelegateImpl::AddPageLocked(const RefPtr<JsAcePage>& page)
 
 void FrontendDelegateImpl::SetCurrentPage(int32_t pageId)
 {
-    LOGD("FrontendDelegateImpl SetCurrentPage pageId=%{private}d", pageId);
     auto page = GetPage(pageId);
     if (page != nullptr) {
         jsAccessibilityManager_->SetRunningPage(page);
@@ -1435,7 +1415,6 @@ void FrontendDelegateImpl::OnPopToPageSuccess(const std::string& url)
 
 void FrontendDelegateImpl::PopToPage(const std::string& url)
 {
-    LOGD("FrontendDelegateImpl PopToPage url = %{private}s", url.c_str());
     taskExecutor_->PostTask(
         [weak = AceType::WeakClaim(this), url] {
             auto delegate = weak.Upgrade();
@@ -1676,7 +1655,6 @@ void FrontendDelegateImpl::ReplacePage(const RefPtr<JsAcePage>& page, const std:
 
 void FrontendDelegateImpl::LoadReplacePage(int32_t pageId, const std::string& url, const std::string& params)
 {
-    LOGD("FrontendDelegateImpl LoadReplacePage[%{private}d]: %{private}s.", pageId, url.c_str());
     {
         std::lock_guard<std::mutex> lock(mutex_);
         pageId_ = pageId;
@@ -1808,7 +1786,6 @@ int32_t FrontendDelegateImpl::GetPageIdByUrl(const std::string& url)
     auto pageIter = std::find_if(std::rbegin(pageRouteStack_), std::rend(pageRouteStack_),
         [&url](const PageInfo& pageRoute) { return url == pageRoute.url; });
     if (pageIter != std::rend(pageRouteStack_)) {
-        LOGD("GetPageIdByUrl pageId=%{private}d url=%{private}s", pageIter->pageId, url.c_str());
         return pageIter->pageId;
     }
     return INVALID_PAGE_ID;

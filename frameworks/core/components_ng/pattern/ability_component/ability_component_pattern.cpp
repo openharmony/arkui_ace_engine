@@ -121,7 +121,6 @@ FocusPattern AbilityComponentPattern::GetFocusPattern() const
 void AbilityComponentPattern::UpdateWindowRect()
 {
     if (!hasConnectionToAbility_) {
-        LOGD("AbilityComponent has not be connected");
         return;
     }
     auto host = GetHost();

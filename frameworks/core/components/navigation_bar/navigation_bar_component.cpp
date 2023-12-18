@@ -470,7 +470,6 @@ RefPtr<Component> WatchTitleBarBuilder::Build()
 RefPtr<Component> NavigationBarComponent::Build(const WeakPtr<PipelineContext>& context)
 {
     auto deviceType = SystemProperties::GetDeviceType();
-    LOGD("build navigation bar for %{public}d", deviceType);
     RefPtr<TitleBarBuilder> builder;
     switch (deviceType) {
 #ifndef WEARABLE_PRODUCT

@@ -30,7 +30,7 @@ public:
     static void SetMatchTextDirection(bool value);
     static void SetFitOriginalSize(bool value);
     static void SetSourceSize(const JSCallbackInfo& info);
-    static void SetObjectFit(int32_t value);
+    static void SetObjectFit(const JSCallbackInfo& args);
     static void SetImageFill(const JSCallbackInfo& info);
     static void SetImageInterpolation(int32_t imageInterpolation);
     static void SetImageRenderMode(int32_t imageRenderMode);
@@ -41,6 +41,7 @@ public:
     static void OnFinish(const JSCallbackInfo& info);
     static void SetSyncLoad(const JSCallbackInfo& info);
     static void SetColorFilter(const JSCallbackInfo& info);
+    static void SetSmoothEdge(const JSCallbackInfo& info);
 
     static void JsBorder(const JSCallbackInfo& info);
     static void JsBorderRadius(const JSCallbackInfo& info);

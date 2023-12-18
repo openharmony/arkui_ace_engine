@@ -240,6 +240,11 @@ public:
         displayMode_ = displayMode;
     }
 
+    double GetOutBoundary() const
+    {
+        return outBoundary_;
+    }
+
     void SetOutBoundary(double outBoundary)
     {
         outBoundary_ = outBoundary;
@@ -467,6 +472,26 @@ public:
         dragFRCSceneCallback_ = std::move(dragFRCSceneCallback);
     }
 
+    float GetMainOffset(const Offset& offset) const
+    {
+        return positionMode_ == PositionMode::BOTTOM ? offset.GetX() : offset.GetY();
+    }
+
+    void SetDragStartPosition(float position)
+    {
+        dragStartPosition_ = position;
+    }
+
+    void SetDragEndPosition(float position)
+    {
+        dragEndPosition_ = position;
+    }
+
+    float GetDragOffset()
+    {
+        return dragEndPosition_ - dragStartPosition_;
+    }
+
 protected:
     void InitTheme();
 
@@ -518,6 +543,8 @@ private:
     double barRegionSize_ = 0.0;
     double friction_ = BAR_FRICTION;
     double frictionPosition_ = 0.0;
+    float dragStartPosition_ = 0.0f;
+    float dragEndPosition_ = 0.0f;
 
     bool isScrollable_ = false;
 

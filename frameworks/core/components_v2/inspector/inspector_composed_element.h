@@ -66,7 +66,6 @@ public:
     {
         auto child = children_.empty() ? nullptr : children_.front();
         while (child) {
-            LOGD("GetContentElement: child = %{public}s", AceType::TypeName(child));
             auto inspectorComposedElement = AceType::DynamicCast<InspectorComposedElement>(child);
             if (inspectorComposedElement && !isFindAll) {
                 return nullptr;

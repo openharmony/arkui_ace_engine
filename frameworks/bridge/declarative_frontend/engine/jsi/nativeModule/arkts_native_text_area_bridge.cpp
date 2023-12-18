@@ -128,7 +128,7 @@ ArkUINativeModuleValue TextAreaBridge::SetCopyOption(ArkUIRuntimeCallInfo *runti
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
     void *nativeNode = firstArg->ToNativePointer(vm)->Value();
-    int32_t copyOptions = static_cast<int32_t>(OHOS::Ace::CopyOptions::Local);
+    int32_t copyOptions = static_cast<int32_t>(OHOS::Ace::CopyOptions::None);
     int32_t copyOptionsDistributed = static_cast<int32_t>(OHOS::Ace::CopyOptions::Distributed);
     if (secondArg->IsNumber() && secondArg->Int32Value(vm) >= copyOptions &&
         secondArg->Int32Value(vm) <= copyOptionsDistributed) {

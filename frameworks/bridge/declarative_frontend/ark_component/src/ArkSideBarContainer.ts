@@ -1,5 +1,23 @@
+/*
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 /// <reference path="./import.ts" />
 class SideBarContainerPositionModifier extends ModifierWithKey<number> {
+  constructor(value: number) {
+    super(value);
+  }
   static identity: Symbol = Symbol('sideBarContainerPosition');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -14,6 +32,9 @@ class SideBarContainerPositionModifier extends ModifierWithKey<number> {
 }
 
 class SideBarContainerAutoHideModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
   static identity: Symbol = Symbol('sideBarContainerautoHide');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -28,6 +49,9 @@ class SideBarContainerAutoHideModifier extends ModifierWithKey<boolean> {
 }
 
 class SideBarContainerShowSideBarModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
   static identity: Symbol = Symbol('sideBarContainerShowSideBar');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -42,6 +66,9 @@ class SideBarContainerShowSideBarModifier extends ModifierWithKey<boolean> {
 }
 
 class SideBarContainerMaxSideBarWidthModifier extends ModifierWithKey<number | Length> {
+  constructor(value: number | Length) {
+    super(value);
+  }
   static identity: Symbol = Symbol('sideBarContainerMaxSideBarWidth');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -56,6 +83,9 @@ class SideBarContainerMaxSideBarWidthModifier extends ModifierWithKey<number | L
 }
 
 class SideBarContainerWidthModifier extends ModifierWithKey<number | Length> {
+  constructor(value: number | Length) {
+    super(value);
+  }
   static identity: Symbol = Symbol('sideBarContainerWidth');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -70,6 +100,9 @@ class SideBarContainerWidthModifier extends ModifierWithKey<number | Length> {
 }
 
 class SideBarContainerMinContentWidthModifier extends ModifierWithKey<Dimension> {
+  constructor(value: Dimension) {
+    super(value);
+  }
   static identity: Symbol = Symbol('sideBarContainerMinContentWidth');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -84,6 +117,9 @@ class SideBarContainerMinContentWidthModifier extends ModifierWithKey<Dimension>
 }
 
 class SideBarContainerShowControlButtonModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
   static identity: Symbol = Symbol('sideBarContainerShowControlButton');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -98,6 +134,9 @@ class SideBarContainerShowControlButtonModifier extends ModifierWithKey<boolean>
 }
 
 class SideBarContainerMinSideBarWidthModifier extends ModifierWithKey<number | Length> {
+  constructor(value: number | Length) {
+    super(value);
+  }
   static identity: Symbol = Symbol('sideBarContainerMinSideBarWidth');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -112,6 +151,9 @@ class SideBarContainerMinSideBarWidthModifier extends ModifierWithKey<number | L
 }
 
 class SideBarContainerControlButtonModifier extends ModifierWithKey<ButtonStyle> {
+  constructor(value: ButtonStyle) {
+    super(value);
+  }
   static identity: Symbol = Symbol('sideBarContainercontrolButton');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -139,6 +181,9 @@ class SideBarContainerControlButtonModifier extends ModifierWithKey<ButtonStyle>
 }
 
 class SideBarContainerDividerModifier extends ModifierWithKey<DividerStyle> {
+  constructor(value: DividerStyle) {
+    super(value);
+  }
   static identity: Symbol = Symbol('sideBarContainerdivider');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -162,6 +207,9 @@ class SideBarContainerDividerModifier extends ModifierWithKey<DividerStyle> {
 }
 
 class ArkSideBarContainerComponent extends ArkComponent implements SideBarContainerAttribute {
+  constructor(nativePtr: KNode) {
+    super(nativePtr);
+  }
   onChange(callback: (value: boolean) => void): SideBarContainerAttribute {
     throw new Error("Method not implemented.");
   }
@@ -220,6 +268,6 @@ globalThis.SideBarContainer.attributeModifier = function (modifier) {
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkSideBarContainerComponent(nativeNode);
   });
-  modifier.applyNormalAttribute(component);
+  applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
 }

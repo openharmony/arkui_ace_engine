@@ -270,6 +270,36 @@ void JSNavigationStack::UpdateReplaceValue(int32_t replaceValue) const
     replaceFunc->Call(dataSourceObj_, 1, params);
 }
 
+bool JSNavigationStack::GetAnimatedValue() const
+{
+    if (dataSourceObj_->IsEmpty()) {
+        return true;
+    }
+    auto animated = dataSourceObj_->GetProperty("animated");
+    return animated->ToBoolean();
+}
+
+void JSNavigationStack::UpdateAnimatedValue(bool animated)
+{
+    if (dataSourceObj_->IsEmpty()) {
+        return;
+    }
+    auto animatedFunc = JSRef<JSFunc>::Cast(dataSourceObj_->GetProperty("setAnimated"));
+    JSRef<JSVal> params[1];
+    params[0] = JSRef<JSVal>::Make(ToJSValue(animated));
+    animatedFunc->Call(dataSourceObj_, 1, params);
+}
+
+
+bool JSNavigationStack::GetDisableAnimation() const
+{
+    if (dataSourceObj_->IsEmpty()) {
+        return false;
+    }
+    auto disableAllAnimation = dataSourceObj_->GetProperty("disableAllAnimation");
+    return disableAllAnimation->ToBoolean();
+}
+
 std::string JSNavigationStack::GetRouteParam() const
 {
     auto size = GetSize();

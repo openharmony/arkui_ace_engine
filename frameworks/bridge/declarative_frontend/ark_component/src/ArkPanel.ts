@@ -1,5 +1,23 @@
+/*
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 /// <reference path='./import.ts' />
 class ArkPanelComponent extends ArkComponent implements PanelAttribute {
+  constructor(nativePtr: KNode) {
+    super(nativePtr);
+  }
   mode(value: PanelMode): this {
     if (typeof value === 'number') {
       modifier(this._modifiers, PanelModeModifier, value);
@@ -81,6 +99,9 @@ class ArkPanelComponent extends ArkComponent implements PanelAttribute {
 }
 
 class PanelBackgroundMaskModifier extends ModifierWithKey<ResourceColor> {
+  constructor(value: ResourceColor) {
+    super(value);
+  }
   static identity: Symbol = Symbol("panelBackgroundMask");
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -100,6 +121,9 @@ class PanelBackgroundMaskModifier extends ModifierWithKey<ResourceColor> {
 }
 
 class PanelModeModifier extends Modifier<PanelMode> {
+  constructor(value: PanelMode) {
+    super(value);
+  }
   static identity: Symbol = Symbol('panelMode');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -111,6 +135,9 @@ class PanelModeModifier extends Modifier<PanelMode> {
 }
 
 class PanelTypeModifier extends Modifier<PanelType> {
+  constructor(value: PanelType) {
+    super(value);
+  }
   static identity: Symbol = Symbol('panelType');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -122,6 +149,9 @@ class PanelTypeModifier extends Modifier<PanelType> {
 }
 
 class PanelCustomHeightModifier extends ModifierWithKey<Dimension | PanelHeight> {
+  constructor(value: Dimension | PanelHeight) {
+    super(value);
+  }
   static identity: Symbol = Symbol("panelCustomHeight");
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -141,6 +171,9 @@ class PanelCustomHeightModifier extends ModifierWithKey<Dimension | PanelHeight>
 }
 
 class PanelFullHeightModifier extends Modifier<string | number> {
+  constructor(value: string | number) {
+    super(value);
+  }
   static identity: Symbol = Symbol('panelFullHeight');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -152,6 +185,9 @@ class PanelFullHeightModifier extends Modifier<string | number> {
 }
 
 class PanelHalfHeightModifier extends Modifier<string | number> {
+  constructor(value: string | number) {
+    super(value);
+  }
   static identity: Symbol = Symbol('panelHalfHeight');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -163,6 +199,9 @@ class PanelHalfHeightModifier extends Modifier<string | number> {
 }
 
 class PanelMiniHeightModifier extends Modifier<string | number> {
+  constructor(value: string | number) {
+    super(value);
+  }
   static identity: Symbol = Symbol('panelMiniHeight');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -174,6 +213,9 @@ class PanelMiniHeightModifier extends Modifier<string | number> {
 }
 
 class ShowCloseIconModifier extends Modifier<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
   static identity: Symbol = Symbol('showCloseIcon');
   applyPeer(node: KNode, reset: boolean) {
     if (reset) {
@@ -185,6 +227,9 @@ class ShowCloseIconModifier extends Modifier<boolean> {
 }
 
 class DragBarModifier extends Modifier<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
   static identity: Symbol = Symbol('dragBar');
   applyPeer(node: KNode, reset: boolean) {
     if (reset) {
@@ -196,6 +241,9 @@ class DragBarModifier extends Modifier<boolean> {
 }
 
 class ShowModifier extends Modifier<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
   static identity: Symbol = Symbol('show');
   applyPeer(node: KNode, reset: boolean) {
     if (reset) {
@@ -213,6 +261,6 @@ globalThis.Panel.attributeModifier = function (modifier) {
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkPanelComponent(nativeNode);
   });
-  modifier.applyNormalAttribute(component);
+  applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
 };

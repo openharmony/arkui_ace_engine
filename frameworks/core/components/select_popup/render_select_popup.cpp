@@ -399,7 +399,6 @@ void RenderSelectPopup::PerformLayout()
 
 void RenderSelectPopup::HandleRawEvent(const Offset& clickPosition)
 {
-    LOGD("Handle Raw Event, Position is %{public}s.", clickPosition.ToString().c_str());
     if (touchRegion_.ContainsInRegion(clickPosition.GetX(), clickPosition.GetY())) {
         LOGI("Contains the touch region.");
         return;

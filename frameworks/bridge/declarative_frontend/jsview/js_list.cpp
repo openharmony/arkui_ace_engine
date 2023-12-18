@@ -23,6 +23,7 @@
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "bridge/declarative_frontend/jsview/models/list_model_impl.h"
 #include "core/components_ng/base/view_stack_model.h"
+#include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/list/list_model.h"
 #include "core/components_ng/pattern/list/list_model_ng.h"
 #include "core/components_ng/pattern/list/list_position_controller.h"
@@ -482,7 +483,8 @@ void JSList::ItemDragStartCallback(const JSCallbackInfo& info)
     }
 
     RefPtr<JsDragFunction> jsOnDragFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(info[0]));
-    auto onItemDragStart = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragFunc)](
+    WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto onItemDragStart = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragFunc), node = frameNode](
                                const ItemDragInfo& dragInfo, int32_t itemIndex) -> RefPtr<AceType> {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, nullptr);
         auto ret = func->ItemDragStartExecute(dragInfo, itemIndex);
@@ -503,6 +505,7 @@ void JSList::ItemDragStartCallback(const JSCallbackInfo& info)
         ViewStackModel::GetInstance()->NewScope();
         {
             ACE_SCORING_EVENT("List.onItemDragStart.builder");
+            PipelineContext::SetCallBackNode(node);
             builderFunc->Execute();
         }
         return ViewStackModel::GetInstance()->Finish();
@@ -515,12 +518,13 @@ void JSList::ItemDragEnterCallback(const JSCallbackInfo& info)
     if (!info[0]->IsFunction()) {
         return;
     }
-
+    WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
     RefPtr<JsDragFunction> jsOnDragEnterFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(info[0]));
-    auto onItemDragEnter = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragEnterFunc)](
-                               const ItemDragInfo& dragInfo) {
+    auto onItemDragEnter = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragEnterFunc),
+                               node = frameNode](const ItemDragInfo& dragInfo) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("List.onItemDragEnter");
+        PipelineContext::SetCallBackNode(node);
         func->ItemDragEnterExecute(dragInfo);
     };
     ListModel::GetInstance()->SetOnItemDragEnter(std::move(onItemDragEnter));
@@ -762,10 +766,16 @@ void JSListScroller::ScrollToItemInGroup(const JSCallbackInfo& args)
         JSException::Throw(ERROR_CODE_PARAM_INVALID, "%s", "Input parameter check failed.");
         return;
     }
+    if (index < 0) {
+        return;
+    }
 
     if (args.Length() >= 2) { // 2 is param count
         if (!ConvertFromJSValue(args[1], indexInGroup)) {
             JSException::Throw(ERROR_CODE_PARAM_INVALID, "%s", "Input parameter check failed.");
+            return;
+        }
+        if (indexInGroup < 0) {
             return;
         }
     }

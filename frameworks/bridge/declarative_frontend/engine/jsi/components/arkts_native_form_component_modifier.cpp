@@ -17,7 +17,6 @@
 
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/pattern/form/form_model_ng.h"
 #include "core/pipeline/base/element_register.h"
 #include "base/geometry/dimension.h"
@@ -25,7 +24,7 @@
 namespace OHOS::Ace::NG {
 const int32_t DEFAULT_VISIBILITY = 0;
 const int32_t DEFAULT_FORM_DIM = 1;
-const bool DEFAULT_ALLOW_UPDATE = false;
+const bool DEFAULT_ALLOW_UPDATE = true;
 void SetFormVisibility(NodeHandle node, int32_t visible)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -56,7 +55,7 @@ void SetModuleName(NodeHandle node, const char* value)
     FormModelNG::SetModuleName(frameNode, moduleName);
 }
 
-void SetFormSize(NodeHandle node, double widthValue, int widthUnit, double heightValue, int heightUnit)
+void SetFormSize(NodeHandle node, double widthValue, int32_t widthUnit, double heightValue, int32_t heightUnit)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -105,9 +104,9 @@ void ResetFormSize(NodeHandle node)
 
 ArkUIFormComponentModifierAPI GetFormComponentModifier()
 {
-    static const ArkUIFormComponentModifierAPI modifier = { SetFormVisibility,
-        AllowUpdate, SetDimension, SetModuleName, SetFormSize, ResetFormVisibility,
-        DisallowUpdate, ResetDimension, ResetModuleName, ResetFormSize };
+    static const ArkUIFormComponentModifierAPI modifier = { SetFormVisibility, AllowUpdate, SetDimension,
+        SetModuleName, SetFormSize, ResetFormVisibility, DisallowUpdate, ResetDimension, ResetModuleName,
+        ResetFormSize };
 
     return modifier;
 }

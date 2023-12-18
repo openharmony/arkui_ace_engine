@@ -31,7 +31,8 @@
 
 namespace OHOS::Ace::NG {
 namespace {
-constexpr int32_t DIRECTION_RANGE = 3;
+constexpr int32_t HORIZONTAL_DIRECTION_RANGE = 3;
+constexpr int32_t VERTICAL_DIRECTION_RANGE = 6;
 constexpr float DEFAULT_BIAS = 0.5f;
 inline bool IsAnchorContainer(const std::string& anchor)
 {
@@ -217,18 +218,20 @@ void RelativeContainerLayoutAlgorithm::MeasureSelf(LayoutWrapper* layoutWrapper)
             continue;
         }
         auto childWrapper = idNodeMap_[nodeName];
-        const auto& layoutConstraint = childWrapper->GetLayoutProperty()->GetLayoutConstraint();
+        if (childWrapper->GetLayoutProperty()->GetVisibility() == VisibleType::GONE) {
+            continue;
+        }
         RectF tempRect(recordOffsetMap_[nodeName].GetX(), recordOffsetMap_[nodeName].GetY(),
-            layoutConstraint->selfIdealSize.Width().value(),
-            layoutConstraint->selfIdealSize.Height().value());
+            childWrapper->GetGeometryNode()->GetMarginFrameSize().Width(),
+            childWrapper->GetGeometryNode()->GetMarginFrameSize().Height());
         relativeContainerRect = relativeContainerRect.CombineRectT(tempRect);
     }
 
-    if (selfIdealSize->Width()->GetDimension().Unit() == DimensionUnit::AUTO) {
+    if (selfIdealSize->Width()->GetDimension().Unit() == DimensionUnit::AUTO && !isHorizontalRelyOnContainer_) {
         layoutWrapper->GetGeometryNode()->SetFrameSize(SizeF(relativeContainerRect.Width() + padding_.Width(),
             layoutWrapper->GetGeometryNode()->GetFrameSize().Height()));
     }
-    if (selfIdealSize->Height()->GetDimension().Unit() == DimensionUnit::AUTO) {
+    if (selfIdealSize->Height()->GetDimension().Unit() == DimensionUnit::AUTO && !isVerticalRelyOnContainer_) {
         layoutWrapper->GetGeometryNode()->SetFrameSize(SizeF(layoutWrapper->GetGeometryNode()->GetFrameSize().Width(),
             relativeContainerRect.Height() + padding_.Height()));
     }
@@ -306,6 +309,11 @@ void RelativeContainerLayoutAlgorithm::GetDependencyRelationship()
         for (const auto& alignRule : flexItem->GetAlignRulesValue()) {
             if (IsAnchorContainer(alignRule.second.anchor) ||
                 idNodeMap_.find(alignRule.second.anchor) == idNodeMap_.end()) {
+                    if (static_cast<uint32_t>(alignRule.first) < HORIZONTAL_DIRECTION_RANGE) {
+                        isHorizontalRelyOnContainer_ = true;
+                    } else if (static_cast<uint32_t>(alignRule.first) < VERTICAL_DIRECTION_RANGE) {
+                        isVerticalRelyOnContainer_ = true;
+                    }
                 continue;
             }
             auto anchorChildWrapper = idNodeMap_[alignRule.second.anchor];
@@ -438,11 +446,6 @@ void RelativeContainerLayoutAlgorithm::CalcSizeParam(LayoutWrapper* layoutWrappe
     }
     horizontalHasIdealSize &= Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN);
     verticalHasIdealSize &= Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN);
-    // for api 11 or larger, alignRules will not effect child component size as described in doc
-    if (horizontalHasIdealSize && verticalHasIdealSize) {
-        childWrapper->Measure(childConstraint);
-        return;
-    }
     const auto& childFlexItemProperty = childLayoutProperty->GetFlexItemProperty();
     std::optional<float> childIdealWidth;
     std::optional<float> childIdealHeight;
@@ -452,17 +455,17 @@ void RelativeContainerLayoutAlgorithm::CalcSizeParam(LayoutWrapper* layoutWrappe
             !IsAnchorContainer(alignRule.second.anchor)) {
             continue;
         }
-        if (static_cast<uint32_t>(alignRule.first) < DIRECTION_RANGE) {
-            if (!horizontalHasIdealSize && !childFlexItemProperty->GetTwoHorizontalDirectionAligned()) {
+        if (static_cast<uint32_t>(alignRule.first) < HORIZONTAL_DIRECTION_RANGE) {
+            if (!childFlexItemProperty->GetTwoHorizontalDirectionAligned()) {
                 CalcHorizontalLayoutParam(alignRule.first, alignRule.second, layoutWrapper, nodeName);
             }
         } else {
-            if (!verticalHasIdealSize && !childFlexItemProperty->GetTwoVerticalDirectionAligned()) {
+            if (!childFlexItemProperty->GetTwoVerticalDirectionAligned()) {
                 CalcVerticalLayoutParam(alignRule.first, alignRule.second, layoutWrapper, nodeName);
             }
         }
     }
-    if (!horizontalHasIdealSize && childFlexItemProperty->GetTwoHorizontalDirectionAligned()) {
+    if (childFlexItemProperty->GetTwoHorizontalDirectionAligned()) {
         auto checkAlign = AlignDirection::MIDDLE;
         if (childFlexItemProperty->GetAligned(checkAlign)) {
             auto middleValue = childFlexItemProperty->GetAlignValue(checkAlign);
@@ -478,14 +481,14 @@ void RelativeContainerLayoutAlgorithm::CalcSizeParam(LayoutWrapper* layoutWrappe
                                            childFlexItemProperty->GetAlignValue(AlignDirection::LEFT),
                 0.0f);
         }
-        if (childIdealWidth.has_value() && LessNotEqual(childIdealWidth.value(), 0.0f)) {
+        if (childIdealWidth.has_value() && LessOrEqual(childIdealWidth.value(), 0.0f)) {
             childConstraint.selfIdealSize.SetWidth(0.0f);
             childConstraint.selfIdealSize.SetHeight(0.0f);
             childWrapper->Measure(childConstraint);
             return;
         }
     }
-    if (!verticalHasIdealSize && childFlexItemProperty->GetTwoVerticalDirectionAligned()) {
+    if (childFlexItemProperty->GetTwoVerticalDirectionAligned()) {
         auto checkAlign = AlignDirection::CENTER;
         if (childFlexItemProperty->GetAligned(checkAlign)) {
             auto centerValue = childFlexItemProperty->GetAlignValue(checkAlign);
@@ -503,13 +506,20 @@ void RelativeContainerLayoutAlgorithm::CalcSizeParam(LayoutWrapper* layoutWrappe
                                             childFlexItemProperty->GetAlignValue(AlignDirection::TOP),
                 0.0f);
         }
-        if (childIdealHeight.has_value() && LessNotEqual(childIdealHeight.value(), 0.0f)) {
+        if (childIdealHeight.has_value() && LessOrEqual(childIdealHeight.value(), 0.0f)) {
             childConstraint.selfIdealSize.SetWidth(0.0f);
             childConstraint.selfIdealSize.SetHeight(0.0f);
             childWrapper->Measure(childConstraint);
             return;
         }
     }
+
+    // for api 11 or larger, alignRules will not effect child component size as described in doc
+    if (horizontalHasIdealSize && verticalHasIdealSize) {
+        childWrapper->Measure(childConstraint);
+        return;
+    }
+
     if (childIdealWidth.has_value()) {
         childConstraint.selfIdealSize.SetWidth(childIdealWidth.value());
     }
@@ -532,7 +542,7 @@ void RelativeContainerLayoutAlgorithm::CalcOffsetParam(LayoutWrapper* layoutWrap
             !IsAnchorContainer(alignRule.second.anchor)) {
             continue;
         }
-        if (static_cast<uint32_t>(alignRule.first) < DIRECTION_RANGE) {
+        if (static_cast<uint32_t>(alignRule.first) < HORIZONTAL_DIRECTION_RANGE) {
             if (!offsetXCalculated) {
                 offsetX = CalcHorizontalOffset(
                     alignRule.first, alignRule.second, containerSizeWithoutPaddingBorder_.Width(), nodeName);
@@ -619,11 +629,11 @@ std::pair<TwoAlignedValues, TwoAlignedValues> RelativeContainerLayoutAlgorithm::
             !IsAnchorContainer(alignRule.second.anchor)) {
             continue;
         }
-        if (static_cast<uint32_t>(alignRule.first) < DIRECTION_RANGE && !horizontalCheckTwoSidesAligned &&
+        if (static_cast<uint32_t>(alignRule.first) < HORIZONTAL_DIRECTION_RANGE && !horizontalCheckTwoSidesAligned &&
             childIdealSize.first.has_value()) {
             UpdateHorizontalTwoAlignValues(horizontalValues, alignRule.second);
-        } else if (static_cast<uint32_t>(alignRule.first) >= DIRECTION_RANGE && !verticalCheckTwoSidesAligned &&
-                   childIdealSize.second.has_value()) {
+        } else if (static_cast<uint32_t>(alignRule.first) >= HORIZONTAL_DIRECTION_RANGE &&
+                   !verticalCheckTwoSidesAligned && childIdealSize.second.has_value()) {
             UpdateVerticalTwoAlignValues(verticalValues, alignRule.second);
         }
     }

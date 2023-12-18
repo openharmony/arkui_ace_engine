@@ -43,6 +43,8 @@ public:
         OnEnterDeleteAreaEvent&& onEnterDeleteArea, OnExitDeleteAreaEvent&& onExitDeleteArea,
         OnStateChangedEvent&& onStateChangeEvent, const Dimension& length, bool isStartArea) override;
 
+    static void SetSelected(FrameNode* frameNode, bool selected);
+    static void SetSelectable(FrameNode* frameNode, bool selectable);
 private:
     void InstallSwiperCallBack(RefPtr<ListItemEventHub> eventHub,
                                OnDeleteEvent&& onDelete,

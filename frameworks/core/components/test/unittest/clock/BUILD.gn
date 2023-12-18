@@ -145,7 +145,6 @@ ohos_unittest("ClockComponentTest") {
     "$ace_root/frameworks/core/components/scroll/render_single_child_scroll.cpp",
     "$ace_root/frameworks/core/components/stack/render_stack.cpp",
     "$ace_root/frameworks/core/components/stage/render_stage.cpp",
-    "$ace_root/frameworks/core/components/test/unittest/mock/mock_flutter_font_manager.cpp",
     "$ace_root/frameworks/core/components/test/unittest/mock/mock_render_node_factory.cpp",
     "$ace_root/frameworks/core/components/text/render_text.cpp",
     "$ace_root/frameworks/core/components/text_span/render_text_span.cpp",

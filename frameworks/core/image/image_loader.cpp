@@ -266,7 +266,6 @@ RefPtr<NG::ImageData> ImageLoader::GetImageData(const ImageSourceInfo& src, cons
 // NG ImageLoader entrance
 bool NetworkImageLoader::DownloadImage(DownloadCallback&& downloadCallback, const std::string& src, bool sync)
 {
-    TAG_LOGD(AceLogTag::ACE_IMAGE, "src = %{public}s, isSync = {public}d", src.c_str(), sync);
     auto container = Container::Current();
     return sync ? DownloadManagerV2::DownloadSync(std::move(downloadCallback), src)
                 : DownloadManagerV2::DownloadAsync(std::move(downloadCallback), src, Container::CurrentId());
@@ -714,7 +713,6 @@ std::string DecodedDataProviderImageLoader::GetThumbnailOrientation(const ImageS
     auto imageSrc = ImageSource::Create(fd);
     CHECK_NULL_RETURN(imageSrc, "");
     std::string orientation = imageSrc->GetProperty("Orientation");
-    TAG_LOGD(AceLogTag::ACE_IMAGE, "image %{public}s has orientation = %{public}s", path.c_str(), orientation.c_str());
     return orientation;
 }
 
@@ -724,6 +722,7 @@ RefPtr<NG::ImageData> DecodedDataProviderImageLoader::LoadDecodedImageData(
 #if !defined(PIXEL_MAP_SUPPORTED)
     return nullptr;
 #else
+    ACE_FUNCTION_TRACE();
     auto pipeline = pipelineWk.Upgrade();
     CHECK_NULL_RETURN(pipeline, nullptr);
     auto dataProvider = pipeline->GetDataProviderManager();
@@ -775,7 +774,7 @@ std::shared_ptr<RSData> SharedMemoryImageLoader::LoadImageData(
     const ImageSourceInfo& src, const WeakPtr<PipelineBase>& pipelineWk)
 #endif
 {
-    CHECK_RUN_ON(BG);
+    CHECK_RUN_ON(BACKGROUND);
     auto pipeline = pipelineWk.Upgrade();
     CHECK_NULL_RETURN(pipeline, nullptr);
     auto manager = pipeline->GetOrCreateSharedImageManager();
@@ -865,7 +864,6 @@ std::string AstcImageLoader::GetThumbnailOrientation(const ImageSourceInfo& src)
     auto imageSrc = ImageSource::Create(fd);
     CHECK_NULL_RETURN(imageSrc, "");
     std::string orientation = imageSrc->GetProperty("Orientation");
-    LOGD("image %{public}s has orientation = %{public}s", path.c_str(), orientation.c_str());
     return orientation;
 }
 

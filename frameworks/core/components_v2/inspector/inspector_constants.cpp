@@ -357,6 +357,7 @@ const char SHEET_COMPONENT_TAG[] = "SheetComponent";
 const char SHEET_ETS_TAG[] = "Sheet";
 const char SHEET_MASK_TAG[] = "SheetMask";
 const char SHEET_PAGE_TAG[] = "SheetPage";
+const char SHEET_WRAPPER_TAG[] = "SheetWrapper";
 
 // full screen modal
 const char MODAL_PAGE_TAG[] = "ModalPage";

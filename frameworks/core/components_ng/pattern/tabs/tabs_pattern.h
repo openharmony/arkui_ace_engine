@@ -63,7 +63,14 @@ public:
 
     void SetOnChangeEvent(std::function<void(const BaseEventInfo*)>&& event);
 
+    ChangeEventPtr GetChangeEvent()
+    {
+        return onChangeEvent_;
+    }
+
     void SetOnTabBarClickEvent(std::function<void(const BaseEventInfo*)>&& event);
+
+    void SetAnimationStartEvent(AnimationStartEvent&& event);
 
     void SetAnimationEndEvent(AnimationEndEvent&& event);
 
@@ -80,6 +87,11 @@ public:
 	
     void SetOnIndexChangeEvent(std::function<void(const BaseEventInfo*)>&& event);
 
+    ChangeEventPtr GetIndexChangeEvent()
+    {
+        return onIndexChangeEvent_;
+    }
+
 private:
     void OnAttachToFrameNode() override;
     void OnAfterModifyDone() override;
@@ -91,6 +103,7 @@ private:
     ChangeEventPtr onChangeEvent_;
     ChangeEventPtr onTabBarClickEvent_;
     ChangeEventPtr onIndexChangeEvent_;
+    AnimationStartEventPtr animationStartEvent_;
     AnimationEndEventPtr animationEndEvent_;
 };
 

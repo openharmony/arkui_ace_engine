@@ -14,8 +14,9 @@
  */
 
 #include "core/components_ng/pattern/ui_extension/ui_extension_manager.h"
-#include "core/components_ng/pattern/ui_extension/ui_extension_pattern.h"
+
 #include "adapter/ohos/entrance/ace_container.h"
+#include "core/components_ng/pattern/ui_extension/ui_extension_pattern.h"
 
 namespace OHOS::Ace::NG {
 std::bitset<UI_EXTENSION_ID_FIRST_MAX> UIExtensionManager::UIExtensionIdUtility::idPool_;
@@ -66,18 +67,17 @@ bool UIExtensionManager::IsWindowTypeUIExtension(const RefPtr<PipelineBase>& pip
 }
 
 bool UIExtensionManager::SendAccessibilityEventInfo(const Accessibility::AccessibilityEventInfo& eventInfo,
-    const std::vector<int32_t>& uiExtensionIdLevelList, const RefPtr<PipelineBase>& pipeline)
+    int32_t uiExtensionOffset, const RefPtr<PipelineBase>& pipeline)
 {
     CHECK_NULL_RETURN(pipeline, false);
     auto instanceId = pipeline->GetInstanceId();
     auto window = Platform::AceContainer::GetUIWindow(instanceId);
     CHECK_NULL_RETURN(window, false);
-    OHOS::Rosen::WMError ret = window->TransferAccessibilityEvent(eventInfo, uiExtensionIdLevelList);
+    OHOS::Rosen::WMError ret = window->TransferAccessibilityEvent(eventInfo, uiExtensionOffset);
     return ret == OHOS::Rosen::WMError::WM_OK;
 }
 
-std::pair<int32_t, int32_t> UIExtensionManager::UnWrapExtensionAbilityId(
-    int32_t extensionOffset, int32_t elementId)
+std::pair<int32_t, int32_t> UIExtensionManager::UnWrapExtensionAbilityId(int32_t extensionOffset, int32_t elementId)
 {
     if (extensionOffset == 0) {
         return std::pair<int32_t, int32_t>(0, 0);

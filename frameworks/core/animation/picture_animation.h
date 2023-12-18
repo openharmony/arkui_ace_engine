@@ -48,7 +48,6 @@ public:
         }
 
         duration_ /= scale;
-        LOGD("update with scale. duration: %{public}f, scale: %{public}f", duration_, scale);
     }
 
 private:
@@ -73,7 +72,6 @@ public:
         if (pictures_.empty()) {
             this->duration_ = 0.0f;
         }
-        LOGD("picture animation: add picture ref, duration: %{public}f", duration);
         pictures_.emplace_back(AceType::MakeRefPtr<Ace::PictureFrame<T>>(duration, pictureInfo));
         this->duration_ += duration;
         return true;
@@ -110,7 +108,6 @@ public:
             picture->UpdateDurationWithScale(this->duration_);
         }
 
-        LOGD("auto scale. scale: %{public}f", this->duration_);
         this->duration_ = NORMALIZED_DURATION_MAX;
     }
 

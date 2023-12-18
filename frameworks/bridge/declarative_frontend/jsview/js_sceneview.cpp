@@ -46,7 +46,6 @@ ModelView* ModelView::GetInstance()
             instance_.reset(new NG::ModelViewNG());
 #else
             if (Container::IsCurrentUseNewPipeline()) {
-                LOGD("ModelView::GetInstance() NG Pipeline");
                 instance_.reset(new NG::ModelViewNG());
             } else {
                 LOGW("ModelView::GetInstance() NOT NG Pipeline not support");
@@ -197,8 +196,6 @@ void JSSceneView::JsCamera(const JSCallbackInfo& info)
     JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(info[0]);
     std::unordered_map<std::string, float> perspect { { "zNear", 0.5f }, { "zFar", 50.0f }, { "yFov", 60.0f } };
     GetModelProperty(jsObj, "perspective", perspect);
-    LOGD("Camera perspective config zNear: %f, zFar: %f, yFov: %f", perspect["zNear"], perspect["zFar"],
-        perspect["yFov"]);
     ModelView::GetInstance()->SetCameraFrustum(perspect["zNear"], perspect["zFar"], perspect["yFov"]);
     // cameraSpace
     std::unordered_map<std::string, float> positionAng { { "theta", 0.0f }, { "phi", 0.0f }, { "radius", 4.0f } };
@@ -206,8 +203,6 @@ void JSSceneView::JsCamera(const JSCallbackInfo& info)
     std::unordered_map<std::string, float> front { { "x", 0.0f }, { "y", 0.0f }, { "z", 0.0f } };
     std::unordered_map<std::string, float> up { { "x", 0.0f }, { "y", 0.0f }, { "z", 0.0f } };
     if (GetModelProperty(jsObj, "cameraSpace", positionAng)) {
-        LOGD("positionInAngles: theta: %f, phi: %f, distance: %f", positionAng["theta"], positionAng["phi"],
-            positionAng["radius"]);
         ModelView::GetInstance()->SetCameraPosition(AnimatableFloat(positionAng["theta"], animOption),
             AnimatableFloat(0, animOption), AnimatableFloat(positionAng["phi"], animOption),
             AnimatableFloat(positionAng["radius"], animOption), true);
@@ -218,13 +213,10 @@ void JSSceneView::JsCamera(const JSCallbackInfo& info)
         JSRef<JSObject> spaceObj = JSRef<JSObject>::Cast(itemCameraSpace);
         // position
         GetModelProperty(spaceObj, "position", position);
-        LOGD("Camera position: x %f, y: %f, z: %f", position["x"], position["y"], position["z"]);
         // front
         GetModelProperty(spaceObj, "front", front);
-        LOGD("Camera front: x %f, y: %f, z: %f", front["x"], front["y"], front["z"]);
         // up
         GetModelProperty(spaceObj, "up", up);
-        LOGD("Camera up: x %f, y: %f, z: %f", up["x"], up["y"], up["z"]);
     }
     ModelView::GetInstance()->SetCameraPosition(AnimatableFloat(position["x"], animOption),
         AnimatableFloat(position["y"], animOption), AnimatableFloat(position["z"], animOption),
@@ -262,7 +254,6 @@ void JSSceneView::JsSetBackground(const JSCallbackInfo& info)
     }
     std::string ohosPath("");
     SetOhosPath(srcPath, ohosPath);
-    LOGD("srcPath after ParseJsMedia(): %s", ohosPath.c_str());
     ModelView::GetInstance()->SetBackground(ohosPath);
 }
 
@@ -280,14 +271,11 @@ void JSSceneView::JsLight(const JSCallbackInfo& info)
     auto type = static_cast<NG::ModelLightType>((itemType->IsNumber()) ? itemType->ToNumber<int32_t>() : 1);
     int intensity = (itemIntensity->IsNumber()) ? itemIntensity->ToNumber<int32_t>() : 10;
     bool shadow = (itemShadow->IsBoolean()) ? itemShadow->ToBoolean() : false;
-    LOGD("Light type: %d, intensity %d, shadow %d", type, intensity, shadow);
     JSRef<JSVal> lightColor = jsObj->GetProperty("color");
     Color color(0xffffffff); // red:255, green:255, blue:255
     ParseJsColor(lightColor, color);
     AnimationOption animOption = ViewStackModel::GetInstance()->GetImplicitAnimationOption();
     Vec3 inputColor = Vec3(color.GetRed() / 255.0f, color.GetGreen() / 255.0f, color.GetBlue() / 255.0f, animOption);
-    LOGD("light color r: %f, g: %f, b: %f, animOption: %d", inputColor.GetX(), inputColor.GetY(), inputColor.GetZ(),
-        animOption.GetDuration());
     OHOS::Ace::NG::ModelPosition position;
     double maxInvalid = std::numeric_limits<double>::max();
     Quaternion rotation = Quaternion(maxInvalid, maxInvalid, maxInvalid, maxInvalid);
@@ -295,8 +283,6 @@ void JSSceneView::JsLight(const JSCallbackInfo& info)
     std::unordered_map<std::string, float> pos { { "x", 0.0f }, { "y", 1.0f }, { "z", 0.0f } };
     std::unordered_map<std::string, float> quat { { "x", 0.0f }, { "y", 1.0f }, { "z", 0.0f }, { "w", 1.0f } };
     if (GetModelProperty(jsObj, "lightSpace", positionAng)) {
-        LOGD("Light positionInAngles: theta: %f, phi %f, distance: %f", positionAng["theta"], positionAng["phi"],
-            positionAng["radius"]);
         position.Set({ AnimatableFloat(positionAng["theta"], animOption), AnimatableFloat(0.0f, animOption),
                          AnimatableFloat(positionAng["phi"], animOption) },
             AnimatableFloat(positionAng["radius"], animOption), true);
@@ -308,12 +294,10 @@ void JSSceneView::JsLight(const JSCallbackInfo& info)
     if (itemLightSpace->IsObject()) {
         JSRef<JSObject> spaceObj = JSRef<JSObject>::Cast(itemLightSpace);
         GetModelProperty(spaceObj, "position", pos);
-        LOGD("Light position x: %f, y: %f, z %f", pos["x"], pos["y"], pos["z"]);
         position.Set({ AnimatableFloat(pos["x"], animOption), AnimatableFloat(pos["y"], animOption),
                          AnimatableFloat(pos["z"], animOption) },
             AnimatableFloat(0.0f, animOption), false);
         GetModelProperty(spaceObj, "rotation", quat);
-        LOGD("Light rotation: x %f, y: %f, z: %f w: %f", quat["x"], quat["y"], quat["z"], quat["w"]);
         rotation = Quaternion(quat["x"], quat["y"], quat["z"], quat["w"]);
     }
     ModelView::GetInstance()->AddLight(AceType::MakeRefPtr<NG::ModelLight>(
@@ -327,7 +311,6 @@ void JSSceneView::JsAddCube(const JSCallbackInfo& info)
         return;
     }
 
-    LOGD("JSAddCube() info[0]: %s", info[0]->ToString().c_str());
     JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(info[0]);
     auto name = jsObj->GetPropertyValue<std::string>("name", "");
     auto width = jsObj->GetPropertyValue<double>("width", 0.0);
@@ -345,7 +328,6 @@ void JSSceneView::JsAddCube(const JSCallbackInfo& info)
         }
     }
 
-    LOGD("JSAddCube(%s, %.2f, %.2f, %.2f)", name.c_str(), width, height, depth);
     ModelView::GetInstance()->AddGeometry(
         std::make_shared<OHOS::Render3D::Cube>(name.c_str(), width, height, depth, position));
 }
@@ -357,7 +339,6 @@ void JSSceneView::JsAddSphere(const JSCallbackInfo& info)
         return;
     }
 
-    LOGD("JSAddSphere() info[0]: %s", info[0]->ToString().c_str());
     JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(info[0]);
     auto name = jsObj->GetPropertyValue<std::string>("name", "");
     auto radius = jsObj->GetPropertyValue<double>("radius", 0.0);
@@ -375,7 +356,6 @@ void JSSceneView::JsAddSphere(const JSCallbackInfo& info)
         }
     }
 
-    LOGD("JSAddSphere(%s, %.2f, %d, %d)", name.c_str(), radius, rings, sectors);
     ModelView::GetInstance()->AddGeometry(
         std::make_shared<OHOS::Render3D::Sphere>(name.c_str(), radius, rings, sectors, position));
 }
@@ -387,7 +367,6 @@ void JSSceneView::JsAddCone(const JSCallbackInfo& info)
         return;
     }
 
-    LOGD("JSAddCone() info[0]: %s", info[0]->ToString().c_str());
     JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(info[0]);
     auto name = jsObj->GetPropertyValue<std::string>("name", "");
     auto radius = jsObj->GetPropertyValue<double>("radius", 0.0);
@@ -405,7 +384,6 @@ void JSSceneView::JsAddCone(const JSCallbackInfo& info)
         }
     }
 
-    LOGD("JSAddCone(%s, %.2f, %d, %d)", name.c_str(), radius, length, sectors);
     ModelView::GetInstance()->AddGeometry(
         std::make_shared<OHOS::Render3D::Cone>(name.c_str(), radius, length, sectors, position));
 }
@@ -454,7 +432,6 @@ void JSSceneView::JsAddCustomRender(const JSCallbackInfo& info)
     std::string ohosPath("");
     SetOhosPath(uri, ohosPath);
     auto desc = std::make_shared<Render3D::CustomRenderDescriptor>(ohosPath, info[1]->ToBoolean());
-    LOGD("JsAddCustomRender(%s, %s)", desc->GetUri().c_str(), (desc->NeedsFrameCallback() ? "true" : "false"));
     ModelView::GetInstance()->AddCustomRender(desc);
 }
 
@@ -510,7 +487,6 @@ void JSSceneView::JsRenderWidth(const JSCallbackInfo& info)
     if (LessNotEqual(value.Value(), 0.0f)) {
         value.SetValue(0.0f);
     }
-    LOGD("JSRenderWidth() get: %f", value.Value());
     ModelView::GetInstance()->SetRenderWidth(value);
 }
 
@@ -519,7 +495,6 @@ void JSSceneView::JsRenderHeight(const JSCallbackInfo& info)
     if (info.Length() < 1) {
         return;
     }
-    LOGD("JSRenderHeight() info[0]: %s", info[0]->ToString().c_str());
     CalcDimension value;
     if (!ParseJsDimensionVp(info[0], value)) {
         LOGE("invalid args for render height");
@@ -534,14 +509,10 @@ void JSSceneView::JsRenderHeight(const JSCallbackInfo& info)
     if (LessNotEqual(value.Value(), 0.0f)) {
         value.SetValue(0.0f);
     }
-    LOGD("JSRenderHeight() get: %f", value.Value());
     ModelView::GetInstance()->SetRenderHeight(value);
 }
 
-void JSSceneView::JsRenderFrameRate(const JSCallbackInfo& info)
-{
-    LOGD("JSRenderFrameRate() info[0] %s", info[0]->ToString().c_str());
-}
+void JSSceneView::JsRenderFrameRate(const JSCallbackInfo& info) {}
 
 void JSSceneView::JsShader(const JSCallbackInfo& info)
 {
@@ -557,7 +528,6 @@ void JSSceneView::JsShader(const JSCallbackInfo& info)
 
     std::string ohosPath("");
     SetOhosPath(shaderPath, ohosPath);
-    LOGD("shaderPath after ParseJsMedia(): %s", ohosPath.c_str());
     ModelView::GetInstance()->SetShader(ohosPath);
 }
 
@@ -575,7 +545,6 @@ void JSSceneView::JsShaderImageTexture(const JSCallbackInfo& info)
 
     std::string ohosPath("");
     SetOhosPath(texturePath, ohosPath);
-    LOGD("texturePath after ParseJsMedia(): %s", ohosPath.c_str());
     ModelView::GetInstance()->AddShaderImageTexture(ohosPath);
 }
 

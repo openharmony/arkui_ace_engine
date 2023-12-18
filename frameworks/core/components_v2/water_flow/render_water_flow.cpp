@@ -982,14 +982,7 @@ RefPtr<RenderWaterFlowItem> RenderWaterFlow::GetFlowItemByChild(const RefPtr<Ren
     return flowItem;
 }
 
-void RenderWaterFlow::OutputMatrix()
-{
-    for (auto it = flowMatrix_.begin(); it != flowMatrix_.end();) {
-        LOGD("%{public}s: [%{public}zu] Pos[%{public}f, %{public}f] Size[%{public}f, %{public}f]", __PRETTY_FUNCTION__,
-            it->first, it->second.crossPos, it->second.mainPos, it->second.crossSize, it->second.mainSize);
-        it++;
-    }
-}
+void RenderWaterFlow::OutputMatrix() {}
 
 void RenderWaterFlow::RequestWaterFlowFooter()
 {
@@ -1402,14 +1395,12 @@ void RenderWaterFlow::HandleScrollEvent()
             case WaterFlowEvents::REACH_START:
                 if (event.second) {
                     ResumeEventCallback(component_, &WaterFlowComponent::GetOnReachStart);
-                    LOGD("waterflow event REACH_START triggered.");
                     event.second = false;
                 }
                 break;
             case WaterFlowEvents::REACH_END:
                 if (event.second) {
                     ResumeEventCallback(component_, &WaterFlowComponent::GetOnReachEnd);
-                    LOGD("waterflow event REACH_END triggered.");
                     event.second = false;
                 }
                 break;

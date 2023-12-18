@@ -151,6 +151,8 @@ void RichEditorOverlayModifier::PaintEdgeEffect(const SizeF& frameSize, RSCanvas
 void RichEditorOverlayModifier::onDraw(DrawingContext& drawingContext)
 {
     if (!showSelect_->Get()) {
+        PaintScrollBar(drawingContext);
+        PaintEdgeEffect(frameSize_->Get(), drawingContext.canvas);
         return;
     }
     drawingContext.canvas.Save();
@@ -177,7 +179,6 @@ void RichEditorOverlayModifier::UpdateScrollBar(PaintWrapper* paintWrapper)
     CHECK_NULL_VOID(richEditorPattern);
     auto scrollBar = richEditorPattern->GetScrollControllerBar();
     if (!scrollBar || !scrollBar->NeedPaint()) {
-        TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "no need paint scroll bar.");
         return;
     }
     auto scrollBarOverlayModifier = scrollBarOverlayModifier_.Upgrade();

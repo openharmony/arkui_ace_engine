@@ -92,12 +92,14 @@ public:
     void DeregisterInteractionOperation();
     bool SendAccessibilitySyncEvent(
         const AccessibilityEvent& accessibilityEvent, Accessibility::AccessibilityEventInfo eventInfo);
+    bool SendExtensionAccessibilitySyncEvent(
+        const AccessibilityEvent& accessibilityEvent, const Accessibility::AccessibilityEventInfo& eventInfo);
     bool TransferAccessibilityAsyncEvent(
         const Accessibility::AccessibilityEventInfo& eventInfo,
-        const std::vector<int32_t>& uiExtensionIdLevelList) override;
+        int32_t uiExtensionOffset) override;
     void SendExtensionAccessibilityEvent(
         const Accessibility::AccessibilityEventInfo& eventInfo,
-        const std::vector<int32_t>& uiExtensionIdLevelList) override;
+        int32_t uiExtensionOffset) override;
     void SearchElementInfoByAccessibilityId(const int32_t elementId, const int32_t requestId,
         Accessibility::AccessibilityElementOperatorCallback& callback, const int32_t mode, const int32_t windowId);
     void SearchElementInfosByText(const int32_t elementId, const std::string& text, const int32_t requestId,
@@ -271,6 +273,10 @@ private:
         NodeId nodeID, const CommonProperty& commonProperty);
 
     void GenerateCommonProperty(const RefPtr<PipelineBase>& context, CommonProperty& output);
+
+    void FindText(const RefPtr<NG::UINode>& node, std::list<Accessibility::AccessibilityElementInfo>& infos,
+        const RefPtr<NG::PipelineContext>& context,
+        const CommonProperty& commonProperty, const SearchParameter& searchParam);
 
     std::string callbackKey_;
     uint32_t windowId_ = 0;

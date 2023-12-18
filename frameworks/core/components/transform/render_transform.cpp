@@ -366,7 +366,6 @@ void RenderTransform::UpdateTransform()
 
 void RenderTransform::SetTouchable(bool enable)
 {
-    LOGD("set transform touchable status: %{public}d", enable);
     enableTouchTest_ = enable;
 }
 
@@ -403,7 +402,6 @@ void RenderTransform::Update(const RefPtr<Component>& component)
 
 void RenderTransform::PerformLayout()
 {
-    LOGD("RenderTransform::PerformLayout");
     auto child = GetFirstChild();
     if (child == nullptr) {
         LOGE("child component is nullptr.");
@@ -537,7 +535,6 @@ bool RenderTransform::HasDisappearingTransition(int32_t nodeId)
 
 void RenderTransform::OnTransition(TransitionType type, int32_t id)
 {
-    LOGD("OnTransition. type: %{public}d, id: %{public}d", type, id);
     auto context = context_.Upgrade();
     if (!context) {
         LOGE("OnTransition failed, context_ is null.");
@@ -591,7 +588,6 @@ void RenderTransform::ClearRenderObject()
 
 void RenderTransform::OnTransformDisappearingCallback()
 {
-    LOGD("OnTransformDisappearingCallback");
     RefPtr<RenderNode> child = AceType::Claim(this);
     while (child && !child->IsDisappearing()) {
         child = child->GetParent().Upgrade();
@@ -607,7 +603,6 @@ void RenderTransform::OnTransformDisappearingCallback()
 
 Matrix4 RenderTransform::GetTransformByOffset(Matrix4 matrix, const Offset& offset)
 {
-    LOGD("Offset(%{public}lf, %{public}lf)", offset.GetX(), offset.GetY());
     if (offset.IsZero()) {
         return matrix;
     }

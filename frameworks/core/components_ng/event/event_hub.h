@@ -427,6 +427,44 @@ public:
 
     void SetCustomerOnDragFunc(DragFuncType dragFuncType, OnNewDragFunc&& onDragEnd);
 
+    const OnDragFunc GetCustomerOnDragFunc(DragFuncType dragFuncType) const
+    {
+        OnDragFunc dragFunc;
+        switch (dragFuncType) {
+            case DragFuncType::DRAG_ENTER:
+                dragFunc = customerOnDragEnter_;
+                break;
+            case DragFuncType::DRAG_LEAVE:
+                dragFunc = customerOnDragLeave_;
+                break;
+            case DragFuncType::DRAG_MOVE:
+                dragFunc = customerOnDragMove_;
+                break;
+            case DragFuncType::DRAG_DROP:
+                dragFunc = customerOnDrop_;
+                break;
+            default:
+                LOGW("unsuport dragFuncType");
+                break;
+        }
+        return dragFunc;
+    }
+
+    const OnNewDragFunc& GetCustomerOnDragEndFunc() const
+    {
+        return customerOnDragEnd_;
+    }
+
+    void ClearCustomerOnDragFunc()
+    {
+        onDragStart_ = nullptr;
+        customerOnDragEnter_ = nullptr;
+        customerOnDragLeave_ = nullptr;
+        customerOnDragMove_ = nullptr;
+        customerOnDrop_ = nullptr;
+        customerOnDragEnd_ = nullptr;
+    }
+
     void FireCustomerOnDragFunc(DragFuncType dragFuncType, const RefPtr<OHOS::Ace::DragEvent>& info,
         const std::string& extraParams = "");
 
@@ -466,6 +504,13 @@ private:
     std::vector<KeyboardShortcut> keyboardShortcut_;
 
     ACE_DISALLOW_COPY_AND_MOVE(EventHub);
+};
+
+class TextCommonEvent : public BaseEventInfo {
+    DECLARE_RELATIONSHIP_OF_CLASSES(TextCommonEvent, BaseEventInfo)
+public:
+    TextCommonEvent() : BaseEventInfo("TextCommonEvent") {}
+    ~TextCommonEvent() override = default;
 };
 
 } // namespace OHOS::Ace::NG

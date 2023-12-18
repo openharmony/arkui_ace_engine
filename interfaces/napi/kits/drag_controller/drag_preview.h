@@ -68,8 +68,7 @@ public:
         napi_unwrap(env, result, (void**)&dragPreview);
 
         dragPreview->SetColor(foregroundColor);
-        LOGI("foregroundColor is %{public}d, opacity is %{public}d", dragPreview->previewStyle_.foregroundColor,
-            dragPreview->previewStyle_.opacity);
+        LOGI("foregroundColor is %{public}x", dragPreview->previewStyle_.foregroundColor);
         if (!dragPreview->hasAnimation_) {
             int32_t instanceId = Container::CurrentId();
             auto container = AceEngine::Get().GetContainer(instanceId);
@@ -159,10 +158,8 @@ private:
             PreviewType::FOREGROUND_COLOR);
         if (iter == previewStyle_.types.end()) {
             previewStyle_.types.emplace_back(PreviewType::FOREGROUND_COLOR);
-            previewStyle_.types.emplace_back(PreviewType::OPACITY);
         }
         previewStyle_.foregroundColor = color.GetValue();
-        previewStyle_.opacity = static_cast<uint32_t>(color.GetAlpha());
     }
 
     static napi_value ParseAnimationInfo(napi_env env, napi_value object, PreviewAnimation& animationInfo)

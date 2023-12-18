@@ -14,6 +14,8 @@
 import("//arkcompiler/ets_frontend/es2panda/es2abc_config.gni")
 import("//build/ohos.gni")
 import("//foundation/arkui/ace_engine/ace_config.gni")
+import("//foundation/arkui/ace_engine/adapter/preview/build/config.gni")
+import("//foundation/arkui/ace_engine/build/ace_gen_obj.gni")
 
 es2abc_gen_abc("gen_composelistitem_abc") {
   src_js = rebase_path("composelistitem.js")
@@ -30,10 +32,21 @@ gen_js_obj("composelistitem_abc") {
   dep = ":gen_composelistitem_abc"
 }
 
+gen_obj("composelistitem_abc_preview") {
+  input = get_label_info(":gen_composelistitem_abc", "target_out_dir") +
+          "/composelistitem.abc"
+  output = target_out_dir + "/composelistitem_abc.c"
+  snapshot_dep = [ ":gen_composelistitem_abc" ]
+}
+
 ohos_shared_library("composelistitem") {
   sources = [ "composelistitem.cpp" ]
 
-  deps = [ ":composelistitem_abc" ]
+  if (use_mingw_win || use_mac || use_linux) {
+    deps = [ ":gen_obj_src_composelistitem_abc_preview" ]
+  } else {
+    deps = [ ":composelistitem_abc" ]
+  }
 
   external_deps = [
     "hilog:libhilog",

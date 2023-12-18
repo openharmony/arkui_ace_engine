@@ -56,8 +56,6 @@ public:
     {
         if (GreatOrEqual(indicatorOffset.Value(), 0.0)) {
             indicatorOffset_ = indicatorOffset;
-        } else {
-            LOGD("indicatorOffset value is invalid");
         }
     }
 

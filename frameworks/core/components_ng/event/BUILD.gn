@@ -31,4 +31,10 @@ build_component_ng("event_ng") {
     "target_component.cpp",
     "touch_event.cpp",
   ]
+
+  standard_input_deps = [
+    "hilog:libhilog",
+    "imf:inputmethod_client",
+    "input:libmmi-client",
+  ]
 }

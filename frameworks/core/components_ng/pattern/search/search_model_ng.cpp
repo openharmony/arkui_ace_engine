@@ -565,6 +565,26 @@ void SearchModelNG::SetOnCut(std::function<void(const std::string&)>&& func)
     eventHub->SetOnCut(std::move(searchPasteFunc));
 }
 
+void SearchModelNG::SetOnPasteWithEvent(std::function<void(const std::string&, NG::TextCommonEvent&)>&& func)
+{
+    auto searchTextField = GetSearchTextFieldFrameNode();
+    CHECK_NULL_VOID(searchTextField);
+    auto eventHub = searchTextField->GetEventHub<TextFieldEventHub>();
+    CHECK_NULL_VOID(eventHub);
+
+    auto searchPasteFunc = [weak = AceType::WeakClaim(AceType::RawPtr(searchTextField)), func](
+                               const std::string& value, NG::TextCommonEvent& info) {
+        if (func) {
+            func(value, info);
+        }
+        auto node = weak.Upgrade();
+        if (node) {
+            node->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+        }
+    };
+    eventHub->SetOnPasteWithEvent(std::move(searchPasteFunc));
+}
+
 void SearchModelNG::SetOnPaste(std::function<void(const std::string&)>&& func)
 {
     auto searchTextField = GetSearchTextFieldFrameNode();

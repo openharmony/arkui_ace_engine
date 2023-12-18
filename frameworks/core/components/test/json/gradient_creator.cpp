@@ -37,7 +37,6 @@ const DimensionUnit DIMENSION_UNITS[] = { DimensionUnit::PX, DimensionUnit::VP, 
 
 Gradient GradientCreator::CreateFromJson(const JsonValue& json)
 {
-    LOGD("Gradient creator");
     std::string classType = json.GetValue(CLASS_NAME)->GetString();
     if (classType != GRADIENT_NAME) {
         LOGE("Create Gradient err: not a Gradient json.");

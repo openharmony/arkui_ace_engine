@@ -68,6 +68,7 @@ private:
     static void SetLayoutMode(const JSRef<JSVal>& info);
     static void SetVerticalAlign(const JSRef<JSVal>& info);
     static void SetSymmetricExtensible(const JSRef<JSVal>& info);
+    static void SetId(const JSRef<JSVal>& info);
     static void SetBottomTabBarStyle(const JSRef<JSObject>& paramObject);
 };
 

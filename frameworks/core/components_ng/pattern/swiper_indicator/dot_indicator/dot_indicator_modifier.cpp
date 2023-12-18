@@ -32,8 +32,6 @@ constexpr int32_t COMPONENT_SHRINK_ANIMATION_DURATION = 300;
 constexpr int32_t MOUSE_PRESS_ANIMATION_DURATION = 250;
 
 constexpr float BLACK_POINT_CENTER_BEZIER_CURVE_VELOCITY = 0.4f;
-constexpr float LONG_POINT_LEFT_CENTER_BEZIER_CURVE_VELOCITY = 0.2f;
-constexpr float LONG_POINT_RIGHT_CENTER_BEZIER_CURVE_VELOCITY = 1.0f;
 constexpr float CENTER_BEZIER_CURVE_MASS = 0.0f;
 constexpr float CENTER_BEZIER_CURVE_STIFFNESS = 1.0f;
 constexpr float CENTER_BEZIER_CURVE_DAMPING = 1.0f;
@@ -48,6 +46,7 @@ constexpr float TOUCH_BOTTOM_CURVE_DAMPING = 1.0f;
 constexpr float TOUCH_BOTTOM_BACKGROUND_WIDTH_MULTIPLE = 1.225f;
 constexpr float TOUCH_BOTTOM_BACKGROUND_HEIGHT_MULTIPLE = 0.8f;
 constexpr float TOUCH_BOTTOM_DOT_WIDTH_MULTIPLE = 0.0125f;
+constexpr int32_t TOUCH_BOTTOM_ANIMATION_DURATION = 200;
 } // namespace
 
 void DotIndicatorModifier::onDraw(DrawingContext& context)
@@ -139,16 +138,18 @@ void DotIndicatorModifier::PaintContent(DrawingContext& context, ContentProperty
 {
     RSCanvas& canvas = context.canvas;
     OffsetF selectedCenter = {};
-    for (size_t i = 0; i < contentProperty.vectorBlackPointCenterX.size(); ++i) {
+    auto totalCount = contentProperty.vectorBlackPointCenterX.size();
+    for (size_t i = 0; i < totalCount; ++i) {
         LinearVector<float> itemHalfSizes = GetItemHalfSizes(i, contentProperty);
         OffsetF center = { contentProperty.vectorBlackPointCenterX[i], centerY_ };
         if (i != currentIndex_) {
-            PaintUnselectedIndicator(canvas, center, itemHalfSizes, false);
+            PaintUnselectedIndicator(canvas, center, itemHalfSizes, false, LinearColor(unselectedColor_->Get()));
         } else {
             selectedCenter = center;
-            PaintUnselectedIndicator(canvas, center, itemHalfSizes, true);
+            PaintUnselectedIndicator(canvas, center, itemHalfSizes, true, LinearColor(unselectedColor_->Get()));
         }
     }
+
     OffsetF leftCenter = { contentProperty.longPointLeftCenterX, centerY_ };
     OffsetF rightCenter = { contentProperty.longPointRightCenterX, centerY_ };
     OffsetF centerDistance = rightCenter - leftCenter;
@@ -157,6 +158,21 @@ void DotIndicatorModifier::PaintContent(DrawingContext& context, ContentProperty
     rightCenter += (centerDilateDistance - centerDistance) * 0.5;
     PaintSelectedIndicator(canvas, selectedCenter, leftCenter, rightCenter,
         contentProperty.itemHalfSizes * contentProperty.longPointDilateRatio);
+
+    bool isLeftTouchBottom = (currentIndex_ == totalCount - 1);
+    bool isRightTouchBottom = (currentIndex_ == 0);
+    bool isTouchBottom = (isLeftTouchBottom || isRightTouchBottom);
+    if (!isTouchBottom || totalCount == 0 || !isTouchBottomLoop_) {
+        return;
+    }
+
+    size_t index = 0;
+    if (isRightTouchBottom) {
+        index = totalCount - 1;
+    }
+    LinearVector<float> itemHalfSizes = GetItemHalfSizes(index, contentProperty);
+    OffsetF center = { contentProperty.vectorBlackPointCenterX[index], centerY_ };
+    PaintUnselectedIndicator(canvas, center, itemHalfSizes, false, touchBottomPointColor_->Get());
 }
 
 LinearVector<float> DotIndicatorModifier::GetItemHalfSizes(size_t index, ContentProperty& contentProperty)
@@ -170,15 +186,15 @@ LinearVector<float> DotIndicatorModifier::GetItemHalfSizes(size_t index, Content
     return contentProperty.itemHalfSizes;
 }
 
-void DotIndicatorModifier::PaintUnselectedIndicator(
-    RSCanvas& canvas, const OffsetF& center, const LinearVector<float>& itemHalfSizes, bool currentIndexFlag)
+void DotIndicatorModifier::PaintUnselectedIndicator(RSCanvas& canvas, const OffsetF& center,
+    const LinearVector<float>& itemHalfSizes, bool currentIndexFlag, const LinearColor& indicatorColor)
 {
     RSBrush brush;
     brush.SetAntiAlias(true);
-    brush.SetColor(ToRSColor(unselectedColor_->Get()));
+    brush.SetColor(ToRSColor(indicatorColor));
     canvas.AttachBrush(brush);
-    if (!NearEqual(itemHalfSizes[ITEM_HALF_WIDTH], itemHalfSizes[ITEM_HALF_HEIGHT]) ||
-        currentIndexFlag ||!isCustomSize_) {
+    if (!NearEqual(itemHalfSizes[ITEM_HALF_WIDTH], itemHalfSizes[ITEM_HALF_HEIGHT]) || currentIndexFlag ||
+        !isCustomSize_) {
         float rectItemWidth = itemHalfSizes[ITEM_HALF_WIDTH] * 2;
         float rectItemHeight = itemHalfSizes[ITEM_HALF_HEIGHT] * 2;
         if (currentIndexFlag) {
@@ -453,8 +469,8 @@ void DotIndicatorModifier::UpdateLongPointDilateRatio()
     }
 }
 
-void DotIndicatorModifier::UpdateAllPointCenterXAnimation(
-    bool isForward, const LinearVector<float>& vectorBlackPointCenterX, const std::pair<float, float>& longPointCenterX)
+void DotIndicatorModifier::UpdateAllPointCenterXAnimation(GestureState gestureState,
+    const LinearVector<float>& vectorBlackPointCenterX, const std::pair<float, float>& longPointCenterX)
 {
     AnimationOption blackPointOption;
     blackPointOption.SetDuration(animationDuration_);
@@ -462,26 +478,31 @@ void DotIndicatorModifier::UpdateAllPointCenterXAnimation(
         CENTER_BEZIER_CURVE_MASS, CENTER_BEZIER_CURVE_STIFFNESS, CENTER_BEZIER_CURVE_DAMPING));
     AnimationUtils::Animate(blackPointOption, [&]() { vectorBlackPointCenterX_->Set(vectorBlackPointCenterX); });
 
+    // normal page turning
+    AnimationOption optionHead;
+    optionHead.SetCurve(headCurve_);
+    optionHead.SetDuration(animationDuration_);
+
+    AnimationOption optionTail;
+    // velocity:0, mass:1, stiffness:81, damping:11
+    optionTail.SetCurve(AceType::MakeRefPtr<InterpolatingSpring>(0, 1, 81, 11));
+    optionTail.SetDuration(animationDuration_);
+    AnimationOption optionLeft = optionTail;
+    AnimationOption optionRight = optionHead;
+
+    if (gestureState == GestureState::GESTURE_STATE_RELEASE_LEFT) {
+        optionLeft = optionHead;
+        optionRight = optionTail;
+    }
+
     if (longPointLeftAnimEnd_) {
-        AnimationOption longPointLeftOption;
-        longPointLeftAnimEnd_ = false;
-        longPointLeftOption.SetDuration(animationDuration_);
-        longPointLeftOption.SetCurve(AceType::MakeRefPtr<CubicCurve>(
-            isForward ? LONG_POINT_RIGHT_CENTER_BEZIER_CURVE_VELOCITY : LONG_POINT_LEFT_CENTER_BEZIER_CURVE_VELOCITY,
-            CENTER_BEZIER_CURVE_MASS, CENTER_BEZIER_CURVE_STIFFNESS, CENTER_BEZIER_CURVE_DAMPING));
-        AnimationUtils::Animate(longPointLeftOption,
-                                [&]() { longPointLeftCenterX_->Set(longPointCenterX.first); },
-                                [&]() { longPointLeftAnimEnd_ = true; });
+        AnimationUtils::Animate(
+            optionLeft, [&]() { longPointLeftCenterX_->Set(longPointCenterX.first); },
+            [&]() { longPointLeftAnimEnd_ = true; });
     }
 
     if (longPointRightAnimEnd_) {
-        AnimationOption longPointRightOption;
-        longPointRightAnimEnd_ = false;
-        longPointRightOption.SetDuration(animationDuration_);
-        longPointRightOption.SetCurve(AceType::MakeRefPtr<CubicCurve>(
-            isForward ? LONG_POINT_LEFT_CENTER_BEZIER_CURVE_VELOCITY : LONG_POINT_RIGHT_CENTER_BEZIER_CURVE_VELOCITY,
-            CENTER_BEZIER_CURVE_MASS, CENTER_BEZIER_CURVE_STIFFNESS, CENTER_BEZIER_CURVE_DAMPING));
-        AnimationUtils::Animate(longPointRightOption,
+        AnimationUtils::Animate(optionRight,
                                 [&]() { longPointRightCenterX_->Set(longPointCenterX.second); },
                                 [&]() { longPointRightAnimEnd_ = true; });
     }
@@ -521,5 +542,131 @@ void DotIndicatorModifier::UpdateTouchBottomAnimation(TouchBottomType touchBotto
             modifier->longPointRightCenterX_->Set(longPointCenterX.second);
         }
     });
+}
+
+void DotIndicatorModifier::PlayBlackPointsAnimation(const LinearVector<float>& vectorBlackPointCenterX)
+{
+    auto curve = AceType::MakeRefPtr<CubicCurve>(BLACK_POINT_CENTER_BEZIER_CURVE_VELOCITY, CENTER_BEZIER_CURVE_MASS,
+        CENTER_BEZIER_CURVE_STIFFNESS, CENTER_BEZIER_CURVE_DAMPING);
+    AnimationOption option;
+    option.SetCurve(curve);
+    option.SetDuration(animationDuration_);
+    blackPointsAnimation_ =
+        AnimationUtils::StartAnimation(option, [&]() { vectorBlackPointCenterX_->Set(vectorBlackPointCenterX); });
+}
+
+void DotIndicatorModifier::PlayTouchBottomAnimation(const std::vector<std::pair<float, float>>& longPointCenterX,
+    TouchBottomTypeLoop touchBottomTypeLoop, const LinearVector<float>& vectorBlackPointCenterX)
+{
+    if (vectorBlackPointCenterX.empty()) {
+        return;
+    }
+    isTouchBottomLoop_ = true;
+    AnimationOption optionBottom;
+    // x0:0.33, y0:0, x1:0.67, y1:1
+    optionBottom.SetCurve(AceType::MakeRefPtr<CubicCurve>(0.33, 0, 0.67, 1));
+    optionBottom.SetDuration(TOUCH_BOTTOM_ANIMATION_DURATION);
+
+    FinishCallback bottomFinishCallback = [&, optionBottom, longPointCenterX, vectorBlackPointCenterX,
+                                              touchBottomTypeLoop]() {
+        if (touchBottomTypeLoop == TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_LEFT) {
+            longPointLeftCenterX_->Set(vectorBlackPointCenterX[vectorBlackPointCenterX.size() - 1]);
+            longPointRightCenterX_->Set(vectorBlackPointCenterX[vectorBlackPointCenterX.size() - 1]);
+        } else if (touchBottomTypeLoop == TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_RIGHT) {
+            longPointLeftCenterX_->Set(vectorBlackPointCenterX[0]);
+            longPointRightCenterX_->Set(vectorBlackPointCenterX[0]);
+        }
+
+        AnimationOption optionOpacity;
+        // x0:0.33, y0:0, x1:0.67, y1:1
+        optionOpacity.SetCurve(AceType::MakeRefPtr<CubicCurve>(0.33, 0, 0.67, 1));
+        optionOpacity.SetDuration(100);
+        touchBottomPointColor_->Set(LinearColor(selectedColor_->Get()));
+        selectedColor_->Set(LinearColor(selectedColor_->Get().BlendOpacity(0.1)));
+        AnimationUtils::StartAnimation(optionOpacity, [&]() {
+            selectedColor_->Set(LinearColor(selectedColor_->Get().BlendOpacity(1.0)));
+            touchBottomPointColor_->Set(LinearColor(touchBottomPointColor_->Get().BlendOpacity(0.1)));
+        }, [&]() {
+            touchBottomPointColor_->Set(LinearColor(unselectedColor_->Get()));
+            isTouchBottomLoop_ = false;
+        });
+        AnimationUtils::StartAnimation(optionBottom, [&, longPointCenterX]() {
+            longPointLeftCenterX_->Set(longPointCenterX[1].first);
+            longPointRightCenterX_->Set(longPointCenterX[1].second);
+        }, [&]() {
+            longPointLeftAnimEnd_ = true;
+            longPointRightAnimEnd_ = true;
+        });
+    };
+    if (longPointLeftAnimEnd_ && longPointRightAnimEnd_) {
+        longPointLeftAnimEnd_ = false;
+        longPointRightAnimEnd_ = false;
+        AnimationUtils::StartAnimation(optionBottom, [&, longPointCenterX]() {
+            longPointLeftCenterX_->Set(longPointCenterX[0].first);
+            longPointRightCenterX_->Set(longPointCenterX[0].second);
+        }, bottomFinishCallback);
+    }
+}
+
+void DotIndicatorModifier::PlayLongPointAnimation(const std::vector<std::pair<float, float>>& longPointCenterX,
+    GestureState gestureState, TouchBottomTypeLoop touchBottomTypeLoop,
+    const LinearVector<float>& vectorBlackPointCenterX)
+{
+    if (longPointCenterX.empty()) {
+        return;
+    }
+    // touch bottom
+    if (longPointCenterX.size() > 1) {
+        PlayTouchBottomAnimation(longPointCenterX, touchBottomTypeLoop, vectorBlackPointCenterX);
+        return;
+    }
+    // normal page turning
+    AnimationOption optionHead;
+    optionHead.SetCurve(headCurve_);
+    optionHead.SetDuration(animationDuration_);
+
+    AnimationOption optionTail;
+    // velocity:0, mass:1, stiffness:81, damping:11
+    optionTail.SetCurve(AceType::MakeRefPtr<InterpolatingSpring>(0, 1, 81, 11));
+    optionTail.SetDuration(animationDuration_);
+    AnimationOption optionLeft = optionTail;
+    AnimationOption optionRight = optionHead;
+
+    if (gestureState == GestureState::GESTURE_STATE_RELEASE_LEFT) {
+        optionLeft = optionHead;
+        optionRight = optionTail;
+    }
+
+    if (longPointLeftAnimEnd_) {
+        longPointLeftAnimEnd_ = false;
+        longPointLeftAnimation_ = AnimationUtils::StartAnimation(optionLeft, [&, longPointCenterX]() {
+                longPointLeftCenterX_->Set(longPointCenterX[0].first);
+            }, [&]() { longPointLeftAnimEnd_ = true; });
+    }
+
+    if (longPointRightAnimEnd_) {
+        longPointRightAnimEnd_ = false;
+        longPointRightAnimation_ = AnimationUtils::StartAnimation(optionRight, [&, longPointCenterX]() {
+                longPointRightCenterX_->Set(longPointCenterX[0].second);
+            }, [&]() { longPointRightAnimEnd_ = true; });
+    }
+}
+
+void DotIndicatorModifier::PlayIndicatorAnimation(const LinearVector<float>& vectorBlackPointCenterX,
+    const std::vector<std::pair<float, float>>& longPointCenterX, GestureState gestureState,
+    TouchBottomTypeLoop touchBottomTypeLoop)
+{
+    isTouchBottomLoop_ = false;
+    PlayBlackPointsAnimation(vectorBlackPointCenterX);
+    PlayLongPointAnimation(longPointCenterX, gestureState, touchBottomTypeLoop, vectorBlackPointCenterX);
+}
+
+void DotIndicatorModifier::StopAnimation()
+{
+    AnimationUtils::StopAnimation(blackPointsAnimation_);
+    AnimationUtils::StopAnimation(longPointLeftAnimation_);
+    longPointRightAnimEnd_ = true;
+    AnimationUtils::StopAnimation(longPointRightAnimation_);
+    longPointRightAnimEnd_ = true;
 }
 } // namespace OHOS::Ace::NG

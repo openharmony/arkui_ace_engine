@@ -103,7 +103,6 @@ void GraphicsProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
     json->Put("brightness", propFrontBrightness.has_value() ? propFrontBrightness->Value() : 1.0);
     json->Put("saturate", propFrontSaturate.has_value() ? propFrontSaturate->Value() : 1.0);
     json->Put("contrast", propFrontContrast.has_value() ? propFrontContrast->Value() : 1.0);
-    json->Put("invert", propFrontInvert.has_value() ? std::get<float>(propFrontInvert.value()) : 0.0);
     json->Put("sepia", propFrontSepia.has_value() ? propFrontSepia->Value() : 0.0);
     json->Put("hueRotate", propFrontHueRotate.has_value() ? propFrontHueRotate.value() : 0.0);
     json->Put("colorBlend", propFrontColorBlend.has_value() ? propFrontColorBlend->ColorToString().c_str() : "");

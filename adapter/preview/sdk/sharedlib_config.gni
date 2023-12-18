@@ -327,10 +327,76 @@ napi_modules = [
         lib_names = [ "segmentbutton" ]
       },
       {
-        label = "//foundation/arkui/ace_engine/advanced_ui_component/breadcrumb/interfaces:breadcrumb"
+        label = "//foundation/arkui/ace_engine/advanced_ui_component/composelistitem/interfaces:composelistitem"
         subsystem_name = "arkui"
         part_name = "ace_engine"
-        lib_names = [ "breadcrumb" ]
+        lib_names = [ "composelistitem" ]
+      },
+      {
+        label = "//foundation/arkui/ace_engine/advanced_ui_component/composetitlebar/interfaces:composetitlebar"
+        subsystem_name = "arkui"
+        part_name = "ace_engine"
+        lib_names = [ "composetitlebar" ]
+      },
+      {
+        label = "//foundation/arkui/ace_engine/advanced_ui_component/dialog/interfaces:dialog"
+        subsystem_name = "arkui"
+        part_name = "ace_engine"
+        lib_names = [ "dialog" ]
+      },
+      {
+        label = "//foundation/arkui/ace_engine/advanced_ui_component/editabletitlebar/interfaces:editabletitlebar"
+        subsystem_name = "arkui"
+        part_name = "ace_engine"
+        lib_names = [ "editabletitlebar" ]
+      },
+      {
+        label = "//foundation/arkui/ace_engine/advanced_ui_component/filter/interfaces:filter"
+        subsystem_name = "arkui"
+        part_name = "ace_engine"
+        lib_names = [ "filter" ]
+      },
+      {
+        label = "//foundation/arkui/ace_engine/advanced_ui_component/progressbutton/interfaces:progressbutton"
+        subsystem_name = "arkui"
+        part_name = "ace_engine"
+        lib_names = [ "progressbutton" ]
+      },
+      {
+        label = "//foundation/arkui/ace_engine/advanced_ui_component/selecttitlebar/interfaces:selecttitlebar"
+        subsystem_name = "arkui"
+        part_name = "ace_engine"
+        lib_names = [ "selecttitlebar" ]
+      },
+      {
+        label = "//foundation/arkui/ace_engine/advanced_ui_component/splitlayout/interfaces:splitlayout"
+        subsystem_name = "arkui"
+        part_name = "ace_engine"
+        lib_names = [ "splitlayout" ]
+      },
+      {
+        label = "//foundation/arkui/ace_engine/advanced_ui_component/subheader/interfaces:subheader"
+        subsystem_name = "arkui"
+        part_name = "ace_engine"
+        lib_names = [ "subheader" ]
+      },
+      {
+        label = "//foundation/arkui/ace_engine/advanced_ui_component/tabtitlebar/interfaces:tabtitlebar"
+        subsystem_name = "arkui"
+        part_name = "ace_engine"
+        lib_names = [ "tabtitlebar" ]
+      },
+      {
+        label = "//foundation/arkui/ace_engine/advanced_ui_component/toolbar/interfaces:toolbar"
+        subsystem_name = "arkui"
+        part_name = "ace_engine"
+        lib_names = [ "toolbar" ]
+      },
+      {
+        label = "//foundation/arkui/ace_engine/advanced_ui_component/treeview/interfaces:treeview"
+        subsystem_name = "arkui"
+        part_name = "ace_engine"
+        lib_names = [ "treeview" ]
       },
       {
         label = "//foundation/arkui/ace_engine/advanced_ui_component/selectionmenu/interfaces:selectionmenu"

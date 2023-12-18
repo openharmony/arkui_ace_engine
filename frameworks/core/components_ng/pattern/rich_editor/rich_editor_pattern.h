@@ -66,6 +66,7 @@ struct AutoScrollParam {
     float offset = 0.0f;
     bool showScrollbar = false;
     Offset eventOffset;
+    bool isFirstRun_ = true;
 };
 
 struct SelectionMenuParams {
@@ -196,7 +197,6 @@ public:
     void HandleSelect(CaretMoveIntent direction) override;
     bool SetCaretPosition(int32_t pos);
     int32_t GetCaretPosition();
-    int32_t GetTextContentLength();
     bool GetCaretVisible() const;
     OffsetF CalcCursorOffsetByPosition(int32_t position, float& selectLineHeight,
         bool downStreamFirst = false, bool needLineHighest = true);
@@ -220,9 +220,9 @@ public:
     void SetTypingStyle(struct UpdateSpanStyle typingStyle, TextStyle textStyle);
     int32_t AddImageSpan(const ImageSpanOptions& options, bool isPaste = false, int32_t index = -1);
     int32_t AddTextSpan(const TextSpanOptions& options, bool isPaste = false, int32_t index = -1);
+    int32_t AddTextSpanOperation(const TextSpanOptions& options, bool isPaste = false, int32_t index = -1);
     void AddSpanItem(const RefPtr<SpanItem>& item, int32_t offset);
     int32_t AddPlaceholderSpan(const RefPtr<UINode>& customNode, const SpanOptionBase& options);
-    RichEditorSelection GetSpansInfo(int32_t start, int32_t end, GetSpansMethod method);
     void SetSelection(int32_t start, int32_t end);
     void OnHandleMoveDone(const RectF& handleRect, bool isFirstHandle) override;
     std::u16string GetLeftTextOfCursor(int32_t number) override;
@@ -234,6 +234,7 @@ public:
     int32_t GetHandleIndex(const Offset& offset) const override;
     void OnAreaChangedInner() override;
     void CreateHandles() override;
+    void HandleMenuCallbackOnSelectAll();
     void HandleOnSelectAll() override;
     void HandleOnCopy() override;
     bool JudgeDraggable(GestureEvent& info);
@@ -284,6 +285,8 @@ public:
     void CopySelectionMenuParams(SelectOverlayInfo& selectInfo, RichEditorResponseType responseType);
 #ifdef ENABLE_DRAG_FRAMEWORK
     std::function<void(Offset)> GetThumbnailCallback() override;
+    void HandleOnDragStatusCallback(
+        const DragEventType& dragEventType, const RefPtr<NotifyDragEvent>& notifyDragEvent) override;
 #endif
     void ResetSelection();
     bool BetweenSelectedPosition(const Offset& globalOffset) override;
@@ -362,6 +365,8 @@ public:
 
     void HandleOnCameraInput() override;
 
+    RefPtr<FocusHub> GetFocusHub() const;
+
 private:
     void UpdateSelectMenuInfo(bool hasData, SelectOverlayInfo& selectInfo, bool isCopyAll);
     void UpdateSelectionType(RichEditorSelection& selection);
@@ -405,10 +410,8 @@ private:
     void ScrollToSafeArea() const override;
 #ifdef ENABLE_DRAG_FRAMEWORK
     void InitDragDropEvent();
+    void onDragDropAndLeave();
     void ClearDragDropEvent();
-    void UpdateSpanItemDragStatus(const std::list<ResultObject>& resultObjects, bool IsDragging);
-    NG::DragDropInfo OnDragStart(const RefPtr<OHOS::Ace::DragEvent>& event);
-    void OnDragEnd();
     void OnDragMove(const RefPtr<OHOS::Ace::DragEvent>& event);
 
     void AddDragFrameNodeToManager(const RefPtr<FrameNode>& frameNode)
@@ -428,17 +431,15 @@ private:
         CHECK_NULL_VOID(dragDropManager);
         dragDropManager->RemoveDragFrameNode(frameNode->GetId());
     }
+
+    void HandleCursorOnDragMoved(const RefPtr<NotifyDragEvent>& notifyDragEvent);
+    void HandleCursorOnDragLeaved(const RefPtr<NotifyDragEvent>& notifyDragEvent);
+    void HandleCursorOnDragEnded(const RefPtr<NotifyDragEvent>& notifyDragEvent);
 #endif // ENABLE_DRAG_FRAMEWORK
 
     int32_t GetParagraphLength(const std::list<RefPtr<UINode>>& spans) const;
     // REQUIRES: 0 <= start < end
     std::vector<RefPtr<SpanNode>> GetParagraphNodes(int32_t start, int32_t end) const;
-    RefPtr<UINode> GetChildByIndex(int32_t index) const;
-    RefPtr<SpanItem> GetSpanItemByIndex(int32_t index) const;
-    std::string GetSelectedSpanText(std::wstring value, int32_t start, int32_t end) const;
-    TextStyleResult GetTextStyleObject(const RefPtr<SpanNode>& node);
-    ResultObject GetTextResultObject(RefPtr<UINode> uinode, int32_t index, int32_t start, int32_t end);
-    ResultObject GetImageResultObject(RefPtr<UINode> uinode, int32_t index, int32_t start, int32_t end);
     void OnHover(bool isHover);
     bool RequestKeyboard(bool isFocusViewChanged, bool needStartTwinkling, bool needShowSoftKeyboard);
     void UpdateCaretInfoToController();
@@ -479,19 +480,29 @@ private:
     void OnAutoScroll(AutoScrollParam param);
     void StopAutoScroll();
     void AutoScrollByEdgeDetection(AutoScrollParam param, OffsetF offset, EdgeDetectionStrategy strategy);
+    float CalcDragSpeed(float hotAreaStart, float hotAreaEnd, float point);
     float MoveTextRect(float offset);
-    bool MoveCaretToContentRect();
+    void MoveCaretToContentRect();
     bool IsTextArea() const override
     {
         return true;
     }
     void ProcessInnerPadding();
+    bool IsReachTop()
+    {
+        return NearEqual(richTextRect_.GetY(), contentRect_.GetY());
+    }
+
+    bool IsReachBottom()
+    {
+        return NearEqual(richTextRect_.Bottom(), contentRect_.Bottom());
+    }
 
     // ai analysis fun
     bool NeedAiAnalysis(
         const CaretUpdateType targeType, const int32_t pos, const int32_t& spanStart, const std::string& content);
     void AdjustCursorPosition(int32_t& pos);
-    void AdjustWordSelection(int32_t& start, int32_t& end);
+    bool AdjustWordSelection(int32_t& start, int32_t& end);
     bool IsClickBoundary(const int32_t position);
 
 #if defined(ENABLE_STANDARD_INPUT)
@@ -516,6 +527,8 @@ private:
     bool blockPress_ = false;
     bool isCustomKeyboardAttached_ = false;
     bool usingMouseRightButton_ = false;
+    bool isCursorAlwaysDisplayed_ = false;
+    bool isClickOnAISpan_ = false;
 
     int32_t moveLength_ = 0;
     int32_t caretPosition_ = 0;
@@ -555,12 +568,14 @@ private:
     bool scrollable_ = true;
     CancelableCallback<void()> autoScrollTask_;
     OffsetF prevAutoScrollOffset_;
+    AutoScrollParam currentScrollParam_;
+    bool isAutoScrollRunning_ = false;
     // add for ai input analysis
     bool hasClicked_ = false;
     CaretUpdateType caretUpdateType_ = CaretUpdateType::NONE;
     TimeStamp lastClickTimeStamp_;
     TimeStamp lastAiPosTimeStamp_;
-
+    bool adjusted_ = false;
     ACE_DISALLOW_COPY_AND_MOVE(RichEditorPattern);
 };
 } // namespace OHOS::Ace::NG

@@ -284,8 +284,6 @@ void HyperlinkPattern::OnHoverEvent(bool isHovered)
 
 void HyperlinkPattern::OnMouseEvent(MouseInfo& info)
 {
-    TAG_LOGD(AceLogTag::ACE_HYPERLINK, "Hyperlink OnMouseEvent in. Button: %{public}d, Action: %{public}d",
-        info.GetButton(), info.GetAction());
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto frame = GetHost();

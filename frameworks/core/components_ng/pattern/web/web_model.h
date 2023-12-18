@@ -29,10 +29,10 @@ public:
     virtual ~WebModel() = default;
 
     virtual void Create(const std::string& src, const RefPtr<WebController>& webController,
-        WebType type = WebType::SURFACE) = 0;
+        WebType type = WebType::SURFACE, bool incognitoMode = false) = 0;
     virtual void Create(const std::string& src, std::function<void(int32_t)>&& setWebIdCallback,
         std::function<void(const std::string&)>&& setHapPathCallback,
-        int32_t parentWebId, bool popup, WebType type = WebType::SURFACE) = 0;
+        int32_t parentWebId, bool popup, WebType type = WebType::SURFACE, bool incognitoMode = false) = 0;
     virtual void SetCustomScheme(const std::string& cmdLine) = 0;
     virtual void SetFocusable(bool focusable) {};
     virtual void SetFocusNode(bool isFocusNode) {};
@@ -122,6 +122,8 @@ public:
         std::function<void(const std::shared_ptr<BaseEventInfo>& info)>&& audioStateChanged) {};
     virtual void SetFirstContentfulPaintId(
         std::function<void(const std::shared_ptr<BaseEventInfo>& info)>&& firstContentfulPaintId) {};
+    virtual void SetNavigationEntryCommittedId(
+        std::function<void(const std::shared_ptr<BaseEventInfo>& info)>&& navigationEntryCommittedId) {};
     virtual void SetOnInterceptKeyEventCallback(std::function<bool(KeyEventInfo& keyEventInfo)>&& keyEventInfo) = 0;
     virtual void SetOnDataResubmitted(
         std::function<void(const std::shared_ptr<BaseEventInfo>& info)>&& dataResubmittedId) {};
@@ -147,7 +149,9 @@ public:
     virtual void SetLayoutMode(WebLayoutMode mode) {}
     virtual void SetOverScrollMode(OverScrollMode mode) {}
     virtual void JavaScriptOnDocumentStart(const ScriptItems& scriptItems) {};
+    virtual void SetCopyOptionMode(CopyOptions mode) {};
 
+    virtual void SetPermissionClipboard(std::function<void(const std::shared_ptr<BaseEventInfo>&)>&& jsCallback) {};
 private:
     static std::unique_ptr<WebModel> instance_;
     static std::mutex mutex_;

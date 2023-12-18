@@ -40,6 +40,9 @@ public:
         value->propTargetSpace_ = CloneTargetSpace();
         value->propBlockEvent_ = CloneBlockEvent();
         value->propPositionOffset_ = ClonePositionOffset();
+        value->propArrowHeight_ = CloneArrowHeight();
+        value->propArrowWidth_ = CloneArrowWidth();
+        value->propRadius_ = CloneRadius();
         return value;
     }
 
@@ -54,6 +57,9 @@ public:
         ResetTargetSpace();
         ResetBlockEvent();
         ResetPositionOffset();
+        ResetArrowHeight();
+        ResetArrowWidth();
+        ResetRadius();
     }
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(EnableArrow, bool, PROPERTY_UPDATE_MEASURE);
@@ -64,6 +70,9 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(TargetSpace, Dimension, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(BlockEvent, bool, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(PositionOffset, OffsetF, PROPERTY_UPDATE_LAYOUT);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ArrowHeight, Dimension, PROPERTY_UPDATE_LAYOUT);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ArrowWidth, Dimension, PROPERTY_UPDATE_LAYOUT);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Radius, Dimension, PROPERTY_UPDATE_LAYOUT);
 
 private:
     ACE_DISALLOW_COPY_AND_MOVE(BubbleLayoutProperty);

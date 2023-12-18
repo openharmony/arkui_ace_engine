@@ -33,25 +33,9 @@ void IndexerModelNG::Create(std::vector<std::string>& arrayValue, int32_t select
     ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::INDEXER_ETS_TAG, nodeId);
     auto frameNode = FrameNode::GetOrCreateFrameNode(
         V2::INDEXER_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<IndexerPattern>(); });
-    int32_t indexerSize = arrayValue.size();
-    auto children = frameNode->GetChildren();
-    auto lastChildCount = static_cast<int32_t>(children.size());
-    if (indexerSize != lastChildCount) {
-        frameNode->Clean();
-        for (int32_t index = 0; index < indexerSize; index++) {
-            auto indexerChildNode = FrameNode::CreateFrameNode(
-                V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
-            CHECK_NULL_VOID(indexerChildNode);
-            frameNode->AddChild(indexerChildNode);
-        }
-    }
     stack->Push(frameNode);
     ACE_UPDATE_LAYOUT_PROPERTY(IndexerLayoutProperty, ArrayValue, arrayValue);
-    if (selected >= 0 && selected < indexerSize) {
-        ACE_UPDATE_LAYOUT_PROPERTY(IndexerLayoutProperty, Selected, selected);
-    } else {
-        ACE_UPDATE_LAYOUT_PROPERTY(IndexerLayoutProperty, Selected, 0);
-    }
+    ACE_UPDATE_LAYOUT_PROPERTY(IndexerLayoutProperty, Selected, selected);
 }
 
 void IndexerModelNG::SetSelectedColor(const std::optional<Color>& selectedColor)
@@ -289,6 +273,11 @@ void IndexerModelNG::SetCreatChangeEvent(std::function<void(const int32_t select
     auto eventHub = frameNode->GetEventHub<IndexerEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetCreatChangeEvent(std::move(changeEvent));
+}
+
+void IndexerModelNG::SetAutoCollapse(bool autoCollapse)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(IndexerLayoutProperty, AutoCollapse, autoCollapse);
 }
 
 void IndexerModelNG::SetFontSize(FrameNode* frameNode, const Dimension& fontSize)

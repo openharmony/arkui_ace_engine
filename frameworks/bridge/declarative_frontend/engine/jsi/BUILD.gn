@@ -156,9 +156,12 @@ template("declarative_js_engine_ark") {
       "components/arkts_native_common_modifier.cpp",
       "components/arkts_native_common_shape_modifier.cpp",
       "components/arkts_native_counter_modifier.cpp",
+      "components/arkts_native_data_panel_modifier.cpp",
       "components/arkts_native_date_picker_modifier.cpp",
       "components/arkts_native_divider_modifier.cpp",
+      "components/arkts_native_gauge_modifier.cpp",
       "components/arkts_native_grid_col_modifier.cpp",
+      "components/arkts_native_grid_item_modifier.cpp",
       "components/arkts_native_grid_modifier.cpp",
       "components/arkts_native_grid_row_modifier.cpp",
       "components/arkts_native_hyperlink_modifier.cpp",
@@ -167,7 +170,10 @@ template("declarative_js_engine_ark") {
       "components/arkts_native_image_span_modifier.cpp",
       "components/arkts_native_line_modifier.cpp",
       "components/arkts_native_list_item_group_modifier.cpp",
+      "components/arkts_native_list_item_modifier.cpp",
       "components/arkts_native_list_modifier.cpp",
+      "components/arkts_native_loading_progress_modifier.cpp",
+      "components/arkts_native_marquee_modifier.cpp",
       "components/arkts_native_menu_item_modifier.cpp",
       "components/arkts_native_menu_modifier.cpp",
       "components/arkts_native_nav_destination_modifier.cpp",
@@ -179,12 +185,15 @@ template("declarative_js_engine_ark") {
       "components/arkts_native_path_modifier.cpp",
       "components/arkts_native_pattern_lock_modifier.cpp",
       "components/arkts_native_polyline_modifier.cpp",
+      "components/arkts_native_progress_modifier.cpp",
+      "components/arkts_native_qrcode_modifier.cpp",
       "components/arkts_native_radio_modifier.cpp",
       "components/arkts_native_rating_modifier.cpp",
       "components/arkts_native_rect_modifier.cpp",
       "components/arkts_native_rich_editor_modifier.cpp",
       "components/arkts_native_row_modifier.cpp",
       "components/arkts_native_row_split_modifier.cpp",
+      "components/arkts_native_scroll_modifier.cpp",
       "components/arkts_native_search_modifier.cpp",
       "components/arkts_native_select_modifier.cpp",
       "components/arkts_native_shape_modifier.cpp",
@@ -193,14 +202,18 @@ template("declarative_js_engine_ark") {
       "components/arkts_native_span_modifier.cpp",
       "components/arkts_native_stack_modifier.cpp",
       "components/arkts_native_stepper_item_modifier.cpp",
+      "components/arkts_native_swiper_modifier.cpp",
       "components/arkts_native_tabs_modifier.cpp",
       "components/arkts_native_text_area_modifier.cpp",
+      "components/arkts_native_text_clock_modifier.cpp",
       "components/arkts_native_text_input_modifier.cpp",
       "components/arkts_native_text_modifier.cpp",
+      "components/arkts_native_text_timer_modifier.cpp",
       "components/arkts_native_textpicker_modifier.cpp",
       "components/arkts_native_timepicker_modifier.cpp",
       "components/arkts_native_toggle_modifier.cpp",
       "components/arkts_native_video_modifier.cpp",
+      "components/arkts_native_water_flow_modifier.cpp",
       "js_converter.cpp",
       "jsi_declarative_engine.cpp",
       "jsi_declarative_group_js_bridge.cpp",
@@ -227,10 +240,13 @@ template("declarative_js_engine_ark") {
       "nativeModule/arkts_native_common_bridge.cpp",
       "nativeModule/arkts_native_common_shape_bridge.cpp",
       "nativeModule/arkts_native_counter_bridge.cpp",
+      "nativeModule/arkts_native_data_panel_bridge.cpp",
       "nativeModule/arkts_native_date_picker_bridge.cpp",
       "nativeModule/arkts_native_divider_bridge.cpp",
+      "nativeModule/arkts_native_gauge_bridge.cpp",
       "nativeModule/arkts_native_grid_bridge.cpp",
       "nativeModule/arkts_native_grid_col_bridge.cpp",
+      "nativeModule/arkts_native_grid_item_bridge.cpp",
       "nativeModule/arkts_native_grid_row_bridge.cpp",
       "nativeModule/arkts_native_hyperlink_bridge.cpp",
       "nativeModule/arkts_native_image_animator_bridge.cpp",
@@ -238,7 +254,10 @@ template("declarative_js_engine_ark") {
       "nativeModule/arkts_native_image_span_bridge.cpp",
       "nativeModule/arkts_native_line_bridge.cpp",
       "nativeModule/arkts_native_list_bridge.cpp",
+      "nativeModule/arkts_native_list_item_bridge.cpp",
       "nativeModule/arkts_native_list_item_group_bridge.cpp",
+      "nativeModule/arkts_native_loading_progress_bridge.cpp",
+      "nativeModule/arkts_native_marquee_bridge.cpp",
       "nativeModule/arkts_native_menu_bridge.cpp",
       "nativeModule/arkts_native_menu_item_bridge.cpp",
       "nativeModule/arkts_native_nav_destination_bridge.cpp",
@@ -250,12 +269,15 @@ template("declarative_js_engine_ark") {
       "nativeModule/arkts_native_path_bridge.cpp",
       "nativeModule/arkts_native_pattern_lock_bridge.cpp",
       "nativeModule/arkts_native_polyline_bridge.cpp",
+      "nativeModule/arkts_native_progress_bridge.cpp",
+      "nativeModule/arkts_native_qrcode_bridge.cpp",
       "nativeModule/arkts_native_radio_bridge.cpp",
       "nativeModule/arkts_native_rating_bridge.cpp",
       "nativeModule/arkts_native_rect_bridge.cpp",
       "nativeModule/arkts_native_rich_editor_bridge.cpp",
       "nativeModule/arkts_native_row_bridge.cpp",
       "nativeModule/arkts_native_row_split_bridge.cpp",
+      "nativeModule/arkts_native_scroll_bridge.cpp",
       "nativeModule/arkts_native_search_bridge.cpp",
       "nativeModule/arkts_native_select_bridge.cpp",
       "nativeModule/arkts_native_shape_bridge.cpp",
@@ -264,18 +286,23 @@ template("declarative_js_engine_ark") {
       "nativeModule/arkts_native_span_bridge.cpp",
       "nativeModule/arkts_native_stack_bridge.cpp",
       "nativeModule/arkts_native_stepper_item_bridge.cpp",
+      "nativeModule/arkts_native_swiper_bridge.cpp",
       "nativeModule/arkts_native_tabs_bridge.cpp",
       "nativeModule/arkts_native_text_area_bridge.cpp",
       "nativeModule/arkts_native_text_bridge.cpp",
+      "nativeModule/arkts_native_text_clock_bridge.cpp",
       "nativeModule/arkts_native_text_input_bridge.cpp",
+      "nativeModule/arkts_native_text_timer_bridge.cpp",
       "nativeModule/arkts_native_textpicker_bridge.cpp",
       "nativeModule/arkts_native_timepicker_bridge.cpp",
       "nativeModule/arkts_native_toggle_bridge.cpp",
       "nativeModule/arkts_native_video_bridge.cpp",
+      "nativeModule/arkts_native_water_flow_bridge.cpp",
       "nativeModule/arkts_utils.cpp",
     ]
 
     deps = []
+    external_deps = []
 
     if (defined(config.form_components_support) &&
         config.form_components_support) {
@@ -284,6 +311,19 @@ template("declarative_js_engine_ark") {
         "nativeModule/arkts_native_form_component_bridge.cpp",
       ]
       deps += [ "${ace_root}/frameworks/core/components_ng/pattern/form:ace_core_components_form_pattern_ng_$platform" ]
+
+      if (is_ohos_standard_system) {
+        external_deps += [
+          "ability_base:want",
+          "ability_runtime:app_manager",
+          "bundle_framework:appexecfwk_core",
+          "form_fwk:fmskit_native",
+          "form_fwk:form_manager",
+          "graphic_2d:librender_service_client",
+          "input:libmmi-client",
+          "ipc:ipc_core",
+        ]
+      }
     }
 
     include_dirs = []
@@ -316,8 +356,6 @@ template("declarative_js_engine_ark") {
       ]
       deps += [ "$ace_root/frameworks/core/components/theme:build_theme_code" ]
     }
-
-    external_deps = []
 
     # add for cross_platfrom_build temporarily, shall be removed after external_deps is supported
     if (is_arkui_x) {

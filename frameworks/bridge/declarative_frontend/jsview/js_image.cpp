@@ -16,6 +16,7 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_image.h"
 #include <cstdint>
 #include <vector>
+#include "base/utils/utils.h"
 
 #if !defined(PREVIEW)
 #include <dlfcn.h>
@@ -31,12 +32,22 @@
 #include "bridge/declarative_frontend/jsview/models/image_model_impl.h"
 #include "core/common/container.h"
 #include "core/components/image/image_event.h"
+#include "core/components/image/image_theme.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_ng/pattern/image/image_model.h"
 #include "core/components_ng/pattern/image/image_model_ng.h"
 #include "core/image/image_source_info.h"
 #include "interfaces/inner_api/ace/ai/image_analyzer.h"
+
+namespace {
+    const std::vector<float> DEFAULT_COLORFILTER_MATRIX = {
+        1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0
+    };
+    constexpr float CEIL_SMOOTHEDGE_VALUE = 1.333f;
+    constexpr float FLOOR_SMOOTHEDGE_VALUE = 0.334f;
+    constexpr float DEFAULT_SMOOTHEDGE_VALUE = 0.0f;
+}
 
 namespace OHOS::Ace {
 
@@ -111,12 +122,18 @@ void JSImage::SetAlt(const JSCallbackInfo& args)
     ImageModel::GetInstance()->SetAlt(ImageSourceInfo { src, bundleName, moduleName });
 }
 
-void JSImage::SetObjectFit(int32_t value)
+void JSImage::SetObjectFit(const JSCallbackInfo& args)
 {
-    auto fit = static_cast<ImageFit>(value);
-    if (fit < ImageFit::FILL || fit > ImageFit::SCALE_DOWN) {
-        fit = ImageFit::COVER;
+    if (args.Length() < 1) {
+        ImageModel::GetInstance()->SetImageFit(ImageFit::COVER);
+        return;
     }
+    int32_t parseRes = 2;
+    ParseJsInteger(args[0], parseRes);
+    if (parseRes < static_cast<int32_t>(ImageFit::FILL) || parseRes > static_cast<int32_t>(ImageFit::SCALE_DOWN)) {
+        parseRes = 2;
+    }
+    auto fit = static_cast<ImageFit>(parseRes);
     ImageModel::GetInstance()->SetImageFit(fit);
 }
 
@@ -212,9 +229,7 @@ void JSImage::Create(const JSCallbackInfo& info)
     // input is PixelMap / Drawable
     if (!srcValid) {
 #if defined(PIXEL_MAP_SUPPORTED)
-        if (isCard) {
-            TAG_LOGD(AceLogTag::ACE_IMAGE, "Not supported pixmap when form render");
-        } else {
+        if (!isCard) {
             if (IsDrawable(info[0])) {
                 pixmap = GetDrawablePixmap(info[0]);
             } else {
@@ -267,7 +282,11 @@ void JSImage::SetImageFill(const JSCallbackInfo& info)
 
     Color color;
     if (!ParseJsColor(info[0], color)) {
-        return;
+        auto pipelineContext = PipelineBase::GetCurrentContext();
+        CHECK_NULL_VOID(pipelineContext);
+        auto theme = pipelineContext->GetTheme<ImageTheme>();
+        CHECK_NULL_VOID(theme);
+        color = theme->GetFillColor();
     }
     ImageModel::GetInstance()->SetImageFill(color);
 }
@@ -392,10 +411,12 @@ void JSColorFilter::DestructorCallback(JSColorFilter* obj)
 void JSImage::SetColorFilter(const JSCallbackInfo& info)
 {
     if (info.Length() != 1) {
+        ImageModel::GetInstance()->SetColorFilterMatrix(DEFAULT_COLORFILTER_MATRIX);
         return;
     }
     auto tmpInfo = info[0];
     if (!tmpInfo->IsArray() && !tmpInfo->IsObject()) {
+        ImageModel::GetInstance()->SetColorFilterMatrix(DEFAULT_COLORFILTER_MATRIX);
         return;
     }
     if (tmpInfo->IsObject() && !tmpInfo->IsArray()) {
@@ -403,17 +424,19 @@ void JSImage::SetColorFilter(const JSCallbackInfo& info)
         if (!tmpInfo->IsUndefined() && !tmpInfo->IsNull()) {
             colorFilter = JSRef<JSObject>::Cast(tmpInfo)->Unwrap<JSColorFilter>();
         } else {
+            ImageModel::GetInstance()->SetColorFilterMatrix(DEFAULT_COLORFILTER_MATRIX);
             return;
         }
         if (colorFilter && colorFilter->GetColorFilterMatrix().size() == COLOR_FILTER_MATRIX_SIZE) {
             ImageModel::GetInstance()->SetColorFilterMatrix(colorFilter->GetColorFilterMatrix());
-        } else {
             return;
         }
+        ImageModel::GetInstance()->SetColorFilterMatrix(DEFAULT_COLORFILTER_MATRIX);
         return;
     }
     JSRef<JSArray> array = JSRef<JSArray>::Cast(tmpInfo);
     if (array->Length() != COLOR_FILTER_MATRIX_SIZE) {
+        ImageModel::GetInstance()->SetColorFilterMatrix(DEFAULT_COLORFILTER_MATRIX);
         return;
     }
     std::vector<float> colorfilter;
@@ -421,12 +444,28 @@ void JSImage::SetColorFilter(const JSCallbackInfo& info)
         JSRef<JSVal> value = array->GetValueAt(i);
         if (value->IsNumber()) {
             colorfilter.emplace_back(value->ToNumber<float>());
+        } else {
+            ImageModel::GetInstance()->SetColorFilterMatrix(DEFAULT_COLORFILTER_MATRIX);
+            return;
         }
     }
-    if (colorfilter.size() != COLOR_FILTER_MATRIX_SIZE) {
+    ImageModel::GetInstance()->SetColorFilterMatrix(colorfilter);
+}
+
+void JSImage::SetSmoothEdge(const JSCallbackInfo& info)
+{
+    if (info.Length() != 1) {
+        ImageModel::GetInstance()->SetSmoothEdge(DEFAULT_SMOOTHEDGE_VALUE);
         return;
     }
-    ImageModel::GetInstance()->SetColorFilterMatrix(colorfilter);
+    double parseRes = DEFAULT_SMOOTHEDGE_VALUE;
+    ParseJsDouble(info[0], parseRes);
+    // Effective range : (FLOOR_SMOOTHEDGE_VALUE, CEIL_SMOOTHEDGE_VALUE]
+    // otherwise: DEFAULT_SMOOTHEDGE_VALUE
+    if (GreatNotEqual(parseRes, CEIL_SMOOTHEDGE_VALUE) || LessNotEqual(parseRes, FLOOR_SMOOTHEDGE_VALUE)) {
+        parseRes = DEFAULT_SMOOTHEDGE_VALUE;
+    }
+    ImageModel::GetInstance()->SetSmoothEdge(static_cast<float>(parseRes));
 }
 
 void JSImage::JSBind(BindingTarget globalObj)
@@ -444,6 +483,7 @@ void JSImage::JSBind(BindingTarget globalObj)
     JSClass<JSImage>::StaticMethod("objectRepeat", &JSImage::SetImageRepeat, opt);
     JSClass<JSImage>::StaticMethod("interpolation", &JSImage::SetImageInterpolation, opt);
     JSClass<JSImage>::StaticMethod("colorFilter", &JSImage::SetColorFilter, opt);
+    JSClass<JSImage>::StaticMethod("edgeAntialiasing", &JSImage::SetSmoothEdge, opt);
 
     JSClass<JSImage>::StaticMethod("border", &JSImage::JsBorder);
     JSClass<JSImage>::StaticMethod("borderRadius", &JSImage::JsBorderRadius);
@@ -464,14 +504,14 @@ void JSImage::JSBind(BindingTarget globalObj)
     JSClass<JSImage>::StaticMethod("draggable", &JSImage::JsSetDraggable);
     JSClass<JSImage>::StaticMethod("onDragStart", &JSImage::JsOnDragStart);
     JSClass<JSImage>::StaticMethod("copyOption", &JSImage::SetCopyOption);
+    JSClass<JSImage>::StaticMethod("enableAnalyzer", &JSImage::EnableAnalyzer);
+    JSClass<JSImage>::StaticMethod("analyzerConfig", &JSImage::AnalyzerConfig);
+
     // override method
     JSClass<JSImage>::StaticMethod("opacity", &JSImage::JsOpacity);
     JSClass<JSImage>::StaticMethod("blur", &JSImage::JsBlur);
     JSClass<JSImage>::StaticMethod("transition", &JSImage::JsTransition);
     JSClass<JSImage>::InheritAndBind<JSViewAbstract>(globalObj);
-
-    JSClass<JSImage>::StaticMethod("enableAnalyzer", &JSImage::EnableAnalyzer);
-    JSClass<JSImage>::StaticMethod("analyzerConfig", &JSImage::AnalyzerConfig);
 
     JSClass<JSColorFilter>::Declare("ColorFilter");
     JSClass<JSColorFilter>::Bind(globalObj, JSColorFilter::ConstructorCallback, JSColorFilter::DestructorCallback);
@@ -488,11 +528,12 @@ void JSImage::JsOnDragStart(const JSCallbackInfo& info)
         return;
     }
     RefPtr<JsDragFunction> jsOnDragStartFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(info[0]));
-    auto onDragStartId = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragStartFunc)](
+    WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto onDragStartId = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragStartFunc), node = frameNode](
                              const RefPtr<DragEvent>& info, const std::string& extraParams) -> NG::DragDropBaseInfo {
         NG::DragDropBaseInfo itemInfo;
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, itemInfo);
-
+        PipelineContext::SetCallBackNode(node);
         auto ret = func->Execute(info, extraParams);
         if (!ret->IsObject()) {
             return itemInfo;

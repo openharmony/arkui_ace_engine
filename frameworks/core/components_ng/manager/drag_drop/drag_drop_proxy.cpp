@@ -107,7 +107,6 @@ void DragDropProxy::onDragCancel()
     auto manager = pipeline->GetDragDropManager();
     CHECK_NULL_VOID(manager);
     CHECK_NULL_VOID(manager->CheckDragDropProxy(id_));
-
     manager->onDragCancel();
 }
 

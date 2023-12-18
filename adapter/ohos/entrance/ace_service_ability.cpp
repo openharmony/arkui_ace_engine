@@ -101,11 +101,8 @@ void AceServiceAbility::OnStart(const OHOS::AAFwk::Want& want, sptr<AAFwk::Sessi
     std::vector<std::string> assetBasePathStr;
     AceEngine::InitJsDumpHeadSignal();
     if (abilityInfo != nullptr && !abilityInfo->srcPath.empty()) {
-        LOGD("AceServiceAbility OnStar assetBasePathStr: %{public}s, parsedUrl: %{public}s",
-            abilityInfo->srcPath.c_str(), parsedUrl.c_str());
         assetBasePathStr = { "assets/js/" + abilityInfo->srcPath + "/", std::string("assets/js/") };
     } else {
-        LOGD("AceServiceAbility OnStar parsedUrl: %{public}s", parsedUrl.c_str());
         assetBasePathStr = { std::string("assets/js/default/"), std::string("assets/js/share/") };
     }
 
@@ -123,7 +120,6 @@ void AceServiceAbility::OnStart(const OHOS::AAFwk::Want& want, sptr<AAFwk::Sessi
 
     // run service
     Platform::PaContainer::RunPa(abilityId_, parsedUrl, want);
-    LOGD("AceServiceAbility OnStart called End");
 }
 
 void AceServiceAbility::OnStop()

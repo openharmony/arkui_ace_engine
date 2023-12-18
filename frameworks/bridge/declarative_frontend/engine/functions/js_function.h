@@ -148,8 +148,41 @@ public:
         JsFunction::ExecuteJS(ARGC, &param);
     }
 
+    void Execute(const std::string& val, T& eventInfo)
+    {
+        JSRef<JSVal> jsVal = JSRef<JSVal>::Make(ToJSValue(val));
+        JSRef<JSVal> itemInfo;
+        if (parser_) {
+            itemInfo = parser_(eventInfo);
+        }
+        JSRef<JSVal> params[] = { jsVal, itemInfo };
+        JsFunction::ExecuteJS(ARGC, params);
+    }
+
 private:
     ParseFunc parser_;
+};
+
+template<class T, int32_t ARGC = 0>
+class ACE_EXPORT JsCommonEventFunction : public JsFunction {
+    DECLARE_ACE_TYPE(JsCommonEventFunction, JsFunction);
+
+public:
+    JsCommonEventFunction() = delete;
+    JsCommonEventFunction(const JSRef<JSFunc>& jsFunction)
+        : JsFunction(JSRef<JSObject>(), jsFunction)
+    {}
+    ~JsCommonEventFunction() override = default;
+
+    void Execute() override
+    {
+        JsFunction::ExecuteJS();
+    }
+
+    void Execute(JSRef<JSVal>* argv)
+    {
+        JsFunction::ExecuteJS(ARGC, argv);
+    }
 };
 
 template<class T, int32_t ARGC = 0>

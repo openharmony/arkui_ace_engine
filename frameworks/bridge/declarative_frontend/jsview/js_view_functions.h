@@ -38,10 +38,7 @@ class ViewFunctions : public AceType {
 public:
     ViewFunctions(const JSRef<JSObject>& jsObject, const JSRef<JSFunc>& jsRenderFunction);
     explicit ViewFunctions(const JSRef<JSObject>& jsObject);
-    ~ViewFunctions() override
-    {
-        LOGD("Destroy: ViewFunctions");
-    }
+    ~ViewFunctions() override {}
 
     void Destroy();
     void Destroy(JSView* parentCustomView);

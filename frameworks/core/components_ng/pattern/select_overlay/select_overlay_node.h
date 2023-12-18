@@ -109,6 +109,7 @@ private:
     void SetSelectMenuOpacity(float value);
     void SetExtensionMenuOpacity(float value);
     void SetBackButtonOpacity(float value);
+    void CreateCustomSelectOverlay(const std::shared_ptr<SelectOverlayInfo>& info);
 
     void SetAnimationStatus(bool toDoAnimation)
     {

@@ -67,6 +67,7 @@ public:
     virtual void SetOnCopy(std::function<void(const std::string&)>&& func);
     virtual void SetOnCut(std::function<void(const std::string&)>&& func);
     virtual void SetOnPaste(std::function<void(const std::string&)>&& func);
+    virtual void SetOnPasteWithEvent(std::function<void(const std::string&, NG::TextCommonEvent&)>&& func);
     virtual void SetOnChangeEvent(std::function<void(const std::string&)>&& onChangeEvent);
     virtual void SetSelectionMenuHidden(bool selectionMenuHidden) = 0;
     virtual void SetCustomKeyboard(const std::function<void ()> &&buildFunc);

@@ -44,7 +44,6 @@ const static std::map<std::string, TabBarIndicatorType> INDICATOR_SIZE_VALUE_MAP
 
 RefPtr<Component> TabBarCreator::CreateFromJson(const JsonValue& componentJson, const JsonComponentFactory& factory)
 {
-    LOGD("CreateFromJson Tabbar");
     std::string classType = componentJson.GetValue(CLASS_NAME)->GetString();
     if (classType != TAB_BAR_NAME) {
         LOGE("Create Tabbar err: not a tabbar json.");
@@ -84,7 +83,6 @@ RefPtr<Component> TabBarCreator::CreateFromJson(const JsonValue& componentJson, 
     if (componentJson.Contains(TAB_INDEX) && componentJson.GetValue(TAB_INDEX)->IsNumber()) {
         int32_t index = componentJson.GetValue(TAB_INDEX)->GetInt();
         tabBar->SetIndex(index);
-        LOGD("Create Tabbar index: %{public}d", index);
     }
 
     UpdateTabBarComponentProperties(componentJson, tabBar);
@@ -100,7 +98,6 @@ void TabBarCreator::UpdateTabBarComponentProperties(
         auto iter = MODE_VALUE_MAP.find(mode);
         if (iter != MODE_VALUE_MAP.end()) {
             tabBar->SetMode(iter->second);
-            LOGD("Create Tabbar mod: %{public}s", mode.c_str());
         }
     }
 
@@ -109,7 +106,6 @@ void TabBarCreator::UpdateTabBarComponentProperties(
         auto iter = INDICATOR_SIZE_VALUE_MAP.find(indicatorSize);
         if (iter != INDICATOR_SIZE_VALUE_MAP.end()) {
             tabBar->SetIndicatorSize(iter->second);
-            LOGD("Create Tabbar indicatorSize: %{public}s", indicatorSize.c_str());
         }
     }
 
@@ -128,7 +124,6 @@ RefPtr<BoxComponent> TabBarCreator::CreateIndicatorFromJson(const JsonValue& com
         Dimension indicatorWidth = DEFAULT_INDICATOR_WIDTH;
         if (componentJson.Contains(TAB_INDICATOR_WIDTH) && componentJson.GetValue(TAB_INDICATOR_WIDTH)->IsNumber()) {
             indicatorWidth = Dimension(componentJson.GetValue(TAB_INDICATOR_WIDTH)->GetDouble());
-            LOGD("Create Tabbar indicatorWidth: %{public}f", indicatorWidth.Value());
         }
 
         Color indicatorColor = DEFAULT_INDICATOR_COLOR;

@@ -23,6 +23,15 @@
 #include "core/components/common/layout/constants.h"
 
 namespace OHOS::Ace::NG {
+constexpr int32_t INDEX_0 = 0;      // Arg Index
+constexpr int32_t INDEX_1 = 1;      // Arg Index
+constexpr int32_t INDEX_2 = 2;      // Arg Index
+constexpr int32_t INDEX_3 = 3;      // Arg Index
+constexpr int32_t INDEX_4 = 4;      // Arg Index
+constexpr int32_t SIZE_OF_FOUR = 4; // Border Radius array size
+const std::vector<float> DEFAULT_COLORFILTER_MATRIX = {
+    1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0
+};
 ArkUINativeModuleValue ImageBridge::SetCopyOption(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
@@ -348,28 +357,64 @@ ArkUINativeModuleValue ImageBridge::ResetImageInterpolation(ArkUIRuntimeCallInfo
     return panda::JSValueRef::Undefined(vm);
 }
 
+void SetColorFilterObject(const EcmaVM* vm, const Local<JSValueRef>& jsObjArg, NodeHandle nativeNode)
+{
+    Framework::JSColorFilter* colorFilter;
+    if (!jsObjArg->IsUndefined() && !jsObjArg->IsNull()) {
+        colorFilter = static_cast<Framework::JSColorFilter*>(jsObjArg->ToObject(vm)->GetNativePointerField(0));
+    } else {
+        GetArkUIInternalNodeAPI()->GetImageModifier().SetColorFilter(
+            nativeNode, &(*DEFAULT_COLORFILTER_MATRIX.begin()), COLOR_FILTER_MATRIX_SIZE);
+        return;
+    }
+    if (colorFilter && colorFilter->GetColorFilterMatrix().size() == COLOR_FILTER_MATRIX_SIZE) {
+        GetArkUIInternalNodeAPI()->GetImageModifier().SetColorFilter(
+            nativeNode, &(*colorFilter->GetColorFilterMatrix().begin()), COLOR_FILTER_MATRIX_SIZE);
+    } else {
+        GetArkUIInternalNodeAPI()->GetImageModifier().SetColorFilter(
+            nativeNode, &(*DEFAULT_COLORFILTER_MATRIX.begin()), COLOR_FILTER_MATRIX_SIZE);
+        return;
+    }
+    GetArkUIInternalNodeAPI()->GetImageModifier().SetColorFilter(
+        nativeNode, &(*DEFAULT_COLORFILTER_MATRIX.begin()), COLOR_FILTER_MATRIX_SIZE);
+}
+
 ArkUINativeModuleValue ImageBridge::SetColorFilter(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
-    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
+    Local<JSValueRef> jsObjArg = runtimeCallInfo->GetCallArgRef(1);
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    auto array = std::make_unique<float[]>(COLOR_FILTER_MATRIX_SIZE);
-    int32_t colorFilterCount = 0;
-    auto getValue = [&colorFilterCount](const EcmaVM* vm, const Local<JSValueRef>& args) mutable {
-        if (args->IsNumber()) {
-            colorFilterCount++;
-            return (float)args->ToNumber(vm)->Value();
-        }
-        return 0.0f;
-    };
-    if (ArkTSUtils::ParseArray<float>(vm, secondArg, array.get(), COLOR_FILTER_MATRIX_SIZE, getValue) &&
-        colorFilterCount == COLOR_FILTER_MATRIX_SIZE) {
-        GetArkUIInternalNodeAPI()->GetImageModifier().SetColorFilter(nativeNode, array.get(), COLOR_FILTER_MATRIX_SIZE);
-    } else {
-        GetArkUIInternalNodeAPI()->GetImageModifier().ResetColorFilter(nativeNode);
+
+    if (!jsObjArg->IsArray(vm) && !jsObjArg->IsObject()) {
+        GetArkUIInternalNodeAPI()->GetImageModifier().SetColorFilter(
+            nativeNode, &(*DEFAULT_COLORFILTER_MATRIX.begin()), COLOR_FILTER_MATRIX_SIZE);
+        return panda::JSValueRef::Undefined(vm);
     }
+    if (jsObjArg->IsObject() && !jsObjArg->IsArray(vm)) {
+        SetColorFilterObject(vm, jsObjArg, nativeNode);
+        return panda::JSValueRef::Undefined(vm);
+    }
+    auto array = panda::CopyableGlobal<panda::ArrayRef>(vm, jsObjArg);
+    if (array->Length(vm) != COLOR_FILTER_MATRIX_SIZE) {
+        GetArkUIInternalNodeAPI()->GetImageModifier().SetColorFilter(
+            nativeNode, &(*DEFAULT_COLORFILTER_MATRIX.begin()), COLOR_FILTER_MATRIX_SIZE);
+        return panda::JSValueRef::Undefined(vm);
+    }
+    std::vector<float> colorfilter;
+    for (size_t i = 0; i < array->Length(vm); i++) {
+        auto value = array->GetValueAt(vm, jsObjArg, i);
+        if (value->IsNumber()) {
+            colorfilter.emplace_back(value->ToNumber(vm)->Value());
+        } else {
+            GetArkUIInternalNodeAPI()->GetImageModifier().SetColorFilter(
+                nativeNode, &(*DEFAULT_COLORFILTER_MATRIX.begin()), COLOR_FILTER_MATRIX_SIZE);
+            return panda::JSValueRef::Undefined(vm);
+        }
+    }
+    GetArkUIInternalNodeAPI()->GetImageModifier().SetColorFilter(
+        nativeNode, &(*colorfilter.begin()), COLOR_FILTER_MATRIX_SIZE);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -408,6 +453,60 @@ ArkUINativeModuleValue ImageBridge::ResetDraggable(ArkUIRuntimeCallInfo* runtime
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
     GetArkUIInternalNodeAPI()->GetImageModifier().ResetImageDraggable(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue ImageBridge::SetBorderRadius(ArkUIRuntimeCallInfo *runtimeCallInfo)
+{
+    EcmaVM *vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    void *nativeNode = firstArg->ToNativePointer(vm)->Value();
+    Local<JSValueRef> topLeftArgs = runtimeCallInfo->GetCallArgRef(INDEX_1);
+    Local<JSValueRef> topRightArgs = runtimeCallInfo->GetCallArgRef(INDEX_2);
+    Local<JSValueRef> bottomLeftArgs = runtimeCallInfo->GetCallArgRef(INDEX_3);
+    Local<JSValueRef> bottomRightArgs = runtimeCallInfo->GetCallArgRef(INDEX_4);
+    if (topLeftArgs->IsUndefined() && topRightArgs->IsUndefined() && bottomLeftArgs->IsUndefined() &&
+        bottomRightArgs->IsUndefined()) {
+        GetArkUIInternalNodeAPI()->GetCommonModifier().ResetBorderRadius(nativeNode);
+        return panda::JSValueRef::Undefined(vm);
+    }
+
+    CalcDimension topLeft;
+    CalcDimension topRight;
+    CalcDimension bottomLeft;
+    CalcDimension bottomRight;
+
+    ArkTSUtils::ParseAllBorder(vm, topLeftArgs, topLeft);
+    ArkTSUtils::ParseAllBorder(vm, topRightArgs, topRight);
+    ArkTSUtils::ParseAllBorder(vm, bottomLeftArgs, bottomLeft);
+    ArkTSUtils::ParseAllBorder(vm, bottomRightArgs, bottomRight);
+
+    uint32_t size = SIZE_OF_FOUR;
+    double values[size];
+    int units[size];
+
+    values[INDEX_0] = topLeft.Value();
+    units[INDEX_0] = static_cast<int>(topLeft.Unit());
+    values[INDEX_1] = topRight.Value();
+    units[INDEX_1] = static_cast<int>(topRight.Unit());
+    values[INDEX_2] = bottomLeft.Value();
+    units[INDEX_2] = static_cast<int>(bottomLeft.Unit());
+    values[INDEX_3] = bottomRight.Value();
+    units[INDEX_3] = static_cast<int>(bottomRight.Unit());
+
+    GetArkUIInternalNodeAPI()->GetImageModifier().SetImageBorderRadius(nativeNode, values, units, SIZE_OF_FOUR);
+
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue ImageBridge::ResetBorderRadius(ArkUIRuntimeCallInfo *runtimeCallInfo)
+{
+    EcmaVM *vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    void *nativeNode = firstArg->ToNativePointer(vm)->Value();
+    GetArkUIInternalNodeAPI()->GetImageModifier().ResetImageBorderRadius(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 } // namespace OHOS::Ace::NG

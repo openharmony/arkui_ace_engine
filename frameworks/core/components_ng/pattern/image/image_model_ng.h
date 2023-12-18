@@ -54,9 +54,11 @@ public:
     void SetOnDragMove(OnDragDropFunc &&onDragMove) override;
     void SetOnDrop(OnDragDropFunc &&onDrop) override;
     void SetCopyOption(const CopyOptions &copyOption) override;
+    void SetSmoothEdge(float value) override;
     bool UpdateDragItemInfo(DragItemInfo &itemInfo) override;
     void EnableAnalyzer(bool isEnableAnalyzer) override;
     void SetImageAnalyzerConfig(const ImageAnalyzerConfig& config) override;
+    static void SetSmoothEdge(FrameNode *frameNode, float value);
     static void SetCopyOption(FrameNode *frameNode, CopyOptions copyOption);
     static void SetAutoResize(FrameNode *frameNode, bool autoResize);
     static void SetImageRepeat(FrameNode *frameNode, ImageRepeat imageRepeat);
@@ -71,6 +73,7 @@ public:
     static void SetImageInterpolation(FrameNode *frameNode, ImageInterpolation interpolation);
     static void SetColorFilterMatrix(FrameNode *frameNode, const std::vector<float> &matrix);
     static void SetDraggable(FrameNode *frameNode, bool draggable);
+    static void SetBackBorder(FrameNode *frameNode);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_IMAGE_IMAGE_MODEL_NG_H

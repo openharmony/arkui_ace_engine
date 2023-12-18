@@ -133,6 +133,8 @@ public:
     // initial drag gesture event
     void InitPanEvent();
 
+    void HandleDragStart();
+
     void HandleDragUpdate(const GestureEvent& info);
 
     void HandleDragEnd(float dragVelocity);
@@ -158,7 +160,6 @@ public:
             height_ = currentHeight;
             ChangeScrollHeight(height_);
         }
-        ProcessColumnRect(height_);
     }
 
     void SetCurrentHeightToOverlay(float height)
@@ -258,6 +259,16 @@ public:
 
     bool IsFold();
 
+    bool GetAnimationBreak() const
+    {
+        return isAnimationBreak_;
+    }
+
+    void SetAnimationProcess(bool isProcess)
+    {
+        isAnimationProcess_ = isProcess;
+    }
+
     float GetSheetMaxHeight()
     {
         return pageHeight_;
@@ -269,6 +280,11 @@ public:
     }
 
     float GetFitContentHeight();
+
+    void ProcessColumnRect(float height = 0.0f);
+
+protected:
+    void OnDetachFromFrameNode(FrameNode* frameNode) override;
 
 private:
     void OnModifyDone() override;
@@ -283,7 +299,6 @@ private:
     void UpdateSheetTitle();
     RefPtr<RenderContext> GetRenderContext();
     bool PostTask(const TaskExecutor::Task& task);
-    OffsetT<Dimension> GetInvisibleOffset();
     void CheckSheetHeightChange();
     void InitSheetDetents();
     void HandleFitContontChange(float height);
@@ -296,8 +311,6 @@ private:
     std::string MoveTo(double x, double y);
     std::string LineTo(double x, double y);
     std::string ArcTo(double rx, double ry, double rotation, int32_t arc_flag, double x, double y);
-    void ProcessColumnRect(float height);
-
     uint32_t keyboardHeight_ = 0;
     int32_t targetId_ = -1;
     std::optional<int32_t> titleId_;
@@ -326,11 +339,16 @@ private:
     float sheetOffsetX_ = 0.0f;
     float sheetOffsetY_ = 0.0f;
     bool isFirstInit_ = true;
+    bool isAnimationBreak_ = false;
+    bool isAnimationProcess_ = false;
     SheetType sheetType_ = SheetType::SHEET_BOTTOM;
+    bool windowChanged_ = false;
 
     std::string sheetThemeType_ = "auto";
 
     std::vector<float> sheetDetentHeight_;
+
+    std::shared_ptr<AnimationUtils::Animation> animation_;
 
     ACE_DISALLOW_COPY_AND_MOVE(SheetPresentationPattern);
 };

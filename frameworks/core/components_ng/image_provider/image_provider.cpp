@@ -87,7 +87,6 @@ RefPtr<ImageObject> ImageProvider::QueryThumbnailCache(const ImageSourceInfo& sr
     CHECK_NULL_RETURN(cache, nullptr);
     auto data = DynamicCast<PixmapData>(cache->GetCacheImageData(src.GetKey()));
     if (data) {
-        TAG_LOGD(AceLogTag::ACE_IMAGE, "thumbnail cache found %{public}s", src.GetSrc().c_str());
         return PixelMapImageObject::Create(src, data);
     }
     return nullptr;
@@ -106,9 +105,6 @@ RefPtr<ImageObject> ImageProvider::QueryImageObjectFromCache(const ImageSourceIn
     auto imageCache = pipelineCtx->GetImageCache();
     CHECK_NULL_RETURN(imageCache, nullptr);
     RefPtr<ImageObject> imageObj = imageCache->GetCacheImgObjNG(src.GetKey());
-    if (imageObj) {
-        TAG_LOGD(AceLogTag::ACE_IMAGE, "imageObj found in cache %{public}s", src.ToString().c_str());
-    }
     return imageObj;
 }
 
@@ -204,12 +200,9 @@ bool ImageProvider::RegisterTask(const std::string& key, const WeakPtr<ImageLoad
     auto it = tasks_.find(key);
     if (it != tasks_.end()) {
         it->second.ctxs_.insert(ctx);
-        TAG_LOGD(AceLogTag::ACE_IMAGE, "task already exist %{public}s, callbacks size = %u", key.c_str(),
-            static_cast<uint32_t>(it->second.ctxs_.size()));
         return false;
     }
     tasks_[key].ctxs_.insert(ctx);
-    TAG_LOGD(AceLogTag::ACE_IMAGE, "task is new %{public}s", key.c_str());
     return true;
 }
 
@@ -226,21 +219,18 @@ std::set<WeakPtr<ImageLoadingContext>> ImageProvider::EndTask(const std::string&
         TAG_LOGW(AceLogTag::ACE_IMAGE, "registered task has empty context %{public}s", key.c_str());
     }
     tasks_.erase(it);
-    TAG_LOGD(AceLogTag::ACE_IMAGE, "endTask %s, ctx size = %u", key.c_str(), static_cast<uint32_t>(ctxs.size()));
     return ctxs;
 }
 
 void ImageProvider::CancelTask(const std::string& key, const WeakPtr<ImageLoadingContext>& ctx)
 {
     std::scoped_lock<std::mutex> lock(taskMtx_);
-    TAG_LOGD(AceLogTag::ACE_IMAGE, "try cancel bgTask %{public}s", key.c_str());
     auto it = tasks_.find(key);
     CHECK_NULL_VOID(it != tasks_.end());
     CHECK_NULL_VOID(it->second.ctxs_.find(ctx) != it->second.ctxs_.end());
     // only one LoadingContext waiting for this task, can just cancel
     if (it->second.ctxs_.size() == 1) {
         bool canceled = it->second.bgTask_.Cancel();
-        TAG_LOGD(AceLogTag::ACE_IMAGE, "cancel bgTask %s, result: %d", key.c_str(), canceled);
         if (canceled) {
             tasks_.erase(it);
             return;
@@ -299,9 +289,6 @@ RefPtr<ImageObject> ImageProvider::BuildImageObject(const ImageSourceInfo& src, 
         return nullptr;
     }
     if (frameCount > 1) {
-        TAG_LOGD(AceLogTag::ACE_IMAGE,
-            "make AnimatedImageObject: imageData's size is %{public}s, frameCount is %{public}d",
-            size.ToString().c_str(), frameCount);
         return MakeRefPtr<AnimatedImageObject>(src, size, data);
     }
     return MakeRefPtr<StaticImageObject>(src, size, data);

@@ -23,6 +23,7 @@
 #include "frameworks/core/components/text_field/text_field_controller.h"
 #include "frameworks/core/components/text_field/textfield_theme.h"
 #include "frameworks/core/components_ng/pattern/text/text_menu_extension.h"
+#include "frameworks/core/components_ng/pattern/text_field/text_field_event_hub.h"
 
 namespace OHOS::Ace::Framework {
 
@@ -94,6 +95,9 @@ public:
     static void SetEnableAutoFill(const JSCallbackInfo& info);
     static void SetCancelButton(const JSCallbackInfo& info);
     static void SetSelectAllValue(const JSCallbackInfo& info);
+    static JSRef<JSVal> CreateJSTextCommonEvent(NG::TextCommonEvent& event);
+    static void CreateJsTextFieldCommonEvent(const JSCallbackInfo& info);
+    static Local<JSValueRef> JsKeepEditableState(panda::JsiRuntimeCallInfo *info);
 };
 
 } // namespace OHOS::Ace::Framework

@@ -112,6 +112,26 @@ public:
         return previewMode_;
     }
 
+    void SetPreviewBeforeAnimationScale(float scaleBeforeAnimation)
+    {
+        previewAnimationOptions_.scaleFrom = scaleBeforeAnimation;
+    }
+
+    float GetPreviewBeforeAnimationScale() const
+    {
+        return previewAnimationOptions_.scaleFrom;
+    }
+
+    void SetPreviewAfterAnimationScale(float scaleAfterAnimation)
+    {
+        previewAnimationOptions_.scaleTo = scaleAfterAnimation;
+    }
+
+    float GetPreviewAfterAnimationScale() const
+    {
+        return previewAnimationOptions_.scaleTo;
+    }
+
     bool IsNavigationMenu() const
     {
         return type_ == MenuType::NAVIGATION_MENU;
@@ -294,6 +314,16 @@ public:
     {
         return targetSize_;
     }
+	
+    void SetIsHeightModifiedBySelect(bool isModified)
+    {
+        isHeightModifiedBySelect_ = isModified;
+    }
+    
+    bool IsHeightModifiedBySelect() const
+    {
+        return isHeightModifiedBySelect_;
+    }
 protected:
     void UpdateMenuItemChildren(RefPtr<FrameNode>& host);
     void SetMenuAttribute(RefPtr<FrameNode>& host);
@@ -341,12 +371,14 @@ private:
 
     bool isSelectMenu_ = false;
     MenuPreviewMode previewMode_ = MenuPreviewMode::NONE;
+    MenuPreviewAnimationOptions previewAnimationOptions_;
     bool isFirstShow_ = false;
     OffsetF originOffset_;
     OffsetF endOffset_;
     OffsetF previewOriginOffset_;
 	
     bool isWidthModifiedBySelect_ = false;
+    bool isHeightModifiedBySelect_ = false;
     bool hasLaid_ = false;
     SizeF targetSize_;
 

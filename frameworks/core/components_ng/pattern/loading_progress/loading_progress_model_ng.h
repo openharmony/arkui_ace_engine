@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_LOADING_PROGRESS_LOADING_PROGRESS_MODEL_NG_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_LOADING_PROGRESS_LOADING_PROGRESS_MODEL_NG_H
 
+#include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/pattern/loading_progress/loading_progress_model.h"
 
 namespace OHOS::Ace::NG {
@@ -24,6 +25,9 @@ public:
     void Create() override;
     void SetColor(const Color& value) override;
     void SetEnableLoading(bool enable) override;
+
+    static void SetColor(FrameNode* frameNode, const Color& value);
+    static void SetEnableLoading(FrameNode* frameNode, bool enable);
 };
 
 } // namespace OHOS::Ace::NG

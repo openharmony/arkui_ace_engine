@@ -18,6 +18,7 @@
 
 #include <cstdint>
 #include <functional>
+#include <stack>
 #include <unordered_map>
 #include <utility>
 
@@ -27,6 +28,7 @@
 #include "core/components/common/properties/placement.h"
 #include "core/components/dialog/dialog_properties.h"
 #include "core/components/picker/picker_data.h"
+#include "core/components_ng/animation/geometry_transition.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/pattern/calendar_picker/calendar_type_define.h"
 #include "core/components_ng/pattern/overlay/modal_style.h"
@@ -139,20 +141,40 @@ public:
     void ShowCalendarDialog(const DialogProperties& dialogProps, const CalendarSettingData& settingData,
         std::map<std::string, NG::DialogEvent> dialogEvent,
         std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent);
-    void PopModalDialog();
-	
+    void PopModalDialog(int32_t maskId);
+
     void CloseDialog(const RefPtr<FrameNode>& dialogNode);
     void SetSubWindowId(int32_t subWindowId)
     {
-        subWindowId_=subWindowId;
+        subWindowId_ = subWindowId;
     }
     int32_t GetSubwindowId()
     {
         return subWindowId_;
     }
-    int32_t GetMaskNodeId()
+    void SetMaskNodeId(int32_t dialogId, int32_t maskId)
     {
-        return maskNodeId_;
+        maskNodeIdMap_[dialogId] = maskId;
+    }
+    bool isMaskNode(int32_t maskId)
+    {
+        for (auto it = maskNodeIdMap_.begin(); it != maskNodeIdMap_.end(); it++) {
+            if (it->second == maskId) {
+                return true;
+            }
+        }
+        return false;
+    }
+    int32_t GetMaskNodeIdWithDialogId(int32_t dialogId)
+    {
+        int32_t maskNodeId = -1;
+        for (auto it = maskNodeIdMap_.begin(); it != maskNodeIdMap_.end(); it++) {
+            if (it->first == dialogId) {
+                maskNodeId = it->second;
+                break;
+            }
+        }
+        return maskNodeId;
     }
     /**  pop overlays (if any) on back press
      *
@@ -205,6 +227,16 @@ public:
     RefPtr<FrameNode> GetPixelMapNode()
     {
         return pixmapColumnNodeWeak_.Upgrade();
+    }
+
+    RefPtr<FrameNode> GetPixelMapContentNode() const
+    {
+        auto column = pixmapColumnNodeWeak_.Upgrade();
+        if (!column) {
+            return nullptr;
+        }
+        auto imageNode = AceType::DynamicCast<FrameNode>(column->GetFirstChild());
+        return imageNode;
     }
 
     bool GetHasFilter()
@@ -364,6 +396,7 @@ private:
     bool DialogInMapHoldingFocus();
     void PlayKeyboardTransition(RefPtr<FrameNode> customKeyboard, bool isTransitionIn);
     void FireNavigationStateChange(const RefPtr<UINode>& root, bool show, const RefPtr<UINode>& node = nullptr);
+    RefPtr<FrameNode> GetModalNodeInStack(std::stack<WeakPtr<FrameNode>>& stack);
     void PlayBubbleStyleSheetTransition(RefPtr<FrameNode> sheetNode, bool isTransitionIn);
 
     // Key: target Id, Value: PopupInfo
@@ -380,7 +413,7 @@ private:
     float sheetHeight_ { 0.0 };
     WeakPtr<UINode> rootNodeWeak_;
     int32_t dialogCount_ = 0;
-    int32_t maskNodeId_ = -1;
+    std::unordered_map<int32_t, int32_t> maskNodeIdMap_;
     int32_t subWindowId_;
 #ifdef ENABLE_DRAG_FRAMEWORK
     bool hasPixelMap_ { false };

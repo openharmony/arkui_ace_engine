@@ -35,6 +35,8 @@ constexpr Color SELECT_FILL_COLOR = Color(0x1A000000);
 constexpr Color SELECT_STROKE_COLOR = Color(0x33FFFFFF);
 const std::string SCROLLABLE_DRAG_SCENE = "scrollable_drag_scene";
 const std::string SCROLL_BAR_DRAG_SCENE = "scrollBar_drag_scene";
+const std::string SCROLLABLE_MOTION_SCENE = "scrollable_motion_scene";
+const std::string SCROLLABLE_MULTI_TASK_SCENE = "scrollable_multi_task_scene";
 } // namespace
 
 RefPtr<PaintProperty> ScrollablePattern::CreatePaintProperty()
@@ -388,11 +390,12 @@ void ScrollablePattern::AddScrollEvent()
     };
     scrollable->SetOnScrollSnapCallback(scrollSnap);
 
-    auto calePredictSnapOffsetCallback = [weak = WeakClaim(this)](float delta) -> std::optional<float> {
+    auto calePredictSnapOffsetCallback =
+            [weak = WeakClaim(this)](float delta, float dragDistance, float velocity) -> std::optional<float> {
         auto pattern = weak.Upgrade();
         std::optional<float> predictSnapOffset;
         CHECK_NULL_RETURN(pattern, predictSnapOffset);
-        return pattern->CalePredictSnapOffset(delta);
+        return pattern->CalePredictSnapOffset(delta, dragDistance, velocity);
     };
     scrollable->SetCalePredictSnapOffsetCallback(std::move(calePredictSnapOffsetCallback));
 
@@ -409,6 +412,13 @@ void ScrollablePattern::AddScrollEvent()
         return pattern->NotifyFRCSceneInfo(SCROLLABLE_DRAG_SCENE, velocity, sceneStatus);
     };
     scrollable->SetDragFRCSceneCallback(std::move(dragFRCSceneCallback));
+
+    auto scrollMotionFRCSceneCallback = [weak = WeakClaim(this)](double velocity, SceneStatus sceneStatus) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        return pattern->NotifyFRCSceneInfo(SCROLLABLE_MOTION_SCENE, velocity, sceneStatus);
+    };
+    scrollable->SetScrollMotionFRCSceneCallback(std::move(scrollMotionFRCSceneCallback));
 
     scrollableEvent_ = MakeRefPtr<ScrollableEvent>(GetAxis());
     scrollableEvent_->SetScrollable(scrollable);
@@ -513,10 +523,11 @@ void ScrollablePattern::RegisterScrollBarEventTask()
         pattern->OnScrollEnd();
     };
     scrollBar_->SetScrollEndCallback(std::move(scrollEnd));
-    auto calePredictSnapOffsetCallback = [weak = WeakClaim(this)](float delta) {
+    auto calePredictSnapOffsetCallback =
+            [weak = WeakClaim(this)](float delta, float dragDistance, float velocity) -> std::optional<float> {
         auto pattern = weak.Upgrade();
         CHECK_NULL_RETURN(pattern, std::optional<float>());
-        return pattern->CalePredictSnapOffset(delta);
+        return pattern->CalePredictSnapOffset(delta, dragDistance, velocity);
     };
     scrollBar_->SetCalePredictSnapOffsetCallback(std::move(calePredictSnapOffsetCallback));
     auto startScrollSnapMotionCallback = [weak = WeakClaim(this)](float scrollSnapDelta, float scrollSnapVelocity) {
@@ -694,10 +705,11 @@ void ScrollablePattern::SetScrollBarProxy(const RefPtr<ScrollBarProxy>& scrollBa
         CHECK_NULL_VOID(pattern);
         pattern->OnScrollEnd();
     };
-    auto calePredictSnapOffsetCallback = [weak = WeakClaim(this)](float delta) {
+    auto calePredictSnapOffsetCallback =
+            [weak = WeakClaim(this)](float delta, float dragDistance, float velocity) -> std::optional<float> {
         auto pattern = weak.Upgrade();
         CHECK_NULL_RETURN(pattern, std::optional<float>());
-        return pattern->CalePredictSnapOffset(delta);
+        return pattern->CalePredictSnapOffset(delta, dragDistance, velocity);
     };
     auto startScrollSnapMotionCallback = [weak = WeakClaim(this)](float scrollSnapDelta, float scrollSnapVelocity) {
         auto pattern = weak.Upgrade();
@@ -826,8 +838,6 @@ void ScrollablePattern::ScrollTo(float position)
 
 void ScrollablePattern::AnimateTo(float position, float duration, const RefPtr<Curve>& curve, bool smooth)
 {
-    TAG_LOGD(AceLogTag::ACE_SCROLLABLE, "The position of the animation is %{public}f, duration is %{public}f", position,
-        duration);
     float currVelocity = 0.0f;
     if (!IsScrollableStopped()) {
         CHECK_NULL_VOID(scrollableEvent_);
@@ -842,6 +852,10 @@ void ScrollablePattern::AnimateTo(float position, float duration, const RefPtr<C
         animator_->AddStopListener([weak = AceType::WeakClaim(this)]() {
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
+            if (pattern->springMotion_) {
+                pattern->NotifyFRCSceneInfo(SCROLLABLE_MULTI_TASK_SCENE, pattern->springMotion_->GetCurrentVelocity(),
+                    SceneStatus::END);
+            }
             pattern->OnAnimateStop();
         });
     } else if (!animator_->IsStopped()) {
@@ -914,10 +928,13 @@ void ScrollablePattern::PlaySpringAnimation(float position, float velocity, floa
     springMotion_->AddListener([weakScroll = AceType::WeakClaim(this)](double position) {
         auto pattern = weakScroll.Upgrade();
         CHECK_NULL_VOID(pattern);
+        pattern->NotifyFRCSceneInfo(SCROLLABLE_MULTI_TASK_SCENE, pattern->springMotion_->GetCurrentVelocity(),
+            SceneStatus::RUNNING);
         if (!pattern->UpdateCurrentOffset(pattern->GetTotalOffset() - position, SCROLL_FROM_ANIMATION_CONTROLLER)) {
             pattern->animator_->Stop();
         }
     });
+    NotifyFRCSceneInfo(SCROLLABLE_MULTI_TASK_SCENE, springMotion_->GetCurrentVelocity(), SceneStatus::START);
     animator_->PlayMotion(springMotion_);
 }
 
@@ -1975,16 +1992,6 @@ void ScrollablePattern::HandleLeaveHotzoneEvent()
 }
 
 /**
- * @description: Set drag status listener
- * @param {DragStatusListener} dragStatusListener  drag status listener
- * @return None
- */
-void ScrollablePattern::SetDragStatusListener(RefPtr<DragStatusListener> listener)
-{
-    dragStatusListener_ = listener;
-}
-
-/**
  * @description: This is the entry point for handling drag events
  * @return None
  */
@@ -1992,28 +1999,6 @@ void ScrollablePattern::HandleOnDragStatusCallback(
     const DragEventType& dragEventType, const RefPtr<NotifyDragEvent>& notifyDragEvent)
 {
     HandleHotZone(dragEventType, notifyDragEvent);
-    CHECK_NULL_VOID(dragStatusListener_.has_value());
-
-    auto dragStatusListener = dragStatusListener_.value();
-    switch (dragEventType) {
-        case DragEventType::START:
-            dragStatusListener->OnDragStarted(notifyDragEvent);
-            break;
-        case DragEventType::ENTER:
-            dragStatusListener->OnDragEntered(notifyDragEvent);
-            break;
-        case DragEventType::MOVE:
-            dragStatusListener->OnDragMoved(notifyDragEvent);
-            break;
-        case DragEventType::LEAVE:
-            dragStatusListener->OnDragLeaved(notifyDragEvent);
-            break;
-        case DragEventType::DROP:
-            dragStatusListener->OnDragEnded(notifyDragEvent);
-            break;
-        default:
-            break;
-    }
 }
 
 /**

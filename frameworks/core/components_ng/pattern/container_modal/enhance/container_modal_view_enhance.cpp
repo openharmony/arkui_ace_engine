@@ -176,11 +176,9 @@ RefPtr<FrameNode> ContainerModalViewEnhance::SetTapGestureEvent(
         auto windowMode = windowManager->GetWindowMode();
         auto maximizeMode = windowManager->GetCurrentWindowMaximizeMode();
         if (maximizeMode == MaximizeMode::MODE_AVOID_SYSTEM_BAR || windowMode == WindowMode::WINDOW_MODE_FULLSCREEN) {
-            LOGD("double click to recover");
             EventReport::ReportDoubleClickTitle(DOUBLE_CLICK_TO_RECOVER);
             windowManager->WindowRecover();
         } else if (windowMode == WindowMode::WINDOW_MODE_FLOATING) {
-            LOGD("double click to maximize");
             EventReport::ReportDoubleClickTitle(DOUBLE_CLICK_TO_MAXIMIZE);
             windowManager->WindowMaximize(true);
         }
@@ -218,10 +216,8 @@ RefPtr<FrameNode> ContainerModalViewEnhance::AddControlButtons(
             auto mode = windowManager->GetWindowMode();
             auto currentMode = windowManager->GetCurrentWindowMaximizeMode();
             if (mode == WindowMode::WINDOW_MODE_FULLSCREEN || currentMode == MaximizeMode::MODE_AVOID_SYSTEM_BAR) {
-                LOGD("recover button clicked");
                 windowManager->WindowRecover();
             } else {
-                LOGD("maximize button clicked");
                 windowManager->WindowMaximize(true);
             }
             containerNode->OnWindowFocused();
@@ -275,7 +271,6 @@ void ContainerModalViewEnhance::BondingMaxBtnGestureEvent(
     auto longPressCallback = [weakMaximizeBtn = AceType::WeakClaim(AceType::RawPtr(maximizeBtn))](GestureEvent& info) {
         auto maximizeBtn = weakMaximizeBtn.Upgrade();
         CHECK_NULL_VOID(maximizeBtn);
-        LOGD("maximize btn long press,call showMaxMenu func");
         auto menuPosX = info.GetScreenLocation().GetX() - info.GetLocalLocation().GetX() - MENU_FLOAT_X.ConvertToPx();
         auto menuPosY = info.GetScreenLocation().GetY() - info.GetLocalLocation().GetY() + MENU_FLOAT_Y.ConvertToPx();
         OffsetF menuPosition { menuPosX, menuPosY };
@@ -294,8 +289,6 @@ void ContainerModalViewEnhance::BondingMaxBtnInputEvent(
     auto windowManager = pipeline->GetWindowManager();
     auto hub = maximizeBtn->GetOrCreateInputEventHub();
     auto hoverMoveFuc = [](MouseInfo& info) {
-        LOGD("container window on hover event action_ = %{public}d sIsMenuPending_ %{public}d", info.GetAction(),
-            sIsMenuPending_);
         sIsForbidMenuEvent_ = info.GetButton() == MouseButton::LEFT_BUTTON ||
                               info.GetAction() == MouseAction::WINDOW_ENTER || info.GetScreenLocation().IsZero();
         if (!sIsMenuPending_ && info.GetAction() == MouseAction::MOVE && !info.GetScreenLocation().IsZero()) {
@@ -387,7 +380,6 @@ RefPtr<FrameNode> ContainerModalViewEnhance::BuildMaximizeMenuItem()
             LOGE("create maxBtn callback func failed,windowManager is null");
             return;
         }
-        LOGD("Enhance Menu, MODE_MAXIMIZE selected");
         ResetHoverTimer();
         if (MaximizeMode::MODE_AVOID_SYSTEM_BAR == windowManager->GetCurrentWindowMaximizeMode()) {
             EventReport::ReportClickTitleMaximizeMenu(MAX_MENU_ITEM_MAXIMIZE, MAX_MENU_DEFAULT_NOT_CHANGE);
@@ -424,7 +416,6 @@ RefPtr<FrameNode> ContainerModalViewEnhance::BuildFullScreenMenuItem()
             return;
         }
         ResetHoverTimer();
-        LOGD("Enhance Menu, MODE_FULLSCREEN selected");
         if (MaximizeMode::MODE_FULL_FILL == windowManager->GetCurrentWindowMaximizeMode()) {
             EventReport::ReportClickTitleMaximizeMenu(MAX_MENU_ITEM_FULLSCREEN, MAX_MENU_DEFAULT_NOT_CHANGE);
         } else {
@@ -477,7 +468,6 @@ RefPtr<FrameNode> ContainerModalViewEnhance::BuildLeftSplitMenuItem()
             LOGE("create leftsplit callback func failed,windowMannager is null!");
             return;
         }
-        LOGD("Enhance Menu, left split selected");
         EventReport::ReportClickTitleMaximizeMenu(MAX_MENU_ITEM_LEFT_SPLIT, MAX_MENU_DEFAULT_NOT_CHANGE);
         windowManager->FireWindowSplitCallBack();
     };
@@ -502,7 +492,6 @@ RefPtr<FrameNode> ContainerModalViewEnhance::BuildRightSplitMenuItem()
             LOGE("create rightSpiltBtn callback func failed, windowManager is null!");
             return;
         }
-        LOGD("Enhance Menu, right split selected");
         EventReport::ReportClickTitleMaximizeMenu(MAX_MENU_ITEM_RIGHT_SPLIT, MAX_MENU_DEFAULT_NOT_CHANGE);
         windowManager->FireWindowSplitCallBack(false);
     };
@@ -627,7 +616,6 @@ RefPtr<FrameNode> ContainerModalViewEnhance::BuildMenuItemPadding(PaddingPropert
 
 void ContainerModalViewEnhance::ResetHoverTimer()
 {
-    LOGD("ContainerModalViewEnhance ResetHoverTimer sIsMenuPending_ %{public}d", sIsMenuPending_);
     sContextTimer_.Reset(nullptr);
     sIsMenuPending_ = false;
 }

@@ -165,7 +165,7 @@ public:
     Rect GetItemRect(int32_t index) const override;
 
     // scrollSnap
-    std::optional<float> CalePredictSnapOffset(float delta) override;
+    std::optional<float> CalePredictSnapOffset(float delta, float dragDistance = 0.f, float velocity = 0.f) override;
     bool NeedScrollSnapToSide(float delta) override;
     void CaleSnapOffsets();
     void CaleSnapOffsetsByInterval(ScrollSnapAlign scrollSnapAlign);
@@ -268,6 +268,17 @@ public:
         return isSelectScroll_;
     }
 
+    void SetEnablePaging(ScrollPagingStatus status)
+    {
+        CHECK_NULL_VOID(enablePagingStatus_ != ScrollPagingStatus::INVALID);
+        enablePagingStatus_ =  status;
+    }
+
+    ScrollPagingStatus GetEnablePaging()
+    {
+        return enablePagingStatus_;
+    }
+
 protected:
     void DoJump(float position, int32_t source = SCROLL_FROM_JUMP);
 
@@ -292,9 +303,11 @@ private:
     void AddScrollEdgeEffect(RefPtr<ScrollEdgeEffect> scrollEffect);
     void UpdateScrollBarOffset() override;
     void SetAccessibilityAction();
+    bool SetScrollProperties(const RefPtr<LayoutWrapper>& dirty);
     void ScrollSnapTrigger();
     void CheckScrollable();
     OffsetF GetOffsetToScroll(const RefPtr<FrameNode>& childFrame) const;
+    float GetPagingDelta(float dragDistance, float velocity) const;
 
     float currentOffset_ = 0.0f;
     float lastOffset_ = 0.0f;
@@ -317,6 +330,7 @@ private:
     
     bool isWidthModifiedBySelect_ = false;
     bool isSelectScroll_ = false;
+    ScrollPagingStatus enablePagingStatus_ = ScrollPagingStatus::NONE;
 };
 
 } // namespace OHOS::Ace::NG

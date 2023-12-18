@@ -122,4 +122,42 @@ void GridItemModelNG::SetOnSelect(SelectFunc&& onSelect)
     eventHub->SetOnSelect(std::move(onSelect));
 }
 
+void GridItemModelNG::SetSelectable(FrameNode* frameNode, bool selectable)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<GridItemPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetSelectable(selectable);
+}
+
+void GridItemModelNG::SetSelected(FrameNode* frameNode, bool selected)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<GridItemPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetSelected(selected);
+    auto eventHub = frameNode->GetEventHub<GridItemEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetCurrentUIState(UI_STATE_SELECTED, selected);
+}
+
+void GridItemModelNG::SetRowStart(FrameNode* frameNode, int32_t rowStart)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(GridItemLayoutProperty, RowStart, rowStart, frameNode);
+}
+
+void GridItemModelNG::SetRowEnd(FrameNode* frameNode, int32_t rowEnd)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(GridItemLayoutProperty, RowEnd, rowEnd, frameNode);
+}
+
+void GridItemModelNG::SetColumnStart(FrameNode* frameNode, int32_t columnStart)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(GridItemLayoutProperty, ColumnStart, columnStart, frameNode);
+}
+
+void GridItemModelNG::SetColumnEnd(FrameNode* frameNode, int32_t columnEnd)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(GridItemLayoutProperty, ColumnEnd, columnEnd, frameNode);
+}
 } // namespace OHOS::Ace::NG

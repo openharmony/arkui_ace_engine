@@ -70,13 +70,6 @@ void OptionLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     if (optionPattern->IsSelectOption()) {
         auto selectOptionWidth = optionPattern->GetSelectOptionWidth();
         idealSize.SetWidth(selectOptionWidth);
-    
-        if (optionPattern->IsHeightModifiedBySelect()) {
-            auto optionPatintProperty = optionNode->GetPaintProperty<OptionPaintProperty>();
-            CHECK_NULL_VOID(optionPatintProperty);
-            auto selectModifiedHeight = optionPatintProperty->GetSelectModifiedHeight();
-            idealSize.SetHeight(selectModifiedHeight.value());
-        }
     }
     auto rowChild = child->GetOrCreateChildByIndex(0);
     if (rowChild && (rowChild->GetHostTag() == V2::PASTE_BUTTON_ETS_TAG)) {
@@ -89,7 +82,6 @@ void OptionLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         rowChild->GetLayoutProperty()->UpdatePropertyChangeFlag(PROPERTY_UPDATE_MEASURE);
         rowChild->Measure(childConstraint);
     }
-    LOGD("option frame size set to %{public}s", idealSize.ToString().c_str());
     layoutWrapper->GetGeometryNode()->SetFrameSize(idealSize);
 }
 

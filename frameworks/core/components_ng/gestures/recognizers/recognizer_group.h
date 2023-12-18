@@ -132,6 +132,21 @@ public:
         }
     }
 
+    void ForceCleanRecognizer() override
+    {
+        for (const auto& child : recognizers_) {
+            if (child) {
+                child->ForceCleanRecognizer();
+            }
+        }
+        touchPoints_.clear();
+        fingersId_.clear();
+        fingerList_.clear();
+        activeFingers_.clear();
+        currentFingers_ = 0;
+        refereeState_ = RefereeState::READY;
+        disposal_ = GestureDisposal::NONE;
+    }
 protected:
     void OnBeginGestureReferee(int32_t touchId, bool needUpdateChild = false) override;
     void OnFinishGestureReferee(int32_t touchId, bool isBlocked = false) override;

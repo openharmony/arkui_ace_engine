@@ -17,6 +17,7 @@
 
 #include <map>
 
+#include "base/utils/utils.h"
 #include "base/want/want_wrap.h"
 #include "core/common/app_bar_helper.h"
 #include "core/common/container.h"
@@ -360,21 +361,17 @@ void AppBarView::SetFontStyle(Ace::FontStyle fontStyle)
 void AppBarView::SetIconColor(const std::optional<Color>& color)
 {
     CHECK_NULL_VOID(atom_);
-    auto uiRow = atom_->GetFirstChild();
-    CHECK_NULL_VOID(uiRow);
-    auto uiBackButton = uiRow->GetFirstChild();
-    CHECK_NULL_VOID(uiBackButton);
-    auto uiBackIcon = uiBackButton->GetFirstChild();
-    CHECK_NULL_VOID(uiBackIcon);
-    auto backIcon = AceType::DynamicCast<FrameNode>(uiBackIcon);
-    auto uiFaButton = atom_->GetLastChild();
-    CHECK_NULL_VOID(uiFaButton);
-    auto uiFaIcon = uiFaButton->GetFirstChild();
-    CHECK_NULL_VOID(uiFaIcon);
-    auto faIcon = AceType::DynamicCast<FrameNode>(uiFaIcon);
+    auto row = atom_->GetFirstChild();
+    CHECK_NULL_VOID(row);
+    auto backButton = row->GetFirstChild();
+    CHECK_NULL_VOID(backButton);
+    auto backIcon = AceType::DynamicCast<FrameNode>(backButton->GetFirstChild());
     SetEachIconColor(backIcon, color, InternalResource::ResourceId::APP_BAR_BACK_SVG);
-    SetEachIconColor(faIcon, color, InternalResource::ResourceId::APP_BAR_FA_SVG);
     isIconColorSetted = color.has_value();
+    auto faButton = GetFaButton();
+    CHECK_NULL_VOID(faButton);
+    auto faIcon = AceType::DynamicCast<FrameNode>(faButton->GetFirstChild());
+    SetEachIconColor(faIcon, color, InternalResource::ResourceId::APP_BAR_FA_SVG);
 }
 
 void AppBarView::SetRowWidth(const Dimension& width)
@@ -385,9 +382,8 @@ void AppBarView::SetRowWidth(const Dimension& width)
     Dimension offset = appBarTheme->GetIconSize() * 3;
     Dimension positionX = width - offset;
     Dimension positionY = (appBarTheme->GetAppBarHeight() / 2.0f) - appBarTheme->GetIconSize();
-    auto uiFaButton = atom_->GetLastChild();
-    CHECK_NULL_VOID(uiFaButton);
-    auto faButton = AceType::DynamicCast<FrameNode>(uiFaButton);
+    auto faButton = GetFaButton();
+    CHECK_NULL_VOID(faButton);
     auto renderContext = faButton->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     renderContext->UpdatePosition(OffsetT(positionX, positionY));
@@ -432,5 +428,14 @@ void AppBarView::IniColor()
     if (!isIconColorSetted) {
         SetIconColor(std::nullopt);
     }
+}
+
+RefPtr<FrameNode> AppBarView::GetFaButton()
+{
+#ifndef IS_EMULATOR
+    CHECK_NULL_RETURN(atom_, nullptr);
+    return AceType::DynamicCast<FrameNode>(atom_->GetLastChild());
+#endif
+    return nullptr;
 }
 } // namespace OHOS::Ace::NG
