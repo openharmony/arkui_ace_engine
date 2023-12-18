@@ -1614,6 +1614,11 @@ void WebPattern::UpdateJavaScriptOnDocumentStart()
     // cross platform is not support now;
 }
 
+void WebPattern::JavaScriptOnDocumentEnd(const ScriptItems& scriptItems)
+{
+    // cross platform is not support now;
+}
+
 void WebPattern::OnOverScrollModeUpdate(int mode)
 {
    // cross platform is not support now;

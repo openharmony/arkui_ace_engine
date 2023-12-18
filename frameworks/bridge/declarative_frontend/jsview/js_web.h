@@ -134,6 +134,7 @@ public:
     static void SetNestedScroll(const JSCallbackInfo& info);
     static void OverScrollMode(int overScrollMode);
     static void JavaScriptOnDocumentStart(const JSCallbackInfo& args);
+    static void JavaScriptOnDocumentEnd(const JSCallbackInfo& args);
     // Enable or disable debugging of web content
     static bool webDebuggingAccess_;
     static JSwebEventCallback OnControllerAttachedCallback_;
@@ -142,6 +143,9 @@ public:
 protected:
     static void OnCommonDialog(const JSCallbackInfo& args, int dialogEventType);
     static void ParseRawfileWebSrc(const JSRef<JSVal>& srcValue, std::string& webSrc);
+
+private:
+    static void ParseScriptItems(const JSCallbackInfo& args, ScriptItems& scriptItems);
 };
 } // namespace OHOS::Ace::Framework
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_WEB_H

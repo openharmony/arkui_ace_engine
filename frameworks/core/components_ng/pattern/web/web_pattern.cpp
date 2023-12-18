@@ -1494,6 +1494,7 @@ void WebPattern::OnModifyDone()
             delegate_->InitOHOSWeb(PipelineContext::GetCurrentContext(), renderSurface_);
         }
         UpdateJavaScriptOnDocumentStart();
+        UpdateJavaScriptOnDocumentEnd();
         delegate_->UpdateBackgroundColor(GetBackgroundColorValue(
             static_cast<int32_t>(renderContext->GetBackgroundColor().value_or(Color::WHITE).GetValue())));
         delegate_->UpdateJavaScriptEnabled(GetJsEnabledValue(true));
@@ -2798,18 +2799,35 @@ RefPtr<NodePaintMethod> WebPattern::CreateNodePaintMethod()
 
 void WebPattern::JavaScriptOnDocumentStart(const ScriptItems& scriptItems)
 {
-    scriptItems_ = std::make_optional<ScriptItems>(scriptItems);
+    onDocumentStartScriptItems_ = std::make_optional<ScriptItems>(scriptItems);
     if (delegate_) {
         UpdateJavaScriptOnDocumentStart();
         delegate_->JavaScriptOnDocumentStart();
     }
 }
 
+void WebPattern::JavaScriptOnDocumentEnd(const ScriptItems& scriptItems)
+{
+    onDocumentEndScriptItems_ = std::make_optional<ScriptItems>(scriptItems);
+    if (delegate_) {
+        UpdateJavaScriptOnDocumentEnd();
+        delegate_->JavaScriptOnDocumentEnd();
+    }
+}
+
 void WebPattern::UpdateJavaScriptOnDocumentStart()
 {
-    if (delegate_ && scriptItems_.has_value()) {
-        delegate_->SetJavaScriptItems(scriptItems_.value());
-        scriptItems_ = std::nullopt;
+    if (delegate_ && onDocumentStartScriptItems_.has_value()) {
+        delegate_->SetJavaScriptItems(onDocumentStartScriptItems_.value(), ScriptItemType::DOCUMENT_START);
+        onDocumentStartScriptItems_ = std::nullopt;
+    }
+}
+
+void WebPattern::UpdateJavaScriptOnDocumentEnd()
+{
+    if (delegate_ && onDocumentEndScriptItems_.has_value()) {
+        delegate_->SetJavaScriptItems(onDocumentEndScriptItems_.value(), ScriptItemType::DOCUMENT_END);
+        onDocumentEndScriptItems_ = std::nullopt;
     }
 }
 

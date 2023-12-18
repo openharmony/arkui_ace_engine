@@ -413,7 +413,9 @@ public:
     bool NotifyStartDragTask();
     bool IsImageDrag();
     void UpdateJavaScriptOnDocumentStart();
+    void UpdateJavaScriptOnDocumentEnd();
     void JavaScriptOnDocumentStart(const ScriptItems& scriptItems);
+    void JavaScriptOnDocumentEnd(const ScriptItems& scriptItems);
 #ifdef ENABLE_DRAG_FRAMEWORK
     DragRet GetDragAcceptableStatus();
 #endif
@@ -676,7 +678,8 @@ private:
     RefPtr<WebDelegate> delegate_;
     RefPtr<WebDelegateObserver> observer_;
     std::set<OHOS::Ace::KeyCode> KeyCodeSet_;
-    std::optional<ScriptItems> scriptItems_;
+    std::optional<ScriptItems> onDocumentStartScriptItems_;
+    std::optional<ScriptItems> onDocumentEndScriptItems_;
     bool isOfflineMode_ = false;
     ACE_DISALLOW_COPY_AND_MOVE(WebPattern);
     bool accessibilityState_ = false;

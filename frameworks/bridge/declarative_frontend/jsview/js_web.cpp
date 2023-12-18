@@ -1653,6 +1653,7 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSClass<JSWeb>::StaticMethod("layoutMode", &JSWeb::SetLayoutMode);
     JSClass<JSWeb>::StaticMethod("nestedScroll", &JSWeb::SetNestedScroll);
     JSClass<JSWeb>::StaticMethod("javaScriptOnDocumentStart", &JSWeb::JavaScriptOnDocumentStart);
+    JSClass<JSWeb>::StaticMethod("javaScriptOnDocumentEnd", &JSWeb::JavaScriptOnDocumentEnd);
     JSClass<JSWeb>::InheritAndBind<JSViewAbstract>(globalObj);
     JSWebDialog::JSBind(globalObj);
     JSWebGeolocation::JSBind(globalObj);
@@ -3906,7 +3907,7 @@ void JSWeb::SetNestedScroll(const JSCallbackInfo& args)
     args.ReturnSelf();
 }
 
-void JSWeb::JavaScriptOnDocumentStart(const JSCallbackInfo& args)
+void JSWeb::ParseScriptItems(const JSCallbackInfo& args, ScriptItems& scriptItems)
 {
     if (args.Length() != 1 || args[0]->IsUndefined() || args[0]->IsNull() || !args[0]->IsArray()) {
         return;
@@ -3917,7 +3918,6 @@ void JSWeb::JavaScriptOnDocumentStart(const JSCallbackInfo& args)
         return;
     }
     std::string script;
-    ScriptItems scriptItems;
     std::vector<std::string> scriptRules;
     for (size_t i = 0; i < length; i++) {
         auto item = paramArray->GetValueAt(i);
@@ -3941,7 +3941,20 @@ void JSWeb::JavaScriptOnDocumentStart(const JSCallbackInfo& args)
             scriptItems.insert(std::make_pair(script, scriptRules));
         }
     }
+}
+
+void JSWeb::JavaScriptOnDocumentStart(const JSCallbackInfo& args)
+{
+    ScriptItems scriptItems;
+    ParseScriptItems(args, scriptItems);
     WebModel::GetInstance()->JavaScriptOnDocumentStart(scriptItems);
+}
+
+void JSWeb::JavaScriptOnDocumentEnd(const JSCallbackInfo& args)
+{
+    ScriptItems scriptItems;
+    ParseScriptItems(args, scriptItems);
+    WebModel::GetInstance()->JavaScriptOnDocumentEnd(scriptItems);
 }
 
 void JSWeb::CopyOption(int32_t copyOption)
