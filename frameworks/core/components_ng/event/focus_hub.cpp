@@ -418,10 +418,6 @@ void FocusHub::RemoveChild(const RefPtr<FocusHub>& focusNode, BlurReason reason)
 void FocusHub::SetParentFocusable(bool parentFocusable)
 {
     parentFocusable_ = parentFocusable;
-    auto focusableNode = IsFocusableNode();
-    if (focusableNode) {
-        RefreshParentFocusable(focusableNode);
-    }
 }
 
 bool FocusHub::IsFocusable()
@@ -463,7 +459,6 @@ void FocusHub::SetFocusable(bool focusable)
     if (!focusable) {
         RemoveSelf(BlurReason::FOCUS_SWITCH);
     }
-    RefreshParentFocusable(IsFocusableNode());
 }
 
 bool FocusHub::IsEnabled() const
@@ -477,20 +472,6 @@ void FocusHub::SetEnabled(bool enabled)
     if (!enabled) {
         RemoveSelf(BlurReason::FOCUS_SWITCH);
     }
-    RefreshParentFocusable(IsFocusableNode());
-}
-
-void FocusHub::SetEnabledNode(bool enabled)
-{
-    if (!enabled) {
-        RefreshFocus();
-    }
-}
-
-void FocusHub::SetEnabledScope(bool enabled)
-{
-    SetEnabledNode(enabled);
-    RefreshParentFocusable(IsFocusableNode());
 }
 
 bool FocusHub::IsShow() const
@@ -515,19 +496,6 @@ void FocusHub::SetShow(bool show)
     if (!show) {
         RemoveSelf(BlurReason::FOCUS_SWITCH);
     }
-    RefreshParentFocusable(IsFocusableNode());
-}
-
-void FocusHub::SetShowNode(bool show)
-{
-    if (!show) {
-        RefreshFocus();
-    }
-}
-
-void FocusHub::SetShowScope(bool show)
-{
-    SetShowNode(show);
 }
 
 bool FocusHub::IsCurrentFocusWholePath()
@@ -889,21 +857,6 @@ bool FocusHub::FocusToHeadOrTailChild(bool isHead)
         return canChildBeFocused;
     }
     return false;
-}
-
-void FocusHub::RefreshParentFocusable(bool focusable)
-{
-    if (focusType_ != FocusType::SCOPE) {
-        return;
-    }
-    std::list<RefPtr<FocusHub>> focusNodes;
-    FlushChildrenFocusHub(focusNodes);
-    for (auto& item : focusNodes) {
-        if (focusable != item->IsParentFocusable()) {
-            item->SetParentFocusable(focusable);
-            item->RefreshParentFocusable(item->IsFocusableNode());
-        }
-    }
 }
 
 bool FocusHub::OnClick(const KeyEvent& event)
@@ -1464,7 +1417,7 @@ bool FocusHub::AcceptFocusOfLastFocus()
         return lastFocusNode ? lastFocusNode->AcceptFocusOfLastFocus() : false;
     }
     if (focusType_ == FocusType::NODE) {
-        return IsFocusable();
+        return IsFocusableWholePath();
     }
     return false;
 }
@@ -1482,7 +1435,7 @@ bool FocusHub::AcceptFocusByRectOfLastFocus(const RectF& rect)
 
 bool FocusHub::AcceptFocusByRectOfLastFocusNode(const RectF& rect)
 {
-    return IsFocusable();
+    return IsFocusableWholePath();
 }
 
 bool FocusHub::AcceptFocusByRectOfLastFocusScope(const RectF& rect)
@@ -1526,7 +1479,7 @@ bool FocusHub::AcceptFocusByRectOfLastFocusFlex(const RectF& rect)
         return false;
     }
 
-    if (focusType_ != FocusType::SCOPE || !IsFocusableScope()) {
+    if (focusType_ != FocusType::SCOPE || !IsFocusableWholePath()) {
         return false;
     }
     if (focusDepend_ == FocusDependence::SELF) {
@@ -1638,7 +1591,7 @@ bool FocusHub::IsOnRootTree() const
 
 void FocusHub::CollectTabIndexNodes(TabIndexNodeList& tabIndexNodes)
 {
-    if (GetTabIndex() > 0 && IsFocusable()) {
+    if (GetTabIndex() > 0 && IsFocusableWholePath()) {
         tabIndexNodes.emplace_back(GetTabIndex(), WeakClaim(this));
     }
     if (GetFocusType() == FocusType::SCOPE) {
