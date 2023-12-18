@@ -47,18 +47,6 @@ std::optional<SizeF> TextInputLayoutAlgorithm::MeasureContent(
 
     autoWidth_ = textFieldLayoutProperty->GetWidthAutoValue(false);
 
-    // errorParagraph  Layout.
-    if (textFieldLayoutProperty->GetShowErrorTextValue(false)) {
-        auto pipeline = PipelineBase::GetCurrentContext();
-        CHECK_NULL_RETURN(pipeline, std::nullopt);
-        auto textFieldTheme = pipeline->GetTheme<TextFieldTheme>();
-        CHECK_NULL_RETURN(textFieldTheme, std::nullopt);
-        CreateErrorParagraph(textFieldLayoutProperty->GetErrorTextValue(""), textFieldTheme);
-        if (errorParagraph_) {
-            errorParagraph_->Layout(std::numeric_limits<double>::infinity());
-        }
-    }
-
     if (textContent_.empty()) {
         // Used for empty text.
         preferredHeight_ = pattern->PreferredLineHeight(true);
