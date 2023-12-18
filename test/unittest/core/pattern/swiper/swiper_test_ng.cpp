@@ -11056,11 +11056,11 @@ HWTEST_F(SwiperTestNg, PlayLongPointAnimation001, TestSize.Level1)
 }
 
 /**
- * @tc.name: SwiperDragScene001
+ * @tc.name: SwiperDragScene002
  * @tc.desc: test Swiper drag LTPO
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperTestNg, SwiperDragScene001, TestSize.Level1)
+HWTEST_F(SwiperTestNg, SwiperDragScene002, TestSize.Level1)
 {
     CreateWithItem([](SwiperModelNG model) {});
     auto renderContext = AceType::DynamicCast<MockRenderContext>(frameNode_->GetRenderContext());
