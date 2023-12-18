@@ -16,7 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SCROLL_SCROLL_EDGE_EFFECT_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SCROLL_SCROLL_EDGE_EFFECT_H
 
-#include "core/components/scroll/scroll_edge_effect_base.h"
+#include "core/components_ng/pattern/scroll/scroll_edge_effect_base.h"
 #include "core/components_ng/render/render_context.h"
 
 namespace OHOS::Ace::NG {
