@@ -346,20 +346,8 @@ void JSText::SetMaxFontSize(const JSCallbackInfo& info)
 
 void JSText::SetLetterSpacing(const JSCallbackInfo& info)
 {
-    if (info[0]->IsString()) {
-        auto value = info[0]->ToString();
-        if (!value.empty() && value.back() == '%') {
-            auto pipelineContext = PipelineBase::GetCurrentContext();
-            CHECK_NULL_VOID(pipelineContext);
-            auto theme = pipelineContext->GetTheme<TextTheme>();
-            CHECK_NULL_VOID(theme);
-            CalcDimension defaultValue = theme->GetTextStyle().GetLetterSpacing();
-            TextModel::GetInstance()->SetLetterSpacing(defaultValue);
-            return;
-        }
-    }
     CalcDimension value;
-    if (!ParseJsDimensionFp(info[0], value)) {
+    if (!ParseJsDimensionFpNG(info[0], value, false)) {
         return;
     }
     TextModel::GetInstance()->SetLetterSpacing(value);

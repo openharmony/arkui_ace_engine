@@ -146,7 +146,7 @@ void JSSpan::SetLetterSpacing(const JSCallbackInfo& info)
         return;
     }
     CalcDimension value;
-    if (!ParseJsDimensionFp(info[0], value)) {
+    if (!ParseJsDimensionFpNG(info[0], value, false)) {
         return;
     }
     SpanModel::GetInstance()->SetLetterSpacing(value);
