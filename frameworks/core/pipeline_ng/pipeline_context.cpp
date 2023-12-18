@@ -2875,4 +2875,70 @@ void PipelineContext::SetIsDragging(bool isDragging)
     }
     eventManager_->SetIsDragging(isDragging);
 }
+
+void PipelineContext::SetContainerModalTitleVisible(bool customTitleSettedShow, bool floatingTitleSettedShow)
+{
+    if (windowModal_ != WindowModal::CONTAINER_MODAL) {
+        return;
+    }
+    CHECK_NULL_VOID(rootNode_);
+    auto containerNode = AceType::DynamicCast<FrameNode>(rootNode_->GetFirstChild());
+    CHECK_NULL_VOID(containerNode);
+    auto containerPattern = containerNode->GetPattern<ContainerModalPattern>();
+    CHECK_NULL_VOID(containerPattern);
+    containerPattern->SetContainerModalTitleVisible(customTitleSettedShow, floatingTitleSettedShow);
+}
+
+void PipelineContext::SetContainerModalTitleHeight(int32_t height)
+{
+    if (windowModal_ != WindowModal::CONTAINER_MODAL) {
+        return;
+    }
+    CHECK_NULL_VOID(rootNode_);
+    auto containerNode = AceType::DynamicCast<FrameNode>(rootNode_->GetFirstChild());
+    CHECK_NULL_VOID(containerNode);
+    auto containerPattern = containerNode->GetPattern<ContainerModalPattern>();
+    CHECK_NULL_VOID(containerPattern);
+    containerPattern->SetContainerModalTitleHeight(height);
+}
+
+int32_t PipelineContext::GetContainerModalTitleHeight()
+{
+    if (windowModal_ != WindowModal::CONTAINER_MODAL) {
+        return -1;
+    }
+    CHECK_NULL_RETURN(rootNode_, -1);
+    auto containerNode = AceType::DynamicCast<FrameNode>(rootNode_->GetFirstChild());
+    CHECK_NULL_RETURN(containerNode, -1);
+    auto containerPattern = containerNode->GetPattern<ContainerModalPattern>();
+    CHECK_NULL_RETURN(containerPattern, -1);
+    return containerPattern->GetContainerModalTitleHeight();
+}
+
+bool PipelineContext::GetContainerModalButtonsRect(RectF& containerModal, RectF& buttons)
+{
+    if (windowModal_ != WindowModal::CONTAINER_MODAL) {
+        return false;
+    }
+    CHECK_NULL_RETURN(rootNode_, false);
+    auto containerNode = AceType::DynamicCast<FrameNode>(rootNode_->GetFirstChild());
+    CHECK_NULL_RETURN(containerNode, false);
+    auto containerPattern = containerNode->GetPattern<ContainerModalPattern>();
+    CHECK_NULL_RETURN(containerPattern, false);
+    return containerPattern->GetContainerModalButtonsRect(containerModal, buttons);
+}
+
+void PipelineContext::SubscribeContainerModalButtonsRectChange(
+    std::function<void(RectF& containerModal, RectF& buttons)>&& callback)
+{
+    if (windowModal_ != WindowModal::CONTAINER_MODAL) {
+        return;
+    }
+    CHECK_NULL_VOID(rootNode_);
+    auto containerNode = AceType::DynamicCast<FrameNode>(rootNode_->GetFirstChild());
+    CHECK_NULL_VOID(containerNode);
+    auto containerPattern = containerNode->GetPattern<ContainerModalPattern>();
+    CHECK_NULL_VOID(containerPattern);
+    containerPattern->SubscribeContainerModalButtonsRectChange(std::move(callback));
+}
 } // namespace OHOS::Ace::NG
