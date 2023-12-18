@@ -236,6 +236,7 @@ void ShowContextMenuDisappearAnimation(
 
 void OverlayManager::PostDialogFinishEvent(const WeakPtr<FrameNode>& nodeWk)
 {
+    TAG_LOGD(AceLogTag::ACE_OVERLAY, "post dialog finishi event enter");
     auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
     auto taskExecutor = context->GetTaskExecutor();
@@ -256,6 +257,7 @@ void OverlayManager::PostDialogFinishEvent(const WeakPtr<FrameNode>& nodeWk)
 
 void OverlayManager::OnDialogCloseEvent(const RefPtr<FrameNode>& node)
 {
+    TAG_LOGD(AceLogTag::ACE_OVERLAY, "on dialog close event enter");
     CHECK_NULL_VOID(node);
 
     BlurOverlayNode(node);
@@ -295,6 +297,7 @@ void OverlayManager::OnDialogCloseEvent(const RefPtr<FrameNode>& node)
 
 void OverlayManager::OpenDialogAnimation(const RefPtr<FrameNode>& node)
 {
+    TAG_LOGD(AceLogTag::ACE_OVERLAY, "open dialog animation");
     CHECK_NULL_VOID(node);
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
@@ -362,6 +365,7 @@ void OverlayManager::OpenDialogAnimation(const RefPtr<FrameNode>& node)
 
 void OverlayManager::CloseDialogAnimation(const RefPtr<FrameNode>& node)
 {
+    TAG_LOGD(AceLogTag::ACE_OVERLAY, "close dialog animation");
     CHECK_NULL_VOID(node);
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
@@ -476,6 +480,7 @@ void OverlayManager::SetShowMenuAnimation(const RefPtr<FrameNode>& menu, bool is
 
 void OverlayManager::PopMenuAnimation(const RefPtr<FrameNode>& menu, bool showPreviewAnimation, bool startDrag)
 {
+    TAG_LOGD(AceLogTag::ACE_OVERLAY, "pop menu animation enter");
     ResetLowerNodeFocusable(menu);
     auto menuWrapper = menu->GetPattern<MenuWrapperPattern>();
     CHECK_NULL_VOID(menuWrapper);
@@ -555,6 +560,7 @@ void OverlayManager::PopMenuAnimation(const RefPtr<FrameNode>& menu, bool showPr
 
 void OverlayManager::ClearMenuAnimation(const RefPtr<FrameNode>& menu, bool showPreviewAnimation, bool startDrag)
 {
+    TAG_LOGD(AceLogTag::ACE_OVERLAY, "clear menu animation enter");
     ResetLowerNodeFocusable(menu);
     AnimationOption option;
     option.SetCurve(Curves::FAST_OUT_SLOW_IN);
@@ -601,6 +607,7 @@ void OverlayManager::ClearMenuAnimation(const RefPtr<FrameNode>& menu, bool show
 void OverlayManager::ShowMenuClearAnimation(const RefPtr<FrameNode>& menu, AnimationOption& option,
     bool showPreviewAnimation, bool startDrag)
 {
+    TAG_LOGD(AceLogTag::ACE_OVERLAY, "show menu clear animation enter");
     auto context = menu->GetRenderContext();
     CHECK_NULL_VOID(context);
     auto pipeline = PipelineBase::GetCurrentContext();
@@ -631,6 +638,7 @@ void OverlayManager::ShowMenuClearAnimation(const RefPtr<FrameNode>& menu, Anima
 void OverlayManager::ShowToast(const std::string& message, int32_t duration, const std::string& bottom,
     bool isRightToLeft, const ToastShowMode& showMode)
 {
+    TAG_LOGD(AceLogTag::ACE_OVERLAY, "show toast enter");
     auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
     auto rootNode = context->GetRootElement();
@@ -761,11 +769,13 @@ void OverlayManager::PopToast(int32_t toastId)
 
 void OverlayManager::ClearToastInSubwindow()
 {
+    TAG_LOGD(AceLogTag::ACE_OVERLAY, "clear toast in subwindow enter");
     SubwindowManager::GetInstance()->ClearToastInSubwindow();
 }
 
 void OverlayManager::ClearToast()
 {
+    TAG_LOGD(AceLogTag::ACE_OVERLAY, "clear toast enter");
     auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
     auto rootNode = context->GetRootElement();
@@ -778,8 +788,10 @@ void OverlayManager::ClearToast()
 
 void OverlayManager::ShowPopup(int32_t targetId, const PopupInfo& popupInfo)
 {
+    TAG_LOGD(AceLogTag::ACE_OVERLAY, "show popup enter");
     popupMap_[targetId] = popupInfo;
     if (!popupInfo.markNeedUpdate) {
+        TAG_LOGW(AceLogTag::ACE_OVERLAY, "mark need update failed");
         return;
     }
     popupMap_[targetId].markNeedUpdate = false;
@@ -831,8 +843,10 @@ void OverlayManager::ShowPopup(int32_t targetId, const PopupInfo& popupInfo)
 
 void OverlayManager::HidePopup(int32_t targetId, const PopupInfo& popupInfo)
 {
+    TAG_LOGD(AceLogTag::ACE_OVERLAY, "hide popup enter");
     popupMap_[targetId] = popupInfo;
     if (!popupInfo.markNeedUpdate) {
+        TAG_LOGW(AceLogTag::ACE_OVERLAY, "mark need update failed");
         return;
     }
     popupMap_[targetId].markNeedUpdate = false;
@@ -903,10 +917,14 @@ void OverlayManager::HidePopup(int32_t targetId, const PopupInfo& popupInfo)
 
 RefPtr<FrameNode> OverlayManager::HidePopupWithoutAnimation(int32_t targetId, const PopupInfo& popupInfo)
 {
+    TAG_LOGD(AceLogTag::ACE_OVERLAY, "hide popup without animation enter");
     popupMap_[targetId] = popupInfo;
     CHECK_NULL_RETURN(popupInfo.markNeedUpdate, nullptr);
+    if (!popupInfo.markNeedUpdate) {
+        TAG_LOGW(AceLogTag::ACE_OVERLAY, "mark need update failed");
+        return nullptr;
+    }
     CHECK_NULL_RETURN(popupInfo.popupNode, nullptr);
-
     popupInfo.popupNode->GetEventHub<BubbleEventHub>()->FireChangeEvent(false);
     CHECK_NULL_RETURN(popupInfo.isCurrentOnShow, nullptr);
     popupMap_[targetId].isCurrentOnShow = false;
@@ -925,6 +943,7 @@ RefPtr<FrameNode> OverlayManager::HidePopupWithoutAnimation(int32_t targetId, co
 
 void OverlayManager::ShowIndexerPopup(int32_t targetId, RefPtr<FrameNode>& customNode)
 {
+    TAG_LOGD(AceLogTag::ACE_OVERLAY, "show indexer popup enter");
     CHECK_NULL_VOID(customNode);
     auto rootNode = rootNodeWeak_.Upgrade();
     CHECK_NULL_VOID(rootNode);
@@ -938,6 +957,7 @@ void OverlayManager::ShowIndexerPopup(int32_t targetId, RefPtr<FrameNode>& custo
 
 void OverlayManager::RemoveIndexerPopupById(int32_t targetId)
 {
+    TAG_LOGD(AceLogTag::ACE_OVERLAY, "remove indexer popup byid enter");
     if (customPopupMap_.empty()) {
         return;
     }
@@ -953,6 +973,7 @@ void OverlayManager::RemoveIndexerPopupById(int32_t targetId)
 
 void OverlayManager::RemoveIndexerPopup()
 {
+    TAG_LOGD(AceLogTag::ACE_OVERLAY, "remove indexer popup enter");
     if (customPopupMap_.empty()) {
         return;
     }
@@ -968,6 +989,7 @@ void OverlayManager::RemoveIndexerPopup()
 
 void OverlayManager::HideCustomPopups()
 {
+    TAG_LOGD(AceLogTag::ACE_OVERLAY, "hide custom popup enter");
     if (popupMap_.empty()) {
         return;
     }
@@ -999,6 +1021,7 @@ void OverlayManager::HideCustomPopups()
 
 void OverlayManager::HideAllPopups()
 {
+    TAG_LOGD(AceLogTag::ACE_OVERLAY, "hide all popup enter");
     if (popupMap_.empty()) {
         return;
     }
@@ -1023,6 +1046,7 @@ void OverlayManager::HideAllPopups()
 
 void OverlayManager::ErasePopup(int32_t targetId)
 {
+    TAG_LOGD(AceLogTag::ACE_OVERLAY, "erase popup enter");
     if (popupMap_.find(targetId) != popupMap_.end()) {
         auto rootNode = rootNodeWeak_.Upgrade();
         CHECK_NULL_VOID(rootNode);
@@ -1034,6 +1058,7 @@ void OverlayManager::ErasePopup(int32_t targetId)
 
 bool OverlayManager::ShowMenuHelper(RefPtr<FrameNode>& menu, int32_t targetId, const NG::OffsetF& offset)
 {
+    TAG_LOGD(AceLogTag::ACE_OVERLAY, "show menu helper enter");
     if (!menu) {
         // get existing menuNode
         auto it = menuMap_.find(targetId);
@@ -1062,7 +1087,9 @@ bool OverlayManager::ShowMenuHelper(RefPtr<FrameNode>& menu, int32_t targetId, c
 
 void OverlayManager::ShowMenu(int32_t targetId, const NG::OffsetF& offset, RefPtr<FrameNode> menu)
 {
+    TAG_LOGD(AceLogTag::ACE_OVERLAY, "show menu enter");
     if (!ShowMenuHelper(menu, targetId, offset)) {
+        TAG_LOGW(AceLogTag::ACE_OVERLAY, "show menu helper failed");
         return;
     }
     auto rootNode = rootNodeWeak_.Upgrade();
@@ -1096,6 +1123,7 @@ void OverlayManager::ShowMenu(int32_t targetId, const NG::OffsetF& offset, RefPt
 // subwindow only contains one menu instance.
 void OverlayManager::ShowMenuInSubWindow(int32_t targetId, const NG::OffsetF& offset, RefPtr<FrameNode> menu)
 {
+    TAG_LOGD(AceLogTag::ACE_OVERLAY, "show menu insubwindow enter");
     auto menuOffset = offset;
     auto currentSubwindow = SubwindowManager::GetInstance()->GetCurrentWindow();
     if (currentSubwindow) {
@@ -1103,6 +1131,7 @@ void OverlayManager::ShowMenuInSubWindow(int32_t targetId, const NG::OffsetF& of
         menuOffset -= subwindowRect.GetOffset();
     }
     if (!ShowMenuHelper(menu, targetId, menuOffset)) {
+        TAG_LOGW(AceLogTag::ACE_OVERLAY, "show menu helper failed");
         return;
     }
     auto rootNode = rootNodeWeak_.Upgrade();
@@ -1121,12 +1150,14 @@ void OverlayManager::ShowMenuInSubWindow(int32_t targetId, const NG::OffsetF& of
 
 void OverlayManager::HideMenuInSubWindow(const RefPtr<FrameNode>& menu, int32_t targetId)
 {
+    TAG_LOGD(AceLogTag::ACE_OVERLAY, "hide menu insubwindow enter");
     CHECK_NULL_VOID(menu);
     PopMenuAnimation(menu);
 }
 
 void OverlayManager::HideMenuInSubWindow(bool showPreviewAnimation, bool startDrag)
 {
+    TAG_LOGD(AceLogTag::ACE_OVERLAY, "hide menu insubwindow enter");
     if (menuMap_.empty()) {
         return;
     }
@@ -1148,6 +1179,7 @@ RefPtr<FrameNode> OverlayManager::GetMenuNode(int32_t targetId)
 
 void OverlayManager::HideMenu(const RefPtr<FrameNode>& menu, int32_t targetId, bool isMenuOnTouch)
 {
+    TAG_LOGD(AceLogTag::ACE_OVERLAY, "hide menu enter");
     auto pattern = menu->GetPattern<MenuWrapperPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetShow(false);
@@ -1166,6 +1198,7 @@ void OverlayManager::HideMenu(const RefPtr<FrameNode>& menu, int32_t targetId, b
 
 void OverlayManager::HideAllMenus()
 {
+    TAG_LOGD(AceLogTag::ACE_OVERLAY, "hide all menus enter");
     auto container = Container::Current();
     if (container && container->IsScenceBoardWindow()) {
         for (const auto& windowScene : windowSceneSet_) {
@@ -1194,6 +1227,7 @@ void OverlayManager::HideAllMenus()
 
 void OverlayManager::DeleteMenu(int32_t targetId)
 {
+    TAG_LOGD(AceLogTag::ACE_OVERLAY, "delete menu enter");
     auto it = menuMap_.find(targetId);
     if (it == menuMap_.end()) {
         return;
@@ -1205,6 +1239,7 @@ void OverlayManager::DeleteMenu(int32_t targetId)
 
 void OverlayManager::CleanMenuInSubWindowWithAnimation()
 {
+    TAG_LOGD(AceLogTag::ACE_OVERLAY, "clean menu insubwindow with animation enter");
     auto rootNode = rootNodeWeak_.Upgrade();
     CHECK_NULL_VOID(rootNode);
     RefPtr<FrameNode> menu;
@@ -1248,6 +1283,7 @@ void OverlayManager::CleanPreviewInSubWindow()
 
 void OverlayManager::CleanMenuInSubWindow()
 {
+    TAG_LOGD(AceLogTag::ACE_OVERLAY, "clean menu insubwindow enter");
     auto rootNode = rootNodeWeak_.Upgrade();
     CHECK_NULL_VOID(rootNode);
     for (const auto& child : rootNode->GetChildren()) {
@@ -1279,6 +1315,7 @@ void OverlayManager::CleanMenuInSubWindow()
 
 void OverlayManager::CleanPopupInSubWindow()
 {
+    TAG_LOGD(AceLogTag::ACE_OVERLAY, "clean popup insubwindow enter");
     auto rootNode = rootNodeWeak_.Upgrade();
     CHECK_NULL_VOID(rootNode);
     std::vector<RefPtr<FrameNode>> removeNodes;
@@ -1309,6 +1346,7 @@ void OverlayManager::CleanPopupInSubWindow()
 
 void OverlayManager::BeforeShowDialog(const RefPtr<FrameNode>& node)
 {
+    TAG_LOGD(AceLogTag::ACE_OVERLAY, "before show dialog");
     CHECK_NULL_VOID(node);
     if (dialogMap_.find(node->GetId()) != dialogMap_.end()) {
         return;
@@ -1319,6 +1357,7 @@ void OverlayManager::BeforeShowDialog(const RefPtr<FrameNode>& node)
 RefPtr<FrameNode> OverlayManager::ShowDialog(
     const DialogProperties& dialogProps, std::function<void()>&& buildFunc, bool isRightToLeft)
 {
+    TAG_LOGD(AceLogTag::ACE_OVERLAY, "show dialog enter");
     RefPtr<UINode> customNode;
     // create custom builder content
     if (buildFunc) {
@@ -1349,6 +1388,7 @@ RefPtr<FrameNode> OverlayManager::ShowDialog(
 
 void OverlayManager::ShowCustomDialog(const RefPtr<FrameNode>& customNode)
 {
+    TAG_LOGD(AceLogTag::ACE_OVERLAY, "show custom dialog enter");
     BeforeShowDialog(customNode);
     OpenDialogAnimation(customNode);
 }
@@ -1356,6 +1396,7 @@ void OverlayManager::ShowCustomDialog(const RefPtr<FrameNode>& customNode)
 void OverlayManager::ShowDateDialog(const DialogProperties& dialogProps, const DatePickerSettingData& settingData,
     std::map<std::string, NG::DialogEvent> dialogEvent, std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent)
 {
+    TAG_LOGD(AceLogTag::ACE_OVERLAY, "show date dialog enter");
     auto dialogNode = DatePickerDialogView::Show(
         dialogProps, std::move(settingData), std::move(dialogEvent), std::move(dialogCancelEvent));
     BeforeShowDialog(dialogNode);
@@ -1366,6 +1407,7 @@ void OverlayManager::ShowTimeDialog(const DialogProperties& dialogProps, const T
     std::map<std::string, PickerTime> timePickerProperty, std::map<std::string, NG::DialogEvent> dialogEvent,
     std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent)
 {
+    TAG_LOGD(AceLogTag::ACE_OVERLAY, "show time dialog enter");
     auto dialogNode = TimePickerDialogView::Show(
         dialogProps, settingData, std::move(timePickerProperty), std::move(dialogEvent), std::move(dialogCancelEvent));
     BeforeShowDialog(dialogNode);
@@ -1376,6 +1418,7 @@ void OverlayManager::ShowTextDialog(const DialogProperties& dialogProps, const T
     std::map<std::string, NG::DialogTextEvent> dialogEvent,
     std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent)
 {
+    TAG_LOGD(AceLogTag::ACE_OVERLAY, "show text dialog enter");
     auto dialogNode =
         TextPickerDialogView::Show(dialogProps, settingData, std::move(dialogEvent), std::move(dialogCancelEvent));
     BeforeShowDialog(dialogNode);
@@ -1390,6 +1433,7 @@ void OverlayManager::ShowTextDialog(const DialogProperties& dialogProps, const T
 void OverlayManager::ShowCalendarDialog(const DialogProperties& dialogProps, const CalendarSettingData& settingData,
     std::map<std::string, NG::DialogEvent> dialogEvent, std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent)
 {
+    TAG_LOGD(AceLogTag::ACE_OVERLAY, "show calendar dialog enter");
     auto dialogNode =
         CalendarDialogView::Show(dialogProps, settingData, std::move(dialogEvent), std::move(dialogCancelEvent));
     BeforeShowDialog(dialogNode);
@@ -1398,6 +1442,7 @@ void OverlayManager::ShowCalendarDialog(const DialogProperties& dialogProps, con
 
 void OverlayManager::PopModalDialog(int32_t maskId)
 {
+    TAG_LOGD(AceLogTag::ACE_OVERLAY, "pop modal dialog enter");
     int32_t dialogId = -1;
     for (auto it = maskNodeIdMap_.begin(); it != maskNodeIdMap_.end(); it++) {
         if (maskId == it->second) {
@@ -1421,6 +1466,7 @@ void OverlayManager::PopModalDialog(int32_t maskId)
 
 void OverlayManager::RemoveDialogFromMap(const RefPtr<FrameNode>& node)
 {
+    TAG_LOGD(AceLogTag::ACE_OVERLAY, "remove dialog from map enter");
     CHECK_NULL_VOID(node);
     if (dialogMap_.find(node->GetId()) == dialogMap_.end()) {
         return;
@@ -1430,6 +1476,7 @@ void OverlayManager::RemoveDialogFromMap(const RefPtr<FrameNode>& node)
 
 bool OverlayManager::DialogInMapHoldingFocus()
 {
+    TAG_LOGD(AceLogTag::ACE_OVERLAY, "dialog in map holding focus enter");
     if (dialogMap_.empty()) {
         return false;
     }
@@ -1446,6 +1493,7 @@ bool OverlayManager::DialogInMapHoldingFocus()
 
 RefPtr<FrameNode> OverlayManager::GetDialog(int32_t dialogId)
 {
+    TAG_LOGD(AceLogTag::ACE_OVERLAY, "get dialog enter");
     for (auto it = dialogMap_.begin(); it != dialogMap_.end(); it++) {
         if (dialogId == it->second->GetId()) {
             return it->second;
@@ -1456,6 +1504,7 @@ RefPtr<FrameNode> OverlayManager::GetDialog(int32_t dialogId)
 
 void OverlayManager::CloseDialog(const RefPtr<FrameNode>& dialogNode)
 {
+    TAG_LOGD(AceLogTag::ACE_OVERLAY, "close dialog enter");
     auto dialogLayoutProp = AceType::DynamicCast<DialogLayoutProperty>(dialogNode->GetLayoutProperty());
     CHECK_NULL_VOID(dialogLayoutProp);
     if (dialogLayoutProp->GetShowInSubWindowValue(false) && dialogLayoutProp->GetIsModal().value_or(true)) {
@@ -1488,6 +1537,7 @@ void OverlayManager::CloseDialog(const RefPtr<FrameNode>& dialogNode)
 
 bool OverlayManager::RemoveDialog(const RefPtr<FrameNode>& overlay, bool isBackPressed, bool isPageRouter)
 {
+    TAG_LOGD(AceLogTag::ACE_OVERLAY, "remove dialog enter");
     if (overlay->IsRemoving()) {
         return false;
     }
@@ -1507,6 +1557,7 @@ bool OverlayManager::RemoveDialog(const RefPtr<FrameNode>& overlay, bool isBackP
 
 bool OverlayManager::RemoveBubble(const RefPtr<FrameNode>& overlay)
 {
+    TAG_LOGD(AceLogTag::ACE_OVERLAY, "remove bubble enter");
     for (const auto& popup : popupMap_) {
         auto targetId = popup.first;
         auto popupInfo = popup.second;
@@ -1521,6 +1572,7 @@ bool OverlayManager::RemoveBubble(const RefPtr<FrameNode>& overlay)
 
 bool OverlayManager::RemoveMenu(const RefPtr<FrameNode>& overlay)
 {
+    TAG_LOGD(AceLogTag::ACE_OVERLAY, "remove menu enter");
     auto menuWrapperPattern = overlay->GetPattern<MenuWrapperPattern>();
     CHECK_NULL_RETURN(menuWrapperPattern, false);
     menuWrapperPattern->HideMenu();
@@ -3274,6 +3326,7 @@ RefPtr<FrameNode> OverlayManager::BindUIExtensionToMenu(const RefPtr<FrameNode>&
 SizeF OverlayManager::CaculateMenuSize(
     const RefPtr<FrameNode>& menuNode, std::string longestContent, int32_t menuSize)
 {
+    TAG_LOGD(AceLogTag::ACE_OVERLAY, "caculate menu size enter");
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, SizeF());
     auto textTheme = pipeline->GetTheme<TextTheme>();
@@ -3317,6 +3370,7 @@ SizeF OverlayManager::CaculateMenuSize(
 bool OverlayManager::ShowUIExtensionMenu(const RefPtr<NG::FrameNode>& uiExtNode, NG::RectF aiRect,
     std::string longestContent, int32_t menuSize, const RefPtr<NG::FrameNode>& targetNode)
 {
+    TAG_LOGD(AceLogTag::ACE_OVERLAY, "show ui extension menu enter");
     CHECK_NULL_RETURN(uiExtNode, false);
     auto menuNode = BindUIExtensionToMenu(uiExtNode, targetNode, longestContent, menuSize);
     CHECK_NULL_RETURN(menuNode, false);
