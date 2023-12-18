@@ -67,9 +67,33 @@ float GridIrregularFiller::Fill(const FillParameters& params)
     return length_;
 }
 
-bool GridIrregularFiller::ItemCanFit(const decltype(GridLayoutInfo::gridMatrix_)::iterator& it, int32_t itemWidth)
+int32_t GridIrregularFiller::FitItem(const decltype(GridLayoutInfo::gridMatrix_)::iterator& it, int32_t itemWidth)
 {
-    return it == info_->gridMatrix_.end() || it->second.size() + itemWidth <= info_->crossCount_;
+    if (it == info_->gridMatrix_.end()) {
+        // empty row, can fit
+        return 0;
+    }
+
+    if (it->second.size() + itemWidth > info_->crossCount_) {
+        // not enough space
+        return -1;
+    }
+
+    for (int i = 0; i <= info_->crossCount_ - itemWidth; ++i) {
+        bool flag = true;
+        for (int j = 0; j < itemWidth; ++j) {
+            if (it->second.find(i + j) != it->second.end()) {
+                // spot already filled
+                flag = false;
+                break;
+            }
+        }
+
+        if (flag) {
+            return i;
+        }
+    }
+    return -1;
 }
 
 GridItemSize GridIrregularFiller::GetItemSize(int32_t idx)
@@ -97,22 +121,24 @@ GridItemSize GridIrregularFiller::GetItemSize(int32_t idx)
 void GridIrregularFiller::FillOne()
 {
     /* alias */
-    const int32_t idx = info_->endIndex_;
+    const int32_t& idx = info_->endIndex_;
     int32_t row = posY_;
 
     auto size = GetItemSize(idx);
 
     auto it = info_->gridMatrix_.find(row);
-    while (!ItemCanFit(it, size.columns)) {
+    int32_t col = FitItem(it, size.columns);
+    while (col == -1) {
         // can't fill at end, find the next available line
         it = info_->gridMatrix_.find(++row);
+        col = FitItem(it, size.columns);
     }
+
     if (it == info_->gridMatrix_.end()) {
         // create a new line
         info_->gridMatrix_[row] = {};
     }
 
-    int32_t col = it->second.size();
     // top left square should be set to [idx], the rest to -1
     for (int32_t r = 0; r < size.rows; ++r) {
         for (int32_t c = 0; c < size.columns; ++c) {
@@ -157,10 +183,12 @@ bool GridIrregularFiller::AdvancePos()
 
 void GridIrregularFiller::UpdateLength(int32_t prevRow, float mainGap)
 {
-    length_ += info_->lineHeightMap_[prevRow];
-    for (int32_t row = prevRow + 1; row < posY_; ++row) {
-        // always add the top gap of GridItems, so the first row doesn't have a gap.
+    for (int32_t row = prevRow; row < posY_; ++row) {
         length_ += info_->lineHeightMap_[row] + mainGap;
+    }
+    if (prevRow == info_->startMainLineIndex_) {
+        // no gap on first row
+        length_ -= mainGap;
     }
 }
 
@@ -169,8 +197,6 @@ void GridIrregularFiller::MeasureNewItem(const FillParameters& params, int32_t c
     auto child = wrapper_->GetOrCreateChildByIndex(info_->endIndex_);
     auto props = AceType::DynamicCast<GridLayoutProperty>(wrapper_->GetLayoutProperty());
     auto constraint = props->CreateChildConstraint();
-
-    auto mainLen = Infinity<float>();
 
     auto itemSize = GetItemSize(info_->endIndex_);
     float crossLen = 0.0f;
@@ -181,10 +207,10 @@ void GridIrregularFiller::MeasureNewItem(const FillParameters& params, int32_t c
 
     constraint.percentReference.SetCrossSize(crossLen, info_->axis_);
     if (info_->axis_ == Axis::VERTICAL) {
-        constraint.maxSize = SizeF { crossLen, mainLen };
+        constraint.maxSize = SizeF { crossLen, Infinity<float>() };
         constraint.selfIdealSize = OptionalSizeF(crossLen, std::nullopt);
     } else {
-        constraint.maxSize = SizeF { mainLen, crossLen };
+        constraint.maxSize = SizeF { Infinity<float>(), crossLen };
         constraint.selfIdealSize = OptionalSizeF(std::nullopt, crossLen);
     }
 
