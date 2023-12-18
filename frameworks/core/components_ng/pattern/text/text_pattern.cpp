@@ -1284,6 +1284,7 @@ void TextPattern::OnDragEnd()
     if (dragResultObjects_.empty()) {
         return;
     }
+    CloseSelectOverlay();
     UpdateSpanItemDragStatus(dragResultObjects_, false);
     dragResultObjects_.clear();
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
