@@ -2582,7 +2582,7 @@ void UIContentImpl::SubscribeContainerModalButtonsRectChange(
     auto pipeline = NG::PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
 
-    if (callback) {
+    if (callback == nullptr) {
         pipeline->SubscribeContainerModalButtonsRectChange(nullptr);
         return;
     }

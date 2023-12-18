@@ -576,7 +576,7 @@ void ContainerModalPattern::SetContainerModalTitleHeight(int32_t height)
     UpdateRowHeight(floatingTitleRow, height);
     auto controlButtonsRow = GetControlButtonRow();
     UpdateRowHeight(controlButtonsRow, height);
-    OnModifyDone();
+    CallButtonsRectChange();
 }
 
 int32_t ContainerModalPattern::GetContainerModalTitleHeight()
@@ -605,24 +605,24 @@ void ContainerModalPattern::SubscribeContainerModalButtonsRectChange(
     controlButtonsRectChangeCallback_ = std::move(callback);
 }
 
-void ContainerModalPattern::OnModifyDone()
+void ContainerModalPattern::CallButtonsRectChange()
 {
+    CHECK_NULL_VOID(controlButtonsRectChangeCallback_);
     RectF containerModal;
     RectF buttons;
     GetContainerModalButtonsRect(containerModal, buttons);
-    if (buttonsRect_ != buttons && controlButtonsRectChangeCallback_) {
-        auto taskExecutor = Container::CurrentTaskExecutor();
-        if (taskExecutor) {
-            taskExecutor->PostTask(
-                [containerModal, buttons, cb = controlButtonsRectChangeCallback_]() mutable {
-                    if (cb) {
-                        cb(containerModal, buttons);
-                    }
-                },
-                TaskExecutor::TaskType::JS);
-        }
+    if (buttonsRect_ == buttons) {
+        return;
     }
     buttonsRect_ = buttons;
-    Pattern::OnModifyDone();
+    auto taskExecutor = Container::CurrentTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    taskExecutor->PostTask(
+        [containerModal, buttons, cb = controlButtonsRectChangeCallback_]() mutable {
+            if (cb) {
+                cb(containerModal, buttons);
+            }
+        },
+        TaskExecutor::TaskType::JS);
 }
 } // namespace OHOS::Ace::NG
