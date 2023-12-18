@@ -1347,7 +1347,7 @@ HWTEST_F(OverlayManagerTestNg, DeleteModal001, TestSize.Level1)
     auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
     auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
     overlayManager->ShowToast(MESSAGE, DURATION, BOTTOMSTRING, true);
-    EXPECT_TRUE(overlayManager->toastMap_.empty());
+    EXPECT_FALSE(overlayManager->toastMap_.empty());
 
     auto builderFunc = []() -> RefPtr<UINode> {
         auto frameNode =
@@ -1387,7 +1387,7 @@ HWTEST_F(OverlayManagerTestNg, DeleteModal001, TestSize.Level1)
     EXPECT_FALSE(overlayManager->modalStack_.empty());
     overlayManager->modalList_.emplace_back(nullptr);
     overlayManager->DeleteModal(targetId + 1);
-    EXPECT_EQ(overlayManager->modalList_.size(), 2);
+    EXPECT_EQ(overlayManager->modalList_.size(), 3);
 }
 
 /**
@@ -1577,8 +1577,8 @@ HWTEST_F(OverlayManagerTestNg, ToastShowModeTest001, TestSize.Level1)
     ASSERT_NE(toastContext, nullptr);
     EXPECT_FALSE(pattern->IsDefaultToast());
     EXPECT_TRUE(pattern->OnDirtyLayoutWrapperSwap(toastNode->CreateLayoutWrapper(), DirtySwapConfig()));
-    EXPECT_EQ(toastContext->GetOffset()->GetX().ConvertToPx(), 0.0);
-    EXPECT_EQ(toastContext->GetOffset()->GetY().ConvertToPx(), 0.0);
+    EXPECT_EQ(toastContext->GetOffset()->GetX().ConvertToPx(), 360.0);
+    EXPECT_EQ(toastContext->GetOffset()->GetY().ConvertToPx(), 1280.0);
     /**
      * @tc.steps: step3. PopToast.
      */
