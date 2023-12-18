@@ -37,6 +37,8 @@ if (enable_player_framework) {
       "//foundation/multimedia/player_framework/interfaces/inner_api/native",
     ]
 
-    external_deps = [ "player_framework:media_client" ]
+    if (!build_ohos_sdk) {
+      external_deps = [ "player_framework:media_client" ]
+    }
   }
 }
