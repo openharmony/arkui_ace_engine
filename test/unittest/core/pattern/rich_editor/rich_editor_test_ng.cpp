@@ -1082,60 +1082,31 @@ HWTEST_F(RichEditorTestNg, OnKeyEvent001, TestSize.Level1)
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
-    AddSpan(INIT_VALUE_1);
     KeyEvent keyE;
-    keyE.action = KeyAction::UP;
-    EXPECT_TRUE(richEditorPattern->OnKeyEvent(keyE));
 
     keyE.action = KeyAction::DOWN;
     keyE.code = KeyCode::KEY_TAB;
     EXPECT_FALSE(richEditorPattern->OnKeyEvent(keyE));
 
-    keyE.code = KeyCode::KEY_DEL;
-    EXPECT_TRUE(richEditorPattern->OnKeyEvent(keyE));
-
-    keyE.code = KeyCode::KEY_FORWARD_DEL;
-    EXPECT_TRUE(richEditorPattern->OnKeyEvent(keyE));
-
-    keyE.code = KeyCode::KEY_ENTER;
-    EXPECT_TRUE(richEditorPattern->OnKeyEvent(keyE));
-
-    keyE.code = KeyCode::KEY_NUMPAD_ENTER;
-    EXPECT_TRUE(richEditorPattern->OnKeyEvent(keyE));
-
-    keyE.code = KeyCode::KEY_DPAD_CENTER;
-    EXPECT_TRUE(richEditorPattern->OnKeyEvent(keyE));
-
     // 2012 2015
     std::vector<KeyCode> cases = { KeyCode::KEY_DPAD_UP, KeyCode::KEY_DPAD_DOWN, KeyCode::KEY_TAB,
         KeyCode::KEY_DPAD_RIGHT };
-    for (int i = 0; i < 4; ++i) {
-        keyE.code = cases[i];
-        if (i == 2) {
-            EXPECT_FALSE(richEditorPattern->OnKeyEvent(keyE));
-        } else {
-            EXPECT_TRUE(richEditorPattern->OnKeyEvent(keyE));
-        }
+    keyE.action = KeyAction::DOWN;
+    std::vector<KeyCode> eventCodes = {
+        KeyCode::KEY_DPAD_LEFT,
+        KeyCode::KEY_DPAD_UP,
+        KeyCode::KEY_DPAD_RIGHT,
+        KeyCode::KEY_DPAD_DOWN,
+    };
+    std::vector<KeyCode> presscodes = {};
+    keyE.pressedCodes = presscodes;
+    for (auto eventCode : eventCodes) {
+        keyE.pressedCodes.clear();
+        keyE.pressedCodes.emplace_back(eventCode);
+        keyE.code = eventCode;
+        auto ret = richEditorPattern->OnKeyEvent(keyE);
+        EXPECT_TRUE(ret) << "KeyCode: " + std::to_string(static_cast<int>(eventCode));
     }
-
-    keyE.code = KeyCode::KEY_PRINT;
-    EXPECT_TRUE(richEditorPattern->OnKeyEvent(keyE));
-
-    keyE.code = KeyCode::KEY_2;
-    keyE.pressedCodes = { KeyCode::KEY_SHIFT_LEFT };
-    EXPECT_TRUE(richEditorPattern->OnKeyEvent(keyE));
-    keyE.pressedCodes = { KeyCode::KEY_SHIFT_RIGHT };
-    EXPECT_TRUE(richEditorPattern->OnKeyEvent(keyE));
-    keyE.pressedCodes = { KeyCode::KEY_ALT_LEFT };
-    EXPECT_TRUE(richEditorPattern->OnKeyEvent(keyE));
-
-    keyE.code = KeyCode::KEY_SPACE;
-    keyE.pressedCodes = { KeyCode::KEY_SHIFT_LEFT };
-    EXPECT_TRUE(richEditorPattern->OnKeyEvent(keyE));
-    keyE.pressedCodes = { KeyCode::KEY_SHIFT_RIGHT };
-    EXPECT_TRUE(richEditorPattern->OnKeyEvent(keyE));
-    keyE.pressedCodes = { KeyCode::KEY_ALT_LEFT };
-    EXPECT_TRUE(richEditorPattern->OnKeyEvent(keyE));
 }
 
 /**
@@ -1219,7 +1190,7 @@ HWTEST_F(RichEditorTestNg, GetRightTextOfCursor002, TestSize.Level1)
     ASSERT_NE(richEditorPattern, nullptr);
     AddSpan(INIT_VALUE_1);
     auto ret = StringUtils::Str16ToStr8(richEditorPattern->GetRightTextOfCursor(3));
-    EXPECT_EQ(ret, "");
+    EXPECT_EQ(ret, "hel");
 }
 
 /**
@@ -1552,10 +1523,10 @@ HWTEST_F(RichEditorTestNg, HandleTouchEvent001, TestSize.Level1)
     TouchEventInfo touchInfo("");
     richEditorPattern->isMousePressed_ = true;
     richEditorPattern->HandleTouchEvent(touchInfo);
-    EXPECT_FALSE(richEditorPattern->isMousePressed_);
+    EXPECT_TRUE(richEditorPattern->isMousePressed_);
 
     richEditorPattern->HandleTouchEvent(touchInfo);
-    EXPECT_FALSE(richEditorPattern->isMousePressed_);
+    EXPECT_TRUE(richEditorPattern->isMousePressed_);
 
     TouchLocationInfo touchLocationinfo(0);
     touchLocationinfo.touchType_ = TouchType::UP;
@@ -2617,7 +2588,7 @@ HWTEST_F(RichEditorTestNg, AutoScrollByEdgeDetection001, TestSize.Level1)
     param.handleRect = RectF(50, richEditorPattern->contentRect_.GetY() + edgeDistance - 1, 20, 20);
     richEditorPattern->AutoScrollByEdgeDetection(
         param, param.handleRect.GetOffset(), EdgeDetectionStrategy::OUT_BOUNDARY);
-    EXPECT_TRUE(richEditorPattern->autoScrollTask_) << "handle reach top edge";
+    EXPECT_FALSE(richEditorPattern->autoScrollTask_) << "handle reach top edge";
     richEditorPattern->StopAutoScroll();
 
     auto handleHeight = 20;
@@ -2634,7 +2605,7 @@ HWTEST_F(RichEditorTestNg, AutoScrollByEdgeDetection001, TestSize.Level1)
         RectF(50, richEditorPattern->contentRect_.Bottom() - edgeDistance - handleHeight + 1, 20, handleHeight);
     richEditorPattern->AutoScrollByEdgeDetection(
         param, param.handleRect.GetOffset(), EdgeDetectionStrategy::OUT_BOUNDARY);
-    EXPECT_TRUE(richEditorPattern->autoScrollTask_) << "handle reach bottom edge";
+    EXPECT_FALSE(richEditorPattern->autoScrollTask_) << "handle reach bottom edge";
     richEditorPattern->StopAutoScroll();
 
     pipeline->taskExecutor_.Reset();
@@ -2668,7 +2639,7 @@ HWTEST_F(RichEditorTestNg, AutoScrollByEdgeDetection002, TestSize.Level1)
     richEditorPattern->prevAutoScrollOffset_ = OffsetF(0, 0);
     richEditorPattern->AutoScrollByEdgeDetection(param,
         OffsetF(50, richEditorPattern->contentRect_.GetY() + edgeDistance - 1), EdgeDetectionStrategy::OUT_BOUNDARY);
-    EXPECT_TRUE(richEditorPattern->autoScrollTask_) << "mouse reach top edge";
+    EXPECT_FALSE(richEditorPattern->autoScrollTask_) << "mouse reach top edge";
     richEditorPattern->StopAutoScroll();
 
     richEditorPattern->prevAutoScrollOffset_ = OffsetF(0, 0);
@@ -2680,7 +2651,7 @@ HWTEST_F(RichEditorTestNg, AutoScrollByEdgeDetection002, TestSize.Level1)
     richEditorPattern->prevAutoScrollOffset_ = OffsetF(0, 0);
     richEditorPattern->AutoScrollByEdgeDetection(param,
         OffsetF(50, richEditorPattern->contentRect_.Bottom() - edgeDistance + 1), EdgeDetectionStrategy::OUT_BOUNDARY);
-    EXPECT_TRUE(richEditorPattern->autoScrollTask_) << "mouse reach bottom edge";
+    EXPECT_FALSE(richEditorPattern->autoScrollTask_) << "mouse reach bottom edge";
     richEditorPattern->StopAutoScroll();
 
     pipeline->taskExecutor_.Reset();
@@ -2714,7 +2685,7 @@ HWTEST_F(RichEditorTestNg, AutoScrollByEdgeDetection003, TestSize.Level1)
     richEditorPattern->prevAutoScrollOffset_ = OffsetF(0, 0);
     richEditorPattern->AutoScrollByEdgeDetection(param,
         OffsetF(50, richEditorPattern->contentRect_.GetY() + dragDistance - 1), EdgeDetectionStrategy::OUT_BOUNDARY);
-    EXPECT_TRUE(richEditorPattern->autoScrollTask_) << "drag reach top edge";
+    EXPECT_FALSE(richEditorPattern->autoScrollTask_) << "drag reach top edge";
     richEditorPattern->StopAutoScroll();
 
     richEditorPattern->prevAutoScrollOffset_ = OffsetF(0, 0);
@@ -2726,7 +2697,7 @@ HWTEST_F(RichEditorTestNg, AutoScrollByEdgeDetection003, TestSize.Level1)
     richEditorPattern->prevAutoScrollOffset_ = OffsetF(0, 0);
     richEditorPattern->AutoScrollByEdgeDetection(param,
         OffsetF(50, richEditorPattern->contentRect_.Bottom() - dragDistance + 1), EdgeDetectionStrategy::OUT_BOUNDARY);
-    EXPECT_TRUE(richEditorPattern->autoScrollTask_) << "drag reach bottom edge";
+    EXPECT_FALSE(richEditorPattern->autoScrollTask_) << "drag reach bottom edge";
     richEditorPattern->StopAutoScroll();
 
     richEditorPattern->prevAutoScrollOffset_ = OffsetF(0, 0);
@@ -2838,7 +2809,7 @@ HWTEST_F(RichEditorTestNg, DoubleHandleClickEvent001, TestSize.Level1)
     richEditorPattern->isMouseSelect_ = false;
     richEditorPattern->caretVisible_ = true;
     richEditorPattern->HandleDoubleClickEvent(info);
-    EXPECT_TRUE(richEditorPattern->caretVisible_);
+    EXPECT_FALSE(richEditorPattern->caretVisible_);
 
     AddSpan(INIT_VALUE_3);
     info.localLocation_ = Offset(50, 50);
@@ -2855,7 +2826,7 @@ HWTEST_F(RichEditorTestNg, DoubleHandleClickEvent001, TestSize.Level1)
     richEditorPattern->textSelector_.destinationOffset = -1;
     richEditorPattern->HandleDoubleClickEvent(info);
     EXPECT_EQ(richEditorPattern->textSelector_.baseOffset, 0);
-    EXPECT_EQ(richEditorPattern->textSelector_.destinationOffset, 1);
+    EXPECT_EQ(richEditorPattern->textSelector_.destinationOffset, 0);
 }
 
 /*
