@@ -3675,6 +3675,7 @@ void RichEditorPattern::HandleOnPaste()
     TextCommonEvent event;
     eventHub->FireOnPaste(event);
     if (event.IsPreventDefault()) {
+        CloseSelectOverlay();
         return;
     }
     CHECK_NULL_VOID(clipboard_);
