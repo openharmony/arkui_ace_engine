@@ -3405,6 +3405,9 @@ void SwiperPattern::UpdateDragFRCSceneInfo(float speed, SceneStatus sceneStatus)
 
 void SwiperPattern::OnScrollStartRecursive(float position)
 {
+    if (IsDisableSwipe()) {
+        return;
+    }
     childScrolling_ = true;
     StopAnimationOnScrollStart(false);
     NotifyParentScrollStart(position);
@@ -3421,6 +3424,9 @@ void SwiperPattern::NotifyParentScrollStart(float position)
 
 void SwiperPattern::OnScrollEndRecursive()
 {
+    if (IsDisableSwipe()) {
+        return;
+    }
     // in case child didn't call swiper's HandleScrollVelocity
     if (!AnimationRunning()) {
         HandleDragEnd(0.0f);
@@ -3445,6 +3451,10 @@ inline bool SwiperPattern::AnimationRunning() const
 
 bool SwiperPattern::HandleScrollVelocity(float velocity)
 {
+    if (IsDisableSwipe()) {
+        return false;
+    }
+
     // haven't reached edge
     if (GetDistanceToEdge() > 0.0f || IsLoop()) {
         HandleDragEnd(velocity);
@@ -3465,6 +3475,10 @@ bool SwiperPattern::HandleScrollVelocity(float velocity)
 
 ScrollResult SwiperPattern::HandleScroll(float offset, int32_t source, NestedState state)
 {
+    if (IsDisableSwipe()) {
+        return { offset, false };
+    }
+
     if (source == SCROLL_FROM_ANIMATION && AnimationRunning()) {
         // deny conflicting animation from child
         return { offset, false };
