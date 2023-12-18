@@ -4123,8 +4123,11 @@ bool JSViewAbstract::ParseJsColorFromResource(const JSRef<JSVal>& jsValue, Color
         result = Color(ColorAlphaAdapt(value));
         return true;
     }
-    result = resourceWrapper->GetColor(resId->ToNumber<uint32_t>());
-    return true;
+    if (resourceObject->GetType() == static_cast<uint32_t>(ResourceType::COLOR)) {
+        result = resourceWrapper->GetColor(resId->ToNumber<uint32_t>());
+        return true;
+    }
+    return false;
 }
 
 bool JSViewAbstract::ParseJsColor(const JSRef<JSVal>& jsValue, Color& result)
