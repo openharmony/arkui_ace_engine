@@ -1089,8 +1089,6 @@ HWTEST_F(RichEditorTestNg, OnKeyEvent001, TestSize.Level1)
     EXPECT_FALSE(richEditorPattern->OnKeyEvent(keyE));
 
     // 2012 2015
-    std::vector<KeyCode> cases = { KeyCode::KEY_DPAD_UP, KeyCode::KEY_DPAD_DOWN, KeyCode::KEY_TAB,
-        KeyCode::KEY_DPAD_RIGHT };
     keyE.action = KeyAction::DOWN;
     std::vector<KeyCode> eventCodes = {
         KeyCode::KEY_DPAD_LEFT,
