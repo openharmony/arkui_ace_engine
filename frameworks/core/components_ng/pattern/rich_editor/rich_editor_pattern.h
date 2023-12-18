@@ -163,7 +163,7 @@ public:
     void SpanNodeFission(RefPtr<SpanNode>& spanNode);
     void CreateTextSpanNode(
         RefPtr<SpanNode>& spanNode, const TextInsertValueInfo& info, const std::string& insertValue, bool isIME = true);
-    void HandleOnDelete() override;
+    void HandleOnDelete(bool backward) override;
     void DeleteBackward(int32_t length = 0) override;
     std::wstring DeleteBackwardOperation(int32_t length = 0);
     void DeleteForward(int32_t length) override;
@@ -177,6 +177,10 @@ public:
     }
     void ClearRedoOperationRecords();
     void AddOperationRecord(const OperationRecord& record);
+    void HandleOnEnter() override
+    {
+        PerformAction(TextInputAction::NEW_LINE, false);
+    }
     void HandleOnUndoAction() override;
     void HandleOnRedoAction() override;
     void CursorMove(CaretMoveIntent direction) override;

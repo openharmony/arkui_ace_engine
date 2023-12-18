@@ -210,6 +210,7 @@ public:
     void DeleteBackwardOperation(int32_t length);
     void DeleteForward(int32_t length) override;
     void DeleteForwardOperation(int32_t length);
+    void HandleOnDelete(bool backward) override;
     void UpdateRecordCaretIndex(int32_t index);
     void CreateHandles() override;
 
@@ -777,6 +778,10 @@ public:
     void HandleSelectionEnd();
     bool HandleOnEscape() override;
     bool HandleOnTab(bool backward) override;
+    void HandleOnEnter() override
+    {
+        PerformAction(GetTextInputActionValue(TextInputAction::DONE), false);
+    }
     void HandleOnUndoAction() override;
     void HandleOnRedoAction() override;
     void HandleOnSelectAll(bool isKeyEvent, bool inlineStyle = false);
@@ -1030,6 +1035,10 @@ public:
     }
 
     void ShowMenu();
+    void HandleOnShowMenu() override
+    {
+        ShowMenu();
+    }
     bool HasFocus() const;
     void StopTwinkling();
 
