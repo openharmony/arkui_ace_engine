@@ -120,6 +120,14 @@ void TxtParagraph::AddText(const std::u16string& text)
 #endif
 }
 
+void TxtParagraph::AddSymbol(const std::uint32_t& symbolId)
+{
+    if (!builder_) {
+        CreateBuilder();
+    }
+    builder_->AppendSymbol(symbolId);
+}
+
 int32_t TxtParagraph::AddPlaceholder(const PlaceholderRun& span)
 {
     if (!builder_) {

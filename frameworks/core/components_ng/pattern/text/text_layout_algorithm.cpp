@@ -336,6 +336,19 @@ bool TextLayoutAlgorithm::CreateParagraph(const TextStyle& textStyle, std::strin
     }
     paragraph_ = Paragraph::Create(paraStyle, FontCollection::Current());
     CHECK_NULL_RETURN(paragraph_, false);
+    if (frameNode->GetTag() == V2::SYMBOL_ETS_TAG) {
+        auto layoutProperty = DynamicCast<TextLayoutProperty>(layoutWrapper->GetLayoutProperty());
+        CHECK_NULL_RETURN(layoutProperty, false);
+        auto symbolSourceInfo = layoutProperty->GetSymbolSourceInfo();
+        CHECK_NULL_RETURN(symbolSourceInfo, false);
+        TextStyle symbolTextStyle = textStyle;
+        symbolTextStyle.isSymbolGlyph_ = true;
+        paragraph_->PushStyle(symbolTextStyle);
+        paragraph_->AddSymbol(symbolSourceInfo->GetUnicode());
+        paragraph_->PopStyle();
+        paragraph_->Build();
+        return true;
+    }
     paragraph_->PushStyle(textStyle);
     CHECK_NULL_RETURN(pattern, -1);
     if (spanItemChildren_.empty()) {

@@ -560,4 +560,8 @@ const char PARTICLE_ETS_TAG[] = "Particle";
 
 // SelectOverlay
 const char SELECT_OVERLAY_ETS_TAG[] = "SelectOverlay";
+
+// Symbol
+const char SYMBOL_COMPONENT_TAG[] = "SymbolGlyphComponent";
+const char SYMBOL_ETS_TAG[] = "SymbolGlyph";
 } // namespace OHOS::Ace::V2
