@@ -81,6 +81,10 @@ bool GestureEventHub::ProcessTouchTestHit(const OffsetF& coordinateOffset, const
     size_t idx = innerTargets.size();
     size_t newIdx = 0;
     auto host = GetFrameNode();
+    if (!host) {
+        TAG_LOGI(AceLogTag::ACE_GESTURE, "Get frame node is null");
+        return false;
+    }
     auto eventHub = eventHub_.Upgrade();
     auto getEventTargetImpl = eventHub ? eventHub->CreateGetEventTargetImpl() : nullptr;
     if (scrollableActuator_) {
