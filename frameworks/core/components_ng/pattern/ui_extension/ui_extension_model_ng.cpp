@@ -96,6 +96,14 @@ void UIExtensionModelNG::Create()
     pipeline->AddWindowStateChangedCallback(nodeId);
 }
 
+void UIExtensionModelNG::InitializeDynamicComponent(const RefPtr<FrameNode>& frameNode, const std::string& hapPath,
+    const std::string& abcPath, const RefPtr<OHOS::Ace::WantWrap>& wantWrap, void* runtime)
+{
+    auto pattern = frameNode->GetPattern<UIExtensionPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->InitializeDynamicComponent(hapPath, abcPath, wantWrap, runtime);
+}
+
 void UIExtensionModelNG::SetOnRemoteReady(std::function<void(const RefPtr<UIExtensionProxy>&)>&& onRemoteReady)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();

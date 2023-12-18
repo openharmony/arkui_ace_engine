@@ -21,7 +21,6 @@
 #include "commonlibrary/ets_utils/js_concurrent_module/worker/worker.h"
 #include "jsnapi.h"
 #include "native_engine.h"
-#include "want_params.h"
 
 #include "base/log/log_wrapper.h"
 #include "base/memory/ace_type.h"
@@ -40,7 +39,6 @@
 #include "core/common/container_scope.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_model.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_model_ng.h"
-#include "core/components_ng/pattern/ui_extension/ui_extension_pattern.h"
 
 using namespace Commonlibrary::Concurrent::WorkerModule;
 
@@ -67,10 +65,6 @@ void JSDynamicComponent::Create(const JSCallbackInfo& info)
         return;
     }
     RefPtr<OHOS::Ace::WantWrap> want = nullptr;
-    if (info[2]->IsObject()) {
-        auto wantObj = JSRef<JSObject>::Cast(info[2]);
-        want = CreateWantWrapFromNapiValue(wantObj);
-    }
 
     auto hostEngine = EngineHelper::GetCurrentEngine();
     CHECK_NULL_VOID(hostEngine);
@@ -90,21 +84,20 @@ void JSDynamicComponent::Create(const JSCallbackInfo& info)
     UIExtensionModel::GetInstance()->Create();
     auto frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto pattern = frameNode->GetPattern<NG::UIExtensionPattern>();
-    CHECK_NULL_VOID(pattern);
     auto instanceId = Container::CurrentId();
 
-    worker->RegisterCallbackForWorkerEnv(
-        [instanceId, weak = AceType::WeakClaim(AceType::RawPtr(pattern)), hapPathStr, abcPathStr, want](napi_env env) {
-            ContainerScope scope(instanceId);
-            auto container = Container::Current();
-            container->GetTaskExecutor()->PostTask(
-                [weak, hapPathStr, abcPathStr, want, env]() {
-                    auto pattern = weak.Upgrade();
-                    CHECK_NULL_VOID(pattern);
-                    pattern->InitializeDynamicComponent(hapPathStr, abcPathStr, want, env);
-                },
-                TaskExecutor::TaskType::UI);
-        });
+    worker->RegisterCallbackForWorkerEnv([instanceId, weak = AceType::WeakClaim(AceType::RawPtr(frameNode)), hapPathStr,
+                                             abcPathStr, want](napi_env env) {
+        ContainerScope scope(instanceId);
+        auto container = Container::Current();
+        container->GetTaskExecutor()->PostTask(
+            [weak, hapPathStr, abcPathStr, want, env]() {
+                auto frameNode = weak.Upgrade();
+                CHECK_NULL_VOID(frameNode);
+                UIExtensionModel::GetInstance()->InitializeDynamicComponent(
+                    frameNode, hapPathStr, abcPathStr, want, env);
+            },
+            TaskExecutor::TaskType::UI);
+    });
 }
 } // namespace OHOS::Ace::Framework

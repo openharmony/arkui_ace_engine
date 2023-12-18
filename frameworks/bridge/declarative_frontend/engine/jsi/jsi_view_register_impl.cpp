@@ -621,7 +621,6 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "ActionSheet", JSActionSheet::JSBind },
     { "AlertDialog", JSAlertDialog::JSBind },
     { "ContextMenu", JSContextMenu::JSBind },
-    { "DynamicComponent", JSDynamicComponent::JSBind },
     { "FormLink", JSFormLink::JSBind },
     { "LocationButton", JSLocationButton::JSBind },
     { "PasteButton", JSPasteButton::JSBind },
@@ -755,6 +754,7 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "Screen", JSScreen::JSBind },
     { "UIExtensionComponent", JSUIExtension::JSBind },
     { "UIExtensionProxy", JSUIExtensionProxy::JSBind },
+    { "DynamicComponent", JSDynamicComponent::JSBind },
     { "WindowScene", JSWindowScene::JSBind },
 #endif
     { "RichEditor", JSRichEditor::JSBind },

@@ -195,7 +195,6 @@ template("declarative_js_engine") {
       "jsview/js_datepicker.cpp",
       "jsview/js_divider.cpp",
       "jsview/js_dump_log.cpp",
-      "jsview/js_dynamic_component.cpp",
       "jsview/js_ellipse.cpp",
       "jsview/js_environment.cpp",
       "jsview/js_flex.cpp",
@@ -567,9 +566,12 @@ template("declarative_js_engine") {
     } else {
       external_deps += [
         "ets_runtime:libark_jsruntime",
-        "ets_utils:worker",
         "napi:ace_napi",
       ]
+
+      if (!build_ohos_sdk) {
+        external_deps += [ "ets_utils:worker" ]
+      }
     }
 
     if (platform == "windows" || platform == "mac" || platform == "linux") {
@@ -592,6 +594,7 @@ template("declarative_js_engine") {
 
       if (defined(config.window_scene_support) && config.window_scene_support) {
         sources += [
+          "jsview/js_dynamic_component.cpp",
           "jsview/js_ui_extension.cpp",
           "jsview/window_scene/js_root_scene.cpp",
           "jsview/window_scene/js_screen.cpp",
@@ -812,8 +815,15 @@ template("declarative_js_engine_ng") {
       }
     }
 
+    if (!build_ohos_sdk) {
+      external_deps += [ "ets_utils:worker" ]
+
+      include_dirs = [ "//commonlibrary/ets_utils/js_concurrent_module/common" ]
+    }
+
     if (defined(config.window_scene_support) && config.window_scene_support) {
       sources += [
+        "jsview/js_dynamic_component.cpp",
         "jsview/js_ui_extension.cpp",
         "jsview/window_scene/js_root_scene.cpp",
         "jsview/window_scene/js_screen.cpp",

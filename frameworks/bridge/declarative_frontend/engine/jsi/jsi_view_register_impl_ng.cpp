@@ -17,6 +17,7 @@
 #include "base/i18n/localization.h"
 #include "base/log/log.h"
 #include "base/memory/ace_type.h"
+#include "bridge/declarative_frontend/jsview/js_dynamic_component.h"
 #include "bridge/declarative_frontend/jsview/js_shape_abstract.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
@@ -447,6 +448,7 @@ void JsBindViews(BindingTarget globalObj)
     JSScreen::JSBind(globalObj);
     JSUIExtension::JSBind(globalObj);
     JSUIExtensionProxy::JSBind(globalObj);
+    JSDynamicComponent::JSBind(globalObj);
 #endif
     JSRating::JSBind(globalObj);
     JSGrid::JSBind(globalObj);

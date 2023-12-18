@@ -29,6 +29,10 @@ void UIExtensionModelNG::Create(const RefPtr<OHOS::Ace::WantWrap>& wantWrap, boo
 
 void UIExtensionModelNG::Create() {}
 
+void UIExtensionModelNG::InitializeDynamicComponent(const RefPtr<NG::FrameNode>& frameNode, const std::string& hapPath,
+    const std::string& abcPath, const RefPtr<OHOS::Ace::WantWrap>& wantWrap, void* runtime)
+{}
+
 void UIExtensionModelNG::SetOnRelease(std::function<void(int32_t)>&& onRelease) {}
 
 void UIExtensionModelNG::SetOnResult(std::function<void(int32_t, const AAFwk::Want&)>&& onResult) {}
