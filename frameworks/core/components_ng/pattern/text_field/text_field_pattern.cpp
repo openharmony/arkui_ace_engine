@@ -1073,6 +1073,7 @@ void TextFieldPattern::HandleOnPaste()
         TextCommonEvent event;
         eventHub->FireOnPasteWithEvent(data, event);
         if (event.IsPreventDefault()) {
+            textfield->CloseSelectOverlay(true);
             return;
         }
 
