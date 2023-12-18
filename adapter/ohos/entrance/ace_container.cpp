@@ -86,7 +86,6 @@
 namespace OHOS::Ace::Platform {
 namespace {
 constexpr uint32_t DIRECTION_KEY = 0b1000;
-constexpr uint32_t DPI_KEY = 0b0100;
 
 #ifdef _ARM64_
 const std::string ASSET_LIBARCH_PATH = "/lib/arm64";
@@ -1935,12 +1934,15 @@ void AceContainer::UpdateConfiguration(const ParsedConfig& parsedConfig, const s
         }
     }
     if (!parsedConfig.direction.empty()) {
-        configurationChange.directionUpdate = true;
         auto resDirection = DeviceOrientation::ORIENTATION_UNDEFINED;
         if (parsedConfig.direction == "horizontal") {
             resDirection = DeviceOrientation::LANDSCAPE;
         } else if (parsedConfig.direction == "vertical") {
             resDirection = DeviceOrientation::PORTRAIT;
+        }
+        if (SystemProperties::GetDeviceOrientation() != resDirection) {
+            configurationChange.directionUpdate = true;
+            SystemProperties::SetDeviceOrientation(resDirection == DeviceOrientation::PORTRAIT ? 0 : 1);
         }
         resConfig.SetOrientation(resDirection);
     }
@@ -1998,9 +2000,6 @@ void AceContainer::NotifyConfigurationChange(
                     CHECK_NULL_VOID(themeManager);
                     if (configurationChange.directionUpdate &&
                         (themeManager->GetResourceLimitKeys() & DIRECTION_KEY) == 0) {
-                        return;
-                    }
-                    if (configurationChange.dpiUpdate && (themeManager->GetResourceLimitKeys() & DPI_KEY) == 0) {
                         return;
                     }
                     if (configurationChange.colorModeUpdate && !container->IsTransparentBg()) {
