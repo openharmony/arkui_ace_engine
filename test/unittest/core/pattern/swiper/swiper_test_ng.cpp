@@ -5517,7 +5517,7 @@ HWTEST_F(SwiperTestNg, SwiperPatternStopPropertyTranslateAnimation001, TestSize.
      * @tc.expected: Related function runs ok.
      */
     for (int i = 0; i <= 1; i++) {
-        pattern_->StopPropertyTranslateAnimation();
+        pattern_->StopPropertyTranslateAnimation(false);
         pattern_->usePropertyAnimation_ = true;
     }
 }
@@ -6245,7 +6245,7 @@ HWTEST_F(SwiperTestNg, SwiperPatternOnTranslateFinish001, TestSize.Level1)
      */
     for (int i = 0; i <= 1; i++) {
         for (int j = 0; j <= 1; j++) {
-            pattern_->OnTranslateFinish(nextIndex, restartAutoPlay, forceStop);
+            pattern_->OnTranslateFinish(nextIndex, restartAutoPlay, pattern_->isFinishAnimation_, forceStop);
             if (i == 1) {
                 pattern_->isFinishAnimation_ = false;
                 continue;
@@ -9732,7 +9732,7 @@ HWTEST_F(SwiperTestNg, SwiperPatternOnTranslateFinish002, TestSize.Level1)
      */
     for (int i = 0; i <= 1; i++) {
         for (int j = 0; j <= 1; j++) {
-            pattern_->OnTranslateFinish(nextIndex, restartAutoPlay, forceStop);
+            pattern_->OnTranslateFinish(nextIndex, restartAutoPlay, pattern_->isFinishAnimation_, forceStop);
             if (i == 1) {
                 pattern_->isUserFinish_ = true;
                 continue;

@@ -220,7 +220,7 @@ void SwiperPattern::OnModifyDone()
     StopAndResetSpringAnimation();
     OnLoopChange();
     if ((layoutProperty->GetPropertyChangeFlag() & PROPERTY_UPDATE_MEASURE) == PROPERTY_UPDATE_MEASURE) {
-        StopPropertyTranslateAnimation();
+        StopPropertyTranslateAnimation(isFinishAnimation_);
         StopTranslateAnimation();
         StopSpringAnimation();
         StopFadeAnimation();
@@ -318,7 +318,7 @@ void SwiperPattern::BeforeCreateLayoutWrapper()
         }
         targetIndex_.reset();
         if (usePropertyAnimation_) {
-            StopPropertyTranslateAnimation(true);
+            StopPropertyTranslateAnimation(false, true);
             currentDelta_ = 0.0f;
             StopIndicatorAnimation();
         }
@@ -352,7 +352,7 @@ void SwiperPattern::InitSurfaceChangedCallback()
                     swiper->StopAutoPlay();
                 }
 
-                swiper->StopPropertyTranslateAnimation();
+                swiper->StopPropertyTranslateAnimation(swiper->isFinishAnimation_);
                 swiper->StopTranslateAnimation();
                 swiper->StopSpringAnimation();
                 swiper->StopFadeAnimation();
@@ -791,7 +791,7 @@ void SwiperPattern::SwipeToWithoutAnimation(int32_t index)
     }
 
     if (usePropertyAnimation_) {
-        StopPropertyTranslateAnimation();
+        StopPropertyTranslateAnimation(isFinishAnimation_);
     }
 
     StopFadeAnimation();
@@ -860,7 +860,7 @@ void SwiperPattern::SwipeTo(int32_t index)
     StopTranslateAnimation();
     StopIndicatorAnimation();
     if (usePropertyAnimation_) {
-        StopPropertyTranslateAnimation();
+        StopPropertyTranslateAnimation(isFinishAnimation_);
     }
 
     targetIndex_ = targetIndex;
@@ -981,7 +981,7 @@ void SwiperPattern::FinishAnimation()
 
     if (usePropertyAnimation_) {
         isFinishAnimation_ = true;
-        StopPropertyTranslateAnimation();
+        StopPropertyTranslateAnimation(isFinishAnimation_);
     }
     if (isUserFinish_) {
         if (swiperController_ && swiperController_->GetFinishCallback()) {
@@ -1540,7 +1540,7 @@ void SwiperPattern::HandleTouchDown(const TouchLocationInfo& locationInfo)
 
     StopIndicatorAnimation();
     if (usePropertyAnimation_) {
-        StopPropertyTranslateAnimation();
+        StopPropertyTranslateAnimation(isFinishAnimation_);
     }
 
     indicatorDoingAnimation_ = false;
@@ -1610,7 +1610,7 @@ void SwiperPattern::HandleDragStart(const GestureEvent& info)
 void SwiperPattern::StopAnimationOnScrollStart(bool flushImmediately)
 {
     if (usePropertyAnimation_) {
-        StopPropertyTranslateAnimation();
+        StopPropertyTranslateAnimation(isFinishAnimation_);
     }
 
     StopIndicatorAnimation();
@@ -1833,7 +1833,7 @@ void SwiperPattern::PlayPropertyTranslateAnimation(
         if (targetIndex_) {
             targetIndex = targetIndex_;
         }
-        StopPropertyTranslateAnimation();
+        StopPropertyTranslateAnimation(isFinishAnimation_);
         StopIndicatorAnimation();
 
         if (targetIndex) {
@@ -1929,10 +1929,10 @@ void SwiperPattern::OnPropertyTranslateAnimationFinish(const OffsetF& offset)
     itemPositionInAnimation_.clear();
     // update postion info.
     UpdateOffsetAfterPropertyAnimation(offset.GetMainOffset(GetDirection()));
-    OnTranslateFinish(propertyAnimationIndex_, false);
+    OnTranslateFinish(propertyAnimationIndex_, false, isFinishAnimation_);
 }
 
-void SwiperPattern::StopPropertyTranslateAnimation(bool isBeforeCreateLayoutWrapper)
+void SwiperPattern::StopPropertyTranslateAnimation(bool isFinishAnimation, bool isBeforeCreateLayoutWrapper)
 {
     if (!usePropertyAnimation_) {
         return;
@@ -1953,7 +1953,7 @@ void SwiperPattern::StopPropertyTranslateAnimation(bool isBeforeCreateLayoutWrap
     if (!isBeforeCreateLayoutWrapper) {
         UpdateOffsetAfterPropertyAnimation(currentOffset.GetMainOffset(GetDirection()));
     }
-    OnTranslateFinish(propertyAnimationIndex_, false, true);
+    OnTranslateFinish(propertyAnimationIndex_, false, isFinishAnimation, true);
 }
 
 RefPtr<Curve> SwiperPattern::GetCurveIncludeMotion() const
@@ -2094,7 +2094,7 @@ void SwiperPattern::PlayTranslateAnimation(
         controller_->AddStopListener([weak, nextIndex, restartAutoPlay]() {
             auto swiper = weak.Upgrade();
             CHECK_NULL_VOID(swiper);
-            swiper->OnTranslateFinish(nextIndex, restartAutoPlay);
+            swiper->OnTranslateFinish(nextIndex, restartAutoPlay, swiper->isFinishAnimation_);
         });
         controller_->SetDuration(GetDuration());
         controller_->AddInterpolator(translate);
@@ -2114,7 +2114,7 @@ void SwiperPattern::PlayTranslateAnimation(
     controller_->AddStopListener([weak, nextIndex, restartAutoPlay]() {
         auto swiper = weak.Upgrade();
         CHECK_NULL_VOID(swiper);
-        swiper->OnTranslateFinish(nextIndex, restartAutoPlay);
+        swiper->OnTranslateFinish(nextIndex, restartAutoPlay, swiper->isFinishAnimation_);
     });
     controller_->PlayMotion(scrollMotion);
 }
@@ -3053,9 +3053,9 @@ void SwiperPattern::UpdateItemRenderGroup(bool itemRenderGroup)
     }
 }
 
-void SwiperPattern::OnTranslateFinish(int32_t nextIndex, bool restartAutoPlay, bool forceStop)
+void SwiperPattern::OnTranslateFinish(int32_t nextIndex, bool restartAutoPlay, bool isFinishAnimation, bool forceStop)
 {
-    if (forceStop && !isFinishAnimation_) {
+    if (forceStop && !isFinishAnimation) {
         TriggerAnimationEndOnForceStop();
     } else {
         TriggerEventOnFinish(nextIndex);
