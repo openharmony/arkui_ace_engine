@@ -1629,7 +1629,8 @@ void ListPattern::SetChainAnimationOptions(const ChainAnimationOptions& options)
         }
         float maxSpace = options.maxSpace.ConvertToPx();
         float minSpace = options.minSpace.ConvertToPx();
-        if (GreatNotEqual(minSpace, maxSpace)) {
+        if (Negative(minSpace) || Negative(maxSpace) || GreatNotEqual(minSpace, space) ||
+            LessNotEqual(maxSpace, space) || GreatNotEqual(minSpace, maxSpace)) {
             minSpace = space;
             maxSpace = space;
         }
