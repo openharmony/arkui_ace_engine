@@ -294,7 +294,7 @@ float GridLayoutInfo::GetContentOffset(const GridLayoutOptions& options, float m
     }
     totalOffset +=
         startIndex_ > lastIndex ? ((startIndex_ - lastIndex - 1) / crossCount_) * (regularHeight + mainGap) : 0;
-    return totalOffset - mainGap - currentOffset_;
+    return totalOffset - currentOffset_;
 }
 
 float GridLayoutInfo::GetContentHeight(const GridLayoutOptions& options, float mainGap) const
