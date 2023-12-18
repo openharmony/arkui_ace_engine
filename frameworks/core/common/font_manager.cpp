@@ -59,6 +59,12 @@ void FontManager::SetFontFamily(const char* familyName, const char* familySrc)
 {
     RefPtr<FontLoader> fontLoader = FontLoader::Create(familyName, familySrc);
     fontLoader->SetDefaultFontFamily(familyName, familySrc);
+    isDefaultFontChanged_ = true;
+}
+
+bool FontManager::IsDefaultFontChanged()
+{
+    return isDefaultFontChanged_;
 }
 
 void FontManager::GetSystemFontList(std::vector<std::string>& fontList)

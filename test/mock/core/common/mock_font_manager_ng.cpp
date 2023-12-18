@@ -29,6 +29,11 @@ bool FontManager::RegisterCallbackNG(
     return false;
 }
 
+bool FontManager::IsDefaultFontChanged()
+{
+    return false;
+}
+
 void FontManager::UnRegisterCallbackNG(const WeakPtr<NG::UINode>& node) {}
 
 void FontManager::AddFontNodeNG(const WeakPtr<NG::UINode>& node)
