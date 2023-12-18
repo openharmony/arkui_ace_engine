@@ -76,8 +76,13 @@ public:
 
     static float GetCurrentRootHeight();
 
+    // handle close keyboard
     RefPtr<FrameNode> HandleFocusNode();
     void IsCloseSCBKeyboard();
+    void SetNeedSoftKeyboard(std::optional<bool> flag)
+    {
+        needSoftKeyboard_ = flag;
+    }
 
     void SetupRootElement() override;
 
@@ -698,6 +703,8 @@ private:
 
     RefPtr<FrameNode> focusNode_;
     std::function<void()> focusOnNodeCallback_;
+
+    std::optional<bool> needSoftKeyboard_ ;
 
     std::unique_ptr<MouseEvent> lastMouseEvent_;
 

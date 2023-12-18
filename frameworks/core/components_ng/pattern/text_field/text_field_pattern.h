@@ -157,6 +157,8 @@ public:
         return true;
     }
 
+    bool CheckBlurReason();
+
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override;
 
     RefPtr<LayoutProperty> CreateLayoutProperty() override

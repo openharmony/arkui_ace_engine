@@ -431,6 +431,13 @@ public:
 
     static void IsCloseKeyboard(RefPtr<FrameNode> frameNode);
 
+    static void PushPageCloseKeyboard();
+
+    BlurReason GetBlurReason() const
+    {
+        return blurReason_;
+    }
+
     void SetFocusPaintParamsPtr(const std::unique_ptr<FocusPaintParam>& paramsPtr)
     {
         CHECK_NULL_VOID(paramsPtr);

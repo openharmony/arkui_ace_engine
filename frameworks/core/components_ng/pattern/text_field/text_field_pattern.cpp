@@ -874,6 +874,18 @@ void TextFieldPattern::InitFocusEvent()
     focusEventInitialized_ = true;
 }
 
+bool TextFieldPattern::CheckBlurReason()
+{
+    auto curFocusHub = GetFocusHub();
+    CHECK_NULL_RETURN(curFocusHub, false);
+    auto curBlurReason = curFocusHub->GetBlurReason();
+    if (curBlurReason == BlurReason::FRAME_DESTROY) {
+        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "TextFieldPattern CheckBlurReason, Close Keyboard.");
+        return true;
+    }
+    return false;
+}
+
 void TextFieldPattern::HandleBlurEvent()
 {
     auto host = GetHost();
@@ -912,9 +924,9 @@ void TextFieldPattern::HandleBlurEvent()
     UpdateShowMagnifier();
     CloseSelectOverlay(true);
     StopTwinkling();
-    if (customKeyboardBuilder_ && isCustomKeyboardAttached_) {
-        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "FrameNode Close CustomKeyboard.");
+    if ((customKeyboardBuilder_ && isCustomKeyboardAttached_) || CheckBlurReason()) {
         CloseKeyboard(true);
+        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "TextFieldPattern Blur, Close Keyboard.");
     }
     selectController_->UpdateCaretIndex(selectController_->GetCaretIndex());
     NotifyOnEditChanged(false);

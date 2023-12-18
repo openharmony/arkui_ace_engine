@@ -441,6 +441,12 @@ void PipelineContext::IsCloseSCBKeyboard()
     if (isSystem) {
         TAG_LOGI(AceLogTag::ACE_KEYBOARD, "In SCBWindow, close keyboard.");
         WindowSceneHelper::IsWindowSceneCloseKeyboard(curFrameNode);
+    } else {
+        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "In page, be ready to close keyboard.");
+        if (needSoftKeyboard_.has_value() && !needSoftKeyboard_.value()) {
+            TAG_LOGI(AceLogTag::ACE_KEYBOARD, "In page, close keyboard.");
+            FocusHub::IsCloseKeyboard(curFrameNode);
+        }
     }
 #else
     FocusHub::IsCloseKeyboard(curFrameNode);

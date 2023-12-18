@@ -104,6 +104,8 @@ public:
         return true;
     }
 
+    bool CheckBlurReason();
+
     uint32_t GetSCBSystemWindowId();
 
     RefPtr<EventHub> CreateEventHub() override
