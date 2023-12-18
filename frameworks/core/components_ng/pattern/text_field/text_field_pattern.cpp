@@ -1535,9 +1535,9 @@ void TextFieldPattern::InitDragDropEvent()
                         Offset(0, theme->GetInsertCursorOffset().ConvertToPx());
         auto position = pattern->ConvertTouchOffsetToCaretPosition(offset);
         CHECK_NULL_VOID(position);
+        pattern->SetCaretPosition(position);
         auto host = pattern->GetHost();
         CHECK_NULL_VOID(host);
-        pattern->CloseSelectOverlay();
     };
     eventHub->SetOnDragMove(std::move(onDragMove));
 
