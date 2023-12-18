@@ -846,6 +846,13 @@ void FrontendDelegateDeclarative::PushWithCallback(const std::string& uri, const
 {
     if (Container::IsCurrentUseNewPipeline()) {
         CHECK_NULL_VOID(pageRouterManager_);
+        auto container = Container::Current();
+        CHECK_NULL_VOID(container);
+        auto currentId = Container::CurrentId();
+        if (container->IsSubContainer()) {
+            currentId = SubwindowManager::GetInstance()->GetParentContainerId(Container::CurrentId());
+        }
+        ContainerScope scope(currentId);
         pageRouterManager_->Push(
             NG::RouterPageInfo({ uri, params, static_cast<NG::RouterMode>(routerMode), errorCallback }));
         OnMediaQueryUpdate();
