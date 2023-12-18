@@ -1316,9 +1316,8 @@ void NavigationModelNG::SetNavBarWidth(const Dimension& value)
     auto navigationPattern = navigationGroupNode->GetPattern<NavigationPattern>();
     CHECK_NULL_VOID(navigationPattern);
     navigationPattern->SetUserSetNavBarWidthFlag(true);
-    if (!setDefaultNavBarWidthFlag_) {
+    if (navigationPattern->GetInitNavBarWidth() != value) {
         navigationPattern->SetInitNavBarWidth(value);
-        setDefaultNavBarWidthFlag_ = true;
     }
 }
 
