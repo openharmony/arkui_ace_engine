@@ -634,6 +634,7 @@ private:
     int32_t GetSelectionSpanItemIndex(const MouseInfo& info);
     void CopySelectionMenuParams(SelectOverlayInfo& selectInfo, TextResponseType responseType);
     void RedisplaySelectOverlay();
+    ResultObject GetBuilderResultObject(RefPtr<UINode> uiNode, int32_t index, int32_t start, int32_t end);
     // to check if drag is in progress
 
     bool isMeasureBoundary_ = false;

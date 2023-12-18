@@ -455,6 +455,7 @@ private:
     bool CloseKeyboard(bool forceClose) override;
     void CalcInsertValueObj(TextInsertValueInfo& info);
     void CalcDeleteValueObj(int32_t currentPosition, int32_t length, RichEditorDeleteValue& info);
+    int32_t DeleteValueSetBuilderSpan(const RefPtr<SpanItem>& spanItem, RichEditorAbstractSpanResult& spanResult);
     int32_t DeleteValueSetImageSpan(const RefPtr<SpanItem>& spanItem, RichEditorAbstractSpanResult& spanResult);
     int32_t DeleteValueSetTextSpan(const RefPtr<SpanItem>& spanItem, int32_t currentPosition, int32_t length,
         RichEditorAbstractSpanResult& spanResult);
