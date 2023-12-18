@@ -114,21 +114,24 @@ void ReportPerfEventToRS(DataBase& data)
     switch (dataRs.eventType) {
         case EVENT_RESPONSE:
             {
-                ACE_SCOPED_TRACE("EVENT_REPORT_RESPONSE_RS");
+                ACE_SCOPED_TRACE("EVENT_REPORT_RESPONSE_RS sceneId = %s, uniqueId = %lld",
+                    dataRs.sceneId.c_str(), static_cast<long long> (dataRs.uniqueId));
                 Rosen::RSInterfaces::GetInstance().ReportEventResponse(dataRs);
                 break;
             }
         case EVENT_COMPLETE:
             {
-                ACE_SCOPED_TRACE("EVENT_REPORT_COMPLETE_RS");
                 if (data.isDisplayAnimator) {
+                    ACE_SCOPED_TRACE("EVENT_REPORT_COMPLETE_RS sceneId = %s, uniqueId = %lld",
+                        dataRs.sceneId.c_str(), static_cast<long long> (dataRs.uniqueId));
                     Rosen::RSInterfaces::GetInstance().ReportEventComplete(dataRs);
                 }
                 break;
             }
         case EVENT_JANK_FRAME:
             {
-                ACE_SCOPED_TRACE("EVENT_REPORT_JANK_RS");
+                ACE_SCOPED_TRACE("EVENT_REPORT_JANK_RS sceneId = %s, uniqueId = %lld",
+                    dataRs.sceneId.c_str(), static_cast<long long> (dataRs.uniqueId));
                 Rosen::RSInterfaces::GetInstance().ReportEventJankFrame(dataRs);
                 break;
             }
