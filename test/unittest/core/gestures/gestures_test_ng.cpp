@@ -12286,7 +12286,7 @@ HWTEST_F(GesturesTestNg, ClickRecognizerHandleTouchUpEvent001, TestSize.Level1)
     clickRecognizerPtr->useCatchMode_ = true;
     clickRecognizerPtr->tappedCount_ = -1;
     clickRecognizerPtr->count_ = 0;
-    clickRecognizer.fingersId_.insert(0);
+    clickRecognizerPtr->fingersId_.insert(0);
     clickRecognizerPtr->SetIsSystemGesture(false);
     clickRecognizerPtr->gestureInfo_->SetTag("test");
     clickRecognizerPtr->HandleTouchUpEvent(touchEvent);
