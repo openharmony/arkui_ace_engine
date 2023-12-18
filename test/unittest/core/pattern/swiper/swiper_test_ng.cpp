@@ -11118,7 +11118,7 @@ HWTEST_F(SwiperTestNg, SwiperLayoutAlgorithmGetChildMaxSize002, TestSize.Level1)
     swiperLayoutAlgorithm->itemPosition_.clear();
     swiperLayoutAlgorithm->GetChildMaxSize(&layoutWrapper, axis, isMainAxis);
     EXPECT_TRUE(swiperLayoutAlgorithm->itemPosition_.empty());
-} 
+}
 
 /**
  * @tc.name: SwiperLayoutAlgorithmGetChildMaxSize004
@@ -11402,7 +11402,6 @@ HWTEST_F(SwiperTestNg, SwiperPatternOnModifyDone00081, TestSize.Level1)
 
     pattern_->touchEvent_ = AceType::MakeRefPtr<TouchEventImpl>(std::move(callback));
     pattern_->InitTouchEvent(gestureEventHub);
-    // EXPECT_TRUE(pattern_->touchEvent_);
     pattern_->OnModifyDone();
     EXPECT_TRUE(pattern_->panEvent_);
 }
