@@ -1542,6 +1542,56 @@ void FrontendDelegateDeclarative::ShowDialog(const PromptDialogAttr& dialogAttr,
     ShowDialogInner(dialogProperties, std::move(callback), callbacks);
 }
 
+void FrontendDelegateDeclarative::OpenCustomDialog(const PromptDialogAttr &dialogAttr,
+    std::function<void(int32_t)> &&callback)
+{
+    DialogProperties dialogProperties = {
+        .isShowInSubWindow = dialogAttr.showInSubWindow,
+        .isModal = dialogAttr.isModal,
+        .maskRect = dialogAttr.maskRect,
+        .customBuilder = dialogAttr.customBuilder,
+    };
+    if (dialogAttr.alignment.has_value()) {
+        dialogProperties.alignment = dialogAttr.alignment.value();
+    }
+    if (dialogAttr.offset.has_value()) {
+        dialogProperties.offset = dialogAttr.offset.value();
+    }
+    auto pipelineContext = pipelineContextHolder_.Get();
+    if (Container::IsCurrentUseNewPipeline()) {
+        LOGI("Dialog IsCurrentUseNewPipeline.");
+        auto task = [dialogAttr, dialogProperties, callback](const RefPtr<NG::OverlayManager>& overlayManager) mutable {
+            CHECK_NULL_VOID(overlayManager);
+            LOGI("Begin to open custom dialog ");
+            if (dialogProperties.isShowInSubWindow) {
+                SubwindowManager::GetInstance()->OpenCustomDialog(dialogAttr, std::move(callback));
+                if (dialogProperties.isModal) {
+                    // temporary not support isShowInSubWindow and isModal
+                    LOGW("temporary not support isShowInSubWindow and isModal");
+                }
+            } else {
+                overlayManager->OpenCustomDialog(dialogProperties, std::move(callback));
+            }
+        };
+        MainWindowOverlay(std::move(task));
+        return;
+    } else {
+        LOGW("not support old pipeline");
+    }
+    return;
+}
+
+void FrontendDelegateDeclarative::CloseCustomDialog(const int32_t dialogId)
+{
+    auto task = [dialogId](const RefPtr<NG::OverlayManager>& overlayManager) {
+        CHECK_NULL_VOID(overlayManager);
+        LOGI("begin to close custom dialog.");
+        overlayManager->CloseCustomDialog(dialogId);
+    };
+    MainWindowOverlay(std::move(task));
+    return;
+}
+
 void FrontendDelegateDeclarative::ShowActionMenuInner(DialogProperties& dialogProperties,
     const std::vector<ButtonInfo>& button, std::function<void(int32_t, int32_t)>&& callback)
 {
