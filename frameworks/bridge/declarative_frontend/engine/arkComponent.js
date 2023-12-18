@@ -26,10 +26,8 @@ const UI_STATE_PRESSED = 1;
 const UI_STATE_FOCUSED = 1 << 1;
 const UI_STATE_DISABLED = 1 << 2;
 const UI_STATE_SELECTED = 1 << 3;
-
 function applyUIAttributes(modifier, nativeNode, component) {
   let state = 0;
-
   if (modifier.applyPressedAttribute !== undefined) {
     state |= UI_STATE_PRESSED;
   }
@@ -42,10 +40,8 @@ function applyUIAttributes(modifier, nativeNode, component) {
   if (modifier.applySelectedAttribute !== undefined) {
     state |= UI_STATE_SELECTED;
   }
-
   GetUINativeModule().setSupportedUIState(nativeNode, state);
   const currentUIState = GetUINativeModule().getUIState(nativeNode);
-
   if (modifier.applyNormalAttribute !== undefined) {
     modifier.applyNormalAttribute(component);
   }
@@ -62,7 +58,6 @@ function applyUIAttributes(modifier, nativeNode, component) {
     modifier.applySelectedAttribute(component);
   }
 }
-
 function isResource(variable) {
   let _a;
   return ((_a = variable) === null || _a === void 0 ? void 0 : _a.bundleName) !== undefined;
@@ -8262,7 +8257,6 @@ class ArkScrollEdgeEffect {
       (this.options === another.options);
   }
 }
-
 class ArkFont {
   constructor() {
     this.size = undefined;
@@ -13434,20 +13428,19 @@ class MarqueeFontWeightModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
   }
-    applyPeer(node, reset) {
-      if (reset) {
-        GetUINativeModule().marquee.resetFontWeight(node);
-      }
-      else {
-        GetUINativeModule().marquee.setFontWeight(node, this.value);
-      }
+  applyPeer(node, reset) {
+    if (reset) {
+      GetUINativeModule().marquee.resetFontWeight(node);
     }
-    checkObjectDiff() {
-      return this.stageValue !== this.value;
+    else {
+      GetUINativeModule().marquee.setFontWeight(node, this.value);
     }
   }
+  checkObjectDiff() {
+    return this.stageValue !== this.value;
+  }
+}
 MarqueeFontWeightModifier.identity = Symbol('fontWeight');
-
 class MarqueeFontFamilyModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -13589,17 +13582,17 @@ class MenuItemSelectedModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().menuitem.resetSelected(node);
+      GetUINativeModule().menuitem.resetMenuItemSelected(node);
     }
     else {
-      GetUINativeModule().menuitem.setSelected(node, this.value);
+      GetUINativeModule().menuitem.setMenuItemSelected(node, this.value);
     }
   }
   checkObjectDiff() {
-    return this.stageValue !== this.value;
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
-MenuItemSelectedModifier.identity = Symbol('selected');
+MenuItemSelectedModifier.identity = Symbol('menuItemSelected');
 class LabelFontColorModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -14657,17 +14650,407 @@ globalThis.Web.attributeModifier = function (modifier) {
   component.applyModifierPatch();
 };
 /// <reference path='./import.ts' />
-class ArkXComponentComponent extends ArkComponent {
+class ArkXComponentComponent {
   constructor(nativePtr) {
-    super(nativePtr);
+    this._modifiersWithKeys = new Map();
+    this.nativePtr = nativePtr;
+  }
+  applyModifierPatch() {
+    let expiringItemsWithKeys = [];
+    this._modifiersWithKeys.forEach((value, key) => {
+      if (value.applyStage(this.nativePtr)) {
+        expiringItemsWithKeys.push(key);
+      }
+    });
+    expiringItemsWithKeys.forEach(key => {
+      this._modifiersWithKeys.delete(key);
+    });
+  }
+  width(value) {
+    throw new Error('Method not implemented.');
+  }
+  height(value) {
+    throw new Error('Method not implemented.');
+  }
+  expandSafeArea(types, edges) {
+    throw new Error('Method not implemented.');
+  }
+  responseRegion(value) {
+    throw new Error('Method not implemented.');
+  }
+  mouseResponseRegion(value) {
+    throw new Error('Method not implemented.');
+  }
+  size(value) {
+    throw new Error('Method not implemented.');
+  }
+  constraintSize(value) {
+    throw new Error('Method not implemented.');
+  }
+  touchable(value) {
+    throw new Error('Method not implemented.');
+  }
+  hitTestBehavior(value) {
+    throw new Error('Method not implemented.');
+  }
+  layoutWeight(value) {
+    throw new Error('Method not implemented.');
+  }
+  padding(value) {
+    throw new Error('Method not implemented.');
+  }
+  margin(value) {
+    throw new Error('Method not implemented.');
+  }
+  background(builder, options) {
+    throw new Error('Method not implemented.');
+  }
+  backgroundColor(value) {
+    modifierWithKey(this._modifiersWithKeys, BackgroundColorModifier.identity, BackgroundColorModifier, value);
+    return this;
+  }
+  backgroundImage(src, repeat) {
+    throw new Error('Method not implemented.');
+  }
+  backgroundImageSize(value) {
+    throw new Error('Method not implemented.');
+  }
+  backgroundImagePosition(value) {
+    throw new Error('Method not implemented.');
+  }
+  backgroundBlurStyle(value, options) {
+    throw new Error('Method not implemented.');
+  }
+  foregroundBlurStyle(value, options) {
+    throw new Error('Method not implemented.');
+  }
+  opacity(value) {
+    modifierWithKey(this._modifiersWithKeys, OpacityModifier.identity, OpacityModifier, value);
+    return this;
+  }
+  border(value) {
+    throw new Error('Method not implemented.');
+  }
+  borderStyle(value) {
+    throw new Error('Method not implemented.');
+  }
+  borderWidth(value) {
+    throw new Error('Method not implemented.');
+  }
+  borderColor(value) {
+    throw new Error('Method not implemented.');
+  }
+  borderRadius(value) {
+    throw new Error('Method not implemented.');
+  }
+  borderImage(value) {
+    throw new Error('Method not implemented.');
+  }
+  foregroundColor(value) {
+    throw new Error('Method not implemented.');
+  }
+  onClick(event) {
+    throw new Error('Method not implemented.');
+  }
+  onHover(event) {
+    throw new Error('Method not implemented.');
+  }
+  hoverEffect(value) {
+    throw new Error('Method not implemented.');
+  }
+  onMouse(event) {
+    throw new Error('Method not implemented.');
+  }
+  onTouch(event) {
+    throw new Error('Method not implemented.');
+  }
+  onKeyEvent(event) {
+    throw new Error('Method not implemented.');
+  }
+  focusable(value) {
+    throw new Error('Method not implemented.');
+  }
+  onFocus(event) {
+    throw new Error('Method not implemented.');
+  }
+  onBlur(event) {
+    throw new Error('Method not implemented.');
+  }
+  tabIndex(index) {
+    throw new Error('Method not implemented.');
+  }
+  defaultFocus(value) {
+    throw new Error('Method not implemented.');
+  }
+  groupDefaultFocus(value) {
+    throw new Error('Method not implemented.');
+  }
+  focusOnTouch(value) {
+    throw new Error('Method not implemented.');
+  }
+  animation(value) {
+    throw new Error('Method not implemented.');
+  }
+  transition(value) {
+    throw new Error('Method not implemented.');
+  }
+  gesture(gesture, mask) {
+    throw new Error('Method not implemented.');
+  }
+  priorityGesture(gesture, mask) {
+    throw new Error('Method not implemented.');
+  }
+  parallelGesture(gesture, mask) {
+    throw new Error('Method not implemented.');
+  }
+  blur(value) {
+    throw new Error('Method not implemented.');
+  }
+  linearGradientBlur(value, options) {
+    throw new Error('Method not implemented.');
+  }
+  brightness(value) {
+    throw new Error('Method not implemented.');
+  }
+  contrast(value) {
+    throw new Error('Method not implemented.');
+  }
+  grayscale(value) {
+    throw new Error('Method not implemented.');
+  }
+  colorBlend(value) {
+    throw new Error('Method not implemented.');
+  }
+  saturate(value) {
+    throw new Error('Method not implemented.');
+  }
+  sepia(value) {
+    throw new Error('Method not implemented.');
+  }
+  invert(value) {
+    throw new Error('Method not implemented.');
+  }
+  hueRotate(value) {
+    throw new Error('Method not implemented.');
+  }
+  useEffect(value) {
+    throw new Error('Method not implemented.');
+  }
+  backdropBlur(value) {
+    throw new Error('Method not implemented.');
+  }
+  renderGroup(value) {
+    throw new Error('Method not implemented.');
+  }
+  translate(value) {
+    throw new Error('Method not implemented.');
+  }
+  scale(value) {
+    throw new Error('Method not implemented.');
+  }
+  gridSpan(value) {
+    throw new Error('Method not implemented.');
+  }
+  gridOffset(value) {
+    throw new Error('Method not implemented.');
+  }
+  rotate(value) {
+    throw new Error('Method not implemented.');
+  }
+  transform(value) {
+    throw new Error('Method not implemented.');
+  }
+  onAppear(event) {
+    throw new Error('Method not implemented.');
+  }
+  onDisAppear(event) {
+    throw new Error('Method not implemented.');
+  }
+  onAreaChange(event) {
+    throw new Error('Method not implemented.');
+  }
+  visibility(value) {
+    throw new Error('Method not implemented.');
+  }
+  flexGrow(value) {
+    throw new Error('Method not implemented.');
+  }
+  flexShrink(value) {
+    throw new Error('Method not implemented.');
+  }
+  flexBasis(value) {
+    throw new Error('Method not implemented.');
+  }
+  alignSelf(value) {
+    throw new Error('Method not implemented.');
+  }
+  displayPriority(value) {
+    throw new Error('Method not implemented.');
+  }
+  zIndex(value) {
+    throw new Error('Method not implemented.');
+  }
+  sharedTransition(id, options) {
+    throw new Error('Method not implemented.');
+  }
+  direction(value) {
+    throw new Error('Method not implemented.');
+  }
+  align(value) {
+    throw new Error('Method not implemented.');
+  }
+  position(value) {
+    throw new Error('Method not implemented.');
+  }
+  markAnchor(value) {
+    throw new Error('Method not implemented.');
+  }
+  offset(value) {
+    throw new Error('Method not implemented.');
+  }
+  enabled(value) {
+    throw new Error('Method not implemented.');
+  }
+  useSizeType(value) {
+    throw new Error('Method not implemented.');
+  }
+  alignRules(value) {
+    throw new Error('Method not implemented.');
+  }
+  aspectRatio(value) {
+    throw new Error('Method not implemented.');
+  }
+  clickEffect(value) {
+    throw new Error('Method not implemented.');
+  }
+  onDragStart(event) {
+    throw new Error('Method not implemented.');
+  }
+  onDragEnter(event) {
+    throw new Error('Method not implemented.');
+  }
+  onDragMove(event) {
+    throw new Error('Method not implemented.');
+  }
+  onDragLeave(event) {
+    throw new Error('Method not implemented.');
+  }
+  onDrop(event) {
+    throw new Error('Method not implemented.');
+  }
+  onDragEnd(event) {
+    throw new Error('Method not implemented.');
+  }
+  allowDrop(value) {
+    throw new Error('Method not implemented.');
+  }
+  draggable(value) {
+    throw new Error('Method not implemented.');
+  }
+  overlay(value, options) {
+    throw new Error('Method not implemented.');
+  }
+  linearGradient(value) {
+    throw new Error('Method not implemented.');
+  }
+  sweepGradient(value) {
+    throw new Error('Method not implemented.');
+  }
+  radialGradient(value) {
+    throw new Error('Method not implemented.');
+  }
+  motionPath(value) {
+    throw new Error('Method not implemented.');
+  }
+  shadow(value) {
+    modifierWithKey(this._modifiersWithKeys, ShadowModifier.identity, ShadowModifier, value);
+    return this;
+  }
+  blendMode(value) {
+    throw new Error('Method not implemented.');
+  }
+  clip(value) {
+    throw new Error('Method not implemented.');
+  }
+  mask(value) {
+    throw new Error('Method not implemented.');
+  }
+  key(value) {
+    throw new Error('Method not implemented.');
+  }
+  id(value) {
+    throw new Error('Method not implemented.');
+  }
+  geometryTransition(id) {
+    throw new Error('Method not implemented.');
+  }
+  bindPopup(show, popup) {
+    throw new Error('Method not implemented.');
+  }
+  bindMenu(content, options) {
+    throw new Error('Method not implemented.');
+  }
+  bindContextMenu(content, responseType, options) {
+    throw new Error('Method not implemented.');
+  }
+  bindContentCover(isShow, builder, options) {
+    throw new Error('Method not implemented.');
+  }
+  bindSheet(isShow, builder, options) {
+    throw new Error('Method not implemented.');
+  }
+  stateStyles(value) {
+    throw new Error('Method not implemented.');
+  }
+  restoreId(value) {
+    throw new Error('Method not implemented.');
+  }
+  onVisibleAreaChange(ratios, event) {
+    throw new Error('Method not implemented.');
+  }
+  sphericalEffect(value) {
+    throw new Error('Method not implemented.');
+  }
+  lightUpEffect(value) {
+    throw new Error('Method not implemented.');
+  }
+  pixelStretchEffect(options) {
+    throw new Error('Method not implemented.');
+  }
+  keyboardShortcut(value, keys, action) {
+    throw new Error('Method not implemented.');
+  }
+  accessibilityGroup(value) {
+    throw new Error('Method not implemented.');
+  }
+  accessibilityText(value) {
+    throw new Error('Method not implemented.');
+  }
+  accessibilityDescription(value) {
+    throw new Error('Method not implemented.');
+  }
+  accessibilityLevel(value) {
+    throw new Error('Method not implemented.');
+  }
+  obscured(reasons) {
+    throw new Error('Method not implemented.');
+  }
+  reuseId(id) {
+    throw new Error('Method not implemented.');
+  }
+  renderFit(fitMode) {
+    throw new Error('Method not implemented.');
+  }
+  attributeModifier(modifier) {
+    return this;
+  }
+  onGestureJudgeBegin(callback) {
+    throw new Error('Method not implemented.');
   }
   onLoad(callback) {
     throw new Error('Method not implemented.');
   }
   onDestroy(event) {
-    throw new Error('Method not implemented.');
-  }
-  monopolizeEvents(monopolize) {
     throw new Error('Method not implemented.');
   }
 }
@@ -14971,12 +15354,11 @@ class ListDividerModifier extends ModifierWithKey {
     }
   }
   checkObjectDiff() {
-    return !(
-      this.stageValue?.strokeWidth === this.value?.strokeWidth &&
-      this.stageValue?.color === this.value?.color &&
-      this.stageValue?.startMargin === this.value?.startMargin &&
-      this.stageValue?.endMargin === this.value?.endMargin
-    );
+    let _a, _b, _c, _d, _e, _f, _g, _h;
+    return !(((_a = this.stageValue) === null || _a === void 0 ? void 0 : _a.strokeWidth) === ((_b = this.value) === null || _b === void 0 ? void 0 : _b.strokeWidth) &&
+      ((_c = this.stageValue) === null || _c === void 0 ? void 0 : _c.color) === ((_d = this.value) === null || _d === void 0 ? void 0 : _d.color) &&
+      ((_e = this.stageValue) === null || _e === void 0 ? void 0 : _e.startMargin) === ((_f = this.value) === null || _f === void 0 ? void 0 : _f.startMargin) &&
+      ((_g = this.stageValue) === null || _g === void 0 ? void 0 : _g.endMargin) === ((_h = this.value) === null || _h === void 0 ? void 0 : _h.endMargin));
   }
 }
 ListDividerModifier.identity = Symbol('listDivider');
@@ -15246,7 +15628,7 @@ class ArkListComponent extends ArkComponent {
     return this;
   }
   nestedScroll(value) {
-    modifierWithKey(this._modifiersWithKeys, ListNestedScrollModifier.idsentity, ListNestedScrollModifier, value);
+    modifierWithKey(this._modifiersWithKeys, ListNestedScrollModifier.identity, ListNestedScrollModifier, value);
     return this;
   }
   enableScrollInteraction(value) {
