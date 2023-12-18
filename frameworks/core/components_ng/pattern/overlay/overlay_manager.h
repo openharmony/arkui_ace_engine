@@ -144,6 +144,10 @@ public:
     void PopModalDialog(int32_t maskId);
 
     void CloseDialog(const RefPtr<FrameNode>& dialogNode);
+
+    void OpenCustomDialog(const DialogProperties& dialogProps, std::function<void(int32_t)> &&callback);
+    void CloseCustomDialog(const int32_t dialogId);
+
     void SetSubWindowId(int32_t subWindowId)
     {
         subWindowId_ = subWindowId;
@@ -368,6 +372,8 @@ private:
     void ResetLowerNodeFocusable(const RefPtr<FrameNode>& currentOverlay);
     void PostDialogFinishEvent(const WeakPtr<FrameNode>& nodeWk);
     void OnDialogCloseEvent(const RefPtr<FrameNode>& node);
+
+    void CloseDialogInner(const RefPtr<FrameNode>& dialogNode);
 
     void SetShowMenuAnimation(const RefPtr<FrameNode>& menu, bool isInSubWindow = false);
     void PopMenuAnimation(const RefPtr<FrameNode>& menu, bool showPreviewAnimation = true, bool startDrag = false);

@@ -65,6 +65,8 @@ public:
     MOCK_METHOD1(CloseDialog, void(int32_t instanceId));
     MOCK_METHOD0(GetOverlayManager, const RefPtr<NG::OverlayManager>());
     MOCK_METHOD0(RequestFocus, void());
+    MOCK_METHOD2(OpenCustomDialog, void(const PromptDialogAttr& dialogAttr, std::function<void(int32_t)>&& callback));
+    MOCK_METHOD1(CloseCustomDialog, void(const int32_t dialogId));
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_TEST_MOCK_BASE_MOCK_SUBWINDOW_H
