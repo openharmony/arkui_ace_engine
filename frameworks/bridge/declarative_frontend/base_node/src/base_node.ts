@@ -14,6 +14,7 @@
  */
 
 declare class __JSBaseNode__ {
+    constructor(options?: RenderOptions);
     build(builder: any, params: Object): void;
     markDirty(flag: DirtyFlag): void;
 }
@@ -23,5 +24,19 @@ enum DirtyFlag {
     UPDATE_CONTENT,
 }
 
+enum NodeRenderType {
+    RENDER_TYPE_DISPLAY = 0,
+    RENDER_TYPE_TEXTURE,
+}
+
+declare interface RenderOptions {
+    selfIdealSize?: Size,
+    type?: NodeRenderType,
+    surfaceId?: string
+}
+
 class BaseNode extends __JSBaseNode__ {
+    constructor(options?: RenderOptions) {
+        super(options);
+    }
 }

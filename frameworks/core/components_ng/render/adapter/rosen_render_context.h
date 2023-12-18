@@ -26,6 +26,7 @@
 #include "include/core/SkRefCnt.h"
 #include "render_service_client/core/animation/rs_particle_params.h"
 #include "render_service_client/core/ui/rs_node.h"
+#include "render_service_client/core/ui/rs_texture_export.h"
 
 #include "base/geometry/dimension_offset.h"
 #include "base/geometry/ng/offset_t.h"
@@ -307,6 +308,8 @@ public:
 
     int32_t CalcExpectedFrameRate(const std::string& scene, float speed) override;
 
+    bool DoTextureExport(uint64_t surfaceId) override;
+
 private:
     void OnBackgroundImageUpdate(const ImageSourceInfo& src) override;
     void OnBackgroundImageRepeatUpdate(const ImageRepeat& imageRepeat) override;
@@ -546,6 +549,8 @@ private:
     bool isTouchUpFinished_ = true;
 
     bool useContentRectForRSFrame_;
+
+    std::shared_ptr<Rosen::RSTextureExport> rsTextureExport_;
 
     template<typename Modifier, typename PropertyType>
     friend class PropertyTransitionEffectTemplate;

@@ -537,6 +537,11 @@ public:
         return true;
     }
 
+    virtual bool DoTextureExport(uint64_t /* surfaceId */)
+    {
+        return false;
+    }
+
 protected:
     RenderContext() = default;
     std::shared_ptr<SharedTransitionOption> sharedTransitionOption_;

@@ -17,7 +17,15 @@ var DirtyFlag;
     DirtyFlag[DirtyFlag["UPDATE_PROPERTY"] = 0] = "UPDATE_PROPERTY";
     DirtyFlag[DirtyFlag["UPDATE_CONTENT"] = 1] = "UPDATE_CONTENT";
 })(DirtyFlag || (DirtyFlag = {}));
+var NodeRenderType;
+(function (NodeRenderType) {
+    NodeRenderType[NodeRenderType["RENDER_TYPE_DISPLAY"] = 0] = "RENDER_TYPE_DISPLAY";
+    NodeRenderType[NodeRenderType["RENDER_TYPE_TEXTURE"] = 1] = "RENDER_TYPE_TEXTURE";
+})(NodeRenderType || (NodeRenderType = {}));
 class BaseNode extends __JSBaseNode__ {
+    constructor(options) {
+        super(options);
+    }
 }
 /*
  * Copyright (c) 2023 Huawei Device Co., Ltd.
@@ -37,8 +45,8 @@ class BaseNode extends __JSBaseNode__ {
 /// <reference path="./index.d.ts" />
 /// <reference path="./base_node.ts" />
 class BuilderNode extends BaseNode {
-    constructor(uiContext) {
-        super();
+    constructor(uiContext, options) {
+        super(options);
         var instanceId = -1;
         if (uiContext === undefined) {
             throw Error("BuilderNode construtor error, parem uicontext error");
@@ -207,4 +215,4 @@ class NodeController {
     }
 }
 
-export default { NodeController, BuilderNode, BaseNode, DirtyFlag };
+export default { NodeController, BuilderNode, BaseNode, DirtyFlag, NodeRenderType };

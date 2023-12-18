@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/custom/custom_node.h"
 
 #include "base/log/dump_log.h"
+#include "base/utils/utils.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/custom/custom_node_pattern.h"
@@ -62,6 +63,12 @@ void CustomNode::Render()
                 GetParent() ? GetParent()->GetId() : 0);
             // first create child node and wrapper.
             ScopedViewStackProcessor scopedViewStackProcessor;
+            auto parent = GetParent();
+            bool parentNeedExportTexture = false;
+            if (parent && parent->GetTag() == V2::COMMON_VIEW_ETS_TAG) {
+                parentNeedExportTexture = parent->IsNeedExportTexture();
+            }
+            ViewStackProcessor::GetInstance()->SetIsExportTexture(parentNeedExportTexture || IsNeedExportTexture());
             auto child = renderFunction();
             if (child) {
                 child->MountToParent(Claim(this));

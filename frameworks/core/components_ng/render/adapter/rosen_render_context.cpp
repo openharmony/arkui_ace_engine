@@ -305,47 +305,52 @@ void RosenRenderContext::InitContext(bool isRoot, const std::optional<ContextPar
 {
     // skip if node already created
     CHECK_NULL_VOID(!rsNode_);
+    auto isTextureExportNode = ViewStackProcessor::GetInstance()->IsExportTexture();
     if (isRoot) {
-        rsNode_ = Rosen::RSRootNode::Create();
+        rsNode_ = Rosen::RSRootNode::Create(false, isTextureExportNode);
         return;
-    } else if (!param.has_value()) {
-        rsNode_ = Rosen::RSCanvasNode::Create();
+    }
+    if (!param.has_value()) {
+        rsNode_ = Rosen::RSCanvasNode::Create(false, isTextureExportNode);
         return;
     }
 
     // create proper RSNode base on input
     switch (param->type) {
         case ContextType::CANVAS:
-            rsNode_ = Rosen::RSCanvasNode::Create();
+            rsNode_ = Rosen::RSCanvasNode::Create(false, isTextureExportNode);
             break;
         case ContextType::ROOT:
-            rsNode_ = Rosen::RSRootNode::Create();
+            rsNode_ = Rosen::RSRootNode::Create(false, isTextureExportNode);
             break;
         case ContextType::SURFACE: {
-            Rosen::RSSurfaceNodeConfig surfaceNodeConfig = { .SurfaceNodeName = param->surfaceName.value_or("") };
+            Rosen::RSSurfaceNodeConfig surfaceNodeConfig = { .SurfaceNodeName = param->surfaceName.value_or(""),
+                .isTextureExportNode = isTextureExportNode };
             rsNode_ = Rosen::RSSurfaceNode::Create(surfaceNodeConfig, false);
             break;
         }
         case ContextType::HARDWARE_SURFACE: {
 #ifndef VIDEO_TEXTURE_SUPPORTED
-            Rosen::RSSurfaceNodeConfig surfaceNodeConfig = { .SurfaceNodeName = param->surfaceName.value_or("") };
+            Rosen::RSSurfaceNodeConfig surfaceNodeConfig = { .SurfaceNodeName = param->surfaceName.value_or(""),
+                .isTextureExportNode = isTextureExportNode };
             auto surfaceNode = Rosen::RSSurfaceNode::Create(surfaceNodeConfig, false);
             if (surfaceNode) {
                 surfaceNode->SetHardwareEnabled(true);
             }
 #else
-            Rosen::RSSurfaceNodeConfig surfaceNodeConfig = { .SurfaceNodeName = param->surfaceName.value_or("") };
-            auto surfaceNode = Rosen::RSSurfaceNode::Create(surfaceNodeConfig,
-                RSSurfaceNodeType::SURFACE_TEXTURE_NODE, false);
+            Rosen::RSSurfaceNodeConfig surfaceNodeConfig = { .SurfaceNodeName = param->surfaceName.value_or(""),
+                .isTextureExportNode = isTextureExportNode };
+            auto surfaceNode =
+                Rosen::RSSurfaceNode::Create(surfaceNodeConfig, RSSurfaceNodeType::SURFACE_TEXTURE_NODE, false);
 #endif
             rsNode_ = surfaceNode;
             break;
         }
         case ContextType::EFFECT:
-            rsNode_ = Rosen::RSEffectNode::Create();
+            rsNode_ = Rosen::RSEffectNode::Create(false, isTextureExportNode);
             break;
         case ContextType::INCREMENTAL_CANVAS:
-            rsNode_ = Rosen::RSCanvasDrawingNode::Create();
+            rsNode_ = Rosen::RSCanvasDrawingNode::Create(false, isTextureExportNode);
             break;
         case ContextType::EXTERNAL:
             break;
@@ -3702,6 +3707,14 @@ int32_t RosenRenderContext::CalcExpectedFrameRate(const std::string& scene, floa
         return 0;
     }
     return rsNode_->CalcExpectedFrameRate(scene, speed);
+}
+
+bool RosenRenderContext::DoTextureExport(uint64_t surfaceId)
+{
+    if (!rsTextureExport_) {
+        rsTextureExport_ = std::make_shared<Rosen::RSTextureExport>();
+    }
+    return rsTextureExport_->DoTextureExport(rsNode_, surfaceId);
 }
 
 void RosenRenderContext::ClearDrawCommands()

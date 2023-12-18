@@ -670,6 +670,8 @@ public:
         cachedGlobalOffset_ = timestampOffset;
     }
 
+    RefPtr<FrameNode> GetNodeContainer();
+
 private:
     void MarkNeedRender(bool isRenderBoundary);
     std::pair<float, float> ContextPositionConvertToPX(

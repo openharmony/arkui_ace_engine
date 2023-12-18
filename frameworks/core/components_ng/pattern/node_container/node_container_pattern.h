@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_NODE_CONTAINER_NODE_CONTAINER_PATTERN_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_NODE_CONTAINER_NODE_CONTAINER_PATTERN_H
 
+#include "base/memory/referenced.h"
 #include "base/utils/noncopyable.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_property.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_algorithm.h"
@@ -75,10 +76,14 @@ public:
     }
 
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
+
 private:
+    void OnMountToParentDone() override;
     std::function<void()> resetFunc_;
     std::function<RefPtr<UINode>()> makeFunc_;
     std::function<void(const SizeF& size)> resizeFunc_;
+    WeakPtr<UINode> exportTextureNode_;
+    uint64_t surfaceId_;
 
     ACE_DISALLOW_COPY_AND_MOVE(NodeContainerPattern);
 };

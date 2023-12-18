@@ -21,8 +21,8 @@ class BuilderNode extends BaseNode {
     updateFuncByElmtId?: Map<number, UpdateFunc | UpdateFuncRecord>
     params: Object;
 
-    constructor(uiContext: UIContext) {
-        super();
+    constructor(uiContext: UIContext, options?: RenderOptions) {
+        super(options);
         var instanceId: number = -1;
         if (uiContext === undefined) {
             throw Error("BuilderNode construtor error, parem uicontext error");

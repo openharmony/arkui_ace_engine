@@ -166,6 +166,18 @@ inline int64_t StringToLongInt(const std::string& value)
     }
 }
 
+inline uint64_t StringToLongUint(const std::string& value, uint64_t defaultErr = 0)
+{
+    errno = 0;
+    char* pEnd = nullptr;
+    uint64_t result = std::strtoull(value.c_str(), &pEnd, 10);
+    if (pEnd == value.c_str() || errno == ERANGE) {
+        return defaultErr;
+    } else {
+        return result;
+    }
+}
+
 inline uint32_t StringToUint(const std::string& value, uint32_t defaultErr = 0)
 {
     errno = 0;
@@ -177,6 +189,7 @@ inline uint32_t StringToUint(const std::string& value, uint32_t defaultErr = 0)
         return result;
     }
 }
+
 // generic string to double value method without success check
 inline double StringToDouble(const std::string& value)
 {

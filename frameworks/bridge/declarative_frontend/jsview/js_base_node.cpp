@@ -14,14 +14,18 @@
  */
 #include "bridge/declarative_frontend/jsview/js_base_node.h"
 
+#include <unordered_set>
+
 #include "base/utils/utils.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_v2/inspector/inspector_constants.h"
 #include "frameworks/bridge/declarative_frontend/engine/functions/js_function.h"
 
 namespace OHOS::Ace::Framework {
 namespace {
 const char* DIRTY_FLAG[] = { "UPDATE_PROPERTY", "UPDATE_CONTENT" };
-}
+const std::unordered_set<std::string> EXPORT_TEXTURE_SUPPORT_TYPES = { V2::JS_VIEW_ETS_TAG, V2::COMMON_VIEW_ETS_TAG };
+} // namespace
 
 void JSBaseNode::BuildNode(const JSCallbackInfo& info)
 {
@@ -37,6 +41,7 @@ void JSBaseNode::BuildNode(const JSCallbackInfo& info)
     {
         NG::ScopedViewStackProcessor builderViewStackProcessor;
         NG::ViewStackProcessor::GetInstance()->SetIsBuilderNode(true);
+        NG::ViewStackProcessor::GetInstance()->SetIsExportTexture(renderType_ == NodeRenderType::RENDER_TYPE_TEXTURE);
         if (info.Length() >= 2 && info[1]->IsObject()) {
             JSRef<JSVal> param = info[1];
             buildFunc->ExecuteJS(1, &param);
@@ -45,11 +50,32 @@ void JSBaseNode::BuildNode(const JSCallbackInfo& info)
         }
         viewNode_ = NG::ViewStackProcessor::GetInstance()->Finish();
     }
+    // only customNode support export texture
+    if (viewNode_ && EXPORT_TEXTURE_SUPPORT_TYPES.count(viewNode_->GetTag()) > 0) {
+        viewNode_->CreateExportTextureInfoIfNeeded();
+        auto exportTextureInfo = viewNode_->GetExportTextureInfo();
+        CHECK_NULL_VOID(exportTextureInfo);
+        exportTextureInfo->SetSurfaceId(surfaceId_);
+        exportTextureInfo->SetCurrentRenderType(renderType_);
+    }
 }
 
 void JSBaseNode::ConstructorCallback(const JSCallbackInfo& info)
 {
-    auto instance = AceType::MakeRefPtr<JSBaseNode>();
+    std::string surfaceId;
+    NodeRenderType renderType = NodeRenderType::RENDER_TYPE_DISPLAY;
+    if (info.Length() > 0 && info[0]->IsObject()) {
+        auto renderOption = JSRef<JSObject>::Cast(info[0]);
+        auto type = renderOption->GetProperty("type");
+        if (type->IsNumber()) {
+            renderType = static_cast<NodeRenderType>(type->ToNumber<uint32_t>());
+        }
+        auto id = renderOption->GetProperty("surfaceId");
+        if (id->IsString()) {
+            surfaceId = id->ToString();
+        }
+    }
+    auto instance = AceType::MakeRefPtr<JSBaseNode>(renderType, surfaceId);
     instance->IncRefCount();
     info.SetReturnValue(AceType::RawPtr(instance));
 }
