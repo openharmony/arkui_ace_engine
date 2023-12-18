@@ -3767,8 +3767,8 @@ void JSViewAbstract::CompleteResourceObject(JSRef<JSObject>& jsObj)
         }
         params->SetValueAt(0, name);
         uint32_t paramIndex = 1;
-        if (jsObj->HasProperty("type")) {
-            auto firstParam = jsObj->GetProperty("type");
+        auto firstParam = jsObj->GetProperty("type");
+        if (!firstParam->IsEmpty()) {
             params->SetValueAt(paramIndex, firstParam);
             paramIndex++;
         }
