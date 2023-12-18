@@ -118,7 +118,8 @@ constexpr uint32_t TWINKLING_INTERVAL_MS = 500;
 constexpr uint32_t SECONDS_TO_MILLISECONDS = 1000;
 constexpr uint32_t RECORD_MAX_LENGTH = 20;
 constexpr uint32_t OBSCURE_SHOW_TICKS = 3;
-constexpr float ERROR_TEXT_BOUNDSRECT_MARGIN = 33.0f;
+constexpr Dimension ERROR_TEXT_TOP_MARGIN = 8.0_vp;
+constexpr Dimension ERROR_TEXT_BOTTOM_MARGIN = 8.0_vp;
 constexpr uint32_t FIND_TEXT_ZERO_INDEX = 1;
 constexpr char16_t OBSCURING_CHARACTER = u'•';
 constexpr char16_t OBSCURING_CHARACTER_FOR_AR = u'*';
@@ -196,8 +197,8 @@ RefPtr<NodePaintMethod> TextFieldPattern::CreateNodePaintMethod()
     if (layoutProperty->GetShowErrorTextValue(false) && errorParagraph_) {
         auto contentOffset = geometryNode->GetContentOffset();
         auto errorTextWidth = errorParagraph_->GetLongestLine();
-        RectF boundsRect(contentOffset.GetX(), frameOffset.GetY(), errorTextWidth,
-            frameSize.Height() + ERROR_TEXT_BOUNDSRECT_MARGIN);
+        RectF boundsRect(contentOffset.GetX(), frameOffset.GetY(), errorTextWidth, errorParagraph_->GetHeight() +
+            ERROR_TEXT_TOP_MARGIN.ConvertToPx() + ERROR_TEXT_BOTTOM_MARGIN.ConvertToPx() + frameSize.Height());
         textFieldOverlayModifier->SetBoundsRect(boundsRect);
     } else {
         if (NearEqual(maxFrameOffsetY_, 0.0f) && NearEqual(maxFrameHeight_, 0.0f)) {
@@ -379,10 +380,6 @@ bool TextFieldPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
     if (paragraph) {
         paragraph_ = paragraph;
         paragraphWidth = std::max(paragraph->GetLongestLine(), 0.0f);
-    }
-    auto errorParagraph = textFieldLayoutAlgorithm->GetErrorParagraph();
-    if (errorParagraph) {
-        errorParagraph_ = errorParagraph;
     }
     if (!IsDragging()) {
         dragParagraph_ = paragraph_;
@@ -4800,6 +4797,23 @@ void TextFieldPattern::SetShowError()
     UpdateErrorTextMargin();
 }
 
+void TextFieldPattern::CreateErrorParagraph(const std::string& content)
+{
+    auto theme = GetTheme();
+    CHECK_NULL_VOID(theme);
+    TextStyle errorTextStyle = theme->GetErrorTextStyle();
+    std::string errorText = content;
+    ParagraphStyle paraStyle { .align = TextAlign::START,
+        .fontLocale = Localization::GetInstance()->GetFontLocale(),
+        .fontSize = errorTextStyle.GetFontSize().ConvertToPx() };
+    errorParagraph_ = Paragraph::Create(paraStyle, FontCollection::Current());
+    CHECK_NULL_VOID(errorParagraph_);
+    errorParagraph_->PushStyle(errorTextStyle);
+    StringUtils::TransformStrCase(errorText, static_cast<int32_t>(errorTextStyle.GetTextCase()));
+    errorParagraph_->AddText(StringUtils::Str8ToStr16(errorText));
+    errorParagraph_->Build();
+}
+
 void TextFieldPattern::UpdateErrorTextMargin()
 {
     auto tmpHost = GetHost();
@@ -4811,9 +4825,16 @@ void TextFieldPattern::UpdateErrorTextMargin()
     auto theme = GetTheme();
     CHECK_NULL_VOID(theme);
     MarginProperty errorMargin;
-    auto errorTextCapsuleMargin = theme->GetErrorTextCapsuleMargin();
-    if (layoutProperty->GetShowErrorTextValue(false) && (preErrorMargin_ < errorTextCapsuleMargin.ConvertToPx())) {
-        errorMargin.bottom = CalcLength(errorTextCapsuleMargin);
+    if (layoutProperty->GetShowErrorTextValue(false)) {
+        CreateErrorParagraph(layoutProperty->GetErrorTextValue(""));
+        if (errorParagraph_) {
+            errorParagraph_->Layout(std::numeric_limits<double>::infinity());
+            auto errorTextMargin = ERROR_TEXT_TOP_MARGIN.ConvertToPx() +
+                ERROR_TEXT_BOTTOM_MARGIN.ConvertToPx() + errorParagraph_->GetHeight();
+            if (preErrorMargin_ < errorTextMargin) {
+                errorMargin.bottom = CalcLength(errorTextMargin);
+            }
+        }
         errorMargin.right = CalcLength(passwordModeStyle_.margin.right->GetDimension());
         errorMargin.left = CalcLength(passwordModeStyle_.margin.left->GetDimension());
         errorMargin.top = CalcLength(passwordModeStyle_.margin.top->GetDimension());

@@ -366,15 +366,6 @@ float TextFieldLayoutAlgorithm::GetVisualTextWidth() const
     return std::min(paragraph_->GetMaxWidth(), std::max(0.0f, paragraph_->GetLongestLine()));
 }
 
-void TextFieldLayoutAlgorithm::ErrorTextMeasureContent(const std::string& content, const RefPtr<TextFieldTheme>& theme)
-{
-    // errorParagraph  Layout.
-    CreateErrorParagraph(content, theme);
-    if (errorParagraph_) {
-        errorParagraph_->Layout(std::numeric_limits<double>::infinity());
-    }
-}
-
 void TextFieldLayoutAlgorithm::UpdateTextStyle(const RefPtr<FrameNode>& frameNode,
     const RefPtr<TextFieldLayoutProperty>& layoutProperty, const RefPtr<TextFieldTheme>& theme, TextStyle& textStyle,
     bool isDisabled)
@@ -610,22 +601,6 @@ void TextFieldLayoutAlgorithm::CreateInlineParagraph(const TextStyle& textStyle,
     inlineParagraph_->Build();
 }
 
-void TextFieldLayoutAlgorithm::CreateErrorParagraph(const std::string& content, const RefPtr<TextFieldTheme>& theme)
-{
-    CHECK_NULL_VOID(theme);
-    TextStyle errorTextStyle = theme->GetErrorTextStyle();
-    std::string errorText = content;
-    ParagraphStyle paraStyle { .align = TextAlign::START,
-        .fontLocale = Localization::GetInstance()->GetFontLocale(),
-        .fontSize = errorTextStyle.GetFontSize().ConvertToPx() };
-    errorParagraph_ = Paragraph::Create(paraStyle, FontCollection::Current());
-    CHECK_NULL_VOID(errorParagraph_);
-    errorParagraph_->PushStyle(errorTextStyle);
-    StringUtils::TransformStrCase(errorText, static_cast<int32_t>(errorTextStyle.GetTextCase()));
-    errorParagraph_->AddText(StringUtils::Str8ToStr16(errorText));
-    errorParagraph_->Build();
-}
-
 TextDirection TextFieldLayoutAlgorithm::GetTextDirection(const std::string& content)
 {
     TextDirection textDirection = TextDirection::LTR;
@@ -645,11 +620,6 @@ TextDirection TextFieldLayoutAlgorithm::GetTextDirection(const std::string& cont
 const RefPtr<Paragraph>& TextFieldLayoutAlgorithm::GetParagraph() const
 {
     return paragraph_;
-}
-
-const RefPtr<Paragraph>& TextFieldLayoutAlgorithm::GetErrorParagraph() const
-{
-    return errorParagraph_;
 }
 
 float TextFieldLayoutAlgorithm::GetTextFieldDefaultHeight()

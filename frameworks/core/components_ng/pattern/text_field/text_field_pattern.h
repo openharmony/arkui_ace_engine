@@ -1158,6 +1158,7 @@ private:
 
     bool IsTouchAtLeftOffset(float currentOffsetX);
     void FilterExistText();
+    void CreateErrorParagraph(const std::string& content);
     void UpdateErrorTextMargin();
     OffsetF GetTextPaintOffset() const;
     void UpdateSelectController();
