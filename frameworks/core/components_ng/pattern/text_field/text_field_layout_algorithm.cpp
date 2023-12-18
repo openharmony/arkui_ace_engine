@@ -84,14 +84,12 @@ std::optional<SizeF> TextFieldLayoutAlgorithm::InlineMeasureContent(
 {
     auto frameNode = layoutWrapper->GetHostNode();
     CHECK_NULL_RETURN(frameNode, std::nullopt);
-    auto pipeline = frameNode->GetContext();
-    CHECK_NULL_RETURN(pipeline, std::nullopt);
     auto textFieldLayoutProperty = DynamicCast<TextFieldLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_RETURN(textFieldLayoutProperty, std::nullopt);
-    auto textFieldTheme = pipeline->GetTheme<TextFieldTheme>();
-    CHECK_NULL_RETURN(textFieldTheme, std::nullopt);
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
     CHECK_NULL_RETURN(pattern, std::nullopt);
+    auto textFieldTheme = pattern->GetTheme();
+    CHECK_NULL_RETURN(textFieldTheme, std::nullopt);
 
     float contentWidth = 0.0f;
     auto safeBoundary = textFieldTheme->GetInlineBorderWidth().ConvertToPx() * 2;
