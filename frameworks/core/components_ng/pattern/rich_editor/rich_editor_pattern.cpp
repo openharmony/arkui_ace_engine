@@ -3295,6 +3295,25 @@ void RichEditorPattern::HandleMouseLeftButton(const MouseInfo& info)
         leftMousePress_ = true;
         mouseStatus_ = MouseStatus::PRESSED;
         blockPress_ = false;
+        caretUpdateType_ = CaretUpdateType::PRESSED;
+        UseHostToUpdateTextFieldManager();
+
+        auto position = paragraphs_.GetIndex(textOffset);
+        AdjustCursorPosition(position);
+        auto focusHub = GetHost()->GetOrCreateFocusHub();
+        if (focusHub && focusHub->RequestFocusImmediately()) {
+            float caretHeight = 0.0f;
+            SetCaretPosition(position);
+            OffsetF caretOffset = CalcCursorOffsetByPosition(GetCaretPosition(), caretHeight, false, false);
+            MoveCaretToContentRect();
+            CHECK_NULL_VOID(overlayMod_);
+            DynamicCast<RichEditorOverlayModifier>(overlayMod_)->SetCaretOffsetAndHeight(caretOffset, caretHeight);
+            StartTwinkling();
+            if (overlayMod_) {
+                RequestKeyboard(false, true, true);
+            }
+        }
+        UseHostToUpdateTextFieldManager();
     } else if (info.GetAction() == MouseAction::RELEASE) {
         blockPress_ = false;
         leftMousePress_ = false;
