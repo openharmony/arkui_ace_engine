@@ -2242,6 +2242,7 @@ void SwiperPattern::PlaySpringAnimation(double dragVelocity)
     if (itemPosition_.empty()) {
         return;
     }
+    childScrolling_ = false;
 
     ExtentPair extentPair = ExtentPair(currentOffset_ + mainSize - itemPosition_.rbegin()->second.endPos,
         currentOffset_ - itemPosition_.begin()->second.startPos);
