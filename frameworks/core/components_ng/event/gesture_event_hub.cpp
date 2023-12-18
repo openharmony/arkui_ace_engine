@@ -97,6 +97,15 @@ bool GestureEventHub::ProcessTouchTestHit(const OffsetF& coordinateOffset, const
     if (clickEventActuator_) {
         clickEventActuator_->OnCollectTouchTarget(coordinateOffset, touchRestrict, getEventTargetImpl, innerTargets);
     }
+    if (userParallelClickEventActuator_) {
+        auto clickRecognizer = userParallelClickEventActuator_->GetClickRecognizer();
+        if (clickRecognizer) {
+            clickRecognizer->SetGestureInfo(MakeRefPtr<GestureInfo>(GestureTypeName::CLICK, true));
+            clickRecognizer->SetOnAction(userParallelClickEventActuator_->GetClickEvent());
+            clickRecognizer->SetCoordinateOffset(Offset(coordinateOffset.GetX(), coordinateOffset.GetY()));
+            clickRecognizer->SetGetEventTargetImpl(getEventTargetImpl);
+        }
+    }
     if (panEventActuator_) {
         panEventActuator_->OnCollectTouchTarget(coordinateOffset, touchRestrict, getEventTargetImpl, innerTargets);
     }
@@ -172,6 +181,31 @@ void GestureEventHub::OnModifyDone()
     }
 }
 
+RefPtr<NGGestureRecognizer> GestureEventHub::PackInnerRecognizer(
+    const Offset& offset, std::list<RefPtr<NGGestureRecognizer>>& innerRecognizers, int32_t touchId,
+    const RefPtr<TargetComponent>& targetComponent)
+{
+    RefPtr<NGGestureRecognizer> current;
+    // Pack inner recognizer include self inner recognizer and children.
+    if (innerRecognizers.size() == 1) {
+        current = *innerRecognizers.begin();
+    } else if (innerRecognizers.size() > 1) {
+        if (!innerExclusiveRecognizer_) {
+            innerExclusiveRecognizer_ = AceType::MakeRefPtr<ExclusiveRecognizer>(std::move(innerRecognizers));
+        } else {
+            innerExclusiveRecognizer_->AddChildren(innerRecognizers);
+        }
+        innerExclusiveRecognizer_->SetCoordinateOffset(offset);
+        innerExclusiveRecognizer_->BeginReferee(touchId);
+        auto host = GetFrameNode();
+        innerExclusiveRecognizer_->AttachFrameNode(WeakPtr<FrameNode>(host));
+        innerExclusiveRecognizer_->SetTargetComponent(targetComponent);
+        current = innerExclusiveRecognizer_;
+    }
+
+    return current;
+}
+
 void GestureEventHub::ProcessTouchTestHierarchy(const OffsetF& coordinateOffset, const TouchRestrict& touchRestrict,
     std::list<RefPtr<NGGestureRecognizer>>& innerRecognizers, TouchTestResult& finalResult, int32_t touchId,
     const RefPtr<TargetComponent>& targetComponent)
@@ -186,23 +220,7 @@ void GestureEventHub::ProcessTouchTestHierarchy(const OffsetF& coordinateOffset,
 
     auto offset = Offset(coordinateOffset.GetX(), coordinateOffset.GetY());
     RefPtr<NGGestureRecognizer> current;
-
-    // Pack inner recognizer include self inner recognizer and children.
-    if (innerRecognizers.size() == 1) {
-        current = *innerRecognizers.begin();
-    } else if (innerRecognizers.size() > 1) {
-        if (!innerExclusiveRecognizer_) {
-            innerExclusiveRecognizer_ = AceType::MakeRefPtr<ExclusiveRecognizer>(std::move(innerRecognizers));
-        } else {
-            innerExclusiveRecognizer_->AddChildren(innerRecognizers);
-        }
-        innerExclusiveRecognizer_->SetCoordinateOffset(offset);
-        innerExclusiveRecognizer_->BeginReferee(touchId);
-        innerExclusiveRecognizer_->AttachFrameNode(WeakPtr<FrameNode>(host));
-        innerExclusiveRecognizer_->SetTargetComponent(targetComponent);
-        current = innerExclusiveRecognizer_;
-    }
-
+    current = PackInnerRecognizer(offset, innerRecognizers, touchId, targetComponent);
     auto geometryNode = host->GetGeometryNode();
     auto size = geometryNode->GetFrameSize();
     auto context = host->GetContext();
@@ -969,14 +987,23 @@ void GestureEventHub::CheckClickActuator()
         clickEventActuator_ = MakeRefPtr<ClickEventActuator>(WeakClaim(this));
         clickEventActuator_->SetOnAccessibility(GetOnAccessibilityEventFunc());
     }
+
+    if (parallelCombineClick && !userParallelClickEventActuator_) {
+        userParallelClickEventActuator_ = MakeRefPtr<ClickEventActuator>(WeakClaim(this));
+        userParallelClickEventActuator_->SetOnAccessibility(GetOnAccessibilityEventFunc());
+    }
 }
 
 void GestureEventHub::SetUserOnClick(GestureEventFunc&& clickEvent)
 {
     CheckClickActuator();
-    clickEventActuator_->SetUserCallback(std::move(clickEvent));
-
-    SetFocusClickEvent(clickEventActuator_->GetClickEvent());
+    if (parallelCombineClick) {
+        userParallelClickEventActuator_->SetUserCallback(std::move(clickEvent));
+        SetFocusClickEvent(userParallelClickEventActuator_->GetClickEvent());
+    } else {
+        clickEventActuator_->SetUserCallback(std::move(clickEvent));
+        SetFocusClickEvent(clickEventActuator_->GetClickEvent());
+    }
 }
 
 void GestureEventHub::SetOnGestureJudgeBegin(GestureJudgeFunc&& gestureJudgeFunc)
