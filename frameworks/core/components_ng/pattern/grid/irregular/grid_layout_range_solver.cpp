@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/pattern/grid/irregular/layout_range_solver.h"
+#include "core/components_ng/pattern/grid/irregular/grid_layout_range_solver.h"
 
 #include "core/components_ng/pattern/grid/grid_layout_property.h"
 namespace OHOS::Ace::NG {

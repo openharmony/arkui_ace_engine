@@ -41,7 +41,6 @@ void GridIrregularFiller::InitPos()
             return;
         }
     }
-    // LOGW("pos not determined, index %d not found at endLine %d in matrix", info_->endIndex_, info_->endMainLineIndex_);
 }
 
 bool GridIrregularFiller::IsFull(float targetLen)

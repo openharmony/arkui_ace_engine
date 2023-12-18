@@ -24,13 +24,14 @@
  * @brief GridIrregularLayout class supports irregular grid items that take multiple rows and multiple columns.
  */
 namespace OHOS::Ace::NG {
-class GridIrregularLayout : public GridLayoutBaseAlgorithm {
-    DECLARE_ACE_TYPE(GridIrregularLayout, GridLayoutBaseAlgorithm);
+class GridIrregularLayoutAlgorithm : public GridLayoutBaseAlgorithm {
+    DECLARE_ACE_TYPE(GridIrregularLayoutAlgorithm, GridLayoutBaseAlgorithm);
 
 public:
-    explicit GridIrregularLayout(GridLayoutInfo gridLayoutInfo) : GridLayoutBaseAlgorithm(std::move(gridLayoutInfo)) {};
+    explicit GridIrregularLayoutAlgorithm(GridLayoutInfo gridLayoutInfo)
+        : GridLayoutBaseAlgorithm(std::move(gridLayoutInfo)) {};
 
-    ~GridIrregularLayout() override = default;
+    ~GridIrregularLayoutAlgorithm() override = default;
 
     void Measure(LayoutWrapper* layoutWrapper) override;
 
@@ -93,7 +94,7 @@ private:
 
     float firstRowPos_ = 0.0f; /**< The position of the first row in the layout. */
 
-    ACE_DISALLOW_COPY_AND_MOVE(GridIrregularLayout);
+    ACE_DISALLOW_COPY_AND_MOVE(GridIrregularLayoutAlgorithm);
 };
 
 } // namespace OHOS::Ace::NG
