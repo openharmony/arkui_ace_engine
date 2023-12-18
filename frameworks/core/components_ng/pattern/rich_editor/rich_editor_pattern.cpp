@@ -1651,6 +1651,7 @@ void RichEditorPattern::HandleMenuCallbackOnSelectAll()
     CHECK_NULL_VOID(host);
     FireOnSelect(textSelector_.GetTextStart(), textSelector_.GetTextEnd());
     SetCaretPosition(textSize);
+    MoveCaretToContentRect();
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
