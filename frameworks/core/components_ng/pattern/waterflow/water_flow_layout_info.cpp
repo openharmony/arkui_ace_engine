@@ -53,7 +53,7 @@ void WaterFlowLayoutInfo::UpdateStartIndex()
             }
         }
     }
-    startIndex_ = tempStartIndex;
+    startIndex_ = tempStartIndex == -1 ? 0 : tempStartIndex;
 }
 
 int32_t WaterFlowLayoutInfo::GetEndIndexByOffset(float offset) const
