@@ -1228,7 +1228,7 @@ void UpdateVirtualNodeAccessibilityElementInfo(
         auto parentRect = parent->GetTransformRectRelativeToWindow();
         auto left = parentRect.Left();
         auto top = parentRect.Top();
-        auto right = parentRect.Right() + virtualNodeRect.Width();
+        auto right = parentRect.Left() + virtualNodeRect.Width();
         if (virtualNodeRect.Width() > (parentRect.Right() - parentRect.Left())) {
             right = parentRect.Right();
         }
