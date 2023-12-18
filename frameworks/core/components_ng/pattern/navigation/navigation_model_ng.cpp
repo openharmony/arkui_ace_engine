@@ -1668,16 +1668,26 @@ void NavigationModelNG::SetTitleMode(FrameNode* frameNode, NG::NavigationTitleMo
 void NavigationModelNG::PutComponentInsideNavigator(
     NavigationGroupNode* navigationGroupNode, const RefPtr<NavBarNode>& navBarNode)
 {
-    // put component inside navigator pattern to trigger back navigation
-    auto navigator = FrameNode::CreateFrameNode(
-        V2::NAVIGATOR_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<NavigatorPattern>());
-    auto hub = navigator->GetEventHub<NavigatorEventHub>();
-    CHECK_NULL_VOID(hub);
-    hub->SetType(NavigatorType::BACK);
-    navigator->MarkModifyDone();
     auto backButtonNode = FrameNode::CreateFrameNode(
         V2::BACK_BUTTON_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ButtonPattern>());
     CHECK_NULL_VOID(backButtonNode);
+    auto gestureEventHub = backButtonNode->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gestureEventHub);
+    auto context = PipelineContext::GetCurrentContext();
+    auto clickCallback = [weakContext = WeakPtr<PipelineContext>(context)](GestureEvent& /* info */) {
+        auto context = weakContext.Upgrade();
+        CHECK_NULL_VOID(context);
+        bool result = context->OnBackPressed();
+        if (!result) {
+            auto delegate = EngineHelper::GetCurrentDelegate();
+            CHECK_NULL_VOID(delegate);
+            delegate->Back("");
+        }
+    };
+    gestureEventHub->AddClickEvent(AceType::MakeRefPtr<ClickEvent>(clickCallback));
+    auto buttonPattern = backButtonNode->GetPattern<ButtonPattern>();
+    CHECK_NULL_VOID(buttonPattern);
+    buttonPattern->SetSkipColorConfigurationUpdate();
     auto backButtonLayoutProperty = backButtonNode->GetLayoutProperty<ButtonLayoutProperty>();
     CHECK_NULL_VOID(backButtonLayoutProperty);
     backButtonLayoutProperty->UpdateUserDefinedIdealSize(
@@ -1716,13 +1726,12 @@ void NavigationModelNG::PutComponentInsideNavigator(
     backButtonImageLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
     backButtonImageNode->MountToParent(backButtonNode);
     backButtonImageNode->MarkModifyDone();
-    backButtonNode->MountToParent(navigator);
     backButtonNode->MarkModifyDone();
     auto hasBackButton = navBarNode->GetBackButton();
     if (hasBackButton) {
         hasBackButton->Clean();
     }
-    navBarNode->SetBackButton(navigator);
+    navBarNode->SetBackButton(backButtonNode);
     navBarNode->UpdateBackButtonNodeOperation(ChildNodeOperation::ADD);
 }
 } // namespace OHOS::Ace::NG
