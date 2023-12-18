@@ -4554,12 +4554,13 @@ void RichEditorPattern::AutoScrollByEdgeDetection(AutoScrollParam param, OffsetF
     auto isDragging = param.autoScrollEvent == AutoScrollEvent::DRAG;
     float edgeThreshold = isDragging ? AUTO_SCROLL_DRAG_EDGE_DISTANCE.ConvertToPx()
                                      : AUTO_SCROLL_EDGE_DISTANCE.ConvertToPx();
-    if (GreatOrEqual(edgeThreshold, contentRect.Height())) {
-        TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "AutoScrollByEdgeDetection: Content height is too small.");
+    auto maxHeight = isDragging ? frameRect_.Height() : contentRect.Height();
+    if (GreatNotEqual(edgeThreshold * 2, maxHeight)) {
+        TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "AutoScrollByEdgeDetection: hot area height is great than max height.");
         return;
     }
     float topEdgeThreshold = isDragging ? edgeThreshold : edgeThreshold + contentRect.GetY();
-    float bottomThreshold = isDragging ? frameRect_.Bottom() - edgeThreshold : contentRect.Bottom() - edgeThreshold;
+    float bottomThreshold = isDragging ? frameRect_.Height() - edgeThreshold : contentRect.Bottom() - edgeThreshold;
     if (param.autoScrollEvent == AutoScrollEvent::HANDLE) {
         auto handleTopOffset = offset;
         auto handleBottomOffset = OffsetF(offset.GetX(), offset.GetY() + param.handleRect.Height());
@@ -4576,7 +4577,7 @@ void RichEditorPattern::AutoScrollByEdgeDetection(AutoScrollParam param, OffsetF
     }
     // drag and mouse
     if (GreatNotEqual(offset.GetY(), bottomThreshold)) {
-        param.offset = isDragging ? -CalcDragSpeed(bottomThreshold, frameRect_.Bottom(), offset.GetY())
+        param.offset = isDragging ? -CalcDragSpeed(bottomThreshold, frameRect_.Height(), offset.GetY())
                                   : bottomThreshold - offset.GetY();
         ScheduleAutoScroll(param);
     } else if (LessNotEqual(offset.GetY(), topEdgeThreshold)) {
