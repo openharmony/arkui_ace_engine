@@ -34,6 +34,8 @@ struct FlowItemPosition {
     float startMainPos = 0;
 };
 
+constexpr int32_t EMPTY_JUMP_INDEX = -2;
+
 class WaterFlowLayoutInfo {
 public:
     int32_t GetCrossIndex(int32_t itemIndex);
@@ -67,7 +69,7 @@ public:
     bool itemStart_ = false;
     bool offsetEnd_ = false;
 
-    int32_t jumpIndex_ = -1;
+    int32_t jumpIndex_ = EMPTY_JUMP_INDEX;
 
     int32_t startIndex_ = 0;
     int32_t endIndex_ = 0;
