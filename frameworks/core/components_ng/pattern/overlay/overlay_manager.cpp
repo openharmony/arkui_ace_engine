@@ -2309,6 +2309,29 @@ void OverlayManager::BindSheet(bool isShow, std::function<void(const std::string
     NG::SheetStyle& sheetStyle, std::function<void()>&& onAppear, std::function<void()>&& onDisappear,
     std::function<void()>&& shouldDismiss, const RefPtr<FrameNode>& targetNode)
 {
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto bindSheetTask = [weak = AceType::WeakClaim(this), isShow, callback = std::move(callback),
+                             buildNodeFunc = std::move(buildNodeFunc),
+                             buildtitleNodeFunc = std::move(buildtitleNodeFunc), sheetStyle,
+                             onAppear = std::move(onAppear), onDisappear = std::move(onDisappear),
+                             shouldDismiss = std::move(shouldDismiss), targetNode]() mutable {
+        auto overlay = weak.Upgrade();
+        CHECK_NULL_VOID(overlay);
+        overlay->OnBindSheet(isShow, std::move(callback), std::move(buildNodeFunc), std::move(buildtitleNodeFunc),
+            sheetStyle, std::move(onAppear), std::move(onDisappear), std::move(shouldDismiss), targetNode);
+        auto pipeline = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
+        pipeline->FlushUITasks();
+    };
+    pipeline->AddAnimationClosure(bindSheetTask);
+}
+
+void OverlayManager::OnBindSheet(bool isShow, std::function<void(const std::string&)>&& callback,
+    std::function<RefPtr<UINode>()>&& buildNodeFunc, std::function<RefPtr<UINode>()>&& buildtitleNodeFunc,
+    NG::SheetStyle& sheetStyle, std::function<void()>&& onAppear, std::function<void()>&& onDisappear,
+    std::function<void()>&& shouldDismiss, const RefPtr<FrameNode>& targetNode)
+{
     int32_t targetId = targetNode->GetId();
     auto rootNode = FindWindowScene(targetNode);
     CHECK_NULL_VOID(rootNode);

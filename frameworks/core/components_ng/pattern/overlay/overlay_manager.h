@@ -293,7 +293,10 @@ public:
         std::function<RefPtr<UINode>()>&& buildNodeFunc, std::function<RefPtr<UINode>()>&& buildTitleNodeFunc,
         NG::SheetStyle& sheetStyle, std::function<void()>&& onAppear, std::function<void()>&& onDisappear,
         std::function<void()>&& shouldDismiss, const RefPtr<FrameNode>& targetNode);
-
+    void OnBindSheet(bool isShow, std::function<void(const std::string&)>&& callback,
+        std::function<RefPtr<UINode>()>&& buildNodeFunc, std::function<RefPtr<UINode>()>&& buildtitleNodeFunc,
+        NG::SheetStyle& sheetStyle, std::function<void()>&& onAppear, std::function<void()>&& onDisappear,
+        std::function<void()>&& shouldDismiss, const RefPtr<FrameNode>& targetNode);
     void CloseSheet(int32_t targetId);
 
     void DismissSheet();
