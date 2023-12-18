@@ -123,6 +123,10 @@ void UIExtensionPattern::OnConnect()
     contentNode_->SetHitTestMode(HitTestMode::HTMNONE);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    auto&& opts = host->GetLayoutProperty()->GetSafeAreaExpandOpts();
+    if (opts && opts->Expansive()) {
+        contentNode_->GetLayoutProperty()->UpdateSafeAreaExpandOpts(*opts);
+    }
     auto context = AceType::DynamicCast<NG::RosenRenderContext>(contentNode_->GetRenderContext());
     CHECK_NULL_VOID(context);
     auto surfaceNode = sessionWrapper_->GetSurfaceNode();
