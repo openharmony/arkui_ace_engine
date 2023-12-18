@@ -318,7 +318,6 @@ void NavigationPattern::CheckTopNavPathChange(
             NotifyPageHide(preTopNavPath->first);
             eventHub->FireOnHiddenEvent(navDestinationPattern->GetName());
             navDestinationPattern->SetIsOnShow(false);
-            preTopNavDestination->SetActive(false);
             // The navigations in NavDestination should be fired the hidden event
             NavigationPattern::FireNavigationStateChange(preTopNavDestination, false);
         }
@@ -476,7 +475,6 @@ void NavigationPattern::TransitionWithOutAnimation(const RefPtr<NavDestinationGr
             auto layoutProperty = preTopNavDestination->GetLayoutProperty();
             CHECK_NULL_VOID(layoutProperty);
             layoutProperty->UpdateVisibility(needVisible ? VisibleType::VISIBLE : VisibleType::INVISIBLE, true);
-            preTopNavDestination->SetActive(needVisible ? true : false);
         }
         navigationNode->OnAccessibilityEvent(AccessibilityEventType::PAGE_CHANGE);
         return;
@@ -487,7 +485,6 @@ void NavigationPattern::TransitionWithOutAnimation(const RefPtr<NavDestinationGr
         auto layoutProperty = navBarNode->GetLayoutProperty();
         CHECK_NULL_VOID(layoutProperty);
         layoutProperty->UpdateVisibility(VisibleType::INVISIBLE, true);
-        navBarNode->SetActive(false);
     }
 
     // navDestination pop to navBar
@@ -1022,7 +1019,6 @@ void NavigationPattern::NotifyDialogChange(bool isShow)
             eventHub->FireOnHiddenEvent(navDestinationPattern->GetName());
         }
         navDestinationPattern->SetIsOnShow(isShow);
-        curDestination->SetActive(isShow);
     }
 }
 } // namespace OHOS::Ace::NG
