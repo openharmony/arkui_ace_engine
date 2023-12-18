@@ -26,13 +26,12 @@
 #include "base/memory/referenced.h"
 #include "base/want/want_wrap.h"
 #include "core/common/container.h"
+#include "core/common/dynamic_component_renderer.h"
 #include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/ui_extension/session_wrapper.h"
 #include "core/event/mouse_event.h"
 #include "core/event/touch_event.h"
-#include "bridge/common/utils/engine_helper.h"
-#include "core/common/dynamic_component_renderer.h"
 
 namespace OHOS::Accessibility {
 class AccessibilityElementInfo;
@@ -195,7 +194,7 @@ private:
 
     // for DynamicComponent
     ComponentType componentType_ = ComponentType::UI_EXTENSION;
-    std::shared_ptr<DynamicComponentRenderer> dynamicComponentRenderer_ = nullptr;
+    std::shared_ptr<DynamicComponentRenderer> dynamicComponentRenderer_;
 
     ACE_DISALLOW_COPY_AND_MOVE(UIExtensionPattern);
 };

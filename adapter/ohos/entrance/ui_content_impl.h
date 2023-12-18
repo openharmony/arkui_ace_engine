@@ -288,7 +288,7 @@ private:
     std::unique_ptr<DistributedUIManager> uiManager_;
 
     bool isDynamicRender_ = false;
-    std::shared_ptr<TaskWrapper> taskWrapper_ = nullptr;
+    std::shared_ptr<TaskWrapper> taskWrapper_;
 
     sptr<IRemoteObject> parentToken_ = nullptr;
 };

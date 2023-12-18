@@ -67,7 +67,7 @@ TaskExecutor::Task TaskExecutorImpl::WrapTaskWithContainer(
     return wrappedTask;
 }
 
-TaskExecutor::Task TaskExecutorImpl::WrapTaskWithContainerAndNapi(
+TaskExecutor::Task TaskExecutorImpl::WrapTaskWithCustomWrapper(
     TaskExecutor::Task&& task, int32_t id, std::function<void()>&& traceIdFunc) const
 {
     auto wrappedTask = [taskWrapper = taskWrapper_, originTask = std::move(task), id,
@@ -194,7 +194,7 @@ bool TaskExecutorImpl::OnPostTask(Task&& task, TaskType type, uint32_t delayTime
             case TaskType::JS:
                 LOGD("wrap npi task, currentId = %{public}d", currentId);
                 wrappedTask =
-                    WrapTaskWithContainerAndNapi(std::move(task), currentId, std::move(traceIdFunc));
+                    WrapTaskWithCustomWrapper(std::move(task), currentId, std::move(traceIdFunc));
                 break;
             case TaskType::IO:
             case TaskType::GPU:

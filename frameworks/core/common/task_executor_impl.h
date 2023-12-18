@@ -59,7 +59,7 @@ public:
 private:
     TaskExecutor::Task WrapTaskWithContainer(
         TaskExecutor::Task&& task, int32_t id, std::function<void()>&& traceIdFunc = nullptr) const;
-    TaskExecutor::Task WrapTaskWithContainerAndNapi(
+    TaskExecutor::Task WrapTaskWithCustomWrapper(
         TaskExecutor::Task&& task, int32_t id, std::function<void()>&& traceIdFunc = nullptr) const;
     bool PostTaskToTaskRunner(const RefPtr<TaskRunnerAdapter>& taskRunner, TaskExecutor::Task&& task,
         uint32_t delayTime, const std::string& callerInfo = {}) const;
@@ -96,7 +96,7 @@ private:
     RefPtr<TaskRunnerAdapter> jsRunner_;
     RefPtr<TaskRunnerAdapter> gpuRunner_;
 
-    std::shared_ptr<TaskWrapper> taskWrapper_ = nullptr;
+    std::shared_ptr<TaskWrapper> taskWrapper_;
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_COMMON_TASK_EXECUTOR_IMPL_H

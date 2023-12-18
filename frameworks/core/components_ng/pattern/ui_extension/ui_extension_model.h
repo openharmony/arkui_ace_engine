@@ -22,7 +22,7 @@
 
 #include "base/utils/macros.h"
 #include "base/want/want_wrap.h"
-#include "bridge/common/utils/engine_helper.h"
+#include "core/components_ng/base/frame_node.h"
 
 namespace OHOS::AAFwk {
 class Want;

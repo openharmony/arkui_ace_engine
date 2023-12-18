@@ -94,7 +94,7 @@ private:
     fml::RefPtr<fml::TaskRunner> jsRunner_;
     fml::RefPtr<fml::TaskRunner> gpuRunner_;
 
-    std::shared_ptr<TaskWrapper> taskWrapper_ = nullptr;
+    std::shared_ptr<TaskWrapper> taskWrapper_;
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_COMMON_FLUTTER_FLUTTER_TASK_EXECUTOR_H

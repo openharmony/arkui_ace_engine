@@ -178,7 +178,7 @@ inline bool PreloadStateManagement(const shared_ptr<JsRuntime>& runtime)
     return runtime->EvaluateJsCode(codeStart, codeLength);
 }
 
-inline bool PreloadUiContent(const shared_ptr<JsRuntime>& runtime)
+inline bool PreloadUIContent(const shared_ptr<JsRuntime>& runtime)
 {
     uint8_t* codeStart = const_cast<uint8_t*>(reinterpret_cast<const uint8_t*>(_binary_jsUIContext_abc_start));
     int32_t codeLength = _binary_jsUIContext_abc_end - _binary_jsUIContext_abc_start;
@@ -370,7 +370,7 @@ bool JsiDeclarativeEngineInstance::InitJsEnv(bool debuggerMode,
             PreloadRequireNative(runtime_, global);
             PreloadJsEnums(runtime_);
             PreloadStateManagement(runtime_);
-            PreloadUiContent(runtime_);
+            PreloadUIContent(runtime_);
             PreloadArkComponent(runtime_);
         }
     }
@@ -480,7 +480,7 @@ void JsiDeclarativeEngineInstance::PreloadAceModule(void* runtime)
 
     bool evalResult = PreloadStateManagement(arkRuntime);
 
-    PreloadUiContent(arkRuntime);
+    PreloadUIContent(arkRuntime);
 
     // preload ark component
     bool arkComponentResult = PreloadArkComponent(arkRuntime);

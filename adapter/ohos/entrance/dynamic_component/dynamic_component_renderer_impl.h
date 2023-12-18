@@ -51,7 +51,7 @@ private:
 
     std::string hapPath_;
     std::string abcPath_;
-    std::shared_ptr<UIContent> uiContent_ = nullptr;
+    std::shared_ptr<UIContent> uiContent_;
     NativeEngine* runtime_ = nullptr;
     WeakPtr<FrameNode> host_;
     int32_t hostInstanceId_ = -1;

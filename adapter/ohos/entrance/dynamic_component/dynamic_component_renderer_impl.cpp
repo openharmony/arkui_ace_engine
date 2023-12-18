@@ -19,8 +19,8 @@
 
 #include "interfaces/inner_api/ace/ui_content.h"
 #include "native_engine/native_engine.h"
-#include "uv_task_wrapper_impl.h"
 
+#include "adapter/ohos/entrance/dynamic_component/uv_task_wrapper_impl.h"
 #include "adapter/ohos/entrance/ui_content_impl.h"
 #include "base/thread/task_executor.h"
 #include "base/utils/utils.h"
