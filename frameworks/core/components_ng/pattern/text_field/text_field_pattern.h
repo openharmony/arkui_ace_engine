@@ -203,9 +203,10 @@ public:
     void UpdateCounterMargin();
     void CleanCounterNode();
     void UltralimitShake();
-    void UpdateCounterBorderStyle(uint32_t& textLength, uint32_t& maxLength);
+    void HandleInputCounterBorder(int32_t& textLength, uint32_t& maxLength);
+    void UpdateCounterBorderStyle(int32_t& textLength, uint32_t& maxLength);
     void UpdateAreaBorderStyle(BorderWidthProperty& currentBorderWidth, BorderWidthProperty& overCountBorderWidth,
-    BorderColorProperty& overCountBorderColor, BorderColorProperty& currentBorderColor);
+        BorderColorProperty& overCountBorderColor, BorderColorProperty& currentBorderColor);
     void DeleteBackward(int32_t length) override;
     void DeleteBackwardOperation(int32_t length);
     void DeleteForward(int32_t length) override;
@@ -226,6 +227,10 @@ public:
     void SetCounterState(bool counterChange)
     {
         counterChange_ = counterChange;
+    }
+    void SetCounterMargin(bool CounterMargin)
+    {
+        hasCounterMargin_ = CounterMargin;
     }
 
     float GetTextOrPlaceHolderFontSize();
@@ -1045,6 +1050,7 @@ public:
 #ifdef ENABLE_DRAG_FRAMEWORK
     void HandleOnDragStatusCallback(
         const DragEventType& dragEventType, const RefPtr<NotifyDragEvent>& notifyDragEvent) override;
+
 protected:
     virtual void InitDragEvent();
 #endif

@@ -1104,6 +1104,8 @@ void TextFieldPattern::HandleOnPaste()
         if (textfield->IsTextArea() && layoutProperty->HasMaxLength()) {
             textfield->HandleCounterBorder();
         }
+        auto maxlength = textfield->GetMaxLength();
+        textfield->HandleInputCounterBorder(caretMoveLength, maxlength);
         textfield->CloseSelectOverlay(true);
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
         textfield->StartTwinkling();
@@ -2007,6 +2009,9 @@ void TextFieldPattern::OnModifyDone()
         UpdateSelection(0);
     }
     UpdateCounterMargin();
+    auto maxlength = GetMaxLength();
+    auto originLength = static_cast<int32_t>(contentController_->GetWideText().length());
+    HandleInputCounterBorder(originLength, maxlength);
     preInputStyle_ = inputStyle;
     Register2DragDropManager();
 }
@@ -3086,7 +3091,7 @@ void TextFieldPattern::InsertValue(const std::string& insertValue)
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto maxlength = GetMaxLength();
-    auto originLength = static_cast<uint32_t>(contentController_->GetWideText().length());
+    auto originLength = static_cast<int32_t>(contentController_->GetWideText().length());
     auto pattern = host->GetPattern<TextFieldPattern>();
     CHECK_NULL_VOID(pattern);
     auto textFieldLayoutProperty = host->GetLayoutProperty<TextFieldLayoutProperty>();
@@ -3114,6 +3119,21 @@ void TextFieldPattern::InsertValue(const std::string& insertValue)
     CloseSelectOverlay(true);
     ScrollToSafeArea();
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
+}
+
+void TextFieldPattern::HandleInputCounterBorder(int32_t& textLength, uint32_t& maxLength)
+{
+    auto host = GetHost();
+    auto textFieldLayoutProperty = host->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(textFieldLayoutProperty);
+    if (!textFieldLayoutProperty->GetShowCounterValue(false) || IsNormalInlineState() || IsShowPasswordIcon() ||
+        !textFieldLayoutProperty->HasMaxLength()) {
+        return;
+    }
+    auto inputValue = textFieldLayoutProperty->GetSetCounterValue(INVAILD_VALUE);
+    if (textLength >= maxLength && inputValue == INVAILD_VALUE) {
+        UpdateCounterBorderStyle(textLength, maxLength);
+    }
 }
 
 void TextFieldPattern::UpdateCounterTextColor()
@@ -3148,7 +3168,7 @@ void TextFieldPattern::UpdateCounterTextColor()
     host->MarkDirtyNode();
 }
 
-void TextFieldPattern::UpdateCounterBorderStyle(uint32_t& textLength, uint32_t& maxLength)
+void TextFieldPattern::UpdateCounterBorderStyle(int32_t& textLength, uint32_t& maxLength)
 {
     auto frameNode = GetHost();
     CHECK_NULL_VOID(frameNode);
@@ -3163,9 +3183,9 @@ void TextFieldPattern::UpdateCounterBorderStyle(uint32_t& textLength, uint32_t& 
     counterChange_ = true;
     auto showBorder = textFieldLayoutProperty->GetShowHighlightBorderValue(true);
     auto counterText = std::to_string(textLength) + "/" + std::to_string(maxLength);
-    if ((textLength + ONE_CHARACTER) == maxLength && !IsTextArea() && showBorder == true) {
+    if (textLength >= maxLength && !IsTextArea() && showBorder == true) {
         SetUnderlineColor(theme->GetErrorUnderlineColor());
-    } else if ((textLength + ONE_CHARACTER) == maxLength && IsTextArea() && showBorder == true) {
+    } else if (textLength >= maxLength && IsTextArea() && showBorder == true) {
         HandleCounterBorder();
     }
     return;
@@ -3722,7 +3742,7 @@ void TextFieldPattern::HandleCounterBorder()
     CHECK_NULL_VOID(tmpHost);
     auto layoutProperty = tmpHost->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
-    if ((HasFocus() && IsNormalInlineState()) || (!layoutProperty->GetShowCounterValue(false))) {
+    if ((HasFocus() && IsNormalInlineState())) {
         return;
     }
     auto textFieldTheme = GetTheme();
