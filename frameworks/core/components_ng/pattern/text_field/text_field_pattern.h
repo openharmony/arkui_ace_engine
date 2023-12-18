@@ -205,7 +205,7 @@ public:
     void UltralimitShake();
     void UpdateCounterBorderStyle(uint32_t& textLength, uint32_t& maxLength);
     void UpdateAreaBorderStyle(BorderWidthProperty& currentBorderWidth, BorderWidthProperty& overCountBorderWidth,
-    BorderColorProperty& overCountBorderColor, BorderColorProperty& currentBorderColor);
+        BorderColorProperty& overCountBorderColor, BorderColorProperty& currentBorderColor);
     void DeleteBackward(int32_t length) override;
     void DeleteBackwardOperation(int32_t length);
     void DeleteForward(int32_t length) override;
@@ -1005,11 +1005,6 @@ public:
             return;
         }
         isShowMagnifier_ = isShowMagnifier;
-        if (isShowMagnifier_) {
-            MakeHighZIndex();
-        } else {
-            MakeZIndexRollBack();
-        }
     }
 
     bool GetShowMagnifier() const
@@ -1045,6 +1040,7 @@ public:
 #ifdef ENABLE_DRAG_FRAMEWORK
     void HandleOnDragStatusCallback(
         const DragEventType& dragEventType, const RefPtr<NotifyDragEvent>& notifyDragEvent) override;
+
 protected:
     virtual void InitDragEvent();
 #endif
@@ -1207,9 +1203,6 @@ private:
     void ScrollToSafeArea() const override;
     void RecordSubmitEvent() const;
     void UpdateCancelNode();
-    void MakeHighZIndex();
-    void MakeZIndexRollBack();
-    void GetMaxZIndex(const RefPtr<UINode>& parent, const RefPtr<FrameNode>& pattern);
 
     RectF frameRect_;
     RectF contentRect_;
@@ -1363,7 +1356,6 @@ private:
     bool isShowMagnifier_ = false;
     OffsetF localOffset_;
     bool isTouchCaret_ = false;
-    std::list<int32_t> zIndexRollBack_;
 };
 } // namespace OHOS::Ace::NG
 
