@@ -308,6 +308,9 @@ void TextLayoutAlgorithm::UpdateParagraphForAISpan(const TextStyle& textStyle, L
     int32_t wTextForAILength = static_cast<int32_t>(wTextForAI.length());
     int32_t preEnd = 0;
     for (auto kv : pattern->GetAISpanMap()) {
+        if (preEnd >= wTextForAILength) {
+            break;
+        }
         auto aiSpan = kv.second;
         if (aiSpan.start < preEnd) {
             TAG_LOGI(AceLogTag::ACE_TEXT, "Error prediction");

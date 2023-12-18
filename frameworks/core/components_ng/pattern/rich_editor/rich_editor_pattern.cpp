@@ -4981,9 +4981,6 @@ bool RichEditorPattern::CanStartAITask()
 
 bool RichEditorPattern::NeedShowAIDetect()
 {
-    if (copyOption_ == CopyOptions::None) {
-        return false;
-    }
-    return textDetectEnable_ && !aiSpanMap_.empty() && IsEnabled() && !HasFocus();
+    return textDetectEnable_ && !aiSpanMap_.empty() && enabled_ && copyOption_ != CopyOptions::None && !HasFocus();
 }
 } // namespace OHOS::Ace::NG

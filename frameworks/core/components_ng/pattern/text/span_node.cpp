@@ -203,17 +203,14 @@ void SpanItem::UpdateTextStyleForAISpan(
     int32_t preEnd = spanStart;
     while (!aiSpanMap.empty()) {
         auto aiSpan = aiSpanMap.begin()->second;
-        if (aiSpan.start >= position) {
+        if (aiSpan.start >= position || preEnd >= position) {
             break;
-        }
-        if (aiSpan.end <= spanStart) {
-            aiSpanMap.erase(aiSpanMap.begin());
-            continue;
         }
         int32_t aiSpanStartInSpan = std::max(spanStart, aiSpan.start);
         int32_t aiSpanEndInSpan = std::min(position, aiSpan.end);
-        if (aiSpanStartInSpan < preEnd) {
+        if (aiSpan.end <= spanStart || aiSpanStartInSpan < preEnd) {
             TAG_LOGI(AceLogTag::ACE_TEXT, "Error prediction");
+            aiSpanMap.erase(aiSpanMap.begin());
             continue;
         }
         if (preEnd < aiSpanStartInSpan) {
