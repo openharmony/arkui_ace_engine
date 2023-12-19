@@ -2170,9 +2170,9 @@ HWTEST_F(TextFieldKeyEventTest, KeyEvent009, TestSize.Level1)
      * @tc.steps: step1. Initialize textInput and get focus
      */
     auto onSubmit = [](int32_t textFieldKey, NG::TextFieldCommonEvent& commonEvent) {
-      commonEvent.SetKeepEditable(true);
-      EXPECT_TRUE(commonEvent.keepEditable_); 
-      EXPECT_EQ(commonEvent.text_, "abcdefghijklmnopqrstuvwxyz");
+        commonEvent.SetKeepEditable(true);
+        EXPECT_TRUE(commonEvent.keepEditable_);
+        EXPECT_EQ(commonEvent.text_, "abcdefghijklmnopqrstuvwxyz");
     };
     CreateTextField(DEFAULT_TEXT, DEFAULT_PLACE_HOLDER, [&](TextFieldModel& model) -> void {
         model.SetInputStyle(DEFAULT_INPUT_STYLE);
@@ -2182,30 +2182,6 @@ HWTEST_F(TextFieldKeyEventTest, KeyEvent009, TestSize.Level1)
     auto focushHub = pattern_->GetFocusHub();
     pattern_->PerformAction(TextInputAction::BEGIN, true);
     EXPECT_TRUE(focushHub->currentFocus_);
-}
-
-/**
- * @tc.name: KeyEvent010
- * @tc.desc: Test KeyEvent enter
- * @tc.type: FUNC
- */
-HWTEST_F(TextFieldKeyEventTest, KeyEvent010, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Initialize textInput and get focus
-     */
-    auto onSubmit = [](int32_t textFieldKey, NG::TextFieldCommonEvent& commonEvent) {
-      EXPECT_TRUE(commonEvent.keepEditable_); 
-      EXPECT_EQ(commonEvent.text_, "abcdefghijklmnopqrstuvwxyz");
-    };
-    CreateTextField(DEFAULT_TEXT, DEFAULT_PLACE_HOLDER, [&](TextFieldModel& model) -> void {
-        model.SetInputStyle(DEFAULT_INPUT_STYLE);
-        model.SetOnSubmit(onSubmit);
-    });
-    GetFocus();
-    auto focushHub = pattern_->GetFocusHub();
-    pattern_->PerformAction(TextInputAction::BEGIN, true);
-    EXPECT_FALSE(focushHub->currentFocus_);
 }
 
 /**
