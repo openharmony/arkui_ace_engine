@@ -513,10 +513,12 @@ void SubwindowOhos::ShowPreviewNG()
 
 void SubwindowOhos::HidePreviewNG()
 {
+#ifdef ENABLE_DRAG_FRAMEWORK
     auto overlayManager = GetOverlayManager();
     CHECK_NULL_VOID(overlayManager);
     overlayManager->RemovePixelMap();
     overlayManager->RemoveEventColumn();
+#endif
     auto aceContainer = Platform::AceContainer::GetContainer(childContainerId_);
     CHECK_NULL_VOID(aceContainer);
     auto pipeline = DynamicCast<NG::PipelineContext>(aceContainer->GetPipelineContext());
