@@ -71,7 +71,8 @@ static const std::set<std::string> stringAttrs = {
     "menu_expand_display",
     "popup_double_border_enable",
     "popup_outer_border_color",
-    "popup_inner_border_color"
+    "popup_inner_border_color",
+    "dialog_expand_display"
 };
 
 double ParseDoubleUnit(const std::string& value, std::string& unit)
