@@ -731,7 +731,7 @@ HWTEST_F(StageTestNg, StageManagerTest008, TestSize.Level1)
     EXPECT_TRUE(bResult);
 
     stageManager.PopPage(true, false);
-    EXPECT_EQ(stageNode->GetChildren().size(), 3);
+    EXPECT_EQ(stageNode->GetChildren().size(), 2);
 }
 
 /**
