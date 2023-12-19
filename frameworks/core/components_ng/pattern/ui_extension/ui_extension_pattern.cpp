@@ -203,8 +203,11 @@ bool UIExtensionPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& d
     auto geometryNode = dirty->GetGeometryNode();
     CHECK_NULL_RETURN(geometryNode, false);
     auto frameRect = geometryNode->GetFrameRect();
-    sessionWrapper_->RefreshDisplayArea(
-        globalOffsetWithTranslate.GetX(), globalOffsetWithTranslate.GetY(), frameRect.Width(), frameRect.Height());
+    ContainerScope scope(instanceId_);
+    auto pipeline = PipelineBase::GetCurrentContext();
+    auto curWindow = pipeline->GetCurrentWindowRect();
+    sessionWrapper_->RefreshDisplayArea(std::round(globalOffsetWithTranslate.GetX() + curWindow.Left()),
+        std::round(globalOffsetWithTranslate.GetY() + curWindow.Top()), frameRect.Width(), frameRect.Height());
     return false;
 }
 
