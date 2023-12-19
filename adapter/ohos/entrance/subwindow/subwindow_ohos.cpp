@@ -589,6 +589,21 @@ void SubwindowOhos::HideMenuNG(const RefPtr<NG::FrameNode>& menu, int32_t target
 #endif // ENABLE_DRAG_FRAMEWORK
 }
 
+
+void SubwindowOhos::UpdateHideMenuOffsetNG(const NG::OffsetF& offset)
+{
+    auto aceContainer = Platform::AceContainer::GetContainer(childContainerId_);
+    CHECK_NULL_VOID(aceContainer);
+    auto context = DynamicCast<NG::PipelineContext>(aceContainer->GetPipelineContext());
+    CHECK_NULL_VOID(context);
+    auto overlay = context->GetOverlayManager();
+    CHECK_NULL_VOID(overlay);
+    if (overlay->IsContextMenuDragHideFinished()) {
+        return;
+    }
+    overlay->UpdateContextMenuDisappearPosition(offset);
+}
+
 void SubwindowOhos::ClearMenuNG(bool inWindow, bool showAnimation)
 {
     TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "clear menu ng enter");

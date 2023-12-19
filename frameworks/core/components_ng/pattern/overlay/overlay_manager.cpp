@@ -178,6 +178,39 @@ void ShowPreviewDisappearAnimation(const RefPtr<MenuWrapperPattern>& menuWrapper
     });
 }
 
+void UpdateContextMenuDisappearPositionAnimation(const RefPtr<FrameNode>& menu, const NG::OffsetF& offset)
+{
+    CHECK_NULL_VOID(menu);
+    auto menuWrapperPattern = menu->GetPattern<MenuWrapperPattern>();
+    CHECK_NULL_VOID(menuWrapperPattern);
+    auto menuChild = menuWrapperPattern->GetMenu();
+    CHECK_NULL_VOID(menuChild);
+    auto menuRenderContext = menuChild->GetRenderContext();
+    CHECK_NULL_VOID(menuRenderContext);
+    auto menuPattern = menuChild->GetPattern<MenuPattern>();
+    CHECK_NULL_VOID(menuPattern);
+    auto menuPosition = menuPattern->GetEndOffset();
+    menuPosition += offset;
+    menuPattern->SetEndOffset(menuPosition);
+
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto menuTheme = pipelineContext->GetTheme<MenuTheme>();
+    CHECK_NULL_VOID(menuTheme);
+
+    auto springMotionResponse = menuTheme->GetPreviewDisappearSpringMotionResponse();
+    auto springMotionDampingFraction = menuTheme->GetPreviewDisappearSpringMotionDampingFraction();
+    AnimationOption positionOption;
+    auto motion = AceType::MakeRefPtr<ResponsiveSpringMotion>(springMotionResponse, springMotionDampingFraction);
+    positionOption.SetCurve(motion);
+    AnimationUtils::Animate(positionOption, [menuRenderContext, menuPosition]() {
+        if (menuRenderContext) {
+            menuRenderContext->UpdatePosition(
+                OffsetT<Dimension>(Dimension(menuPosition.GetX()), Dimension(menuPosition.GetY())));
+        }
+    });
+}
+
 void ShowContextMenuDisappearAnimation(
     AnimationOption& option, const RefPtr<MenuWrapperPattern>& menuWrapperPattern, bool startDrag = false)
 {
@@ -233,6 +266,30 @@ void ShowContextMenuDisappearAnimation(
         option.GetOnFinishEvent());
 }
 } // namespace
+
+void OverlayManager::UpdateContextMenuDisappearPosition(const NG::OffsetF& offset)
+{
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto overlayManager = pipelineContext->GetOverlayManager();
+    CHECK_NULL_VOID(overlayManager);
+    overlayManager->UpdateDragMoveVector(offset);
+
+    if (overlayManager->IsOriginDragMoveVector() || !overlayManager->IsUpdateDragMoveVector()) {
+        return;
+    }
+    
+    if (menuMap_.empty()) {
+        return;
+    }
+    auto rootNode = rootNodeWeak_.Upgrade();
+    for (const auto& child : rootNode->GetChildren()) {
+        auto node = DynamicCast<FrameNode>(child);
+        if (node && node->GetTag() == V2::MENU_WRAPPER_ETS_TAG) {
+            UpdateContextMenuDisappearPositionAnimation(node, overlayManager->GetUpdateDragMoveVector());
+        }
+    }
+}
 
 void OverlayManager::PostDialogFinishEvent(const WeakPtr<FrameNode>& nodeWk)
 {
@@ -482,6 +539,8 @@ void OverlayManager::PopMenuAnimation(const RefPtr<FrameNode>& menu, bool showPr
 {
     TAG_LOGD(AceLogTag::ACE_OVERLAY, "pop menu animation enter");
     ResetLowerNodeFocusable(menu);
+    ResetContextMenuDragHideFinished();
+
     auto menuWrapper = menu->GetPattern<MenuWrapperPattern>();
     CHECK_NULL_VOID(menuWrapper);
     menuWrapper->CallMenuAboutToDisappearCallback();
@@ -501,6 +560,9 @@ void OverlayManager::PopMenuAnimation(const RefPtr<FrameNode>& menu, bool showPr
                 auto menu = menuWK.Upgrade();
                 CHECK_NULL_VOID(menu);
                 auto root = rootWeak.Upgrade();
+                auto overlayManager = weak.Upgrade();
+                CHECK_NULL_VOID(overlayManager);
+                overlayManager->SetContextMenuDragHideFinished(true);
                 auto menuWrapperPattern = menu->GetPattern<MenuWrapperPattern>();
                 menuWrapperPattern->CallMenuDisappearCallback();
                 auto mainPipeline = PipelineContext::GetMainPipelineContext();
@@ -515,12 +577,11 @@ void OverlayManager::PopMenuAnimation(const RefPtr<FrameNode>& menu, bool showPr
                 auto expandDisplay = theme->GetExpandDisplay();
                 if ((menuWrapperPattern && menuWrapperPattern->IsContextMenu()) || expandDisplay) {
                     SubwindowManager::GetInstance()->ClearMenuNG(id);
+                    overlayManager->ResetContextMenuDragHideFinished();
                     return;
                 }
                 ContainerScope scope(id);
                 auto container = Container::Current();
-                auto overlayManager = weak.Upgrade();
-                CHECK_NULL_VOID(overlayManager);
                 if (container && container->IsScenceBoardWindow()) {
                     root = overlayManager->FindWindowScene(menu);
                 }
