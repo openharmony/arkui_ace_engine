@@ -508,6 +508,8 @@ void NavigationPattern::TransitionWithAnimation(const RefPtr<NavDestinationGroup
     CHECK_NULL_VOID(navigationNode);
     auto navBarNode = AceType::DynamicCast<NavBarNode>(navigationNode->GetNavBarNode());
     CHECK_NULL_VOID(navBarNode);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
 
     // replace
     auto replaceValue = navigationStack_->GetReplaceValue();
@@ -536,6 +538,16 @@ void NavigationPattern::TransitionWithAnimation(const RefPtr<NavDestinationGroup
     auto layoutProperty = navigationNode->GetLayoutProperty<NavigationLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     if (layoutProperty->GetHideNavBarValue(false)) {
+        if (preTopNavDestination) {
+            auto parent = preTopNavDestination->GetParent();
+            CHECK_NULL_VOID(parent);
+            if (preTopNavDestination->GetContentNode()) {
+                preTopNavDestination->GetContentNode()->Clean();
+            }
+            parent->RemoveChild(preTopNavDestination);
+            parent->RebuildRenderContextTree();
+            pipeline->RequestFrame();
+        }
         return;
     }
 
