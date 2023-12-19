@@ -36,6 +36,7 @@ public:
     struct TipParameters {
         bool isDrawTip_ = false;
         OffsetF bubbleVertex_;
+        OffsetF sliderGlobalOffset_;
     };
     explicit SliderPaintMethod(const RefPtr<SliderContentModifier>& sliderContentModifier,
         const SliderContentModifier::Parameters& parameters, float sliderLength, float borderBlank,

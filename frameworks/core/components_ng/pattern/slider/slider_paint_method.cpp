@@ -91,7 +91,7 @@ void SliderPaintMethod::UpdateOverlayModifier(PaintWrapper* paintWrapper)
     sliderTipModifier_->SetContentOffset(paintWrapper->GetContentOffset());
     sliderTipModifier_->SetContentSize(paintWrapper->GetContentSize());
     sliderTipModifier_->SetBubbleVertex(tipParameters_.bubbleVertex_);
-
+    sliderTipModifier_->SetSliderGlobalOffset(tipParameters_.sliderGlobalOffset_);
     sliderTipModifier_->BuildParagraph();
     sliderTipModifier_->UpdateBubbleSize();
     if (sliderTipModifier_->UpdateOverlayRect(paintWrapper->GetGeometryNode()->GetFrameSize())) {
