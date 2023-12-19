@@ -61,7 +61,6 @@ constexpr uint8_t DEFAULT_SAFE_AREA_EDGE = 0b1111;
 constexpr Dimension DEFAULT_FLEX_BASIS { 0.0, DimensionUnit::AUTO };
 constexpr int32_t DEFAULT_DISPLAY_PRIORITY = 0;
 constexpr int32_t DEFAULT_ID = 0;
-constexpr double DEFAULT_PADDING = 16.0;
 
 BorderStyle ConvertBorderStyle(int32_t value)
 {
@@ -1763,8 +1762,8 @@ void ResetPadding(NodeHandle node)
     NG::PaddingProperty paddings;
     paddings.top = std::optional<CalcLength>(CalcLength(0.0, DimensionUnit::VP));
     paddings.bottom = std::optional<CalcLength>(CalcLength(0.0, DimensionUnit::VP));
-    paddings.left = std::optional<CalcLength>(CalcLength(DEFAULT_PADDING, DimensionUnit::VP));
-    paddings.right = std::optional<CalcLength>(CalcLength(DEFAULT_PADDING, DimensionUnit::VP));
+    paddings.left = std::optional<CalcLength>(CalcLength(0.0, DimensionUnit::VP));
+    paddings.right = std::optional<CalcLength>(CalcLength(0.0, DimensionUnit::VP));
     ViewAbstract::SetPadding(frameNode, paddings);
 }
 
