@@ -27,9 +27,9 @@ public:
     WebAccessibilityNode(WeakPtr<FrameNode> webNode)
         : FrameNode(V2::WEB_CORE_TAG, 0, MakeRefPtr<Pattern>()), webNode_(webNode)
     {
-        auto webNode = webNode_.Upgrade();
-        CHECK_NULL_VOID(webNode);
-        accessibilityNodeInfo_.pageId = webNode->GetPageId();
+        auto node = webNode_.Upgrade();
+        CHECK_NULL_VOID(node);
+        accessibilityNodeInfo_.pageId = node->GetPageId();
     }
     ~WebAccessibilityNode() override = default;
     NWeb::NWebAccessibilityNodeInfo& GetAccessibilityNodeInfo()
