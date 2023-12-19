@@ -92,9 +92,9 @@ void RichEditorController::SetUpdateSpanStyle(struct UpdateSpanStyle updateSpanS
     updateSpanStyle_ = updateSpanStyle;
 }
 
-RichEditorSelection RichEditorController::GetSpansInfo(int32_t start, int32_t end)
+SelectionInfo RichEditorController::GetSpansInfo(int32_t start, int32_t end)
 {
-    RichEditorSelection value;
+    SelectionInfo value;
     auto richEditorPattern = pattern_.Upgrade();
     if (richEditorPattern) {
         value = richEditorPattern->GetSpansInfo(start, end, GetSpansMethod::GETSPANS);
@@ -102,9 +102,9 @@ RichEditorSelection RichEditorController::GetSpansInfo(int32_t start, int32_t en
     return value;
 }
 
-RichEditorSelection RichEditorController::GetSelectionSpansInfo()
+SelectionInfo RichEditorController::GetSelectionSpansInfo()
 {
-    RichEditorSelection value;
+    SelectionInfo value;
     auto richEditorPattern = pattern_.Upgrade();
     if (richEditorPattern) {
         auto start = std::max(richEditorPattern->GetTextSelector().GetTextStart(), 0);

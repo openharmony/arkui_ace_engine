@@ -433,6 +433,7 @@ build_component_ng("pattern_ng") {
     "text/span_node.cpp",
     "text/text_accessibility_property.cpp",
     "text/text_content_modifier.cpp",
+    "text/text_controller.cpp",
     "text/text_layout_adapter/text_layout_adapter.cpp",
     "text/text_layout_algorithm.cpp",
     "text/text_layout_property.cpp",

@@ -37,7 +37,7 @@
 #include "core/components_ng/pattern/rich_editor/rich_editor_layout_property.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_overlay_modifier.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_paint_method.h"
-#include "core/components_ng/pattern/rich_editor/rich_editor_selection.h"
+#include "core/components_ng/pattern/rich_editor/selection_info.h"
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
 #include "core/components_ng/pattern/text/span_node.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
@@ -67,21 +67,6 @@ struct AutoScrollParam {
     bool showScrollbar = false;
     Offset eventOffset;
     bool isFirstRun_ = true;
-};
-
-struct SelectionMenuParams {
-    RichEditorType type;
-    std::function<void()> buildFunc;
-    std::function<void(int32_t, int32_t)> onAppear;
-    std::function<void()> onDisappear;
-    RichEditorResponseType responseType;
-
-    SelectionMenuParams(RichEditorType _type, std::function<void()> _buildFunc,
-        std::function<void(int32_t, int32_t)> _onAppear, std::function<void()> _onDisappear,
-        RichEditorResponseType _responseType)
-        : type(_type), buildFunc(_buildFunc), onAppear(_onAppear), onDisappear(_onDisappear),
-          responseType(_responseType)
-    {}
 };
 
 class RichEditorPattern : public TextPattern, public TextInputClient {
@@ -233,7 +218,7 @@ public:
     std::u16string GetRightTextOfCursor(int32_t number) override;
     int32_t GetTextIndexAtCursor() override;
     void ShowSelectOverlay(const RectF& firstHandle, const RectF& secondHandle, bool isCopyAll = false,
-        RichEditorResponseType responseType = RichEditorResponseType::LONG_PRESS, bool handlReverse = false);
+        TextResponseType responseType = TextResponseType::LONG_PRESS, bool handlReverse = false);
     void OnHandleMove(const RectF& handleRect, bool isFirstHandle) override;
     int32_t GetHandleIndex(const Offset& offset) const override;
     void OnAreaChangedInner() override;
@@ -286,7 +271,7 @@ public:
     RectF GetCaretRect() const override;
     void CloseSelectOverlay() override;
     void CalculateHandleOffsetAndShowOverlay(bool isUsingMouse = false);
-    void CopySelectionMenuParams(SelectOverlayInfo& selectInfo, RichEditorResponseType responseType);
+    void CopySelectionMenuParams(SelectOverlayInfo& selectInfo, TextResponseType responseType);
 #ifdef ENABLE_DRAG_FRAMEWORK
     std::function<void(Offset)> GetThumbnailCallback() override;
     void HandleOnDragStatusCallback(
@@ -317,7 +302,7 @@ public:
         }
         customKeyboardBuilder_ = keyboardBuilder;
     }
-    void BindSelectionMenu(RichEditorResponseType type, RichEditorType richEditorType,
+    void BindSelectionMenu(TextResponseType type, TextSpanType richEditorType,
         std::function<void()>& menuBuilder, std::function<void(int32_t, int32_t)>& onAppear,
         std::function<void()>& onDisappear);
     void ClearSelectionMenu()
@@ -377,8 +362,6 @@ protected:
 
 private:
     void UpdateSelectMenuInfo(bool hasData, SelectOverlayInfo& selectInfo, bool isCopyAll);
-    void UpdateSelectionType(RichEditorSelection& selection);
-    std::shared_ptr<SelectionMenuParams> GetMenuParams(RichEditorResponseType responseType, RichEditorType type);
     void HandleOnPaste() override;
     void HandleOnCut() override;
     void InitClickEvent(const RefPtr<GestureEventHub>& gestureHub) override;
@@ -473,7 +456,6 @@ private:
     RefPtr<SpanNode> InsertValueToBeforeSpan(RefPtr<SpanNode>& spanNodeBefore, const std::string& insertValue);
     void SetCaretSpanIndex(int32_t index);
     bool HasSameTypingStyle(const RefPtr<SpanNode>& spanNode);
-    bool IsSelectedBindSelectionMenu();
 
     // add for scroll.
     void UpdateChildrenOffset();
@@ -564,8 +546,6 @@ private:
 #ifdef ENABLE_DRAG_FRAMEWORK
     std::list<ResultObject> dragResultObjects_;
 #endif // ENABLE_DRAG_FRAMEWORK
-    std::map<std::pair<RichEditorType, RichEditorResponseType>, std::shared_ptr<SelectionMenuParams>> selectionMenuMap_;
-    std::optional<RichEditorType> selectedType_;
 
     std::function<void()> customKeyboardBuilder_;
     Offset selectionMenuOffset_;

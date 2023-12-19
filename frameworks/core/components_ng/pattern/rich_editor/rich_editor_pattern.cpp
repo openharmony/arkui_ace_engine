@@ -47,7 +47,7 @@
 #include "core/components_ng/pattern/rich_editor/rich_editor_layout_property.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_model.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_overlay_modifier.h"
-#include "core/components_ng/pattern/rich_editor/rich_editor_selection.h"
+#include "core/components_ng/pattern/rich_editor/selection_info.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_theme.h"
 #include "core/components_ng/pattern/rich_editor_drag/rich_editor_drag_pattern.h"
 #include "core/components_ng/pattern/text/span_node.h"
@@ -1646,9 +1646,9 @@ void RichEditorPattern::HandleMenuCallbackOnSelectAll()
         CloseSelectOverlay();
     }
     auto responseType = selectOverlayProxy_
-                            ? static_cast<RichEditorResponseType>(
+                            ? static_cast<TextResponseType>(
                                   selectOverlayProxy_->GetSelectOverlayMangerInfo().menuInfo.responseType.value_or(0))
-                            : RichEditorResponseType::LONG_PRESS;
+                            : TextResponseType::LONG_PRESS;
     selectMenuInfo_.showCopyAll = false;
     selectOverlayProxy_->UpdateSelectMenuInfo(selectMenuInfo_);
     selectOverlayProxy_.Reset();
@@ -2022,7 +2022,7 @@ void RichEditorPattern::UpdateCaretInfoToController()
     std::string text = "";
     if (!resultObjects.empty()) {
         for (const auto& resultObj : resultObjects) {
-            if (resultObj.type == RichEditorSpanType::TYPESPAN) {
+            if (resultObj.type == SelectSpanType::TYPESPAN) {
                 text += resultObj.valueString;
             }
         }
@@ -3338,7 +3338,7 @@ void RichEditorPattern::HandleMouseLeftButton(const MouseInfo& info)
             oldMouseStatus == MouseStatus::MOVE) {
             selectionMenuOffsetByMouse_ = OffsetF(static_cast<float>(info.GetGlobalLocation().GetX()),
                 static_cast<float>(info.GetGlobalLocation().GetY()));
-            ShowSelectOverlay(RectF(), RectF(), false, RichEditorResponseType::SELECTED_BY_MOUSE);
+            ShowSelectOverlay(RectF(), RectF(), false, TextResponseType::SELECTED_BY_MOUSE);
         }
     }
 }
@@ -3353,7 +3353,7 @@ void RichEditorPattern::HandleMouseRightButton(const MouseInfo& info)
         selectionMenuOffsetByMouse_ = OffsetF(
             static_cast<float>(info.GetGlobalLocation().GetX()), static_cast<float>(info.GetGlobalLocation().GetY()));
         if (textSelector_.IsValid() && BetweenSelectedPosition(info.GetGlobalLocation())) {
-            ShowSelectOverlay(RectF(), RectF(), IsSelectAll(), RichEditorResponseType::RIGHT_CLICK);
+            ShowSelectOverlay(RectF(), RectF(), IsSelectAll(), TextResponseType::RIGHT_CLICK);
             isMousePressed_ = false;
             usingMouseRightButton_ = false;
             return;
@@ -3363,7 +3363,7 @@ void RichEditorPattern::HandleMouseRightButton(const MouseInfo& info)
             ResetSelection();
         }
         MouseRightFocus(info);
-        ShowSelectOverlay(RectF(), RectF(), IsSelectAll(), RichEditorResponseType::RIGHT_CLICK);
+        ShowSelectOverlay(RectF(), RectF(), IsSelectAll(), TextResponseType::RIGHT_CLICK);
         isMousePressed_ = false;
         usingMouseRightButton_ = false;
     }
@@ -3391,7 +3391,7 @@ void RichEditorPattern::MouseRightFocus(const MouseInfo& info)
     auto spanNode = DynamicCast<FrameNode>(GetChildByIndex(spanInfo.GetSpanIndex() - 1));
     if (spanNode && spanNode->GetTag() == V2::IMAGE_ETS_TAG && spanInfo.GetOffsetInSpan() == 0 &&
         selectEnd == selectStart + 1 && BetweenSelectedPosition(info.GetGlobalLocation())) {
-        selectedType_ = RichEditorType::IMAGE;
+        selectedType_ = TextSpanType::IMAGE;
         FireOnSelect(selectStart, selectEnd);
         host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
         return;
@@ -3403,7 +3403,7 @@ void RichEditorPattern::MouseRightFocus(const MouseInfo& info)
     float caretHeight = 0.0f;
     OffsetF caretOffset = CalcCursorOffsetByPosition(GetCaretPosition(), caretHeight);
     SetCaretPosition(position);
-    selectedType_ = RichEditorType::TEXT;
+    selectedType_ = TextSpanType::TEXT;
     CHECK_NULL_VOID(overlayMod_);
     DynamicCast<RichEditorOverlayModifier>(overlayMod_)->SetCaretOffsetAndHeight(caretOffset, caretHeight);
     StartTwinkling();
@@ -3473,69 +3473,33 @@ void RichEditorPattern::OnHandleMoveDone(const RectF& handleRect, bool isFirstHa
         auto handleReverse = selectOverlayProxy_->IsHandleReverse();
         selectOverlayProxy_.Reset();
         ShowSelectOverlay(textSelector_.firstHandle, textSelector_.secondHandle, IsSelectAll(),
-            RichEditorResponseType::LONG_PRESS, handleReverse);
+            TextResponseType::LONG_PRESS, handleReverse);
         return;
     }
     ShowSelectOverlay(
-        textSelector_.firstHandle, textSelector_.secondHandle, IsSelectAll(), RichEditorResponseType::LONG_PRESS);
+        textSelector_.firstHandle, textSelector_.secondHandle, IsSelectAll(), TextResponseType::LONG_PRESS);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
-bool RichEditorPattern::IsSelectedBindSelectionMenu()
+void RichEditorPattern::CopySelectionMenuParams(SelectOverlayInfo& selectInfo, TextResponseType responseType)
 {
-    bool result = false;
-    auto selectType = selectedType_.value_or(RichEditorType::TEXT);
-    if (selectType == RichEditorType::TEXT) {
-        result = GetMenuParams(RichEditorResponseType::SELECTED_BY_MOUSE, RichEditorType::TEXT) != nullptr;
-    } else if (selectType == RichEditorType::IMAGE) {
-        result = GetMenuParams(RichEditorResponseType::SELECTED_BY_MOUSE, RichEditorType::IMAGE) != nullptr;
-    } else if (selectType == RichEditorType::MIXED) {
-        result = GetMenuParams(RichEditorResponseType::SELECTED_BY_MOUSE, RichEditorType::MIXED) != nullptr;
-    }
-    return result;
-}
-
-void RichEditorPattern::CopySelectionMenuParams(SelectOverlayInfo& selectInfo, RichEditorResponseType responseType)
-{
-    auto selectType = selectedType_.value_or(RichEditorType::NONE);
+    auto selectType = selectedType_.value_or(TextSpanType::NONE);
     std::shared_ptr<SelectionMenuParams> menuParams = nullptr;
-    if (selectType == RichEditorType::TEXT) {
-        menuParams = GetMenuParams(responseType, RichEditorType::TEXT);
-    } else if (selectType == RichEditorType::IMAGE) {
-        menuParams = GetMenuParams(responseType, RichEditorType::IMAGE);
-    } else if (selectType == RichEditorType::MIXED) {
-        menuParams = GetMenuParams(responseType, RichEditorType::MIXED);
-    }
-
+    menuParams = GetMenuParams(selectType, responseType);
     if (menuParams == nullptr) {
         return;
     }
 
     // long pressing on the image needs to set the position of the pop-up menu following the long pressing position
-    if (selectType == RichEditorType::IMAGE && !selectInfo.isUsingMouse) {
+    if (selectType == TextSpanType::IMAGE && !selectInfo.isUsingMouse) {
         selectInfo.menuInfo.menuOffset = OffsetF(selectionMenuOffset_.GetX(), selectionMenuOffset_.GetY());
     }
 
-    selectInfo.menuInfo.menuBuilder = menuParams->buildFunc;
-    if (menuParams->onAppear) {
-        auto weak = AceType::WeakClaim(this);
-        auto callback = [weak, menuParams]() {
-            auto pattern = weak.Upgrade();
-            CHECK_NULL_VOID(pattern);
-            CHECK_NULL_VOID(menuParams->onAppear);
-
-            auto& textSelector = pattern->textSelector_;
-            auto selectStart = std::min(textSelector.baseOffset, textSelector.destinationOffset);
-            auto selectEnd = std::max(textSelector.baseOffset, textSelector.destinationOffset);
-            menuParams->onAppear(selectStart, selectEnd);
-        };
-        selectInfo.menuCallback.onAppear = std::move(callback);
-    }
-    selectInfo.menuCallback.onDisappear = menuParams->onDisappear;
+    CopyBindSelectionMenuParams(selectInfo, menuParams);
 }
 
 void RichEditorPattern::ShowSelectOverlay(const RectF& firstHandle, const RectF& secondHandle, bool isCopyAll,
-    RichEditorResponseType responseType, bool handleReverse)
+    TextResponseType responseType, bool handleReverse)
 {
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
@@ -3545,12 +3509,12 @@ void RichEditorPattern::ShowSelectOverlay(const RectF& firstHandle, const RectF&
         SelectOverlayInfo selectInfo;
         selectInfo.handleReverse = handleReverse;
         bool usingMouse = pattern->IsUsingMouse();
-        if (!pattern->IsUsingMouse() && responseType == RichEditorResponseType::LONG_PRESS) {
+        if (!pattern->IsUsingMouse() && responseType == TextResponseType::LONG_PRESS) {
             selectInfo.firstHandle.paintRect = firstHandle;
             selectInfo.secondHandle.paintRect = secondHandle;
         } else {
-            if (responseType == RichEditorResponseType::LONG_PRESS) {
-                responseType = RichEditorResponseType::RIGHT_CLICK;
+            if (responseType == TextResponseType::LONG_PRESS) {
+                responseType = TextResponseType::RIGHT_CLICK;
             }
             selectInfo.isUsingMouse = true;
             selectInfo.rightClickOffset = pattern->GetSelectionMenuOffset();
@@ -3643,14 +3607,14 @@ void RichEditorPattern::HandleOnCopy()
                                const ResultObject& result) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
-        if (result.type == RichEditorSpanType::TYPESPAN) {
+        if (result.type == SelectSpanType::TYPESPAN) {
             auto data = pattern->GetSelectedSpanText(StringUtils::ToWstring(result.valueString),
                 result.offsetInSpan[RichEditorSpanRange::RANGESTART],
                 result.offsetInSpan[RichEditorSpanRange::RANGEEND]);
             clipboard->AddTextRecord(pasteData, data);
             return;
         }
-        if (result.type == RichEditorSpanType::TYPEIMAGE) {
+        if (result.type == SelectSpanType::TYPEIMAGE) {
             if (result.valuePixelMap) {
                 clipboard->AddPixelMapRecord(pasteData, result.valuePixelMap);
             } else {
@@ -3874,7 +3838,7 @@ void RichEditorPattern::CreateHandles()
     textSelector_.firstHandle = firstHandle;
     RectF secondHandle = RectF(secondHandleOffset, secondHandlePaintSize);
     textSelector_.secondHandle = secondHandle;
-    ShowSelectOverlay(firstHandle, secondHandle, IsSelectAll(), RichEditorResponseType::LONG_PRESS);
+    ShowSelectOverlay(firstHandle, secondHandle, IsSelectAll(), TextResponseType::LONG_PRESS);
 }
 
 void RichEditorPattern::OnAreaChangedInner()
@@ -4139,7 +4103,7 @@ void RichEditorPattern::SetSelection(int32_t start, int32_t end)
         if (!isMousePressed_ || selectedTypeChange) {
             CalculateHandleOffsetAndShowOverlay();
             CloseSelectOverlay();
-            auto responseType = static_cast<RichEditorResponseType>(
+            auto responseType = static_cast<TextResponseType>(
                 selectOverlayProxy_->GetSelectOverlayMangerInfo().menuInfo.responseType.value_or(0));
             ShowSelectOverlay(textSelector_.firstHandle, textSelector_.secondHandle, IsSelectAll(), responseType);
         }
@@ -4151,29 +4115,11 @@ void RichEditorPattern::SetSelection(int32_t start, int32_t end)
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
-void RichEditorPattern::BindSelectionMenu(RichEditorResponseType type, RichEditorType richEditorType,
+void RichEditorPattern::BindSelectionMenu(TextResponseType type, TextSpanType richEditorType,
     std::function<void()>& menuBuilder, std::function<void(int32_t, int32_t)>& onAppear,
     std::function<void()>& onDisappear)
 {
-    auto key = std::make_pair(richEditorType, type);
-    auto it = selectionMenuMap_.find(key);
-    if (it != selectionMenuMap_.end()) {
-        if (menuBuilder == nullptr) {
-            selectionMenuMap_.erase(it);
-            return;
-        }
-        it->second->buildFunc = menuBuilder;
-        it->second->onAppear = onAppear;
-        it->second->onDisappear = onDisappear;
-        return;
-    }
-
-    auto selectionMenuParams =
-        std::make_shared<SelectionMenuParams>(richEditorType, menuBuilder, onAppear, onDisappear, type);
-    selectionMenuMap_[key] = selectionMenuParams;
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    TextPattern::BindSelectionMenu(richEditorType, type, menuBuilder, onAppear, onDisappear);
 }
 
 RefPtr<NodePaintMethod> RichEditorPattern::CreateNodePaintMethod()
@@ -4247,41 +4193,6 @@ void RichEditorPattern::UpdateSelectMenuInfo(bool hasData, SelectOverlayInfo& se
     selectInfo.menuInfo.showCameraInput = !IsSelected() && isSupportCameraInput;
     selectInfo.menuInfo.menuIsShow = hasValue || hasData || selectInfo.menuInfo.showCameraInput;
     selectMenuInfo_ = selectInfo.menuInfo;
-}
-
-void RichEditorPattern::UpdateSelectionType(RichEditorSelection& selection)
-{
-    selectedType_ = RichEditorType::NONE;
-    auto list = selection.GetSelection().resultObjects;
-    bool imageSelected = false;
-    bool textSelected = false;
-    for (const auto& obj : list) {
-        if (obj.type == RichEditorSpanType::TYPEIMAGE) {
-            imageSelected = true;
-        } else if (obj.type == RichEditorSpanType::TYPESPAN) {
-            textSelected = true;
-        }
-        if (imageSelected && textSelected) {
-            selectedType_ = RichEditorType::MIXED;
-            return;
-        }
-    }
-    if (imageSelected) {
-        selectedType_ = RichEditorType::IMAGE;
-    } else if (textSelected) {
-        selectedType_ = RichEditorType::TEXT;
-    }
-}
-
-std::shared_ptr<SelectionMenuParams> RichEditorPattern::GetMenuParams(
-    RichEditorResponseType responseType, RichEditorType type)
-{
-    auto key = std::make_pair(type, responseType);
-    auto it = selectionMenuMap_.find(key);
-    if (it != selectionMenuMap_.end()) {
-        return it->second;
-    }
-    return nullptr;
 }
 
 RectF RichEditorPattern::GetCaretRect() const
@@ -4808,14 +4719,14 @@ std::string RichEditorPattern::GetPositionSpansText(int32_t position, int32_t& s
 
     std::stringstream sstream;
     for (const auto& obj : list) {
-        if (obj.type == RichEditorSpanType::TYPEIMAGE) {
+        if (obj.type == SelectSpanType::TYPEIMAGE) {
             if (obj.spanPosition.spanRange[1] <= position) {
                 sstream.str("");
                 startSpan = -1;
             } else {
                 break;
             }
-        } else if (obj.type == RichEditorSpanType::TYPESPAN) {
+        } else if (obj.type == SelectSpanType::TYPESPAN) {
             if (startSpan < 0) {
                 startSpan = obj.spanPosition.spanRange[0] + obj.offsetInSpan[0];
             }

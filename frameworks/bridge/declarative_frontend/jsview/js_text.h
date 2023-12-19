@@ -70,9 +70,46 @@ public:
     static void JsMenuOptionsExtension(const JSCallbackInfo& info);
     static void JsEnableDataDetector(const JSCallbackInfo& info);
     static void JsDataDetectorConfig(const JSCallbackInfo& info);
+    static void BindSelectionMenu(const JSCallbackInfo& info);
+    static void SetOnTextSelectionChange(const JSCallbackInfo& info);
+    static void ParseMenuParam(
+        const JSCallbackInfo& info, const JSRef<JSObject>& menuOptions, NG::SelectMenuParam& menuParam);
 
 private:
     static RefPtr<TextComponentV2> GetComponent();
+};
+
+class JSTextController final : public Referenced {
+public:
+    JSTextController() = default;
+    ~JSTextController() override = default;
+
+    static void JSBind(BindingTarget globalObj);
+
+    static void Constructor(const JSCallbackInfo& args)
+    {
+        auto controller = Referenced::MakeRefPtr<JSTextController>();
+        controller->IncRefCount();
+        args.SetReturnValue(Referenced::RawPtr(controller));
+    }
+
+    static void Destructor(JSTextController* controller)
+    {
+        if (controller != nullptr) {
+            controller->DecRefCount();
+        }
+    }
+
+    void SetController(const RefPtr<TextControllerBase>& controller)
+    {
+        controllerWeak_ = controller;
+    }
+
+    void CloseSelectionMenu();
+
+private:
+    WeakPtr<TextControllerBase> controllerWeak_;
+    ACE_DISALLOW_COPY_AND_MOVE(JSTextController);
 };
 
 } // namespace OHOS::Ace::Framework

@@ -22,6 +22,7 @@
 #include <string>
 
 #include "base/geometry/dimension.h"
+#include "base/memory/ace_type.h"
 #include "base/utils/macros.h"
 #include "base/utils/noncopyable.h"
 #include "core/components/box/drag_drop_event.h"
@@ -30,8 +31,16 @@
 #include "core/components_ng/pattern/text/text_menu_extension.h"
 #include "core/components_ng/pattern/text/text_styles.h"
 #include "core/components_ng/pattern/text_field/text_field_model.h"
+#include "core/components_ng/pattern/text_field/text_selector.h"
 
 namespace OHOS::Ace {
+class ACE_EXPORT TextControllerBase : public AceType {
+    DECLARE_ACE_TYPE(TextControllerBase, AceType);
+
+public:
+    virtual void CloseSelectionMenu() = 0;
+};
+
 class ACE_EXPORT TextModel {
 public:
     static TextModel* GetInstance();
@@ -81,6 +90,13 @@ public:
     virtual void SetMenuOptionItems(std::vector<NG::MenuOptionsParam>&& menuOptionsItems) = 0;
 
     virtual void SetTextSelection(int32_t startIndex, int32_t endIndex) = 0;
+    virtual void BindSelectionMenu(NG::TextSpanType& spanType, NG::TextResponseType& responseType,
+        std::function<void()>& buildFunc, NG::SelectMenuParam& menuParam) {};
+    virtual void SetOnTextSelectionChange(std::function<void(int32_t, int32_t)>&& func) {};
+    virtual RefPtr<TextControllerBase> GetTextController()
+    {
+        return nullptr;
+    };
 
 private:
     static std::unique_ptr<TextModel> instance_;
