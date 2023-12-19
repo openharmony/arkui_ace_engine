@@ -147,7 +147,7 @@ void PixelMapImage::DrawRect(RSCanvas& canvas, const RSRect& dstRect)
     auto pixelMap = pixelMap_->GetPixelMapSharedPtr();
     RSRect src = RSRect(0, 0, pixelMap->GetWidth(), pixelMap->GetHeight());
     recordingCanvas.AttachBrush(brush);
-    TAG_LOGW(AceLogTag::ACE_IMAGE, "Drawing is not supported, DrawPixelMapRect is not define");
+    recordingCanvas.DrawPixelMapRect(pixelMap, src, dst, options);
     recordingCanvas.DetachBrush();
 #endif
 #endif
