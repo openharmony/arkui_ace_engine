@@ -2469,6 +2469,8 @@ void OverlayManager::OnBindSheet(bool isShow, std::function<void(const std::stri
     CHECK_NULL_VOID(rootNode);
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
+    auto sheetTheme = pipeline->GetTheme<SheetTheme>();
+    CHECK_NULL_VOID(sheetTheme);
     if (!isShow) {
         CloseSheet(targetId);
         return;
@@ -2484,11 +2486,11 @@ void OverlayManager::OnBindSheet(bool isShow, std::function<void(const std::stri
             if (sheetStyle.backgroundBlurStyle.has_value()) {
                 SetSheetBackgroundBlurStyle(topModalNode, sheetStyle.backgroundBlurStyle.value());
             }
-            if (sheetStyle.maskColor.has_value()) {
-                auto maskNode = GetSheetMask(topModalNode);
-                if (maskNode) {
-                    maskNode->GetRenderContext()->UpdateBackgroundColor(sheetStyle.maskColor.value());
-                }
+            auto maskNode = GetSheetMask(topModalNode);
+            if (maskNode) {
+                auto maskRenderContext = maskNode->GetRenderContext();
+                CHECK_NULL_VOID(maskRenderContext);
+                maskRenderContext->UpdateBackgroundColor(sheetStyle.maskColor.value_or(sheetTheme->GetMaskColor()));
             }
             topModalNode->GetPattern<SheetPresentationPattern>()->UpdateOnDisappear(std::move(onDisappear));
             topModalNode->GetPattern<SheetPresentationPattern>()->UpdateShouldDismiss(std::move(shouldDismiss));
@@ -2529,25 +2531,29 @@ void OverlayManager::OnBindSheet(bool isShow, std::function<void(const std::stri
     modalStack_.push(WeakClaim(RawPtr(sheetNode)));
     SaveLastModalNode();
     // create maskColor node
-    if (sheetStyle.maskColor.has_value()) {
-        auto maskNode = FrameNode::CreateFrameNode(
-            V2::SHEET_MASK_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
-        maskNode->GetLayoutProperty()->UpdateMeasureType(MeasureType::MATCH_PARENT);
-        maskNode->GetRenderContext()->UpdateBackgroundColor(sheetStyle.maskColor.value());
-        maskNode->MountToParent(rootNode);
-        auto eventConfirmHub = maskNode->GetOrCreateGestureEventHub();
-        CHECK_NULL_VOID(eventConfirmHub);
-        sheetMaskClickEvent_ = AceType::MakeRefPtr<NG::ClickEvent>
-            ([weak = AceType::WeakClaim(AceType::RawPtr(sheetNode))](const GestureEvent& /* info */) {
+    auto sheetType = sheetNode->GetPattern<SheetPresentationPattern>()->GetSheetType();
+    auto maskNode = FrameNode::CreateFrameNode(
+        V2::SHEET_MASK_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    CHECK_NULL_VOID(maskNode);
+    auto maskLayoutProps = maskNode->GetLayoutProperty();
+    CHECK_NULL_VOID(maskLayoutProps);
+    maskLayoutProps->UpdateMeasureType(MeasureType::MATCH_PARENT);
+    auto maskRenderContext = maskNode->GetRenderContext();
+    CHECK_NULL_VOID(maskRenderContext);
+    maskRenderContext->UpdateBackgroundColor(sheetStyle.maskColor.value_or(sheetTheme->GetMaskColor()));
+    maskNode->MountToParent(rootNode);
+    auto eventConfirmHub = maskNode->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(eventConfirmHub);
+    sheetMaskClickEvent_ = AceType::MakeRefPtr<NG::ClickEvent>(
+        [weak = AceType::WeakClaim(AceType::RawPtr(sheetNode))](const GestureEvent& /* info */) {
             auto sheet = weak.Upgrade();
             CHECK_NULL_VOID(sheet);
             auto sheetPattern = sheet->GetPattern<SheetPresentationPattern>();
             CHECK_NULL_VOID(sheetPattern);
             sheetPattern->SheetInteractiveDismiss(false);
         });
-        eventConfirmHub->AddClickEvent(sheetMaskClickEvent_);
-        PlaySheetMaskTransition(maskNode, true);
-    }
+    eventConfirmHub->AddClickEvent(sheetMaskClickEvent_);
+    PlaySheetMaskTransition(maskNode, true);
     auto columnNode = FrameNode::CreateFrameNode(V2::SHEET_WRAPPER_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<LinearLayoutPattern>(true));
     CHECK_NULL_VOID(columnNode);
@@ -2567,7 +2573,6 @@ void OverlayManager::OnBindSheet(bool isShow, std::function<void(const std::stri
     }
 
     // start transition animation
-    auto sheetType = sheetNode->GetPattern<SheetPresentationPattern>()->GetSheetType();
     if (sheetType == SheetType::SHEET_POPUP) {
         PlayBubbleStyleSheetTransition(sheetNode, true);
     } else {

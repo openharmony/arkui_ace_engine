@@ -66,6 +66,7 @@ struct SheetStyle {
     std::optional<std::string> sheetTitle;
     std::optional<std::string> sheetSubtitle;
     std::vector<SheetHeight> detents;
+    std::optional<bool> interactive;
 
     bool operator==(const SheetStyle& sheetStyle) const
     {
@@ -74,7 +75,8 @@ struct SheetStyle {
                 isTitleBuilder == sheetStyle.isTitleBuilder && sheetType == sheetStyle.sheetType &&
                 backgroundColor == sheetStyle.backgroundColor && maskColor == sheetStyle.maskColor &&
                 detents == sheetStyle.detents && backgroundBlurStyle == sheetStyle.backgroundBlurStyle &&
-                sheetTitle == sheetStyle.sheetTitle && sheetSubtitle == sheetStyle.sheetSubtitle);
+                sheetTitle == sheetStyle.sheetTitle && sheetSubtitle == sheetStyle.sheetSubtitle &&
+                interactive == sheetStyle.interactive);
     }
 };
 } // namespace OHOS::Ace::NG
