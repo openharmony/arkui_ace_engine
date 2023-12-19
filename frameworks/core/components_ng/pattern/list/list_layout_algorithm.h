@@ -31,6 +31,7 @@ namespace OHOS::Ace::NG {
 class PipelineContext;
 
 struct ListItemInfo {
+    int32_t id;
     float startPos;
     float endPos;
     bool isGroup;

@@ -822,6 +822,7 @@ int32_t ListLayoutAlgorithm::LayoutALineForward(LayoutWrapper* layoutWrapper,
     }
     auto wrapper = layoutWrapper->GetOrCreateChildByIndex(currentIndex + 1);
     CHECK_NULL_RETURN(wrapper, 0);
+    int32_t id = wrapper->GetHostNode()->GetId();
     ++currentIndex;
     bool isGroup = wrapper->GetHostTag() == V2::LIST_ITEM_GROUP_ETS_TAG;
     if (isGroup) {
@@ -834,7 +835,7 @@ int32_t ListLayoutAlgorithm::LayoutALineForward(LayoutWrapper* layoutWrapper,
     }
     float mainLen = GetMainAxisSize(wrapper->GetGeometryNode()->GetMarginFrameSize(), axis_);
     endPos = startPos + mainLen;
-    itemPosition_[currentIndex] = { startPos, endPos, isGroup };
+    itemPosition_[currentIndex] = { id, startPos, endPos, isGroup };
     OnItemPositionAddOrUpdate(layoutWrapper, currentIndex);
     return 1;
 }
@@ -847,6 +848,7 @@ int32_t ListLayoutAlgorithm::LayoutALineBackward(LayoutWrapper* layoutWrapper,
     }
     auto wrapper = layoutWrapper->GetOrCreateChildByIndex(currentIndex - 1);
     CHECK_NULL_RETURN(wrapper, 0);
+    int32_t id = wrapper->GetHostNode()->GetId();
     --currentIndex;
     bool isGroup = wrapper->GetHostTag() == V2::LIST_ITEM_GROUP_ETS_TAG;
     if (isGroup) {
@@ -859,7 +861,7 @@ int32_t ListLayoutAlgorithm::LayoutALineBackward(LayoutWrapper* layoutWrapper,
     }
     float mainLen = GetMainAxisSize(wrapper->GetGeometryNode()->GetMarginFrameSize(), axis_);
     startPos = endPos - mainLen;
-    itemPosition_[currentIndex] = { startPos, endPos, isGroup };
+    itemPosition_[currentIndex] = { id, startPos, endPos, isGroup };
     OnItemPositionAddOrUpdate(layoutWrapper, currentIndex);
     return 1;
 }
@@ -1340,13 +1342,15 @@ void ListLayoutAlgorithm::SetListItemGroupParam(const RefPtr<LayoutWrapper>& lay
 
 ListItemInfo ListLayoutAlgorithm::GetListItemGroupPosition(const RefPtr<LayoutWrapper>& layoutWrapper, int32_t index)
 {
-    ListItemInfo pos = { 0, 0, true };
+    auto wrapper = layoutWrapper->GetOrCreateChildByIndex(index);
+    int32_t id = wrapper->GetHostNode()->GetId();
+    ListItemInfo pos = { id, 0, 0, true };
     auto layoutAlgorithmWrapper = layoutWrapper->GetLayoutAlgorithm(true);
     CHECK_NULL_RETURN(layoutAlgorithmWrapper, pos);
     auto itemGroup = AceType::DynamicCast<ListItemGroupLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
     CHECK_NULL_RETURN(itemGroup, pos);
     auto res = itemGroup->GetItemGroupPosition(index);
-    return { res.first, res.second, true };
+    return { id, res.first, res.second, true };
 }
 
 float ListLayoutAlgorithm::GetListGroupItemHeight(const RefPtr<LayoutWrapper>& layoutWrapper, int32_t index)
@@ -1474,7 +1478,8 @@ std::list<int32_t> ListLayoutAlgorithm::LayoutCachedItem(LayoutWrapper* layoutWr
         bool isGroup = wrapper->GetHostTag() == V2::LIST_ITEM_GROUP_ETS_TAG;
         auto childSize = wrapper->GetGeometryNode()->GetMarginFrameSize();
         auto endPos = currPos + GetMainAxisSize(childSize, axis_);
-        ListItemInfo pos = { currPos, endPos, isGroup };
+        int32_t id = wrapper->GetHostNode()->GetId();
+        ListItemInfo pos = { id, currPos, endPos, isGroup };
         currPos = endPos + spaceWidth_;
         auto startIndex = index;
         LayoutItem(wrapper, index, pos, startIndex, crossSize);
@@ -1494,7 +1499,8 @@ std::list<int32_t> ListLayoutAlgorithm::LayoutCachedItem(LayoutWrapper* layoutWr
         bool isGroup = wrapper->GetHostTag() == V2::LIST_ITEM_GROUP_ETS_TAG;
         auto childSize = wrapper->GetGeometryNode()->GetMarginFrameSize();
         auto startPos = currPos - GetMainAxisSize(childSize, axis_);
-        ListItemInfo pos = { startPos, currPos, isGroup };
+        int32_t id = wrapper->GetHostNode()->GetId();
+        ListItemInfo pos = { id, startPos, currPos, isGroup };
         currPos = startPos - spaceWidth_;
         auto startIndex = index;
         LayoutItem(wrapper, index, pos, startIndex, crossSize);

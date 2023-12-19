@@ -23,9 +23,25 @@
 #include "core/components_v2/list/list_properties.h"
 
 namespace OHOS::Ace::NG {
+struct DividerInfo {
+    float constrainStrokeWidth;
+    float crossSize;
+    float startMargin;
+    float endMargin;
+    float space;
+    float mainPadding;
+    float crossPadding;
+    bool isVertical;
+    int32_t lanes;
+    int32_t totalItemCount;
+    Color color;
+    float laneGutter = 0.0f;
+};
+
 class ACE_EXPORT ListPaintMethod : public NodePaintMethod {
     DECLARE_ACE_TYPE(ListPaintMethod, NodePaintMethod)
 public:
+    using PositionMap = ListLayoutAlgorithm::PositionMap;
     ListPaintMethod(
         const V2::ItemDivider& divider, bool vertical, int32_t lanes, float space)
         : divider_(divider), vertical_(vertical), lanes_(lanes), space_(space)
@@ -40,6 +56,8 @@ public:
     }
 
     void UpdateContentModifier(PaintWrapper* paintWrapper) override;
+
+    void UpdateDividerList(const DividerInfo& dividerInfo);
 
     void PaintEdgeEffect(PaintWrapper* paintWrapper, RSCanvas& canvas);
 
@@ -61,6 +79,11 @@ public:
     void SetContentModifier(const RefPtr<ListContentModifier>& modify)
     {
         listContentModifier_ = modify;
+    }
+
+    void SetItemPosition(const PositionMap& positionMap)
+    {
+        itemPosition_ = positionMap;
     }
 
     void SetLaneGutter(float laneGutter)
@@ -92,6 +115,7 @@ private:
     int32_t totalItemCount_;
     float space_;
     float laneGutter_ = 0.0f;
+    PositionMap itemPosition_;
     RefPtr<ListContentModifier> listContentModifier_;
 
     WeakPtr<ScrollBar> scrollBar_;

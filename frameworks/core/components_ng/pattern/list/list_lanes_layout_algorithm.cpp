@@ -112,7 +112,9 @@ int32_t ListLanesLayoutAlgorithm::LayoutALineForward(LayoutWrapper* layoutWrappe
     if (cnt > 0) {
         endPos = startPos + mainLen;
         for (int32_t i = 0; i < cnt; i++) {
-            SetItemInfo(currentIndex - i, { startPos, endPos, isGroup });
+            auto wrap = layoutWrapper->GetOrCreateChildByIndex(currentIndex - i);
+            int32_t id = wrap->GetHostNode()->GetId();
+            SetItemInfo(currentIndex - i, { id, startPos, endPos, isGroup });
         }
     }
     return cnt;
@@ -168,7 +170,9 @@ int32_t ListLanesLayoutAlgorithm::LayoutALineBackward(LayoutWrapper* layoutWrapp
     if (cnt > 0) {
         startPos = endPos - mainLen;
         for (int32_t i = 0; i < cnt; i++) {
-            SetItemInfo(currentIndex + i, { startPos, endPos, isGroup });
+            auto wrap = layoutWrapper->GetOrCreateChildByIndex(currentIndex + i);
+            int32_t id = wrap->GetHostNode()->GetId();
+            SetItemInfo(currentIndex + i, { id, startPos, endPos, isGroup });
         }
     }
     return cnt;
