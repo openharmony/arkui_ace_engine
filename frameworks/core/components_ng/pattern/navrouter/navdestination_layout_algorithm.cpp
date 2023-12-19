@@ -138,6 +138,18 @@ void NavDestinationLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     float contentChildHeight =
         MeasureContentChild(layoutWrapper, hostNode, navDestinationLayoutProperty, size, titleBarHeight);
     size.SetHeight(titleBarHeight + contentChildHeight);
+    if (titleBarHeight + contentChildHeight == 0) {
+        auto parent = hostNode->GetParent();
+        CHECK_NULL_VOID(parent);
+        auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(parent->GetParent());
+        CHECK_NULL_VOID(navigationGroupNode);
+        auto navBarNode = AceType::DynamicCast<FrameNode>(navigationGroupNode->GetNavBarNode());
+        CHECK_NULL_VOID(navBarNode);
+        auto geometryNode = navBarNode->GetGeometryNode();
+        CHECK_NULL_VOID(geometryNode);
+        auto navBarHeight = geometryNode->GetFrameSize().Height();
+        size.SetHeight(navBarHeight);
+    }
     layoutWrapper->GetGeometryNode()->SetFrameSize(size);
 }
 
