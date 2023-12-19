@@ -166,6 +166,8 @@ void OnTextChangedListenerImpl::HandleFunctionKey(MiscServices::FunctionKey func
             case TextInputAction::SEARCH:
             case TextInputAction::SEND:
             case TextInputAction::GO:
+            case TextInputAction::PREVIOUS:
+            case TextInputAction::NEW_LINE:
                 client->PerformAction(action, true);
                 break;
             default:

@@ -827,6 +827,8 @@ var EnterKeyType;
   EnterKeyType[EnterKeyType["Send"] = 4] = "Send";
   EnterKeyType[EnterKeyType["Next"] = 5] = "Next";
   EnterKeyType[EnterKeyType["Done"] = 6] = "Done";
+  EnterKeyType[EnterKeyType["PREVIOUS"] = 7] = "PREVIOUS";
+  EnterKeyType[EnterKeyType["NEW_LINE"] = 8] = "NEW_LINE";
 })(EnterKeyType || (EnterKeyType = {}));
 
 var ItemState
