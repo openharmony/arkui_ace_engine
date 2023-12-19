@@ -819,15 +819,11 @@ template("declarative_js_engine_ng") {
 
     if (defined(config.web_components_support) &&
         config.web_components_support) {
-      if (!is_arkui_x) {
-        sources += [
-          "jsview/js_richtext.cpp",
-          "jsview/js_web.cpp",
-          "jsview/js_web_controller.cpp",
-        ]
-      } else {
-        sources += [ "jsview/js_web.cpp" ]
-      }
+      sources += [
+        "jsview/js_richtext.cpp",
+        "jsview/js_web.cpp",
+        "jsview/js_web_controller.cpp",
+      ]
     }
 
     if (defined(config.remote_window_support) && config.remote_window_support) {

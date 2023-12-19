@@ -35,6 +35,7 @@ build_component_ng("web_pattern_ng") {
       "cross_platform/web_delegate_cross.cpp",
       "cross_platform/web_pattern.cpp",
       "cross_platform/web_resource.cpp",
+      "richtext_model_ng.cpp",
       "web_accessibility_property.cpp",
       "web_layout_algorithm.cpp",
       "web_model_ng.cpp",

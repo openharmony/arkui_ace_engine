@@ -18,7 +18,11 @@
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/web/web_event_hub.h"
+#if !defined(ANDROID_PLATFORM) && !defined(IOS_PLATFORM)
 #include "core/components_ng/pattern/web/web_pattern.h"
+#else
+#include "core/components_ng/pattern/web/cross_platform/web_pattern.h"
+#endif
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
@@ -33,7 +37,11 @@ void RichTextModelNG::Create(const std::string& webData)
 
     auto webPattern = frameNode->GetPattern<WebPattern>();
     CHECK_NULL_VOID(webPattern);
+#ifdef ANDROID_PLATFORM
+    webPattern->RichTextInit();
+#endif
     webPattern->SetWebData(webData);
+    isDataEmpty_ = webData.empty();
     auto pipeline = NG::PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     pipeline->AddWindowStateChangedCallback(nodeId);
@@ -42,6 +50,11 @@ void RichTextModelNG::Create(const std::string& webData)
 
 void RichTextModelNG::SetOnPageStart(std::function<void(const BaseEventInfo*)>&& onPageStarted)
 {
+#ifdef IOS_PLATFORM
+    if (isDataEmpty_) {
+        return;
+    }
+#endif
     auto func = onPageStarted;
     auto onPageStartedEvent = [func](const std::shared_ptr<BaseEventInfo>& info) { func(info.get()); };
     auto webEventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>();
@@ -51,6 +64,11 @@ void RichTextModelNG::SetOnPageStart(std::function<void(const BaseEventInfo*)>&&
 
 void RichTextModelNG::SetOnPageFinish(std::function<void(const BaseEventInfo*)>&& onPageFinish)
 {
+#ifdef IOS_PLATFORM
+    if (isDataEmpty_) {
+        return;
+    }
+#endif
     auto func = onPageFinish;
     auto onPageFinishEvent = [func](const std::shared_ptr<BaseEventInfo>& info) { func(info.get()); };
     auto webEventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>();

@@ -113,6 +113,7 @@ constexpr char NTC_PARAM_URL[] = "url";
 constexpr char NTC_PARAM_PAGE_URL[] = "pageUrl";
 constexpr char NTC_PARAM_PAGE_INVALID[] = "pageInvalid";
 constexpr char NTC_PARAM_DESCRIPTION[] = "description";
+constexpr char NTC_PARAM_RICH_TEXT_INIT[] = "richTextInit";
 constexpr char WEB_ERROR_CODE_CREATEFAIL[] = "error-web-delegate-000001";
 constexpr char WEB_ERROR_MSG_CREATEFAIL[] = "create web_delegate failed.";
 
@@ -142,6 +143,8 @@ const char WEB_PARAM_BEGIN[] = "#HWJS-?-#";
 const char WEB_METHOD[] = "method";
 const char WEB_EVENT[] = "event";
 const char WEB_RESULT_FAIL[] = "fail";
+constexpr char MIMETYPE[] = "text/html";
+constexpr char ENCODING[] = "UTF-8";
 
 constexpr int FONT_MIN_SIZE = 1;
 constexpr int FONT_MAX_SIZE = 72;
@@ -690,7 +693,8 @@ void WebDelegateCross::CreatePluginResource(
                     << WEB_PARAM_EQUALS << position.GetX() * context->GetViewScale() << WEB_PARAM_AND << NTC_PARAM_TOP
                     << WEB_PARAM_EQUALS << position.GetY() * context->GetViewScale() << WEB_PARAM_AND << NTC_PARAM_SRC
                     << WEB_PARAM_EQUALS << webPattern->GetWebSrc().value_or("") << WEB_PARAM_AND << NTC_PARAM_PAGE_URL
-                    << WEB_PARAM_EQUALS << pageUrl;
+                    << WEB_PARAM_EQUALS << pageUrl << WEB_PARAM_AND << NTC_PARAM_RICH_TEXT_INIT << WEB_PARAM_EQUALS
+                    << webPattern->GetRichTextInit();
 
         std::string param = paramStream.str();
         webDelegate->id_ = resRegister->CreateResource(WEB_CREATE, param);
@@ -1646,7 +1650,28 @@ void WebDelegateCross::LoadUrl()
 {}
 
 bool WebDelegateCross::LoadDataWithRichText()
-{}
+{
+    auto webPattern = webPattern_.Upgrade();
+    CHECK_NULL_RETURN(webPattern, false);
+    auto webData = webPattern->GetWebData();
+    CHECK_NULL_RETURN(webData, false);
+    const std::string& data = webData.value();
+    if (data.empty()) {
+        return false;
+    }
+    hash_ = MakeResourceHash();
+    loadDataMethod_ = MakeMethodHash(WEB_METHOD_LOAD_DATA);
+    std::stringstream paramStream;
+    paramStream << NTC_PARAM_LOADDATA_DATA << WEB_PARAM_EQUALS
+                << data.c_str() << WEB_PARAM_AND
+                << NTC_PARAM_LOADDATA_MIMETYPE << WEB_PARAM_EQUALS
+                << MIMETYPE << WEB_PARAM_AND
+                << NTC_PARAM_LOADDATA_ENCODING << WEB_PARAM_EQUALS
+                << ENCODING;
+    std::string param = paramStream.str();
+    CallResRegisterMethod(loadDataMethod_, param, nullptr);
+    return true;
+}
 
 void WebDelegateCross::SetBackgroundColor(int32_t backgroundColor)
 {}

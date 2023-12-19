@@ -24,6 +24,9 @@ public:
     void Create(const std::string&) override;
     void SetOnPageStart(std::function<void(const BaseEventInfo*)>&& onStarted) override;
     void SetOnPageFinish(std::function<void(const BaseEventInfo*)>&& onFinish) override;
+
+private:
+    bool isDataEmpty_ = true;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_WEB_RICHTEXT_MODEL_NG_H
