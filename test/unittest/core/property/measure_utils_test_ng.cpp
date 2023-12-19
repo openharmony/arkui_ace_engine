@@ -1097,8 +1097,8 @@ HWTEST_F(MeasureUtilsTestNg, MeasureUtilsTestNg032, TestSize.Level1)
     EXPECT_EQ(optionResult.Width(), std::nullopt);
 
     /**
-     * @tc.steps: step5. call CreateIdealSizeByPercentRef withOut selfIdealSize Valid and Measure is
-     * MEASURE_TYPE_MAIN_AXIS. MEASURE_TYPE_MATCH_PARENT.
+     * @tc.steps: step5. call CreateIdealSizeByPercentRef withOut selfIdealSize Valid
+     * and Measure is MEASURE_TYPE_CROSS_AXIS.
      */
     layoutConstraint.parentIdealSize.Reset();
     optionResult = CreateIdealSizeByPercentRef(layoutConstraint, axis, MEASURE_TYPE_CROSS_AXIS, true);
@@ -1108,15 +1108,14 @@ HWTEST_F(MeasureUtilsTestNg, MeasureUtilsTestNg032, TestSize.Level1)
     /**
      * @tc.steps: step6. call CreateIdealSizeByPercentRef withOut selfIdealSize Valid
      * and Measure is MEASURE_TYPE_MAIN_AXIS.
-     * MEASURE_TYPE_MATCH_PARENT.
      */
     optionResult = CreateIdealSizeByPercentRef(layoutConstraint, Axis::VERTICAL, MEASURE_TYPE_MAIN_AXIS, true);
     EXPECT_EQ(optionResult.Height(), 20);
     EXPECT_EQ(optionResult.Width(), std::nullopt);
 
     /**
-     * @tc.steps: step7. call CreateIdealSizeByPercentRef withOut selfIdealSize Valid and Measure is
-     * MEASURE_TYPE_MAIN_AXIS.
+     * @tc.steps: step7. call CreateIdealSizeByPercentRef withOut selfIdealSize Valid
+     * and Measure is MEASURE_TYPE_MAIN_AXIS.
      */
     layoutConstraint.parentIdealSize = { 10.0, 30.0 };
     optionResult = CreateIdealSizeByPercentRef(layoutConstraint, Axis::HORIZONTAL, MEASURE_TYPE_MAIN_AXIS, true);
