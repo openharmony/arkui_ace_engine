@@ -184,7 +184,7 @@ WebPattern::WebPattern(const std::string& webSrc,
 
 WebPattern::~WebPattern()
 {
-    LOGI("~WebPattern");
+    TAG_LOGI(AceLogTag::ACE_WEB, "~WebPattern");
     if (delegate_) {
         delegate_->SetAudioMuted(true);
     }
