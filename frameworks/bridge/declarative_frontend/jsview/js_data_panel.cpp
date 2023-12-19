@@ -225,16 +225,25 @@ void JSDataPanel::ShadowOption(const JSCallbackInfo& info)
         ParseJsDouble(jsOffsetY, offsetY);
 
         auto colors = paramObject->GetProperty("colors");
-        if (!colors->IsEmpty() && colors->IsArray()) {
-            shadowColors.clear();
-            auto colorsArray = JSRef<JSArray>::Cast(colors);
-            for (size_t i = 0; i < colorsArray->Length(); ++i) {
-                auto item = colorsArray->GetValueAt(i);
-                OHOS::Ace::NG::Gradient gradient;
-                if (ConvertGradientColor(item, gradient)) {
-                    shadowColors.emplace_back(gradient);
-                }
+        if (!colors->IsArray()) {
+            shadow.radius = radius;
+            shadow.offsetX = offsetX;
+            shadow.offsetY = offsetY;
+            shadow.colors = shadowColors;
+            DataPanelModel::GetInstance()->SetShadowOption(shadow);
+            return;
+        }
+        shadowColors.clear();
+        auto colorsArray = JSRef<JSArray>::Cast(colors);
+        for (size_t i = 0; i < colorsArray->Length(); ++i) {
+            auto item = colorsArray->GetValueAt(i);
+            OHOS::Ace::NG::Gradient gradient;
+            if (!ConvertGradientColor(item, gradient)) {
+                shadowColors.clear();
+                ConvertThemeColor(shadowColors);
+                break;
             }
+            shadowColors.emplace_back(gradient);
         }
     }
 

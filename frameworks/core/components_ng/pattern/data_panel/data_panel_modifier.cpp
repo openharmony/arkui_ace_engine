@@ -109,7 +109,7 @@ void DataPanelModifier::UpdateDate()
 {
     if (isEffect_->Get()) {
         // When the date update, the animation will repeat once.
-        date_->Set(0.0f);
+        date_->Set(ANIMATION_START);
         AnimationOption option = AnimationOption();
         RefPtr<Curve> curve = AceType::MakeRefPtr<SpringCurve>(
             ANIMATION_CURVE_VELOCITY, ANIMATION_CURVE_MASS, ANIMATION_CURVE_STIFFNESS, ANIMATION_CURVE_DAMPING);
@@ -117,9 +117,9 @@ void DataPanelModifier::UpdateDate()
         option.SetDelay(ANIMATION_DELAY);
         option.SetCurve(curve);
         option.SetIteration(ANIMATION_TIMES);
-        AnimationUtils::Animate(option, [&]() { date_->Set(1.0f); });
+        AnimationUtils::Animate(option, [&]() { date_->Set(ANIMATION_END); });
     } else {
-        date_->Set(1.0f);
+        date_->Set(ANIMATION_END);
     }
 }
 
