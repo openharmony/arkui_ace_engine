@@ -347,6 +347,7 @@ const std::unordered_map<std::string, std::string> COMPONENT_TAG_TO_ETS_TAG_MAP 
     { PARTICLE_COMPONENT_TAG, PARTICLE_ETS_TAG },
     { SYMBOL_COMPONENT_TAG, SYMBOL_ETS_TAG },
     { SYMBOL_SPAN_COMPONENT_TAG, SYMBOL_SPAN_ETS_TAG},
+    { DYNAMIC_COMPONENT_TAG, DYNAMIC_COMPONENT_ETS_TAG },
 };
 
 thread_local int32_t InspectorComposedComponent::composedElementId_ = 1;

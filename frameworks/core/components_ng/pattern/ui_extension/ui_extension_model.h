@@ -22,6 +22,7 @@
 
 #include "base/utils/macros.h"
 #include "base/want/want_wrap.h"
+#include "core/components_ng/base/frame_node.h"
 
 namespace OHOS::AAFwk {
 class Want;
@@ -32,12 +33,18 @@ namespace OHOS::Ace {
 namespace NG {
 class UIExtensionProxy;
 }
+
 class ACE_EXPORT UIExtensionModel {
 public:
     static UIExtensionModel* GetInstance();
     virtual ~UIExtensionModel() = default;
 
     virtual void Create(const RefPtr<OHOS::Ace::WantWrap>& wantWrap, bool transferringCaller = false);
+    // for DynamicComponent
+    virtual void Create();
+    virtual void InitializeDynamicComponent(const RefPtr<NG::FrameNode>& frameNode, const std::string& hapPath,
+        const std::string& abcPath, const RefPtr<OHOS::Ace::WantWrap>& wantWrap, void* runtime);
+
     virtual void SetOnRemoteReady(std::function<void(const RefPtr<NG::UIExtensionProxy>&)>&& onRemoteReady);
     virtual void SetOnRelease(std::function<void(int32_t)>&& onRelease);
     virtual void SetOnResult(std::function<void(int32_t, const AAFwk::Want&)>&& onResult);

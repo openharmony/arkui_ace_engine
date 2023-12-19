@@ -207,9 +207,11 @@ void JSImage::Create(const JSCallbackInfo& info)
         return;
     }
 
+    auto container = Container::Current();
+    CHECK_NULL_VOID(container);
     auto context = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(context);
-    bool isCard = context->IsFormRender();
+    bool isCard = context->IsFormRender() && !container->IsDynamicRender();
 
     // Interim programme
     std::string bundleName;

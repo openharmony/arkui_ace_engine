@@ -44,6 +44,7 @@
 #include "adapter/ohos/entrance/ace_view_ohos.h"
 #include "adapter/ohos/entrance/capability_registry.h"
 #include "adapter/ohos/entrance/dialog_container.h"
+#include "adapter/ohos/entrance/dynamic_component/uv_task_wrapper_impl.h"
 #include "adapter/ohos/entrance/file_asset_provider.h"
 #include "adapter/ohos/entrance/file_asset_provider_impl.h"
 #include "adapter/ohos/entrance/form_utils_impl.h"
@@ -481,6 +482,16 @@ void UIContentImpl::InitializeByName(OHOS::Rosen::Window* window, const std::str
     InitializeInner(window, name, storage, true);
 }
 
+void UIContentImpl::InitializeDynamic(const std::string& hapPath, const std::string& abcPath)
+{
+    isDynamicRender_ = true;
+    hapPath_ = hapPath;
+    auto env = reinterpret_cast<napi_env>(runtime_);
+    CHECK_NULL_VOID(env);
+    taskWrapper_ = std::make_shared<NG::UVTaskWrapperImpl>(env);
+    InitializeInner(nullptr, abcPath, nullptr, false);
+}
+
 void UIContentImpl::Initialize(
     OHOS::Rosen::Window* window, const std::string& url, napi_value storage, uint32_t focusWindowId)
 {
@@ -806,10 +817,11 @@ void UIContentImpl::CommonInitializeForm(
                     want.SetAction(ACTION_VIEWDATA);
                     abilityContext->StartAbility(want, REQUEST_CODE);
                 }),
-            false, false, useNewPipe);
+            taskWrapper_, false, false, useNewPipe);
 
     CHECK_NULL_VOID(container);
     container->SetIsFormRender(isFormRender_);
+    container->SetIsDynamicRender(isDynamicRender_);
     container->SetIsFRSCardContainer(isFormRender_);
     if (window_) {
         container->SetWindowName(window_->GetWindowName());
@@ -879,7 +891,7 @@ void UIContentImpl::CommonInitializeForm(
 
     // create ace_view
     Platform::AceViewOhos* aceView = nullptr;
-    if (isFormRender_) {
+    if (isFormRender_ && !isDynamicRender_) {
         aceView = Platform::AceViewOhos::CreateView(instanceId_, true, container->GetSettings().usePlatformAsUIThread);
         Platform::AceViewOhos::SurfaceCreated(aceView, window_);
     } else {

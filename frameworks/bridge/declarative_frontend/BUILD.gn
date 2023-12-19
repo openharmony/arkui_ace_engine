@@ -594,6 +594,16 @@ template("declarative_js_engine") {
           "jsview/window_scene/js_screen.cpp",
           "jsview/window_scene/js_window_scene.cpp",
         ]
+
+        if (defined(config.dynamic_component_support) &&
+            config.dynamic_component_support && !build_ohos_sdk) {
+          external_deps += [ "ets_utils:worker" ]
+
+          include_dirs +=
+              [ "//commonlibrary/ets_utils/js_concurrent_module/common" ]
+
+          sources += [ "jsview/js_dynamic_component.cpp" ]
+        }
       }
     }
   }
@@ -817,6 +827,16 @@ template("declarative_js_engine_ng") {
         "jsview/window_scene/js_screen.cpp",
         "jsview/window_scene/js_window_scene.cpp",
       ]
+
+      if (defined(config.dynamic_component_support) &&
+          config.dynamic_component_support && !build_ohos_sdk) {
+        external_deps += [ "ets_utils:worker" ]
+
+        include_dirs =
+            [ "//commonlibrary/ets_utils/js_concurrent_module/common" ]
+
+        sources += [ "jsview/js_dynamic_component.cpp" ]
+      }
     }
 
     if (defined(config.enable_ability_component) &&

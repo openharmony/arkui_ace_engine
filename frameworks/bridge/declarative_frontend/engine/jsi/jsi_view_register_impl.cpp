@@ -95,6 +95,7 @@
 #include "bridge/declarative_frontend/jsview/js_menu.h"
 #include "bridge/declarative_frontend/jsview/js_menu_item.h"
 #include "bridge/declarative_frontend/jsview/js_menu_item_group.h"
+#include "bridge/declarative_frontend/jsview/js_dynamic_component.h"
 #include "bridge/declarative_frontend/jsview/js_navdestination.h"
 #include "bridge/declarative_frontend/jsview/js_navigation.h"
 #include "bridge/declarative_frontend/jsview/js_navigator.h"
@@ -757,6 +758,9 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "UIExtensionComponent", JSUIExtension::JSBind },
     { "UIExtensionProxy", JSUIExtensionProxy::JSBind },
     { "WindowScene", JSWindowScene::JSBind },
+#if defined(DYNAMIC_COMPONENT_SUPPORT)
+    { "DynamicComponent", JSDynamicComponent::JSBind },
+#endif
 #endif
     { "RichEditor", JSRichEditor::JSBind },
     { "RichEditorController", JSRichEditorController::JSBind },
