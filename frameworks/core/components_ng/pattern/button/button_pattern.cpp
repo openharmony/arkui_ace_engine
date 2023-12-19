@@ -98,12 +98,12 @@ void ButtonPattern::UpdateTextStyle(
     CHECK_NULL_VOID(pipeline);
     auto buttonTheme = pipeline->GetTheme<ButtonTheme>();
     CHECK_NULL_VOID(buttonTheme);
-    if (!layoutProperty->GetFontColor().has_value()) {
+    if (!textLayoutProperty->HasTextColor()) {
         ButtonStyleMode buttonStyle = layoutProperty->GetButtonStyle().value_or(ButtonStyleMode::EMPHASIZE);
         Color fontColor = buttonTheme->GetTextColor(buttonStyle);
         textLayoutProperty->UpdateTextColor(fontColor);
     }
-    if (!layoutProperty->HasFontSize()) {
+    if (!textLayoutProperty->HasFontSize()) {
         ControlSize controlSize = layoutProperty->GetControlSize().value_or(ControlSize::NORMAL);
         Dimension fontSize = buttonTheme->GetTextSize(controlSize);
         textLayoutProperty->UpdateFontSize(fontSize);
