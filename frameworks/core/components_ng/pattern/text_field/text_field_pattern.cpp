@@ -1966,7 +1966,7 @@ void TextFieldPattern::OnModifyDone()
             SetScrollEnable(false);
         }
     }
-    if (!IsNormalInlineState() && !IsDisabled()) {
+    if (!IsDisabled()) {
         SetShowError();
     }
     if (IsTextArea()) {
@@ -4785,8 +4785,10 @@ void TextFieldPattern::SetShowError()
     auto renderContext = tmpHost->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     auto visible = layoutProperty->GetShowErrorTextValue(false);
+    auto errorText = layoutProperty->GetErrorTextValue("");
 
-    if (visible && layoutProperty->GetShowUnderlineValue(false) && IsUnspecifiedOrTextType()) {
+    if (visible && layoutProperty->GetShowUnderlineValue(false) && IsUnspecifiedOrTextType()
+        && !errorText.empty()) {
         underlineColor_ = textFieldTheme->GetErrorUnderlineColor();
         underlineWidth_ = ERROR_UNDERLINE_WIDTH;
         preErrorState_ = true;
@@ -4796,7 +4798,7 @@ void TextFieldPattern::SetShowError()
         underlineWidth_ = UNDERLINE_WIDTH;
         preErrorState_ = false;
     }
-    if (visible && passWordMode) {
+    if (visible && passWordMode && !errorText.empty()) {
         BorderWidthProperty borderWidth;
         BorderColorProperty borderColor;
         preErrorState_ = true;
@@ -4814,7 +4816,7 @@ void TextFieldPattern::SetShowError()
         layoutProperty->UpdateTextColor(passwordModeStyle_.textColor);
         preErrorState_ = false;
     }
-    if (visible && !passWordMode) {
+    if (visible && (!passWordMode || !errorText.empty())) {
         layoutProperty->UpdateBorderWidth(passwordModeStyle_.borderwidth);
         renderContext->UpdateBorderColor(passwordModeStyle_.borderColor);
         renderContext->UpdateBackgroundColor(passwordModeStyle_.bgColor);
