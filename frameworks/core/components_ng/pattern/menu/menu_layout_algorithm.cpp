@@ -1472,6 +1472,13 @@ OffsetF MenuLayoutAlgorithm::MenuLayoutAvoidAlgorithm(const RefPtr<MenuLayoutPro
         y = std::clamp(
             y, windowsOffsetY + paddingTop_, windowsOffsetY + wrapperSize_.Height() - size.Height() - paddingBottom_);
     }
+    if (hierarchicalParameters_) {
+        auto displayAvailableRect = pipelineContext->GetDisplayAvailableRect();
+        windowsOffsetY = displayAvailableRect.GetOffset().GetY();
+        float wrapperHeight = displayAvailableRect.Height();
+        y = std::clamp(
+            y, windowsOffsetY + paddingTop_, windowsOffsetY + wrapperHeight - size.Height() - paddingBottom_);
+    }
     return { x, y };
 }
 
