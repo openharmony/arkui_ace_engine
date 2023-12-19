@@ -85,6 +85,20 @@ FocusPattern UIExtensionPattern::GetFocusPattern() const
     return { FocusType::NODE, true, FocusStyleType::NONE };
 }
 
+void UIExtensionPattern::InitializeDynamicComponent(const std::string& hapPath, const std::string& abcPath,
+    const RefPtr<OHOS::Ace::WantWrap>& wantWrap, void* runtime)
+{
+    componentType_ = ComponentType::DYNAMIC;
+
+    if (!dynamicComponentRenderer_) {
+        ContainerScope scope(instanceId_);
+        dynamicComponentRenderer_ =
+            DynamicComponentRenderer::Create(GetHost(), instanceId_, hapPath, abcPath, runtime);
+        CHECK_NULL_VOID(dynamicComponentRenderer_);
+        dynamicComponentRenderer_->CreateContent();
+    }
+}
+
 void UIExtensionPattern::UpdateWant(const RefPtr<OHOS::Ace::WantWrap>& wantWrap)
 {
     auto want = AceType::DynamicCast<WantWrapOhos>(wantWrap)->GetWant();
@@ -200,6 +214,10 @@ bool UIExtensionPattern::OnBackPressed()
 
 bool UIExtensionPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
 {
+    if (componentType_ == ComponentType::DYNAMIC) {
+        return OnDirtyLayoutWrapperSwapForDynamicComponent(dirty, config);
+    }
+
     CHECK_NULL_RETURN(sessionWrapper_, false);
     CHECK_NULL_RETURN(dirty, false);
     auto host = dirty->GetHostNode();
@@ -210,6 +228,32 @@ bool UIExtensionPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& d
     auto frameRect = geometryNode->GetFrameRect();
     sessionWrapper_->RefreshDisplayArea(
         globalOffsetWithTranslate.GetX(), globalOffsetWithTranslate.GetY(), frameRect.Width(), frameRect.Height());
+    return false;
+}
+
+bool UIExtensionPattern::OnDirtyLayoutWrapperSwapForDynamicComponent(
+    const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
+{
+    CHECK_NULL_RETURN(dynamicComponentRenderer_, false);
+
+    CHECK_NULL_RETURN(dirty, false);
+    auto host = dirty->GetHostNode();
+    CHECK_NULL_RETURN(host, false);
+    auto offset = host->GetPaintRectGlobalOffsetWithTranslate().first;
+    auto size = dirty->GetGeometryNode()->GetFrameSize();
+    Ace::ViewportConfig vpConfig;
+    vpConfig.SetSize(size.Width(), size.Height());
+    vpConfig.SetPosition(offset.GetX(), offset.GetY());
+    float density = 1.0f;
+    int32_t orientation = 0;
+    auto defaultDisplay = Rosen::DisplayManager::GetInstance().GetDefaultDisplay();
+    if (defaultDisplay) {
+        density = defaultDisplay->GetVirtualPixelRatio();
+        orientation = static_cast<int32_t>(defaultDisplay->GetOrientation());
+    }
+    vpConfig.SetDensity(density);
+    vpConfig.SetOrientation(orientation);
+    dynamicComponentRenderer_->UpdateViewportConfig(vpConfig, Rosen::WindowSizeChangeReason::UNDEFINED, nullptr);
     return false;
 }
 
@@ -253,6 +297,13 @@ void UIExtensionPattern::NotifyDestroy()
 
 void UIExtensionPattern::OnDetachFromFrameNode(FrameNode* frameNode)
 {
+    if (componentType_ == ComponentType::DYNAMIC) {
+        CHECK_NULL_VOID(dynamicComponentRenderer_);
+        dynamicComponentRenderer_->DestroyContent();
+        dynamicComponentRenderer_ = nullptr;
+        return;
+    }
+
     auto id = frameNode->GetId();
     auto pipeline = AceType::DynamicCast<PipelineContext>(PipelineBase::GetCurrentContext());
     CHECK_NULL_VOID(pipeline);
@@ -488,7 +539,11 @@ void UIExtensionPattern::HandleHoverEvent(bool isHover)
 
 void UIExtensionPattern::DispatchKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent)
 {
-    if (sessionWrapper_ && keyEvent) {
+    CHECK_NULL_VOID(keyEvent);
+    if (componentType_ == ComponentType::DYNAMIC) {
+        CHECK_NULL_VOID(dynamicComponentRenderer_);
+        dynamicComponentRenderer_->TransferKeyEvent(keyEvent);
+    } else if (sessionWrapper_) {
         sessionWrapper_->NotifyKeyEventAsync(keyEvent);
     }
 }
@@ -512,7 +567,11 @@ void UIExtensionPattern::DispatchFocusState(bool focusState)
 
 void UIExtensionPattern::DispatchPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
 {
-    if (sessionWrapper_ && pointerEvent) {
+    CHECK_NULL_VOID(pointerEvent);
+    if (componentType_ == ComponentType::DYNAMIC) {
+        CHECK_NULL_VOID(dynamicComponentRenderer_);
+        dynamicComponentRenderer_->TransferPointerEvent(pointerEvent);
+    } else if (sessionWrapper_) {
         sessionWrapper_->NotifyPointerEventAsync(pointerEvent);
     }
 }

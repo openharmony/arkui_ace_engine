@@ -37,6 +37,7 @@ public:
     explicit FlutterTaskExecutor(const RefPtr<FlutterTaskExecutor>& taskExecutors);
     explicit FlutterTaskExecutor(const flutter::TaskRunners& taskRunners);
     FlutterTaskExecutor() = default;
+    explicit FlutterTaskExecutor(std::shared_ptr<TaskWrapper> taskWrapper) : taskWrapper_(taskWrapper) {}
     ~FlutterTaskExecutor() final;
     // Must call this method on platform thread
     void InitPlatformThread(bool useCurrentEventRunner = false, bool isStageModel = false);
@@ -92,6 +93,8 @@ private:
     fml::RefPtr<fml::TaskRunner> ioRunner_;
     fml::RefPtr<fml::TaskRunner> jsRunner_;
     fml::RefPtr<fml::TaskRunner> gpuRunner_;
+
+    std::shared_ptr<TaskWrapper> taskWrapper_;
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_COMMON_FLUTTER_FLUTTER_TASK_EXECUTOR_H
