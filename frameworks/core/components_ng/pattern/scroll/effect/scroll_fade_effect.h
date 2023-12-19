@@ -22,6 +22,9 @@
 #include "core/components_ng/pattern/scroll/effect/scroll_fade_painter.h"
 
 namespace OHOS::Ace::NG {
+constexpr float SCALE_THRESHOLD = 0.3;
+constexpr float OVER_SCROLL_THRESHOLD = 2;
+
 class ACE_EXPORT ScrollFadeEffect final : public ScrollEdgeEffect {
     DECLARE_ACE_TYPE(ScrollFadeEffect, ScrollEdgeEffect);
 
@@ -38,13 +41,14 @@ public:
     void InitialEdgeEffect() override;
     double CalculateOverScroll(double oldPosition, bool isReachMax) override;
     void Paint(RSCanvas& canvas, const SizeF& viewPort, const OffsetF& offset) override;
-    void HandleOverScroll(Axis axis, float overScroll, const SizeF& viewPort, bool isScrollFromUpdate = false) override;
+    void HandleOverScroll(Axis axis, float overScroll, const SizeF& viewPort,
+        bool isScrollFromUpdate = false, bool isNotFullScreen = false) override;
     void SetHandleOverScrollCallback(const HandleOverScrollCallback& callback) override;
 
 private:
     void ResetFadeEffect(const Color& color);
     void SetOpacityAndScale(float opacity, float scale);
-    void SetPaintDirection(Axis axis, float overScroll);
+    void SetPaintDirection(Axis axis, float overScroll, bool isNotFullScreen);
 
     Color fadeColor_ = Color::GRAY;
     RefPtr<ScrollFadePainter> fadePainter_;

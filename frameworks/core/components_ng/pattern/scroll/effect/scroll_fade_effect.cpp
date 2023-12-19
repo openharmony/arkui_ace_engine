@@ -72,20 +72,51 @@ double ScrollFadeEffect::CalculateOverScroll(double oldPosition, bool isReachMax
     return 0.0;
 }
 
-void ScrollFadeEffect::SetPaintDirection(Axis axis, float overScroll)
+void ScrollFadeEffect::SetPaintDirection(Axis axis, float overScroll, bool isNotFullScreen)
 {
     if (NearZero(overScroll) || !fadePainter_) {
         return;
     }
     auto const isVertical = axis == Axis::VERTICAL;
-    if (isVertical && overScroll < 0.0) {
-        fadePainter_->SetDirection(OverScrollDirection::UP);
-    } else if (isVertical && overScroll > 0.0) {
-        fadePainter_->SetDirection(OverScrollDirection::DOWN);
-    } else if (overScroll < 0.0) {
-        fadePainter_->SetDirection(OverScrollDirection::LEFT);
+    auto scaleFactor = fadePainter_->GetScaleFactor();
+    if (isNotFullScreen) {
+        if (isVertical && overScroll < 0.0) {
+            if (fadePainter_->GetDirection() == OverScrollDirection::DOWN &&
+                GreatOrEqual(scaleFactor, SCALE_THRESHOLD) &&
+                             LessOrEqual(std::abs(overScroll), OVER_SCROLL_THRESHOLD)) {
+                return;
+            }
+            fadePainter_->SetDirection(OverScrollDirection::UP);
+        } else if (isVertical && overScroll > 0.0) {
+            if (fadePainter_->GetDirection() == OverScrollDirection::UP &&
+                GreatOrEqual(scaleFactor, SCALE_THRESHOLD) && LessOrEqual(overScroll, OVER_SCROLL_THRESHOLD)) {
+                return;
+            }
+            fadePainter_->SetDirection(OverScrollDirection::DOWN);
+        } else if (overScroll < 0.0) {
+            if (fadePainter_->GetDirection() == OverScrollDirection::RIGHT &&
+                GreatOrEqual(scaleFactor, SCALE_THRESHOLD) &&
+                             LessOrEqual(std::abs(overScroll), OVER_SCROLL_THRESHOLD)) {
+                return;
+            }
+            fadePainter_->SetDirection(OverScrollDirection::LEFT);
+        } else {
+            if (fadePainter_->GetDirection() == OverScrollDirection::LEFT &&
+                GreatOrEqual(scaleFactor, SCALE_THRESHOLD) && LessOrEqual(overScroll, OVER_SCROLL_THRESHOLD)) {
+                return;
+            }
+            fadePainter_->SetDirection(OverScrollDirection::RIGHT);
+        }
     } else {
-        fadePainter_->SetDirection(OverScrollDirection::RIGHT);
+        if (isVertical && overScroll < 0.0) {
+            fadePainter_->SetDirection(OverScrollDirection::UP);
+        } else if (isVertical && overScroll > 0.0) {
+            fadePainter_->SetDirection(OverScrollDirection::DOWN);
+        } else if (overScroll < 0.0) {
+            fadePainter_->SetDirection(OverScrollDirection::LEFT);
+        } else {
+            fadePainter_->SetDirection(OverScrollDirection::RIGHT);
+        }
     }
 }
 
@@ -97,13 +128,14 @@ void ScrollFadeEffect::Paint(RSCanvas& canvas, const SizeF& viewPort, const Offs
     }
 }
 
-void ScrollFadeEffect::HandleOverScroll(Axis axis, float overScroll, const SizeF& viewPort, bool isScrollFromUpdate)
+void ScrollFadeEffect::HandleOverScroll(Axis axis, float overScroll, const SizeF& viewPort,
+    bool isScrollFromUpdate, bool isNotFullScreen)
 {
     if (NearZero(overScroll)) {
         return;
     }
 
-    SetPaintDirection(axis, overScroll);
+    SetPaintDirection(axis, overScroll, isNotFullScreen);
 
     if (!fadeController_) {
         fadeController_ = AceType::MakeRefPtr<ScrollFadeController>();
