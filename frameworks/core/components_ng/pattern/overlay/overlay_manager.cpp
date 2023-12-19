@@ -1347,6 +1347,72 @@ RefPtr<FrameNode> OverlayManager::ShowDialog(
     return dialog;
 }
 
+void OverlayManager::OpenCustomDialog(const DialogProperties& dialogProps, std::function<void(int32_t)> &&callback)
+{
+    RefPtr<UINode> customNode;
+    if (dialogProps.customBuilder) {
+        NG::ScopedViewStackProcessor builderViewStackProcessor;
+        dialogProps.customBuilder();
+        customNode = NG::ViewStackProcessor::GetInstance()->Finish();
+        CHECK_NULL_VOID(customNode);
+    }
+    auto dialog = DialogView::CreateDialogNode(dialogProps, customNode);
+    CHECK_NULL_VOID(dialog);
+
+    BeforeShowDialog(dialog);
+
+    // callback dialogId
+    if (callback) {
+        callback(dialog->GetId());
+    }
+
+    OpenDialogAnimation(dialog);
+    dialogCount_++;
+
+    if (Recorder::EventRecorder::Get().IsComponentRecordEnable()) {
+        Recorder::EventParamsBuilder builder;
+        builder
+            .SetType("Dialog")
+            .SetEventType(Recorder::EventType::DIALOG_SHOW)
+            .SetExtra(Recorder::KEY_TITLE, dialogProps.title)
+            .SetExtra(Recorder::KEY_SUB_TITLE, dialogProps.subtitle);
+        Recorder::EventRecorder::Get().OnEvent(std::move(builder));
+    }
+    return;
+}
+
+void OverlayManager::CloseCustomDialog(const int32_t dialogId)
+{
+    auto iter = dialogMap_.end();
+    if (dialogId == -1) {
+        int32_t tmpNodeId = -1;
+        RefPtr<FrameNode> tmpNode;
+        iter = dialogMap_.begin();
+        while (iter != dialogMap_.end()) {
+            auto dialogNode = (*iter).second;
+            if (dialogNode && dialogNode->GetId() > tmpNodeId) {
+                tmpNodeId = dialogNode->GetId();
+                tmpNode = dialogNode;
+            }
+            iter++;
+        }
+        if (tmpNode) {
+            CloseDialogInner(tmpNode);
+        } else {
+            LOGE("not find dialog when no dialog id");
+        }
+    } else {
+        iter = dialogMap_.find(dialogId);
+        if (iter == dialogMap_.end()) {
+            LOGE("not find dialog by id %{public}d", dialogId);
+            return;
+        }
+        RefPtr<FrameNode> tmpDialog = (*iter).second;
+        CloseDialogInner(tmpDialog);
+    }
+    return;
+}
+
 void OverlayManager::ShowCustomDialog(const RefPtr<FrameNode>& customNode)
 {
     BeforeShowDialog(customNode);
@@ -1469,6 +1535,11 @@ void OverlayManager::CloseDialog(const RefPtr<FrameNode>& dialogNode)
             parentOverlayManager->CloseDialog(maskNode);
         }
     }
+    CloseDialogInner(dialogNode);
+}
+
+void OverlayManager::CloseDialogInner(const RefPtr<FrameNode>& dialogNode)
+{
     RemoveDialogFromMap(dialogNode);
     if (dialogNode->IsRemoving()) {
         // already in close animation

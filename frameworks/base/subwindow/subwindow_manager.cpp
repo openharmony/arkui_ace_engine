@@ -620,6 +620,42 @@ void SubwindowManager::CloseDialog(int32_t instanceId)
     }
 }
 
+void SubwindowManager::OpenCustomDialog(const PromptDialogAttr &dialogAttr, std::function<void(int32_t)> &&callback)
+{
+    PromptDialogAttr tmpPromptAttr = dialogAttr;
+    tmpPromptAttr.showInSubWindow = false;
+    auto containerId = Container::CurrentId();
+    // for pa service
+    if (containerId >= MIN_PA_SERVICE_ID || containerId < 0) {
+        auto subWindow = GetOrCreateSubWindow();
+        CHECK_NULL_VOID(subWindow);
+        subWindow->OpenCustomDialog(tmpPromptAttr, std::move(callback));
+        // for ability
+    } else {
+        auto subWindow = GetSubwindow(containerId);
+        if (!subWindow) {
+            subWindow = Subwindow::CreateSubwindow(containerId);
+            subWindow->InitContainer();
+            AddSubwindow(containerId, subWindow);
+        }
+        subWindow->OpenCustomDialog(tmpPromptAttr, std::move(callback));
+    }
+    return;
+}
+
+void SubwindowManager::CloseCustomDialog(const int32_t dialogId)
+{
+    auto containerId = Container::CurrentId();
+    TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "CloseCustomDialog dialogId = %{public}d, containerId = %{public}d.",
+        dialogId, containerId);
+    auto subwindow = GetDialogSubwindow(containerId);
+    if (!subwindow) {
+        return;
+    }
+    subwindow->CloseCustomDialog(dialogId);
+    return;
+}
+
 void SubwindowManager::HideSubWindowNG()
 {
     RefPtr<Subwindow> subwindow;
