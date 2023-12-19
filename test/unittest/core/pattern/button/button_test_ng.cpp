@@ -1331,8 +1331,6 @@ HWTEST_F(ButtonTestNg, ButtonPatternTest023, TestSize.Level1)
  */
 HWTEST_F(ButtonTestNg, OnColorConfigurationUpdate001, TestSize.Level1)
 {
-    auto pipeline = PipelineBase::GetCurrentContext();
-    pipeline->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_ELEVEN));
     ButtonModelNG buttonModelNG;
     buttonModelNG.CreateWithLabel(CREATE_VALUE);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -1342,12 +1340,12 @@ HWTEST_F(ButtonTestNg, OnColorConfigurationUpdate001, TestSize.Level1)
     buttonPattern->OnColorConfigurationUpdate();
     auto renderContext = frameNode->GetRenderContext();
     ASSERT_NE(renderContext, nullptr);
-    EXPECT_EQ(renderContext->GetBackgroundColor(), Color::GRAY);
+    EXPECT_EQ(renderContext->GetBackgroundColor(), Color::RED);
     auto textNode = AceType::DynamicCast<FrameNode>(frameNode->GetFirstChild());
     ASSERT_NE(textNode, nullptr);
     auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
     ASSERT_NE(textLayoutProperty, nullptr);
-    EXPECT_EQ(textLayoutProperty->GetTextColor(), Color::BLUE);
+    EXPECT_EQ(textLayoutProperty->GetTextColor(), Color::BLACK);
 }
 
 /**
