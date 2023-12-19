@@ -87,6 +87,7 @@ public:
     bool IsBoolean() const;
     bool IsObject() const;
     bool IsArray() const;
+    bool IsArrayBuffer() const;
     bool IsUint8ClampedArray() const;
     bool IsUndefined() const;
     bool IsNull() const;
