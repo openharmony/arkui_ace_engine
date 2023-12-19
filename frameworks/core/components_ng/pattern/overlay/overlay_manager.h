@@ -217,7 +217,6 @@ public:
         return false;
     }
 
-#ifdef ENABLE_DRAG_FRAMEWORK
     bool GetHasPixelMap()
     {
         return hasPixelMap_;
@@ -288,7 +287,6 @@ public:
     void RemoveFilter();
     void RemoveFilterAnimation();
     void RemoveEventColumn();
-#endif // ENABLE_DRAG_FRAMEWORK
     void UpdateContextMenuDisappearPosition(const NG::OffsetF& offset);
 
     void ResetContextMenuDragHideFinished()
@@ -464,7 +462,6 @@ private:
     int32_t dialogCount_ = 0;
     std::unordered_map<int32_t, int32_t> maskNodeIdMap_;
     int32_t subWindowId_;
-#ifdef ENABLE_DRAG_FRAMEWORK
     bool hasPixelMap_ { false };
     bool hasFilter_ { false };
     bool hasEvent_ { false };
@@ -472,7 +469,6 @@ private:
     WeakPtr<FrameNode> pixmapColumnNodeWeak_;
     WeakPtr<FrameNode> filterColumnNodeWeak_;
     WeakPtr<FrameNode> eventColumnNodeWeak_;
-#endif // ENABLE_DRAG_FRAMEWORK
     bool isContextMenuDragHideFinished_ = false;
     OffsetF dragMoveVector_ = OffsetF(0.0f, 0.0f);
     OffsetF lastDragMoveVector_ = OffsetF(0.0f, 0.0f);

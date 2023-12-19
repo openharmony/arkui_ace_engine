@@ -2844,15 +2844,9 @@ HWTEST_F(DragDropManagerTestNg, DragDropManagerFireOnEditableTextComponent, Test
      */
     {
         auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::TEXTINPUT_ETS_TAG, 1, AceType::MakeRefPtr<Pattern>());
-#ifdef ENABLE_DRAG_FRAMEWORK
         EXPECT_CALL(*(AceType::DynamicCast<MockInteractionInterface>(
             MockInteractionInterface::GetInstance())), EnterTextEditorArea(_))
             .Times(1).WillOnce(::testing::Return(0));
-#else
-        EXPECT_CALL(*(AceType::DynamicCast<MockInteractionInterface>(
-            MockInteractionInterface::GetInstance())), EnterTextEditorArea(_))
-            .Times(0);
-#endif // ENABLE_DRAG_FRAMEWORK
         dragDropManager->FireOnEditableTextComponent(frameNode, DragEventType::ENTER);
         dragDropManager->FireOnEditableTextComponent(frameNode, DragEventType::ENTER);
         dragDropManager->FireOnEditableTextComponent(frameNode, DragEventType::MOVE);

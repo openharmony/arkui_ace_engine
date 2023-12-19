@@ -18,7 +18,6 @@
 #include "core/common/interaction/interaction_data.h"
 #include "core/gestures/gesture_info.h"
 
-#ifdef ENABLE_DRAG_FRAMEWORK
 #include "interaction_manager.h"
 #include "start_drag_listener_impl.h"
 
@@ -27,6 +26,7 @@ using namespace OHOS::Msdp::DeviceStatus;
 namespace OHOS::Ace {
     Msdp::DeviceStatus::DragCursorStyle TranslateDragCursorStyle(OHOS::Ace::DragCursorStyleCore style);
     Msdp::DeviceStatus::DragResult TranslateDragResult(DragRet dragResult);
+    Msdp::DeviceStatus::PreviewStyle TranslatePreviewStyle(const OHOS::Ace::PreviewStyle& previewStyle);
     DragRet TranslateDragResult(Msdp::DeviceStatus::DragResult dragResult);
 
 InteractionInterface* InteractionInterface::GetInstance()
@@ -37,7 +37,12 @@ InteractionInterface* InteractionInterface::GetInstance()
 
 int32_t InteractionImpl::UpdateShadowPic(const OHOS::Ace::ShadowInfoCore& shadowInfo)
 {
-    Msdp::DeviceStatus::ShadowInfo msdpShadowInfo { shadowInfo.pixelMap, shadowInfo.x,
+    auto pixelMap = shadowInfo.pixelMap;
+    if (!pixelMap) {
+        Msdp::DeviceStatus::ShadowInfo msdpShadowInfo { nullptr, shadowInfo.x, shadowInfo.y };
+        return InteractionManager::GetInstance()->UpdateShadowPic(msdpShadowInfo);
+    }
+    Msdp::DeviceStatus::ShadowInfo msdpShadowInfo { shadowInfo.pixelMap->GetPixelMapSharedPtr(), shadowInfo.x,
         shadowInfo.y };
     return InteractionManager::GetInstance()->UpdateShadowPic(msdpShadowInfo);
 }
@@ -54,14 +59,22 @@ int32_t InteractionImpl::StartDrag(const DragDataCore& dragData,
         = [=](const Msdp::DeviceStatus::DragNotifyMsg& dragNotifyMsg) {
         OHOS::Ace::DragNotifyMsg msg { dragNotifyMsg.displayX,
             dragNotifyMsg.displayY, dragNotifyMsg.targetPid, TranslateDragResult(dragNotifyMsg.result) };
-        callback(msg);
+        if (callback) {
+            callback(msg);
+        }
     };
-    Msdp::DeviceStatus::ShadowInfo shadowInfo { dragData.shadowInfo.pixelMap,
-        dragData.shadowInfo.x, dragData.shadowInfo.y };
-    Msdp::DeviceStatus::DragData msdpDragData { { shadowInfo },
+    Msdp::DeviceStatus::DragData msdpDragData { {},
         dragData.buffer, dragData.udKey, dragData.filterInfo, dragData.extraInfo,
         dragData.sourceType, dragData.dragNum, dragData.pointerId, dragData.displayX, dragData.displayY,
-        dragData.displayId, dragData.hasCanceledAnimation, false, dragData.summary };
+        dragData.displayId, dragData.hasCanceledAnimation, dragData.hasCoordinateCorrected, dragData.summarys };
+    for (auto& shadowInfo: dragData.shadowInfos) {
+        if (shadowInfo.pixelMap) {
+            msdpDragData.shadowInfos.push_back({ shadowInfo.pixelMap->GetPixelMapSharedPtr(),
+                shadowInfo.x, shadowInfo.y });
+        } else {
+            msdpDragData.shadowInfos.push_back({ nullptr, shadowInfo.x, shadowInfo.y });
+        }
+    }
     return InteractionManager::GetInstance()->StartDrag(msdpDragData,
         std::make_shared<StartDragListenerImpl>(callbackCore));
 }
@@ -69,6 +82,20 @@ int32_t InteractionImpl::StartDrag(const DragDataCore& dragData,
 int32_t InteractionImpl::UpdateDragStyle(OHOS::Ace::DragCursorStyleCore style)
 {
     return InteractionManager::GetInstance()->UpdateDragStyle(TranslateDragCursorStyle(style));
+}
+
+int32_t InteractionImpl::UpdatePreviewStyle(const OHOS::Ace::PreviewStyle& previewStyle)
+{
+    Msdp::DeviceStatus::PreviewStyle msdpPreviewStyle = TranslatePreviewStyle(previewStyle);
+    return InteractionManager::GetInstance()->UpdatePreviewStyle(msdpPreviewStyle);
+}
+
+int32_t InteractionImpl::UpdatePreviewStyleWithAnimation(const OHOS::Ace::PreviewStyle& previewStyle,
+    const OHOS::Ace::PreviewAnimation& animation)
+{
+    Msdp::DeviceStatus::PreviewStyle msdpPreviewStyle = TranslatePreviewStyle(previewStyle);
+    Msdp::DeviceStatus::PreviewAnimation msdpAnimation { animation.duration, animation.curveName, animation.curve };
+    return InteractionManager::GetInstance()->UpdatePreviewStyleWithAnimation(msdpPreviewStyle, msdpAnimation);
 }
 
 int32_t InteractionImpl::StopDrag(DragDropRet result)
@@ -142,6 +169,35 @@ Msdp::DeviceStatus::DragResult TranslateDragResult(DragRet dragResult)
     }
 }
 
+Msdp::DeviceStatus::PreviewStyle TranslatePreviewStyle(const OHOS::Ace::PreviewStyle& previewStyle)
+{
+    Msdp::DeviceStatus::PreviewStyle msdpPreviewStyle;
+    for (auto& previewType: previewStyle.types) {
+        switch (previewType) {
+            case OHOS::Ace::PreviewType::FOREGROUND_COLOR:
+                msdpPreviewStyle.types.push_back(Msdp::DeviceStatus::PreviewType::FOREGROUND_COLOR);
+                break;
+            case OHOS::Ace::PreviewType::OPACITY:
+                msdpPreviewStyle.types.push_back(Msdp::DeviceStatus::PreviewType::OPACITY);
+                break;
+            case OHOS::Ace::PreviewType::RADIUS:
+                msdpPreviewStyle.types.push_back(Msdp::DeviceStatus::PreviewType::RADIUS);
+                break;
+            case OHOS::Ace::PreviewType::SCALE:
+                msdpPreviewStyle.types.push_back(Msdp::DeviceStatus::PreviewType::SCALE);
+                break;
+            default:
+                msdpPreviewStyle.types.push_back(Msdp::DeviceStatus::PreviewType::FOREGROUND_COLOR);
+                break;
+        }
+    }
+    msdpPreviewStyle.foregroundColor = previewStyle.foregroundColor;
+    msdpPreviewStyle.opacity = previewStyle.opacity;
+    msdpPreviewStyle.radius = previewStyle.radius;
+    msdpPreviewStyle.scale = previewStyle.scale;
+    return msdpPreviewStyle;
+}
+
 DragRet TranslateDragResult(Msdp::DeviceStatus::DragResult dragResult)
 {
     switch (dragResult) {
@@ -183,5 +239,5 @@ int32_t InteractionImpl::GetDragState(DragState& dragState) const
     }
     return ret;
 }
+
 } // namespace OHOS::Ace
-#endif // ENABLE_DRAG_FRAMEWORK

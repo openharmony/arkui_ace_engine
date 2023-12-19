@@ -165,11 +165,10 @@ private:
     RefPtr<PipelineBase> GetChildPipelineContext() const;
     void ContainerModalUnFocus();
 
-#ifdef ENABLE_DRAG_FRAMEWORK
     void HideFilter();
     void HidePixelMap(bool startDrag = false, double x = 0, double y = 0, bool showAnimation = true);
     void HideEventColumn();
-#endif // ENABLE_DRAG_FRAMEWORK
+
     static int32_t id_;
     int32_t windowId_ = 0;
     int32_t parentContainerId_ = -1;

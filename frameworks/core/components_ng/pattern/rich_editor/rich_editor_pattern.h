@@ -277,11 +277,9 @@ public:
     void CloseSelectOverlay() override;
     void CalculateHandleOffsetAndShowOverlay(bool isUsingMouse = false);
     void CopySelectionMenuParams(SelectOverlayInfo& selectInfo, TextResponseType responseType);
-#ifdef ENABLE_DRAG_FRAMEWORK
     std::function<void(Offset)> GetThumbnailCallback() override;
     void HandleOnDragStatusCallback(
         const DragEventType& dragEventType, const RefPtr<NotifyDragEvent>& notifyDragEvent) override;
-#endif
     void ResetSelection();
     bool BetweenSelectedPosition(const Offset& globalOffset) override;
     void HandleSurfaceChanged(int32_t newWidth, int32_t newHeight, int32_t prevWidth, int32_t prevHeight) override;
@@ -409,7 +407,6 @@ private:
     void UseHostToUpdateTextFieldManager();
     void UpdateTextFieldManager(const Offset& offset, float height);
     void ScrollToSafeArea() const override;
-#ifdef ENABLE_DRAG_FRAMEWORK
     void InitDragDropEvent();
     void onDragDropAndLeave();
     void ClearDragDropEvent();
@@ -436,7 +433,6 @@ private:
     void HandleCursorOnDragMoved(const RefPtr<NotifyDragEvent>& notifyDragEvent);
     void HandleCursorOnDragLeaved(const RefPtr<NotifyDragEvent>& notifyDragEvent);
     void HandleCursorOnDragEnded(const RefPtr<NotifyDragEvent>& notifyDragEvent);
-#endif // ENABLE_DRAG_FRAMEWORK
 
     int32_t GetParagraphLength(const std::list<RefPtr<UINode>>& spans) const;
     // REQUIRES: 0 <= start < end
@@ -554,9 +550,7 @@ private:
     RectF frameRect_;
     std::optional<struct UpdateSpanStyle> typingStyle_;
     std::optional<TextStyle> typingTextStyle_;
-#ifdef ENABLE_DRAG_FRAMEWORK
     std::list<ResultObject> dragResultObjects_;
-#endif // ENABLE_DRAG_FRAMEWORK
 
     std::function<void()> customKeyboardBuilder_;
     Offset selectionMenuOffset_;

@@ -15,8 +15,5 @@ import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
 ace_unittest("rich_editor_drag_test_ng") {
   type = "new"
-  sources = [
-    "$ace_root/test/mock/core/render/mock_pixmap_image.cpp",
-    "rich_editor_drag_test_ng.cpp",
-  ]
+  sources = [ "rich_editor_drag_test_ng.cpp" ]
 }

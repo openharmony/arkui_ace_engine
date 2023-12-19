@@ -13,9 +13,10 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_ACE_ENGINE_ADAPTER_OHOS_CAPABILITY_INTERACTION_IMPL_H
-#define FOUNDATION_ACE_ACE_ENGINE_ADAPTER_OHOS_CAPABILITY_INTERACTION_IMPL_H
- 
+
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_INTERACTION_MANAGER_IMPL_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_INTERACTION_MANAGER_IMPL_H
+
 #include "core/common/interaction/interaction_interface.h"
 
 namespace OHOS::Ace {
@@ -35,7 +36,7 @@ public:
     int32_t UpdatePreviewStyle(const PreviewStyle& previewStyle) override;
 
     int32_t UpdatePreviewStyleWithAnimation(const PreviewStyle& previewStyle,
-                                const PreviewAnimation& animation) override;
+        const PreviewAnimation& animation) override;
 
     int32_t StopDrag(DragDropRet result) override;
 
@@ -53,5 +54,6 @@ public:
 
     int32_t AddPrivilege() override;
 };
+
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_ACE_ENGINE_ADAPTER_OHOS_CAPABILITY_INTERACTION_IMPL_H

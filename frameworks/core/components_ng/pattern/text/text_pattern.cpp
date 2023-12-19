@@ -47,10 +47,8 @@
 #include "core/components_ng/pattern/text_drag/text_drag_pattern.h"
 #include "core/components_ng/property/property.h"
 
-#ifdef ENABLE_DRAG_FRAMEWORK
 #include "core/common/ace_engine_ext.h"
 #include "core/common/udmf/udmf_client.h"
-#endif
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -287,14 +285,10 @@ void TextPattern::HandleLongPress(GestureEvent& info)
     if (IsDraggable(info.GetLocalLocation())) {
         dragBoxes_ = GetTextBoxes();
         // prevent long press event from being triggered when dragging
-#ifdef ENABLE_DRAG_FRAMEWORK
         gestureHub->SetIsTextDraggable(true);
-#endif
         return;
     }
-#ifdef ENABLE_DRAG_FRAMEWORK
     gestureHub->SetIsTextDraggable(false);
-#endif
     auto textPaintOffset = contentRect_.GetOffset() - OffsetF(0.0f, std::min(baselineOffset_, 0.0f));
     Offset textOffset = { info.GetLocalLocation().GetX() - textPaintOffset.GetX(),
         info.GetLocalLocation().GetY() - textPaintOffset.GetY() };
@@ -1216,7 +1210,6 @@ void TextPattern::HandlePanEnd(const GestureEvent& info)
     }
 }
 
-#ifdef ENABLE_DRAG_FRAMEWORK
 NG::DragDropInfo TextPattern::OnDragStart(const RefPtr<Ace::DragEvent>& event, const std::string& extraParams)
 {
     DragDropInfo itemInfo;
@@ -1467,8 +1460,6 @@ std::function<void(Offset)> TextPattern::GetThumbnailCallback()
         }
     };
 }
-
-#endif // ENABLE_DRAG_FRAMEWORK
 
 std::string TextPattern::GetSelectedSpanText(std::wstring value, int32_t start, int32_t end) const
 {
@@ -1769,11 +1760,7 @@ void TextPattern::OnModifyDone()
         }
         InitLongPressEvent(gestureEventHub);
         if (host->IsDraggable()) {
-#ifdef ENABLE_DRAG_FRAMEWORK
             InitDragEvent();
-#else
-            InitPanEvent(gestureEventHub);
-#endif
         }
         InitMouseEvent();
         InitTouchEvent();

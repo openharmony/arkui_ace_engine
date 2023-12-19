@@ -12,12 +12,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-#include "image_source_preview.h"
-
-#include "frameworks/base/image/image_source.h"
+#include "test/mock/base/mock_image_source.h"
 namespace OHOS::Ace {
-RefPtr<ImageSource> ImageSource::Create(int32_t /* fd */)
+RefPtr<ImageSource> ImageSource::Create(int32_t fd)
 {
     return nullptr;
 }
@@ -34,36 +31,12 @@ RefPtr<ImageSource> ImageSource::Create(const std::string& filePath)
 
 bool ImageSource::IsAstc(const uint8_t* data, size_t size)
 {
-    return false;
+    return true;
 }
 
-ImageSource::Size ImageSource::GetASTCInfo(const uint8_t* data, size_t size)
+Size ImageSource::GetASTCInfo(const uint8_t* data, size_t size)
 {
-    return { 0, 0 };
+    return {0, 0};
 }
 
-std::string ImageSourcePreview::GetProperty(const std::string& /* key */)
-{
-    return "";
-}
-
-RefPtr<PixelMap> ImageSourcePreview::CreatePixelMap(const Size& size)
-{
-    return nullptr;
-}
-
-RefPtr<PixelMap> ImageSourcePreview::CreatePixelMap(uint32_t index, const Size& size)
-{
-    return nullptr;
-}
-
-RefPtr<PixelMap> ImageSourcePreview::CreatePixelMap()
-{
-    return nullptr;
-}
-
-ImageSource::Size ImageSourcePreview::GetImageSize()
-{
-    return {};
-}
 } // namespace OHOS::Ace

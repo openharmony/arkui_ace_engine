@@ -42,9 +42,7 @@
 #include "form_info.h"
 #endif
 
-#ifdef ENABLE_DRAG_FRAMEWORK
 #include "core/common/udmf/udmf_client.h"
-#endif // ENABLE_DRAG_FRAMEWORK
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -1031,7 +1029,6 @@ void FormPattern::EnableDrag()
                          const std::string& /* extraParams */) -> DragDropInfo {
         DragDropInfo info;
 
-#ifdef ENABLE_DRAG_FRAMEWORK
         auto form = weak.Upgrade();
         CHECK_NULL_RETURN(form, info);
         auto subcontainer = form->GetSubContainer();
@@ -1040,7 +1037,6 @@ void FormPattern::EnableDrag()
         RefPtr<UnifiedData> unifiedData = UdmfClient::GetInstance()->CreateUnifiedData();
         UdmfClient::GetInstance()->AddFormRecord(unifiedData, subcontainer->GetRunningCardId(), form->cardInfo_);
         event->SetData(unifiedData);
-#endif // ENABLE_DRAG_FRAMEWORK
 
         info.extraInfo = "card drag";
         return info;

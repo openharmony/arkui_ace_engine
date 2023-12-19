@@ -338,9 +338,7 @@ FrameNode::~FrameNode()
         auto dragManager = pipeline->GetDragDropManager();
         if (dragManager) {
             dragManager->RemoveDragFrameNode(GetId());
-#ifdef ENABLE_DRAG_FRAMEWORK
             dragManager->UnRegisterDragStatusListener(GetId());
-#endif // ENABLE_DRAG_FRAMEWORK
         }
         auto frameRateManager = pipeline->GetFrameRateManager();
         if (frameRateManager) {

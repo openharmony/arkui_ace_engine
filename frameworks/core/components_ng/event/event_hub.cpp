@@ -180,12 +180,10 @@ void EventHub::FireCustomerOnDragFunc(DragFuncType dragFuncType, const RefPtr<OH
 
 bool EventHub::IsFireOnDrop(const RefPtr<OHOS::Ace::DragEvent>& info)
 {
-#ifdef ENABLE_DRAG_FRAMEWORK
     return !HasCustomerOnDrop()
         || info->GetResult() == DragRet::DRAG_DEFAULT
         || info->GetResult() == DragRet::ENABLE_DROP
         || info->GetResult() == DragRet::DISABLE_DROP;
-#endif
     return true;
 }
 

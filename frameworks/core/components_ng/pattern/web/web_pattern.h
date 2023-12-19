@@ -418,9 +418,7 @@ public:
     void JavaScriptOnDocumentStart(const ScriptItems& scriptItems);
     void JavaScriptOnDocumentEnd(const ScriptItems& scriptItems);
     void SetTouchEventInfo(const TouchEvent& touchEvent, TouchEventInfo& touchEventInfo);
-#ifdef ENABLE_DRAG_FRAMEWORK
     DragRet GetDragAcceptableStatus();
-#endif
     Offset GetDragOffset() const;
     void OnOverScrollFlingVelocity(float xVelocity, float yVelocity, bool isFling);
     void OnScrollState(bool scrollState);

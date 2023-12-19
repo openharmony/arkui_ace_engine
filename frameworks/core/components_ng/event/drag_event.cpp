@@ -29,8 +29,6 @@
 #include "core/components_ng/gestures/recognizers/sequenced_recognizer.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
-#ifdef ENABLE_DRAG_FRAMEWORK
-#include "base/msdp/device_status/interfaces/innerkits/interaction/include/interaction_manager.h"
 #include "base/subwindow/subwindow_manager.h"
 #include "core/animation/animation_pub.h"
 #include "core/components/container_modal/container_modal_constants.h"
@@ -41,10 +39,8 @@
 #include "core/components_ng/pattern/text_drag/text_drag_base.h"
 #include "core/components_ng/pattern/text_drag/text_drag_pattern.h"
 #include "core/components_ng/render/adapter/component_snapshot.h"
-#include "core/components_ng/render/adapter/rosen_render_context.h"
 #include "core/components_ng/render/render_context.h"
 #include "core/components_v2/inspector/inspector_constants.h"
-#endif // ENABLE_DRAG_FRAMEWORK
 
 #ifdef WEB_SUPPORTED
 #include "core/components_ng/pattern/web/web_pattern.h"
@@ -56,7 +52,6 @@ constexpr int32_t PAN_FINGER = 1;
 constexpr double PAN_DISTANCE = 5.0;
 constexpr int32_t LONG_PRESS_DURATION = 500;
 constexpr int32_t PREVIEW_LONG_PRESS_RECONGNIZER = 800;
-#ifdef ENABLE_DRAG_FRAMEWORK
 constexpr Dimension FILTER_VALUE(0.0f);
 constexpr float PIXELMAP_DRAG_SCALE_MULTIPLE = 1.05f;
 constexpr int32_t PIXELMAP_ANIMATION_TIME = 800;
@@ -67,8 +62,9 @@ constexpr int32_t PIXELMAP_ANIMATION_DURATION = 300;
 constexpr float SPRING_RESPONSE = 0.416f;
 constexpr float SPRING_DAMPING_FRACTION = 0.73f;
 constexpr Dimension PIXELMAP_BORDER_RADIUS = 16.0_vp;
+#if defined(PIXEL_MAP_SUPPORTED)
 constexpr int32_t CREATE_PIXELMAP_TIME = 80;
-#endif // ENABLE_DRAG_FRAMEWORK
+#endif
 } // namespace
 
 DragEventActuator::DragEventActuator(
@@ -129,7 +125,6 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
     CHECK_NULL_VOID(gestureHub);
     auto frameNode = gestureHub->GetFrameNode();
     CHECK_NULL_VOID(frameNode);
-#ifdef ENABLE_DRAG_FRAMEWORK
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto dragDropManager = pipeline->GetDragDropManager();
@@ -138,7 +133,6 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
         (!frameNode->IsDraggable() && frameNode->IsCustomerSet())) {
         return;
     }
-#endif
     auto actionStart = [weak = WeakClaim(this), this](GestureEvent& info) {
         if (SystemProperties::GetDebugEnabled()) {
             LOGI("DragEvent panRecognizer onActionStart.");
@@ -150,7 +144,6 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
         auto dragDropManager = pipeline->GetDragDropManager();
         CHECK_NULL_VOID(dragDropManager);
         dragDropManager->ResetDragging(DragDropMgrState::ABOUT_TO_PREVIEW);
-#ifdef ENABLE_DRAG_FRAMEWORK
         auto gestureHub = actuator->gestureEventHub_.Upgrade();
         CHECK_NULL_VOID(gestureHub);
         auto frameNode = gestureHub->GetFrameNode();
@@ -200,7 +193,6 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
             }
         }
 
-#endif // ENABLE_DRAG_FRAMEWORK
        // Trigger drag start event set by user.
         CHECK_NULL_VOID(actuator->userCallback_);
         auto userActionStart = actuator->userCallback_->GetActionStartEventFunc();
@@ -255,17 +247,12 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
         actuator->SetIsNotInPreviewState(false);
     };
     panRecognizer_->SetOnActionEnd(actionEnd);
-#ifdef ENABLE_DRAG_FRAMEWORK
     auto actionCancel = [weak = WeakClaim(this), this]() {
-#else
-    auto actionCancel = [weak = WeakClaim(this)]() {
-#endif // ENABLE_DRAG_FRAMEWORK
         if (SystemProperties::GetDebugEnabled()) {
             LOGI("DragEvent panRecognizer onActionCancel.");
         }
         auto actuator = weak.Upgrade();
         CHECK_NULL_VOID(actuator);
-#ifdef ENABLE_DRAG_FRAMEWORK
         auto gestureHub = actuator->gestureEventHub_.Upgrade();
         CHECK_NULL_VOID(gestureHub);
         if (!GetIsBindOverlayValue(actuator)) {
@@ -305,7 +292,6 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
             }
         }
         actuator->SetIsNotInPreviewState(false);
-#endif // ENABLE_DRAG_FRAMEWORK
         CHECK_NULL_VOID(actuator->userCallback_);
         auto userActionCancel = actuator->userCallback_->GetActionCancelEventFunc();
         if (userActionCancel) {
@@ -322,7 +308,6 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
     actionCancel_ = actionCancel;
     panRecognizer_->SetCoordinateOffset(Offset(coordinateOffset.GetX(), coordinateOffset.GetY()));
     panRecognizer_->SetOnActionCancel(actionCancel);
-#ifdef ENABLE_DRAG_FRAMEWORK
     if (touchRestrict.sourceType == SourceType::MOUSE) {
         std::vector<RefPtr<NGGestureRecognizer>> recognizers { panRecognizer_ };
         SequencedRecognizer_ = AceType::MakeRefPtr<SequencedRecognizer>(recognizers);
@@ -401,7 +386,6 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
     };
     longPressUpdate_ = longPressUpdate;
     previewLongPressRecognizer_->SetOnAction(longPressUpdate);
-#endif // ENABLE_DRAG_FRAMEWORK
     previewLongPressRecognizer_->SetGestureHub(gestureEventHub_);
     auto eventHub = frameNode->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
@@ -419,7 +403,7 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
                 gestureHub->SetPixelMap(dragPreviewInfo.pixelMap);
                 gestureHub->SetDragPreviewPixelMap(dragPreviewInfo.pixelMap);
             } else if (dragPreviewInfo.customNode != nullptr) {
-#if defined(ENABLE_DRAG_FRAMEWORK) && defined(ENABLE_ROSEN_BACKEND) && defined(PIXEL_MAP_SUPPORTED)
+#if defined(PIXEL_MAP_SUPPORTED)
                 auto callback = [id = Container::CurrentId(), pipeline, gestureHub]
                     (std::shared_ptr<Media::PixelMap> pixelMap, int32_t arg, std::function<void()>) {
                     ContainerScope scope(id);
@@ -459,7 +443,6 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
     result.emplace_back(previewLongPressRecognizer_);
 }
 
-#ifdef ENABLE_DRAG_FRAMEWORK
 void DragEventActuator::SetFilter(const RefPtr<DragEventActuator>& actuator)
 {
     if (SystemProperties::GetDebugEnabled()) {
@@ -976,5 +959,4 @@ bool DragEventActuator::IsAllowedDrag()
     bool isAllowedDrag = gestureHub->IsAllowedDrag(eventHub);
     return isAllowedDrag;
 }
-#endif // ENABLE_DRAG_FRAMEWORK
 } // namespace OHOS::Ace::NG
