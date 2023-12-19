@@ -5614,7 +5614,8 @@ HWTEST_F(ListTestNg, Pattern005, TestSize.Level1)
     pattern_->AnimateTo(0, 0, nullptr, true);
     pattern_->animator_->Resume();
     EXPECT_TRUE(pattern_->animator_->IsRunning());
-    pattern_->OnScrollPosition(100.f, SCROLL_FROM_START);
+    double offset = 100.0;
+    pattern_->OnScrollPosition(offset, SCROLL_FROM_START);
     EXPECT_TRUE(pattern_->scrollAbort_);
     pattern_->OnScrollCallback(100.f, SCROLL_FROM_START);
     EXPECT_TRUE(pattern_->scrollAbort_);
