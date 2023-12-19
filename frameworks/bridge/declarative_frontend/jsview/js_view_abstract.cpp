@@ -67,6 +67,7 @@
 #include "core/components/common/properties/decoration.h"
 #include "core/components/common/properties/invert.h"
 #include "core/components/common/properties/shadow.h"
+#include "core/components/common/properties/shadow_config.h"
 #include "core/components/theme/resource_adapter.h"
 #include "core/components/theme/shadow_theme.h"
 #include "core/components_ng/base/view_abstract_model.h"
@@ -758,6 +759,33 @@ void SetPlacementOnTopVal(const JSRef<JSObject>& popupObj, const RefPtr<PopupPar
     }
 }
 
+void GetShadowFromStyle(ShadowStyle shadowStyle, Shadow& shadow)
+{
+    switch (shadowStyle) {
+        case ShadowStyle::OuterDefaultXS:
+            shadow = ShadowConfig::DefaultShadowXS;
+            break;
+        case ShadowStyle::OuterDefaultSM:
+            shadow = ShadowConfig::DefaultShadowS;
+            break;
+        case ShadowStyle::OuterDefaultMD:
+            shadow = ShadowConfig::DefaultShadowM;
+            break;
+        case ShadowStyle::OuterDefaultLG:
+            shadow = ShadowConfig::DefaultShadowL;
+            break;
+        case ShadowStyle::OuterFloatingSM:
+            shadow = ShadowConfig::FloatingShadowS;
+            break;
+        case ShadowStyle::OuterFloatingMD:
+            shadow = ShadowConfig::FloatingShadowM;
+            break;
+        default:
+            shadow = ShadowConfig::DefaultShadowM;
+            break;
+    }
+}
+
 void ParsePopupCommonParam(
     const JSCallbackInfo& info, const JSRef<JSObject>& popupObj, const RefPtr<PopupParam>& popupParam)
 {
@@ -903,41 +931,58 @@ void ParsePopupCommonParam(
 
     auto arrowWidthVal = popupObj->GetProperty("arrowWidth");
     if (!arrowWidthVal->IsNull()) {
+        bool setError = true;
         CalcDimension arrowWidth;
         if (JSViewAbstract::ParseJsDimensionVp(arrowWidthVal, arrowWidth)) {
-            if (arrowWidth.Value() > 0) {
+            if (arrowWidth.Value() > 0 && arrowWidth.Unit() != DimensionUnit::PERCENT) {
                 popupParam->SetArrowWidth(arrowWidth);
+                setError = false;
             }
         }
+        popupParam->SetErrorArrowWidth(setError);
     }
 
     auto arrowHeightVal = popupObj->GetProperty("arrowHeight");
     if (!arrowHeightVal->IsNull()) {
+        bool setError = true;
         CalcDimension arrowHeight;
         if (JSViewAbstract::ParseJsDimensionVp(arrowHeightVal, arrowHeight)) {
-            if (arrowHeight.Value() > 0) {
+            if (arrowHeight.Value() > 0 && arrowHeight.Unit() != DimensionUnit::PERCENT) {
                 popupParam->SetArrowHeight(arrowHeight);
+                setError = false;
             }
         }
+        popupParam->SetErrorArrowHeight(setError);
     }
 
     auto radiusVal = popupObj->GetProperty("radius");
     if (!radiusVal->IsNull()) {
+        bool setError = true;
         CalcDimension radius;
         if (JSViewAbstract::ParseJsDimensionVp(radiusVal, radius)) {
-            if (radius.Value() > 0) {
+            if (radius.Value() >= 0) {
                 popupParam->SetRadius(radius);
+                setError = false;
             }
         }
+        popupParam->SetErrorRadius(setError);
     }
 
     auto shadowVal = popupObj->GetProperty("shadow");
     Shadow shadow;
-    JSViewAbstract::GetShadowFromTheme(ShadowStyle::OuterFloatingMD, shadow);
-    if (shadowVal->IsObject() || shadowVal->IsNumber()) {
+    if (shadowVal->IsObject()) {
         JSViewAbstract::ParseShadowProps(shadowVal, shadow);
+        popupParam->SetShadow(shadow);
+    } else if (shadowVal->IsNumber()) {
+        int32_t shadowStyle = 0;
+        if (JSViewAbstract::ParseJsInteger<int32_t>(shadowVal, shadowStyle)) {
+            auto style = static_cast<ShadowStyle>(shadowStyle);
+            GetShadowFromStyle(style, shadow);
+            popupParam->SetShadow(shadow);
+        }
+    } else if (shadowVal->IsUndefined()) {
+        popupParam->SetShadow(ShadowConfig::DefaultShadowM);
     }
-    popupParam->SetShadow(shadow);
 }
 
 void ParsePopupParam(const JSCallbackInfo& info, const JSRef<JSObject>& popupObj, const RefPtr<PopupParam>& popupParam)

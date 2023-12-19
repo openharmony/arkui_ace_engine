@@ -46,6 +46,16 @@ constexpr Dimension ARROW_RADIUS = 2.0_vp;
 constexpr Dimension DRAW_EDGES_SPACE = 1.0_vp;
 constexpr double BUBBLE_ARROW_HALF = 2.0;
 constexpr size_t ALIGNMENT_STEP_OFFSET = 2;
+
+// help value to calculate p2 p4 position
+constexpr Dimension DEFAULT_BUBBLE_ARROW_WIDTH = 16.0_vp;
+constexpr Dimension DEFAULT_BUBBLE_ARROW_HEIGHT = 8.0_vp;
+constexpr Dimension DEFAULT_P3_HEIGHT = 9.0_vp;
+constexpr Dimension DEFAULT_P3_END_HEIGHT = 9.5_vp;
+Dimension DEFAULT_P2_HEIGHT = 7.32_vp;
+Dimension DEFAULT_P4_END_Y = 3.5_vp;
+Dimension DEFAULT_P2_END_X = 3.2_vp;
+
 Dimension BUBBLE_ARROW_WIDTH = 16.0_vp;
 Dimension BUBBLE_ARROW_HEIGHT = 8.0_vp;
 constexpr double ARROW_OFFSET_START_VALUE = 0.0;
@@ -103,56 +113,76 @@ constexpr int16_t ARROW_OFFSETS_INDEX_ONE = 1;
 constexpr int16_t ARROW_OFFSETS_INDEX_TWO = 2;
 constexpr int16_t ARROW_OFFSETS_INDEX_THREE = 3;
 
+void GetEndP2P4(const Dimension& radius)
+{
+    auto P3Y = DEFAULT_P3_END_HEIGHT * BUBBLE_ARROW_HEIGHT.ConvertToPx() / DEFAULT_BUBBLE_ARROW_HEIGHT.ConvertToPx();
+    float tanR = BUBBLE_ARROW_WIDTH.ConvertToPx() / P3Y.ConvertToPx();
+    float tanHalfR = std::tan(std::atan(tanR) / HALF);
+    if (tanHalfR > 0) {
+        DEFAULT_P4_END_Y = radius / tanHalfR;
+        DEFAULT_P2_END_X = DEFAULT_P4_END_Y * std::sin(std::atan(tanR));
+    }
+}
+
+void GetP2(const Dimension& radius)
+{
+    auto P3Y = DEFAULT_P3_HEIGHT * BUBBLE_ARROW_HEIGHT.ConvertToPx() / DEFAULT_BUBBLE_ARROW_HEIGHT.ConvertToPx();
+    float tanR = BUBBLE_ARROW_WIDTH.ConvertToPx() / P3Y.ConvertToPx() / HALF;
+    float cosR = std::cos(std::atan(tanR));
+    if (tanR > 0) {
+        DEFAULT_P2_HEIGHT = P3Y - radius / tanR * cosR;
+    }
+}
 
 void calculateArrowPoint(Dimension height, Dimension width)
 {
     auto rateX = width.ConvertToPx() / BUBBLE_ARROW_WIDTH.ConvertToPx();
-    auto rateY = height.ConvertToPx() / BUBBLE_ARROW_HEIGHT.ConvertToPx();
+    auto rateHeightWidth = height.ConvertToPx() / width.ConvertToPx();
     BUBBLE_ARROW_WIDTH = width;
     BUBBLE_ARROW_HEIGHT = height;
 
+    GetEndP2P4(ARROW_RADIUS);
+    GetP2(ARROW_RADIUS);
+
     ARROW_VERTICAL_P1_OFFSET_X = ARROW_VERTICAL_P1_OFFSET_X * rateX;
-    ARROW_VERTICAL_P2_OFFSET_X = ARROW_VERTICAL_P2_OFFSET_X * rateX;
-    ARROW_VERTICAL_P2_OFFSET_Y = ARROW_VERTICAL_P2_OFFSET_Y * rateY;
-    ARROW_VERTICAL_P4_OFFSET_X = ARROW_VERTICAL_P4_OFFSET_X * rateX;
-    ARROW_VERTICAL_P4_OFFSET_Y = ARROW_VERTICAL_P4_OFFSET_Y * rateY;
+    ARROW_VERTICAL_P2_OFFSET_Y = DEFAULT_P2_HEIGHT;
+    ARROW_VERTICAL_P4_OFFSET_Y = DEFAULT_P2_HEIGHT;
     ARROW_VERTICAL_P5_OFFSET_X = ARROW_VERTICAL_P5_OFFSET_X * rateX;
 
-    ARROW_HORIZON_P1_OFFSET_Y = ARROW_HORIZON_P1_OFFSET_Y * rateY;
-    ARROW_HORIZON_P2_OFFSET_Y = ARROW_HORIZON_P2_OFFSET_Y * rateY;
-    ARROW_HORIZON_P2_OFFSET_X = ARROW_HORIZON_P2_OFFSET_X * rateX;
-    ARROW_HORIZON_P4_OFFSET_Y = ARROW_HORIZON_P4_OFFSET_Y * rateY;
-    ARROW_HORIZON_P4_OFFSET_X = ARROW_HORIZON_P4_OFFSET_X * rateX;
-    ARROW_HORIZON_P5_OFFSET_Y = ARROW_HORIZON_P5_OFFSET_Y * rateY;
+    ARROW_HORIZON_P1_OFFSET_Y = ARROW_HORIZON_P1_OFFSET_Y * rateX;
+    ARROW_HORIZON_P2_OFFSET_X = DEFAULT_P2_HEIGHT;
+    ARROW_HORIZON_P4_OFFSET_X = DEFAULT_P2_HEIGHT;
+    ARROW_HORIZON_P5_OFFSET_Y = ARROW_HORIZON_P5_OFFSET_Y * rateX;
 
     ARROW_REPLACE_START_VERTICAL_P1_OFFSET_X = ARROW_REPLACE_START_VERTICAL_P1_OFFSET_X * rateX;
     ARROW_REPLACE_START_VERTICAL_P2_OFFSET_X = ARROW_REPLACE_START_VERTICAL_P2_OFFSET_X * rateX;
-    ARROW_REPLACE_START_VERTICAL_P2_OFFSET_Y = ARROW_REPLACE_START_VERTICAL_P2_OFFSET_Y * rateY;
-    ARROW_REPLACE_START_VERTICAL_P4_OFFSET_X = ARROW_REPLACE_START_VERTICAL_P4_OFFSET_X * rateX;
-    ARROW_REPLACE_START_VERTICAL_P4_OFFSET_Y = ARROW_REPLACE_START_VERTICAL_P4_OFFSET_Y * rateY;
+    ARROW_REPLACE_START_VERTICAL_P2_OFFSET_Y = BUBBLE_ARROW_HEIGHT - DEFAULT_P4_END_Y;
+    ARROW_REPLACE_START_VERTICAL_P4_OFFSET_X = ARROW_REPLACE_START_VERTICAL_P1_OFFSET_X - DEFAULT_P2_END_X;
+    ARROW_REPLACE_START_VERTICAL_P4_OFFSET_Y = BUBBLE_ARROW_HEIGHT - DEFAULT_P2_END_X * rateHeightWidth;
     ARROW_REPLACE_START_VERTICAL_P5_OFFSET_X = ARROW_REPLACE_START_VERTICAL_P5_OFFSET_X * rateX;
 
     ARROW_REPLACE_END_VERTICAL_P1_OFFSET_X = ARROW_REPLACE_END_VERTICAL_P1_OFFSET_X * rateX;
-    ARROW_REPLACE_END_VERTICAL_P2_OFFSET_X = ARROW_REPLACE_END_VERTICAL_P2_OFFSET_X * rateX;
-    ARROW_REPLACE_END_VERTICAL_P2_OFFSET_Y = ARROW_REPLACE_END_VERTICAL_P2_OFFSET_Y * rateY;
+    ARROW_REPLACE_END_VERTICAL_P2_OFFSET_X = ARROW_REPLACE_END_VERTICAL_P1_OFFSET_X - DEFAULT_P2_END_X;
+    ARROW_REPLACE_END_VERTICAL_P2_OFFSET_Y = BUBBLE_ARROW_HEIGHT - DEFAULT_P2_END_X * rateHeightWidth;
     ARROW_REPLACE_END_VERTICAL_P4_OFFSET_X = ARROW_REPLACE_END_VERTICAL_P4_OFFSET_X * rateX;
-    ARROW_REPLACE_END_VERTICAL_P4_OFFSET_Y = ARROW_REPLACE_END_VERTICAL_P4_OFFSET_Y * rateY;
+    ARROW_REPLACE_END_VERTICAL_P4_OFFSET_Y = BUBBLE_ARROW_HEIGHT - DEFAULT_P4_END_Y;
     ARROW_REPLACE_END_VERTICAL_P5_OFFSET_X = ARROW_REPLACE_END_VERTICAL_P5_OFFSET_X * rateX;
 
-    ARROW_REPLACE_START_HORIZON_P1_OFFSET_Y = ARROW_REPLACE_START_HORIZON_P1_OFFSET_Y * rateY;
-    ARROW_REPLACE_START_HORIZON_P2_OFFSET_X = ARROW_REPLACE_START_HORIZON_P2_OFFSET_X * rateX;
-    ARROW_REPLACE_START_HORIZON_P2_OFFSET_Y = ARROW_REPLACE_START_HORIZON_P2_OFFSET_Y * rateY;
-    ARROW_REPLACE_START_HORIZON_P4_OFFSET_X = ARROW_REPLACE_START_HORIZON_P4_OFFSET_X * rateX;
-    ARROW_REPLACE_START_HORIZON_P4_OFFSET_Y = ARROW_REPLACE_START_HORIZON_P4_OFFSET_Y * rateY;
-    ARROW_REPLACE_START_HORIZON_P5_OFFSET_Y = ARROW_REPLACE_START_HORIZON_P5_OFFSET_Y * rateY;
+    ARROW_REPLACE_START_HORIZON_P1_OFFSET_Y = ARROW_REPLACE_START_HORIZON_P1_OFFSET_Y * rateX;
+    ARROW_REPLACE_START_HORIZON_P2_OFFSET_X = BUBBLE_ARROW_HEIGHT - DEFAULT_P4_END_Y;
+    ARROW_REPLACE_START_HORIZON_P2_OFFSET_Y = ARROW_REPLACE_START_HORIZON_P2_OFFSET_Y * rateX;
+    ARROW_REPLACE_START_HORIZON_P4_OFFSET_X = BUBBLE_ARROW_HEIGHT - DEFAULT_P2_END_X * rateHeightWidth;
+    ARROW_REPLACE_START_HORIZON_P4_OFFSET_Y = ARROW_REPLACE_START_HORIZON_P1_OFFSET_Y - DEFAULT_P2_END_X;
+    ARROW_REPLACE_START_HORIZON_P5_OFFSET_Y = ARROW_REPLACE_START_HORIZON_P5_OFFSET_Y * rateX;
 
-    ARROW_REPLACE_END_HORIZON_P1_OFFSET_Y = ARROW_REPLACE_END_HORIZON_P1_OFFSET_Y * rateY;
-    ARROW_REPLACE_END_HORIZON_P2_OFFSET_X = ARROW_REPLACE_END_HORIZON_P2_OFFSET_X * rateX;
-    ARROW_REPLACE_END_HORIZON_P2_OFFSET_Y = ARROW_REPLACE_END_HORIZON_P2_OFFSET_Y * rateY;
-    ARROW_REPLACE_END_HORIZON_P4_OFFSET_X = ARROW_REPLACE_END_HORIZON_P4_OFFSET_X * rateX;
-    ARROW_REPLACE_END_HORIZON_P4_OFFSET_Y = ARROW_REPLACE_END_HORIZON_P4_OFFSET_Y * rateY;
-    ARROW_REPLACE_END_HORIZON_P5_OFFSET_Y = ARROW_REPLACE_END_HORIZON_P5_OFFSET_Y * rateY;
+    ARROW_REPLACE_END_HORIZON_P1_OFFSET_Y = ARROW_REPLACE_END_HORIZON_P1_OFFSET_Y * rateX;
+    ARROW_REPLACE_END_HORIZON_P2_OFFSET_X = BUBBLE_ARROW_HEIGHT - DEFAULT_P2_END_X * rateHeightWidth;
+    ARROW_REPLACE_END_HORIZON_P2_OFFSET_Y = ARROW_REPLACE_END_HORIZON_P1_OFFSET_Y - DEFAULT_P2_END_X;
+    ARROW_REPLACE_END_HORIZON_P4_OFFSET_X = BUBBLE_ARROW_HEIGHT - DEFAULT_P4_END_Y;
+    ARROW_REPLACE_END_HORIZON_P4_OFFSET_Y = ARROW_REPLACE_END_HORIZON_P4_OFFSET_Y * rateX;
+    ARROW_REPLACE_END_HORIZON_P5_OFFSET_Y = ARROW_REPLACE_END_HORIZON_P5_OFFSET_Y * rateX;
 }
+
 // get main window's pipeline
 RefPtr<PipelineContext> GetMainPipelineContext()
 {
@@ -269,22 +299,6 @@ void BubbleLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         childLayoutConstraint.UpdateMaxSizeWithCheck(size);
         child->Measure(childLayoutConstraint);
     }
-    auto childSize = child->GetGeometryNode()->GetMarginFrameSize();
-    auto littleSide = childSize.Height() > childSize.Width() ? childSize.Width() : childSize.Height();
-    // 2: the half length of the little side
-    auto littleSideHalf = littleSide / 2;
-    if (borderRadius_.Value() > littleSideHalf) {
-        borderRadius_.SetValue(littleSideHalf);
-        border_.SetBorderRadius(Radius(borderRadius_));
-    }
-    // 2: the max width of arrow is the bubble width - double of borderRadius
-    auto arrowMaxWidth = childSize.Width() - 2 * borderRadius_.ConvertToPx();
-    auto pipeline = PipelineBase::GetCurrentContext();
-    arrowMaxWidth /= pipeline->GetDipScale();
-    if (BUBBLE_ARROW_WIDTH.ConvertToPx() > arrowMaxWidth) {
-        Dimension width(arrowMaxWidth, DimensionUnit::VP);
-        calculateArrowPoint(BUBBLE_ARROW_HEIGHT, width);
-    }
 }
 
 void BubbleLayoutAlgorithm::BubbleAvoidanceRule(RefPtr<LayoutWrapper> child, RefPtr<BubbleLayoutProperty> bubbleProp,
@@ -386,8 +400,8 @@ void BubbleLayoutAlgorithm::InitProps(const RefPtr<BubbleLayoutProperty>& layout
     targetSpace_ = layoutProp->GetTargetSpace().value_or(popupTheme->GetTargetSpace());
     placement_ = layoutProp->GetPlacement().value_or(Placement::BOTTOM);
     scaledBubbleSpacing_ = static_cast<float>(popupTheme->GetBubbleSpacing().ConvertToPx());
-    auto height = layoutProp->GetArrowHeight().value_or(BUBBLE_ARROW_HEIGHT);
-    auto width = layoutProp->GetArrowWidth().value_or(BUBBLE_ARROW_WIDTH);
+    auto height = layoutProp->GetArrowHeight().value_or(DEFAULT_BUBBLE_ARROW_HEIGHT);
+    auto width = layoutProp->GetArrowWidth().value_or(DEFAULT_BUBBLE_ARROW_WIDTH);
     calculateArrowPoint(height, width);
     arrowHeight_ = height.ConvertToPx();
     positionOffset_ = layoutProp->GetPositionOffset().value_or(OffsetF());
@@ -626,6 +640,21 @@ OffsetF BubbleLayoutAlgorithm::GetChildPosition(const SizeF& childSize, const Re
             positionOffset_ = OffsetF(0.0f, 0.0f);
         }
         childPosition = GetPositionWithPlacement(childSize, topPosition, bottomPosition, ArrowOffset);
+        if (placement_ == Placement::RIGHT ||
+            placement_ == Placement::RIGHT_TOP ||
+            placement_ == Placement::RIGHT_BOTTOM) {
+            childPosition += OffsetF(arrowHeight_, 0);
+        } else if (placement_ == Placement::LEFT ||
+            placement_ == Placement::LEFT_TOP ||
+            placement_ == Placement::LEFT_BOTTOM) {
+            childPosition -= OffsetF(arrowHeight_, 0);
+        } else if (placement_ == Placement::TOP_LEFT ||
+            placement_ == Placement::TOP_RIGHT) {
+            childPosition -= OffsetF(0, arrowHeight_);
+        } else if (placement_ == Placement::BOTTOM_LEFT ||
+            placement_ == Placement::BOTTOM_RIGHT) {
+            childPosition += OffsetF(0, arrowHeight_);
+        }
         UpdateChildPosition(childPosition);
         didNeedArrow = GetIfNeedArrow(bubbleProp, childSize_);
         position = FitToScreen(childPosition, step, i, childSize, didNeedArrow);
@@ -1346,8 +1375,20 @@ std::string BubbleLayoutAlgorithm::ClipBubbleWithPath()
     if (!bCaretMode_) {
         arrowOffset = GetArrowOffset(arrowPlacement_);
     }
+    auto littleSide = childSize_.Height() > childSize_.Width() ? childSize_.Width() : childSize_.Height();
+    auto littleSideHalf = littleSide / HALF;
+    if (borderRadius_.Unit() == DimensionUnit::PERCENT) {
+        auto value = borderRadius_.Value() * littleSideHalf;
+        borderRadius_.SetValue(value);
+        borderRadius_.SetUnit(DimensionUnit::PX);
+        border_.SetBorderRadius(Radius(borderRadius_));
+    }
     auto borderRadius = ModifyBorderRadius(border_.BottomLeftRadius().GetY().ConvertToPx(), childSize_.Height() / 2);
-    float radiusPx = borderRadius;
+    auto borderRadius2 = ModifyBorderRadius(border_.BottomLeftRadius().GetY().ConvertToPx(), childSize_.Width() / 2);
+    float radiusPx = borderRadius < borderRadius2 ? borderRadius : borderRadius2;
+    borderRadius_.SetValue(radiusPx);
+    borderRadius_.SetUnit(DimensionUnit::PX);
+    border_.SetBorderRadius(Radius(borderRadius_));
     Placement arrowBuildplacement = Placement::NONE;
     if (enableArrow_ && showArrow_) {
         GetArrowBuildPlacement(arrowBuildplacement);
@@ -1514,23 +1555,20 @@ float BubbleLayoutAlgorithm::ModifyBorderRadius(float borderRadius, float halfCh
 
 void BubbleLayoutAlgorithm::GetArrowBuildPlacement(Placement& arrowBuildplacement)
 {
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto popupTheme = pipeline->GetTheme<PopupTheme>();
-    CHECK_NULL_VOID(popupTheme);
+    auto radius = borderRadius_.ConvertToPx();
     float maxOffset = 0.0;
     switch (arrowPlacement_) {
         case Placement::BOTTOM:
         case Placement::BOTTOM_LEFT:
         case Placement::BOTTOM_RIGHT: // TOP
-            maxOffset = childOffset_.GetX() + childSize_.Width() - popupTheme->GetRadius().GetX().ConvertToPx() -
+            maxOffset = childOffset_.GetX() + childSize_.Width() - radius -
                         BUBBLE_ARROW_WIDTH.ConvertToPx() / HALF;
             if ((!bCaretMode_) && (arrowOffset_.Unit() != DimensionUnit::PERCENT)) {
                 if ((arrowPosition_.GetX() + arrowOffset_.ConvertToPx()) > maxOffset) {
                     arrowBuildplacement = Placement::TOP_RIGHT;
                     break;
                 }
-                if ((arrowOffset_.ConvertToPx()) < popupTheme->GetRadius().GetX().ConvertToPx()) {
+                if ((arrowOffset_.ConvertToPx()) < radius) {
                     arrowBuildplacement = Placement::TOP_LEFT;
                     break;
                 }
@@ -1542,14 +1580,14 @@ void BubbleLayoutAlgorithm::GetArrowBuildPlacement(Placement& arrowBuildplacemen
         case Placement::LEFT:
         case Placement::LEFT_TOP:
         case Placement::LEFT_BOTTOM: // Right
-            maxOffset = childOffset_.GetY() + childSize_.Height() - popupTheme->GetRadius().GetY().ConvertToPx() -
+            maxOffset = childOffset_.GetY() + childSize_.Height() - radius -
                         BUBBLE_ARROW_WIDTH.ConvertToPx() / HALF;
             if ((!bCaretMode_) && (arrowOffset_.Unit() != DimensionUnit::PERCENT)) {
                 if ((arrowPosition_.GetY() + arrowOffset_.ConvertToPx()) > maxOffset) {
                     arrowBuildplacement = Placement::RIGHT_BOTTOM;
                     break;
                 }
-                if ((arrowOffset_.ConvertToPx()) < popupTheme->GetRadius().GetY().ConvertToPx()) {
+                if ((arrowOffset_.ConvertToPx()) < radius) {
                     arrowBuildplacement = Placement::RIGHT_TOP;
                     break;
                 }
@@ -1561,14 +1599,14 @@ void BubbleLayoutAlgorithm::GetArrowBuildPlacement(Placement& arrowBuildplacemen
         case Placement::TOP:
         case Placement::TOP_LEFT:
         case Placement::TOP_RIGHT: // Bottom
-            maxOffset = childOffset_.GetX() + childSize_.Width() - popupTheme->GetRadius().GetX().ConvertToPx() -
+            maxOffset = childOffset_.GetX() + childSize_.Width() - radius -
                         BUBBLE_ARROW_WIDTH.ConvertToPx() / HALF;
             if ((!bCaretMode_) && (arrowOffset_.Unit() != DimensionUnit::PERCENT)) {
                 if ((arrowPosition_.GetX() + arrowOffset_.ConvertToPx()) > maxOffset) {
                     arrowBuildplacement = Placement::BOTTOM_RIGHT; // replace
                     break;
                 }
-                if ((arrowOffset_.ConvertToPx()) < popupTheme->GetRadius().GetX().ConvertToPx()) {
+                if ((arrowOffset_.ConvertToPx()) < radius) {
                     arrowBuildplacement = Placement::BOTTOM_LEFT; // replace
                     break;
                 }
@@ -1580,14 +1618,14 @@ void BubbleLayoutAlgorithm::GetArrowBuildPlacement(Placement& arrowBuildplacemen
         case Placement::RIGHT:
         case Placement::RIGHT_TOP:
         case Placement::RIGHT_BOTTOM: // Left
-            maxOffset = childOffset_.GetY() + childSize_.Height() - popupTheme->GetRadius().GetX().ConvertToPx() -
+            maxOffset = childOffset_.GetY() + childSize_.Height() - radius -
                         BUBBLE_ARROW_WIDTH.ConvertToPx() / HALF;
             if ((!bCaretMode_) && (arrowOffset_.Unit() != DimensionUnit::PERCENT)) {
                 if ((arrowPosition_.GetY() + arrowOffset_.ConvertToPx()) > maxOffset) {
                     arrowBuildplacement = Placement::LEFT_BOTTOM;
                     break;
                 }
-                if ((arrowOffset_.ConvertToPx()) < popupTheme->GetRadius().GetX().ConvertToPx()) {
+                if ((arrowOffset_.ConvertToPx()) < radius) {
                     arrowBuildplacement = Placement::LEFT_TOP;
                     break;
                 }
@@ -1605,13 +1643,9 @@ std::string BubbleLayoutAlgorithm::BuildTopLinePath(float arrowOffset, float rad
 {
     std::string path;
     float childOffsetY = childOffset_.GetY();
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_RETURN(pipeline, path);
-    auto popupTheme = pipeline->GetTheme<PopupTheme>();
-    CHECK_NULL_RETURN(popupTheme, path);
     auto leftOffset =
-        childOffset_.GetX() + popupTheme->GetRadius().GetX().ConvertToPx() + BUBBLE_ARROW_WIDTH.ConvertToPx() / HALF;
-    auto rightOffset = childOffset_.GetX() + childSize_.Width() - popupTheme->GetRadius().GetX().ConvertToPx() -
+        childOffset_.GetX() + radius + BUBBLE_ARROW_WIDTH.ConvertToPx() / HALF;
+    auto rightOffset = childOffset_.GetX() + childSize_.Width() - radius -
                        BUBBLE_ARROW_WIDTH.ConvertToPx() / HALF;
     auto arrowTopOffset = std::clamp(
         arrowPosition_.GetX() + arrowOffset, static_cast<float>(leftOffset), static_cast<float>(rightOffset));
@@ -1652,13 +1686,9 @@ std::string BubbleLayoutAlgorithm::BuildRightLinePath(float arrowOffset, float r
 {
     std::string path;
     float childOffsetY = childOffset_.GetY();
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_RETURN(pipeline, path);
-    auto popupTheme = pipeline->GetTheme<PopupTheme>();
-    CHECK_NULL_RETURN(popupTheme, path);
     auto topOffset =
-        childOffset_.GetY() + popupTheme->GetRadius().GetY().ConvertToPx() + BUBBLE_ARROW_WIDTH.ConvertToPx() / HALF;
-    auto bottomOffset = childOffset_.GetY() + childSize_.Height() - popupTheme->GetRadius().GetY().ConvertToPx() -
+        childOffset_.GetY() + radius + BUBBLE_ARROW_WIDTH.ConvertToPx() / HALF;
+    auto bottomOffset = childOffset_.GetY() + childSize_.Height() - radius -
                         BUBBLE_ARROW_WIDTH.ConvertToPx() / HALF;
     auto arrowRightOffset = std::clamp(
         arrowPosition_.GetY() + arrowOffset, static_cast<float>(topOffset), static_cast<float>(bottomOffset));
@@ -1702,13 +1732,9 @@ std::string BubbleLayoutAlgorithm::BuildBottomLinePath(float arrowOffset, float 
 {
     std::string path;
     float childOffsetY = childOffset_.GetY();
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_RETURN(pipeline, path);
-    auto popupTheme = pipeline->GetTheme<PopupTheme>();
-    CHECK_NULL_RETURN(popupTheme, path);
     auto leftOffset =
-        childOffset_.GetX() + popupTheme->GetRadius().GetX().ConvertToPx() + BUBBLE_ARROW_WIDTH.ConvertToPx() / HALF;
-    auto rightOffset = childOffset_.GetX() + childSize_.Width() - popupTheme->GetRadius().GetX().ConvertToPx() -
+        childOffset_.GetX() + radius + BUBBLE_ARROW_WIDTH.ConvertToPx() / HALF;
+    auto rightOffset = childOffset_.GetX() + childSize_.Width() - radius -
                        BUBBLE_ARROW_WIDTH.ConvertToPx() / HALF;
     auto arrowBottomOffset = std::clamp(
         arrowPosition_.GetX() + arrowOffset, static_cast<float>(leftOffset), static_cast<float>(rightOffset));
@@ -1752,13 +1778,9 @@ std::string BubbleLayoutAlgorithm::BuildLeftLinePath(float arrowOffset, float ra
 {
     std::string path;
     float childOffsetY = childOffset_.GetY();
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_RETURN(pipeline, path);
-    auto popupTheme = pipeline->GetTheme<PopupTheme>();
-    CHECK_NULL_RETURN(popupTheme, path);
     auto topOffset =
-        childOffset_.GetY() + popupTheme->GetRadius().GetX().ConvertToPx() + BUBBLE_ARROW_WIDTH.ConvertToPx() / HALF;
-    auto bottomOffset = childOffset_.GetY() + childSize_.Height() - popupTheme->GetRadius().GetX().ConvertToPx() -
+        childOffset_.GetY() + radius + BUBBLE_ARROW_WIDTH.ConvertToPx() / HALF;
+    auto bottomOffset = childOffset_.GetY() + childSize_.Height() - radius -
                         BUBBLE_ARROW_WIDTH.ConvertToPx() / HALF;
     auto arrowLeftOffset = std::clamp(
         arrowPosition_.GetY() + arrowOffset, static_cast<float>(topOffset), static_cast<float>(bottomOffset));
