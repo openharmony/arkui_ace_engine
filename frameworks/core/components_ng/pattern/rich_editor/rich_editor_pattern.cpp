@@ -1359,7 +1359,7 @@ bool RichEditorPattern::HandleUserGestureEvent(
 void RichEditorPattern::HandleClickAISpanEvent(GestureEvent& info)
 {
     isClickOnAISpan_ = false;
-    if (!textDetectEnable_ || aiSpanMap_.empty()) {
+    if (!NeedShowAIDetect()) {
         return;
     }
     auto host = GetHost();
@@ -1451,14 +1451,12 @@ void RichEditorPattern::InitFocusEvent(const RefPtr<FocusHub>& focusHub)
     auto focusTask = [weak = WeakClaim(this)]() {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
-        pattern->textDetectEnable_ = false;
         pattern->HandleFocusEvent();
     };
     focusHub->SetOnFocusInternal(focusTask);
     auto blurTask = [weak = WeakClaim(this)]() {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
-        pattern->textDetectEnable_ = true;
         pattern->HandleBlurEvent();
     };
     focusHub->SetOnBlurInternal(blurTask);
@@ -1473,6 +1471,7 @@ void RichEditorPattern::InitFocusEvent(const RefPtr<FocusHub>& focusHub)
 
 void RichEditorPattern::HandleBlurEvent()
 {
+    StartAITask();
     StopTwinkling();
     // The pattern handles blurevent, Need to close the softkeyboard first.
     if (customKeyboardBuilder_ && isCustomKeyboardAttached_) {
@@ -1487,6 +1486,11 @@ void RichEditorPattern::HandleBlurEvent()
 
 void RichEditorPattern::HandleFocusEvent()
 {
+    auto host = GetHost();
+    if (host && textDetectEnable_ && !aiSpanMap_.empty()) {
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    }
+    CancelAITask();
     UseHostToUpdateTextFieldManager();
     StartTwinkling();
     if (!usingMouseRightButton_ && !isLongPress_) {
@@ -4968,5 +4972,18 @@ void RichEditorPattern::HandleOnCameraInput()
     }
 #endif
 #endif
+}
+
+bool RichEditorPattern::CanStartAITask()
+{
+    return !HasFocus();
+}
+
+bool RichEditorPattern::NeedShowAIDetect()
+{
+    if (copyOption_ == CopyOptions::None) {
+        return false;
+    }
+    return textDetectEnable_ && !aiSpanMap_.empty() && IsEnabled() && !HasFocus();
 }
 } // namespace OHOS::Ace::NG

@@ -334,7 +334,6 @@ bool TextLayoutAlgorithm::CreateParagraph(const TextStyle& textStyle, std::strin
 {
     auto frameNode = layoutWrapper->GetHostNode();
     auto pipeline = frameNode->GetContext();
-    auto textLayoutProperty = DynamicCast<TextLayoutProperty>(layoutWrapper->GetLayoutProperty());
     auto pattern = frameNode->GetPattern<TextPattern>();
     auto paraStyle = GetParagraphStyle(textStyle, content);
     if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN) && spanItemChildren_.empty()) {
@@ -362,7 +361,7 @@ bool TextLayoutAlgorithm::CreateParagraph(const TextStyle& textStyle, std::strin
             auto dragContents = pattern->GetDragContents();
             CreateParagraphDrag(textStyle, dragContents, content);
         } else {
-            if (pattern->GetTextDetectEnable() && !pattern->GetAISpanMap().empty()) {
+            if (pattern->NeedShowAIDetect()) {
                 UpdateParagraphForAISpan(textStyle, layoutWrapper);
             } else {
                 StringUtils::TransformStrCase(content, static_cast<int32_t>(textStyle.GetTextCase()));

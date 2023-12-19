@@ -469,6 +469,7 @@ public:
         CloseSelectOverlay();
         ResetSelection();
     }
+    virtual bool NeedShowAIDetect();
 
 protected:
     void OnAfterModifyDone() override;
@@ -498,6 +499,10 @@ protected:
     void ParseAIJson(const std::unique_ptr<JsonValue>& jsonValue, TextDataDetectType type, int32_t startPos,
         bool isMenuOption = false);
     void StartAITask();
+    void CancelAITask()
+    {
+        aiDetectDelayTask_.Cancel();
+    }
     bool IsDraggable(const Offset& localOffset);
     virtual void InitClickEvent(const RefPtr<GestureEventHub>& gestureHub);
     void CalculateHandleOffsetAndShowOverlay(bool isUsingMouse = false);
@@ -511,6 +516,12 @@ protected:
     std::string GetSelectedText(int32_t start, int32_t end) const;
     void CalcCaretMetricsByPosition(
         int32_t extent, CaretMetricsF& caretCaretMetric, TextAffinity textAffinity = TextAffinity::DOWNSTREAM);
+
+    virtual bool CanStartAITask()
+    {
+        return true;
+    };
+    bool IsEnabled();
 
     Status status_ = Status::NONE;
     bool contChange_ = false;

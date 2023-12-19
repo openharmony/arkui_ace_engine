@@ -1797,7 +1797,10 @@ void TextPattern::ParseAIJson(
 
 void TextPattern::StartAITask()
 {
-    if (copyOption_ == CopyOptions::None || !textDetectEnable_) {
+    if (!CanStartAITask()) {
+        return;
+    }
+    if (copyOption_ == CopyOptions::None || !textDetectEnable_ || !IsEnabled()) {
         return;
     }
     aiSpanMap_.clear();
@@ -2450,5 +2453,25 @@ void TextPattern::RemoveAreaChangeInner()
         return;
     }
     pipeline->RemoveOnAreaChangeNode(host->GetId());
+}
+
+bool TextPattern::IsEnabled()
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto eventHub = host->GetEventHub<EventHub>();
+    CHECK_NULL_RETURN(eventHub, false);
+    return eventHub->IsEnabled();
+}
+
+bool TextPattern::NeedShowAIDetect()
+{
+    auto textLayoutProp = GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_RETURN(textLayoutProp, false);
+    if (textLayoutProp->GetCopyOptionValue(CopyOptions::None) == CopyOptions::None) {
+        return false;
+    }
+
+    return textDetectEnable_ && !aiSpanMap_.empty() && IsEnabled();
 }
 } // namespace OHOS::Ace::NG
