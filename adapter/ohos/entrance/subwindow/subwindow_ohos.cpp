@@ -592,11 +592,10 @@ void SubwindowOhos::HideMenuNG(const RefPtr<NG::FrameNode>& menu, int32_t target
 
 void SubwindowOhos::UpdateHideMenuOffsetNG(const NG::OffsetF& offset)
 {
-    auto aceContainer = Platform::AceContainer::GetContainer(childContainerId_);
-    CHECK_NULL_VOID(aceContainer);
-    auto context = DynamicCast<NG::PipelineContext>(aceContainer->GetPipelineContext());
-    CHECK_NULL_VOID(context);
-    auto overlay = context->GetOverlayManager();
+    ContainerScope scope(childContainerId_);
+    auto pipelineContext = NG::PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto overlay = pipelineContext->GetOverlayManager();
     CHECK_NULL_VOID(overlay);
     if (overlay->IsContextMenuDragHideFinished()) {
         return;
