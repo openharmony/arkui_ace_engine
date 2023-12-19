@@ -184,6 +184,7 @@ WebPattern::WebPattern(const std::string& webSrc,
 
 WebPattern::~WebPattern()
 {
+    TAG_LOGI(AceLogTag::ACE_WEB, "Web pattern destory");
     if (delegate_) {
         delegate_->SetAudioMuted(true);
     }
@@ -1553,7 +1554,7 @@ void WebPattern::OnModifyDone()
         isAllowWindowOpenMethod_ = SystemProperties::GetAllowWindowOpenMethodEnabled();
         delegate_->UpdateAllowWindowOpenMethod(GetAllowWindowOpenMethodValue(isAllowWindowOpenMethod_));
         if (!webAccessibilityNode_) {
-            webAccessibilityNode_ = AceType::MakeRefPtr<WebAccessibilityNode>(host);
+            webAccessibilityNode_ = AceType::MakeRefPtr<WebAccessibilityNode>(WeakPtr<FrameNode>(host));
         }
     }
 
