@@ -178,7 +178,8 @@ struct DialogProperties {
     DialogButtonDirection buttonDirection = DialogButtonDirection::AUTO;
     bool isMask = false;
     bool isModal = true;
-	
+    std::function<void()> customBuilder;
+
 #ifndef NG_BUILD
     std::unordered_map<std::string, EventMarker> callbacks; // <callback type(success, cancel, complete), eventId>
     // These ids is used for AlertDialog of declarative.
@@ -203,6 +204,7 @@ struct PromptDialogAttr {
     bool autoCancel = true;
     bool showInSubWindow = false;
     bool isModal = false;
+    std::function<void()> customBuilder;
 
     std::optional<DialogAlignment> alignment;
     std::optional<DimensionOffset> offset;

@@ -1098,6 +1098,53 @@ void SubwindowOhos::ShowDialog(const PromptDialogAttr& dialogAttr, const std::ve
     }
 }
 
+void SubwindowOhos::OpenCustomDialogForAbility(const PromptDialogAttr& dialogAttr,
+    std::function<void(int32_t)>&& callback)
+{
+    TAG_LOGI(AceLogTag::ACE_SUB_WINDOW, "open custom dialog");
+    SubwindowManager::GetInstance()->SetCurrentSubwindow(AceType::Claim(this));
+
+    auto aceContainer = Platform::AceContainer::GetContainer(childContainerId_);
+    if (!aceContainer) {
+        return;
+    }
+
+    auto engine = EngineHelper::GetEngine(aceContainer->GetInstanceId());
+    auto delegate = engine->GetFrontend();
+    if (!delegate) {
+        return;
+    }
+    delegate->OpenCustomDialog(dialogAttr, std::move(callback));
+}
+
+void SubwindowOhos::OpenCustomDialogForService(const PromptDialogAttr& dialogAttr,
+    std::function<void(int32_t)>&& callback)
+{
+    // temporary not support
+    LOGW("temporary not support for service by promptAction with CustomBuilder");
+}
+
+void SubwindowOhos::OpenCustomDialog(const PromptDialogAttr& dialogAttr, std::function<void(int32_t)>&& callback)
+{
+    if (parentContainerId_ >= MIN_PA_SERVICE_ID || parentContainerId_ < 0) {
+        OpenCustomDialogForService(dialogAttr, std::move(callback));
+    } else {
+        OpenCustomDialogForAbility(dialogAttr, std::move(callback));
+    }
+}
+
+void SubwindowOhos::CloseCustomDialog(const int32_t dialogId)
+{
+    auto aceContainer = Platform::AceContainer::GetContainer(childContainerId_);
+    CHECK_NULL_VOID(aceContainer);
+    auto context = DynamicCast<NG::PipelineContext>(aceContainer->GetPipelineContext());
+    CHECK_NULL_VOID(context);
+    auto overlay = context->GetOverlayManager();
+    CHECK_NULL_VOID(overlay);
+    ContainerScope scope(childContainerId_);
+    return overlay->CloseCustomDialog(dialogId);
+}
+
 void SubwindowOhos::ShowActionMenuForAbility(
     const std::string& title, const std::vector<ButtonInfo>& button, std::function<void(int32_t, int32_t)>&& callback)
 {

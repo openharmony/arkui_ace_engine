@@ -110,6 +110,8 @@ public:
         std::function<void(int32_t, int32_t)>&& callback);
     void CloseDialog(int32_t instanceId);
     void RequestFocusSubwindow(int32_t instanceId);
+    void OpenCustomDialog(const PromptDialogAttr &dialogAttr, std::function<void(int32_t)> &&callback);
+    void CloseCustomDialog(const int32_t dialogId);
     
     bool GetShown();
 

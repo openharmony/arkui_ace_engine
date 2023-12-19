@@ -2416,6 +2416,45 @@ HWTEST_F(OverlayManagerTestNg, DialogTest004, TestSize.Level1)
 }
 
 /**
+ * @tc.name: DialogTest005
+ * @tc.desc: Test OverlayManager::OpenCustomDialog->CloseCustomDialog.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTestNg, DialogTest005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create root node and dialogParam.
+     */
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    DialogProperties dialogParam;
+    dialogParam.isShowInSubWindow = false;
+
+    /**
+     * @tc.steps: step2. create overlayManager and call OpenCustomDialog.
+     * @tc.expected: dialogMap_ is not empty
+     */
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    auto callbackFunc = [overlayManager](int32_t dialogId) {
+        /**
+         * @tc.steps: step4. call CloseCustomDialog when dialogMap_ is not empty.
+         * @tc.expected: remove successfully
+         */
+        overlayManager->CloseCustomDialog(dialogId);
+        EXPECT_TRUE(overlayManager->dialogMap_.empty());
+
+        /**
+         * @tc.steps: step4. call CloseDialog again when dialogMap_ is empty.
+         * @tc.expected: function exits normally
+         */
+        overlayManager->CloseCustomDialog(dialogId);
+        EXPECT_TRUE(overlayManager->dialogMap_.empty());
+    };
+
+    overlayManager->OpenCustomDialog(dialogParam, callbackFunc);
+    EXPECT_FALSE(overlayManager->dialogMap_.empty());
+}
+
+/**
  * @tc.name: SheetPresentationPattern2
  * @tc.desc: Test SheetPresentationPattern::CheckSheetHeightChange().
  * @tc.type: FUNC
