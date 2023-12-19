@@ -138,7 +138,7 @@ abstract class ViewPU extends NativeViewPartialUpdate
   private watchedProps: Map<string, (propName: string) => void>
     = new Map<string, (propName: string) => void>();
 
-  private recycleManager: RecycleManager = undefined;
+  private recycleManager_: RecycleManager = undefined;
   
   private isCompFreezeAllowed: boolean = false;
 
@@ -685,7 +685,11 @@ abstract class ViewPU extends NativeViewPartialUpdate
         }
         stateMgmtConsole.debug(`${this.debugInfo()}: viewPropertyHasChanged property: elmtIds that need re-render due to state variable change: ${this.debugInfoElmtIds(Array.from(dependentElmtIds))} .`)
         for (const elmtId of dependentElmtIds) {
-          this.dirtDescendantElementIds_.add(elmtId);
+          if (this.hasRecycleManager()) {
+            this.dirtDescendantElementIds_.add(this.recycleManager_.proxyNodeId(elmtId));
+          } else {
+            this.dirtDescendantElementIds_.add(elmtId);
+          }
         }
         stateMgmtConsole.debug(`   ... updated full list of elmtIds that need re-render [${this.debugInfoElmtIds(Array.from(this.dirtDescendantElementIds_))}].`)
       } else {
@@ -827,7 +831,11 @@ abstract class ViewPU extends NativeViewPartialUpdate
         // ascending order ensures parent nodes will be updated before their children
         // prior cleanup ensure no already deleted Elements have their update func executed
         Array.from(this.dirtDescendantElementIds_).sort(ViewPU.compareNumber).forEach(elmtId => {
-            this.UpdateElement(elmtId);
+            if (this.hasRecycleManager()) {
+              this.UpdateElement(this.recycleManager_.proxyNodeId(elmtId));
+            } else {
+              this.UpdateElement(elmtId);
+            }
             this.dirtDescendantElementIds_.delete(elmtId);
         });
 
@@ -954,26 +962,26 @@ abstract class ViewPU extends NativeViewPartialUpdate
   }
 
   getOrCreateRecycleManager(): RecycleManager {
-    if (!this.recycleManager) {
-      this.recycleManager = new RecycleManager
+    if (!this.recycleManager_) {
+      this.recycleManager_ = new RecycleManager
     }
-    return this.recycleManager;
+    return this.recycleManager_;
   }
 
   getRecycleManager(): RecycleManager {
-    return this.recycleManager;
+    return this.recycleManager_;
   }
 
   hasRecycleManager(): boolean {
-    return !(this.recycleManager === undefined);
+    return !(this.recycleManager_ === undefined);
   }
 
   initRecycleManager(): void {
-    if (this.recycleManager) {
+    if (this.recycleManager_) {
       stateMgmtConsole.error(`${this.debugInfo()}: init recycleManager multiple times. Internal error.`);
       return;
     }
-    this.recycleManager = new RecycleManager;
+    this.recycleManager_ = new RecycleManager;
   }
 
   /**
@@ -999,25 +1007,17 @@ abstract class ViewPU extends NativeViewPartialUpdate
     // if there is a suitable recycle node, run a recycle update function.
     const newElmtId: number = ViewStackProcessor.AllocateNewElmetIdForNextComponent();
     const oldElmtId: number = node.id__();
-    // store the current id and origin id, used for dirty element sort in {compareNumber}
-    recycleUpdateFunc(newElmtId, /* is first render */ true, node);
-    const oldEntry: UpdateFuncRecord | undefined = this.updateFuncByElmtId.get(oldElmtId);
-    this.updateFuncByElmtId.delete(oldElmtId);
-    this.updateFuncByElmtId.set(newElmtId, {
-      updateFunc: compilerAssignedUpdateFunc,
-      classObject: oldEntry && oldEntry.getComponentClass(),
-      node: oldEntry && oldEntry.getNode()
-    });
-    node.updateId(newElmtId);
-    node.updateRecycleElmtId(oldElmtId, newElmtId);
-    SubscriberManager.UpdateRecycleElmtId(oldElmtId, newElmtId);
+    this.recycleManager_.updateNodeId(oldElmtId, newElmtId);
+    recycleUpdateFunc(oldElmtId, /* is first render */ true, node);
   }
 
   aboutToReuseInternal() {
     this.runReuse_ = true;
     stateMgmtTrace.scopedTrace(() => {
       if (this.paramsGenerator_ && typeof this.paramsGenerator_ == "function") {
-        this.aboutToReuse(this.paramsGenerator_());
+        const params = this.paramsGenerator_();
+        this.updateStateVars(params);
+        this.aboutToReuse(params);
       }
     }, "aboutToReuse", this.constructor.name);
     this.updateDirtyElements();
