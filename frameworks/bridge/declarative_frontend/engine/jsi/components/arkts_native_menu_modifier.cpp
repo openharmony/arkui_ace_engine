@@ -116,7 +116,8 @@ void ResetRadius(NodeHandle node)
 }
 ArkUIMenuModifierAPI GetMenuModifier()
 {
-    static const ArkUIMenuModifierAPI modifier = { SetMenuFontColor, ResetMenuFontColor, SetMenuFont, ResetMenuFont, SetRadius, ResetRadius };
+    static const ArkUIMenuModifierAPI modifier = { SetMenuFontColor, ResetMenuFontColor, SetMenuFont, ResetMenuFont,
+        SetRadius, ResetRadius };
 
     return modifier;
 }

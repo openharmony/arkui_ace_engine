@@ -1985,7 +1985,7 @@ function CheckJSCallbackInfo(value: any, checklist: any[]) {
     }
 
   });
-  return typeVerified || checklist.length == 0;
+  return typeVerified || checklist.length === 0;
 }
 
 function modifier<T extends number | string | boolean | Equable, M extends Modifier<T>>(

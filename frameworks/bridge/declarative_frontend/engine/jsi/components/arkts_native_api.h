@@ -1367,9 +1367,9 @@ struct ArkUIListModifierAPI {
     void (*ListSetDivider)(NodeHandle node, double strokeWidth, const uint32_t color, double startMargin,
         double endMargin, int32_t strokeWidth_size, int32_t startMargin_size, int32_t endMargin_size);
     void (*ListResetDivider)(NodeHandle node);
-    void (*SetChainAnimationOptions)(NodeHandle node, double minSpace, double maxSpace, 
-        double conductivity, double intensity, int32_t edgeEffect, double stiffness, double damping, 
-        int32_t minSpace_size, int32_t maxSpace_size);
+    void (*SetChainAnimationOptions)(NodeHandle node, double minSpace, double maxSpace, double conductivity,
+        double intensity, int32_t edgeEffect, double stiffness, double damping, int32_t minSpace_size,
+        int32_t maxSpace_size);
     void (*ResetChainAnimationOptions)(NodeHandle node);
 };
 
