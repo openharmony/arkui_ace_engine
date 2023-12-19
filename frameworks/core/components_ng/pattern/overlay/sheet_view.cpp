@@ -95,7 +95,6 @@ RefPtr<FrameNode> SheetView::CreateOperationColumnNode(
         }
     }
 
-    bool isShow = sheetStyle.showDragBar.value_or(true);
     auto dragBarNode = FrameNode::GetOrCreateFrameNode("SheetDragBar", ElementRegister::GetInstance()->MakeUniqueId(),
         []() { return AceType::MakeRefPtr<SheetDragBarPattern>(); });
     auto dragBarLayoutProperty = dragBarNode->GetLayoutProperty();
@@ -103,11 +102,7 @@ RefPtr<FrameNode> SheetView::CreateOperationColumnNode(
     dragBarLayoutProperty->UpdateUserDefinedIdealSize(
         CalcSize(CalcLength(SHEET_DRAG_BAR_WIDTH), CalcLength(SHEET_DRAG_BAR_HEIGHT)));
     dragBarLayoutProperty->UpdateAlignment(Alignment::CENTER);
-    if (sheetStyle.isTitleBuilder.has_value()) {
-        dragBarLayoutProperty->UpdateVisibility(isShow ? VisibleType::VISIBLE : VisibleType::INVISIBLE);
-    } else {
-        dragBarLayoutProperty->UpdateVisibility(isShow ? VisibleType::VISIBLE : VisibleType::GONE);
-    }
+    dragBarLayoutProperty->UpdateVisibility(VisibleType::GONE);
 
     dragBarNode->MountToParent(operationColumn);
     dragBarNode->MarkModifyDone();

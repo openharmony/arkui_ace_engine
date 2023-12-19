@@ -2668,6 +2668,7 @@ void OverlayManager::PlaySheetTransition(
                 auto sheetPattern = sheet->GetPattern<SheetPresentationPattern>();
                 CHECK_NULL_VOID(sheetPattern);
                 sheetPattern->ProcessColumnRect(height);
+                sheetPattern->ChangeScrollHeight(height);
         });
         AnimationUtils::Animate(
             option,
