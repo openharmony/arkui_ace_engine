@@ -21,13 +21,16 @@
 #include <vector>
 
 #include "gtest/gtest.h"
-#define protected public
+
 #define private public
+#define protected public
 #include "base/geometry/ng/size_t.h"
 #include "base/geometry/size.h"
 #include "core/components_ng/property/calc_length.h"
 #include "core/components_ng/property/layout_constraint.h"
 #include "core/components_ng/property/measure_property.h"
+#undef protected
+#undef private
 
 using namespace testing;
 using namespace testing::ext;
@@ -400,7 +403,8 @@ HWTEST_F(LayoutConstraintTestNg, LayoutConstraintTestNg007, TestSize.Level1)
     layoutConstraint.selfIdealSize = OptionalSizeF(480, 960);
 
     /**
-     * @tc.steps: step1 call ApplyAspectRatioToParentIdealSize and set ratio > 0 and useWidth false and parentIdealSize width false.
+     * @tc.steps: step1 call ApplyAspectRatioToParentIdealSize and set ratio > 0 and useWidth false
+     * and parentIdealSize width false.
      * @tc.expected: width changed successfully
      */
     bool useWidth = false;
@@ -409,7 +413,8 @@ HWTEST_F(LayoutConstraintTestNg, LayoutConstraintTestNg007, TestSize.Level1)
     EXPECT_EQ(layoutConstraint.parentIdealSize.Width().value(), 2048);
 
     /**
-     * @tc.steps: step2 call ApplyAspectRatioToParentIdealSize and set ratio > 0 and useWidth true and parentIdealSize width false.
+     * @tc.steps: step2 call ApplyAspectRatioToParentIdealSize and set ratio > 0 and useWidth true
+     * and parentIdealSize width false.
      * @tc.expected: width changed successfully
      */
     ratio = 1;
@@ -440,7 +445,7 @@ HWTEST_F(LayoutConstraintTestNg, LayoutConstraintTestNg008, TestSize.Level1)
     EXPECT_EQ(layoutConstraint.parentIdealSize.Width().value(), 768.0);
 
     /**
-     * @tc.steps: step2 call ApplyAspectRatioWithoutCalcSize and set ratio = 2 reaterThanApiTen true. 
+     * @tc.steps: step2 call ApplyAspectRatioWithoutCalcSize and set ratio = 2 reaterThanApiTen true.
      * @tc.expected: minSize,maxSize,percentRef height all set success
      */
     ratio = 2;
@@ -495,7 +500,6 @@ HWTEST_F(LayoutConstraintTestNg, LayoutConstraintTestNg009, TestSize.Level1)
      * @tc.expected: Reset Success.
      */
     layoutConstraint.Reset();
-    //EXPECT_FALSE(layoutConstraint.parentIdealSize.width_->has_value());
     EXPECT_EQ(layoutConstraint.minSize.Width(), 0);
     EXPECT_EQ(layoutConstraint.minSize.Height(), 0);
 }
