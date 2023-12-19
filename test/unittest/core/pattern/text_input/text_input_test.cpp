@@ -91,6 +91,8 @@ constexpr int32_t DEFAULT_RETURN_VALUE = -1;
 const std::string DEFAULT_TEXT = "abcdefghijklmnopqrstuvwxyz";
 const std::string HELLO_TEXT = "hello";
 const std::string DEFAULT_PLACE_HOLDER = "please input text here";
+const std::string LOWERCASE_FILTER = "[a-z]";
+const std::string NUMBER_FILTER = "^[0-9]*$";
 const Color DEFAULT_PLACE_HODER_COLOR = Color::RED;
 const Color DEFAULT_SELECTED_BACKFROUND_COLOR = Color::BLUE;
 const Color DEFAULT_CARET_COLOR = Color::BLACK;
@@ -907,6 +909,78 @@ HWTEST_F(TextInputCursorTest, OnHandleMove003, TestSize.Level1)
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(pattern_->selectController_->GetFirstHandleInfo().index, 5);
     EXPECT_EQ(pattern_->selectController_->GetSecondHandleInfo().index, 21);
+}
+
+/**
+ * @tc.name: OnHandleMove004
+ * @tc.desc: Test the clip board interface
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputCursorTest, OnHandleMove004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: steps1. Initialize text input and Move the handles and then do handle selection.
+     */
+    std::vector<CaretMoveIntent> select = { CaretMoveIntent::LeftWord, CaretMoveIntent::RightWord,
+        CaretMoveIntent::Home, CaretMoveIntent::End };
+    CreateTextField(DEFAULT_PLACE_HOLDER, DEFAULT_PLACE_HOLDER);
+
+    /**
+     * @tc.steps: Move the handles and selection leftword "please".
+     *            Verify the selection data.
+     */
+    pattern_->HandleSetSelection(6, 6, false);
+    pattern_->HandleSelect(select[0]);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->selectController_->GetFirstHandleInfo().index, 6);
+    EXPECT_EQ(pattern_->selectController_->GetSecondHandleInfo().index, 0);
+
+    /**
+     * @tc.steps: Move the handles and selection rightword "input".
+     *            Verify the selection data.
+     */
+    pattern_->HandleSetSelection(7, 7, false);
+    pattern_->HandleSelect(select[1]);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->selectController_->GetFirstHandleInfo().index, 7);
+    EXPECT_EQ(pattern_->selectController_->GetSecondHandleInfo().index, 13);
+}
+
+/**
+ * @tc.name: OnHandleMove005
+ * @tc.desc: Test the clip board interface
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputCursorTest, OnHandleMove005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: steps1. Initialize text input and Move the handles and then do handle selection.
+     */
+    int32_t start = 6;
+    int32_t end = 6;
+    std::vector<CaretMoveIntent> select = { CaretMoveIntent::LeftWord, CaretMoveIntent::RightWord,
+        CaretMoveIntent::Home, CaretMoveIntent::End };
+    CreateTextField(DEFAULT_PLACE_HOLDER, DEFAULT_PLACE_HOLDER);
+
+    /**
+     * @tc.steps: Move the handles and selection home.
+     *            Verify the selection data.
+     */
+    pattern_->HandleSetSelection(start, end, false);
+    pattern_->HandleSelect(select[2]);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->selectController_->GetFirstHandleInfo().index, start);
+    EXPECT_EQ(pattern_->selectController_->GetSecondHandleInfo().index, 0);
+
+    /**
+     * @tc.steps: Move the handles and selection end.
+     *            Verify the selection data.
+     */
+    pattern_->HandleSetSelection(start, end, false);
+    pattern_->HandleSelect(select[3]);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->selectController_->GetFirstHandleInfo().index, start);
+    EXPECT_EQ(pattern_->selectController_->GetSecondHandleInfo().index, 22);
 }
 
 /**
@@ -2750,5 +2824,163 @@ HWTEST_F(TextFieldUXTest, AdjustWordCursorAndSelect01, TestSize.Level1)
     mockDataDetectorMgr.AdjustWordSelection(pos, content, start, end);
     EXPECT_EQ(start, -1);
     EXPECT_EQ(end, -1);
+}
+
+/**
+ * @tc.name: TextFieldFilter001
+ * @tc.desc: Test textfield filter.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldControllerTest, TextFieldFilter001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize text input.
+     */
+    CreateTextField(DEFAULT_TEXT, "");
+
+    /**
+     * @tc.steps: step2. assign filter as lowercase filter
+     */
+    layoutProperty_->UpdateInputFilter(LOWERCASE_FILTER);
+    pattern_->InsertValue("X");
+    EXPECT_EQ(pattern_->GetInputFilter(), LOWERCASE_FILTER);
+}
+
+/**
+ * @tc.name: TextFieldFilter002
+ * @tc.desc: Test textfield filter.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldControllerTest, TextFieldFilter002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize text input.
+     */
+    CreateTextField(DEFAULT_TEXT, "");
+
+    /**
+     * @tc.steps: step2. assign filter as number filter
+     */
+    layoutProperty_->UpdateInputFilter(NUMBER_FILTER);
+    auto numStr = "1";
+    pattern_->InsertValue(numStr);
+    EXPECT_EQ(pattern_->GetInputFilter(), NUMBER_FILTER);
+}
+
+/**
+ * @tc.name: TextFieldPatternOnTextInputScroll001
+ * @tc.desc: Verify that the AddScrollEvent interface calls normally and exits without exception.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldControllerTest, TextFieldPatternOnTextInputScroll001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize text input.
+     */
+    CreateTextField(DEFAULT_TEXT);
+
+    /**
+     * @tc.steps: step2. Call the OnTextInputScroll.
+     * @tc.expected: step2. Check the value set in OnTextInputScroll.
+     */
+    layoutProperty_->UpdateMaxLines(2);
+    pattern_->OnTextInputScroll(0.0f);
+    layoutProperty_->UpdateMaxLines(1);
+    pattern_->textRect_.x_ = 10.0f;
+    pattern_->textRect_.width_ = 200.0f;
+    pattern_->contentRect_.x_ = 20.0f;
+    pattern_->contentRect_.width_ = 100.0f;
+    pattern_->OnTextInputScroll(-1000.0f);
+    pattern_->isSingleHandle_ = false;
+    pattern_->OnTextInputScroll(0.0f);
+    pattern_->isSingleHandle_ = true;
+    pattern_->OnTextInputScroll(0.0f);
+    EXPECT_EQ(pattern_->selectController_->GetCaretRect().GetX(), -90.0f);
+    EXPECT_EQ(pattern_->textRect_.GetOffset(), OffsetF(pattern_->currentOffset_, pattern_->textRect_.GetY()));
+}
+
+/**
+ * @tc.name: CreateNodePaintMethod001
+ * @tc.desc: Test textfield to create paint.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldControllerTest, CreateNodePaintMethod001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize text input.
+     */
+    CreateTextField(DEFAULT_TEXT);
+
+    /**
+     * @tc.steps: step2. call CreateNodePaintMethod
+     * tc.expected: step2. Check if the value is created.
+     */
+    auto paint = pattern_->CreateNodePaintMethod();
+    EXPECT_NE(pattern_->GetContentModifier(), nullptr);
+}
+
+/**
+ * @tc.name: CursorInContentRegion001
+ * @tc.desc: Test textfield if the cursor in content.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldControllerTest, CursorInContentRegion001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize text input.
+     */
+    CreateTextField(DEFAULT_TEXT);
+
+    /**
+     * @tc.steps: step2. call CursorInContentRegion
+     * tc.expected: step2. Check the cursor position.
+     */
+    GetFocus();
+    EXPECT_TRUE(pattern_->CursorInContentRegion());
+}
+
+/**
+ * @tc.name: OffsetInContentRegion
+ * @tc.desc: Test textfield if the cursor in content.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldControllerTest, OffsetInContentRegion, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize text input.
+     */
+    CreateTextField(DEFAULT_TEXT);
+
+    /**
+     * @tc.steps: step2. call CursorInContentRegion
+     * tc.expected: step2. Check the offset position.
+     */
+    EXPECT_TRUE(pattern_->OffsetInContentRegion(Offset(1.0f, 1.0f)));
+}
+
+/**
+ * @tc.name: OnModifyDone001
+ * @tc.desc: Test the OnModifyDone.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldControllerTest, OnModifyDone001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize text input.
+     */
+    CreateTextField(DEFAULT_TEXT);
+
+    /**
+     * @tc.steps: step2. Set showUnderLine. Call function OnModifyDone.
+     * @tc.expected: Check the showUnderLine set successfully.
+     */
+    layoutProperty_->UpdateShowUnderline(true);
+    pattern_->OnModifyDone();
+    GetFocus();
+    EXPECT_TRUE(layoutProperty_->GetShowUnderlineValue(false));
+    layoutProperty_->UpdateShowUnderline(false);
+    pattern_->OnModifyDone();
+    GetFocus();
+    EXPECT_FALSE(layoutProperty_->GetShowUnderlineValue(false));
 }
 } // namespace OHOS::Ace::NG
