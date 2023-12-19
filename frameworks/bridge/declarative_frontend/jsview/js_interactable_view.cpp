@@ -172,6 +172,9 @@ void JSInteractableView::JsOnClick(const JSCallbackInfo& info)
     };
 
     ViewAbstractModel::GetInstance()->SetOnClick(std::move(onTap), std::move(onClick));
+    auto focusHub = NG::ViewStackProcessor::GetInstance()->GetOrCreateMainFrameNodeFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    focusHub->SetFocusable(true, false);
 }
 
 void JSInteractableView::SetFocusable(bool focusable)

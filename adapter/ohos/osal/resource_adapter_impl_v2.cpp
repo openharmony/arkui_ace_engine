@@ -227,8 +227,6 @@ RefPtr<ThemeStyle> ResourceAdapterImplV2::GetTheme(int32_t themeId)
                 std::string patternTag = PATTERN_MAP[i];
                 std::string patternName = std::string(OHFlag) + PATTERN_MAP[i];
                 ret = manager->GetPatternByName(patternName.c_str(), attrMap);
-                LOGD("theme pattern[%{public}s, %{public}s], attr size=%{public}zu", patternTag.c_str(),
-                    patternName.c_str(), attrMap.size());
                 if (attrMap.empty()) {
                     continue;
                 }
@@ -741,4 +739,23 @@ uint32_t ResourceAdapterImplV2::GetResourceLimitKeys() const
     CHECK_NULL_RETURN(manager, 0);
     return manager->GetResourceLimitKeys();
 }
+
+uint32_t ResourceAdapterImplV2::GetSymbolByName(const char* resName) const
+{
+    uint32_t result = 0;
+    auto manager = GetResourceManager();
+    CHECK_NULL_RETURN(manager, -1);
+    manager->GetSymbolByName(resName, result);
+    return result;
+}
+
+uint32_t ResourceAdapterImplV2::GetSymbolById(uint32_t resId) const
+{
+    uint32_t result = 0;
+    auto manager = GetResourceManager();
+    CHECK_NULL_RETURN(manager, -1);
+    manager->GetSymbolById(resId, result);
+    return result;
+}
+
 } // namespace OHOS::Ace

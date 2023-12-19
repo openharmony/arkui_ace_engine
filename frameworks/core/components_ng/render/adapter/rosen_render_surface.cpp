@@ -214,7 +214,6 @@ void RosenRenderSurface::DrawBuffer()
 #ifndef USE_ROSEN_DRAWING
         Rosen::RSModifierType::CONTENT_STYLE, [surfaceNode](const std::shared_ptr<SkCanvas>& canvas) {
             CHECK_NULL_VOID(canvas);
-            LOGD("RSRecordingCanvas->onDrawRect");
             Rosen::RSSurfaceBufferInfo info { surfaceNode->buffer_, surfaceNode->orgin_.GetX(),
                 surfaceNode->orgin_.GetY(), surfaceNode->buffer_->GetSurfaceBufferWidth(),
                 surfaceNode->buffer_->GetSurfaceBufferHeight() };
@@ -254,8 +253,6 @@ void RosenRenderSurface::ConsumeWebBuffer()
         return;
     }
     int32_t bufferHeight = surfaceBuffer->GetSurfaceBufferHeight();
-    LOGD("x = %{public}d, y = %{public}d, width = %{public}d, height = %{public}d)", (int32_t)orgin_.GetX(),
-        (int32_t)(orgin_.GetY()), surfaceBuffer->GetSurfaceBufferWidth(), bufferHeight);
     auto renderContext = renderContext_.Upgrade();
     CHECK_NULL_VOID(renderContext);
     auto task = [renderContext]() {
@@ -270,7 +267,6 @@ void RosenRenderSurface::ConsumeWebBuffer()
     if (std::count(DEFAULT_HEIGHT_GEAR.begin(), DEFAULT_HEIGHT_GEAR.end(), bufferHeight)) {
         auto iterator = std::find(DEFAULT_HEIGHT_GEAR.begin(), DEFAULT_HEIGHT_GEAR.end(), bufferHeight);
         int32_t index = iterator - DEFAULT_HEIGHT_GEAR.begin();
-        LOGD("RSRecordingCanvas->onDrawRect, index = %{public}d", index);
         if (index >= static_cast<int32_t>(DEFAULT_HEIGHT_GEAR.size())) {
             LOGE("surfaceBuffer'height out of range");
             return;

@@ -85,9 +85,12 @@ public:
     using SetHapPathCallback = std::function<void(const std::string&)>;
     using JsProxyCallback = std::function<void()>;
     using OnControllerAttachedCallback = std::function<void()>;
+    using PermissionClipboardCallback = std::function<void(const std::shared_ptr<BaseEventInfo>&)>;
     WebPattern();
-    WebPattern(std::string webSrc, const RefPtr<WebController>& webController, WebType type = WebType::SURFACE);
-    WebPattern(std::string webSrc, const SetWebIdCallback& setWebIdCallback, WebType type = WebType::SURFACE);
+    WebPattern(const std::string& webSrc, const RefPtr<WebController>& webController, WebType type = WebType::SURFACE,
+               bool incognitoMode = false);
+    WebPattern(const std::string& webSrc, const SetWebIdCallback& setWebIdCallback, WebType type = WebType::SURFACE,
+               bool incognitoMode = false);
 
     ~WebPattern() override;
 
@@ -202,6 +205,16 @@ public:
         return setWebIdCallback_;
     }
 
+    void SetPermissionClipboardCallback(PermissionClipboardCallback&& Callback)
+    {
+        permissionClipboardCallback_ = std::move(Callback);
+    }
+
+    PermissionClipboardCallback GetPermissionClipboardCallback() const
+    {
+        return permissionClipboardCallback_;
+    }
+
     void SetWebType(WebType type)
     {
         type_ = type;
@@ -210,6 +223,16 @@ public:
     WebType GetWebType()
     {
         return type_;
+    }
+
+    void SetIncognitoMode(bool incognitoMode)
+    {
+        incognitoMode_ = incognitoMode;
+    }
+
+    bool GetIncognitoMode() const
+    {
+        return incognitoMode_;
     }
 
     void SetOnControllerAttachedCallback(OnControllerAttachedCallback&& callback)
@@ -338,6 +361,7 @@ public:
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, VerticalScrollBarAccessEnabled, bool);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, ScrollBarColor, std::string);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, OverScrollMode, int32_t);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, CopyOptionMode, int32_t);
 
     void RequestFullScreen();
     void ExitFullScreen();
@@ -389,7 +413,9 @@ public:
     bool NotifyStartDragTask();
     bool IsImageDrag();
     void UpdateJavaScriptOnDocumentStart();
+    void UpdateJavaScriptOnDocumentEnd();
     void JavaScriptOnDocumentStart(const ScriptItems& scriptItems);
+    void JavaScriptOnDocumentEnd(const ScriptItems& scriptItems);
 #ifdef ENABLE_DRAG_FRAMEWORK
     DragRet GetDragAcceptableStatus();
 #endif
@@ -479,6 +505,7 @@ private:
     void OnVerticalScrollBarAccessEnabledUpdate(bool value);
     void OnScrollBarColorUpdate(const std::string& value);
     void OnOverScrollModeUpdate(const int32_t value);
+    void OnCopyOptionModeUpdate(const int32_t value);
     int GetWebId();
 
     void InitEvent();
@@ -588,7 +615,9 @@ private:
     std::optional<std::string> customScheme_;
     RefPtr<WebController> webController_;
     SetWebIdCallback setWebIdCallback_ = nullptr;
+    PermissionClipboardCallback permissionClipboardCallback_ = nullptr;
     WebType type_;
+    bool incognitoMode_ = false;
     SetHapPathCallback setHapPathCallback_ = nullptr;
     JsProxyCallback jsProxyCallback_ = nullptr;
     OnControllerAttachedCallback onControllerAttachedCallback_ = nullptr;
@@ -649,7 +678,8 @@ private:
     RefPtr<WebDelegate> delegate_;
     RefPtr<WebDelegateObserver> observer_;
     std::set<OHOS::Ace::KeyCode> KeyCodeSet_;
-    std::optional<ScriptItems> scriptItems_;
+    std::optional<ScriptItems> onDocumentStartScriptItems_;
+    std::optional<ScriptItems> onDocumentEndScriptItems_;
     bool isOfflineMode_ = false;
     ACE_DISALLOW_COPY_AND_MOVE(WebPattern);
     bool accessibilityState_ = false;

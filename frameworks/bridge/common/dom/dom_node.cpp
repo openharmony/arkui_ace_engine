@@ -220,7 +220,6 @@ void DOMNode::SetAttrInternal(const std::vector<std::pair<std::string, std::stri
 void DOMNode::CallMethod(const std::string& method, const std::string& args)
 {
     if (method == COMMON_METHOD_FOCUS) {
-        LOGD("CallMethod: node tag: %{public}s call focus method.", tag_.c_str());
         if (!focusableEventComponent_) {
             return;
         }
@@ -648,7 +647,6 @@ void DOMNode::UpdatePseudoStyle(bool isBackendChange)
         return;
     }
     auto status = CalculatePseudoStatus();
-    LOGD("UpdatePseudoStyle status is:%{public}d, isBackendChange:%{public}d", status, isBackendChange);
     if (!isBackendChange) {
         UpdatePseudoStyleByStatus(status, false);
         return;

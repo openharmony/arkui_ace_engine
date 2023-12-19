@@ -19,7 +19,6 @@ namespace OHOS::Ace {
 
 RefPtr<RenderNode> RenderSceneViewer::Create(uint32_t key)
 {
-    LOGD("ACE-3D RenderSceneViewer::Create() key: %d", key);
     if (SystemProperties::GetRosenBackendEnabled()) {
 #ifdef ENABLE_ROSEN_BACKEND
         return AceType::MakeRefPtr<RosenRenderSceneViewer>(key);

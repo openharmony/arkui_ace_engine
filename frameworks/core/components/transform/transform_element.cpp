@@ -56,7 +56,6 @@ RefPtr<PageElement> TransformElement::SearchParentPage() const
     while (parent) {
         auto page = AceType::DynamicCast<PageElement>(parent);
         if (page) {
-            LOGD("Find parent page. page id: %{public}d", page->GetPageId());
             return page;
         }
         parent = parent->GetElementParent().Upgrade();

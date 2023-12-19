@@ -327,6 +327,7 @@ public:
     static void JsAccessibilityLevel(const std::string& level);
     static void JsAllowDrop(const JSCallbackInfo& info);
     static void JsDragPreview(const JSCallbackInfo& info);
+    static void JsAccessibilityVirtualNode(const JSCallbackInfo& info);
 
     static void JSCreateAnimatableProperty(const JSCallbackInfo& info);
     static void JSUpdateAnimatableProperty(const JSCallbackInfo& info);
@@ -404,7 +405,6 @@ public:
         }
 
         if (jsValue->IsNumber()) {
-            LOGD("jsValue->IsNumber()");
             result = jsValue->ToNumber<T>();
             return true;
         }
@@ -412,7 +412,6 @@ public:
         JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsValue);
         JSRef<JSVal> type = jsObj->GetProperty("type");
         if (!type->IsNumber()) {
-            LOGD("type is not number");
             return false;
         }
 
@@ -496,6 +495,7 @@ public:
     static bool CheckColor(const JSRef<JSVal>& jsValue, Color& result, const char* componentName, const char* propName);
     static bool CheckLength(
         const JSRef<JSVal>& jsValue, CalcDimension& result, const char* componentName, const char* propName);
+    static bool ParseJsSymbolId(const JSRef<JSVal>& jsValue, uint32_t& symbolId);
 };
 } // namespace OHOS::Ace::Framework
 #endif // JS_VIEW_ABSTRACT_H

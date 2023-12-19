@@ -87,6 +87,63 @@ public:
         return appLabel_;
     }
 
+    RefPtr<FrameNode> GetColumnNode()
+    {
+        auto host = GetHost();
+        CHECK_NULL_RETURN(host, nullptr);
+        return AceType::DynamicCast<FrameNode>(host->GetChildren().front());
+    }
+
+    RefPtr<FrameNode> GetFloatingTitleRow()
+    {
+        auto host = GetHost();
+        CHECK_NULL_RETURN(host, nullptr);
+        return AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(1));
+    }
+
+    RefPtr<FrameNode> GetControlButtonRow()
+    {
+        auto host = GetHost();
+        CHECK_NULL_RETURN(host, nullptr);
+        return AceType::DynamicCast<FrameNode>(host->GetChildren().back());
+    }
+
+    RefPtr<FrameNode> GetCustomTitleRow()
+    {
+        auto columnNode = GetColumnNode();
+        CHECK_NULL_RETURN(columnNode, nullptr);
+        return AceType::DynamicCast<FrameNode>(columnNode->GetChildren().front());
+    }
+
+    RefPtr<CustomTitleNode> GetCustomTitleNode()
+    {
+        auto row = GetCustomTitleRow();
+        CHECK_NULL_RETURN(row, nullptr);
+        return AceType::DynamicCast<CustomTitleNode>(row->GetChildren().front());
+    }
+
+    RefPtr<FrameNode> GetStackNode()
+    {
+        auto columnNode = GetColumnNode();
+        CHECK_NULL_RETURN(columnNode, nullptr);
+        return AceType::DynamicCast<FrameNode>(columnNode->GetChildren().back());
+    }
+
+    RefPtr<CustomTitleNode> GetFloatingTitleNode()
+    {
+        auto row = GetFloatingTitleRow();
+        CHECK_NULL_RETURN(row, nullptr);
+        return AceType::DynamicCast<CustomTitleNode>(row->GetChildren().front());
+    }
+
+    void SetContainerModalTitleVisible(bool customTitleSettedShow, bool floatingTitleSettedShow);
+    void SetContainerModalTitleHeight(int32_t height);
+    int32_t GetContainerModalTitleHeight();
+    bool GetContainerModalButtonsRect(RectF& containerModal, RectF& buttons);
+    void SubscribeContainerModalButtonsRectChange(
+        std::function<void(RectF& containerModal, RectF& buttons)>&& callback);
+    void OnModifyDone() override;
+
 protected:
     virtual RefPtr<UINode> GetTitleItemByIndex(const RefPtr<FrameNode>& controlButtonsNode, int32_t originIndex)
     {
@@ -112,6 +169,11 @@ protected:
     bool CanShowFloatingTitle();
 
     WindowMode windowMode_;
+    bool customTitleSettedShow_ = true;
+    bool floatingTitleSettedShow_ = true;
+    std::function<void(RectF&, RectF&)> controlButtonsRectChangeCallback_;
+    RectF buttonsRect_;
+    Dimension titleHeight_ = CONTAINER_TITLE_HEIGHT;
 
 private:
     void WindowFocus(bool isFocus);

@@ -22,6 +22,7 @@
 #include <atomic>
 
 #include "interfaces/inner_api/ace/ace_forward_compatibility.h"
+#include "interfaces/inner_api/ace/navigation_controller.h"
 
 #include "base/memory/ace_type.h"
 #include "base/resource/asset_manager.h"
@@ -48,10 +49,13 @@
 namespace OHOS::Ace {
 
 using PageTask = std::function<void()>;
-using TouchEventCallback = std::function<void(const TouchEvent&, const std::function<void()>&)>;
+using TouchEventCallback = std::function<void(const TouchEvent&, const std::function<void()>&,
+    const RefPtr<NG::FrameNode>&)>;
 using KeyEventCallback = std::function<bool(const KeyEvent&)>;
-using MouseEventCallback = std::function<void(const MouseEvent&, const std::function<void()>&)>;
-using AxisEventCallback = std::function<void(const AxisEvent&, const std::function<void()>&)>;
+using MouseEventCallback = std::function<void(const MouseEvent&, const std::function<void()>&,
+    const RefPtr<NG::FrameNode>&)>;
+using AxisEventCallback = std::function<void(const AxisEvent&, const std::function<void()>&,
+    const RefPtr<NG::FrameNode>&)>;
 using RotationEventCallBack = std::function<bool(const RotationEvent&)>;
 using CardViewPositionCallBack = std::function<void(int id, float offsetX, float offsetY)>;
 using DragEventCallBack = std::function<void(const PointerEvent& pointerEvent, const DragEventAction& action)>;
@@ -113,6 +117,10 @@ public:
     virtual void TriggerGarbageCollection() {}
 
     virtual void DumpHeapSnapshot(bool isPrivate) {}
+
+    virtual void DestroyHeapProfiler() {}
+
+    virtual void ForceFullGC() {}
 
     virtual void NotifyFontNodes() {}
 
@@ -387,6 +395,11 @@ public:
     virtual bool RequestAutoSave(const RefPtr<NG::FrameNode>& node)
     {
         return false;
+    }
+
+    virtual std::shared_ptr<NavigationController> GetNavigationController(const std::string& navigationId)
+    {
+        return nullptr;
     }
 
     static bool LessThanAPIVersion(PlatformVersion version)

@@ -185,6 +185,7 @@ template("declarative_js_engine_ark") {
       "components/arkts_native_path_modifier.cpp",
       "components/arkts_native_pattern_lock_modifier.cpp",
       "components/arkts_native_polyline_modifier.cpp",
+      "components/arkts_native_progress_modifier.cpp",
       "components/arkts_native_qrcode_modifier.cpp",
       "components/arkts_native_radio_modifier.cpp",
       "components/arkts_native_rating_modifier.cpp",
@@ -268,6 +269,7 @@ template("declarative_js_engine_ark") {
       "nativeModule/arkts_native_path_bridge.cpp",
       "nativeModule/arkts_native_pattern_lock_bridge.cpp",
       "nativeModule/arkts_native_polyline_bridge.cpp",
+      "nativeModule/arkts_native_progress_bridge.cpp",
       "nativeModule/arkts_native_qrcode_bridge.cpp",
       "nativeModule/arkts_native_radio_bridge.cpp",
       "nativeModule/arkts_native_rating_bridge.cpp",
@@ -300,6 +302,7 @@ template("declarative_js_engine_ark") {
     ]
 
     deps = []
+    external_deps = []
 
     if (defined(config.form_components_support) &&
         config.form_components_support) {
@@ -308,6 +311,19 @@ template("declarative_js_engine_ark") {
         "nativeModule/arkts_native_form_component_bridge.cpp",
       ]
       deps += [ "${ace_root}/frameworks/core/components_ng/pattern/form:ace_core_components_form_pattern_ng_$platform" ]
+
+      if (is_ohos_standard_system) {
+        external_deps += [
+          "ability_base:want",
+          "ability_runtime:app_manager",
+          "bundle_framework:appexecfwk_core",
+          "form_fwk:fmskit_native",
+          "form_fwk:form_manager",
+          "graphic_2d:librender_service_client",
+          "input:libmmi-client",
+          "ipc:ipc_core",
+        ]
+      }
     }
 
     include_dirs = []
@@ -340,8 +356,6 @@ template("declarative_js_engine_ark") {
       ]
       deps += [ "$ace_root/frameworks/core/components/theme:build_theme_code" ]
     }
-
-    external_deps = []
 
     # add for cross_platfrom_build temporarily, shall be removed after external_deps is supported
     if (is_arkui_x) {

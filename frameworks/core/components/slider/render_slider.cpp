@@ -90,8 +90,6 @@ void RenderSlider::Update(const RefPtr<Component>& component)
             MarkNeedLayout();
             return;
         }
-        LOGD("Slider::RenderSlider::Update Min: %{public}lf max: %{public}lf step: %{public}lf value: %{public}lf",
-            min_, max_, step_, value_);
         totalRatio_ = (value_ - min_) / (max_ - min_);
 
         // Event update
@@ -460,7 +458,6 @@ void RenderSlider::FireMovingEvent(SliderEvent mode)
 
 void RenderSlider::HandleClick(const Offset& clickPosition)
 {
-    LOGD("Slider::Handle click position x:%{public}f y:%{public}f", clickPosition.GetX(), clickPosition.GetY());
     if (NearZero(trackLength_)) {
         totalRatio_ = 0.0;
         return;
@@ -559,12 +556,10 @@ void RenderSlider::RenderBlockPosition(const Offset& touchPosition)
     if (diff < 0.0) {
         SyncValueToComponent(min_);
         SetTotalRatio(0.0);
-        LOGD("Slider::RenderSlider RenderBlockPosition value: %{public}lf", value_);
         MarkNeedLayout();
         return;
     }
     totalRatio_ = diff / trackLength_;
-    LOGD("Slider::RenderSlider RenderBlockPosition totalRatio: %{public}lf", totalRatio_);
     if (totalRatio_ > 1.0) {
         value_ = max_;
         SetTotalRatio(1.0);
@@ -583,7 +578,6 @@ void RenderSlider::RenderBlockPosition(const Offset& touchPosition)
         }
     }
     SyncValueToComponent(value_);
-    LOGD("Slider::RenderSlider RenderBlockPosition value: %{public}lf", value_);
     MarkNeedLayout();
 }
 

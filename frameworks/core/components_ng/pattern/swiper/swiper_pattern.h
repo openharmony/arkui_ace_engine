@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SWIPER_SWIPER_PATTERN_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SWIPER_SWIPER_PATTERN_H
 
+#include <functional>
 #include <optional>
 #include <vector>
 
@@ -37,6 +38,7 @@
 #include "core/components_ng/pattern/swiper/swiper_model.h"
 #include "core/components_ng/pattern/swiper/swiper_paint_method.h"
 #include "core/components_ng/pattern/swiper/swiper_paint_property.h"
+#include "core/components_ng/pattern/tabs/tab_content_transition_proxy.h"
 #include "core/components_v2/inspector/utils.h"
 
 namespace OHOS::Ace::NG {
@@ -44,6 +46,8 @@ class SwiperPattern : public NestableScrollContainer {
     DECLARE_ACE_TYPE(SwiperPattern, NestableScrollContainer);
 
 public:
+    using CustomContentTransitionPtr = std::shared_ptr<std::function<TabContentAnimatedTransition(int32_t, int32_t)>>;
+
     SwiperPattern();
     ~SwiperPattern() override = default;
 
@@ -225,9 +229,19 @@ public:
         return turnPageRate_;
     }
 
+    GestureState GetGestureState() const
+    {
+        return gestureState_;
+    }
+
+    TouchBottomTypeLoop GetTouchBottomTypeLoop() const
+    {
+        return touchBottomType_;
+    }
+
     bool IsIndicatorAnimatorRunning() const
     {
-        return indicatorController_ ? indicatorController_->IsRunning() : false;
+        return indicatorAnimationIsRunning_;
     }
 
     void SetTurnPageRate(float turnPageRate)
@@ -494,6 +508,11 @@ public:
         return finishCallbackType_;
     }
 
+    void SetStopIndicatorAnimationCb(const std::function<void(void)>& stopCallback)
+    {
+        stopIndicatorAnimationFunc_ = std::move(stopCallback);
+    }
+
     std::shared_ptr<SwiperParameters> GetSwiperParameters() const;
     std::shared_ptr<SwiperDigitalParameters> GetSwiperDigitalParameters() const;
 
@@ -514,6 +533,28 @@ public:
     void DumpAdvanceInfo() override;
     int32_t GetLoopIndex(int32_t originalIndex) const;
     int32_t GetDuration() const;
+    RefPtr<Curve> GetCurveIncludeMotion() const;
+    void OnCustomContentTransition(int32_t toIndex);
+    void OnCustomAnimationFinish(int32_t fromIndex, int32_t toIndex, bool hasOnChanged);
+
+    void SetCustomAnimationToIndex(int32_t toIndex)
+    {
+        customAnimationToIndex_ = toIndex;
+    }
+
+    void SetCustomContentTransition(std::function<TabContentAnimatedTransition(int32_t, int32_t)>&& event)
+    {
+        onCustomContentTransition_ =
+            std::make_shared<std::function<TabContentAnimatedTransition(int32_t, int32_t)>>(event);
+    }
+
+    CustomContentTransitionPtr GetCustomContentTransition() const
+    {
+        return onCustomContentTransition_;
+    }
+
+    void SetSwiperEventCallback(bool disableSwipe);
+    void UpdateSwiperPanEvent(bool disableSwipe);
 
 private:
     void OnModifyDone() override;
@@ -559,10 +600,9 @@ private:
     // use property animation feature
     void PlayPropertyTranslateAnimation(
         float translate, int32_t nextIndex, float velocity = 0.0f, bool stopAutoPlay = false);
-    void StopPropertyTranslateAnimation(bool isBeforeCreateLayoutWrapper = false);
+    void StopPropertyTranslateAnimation(bool isFinishAnimation, bool isBeforeCreateLayoutWrapper = false);
     void UpdateOffsetAfterPropertyAnimation(float offset);
     void OnPropertyTranslateAnimationFinish(const OffsetF& offset);
-    RefPtr<Curve> GetCurveIncludeMotion(float velocity = 0.0f) const;
     void PlayIndicatorTranslateAnimation(float translate);
 
     // Implement of swiper controller
@@ -606,7 +646,7 @@ private:
     void PostTranslateTask(uint32_t delayTime);
     void RegisterVisibleAreaChange();
     bool NeedAutoPlay() const;
-    void OnTranslateFinish(int32_t nextIndex, bool restartAutoPlay, bool forceStop = false);
+    void OnTranslateFinish(int32_t nextIndex, bool restartAutoPlay, bool isFinishAnimation, bool forceStop = false);
     bool IsShowArrow() const;
     void SaveArrowProperty(const RefPtr<FrameNode>& arrowNode);
     RefPtr<FocusHub> GetFocusHubChild(std::string childFrameName);
@@ -646,6 +686,8 @@ private:
     bool AutoLinearAnimationNeedReset(float translate) const;
     void OnAnimationTranslateZero(int32_t nextIndex, bool stopAutoPlay);
     void UpdateDragFRCSceneInfo(float speed, SceneStatus sceneStatus);
+    void TriggerCustomContentTransitionEvent(int32_t fromIndex, int32_t toIndex);
+    bool IsUseCustomAnimation() const;
 
     /**
      * @brief Stops animations when the scroll starts.
@@ -697,6 +739,9 @@ private:
     void NotifyParentScrollEnd();
 
     inline bool ChildFirst(NestedState state);
+    void HandleTouchBottomLoop();
+    void CalculateGestureState(float additionalOffset, float currentTurnPageRate);
+    void StopIndicatorAnimation();
 
     WeakPtr<NestableScrollContainer> parent_;
     /**
@@ -712,13 +757,18 @@ private:
     RefPtr<Animator> controller_;
 
     // Control spring animation when drag beyond boundary and drag end.
-    RefPtr<Animator> springController_;
+    std::shared_ptr<AnimationUtils::Animation> springAnimation_;
 
     // Control fade animation when drag beyond boundary and drag end.
     std::shared_ptr<AnimationUtils::Animation> fadeAnimation_;
 
     // Control translate animation for indicator.
-    RefPtr<Animator> indicatorController_;
+    std::shared_ptr<AnimationUtils::Animation> indicatorAnimation_;
+
+    bool indicatorAnimationIsRunning_ = false;
+
+    // stop indicator animation callback
+    std::function<void(void)> stopIndicatorAnimationFunc_;
 
     RefPtr<SwiperController> swiperController_;
     RefPtr<InputEvent> mouseEvent_;
@@ -736,6 +786,8 @@ private:
     float currentOffset_ = 0.0f;
     float fadeOffset_ = 0.0f;
     float turnPageRate_ = 0.0f;
+    GestureState gestureState_ = GestureState::GESTURE_STATE_FOLLOW;
+    TouchBottomTypeLoop touchBottomType_ = TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_NONE;
     float touchBottomRate_ = 1.0f;
     float currentIndexOffset_ = 0.0f;
     int32_t gestureSwipeIndex_ = 0;
@@ -793,10 +845,13 @@ private:
     float currentDelta_ = 0.0f;
     SwiperLayoutAlgorithm::PositionMap itemPosition_;
     std::optional<float> velocity_;
+    float motionVelocity_ = 0.0f;
     bool isFinishAnimation_ = false;
     bool mainSizeIsMeasured_ = false;
     bool isNeedResetPrevMarginAndNextMargin_ = false;
     bool usePropertyAnimation_ = false;
+    bool springAnimationIsRunning_ = false;
+    bool isTouchDownSpringAnimation_ = false;
     int32_t propertyAnimationIndex_ = -1;
     bool isUserFinish_ = true;
     bool isVoluntarilyClear_ = false;
@@ -804,6 +859,7 @@ private:
     bool stopIndicatorAnimation_ = true;
     bool isTouchPad_ = false;
     bool fadeAnimationIsRunning_ = false;
+    bool autoLinearReachBoundary = false;
 
     float mainDeltaSum_ = 0.0f;
     std::optional<int32_t> cachedCount_;
@@ -814,6 +870,12 @@ private:
     WindowSizeChangeReason windowSizeChangeReason_ = WindowSizeChangeReason::UNDEFINED;
     std::vector<RefPtr<ScrollingListener>> scrollingListener_;
     FinishCallbackType finishCallbackType_ = FinishCallbackType::REMOVED;
+
+    CustomContentTransitionPtr onCustomContentTransition_;
+    std::set<int32_t> indexsInAnimation_;
+    std::set<int32_t> needUnmountIndexs_;
+    std::optional<int32_t> customAnimationToIndex_;
+    RefPtr<TabContentTransitionProxy> currentProxyInAnimation_;
 };
 } // namespace OHOS::Ace::NG
 

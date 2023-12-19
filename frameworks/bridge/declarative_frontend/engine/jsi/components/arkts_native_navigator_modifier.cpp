@@ -32,7 +32,7 @@ void ResetTarget(NodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    NavigatorModelNG::SetUri(frameNode, nullptr);
+    NavigatorModelNG::SetUri(frameNode, "");
 }
 
 void SetType(NodeHandle node, int32_t value)

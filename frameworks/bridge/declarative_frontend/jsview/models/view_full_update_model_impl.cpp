@@ -69,7 +69,6 @@ RefPtr<AceType> ViewFullUpdateModelImpl::CreateNode(NodeInfo&& info)
     composedComponent->SetElementFunction(std::move(elementFunction));
 
     if (isStatic) {
-        LOGD("will mark composedComponent as static");
         composedComponent->SetStatic();
     }
     return composedComponent;
@@ -85,7 +84,6 @@ bool ViewFullUpdateModelImpl::MarkNeedUpdate(const WeakPtr<AceType>& node)
     }
     auto element = weakElement.Upgrade();
     if (element) {
-        LOGD("Element %{public}d MarkDirty", element->GetElementId());
         element->MarkDirty();
     }
     return true;

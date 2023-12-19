@@ -59,6 +59,8 @@ public:
     NG::RectF GetRect() override;
     void ShowMenu(const RefPtr<Component>& newComponent) override;
     void ShowMenuNG(const RefPtr<NG::FrameNode> menuNode, int32_t targetId, const NG::OffsetF& offset) override;
+    void ShowPreviewNG() override;
+    void HidePreviewNG() override;
     void HideMenuNG(const RefPtr<NG::FrameNode>& menu, int32_t targetId) override;
     void HideMenuNG(bool showPreviewAnimation, bool startDrag) override;
     void ShowPopup(const RefPtr<Component>& newComponent, bool disableTouchEvent = true) override;
@@ -92,6 +94,8 @@ public:
     void ShowActionMenu(const std::string& title, const std::vector<ButtonInfo>& button,
         std::function<void(int32_t, int32_t)>&& callback) override;
     void CloseDialog(int32_t instanceId) override;
+    void OpenCustomDialog(const PromptDialogAttr& dialogAttr, std::function<void(int32_t)>&& callback) override;
+    void CloseCustomDialog(const int32_t dialogId) override;
     const RefPtr<NG::OverlayManager> GetOverlayManager() override;
 
     int32_t GetChildContainerId() const override
@@ -150,6 +154,8 @@ private:
         std::function<void(int32_t, int32_t)>&& callback, const std::set<std::string>& callbacks);
     void ShowDialogForService(const PromptDialogAttr& dialogAttr, const std::vector<ButtonInfo>& buttons,
         std::function<void(int32_t, int32_t)>&& callback, const std::set<std::string>& callbacks);
+    void OpenCustomDialogForAbility(const PromptDialogAttr& dialogAttr, std::function<void(int32_t)>&& callback);
+    void OpenCustomDialogForService(const PromptDialogAttr& dialogAttr, std::function<void(int32_t)>&& callback);
     void ShowActionMenuForAbility(const std::string& title, const std::vector<ButtonInfo>& button,
         std::function<void(int32_t, int32_t)>&& callback);
     void ShowActionMenuForService(const std::string& title, const std::vector<ButtonInfo>& button,

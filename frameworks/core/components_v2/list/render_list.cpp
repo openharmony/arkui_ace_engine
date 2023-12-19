@@ -747,7 +747,6 @@ void RenderList::PerformLayout()
     case ListEvents::eventNumber:                                      \
         if (event.second) {                                            \
             ResumeEventCallback(component_, &ListComponent::callback); \
-            LOGD("list event %{public}s triggered.", #eventNumber);    \
             event.second = false;                                      \
         }                                                              \
         break;
@@ -2005,12 +2004,10 @@ void RenderList::ProcessDragUpdate(double dragOffset)
 void RenderList::ProcessScrollOverCallback(double velocity)
 {
     if (!chainAnimation_) {
-        LOGD("chain animation is null, no need to handle it.");
         return;
     }
 
     if (NearZero(velocity)) {
-        LOGD("velocity is zero, no need to handle in chain animation.");
         return;
     }
 
@@ -2093,7 +2090,6 @@ double RenderList::GetChainDelta(int32_t index) const
     if (node) {
         value = node->GetValue();
     }
-    LOGD("ChainDelta. controlIndex: %{public}d, index: %{public}d, value: %{public}.3lf", controlIndex, index, value);
     return value;
 }
 
@@ -2138,21 +2134,17 @@ double RenderList::FlushChainAnimation()
     chain_->FlushAnimation();
     if (dragStartIndexPending_ != dragStartIndex_) {
         deltaDistance = chainAdapter_->ResetControl(dragStartIndexPending_ - dragStartIndex_);
-        LOGD("Switch chain control node. %{public}zu -> %{public}zu, deltaDistance: %{public}.1f", dragStartIndex_,
-            dragStartIndexPending_, deltaDistance);
         dragStartIndex_ = dragStartIndexPending_;
         chainAdapter_->SetDeltaValue(-deltaDistance);
         needSetValue = true;
     }
     if (!NearZero(currentDelta_)) {
-        LOGD("Set delta chain value. delta: %{public}.1f", currentDelta_);
         chainAdapter_->SetDeltaValue(currentDelta_);
         currentDelta_ = 0.0;
         needSetValue = true;
     }
     if (needSetValue) {
         chain_->SetValue(0.0);
-        LOGD("FlushChainAnimation: %{public}s", chainAdapter_->DumpNodes().c_str());
     }
     return deltaDistance;
 }
@@ -2166,7 +2158,6 @@ void RenderList::UpdateAccessibilityAttr()
 
     auto accessibilityNode = GetAccessibilityNode().Upgrade();
     if (!accessibilityNode) {
-        LOGD("RenderList: current accessibilityNode is null.");
         return;
     }
 
@@ -3153,7 +3144,6 @@ void RenderList::AddChildItem(RefPtr<RenderNode> child)
 
 void RenderList::SizeChangeOffset(double newWindowHeight)
 {
-    LOGD("list newWindowHeight = %{public}f", newWindowHeight);
     auto context = context_.Upgrade();
     if (!context) {
         return;
@@ -3172,7 +3162,6 @@ void RenderList::SizeChangeOffset(double newWindowHeight)
             currentOffset_ += offset;
             startIndexOffset_ += offset;
         }
-        LOGD("size change offset applied, %{public}f", offset);
     }
 }
 

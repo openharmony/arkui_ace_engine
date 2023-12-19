@@ -160,19 +160,24 @@ EventRecorder& EventRecorder::Get()
 
 EventRecorder::EventRecorder() {}
 
+void EventRecorder::UpdateEventSwitch(const EventSwitch& eventSwitch)
+{
+    eventSwitch_ = eventSwitch;
+}
+
 bool EventRecorder::IsPageRecordEnable() const
 {
-    return pageEnable_;
+    return pageEnable_ && eventSwitch_.pageEnable;
 }
 
 bool EventRecorder::IsExposureRecordEnable() const
 {
-    return exposureEnable_;
+    return exposureEnable_ && eventSwitch_.exposureEnable;
 }
 
 bool EventRecorder::IsComponentRecordEnable() const
 {
-    return componentEnable_;
+    return componentEnable_ && eventSwitch_.componentEnable;
 }
 
 void EventRecorder::SetContainerInfo(const std::string& windowName, int32_t id, bool foreground)
@@ -208,8 +213,11 @@ int32_t EventRecorder::GetContainerId()
     return focusContainerId_;
 }
 
-const std::string& EventRecorder::GetPageUrl() const
+const std::string& EventRecorder::GetPageUrl()
 {
+    if (pageUrl_.empty()) {
+        pageUrl_ = GetCurrentPageUrl();
+    }
     return pageUrl_;
 }
 
@@ -226,7 +234,6 @@ void EventRecorder::OnPageShow(const std::string& pageUrl, const std::string& pa
     builder.SetType(std::to_string(PageEventType::ROUTER_PAGE))
         .SetText(pageUrl)
         .SetExtra(Recorder::KEY_PAGE_PARAM, param);
-    TAG_LOGD(AceLogTag::ACE_UIEVENT, "OnPageShow record %{public}s", builder.ToString().c_str());
     EventController::Get().NotifyEvent(
         EventCategory::CATEGORY_PAGE, static_cast<int32_t>(EventType::PAGE_SHOW), std::move(builder.build()));
 }
@@ -237,7 +244,6 @@ void EventRecorder::OnPageHide(const std::string& pageUrl, const int64_t duratio
     builder.SetType(std::to_string(PageEventType::ROUTER_PAGE))
         .SetText(pageUrl)
         .SetExtra(KEY_DURATION, std::to_string(duration));
-    TAG_LOGD(AceLogTag::ACE_UIEVENT, "OnPageHide record %{public}s", builder.ToString().c_str());
     EventController::Get().NotifyEvent(
         EventCategory::CATEGORY_PAGE, static_cast<int32_t>(EventType::PAGE_HIDE), std::move(builder.build()));
 }
@@ -250,12 +256,11 @@ void EventRecorder::OnClick(EventParamsBuilder&& builder)
         taskExecutor_ = container->GetTaskExecutor();
     }
     CHECK_NULL_VOID(taskExecutor_);
-    builder.SetPageUrl(pageUrl_);
+    builder.SetPageUrl(GetPageUrl());
     builder.SetNavDst(navDstName_);
     auto params = builder.build();
     taskExecutor_->PostTask(
         [taskExecutor = taskExecutor_, params]() {
-            TAG_LOGD(AceLogTag::ACE_UIEVENT, "OnClick record %{public}s", MapToString(params).c_str());
             EventController::Get().NotifyEvent(
                 EventCategory::CATEGORY_COMPONENT, static_cast<int32_t>(EventType::CLICK), std::move(params));
         },
@@ -264,22 +269,19 @@ void EventRecorder::OnClick(EventParamsBuilder&& builder)
 
 void EventRecorder::OnChange(EventParamsBuilder&& builder)
 {
-    builder.SetPageUrl(pageUrl_);
+    builder.SetPageUrl(GetPageUrl());
     builder.SetNavDst(navDstName_);
     auto params = builder.build();
-    TAG_LOGD(AceLogTag::ACE_UIEVENT, "OnChange record %{public}s", MapToString(params).c_str());
     EventController::Get().NotifyEvent(
         EventCategory::CATEGORY_COMPONENT, static_cast<int32_t>(EventType::CHANGE), std::move(params));
 }
 
 void EventRecorder::OnEvent(EventParamsBuilder&& builder)
 {
-    builder.SetPageUrl(pageUrl_);
+    builder.SetPageUrl(GetPageUrl());
     builder.SetNavDst(navDstName_);
     auto eventType = builder.GetEventType();
     auto params = builder.build();
-    TAG_LOGD(AceLogTag::ACE_UIEVENT, "OnEvent record event %{public}d, %{public}s", static_cast<int32_t>(eventType),
-        MapToString(params).c_str());
     EventController::Get().NotifyEvent(
         EventCategory::CATEGORY_COMPONENT, static_cast<int32_t>(eventType), std::move(params));
 }
@@ -288,10 +290,9 @@ void EventRecorder::OnNavDstShow(EventParamsBuilder&& builder)
 {
     navDstName_ = builder.GetText();
     navShowTime_ = GetCurrentTimestamp();
-    builder.SetPageUrl(pageUrl_);
+    builder.SetPageUrl(GetPageUrl());
     builder.SetType(std::to_string(PageEventType::NAV_PAGE));
     auto params = builder.build();
-    TAG_LOGD(AceLogTag::ACE_UIEVENT, "OnNavDestShow record %{public}s", MapToString(params).c_str());
     EventController::Get().NotifyEvent(
         EventCategory::CATEGORY_PAGE, static_cast<int32_t>(EventType::PAGE_SHOW), std::move(params));
 }
@@ -306,10 +307,9 @@ void EventRecorder::OnNavDstHide(EventParamsBuilder&& builder)
             navShowTime_ = 0;
         }
     }
-    builder.SetPageUrl(pageUrl_);
+    builder.SetPageUrl(GetPageUrl());
     builder.SetType(std::to_string(PageEventType::NAV_PAGE));
     auto params = builder.build();
-    TAG_LOGD(AceLogTag::ACE_UIEVENT, "OnNavDestHide record %{public}s", MapToString(params).c_str());
     EventController::Get().NotifyEvent(
         EventCategory::CATEGORY_PAGE, static_cast<int32_t>(EventType::PAGE_HIDE), std::move(params));
 }
@@ -317,7 +317,6 @@ void EventRecorder::OnNavDstHide(EventParamsBuilder&& builder)
 void EventRecorder::OnExposure(EventParamsBuilder&& builder)
 {
     auto params = builder.build();
-    TAG_LOGD(AceLogTag::ACE_UIEVENT, "OnExposure record %{public}s", MapToString(params).c_str());
     EventController::Get().NotifyEvent(
         EventCategory::CATEGORY_EXPOSURE, static_cast<int32_t>(EventType::EXPOSURE), std::move(params));
 }

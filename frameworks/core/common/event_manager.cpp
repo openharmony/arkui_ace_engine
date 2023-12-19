@@ -34,7 +34,7 @@
 
 namespace OHOS::Ace {
 constexpr uint8_t KEYS_MAX_VALUE = 3;
-constexpr int64_t EVENT_CLEAR_DURATION = 3000;
+constexpr int64_t EVENT_CLEAR_DURATION = 1000;
 constexpr int64_t TRANSLATE_NS_TO_MS = 1000000;
 const std::string SHORT_CUT_VALUE_X = "X";
 const std::string SHORT_CUT_VALUE_Y = "Y";
@@ -342,6 +342,26 @@ void EventManager::FlushTouchEventsEnd(const std::list<TouchEvent>& touchEvents)
     }
 }
 
+void EventManager::CheckTouchEvent(TouchEvent touchEvent)
+{
+    auto touchEventFindResult = downFingerIds_.find(touchEvent.id);
+    if (touchEvent.type == TouchType::DOWN) {
+        if (touchEventFindResult == downFingerIds_.end()) {
+            downFingerIds_.insert(touchEvent.id);
+        } else {
+            TAG_LOGW(AceLogTag::ACE_INPUTTRACKING, "EventManager receive DOWN event twice,"
+                " touchEvent id is %{public}d", touchEvent.id);
+        }
+    } else if (touchEvent.type == TouchType::UP) {
+        if (touchEventFindResult == downFingerIds_.end()) {
+            TAG_LOGW(AceLogTag::ACE_INPUTTRACKING, "EventManager receive UP event without receive DOWN event,"
+                " touchEvent id is %{public}d", touchEvent.id);
+        } else {
+            downFingerIds_.erase(touchEvent.id);
+        }
+    }
+}
+
 bool EventManager::DispatchTouchEvent(const TouchEvent& event)
 {
     if (event.type != TouchType::MOVE) {
@@ -351,6 +371,7 @@ bool EventManager::DispatchTouchEvent(const TouchEvent& event)
             "type=%{public}d",
             event.id, event.x, event.y, (int)event.type);
     }
+    CheckTouchEvent(event);
     ContainerScope scope(instanceId_);
     TouchEvent point = event;
 #ifdef ENABLE_DRAG_FRAMEWORK
@@ -375,7 +396,13 @@ bool EventManager::DispatchTouchEvent(const TouchEvent& event)
         int64_t currentEventTime = static_cast<int64_t>(point.time.time_since_epoch().count());
         int64_t lastEventTime = static_cast<int64_t>(lastEventTime_.time_since_epoch().count());
         int64_t duration = static_cast<int64_t>((currentEventTime - lastEventTime) / TRANSLATE_NS_TO_MS);
-        if (duration >= EVENT_CLEAR_DURATION) {
+        if (duration >= EVENT_CLEAR_DURATION && !refereeNG_->CheckGestureRefereeState()) {
+            TAG_LOGW(AceLogTag::ACE_INPUTTRACKING, "GestureReferee check state fail, force clean gestureReferee.");
+            std::list<std::pair<int32_t, std::string>> dumpList;
+            eventTree_.Dump(dumpList, 0);
+            for (auto& item : dumpList) {
+                TAG_LOGI(AceLogTag::ACE_INPUTTRACKING, "EventTreeDumpInfo: %{public}s", item.second.c_str());
+            }
             refereeNG_->ForceCleanGestureReferee();
         }
         // first collect gesture into gesture referee.
@@ -473,14 +500,13 @@ bool EventManager::DispatchTouchEvent(const AxisEvent& event)
         }
         axisTouchTestResults_.erase(event.id);
     }
+    lastEventTime_ = event.time;
     return true;
 }
 
 bool EventManager::DispatchTabIndexEvent(
     const KeyEvent& event, const RefPtr<FocusNode>& focusNode, const RefPtr<FocusGroup>& mainNode)
 {
-    LOGD("The key code is %{public}d, the key action is %{public}d, the repeat time is %{public}d.", event.code,
-        event.action, event.repeatTime);
     CHECK_NULL_RETURN(focusNode, false);
     CHECK_NULL_RETURN(mainNode, false);
     if (focusNode->HandleFocusByTabIndex(event, mainNode)) {
@@ -493,13 +519,10 @@ bool EventManager::DispatchTabIndexEvent(
 bool EventManager::DispatchKeyEvent(const KeyEvent& event, const RefPtr<FocusNode>& focusNode)
 {
     CHECK_NULL_RETURN(focusNode, false);
-    LOGD("The key code is %{public}d, the key action is %{public}d, the repeat time is %{public}d.", event.code,
-        event.action, event.repeatTime);
     if (focusNode->HandleKeyEvent(event)) {
         LOGI("Default focus system handled this event");
         return true;
     }
-    LOGD("Use platform to handle this event");
     return false;
 }
 
@@ -512,7 +535,7 @@ bool EventManager::DispatchTabIndexEventNG(const KeyEvent& event, const RefPtr<N
     auto mainViewFocusHub = mainView->GetFocusHub();
     CHECK_NULL_RETURN(mainViewFocusHub, false);
     if (mainViewFocusHub->HandleFocusByTabIndex(event)) {
-        TAG_LOGI(AceLogTag::ACE_FOCUS, "Tab index handled the key event: code:%{public}d/action:%{public}d", event.code,
+        TAG_LOGD(AceLogTag::ACE_FOCUS, "Tab index handled the key event: code:%{public}d/action:%{public}d", event.code,
             event.action);
         return true;
     }
@@ -532,7 +555,7 @@ bool EventManager::DispatchKeyEventNG(const KeyEvent& event, const RefPtr<NG::Fr
             event.code, event.action);
         return true;
     }
-    TAG_LOGI(AceLogTag::ACE_FOCUS, "Focus system do not handled the key event: code:%{public}d/action:%{public}d",
+    TAG_LOGD(AceLogTag::ACE_FOCUS, "Focus system do not handled the key event: code:%{public}d/action:%{public}d",
         event.code, event.action);
     return false;
 }
@@ -544,9 +567,7 @@ void EventManager::MouseTest(const MouseEvent& event, const RefPtr<RenderNode>& 
     MouseHoverTestList hitTestResult;
     WeakPtr<RenderNode> hoverNode = nullptr;
     renderNode->MouseDetect(point, point, hitTestResult, hoverNode);
-    if (hitTestResult.empty()) {
-        LOGD("mouse hover test result is empty");
-    }
+
     if (event.action == MouseAction::WINDOW_LEAVE) {
         mouseHoverTestResultsPre_ = std::move(mouseHoverTestResults_);
         mouseHoverTestResults_.clear();
@@ -567,7 +588,6 @@ bool EventManager::DispatchMouseEvent(const MouseEvent& event)
 {
     if (event.action == MouseAction::PRESS || event.action == MouseAction::RELEASE ||
         event.action == MouseAction::MOVE) {
-        LOGD("RenderBox::HandleMouseEvent, button is %{public}d, action is %{public}d", event.button, event.action);
         for (const auto& wp : mouseHoverTestResults_) {
             auto hoverNode = wp.Upgrade();
             if (hoverNode) {
@@ -690,9 +710,7 @@ void EventManager::MouseTest(
         frameNode->CheckSecurityComponentStatus(rect);
     }
     frameNode->TouchTest(point, point, point, touchRestrict, testResult, event.GetId());
-    if (testResult.empty()) {
-        TAG_LOGD(AceLogTag::ACE_MOUSE, "Mouse hover test result is empty.");
-    }
+
     currMouseTestResults_.clear();
     HoverTestResult hoverTestResult;
     WeakPtr<NG::FrameNode> hoverNode = nullptr;
@@ -727,13 +745,10 @@ void EventManager::MouseTest(
     lastHoverNode_ = currHoverNode_;
     currHoverNode_ = hoverNode;
     LogPrintMouseTest();
-    TAG_LOGD(AceLogTag::ACE_MOUSE, "Mouse test end.");
 }
 
 bool EventManager::DispatchMouseEventNG(const MouseEvent& event)
 {
-    TAG_LOGD(AceLogTag::ACE_MOUSE, "Handle mouse event. Button: %{public}d. Action: %{public}d.", event.button,
-        event.action);
     if (event.action == MouseAction::PRESS || event.action == MouseAction::RELEASE ||
         event.action == MouseAction::MOVE || event.action == MouseAction::WINDOW_ENTER ||
         event.action == MouseAction::WINDOW_LEAVE) {
@@ -780,8 +795,6 @@ void EventManager::DoMouseActionRelease()
 
 void EventManager::DispatchMouseHoverAnimationNG(const MouseEvent& event)
 {
-    TAG_LOGD(AceLogTag::ACE_MOUSE, "Handle hover effect. Button: %{public}d. Action: %{public}d.", event.button,
-        event.action);
     auto hoverNodeCur = currHoverNode_.Upgrade();
     auto hoverNodePre = lastHoverNode_.Upgrade();
     if (event.action == MouseAction::PRESS) {
@@ -814,8 +827,6 @@ void EventManager::DispatchMouseHoverAnimationNG(const MouseEvent& event)
 
 bool EventManager::DispatchMouseHoverEventNG(const MouseEvent& event)
 {
-    TAG_LOGD(AceLogTag::ACE_MOUSE, "Handle hover event. Button: %{public}d. Action: %{public}d.", event.button,
-        event.action);
     auto lastHoverEndNode = lastHoverTestResults_.begin();
     auto currHoverEndNode = currHoverTestResults_.begin();
     RefPtr<HoverEventTarget> lastHoverEndNodeTarget;
@@ -896,8 +907,6 @@ bool EventManager::DispatchAxisEventNG(const AxisEvent& event)
     if (event.horizontalAxis == 0 && event.verticalAxis == 0 && event.pinchAxisScale == 0) {
         return false;
     }
-    LOGD("DispatchAxisEventNG, action is %{public}d, axis is %{public}f / %{public}f / %{public}f", event.action,
-        event.horizontalAxis, event.verticalAxis, event.pinchAxisScale);
     for (const auto& axisTarget : axisTestResults_) {
         if (axisTarget && axisTarget->HandleAxisEvent(event)) {
             return true;
@@ -911,10 +920,8 @@ bool EventManager::DispatchRotationEvent(
 {
     CHECK_NULL_RETURN(renderNode, false);
     if (requestFocusNode && renderNode->RotationMatchTest(requestFocusNode)) {
-        LOGD("RotationMatchTest: dispatch rotation to request node.");
         return requestFocusNode->RotationTestForward(event);
     } else {
-        LOGD("RotationMatchTest: dispatch rotation to stack render node.");
         return renderNode->RotationTest(event);
     }
 }
@@ -1281,7 +1288,6 @@ void TriggerKeyboardShortcut(const KeyEvent& event, const std::vector<NG::Keyboa
 
 void EventManager::DispatchKeyboardShortcut(const KeyEvent& event)
 {
-    LOGD("EventManager: The key code is %{public}d, the key action is %{public}d.", event.code, event.action);
     if (event.action != KeyAction::DOWN) {
         return;
     }
@@ -1327,7 +1333,6 @@ void EventManager::ClearResults()
 
 EventManager::EventManager()
 {
-    LOGD("EventManger Constructor.");
     refereeNG_ = AceType::MakeRefPtr<NG::GestureReferee>();
     referee_ = AceType::MakeRefPtr<GestureReferee>();
     responseCtrl_ = AceType::MakeRefPtr<NG::ResponseCtrl>();

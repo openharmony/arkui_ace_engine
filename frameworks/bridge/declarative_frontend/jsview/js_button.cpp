@@ -123,6 +123,31 @@ void JSButton::SetType(const JSCallbackInfo& info)
     }
 }
 
+void JSButton::SetButtonStyle(const JSCallbackInfo& info)
+{
+    int32_t value = static_cast<int32_t>(ButtonStyleMode::NORMAL);
+    if (info[0]->IsNumber()) {
+        auto valueT = info[0]->ToNumber<int32_t>();
+        if (valueT >= static_cast<int32_t>(ButtonStyleMode::NORMAL) &&
+            valueT <= static_cast<int32_t>(ButtonStyleMode::TEXT)) {
+            value = valueT;
+        }
+    }
+    ButtonModel::GetInstance()->SetButtonStyle(static_cast<ButtonStyleMode>(value));
+}
+
+void JSButton::SetControlSize(const JSCallbackInfo& info)
+{
+    int32_t value = static_cast<int32_t>(ControlSize::NORMAL);
+    if (info[0]->IsNumber()) {
+        auto valueT = info[0]->ToNumber<int32_t>();
+        if (valueT >= static_cast<int32_t>(ControlSize::SMALL) && valueT <= static_cast<int32_t>(ControlSize::NORMAL)) {
+            value = valueT;
+        }
+    }
+    ButtonModel::GetInstance()->SetControlSize(static_cast<ControlSize>(value));
+}
+
 void JSButton::SetStateEffect(const JSCallbackInfo& info)
 {
     bool value = info[0]->IsBoolean() ? info[0]->ToBoolean() : true;
@@ -309,7 +334,8 @@ void JSButton::JSBind(BindingTarget globalObj)
     JSClass<JSButton>::StaticMethod("size", &JSButton::JsSize);
     JSClass<JSButton>::StaticMethod("padding", &JSButton::JsPadding);
     JSClass<JSButton>::StaticMethod("hoverEffect", &JSButton::JsHoverEffect);
-
+    JSClass<JSButton>::StaticMethod("buttonStyle", &JSButton::SetButtonStyle);
+    JSClass<JSButton>::StaticMethod("controlSize", &JSButton::SetControlSize);
     JSClass<JSButton>::StaticMethod("createWithLabel", &JSButton::CreateWithLabel, MethodOptions::NONE);
     JSClass<JSButton>::StaticMethod("createWithChild", &JSButton::CreateWithChild, MethodOptions::NONE);
     JSClass<JSButton>::InheritAndBind<JSContainerBase>(globalObj);
@@ -318,31 +344,7 @@ void JSButton::JSBind(BindingTarget globalObj)
 void JSButton::CreateWithLabel(const JSCallbackInfo& info)
 {
     std::list<RefPtr<Component>> buttonChildren;
-    std::string label;
-    bool labelSet = false;
-    CreateWithPara para;
-    para.parseSuccess = ParseJsString(info[0], label);
-    para.label = label;
-    if (info[0]->IsObject() && JSRef<JSObject>::Cast(info[0])->GetProperty("type")->IsNumber()) {
-        para.typeFirst =
-            static_cast<ButtonType>(JSRef<JSObject>::Cast(info[0])->GetProperty("type")->ToNumber<int32_t>());
-    }
-    if (info[1]->IsObject() && JSRef<JSObject>::Cast(info[1])->GetProperty("type")->IsNumber()) {
-        para.typeSecond =
-            static_cast<ButtonType>(JSRef<JSObject>::Cast(info[1])->GetProperty("type")->ToNumber<int32_t>());
-    }
-    if (info[0]->IsObject() && JSRef<JSObject>::Cast(info[0])->GetProperty("stateEffect")->IsBoolean()) {
-        para.stateEffectFirst = JSRef<JSObject>::Cast(info[0])->GetProperty("stateEffect")->ToBoolean();
-    }
-    if (info[1]->IsObject() && JSRef<JSObject>::Cast(info[1])->GetProperty("stateEffect")->IsBoolean()) {
-        para.stateEffectSecond = JSRef<JSObject>::Cast(info[1])->GetProperty("stateEffect")->ToBoolean();
-    }
-    if (para.parseSuccess.value()) {
-        labelSet = true;
-    }
-
-    para.labelSetInfoFirst = !labelSet && info[0]->IsObject();
-    para.labelSetInfoSecond = (info.Length() > 1) && info[1]->IsObject();
+    CreateWithPara para = ParseCreatePara(info, true);
     ButtonModel::GetInstance()->CreateWithLabel(para, buttonChildren);
     ButtonModel::GetInstance()->Create(para, buttonChildren);
     isLabelButton_ = true;
@@ -350,26 +352,7 @@ void JSButton::CreateWithLabel(const JSCallbackInfo& info)
 
 void JSButton::CreateWithChild(const JSCallbackInfo& info)
 {
-    CreateWithPara para;
-    para.labelSetInfoFirst = info[0]->IsObject();
-    para.labelSetInfoSecond = (info.Length() > 1) && info[1]->IsObject();
-    if (info[0]->IsObject() && JSRef<JSObject>::Cast(info[0])->GetProperty("type")->IsNumber()) {
-        para.typeFirst =
-            static_cast<ButtonType>(JSRef<JSObject>::Cast(info[0])->GetProperty("type")->ToNumber<int32_t>());
-    }
-
-    if (info[1]->IsObject() && JSRef<JSObject>::Cast(info[1])->GetProperty("type")->IsNumber()) {
-        para.typeSecond =
-            static_cast<ButtonType>(JSRef<JSObject>::Cast(info[1])->GetProperty("type")->ToNumber<int32_t>());
-    }
-
-    if (info[0]->IsObject() && JSRef<JSObject>::Cast(info[0])->GetProperty("stateEffect")->IsBoolean()) {
-        para.stateEffectFirst = JSRef<JSObject>::Cast(info[0])->GetProperty("stateEffect")->ToBoolean();
-    }
-
-    if (info[1]->IsObject() && JSRef<JSObject>::Cast(info[1])->GetProperty("stateEffect")->IsBoolean()) {
-        para.stateEffectSecond = JSRef<JSObject>::Cast(info[1])->GetProperty("stateEffect")->ToBoolean();
-    }
+    CreateWithPara para = ParseCreatePara(info, false);
     ButtonModel::GetInstance()->CreateWithChild(para);
     isLabelButton_ = false;
 }
@@ -634,5 +617,59 @@ void JSButton::JsHoverEffect(const JSCallbackInfo& info)
 
     auto hoverEffectNum = info[0]->ToNumber<int32_t>();
     ButtonModel::GetInstance()->SetHoverEffect(hoverEffectNum);
+}
+
+CreateWithPara JSButton::ParseCreatePara(const JSCallbackInfo& info, bool hasLabel)
+{
+    std::string label;
+    CreateWithPara para;
+    para.parseSuccess = false;
+    para.optionSetFirst = false;
+    if (info.Length() < 1) {
+        para.label = label;
+        return para;
+    }
+    int32_t optionIndex = 0;
+    if (hasLabel) {
+        para.parseSuccess = ParseJsString(info[0], label);
+        if (para.parseSuccess) {
+            // resource string
+            if (info[0]->IsObject() && JSRef<JSObject>::Cast(info[0])->HasProperty("id")) {
+                optionIndex++;
+                // string
+            } else if (info[0]->IsString()) {
+                optionIndex++;
+            }
+        }
+        para.label = label;
+    }
+    if (optionIndex >= info.Length() || !info[optionIndex]->IsObject()) {
+        return para;
+    }
+    if (optionIndex == 0) {
+        para.optionSetFirst = true;
+    }
+    JSRef<JSObject> optionObj = JSRef<JSObject>::Cast(info[optionIndex]);
+    if (optionObj->GetProperty(JSButton::TYPE)->IsNumber()) {
+        para.type = static_cast<ButtonType>(optionObj->GetProperty(JSButton::TYPE)->ToNumber<int32_t>());
+    }
+    if (optionObj->GetProperty(JSButton::STATE_EFFECT)->IsBoolean()) {
+        para.stateEffect = optionObj->GetProperty(JSButton::STATE_EFFECT)->ToBoolean();
+    }
+    if (optionObj->GetProperty(JSButton::BUTTON_STYLE)->IsNumber()) {
+        auto styleModeIntValue = optionObj->GetProperty(JSButton::BUTTON_STYLE)->ToNumber<int32_t>();
+        if (styleModeIntValue >= static_cast<int32_t>(ButtonStyleMode::NORMAL) &&
+            styleModeIntValue <= static_cast<int32_t>(ButtonStyleMode::TEXT)) {
+            para.buttonStyleMode = static_cast<ButtonStyleMode>(styleModeIntValue);
+        }
+    }
+    if (optionObj->GetProperty(JSButton::CONTROL_SIZE)->IsNumber()) {
+        auto controlSizeIntValue = optionObj->GetProperty(JSButton::CONTROL_SIZE)->ToNumber<int32_t>();
+        if (controlSizeIntValue >= static_cast<int32_t>(ControlSize::SMALL) &&
+            controlSizeIntValue <= static_cast<int32_t>(ControlSize::NORMAL)) {
+            para.controlSize = static_cast<ControlSize>(controlSizeIntValue);
+        }
+    }
+    return para;
 }
 } // namespace OHOS::Ace::Framework

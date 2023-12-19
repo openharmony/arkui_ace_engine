@@ -39,11 +39,9 @@ void RosenRenderTextSpan::UpdateText(Rosen::TypographyCreate& builder,
     }
 
     if (!spanComponent_->IsShow()) {
-        LOGD("the span is not show");
         return;
     }
     if (spanComponent_->HasNewStyle()) {
-        LOGD("test span has new style");
 #ifndef USE_GRAPHIC_TEXT_GINE
         txt::TextStyle style;
 #else
@@ -80,7 +78,6 @@ void RosenRenderTextSpan::UpdateTouchRegions(std::map<int32_t, std::map<GestureT
 {
     auto spanData = StringUtils::Str8ToStr16(spanComponent_->GetSpanData());
     if (spanData.empty()) {
-        LOGD("RosenRenderTextSpan::UpdateTouchRegions spanData is empty");
         return;
     }
 

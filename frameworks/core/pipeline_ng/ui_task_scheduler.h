@@ -122,6 +122,11 @@ public:
 
     void SetJSViewActive(bool active, WeakPtr<CustomNode> custom);
 
+    bool IsDirtyLayoutNodesEmpty()
+    {
+        return dirtyLayoutNodes_.empty();
+    }
+
 private:
     bool NeedAdditionalLayout();
 

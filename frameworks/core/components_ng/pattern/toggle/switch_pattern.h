@@ -106,10 +106,6 @@ public:
     }
 
     void MarkIsSelected(bool isSelected);
-    void SetSelect(bool select)
-    {
-        isOn_ = select;
-    }
 
     void SetIsUserSetResponseRegion(bool isUserSetResponseRegion)
     {

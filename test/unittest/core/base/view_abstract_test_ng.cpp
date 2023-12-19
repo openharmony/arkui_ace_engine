@@ -1084,8 +1084,16 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractTest025, TestSize.Level1)
     /**
      * @tc.steps: step2. get popupInfo and change some params.
      */
-    auto overlayManager = MockPipelineContext::GetCurrent()->GetOverlayManager();
-    PopupInfo info = overlayManager->GetPopupInfo(targetNode->GetId());
+    auto container = Container::Current();
+    ASSERT_NE(container, nullptr);
+    auto pipelineContext = container->GetPipelineContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto context = AceType::DynamicCast<NG::PipelineContext>(pipelineContext);
+    ASSERT_NE(context, nullptr);
+    auto overlayManager = context->GetOverlayManager();
+    ASSERT_NE(overlayManager, nullptr);
+    auto nodeId = targetNode->GetId();
+    PopupInfo info = overlayManager->GetPopupInfo(nodeId);
     info.isCurrentOnShow = true;
     info.popupId = 1;
     auto popupNode1 = FrameNode::CreateFrameNode(
@@ -1680,7 +1688,16 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractTest040, TestSize.Level1)
      */
     const RefPtr<FrameNode> mainNode = FrameNode::CreateFrameNode("main", 1, AceType::MakeRefPtr<Pattern>(), true);
     ViewStackProcessor::GetInstance()->Push(mainNode);
-    ASSERT_NE(MockPipelineContext::GetCurrent()->GetOverlayManager(), nullptr);
+
+    auto container = Container::Current();
+    ASSERT_NE(container, nullptr);
+    auto pipelineContext = container->GetPipelineContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto context = AceType::DynamicCast<NG::PipelineContext>(pipelineContext);
+    ASSERT_NE(context, nullptr);
+    auto overlayManager = context->GetOverlayManager();
+    ASSERT_NE(overlayManager, nullptr);
+
     ASSERT_NE(SubwindowManager::GetInstance(), nullptr);
     std::function<void()> flagFunc = []() { flag++; };
     std::vector<NG::OptionParam> params = {};

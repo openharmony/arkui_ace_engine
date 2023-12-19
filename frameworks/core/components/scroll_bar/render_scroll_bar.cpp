@@ -186,7 +186,6 @@ void RenderScrollBar::InitChildPosition()
     } else if (axis_ == Axis::HORIZONTAL) {
         childPosition.SetY(0.0);
     } else {
-        LOGD("Axis of ScrollBar is not support: %{public}d", axis_);
         return;
     }
     childPosition_ = childPosition;

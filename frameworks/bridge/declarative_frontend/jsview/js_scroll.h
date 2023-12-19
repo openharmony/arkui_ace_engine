@@ -47,6 +47,7 @@ public:
     static void SetScrollEnabled(const JSCallbackInfo& args);
     static void SetFriction(const JSCallbackInfo& info);
     static void SetScrollSnap(const JSCallbackInfo& args);
+    static void SetEnablePaging(const JSCallbackInfo& args);
 };
 
 } // namespace OHOS::Ace::Framework

@@ -52,7 +52,6 @@ bool PageElement::RequestNextFocus(bool vertical, bool reverse, const Rect& rect
 
 void PageElement::RemoveSharedTransition(const ShareId& shareId)
 {
-    LOGD("Remove shared transition id:%{public}s", shareId.c_str());
     sharedTransitionElementMap_.erase(shareId);
 }
 
@@ -62,7 +61,6 @@ void PageElement::AddSharedTransition(const RefPtr<SharedTransitionElement>& sha
         LOGE("Add shared transition failed. element is null.");
         return;
     }
-    LOGD("Add shared transition element id:%{public}s", shared->GetShareId().c_str());
     sharedTransitionElementMap_[shared->GetShareId()] = shared;
 }
 

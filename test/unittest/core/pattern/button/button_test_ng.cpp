@@ -22,6 +22,9 @@
 
 #define protected public
 #define private public
+#include "test/mock/core/common/mock_theme_manager.h"
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
+
 #include "base/geometry/dimension.h"
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
@@ -39,9 +42,7 @@
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/pattern/text/text_styles.h"
-#include "test/mock/core/common/mock_theme_manager.h"
 #include "core/event/touch_event.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "core/pipeline_ng/ui_task_scheduler.h"
 
 using namespace testing;
@@ -80,16 +81,9 @@ const float START_OPACITY = 0.0f;
 const float END_OPACITY = 0.1f;
 const int32_t DURATION = 100;
 
-struct CreateWithPara createWithPara = {
-    std::make_optional(true),
-    std::make_optional(true),
-    std::make_optional(true),
-    std::make_optional(true),
-    std::make_optional(true),
-    std::make_optional(ButtonType::CAPSULE),
-    std::make_optional(ButtonType::CAPSULE),
-    std::make_optional(CREATE_VALUE),
-};
+struct CreateWithPara createWithPara = { std::make_optional(true), std::make_optional(CREATE_VALUE),
+    std::make_optional(true), std::make_optional(ButtonType::CAPSULE), std::make_optional(true), std::nullopt,
+    std::nullopt };
 } // namespace
 
 struct TestProperty {
@@ -101,6 +95,8 @@ struct TestProperty {
     std::optional<Ace::FontStyle> fontStyleValue = std::nullopt;
     std::optional<std::vector<std::string>> fontFamilyValue = std::nullopt;
     std::optional<Dimension> borderRadius = std::nullopt;
+    std::optional<ButtonStyleMode> buttonStyle = std::nullopt;
+    std::optional<ControlSize> controlSize = std::nullopt;
 };
 
 struct LableStyleProperty {
@@ -137,6 +133,11 @@ void ButtonTestNg::SetUpTestCase()
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     auto buttonTheme = AceType::MakeRefPtr<ButtonTheme>();
     buttonTheme->height_ = DEFAULT_HEIGTH;
+    buttonTheme->bgColorMap_.emplace(std::pair<ButtonStyleMode, Color>(ButtonStyleMode::EMPHASIZE, Color::RED));
+    buttonTheme->bgColorMap_.emplace(std::pair<ButtonStyleMode, Color>(ButtonStyleMode::NORMAL, Color::GRAY));
+    buttonTheme->textColorMap_.emplace(std::pair<ButtonStyleMode, Color>(ButtonStyleMode::EMPHASIZE, Color::BLACK));
+    buttonTheme->textColorMap_.emplace(std::pair<ButtonStyleMode, Color>(ButtonStyleMode::NORMAL, Color::BLUE));
+    buttonTheme->heightMap_.emplace(std::pair<ControlSize, Dimension>(ControlSize::SMALL, DEFAULT_HEIGTH));
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(buttonTheme));
 }
 
@@ -251,7 +252,12 @@ RefPtr<FrameNode> ButtonTestNg::CreateLabelButtonParagraph(
     if (testProperty.borderRadius.has_value()) {
         buttonModelNG.SetBorderRadius(testProperty.borderRadius.value());
     }
-
+    if (testProperty.buttonStyle.has_value()) {
+        buttonModelNG.SetButtonStyle(testProperty.buttonStyle.value());
+    }
+    if (testProperty.controlSize.has_value()) {
+        buttonModelNG.SetControlSize(testProperty.controlSize.value());
+    }
     RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
     return AceType::DynamicCast<FrameNode>(element);
 }
@@ -1025,7 +1031,7 @@ HWTEST_F(ButtonTestNg, ButtonPatternTest015, TestSize.Level1)
     auto constraintSize =
         buttonLayoutAlgorithm->HandleLabelCircleButtonConstraint(AccessibilityManager::RawPtr(layoutWrapper));
     buttonLayoutAlgorithm->HandleLabelCircleButtonFrameSize(
-        layoutWrapper->GetLayoutProperty()->CreateChildConstraint(), frameSize);
+        layoutWrapper->GetLayoutProperty()->CreateChildConstraint(), frameSize, DEFAULT_HEIGTH.ConvertToPx());
     EXPECT_EQ(constraintSize, SizeF(DEFAULT_HEIGTH.ConvertToPx(), DEFAULT_HEIGTH.ConvertToPx()));
     EXPECT_EQ(frameSize, SizeF(DEFAULT_HEIGTH.ConvertToPx(), DEFAULT_HEIGTH.ConvertToPx()));
     auto buttonLayoutProperty =
@@ -1042,7 +1048,7 @@ HWTEST_F(ButtonTestNg, ButtonPatternTest015, TestSize.Level1)
         buttonLayoutAlgorithm->HandleLabelCircleButtonConstraint(AccessibilityManager::RawPtr(layoutWrapper));
     frameSize.SetHeight(BUTTON_HEIGHT);
     buttonLayoutAlgorithm->HandleLabelCircleButtonFrameSize(
-        layoutWrapper->GetLayoutProperty()->CreateChildConstraint(), frameSize);
+        layoutWrapper->GetLayoutProperty()->CreateChildConstraint(), frameSize, BUTTON_HEIGHT);
     EXPECT_EQ(constraintSize, SizeF(BUTTON_HEIGHT, BUTTON_HEIGHT));
     EXPECT_EQ(frameSize, SizeF(BUTTON_HEIGHT, BUTTON_HEIGHT));
     parentLayoutConstraint.selfIdealSize.Reset();
@@ -1053,7 +1059,7 @@ HWTEST_F(ButtonTestNg, ButtonPatternTest015, TestSize.Level1)
         buttonLayoutAlgorithm->HandleLabelCircleButtonConstraint(AccessibilityManager::RawPtr(layoutWrapper));
     frameSize.SetWidth(BUTTON_WIDTH);
     buttonLayoutAlgorithm->HandleLabelCircleButtonFrameSize(
-        layoutWrapper->GetLayoutProperty()->CreateChildConstraint(), frameSize);
+        layoutWrapper->GetLayoutProperty()->CreateChildConstraint(), frameSize, BUTTON_WIDTH);
     EXPECT_EQ(constraintSize, SizeF(BUTTON_WIDTH, BUTTON_WIDTH));
     EXPECT_EQ(frameSize, SizeF(BUTTON_WIDTH, BUTTON_WIDTH));
 }
@@ -1170,9 +1176,9 @@ HWTEST_F(ButtonTestNg, ButtonPatternTest018, TestSize.Level1)
     auto theme = pipeline->GetTheme<ButtonTheme>();
     ASSERT_NE(theme, nullptr);
     auto alpha = theme->GetBgDisabledAlpha();
-    auto backgroundColor = renderContext->GetBackgroundColor().value_or(theme->GetBgColor());
+    auto originalOpacity = renderContext->GetOpacityValue(1.0);
     buttonPattern->HandleEnabled();
-    EXPECT_EQ(buttonPattern->backgroundColor_, backgroundColor.BlendOpacity(alpha));
+    EXPECT_EQ(renderContext->GetOpacityValue(1.0), alpha * originalOpacity);
 }
 
 /**
@@ -1253,6 +1259,72 @@ HWTEST_F(ButtonTestNg, ButtonPatternTest021, TestSize.Level1)
 }
 
 /**
+ * @tc.name: ButtonPatternTest022
+ * @tc.desc: Test default button style
+ * @tc.type: FUNC
+ */
+HWTEST_F(ButtonTestNg, ButtonPatternTest022, TestSize.Level1)
+{
+    auto pipeline = PipelineBase::GetCurrentContext();
+    pipeline->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_NINE));
+    TestProperty testProperty;
+    auto frameNode = CreateLabelButtonParagraph(CREATE_VALUE, testProperty);
+    ASSERT_NE(frameNode, nullptr);
+    auto renderContext = frameNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    EXPECT_EQ(renderContext->GetBackgroundColor(), Color::RED);
+}
+
+/**
+ * @tc.name: ButtonPatternTest023
+ * @tc.desc: Test ButtonStyle and ControlSize
+ * @tc.type: FUNC
+ */
+HWTEST_F(ButtonTestNg, ButtonPatternTest023, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create button and get frameNode
+     */
+    TestProperty testProperty;
+    testProperty.buttonStyle = ButtonStyleMode::EMPHASIZE;
+    testProperty.controlSize = ControlSize::SMALL;
+    auto frameNode = CreateLabelButtonParagraph(CREATE_VALUE, testProperty);
+    ASSERT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.steps: step2. test button style and control size
+     * @tc.expected: step2. button style and control size is set correct
+     */
+    auto buttonPattern = frameNode->GetPattern<ButtonPattern>();
+    ASSERT_NE(buttonPattern, nullptr);
+    auto buttonLayoutProperty = buttonPattern->GetLayoutProperty<ButtonLayoutProperty>();
+    ASSERT_NE(buttonLayoutProperty, nullptr);
+    EXPECT_EQ(buttonLayoutProperty->GetButtonStyleValue(), ButtonStyleMode::EMPHASIZE);
+    EXPECT_EQ(buttonLayoutProperty->GetControlSizeValue(), ControlSize::SMALL);
+    auto renderContext = frameNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    EXPECT_EQ(renderContext->GetBackgroundColor(), Color::RED);
+    EXPECT_EQ(renderContext->GetForegroundColor(), Color::BLACK);
+
+    /**
+     * @tc.steps: step3. test layout algorithm
+     * @tc.expected: step3. check whether the height of geometry is correct
+     */
+    auto layoutWrapper = frameNode->CreateLayoutWrapper();
+    auto buttonLayoutAlgorithm = buttonPattern->CreateLayoutAlgorithm();
+    ASSERT_NE(buttonLayoutAlgorithm, nullptr);
+    layoutWrapper->SetLayoutAlgorithm(AccessibilityManager::MakeRefPtr<LayoutAlgorithmWrapper>(buttonLayoutAlgorithm));
+    LayoutConstraintF parentLayoutConstraint;
+    parentLayoutConstraint.maxSize = CONTAINER_SIZE;
+    parentLayoutConstraint.percentReference = CONTAINER_SIZE;
+    layoutWrapper->GetLayoutProperty()->UpdateLayoutConstraint(parentLayoutConstraint);
+    layoutWrapper->GetLayoutProperty()->UpdateContentConstraint();
+    buttonLayoutAlgorithm->Measure(AccessibilityManager::RawPtr(layoutWrapper));
+    buttonLayoutAlgorithm->Layout(AccessibilityManager::RawPtr(layoutWrapper));
+    EXPECT_EQ(layoutWrapper->GetGeometryNode()->GetFrameSize().Height(), DEFAULT_HEIGTH.ConvertToPx());
+}
+
+/**
  * @tc.name: OnColorConfigurationUpdate001
  * @tc.desc: Test on color configuration update
  * @tc.type: FUNC
@@ -1265,10 +1337,6 @@ HWTEST_F(ButtonTestNg, OnColorConfigurationUpdate001, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
     auto buttonPattern = frameNode->GetPattern<ButtonPattern>();
     ASSERT_NE(buttonPattern, nullptr);
-    auto pipeline = PipelineBase::GetCurrentContext();
-    auto buttonTheme = pipeline->GetTheme<ButtonTheme>();
-    buttonTheme->bgColor_ = Color::RED;
-    buttonTheme->textStyle_.textColor_ = Color::RED;
     buttonPattern->OnColorConfigurationUpdate();
     auto renderContext = frameNode->GetRenderContext();
     ASSERT_NE(renderContext, nullptr);
@@ -1277,7 +1345,7 @@ HWTEST_F(ButtonTestNg, OnColorConfigurationUpdate001, TestSize.Level1)
     ASSERT_NE(textNode, nullptr);
     auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
     ASSERT_NE(textLayoutProperty, nullptr);
-    EXPECT_EQ(textLayoutProperty->GetTextColor(), Color::RED);
+    EXPECT_EQ(textLayoutProperty->GetTextColor(), Color::BLACK);
 }
 
 /**

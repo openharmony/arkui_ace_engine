@@ -205,11 +205,12 @@ public:
     void UltralimitShake();
     void UpdateCounterBorderStyle(uint32_t& textLength, uint32_t& maxLength);
     void UpdateAreaBorderStyle(BorderWidthProperty& currentBorderWidth, BorderWidthProperty& overCountBorderWidth,
-    BorderColorProperty& overCountBorderColor, BorderColorProperty& currentBorderColor);
+        BorderColorProperty& overCountBorderColor, BorderColorProperty& currentBorderColor);
     void DeleteBackward(int32_t length) override;
     void DeleteBackwardOperation(int32_t length);
     void DeleteForward(int32_t length) override;
     void DeleteForwardOperation(int32_t length);
+    void HandleOnDelete(bool backward) override;
     void UpdateRecordCaretIndex(int32_t index);
     void CreateHandles() override;
 
@@ -777,6 +778,10 @@ public:
     void HandleSelectionEnd();
     bool HandleOnEscape() override;
     bool HandleOnTab(bool backward) override;
+    void HandleOnEnter() override
+    {
+        PerformAction(GetTextInputActionValue(TextInputAction::DONE), false);
+    }
     void HandleOnUndoAction() override;
     void HandleOnRedoAction() override;
     void HandleOnSelectAll(bool isKeyEvent, bool inlineStyle = false);
@@ -981,11 +986,6 @@ public:
         return cleanNodeResponseArea_;
     }
 
-    void SetCleanNodeStyle(CleanNodeStyle cleanNodeStyle)
-    {
-        cleanNodeStyle_ = cleanNodeStyle;
-    }
-
     bool IsShowUnit() const;
     bool IsShowPasswordIcon() const;
     bool IsInPasswordMode() const;
@@ -1006,6 +1006,9 @@ public:
 
     void UpdateShowMagnifier(bool isShowMagnifier = false)
     {
+        if (isShowMagnifier_ == isShowMagnifier) {
+            return;
+        }
         isShowMagnifier_ = isShowMagnifier;
     }
 
@@ -1018,7 +1021,7 @@ public:
     {
         localOffset_.SetX(localOffset.GetX());
         localOffset_.SetY(localOffset.GetY());
-        isShowMagnifier_ = true;
+        UpdateShowMagnifier(true);
     }
 
     OffsetF GetLocalOffset() const
@@ -1032,6 +1035,10 @@ public:
     }
 
     void ShowMenu();
+    void HandleOnShowMenu() override
+    {
+        ShowMenu();
+    }
     bool HasFocus() const;
     void StopTwinkling();
 
@@ -1040,6 +1047,9 @@ public:
         return lastClickTimeStamp_;
     }
 #ifdef ENABLE_DRAG_FRAMEWORK
+    void HandleOnDragStatusCallback(
+        const DragEventType& dragEventType, const RefPtr<NotifyDragEvent>& notifyDragEvent) override;
+
 protected:
     virtual void InitDragEvent();
 #endif
@@ -1063,6 +1073,9 @@ private:
     std::function<void(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)> OnDragDrop();
     void ClearDragDropEvent();
     std::function<void(Offset)> GetThumbnailCallback();
+    void HandleCursorOnDragMoved(const RefPtr<NotifyDragEvent>& notifyDragEvent);
+    void HandleCursorOnDragLeaved(const RefPtr<NotifyDragEvent>& notifyDragEvent);
+    void HandleCursorOnDragEnded(const RefPtr<NotifyDragEvent>& notifyDragEvent);
 #endif
     int32_t UpdateCaretPositionOnHandleMove(const OffsetF& localOffset);
     bool HasStateStyle(UIState state) const;
@@ -1158,6 +1171,7 @@ private:
 
     bool IsTouchAtLeftOffset(float currentOffsetX);
     void FilterExistText();
+    void CreateErrorParagraph(const std::string& content);
     void UpdateErrorTextMargin();
     OffsetF GetTextPaintOffset() const;
     void UpdateSelectController();
@@ -1165,6 +1179,8 @@ private:
     void CloseHandleAndSelect() override;
     bool RepeatClickCaret(const Offset& offset, int32_t lastCaretIndex);
     void PaintTextRect();
+    void GetIconPaintRect(const RefPtr<TextInputResponseArea>& responseArea, RoundRect& paintRect);
+    void GetInnerFocusPaintRect(RoundRect& paintRect);
     void PaintResponseAreaRect();
     void PaintCancelRect();
     void PaintUnitRect();
@@ -1195,7 +1211,7 @@ private:
     bool ProcessAutoFill();
     void ScrollToSafeArea() const override;
     void RecordSubmitEvent() const;
-    void UpdateCancelNode(bool isShow);
+    void UpdateCancelNode();
 
     RectF frameRect_;
     RectF contentRect_;
@@ -1247,6 +1263,7 @@ private:
     bool counterChange_ = false;
     WeakPtr<LayoutWrapper> counterTextNode_;
     bool hasCounterMargin_ = false;
+    bool isCursorAlwaysDisplayed_ = false;
     std::optional<int32_t> surfaceChangedCallbackId_;
     std::optional<int32_t> surfacePositionChangedCallbackId_;
 
@@ -1344,7 +1361,6 @@ private:
     std::string lastAutoFillPasswordTextValue_;
     bool isSupportCameraInput_ = false;
     std::function<void()> processOverlayDelayTask_;
-    CleanNodeStyle cleanNodeStyle_ = CleanNodeStyle::INVISIBLE;
     FocuseIndex focusIndex_ = FocuseIndex::TEXT;
     bool isShowMagnifier_ = false;
     OffsetF localOffset_;

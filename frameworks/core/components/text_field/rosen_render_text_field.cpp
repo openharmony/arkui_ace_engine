@@ -114,13 +114,11 @@ bool RosenRenderTextField::GetCaretRect(int32_t extent, Rect& caretRect, double 
     if (computeSuccess && !GetEditingValue().text.empty()) {
         if (metrics.height <= 0 || std::isnan(metrics.height)) {
             // The reason may be text lines is exceed the paragraph maxline.
-            LOGD("Illegal caret height. Consider release restriction of paragraph max_line.");
             return false;
         }
         caretRect.SetRect(metrics.offset.GetX(), metrics.offset.GetY() + caretHeightOffset, NormalizeToPx(CURSOR_WIDTH),
             metrics.height - caretHeightOffset * 2.0);
     } else {
-        LOGD("Caret is at the begin of text. Make caret offset according to alignment.");
         // Use proto caret.
         caretRect = caretProto_ + MakeEmptyOffset();
     }
@@ -628,8 +626,6 @@ void RosenRenderTextField::PaintScrollBar(const Offset& offset, RenderContext& c
         scrollBar_->UpdateScrollBarRegion(offset, GetLayoutSize(), GetLastOffset(), GetLongestLine());
         RefPtr<RosenScrollBarPainter> scrollBarPainter = AceType::MakeRefPtr<RosenScrollBarPainter>();
         scrollBarPainter->PaintBar(canvas, offset, GetPaintRect(), scrollBar_, GetGlobalOffset(), OPTICITY);
-    } else {
-        LOGD("no need paint scroll bar");
     }
 }
 
@@ -1103,7 +1099,6 @@ void RosenRenderTextField::SetShaderIfNeeded(std::unique_ptr<Rosen::TypographySt
 
     const double shadeWidth = innerRect_.Left();
     if (shadeWidth * 2 > innerRect_.Width()) {
-        LOGD("The region is too short to do shade.");
         return;
     }
 

@@ -18,7 +18,7 @@
 #include "base/geometry/axis.h"
 #include "base/geometry/dimension.h"
 #include "base/utils/utils.h"
-#include "core/components/scroll/scrollable.h"
+#include "core/components_ng/pattern/scrollable/scrollable.h"
 #include "core/components_ng/pattern/scroll/scroll_edge_effect.h"
 #include "core/components_ng/pattern/scroll/scroll_event_hub.h"
 #include "core/components_ng/pattern/scroll/scroll_layout_algorithm.h"
@@ -39,6 +39,7 @@ constexpr float SCROLL_BY_SPEED = 250.0f; // move 250 pixels per second
 constexpr float UNIT_CONVERT = 1000.0f;   // 1s convert to 1000ms
 constexpr Dimension SELECT_SCROLL_MIN_WIDTH = 64.0_vp;
 constexpr int32_t COLUMN_NUM = 2;
+constexpr float SCROLL_PAGING_SPEED_THRESHOLD = 1200.0f;
 
 float CalculateOffsetByFriction(float extentOffset, float delta, float friction)
 {
@@ -93,24 +94,8 @@ bool ScrollPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     if (config.skipMeasure && config.skipLayout) {
         return false;
     }
-    auto layoutAlgorithmWrapper = DynamicCast<LayoutAlgorithmWrapper>(dirty->GetLayoutAlgorithm());
-    CHECK_NULL_RETURN(layoutAlgorithmWrapper, false);
-    auto layoutAlgorithm = DynamicCast<ScrollLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
-    CHECK_NULL_RETURN(layoutAlgorithm, false);
-    currentOffset_ = layoutAlgorithm->GetCurrentOffset();
-    scrollableDistance_ = layoutAlgorithm->GetScrollableDistance();
-    auto axis = GetAxis();
-    auto oldMainSize = GetMainAxisSize(viewPort_, axis);
-    auto newMainSize = GetMainAxisSize(layoutAlgorithm->GetViewPort(), axis);
-    auto oldExtentMainSize = GetMainAxisSize(viewPortExtent_, axis);
-    auto newExtentMainSize = GetMainAxisSize(layoutAlgorithm->GetViewPortExtent(), axis);
-    viewPortLength_ = layoutAlgorithm->GetViewPortLength();
-    viewPort_ = layoutAlgorithm->GetViewPort();
-    viewSize_ = layoutAlgorithm->GetViewSize();
-    viewPortExtent_ = layoutAlgorithm->GetViewPortExtent();
-    if (scrollSnapUpdate_ || !NearEqual(oldMainSize, newMainSize) || !NearEqual(oldExtentMainSize, newExtentMainSize)) {
-        CaleSnapOffsets();
-        scrollSnapUpdate_ = false;
+    if (!SetScrollProperties(dirty)) {
+        return false;
     }
     UpdateScrollBarOffset();
     if (config.frameSizeChange) {
@@ -145,6 +130,33 @@ bool ScrollPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     host->SetViewPort(globalViewPort);
     isInitialized_ = true;
     return false;
+}
+
+bool ScrollPattern::SetScrollProperties(const RefPtr<LayoutWrapper>& dirty)
+{
+    auto layoutAlgorithmWrapper = DynamicCast<LayoutAlgorithmWrapper>(dirty->GetLayoutAlgorithm());
+    CHECK_NULL_RETURN(layoutAlgorithmWrapper, false);
+    auto layoutAlgorithm = DynamicCast<ScrollLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
+    CHECK_NULL_RETURN(layoutAlgorithm, false);
+    currentOffset_ = layoutAlgorithm->GetCurrentOffset();
+    scrollableDistance_ = layoutAlgorithm->GetScrollableDistance();
+    auto axis = GetAxis();
+    auto oldMainSize = GetMainAxisSize(viewPort_, axis);
+    auto newMainSize = GetMainAxisSize(layoutAlgorithm->GetViewPort(), axis);
+    auto oldExtentMainSize = GetMainAxisSize(viewPortExtent_, axis);
+    auto newExtentMainSize = GetMainAxisSize(layoutAlgorithm->GetViewPortExtent(), axis);
+    viewPortLength_ = layoutAlgorithm->GetViewPortLength();
+    viewPort_ = layoutAlgorithm->GetViewPort();
+    viewSize_ = layoutAlgorithm->GetViewSize();
+    viewPortExtent_ = layoutAlgorithm->GetViewPortExtent();
+    if (enablePagingStatus_ == ScrollPagingStatus::VALID) {
+        SetIntervalSize(Dimension(static_cast<double>(viewPortLength_)));
+    }
+    if (scrollSnapUpdate_ || !NearEqual(oldMainSize, newMainSize) || !NearEqual(oldExtentMainSize, newExtentMainSize)) {
+        CaleSnapOffsets();
+        scrollSnapUpdate_ = false;
+    }
+    return true;
 }
 
 void ScrollPattern::ScrollSnapTrigger()
@@ -561,7 +573,8 @@ void ScrollPattern::UpdateScrollBarOffset()
     auto layoutProperty = host->GetLayoutProperty<ScrollLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     auto padding = layoutProperty->CreatePaddingAndBorder();
-    Size size(viewSize_.Width(), viewSize_.Height());
+    auto contentEndOffset = layoutProperty->GetScrollContentEndOffsetValue(.0f);
+    Size size(viewSize_.Width(), viewSize_.Height() - contentEndOffset);
     auto viewPortExtent = viewPortExtent_;
     AddPaddingToSize(padding, viewPortExtent);
     auto estimatedHeight = (GetAxis() == Axis::HORIZONTAL) ? viewPortExtent.Width() : viewPortExtent.Height();
@@ -632,11 +645,6 @@ bool ScrollPattern::ScrollToNode(const RefPtr<FrameNode>& focusFrameNode)
     auto scrollGeometry = scrollFrame->GetGeometryNode();
     CHECK_NULL_RETURN(scrollGeometry, false);
     auto scrollFrameSize = scrollGeometry->GetFrameSize();
-    TAG_LOGD(AceLogTag::ACE_SCROLLABLE, "Child: %{public}s/%{public}d on focus. Size is (%{public}f,%{public}f). "
-        "Offset to Scroll is (%{public}f,%{public}f). Scroll size is (%{public}f,%{public}f)",
-        focusFrameNode->GetTag().c_str(), focusFrameNode->GetId(), focusNodeSize.Width(), focusNodeSize.Height(),
-        focusNodeOffsetToScrolll.GetX(), focusNodeOffsetToScrolll.GetY(), scrollFrameSize.Width(),
-        scrollFrameSize.Height());
     float focusNodeDiffToScroll =
         GetAxis() == Axis::VERTICAL ? focusNodeOffsetToScrolll.GetY() : focusNodeOffsetToScrolll.GetX();
     if (NearZero(focusNodeDiffToScroll)) {
@@ -656,11 +664,14 @@ bool ScrollPattern::ScrollToNode(const RefPtr<FrameNode>& focusFrameNode)
     return false;
 }
 
-std::optional<float> ScrollPattern::CalePredictSnapOffset(float delta)
+std::optional<float> ScrollPattern::CalePredictSnapOffset(float delta, float dragDistance, float velocity)
 {
     std::optional<float> predictSnapOffset;
     CHECK_NULL_RETURN(!snapOffsets_.empty(), predictSnapOffset);
     CHECK_NULL_RETURN(GetScrollSnapAlign() != ScrollSnapAlign::NONE, predictSnapOffset);
+    if (enablePagingStatus_ == ScrollPagingStatus::VALID) {
+        delta = GetPagingDelta(dragDistance, velocity);
+    }
     float finalPosition = currentOffset_ + delta;
     if (!IsSnapToInterval()) {
         if (!enableSnapToSide_.first) {
@@ -699,7 +710,6 @@ std::optional<float> ScrollPattern::CalePredictSnapOffset(float delta)
     }
     if (predictSnapOffset.has_value()) {
         predictSnapOffset = predictSnapOffset.value() - currentOffset_;
-        TAG_LOGD(AceLogTag::ACE_SCROLL, "Prediction of snap offset is %{public}f", predictSnapOffset.value());
     }
     return predictSnapOffset;
 }
@@ -869,5 +879,23 @@ float ScrollPattern::GetSelectScrollWidth()
     }
 
     return finalWidth;
+}
+
+float ScrollPattern::GetPagingDelta(float dragDistance, float velocity)  const
+{
+    auto dragDistanceThreshold = viewPortLength_ * 0.5f;
+    dragDistance = fmod(dragDistance, viewPortLength_);
+    // dragDistance and velocity have not reached the threshold
+    if (LessNotEqual(std::abs(dragDistance), dragDistanceThreshold) &&
+        LessNotEqual(std::abs(velocity), SCROLL_PAGING_SPEED_THRESHOLD)) {
+        return - dragDistance;
+    }
+    // The direction of dragDistance is the same as the direction of velocity
+    if (GreatOrEqual(dragDistance * velocity, 0.f)) {
+        auto direction = NearZero(dragDistance) ? velocity : dragDistance;
+        return - dragDistance + (GreatNotEqual(direction, 0.f) ? viewPortLength_ : -viewPortLength_);
+    }
+    // The direction of dragDistance is opposite to the direction of velocity
+    return - dragDistance;
 }
 } // namespace OHOS::Ace::NG

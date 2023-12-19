@@ -225,6 +225,7 @@ build_component_ng("pattern_ng") {
     "navigation/bar_item_layout_algorithm.cpp",
     "navigation/bar_item_node.cpp",
     "navigation/bar_item_pattern.cpp",
+    "navigation/inner_navigation_controller.cpp",
     "navigation/nav_bar_layout_algorithm.cpp",
     "navigation/nav_bar_node.cpp",
     "navigation/nav_bar_pattern.cpp",
@@ -333,6 +334,7 @@ build_component_ng("pattern_ng") {
     "scroll_bar/scroll_bar_pattern.cpp",
     "scrollable/nestable_scroll_container.cpp",
     "scrollable/refresh_coordination.cpp",
+    "scrollable/scrollable.cpp",
     "scrollable/scrollable_controller.cpp",
     "scrollable/scrollable_model_ng.cpp",
     "scrollable/scrollable_paint_property.cpp",
@@ -409,6 +411,8 @@ build_component_ng("pattern_ng") {
     "swiper_indicator/indicator_common/swiper_arrow_layout_algorithm.cpp",
     "swiper_indicator/indicator_common/swiper_arrow_pattern.cpp",
     "swiper_indicator/indicator_common/swiper_indicator_pattern.cpp",
+    "symbol/symbol_model_ng.cpp",
+    "symbol/symbol_source_info.cpp",
     "tabs/tab_bar_accessibility_property.cpp",
     "tabs/tab_bar_layout_algorithm.cpp",
     "tabs/tab_bar_layout_property.cpp",
@@ -494,14 +498,16 @@ build_component_ng("pattern_ng") {
     "waterflow/water_flow_pattern.cpp",
   ]
 
+  external_deps = []
   deps = [ "container_modal/interfaces:customtitle" ]
 
   if (defined(vendor_configs.ace_engine_advanced)) {
     sources += vendor_configs.ace_engine_advanced_pattern
+    external_deps += vendor_configs.ace_engine_ext_extra_deps
   }
 
   if (is_ohos_standard_system) {
-    external_deps = [
+    external_deps += [
       "graphic_2d:librender_service_client",
       "napi:ace_napi",
     ]

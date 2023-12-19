@@ -110,6 +110,16 @@ public:
         text_ = text;
     }
 
+    void SetSmoothEdge(float value)
+    {
+        smoothEdge_ = value;
+    }
+
+    float GetSmoothEdge() const
+    {
+        return smoothEdge_;
+    }
+
     RefPtr<SvgBaseDeclaration> GetDeclaration()
     {
         return declaration_;
@@ -173,6 +183,7 @@ protected:
     std::string hrefMaskId_;
     std::string hrefFilterId_;
     uint8_t opacity_ = 0xFF;
+    float smoothEdge_ = 0.0f;
 
     bool hrefFill_ = true;   // get fill attributes from reference
     bool hrefRender_ = true; // get render attr (mask, filter, transform, opacity, clip path) from reference

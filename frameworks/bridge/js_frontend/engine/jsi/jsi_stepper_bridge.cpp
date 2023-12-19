@@ -51,11 +51,7 @@ void JsiStepperBridge::GetAttrLabel(
                 stepperLabel.rightLabel = valStr;
             } else if (keyStr == DOM_STEPPER_INITIAL_STATUS) {
                 stepperLabel.initialStatus = valStr;
-            } else {
-                LOGD("key : %{public}s unsupported. Ignoring!", keyStr.c_str());
             }
-        } else {
-            LOGD("value of unsupported type. Ignoring!");
         }
     }
 }

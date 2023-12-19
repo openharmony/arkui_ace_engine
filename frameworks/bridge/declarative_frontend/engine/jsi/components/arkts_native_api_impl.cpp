@@ -42,6 +42,7 @@
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_node_container_modifier.h"
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_panel_modifier.h"
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_pattern_lock_modifier.h"
+#include "bridge/declarative_frontend/engine/jsi/components/arkts_native_progress_modifier.h"
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_text_area_modifier.h"
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_text_input_modifier.h"
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_swiper_modifier.h"
@@ -99,8 +100,28 @@ NodeHandle GetFrameNodeById(int nodeId)
     return OHOS::Ace::AceType::RawPtr(node);
 }
 
+int64_t GetUIState(NodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, 0);
+    auto eventHub = frameNode->GetEventHub<EventHub>();
+    CHECK_NULL_RETURN(eventHub, 0);
+    return eventHub->GetCurrentUIState();
+}
+
+void SetSupportedUIState(NodeHandle node, uint64_t state)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->AddSupportedState(static_cast<uint64_t>(state));
+}
+
 static struct ArkUINodeAPI impl = {
     GetFrameNodeById,
+    GetUIState,
+    SetSupportedUIState,
     GetCommonModifier,
     GetCheckboxGroupModifier,
     GetCounterModifier,
@@ -158,6 +179,7 @@ static struct ArkUINodeAPI impl = {
     GetGaugeModifier,
     GetScrollModifier,
     GetGridItemModifier,
+    GetProgressModifier,
     GetCommonShapeModifier,
     GetShapeModifier,
     GetRectModifier,

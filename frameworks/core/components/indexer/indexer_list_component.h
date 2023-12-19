@@ -89,7 +89,6 @@ public:
 
     void SetRightToLeft(bool isRightToLeft)
     {
-        LOGD("[indexer] SetRightToLeft: %d", isRightToLeft);
         isRightToLeft_ = isRightToLeft;
     }
 

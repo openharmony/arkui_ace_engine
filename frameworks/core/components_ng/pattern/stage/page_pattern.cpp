@@ -41,7 +41,6 @@ void IterativeAddToSharedMap(const RefPtr<UINode>& node, SharedTransitionMap& ma
         }
         auto id = frameChild->GetRenderContext()->GetShareId();
         if (!id.empty()) {
-            LOGD("add id:%{public}s", id.c_str());
             map[id] = frameChild;
         }
         IterativeAddToSharedMap(frameChild, map);
@@ -83,17 +82,25 @@ bool PagePattern::TriggerPageTransition(PageTransitionType type, const std::func
     }
     auto effect = FindPageTransitionEffect(type);
     pageTransitionFinish_ = std::make_shared<std::function<void()>>(onFinish);
-    auto wrappedOnFinish = [weak = WeakClaim(this), sharedFinish = pageTransitionFinish_]() {
-        auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID(pattern);
-        auto host = pattern->GetHost();
-        CHECK_NULL_VOID(host);
-        if (sharedFinish == pattern->pageTransitionFinish_) {
-            // ensure this is exactly the finish callback saved in pagePattern,
-            // otherwise means new pageTransition started
-            pattern->FirePageTransitionFinish();
-            host->DeleteAnimatablePropertyFloat(KEY_PAGE_TRANSITION_PROPERTY);
-        }
+    auto wrappedOnFinish = [weak = WeakClaim(this), sharedFinish = pageTransitionFinish_,
+                               instanceId = Container::CurrentId()]() {
+        ContainerScope scope(instanceId);
+        auto taskExecutor = Container::CurrentTaskExecutor();
+        CHECK_NULL_VOID(taskExecutor);
+        taskExecutor->PostSyncTask(
+            [weak, sharedFinish] {
+                auto pattern = weak.Upgrade();
+                CHECK_NULL_VOID(pattern);
+                auto host = pattern->GetHost();
+                CHECK_NULL_VOID(host);
+                if (sharedFinish == pattern->pageTransitionFinish_) {
+                    // ensure this is exactly the finish callback saved in pagePattern,
+                    // otherwise means new pageTransition started
+                    pattern->FirePageTransitionFinish();
+                    host->DeleteAnimatablePropertyFloat(KEY_PAGE_TRANSITION_PROPERTY);
+                }
+            },
+            TaskExecutor::TaskType::UI);
     };
     if (effect && effect->GetUserCallback()) {
         RouteType routeType = (type == PageTransitionType::ENTER_POP || type == PageTransitionType::EXIT_POP)
@@ -166,7 +173,7 @@ void PagePattern::OnShow()
     CHECK_NULL_VOID(host);
     host->SetJSViewActive(true);
     isOnShow_ = true;
-    JankFrameReport::StartRecord(pageInfo_->GetPageUrl());
+    JankFrameReport::GetInstance().StartRecord(pageInfo_->GetPageUrl());
     PerfMonitor::GetPerfMonitor()->SetPageUrl(pageInfo_->GetPageUrl());
     auto pageUrlChecker = container->GetPageUrlChecker();
     if (pageUrlChecker != nullptr) {
@@ -189,7 +196,7 @@ void PagePattern::OnShow()
 void PagePattern::OnHide()
 {
     CHECK_NULL_VOID(isOnShow_);
-    JankFrameReport::FlushRecord();
+    JankFrameReport::GetInstance().FlushRecord();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->SetJSViewActive(false);
@@ -208,7 +215,7 @@ void PagePattern::OnHide()
     if (Recorder::EventRecorder::Get().IsPageRecordEnable()) {
         auto entryPageInfo = DynamicCast<EntryPageInfo>(pageInfo_);
         int64_t duration = 0;
-        if (entryPageInfo) {
+        if (entryPageInfo && entryPageInfo->GetShowTime() > 0) {
             duration = GetCurrentTimestamp() - entryPageInfo->GetShowTime();
         }
         Recorder::EventRecorder::Get().OnPageHide(pageInfo_->GetPageUrl(), duration);

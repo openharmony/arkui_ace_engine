@@ -258,6 +258,23 @@ public:
      */
     virtual void RecoverForm(const std::string &statusData) {}
 
+    virtual void SetContainerModalTitleVisible(bool customTitleSettedShow, bool floatingTitleSettedShow) {}
+
+    virtual void SetContainerModalTitleHeight(int height) {}
+
+    virtual int32_t GetContainerModalTitleHeight()
+    {
+        return -1;
+    }
+
+    virtual bool GetContainerModalButtonsRect(Rosen::Rect& containerModal, Rosen::Rect& buttons)
+    {
+        return false;
+    }
+
+    virtual void SubscribeContainerModalButtonsRectChange(
+        std::function<void(Rosen::Rect& containerModal, Rosen::Rect& buttons)>&& callback) {}
+
 #ifndef PREVIEW
     virtual void SearchElementInfoByAccessibilityId(
         int32_t elementId, int32_t mode,

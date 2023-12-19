@@ -66,7 +66,6 @@ void OptionPaintMethod::PaintDivider(RSCanvas& canvas, PaintWrapper* paintWrappe
     // draw divider above content, length = content width
     path.AddRect(horInterval + iconHorInterval, 0, optionSize.Width() - horInterval,
         static_cast<float>(selectTheme->GetDefaultDividerWidth().ConvertToPx()));
-    LOGD("drawing option divider with length %{public}f", optionSize.Width() - 2 * horInterval - iconHorInterval);
 
     RSBrush brush;
     auto dividerColor = selectTheme->GetLineColor();

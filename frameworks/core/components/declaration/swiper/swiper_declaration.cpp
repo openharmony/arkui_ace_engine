@@ -238,7 +238,6 @@ void SwiperDeclaration::CallSpecializedMethod(const std::string& method, const s
     } else if (method == DOM_ROTATION) {
         auto controller = GetRotationController();
         if (controller) {
-            LOGD("SwiperDeclaration rotation focus request");
             controller->RequestRotation(true);
         }
     } else {

@@ -92,7 +92,6 @@ void ScrollBarController::Initialize(const WeakPtr<PipelineContext>& context, bo
 
 void ScrollBarController::PlayGrowAnimation()
 {
-    LOGD("start play grow animation.");
     if (!touchDownCallback_) {
         return;
     }
@@ -126,7 +125,6 @@ void ScrollBarController::PlayGrowAnimation()
 
 void ScrollBarController::PlayShrinkAnimation()
 {
-    LOGD("start play shrink animation.");
     if (!touchUpCallback_) {
         return;
     }
@@ -193,7 +191,6 @@ void ScrollBarController::HandleTouchUp()
 
 void ScrollBarController::HandleDragUpdate(const GestureEvent& info)
 {
-    LOGD("handle drag update, offset is %{public}lf", info.GetMainDelta());
     if (info.GetInputEventType() == InputEventType::AXIS) {
         UpdateScrollPosition(info.GetMainDelta(), SCROLL_FROM_AXIS);
     } else {
@@ -214,7 +211,6 @@ void ScrollBarController::HandleDragEnd(const GestureEvent& info)
         dragEndMotion_->Reset(FRICTION, mainPosition, correctVelocity);
     } else {
         dragEndMotion_ = AceType::MakeRefPtr<FrictionMotion>(FRICTION, mainPosition, correctVelocity);
-        LOGD("Mainposition is %{public}lf, velocity is %{public}lf", mainPosition, correctVelocity);
         dragEndMotion_->AddListener([weakScroll = AceType::WeakClaim(this)](double value) {
             auto scrollBarController = weakScroll.Upgrade();
             if (scrollBarController) {
@@ -329,18 +325,14 @@ bool ScrollBarController::CheckScroll()
 
 void ScrollBarController::SetIsHover(bool isInBarRegion)
 {
-    LOGD("set isBarRegion state : %{public}d", isInBarRegion);
     if (isInBar_ == isInBarRegion) {
-        LOGD("isInBar_ state is not changed");
         return;
     }
     isInBar_ = isInBarRegion;
     if (isPressed_) {
-        LOGD("scroll bar is pressed now.");
         return;
     }
     isHover_ = isInBar_;
-    LOGD("set scroll bar hover state: %{public}d", isHover_);
     if (isHover_) {
         isActive_ = true;
         PlayGrowAnimation();

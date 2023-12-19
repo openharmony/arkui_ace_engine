@@ -122,7 +122,7 @@ void GridItemModelNG::SetOnSelect(SelectFunc&& onSelect)
     eventHub->SetOnSelect(std::move(onSelect));
 }
 
-void GridItemModelNG::SetGridItemSelectable(FrameNode* frameNode, bool selectable)
+void GridItemModelNG::SetSelectable(FrameNode* frameNode, bool selectable)
 {
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<GridItemPattern>();
@@ -130,7 +130,7 @@ void GridItemModelNG::SetGridItemSelectable(FrameNode* frameNode, bool selectabl
     pattern->SetSelectable(selectable);
 }
 
-void GridItemModelNG::SetGridItemSelected(FrameNode* frameNode, bool selected)
+void GridItemModelNG::SetSelected(FrameNode* frameNode, bool selected)
 {
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<GridItemPattern>();
@@ -141,24 +141,23 @@ void GridItemModelNG::SetGridItemSelected(FrameNode* frameNode, bool selected)
     eventHub->SetCurrentUIState(UI_STATE_SELECTED, selected);
 }
 
-void GridItemModelNG::SetGridItemRowStart(FrameNode* frameNode, int32_t rowStart)
+void GridItemModelNG::SetRowStart(FrameNode* frameNode, int32_t rowStart)
 {
-    ACE_UPDATE_NODE_PAINT_PROPERTY(GridItemLayoutProperty, RowStart, rowStart, frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(GridItemLayoutProperty, RowStart, rowStart, frameNode);
 }
 
-void GridItemModelNG::SetGridItemRowEnd(FrameNode* frameNode, int32_t rowEnd)
+void GridItemModelNG::SetRowEnd(FrameNode* frameNode, int32_t rowEnd)
 {
-    ACE_UPDATE_NODE_PAINT_PROPERTY(GridItemLayoutProperty, RowEnd, rowEnd, frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(GridItemLayoutProperty, RowEnd, rowEnd, frameNode);
 }
 
-void GridItemModelNG::SetGridItemColumnStart(FrameNode* frameNode, int32_t columnStart)
+void GridItemModelNG::SetColumnStart(FrameNode* frameNode, int32_t columnStart)
 {
-    ACE_UPDATE_NODE_PAINT_PROPERTY(GridItemLayoutProperty, ColumnStart, columnStart, frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(GridItemLayoutProperty, ColumnStart, columnStart, frameNode);
 }
 
-void GridItemModelNG::SetGridItemColumnEnd(FrameNode* frameNode, int32_t columnEnd)
+void GridItemModelNG::SetColumnEnd(FrameNode* frameNode, int32_t columnEnd)
 {
-    ACE_UPDATE_NODE_PAINT_PROPERTY(GridItemLayoutProperty, ColumnEnd, columnEnd, frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(GridItemLayoutProperty, ColumnEnd, columnEnd, frameNode);
 }
-
 } // namespace OHOS::Ace::NG

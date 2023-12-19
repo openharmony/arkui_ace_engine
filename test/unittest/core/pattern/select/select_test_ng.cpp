@@ -1145,37 +1145,6 @@ HWTEST_F(SelectTestNg, SelectOption001, TestSize.Level1)
 }
 
 /**
- * @tc.name: SelectOption002
- * @tc.desc: Test SelectModelNG SetOptionHeight.
- * @tc.type: FUNC
- */
-HWTEST_F(SelectTestNg, SelectOption002, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Create select model and call SetOptionHeight.
-     * @tc.expected: Objects are created successfully.
-     */
-    Dimension OPTION_HEIGHT = Dimension(100.0f, DimensionUnit::VP);
-    SelectModelNG selectModelInstance;
-    selectModelInstance.SetOptionHeight(OPTION_HEIGHT);
-    /**
-     * @tc.steps: step2. Get select frame node, select pattern and option node.
-     * @tc.expected: Objects are gotten successfully.
-     */
-    auto select = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    auto selectPattern = select->GetPattern<SelectPattern>();
-    auto options = selectPattern->GetOptions();
-    /**
-     * @tc.steps: step3. Get option paint property, compare the height of option with the original value.
-     * @tc.expected: Setting is successful, values are equal.
-     */
-    if (options.size() > 0) {
-        auto optionPaintProperty = options[0]->GetPaintProperty<OptionPaintProperty>();
-        EXPECT_EQ(optionPaintProperty->GetSelectModifiedHeight().value(), OPTION_HEIGHT.ConvertToPx());
-    }
-}
-
-/**
  * @tc.name: SelectFont001
  * @tc.desc: Test SelectPattern GetFontSize.
  * @tc.type: FUNC
@@ -1306,7 +1275,36 @@ HWTEST_F(SelectTestNg, SelectPadding001, TestSize.Level1)
     const auto& padding = layoutProps->GetPaddingProperty();
     ASSERT_NE(padding, nullptr);
 
-    EXPECT_EQ(padding->left.value().GetDimension().ConvertToVp(), 4.0);
-    EXPECT_EQ(padding->right.value().GetDimension().ConvertToVp(), 4.0);
+    EXPECT_EQ(padding->left.value().GetDimension().ConvertToVp(), 8.0);
+    EXPECT_EQ(padding->right.value().GetDimension().ConvertToVp(), 8.0);
+}
+
+/**
+ * @tc.name: SelectOptionHeight001
+ * @tc.desc: Test SelectModelNG SetOptionHeight.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectTestNg, SelectOptionHeight001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Build select model instance an parameters.
+     * @tc.expected: Objects are created successfully.
+     */
+    Dimension OPTION_HEIGHT = Dimension(150.0f, DimensionUnit::VP);
+    SelectModelNG selectModelInstance;
+    /**
+     * @tc.steps: step2. Call SetOptionHeight.
+     */
+    selectModelInstance.SetOptionHeight(OPTION_HEIGHT);
+    auto select = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto selectPattern = select->GetPattern<SelectPattern>();
+    /**
+     * @tc.steps: step3. Call SetOptionHeight.
+     * @tc.expected: Attributes are called successfully.
+     */
+    auto menu = selectPattern->GetMenuNode();
+    auto menuLayoutProperty = menu->GetLayoutProperty<MenuLayoutProperty>();
+    EXPECT_EQ(menuLayoutProperty->GetSelectModifiedHeight().value(),
+    OPTION_HEIGHT.ConvertToPx());
 }
 } // namespace OHOS::Ace::NG

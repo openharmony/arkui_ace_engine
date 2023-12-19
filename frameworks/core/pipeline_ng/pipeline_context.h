@@ -76,6 +76,9 @@ public:
 
     static float GetCurrentRootHeight();
 
+    RefPtr<FrameNode> HandleFocusNode();
+    void IsCloseSCBKeyboard();
+
     void SetupRootElement() override;
 
     void SetupSubRootElement();
@@ -112,6 +115,12 @@ public:
 
     // remove schedule task by id.
     void RemoveScheduleTask(uint32_t id) override;
+
+    void OnTouchEvent(const TouchEvent& point, const RefPtr<NG::FrameNode>& node, bool isSubPipe = false) override;
+
+    void OnMouseEvent(const MouseEvent& event, const RefPtr<NG::FrameNode>& node) override;
+
+    void OnAxisEvent(const AxisEvent& event, const RefPtr<NG::FrameNode>& node) override;
 
     // Called by view when touch event received.
     void OnTouchEvent(const TouchEvent& point, bool isSubPipe = false) override;
@@ -161,7 +170,7 @@ public:
 
     void RemoveOnAreaChangeNode(int32_t nodeId);
 
-    void HandleOnAreaChangeEvent();
+    void HandleOnAreaChangeEvent(uint64_t nanoTimestamp);
 
     void AddVisibleAreaChangeNode(
         const RefPtr<FrameNode>& node, double ratio, const VisibleRatioCallback& callback, bool isUserCallback = true);
@@ -471,6 +480,10 @@ public:
     void NotifyFillRequestSuccess(AceAutoFillType autoFillType, RefPtr<ViewDataWrap> viewDataWrap);
     void NotifyFillRequestFailed(RefPtr<FrameNode> node, int32_t errCode);
 
+    std::shared_ptr<NavigationController> GetNavigationController(const std::string& id) override;
+    void AddOrReplaceNavigationNode(const std::string& id, const WeakPtr<FrameNode>& node);
+    void DeleteNavigationNode(const std::string& id);
+
     void SetDragCleanTask(std::function<void()>&& task)
     {
         dragCleanTask_ = std::move(task);
@@ -530,6 +543,14 @@ public:
 
     bool IsDragging() const override;
     void SetIsDragging(bool isDragging) override;
+
+    void SetContainerModalTitleVisible(bool customTitleSettedShow, bool floatingTitleSettedShow);
+    void SetContainerModalTitleHeight(int32_t height);
+    int32_t GetContainerModalTitleHeight();
+    bool GetContainerModalButtonsRect(RectF& containerModal, RectF& buttons);
+    void SubscribeContainerModalButtonsRectChange(
+        std::function<void(RectF& containerModal, RectF& buttons)>&& callback);
+
 protected:
     void StartWindowSizeChangeAnimate(int32_t width, int32_t height, WindowSizeChangeReason type,
         const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr);
@@ -691,6 +712,8 @@ private:
 
     std::map<int32_t, std::function<void(bool)>> isFocusActiveUpdateEvents_;
     std::map<int32_t, std::function<void(bool)>> onFormVisibleChangeEvents_;
+    mutable std::mutex navigationMutex_;
+    std::map<std::string, WeakPtr<FrameNode>> navigationNodes_;
     std::list<DelayedTask> delayedTasks_;
 
     ACE_DISALLOW_COPY_AND_MOVE(PipelineContext);

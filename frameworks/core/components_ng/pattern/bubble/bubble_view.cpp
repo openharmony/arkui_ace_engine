@@ -47,6 +47,7 @@ namespace OHOS::Ace::NG {
 namespace {
 constexpr double DOUBLENESS = 2.0;
 constexpr Dimension BUBBLE_MAX_HEIGHT = 480.0_vp;
+constexpr Dimension BUBBLE_MAX_WIDTH = 400.0_vp;
 constexpr Dimension OUT_RANGE_SPACE = 40.0_vp;
 OffsetF GetDisplayWindowRectOffset()
 {
@@ -129,6 +130,15 @@ RefPtr<FrameNode> BubbleView::CreateBubbleNode(
     popupProp->UpdateShowInSubWindow(param->IsShowInSubWindow());
     popupProp->UpdatePositionOffset(OffsetF(param->GetTargetOffset().GetX(), param->GetTargetOffset().GetY()));
     popupProp->UpdateBlockEvent(param->IsBlockEvent());
+    if (param->GetArrowHeight().has_value()) {
+        popupProp->UpdateArrowHeight(param->GetArrowHeight().value());
+    }
+    if (param->GetArrowWidth().has_value()) {
+        popupProp->UpdateArrowWidth(param->GetArrowWidth().value());
+    }
+    if (param->GetRadius().has_value()) {
+        popupProp->UpdateRadius(param->GetRadius().value());
+    }
     SetHitTestMode(popupNode, param->IsBlockEvent());
     if (param->GetTargetSpace().has_value()) {
         popupProp->UpdateTargetSpace(param->GetTargetSpace().value());
@@ -207,6 +217,10 @@ RefPtr<FrameNode> BubbleView::CreateBubbleNode(
         renderContext->UpdateBackBlurStyle(styleOption);
         auto backgroundColor = popupPaintProp->GetBackgroundColor().value_or(GetPopupTheme()->GetBackgroundColor());
         renderContext->UpdateBackgroundColor(backgroundColor);
+        renderContext->UpdateBackShadow(ShadowConfig::DefaultShadowM);
+        if (param->GetShadow().has_value()) {
+            renderContext->UpdateBackShadow(param->GetShadow().value());
+        }
     }
     child->MountToParent(popupNode);
     return popupNode;
@@ -230,6 +244,15 @@ RefPtr<FrameNode> BubbleView::CreateCustomBubbleNode(
     layoutProps->UpdatePlacement(param->GetPlacement());
     layoutProps->UpdateShowInSubWindow(param->IsShowInSubWindow());
     layoutProps->UpdateBlockEvent(param->IsBlockEvent());
+    if (param->GetArrowHeight().has_value()) {
+        layoutProps->UpdateArrowHeight(param->GetArrowHeight().value());
+    }
+    if (param->GetArrowWidth().has_value()) {
+        layoutProps->UpdateArrowWidth(param->GetArrowWidth().value());
+    }
+    if (param->GetRadius().has_value()) {
+        layoutProps->UpdateRadius(param->GetRadius().value());
+    }
     SetHitTestMode(popupNode, param->IsBlockEvent());
     auto displayWindowOffset = GetDisplayWindowRectOffset();
     layoutProps->UpdateDisplayWindowOffset(displayWindowOffset);
@@ -277,6 +300,10 @@ RefPtr<FrameNode> BubbleView::CreateCustomBubbleNode(
             columnRenderContext->UpdateBackgroundColor(backgroundColor);
         }
         columnRenderContext->UpdateBackBlurStyle(styleOption);
+        columnRenderContext->UpdateBackShadow(ShadowConfig::DefaultShadowM);
+        if (param->GetShadow().has_value()) {
+            columnRenderContext->UpdateBackShadow(param->GetShadow().value());
+        }
     }
     if (customRenderContext) {
         if (customRenderContext->HasBackgroundColor()) {
@@ -316,6 +343,7 @@ void BubbleView::UpdatePopupParam(int32_t popupId, const RefPtr<PopupParam>& par
         for (const auto& uinode : children) {
             if (uinode->GetTag() == V2::SCROLL_ETS_TAG) {
                 auto scrollNode = AceType::DynamicCast<FrameNode>(uinode);
+                CHECK_NULL_VOID(scrollNode);
                 auto scrollProps = scrollNode->GetLayoutProperty<ScrollLayoutProperty>();
                 scrollProps->UpdateCalcMaxSize(CalcSize(
                     std::nullopt, CalcLength(Dimension(popupMaxHeight) - buttonTheme->GetHeight() * DOUBLENESS)));
@@ -336,6 +364,7 @@ void BubbleView::UpdatePopupParam(int32_t popupId, const RefPtr<PopupParam>& par
         popupPaintProp->UpdateBackgroundColor(param->GetBackgroundColor());
     }
     auto childNode = AceType::DynamicCast<FrameNode>(popupNode->GetFirstChild());
+    CHECK_NULL_VOID(childNode);
     auto renderContext = childNode->GetRenderContext();
     if (renderContext) {
         auto backgroundColor = popupPaintProp->GetBackgroundColor().value_or(GetPopupTheme()->GetBackgroundColor());
@@ -359,6 +388,7 @@ void BubbleView::UpdateCustomPopupParam(int32_t popupId, const RefPtr<PopupParam
     popupPaintProp->UpdateEnableArrow(param->EnableArrow());
     auto backgroundColor = popupPaintProp->GetBackgroundColor().value_or(GetPopupTheme()->GetBackgroundColor());
     auto childNode = AceType::DynamicCast<FrameNode>(popupNode->GetFirstChild());
+    CHECK_NULL_VOID(childNode);
     auto customFrameNode = AceType::DynamicCast<FrameNode>(childNode->GetFirstChild());
     auto columnRenderContext = childNode->GetRenderContext();
     RefPtr<RenderContext> customRenderContext;
@@ -396,8 +426,8 @@ void BubbleView::GetPopupMaxWidthAndHeight(const RefPtr<PopupParam>& param, floa
     } else {
         popupMaxHeight = maxHeight - OUT_RANGE_SPACE.ConvertToPx() - OUT_RANGE_SPACE.ConvertToPx() - bottom - top;
     }
-    if (maxWidth > BUBBLE_MAX_HEIGHT.ConvertToPx()) {
-        popupMaxWidth = BUBBLE_MAX_HEIGHT.ConvertToPx();
+    if (maxWidth > BUBBLE_MAX_WIDTH.ConvertToPx()) {
+        popupMaxWidth = BUBBLE_MAX_WIDTH.ConvertToPx();
     } else {
         popupMaxWidth = maxWidth - OUT_RANGE_SPACE.ConvertToPx() - OUT_RANGE_SPACE.ConvertToPx();
     }
@@ -420,6 +450,15 @@ void BubbleView::UpdateCommonParam(int32_t popupId, const RefPtr<PopupParam>& pa
     }
     popupLayoutProp->UpdateShowInSubWindow(param->IsShowInSubWindow());
     popupLayoutProp->UpdateBlockEvent(param->IsBlockEvent());
+    if (param->GetArrowHeight().has_value()) {
+        popupLayoutProp->UpdateArrowHeight(param->GetArrowHeight().value());
+    }
+    if (param->GetArrowWidth().has_value()) {
+        popupLayoutProp->UpdateArrowWidth(param->GetArrowWidth().value());
+    }
+    if (param->GetRadius().has_value()) {
+        popupLayoutProp->UpdateRadius(param->GetRadius().value());
+    }
     SetHitTestMode(popupNode, param->IsBlockEvent());
     popupLayoutProp->UpdatePositionOffset(OffsetF(param->GetTargetOffset().GetX(), param->GetTargetOffset().GetY()));
     if (param->IsMaskColorSetted()) {
@@ -434,6 +473,11 @@ void BubbleView::UpdateCommonParam(int32_t popupId, const RefPtr<PopupParam>& pa
         popupPaintProp->UpdateBackgroundColor(param->GetBackgroundColor());
     }
     auto childNode = AceType::DynamicCast<FrameNode>(popupNode->GetFirstChild());
+    CHECK_NULL_VOID(childNode);
+    auto renderContext = childNode->GetRenderContext();
+    if (renderContext && param->GetShadow().has_value()) {
+        renderContext->UpdateBackShadow(param->GetShadow().value());
+    }
     auto childLayoutProperty = childNode->GetLayoutProperty();
     CHECK_NULL_VOID(childLayoutProperty);
     float popupMaxWidth = 0.0f;
@@ -487,6 +531,7 @@ RefPtr<FrameNode> BubbleView::CreateCombinedChild(
     textPadding.top = CalcLength(padding.Top());
     textLayoutProps->UpdatePadding(textPadding);
     textLayoutProps->UpdateAlignSelf(FlexAlign::FLEX_START);
+    textLayoutProps->UpdateTextColor(popupTheme->GetFontSecondaryColor());
     UpdateTextProperties(param, textLayoutProps);
     message->MarkModifyDone();
     auto pipelineContext = PipelineBase::GetCurrentContext();
@@ -507,7 +552,6 @@ RefPtr<FrameNode> BubbleView::CreateCombinedChild(
     scrollNode->MarkModifyDone();
     message->MountToParent(scrollNode);
     scrollNode->MountToParent(columnNode);
-
     auto buttonFlex = BubbleView::CreateButtons(param, popupId, targetId);
     auto buttonFlexLayoutProperty = buttonFlex->GetLayoutProperty<FlexLayoutProperty>();
     buttonFlexLayoutProperty->UpdateAlignSelf(FlexAlign::FLEX_END);
@@ -517,7 +561,6 @@ RefPtr<FrameNode> BubbleView::CreateCombinedChild(
     childLayoutProperty->UpdateCalcMaxSize(
         CalcSize(NG::CalcLength(Dimension(popupMaxWidth)), NG::CalcLength(Dimension(popupMaxHeight))));
     buttonFlex->MountToParent(columnNode);
-
     columnNode->MarkModifyDone();
     return columnNode;
 }
@@ -576,6 +619,7 @@ RefPtr<FrameNode> BubbleView::CreateButton(
     auto buttonTextNode = BubbleView::CreateMessage(buttonParam.value, isUseCustom);
     auto textLayoutProperty = buttonTextNode->GetLayoutProperty<TextLayoutProperty>();
     textLayoutProperty->UpdateFontSize(popupTheme->GetButtonFontSize());
+    textLayoutProperty->UpdateTextColor(popupTheme->GetButtonFontColor());
     auto buttonTextInsideMargin = popupTheme->GetButtonTextInsideMargin();
     buttonTextNode->MountToParent(buttonNode);
 

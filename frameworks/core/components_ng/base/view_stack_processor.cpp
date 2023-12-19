@@ -71,7 +71,6 @@ void ViewStackProcessor::ImplicitPopBeforeContinue()
 {
     if ((elementsStack_.size() > 1) && ShouldPopImmediately()) {
         Pop();
-        LOGD("Implicit Pop done, top component is %{public}s", GetMainElementNode()->GetTag().c_str());
     }
 }
 

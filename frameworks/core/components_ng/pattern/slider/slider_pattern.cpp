@@ -665,12 +665,15 @@ bool SliderPattern::MoveStep(int32_t stepCount)
     if (NearZero(step)) {
         return false;
     }
-    float nextValue = -1.0;
-    nextValue = value_ + static_cast<float>(stepCount) * step;
-    if (NearEqual(nextValue, -1.0)) {
-        return false;
+    float nextValue = value_ + static_cast<float>(stepCount) * step;
+    auto oldStep = (value_ - min) / step;
+    if (!NearEqual(oldStep, std::round(oldStep))) {
+        if (stepCount > 0) {
+            nextValue = std::floor((nextValue - min) / step) * step + min;
+        } else {
+            nextValue = std::ceil((nextValue - min) / step) * step + min;
+        }
     }
-    nextValue = std::floor(nextValue / step) * step;
     nextValue = std::clamp(nextValue, min, max);
     if (NearEqual(nextValue, value_)) {
         return false;
@@ -740,8 +743,7 @@ void SliderPattern::FireChangeEvent(int32_t mode)
 {
     auto sliderEventHub = GetEventHub<SliderEventHub>();
     CHECK_NULL_VOID(sliderEventHub);
-    if ((mode == SliderChangeMode::Click || mode == SliderChangeMode::Moving) &&
-        NearEqual(value_, sliderEventHub->GetValue())) {
+    if (mode == SliderChangeMode::Moving && NearEqual(value_, sliderEventHub->GetValue())) {
         return;
     }
     sliderEventHub->FireChangeEvent(static_cast<float>(value_), mode);

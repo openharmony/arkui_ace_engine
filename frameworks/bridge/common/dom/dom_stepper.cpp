@@ -143,8 +143,6 @@ void DOMStepper::OnChildNodeAdded(const RefPtr<DOMNode>& child, int32_t slot)
         return;
     }
     auto childIndex = domStepperItem->GetItemIndex();
-    LOGD("DOMStepper AddChild %{public}s, childIndex: %{public}d, slot: %{public}d",
-        child->GetTag().c_str(), childIndex, slot);
     if (childIndex != DEFAULT_NODE_INDEX) {
         stepperComponent_->InsertChild(childIndex, child->GetRootComponent());
     } else {

@@ -97,6 +97,15 @@ const std::string FILE_SEPARATOR = "/";
 const std::string START_PARAMS_KEY = "__startParams";
 const std::string ACTION_VIEWDATA = "ohos.want.action.viewData";
 
+Rosen::Rect ConvertToRSRect(NG::RectF& rect)
+{
+    Rosen::Rect rsRect;
+    rsRect.posX_ = floor(rect.GetX());
+    rsRect.posY_ = floor(rect.GetY());
+    rsRect.width_ = ceil(rect.Width());
+    rsRect.height_ = ceil(rect.Height());
+    return rsRect;
+}
 } // namespace
 
 const std::string SUBWINDOW_PREFIX = "ARK_APP_SUBWINDOW_";
@@ -573,9 +582,6 @@ void UIContentImpl::CommonInitializeForm(
         density = defaultDisplay->GetVirtualPixelRatio();
         deviceWidth = defaultDisplay->GetWidth();
         deviceHeight = defaultDisplay->GetHeight();
-        TAG_LOGD(AceLogTag::ACE_FORM,
-            "UIContent: deviceWidth: %{public}d, deviceHeight: %{public}d, default density: %{public}f", deviceWidth,
-            deviceHeight, density);
     }
 
     SystemProperties::InitDeviceInfo(deviceWidth, deviceHeight, deviceHeight >= deviceWidth ? 0 : 1, density, false);
@@ -636,7 +642,6 @@ void UIContentImpl::CommonInitializeForm(
     std::string resPath;
     std::string pageProfile;
     if (isFormRender_) {
-        TAG_LOGD(AceLogTag::ACE_FORM, "Initialize UIContent form assetProvider");
         std::vector<std::string> basePaths;
         basePaths.emplace_back("assets/js/" + moduleName_ + "/");
         basePaths.emplace_back("assets/js/share/");
@@ -763,7 +768,6 @@ void UIContentImpl::CommonInitializeForm(
             auto pos = moduleHapPath.find_last_of('/');
             if (pos != std::string::npos) {
                 hapPath = LOCAL_BUNDLE_CODE_PATH + moduleHapPath.substr(pos + 1);
-                LOGD("In Stage mode, hapPath:%{private}s", hapPath.c_str());
             }
         }
     }
@@ -864,7 +868,6 @@ void UIContentImpl::CommonInitializeForm(
 
     if (window_) {
         if (window_->IsDecorEnable()) {
-            LOGD("Container modal is enabled.");
             container->SetWindowModal(WindowModal::CONTAINER_MODAL);
         }
 
@@ -885,8 +888,6 @@ void UIContentImpl::CommonInitializeForm(
     }
 
     if (isFormRender_) {
-        LOGD("Platform AceContainer SetViewNew is card formWidth=%{public}f, formHeight=%{public}f", formWidth_,
-            formHeight_);
         Platform::AceContainer::SetViewNew(aceView, density, formWidth_, formHeight_, window_);
         auto frontend = AceType::DynamicCast<FormFrontendDeclarative>(container->GetFrontend());
         CHECK_NULL_VOID(frontend);
@@ -900,7 +901,6 @@ void UIContentImpl::CommonInitializeForm(
 
     // after frontend initialize
     if (window_ && window_->IsFocused()) {
-        LOGD("UIContentImpl: focus again");
         Focus();
     }
 
@@ -915,7 +915,6 @@ void UIContentImpl::CommonInitializeForm(
         // Set sdk version in module json mode for form
         auto pipeline = container->GetPipelineContext();
         if (pipeline && appInfo) {
-            LOGD("SetMinPlatformVersion is %{public}d", appInfo->apiCompatibleVersion);
             pipeline->SetMinPlatformVersion(appInfo->apiCompatibleVersion);
         }
     } else {
@@ -925,7 +924,6 @@ void UIContentImpl::CommonInitializeForm(
     if (isModelJson) {
         auto pipeline = container->GetPipelineContext();
         if (pipeline && appInfo) {
-            LOGD("SetMinPlatformVersion is %{public}d", appInfo->apiCompatibleVersion);
             pipeline->SetMinPlatformVersion(appInfo->apiCompatibleVersion);
         }
     }
@@ -957,7 +955,6 @@ void UIContentImpl::SetConfiguration(const std::shared_ptr<OHOS::AppExecFwk::Con
     auto deviceAccess = config->GetItem(OHOS::AAFwk::GlobalConfigurationKey::INPUT_POINTER_DEVICE);
     auto languageTag = config->GetItem(OHOS::AAFwk::GlobalConfigurationKey::SYSTEM_LANGUAGE);
     if (!colorMode.empty()) {
-        LOGD("SetConfiguration colorMode: %{public}s", colorMode.c_str());
         if (colorMode == "dark") {
             SystemProperties::SetColorMode(ColorMode::DARK);
         } else {
@@ -967,12 +964,10 @@ void UIContentImpl::SetConfiguration(const std::shared_ptr<OHOS::AppExecFwk::Con
 
     if (!deviceAccess.empty()) {
         // Event of accessing mouse or keyboard
-        LOGD("SetConfiguration deviceAccess: %{public}s", deviceAccess.c_str());
         SystemProperties::SetDeviceAccess(deviceAccess == "true");
     }
 
     if (!languageTag.empty()) {
-        LOGD("SetConfiguration languageTag: %{public}s", languageTag.c_str());
         std::string language;
         std::string script;
         std::string region;
@@ -1007,7 +1002,6 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
     CHECK_NULL_VOID(context);
     static std::once_flag onceFlag;
     std::call_once(onceFlag, [&context]() {
-        LOGD("Initialize for current process.");
         SetHwIcuDirectory();
         Container::UpdateCurrent(INSTANCE_ID_PLATFORM);
         auto abilityContext = OHOS::AbilityRuntime::Context::ConvertTo<OHOS::AbilityRuntime::AbilityContext>(context);
@@ -1072,9 +1066,6 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
         deviceHeight = defaultDisplay->GetHeight();
         devicePhysicalWidth = defaultDisplay->GetPhysicalWidth();
         devicePhysicalHeight = defaultDisplay->GetPhysicalHeight();
-        LOGD("UIContent: deviceWidth: %{public}d, deviceHeight: %{public}d, devicePhysicalWidth=%{public}d, "
-             "devicePhysicalHeight=%{public}d, default density: %{public}f",
-            deviceWidth, deviceHeight, devicePhysicalWidth, devicePhysicalHeight, density);
     }
     SystemProperties::InitDeviceInfo(deviceWidth, deviceHeight, deviceHeight >= deviceWidth ? 0 : 1, density, false);
     SystemProperties::SetDevicePhysicalWidth(devicePhysicalWidth);
@@ -1099,10 +1090,8 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
         }
         if (resConfig->GetColorMode() == OHOS::Global::Resource::ColorMode::DARK) {
             SystemProperties::SetColorMode(ColorMode::DARK);
-            LOGD("UIContent set dark mode");
         } else {
             SystemProperties::SetColorMode(ColorMode::LIGHT);
-            LOGD("UIContent set light mode");
         }
         SystemProperties::SetDeviceAccess(
             resConfig->GetInputDevice() == Global::Resource::InputDevice::INPUTDEVICE_POINTINGDEVICE);
@@ -1140,13 +1129,11 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
     LOGI("Initialize UIContent isModelJson:%{public}s", isModelJson ? "true" : "false");
     if (isModelJson) {
         std::string hapPath = info != nullptr ? info->hapPath : "";
-        LOGD("hapPath:%{public}s", hapPath.c_str());
         // first use hap provider
         if (SystemProperties::GetFlutterDecouplingEnabled()) {
             if (assetManagerImpl && !hapPath.empty()) {
                 auto hapAssetProvider = AceType::MakeRefPtr<HapAssetProviderImpl>();
                 if (hapAssetProvider->Initialize(hapPath, { "", "ets/", "resources/base/profile/" })) {
-                    LOGD("Push HapAssetProvider to queue.");
                     assetManagerImpl->PushBack(std::move(hapAssetProvider));
                 }
             }
@@ -1154,7 +1141,6 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
             if (flutterAssetManager && !hapPath.empty()) {
                 auto assetProvider = AceType::MakeRefPtr<HapAssetProvider>();
                 if (assetProvider->Initialize(hapPath, { "", "ets/", "resources/base/profile/" })) {
-                    LOGD("Push HapAssetProvider to queue.");
                     flutterAssetManager->PushBack(std::move(assetProvider));
                 }
             }
@@ -1173,13 +1159,11 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
         }
 
         // second use file provider, will remove later
-        LOGD("In stage mode, resPath:%{private}s", resPath.c_str());
         auto assetBasePathStr = { std::string("ets/"), std::string("resources/base/profile/") };
         if (SystemProperties::GetFlutterDecouplingEnabled()) {
             if (assetManagerImpl && !resPath.empty()) {
                 auto fileAssetProvider = AceType::MakeRefPtr<FileAssetProviderImpl>();
                 if (fileAssetProvider->Initialize(resPath, assetBasePathStr)) {
-                    LOGD("Push fileAssetProvider to queue.");
                     assetManagerImpl->PushBack(std::move(fileAssetProvider));
                 }
             }
@@ -1187,7 +1171,6 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
             if (flutterAssetManager && !resPath.empty()) {
                 auto assetProvider = AceType::MakeRefPtr<FileAssetProvider>();
                 if (assetProvider->Initialize(resPath, assetBasePathStr)) {
-                    LOGD("Push AssetProvider to queue.");
                     flutterAssetManager->PushBack(std::move(assetProvider));
                 }
             }
@@ -1199,7 +1182,6 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
             if (pageProfile.compare(0, profilePrefix.size(), profilePrefix) == 0) {
                 pageProfile = pageProfile.substr(profilePrefix.length()).append(".json");
             }
-            LOGD("In stage mode, pageProfile:%{public}s", pageProfile.c_str());
         }
     } else {
         auto packagePathStr = context->GetBundleCodeDir();
@@ -1218,7 +1200,6 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
             if (assetManagerImpl && !packagePathStr.empty()) {
                 auto fileAssetProvider = AceType::MakeRefPtr<FileAssetProviderImpl>();
                 if (fileAssetProvider->Initialize(packagePathStr, assetBasePathStr)) {
-                    LOGD("Push AssetProvider to queue.");
                     assetManagerImpl->PushBack(std::move(fileAssetProvider));
                 }
             }
@@ -1226,7 +1207,6 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
             if (flutterAssetManager && !packagePathStr.empty()) {
                 auto assetProvider = AceType::MakeRefPtr<FileAssetProvider>();
                 if (assetProvider->Initialize(packagePathStr, assetBasePathStr)) {
-                    LOGD("Push AssetProvider to queue.");
                     flutterAssetManager->PushBack(std::move(assetProvider));
                 }
             }
@@ -1252,7 +1232,6 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
             auto pos = moduleHapPath.find_last_of('/');
             if (pos != std::string::npos) {
                 hapPath = LOCAL_BUNDLE_CODE_PATH + moduleHapPath.substr(pos + 1);
-                LOGD("In Stage mode, hapPath:%{private}s", hapPath.c_str());
             }
         }
     }
@@ -1357,7 +1336,6 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
     }
 
     if (window_->IsDecorEnable()) {
-        LOGD("Container modal is enabled.");
         container->SetWindowModal(WindowModal::CONTAINER_MODAL);
     }
     dragWindowListener_ = new DragWindowListener(instanceId_);
@@ -1388,7 +1366,6 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
                 if (context != nullptr) {
                     context->SetRSUIDirector(rsUiDirector);
                 }
-                LOGD("UIContent Init Rosen Backend");
             }
         };
 #endif
@@ -1685,13 +1662,11 @@ bool UIContentImpl::ProcessKeyEvent(const std::shared_ptr<OHOS::MMI::KeyEvent>& 
 
 bool UIContentImpl::ProcessAxisEvent(const std::shared_ptr<OHOS::MMI::AxisEvent>& axisEvent)
 {
-    LOGD("UIContentImpl ProcessAxisEvent");
     return false;
 }
 
 bool UIContentImpl::ProcessVsyncEvent(uint64_t timeStampNanos)
 {
-    LOGD("UIContentImpl ProcessVsyncEvent");
     return false;
 }
 
@@ -2123,7 +2098,6 @@ void UIContentImpl::SetResourcePaths(const std::vector<std::string>& resourcesPa
             }
 
             if (!assetRootPath.empty()) {
-                LOGD("new FileAssetProvider, assetRootPath: %{private}s", assetRootPath.c_str());
                 if (SystemProperties::GetFlutterDecouplingEnabled()) {
                     auto fileAssetProviderImpl = AceType::MakeRefPtr<FileAssetProviderImpl>();
                     if (fileAssetProviderImpl->Initialize(assetRootPath, assetBasePaths)) {
@@ -2138,7 +2112,6 @@ void UIContentImpl::SetResourcePaths(const std::vector<std::string>& resourcesPa
                 return;
             }
             for (auto iter = resourcesPaths.begin(); iter != resourcesPaths.end(); iter++) {
-                LOGD("new HapAssetProvider, iter: %{private}s", iter->c_str());
                 if (SystemProperties::GetFlutterDecouplingEnabled()) {
                     auto hapAssetProviderImpl = AceType::MakeRefPtr<HapAssetProviderImpl>();
                     if (hapAssetProviderImpl->Initialize(*iter, assetBasePaths)) {
@@ -2372,7 +2345,6 @@ bool UIContentImpl::NotifyExecuteAction(
 
 std::string UIContentImpl::RecycleForm()
 {
-    LOGD("UIContentImpl: RecycleForm");
     auto container = Platform::AceContainer::GetContainer(instanceId_);
     std::string statusData;
     CHECK_NULL_RETURN(container, statusData);
@@ -2383,7 +2355,6 @@ std::string UIContentImpl::RecycleForm()
 
 void UIContentImpl::RecoverForm(const std::string& statusData)
 {
-    LOGD("UIContentImpl: RecoverForm");
     auto container = Platform::AceContainer::GetContainer(instanceId_);
     CHECK_NULL_VOID(container);
     auto pipeline = container->GetPipelineContext();
@@ -2556,5 +2527,71 @@ void UIContentImpl::DestroyCustomPopupUIExtension(int32_t nodeId)
             customPopupConfigMap_.erase(nodeId);
         },
         TaskExecutor::TaskType::UI);
+}
+
+void UIContentImpl::SetContainerModalTitleVisible(bool customTitleSettedShow, bool floatingTitleSettedShow)
+{
+    auto taskExecutor = Container::CurrentTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    taskExecutor->PostTask(
+        [customTitleSettedShow, floatingTitleSettedShow]() {
+            auto pipeline = NG::PipelineContext::GetCurrentContext();
+            CHECK_NULL_VOID(pipeline);
+            pipeline->SetContainerModalTitleVisible(customTitleSettedShow, floatingTitleSettedShow);
+        },
+        TaskExecutor::TaskType::UI);
+}
+
+void UIContentImpl::SetContainerModalTitleHeight(int32_t height)
+{
+    auto taskExecutor = Container::CurrentTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    taskExecutor->PostTask(
+        [height]() {
+            auto pipeline = NG::PipelineContext::GetCurrentContext();
+            CHECK_NULL_VOID(pipeline);
+            pipeline->SetContainerModalTitleHeight(height);
+        },
+        TaskExecutor::TaskType::UI);
+}
+
+int32_t UIContentImpl::GetContainerModalTitleHeight()
+{
+    auto pipeline = NG::PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, -1);
+    return pipeline->GetContainerModalTitleHeight();
+}
+
+bool UIContentImpl::GetContainerModalButtonsRect(Rosen::Rect& containerModal, Rosen::Rect& buttons)
+{
+    NG::RectF floatContainerModal;
+    NG::RectF floatButtons;
+    auto pipeline = NG::PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, false);
+    if (!pipeline->GetContainerModalButtonsRect(floatContainerModal, floatButtons)) {
+        return false;
+    }
+    containerModal = ConvertToRSRect(floatContainerModal);
+    buttons = ConvertToRSRect(floatButtons);
+    return true;
+}
+
+void UIContentImpl::SubscribeContainerModalButtonsRectChange(
+    std::function<void(Rosen::Rect& containerModal, Rosen::Rect& buttons)>&& callback)
+{
+    auto pipeline = NG::PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+
+    if (callback) {
+        pipeline->SubscribeContainerModalButtonsRectChange(nullptr);
+        return;
+    }
+    std::function<void(NG::RectF&, NG::RectF&)> wrapFunc = [cb = std::move(callback)](NG::RectF& floatContainerModal,
+                                                               NG::RectF& floatButtons) {
+        Rosen::Rect containerModal = ConvertToRSRect(floatContainerModal);
+        Rosen::Rect buttons = ConvertToRSRect(floatButtons);
+        cb(containerModal, buttons);
+    };
+    pipeline->SubscribeContainerModalButtonsRectChange(std::move(wrapFunc));
 }
 } // namespace OHOS::Ace

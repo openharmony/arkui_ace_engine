@@ -25,7 +25,7 @@
 #include "base/memory/ace_type.h"
 #include "base/utils/utils.h"
 #include "core/components/common/layout/constants.h"
-#include "core/components/scroll/scrollable.h"
+#include "core/components_ng/pattern/scrollable/scrollable.h"
 #include "core/components/tab_bar/tab_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
@@ -645,6 +645,7 @@ void TabBarPattern::HandleClick(const GestureEvent& info)
         return;
     }
     SetSwiperCurve(DurationCubicCurve);
+
     TabBarClickEvent(index);
     if (tabBarStyles_[indicator_] == TabBarStyle::SUBTABBATSTYLE &&
         tabBarStyles_[index] == TabBarStyle::SUBTABBATSTYLE &&
@@ -652,11 +653,21 @@ void TabBarPattern::HandleClick(const GestureEvent& info)
         HandleSubTabBarClick(layoutProperty, index);
         return;
     }
-    if (GetAnimationDuration().has_value()) {
-        swiperController_->SwipeTo(index);
+
+    auto tabsNode = AceType::DynamicCast<TabsNode>(host->GetParent());
+    CHECK_NULL_VOID(tabsNode);
+    auto tabsPattern = tabsNode->GetPattern<TabsPattern>();
+    CHECK_NULL_VOID(tabsPattern);
+    if (tabsPattern->GetIsCustomAnimation()) {
+        OnCustomContentTransition(indicator_, index);
     } else {
-        swiperController_->SwipeToWithoutAnimation(index);
+        if (GetAnimationDuration().has_value()) {
+            swiperController_->SwipeTo(index);
+        } else {
+            swiperController_->SwipeToWithoutAnimation(index);
+        }
     }
+
     layoutProperty->UpdateIndicator(index);
 }
 
@@ -967,7 +978,15 @@ void TabBarPattern::HandleSubTabBarClick(const RefPtr<TabBarLayoutProperty>& lay
             targetPaintRect.GetX() + targetPaintRect.Width() / 2, targetOffset);
     }
     UpdateTextColor(index);
-    swiperController_->SwipeTo(index);
+
+    auto tabsPattern = tabsFrameNode->GetPattern<TabsPattern>();
+    CHECK_NULL_VOID(tabsPattern);
+    if (tabsPattern->GetIsCustomAnimation()) {
+        OnCustomContentTransition(indicator, index);
+    } else {
+        swiperController_->SwipeTo(index);
+    }
+
     layoutProperty->UpdateIndicator(index);
 }
 
@@ -1869,6 +1888,23 @@ void TabBarPattern::TabBarClickEvent(int32_t index) const
     auto tabBarClickEvent = tabsPattern->GetTabBarClickEvent();
     CHECK_NULL_VOID(tabBarClickEvent);
     (*tabBarClickEvent)(index);
+}
+
+
+void TabBarPattern::OnCustomContentTransition(int32_t fromIndex, int32_t toIndex)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto tabsNode = AceType::DynamicCast<TabsNode>(host->GetParent());
+    CHECK_NULL_VOID(tabsNode);
+    auto tabsPattern = tabsNode->GetPattern<TabsPattern>();
+    CHECK_NULL_VOID(tabsPattern);
+    auto swiperNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabs());
+    CHECK_NULL_VOID(swiperNode);
+    auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_VOID(swiperPattern);
+
+    swiperPattern->OnCustomContentTransition(toIndex);
 }
 
 bool TabBarPattern::CheckSwiperDisable() const

@@ -144,13 +144,10 @@ void AceContainer::Initialize()
 void AceContainer::Destroy()
 {
     ContainerScope scope(instanceId_);
-    LOGD("AceContainer::Destroy begin");
     if (!pipelineContext_) {
-        LOGD("no context find in %{private}d container", instanceId_);
         return;
     }
     if (!taskExecutor_) {
-        LOGD("no taskExecutor find in %{private}d container", instanceId_);
         return;
     }
     auto weak = AceType::WeakClaim(AceType::RawPtr(pipelineContext_));
@@ -323,7 +320,8 @@ void AceContainer::InitializeCallback()
 
     auto weak = AceType::WeakClaim(AceType::RawPtr(pipelineContext_));
     auto&& touchEventCallback = [weak, id = instanceId_](
-                                    const TouchEvent& event, const std::function<void()>& ignoreMark) {
+                                    const TouchEvent& event, const std::function<void()>& ignoreMark,
+                                    const RefPtr<OHOS::Ace::NG::FrameNode>& node) {
         ContainerScope scope(id);
         auto context = weak.Upgrade();
         if (context == nullptr) {
@@ -348,7 +346,8 @@ void AceContainer::InitializeCallback()
     aceView_->RegisterKeyEventCallback(keyEventCallback);
 
     auto&& mouseEventCallback = [weak, id = instanceId_](
-                                    const MouseEvent& event, const std::function<void()>& ignoreMark) {
+                                    const MouseEvent& event, const std::function<void()>& ignoreMark,
+                                    const RefPtr<OHOS::Ace::NG::FrameNode>& node) {
         ContainerScope scope(id);
         auto context = weak.Upgrade();
         if (context == nullptr) {
@@ -360,7 +359,8 @@ void AceContainer::InitializeCallback()
     aceView_->RegisterMouseEventCallback(mouseEventCallback);
 
     auto&& axisEventCallback = [weak, id = instanceId_](
-                                   const AxisEvent& event, const std::function<void()>& ignoreMark) {
+                                   const AxisEvent& event, const std::function<void()>& ignoreMark,
+                                   const RefPtr<OHOS::Ace::NG::FrameNode>& node) {
         ContainerScope scope(id);
         auto context = weak.Upgrade();
         if (context == nullptr) {
@@ -492,7 +492,6 @@ void AceContainer::DestroyContainer(int32_t instanceId)
 {
     auto container = AceEngine::Get().GetContainer(instanceId);
     if (!container) {
-        LOGD("no AceContainer with id %{private}d in AceEngine", instanceId);
         return;
     }
     container->Destroy();
@@ -712,7 +711,6 @@ void AceContainer::AddAssetPath(
         }
 
         for (const auto& path : paths) {
-            LOGD("Current path is: %{private}s", path.c_str());
             auto dirAssetProvider = AceType::MakeRefPtr<DirAssetProvider>(
                 path, std::make_unique<flutter::DirectoryAssetBundle>(
                           fml::OpenDirectory(path.c_str(), false, fml::FilePermission::kRead)));
@@ -736,7 +734,6 @@ void AceContainer::AddAssetPath(
     }
 
     for (const auto& path : paths) {
-        LOGD("Current path is: %{private}s", path.c_str());
         auto dirAssetProvider = AceType::MakeRefPtr<RSDirAssetProvider>(path);
         container->assetManager_->PushBack(std::move(dirAssetProvider));
     }
@@ -1010,7 +1007,6 @@ void AceContainer::AttachView(std::shared_ptr<Window> window, AceViewPreview* vi
     pipelineContext_->SetDrawDelegate(aceView_->GetDrawDelegate());
     pipelineContext_->SetIsJsCard(type_ == FrontendType::JS_CARD);
     if (installationFree_ && !isComponentMode_) {
-        LOGD("installationFree:%{public}d, labelId:%{public}d", installationFree_, labelId_);
         pipelineContext_->SetInstallationFree(installationFree_);
         pipelineContext_->SetAppLabelId(labelId_);
     }

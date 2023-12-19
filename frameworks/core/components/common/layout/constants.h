@@ -37,6 +37,10 @@ enum class ButtonType {
     CUSTOM,
 };
 
+enum class ButtonStyleMode { NORMAL, EMPHASIZE, TEXT };
+
+enum class ControlSize { SMALL, NORMAL };
+
 // Flex Styles
 enum class FlexDirection {
     ROW = 0,

@@ -205,15 +205,9 @@ inline RefPtr<Element> Element::DoUpdateChildWithNewComponent(
 RefPtr<Element> Element::UpdateChildWithSlot(
     const RefPtr<Element>& child, const RefPtr<Component>& newComponent, int32_t slot, int32_t renderSlot)
 {
-    LOGD("%{public}s(elmtId: %{public}d)::UpdateChildWithSlot(child: %{public}s(elmtId: %{public}d), "
-    "component: %{public}s(elmtId: %{public}d), slot: %{public}d, renderSlot: %{public}d)",
-        AceType::TypeName(this), GetElementId(), (child ? AceType::TypeName(child) : "no child Element (yet)"),
-        (child ? child->GetElementId() : -1), newComponent ? AceType::TypeName(newComponent) : "no Component",
-        newComponent ? newComponent->GetElementId() : -1, slot, renderSlot);
     // Considering 4 cases:
     // 1. child == null && newComponent == null  -->  do nothing
     if (!child && !newComponent) {
-        LOGD("no child and no newComponent, likely an internal error!");
         return nullptr;
     }
 
@@ -505,7 +499,6 @@ void Element::MarkActive(bool active)
 
 void Element::SetElementId(int32_t elmtId)
 {
-    LOGD("Setting elmtId %{public}d for %{public}s", elmtId, AceType::TypeName(this));
     elmtId_ = elmtId;
 }
 
@@ -515,10 +508,6 @@ void Element::SetElementId(int32_t elmtId)
 void Element::LocalizedUpdateWithComponent(
     const RefPtr<Component>& newComponent, const RefPtr<Component>& outmostWrappingComponent)
 {
-    LOGD("%{public}s elmtId %{public}d  updating with %{public}s elmtId %{public}d, canUpdate(): %{public}s",
-        AceType::TypeName(this), GetElementId(), AceType::TypeName(newComponent), newComponent->GetElementId(),
-        CanUpdate(newComponent) ? "yes" : "no");
-
     ACE_DCHECK(CanUpdate(newComponent));
     ACE_DCHECK(
         (GetElementId() == ElementRegister::UndefinedElementId) || (GetElementId() == newComponent->GetElementId()));
@@ -541,7 +530,6 @@ void Element::LocalizedUpdateWithComponent(
 
 void Element::LocalizedUpdate()
 {
-    LOGD("%{public}s elmtId %{public}d calling Update function", AceType::TypeName(this), GetElementId());
     Update();
 }
 

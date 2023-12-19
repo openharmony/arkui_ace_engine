@@ -22,15 +22,9 @@ namespace OHOS::Ace::Framework {
 
 thread_local std::unordered_map<int32_t, JSRef<JSObject>> JSLocalStorage::storages_;
 
-JSLocalStorage::JSLocalStorage()
-{
-    LOGD("JSLocalStorage: JSLocalStorage()");
-}
+JSLocalStorage::JSLocalStorage() {}
 
-JSLocalStorage::~JSLocalStorage()
-{
-    LOGD("JSLocalStorage: ~JSLocalStorage()");
-}
+JSLocalStorage::~JSLocalStorage() {}
 
 void JSLocalStorage::JSBind(BindingTarget globalObj)
 {
@@ -77,7 +71,6 @@ void JSLocalStorage::GetShared(const JSCallbackInfo& info)
     if (currentInstance >= MIN_SUBCONTAINER_ID && currentInstance < MIN_PLUGIN_SUBCONTAINER_ID) {
         currentInstance = SubwindowManager::GetInstance()->GetParentContainerId(currentInstance);
     }
-    LOGD("Current ID is %{public}d", currentInstance);
     auto it = storages_.find(currentInstance);
     if (it == storages_.end()) {
         LOGW("LocalStorage with ID %{public}d not found!", currentInstance);

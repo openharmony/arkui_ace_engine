@@ -52,10 +52,18 @@ public:
     void SetFriction(double friction) override;
     void SetScrollSnap(ScrollSnapAlign scrollSnapAlign, const Dimension& intervalSize,
         const std::vector<Dimension>& snapPaginations, const std::pair<bool, bool>& enableSnapToSide) override;
-    static void SetScrollable(FrameNode* frameNode, uint32_t scrollDirection);
+
+    static void SetNestedScroll(FrameNode* frameNode, const NestedScrollOptions& nestedOpt);
+    static void SetScrollEnabled(FrameNode* frameNode, bool scrollEnabled);
+    static void SetFriction(FrameNode* frameNode, double friction);
+    static void SetScrollSnap(FrameNode* frameNode, ScrollSnapAlign scrollSnapAlign, const Dimension& intervalSize,
+        const std::vector<Dimension>& snapPaginations, const std::pair<bool, bool>& enableSnapToSide);
+    static void SetScrollBar(FrameNode* frameNode, DisplayMode barState);
+    static void SetAxis(FrameNode* frameNode, Axis axis);
     static void SetScrollBarColor(FrameNode* frameNode, const Color& color);
     static void SetScrollBarWidth(FrameNode* frameNode, const Dimension& dimension);
     static void SetEdgeEffect(FrameNode* frameNode, const EdgeEffect& edgeEffect, bool alwaysEnabled);
+    void SetEnablePaging(bool enablePaging) override;
 };
 
 } // namespace OHOS::Ace::NG

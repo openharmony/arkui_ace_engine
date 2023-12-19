@@ -33,7 +33,6 @@ void CalendarControllerNg::GoTo(int32_t year, int32_t month, int32_t day)
     auto pattern = pattern_.Upgrade();
     CHECK_NULL_VOID(pattern);
     auto calendarPattern = AceType::DynamicCast<CalendarPattern>(pattern);
-    LOGD("go to: year=%{private}d, month=%{private}d, day=%{private}d", year, month, day);
     calendarPattern->FireGoToRequestData(year, month, day);
     calendarPattern->SetGoTo(true);
 }

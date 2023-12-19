@@ -109,7 +109,7 @@ frameworks/core/components_ng/pattern/refresh/  @Hu_ZeQi
 frameworks/core/components_ng/pattern/relative_container/  @xiexiyun
 frameworks/core/components_ng/pattern/remote_window/  @liuchao92
 frameworks/core/components_ng/pattern/rendering_context/  @keerecles
-frameworks/core/components_ng/pattern/rich_editor/  @wu-yinxiao
+frameworks/core/components_ng/pattern/rich_editor/  @xiexiyun
 frameworks/core/components_ng/pattern/root/  @zhoutianer
 frameworks/core/components_ng/pattern/scroll/  @rongShao-Z
 frameworks/core/components_ng/pattern/scroll_bar/  @rongShao-Z
@@ -117,7 +117,7 @@ frameworks/core/components_ng/pattern/scrollable/  @yeyinglong_admin
 frameworks/core/components_ng/pattern/search/  @jyj_0306
 frameworks/core/components_ng/pattern/security_component/  @
 frameworks/core/components_ng/pattern/select/  @luoying_ace_admin
-frameworks/core/components_ng/pattern/select_overlay/  @lijuan124
+frameworks/core/components_ng/pattern/select_overlay/  @LuckClover
 frameworks/core/components_ng/pattern/shape/  @sunbees
 frameworks/core/components_ng/pattern/side_bar/  @tsj_2020
 frameworks/core/components_ng/pattern/slider/  @luoying_ace_admin
@@ -128,9 +128,11 @@ frameworks/core/components_ng/pattern/swiper/  @xuzhidan
 frameworks/core/components_ng/pattern/swiper_indicator/  @xuzhidan
 frameworks/core/components_ng/pattern/tabs/  @xuzhidan
 frameworks/core/components_ng/pattern/text/  @lijuan124
+frameworks/core/components_ng/pattern/text_area/  @lijuan124
 frameworks/core/components_ng/pattern/text_clock/  @Zhang-Dong-hui
 frameworks/core/components_ng/pattern/text_drag/  @zhaojian2021
-frameworks/core/components_ng/pattern/text_field/  @jyj_0306  @lijuan124
+frameworks/core/components_ng/pattern/text_field/  @jyj_0306  @LuckClover
+frameworks/core/components_ng/pattern/text_input/  @lijuan124
 frameworks/core/components_ng/pattern/text_picker/  @luoying_ace_admin
 frameworks/core/components_ng/pattern/texttimer/  @Zhang-Dong-hui
 frameworks/core/components_ng/pattern/time_picker/  @luoying_ace_admin
@@ -208,7 +210,7 @@ frameworks/core/components/proxy/  @yan-shuifeng
 frameworks/core/components/qrcode/  @Zhang-Dong-hui
 frameworks/core/components/rating/  @luoying_ace_admin
 frameworks/core/components/refresh/  @Hu_ZeQi
-frameworks/core/components/relative_container/  @nickyjd
+frameworks/core/components/relative_container/  @xiexiyun
 frameworks/core/components/remote_window/  @liuchao92
 frameworks/core/components/rich_text/  @LongLie
 frameworks/core/components/root/  @yan-shuifeng
@@ -235,7 +237,7 @@ frameworks/core/components/swiper/  @xuzhidan
 frameworks/core/components/tab_bar/  @xuzhidan
 frameworks/core/components/text/  @lijuan124
 frameworks/core/components/text_clock/  @Zhang-Dong-hui
-frameworks/core/components/text_field/  @jyj_0306  @lijuan124
+frameworks/core/components/text_field/  @jyj_0306  @LuckClover
 frameworks/core/components/text_overlay/  @yangfan229
 frameworks/core/components/text_span/  @lijuan124
 frameworks/core/components/texttimer/  @Zhang-Dong-hui

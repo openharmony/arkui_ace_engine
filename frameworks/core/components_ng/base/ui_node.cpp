@@ -26,6 +26,7 @@
 #include "base/utils/utils.h"
 #include "bridge/common/utils/engine_helper.h"
 #include "core/common/container.h"
+#include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline/base/element_register.h"
 #include "core/pipeline_ng/pipeline_context.h"
@@ -52,6 +53,8 @@ UINode::UINode(const std::string& tag, int32_t nodeId, bool isRoot)
         distributedUI->AddNewNode(nodeId_);
     } while (false);
 #endif
+    nodeStatus_ = ViewStackProcessor::GetInstance()->IsBuilderNode() ? NodeStatus::BUILDER_NODE_OFF_MAINTREE
+                                                                     : NodeStatus::NORMAL_NODE;
 }
 
 UINode::~UINode()
@@ -77,6 +80,9 @@ UINode::~UINode()
         return;
     }
     onMainTree_ = false;
+    if (nodeStatus_ == NodeStatus::BUILDER_NODE_ON_MAINTREE) {
+        nodeStatus_ = NodeStatus::BUILDER_NODE_OFF_MAINTREE;
+    }
 }
 
 void UINode::AddChild(const RefPtr<UINode>& child, int32_t slot, bool silently)
@@ -84,9 +90,6 @@ void UINode::AddChild(const RefPtr<UINode>& child, int32_t slot, bool silently)
     CHECK_NULL_VOID(child);
     auto it = std::find(children_.begin(), children_.end(), child);
     if (it != children_.end()) {
-        LOGD("Child node already exists. Existing child nodeId %{public}d, add %{public}s child nodeId nodeId "
-             "%{public}d",
-            (*it)->GetId(), child->GetTag().c_str(), child->GetId());
         return;
     }
 
@@ -318,6 +321,9 @@ void UINode::AttachToMainTree(bool recursive)
         return;
     }
     onMainTree_ = true;
+    if (nodeStatus_ == NodeStatus::BUILDER_NODE_OFF_MAINTREE) {
+        nodeStatus_ = NodeStatus::BUILDER_NODE_ON_MAINTREE;
+    }
     isRemoving_ = false;
     OnAttachToMainTree(recursive);
     // if recursive = false, recursively call AttachToMainTree(false), until we reach the first FrameNode.
@@ -333,6 +339,9 @@ void UINode::DetachFromMainTree(bool recursive)
         return;
     }
     onMainTree_ = false;
+    if (nodeStatus_ == NodeStatus::BUILDER_NODE_ON_MAINTREE) {
+        nodeStatus_ = NodeStatus::BUILDER_NODE_OFF_MAINTREE;
+    }
     isRemoving_ = true;
     OnDetachFromMainTree(recursive);
     // if recursive = false, recursively call DetachFromMainTree(false), until we reach the first FrameNode.
@@ -949,5 +958,10 @@ std::string UINode::GetCurrentCustomNodeInfo()
 int32_t UINode::GenerateAccessibilityId()
 {
     return currentAccessibilityId_++;
+}
+
+NodeStatus UINode::GetNodeStatus() const
+{
+    return nodeStatus_;
 }
 } // namespace OHOS::Ace::NG

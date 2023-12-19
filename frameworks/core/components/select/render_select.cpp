@@ -23,7 +23,6 @@ namespace OHOS::Ace {
 void RenderSelect::OnTouchTestHit(
     const Offset& coordinateOffset, const TouchRestrict& touchRestrict, TouchTestResult& result)
 {
-    LOGD("RenderSelect::OnTouchTestHit(%{public}lf, %{public}lf).", coordinateOffset.GetX(), coordinateOffset.GetY());
     if (clickRecognizer_) {
         clickRecognizer_->SetCoordinateOffset(coordinateOffset);
         result.emplace_back(clickRecognizer_);
@@ -59,7 +58,6 @@ void RenderSelect::PerformLayout()
         return;
     }
 
-    LOGD("RenderSelect::PerformLayout: %{public}s.", AceType::TypeName(child));
     child->Layout(GetLayoutParam());
     selectSize_ = child->GetLayoutSize();
     selectSize_ = GetLayoutParam().Constrain(selectSize_);

@@ -267,7 +267,6 @@ void RenderSwiper::Update(const RefPtr<Component>& component)
     ClearItems(lazyComponent, static_cast<int32_t>(swiper->GetIndex()));
 
     if (itemCount_ < LEAST_SLIDE_ITEM_COUNT) {
-        LOGD("swiper item is less than least slide count");
         swiper_ = swiper;
         index_ = 0;
         return;
@@ -342,7 +341,6 @@ void RenderSwiper::PerformLayout()
         maxWidth = 0.0;
         maxHeight = (axis_ == Axis::VERTICAL && isLinearLayout) ? 0.0 : maxSize.Height();
     } else if (mainSwiperSize_ == MainSwiperSize::AUTO) {
-        LOGD("Use default MainSwiperSize");
     } else {
         LOGE("input wrong MainSwiperSize");
     }
@@ -460,12 +458,10 @@ void RenderSwiper::Initialize(const WeakPtr<PipelineContext>& context, bool catc
         };
         scheduler_ = SchedulerBuilder::Build(callback, context);
     } else if (scheduler_->IsActive()) {
-        LOGD("stop autoplay");
         scheduler_->Stop();
     }
 
     if (autoPlay_ && !scheduler_->IsActive() && show_ && !IsDisabled()) {
-        LOGD("start autoplay");
         scheduler_->Start();
     }
 }
@@ -685,7 +681,6 @@ void RenderSwiper::HandleTouchUp(const TouchEventInfo& info)
     fingerId_ = -1;
     // indicator zone
     if (touchContentType_ == TouchContentType::TOUCH_NONE) {
-        LOGD(" touch content type is none");
         return;
     } else if (touchContentType_ == TouchContentType::TOUCH_INDICATOR) {
         if (swiperIndicatorData_.isPressed) {
@@ -789,7 +784,6 @@ void RenderSwiper::HandleClick(const ClickInfo& clickInfo)
             return;
         }
         // refuse click event
-        LOGD("drop click event on press and hover status, otherwise exist hover index.");
         return;
     }
 
@@ -869,7 +863,7 @@ void RenderSwiper::HandleDragStart(const DragStartInfo& info)
     ResSchedReport::GetInstance().ResSchedDataReport("slide_on");
 #endif
     // for swiper item
-    JankFrameReport::SetFrameJankFlag(JANK_RUNNING_SWIPER);
+    JankFrameReport::GetInstance().SetFrameJankFlag(JANK_RUNNING_SWIPER);
     hasDragAction_ = true;
     scrollOffset_ = fmod(scrollOffset_, nextItemOffset_);
     if (onFocus_) {
@@ -904,7 +898,7 @@ void RenderSwiper::HandleDragUpdate(const DragUpdateInfo& info)
         DragIndicator(std::clamp(info.GetMainDelta(), -MAX_VIEW_PORT_WIDTH, MAX_VIEW_PORT_WIDTH));
         return;
     }
-    JankFrameReport::RecordFrameUpdate();
+    JankFrameReport::GetInstance().RecordFrameUpdate();
     if (touchContentType_ == TouchContentType::TOUCH_CONTENT || rotationStatus_ == RotationStatus::ROTATION_UPDATE) {
         EdgeEffect edgeEffect = swiper_->GetEdgeEffect();
         if (edgeEffect == EdgeEffect::SPRING && (!loop_) && currentIndex_ == targetIndex_
@@ -1010,7 +1004,7 @@ void RenderSwiper::HandleDragEnd(const DragEndInfo& info)
     if (SpringItems(info)) {
         return;
     }
-    JankFrameReport::ClearFrameJankFlag(JANK_RUNNING_SWIPER);
+    JankFrameReport::GetInstance().ClearFrameJankFlag(JANK_RUNNING_SWIPER);
     isIndicatorAnimationStart_ = false;
     MoveItems(info.GetMainVelocity());
 }
@@ -1603,7 +1597,6 @@ void RenderSwiper::ShowNext()
 void RenderSwiper::OnFocus()
 {
     if (autoPlay_) {
-        LOGD("stop autoplay cause by on focus");
         if (scheduler_) {
             scheduler_->Stop();
         }
@@ -1638,7 +1631,6 @@ void RenderSwiper::UpdateScrollPosition(double dragDelta)
     double newDragOffset = scrollOffset_ + limitDelta;
     int32_t toIndex = newDragOffset > 0 ? GetPrevIndex() : GetNextIndex();
     if (toIndex < 0 || toIndex >= itemCount_) {
-        LOGD("toIndex is error %{public}d", toIndex);
         return;
     }
     if (currentIndex_ == toIndex) {
@@ -1662,8 +1654,6 @@ void RenderSwiper::UpdateScrollPosition(double dragDelta)
         ResetIndicatorPosition();
         MarkNeedLayout(true);
         // drag length is greater than swiper's width, don't need to move position
-        LOGD("scroll to next page index[%{public}d] from index[%{public}d], scroll offset:%{public}lf",
-            currentIndex_, outItemIndex_, scrollOffset_);
         return;
     }
 
@@ -1708,7 +1698,6 @@ void RenderSwiper::SetSwiperEffect(double dragOffset)
 void RenderSwiper::UpdateChildPosition(double offset, int32_t fromIndex, bool inLayout)
 {
     if (itemCount_ <= 0) {
-        LOGD("No child in swiper. return.");
         return;
     }
     if (std::abs(currentIndex_ - fromIndex) == 1) {
@@ -1790,7 +1779,6 @@ void RenderSwiper::Tick(uint64_t duration)
     elapsedTime_ += duration;
     if (elapsedTime_ >= autoPlayInterval_) {
         if (currentIndex_ >= itemCount_ - 1 && !loop_) {
-            LOGD("already last one, stop auto play because not loop");
             if (scheduler_) {
                 scheduler_->Stop();
             }
@@ -1819,7 +1807,6 @@ void RenderSwiper::OnHiddenChanged(bool hidden)
 {
     if (hidden) {
         if (autoPlay_) {
-            LOGD("stop autoplay cause by hidden");
             if (scheduler_) {
                 scheduler_->Stop();
             }
@@ -2384,7 +2371,6 @@ void RenderSwiper::UpdateIndicatorSpringStatus(SpringStatus status)
         status == SpringStatus::FOCUS_SWITCH) {
         return;
     }
-    LOGD("UpdateIndicatorSpringStatus from[%{public}d] to[%{public}d]", indicatorSpringStatus_, status);
     indicatorSpringStatus_ = status;
 }
 
@@ -2430,7 +2416,6 @@ void RenderSwiper::MarkIndicatorPosition(bool isZoomMax)
 
 void RenderSwiper::StartIndicatorSpringAnimation(double start, double end)
 {
-    LOGD("StartIndicatorSpringAnimation(%{public}lf, %{public}lf)", start, end);
     if (!springController_) {
         return;
     }
@@ -2472,7 +2457,6 @@ void RenderSwiper::StopIndicatorSpringAnimation()
         springController_->Stop();
     }
     ResetIndicatorSpringStatus();
-    LOGD("StopIndicatorSpringAnimation");
 }
 
 void RenderSwiper::CalMaxStretch()
@@ -2489,7 +2473,6 @@ void RenderSwiper::CalMaxStretch()
                 focusStretchMaxTime_ = actualStep;
             }
         }
-        LOGD("CalMaxStretch(%{public}lf), time(%{public}lf)", maxStretch, focusStretchMaxTime_);
     }
 }
 
@@ -2536,7 +2519,6 @@ void RenderSwiper::MoveIndicator(int32_t toIndex, double offset, bool isAuto)
 
     // curve sport into spring sport
     if (GetIndicatorSpringStatus() == SpringStatus::SPRING_STOP) {
-        LOGD("indicator tail move end, start spring motion.");
         double springStart = INDICATOR_FOCUS_TAIL->MoveInternal(dragRate);
         UpdateIndicatorTailPosition(springStart * indicatorMoveNums);
         StartIndicatorSpringAnimation(springStart * indicatorMoveNums, DRAG_OFFSET_MAX * indicatorMoveNums);
@@ -2547,7 +2529,6 @@ void RenderSwiper::DragIndicator(double offset)
 {
     // start drag after zoom in completed.
     if (!IsZoomAnimationStopped()) {
-        LOGD("zoom in is not completed");
         return;
     }
 
@@ -2604,14 +2585,12 @@ void RenderSwiper::DragIndicatorEnd()
     if ((currentIndex_ + animationDirect_ >= itemCount_ || currentIndex_ + animationDirect_ < 0) &&
         std::fabs(dragMoveOffset_ - dragBaseOffset_) > 0) {
         // drag than 80dp, play reset and zoom out animation
-        LOGD("drag end and start restriction animation");
         StartDragRetractionAnimation();
         StartZoomOutAnimation();
     } else {
         ResetIndicatorPosition();
         UpdateEdgeStretchRate(DRAG_OFFSET_MIN);
         // only play zoom out animation
-        LOGD("drag end and start mask zoom out animation");
         StartZoomOutAnimation();
     }
     dragBaseOffset_ = DRAG_OFFSET_MIN;
@@ -2637,8 +2616,6 @@ void RenderSwiper::StartZoomInAnimation(bool isMouseHover)
     if (!zoomInController_) {
         return;
     }
-    LOGD("startZoomInAnimation zoom[%{public}lf,%{public}lf], opacity[%{public}lf,%{public}lf], duration[%{public}d]",
-        zoomValue_, ZOOM_MAX, opacityValue_, OPACITY_MAX, ZOOM_IN_DURATION);
     zoomInAnimation_ = AceType::MakeRefPtr<CurveAnimation<double>>(zoomValue_, ZOOM_MAX, Curves::SHARP);
     zoomInAnimation_->AddListener([weak = AceType::WeakClaim(this)](const double value) {
         auto swiper = weak.Upgrade();
@@ -2673,8 +2650,6 @@ void RenderSwiper::StartZoomOutAnimation(bool isMouseHover)
         return;
     }
     int duration = isMouseHover ? ZOOM_OUT_HOVER_DURATION : ZOOM_OUT_DURATION;
-    LOGD("StartZoomOutAnimation zoom[%{public}lf,%{public}lf], opacity[%{public}lf,%{public}lf], duration[%{public}d]",
-        zoomValue_, ZOOM_MIN, opacityValue_, OPACITY_MIN, duration);
     zoomOutAnimation_ = AceType::MakeRefPtr<CurveAnimation<double>>(zoomValue_, ZOOM_MIN, Curves::SHARP);
     zoomOutAnimation_->AddListener([weak = AceType::WeakClaim(this)](const double value) {
         auto swiper = weak.Upgrade();
@@ -2709,8 +2684,6 @@ void RenderSwiper::StartZoomInDotAnimation(int32_t index)
     if (!zoomInDotController_) {
         return;
     }
-    LOGD("StartZoomInDotAnimation zoom[%{public}lf, %{public}lf], duration[%{public}d]",
-        ZOOM_DOT_MIN, ZOOM_DOT_MAX, ZOOM_IN_DOT_DURATION);
     if (!zoomInDotAnimation_) {
         zoomInDotAnimation_ = AceType::MakeRefPtr<CurveAnimation<double>>(ZOOM_DOT_MIN, ZOOM_DOT_MAX, Curves::SHARP);
         zoomInDotAnimation_->AddListener([weak = AceType::WeakClaim(this)](const double value) {
@@ -2733,8 +2706,6 @@ void RenderSwiper::StartZoomOutDotAnimation()
     if (!zoomOutDotController_) {
         return;
     }
-    LOGD("StartZoomOutDotAnimation zoom[%{public}lf, %{public}lf], duration[%{public}d]",
-        ZOOM_DOT_MAX, ZOOM_DOT_MIN, ZOOM_OUT_DOT_DURATION);
     if (!zoomOutDotAnimation_) {
         zoomOutDotAnimation_ = AceType::MakeRefPtr<CurveAnimation<double>>(ZOOM_DOT_MAX, ZOOM_DOT_MIN, Curves::SHARP);
         zoomOutDotAnimation_->AddListener([weak = AceType::WeakClaim(this)](const double value) {
@@ -2758,7 +2729,6 @@ void RenderSwiper::StartZoomOutDotAnimation()
 
 void RenderSwiper::StopZoomAnimation()
 {
-    LOGD("stopZoomAnimation");
     if (zoomInController_ && !zoomInController_->IsStopped()) {
         zoomInController_->ClearStopListeners();
         zoomInController_->Stop();
@@ -2771,7 +2741,6 @@ void RenderSwiper::StopZoomAnimation()
 
 void RenderSwiper::StopZoomDotAnimation()
 {
-    LOGD("StopZoomDotAnimation");
     if (zoomInDotController_ && !zoomInDotController_->IsStopped()) {
         zoomInDotController_->ClearStopListeners();
         zoomInDotController_->Stop();
@@ -2908,7 +2877,6 @@ void RenderSwiper::UpdateIndicatorOffset(int32_t fromIndex, int32_t toIndex, dou
 
     // curve sport into spring sport
     if (GetIndicatorSpringStatus() == SpringStatus::SPRING_STOP) {
-        LOGD("indicator tail move end, start spring sport.");
         double springStart = INDICATOR_FOCUS_TAIL->MoveInternal(value) * indicatorMoveNums;
         UpdateIndicatorTailPosition(springStart);
         StartIndicatorSpringAnimation(springStart, indicatorMoveNums * DRAG_OFFSET_MAX);
@@ -2975,9 +2943,7 @@ void RenderSwiper::UpdateHoverStatus(bool isHover)
 
 void RenderSwiper::StartIndicatorAnimation(int32_t fromIndex, int32_t toIndex, bool isLoop)
 {
-    LOGD("StartIndicatorAnimation");
     if (fromIndex == toIndex) {
-        LOGD("from index is same to next index.");
         return;
     }
     if (isIndicatorAnimationStart_) {
@@ -3035,7 +3001,6 @@ void RenderSwiper::StartIndicatorAnimation(int32_t fromIndex, int32_t toIndex, b
 
 void RenderSwiper::StopIndicatorAnimation()
 {
-    LOGD("stopZoomAnimation");
     if (indicatorController_ && !indicatorController_->IsStopped()) {
         indicatorController_->ClearStopListeners();
         indicatorController_->Stop();

@@ -15,7 +15,6 @@
 
 #include "core/components_ng/pattern/ui_extension/ui_extension_pattern.h"
 
-#include "configuration.h"
 #include "key_event.h"
 #include "pointer_event.h"
 #include "session/host/include/extension_session.h"
@@ -124,6 +123,10 @@ void UIExtensionPattern::OnConnect()
     contentNode_->SetHitTestMode(HitTestMode::HTMNONE);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    auto&& opts = host->GetLayoutProperty()->GetSafeAreaExpandOpts();
+    if (opts && opts->Expansive()) {
+        contentNode_->GetLayoutProperty()->UpdateSafeAreaExpandOpts(*opts);
+    }
     auto context = AceType::DynamicCast<NG::RosenRenderContext>(contentNode_->GetRenderContext());
     CHECK_NULL_VOID(context);
     auto surfaceNode = sessionWrapper_->GetSurfaceNode();
@@ -147,28 +150,18 @@ void UIExtensionPattern::OnConnect()
 }
 
 void UIExtensionPattern::OnAccessibilityEvent(
-    const Accessibility::AccessibilityEventInfo& info, const std::vector<int32_t>& uiExtensionIdLevelList)
+    const Accessibility::AccessibilityEventInfo& info, int32_t uiExtensionOffset)
 {
     TAG_LOGI(AceLogTag::ACE_UIEXTENSIONCOMPONENT, "The accessibility event is reported.");
     ContainerScope scope(instanceId_);
-    auto container = AceType::DynamicCast<Platform::AceContainer>(Container::Current());
-    CHECK_NULL_VOID(container);
-    auto pipelineContext = container->GetPipelineContext();
-    auto ngPipeline = AceType::DynamicCast<NG::PipelineContext>(pipelineContext);
-    if (ngPipeline) {
-        auto window = container->GetUIWindow(instanceId_);
-        CHECK_NULL_VOID(window);
-        std::vector<int32_t> uiExtensionIdLevelListNew;
-        uiExtensionIdLevelListNew.assign(uiExtensionIdLevelList.begin(), uiExtensionIdLevelList.end());
-        uiExtensionIdLevelListNew.insert(uiExtensionIdLevelListNew.begin(), uiExtensionId_);
-        auto frontend = container->GetFrontend();
-        CHECK_NULL_VOID(frontend);
-        auto accessibilityManager = frontend->GetAccessibilityManager();
-        CHECK_NULL_VOID(accessibilityManager);
-        if (accessibilityManager) {
-            accessibilityManager->SendExtensionAccessibilityEvent(info, uiExtensionIdLevelListNew);
-        }
-    }
+    auto ngPipeline = NG::PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(ngPipeline);
+    uiExtensionOffset = uiExtensionId_ * NG::UI_EXTENSION_OFFSET_MAX + uiExtensionOffset;
+    auto frontend = ngPipeline->GetFrontend();
+    CHECK_NULL_VOID(frontend);
+    auto accessibilityManager = frontend->GetAccessibilityManager();
+    CHECK_NULL_VOID(accessibilityManager);
+    accessibilityManager->SendExtensionAccessibilityEvent(info, uiExtensionOffset);
 }
 
 void UIExtensionPattern::OnDisconnect()
@@ -206,7 +199,7 @@ bool UIExtensionPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& d
     CHECK_NULL_RETURN(dirty, false);
     auto host = dirty->GetHostNode();
     CHECK_NULL_RETURN(host, false);
-    auto globalOffsetWithTranslate = host->GetPaintRectGlobalOffsetWithTranslate();
+    auto [globalOffsetWithTranslate, err] = host->GetPaintRectGlobalOffsetWithTranslate();
     auto geometryNode = dirty->GetGeometryNode();
     CHECK_NULL_RETURN(geometryNode, false);
     auto frameRect = geometryNode->GetFrameRect();

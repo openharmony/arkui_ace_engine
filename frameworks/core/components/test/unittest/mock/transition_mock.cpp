@@ -24,16 +24,13 @@ MockTransitionElement::HookTransitionElement g_hookTransitionElement;
 
 void MockTransitionElement::SetMockHook(const HookTransitionElement& hook)
 {
-    LOGD("set hook.");
     g_hookTransitionElement = hook;
 }
 
 RefPtr<Element> MockTransitionComponent::CreateElement()
 {
-    LOGD("MockTransitionComponent CreateElement");
     auto transitionElement = AceType::MakeRefPtr<MockTransitionElement>();
     if (g_hookTransitionElement) {
-        LOGD("execute hook.");
         g_hookTransitionElement(transitionElement);
     }
     return transitionElement;

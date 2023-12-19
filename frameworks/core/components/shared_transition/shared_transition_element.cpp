@@ -148,7 +148,6 @@ bool SharedTransitionElement::AboardShuttle(Offset& ticket)
         LOGE("Aboard Shuttle Component failed. render passenger do not have pajamas. id: %{public}s", GetId().c_str());
         return false;
     }
-    LOGD("SharedTransitionElement: aboard shuttle. id: %{public}s", GetId().c_str());
     // save origin width/height and recover it when GetOffShuttle
     passengerWidth_ = passengerComponent_->GetWidthDimension();
     passengerHeight_ = passengerComponent_->GetHeightDimension();
@@ -188,7 +187,6 @@ bool SharedTransitionElement::AboardShuttle(Offset& ticket)
 
 void SharedTransitionElement::GetOffShuttle()
 {
-    LOGD("SharedTransitionElement: get off shuttle. id: %{public}s", GetId().c_str());
     auto placeHolder = GetContentElement();
     if (!passengerElement_ || !passengerRender_ || !placeHolder) {
         LOGE("GetOff Shuttle failed. Passenger already Get Off or place holder is null.");
@@ -279,7 +277,6 @@ void SharedTransitionElement::Register()
         LOGE("No parent page found.");
         return;
     }
-    LOGD("SharedTransitionElement Register shareId: %{public}s, id: %{public}s", shareId_.c_str(), GetId().c_str());
     pageElement_ = page;
     if (!oldShareId_.empty()) {
         auto& sharedTransitionElementMap = page->GetSharedTransitionMap();
@@ -301,12 +298,10 @@ RefPtr<PageElement> SharedTransitionElement::SearchParentPage() const
     while (parent) {
         auto page = AceType::DynamicCast<PageElement>(parent);
         if (page) {
-            LOGD("Find parent page. page id: %{public}d, id: %{public}s", page->GetPageId(), GetId().c_str());
             return page;
         }
         parent = parent->GetElementParent().Upgrade();
     }
-    LOGD("No parent page found. shareId: %{public}s, id: %{public}s", shareId_.c_str(), GetId().c_str());
     return nullptr;
 }
 

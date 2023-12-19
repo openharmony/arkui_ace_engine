@@ -30,10 +30,8 @@ RefPtr<GestureRecognizer> Ace::PanGesture::CreateRecognizer(WeakPtr<PipelineBase
     double distance = newContext->NormalizeToPx(Dimension(distance_, DimensionUnit::VP));
     RefPtr<OHOS::Ace::PanRecognizer> panRecognizer;
     if (panGestureOption_) {
-        LOGD("AceType::MakeRefPtr<OHOS::Ace::PanRecognizer>(context, panGestureOption_)");
         panRecognizer = AceType::MakeRefPtr<OHOS::Ace::PanRecognizer>(context, panGestureOption_);
     } else {
-        LOGD("AceType::MakeRefPtr<OHOS::Ace::PanRecognizer>(context, fingers_, direction_, distance)");
         panRecognizer = AceType::MakeRefPtr<OHOS::Ace::PanRecognizer>(context, fingers_, direction_, distance);
     }
     if (onActionStartId_) {

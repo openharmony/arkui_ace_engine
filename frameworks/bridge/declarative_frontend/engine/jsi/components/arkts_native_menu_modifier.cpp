@@ -23,7 +23,6 @@
 #include "frameworks/bridge/common/utils/utils.h"
 
 namespace OHOS::Ace::NG {
-constexpr uint32_t DEFAULT_MENU_FONTCOLOR_COLOR = 0xFF182431;
 const char DELIMITER = '|';
 constexpr int32_t SIZE_OF_FONT_INFO = 3;
 const int NUM_0 = 0;
@@ -31,9 +30,7 @@ const int NUM_1 = 1;
 const int NUM_2 = 2;
 const int NUM_3 = 3;
 static const char* ERR_CODE = "-1";
-const std::string DEFAULT_SIZE = "24.0vp";
 const std::string DEFAULT_FONT_WEIGHT = "normal";
-const std::string DEFAULT_FONT_FAMILY = "HarmonyOS Sans";
 const std::vector<OHOS::Ace::FontStyle> FONT_STYLES = { OHOS::Ace::FontStyle::NORMAL, OHOS::Ace::FontStyle::ITALIC };
 void SetMenuFontColor(NodeHandle node, uint32_t color)
 {
@@ -45,7 +42,8 @@ void ResetMenuFontColor(NodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    MenuModelNG::SetFontColor(frameNode, Color(DEFAULT_MENU_FONTCOLOR_COLOR));
+    std::optional<Color> color = std::nullopt;
+    MenuModelNG::SetFontColor(frameNode, color);
 }
 void SetMenuFont(NodeHandle node, const char* fontInfo, int32_t styleVal)
 {
@@ -59,7 +57,7 @@ void SetMenuFont(NodeHandle node, const char* fontInfo, int32_t styleVal)
         return;
     }
 
-    CalcDimension fontSize = Dimension(-1.0);
+    CalcDimension fontSize;
     if (res[NUM_0] != ERR_CODE) {
         fontSize = StringUtils::StringToCalcDimension(res[NUM_0], false, DimensionUnit::FP);
     }
@@ -73,8 +71,6 @@ void SetMenuFont(NodeHandle node, const char* fontInfo, int32_t styleVal)
 
     if (styleVal >= 0 && styleVal < static_cast<int32_t>(FONT_STYLES.size())) {
         MenuModelNG::SetFontStyle(frameNode, FONT_STYLES[styleVal]);
-    } else {
-        MenuModelNG::SetFontStyle(frameNode, FONT_STYLES[0]);
     }
 
     if (res[NUM_2] != ERR_CODE) {
@@ -85,17 +81,10 @@ void ResetMenuFont(NodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    CalcDimension fontSize =
-        StringUtils::StringToCalcDimension(DEFAULT_SIZE, false, DimensionUnit::FP);
+    CalcDimension fontSize;
     FontWeight fontWeight = StringUtils::StringToFontWeight(DEFAULT_FONT_WEIGHT);
-    std::vector<std::string> fontFamily =
-        Framework::ConvertStrToFontFamilies(std::string(DEFAULT_FONT_FAMILY));
-    OHOS::Ace::FontStyle fontStyle = FONT_STYLES[0];
-
     MenuModelNG::SetFontSize(frameNode, fontSize);
     MenuModelNG::SetFontWeight(frameNode, fontWeight);
-    MenuModelNG::SetFontFamily(frameNode, fontFamily);
-    MenuModelNG::SetFontStyle(frameNode, fontStyle);
 }
 void SetRadius(NodeHandle node, const double* values, const int* units)
 {

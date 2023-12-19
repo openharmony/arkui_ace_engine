@@ -13,18 +13,16 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/base/observer_handler.h"
-namespace OHOS::Ace::NG {
-UIObserverHandler& UIObserverHandler::GetInstance()
-{
-    static UIObserverHandler instance;
-    return instance;
-}
+#ifndef FOUNDATION_ACE_ADAPTER_OHOS_ENTRANCE_NAVIGATION_CONTROLLER_HELPER_H
+#define FOUNDATION_ACE_ADAPTER_OHOS_ENTRANCE_NAVIGATION_CONTROLLER_HELPER_H
 
-void UIObserverHandler::NotifyNavigationStateChange(const WeakPtr<AceType>& weakPattern, NavDestinationState state) {}
+#include "interfaces/inner_api/ace/navigation_controller.h"
 
-std::shared_ptr<NavDestinationInfo> UIObserverHandler::GetNavigationState(const RefPtr<AceType>& node)
-{
-    return nullptr;
-}
-} // namespace OHOS::Ace::NG
+namespace OHOS::Ace {
+class NavigationControllerHelper {
+public:
+    static NavigationController* GetNavigationController(
+        UIContent* uiContent, const std::string& navigationId);
+};
+} // namespace OHOS::Ace
+#endif // FOUNDATION_ACE_ADAPTER_OHOS_ENTRANCE_NAVIGATION_CONTROLLER_HELPER_H

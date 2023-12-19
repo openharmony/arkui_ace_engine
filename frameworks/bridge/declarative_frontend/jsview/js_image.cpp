@@ -16,6 +16,7 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_image.h"
 #include <cstdint>
 #include <vector>
+#include "base/utils/utils.h"
 
 #if !defined(PREVIEW)
 #include <dlfcn.h>
@@ -43,6 +44,9 @@ namespace {
     const std::vector<float> DEFAULT_COLORFILTER_MATRIX = {
         1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0
     };
+    constexpr float CEIL_SMOOTHEDGE_VALUE = 1.333f;
+    constexpr float FLOOR_SMOOTHEDGE_VALUE = 0.334f;
+    constexpr float DEFAULT_SMOOTHEDGE_VALUE = 0.0f;
 }
 
 namespace OHOS::Ace {
@@ -225,9 +229,7 @@ void JSImage::Create(const JSCallbackInfo& info)
     // input is PixelMap / Drawable
     if (!srcValid) {
 #if defined(PIXEL_MAP_SUPPORTED)
-        if (isCard) {
-            TAG_LOGD(AceLogTag::ACE_IMAGE, "Not supported pixmap when form render");
-        } else {
+        if (!isCard) {
             if (IsDrawable(info[0])) {
                 pixmap = GetDrawablePixmap(info[0]);
             } else {
@@ -427,6 +429,7 @@ void JSImage::SetColorFilter(const JSCallbackInfo& info)
         }
         if (colorFilter && colorFilter->GetColorFilterMatrix().size() == COLOR_FILTER_MATRIX_SIZE) {
             ImageModel::GetInstance()->SetColorFilterMatrix(colorFilter->GetColorFilterMatrix());
+            return;
         }
         ImageModel::GetInstance()->SetColorFilterMatrix(DEFAULT_COLORFILTER_MATRIX);
         return;
@@ -449,6 +452,22 @@ void JSImage::SetColorFilter(const JSCallbackInfo& info)
     ImageModel::GetInstance()->SetColorFilterMatrix(colorfilter);
 }
 
+void JSImage::SetSmoothEdge(const JSCallbackInfo& info)
+{
+    if (info.Length() != 1) {
+        ImageModel::GetInstance()->SetSmoothEdge(DEFAULT_SMOOTHEDGE_VALUE);
+        return;
+    }
+    double parseRes = DEFAULT_SMOOTHEDGE_VALUE;
+    ParseJsDouble(info[0], parseRes);
+    // Effective range : (FLOOR_SMOOTHEDGE_VALUE, CEIL_SMOOTHEDGE_VALUE]
+    // otherwise: DEFAULT_SMOOTHEDGE_VALUE
+    if (GreatNotEqual(parseRes, CEIL_SMOOTHEDGE_VALUE) || LessNotEqual(parseRes, FLOOR_SMOOTHEDGE_VALUE)) {
+        parseRes = DEFAULT_SMOOTHEDGE_VALUE;
+    }
+    ImageModel::GetInstance()->SetSmoothEdge(static_cast<float>(parseRes));
+}
+
 void JSImage::JSBind(BindingTarget globalObj)
 {
     JSClass<JSImage>::Declare("Image");
@@ -464,6 +483,7 @@ void JSImage::JSBind(BindingTarget globalObj)
     JSClass<JSImage>::StaticMethod("objectRepeat", &JSImage::SetImageRepeat, opt);
     JSClass<JSImage>::StaticMethod("interpolation", &JSImage::SetImageInterpolation, opt);
     JSClass<JSImage>::StaticMethod("colorFilter", &JSImage::SetColorFilter, opt);
+    JSClass<JSImage>::StaticMethod("edgeAntialiasing", &JSImage::SetSmoothEdge, opt);
 
     JSClass<JSImage>::StaticMethod("border", &JSImage::JsBorder);
     JSClass<JSImage>::StaticMethod("borderRadius", &JSImage::JsBorderRadius);
@@ -484,14 +504,14 @@ void JSImage::JSBind(BindingTarget globalObj)
     JSClass<JSImage>::StaticMethod("draggable", &JSImage::JsSetDraggable);
     JSClass<JSImage>::StaticMethod("onDragStart", &JSImage::JsOnDragStart);
     JSClass<JSImage>::StaticMethod("copyOption", &JSImage::SetCopyOption);
+    JSClass<JSImage>::StaticMethod("enableAnalyzer", &JSImage::EnableAnalyzer);
+    JSClass<JSImage>::StaticMethod("analyzerConfig", &JSImage::AnalyzerConfig);
+
     // override method
     JSClass<JSImage>::StaticMethod("opacity", &JSImage::JsOpacity);
     JSClass<JSImage>::StaticMethod("blur", &JSImage::JsBlur);
     JSClass<JSImage>::StaticMethod("transition", &JSImage::JsTransition);
     JSClass<JSImage>::InheritAndBind<JSViewAbstract>(globalObj);
-
-    JSClass<JSImage>::StaticMethod("enableAnalyzer", &JSImage::EnableAnalyzer);
-    JSClass<JSImage>::StaticMethod("analyzerConfig", &JSImage::AnalyzerConfig);
 
     JSClass<JSColorFilter>::Declare("ColorFilter");
     JSClass<JSColorFilter>::Bind(globalObj, JSColorFilter::ConstructorCallback, JSColorFilter::DestructorCallback);

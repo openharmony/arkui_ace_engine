@@ -55,7 +55,7 @@ public:
     bool IsWrapExtensionAbilityId(int32_t elementId);
     bool IsWindowTypeUIExtension(const RefPtr<PipelineBase>& pipeline);
     bool SendAccessibilityEventInfo(const Accessibility::AccessibilityEventInfo& eventInfo,
-        const std::vector<int32_t>& uiExtensionIdLevelList, const RefPtr<PipelineBase>& pipeline);
+        int32_t uiExtensionOffset, const RefPtr<PipelineBase>& pipeline);
     std::pair<int32_t, int32_t> UnWrapExtensionAbilityId(int32_t extensionOffset, int32_t elementId);
     int32_t ApplyExtensionId();
     void RecycleExtensionId(int32_t id);

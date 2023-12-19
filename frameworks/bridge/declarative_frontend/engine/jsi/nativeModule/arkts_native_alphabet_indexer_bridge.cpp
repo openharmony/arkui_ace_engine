@@ -76,7 +76,9 @@ ArkUINativeModuleValue AlphabetIndexerBridge::SetPopupItemFont(ArkUIRuntimeCallI
         if (thirdArg->IsNumber()) {
             weight = std::to_string(thirdArg->Int32Value(vm));
         } else {
-            ArkTSUtils::ParseJsString(vm, thirdArg, weight);
+            if (ArkTSUtils::ParseJsString(vm, thirdArg, weight) || weight.empty()) {
+                weight = DEFAULT_POPUP_ITEM_FONT_WEIGHT;
+            }
         }
     }
     GetArkUIInternalNodeAPI()->GetAlphabetIndexerModifier().SetPopupItemFont(
@@ -122,16 +124,9 @@ ArkUINativeModuleValue AlphabetIndexerBridge::SetSelectedFont(ArkUIRuntimeCallIn
         (thirdArg->IsString() || thirdArg->IsNumber())) {
         weight = thirdArg->ToString(vm)->ToString();
     }
-    std::string fontFamily = DEFAULT_FAMILY;
-    std::vector<std::string> fontFamilies;
-    if (!fourthArg->IsNull() && !fourthArg->IsUndefined()) {
-        ArkTSUtils::ParseJsFontFamilies(vm, fourthArg, fontFamilies);
-        if (fontFamilies.size() > 0) {
-            fontFamily = "";
-            for (uint32_t i = 0; i < fontFamilies.size(); i++) {
-                fontFamily += fontFamilies.at(i);
-            }
-        }
+    std::string fontFamily;
+    if (!ArkTSUtils::ParseJsFontFamiliesToString(vm, fourthArg, fontFamily) || fontFamily.empty()) {
+        fontFamily = DEFAULT_FAMILY;
     }
     int32_t styleVal = 0;
     if (!fifthArg->IsNull() && !fifthArg->IsUndefined() && fifthArg->IsNumber()) {
@@ -181,16 +176,9 @@ ArkUINativeModuleValue AlphabetIndexerBridge::SetPopupFont(ArkUIRuntimeCallInfo*
         (thirdArg->IsString() || thirdArg->IsNumber())) {
         weight = thirdArg->ToString(vm)->ToString();
     }
-    std::string fontFamily = DEFAULT_FAMILY;
-    std::vector<std::string> fontFamilies;
-    if (!fourthArg->IsNull() && !fourthArg->IsUndefined()) {
-        ArkTSUtils::ParseJsFontFamilies(vm, fourthArg, fontFamilies);
-        if (fontFamilies.size() > 0) {
-            fontFamily = "";
-            for (uint32_t i = 0; i < fontFamilies.size(); i++) {
-                fontFamily += fontFamilies.at(i);
-            }
-        }
+    std::string fontFamily;
+    if (!ArkTSUtils::ParseJsFontFamiliesToString(vm, fourthArg, fontFamily) || fontFamily.empty()) {
+        fontFamily = DEFAULT_FAMILY;
     }
     int32_t styleVal = 0;
     if (!fifthArg->IsNull() && !fifthArg->IsUndefined() && fifthArg->IsNumber()) {
@@ -240,16 +228,9 @@ ArkUINativeModuleValue AlphabetIndexerBridge::SetFont(ArkUIRuntimeCallInfo* runt
         (thirdArg->IsString() || thirdArg->IsNumber())) {
         weight = thirdArg->ToString(vm)->ToString();
     }
-    std::string fontFamily = DEFAULT_FAMILY;
-    std::vector<std::string> fontFamilies;
-    if (!fourthArg->IsNull() && !fourthArg->IsUndefined()) {
-        ArkTSUtils::ParseJsFontFamilies(vm, fourthArg, fontFamilies);
-        if (fontFamilies.size() > 0) {
-            fontFamily = "";
-            for (uint32_t i = 0; i < fontFamilies.size(); i++) {
-                fontFamily += fontFamilies.at(i);
-            }
-        }
+    std::string fontFamily;
+    if (!ArkTSUtils::ParseJsFontFamiliesToString(vm, fourthArg, fontFamily) || fontFamily.empty()) {
+        fontFamily = DEFAULT_FAMILY;
     }
     int32_t styleVal = 0;
     if (!fifthArg->IsNull() && !fifthArg->IsUndefined() && fifthArg->IsNumber()) {

@@ -143,6 +143,7 @@
 #include "bridge/declarative_frontend/jsview/js_stepper.h"
 #include "bridge/declarative_frontend/jsview/js_stepper_item.h"
 #include "bridge/declarative_frontend/jsview/js_swiper.h"
+#include "bridge/declarative_frontend/jsview/js_symbol.h"
 #include "bridge/declarative_frontend/jsview/js_tab_content.h"
 #include "bridge/declarative_frontend/jsview/js_tabs.h"
 #include "bridge/declarative_frontend/jsview/js_tabs_controller.h"
@@ -758,6 +759,7 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "RichEditorController", JSRichEditorController::JSBind },
     { "NodeContainer", JSNodeContainer::JSBind },
     { "__JSBaseNode__", JSBaseNode::JSBind },
+    { "SymbolGlyph", JSSymbol::JSBind },
 };
 
 void RegisterAllModule(BindingTarget globalObj)

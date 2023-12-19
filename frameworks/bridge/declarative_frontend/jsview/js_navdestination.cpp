@@ -195,6 +195,17 @@ void JSNavDestination::SetOnBackPressed(const JSCallbackInfo& info)
     info.ReturnSelf();
 }
 
+void JSNavDestination::SetMode(const JSCallbackInfo& info)
+{
+    if (!info[0]->IsNumber()) {
+        // set default back ground color
+        NavDestinationModel::GetInstance()->SetNavDestinationMode(NG::NavDestinationMode::STANDARD);
+        return;
+    }
+    auto mode = info[0]->ToNumber<int32_t>();
+    NavDestinationModel::GetInstance()->SetNavDestinationMode(static_cast<NG::NavDestinationMode>(mode));
+}
+
 void JSNavDestination::JSBind(BindingTarget globalObj)
 {
     JSClass<JSNavDestination>::Declare("NavDestination");
@@ -208,6 +219,7 @@ void JSNavDestination::JSBind(BindingTarget globalObj)
     JSClass<JSNavDestination>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSNavDestination>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
     JSClass<JSNavDestination>::StaticMethod("id", &JSViewAbstract::JsId);
+    JSClass<JSNavDestination>::StaticMethod("mode", &JSNavDestination::SetMode);
     JSClass<JSNavDestination>::InheritAndBind<JSContainerBase>(globalObj);
 }
 

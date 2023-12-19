@@ -51,7 +51,6 @@ bool FileAssetProviderImpl::IsValid() const
 std::unique_ptr<AssetMapping> FileAssetProviderImpl::GetAsMapping(const std::string& assetName) const
 {
     ACE_SCOPED_TRACE("GetAsMapping");
-    LOGD("assert name is: %{public}s", assetName.c_str());
     std::lock_guard<std::mutex> lock(mutex_);
 
     for (const auto& basePath : assetBasePaths_) {

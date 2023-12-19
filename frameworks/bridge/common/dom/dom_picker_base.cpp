@@ -153,7 +153,6 @@ bool DOMPickerBase::GetPickerDateTime(const std::string& strDate, PickerDateTime
         outTime.SetHour(StringUtils::StringToInt(strValues[3]));
         outTime.SetMinute(StringUtils::StringToInt(strValues[4]));
     } else {
-        LOGD("input date time is invalidate.");
         return false;
     }
     outDateTime.SetDate(outDate);

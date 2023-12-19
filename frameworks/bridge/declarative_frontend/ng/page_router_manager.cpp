@@ -68,7 +68,6 @@ void PageRouterManager::LoadOhmUrl(const RouterPageInfo& target)
 {
     RouterPageInfo info = target;
     info.path = info.url + ".js";
-    LOGD("Router push pagePath = %{private}s", info.url.c_str());
     RouterOptScope scope(this);
     LoadPage(GenerateNextPageId(), info);
 }
@@ -117,7 +116,6 @@ void PageRouterManager::RunPage(const std::string& url, const std::string& param
         info.path = manifestParser_->GetRouter()->GetEntry();
         info.url = manifestParser_->GetRouter()->GetEntry("");
     }
-    LOGD("Router start run page, pagePath = %{private}s", info.url.c_str());
     RouterOptScope scope(this);
     LoadPage(GenerateNextPageId(), info);
 }
@@ -145,7 +143,6 @@ void PageRouterManager::RunPage(const std::shared_ptr<std::vector<uint8_t>>& con
 
 void PageRouterManager::RunPageByNamedRouter(const std::string& name, const std::string& params)
 {
-    LOGD("Router start run page by name, pagePath = %{private}s", info.url.c_str());
     RouterPageInfo info { name, params };
     info.isNamedRouterMode = true;
     RouterOptScope scope(this);
@@ -329,7 +326,6 @@ void PageRouterManager::EnableAlertBeforeBackPage(const std::string& message, st
         .onSuccess =
             [weak = AceType::WeakClaim(this), weakPageInfo = AceType::WeakClaim(AceType::RawPtr(pageInfo))](
                 int32_t successType, int32_t successIndex) {
-                LOGD("Dialog show success, Type: %{public}d, Index: %{public}d", successType, successIndex);
                 auto pageInfo = weakPageInfo.Upgrade();
                 if (pageInfo && pageInfo->GetAlertCallback() && !successType) {
                     pageInfo->GetAlertCallback()(successIndex);
@@ -641,7 +637,6 @@ void PageRouterManager::PushOhmUrl(const RouterPageInfo& target)
     }
     RouterPageInfo info = target;
     info.path = info.url + ".js";
-    LOGD("Router push page, path = %{private}s", info.path.c_str());
 
     if (target.routerMode == RouterMode::SINGLE) {
         auto pageInfo = FindPageInStack(info.url);
@@ -710,7 +705,6 @@ void PageRouterManager::StartPush(const RouterPageInfo& target)
     }
     RouterPageInfo info = target;
     info.path = manifestParser_->GetRouter()->GetPagePath(info.url);
-    LOGD("Router push page, path = %{private}s", info.path.c_str());
     if (info.path.empty()) {
         LOGW("[Engine Log] this uri is empty, not support in route push.");
         if (info.errorCallback != nullptr) {
@@ -738,7 +732,6 @@ void PageRouterManager::ReplaceOhmUrl(const RouterPageInfo& target)
     RouterOptScope scope(this);
     RouterPageInfo info = target;
     info.path = info.url + ".js";
-    LOGD("Router push page, path = %{private}s", info.path.c_str());
 
     PopPage("", false, false);
 
@@ -803,7 +796,6 @@ void PageRouterManager::StartReplace(const RouterPageInfo& target)
     }
     RouterPageInfo info = target;
     info.path = manifestParser_->GetRouter()->GetPagePath(info.url);
-    LOGD("Router push pagePath = %{private}s", info.path.c_str());
     if (info.path.empty()) {
         LOGW("[Engine Log] this uri is empty, not support in route push.");
         if (info.errorCallback != nullptr) {
@@ -850,7 +842,6 @@ void PageRouterManager::StartBack(const RouterPageInfo& target)
 #if !defined(PREVIEW)
         if (info.url.substr(0, strlen(BUNDLE_TAG)) == BUNDLE_TAG) {
             info.path = info.url + ".js";
-            LOGD("Router push pagePath = %{private}s", info.path.c_str());
             PopPageToIndex(pageInfo.first, info.params, true, true);
             return;
         }
@@ -860,7 +851,6 @@ void PageRouterManager::StartBack(const RouterPageInfo& target)
         }
 
         info.path = manifestParser_->GetRouter()->GetPagePath(info.url);
-        LOGD("Router push pagePath = %{private}s", info.path.c_str());
         if (info.path.empty()) {
             LOGW("[Engine Log] this uri is empty, not support in route push.");
             return;
@@ -999,7 +989,6 @@ void PageRouterManager::MovePageToFront(int32_t index, const RefPtr<FrameNode>& 
     CHECK_NULL_VOID(pageInfo);
 
     if (index == static_cast<int32_t>(pageRouterStack_.size() - 1)) {
-        LOGD("Current page is already on the top");
         pageInfo->ReplacePageParams(target.params);
         if (forceShowCurrent) {
             pageNode->GetRenderContext()->ResetPageTransitionEffect();
@@ -1082,7 +1071,6 @@ void PageRouterManager::PopPage(const std::string& params, bool needShowNext, bo
 
 void PageRouterManager::PopPageToIndex(int32_t index, const std::string& params, bool needShowNext, bool needTransition)
 {
-    LOGD("PopPageToIndex to index: %{public}d", index);
     std::list<WeakPtr<FrameNode>> temp;
     std::swap(temp, pageRouterStack_);
     auto iter = temp.begin();

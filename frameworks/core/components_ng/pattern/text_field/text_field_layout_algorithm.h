@@ -50,8 +50,6 @@ public:
 
     const RefPtr<Paragraph>& GetParagraph() const;
 
-    const RefPtr<Paragraph>& GetErrorParagraph() const;
-
     const RectF& GetTextRect() const
     {
         return textRect_;
@@ -95,7 +93,6 @@ protected:
         const std::string& content, bool needObscureText, bool disableTextAlign = false);
     void CreateInlineParagraph(const TextStyle& textStyle, std::string content, bool needObscureText,
         int32_t nakedCharPosition, bool disableTextAlign = false);
-    void CreateErrorParagraph(const std::string& content, const RefPtr<TextFieldTheme>& theme);
     bool CreateParagraphAndLayout(
         const TextStyle& textStyle, const std::string& content, const LayoutConstraintF& contentConstraint);
     bool AdaptMinTextSize(TextStyle& textStyle, const std::string& content, const LayoutConstraintF& contentConstraint,
@@ -107,7 +104,6 @@ protected:
 
     void ConstructTextStyles(
         const RefPtr<FrameNode>& frameNode, TextStyle& textStyle, std::string& textContent, bool& showPlaceHolder);
-    void ErrorTextMeasureContent(const std::string& content, const RefPtr<TextFieldTheme>& theme);
     LayoutConstraintF CalculateContentMaxSizeWithCalculateConstraint(
         const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper);
 
@@ -125,7 +121,6 @@ protected:
         const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper, float imageWidth);
     SizeF TextAreaMeasureContent(const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper);
     RefPtr<Paragraph> paragraph_;
-    RefPtr<Paragraph> errorParagraph_;
     RefPtr<Paragraph> inlineParagraph_;
     InlineMeasureItem inlineMeasureItem_;
 

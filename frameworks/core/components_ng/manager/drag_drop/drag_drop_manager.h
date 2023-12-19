@@ -72,11 +72,14 @@ public:
         textFieldDragFrameNodes_.try_emplace(id, dragFrameNode);
     }
 
+    void OnDragOut();
+
     void UpdateDragWindowPosition(int32_t globalX, int32_t globalY);
     void OnDragStart(const Point& point);
     void OnDragStart(const Point& point, const RefPtr<FrameNode>& frameNode);
     void OnDragMove(const PointerEvent& pointerEvent, const std::string& extraInfo);
     void OnDragEnd(const PointerEvent& pointerEvent, const std::string& extraInfo);
+    void OnDragMoveOut(const PointerEvent& pointerEvent, const std::string& extraInfo);
     void OnTextDragEnd(float globalX, float globalY, const std::string& extraInfo);
     void onDragCancel();
     void OnItemDragStart(float globalX, float globalY, const RefPtr<FrameNode>& frameNode);
@@ -233,7 +236,28 @@ public:
         return true;
     }
 
+    typedef struct DragPreviewInfo {
+        double width { 0.0 };
+        double height { 0.0 };
+        double maxWidth { 0.0 };
+        double scale { -1.0 };
+        RefPtr<FrameNode> imageNode { nullptr };
+    } DragPreviewInfo;
+#ifdef ENABLE_DRAG_FRAMEWORK
+    bool IsNeedScaleDragPreview();
+    void DoDragMoveAnimate(const PointerEvent& pointerEvent);
+    void DoDragStartAnimation(const RefPtr<OverlayManager> overlayManager, const GestureEvent& event);
+#endif
+
 private:
+#ifdef ENABLE_DRAG_FRAMEWORK
+    double CalcDragPreviewDistanceWithPoint(
+        const OHOS::Ace::Dimension& preserverHeight, int32_t x, int32_t y, const DragPreviewInfo& info);
+    Offset CalcDragMoveOffset(
+        const OHOS::Ace::Dimension& preserverHeight, int32_t x, int32_t y, const DragPreviewInfo& info);
+    bool GetDragPreviewInfo(
+        const OHOS::Ace::RefPtr<OHOS::Ace::NG::OverlayManager> overlayManager, DragPreviewInfo& dragPreviewInfo);
+#endif
     RefPtr<FrameNode> FindDragFrameNodeByPosition(float globalX, float globalY, DragType dragType, bool findDrop);
     void FireOnDragEvent(
         const RefPtr<FrameNode>& frameNode, const Point& point, DragEventType type, const std::string& extraInfo);
@@ -287,6 +311,7 @@ private:
     VelocityTracker velocityTracker_;
     DragDropMgrState dragDropState_ = DragDropMgrState::IDLE;
     Rect previewRect_ { -1, -1, -1, -1 };
+    DragPreviewInfo info_;
 
     ACE_DISALLOW_COPY_AND_MOVE(DragDropManager);
 };

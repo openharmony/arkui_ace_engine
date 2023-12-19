@@ -25,7 +25,6 @@ namespace OHOS::Ace {
 
 RefPtr<Component> ScrollCreator::CreateFromJson(const JsonValue& componentJson, const JsonComponentFactory& factory)
 {
-    LOGD("CreateFromJson Scroll");
     std::string classType = componentJson.GetValue(CLASS_NAME)->GetString();
     if (classType != SCROLL_NAME) {
         LOGE("Create scroll err: not a scroll json.");

@@ -48,6 +48,7 @@ protected:
     static void SetClip(const JSCallbackInfo& info);
     static void SetBarGridAlign(const JSCallbackInfo& info);
     static void SetScrollableBarModeOptions(const JSRef<JSVal>& info);
+    static void SetCustomContentTransition(const JSCallbackInfo& info);
 };
 
 } // namespace OHOS::Ace::Framework

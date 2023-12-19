@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 /// <reference path='./import.ts' />
 
 class ArkBorderStyle implements Equable {
@@ -478,16 +479,16 @@ class ArkListEdgeEffect implements Equable {
   }
 }
 
-class ArkListNestedScrollOptions implements Equable {
-  scrollForward: number;
-  scrollBackward: number;
+class ArkScrollEdgeEffect implements Equable {
+  value: EdgeEffect;
+  options?: EdgeEffectOptions | undefined;
   constructor() {
-    this.scrollForward = undefined;
-    this.scrollBackward = undefined;
+    this.value = undefined;
+    this.options = undefined;
   }
-  isEqual(another: ArkListNestedScrollOptions): boolean {
-    return (this.scrollForward === another.scrollForward &&
-      this.scrollBackward === another.scrollBackward)
+  isEqual(another: ArkScrollEdgeEffect): boolean {
+    return (this.value === another.value) &&
+      (this.options === another.options);
   }
 }
 
@@ -731,7 +732,7 @@ class ArkBorder implements Equable {
       this.arkStyle.isEqual(another.arkStyle)
     );
   }
-  
+
   checkObjectDiff(another: ArkBorder): boolean {
     return !this.isEqual(another);
   }
@@ -1434,11 +1435,11 @@ class ArkNestedScrollOptions {
   scrollForward: NestedScrollMode | undefined;
   scrollBackward: NestedScrollMode | undefined;
   constructor() {
-      this.scrollForward = undefined;
-      this.scrollBackward = undefined;
+    this.scrollForward = undefined;
+    this.scrollBackward = undefined;
   }
   isEqual(another: ArkNestedScrollOptions): boolean {
-      return ((this.scrollForward === another.scrollForward) && (this.scrollBackward === another.scrollBackward));
+    return ((this.scrollForward === another.scrollForward) && (this.scrollBackward === another.scrollBackward));
   }
 }
 
@@ -1643,9 +1644,9 @@ class ArkMesh {
 }
 
 class ArkLanesOpt {
-  lanesNum: number;
-  minLength: Length;
-  maxLength: Length;
+  lanesNum: number | undefined;
+  minLength: Length | undefined;
+  maxLength: Length | undefined;
   gutter?: undefined;
   constructor() {
     this.lanesNum = undefined;
@@ -1657,5 +1658,24 @@ class ArkLanesOpt {
   isEqual(another: ArkLanesOpt): boolean {
     return (this.lanesNum === another.lanesNum && this.minLength === another.minLength
       && this.maxLength === another.maxLength && this.gutter === another.gutter);
+  }
+}
+
+class ArkScrollSnapOptions {
+  snapAlign: ScrollSnapAlign;
+  snapPagination: Dimension | Array<Dimension>;
+  enableSnapToStart: boolean;
+  enableSnapToEnd: boolean;
+  constructor() {
+    this.snapAlign = undefined;
+    this.snapPagination = undefined;
+    this.enableSnapToStart = undefined;
+    this.enableSnapToEnd = undefined;
+  }
+  isEqual(another: ArkScrollSnapOptions): boolean {
+    return ((this.snapAlign === another.snapAlign)
+      && (this.snapPagination === another.snapPagination)
+      && (this.enableSnapToStart === another.enableSnapToStart)
+      && (this.enableSnapToEnd === another.enableSnapToEnd));
   }
 }

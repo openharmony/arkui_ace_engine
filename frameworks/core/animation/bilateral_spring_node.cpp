@@ -78,7 +78,6 @@ void BilateralSpringNode::OnAnimation()
         if (scheduler_->IsActive()) {
             scheduler_->Stop();
         }
-        LOGD("Animation. index: %{public}d complete at value: %{public}.3lf", index_, value_);
     } else {
         OnUpdate(value_, velocity_);
         NotifyUpdateListener(value_, velocity_);

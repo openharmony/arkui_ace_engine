@@ -63,43 +63,33 @@ void DOMText::CheckAndSetSpanStyle(const RefPtr<DOMSpan>& dmoSpan, TextStyle& sp
 
     const auto& textStyle = textDeclaration->GetTextStyle();
     if (!dmoSpan->HasSetFontSize()) {
-        LOGD("Set Text Font Size to Span");
         spanStyle.SetFontSize(textStyle.GetFontSize());
     }
     if (!dmoSpan->HasSetFontStyle()) {
-        LOGD("Set Text Font Style to Span");
         spanStyle.SetFontStyle(textStyle.GetFontStyle());
     }
     if (!dmoSpan->HasSetFontColor()) {
-        LOGD("Set Text Font Color to Span");
         spanStyle.SetTextColor(textStyle.GetTextColor());
     }
     if (!dmoSpan->HasSetFontWeight()) {
-        LOGD("Set Text Font Weight to Span");
         spanStyle.SetFontWeight(textStyle.GetFontWeight());
     }
     if (!dmoSpan->HasSetTextDecoration()) {
-        LOGD("Set Text Decoration to Span");
         spanStyle.SetTextDecoration(textStyle.GetTextDecoration());
     }
     if (!dmoSpan->HasSetTextDecorationColor()) {
-        LOGD("Set Text Decoration Color to Span");
         spanStyle.SetTextDecorationColor(textStyle.GetTextDecorationColor());
     }
     if (!dmoSpan->HasSetTextDecorationStyle()) {
-        LOGD("Set Text Decoration Style to Span");
         spanStyle.SetTextDecorationStyle(textStyle.GetTextDecorationStyle());
     }
     if (!dmoSpan->HasSetFontFamily()) {
-        LOGD("Set Text Font Family to Span");
         spanStyle.SetFontFamilies(textStyle.GetFontFamilies());
     }
     if (!dmoSpan->HasSetAllowScale()) {
-        LOGD("Set Allow Scale to Span");
         spanStyle.SetAllowScale(textStyle.IsAllowScale());
     }
     if (!dmoSpan->HasSetFontFeatures()) {
-        LOGD("Set Font Feature Settings to Span");
         spanStyle.SetFontFeatures(textStyle.GetFontFeatures());
     }
     spanStyle.SetLetterSpacing(textStyle.GetLetterSpacing());

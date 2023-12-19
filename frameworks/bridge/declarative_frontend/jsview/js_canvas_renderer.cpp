@@ -403,9 +403,11 @@ void JSCanvasRenderer::JsSetFont(const JSCallbackInfo& info)
 
     std::vector<std::string> fontProps;
     StringUtils::StringSplitter(fontStr.c_str(), ' ', fontProps);
+    bool updateFontweight = false;
     bool updateFontStyle = false;
     for (const auto& fontProp : fontProps) {
         if (FONT_WEIGHTS.find(fontProp) != FONT_WEIGHTS.end()) {
+            updateFontweight = true;
             auto weight = ConvertStrToFontWeight(fontProp);
             style_.SetFontWeight(weight);
             CanvasRendererModel::GetInstance()->SetFontWeight(baseInfo, weight);
@@ -432,6 +434,9 @@ void JSCanvasRenderer::JsSetFont(const JSCallbackInfo& info)
     }
     if (!updateFontStyle) {
         CanvasRendererModel::GetInstance()->SetFontStyle(baseInfo, FontStyle::NORMAL);
+    }
+    if (!updateFontweight) {
+        CanvasRendererModel::GetInstance()->SetFontWeight(baseInfo, FontWeight::NORMAL);
     }
 }
 
@@ -1131,7 +1136,7 @@ void JSCanvasRenderer::JsGetPixelMap(const JSCallbackInfo& info)
     napi_set_named_property(env, napiValue, "index", temp);
 #endif
 #else
-    TAG_LOGD(
+    TAG_LOGI(
         AceLogTag::ACE_CANVAS, "[Engine Log] The function 'getPixelMap' is not supported on the current platform.");
 #endif
 }

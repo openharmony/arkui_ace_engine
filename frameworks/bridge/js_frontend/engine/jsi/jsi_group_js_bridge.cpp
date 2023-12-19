@@ -47,7 +47,6 @@ const int32_t PLUGIN_REQUEST_ARG_APP_PARAMS_INDEX_SYNC = 2;
 
 int32_t JsiGroupJsBridge::InitializeGroupJsBridge(const shared_ptr<JsRuntime>& runtime)
 {
-    LOGD("Enter InitializeGroupJsBridge");
     if (!runtime) {
         LOGE("group module init, context is null");
         EventReport::SendAPIChannelException(APIChannelExcepType::JS_BRIDGE_INIT_ERR);
@@ -414,7 +413,6 @@ void JsiGroupJsBridge::ProcessParseJsError(
 bool JsiGroupJsBridge::SetModuleGroupCallbackFuncs(const std::vector<shared_ptr<JsValue>>& argv,
     int32_t resolveCallbackIndex, int32_t rejectCallbackIndex, int32_t callbackId)
 {
-    LOGD("Enter SetModuleGroupCallbackFuncs");
     if (argv[resolveCallbackIndex]->IsNull(runtime_) || !argv[resolveCallbackIndex]->IsFunction(runtime_) ||
         argv[rejectCallbackIndex]->IsNull(runtime_) || !argv[rejectCallbackIndex]->IsFunction(runtime_)) {
         LOGE("resolve or reject callback function is invalid");
@@ -500,7 +498,6 @@ ParseJsDataResult JsiGroupJsBridge::ParseJsPara(const shared_ptr<JsRuntime>& run
             CodecData arg(objStr);
             arguments.push_back(arg);
         } else if (val->IsUndefined(runtime)) {
-            LOGD("Process callNative para type:undefined");
         } else {
             LOGE("Process callNative para type: unsupported type");
             return ParseJsDataResult::PARSE_JS_ERR_UNSUPPORTED_TYPE;
@@ -740,19 +737,13 @@ void JsiGroupJsBridge::GetRequestData(const shared_ptr<JsValue>& valObject, Requ
                 fetchRequestDataMap1, ArraySize(fetchRequestDataMap1), key->ToString(runtime_).c_str());
             if (iter != -1) {
                 fetchRequestDataMap1[iter].value(item->ToString(runtime_).c_str(), requestData);
-            } else {
-                LOGD("key : %{public}s unsupported. Ignoring!", key->ToString(runtime_).c_str());
             }
         } else if (item->IsObject(runtime_)) {
             auto iter = BinarySearchFindIndex(
                 fetchRequestDataMap2, ArraySize(fetchRequestDataMap2), key->ToString(runtime_).c_str());
             if (iter != -1) {
                 fetchRequestDataMap2[iter].value(runtime_, item, requestData);
-            } else {
-                LOGD("key : %{public}s unsupported. Ignoring!", key->ToString(runtime_).c_str());
             }
-        } else {
-            LOGD("key : %{public}s, value of unsupported type. Ignoring!", key->ToString(runtime_).c_str());
         }
 
     }
@@ -775,7 +766,6 @@ ParseJsDataResult JsiGroupJsBridge::ParseRequestData(
             }
             GetRequestData(val, requestData);
         } else if (val->IsUndefined(runtime_)) {
-            LOGD("Process callNative para type:undefined");
         } else {
             LOGE("Process callNative para type: unsupported type");
             return ParseJsDataResult::PARSE_JS_ERR_UNSUPPORTED_TYPE;

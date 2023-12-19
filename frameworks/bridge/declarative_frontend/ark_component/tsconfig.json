@@ -80,6 +80,7 @@
         "src/ArkTabContent.ts",
         "src/ArkUIExtensionComponent.ts",
         "src/ArkWaterFlow.ts",
+        "src/ArkCommonShape.ts",
         "src/ArkCircle.ts",
         "src/ArkEllipse.ts",
         "src/ArkLine.ts",
@@ -91,7 +92,8 @@
         "src/ArkCanvas.ts",
         "src/ArkGridContainer.ts",
         "src/ArkDatePicker.ts",
-        "src/ArkCommonShape.ts",
+        "src/ArkEffectComponent.ts",
+        "src/ArkRemoteWindow.ts"      
     ],
     "compilerOptions": {
         "module": "none",

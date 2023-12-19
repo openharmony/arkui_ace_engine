@@ -130,7 +130,6 @@ RefPtr<PixelMap> CreatePixelMapFromNapiValue(const shared_ptr<JsRuntime>& runtim
 
 RefPtr<JsAcePage> GetStagingPage(const shared_ptr<JsRuntime>& runtime)
 {
-    LOGD("GetStagingPage");
     if (!runtime) {
         LOGE("JsRuntime is null, cannot get staging page!");
         return nullptr;
@@ -141,7 +140,6 @@ RefPtr<JsAcePage> GetStagingPage(const shared_ptr<JsRuntime>& runtime)
 
 RefPtr<JsAcePage> GetRunningPage(const shared_ptr<JsRuntime>& runtime)
 {
-    LOGD("GetRunningPage");
     if (!runtime) {
         LOGE("JsRuntime is null, cannot get running page!");
         return nullptr;
@@ -152,7 +150,6 @@ RefPtr<JsAcePage> GetRunningPage(const shared_ptr<JsRuntime>& runtime)
 
 RefPtr<FrontendDelegate> GetFrontendDelegate(const shared_ptr<JsRuntime>& runtime)
 {
-    LOGD("GetFrontendDelegate");
     if (!runtime) {
         LOGE("JsRuntime is null, cannot get frontend delegate!");
         return nullptr;
@@ -262,8 +259,6 @@ void GetStyleAnimationName(const shared_ptr<JsRuntime>& runtime, const shared_pt
                     std::string propKeyStr = propKey->ToString(runtime);
                     std::string propValueStr = propValue->ToString(runtime);
                     animationNameKeyFrame.emplace(propKeyStr, propValueStr);
-                } else {
-                    LOGD("GetStyleAnimationName: type of value is either string nor object, unsupported.");
                 }
             }
         }
@@ -308,11 +303,7 @@ void GetAttrImage(
                 imageProperties.left = StringToDimension(valStr);
             } else if (keyStr == DOM_DURATION) {
                 imageProperties.duration = StringToInt(valStr);
-            } else {
-                LOGD("key : %{public}s unsupported. Ignoring!", keyStr.c_str());
             }
-        } else {
-            LOGD("value of unsupported type. Ignoring!");
         }
     }
 }
@@ -361,7 +352,6 @@ void SetDomAttributesWithArray(const shared_ptr<JsRuntime>& runtime, const std::
     } else {
         std::string valStr;
         GetValueAsString(runtime, value, valStr);
-        LOGD("SetDomAttributes: key: %{private}s, attr: %{private}s", keyStr.c_str(), valStr.c_str());
         attrs.emplace_back(keyStr, valStr);
     }
 }
@@ -395,15 +385,12 @@ void SetDomAttributesWithObject(const shared_ptr<JsRuntime>& runtime, const std:
         StepperLabels label;
         stepperBridge->GetAttrLabel(runtime, value, label);
         command.SetStepperLabel(label);
-    } else {
-        LOGD("key %{public}s unsupported. Ignoring!", keyStr.c_str());
     }
 }
 
 bool SetDomAttributes(
     const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& attrObj, JsCommandDomElementOperator& command)
 {
-    LOGD("SetDomAttributes");
     bool hasShowAttr = false;
 
     if (!attrObj || !attrObj->IsObject(runtime)) {
@@ -425,7 +412,6 @@ bool SetDomAttributes(
         std::string keyStr = key->ToString(runtime);
         if (value->IsString(runtime) || value->IsNumber(runtime) || value->IsBoolean(runtime)) {
             std::string valStr = value->ToString(runtime);
-            LOGD("SetDomAttributes: key %{private}s, attr: %{private}s", keyStr.c_str(), valStr.c_str());
             if (keyStr == DOM_ID) {
                 command.SetId(valStr);
             } else if (keyStr == DOM_TARGET) {
@@ -454,7 +440,6 @@ bool SetDomAttributes(
 void SetDomStyle(
     const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& styleObj, JsCommandDomElementOperator& command)
 {
-    LOGD("SetDomStyle");
     if (!styleObj || !styleObj->IsObject(runtime)) {
         return;
     }
@@ -474,7 +459,6 @@ void SetDomStyle(
         std::string keyStr = key->ToString(runtime);
         if (value->IsString(runtime) || value->IsNumber(runtime) || value->IsBoolean(runtime)) {
             std::string valStr = value->ToString(runtime);
-            LOGD("SetDomStyle: key: %{private}s, style: %{private}s", keyStr.c_str(), valStr.c_str());
             styles.emplace_back(keyStr, valStr);
         } else if (value->IsArray(runtime)) {
             if (strcmp(keyStr.c_str(), DOM_TEXT_FONT_FAMILY) == 0) {
@@ -500,13 +484,7 @@ void SetDomStyle(
                 std::vector<std::unordered_map<std::string, std::string>> sharedTransitionName;
                 GetStyleAnimationName(runtime, value, sharedTransitionName);
                 command.SetSharedTransitionName(std::move(sharedTransitionName));
-            } else {
-                LOGD("value is array, key unsupported. Ignoring!");
             }
-        } else if (value->IsUndefined(runtime)) {
-            LOGD("value is undefined. Ignoring!");
-        } else {
-            LOGD("value of unsupported type. Ignoring!");
         }
     }
 
@@ -543,8 +521,6 @@ void SetDomStyle(
 void AddDomEvent(
     const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& eventObj, JsCommandDomElementOperator& command)
 {
-    LOGD("AddDomEvent");
-
     if (!eventObj || !eventObj->IsObject(runtime)) {
         return;
     }
@@ -574,7 +550,6 @@ void AddDomEvent(
 
 shared_ptr<JsValue> GetAppInfo(const shared_ptr<JsRuntime>& runtime)
 {
-    LOGD("GetAppInfo");
     auto delegate = GetFrontendDelegate(runtime);
     shared_ptr<JsValue> appID = runtime->NewString(delegate->GetAppID());
     shared_ptr<JsValue> appName = runtime->NewString(delegate->GetAppName());
@@ -641,7 +616,6 @@ void GetPackageInfoCallback(
 
 void GetPackageInfo(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& arg)
 {
-    LOGD("GetPackageInfo");
     if (!arg->IsObject(runtime) || !arg->IsArray(runtime)) {
         LOGE("GetPackageInfo: arg is not Object or Array");
         return;
@@ -655,8 +629,6 @@ void GetPackageInfo(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsVal
     shared_ptr<JsValue> message = arg->GetElement(runtime, PAG_INFO_ARGS_MSG_IDX);
     shared_ptr<JsValue> callBackId = arg->GetElement(runtime, 1);
     std::string callbackIdStr = callBackId->ToString(runtime);
-    LOGD("system app getPackageInfo callBackID is %{private}s", callbackIdStr.c_str());
-
     if (!callbackIdStr.empty()) {
         GetPackageInfoCallback(runtime, message, callbackIdStr);
     }
@@ -742,8 +714,6 @@ void SetScreenOnVisible(const shared_ptr<JsRuntime>& runtime, const shared_ptr<J
 
 shared_ptr<JsValue> GetLocale(const shared_ptr<JsRuntime>& runtime)
 {
-    LOGD("GetLocale");
-
     shared_ptr<JsValue> language = runtime->NewString(AceApplicationInfo::GetInstance().GetLanguage());
     shared_ptr<JsValue> countryOrRegion = runtime->NewString(AceApplicationInfo::GetInstance().GetCountryOrRegion());
     shared_ptr<JsValue> dir = runtime->NewString(
@@ -758,7 +728,6 @@ shared_ptr<JsValue> GetLocale(const shared_ptr<JsRuntime>& runtime)
 
 void SetLocale(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& arg)
 {
-    LOGD("SetLocale");
     std::unique_ptr<JsonValue> localeJson = JsonUtil::ParseJsonString(arg->ToString(runtime));
 
     if (localeJson) {
@@ -779,7 +748,6 @@ void SetLocale(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& 
 
 std::string GetDeviceInfo()
 {
-    LOGD("GetDeviceInfo");
     auto infoList = JsonUtil::Create(true);
     infoList->Put("brand", SystemProperties::GetBrand().c_str());
     infoList->Put("manufacturer", SystemProperties::GetManufacturer().c_str());
@@ -847,7 +815,6 @@ std::string GetDeviceInfo()
 
 std::string ParseRouteUrl(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& arg, const std::string& key)
 {
-    LOGD("ParseRouteUrl");
     std::string argStr = arg->ToString(runtime);
     if (argStr.empty()) {
         return argStr;
@@ -858,8 +825,6 @@ std::string ParseRouteUrl(const shared_ptr<JsRuntime>& runtime, const shared_ptr
     if (argsPtr != nullptr && argsPtr->GetValue(key) != nullptr && argsPtr->GetValue(key)->IsString()) {
         pageRoute = argsPtr->GetValue(key)->GetString();
     }
-    LOGD("JsParseRouteUrl pageRoute = %{private}s", pageRoute.c_str());
-
     return pageRoute;
 }
 
@@ -878,8 +843,6 @@ std::string ParseRouteUrlSpecial(const shared_ptr<JsRuntime>& runtime, const sha
     } else if (argsPtr->Contains(ROUTE_KEY_PATH)) {
         pageRoute = argsPtr->GetValue(ROUTE_KEY_PATH)->GetString();
     }
-    LOGD("JsParseRouteUrl pageRoute = %{private}s", pageRoute.c_str());
-
     return pageRoute;
 }
 
@@ -934,7 +897,6 @@ void AddListener(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>
 
 void ShowToast(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& arg)
 {
-    LOGD("ShowToast");
     std::string argStr = arg->ToString(runtime);
 
     std::unique_ptr<JsonValue> argsPtr = JsonUtil::ParseJsonString(argStr);
@@ -960,8 +922,6 @@ void ShowToast(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& 
             }
         }
     }
-    LOGD("ShowToast message = %{private}s duration = %{public}d bottom = %{private}s", message.c_str(), duration,
-        bottom.c_str());
 
     GetFrontendDelegate(runtime)->ShowToast(message, duration, bottom, NG::ToastShowMode::DEFAULT);
 }
@@ -990,8 +950,6 @@ std::vector<ButtonInfo> ParseDialogButtons(
 
 void ShowDialog(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& arg)
 {
-    LOGD("ShowDialog");
-
     const std::string title = ParseRouteUrl(runtime, arg, PROMPT_KEY_TITLE);
     const std::string message = ParseRouteUrl(runtime, arg, PROMPT_KEY_MESSAGE);
     std::vector<ButtonInfo> buttons = ParseDialogButtons(runtime, arg, PROMPT_KEY_BUTTONS);
@@ -1041,7 +999,6 @@ void ShowDialog(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>&
 
 void SetTimer(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& arg, bool isInterval)
 {
-    LOGD("SetTimer");
     if (arg->IsArray(runtime)) {
         int32_t len = arg->GetArrayLength(runtime);
         if (len < 2) {
@@ -1058,8 +1015,6 @@ void SetTimer(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& a
 
 void ClearTimeout(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& arg)
 {
-    LOGD("ClearTimeout");
-
     if (arg->IsArray(runtime)) {
         int32_t len = arg->GetArrayLength(runtime);
         if (len < 1) {
@@ -1114,7 +1069,6 @@ shared_ptr<JsValue> JsHandleCallback(
             GetFrontendDelegate(runtime)->SetCallBackResult(callbackIdStr, resultStr);
         }
     } else if (methodName == APP_DESTROY_FINISH) {
-        LOGD("JsHandleCallback: appDestroyFinish should release resource here");
     } else {
         LOGW("internal.jsResult not support method = %{private}s", methodName.c_str());
     }
@@ -1360,7 +1314,6 @@ shared_ptr<JsValue> JsReadArrayBuffer(
 shared_ptr<JsValue> JsHandleReadResource(
     const shared_ptr<JsRuntime>& runtime, const std::vector<shared_ptr<JsValue>>& argv, const std::string& methodName)
 {
-    LOGD("JsHandleReadResource");
     if (methodName == READ_TEXT) {
         return JsReadText(runtime, argv);
     } else if (methodName == READ_ARRAY_BUFFER) {
@@ -1408,7 +1361,6 @@ shared_ptr<JsValue> JsGetDeviceInfo(const shared_ptr<JsRuntime>& runtime, const 
     if (callbackId.empty()) {
         LOGE("system device getInfo callBackID is null");
     } else {
-        LOGD("system device getInfo callBackID = %{private}s", callbackId.c_str());
         std::string info = GetDeviceInfo();
         auto engineInstance = static_cast<JsiEngineInstance*>(runtime->GetEmbedderData());
         if (info.find("N/A") != std::string::npos) {
@@ -1754,13 +1706,11 @@ shared_ptr<JsValue> JsHandlePageRoute(
         pageRouteOperators[] = {
             { ROUTE_PAGE_BACK,
                 [](const std::string& uri, const std::string& params, JsiEngineInstance& instance) {
-                    LOGD("JsBackRoute uri = %{private}s", uri.c_str());
                     instance.GetFrontendDelegate()->Back(uri, params);
                     return instance.GetJsRuntime()->NewNull();
                 } },
             { ROUTE_PAGE_CLEAR,
                 [](const std::string& uri, const std::string& params, JsiEngineInstance& instance) {
-                    LOGD("Clear Page Route");
                     instance.GetFrontendDelegate()->Clear();
                     return instance.GetJsRuntime()->NewNull();
                 } },
@@ -1768,7 +1718,6 @@ shared_ptr<JsValue> JsHandlePageRoute(
                 [](const std::string& uri, const std::string& params, JsiEngineInstance& instance) {
                     int32_t routeLength = instance.GetFrontendDelegate()->GetStackSize();
                     std::string indexLength = std::to_string(routeLength);
-                    LOGD("JsGetLengthRoute routeLength=%{private}s", indexLength.c_str());
                     return instance.GetJsRuntime()->NewString(indexLength);
                 } },
             { ROUTE_PAGE_GET_STATE,
@@ -1777,8 +1726,6 @@ shared_ptr<JsValue> JsHandlePageRoute(
                     std::string routeName;
                     std::string routePath;
                     instance.GetFrontendDelegate()->GetState(routeIndex, routeName, routePath);
-                    LOGD("JsGetStateRoute index=%{public}d name=%{private}s path=%{private}s", routeIndex,
-                        routeName.c_str(), routePath.c_str());
 
                     shared_ptr<JsRuntime> runtime = instance.GetJsRuntime();
                     shared_ptr<JsValue> routeData = runtime->NewObject();
@@ -1789,13 +1736,11 @@ shared_ptr<JsValue> JsHandlePageRoute(
                 } },
             { ROUTE_PAGE_PUSH,
                 [](const std::string& uri, const std::string& params, JsiEngineInstance& instance) {
-                    LOGD("JsPushRoute uri = %{private}s", uri.c_str());
                     instance.GetFrontendDelegate()->Push(uri, params);
                     return instance.GetJsRuntime()->NewNull();
                 } },
             { ROUTE_PAGE_REPLACE,
                 [](const std::string& uri, const std::string& params, JsiEngineInstance& instance) {
-                    LOGD("JsReplaceRoute uri = %{private}s", uri.c_str());
                     instance.GetFrontendDelegate()->Replace(uri, params);
                     return instance.GetJsRuntime()->NewNull();
                 } },
@@ -1947,8 +1892,6 @@ shared_ptr<JsValue> JsDomCreateBody(const shared_ptr<JsRuntime>& runtime, const 
 
     const int32_t pageId = page->GetPageId();
     int32_t nodeId = DOM_ROOT_NODE_ID_BASE + pageId;
-    LOGD("JsDomCreateBody: pageId: %{public}d, nodeId: %{public}d:", pageId, nodeId);
-
     std::string tag = argv[CREATE_BODY_TAG_IDX]->ToString(runtime);
     auto command = Referenced::MakeRefPtr<JsCommandCreateDomBody>(tag.c_str(), nodeId);
     SetDomAttributes(runtime, argv[CREATE_BODY_ATTR_IDX], *command);
@@ -1986,8 +1929,6 @@ shared_ptr<JsValue> JsDomAddElement(const shared_ptr<JsRuntime>& runtime, const 
 
     int32_t nodeId = argv[ADD_ELEMENT_NODEID_IDX]->ToInt32(runtime);
     std::string tag = argv[ADD_ELEMENT_TAG_IDX]->ToString(runtime);
-    LOGD("JsDomAddElement: pageId: %{private}d, parentNodeId: %{private}d, nodeId: %{private}d, tag: %{private}s",
-        pageId, parentNodeId, nodeId, tag.c_str());
 
     auto command = Referenced::MakeRefPtr<JsCommandAddDomElement>(tag.c_str(), nodeId, parentNodeId);
     SetDomAttributes(runtime, argv[ADD_ELEMENT_ATTR_IDX], *command);
@@ -2011,7 +1952,6 @@ shared_ptr<JsValue> JsDomAddElement(const shared_ptr<JsRuntime>& runtime, const 
 shared_ptr<JsValue> JsRemoveElement(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& thisObj,
     const std::vector<shared_ptr<JsValue>>& argv, int32_t argc)
 {
-    LOGD("JsRemoveElement");
     if (argc != REMOVE_ELEMENT_ARGS_LEN) {
         LOGE("The arg is wrong, it is supposed to have %{public}d arguments", REMOVE_ELEMENT_ARGS_LEN);
         return runtime->NewUndefined();
@@ -2042,7 +1982,6 @@ shared_ptr<JsValue> JsRemoveElement(const shared_ptr<JsRuntime>& runtime, const 
 shared_ptr<JsValue> JsUpdateElementAttrs(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& thisObj,
     const std::vector<shared_ptr<JsValue>>& argv, int32_t argc)
 {
-    LOGD("JsUpdateElementAttrs");
     if (argc != UPLOAD_ELEMENT_ARGS_LEN) {
         LOGE("The arg is wrong, it is supposed to have %{public}d arguments", UPLOAD_ELEMENT_ARGS_LEN);
         return runtime->NewUndefined();
@@ -2077,7 +2016,6 @@ shared_ptr<JsValue> JsUpdateElementAttrs(const shared_ptr<JsRuntime>& runtime, c
 shared_ptr<JsValue> JsUpdateElementStyles(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& thisObj,
     const std::vector<shared_ptr<JsValue>>& argv, int32_t argc)
 {
-    LOGD("JsUpdateElementStyles");
     if (argc != UPLOAD_ELEMENT_ARGS_LEN) {
         LOGE("The arg is wrong, it is supposed to have %{public}d arguments", UPLOAD_ELEMENT_ARGS_LEN);
         return runtime->NewUndefined();
@@ -2110,8 +2048,6 @@ shared_ptr<JsValue> JsUpdateElementStyles(const shared_ptr<JsRuntime>& runtime, 
 shared_ptr<JsValue> JsOnCreateFinish(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& thisObj,
     const std::vector<shared_ptr<JsValue>>& argv, int32_t argc)
 {
-    LOGD("JsOnCreateFinish");
-
     auto page = GetStagingPage(runtime);
     if (page == nullptr) {
         LOGE("GetStagingPage return nullptr");
@@ -2126,8 +2062,6 @@ shared_ptr<JsValue> JsOnCreateFinish(const shared_ptr<JsRuntime>& runtime, const
 shared_ptr<JsValue> JsOnUpdateFinish(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& thisObj,
     const std::vector<shared_ptr<JsValue>>& argv, int32_t argc)
 {
-    LOGD("JsOnUpdateFinish");
-
     auto page = GetStagingPage(runtime);
     if (page == nullptr) {
         LOGE("GetStagingPage return nullptr");
@@ -2144,14 +2078,12 @@ shared_ptr<JsValue> JsOnUpdateFinish(const shared_ptr<JsRuntime>& runtime, const
 shared_ptr<JsValue> JsCallNative(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& thisObj,
     const std::vector<shared_ptr<JsValue>>& argv, int32_t argc)
 {
-    LOGD("JsCallNative");
     if (argc != NATIVE_ARGS_LEN) {
         LOGE("The arg is wrong, it is supposed to have %{public}d arguments", NATIVE_ARGS_LEN);
         return runtime->NewUndefined();
     }
 
     std::string moduleAndMethod = argv[NATIVE_ARGS_METHOD_IDX]->ToString(runtime);
-    LOGD("JsCallNative moduleAndMethod = %{public}s", moduleAndMethod.c_str());
 
     std::unique_ptr<JsonValue> moduleAndMethodPtr = JsonUtil::ParseJsonString(moduleAndMethod);
     if (!moduleAndMethodPtr) {
@@ -2181,7 +2113,6 @@ shared_ptr<JsValue> JsCallNative(const shared_ptr<JsRuntime>& runtime, const sha
 shared_ptr<JsValue> JsCallComponent(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& thisObj,
     const std::vector<shared_ptr<JsValue>>& argv, int32_t argc)
 {
-    LOGD("JsCallComponent");
     if (argc != COMPONENT_ARGS_LEN) {
         LOGE("The arg is wrong, it is supposed to have %{public}d arguments", COMPONENT_ARGS_LEN);
         return runtime->NewUndefined();
@@ -2236,7 +2167,6 @@ shared_ptr<JsValue> JsCallComponent(const shared_ptr<JsRuntime>& runtime, const 
 
     shared_ptr<JsValue> resultValue = runtime->NewUndefined();
     if (std::strcmp(methodName.c_str(), "animate") == 0) {
-        LOGD("animate args = %{private}s", arguments.c_str());
         resultValue = JsiAnimationBridgeUtils::CreateAnimationContext(runtime, page->GetPageId(), nodeId);
         auto animationBridge = AceType::MakeRefPtr<JsiAnimationBridge>(runtime, resultValue, nodeId);
         auto task = AceType::MakeRefPtr<JsiAnimationBridgeTaskCreate>(runtime, animationBridge, arguments);
@@ -2636,8 +2566,6 @@ shared_ptr<JsValue> JsPerfEnd(const shared_ptr<JsRuntime>& runtime, const shared
 shared_ptr<JsValue> JsHiViewReport(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& thisObj,
     const std::vector<shared_ptr<JsValue>>& argv, int32_t argc)
 {
-    LOGD("JsHiViewReport");
-
     if (argc != HIVIEW_ARGS_LEN) {
         LOGE("argc error, argc = %{public}d", argc);
         return runtime->NewNull();
@@ -2646,7 +2574,6 @@ shared_ptr<JsValue> JsHiViewReport(const shared_ptr<JsRuntime>& runtime, const s
         std::string eventId = argv[HIVIEW_ARGS_ID_IDX]->ToString(runtime);
         std::string eventJson = argv[HIVIEW_ARGS_JSON_IDX]->ToString(runtime);
         EventReport::JsEventReport(StringToInt(eventId), eventJson);
-        LOGD("JsEventReport success");
     } else {
         LOGE("parameter type error");
     }
@@ -2759,7 +2686,6 @@ void JsiEngineInstance::SetJsMessageDispatcher(const WeakPtr<JsMessageDispatcher
 void JsiEngineInstance::RegisterAceModule()
 {
     ACE_SCOPED_TRACE("JsiEngine::RegisterAceModule");
-    LOGD("JsiEngineInstance RegisterAceModule");
 
     shared_ptr<JsValue> aceObj = runtime_->NewObject();
     if (!aceObj) {
@@ -2822,7 +2748,6 @@ shared_ptr<JsValue> JsCallNativeHandler(const shared_ptr<JsRuntime>& runtime, co
 void JsiEngineInstance::RegisterConsoleModule()
 {
     ACE_SCOPED_TRACE("JsiEngine::RegisterConsoleModule");
-    LOGD("JsiEngineInstance RegisterConsoleModule");
     shared_ptr<JsValue> global = runtime_->GetGlobal();
 
     // app log method
@@ -2848,7 +2773,6 @@ void JsiEngineInstance::RegisterConsoleModule()
 void JsiEngineInstance::RegisterConsoleModule(ArkNativeEngine* engine)
 {
     ACE_SCOPED_TRACE("JsiEngineInstance::RegisterConsoleModule");
-    LOGD("JsiEngineInstance RegisterConsoleModule to nativeEngine");
     napi_env env = reinterpret_cast<napi_env>(engine);
     napi_value globalObj;
     napi_get_global(env, &globalObj);
@@ -2899,7 +2823,6 @@ shared_ptr<JsValue> SyscapCanIUse(const shared_ptr<JsRuntime>& runtime, const sh
 void JsiEngineInstance::RegisterSyscapModule()
 {
     ACE_SCOPED_TRACE("JsiEngine::RegisterSyscapModule");
-    LOGD("JsiEngineInstance RegisterSyscapModule");
     shared_ptr<JsValue> global = runtime_->GetGlobal();
 
     global->SetProperty(runtime_, CAN_IUSE, runtime_->NewFunction(SyscapCanIUse));
@@ -2908,7 +2831,6 @@ void JsiEngineInstance::RegisterSyscapModule()
 void JsiEngineInstance::RegisterDocumentModule()
 {
     ACE_SCOPED_TRACE("JsiEngine::RegisterDocumentModule");
-    LOGD("JsiEngineInstance RegisterDocumentModule");
     shared_ptr<JsValue> global = runtime_->GetGlobal();
     shared_ptr<JsValue> domObj = runtime_->NewObject();
     domObj->SetProperty(runtime_, "createElement", runtime_->NewFunction(JsCreateElement));
@@ -2918,7 +2840,6 @@ void JsiEngineInstance::RegisterDocumentModule()
 void JsiEngineInstance::RegisterPerfUtilModule()
 {
     ACE_SCOPED_TRACE("JsiEngine::RegisterPerfUtilModule");
-    LOGD("JsiEngineInstance RegisterPerfUtilModule");
     shared_ptr<JsValue> perfObj = runtime_->NewObject();
     perfObj->SetProperty(runtime_, "printlog", runtime_->NewFunction(JsPerfPrint));
     perfObj->SetProperty(runtime_, "sleep", runtime_->NewFunction(JsPerfSleep));
@@ -2932,7 +2853,6 @@ void JsiEngineInstance::RegisterPerfUtilModule()
 void JsiEngineInstance::RegisterHiViewModule()
 {
     ACE_SCOPED_TRACE("JsiEngine::RegisterHiViewModule");
-    LOGD("JsiEngineInstance RegisterHiViewModule");
     shared_ptr<JsValue> hiViewObj = runtime_->NewObject();
     hiViewObj->SetProperty(runtime_, "report", runtime_->NewFunction(JsHiViewReport));
 
@@ -2943,7 +2863,6 @@ void JsiEngineInstance::RegisterHiViewModule()
 void JsiEngineInstance::RegisterI18nPluralRulesModule()
 {
     ACE_SCOPED_TRACE("JsiEngine::RegisterI18nPluralRulesModule");
-    LOGD("JsiEngineInstance RegisterI18nPluralRulesModule");
     shared_ptr<JsValue> i18nObj = runtime_->NewObject();
     i18nObj->SetProperty(runtime_, "select", runtime_->NewFunction(JsPluralRulesFormat));
 
@@ -3024,8 +2943,6 @@ bool JsiEngineInstance::InitJsEnv(bool debugger_mode, const std::unordered_map<s
         return false;
     }
 #endif
-    LOGD("Load js framework success");
-
     // Init groupJsBridge
     InitGroupJsBridge();
 
@@ -3045,7 +2962,6 @@ void JsiEngineInstance::InitGroupJsBridge()
 
 bool JsiEngineInstance::FireJsEvent(const std::string& eventStr)
 {
-    LOGD("JsiEngineInstance FireJsEvent");
     if (!runningPage_) {
         LOGW("js engine instance running page is not valid.");
         return false;
@@ -3102,7 +3018,6 @@ void JsiEngineInstance::CallJs(const std::string& callbackId, const std::string&
                                .append(",")
                                .append(keepAliveStr)
                                .append("], \"method\":\"callback\"}]");
-    LOGD("CallJs string: %{private}s", callBuff.c_str());
     int32_t instanceId = isGlobal ? DEFAULT_APP_ID : runningPage_->GetPageId();
 
     std::vector<shared_ptr<JsValue>> argv;
@@ -3153,7 +3068,6 @@ void JsiEngineInstance::SetDebuggerPostTask(std::string& library_path)
 bool JsiEngine::Initialize(const RefPtr<FrontendDelegate>& delegate)
 {
     ACE_SCOPED_TRACE("JsiEngine::Initialize");
-    LOGD("JsiEngine initialize");
     engineInstance_ = AceType::MakeRefPtr<JsiEngineInstance>(delegate, instanceId_);
     engineInstance_->SetDebugMode(NeedDebugBreakPoint());
     bool result = engineInstance_->InitJsEnv(IsDebugVersion(), GetExtraNativeObject());
@@ -3337,7 +3251,6 @@ JsiEngine::~JsiEngine()
 
 void JsiEngine::GetLoadOptions(std::string& optionStr, bool isMainPage, bool hasAppCode)
 {
-    LOGD("JsiEngine GetLoadOptions");
     ACE_DCHECK(engineInstance_);
     auto delegate = engineInstance_->GetFrontendDelegate();
     if (!delegate) {
@@ -3378,7 +3291,6 @@ bool JsiEngine::ExecuteAbc(const std::string &fileName)
 
     std::vector<uint8_t> content;
     if (!delegate->GetAssetContent(fileName, content)) {
-        LOGD("GetAssetContent \"%{private}s\" failed.", fileName.c_str());
         return true;
     }
 #ifdef OHOS_PLATFORM
@@ -3396,7 +3308,6 @@ bool JsiEngine::ExecuteAbc(const std::string &fileName)
 void JsiEngine::LoadJs(const std::string& url, const RefPtr<JsAcePage>& page, bool isMainPage)
 {
     ACE_SCOPED_TRACE("JsiEngine::LoadJs");
-    LOGD("JsiEngine LoadJs");
     ACE_DCHECK(engineInstance_);
     engineInstance_->SetStagingPage(page);
     if (isMainPage) {
@@ -3496,7 +3407,6 @@ void JsiEngine::LoadJs(const std::string& url, const RefPtr<JsAcePage>& page, bo
 // Update running page
 void JsiEngine::UpdateRunningPage(const RefPtr<JsAcePage>& page)
 {
-    LOGD("JsiEngine UpdateRunningPage");
     ACE_DCHECK(engineInstance_);
     engineInstance_->SetRunningPage(page);
 }
@@ -3504,7 +3414,6 @@ void JsiEngine::UpdateRunningPage(const RefPtr<JsAcePage>& page)
 // Update staging page
 void JsiEngine::UpdateStagingPage(const RefPtr<JsAcePage>& page)
 {
-    LOGD("JsiEngine UpdateStagingPage");
     ACE_DCHECK(engineInstance_);
     engineInstance_->SetStagingPage(page);
 }
@@ -3512,7 +3421,6 @@ void JsiEngine::UpdateStagingPage(const RefPtr<JsAcePage>& page)
 // Reset loading page
 void JsiEngine::ResetStagingPage()
 {
-    LOGD("JsiEngine ResetStagingPage");
     ACE_DCHECK(engineInstance_);
     // weird
     auto runningPage = engineInstance_->GetRunningPage();
@@ -3521,14 +3429,12 @@ void JsiEngine::ResetStagingPage()
 
 void JsiEngine::SetJsMessageDispatcher(const RefPtr<JsMessageDispatcher>& dispatcher)
 {
-    LOGD("JsiEngine SetJsMessageDispatcher");
     ACE_DCHECK(engineInstance_);
     engineInstance_->SetJsMessageDispatcher(dispatcher);
 }
 
 void JsiEngine::FireAsyncEvent(const std::string& eventId, const std::string& param)
 {
-    LOGD("JsiEngine FireAsyncEvent");
     ACE_DCHECK(engineInstance_);
 
     std::string callBuf = std::string("[{\"args\": [\"")
@@ -3536,7 +3442,6 @@ void JsiEngine::FireAsyncEvent(const std::string& eventId, const std::string& pa
                               .append("\",")
                               .append(param)
                               .append("], \"method\":\"fireEvent\"}]");
-    LOGD("FireASyncEvent string: %{private}s", callBuf.c_str());
 
     ACE_DCHECK(engineInstance_);
     if (!engineInstance_->FireJsEvent(callBuf.c_str())) {
@@ -3546,13 +3451,11 @@ void JsiEngine::FireAsyncEvent(const std::string& eventId, const std::string& pa
 
 void JsiEngine::FireSyncEvent(const std::string& eventId, const std::string& param)
 {
-    LOGD("JsiEngine FireSyncEvent");
     std::string callBuf = std::string("[{\"args\": [\"")
                               .append(eventId)
                               .append("\",")
                               .append(param)
                               .append("], \"method\":\"fireEventSync\"}]");
-    LOGD("FireSyncEvent string: %{private}s", callBuf.c_str());
 
     ACE_DCHECK(engineInstance_);
     if (!engineInstance_->FireJsEvent(callBuf.c_str())) {
@@ -3663,6 +3566,20 @@ void JsiEngine::DumpHeapSnapshot(bool isPrivate)
     }
 }
 
+void JsiEngine::DestroyHeapProfiler()
+{
+    if (engineInstance_ && engineInstance_->GetJsRuntime()) {
+        engineInstance_->GetJsRuntime()->DestroyHeapProfiler();
+    }
+}
+
+void JsiEngine::ForceFullGC()
+{
+    if (engineInstance_ && engineInstance_->GetJsRuntime()) {
+        engineInstance_->GetJsRuntime()->RunFullGC();
+    }
+}
+
 std::string JsiEngine::GetStacktraceMessage()
 {
     auto arkNativeEngine = static_cast<ArkNativeEngine*>(nativeEngine_);
@@ -3769,7 +3686,6 @@ bool JsiEngine::CallAppFunc(const std::string& appFuncName)
 
 bool JsiEngine::CallAppFunc(const std::string& appFuncName, std::vector<shared_ptr<JsValue>>& argv)
 {
-    LOGD("JsiEngine CallAppFunc");
     shared_ptr<JsRuntime> runtime = engineInstance_->GetJsRuntime();
     ACE_DCHECK(runtime);
     shared_ptr<JsValue> global = runtime->GetGlobal();

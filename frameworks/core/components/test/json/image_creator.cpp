@@ -27,7 +27,6 @@ namespace OHOS::Ace {
 
 RefPtr<Component> ImageCreator::CreateFromJson(const JsonValue& componentJson, const JsonComponentFactory&)
 {
-    LOGD("CreateFromJson Image");
     std::string classType = componentJson.GetValue(CLASS_NAME)->GetString();
     if (classType != IMAGE_NAME) {
         LOGE("Create Image err: not a image json.");

@@ -24,7 +24,6 @@ namespace OHOS::Ace {
 
 RenderSceneViewer::RenderSceneViewer(uint32_t key) : RenderNode(true), sceneViewerAdapter_(key), key_(key)
 {
-    LOGD("ACE-3D RenderSceneViewer::RenderSceneViewer Ctor key = %d", GetKey());
     Initialize();
 }
 
@@ -46,7 +45,6 @@ RenderSceneViewer::~RenderSceneViewer()
 
 void RenderSceneViewer::Initialize()
 {
-    LOGD("ACE-3D RenderSceneViewer::Initialize() key = %d", GetKey());
     auto wp = AceType::WeakClaim(this);
     touchHandler_ = AceType::MakeRefPtr<SceneViewerTouchHandler>();
     touchHandler_->SetEventCallback([wp](const OHOS::Render3D::SceneViewerTouchEvent& event) {
@@ -60,7 +58,6 @@ void RenderSceneViewer::Initialize()
 void RenderSceneViewer::HandleEvent(const OHOS::Render3D::SceneViewerTouchEvent& event)
 {
     ACE_SCOPED_TRACE("RenderSceneViewer::HandleEvent()");
-    LOGD("ACE-3D %s %d", __func__, __LINE__);
     switch (event.GetEventType()) {
         case OHOS::Ace::TouchType::DOWN:
             isClicked_ = true;
@@ -88,13 +85,8 @@ void RenderSceneViewer::HandleEvent(const OHOS::Render3D::SceneViewerTouchEvent&
     }
 
     // Convert to LUME stuff.
-    LOGD("ACE-3D HandleEvent() eventId[%d], eventType[%zu], position[%.2f, %.2f], delta[%.2f, %.2f], key = %d",
-        event.GetFingerId(), event.GetEventType(), event.GetGlobalLocation().GetX(), event.GetGlobalLocation().GetY(),
-        event.GetDeltaChange().GetX(), event.GetDeltaChange().GetY(), GetKey());
-
     auto context = GetContext().Upgrade();
     if (context) {
-        LOGD("ACE-3D RenderSceneViewer::HandleEvent() GetKey %d Post Task", GetKey());
 #if MULTI_ECS_UPDATE_AT_ONCE
         OHOS::Render3D::GraphicsTask::GetInstance().PushSyncMessage([weak = WeakClaim(this), event] {
 #else
@@ -115,8 +107,6 @@ void RenderSceneViewer::HandleEvent(const OHOS::Render3D::SceneViewerTouchEvent&
 void RenderSceneViewer::RenderWithContext(RenderContext& context, const Offset& offset) {
 
     ACE_SCOPED_TRACE("RenderSceneViewer::RenderWithContext()");
-    LOGD("ACE-3D RenderSceneViewer::RenderWithContext() needsSceneSetup_: %s", needsSceneSetup_ ? "true" : "false");
-    LOGD("ACE-3D RenderSceneViewer::RenderWithContext() key = %d", GetKey());
 
     auto pipelineContext = GetContext().Upgrade();
     if (!pipelineContext) {
@@ -141,15 +131,12 @@ void RenderSceneViewer::RenderWithContext(RenderContext& context, const Offset& 
                 return;
             }
 
-            LOGD("ACE-3D init Engine widget this %d E", delegate->GetKey());
             auto& gfxManager = OHOS::Render3D::GraphicsManager::GetInstance();
             gfxManager.Register(delegate->GetKey());
-            LOGD("ACE-3D init Engine this  %d %d", delegate->GetKey(), __LINE__);
 
             delegate->eglContext_ = gfxManager.CreateOffScreenContext(eglContext);
             delegate->textureInfo_ = delegate->CreateRenderTarget(delegate->sceneSize_.Width(),
                 delegate->sceneSize_.Height());
-            LOGD("ACE-3D init Engine GetKey %d texture id %d E", delegate->GetKey(), delegate->textureInfo_.textureId_);
         });
 
         PrepareTextureLayer(textureInfo_);
@@ -169,15 +156,11 @@ void RenderSceneViewer::RenderWithContext(RenderContext& context, const Offset& 
 
             auto& gfxManager = OHOS::Render3D::GraphicsManager::GetInstance();
             auto &&engine = gfxManager.GetEngine(OHOS::Render3D::EngineFactory::EngineType::LUME, eglContext);
-            LOGD("ACE-3D init Engine this %d %d", delegate->GetKey(), __LINE__);
             delegate->sceneViewerAdapter_.SetEngine(std::move(engine));
-            LOGD("ACE-3D init Engine this %d %d", delegate->GetKey(), __LINE__);
         });
     }
 
     if (needsSceneSetup_) {
-        LOGD("ACE-3D RenderSceneViewer::RenderWithContext() needsSceneSetup_. RenderSceneViewer Post Task");
-
         // Make sure needs scene setup is on, or introduce another flag
         if (!customRenders_.empty()) {
             PassCustomRenders(customRenders_);
@@ -214,8 +197,6 @@ void RenderSceneViewer::RenderWithContext(RenderContext& context, const Offset& 
 
             delegate->sceneViewerAdapter_.SetUpSceneViewer(delegate->textureInfo_, delegate->glTFSrc_,
                 delegate->backgroundSrc_, bg_type);
-            // Check if animating_ to be set here!
-            LOGD("glTFSrc_ %s GetKey() %d", delegate->glTFSrc_.c_str(), delegate->GetKey());
         });
         needsSceneSetup_ = false;
         SetNeedRender(true);
@@ -239,12 +220,9 @@ void RenderSceneViewer::RenderWithContext(RenderContext& context, const Offset& 
 void RenderSceneViewer::Paint(RenderContext& context, const Offset& offset)
 {
     ACE_FUNCTION_TRACE();
-    LOGD("ACE-3D RenderSceneViewer::Paint() offset: %f, %f", offset.GetX(), offset.GetY());
-    LOGD("ACE-3D RenderSceneViewer::Paint() tex id = %d", textureId_);
 
     auto pipeline_context = GetContext().Upgrade();
     if (pipeline_context) {
-        LOGD("ACE-3D RenderSceneViewer::Paint() Post Task");
         // auto &&ftr = OHOS::Render3D::GraphicsTask::GetInstance().PushAsyncMessage([this] {
         // If open MULTI_ECS_UPDATE_AT_ONCE macro  SetGSVsyncCallback is called on current thread
         // that means all the 3D engine task should be in syncorinize manner.
@@ -267,7 +245,6 @@ void RenderSceneViewer::Paint(RenderContext& context, const Offset& offset)
     RenderNode::Paint(context, offset);
 
     if ((animating_ || handlesNotReady_) && pipeline_context) {
-        LOGD("ACE-3D RenderSceneViewer::Paint() animating_ ! ");
         SetNeedRender(true);
         pipeline_context->AddDirtyRenderNode(AceType::Claim(this), false);
     }
@@ -276,7 +253,6 @@ void RenderSceneViewer::Paint(RenderContext& context, const Offset& offset)
 void RenderSceneViewer::Update(const RefPtr<Component>& component)
 {
     ACE_SCOPED_TRACE("RenderSceneViewer::Update()");
-    LOGD("ACE-3D RenderSceneViewer::Update Key = %d", GetKey());
     RefPtr<SceneViewerComponent> svComponent = AceType::DynamicCast<SceneViewerComponent>(component);
     if (!svComponent) {
         LOGE("ACE-3D RenderSceneViewer::Update() svComponent is null!");
@@ -289,7 +265,6 @@ void RenderSceneViewer::Update(const RefPtr<Component>& component)
     if (src_updated || background_updated) {
         auto pipeline_context = GetContext().Upgrade();
         if (pipeline_context) {
-            LOGD("ACE-3D RenderSceneViewer::Update() Post Task");
 #if MULTI_ECS_UPDATE_AT_ONCE
             OHOS::Render3D::GraphicsTask::GetInstance().PushSyncMessage([weak = WeakClaim(this)] {
 #else
@@ -307,7 +282,6 @@ void RenderSceneViewer::Update(const RefPtr<Component>& component)
 
     // Update camera properties if changed.
     if (IsCameraPropertyChanged(svComponent)) {
-        LOGD("ACE-3D RenderSceneViewer::Update() camera properties changed.");
         // Position is Animatable currently.
         cameraPosition_.SetVec(svComponent->GetCameraPositionVec());
         cameraPosition_.SetDistance(svComponent->GetCameraPosDistance());
@@ -344,12 +318,9 @@ void RenderSceneViewer::Update(const RefPtr<Component>& component)
     }
 
     if (!svComponent->GetCustomRenders().empty()) {
-        LOGD("ACE-3D RenderSceneViewer::AddCustomRenders().");
         customRenders_ = svComponent->GetCustomRenders();
         needsSceneSetup_ = true;
     }
-
-    LOGD("ACE-3D RenderSceneViewer::Update() isTransparent_ : %s", isTransparent_ ? "true" : "false");
 }
 
 void RenderSceneViewer::PerformLayout()
@@ -357,20 +328,15 @@ void RenderSceneViewer::PerformLayout()
     ACE_SCOPED_TRACE("RenderSceneViewer::PerformLayout()");
     double w = GetLayoutParam().GetMaxSize().Width();
     double h = GetLayoutParam().GetMaxSize().Height();
-    LOGD("ACE-3D RenderSceneViewer::PerformLayout() key: %d, w: %f, h: %f ", GetKey(), w, h);
     sceneSize_ = Size(w, h);
     SetLayoutSize(Size(w, h));
 }
 
-void RenderSceneViewer::OnPaintFinish()
-{
-    LOGD("ACE-3D RenderSceneViewer::OnPaintFinish() key: %d", GetKey());
-}
+void RenderSceneViewer::OnPaintFinish() {}
 
 void RenderSceneViewer::OnSurfaceChanged()
 {
     ACE_SCOPED_TRACE("RenderSceneViewer::OnSurfaceChanged key: %d", GetKey());
-    LOGD("RenderSceneViewer::OnSurfaceChanged key: %d", GetKey());
     if (inited_) {
         OHOS::Render3D::GraphicsTask::GetInstance().PushSyncMessage([weak = WeakClaim(this)] {
             auto delegate = weak.Upgrade();
@@ -387,7 +353,6 @@ void RenderSceneViewer::OnSurfaceChanged()
 }
 
 void RenderSceneViewer::ClearRenderObject() {
-    LOGD("ACE-3D RenderSceneViewer::ClearRenderObject() key: %d", GetKey());
     RenderNode::ClearRenderObject();
 }
 
@@ -402,14 +367,12 @@ Size RenderSceneViewer::GetSize() {
 void RenderSceneViewer::OnTouchTestHit(
     const Offset& coordinateOffset, const TouchRestrict& touchRestrict, TouchTestResult& result) {
     ACE_SCOPED_TRACE("RenderSceneViewer::OnTouchTestHit()");
-    LOGD("ACE-3D RenderSceneViewer::OnTouchTestHit() curr key: %d, key = %d", key_, GetKey());
     touchHandler_->SetCoordinateOffset(coordinateOffset);
     result.emplace_back(touchHandler_);
 }
 
 void RenderSceneViewer::PerformClick()
 {
-    LOGD("ACE-3D RenderSceneViewer::PerformClick() perform click");
     if (onClick_) {
         onClick_();
     }
@@ -417,8 +380,6 @@ void RenderSceneViewer::PerformClick()
 
 void RenderSceneViewer::PerformCameraUpdate()
 {
-    LOGD("ACE-3D RenderSceneViewer::PerformCameraUpdate() position: %f, %f, %f, %f", cameraPosition_.GetX(),
-        cameraPosition_.GetY(), cameraPosition_.GetZ(), cameraPosition_.GetDistance().GetValue());
     UpdateCameraOnly();
 }
 
@@ -427,7 +388,6 @@ void RenderSceneViewer::UpdateCameraOnly()
     ACE_SCOPED_TRACE("RenderSceneViewer::UpdateCameraOnly()");
     auto pipeline_context = GetContext().Upgrade();
     if (pipeline_context) {
-        LOGD("ACE-3D RenderSceneViewer::UpdateCameraOnly() Post Task");
 #if MULTI_ECS_UPDATE_AT_ONCE
         OHOS::Render3D::GraphicsTask::GetInstance().PushSyncMessage([weak = WeakClaim(this)] {
 #else
@@ -449,7 +409,6 @@ void RenderSceneViewer::UpdateCameraOnly()
 
 void RenderSceneViewer::PerformLightUpdate()
 {
-    LOGD("ACE-3D PerformLightUpdate()");
     UpdateLightOnly();
 }
 
@@ -458,7 +417,6 @@ void RenderSceneViewer::UpdateLightOnly()
     ACE_SCOPED_TRACE("RenderSceneViewer::UpdateLightOnly()");
     auto pipeline_context = GetContext().Upgrade();
     if (pipeline_context) {
-        LOGD("ACE-3D RenderSceneViewer::UpdateLightOnly() Post Task");
 #if MULTI_ECS_UPDATE_AT_ONCE
         OHOS::Render3D::GraphicsTask::GetInstance().PushSyncMessage([weak = WeakClaim(this)] {
 #else
@@ -500,14 +458,12 @@ void RenderSceneViewer::PassGeometries(const std::vector<RefPtr<OHOS::Render3D::
 void RenderSceneViewer::UpdateGLTFAnimations(const std::vector<RefPtr<OHOS::Render3D::GLTFAnimation>>& gltfAnimations)
 {
     ACE_SCOPED_TRACE("RenderSceneViewer::UpdateGLTFAnimations()");
-    LOGD("RenderSceneViewer::UpdateGLTFAnimations() size: %zu", gltfAnimations.size());
     auto pipeline_context = GetContext().Upgrade();
     if (!pipeline_context) {
         LOGE("RenderSceneViewer::UpdateGLTFAnimations() GetContext failed.");
         return;
     }
 
-    LOGD("RenderSceneViewer::UpdateGLTFAnimations() Post Task");
 #if MULTI_ECS_UPDATE_AT_ONCE
     OHOS::Render3D::GraphicsTask::GetInstance().PushSyncMessage([weak = WeakClaim(this), gltfAnimations] {
 #else
@@ -517,7 +473,6 @@ void RenderSceneViewer::UpdateGLTFAnimations(const std::vector<RefPtr<OHOS::Rend
         if (delegate) {
             delegate->sceneViewerAdapter_.UpdateGLTFAnimations(gltfAnimations);
             delegate->animating_ = delegate->sceneViewerAdapter_.IsAnimating();
-            LOGD("RenderSceneViewer::UpdateGLTFAnimations() animating: %d", delegate->animating_);
         }
     });
 }
@@ -562,13 +517,10 @@ void RenderSceneViewer::HandleLightsUpdate(const RefPtr<SceneViewerComponent>& s
     }
 
     if (!IsLightPropertyChanged(svComponent)) {
-        LOGD("HandleLightsUpdate() Lights not changed!");
         return;
     }
 
     std::vector<OHOS::Ace::RefPtr<OHOS::Render3D::SVLight>> newLights = svComponent->GetLights();
-    LOGD("ACE-3D RenderSceneViewer::HandleLightsUpdate() lights_: %zu, newLights: %zu",
-        lights_.size(), newLights.size());
 
     int index = 0;
     for (auto& light : lights_) {

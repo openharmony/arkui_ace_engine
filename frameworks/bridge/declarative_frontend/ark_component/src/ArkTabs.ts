@@ -1,5 +1,23 @@
+/*
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 /// <reference path='./import.ts' />
 class ArkTabsComponent extends ArkComponent implements TabsAttribute {
+  constructor(nativePtr: KNode) {
+    super(nativePtr);
+  }
   onAnimationStart(handler: (index: number, targetIndex: number, event: TabsAnimationEvent) => void): TabsAttribute {
     throw new Error('Method not implemented.');
   }
@@ -76,6 +94,9 @@ class ArkTabsComponent extends ArkComponent implements TabsAttribute {
 }
 
 class BarGridAlignModifier extends ModifierWithKey<BarGridColumnOptions> {
+  constructor(value: BarGridColumnOptions) {
+    super(value);
+  }
   static identity: Symbol = Symbol('barGridAlign');
 
   applyPeer(node: KNode, reset: boolean): void {
@@ -97,6 +118,9 @@ class BarGridAlignModifier extends ModifierWithKey<BarGridColumnOptions> {
 }
 
 class DividerModifier extends ModifierWithKey<DividerStyle> {
+  constructor(value: DividerStyle) {
+    super(value);
+  }
   static identity: Symbol = Symbol('Divider');
 
   applyPeer(node: KNode, reset: boolean): void {
@@ -117,6 +141,9 @@ class DividerModifier extends ModifierWithKey<DividerStyle> {
 }
 
 class BarWidthModifier extends ModifierWithKey<Length> {
+  constructor(value: Length) {
+    super(value);
+  }
   static identity: Symbol = Symbol('barWidth');
 
   applyPeer(node: KNode, reset: boolean): void {
@@ -137,6 +164,9 @@ class BarWidthModifier extends ModifierWithKey<Length> {
 }
 
 class BarAdaptiveHeightModifier extends Modifier<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
   static identity: Symbol = Symbol('barAdaptiveHeight');
 
   applyPeer(node: KNode, reset: boolean): void {
@@ -149,6 +179,9 @@ class BarAdaptiveHeightModifier extends Modifier<boolean> {
 }
 
 class BarHeightModifier extends ModifierWithKey<Length> {
+  constructor(value: Length) {
+    super(value);
+  }
   static identity: Symbol = Symbol('barHeight');
 
   applyPeer(node: KNode, reset: boolean): void {
@@ -169,6 +202,9 @@ class BarHeightModifier extends ModifierWithKey<Length> {
 }
 
 class BarOverlapModifier extends Modifier<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
   static identity: Symbol = Symbol('barOverlap');
 
   applyPeer(node: KNode, reset: boolean): void {
@@ -181,6 +217,9 @@ class BarOverlapModifier extends Modifier<boolean> {
 }
 
 class TabsVerticalModifier extends Modifier<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
   static identity: Symbol = Symbol('vertical');
 
   applyPeer(node: KNode, reset: boolean): void {
@@ -193,6 +232,9 @@ class TabsVerticalModifier extends Modifier<boolean> {
 }
 
 class AnimationDurationModifier extends Modifier<number> {
+  constructor(value: number) {
+    super(value);
+  }
   static identity: Symbol = Symbol('animationduration');
 
   applyPeer(node: KNode, reset: boolean): void {
@@ -205,6 +247,9 @@ class AnimationDurationModifier extends Modifier<number> {
 }
 
 class ScrollableModifier extends Modifier<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
   static identity: Symbol = Symbol('scrollable');
 
   applyPeer(node: KNode, reset: boolean): void {
@@ -217,6 +262,9 @@ class ScrollableModifier extends Modifier<boolean> {
 }
 
 class TabBarModeModifier extends ModifierWithKey<ArkBarMode> {
+  constructor(value: ArkBarMode) {
+    super(value);
+  }
   static identity: Symbol = Symbol('tabsbarMode');
 
   applyPeer(node: KNode, reset: boolean): void {
@@ -244,6 +292,9 @@ class TabBarModeModifier extends ModifierWithKey<ArkBarMode> {
 }
 
 class BarPositionModifier extends Modifier<number> {
+  constructor(value: number) {
+    super(value);
+  }
   static identity: Symbol = Symbol('barPosition');
 
   applyPeer(node: KNode, reset: boolean): void {
@@ -256,6 +307,9 @@ class BarPositionModifier extends Modifier<number> {
 }
 
 class TabsHideTitleBarModifier extends Modifier<string> {
+  constructor(value: string) {
+    super(value);
+  }
   static identity: Symbol = Symbol('hideTitleBar');
 
   applyPeer(node: KNode, reset: boolean): void {
@@ -268,6 +322,9 @@ class TabsHideTitleBarModifier extends Modifier<string> {
 }
 
 class BarBackgroundColorModifier extends ModifierWithKey<ResourceColor> {
+  constructor(value: ResourceColor) {
+    super(value);
+  }
   static identity: Symbol = Symbol('barbackgroundcolor');
 
   applyPeer(node: KNode, reset: boolean): void {
@@ -288,6 +345,9 @@ class BarBackgroundColorModifier extends ModifierWithKey<ResourceColor> {
 }
 
 class FadingEdgeModifier extends Modifier<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
   static identity: Symbol = Symbol('fadingedge');
 
   applyPeer(node: KNode, reset: boolean): void {
@@ -306,6 +366,6 @@ globalThis.Tabs.attributeModifier = function (modifier) {
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkTabsComponent(nativeNode);
   });
-  modifier.applyNormalAttribute(component);
+  applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
 };

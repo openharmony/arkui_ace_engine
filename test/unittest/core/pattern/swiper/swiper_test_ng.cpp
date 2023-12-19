@@ -41,12 +41,12 @@
 #include "core/components_ng/pattern/swiper_indicator/indicator_common/swiper_indicator_pattern.h"
 #include "core/components_ng/pattern/swiper/swiper_utils.h"
 #include "core/components_ng/pattern/text/text_model_ng.h"
+#include "core/components_v2/inspector/inspector_constants.h"
 #include "test/mock/core/pattern/mock_nestable_scroll_container.h"
 #include "test/mock/core/render/mock_render_context.h"
 #include "test/mock/core/rosen/mock_canvas.h"
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "test/unittest/core/pattern/test_ng.h"
-#include "core/components_v2/inspector/inspector_constants.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "test/mock/base/mock_task_executor.h"
 #include "test/mock/core/common/mock_container.h"
@@ -662,15 +662,12 @@ HWTEST_F(SwiperTestNg, SwiperEvent001, TestSize.Level1)
     const char* name = "HandleTouchDown";
     pattern_->controller_ = CREATE_ANIMATOR(name);
     pattern_->controller_->status_ = Animator::Status::RUNNING;
-    pattern_->springController_ = CREATE_ANIMATOR(name);
-    pattern_->springController_->status_ = Animator::Status::RUNNING;
     pattern_->HandleTouchEvent(touchEventInfo);
     EXPECT_FALSE(pattern_->indicatorDoingAnimation_);
 
     touchEventInfo.touches_.begin()->SetTouchType(TouchType::UP);
     pattern_->HandleTouchEvent(touchEventInfo);
     pattern_->controller_ = nullptr;
-    pattern_->springController_ = nullptr;
     touchEventInfo.touches_.begin()->SetTouchType(TouchType::CANCEL);
     pattern_->HandleTouchEvent(touchEventInfo);
     touchEventInfo.touches_.begin()->SetTouchType(TouchType::MOVE);
@@ -717,6 +714,114 @@ HWTEST_F(SwiperTestNg, SwiperEvent002, TestSize.Level1)
     pattern_->panEvent_->actionCancel_();
     EXPECT_TRUE(pattern_->swiperController_->tabBarFinishCallback_);
     EXPECT_TRUE(pattern_->swiperController_->removeSwiperEventCallback_);
+}
+
+/**
+ * @tc.name: SwiperPatternSpringAnimation001
+ * @tc.desc: Swiper spring animation is playing
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, SwiperPatternSpringAnimation001, TestSize.Level1)
+{
+    CreateWithItem([](SwiperModelNG model) {});
+    double dragVelocity = 2000.0;
+    pattern_->springAnimation_ = nullptr;
+    pattern_->currentOffset_ = 1;
+    pattern_->contentMainSize_ = 1.0f;
+    struct SwiperItemInfo swiperItemInfo;
+    swiperItemInfo.startPos = -1.0f;
+    swiperItemInfo.endPos = -1.0f;
+    pattern_->itemPosition_.emplace(std::make_pair(1, swiperItemInfo));
+    pattern_->PlaySpringAnimation(dragVelocity);
+    EXPECT_FALSE(pattern_->springAnimationIsRunning_);
+}
+
+/**
+ * @tc.name: SwiperPatternSpringAnimation002
+ * @tc.desc: StopAndResetSpringAnimation
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, SwiperPatternSpringAnimation002, TestSize.Level1)
+{
+    CreateWithItem([](SwiperModelNG model) {});
+    double dragVelocity = 2000.0;
+    pattern_->springAnimation_ = nullptr;
+    pattern_->currentOffset_ = 1;
+    pattern_->contentMainSize_ = 1.0f;
+    struct SwiperItemInfo swiperItemInfo;
+    swiperItemInfo.startPos = -1.0f;
+    swiperItemInfo.endPos = -1.0f;
+    pattern_->itemPosition_.emplace(std::make_pair(1, swiperItemInfo));
+    pattern_->PlaySpringAnimation(dragVelocity);
+    pattern_->StopAndResetSpringAnimation();
+    EXPECT_FALSE(pattern_->springAnimationIsRunning_);
+}
+
+/**
+ * @tc.name: SwiperPatternSpringAnimation003
+ * @tc.desc: StopSpringAnimationAndFlushImmediately
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, SwiperPatternSpringAnimation003, TestSize.Level1)
+{
+    CreateWithItem([](SwiperModelNG model) {});
+    double dragVelocity = 2000.0;
+    pattern_->springAnimation_ = nullptr;
+    pattern_->currentOffset_ = 1;
+    pattern_->contentMainSize_ = 1.0f;
+    struct SwiperItemInfo swiperItemInfo;
+    swiperItemInfo.startPos = -1.0f;
+    swiperItemInfo.endPos = -1.0f;
+    pattern_->itemPosition_.emplace(std::make_pair(1, swiperItemInfo));
+    pattern_->PlaySpringAnimation(dragVelocity);
+    pattern_->StopSpringAnimationAndFlushImmediately();
+    EXPECT_FALSE(pattern_->springAnimationIsRunning_);
+}
+
+/**
+ * @tc.name: SwiperPatternSpringAnimation004
+ * @tc.desc: StopSpringAnimation
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, SwiperPatternSpringAnimation004, TestSize.Level1)
+{
+    CreateWithItem([](SwiperModelNG model) {});
+    double dragVelocity = 2000.0;
+    pattern_->springAnimation_ = nullptr;
+    pattern_->currentOffset_ = 1;
+    pattern_->contentMainSize_ = 1.0f;
+    struct SwiperItemInfo swiperItemInfo;
+    swiperItemInfo.startPos = -1.0f;
+    swiperItemInfo.endPos = -1.0f;
+    pattern_->itemPosition_.emplace(std::make_pair(1, swiperItemInfo));
+    pattern_->PlaySpringAnimation(dragVelocity);
+    pattern_->StopSpringAnimation();
+    EXPECT_FALSE(pattern_->springAnimationIsRunning_);
+}
+
+/**
+ * @tc.name: SwiperPatternSpringAnimation005
+ * @tc.desc: Swiper spring animation is playing, handle touch down to break playing animation,
+ *           and handle touch up to continue playing animation
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, SwiperPatternSpringAnimation005, TestSize.Level1)
+{
+    CreateWithItem([](SwiperModelNG model) {});
+    double dragVelocity = 2000.0;
+    pattern_->springAnimation_ = nullptr;
+    pattern_->currentOffset_ = 1;
+    pattern_->contentMainSize_ = 1.0f;
+    struct SwiperItemInfo swiperItemInfo;
+    swiperItemInfo.startPos = -1.0f;
+    swiperItemInfo.endPos = -1.0f;
+    pattern_->itemPosition_.emplace(std::make_pair(1, swiperItemInfo));
+    pattern_->PlaySpringAnimation(dragVelocity);
+
+    TouchLocationInfo touchLocationInfo("down", 0);
+    touchLocationInfo.SetTouchType(TouchType::DOWN);
+    pattern_->HandleTouchDown(touchLocationInfo);
+    EXPECT_FALSE(pattern_->springAnimationIsRunning_);
 }
 
 /**
@@ -4973,12 +5078,6 @@ HWTEST_F(SwiperTestNg, SwiperPatternSwipeTo001, TestSize.Level1)
         pattern_->currentIndex_ = 1;
     }
 
-    pattern_->springController_ = AceType::MakeRefPtr<Animator>();
-    for (int i = 0; i <= 1; i++) {
-        pattern_->SwipeTo(index);
-        pattern_->springController_->status_ = Animator::Status::STOPPED;
-    }
-    pattern_->indicatorController_ = AceType::MakeRefPtr<Animator>();
     pattern_->usePropertyAnimation_ = true;
     pattern_->SwipeTo(index);
 }
@@ -5067,7 +5166,6 @@ HWTEST_F(SwiperTestNg, SwiperPatternShowNext001, TestSize.Level1)
     frameNode_->AddChild(rightArrow);
     for (int i = 0; i <= 1; i++) {
         pattern_->ShowNext();
-        pattern_->indicatorController_ = AceType::MakeRefPtr<Animator>();
         pattern_->isVisible_ = false;
     }
 }
@@ -5177,33 +5275,10 @@ HWTEST_F(SwiperTestNg, SwiperPatternFinishAnimation001, TestSize.Level1)
     for (int i = 0; i <= 1; i++) {
         for (int j = 0; j <= 1; j++) {
             pattern_->FinishAnimation();
-            pattern_->indicatorController_ = AceType::MakeRefPtr<Animator>();
-            ASSERT_NE(pattern_->indicatorController_, nullptr);
             pattern_->usePropertyAnimation_ = true;
             pattern_->isUserFinish_ = true;
                 }
         pattern_->swiperController_->SetFinishCallback([]() {});
-    }
-}
-
-/**
- * @tc.name: SwiperPatternStopSpringAnimation001
- * @tc.desc: StopSpringAnimation
- * @tc.type: FUNC
- */
-HWTEST_F(SwiperTestNg, SwiperPatternStopSpringAnimation001, TestSize.Level1)
-{
-    CreateWithItem([](SwiperModelNG model) {});
-    pattern_->springController_ = AceType::MakeRefPtr<Animator>();
-    pattern_->springController_->status_ = Animator::Status::RUNNING;
-
-    /**
-     * @tc.steps: step2. call StopSpringAnimation.
-     * @tc.expected: Related function runs ok.
-     */
-    for (int i = 0; i <= 1; i++) {
-        pattern_->StopSpringAnimation();
-        pattern_->springController_->status_ = Animator::Status::STOPPED;
     }
 }
 
@@ -5260,8 +5335,6 @@ HWTEST_F(SwiperTestNg, SwiperPatternHandleTouchUp001, TestSize.Level1)
     pattern_->controller_ = AceType::MakeRefPtr<Animator>();
     ASSERT_NE(pattern_->controller_, nullptr);
     pattern_->controller_->status_ = Animator::Status::PAUSED;
-    pattern_->springController_ = AceType::MakeRefPtr<Animator>();
-    pattern_->springController_->status_ = Animator::Status::PAUSED;
 
     /**
      * @tc.steps: step2. call HandleTouchUp.
@@ -5331,49 +5404,6 @@ HWTEST_F(SwiperTestNg, SwiperPatternStopFadeAnimation001, TestSize.Level1)
     pattern_->fadeAnimationIsRunning_ = true;
     pattern_->StopFadeAnimation();
     EXPECT_FALSE(pattern_->fadeAnimationIsRunning_);
-}
-
-/**
- * @tc.name: SwiperPatternPlaySpringAnimation001
- * @tc.desc: PlaySpringAnimation
- * @tc.type: FUNC
- */
-HWTEST_F(SwiperTestNg, SwiperPatternPlaySpringAnimation001, TestSize.Level1)
-{
-    CreateWithItem([](SwiperModelNG model) {});
-    double dragVelocity = 1.0;
-    pattern_->springController_ = nullptr;
-    pattern_->currentOffset_ = 1;
-    pattern_->contentMainSize_ = 1.0f;
-    struct SwiperItemInfo swiperItemInfo1;
-    swiperItemInfo1.startPos = -1.0f;
-    swiperItemInfo1.endPos = -1.0f;
-    pattern_->itemPosition_.emplace(std::make_pair(1, swiperItemInfo1));
-
-    /**
-     * @tc.steps: step2. call PlaySpringAnimation.
-     * @tc.expected: Related function runs ok.
-     */
-    for (int i = 0; i <= 1; i++) {
-        for (int j = 0; j <= 1; j++) {
-            pattern_->PlaySpringAnimation(dragVelocity);
-            if (i == 1) {
-                break;
-            }
-            pattern_->springController_ = AceType::MakeRefPtr<Animator>();
-                    pattern_->currentOffset_ = 0;
-        }
-        pattern_->contentMainSize_ = -1.0f;
-    }
-    double position = 1.0;
-    pattern_->contentMainSize_ = 1.0f;
-    pattern_->PlaySpringAnimation(dragVelocity);
-    ScrollMotion::ValueCallback valueCallback = pattern_->springController_->motion_->callbacks_.begin()->second;
-    valueCallback.callback_(position);
-    Animator::StatusCallback statusCallback1 = pattern_->springController_->startCallbacks_.begin()->second;
-    statusCallback1.callback_();
-    Animator::StatusCallback statusCallback2 = pattern_->springController_->stopCallbacks_.begin()->second;
-    statusCallback2.callback_();
 }
 
 /**
@@ -5487,7 +5517,7 @@ HWTEST_F(SwiperTestNg, SwiperPatternStopPropertyTranslateAnimation001, TestSize.
      * @tc.expected: Related function runs ok.
      */
     for (int i = 0; i <= 1; i++) {
-        pattern_->StopPropertyTranslateAnimation();
+        pattern_->StopPropertyTranslateAnimation(false);
         pattern_->usePropertyAnimation_ = true;
     }
 }
@@ -5515,7 +5545,7 @@ HWTEST_F(SwiperTestNg, SwiperPatternGetCurveIncludeMotion001, TestSize.Level1)
     for (int i = 0; i <= 1; i++) {
         for (int j = 0; j <= 1; j++) {
             for (int k = 0; k <= 1; k++) {
-                pattern_->GetCurveIncludeMotion(velocity);
+                pattern_->GetCurveIncludeMotion();
                 if (i == 1) {
                     curve2->UpdateVelocity(-0.1f);
                     continue;
@@ -5552,9 +5582,7 @@ HWTEST_F(SwiperTestNg, SwiperPatternPlayIndicatorTranslateAnimation001, TestSize
                 break;
             }
             pattern_->indicatorId_ = 1;
-            pattern_->indicatorController_ = nullptr;
         }
-        pattern_->indicatorController_ = AceType::MakeRefPtr<Animator>();
     }
 }
 
@@ -6217,7 +6245,7 @@ HWTEST_F(SwiperTestNg, SwiperPatternOnTranslateFinish001, TestSize.Level1)
      */
     for (int i = 0; i <= 1; i++) {
         for (int j = 0; j <= 1; j++) {
-            pattern_->OnTranslateFinish(nextIndex, restartAutoPlay, forceStop);
+            pattern_->OnTranslateFinish(nextIndex, restartAutoPlay, pattern_->isFinishAnimation_, forceStop);
             if (i == 1) {
                 pattern_->isFinishAnimation_ = false;
                 continue;
@@ -7195,7 +7223,6 @@ HWTEST_F(SwiperTestNg, SwiperPatternBeforeCreateLayoutWrapper001, TestSize.Level
             pattern_->GetLayoutProperty<SwiperLayoutProperty>()->UpdateShowIndicator(false);
             frameNode_->AddChild(leftArrow);
             frameNode_->AddChild(rightArrow);
-            pattern_->indicatorController_ = AceType::MakeRefPtr<Animator>();
         }
         pattern_->GetLayoutProperty<SwiperLayoutProperty>()->UpdateLoop(false);
         pattern_->jumpIndex_ = -1;
@@ -7283,26 +7310,6 @@ HWTEST_F(SwiperTestNg, SwiperPatternIsVisibleChildrenSizeLessThanSwiper001, Test
             pattern_->itemPosition_.emplace(std::make_pair(0, SwiperItemInfo { 1, 2 }));
             pattern_->itemPosition_.emplace(std::make_pair(2, SwiperItemInfo { 1, 2 }));
         }
-    }
-}
-
-/**
- * @tc.name: SwiperPatternStopAndResetSpringAnimation001
- * @tc.desc: StopAndResetSpringAnimation
- * @tc.type: FUNC
- */
-HWTEST_F(SwiperTestNg, SwiperPatternStopAndResetSpringAnimation001, TestSize.Level1)
-{
-    CreateWithItem([](SwiperModelNG model) {});
-    pattern_->springController_ = AceType::MakeRefPtr<Animator>();
-
-    /**
-     * @tc.steps: step2. call StopAndResetSpringAnimation.
-     * @tc.expected: Related function runs ok.
-     */
-    for (int i = 0; i <= 1; i++) {
-        pattern_->StopAndResetSpringAnimation();
-        pattern_->springController_->status_ = Animator::Status::STOPPED;
     }
 }
 
@@ -7622,7 +7629,6 @@ HWTEST_F(SwiperTestNg, SwiperPatternShowPrevious002, TestSize.Level1)
 
     for (int i = 0; i <= 1; i++) {
         pattern_->ShowPrevious();
-        pattern_->indicatorController_ = AceType::MakeRefPtr<Animator>();
         pattern_->isVisible_ = false;
         pattern_->preTargetIndex_ = 0;
     }
@@ -7926,7 +7932,6 @@ HWTEST_F(SwiperTestNg, SwiperPatternOnTouchTestHit002, TestSize.Level1)
 HWTEST_F(SwiperTestNg, SwiperPatternHandleTouchDown001, TestSize.Level1)
 {
     CreateWithItem([](SwiperModelNG model) {});
-    pattern_->indicatorController_ = AceType::MakeRefPtr<Animator>();
     pattern_->usePropertyAnimation_ = true;
 
     /**
@@ -7946,7 +7951,6 @@ HWTEST_F(SwiperTestNg, SwiperPatternHandleTouchDown001, TestSize.Level1)
 HWTEST_F(SwiperTestNg, SwiperPatternPlayPropertyTranslateAnimation002, TestSize.Level1)
 {
     CreateWithItem([](SwiperModelNG model) {});
-    pattern_->indicatorController_ = AceType::MakeRefPtr<Animator>();
     pattern_->usePropertyAnimation_ = true;
     float translate = 0.1f;
     int32_t nextIndex = 1;
@@ -7954,7 +7958,6 @@ HWTEST_F(SwiperTestNg, SwiperPatternPlayPropertyTranslateAnimation002, TestSize.
     pattern_->usePropertyAnimation_ = true;
     pattern_->itemPositionInAnimation_.clear();
     pattern_->targetIndex_ = 1;
-    pattern_->indicatorController_ = nullptr;
 
     /**
      * @tc.steps: step2. call HandleTouchDown.
@@ -8503,15 +8506,10 @@ HWTEST_F(SwiperTestNg, SwiperPatternShowPrevious003, TestSize.Level1)
      */
     pattern_->ShowPrevious();
     EXPECT_EQ(pattern_->preTargetIndex_.value(), -1);
-    pattern_->indicatorController_ = AceType::MakeRefPtr<Animator>();
-    pattern_->indicatorController_->elapsedTime_ = 1;
     pattern_->isVisible_ = false;
     pattern_->preTargetIndex_ = 0;
     pattern_->isUserFinish_ = true;
-    pattern_->indicatorController_->iteration_ = 1;
-    pattern_->indicatorController_->status_ = Animator::Status::IDLE;
     pattern_->ShowPrevious();
-    EXPECT_EQ(pattern_->indicatorController_->elapsedTime_, 0);
     EXPECT_EQ(pattern_->preTargetIndex_.value(), 0);
 }
 
@@ -8853,7 +8851,6 @@ HWTEST_F(SwiperTestNg, SwiperIndicatorPatternCheckIsTouchBottom001, TestSize.Lev
 HWTEST_F(SwiperTestNg, SwiperPatternHandleTouchUp002, TestSize.Level1)
 {
     CreateWithItem([](SwiperModelNG model) {});
-    pattern_->springController_ = AceType::MakeRefPtr<Animator>();
     pattern_->isDragging_ = false;
     pattern_->itemPosition_.emplace(std::make_pair(0, SwiperItemInfo { 1.0f, 2.0f }));
     pattern_->velocity_ = 1.0f;
@@ -8903,11 +8900,11 @@ HWTEST_F(SwiperTestNg, SwiperPatternPlayIndicatorTranslateAnimation003, TestSize
 }
 
 /**
- * @tc.name: SwiperPatternPlaySpringAnimation002
+ * @tc.name: SwiperPatternPlaySpringAnimation001
  * @tc.desc: PlaySpringAnimation
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperTestNg, SwiperPatternPlaySpringAnimation002, TestSize.Level1)
+HWTEST_F(SwiperTestNg, SwiperPatternPlaySpringAnimation001, TestSize.Level1)
 {
     CreateWithItem([](SwiperModelNG model) {});
     pattern_->contentMainSize_ = 1.0f;
@@ -9012,7 +9009,7 @@ HWTEST_F(SwiperTestNg, SwiperIndicatorPatternTouchBottom001, TestSize.Level1)
     TouchLocationInfo touchLocationInfo("down", 0);
     touchLocationInfo.SetTouchType(TouchType::DOWN);
     EXPECT_FALSE(indicatorPattern->CheckIsTouchBottom(info));
-    EXPECT_FALSE(indicatorPattern->CheckIsTouchBottom(touchLocationInfo));
+    EXPECT_TRUE(indicatorPattern->CheckIsTouchBottom(touchLocationInfo));
 
     pattern_->currentIndex_ = 0;
     layoutProperty_->UpdateLoop(false);
@@ -9115,8 +9112,6 @@ HWTEST_F(SwiperTestNg, SwiperIndicatorPatternTestNg0011, TestSize.Level1)
     pattern_->currentIndex_ = 0;
     layoutProperty_->UpdateLoop(false);
     indicatorPattern->HandleLongDragUpdate(touchEventInfo.GetTouches().front());
-    pattern_->indicatorController_ = AceType::MakeRefPtr<Animator>();
-    pattern_->indicatorController_->status_ = Animator::Status::RUNNING;
     indicatorPattern->HandleLongDragUpdate(touchEventInfo.GetTouches().front());
 }
 
@@ -9325,10 +9320,6 @@ HWTEST_F(SwiperTestNg, SwiperPatternPlayIndicatorTranslateAnimation004, TestSize
     for (int i = 0; i <= 1; i++) {
         for (int j = 0; j <= 1; j++) {
             pattern_->PlayIndicatorTranslateAnimation(translate);
-            auto translateAnimation = static_cast<CurveAnimation<double>*>(
-                AceType::RawPtr(pattern_->indicatorController_->interpolators_.front()));
-            auto callBack = translateAnimation->callbacks_.begin()->second;
-            callBack(0.2);
             if (i == 1) {
                 pattern_->swiperController_->SetTurnPageRateCallback(nullptr);
                 continue;
@@ -9702,25 +9693,6 @@ HWTEST_F(SwiperTestNg, SwiperLayoutAlgorithmLayoutForward007, TestSize.Level1)
 }
 
 /**
- * @tc.name: SwiperPatternStopSpringAnimationAndFlushImmediately001
- * @tc.desc: StopSpringAnimationAndFlushImmediately
- * @tc.type: FUNC
- */
-HWTEST_F(SwiperTestNg, SwiperPatternStopSpringAnimationAndFlushImmediately001, TestSize.Level1)
-{
-    CreateWithItem([](SwiperModelNG model) {});
-    pattern_->springController_ = AceType::MakeRefPtr<Animator>();
-    pattern_->springController_->status_ = Animator::Status::IDLE;
-
-    /**
-     * @tc.steps: step2. call PlaySpringAnimation.
-     * @tc.expected: Related function runs ok.
-     */
-    pattern_->StopSpringAnimationAndFlushImmediately();
-    EXPECT_TRUE(pattern_->isVoluntarilyClear_);
-}
-
-/**
  * @tc.name: SwiperPatternOnTranslateFinish002
  * @tc.desc: OnTranslateFinish
  * @tc.type: FUNC
@@ -9760,7 +9732,7 @@ HWTEST_F(SwiperTestNg, SwiperPatternOnTranslateFinish002, TestSize.Level1)
      */
     for (int i = 0; i <= 1; i++) {
         for (int j = 0; j <= 1; j++) {
-            pattern_->OnTranslateFinish(nextIndex, restartAutoPlay, forceStop);
+            pattern_->OnTranslateFinish(nextIndex, restartAutoPlay, pattern_->isFinishAnimation_, forceStop);
             if (i == 1) {
                 pattern_->isUserFinish_ = true;
                 continue;
@@ -9843,7 +9815,7 @@ HWTEST_F(SwiperTestNg, SwiperIndicatorPatternTestNg0020, TestSize.Level1)
     TouchEventInfo touchEventInfo("down");
     touchEventInfo.touches_ = infoSwiper;
     pattern_->currentIndex_ = 0;
-    EXPECT_FALSE(indicatorPattern->CheckIsTouchBottom(touchEventInfo.GetTouches().front()));
+    EXPECT_TRUE(indicatorPattern->CheckIsTouchBottom(touchEventInfo.GetTouches().front()));
     layoutProperty_->UpdateLoop(false);
     ASSERT_FALSE(layoutProperty_->GetLoop().value_or(true));
     pattern_->leftButtonId_ = 1;
@@ -10262,7 +10234,6 @@ HWTEST_F(SwiperTestNg, SwiperPatternInitSurfaceChangedCallback001, TestSize.Leve
     auto callbacknumber2 = pattern_->surfaceChangedCallbackId_;
     EXPECT_EQ(callbacknumber2, 1);
 
-    pattern_->indicatorController_ = AceType::MakeRefPtr<Animator>();
     auto childswiperNode1 = FrameNode::CreateFrameNode("childswiper", 1, AceType::MakeRefPtr<SwiperPattern>(), false);
     childswiperNode1->MountToParent(frameNode_);
     auto childswiperNode2 =
@@ -10527,6 +10498,11 @@ HWTEST_F(SwiperTestNg, SwiperPatternHandleScroll001, TestSize.Level1)
     pattern_->GetLayoutProperty<SwiperLayoutProperty>()->UpdateLoop(true);
     auto res = pattern_->HandleScroll(5.0f, SCROLL_FROM_UPDATE, NestedState::GESTURE);
     EXPECT_EQ(res.remain, 0.0f);
+
+    pattern_->GetPaintProperty<SwiperPaintProperty>()->UpdateDisableSwipe(true);
+    res = pattern_->HandleScroll(5.0f, SCROLL_FROM_UPDATE, NestedState::GESTURE);
+    EXPECT_EQ(res.remain, 5.0f);
+    EXPECT_FALSE(res.reachEdge);
 }
 
 /**
@@ -10680,6 +10656,10 @@ HWTEST_F(SwiperTestNg, SwiperPatternHandleScrollVelocity001, TestSize.Level1)
     pattern_->GetLayoutProperty<SwiperLayoutProperty>()->UpdateLoop(true);
     auto res = pattern_->HandleScrollVelocity(5.0f);
     EXPECT_TRUE(res);
+
+    pattern_->GetPaintProperty<SwiperPaintProperty>()->UpdateDisableSwipe(true);
+    res = pattern_->HandleScrollVelocity(5.0f);
+    EXPECT_FALSE(res);
 }
 
 /**
@@ -10793,5 +10773,294 @@ HWTEST_F(SwiperTestNg, SwiperDragScene001, TestSize.Level1)
     pattern_->HandleDragUpdate(info);
     pattern_->HandleDragUpdate(info);
     pattern_->HandleDragEnd(info.GetMainVelocity());
+}
+
+/**
+ * @tc.name: HandleTouchBottomLoop001
+ * @tc.desc: test Swiper indicator no touch bottom in loop
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, HandleTouchBottomLoop001, TestSize.Level1)
+{
+    CreateWithItem([](SwiperModelNG model) {});
+    EXPECT_EQ(pattern_->TotalCount(), 4);
+    pattern_->currentFirstIndex_ = 1;
+    pattern_->currentIndex_ = 1;
+    pattern_->gestureState_ = GestureState::GESTURE_STATE_FOLLOW_RIGHT;
+    pattern_->HandleTouchBottomLoop();
+    EXPECT_EQ(pattern_->touchBottomType_, TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_NONE);
+}
+
+/**
+ * @tc.name: HandleTouchBottomLoop002
+ * @tc.desc: test Swiper indicator touch left bottom in loop
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, HandleTouchBottomLoop002, TestSize.Level1)
+{
+    CreateWithItem([](SwiperModelNG model) {});
+    EXPECT_EQ(pattern_->TotalCount(), 4);
+    pattern_->currentFirstIndex_ = pattern_->TotalCount() - 1;
+    pattern_->currentIndex_ = 0;
+    pattern_->gestureState_ = GestureState::GESTURE_STATE_FOLLOW_LEFT;
+    pattern_->HandleTouchBottomLoop();
+    EXPECT_EQ(pattern_->touchBottomType_, TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_LEFT);
+
+    pattern_->gestureState_ = GestureState::GESTURE_STATE_FOLLOW_RIGHT;
+    pattern_->HandleTouchBottomLoop();
+    EXPECT_EQ(pattern_->touchBottomType_, TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_LEFT);
+
+    pattern_->gestureState_ = GestureState::GESTURE_STATE_RELEASE_LEFT;
+    pattern_->HandleTouchBottomLoop();
+    EXPECT_EQ(pattern_->touchBottomType_, TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_LEFT);
+}
+
+/**
+ * @tc.name: HandleTouchBottomLoop003
+ * @tc.desc: test Swiper indicator touch right bottom in loop
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, HandleTouchBottomLoop003, TestSize.Level1)
+{
+    CreateWithItem([](SwiperModelNG model) {});
+    EXPECT_EQ(pattern_->TotalCount(), 4);
+    pattern_->currentFirstIndex_ = 0;
+    pattern_->currentIndex_ = pattern_->TotalCount() - 1;
+    pattern_->gestureState_ = GestureState::GESTURE_STATE_RELEASE_RIGHT;
+    pattern_->HandleTouchBottomLoop();
+    EXPECT_EQ(pattern_->touchBottomType_, TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_RIGHT);
+
+    pattern_->currentFirstIndex_ = pattern_->TotalCount() - 1;
+    pattern_->currentIndex_ = pattern_->TotalCount() - 1;
+    pattern_->gestureState_ = GestureState::GESTURE_STATE_FOLLOW_LEFT;
+    pattern_->HandleTouchBottomLoop();
+    EXPECT_EQ(pattern_->touchBottomType_, TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_RIGHT);
+
+    pattern_->currentFirstIndex_ = pattern_->TotalCount() - 1;
+    pattern_->currentIndex_ = pattern_->TotalCount() - 1;
+    pattern_->gestureState_ = GestureState::GESTURE_STATE_FOLLOW_RIGHT;
+    pattern_->HandleTouchBottomLoop();
+    EXPECT_EQ(pattern_->touchBottomType_, TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_RIGHT);
+}
+
+/**
+ * @tc.name: CalculateGestureState001
+ * @tc.desc: test Swiper indicator gesture state
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, CalculateGestureState001, TestSize.Level1)
+{
+    CreateWithItem([](SwiperModelNG model) {});
+    EXPECT_EQ(pattern_->TotalCount(), 4);
+    pattern_->CalculateGestureState(1.0f, 0.0f);
+    EXPECT_EQ(pattern_->gestureState_, GestureState::GESTURE_STATE_RELEASE_LEFT);
+
+    pattern_->CalculateGestureState(-1.0f, 0.0f);
+    EXPECT_EQ(pattern_->gestureState_, GestureState::GESTURE_STATE_RELEASE_RIGHT);
+
+    pattern_->currentFirstIndex_ = 0;
+    pattern_->currentIndex_ = 0;
+    pattern_->turnPageRate_ = -1.0f;
+    pattern_->CalculateGestureState(0.0f, -1.1f);
+    EXPECT_EQ(pattern_->gestureState_, GestureState::GESTURE_STATE_FOLLOW_RIGHT);
+
+    pattern_->currentFirstIndex_ = 0;
+    pattern_->currentIndex_ = 1;
+    pattern_->turnPageRate_ = -1.0f;
+    pattern_->CalculateGestureState(0.0f, -1.1f);
+    EXPECT_EQ(pattern_->gestureState_, GestureState::GESTURE_STATE_FOLLOW_LEFT);
+
+    pattern_->currentFirstIndex_ = 0;
+    pattern_->currentIndex_ = 0;
+    pattern_->turnPageRate_ = -1.0f;
+    pattern_->CalculateGestureState(0.0f, -0.9f);
+    EXPECT_EQ(pattern_->gestureState_, GestureState::GESTURE_STATE_FOLLOW_LEFT);
+}
+
+/**
+ * @tc.name: GetStartAndEndIndex001
+ * @tc.desc: get long point start and end index
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, GetStartAndEndIndex001, TestSize.Level1)
+{
+    CreateWithItem([](SwiperModelNG model) {});
+    EXPECT_EQ(pattern_->TotalCount(), 4);
+    RefPtr<DotIndicatorModifier> modifier = AceType::MakeRefPtr<DotIndicatorModifier>();
+    RefPtr<DotIndicatorPaintMethod> paintMethod = AceType::MakeRefPtr<DotIndicatorPaintMethod>(modifier);
+
+    paintMethod->itemCount_ = pattern_->TotalCount();
+    paintMethod->turnPageRate_ = -0.9f;
+
+    // expand to long point
+    paintMethod->pointAnimationStage_ = PointAnimationStage::STATE_EXPAND_TO_LONG_POINT;
+    paintMethod->gestureState_ = GestureState::GESTURE_STATE_RELEASE_LEFT;
+    paintMethod->touchBottomTypeLoop_ = TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_LEFT;
+    auto index = pattern_->TotalCount() - 1;
+    auto expectVal = std::pair<int32_t, int32_t>(index, index);
+    EXPECT_EQ(paintMethod->GetStartAndEndIndex(index), expectVal);
+
+    paintMethod->gestureState_ = GestureState::GESTURE_STATE_RELEASE_RIGHT;
+    paintMethod->touchBottomTypeLoop_ = TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_RIGHT;
+    expectVal = std::pair<int32_t, int32_t>(0, 0);
+    EXPECT_EQ(paintMethod->GetStartAndEndIndex(index), expectVal);
+}
+
+/**
+ * @tc.name: GetStartAndEndIndex002
+ * @tc.desc: get long point start and end index
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, GetStartAndEndIndex002, TestSize.Level1)
+{
+    CreateWithItem([](SwiperModelNG model) {});
+    EXPECT_EQ(pattern_->TotalCount(), 4);
+    RefPtr<DotIndicatorModifier> modifier = AceType::MakeRefPtr<DotIndicatorModifier>();
+    RefPtr<DotIndicatorPaintMethod> paintMethod = AceType::MakeRefPtr<DotIndicatorPaintMethod>(modifier);
+
+    paintMethod->itemCount_ = pattern_->TotalCount();
+    paintMethod->turnPageRate_ = -0.8f;
+
+    // shrink to black point
+    paintMethod->pointAnimationStage_ = PointAnimationStage::STATE_SHRINKT_TO_BLACK_POINT;
+    paintMethod->touchBottomTypeLoop_ = TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_LEFT;
+    auto expectVal = std::pair<int32_t, int32_t>(0, 0);
+    auto index = pattern_->TotalCount() - 1;
+    EXPECT_EQ(paintMethod->GetStartAndEndIndex(index), expectVal);
+
+    paintMethod->gestureState_ = GestureState::GESTURE_STATE_RELEASE_RIGHT;
+    paintMethod->touchBottomTypeLoop_ = TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_RIGHT;
+    expectVal = std::pair<int32_t, int32_t>(index, index);
+    EXPECT_EQ(paintMethod->GetStartAndEndIndex(1), expectVal);
+
+    paintMethod->gestureState_ = GestureState::GESTURE_STATE_RELEASE_LEFT;
+    expectVal = std::pair<int32_t, int32_t>(index, index);
+    EXPECT_EQ(paintMethod->GetStartAndEndIndex(index), expectVal);
+}
+
+/**
+ * @tc.name: AdjustPointCenterXForTouchBottom
+ * @tc.desc: adjust long point centerX for touch bottom
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, AdjustPointCenterXForTouchBottom001, TestSize.Level1)
+{
+    CreateWithItem([](SwiperModelNG model) {});
+    auto totalCount = pattern_->TotalCount();
+    EXPECT_EQ(totalCount, 4);
+    RefPtr<DotIndicatorModifier> modifier = AceType::MakeRefPtr<DotIndicatorModifier>();
+    RefPtr<DotIndicatorPaintMethod> paintMethod = AceType::MakeRefPtr<DotIndicatorPaintMethod>(modifier);
+    DotIndicatorPaintMethod::StarAndEndPointCenter pointCenter;
+    LinearVector<float> endVectorBlackPointCenterX;
+    for (int32_t i = 0; i < totalCount; ++i) {
+        endVectorBlackPointCenterX.emplace_back(static_cast<float>(i + 1));
+    }
+
+    int32_t startCurrentIndex = 0;
+    int32_t endCurrentIndex = totalCount - 1;
+
+    // shrink to black point
+    paintMethod->pointAnimationStage_ = PointAnimationStage::STATE_SHRINKT_TO_BLACK_POINT;
+    paintMethod->touchBottomTypeLoop_ = TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_LEFT;
+    paintMethod->AdjustPointCenterXForTouchBottom(
+        pointCenter, endVectorBlackPointCenterX, startCurrentIndex, endCurrentIndex);
+    EXPECT_EQ(pointCenter.endLongPointRightCenterX, endVectorBlackPointCenterX[0]);
+    EXPECT_EQ(pointCenter.endLongPointLeftCenterX, endVectorBlackPointCenterX[0]);
+
+    paintMethod->pointAnimationStage_ = PointAnimationStage::STATE_SHRINKT_TO_BLACK_POINT;
+    paintMethod->touchBottomTypeLoop_ = TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_RIGHT;
+    pointCenter = { 0.0f, 0.0f, 0.0f, 0.0f };
+    paintMethod->AdjustPointCenterXForTouchBottom(
+        pointCenter, endVectorBlackPointCenterX, startCurrentIndex, endCurrentIndex);
+    EXPECT_EQ(pointCenter.endLongPointRightCenterX, endVectorBlackPointCenterX[startCurrentIndex]);
+    EXPECT_EQ(pointCenter.endLongPointLeftCenterX, endVectorBlackPointCenterX[startCurrentIndex]);
+
+    // expand to long point
+    paintMethod->pointAnimationStage_ = PointAnimationStage::STATE_EXPAND_TO_LONG_POINT;
+    paintMethod->gestureState_ = GestureState::GESTURE_STATE_RELEASE_LEFT;
+    paintMethod->touchBottomTypeLoop_ = TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_LEFT;
+    pointCenter = { 0.0f, 0.0f, 0.0f, 0.0f };
+    paintMethod->AdjustPointCenterXForTouchBottom(
+        pointCenter, endVectorBlackPointCenterX, startCurrentIndex, endCurrentIndex);
+    EXPECT_EQ(pointCenter.startLongPointRightCenterX, endVectorBlackPointCenterX[endCurrentIndex]);
+    EXPECT_EQ(pointCenter.endLongPointLeftCenterX, endVectorBlackPointCenterX[endCurrentIndex]);
+
+    paintMethod->pointAnimationStage_ = PointAnimationStage::STATE_EXPAND_TO_LONG_POINT;
+    paintMethod->gestureState_ = GestureState::GESTURE_STATE_RELEASE_RIGHT;
+    paintMethod->touchBottomTypeLoop_ = TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_RIGHT;
+    pointCenter = { 0.0f, 0.0f, 0.0f, 0.0f };
+    paintMethod->AdjustPointCenterXForTouchBottom(
+        pointCenter, endVectorBlackPointCenterX, startCurrentIndex, endCurrentIndex);
+    EXPECT_EQ(pointCenter.startLongPointRightCenterX, endVectorBlackPointCenterX[0]);
+    EXPECT_EQ(pointCenter.endLongPointLeftCenterX, endVectorBlackPointCenterX[0]);
+}
+
+/**
+ * @tc.name: GetLongPointAnimationStateSecondCenter
+ * @tc.desc: get long point animation state second center
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, GetLongPointAnimationStateSecondCenter001, TestSize.Level1)
+{
+    CreateWithItem([](SwiperModelNG model) {});
+    RefPtr<DotIndicatorModifier> modifier = AceType::MakeRefPtr<DotIndicatorModifier>();
+    RefPtr<DotIndicatorPaintMethod> paintMethod = AceType::MakeRefPtr<DotIndicatorPaintMethod>(modifier);
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    auto paintProperty = AceType::MakeRefPtr<DotIndicatorPaintProperty>();
+    auto renderContext = frameNode_->GetRenderContext();
+
+    PaintWrapper paintWrapper(renderContext, geometryNode, paintProperty);
+    std::vector<std::pair<float, float>> pointCenterX;
+    paintMethod->turnPageRate_ = -1.0f;
+
+    paintMethod->gestureState_ = GestureState::GESTURE_STATE_RELEASE_LEFT;
+    paintMethod->touchBottomTypeLoop_ = TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_LEFT;
+    paintMethod->GetLongPointAnimationStateSecondCenter(&paintWrapper, pointCenterX);
+    EXPECT_EQ(pointCenterX.size(), 1);
+
+    paintMethod->gestureState_ = GestureState::GESTURE_STATE_RELEASE_RIGHT;
+    paintMethod->touchBottomTypeLoop_ = TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_RIGHT;
+    pointCenterX.clear();
+    paintMethod->GetLongPointAnimationStateSecondCenter(&paintWrapper, pointCenterX);
+    EXPECT_EQ(pointCenterX.size(), 1);
+
+    paintMethod->gestureState_ = GestureState::GESTURE_STATE_RELEASE_LEFT;
+    paintMethod->touchBottomTypeLoop_ = TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_RIGHT;
+    pointCenterX.clear();
+    paintMethod->GetLongPointAnimationStateSecondCenter(&paintWrapper, pointCenterX);
+    EXPECT_EQ(pointCenterX.size(), 0);
+
+    paintMethod->gestureState_ = GestureState::GESTURE_STATE_RELEASE_LEFT;
+    paintMethod->touchBottomTypeLoop_ = TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_RIGHT;
+    pointCenterX.clear();
+    paintMethod->GetLongPointAnimationStateSecondCenter(&paintWrapper, pointCenterX);
+    EXPECT_EQ(pointCenterX.size(), 0);
+}
+
+/**
+ * @tc.name: PlayLongPointAnimation
+ * @tc.desc: play long point animation
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, PlayLongPointAnimation001, TestSize.Level1)
+{
+    CreateWithItem([](SwiperModelNG model) {});
+    auto totalCount = pattern_->TotalCount();
+    EXPECT_EQ(totalCount, 4);
+    RefPtr<DotIndicatorModifier> modifier = AceType::MakeRefPtr<DotIndicatorModifier>();
+    LinearVector<float> endVectorBlackPointCenterX;
+    for (int32_t i = 0; i < totalCount; ++i) {
+        endVectorBlackPointCenterX.emplace_back(static_cast<float>(i + 1));
+    }
+    std::vector<std::pair<float, float>> longPointCenterX = { { 0.0f, 0.0f } };
+
+    modifier->PlayLongPointAnimation(longPointCenterX, GestureState::GESTURE_STATE_RELEASE_RIGHT,
+        TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_NONE, endVectorBlackPointCenterX);
+    EXPECT_FALSE(modifier->isTouchBottomLoop_);
+
+    longPointCenterX.emplace_back(1.0f, 1.0f);
+    modifier->PlayLongPointAnimation(longPointCenterX, GestureState::GESTURE_STATE_RELEASE_RIGHT,
+        TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_RIGHT, endVectorBlackPointCenterX);
+    EXPECT_FALSE(modifier->isTouchBottomLoop_);
 }
 } // namespace OHOS::Ace::NG

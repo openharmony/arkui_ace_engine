@@ -69,29 +69,28 @@ void AceViewPreview::NotifySurfaceChanged(int32_t width, int32_t height,
 bool AceViewPreview::HandleMouseEvent(const MouseEvent& mouseEvent)
 {
     int32_t eventID = mouseEvent.GetId();
-    auto markProcess = [eventID]() { LOGD("Mark %{public}d id Mouse Event Processed", eventID); };
-    mouseEventCallback_(mouseEvent, markProcess);
+    auto markProcess = [eventID]() {};
+    mouseEventCallback_(mouseEvent, markProcess, nullptr);
     return true;
 }
 
 bool AceViewPreview::HandleAxisEvent(const AxisEvent& axisEvent)
 {
     int32_t eventID = axisEvent.id;
-    auto markProcess = [eventID]() { LOGD("Mark %{public}d id Axis Event Processed", eventID); };
-    axisEventCallback_(axisEvent, markProcess);
+    auto markProcess = [eventID]() {};
+    axisEventCallback_(axisEvent, markProcess, nullptr);
     return true;
 }
 
 bool AceViewPreview::HandleTouchEvent(const TouchEvent& touchEvent)
 {
-    LOGD("Event: [x, y, size] = [%{public}lf, %{public}lf, %{public}lf]", touchEvent.x, touchEvent.y, touchEvent.size);
     if (touchEvent.type == TouchType::UNKNOWN) {
         LOGW("Unknown event.");
         return false;
     }
     CHECK_NULL_RETURN(touchEventCallback_, true);
     auto event = touchEvent.UpdatePointers();
-    touchEventCallback_(event, nullptr);
+    touchEventCallback_(event, nullptr, nullptr);
     return true;
 }
 

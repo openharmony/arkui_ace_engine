@@ -983,6 +983,7 @@ public:
     void SetAccessibilityText(const std::string& text) override;
     void SetAccessibilityDescription(const std::string& description) override;
     void SetAccessibilityImportance(const std::string& importance) override;
+    void SetAccessibilityVirtualNode(std::function<void()>&& buildFunc) override;
 
     void SetForegroundColor(const Color& color) override
     {
@@ -1043,7 +1044,7 @@ public:
     {
         ViewAbstract::DisableOnBlur();
     }
-    
+
     static void SetAccessibilityText(FrameNode* frameNode, const std::string& text);
 
     void SetLightPosition(
@@ -1071,7 +1072,7 @@ public:
     {
         ViewAbstract::SetBloom(value);
     }
-    
+
     static void SetAccessibilityGroup(FrameNode* frameNode, bool accessible);
 
     static void SetAccessibilityImportance(FrameNode* frameNode, const std::string& importance);

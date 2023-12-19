@@ -72,7 +72,6 @@ DataReadyNotifyTask ImagePattern::CreateDataReadyCallback()
                 currentSourceInfo.ToString().c_str(), sourceInfo.ToString().c_str());
             return;
         }
-        TAG_LOGD(AceLogTag::ACE_IMAGE, "Image Data Ready %{public}s", sourceInfo.ToString().c_str());
         pattern->OnImageDataReady();
     };
 }
@@ -92,7 +91,6 @@ LoadSuccessNotifyTask ImagePattern::CreateLoadSuccessCallback()
                 currentSourceInfo.ToString().c_str(), sourceInfo.ToString().c_str());
             return;
         }
-        TAG_LOGD(AceLogTag::ACE_IMAGE, "Image Load Success %{public}s", sourceInfo.ToString().c_str());
         pattern->OnImageLoadSuccess();
     };
 }
@@ -150,7 +148,6 @@ void ImagePattern::RegisterVisibleAreaChange()
     auto callback = [weak = WeakClaim(this)](bool visible, double ratio) {
         auto self = weak.Upgrade();
         CHECK_NULL_VOID(self);
-        TAG_LOGD(AceLogTag::ACE_IMAGE, "current image visible ratio = %f", ratio);
         self->OnVisibleChange(visible);
     };
     auto host = GetHost();
@@ -489,7 +486,6 @@ void ImagePattern::UpdateInternalResource(ImageSourceInfo& sourceInfo)
 
 void ImagePattern::OnNotifyMemoryLevel(int32_t level)
 {
-    TAG_LOGD(AceLogTag::ACE_IMAGE, "Receive Memory level notification, level: %{public}d", level);
     // TODO: do different data cleaning operation according to level
     // when image component is [onShow], do not clean image data
     // TODO: use [isActive_] to determine image data management
@@ -774,6 +770,20 @@ void ImagePattern::UpdateFillColorIfForegroundColor()
         auto imageRenderProperty = frameNode->GetPaintProperty<ImageRenderProperty>();
         CHECK_NULL_VOID(imageRenderProperty);
         imageRenderProperty->UpdateSvgFillColor(Color::FOREGROUND);
+    }
+}
+
+void ImagePattern::DumpInfo()
+{
+    auto layoutProp = GetLayoutProperty<ImageLayoutProperty>();
+    CHECK_NULL_VOID(layoutProp);
+    auto src = layoutProp->GetImageSourceInfo().value_or(ImageSourceInfo(""));
+    DumpLog::GetInstance().AddDesc(std::string("url: ").append(src.ToString()));
+    syncLoad_ ? DumpLog::GetInstance().AddDesc("syncLoad:true") : DumpLog::GetInstance().AddDesc("syncLoad:false");
+    DumpLog::GetInstance().AddDesc("imageInterpolation:" + GetImageInterpolation());
+    if (loadingCtx_) {
+        auto currentLoadImageState = loadingCtx_->GetCurrentLoadingState();
+        DumpLog::GetInstance().AddDesc(std::string("currentLoadImageState : ").append(currentLoadImageState));
     }
 }
 

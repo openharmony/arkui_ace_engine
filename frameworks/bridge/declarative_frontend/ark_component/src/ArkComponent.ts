@@ -1,3 +1,18 @@
+/*
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 /// <reference path="./import.ts" />
 const arkUINativeModule = globalThis.getArkUINativeModule();
 function GetUINativeModule() {
@@ -5,6 +20,47 @@ function GetUINativeModule() {
     return arkUINativeModule;
   }
   return arkUINativeModule;
+}
+
+const UI_STATE_NORMAL = 0;
+const UI_STATE_PRESSED = 1;
+const UI_STATE_FOCUSED = 1 << 1;
+const UI_STATE_DISABLED = 1 << 2;
+const UI_STATE_SELECTED = 1 << 3;
+
+function applyUIAttributes(modifier: AttributeModifier<CommonAttribute>, nativeNode: KNode, component: ArkComponent): void {
+  let state = 0;
+  if (modifier.applyPressedAttribute !== undefined) {
+    state |= UI_STATE_PRESSED;
+  }
+  if (modifier.applyFocusedAttribute !== undefined) {
+    state |= UI_STATE_FOCUSED;
+  }
+  if (modifier.applyDisabledAttribute !== undefined) {
+    state |= UI_STATE_DISABLED;
+  }
+  if (modifier.applySelectedAttribute !== undefined) {
+    state |= UI_STATE_SELECTED;
+  }
+
+  GetUINativeModule().setSupportedUIState(nativeNode, state);
+  const currentUIState = GetUINativeModule().getUIState(nativeNode);
+
+  if (modifier.applyNormalAttribute !== undefined) {
+    modifier.applyNormalAttribute(component);
+  }
+  if ((currentUIState & UI_STATE_PRESSED) && (modifier.applyPressedAttribute !== undefined)) {
+    modifier.applyPressedAttribute(component);
+  }
+  if ((currentUIState & UI_STATE_FOCUSED) && (modifier.applyFocusedAttribute !== undefined)) {
+    modifier.applyFocusedAttribute(component);
+  }
+  if ((currentUIState & UI_STATE_DISABLED) && (modifier.applyDisabledAttribute !== undefined)) {
+    modifier.applyDisabledAttribute(component);
+  }
+  if ((currentUIState & UI_STATE_SELECTED) && (modifier.applySelectedAttribute !== undefined)) {
+    modifier.applySelectedAttribute(component);
+  }
 }
 
 function isResource(variable: any): variable is Resource {
@@ -119,6 +175,9 @@ class ModifierWithKey<T extends number | string | boolean | object> {
 }
 
 class BackgroundColorModifier extends ModifierWithKey<ResourceColor> {
+  constructor(value: ResourceColor) {
+    super(value);
+  }
   static identity: Symbol = Symbol("backgroundColor");
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -138,6 +197,9 @@ class BackgroundColorModifier extends ModifierWithKey<ResourceColor> {
 }
 
 class WidthModifier extends ModifierWithKey<Length> {
+  constructor(value: Length) {
+    super(value);
+  }
   static identity: Symbol = Symbol("width");
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -158,6 +220,9 @@ class WidthModifier extends ModifierWithKey<Length> {
 }
 
 class BorderWidthModifier extends ModifierWithKey<Length | EdgeWidths> {
+  constructor(value: Length | EdgeWidths) {
+    super(value);
+  }
   static identity: Symbol = Symbol("borderWidth");
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -191,6 +256,9 @@ class BorderWidthModifier extends ModifierWithKey<Length | EdgeWidths> {
 }
 
 class HeightModifier extends ModifierWithKey<Length> {
+  constructor(value: Length) {
+    super(value);
+  }
   static identity: Symbol = Symbol("height");
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -211,6 +279,9 @@ class HeightModifier extends ModifierWithKey<Length> {
 }
 
 class BorderRadiusModifier extends ModifierWithKey<Length | BorderRadiuses> {
+  constructor(value: Length | BorderRadiuses) {
+    super(value);
+  }
   static identity: Symbol = Symbol("borderRadius");
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -244,6 +315,9 @@ class BorderRadiusModifier extends ModifierWithKey<Length | BorderRadiuses> {
 }
 
 class PositionModifier extends ModifierWithKey<Position> {
+  constructor(value: Position) {
+    super(value);
+  }
   static identity: Symbol = Symbol("position");
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -260,6 +334,9 @@ class PositionModifier extends ModifierWithKey<Position> {
 }
 
 class BorderColorModifier extends ModifierWithKey<ResourceColor | EdgeColors> {
+  constructor(value: ResourceColor | EdgeColors) {
+    super(value);
+  }
   static identity: Symbol = Symbol("borderColor");
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -294,6 +371,9 @@ class BorderColorModifier extends ModifierWithKey<ResourceColor | EdgeColors> {
 
 
 class TransformModifier extends Modifier<ArkTransformMatrix> {
+  constructor(value: ArkTransformMatrix) {
+    super(value);
+  }
   static identity: Symbol = Symbol("transform");
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -306,6 +386,9 @@ class TransformModifier extends Modifier<ArkTransformMatrix> {
 }
 
 class BorderStyleModifier extends Modifier<ArkBorderStyle> {
+  constructor(value: ArkBorderStyle) {
+    super(value);
+  }
   static identity: Symbol = Symbol("borderStyle");
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -319,6 +402,9 @@ class BorderStyleModifier extends Modifier<ArkBorderStyle> {
 }
 
 class ShadowModifier extends ModifierWithKey<ShadowOptions | ShadowStyle> {
+  constructor(value: ShadowOptions | ShadowStyle) {
+    super(value);
+  }
   static identity: Symbol = Symbol("shadow");
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -350,6 +436,9 @@ class ShadowModifier extends ModifierWithKey<ShadowOptions | ShadowStyle> {
 }
 
 class HitTestBehaviorModifier extends Modifier<number> {
+  constructor(value: number) {
+    super(value);
+  }
   static identity: Symbol = Symbol("hitTestBehavior");
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -362,6 +451,9 @@ class HitTestBehaviorModifier extends Modifier<number> {
 }
 
 class ZIndexModifier extends Modifier<number> {
+  constructor(value: number) {
+    super(value);
+  }
   static identity: Symbol = Symbol("zIndex");
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -374,6 +466,9 @@ class ZIndexModifier extends Modifier<number> {
 }
 
 class OpacityModifier extends ModifierWithKey<number | Resource> {
+  constructor(value: number | Resource) {
+    super(value);
+  }
   static identity: Symbol = Symbol("opacity");
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -394,6 +489,9 @@ class OpacityModifier extends ModifierWithKey<number | Resource> {
 }
 
 class AlignModifier extends Modifier<number> {
+  constructor(value: number) {
+    super(value);
+  }
   static identity: Symbol = Symbol("align");
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -406,6 +504,9 @@ class AlignModifier extends Modifier<number> {
 }
 
 class BackdropBlurModifier extends Modifier<number> {
+  constructor(value: number) {
+    super(value);
+  }
   static identity: Symbol = Symbol("backdropBlur");
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -418,6 +519,9 @@ class BackdropBlurModifier extends Modifier<number> {
 }
 
 class HueRotateModifier extends Modifier<number | string> {
+  constructor(value: number | string) {
+    super(value);
+  }
   static identity: Symbol = Symbol("hueRotate");
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -430,6 +534,9 @@ class HueRotateModifier extends Modifier<number | string> {
 }
 
 class InvertModifier extends Modifier<number> {
+  constructor(value: number) {
+    super(value);
+  }
   static identity: Symbol = Symbol("invert");
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -442,6 +549,9 @@ class InvertModifier extends Modifier<number> {
 }
 
 class SepiaModifier extends Modifier<number> {
+  constructor(value: number) {
+    super(value);
+  }
   static identity: Symbol = Symbol("sepia");
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -454,6 +564,9 @@ class SepiaModifier extends Modifier<number> {
 }
 
 class SaturateModifier extends Modifier<number> {
+  constructor(value: number) {
+    super(value);
+  }
   static identity: Symbol = Symbol("saturate");
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -465,7 +578,10 @@ class SaturateModifier extends Modifier<number> {
   }
 }
 
-class ColorBlendModifier extends Modifier<Color | string | Resource> {
+class ColorBlendModifier extends ModifierWithKey<Color | string | Resource> {
+  constructor(value: Color | string | Resource) {
+    super(value);
+  }
   static identity: Symbol = Symbol("colorBlend");
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -486,6 +602,9 @@ class ColorBlendModifier extends Modifier<Color | string | Resource> {
 }
 
 class GrayscaleModifier extends Modifier<number> {
+  constructor(value: number) {
+    super(value);
+  }
   static identity: Symbol = Symbol("grayscale");
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -498,6 +617,9 @@ class GrayscaleModifier extends Modifier<number> {
 }
 
 class ContrastModifier extends Modifier<number> {
+  constructor(value: number) {
+    super(value);
+  }
   static identity: Symbol = Symbol("contrast");
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -510,6 +632,9 @@ class ContrastModifier extends Modifier<number> {
 }
 
 class BrightnessModifier extends Modifier<number> {
+  constructor(value: number) {
+    super(value);
+  }
   static identity: Symbol = Symbol("brightness");
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -522,6 +647,9 @@ class BrightnessModifier extends Modifier<number> {
 }
 
 class BlurModifier extends Modifier<number> {
+  constructor(value: number) {
+    super(value);
+  }
   static identity: Symbol = Symbol("blur");
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -534,6 +662,9 @@ class BlurModifier extends Modifier<number> {
 }
 
 class LinearGradientModifier extends ModifierWithKey<{ angle?: number | string; direction?: GradientDirection; colors: Array<any>; repeating?: boolean; }> {
+  constructor(value: { angle?: number | string; direction?: GradientDirection; colors: Array<any>; repeating?: boolean; }) {
+    super(value);
+  }
   static identity: Symbol = Symbol("linearGradient");
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -554,6 +685,9 @@ class LinearGradientModifier extends ModifierWithKey<{ angle?: number | string; 
 }
 
 class RadialGradientModifier extends ModifierWithKey<{ center: Array<any>; radius: number | string; colors: Array<any>; repeating?: boolean }> {
+  constructor(value: { center: Array<any>; radius: number | string; colors: Array<any>; repeating?: boolean }) {
+    super(value);
+  }
   static identity: Symbol = Symbol("radialGradient");
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -573,6 +707,9 @@ class RadialGradientModifier extends ModifierWithKey<{ center: Array<any>; radiu
 }
 
 class SweepGradientModifier extends ModifierWithKey<{ center: Array<any>; start?: number | string; end?: number | string; rotation?: number | string; colors: Array<any>; repeating?: boolean; }> {
+  constructor(value: { center: Array<any>; start?: number | string; end?: number | string; rotation?: number | string; colors: Array<any>; repeating?: boolean; }) {
+    super(value);
+  }
   static identity: Symbol = Symbol("sweepGradient");
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -596,6 +733,9 @@ class SweepGradientModifier extends ModifierWithKey<{ center: Array<any>; start?
 }
 
 class OverlayModifier extends ModifierWithKey<ArkOverlay> {
+  constructor(value: ArkOverlay) {
+    super(value);
+  }
   static identity: Symbol = Symbol("overlay");
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -616,6 +756,9 @@ class OverlayModifier extends ModifierWithKey<ArkOverlay> {
 }
 
 class BorderImageModifier extends ModifierWithKey<BorderImageOption> {
+  constructor(value: BorderImageOption) {
+    super(value);
+  }
   static identity: Symbol = Symbol("borderImage");
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -711,6 +854,9 @@ class BorderImageModifier extends ModifierWithKey<BorderImageOption> {
 }
 
 class BorderModifier extends ModifierWithKey<ArkBorder>{
+  constructor(value: ArkBorder) {
+    super(value);
+  }
   static identity: Symbol = Symbol('border');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -731,6 +877,9 @@ class BorderModifier extends ModifierWithKey<ArkBorder>{
 }
 
 class ForegroundBlurStyleModifier extends ModifierWithKey<ArkForegroundBlurStyle> {
+  constructor(value: ArkForegroundBlurStyle) {
+    super(value);
+  }
   static identity: Symbol = Symbol("foregroundBlurStyle");
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -751,6 +900,9 @@ class ForegroundBlurStyleModifier extends ModifierWithKey<ArkForegroundBlurStyle
 }
 
 class BackgroundImagePositionModifier extends ModifierWithKey<Position | Alignment>{
+  constructor(value: Position | Alignment) {
+    super(value);
+  }
   static identity: Symbol = Symbol("backgroundImagePosition");
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -771,6 +923,9 @@ class BackgroundImagePositionModifier extends ModifierWithKey<Position | Alignme
 }
 
 class LinearGradientBlurModifier extends Modifier<ArkLinearGradientBlur> {
+  constructor(value: ArkLinearGradientBlur) {
+    super(value);
+  }
   static identity: Symbol = Symbol("linearGradientBlur");
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -784,6 +939,9 @@ class LinearGradientBlurModifier extends Modifier<ArkLinearGradientBlur> {
 }
 
 class BackgroundImageModifier extends ModifierWithKey<ArkBackgroundImage>{
+  constructor(value: ArkBackgroundImage) {
+    super(value);
+  }
   static identity: Symbol = Symbol("backgroundImage");
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -800,6 +958,9 @@ class BackgroundImageModifier extends ModifierWithKey<ArkBackgroundImage>{
 }
 
 class BackgroundBlurStyleModifier extends ModifierWithKey<ArkBackgroundBlurStyle> {
+  constructor(value: ArkBackgroundBlurStyle) {
+    super(value);
+  }
   static identity: Symbol = Symbol("backgroundBlurStyle");
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -813,6 +974,9 @@ class BackgroundBlurStyleModifier extends ModifierWithKey<ArkBackgroundBlurStyle
 }
 
 class BackgroundImageSizeModifier extends ModifierWithKey<SizeOptions | ImageSize>{
+  constructor(value: SizeOptions | ImageSize) {
+    super(value);
+  }
   static identity: Symbol = Symbol("backgroundImageSize");
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -833,6 +997,9 @@ class BackgroundImageSizeModifier extends ModifierWithKey<SizeOptions | ImageSiz
 }
 
 class TranslateModifier extends Modifier<ArkTranslate>{
+  constructor(value: ArkTranslate) {
+    super(value);
+  }
   static identity: Symbol = Symbol("translate");
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -845,6 +1012,9 @@ class TranslateModifier extends Modifier<ArkTranslate>{
 }
 
 class ScaleModifier extends Modifier<ArkScale>{
+  constructor(value: ArkScale) {
+    super(value);
+  }
   static identity: Symbol = Symbol("scale");
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -857,6 +1027,9 @@ class ScaleModifier extends Modifier<ArkScale>{
 }
 
 class RotateModifier extends Modifier<ArkRotate>{
+  constructor(value: ArkRotate) {
+    super(value);
+  }
   static identity: Symbol = Symbol("rotate");
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -870,6 +1043,9 @@ class RotateModifier extends Modifier<ArkRotate>{
 }
 
 class GeometryTransitionModifier extends Modifier<string>{
+  constructor(value: string) {
+    super(value);
+  }
   static identity: Symbol = Symbol("geometryTransition");
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -882,6 +1058,9 @@ class GeometryTransitionModifier extends Modifier<string>{
 }
 
 class ClipModifier extends ModifierWithKey<boolean | object> {
+  constructor(value: boolean | object) {
+    super(value);
+  }
   static identity: Symbol = Symbol("clip");
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -898,6 +1077,9 @@ class ClipModifier extends ModifierWithKey<boolean | object> {
 }
 
 class MaskModifier extends ModifierWithKey<boolean | object> {
+  constructor(value: boolean | object) {
+    super(value);
+  }
   static identity: Symbol = Symbol("mask");
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -914,6 +1096,9 @@ class MaskModifier extends ModifierWithKey<boolean | object> {
 }
 
 class PixelStretchEffectModifier extends ModifierWithKey<PixelStretchEffectOptions> {
+  constructor(value: PixelStretchEffectOptions) {
+    super(value);
+  }
   static identity: Symbol = Symbol("pixelStretchEffect");
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -934,6 +1119,9 @@ class PixelStretchEffectModifier extends ModifierWithKey<PixelStretchEffectOptio
 }
 
 class LightUpEffectModifier extends ModifierWithKey<number> {
+  constructor(value: number) {
+    super(value);
+  }
   static identity: Symbol = Symbol("lightUpEffect");
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -946,6 +1134,9 @@ class LightUpEffectModifier extends ModifierWithKey<number> {
 }
 
 class SphericalEffectModifier extends Modifier<number> {
+  constructor(value: number) {
+    super(value);
+  }
   static identity: Symbol = Symbol("sphericalEffect");
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -958,6 +1149,9 @@ class SphericalEffectModifier extends Modifier<number> {
 }
 
 class RenderGroupModifier extends Modifier<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
   static identity: Symbol = Symbol("renderGroup");
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -970,6 +1164,9 @@ class RenderGroupModifier extends Modifier<boolean> {
 }
 
 class RenderFitModifier extends Modifier<number> {
+  constructor(value: number) {
+    super(value);
+  }
   static identity: Symbol = Symbol("renderFit");
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -982,6 +1179,9 @@ class RenderFitModifier extends Modifier<number> {
 }
 
 class UseEffectModifier extends Modifier<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
   static identity: Symbol = Symbol("useEffect");
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -994,6 +1194,9 @@ class UseEffectModifier extends Modifier<boolean> {
 }
 
 class ForegroundColorModifier extends ModifierWithKey<ResourceColor | ColoringStrategy> {
+  constructor(value: ResourceColor | ColoringStrategy) {
+    super(value);
+  }
   static identity: Symbol = Symbol("foregroundColor");
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -1014,6 +1217,9 @@ class ForegroundColorModifier extends ModifierWithKey<ResourceColor | ColoringSt
 }
 
 class MotionPathModifier extends Modifier<ArkMotionPath> {
+  constructor(value: ArkMotionPath) {
+    super(value);
+  }
   static identity: Symbol = Symbol("motionPath");
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -1027,6 +1233,9 @@ class MotionPathModifier extends Modifier<ArkMotionPath> {
 }
 
 class GroupDefaultFocusModifier extends Modifier<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
   static identity: Symbol = Symbol("groupDefaultFocus");
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -1039,6 +1248,9 @@ class GroupDefaultFocusModifier extends Modifier<boolean> {
 }
 
 class FocusOnTouchModifier extends Modifier<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
   static identity: Symbol = Symbol("focusOnTouch");
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -1050,6 +1262,9 @@ class FocusOnTouchModifier extends Modifier<boolean> {
   }
 }
 class OffsetModifier extends ModifierWithKey<Position> {
+  constructor(value: Position) {
+    super(value);
+  }
   static identity: Symbol = Symbol('offset');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -1066,6 +1281,9 @@ class OffsetModifier extends ModifierWithKey<Position> {
 }
 
 class MarkAnchorModifier extends ModifierWithKey<Position> {
+  constructor(value: Position) {
+    super(value);
+  }
   static identity: Symbol = Symbol('markAnchor');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -1081,6 +1299,9 @@ class MarkAnchorModifier extends ModifierWithKey<Position> {
   }
 }
 class DefaultFocusModifier extends Modifier<boolean>{
+  constructor(value: boolean) {
+    super(value);
+  }
   static identity: Symbol = Symbol("defaultFocus");
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -1093,6 +1314,9 @@ class DefaultFocusModifier extends Modifier<boolean>{
 }
 
 class FocusableModifier extends Modifier<boolean>{
+  constructor(value: boolean) {
+    super(value);
+  }
   static identity: Symbol = Symbol("focusable");
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -1105,6 +1329,9 @@ class FocusableModifier extends Modifier<boolean>{
 }
 
 class TouchableModifier extends Modifier<boolean>{
+  constructor(value: boolean) {
+    super(value);
+  }
   static identity: Symbol = Symbol("touchable");
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -1117,6 +1344,9 @@ class TouchableModifier extends Modifier<boolean>{
 }
 
 class MarginModifier extends ModifierWithKey<ArkPadding> {
+  constructor(value: ArkPadding) {
+    super(value);
+  }
   static identity: Symbol = Symbol('margin');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -1136,6 +1366,9 @@ class MarginModifier extends ModifierWithKey<ArkPadding> {
 }
 
 class PaddingModifier extends ModifierWithKey<ArkPadding> {
+  constructor(value: ArkPadding) {
+    super(value);
+  }
   static identity: Symbol = Symbol('padding');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -1155,6 +1388,9 @@ class PaddingModifier extends ModifierWithKey<ArkPadding> {
 }
 
 class VisibilityModifier extends ModifierWithKey<number> {
+  constructor(value: number) {
+    super(value);
+  }
   static identity: Symbol = Symbol('visibility');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -1169,6 +1405,9 @@ class VisibilityModifier extends ModifierWithKey<number> {
 }
 
 class AccessibilityTextModifier extends Modifier<string> {
+  constructor(value: string) {
+    super(value);
+  }
   static identity: Symbol = Symbol("accessibilityText");
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -1181,6 +1420,9 @@ class AccessibilityTextModifier extends Modifier<string> {
 }
 
 class AllowDropModifier extends Modifier<ArkAllowDrop> {
+  constructor(value: ArkAllowDrop) {
+    super(value);
+  }
   static identity: Symbol = Symbol("allowDrop");
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -1193,6 +1435,9 @@ class AllowDropModifier extends Modifier<ArkAllowDrop> {
 }
 
 class AccessibilityLevelModifier extends Modifier<string> {
+  constructor(value: string) {
+    super(value);
+  }
   static identity: Symbol = Symbol("accessibilityLevel");
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -1205,6 +1450,9 @@ class AccessibilityLevelModifier extends Modifier<string> {
 }
 
 class AccessibilityDescriptionModifier extends Modifier<string> {
+  constructor(value: string) {
+    super(value);
+  }
   static identity: Symbol = Symbol("accessibilityDescription");
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -1217,6 +1465,9 @@ class AccessibilityDescriptionModifier extends Modifier<string> {
 }
 
 class DirectionModifier extends ModifierWithKey<number> {
+  constructor(value: number) {
+    super(value);
+  }
   static identity: Symbol = Symbol('direction');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -1230,6 +1481,9 @@ class DirectionModifier extends ModifierWithKey<number> {
   }
 }
 class AlignRulesModifier extends Modifier<ArkAlignRules> {
+  constructor(value: ArkAlignRules) {
+    super(value);
+  }
   static identity: Symbol = Symbol('alignRules');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -1242,6 +1496,9 @@ class AlignRulesModifier extends Modifier<ArkAlignRules> {
 }
 
 class ExpandSafeAreaModifier extends Modifier<ArkSafeAreaExpandOpts | undefined> {
+  constructor(value: ArkSafeAreaExpandOpts | undefined) {
+    super(value);
+  }
   static identity: Symbol = Symbol('expandSafeArea');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -1253,6 +1510,9 @@ class ExpandSafeAreaModifier extends Modifier<ArkSafeAreaExpandOpts | undefined>
 }
 
 class GridSpanModifier extends Modifier<number> {
+  constructor(value: number) {
+    super(value);
+  }
   static identity: Symbol = Symbol('gridSpan');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -1264,6 +1524,9 @@ class GridSpanModifier extends Modifier<number> {
 }
 
 class GridOffsetModifier extends Modifier<number> {
+  constructor(value: number) {
+    super(value);
+  }
   static identity: Symbol = Symbol('gridOffset');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -1275,6 +1538,9 @@ class GridOffsetModifier extends Modifier<number> {
 }
 
 class AlignSelfModifier extends ModifierWithKey<number> {
+  constructor(value: number) {
+    super(value);
+  }
   static identity: Symbol = Symbol('alignSelf');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -1289,6 +1555,9 @@ class AlignSelfModifier extends ModifierWithKey<number> {
 }
 
 class SizeModifier extends ModifierWithKey<SizeOptions> {
+  constructor(value: SizeOptions) {
+    super(value);
+  }
   static identity: Symbol = Symbol('size');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -1305,6 +1574,9 @@ class SizeModifier extends ModifierWithKey<SizeOptions> {
 }
 
 class DisplayPriorityModifier extends ModifierWithKey<number> {
+  constructor(value: number) {
+    super(value);
+  }
   static identity: Symbol = Symbol('displayPriority');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -1319,6 +1591,9 @@ class DisplayPriorityModifier extends ModifierWithKey<number> {
 }
 
 class IDModifier extends Modifier<string> {
+  constructor(value: string) {
+    super(value);
+  }
   static identity: Symbol = Symbol("id");
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -1331,6 +1606,9 @@ class IDModifier extends Modifier<string> {
 }
 
 class KeyModifier extends Modifier<string> {
+  constructor(value: string) {
+    super(value);
+  }
   static identity: Symbol = Symbol("key");
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -1343,6 +1621,9 @@ class KeyModifier extends Modifier<string> {
 }
 
 class RestoreIdModifier extends Modifier<number> {
+  constructor(value: number) {
+    super(value);
+  }
   static identity: Symbol = Symbol("restoreId");
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -1355,6 +1636,9 @@ class RestoreIdModifier extends Modifier<number> {
 }
 
 class TabIndexModifier extends Modifier<number> {
+  constructor(value: number) {
+    super(value);
+  }
   static identity: Symbol = Symbol("tabIndex");
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -1367,6 +1651,9 @@ class TabIndexModifier extends Modifier<number> {
 }
 
 class ObscuredModifier extends Modifier<ArkObscured> {
+  constructor(value: ArkObscured) {
+    super(value);
+  }
   static identity: Symbol = Symbol("obscured");
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -1379,6 +1666,9 @@ class ObscuredModifier extends Modifier<ArkObscured> {
 }
 
 class MouseResponseRegionModifier extends ModifierWithKey<Array<Rectangle> | Rectangle> {
+  constructor(value: Array<Rectangle> | Rectangle) {
+    super(value);
+  }
   static identity = Symbol("mouseResponseRegion");
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -1432,6 +1722,9 @@ class MouseResponseRegionModifier extends ModifierWithKey<Array<Rectangle> | Rec
 }
 
 class ResponseRegionModifier extends ModifierWithKey<Array<Rectangle> | Rectangle> {
+  constructor(value: Array<Rectangle> | Rectangle) {
+    super(value);
+  }
   static identity = Symbol("responseRegion");
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -1484,6 +1777,9 @@ class ResponseRegionModifier extends ModifierWithKey<Array<Rectangle> | Rectangl
   }
 }
 class FlexGrowModifier extends ModifierWithKey<number> {
+  constructor(value: number) {
+    super(value);
+  }
   static identity: Symbol = Symbol('flexGrow');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -1498,6 +1794,9 @@ class FlexGrowModifier extends ModifierWithKey<number> {
 }
 
 class FlexShrinkModifier extends ModifierWithKey<number> {
+  constructor(value: number) {
+    super(value);
+  }
   static identity: Symbol = Symbol('flexShrink');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -1512,6 +1811,9 @@ class FlexShrinkModifier extends ModifierWithKey<number> {
 }
 
 class AspectRatioModifier extends ModifierWithKey<number> {
+  constructor(value: number) {
+    super(value);
+  }
   static identity: Symbol = Symbol('aspectRatio');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -1526,6 +1828,9 @@ class AspectRatioModifier extends ModifierWithKey<number> {
 }
 
 class ConstraintSizeModifier extends ModifierWithKey<ConstraintSizeOptions> {
+  constructor(value: ConstraintSizeOptions) {
+    super(value);
+  }
   static identity: Symbol = Symbol('constraintSize');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -1545,6 +1850,9 @@ class ConstraintSizeModifier extends ModifierWithKey<ConstraintSizeOptions> {
 }
 
 class FlexBasisModifier extends ModifierWithKey<number | string> {
+  constructor(value: number | string) {
+    super(value);
+  }
   static identity: Symbol = Symbol('flexBasis');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -1559,6 +1867,9 @@ class FlexBasisModifier extends ModifierWithKey<number | string> {
 }
 
 class LayoutWeightModifier extends Modifier<number | string> {
+  constructor(value: number | string) {
+    super(value);
+  }
   static identity: Symbol = Symbol('layoutWeight');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -1570,6 +1881,9 @@ class LayoutWeightModifier extends Modifier<number | string> {
 }
 
 class EnabledModifier extends Modifier<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
   static identity: Symbol = Symbol("enabled");
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -1582,6 +1896,9 @@ class EnabledModifier extends Modifier<boolean> {
 }
 
 class DraggableModifier extends Modifier<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
   static identity: Symbol = Symbol("draggable");
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -1594,6 +1911,9 @@ class DraggableModifier extends Modifier<boolean> {
 }
 
 class AccessibilityGroupModifier extends Modifier<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
   static identity: Symbol = Symbol("accessibilityGroup");
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -1606,6 +1926,9 @@ class AccessibilityGroupModifier extends Modifier<boolean> {
 }
 
 class HoverEffectModifier extends Modifier<HoverEffect> {
+  constructor(value: HoverEffect) {
+    super(value);
+  }
   static identity: Symbol = Symbol("hoverEffect");
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -1618,6 +1941,9 @@ class HoverEffectModifier extends Modifier<HoverEffect> {
 }
 
 class ClickEffectModifier extends Modifier<ArkClickEffect> {
+  constructor(value: ArkClickEffect) {
+    super(value);
+  }
   static identity: Symbol = Symbol("clickEffect");
   applyPeer(node: KNode, reset: boolean): void {
     if (reset || !this.value) {
@@ -1630,6 +1956,9 @@ class ClickEffectModifier extends Modifier<ArkClickEffect> {
 }
 
 class KeyBoardShortCutModifier extends Modifier<ArkKeyBoardShortCut> {
+  constructor(value: ArkKeyBoardShortCut) {
+    super(value);
+  }
   static identity: Symbol = Symbol("keyboardShortcut");
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -1641,6 +1970,9 @@ class KeyBoardShortCutModifier extends Modifier<ArkKeyBoardShortCut> {
 }
 
 class TransitionModifier extends ModifierWithKey<object> {
+  constructor(value: object) {
+    super(value);
+  }
   static identity: Symbol = Symbol("transition");
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -1653,6 +1985,9 @@ class TransitionModifier extends ModifierWithKey<object> {
 }
 
 class SharedTransitionModifier extends ModifierWithKey<ArkSharedTransition> {
+  constructor(value: ArkSharedTransition) {
+    super(value);
+  }
   static identity: Symbol = Symbol("sharedTransition");
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {

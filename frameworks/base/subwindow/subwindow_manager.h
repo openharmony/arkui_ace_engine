@@ -61,6 +61,8 @@ public:
     const RefPtr<Subwindow>& GetCurrentWindow();
     Rect GetParentWindowRect();
 
+    RefPtr<Subwindow> ShowPreviewNG();
+    void HidePreviewNG();
     void ShowMenu(const RefPtr<Component>& newComponent);
     void ShowMenuNG(
         const RefPtr<NG::FrameNode>& menuNode, int32_t targetId, const NG::OffsetF& offset, bool isAboveApps = false);
@@ -108,6 +110,8 @@ public:
         std::function<void(int32_t, int32_t)>&& callback);
     void CloseDialog(int32_t instanceId);
     void RequestFocusSubwindow(int32_t instanceId);
+    void OpenCustomDialog(const PromptDialogAttr &dialogAttr, std::function<void(int32_t)> &&callback);
+    void CloseCustomDialog(const int32_t dialogId);
     
     bool GetShown();
 

@@ -51,7 +51,6 @@ public:
 
     int32_t GetSpan(GridSizeType sizeType) const
     {
-        LOGD("GetSpan %{public}d", span_->sm);
         switch (sizeType) {
             case GridSizeType::XS:
                 return span_->xs;

@@ -44,13 +44,11 @@ RefPtr<UINode> ContainerModalPatternEnhance::GetTitleItemByIndex(
 
 void ContainerModalPatternEnhance::OnWindowFocused()
 {
-    LOGD("windowOnFocus refresh window");
     ContainerModalPattern::OnWindowFocused();
 }
 
 void ContainerModalPatternEnhance::OnWindowUnfocused()
 {
-    LOGD("OnWindowUnfocused refresh window");
     if (SubwindowManager::GetInstance()->GetCurrentWindow() &&
         SubwindowManager::GetInstance()->GetCurrentWindow()->GetShown()) {
         SetIsFocus(false);
@@ -69,22 +67,14 @@ void ContainerModalPatternEnhance::OnWindowForceUnfocused()
 void ContainerModalPatternEnhance::ChangeCustomTitle(bool isFocus)
 {
     // update custom title label
-    auto containerNode = GetHost();
-    CHECK_NULL_VOID(containerNode);
-    auto columnNode = AceType::DynamicCast<FrameNode>(containerNode->GetChildren().front());
-    CHECK_NULL_VOID(columnNode);
-    auto rowNode = AceType::DynamicCast<FrameNode>(columnNode->GetChildren().front());
-    CHECK_NULL_VOID(rowNode);
-    auto customTitleNode = AceType::DynamicCast<CustomTitleNode>(rowNode->GetChildren().front());
+    auto customTitleNode = GetCustomTitleNode();
     CHECK_NULL_VOID(customTitleNode);
     isFocus ? customTitleNode->FireOnWindowFocusedCallback() : customTitleNode->FireOnWindowUnfocusedCallback();
 }
 
 void ContainerModalPatternEnhance::ChangeControlButtons(bool isFocus)
 {
-    auto containerNode = GetHost();
-    CHECK_NULL_VOID(containerNode);
-    auto controlButtonsNode = AceType::DynamicCast<FrameNode>(containerNode->GetChildren().back());
+    auto controlButtonsNode = GetControlButtonRow();
     CHECK_NULL_VOID(controlButtonsNode);
 
     // update maximize button
@@ -122,11 +112,7 @@ void ContainerModalPatternEnhance::ChangeFloatingTitle(bool isFocus)
     }
 
     // update floating custom title label
-    auto containerNode = GetHost();
-    CHECK_NULL_VOID(containerNode);
-    auto floatingNode = AceType::DynamicCast<FrameNode>(containerNode->GetChildAtIndex(1));
-    CHECK_NULL_VOID(floatingNode);
-    auto customFloatingTitleNode = AceType::DynamicCast<CustomTitleNode>(floatingNode->GetChildren().front());
+    auto customFloatingTitleNode = GetFloatingTitleNode();
     CHECK_NULL_VOID(customFloatingTitleNode);
     isFocus ? customFloatingTitleNode->FireOnWindowFocusedCallback()
             : customFloatingTitleNode->FireOnWindowUnfocusedCallback();
@@ -143,11 +129,7 @@ void ContainerModalPatternEnhance::ChangeTitleButtonIcon(
 
 void ContainerModalPatternEnhance::SetContainerButtonHide(bool hideSplit, bool hideMaximize, bool hideMinimize)
 {
-    LOGD("hideBtn hideSplit:%{public}d hideMaximize:%{public}d hideMinimize:%{public}d ", hideSplit, hideMaximize,
-        hideMinimize);
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto controlButtonsNode = AceType::DynamicCast<FrameNode>(host->GetChildren().back());
+    auto controlButtonsNode = GetControlButtonRow();
     CHECK_NULL_VOID(controlButtonsNode);
     ContainerModalViewEnhance::SetEnableSplit(!hideSplit);
 
@@ -170,9 +152,7 @@ void ContainerModalPatternEnhance::SetContainerButtonHide(bool hideSplit, bool h
 
 bool ContainerModalPatternEnhance::CanHideFloatingTitle()
 {
-    auto containerNode = GetHost();
-    CHECK_NULL_RETURN(containerNode, true);
-    auto controlButtonsNode = AceType::DynamicCast<FrameNode>(containerNode->GetChildren().back());
+    auto controlButtonsNode = GetControlButtonRow();
     CHECK_NULL_RETURN(controlButtonsNode, true);
     auto maximizeBtn = GetTitleItemByIndex(controlButtonsNode, MAX_RECOVER_BUTTON_INDEX);
     CHECK_NULL_RETURN(maximizeBtn, true);
@@ -192,16 +172,14 @@ bool ContainerModalPatternEnhance::CanHideFloatingTitle()
 
 void ContainerModalPatternEnhance::UpdateTitleInTargetPos(bool isShow, int32_t height)
 {
-    auto containerNode = GetHost();
-    CHECK_NULL_VOID(containerNode);
-    auto floatingTitleNode = AceType::DynamicCast<FrameNode>(containerNode->GetChildAtIndex(1));
+    auto floatingTitleNode = GetFloatingTitleRow();
     CHECK_NULL_VOID(floatingTitleNode);
     auto floatingLayoutProperty = floatingTitleNode->GetLayoutProperty();
     CHECK_NULL_VOID(floatingLayoutProperty);
     auto floatingContext = floatingTitleNode->GetRenderContext();
     CHECK_NULL_VOID(floatingContext);
 
-    auto controlButtonsNode = AceType::DynamicCast<FrameNode>(containerNode->GetChildren().back());
+    auto controlButtonsNode = GetControlButtonRow();
     CHECK_NULL_VOID(controlButtonsNode);
     auto controlButtonsLayoutProperty = controlButtonsNode->GetLayoutProperty();
     CHECK_NULL_VOID(controlButtonsLayoutProperty);
@@ -213,9 +191,13 @@ void ContainerModalPatternEnhance::UpdateTitleInTargetPos(bool isShow, int32_t h
     option.SetDuration(TITLE_POPUP_DURATION);
     option.SetCurve(Curves::EASE_IN_OUT);
 
-    if (isShow && this->CanShowFloatingTitle()) {
+    if (!this->CanShowFloatingTitle()) {
+        return;
+    }
+    if (isShow) {
         floatingContext->OnTransformTranslateUpdate({ 0.0f, height - static_cast<float>(titlePopupDistance), 0.0f });
-        floatingLayoutProperty->UpdateVisibility(VisibleType::VISIBLE);
+        floatingLayoutProperty->UpdateVisibility(
+            floatingTitleSettedShow_ ? VisibleType::VISIBLE : VisibleType::GONE);
         AnimationUtils::Animate(option, [floatingContext, height]() {
             floatingContext->OnTransformTranslateUpdate({ 0.0f, height, 0.0f });
         });
@@ -224,9 +206,7 @@ void ContainerModalPatternEnhance::UpdateTitleInTargetPos(bool isShow, int32_t h
         AnimationUtils::Animate(option, [buttonsContext, height]() {
             buttonsContext->OnTransformTranslateUpdate({ 0.0f, height, 0.0f });
         });
-    }
-
-    if (!isShow && this->CanHideFloatingTitle()) {
+    } else {
         AnimationUtils::Animate(
             option,
             [floatingContext, buttonsContext, titlePopupDistance]() {

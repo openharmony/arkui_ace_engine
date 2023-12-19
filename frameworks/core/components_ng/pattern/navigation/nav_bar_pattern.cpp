@@ -502,8 +502,10 @@ void MountTitleBar(const RefPtr<NavBarNode>& hostNode)
     BuildTitleBar(hostNode, titleBarNode, navBarLayoutProperty);
     if (navBarLayoutProperty->GetHideTitleBar().value_or(false)) {
         titleBarLayoutProperty->UpdateVisibility(VisibleType::GONE);
+        titleBarNode->SetActive(false);
     } else {
         titleBarLayoutProperty->UpdateVisibility(VisibleType::VISIBLE);
+        titleBarNode->SetActive(true);
     }
     titleBarNode->MarkModifyDone();
 }
@@ -525,8 +527,10 @@ void MountToolBar(const RefPtr<NavBarNode>& hostNode)
 
     if (navBarLayoutProperty->GetHideToolBar().value_or(false)) {
         toolBarLayoutProperty->UpdateVisibility(VisibleType::GONE);
+        toolBarNode->SetActive(false);
     } else {
         toolBarLayoutProperty->UpdateVisibility(VisibleType::VISIBLE);
+        toolBarNode->SetActive(true);
     }
 }
 } // namespace

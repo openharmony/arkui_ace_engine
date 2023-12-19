@@ -76,7 +76,6 @@ public:
         if (builder_) {
             return (*builder_)();
         } else {
-            LOGD("No builder function for tab.");
             return nullptr;
         }
     }
@@ -100,7 +99,6 @@ public:
         if (barBuilder_) {
             return (*barBuilder_)();
         }
-        LOGD("No builder function for tab.");
         return nullptr;
     }
 

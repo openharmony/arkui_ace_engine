@@ -158,7 +158,7 @@ void JSText::SetFontSize(const JSCallbackInfo& info)
     CHECK_NULL_VOID(theme);
     CalcDimension fontSize = theme->GetTextStyle().GetFontSize();
     ParseJsDimensionFp(info[0], fontSize);
-    if (fontSize.IsNegative() || fontSize.Unit() == DimensionUnit::PERCENT) {
+    if (fontSize.IsNonPositive() || fontSize.Unit() == DimensionUnit::PERCENT) {
         fontSize = theme->GetTextStyle().GetFontSize();
     }
     TextModel::GetInstance()->SetFontSize(fontSize);
@@ -446,6 +446,10 @@ void JSText::JsOnClick(const JSCallbackInfo& info)
             func->Execute(*clickInfo);
         };
         TextModel::GetInstance()->SetOnClick(std::move(onClick));
+
+        auto focusHub = NG::ViewStackProcessor::GetInstance()->GetOrCreateMainFrameNodeFocusHub();
+        CHECK_NULL_VOID(focusHub);
+        focusHub->SetFocusable(true, false);
     } else {
 #ifndef NG_BUILD
         if (info[0]->IsFunction()) {

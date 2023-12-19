@@ -25,7 +25,6 @@ constexpr double MAX_THRESHOLD = 2.0;
 
 void PressRecognizer::OnAccepted(size_t touchId)
 {
-    LOGD("press gesture has been accepted! the touch id is %{public}zu", touchId);
     state_ = DetectState::DETECTED;
     if (onPress_) {
         PressInfo info(touchId);
@@ -46,14 +45,12 @@ void PressRecognizer::OnAccepted(size_t touchId)
 
 void PressRecognizer::OnRejected(size_t touchId)
 {
-    LOGD("press gesture has been rejected! the touch id is %{public}zu", touchId);
     deadlineTimer_.Cancel();
     state_ = DetectState::READY;
 }
 
 void PressRecognizer::HandleTouchDownEvent(const TouchEvent& event)
 {
-    LOGD("press recognizer receives touch down event, begin to detect press event");
     if (state_ == DetectState::READY) {
         auto context = context_.Upgrade();
         if (!context) {
@@ -79,9 +76,7 @@ void PressRecognizer::HandleTouchDownEvent(const TouchEvent& event)
 
 void PressRecognizer::HandleTouchUpEvent(const TouchEvent& event)
 {
-    LOGD("press recognizer receives touch up event");
     if (state_ == DetectState::DETECTING) {
-        LOGD("this gesture is not press, try to reject it");
         OnRejected(trackPoint_.id);
     } else if (state_ == DetectState::DETECTED) {
         if (onPressCancel_) {
@@ -93,11 +88,9 @@ void PressRecognizer::HandleTouchUpEvent(const TouchEvent& event)
 
 void PressRecognizer::HandleTouchMoveEvent(const TouchEvent& event)
 {
-    LOGD("press recognizer receives touch move event");
     if (state_ == DetectState::DETECTING) {
         Offset offset = event.GetOffset() - trackPoint_.GetOffset();
         if (offset.GetDistance() > MAX_THRESHOLD) {
-            LOGD("this gesture is not press, try to reject it");
             OnRejected(event.id);
         }
     } else if (state_ == DetectState::DETECTED) {
@@ -110,9 +103,7 @@ void PressRecognizer::HandleTouchMoveEvent(const TouchEvent& event)
 
 void PressRecognizer::HandleTouchCancelEvent(const TouchEvent& event)
 {
-    LOGD("press recognizer receives touch cancel event");
     if (state_ == DetectState::DETECTING) {
-        LOGD("cancel press gesture detect, try to reject it");
         OnRejected(event.id);
     }
     state_ = DetectState::READY;
@@ -121,7 +112,6 @@ void PressRecognizer::HandleTouchCancelEvent(const TouchEvent& event)
 void PressRecognizer::HandleOverdueDeadline()
 {
     if (state_ == DetectState::DETECTING) {
-        LOGD("this gesture is press, try to accept it");
         OnAccepted(trackPoint_.id);
     } else {
         LOGW("the state is not detecting for accept press gesture");

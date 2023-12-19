@@ -619,7 +619,7 @@ int32_t OH_NativeXComponent_RegisterOnFrameCallback(OH_NativeXComponent* compone
  * @since 11
  * @version 1.0
  */
-int32_t OH_NativeXComponent_UnRegisterOnFrameCallback(OH_NativeXComponent* component);
+int32_t OH_NativeXComponent_UnregisterOnFrameCallback(OH_NativeXComponent* component);
 
 #ifdef __cplusplus
 };

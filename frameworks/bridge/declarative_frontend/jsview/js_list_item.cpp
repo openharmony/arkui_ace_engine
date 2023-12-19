@@ -105,7 +105,6 @@ void JSListItem::CreateForPartialUpdate(const JSCallbackInfo& args)
         auto listItemDeepRenderFunc = [execCtx = args.GetExecutionContext(),
                                           jsDeepRenderFunc = std::move(jsDeepRender)](int32_t nodeId) {
             ACE_SCOPED_TRACE("JSListItem::ExecuteDeepRender");
-            LOGD("ListItem elmtId %{public}d DeepRender JS function execution start ....", nodeId);
             JAVASCRIPT_EXECUTION_SCOPE(execCtx);
             JSRef<JSVal> jsParams[2];
             jsParams[0] = JSRef<JSVal>::Make(ToJSValue(nodeId));

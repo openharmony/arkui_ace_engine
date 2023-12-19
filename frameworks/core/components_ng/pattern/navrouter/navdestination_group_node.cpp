@@ -25,6 +25,13 @@
 
 namespace OHOS::Ace::NG {
 
+NavDestinationGroupNode::~NavDestinationGroupNode()
+{
+    if (contentNode_) {
+        contentNode_->Clean();
+    }
+}
+
 RefPtr<NavDestinationGroupNode> NavDestinationGroupNode::GetOrCreateGroupNode(
     const std::string& tag, int32_t nodeId, const std::function<RefPtr<Pattern>(void)>& patternCreator)
 {

@@ -35,6 +35,7 @@ public:
     void SetOnBackPressed(std::function<bool()>&& onBackPressed) override;
     RefPtr<AceType> CreateEmpty() override;
     static void SetHideTitleBar(FrameNode* frameNode, bool hideTitleBar);
+    void SetNavDestinationMode(NavDestinationMode mode) override;
 
 private:
     void CreateBackButton(const RefPtr<NavDestinationGroupNode>& navDestinationNode);

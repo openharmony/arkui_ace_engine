@@ -124,7 +124,6 @@ public:
     void ClearPendingRemoveNodes();
 
     void RegisterJSCleanUpIdleTaskFunc(const std::function<void(void)>& jsCallback) {
-        LOGD("RegisterJSCleanUpIdleTaskFunc registered");
         jsCleanUpIdleTaskCallback_ = std::move(jsCallback);
     }
 

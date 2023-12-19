@@ -14,11 +14,11 @@
  */
 
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_hyperlink_modifier.h"
+#include "core/components/hyperlink/hyperlink_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/hyperlink/hyperlink_model_ng.h"
 
 namespace OHOS::Ace::NG {
-const uint32_t COLOR_BLUE = 0xff0000ff;
 void SetHyperlinkColor(NodeHandle node, uint32_t color)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -30,7 +30,13 @@ void ResetHyperlinkColor(NodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    HyperlinkModelNG::SetColor(frameNode, Color(COLOR_BLUE));
+    auto context = frameNode->GetContext();
+    auto themeManager = context->GetThemeManager();
+    CHECK_NULL_VOID(themeManager);
+    auto hyperlinkTheme = themeManager->GetTheme<HyperlinkTheme>();
+    CHECK_NULL_VOID(hyperlinkTheme);
+
+    HyperlinkModelNG::SetColor(frameNode, Color(hyperlinkTheme->GetTextColor()));
 }
 
 ArkUIHyperlinkModifierAPI GetHyperlinkModifier()

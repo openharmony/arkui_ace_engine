@@ -114,13 +114,11 @@ private:
     void AnimateTo(double endValue)
     {
         if (isFirstAssign_) {
-            LOGD("AnimateTo with first assign. endValue: %{public}.2f", endValue);
             isFirstAssign_ = false;
             SetValue(endValue);
             return;
         }
         if (NearEqual(value_, endValue)) {
-            LOGD("AnimateTo with same value. endValue: %{public}.2f", endValue);
             return;
         }
         ResetController();

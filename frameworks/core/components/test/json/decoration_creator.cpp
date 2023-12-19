@@ -28,7 +28,6 @@ namespace OHOS::Ace {
 
 RefPtr<Decoration> DecorationCreator::CreateFromJson(const JsonValue& json)
 {
-    LOGD("CreateFromJson Decoration");
     std::string classType = json.GetValue(CLASS_NAME)->GetString();
     if (classType != DECORATION_NAME) {
         LOGE("Create decoration err: not a decoration json.");

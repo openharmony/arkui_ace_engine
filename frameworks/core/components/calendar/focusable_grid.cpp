@@ -97,7 +97,6 @@ int32_t FocusableGrid::FocusMove(KeyDirection direction)
     focusRow_ = nextRow;
     focusCol_ = nextCol;
     if (next < firstDayIndex_ && direction == KeyDirection::UP) {
-        LOGD("focus move out of calendar");
         return -1;
     }
     FocusChanged(focusIndex_, next);

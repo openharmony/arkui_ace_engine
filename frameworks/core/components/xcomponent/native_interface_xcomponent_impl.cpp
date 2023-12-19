@@ -230,7 +230,7 @@ int32_t OH_NativeXComponent::RegisterOnFrameCallback(
     return OH_NATIVEXCOMPONENT_RESULT_SUCCESS;
 }
 
-int32_t OH_NativeXComponent::UnRegisterOnFrameCallback()
+int32_t OH_NativeXComponent::UnregisterOnFrameCallback()
 {
     if (xcomponentImpl_ == nullptr || !xcomponentImpl_->setUnregisterOnFrameEventCallback_) {
         return OH_NATIVEXCOMPONENT_RESULT_BAD_PARAMETER;

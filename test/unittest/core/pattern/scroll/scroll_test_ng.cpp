@@ -711,10 +711,14 @@ HWTEST_F(ScrollTestNg, Event006, TestSize.Level1)
      * @tc.steps: step1. When animte stop
      * @tc.expected: onScrollStop would not be trigger
      */
-    float endValue = pattern_->springMotion_->GetEndValue();
-    pattern_->springMotion_->NotifyListener(endValue);
+    float endValue = pattern_->GetFinalPosition();
+    pattern_->UpdateCurrentOffset(pattern_->GetTotalOffset() - endValue,
+            SCROLL_FROM_ANIMATION_CONTROLLER);
     // when out of scrollable distance, will trigger animator stop
-    pattern_->springMotion_->NotifyListener(pattern_->GetTotalOffset() + 1);
+    pattern_->UpdateCurrentOffset(-1, SCROLL_FROM_ANIMATION_CONTROLLER);
+    if (pattern_->IsAtBottom()) {
+        pattern_->StopAnimation(pattern_->springAnimation_);
+    }
     FlushLayoutTask(frameNode_);
     EXPECT_TRUE(isStopTrigger);
 }
@@ -2589,10 +2593,10 @@ HWTEST_F(ScrollTestNg, Pattern002, TestSize.Level1)
      */
     CreateWithContent();
     accessibilityProperty_->actionScrollForwardImpl_();
-    ASSERT_NE(pattern_->animator_, nullptr);
-    pattern_->animator_ = nullptr;
+    ASSERT_NE(pattern_->springAnimation_, nullptr);
+    pattern_->springAnimation_ = nullptr;
     accessibilityProperty_->actionScrollBackwardImpl_();
-    ASSERT_NE(pattern_->animator_, nullptr);
+    ASSERT_NE(pattern_->springAnimation_, nullptr);
 
     /**
      * @tc.steps: step2. Test SetAccessibilityAction with unScrollable scroll, scrollableDistance_ <= 0

@@ -178,8 +178,6 @@ RefPtr<ThemeStyle> ResourceAdapterImpl::GetTheme(int32_t themeId)
             std::string patternTag = PATTERN_MAP[i];
             std::string patternName = std::string(OHFlag) + PATTERN_MAP[i];
             ret = resourceManager_->GetPatternByName(patternName.c_str(), attrMap);
-            LOGD("theme pattern[%{public}s, %{public}s], attr size=%{public}zu", patternTag.c_str(),
-                patternName.c_str(), attrMap.size());
             if (attrMap.empty()) {
                 continue;
             }
@@ -205,7 +203,7 @@ Color ResourceAdapterImpl::GetColor(uint32_t resId)
     if (resourceManager_) {
         auto state = resourceManager_->GetColorById(resId, result);
         if (state != Global::Resource::SUCCESS) {
-            LOGW("GetColor error, id=%{public}u", resId);
+            TAG_LOGW(AceLogTag::ACE_RESOURCE, "GetColor error, id=%{public}u", resId);
         }
     }
     return Color(result);
@@ -219,7 +217,7 @@ Color ResourceAdapterImpl::GetColorByName(const std::string& resName)
         auto actualResName = resName.substr(index + 1, resName.length() - index - 1);
         auto state = resourceManager_->GetColorByName(actualResName.c_str(), result);
         if (state != Global::Resource::SUCCESS) {
-            LOGE("GetColorByName error, name=%{public}s", resName.c_str());
+            TAG_LOGW(AceLogTag::ACE_RESOURCE, "GetColorByName error, name=%{public}s", resName.c_str());
         }
     }
     return Color(result);
@@ -232,7 +230,7 @@ Dimension ResourceAdapterImpl::GetDimension(uint32_t resId)
     if (resourceManager_) {
         auto state = resourceManager_->GetFloatById(resId, dimensionFloat, unit);
         if (state != Global::Resource::SUCCESS) {
-            LOGW("GetDimension error, id=%{public}u", resId);
+            TAG_LOGW(AceLogTag::ACE_RESOURCE, "GetDimension error, id=%{public}u", resId);
         }
     }
     return Dimension(static_cast<double>(dimensionFloat), ParseDimensionUnit(unit));
@@ -247,7 +245,7 @@ Dimension ResourceAdapterImpl::GetDimensionByName(const std::string& resName)
         auto actualResName = resName.substr(index + 1, resName.length() - index - 1);
         auto state = resourceManager_->GetFloatByName(actualResName.c_str(), dimensionFloat, unit);
         if (state != Global::Resource::SUCCESS) {
-            LOGE("GetDimensionByName error, name=%{public}s", resName.c_str());
+            TAG_LOGW(AceLogTag::ACE_RESOURCE, "GetDimensionByName error, name=%{public}s", resName.c_str());
         }
     }
     return Dimension(static_cast<double>(dimensionFloat), ParseDimensionUnit(unit));
@@ -259,7 +257,21 @@ std::string ResourceAdapterImpl::GetString(uint32_t resId)
     if (resourceManager_) {
         auto state = resourceManager_->GetStringById(resId, strResult);
         if (state != Global::Resource::SUCCESS) {
-            LOGW("GetString error, id=%{public}u", resId);
+            TAG_LOGW(AceLogTag::ACE_RESOURCE, "GetString error, id=%{public}u", resId);
+        }
+    }
+    return strResult;
+}
+
+std::string ResourceAdapterImpl::GetStringByName(const std::string& resName)
+{
+    std::string strResult = "";
+    auto actualResName = GetActualResourceName(resName);
+    if (resourceManager_) {
+        auto state = resourceManager_->GetStringByName(actualResName.c_str(), strResult);
+        if (state != Global::Resource::SUCCESS) {
+            TAG_LOGW(AceLogTag::ACE_RESOURCE, "Get string by name error, resName=%{public}s, errorCode=%{public}d",
+                resName.c_str(), state);
         }
     }
     return strResult;
@@ -271,7 +283,21 @@ std::string ResourceAdapterImpl::GetPluralString(uint32_t resId, int quantity)
     if (resourceManager_) {
         auto state = resourceManager_->GetPluralStringById(resId, quantity, strResult);
         if (state != Global::Resource::SUCCESS) {
-            LOGW("GetPluralString error, id=%{public}u", resId);
+            TAG_LOGW(AceLogTag::ACE_RESOURCE, "GetPluralString error, id=%{public}u", resId);
+        }
+    }
+    return strResult;
+}
+
+std::string ResourceAdapterImpl::GetPluralStringByName(const std::string& resName, int quantity)
+{
+    std::string strResult = "";
+    auto actualResName = GetActualResourceName(resName);
+    if (resourceManager_) {
+        auto state = resourceManager_->GetPluralStringByName(actualResName.c_str(), quantity, strResult);
+        if (state != Global::Resource::SUCCESS) {
+            TAG_LOGW(AceLogTag::ACE_RESOURCE,
+                "Get plural string by name error, resName=%{public}s, errorCode=%{public}d", resName.c_str(), state);
         }
     }
     return strResult;
@@ -283,7 +309,21 @@ std::vector<std::string> ResourceAdapterImpl::GetStringArray(uint32_t resId) con
     if (resourceManager_) {
         auto state = resourceManager_->GetStringArrayById(resId, strResults);
         if (state != Global::Resource::SUCCESS) {
-            LOGW("GetStringArray error, id=%{public}u", resId);
+            TAG_LOGW(AceLogTag::ACE_RESOURCE, "GetStringArray error, id=%{public}u", resId);
+        }
+    }
+    return strResults;
+}
+
+std::vector<std::string> ResourceAdapterImpl::GetStringArrayByName(const std::string& resName) const
+{
+    std::vector<std::string> strResults;
+    auto actualResName = GetActualResourceName(resName);
+    if (resourceManager_) {
+        auto state = resourceManager_->GetStringArrayByName(actualResName.c_str(), strResults);
+        if (state != Global::Resource::SUCCESS) {
+            TAG_LOGW(AceLogTag::ACE_RESOURCE, "Get stringArray by name error, resName=%{public}s, errorCode=%{public}d",
+                resName.c_str(), state);
         }
     }
     return strResults;
@@ -295,7 +335,21 @@ double ResourceAdapterImpl::GetDouble(uint32_t resId)
     if (resourceManager_) {
         auto state = resourceManager_->GetFloatById(resId, result);
         if (state != Global::Resource::SUCCESS) {
-            LOGW("GetDouble error, id=%{public}u", resId);
+            TAG_LOGW(AceLogTag::ACE_RESOURCE, "GetDouble error, id=%{public}u", resId);
+        }
+    }
+    return static_cast<double>(result);
+}
+
+double ResourceAdapterImpl::GetDoubleByName(const std::string& resName)
+{
+    float result = 0.0f;
+    auto actualResName = GetActualResourceName(resName);
+    if (resourceManager_) {
+        auto state = resourceManager_->GetFloatByName(actualResName.c_str(), result);
+        if (state != Global::Resource::SUCCESS) {
+            TAG_LOGW(AceLogTag::ACE_RESOURCE, "Get double by name error, resName=%{public}s, errorCode=%{public}d",
+                resName.c_str(), state);
         }
     }
     return static_cast<double>(result);
@@ -307,7 +361,21 @@ int32_t ResourceAdapterImpl::GetInt(uint32_t resId)
     if (resourceManager_) {
         auto state = resourceManager_->GetIntegerById(resId, result);
         if (state != Global::Resource::SUCCESS) {
-            LOGW("GetInt error, id=%{public}u", resId);
+            TAG_LOGW(AceLogTag::ACE_RESOURCE, "GetInt error, id=%{public}u", resId);
+        }
+    }
+    return result;
+}
+
+int32_t ResourceAdapterImpl::GetIntByName(const std::string& resName)
+{
+    int32_t result = 0;
+    auto actualResName = GetActualResourceName(resName);
+    if (resourceManager_) {
+        auto state = resourceManager_->GetIntegerByName(actualResName.c_str(), result);
+        if (state != Global::Resource::SUCCESS) {
+            TAG_LOGW(AceLogTag::ACE_RESOURCE, "Get int by name error, resName=%{public}s, errorCode=%{public}d",
+                resName.c_str(), state);
         }
     }
     return result;
@@ -319,9 +387,27 @@ std::vector<uint32_t> ResourceAdapterImpl::GetIntArray(uint32_t resId) const
     if (resourceManager_) {
         auto state = resourceManager_->GetIntArrayById(resId, intVectorResult);
         if (state != Global::Resource::SUCCESS) {
-            LOGW("GetIntArray error, id=%{public}u", resId);
+            TAG_LOGW(AceLogTag::ACE_RESOURCE, "GetIntArray error, id=%{public}u", resId);
         }
     }
+    std::vector<uint32_t> result;
+    std::transform(
+        intVectorResult.begin(), intVectorResult.end(), result.begin(), [](int x) { return static_cast<uint32_t>(x); });
+    return result;
+}
+
+std::vector<uint32_t> ResourceAdapterImpl::GetIntArrayByName(const std::string& resName) const
+{
+    std::vector<int> intVectorResult;
+    auto actualResName = GetActualResourceName(resName);
+    if (resourceManager_) {
+        auto state = resourceManager_->GetIntArrayByName(actualResName.c_str(), intVectorResult);
+        if (state != Global::Resource::SUCCESS) {
+            TAG_LOGW(AceLogTag::ACE_RESOURCE, "Get intArray by name error, resName=%{public}s, errorCode=%{public}d",
+                resName.c_str(), state);
+        }
+    }
+
     std::vector<uint32_t> result;
     std::transform(
         intVectorResult.begin(), intVectorResult.end(), result.begin(), [](int x) { return static_cast<uint32_t>(x); });
@@ -334,7 +420,21 @@ bool ResourceAdapterImpl::GetBoolean(uint32_t resId) const
     if (resourceManager_) {
         auto state = resourceManager_->GetBooleanById(resId, result);
         if (state != Global::Resource::SUCCESS) {
-            LOGW("GetBoolean error, id=%{public}u", resId);
+            TAG_LOGW(AceLogTag::ACE_RESOURCE, "GetBoolean error, id=%{public}u", resId);
+        }
+    }
+    return result;
+}
+
+bool ResourceAdapterImpl::GetBooleanByName(const std::string& resName) const
+{
+    bool result = false;
+    auto actualResName = GetActualResourceName(resName);
+    if (resourceManager_) {
+        auto state = resourceManager_->GetBooleanByName(actualResName.c_str(), result);
+        if (state != Global::Resource::SUCCESS) {
+            TAG_LOGW(AceLogTag::ACE_RESOURCE, "Get boolean by name error, resName=%{public}s, errorCode=%{public}d",
+                resName.c_str(), state);
         }
     }
     return result;
@@ -346,7 +446,7 @@ std::string ResourceAdapterImpl::GetMediaPath(uint32_t resId)
     if (resourceManager_) {
         auto state = resourceManager_->GetMediaById(resId, mediaPath);
         if (state != Global::Resource::SUCCESS) {
-            LOGW("GetMediaPath error, id=%{public}u", resId);
+            TAG_LOGW(AceLogTag::ACE_RESOURCE, "GetMediaPath error, id=%{public}u", resId);
             return "";
         }
         // The Media file directory starts with file// on the PC Preview
@@ -362,7 +462,8 @@ std::string ResourceAdapterImpl::GetMediaPathByName(const std::string& resName)
     if (resourceManager_) {
         auto state = resourceManager_->GetMediaByName(actualResName.c_str(), mediaPath);
         if (state != Global::Resource::SUCCESS) {
-            LOGE("GetMediaPathByName error, resName=%{public}s, errorCode=%{public}u", resName.c_str(), state);
+            TAG_LOGW(AceLogTag::ACE_RESOURCE, "GetMediaPathByName error, resName=%{public}s, errorCode=%{public}u",
+                resName.c_str(), state);
             return "";
         }
         // The Media file directory starts with file// on the PC Preview

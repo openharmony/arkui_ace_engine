@@ -392,10 +392,6 @@ bool RenderSearch::HandleFocusEvent(bool vertical, bool reverse)
 bool RenderSearch::TouchTest(const Point& globalPoint, const Point& parentLocalPoint,
     const TouchRestrict& touchRestrict, TouchTestResult& result)
 {
-    LOGD("OnTouchTest: type is %{public}s, the region is %{public}lf, %{public}lf, %{public}lf, %{public}lf",
-        GetTypeName(), GetTouchRect().Left(), GetTouchRect().Top(), GetTouchRect().Width(), GetTouchRect().Height());
-    LOGD("OnTouchTest: the local point refer to parent is %{public}lf, %{public}lf, ", parentLocalPoint.GetX(),
-        parentLocalPoint.GetY());
     auto pointWithoutMargin = parentLocalPoint - GetPosition();
     if (GetDisableTouchEvent() || disabled_) {
         return false;

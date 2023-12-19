@@ -1,5 +1,23 @@
+/*
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 /// <reference path='./import.ts' />
 class ArkTextClockComponent extends ArkComponent implements TextClockAttribute {
+  constructor(nativePtr: KNode) {
+    super(nativePtr);
+  }
   format(value: string): this {
     modifierWithKey(this._modifiersWithKeys, TextClockFormatModifier.identity, TextClockFormatModifier, value);
     return this;
@@ -39,6 +57,9 @@ class ArkTextClockComponent extends ArkComponent implements TextClockAttribute {
 }
 
 class TextClockFormatModifier extends ModifierWithKey<string> {
+  constructor(value: string) {
+    super(value);
+  }
   static identity: Symbol = Symbol('textClockFormat');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -50,6 +71,9 @@ class TextClockFormatModifier extends ModifierWithKey<string> {
 }
 
 class TextClockFontColorModifier extends ModifierWithKey<ResourceColor> {
+  constructor(value: ResourceColor) {
+    super(value);
+  }
   static identity: Symbol = Symbol('textClockFontColor');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -65,6 +89,9 @@ class TextClockFontColorModifier extends ModifierWithKey<ResourceColor> {
 }
 
 class TextClockFontSizeModifier extends ModifierWithKey<Length> {
+  constructor(value: Length) {
+    super(value);
+  }
   static identity: Symbol = Symbol('textClockFontSize');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -79,6 +106,9 @@ class TextClockFontSizeModifier extends ModifierWithKey<Length> {
 }
 
 class TextClockFontStyleModifier extends ModifierWithKey<FontStyle> {
+  constructor(value: FontStyle) {
+    super(value);
+  }
   static identity: Symbol = Symbol('textClockFontStyle');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -90,6 +120,9 @@ class TextClockFontStyleModifier extends ModifierWithKey<FontStyle> {
 }
 
 class TextClockFontWeightModifier extends ModifierWithKey<number | FontWeight | string> {
+  constructor(value: number | FontWeight | string) {
+    super(value);
+  }
   static identity: Symbol = Symbol('textClockFontWeight');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -101,6 +134,9 @@ class TextClockFontWeightModifier extends ModifierWithKey<number | FontWeight | 
 }
 
 class TextClockFontFamilyModifier extends ModifierWithKey<ResourceStr> {
+  constructor(value: ResourceStr) {
+    super(value);
+  }
   static identity: Symbol = Symbol('textClockFontFamily');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -122,6 +158,6 @@ globalThis.TextClock.attributeModifier = function (modifier) {
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkTextClockComponent(nativeNode);
   });
-  modifier.applyNormalAttribute(component);
+  applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
 }

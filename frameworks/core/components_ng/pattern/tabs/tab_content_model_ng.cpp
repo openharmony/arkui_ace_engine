@@ -212,6 +212,10 @@ void TabContentModelNG::AddTabBarItem(const RefPtr<UINode>& tabContent, int32_t 
     CHECK_NULL_VOID(layoutProperty);
     if (tabBarStyle == TabBarStyle::SUBTABBATSTYLE || tabBarStyle == TabBarStyle::BOTTOMTABBATSTYLE) {
         layoutProperty->UpdatePadding(padding);
+        auto accessibilityProperty = columnNode->GetAccessibilityProperty<AccessibilityProperty>();
+        accessibilityProperty->SetAccessibilityGroup(true);
+        auto id = tabContentPattern->GetId();
+        columnNode->UpdateInspectorId(id);
     } else {
         auto deviceType = SystemProperties::GetDeviceType();
         auto tabBarItemPadding = deviceType == DeviceType::PHONE ? tabTheme->GetSubTabHorizontalPadding()
@@ -313,8 +317,6 @@ void TabContentModelNG::RemoveTabBarItem(const RefPtr<TabContentNode>& tabConten
     }
 
     auto tabBarItemId = tabContentNode->GetTabBarItemId();
-    TAG_LOGD(AceLogTag::ACE_TABS, "Start remove item, tab ID: %{public}d, Bar item ID: %{public}d",
-        tabContentNode->GetId(), tabBarItemId);
     auto tabBarItemNode = ElementRegister::GetInstance()->GetUINodeById(tabBarItemId);
     CHECK_NULL_VOID(tabBarItemNode);
     auto tabBarNode = tabBarItemNode->GetParent();
@@ -403,6 +405,13 @@ void TabContentModelNG::SetSymmetricExtensible(bool isExtensible)
     auto frameNodePattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<TabContentPattern>();
     CHECK_NULL_VOID(frameNodePattern);
     frameNodePattern->SetSymmetricExtensible(isExtensible);
+}
+
+void TabContentModelNG::SetId(const std::string& id)
+{
+    auto frameNodePattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<TabContentPattern>();
+    CHECK_NULL_VOID(frameNodePattern);
+    frameNodePattern->SetId(id);
 }
 
 void TabContentModelNG::UpdateLabelStyle(const LabelStyle& labelStyle, RefPtr<TextLayoutProperty> textLayoutProperty)

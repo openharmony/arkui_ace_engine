@@ -28,6 +28,7 @@ public:
     ~NavigationContentLayoutAlgorithm() override = default;
 
     void Measure(LayoutWrapper* layoutWrapper) override;
+    void Layout(LayoutWrapper* layoutWrapper) override;
 
 private:
     ACE_DISALLOW_COPY_AND_MOVE(NavigationContentLayoutAlgorithm);

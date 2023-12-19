@@ -51,8 +51,6 @@ void WebLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto type = pattern->GetWebType();
     if (pattern->GetLayoutMode() == WebLayoutMode::FIT_CONTENT && IsValidRootLayer(rootLayerWidth, type) &&
         IsValidRootLayer(rootLayerHeight, type)) {
-        TAG_LOGD(AceLogTag::ACE_WEB, "RootLayerWidth = %{public}d, RootLayerHeight = %{public}d", rootLayerWidth,
-            rootLayerHeight);
         layoutWrapper->GetGeometryNode()->SetFrameSize(SizeF(rootLayerWidth, rootLayerHeight));
     } else {
         BoxLayoutAlgorithm::Measure(layoutWrapper);

@@ -35,6 +35,7 @@
 namespace OHOS::Ace::NG {
 namespace {
 constexpr int32_t ANIMATION_TIME = 400;
+constexpr int32_t DELAY_TIME = 300;
 } // namespace
 
 void FolderStackPattern::OnAttachToFrameNode()
@@ -101,10 +102,34 @@ void FolderStackPattern::RefreshStack(FoldStatus foldStatus)
     if (eventHub) {
         eventHub->OnFolderStateChange(event);
     }
-    if (foldStatus != FoldStatus::HALF_FOLD) {
-        RestoreScreenState();
+    currentFoldStatus_ = foldStatus;
+    if (foldStatusDelayTask_) {
+        foldStatusDelayTask_.Cancel();
     }
-    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto taskExecutor = pipeline->GetTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    foldStatusDelayTask_.Reset([weak = WeakClaim(this), pipeline, currentFoldStatus = currentFoldStatus_, host]() {
+        auto pattern = weak.Upgrade();
+        auto container = Container::Current();
+        CHECK_NULL_VOID(container);
+        auto displayInfo = container->GetDisplayInfo();
+        if (displayInfo->GetFoldStatus() != FoldStatus::HALF_FOLD) {
+            pattern->RestoreScreenState();
+        } else {
+            pattern->SetAutoRotate();
+        }
+        auto windowManager = pipeline->GetWindowManager();
+        auto windowMode = windowManager->GetWindowMode();
+        auto rotation = displayInfo->GetRotation();
+        auto isLandscape = rotation == Rotation::ROTATION_90 || rotation == Rotation::ROTATION_270;
+        if (currentFoldStatus == displayInfo->GetFoldStatus() && isLandscape &&
+            windowMode == WindowMode::WINDOW_MODE_FULLSCREEN) {
+            host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        }
+    });
+    taskExecutor->PostDelayedTask(foldStatusDelayTask_, TaskExecutor::TaskType::UI, DELAY_TIME);
 }
 
 bool FolderStackPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, bool skipMeasure, bool skipLayout)
@@ -112,7 +137,16 @@ bool FolderStackPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& d
     if (skipMeasure && skipLayout) {
         return false;
     }
-    StartOffsetEnteringAnimation();
+    auto layoutAlgorithmWrapper = DynamicCast<LayoutAlgorithmWrapper>(dirty->GetLayoutAlgorithm());
+    CHECK_NULL_RETURN(layoutAlgorithmWrapper, false);
+    auto folderStackLayoutAlgorithm =
+        DynamicCast<FolderStackLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
+    CHECK_NULL_RETURN(folderStackLayoutAlgorithm, false);
+    auto isIntoFolderStack = folderStackLayoutAlgorithm->GetIsIntoFolderStack();
+    if (isIntoFolderStack != hasInHoverMode_) {
+        StartOffsetEnteringAnimation();
+    }
+    hasInHoverMode_ = isIntoFolderStack;
     return false;
 }
 
@@ -146,6 +180,11 @@ RefPtr<RenderContext> FolderStackPattern::GetRenderContext()
 void FolderStackPattern::BeforeCreateLayoutWrapper()
 {
     Pattern::BeforeCreateLayoutWrapper();
+    SetAutoRotate();
+}
+
+void FolderStackPattern::SetAutoRotate()
+{
     auto layoutProperty = GetLayoutProperty<FolderStackLayoutProperty>();
     auto autoHalfFold = layoutProperty->GetAutoHalfFold().value_or(true);
     auto container = Container::Current();

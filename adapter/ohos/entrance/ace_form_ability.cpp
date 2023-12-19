@@ -95,11 +95,8 @@ void AceFormAbility::LoadFormEnv(const OHOS::AAFwk::Want& want)
     std::vector<std::string> assetBasePathStr;
 
     if (abilityInfo != nullptr && !abilityInfo->srcPath.empty()) {
-        TAG_LOGD(AceLogTag::ACE_FORM, "AceFormAbility srcPath:%{public}s url:%{public}s", abilityInfo->srcPath.c_str(),
-            parsedUrl.c_str());
         assetBasePathStr = { "assets/js/" + abilityInfo->srcPath + "/", std::string("assets/js/") };
     } else {
-        TAG_LOGD(AceLogTag::ACE_FORM, "AceFormAbility parsedUrl:%{public}s", parsedUrl.c_str());
         assetBasePathStr = { std::string("assets/js/default/"), std::string("assets/js/share/") };
     }
 
@@ -175,7 +172,6 @@ void AceFormAbility::OnVisibilityChanged(const std::map<int64_t, int32_t>& formE
 
 bool AceFormAbility::OnShare(int64_t formId, OHOS::AAFwk::WantParams& wantParams)
 {
-    TAG_LOGD(AceLogTag::ACE_FORM, "AceFormAbility OnShare called");
     return Platform::PaContainer::OnShare(instanceId_, formId, wantParams);
 }
 
@@ -207,7 +203,6 @@ void AceFormAbility::OnDisconnect(const Want& want)
 
 sptr<IRemoteObject> AceFormAbility::GetFormRemoteObject()
 {
-    TAG_LOGD(AceLogTag::ACE_FORM, "Get form remote object start");
     if (formProviderRemoteObject_ == nullptr) {
         sptr<FormProviderClient> providerClient = new (std::nothrow) FormProviderClient();
         std::shared_ptr<Ability> thisAbility = this->shared_from_this();

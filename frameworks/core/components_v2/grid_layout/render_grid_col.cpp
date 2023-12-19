@@ -41,8 +41,6 @@ void RenderGridCol::PerformLayout()
     for (const auto& child : children) {
         // single child will run for once
         child->Layout(layout);
-        LOGD("GridContainer grid col layout size width %{public}lf height %{public}lf", child->GetLayoutSize().Width(),
-            child->GetLayoutSize().Height());
         SetLayoutSize(child->GetLayoutSize());
     }
 }

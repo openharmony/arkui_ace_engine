@@ -16,6 +16,9 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_SVG_PARSE_SVG_GRAPHIC_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_SVG_PARSE_SVG_GRAPHIC_H
 
+#include "include/core/SkMaskFilter.h"
+#include "base/utils/utils.h"
+#include "core/components_ng/render/drawing_forward.h"
 #ifndef USE_ROSEN_DRAWING
 #include "include/core/SkPaint.h"
 #else
@@ -60,10 +63,27 @@ protected:
     {
 #ifndef USE_ROSEN_DRAWING
         if (skCanvas_) {
-            skCanvas_->drawPath(path_, fillPaint_);
+            auto smoothEdge = GetSmoothEdge();
+            if (GreatNotEqual(smoothEdge, 0.0f)) {
+                auto filter = SkMaskFilter::MakeBlur(SkBlurStyle::kNormal_SkBlurStyle, smoothEdge);
+                auto tmpFillPaint = fillPaint_;
+                tmpFillPaint.setMaskFilter(filter);
+                skCanvas_->drawPath(path_, tmpFillPaint);
+                tmpFillPaint.setMaskFilter(nullptr);
+            } else {
+                skCanvas_->drawPath(path_, fillPaint_);
+            }
         }
 #else
         if (rsCanvas_) {
+            auto smoothEdge = GetSmoothEdge();
+            if (GreatNotEqual(smoothEdge, 0.0f)) {
+                RSFilter filter;
+                filter.SetMaskFilter(RSMaskFilter::CreateBlurMaskFilter(
+                    RSBlurType::NORMAL, static_cast<double>(smoothEdge)
+                ));
+                strokePen_.SetFilter(filter);
+            }
             rsCanvas_->AttachBrush(fillBrush_);
             rsCanvas_->DrawPath(path_);
             rsCanvas_->DetachBrush();
@@ -75,10 +95,27 @@ protected:
     {
 #ifndef USE_ROSEN_DRAWING
         if (skCanvas_) {
-            skCanvas_->drawPath(path_, strokePaint_);
+            auto smoothEdge = GetSmoothEdge();
+            if (GreatNotEqual(smoothEdge, 0.0f)) {
+                auto filter = SkMaskFilter::MakeBlur(SkBlurStyle::kNormal_SkBlurStyle, smoothEdge);
+                auto tmpStrokePaint = strokePaint_;
+                tmpStrokePaint.setMaskFilter(filter);
+                skCanvas_->drawPath(path_, tmpStrokePaint);
+                tmpStrokePaint.setMaskFilter(nullptr);
+            } else {
+                skCanvas_->drawPath(path_, strokePaint_);
+            }
         }
 #else
         if (rsCanvas_) {
+            auto smoothEdge = GetSmoothEdge();
+            if (GreatNotEqual(smoothEdge, 0.0f)) {
+                RSFilter filter;
+                filter.SetMaskFilter(RSMaskFilter::CreateBlurMaskFilter(
+                    RSBlurType::NORMAL, static_cast<double>(smoothEdge)
+                ));
+                strokePen_.SetFilter(filter);
+            }
             rsCanvas_->AttachPen(strokePen_);
             rsCanvas_->DrawPath(path_);
             rsCanvas_->DetachPen();

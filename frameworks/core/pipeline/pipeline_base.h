@@ -61,6 +61,9 @@ class RSTransaction;
 }
 
 namespace OHOS::Ace {
+namespace NG {
+class FrameNode;
+}
 
 struct KeyboardAnimationConfig {
     std::string curveType_;
@@ -87,6 +90,7 @@ class OffscreenCanvas;
 class Window;
 class FontManager;
 class ManagerInterface;
+class NavigationController;
 enum class FrontendType;
 using SharePanelCallback = std::function<void(const std::string& bundleName, const std::string& abilityName)>;
 using AceVsyncCallback = std::function<void(uint64_t, uint32_t)>;
@@ -164,6 +168,9 @@ public:
     // Called by view when touch event received.
     virtual void OnTouchEvent(const TouchEvent& point, bool isSubPipe = false) = 0;
 
+    // Called by ohos AceContainer when touch event received.
+    virtual void OnTouchEvent(const TouchEvent& point, const RefPtr<NG::FrameNode>& node, bool isSubPipe = false) {}
+
     // Called by container when key event received.
     // if return false, then this event needs platform to handle it.
     virtual bool OnKeyEvent(const KeyEvent& event) = 0;
@@ -171,8 +178,14 @@ public:
     // Called by view when mouse event received.
     virtual void OnMouseEvent(const MouseEvent& event) = 0;
 
+    // Called by ohos AceContainer when mouse event received.
+    virtual void OnMouseEvent(const MouseEvent& event, const RefPtr<NG::FrameNode>& node) {}
+
     // Called by view when axis event received.
     virtual void OnAxisEvent(const AxisEvent& event) = 0;
+
+    // Called by ohos AceContainer when axis event received.
+    virtual void OnAxisEvent(const AxisEvent& event, const RefPtr<NG::FrameNode>& node) {}
 
     // Called by container when rotation event received.
     // if return false, then this event needs platform to handle it.
@@ -298,6 +311,11 @@ public:
     virtual void GetBoundingRectData(int32_t nodeId, Rect& rect) {}
 
     virtual RefPtr<AccessibilityManager> GetAccessibilityManager() const;
+
+    virtual std::shared_ptr<NavigationController> GetNavigationController(const std::string& id)
+    {
+        return nullptr;
+    }
 
     void SetRootSize(double density, int32_t width, int32_t height);
 
@@ -547,7 +565,7 @@ public:
     template<typename T>
     bool GetDraggable()
     {
-        if (IsJsCard()) {
+        if (isJsCard_ || isFormRender_) {
             return false;
         }
         auto theme = GetTheme<T>();

@@ -17,7 +17,6 @@
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_api.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 
-
 namespace OHOS::Ace::NG {
 constexpr int NUM_0 = 0;
 constexpr int NUM_1 = 1;
@@ -45,21 +44,21 @@ ArkUINativeModuleValue CheckboxBridge::SetMark(ArkUIRuntimeCallInfo* runtimeCall
     if (!ArkTSUtils::ParseJsColorAlpha(vm, colorArg, strokeColor)) {
         strokeColor = theme->GetPointColor();
     }
-    
+
     CalcDimension size;
-    if (!(ArkTSUtils::ParseJsDimensionVp(vm, sizeArg, size)) || (size.Unit() == DimensionUnit::PERCENT) ||
+    if (!(ArkTSUtils::ParseJsDimensionVp(vm, sizeArg, size, false)) || (size.Unit() == DimensionUnit::PERCENT) ||
         (size.ConvertToVp() < 0)) {
         size = Dimension(CHECK_BOX_MARK_SIZE_INVALID_VALUE);
     }
 
     CalcDimension strokeWidth;
-    if (!(ArkTSUtils::ParseJsDimensionVp(vm, widthArg, strokeWidth)) ||
+    if (!(ArkTSUtils::ParseJsDimensionVp(vm, widthArg, strokeWidth, false)) ||
         (strokeWidth.Unit() == DimensionUnit::PERCENT) || (strokeWidth.ConvertToVp() < 0)) {
         strokeWidth = theme->GetCheckStroke();
     }
 
-    GetArkUIInternalNodeAPI()->GetCheckboxModifier().SetMark(nativeNode,
-        strokeColor.GetValue(), size.Value(), strokeWidth.Value());
+    GetArkUIInternalNodeAPI()->GetCheckboxModifier().SetMark(
+        nativeNode, strokeColor.GetValue(), size.Value(), strokeWidth.Value());
     return panda::JSValueRef::Undefined(vm);
 }
 

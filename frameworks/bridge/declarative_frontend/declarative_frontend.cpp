@@ -183,7 +183,6 @@ void DeclarativeFrontend::Destroy()
 
 bool DeclarativeFrontend::Initialize(FrontendType type, const RefPtr<TaskExecutor>& taskExecutor)
 {
-    LOGD("DeclarativeFrontend initialize begin.");
     type_ = type;
     taskExecutor_ = taskExecutor;
     ACE_DCHECK(type_ == FrontendType::DECLARATIVE_JS);
@@ -208,13 +207,11 @@ bool DeclarativeFrontend::Initialize(FrontendType type, const RefPtr<TaskExecuto
         initJSEngineTask();
     }
 
-    LOGD("DeclarativeFrontend initialize end.");
     return true;
 }
 
 void DeclarativeFrontend::AttachPipelineContext(const RefPtr<PipelineBase>& context)
 {
-    LOGD("DeclarativeFrontend AttachPipelineContext.");
     if (!delegate_) {
         return;
     }
@@ -1095,9 +1092,6 @@ void DeclarativeEventHandler::HandleAsyncEvent(const EventMarker& eventMarker, c
     } else if (eventMarker.GetData().eventType == "swipe") {
         SwipeInfoToString(info, eventParam);
     }
-
-    LOGD("HandleAsyncEvent pageId: %{public}d, eventId: %{public}s, eventType: %{public}s",
-        eventMarker.GetData().pageId, eventMarker.GetData().eventId.c_str(), eventMarker.GetData().eventType.c_str());
     std::string param = eventMarker.GetData().GetEventParam();
     if (eventParam.empty()) {
         param.append("null");
@@ -1132,8 +1126,6 @@ void DeclarativeEventHandler::HandleAsyncEvent(
 
 void DeclarativeEventHandler::HandleSyncEvent(const EventMarker& eventMarker, const KeyEvent& info, bool& result)
 {
-    LOGD("HandleSyncEvent pageId: %{public}d, eventId: %{public}s, eventType: %{public}s", eventMarker.GetData().pageId,
-        eventMarker.GetData().eventId.c_str(), eventMarker.GetData().eventType.c_str());
     std::string param = std::string("\"")
                             .append(eventMarker.GetData().eventType)
                             .append("\",{\"code\":")
@@ -1174,9 +1166,6 @@ void DeclarativeEventHandler::HandleAsyncEvent(const EventMarker& eventMarker, c
 
 void DeclarativeEventHandler::HandleAsyncEvent(const EventMarker& eventMarker, const std::string& param)
 {
-    LOGD("HandleAsyncEvent pageId: %{public}d, eventId: %{public}s", eventMarker.GetData().pageId,
-        eventMarker.GetData().eventId.c_str());
-
     if (eventMarker.GetData().isDeclarativeUi) {
         std::string fixParam(param);
         std::string::size_type startPos = param.find_first_of("{");

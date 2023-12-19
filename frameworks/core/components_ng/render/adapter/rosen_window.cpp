@@ -56,7 +56,7 @@ RosenWindow::RosenWindow(const OHOS::sptr<OHOS::Rosen::Window>& window, RefPtr<T
             auto pipeline = container->GetPipelineContext();
             CHECK_NULL_VOID(pipeline);
             pipeline->OnIdle(timeStampNanos + refreshPeriod);
-            JankFrameReport::JankFrameRecord(timeStampNanos);
+            JankFrameReport::GetInstance().JankFrameRecord(timeStampNanos);
         };
         auto uiTaskRunner = SingleTaskExecutor::Make(taskExecutor, TaskExecutor::TaskType::UI);
         if (uiTaskRunner.IsRunOnCurrentThread()) {
@@ -105,7 +105,6 @@ void RosenWindow::RequestFrame()
     CHECK_NULL_VOID(onShow_);
     CHECK_RUN_ON(UI);
     CHECK_NULL_VOID(!isRequestVsync_);
-    LOGD("request next vsync");
     if (rsWindow_) {
         isRequestVsync_ = true;
         rsWindow_->RequestVsync(vsyncCallback_);
@@ -170,7 +169,6 @@ void RosenWindow::SetRootFrameNode(const RefPtr<NG::FrameNode>& root)
 
 void RosenWindow::RecordFrameTime(uint64_t timeStamp, const std::string& name)
 {
-    LOGD("Rosenwindow RecordFrameTime");
     CHECK_NULL_VOID(rsUIDirector_);
     rsUIDirector_->SetTimeStamp(timeStamp, name);
 }
@@ -178,10 +176,9 @@ void RosenWindow::RecordFrameTime(uint64_t timeStamp, const std::string& name)
 void RosenWindow::FlushTasks()
 {
     CHECK_RUN_ON(UI);
-    LOGD("Rosenwindow flush tasks");
     CHECK_NULL_VOID(rsUIDirector_);
     rsUIDirector_->SendMessages();
-    JankFrameReport::JsAnimationToRsRecord();
+    JankFrameReport::GetInstance().JsAnimationToRsRecord();
 }
 
 float RosenWindow::GetRefreshRate() const
@@ -197,13 +194,11 @@ void RosenWindow::SetKeepScreenOn(bool keepScreenOn)
 {
 #ifdef OHOS_PLATFORM
     if (rsWindow_) {
-        LOGD("Rosenwindow SetKeepScreenOn switch = %{public}d", keepScreenOn);
         rsWindow_->SetKeepScreenOn(keepScreenOn);
     } else {
         LOGE("SetKeepScreenOn Rosenwindow is null");
     }
 #else
-    LOGD("Rosenwindow unsupports the SetKeepScreenOn");
 #endif
 }
 

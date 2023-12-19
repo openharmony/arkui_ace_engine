@@ -367,8 +367,6 @@ void ThreadWatcher::TagIncrease()
 {
     std::unique_lock<std::shared_mutex> lock(mutex_);
     ++threadTag_;
-    LOGD("thread check, instanceId: %{public}d, thread: %{public}s, looptime: %{public}d, "
-         "checktime: %{public}d", instanceId_, threadName_.c_str(), loopTime_, threadTag_);
 }
 
 WatchDog::WatchDog()

@@ -140,8 +140,6 @@ void TabContentModelImpl::SetTabBar(const std::optional<std::string>& text, cons
     if (tabContentItemComponent->GetBarElementId() == ElementRegister::UndefinedElementId) {
         const auto id = ElementRegister::GetInstance()->MakeUniqueId();
         tabContentItemComponent->SetBarElementId(id);
-        LOGD("Setting ID for tab bar item to %{public}d tabContentItemComponent id %{public}d", id,
-            tabContentItemComponent->GetBarElementId());
     }
 }
 

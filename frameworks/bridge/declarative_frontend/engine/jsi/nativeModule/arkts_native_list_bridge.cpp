@@ -16,47 +16,63 @@
 
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_api.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
-#include "frameworks/core/components/list/list_theme.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_abstract.h"
+#include "frameworks/core/components/list/list_theme.h"
 
 namespace OHOS::Ace::NG {
-constexpr int NUM_0 = 0;
-constexpr int NUM_1 = 1;
-constexpr int NUM_2 = 2;
-constexpr int NUM_3 = 3;
-constexpr int NUM_4 = 4;
-constexpr int NUM_5 = 5;
-constexpr int NUM_6 = 6;
-constexpr int NUM_7 = 7;
+constexpr int32_t LIST_ARG_INDEX_0 = 0;
+constexpr int32_t LIST_ARG_INDEX_1 = 1;
+constexpr int32_t LIST_ARG_INDEX_2 = 2;
+constexpr int32_t LIST_ARG_INDEX_3 = 3;
+constexpr int32_t LIST_ARG_INDEX_4 = 4;
+constexpr int32_t LIST_ARG_INDEX_5 = 5;
+constexpr int32_t LIST_ARG_INDEX_6 = 6;
+constexpr int32_t LIST_ARG_INDEX_7 = 7;
+
+constexpr int32_t ARG_LENGTH = 3;
+
 ArkUINativeModuleValue ListBridge::SetListLanes(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
-    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
-    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
-    Local<JSValueRef> thirdArg = runtimeCallInfo->GetCallArgRef(NUM_2);
-    Local<JSValueRef> fourthArg = runtimeCallInfo->GetCallArgRef(NUM_3);
-    Local<JSValueRef> fifthArg = runtimeCallInfo->GetCallArgRef(NUM_4);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+    Local<JSValueRef> frameNodeArg = runtimeCallInfo->GetCallArgRef(0); // 0: index of parameter frameNode
+    Local<JSValueRef> laneNumArg = runtimeCallInfo->GetCallArgRef(1);   // 1: index of parameter laneNum
+    Local<JSValueRef> minLengthArg = runtimeCallInfo->GetCallArgRef(2); // 2: index of parameter minLength
+    Local<JSValueRef> maxLengthArg = runtimeCallInfo->GetCallArgRef(3); // 3: index of parameter maxLength
+    Local<JSValueRef> gutterArg = runtimeCallInfo->GetCallArgRef(4);    // 4: index of parameter gutter
+    void* nativeNode = frameNodeArg->ToNativePointer(vm)->Value();
+    ArkUIDimensionType gutterType;
+    ArkUIDimensionType minLengthType;
+    ArkUIDimensionType maxLengthType;
 
-    CalcDimension gutter;
-    if (fifthArg->IsUndefined() || !ArkTSUtils::ParseJsDimension(vm, fifthArg, gutter, DimensionUnit::VP)) {
-        gutter = Dimension(0);
+    CalcDimension gutter = Dimension(0.0);
+    int32_t laneNum = 1;
+    CalcDimension minLength = -1.0_vp;
+    CalcDimension maxLength = -1.0_vp;
+    if (!gutterArg->IsUndefined() && ArkTSUtils::ParseJsDimensionVp(vm, gutterArg, gutter)) {
+        if (gutter.IsNegative()) {
+            gutter.Reset();
+        }
+        gutterType.value = gutter.Value();
+        gutterType.units = static_cast<int32_t>(gutter.Unit());
     }
-
-    if (!secondArg->IsUndefined()) {
-        CalcDimension minLength = 0.0_vp;
-        CalcDimension maxLength = 0.0_vp;
-        GetArkUIInternalNodeAPI()->GetListModifier().SetListLanes(
-            nativeNode, secondArg->ToNumber(vm)->Value(), minLength, maxLength, gutter);
-    } else {
-        CalcDimension minLength;
-        CalcDimension maxLength;
-        ArkTSUtils::ParseJsDimension(vm, thirdArg, minLength, DimensionUnit::VP);
-        ArkTSUtils::ParseJsDimension(vm, fourthArg, maxLength, DimensionUnit::VP);
-        GetArkUIInternalNodeAPI()->GetListModifier().SetListLanes(nativeNode, -1, minLength, maxLength, gutter);
+    if (!laneNumArg->IsUndefined() && ArkTSUtils::ParseJsInteger(vm, laneNumArg, laneNum)) {
+        minLengthType.value = minLength.Value();
+        minLengthType.units = static_cast<int32_t>(minLength.Unit());
+        maxLengthType.value = maxLength.Value();
+        maxLengthType.units = static_cast<int32_t>(maxLength.Unit());
     }
-
+    if (!minLengthArg->IsUndefined() && !maxLengthArg->IsUndefined() &&
+        ArkTSUtils::ParseJsDimensionVp(vm, minLengthArg, minLength) &&
+        ArkTSUtils::ParseJsDimensionVp(vm, maxLengthArg, maxLength)) {
+        laneNum = -1;
+        minLengthType.value = minLength.Value();
+        minLengthType.units = static_cast<int32_t>(minLength.Unit());
+        maxLengthType.value = maxLength.Value();
+        maxLengthType.units = static_cast<int32_t>(maxLength.Unit());
+    }
+    GetArkUIInternalNodeAPI()->GetListModifier().SetListLanes(
+        nativeNode, laneNum, &minLengthType, &maxLengthType, &gutterType);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -64,7 +80,7 @@ ArkUINativeModuleValue ListBridge::ResetListLanes(ArkUIRuntimeCallInfo* runtimeC
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
-    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(LIST_ARG_INDEX_0);
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
     GetArkUIInternalNodeAPI()->GetListModifier().ResetListLanes(nativeNode);
 
@@ -74,8 +90,8 @@ ArkUINativeModuleValue ListBridge::SetEditMode(ArkUIRuntimeCallInfo* runtimeCall
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
-    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
-    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(LIST_ARG_INDEX_0);
+    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(LIST_ARG_INDEX_1);
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
     if (secondArg->IsUndefined()) {
         GetArkUIInternalNodeAPI()->GetListModifier().ResetEditMode(nativeNode);
@@ -102,8 +118,8 @@ ArkUINativeModuleValue ListBridge::SetMultiSelectable(ArkUIRuntimeCallInfo* runt
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
-    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
-    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(LIST_ARG_INDEX_0);
+    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(LIST_ARG_INDEX_1);
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
     if (secondArg->IsUndefined()) {
         GetArkUIInternalNodeAPI()->GetListModifier().ResetMultiSelectable(nativeNode);
@@ -130,8 +146,8 @@ ArkUINativeModuleValue ListBridge::SetChainAnimation(ArkUIRuntimeCallInfo* runti
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
-    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
-    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(LIST_ARG_INDEX_0);
+    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(LIST_ARG_INDEX_1);
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
     bool chainAnimation = secondArg->ToBoolean(vm)->Value();
     GetArkUIInternalNodeAPI()->GetListModifier().SetChainAnimation(nativeNode, chainAnimation);
@@ -154,8 +170,8 @@ ArkUINativeModuleValue ListBridge::SetCachedCount(ArkUIRuntimeCallInfo* runtimeC
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
-    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
-    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(LIST_ARG_INDEX_0);
+    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(LIST_ARG_INDEX_1);
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
     int32_t cachedCount = secondArg->Int32Value(vm);
 
@@ -168,7 +184,7 @@ ArkUINativeModuleValue ListBridge::ResetCachedCount(ArkUIRuntimeCallInfo* runtim
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
-    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(LIST_ARG_INDEX_0);
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
     GetArkUIInternalNodeAPI()->GetListModifier().ResetCachedCount(nativeNode);
 
@@ -179,8 +195,8 @@ ArkUINativeModuleValue ListBridge::SetEnableScrollInteraction(ArkUIRuntimeCallIn
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
-    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
-    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(LIST_ARG_INDEX_0);
+    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(LIST_ARG_INDEX_1);
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
     if (secondArg->IsBoolean()) {
         bool enableScrollInteraction = secondArg->ToBoolean(vm)->Value();
@@ -196,7 +212,7 @@ ArkUINativeModuleValue ListBridge::ResetEnableScrollInteraction(ArkUIRuntimeCall
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
-    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(LIST_ARG_INDEX_0);
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
     GetArkUIInternalNodeAPI()->GetListModifier().ResetEnableScrollInteraction(nativeNode);
 
@@ -207,8 +223,8 @@ ArkUINativeModuleValue ListBridge::SetSticky(ArkUIRuntimeCallInfo* runtimeCallIn
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
-    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
-    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(LIST_ARG_INDEX_0);
+    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(LIST_ARG_INDEX_1);
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
     if (secondArg->IsUndefined()) {
         GetArkUIInternalNodeAPI()->GetListModifier().ResetSticky(nativeNode);
@@ -224,7 +240,7 @@ ArkUINativeModuleValue ListBridge::ResetSticky(ArkUIRuntimeCallInfo* runtimeCall
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
-    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(LIST_ARG_INDEX_0);
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
     GetArkUIInternalNodeAPI()->GetListModifier().ResetSticky(nativeNode);
 
@@ -235,10 +251,10 @@ ArkUINativeModuleValue ListBridge::SetListEdgeEffect(ArkUIRuntimeCallInfo* runti
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
-    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
-    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
-    Local<JSValueRef> thirdArg = runtimeCallInfo->GetCallArgRef(NUM_2);
-    
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(LIST_ARG_INDEX_0);
+    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(LIST_ARG_INDEX_1);
+    Local<JSValueRef> thirdArg = runtimeCallInfo->GetCallArgRef(LIST_ARG_INDEX_2);
+
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
     int32_t effect = static_cast<int32_t>(EdgeEffect::SPRING);
 
@@ -263,7 +279,7 @@ ArkUINativeModuleValue ListBridge::ResetListEdgeEffect(ArkUIRuntimeCallInfo* run
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
-    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(LIST_ARG_INDEX_0);
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
     GetArkUIInternalNodeAPI()->GetListModifier().ResetListEdgeEffect(nativeNode);
     return panda::JSValueRef::Undefined(vm);
@@ -273,8 +289,8 @@ ArkUINativeModuleValue ListBridge::SetListDirection(ArkUIRuntimeCallInfo* runtim
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
-    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
-    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(LIST_ARG_INDEX_0);
+    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(LIST_ARG_INDEX_1);
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
     if (secondArg->IsUndefined()) {
         GetArkUIInternalNodeAPI()->GetListModifier().ResetListDirection(nativeNode);
@@ -289,7 +305,7 @@ ArkUINativeModuleValue ListBridge::ResetListDirection(ArkUIRuntimeCallInfo* runt
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
-    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(LIST_ARG_INDEX_0);
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
     GetArkUIInternalNodeAPI()->GetListModifier().ResetListDirection(nativeNode);
 
@@ -300,8 +316,8 @@ ArkUINativeModuleValue ListBridge::SetListFriction(ArkUIRuntimeCallInfo* runtime
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
-    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
-    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(LIST_ARG_INDEX_0);
+    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(LIST_ARG_INDEX_1);
 
     double friction = -1.0;
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
@@ -316,7 +332,7 @@ ArkUINativeModuleValue ListBridge::ResetListFriction(ArkUIRuntimeCallInfo* runti
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
-    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(LIST_ARG_INDEX_0);
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
     GetArkUIInternalNodeAPI()->GetListModifier().ResetListFriction(nativeNode);
     return panda::JSValueRef::Undefined(vm);
@@ -326,9 +342,9 @@ ArkUINativeModuleValue ListBridge::SetListNestedScroll(ArkUIRuntimeCallInfo* run
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
-    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
-    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
-    Local<JSValueRef> thirdArg = runtimeCallInfo->GetCallArgRef(NUM_2);
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(LIST_ARG_INDEX_0);
+    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(LIST_ARG_INDEX_1);
+    Local<JSValueRef> thirdArg = runtimeCallInfo->GetCallArgRef(LIST_ARG_INDEX_2);
 
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
     int32_t forward = 0;
@@ -359,7 +375,7 @@ ArkUINativeModuleValue ListBridge::ResetListNestedScroll(ArkUIRuntimeCallInfo* r
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
-    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(LIST_ARG_INDEX_0);
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
     GetArkUIInternalNodeAPI()->GetListModifier().ResetListNestedScroll(nativeNode);
     return panda::JSValueRef::Undefined(vm);
@@ -369,8 +385,8 @@ ArkUINativeModuleValue ListBridge::SetListScrollBar(ArkUIRuntimeCallInfo* runtim
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
-    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
-    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(LIST_ARG_INDEX_0);
+    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(LIST_ARG_INDEX_1);
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
     if (secondArg->IsUndefined()) {
         GetArkUIInternalNodeAPI()->GetListModifier().ResetListScrollBar(nativeNode);
@@ -386,7 +402,7 @@ ArkUINativeModuleValue ListBridge::ResetListScrollBar(ArkUIRuntimeCallInfo* runt
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
-    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(LIST_ARG_INDEX_0);
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
     GetArkUIInternalNodeAPI()->GetListModifier().ResetListScrollBar(nativeNode);
 
@@ -397,8 +413,8 @@ ArkUINativeModuleValue ListBridge::SetAlignListItem(ArkUIRuntimeCallInfo* runtim
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
-    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
-    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(LIST_ARG_INDEX_0);
+    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(LIST_ARG_INDEX_1);
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
     int32_t listItemAlign = secondArg->Int32Value(vm);
     GetArkUIInternalNodeAPI()->GetListModifier().SetAlignListItem(nativeNode, listItemAlign);
@@ -420,8 +436,8 @@ ArkUINativeModuleValue ListBridge::SetScrollSnapAlign(ArkUIRuntimeCallInfo* runt
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
-    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
-    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(LIST_ARG_INDEX_0);
+    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(LIST_ARG_INDEX_1);
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
     if (secondArg->IsUndefined()) {
         GetArkUIInternalNodeAPI()->GetListModifier().ResetScrollSnapAlign(nativeNode);
@@ -447,38 +463,57 @@ ArkUINativeModuleValue ListBridge::SetDivider(ArkUIRuntimeCallInfo* runtimeCallI
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
-    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
-    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
-    Local<JSValueRef> thirdArg = runtimeCallInfo->GetCallArgRef(NUM_2);
-    Local<JSValueRef> fourthArg = runtimeCallInfo->GetCallArgRef(NUM_3);
-    Local<JSValueRef> fifthArg = runtimeCallInfo->GetCallArgRef(NUM_4);
-
-    CalcDimension strokeWidth;
-    Color color;
-    CalcDimension startMargin;
-    CalcDimension endMargin;
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    if (secondArg->IsNull() || secondArg->IsUndefined() ||
-        !ArkTSUtils::ParseJsDimension(vm, secondArg, strokeWidth, DimensionUnit::VP)) {
-        strokeWidth = 0.0_vp;
-    };
-    if (!ArkTSUtils::ParseJsColorAlpha(vm, thirdArg, color)) {
-        RefPtr<ListTheme> listTheme = Framework::JSViewAbstract::GetTheme<ListTheme>();
-        if (listTheme) {
-            color = listTheme->GetDividerColor();
-        }
-    };
-    if (fourthArg->IsNull() || fourthArg->IsUndefined() ||
-        !ArkTSUtils::ParseJsDimension(vm, fourthArg, startMargin, DimensionUnit::VP)) {
-        startMargin = 0.0_vp;
-    };
-    if (fifthArg->IsNull() || fifthArg->IsUndefined() ||
-        !ArkTSUtils::ParseJsDimension(vm, fifthArg, endMargin, DimensionUnit::VP)) {
-        endMargin = 0.0_vp;
-    };
-    GetArkUIInternalNodeAPI()->GetListModifier().ListSetDivider(nativeNode, strokeWidth.Value(), color.GetValue(),
-        startMargin.Value(), endMargin.Value(), static_cast<int>(strokeWidth.Unit()),
-        static_cast<int>(startMargin.Unit()), static_cast<int>(endMargin.Unit()));
+    Local<JSValueRef> dividerStrokeWidthArgs = runtimeCallInfo->GetCallArgRef(LIST_ARG_INDEX_1);
+    Local<JSValueRef> colorArg = runtimeCallInfo->GetCallArgRef(LIST_ARG_INDEX_2);
+    Local<JSValueRef> dividerStartMarginArgs = runtimeCallInfo->GetCallArgRef(LIST_ARG_INDEX_3);
+    Local<JSValueRef> dividerEndMarginArgs = runtimeCallInfo->GetCallArgRef(LIST_ARG_INDEX_4);
+    if (dividerStrokeWidthArgs->IsUndefined() && dividerStartMarginArgs->IsUndefined() &&
+        dividerEndMarginArgs->IsUndefined() && colorArg->IsUndefined()) {
+        GetArkUIInternalNodeAPI()->GetListModifier().ListResetDivider(nativeNode);
+        return panda::JSValueRef::Undefined(vm);
+    }
+
+    CalcDimension dividerStrokeWidth;
+    CalcDimension dividerStartMargin;
+    CalcDimension dividerEndMargin;
+    uint32_t color;
+    auto* frameNode = reinterpret_cast<FrameNode*>(nativeNode);
+    auto context = frameNode->GetContext();
+    auto themeManager = context->GetThemeManager();
+    CHECK_NULL_RETURN(themeManager, panda::NativePointerRef::New(vm, nullptr));
+    auto listTheme = themeManager->GetTheme<ListTheme>();
+    CHECK_NULL_RETURN(listTheme, panda::NativePointerRef::New(vm, nullptr));
+
+    if (!ArkTSUtils::ParseJsDimensionVp(vm, dividerStrokeWidthArgs, dividerStrokeWidth) ||
+        LessNotEqual(dividerStrokeWidth.Value(), 0.0f) || dividerStrokeWidth.Unit() == DimensionUnit::PERCENT) {
+        dividerStrokeWidth.Reset();
+    }
+    Color colorObj;
+    if (!ArkTSUtils::ParseJsColorAlpha(vm, colorArg, colorObj)) {
+        color = listTheme->GetDividerColor().GetValue();
+    } else {
+        color = colorObj.GetValue();
+    }
+    if (!ArkTSUtils::ParseJsDimensionVp(vm, dividerStartMarginArgs, dividerStartMargin) ||
+        LessNotEqual(dividerStartMargin.Value(), 0.0f) || dividerStartMargin.Unit() == DimensionUnit::PERCENT) {
+        dividerStartMargin.Reset();
+    }
+    if (!ArkTSUtils::ParseJsDimensionVp(vm, dividerEndMarginArgs, dividerEndMargin) ||
+        LessNotEqual(dividerEndMargin.Value(), 0.0f) || dividerEndMargin.Unit() == DimensionUnit::PERCENT) {
+        dividerEndMargin.Reset();
+    }
+    uint32_t size = ARG_LENGTH;
+    double values[size];
+    int32_t units[size];
+    values[LIST_ARG_INDEX_0] = dividerStrokeWidth.Value();
+    values[LIST_ARG_INDEX_1] = dividerStartMargin.Value();
+    values[LIST_ARG_INDEX_2] = dividerEndMargin.Value();
+    units[LIST_ARG_INDEX_0] = static_cast<int32_t>(dividerStrokeWidth.Unit());
+    units[LIST_ARG_INDEX_1] = static_cast<int32_t>(dividerStartMargin.Unit());
+    units[LIST_ARG_INDEX_2] = static_cast<int32_t>(dividerEndMargin.Unit());
+    GetArkUIInternalNodeAPI()->GetListModifier().ListSetDivider(nativeNode, color, values, units, size);
 
     return panda::JSValueRef::Undefined(vm);
 }
@@ -487,7 +522,7 @@ ArkUINativeModuleValue ListBridge::ResetDivider(ArkUIRuntimeCallInfo* runtimeCal
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
-    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(LIST_ARG_INDEX_0);
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
     GetArkUIInternalNodeAPI()->GetListModifier().ListResetDivider(nativeNode);
     return panda::JSValueRef::Undefined(vm);
@@ -497,47 +532,52 @@ ArkUINativeModuleValue ListBridge::SetChainAnimationOptions(ArkUIRuntimeCallInfo
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
-    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
-    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
-    Local<JSValueRef> thirdArg = runtimeCallInfo->GetCallArgRef(NUM_2);
-    Local<JSValueRef> fourthArg = runtimeCallInfo->GetCallArgRef(NUM_3);
-    Local<JSValueRef> fifthArg = runtimeCallInfo->GetCallArgRef(NUM_4);
-    Local<JSValueRef> sixthArg = runtimeCallInfo->GetCallArgRef(NUM_5);
-    Local<JSValueRef> seventhArg = runtimeCallInfo->GetCallArgRef(NUM_6);
-    Local<JSValueRef> eighthArg = runtimeCallInfo->GetCallArgRef(NUM_7);
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(LIST_ARG_INDEX_0);
+    Local<JSValueRef> minSpaceArgs = runtimeCallInfo->GetCallArgRef(LIST_ARG_INDEX_1);
+    Local<JSValueRef> maxSpaceArgs = runtimeCallInfo->GetCallArgRef(LIST_ARG_INDEX_2);
+    Local<JSValueRef> conductivityArgs = runtimeCallInfo->GetCallArgRef(LIST_ARG_INDEX_3);
+    Local<JSValueRef> intensityArgs = runtimeCallInfo->GetCallArgRef(LIST_ARG_INDEX_4);
+    Local<JSValueRef> edgeEffectArgs = runtimeCallInfo->GetCallArgRef(LIST_ARG_INDEX_5);
+    Local<JSValueRef> stiffnessArgs = runtimeCallInfo->GetCallArgRef(LIST_ARG_INDEX_6);
+    Local<JSValueRef> dampingArgs = runtimeCallInfo->GetCallArgRef(LIST_ARG_INDEX_7);
 
     CalcDimension minSpace;
     CalcDimension maxSpace;
-    double conductivity = 0;
-    double intensity = 0;
-    int32_t edgeEffect = 0;
-    double stiffness = 0;
-    double damping = 0;
 
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    if (secondArg->IsUndefined() || thirdArg->IsUndefined()) {
-        RefPtr<ListTheme> listTheme = Framework::JSViewAbstract::GetTheme<ListTheme>();
+    if (minSpaceArgs->IsUndefined() && maxSpaceArgs->IsUndefined() && conductivityArgs->IsUndefined() &&
+        intensityArgs->IsUndefined() && edgeEffectArgs->IsUndefined() && stiffnessArgs->IsUndefined() &&
+        dampingArgs->IsUndefined()) {
+        GetArkUIInternalNodeAPI()->GetListModifier().ResetChainAnimationOptions(nativeNode);
+        return panda::JSValueRef::Undefined(vm);
+    } else {
+        RefPtr<ListTheme> listTheme = ArkTSUtils::GetTheme<ListTheme>();
         CHECK_NULL_RETURN(listTheme, panda::NativePointerRef::New(vm, nullptr));
 
         minSpace = listTheme->GetChainMinSpace();
         maxSpace = listTheme->GetChainMaxSpace();
-        conductivity = listTheme->GetChainConductivity();
-        intensity = listTheme->GetChainIntensity();
-        edgeEffect = 0;
-        stiffness = listTheme->GetChainStiffness();
-        damping = listTheme->GetChainDamping();
+        ArkUIChainAnimationOptionsType chainAnimationOptions;
+        chainAnimationOptions.conductivity = listTheme->GetChainConductivity();
+        chainAnimationOptions.intensity = listTheme->GetChainIntensity();
+        chainAnimationOptions.edgeEffect = 0;
+        chainAnimationOptions.stiffness = listTheme->GetChainStiffness();
+        chainAnimationOptions.damping = listTheme->GetChainDamping();
 
-        ArkTSUtils::ParseJsDimension(vm, secondArg, minSpace, DimensionUnit::VP);
-        ArkTSUtils::ParseJsDimension(vm, thirdArg, maxSpace, DimensionUnit::VP);
-        ArkTSUtils::ParseJsDouble(vm, fourthArg, conductivity);
-        ArkTSUtils::ParseJsDouble(vm, fifthArg, intensity);
-        edgeEffect = sixthArg->ToNumber(vm)->Value();
-        ArkTSUtils::ParseJsDouble(vm, seventhArg, stiffness);
-        ArkTSUtils::ParseJsDouble(vm, eighthArg, damping);
+        ArkTSUtils::ParseJsDimension(vm, minSpaceArgs, minSpace, DimensionUnit::VP);
+        ArkTSUtils::ParseJsDimension(vm, maxSpaceArgs, maxSpace, DimensionUnit::VP);
+        ArkTSUtils::ParseJsDouble(vm, conductivityArgs, chainAnimationOptions.conductivity);
+        ArkTSUtils::ParseJsDouble(vm, intensityArgs, chainAnimationOptions.intensity);
+        if (edgeEffectArgs->IsNumber()) {
+            chainAnimationOptions.edgeEffect = edgeEffectArgs->ToNumber(vm)->Value();
+        }
+        ArkTSUtils::ParseJsDouble(vm, stiffnessArgs, chainAnimationOptions.stiffness);
+        ArkTSUtils::ParseJsDouble(vm, dampingArgs, chainAnimationOptions.damping);
+        chainAnimationOptions.minSpace = minSpace.Value();
+        chainAnimationOptions.minSpaceUnits = static_cast<int32_t>(minSpace.Unit());
+        chainAnimationOptions.maxSpace = maxSpace.Value();
+        chainAnimationOptions.maxSpaceUnits = static_cast<int32_t>(maxSpace.Unit());
 
-        GetArkUIInternalNodeAPI()->GetListModifier().SetChainAnimationOptions(nativeNode, minSpace.Value(),
-            maxSpace.Value(), conductivity, intensity, edgeEffect, stiffness, damping,
-            static_cast<int>(minSpace.Unit()), static_cast<int>(maxSpace.Unit()));
+        GetArkUIInternalNodeAPI()->GetListModifier().SetChainAnimationOptions(nativeNode, &chainAnimationOptions);
     }
 
     return panda::JSValueRef::Undefined(vm);
@@ -547,7 +587,7 @@ ArkUINativeModuleValue ListBridge::ResetChainAnimationOptions(ArkUIRuntimeCallIn
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
-    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(LIST_ARG_INDEX_0);
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
     GetArkUIInternalNodeAPI()->GetListModifier().ResetChainAnimationOptions(nativeNode);
     return panda::JSValueRef::Undefined(vm);

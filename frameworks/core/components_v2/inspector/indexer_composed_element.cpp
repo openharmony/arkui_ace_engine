@@ -272,7 +272,7 @@ std::string IndexerComposedElement::ConvertAlignStyleToString(AlignStyle alignSt
             result = "AlignStyle.Left";
             break;
         default:
-            LOGD("input do not match any AlignStyle");
+            break;
     }
     return result;
 }

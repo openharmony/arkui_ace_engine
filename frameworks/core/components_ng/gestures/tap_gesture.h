@@ -51,6 +51,11 @@ public:
     }
     ~TapGesture() override = default;
 
+    int32_t GetTapCount() const
+    {
+        return count_;
+    }
+
 protected:
     RefPtr<NGGestureRecognizer> CreateRecognizer() override;
 

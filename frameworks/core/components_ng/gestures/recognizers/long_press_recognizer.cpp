@@ -73,7 +73,7 @@ void LongPressRecognizer::OnAccepted()
 
     UpdateFingerListInfo();
     SendCallbackMsg(onActionUpdate_, false);
-    SendCallbackMsg(onAction_, false);
+    SendCallbackMsg(onAction_, false, true);
     if (repeat_) {
         StartRepeatTimer();
     }
@@ -269,7 +269,7 @@ void LongPressRecognizer::DoRepeat()
         return;
     }
     if (refereeState_ == RefereeState::SUCCEED) {
-        SendCallbackMsg(onAction_, true);
+        SendCallbackMsg(onAction_, true, true);
         StartRepeatTimer();
     }
 }
@@ -299,7 +299,8 @@ double LongPressRecognizer::ConvertPxToVp(double offset) const
     return vpOffset;
 }
 
-void LongPressRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& callback, bool isRepeat)
+void LongPressRecognizer::SendCallbackMsg(
+    const std::unique_ptr<GestureEventFunc>& callback, bool isRepeat, bool isOnAction)
 {
     if (callback && *callback) {
         GestureEvent info;
@@ -331,7 +332,7 @@ void LongPressRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc
         // callback may be overwritten in its invoke so we copy it first
         auto callbackFunction = *callback;
         callbackFunction(info);
-        if (longPressRecorder_ && *longPressRecorder_) {
+        if (isOnAction && longPressRecorder_ && *longPressRecorder_) {
             (*longPressRecorder_)(info);
         }
     }

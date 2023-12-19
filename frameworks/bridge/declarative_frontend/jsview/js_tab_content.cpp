@@ -365,6 +365,15 @@ void JSTabContent::SetPadding(const JSRef<JSVal>& info, bool isSubTabStyle)
     TabContentModel::GetInstance()->SetPadding(padding);
 }
 
+void JSTabContent::SetId(const JSRef<JSVal>& info)
+{
+    std::string id;
+    if (!ParseJsString(info, id)) {
+        return;
+    }
+    TabContentModel::GetInstance()->SetId(id);
+}
+
 void JSTabContent::CompleteParameters(LabelStyle& labelStyle, bool isSubTabStyle)
 {
     auto tabTheme = GetTheme<TabTheme>();
@@ -436,6 +445,9 @@ void JSTabContent::SetSubTabBarStyle(const JSRef<JSObject>& paramObject)
     JSRef<JSVal> paddingParam = paramObject->GetProperty("padding");
     SetPadding(paddingParam, true);
 
+    JSRef<JSVal> idParam = paramObject->GetProperty("id");
+    SetId(idParam);
+
     TabContentModel::GetInstance()->SetTabBarStyle(TabBarStyle::SUBTABBATSTYLE);
     TabContentModel::GetInstance()->SetTabBar(contentOpt, std::nullopt, nullptr, false);
 }
@@ -500,6 +512,9 @@ void JSTabContent::SetBottomTabBarStyle(const JSRef<JSObject>& paramObject)
 
     JSRef<JSVal> labelStyleParam = paramObject->GetProperty("labelStyle");
     SetLabelStyle(labelStyleParam, false);
+
+    JSRef<JSVal> idParam = paramObject->GetProperty("id");
+    SetId(idParam);
 
     TabContentModel::GetInstance()->SetTabBarStyle(TabBarStyle::BOTTOMTABBATSTYLE);
     TabContentModel::GetInstance()->SetTabBar(textOpt, iconOpt, nullptr, false);

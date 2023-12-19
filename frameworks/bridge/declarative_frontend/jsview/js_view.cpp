@@ -374,7 +374,6 @@ void JSViewFullUpdate::DestructorCallback(JSViewFullUpdate* view)
     if (view == nullptr) {
         return;
     }
-    LOGD("JSViewFullUpdate(DestructorCallback) start: %{public}s", view->id_.c_str());
     view->DecRefCount();
 }
 
@@ -406,7 +405,6 @@ void JSViewFullUpdate::CleanUpAbandonedChild()
     while (startIter != endIter) {
         auto found = lastAccessedViewIds_.find(startIter->first);
         if (found == lastAccessedViewIds_.end()) {
-            LOGD(" found abandoned view with id %{public}s", startIter->first.c_str());
             removedViewIds.emplace_back(startIter->first);
             auto* view = startIter->second->Unwrap<JSView>();
             if (view != nullptr) {
@@ -470,7 +468,6 @@ void JSViewFullUpdate::RemoveChildGroupById(const std::string& viewId)
     // js runtime may be released
     CHECK_JAVASCRIPT_SCOPE_AND_RETURN;
     JAVASCRIPT_EXECUTION_SCOPE_STATIC;
-    LOGD("JSView remove childGroup by id in lazy for each case: %{public}s", viewId.c_str());
     auto iter = lazyItemGroups_.find(viewId);
     if (iter == lazyItemGroups_.end()) {
         return;
@@ -554,7 +551,6 @@ RefPtr<AceType> JSViewPartialUpdate::CreateViewNode(bool isTitleNode)
             return;
         }
         jsView->needsUpdate_ = false;
-        LOGD("Rerender function start for ComposedElement elmtId %{public}s - start...", jsView->viewId_.c_str());
         {
             ACE_SCOPED_TRACE("JSView: ExecuteRerender");
             jsView->jsViewFunction_->ExecuteRerender();

@@ -104,7 +104,7 @@ void ResetTextInputPlaceholderColor(NodeHandle node)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto theme = Framework::JSViewAbstract::GetTheme<TextFieldTheme>();
+    auto theme = ArkTSUtils::GetTheme<TextFieldTheme>();
     CHECK_NULL_VOID(theme);
     TextFieldModelNG::SetPlaceholderColor(frameNode, theme->GetPlaceholderColor());
 }
@@ -355,7 +355,7 @@ void ResetTextInputFontSize(NodeHandle node)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto theme = Framework::JSViewAbstract::GetTheme<TextFieldTheme>();
+    auto theme = ArkTSUtils::GetTheme<TextFieldTheme>();
     CHECK_NULL_VOID(theme);
     TextFieldModelNG::SetFontSize(frameNode, theme->GetFontSize());
 }
@@ -449,7 +449,7 @@ void ResetTextInputPlaceholderFont(NodeHandle node)
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     Font font;
-    auto theme = Framework::JSViewAbstract::GetTheme<TextFieldTheme>();
+    auto theme = ArkTSUtils::GetTheme<TextFieldTheme>();
     CHECK_NULL_VOID(theme);
     font.fontSize = theme->GetFontSize();
     font.fontWeight = DEFAULT_FONT_WEIGHT;
@@ -468,7 +468,7 @@ void ResetTextInputFontColor(NodeHandle node)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto theme = Framework::JSViewAbstract::GetTheme<TextFieldTheme>();
+    auto theme = ArkTSUtils::GetTheme<TextFieldTheme>();
     CHECK_NULL_VOID(theme);
     TextFieldModelNG::SetTextColor(frameNode, theme->GetTextColor());
 }

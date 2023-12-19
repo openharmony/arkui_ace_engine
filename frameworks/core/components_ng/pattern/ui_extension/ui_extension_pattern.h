@@ -109,7 +109,7 @@ public:
     virtual bool TransferExecuteAction(int32_t elementId, const std::map<std::string, std::string>& actionArguments,
         int32_t action, int32_t offset) override;
     void OnAccessibilityEvent(
-        const Accessibility::AccessibilityEventInfo& info, const std::vector<int32_t>& uiExtensionIdLevelList);
+        const Accessibility::AccessibilityEventInfo& info, int32_t uiExtensionOffset);
 
 private:
     enum class ReleaseCode {

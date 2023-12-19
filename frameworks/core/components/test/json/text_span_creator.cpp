@@ -25,7 +25,6 @@ namespace OHOS::Ace {
 
 RefPtr<Component> TextSpanCreator::CreateFromJson(const JsonValue& componentJson, const JsonComponentFactory& factory)
 {
-    LOGD("CreateFromJson TextSpan");
     auto data = componentJson.GetString(TEXT_DATA);
     auto textSpan = AceType::MakeRefPtr<TextSpanComponent>(data);
     if (componentJson.Contains(TEXT_STYLE) && componentJson.GetValue(TEXT_STYLE)->IsObject()) {

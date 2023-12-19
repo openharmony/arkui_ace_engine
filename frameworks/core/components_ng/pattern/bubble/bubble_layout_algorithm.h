@@ -93,6 +93,10 @@ public:
     {
         return clipFrameNode_;
     }
+    const std::vector<float>& GetArrowOffsetsFromClip() const
+    {
+        return arrowOffsetsFromClip_;
+    }
 
 protected:
     OffsetF positionOffset_;
@@ -129,7 +133,7 @@ private:
     void InitArrowState(const RefPtr<BubbleLayoutProperty>& layoutProp);
     OffsetF GetPositionWithPlacement(
         const SizeF& childSize, const OffsetF& topPosition, const OffsetF& bottomPosition, OffsetF& arrowPosition);
-    OffsetF GetChildPosition(const SizeF& childSize, bool didNeedArrow, bool useArrowOffset);
+    OffsetF GetChildPosition(const SizeF& childSize, const RefPtr<BubbleLayoutProperty>& bubbleProp);
     OffsetF FitToScreen(
         const OffsetF& position, size_t step, size_t& i, const SizeF& childSize, bool didNeedArrow = false);
     bool GetIfNeedArrow(const RefPtr<BubbleLayoutProperty>& bubbleProp, const SizeF& childSize);
@@ -209,6 +213,8 @@ private:
     std::string clipPath_;
     RefPtr<FrameNode> clipFrameNode_;
     ACE_DISALLOW_COPY_AND_MOVE(BubbleLayoutAlgorithm);
+    // top right bottom left
+    std::vector<float> arrowOffsetsFromClip_ = { 0.0f, 0.0f, 0.0f, 0.0f };
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_BUBBLE_BUBBLE_LAYOUT_ALGORITHM_H

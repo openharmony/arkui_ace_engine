@@ -1,5 +1,23 @@
+/*
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 /// <reference path='./import.ts' />
 class ListEditModeModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
   static identity: Symbol = Symbol('editMode');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -11,6 +29,9 @@ class ListEditModeModifier extends ModifierWithKey<boolean> {
 }
 
 class ListMultiSelectableModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
   static identity: Symbol = Symbol('listMultiSelectable');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -22,6 +43,9 @@ class ListMultiSelectableModifier extends ModifierWithKey<boolean> {
 }
 
 class ListAlignListItemModifier extends ModifierWithKey<ListItemAlign> {
+  constructor(value: ListItemAlign) {
+    super(value);
+  }
   static identity: Symbol = Symbol('listAlignListItem');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -33,6 +57,9 @@ class ListAlignListItemModifier extends ModifierWithKey<ListItemAlign> {
 }
 
 class ListScrollSnapAlignModifier extends ModifierWithKey<ScrollSnapAlign> {
+  constructor(value: ScrollSnapAlign) {
+    super(value);
+  }
   static identity: Symbol = Symbol('listScrollSnapAlign');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -43,7 +70,10 @@ class ListScrollSnapAlignModifier extends ModifierWithKey<ScrollSnapAlign> {
   }
 }
 
-class ListDividerModifier extends ModifierWithKey<{ strokeWidth: any; color?: any; startMargin?: any; endMargin?: any; } | null> {
+class ListDividerModifier extends ModifierWithKey<DividerStyle> {
+  constructor(value: DividerStyle) {
+    super(value);
+  }
   static identity: Symbol = Symbol('listDivider');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -54,11 +84,17 @@ class ListDividerModifier extends ModifierWithKey<{ strokeWidth: any; color?: an
   }
 
   checkObjectDiff(): boolean {
-    return !isBaseOrResourceEqual(this.stageValue.strokeWidth, this.value.strokeWidth);
+    return !(this.stageValue?.strokeWidth === this.value?.strokeWidth &&
+      this.stageValue?.color === this.value?.color &&
+      this.stageValue?.startMargin === this.value?.startMargin &&
+      this.stageValue?.endMargin === this.value?.endMargin);
   }
 }
 
 class ChainAnimationOptionsModifier extends ModifierWithKey<ChainAnimationOptions> {
+  constructor(value: ChainAnimationOptions) {
+    super(value);
+  }
   static identity: Symbol = Symbol('chainAnimationOptions');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -69,14 +105,17 @@ class ChainAnimationOptionsModifier extends ModifierWithKey<ChainAnimationOption
   }
 
   checkObjectDiff(): boolean {
-    return !isBaseOrResourceEqual(this.stageValue.minSpace, this.value.minSpace) || !isBaseOrResourceEqual(this.stageValue.maxSpace, this.value.maxSpace) ||
-    !isBaseOrResourceEqual(this.stageValue.conductivity, this.value.conductivity) || !isBaseOrResourceEqual(this.stageValue.intensity, this.value.intensity) ||
-    !isBaseOrResourceEqual(this.stageValue.edgeEffect, this.value.edgeEffect) || !isBaseOrResourceEqual(this.stageValue.stiffness, this.value.stiffness) ||
-    !isBaseOrResourceEqual(this.stageValue.damping, this.value.damping);
-}
+    return !(this.stageValue.minSpace === this.value.minSpace && this.stageValue.maxSpace === this.value.maxSpace &&
+      this.stageValue.conductivity === this.value.conductivity && this.stageValue.intensity === this.value.intensity &&
+      this.stageValue.edgeEffect === this.value.edgeEffect && this.stageValue.stiffness === this.value.stiffness &&
+      this.stageValue.damping === this.value.damping);
+  }
 }
 
 class ListChainAnimationModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
   static identity: Symbol = Symbol('listChainAnimation');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -85,12 +124,12 @@ class ListChainAnimationModifier extends ModifierWithKey<boolean> {
       GetUINativeModule().list.setChainAnimation(node, this.value!);
     }
   }
-  checkObjectDiff(): boolean {
-    return false;
-  }
 }
 
 class ListCachedCountModifier extends ModifierWithKey<number> {
+  constructor(value: number) {
+    super(value);
+  }
   static identity: Symbol = Symbol('listCachedCount');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -102,6 +141,9 @@ class ListCachedCountModifier extends ModifierWithKey<number> {
 }
 
 class ListEnableScrollInteractionModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
   static identity: Symbol = Symbol('listEnableScrollInteraction');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -113,6 +155,9 @@ class ListEnableScrollInteractionModifier extends ModifierWithKey<boolean> {
 }
 
 class ListStickyModifier extends ModifierWithKey<number> {
+  constructor(value: number) {
+    super(value);
+  }
   static identity: Symbol = Symbol('listSticky');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -124,6 +169,9 @@ class ListStickyModifier extends ModifierWithKey<number> {
 }
 
 class ListEdgeEffectModifier extends ModifierWithKey<ArkListEdgeEffect> {
+  constructor(value: ArkListEdgeEffect) {
+    super(value);
+  }
   static identity: Symbol = Symbol('listEdgeEffect');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -139,6 +187,9 @@ class ListEdgeEffectModifier extends ModifierWithKey<ArkListEdgeEffect> {
 }
 
 class ListListDirectionModifier extends ModifierWithKey<number> {
+  constructor(value: number) {
+    super(value);
+  }
   static identity: Symbol = Symbol('listListDirection');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -150,6 +201,9 @@ class ListListDirectionModifier extends ModifierWithKey<number> {
 }
 
 class ListFrictionModifier extends ModifierWithKey<number | Resource> {
+  constructor(value: number | Resource) {
+    super(value);
+  }
   static identity: Symbol = Symbol('listFriction');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -174,18 +228,24 @@ class ListFrictionModifier extends ModifierWithKey<number | Resource> {
   }
 }
 
-class ListNestedScrollModifier extends ModifierWithKey<ArkListNestedScrollOptions> {
+class ListNestedScrollModifier extends ModifierWithKey<NestedScrollOptions> {
+  constructor(value: NestedScrollOptions) {
+    super(value);
+  }
   static identity: Symbol = Symbol('listNestedScroll');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
       GetUINativeModule().list.resetListNestedScroll(node);
     } else {
-      GetUINativeModule().list.setListNestedScroll(node, this.value.scrollForward, this.value.scrollBackward);
+      GetUINativeModule().list.setListNestedScroll(node, this.value?.scrollForward, this.value?.scrollBackward);
     }
   }
 }
 
 class ListScrollBarModifier extends ModifierWithKey<number> {
+  constructor(value: number) {
+    super(value);
+  }
   static identity: Symbol = Symbol('listScrollBar');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -197,6 +257,9 @@ class ListScrollBarModifier extends ModifierWithKey<number> {
 }
 
 class ListLanesModifier extends ModifierWithKey<ArkLanesOpt> {
+  constructor(value: ArkLanesOpt) {
+    super(value);
+  }
   static identity: Symbol = Symbol('listLanes');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -212,13 +275,21 @@ class ListLanesModifier extends ModifierWithKey<ArkLanesOpt> {
 }
 
 class ArkListComponent extends ArkComponent implements ListAttribute {
+  constructor(nativePtr: KNode) {
+    super(nativePtr);
+  }
   lanes(value: number | LengthConstrain, gutter?: any): this {
     let opt: ArkLanesOpt = new ArkLanesOpt();
     opt.gutter = gutter;
-    opt.lanesNum = value as number;
-    const lc = value as LengthConstrain;
-    opt.minLength = lc.minLength;
-    opt.maxLength = lc.maxLength;
+    if (isUndefined(value)) {
+      opt.lanesNum = undefined;
+    } else if (isNumber(value)) {
+      opt.lanesNum = value as number;
+    } else {
+      const lc = value as LengthConstrain;
+      opt.minLength = lc.minLength;
+      opt.maxLength = lc.maxLength;
+    }
     modifierWithKey(this._modifiersWithKeys, ListLanesModifier.identity, ListLanesModifier, opt);
     return this;
   }
@@ -280,10 +351,7 @@ class ArkListComponent extends ArkComponent implements ListAttribute {
     return this;
   }
   nestedScroll(value: NestedScrollOptions): this {
-    let opt: ArkListNestedScrollOptions = new ArkListNestedScrollOptions();
-    opt.scrollBackward = value.scrollBackward;
-    opt.scrollForward = value.scrollForward;
-    modifierWithKey(this._modifiersWithKeys, ListNestedScrollModifier.identity, ListNestedScrollModifier, opt);
+    modifierWithKey(this._modifiersWithKeys, ListNestedScrollModifier.identity, ListNestedScrollModifier, value);
     return this;
   }
   enableScrollInteraction(value: boolean): this {
@@ -348,6 +416,6 @@ globalThis.List.attributeModifier = function (modifier) {
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkListComponent(nativeNode);
   });
-  modifier.applyNormalAttribute(component);
+  applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
 }

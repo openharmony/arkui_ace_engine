@@ -149,9 +149,6 @@ DOMDocument::~DOMDocument()
 
 RefPtr<DOMNode> DOMDocument::CreateNodeWithId(const std::string& tag, NodeId nodeId, int32_t itemIndex)
 {
-    LOGD("DOMDocument:created new DOMNode %{public}s, id %{public}d, itemIndex %{public}d", tag.c_str(), nodeId,
-        itemIndex);
-
     static const LinearMapNode<RefPtr<DOMNode> (*)(NodeId, const std::string&, int32_t)> domNodeCreators[] = {
         { DOM_NODE_TAG_ANIMATE, &DOMNodeCreator<DOMSvgAnimate> },
         { DOM_NODE_TAG_ANIMATE_MOTION, &DOMNodeCreator<DOMSvgAnimateMotion> },
@@ -406,7 +403,6 @@ void DOMDocument::AddNodeWithTarget(const std::string& key, const RefPtr<DOMNode
 
 void DOMDocument::HandleComponentPostBinding()
 {
-    LOGD("HandleComponentPostBinding");
     for (auto iterTarget = nodeWithTargetVec_.begin(); iterTarget != nodeWithTargetVec_.end();) {
         auto targetNode = iterTarget->second.Upgrade();
         if (!targetNode) {
@@ -470,7 +466,6 @@ void DOMDocument::HandlePageLoadFinish()
 
 void DOMDocument::SetUpRootComponent(const RefPtr<DOMNode>& node)
 {
-    LOGD("DOMDocument SetUpRootComponent");
     if (!node) {
         EventReport::SendComponentException(ComponentExcepType::SET_ROOT_DOM_NODE_ERR);
         return;

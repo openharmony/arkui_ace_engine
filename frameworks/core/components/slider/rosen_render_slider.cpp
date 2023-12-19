@@ -38,7 +38,6 @@ constexpr uint32_t FOCUS_BORDER_COLOR = 0xFF0A59F7;
 
 void RosenRenderSlider::Update(const RefPtr<Component>& component)
 {
-    LOGD("Slider::Update");
     RenderSlider::Update(component);
     if (initialUpdate_) {
         track_ = RenderTrack::Create();
@@ -69,7 +68,6 @@ void RosenRenderSlider::Update(const RefPtr<Component>& component)
     track->SetTrackThickness(thickness * scaleValue_);
     track_->Update(track);
 
-    LOGD("Slider::Update end");
     MarkNeedLayout();
 }
 
@@ -77,7 +75,6 @@ void RosenRenderSlider::PerformLayout()
 {
     RenderSlider::PerformLayout();
 
-    LOGD("Slider::PerformLayout totalRatio_:%{public}lf, trackLength:%{public}lf", totalRatio_, trackLength_);
     if (direction_ == Axis::VERTICAL) {
         double dxOffset = GetLayoutSize().Width() * HALF;
         double dyOffset = isReverse_ ? GetLayoutSize().Height() - NormalizeToPx(SLIDER_PADDING_DP) -

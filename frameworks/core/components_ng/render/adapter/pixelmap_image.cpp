@@ -170,7 +170,6 @@ RefPtr<CanvasImage> PixelMapImage::QueryFromCache(const std::string& key)
     CHECK_NULL_RETURN(cache, nullptr);
     auto data = DynamicCast<PixmapData>(cache->GetCacheImageData(key));
     CHECK_NULL_RETURN(data, nullptr);
-    TAG_LOGD(AceLogTag::ACE_IMAGE, "pixelMap cache found %{public}s", key.c_str());
     return MakeRefPtr<PixelMapImage>(data->GetPixmap());
 }
 } // namespace OHOS::Ace::NG

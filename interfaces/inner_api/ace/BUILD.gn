@@ -75,6 +75,7 @@ ohos_shared_library("ace_uicontent") {
   sources = [
     "${ace_root}/interfaces/inner_api/ace/declarative_module_preloader.cpp",
     "${ace_root}/interfaces/inner_api/ace/hot_reloader.cpp",
+    "${ace_root}/interfaces/inner_api/ace/navigation_controller.cpp",
     "${ace_root}/interfaces/inner_api/ace/serializeable_object.cpp",
     "${ace_root}/interfaces/inner_api/ace/ui_content.cpp",
     "${ace_root}/interfaces/inner_api/ace/ui_event.cpp",

@@ -62,6 +62,7 @@
 #include "core/components_ng/pattern/text_field/text_field_model.h"
 #include "core/components_ng/pattern/text_field/text_field_model_ng.h"
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
+#include "core/components_ng/pattern/text_field/text_field_event_hub.h"
 #include "core/event/key_event.h"
 #include "core/event/touch_event.h"
 #include "core/gestures/gesture_info.h"
@@ -291,6 +292,7 @@ HWTEST_F(TextFiledAttrsTest, LayoutProperty001, TestSize.Level1)
         model.SetInputStyle(DEFAULT_INPUT_STYLE);
         model.SetShowUnderline(true);
         model.SetSelectAllValue(true);
+        model.SetShowCounterBorder(true);
     });
 
     /**
@@ -698,6 +700,7 @@ HWTEST_F(TextInputCursorTest, OnTextChangedListenerCaretPosition006, TestSize.Le
      * @tc.expected: Check if the new handle positions are correct
      */
     EXPECT_EQ(pattern_->selectController_->GetFirstHandleInfo().index, 0);
+    EXPECT_EQ(pattern_->selectController_->GetCaretRect().GetX(), 26);
     EXPECT_EQ(pattern_->selectController_->GetSecondHandleInfo().index, 26)
         << "Second index is " + std::to_string(pattern_->selectController_->GetSecondHandleInfo().index);
 
@@ -1521,6 +1524,217 @@ HWTEST_F(TextFieldControllerTest, TextFiledControllerTest002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: KeyEventChar001
+ * @tc.desc: Test symbols key input
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldKeyEventTest, KeyEventChar001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize textInput and get focus
+     */
+    CreateTextField();
+    GetFocus();
+    /**
+     * @tc.steps: step2. Create keyboard events
+     */
+    KeyEvent event;
+    event.action = KeyAction::DOWN;
+    std::vector<KeyCode> presscodes = {};
+    event.pressedCodes = presscodes;
+    const std::unordered_map<KeyCode, wchar_t> symbols = {
+        { KeyCode::KEY_GRAVE, L'`' },
+        { KeyCode::KEY_MINUS, L'-' },
+        { KeyCode::KEY_EQUALS, L'=' },
+        { KeyCode::KEY_LEFT_BRACKET, L'[' },
+        { KeyCode::KEY_RIGHT_BRACKET, L']' },
+        { KeyCode::KEY_BACKSLASH, L'\\' },
+        { KeyCode::KEY_SEMICOLON, L';' },
+        { KeyCode::KEY_APOSTROPHE, L'\'' },
+        { KeyCode::KEY_COMMA, L',' },
+        { KeyCode::KEY_PERIOD, L'.' },
+        { KeyCode::KEY_SLASH, L'/' },
+        { KeyCode::KEY_SPACE, L' ' },
+        { KeyCode::KEY_NUMPAD_DIVIDE, L'/' },
+        { KeyCode::KEY_NUMPAD_MULTIPLY, L'*' },
+        { KeyCode::KEY_NUMPAD_SUBTRACT, L'-' },
+        { KeyCode::KEY_NUMPAD_ADD, L'+' },
+        { KeyCode::KEY_NUMPAD_DOT, L'.' },
+        { KeyCode::KEY_NUMPAD_COMMA, L',' },
+        { KeyCode::KEY_NUMPAD_EQUALS, L'=' },
+    };
+    /**
+     * @tc.expected: Calling the keyboard event interface
+     */
+    std::string result;
+    for (auto code : symbols) {
+        event.pressedCodes.clear();
+        event.pressedCodes.push_back(code.first);
+        event.code = code.first;
+        auto ret = pattern_->OnKeyEvent(event);
+        FlushLayoutTask(frameNode_);
+        std::wstring appendElement(1, code.second);
+        result.append(StringUtils::ToString(appendElement));
+        EXPECT_EQ(pattern_->GetTextValue(), result);
+        EXPECT_TRUE(ret);
+    }
+}
+
+/**
+ * @tc.name: KeyEventChar001
+ * @tc.desc: Test shift + symbols key input
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldKeyEventTest, KeyEventChar002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize textInput and get focus
+     */
+    CreateTextField();
+    GetFocus();
+    /**
+     * @tc.steps: step2. Create keyboard events
+     */
+    KeyEvent event;
+    event.action = KeyAction::DOWN;
+    std::vector<KeyCode> presscodes = {};
+    event.pressedCodes = presscodes;
+    std::vector<KeyCode> shiftCodes = { KeyCode::KEY_SHIFT_LEFT, KeyCode::KEY_SHIFT_RIGHT };
+    const std::unordered_map<KeyCode, wchar_t> symbols = {
+        { KeyCode::KEY_GRAVE, L'~' },
+        { KeyCode::KEY_MINUS, L'_' },
+        { KeyCode::KEY_EQUALS, L'+' },
+        { KeyCode::KEY_LEFT_BRACKET, L'{' },
+        { KeyCode::KEY_RIGHT_BRACKET, L'}' },
+        { KeyCode::KEY_BACKSLASH, L'|' },
+        { KeyCode::KEY_SEMICOLON, L':' },
+        { KeyCode::KEY_APOSTROPHE, L'\"' },
+        { KeyCode::KEY_COMMA, L'<' },
+        { KeyCode::KEY_PERIOD, L'>' },
+        { KeyCode::KEY_SLASH, L'?' },
+    };
+    /**
+     * @tc.expected: Calling the keyboard event interface
+     */
+    std::string result;
+    for (auto shift : shiftCodes) {
+        for (auto code : symbols) {
+            event.pressedCodes.clear();
+            event.pressedCodes.push_back(shift);
+            event.pressedCodes.push_back(code.first);
+            event.code = code.first;
+            auto ret = pattern_->OnKeyEvent(event);
+            FlushLayoutTask(frameNode_);
+            std::wstring appendElement(1, code.second);
+            result.append(StringUtils::ToString(appendElement));
+            EXPECT_EQ(pattern_->GetTextValue(), result);
+            EXPECT_TRUE(ret);
+        }
+    }
+}
+
+/**
+ * @tc.name: KeyEventChar003
+ * @tc.desc: Test uppercase letters input
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldKeyEventTest, KeyEventChar003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize textInput and get focus
+     */
+    CreateTextField();
+    GetFocus();
+    /**
+     * @tc.steps: step2. Create keyboard events
+     */
+    KeyEvent event;
+    event.action = KeyAction::DOWN;
+    std::vector<KeyCode> presscodes = {};
+    event.pressedCodes = presscodes;
+    std::vector<KeyCode> shiftCodes = { KeyCode::KEY_SHIFT_LEFT, KeyCode::KEY_SHIFT_RIGHT };
+    const std::unordered_map<KeyCode, wchar_t> symbols = {
+        { KeyCode::KEY_A, 'A' },
+        { KeyCode::KEY_B, 'B' },
+        { KeyCode::KEY_C, 'C' },
+        { KeyCode::KEY_X, 'X' },
+        { KeyCode::KEY_Y, 'Y' },
+        { KeyCode::KEY_Z, 'Z' },
+    };
+    /**
+     * @tc.expected: lowercase to uppercase
+     */
+    std::string result;
+    for (auto shift : shiftCodes) {
+        for (auto code : symbols) {
+            event.pressedCodes.clear();
+            EXPECT_EQ(event.pressedCodes.size(), 0);
+            event.pressedCodes.push_back(shift);
+            event.pressedCodes.push_back(code.first);
+            event.code = code.first;
+            auto ret = pattern_->OnKeyEvent(event);
+            FlushLayoutTask(frameNode_);
+            std::wstring appendElement(1, code.second);
+            result.append(StringUtils::ToString(appendElement));
+            EXPECT_EQ(pattern_->GetTextValue(), result);
+            EXPECT_TRUE(ret);
+        }
+    }
+}
+
+/**
+ * @tc.name: KeyEventChar004
+ * @tc.desc: Test Shift + 0-9 symbols input
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldKeyEventTest, KeyEventChar004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize textInput and get focus
+     */
+    CreateTextField();
+    GetFocus();
+    /**
+     * @tc.steps: step2. Create keyboard events
+     */
+    KeyEvent event;
+    event.action = KeyAction::DOWN;
+    std::vector<KeyCode> presscodes = {};
+    std::vector<KeyCode> shiftCodes = { KeyCode::KEY_SHIFT_LEFT, KeyCode::KEY_SHIFT_RIGHT };
+    const std::unordered_map<KeyCode, wchar_t> symbols = {
+        { KeyCode::KEY_0, ')' },
+        { KeyCode::KEY_1, '!' },
+        { KeyCode::KEY_2, '@' },
+        { KeyCode::KEY_3, '#' },
+        { KeyCode::KEY_4, '$' },
+        { KeyCode::KEY_5, '%' },
+        { KeyCode::KEY_6, '^' },
+        { KeyCode::KEY_7, '&' },
+        { KeyCode::KEY_8, '*' },
+        { KeyCode::KEY_9, '(' },
+    };
+    /**
+     * @tc.expected: shift + number to input
+     */
+    std::string result;
+    for (auto shift : shiftCodes) {
+        for (auto code : symbols) {
+            event.pressedCodes.clear();
+            EXPECT_EQ(event.pressedCodes.size(), 0);
+            event.pressedCodes.push_back(shift);
+            event.pressedCodes.push_back(code.first);
+            event.code = code.first;
+            auto ret = pattern_->OnKeyEvent(event);
+            FlushLayoutTask(frameNode_);
+            std::wstring appendElement(1, code.second);
+            result.append(StringUtils::ToString(appendElement));
+            EXPECT_EQ(pattern_->GetTextValue(), result);
+            EXPECT_TRUE(ret);
+        }
+    }
+}
+
+/**
  * @tc.name: KeyEvent001
  * @tc.desc: Test KeyEvent selections
  * @tc.type: FUNC
@@ -1755,6 +1969,123 @@ HWTEST_F(TextFieldKeyEventTest, KeyEvent005, TestSize.Level1)
 }
 
 /**
+ * @tc.name: KeyEvent006
+ * @tc.desc: Test KeyEvent ctrl + z/y
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldKeyEventTest, KeyEvent006, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize textInput and get focus
+     */
+    std::string expectStr = "fghij";
+    auto onCopy = [expectStr](const std::string& str) { EXPECT_EQ(expectStr, str); };
+    auto onPaste = [expectStr](const std::string& str) { EXPECT_EQ(expectStr, str); };
+    CreateTextField(DEFAULT_TEXT, DEFAULT_PLACE_HOLDER, [&](TextFieldModel& model) -> void {
+        model.SetOnCopy(onCopy);
+        model.SetOnPaste(onPaste);
+    });
+    FlushLayoutTask(frameNode_);
+
+    /**
+     * @tc.steps: step2. Create keyboard events
+     */
+    KeyEvent event;
+    event.action = KeyAction::DOWN;
+    std::vector<KeyCode> presscodes = {};
+    event.pressedCodes = presscodes;
+
+    /**
+     * @tc.expected: shift + c/v to input
+     */
+    event.pressedCodes.clear();
+    event.pressedCodes.push_back(KeyCode::KEY_CTRL_LEFT);
+    event.pressedCodes.push_back(KeyCode::KEY_C);
+    event.code = KeyCode::KEY_C;
+    pattern_->HandleSetSelection(5, 10, false);
+    auto ret = pattern_->OnKeyEvent(event);
+    FlushLayoutTask(frameNode_);
+    EXPECT_TRUE(ret);
+
+    event.pressedCodes.clear();
+    event.pressedCodes.push_back(KeyCode::KEY_CTRL_LEFT);
+    event.pressedCodes.push_back(KeyCode::KEY_V);
+    event.code = KeyCode::KEY_V;
+    pattern_->SetCaretPosition(0);
+    ret = pattern_->OnKeyEvent(event);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->GetTextValue(), expectStr + DEFAULT_TEXT);
+    EXPECT_TRUE(ret);
+
+    /**
+     * @tc.expected: shift + z/y to input
+     */
+    event.pressedCodes.clear();
+    event.pressedCodes.push_back(KeyCode::KEY_CTRL_LEFT);
+    event.pressedCodes.push_back(KeyCode::KEY_Z);
+    event.code = KeyCode::KEY_Z;
+    ret = pattern_->OnKeyEvent(event);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->GetTextValue(), "");
+    EXPECT_TRUE(ret);
+
+    event.pressedCodes.clear();
+    event.pressedCodes.push_back(KeyCode::KEY_CTRL_LEFT);
+    event.pressedCodes.push_back(KeyCode::KEY_Y);
+    event.code = KeyCode::KEY_Y;
+    ret = pattern_->OnKeyEvent(event);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->GetTextValue(), expectStr + DEFAULT_TEXT);
+    EXPECT_TRUE(ret);
+}
+
+/**
+ * @tc.name: KeyEvent007
+ * @tc.desc: Test KeyEvent enter
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldKeyEventTest, KeyEvent007, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize textInput and get focus
+     */
+    auto onSubmit = [](int32_t textFieldKey, NG::TextFieldCommonEvent& commonEvent) {
+        commonEvent.SetKeepEditable(true);
+        EXPECT_TRUE(commonEvent.keepEditable_);
+    };
+    CreateTextField(DEFAULT_TEXT, DEFAULT_PLACE_HOLDER, [&](TextFieldModel& model) -> void {
+        model.SetOnSubmit(onSubmit);
+    });
+    GetFocus();
+
+    pattern_->PerformAction(TextInputAction::DONE, true);
+    EXPECT_TRUE(pattern_->GetCursorVisible());
+}
+
+/**
+ * @tc.name: KeyEvent008
+ * @tc.desc: Test KeyEvent enter
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldKeyEventTest, KeyEvent008, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize textInput and get focus
+     */
+    auto onSubmit = [](int32_t textFieldKey, NG::TextFieldCommonEvent& commonEvent) {
+        EXPECT_FALSE(commonEvent.keepEditable_);
+        EXPECT_EQ(commonEvent.text_, "abcdefghijklmnopqrstuvwxyz");
+    };
+    CreateTextField(DEFAULT_TEXT, DEFAULT_PLACE_HOLDER, [&](TextFieldModel& model) -> void {
+        model.SetOnSubmit(onSubmit);
+    });
+    GetFocus();
+
+    pattern_->PerformAction(TextInputAction::DONE, true);
+    EXPECT_FALSE(pattern_->GetCursorVisible());
+}
+
+/**
  * @tc.name: UpdateCaretByTouchMove001
  * @tc.desc: Test UpdateCaretByTouchMove
  * @tc.type: FUNC
@@ -1835,7 +2166,11 @@ HWTEST_F(TextFieldUXTest, CleanNode001, TestSize.Level1)
     /**
      * @tc.steps: step1. Initialize text input
      */
-    CreateTextField(DEFAULT_TEXT);
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetCleanNodeStyle(CleanNodeStyle::CONSTANT);
+        model.SetIsShowCancelButton(true);
+        model.SetCancelIconSize(Dimension(ICON_SIZE, DimensionUnit::PX));
+    });
 
     /**
      * @tc.steps: step2. Get clear node response area
@@ -1874,7 +2209,11 @@ HWTEST_F(TextFieldUXTest, CleanNode002, TestSize.Level1)
     /**
      * @tc.steps: step1. Initialize text input
      */
-    CreateTextField(DEFAULT_TEXT);
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetCleanNodeStyle(CleanNodeStyle::CONSTANT);
+        model.SetIsShowCancelButton(true);
+        model.SetCancelIconSize(Dimension(ICON_SIZE, DimensionUnit::PX));
+    });
 
     /**
      * @tc.steps: step2. Get clean node response area
@@ -1954,18 +2293,15 @@ HWTEST_F(TextFieldUXTest, UpdateFocusForward002, TestSize.Level1)
     /**
      * @tc.steps: step1. Initialize text input.
      */
-    CreateTextField(DEFAULT_TEXT);
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetCleanNodeStyle(CleanNodeStyle::CONSTANT);
+        model.SetIsShowCancelButton(true);
+    });
 
     /**
      * @tc.steps: step2. Text input request focus.
      */
     GetFocus();
-
-    /**
-     * @tc.steps: step3. show cancel image.
-     */
-    pattern_->cleanNodeStyle_ = CleanNodeStyle::CONSTANT;
-    FlushLayoutTask(frameNode_);
 
     /**
      * @tc.steps: step4. Test update focus forward when focus index = CANCEL.
@@ -1987,6 +2323,8 @@ HWTEST_F(TextFieldUXTest, UpdateFocusForward003, TestSize.Level1)
     CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
         model.SetType(TextInputType::VISIBLE_PASSWORD);
         model.SetShowPasswordIcon(true);
+        model.SetCleanNodeStyle(CleanNodeStyle::CONSTANT);
+        model.SetIsShowCancelButton(true);
     });
 
     /**
@@ -1995,13 +2333,7 @@ HWTEST_F(TextFieldUXTest, UpdateFocusForward003, TestSize.Level1)
     GetFocus();
 
     /**
-     * @tc.steps: step3. show cancel image.
-     */
-    pattern_->cleanNodeStyle_ = CleanNodeStyle::CONSTANT;
-    FlushLayoutTask(frameNode_);
-
-    /**
-     * @tc.steps: step4. Test update focus forward, focus index = CANCEL.
+     * @tc.steps: step3. Test update focus forward, focus index = CANCEL.
      */
     pattern_->focusIndex_ = FocuseIndex::CANCEL;
     EXPECT_TRUE(pattern_->UpdateFocusForward());
@@ -2068,7 +2400,10 @@ HWTEST_F(TextFieldUXTest, UpdateFocusBackward002, TestSize.Level1)
     /**
      * @tc.steps: step1. Initialize text input.
      */
-    CreateTextField(DEFAULT_TEXT);
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetCleanNodeStyle(CleanNodeStyle::CONSTANT);
+        model.SetIsShowCancelButton(true);
+    });
 
     /**
      * @tc.steps: step2. Text input request focus.
@@ -2076,13 +2411,7 @@ HWTEST_F(TextFieldUXTest, UpdateFocusBackward002, TestSize.Level1)
     GetFocus();
 
     /**
-     * @tc.steps: step3. show cancel image.
-     */
-    pattern_->cleanNodeStyle_ = CleanNodeStyle::CONSTANT;
-    FlushLayoutTask(frameNode_);
-
-    /**
-     * @tc.steps: step4. Test update focus backward when focus index = CANCEL.
+     * @tc.steps: step3. Test update focus backward when focus index = CANCEL.
      */
     pattern_->focusIndex_ = FocuseIndex::CANCEL;
     EXPECT_TRUE(pattern_->UpdateFocusBackward());
@@ -2128,6 +2457,7 @@ HWTEST_F(TextFieldUXTest, UpdateFocusBackward004, TestSize.Level1)
     CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
         model.SetType(TextInputType::VISIBLE_PASSWORD);
         model.SetShowPasswordIcon(true);
+        model.SetCleanNodeStyle(CleanNodeStyle::CONSTANT);
     });
 
     /**
@@ -2136,13 +2466,7 @@ HWTEST_F(TextFieldUXTest, UpdateFocusBackward004, TestSize.Level1)
     GetFocus();
 
     /**
-     * @tc.steps: step3. show cancel image.
-     */
-    pattern_->cleanNodeStyle_ = CleanNodeStyle::CONSTANT;
-    FlushLayoutTask(frameNode_);
-
-    /**
-     * @tc.steps: step4. Test update focus backward when focus index = UNIT.
+     * @tc.steps: step3. Test update focus backward when focus index = UNIT.
      */
     pattern_->focusIndex_ = FocuseIndex::UNIT;
     EXPECT_TRUE(pattern_->UpdateFocusBackward());
@@ -2246,7 +2570,7 @@ HWTEST_F(TextFieldUXTest, ShowMenu001, TestSize.Level1)
      * @tc.expected: text menu is close
      */
     auto ret = pattern_->GetSelectOverlayProxy()->IsMenuShow();
-    EXPECT_FALSE(ret);
+    EXPECT_TRUE(ret);
 
     /**
      * @tc.steps: step6. Show menu when select all value

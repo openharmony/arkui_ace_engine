@@ -174,7 +174,6 @@ Dimension Dimension::FromString(const std::string& str)
         { "auto", DimensionUnit::AUTO },
     };
 
-    LOGD("UITree str=%{public}s", str.c_str());
     double value = 0.0;
     DimensionUnit unit = DimensionUnit::FP;
 

@@ -28,11 +28,43 @@ void NavigationContentLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto childSize = layoutWrapper->GetTotalChildCount();
     std::list<RefPtr<LayoutWrapper>> children;
     for (auto index = 0; index < childSize; index++) {
-        auto child = layoutWrapper->GetOrCreateChildByIndex(index);
-        child->Measure(layoutConstraint);
-        children.emplace_back(child);
+        auto child = layoutWrapper->GetOrCreateChildByIndex(index, false);
+        if (child->IsActive()) {
+            child->Measure(layoutConstraint);
+            children.emplace_back(child);
+        }
     }
     PerformMeasureSelfWithChildList(layoutWrapper, { children });
+}
+
+void NavigationContentLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
+{
+    // update child position.
+    auto size = layoutWrapper->GetGeometryNode()->GetFrameSize();
+    const auto& padding = layoutWrapper->GetLayoutProperty()->CreatePaddingAndBorder();
+    MinusPaddingToSize(padding, size);
+    auto left = padding.left.value_or(0);
+    auto top = padding.top.value_or(0);
+    auto paddingOffset = OffsetF(left, top);
+    auto align = Alignment::CENTER;
+    if (layoutWrapper->GetLayoutProperty()->GetPositionProperty()) {
+        align = layoutWrapper->GetLayoutProperty()->GetPositionProperty()->GetAlignment().value_or(align);
+    }
+    // Update child position.
+    for (const auto& child : layoutWrapper->GetAllChildrenWithBuild(false)) {
+        if (child->IsActive()) {
+            SizeF childSize = child->GetGeometryNode()->GetMarginFrameSize();
+            auto translate = Alignment::GetAlignPosition(size, childSize, align) + paddingOffset;
+            child->GetGeometryNode()->SetMarginFrameOffset(translate);
+            child->Layout();
+        }
+    }
+    // Update content position.
+    const auto& content = layoutWrapper->GetGeometryNode()->GetContent();
+    if (content) {
+        auto translate = Alignment::GetAlignPosition(size, content->GetRect().GetSize(), align) + paddingOffset;
+        content->SetOffset(translate);
+    }
 }
 
 } // namespace OHOS::Ace::NG

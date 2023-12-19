@@ -1,5 +1,23 @@
+/*
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 /// <reference path='./import.ts' />
 class ArkQRCodeComponent extends ArkComponent implements QRCodeAttribute {
+  constructor(nativePtr: KNode) {
+    super(nativePtr);
+  }
   color(value: ResourceColor): this {
     modifierWithKey(this._modifiersWithKeys, QRColorModifier.identity, QRColorModifier, value);
     return this;
@@ -18,6 +36,9 @@ class ArkQRCodeComponent extends ArkComponent implements QRCodeAttribute {
 }
 
 class QRColorModifier extends ModifierWithKey<ResourceColor> {
+  constructor(value: ResourceColor) {
+    super(value);
+  }
   static identity: Symbol = Symbol('color');
   applyPeer(node: KNode, reset: boolean): void {
       if (reset) {
@@ -37,6 +58,9 @@ class QRColorModifier extends ModifierWithKey<ResourceColor> {
 }
 
 class QRBackgroundColorModifier extends ModifierWithKey<ResourceColor> {
+  constructor(value: ResourceColor) {
+    super(value);
+  }
   static identity: Symbol = Symbol('qrBackgroundColor');
   applyPeer(node: KNode, reset: boolean): void {
       if (reset) {
@@ -56,6 +80,9 @@ class QRBackgroundColorModifier extends ModifierWithKey<ResourceColor> {
 }
 
 class QRContentOpacityModifier extends ModifierWithKey<number | Resource> {
+  constructor(value: number | Resource) {
+    super(value);
+  }
   static identity: Symbol = Symbol('qrContentOpacity');
   applyPeer(node: KNode, reset: boolean): void {
       if (reset) {
@@ -77,6 +104,6 @@ globalThis.QRCode.attributeModifier = function (modifier) {
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkQRCodeComponent(nativeNode);
   });
-  modifier.applyNormalAttribute(component);
+  applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
 }

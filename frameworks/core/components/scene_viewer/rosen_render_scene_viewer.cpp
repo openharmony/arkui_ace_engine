@@ -60,7 +60,6 @@ void RosenRenderSceneViewer::PaintTextureLayer(RenderContext& context, const Off
 {
     auto newWidth = static_cast<uint32_t>(GetLayoutSize().Width());
     auto newHeight = static_cast<uint32_t>(GetLayoutSize().Height());
-    LOGD("PaintTextureLayer() newWidth: %d, newHeight: %d", newWidth, newHeight);
     if (width_ != newWidth || height_ != newHeight) {
         width_ = newWidth;
         height_ = newHeight;

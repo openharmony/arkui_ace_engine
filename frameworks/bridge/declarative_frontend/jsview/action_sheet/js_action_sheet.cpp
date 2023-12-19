@@ -109,7 +109,6 @@ ActionSheetInfo ParseSheetInfo(const JSCallbackInfo& args, JSRef<JSVal> val)
 
 void JSActionSheet::Show(const JSCallbackInfo& args)
 {
-    LOGD("show ActionSheet");
     auto scopedDelegate = EngineHelper::GetCurrentDelegate();
     if (!scopedDelegate) {
         // this case usually means there is no foreground container, need to figure out the reason.
@@ -188,7 +187,6 @@ void JSActionSheet::Show(const JSCallbackInfo& args)
                     auto pipelineContext = PipelineContext::GetCurrentContext();
                     CHECK_NULL_VOID(pipelineContext);
                     pipelineContext->UpdateCurrentActiveNode(node);
-                    LOGD("actionSheet confirm triggered");
                     func->ExecuteJS();
                 };
                 actionFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(actionValue));

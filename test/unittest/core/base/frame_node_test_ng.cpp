@@ -67,6 +67,13 @@ const float CONTAINER_HEIGHT = 1000.0f;
 const SizeF CONTAINER_SIZE(CONTAINER_WIDTH, CONTAINER_HEIGHT);
 
 const OffsetF OFFSETF { 1.0, 1.0 };
+const float DEFAULT_X = 10;
+const float DEFAULT_Y = 10;
+
+constexpr uint64_t TIMESTAMP_1 = 100;
+constexpr uint64_t TIMESTAMP_2 = 101;
+constexpr uint64_t TIMESTAMP_3 = 102;
+constexpr uint64_t TIMESTAMP_4 = 103;
 } // namespace
 class FrameNodeTestNg : public testing::Test {
 public:
@@ -742,7 +749,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTriggerOnAreaChangeCallback0013, TestSize.Lev
      * @tc.steps: step2. call TriggerOnAreaChangeCallback before set callback
      * @tc.expected: expect flag is still false
      */
-    FRAME_NODE2->TriggerOnAreaChangeCallback();
+    FRAME_NODE2->TriggerOnAreaChangeCallback(TIMESTAMP_1);
     EXPECT_FALSE(flag);
 
     /**
@@ -751,7 +758,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTriggerOnAreaChangeCallback0013, TestSize.Lev
      */
     FRAME_NODE2->eventHub_->SetOnAreaChanged(std::move(onAreaChanged));
     FRAME_NODE2->lastParentOffsetToWindow_ = nullptr;
-    FRAME_NODE2->TriggerOnAreaChangeCallback();
+    FRAME_NODE2->TriggerOnAreaChangeCallback(TIMESTAMP_2);
     EXPECT_FALSE(flag);
 
     /**
@@ -759,7 +766,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTriggerOnAreaChangeCallback0013, TestSize.Lev
      * @tc.expected: expect flag is still false
      */
     FRAME_NODE2->lastFrameRect_ = nullptr;
-    FRAME_NODE2->TriggerOnAreaChangeCallback();
+    FRAME_NODE2->TriggerOnAreaChangeCallback(TIMESTAMP_3);
     EXPECT_FALSE(flag);
 
     /**
@@ -768,7 +775,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTriggerOnAreaChangeCallback0013, TestSize.Lev
      */
     FRAME_NODE2->lastParentOffsetToWindow_ = std::make_unique<OffsetF>();
     FRAME_NODE2->lastFrameRect_ = std::make_unique<RectF>();
-    FRAME_NODE2->TriggerOnAreaChangeCallback();
+    FRAME_NODE2->TriggerOnAreaChangeCallback(TIMESTAMP_4);
     EXPECT_FALSE(flag);
 }
 
@@ -1937,5 +1944,405 @@ HWTEST_F(FrameNodeTestNg, DumpAdvanceInfo001, TestSize.Level1)
         ElementRegister::GetInstance()->GetOrCreateGeometryTransition("test", false);
     FRAME_NODE3->DumpAdvanceInfo();
     EXPECT_NE(FRAME_NODE3->renderContext_, nullptr);
+}
+
+/**
+ * @tc.name: FrameNodeTestNg_GetOnChildTouchTestRet001
+ * @tc.desc: Test frame node method GetOnChildTouchTestRet
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, GetOnChildTouchTestRet001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. initialize parameters.
+     */
+    std::vector<TouchTestInfo> touchInfos;
+    TouchTestInfo info;
+    touchInfos.emplace_back(info);
+
+    TouchResult touchResult;
+    touchResult.strategy = TouchTestStrategy::DEFAULT;
+    touchResult.id = "test1";
+
+    OnChildTouchTestFunc callback = [](const std::vector<TouchTestInfo>& touchInfo) {
+        TouchResult res;
+        res.strategy = TouchTestStrategy::DEFAULT;
+        res.id = "test1";
+        return res;
+    };
+
+    /**
+     * @tc.steps: step2. set parent node and initialize gestureHub.
+     */
+    const RefPtr<FrameNode> GET_PARENT = FrameNode::CreateFrameNode("parent", 4, AceType::MakeRefPtr<Pattern>());
+    auto gestureHub = GET_PARENT->GetOrCreateGestureEventHub();
+    gestureHub->SetOnTouchTestFunc(std::move(callback));
+
+    /**
+     * @tc.steps: step3. call GetOnChildTouchTestRet.
+     * @tc.expected: expect GetOnChildTouchTestRet run ok.
+     */
+    TouchResult test = GET_PARENT->GetOnChildTouchTestRet(touchInfos);
+    EXPECT_EQ(test.id, touchResult.id);
+}
+
+/**
+ * @tc.name: FrameNodeTestNg_GetOnTouchTestFunc001
+ * @tc.desc: Test frame node method GetOnTouchTestFunc
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, GetOnTouchTestFunc001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. set parent node and call GetOnTouchTestFunc.
+     */
+    const RefPtr<FrameNode> GET_PARENT = FrameNode::CreateFrameNode("parent", 4, AceType::MakeRefPtr<Pattern>());
+    OnChildTouchTestFunc test = GET_PARENT->GetOnTouchTestFunc();
+
+    /**
+     * @tc.expected: expect GetOnTouchTestFunc ruturn nullptr.
+     */
+    EXPECT_EQ(test, nullptr);
+
+    OnChildTouchTestFunc callback = [](const std::vector<TouchTestInfo>& touchInfo) {
+        TouchResult result;
+        return result;
+    };
+
+    /**
+     * @tc.steps: step2. set parent node and initialize gestureHub.
+     */
+    auto gestureHub = GET_PARENT->GetOrCreateGestureEventHub();
+    gestureHub->SetOnTouchTestFunc(std::move(callback));
+
+    /**
+     * @tc.steps: step3. call GetOnTouchTestFunc.
+     * @tc.expected: expect GetOnTouchTestFunc run ok.
+     */
+    OnChildTouchTestFunc res = GET_PARENT->GetOnTouchTestFunc();
+    EXPECT_NE(res, nullptr);
+}
+
+/**
+ * @tc.name: FrameNodeTestNg_GetDispatchFrameNode001
+ * @tc.desc: Test frame node method GetDispatchFrameNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, GetDispatchFrameNode001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. creat node and generate a node tree.
+     */
+    const RefPtr<FrameNode> GET_PARENT = FrameNode::CreateFrameNode("parent", 4, AceType::MakeRefPtr<Pattern>());
+    const RefPtr<FrameNode> GET_CHILD1 = FrameNode::CreateFrameNode("child1", 5, AceType::MakeRefPtr<Pattern>());
+    const RefPtr<FrameNode> GET_CHILD2 = FrameNode::CreateFrameNode("child2", 6, AceType::MakeRefPtr<Pattern>());
+    GET_CHILD1->UpdateInspectorId("child1");
+    GET_CHILD2->UpdateInspectorId("child2");
+    GET_PARENT->frameChildren_.insert(GET_CHILD1);
+    GET_PARENT->frameChildren_.insert(GET_CHILD2);
+
+    /**
+     * @tc.steps: step2. initialize parentEventHub and set HitTestMode.
+     */
+    auto parentEventHub = GET_PARENT->GetOrCreateGestureEventHub();
+    parentEventHub->SetHitTestMode(HitTestMode::HTMBLOCK);
+    TouchResult touchResult;
+
+    /**
+     * @tc.steps: step3. call GetDispatchFrameNode.
+     * @tc.expected: expect GetDispatchFrameNode ruturn nullptr.
+     */
+    auto test = GET_PARENT->GetDispatchFrameNode(touchResult);
+    EXPECT_EQ(test, nullptr);
+}
+
+/**
+ * @tc.name: FrameNodeTestNg_GetDispatchFrameNode002
+ * @tc.desc: Test frame node method GetDispatchFrameNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, GetDispatchFrameNode002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. creat node and generate a node tree.
+     */
+    const RefPtr<FrameNode> GET_PARENT = FrameNode::CreateFrameNode("parent", 4, AceType::MakeRefPtr<Pattern>());
+    const RefPtr<FrameNode> GET_CHILD1 = FrameNode::CreateFrameNode("child1", 5, AceType::MakeRefPtr<Pattern>());
+    const RefPtr<FrameNode> GET_CHILD2 = FrameNode::CreateFrameNode("child2", 6, AceType::MakeRefPtr<Pattern>());
+    GET_CHILD1->UpdateInspectorId("child1");
+    GET_CHILD2->UpdateInspectorId("child2");
+    GET_PARENT->frameChildren_.insert(GET_CHILD1);
+    GET_PARENT->frameChildren_.insert(GET_CHILD2);
+
+    /**
+     * @tc.steps: step2. initialize parentEventHub, set HitTestMode and TouchTestStrategy.
+     */
+    auto parentEventHub = GET_PARENT->GetOrCreateGestureEventHub();
+    parentEventHub->SetHitTestMode(HitTestMode::HTMDEFAULT);
+    TouchResult touchResult;
+    touchResult.strategy = TouchTestStrategy::FORWARD_COMPETITION;
+    touchResult.id = "child1";
+
+    /**
+     * @tc.steps: step3. call GetDispatchFrameNode.
+     * @tc.expected: expect GetDispatchFrameNode run ok.
+     */
+    auto test = GET_PARENT->GetDispatchFrameNode(touchResult);
+    EXPECT_EQ(test, GET_CHILD1);
+}
+
+/**
+ * @tc.name: FrameNodeTestNg_GetDispatchFrameNode003
+ * @tc.desc: Test frame node method GetDispatchFrameNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, GetDispatchFrameNode003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. creat node and generate a node tree.
+     */
+    const RefPtr<FrameNode> GET_PARENT = FrameNode::CreateFrameNode("parent", 4, AceType::MakeRefPtr<Pattern>());
+    const RefPtr<FrameNode> GET_CHILD1 = FrameNode::CreateFrameNode("child1", 5, AceType::MakeRefPtr<Pattern>());
+    const RefPtr<FrameNode> GET_CHILD2 = FrameNode::CreateFrameNode("child2", 6, AceType::MakeRefPtr<Pattern>());
+    GET_CHILD1->UpdateInspectorId("child1");
+    GET_CHILD2->UpdateInspectorId("child2");
+    GET_PARENT->frameChildren_.insert(GET_CHILD1);
+    GET_PARENT->frameChildren_.insert(GET_CHILD2);
+
+    /**
+     * @tc.steps: step2. initialize parentEventHub, set HitTestMode and TouchTestStrategy.
+     */
+    auto parentEventHub = GET_PARENT->GetOrCreateGestureEventHub();
+    parentEventHub->SetHitTestMode(HitTestMode::HTMDEFAULT);
+    TouchResult touchResult;
+    touchResult.strategy = TouchTestStrategy::DEFAULT;
+
+    /**
+     * @tc.steps: step3. call GetDispatchFrameNode.
+     * @tc.expected: expect GetDispatchFrameNode ruturn nullptr.
+     */
+    auto test = GET_PARENT->GetDispatchFrameNode(touchResult);
+    EXPECT_EQ(test, nullptr);
+}
+
+/**
+ * @tc.name: FrameNodeTestNg_CollectTouchInfos001
+ * @tc.desc: Test frame node method CollectTouchInfos
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, CollectTouchInfos001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. initialize parameters.
+     */
+    PointF globalPoint;
+    PointF parentRevertPoint;
+    std::vector<TouchTestInfo> touchInfos;
+
+    /**
+     * @tc.steps: step2. creat node and generate a node tree.
+     */
+    const RefPtr<FrameNode> GET_PARENT = FrameNode::CreateFrameNode("parent", 4, AceType::MakeRefPtr<Pattern>());
+    const RefPtr<FrameNode> GET_CHILD1 = FrameNode::CreateFrameNode("child1", 5, AceType::MakeRefPtr<Pattern>());
+    const RefPtr<FrameNode> GET_CHILD2 = FrameNode::CreateFrameNode("child2", 6, AceType::MakeRefPtr<Pattern>());
+    GET_CHILD1->UpdateInspectorId("child1");
+    GET_CHILD2->UpdateInspectorId("child2");
+    GET_PARENT->frameChildren_.insert(GET_CHILD1);
+    GET_PARENT->frameChildren_.insert(GET_CHILD2);
+
+    OnChildTouchTestFunc callback = [](const std::vector<TouchTestInfo>& touchInfo) {
+        TouchResult result;
+        return result;
+    };
+
+    /**
+     * @tc.steps: step3. initialize gestureHub and set HitTestMode.
+     */
+    auto gestureHub = GET_PARENT->GetOrCreateGestureEventHub();
+    gestureHub->SetHitTestMode(HitTestMode::HTMDEFAULT);
+    gestureHub->SetOnTouchTestFunc(std::move(callback));
+
+    /**
+     * @tc.steps: step4. call CollectTouchInfos.
+     * @tc.expected: expect CollectTouchInfos run ok.
+     */
+    GET_PARENT->CollectTouchInfos(globalPoint, parentRevertPoint, touchInfos);
+    EXPECT_EQ(touchInfos.size(), 2);
+}
+
+/**
+ * @tc.name: FrameNodeTestNg_CollectTouchInfos002
+ * @tc.desc: Test frame node method CollectTouchInfos
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, CollectTouchInfos002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. initialize parameters.
+     */
+    PointF globalPoint;
+    PointF parentRevertPoint;
+    std::vector<TouchTestInfo> touchInfos;
+
+    /**
+     * @tc.steps: step2. creat node and generate a node tree.
+     */
+    const RefPtr<FrameNode> GET_PARENT = FrameNode::CreateFrameNode("parent", 4, AceType::MakeRefPtr<Pattern>());
+    const RefPtr<FrameNode> GET_CHILD1 = FrameNode::CreateFrameNode("child1", 5, AceType::MakeRefPtr<Pattern>());
+    const RefPtr<FrameNode> GET_CHILD2 = FrameNode::CreateFrameNode("child2", 6, AceType::MakeRefPtr<Pattern>());
+    GET_CHILD1->UpdateInspectorId("child1");
+    GET_CHILD2->UpdateInspectorId("child2");
+    GET_PARENT->frameChildren_.insert(GET_CHILD1);
+    GET_PARENT->frameChildren_.insert(GET_CHILD2);
+
+    /**
+     * @tc.steps: step3. initialize gestureHub and set HitTestMode.
+     */
+    auto gestureHub = GET_PARENT->GetOrCreateGestureEventHub();
+    gestureHub->SetHitTestMode(HitTestMode::HTMBLOCK);
+
+    /**
+     * @tc.steps: step4. call CollectTouchInfos.
+     * @tc.expected: expect CollectTouchInfos return touchInfos.size is 0.
+     */
+    GET_PARENT->CollectTouchInfos(globalPoint, parentRevertPoint, touchInfos);
+    EXPECT_EQ(touchInfos.size(), 0);
+}
+
+/**
+ * @tc.name: FrameNodeTestNg_CollectTouchInfos003
+ * @tc.desc: Test frame node method CollectTouchInfos
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, CollectTouchInfos003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. initialize parameters.
+     */
+    PointF globalPoint;
+    PointF parentRevertPoint;
+    std::vector<TouchTestInfo> touchInfos;
+
+    /**
+     * @tc.steps: step2. creat node and generate a node tree.
+     */
+    const RefPtr<FrameNode> GET_PARENT = FrameNode::CreateFrameNode("parent", 4, AceType::MakeRefPtr<Pattern>());
+    const RefPtr<FrameNode> GET_CHILD1 = FrameNode::CreateFrameNode("child1", 5, AceType::MakeRefPtr<Pattern>());
+    const RefPtr<FrameNode> GET_CHILD2 = FrameNode::CreateFrameNode("child2", 6, AceType::MakeRefPtr<Pattern>());
+    GET_CHILD1->UpdateInspectorId("child1");
+    GET_CHILD2->UpdateInspectorId("child2");
+    GET_PARENT->frameChildren_.insert(GET_CHILD1);
+    GET_PARENT->frameChildren_.insert(GET_CHILD2);
+
+    /**
+     * @tc.steps: step3. initialize gestureHub and set HitTestMode.
+     */
+    auto gestureHub = GET_PARENT->GetOrCreateGestureEventHub();
+    gestureHub->SetHitTestMode(HitTestMode::HTMDEFAULT);
+
+    /**
+     * @tc.steps: step4. call CollectTouchInfos.
+     * @tc.expected: expect CollectTouchInfos return touchInfos.size is 0.
+     */
+    GET_PARENT->CollectTouchInfos(globalPoint, parentRevertPoint, touchInfos);
+    EXPECT_EQ(touchInfos.size(), 0);
+}
+
+/**
+ * @tc.name: FrameNodeTestNg_IsPreviewNeedScale001
+ * @tc.desc: Test frame node method IsPreviewNeedScale
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, IsPreviewNeedScale001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. initialize parameters.
+     */
+    FRAME_NODE->isActive_ = true;
+    FRAME_NODE->eventHub_->SetEnabled(true);
+    SystemProperties::debugEnabled_ = true;
+
+    /**
+     * @tc.steps: step2. call IsPreviewNeedScale
+     * @tc.expected: expect IsPreviewNeedScale return false.
+     */
+    EXPECT_FALSE(FRAME_NODE->IsPreviewNeedScale());
+
+    /**
+     * @tc.steps: step2. set a large size and call IsPreviewNeedScale.
+     * @tc.expected: expect IsPreviewNeedScale return true.
+     */
+    auto geometryNode = FRAME_NODE->GetGeometryNode();
+    geometryNode->SetFrameSize(CONTAINER_SIZE);
+    EXPECT_TRUE(FRAME_NODE->IsPreviewNeedScale());
+}
+
+/**
+ * @tc.name: FrameNodeTestNg_GetGlobalOffset001
+ * @tc.desc: Test frame node method GetGlobalOffset
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, GetGlobalOffset001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. initialize parameters.
+     */
+    FRAME_NODE->isActive_ = true;
+    FRAME_NODE->eventHub_->SetEnabled(true);
+    SystemProperties::debugEnabled_ = true;
+    auto mockRenderContext = AceType::MakeRefPtr<MockRenderContext>();
+    ASSERT_NE(mockRenderContext, nullptr);
+    mockRenderContext->rect_ = RectF(DEFAULT_X, DEFAULT_Y, DEFAULT_X, DEFAULT_Y);
+    FRAME_NODE->renderContext_ = mockRenderContext;
+
+    /**
+     * @tc.steps: step2. call GetGlobalOffset.
+     * @tc.expected: expect GetGlobalOffset return the result which is not (0, 0).
+     */
+    EXPECT_NE(FRAME_NODE->GetGlobalOffset(), OffsetF(0.0f, 0.0f));
+}
+
+/**
+ * @tc.name: FrameNodeTestNg_GetPixelMap001
+ * @tc.desc: Test frame node method GetPixelMap
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, GetPixelMap001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. initialize parameters.
+     */
+    FRAME_NODE->isActive_ = true;
+    FRAME_NODE->eventHub_->SetEnabled(true);
+    SystemProperties::debugEnabled_ = true;
+    auto gestureHub = FRAME_NODE->GetOrCreateGestureEventHub();
+    ASSERT_NE(gestureHub, nullptr);
+    auto mockRenderContext = AceType::MakeRefPtr<MockRenderContext>();
+    ASSERT_NE(mockRenderContext, nullptr);
+    FRAME_NODE->renderContext_ = mockRenderContext;
+
+    /**
+     * @tc.steps: step2. Don't initialize pixelMap and rosenNode.
+     * @tc.expected: expect GetPixelMap() == nullptr.
+     */
+    EXPECT_EQ(FRAME_NODE->GetPixelMap(), nullptr);
+
+    /**
+     * @tc.steps: step3. set a pixelMap of gestureHub, and call GetPixelMap.
+     * @tc.expected: expect GetPixelMap() != nullptr.
+     */
+    void* voidPtr = static_cast<void*>(new char[0]);
+    RefPtr<PixelMap> pixelMap = PixelMap::CreatePixelMap(voidPtr);
+    ASSERT_NE(pixelMap, nullptr);
+    gestureHub->SetPixelMap(pixelMap);
+    EXPECT_NE(FRAME_NODE->GetPixelMap(), nullptr);
+
+    /**
+     * @tc.steps: step4. set a pixelMap of the renderContext, and call GetPixelMap.
+     * @tc.expected: expect GetPixelMap() != nullptr.
+     */
+    gestureHub->SetPixelMap(nullptr);
+    // mockRenderContext->pixelMap_ = pixelMap;
+    EXPECT_EQ(FRAME_NODE->GetPixelMap(), nullptr);
 }
 } // namespace OHOS::Ace::NG

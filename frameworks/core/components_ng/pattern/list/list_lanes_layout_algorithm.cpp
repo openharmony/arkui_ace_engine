@@ -233,9 +233,6 @@ int32_t ListLanesLayoutAlgorithm::CalculateLanesParam(std::optional<float>& minL
         return lanes;
     }
     lanes = 1;
-    TAG_LOGD(AceLogTag::ACE_LIST, "unexpected situation, set lanes to 1, maxLanes: %{public}f, "
-        "minLanes: %{public}f, minLaneLength_: %{public}f, maxLaneLength_: %{public}f",
-        maxLanes, minLanes, minLaneLength.value(), maxLaneLength.value());
     return lanes;
 }
 
@@ -268,8 +265,6 @@ void ListLanesLayoutAlgorithm::ModifyLaneLength(
     std::optional<float>& minLaneLength, std::optional<float>& maxLaneLength, float crossSize)
 {
     if (GreatNotEqual(minLaneLength.value(), maxLaneLength.value())) {
-        TAG_LOGD(AceLogTag::ACE_LIST, "minLaneLength: %{public}f is greater than maxLaneLength: %{public}f, "
-            "assign minLaneLength to maxLaneLength", minLaneLength.value(), maxLaneLength.value());
         maxLaneLength = minLaneLength;
     }
 }

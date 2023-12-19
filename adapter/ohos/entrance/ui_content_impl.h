@@ -141,6 +141,11 @@ public:
 
     void SetFormBackgroundColor(const std::string& color) override;
 
+    int32_t GetInstanceId()
+    {
+        return instanceId_;
+    }
+
     SerializeableObjectArray DumpUITree() override
     {
         CHECK_NULL_RETURN(uiManager_, SerializeableObjectArray());
@@ -227,6 +232,14 @@ public:
     int32_t CreateCustomPopupUIExtension(const AAFwk::Want& want,
         const ModalUIExtensionCallbacks& callbacks, const CustomPopupUIExtensionConfig& config) override;
     void DestroyCustomPopupUIExtension(int32_t nodeId) override;
+
+    void SetContainerModalTitleVisible(bool customTitleSettedShow, bool floatingTitleSettedShow) override;
+    void SetContainerModalTitleHeight(int32_t height) override;
+    int32_t GetContainerModalTitleHeight() override;
+    bool GetContainerModalButtonsRect(Rosen::Rect& containerModal, Rosen::Rect& buttons) override;
+    void SubscribeContainerModalButtonsRectChange(
+        std::function<void(Rosen::Rect& containerModal, Rosen::Rect& buttons)>&& callback) override;
+
 private:
     void InitializeInner(
         OHOS::Rosen::Window* window, const std::string& contentInfo, napi_value storage, bool isNamedRouter);

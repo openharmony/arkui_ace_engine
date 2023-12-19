@@ -13,13 +13,15 @@
  * limitations under the License.
  */
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_grid_bridge.h"
-
+#include "base/utils/string_utils.h"
+#include "base/utils/utils.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 
 namespace OHOS::Ace::NG {
-constexpr int CALL_ARG_0 = 0;
-constexpr int CALL_ARG_1 = 1;
-constexpr int CALL_ARG_2 = 2;
+constexpr int32_t CALL_ARG_0 = 0;
+constexpr int32_t CALL_ARG_1 = 1;
+constexpr int32_t CALL_ARG_2 = 2;
+constexpr int32_t DEFAULT_CACHED_COUNT = 1;
 
 ArkUINativeModuleValue GridBridge::SetColumnsTemplate(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
@@ -80,11 +82,11 @@ ArkUINativeModuleValue GridBridge::SetColumnsGap(ArkUIRuntimeCallInfo* runtimeCa
     Local<JSValueRef> node = runtimeCallInfo->GetCallArgRef(CALL_ARG_0);
     Local<JSValueRef> arg_size = runtimeCallInfo->GetCallArgRef(CALL_ARG_1);
     void* nativeNode = node->ToNativePointer(vm)->Value();
-    
+
     CalcDimension size;
     std::string calcStr;
     struct ArkUIResourceLength columnGap = { 0.0, 0, nullptr };
-    if (arg_size->IsUndefined() || !ArkTSUtils::ParseJsDimensionVpNG(vm, arg_size, size, false)) {
+    if (arg_size->IsUndefined() || !ArkTSUtils::ParseJsDimensionVpNG(vm, arg_size, size, true)) {
         GetArkUIInternalNodeAPI()->GetGridModifier().ResetGridColumnsGap(nativeNode);
     } else {
         if (size.Unit() == DimensionUnit::CALC) {
@@ -119,11 +121,11 @@ ArkUINativeModuleValue GridBridge::SetRowsGap(ArkUIRuntimeCallInfo* runtimeCallI
     Local<JSValueRef> node = runtimeCallInfo->GetCallArgRef(CALL_ARG_0);
     Local<JSValueRef> arg_size = runtimeCallInfo->GetCallArgRef(CALL_ARG_1);
     void* nativeNode = node->ToNativePointer(vm)->Value();
-    
+
     CalcDimension size;
     std::string calcStr;
     struct ArkUIResourceLength rowsGap = { 0.0, 0, nullptr };
-    if (arg_size->IsUndefined() || !ArkTSUtils::ParseJsDimensionVpNG(vm, arg_size, size, false)) {
+    if (arg_size->IsUndefined() || !ArkTSUtils::ParseJsDimensionVpNG(vm, arg_size, size, true)) {
         GetArkUIInternalNodeAPI()->GetGridModifier().ResetGridRowsGap(nativeNode);
     } else {
         if (size.Unit() == DimensionUnit::CALC) {
@@ -160,7 +162,11 @@ ArkUINativeModuleValue GridBridge::SetScrollBar(ArkUIRuntimeCallInfo* runtimeCal
     void* nativeNode = node->ToNativePointer(vm)->Value();
     if (!arg_scrollBar->IsNull() && arg_scrollBar->IsNumber()) {
         int32_t scrollBar = arg_scrollBar->Int32Value(vm);
-        GetArkUIInternalNodeAPI()->GetGridModifier().SetGridScrollBar(nativeNode, scrollBar);
+        if (scrollBar < 0) {
+            GetArkUIInternalNodeAPI()->GetGridModifier().ResetGridScrollBar(nativeNode);
+        } else {
+            GetArkUIInternalNodeAPI()->GetGridModifier().SetGridScrollBar(nativeNode, scrollBar);
+        }
     } else {
         GetArkUIInternalNodeAPI()->GetGridModifier().ResetGridScrollBar(nativeNode);
     }
@@ -181,19 +187,20 @@ ArkUINativeModuleValue GridBridge::SetScrollBarWidth(ArkUIRuntimeCallInfo* runti
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
-    Local<JSValueRef> node = runtimeCallInfo->GetCallArgRef(CALL_ARG_0);
-    Local<JSValueRef> arg_width = runtimeCallInfo->GetCallArgRef(CALL_ARG_1);
-    void* nativeNode = node->ToNativePointer(vm)->Value();
-    if (arg_width->IsNull()) {
+    Local<JSValueRef> nativeNodeArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_0);
+    Local<JSValueRef> scrollBarArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_1);
+    void* nativeNode = nativeNodeArg->ToNativePointer(vm)->Value();
+
+    CalcDimension scrollBarWidth;
+    if (!ArkTSUtils::ParseJsDimensionVpNG(vm, scrollBarArg, scrollBarWidth, false)) {
         GetArkUIInternalNodeAPI()->GetGridModifier().ResetGridScrollBarWidth(nativeNode);
     } else {
-        Dimension width = 0.0_vp;
-        if (arg_width->IsNumber()) {
-            width = Dimension(arg_width->ToNumber(vm)->Value(), DimensionUnit::VP);
-        } else if (arg_width->IsString()) {
-            width = StringUtils::StringToDimension(arg_width->ToString(vm)->ToString(), true);
+        if (LessNotEqual(scrollBarWidth.Value(), 0.0f)) {
+            GetArkUIInternalNodeAPI()->GetGridModifier().ResetGridScrollBarWidth(nativeNode);
+        } else {
+            GetArkUIInternalNodeAPI()->GetGridModifier().SetGridScrollBarWidth(
+                nativeNode, scrollBarWidth.Value(), static_cast<int32_t>(scrollBarWidth.Unit()));
         }
-        GetArkUIInternalNodeAPI()->GetGridModifier().SetGridScrollBarWidth(nativeNode, width);
     }
     return panda::JSValueRef::Undefined(vm);
 }
@@ -215,16 +222,23 @@ ArkUINativeModuleValue GridBridge::SetScrollBarColor(ArkUIRuntimeCallInfo* runti
     Local<JSValueRef> node = runtimeCallInfo->GetCallArgRef(CALL_ARG_0);
     Local<JSValueRef> arg_color = runtimeCallInfo->GetCallArgRef(CALL_ARG_1);
     void* nativeNode = node->ToNativePointer(vm)->Value();
-    Color color;
-    if (arg_color->IsNull() || arg_color->IsUndefined() || !ArkTSUtils::ParseJsColorAlpha(vm, arg_color, color)) {
-        if (arg_color->IsString()) {
-            GetArkUIInternalNodeAPI()->GetGridModifier().SetGridScrollBarColor(
-                nativeNode, Color::ColorFromString(arg_color->ToString(vm)->ToString()).GetValue());
-        } else {
+    if (arg_color->IsNull() || arg_color->IsUndefined()) {
+        GetArkUIInternalNodeAPI()->GetGridModifier().ResetGridScrollBarColor(nativeNode);
+        return panda::JSValueRef::Undefined(vm);
+    }
+    if (arg_color->IsNumber()) {
+        auto colorNum = arg_color->ToNumber(vm)->Value();
+        if (colorNum <= 0) {
             GetArkUIInternalNodeAPI()->GetGridModifier().ResetGridScrollBarColor(nativeNode);
+            return panda::JSValueRef::Undefined(vm);
         }
+    }
+    Color color;
+    if (ArkTSUtils::ParseJsColorAlpha(vm, arg_color, color)) {
+        GetArkUIInternalNodeAPI()->GetGridModifier().SetGridScrollBarColor(
+            nativeNode, color.GetValue());
     } else {
-        GetArkUIInternalNodeAPI()->GetGridModifier().SetGridScrollBarColor(nativeNode, color.GetValue());
+        GetArkUIInternalNodeAPI()->GetGridModifier().ResetGridScrollBarColor(nativeNode);
     }
     return panda::JSValueRef::Undefined(vm);
 }
@@ -246,16 +260,14 @@ ArkUINativeModuleValue GridBridge::SetCachedCount(ArkUIRuntimeCallInfo* runtimeC
     Local<JSValueRef> node = runtimeCallInfo->GetCallArgRef(CALL_ARG_0);
     Local<JSValueRef> arg_cachedCount = runtimeCallInfo->GetCallArgRef(CALL_ARG_1);
     void* nativeNode = node->ToNativePointer(vm)->Value();
-    if (!arg_cachedCount->IsNull() && arg_cachedCount->IsNumber()) {
-        int32_t cachedCount = arg_cachedCount->Int32Value(vm);
-        if (cachedCount < 0) {
-            GetArkUIInternalNodeAPI()->GetGridModifier().ResetGridCachedCount(nativeNode);
-        } else {
-            GetArkUIInternalNodeAPI()->GetGridModifier().SetGridCachedCount(nativeNode, cachedCount);
+    auto value = DEFAULT_CACHED_COUNT;
+    if (!arg_cachedCount->IsUndefined()) {
+        ArkTSUtils::ParseJsInteger(vm, arg_cachedCount, value);
+        if (value < 0) {
+            value = DEFAULT_CACHED_COUNT;
         }
-    } else {
-        GetArkUIInternalNodeAPI()->GetGridModifier().ResetGridCachedCount(nativeNode);
     }
+    GetArkUIInternalNodeAPI()->GetGridModifier().SetGridCachedCount(nativeNode, value);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -457,13 +469,12 @@ ArkUINativeModuleValue GridBridge::SetEdgeEffect(ArkUIRuntimeCallInfo* runtimeCa
 
     void* nativeNode = node->ToNativePointer(vm)->Value();
     int32_t effect = static_cast<int32_t>(EdgeEffect::NONE);
-    if (arg_effect->IsNull() || arg_effect->IsUndefined()) {
-        effect = static_cast<int32_t>(EdgeEffect::NONE);
-    } else {
-        effect = arg_effect->Uint32Value(vm);
+    if (!arg_effect->IsUndefined() && !arg_effect->IsNull()) {
+        effect = arg_effect->Int32Value(vm);
     }
 
-    if (effect < static_cast<int32_t>(EdgeEffect::SPRING) || effect > static_cast<int32_t>(EdgeEffect::NONE)) {
+    if (effect != static_cast<int32_t>(EdgeEffect::SPRING) && effect != static_cast<int32_t>(EdgeEffect::NONE) &&
+        effect != static_cast<int32_t>(EdgeEffect::FADE)) {
         effect = static_cast<int32_t>(EdgeEffect::NONE);
     }
 

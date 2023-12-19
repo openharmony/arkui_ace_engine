@@ -106,7 +106,6 @@ void RenderNavigator::Update(const RefPtr<Component>& component)
 
 void RenderNavigator::PerformLayout()
 {
-    LOGD("RenderNavigator PerformLayout");
     if (!GetChildren().empty()) {
         LayoutParam innerLayout = GetLayoutParam();
         auto child = GetChildren().front();

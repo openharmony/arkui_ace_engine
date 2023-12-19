@@ -34,14 +34,12 @@ void RosenScrollFadePainter::Paint(SkCanvas* canvas, const Size& size, const Off
         return;
     }
 
-    LOGD("ScrollFadePainter: opacity_(%{public}lf), scaleFactor(%{public}lf)", opacity_, scaleFactor_);
     double baseGlowScale = size.Width() > size.Height() ? size.Height() / size.Width() : 1.0;
     double radius = size.Width() * 3.0 / 2.0;
     double height = std::min(size.Height(), size.Width() * WIDTH_TO_HEIGHT_FACTOR);
     double scaleH = scaleFactor_ * baseGlowScale;
     const auto& clipRect = Rect(Offset::Zero(), Size(size.Width(), height));
     Offset center = Offset(size.Width() / 2.0, height - radius);
-    LOGD("center(%{public}lf, %{public}lf), radius(%{public}lf)", center.GetX(), center.GetY(), radius);
 
     SkPaint painter;
     painter.setColor(color_.GetValue());
@@ -61,14 +59,12 @@ void RosenScrollFadePainter::Paint(RSCanvas* canvas, const Size& size, const Off
         return;
     }
 
-    LOGD("ScrollFadePainter: opacity_(%{public}lf), scaleFactor(%{public}lf)", opacity_, scaleFactor_);
     double baseGlowScale = size.Width() > size.Height() ? size.Height() / size.Width() : 1.0;
     double radius = size.Width() * 3.0 / 2.0;
     double height = std::min(size.Height(), size.Width() * WIDTH_TO_HEIGHT_FACTOR);
     double scaleH = scaleFactor_ * baseGlowScale;
     const auto& clipRect = Rect(Offset::Zero(), Size(size.Width(), height));
     Offset center = Offset(size.Width() / 2.0, height - radius);
-    LOGD("center(%{public}lf, %{public}lf), radius(%{public}lf)", center.GetX(), center.GetY(), radius);
 
     RSBrush brush;
     brush.SetColor(color_.GetValue());

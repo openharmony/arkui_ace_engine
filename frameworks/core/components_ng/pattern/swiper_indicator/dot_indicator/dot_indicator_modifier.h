@@ -20,6 +20,7 @@
 
 #include "core/components/swiper/swiper_indicator_theme.h"
 #include "core/components_ng/base/modifier.h"
+#include "core/components_ng/render/animation_utils.h"
 #include "core/components_ng/render/drawing_prop_convertor.h"
 
 namespace OHOS::Ace::NG {
@@ -45,7 +46,8 @@ public:
           backgroundWidthDilateRatio_(AceType::MakeRefPtr<AnimatablePropertyFloat>(1)),
           backgroundHeightDilateRatio_(AceType::MakeRefPtr<AnimatablePropertyFloat>(1)),
           unselectedColor_(AceType::MakeRefPtr<PropertyColor>(Color::TRANSPARENT)),
-          selectedColor_(AceType::MakeRefPtr<PropertyColor>(Color::TRANSPARENT))
+          selectedColor_(AceType::MakeRefPtr<AnimatablePropertyColor>(LinearColor::TRANSPARENT)),
+          touchBottomPointColor_(AceType::MakeRefPtr<AnimatablePropertyColor>(LinearColor::TRANSPARENT))
     {
         AttachProperty(vectorBlackPointCenterX_);
         AttachProperty(longPointLeftCenterX_);
@@ -61,6 +63,7 @@ public:
         AttachProperty(selectedColor_);
         AttachProperty(backgroundWidthDilateRatio_);
         AttachProperty(backgroundHeightDilateRatio_);
+        AttachProperty(touchBottomPointColor_);
     }
     ~DotIndicatorModifier() override = default;
 
@@ -80,8 +83,8 @@ public:
     void onDraw(DrawingContext& context) override;
     // paint
     void PaintContent(DrawingContext& context, ContentProperty& contentProperty);
-    void PaintUnselectedIndicator(
-        RSCanvas& canvas, const OffsetF& center, const LinearVector<float>& itemHalfSizes, bool currentIndexFlag);
+    void PaintUnselectedIndicator(RSCanvas& canvas, const OffsetF& center, const LinearVector<float>& itemHalfSizes,
+        bool currentIndexFlag, const LinearColor& indicatorColor);
     void PaintSelectedIndicator(RSCanvas& canvas, const OffsetF& center, const OffsetF& leftCenter,
         const OffsetF& rightCenter, const LinearVector<float>& itemHalfSizes);
     void PaintMask(DrawingContext& context);
@@ -116,7 +119,7 @@ public:
     void UpdateHoverToNormalPointDilateRatio();
     void UpdateLongPointDilateRatio();
 
-    void UpdateAllPointCenterXAnimation(bool isForward, const LinearVector<float>& vectorBlackPointCenterX,
+    void UpdateAllPointCenterXAnimation(GestureState gestureState, const LinearVector<float>& vectorBlackPointCenterX,
         const std::pair<float, float>& longPointCenterX);
 
     void UpdateLongPointLeftCenterX(float longPointLeftCenterX, bool isAnimation);
@@ -136,12 +139,16 @@ public:
         if (unselectedColor_) {
             unselectedColor_->Set(unselectedColor);
         }
+
+        if (touchBottomPointColor_) {
+            touchBottomPointColor_->Set(LinearColor(unselectedColor));
+        }
     }
 
     void SetSelectedColor(const Color& selectedColor)
     {
         if (selectedColor_) {
-            selectedColor_->Set(selectedColor);
+            selectedColor_->Set(LinearColor(selectedColor));
         }
     }
 
@@ -244,6 +251,14 @@ public:
     {
         animationDuration_ = duration;
     }
+    void PlayIndicatorAnimation(const LinearVector<float>& vectorBlackPointCenterX,
+        const std::vector<std::pair<float, float>>& longPointCenterX, GestureState gestureState,
+        TouchBottomTypeLoop touchBottomTypeLoop);
+    void StopAnimation();
+    void SetLongPointHeadCurve(RefPtr<Curve> curve)
+    {
+        headCurve_ = curve;
+    }
 
 private:
     static RefPtr<OHOS::Ace::SwiperIndicatorTheme> GetSwiperIndicatorTheme()
@@ -254,6 +269,13 @@ private:
         CHECK_NULL_RETURN(swiperTheme, nullptr);
         return swiperTheme;
     }
+
+    void PlayBlackPointsAnimation(const LinearVector<float>& vectorBlackPointCenterX);
+    void PlayLongPointAnimation(const std::vector<std::pair<float, float>>& longPointCenterX,
+        GestureState gestureState, TouchBottomTypeLoop touchBottomTypeLoop,
+        const LinearVector<float>& vectorBlackPointCenterX);
+    void PlayTouchBottomAnimation(const std::vector<std::pair<float, float>>& longPointCenterX,
+        TouchBottomTypeLoop touchBottomTypeLoop, const LinearVector<float>& vectorBlackPointCenterX);
 
     RefPtr<AnimatablePropertyColor> backgroundColor_;
     RefPtr<AnimatablePropertyVectorFloat> vectorBlackPointCenterX_;
@@ -268,10 +290,17 @@ private:
     RefPtr<AnimatablePropertyFloat> backgroundWidthDilateRatio_;
     RefPtr<AnimatablePropertyFloat> backgroundHeightDilateRatio_;
 
+    std::shared_ptr<AnimationUtils::Animation> blackPointsAnimation_;
+    std::shared_ptr<AnimationUtils::Animation> longPointLeftAnimation_;
+    std::shared_ptr<AnimationUtils::Animation> longPointRightAnimation_;
+    RefPtr<Curve> headCurve_;
+
     float centerY_ = 0;
     Axis axis_ = Axis::HORIZONTAL;
     RefPtr<PropertyColor> unselectedColor_;
-    RefPtr<PropertyColor> selectedColor_;
+    RefPtr<AnimatablePropertyColor> selectedColor_;
+    RefPtr<AnimatablePropertyColor> touchBottomPointColor_;
+    bool isTouchBottomLoop_ = false;
     std::optional<int32_t> normalToHoverIndex_ = std::nullopt;
     std::optional<int32_t> hoverToNormalIndex_ = std::nullopt;
     bool longPointIsHover_ = false;

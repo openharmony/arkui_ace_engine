@@ -68,12 +68,10 @@ bool UnwrapRawImageDataMap(napi_env env, napi_value argv, std::map<std::string, 
     for (uint32_t index = 0; index < jsProCount; index++) {
         NAPI_CALL_BASE(env, napi_get_element(env, jsProNameList, index, &jsProName), false);
         std::string strProName = AppExecFwk::UnwrapStringFromJS(env, jsProName);
-        LOGD("%{public}s called. Property name=%{public}s.", __func__, strProName.c_str());
         NAPI_CALL_BASE(env, napi_get_named_property(env, argv, strProName.c_str(), &jsProValue), false);
         NAPI_CALL_BASE(env, napi_typeof(env, jsProValue, &jsValueType), false);
         int natValue = AppExecFwk::UnwrapInt32FromJS(env, jsProValue);
         rawImageDataMap.emplace(strProName, natValue);
-        LOGD("%{public}s called. Property value=%{public}d.", __func__, natValue);
     }
     return true;
 }
@@ -82,7 +80,6 @@ bool UnwrapRawImageDataMap(napi_env env, napi_value argv, std::map<std::string, 
 shared_ptr<JsValue> JsOnCreateFinish(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& thisObj,
     const std::vector<shared_ptr<JsValue>>& argv, int32_t argc)
 {
-    LOGD("JsOnCreateFinish");
     return runtime->NewUndefined();
 }
 
@@ -98,7 +95,6 @@ shared_ptr<JsValue> JsHandleCallback(const shared_ptr<JsRuntime>& runtime, const
 shared_ptr<JsValue> JsRunLoopOnce(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& thisObj,
     const std::vector<shared_ptr<JsValue>>& argv, int32_t argc)
 {
-    LOGD("JsRunLoopOnce");
     auto engineInstance = static_cast<JsiPaEngine*>(runtime->GetEmbedderData());
     if (engineInstance == nullptr) {
         LOGE("engineInstance is nullptr");
@@ -119,7 +115,6 @@ shared_ptr<JsValue> JsRunLoopOnce(const shared_ptr<JsRuntime>& runtime, const sh
 shared_ptr<JsValue> JsRunMicrotasks(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& thisObj,
     const std::vector<shared_ptr<JsValue>>& argv, int32_t argc)
 {
-    LOGD("JsRunMicrotasks");
     runtime->ExecutePendingJob();
     return runtime->NewUndefined();
 }
@@ -311,7 +306,6 @@ bool JsiPaEngine::InitJsEnv(bool debuggerMode, const std::unordered_map<std::str
 
 #if !defined(PREVIEW)
     for (const auto& [key, value] : extraNativeObject) {
-        LOGD("Set property, key: %{public}s.", key.c_str());
         shared_ptr<JsValue> nativeValue = runtime_->NewNativePointer(value);
         runtime_->GetGlobal()->SetProperty(runtime_, key, nativeValue);
     }
@@ -612,7 +606,6 @@ shared_ptr<JsValue> JsiPaEngine::CallFunc(const shared_ptr<JsValue>& func)
 
 shared_ptr<JsValue> JsiPaEngine::CallFunc(const shared_ptr<JsValue>& func, const std::vector<shared_ptr<JsValue>>& argv)
 {
-    LOGD("JsiPaEngine CallFunc");
     shared_ptr<JsRuntime> runtime = GetJsRuntime();
     ACE_DCHECK(runtime);
     if (func == nullptr) {
@@ -666,7 +659,6 @@ shared_ptr<JsValue> JsiPaEngine::CallFunc(const shared_ptr<JsValue>& func, const
 shared_ptr<JsValue> JsiPaEngine::CallFuncWithDefaultThis(
     const shared_ptr<JsValue>& func, const std::vector<shared_ptr<JsValue>>& argv)
 {
-    LOGD("JsiPaEngine CallFuncCallFuncWithDefaultThis");
     shared_ptr<JsRuntime> runtime = GetJsRuntime();
     ACE_DCHECK(runtime);
     if (func == nullptr) {
@@ -739,7 +731,6 @@ shared_ptr<JsValue> JsiPaEngine::CallFuncWithDefaultThis(
 shared_ptr<JsValue> JsiPaEngine::CallFunc(
     const shared_ptr<JsValue>& func, const std::vector<shared_ptr<JsValue>>& argv, const CallingInfo& callingInfo)
 {
-    LOGD("JsiPaEngine CallFunc");
     shared_ptr<JsRuntime> runtime = GetJsRuntime();
     ACE_DCHECK(runtime);
     if (func == nullptr) {
@@ -801,7 +792,6 @@ shared_ptr<JsValue> JsiPaEngine::CallFunc(
 shared_ptr<JsValue> JsiPaEngine::CallAsyncFunc(
     const shared_ptr<JsValue>& func, std::vector<shared_ptr<JsValue>>& argv, const CallingInfo& callingInfo)
 {
-    LOGD("JsiPaEngine CallAsyncFunc");
     shared_ptr<JsRuntime> runtime = GetJsRuntime();
     ACE_DCHECK(runtime);
     if (func == nullptr) {
@@ -865,7 +855,6 @@ shared_ptr<JsValue> JsiPaEngine::CallAsyncFunc(
         runtime->ExecutePendingJob();
     }
     NAPI_RemoteObject_resetOldCallingInfo(env, oldCallingInfo);
-    LOGD("JsiPaEngine CallAsyncFunc end");
     return GetAsyncResult();
 }
 
@@ -1014,7 +1003,6 @@ std::shared_ptr<AppExecFwk::PacMap> JsiPaEngine::Call(
         return nullptr;
     }
     result->FromString(retStr);
-    LOGD("JsiPaEngine Call End: %{public}s", result->ToString().c_str());
     return result;
 }
 
@@ -1182,7 +1170,6 @@ int32_t JsiPaEngine::Delete(
 
 std::string JsiPaEngine::GetType(const Uri& uri, const CallingInfo& callingInfo)
 {
-    LOGD("JsiPaEngine GetType");
     shared_ptr<JsRuntime> runtime = GetJsRuntime();
     std::vector<shared_ptr<JsValue>> argv;
     argv.push_back(runtime->NewString(uri.ToString()));
@@ -1425,7 +1412,6 @@ void JsiPaEngine::OnUpdate(const int64_t formId)
 
 void JsiPaEngine::OnCastTemptoNormal(const int64_t formId)
 {
-    LOGD("JsiPaEngine OnCastTemptoNormal");
     shared_ptr<JsRuntime> runtime = GetJsRuntime();
     const std::vector<shared_ptr<JsValue>>& argv = { runtime->NewString(std::to_string(formId)) };
     auto func = GetPaFunc("onCastToNormal");
@@ -1481,7 +1467,6 @@ int32_t JsiPaEngine::OnAcquireFormState(const OHOS::AAFwk::Want& want)
 
 bool JsiPaEngine::OnShare(int64_t formId, OHOS::AAFwk::WantParams& wantParams)
 {
-    LOGD("JsiPaEngine OnShare, create");
     auto runtime = GetJsRuntime();
     if (runtime == nullptr) {
         LOGE("JsiPaEngine JsRuntime Get nullptr!");
@@ -1489,7 +1474,10 @@ bool JsiPaEngine::OnShare(int64_t formId, OHOS::AAFwk::WantParams& wantParams)
     }
 
     const std::vector<shared_ptr<JsValue>> argv = { runtime->NewString(std::to_string(formId)) };
-    auto func = GetPaFunc("onShare");
+    auto func = GetPaFunc("onShareForm");
+    if (func == nullptr) {
+        func = GetPaFunc("onShare");
+    }
     auto result = CallFuncWithDefaultThis(func, argv);
     if (result == nullptr) {
         LOGE("JsiPaEngine Call function result is nullptr!");
