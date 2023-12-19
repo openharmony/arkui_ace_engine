@@ -2413,9 +2413,9 @@ void RichEditorPattern::FireOnDeleteComplete(const RichEditorDeleteValue& info)
     }
 }
 
-void RichEditorPattern::HandleOnDelete()
+void RichEditorPattern::HandleOnDelete(bool backward)
 {
-    DeleteBackward(1);
+    backward ? DeleteBackward(1) : DeleteForward(1);
 }
 
 void RichEditorPattern::DeleteBackward(int32_t length)

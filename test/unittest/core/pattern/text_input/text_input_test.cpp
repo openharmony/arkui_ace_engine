@@ -1524,6 +1524,217 @@ HWTEST_F(TextFieldControllerTest, TextFiledControllerTest002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: KeyEventChar001
+ * @tc.desc: Test symbols key input
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldKeyEventTest, KeyEventChar001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize textInput and get focus
+     */
+    CreateTextField();
+    GetFocus();
+    /**
+     * @tc.steps: step2. Create keyboard events
+     */
+    KeyEvent event;
+    event.action = KeyAction::DOWN;
+    std::vector<KeyCode> presscodes = {};
+    event.pressedCodes = presscodes;
+    const std::unordered_map<KeyCode, wchar_t> symbols = {
+        { KeyCode::KEY_GRAVE, L'`' },
+        { KeyCode::KEY_MINUS, L'-' },
+        { KeyCode::KEY_EQUALS, L'=' },
+        { KeyCode::KEY_LEFT_BRACKET, L'[' },
+        { KeyCode::KEY_RIGHT_BRACKET, L']' },
+        { KeyCode::KEY_BACKSLASH, L'\\' },
+        { KeyCode::KEY_SEMICOLON, L';' },
+        { KeyCode::KEY_APOSTROPHE, L'\'' },
+        { KeyCode::KEY_COMMA, L',' },
+        { KeyCode::KEY_PERIOD, L'.' },
+        { KeyCode::KEY_SLASH, L'/' },
+        { KeyCode::KEY_SPACE, L' ' },
+        { KeyCode::KEY_NUMPAD_DIVIDE, L'/' },
+        { KeyCode::KEY_NUMPAD_MULTIPLY, L'*' },
+        { KeyCode::KEY_NUMPAD_SUBTRACT, L'-' },
+        { KeyCode::KEY_NUMPAD_ADD, L'+' },
+        { KeyCode::KEY_NUMPAD_DOT, L'.' },
+        { KeyCode::KEY_NUMPAD_COMMA, L',' },
+        { KeyCode::KEY_NUMPAD_EQUALS, L'=' },
+    };
+    /**
+     * @tc.expected: Calling the keyboard event interface
+     */
+    std::string result;
+    for (auto code : symbols) {
+        event.pressedCodes.clear();
+        event.pressedCodes.push_back(code.first);
+        event.code = code.first;
+        auto ret = pattern_->OnKeyEvent(event);
+        FlushLayoutTask(frameNode_);
+        std::wstring appendElement(1, code.second);
+        result.append(StringUtils::ToString(appendElement));
+        EXPECT_EQ(pattern_->GetTextValue(), result);
+        EXPECT_TRUE(ret);
+    }
+}
+
+/**
+ * @tc.name: KeyEventChar001
+ * @tc.desc: Test shift + symbols key input
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldKeyEventTest, KeyEventChar002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize textInput and get focus
+     */
+    CreateTextField();
+    GetFocus();
+    /**
+     * @tc.steps: step2. Create keyboard events
+     */
+    KeyEvent event;
+    event.action = KeyAction::DOWN;
+    std::vector<KeyCode> presscodes = {};
+    event.pressedCodes = presscodes;
+    std::vector<KeyCode> shiftCodes = { KeyCode::KEY_SHIFT_LEFT, KeyCode::KEY_SHIFT_RIGHT };
+    const std::unordered_map<KeyCode, wchar_t> symbols = {
+        { KeyCode::KEY_GRAVE, L'~' },
+        { KeyCode::KEY_MINUS, L'_' },
+        { KeyCode::KEY_EQUALS, L'+' },
+        { KeyCode::KEY_LEFT_BRACKET, L'{' },
+        { KeyCode::KEY_RIGHT_BRACKET, L'}' },
+        { KeyCode::KEY_BACKSLASH, L'|' },
+        { KeyCode::KEY_SEMICOLON, L':' },
+        { KeyCode::KEY_APOSTROPHE, L'\"' },
+        { KeyCode::KEY_COMMA, L'<' },
+        { KeyCode::KEY_PERIOD, L'>' },
+        { KeyCode::KEY_SLASH, L'?' },
+    };
+    /**
+     * @tc.expected: Calling the keyboard event interface
+     */
+    std::string result;
+    for (auto shift : shiftCodes) {
+        for (auto code : symbols) {
+            event.pressedCodes.clear();
+            event.pressedCodes.push_back(shift);
+            event.pressedCodes.push_back(code.first);
+            event.code = code.first;
+            auto ret = pattern_->OnKeyEvent(event);
+            FlushLayoutTask(frameNode_);
+            std::wstring appendElement(1, code.second);
+            result.append(StringUtils::ToString(appendElement));
+            EXPECT_EQ(pattern_->GetTextValue(), result);
+            EXPECT_TRUE(ret);
+        }
+    }
+}
+
+/**
+ * @tc.name: KeyEventChar003
+ * @tc.desc: Test uppercase letters input
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldKeyEventTest, KeyEventChar003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize textInput and get focus
+     */
+    CreateTextField();
+    GetFocus();
+    /**
+     * @tc.steps: step2. Create keyboard events
+     */
+    KeyEvent event;
+    event.action = KeyAction::DOWN;
+    std::vector<KeyCode> presscodes = {};
+    event.pressedCodes = presscodes;
+    std::vector<KeyCode> shiftCodes = { KeyCode::KEY_SHIFT_LEFT, KeyCode::KEY_SHIFT_RIGHT };
+    const std::unordered_map<KeyCode, wchar_t> symbols = {
+        { KeyCode::KEY_A, 'A' },
+        { KeyCode::KEY_B, 'B' },
+        { KeyCode::KEY_C, 'C' },
+        { KeyCode::KEY_X, 'X' },
+        { KeyCode::KEY_Y, 'Y' },
+        { KeyCode::KEY_Z, 'Z' },
+    };
+    /**
+     * @tc.expected: lowercase to uppercase
+     */
+    std::string result;
+    for (auto shift : shiftCodes) {
+        for (auto code : symbols) {
+            event.pressedCodes.clear();
+            EXPECT_EQ(event.pressedCodes.size(), 0);
+            event.pressedCodes.push_back(shift);
+            event.pressedCodes.push_back(code.first);
+            event.code = code.first;
+            auto ret = pattern_->OnKeyEvent(event);
+            FlushLayoutTask(frameNode_);
+            std::wstring appendElement(1, code.second);
+            result.append(StringUtils::ToString(appendElement));
+            EXPECT_EQ(pattern_->GetTextValue(), result);
+            EXPECT_TRUE(ret);
+        }
+    }
+}
+
+/**
+ * @tc.name: KeyEventChar004
+ * @tc.desc: Test Shift + 0-9 symbols input
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldKeyEventTest, KeyEventChar004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize textInput and get focus
+     */
+    CreateTextField();
+    GetFocus();
+    /**
+     * @tc.steps: step2. Create keyboard events
+     */
+    KeyEvent event;
+    event.action = KeyAction::DOWN;
+    std::vector<KeyCode> presscodes = {};
+    std::vector<KeyCode> shiftCodes = { KeyCode::KEY_SHIFT_LEFT, KeyCode::KEY_SHIFT_RIGHT };
+    const std::unordered_map<KeyCode, wchar_t> symbols = {
+        { KeyCode::KEY_0, ')' },
+        { KeyCode::KEY_1, '!' },
+        { KeyCode::KEY_2, '@' },
+        { KeyCode::KEY_3, '#' },
+        { KeyCode::KEY_4, '$' },
+        { KeyCode::KEY_5, '%' },
+        { KeyCode::KEY_6, '^' },
+        { KeyCode::KEY_7, '&' },
+        { KeyCode::KEY_8, '*' },
+        { KeyCode::KEY_9, '(' },
+    };
+    /**
+     * @tc.expected: shift + number to input
+     */
+    std::string result;
+    for (auto shift : shiftCodes) {
+        for (auto code : symbols) {
+            event.pressedCodes.clear();
+            EXPECT_EQ(event.pressedCodes.size(), 0);
+            event.pressedCodes.push_back(shift);
+            event.pressedCodes.push_back(code.first);
+            event.code = code.first;
+            auto ret = pattern_->OnKeyEvent(event);
+            FlushLayoutTask(frameNode_);
+            std::wstring appendElement(1, code.second);
+            result.append(StringUtils::ToString(appendElement));
+            EXPECT_EQ(pattern_->GetTextValue(), result);
+            EXPECT_TRUE(ret);
+        }
+    }
+}
+
+/**
  * @tc.name: KeyEvent001
  * @tc.desc: Test KeyEvent selections
  * @tc.type: FUNC

@@ -3985,6 +3985,23 @@ void TextFieldPattern::InitSurfacePositionChangedCallback()
     }
 }
 
+void TextFieldPattern::HandleOnDelete(bool backward)
+{
+    if (backward) {
+#if defined(PREVIEW)
+        DeleteForward(GetGraphemeClusterLength(GetWideText(), GetCaretIndex()));
+#else
+        DeleteBackward(GetGraphemeClusterLength(GetWideText(), GetCaretIndex(), true));
+#endif
+    } else {
+#if defined(PREVIEW)
+        DeleteBackward(GetGraphemeClusterLength(GetWideText(), GetCaretIndex(), true));
+#else
+        DeleteForward(GetGraphemeClusterLength(GetWideText(), GetCaretIndex()));
+#endif
+    }
+}
+
 void TextFieldPattern::DeleteBackward(int32_t length)
 {
     auto tmpHost = GetHost();

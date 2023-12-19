@@ -2678,7 +2678,7 @@ bool RenderTextField::HandleKeyEvent(const KeyEvent& event)
 bool RenderTextField::HandleShiftPressedEvent(const KeyEvent& event)
 {
     const static size_t maxKeySizes = 2;
-    wchar_t keyChar;
+    char keyChar;
     auto iterCode = KEYBOARD_SYMBOLS.find(event.code);
     if (event.pressedCodes.size() == 1 && iterCode != KEYBOARD_SYMBOLS.end()) {
         if (iterCode != KEYBOARD_SYMBOLS.end()) {
@@ -2692,7 +2692,7 @@ bool RenderTextField::HandleShiftPressedEvent(const KeyEvent& event)
         if (iterCode != SHIFT_KEYBOARD_SYMBOLS.end()) {
             keyChar = iterCode->second;
         } else if (KeyCode::KEY_A <= event.code && event.code <= KeyCode::KEY_Z) {
-            keyChar = static_cast<wchar_t>(event.code) - static_cast<wchar_t>(KeyCode::KEY_A) + UPPER_CASE_A;
+            keyChar = static_cast<char>(event.code) - static_cast<char>(KeyCode::KEY_A) + UPPER_CASE_A;
         } else if (KeyCode::KEY_0 <= event.code && event.code <= KeyCode::KEY_9) {
             keyChar = NUM_SYMBOLS[static_cast<int32_t>(event.code) - static_cast<int32_t>(KeyCode::KEY_0)];
         } else {
@@ -2701,8 +2701,7 @@ bool RenderTextField::HandleShiftPressedEvent(const KeyEvent& event)
     } else {
         return false;
     }
-    std::wstring wideAppendElement(1, keyChar);
-    auto appendElement = StringUtils::ToString(wideAppendElement);
+    std::string appendElement(1, keyChar);
     InsertValueDone(appendElement);
     return true;
 }
