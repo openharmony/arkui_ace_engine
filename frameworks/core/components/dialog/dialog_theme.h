@@ -105,10 +105,6 @@ public:
                 dialogPattern->GetAttr<Dimension>("muti_button_padding_horizontal", 8.0_vp);
             theme->mutiButtonPaddingVertical_ =
                 dialogPattern->GetAttr<Dimension>("muti_button_padding_vertical", 4.0_vp);
-            theme->actionsPadding_ = Edge(dialogPattern->GetAttr<Dimension>("dialog_padding_actions_left", 16.0_vp),
-                dialogPattern->GetAttr<Dimension>("dialog_padding_actions_top", 8.0_vp),
-                dialogPattern->GetAttr<Dimension>("dialog_padding_actions_right", 16.0_vp),
-                dialogPattern->GetAttr<Dimension>("dialog_padding_actions_bottom", 16.0_vp));
             theme->multipleDialogDisplay_ = dialogPattern->GetAttr<std::string>("multiple_dialog_display", "stack");
             theme->actionsPadding_ = Edge(dialogPattern->GetAttr<Dimension>("dialog_padding_actions_left", 16.0_vp),
                 dialogPattern->GetAttr<Dimension>("dialog_padding_actions_top", 8.0_vp),
