@@ -22,15 +22,11 @@
 
 #include "gtest/gtest.h"
 
-#define private public
-#define protected public
 #include "base/geometry/ng/size_t.h"
 #include "base/geometry/size.h"
 #include "core/components_ng/property/calc_length.h"
 #include "core/components_ng/property/layout_constraint.h"
 #include "core/components_ng/property/measure_property.h"
-#undef protected
-#undef private
 
 using namespace testing;
 using namespace testing::ext;
