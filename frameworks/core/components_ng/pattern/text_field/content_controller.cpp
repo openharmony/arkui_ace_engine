@@ -25,6 +25,7 @@
 namespace OHOS::Ace::NG {
 namespace {
 const std::string DIGIT_WHITE_LIST = "[0-9]";
+const std::string DIGIT_DECIMAL_WHITE_LIST = "[0-9.]";
 const std::string PHONE_WHITE_LIST = R"([\d\-\+\*\#]+)";
 const std::string EMAIL_WHITE_LIST = "[\\w.\\@]";
 const std::string URL_WHITE_LIST = "[a-zA-z]+://[^\\s]*";
@@ -131,6 +132,8 @@ void ContentController::FilterTextInputStyle(bool& textChanged, std::string& res
             textChanged |= FilterWithAscii(result);
             break;
         }
+        case TextInputType::NUMBER_DECIMAL:
+            textChanged |= FilterWithEvent(DIGIT_DECIMAL_WHITE_LIST, result);
         default: {
             break;
         }
