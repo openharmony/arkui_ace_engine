@@ -385,9 +385,6 @@ void TextPickerColumnPattern::FlushCurrentOptions(
     } else if (columnkind_ == MIXTURE) {
         FlushCurrentMixtureOptions(textPickerLayoutProperty, isUpateTextContentOnly);
     }
-    if (isIndexChanged_) {
-        HandleEventCallback(true);
-    }
     if (isUpateTextContentOnly && isUpdateAnimationProperties) {
         FlushAnimationTextProperties(isDown);
     }
@@ -753,24 +750,17 @@ void TextPickerColumnPattern::UpdatePickerTextProperties(const RefPtr<TextLayout
     CHECK_NULL_VOID(context);
     auto pickerTheme = context->GetTheme<PickerTheme>();
     CHECK_NULL_VOID(pickerTheme);
-    if (currentIndex < middleIndex) {
-        if (currentIndex == 0) {
-            UpdateDisappearTextProperties(pickerTheme, textLayoutProperty, textPickerLayoutProperty);
-        } else {
-            UpdateCandidateTextProperties(pickerTheme, textLayoutProperty, textPickerLayoutProperty);
-        }
-        textLayoutProperty->UpdateAlignment(Alignment::TOP_CENTER);
-    }
     if (currentIndex == middleIndex) {
         UpdateSelectedTextProperties(pickerTheme, textLayoutProperty, textPickerLayoutProperty);
         textLayoutProperty->UpdateAlignment(Alignment::CENTER);
+    } else if ((currentIndex == middleIndex + 1) || (currentIndex == middleIndex - 1)) {
+        UpdateCandidateTextProperties(pickerTheme, textLayoutProperty, textPickerLayoutProperty);
+    } else {
+        UpdateDisappearTextProperties(pickerTheme, textLayoutProperty, textPickerLayoutProperty);
     }
-    if (currentIndex > middleIndex) {
-        if (currentIndex == showCount - 1) {
-            UpdateDisappearTextProperties(pickerTheme, textLayoutProperty, textPickerLayoutProperty);
-        } else {
-            UpdateCandidateTextProperties(pickerTheme, textLayoutProperty, textPickerLayoutProperty);
-        }
+    if (currentIndex < middleIndex) {
+        textLayoutProperty->UpdateAlignment(Alignment::TOP_CENTER);
+    } else if (currentIndex > middleIndex) {
         textLayoutProperty->UpdateAlignment(Alignment::BOTTOM_CENTER);
     }
     textLayoutProperty->UpdateMaxLines(1);
