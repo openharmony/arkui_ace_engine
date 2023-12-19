@@ -55,48 +55,10 @@ CanvasDrawFunction DatePickerPaintMethod::GetForegroundDrawFunction(PaintWrapper
         dividerPainter.DrawLine(canvas, offsetY);
         auto picker = weak.Upgrade();
         CHECK_NULL_VOID(picker);
-        if (enabled) {
-            picker->PaintGradient(canvas, frameRect);
-        } else {
+        if (!enabled) {
             picker->PaintDisable(canvas, frameRect.Width(), frameRect.Height());
         }
     };
-}
-
-void DatePickerPaintMethod::PaintGradient(RSCanvas& canvas, const RectF& frameRect)
-{
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto theme = pipeline->GetTheme<PickerTheme>();
-    auto gradientHeight = static_cast<float>(pipeline->NormalizeToPx(theme->GetGradientHeight()));
-    if (NearZero(gradientHeight)) {
-        return;
-    }
-
-    // Paint gradient rect over the picker content.
-    RSBrush topBrush;
-    RSRect rect(0.0f, 0.0f, frameRect.Right() - frameRect.Left(), frameRect.Bottom() - frameRect.Top());
-    RSPoint topStartPoint;
-    topStartPoint.SetX(0.0f);
-    topStartPoint.SetY(0.0f);
-    RSPoint topEndPoint;
-    topEndPoint.SetX(0.0f);
-    topEndPoint.SetY(frameRect.Height());
-    Color endColor = backgroundColor_;
-    Color middleColor = endColor.ChangeAlpha(0);
-    if (NearZero(frameRect.Bottom())) {
-        return;
-    }
-    std::vector<float> topPos { 0.0f, gradientHeight / frameRect.Bottom(),
-        (frameRect.Bottom() - gradientHeight) / frameRect.Bottom(), 1.0f };
-    std::vector<RSColorQuad> topColors { endColor.GetValue(), middleColor.GetValue(), middleColor.GetValue(),
-        endColor.GetValue() };
-    topBrush.SetShaderEffect(
-        RSShaderEffect::CreateLinearGradient(topStartPoint, topEndPoint, topColors, topPos, RSTileMode::CLAMP));
-    canvas.DetachPen().AttachBrush(topBrush);
-    canvas.DrawRect(rect);
-    canvas.DetachBrush();
-    canvas.Restore();
 }
 
 void DatePickerPaintMethod::PaintDisable(RSCanvas& canvas, double X, double Y)
