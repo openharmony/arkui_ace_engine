@@ -55,6 +55,7 @@
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
 #include "core/components_ng/pattern/text_field/text_input_ai_checker.h"
 #include "core/components_ng/property/property.h"
+#include "core/components_v2/inspector/inspector_constants.h"
 #include "core/gestures/gesture_info.h"
 #include "core/pipeline/base/element_register.h"
 
@@ -500,6 +501,59 @@ int32_t RichEditorPattern::AddTextSpanOperation(const TextSpanOptions& options, 
         CloseSelectOverlay();
         ResetSelection();
     }
+    SpanNodeFission(spanNode);
+    return spanIndex;
+}
+
+int32_t RichEditorPattern::AddSymbolSpan(const SymbolSpanOptions& options, bool isPaste, int32_t index)
+{
+    OperationRecord record;
+    record.beforeCaretPosition = options.offset.value_or(static_cast<int32_t>(GetTextContentLength()));
+    record.addText = " ";
+    ClearRedoOperationRecords();
+    record.afterCaretPosition = record.beforeCaretPosition + std::to_string(options.symbolId).length();
+    AddOperationRecord(record);
+    return AddSymbolSpanOperation(options, isPaste, index);
+}
+
+int32_t RichEditorPattern::AddSymbolSpanOperation(const SymbolSpanOptions& options, bool isPaste, int32_t index)
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, -1);
+
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto spanNode = SpanNode::GetOrCreateSpanNode(V2::SYMBOL_SPAN_ETS_TAG, nodeId);
+
+    int32_t spanIndex = 0;
+    int32_t offset = -1;
+    if (options.offset.has_value()) {
+        offset = TextSpanSplit(options.offset.value());
+        if (offset == -1) {
+            spanIndex = host->GetChildren().size();
+        } else {
+            spanIndex = offset;
+        }
+        spanNode->MountToParent(host, offset);
+    } else if (index != -1) {
+        spanNode->MountToParent(host, index);
+        spanIndex = index;
+    } else {
+        spanIndex = host->GetChildren().size();
+        spanNode->MountToParent(host);
+    }
+    spanNode->UpdateContent(options.symbolId);
+    spanNode->AddPropertyInfo(PropertyInfo::NONE);
+    if (options.style.has_value()) {
+        spanNode->UpdateFontSize(options.style.value().GetFontSize());
+        spanNode->AddPropertyInfo(PropertyInfo::FONTSIZE);
+        spanNode->UpdateFontWeight(options.style.value().GetFontWeight());
+        spanNode->AddPropertyInfo(PropertyInfo::FONTWEIGHT);
+    }
+    auto spanItem = spanNode->GetSpanItem();
+    spanItem->content = options.symbolId;
+    spanItem->SetTextStyle(options.style);
+    AddSpanItem(spanItem, offset);
     SpanNodeFission(spanNode);
     return spanIndex;
 }

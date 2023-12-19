@@ -127,6 +127,7 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_stepper_item.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_swiper.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_symbol.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_symbol_span.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_tab_content.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_tabs.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_tabs_controller.h"
@@ -546,6 +547,7 @@ void JsBindViews(BindingTarget globalObj)
     JSDumpRegister::JSBind(globalObj);
     JSKeyboardAvoid::JSBind(globalObj);
     JSSymbol::JSBind(globalObj);
+    JSSymbolSpan::JSBind(globalObj);
 #ifdef USE_COMPONENTS_LIB
     JSBindLibs("arkui.qrcode", "QRCode");
     JSBindLibs("arkui.relativeContainer", "RelativeContainer");

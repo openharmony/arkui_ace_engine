@@ -1027,6 +1027,47 @@ void JSRichEditorController::AddTextSpan(const JSCallbackInfo& args)
     args.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(spanIndex)));
 }
 
+void JSRichEditorController::AddSymbolSpan(const JSCallbackInfo& args)
+{
+    if (args.Length() < 1) {
+        return;
+    }
+    SymbolSpanOptions options;
+    uint32_t symbolId;
+    if (!args[0]->IsEmpty() && JSContainerBase::ParseJsSymbolId(args[0], symbolId)) {
+        options.symbolId = symbolId;
+    } else {
+        args.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(-1)));
+        return;
+    }
+
+    if (args.Length() > 1 && args[1]->IsObject()) {
+        JSRef<JSObject> spanObject = JSRef<JSObject>::Cast(args[1]);
+        JSRef<JSVal> offset = spanObject->GetProperty("offset");
+        int32_t spanOffset = 0;
+        if (!offset->IsNull() && JSContainerBase::ParseJsInt32(offset, spanOffset)) {
+            options.offset = spanOffset;
+        }
+        auto styleObj = spanObject->GetProperty("style");
+        JSRef<JSObject> styleObject = JSRef<JSObject>::Cast(styleObj);
+        if (!styleObject->IsUndefined()) {
+            auto pipelineContext = PipelineBase::GetCurrentContext();
+            CHECK_NULL_VOID(pipelineContext);
+            auto theme = pipelineContext->GetTheme<TextTheme>();
+            TextStyle style = theme ? theme->GetTextStyle() : TextStyle();
+            ParseJsTextStyle(styleObject, style, updateSpanStyle_);
+            options.style = style;
+        }
+    }
+
+    auto controller = controllerWeak_.Upgrade();
+    int32_t spanIndex = 0;
+    if (controller) {
+        spanIndex = controller->AddSymbolSpan(options);
+    }
+    args.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(spanIndex)));
+}
+
 JSRef<JSVal> JSRichEditorController::CreateJSSpansInfo(const RichEditorSelection& info)
 {
     uint32_t idx = 0;
@@ -1173,6 +1214,7 @@ void JSRichEditorController::JSBind(BindingTarget globalObj)
     JSClass<JSRichEditorController>::Declare("RichEditorController");
     JSClass<JSRichEditorController>::CustomMethod("addImageSpan", &JSRichEditorController::AddImageSpan);
     JSClass<JSRichEditorController>::CustomMethod("addTextSpan", &JSRichEditorController::AddTextSpan);
+    JSClass<JSRichEditorController>::CustomMethod("addSymbolSpan", &JSRichEditorController::AddSymbolSpan);
     JSClass<JSRichEditorController>::CustomMethod("addBuilderSpan", &JSRichEditorController::AddPlaceholderSpan);
     JSClass<JSRichEditorController>::CustomMethod("setCaretOffset", &JSRichEditorController::SetCaretOffset);
     JSClass<JSRichEditorController>::CustomMethod("getCaretOffset", &JSRichEditorController::GetCaretOffset);

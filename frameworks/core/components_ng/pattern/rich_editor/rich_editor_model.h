@@ -161,12 +161,19 @@ struct TextSpanOptions : SpanOptionBase {
     bool hasResourceFontColor = false;
 };
 
+struct SymbolSpanOptions : SpanOptionBase {
+    std::optional<int32_t> offset;
+    uint32_t symbolId;
+    std::optional<TextStyle> style;
+};
+
 class ACE_EXPORT RichEditorControllerBase : public AceType {
     DECLARE_ACE_TYPE(RichEditorControllerBase, AceType);
 
 public:
     virtual int32_t AddImageSpan(const ImageSpanOptions& options) = 0;
     virtual int32_t AddTextSpan(const TextSpanOptions& options) = 0;
+    virtual int32_t AddSymbolSpan(const SymbolSpanOptions& options) = 0;
     virtual int32_t AddPlaceholderSpan(const RefPtr<NG::UINode>& customNode, const SpanOptionBase& options) = 0;
     virtual int32_t GetCaretOffset() = 0;
     virtual bool SetCaretOffset(int32_t caretPosition) = 0;

@@ -2108,7 +2108,7 @@ void TextPattern::AddChildSpanItem(const RefPtr<UINode>& child)
         return;
     }
 
-    if (child->GetTag() == V2::SPAN_ETS_TAG) {
+    if (child->GetTag() == V2::SPAN_ETS_TAG || child->GetTag() == V2::SYMBOL_SPAN_ETS_TAG) {
         auto spanNode = DynamicCast<SpanNode>(child);
         if (spanNode) {
             spans_.emplace_back(spanNode->GetSpanItem());

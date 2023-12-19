@@ -110,6 +110,17 @@ RefPtr<SpanNode> SpanNode::GetOrCreateSpanNode(int32_t nodeId)
     return spanNode;
 }
 
+RefPtr<SpanNode> SpanNode::GetOrCreateSpanNode(const std::string& tag, int32_t nodeId)
+{
+    auto spanNode = ElementRegister::GetInstance()->GetSpecificItemById<SpanNode>(nodeId);
+    if (spanNode) {
+        return spanNode;
+    }
+    spanNode = MakeRefPtr<SpanNode>(tag, nodeId);
+    ElementRegister::GetInstance()->AddUINode(spanNode);
+    return spanNode;
+}
+
 void SpanNode::MountToParagraph()
 {
     auto parent = GetParent();
@@ -180,6 +191,12 @@ int32_t SpanItem::UpdateParagraph(const RefPtr<FrameNode>& frameNode,
         UpdateTextStyle(spanContent, builder, textStyle);
     }
     textStyle_ = textStyle;
+
+    auto symbolUnicode = GetSymbolUnicode();
+    if (symbolUnicode != 0) {
+        builder->AddSymbol(symbolUnicode);
+    }
+
     for (const auto& child : children) {
         if (child) {
             if (!aiSpanMap.empty()) {
@@ -360,6 +377,11 @@ std::string SpanItem::GetSpanContent(const std::string& rawContent)
 std::string SpanItem::GetSpanContent()
 {
     return content;
+}
+
+uint32_t SpanItem::GetSymbolUnicode()
+{
+    return unicode;
 }
 
 #ifdef ENABLE_DRAG_FRAMEWORK
