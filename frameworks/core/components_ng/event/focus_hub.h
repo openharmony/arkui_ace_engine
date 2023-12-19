@@ -572,17 +572,11 @@ public:
     }
     void SetParentFocusable(bool parentFocusable);
 
-    void RefreshParentFocusable(bool focusable);
-
     void RefreshFocus();
 
     void SetFocusable(bool focusable, bool isExplicit = true);
     void SetShow(bool show);
-    void SetShowNode(bool show);
-    void SetShowScope(bool show);
     void SetEnabled(bool enabled);
-    void SetEnabledNode(bool enabled);
-    void SetEnabledScope(bool enabled);
 
     bool IsShow() const;
 

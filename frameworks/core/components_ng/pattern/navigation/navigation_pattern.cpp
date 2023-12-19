@@ -258,7 +258,6 @@ void NavigationPattern::CheckTopNavPathChange(
         auto navBarNode = AceType::DynamicCast<NavBarNode>(hostNode->GetNavBarNode());
         CHECK_NULL_VOID(navBarNode);
         auto focusHub = navBarNode->GetOrCreateFocusHub();
-        focusHub->SetParentFocusable(false);
         focusHub->LostFocus();
     }
     RefPtr<NavDestinationGroupNode> newTopNavDestination;
@@ -297,7 +296,6 @@ void NavigationPattern::CheckTopNavPathChange(
         }
         navBarNode->GetEventHub<EventHub>()->SetEnabledInternal(true);
         auto focusHub = navBarNode->GetOrCreateFocusHub();
-        focusHub->SetParentFocusable(true);
         focusHub->RequestFocus();
     }
     bool isShow = false;

@@ -55,12 +55,15 @@ public:
                     pattern->UpdateImagePositionY(y);
                 });
         }
-        SliderPaintMethod::TipParameters tipParameters { bubbleFlag_,
-            GetBubbleVertexPosition(circleCenter_, trackThickness_, blockSize_) };
+        auto overlayGlobalOffset = CalculateGlobalSafeOffset();
+        std::pair<OffsetF, float> BubbleVertex = GetBubbleVertexPosition(circleCenter_, trackThickness_, blockSize_);
+        SliderPaintMethod::TipParameters tipParameters { bubbleFlag_, BubbleVertex.first, overlayGlobalOffset };
         if (!sliderTipModifier_ && bubbleFlag_) {
             sliderTipModifier_ = AceType::MakeRefPtr<SliderTipModifier>([weak = WeakClaim(this)]() {
                 auto pattern = weak.Upgrade();
-                CHECK_NULL_RETURN(pattern, OffsetF());
+                if (!pattern) {
+                    return std::pair<OffsetF, float>();
+                }
                 auto blockCenter = pattern->GetBlockCenter();
                 auto trackThickness = pattern->sliderContentModifier_->GetTrackThickness();
                 auto blockSize = pattern->sliderContentModifier_->GetBlockSize();
@@ -116,12 +119,13 @@ public:
     {
         return valueRatio_;
     }
-    
+
     std::string ProvideRestoreInfo() override;
     void OnRestoreInfo(const std::string& restoreInfo) override;
-
+    OffsetF CalculateGlobalSafeOffset();
     void UpdateValue(float value);
     void OnVisibleChange(bool isVisible) override;
+
 private:
     void OnAttachToFrameNode() override;
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
@@ -185,7 +189,8 @@ private:
     void LayoutImageNode();
     void UpdateImagePositionX(float centerX);
     void UpdateImagePositionY(float centerY);
-    OffsetF GetBubbleVertexPosition(const OffsetF& blockCenter, float trackThickness, const SizeF& blockSize);
+    std::pair<OffsetF, float> GetBubbleVertexPosition(
+        const OffsetF& blockCenter, float trackThickness, const SizeF& blockSize);
     void SetAccessibilityAction();
     void UpdateTipState();
     void OnIsFocusActiveUpdate(bool isFocusActive);

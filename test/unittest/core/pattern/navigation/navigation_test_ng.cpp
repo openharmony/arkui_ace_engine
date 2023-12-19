@@ -3318,4 +3318,196 @@ HWTEST_F(NavigationTestNg, NavigationFocusTest001, TestSize.Level1)
     pattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
     EXPECT_FALSE(backButtonNode->GetOrCreateFocusHub()->IsDefaultFocus());
 }
+
+/**
+ * @tc.name: NavDestinationTest001
+ * @tc.desc: Test Dialog page visibility
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationTestNg, NavDestinationDialogTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create navigation stack
+     */
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    auto navigationStack = AceType::MakeRefPtr<MockNavigationStack>();
+    navigationModel.SetNavigationStack(navigationStack);
+    RefPtr<NavigationGroupNode> navigationNode =
+        AceType::DynamicCast<NavigationGroupNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(navigationNode, nullptr);
+
+    /**
+     * @tc.steps: step2.push page A to navDestination
+     * @tc.expected: navbar is visible,page is visible
+     */
+    auto navDestination = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    navDestination->SetNavDestinationMode(NavDestinationMode::DIALOG);
+    navigationStack->Add("A", navDestination);
+    auto pattern = AceType::DynamicCast<NavigationPattern>(navigationNode->GetPattern());
+    EXPECT_NE(pattern, nullptr);
+    pattern->SetNavigationMode(NavigationMode::STACK);
+    pattern->OnModifyDone();
+    auto destinationProperty = AceType::DynamicCast<NavDestinationLayoutProperty>(navDestination->GetLayoutProperty());
+    EXPECT_TRUE(destinationProperty != nullptr);
+    destinationProperty->UpdateHideTitleBar(true);
+    EXPECT_EQ(destinationProperty->GetVisibilityValue(VisibleType::VISIBLE), VisibleType::VISIBLE);
+    auto navBarNode = AceType::DynamicCast<NavBarNode>(navigationNode->GetNavBarNode());
+    EXPECT_NE(navBarNode, nullptr);
+    auto navBarProperty = navBarNode->GetLayoutProperty();
+    EXPECT_EQ(navBarProperty->GetVisibilityValue(VisibleType::VISIBLE), VisibleType::VISIBLE);
+
+    /**
+     * @tc.steps: step2. push navdestination page B
+     * @tc.expected: page A is visible, page B is visible
+     */
+    auto navDestinationB = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    navDestinationB->SetNavDestinationMode(NavDestinationMode::DIALOG);
+    navigationStack->Add("B", navDestinationB);
+    pattern->OnModifyDone();
+    auto layoutPropertyB = AceType::DynamicCast<NavDestinationLayoutProperty>(navDestinationB->GetLayoutProperty());
+    EXPECT_NE(layoutPropertyB, nullptr);
+    layoutPropertyB->UpdateHideTitleBar(true);
+    EXPECT_EQ(layoutPropertyB->GetVisibilityValue(VisibleType::VISIBLE), VisibleType::VISIBLE);
+    EXPECT_EQ(destinationProperty->GetVisibilityValue(VisibleType::VISIBLE), VisibleType::VISIBLE);
+
+    /**
+     * @tc.steps: step3. push standard page C
+     * @tc.expected: page A is invisible, pageB is invisible, navBar is invisible, pageC is visible
+     */
+    auto navDestinationC = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() {
+            return AceType::MakeRefPtr<NavDestinationPattern>();
+        });
+    auto layoutPropertyC = AceType::DynamicCast<NavDestinationLayoutProperty>(navDestinationC->GetLayoutProperty());
+    EXPECT_NE(layoutPropertyC, nullptr);
+    layoutPropertyC->UpdateHideTitleBar(true);
+
+    navigationStack->Add("C", navDestinationC);
+    pattern->OnModifyDone();
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    auto layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(navigationNode, geometryNode, navigationNode->GetLayoutProperty());
+    ASSERT_NE(layoutWrapper, nullptr);
+    DirtySwapConfig config;
+    config.skipMeasure = true;
+    config.skipLayout = true;
+    pattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
+    EXPECT_EQ(layoutPropertyB->GetVisibilityValue(VisibleType::VISIBLE), VisibleType::INVISIBLE);
+    EXPECT_EQ(destinationProperty->GetVisibilityValue(VisibleType::VISIBLE), VisibleType::INVISIBLE);
+    EXPECT_EQ(layoutPropertyC->GetVisibilityValue(VisibleType::VISIBLE), VisibleType::VISIBLE);
+}
+
+/**
+ * @tc.name: NavDestinationDialogTest002
+ * @tc.desc: Test window lifecycle event
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationTestNg, NavDestinationDialogTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1.create navigation stack
+    */
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    auto navigationStack = AceType::MakeRefPtr<MockNavigationStack>();
+    navigationModel.SetNavigationStack(navigationStack);
+    RefPtr<NavigationGroupNode> navigationNode =
+        AceType::DynamicCast<NavigationGroupNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(navigationNode, nullptr);
+    auto navigationPattern = AceType::DynamicCast<NavigationPattern>(navigationNode->GetPattern());
+    ASSERT_NE(navigationPattern, nullptr);
+    auto context = PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    context->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
+    auto taskExecutor = context->GetTaskExecutor();
+    ASSERT_NE(taskExecutor, nullptr);
+
+    /**
+     * @tc.steps: step2. add pageA and pageB to navDestination
+    */
+    auto navDestinationA = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    navDestinationA->SetNavDestinationMode(NavDestinationMode::DIALOG);
+    navigationStack->Add("A", navDestinationA);
+    auto navDestinationB = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    navDestinationB->SetNavDestinationMode(NavDestinationMode::DIALOG);
+    navigationStack->Add("B", navDestinationB);
+    navigationPattern->OnModifyDone();
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    auto layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(navigationNode, geometryNode, navigationNode->GetLayoutProperty());
+    ASSERT_NE(layoutWrapper, nullptr);
+    DirtySwapConfig config;
+    config.skipMeasure = true;
+    config.skipLayout = true;
+    navigationPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
+    navigationPattern->NotifyDialogChange(true);
+    auto navDestinationPatternA = AceType::DynamicCast<NavDestinationPattern>(navDestinationA->GetPattern());
+    EXPECT_NE(navDestinationPatternA, nullptr);
+    auto navDestinationPatternB = AceType::DynamicCast<NavDestinationPattern>(navDestinationB->GetPattern());
+    EXPECT_NE(navDestinationPatternB, nullptr);
+    EXPECT_TRUE(navDestinationPatternB->GetIsOnShow());
+    EXPECT_TRUE(navDestinationPatternA->GetIsOnShow());
+
+    /**
+     * @tc.steps: step2. trigger window hide
+     * @tc.expected: step2. pageA and pageB is all hide
+     */
+    navigationPattern->OnWindowHide();
+    EXPECT_FALSE(navDestinationPatternA->GetIsOnShow());
+    EXPECT_FALSE(navDestinationPatternB->GetIsOnShow());
+
+    /**
+     * @tc.steps: step3.trigger window show
+    */
+    navigationPattern->OnWindowShow();
+    EXPECT_TRUE(navDestinationPatternA->GetIsOnShow());
+    EXPECT_TRUE(navDestinationPatternB->GetIsOnShow());
+}
+
+/**
+ * @tc.name: NavDestinationDialogTest003
+ * @tc.desc: Test window lifecycle event
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationTestNg, NavDestinationDialogTest003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1.create navigation stack
+    */
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    auto navigationStack = AceType::MakeRefPtr<MockNavigationStack>();
+    navigationModel.SetNavigationStack(navigationStack);
+    RefPtr<NavigationGroupNode> navigationNode =
+        AceType::DynamicCast<NavigationGroupNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(navigationNode, nullptr);
+    auto navigationPattern = AceType::DynamicCast<NavigationPattern>(navigationNode->GetPattern());
+    ASSERT_NE(navigationPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. push standard page C
+    */
+    auto navDestinationC = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    navigationStack->Add("C", navDestinationC);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    auto layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(navigationNode, geometryNode, navigationNode->GetLayoutProperty());
+    ASSERT_NE(layoutWrapper, nullptr);
+    DirtySwapConfig config;
+    config.skipMeasure = true;
+    config.skipLayout = true;
+    navigationPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
+    auto layoutPropertyC = navDestinationC->GetLayoutProperty();
+    EXPECT_NE(layoutPropertyC, nullptr);
+    EXPECT_EQ(layoutPropertyC->GetVisibilityValue(VisibleType::VISIBLE), VisibleType::VISIBLE);
+}
 } // namespace OHOS::Ace::NG

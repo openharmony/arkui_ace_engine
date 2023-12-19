@@ -1102,6 +1102,8 @@ void TextFieldPattern::HandleOnPaste()
         if (textfield->IsTextArea() && layoutProperty->HasMaxLength()) {
             textfield->HandleCounterBorder();
         }
+        auto maxlength = textfield->GetMaxLength();
+        textfield->HandleInputCounterBorder(caretMoveLength, maxlength);
         textfield->CloseSelectOverlay(true);
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
         textfield->StartTwinkling();
@@ -1473,11 +1475,11 @@ std::function<void(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)> Tex
         if (pattern->dragStatus_ == DragStatus::NONE) {
             pattern->InsertValue(str);
         } else {
-            pattern->showSelect_ = true;
-            pattern->ShowSelectOverlayAfterDrag();
             auto current = pattern->selectController_->GetCaretIndex();
             auto dragTextStart = pattern->dragTextStart_;
             auto dragTextEnd = pattern->dragTextEnd_;
+            pattern->selectController_->UpdateHandleIndex(dragTextStart, dragTextEnd);
+            pattern->showSelect_ = true;
             if (current < dragTextStart) {
                 pattern->contentController_->erase(dragTextStart, dragTextEnd - dragTextStart);
                 pattern->InsertValue(str);
@@ -1563,7 +1565,6 @@ void TextFieldPattern::InitDragDropEvent()
             pattern->showSelect_ = true;
             auto layoutProperty = host->GetLayoutProperty<TextFieldLayoutProperty>();
             CHECK_NULL_VOID(layoutProperty);
-            pattern->ShowSelectOverlayAfterDrag();
             host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
         }
     };
@@ -1966,7 +1967,7 @@ void TextFieldPattern::OnModifyDone()
             SetScrollEnable(false);
         }
     }
-    if (!IsNormalInlineState() && !IsDisabled()) {
+    if (!IsDisabled()) {
         SetShowError();
     }
     if (IsTextArea()) {
@@ -2005,6 +2006,9 @@ void TextFieldPattern::OnModifyDone()
         UpdateSelection(0);
     }
     UpdateCounterMargin();
+    auto maxlength = GetMaxLength();
+    auto originLength = static_cast<int32_t>(contentController_->GetWideText().length());
+    HandleInputCounterBorder(originLength, maxlength);
     preInputStyle_ = inputStyle;
     Register2DragDropManager();
 }
@@ -2277,16 +2281,6 @@ void TextFieldPattern::ShowSelectOverlay(const ShowSelectOverlayParams& showOver
     } else {
         StartRequestSelectOverlay(showOverlayParams);
     }
-}
-
-void TextFieldPattern::ShowSelectOverlayAfterDrag()
-{
-    ShowSelectOverlayParams showOverlayParams = { .animation = true,
-        .isShowMenu = true,
-        .isUpdateMenu = true,
-        .firstHandle = selectController_->GetFirstHandleRect(),
-        .secondHandle = selectController_->GetSecondHandleRect() };
-    ShowSelectOverlay(showOverlayParams);
 }
 
 void TextFieldPattern::StartRequestSelectOverlay(const ShowSelectOverlayParams& params, bool isShowPaste)
@@ -3084,7 +3078,7 @@ void TextFieldPattern::InsertValue(const std::string& insertValue)
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto maxlength = GetMaxLength();
-    auto originLength = static_cast<uint32_t>(contentController_->GetWideText().length());
+    auto originLength = static_cast<int32_t>(contentController_->GetWideText().length());
     auto pattern = host->GetPattern<TextFieldPattern>();
     CHECK_NULL_VOID(pattern);
     auto textFieldLayoutProperty = host->GetLayoutProperty<TextFieldLayoutProperty>();
@@ -3112,6 +3106,21 @@ void TextFieldPattern::InsertValue(const std::string& insertValue)
     CloseSelectOverlay(true);
     ScrollToSafeArea();
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
+}
+
+void TextFieldPattern::HandleInputCounterBorder(int32_t& textLength, uint32_t& maxLength)
+{
+    auto host = GetHost();
+    auto textFieldLayoutProperty = host->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(textFieldLayoutProperty);
+    if (!textFieldLayoutProperty->GetShowCounterValue(false) || IsNormalInlineState() || IsShowPasswordIcon() ||
+        !textFieldLayoutProperty->HasMaxLength()) {
+        return;
+    }
+    auto inputValue = textFieldLayoutProperty->GetSetCounterValue(INVAILD_VALUE);
+    if (textLength >= maxLength && inputValue == INVAILD_VALUE) {
+        UpdateCounterBorderStyle(textLength, maxLength);
+    }
 }
 
 void TextFieldPattern::UpdateCounterTextColor()
@@ -3146,7 +3155,7 @@ void TextFieldPattern::UpdateCounterTextColor()
     host->MarkDirtyNode();
 }
 
-void TextFieldPattern::UpdateCounterBorderStyle(uint32_t& textLength, uint32_t& maxLength)
+void TextFieldPattern::UpdateCounterBorderStyle(int32_t& textLength, uint32_t& maxLength)
 {
     auto frameNode = GetHost();
     CHECK_NULL_VOID(frameNode);
@@ -3161,9 +3170,9 @@ void TextFieldPattern::UpdateCounterBorderStyle(uint32_t& textLength, uint32_t& 
     counterChange_ = true;
     auto showBorder = textFieldLayoutProperty->GetShowHighlightBorderValue(true);
     auto counterText = std::to_string(textLength) + "/" + std::to_string(maxLength);
-    if ((textLength + ONE_CHARACTER) == maxLength && !IsTextArea() && showBorder == true) {
+    if (textLength >= maxLength && !IsTextArea() && showBorder == true) {
         SetUnderlineColor(theme->GetErrorUnderlineColor());
-    } else if ((textLength + ONE_CHARACTER) == maxLength && IsTextArea() && showBorder == true) {
+    } else if (textLength >= maxLength && IsTextArea() && showBorder == true) {
         HandleCounterBorder();
     }
     return;
@@ -3720,7 +3729,7 @@ void TextFieldPattern::HandleCounterBorder()
     CHECK_NULL_VOID(tmpHost);
     auto layoutProperty = tmpHost->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
-    if ((HasFocus() && IsNormalInlineState()) || (!layoutProperty->GetShowCounterValue(false))) {
+    if ((HasFocus() && IsNormalInlineState())) {
         return;
     }
     auto textFieldTheme = GetTheme();
@@ -3982,6 +3991,23 @@ void TextFieldPattern::InitSurfacePositionChangedCallback()
                 }
             });
         UpdateSurfacePositionChangedCallbackId(callbackId);
+    }
+}
+
+void TextFieldPattern::HandleOnDelete(bool backward)
+{
+    if (backward) {
+#if defined(PREVIEW)
+        DeleteForward(GetGraphemeClusterLength(GetWideText(), GetCaretIndex()));
+#else
+        DeleteBackward(GetGraphemeClusterLength(GetWideText(), GetCaretIndex(), true));
+#endif
+    } else {
+#if defined(PREVIEW)
+        DeleteBackward(GetGraphemeClusterLength(GetWideText(), GetCaretIndex(), true));
+#else
+        DeleteForward(GetGraphemeClusterLength(GetWideText(), GetCaretIndex()));
+#endif
     }
 }
 
@@ -4768,8 +4794,10 @@ void TextFieldPattern::SetShowError()
     auto renderContext = tmpHost->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     auto visible = layoutProperty->GetShowErrorTextValue(false);
+    auto errorText = layoutProperty->GetErrorTextValue("");
 
-    if (visible && layoutProperty->GetShowUnderlineValue(false) && IsUnspecifiedOrTextType()) {
+    if (visible && layoutProperty->GetShowUnderlineValue(false) && IsUnspecifiedOrTextType()
+        && !errorText.empty()) {
         underlineColor_ = textFieldTheme->GetErrorUnderlineColor();
         underlineWidth_ = ERROR_UNDERLINE_WIDTH;
         preErrorState_ = true;
@@ -4779,7 +4807,7 @@ void TextFieldPattern::SetShowError()
         underlineWidth_ = UNDERLINE_WIDTH;
         preErrorState_ = false;
     }
-    if (visible && passWordMode) {
+    if (visible && passWordMode && !errorText.empty()) {
         BorderWidthProperty borderWidth;
         BorderColorProperty borderColor;
         preErrorState_ = true;
@@ -4797,7 +4825,7 @@ void TextFieldPattern::SetShowError()
         layoutProperty->UpdateTextColor(passwordModeStyle_.textColor);
         preErrorState_ = false;
     }
-    if (visible && !passWordMode) {
+    if (visible && (!passWordMode || !errorText.empty())) {
         layoutProperty->UpdateBorderWidth(passwordModeStyle_.borderwidth);
         renderContext->UpdateBorderColor(passwordModeStyle_.borderColor);
         renderContext->UpdateBackgroundColor(passwordModeStyle_.bgColor);

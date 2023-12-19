@@ -3956,6 +3956,12 @@ bool JSViewAbstract::ParseJsDimensionFp(const JSRef<JSVal>& jsValue, CalcDimensi
     return ParseJsDimension(jsValue, result, DimensionUnit::FP);
 }
 
+bool JSViewAbstract::ParseJsDimensionFpNG(const JSRef<JSVal>& jsValue, CalcDimension& result, bool isSupportPercent)
+{
+    // the 'fp' unit is used for text scenes.
+    return ParseJsDimensionNG(jsValue, result, DimensionUnit::FP, isSupportPercent);
+}
+
 bool JSViewAbstract::ParseJsDimensionPx(const JSRef<JSVal>& jsValue, CalcDimension& result)
 {
     return ParseJsDimension(jsValue, result, DimensionUnit::PX);
@@ -5884,6 +5890,7 @@ void JSViewAbstract::ParseSheetStyle(const JSRef<JSObject>& paramObj, NG::SheetS
     auto backgroundBlurStyle = paramObj->GetProperty("blurStyle");
     auto showCloseIcon = paramObj->GetProperty("showClose");
     auto type = paramObj->GetProperty("preferType");
+    auto interactive = paramObj->GetProperty("enableOutsideInteractive");
 
     std::vector<NG::SheetHeight> detents;
     if (ParseSheetDetents(sheetDetents, detents)) {
@@ -5900,6 +5907,10 @@ void JSViewAbstract::ParseSheetStyle(const JSRef<JSObject>& paramObj, NG::SheetS
         if (ParseJsBool(showCloseIcon, showClose)) {
             sheetStyle.showCloseIcon = showClose;
         }
+    }
+    bool isInteractive = false;
+    if (ParseJsBool(interactive, isInteractive)) {
+        sheetStyle.interactive = isInteractive;
     }
     if (showDragBar->IsNull() || showDragBar->IsUndefined()) {
         sheetStyle.showDragBar = true;

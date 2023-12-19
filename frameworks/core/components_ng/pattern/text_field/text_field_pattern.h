@@ -203,13 +203,15 @@ public:
     void UpdateCounterMargin();
     void CleanCounterNode();
     void UltralimitShake();
-    void UpdateCounterBorderStyle(uint32_t& textLength, uint32_t& maxLength);
+    void HandleInputCounterBorder(int32_t& textLength, uint32_t& maxLength);
+    void UpdateCounterBorderStyle(int32_t& textLength, uint32_t& maxLength);
     void UpdateAreaBorderStyle(BorderWidthProperty& currentBorderWidth, BorderWidthProperty& overCountBorderWidth,
         BorderColorProperty& overCountBorderColor, BorderColorProperty& currentBorderColor);
     void DeleteBackward(int32_t length) override;
     void DeleteBackwardOperation(int32_t length);
     void DeleteForward(int32_t length) override;
     void DeleteForwardOperation(int32_t length);
+    void HandleOnDelete(bool backward) override;
     void UpdateRecordCaretIndex(int32_t index);
     void CreateHandles() override;
 
@@ -226,6 +228,10 @@ public:
     void SetCounterState(bool counterChange)
     {
         counterChange_ = counterChange;
+    }
+    void SetCounterMargin(bool CounterMargin)
+    {
+        hasCounterMargin_ = CounterMargin;
     }
 
     float GetTextOrPlaceHolderFontSize();
@@ -777,6 +783,10 @@ public:
     void HandleSelectionEnd();
     bool HandleOnEscape() override;
     bool HandleOnTab(bool backward) override;
+    void HandleOnEnter() override
+    {
+        PerformAction(GetTextInputActionValue(TextInputAction::DONE), false);
+    }
     void HandleOnUndoAction() override;
     void HandleOnRedoAction() override;
     void HandleOnSelectAll(bool isKeyEvent, bool inlineStyle = false);
@@ -1030,6 +1040,10 @@ public:
     }
 
     void ShowMenu();
+    void HandleOnShowMenu() override
+    {
+        ShowMenu();
+    }
     bool HasFocus() const;
     void StopTwinkling();
 
@@ -1091,7 +1105,6 @@ private:
     void HandleLongPress(GestureEvent& info);
     void UpdateCaretPositionWithClamp(const int32_t& pos);
     void ShowSelectOverlay(const ShowSelectOverlayParams& params);
-    void ShowSelectOverlayAfterDrag();
     void CursorMoveOnClick(const Offset& offset);
 
     void ProcessOverlay(

@@ -56,7 +56,7 @@ using GetRectByIndex = std::function<GridItemRect(int32_t)>;
 struct GridLayoutOptions {
     GridItemSize regularSize;
     std::set<int32_t> irregularIndexes;
-    GetSizeByIndex getSizeByIndex;
+    GetSizeByIndex getSizeByIndex; // irregular sizes
     GetRectByIndex getRectByIndex;
     bool operator==(const GridLayoutOptions& options) const
     {

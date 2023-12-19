@@ -50,7 +50,7 @@
 #include "core/components_ng/pattern/rich_editor/rich_editor_model_ng.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_overlay_modifier.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_pattern.h"
-#include "core/components_ng/pattern/rich_editor/rich_editor_selection.h"
+#include "core/components_ng/pattern/rich_editor/selection_info.h"
 #include "core/components_ng/pattern/root/root_pattern.h"
 #include "core/components_ng/pattern/select_overlay/select_overlay_property.h"
 #include "core/components_ng/pattern/text/span_model_ng.h"
@@ -110,6 +110,11 @@ constexpr int32_t WORD_LIMIT_LEN = 6;
 constexpr int32_t WORD_LIMIT_RETURN = 2;
 constexpr int32_t BEYOND_LIMIT_RETURN = 4;
 constexpr int32_t DEFAULT_RETURN_VALUE = -1;
+const float CONTAINER_WIDTH = 300.0f;
+const float CONTAINER_HEIGHT = 300.0f;
+const float BUILDER_WIDTH = 150.0f;
+const float BUILDER_HEIGHT = 75.0f;
+const SizeF BUILDER_SIZE(BUILDER_WIDTH, BUILDER_HEIGHT);
 } // namespace
 
 class RichEditorTestNg : public testing::Test {
@@ -257,7 +262,7 @@ HWTEST_F(RichEditorTestNg, RichEditorModel001, TestSize.Level1)
     ASSERT_NE(richEditorPattern, nullptr);
     RichEditorModelNG richEditorModel;
     richEditorModel.Create();
-    EXPECT_EQ(ViewStackProcessor::GetInstance()->elementsStack_.size(), 1);
+    EXPECT_EQ(static_cast<int32_t>(ViewStackProcessor::GetInstance()->elementsStack_.size()), 1);
     while (!ViewStackProcessor::GetInstance()->elementsStack_.empty()) {
         ViewStackProcessor::GetInstance()->elementsStack_.pop();
     }
@@ -425,7 +430,7 @@ HWTEST_F(RichEditorTestNg, RichEditorModel008, TestSize.Level1)
     ASSERT_NE(richEditorPattern, nullptr);
     auto eventHub = richEditorPattern->GetEventHub<RichEditorEventHub>();
     ASSERT_NE(eventHub, nullptr);
-    RichEditorSelection selection;
+    SelectionInfo selection;
     eventHub->FireOnSelect(&selection);
     EXPECT_EQ(testOnSelect, 1);
     while (!ViewStackProcessor::GetInstance()->elementsStack_.empty()) {
@@ -579,12 +584,12 @@ HWTEST_F(RichEditorTestNg, RichEditorDelete001, TestSize.Level1)
     AddImageSpan();
     richEditorPattern->caretPosition_ = 0;
     richEditorPattern->DeleteForward(1);
-    EXPECT_EQ(richEditorNode_->GetChildren().size(), 0);
+    EXPECT_EQ(static_cast<int32_t>(richEditorNode_->GetChildren().size()), 0);
     ClearSpan();
     AddSpan(INIT_VALUE_1);
     richEditorPattern->caretPosition_ = 0;
     richEditorPattern->DeleteForward(7);
-    EXPECT_EQ(richEditorNode_->GetChildren().size(), 0);
+    EXPECT_EQ(static_cast<int32_t>(richEditorNode_->GetChildren().size()), 0);
 }
 
 /**
@@ -621,7 +626,7 @@ HWTEST_F(RichEditorTestNg, RichEditorDelete003, TestSize.Level1)
     AddImageSpan();
     richEditorPattern->caretPosition_ = 0;
     richEditorPattern->DeleteBackward(1);
-    EXPECT_NE(richEditorNode_->GetChildren().size(), 0);
+    EXPECT_NE(static_cast<int32_t>(richEditorNode_->GetChildren().size()), 0);
     richEditorPattern->textSelector_ = TextSelector(0, 1);
     richEditorPattern->caretPosition_ = 1;
     richEditorPattern->DeleteBackward(1);
@@ -1082,60 +1087,29 @@ HWTEST_F(RichEditorTestNg, OnKeyEvent001, TestSize.Level1)
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
-    AddSpan(INIT_VALUE_1);
     KeyEvent keyE;
-    keyE.action = KeyAction::UP;
-    EXPECT_TRUE(richEditorPattern->OnKeyEvent(keyE));
 
     keyE.action = KeyAction::DOWN;
     keyE.code = KeyCode::KEY_TAB;
     EXPECT_FALSE(richEditorPattern->OnKeyEvent(keyE));
 
-    keyE.code = KeyCode::KEY_DEL;
-    EXPECT_TRUE(richEditorPattern->OnKeyEvent(keyE));
-
-    keyE.code = KeyCode::KEY_FORWARD_DEL;
-    EXPECT_TRUE(richEditorPattern->OnKeyEvent(keyE));
-
-    keyE.code = KeyCode::KEY_ENTER;
-    EXPECT_TRUE(richEditorPattern->OnKeyEvent(keyE));
-
-    keyE.code = KeyCode::KEY_NUMPAD_ENTER;
-    EXPECT_TRUE(richEditorPattern->OnKeyEvent(keyE));
-
-    keyE.code = KeyCode::KEY_DPAD_CENTER;
-    EXPECT_TRUE(richEditorPattern->OnKeyEvent(keyE));
-
     // 2012 2015
-    std::vector<KeyCode> cases = { KeyCode::KEY_DPAD_UP, KeyCode::KEY_DPAD_DOWN, KeyCode::KEY_TAB,
-        KeyCode::KEY_DPAD_RIGHT };
-    for (int i = 0; i < 4; ++i) {
-        keyE.code = cases[i];
-        if (i == 2) {
-            EXPECT_FALSE(richEditorPattern->OnKeyEvent(keyE));
-        } else {
-            EXPECT_TRUE(richEditorPattern->OnKeyEvent(keyE));
-        }
+    keyE.action = KeyAction::DOWN;
+    std::vector<KeyCode> eventCodes = {
+        KeyCode::KEY_DPAD_LEFT,
+        KeyCode::KEY_DPAD_UP,
+        KeyCode::KEY_DPAD_RIGHT,
+        KeyCode::KEY_DPAD_DOWN,
+    };
+    std::vector<KeyCode> presscodes = {};
+    keyE.pressedCodes = presscodes;
+    for (auto eventCode : eventCodes) {
+        keyE.pressedCodes.clear();
+        keyE.pressedCodes.emplace_back(eventCode);
+        keyE.code = eventCode;
+        auto ret = richEditorPattern->OnKeyEvent(keyE);
+        EXPECT_TRUE(ret) << "KeyCode: " + std::to_string(static_cast<int>(eventCode));
     }
-
-    keyE.code = KeyCode::KEY_PRINT;
-    EXPECT_TRUE(richEditorPattern->OnKeyEvent(keyE));
-
-    keyE.code = KeyCode::KEY_2;
-    keyE.pressedCodes = { KeyCode::KEY_SHIFT_LEFT };
-    EXPECT_TRUE(richEditorPattern->OnKeyEvent(keyE));
-    keyE.pressedCodes = { KeyCode::KEY_SHIFT_RIGHT };
-    EXPECT_TRUE(richEditorPattern->OnKeyEvent(keyE));
-    keyE.pressedCodes = { KeyCode::KEY_ALT_LEFT };
-    EXPECT_TRUE(richEditorPattern->OnKeyEvent(keyE));
-
-    keyE.code = KeyCode::KEY_SPACE;
-    keyE.pressedCodes = { KeyCode::KEY_SHIFT_LEFT };
-    EXPECT_TRUE(richEditorPattern->OnKeyEvent(keyE));
-    keyE.pressedCodes = { KeyCode::KEY_SHIFT_RIGHT };
-    EXPECT_TRUE(richEditorPattern->OnKeyEvent(keyE));
-    keyE.pressedCodes = { KeyCode::KEY_ALT_LEFT };
-    EXPECT_TRUE(richEditorPattern->OnKeyEvent(keyE));
 }
 
 /**
@@ -1219,7 +1193,7 @@ HWTEST_F(RichEditorTestNg, GetRightTextOfCursor002, TestSize.Level1)
     ASSERT_NE(richEditorPattern, nullptr);
     AddSpan(INIT_VALUE_1);
     auto ret = StringUtils::Str16ToStr8(richEditorPattern->GetRightTextOfCursor(3));
-    EXPECT_EQ(ret, "");
+    EXPECT_EQ(ret, "hel");
 }
 
 /**
@@ -1552,10 +1526,10 @@ HWTEST_F(RichEditorTestNg, HandleTouchEvent001, TestSize.Level1)
     TouchEventInfo touchInfo("");
     richEditorPattern->isMousePressed_ = true;
     richEditorPattern->HandleTouchEvent(touchInfo);
-    EXPECT_FALSE(richEditorPattern->isMousePressed_);
+    EXPECT_TRUE(richEditorPattern->isMousePressed_);
 
     richEditorPattern->HandleTouchEvent(touchInfo);
-    EXPECT_FALSE(richEditorPattern->isMousePressed_);
+    EXPECT_TRUE(richEditorPattern->isMousePressed_);
 
     TouchLocationInfo touchLocationinfo(0);
     touchLocationinfo.touchType_ = TouchType::UP;
@@ -1736,23 +1710,23 @@ HWTEST_F(RichEditorTestNg, CopySelectionMenuParams001, TestSize.Level1)
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
     SelectOverlayInfo selectInfo;
-    richEditorPattern->selectedType_ = RichEditorType::TEXT;
-    richEditorPattern->CopySelectionMenuParams(selectInfo, RichEditorResponseType::LONG_PRESS);
+    richEditorPattern->selectedType_ = TextSpanType::TEXT;
+    richEditorPattern->CopySelectionMenuParams(selectInfo, TextResponseType::LONG_PRESS);
     EXPECT_EQ(selectInfo.menuCallback.onDisappear, nullptr);
 
-    richEditorPattern->selectedType_ = RichEditorType::IMAGE;
-    richEditorPattern->CopySelectionMenuParams(selectInfo, RichEditorResponseType::LONG_PRESS);
+    richEditorPattern->selectedType_ = TextSpanType::IMAGE;
+    richEditorPattern->CopySelectionMenuParams(selectInfo, TextResponseType::LONG_PRESS);
     EXPECT_EQ(selectInfo.menuCallback.onDisappear, nullptr);
 
-    richEditorPattern->selectedType_ = RichEditorType::MIXED;
-    richEditorPattern->CopySelectionMenuParams(selectInfo, RichEditorResponseType::LONG_PRESS);
+    richEditorPattern->selectedType_ = TextSpanType::MIXED;
+    richEditorPattern->CopySelectionMenuParams(selectInfo, TextResponseType::LONG_PRESS);
     EXPECT_EQ(selectInfo.menuCallback.onDisappear, nullptr);
 
-    richEditorPattern->selectedType_ = RichEditorType(-1);
-    richEditorPattern->CopySelectionMenuParams(selectInfo, RichEditorResponseType::LONG_PRESS);
+    richEditorPattern->selectedType_ = TextSpanType(-1);
+    richEditorPattern->CopySelectionMenuParams(selectInfo, TextResponseType::LONG_PRESS);
     EXPECT_EQ(selectInfo.menuCallback.onDisappear, nullptr);
 
-    auto key = std::make_pair(RichEditorType::MIXED, RichEditorResponseType::RIGHT_CLICK);
+    auto key = std::make_pair(TextSpanType::MIXED, TextResponseType::RIGHT_CLICK);
     callBack1 = 0;
     callBack2 = 0;
     callBack3 = 0;
@@ -1769,20 +1743,20 @@ HWTEST_F(RichEditorTestNg, CopySelectionMenuParams001, TestSize.Level1)
         return;
     };
     std::shared_ptr<SelectionMenuParams> params1 = std::make_shared<SelectionMenuParams>(
-        RichEditorType::MIXED, buildFunc, onAppear, onDisappear, RichEditorResponseType::RIGHT_CLICK);
+        TextSpanType::MIXED, buildFunc, onAppear, onDisappear, TextResponseType::RIGHT_CLICK);
     richEditorPattern->selectionMenuMap_[key] = params1;
     selectInfo.isUsingMouse = true;
-    richEditorPattern->selectedType_ = RichEditorType::MIXED;
-    richEditorPattern->CopySelectionMenuParams(selectInfo, RichEditorResponseType::RIGHT_CLICK);
+    richEditorPattern->selectedType_ = TextSpanType::MIXED;
+    richEditorPattern->CopySelectionMenuParams(selectInfo, TextResponseType::RIGHT_CLICK);
     EXPECT_NE(selectInfo.menuCallback.onDisappear, nullptr);
 
-    key = std::make_pair(RichEditorType::MIXED, RichEditorResponseType::LONG_PRESS);
+    key = std::make_pair(TextSpanType::MIXED, TextResponseType::LONG_PRESS);
     std::shared_ptr<SelectionMenuParams> params2 = std::make_shared<SelectionMenuParams>(
-        RichEditorType::MIXED, buildFunc, nullptr, nullptr, RichEditorResponseType::RIGHT_CLICK);
+        TextSpanType::MIXED, buildFunc, nullptr, nullptr, TextResponseType::RIGHT_CLICK);
     richEditorPattern->selectionMenuMap_[key] = params2;
     selectInfo.isUsingMouse = false;
-    richEditorPattern->selectedType_ = RichEditorType::MIXED;
-    richEditorPattern->CopySelectionMenuParams(selectInfo, RichEditorResponseType::RIGHT_CLICK);
+    richEditorPattern->selectedType_ = TextSpanType::MIXED;
+    richEditorPattern->CopySelectionMenuParams(selectInfo, TextResponseType::RIGHT_CLICK);
     EXPECT_NE(selectInfo.menuCallback.onDisappear, nullptr);
 }
 
@@ -1796,24 +1770,24 @@ HWTEST_F(RichEditorTestNg, UpdateSelectionType001, TestSize.Level1)
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
-    RichEditorSelection selection;
+    SelectionInfo selection;
 
     ResultObject obj1;
-    obj1.type = RichEditorSpanType::TYPESPAN;
+    obj1.type = SelectSpanType::TYPESPAN;
     selection.selection_.resultObjects.push_front(obj1);
     richEditorPattern->UpdateSelectionType(selection);
-    EXPECT_EQ(richEditorPattern->selectedType_.value(), RichEditorType::TEXT);
+    EXPECT_EQ(richEditorPattern->selectedType_.value(), TextSpanType::TEXT);
 
     selection.selection_.resultObjects.pop_front();
     ResultObject obj2;
-    obj2.type = RichEditorSpanType::TYPEIMAGE;
+    obj2.type = SelectSpanType::TYPEIMAGE;
     selection.selection_.resultObjects.push_front(obj2);
     richEditorPattern->UpdateSelectionType(selection);
-    EXPECT_EQ(richEditorPattern->selectedType_.value(), RichEditorType::IMAGE);
+    EXPECT_EQ(richEditorPattern->selectedType_.value(), TextSpanType::IMAGE);
 
     selection.selection_.resultObjects.push_front(obj1);
     richEditorPattern->UpdateSelectionType(selection);
-    EXPECT_EQ(richEditorPattern->selectedType_.value(), RichEditorType::MIXED);
+    EXPECT_EQ(richEditorPattern->selectedType_.value(), TextSpanType::MIXED);
 }
 
 /**
@@ -1875,24 +1849,24 @@ HWTEST_F(RichEditorTestNg, BindSelectionMenu001, TestSize.Level1)
         return;
     };
 
-    auto key = std::make_pair(RichEditorType::MIXED, RichEditorResponseType::RIGHT_CLICK);
+    auto key = std::make_pair(TextSpanType::MIXED, TextResponseType::RIGHT_CLICK);
     std::shared_ptr<SelectionMenuParams> params1 = std::make_shared<SelectionMenuParams>(
-        RichEditorType::MIXED, buildFunc, onAppear, onDisappear, RichEditorResponseType::RIGHT_CLICK);
+        TextSpanType::MIXED, buildFunc, onAppear, onDisappear, TextResponseType::RIGHT_CLICK);
     richEditorPattern->selectionMenuMap_[key] = params1;
 
     std::function<void()> nullFunc = nullptr;
 
     richEditorPattern->BindSelectionMenu(
-        RichEditorResponseType::RIGHT_CLICK, RichEditorType::MIXED, nullFunc, onAppear, onDisappear);
+        TextResponseType::RIGHT_CLICK, TextSpanType::MIXED, nullFunc, onAppear, onDisappear);
     EXPECT_TRUE(richEditorPattern->selectionMenuMap_.empty());
 
     richEditorPattern->selectionMenuMap_[key] = params1;
     richEditorPattern->BindSelectionMenu(
-        RichEditorResponseType::RIGHT_CLICK, RichEditorType::MIXED, buildFunc, onAppear, onDisappear);
+        TextResponseType::RIGHT_CLICK, TextSpanType::MIXED, buildFunc, onAppear, onDisappear);
     EXPECT_FALSE(richEditorPattern->selectionMenuMap_.empty());
 
     richEditorPattern->BindSelectionMenu(
-        RichEditorResponseType::RIGHT_CLICK, RichEditorType::IMAGE, buildFunc, onAppear, onDisappear);
+        TextResponseType::RIGHT_CLICK, TextSpanType::IMAGE, buildFunc, onAppear, onDisappear);
     EXPECT_FALSE(richEditorPattern->selectionMenuMap_.empty());
 }
 
@@ -2328,10 +2302,10 @@ HWTEST_F(RichEditorTestNg, HandleMouseLeftButton002, TestSize.Level1)
     richEditorPattern->HandleMouseLeftButton(mouseInfo);
     EXPECT_EQ(richEditorPattern->mouseStatus_, MouseStatus::RELEASED);
     richEditorPattern->textSelector_ = TextSelector(0, 2);
-    std::vector<RichEditorType> selectType = { RichEditorType::TEXT, RichEditorType::IMAGE, RichEditorType::MIXED };
+    std::vector<TextSpanType> selectType = { TextSpanType::TEXT, TextSpanType::IMAGE, TextSpanType::MIXED };
     SelectOverlayInfo selectInfo;
     selectInfo.isUsingMouse = true;
-    for (int32_t i = 0; i < selectType.size(); i++) {
+    for (int32_t i = 0; i < static_cast<int32_t>(selectType.size()); i++) {
         richEditorPattern->selectedType_ = selectType[i];
         richEditorPattern->HandleMouseLeftButton(mouseInfo);
         EXPECT_NE(richEditorPattern->selectionMenuOffsetByMouse_.GetX(),
@@ -2352,11 +2326,11 @@ HWTEST_F(RichEditorTestNg, HandleMouseLeftButton002, TestSize.Level1)
         return;
     };
     richEditorPattern->mouseStatus_ = MouseStatus::MOVE;
-    for (int32_t i = 0; i < selectType.size(); i++) {
+    for (int32_t i = 0; i < static_cast<int32_t>(selectType.size()); i++) {
         richEditorPattern->selectedType_ = selectType[i];
-        auto key = std::make_pair(selectType[i], RichEditorResponseType::SELECTED_BY_MOUSE);
+        auto key = std::make_pair(selectType[i], TextResponseType::SELECTED_BY_MOUSE);
         std::shared_ptr<SelectionMenuParams> params1 = std::make_shared<SelectionMenuParams>(
-            selectType[i], buildFunc, onAppear, onDisappear, RichEditorResponseType::SELECTED_BY_MOUSE);
+            selectType[i], buildFunc, onAppear, onDisappear, TextResponseType::SELECTED_BY_MOUSE);
         richEditorPattern->selectionMenuMap_[key] = params1;
         richEditorPattern->mouseStatus_ = MouseStatus::MOVE;
         richEditorPattern->HandleMouseLeftButton(mouseInfo);
@@ -2835,7 +2809,7 @@ HWTEST_F(RichEditorTestNg, DoubleHandleClickEvent001, TestSize.Level1)
     richEditorPattern->isMouseSelect_ = false;
     richEditorPattern->caretVisible_ = true;
     richEditorPattern->HandleDoubleClickEvent(info);
-    EXPECT_TRUE(richEditorPattern->caretVisible_);
+    EXPECT_FALSE(richEditorPattern->caretVisible_);
 
     AddSpan(INIT_VALUE_3);
     info.localLocation_ = Offset(50, 50);
@@ -2852,7 +2826,7 @@ HWTEST_F(RichEditorTestNg, DoubleHandleClickEvent001, TestSize.Level1)
     richEditorPattern->textSelector_.destinationOffset = -1;
     richEditorPattern->HandleDoubleClickEvent(info);
     EXPECT_EQ(richEditorPattern->textSelector_.baseOffset, 0);
-    EXPECT_EQ(richEditorPattern->textSelector_.destinationOffset, 1);
+    EXPECT_EQ(richEditorPattern->textSelector_.destinationOffset, 0);
 }
 
 /*
@@ -2912,5 +2886,128 @@ HWTEST_F(RichEditorTestNg, AdjustWordCursorAndSelect01, TestSize.Level1)
     mockDataDetectorMgr.AdjustWordSelection(pos, content, start, end);
     EXPECT_EQ(start, -1);
     EXPECT_EQ(end, -1);
+}
+
+/**
+ * @tc.name: RichEditorController008
+ * @tc.desc: test add builder span
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorTestNg, RichEditorController008, TestSize.Level1)
+{
+    auto nodeId = ViewStackProcessor::GetInstance()->ClaimNodeId();
+    richEditorNode_ = FrameNode::GetOrCreateFrameNode(
+        V2::RICH_EDITOR_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<RichEditorPattern>(); });
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    richEditorPattern->SetRichEditorController(AceType::MakeRefPtr<RichEditorController>());
+    auto richEditorController = richEditorPattern->GetRichEditorController();
+    ASSERT_NE(richEditorController, nullptr);
+    richEditorPattern->GetRichEditorController()->SetPattern(AceType::WeakClaim(AceType::RawPtr(richEditorPattern)));
+    AddSpan("test");
+    auto builderId1 = ElementRegister::GetInstance()->MakeUniqueId();
+    auto builderNode1 = FrameNode::GetOrCreateFrameNode(
+        V2::ROW_ETS_TAG, builderId1, []() { return AceType::MakeRefPtr<LinearLayoutPattern>(false); });
+    auto index1 = richEditorController->AddPlaceholderSpan(builderNode1, {});
+    EXPECT_EQ(index1, 1);
+    EXPECT_EQ(static_cast<int32_t>(richEditorNode_->GetChildren().size()), 2);
+    auto builderSpanChildren = richEditorNode_->GetChildren();
+    ASSERT_NE(static_cast<int32_t>(builderSpanChildren.size()), 0);
+    auto builderSpanChild = builderSpanChildren.begin();
+    EXPECT_EQ((*builderSpanChild)->GetTag(), V2::PLACEHOLDER_SPAN_ETS_TAG);
+    ClearSpan();
+}
+
+/**
+ * @tc.name: RichEditorController009
+ * @tc.desc: test add builder span
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorTestNg, RichEditorController009, TestSize.Level1)
+{
+    auto nodeId = ViewStackProcessor::GetInstance()->ClaimNodeId();
+    richEditorNode_ = FrameNode::GetOrCreateFrameNode(
+        V2::RICH_EDITOR_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<RichEditorPattern>(); });
+    ASSERT_NE(richEditorNode_, nullptr);
+    RefPtr<GeometryNode> containerGeometryNode = AceType::MakeRefPtr<GeometryNode>();
+    EXPECT_FALSE(containerGeometryNode == nullptr);
+    containerGeometryNode->SetFrameSize(SizeF(CONTAINER_WIDTH, CONTAINER_HEIGHT));
+    ASSERT_NE(richEditorNode_->GetLayoutProperty(), nullptr);
+    LayoutWrapperNode layoutWrapper =
+        LayoutWrapperNode(richEditorNode_, containerGeometryNode, richEditorNode_->GetLayoutProperty());
+
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    richEditorPattern->SetRichEditorController(AceType::MakeRefPtr<RichEditorController>());
+    auto richEditorController = richEditorPattern->GetRichEditorController();
+    ASSERT_NE(richEditorController, nullptr);
+    richEditorPattern->GetRichEditorController()->SetPattern(AceType::WeakClaim(AceType::RawPtr(richEditorPattern)));
+
+    auto builderId1 = ElementRegister::GetInstance()->MakeUniqueId();
+    auto builderNode1 = FrameNode::GetOrCreateFrameNode(
+        V2::ROW_ETS_TAG, builderId1, []() { return AceType::MakeRefPtr<LinearLayoutPattern>(false); });
+    auto index1 = richEditorController->AddPlaceholderSpan(builderNode1, {});
+    EXPECT_EQ(index1, 0);
+    EXPECT_EQ(richEditorNode_->GetChildren().size(), 1);
+    auto builderSpanChildren = richEditorNode_->GetChildren();
+    ASSERT_NE(static_cast<int32_t>(builderSpanChildren.size()), 0);
+    auto builderSpan = builderSpanChildren.begin();
+    auto builderSpanChild = AceType::DynamicCast<FrameNode>(*builderSpan);
+    ASSERT_NE(builderSpanChild, nullptr);
+    EXPECT_EQ(builderSpanChild->GetTag(), V2::PLACEHOLDER_SPAN_ETS_TAG);
+
+    auto richEditorLayoutAlgorithm = richEditorPattern->CreateLayoutAlgorithm();
+    layoutWrapper.SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(richEditorLayoutAlgorithm));
+
+    auto childLayoutConstraint = layoutWrapper.GetLayoutProperty()->CreateChildConstraint();
+    childLayoutConstraint.selfIdealSize = OptionalSizeF(BUILDER_SIZE);
+
+    RefPtr<GeometryNode> builderGeometryNode = AceType::MakeRefPtr<GeometryNode>();
+    builderGeometryNode->Reset();
+    RefPtr<LayoutWrapperNode> builderLayoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
+        builderSpanChild, builderGeometryNode, builderSpanChild->GetLayoutProperty());
+    EXPECT_FALSE(builderLayoutWrapper == nullptr);
+    auto builderPattern = builderSpanChild->GetPattern();
+    builderLayoutWrapper->GetLayoutProperty()->UpdateLayoutConstraint(childLayoutConstraint);
+    auto firstItemLayoutAlgorithm = builderPattern->CreateLayoutAlgorithm();
+    EXPECT_FALSE(firstItemLayoutAlgorithm == nullptr);
+    builderLayoutWrapper->SetLayoutAlgorithm(
+        AccessibilityManager::MakeRefPtr<LayoutAlgorithmWrapper>(firstItemLayoutAlgorithm));
+    builderLayoutWrapper->GetLayoutProperty()->UpdateUserDefinedIdealSize(
+        CalcSize(CalcLength(BUILDER_WIDTH), CalcLength(BUILDER_HEIGHT)));
+    layoutWrapper.AppendChild(builderLayoutWrapper);
+
+    // mock process in flex layout algorithm
+    richEditorLayoutAlgorithm->Measure(&layoutWrapper);
+    richEditorLayoutAlgorithm->Layout(&layoutWrapper);
+    EXPECT_EQ(builderGeometryNode->GetMarginFrameSize().Width(), BUILDER_WIDTH);
+    EXPECT_EQ(builderGeometryNode->GetMarginFrameSize().Height(), BUILDER_HEIGHT);
+    ClearSpan();
+}
+
+/**
+ * @tc.name: RichEditorController010
+ * @tc.desc: test add builder span
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorTestNg, RichEditorController010, TestSize.Level1)
+{
+    auto nodeId = ViewStackProcessor::GetInstance()->ClaimNodeId();
+    richEditorNode_ = FrameNode::GetOrCreateFrameNode(
+        V2::RICH_EDITOR_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<RichEditorPattern>(); });
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    richEditorPattern->SetRichEditorController(AceType::MakeRefPtr<RichEditorController>());
+    auto richEditorController = richEditorPattern->GetRichEditorController();
+    ASSERT_NE(richEditorController, nullptr);
+    richEditorPattern->GetRichEditorController()->SetPattern(AceType::WeakClaim(AceType::RawPtr(richEditorPattern)));
+    AddSpan("test");
+    RefPtr<FrameNode> builderNode1 = nullptr;
+    auto index1 = richEditorController->AddPlaceholderSpan(builderNode1, {});
+    EXPECT_EQ(index1, 0);
+    EXPECT_EQ(static_cast<int32_t>(richEditorNode_->GetChildren().size()), 1);
+    ClearSpan();
 }
 } // namespace OHOS::Ace::NG

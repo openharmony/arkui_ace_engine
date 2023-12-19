@@ -289,6 +289,46 @@ public:
     void RemoveFilterAnimation();
     void RemoveEventColumn();
 #endif // ENABLE_DRAG_FRAMEWORK
+    void UpdateContextMenuDisappearPosition(const NG::OffsetF& offset);
+
+    void ResetContextMenuDragHideFinished()
+    {
+        isContextMenuDragHideFinished_ = false;
+        dragMoveVector_ = OffsetF(0.0f, 0.0f);
+        lastDragMoveVector_ = OffsetF(0.0f, 0.0f);
+    }
+
+    void SetContextMenuDragHideFinished(bool isContextMenuDragHideFinished)
+    {
+        isContextMenuDragHideFinished_ = isContextMenuDragHideFinished;
+    }
+
+    bool IsContextMenuDragHideFinished() const
+    {
+        return isContextMenuDragHideFinished_ == true;
+    }
+
+    bool IsOriginDragMoveVector() const
+    {
+        return dragMoveVector_.NonOffset() && lastDragMoveVector_.NonOffset();
+    }
+
+    bool IsUpdateDragMoveVector() const
+    {
+        return !GetUpdateDragMoveVector().NonOffset() && !lastDragMoveVector_.NonOffset();
+    }
+
+    void UpdateDragMoveVector(const NG::OffsetF& offset)
+    {
+        lastDragMoveVector_ = dragMoveVector_;
+        dragMoveVector_ = offset;
+    }
+
+    OffsetF GetUpdateDragMoveVector() const
+    {
+        return dragMoveVector_ - lastDragMoveVector_;
+    }
+
     void BindContentCover(bool isShow, std::function<void(const std::string&)>&& callback,
         std::function<RefPtr<UINode>()>&& buildNodeFunc, NG::ModalStyle& modalStyle, std::function<void()>&& onAppear,
         std::function<void()>&& onDisappear, const RefPtr<FrameNode>& targetNode, int32_t sessionId = 0);
@@ -433,6 +473,9 @@ private:
     WeakPtr<FrameNode> filterColumnNodeWeak_;
     WeakPtr<FrameNode> eventColumnNodeWeak_;
 #endif // ENABLE_DRAG_FRAMEWORK
+    bool isContextMenuDragHideFinished_ = false;
+    OffsetF dragMoveVector_ = OffsetF(0.0f, 0.0f);
+    OffsetF lastDragMoveVector_ = OffsetF(0.0f, 0.0f);
 
     std::function<void()> onHideDialogCallback_ = nullptr;
     CancelableCallback<void()> continuousTask_;

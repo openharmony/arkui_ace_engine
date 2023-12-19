@@ -17,6 +17,7 @@
 
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/point.h"
+#include "base/subwindow/subwindow_manager.h"
 #include "base/utils/utils.h"
 #include "core/common/interaction/interaction_data.h"
 #include "core/common/interaction/interaction_interface.h"
@@ -476,6 +477,8 @@ void DragDropManager::OnDragMove(const PointerEvent& pointerEvent, const std::st
     }
     SetIsWindowConsumed(false);
 #endif // ENABLE_DRAG_FRAMEWORK
+    SubwindowManager::GetInstance()->UpdateHideMenuOffsetNG(OffsetF(static_cast<float>(point.GetX()),
+        static_cast<float>(point.GetY())));
     UpdateVelocityTrackerPoint(point, false);
     UpdateDragListener(point);
     auto dragFrameNode = FindDragFrameNodeByPosition(

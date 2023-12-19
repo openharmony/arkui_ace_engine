@@ -40,9 +40,10 @@
 #include "core/components_ng/base/view_stack_model.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_model.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_model_ng.h"
-#include "core/components_ng/pattern/rich_editor/rich_editor_selection.h"
+#include "core/components_ng/pattern/rich_editor/selection_info.h"
 #include "core/components_v2/inspector/utils.h"
 #include "frameworks/bridge/common/utils/engine_helper.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_text.h"
 
 namespace OHOS::Ace {
 std::unique_ptr<RichEditorModel> RichEditorModel::instance_ = nullptr;
@@ -224,10 +225,10 @@ JSRef<JSObject> JSRichEditor::CreateJSSpanResultObject(const ResultObject& resul
     spanPositionObj->SetPropertyObject("spanRange", spanRangeArray);
     resultObj->SetPropertyObject("offsetInSpan", offsetArray);
     resultObj->SetPropertyObject("spanPosition", spanPositionObj);
-    if (resultObject.type == RichEditorSpanType::TYPESPAN) {
+    if (resultObject.type == SelectSpanType::TYPESPAN) {
         resultObj->SetProperty<std::string>("value", resultObject.valueString);
         resultObj->SetPropertyObject("textStyle", CreateJSTextStyleResult(resultObject.textStyle));
-    } else if (resultObject.type == RichEditorSpanType::TYPEIMAGE) {
+    } else if (resultObject.type == SelectSpanType::TYPEIMAGE) {
         if (resultObject.valuePixelMap) {
 #ifdef PIXEL_MAP_SUPPORTED
             auto jsPixmap = ConvertPixmap(resultObject.valuePixelMap);
@@ -244,7 +245,7 @@ JSRef<JSObject> JSRichEditor::CreateJSSpanResultObject(const ResultObject& resul
     return resultObj;
 }
 
-JSRef<JSVal> JSRichEditor::CreateJSSelection(const RichEditorSelection& selectInfo)
+JSRef<JSVal> JSRichEditor::CreateJSSelection(const SelectionInfo& selectInfo)
 {
     uint32_t idx = 0;
 
@@ -271,10 +272,10 @@ void JSRichEditor::SetOnSelect(const JSCallbackInfo& args)
         return;
     }
     auto jsSelectFunc =
-        AceType::MakeRefPtr<JsEventFunction<RichEditorSelection, 1>>(JSRef<JSFunc>::Cast(args[0]), CreateJSSelection);
+        AceType::MakeRefPtr<JsEventFunction<SelectionInfo, 1>>(JSRef<JSFunc>::Cast(args[0]), CreateJSSelection);
     auto onSelect = [execCtx = args.GetExecutionContext(), func = std::move(jsSelectFunc)](const BaseEventInfo* info) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-        const auto* eventInfo = TypeInfoHelper::DynamicCast<RichEditorSelection>(info);
+        const auto* eventInfo = TypeInfoHelper::DynamicCast<SelectionInfo>(info);
         func->Execute(*eventInfo);
     };
     NG::RichEditorModelNG::GetInstance()->SetOnSelect(std::move(onSelect));
@@ -515,13 +516,13 @@ void JSRichEditor::SetCopyOptions(const JSCallbackInfo& info)
 
 void JSRichEditor::BindSelectionMenu(const JSCallbackInfo& info)
 {
-    RichEditorType editorType = RichEditorType::NONE;
+    NG::TextSpanType editorType = NG::TextSpanType::NONE;
     if (info.Length() >= 1 && info[0]->IsUndefined()) {
-        editorType = RichEditorType::TEXT;
+        editorType = NG::TextSpanType::TEXT;
     }
     if (info.Length() >= 1 && info[0]->IsNumber()) {
         auto spanType = info[0]->ToNumber<int32_t>();
-        editorType = static_cast<RichEditorType>(spanType);
+        editorType = static_cast<NG::TextSpanType>(spanType);
     }
 
     // Builder
@@ -538,54 +539,22 @@ void JSRichEditor::BindSelectionMenu(const JSCallbackInfo& info)
     CHECK_NULL_VOID(builderFunc);
 
     // responseType
-    RichEditorResponseType responseType = RichEditorResponseType::LONG_PRESS;
+    NG::TextResponseType responseType = NG::TextResponseType::LONG_PRESS;
     if (info.Length() >= 3 && info[2]->IsNumber()) {
         auto response = info[2]->ToNumber<int32_t>();
-        responseType = static_cast<RichEditorResponseType>(response);
+        responseType = static_cast<NG::TextResponseType>(response);
     }
     std::function<void()> buildFunc = [execCtx = info.GetExecutionContext(), func = std::move(builderFunc)]() {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("BindSelectionMenu");
         func->Execute();
     };
-    SelectMenuParam menuParam;
-    if (info.Length() > 3 && info[3]->IsObject()) {
-        ParseMenuParam(info, info[3], menuParam);
+    NG::SelectMenuParam menuParam;
+    int32_t requiredParamCount = 3;
+    if (info.Length() > requiredParamCount && info[requiredParamCount]->IsObject()) {
+        JSText::ParseMenuParam(info, info[requiredParamCount], menuParam);
     }
     RichEditorModel::GetInstance()->BindSelectionMenu(editorType, responseType, buildFunc, menuParam);
-}
-
-void JSRichEditor::ParseMenuParam(
-    const JSCallbackInfo& info, const JSRef<JSObject>& menuOptions, SelectMenuParam& menuParam)
-{
-    auto onAppearValue = menuOptions->GetProperty("onAppear");
-    if (onAppearValue->IsFunction()) {
-        RefPtr<JsFunction> jsOnAppearFunc =
-            AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onAppearValue));
-        auto onAppear = [execCtx = info.GetExecutionContext(), func = std::move(jsOnAppearFunc)](
-                            int32_t start, int32_t end) {
-            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-            ACE_SCORING_EVENT("onAppear");
-
-            JSRef<JSVal> params[2];
-            params[0] = JSRef<JSVal>::Make(ToJSValue(start));
-            params[1] = JSRef<JSVal>::Make(ToJSValue(end));
-            func->ExecuteJS(2, params);
-        };
-        menuParam.onAppear = std::move(onAppear);
-    }
-
-    auto onDisappearValue = menuOptions->GetProperty("onDisappear");
-    if (onDisappearValue->IsFunction()) {
-        RefPtr<JsFunction> jsOnDisAppearFunc =
-            AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onDisappearValue));
-        auto onDisappear = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDisAppearFunc)]() {
-            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-            ACE_SCORING_EVENT("onDisappear");
-            func->Execute();
-        };
-        menuParam.onDisappear = std::move(onDisappear);
-    }
 }
 
 JSRef<JSVal> JSRichEditor::CreateJSTextCommonEvent(NG::TextCommonEvent& event)
@@ -1068,7 +1037,7 @@ void JSRichEditorController::AddSymbolSpan(const JSCallbackInfo& args)
     args.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(spanIndex)));
 }
 
-JSRef<JSVal> JSRichEditorController::CreateJSSpansInfo(const RichEditorSelection& info)
+JSRef<JSVal> JSRichEditorController::CreateJSSpansInfo(const SelectionInfo& info)
 {
     uint32_t idx = 0;
 
@@ -1101,7 +1070,7 @@ void JSRichEditorController::GetSpansInfo(const JSCallbackInfo& args)
         }
     }
     if (controllerWeak_.Upgrade()) {
-        RichEditorSelection value = controllerWeak_.Upgrade()->GetSpansInfo(start, end);
+        SelectionInfo value = controllerWeak_.Upgrade()->GetSpansInfo(start, end);
         args.SetReturnValue(CreateJSSpansInfo(value));
     }
 }
@@ -1204,7 +1173,7 @@ void JSRichEditorController::GetSelection(const JSCallbackInfo& args)
 {
     auto controller = controllerWeak_.Upgrade();
     if (controller) {
-        RichEditorSelection value = controller->GetSelectionSpansInfo();
+        SelectionInfo value = controller->GetSelectionSpansInfo();
         args.SetReturnValue(JSRichEditor::CreateJSSelection(value));
     }
 }

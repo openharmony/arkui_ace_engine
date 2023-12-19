@@ -182,10 +182,7 @@ int32_t SpanItem::UpdateParagraph(const RefPtr<FrameNode>& frameNode,
     auto spanContent = GetSpanContent(content);
     auto pattern = frameNode->GetPattern<TextPattern>();
     CHECK_NULL_RETURN(pattern, -1);
-    auto textLayoutProp = pattern->GetLayoutProperty<TextLayoutProperty>();
-    CHECK_NULL_RETURN(textLayoutProp, -1);
-    if (textLayoutProp->GetCopyOptionValue(CopyOptions::None) != CopyOptions::None && pattern->GetTextDetectEnable() &&
-        !aiSpanMap.empty()) {
+    if (pattern->NeedShowAIDetect() && !aiSpanMap.empty()) {
         UpdateTextStyleForAISpan(spanContent, builder, textStyle);
     } else {
         UpdateTextStyle(spanContent, builder, textStyle);

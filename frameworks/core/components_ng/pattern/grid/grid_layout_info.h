@@ -116,12 +116,15 @@ struct GridLayoutInfo {
     float GetContentOffset(const GridLayoutOptions& options, float mainGap) const;
     float GetContentHeight(const GridLayoutOptions& options, float mainGap) const;
 
+
     Axis axis_ = Axis::VERTICAL;
 
     float currentOffset_ = 0.0f;
     float prevOffset_ = 0.0f;
     float lastMainSize_ = 0.0f;
     float totalHeightOfItemsInView_ = 0.0f;
+
+    // additional padding to accommodate navigation bar when SafeArea is expanded
     float contentEndPadding_ = 0.0f;
 
     std::optional<int32_t> lastCrossCount_;
@@ -150,10 +153,10 @@ struct GridLayoutInfo {
     // rect of grid item dragged in
     RectF currentRect_;
 
-    bool reachEnd_ = false;
+    bool reachEnd_ = false; // true if last GridItem appears in the viewPort
     bool reachStart_ = false;
 
-    bool offsetEnd_ = false;
+    bool offsetEnd_ = false; // true if last GridItem is fully within the viewport
 
     // Grid has GridItem whose columnEnd - columnStart > 0
     bool hasBigItem_;

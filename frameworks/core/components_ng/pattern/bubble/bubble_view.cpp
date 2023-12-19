@@ -367,6 +367,9 @@ void BubbleView::UpdatePopupParam(int32_t popupId, const RefPtr<PopupParam>& par
     CHECK_NULL_VOID(childNode);
     auto renderContext = childNode->GetRenderContext();
     if (renderContext) {
+        BlurStyleOption styleOption;
+        styleOption.blurStyle = BlurStyle::COMPONENT_ULTRA_THICK;
+        renderContext->UpdateBackBlurStyle(styleOption);
         auto backgroundColor = popupPaintProp->GetBackgroundColor().value_or(GetPopupTheme()->GetBackgroundColor());
         renderContext->UpdateBackgroundColor(backgroundColor);
     }
@@ -393,6 +396,9 @@ void BubbleView::UpdateCustomPopupParam(int32_t popupId, const RefPtr<PopupParam
     auto columnRenderContext = childNode->GetRenderContext();
     RefPtr<RenderContext> customRenderContext;
     if (columnRenderContext) {
+        BlurStyleOption styleOption;
+        styleOption.blurStyle = BlurStyle::COMPONENT_ULTRA_THICK;
+        columnRenderContext->UpdateBackBlurStyle(styleOption);
         if (customFrameNode) {
             customRenderContext = customFrameNode->GetRenderContext();
         } else {

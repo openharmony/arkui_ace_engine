@@ -548,6 +548,7 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
 
 static const std::unordered_map<std::string, std::function<void(BindingTarget)>> bindFuncs = {
     { "Flex", JSFlexImpl::JSBind },
+    { "TextController", JSTextController::JSBind },
     { "Text", JSText::JSBind },
     { "Animator", JSAnimator::JSBind },
     { "SpringProp", JSAnimator::JSBind },
@@ -801,6 +802,7 @@ void RegisterAllModule(BindingTarget globalObj)
 #endif
 #endif
     JSRichEditorController::JSBind(globalObj);
+    JSTextController::JSBind(globalObj);
     JSNodeContainer::JSBind(globalObj);
     JSBaseNode::JSBind(globalObj);
     for (auto& iter : bindFuncs) {
@@ -897,6 +899,8 @@ void RegisterModuleByName(BindingTarget globalObj, std::string moduleName)
 #endif
     } else if ((*func).first == V2::RICH_EDITOR_ETS_TAG) {
         JSRichEditorController::JSBind(globalObj);
+    } else if ((*func).first == V2::TEXT_ETS_TAG) {
+        JSTextController::JSBind(globalObj);
     }
 
     (*func).second(globalObj);

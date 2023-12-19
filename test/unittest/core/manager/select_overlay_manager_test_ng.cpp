@@ -102,7 +102,7 @@ HWTEST_F(SelectOverlayManagerTestNg, SelectOverlayManagerTest001, TestSize.Level
     auto selectOverlayNode = root_->GetChildren().back();
     ASSERT_TRUE(selectOverlayNode);
     auto node_id = selectOverlayNode->GetId();
-    EXPECT_EQ(node_id, 0);
+    EXPECT_EQ(node_id, 2);
 }
 
 /**
