@@ -30,11 +30,11 @@
 #include "base/utils/time_util.h"
 #include "base/utils/utils.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/base/inspector.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
-#include "core/components_v2/foreach/lazy_foreach_component.h"
 #include "core/components_ng/pattern/list/list_item_pattern.h"
-#include "core/components_ng/base/inspector.h"
+#include "core/components_v2/foreach/lazy_foreach_component.h"
 
 namespace OHOS::Ace::NG {
 
@@ -380,7 +380,8 @@ public:
         return result;
     }
 
-    void ProcessOffscreenNode(RefPtr<UINode>& uiNode, bool remove) {
+    void ProcessOffscreenNode(RefPtr<UINode>& uiNode, bool remove)
+    {
         if (uiNode) {
             auto frameNode = DynamicCast<FrameNode>(uiNode);
             while (!frameNode) {
@@ -401,7 +402,8 @@ public:
         }
     }
 
-    void ClearAllOffscreenNode() {
+    void ClearAllOffscreenNode()
+    {
         for (auto& [key, node] : expiringItem_) {
             ProcessOffscreenNode(node.second, true);
         }
