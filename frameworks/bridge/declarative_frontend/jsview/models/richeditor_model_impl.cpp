@@ -41,8 +41,8 @@ void RichEditorModelImpl::SetCustomKeyboard(std::function<void()>&& func) {}
 
 void RichEditorModelImpl::SetCopyOption(CopyOptions& copyOptions) {}
 
-void RichEditorModelImpl::BindSelectionMenu(RichEditorType& editorType, RichEditorResponseType& responseType,
-    std::function<void()>& buildFunc, SelectMenuParam& menuParam)
+void RichEditorModelImpl::BindSelectionMenu(NG::TextSpanType& editorType, NG::TextResponseType& responseType,
+    std::function<void()>& buildFunc, NG::SelectMenuParam& menuParam)
 {}
 
 void RichEditorModelImpl::SetOnPaste(std::function<void(NG::TextCommonEvent&)>&& func) {}
