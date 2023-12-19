@@ -283,6 +283,16 @@ public:
         return themeConstants_->GetResourceIdByName(resName, resType, resId);
     }
 
+    uint32_t GetSymbolByName(const char *name) const
+    {
+        return resourceAdapter_->GetSymbolByName(name);
+    }
+
+    uint32_t GetSymbolById(uint32_t resId) const
+    {
+        return resourceAdapter_->GetSymbolById(resId);
+    }
+
 private:
     RefPtr<ThemeConstants> themeConstants_;
     RefPtr<ResourceAdapter> resourceAdapter_;

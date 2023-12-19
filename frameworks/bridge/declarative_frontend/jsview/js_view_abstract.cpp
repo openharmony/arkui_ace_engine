@@ -4172,6 +4172,30 @@ bool JSViewAbstract::ParseJsShadowColorStrategy(const JSRef<JSVal>& jsValue, Sha
     return false;
 }
 
+bool JSViewAbstract::ParseJsSymbolId(const JSRef<JSVal>& jsValue, std::uint32_t& symbolId)
+{
+    JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsValue);
+    JSRef<JSVal> resId = jsObj->GetProperty("id");
+    if (resId->IsNull() || !resId->IsNumber()) {
+        return false;
+    }
+    auto resourceObject = GetResourceObject(jsObj);
+    if (!resourceObject) {
+        return false;
+    }
+    auto resourceWrapper = CreateResourceWrapper(jsObj, resourceObject);
+    if (!resourceWrapper) {
+        return false;
+    }
+    
+    auto symbol = resourceWrapper->GetSymbolById(resId->ToNumber<uint32_t>());
+    if (!symbol) {
+        return false;
+    }
+    symbolId = symbol;
+    return true;
+}
+
 bool JSViewAbstract::ParseJsFontFamilies(const JSRef<JSVal>& jsValue, std::vector<std::string>& result)
 {
     result.clear();

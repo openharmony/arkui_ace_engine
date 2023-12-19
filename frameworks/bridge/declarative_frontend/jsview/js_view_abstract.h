@@ -495,6 +495,7 @@ public:
     static bool CheckColor(const JSRef<JSVal>& jsValue, Color& result, const char* componentName, const char* propName);
     static bool CheckLength(
         const JSRef<JSVal>& jsValue, CalcDimension& result, const char* componentName, const char* propName);
+    static bool ParseJsSymbolId(const JSRef<JSVal>& jsValue, uint32_t& symbolId);
 };
 } // namespace OHOS::Ace::Framework
 #endif // JS_VIEW_ABSTRACT_H

@@ -411,6 +411,8 @@ build_component_ng("pattern_ng") {
     "swiper_indicator/indicator_common/swiper_arrow_layout_algorithm.cpp",
     "swiper_indicator/indicator_common/swiper_arrow_pattern.cpp",
     "swiper_indicator/indicator_common/swiper_indicator_pattern.cpp",
+    "symbol/symbol_model_ng.cpp",
+    "symbol/symbol_source_info.cpp",
     "tabs/tab_bar_accessibility_property.cpp",
     "tabs/tab_bar_layout_algorithm.cpp",
     "tabs/tab_bar_layout_property.cpp",
