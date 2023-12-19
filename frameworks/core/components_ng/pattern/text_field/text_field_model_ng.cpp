@@ -457,6 +457,8 @@ void TextFieldModelNG::SetShowCounter(bool value)
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
     CHECK_NULL_VOID(pattern);
+    pattern->SetCounterMargin(false);
+    pattern->SetCounterState(false);
     if (value) {
         pattern->AddCounterNode();
     } else {
