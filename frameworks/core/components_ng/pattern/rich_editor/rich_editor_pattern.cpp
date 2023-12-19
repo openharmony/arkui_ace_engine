@@ -1644,9 +1644,10 @@ void RichEditorPattern::HandleMenuCallbackOnSelectAll()
                             ? static_cast<RichEditorResponseType>(
                                   selectOverlayProxy_->GetSelectOverlayMangerInfo().menuInfo.responseType.value_or(0))
                             : RichEditorResponseType::LONG_PRESS;
-    ShowSelectOverlay(textSelector_.firstHandle, textSelector_.secondHandle, true, responseType);
     selectMenuInfo_.showCopyAll = false;
     selectOverlayProxy_->UpdateSelectMenuInfo(selectMenuInfo_);
+    selectOverlayProxy_.Reset();
+    ShowSelectOverlay(textSelector_.firstHandle, textSelector_.secondHandle, true, responseType);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     FireOnSelect(textSelector_.GetTextStart(), textSelector_.GetTextEnd());
