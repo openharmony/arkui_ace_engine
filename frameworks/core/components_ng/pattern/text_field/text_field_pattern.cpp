@@ -3810,7 +3810,7 @@ void TextFieldPattern::PerformAction(TextInputAction action, bool forceCloseKeyb
         RecordSubmitEvent();
         eventHub->FireOnSubmit(static_cast<int32_t>(action), event);
         if (event.IsKeepEditable()) {
-          return;
+            return;
         }
         auto focusHub = host->GetOrCreateFocusHub();
         focusHub->LostFocus();
