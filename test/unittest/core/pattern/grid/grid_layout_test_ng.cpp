@@ -17,6 +17,7 @@
 
 #include "core/components_ng/pattern/grid/grid_layout_info.h"
 #include "core/components_ng/pattern/grid/irregular/grid_irregular_filler.h"
+#include "core/components_ng/pattern/grid/irregular/grid_irregular_layout_algorithm.h"
 #include "core/components_ng/pattern/grid/irregular/grid_layout_range_solver.h"
 
 namespace OHOS::Ace::NG {
@@ -1606,5 +1607,149 @@ HWTEST_F(GridLayoutTestNg, SolveBackward001, TestSize.Level1)
     res = solver.FindStartingRow(5.0f);
     EXPECT_EQ(res.pos, 30.0f);
     EXPECT_EQ(res.row, 0);
+}
+
+/**
+ * @tc.name: GridIrregularLayout::LayoutChildren001
+ * @tc.desc: Test GridIrregularLayout::LayoutChildren
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridLayoutTestNg, LayoutChildren001, TestSize.Level1)
+{
+    Create([](GridModelNG model) {
+        model.SetColumnsTemplate("1fr 1fr 1fr");
+        CreateRowItem(10);
+    });
+
+    frameNode_->GetGeometryNode()->UpdatePaddingWithBorder(PaddingPropertyF { .left = 5.0f, .top = 3.0f });
+
+    GridLayoutInfo info;
+    info.gridMatrix_ = {
+        { 0, { { 0, 0 }, { 0, -1 }, { 2, 1 } } }, // 0 | 0 | 1
+        { 1, { { 0, 2 }, { 1, 3 }, { 2, 4 } } },  // 2 | 3 | 4
+        { 2, { { 0, 5 }, { 1, 6 }, { 2, 7 } } },  // 5 | 6 | 7
+        { 3, { { 0, 8 }, { 1, -1 } } },           // 8 | 8 | x
+        { 4, { { 0, 9 }, { 1, -1 } } },           // 9 | 9 | x
+    };
+    info.lineHeightMap_ = { { 0, 20.0f }, { 1, 20.0f }, { 2, 10.0f }, { 3, 15.0f }, { 4, 30.0f } };
+    info.crossCount_ = 3;
+    info.startMainLineIndex_ = 0;
+    info.endMainLineIndex_ = 4;
+
+    auto algorithm = AceType::MakeRefPtr<GridIrregularLayoutAlgorithm>(info);
+    algorithm->wrapper_ = AceType::RawPtr(frameNode_);
+    algorithm->crossLens_ = { 50.0f, 50.0f, 100.0f };
+    algorithm->crossGap_ = 5.0f;
+    algorithm->mainGap_ = 1.0f;
+    algorithm->LayoutChildren(0.0f);
+
+    EXPECT_EQ(frameNode_->GetChildByIndex(0)->GetGeometryNode()->GetFrameOffset(), OffsetF(5.0f, 3.0f));
+    EXPECT_EQ(frameNode_->GetChildByIndex(1)->GetGeometryNode()->GetFrameOffset(), OffsetF(115.0f, 3.0f));
+    EXPECT_EQ(frameNode_->GetChildByIndex(2)->GetGeometryNode()->GetFrameOffset(), OffsetF(5.0f, 24.0f));
+    EXPECT_EQ(frameNode_->GetChildByIndex(3)->GetGeometryNode()->GetFrameOffset(), OffsetF(60.0f, 24.0f));
+    EXPECT_EQ(frameNode_->GetChildByIndex(4)->GetGeometryNode()->GetFrameOffset(), OffsetF(115.0f, 24.0f));
+    EXPECT_EQ(frameNode_->GetChildByIndex(5)->GetGeometryNode()->GetFrameOffset(), OffsetF(5.0f, 45.0f));
+    EXPECT_EQ(frameNode_->GetChildByIndex(6)->GetGeometryNode()->GetFrameOffset(), OffsetF(60.0f, 45.0f));
+    EXPECT_EQ(frameNode_->GetChildByIndex(7)->GetGeometryNode()->GetFrameOffset(), OffsetF(115.0f, 45.0f));
+    EXPECT_EQ(frameNode_->GetChildByIndex(8)->GetGeometryNode()->GetFrameOffset(), OffsetF(5.0f, 56.0f));
+    EXPECT_EQ(frameNode_->GetChildByIndex(9)->GetGeometryNode()->GetFrameOffset(), OffsetF(5.0f, 72.0f));
+}
+
+/**
+ * @tc.name: GridIrregularLayout::Measure001
+ * @tc.desc: Test GridIrregularLayout::Measure
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridLayoutTestNg, Measure001, TestSize.Level1)
+{
+    GridLayoutOptions option;
+    option.irregularIndexes = {
+        0, // [2 x 2]
+        3, // [1 x 2]
+        4, // [1 x 2]
+        6, // [3 x 2]
+    };
+
+    // 0 | 0 | 1
+    // 0 | 0 | 2
+    // 3 | 4 | 5
+    // 3 | 4 | x
+    // 6 | 6 | 6
+    // 6 | 6 | 6
+    // 7 | 8 | 9
+
+    auto onGetIrregularSizeByIndex = [](int32_t index) -> GridItemSize {
+        if (index == 0) {
+            return { 2, 2 };
+        }
+        if (index == 6) {
+            return { .rows = 2, .columns = 3 };
+        }
+        return { .rows = 2, .columns = 1 };
+    };
+
+    option.getSizeByIndex = std::move(onGetIrregularSizeByIndex);
+    Create([option](GridModelNG model) {
+        model.SetColumnsTemplate("1fr 1fr 1fr");
+        model.SetLayoutOptions(option);
+        model.SetColumnsGap(Dimension { 5.0f });
+        model.SetRowsGap(Dimension { 1.0f });
+        CreateRowItem(10);
+    });
+    LayoutConstraintF constraint { .maxSize = { 610.0f, 600.0f }, .percentReference = { 610.0f, 600.0f } };
+    layoutProperty_->layoutConstraint_ = constraint;
+
+    auto algorithm = AceType::MakeRefPtr<GridIrregularLayoutAlgorithm>(GridLayoutInfo {});
+    algorithm->gridLayoutInfo_.currentOffset_ = 0.0f;
+    algorithm->Measure(AceType::RawPtr(frameNode_));
+
+    std::vector<float> cmp = { 200.0f, 200.0f, 200.0f };
+    EXPECT_EQ(frameNode_->GetGeometryNode()->GetFrameSize().Width(), 610.0f);
+    EXPECT_EQ(algorithm->crossLens_, cmp);
+
+    const auto& info = algorithm->gridLayoutInfo_;
+    EXPECT_EQ(algorithm->mainGap_, 1.0f);
+    EXPECT_EQ(algorithm->crossGap_, 5.0f);
+    EXPECT_EQ(info.startMainLineIndex_, 0);
+    EXPECT_EQ(info.endMainLineIndex_, 6);
+    EXPECT_EQ(info.startIndex_, 0);
+    EXPECT_EQ(info.endIndex_, 9);
+}
+
+/**
+ * @tc.name: GridIrregularLayout::Layout001
+ * @tc.desc: Test GridIrregularLayout::Layout
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridLayoutTestNg, Layout001, TestSize.Level1)
+{
+    Create([](GridModelNG model) {
+        model.SetColumnsTemplate("1fr 1fr 1fr");
+        CreateRowItem(10);
+    });
+    frameNode_->GetGeometryNode()->UpdatePaddingWithBorder(PaddingPropertyF { .left = 1.0f, .top = 1.0f });
+    frameNode_->GetGeometryNode()->SetFrameSize(SizeF { 200.0f, 500.0f });
+
+    auto algorithm = AceType::MakeRefPtr<GridIrregularLayoutAlgorithm>(GridLayoutInfo {});
+    algorithm->crossLens_ = { 50.0f, 50.0f, 50.0f };
+    auto& info = algorithm->gridLayoutInfo_;
+    info.gridMatrix_ = {
+        { 0, { { 0, 0 }, { 0, -1 }, { 2, -1 } } }, // 0 | 0 | 0
+        { 1, { { 0, 2 }, { 1, 3 }, { 2, 4 } } },   // 2 | 3 | 4
+        { 2, { { 0, 5 }, { 1, 6 }, { 2, 7 } } },   // 5 | 6 | 7
+        { 3, { { 0, 8 }, { 1, -1 }, { 2, 9 } } },  // 8 | 6 | 9
+    };
+    info.lineHeightMap_ = { { 0, 20.0f }, { 1, 20.0f }, { 2, 10.0f }, { 3, 15.0f } };
+    info.crossCount_ = 3;
+    info.startMainLineIndex_ = 0;
+    info.endMainLineIndex_ = 3;
+    info.startIndex_ = 0;
+    info.endIndex_ = 9;
+    info.currentOffset_ = 10.0f;
+    algorithm->Layout(AceType::RawPtr(frameNode_));
+
+    EXPECT_TRUE(info.reachStart_);
+    EXPECT_TRUE(info.reachEnd_);
+    EXPECT_TRUE(info.offsetEnd_);
 }
 } // namespace OHOS::Ace::NG

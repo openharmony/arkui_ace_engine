@@ -69,11 +69,6 @@ private:
     void UpdateLayoutInfo();
 
     /**
-     * @brief Removes children that are out of bounds.
-     */
-    void RemoveOutOfBoundChildren();
-
-    /**
      * @brief Calculates the cross positions based on the padding.
      * @param padding The padding property of the layout.
      * @return A vector containing the cross positions.

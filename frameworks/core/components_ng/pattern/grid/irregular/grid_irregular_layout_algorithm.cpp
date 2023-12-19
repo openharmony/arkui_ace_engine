@@ -55,7 +55,7 @@ void GridIrregularLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 {
     wrapper_ = layoutWrapper;
 
-    RemoveOutOfBoundChildren();
+    wrapper_->RemoveAllChildInRenderTree();
 
     LayoutChildren(gridLayoutInfo_.currentOffset_);
 
@@ -138,7 +138,7 @@ void GridIrregularLayoutAlgorithm::UpdateLayoutInfo()
 {
     auto& info = gridLayoutInfo_;
 
-    info.reachStart_ = info.currentOffset_ >= 0.0f;
+    info.reachStart_ = info.startIndex_ == 0 && info.currentOffset_ >= 0;
     // GridLayoutInfo::reachEnd_ has a different meaning
     info.reachEnd_ = info.endIndex_ == wrapper_->GetTotalChildCount() - 1;
 
@@ -146,34 +146,6 @@ void GridIrregularLayoutAlgorithm::UpdateLayoutInfo()
 
     info.lastMainSize_ = wrapper_->GetGeometryNode()->GetContentSize().MainSize(info.axis_);
     info.totalHeightOfItemsInView_ = info.GetTotalHeightOfItemsInView(mainGap_);
-}
-
-void GridIrregularLayoutAlgorithm::RemoveOutOfBoundChildren()
-{
-    wrapper_->RemoveAllChildInRenderTree();
-    return;
-    // try to optimize and remove only the children that are going out of bound
-    int32_t idx = gridLayoutInfo_.startIndex_;
-    // remove above
-    while (idx > 0) {
-        auto child = wrapper_->GetChildByIndex(--idx);
-        if (!child || !child->IsActive()) {
-            // no more children to remove
-            break;
-        }
-        wrapper_->RemoveChildInRenderTree(idx);
-    }
-
-    // remove below
-    idx = gridLayoutInfo_.endIndex_;
-    while (idx < wrapper_->GetTotalChildCount() - 1) {
-        auto child = wrapper_->GetChildByIndex(++idx);
-        if (!child || !child->IsActive()) {
-            // no more children to remove
-            break;
-        }
-        wrapper_->RemoveChildInRenderTree(idx);
-    }
 }
 
 void GridIrregularLayoutAlgorithm::LayoutChildren(float mainOffset)
