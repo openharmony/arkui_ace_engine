@@ -1473,11 +1473,11 @@ std::function<void(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)> Tex
         if (pattern->dragStatus_ == DragStatus::NONE) {
             pattern->InsertValue(str);
         } else {
-            pattern->showSelect_ = true;
-            pattern->ShowSelectOverlayAfterDrag();
             auto current = pattern->selectController_->GetCaretIndex();
             auto dragTextStart = pattern->dragTextStart_;
             auto dragTextEnd = pattern->dragTextEnd_;
+            pattern->selectController_->UpdateHandleIndex(dragTextStart, dragTextEnd);
+            pattern->showSelect_ = true;
             if (current < dragTextStart) {
                 pattern->contentController_->erase(dragTextStart, dragTextEnd - dragTextStart);
                 pattern->InsertValue(str);
@@ -1563,7 +1563,6 @@ void TextFieldPattern::InitDragDropEvent()
             pattern->showSelect_ = true;
             auto layoutProperty = host->GetLayoutProperty<TextFieldLayoutProperty>();
             CHECK_NULL_VOID(layoutProperty);
-            pattern->ShowSelectOverlayAfterDrag();
             host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
         }
     };
@@ -2277,16 +2276,6 @@ void TextFieldPattern::ShowSelectOverlay(const ShowSelectOverlayParams& showOver
     } else {
         StartRequestSelectOverlay(showOverlayParams);
     }
-}
-
-void TextFieldPattern::ShowSelectOverlayAfterDrag()
-{
-    ShowSelectOverlayParams showOverlayParams = { .animation = true,
-        .isShowMenu = true,
-        .isUpdateMenu = true,
-        .firstHandle = selectController_->GetFirstHandleRect(),
-        .secondHandle = selectController_->GetSecondHandleRect() };
-    ShowSelectOverlay(showOverlayParams);
 }
 
 void TextFieldPattern::StartRequestSelectOverlay(const ShowSelectOverlayParams& params, bool isShowPaste)
