@@ -4781,12 +4781,13 @@ void JSViewAbstract::JsSetDragPreviewOptions(const JSCallbackInfo& info)
     JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
     auto mode = obj->GetProperty("mode");
     if (!mode->IsNumber()) {
+        ViewAbstractModel::GetInstance()->SetDragPreviewOptions({NG::DragPreviewMode::AUTO});
         return;
     }
     int32_t dragPreviewMode = mode->ToNumber<int>();
     if (!(dragPreviewMode >= static_cast<int32_t>(NG::DragPreviewMode::AUTO) &&
             dragPreviewMode <= static_cast<int32_t>(NG::DragPreviewMode::DISABLE_SCALE))) {
-        return;
+        dragPreviewMode = static_cast<int32_t>(NG::DragPreviewMode::AUTO);
     }
     NG::DragPreviewOption option {static_cast<NG::DragPreviewMode>(dragPreviewMode)};
     ViewAbstractModel::GetInstance()->SetDragPreviewOptions(option);
