@@ -329,4 +329,174 @@ HWTEST_F(LayoutConstraintTestNg, LayoutConstraintTestNg005, TestSize.Level1)
     layoutConstraint.ApplyAspectRatioWithoutCalcSize(ratio);
     EXPECT_EQ(layoutConstraint.minSize.Width(), layoutConstraint.minSize.Height() * 2);
 }
+
+/**
+ * @tc.name: LayoutConstraintTestNg006
+ * @tc.desc: Test ApplyAspectRatio.
+ * @tc.type: FUNC
+ */
+HWTEST_F(LayoutConstraintTestNg, LayoutConstraintTestNg006, TestSize.Level1)
+{
+    LayoutConstraintF layoutConstraint;
+    layoutConstraint.parentIdealSize = OptionalSizeF(768, 1024);
+
+    auto calcSize = std::make_optional<CalcSize>();
+    /**
+     * @tc.steps: step1 call ApplyAspectRatio and set ratio > 0 and calcSize not has width and height.
+     * @tc.expected: the set value do not change.
+     */
+    float ratio = 1.0;
+    layoutConstraint.ApplyAspectRatio(ratio, calcSize);
+    EXPECT_EQ(layoutConstraint.parentIdealSize.Width().value(), 768.0);
+
+    /**
+     * @tc.steps: step2 call ApplyAspectRatio, set ratio = 1 and useDefinedWidth.
+     * @tc.expected: set Height failure, height not change.
+     */
+    std::string widthStr = "768px";
+    CalcLength width = CalcLength::FromString(widthStr);
+    std::string heightStr = "1024px";
+    CalcLength height = CalcLength::FromString(heightStr);
+    calcSize = std::make_optional<CalcSize>(width, height);
+    layoutConstraint.selfIdealSize.SetHeight(960);
+    layoutConstraint.ApplyAspectRatio(ratio, calcSize);
+    EXPECT_EQ(layoutConstraint.selfIdealSize.Height(), 960.0);
+
+    /**
+     * @tc.steps: step3 call ApplyAspectRatio, set ratio = 2 and not useDefinedWidth
+                    and selfIdealSize.Width().
+     * @tc.expected: the selfIdealSize.Width() = selfIdealSize.Height() * 2.
+     */
+    ratio = 2.0;
+    width = CalcLength();
+    heightStr = "1024px";
+    height = CalcLength::FromString(heightStr);
+    calcSize.value().Reset();
+    calcSize->SetHeight(height);
+    layoutConstraint.ApplyAspectRatio(ratio, calcSize);
+    EXPECT_EQ(layoutConstraint.selfIdealSize.Width().value(), layoutConstraint.selfIdealSize.Height().value() * 2);
+
+    /**
+     * @tc.steps: step4 call ApplyAspectRatio, set minSize and set maxSize
+     * @tc.expected: minSize and maxSize is neaer Infinity.
+     */
+    layoutConstraint.minSize = { Infinity<float>() / 2, Infinity<float>() / 2 };
+    layoutConstraint.maxSize = { Infinity<float>() / 2, Infinity<float>() / 2 };
+    layoutConstraint.ApplyAspectRatio(ratio, calcSize);
+    EXPECT_EQ(layoutConstraint.maxSize.Width(), Infinity<float>());
+    EXPECT_EQ(layoutConstraint.minSize.Width(), Infinity<float>());
+}
+
+/**
+ * @tc.name: LayoutConstraintTestNg007
+ * @tc.desc: Test ApplyAspectRatioToParentIdealSize.
+ * @tc.type: FUNC
+ */
+HWTEST_F(LayoutConstraintTestNg, LayoutConstraintTestNg007, TestSize.Level1)
+{
+    LayoutConstraintF layoutConstraint;
+    layoutConstraint.parentIdealSize = OptionalSizeF(0, 1024);
+    layoutConstraint.selfIdealSize = OptionalSizeF(480, 960);
+
+    /**
+     * @tc.steps: step1 call ApplyAspectRatioToParentIdealSize and set ratio > 0 and useWidth false
+     * and parentIdealSize width false.
+     * @tc.expected: width changed successfully
+     */
+    bool useWidth = false;
+    float ratio = 2;
+    layoutConstraint.ApplyAspectRatioToParentIdealSize(useWidth, ratio);
+    EXPECT_EQ(layoutConstraint.parentIdealSize.Width().value(), 2048);
+
+    /**
+     * @tc.steps: step2 call ApplyAspectRatioToParentIdealSize and set ratio > 0 and useWidth true
+     * and parentIdealSize width false.
+     * @tc.expected: width changed successfully
+     */
+    ratio = 1;
+    useWidth = true;
+    layoutConstraint.parentIdealSize.Reset();
+    layoutConstraint.parentIdealSize.SetHeight(1024);
+    layoutConstraint.ApplyAspectRatioToParentIdealSize(useWidth, ratio);
+    EXPECT_EQ(layoutConstraint.parentIdealSize.Width().value(), 1024);
+}
+
+/**
+ * @tc.name: LayoutConstraintTestNg008
+ * @tc.desc: Test ApplyAspectRatioWithoutCalcSize.
+ * @tc.type: FUNC
+ */
+HWTEST_F(LayoutConstraintTestNg, LayoutConstraintTestNg008, TestSize.Level1)
+{
+    LayoutConstraintF layoutConstraint;
+    layoutConstraint.parentIdealSize = OptionalSizeF(768, 1024);
+    layoutConstraint.selfIdealSize = OptionalSizeF(480, 960);
+
+    /**
+     * @tc.steps: step1 call ApplyAspectRatioWithoutCalcSize and set ratio < 0 and greaterThanApiTen true.
+     * @tc.expected: the set value do not change.
+     */
+    float ratio = -1;
+    layoutConstraint.ApplyAspectRatioWithoutCalcSize(ratio, true);
+    EXPECT_EQ(layoutConstraint.parentIdealSize.Width().value(), 768.0);
+
+    /**
+     * @tc.steps: step2 call ApplyAspectRatioWithoutCalcSize and set ratio = 2 reaterThanApiTen true.
+     * @tc.expected: minSize,maxSize,percentRef height all set success
+     */
+    ratio = 2;
+    layoutConstraint.percentReference = { 0, 1025 };
+    layoutConstraint.maxSize.SetWidth(2048);
+    layoutConstraint.maxSize.SetHeight(4096);
+    layoutConstraint.minSize.SetWidth(1);
+    layoutConstraint.minSize.SetHeight(2);
+    layoutConstraint.ApplyAspectRatioWithoutCalcSize(ratio, true);
+    EXPECT_EQ(layoutConstraint.minSize.Height(), 0.5f);
+    EXPECT_EQ(layoutConstraint.maxSize.Height(), 1024);
+    EXPECT_EQ(layoutConstraint.percentReference.Height(), 0);
+
+    /**
+     * @tc.steps: step3 call ApplyAspectRatioWithoutCalcSize and set ratio = 2 reaterThanApiTen true.
+     * @tc.expected: minSize,maxSize,percentRef width all set success
+     */
+    ratio = 2;
+    layoutConstraint.maxSize.SetWidth(4096);
+    layoutConstraint.maxSize.SetHeight(2048);
+    layoutConstraint.minSize.SetWidth(1);
+    layoutConstraint.minSize.SetHeight(2);
+    layoutConstraint.percentReference = { 8193, 0 };
+    layoutConstraint.ApplyAspectRatioWithoutCalcSize(ratio, true);
+    EXPECT_EQ(layoutConstraint.minSize.Width(), 4);
+    EXPECT_EQ(layoutConstraint.maxSize.Width(), 4096);
+    EXPECT_EQ(layoutConstraint.percentReference.Width(), 0);
+
+    /**
+     * @tc.steps: step4 call ApplyAspectRatioWithoutCalcSize and set ratio = 2 reaterThanApiTen true.
+     * @tc.expected: minSize,maxSize,percentRef all set fail
+     */
+    layoutConstraint.percentReference = { 0, 0 };
+    layoutConstraint.ApplyAspectRatioWithoutCalcSize(ratio, true);
+    EXPECT_EQ(layoutConstraint.percentReference.Width(), 0);
+    EXPECT_EQ(layoutConstraint.percentReference.Height(), 0);
+}
+
+/**
+ * @tc.name: LayoutConstraintTestNg009
+ * @tc.desc: Test ApplyAspectRatioWithoutCalcSize.
+ * @tc.type: FUNC
+ */
+HWTEST_F(LayoutConstraintTestNg, LayoutConstraintTestNg009, TestSize.Level1)
+{
+    LayoutConstraintF layoutConstraint;
+    layoutConstraint.parentIdealSize = OptionalSizeF(768, 1024);
+    layoutConstraint.selfIdealSize = OptionalSizeF(480, 960);
+
+    /**
+     * @tc.steps: step1 call Reset.
+     * @tc.expected: Reset Success.
+     */
+    layoutConstraint.Reset();
+    EXPECT_EQ(layoutConstraint.minSize.Width(), 0);
+    EXPECT_EQ(layoutConstraint.minSize.Height(), 0);
+}
 } // namespace OHOS::Ace::NG

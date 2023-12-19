@@ -284,4 +284,34 @@ HWTEST_F(BorderPropertyTestNg, BorderPropertyTestNg006, TestSize.Level1)
     retFlag = borderRadiusProperty.UpdateWithCheck(newBorderRadiusProperty);
     EXPECT_FALSE(retFlag);
 }
+
+/**
+ * @tc.name: BorderPropertyTestNg007
+ * @tc.desc: Test BorderRadiusPropertyT<Dimension>::ToString function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(BorderPropertyTestNg, BorderPropertyTestNg007, TestSize.Level1)
+{
+    BorderColorProperty borderColorProperty;
+    string strResult = borderColorProperty.ToString();
+    const string strTemp = "leftColor: [NA]rightColor: [NA]topColor: [NA]bottomColor: [NA]";
+    EXPECT_EQ(strTemp, strResult);
+
+    Color cTemp = Color::FromARGB(25, 0, 0, 0);
+    borderColorProperty.SetColor(cTemp);
+    EXPECT_TRUE(borderColorProperty.leftColor.has_value());
+    strResult = borderColorProperty.ToString();
+    EXPECT_NE(strTemp, strResult);
+
+    BorderWidthPropertyT<Dimension> borderWidthProperty;
+    BorderWidthPropertyT<Dimension> borderWidthProperty2;
+    Dimension dimenTemp(2.0, DimensionUnit::PX);
+    borderWidthProperty.SetBorderWidth(dimenTemp);
+    EXPECT_TRUE(borderWidthProperty.leftDimen.has_value());
+    EXPECT_TRUE(borderWidthProperty.topDimen.has_value());
+    EXPECT_TRUE(borderWidthProperty.rightDimen.has_value());
+    EXPECT_TRUE(borderWidthProperty.bottomDimen.has_value());
+    borderWidthProperty2.SetBorderWidth(dimenTemp);
+    EXPECT_EQ(borderWidthProperty, borderWidthProperty2);
+}
 } // namespace OHOS::Ace::NG
