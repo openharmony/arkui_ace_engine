@@ -448,7 +448,9 @@ void JsBindViews(BindingTarget globalObj)
     JSScreen::JSBind(globalObj);
     JSUIExtension::JSBind(globalObj);
     JSUIExtensionProxy::JSBind(globalObj);
+#if defined(DYNAMIC_COMPONENT_SUPPORT)
     JSDynamicComponent::JSBind(globalObj);
+#endif
 #endif
     JSRating::JSBind(globalObj);
     JSGrid::JSBind(globalObj);

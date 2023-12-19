@@ -29,8 +29,6 @@ namespace OHOS::Ace::NG {
 
 class DynamicComponentRendererImpl : public DynamicComponentRenderer,
                                      public std::enable_shared_from_this<DynamicComponentRendererImpl> {
-    DECLARE_ACE_TYPE(DynamicComponentRendererImpl, DynamicComponentRenderer)
-
 public:
     DynamicComponentRendererImpl(const RefPtr<FrameNode>& host, int32_t hostInstanceId, const std::string& hapPath,
         const std::string& abcPath, void* runtime);

@@ -27,9 +27,7 @@
 
 namespace OHOS::Ace::NG {
 
-class DynamicComponentRenderer : public virtual AceType {
-    DECLARE_ACE_TYPE(DynamicComponentRenderer, AceType);
-
+class DynamicComponentRenderer {
 public:
     virtual ~DynamicComponentRenderer() = default;
 

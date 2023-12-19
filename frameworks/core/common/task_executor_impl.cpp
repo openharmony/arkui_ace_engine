@@ -76,9 +76,7 @@ TaskExecutor::Task TaskExecutorImpl::WrapTaskWithCustomWrapper(
         std::unique_ptr<TraceId> traceIdPtr(traceId);
         if (originTask && traceIdPtr) {
             traceIdPtr->SetTraceId();
-
             taskWrapper->Call(originTask);
-
             traceIdPtr->ClearTraceId();
         } else {
             LOGW("WrapTaskWithContainer: originTask or traceIdPtr is null.");

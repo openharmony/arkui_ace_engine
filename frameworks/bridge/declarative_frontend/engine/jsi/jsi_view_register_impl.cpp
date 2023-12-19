@@ -754,8 +754,10 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "Screen", JSScreen::JSBind },
     { "UIExtensionComponent", JSUIExtension::JSBind },
     { "UIExtensionProxy", JSUIExtensionProxy::JSBind },
-    { "DynamicComponent", JSDynamicComponent::JSBind },
     { "WindowScene", JSWindowScene::JSBind },
+#if defined(DYNAMIC_COMPONENT_SUPPORT)
+    { "DynamicComponent", JSDynamicComponent::JSBind },
+#endif
 #endif
     { "RichEditor", JSRichEditor::JSBind },
     { "RichEditorController", JSRichEditorController::JSBind },
