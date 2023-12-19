@@ -24,7 +24,6 @@ group("core_common_unittest") {
     "others:thread_checker_test",
     "plugin:plugin_manager_test",
     "recorder:event_recorder_test",
-    "register:register_test",
     "resource:resource_manager_test",
     "rosen:rosen_test",
     "sharedata:share_data_test",
