@@ -609,6 +609,9 @@ void SheetPresentationPattern::UpdateDragBarStatus()
 
 void SheetPresentationPattern::UpdateCloseIconStatus()
 {
+    if (!Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+        return;
+    }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto pipeline = PipelineContext::GetCurrentContext();
