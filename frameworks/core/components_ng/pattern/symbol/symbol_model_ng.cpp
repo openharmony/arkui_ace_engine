@@ -42,4 +42,14 @@ void SymbolModelNG::SetFontSize(const CalcDimension& value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, FontSize, value);
 }
+
+void SymbolModelNG::SetSymbolRenderingStrategy(const std::uint32_t renderingStrategy)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, SymbolRenderingStrategy, renderingStrategy);
+}
+
+void SymbolModelNG::SetFontColor(std::vector<Color>& symbolColor)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, SymbolColorList, symbolColor);
+}
 } // namespace OHOS::Ace::NG

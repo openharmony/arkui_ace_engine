@@ -4196,6 +4196,37 @@ bool JSViewAbstract::ParseJsSymbolId(const JSRef<JSVal>& jsValue, std::uint32_t&
     return true;
 }
 
+bool JSViewAbstract::ParseJsSymbolColor(const JSRef<JSVal>& jsValue, std::vector<Color>& result)
+{
+    if (!jsValue->IsArray()) {
+        return false;
+    }
+    if (jsValue->IsArray()) {
+        JSRef<JSArray> array = JSRef<JSArray>::Cast(jsValue);
+        for (size_t i = 0; i < array->Length(); i++) {
+            JSRef<JSVal> value = array->GetValueAt(i);
+            if (!value->IsNumber() && !value->IsString() && !value->IsObject()) {
+                return false;
+            }
+            if (value->IsNumber()) {
+                result.emplace_back(Color(ColorAlphaAdapt(value->ToNumber<uint32_t>())));
+                continue;
+            } else if (value->IsString()) {
+                Color color;
+                Color::ParseColorString(value->ToString(), color);
+                result.emplace_back(color);
+                continue;
+            } else {
+                Color color;
+                ParseJsColorFromResource(value, color);
+                result.emplace_back(color);
+            }
+        }
+        return true;
+    }
+    return false;
+}
+
 bool JSViewAbstract::ParseJsFontFamilies(const JSRef<JSVal>& jsValue, std::vector<std::string>& result)
 {
     result.clear();

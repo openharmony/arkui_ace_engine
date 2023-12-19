@@ -343,6 +343,9 @@ bool TextLayoutAlgorithm::CreateParagraph(const TextStyle& textStyle, std::strin
         CHECK_NULL_RETURN(symbolSourceInfo, false);
         TextStyle symbolTextStyle = textStyle;
         symbolTextStyle.isSymbolGlyph_ = true;
+        if (symbolTextStyle.GetRenderStrategy() < 0) {
+            symbolTextStyle.SetRenderStrategy(0);
+        }
         paragraph_->PushStyle(symbolTextStyle);
         paragraph_->AddSymbol(symbolSourceInfo->GetUnicode());
         paragraph_->PopStyle();

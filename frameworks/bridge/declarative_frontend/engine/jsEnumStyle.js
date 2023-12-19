@@ -1087,6 +1087,13 @@ var CopyOptions;
   CopyOptions[CopyOptions["CROSS_DEVICE"] = 3] = "CrossDevice";
 })(CopyOptions || (CopyOptions = {}));
 
+var SymbolRenderingStrategy;
+(function (SymbolRenderingStrategy) {
+  SymbolRenderingStrategy[SymbolRenderingStrategy["SINGLE"] = 0] = "SINGLE";
+  SymbolRenderingStrategy[SymbolRenderingStrategy["MULTIPLE_COLOR"] = 1] = "MULTIPLE_COLOR";
+  SymbolRenderingStrategy[SymbolRenderingStrategy["MULTIPLE_OPACITY"] = 2] = "MULTIPLE_OPACITY";
+})(SymbolRenderingStrategy || (SymbolRenderingStrategy = {}));
+
 var RichEditorSpanType;
 (function (RichEditorSpanType) {
   RichEditorSpanType[RichEditorSpanType["TEXT"] = 0] = "TEXT";
