@@ -848,6 +848,7 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
         }
         return;
     }
+    dragDropManager->UpdateDragStyle();
     dragDropManager->SetDraggingPointer(info.GetPointerId());
     dragDropManager->SetPreviewRect(Rect(pixelMapOffset.GetX(), pixelMapOffset.GetY(), width, height));
     dragDropManager->ResetRecordSize(static_cast<uint32_t>(recordsSize));
