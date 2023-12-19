@@ -92,8 +92,6 @@ private:
     float crossGap_ = 0.0f;        /**< The cross-axis gap between GridItems. */
     float mainGap_ = 0.0f;         /**< The main-axis gap between GridItems. */
 
-    float firstRowPos_ = 0.0f; /**< The position of the first row in the layout. */
-
     ACE_DISALLOW_COPY_AND_MOVE(GridIrregularLayoutAlgorithm);
 };
 

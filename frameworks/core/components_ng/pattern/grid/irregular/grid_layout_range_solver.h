@@ -35,9 +35,8 @@ public:
      * @brief Structure to store the information of the starting row.
      */
     struct StartingRowInfo {
-        int32_t row;  /**< Row index of the starting row. */
-        float pos;    /**< Main position of the starting row in the contentRect. */
-        float height; /**< Height of the starting row. */
+        int32_t row; /**< Row index of the starting row. */
+        float pos;   /**< Main position of the starting row in ViewBox. The new currentOffset_ */
     };
 
     /**
@@ -50,15 +49,33 @@ public:
 
 private:
     /**
-     * @brief Adds the next rows to the layout.
+     * @brief Find the starting row going forward, when currentOffset_ is negative (scrolling down).
+     */
+    StartingRowInfo SolveForward(float mainGap);
+
+    /**
+     * @brief Adds the next rows to the layout in SolveForward.
      *
      * Because of irregular items, we might add multiples rows in a single iteration.
      *
      * @param mainGap The gap between rows.
-     * @param row The index of the next row.
+     * @param idx The index of the next row.
      * @return A pair containing the number of rows added and the total height of the added rows.
      */
-    std::pair<int32_t, float> AddNextRows(float mainGap, int32_t row);
+    std::pair<int32_t, float> AddNextRows(float mainGap, int32_t idx);
+
+    /**
+     * @brief Find the starting row going backward, when currentOffset_ is positive (scrolling up).
+     */
+    StartingRowInfo SolveBackward(float mainGap);
+
+    /**
+     * @brief Looks for multi-row items in the row.
+     *
+     * @param idx The row index.
+     * @return The maximum row count upwards of multi-row items in Row [idx].
+     */
+    int32_t CheckMultiRow(int32_t idx);
 
     const GridLayoutInfo* info_;
     const LayoutWrapper* wrapper_;

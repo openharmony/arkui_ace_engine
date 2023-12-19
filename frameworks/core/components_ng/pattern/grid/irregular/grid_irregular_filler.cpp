@@ -115,6 +115,11 @@ GridItemSize GridIrregularFiller::GetItemSize(int32_t idx)
             std::swap(size.rows, size.columns);
         }
     }
+
+    // handle illegal size
+    if (size.columns > info_->crossCount_) {
+        size.columns = info_->crossCount_;
+    }
     return size;
 }
 

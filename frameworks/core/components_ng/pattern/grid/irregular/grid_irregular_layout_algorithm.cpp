@@ -39,14 +39,14 @@ void GridIrregularLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     GridLayoutRangeSolver solver(&info, wrapper_);
     auto res = solver.FindStartingRow(mainGap_);
 
-    firstRowPos_ = res.pos;
     info.startMainLineIndex_ = res.row;
+    info.currentOffset_ = res.pos;
     // on init, gridMatrix_ is empty
     if (info.gridMatrix_.find(res.row) != info.gridMatrix_.end()) {
         info.startIndex_ = info.gridMatrix_[res.row][0];
     }
 
-    FillWithItems(mainSize + res.height);
+    FillWithItems(mainSize - res.pos);
 
     wrapper_->SetCacheCount(static_cast<int32_t>(props->GetCachedCountValue(1) * info.crossCount_));
 }
@@ -57,8 +57,7 @@ void GridIrregularLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 
     RemoveOutOfBoundChildren();
 
-    float mainOffset = firstRowPos_ + gridLayoutInfo_.currentOffset_;
-    LayoutChildren(mainOffset);
+    LayoutChildren(gridLayoutInfo_.currentOffset_);
 
     UpdateLayoutInfo();
 }
@@ -194,6 +193,8 @@ void GridIrregularLayoutAlgorithm::LayoutChildren(float mainOffset)
 
             auto offset = info.axis_ == Axis::HORIZONTAL ? OffsetF { mainOffset, crossPos[c] }
                                                          : OffsetF { crossPos[c], mainOffset };
+            // alignment translate
+
             child->GetGeometryNode()->SetMarginFrameOffset(offset);
             child->Layout();
         }
