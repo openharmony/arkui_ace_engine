@@ -74,6 +74,7 @@ void WindowScene::OnAttachToFrameNode()
     CHECK_NULL_VOID(host);
     CHECK_NULL_VOID(session_);
     session_->SetUINodeId(host->GetAccessibilityId());
+    session_->AttachToFrameNode(true);
 
     if (!IsMainWindow()) {
         auto surfaceNode = session_->GetSurfaceNode();
@@ -96,6 +97,13 @@ void WindowScene::OnAttachToFrameNode()
     RegisterFocusCallback();
 
     WindowPattern::OnAttachToFrameNode();
+}
+
+void WindowScene::OnDetachFromFrameNode(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(session_);
+    session_->SetUINodeId(0);
+    session_->AttachToFrameNode(false);
 }
 
 void WindowScene::RegisterFocusCallback()
