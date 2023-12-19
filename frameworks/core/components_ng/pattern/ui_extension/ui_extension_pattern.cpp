@@ -137,6 +137,11 @@ void UIExtensionPattern::OnConnect()
     surfaceNode->CreateNodeInRenderThread();
     surfaceNode->SetForeground(isModal_);
     FireOnRemoteReadyCallback();
+    if (isModal_) {
+        auto focusHub = host->GetFocusHub();
+        CHECK_NULL_VOID(focusHub);
+        focusHub->RequestFocusImmediately();
+    }
     bool isFocused = IsCurrentFocus();
     RegisterVisibleAreaChange();
     DispatchFocusState(isFocused);
