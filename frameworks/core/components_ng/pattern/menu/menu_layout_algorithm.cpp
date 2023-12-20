@@ -410,6 +410,26 @@ void MenuLayoutAlgorithm::Initialize(LayoutWrapper* layoutWrapper)
 
 void MenuLayoutAlgorithm::InitializePadding(LayoutWrapper* layoutWrapper)
 {
+    auto menuPattern = layoutWrapper->GetHostNode()->GetPattern<MenuPattern>();
+    CHECK_NULL_VOID(menuPattern);
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetTheme<SelectTheme>();
+    CHECK_NULL_VOID(theme);
+    if (!menuPattern->IsSelectOverlayExtensionMenu()) {
+        margin_ = static_cast<float>(theme->GetOutPadding().ConvertToPx());
+        optionPadding_ = margin_;
+        paddingStart_ = static_cast<float>(theme->GetDefaultPaddingStart().ConvertToPx());
+        paddingEnd_ = static_cast<float>(theme->GetDefaultPaddingEnd().ConvertToPx());
+        paddingTop_ = static_cast<float>(theme->GetDefaultPaddingTop().ConvertToPx());
+        paddingBottom_ = static_cast<float>(theme->GetDefaultPaddingBottomFixed().ConvertToPx());
+    } else {
+        optionPadding_ = static_cast<float>(theme->GetOutPadding().ConvertToPx());
+    }
+}
+
+void MenuLayoutAlgorithm::InitializePaddingAPI11(LayoutWrapper* layoutWrapper)
+{
     auto menuNode = layoutWrapper->GetHostNode();
     CHECK_NULL_VOID(menuNode);
     auto menuPattern = menuNode->GetPattern<MenuPattern>();
@@ -457,8 +477,9 @@ void MenuLayoutAlgorithm::ModifyPositionToWrapper(LayoutWrapper* layoutWrapper, 
     auto menuPattern = menu->GetPattern<MenuPattern>();
     CHECK_NULL_VOID(menuPattern);
     bool isSubMenu = menuPattern->IsSubMenu() || menuPattern->IsSelectOverlaySubMenu();
-    if (menuPattern->IsContextMenu() || (isSubMenu && Container::CurrentId() >= MIN_SUBCONTAINER_ID) ||
-        hierarchicalParameters_) {
+    if ((menuPattern->IsContextMenu() || (isSubMenu && Container::CurrentId() >= MIN_SUBCONTAINER_ID) ||
+            hierarchicalParameters_) &&
+        (targetTag_ != V2::SELECT_ETS_TAG)) {
         // no need to modify for context menu, because context menu wrapper is full screen.
         return;
     }
@@ -1729,7 +1750,7 @@ void MenuLayoutAlgorithm::InitTargetSizeAndPosition(const LayoutWrapper* layoutW
     menuPattern->SetTargetSize(targetSize_);
     auto pipelineContext = GetCurrentPipelineContext();
     CHECK_NULL_VOID(pipelineContext);
-    if (isContextMenu || hierarchicalParameters_) {
+    if ((isContextMenu || hierarchicalParameters_) && (targetTag_ != V2::SELECT_ETS_TAG)) {
         auto windowGlobalRect = pipelineContext->GetDisplayWindowRectInfo();
         float windowsOffsetX = static_cast<float>(windowGlobalRect.GetOffset().GetX());
         float windowsOffsetY = static_cast<float>(windowGlobalRect.GetOffset().GetY());
