@@ -582,6 +582,12 @@ OffsetF GestureEventHub::GetPixelMapOffset(
 float GestureEventHub::GetPixelMapScale(const int32_t height, const int32_t width) const
 {
     float scale = 1.0f;
+    auto frameNode = GetFrameNode();
+    CHECK_NULL_RETURN(frameNode, scale);
+    if (frameNode->GetDragPreviewOption().mode == DragPreviewMode::DISABLE_SCALE ||
+        !(frameNode->GetTag() == V2::WEB_ETS_TAG)) {
+        return scale;
+    }
     int32_t deviceHeight = SystemProperties::GetDevicePhysicalHeight();
     int32_t deviceWidth = SystemProperties::GetDevicePhysicalWidth();
     int32_t maxDeviceLength = std::max(deviceHeight, deviceWidth);
@@ -805,8 +811,7 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
     }
     float defaultPixelMapScale =
         info.GetInputEventType() == InputEventType::MOUSE_BUTTON ? 1.0f : DEFALUT_DRAG_PPIXELMAP_SCALE;
-    float scale = GetPixelMapScale(pixelMap->GetHeight(), pixelMap->GetWidth()) *
-                  defaultPixelMapScale;
+    float scale = GetPixelMapScale(pixelMap->GetHeight(), pixelMap->GetWidth()) * defaultPixelMapScale;
     auto overlayManager = pipeline->GetOverlayManager();
     if (IsPixelMapNeedScale()) {
         RefPtr<FrameNode> imageNode = overlayManager->GetPixelMapContentNode();
