@@ -60,7 +60,10 @@ struct SelectMenuInfo {
     bool showCut = true;
     bool showCameraInput = false;
     std::optional<OffsetF> menuOffset;
+
+    // Customize menu information.
     std::optional<int32_t> responseType;
+    std::optional<int32_t> editorType;
     std::function<void()> menuBuilder;
 
     bool IsIconChanged(const SelectMenuInfo& info) const
