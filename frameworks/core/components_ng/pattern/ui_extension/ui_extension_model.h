@@ -43,7 +43,7 @@ public:
     // for DynamicComponent
     virtual void Create();
     virtual void InitializeDynamicComponent(const RefPtr<NG::FrameNode>& frameNode, const std::string& hapPath,
-        const std::string& abcPath, const RefPtr<OHOS::Ace::WantWrap>& wantWrap, void* runtime);
+        const std::string& abcPath, const std::string& entryPoint, void* runtime);
 
     virtual void SetOnRemoteReady(std::function<void(const RefPtr<NG::UIExtensionProxy>&)>&& onRemoteReady);
     virtual void SetOnRelease(std::function<void(int32_t)>&& onRelease);

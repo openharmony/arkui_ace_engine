@@ -266,7 +266,7 @@ public:
     bool LoadPageSource(const std::shared_ptr<std::vector<uint8_t>>& content,
         const std::function<void(const std::string&, int32_t)>& errorCallback = nullptr) override;
 
-    bool LoadCard(const std::string& url, int64_t cardId) override;
+    bool LoadCard(const std::string& url, int64_t cardId, const std::string& entryPoint) override;
 
     // Update running page
     void UpdateRunningPage(const RefPtr<JsAcePage>& page) override;
@@ -427,6 +427,7 @@ private:
     void RegisterAssetFunc();
     bool ExecuteAbc(const std::string& fileName);
     bool ExecuteCardAbc(const std::string& fileName, int64_t cardId);
+    bool ExecuteDynamicAbc(const std::string& fileName, const std::string& entryPoint);
 
     RefPtr<JsiDeclarativeEngineInstance> engineInstance_;
 

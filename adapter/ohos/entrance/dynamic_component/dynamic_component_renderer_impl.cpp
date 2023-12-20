@@ -30,17 +30,18 @@
 
 namespace OHOS::Ace::NG {
 DynamicComponentRendererImpl::DynamicComponentRendererImpl(const RefPtr<FrameNode>& host, int32_t hostInstanceId,
-    const std::string& hapPath, const std::string& abcPath, void* runtime)
-    : hapPath_(hapPath), abcPath_(abcPath), hostInstanceId_(hostInstanceId)
+    const std::string& hapPath, const std::string& abcPath, const std::string& entryPoint, void* runtime)
+    : hapPath_(hapPath), abcPath_(abcPath), entryPoint_(entryPoint), hostInstanceId_(hostInstanceId)
 {
     host_ = WeakPtr(host);
     runtime_ = reinterpret_cast<NativeEngine*>(runtime);
 }
 
 std::shared_ptr<DynamicComponentRenderer> DynamicComponentRenderer::Create(const RefPtr<FrameNode>& host,
-    int32_t hostInstanceId, const std::string& hapPath, const std::string& abcPath, void* runtime)
+    int32_t hostInstanceId, const std::string& hapPath, const std::string& abcPath, const std::string& entryPoint,
+    void* runtime)
 {
-    return std::make_shared<DynamicComponentRendererImpl>(host, hostInstanceId, hapPath, abcPath, runtime);
+    return std::make_shared<DynamicComponentRendererImpl>(host, hostInstanceId, hapPath, abcPath, entryPoint, runtime);
 }
 
 void DynamicComponentRendererImpl::CreateContent()
@@ -63,7 +64,7 @@ void DynamicComponentRendererImpl::CreateContent()
         renderer->uiContent_ = UIContent::Create(nullptr, renderer->runtime_, true);
         CHECK_NULL_VOID(renderer->uiContent_);
 
-        renderer->uiContent_->InitializeDynamic(renderer->hapPath_, renderer->abcPath_);
+        renderer->uiContent_->InitializeDynamic(renderer->hapPath_, renderer->abcPath_, renderer->entryPoint_);
         renderer->AttachRenderContext();
         LOGD("foreground dynamic UI content");
         renderer->uiContent_->Foreground();

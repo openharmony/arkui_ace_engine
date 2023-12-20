@@ -113,6 +113,8 @@ public:
 
     virtual void RunPage(const std::string& content, const std::string& params) = 0;
     virtual void RunPage(const std::shared_ptr<std::vector<uint8_t>>& content, const std::string& params) {};
+    virtual void RunDynamicPage(
+        const std::string& content, const std::string& params, const std::string& entryPoint) {};
 
     virtual void RunPageByNamedRouter(const std::string& name) {}
 

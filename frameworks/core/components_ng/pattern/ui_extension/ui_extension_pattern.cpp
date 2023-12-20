@@ -86,14 +86,14 @@ FocusPattern UIExtensionPattern::GetFocusPattern() const
 }
 
 void UIExtensionPattern::InitializeDynamicComponent(const std::string& hapPath, const std::string& abcPath,
-    const RefPtr<OHOS::Ace::WantWrap>& wantWrap, void* runtime)
+    const std::string& entryPoint, void* runtime)
 {
     componentType_ = ComponentType::DYNAMIC;
 
     if (!dynamicComponentRenderer_) {
         ContainerScope scope(instanceId_);
         dynamicComponentRenderer_ =
-            DynamicComponentRenderer::Create(GetHost(), instanceId_, hapPath, abcPath, runtime);
+            DynamicComponentRenderer::Create(GetHost(), instanceId_, hapPath, abcPath, entryPoint, runtime);
         CHECK_NULL_VOID(dynamicComponentRenderer_);
         dynamicComponentRenderer_->CreateContent();
     }

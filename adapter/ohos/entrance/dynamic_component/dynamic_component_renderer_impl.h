@@ -31,7 +31,7 @@ class DynamicComponentRendererImpl : public DynamicComponentRenderer,
                                      public std::enable_shared_from_this<DynamicComponentRendererImpl> {
 public:
     DynamicComponentRendererImpl(const RefPtr<FrameNode>& host, int32_t hostInstanceId, const std::string& hapPath,
-        const std::string& abcPath, void* runtime);
+        const std::string& abcPath, const std::string& entryPoint, void* runtime);
     ~DynamicComponentRendererImpl() override = default;
 
     void CreateContent() override;
@@ -49,6 +49,7 @@ private:
 
     std::string hapPath_;
     std::string abcPath_;
+    std::string entryPoint_;
     std::shared_ptr<UIContent> uiContent_;
     NativeEngine* runtime_ = nullptr;
     WeakPtr<FrameNode> host_;

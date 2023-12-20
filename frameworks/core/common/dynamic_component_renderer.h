@@ -32,7 +32,7 @@ public:
     virtual ~DynamicComponentRenderer() = default;
 
     static std::shared_ptr<DynamicComponentRenderer> Create(const RefPtr<FrameNode>& host, int32_t hostInstanceId,
-        const std::string& hapPath, const std::string& abcPath, void* runtime);
+        const std::string& hapPath, const std::string& abcPath, const std::string& entryPoint, void* runtime);
 
     virtual void CreateContent() = 0;
     virtual void DestroyContent() = 0;

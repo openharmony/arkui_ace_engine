@@ -974,6 +974,18 @@ bool AceContainer::RunPage(
     return true;
 }
 
+bool AceContainer::RunDynamicPage(
+    int32_t instanceId, const std::string& content, const std::string& params, const std::string& entryPoint)
+{
+    auto container = AceEngine::Get().GetContainer(instanceId);
+    CHECK_NULL_RETURN(container, false);
+    ContainerScope scope(instanceId);
+    auto front = container->GetFrontend();
+    CHECK_NULL_RETURN(front, false);
+    front->RunDynamicPage(content, params, entryPoint);
+    return true;
+}
+
 bool AceContainer::PushPage(int32_t instanceId, const std::string& content, const std::string& params)
 {
     auto container = AceEngine::Get().GetContainer(instanceId);
