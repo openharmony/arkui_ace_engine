@@ -14,6 +14,8 @@
 import("//arkcompiler/ets_frontend/es2panda/es2abc_config.gni")
 import("//build/ohos.gni")
 import("//foundation/arkui/ace_engine/ace_config.gni")
+import("//foundation/arkui/ace_engine/adapter/preview/build/config.gni")
+import("//foundation/arkui/ace_engine/build/ace_gen_obj.gni")
 
 es2abc_gen_abc("gen_swiperefresher_abc") {
   src_js = rebase_path("swiperefresher.js")
@@ -30,10 +32,21 @@ gen_js_obj("swiperefresher_abc") {
   dep = ":gen_swiperefresher_abc"
 }
 
+gen_obj("swiperefresher_abc_preview") {
+  input = get_label_info(":gen_swiperefresher_abc", "target_out_dir") +
+          "/swiperefresher.abc"
+  output = target_out_dir + "/swiperefresher_abc.c"
+  snapshot_dep = [ ":gen_swiperefresher_abc" ]
+}
+
 ohos_shared_library("swiperefresher") {
   sources = [ "swiperefresher.cpp" ]
 
-  deps = [ ":swiperefresher_abc" ]
+if (use_mingw_win || use_mac || use_linux) {
+    deps = [ ":gen_obj_src_swiperefresher_abc_preview" ]
+  } else {
+    deps = [ ":swiperefresher_abc" ]
+  }
 
   external_deps = [
     "hilog:libhilog",
