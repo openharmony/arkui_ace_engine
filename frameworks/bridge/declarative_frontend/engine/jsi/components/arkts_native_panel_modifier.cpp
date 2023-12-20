@@ -119,6 +119,13 @@ void SetPanelCustomHeight(NodeHandle node, double value, int unit)
         frameNode, CalcDimension(value, static_cast<OHOS::Ace::DimensionUnit>(unit)));
 }
 
+void SetPanelCustomHeightByString(NodeHandle node, const char* value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    SlidingPanelModelNG::SetPanelCustomHeight(frameNode, CalcDimension(value));
+}
+
 void ResetPanelCustomHeight(NodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -173,8 +180,8 @@ ArkUIPanelModifierAPI GetPanelModifier()
     static const ArkUIPanelModifierAPI modifier = { SetPanelMode, ResetPanelMode, SetPanelFullHeight,
         ResetPanelFullHeight, SetPanelHalfHeight, ResetPanelHalfHeight, SetPanelMiniHeight, ResetPanelMiniHeight,
         SetPanelBackgroundMask, ResetPanelBackgroundMask, SetPanelType, ResetPanelType, SetPanelCustomHeight,
-        ResetPanelCustomHeight, SetShowCloseIcon, ResetShowCloseIcon, SetDragBar, ResetDragBar,
-        SetShow, ResetShow };
+        SetPanelCustomHeightByString, ResetPanelCustomHeight, SetShowCloseIcon, ResetShowCloseIcon, SetDragBar,
+        ResetDragBar, SetShow, ResetShow };
 
     return modifier;
 }

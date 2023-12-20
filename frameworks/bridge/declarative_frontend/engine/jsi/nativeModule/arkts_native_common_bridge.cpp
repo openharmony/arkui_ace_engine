@@ -831,19 +831,19 @@ void ParseOuterBorderColor(ArkUIRuntimeCallInfo *runtimeCallInfo, EcmaVM *vm, st
     std::optional<Color> bottomColor;
 
     Color left;
-    if (!leftArg->IsUndefined() && ArkTSUtils::ParseJsColor(vm, leftArg, left)) {
+    if (!leftArg->IsUndefined() && ArkTSUtils::ParseJsColorAlpha(vm, leftArg, left)) {
         leftColor = left;
     }
     Color right;
-    if (!rightArg->IsUndefined() && ArkTSUtils::ParseJsColor(vm, rightArg, right)) {
+    if (!rightArg->IsUndefined() && ArkTSUtils::ParseJsColorAlpha(vm, rightArg, right)) {
         rightColor = right;
     }
     Color top;
-    if (!topArg->IsUndefined() && ArkTSUtils::ParseJsColor(vm, topArg, top)) {
+    if (!topArg->IsUndefined() && ArkTSUtils::ParseJsColorAlpha(vm, topArg, top)) {
         topColor = top;
     }
     Color bottom;
-    if (!bottomArg->IsUndefined() && ArkTSUtils::ParseJsColor(vm, bottomArg, bottom)) {
+    if (!bottomArg->IsUndefined() && ArkTSUtils::ParseJsColorAlpha(vm, bottomArg, bottom)) {
         bottomColor = bottom;
     }
 
