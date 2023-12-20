@@ -13,38 +13,19 @@
  * limitations under the License.
  */
 
+#include "mock_canvas_image.h"
+
+#include "base/image/pixel_map.h"
 #include "core/components_ng/render/adapter/pixelmap_image.h"
 
 namespace OHOS::Ace::NG {
+RefPtr<CanvasImage> CanvasImage::Create(void* rawImage)
+{
+    return nullptr;
+}
+
 RefPtr<CanvasImage> CanvasImage::Create(const RefPtr<PixelMap>& pixelMap)
 {
     return nullptr;
 }
-
-int32_t PixelMapImage::GetWidth() const
-{
-    return 0;
-}
-
-int32_t PixelMapImage::GetHeight() const
-{
-    return 0;
-}
-
-RefPtr<CanvasImage> PixelMapImage::Clone()
-{
-    return Claim(this);
-}
-
-void PixelMapImage::Cache(const std::string& key) {}
-RefPtr<CanvasImage> PixelMapImage::QueryFromCache(const std::string& key)
-{
-    return nullptr;
-}
-
-void PixelMapImage::DrawToRSCanvas(
-    RSCanvas& canvas, const RSRect& /* srcRect */, const RSRect& /* dstRect */, const BorderRadiusArray& radiusXY)
-{}
-
-void PixelMapImage::DrawRect(RSCanvas& canvas, const RSRect& dstRect) {}
 } // namespace OHOS::Ace::NG
