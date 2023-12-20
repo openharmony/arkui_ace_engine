@@ -32,6 +32,7 @@ abstract class NodeController {
     aboutToResize(size: Size) { }
     aboutToAppear() { }
     aboutToDisappear() { }
+    onTouchEvent(event: TouchEvent) { }
 
     rebuild() {
         if (this.nodeContainerId_ >= 0) {

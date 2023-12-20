@@ -17,6 +17,9 @@ declare class UIContext {
     instanceId_: number;
 }
 
+declare interface TouchEvent {
+}
+
 declare type UpdateFunc = (elmtId: number, isFirstRender: boolean) => void;
 
 interface UpdateFuncRecord {
@@ -48,4 +51,4 @@ declare interface Size {
     height: number
 }
 
-declare abstract class ViewPU {}
+declare abstract class ViewPU { }

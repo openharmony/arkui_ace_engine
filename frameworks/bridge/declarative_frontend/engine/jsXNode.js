@@ -200,6 +200,7 @@ class NodeController {
     aboutToResize(size) { }
     aboutToAppear() { }
     aboutToDisappear() { }
+    onTouchEvent(event) { }
     rebuild() {
         if (this.nodeContainerId_ >= 0) {
             GetUINativeModule().nodeContainer.rebuild(this.nodeContainerId_);
