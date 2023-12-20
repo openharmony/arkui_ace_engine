@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 const START_TIME = 250;
 const END_TIME = 200;
 const BORDER_RADIUS = 12;
@@ -28,22 +29,21 @@ export enum MarginType {
 export interface PromptOptions {
   icon?: ResourceStr,
   tip?: ResourceStr,
-  marginState: MarginType,
-  touchText?: ResourceStr,
-  isTouchShow?: boolean,
-  positionTop: number,
-  isShow?: boolean
+  marginType: MarginType,
+  actionText?: ResourceStr,
+  marginTop: number,
+  isShown?: boolean
 }
 
 @Component
 export struct ExceptionPrompt {
   @Prop options: PromptOptions
   touchBackgroundColor: Resource = $r('sys.color.ohos_id_color_sub_background_transparent')
-  onTextClick: () => void = () => {
-    // Click the text on the left to change into the connecting state
+  onTipClick: () => void = () => {
+    // Click the text on the left to change into the connecting state.
   }
-  onConfigure: () => void = () => {
-    // Click Set Network to open the Set network pop-up interface
+  onActionTextClick: () => void = () => {
+    // Click Set Network to open the Set network pop-up interface.
   }
 
   @Builder FirstBuilder() {
@@ -84,13 +84,13 @@ export struct ExceptionPrompt {
       .width('100%')
       .height('100%')
       .onClick(() => {
-        this.onTextClick() //Click the callback of the prompt text
+        this.onTipClick()
       })
 
-      if (this.options.isTouchShow) {
+      if (this.options.actionText) {
         Button({ stateEffect: true, type: ButtonType.Normal }) {
           Row() {
-            Text(this.options.touchText)
+            Text(this.options.actionText)
               .fontSize($r('sys.float.ohos_id_text_size_body2'))
               .fontColor($r('sys.color.ohos_id_color_text_secondary'))
               .maxLines(1)
@@ -104,7 +104,7 @@ export struct ExceptionPrompt {
           }
         }
         .backgroundColor(this.touchBackgroundColor)
-        .width(this.options.isTouchShow ? 120 : 0)
+        .width(this.options.actionText ? 120 : 0)
         .height(32)
         .borderRadius($r('sys.float.ohos_id_corner_radius_subtab'))
         .padding({
@@ -115,7 +115,7 @@ export struct ExceptionPrompt {
 
           if (event.type === TouchType.Down) {
             this.touchBackgroundColor = $r('sys.color.ohos_id_color_click_effect')
-            this.onConfigure() //Click the icon button on the right for the callback
+            this.onActionTextClick()
           } else if (event.type === TouchType.Up) {
             this.touchBackgroundColor = $r('sys.color.ohos_id_color_sub_background_transparent')
           }
@@ -140,17 +140,23 @@ export struct ExceptionPrompt {
         this.SecondBuilder()
         this.TextBuilder()
       }
-      .padding(this.options.marginState === MarginType.DEFAULT_MARGIN ? { left: $r('sys.float.ohos_id_card_margin_start'), right: $r('sys.float.ohos_id_card_margin_end') } : { left: $r('sys.float.ohos_id_max_padding_start'), right: $r('sys.float.ohos_id_max_padding_end') })
+      .padding(this.options.marginType === MarginType.DEFAULT_MARGIN ? {
+                                                                         left: $r('sys.float.ohos_id_card_margin_start'),
+                                                                         right: $r('sys.float.ohos_id_card_margin_end')
+                                                                       } : {
+                                                                             left: $r('sys.float.ohos_id_max_padding_start'),
+                                                                             right: $r('sys.float.ohos_id_max_padding_end')
+                                                                           })
       .transition(
         TransitionEffect.OPACITY.animation({
-          duration: this.options.isShow ? START_TIME : END_TIME
+          duration: this.options.isShown ? START_TIME : END_TIME
         })
       )
-      .visibility(this.options.isShow ? Visibility.Visible : Visibility.None)
+      .visibility(this.options.isShown ? Visibility.Visible : Visibility.None)
     }
     .width('100%')
-    .height(this.options.isTouchShow ? FIT_HEIGHT : DEFAULT_HEIGHT)
-    .position({ y: this.options.positionTop })
+    .height(this.options.actionText ? FIT_HEIGHT : DEFAULT_HEIGHT)
+    .position({ y: this.options.marginTop })
     .zIndex(ZINDEX_NUM)
   }
 }
