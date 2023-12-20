@@ -69,13 +69,11 @@ void UIDisplaySync::OnFrame()
         data_->onFrameWithData_(data_);
     }
 
-    if (data_->noSkip_ && data_->onFrameWithTimestamp_) {
+    if (IsEnabled() && data_->noSkip_ && data_->onFrameWithTimestamp_) {
         data_->onFrameWithTimestamp_(data_->timestamp_);
     }
 
-    if (!data_->noSkip_) {
-        RequestFrame();
-    }
+    RequestFrame();
 }
 
 void UIDisplaySync::AddToPipeline(WeakPtr<PipelineBase>& pipelineContext)
