@@ -19,6 +19,7 @@
 #include "transaction/rs_sync_transaction_controller.h"
 #include "ui/rs_surface_node.h"
 
+#include "core/components_ng/pattern/window_scene/helper/window_scene_helper.h"
 #include "core/components_ng/render/adapter/rosen_render_context.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
@@ -74,6 +75,28 @@ void WindowScene::OnAttachToFrameNode()
     CHECK_NULL_VOID(host);
     CHECK_NULL_VOID(session_);
     session_->SetUINodeId(host->GetAccessibilityId());
+    auto responseRegionCallback = [weakThis = WeakClaim(this), weakSession = wptr(session_)](
+        const std::vector<DimensionRect>& responseRegion) {
+        auto self = weakThis.Upgrade();
+        CHECK_NULL_VOID(self);
+        auto session = weakSession.promote();
+        CHECK_NULL_VOID(session);
+        std::vector<Rosen::Rect> hotAreas;
+        for (auto& rect : responseRegion) {
+            Rosen::Rect windowRect {
+                .posX_ = std::round(rect.GetOffset().GetX().Value()),
+                .posY_ = std::round(rect.GetOffset().GetY().Value()),
+                .width_ = std::round(rect.GetWidth().Value()),
+                .height_ = std::round(rect.GetHeight().Value()),
+            };
+            hotAreas.push_back(windowRect);
+        }
+        session->SetTouchHotAreas(hotAreas);
+    };
+    auto gestureHub = host->GetOrCreateGestureEventHub();
+    if (gestureHub) {
+        gestureHub->SetResponseRegionFunc(responseRegionCallback);
+    }
 
     if (!IsMainWindow()) {
         auto surfaceNode = session_->GetSurfaceNode();
@@ -87,14 +110,12 @@ void WindowScene::OnAttachToFrameNode()
 
     auto surfaceNode = session_->GetLeashWinSurfaceNode();
     CHECK_NULL_VOID(surfaceNode);
-
     auto context = AceType::DynamicCast<NG::RosenRenderContext>(host->GetRenderContext());
     CHECK_NULL_VOID(context);
     context->SetRSNode(surfaceNode);
     surfaceNode->SetBoundsChangedCallback(boundsChangedCallback_);
 
     RegisterFocusCallback();
-
     WindowPattern::OnAttachToFrameNode();
 }
 
