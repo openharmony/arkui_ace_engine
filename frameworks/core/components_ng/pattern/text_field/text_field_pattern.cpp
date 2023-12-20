@@ -402,6 +402,10 @@ bool TextFieldPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
         inlineSelectAllFlag_ = false;
         showSelect_ = true;
     }
+    if (needSelectAll_ && !isLongPress_) {
+        HandleOnSelectAll(true);
+        needSelectAll_ = false;
+    }
     if (mouseStatus_ == MouseStatus::RELEASED) {
         mouseStatus_ = MouseStatus::NONE;
     }
@@ -650,6 +654,10 @@ void TextFieldPattern::HandleFocusEvent()
     CHECK_NULL_VOID(paintProperty);
     auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
+    auto isSelectAll = layoutProperty->GetSelectAllValueValue(false);
+    if (isSelectAll && !contentController_->IsEmpty()) {
+        needSelectAll_ = true;
+    }
     if (IsNormalInlineState()) {
         ApplyInlineStates(true);
         inlineFocusState_ = true;
@@ -1681,7 +1689,6 @@ void TextFieldPattern::HandleSingleClickEvent(GestureEvent& info)
     SetIsSingleHandle(true);
     CloseSelectOverlay(true);
 
-    auto isSelectAll = layoutProperty->GetSelectAllValueValue(false);
     if (RepeatClickCaret(info.GetLocalLocation(), lastCaretIndex) && info.GetSourceDevice() != SourceType::MOUSE) {
         if (contentController_->IsEmpty()) {
             ProcessOverlay(true, true, true, true);
@@ -1692,8 +1699,7 @@ void TextFieldPattern::HandleSingleClickEvent(GestureEvent& info)
         && !IsNormalInlineState()) {
         if (GetNakedCharPosition() >= 0) {
             DelayProcessOverlay(true, true, false);
-        } else if (isSelectAll && !contentController_->IsEmpty() && isFocusedBeforeClick_) {
-            isFocusedBeforeClick_ = false;
+        } else if (needSelectAll_) {
             HandleOnSelectAll(true);
         } else {
             ProcessOverlay(true, true, false);
@@ -1705,10 +1711,6 @@ void TextFieldPattern::HandleSingleClickEvent(GestureEvent& info)
     }
     // emulate clicking bottom of the textField
     UpdateTextFieldManager(Offset(parentGlobalOffset_.GetX(), parentGlobalOffset_.GetY()), frameRect_.Height());
-    if (isSelectAll && !contentController_->IsEmpty() && isFocusedBeforeClick_) {
-        isFocusedBeforeClick_ = false;
-        HandleOnSelectAll(true);
-    }
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
@@ -1762,6 +1764,10 @@ bool TextFieldPattern::ProcessAutoFill()
 
 void TextFieldPattern::HandleDoubleClickEvent(GestureEvent& info)
 {
+    if (showSelect_) {
+        SetIsSingleHandle(true);
+        CloseSelectOverlay();
+    }
     selectController_->UpdateSelectByOffset(info.GetLocalLocation());
     if (IsSelected()) {
         StopTwinkling();
@@ -2220,7 +2226,6 @@ void TextFieldPattern::HandleLongPress(GestureEvent& info)
         ProcessOverlay(true, true);
         UpdateSelectMenuVisibility(true);
     }
-    isFocusedBeforeClick_ = false;
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
@@ -2566,6 +2571,9 @@ void TextFieldPattern::OnHandleClosed(bool closedByGlobalEvent)
         UpdateSelectMenuVisibility(false);
     }
     UpdateShowMagnifier();
+    auto tmpHost = GetHost();
+    CHECK_NULL_VOID(tmpHost);
+    tmpHost->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
 void TextFieldPattern::InitEditingValueText(std::string content)

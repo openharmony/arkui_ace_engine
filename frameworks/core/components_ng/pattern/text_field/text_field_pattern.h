@@ -1371,6 +1371,7 @@ private:
     bool isShowMagnifier_ = false;
     OffsetF localOffset_;
     bool isTouchCaret_ = false;
+    bool needSelectAll_ = false;
 };
 } // namespace OHOS::Ace::NG
 
