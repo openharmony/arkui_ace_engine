@@ -89,8 +89,8 @@ ohos_unittest("form_render_test") {
     "$ace_root/test/mock/core/pipeline/mock_element_register.cpp",
     "$ace_root/test/mock/core/pipeline/mock_pipeline_context.cpp",
     "$ace_root/test/mock/core/render/mock_animation_utils.cpp",
-    "$ace_root/test/mock/core/render/mock_render_context_creator.cpp",
     "$ace_root/test/mock/core/render/mock_modifier_adapter.cpp",
+    "$ace_root/test/mock/core/render/mock_render_context_creator.cpp",
     "$ace_root/test/mock/interfaces/mock_uicontent_creator.cpp",
     "form_render_test.cpp",
   ]

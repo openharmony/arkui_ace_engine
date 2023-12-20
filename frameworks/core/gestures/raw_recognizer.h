@@ -99,7 +99,6 @@ private:
     CatchTouchEventCallback catcheventCallbacks_[EventStage::SIZE][EventType::SIZE];
     TouchEvent lastPoint_;
     Offset coordinateOffset_;
-    
 };
 
 } // namespace OHOS::Ace
