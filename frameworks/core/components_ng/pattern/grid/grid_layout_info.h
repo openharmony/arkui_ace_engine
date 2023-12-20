@@ -119,7 +119,7 @@ struct GridLayoutInfo {
 
     Axis axis_ = Axis::VERTICAL;
 
-    float currentOffset_ = 0.0f;
+    float currentOffset_ = 0.0f; // offset on the current top GridItem on [startMainLineIndex_]
     float prevOffset_ = 0.0f;
     float lastMainSize_ = 0.0f;
     float totalHeightOfItemsInView_ = 0.0f;

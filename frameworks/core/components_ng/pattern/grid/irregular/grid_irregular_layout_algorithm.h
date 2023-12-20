@@ -69,11 +69,6 @@ private:
     void UpdateLayoutInfo();
 
     /**
-     * @brief Removes children that are out of bounds.
-     */
-    void RemoveOutOfBoundChildren();
-
-    /**
      * @brief Calculates the cross positions based on the padding.
      * @param padding The padding property of the layout.
      * @return A vector containing the cross positions.
@@ -91,8 +86,6 @@ private:
     std::vector<float> crossLens_; /**< The column widths of the GridItems. */
     float crossGap_ = 0.0f;        /**< The cross-axis gap between GridItems. */
     float mainGap_ = 0.0f;         /**< The main-axis gap between GridItems. */
-
-    float firstRowPos_ = 0.0f; /**< The position of the first row in the layout. */
 
     ACE_DISALLOW_COPY_AND_MOVE(GridIrregularLayoutAlgorithm);
 };
