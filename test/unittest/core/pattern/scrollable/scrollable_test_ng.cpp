@@ -56,7 +56,7 @@ public:
     MOCK_METHOD(bool, IsAtTop, (), (const, override));
     MOCK_METHOD(bool, IsAtBottom, (), (const, override));
     MOCK_METHOD(void, UpdateScrollBarOffset, (), (override));
-
+    MOCK_METHOD(bool, IsScrollable, (), (const, override));
     MOCK_METHOD(OverScrollOffset, GetOverScrollOffset, (double delta), (const, override));
 };
 
@@ -69,7 +69,7 @@ public:
 
 void ScrollableTestNg::SetUpTestSuite()
 {
-    MockPipelineContext::TearDown();
+    MockPipelineContext::SetUp();
     MockContainer::SetUp();
     MockContainer::Current()->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
 }
@@ -952,5 +952,61 @@ HWTEST_F(ScrollableTestNg, OnScrollEnd001, TestSize.Level1)
 
     EXPECT_CALL(*mockPn, OnScrollEndRecursive).Times(1);
     scrollPn->OnScrollEndRecursive();
+}
+
+HWTEST_F(ScrollableTestNg, IsInHotZone001, TestSize.Level1)
+{
+    auto scrollPn = scroll_->GetPattern<PartiallyMockedScrollable>();
+    EXPECT_TRUE(scrollPn);
+    auto pipeLine = PipelineBase::GetCurrentContext();
+    auto frameNode = scrollPn->GetHost();
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    geometryNode->SetFrameSize(SizeF(700.0, 1200.0));
+    frameNode->SetGeometryNode(geometryNode);
+
+    scrollPn->SetAxis(Axis::VERTICAL);
+    EXPECT_TRUE(scrollPn->IsInHotZone(PointF(80.0, 250.0)) == 0.0f);
+    EXPECT_TRUE(Positive(scrollPn->IsInHotZone(PointF(0.0, 0.0))));
+    EXPECT_TRUE(Negative(scrollPn->IsInHotZone(PointF(0.0, 1200.0))));
+
+    scrollPn->SetAxis(Axis::HORIZONTAL);
+    EXPECT_TRUE(Positive(scrollPn->IsInHotZone(PointF(0.0, 0.0))));
+    EXPECT_TRUE(Negative(scrollPn->IsInHotZone(PointF(700.0, 0.0))));
+}
+
+HWTEST_F(ScrollableTestNg, IsVertical, TestSize.Level1)
+{
+    auto scrollPn = scroll_->GetPattern<PartiallyMockedScrollable>();
+    EXPECT_TRUE(scrollPn);
+    scrollPn->SetAxis(Axis::HORIZONTAL);
+    EXPECT_FALSE(scrollPn->isVertical());
+    scrollPn->SetAxis(Axis::VERTICAL);
+    EXPECT_TRUE(scrollPn->isVertical());
+}
+
+HWTEST_F(ScrollableTestNg, HandleMoveEventInComp, TestSize.Level1)
+{
+    auto scrollPn = scroll_->GetPattern<PartiallyMockedScrollable>();
+    EXPECT_TRUE(scrollPn);
+    EXPECT_CALL(*scrollPn, IsScrollable).Times(1).WillOnce(Return(true));
+    auto pt = PointF(0.0, 0.0);
+    scrollPn->HandleMoveEventInComp(pt);
+    EXPECT_TRUE(scrollPn->velocityMotion_);
+    EXPECT_TRUE(scrollPn->animator_);
+    pt = PointF(80.0, 250.0);
+    scrollPn->HandleMoveEventInComp(pt);
+    EXPECT_TRUE(scrollPn->animator_->IsStopped());
+}
+
+HWTEST_F(ScrollableTestNg, HotZoneScroll, TestSize.Level1)
+{
+    auto scrollPn = scroll_->GetPattern<PartiallyMockedScrollable>();
+    EXPECT_TRUE(scrollPn);
+    float offsetPct = 0.5f;
+    EXPECT_CALL(*scrollPn, IsScrollable).Times(1).WillOnce(Return(true));
+    scrollPn->HotZoneScroll(offsetPct);
+    EXPECT_TRUE(scrollPn->animator_);
+    EXPECT_TRUE(scrollPn->velocityMotion_);
+    EXPECT_TRUE(NearEqual(scrollPn->lastHonezoneOffsetPct_, offsetPct));
 }
 } // namespace OHOS::Ace::NG

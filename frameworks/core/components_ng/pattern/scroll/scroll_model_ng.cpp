@@ -24,6 +24,7 @@
 #include "core/components_ng/pattern/scroll/scroll_spring_effect.h"
 #include "core/components_ng/pattern/scroll_bar/proxy/scroll_bar_proxy.h"
 #include "core/components_ng/pattern/scrollable/scrollable_model_ng.h"
+#include "core/components_ng/pattern/scrollable/scrollable_properties.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
@@ -257,6 +258,7 @@ void ScrollModelNG::SetScrollSnap(ScrollSnapAlign scrollSnapAlign, const Dimensi
     pattern->SetIntervalSize(intervalSize);
     pattern->SetSnapPaginations(snapPaginations);
     pattern->SetEnableSnapToSide(enableSnapToSide);
+    pattern->SetEnablePaging(ScrollPagingStatus::INVALID);
 }
 
 void ScrollModelNG::SetAxis(FrameNode* frameNode, Axis axis)
@@ -277,5 +279,27 @@ void ScrollModelNG::SetScrollBarWidth(FrameNode* frameNode, const Dimension& dim
 void ScrollModelNG::SetEdgeEffect(FrameNode* frameNode, const EdgeEffect& edgeEffect, bool alwaysEnabled)
 {
     ScrollableModelNG::SetEdgeEffect(frameNode, edgeEffect, alwaysEnabled);
+}
+
+void ScrollModelNG::SetEnablePaging(bool enablePaging)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<ScrollPattern>();
+    CHECK_NULL_VOID(pattern);
+    CHECK_NULL_VOID(pattern->GetEnablePaging() != ScrollPagingStatus::INVALID);
+    if (!enablePaging) {
+        pattern->SetEnablePaging(ScrollPagingStatus::NONE);
+        if (pattern->GetScrollSnapAlign() != ScrollSnapAlign::NONE) {
+            ACE_UPDATE_LAYOUT_PROPERTY(ScrollLayoutProperty, ScrollSnapAlign, ScrollSnapAlign::NONE);
+        }
+        return;
+    }
+    pattern->SetEnablePaging(ScrollPagingStatus::VALID);
+    // Reuse scrollSnap, and set intervalSize after layout.
+    if (pattern->GetScrollSnapAlign() != ScrollSnapAlign::START) {
+        ACE_UPDATE_LAYOUT_PROPERTY(ScrollLayoutProperty, ScrollSnapAlign, ScrollSnapAlign::START);
+    }
+    pattern->SetScrollSnapUpdate(true);
 }
 } // namespace OHOS::Ace::NG

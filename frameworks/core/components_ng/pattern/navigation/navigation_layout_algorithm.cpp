@@ -77,7 +77,7 @@ float LayoutNavBar(LayoutWrapper* layoutWrapper, const RefPtr<NavigationGroupNod
     auto navBarNode = hostNode->GetNavBarNode();
     CHECK_NULL_RETURN(navBarNode, 0.0f);
     auto index = hostNode->GetChildIndexById(navBarNode->GetId());
-    auto navBarWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
+    auto navBarWrapper = layoutWrapper->GetOrCreateChildByIndex(index, false);
     CHECK_NULL_RETURN(navBarWrapper, 0.0f);
     auto geometryNode = navBarWrapper->GetGeometryNode();
     auto navigationGeometryNode = layoutWrapper->GetGeometryNode();
@@ -218,9 +218,6 @@ void NavigationLayoutAlgorithm::RangeCalculation(
             static_cast<float>(userSetMaxNavBarWidthValue.ConvertToPxWithSize(parentSize.Width().value_or(0.0f)));
     }
     maxNavBarWidthValue_ = Dimension(std::max(maxNavBarWidth, minNavBarWidth), DimensionUnit::PX);
-    auto navBarWidthValue = navigationLayoutProperty->GetNavBarWidthValue(DEFAULT_NAV_BAR_WIDTH);
-    auto navBarWidth = navBarWidthValue.ConvertToPxWithSize(parentSize.Width().value_or(0.0f));
-    realNavBarWidth_ = navBarWidth;
     auto currentPlatformVersion = pipeline->GetMinPlatformVersion();
     if (currentPlatformVersion >= PLATFORM_VERSION_TEN) {
         auto minNavBarWidth = minNavBarWidthValue_.ConvertToPxWithSize(parentSize.Width().value_or(0.0f));
@@ -266,6 +263,10 @@ void NavigationLayoutAlgorithm::UpdateNavigationMode(const RefPtr<NavigationLayo
     if (usrNavigationMode == NavigationMode::AUTO) {
         if (frameSize.Width() >= navigationWidth) {
             usrNavigationMode = NavigationMode::SPLIT;
+            auto navBarNode = hostNode->GetNavBarNode();
+            if (navBarNode) {
+                navBarNode->SetActive(true);
+            }
         } else {
             usrNavigationMode = NavigationMode::STACK;
         }
@@ -399,7 +400,7 @@ void NavigationLayoutAlgorithm::MeasureNavBar(LayoutWrapper* layoutWrapper, cons
     auto navBarNode = hostNode->GetNavBarNode();
     CHECK_NULL_VOID(navBarNode);
     auto index = hostNode->GetChildIndexById(navBarNode->GetId());
-    auto navBarWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
+    auto navBarWrapper = layoutWrapper->GetOrCreateChildByIndex(index, false);
     CHECK_NULL_VOID(navBarWrapper);
     auto constraint = navigationLayoutProperty->CreateChildConstraint();
     if (IsAutoHeight(navigationLayoutProperty)) {

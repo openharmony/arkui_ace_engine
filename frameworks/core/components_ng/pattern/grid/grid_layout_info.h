@@ -25,6 +25,7 @@
 #include "core/components_ng/pattern/grid/grid_layout_options.h"
 
 namespace OHOS::Ace::NG {
+constexpr int32_t EMPTY_JUMP_INDEX = -2;
 
 // Try not to add more variables in [GridLayoutInfo] because the more state variables, the more problematic and the
 // harder it is to maintain
@@ -115,12 +116,15 @@ struct GridLayoutInfo {
     float GetContentOffset(const GridLayoutOptions& options, float mainGap) const;
     float GetContentHeight(const GridLayoutOptions& options, float mainGap) const;
 
+
     Axis axis_ = Axis::VERTICAL;
 
-    float currentOffset_ = 0.0f;
+    float currentOffset_ = 0.0f; // offset on the current top GridItem on [startMainLineIndex_]
     float prevOffset_ = 0.0f;
     float lastMainSize_ = 0.0f;
     float totalHeightOfItemsInView_ = 0.0f;
+
+    // additional padding to accommodate navigation bar when SafeArea is expanded
     float contentEndPadding_ = 0.0f;
 
     std::optional<int32_t> lastCrossCount_;
@@ -132,7 +136,7 @@ struct GridLayoutInfo {
     int32_t startMainLineIndex_ = 0;
     int32_t endMainLineIndex_ = 0;
 
-    int32_t jumpIndex_ = -1;
+    int32_t jumpIndex_ = EMPTY_JUMP_INDEX;
     int32_t crossCount_ = 0;
     int32_t childrenCount_ = 0;
     ScrollAlign scrollAlign_ = ScrollAlign::AUTO;
@@ -149,10 +153,10 @@ struct GridLayoutInfo {
     // rect of grid item dragged in
     RectF currentRect_;
 
-    bool reachEnd_ = false;
+    bool reachEnd_ = false; // true if last GridItem appears in the viewPort
     bool reachStart_ = false;
 
-    bool offsetEnd_ = false;
+    bool offsetEnd_ = false; // true if last GridItem is fully within the viewport
 
     // Grid has GridItem whose columnEnd - columnStart > 0
     bool hasBigItem_;

@@ -103,6 +103,25 @@ public:
         copyOption_ = value;
     }
 
+    void SetImageInterpolation(ImageInterpolation value)
+    {
+        interpolation_ = value;
+    }
+
+    std::string GetImageInterpolation()
+    {
+        switch (interpolation_) {
+            case ImageInterpolation::LOW:
+                return "LOW";
+            case ImageInterpolation::MEDIUM:
+                return "MEDIUM";
+            case ImageInterpolation::HIGH:
+                return "HIGH";
+            default:
+                return "NONE";
+        }
+    }
+
     void SetSyncLoad(bool value)
     {
         syncLoad_ = value;
@@ -116,6 +135,7 @@ public:
     void SetImageAnalyzerConfig(const ImageAnalyzerConfig& config);
 
     void BeforeCreatePaintWrapper() override;
+    void DumpInfo() override;
     void DumpAdvanceInfo() override;
 
 private:
@@ -185,6 +205,7 @@ private:
     bool IsSupportImageAnalyzerFeature();
 
     CopyOptions copyOption_ = CopyOptions::None;
+    ImageInterpolation interpolation_ = ImageInterpolation::NONE;
 
     RefPtr<ImageLoadingContext> loadingCtx_;
     RefPtr<CanvasImage> image_;

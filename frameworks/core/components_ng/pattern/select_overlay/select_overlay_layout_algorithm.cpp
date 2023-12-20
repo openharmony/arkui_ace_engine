@@ -16,7 +16,6 @@
 #include "core/components_ng/pattern/select_overlay/select_overlay_layout_algorithm.h"
 
 #include <cmath>
-
 #include <optional>
 
 #include "base/geometry/ng/offset_t.h"
@@ -31,17 +30,103 @@ namespace OHOS::Ace::NG {
 namespace {
 constexpr Dimension MORE_MENU_INTERVAL = 8.0_vp;
 }
+
+void SelectOverlayLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
+{
+    auto layoutProperty = layoutWrapper->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    auto layoutConstraint = layoutProperty->CreateChildConstraint();
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto safeAreaManager = pipeline->GetSafeAreaManager();
+    CHECK_NULL_VOID(safeAreaManager);
+    auto keyboardHeight = safeAreaManager->GetKeyboardInset().Length();
+    auto maxSize =
+        SizeF(layoutConstraint.maxSize.Width(), layoutConstraint.maxSize.Height() - keyboardHeight -
+                                                    (info_->isUsingMouse ? info_->rightClickOffset.GetY() : 0.0f));
+    layoutConstraint.maxSize = maxSize;
+    bool isMouseCustomMenu = false;
+    if (info_->menuInfo.menuBuilder) {
+        auto customMenuLayoutWrapper = layoutWrapper->GetChildByIndex(0);
+        CHECK_NULL_VOID(customMenuLayoutWrapper);
+        auto customMenuLayoutConstraint = layoutConstraint;
+        CalculateCustomMenuLayoutConstraint(layoutWrapper, customMenuLayoutConstraint);
+        customMenuLayoutWrapper->Measure(customMenuLayoutConstraint);
+        isMouseCustomMenu = true;
+    }
+    auto childIndex = -1;
+    for (auto&& child : layoutWrapper->GetAllChildrenWithBuild()) {
+        childIndex++;
+        if (childIndex == 0 && isMouseCustomMenu) {
+            continue;
+        }
+        child->Measure(layoutConstraint);
+    }
+    PerformMeasureSelf(layoutWrapper);
+}
+
+void SelectOverlayLayoutAlgorithm::CalculateCustomMenuLayoutConstraint(
+    LayoutWrapper* layoutWrapper, LayoutConstraintF& layoutConstraint)
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetTheme<TextOverlayTheme>();
+    CHECK_NULL_VOID(theme);
+    // Calculate the spacing with text and handle, menu is fixed up the handle and text.
+    double menuSpacingBetweenText = theme->GetMenuSpacingWithText().ConvertToPx();
+    double menuSpacingBetweenHandle = theme->GetHandleDiameter().ConvertToPx();
+
+    // paint rect is in global position, need to convert to local position
+    auto offset = layoutWrapper->GetGeometryNode()->GetFrameOffset();
+    const auto firstHandleRect = info_->firstHandle.paintRect - offset;
+    const auto secondHandleRect = info_->secondHandle.paintRect - offset;
+
+    auto topSpace = firstHandleRect.Top() - menuSpacingBetweenText - menuSpacingBetweenHandle;
+    auto bottomSpace = layoutConstraint.maxSize.Height() -
+                       (secondHandleRect.Bottom() + menuSpacingBetweenText + menuSpacingBetweenHandle);
+    if (info_->isUsingMouse) {
+        layoutConstraint.selfIdealSize = OptionalSizeF(std::nullopt, layoutConstraint.maxSize.Height());
+    } else {
+        layoutConstraint.selfIdealSize = OptionalSizeF(std::nullopt, std::max(topSpace, bottomSpace));
+    }
+}
+
+OffsetF SelectOverlayLayoutAlgorithm::CalculateCustomMenuByMouseOffset(LayoutWrapper* layoutWrapper)
+{
+    auto menuOffset = info_->rightClickOffset;
+    auto layoutProperty = layoutWrapper->GetLayoutProperty();
+    CHECK_NULL_RETURN(layoutProperty, menuOffset);
+    auto layoutConstraint = layoutProperty->GetLayoutConstraint();
+    CHECK_NULL_RETURN(layoutConstraint, menuOffset);
+    auto menu = layoutWrapper->GetOrCreateChildByIndex(0);
+    CHECK_NULL_RETURN(menu, menuOffset);
+    auto maxWidth = layoutConstraint->selfIdealSize.Width().value_or(0.0f);
+    auto menuSize = menu->GetGeometryNode()->GetFrameSize();
+    if (menuOffset.GetX() + menuSize.Width() > maxWidth && menuOffset.GetX() >= menuSize.Width()) {
+        menuOffset.SetX(menuOffset.GetX() - menuSize.Width());
+    }
+    return menuOffset;
+}
+
 void SelectOverlayLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 {
     auto menu = layoutWrapper->GetOrCreateChildByIndex(0);
     CHECK_NULL_VOID(menu);
-    if (!CheckInShowArea(*info_) ||
-        (!info_->firstHandle.isShow && !info_->secondHandle.isShow && !info_->isSelectRegionVisible)) {
+    if ((!CheckInShowArea(*info_) ||
+            (!info_->firstHandle.isShow && !info_->secondHandle.isShow && !info_->isSelectRegionVisible)) &&
+        !info_->isUsingMouse) {
         menu->SetActive(false);
         return;
     } else {
         menu->SetActive(true);
     }
+    OffsetF menuOffset;
+    if (info_->isUsingMouse) {
+        menuOffset = CalculateCustomMenuByMouseOffset(layoutWrapper);
+    } else {
+        menuOffset = ComputeSelectMenuPosition(layoutWrapper);
+    }
+    menu->GetGeometryNode()->SetMarginFrameOffset(menuOffset);
 
     // custom menu need to layout all menu and submenu
     if (info_->menuInfo.menuBuilder) {
@@ -50,9 +135,6 @@ void SelectOverlayLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         }
         return;
     }
-
-    auto menuOffset = ComputeSelectMenuPosition(layoutWrapper);
-    menu->GetGeometryNode()->SetMarginFrameOffset(menuOffset);
     menu->Layout();
     auto button = layoutWrapper->GetOrCreateChildByIndex(1);
     CHECK_NULL_VOID(button);
@@ -172,13 +254,15 @@ OffsetF SelectOverlayLayoutAlgorithm::ComputeSelectMenuPosition(LayoutWrapper* l
             viewPort = viewPortOption.value();
         }
     }
-
     // Adjust position of overlay.
-    if (LessOrEqual(menuPosition.GetX(), viewPort.GetX())) {
-        menuPosition.SetX(theme->GetDefaultMenuPositionX());
-    } else if (GreatOrEqual(menuPosition.GetX() + menuWidth, viewPort.GetX() + viewPort.Width())) {
-        menuPosition.SetX(overlayWidth - menuWidth - theme->GetDefaultMenuPositionX());
-    }
+    auto adjustPositionXWithViewPort = [&](OffsetF& menuPosition) {
+        if (LessOrEqual(menuPosition.GetX(), viewPort.GetX())) {
+            menuPosition.SetX(theme->GetDefaultMenuPositionX());
+        } else if (GreatOrEqual(menuPosition.GetX() + menuWidth, viewPort.GetX() + viewPort.Width())) {
+            menuPosition.SetX(overlayWidth - menuWidth - theme->GetDefaultMenuPositionX());
+        }
+    };
+    adjustPositionXWithViewPort(menuPosition);
     if (LessNotEqual(menuPosition.GetY(), menuHeight)) {
         if (IsTextAreaSelectAll()) {
             menuPosition.SetY(singleHandle.Top());
@@ -223,6 +307,7 @@ OffsetF SelectOverlayLayoutAlgorithm::ComputeSelectMenuPosition(LayoutWrapper* l
     }
     auto menuRect = RectF(menuPosition, SizeF(menuWidth, menuHeight));
     menuPosition = AdjustSelectMenuOffset(layoutWrapper, menuRect, menuSpacingBetweenText, menuSpacingBetweenHandle);
+    adjustPositionXWithViewPort(menuPosition);
     defaultMenuEndOffset_ = menuPosition + OffsetF(menuWidth, 0.0f);
     if (isExtension) {
         return defaultMenuEndOffset_ - OffsetF(width, 0);
@@ -266,7 +351,7 @@ OffsetF SelectOverlayLayoutAlgorithm::AdjustSelectMenuOffset(
         return menuOffset;
     }
     // avoid soft keyboard and root bottom
-    if (!upHandle.isShow && downHandle.isShow) {
+    if ((!upHandle.isShow && downHandle.isShow) || info_->menuInfo.menuBuilder) {
         CHECK_NULL_RETURN(pipeline, menuOffset);
         auto safeAreaManager = pipeline->GetSafeAreaManager();
         CHECK_NULL_RETURN(safeAreaManager, menuOffset);
@@ -275,9 +360,10 @@ OffsetF SelectOverlayLayoutAlgorithm::AdjustSelectMenuOffset(
             GreatNotEqual(keyboardInsert.Length(), 0.0f) && GreatNotEqual(menuRect.Bottom(), keyboardInsert.start);
         auto rootRect = layoutWrapper->GetGeometryNode()->GetFrameRect();
         auto shouldAvoidBottom = GreatNotEqual(menuRect.Bottom(), rootRect.Height());
-        if (shouldAvoidKeyboard || shouldAvoidBottom) {
-            auto menuSpace = NearEqual(upPaint.Top(), downPaint.Top()) ? spaceBetweenHandle : spaceBetweenText;
-            menuOffset.SetY(downPaint.GetY() - menuSpace - menuRect.Height());
+        auto menuSpace = NearEqual(upPaint.Top(), downPaint.Top()) ? spaceBetweenHandle : spaceBetweenText;
+        auto offsetY = downPaint.GetY() - menuSpace - menuRect.Height();
+        if ((shouldAvoidKeyboard || shouldAvoidBottom) && offsetY > 0) {
+            menuOffset.SetY(offsetY);
         }
     }
     return menuOffset;

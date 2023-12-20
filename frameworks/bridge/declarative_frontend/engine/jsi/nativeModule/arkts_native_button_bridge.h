@@ -39,11 +39,20 @@ public:
     static ArkUINativeModuleValue ResetLabelStyle(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetBackgroundColor(ArkUIRuntimeCallInfo *runtimeCallInfo);
     static ArkUINativeModuleValue ResetBackgroundColor(ArkUIRuntimeCallInfo *runtimeCallInfo);
+    static ArkUINativeModuleValue SetButtonBorderRadius(ArkUIRuntimeCallInfo *runtimeCallInfo);
+    static ArkUINativeModuleValue ResetButtonBorderRadius(ArkUIRuntimeCallInfo *runtimeCallInfo);
 
 private:
-    static bool ButtonParseJsDimensionFp(const EcmaVM* vm, const Local<JSValueRef>& value, CalcDimension& result);
+    static void PushValuesVector(const std::optional<int32_t>& value, std::vector<int32_t>& valuesVector);
+    static void PushDimensionVector(const std::optional<Dimension>& valueDimen, std::vector<double>& dimensions);
+    static void PushButtonDimension(
+        ArkUIRuntimeCallInfo* runtimeCallInfo, EcmaVM* vm, std::vector<double>& fontSizesVector, int32_t argIndex);
     static void PutButtonDimensionParameters(
-        ArkUIRuntimeCallInfo* runtimeCallInfo, EcmaVM* vm, double* dimensionValueArray, int* dimensionUnitArray);
+        ArkUIRuntimeCallInfo* runtimeCallInfo, EcmaVM* vm, std::vector<double>& fontSizes);
+    static void PutButtonStringParameters(
+        ArkUIRuntimeCallInfo* runtimeCallInfo, EcmaVM* vm, std::vector<const char*>& stringParameters);
+    static void PutButtonValuesParameters(
+        ArkUIRuntimeCallInfo* runtimeCallInfo, EcmaVM* vm, std::vector<int32_t>& valuesVector);
 };
 } // namespace OHOS::Ace::NG
 

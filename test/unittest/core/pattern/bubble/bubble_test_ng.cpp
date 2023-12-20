@@ -1169,7 +1169,7 @@ HWTEST_F(BubbleTestNg, BubblePatternTest014, TestSize.Level1)
 
 /**
  * @tc.name: BubblePatternTest015
- * @tc.desc: Test CreateBubbleNode with Offset.
+ * @tc.desc: Test CreateBubbleNode with Offset, Radius, ArrowHeight, ArrowWidth and Shadow.
  * @tc.type: FUNC
  */
 HWTEST_F(BubbleTestNg, BubblePatternTest015, TestSize.Level1)
@@ -1181,6 +1181,15 @@ HWTEST_F(BubbleTestNg, BubblePatternTest015, TestSize.Level1)
     popupParam->SetIsShow(BUBBLE_PROPERTY_SHOW);
     popupParam->SetMessage(BUBBLE_MESSAGE);
     popupParam->SetTargetOffset(POPUP_PARAM_POSITION_OFFSET);
+
+    Dimension radius = 20.0_px;
+    Dimension arrowHeight = 20.0_px;
+    Dimension arrowWidth = 20.0_px;
+    Shadow shadow = ShadowConfig::DefaultShadowL;
+    popupParam->SetRadius(radius);
+    popupParam->SetArrowHeight(arrowHeight);
+    popupParam->SetArrowWidth(arrowWidth);
+    popupParam->SetShadow(shadow);
 
     /**
      * @tc.steps: step2. create BubbleNode with position offset
@@ -1202,11 +1211,35 @@ HWTEST_F(BubbleTestNg, BubblePatternTest015, TestSize.Level1)
      */
     auto property = popupNode->GetLayoutProperty<BubbleLayoutProperty>();
     EXPECT_EQ(property->GetPositionOffset().value(), BUBBLE_POSITION_OFFSET);
+    EXPECT_EQ(property->GetRadius().value(), radius);
+    EXPECT_EQ(property->GetArrowHeight().value(), arrowHeight);
+    EXPECT_EQ(property->GetArrowWidth().value(), arrowWidth);
+
+    auto childNode = AceType::DynamicCast<FrameNode>(popupNode->GetFirstChild());
+    ASSERT_NE(childNode, nullptr);
+    auto renderContext = childNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    EXPECT_EQ(renderContext->GetBackShadow().value(), shadow);
+
+    auto popupId = popupNode->GetId();
+    Dimension radiusNew = 40.0_px;
+    Dimension arrowHeightNew = 40.0_px;
+    Dimension arrowWidthNew = 40.0_px;
+    Shadow shadowNew = ShadowConfig::DefaultShadowM;
+    popupParam->SetRadius(radiusNew);
+    popupParam->SetArrowHeight(arrowHeightNew);
+    popupParam->SetArrowWidth(arrowWidthNew);
+    popupParam->SetShadow(shadowNew);
+    BubbleView::UpdateCommonParam(popupId, popupParam);
+    EXPECT_EQ(property->GetRadius().value(), radiusNew);
+    EXPECT_EQ(property->GetArrowHeight().value(), arrowHeightNew);
+    EXPECT_EQ(property->GetArrowWidth().value(), arrowWidthNew);
+    EXPECT_EQ(renderContext->GetBackShadow().value(), shadowNew);
 }
 
 /**
  * @tc.name: BubblePatternTest016
- * @tc.desc: Test CreateCustomBubbleNode with with Offset.
+ * @tc.desc: Test CreateCustomBubbleNode with with Offset, Radius, ArrowHeight, ArrowWidth and Shadow.
  * @tc.type: FUNC
  */
 HWTEST_F(BubbleTestNg, BubblePatternTest016, TestSize.Level1)
@@ -1218,6 +1251,15 @@ HWTEST_F(BubbleTestNg, BubblePatternTest016, TestSize.Level1)
     popupParam->SetIsShow(BUBBLE_PROPERTY_SHOW);
     popupParam->SetMessage(BUBBLE_MESSAGE);
     popupParam->SetTargetOffset(POPUP_PARAM_POSITION_OFFSET);
+
+    Dimension radius = 20.0_px;
+    Dimension arrowHeight = 20.0_px;
+    Dimension arrowWidth = 20.0_px;
+    Shadow shadow = ShadowConfig::DefaultShadowL;
+    popupParam->SetRadius(radius);
+    popupParam->SetArrowHeight(arrowHeight);
+    popupParam->SetArrowWidth(arrowWidth);
+    popupParam->SetShadow(shadow);
 
     /**
      * @tc.steps: step2. create CustomBubbleNode with positon offset
@@ -1240,6 +1282,15 @@ HWTEST_F(BubbleTestNg, BubblePatternTest016, TestSize.Level1)
      */
     auto property = popupNode->GetLayoutProperty<BubbleLayoutProperty>();
     EXPECT_EQ(property->GetPositionOffset().value(), BUBBLE_POSITION_OFFSET);
+    EXPECT_EQ(property->GetRadius().value(), radius);
+    EXPECT_EQ(property->GetArrowHeight().value(), arrowHeight);
+    EXPECT_EQ(property->GetArrowWidth().value(), arrowWidth);
+
+    auto childNode = AceType::DynamicCast<FrameNode>(popupNode->GetFirstChild());
+    ASSERT_NE(childNode, nullptr);
+    auto renderContext = childNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    EXPECT_EQ(renderContext->GetBackShadow().value(), shadow);
 }
 
 /**
@@ -1379,6 +1430,10 @@ HWTEST_F(BubbleTestNg, BubbleLayoutTest003, TestSize.Level1)
     popupParam->SetIsShow(BUBBLE_PROPERTY_SHOW);
     popupParam->SetMessage(BUBBLE_MESSAGE);
     popupParam->SetUseCustomComponent(BUBBLE_LAYOUT_PROPERTY_USE_CUSTOM_FALSE);
+    Dimension radius = 1000.0_vp;
+    Dimension arrowWidth = 1000.0_vp;
+    popupParam->SetRadius(radius);
+    popupParam->SetArrowWidth(arrowWidth);
     auto targetNode = CreateTargetNode();
     auto targetId = targetNode->GetId();
     auto targetTag = targetNode->GetTag();
@@ -1390,7 +1445,6 @@ HWTEST_F(BubbleTestNg, BubbleLayoutTest003, TestSize.Level1)
     auto frameNode =
         FrameNode::CreateFrameNode(V2::POPUP_ETS_TAG, popupId, AceType::MakeRefPtr<BubblePattern>(targetId, targetTag));
     EXPECT_FALSE(frameNode == nullptr);
-
     /**
      * @tc.steps: step2. get layout property, layoutAlgorithm and create layoutWrapper.
      * @tc.expected: step2. related function is called.
@@ -1448,7 +1502,6 @@ HWTEST_F(BubbleTestNg, BubbleLayoutTest003, TestSize.Level1)
     textLayoutWrapper->SetLayoutAlgorithm(AccessibilityManager::MakeRefPtr<LayoutAlgorithmWrapper>(boxLayoutAlgorithm));
     frameNode->AddChild(textFrameNode);
     layoutWrapper->AppendChild(textLayoutWrapper);
-
     /**
      * @tc.steps: step5. use layoutAlgorithm to measure and layout.
      * @tc.expected: step5. check whether the value of the bubble child's frameSize and frameOffset is correct.
@@ -1456,8 +1509,8 @@ HWTEST_F(BubbleTestNg, BubbleLayoutTest003, TestSize.Level1)
     bubbleLayoutAlgorithm->Measure(AceType::RawPtr(layoutWrapper));
     bubbleLayoutAlgorithm->Layout(AceType::RawPtr(layoutWrapper));
     EXPECT_EQ(textLayoutWrapper->GetGeometryNode()->GetFrameSize(), SizeF(BUBBLE_WIDTH, BUBBLE_HEIGHT));
-    EXPECT_NE(textLayoutWrapper->GetGeometryNode()->GetFrameOffset().GetX(), 0);
-    EXPECT_EQ(textLayoutWrapper->GetGeometryNode()->GetFrameOffset().GetY(), 0);
+    EXPECT_EQ(textLayoutWrapper->GetGeometryNode()->GetFrameOffset().GetX(), 16);
+    EXPECT_EQ(textLayoutWrapper->GetGeometryNode()->GetFrameOffset().GetY(), 1);
 }
 
 /**
@@ -1694,7 +1747,8 @@ HWTEST_F(BubbleTestNg, BubbleLayoutTest007, TestSize.Level1)
     EXPECT_FALSE(children.empty());
     bubbleLayoutAlgorithm->Measure(AceType::RawPtr(layoutWrapper));
     bubbleLayoutAlgorithm->Layout(AceType::RawPtr(layoutWrapper));
-    EXPECT_FALSE(bubbleLayoutAlgorithm->GetChildPosition(SizeF(ZERO, ZERO), true, true) == DISPLAY_WINDOW_OFFSET);
+    EXPECT_FALSE(
+        bubbleLayoutAlgorithm->GetChildPosition(SizeF(ZERO, ZERO), bubbleLayoutProperty) == DISPLAY_WINDOW_OFFSET);
 }
 
 /**
@@ -1736,6 +1790,7 @@ HWTEST_F(BubbleTestNg, BubbleLayoutTest008, TestSize.Level1)
         bubbleLayoutAlgorithm->arrowPlacement_ = BUBBLE_LAYOUT_PROPERTY_PLACEMENTS[i];
         bubbleLayoutAlgorithm->targetSize_ = SizeF(TARGET_SIZE_WIDTH, TARGET_SIZE_HEIGHT);
         bubbleLayoutAlgorithm->targetOffset_ = OffsetF(POSITION_OFFSET, POSITION_OFFSET);
+        bubbleLayoutAlgorithm->wrapperSize_ = childSize;
         /**
          * @tc.steps: step3. excute GetIfNeedArrow
          * @tc.expected: step3. GetIfNeedArrow returns a sharp corner that needs to be drawn.
@@ -1746,7 +1801,7 @@ HWTEST_F(BubbleTestNg, BubbleLayoutTest008, TestSize.Level1)
          * @tc.steps: step4. excute GetChildPosition
          * @tc.expected: step4. GetChildPosition returns the result as the bubble position.
          */
-        auto resultOffset = bubbleLayoutAlgorithm->GetChildPosition(childSize, needArrow, true);
+        auto resultOffset = bubbleLayoutAlgorithm->GetChildPosition(childSize, bubbleLayoutProperty);
         EXPECT_EQ(resultOffset, DISPLAY_WINDOW_OFFSET);
         OffsetF arrowPosition;
         /**

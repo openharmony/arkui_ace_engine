@@ -182,7 +182,7 @@ OffsetF GetFloatImageOffset(const RefPtr<FrameNode>& frameNode)
     return OffsetF(offsetX, offsetY);
 }
 
-void ShowPixelMapAnimation(const RefPtr<FrameNode>& imageNode)
+void ShowPixelMapAnimation(const RefPtr<FrameNode>& imageNode, float scaleBefore, float scaleAfter)
 {
     auto imageContext = imageNode->GetRenderContext();
     CHECK_NULL_VOID(imageContext);
@@ -191,8 +191,11 @@ void ShowPixelMapAnimation(const RefPtr<FrameNode>& imageNode)
     CHECK_NULL_VOID(pipeline);
     auto menuTheme = pipeline->GetTheme<NG::MenuTheme>();
     CHECK_NULL_VOID(menuTheme);
-    auto previewBeforeAnimationScale = menuTheme->GetPreviewBeforeAnimationScale();
-    auto previewAfterAnimationScale = menuTheme->GetPreviewAfterAnimationScale();
+
+    auto previewBeforeAnimationScale =
+        LessNotEqual(scaleBefore, 0.0) ? menuTheme->GetPreviewBeforeAnimationScale() : scaleBefore;
+    auto previewAfterAnimationScale =
+        LessNotEqual(scaleAfter, 0.0) ? menuTheme->GetPreviewAfterAnimationScale() : scaleAfter;
     auto springMotionResponse = menuTheme->GetSpringMotionResponse();
     auto springMotionDampingFraction = menuTheme->GetSpringMotionDampingFraction();
     auto previewBorderRadius = menuTheme->GetPreviewBorderRadius();
@@ -263,7 +266,8 @@ void InitPanEvent(const RefPtr<GestureEventHub>& gestureHub, const RefPtr<FrameN
     gestureHub->AddPanEvent(panEvent, panDirection, 1, DEFAULT_PAN_DISTANCE);
 }
 
-void SetPixelMap(const RefPtr<FrameNode>& target, const RefPtr<FrameNode>& menuNode)
+void SetPixelMap(const RefPtr<FrameNode>& target, const RefPtr<FrameNode>& menuNode,
+    float scaleBefore, float scaleAfter)
 {
     CHECK_NULL_VOID(target);
     auto eventHub = target->GetEventHub<NG::EventHub>();
@@ -297,7 +301,7 @@ void SetPixelMap(const RefPtr<FrameNode>& target, const RefPtr<FrameNode>& menuN
     imageContext->UpdatePosition(OffsetT<Dimension>(Dimension(offsetX), Dimension(offsetY)));
     imageNode->MarkModifyDone();
     imageNode->MountToParent(menuNode);
-    ShowPixelMapAnimation(imageNode);
+    ShowPixelMapAnimation(imageNode, scaleBefore, scaleAfter);
 }
 
 void ShowFilterAnimation(const RefPtr<FrameNode>& columnNode)
@@ -439,6 +443,8 @@ RefPtr<FrameNode> MenuView::Create(const RefPtr<UINode>& customNode, int32_t tar
     auto pattern = menuNode->GetPattern<MenuPattern>();
     if (pattern) {
         pattern->SetPreviewMode(menuParam.previewMode);
+        pattern->SetPreviewBeforeAnimationScale(menuParam.previewAnimationOptions.scaleFrom);
+        pattern->SetPreviewAfterAnimationScale(menuParam.previewAnimationOptions.scaleTo);
     }
     // put custom node in a scroll to limit its height
     auto scroll = CreateMenuScroll(customNode);
@@ -489,7 +495,8 @@ RefPtr<FrameNode> MenuView::Create(const RefPtr<UINode>& customNode, int32_t tar
         auto targetNode = FrameNode::GetFrameNode(targetTag, targetId);
         SetFilter(targetNode);
         if (menuParam.previewMode == MenuPreviewMode::IMAGE) {
-            SetPixelMap(targetNode, wrapperNode);
+            SetPixelMap(targetNode, wrapperNode,
+                menuParam.previewAnimationOptions.scaleFrom, menuParam.previewAnimationOptions.scaleTo);
         }
     }
 #endif

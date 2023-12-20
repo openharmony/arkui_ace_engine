@@ -51,6 +51,8 @@
 * The @Observed decorator is public, part of the SDK, starting from API 9.
 *
 */
+
+
 // define just once to get just one Symbol
 const __IS_OBSERVED_PROXIED = Symbol("_____is_observed_proxied__");
 
@@ -94,18 +96,30 @@ function Observed(constructor_: any, _?: any): any {
  *
  */
 
+type PropertyReadCbFunc = (readObject: Object, readPropName: string, isTracked: boolean) => void;
+
 class SubscribableHandler {
   static readonly SUBSCRIBE = Symbol("_____subscribe__");
   static readonly UNSUBSCRIBE = Symbol("_____unsubscribe__")
+  static readonly COUNT_SUBSCRIBERS = Symbol("____count_subscribers__")
+  static readonly SET_ONREAD_CB = Symbol("_____set_onread_cb__");
 
   private owningProperties_: Set<number>;
+  private readCbFunc_? : PropertyReadCbFunc;
 
   constructor(owningProperty: IPropertySubscriber) {
     this.owningProperties_ = new Set<number>();
+
     if (owningProperty) {
       this.addOwningProperty(owningProperty);
     }
     stateMgmtConsole.debug(`SubscribableHandler: constructor done`);
+  }
+
+  private isPropertyTracked(obj: Object, property: string): boolean {
+    return Reflect.has(obj, `___TRACKED_${property}`) || 
+        property == TrackedObject.___TRACKED_OPTI_ASSIGNMENT_FAKE_PROP_PROPERTY ||
+        property == TrackedObject.___TRACKED_OPTI_ASSIGNMENT_FAKE_OBJLINK_PROPERTY;
   }
 
   addOwningProperty(subscriber: IPropertySubscriber): void {
@@ -118,8 +132,8 @@ class SubscribableHandler {
   }
 
   /*
-      the inverse function of createOneWaySync or createTwoWaySync
-    */
+    the inverse function of createOneWaySync or createTwoWaySync
+   */
   public removeOwningProperty(property: IPropertySubscriber): void {
     return this.removeOwningPropertyById(property.id__());
   }
@@ -133,16 +147,14 @@ class SubscribableHandler {
     stateMgmtConsole.debug(`SubscribableHandler: notifyObjectPropertyHasChanged '${propName}'.`)
     this.owningProperties_.forEach((subscribedId) => {
       var owningProperty: IPropertySubscriber = SubscriberManager.Find(subscribedId)
-
       if (!owningProperty) {
         stateMgmtConsole.warn(`SubscribableHandler: notifyObjectPropertyHasChanged: unknown subscriber.'${subscribedId}' error!.`);
         return;
       }
 
       // PU code path
-      if ('objectPropertyHasChangedPU' in owningProperty) {
-        (owningProperty as unknown as ObservedObjectEventsPUReceiver<any>).objectPropertyHasChangedPU(this, propName);
-        return;
+      if ('onTrackedObjectPropertyCompatModeHasChangedPU' in owningProperty) {
+        (owningProperty as unknown as ObservedObjectEventsPUReceiver<any>).onTrackedObjectPropertyCompatModeHasChangedPU(this, propName);
       }
 
       // FU code path
@@ -155,21 +167,18 @@ class SubscribableHandler {
     });
   }
 
-  // notify a property has been 'read'
-  // this functionality is in preparation for observed computed variables
-  // enable calling from 'get' trap handler functions to this function once
-  // adding support for observed computed variables
-  protected notifyObjectPropertyHasBeenRead(propName: string) {
-    stateMgmtConsole.debug(`SubscribableHandler: notifyObjectPropertyHasBeenRead '${propName}'.`)
+  protected notifyTrackedObjectPropertyHasChanged(propName: string) : void {
+    stateMgmtConsole.debug(`SubscribableHandler: notifyTrackedObjectPropertyHasChanged '@Track ${propName}'.`)
     this.owningProperties_.forEach((subscribedId) => {
       var owningProperty: IPropertySubscriber = SubscriberManager.Find(subscribedId)
-      if (owningProperty) {
-        // PU code path
-        if ('objectPropertyHasBeenReadPU' in owningProperty) {
-          (owningProperty as unknown as ObservedObjectEventsPUReceiver<any>).objectPropertyHasBeenReadPU(this, propName);
-        }
+      if (owningProperty && 'onTrackedObjectPropertyHasChangedPU' in owningProperty) {
+        // PU code path with observed object property change tracking optimization
+        (owningProperty as unknown as ObservedObjectEventsPUReceiver<any>).onTrackedObjectPropertyHasChangedPU(this, propName);
+      } else {
+        stateMgmtConsole.warn(`SubscribableHandler: notifyTrackedObjectPropertyHasChanged: subscriber.'${subscribedId}' lacks method 'trackedObjectPropertyHasChangedPU' internal error!.`);
       }
     });
+    // no need to support FU code path when app uses @Track
   }
 
   public has(target: Object, property: PropertyKey) : boolean {
@@ -178,29 +187,64 @@ class SubscribableHandler {
   }
 
   public get(target: Object, property: PropertyKey, receiver?: any): any {
-    stateMgmtConsole.debug(`SubscribableHandler: get '${property.toString()}'.`);
-    return (property === ObservedObject.__OBSERVED_OBJECT_RAW_OBJECT) ? target : Reflect.get(target, property, receiver);
+    switch (property) {
+      case ObservedObject.__OBSERVED_OBJECT_RAW_OBJECT:
+        return target;
+        break;
+      case SubscribableHandler.COUNT_SUBSCRIBERS:
+        return this.owningProperties_.size
+        break;
+      default:
+        const result = Reflect.get(target, property, receiver);
+        let propertyStr : string = property.toString();
+        if (this.readCbFunc_ && typeof result != "function") {
+          let isTracked = this.isPropertyTracked(target, propertyStr);
+          stateMgmtConsole.debug(`SubscribableHandler: get ObservedObject property '${isTracked ? "@Track " : ""}${propertyStr}' notifying read.`);
+          this.readCbFunc_(receiver, propertyStr, isTracked);
+        } else {
+          // result is function or in compatibility mode (in compat mode cbFunc will never be set)
+          stateMgmtConsole.debug(`SubscribableHandler: get ObservedObject property '${propertyStr}' not notifying read.`);
+        }
+        return result;
+        break;
+    }
   }
 
   public set(target: Object, property: PropertyKey, newValue: any): boolean {
     switch (property) {
       case SubscribableHandler.SUBSCRIBE:
-        // assignment obsObj[SubscribableHandler.SUBSCRCRIBE] = subscriber
+        // assignment obsObj[SubscribableHandler.SUBSCRIBE] = subscriber
         this.addOwningProperty(newValue as IPropertySubscriber);
         return true;
         break;
       case SubscribableHandler.UNSUBSCRIBE:
-        // assignment obsObj[SubscribableHandler.UNSUBSCRCRIBE] = subscriber
+        // assignment obsObj[SubscribableHandler.UNSUBSCRIBE] = subscriber
         this.removeOwningProperty(newValue as IPropertySubscriber);
+        return true;
+        break;
+      case SubscribableHandler.SET_ONREAD_CB:
+        // assignment obsObj[SubscribableHandler.SET_ONREAD_CB] = readCallbackFunc
+        stateMgmtConsole.debug(`SubscribableHandler: setReadingProperty: ${TrackedObject.isCompatibilityMode(target) ? 'not used in compatibility mode' : newValue ? 'set new cb function' : 'unset cb function'}.`);
+        this.readCbFunc_ = TrackedObject.isCompatibilityMode(target) ? undefined : (newValue as (PropertyReadCbFunc | undefined));
         return true;
         break;
       default:
         if (Reflect.get(target, property) == newValue) {
           return true;
         }
-        stateMgmtConsole.debug(`SubscribableHandler: set '${property.toString()}'.`);
         Reflect.set(target, property, newValue);
-        this.notifyObjectPropertyHasChanged(property.toString(), newValue);
+        const propString = property.toString();
+        if (TrackedObject.isCompatibilityMode(target)) {
+          stateMgmtConsole.debug(`SubscribableHandler: set ObservedObject property '${propString}' (object property tracking compatibility mode).`);
+          this.notifyObjectPropertyHasChanged(propString, newValue);
+        } else {
+          if (this.isPropertyTracked(target, propString)) {
+            stateMgmtConsole.debug(`SubscribableHandler: set ObservedObject property '@Track ${propString}'.`);
+            this.notifyTrackedObjectPropertyHasChanged(propString);
+          } else {
+            stateMgmtConsole.debug(`SubscribableHandler: set ObservedObject property '${propString}' (object property tracking mode) is NOT @Tracked!`);
+          }
+        }
         return true;
         break;
     }
@@ -210,11 +254,74 @@ class SubscribableHandler {
   }
 }
 
+class SubscribableMapSetHandler extends SubscribableHandler {
+  constructor(owningProperty: IPropertySubscriber) {
+      super(owningProperty);
+  }
+
+  // In-place Map/Set modification functions
+  mutatingFunctions = new Set([
+    /*Map functions*/
+    "set", "clear", "delete",
+    /*Set functions*/
+    "add", "clear", "delete",
+  ]);
+  proxiedFunctions = new Set([
+    /*Map functions*/
+    "set",
+    /*Set functions*/
+    "add"
+  ]);
+
+  /**
+   * Get trap for Map/Set type proxy
+   * Functions that modify Map/Set in-place are intercepted and replaced with a function
+   * that executes the original function and notifies the handler of a change.
+   * @param target Original Map/Set object
+   * @param property
+   * @param receiver Proxied Map/Set object
+   * @returns
+   */
+  get(target, property, receiver) {
+      if (property === ObservedObject.__OBSERVED_OBJECT_RAW_OBJECT) {
+        return target;
+      }
+
+      //receiver will fail for internal slot methods of Set and Map
+      //So assign the target as receiver in this case.
+      if (property === Symbol.iterator || property === 'size') {
+        receiver = target;
+      }
+
+      let ret = super.get(target, property, receiver);
+      if (ret && typeof ret === 'function') {
+        const self = this;
+        return function () {
+          // execute original function with given arguments
+          const result = ret.apply(target, arguments);
+          if (self.mutatingFunctions.has(property)) {
+            self.notifyObjectPropertyHasChanged(property, target);
+          }
+          // Only calls to inserting items can be chained, so returning the 'proxiedObject'
+          // ensures that when chain calls also 2nd function call operates on the proxied object.
+          // Otherwise return the original result of the function.
+          return self.proxiedFunctions.has(property) ? receiver: result;
+        }.bind(receiver);
+      }
+
+      return ret;
+  }
+}
+
 class SubscribableDateHandler extends SubscribableHandler {
 
   constructor(owningProperty: IPropertySubscriber) {
     super(owningProperty);
   }
+
+  dateSetFunctions = new Set(["setFullYear", "setMonth", "setDate", "setHours", "setMinutes", "setSeconds",
+      "setMilliseconds", "setTime", "setUTCFullYear", "setUTCMonth", "setUTCDate", "setUTCHours", "setUTCMinutes",
+      "setUTCSeconds", "setUTCMilliseconds"]);
 
   /**
    * Get trap for Date type proxy
@@ -224,24 +331,70 @@ class SubscribableDateHandler extends SubscribableHandler {
    * @param property
    * @returns
    */
-  public get(target: Object, property: PropertyKey): any {
-
-    const dateSetFunctions = new Set(["setFullYear", "setMonth", "setDate", "setHours", "setMinutes", "setSeconds",
-      "setMilliseconds", "setTime", "setUTCFullYear", "setUTCMonth", "setUTCDate", "setUTCHours", "setUTCMinutes",
-      "setUTCSeconds", "setUTCMilliseconds"]);
-
+  public get(target, property): any {
     let ret = super.get(target, property);
 
-    if (typeof ret === "function" && property.toString() && dateSetFunctions.has(property.toString())) {
+    if (typeof ret === "function") {
+      if(this.dateSetFunctions.has(property)) {
+        const self = this;
+        return function () {
+          // execute original function with given arguments
+          let result = ret.apply(this, arguments);
+          self.notifyObjectPropertyHasChanged(property.toString(), this);
+          return result;
+          // bind "this" to target inside the function
+        }.bind(target)
+      }
+      return ret.bind(target);
+    }
+    return ret;
+  }
+}
+
+class SubscribableArrayHandler extends SubscribableHandler {
+  constructor(owningProperty: IPropertySubscriber) {
+    super(owningProperty);
+  }
+
+  // In-place array modification functions
+  mutatingFunctions = new Set(["splice", "copyWithin", "fill", "reverse", "sort"]);
+  // 'splice' and 'pop' self modifies the array, returns deleted array items
+  // means, alike other self-modifying functions, splice does not return the array itself.
+  specialFunctions = new Set(["splice", "pop"]);
+
+  /**
+   * Get trap for Array type proxy
+   * Functions that modify Array in-place are intercepted and replaced with a function
+   * that executes the original function and notifies the handler of a change.
+   * @param target Original Array object
+   * @param property
+   * @param receiver Proxied Array object
+   * @returns
+   */
+  get(target, property, receiver) {
+    if (property === ObservedObject.__OBSERVED_OBJECT_RAW_OBJECT) {
+      return target;
+    }
+
+    let ret = super.get(target, property, receiver);
+    if (ret && typeof ret === "function") {
       const self = this;
-      return function () {
-        // execute original function with given arguments
-        let result = ret.apply(this, arguments);
-        self.notifyObjectPropertyHasChanged(property.toString(), this);
-        return result;
-      }.bind(target) // bind "this" to target inside the function
-    } else if (typeof ret === "function") {
-      ret = ret.bind(target);
+      const prop = property.toString();
+      if (self.mutatingFunctions.has(prop)) {
+        return function () {
+          const result = ret.apply(target, arguments);
+          // prop is the function name here
+          // and result is the function return value
+          // function modifies none or more properties
+          self.notifyObjectPropertyHasChanged(prop, self.specialFunctions.has(prop)? target: result);
+          // returning the 'receiver(proxied object)' ensures that when chain calls also 2nd function call
+          // operates on the proxied object.
+          return self.specialFunctions.has(prop)? result: receiver;
+        }.bind(receiver);
+      }
+      // binding the proxiedObject ensures that modifying functions like push() operate on the
+      // proxied array and each array change is notified.
+      return ret.bind(receiver);
     }
     return ret;
   }
@@ -284,65 +437,19 @@ class ObservedObject<T extends Object> extends ExtendableProxy {
 
   public static createNewInternal<T extends Object>(rawObject: T,
     owningProperty: IPropertySubscriber): T {
-
-    let proxiedObject = new ObservedObject<T>(rawObject,
-      Array.isArray(rawObject) ? new class extends SubscribableHandler {
-        // In-place array modification functions
-        // splice is also in-place modifying function, but we need to handle separately
-        private readonly inPlaceModifications: Set<string> = new Set(["copyWithin", "fill", "reverse", "sort"]);
-
-        constructor(owningProperty: IPropertySubscriber) {
-          super(owningProperty);
-        }
-
-        public get(target: Object, property: PropertyKey, receiver: any): any {
-          let ret = super.get(target, property, receiver);
-          if (ret && typeof ret === "function") {
-            const self = this;
-            const prop = property.toString();
-            // prop is the function name here
-            if (prop == "splice" || prop == "pop") {
-              // 'splice' self modifies the array, returns deleted array items
-              // means, alike other self-modifying functions, splice does not return the array itself.
-              return function () {
-                const result = ret.apply(target, arguments);
-                // prop is the function name here
-                // and result is the function return value
-                // functinon modifies none or more properties
-                self.notifyObjectPropertyHasChanged(prop, target);
-                return result;
-              }.bind(proxiedObject);
-            }
-
-            if (self.inPlaceModifications.has(prop)) {
-              // in place modfication function result == target, the raw array modified
-              stateMgmtConsole.debug("return self mod function");
-              return function () {
-                const result = ret.apply(target, arguments);
-
-                // 'result' is the unproxied object               
-                // functinon modifies none or more properties
-                self.notifyObjectPropertyHasChanged(prop, result);
-
-                // returning the 'proxiedObject' ensures that when chain calls also 2nd function call
-                // operates on the proxied object.
-                return proxiedObject;
-              }.bind(proxiedObject);
-            }
-
-            // binding the proxiedObject ensures that modifying functions like push() operate on the 
-            // proxied array and each array change is notified.
-            return ret.bind(proxiedObject);
-          }
-
-          return ret;
-        }       
-      }(owningProperty) // SubscribableArrayHandlerAnonymous
-        : (rawObject instanceof Date)
-          ? new SubscribableDateHandler(owningProperty)
-          : new SubscribableHandler(owningProperty),
-      owningProperty);
-
+    let proxiedObject;
+    if(rawObject instanceof Map || rawObject instanceof Set) {
+      proxiedObject = new ObservedObject<T>(rawObject, new SubscribableMapSetHandler(owningProperty), owningProperty);
+    }
+    else if (rawObject instanceof Date) {
+      proxiedObject = new ObservedObject<T>(rawObject, new SubscribableDateHandler(owningProperty), owningProperty);
+    }
+    else if (Array.isArray(rawObject)) {
+      proxiedObject = new ObservedObject<T>(rawObject, new SubscribableArrayHandler(owningProperty), owningProperty);
+    }
+    else {
+      proxiedObject = new ObservedObject(rawObject, new SubscribableHandler(owningProperty), owningProperty);
+    }
     return proxiedObject as T;
   }
 
@@ -400,6 +507,37 @@ class ObservedObject<T extends Object> extends ExtendableProxy {
     obj[SubscribableHandler.UNSUBSCRIBE] = subscriber;
     return true;
   }
+
+  /**
+   * 
+   * @param obj any Object
+   * @returns return number of subscribers to the given ObservedObject
+   * or false if given object is not an ObservedObject
+   */
+  public static countSubscribers(obj: Object) : number | false 
+  {
+    return ObservedObject.IsObservedObject(obj) ? obj[SubscribableHandler.COUNT_SUBSCRIBERS] : false;
+  }
+
+  /*
+    set or unset callback function to be called when a property has been called
+  */
+  public static registerPropertyReadCb(obj: Object, readPropCb : PropertyReadCbFunc): boolean {
+    if (!ObservedObject.IsObservedObject(obj)) {
+      return false;
+    }
+    obj[SubscribableHandler.SET_ONREAD_CB] = readPropCb;
+    return true;
+  }
+
+  public static unregisterPropertyReadCb(obj: Object): boolean {
+    if (!ObservedObject.IsObservedObject(obj)) {
+      return false;
+    }
+    obj[SubscribableHandler.SET_ONREAD_CB] = undefined;
+    return true;
+  }
+
 
   /**
    * Utility function for debugging the prototype chain of given Object

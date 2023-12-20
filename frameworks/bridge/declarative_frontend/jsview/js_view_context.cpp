@@ -69,7 +69,7 @@ constexpr uint32_t DEFAULT_DURATION = 1000; // ms
 constexpr int64_t MICROSEC_TO_MILLISEC = 1000;
 
 void AnimateToForStageMode(const RefPtr<PipelineBase>& pipelineContext, AnimationOption& option,
-    JSRef<JSFunc> jsAnimateToFunc, std::function<void()>& onFinishEvent)
+    JSRef<JSFunc> jsAnimateToFunc, std::function<void()>& onFinishEvent, bool immediately)
 {
     auto triggerId = Container::CurrentId();
     AceEngine::Get().NotifyContainers([triggerId, option](const RefPtr<Container>& container) {
@@ -116,10 +116,13 @@ void AnimateToForStageMode(const RefPtr<PipelineBase>& pipelineContext, Animatio
     });
     pipelineContext->SetSyncAnimationOption(AnimationOption());
     pipelineContext->CloseImplicitAnimation();
+    if (immediately) {
+        pipelineContext->FlushMessages();
+    }
 }
 
 void AnimateToForFaMode(const RefPtr<PipelineBase>& pipelineContext, AnimationOption& option,
-    const JSCallbackInfo& info, std::function<void()>& onFinishEvent)
+    const JSCallbackInfo& info, std::function<void()>& onFinishEvent, bool immediately)
 {
     pipelineContext->FlushBuild();
     pipelineContext->OpenImplicitAnimation(option, option.GetCurve(), onFinishEvent);
@@ -129,6 +132,9 @@ void AnimateToForFaMode(const RefPtr<PipelineBase>& pipelineContext, AnimationOp
     pipelineContext->FlushBuild();
     pipelineContext->SetSyncAnimationOption(AnimationOption());
     pipelineContext->CloseImplicitAnimation();
+    if (immediately) {
+        pipelineContext->FlushMessages();
+    }
 }
 
 int64_t GetFormAnimationTimeInterval(const RefPtr<PipelineBase>& pipelineContext)
@@ -310,12 +316,23 @@ void JSViewContext::JSAnimation(const JSCallbackInfo& info)
         option.SetAllowRunningAsynchronously(true);
     }
     ViewContextModel::GetInstance()->openAnimation(option);
-    JankFrameReport::ReportJSAnimation();
+    JankFrameReport::GetInstance().ReportJSAnimation();
 }
 
 void JSViewContext::JSAnimateTo(const JSCallbackInfo& info)
 {
     ACE_FUNCTION_TRACE();
+    AnimateToInner(info, false);
+}
+
+void JSViewContext::JSAnimateToImmediately(const JSCallbackInfo& info)
+{
+    ACE_FUNCTION_TRACE();
+    AnimateToInner(info, true);
+}
+
+void JSViewContext::AnimateToInner(const JSCallbackInfo& info, bool immediately)
+{
     auto scopedDelegate = EngineHelper::GetCurrentDelegate();
     if (!scopedDelegate) {
         // this case usually means there is no foreground container, need to figure out the reason.
@@ -392,20 +409,20 @@ void JSViewContext::JSAnimateTo(const JSCallbackInfo& info)
                     option.GetDuration(), option.GetCurve() ? option.GetCurve()->ToString().c_str() : "");
                 pipelineContext->GetTaskExecutor()->PostTask(
                     [id = Container::CurrentId(), option, func = JSRef<JSFunc>::Cast(info[1]),
-                        onFinishEvent]() mutable {
+                        onFinishEvent, immediately]() mutable {
                         ContainerScope scope(id);
                         auto container = Container::Current();
                         CHECK_NULL_VOID(container);
                         auto pipelineContext = container->GetPipelineContext();
                         CHECK_NULL_VOID(pipelineContext);
-                        AnimateToForStageMode(pipelineContext, option, func, onFinishEvent);
+                        AnimateToForStageMode(pipelineContext, option, func, onFinishEvent, immediately);
                     },
                     TaskExecutor::TaskType::UI);
                 return;
             }
-            AnimateToForStageMode(pipelineContext, option, JSRef<JSFunc>::Cast(info[1]), onFinishEvent);
+            AnimateToForStageMode(pipelineContext, option, JSRef<JSFunc>::Cast(info[1]), onFinishEvent, immediately);
         } else {
-            AnimateToForFaMode(pipelineContext, option, info, onFinishEvent);
+            AnimateToForFaMode(pipelineContext, option, info, onFinishEvent, immediately);
         }
     } else {
         pipelineContext->FlushBuild();
@@ -424,6 +441,7 @@ void JSViewContext::JSBind(BindingTarget globalObj)
     JSClass<JSViewContext>::Declare("Context");
     JSClass<JSViewContext>::StaticMethod("animation", JSAnimation);
     JSClass<JSViewContext>::StaticMethod("animateTo", JSAnimateTo);
+    JSClass<JSViewContext>::StaticMethod("animateToImmediately", JSAnimateToImmediately);
     JSClass<JSViewContext>::Bind<>(globalObj);
 }
 

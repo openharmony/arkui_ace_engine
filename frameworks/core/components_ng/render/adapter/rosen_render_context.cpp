@@ -19,6 +19,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <memory>
+#include <string>
 
 #include "common/rs_vector2.h"
 #include "include/utils/SkParsePath.h"
@@ -359,12 +360,6 @@ void RosenRenderContext::SetSandBox(const std::optional<OffsetF>& parentPosition
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     if (parentPosition.has_value()) {
-        RefPtr<FrameNode> parent = sandBoxCount_ == 0 ? host->GetAncestorNodeOfFrame() : nullptr;
-        while (parent) {
-            auto rosenRenderContext = DynamicCast<RosenRenderContext>(parent->GetRenderContext());
-            CHECK_NULL_VOID(rosenRenderContext && rosenRenderContext->allowSandBox_);
-            parent = parent->GetAncestorNodeOfFrame();
-        }
         if (!force) {
             sandBoxCount_++;
         }
@@ -377,6 +372,7 @@ void RosenRenderContext::SetSandBox(const std::optional<OffsetF>& parentPosition
                 return;
             }
             sandBoxCount_ = 0;
+            CHECK_NULL_VOID(!host->IsRemoving());
         }
         rsNode_->SetSandBox(std::nullopt);
     }
@@ -1303,9 +1299,7 @@ void RosenRenderContext::OnTransformScaleUpdate(const VectorF& scale)
 {
     CHECK_NULL_VOID(rsNode_);
     auto curScale = rsNode_->GetStagingProperties().GetScale();
-    if (!NearEqual(curScale, Vector2f(1.0f, 1.0f)) && !NearEqual(scale, VectorF(1.0f, 1.0f))) {
-        allowSandBox_ = false;
-    }
+    hasScales_ = !NearEqual(curScale, Vector2f(1.0f, 1.0f)) && !NearEqual(scale, VectorF(1.0f, 1.0f));
     rsNode_->SetScale(scale.x, scale.y);
     RequestNextFrame();
 }
@@ -1479,17 +1473,18 @@ std::vector<double> RosenRenderContext::GetTrans()
     return transInfo_;
 }
 
-RectF RosenRenderContext::GetPaintRectWithTranslate()
+std::pair<RectF, bool> RosenRenderContext::GetPaintRectWithTranslate()
 {
     RectF rect;
-    CHECK_NULL_RETURN(rsNode_, rect);
+    bool error = hasScales_;
+    CHECK_NULL_RETURN(rsNode_, std::make_pair(rect, error));
     if (rsNode_->GetStagingProperties().GetRotation()) {
-        return RectF(0, 0, -1, -1);
+        return std::make_pair(RectF(0, 0, -1, -1), error);
     }
     rect = GetPaintRectWithoutTransform();
     auto translate = rsNode_->GetStagingProperties().GetTranslate();
     rect.SetOffset(rect.GetOffset() + OffsetF(translate[0], translate[1]));
-    return rect;
+    return std::make_pair(rect, error);
 }
 
 Matrix4 RosenRenderContext::GetRevertMatrix()
@@ -1795,10 +1790,10 @@ void RosenRenderContext::SetOuterBorderWidth(const BorderWidthProperty& value)
 {
     CHECK_NULL_VOID(rsNode_);
     Rosen::Vector4f cornerBorderWidth;
-    cornerBorderWidth.SetValues(static_cast<float>((value.leftDimen.value()).ConvertToPx()),
-        static_cast<float>((value.topDimen.value()).ConvertToPx()),
-        static_cast<float>((value.rightDimen.value()).ConvertToPx()),
-        static_cast<float>((value.bottomDimen.value()).ConvertToPx()));
+    cornerBorderWidth.SetValues(static_cast<float>((value.leftDimen.value_or(Dimension(0.0))).ConvertToPx()),
+        static_cast<float>((value.topDimen.value_or(Dimension(0.0))).ConvertToPx()),
+        static_cast<float>((value.rightDimen.value_or(Dimension(0.0))).ConvertToPx()),
+        static_cast<float>((value.bottomDimen.value_or(Dimension(0.0))).ConvertToPx()));
     rsNode_->SetOuterBorderWidth(cornerBorderWidth);
     RequestNextFrame();
 }
@@ -3152,6 +3147,12 @@ std::shared_ptr<Rosen::RSTransitionEffect> RosenRenderContext::GetRSTransitionWi
     return effect;
 }
 
+void RosenRenderContext::SetBackgroundShader(const std::shared_ptr<Rosen::RSShader>& shader)
+{
+    CHECK_NULL_VOID(rsNode_);
+    rsNode_->SetBackgroundShader(shader);
+}
+
 void RosenRenderContext::PaintGradient(const SizeF& frameSize)
 {
     CHECK_NULL_VOID(rsNode_);
@@ -3166,12 +3167,11 @@ void RosenRenderContext::PaintGradient(const SizeF& frameSize)
     if (gradientProperty->HasSweepGradient()) {
         gradient = gradientProperty->GetSweepGradientValue();
     }
-#ifndef USE_ROSEN_DRAWING
-    auto shader = SkiaDecorationPainter::CreateGradientShader(gradient, frameSize);
-#else
-    auto shader = DrawingDecorationPainter::CreateGradientShader(gradient, frameSize);
-#endif
-    rsNode_->SetBackgroundShader(RSShader::CreateRSShader(shader));
+    if (!gradientStyleModifier_) {
+        gradientStyleModifier_ = std::make_shared<GradientStyleModifier>(WeakClaim(this));
+        rsNode_->AddModifier(gradientStyleModifier_);
+    }
+    gradientStyleModifier_->SetGradient(gradient);
 }
 
 void RosenRenderContext::OnLinearGradientUpdate(const NG::Gradient& gradient)
@@ -3539,16 +3539,20 @@ void RosenRenderContext::PaintOverlayText()
         if (modifier_) {
             modifier_->SetCustomData(NG::OverlayTextData(overlayText));
             auto overlayOffset = modifier_->GetOverlayOffset();
-            overlayRect = std::make_shared<Rosen::RectF>(paintRect.GetX(), paintRect.GetY(),
-                paintRect.Width() + overlayOffset.GetX(), paintRect.Height() + overlayOffset.GetY());
+            auto paragraphSize = modifier_->GetParagraphSize(paintRect.Width());
+            overlayRect = std::make_shared<Rosen::RectF>(overlayOffset.GetX(), overlayOffset.GetY(),
+                std::max(paragraphSize.Width(), paintRect.Width()),
+                std::max(paragraphSize.Height(), paintRect.Height()));
             rsNode_->SetDrawRegion(overlayRect);
         } else {
             modifier_ = std::make_shared<OverlayTextModifier>();
             rsNode_->AddModifier(modifier_);
             modifier_->SetCustomData(NG::OverlayTextData(overlayText));
             auto overlayOffset = modifier_->GetOverlayOffset();
-            overlayRect = std::make_shared<Rosen::RectF>(paintRect.GetX(), paintRect.GetY(),
-                paintRect.Width() + overlayOffset.GetX(), paintRect.Height() + overlayOffset.GetY());
+            auto paragraphSize = modifier_->GetParagraphSize(paintRect.Width());
+            overlayRect = std::make_shared<Rosen::RectF>(overlayOffset.GetX(), overlayOffset.GetY(),
+                std::max(paragraphSize.Width(), paintRect.Width()),
+                std::max(paragraphSize.Height(), paintRect.Height()));
             rsNode_->SetDrawRegion(overlayRect);
         }
     }
@@ -3782,7 +3786,7 @@ void RosenRenderContext::PaintMouseSelectRect(const RectF& rect, const Color& fi
     rsNode_->AddModifier(mouseSelectModifier_);
 }
 
-void RosenRenderContext::DumpInfo() const
+void RosenRenderContext::DumpInfo() 
 {
     if (rsNode_) {
         DumpLog::GetInstance().AddDesc("------------start print rsNode");
@@ -3870,6 +3874,50 @@ void RosenRenderContext::DumpInfo() const
         if (!NearEqual(rsNode_->GetStagingProperties().GetAlpha(), 1)) {
             DumpLog::GetInstance().AddDesc(
                 std::string("Alpha:").append(std::to_string(rsNode_->GetStagingProperties().GetAlpha())));
+        }
+        auto translate = rsNode_->GetStagingProperties().GetTranslate();
+        if (!(NearZero(translate[0]) && NearZero(translate[0]))) {
+            DumpLog::GetInstance().AddDesc(
+                std::string("translate(x,y): ")
+                    .append(std::to_string(translate[0]).append(",").append(std::to_string(translate[1]))));
+        }
+        auto scale = rsNode_->GetStagingProperties().GetScale();
+        if (!(NearEqual(scale[0], 1) && NearEqual(scale[1], 1))) {
+            DumpLog::GetInstance().AddDesc(
+                std::string("scale(x,y): ")
+                    .append(std::to_string(translate[0]).append(",").append(std::to_string(translate[1]))));
+        }
+        auto rect = GetPaintRectWithoutTransform();
+        if (HasTransformTranslate()) {
+            auto translateArk = GetTransformTranslate().value();
+            auto arkTranslateX = translateArk.x.ConvertToPxWithSize(rect.Width());
+            auto arkTranslateY = translateArk.y.ConvertToPxWithSize(rect.Height());
+            if (!NearEqual(arkTranslateX, translate[0])) {
+                DumpLog::GetInstance().AddDesc(
+                    std::string("TranlateX has difference,arkui:").append(std::to_string(arkTranslateX)));
+            }
+            if (!NearEqual(arkTranslateY, translate[1])) {
+                DumpLog::GetInstance().AddDesc(
+                    std::string("TranlateY has difference,arkui:").append(std::to_string(arkTranslateY)));
+            }
+        }
+        if (HasTransformScale()) {
+            auto arkTransformScale = GetTransformScale().value();
+            if (!NearEqual(arkTransformScale.x, scale[0])) {
+                DumpLog::GetInstance().AddDesc(
+                    std::string("scaleX has difference,arkui:").append(std::to_string(arkTransformScale.x)));
+            }
+            if (!NearEqual(arkTransformScale.y, scale[1])) {
+                DumpLog::GetInstance().AddDesc(
+                    std::string("scaleY has difference,arkui:").append(std::to_string(arkTransformScale.y)));
+            }
+        }
+        if (HasOpacity()) {
+            auto arkAlpha = GetOpacity();
+            if (!NearEqual(arkAlpha.value(), rsNode_->GetStagingProperties().GetAlpha())) {
+                DumpLog::GetInstance().AddDesc(
+                    std::string("Alpha has difference,arkui:").append(std::to_string(arkAlpha.value())));
+            }
         }
     }
 }

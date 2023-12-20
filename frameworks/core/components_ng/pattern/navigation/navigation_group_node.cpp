@@ -78,6 +78,13 @@ RefPtr<NavigationGroupNode> NavigationGroupNode::GetOrCreateGroupNode(
     return navigationGroupNode;
 }
 
+NavigationGroupNode::~NavigationGroupNode()
+{
+    auto context = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    context->DeleteNavigationNode(curId_);
+}
+
 void NavigationGroupNode::AddChildToGroup(const RefPtr<UINode>& child, int32_t slot)
 {
     auto pattern = AceType::DynamicCast<NavigationPattern>(GetPattern());
@@ -107,7 +114,8 @@ void NavigationGroupNode::UpdateNavDestinationNodeWithoutMarkDirty(const RefPtr<
     CHECK_NULL_VOID(navigationContentNode);
     bool hasChanged = false;
     int32_t slot = 0;
-    for (size_t i = 0; i != navDestinationNodes.size(); ++i) {
+    UpdateLastStandardIndex();
+    for (int32_t i = 0; i != navDestinationNodes.size(); ++i) {
         const auto& childNode = navDestinationNodes[i];
         const auto& uiNode = childNode.second;
         auto navDestination = AceType::DynamicCast<NavDestinationGroupNode>(GetNavDestinationNode(uiNode));
@@ -127,25 +135,8 @@ void NavigationGroupNode::UpdateNavDestinationNodeWithoutMarkDirty(const RefPtr<
                 pattern->DeleteOnStateChangeItem(iter->first);
             }
         }
-        if (i == navDestinationNodes.size() - 1) {
-            // process shallow builder
-            navDestination->ProcessShallowBuilder();
-            navDestination->GetLayoutProperty()->UpdateVisibility(VisibleType::VISIBLE);
-            navDestination->GetEventHub<EventHub>()->SetEnabledInternal(true);
-            // for the navDestination at the top, FireChangeEvent
-            eventHub->FireChangeEvent(true);
-            hasChanged = CheckNeedMeasure(navDestination->GetLayoutProperty()->GetPropertyChangeFlag());
-            if (!hasChanged && NavigationLayoutAlgorithm::IsAutoHeight(GetLayoutProperty<NavigationLayoutProperty>())) {
-                hasChanged = true;
-            }
-        } else {
-            eventHub->FireChangeEvent(false);
-            // node is not animation need to hide
-            if (navDestination->GetPattern<NavDestinationPattern>()->GetNavDestinationNode() != remainChild &&
-                !navDestination->IsOnAnimation()) {
-                navDestination->GetLayoutProperty()->UpdateVisibility(VisibleType::INVISIBLE);
-            }
-        }
+        hasChanged =
+            UpdateNavDestinationVisibility(navDestination, remainChild, i, navDestinationNodes.size());
         int32_t childIndex = navigationContentNode->GetChildIndex(navDestination);
         if (childIndex < 0) {
             navigationContentNode->AddChild(navDestination, slot);
@@ -176,6 +167,11 @@ void NavigationGroupNode::UpdateNavDestinationNodeWithoutMarkDirty(const RefPtr<
             }
             // remove content child
             auto navDestinationPattern = navDestination->GetPattern<NavDestinationPattern>();
+            if (navDestinationPattern->GetIsOnShow()) {
+                eventHub->FireOnHiddenEvent(navDestinationPattern->GetName());
+                navDestinationPattern->SetIsOnShow(false);
+                NavigationPattern::FireNavigationStateChange(navDestination, false);
+            }
             auto shallowBuilder = navDestinationPattern->GetShallowBuilder();
             if (shallowBuilder) {
                 shallowBuilder->MarkIsExecuteDeepRenderDone(false);
@@ -381,9 +377,6 @@ void NavigationGroupNode::ExitTransitionWithPop(const RefPtr<FrameNode>& node)
                 if (shallowBuilder) {
                     shallowBuilder->MarkIsExecuteDeepRenderDone(false);
                 }
-                if (node->GetContentNode()) {
-                    node->GetContentNode()->Clean();
-                }
                 auto parent = node->GetParent();
                 CHECK_NULL_VOID(parent);
                 parent->RemoveChild(node);
@@ -479,6 +472,7 @@ void NavigationGroupNode::ExitTransitionWithPush(const RefPtr<FrameNode>& node, 
                 // for the case, the navBar form EXIT_PUSH to push during animation
                 if (needSetInvisible) {
                     node->GetLayoutProperty()->UpdateVisibility(VisibleType::INVISIBLE);
+                    node->SetActive(false);
                     if (isNavBar) {
                         navigation->NotifyPageHide();
                     }
@@ -628,7 +622,8 @@ void NavigationGroupNode::EnterTransitionWithPop(const RefPtr<FrameNode>& node, 
     // title
     titleNode->GetRenderContext()->UpdateTranslateInXY({ nodeWidth * PARENT_TITLE_OFFSET, 0.0f });
     AnimationUtils::Animate(
-        option, [node, titleNode]() {
+        option,
+        [node, titleNode]() {
             PerfMonitor::GetPerfMonitor()->Start(PerfConstants::ABILITY_OR_PAGE_SWITCH, PerfActionType::LAST_UP, "");
             TAG_LOGD(AceLogTag::ACE_NAVIGATION, "navigation animation start");
             node->GetRenderContext()->UpdateTranslateInXY({ 0.0f, 0.0f });
@@ -757,13 +752,21 @@ void NavigationGroupNode::TransitionWithReplace(
     isOnAnimation_ = true;
 }
 
-void NavigationGroupNode::DealNavigationExit(const RefPtr<FrameNode>& preNode, bool isNavBar)
+void NavigationGroupNode::OnInspectorIdUpdate(const std::string& id)
+{
+    auto context = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    context->AddOrReplaceNavigationNode(id, WeakClaim(this));
+    curId_ = id;
+}
+
+void NavigationGroupNode::DealNavigationExit(const RefPtr<FrameNode>& preNode, bool isNavBar, bool isAnimated)
 {
     CHECK_NULL_VOID(preNode);
     if (preNode->GetEventHub<EventHub>()) {
         preNode->GetEventHub<EventHub>()->SetEnabledInternal(true);
     }
-    if (isNavBar) {
+    if (isNavBar && isAnimated) {
         SetNeedSetInvisible(true);
         return;
     }
@@ -800,5 +803,75 @@ void NavigationGroupNode::NotifyPageHide()
     CHECK_NULL_VOID(pagePattern);
     auto pageInfo = pagePattern->GetPageInfo();
     pageUrlChecker->NotifyPageHide(pageInfo->GetPageUrl());
+}
+
+void NavigationGroupNode::UpdateLastStandardIndex()
+{
+    // remove the impact of last standard index
+    lastStandardIndex_ = -1;
+    auto navigationPattern = AceType::DynamicCast<NavigationPattern>(GetPattern());
+    CHECK_NULL_VOID(navigationPattern);
+    auto navigationStack = navigationPattern->GetNavigationStack();
+    CHECK_NULL_VOID(navigationStack);
+    const auto& navDestinationNodes = navigationStack->GetAllNavDestinationNodes();
+    if (navDestinationNodes.size() == 0) {
+        return;
+    }
+    for (int32_t index = navDestinationNodes.size() - 1; index >= 0; index--) {
+        const auto& curPath = navDestinationNodes[index];
+        const auto& uiNode = curPath.second;
+        if (!uiNode) {
+            continue;
+        }
+        auto navDestinationNode = AceType::DynamicCast<NavDestinationGroupNode>(GetNavDestinationNode(uiNode));
+        if (navDestinationNode && navDestinationNode->GetNavDestinationMode() == NavDestinationMode::STANDARD) {
+            lastStandardIndex_ = index;
+            return;
+        }
+    }
+}
+
+bool NavigationGroupNode::UpdateNavDestinationVisibility(const RefPtr<NavDestinationGroupNode>& navDestination,
+    const RefPtr<UINode>& remainChild, int32_t index, size_t destinationSize)
+{
+    auto eventHub = navDestination->GetEventHub<NavDestinationEventHub>();
+    CHECK_NULL_RETURN(eventHub, false);
+    if (index == destinationSize - 1) {
+        // process shallow builder
+        navDestination->ProcessShallowBuilder();
+        navDestination->GetLayoutProperty()->UpdateVisibility(VisibleType::VISIBLE, true);
+        navDestination->SetActive(true);
+        navDestination->GetEventHub<EventHub>()->SetEnabledInternal(true);
+        // for the navDestination at the top, FireChangeEvent
+        eventHub->FireChangeEvent(true);
+        bool hasChanged = CheckNeedMeasure(navDestination->GetLayoutProperty()->GetPropertyChangeFlag());
+        if (!hasChanged && NavigationLayoutAlgorithm::IsAutoHeight(GetLayoutProperty<NavigationLayoutProperty>())) {
+            hasChanged = true;
+        }
+        return hasChanged;
+    }
+    if (index < lastStandardIndex_) {
+        auto pattern = AceType::DynamicCast<NavDestinationPattern>(navDestination->GetPattern());
+        if (navDestination->GetPattern<NavDestinationPattern>()->GetNavDestinationNode() != remainChild &&
+            !navDestination->IsOnAnimation()) {
+            if (pattern && pattern->GetIsOnShow()) {
+                // fire hidden event
+                eventHub->FireOnHiddenEvent(pattern->GetName());
+                eventHub->FireChangeEvent(false);
+                pattern->SetIsOnShow(false);
+                NavigationPattern::FireNavigationStateChange(navDestination, false);
+            }
+            navDestination->GetLayoutProperty()->UpdateVisibility(VisibleType::INVISIBLE);
+            navDestination->SetActive(false);
+        }
+        return false;
+    }
+    auto pattern = AceType::DynamicCast<NavDestinationPattern>(navDestination->GetPattern());
+    if (navDestination->GetPattern<NavDestinationPattern>()->GetNavDestinationNode() != remainChild &&
+        !navDestination->IsOnAnimation()) {
+        navDestination->GetLayoutProperty()->UpdateVisibility(VisibleType::VISIBLE);
+        navDestination->SetActive(true);
+    }
+    return false;
 }
 } // namespace OHOS::Ace::NG

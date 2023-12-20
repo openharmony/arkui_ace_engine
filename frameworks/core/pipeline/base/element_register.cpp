@@ -193,10 +193,8 @@ void ElementRegister::DumpGeometryTransition()
         if (!item || item->IsInAndOutEmpty()) {
             iter = geometryTransitionMap_.erase(iter);
         } else {
-            if (SystemProperties::GetDebugEnabled()) {
-                LOGI("GeometryTransition map item: id: %{public}s, %{public}s", itemId.c_str(),
-                    item->ToString().c_str());
-            }
+            TAG_LOGD(AceLogTag::ACE_GEOMETRY_TRANSITION, "map item: id: %{public}s, %{public}s", itemId.c_str(),
+                item->ToString().c_str());
             iter++;
         }
     }

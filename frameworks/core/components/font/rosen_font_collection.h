@@ -17,8 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_FONT_ROSEN_FONT_COLLECTION_H
 
 #include <future>
-
-#include "flutter/common/task_runners.h"
+#include <vector>
 #ifndef USE_GRAPHIC_TEXT_GINE
 #include "txt/font_collection.h"
 #else

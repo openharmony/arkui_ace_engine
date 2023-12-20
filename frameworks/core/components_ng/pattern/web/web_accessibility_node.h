@@ -24,11 +24,12 @@ namespace OHOS::Ace::NG {
 class ACE_EXPORT WebAccessibilityNode : public FrameNode {
     DECLARE_ACE_TYPE(WebAccessibilityNode, FrameNode)
 public:
-    WebAccessibilityNode(RefPtr<FrameNode> webNode)
+    WebAccessibilityNode(WeakPtr<FrameNode> webNode)
         : FrameNode(V2::WEB_CORE_TAG, 0, MakeRefPtr<Pattern>()), webNode_(webNode)
     {
-        CHECK_NULL_VOID(webNode_);
-        accessibilityNodeInfo_.pageId = webNode_->GetPageId();
+        auto node = webNode_.Upgrade();
+        CHECK_NULL_VOID(node);
+        accessibilityNodeInfo_.pageId = node->GetPageId();
     }
     ~WebAccessibilityNode() override = default;
     NWeb::NWebAccessibilityNodeInfo& GetAccessibilityNodeInfo()
@@ -37,12 +38,12 @@ public:
     }
     RefPtr<FrameNode> GetWebNode()
     {
-        return webNode_;
+        return webNode_.Upgrade();
     }
 
 private:
     NWeb::NWebAccessibilityNodeInfo accessibilityNodeInfo_;
-    RefPtr<FrameNode> webNode_ = nullptr;
+    WeakPtr<FrameNode> webNode_ = nullptr;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_WEB_WEB_ACCESSIBILITY_NODE_H

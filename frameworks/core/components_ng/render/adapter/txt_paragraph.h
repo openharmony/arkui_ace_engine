@@ -53,6 +53,7 @@ public:
     void PopStyle() override;
 
     void AddText(const std::u16string& text) override;
+    void AddSymbol(const uint32_t& symbolId) override;
     int32_t AddPlaceholder(const PlaceholderRun& span) override;
     void Build() override;
     void Reset() override;

@@ -209,6 +209,25 @@ bool OptionPattern::OnKeyEvent(const KeyEvent& event)
         OnSelectProcess();
         return true;
     }
+    if ((event.code == KeyCode::KEY_MOVE_HOME || event.code == KeyCode::KEY_MOVE_END) && IsSelectOption()) {
+        return UpdateOptionFocus(event.code);
+    }
+    return false;
+}
+
+bool OptionPattern::UpdateOptionFocus(KeyCode code)
+{
+    auto meunNode = GetMenu().Upgrade();
+    CHECK_NULL_RETURN(meunNode, false);
+    auto menuPattern = meunNode->GetPattern<MenuPattern>();
+    CHECK_NULL_RETURN(menuPattern, false);
+    auto options = menuPattern->GetOptions();
+    if (!options.empty()) {
+        auto optionNode = (code == KeyCode::KEY_MOVE_HOME) ? options.front() : options.back();
+        auto eventHub = optionNode->GetOrCreateFocusHub();
+        eventHub->RequestFocusImmediately();
+        return true;
+    }
     return false;
 }
 

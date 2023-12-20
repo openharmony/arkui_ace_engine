@@ -95,6 +95,7 @@
 #include "bridge/declarative_frontend/jsview/js_menu.h"
 #include "bridge/declarative_frontend/jsview/js_menu_item.h"
 #include "bridge/declarative_frontend/jsview/js_menu_item_group.h"
+#include "bridge/declarative_frontend/jsview/js_dynamic_component.h"
 #include "bridge/declarative_frontend/jsview/js_navdestination.h"
 #include "bridge/declarative_frontend/jsview/js_navigation.h"
 #include "bridge/declarative_frontend/jsview/js_navigator.h"
@@ -143,6 +144,8 @@
 #include "bridge/declarative_frontend/jsview/js_stepper.h"
 #include "bridge/declarative_frontend/jsview/js_stepper_item.h"
 #include "bridge/declarative_frontend/jsview/js_swiper.h"
+#include "bridge/declarative_frontend/jsview/js_symbol.h"
+#include "bridge/declarative_frontend/jsview/js_symbol_span.h"
 #include "bridge/declarative_frontend/jsview/js_tab_content.h"
 #include "bridge/declarative_frontend/jsview/js_tabs.h"
 #include "bridge/declarative_frontend/jsview/js_tabs_controller.h"
@@ -541,10 +544,12 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "__Common__", JSCommonView::JSBind },
     { "LinearGradient", JSLinearGradient::JSBind },
     { "FormLink", JSFormLink::JSBind },
+    { "SymbolSpan", JSSymbolSpan::JSBind },
 };
 
 static const std::unordered_map<std::string, std::function<void(BindingTarget)>> bindFuncs = {
     { "Flex", JSFlexImpl::JSBind },
+    { "TextController", JSTextController::JSBind },
     { "Text", JSText::JSBind },
     { "Animator", JSAnimator::JSBind },
     { "SpringProp", JSAnimator::JSBind },
@@ -753,11 +758,16 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "UIExtensionComponent", JSUIExtension::JSBind },
     { "UIExtensionProxy", JSUIExtensionProxy::JSBind },
     { "WindowScene", JSWindowScene::JSBind },
+#if defined(DYNAMIC_COMPONENT_SUPPORT)
+    { "DynamicComponent", JSDynamicComponent::JSBind },
+#endif
 #endif
     { "RichEditor", JSRichEditor::JSBind },
     { "RichEditorController", JSRichEditorController::JSBind },
     { "NodeContainer", JSNodeContainer::JSBind },
     { "__JSBaseNode__", JSBaseNode::JSBind },
+    { "SymbolGlyph", JSSymbol::JSBind },
+    { "SymbolSpan", JSSymbolSpan::JSBind },
 };
 
 void RegisterAllModule(BindingTarget globalObj)
@@ -796,6 +806,7 @@ void RegisterAllModule(BindingTarget globalObj)
 #endif
 #endif
     JSRichEditorController::JSBind(globalObj);
+    JSTextController::JSBind(globalObj);
     JSNodeContainer::JSBind(globalObj);
     JSBaseNode::JSBind(globalObj);
     for (auto& iter : bindFuncs) {
@@ -892,6 +903,8 @@ void RegisterModuleByName(BindingTarget globalObj, std::string moduleName)
 #endif
     } else if ((*func).first == V2::RICH_EDITOR_ETS_TAG) {
         JSRichEditorController::JSBind(globalObj);
+    } else if ((*func).first == V2::TEXT_ETS_TAG) {
+        JSTextController::JSBind(globalObj);
     }
 
     (*func).second(globalObj);

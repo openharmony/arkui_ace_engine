@@ -21,6 +21,7 @@
 #include "datashare_helper.h"
 
 #include "adapter/ohos/entrance/data_ability_helper_standard.h"
+#include "base/log/ace_trace.h"
 #include "base/utils/string_utils.h"
 #include "base/utils/utils.h"
 
@@ -50,6 +51,7 @@ void* DataAbilityHelperStandard::QueryThumbnailResFromDataAbility(const std::str
     return nullptr;
 #else
 #ifdef MEDIA_LIBRARY_EXISTS
+    ACE_FUNCTION_TRACE();
     Uri fileUri(uri);
     return mgr_.GetThumbnail(fileUri).release();
 #else

@@ -85,6 +85,20 @@ FocusPattern UIExtensionPattern::GetFocusPattern() const
     return { FocusType::NODE, true, FocusStyleType::NONE };
 }
 
+void UIExtensionPattern::InitializeDynamicComponent(const std::string& hapPath, const std::string& abcPath,
+    const RefPtr<OHOS::Ace::WantWrap>& wantWrap, void* runtime)
+{
+    componentType_ = ComponentType::DYNAMIC;
+
+    if (!dynamicComponentRenderer_) {
+        ContainerScope scope(instanceId_);
+        dynamicComponentRenderer_ =
+            DynamicComponentRenderer::Create(GetHost(), instanceId_, hapPath, abcPath, runtime);
+        CHECK_NULL_VOID(dynamicComponentRenderer_);
+        dynamicComponentRenderer_->CreateContent();
+    }
+}
+
 void UIExtensionPattern::UpdateWant(const RefPtr<OHOS::Ace::WantWrap>& wantWrap)
 {
     auto want = AceType::DynamicCast<WantWrapOhos>(wantWrap)->GetWant();
@@ -123,6 +137,10 @@ void UIExtensionPattern::OnConnect()
     contentNode_->SetHitTestMode(HitTestMode::HTMNONE);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    auto&& opts = host->GetLayoutProperty()->GetSafeAreaExpandOpts();
+    if (opts && opts->Expansive()) {
+        contentNode_->GetLayoutProperty()->UpdateSafeAreaExpandOpts(*opts);
+    }
     auto context = AceType::DynamicCast<NG::RosenRenderContext>(contentNode_->GetRenderContext());
     CHECK_NULL_VOID(context);
     auto surfaceNode = sessionWrapper_->GetSurfaceNode();
@@ -133,6 +151,11 @@ void UIExtensionPattern::OnConnect()
     surfaceNode->CreateNodeInRenderThread();
     surfaceNode->SetForeground(isModal_);
     FireOnRemoteReadyCallback();
+    if (isModal_) {
+        auto focusHub = host->GetFocusHub();
+        CHECK_NULL_VOID(focusHub);
+        focusHub->RequestFocusImmediately();
+    }
     bool isFocused = IsCurrentFocus();
     RegisterVisibleAreaChange();
     DispatchFocusState(isFocused);
@@ -146,28 +169,18 @@ void UIExtensionPattern::OnConnect()
 }
 
 void UIExtensionPattern::OnAccessibilityEvent(
-    const Accessibility::AccessibilityEventInfo& info, const std::vector<int32_t>& uiExtensionIdLevelList)
+    const Accessibility::AccessibilityEventInfo& info, int32_t uiExtensionOffset)
 {
     TAG_LOGI(AceLogTag::ACE_UIEXTENSIONCOMPONENT, "The accessibility event is reported.");
     ContainerScope scope(instanceId_);
-    auto container = AceType::DynamicCast<Platform::AceContainer>(Container::Current());
-    CHECK_NULL_VOID(container);
-    auto pipelineContext = container->GetPipelineContext();
-    auto ngPipeline = AceType::DynamicCast<NG::PipelineContext>(pipelineContext);
-    if (ngPipeline) {
-        auto window = container->GetUIWindow(instanceId_);
-        CHECK_NULL_VOID(window);
-        std::vector<int32_t> uiExtensionIdLevelListNew;
-        uiExtensionIdLevelListNew.assign(uiExtensionIdLevelList.begin(), uiExtensionIdLevelList.end());
-        uiExtensionIdLevelListNew.insert(uiExtensionIdLevelListNew.begin(), uiExtensionId_);
-        auto frontend = container->GetFrontend();
-        CHECK_NULL_VOID(frontend);
-        auto accessibilityManager = frontend->GetAccessibilityManager();
-        CHECK_NULL_VOID(accessibilityManager);
-        if (accessibilityManager) {
-            accessibilityManager->SendExtensionAccessibilityEvent(info, uiExtensionIdLevelListNew);
-        }
-    }
+    auto ngPipeline = NG::PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(ngPipeline);
+    uiExtensionOffset = uiExtensionId_ * NG::UI_EXTENSION_OFFSET_MAX + uiExtensionOffset;
+    auto frontend = ngPipeline->GetFrontend();
+    CHECK_NULL_VOID(frontend);
+    auto accessibilityManager = frontend->GetAccessibilityManager();
+    CHECK_NULL_VOID(accessibilityManager);
+    accessibilityManager->SendExtensionAccessibilityEvent(info, uiExtensionOffset);
 }
 
 void UIExtensionPattern::OnDisconnect()
@@ -201,16 +214,49 @@ bool UIExtensionPattern::OnBackPressed()
 
 bool UIExtensionPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
 {
+    if (componentType_ == ComponentType::DYNAMIC) {
+        return OnDirtyLayoutWrapperSwapForDynamicComponent(dirty, config);
+    }
+
     CHECK_NULL_RETURN(sessionWrapper_, false);
     CHECK_NULL_RETURN(dirty, false);
     auto host = dirty->GetHostNode();
     CHECK_NULL_RETURN(host, false);
-    auto globalOffsetWithTranslate = host->GetPaintRectGlobalOffsetWithTranslate();
+    auto [globalOffsetWithTranslate, err] = host->GetPaintRectGlobalOffsetWithTranslate();
     auto geometryNode = dirty->GetGeometryNode();
     CHECK_NULL_RETURN(geometryNode, false);
     auto frameRect = geometryNode->GetFrameRect();
-    sessionWrapper_->RefreshDisplayArea(
-        globalOffsetWithTranslate.GetX(), globalOffsetWithTranslate.GetY(), frameRect.Width(), frameRect.Height());
+    ContainerScope scope(instanceId_);
+    auto pipeline = PipelineBase::GetCurrentContext();
+    auto curWindow = pipeline->GetCurrentWindowRect();
+    sessionWrapper_->RefreshDisplayArea(std::round(globalOffsetWithTranslate.GetX() + curWindow.Left()),
+        std::round(globalOffsetWithTranslate.GetY() + curWindow.Top()), frameRect.Width(), frameRect.Height());
+    return false;
+}
+
+bool UIExtensionPattern::OnDirtyLayoutWrapperSwapForDynamicComponent(
+    const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
+{
+    CHECK_NULL_RETURN(dynamicComponentRenderer_, false);
+
+    CHECK_NULL_RETURN(dirty, false);
+    auto host = dirty->GetHostNode();
+    CHECK_NULL_RETURN(host, false);
+    auto offset = host->GetPaintRectGlobalOffsetWithTranslate().first;
+    auto size = dirty->GetGeometryNode()->GetFrameSize();
+    Ace::ViewportConfig vpConfig;
+    vpConfig.SetSize(size.Width(), size.Height());
+    vpConfig.SetPosition(offset.GetX(), offset.GetY());
+    float density = 1.0f;
+    int32_t orientation = 0;
+    auto defaultDisplay = Rosen::DisplayManager::GetInstance().GetDefaultDisplay();
+    if (defaultDisplay) {
+        density = defaultDisplay->GetVirtualPixelRatio();
+        orientation = static_cast<int32_t>(defaultDisplay->GetOrientation());
+    }
+    vpConfig.SetDensity(density);
+    vpConfig.SetOrientation(orientation);
+    dynamicComponentRenderer_->UpdateViewportConfig(vpConfig, Rosen::WindowSizeChangeReason::UNDEFINED, nullptr);
     return false;
 }
 
@@ -254,6 +300,13 @@ void UIExtensionPattern::NotifyDestroy()
 
 void UIExtensionPattern::OnDetachFromFrameNode(FrameNode* frameNode)
 {
+    if (componentType_ == ComponentType::DYNAMIC) {
+        CHECK_NULL_VOID(dynamicComponentRenderer_);
+        dynamicComponentRenderer_->DestroyContent();
+        dynamicComponentRenderer_ = nullptr;
+        return;
+    }
+
     auto id = frameNode->GetId();
     auto pipeline = AceType::DynamicCast<PipelineContext>(PipelineBase::GetCurrentContext());
     CHECK_NULL_VOID(pipeline);
@@ -489,7 +542,11 @@ void UIExtensionPattern::HandleHoverEvent(bool isHover)
 
 void UIExtensionPattern::DispatchKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent)
 {
-    if (sessionWrapper_ && keyEvent) {
+    CHECK_NULL_VOID(keyEvent);
+    if (componentType_ == ComponentType::DYNAMIC) {
+        CHECK_NULL_VOID(dynamicComponentRenderer_);
+        dynamicComponentRenderer_->TransferKeyEvent(keyEvent);
+    } else if (sessionWrapper_) {
         sessionWrapper_->NotifyKeyEventAsync(keyEvent);
     }
 }
@@ -513,7 +570,11 @@ void UIExtensionPattern::DispatchFocusState(bool focusState)
 
 void UIExtensionPattern::DispatchPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
 {
-    if (sessionWrapper_ && pointerEvent) {
+    CHECK_NULL_VOID(pointerEvent);
+    if (componentType_ == ComponentType::DYNAMIC) {
+        CHECK_NULL_VOID(dynamicComponentRenderer_);
+        dynamicComponentRenderer_->TransferPointerEvent(pointerEvent);
+    } else if (sessionWrapper_) {
         sessionWrapper_->NotifyPointerEventAsync(pointerEvent);
     }
 }

@@ -31,6 +31,7 @@
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/layout/layout_wrapper_builder.h"
 #include "core/components_ng/layout/layout_wrapper_node.h"
+#include "core/components_ng/pattern/custom/custom_node.h"
 #include "core/components_ng/pattern/flex/flex_layout_algorithm.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/list/list_pattern.h"
@@ -1680,6 +1681,14 @@ HWTEST_F(LayoutWrapperTestNg, LayoutWrapperTest042, TestSize.Level1)
     layoutWrapper->geometryNode_->SetFrameOffset({ 0, 0 });
     layoutWrapper->OffsetNodeToSafeArea();
     EXPECT_EQ(layoutWrapper->geometryNode_->GetFrameOffset(), OffsetF(0, 1));
+
+    // set right and bottom again
+    layoutWrapper->geometryNode_->SetFrameOffset({ 1, 1 });
+    layoutWrapper->layoutProperty_->UpdateSafeAreaInsets(
+        SafeAreaInsets({ 0, 0 }, { 0, 0 }, { RK356_HEIGHT, RK356_HEIGHT + 1 }, { RK356_HEIGHT, RK356_HEIGHT + 1 }));
+    layoutWrapper->OffsetNodeToSafeArea();
+    EXPECT_EQ(layoutWrapper->geometryNode_->GetFrameOffset().x_, 1);
+    EXPECT_EQ(layoutWrapper->geometryNode_->GetFrameOffset().y_, 1);
 }
 
 /**
@@ -1747,6 +1756,209 @@ HWTEST_F(LayoutWrapperTestNg, LayoutWrapperTest045, TestSize.Level1)
  * @tc.type: FUNC
  */
 HWTEST_F(LayoutWrapperTestNg, LayoutWrapperTest046, TestSize.Level1)
+{
+    auto [parent, layoutWrapper] = CreateNodeAndWrapper(OHOS::Ace::V2::FLEX_ETS_TAG, NODE_ID_0);
+
+    /**
+     * @tc.steps: step1. call AddNodeFlexLayouts on a frame with parent JS_VIEW_ETS_TAG.
+     * @tc.expected:
+     */
+    auto [node1, nodeLayoutWrapper1] = CreateNodeAndWrapper(OHOS::Ace::V2::JS_VIEW_ETS_TAG, NODE_ID_1);
+    node1->MountToParent(parent);
+
+    auto [child, childWrapper] = CreateNodeAndWrapper(FIRST_CHILD_FRAME_NODE, NODE_ID_2);
+    child->MountToParent(node1);
+    childWrapper->AddNodeFlexLayouts();
+    EXPECT_EQ(node1->GetFlexLayouts(), 0);
+
+    /**
+     * @tc.steps: step2. call AddNodeFlexLayouts on a frame with parent COMMON_VIEW_ETS_TAG.
+     * @tc.expected:
+     */
+    auto [child2, childWrapper2] = CreateNodeAndWrapper(FIRST_CHILD_FRAME_NODE, NODE_ID_3);
+    child2->MountToParent(child);
+    node1->tag_ = OHOS::Ace::V2::COMMON_VIEW_ETS_TAG;
+    childWrapper->AddNodeFlexLayouts();
+    EXPECT_EQ(child2->GetFlexLayouts(), 0);
+
+    /**
+     * @tc.steps: step3. call AddNodeFlexLayouts on a frame with parent ROW_FRAME_NODE.
+     * @tc.expected:
+     */
+    node1->tag_ = ROW_FRAME_NODE;
+    childWrapper->AddNodeFlexLayouts();
+    EXPECT_EQ(child->GetFlexLayouts(), 0);
+}
+
+/**
+ * @tc.name: LayoutWrapperTest047
+ * @tc.desc: Test SaveGeoState.
+ * @tc.type: FUNC
+ */
+HWTEST_F(LayoutWrapperTestNg, LayoutWrapperTest047, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create LayoutWrapper.
+     */
+    auto rowFrameNode = FrameNode::CreateFrameNode(
+        OHOS::Ace::V2::FLEX_ETS_TAG, NODE_ID_0, AceType::MakeRefPtr<LinearLayoutPattern>(false));
+
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    geometryNode->frame_.rect_.x_ = 1.0f;
+    geometryNode->frame_.rect_.y_ = 1.0f;
+    RefPtr<LayoutWrapperNode> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(rowFrameNode, geometryNode, rowFrameNode->GetLayoutProperty());
+
+    /**
+     * @tc.steps: step2. set expandOpts and tag = V2::PAGE_ETS_TAG.
+     * @tc.expected: Save success.
+     */
+    layoutWrapper->geometryNode_->previousState_ = nullptr;
+    layoutWrapper->layoutProperty_->safeAreaExpandOpts_ = nullptr;
+    layoutWrapper->layoutProperty_->UpdateSafeAreaExpandOpts({ SAFE_AREA_TYPE_ALL, SAFE_AREA_EDGE_ALL });
+    layoutWrapper->hostNode_.Upgrade()->tag_ = V2::PAGE_ETS_TAG;
+    layoutWrapper->SaveGeoState();
+    EXPECT_EQ(layoutWrapper->GetGeometryNode()->previousState_->x_, 1.0f);
+    EXPECT_EQ(layoutWrapper->GetGeometryNode()->previousState_->y_, 1.0f);
+
+    /**
+     * @tc.steps: step3. set expandOpts and tag = V2::PAGE_ETS_TAG.
+     * @tc.expected: Save success.
+     */
+    layoutWrapper->geometryNode_->previousState_ = nullptr;
+    layoutWrapper->layoutProperty_->safeAreaExpandOpts_ = nullptr;
+    layoutWrapper->layoutProperty_->UpdateSafeAreaExpandOpts({ SAFE_AREA_TYPE_ALL, SAFE_AREA_EDGE_ALL });
+    layoutWrapper->hostNode_.Upgrade()->tag_ = V2::STAGE_ETS_TAG;
+    layoutWrapper->SaveGeoState();
+    EXPECT_EQ(layoutWrapper->GetGeometryNode()->previousState_->x_, 1.0f);
+    EXPECT_EQ(layoutWrapper->GetGeometryNode()->previousState_->y_, 1.0f);
+
+    /**
+     * @tc.steps: step4. set expandOpts and tag = V2::PAGE_ETS_TAG.
+     * @tc.expected: Save success.
+     */
+    layoutWrapper->geometryNode_->previousState_ = nullptr;
+    layoutWrapper->layoutProperty_->safeAreaExpandOpts_ = nullptr;
+    layoutWrapper->layoutProperty_->UpdateSafeAreaExpandOpts({ SAFE_AREA_TYPE_NONE, SAFE_AREA_EDGE_NONE });
+    layoutWrapper->hostNode_.Upgrade()->tag_ = V2::PAGE_ETS_TAG;
+    layoutWrapper->SaveGeoState();
+    EXPECT_EQ(layoutWrapper->GetGeometryNode()->previousState_->x_, 1.0f);
+    EXPECT_EQ(layoutWrapper->GetGeometryNode()->previousState_->y_, 1.0f);
+
+    /**
+     * @tc.steps: step4. set expandOpts and tag = V2::PAGE_ETS_TAG.
+     * @tc.expected: Save fail.
+     */
+    layoutWrapper->geometryNode_->previousState_ = nullptr;
+    layoutWrapper->layoutProperty_->safeAreaExpandOpts_ = nullptr;
+    layoutWrapper->layoutProperty_->UpdateSafeAreaExpandOpts({ SAFE_AREA_TYPE_NONE, SAFE_AREA_EDGE_NONE });
+    layoutWrapper->hostNode_.Upgrade()->tag_ = V2::STAGE_ETS_TAG;
+    layoutWrapper->SaveGeoState();
+    EXPECT_FALSE(layoutWrapper->GetGeometryNode()->previousState_);
+}
+
+/**
+ * @tc.name: LayoutWrapperTest048
+ * @tc.desc: Test AdjustChildren.
+ * @tc.type: FUNC
+ */
+HWTEST_F(LayoutWrapperTestNg, LayoutWrapperTest048, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. rowFrameNode addChildren .
+     */
+    auto rowFrameNode = FrameNode::CreateFrameNode(
+        OHOS::Ace::V2::FLEX_ETS_TAG, NODE_ID_0, AceType::MakeRefPtr<LinearLayoutPattern>(false));
+
+    auto rowFrameNode1 = FrameNode::CreateFrameNode(
+        OHOS::Ace::V2::FLEX_ETS_TAG, NODE_ID_1, AceType::MakeRefPtr<LinearLayoutPattern>(false));
+    RefPtr<CustomNode> cusNodeTemp = AceType::MakeRefPtr<CustomNode>(NODE_ID_2, OHOS::Ace::V2::FLEX_ETS_TAG);
+    rowFrameNode->AddChild(cusNodeTemp);
+    rowFrameNode->AddChild(rowFrameNode1);
+
+    /**
+     * @tc.steps: step2. create LayoutWrapper.
+     */
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    RefPtr<LayoutWrapperNode> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(rowFrameNode, geometryNode, rowFrameNode->GetLayoutProperty());
+
+    /**
+     * @tc.steps: step3. Call AdjustChildren().
+     */
+    layoutWrapper->AdjustChildren(OffsetF(0, 10));
+    EXPECT_FALSE(rowFrameNode1->GetLayoutProperty()->GetSafeAreaExpandOpts());
+}
+
+/**
+ * @tc.name: LayoutWrapperTest049
+ * @tc.desc: Test AvoidKeyboard.
+ * @tc.type: FUNC
+ */
+HWTEST_F(LayoutWrapperTestNg, LayoutWrapperTest049, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create LayoutWrapper.
+     */
+    auto node = FrameNode::CreateFrameNode(V2::STAGE_ETS_TAG, NODE_ID_0, AceType::MakeRefPtr<Pattern>());
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    RefPtr<LayoutWrapperNode> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(node, geometryNode, node->GetLayoutProperty());
+
+    /**
+     * @tc.steps: step2. Call AvoidKeyboard.
+     * @tc.expected: GetHostTag() != V2::PAGE_ETS_TAG.
+     */
+    layoutWrapper->AvoidKeyboard();
+    EXPECT_NE(layoutWrapper->GetHostTag(), V2::PAGE_ETS_TAG);
+}
+
+/**
+ * @tc.name: LayoutWrapperTest050
+ * @tc.desc: Test AvoidKeyboard.
+ * @tc.type: FUNC
+ */
+HWTEST_F(LayoutWrapperTestNg, LayoutWrapperTest050, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create LayoutWrapper.
+     */
+    auto node = FrameNode::CreateFrameNode(V2::PAGE_ETS_TAG, NODE_ID_0, AceType::MakeRefPtr<Pattern>());
+    RefPtr<EventHub> eventHub = AceType::MakeRefPtr<EventHub>();
+    RefPtr<FocusHub> focusHub = AceType::MakeRefPtr<FocusHub>(eventHub);
+    focusHub->currentFocus_ = false;
+    eventHub->focusHub_ = focusHub;
+    node->eventHub_ = eventHub;
+
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    RefPtr<LayoutWrapperNode> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(node, geometryNode, node->GetLayoutProperty());
+
+    /**
+     * @tc.steps: step2. create safeAreaManager_.
+     */
+    RefPtr<SafeAreaManager> safeAreamanager = AceType::MakeRefPtr<SafeAreaManager>();
+    safeAreamanager->keyboardOffset_ = -1.0f;
+
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->safeAreaManager_ = safeAreamanager;
+
+    /**
+     * @tc.steps: step3. Call AvoidKeyboard.
+     */
+    layoutWrapper->AvoidKeyboard();
+    EXPECT_TRUE(node->GetFocusHub());
+    EXPECT_TRUE(!node->GetFocusHub()->IsCurrentFocus());
+    EXPECT_TRUE(LessNotEqual(safeAreamanager->GetKeyboardOffset(), 0.0));
+}
+
+/**
+ * @tc.name: LayoutWrapperTest051
+ * @tc.desc: Test AddNodeFlexLayouts.
+ * @tc.type: FUNC
+ */
+HWTEST_F(LayoutWrapperTestNg, LayoutWrapperTest051, TestSize.Level1)
 {
     auto [parent, layoutWrapper] = CreateNodeAndWrapper(OHOS::Ace::V2::FLEX_ETS_TAG, NODE_ID_0);
 

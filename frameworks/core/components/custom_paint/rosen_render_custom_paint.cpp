@@ -687,6 +687,26 @@ bool RosenRenderCustomPaint::IsApplyIndent(const MeasureContext& context, double
     return false;
 }
 
+void RosenRenderCustomPaint::ApplyLineHeightInNumUnit(const MeasureContext& context, Rosen::TextStyle& txtStyle)
+{
+    auto lineHeight = context.lineHeight.value().Value();
+    auto pipelineContext = PipelineBase::GetCurrentContext();
+    if (pipelineContext) {
+        lineHeight = pipelineContext->NormalizeToPx(context.lineHeight.value());
+    }
+    txtStyle.heightOnly = true;
+    if (!NearEqual(lineHeight, txtStyle.fontSize) && (lineHeight > 0.0) && (!NearZero(txtStyle.fontSize))) {
+        txtStyle.heightScale = lineHeight / txtStyle.fontSize;
+    } else {
+        txtStyle.heightScale = 1;
+        static const int32_t BEGIN_VERSION = 6;
+        auto isBeginVersion = pipelineContext && pipelineContext->GetMinPlatformVersion() >= BEGIN_VERSION;
+        if (NearZero(lineHeight) || (!isBeginVersion && NearEqual(lineHeight, txtStyle.fontSize))) {
+            txtStyle.heightOnly = false;
+        }
+    }
+}
+
 Size RosenRenderCustomPaint::MeasureTextSizeInner(const MeasureContext& context)
 {
     using namespace Constants;
@@ -779,17 +799,14 @@ Size RosenRenderCustomPaint::MeasureTextSizeInner(const MeasureContext& context)
             txtStyle.heightScale = context.lineHeight->Value();
 #endif
         } else {
-            auto lineHeight = context.lineHeight.value().ConvertToPx();
 #ifndef USE_GRAPHIC_TEXT_GINE
+            auto lineHeight = context.lineHeight.value().ConvertToPx();
             if (!NearEqual(lineHeight, txtStyle.font_size) && (lineHeight > 0.0) && (!NearZero(txtStyle.font_size))) {
                 txtStyle.height = lineHeight / txtStyle.font_size;
                 txtStyle.has_height_override = true;
             }
 #else
-            if (!NearEqual(lineHeight, txtStyle.fontSize) && (lineHeight > 0.0) && (!NearZero(txtStyle.fontSize))) {
-                txtStyle.heightScale = lineHeight / txtStyle.fontSize;
-                txtStyle.heightOnly = true;
-            }
+            ApplyLineHeightInNumUnit(context, txtStyle);
 #endif
         }
     }
@@ -806,7 +823,7 @@ Size RosenRenderCustomPaint::MeasureTextSizeInner(const MeasureContext& context)
     if (!paragraph) {
         return Size(0.0, 0.0);
     }
-    if (context.textIndent.has_value()) {
+    if (context.textIndent.has_value() && !LessOrEqual(context.textIndent.value().Value(), 0.0)) {
         double indent = 0.0;
         // first line indent
         if (IsApplyIndent(context, indent)) {

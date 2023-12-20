@@ -18,7 +18,6 @@ group("core_common_unittest") {
     "clipboard:clip_board_test",
     "connect_server:ace_connect_server_manager_test",
     "environment:environment_test",
-    "flutter:flutter_test",
     "form:form_manager_test",
     "ime:ime_test",
     "others:thread_checker_test",

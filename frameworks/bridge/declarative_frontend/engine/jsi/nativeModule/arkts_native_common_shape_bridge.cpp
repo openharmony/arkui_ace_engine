@@ -131,9 +131,6 @@ ArkUINativeModuleValue CommonShapeBridge::SetStrokeDashOffset(ArkUIRuntimeCallIn
     if (secondArg->IsUndefined() || !ArkTSUtils::ParseJsDimensionVpNG(vm, secondArg, strokeDashOffset)) {
         GetArkUIInternalNodeAPI()->GetCommonShapeModifier().ResetStrokeDashOffset(nativeNode);
     } else {
-        if (LessNotEqual(strokeDashOffset.Value(), 0.0)) {
-            strokeDashOffset.SetValue(0.0);
-        }
         GetArkUIInternalNodeAPI()->GetCommonShapeModifier().SetStrokeDashOffset(
             nativeNode, strokeDashOffset.Value(), static_cast<int>(strokeDashOffset.Unit()));
     }

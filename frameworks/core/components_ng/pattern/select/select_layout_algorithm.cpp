@@ -54,17 +54,19 @@ void SelectLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         textSize.SetWidth(childConstraint.parentIdealSize.Width().value() - spinnerSize.Width() - space);
     }
 
-    auto textProps = DynamicCast<TextLayoutProperty>(textWrapper->GetLayoutProperty());
-    CHECK_NULL_VOID(textProps);
-    auto fontSize = textProps->GetFontSize().value().ConvertToPx();
+    auto fontSize = textLayoutProperty->GetFontSize().value().ConvertToPx();
+    bool isTextMin = false;
     if (textSize.Width() < fontSize * MIN_CHAR_VAL) {
         textSize.SetWidth(fontSize * MIN_CHAR_VAL);
+        isTextMin = true;
     }
-
-    textLayoutProperty->UpdateMarginSelfIdealSize(textSize);
-    textLayoutConstraint.selfIdealSize = OptionalSize<float>(textSize.Width(), textSize.Height());
-    textWrapper->Measure(textLayoutConstraint);
-
+    
+    if (isTextMin || childConstraint.parentIdealSize.Width().has_value()) {
+        textLayoutProperty->UpdateMarginSelfIdealSize(textSize);
+        textLayoutConstraint.selfIdealSize = OptionalSize<float>(textSize.Width(), textSize.Height());
+        textWrapper->Measure(textLayoutConstraint);
+    }
+    
     auto rowGeometry = rowWrapper->GetGeometryNode();
     CHECK_NULL_VOID(rowGeometry);
     auto minSpace = Dimension(MIN_SPACE, DimensionUnit::VP);

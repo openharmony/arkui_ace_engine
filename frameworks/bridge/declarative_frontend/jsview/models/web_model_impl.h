@@ -25,10 +25,11 @@ namespace OHOS::Ace::Framework {
 class WebModelImpl : public OHOS::Ace::WebModel {
 public:
     void Create(const std::string& src, const RefPtr<WebController>& webController,
-        WebType type = WebType::SURFACE) override;
+        WebType type = WebType::SURFACE, bool incognitoMode = false) override;
     void Create(const std::string& src, std::function<void(int32_t)>&& setWebIdCallback,
         std::function<void(const std::string&)>&& setHapPathCallback,
-        int32_t parentWebId, bool popup, WebType type = WebType::SURFACE) override;
+        int32_t parentWebId, bool popup, WebType type = WebType::SURFACE,
+        bool incognitoMode = false) override;
     void SetCustomScheme(const std::string& cmdLine) override;
     void SetFocusable(bool focusable) override;
     void SetFocusNode(bool isFocusNode) override;
@@ -102,6 +103,7 @@ public:
     void SetOnInterceptKeyEventCallback(std::function<bool(KeyEventInfo& keyEventInfo)>&& keyEventInfo) override;
     void SetOverScrollId(std::function<void(const BaseEventInfo* info)>&& jsCallback) override;
     void SetOverScrollMode(OverScrollMode mode) override;
+    void SetCopyOptionMode(CopyOptions mode) override;
 };
 } // namespace OHOS::Ace::Framework
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_MODELS_WEB_MODEL_IMPL_H

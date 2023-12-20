@@ -504,6 +504,11 @@ public:
         return pixelMap_;
     }
 
+    void SetDragPreviewPixelMap(RefPtr<PixelMap> pixelMap)
+    {
+        dragPreviewPixelMap_ = pixelMap;
+    }
+
     RefPtr<LongPressRecognizer> GetLongPressRecognizer() const
     {
         CHECK_NULL_RETURN(longPressEventActuator_, nullptr);
@@ -519,11 +524,11 @@ public:
 #ifdef ENABLE_DRAG_FRAMEWORK
     int32_t SetDragData(const RefPtr<UnifiedData>& unifiedData, std::string& udKey);
     OnDragCallbackCore GetDragCallback(const RefPtr<PipelineBase>& context, const WeakPtr<EventHub>& hub);
-
-    std::function<void()> GetMousePixelMapCallback(const GestureEvent& info);
+    void GenerateMousePixelMap(const GestureEvent& info);
     OffsetF GetPixelMapOffset(
         const GestureEvent& info, const SizeF& size, const float scale = 1.0f, const bool needScale = false) const;
-    float GetPixelMapScale(const DragPreviewOption& option, const int32_t height, const int32_t width) const;
+    float GetPixelMapScale(const int32_t height, const int32_t width) const;
+    bool IsPixelMapNeedScale() const;
 #endif // ENABLE_DRAG_FRAMEWORK
     void InitDragDropEvent();
     void HandleOnDragStart(const GestureEvent& info);
@@ -593,6 +598,10 @@ private:
     std::vector<DimensionRect> mouseResponseRegion_;
     bool touchable_ = true;
     RefPtr<PixelMap> pixelMap_;
+
+    // Save dragPreview pixelMap of user setting, transfer to drag framework on drag start.
+    RefPtr<PixelMap> dragPreviewPixelMap_;
+
     OffsetF frameNodeOffset_;
     GestureEvent gestureInfoForWeb_;
     bool isReceivedDragGestureInfo_ = false;

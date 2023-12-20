@@ -26,6 +26,7 @@
 #include "base/memory/referenced.h"
 #include "base/want/want_wrap.h"
 #include "core/common/container.h"
+#include "core/common/dynamic_component_renderer.h"
 #include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/ui_extension/session_wrapper.h"
@@ -65,6 +66,12 @@ public:
     void OnWindowHide() override;
     void OnVisibleChange(bool visible) override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
+
+    // for DynamicComponent
+    void InitializeDynamicComponent(const std::string& hapPath, const std::string& abcPath,
+        const RefPtr<OHOS::Ace::WantWrap>& wantWrap, void* runtime);
+    bool OnDirtyLayoutWrapperSwapForDynamicComponent(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config);
+
     void OnConnect();
     void OnDisconnect();
     void OnExtensionDied();
@@ -109,7 +116,7 @@ public:
     virtual bool TransferExecuteAction(int32_t elementId, const std::map<std::string, std::string>& actionArguments,
         int32_t action, int32_t offset) override;
     void OnAccessibilityEvent(
-        const Accessibility::AccessibilityEventInfo& info, const std::vector<int32_t>& uiExtensionIdLevelList);
+        const Accessibility::AccessibilityEventInfo& info, int32_t uiExtensionOffset);
 
 private:
     enum class ReleaseCode {
@@ -128,6 +135,11 @@ private:
         int32_t code = 0;
         std::string name;
         std::string message;
+    };
+
+    enum class ComponentType {
+        DYNAMIC,
+        UI_EXTENSION
     };
 
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
@@ -179,6 +191,11 @@ private:
     bool isVisible_ = true;
     bool isModal_ = false;
     int32_t uiExtensionId_ = 0;
+
+    // for DynamicComponent
+    ComponentType componentType_ = ComponentType::UI_EXTENSION;
+    std::shared_ptr<DynamicComponentRenderer> dynamicComponentRenderer_;
+
     ACE_DISALLOW_COPY_AND_MOVE(UIExtensionPattern);
 };
 } // namespace OHOS::Ace::NG

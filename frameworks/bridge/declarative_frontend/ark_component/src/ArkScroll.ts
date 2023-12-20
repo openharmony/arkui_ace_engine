@@ -1,3 +1,18 @@
+/*
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 /// <reference path='./import.ts' />
 
 class ScrollNestedScrollModifier extends ModifierWithKey<ArkNestedScrollOptions> {
@@ -53,25 +68,33 @@ class ScrollFrictionModifier extends ModifierWithKey<number | Resource> {
 class ScrollScrollSnapModifier extends ModifierWithKey<ArkScrollSnapOptions> {
   static identity: symbol = Symbol('scrollSnap');
   applyPeer(node: KNode, reset: boolean): void {
-    let snapPagination = [];
-    if (Array.isArray(this.value.snapPagination)) {
-      for (let i = 0; i <= this.value.snapPagination.length; i++) {
-        let item = this.value.snapPagination[i];
-        snapPagination.push(item);
-      }
-    } else {
-      snapPagination.push(this.value.snapPagination);
-    }
-
     if (reset) {
       GetUINativeModule().scroll.resetScrollSnap(node);
     } else {
-      GetUINativeModule().scroll.setScrollSnap(node, this.value.snapAlign, snapPagination, this.value.enableSnapToStart, this.value.enableSnapToEnd);
+      let snapPagination = [];
+      let isArray = true;
+      if (Array.isArray(this.value.snapPagination)) {
+        for (let i = 0; i <= this.value.snapPagination.length; i++) {
+          let item = this.value.snapPagination[i];
+          snapPagination.push(item);
+        }
+      } else {
+        isArray = false;
+      }
+
+      if (isArray) {
+        GetUINativeModule().scroll.setScrollSnap(node, this.value.snapAlign, snapPagination, this.value.enableSnapToStart, this.value.enableSnapToEnd);
+      } else {
+        GetUINativeModule().scroll.setScrollSnap(node, this.value.snapAlign, this.value.snapPagination, this.value.enableSnapToStart, this.value.enableSnapToEnd);
+      }
     }
   }
 
   checkObjectDiff(): boolean {
-    return !isBaseOrResourceEqual(this.stageValue, this.value);
+    return !((this.stageValue.snapAlign === this.value.snapAlign) &&
+      (this.stageValue.enableSnapToStart === this.value.enableSnapToStart) &&
+      (this.stageValue.enableSnapToEnd === this.value.enableSnapToEnd) &&
+      (this.stageValue.snapPagination === this.value.snapPagination));
   }
 }
 
@@ -231,9 +254,9 @@ class ArkScrollComponent extends ArkComponent implements ScrollAttribute {
     }
     return this;
   }
-
-  enableScrollInteraction(value: boolean): this {
-    throw new Error('Method not implemented.');
+  enableScrollInteraction(value: boolean): ScrollAttribute {
+    modifierWithKey(this._modifiersWithKeys, ScrollEnableScrollInteractionModifier.identity, ScrollEnableScrollInteractionModifier, value);
+    return this;
   }
   friction(value: number | Resource): ScrollAttribute {
     modifierWithKey(this._modifiersWithKeys, ScrollFrictionModifier.identity, ScrollFrictionModifier, value);
@@ -266,6 +289,6 @@ globalThis.Scroll.attributeModifier = function (modifier) {
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkScrollComponent(nativeNode);
   });
-  modifier.applyNormalAttribute(component);
+  applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
 }

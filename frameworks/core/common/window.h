@@ -164,6 +164,11 @@ public:
         return isUserSetCursor_;
     }
 
+    virtual int32_t GetCurrentRefreshRateMode() const
+    {
+        return 0;
+    }
+
 protected:
     bool isRequestVsync_ = false;
     bool onShow_ = true;

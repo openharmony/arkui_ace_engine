@@ -123,10 +123,6 @@ public:
             napi_get_reference_value(env_, cbRef, &cb);
             napi_call_function(env_, nullptr, cb, 1, &resultArg, nullptr);
         }
-        if (dragStatus == DragStatus::ENDED && asyncCtx_ != nullptr) {
-            delete asyncCtx_;
-            asyncCtx_ = nullptr;
-        }
     }
 
     void NapiSerializer(napi_env& env, napi_value& result)
@@ -140,6 +136,7 @@ public:
                         delete dragAction->asyncCtx_->dragAction;
                         dragAction->asyncCtx_->dragAction = nullptr;
                     }
+                    dragAction->DeleteRef();
                     delete dragAction;
                 }
             },
@@ -158,6 +155,19 @@ public:
         funName = "startDrag";
         napi_create_function(env, funName, NAPI_AUTO_LENGTH, StartDrag, nullptr, &funcValue);
         napi_set_named_property(env, result, funName, funcValue);
+    }
+
+    void DeleteRef()
+    {
+        CHECK_NULL_VOID(asyncCtx_);
+        for (auto customBuilderValue : asyncCtx_->customBuilderList) {
+            if (customBuilderValue == nullptr) {
+                continue;
+            }
+            napi_delete_reference(asyncCtx_->env, customBuilderValue);
+        }
+        delete asyncCtx_;
+        asyncCtx_ = nullptr;
     }
 
     static napi_value On(napi_env env, napi_callback_info info)
@@ -330,7 +340,6 @@ private:
                 napi_value cb = nullptr;
                 napi_get_reference_value(dragCtx->env, customBuilderValue, &cb);
                 GetPixelMapArrayByCustom(dragCtx, cb, arrayLenth);
-                napi_delete_reference(dragCtx->env, customBuilderValue);
             }
         } else {
             LOGE("Parameter data is failed.");
@@ -610,12 +619,31 @@ static void SetIsDragging(const RefPtr<Container>& container, bool isDragging)
     pipelineContext->SetIsDragging(isDragging);
 }
 
+bool JudgeCoordinateCanDrag(Msdp::DeviceStatus::ShadowInfo& shadowInfo)
+{
+    if (!shadowInfo.pixelMap) {
+        return false;
+    }
+    int32_t x = -shadowInfo.x;
+    int32_t y = -shadowInfo.y;
+    int32_t width = shadowInfo.pixelMap->GetWidth();
+    int32_t height = shadowInfo.pixelMap->GetHeight();
+    if (x < 0 || y < 0 || x > width || y > height) {
+        return false;
+    }
+    return true;
+}
+
 void EnvelopedDragData(DragControllerAsyncCtx* asyncCtx, std::optional<Msdp::DeviceStatus::DragData>& dragData)
 {
     std::vector<Msdp::DeviceStatus::ShadowInfo> shadowInfos;
     GetShadowInfoArray(asyncCtx, shadowInfos);
     if (shadowInfos.empty()) {
         LOGE("shadowInfo array is empty");
+        return;
+    }
+    if (!JudgeCoordinateCanDrag(shadowInfos[0])) {
+        HandleFail(asyncCtx, Framework::ERROR_CODE_PARAM_INVALID, "touchPoint's coordinate out of range");
         return;
     }
     auto pointerId = asyncCtx->pointerId;
@@ -628,9 +656,8 @@ void EnvelopedDragData(DragControllerAsyncCtx* asyncCtx, std::optional<Msdp::Dev
         }
         dataSize = static_cast<int32_t>(asyncCtx->unifiedData->GetSize());
     }
-    dragData = { shadowInfos, {}, udKey, "", "", asyncCtx->sourceType,
-        dataSize != 0 ? dataSize : shadowInfos.size(), pointerId, asyncCtx->globalX, asyncCtx->globalY, 0, true, {}
-    };
+    dragData = { shadowInfos, {}, udKey, "", "", asyncCtx->sourceType, dataSize != 0 ? dataSize : shadowInfos.size(),
+        pointerId, asyncCtx->globalX, asyncCtx->globalY, 0, true, false, {} };
 }
 
 void StartDragService(DragControllerAsyncCtx* asyncCtx)

@@ -128,6 +128,11 @@ public:
         CHECK_NULL_VOID(handleOpacity_);
         handleOpacity_->Set(opacity);
     }
+    
+    void SetIsUsingMouse(bool value)
+    {
+        isUsingMouse_ = value;
+    }
 
 private:
     void PaintHandle(RSCanvas& canvas, const RectF& handleRect, bool handleOnTop, bool isHandleLineShow = true);
@@ -147,6 +152,7 @@ private:
     RefPtr<PropertyFloat> handleRadius_;
     RefPtr<PropertyFloat> innerHandleRadius_;
     RefPtr<AnimatablePropertyFloat> handleOpacity_;
+    bool isUsingMouse_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(SelectOverlayContentModifier);
 };

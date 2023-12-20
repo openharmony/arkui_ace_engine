@@ -42,8 +42,21 @@ public:
         }
     }
 
+    void SetOnSelectionChange(std::function<void(int32_t, int32_t)>&& func)
+    {
+        onSelectionChange_ = std::move(func);
+    }
+
+    void FireOnSelectionChange(int32_t selectionStart, int32_t selectionEnd)
+    {
+        if (onSelectionChange_) {
+            onSelectionChange_(selectionStart, selectionEnd);
+        }
+    }
+
 private:
     std::function<void(const std::string&)> onCopy_;
+    std::function<void(int32_t, int32_t)> onSelectionChange_;
     ACE_DISALLOW_COPY_AND_MOVE(TextEventHub);
 };
 } // namespace OHOS::Ace::NG

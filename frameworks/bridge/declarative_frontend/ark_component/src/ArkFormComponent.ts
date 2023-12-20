@@ -1,41 +1,48 @@
+/*
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 /// <reference path='./import.ts' />
 class ArkFormComponentComponent extends ArkComponent implements FormComponentAttribute {
   constructor(nativePtr: KNode) {
     super(nativePtr);
   }
   size(value: { width: Length; height: Length }): this {
-    modifierWithKey(this._modifiersWithKeys, FormComponentSizeModifier.identity, FormComponentSizeModifier, value);
+    modifierWithKey(this._modifiersWithKeys,
+      FormComponentSizeModifier.identity, FormComponentSizeModifier, value);
     return this;
   }
 
   visibility(value: Visibility): this {
-    if (isNumber(value)) {
-      modifier(this._modifiers, FormComponentVisibilityModifier, value);
-    } else {
-      modifier(this._modifiers, FormComponentVisibilityModifier, undefined);
-    }
+    modifierWithKey(this._modifiersWithKeys,
+      FormComponentVisibilityModifier.identity, FormComponentVisibilityModifier, value);
     return this;
   }
 
   moduleName(value: string): this {
-    if (isString(value)) {
-      modifier(this._modifiers, FormComponentModuleNameModifier, value);
-    } else {
-      modifier(this._modifiers, FormComponentModuleNameModifier, undefined);
-    }
+    modifierWithKey(this._modifiersWithKeys,
+      FormComponentModuleNameModifier.identity, FormComponentModuleNameModifier, value);
     return this;
   }
   dimension(value: FormDimension): this {
-    modifierWithKey(this._modifiersWithKeys, FormComponentDimensionModifier.identity,
-      FormComponentDimensionModifier, value);
+    modifierWithKey(this._modifiersWithKeys,
+      FormComponentDimensionModifier.identity, FormComponentDimensionModifier, value);
     return this;
   }
   allowUpdate(value: boolean): this {
-    if (isBoolean(value)) {
-      modifier(this._modifiers, FormComponentAllowUpdateModifier, value);
-    } else {
-      modifier(this._modifiers, FormComponentAllowUpdateModifier, undefined);
-    }
+    modifierWithKey(this._modifiersWithKeys,
+      FormComponentAllowUpdateModifier.identity, FormComponentAllowUpdateModifier, value);
     return this;
   }
   onAcquired(callback: (info: { id: number; }) => void): this {
@@ -55,7 +62,7 @@ class ArkFormComponentComponent extends ArkComponent implements FormComponentAtt
   }
 }
 
-class FormComponentModuleNameModifier extends Modifier<string> {
+class FormComponentModuleNameModifier extends ModifierWithKey<string> {
   constructor(value: string) {
     super(value);
   }
@@ -87,7 +94,7 @@ class FormComponentDimensionModifier extends ModifierWithKey<FormDimension> {
   }
 }
 
-class FormComponentAllowUpdateModifier extends Modifier<boolean> {
+class FormComponentAllowUpdateModifier extends ModifierWithKey<boolean> {
   constructor(value: boolean) {
     super(value);
   }
@@ -121,8 +128,8 @@ class FormComponentSizeModifier extends ModifierWithKey<{ width: Length; height:
   }
 }
 
-class FormComponentVisibilityModifier extends Modifier<number> {
-  constructor(value: number) {
+class FormComponentVisibilityModifier extends ModifierWithKey<Visibility> {
+  constructor(value: Visibility) {
     super(value);
   }
   static identity: Symbol = Symbol('formComponentVisibility');
@@ -142,6 +149,6 @@ globalThis.FormComponent.attributeModifier = function (modifier) {
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkFormComponentComponent(nativeNode);
   });
-  modifier.applyNormalAttribute(component);
+  applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
 }

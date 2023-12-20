@@ -30,22 +30,10 @@ namespace OHOS::Ace::Napi {
 using namespace OHOS::Ace;
 namespace {
 
-enum class ResourceType : uint32_t {
-    COLOR = 10001,
-    FLOAT,
-    STRING,
-    PLURAL,
-    BOOLEAN,
-    INTARRAY,
-    INTEGER,
-    PATTERN,
-    STRARRAY,
-    MEDIA = 20000,
-    RAWFILE = 30000
-};
-
 const std::regex RESOURCE_APP_STRING_PLACEHOLDER(R"(\%((\d+)(\$)){0,1}([dsf]))", std::regex::icase);
 constexpr int32_t NAPI_BUF_LENGTH = 256;
+constexpr int32_t UNKNOWN_RESOURCE_ID = -1;
+std::vector<std::string> RESOURCE_HEADS = { "app", "sys" };
 } // namespace
 
 static const std::unordered_map<int32_t, std::string> ERROR_CODE_TO_MSG {
@@ -199,6 +187,142 @@ RefPtr<ResourceWrapper> CreateResourceWrapper(const ResourceInfo& info)
     }
     auto resourceWrapper = AceType::MakeRefPtr<ResourceWrapper>(themeConstants, resourceAdapter);
     return resourceWrapper;
+}
+
+napi_value CreateNapiString(napi_env env, std::string rawStr)
+{
+    napi_value retVal = nullptr;
+    napi_create_string_utf8(env, rawStr.c_str(), rawStr.length(), &retVal);
+    return retVal;
+}
+
+bool ConvertResourceType(const std::string& typeName, ResourceType& resType)
+{
+    static const std::unordered_map<std::string, ResourceType> resTypeMap {
+        { "color", ResourceType::COLOR },
+        { "media", ResourceType::MEDIA },
+        { "float", ResourceType::FLOAT },
+        { "string", ResourceType::STRING },
+        { "plural", ResourceType::PLURAL },
+        { "pattern", ResourceType::PATTERN },
+        { "boolean", ResourceType::BOOLEAN },
+        { "integer", ResourceType::INTEGER },
+        { "strarray", ResourceType::STRARRAY },
+        { "intarray", ResourceType::INTARRAY },
+    };
+    auto it = resTypeMap.find(typeName);
+    if (it == resTypeMap.end()) {
+        return false;
+    }
+    resType = it->second;
+    return true;
+}
+
+bool ParseDollarResource(napi_env env, napi_value value, ResourceType& resType, std::string& resName)
+{
+    napi_valuetype valueType = napi_undefined;
+    napi_typeof(env, value, &valueType);
+    if (valueType != napi_string) {
+        return false;
+    }
+    std::string resPath;
+    if (!GetNapiString(env, value, resPath, valueType)) {
+        return false;
+    }
+    std::vector<std::string> tokens;
+    StringUtils::StringSplitter(resPath, '.', tokens);
+    if (static_cast<int32_t>(tokens.size()) != 3) { // $r format like app.xxx.xxx, has 3 paragraph
+        return false;
+    }
+    if (std::find(RESOURCE_HEADS.begin(), RESOURCE_HEADS.end(), tokens[0]) == RESOURCE_HEADS.end()) {
+        return false;
+    }
+    if (!ConvertResourceType(tokens[1], resType)) {
+        return false;
+    }
+    resName = resPath;
+    return true;
+}
+
+void CompleteResourceParam(napi_env env, napi_value value)
+{
+    napi_value idNApi = nullptr;
+    napi_valuetype valueType = napi_undefined;
+    napi_typeof(env, value, &valueType);
+    if (valueType != napi_object) {
+        return;
+    }
+    if (napi_get_named_property(env, value, "id", &idNApi) != napi_ok) {
+        return;
+    }
+    std::string resName;
+    ResourceType resType;
+    if (!ParseDollarResource(env, idNApi, resType, resName)) {
+        return;
+    }
+    bool hasProperty = false;
+    napi_value typeIdNApi = nullptr;
+    napi_value resourceIdNApi = nullptr;
+    napi_value typeKeyNApi = CreateNapiString(env, "type");
+    napi_value defaultNameNApi = CreateNapiString(env, "");
+    napi_value bundleNameKeyNApi = CreateNapiString(env, "bundleName");
+    napi_value moduleNameKeyNApi = CreateNapiString(env, "moduleName");
+    napi_create_int32(env, UNKNOWN_RESOURCE_ID, &resourceIdNApi);
+    napi_create_int32(env, static_cast<uint32_t>(resType), &typeIdNApi);
+    ModifyResourceParam(env, value, resType, resName);
+    napi_set_property(env, value, typeKeyNApi, typeIdNApi);
+    napi_set_property(env, value, CreateNapiString(env, "id"), resourceIdNApi);
+    napi_has_property(env, value, bundleNameKeyNApi, &hasProperty);
+    if (!hasProperty) {
+        napi_set_property(env, value, bundleNameKeyNApi, defaultNameNApi);
+    }
+    napi_has_property(env, value, moduleNameKeyNApi, &hasProperty);
+    if (!hasProperty) {
+        napi_set_property(env, value, moduleNameKeyNApi, defaultNameNApi);
+    }
+}
+
+void ModifyResourceParam(napi_env env, napi_value value, const ResourceType& resType, const std::string& resName)
+{
+    // raw input : {"id":"app.xxx.xxx","params":[],"moduleName":"xxx","bundleName":"xxx"}
+    // modified output : {"id":-1, "params":["app.xxx.xxx"],"type":xxxx,"moduleName":"xxx","bundleName":"xxx"}
+    napi_value paramsNApi = nullptr;
+    napi_get_named_property(env, value, "params", &paramsNApi);
+    bool isArray = false;
+    if (napi_is_array(env, paramsNApi, &isArray) != napi_ok) {
+        return;
+    }
+    if (!isArray) {
+        return;
+    }
+    uint32_t paramCount = 0;
+    bool hasProperty = false;
+    napi_get_array_length(env, paramsNApi, &paramCount);
+    napi_value typeKeyNApi = CreateNapiString(env, "type");
+    napi_value resNameNApi = CreateNapiString(env, resName);
+    if (resType == ResourceType::PLURAL || resType == ResourceType::STRING) {
+        std::vector<napi_value> tmpParams;
+        for (uint32_t i = 0; i < paramCount; i++) {
+            napi_value param = nullptr;
+            napi_get_element(env, paramsNApi, i, &param);
+            tmpParams.insert(tmpParams.end(), param);
+        }
+        napi_set_element(env, paramsNApi, 0, resNameNApi);
+        uint32_t paramIndex = 1;
+        napi_has_property(env, value, typeKeyNApi, &hasProperty);
+        if (hasProperty) {
+            napi_value firstParam = nullptr;
+            napi_get_property(env, value, typeKeyNApi, &firstParam);
+            napi_set_element(env, paramsNApi, paramIndex, firstParam);
+            paramIndex++;
+        }
+        for (auto tmpParam : tmpParams) {
+            napi_set_element(env, paramsNApi, paramIndex, tmpParam);
+            paramIndex++;
+        }
+    } else {
+        napi_set_element(env, paramsNApi, 0, resNameNApi);
+    }
 }
 
 void ParseCurveInfo(const std::string& curveString, std::string& curveTypeString, std::vector<float>& curveValue)
@@ -373,6 +497,7 @@ bool ParseColor(napi_env env, napi_value value, Color& result)
 
 bool ParseResourceParam(napi_env env, napi_value value, ResourceInfo& info)
 {
+    CompleteResourceParam(env, value);
     napi_value idNApi = nullptr;
     napi_value typeNApi = nullptr;
     napi_value paramsNApi = nullptr;
@@ -472,27 +597,45 @@ bool ParseString(const ResourceInfo& info, std::string& result)
     auto resourceWrapper = CreateResourceWrapper(info);
 
     if (info.type == static_cast<int>(ResourceType::PLURAL)) {
-        auto count = StringUtils::StringToDouble(info.params[0]);
-        auto pluralResults = resourceWrapper->GetStringArray(info.resId);
-        auto pluralChoice = Localization::GetInstance()->PluralRulesFormat(count);
-        auto iter = std::find(pluralResults.begin(), pluralResults.end(), pluralChoice);
-        std::string originStr;
-        if (iter != pluralResults.end() && ++iter != pluralResults.end()) {
-            originStr = *iter;
+        std::string pluralResults;
+        if (info.resId == UNKNOWN_RESOURCE_ID) {
+            auto count = StringUtils::StringToInt(info.params[1]);
+            pluralResults = resourceWrapper->GetPluralStringByName(info.params[0], count);
+            ReplaceHolder(pluralResults, info.params, 2); // plural holder in index 2
+        } else {
+            auto count = StringUtils::StringToInt(info.params[0]);
+            pluralResults = resourceWrapper->GetPluralString(info.resId, count);
+            ReplaceHolder(pluralResults, info.params, 1);
         }
-        ReplaceHolder(originStr, info.params, 1);
-        result = originStr;
-    } else if (info.type == static_cast<int>(ResourceType::RAWFILE)) {
+        result = pluralResults;
+        return true;
+    }
+    if (info.type == static_cast<int>(ResourceType::RAWFILE)) {
         auto fileName = info.params[0];
         result = resourceWrapper->GetRawfile(fileName);
-    } else if (info.type == static_cast<int>(ResourceType::FLOAT)) {
-        result = DimensionToString(resourceWrapper->GetDimension(info.resId));
-    } else {
-        auto originStr = resourceWrapper->GetString(info.resId);
-        ReplaceHolder(originStr, info.params, 0);
-        result = originStr;
+        return true;
     }
-    return true;
+    if (info.type == static_cast<int>(ResourceType::FLOAT)) {
+        if (info.resId == UNKNOWN_RESOURCE_ID) {
+            result = DimensionToString(resourceWrapper->GetDimensionByName(info.params[0]));
+        } else {
+            result = DimensionToString(resourceWrapper->GetDimension(info.resId));
+        }
+        return true;
+    }
+    if (info.type == static_cast<int>(ResourceType::STRING)) {
+        std::string originStr;
+        if (info.resId == UNKNOWN_RESOURCE_ID) {
+            originStr = resourceWrapper->GetStringByName(info.params[0]);
+            ReplaceHolder(originStr, info.params, 1);
+        } else {
+            originStr = resourceWrapper->GetString(info.resId);
+            ReplaceHolder(originStr, info.params, 0);
+        }
+        result = originStr;
+        return true;
+    }
+    return false;
 }
 
 std::string ErrorToMessage(int32_t code)

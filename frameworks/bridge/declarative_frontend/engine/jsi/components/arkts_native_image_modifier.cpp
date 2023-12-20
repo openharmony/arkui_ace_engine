@@ -305,6 +305,30 @@ void ResetImageDraggable(NodeHandle node)
     ImageModelNG::SetDraggable(frameNode, DEFAULT_DRAGGABLE);
 }
 
+/**
+ * @param values radius values
+ * value[0] : radius value for TopLeft，value[1] : radius value for TopRight
+ * value[2] : radius value for BottomLeft，value[3] : radius value for BottomRight
+ * @param units adius units
+ * units[0]: radius unit for TopLeft ,units[1] : radius unit for TopRight
+ * units[2]: radius unit for BottomLeft, units[3] : radius unit for TopRight
+ */
+void SetImageBorderRadius(NodeHandle node, const double* values, const int* units, int32_t length)
+{
+    GetArkUIInternalNodeAPI()->GetCommonModifier().SetBorderRadius(node, values, units, length);
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ImageModelNG::SetBackBorder(frameNode);
+}
+
+void ResetImageBorderRadius(NodeHandle node)
+{
+    GetArkUIInternalNodeAPI()->GetCommonModifier().ResetBorderRadius(node);
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ImageModelNG::SetBackBorder(frameNode);
+}
+
 ArkUIImageModifierAPI GetImageModifier()
 {
     static const ArkUIImageModifierAPI modifier = { SetCopyOption, ResetCopyOption, SetAutoResize, ResetAutoResize,
@@ -313,8 +337,9 @@ ArkUIImageModifierAPI GetImageModifier()
         ResetMatchTextDirection, SetFillColor, ResetFillColor, SetAlt, ResetAlt, SetImageInterpolation,
         ResetImageInterpolation, SetColorFilter, ResetColorFilter, SetImageSyncLoad, ResetImageSyncLoad,
         SetImageObjectFit, ResetImageObjectFit, SetImageFitOriginalSize, ResetImageFitOriginalSize, SetImageDraggable,
-        ResetImageDraggable };
-
+        ResetImageDraggable,
+        SetImageBorderRadius, ResetImageBorderRadius
+        };
     return modifier;
 }
 } // namespace OHOS::Ace::NG

@@ -148,9 +148,6 @@ void OnTextChangedListenerImpl::SendFunctionKey(const MiscServices::FunctionKey&
 void OnTextChangedListenerImpl::HandleKeyboardStatus(MiscServices::KeyboardStatus status)
 {
     TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "[OnTextChangedListenerImpl] HandleKeyboardStatus status: %{public}d", status);
-    if (status == MiscServices::KeyboardStatus::NONE) {
-        return;
-    }
     SetKeyboardStatus(status == MiscServices::KeyboardStatus::SHOW);
 }
 
@@ -169,6 +166,8 @@ void OnTextChangedListenerImpl::HandleFunctionKey(MiscServices::FunctionKey func
             case TextInputAction::SEARCH:
             case TextInputAction::SEND:
             case TextInputAction::GO:
+            case TextInputAction::PREVIOUS:
+            case TextInputAction::NEW_LINE:
                 client->PerformAction(action, true);
                 break;
             default:

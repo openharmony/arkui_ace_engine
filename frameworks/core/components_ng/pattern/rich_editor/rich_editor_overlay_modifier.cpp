@@ -151,6 +151,8 @@ void RichEditorOverlayModifier::PaintEdgeEffect(const SizeF& frameSize, RSCanvas
 void RichEditorOverlayModifier::onDraw(DrawingContext& drawingContext)
 {
     if (!showSelect_->Get()) {
+        PaintScrollBar(drawingContext);
+        PaintEdgeEffect(frameSize_->Get(), drawingContext.canvas);
         return;
     }
     drawingContext.canvas.Save();

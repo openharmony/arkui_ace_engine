@@ -180,13 +180,13 @@ ArkUINativeModuleValue CheckboxGroupBridge::SetCheckboxGroupMark(ArkUIRuntimeCal
     }
 
     CalcDimension size;
-    if (!(ArkTSUtils::ParseJsDimensionVp(vm, sizeArg, size)) || (size.Unit() == DimensionUnit::PERCENT) ||
+    if (!(ArkTSUtils::ParseJsDimensionVp(vm, sizeArg, size, false)) || (size.Unit() == DimensionUnit::PERCENT) ||
         (size.ConvertToVp() < 0)) {
         size = Dimension(DEFAULT_SIZE_VALUE);
     }
 
     CalcDimension strokeWidth;
-    if (!(ArkTSUtils::ParseJsDimensionVp(vm, widthArg, strokeWidth)) ||
+    if (!(ArkTSUtils::ParseJsDimensionVp(vm, widthArg, strokeWidth, false)) ||
         (strokeWidth.Unit() == DimensionUnit::PERCENT) || (strokeWidth.ConvertToVp() < 0)) {
         strokeWidth = theme->GetCheckStroke();
     }

@@ -12,14 +12,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
+#define protected public
+#define private public
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 
 #include "core/components/common/layout/grid_system_manager.h"
-#define protected public
-#define private public
 #include "core/components_ng/property/grid_property.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "core/components_ng/pattern/grid_container/grid_container_layout_property.h"
 #undef private
 #undef protected
 
@@ -117,6 +117,58 @@ HWTEST_F(GridPropertyTestNg, UpdateSpan_Test, TestSize.Level1)
      */
     bool result_Off = gridProperty->UpdateOffset(OFFSETONE, type);
     EXPECT_TRUE(result_Off);
+}
+
+/**
+ * @tc.name: UpdateSpan_Test002
+ * @tc.desc: Test cast to GridProperty
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridPropertyTestNg, UpdateSpan_Test002, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: create a object gridProperty.
+     */
+    RefPtr<GridProperty> gridProperty = AceType::MakeRefPtr<NG::GridProperty>();
+    auto type = static_cast<GridSizeType>(INDEX);
+
+    /**
+     * @tc.steps2: create a container_.
+     */
+    gridProperty->container_ = AceType::MakeRefPtr<GridContainerLayoutProperty>();
+
+    /**
+     * @tc.steps2: call UpdateSpan.push span is < 0.
+     * @tc.expected: Return result is false.
+     */
+    bool result = gridProperty->UpdateSpan(SPANONE, type);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: UpdateOffset_Test
+ * @tc.desc: Test cast to GridProperty
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridPropertyTestNg, UpdateOffset_Test, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: create a object gridProperty.
+     */
+    RefPtr<GridProperty> gridProperty = AceType::MakeRefPtr<NG::GridProperty>();
+    auto type = static_cast<GridSizeType>(INDEX);
+
+    /**
+     * @tc.steps2: create a container_.
+     */
+    gridProperty->container_ = AceType::MakeRefPtr<GridContainerLayoutProperty>();
+
+    /**
+     * @tc.steps2: call UpdateSpan.push span is < 0.
+     * @tc.expected: Return result is false.
+     */
+    bool result = gridProperty->UpdateOffset(OFFSETONE, type);
+    EXPECT_FALSE(result);
 }
 
 /**
@@ -316,5 +368,58 @@ HWTEST_F(GridPropertyTestNg, GetOffset_Test, TestSize.Level1)
     gridProperty->gridInfo_->hasColumnOffset_ = true;
     auto result_Two = gridProperty->GetOffset();
     EXPECT_EQ(result_Two, UNDEFINED_DIMENSION);
+}
+
+/**
+ * @tc.name: GetContainerPositionTest01
+ * @tc.desc: Test cast to GridProperty
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridPropertyTestNg, GetContainerPositionTest01, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: create a object gridProperty.
+     */
+    RefPtr<GridProperty> gridProperty = AceType::MakeRefPtr<NG::GridProperty>();
+
+    gridProperty->container_ = AceType::MakeRefPtr<GridContainerLayoutProperty>();
+    auto columnFrameNode1 = AceType::MakeRefPtr<FrameNode>("test1", 1, AceType::MakeRefPtr<Pattern>());
+    auto temp = AceType::MakeRefPtr<GridContainerLayoutProperty>();
+    temp->host_ = columnFrameNode1;
+    gridProperty->container_ = temp;
+
+    /**
+     * @tc.steps2: callback GetContainerPosition.push container_ is not null.
+     * @tc.expected: Return expected results.
+     */
+    auto result = gridProperty->GetContainerPosition();
+    EXPECT_EQ(result, OffsetF());
+}
+
+/**
+ * @tc.name: UpdateContainerTest01
+ * @tc.desc: Test cast to GridProperty
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridPropertyTestNg, UpdateContainerTest01, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: create a object gridProperty.
+     */
+    RefPtr<GridProperty> gridProperty = AceType::MakeRefPtr<NG::GridProperty>();
+
+    auto container = AceType::MakeRefPtr<GridContainerLayoutProperty>();
+    GridContainerInfo gridTemp;
+    container->propContainerInfo_ = gridTemp;
+    auto host = AceType::MakeRefPtr<FrameNode>("test1", 1, AceType::MakeRefPtr<Pattern>());
+
+    /**
+     * @tc.steps2: callback UpdateContainer.
+     * @tc.expected: UpdateContainer Success
+     */
+    auto result = gridProperty->UpdateContainer(container, host);
+    EXPECT_EQ(gridProperty->container_, container);
+    EXPECT_EQ(container->childrenFramenode_.size(), 1);
+    EXPECT_TRUE(result);
 }
 } // namespace OHOS::Ace::NG

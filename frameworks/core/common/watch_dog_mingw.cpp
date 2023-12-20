@@ -20,7 +20,6 @@
 #include <pthread.h>
 #include <shared_mutex>
 
-#include "flutter/fml/thread.h"
 
 #include "base/log/event_report.h"
 #include "base/log/log.h"
@@ -48,32 +47,18 @@ constexpr int32_t ANR_DIALOG_BLOCK_TIME = 20;
 enum class State { NORMAL, WARNING, FREEZE };
 
 using Task = std::function<void()>;
-std::unique_ptr<fml::Thread> g_anrThreadFml;
 RefPtr<TaskRunnerAdapter> g_anrThread;
 
 bool PostTaskToTaskRunner(Task&& task, uint32_t delayTime)
 {
-    if (SystemProperties::GetFlutterDecouplingEnabled()) {
-        if (!g_anrThread || !task) {
-            return false;
-        }
+    if (!g_anrThread || !task) {
+        return false;
+    }
 
-        if (delayTime > 0) {
-            g_anrThread->PostDelayedTask(std::move(task), delayTime, {});
-        } else {
-            g_anrThread->PostTask(std::move(task), {});
-        }
+    if (delayTime > 0) {
+        g_anrThread->PostDelayedTask(std::move(task), delayTime, {});
     } else {
-        if (!g_anrThreadFml || !task) {
-            return false;
-        }
-
-        auto anrTaskRunner = g_anrThreadFml->GetTaskRunner();
-        if (delayTime > 0) {
-            anrTaskRunner->PostDelayedTask(std::move(task), fml::TimeDelta::FromSeconds(delayTime), {});
-        } else {
-            anrTaskRunner->PostTask(std::move(task), {});
-        }
+        g_anrThread->PostTask(std::move(task), {});
     }
     return true;
 }
@@ -371,14 +356,8 @@ void ThreadWatcher::TagIncrease()
 
 WatchDog::WatchDog()
 {
-    if (SystemProperties::GetFlutterDecouplingEnabled()) {
-        if (!g_anrThread) {
-            g_anrThread = TaskRunnerAdapterFactory::Create(false, "anr");
-        }
-    } else {
-        if (!g_anrThreadFml) {
-            g_anrThreadFml = std::make_unique<fml::Thread>("anr");
-        }
+    if (!g_anrThread) {
+        g_anrThread = TaskRunnerAdapterFactory::Create(false, "anr");
     }
 #if defined(OHOS_PLATFORM) || defined(ANDROID_PLATFORM)
     PostTaskToTaskRunner(InitializeGcTrigger, GC_CHECK_PERIOD);
@@ -387,11 +366,7 @@ WatchDog::WatchDog()
 
 WatchDog::~WatchDog()
 {
-    if (SystemProperties::GetFlutterDecouplingEnabled()) {
-        g_anrThread.Reset();
-    } else {
-        g_anrThreadFml.reset();
-    }
+    g_anrThread.Reset();
 }
 
 void WatchDog::Register(int32_t instanceId, const RefPtr<TaskExecutor>& taskExecutor, bool useUIAsJSThread)

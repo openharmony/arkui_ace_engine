@@ -61,13 +61,13 @@ public:
 
     void SetCapacity(size_t capacity)
     {
-        LOGI("Set Capacity : %{public}d", static_cast<int32_t>(capacity));
+        TAG_LOGI(AceLogTag::ACE_IMAGE, "Set Capacity : %{public}d", static_cast<int32_t>(capacity));
         capacity_ = capacity;
     }
 
     void SetDataCacheLimit(size_t sizeLimit)
     {
-        LOGI("Set data size cache limit : %{public}d", static_cast<int32_t>(sizeLimit));
+        TAG_LOGI(AceLogTag::ACE_IMAGE, "Set data size cache limit : %{public}d", static_cast<int32_t>(sizeLimit));
         dataSizeLimit_ = sizeLimit;
     }
 

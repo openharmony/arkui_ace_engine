@@ -281,11 +281,6 @@ public:
 
     virtual float MeasureAndGetChildHeight(LayoutWrapper* layoutWrapper, int32_t childIndex);
 
-    bool GroupNeedAllLayout()
-    {
-        return targetIndex_.has_value() && scrollAlign_ == ScrollAlign::CENTER;
-    }
-
     virtual int32_t GetLanes() const
     {
         return 1;
@@ -315,7 +310,7 @@ public:
     bool JudgeInOfScreenScrollAutoType(const RefPtr<LayoutWrapper>& layoutWrapper,
         const RefPtr<ListLayoutProperty>& layoutProperty, float topPos, float bottomPos);
 
-    void JudgeOutOfScreenScrollAutoType(const RefPtr<LayoutWrapper>& layoutWrapper,
+    void JudgeOutOfScreenScrollAutoType(const RefPtr<LayoutWrapper>& layoutWrapper, int32_t index,
         const RefPtr<ListLayoutProperty>& layoutProperty, int32_t indexInGroup, int32_t judgeIndex,
         int32_t startIndex, int32_t endIndex);
 
@@ -343,8 +338,8 @@ protected:
         return index;
     }
 
-    void SetListItemGroupParam(const RefPtr<LayoutWrapper>& layoutWrapper, float referencePos, bool forwardLayout,
-        const RefPtr<ListLayoutProperty>& layoutProperty, bool groupNeedAllLayout);
+    void SetListItemGroupParam(const RefPtr<LayoutWrapper>& layoutWrapper, int32_t index, float referencePos,
+        bool forwardLayout, const RefPtr<ListLayoutProperty>& layoutProperty, bool groupNeedAllLayout);
     static void SetListItemIndex(const RefPtr<LayoutWrapper>& layoutWrapper, int32_t index);
     void CheckListItemGroupRecycle(
         LayoutWrapper* layoutWrapper, int32_t index, float referencePos, bool forwardLayout) const;

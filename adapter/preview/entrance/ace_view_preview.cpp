@@ -30,31 +30,17 @@
 namespace OHOS::Ace::Platform {
 AceViewPreview* AceViewPreview::CreateView(int32_t instanceId, bool useCurrentEventRunner, bool usePlatformThread)
 {
-    if (SystemProperties::GetFlutterDecouplingEnabled()) {
-        auto* aceView =
-            new AceViewPreview(instanceId, ThreadModelImpl::CreateThreadModel(useCurrentEventRunner, !usePlatformThread,
-                !SystemProperties::GetRosenBackendEnabled()));
-        if (aceView != nullptr) {
-            aceView->IncRefCount();
-        }
-        return aceView;
-    } else {
-        auto* aceView =
-            new AceViewPreview(instanceId, FlutterThreadModel::CreateThreadModel(useCurrentEventRunner,
-                !usePlatformThread, !SystemProperties::GetRosenBackendEnabled()));
-        if (aceView != nullptr) {
-            aceView->IncRefCount();
-        }
-        return aceView;
+    auto* aceView =
+        new AceViewPreview(instanceId, ThreadModelImpl::CreateThreadModel(useCurrentEventRunner, !usePlatformThread,
+            !SystemProperties::GetRosenBackendEnabled()));
+    if (aceView != nullptr) {
+        aceView->IncRefCount();
     }
+    return aceView;
 }
 
 AceViewPreview::AceViewPreview(int32_t instanceId, std::unique_ptr<ThreadModelImpl> threadModelImpl)
     : instanceId_(instanceId), threadModelImpl_(std::move(threadModelImpl))
-{}
-
-AceViewPreview::AceViewPreview(int32_t instanceId, std::unique_ptr<FlutterThreadModel> threadModel)
-    : instanceId_(instanceId), threadModel_(std::move(threadModel))
 {}
 
 void AceViewPreview::NotifySurfaceChanged(int32_t width, int32_t height,
@@ -70,7 +56,7 @@ bool AceViewPreview::HandleMouseEvent(const MouseEvent& mouseEvent)
 {
     int32_t eventID = mouseEvent.GetId();
     auto markProcess = [eventID]() {};
-    mouseEventCallback_(mouseEvent, markProcess);
+    mouseEventCallback_(mouseEvent, markProcess, nullptr);
     return true;
 }
 
@@ -78,7 +64,7 @@ bool AceViewPreview::HandleAxisEvent(const AxisEvent& axisEvent)
 {
     int32_t eventID = axisEvent.id;
     auto markProcess = [eventID]() {};
-    axisEventCallback_(axisEvent, markProcess);
+    axisEventCallback_(axisEvent, markProcess, nullptr);
     return true;
 }
 
@@ -90,7 +76,7 @@ bool AceViewPreview::HandleTouchEvent(const TouchEvent& touchEvent)
     }
     CHECK_NULL_RETURN(touchEventCallback_, true);
     auto event = touchEvent.UpdatePointers();
-    touchEventCallback_(event, nullptr);
+    touchEventCallback_(event, nullptr, nullptr);
     return true;
 }
 

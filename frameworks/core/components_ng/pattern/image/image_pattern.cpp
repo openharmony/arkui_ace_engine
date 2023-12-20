@@ -773,6 +773,20 @@ void ImagePattern::UpdateFillColorIfForegroundColor()
     }
 }
 
+void ImagePattern::DumpInfo()
+{
+    auto layoutProp = GetLayoutProperty<ImageLayoutProperty>();
+    CHECK_NULL_VOID(layoutProp);
+    auto src = layoutProp->GetImageSourceInfo().value_or(ImageSourceInfo(""));
+    DumpLog::GetInstance().AddDesc(std::string("url: ").append(src.ToString()));
+    syncLoad_ ? DumpLog::GetInstance().AddDesc("syncLoad:true") : DumpLog::GetInstance().AddDesc("syncLoad:false");
+    DumpLog::GetInstance().AddDesc("imageInterpolation:" + GetImageInterpolation());
+    if (loadingCtx_) {
+        auto currentLoadImageState = loadingCtx_->GetCurrentLoadingState();
+        DumpLog::GetInstance().AddDesc(std::string("currentLoadImageState : ").append(currentLoadImageState));
+    }
+}
+
 void ImagePattern::DumpAdvanceInfo()
 {
     auto layoutProp = GetLayoutProperty<ImageLayoutProperty>();

@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 /// <reference path="./import.ts" />
 class ArkCommonShapeComponent extends ArkComponent implements CommonShapeMethod<ShapeAttribute> {
     constructor(nativePtr: KNode) {
@@ -116,7 +117,7 @@ class StrokeModifier extends ModifierWithKey<ResourceColor> {
     }
 }
 
-class FillModifier extends Modifier<ResourceColor> {
+class FillModifier extends ModifierWithKey<ResourceColor> {
     constructor(value: ResourceColor) {
         super(value);
     }

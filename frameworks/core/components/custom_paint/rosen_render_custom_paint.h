@@ -106,6 +106,7 @@ public:
     void SetFillRuleForPath(const CanvasFillRule& rule) override;
     void SetFillRuleForPath2D(const CanvasFillRule& rule) override;
     static bool IsApplyIndent(const MeasureContext& context, double& indent);
+    static void ApplyLineHeightInNumUnit(const MeasureContext& context, Rosen::TextStyle& txtStyle);
 
     bool IsRepaintBoundary() const override
     {

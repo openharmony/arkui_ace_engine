@@ -435,11 +435,6 @@ public:
         return inlineBorderWidth_;
     }
 
-    const Dimension& GetErrorTextCapsuleMargin() const
-    {
-        return errorTextCapsuleMargin_;
-    }
-
     bool GetDraggable() const
     {
         return draggable_;
@@ -533,7 +528,6 @@ private:
     Dimension iconSize_;
     Dimension iconHotZoneSize_;
     Dimension inlineBorderWidth_ = 2.0_vp;
-    Dimension errorTextCapsuleMargin_ = 22.0_vp;
 
     // UX::insert cursor offset up by 8vp
     Dimension insertCursorOffset_ = 8.0_vp;

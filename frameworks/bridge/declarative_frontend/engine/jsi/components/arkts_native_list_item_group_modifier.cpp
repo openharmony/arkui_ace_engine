@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_list_item_group_modifier.h"
+
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/color.h"
 #include "core/components_ng/base/frame_node.h"
@@ -23,10 +24,17 @@ namespace OHOS::Ace::NG {
 constexpr int CALL_ARG_0 = 0;
 constexpr int CALL_ARG_1 = 1;
 constexpr int CALL_ARG_2 = 2;
-void ListItemGroupSetDivider(NodeHandle node, uint32_t color, const double* values, const int* units)
+constexpr int32_t DEFAULT_GROUP_DIVIDER_VALUES_COUNT = 3;
+
+void ListItemGroupSetDivider(NodeHandle node, uint32_t color, const double* values, const int* units, int32_t length)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
+
+    if (length != DEFAULT_GROUP_DIVIDER_VALUES_COUNT) {
+        return;
+    }
+
     V2::ItemDivider divider;
     divider.color = Color(color);
     divider.strokeWidth = Dimension(values[CALL_ARG_0], static_cast<OHOS::Ace::DimensionUnit>(units[CALL_ARG_0]));

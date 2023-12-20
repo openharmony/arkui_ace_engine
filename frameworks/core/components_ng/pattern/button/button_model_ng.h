@@ -51,7 +51,11 @@ public:
     static void SetStateEffect(FrameNode* frameNode, const bool stateEffect);
     static void SetLableStyle(FrameNode* frameNode, const ButtonParameters& buttonParameters);
     static void BackgroundColor(FrameNode* frameNode, const Color& color, const bool& colorFlag);
-    
+    static void SetBorderRadius(FrameNode* frameNode, const Dimension& radius);
+    static void SetBorderRadius(FrameNode* frameNode, const std::optional<Dimension>& radiusTopLeft,
+        const std::optional<Dimension>& radiusTopRight, const std::optional<Dimension>& radiusBottomLeft,
+        const std::optional<Dimension>& radiusBottomRight);
+
 private:
     static void CreateWithLabel(const std::string& label);
     static void Create(const std::string& tagName);

@@ -100,6 +100,7 @@ public:
     virtual void Initialize(
         OHOS::Rosen::Window* window, const std::shared_ptr<std::vector<uint8_t>>& content, napi_value storage) = 0;
     virtual void InitializeByName(OHOS::Rosen::Window* window, const std::string& name, napi_value storage) = 0;
+    virtual void InitializeDynamic(const std::string& hapPath, const std::string& abcPath) = 0;
 
     // UIExtensionAbility initialize for focusWindow ID
     virtual void Initialize(
@@ -243,6 +244,11 @@ public:
         return false;
     }
 
+    virtual int32_t GetInstanceId()
+    {
+        return -1;
+    }
+
     /**
      * @description: Recycle form.
      * @return return Json string of status data of ArkTS form.
@@ -257,6 +263,23 @@ public:
      * @param statusData Indicates json string of status data of ArkTS form.
      */
     virtual void RecoverForm(const std::string &statusData) {}
+
+    virtual void SetContainerModalTitleVisible(bool customTitleSettedShow, bool floatingTitleSettedShow) {}
+
+    virtual void SetContainerModalTitleHeight(int height) {}
+
+    virtual int32_t GetContainerModalTitleHeight()
+    {
+        return -1;
+    }
+
+    virtual bool GetContainerModalButtonsRect(Rosen::Rect& containerModal, Rosen::Rect& buttons)
+    {
+        return false;
+    }
+
+    virtual void SubscribeContainerModalButtonsRectChange(
+        std::function<void(Rosen::Rect& containerModal, Rosen::Rect& buttons)>&& callback) {}
 
 #ifndef PREVIEW
     virtual void SearchElementInfoByAccessibilityId(

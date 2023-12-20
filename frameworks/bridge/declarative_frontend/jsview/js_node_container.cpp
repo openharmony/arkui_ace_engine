@@ -80,7 +80,7 @@ void JSNodeContainer::Create(const JSCallbackInfo& info)
     };
     NodeContainerModel::GetInstance()->BindController(std::move(resetFunc));
     auto execCtx = info.GetExecutionContext();
-    auto child = CreateNodeByNodeController(object, execCtx);
+    auto child = GetNodeByNodeController(object, execCtx);
     // set the nodeContainerId_ to nodeController
     JSObject firstArg = JSRef<JSObject>::Cast(info[0]).Get();
     firstArg->SetProperty(NODE_CONTAINER_ID, frameNode->GetId());
@@ -94,7 +94,7 @@ void JSNodeContainer::Create(const JSCallbackInfo& info)
     frameNode->MarkNeedFrameFlushDirty(NG::PROPERTY_UPDATE_MEASURE);
 }
 
-RefPtr<NG::UINode> JSNodeContainer::CreateNodeByNodeController(
+RefPtr<NG::UINode> JSNodeContainer::GetNodeByNodeController(
     const JSRef<JSObject>& object, JsiExecutionContext execCtx)
 {
     // get the function to makeNode

@@ -359,7 +359,7 @@ HWTEST_F(GeometryTransitionTestNg, GeometryTransition004, TestSize.Level1)
     gt_->OnReSync(trigger);
     gt_->OnReSync();
     gt_->ToString();
-    EXPECT_TRUE(gt_->hasOutAnim_);
+    EXPECT_FALSE(gt_->hasOutAnim_);
 
     // posChanged  is true
     gt_->hasOutAnim_ = false;
@@ -375,12 +375,12 @@ HWTEST_F(GeometryTransitionTestNg, GeometryTransition004, TestSize.Level1)
     // sizeChanged  is true
     gt_->outNodeTargetAbsRect_ = RectF(1.0f, 1.0f, 10.0f, 1.0f);
     gt_->OnReSync();
-    EXPECT_TRUE(gt_->hasOutAnim_);
+    EXPECT_FALSE(gt_->hasOutAnim_);
 
     // sizeChanged  is true
     gt_->outNodeTargetAbsRect_ = RectF(1.0f, 1.0f, 1.0f, 10.0f);
     gt_->OnReSync();
-    EXPECT_TRUE(gt_->hasOutAnim_);
+    EXPECT_FALSE(gt_->hasOutAnim_);
 }
 
 /**
@@ -503,5 +503,184 @@ HWTEST_F(GeometryTransitionTestNg, GeometryTransitionTest006, TestSize.Level1)
     gt_->RecordAnimationOption(trigger, option);
     result = option.IsValid();
     EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: GeometryTransition007
+ * @tc.desc: Test the Build function in the GeometryTransition
+ * @tc.type: FUNC
+ */
+HWTEST_F(GeometryTransitionTestNg, GeometryTransition007, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create GeometryTransition with weakNode1.
+     */
+    Create(weakNode1, true);
+
+    gt_->hasInAnim_ = false;
+    gt_->outNode_ = weakNode2;
+    gt_->hasOutAnim_ = true;
+
+    /**
+     * @tc.steps: step2. create holder_ with out.
+     */
+    gt_->holder_ = CreateHolderNode(gt_->outNode_.Upgrade());
+
+    /**
+     * @tc.steps: step3. set holder_ is son of node1.
+     */
+    RefPtr<FrameNode> trigger = AceType::MakeRefPtr<FrameNode>("test1", 1, AceType::MakeRefPtr<Pattern>());
+    trigger->AddChild(gt_->holder_);
+
+    /**
+     * @tc.steps: step4. call Build.
+     * @tc.expected: gt_->holder_ is nullptr and hasout is true.
+     */
+    gt_->Build(weakNode3, false);
+    EXPECT_FALSE(gt_->holder_);
+    EXPECT_TRUE(gt_->hasOutAnim_);
+    EXPECT_FALSE(gt_->hasInAnim_);
+}
+
+/**
+ * @tc.name: GeometryTransitionTest008
+ * @tc.desc: Test OnAdditionalLayout()
+ * @tc.type: FUNC
+ */
+HWTEST_F(GeometryTransitionTestNg, GeometryTransition008, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create GeometryTransition with weakNode1.
+     */
+    Create(weakNode1, true);
+    gt_->state_ = GeometryTransition::State::IDENTITY;
+
+    /**
+     * @tc.steps: step2. set Out is weakNode2.
+     */
+    gt_->outNode_ = weakNode2;
+    gt_->hasOutAnim_ = true;
+
+    /**
+     * @tc.steps: step3. call OnAdditionalLayout.
+     * @tc.expected: True.
+     */
+    bool bResult = gt_->OnAdditionalLayout(weakNode2);
+    EXPECT_TRUE(bResult);
+}
+
+/**
+ * @tc.name: GeometryTransitionTest009
+ * @tc.desc: Test RecordAnimationOption()
+ * @tc.type: FUNC
+ */
+HWTEST_F(GeometryTransitionTestNg, GeometryTransitionTest009, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create GeometryTransition with node.
+     */
+    Create(weakNode1, true);
+    node2->AddChild(node1);
+    gt_->inNode_ = weakNode1;
+    gt_->outNode_ = weakNode2;
+
+    /**
+     * @tc.steps: step2. construt input parameters and call OnReSync RecordAnimationOption.
+     * @tc.expected: called RecordAnimationOption and result is expected.
+     */
+    RefPtr<FrameNode> trigger = AceType::MakeRefPtr<FrameNode>("test1", 1, AceType::MakeRefPtr<Pattern>());
+    AnimationOption option = AnimationOption();
+    gt_->RecordAnimationOption(trigger, option);
+    bool result = option.IsValid();
+    EXPECT_FALSE(result);
+
+    /**
+     * @tc.steps: step3. set animation option attribute and call OnReSync RecordAnimationOption.
+     * @tc.expected: called RecordAnimationOption and cover branch animationOption is true.
+     */
+    option.SetDuration(DURATION_TIMES);
+    gt_->RecordAnimationOption(trigger, option);
+    result = option.IsValid();
+    EXPECT_TRUE(result);
+
+    /**
+     * @tc.steps:step4 IsParent(trigger, inNode_) is true
+     * @tc.expected: option is not IsValid
+     */
+    trigger->AddChild(gt_->inNode_.Upgrade());
+    gt_->RecordAnimationOption(trigger, option);
+    result = option.IsValid();
+    EXPECT_TRUE(result);
+
+    /**
+     * @tc.steps:step5 set option Duration(0);
+     */
+    option.SetDuration(0);
+    AnimationOption optionTemp = AnimationOption();
+
+    /**
+     * @tc.steps:step6 set pipeline->GetSyncAnimationOption() IsValid;
+     * @tc.expected: animationOption_ is not IsValid
+     */
+    optionTemp.SetDuration(DURATION_TIMES);
+    auto pipeline = PipelineBase::GetCurrentContext();
+    pipeline->animationOption_ = optionTemp;
+    gt_->RecordAnimationOption(trigger, option);
+    EXPECT_TRUE(gt_->animationOption_.IsValid());
+
+    /**
+     * @tc.steps:step7 Remove child from trigger
+     * @tc.expected: gt_->animationOption_ is not IsValid
+     */
+    gt_->animationOption_ = AnimationOption();
+    trigger->RemoveChild(gt_->inNode_.Upgrade());
+    gt_->RecordAnimationOption(trigger, option);
+    EXPECT_FALSE(gt_->animationOption_.IsValid());
+
+    /**
+     * @tc.steps:step8 pipeline->animationOption_ is not Valid
+     * @tc.expected: gt_->animationOption_ is not IsValid
+     */
+    pipeline->animationOption_ = gt_->animationOption_;
+    gt_->RecordAnimationOption(trigger, option);
+    EXPECT_FALSE(gt_->animationOption_.IsValid());
+}
+
+/**
+ * @tc.name: GeometryTransitionTest010
+ * @tc.desc: Test RecordAnimationOption()
+ * @tc.type: FUNC
+ */
+HWTEST_F(GeometryTransitionTestNg, GeometryTransitionTest010, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create GeometryTransition with node.
+     */
+    Create(weakNode1, true);
+    node2->AddChild(node1);
+    gt_->inNode_ = weakNode1;
+    gt_->outNode_ = weakNode2;
+
+    /**
+     * @tc.steps: step2. construt input parameters and call OnReSync RecordAnimationOption.
+     * @tc.expected: called RecordAnimationOption and result is expected.
+     */
+    RefPtr<FrameNode> trigger = AceType::MakeRefPtr<FrameNode>("test1", 1, AceType::MakeRefPtr<Pattern>());
+    AnimationOption option = AnimationOption();
+    gt_->RecordAnimationOption(trigger, option);
+    bool result = option.IsValid();
+    EXPECT_FALSE(result);
+
+    /**
+     * @tc.steps: step3.set animation option attribute and call OnReSync RecordAnimationOption.
+     * @tc.expected: called RecordAnimationOption and cover branch animationOption is True.
+     */
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto implicitAnimationOption = stack->GetImplicitAnimationOption();
+    implicitAnimationOption.SetDuration(DURATION_TIMES);
+    stack->SetImplicitAnimationOption(implicitAnimationOption);
+    gt_->RecordAnimationOption(trigger, option);
+    result = stack->GetImplicitAnimationOption().IsValid();
+    EXPECT_TRUE(result);
 }
 } // namespace OHOS::Ace::NG

@@ -846,6 +846,13 @@ void FrontendDelegateDeclarative::PushWithCallback(const std::string& uri, const
 {
     if (Container::IsCurrentUseNewPipeline()) {
         CHECK_NULL_VOID(pageRouterManager_);
+        auto container = Container::Current();
+        CHECK_NULL_VOID(container);
+        auto currentId = Container::CurrentId();
+        if (container->IsSubContainer()) {
+            currentId = SubwindowManager::GetInstance()->GetParentContainerId(Container::CurrentId());
+        }
+        ContainerScope scope(currentId);
         pageRouterManager_->Push(
             NG::RouterPageInfo({ uri, params, static_cast<NG::RouterMode>(routerMode), errorCallback }));
         OnMediaQueryUpdate();
@@ -1361,6 +1368,7 @@ Size FrontendDelegateDeclarative::MeasureTextSize(const MeasureContext& context)
 void FrontendDelegateDeclarative::ShowToast(
     const std::string& message, int32_t duration, const std::string& bottom, const NG::ToastShowMode& showMode)
 {
+    TAG_LOGD(AceLogTag::ACE_OVERLAY, "show toast enter");
     int32_t durationTime = std::clamp(duration, TOAST_TIME_DEFAULT, TOAST_TIME_MAX);
     bool isRightToLeft = AceApplicationInfo::GetInstance().IsRightToLeft();
     if (Container::IsCurrentUseNewPipeline()) {
@@ -1383,12 +1391,14 @@ void FrontendDelegateDeclarative::ShowToast(
 
 void FrontendDelegateDeclarative::SetToastStopListenerCallback(std::function<void()>&& stopCallback)
 {
+    TAG_LOGD(AceLogTag::ACE_OVERLAY, "set toast stop listener enter");
     ToastComponent::GetInstance().SetToastStopListenerCallback(std::move(stopCallback));
 }
 
 void FrontendDelegateDeclarative::ShowDialogInner(DialogProperties& dialogProperties,
     std::function<void(int32_t, int32_t)>&& callback, const std::set<std::string>& callbacks)
 {
+    TAG_LOGD(AceLogTag::ACE_OVERLAY, "show dialog inner enter");
     auto pipelineContext = pipelineContextHolder_.Get();
     if (Container::IsCurrentUseNewPipeline()) {
         LOGI("Dialog IsCurrentUseNewPipeline.");
@@ -1410,6 +1420,7 @@ void FrontendDelegateDeclarative::ShowDialogInner(DialogProperties& dialogProper
                     Maskarg.autoCancel = dialogProperties.autoCancel;
                     auto mask = overlayManager->ShowDialog(Maskarg, nullptr, false);
                     CHECK_NULL_VOID(mask);
+                    overlayManager->SetMaskNodeId(dialog->GetId(), mask->GetId());
                 }
             } else {
                 dialog = overlayManager->ShowDialog(
@@ -1460,6 +1471,7 @@ void FrontendDelegateDeclarative::ShowDialog(const std::string& title, const std
     const std::vector<ButtonInfo>& buttons, bool autoCancel, std::function<void(int32_t, int32_t)>&& callback,
     const std::set<std::string>& callbacks)
 {
+    TAG_LOGD(AceLogTag::ACE_OVERLAY, "show dialog enter");
     DialogProperties dialogProperties = {
         .title = title,
         .content = message,
@@ -1473,6 +1485,7 @@ void FrontendDelegateDeclarative::ShowDialog(const std::string& title, const std
     const std::vector<ButtonInfo>& buttons, bool autoCancel, std::function<void(int32_t, int32_t)>&& callback,
     const std::set<std::string>& callbacks, std::function<void(bool)>&& onStatusChanged)
 {
+    TAG_LOGD(AceLogTag::ACE_OVERLAY, "show dialog enter");
     DialogProperties dialogProperties = {
         .title = title,
         .content = message,
@@ -1486,6 +1499,7 @@ void FrontendDelegateDeclarative::ShowDialog(const std::string& title, const std
 void FrontendDelegateDeclarative::ShowDialog(const PromptDialogAttr& dialogAttr, const std::vector<ButtonInfo>& buttons,
     std::function<void(int32_t, int32_t)>&& callback, const std::set<std::string>& callbacks)
 {
+    TAG_LOGD(AceLogTag::ACE_OVERLAY, "show dialog enter");
     DialogProperties dialogProperties = {
         .title = dialogAttr.title,
         .content = dialogAttr.message,
@@ -1508,6 +1522,7 @@ void FrontendDelegateDeclarative::ShowDialog(const PromptDialogAttr& dialogAttr,
     std::function<void(int32_t, int32_t)>&& callback, const std::set<std::string>& callbacks,
     std::function<void(bool)>&& onStatusChanged)
 {
+    TAG_LOGD(AceLogTag::ACE_OVERLAY, "show dialog enter");
     DialogProperties dialogProperties = {
         .title = dialogAttr.title,
         .content = dialogAttr.message,
@@ -1527,9 +1542,60 @@ void FrontendDelegateDeclarative::ShowDialog(const PromptDialogAttr& dialogAttr,
     ShowDialogInner(dialogProperties, std::move(callback), callbacks);
 }
 
+void FrontendDelegateDeclarative::OpenCustomDialog(const PromptDialogAttr &dialogAttr,
+    std::function<void(int32_t)> &&callback)
+{
+    DialogProperties dialogProperties = {
+        .isShowInSubWindow = dialogAttr.showInSubWindow,
+        .isModal = dialogAttr.isModal,
+        .maskRect = dialogAttr.maskRect,
+        .customBuilder = dialogAttr.customBuilder,
+    };
+    if (dialogAttr.alignment.has_value()) {
+        dialogProperties.alignment = dialogAttr.alignment.value();
+    }
+    if (dialogAttr.offset.has_value()) {
+        dialogProperties.offset = dialogAttr.offset.value();
+    }
+    auto pipelineContext = pipelineContextHolder_.Get();
+    if (Container::IsCurrentUseNewPipeline()) {
+        LOGI("Dialog IsCurrentUseNewPipeline.");
+        auto task = [dialogAttr, dialogProperties, callback](const RefPtr<NG::OverlayManager>& overlayManager) mutable {
+            CHECK_NULL_VOID(overlayManager);
+            LOGI("Begin to open custom dialog ");
+            if (dialogProperties.isShowInSubWindow) {
+                SubwindowManager::GetInstance()->OpenCustomDialog(dialogAttr, std::move(callback));
+                if (dialogProperties.isModal) {
+                    // temporary not support isShowInSubWindow and isModal
+                    LOGW("temporary not support isShowInSubWindow and isModal");
+                }
+            } else {
+                overlayManager->OpenCustomDialog(dialogProperties, std::move(callback));
+            }
+        };
+        MainWindowOverlay(std::move(task));
+        return;
+    } else {
+        LOGW("not support old pipeline");
+    }
+    return;
+}
+
+void FrontendDelegateDeclarative::CloseCustomDialog(const int32_t dialogId)
+{
+    auto task = [dialogId](const RefPtr<NG::OverlayManager>& overlayManager) {
+        CHECK_NULL_VOID(overlayManager);
+        LOGI("begin to close custom dialog.");
+        overlayManager->CloseCustomDialog(dialogId);
+    };
+    MainWindowOverlay(std::move(task));
+    return;
+}
+
 void FrontendDelegateDeclarative::ShowActionMenuInner(DialogProperties& dialogProperties,
     const std::vector<ButtonInfo>& button, std::function<void(int32_t, int32_t)>&& callback)
 {
+    TAG_LOGD(AceLogTag::ACE_OVERLAY, "show action menu inner enter");
     ButtonInfo buttonInfo = { .text = Localization::GetInstance()->GetEntryLetters("common.cancel"), .textColor = "" };
     dialogProperties.buttons.emplace_back(buttonInfo);
     if (Container::IsCurrentUseNewPipeline()) {
@@ -1554,6 +1620,7 @@ void FrontendDelegateDeclarative::ShowActionMenuInner(DialogProperties& dialogPr
                         Maskarg.autoCancel = dialogProperties.autoCancel;
                         auto mask = overlayManager->ShowDialog(Maskarg, nullptr, false);
                         CHECK_NULL_VOID(mask);
+                        overlayManager->SetMaskNodeId(dialog->GetId(), mask->GetId());
                     }
                 } else {
                     dialog = overlayManager->ShowDialog(
@@ -1598,6 +1665,7 @@ void FrontendDelegateDeclarative::ShowActionMenuInner(DialogProperties& dialogPr
 void FrontendDelegateDeclarative::ShowActionMenu(
     const std::string& title, const std::vector<ButtonInfo>& button, std::function<void(int32_t, int32_t)>&& callback)
 {
+    TAG_LOGD(AceLogTag::ACE_OVERLAY, "show action menu enter");
     DialogProperties dialogProperties = {
         .title = title,
         .autoCancel = true,
@@ -1610,6 +1678,7 @@ void FrontendDelegateDeclarative::ShowActionMenu(
 void FrontendDelegateDeclarative::ShowActionMenu(const std::string& title, const std::vector<ButtonInfo>& button,
     std::function<void(int32_t, int32_t)>&& callback, std::function<void(bool)>&& onStatusChanged)
 {
+    TAG_LOGD(AceLogTag::ACE_OVERLAY, "show action menu enter");
     DialogProperties dialogProperties = {
         .title = title,
         .autoCancel = true,
@@ -1623,6 +1692,7 @@ void FrontendDelegateDeclarative::ShowActionMenu(const std::string& title, const
 void FrontendDelegateDeclarative::ShowActionMenu(const PromptDialogAttr& dialogAttr,
     const std::vector<ButtonInfo>& buttons, std::function<void(int32_t, int32_t)>&& callback)
 {
+    TAG_LOGD(AceLogTag::ACE_OVERLAY, "show action menu enter");
     DialogProperties dialogProperties = {
         .title = dialogAttr.title,
         .autoCancel = true,

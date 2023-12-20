@@ -56,7 +56,7 @@ RosenWindow::RosenWindow(const OHOS::sptr<OHOS::Rosen::Window>& window, RefPtr<T
             auto pipeline = container->GetPipelineContext();
             CHECK_NULL_VOID(pipeline);
             pipeline->OnIdle(timeStampNanos + refreshPeriod);
-            JankFrameReport::JankFrameRecord(timeStampNanos);
+            JankFrameReport::GetInstance().JankFrameRecord(timeStampNanos);
         };
         auto uiTaskRunner = SingleTaskExecutor::Make(taskExecutor, TaskExecutor::TaskType::UI);
         if (uiTaskRunner.IsRunOnCurrentThread()) {
@@ -178,7 +178,7 @@ void RosenWindow::FlushTasks()
     CHECK_RUN_ON(UI);
     CHECK_NULL_VOID(rsUIDirector_);
     rsUIDirector_->SendMessages();
-    JankFrameReport::JsAnimationToRsRecord();
+    JankFrameReport::GetInstance().JsAnimationToRsRecord();
 }
 
 float RosenWindow::GetRefreshRate() const

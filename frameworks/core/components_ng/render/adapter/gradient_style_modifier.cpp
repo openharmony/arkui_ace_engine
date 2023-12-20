@@ -19,6 +19,7 @@
 #include "base/log/log_wrapper.h"
 #include "base/utils/utils.h"
 #include "core/components_ng/render/adapter/graphic_modifier.h"
+#include "core/components_ng/render/adapter/rosen_render_context.h"
 #ifndef USE_ROSEN_DRAWING
 #include "core/components_ng/render/adapter/skia_decoration_painter.h"
 #else
@@ -51,22 +52,9 @@ void GradientStyleModifier::PaintGradient(SkCanvas& canvas, const SizeF& frameSi
         return;
     }
     auto shader = SkiaDecorationPainter::CreateGradientShader(GetGradient(), frameSize);
-    SkPaint paint;
-    paint.setAntiAlias(true);
-    paint.setShader(shader);
-
-    SkRRect rRect;
-    if (borderRadius_.has_value()) {
-        SkVector fRadii[4] = { { borderRadius_.value().x_, borderRadius_.value().x_ },
-            { borderRadius_.value().y_, borderRadius_.value().y_ },
-            { borderRadius_.value().z_, borderRadius_.value().z_ },
-            { borderRadius_.value().w_, borderRadius_.value().w_ } };
-        rRect.setRectRadii(SkRect::MakeWH(frameSize.Width(), frameSize.Height()), fRadii);
-        canvas.save();
-        canvas.clipRRect(rRect, SkClipOp::kIntersect, true);
-    }
-    canvas.drawRect(SkRect::MakeXYWH(0, 0, frameSize.Width(), frameSize.Height()), paint);
-    canvas.restore();
+    auto renderContext = renderContext_.Upgrade();
+    CHECK_NULL_VOID(renderContext);
+    renderContext->SetBackgroundShader(Rosen::RSShader::CreateRSShader(shader));
 }
 #else
 void GradientStyleModifier::PaintGradient(RSCanvas& canvas, const SizeF& frameSize) const
@@ -75,24 +63,9 @@ void GradientStyleModifier::PaintGradient(RSCanvas& canvas, const SizeF& frameSi
         return;
     }
     auto shader = DrawingDecorationPainter::CreateGradientShader(GetGradient(), frameSize);
-    RSBrush brush;
-    brush.SetAntiAlias(true);
-    brush.SetShaderEffect(shader);
-
-    RSRoundRect rRect;
-    if (borderRadius_.has_value()) {
-        std::vector<RSPoint> fRadii = { { borderRadius_.value().x_, borderRadius_.value().x_ },
-            { borderRadius_.value().y_, borderRadius_.value().y_ },
-            { borderRadius_.value().z_, borderRadius_.value().z_ },
-            { borderRadius_.value().w_, borderRadius_.value().w_ } };
-        rRect = RSRoundRect(RSRect(0, 0, frameSize.Width(), frameSize.Height()), fRadii);
-        canvas.Save();
-        canvas.ClipRoundRect(rRect, RSClipOp::INTERSECT, true);
-    }
-    canvas.AttachBrush(brush);
-    canvas.DrawRect(RSRect(0, 0, frameSize.Width(), frameSize.Height()));
-    canvas.DetachBrush();
-    canvas.Restore();
+    auto renderContext = renderContext_.Upgrade();
+    CHECK_NULL_VOID(renderContext);
+    renderContext->SetBackgroundShader(Rosen::RSShader::CreateRSShader(shader));
 }
 #endif
 

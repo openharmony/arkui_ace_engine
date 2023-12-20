@@ -739,4 +739,23 @@ uint32_t ResourceAdapterImplV2::GetResourceLimitKeys() const
     CHECK_NULL_RETURN(manager, 0);
     return manager->GetResourceLimitKeys();
 }
+
+uint32_t ResourceAdapterImplV2::GetSymbolByName(const char* resName) const
+{
+    uint32_t result = 0;
+    auto manager = GetResourceManager();
+    CHECK_NULL_RETURN(manager, -1);
+    manager->GetSymbolByName(resName, result);
+    return result;
+}
+
+uint32_t ResourceAdapterImplV2::GetSymbolById(uint32_t resId) const
+{
+    uint32_t result = 0;
+    auto manager = GetResourceManager();
+    CHECK_NULL_RETURN(manager, -1);
+    manager->GetSymbolById(resId, result);
+    return result;
+}
+
 } // namespace OHOS::Ace

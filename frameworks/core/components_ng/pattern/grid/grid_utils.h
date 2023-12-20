@@ -30,8 +30,8 @@ public:
     ~GridUtils() = delete;
 
     static std::string ParseArgs(const std::string& args);
-    static float GetMainGap(const RefPtr<GridLayoutProperty>& gridLayoutProperty, const SizeF& frameSize, Axis axis);
-    static float GetCrossGap(const RefPtr<GridLayoutProperty>& gridLayoutProperty, const SizeF& frameSize, Axis axis);
+    static float GetMainGap(const RefPtr<GridLayoutProperty>& props, const SizeF& frameSize, Axis axis);
+    static float GetCrossGap(const RefPtr<GridLayoutProperty>& props, const SizeF& frameSize, Axis axis);
 };
 
 } // namespace OHOS::Ace::NG

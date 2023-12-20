@@ -87,6 +87,7 @@ private:
     static std::string FilterWithRegex(const std::string& filter, std::string& result);
     static bool FilterWithEmail(std::string& result);
     static bool FilterWithAscii(std::string& result);
+    static bool FilterWithDecimal(std::string& result);
 
     std::string content_;
     WeakPtr<Pattern> pattern_;

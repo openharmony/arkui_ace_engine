@@ -126,6 +126,8 @@ public:
         return safeAreaCurve_;
     }
 
+    OffsetF GetWindowWrapperOffset();
+
     bool SetIsFullScreen(bool value);
     bool SetIsNeedAvoidWindow(bool value);
     bool SetIgnoreSafeArea(bool value);

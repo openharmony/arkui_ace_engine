@@ -114,21 +114,24 @@ void ReportPerfEventToRS(DataBase& data)
     switch (dataRs.eventType) {
         case EVENT_RESPONSE:
             {
-                ACE_SCOPED_TRACE("EVENT_REPORT_RESPONSE_RS");
+                ACE_SCOPED_TRACE("EVENT_REPORT_RESPONSE_RS sceneId = %s, uniqueId = %lld",
+                    dataRs.sceneId.c_str(), static_cast<long long> (dataRs.uniqueId));
                 Rosen::RSInterfaces::GetInstance().ReportEventResponse(dataRs);
                 break;
             }
         case EVENT_COMPLETE:
             {
-                ACE_SCOPED_TRACE("EVENT_REPORT_COMPLETE_RS");
                 if (data.isDisplayAnimator) {
+                    ACE_SCOPED_TRACE("EVENT_REPORT_COMPLETE_RS sceneId = %s, uniqueId = %lld",
+                        dataRs.sceneId.c_str(), static_cast<long long> (dataRs.uniqueId));
                     Rosen::RSInterfaces::GetInstance().ReportEventComplete(dataRs);
                 }
                 break;
             }
         case EVENT_JANK_FRAME:
             {
-                ACE_SCOPED_TRACE("EVENT_REPORT_JANK_RS");
+                ACE_SCOPED_TRACE("EVENT_REPORT_JANK_RS sceneId = %s, uniqueId = %lld",
+                    dataRs.sceneId.c_str(), static_cast<long long> (dataRs.uniqueId));
                 Rosen::RSInterfaces::GetInstance().ReportEventJankFrame(dataRs);
                 break;
             }
@@ -469,6 +472,15 @@ bool PerfMonitor::IsExceptResponseTime(int64_t time, const std::string& sceneId)
     if ((sceneId == PerfConstants::ABILITY_OR_PAGE_SWITCH
         && GetCurrentRealTimeNs() - time > RESPONSE_TIMEOUT)
         || sceneId == PerfConstants::VOLUME_BAR_SHOW) {
+        return true;
+    }
+    if (sceneId == PerfConstants::PC_APP_CENTER_GESTURE_OPERATION ||
+        sceneId == PerfConstants::PC_GESTURE_TO_RECENT ||
+        sceneId == PerfConstants::PC_SHORTCUT_SHOW_DESKTOP ||
+        sceneId == PerfConstants::PC_SHORTCUT_RESTORE_DESKTOP ||
+        sceneId == PerfConstants::PC_SHOW_DESKTOP_GESTURE_OPERATION ||
+        sceneId == PerfConstants::PC_ALT_TAB_TO_RECENT ||
+        sceneId == PerfConstants::PC_SHORTCUT_TO_RECENT) {
         return true;
     }
     return false;

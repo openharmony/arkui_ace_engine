@@ -21,6 +21,7 @@
 
 #include "base/geometry/axis.h"
 #include "core/animation/select_motion.h"
+#include "core/animation/spring_curve.h"
 #include "core/animation/bezier_variable_velocity_motion.h"
 #include "core/components_ng/base/frame_scene_status.h"
 #include "core/components_ng/event/drag_event.h"
@@ -36,8 +37,9 @@
 #include "core/components_ng/pattern/scrollable/scrollable_coordination_event.h"
 #include "core/components_ng/pattern/scrollable/scrollable_paint_property.h"
 #include "core/components_ng/pattern/scrollable/scrollable_properties.h"
+#include "core/components_ng/render/animation_utils.h"
 #include "core/event/mouse_event.h"
-
+#include "core/components_ng/event/scrollable_event.h"
 namespace OHOS::Ace::NG {
 #ifndef WEARABLE_PRODUCT
 constexpr double FRICTION = 0.6;
@@ -140,8 +142,6 @@ public:
     {
         return scrollEffect_;
     }
-    void SetEdgeEffect(EdgeEffect edgeEffect);
-    void AddScrollEdgeEffect(RefPtr<ScrollEdgeEffect> edgeEffect);
     bool HandleEdgeEffect(float offset, int32_t source, const SizeF& size, bool reverse = false);
     virtual void SetEdgeEffectCallback(const RefPtr<ScrollEdgeEffect>& scrollEffect) {}
     bool IsRestrictBoundary()
@@ -263,11 +263,11 @@ public:
     void StopAnimate();
     bool AnimateRunning() const
     {
-        return animator_ && animator_->IsRunning();
+        return (animator_ && animator_->IsRunning()) || !isAnimationStop_;
     }
     bool AnimateStoped() const
     {
-        return !animator_ || animator_->IsStopped();
+        return (!animator_ || animator_->IsStopped()) && isAnimationStop_;
     }
 
     void AbortScrollAnimator()
@@ -275,6 +275,11 @@ public:
         if (animator_ && !animator_->IsStopped()) {
             scrollAbort_ = true;
             animator_->Stop();
+        }
+        if (!isAnimationStop_) {
+            scrollAbort_ = true;
+            StopAnimation(springAnimation_);
+            StopAnimation(curveAnimation_);
         }
     }
     bool GetScrollAbort() const
@@ -308,7 +313,7 @@ public:
     void UpdateMouseStart(float offset);
 
     // scrollSnap
-    virtual std::optional<float> CalePredictSnapOffset(float delta)
+    virtual std::optional<float> CalePredictSnapOffset(float delta, float dragDistance, float velocity)
     {
         std::optional<float> predictSnapPosition;
         return predictSnapPosition;
@@ -335,6 +340,16 @@ public:
     int32_t GetScrollSource() const
     {
         return scrollSource_;
+    }
+
+    int32_t GetCurrentVelocity() const
+    {
+        return currentVelocity_;
+    }
+
+    int32_t IsAnimationStop() const
+    {
+        return isAnimationStop_;
     }
 
     ScrollState GetScrollState() const;
@@ -378,11 +393,6 @@ public:
         return Rect();
     };
 
-    void SetEdgeEffect()
-    {
-        SetEdgeEffect(edgeEffect_);
-    }
-
     void SetEdgeEffect(EdgeEffect edgeEffect, bool alwaysEnabled)
     {
         edgeEffect_ = edgeEffect;
@@ -399,6 +409,10 @@ public:
         edgeEffectAlwaysEnabled_ = alwaysEnabled;
     }
 
+    float GetFinalPosition() const
+    {
+        return finalPosition_;
+    }
     void HandleOnDragStatusCallback(
         const DragEventType& dragEventType, const RefPtr<NotifyDragEvent>& notifyDragEvent) override;
 
@@ -418,6 +432,10 @@ protected:
     void UpdateScrollBarRegion(float offset, float estimatedHeight, Size viewPort, Offset viewOffset);
 
     EdgeEffect GetEdgeEffect() const;
+    void SetEdgeEffect()
+    {
+        SetEdgeEffect(edgeEffect_);
+    }
 
     virtual void FireOnScroll(float finalOffset, OnScrollEvent& onScroll) const;
 
@@ -475,15 +493,19 @@ protected:
 private:
     virtual void OnScrollEndCallback() {};
 
-    void DraggedDownScrollEndProcess();
     void RegisterScrollBarEventTask();
-    bool OnScrollPosition(double offset, int32_t source);
+    bool OnScrollPosition(double& offset, int32_t source);
     void SetParentScrollable();
     void ProcessNavBarReactOnStart();
-    bool ProcessNavBarReactOnUpdate(float offset);
+    float ProcessNavBarReactOnUpdate(float offset);
     void ProcessNavBarReactOnEnd();
+    void InitSpringOffsetProperty();
+    void InitCurveOffsetProperty(float position);
+    void StopAnimation(std::shared_ptr<AnimationUtils::Animation> animation);
+    void InitOption(AnimationOption &option, float duration, const RefPtr<Curve>& curve);
 
     void OnAttachToFrameNode() override;
+    void AttachAnimatableProperty(RefPtr<Scrollable> scrollable);
 
     // select with mouse
     virtual void MultiSelectWithoutKeyboard(const RectF& selectedZone) {};
@@ -503,8 +525,6 @@ private:
     float GetOffsetWithLimit(float offset) const;
     void LimitMouseEndOffset();
     void UpdateBorderRadius();
-
-    bool ProcessAssociatedScroll(double offset, int32_t source);
 
     /******************************************************************************
      * NestableScrollContainer implementations
@@ -527,6 +547,7 @@ private:
 
     void OnScrollEnd();
     void ProcessSpringEffect(float velocity);
+    void SetEdgeEffect(EdgeEffect edgeEffect);
 
     // Scrollable::UpdateScrollPosition
     bool HandleScrollImpl(float offset, int32_t source);
@@ -551,9 +572,10 @@ private:
     float GetVelocity() const;
     bool NeedSplitScroll(OverScrollOffset& overOffsets, int32_t source);
     RefreshCoordinationMode CoordinateWithRefresh(double& offset, int32_t source, bool isAtTop);
-    bool CoordinateWithNavigation(bool isAtTop, bool isDraggedDown, double& offset, int32_t source);
+    bool CoordinateWithNavigation(double& offset, int32_t source, bool isAtTop);
     void NotifyFRCSceneInfo(const std::string& scene, double velocity, SceneStatus sceneStatus);
     ModalSheetCoordinationMode CoordinateWithSheet(double& offset, int32_t source, bool isAtTop);
+    bool NeedCoordinateScrollWithNavigation(double offset, int32_t source, const OverScrollOffset& overOffsets);
 
     Axis axis_;
     RefPtr<ScrollableEvent> scrollableEvent_;
@@ -574,7 +596,6 @@ private:
     double friction_ = FRICTION;
     // scroller
     RefPtr<Animator> animator_;
-    RefPtr<SpringMotion> springMotion_;
     bool scrollAbort_ = false;
     bool animateOverScroll_ = false;
 
@@ -599,6 +620,15 @@ private:
     EdgeEffect edgeEffect_ = EdgeEffect::NONE;
     bool edgeEffectAlwaysEnabled_ = false;
 
+    RefPtr<NodeAnimatablePropertyFloat> springOffsetProperty_;
+    RefPtr<NodeAnimatablePropertyFloat> curveOffsetProperty_;
+    std::shared_ptr<AnimationUtils::Animation> springAnimation_;
+    std::shared_ptr<AnimationUtils::Animation> curveAnimation_;
+    std::chrono::high_resolution_clock::time_point lastTime_;
+    bool isAnimationStop_ = true;
+    float currentVelocity_ = 0.0f;
+    float lastPosition_ = 0.0f;
+    float finalPosition_ = 0.0f;
     RefPtr<Animator> hotzoneAnimator_;
     float lastHonezoneOffsetPct_ = 0.0f;
     RefPtr<BezierVariableVelocityMotion> velocityMotion_;

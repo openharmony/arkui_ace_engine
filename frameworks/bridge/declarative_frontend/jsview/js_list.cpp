@@ -766,10 +766,16 @@ void JSListScroller::ScrollToItemInGroup(const JSCallbackInfo& args)
         JSException::Throw(ERROR_CODE_PARAM_INVALID, "%s", "Input parameter check failed.");
         return;
     }
+    if (index < 0) {
+        return;
+    }
 
     if (args.Length() >= 2) { // 2 is param count
         if (!ConvertFromJSValue(args[1], indexInGroup)) {
             JSException::Throw(ERROR_CODE_PARAM_INVALID, "%s", "Input parameter check failed.");
+            return;
+        }
+        if (indexInGroup < 0) {
             return;
         }
     }

@@ -52,7 +52,7 @@ DataPanelModifier::DataPanelModifier()
     auto theme = pipelineContext->GetTheme<DataPanelTheme>();
     auto colors = theme->GetColorsArray();
 
-    date_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(1.0);
+    date_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(0.0);
     for (size_t i = 0; i < MAX_COUNT; ++i) {
         auto value = AceType::MakeRefPtr<AnimatablePropertyFloat>(0.0);
         AttachProperty(value);
@@ -109,11 +109,8 @@ void DataPanelModifier::UpdateDate()
 {
     if (isEffect_->Get()) {
         // When the date update, the animation will repeat once.
+        date_->Set(ANIMATION_START);
         AnimationOption option = AnimationOption();
-        option.SetDuration(0);
-        option.SetDelay(ANIMATION_DELAY);
-        option.SetIteration(ANIMATION_TIMES);
-        AnimationUtils::Animate(option, [&]() { date_->Set(ANIMATION_START); });
         RefPtr<Curve> curve = AceType::MakeRefPtr<SpringCurve>(
             ANIMATION_CURVE_VELOCITY, ANIMATION_CURVE_MASS, ANIMATION_CURVE_STIFFNESS, ANIMATION_CURVE_DAMPING);
         option.SetDuration(ANIMATION_DURATION);
@@ -121,6 +118,8 @@ void DataPanelModifier::UpdateDate()
         option.SetCurve(curve);
         option.SetIteration(ANIMATION_TIMES);
         AnimationUtils::Animate(option, [&]() { date_->Set(ANIMATION_END); });
+    } else {
+        date_->Set(ANIMATION_END);
     }
 }
 

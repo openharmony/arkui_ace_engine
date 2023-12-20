@@ -227,7 +227,7 @@ public:
 
     RectF GetPaintRectWithTransform() override;
 
-    RectF GetPaintRectWithTranslate() override;
+    std::pair<RectF, bool> GetPaintRectWithTranslate() override;
 
     RectF GetPaintRectWithoutTransform() override;
 
@@ -260,7 +260,7 @@ public:
 
     void OnPositionUpdate(const OffsetT<Dimension>& value) override;
     void OnZIndexUpdate(int32_t value) override;
-    void DumpInfo() const override;
+    void DumpInfo() override;
     void SetClipBoundsWithCommands(const std::string& commands) override;
     void SetNeedDebugBoundary(bool flag) override
     {
@@ -306,6 +306,8 @@ public:
     void SetFrameGravity(OHOS::Rosen::Gravity gravity) override;
 
     int32_t CalcExpectedFrameRate(const std::string& scene, float speed) override;
+
+    void SetBackgroundShader(const std::shared_ptr<Rosen::RSShader>& shader);
 
 private:
     void OnBackgroundImageUpdate(const ImageSourceInfo& src) override;
@@ -499,7 +501,7 @@ private:
     bool hasDefaultTransition_ = false;
     bool measureTriggered_ = false;
     bool particleAnimationPlaying_ = false;
-    bool allowSandBox_ = true;
+    bool hasScales_ = false;
     int appearingTransitionCount_ = 0;
     int disappearingTransitionCount_ = 0;
     int sandBoxCount_ = 0;
@@ -522,6 +524,7 @@ private:
     std::shared_ptr<Rosen::RSProperty<Rosen::Vector2f>> pivotProperty_;
     std::unique_ptr<SharedTransitionModifier> sharedTransitionModifier_;
     std::shared_ptr<OverlayTextModifier> modifier_ = nullptr;
+    std::shared_ptr<GradientStyleModifier> gradientStyleModifier_;
 
     // translate modifiers for developer
     std::shared_ptr<Rosen::RSTranslateModifier> translateXY_;

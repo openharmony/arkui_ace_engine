@@ -168,17 +168,7 @@ public:
     {
         return isWidthModifiedBySelect_;
     }
-    
-    void SetIsHeightModifiedBySelect(bool isModified)
-    {
-        isHeightModifiedBySelect_ = isModified;
-    }
-    
-    bool IsHeightModifiedBySelect() const
-    {
-        return isHeightModifiedBySelect_;
-    }
-    
+ 
     void SetIsSelectOption(bool isSelect)
     {
         isSelectOption_ = isSelect;
@@ -211,6 +201,7 @@ private:
     bool OnKeyEvent(const KeyEvent& event);
 
     void OnSelectProcess();
+    bool UpdateOptionFocus(KeyCode code);
     void SetAccessibilityAction();
     void UpdatePasteFontColor(const Color& fontColor);
 
@@ -230,7 +221,6 @@ private:
     Color bgBlendColor_ = Color::TRANSPARENT;
     bool isHover_ = false;
     bool isWidthModifiedBySelect_ = false;
-    bool isHeightModifiedBySelect_ = false;
     bool isSelectOption_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(OptionPattern);

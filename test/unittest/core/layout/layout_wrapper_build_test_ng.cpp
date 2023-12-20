@@ -27,6 +27,7 @@
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/syntax/lazy_for_each_model.h"
 #include "core/components_ng/syntax/lazy_layout_wrapper_builder.h"
+#include "test/unittest/core/syntax/mock_lazy_for_each_builder.h"
 #undef private
 #undef protected
 
@@ -36,6 +37,8 @@ using namespace testing::ext;
 namespace OHOS::Ace::NG {
 namespace {
 const int32_t INDEX = 1;
+constexpr int32_t NODE_ID_0 = 0;
+constexpr int32_t NODE_ID_1 = 1;
 
 RefPtr<LazyLayoutWrapperBuilder> CreateWrapperBuilder()
 {
@@ -131,5 +134,45 @@ HWTEST_F(LayoutWrapperBuildTestNg, LayoutWrapperBuildRemoveAllChildInRenderTree,
         { { 1, CreateLayoutWrapper() }, { 2, CreateLayoutWrapper() } });
     wrapperBuilder->RemoveAllChildInRenderTree();
     EXPECT_EQ(wrapperBuilder->wrapperMap_.size(), 2);
+}
+
+/**
+ * @tc.name: LayoutWrapperBuildTest0001
+ * @tc.desc: Test the operation of GetOrCreateWrapperByIndex.
+ * @tc.type: FUNC
+ */
+HWTEST_F(LayoutWrapperBuildTestNg, LayoutWrapperBuildTest0001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create a wrapperBuilder.
+     */
+    RefPtr<LazyLayoutWrapperBuilder> wrapperBuilder = CreateWrapperBuilder();
+
+    /**
+     * @tc.steps: step2. callback GetOrCreateWrapperByIndex
+     * @tc.expected: expect Return GetOrCreateWrapperByIndex is null.
+     */
+    wrapperBuilder->OnExpandChildLayoutWrapper();
+    auto test = wrapperBuilder->GetOrCreateWrapperByIndex(INDEX);
+    EXPECT_EQ(test, nullptr);
+
+    /**
+     * @tc.steps: step2. add cachedItems_
+     * @tc.expected: add Successful.
+     */
+    RefPtr<LazyForEachBuilder> lazyEach = AceType::MakeRefPtr<Framework::MockLazyForEachBuilder>();
+    auto node = FrameNode::CreateFrameNode(OHOS::Ace::V2::FLEX_ETS_TAG, NODE_ID_0, AceType::MakeRefPtr<Pattern>());
+    auto node2 = FrameNode::CreateFrameNode(OHOS::Ace::V2::FLEX_ETS_TAG, NODE_ID_1, AceType::MakeRefPtr<Pattern>());
+    lazyEach->cachedItems_[INDEX] = std::make_pair("test1", node);
+    lazyEach->cachedItems_[INDEX + 1] = std::make_pair("test2", node2);
+    wrapperBuilder->builder_ = lazyEach;
+    EXPECT_EQ(lazyEach->GetTotalCount(), 2);
+
+    /**
+     * @tc.steps: step3. callback GetOrCreateWrapperByIndex
+     * @tc.expected: expect Return GetOrCreateWrapperByIndex is not null.
+     */
+    test = wrapperBuilder->GetOrCreateWrapperByIndex(INDEX);
+    EXPECT_NE(test, nullptr);
 }
 } // namespace OHOS::Ace::NG

@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 /// <reference path='./import.ts' />
 
 class ArkBorderStyle implements Equable {
@@ -488,19 +489,6 @@ class ArkScrollEdgeEffect implements Equable {
   isEqual(another: ArkScrollEdgeEffect): boolean {
     return (this.value === another.value) &&
       (this.options === another.options);
-  }
-}
-
-class ArkListNestedScrollOptions implements Equable {
-  scrollForward: number;
-  scrollBackward: number;
-  constructor() {
-    this.scrollForward = undefined;
-    this.scrollBackward = undefined;
-  }
-  isEqual(another: ArkListNestedScrollOptions): boolean {
-    return (this.scrollForward === another.scrollForward &&
-      this.scrollBackward === another.scrollBackward)
   }
 }
 
@@ -1656,9 +1644,9 @@ class ArkMesh {
 }
 
 class ArkLanesOpt {
-  lanesNum: number;
-  minLength: Length;
-  maxLength: Length;
+  lanesNum: number | undefined;
+  minLength: Length | undefined;
+  maxLength: Length | undefined;
   gutter?: undefined;
   constructor() {
     this.lanesNum = undefined;
@@ -1685,6 +1673,9 @@ class ArkScrollSnapOptions {
     this.enableSnapToEnd = undefined;
   }
   isEqual(another: ArkScrollSnapOptions): boolean {
-    return ((this.snapAlign === another.snapAlign) && (this.snapPagination === another.snapPagination) && (this.enableSnapToStart === another.enableSnapToStart) && (this.enableSnapToEnd === another.enableSnapToEnd));
+    return ((this.snapAlign === another.snapAlign)
+      && (this.snapPagination === another.snapPagination)
+      && (this.enableSnapToStart === another.enableSnapToStart)
+      && (this.enableSnapToEnd === another.enableSnapToEnd));
   }
 }

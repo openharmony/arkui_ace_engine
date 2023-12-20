@@ -87,7 +87,7 @@ public:
     }
 
     void OnAccessibilityEvent(
-        const Accessibility::AccessibilityEventInfo& info, const std::vector<int32_t>& uiExtensionIdLevelList) override
+        const Accessibility::AccessibilityEventInfo& info, int32_t uiExtensionOffset) override
     {
         ContainerScope scope(instanceId_);
         auto pipeline = PipelineBase::GetCurrentContext();
@@ -95,10 +95,10 @@ public:
         auto taskExecutor = pipeline->GetTaskExecutor();
         CHECK_NULL_VOID(taskExecutor);
         taskExecutor->PostTask(
-            [weak = hostPattern_, info, uiExtensionIdLevelList]() {
+            [weak = hostPattern_, info, uiExtensionOffset]() {
                 auto pattern = weak.Upgrade();
                 CHECK_NULL_VOID(pattern);
-                pattern->OnAccessibilityEvent(info, uiExtensionIdLevelList);
+                pattern->OnAccessibilityEvent(info, uiExtensionOffset);
             },
             TaskExecutor::TaskType::UI);
     }

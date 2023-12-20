@@ -38,6 +38,7 @@
 #include "core/components_ng/pattern/swiper/swiper_model.h"
 #include "core/components_ng/pattern/swiper/swiper_paint_method.h"
 #include "core/components_ng/pattern/swiper/swiper_paint_property.h"
+#include "core/components_ng/pattern/tabs/tab_content_transition_proxy.h"
 #include "core/components_v2/inspector/utils.h"
 
 namespace OHOS::Ace::NG {
@@ -45,6 +46,8 @@ class SwiperPattern : public NestableScrollContainer {
     DECLARE_ACE_TYPE(SwiperPattern, NestableScrollContainer);
 
 public:
+    using CustomContentTransitionPtr = std::shared_ptr<std::function<TabContentAnimatedTransition(int32_t, int32_t)>>;
+
     SwiperPattern();
     ~SwiperPattern() override = default;
 
@@ -531,6 +534,27 @@ public:
     int32_t GetLoopIndex(int32_t originalIndex) const;
     int32_t GetDuration() const;
     RefPtr<Curve> GetCurveIncludeMotion() const;
+    void OnCustomContentTransition(int32_t toIndex);
+    void OnCustomAnimationFinish(int32_t fromIndex, int32_t toIndex, bool hasOnChanged);
+
+    void SetCustomAnimationToIndex(int32_t toIndex)
+    {
+        customAnimationToIndex_ = toIndex;
+    }
+
+    void SetCustomContentTransition(std::function<TabContentAnimatedTransition(int32_t, int32_t)>&& event)
+    {
+        onCustomContentTransition_ =
+            std::make_shared<std::function<TabContentAnimatedTransition(int32_t, int32_t)>>(event);
+    }
+
+    CustomContentTransitionPtr GetCustomContentTransition() const
+    {
+        return onCustomContentTransition_;
+    }
+
+    void SetSwiperEventCallback(bool disableSwipe);
+    void UpdateSwiperPanEvent(bool disableSwipe);
 
 private:
     void OnModifyDone() override;
@@ -576,7 +600,7 @@ private:
     // use property animation feature
     void PlayPropertyTranslateAnimation(
         float translate, int32_t nextIndex, float velocity = 0.0f, bool stopAutoPlay = false);
-    void StopPropertyTranslateAnimation(bool isBeforeCreateLayoutWrapper = false);
+    void StopPropertyTranslateAnimation(bool isFinishAnimation, bool isBeforeCreateLayoutWrapper = false);
     void UpdateOffsetAfterPropertyAnimation(float offset);
     void OnPropertyTranslateAnimationFinish(const OffsetF& offset);
     void PlayIndicatorTranslateAnimation(float translate);
@@ -622,7 +646,7 @@ private:
     void PostTranslateTask(uint32_t delayTime);
     void RegisterVisibleAreaChange();
     bool NeedAutoPlay() const;
-    void OnTranslateFinish(int32_t nextIndex, bool restartAutoPlay, bool forceStop = false);
+    void OnTranslateFinish(int32_t nextIndex, bool restartAutoPlay, bool isFinishAnimation, bool forceStop = false);
     bool IsShowArrow() const;
     void SaveArrowProperty(const RefPtr<FrameNode>& arrowNode);
     RefPtr<FocusHub> GetFocusHubChild(std::string childFrameName);
@@ -662,6 +686,8 @@ private:
     bool AutoLinearAnimationNeedReset(float translate) const;
     void OnAnimationTranslateZero(int32_t nextIndex, bool stopAutoPlay);
     void UpdateDragFRCSceneInfo(float speed, SceneStatus sceneStatus);
+    void TriggerCustomContentTransitionEvent(int32_t fromIndex, int32_t toIndex);
+    bool IsUseCustomAnimation() const;
 
     /**
      * @brief Stops animations when the scroll starts.
@@ -844,6 +870,12 @@ private:
     WindowSizeChangeReason windowSizeChangeReason_ = WindowSizeChangeReason::UNDEFINED;
     std::vector<RefPtr<ScrollingListener>> scrollingListener_;
     FinishCallbackType finishCallbackType_ = FinishCallbackType::REMOVED;
+
+    CustomContentTransitionPtr onCustomContentTransition_;
+    std::set<int32_t> indexsInAnimation_;
+    std::set<int32_t> needUnmountIndexs_;
+    std::optional<int32_t> customAnimationToIndex_;
+    RefPtr<TabContentTransitionProxy> currentProxyInAnimation_;
 };
 } // namespace OHOS::Ace::NG
 

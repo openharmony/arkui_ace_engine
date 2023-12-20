@@ -27,7 +27,7 @@ class MockNestableScrollContainer : public NestableScrollContainer {
     DECLARE_ACE_TYPE(MockNestableScrollContainer, NestableScrollContainer);
 public:
     MOCK_METHOD(OHOS::Ace::Axis, GetAxis, (), (const, override));
-    MOCK_METHOD(OHOS::Ace::ScrollResult, HandleScroll, (float, int32_t, OHOS::Ace::NestedState), (override));
+    MOCK_METHOD(ScrollResult, HandleScroll, (float, int32_t, NestedState), (override));
     MOCK_METHOD(bool, HandleScrollVelocity, (float), (override));
     MOCK_METHOD(void, OnScrollStartRecursive, (float), (override));
     MOCK_METHOD(void, OnScrollEndRecursive, (), (override));

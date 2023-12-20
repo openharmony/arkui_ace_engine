@@ -206,6 +206,16 @@ public:
         return 0;
     }
 
+    virtual uint32_t GetSymbolByName(const char *name) const
+    {
+        return -1;
+    }
+
+    virtual uint32_t GetSymbolById(uint32_t resId) const
+    {
+        return -1;
+    }
+
     static RefPtr<ResourceAdapter> CreateNewResourceAdapter(
         const std::string& bundleName, const std::string& moduleName);
 };

@@ -46,6 +46,15 @@ void SystemWindowScene::OnBoundsChanged(const Rosen::Vector4f& bounds)
     };
 
     CHECK_NULL_VOID(session_);
+    Rosen::WSRectF originBounds = {
+        .posX_ = bounds.x_,
+        .posY_ = bounds.y_,
+        .width_ = bounds.z_,
+        .height_ = bounds.w_,
+    };
+    session_->SetBounds(originBounds);
+    windowRect.posX_ = std::round(bounds.x_ + session_->GetOffsetX());
+    windowRect.posY_ = std::round(bounds.y_ + session_->GetOffsetY());
     session_->UpdateRect(windowRect, Rosen::SizeChangeReason::UNDEFINED);
 }
 

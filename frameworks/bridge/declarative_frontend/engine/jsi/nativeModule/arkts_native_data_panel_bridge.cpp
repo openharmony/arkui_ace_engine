@@ -62,7 +62,7 @@ void ConvertThemeColor(std::vector<OHOS::Ace::NG::Gradient>& colors)
 bool ConvertResourceColor(const EcmaVM* vm, const Local<JSValueRef>& item, OHOS::Ace::NG::Gradient& gradient)
 {
     Color color;
-    if (!ArkTSUtils::ParseJsColor(vm, item, color)) {
+    if (!ArkTSUtils::ParseJsColorAlpha(vm, item, color)) {
         return false;
     }
     OHOS::Ace::NG::GradientColor gradientColorStart;
@@ -182,6 +182,10 @@ ArkUINativeModuleValue DataPanelBridge::SetTrackShadow(ArkUIRuntimeCallInfo* run
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+    if (secondArg->IsNull()) {
+        GetArkUIInternalNodeAPI()->GetDataPanelModifier().SetNullTrackShadow(nativeNode);
+        return panda::JSValueRef::Undefined(vm);
+    }
     if (!secondArg->IsObject()) {
         GetArkUIInternalNodeAPI()->GetDataPanelModifier().ResetTrackShadow(nativeNode);
         return panda::JSValueRef::Undefined(vm);
@@ -262,18 +266,18 @@ ArkUINativeModuleValue DataPanelBridge::ResetCloseEffect(ArkUIRuntimeCallInfo* r
 
 ArkUINativeModuleValue DataPanelBridge::SetDataPanelTrackBackgroundColor(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
-    EcmaVM *vm = runtimeCallInfo->GetVM();
+    EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+
     Color color;
-    if (!ArkTSUtils::ParseJsColor(vm, secondArg, color)) {
-        GetArkUIInternalNodeAPI()->GetDataPanelModifier().ResetDataPanelTrackBackgroundColor(nativeNode);
-    } else {
-        GetArkUIInternalNodeAPI()->GetDataPanelModifier().SetDataPanelTrackBackgroundColor(
-            nativeNode, color.GetValue());
+    if (!ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color)) {
+        RefPtr<DataPanelTheme> theme = GetTheme<DataPanelTheme>();
+        color = theme->GetBackgroundColor();
     }
+    GetArkUIInternalNodeAPI()->GetDataPanelModifier().SetDataPanelTrackBackgroundColor(nativeNode, color.GetValue());
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -295,10 +299,22 @@ ArkUINativeModuleValue DataPanelBridge::SetDataPanelStrokeWidth(ArkUIRuntimeCall
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
     Local<JSValueRef> jsValue = runtimeCallInfo->GetCallArgRef(1);
 
+    RefPtr<DataPanelTheme> theme = GetTheme<DataPanelTheme>();
+
     CalcDimension strokeWidth;
-    if (!ArkTSUtils::ParseJsDimensionVpNG(vm, jsValue, strokeWidth) || strokeWidth.Unit() == DimensionUnit::PERCENT) {
-        strokeWidth = CalcDimension(0);
+
+    if (!ArkTSUtils::ParseJsDimensionVp(vm, jsValue, strokeWidth)) {
+        strokeWidth = theme->GetThickness();
     }
+
+    if (jsValue->IsString() && jsValue->ToString(vm)->ToString().empty()) {
+        strokeWidth = theme->GetThickness();
+    }
+
+    if (strokeWidth.IsNegative() || strokeWidth.Unit() == DimensionUnit::PERCENT) {
+        strokeWidth = theme->GetThickness();
+    }
+
     GetArkUIInternalNodeAPI()->GetDataPanelModifier().SetDataPanelStrokeWidth(
         nativeNode, strokeWidth.Value(), static_cast<int>(strokeWidth.Unit()));
     return panda::JSValueRef::Undefined(vm);

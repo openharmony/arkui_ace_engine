@@ -45,7 +45,7 @@ void SearchTextFieldPattern::PerformAction(TextInputAction action, bool forceClo
     CloseKeyboard(forceCloseKeyboard);
 }
 
-TextInputAction SearchTextFieldPattern::GetDefaultTextInputAction()
+TextInputAction SearchTextFieldPattern::GetDefaultTextInputAction() const
 {
     return TextInputAction::SEARCH;
 }

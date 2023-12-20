@@ -61,6 +61,7 @@ SelectOverlayContentModifier::SelectOverlayContentModifier()
 
 void SelectOverlayContentModifier::onDraw(DrawingContext& drawingContext)
 {
+    CHECK_NULL_VOID(!isUsingMouse_);
     if (isHiddenHandle_->Get()) {
         return;
     }

@@ -60,9 +60,15 @@ enum PageEventType: int32_t {
     NAV_PAGE,
 };
 
+struct EventSwitch {
+    bool pageEnable = false;
+    bool exposureEnable = false;
+    bool componentEnable = false;
+};
+
 constexpr char KEY_ID[] = "id";
 constexpr char KEY_TYPE[] = "type";
-constexpr char KEY_NAV_DST[] = "navDest";
+constexpr char KEY_NAV_DST[] = "navDst";
 constexpr char KEY_PAGE[] = "page";
 constexpr char KEY_PAGE_PARAM[] = "pageParam";
 constexpr char KEY_DURATION[] = "duration";
@@ -125,11 +131,12 @@ public:
     bool IsPageRecordEnable() const;
     bool IsExposureRecordEnable() const;
     bool IsComponentRecordEnable() const;
+    void UpdateEventSwitch(const EventSwitch& eventSwitch);
 
     void SetContainerInfo(const std::string& windowName, int32_t id, bool foreground);
     void SetFocusContainerInfo(const std::string& windowName, int32_t id);
     int32_t GetContainerId();
-    const std::string& GetPageUrl() const;
+    const std::string& GetPageUrl();
     const std::string& GetNavDstName() const;
 
     void OnPageShow(const std::string& pageUrl, const std::string& param);
@@ -144,6 +151,8 @@ public:
 private:
     EventRecorder();
     friend class EventConfig;
+
+    EventSwitch eventSwitch_;
 
     bool pageEnable_ = true;
     bool componentEnable_ = true;

@@ -484,31 +484,6 @@ HWTEST_F(OptionTestNg, OptionPaintMethodTestNg002, TestSize.Level1)
 }
 
 /**
- * @tc.name: OptionPaintPropertyTestNg006
- * @tc.desc: Verify the usability of select modified width and height.
- * @tc.type: FUNC
- */
-HWTEST_F(OptionTestNg, OptionPaintPropertyTestNg006, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Create a option paint property object and verify its default value.
-     * @tc.expected: Default value of select modified width and select modified height.
-     * properties is false.
-     */
-    OptionPaintProperty property;
-    EXPECT_FALSE(property.GetSelectModifiedWidth().has_value());
-    EXPECT_FALSE(property.GetSelectModifiedHeight().has_value());
-    /**
-     * @tc.steps: step2. Update select modified width and select modifiedHeight properties value.
-     * @tc.expected: properties values are as expected.
-     */
-    property.UpdateSelectModifiedWidth(WIDTH.ConvertToPx());
-    property.UpdateSelectModifiedHeight(HEIGHT.ConvertToPx());
-    EXPECT_EQ(property.GetSelectModifiedWidth(), WIDTH.ConvertToPx());
-    EXPECT_EQ(property.GetSelectModifiedHeight(), HEIGHT.ConvertToPx());
-}
-
-/**
  * @tc.name: OptionPaintMethodTestNg003
  * @tc.desc: Verify select option attributes default value and their get and set function.
  * @tc.type: FUNC

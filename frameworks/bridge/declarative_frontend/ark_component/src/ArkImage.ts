@@ -1,3 +1,18 @@
+/*
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 /// <reference path="./import.ts" />
 class ImageColorFilterModifier extends ModifierWithKey<ColorFilter> {
   constructor(value: ColorFilter) {
@@ -237,7 +252,40 @@ class ImageObjectFitModifier extends ModifierWithKey<ImageFit> {
     return this.stageValue !== this.value;
   }
 }
+class ImageBorderRadiusModifier extends ModifierWithKey<Length | BorderRadiuses> {
+  constructor(value: Length | BorderRadiuses) {
+    super(value);
+  }
+  static identity: Symbol = Symbol("imageBorderRadius");
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      GetUINativeModule().image.resetBorderRadius(node);
+    } else {
+      if (isNumber(this.value) || isString(this.value) || isResource(this.value)) {
+        GetUINativeModule().image.setBorderRadius(node, this.value, this.value, this.value, this.value);
+      } else {
+        GetUINativeModule().image.setBorderRadius(node,
+          (this.value as BorderRadiuses).topLeft,
+          (this.value as BorderRadiuses).topRight,
+          (this.value as BorderRadiuses).bottomLeft,
+          (this.value as BorderRadiuses).bottomRight);
+      }
+    }
+  }
 
+  checkObjectDiff(): boolean {
+    if (isResource(this.stageValue) && isResource(this.value)) {
+      return !isResourceEqual(this.stageValue, this.value);
+    } else if (!isResource(this.stageValue) && !isResource(this.value)) {
+      return !((this.stageValue as BorderRadiuses).topLeft === (this.value as BorderRadiuses).topLeft &&
+        (this.stageValue as BorderRadiuses).topRight === (this.value as BorderRadiuses).topRight &&
+        (this.stageValue as BorderRadiuses).bottomLeft === (this.value as BorderRadiuses).bottomLeft &&
+        (this.stageValue as BorderRadiuses).bottomRight === (this.value as BorderRadiuses).bottomRight);
+    } else {
+      return true;
+    }
+  }
+}
 class ArkImageComponent extends ArkComponent implements ImageAttribute {
   constructor(nativePtr: KNode) {
     super(nativePtr);
@@ -312,6 +360,10 @@ class ArkImageComponent extends ArkComponent implements ImageAttribute {
       ImageCopyOptionModifier, value);
     return this;
   }
+  borderRadius(value: Length | BorderRadiuses): this {
+    modifierWithKey(this._modifiersWithKeys, ImageBorderRadiusModifier.identity, ImageBorderRadiusModifier, value);
+    return this;
+  }
   onComplete(
     callback: (event?: {
       width: number;
@@ -346,6 +398,6 @@ globalThis.Image.attributeModifier = function (modifier) {
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkImageComponent(nativeNode);
   });
-  modifier.applyNormalAttribute(component);
+  applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
 }

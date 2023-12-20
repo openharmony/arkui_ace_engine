@@ -22,10 +22,10 @@
 #include "bridge/common/utils/utils.h"
 
 namespace OHOS::Ace::NG {
-constexpr int SIZE_OF_THREE = 3;
-constexpr int POS_0 = 0;
-constexpr int POS_1 = 1;
-constexpr int POS_2 = 2;
+constexpr int32_t SIZE_OF_THREE = 3;
+constexpr int32_t POS_0 = 0;
+constexpr int32_t POS_1 = 1;
+constexpr int32_t POS_2 = 2;
 const char DEFAULT_DELIMITER = '|';
 
 void SetTextpickerBackgroundColor(NodeHandle node, uint32_t color)
@@ -39,13 +39,11 @@ void ResetTextpickerBackgroundColor(NodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    auto context = frameNode->GetContext();
-    CHECK_NULL_VOID(context);
-    auto themeManager = context->GetThemeManager();
-    CHECK_NULL_VOID(themeManager);
-    auto dialogTheme = themeManager->GetTheme<DialogTheme>();
-    CHECK_NULL_VOID(dialogTheme);
-    TextPickerModelNG::SetBackgroundColor(frameNode, dialogTheme->GetBackgroundColor());
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetTheme<DialogTheme>();
+    CHECK_NULL_VOID(theme);
+    TextPickerModelNG::SetBackgroundColor(frameNode, theme->GetBackgroundColor());
 }
 
 void SetTextpickerCanLoop(NodeHandle node, bool canLoop)
@@ -76,7 +74,7 @@ void ResetTextpickerSelected(NodeHandle node)
     TextPickerModelNG::SetSelected(frameNode, 0);
 }
 
-void SetTextpickerSelectedIndex(NodeHandle node, uint32_t* values, int size)
+void SetTextpickerSelectedIndex(NodeHandle node, uint32_t* values, int32_t size)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -171,18 +169,12 @@ void ProcessCascadeSelected(
     }
 }
 
-void ResetTextpickerSelectedIndex(NodeHandle node)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    TextPickerModelNG::SetSelected(frameNode, 0);
-}
-
 void SetTextpickerTextStyle(NodeHandle node, uint32_t color, const char* fontInfo, int32_t styleVal)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    NG::PickerTextStyle pickerTextStyle = GetPickerTextStyle(color, fontInfo, styleVal);
+    NG::PickerTextStyle pickerTextStyle;
+    GetPickerTextStyle(color, fontInfo, styleVal, pickerTextStyle);
     auto context = frameNode->GetContext();
     CHECK_NULL_VOID(context);
     auto themeManager = context->GetThemeManager();
@@ -207,7 +199,8 @@ void SetTextpickerSelectedTextStyle(NodeHandle node, uint32_t color, const char*
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    NG::PickerTextStyle pickerTextStyle = GetPickerTextStyle(color, fontInfo, styleVal);
+    NG::PickerTextStyle pickerTextStyle;
+    GetPickerTextStyle(color, fontInfo, styleVal, pickerTextStyle);
     auto context = frameNode->GetContext();
     CHECK_NULL_VOID(context);
     auto themeManager = context->GetThemeManager();
@@ -233,7 +226,8 @@ void SetTextpickerDisappearTextStyle(NodeHandle node, uint32_t color, const char
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    NG::PickerTextStyle pickerTextStyle = GetPickerTextStyle(color, fontInfo, styleVal);
+    NG::PickerTextStyle pickerTextStyle;
+    GetPickerTextStyle(color, fontInfo, styleVal, pickerTextStyle);
     auto context = frameNode->GetContext();
     CHECK_NULL_VOID(context);
     auto themeManager = context->GetThemeManager();
@@ -255,7 +249,7 @@ void ResetTextpickerDisappearTextStyle(NodeHandle node)
     TextPickerModelNG::SetDisappearTextStyle(frameNode, pickerTheme, pickerTextStyle);
 }
 
-void SetTextpickerDefaultPickerItemHeight(NodeHandle node, float dVal, int dUnit)
+void SetTextpickerDefaultPickerItemHeight(NodeHandle node, double dVal, int32_t dUnit)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -265,9 +259,8 @@ void SetTextpickerDefaultPickerItemHeight(NodeHandle node, float dVal, int dUnit
 
 void ResetTextpickerDefaultPickerItemHeight(NodeHandle node) {}
 
-NG::PickerTextStyle GetPickerTextStyle(uint32_t color, const char* fontInfo, int32_t styleVal)
+void GetPickerTextStyle(uint32_t color, const char* fontInfo, int32_t styleVal, NG::PickerTextStyle& textStyle)
 {
-    NG::PickerTextStyle textStyle;
     textStyle.textColor = Color(color);
 
     std::vector<std::string> res;
@@ -275,7 +268,7 @@ NG::PickerTextStyle GetPickerTextStyle(uint32_t color, const char* fontInfo, int
     StringUtils::StringSplitter(fontValues, DEFAULT_DELIMITER, res);
 
     if (res.size() != SIZE_OF_THREE) {
-        return textStyle;
+        return;
     }
 
     if (res[POS_0] != "-1") {
@@ -292,17 +285,15 @@ NG::PickerTextStyle GetPickerTextStyle(uint32_t color, const char* fontInfo, int
         textStyle.fontFamily = Framework::ConvertStrToFontFamilies(res[POS_2]);
     }
     textStyle.fontStyle = static_cast<Ace::FontStyle>(styleVal);
-    return textStyle;
 }
 
 ArkUITextpickerModifierAPI GetTextpickerModifier()
 {
-    static const ArkUITextpickerModifierAPI modifier = {
-        SetTextpickerBackgroundColor, SetTextpickerCanLoop, SetTextpickerSelected, SetTextpickerSelectedIndex,
-        SetTextpickerTextStyle, SetTextpickerSelectedTextStyle, SetTextpickerDisappearTextStyle,
-        SetTextpickerDefaultPickerItemHeight, ResetTextpickerCanLoop, ResetTextpickerSelected,
-        ResetTextpickerTextStyle, ResetTextpickerSelectedTextStyle, ResetTextpickerDisappearTextStyle,
-        ResetTextpickerDefaultPickerItemHeight, ResetTextpickerBackgroundColor };
+    static const ArkUITextpickerModifierAPI modifier = { SetTextpickerBackgroundColor, SetTextpickerCanLoop,
+        SetTextpickerSelected, SetTextpickerSelectedIndex, SetTextpickerTextStyle, SetTextpickerSelectedTextStyle,
+        SetTextpickerDisappearTextStyle, SetTextpickerDefaultPickerItemHeight, ResetTextpickerCanLoop,
+        ResetTextpickerSelected, ResetTextpickerTextStyle, ResetTextpickerSelectedTextStyle,
+        ResetTextpickerDisappearTextStyle, ResetTextpickerDefaultPickerItemHeight, ResetTextpickerBackgroundColor };
 
     return modifier;
 }

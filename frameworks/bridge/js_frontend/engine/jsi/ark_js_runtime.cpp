@@ -166,8 +166,8 @@ bool ArkJSRuntime::StartDebugger()
         ConnectServerManager::Get().SetDebugMode();
         JSNApi::DebugOption debugOption = { libPath_.c_str(), isDebugMode_ };
 #if !defined(ANDROID_PLATFORM) && !defined(IOS_PLATFORM)
-        ConnectServerManager::Get().AddInstance(instanceId_, language_);
-        ret = JSNApi::NotifyDebugMode(getpid(), vm_, libPath_.c_str(), debugOption, instanceId_, debuggerPostTask_,
+        ConnectServerManager::Get().AddInstance(gettid(), language_);
+        ret = JSNApi::NotifyDebugMode(gettid(), vm_, libPath_.c_str(), debugOption, gettid(), debuggerPostTask_,
             AceApplicationInfo::GetInstance().IsDebugVersion(), isDebugMode_);
 #elif defined(ANDROID_PLATFORM)
         ret = JSNApi::StartDebugger(vm_, debugOption, instanceId_, debuggerPostTask_);

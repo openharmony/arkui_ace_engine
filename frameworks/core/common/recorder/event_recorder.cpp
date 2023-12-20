@@ -160,19 +160,24 @@ EventRecorder& EventRecorder::Get()
 
 EventRecorder::EventRecorder() {}
 
+void EventRecorder::UpdateEventSwitch(const EventSwitch& eventSwitch)
+{
+    eventSwitch_ = eventSwitch;
+}
+
 bool EventRecorder::IsPageRecordEnable() const
 {
-    return pageEnable_;
+    return pageEnable_ && eventSwitch_.pageEnable;
 }
 
 bool EventRecorder::IsExposureRecordEnable() const
 {
-    return exposureEnable_;
+    return exposureEnable_ && eventSwitch_.exposureEnable;
 }
 
 bool EventRecorder::IsComponentRecordEnable() const
 {
-    return componentEnable_;
+    return componentEnable_ && eventSwitch_.componentEnable;
 }
 
 void EventRecorder::SetContainerInfo(const std::string& windowName, int32_t id, bool foreground)
@@ -208,8 +213,11 @@ int32_t EventRecorder::GetContainerId()
     return focusContainerId_;
 }
 
-const std::string& EventRecorder::GetPageUrl() const
+const std::string& EventRecorder::GetPageUrl()
 {
+    if (pageUrl_.empty()) {
+        pageUrl_ = GetCurrentPageUrl();
+    }
     return pageUrl_;
 }
 
@@ -248,7 +256,7 @@ void EventRecorder::OnClick(EventParamsBuilder&& builder)
         taskExecutor_ = container->GetTaskExecutor();
     }
     CHECK_NULL_VOID(taskExecutor_);
-    builder.SetPageUrl(pageUrl_);
+    builder.SetPageUrl(GetPageUrl());
     builder.SetNavDst(navDstName_);
     auto params = builder.build();
     taskExecutor_->PostTask(
@@ -261,7 +269,7 @@ void EventRecorder::OnClick(EventParamsBuilder&& builder)
 
 void EventRecorder::OnChange(EventParamsBuilder&& builder)
 {
-    builder.SetPageUrl(pageUrl_);
+    builder.SetPageUrl(GetPageUrl());
     builder.SetNavDst(navDstName_);
     auto params = builder.build();
     EventController::Get().NotifyEvent(
@@ -270,7 +278,7 @@ void EventRecorder::OnChange(EventParamsBuilder&& builder)
 
 void EventRecorder::OnEvent(EventParamsBuilder&& builder)
 {
-    builder.SetPageUrl(pageUrl_);
+    builder.SetPageUrl(GetPageUrl());
     builder.SetNavDst(navDstName_);
     auto eventType = builder.GetEventType();
     auto params = builder.build();
@@ -282,7 +290,7 @@ void EventRecorder::OnNavDstShow(EventParamsBuilder&& builder)
 {
     navDstName_ = builder.GetText();
     navShowTime_ = GetCurrentTimestamp();
-    builder.SetPageUrl(pageUrl_);
+    builder.SetPageUrl(GetPageUrl());
     builder.SetType(std::to_string(PageEventType::NAV_PAGE));
     auto params = builder.build();
     EventController::Get().NotifyEvent(
@@ -299,7 +307,7 @@ void EventRecorder::OnNavDstHide(EventParamsBuilder&& builder)
             navShowTime_ = 0;
         }
     }
-    builder.SetPageUrl(pageUrl_);
+    builder.SetPageUrl(GetPageUrl());
     builder.SetType(std::to_string(PageEventType::NAV_PAGE));
     auto params = builder.build();
     EventController::Get().NotifyEvent(

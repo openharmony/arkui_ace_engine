@@ -379,9 +379,10 @@ bool ArkTSUtils::ParseStringArray(const EcmaVM* vm, const Local<JSValueRef>& arg
     return true;
 }
 
-bool ArkTSUtils::ParseJsDimensionVp(const EcmaVM* vm, const Local<JSValueRef>& value, CalcDimension& result)
+bool ArkTSUtils::ParseJsDimensionVp(
+    const EcmaVM* vm, const Local<JSValueRef>& value, CalcDimension& result, bool enableCheckInvalidvalue)
 {
-    return ArkTSUtils::ParseJsDimension(vm, value, result, DimensionUnit::VP);
+    return ArkTSUtils::ParseJsDimension(vm, value, result, DimensionUnit::VP, true, enableCheckInvalidvalue);
 }
 
 bool ArkTSUtils::ParseJsInteger(const EcmaVM *vm, const Local<JSValueRef> &value, int32_t &result)
@@ -532,7 +533,7 @@ bool ArkTSUtils::ParseJsDimensionVpNG(const EcmaVM *vm, const Local<JSValueRef> 
 }
 
 bool ArkTSUtils::ParseJsDimension(const EcmaVM *vm, const Local<JSValueRef> &jsValue, CalcDimension &result,
-    DimensionUnit defaultUnit, bool isSupportPercent)
+    DimensionUnit defaultUnit, bool isSupportPercent, bool enableCheckInvalidvalue)
 {
     if (!jsValue->IsNumber() && !jsValue->IsString() && !jsValue->IsObject()) {
         return false;
@@ -547,12 +548,14 @@ bool ArkTSUtils::ParseJsDimension(const EcmaVM *vm, const Local<JSValueRef> &jsV
         if (stringValue.back() == '%' && !isSupportPercent) {
             return false;
         }
-        errno = 0;
-        char* pEnd = nullptr;
-        std::string str = jsValue->ToString(vm)->ToString();
-        std::strtod(str.c_str(), &pEnd);
-        if (pEnd == str.c_str() || errno == ERANGE) {
-            return false;
+        if (enableCheckInvalidvalue && stringValue.find("calc") == std::string::npos) {
+            errno = 0;
+            char* pEnd = nullptr;
+            std::string str = jsValue->ToString(vm)->ToString();
+            std::strtod(str.c_str(), &pEnd);
+            if (pEnd == str.c_str() || errno == ERANGE) {
+                return false;
+            }
         }
         result = StringUtils::StringToCalcDimension(jsValue->ToString(vm)->ToString(), false, defaultUnit);
         return true;
@@ -563,10 +566,39 @@ bool ArkTSUtils::ParseJsDimension(const EcmaVM *vm, const Local<JSValueRef> &jsV
     return false;
 }
 
-bool ArkTSUtils::ParseJsDimensionFp(
-    const EcmaVM *vm, const Local<JSValueRef> &jsValue, CalcDimension &result, bool isSupportPercent)
+bool ArkTSUtils::ParseJsDimensionFp(const EcmaVM* vm, const Local<JSValueRef>& jsValue, CalcDimension& result,
+    bool isSupportPercent, bool enableCheckInvalidvalue)
 {
-    return ArkTSUtils::ParseJsDimension(vm, jsValue, result, DimensionUnit::FP, isSupportPercent);
+    return ArkTSUtils::ParseJsDimension(
+        vm, jsValue, result, DimensionUnit::FP, isSupportPercent, enableCheckInvalidvalue);
+}
+
+bool ArkTSUtils::ParseJsFontFamiliesToString(const EcmaVM* vm, const Local<JSValueRef>& jsValue, std::string& result)
+{
+    if (jsValue->IsNull() || jsValue->IsUndefined()) {
+        return false;
+    }
+
+    if (jsValue->IsString() && jsValue->ToString(vm)->ToString().empty()) {
+        return false;
+    }
+
+    std::vector<std::string> fontFamilies;
+    if (!ParseJsFontFamilies(vm, jsValue, fontFamilies)) {
+        return false;
+    }
+    if (fontFamilies.size() > 0) {
+        result = "";
+        for (uint32_t i = 0; i < fontFamilies.size(); i++) {
+            result += fontFamilies.at(i);
+            if (&fontFamilies.at(i) != &fontFamilies.back()) {
+                result += ",";
+            }
+        }
+        return true;
+    }
+
+    return true;
 }
 
 bool ArkTSUtils::ParseJsFontFamilies(

@@ -57,7 +57,12 @@ void SetContentOpacity(NodeHandle node, double opacity)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    QRCodeModelNG::SetContentOpacity(frameNode, opacity);
+    // The minimum value of opacity is 0 and the maximum value is 1.
+    if (LessNotEqual(opacity, 0.0) || GreatNotEqual(opacity, 1.0)) {
+        QRCodeModelNG::SetContentOpacity(frameNode, DEFAULT_OPACITY);
+    } else {
+        QRCodeModelNG::SetContentOpacity(frameNode, opacity);
+    }
 }
 
 void ResetContentOpacity(NodeHandle node)

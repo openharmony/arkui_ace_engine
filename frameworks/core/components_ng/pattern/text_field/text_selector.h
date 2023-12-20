@@ -192,6 +192,40 @@ struct TextSelector {
     OnAccessibilityCallback onAccessibilityCallback_;
 };
 
+enum class TextSpanType : int32_t {
+    TEXT = 0,
+    IMAGE,
+    MIXED,
+    NONE,
+};
+
+enum class TextResponseType : int32_t {
+    RIGHT_CLICK = 0,
+    LONG_PRESS,
+    SELECTED_BY_MOUSE,
+    NONE,
+};
+
+struct SelectMenuParam {
+    std::function<void(int32_t, int32_t)> onAppear;
+    std::function<void()> onDisappear;
+};
+
+struct SelectionMenuParams {
+    TextSpanType type;
+    std::function<void()> buildFunc;
+    std::function<void(int32_t, int32_t)> onAppear;
+    std::function<void()> onDisappear;
+    TextResponseType responseType;
+
+    SelectionMenuParams(TextSpanType _type, std::function<void()> _buildFunc,
+        std::function<void(int32_t, int32_t)> _onAppear, std::function<void()> _onDisappear,
+        TextResponseType _responseType)
+        : type(_type), buildFunc(_buildFunc), onAppear(_onAppear), onDisappear(_onDisappear),
+          responseType(_responseType)
+    {}
+};
+
 } // namespace OHOS::Ace::NG
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_TEXT_FIELD_TEXT_SELECTOR_H

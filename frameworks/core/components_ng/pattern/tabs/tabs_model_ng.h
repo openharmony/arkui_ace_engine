@@ -58,6 +58,8 @@ public:
     void SetClipEdge(bool clipEdge) override;
     void SetScrollableBarModeOptions(const ScrollableBarModeOptions& option) override;
     void SetBarGridAlign(const BarGridColumnOptions& BarGridColumnOptions) override;
+    void SetIsCustomAnimation(bool isCustom) override;
+    void SetOnCustomAnimation(TabsCustomAnimationEvent&& onCustomAnimation) override;
     static RefPtr<TabsNode> GetOrCreateTabsNode(
         const std::string& tag, int32_t nodeId, const std::function<RefPtr<Pattern>(void)>& patternCreator);
     static void SetTabBarMode(FrameNode* frameNode, TabBarMode tabBarMode);

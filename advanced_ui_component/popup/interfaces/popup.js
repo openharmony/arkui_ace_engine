@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+const mediaquery = requireNapi('mediaquery');
+
 export const defaultTheme = {
     icon: {
         size: { width: 32, height: 32 },
@@ -29,7 +31,7 @@ export const defaultTheme = {
     title: {
         margin: { bottom: 2 },
         minFontSize: 12,
-        fontWeight: FontWeight.Normal,
+        fontWeight: FontWeight.Medium,
         fontSize: {
             id: -1,
             type: 10002,
@@ -40,7 +42,7 @@ export const defaultTheme = {
         fontColor: {
             id: -1,
             type: 10001,
-            params: ["sys.color.ohos_fa_text_primary"],
+            params: ["sys.color.ohos_id_color_text_primary"],
             bundleName: "",
             moduleName: ""
         }
@@ -57,12 +59,13 @@ export const defaultTheme = {
         fontColor: {
             id: -1,
             type: 10001,
-            params: ["sys.color.ohos_fa_text_activated"],
+            params: ["sys.color.ohos_id_color_text_primary_activated"],
             bundleName: "",
             moduleName: ""
         },
         textMargin: { top: 8, bottom: 8, left: 8, right: 8 },
         minFontSize: 9,
+        fontWeight: FontWeight.Medium,
         hoverColor: {
             id: -1,
             type: 10001,
@@ -89,14 +92,24 @@ export const defaultTheme = {
         fontColor: {
             id: -1,
             type: 10001,
-            params: ["sys.color.ohos_fa_text_secondary"],
+            params: ["sys.color.ohos_id_color_text_secondary"],
+            bundleName: "",
+            moduleName: ""
+        },
+        fontWeight: FontWeight.Regular,
+        plainFontColor: {
+            id: -1,
+            type: 10001,
+            params: ["sys.color.ohos_id_color_text_primary"],
             bundleName: "",
             moduleName: ""
         }
     },
     windows: { padding: { top: 12, bottom: 12, left: 12, right: 12 } },
     closeButton: {
-        size: { width: 20, height: 20 },
+        size: { width: 22, height: 22 },
+        imageSize: { width: 18, height: 18 },
+        padding: { top: 2, bottom: 2, left: 2, right: 2 },
         margin: { top: 12, bottom: 12, left: 12, right: 12 },
         image: {
             id: -1,
@@ -108,7 +121,7 @@ export const defaultTheme = {
         fillColor: {
             id: -1,
             type: 10001,
-            params: ["sys.color.ohos_fa_icon_secondary"],
+            params: ["sys.color.ohos_id_color_secondary"],
             bundleName: "",
             moduleName: ""
         },
@@ -197,7 +210,9 @@ export class PopupComponent extends ViewPU {
         this.__applyHeight = new ObservedPropertySimplePU(0, this, "applyHeight");
         this.__buttonHeight = new ObservedPropertySimplePU(0, this, "buttonHeight");
         this.__scrollHeight = new ObservedPropertySimplePU(0, this, "scrollHeight");
-        this.__scrollMaxHeight = new ObservedPropertySimplePU(0, this, "scrollMaxHeight");
+        this.__beforeScreenStatus = new ObservedPropertySimplePU(!0, this, "beforeScreenStatus");
+        this.__currentScreenStatus = new ObservedPropertySimplePU(!0, this, "currentScreenStatus");
+        this.listener = mediaquery.matchMediaSync("(orientation: landscape)");
         this.setInitiallyProvidedValue(e)
     }
 
@@ -217,7 +232,9 @@ export class PopupComponent extends ViewPU {
         void 0 !== t.applyHeight && (this.applyHeight = t.applyHeight);
         void 0 !== t.buttonHeight && (this.buttonHeight = t.buttonHeight);
         void 0 !== t.scrollHeight && (this.scrollHeight = t.scrollHeight);
-        void 0 !== t.scrollMaxHeight && (this.scrollMaxHeight = t.scrollMaxHeight)
+        void 0 !== t.beforeScreenStatus && (this.beforeScreenStatus = t.beforeScreenStatus);
+        void 0 !== t.currentScreenStatus && (this.currentScreenStatus = t.currentScreenStatus);
+        void 0 !== t.listener && (this.listener = t.listener)
     }
 
     updateStateVars(t) {
@@ -242,7 +259,8 @@ export class PopupComponent extends ViewPU {
         this.__applyHeight.purgeDependencyOnElmtId(t);
         this.__buttonHeight.purgeDependencyOnElmtId(t);
         this.__scrollHeight.purgeDependencyOnElmtId(t);
-        this.__scrollMaxHeight.purgeDependencyOnElmtId(t)
+        this.__beforeScreenStatus.purgeDependencyOnElmtId(t);
+        this.__currentScreenStatus.purgeDependencyOnElmtId(t)
     }
 
     aboutToBeDeleted() {
@@ -259,7 +277,8 @@ export class PopupComponent extends ViewPU {
         this.__applyHeight.aboutToBeDeleted();
         this.__buttonHeight.aboutToBeDeleted();
         this.__scrollHeight.aboutToBeDeleted();
-        this.__scrollMaxHeight.aboutToBeDeleted();
+        this.__beforeScreenStatus.aboutToBeDeleted();
+        this.__currentScreenStatus.aboutToBeDeleted();
         SubscriberManager.Get().delete(this.id__());
         this.aboutToBeDeletedInternal()
     }
@@ -368,12 +387,20 @@ export class PopupComponent extends ViewPU {
         this.__scrollHeight.set(t)
     }
 
-    get scrollMaxHeight() {
-        return this.__scrollMaxHeight.get()
+    get beforeScreenStatus() {
+        return this.__beforeScreenStatus.get()
     }
 
-    set scrollMaxHeight(t) {
-        this.__scrollMaxHeight.set(t)
+    set beforeScreenStatus(t) {
+        this.__beforeScreenStatus.set(t)
+    }
+
+    get currentScreenStatus() {
+        return this.__currentScreenStatus.get()
+    }
+
+    set currentScreenStatus(t) {
+        this.__currentScreenStatus.set(t)
     }
 
     getIconWidth() {
@@ -464,6 +491,18 @@ export class PopupComponent extends ViewPU {
         return this.theme.closeButton.backgroundColor
     }
 
+    getCloseButtonPadding() {
+        return this.theme.closeButton.padding
+    }
+
+    getCloseButtonImageWidth() {
+        return this.theme.closeButton.imageSize.width
+    }
+
+    getCloseButtonImageHeight() {
+        return this.theme.closeButton.imageSize.height
+    }
+
     getMessageText() {
         return this.message.text
     }
@@ -474,17 +513,35 @@ export class PopupComponent extends ViewPU {
     }
 
     getMessageFontColor() {
-        var t;
-        return null !== (t = this.message.fontColor) && void 0 !== t ? t : this.theme.message.fontColor
+        var t, e, o, i, n, s, r, l;
+        let h;
+        h = this.message.fontColor ? this.message.fontColor : "" !== this.icon.image && void 0 !== this.icon.image || "" !== this.title.text && void 0 !== this.title.text || "" !== (null === (e = null === (t = this.buttons) || void 0 === t ? void 0 : t[0]) || void 0 === e ? void 0 : e.text) && void 0 !== (null === (i = null === (o = this.buttons) || void 0 === o ? void 0 : o[0]) || void 0 === i ? void 0 : i.text) || "" !== (null === (s = null === (n = this.buttons) || void 0 === n ? void 0 : n[1]) || void 0 === s ? void 0 : s.text) && void 0 !== (null === (l = null === (r = this.buttons) || void 0 === r ? void 0 : r[1]) || void 0 === l ? void 0 : l.text) ? this.theme.message.fontColor : this.theme.message.plainFontColor;
+        return h
     }
 
     getMessagePadding() {
         let t;
-        t = this.title ? { left: this.theme.button.margin.left / 2 } : {
+        t = "" !== this.title.text && void 0 !== this.title.text ? { left: this.theme.button.margin.left / 2 } : {
             left: this.theme.button.margin.left / 2,
             right: this.theme.closeButton.margin.right
         };
         return t
+    }
+
+    getMessageMaxWeight() {
+        let t;
+        if (this.showClose || void 0 === this.showClose) {
+            t = 400;
+            t -= this.theme.windows.padding.left - this.theme.button.margin.right / 2;
+            t -= this.theme.windows.padding.right;
+            t -= this.theme.button.margin.left / 2;
+            t -= this.getCloseButtonWidth()
+        }
+        return t
+    }
+
+    getMessageFontWeight() {
+        return this.theme.message.fontWeight
     }
 
     getButtonMargin() {
@@ -542,6 +599,10 @@ export class PopupComponent extends ViewPU {
         return this.theme.button.minFontSize
     }
 
+    getButtonFontWeight() {
+        return this.theme.button.fontWeight
+    }
+
     getWindowsPadding() {
         return {
             top: this.theme.windows.padding.top,
@@ -551,22 +612,38 @@ export class PopupComponent extends ViewPU {
         }
     }
 
+    aboutToAppear() {
+        this.listener.on("change", (t => {
+            this.currentScreenStatus = t.matches
+        }))
+    }
+
+    aboutToDisappear() {
+        this.listener.off("change")
+    }
+
     getScrollMaxHeight() {
-        this.textHeight > this.scrollHeight && (this.scrollMaxHeight = this.applyHeight);
-        let t = this.scrollMaxHeight;
+        let t;
+        if (this.currentScreenStatus !== this.beforeScreenStatus) {
+            this.beforeScreenStatus = this.currentScreenStatus;
+            return t
+        }
+        t = this.applyHeight;
         t -= this.titleHeight;
         t -= this.buttonHeight;
         t -= this.theme.windows.padding.top;
         t -= this.theme.button.textMargin.bottom / 2;
         t -= this.theme.title.margin.bottom;
         t -= this.theme.windows.padding.bottom - this.theme.button.textMargin.bottom / 2;
+        if (Math.floor(this.textHeight) > Math.floor(t + 1)) return t;
+        t = void 0;
         return t
     }
 
     getLayoutWeight() {
-        var t, e, o, i, n, s, l, r;
+        var t, e, o, i, n, s, r, l;
         let h;
-        h = "" !== this.icon.image && void 0 !== this.icon.image || "" !== this.title.text && void 0 !== this.title.text || this.showClose || void 0 === this.showClose || "" !== (null === (e = null === (t = this.buttons) || void 0 === t ? void 0 : t[0]) || void 0 === e ? void 0 : e.text) && void 0 !== (null === (i = null === (o = this.buttons) || void 0 === o ? void 0 : o[0]) || void 0 === i ? void 0 : i.text) || "" !== (null === (s = null === (n = this.buttons) || void 0 === n ? void 0 : n[1]) || void 0 === s ? void 0 : s.text) && void 0 !== (null === (r = null === (l = this.buttons) || void 0 === l ? void 0 : l[1]) || void 0 === r ? void 0 : r.text) ? 1 : 0;
+        h = "" !== this.icon.image && void 0 !== this.icon.image || "" !== this.title.text && void 0 !== this.title.text || "" !== (null === (e = null === (t = this.buttons) || void 0 === t ? void 0 : t[0]) || void 0 === e ? void 0 : e.text) && void 0 !== (null === (i = null === (o = this.buttons) || void 0 === o ? void 0 : o[0]) || void 0 === i ? void 0 : i.text) || "" !== (null === (s = null === (n = this.buttons) || void 0 === n ? void 0 : n[1]) || void 0 === s ? void 0 : s.text) && void 0 !== (null === (l = null === (r = this.buttons) || void 0 === r ? void 0 : r[1]) || void 0 === l ? void 0 : l.text) ? 1 : 0;
         return h
     }
 
@@ -576,7 +653,7 @@ export class PopupComponent extends ViewPU {
             Row.alignItems(VerticalAlign.Top);
             Row.padding(this.getWindowsPadding());
             Row.onAreaChange(((t, e) => {
-                this.applyHeight !== e.height && (this.applyHeight = e.height)
+                this.applyHeight = e.height
             }))
         }), Row);
         this.observeComponentCreation2(((t, e) => {
@@ -629,6 +706,7 @@ export class PopupComponent extends ViewPU {
                             Button.createWithChild();
                             Button.width(this.getCloseButtonWidth());
                             Button.height(this.getCloseButtonHeight());
+                            Button.padding(this.getCloseButtonPadding());
                             Button.backgroundColor(ObservedObject.GetRawObject(this.closeButtonBackgroundColor));
                             Button.onHover((t => {
                                 this.closeButtonBackgroundColor = t ? this.getCloseButtonHoverColor() : this.getCloseButtonBackgroundColor()
@@ -640,6 +718,8 @@ export class PopupComponent extends ViewPU {
                         this.observeComponentCreation2(((t, e) => {
                             Image.create(this.getCloseButtonImage());
                             Image.focusable(!0);
+                            Image.width(this.getCloseButtonImageWidth());
+                            Image.height(this.getCloseButtonImageHeight());
                             Image.fillColor(this.getCloseButtonFillColor())
                         }), Image);
                         Button.pop()
@@ -657,15 +737,20 @@ export class PopupComponent extends ViewPU {
                     Scroll.scrollable(ScrollDirection.Vertical);
                     Scroll.constraintSize({ maxHeight: this.getScrollMaxHeight() });
                     Scroll.onAreaChange(((t, e) => {
-                        this.scrollHeight !== e.height && (this.scrollHeight = e.height)
+                        this.scrollHeight = e.height
                     }))
                 }), Scroll);
                 this.observeComponentCreation2(((t, e) => {
                     Text.create(this.getMessageText());
                     Text.fontSize(this.getMessageFontSize());
                     Text.fontColor(this.getMessageFontColor());
+                    Text.fontWeight(this.getMessageFontWeight());
+                    Text.constraintSize({
+                        maxWidth: this.getMessageMaxWeight(),
+                        minHeight: this.getCloseButtonHeight()
+                    });
                     Text.onAreaChange(((t, e) => {
-                        this.textHeight !== e.height && (this.textHeight = e.height)
+                        this.textHeight = e.height
                     }))
                 }), Text);
                 Text.pop();
@@ -700,6 +785,7 @@ export class PopupComponent extends ViewPU {
                             Text.focusable(!0);
                             Text.fontSize(this.getFirstButtonFontSize());
                             Text.fontColor(this.getFirstButtonFontColor());
+                            Text.fontWeight(this.getButtonFontWeight());
                             Text.minFontSize(this.getButtonMinFontSize());
                             Text.textOverflow({ overflow: TextOverflow.Ellipsis })
                         }), Text);
@@ -731,6 +817,7 @@ export class PopupComponent extends ViewPU {
                             Text.focusable(!0);
                             Text.fontSize(this.getSecondButtonFontSize());
                             Text.fontColor(this.getSecondButtonFontColor());
+                            Text.fontWeight(this.getButtonFontWeight());
                             Text.minFontSize(this.getButtonMinFontSize());
                             Text.textOverflow({ overflow: TextOverflow.Ellipsis })
                         }), Text);
@@ -761,15 +848,20 @@ export class PopupComponent extends ViewPU {
                     Scroll.scrollable(ScrollDirection.Vertical);
                     Scroll.constraintSize({ maxHeight: this.getScrollMaxHeight() });
                     Scroll.onAreaChange(((t, e) => {
-                        this.scrollHeight !== e.height && (this.scrollHeight = e.height)
+                        this.scrollHeight = e.height
                     }))
                 }), Scroll);
                 this.observeComponentCreation2(((t, e) => {
                     Text.create(this.getMessageText());
                     Text.fontSize(this.getMessageFontSize());
                     Text.fontColor(this.getMessageFontColor());
+                    Text.fontWeight(this.getMessageFontWeight());
+                    Text.constraintSize({
+                        maxWidth: this.getMessageMaxWeight(),
+                        minHeight: this.getCloseButtonHeight()
+                    });
                     Text.onAreaChange(((t, e) => {
-                        this.textHeight !== e.height && (this.textHeight = e.height)
+                        this.textHeight = e.height
                     }))
                 }), Text);
                 Text.pop();
@@ -781,6 +873,7 @@ export class PopupComponent extends ViewPU {
                             Button.createWithChild();
                             Button.width(this.getCloseButtonWidth());
                             Button.height(this.getCloseButtonHeight());
+                            Button.padding(this.getCloseButtonPadding());
                             Button.backgroundColor(ObservedObject.GetRawObject(this.closeButtonBackgroundColor));
                             Button.onHover((t => {
                                 this.closeButtonBackgroundColor = t ? this.getCloseButtonHoverColor() : this.getCloseButtonBackgroundColor()
@@ -792,6 +885,8 @@ export class PopupComponent extends ViewPU {
                         this.observeComponentCreation2(((t, e) => {
                             Image.create(this.getCloseButtonImage());
                             Image.focusable(!0);
+                            Image.width(this.getCloseButtonImageWidth());
+                            Image.height(this.getCloseButtonImageHeight());
                             Image.fillColor(this.getCloseButtonFillColor())
                         }), Image);
                         Button.pop()
@@ -830,6 +925,7 @@ export class PopupComponent extends ViewPU {
                             Text.focusable(!0);
                             Text.fontSize(this.getFirstButtonFontSize());
                             Text.fontColor(this.getFirstButtonFontColor());
+                            Text.fontWeight(this.getButtonFontWeight());
                             Text.minFontSize(this.getButtonMinFontSize());
                             Text.textOverflow({ overflow: TextOverflow.Ellipsis })
                         }), Text);
@@ -861,6 +957,7 @@ export class PopupComponent extends ViewPU {
                             Text.focusable(!0);
                             Text.fontSize(this.getSecondButtonFontSize());
                             Text.fontColor(this.getSecondButtonFontColor());
+                            Text.fontWeight(this.getButtonFontWeight());
                             Text.minFontSize(this.getButtonMinFontSize());
                             Text.textOverflow({ overflow: TextOverflow.Ellipsis })
                         }), Text);

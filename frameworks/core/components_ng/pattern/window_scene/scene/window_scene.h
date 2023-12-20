@@ -49,8 +49,6 @@ private:
     void OnBoundsChanged(const Rosen::Vector4f& bounds);
     void RegisterFocusCallback();
 
-    bool destroyed_ = false;
-
     ACE_DISALLOW_COPY_AND_MOVE(WindowScene);
 };
 } // namespace OHOS::Ace::NG

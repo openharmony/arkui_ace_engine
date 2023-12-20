@@ -218,6 +218,8 @@ void UITaskScheduler::FlushAfterLayoutTask()
             task();
         }
     }
+    // flush correct rect again and flush dirty node again
+    FlushPersistAfterLayoutTask();
 }
 
 void UITaskScheduler::FlushPersistAfterLayoutTask()

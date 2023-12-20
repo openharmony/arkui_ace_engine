@@ -1,3 +1,18 @@
+/*
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 /// <reference path="./import.ts" />
 /// <reference path="./ArkComponent.ts" />
 const FontWeightMap = {
@@ -30,20 +45,11 @@ class ArkButtonComponent extends ArkComponent implements ButtonAttribute {
     return this;
   }
   type (value: ButtonType): this {
-    if (isNumber(value)) {
-      modifier(this._modifiers, ButtonTypeModifier, value);
-    }
-    else {
-      modifier(this._modifiers, ButtonTypeModifier, undefined);
-    }
+    modifierWithKey(this._modifiersWithKeys, ButtonTypeModifier.identity, ButtonTypeModifier, value);
     return this;
   }
   stateEffect(value: boolean): this {
-    if (isBoolean(value)) {
-      modifier(this._modifiers, ButtonStateEffectModifier, value);
-    } else {
-      modifier(this._modifiers, ButtonStateEffectModifier, undefined);
-    }
+    modifierWithKey(this._modifiersWithKeys, ButtonStateEffectModifier.identity, ButtonStateEffectModifier, value);
     return this;
   }
   fontColor(value: ResourceColor): this {
@@ -55,19 +61,11 @@ class ArkButtonComponent extends ArkComponent implements ButtonAttribute {
     return this;
   }
   fontWeight(value: string | number | FontWeight): this {
-    if (typeof value === "string" || typeof value === "number") {
-      modifier(this._modifiers, ButtonFontWeightModifier, value);
-    } else {
-      modifier(this._modifiers, ButtonFontWeightModifier, undefined);
-    }
+    modifierWithKey(this._modifiersWithKeys, ButtonFontWeightModifier.identity, ButtonFontWeightModifier, value);
     return this;
   }
   fontStyle(value: FontStyle): this {
-    if (typeof value === 'number' && value >= 0 && value < 2) {
-      modifier(this._modifiers, ButtonFontStyleModifier, value);
-    } else {
-      modifier(this._modifiers, ButtonFontStyleModifier, undefined);
-    }
+    modifierWithKey(this._modifiersWithKeys, ButtonFontStyleModifier.identity, ButtonFontStyleModifier, value);
     return this;
   }
   fontFamily(value: string | Resource): this {
@@ -76,6 +74,10 @@ class ArkButtonComponent extends ArkComponent implements ButtonAttribute {
   }
   labelStyle(value: LabelStyle): this {
     modifierWithKey(this._modifiersWithKeys, ButtonLabelStyleModifier.identity,ButtonLabelStyleModifier, value);
+    return this;
+  }
+  borderRadius(value: Length | BorderRadiuses): this {
+    modifierWithKey(this._modifiersWithKeys, ButtonBorderRadiusModifier.identity, ButtonBorderRadiusModifier, value);
     return this;
   }
 }
@@ -100,7 +102,7 @@ class ButtonBackgroundColorModifier extends ModifierWithKey<ResourceColor> {
     }
   }
 }
-class ButtonStateEffectModifier extends Modifier<boolean> {
+class ButtonStateEffectModifier extends ModifierWithKey<boolean> {
   constructor(value: boolean) {
     super(value);
   }
@@ -114,7 +116,7 @@ class ButtonStateEffectModifier extends Modifier<boolean> {
     }
   }
 }
-class ButtonFontStyleModifier extends Modifier<number> {
+class ButtonFontStyleModifier extends ModifierWithKey<number> {
   constructor(value: number) {
     super(value);
   }
@@ -160,31 +162,24 @@ class ButtonLabelStyleModifier extends ModifierWithKey<LabelStyle> {
         GetUINativeModule().button.resetLabelStyle(node);
     }
     else {
-      let textOverflow = this.value.overflow; // number -> Ace::TextOverflow
+      let textOverflow = this.value.overflow; // number(enum) -> Ace::TextOverflow
       let maxLines = this.value.maxLines; // number -> uint32_t
-      let minFontSize = this.value.minFontSize; // number/string -> Dimension
-      let maxFontSize = this.value.maxFontSize; // number/string -> Dimension
-      let heightAdaptivePolicy = this.value.heightAdaptivePolicy; // number -> Ace::TextHeightAdaptivePolicy
-      let fontSize = undefined; // number/string ->Dimension
-      let fontWeight = undefined; // string -> Ace::FontWeight
-      let fontStyle = undefined; // number -> Ace::FontStyle
-      let fontFamily = undefined; // string ->std::vector<std::string>
+      let minFontSize = this.value.minFontSize; // number | string | Resource -> Dimension
+      let maxFontSize = this.value.maxFontSize; // number | string | Resource -> Dimension
+      let heightAdaptivePolicy = this.value.heightAdaptivePolicy; // number(enum) -> Ace::TextHeightAdaptivePolicy
+      let fontSize = undefined; // number | string | Resource -> Dimension
+      let fontWeight = undefined; // number | string | Ace::FontWeight -> string -> Ace::FontWeight
+      let fontStyle = undefined; // number(enum) -> Ace::FontStyle
+      let fontFamily = undefined; // string -> std::vector<std::string>
       if (isObject(this.value.font))
       {
         fontSize = this.value.font.size;
-        fontWeight = 'normal';
         fontStyle = this.value.font.style;
         fontFamily = this.value.font.family;
-        if (typeof this.value.font.weight === "string") {
-          fontWeight = this.value.font.weight;
-        } else {
-          if (this.value.font.weight in FontWeightMap) {
-            fontWeight = FontWeightMap[this.value.font.weight];
-          }
+        fontWeight = this.value.font.weight;
       }
       GetUINativeModule().button.setLabelStyle(node, textOverflow, maxLines, minFontSize, maxFontSize,
         heightAdaptivePolicy, fontSize, fontWeight, fontStyle, fontFamily);
-      }
     }
   }
   checkObjectDiff(): boolean {
@@ -203,7 +198,7 @@ class ButtonLabelStyleModifier extends ModifierWithKey<LabelStyle> {
     }
   }
 }
-class ButtonTypeModifier extends Modifier<number> {
+class ButtonTypeModifier extends ModifierWithKey<number> {
   constructor(value: number) {
     super(value);
   }
@@ -263,7 +258,7 @@ class ButtonFontSizeModifier extends ModifierWithKey<Length> {
     }
   }
 }
-class ButtonFontWeightModifier extends Modifier<string | number | FontWeight> {
+class ButtonFontWeightModifier extends ModifierWithKey<string | number | FontWeight> {
   constructor(value: string | number | FontWeight) {
     super(value);
   }
@@ -273,15 +268,42 @@ class ButtonFontWeightModifier extends Modifier<string | number | FontWeight> {
       GetUINativeModule().button.resetFontWeight(node);
     }
     else {
-      let fontWeightStr = 'normal';
-      if (typeof this.value === "string") {
-        fontWeightStr = this.value;
+      GetUINativeModule().button.setFontWeight(node, this.value);
+    }
+  }
+}
+
+class ButtonBorderRadiusModifier extends ModifierWithKey<Length | BorderRadiuses> {
+  constructor(value: Length | BorderRadiuses) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('buttonBorderRadius');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      GetUINativeModule().button.resetButtonBorderRadius(node);
+    } else {
+      if (isNumber(this.value) || isString(this.value) || isResource(this.value)) {
+        GetUINativeModule().button.setButtonBorderRadius(node, this.value, this.value, this.value, this.value);
       } else {
-        if (this.value in FontWeightMap) {
-          fontWeightStr = FontWeightMap[this.value];
-        }
+        GetUINativeModule().button.setButtonBorderRadius(node,
+          (this.value as BorderRadiuses).topLeft,
+          (this.value as BorderRadiuses).topRight,
+          (this.value as BorderRadiuses).bottomLeft,
+          (this.value as BorderRadiuses).bottomRight);
       }
-      GetUINativeModule().button.setFontWeight(node, fontWeightStr);
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    if (isResource(this.stageValue) && isResource(this.value)) {
+      return !isResourceEqual(this.stageValue, this.value);
+    } else if (!isResource(this.stageValue) && !isResource(this.value)) {
+      return !((this.stageValue as BorderRadiuses).topLeft === (this.value as BorderRadiuses).topLeft &&
+        (this.stageValue as BorderRadiuses).topRight === (this.value as BorderRadiuses).topRight &&
+        (this.stageValue as BorderRadiuses).bottomLeft === (this.value as BorderRadiuses).bottomLeft &&
+        (this.stageValue as BorderRadiuses).bottomRight === (this.value as BorderRadiuses).bottomRight);
+    } else {
+      return true;
     }
   }
 }
@@ -292,6 +314,6 @@ globalThis.Button.attributeModifier = function (modifier) {
   let component = this.createOrGetNode(elmtId, ()=> {
     return new ArkButtonComponent(nativeNode);
   });
-  modifier.applyNormalAttribute(component);
+  applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
 }

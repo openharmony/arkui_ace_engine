@@ -72,7 +72,8 @@
                 "security_component_manager",
                 "camera_framework",
                 "media_library",
-                "app_file_service"
+                "app_file_service",
+                "ets_utils"
             ],
             "third_party": [
                 "json",
@@ -108,6 +109,7 @@
                     "header": {
                         "header_base": "//foundation/arkui/ace_engine/interfaces/inner_api/ace/",
                         "header_files": [
+                            "navigation_controller.h",
                             "ui_content.h",
                             "ui_event.h",
                             "ui_event_observer.h",

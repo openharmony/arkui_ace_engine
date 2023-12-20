@@ -217,9 +217,27 @@ void TabsPattern::OnUpdateShowDivider()
     dividerFrameNode->MarkModifyDone();
 }
 
+void TabsPattern::UpdateSwiperDisableSwipe(bool disableSwipe)
+{
+    auto tabsNode = AceType::DynamicCast<TabsNode>(GetHost());
+    CHECK_NULL_VOID(tabsNode);
+    auto swiperNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabs());
+    CHECK_NULL_VOID(swiperNode);
+    auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_VOID(swiperPattern);
+    auto swiperPaintProperty = swiperNode->GetPaintProperty<SwiperPaintProperty>();
+    CHECK_NULL_VOID(swiperPaintProperty);
+    swiperPaintProperty->UpdateDisableSwipe(disableSwipe);
+    swiperPattern->UpdateSwiperPanEvent(disableSwipe);
+    swiperPattern->SetSwiperEventCallback(disableSwipe);
+}
+
 void TabsPattern::OnModifyDone()
 {
     Pattern::OnModifyDone();
+
+    UpdateSwiperDisableSwipe(isCustomAnimation_ ? true : isDisableSwipe_);
+
     if (onChangeEvent_) {
         return;
     }

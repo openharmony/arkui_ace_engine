@@ -42,6 +42,7 @@ constexpr uint8_t DEFAULT_COLUMNS = 8;
 constexpr float DEFAULT_GRID_ROW_WIDTH = (DEFAULT_SPAN_WIDTH * DEFAULT_COLUMNS);
 constexpr uint8_t DEFAULT_OFFSET = 7;
 constexpr uint8_t DEFAULT_HEIGHT = 10;
+constexpr uint8_t TEST_ALIGN_HEIGHT = 30;
 } // namespace
 
 class GridRowTestNg : public testing::Test {
@@ -262,14 +263,38 @@ HWTEST_F(GridRowTestNg, Algorithm004, TestSize.Level1)
  */
 HWTEST_F(GridRowTestNg, Algorithm005, TestSize.Level1)
 {
+    /**
+     * @tc.steps: step1. V2::GridRowDirection::Row
+     * @tc.expected: GridCol is sorted from left to right
+     */
     auto layoutProperty = rowNode_->GetLayoutProperty<GridRowLayoutProperty>();
-    layoutProperty->UpdateDirection(V2::GridRowDirection::RowReverse);
+    auto direction = layoutProperty->GetDirection();
+    EXPECT_EQ(direction, V2::GridRowDirection::Row);
     auto layoutWrapper = CreateLayoutWrapperAndLayout(true);
     auto frameRect = layoutWrapper->GetOrCreateChildByIndex(0)->GetGeometryNode()->GetFrameRect();
-    float columnWidth = frameRect.Width();
+    auto columnWidth = frameRect.Width();
 
     EXPECT_EQ(columnWidth, DEFAULT_SPAN_WIDTH);
+    EXPECT_EQ(frameRect.GetX(), DEFAULT_GRID_ROW_WIDTH - DEFAULT_SPAN_WIDTH);
+    EXPECT_EQ(frameRect.GetY(), 0);
+    frameRect = layoutWrapper->GetOrCreateChildByIndex(1)->GetGeometryNode()->GetFrameRect();
     EXPECT_EQ(frameRect.GetX(), 0);
+    EXPECT_EQ(frameRect.GetY(), DEFAULT_HEIGHT);
+
+    /**
+     * @tc.steps: step2. V2::GridRowDirection::RowReverse
+     * @tc.expected: GridCol is sorted from right to left
+     */
+    layoutProperty->UpdateDirection(V2::GridRowDirection::RowReverse);
+    layoutWrapper = CreateLayoutWrapperAndLayout(true);
+    frameRect = layoutWrapper->GetOrCreateChildByIndex(0)->GetGeometryNode()->GetFrameRect();
+    columnWidth = frameRect.Width();
+    EXPECT_EQ(columnWidth, DEFAULT_SPAN_WIDTH);
+    EXPECT_EQ(frameRect.GetX(), DEFAULT_GRID_ROW_WIDTH - (DEFAULT_OFFSET + 1) * DEFAULT_SPAN_WIDTH);
+    EXPECT_EQ(frameRect.GetY(), 0);
+    frameRect = layoutWrapper->GetOrCreateChildByIndex(1)->GetGeometryNode()->GetFrameRect();
+    EXPECT_EQ(frameRect.GetX(), (DEFAULT_COLUMNS - 1) * DEFAULT_SPAN_WIDTH);
+    EXPECT_EQ(frameRect.GetY(), DEFAULT_HEIGHT);
 }
 
 /**
@@ -288,6 +313,984 @@ HWTEST_F(GridRowTestNg, Algorithm006, TestSize.Level1)
 
     EXPECT_EQ(frameRect.GetX(), 0);
     EXPECT_EQ(frameRect.GetY(), DEFAULT_HEIGHT); // because of DEFAULT_OFFSET, the col is at second row
+}
+
+/**
+ * @tc.name: ItemAlign001
+ * @tc.desc: Test GridRow layout algorithm with default ItemAlign.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridRowTestNg, ItemAlign001, TestSize.Level1)
+{
+    auto layoutProperty = rowNode_->GetLayoutProperty<GridRowLayoutProperty>();
+    auto direction = layoutProperty->GetDirection();
+    EXPECT_EQ(direction, V2::GridRowDirection::Row);
+    auto itemAlign = layoutProperty->GetAlignItems();
+    EXPECT_FALSE(itemAlign.has_value());
+
+    /**
+     * @tc.steps: step1. create environment for running process.
+     */
+    auto firstColNode = colNodes_.front();
+    auto firstColLayoutProperty = firstColNode->GetLayoutProperty<GridColLayoutProperty>();
+    firstColLayoutProperty->UpdateSpan(V2::GridContainerSize(1));
+    firstColLayoutProperty->UpdateOffset(V2::GridContainerSize(0));
+    firstColLayoutProperty->UpdateOrder(V2::GridContainerSize());
+    firstColLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(TEST_ALIGN_HEIGHT)));
+
+    auto secondColNode = colNodes_.back();
+    auto secondColLayoutProperty = secondColNode->GetLayoutProperty<GridColLayoutProperty>();
+    secondColLayoutProperty->UpdateSpan(V2::GridContainerSize(1));
+    secondColLayoutProperty->UpdateOffset(V2::GridContainerSize(0));
+    secondColLayoutProperty->UpdateOrder(V2::GridContainerSize());
+    secondColLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(DEFAULT_HEIGHT)));
+
+    /**
+     * @tc.steps: step2. Running layout function and check the result with expected results.
+     */
+    auto layoutWrapper = CreateLayoutWrapperAndLayout(true);
+    auto frameRect = layoutWrapper->GetOrCreateChildByIndex(0)->GetGeometryNode()->GetFrameRect();
+    auto columnWidth = frameRect.Width();
+    auto columnHeight = frameRect.Height();
+    EXPECT_EQ(frameRect.GetX(), 0);
+    EXPECT_EQ(frameRect.GetY(), 0);
+    EXPECT_EQ(columnWidth, DEFAULT_SPAN_WIDTH);
+    EXPECT_EQ(columnHeight, TEST_ALIGN_HEIGHT);
+
+    frameRect = layoutWrapper->GetOrCreateChildByIndex(1)->GetGeometryNode()->GetFrameRect();
+    columnWidth = frameRect.Width();
+    columnHeight = frameRect.Height();
+    EXPECT_EQ(frameRect.GetX(), DEFAULT_SPAN_WIDTH);
+    EXPECT_EQ(frameRect.GetY(), 0);
+    EXPECT_EQ(columnWidth, DEFAULT_SPAN_WIDTH);
+    EXPECT_EQ(columnHeight, DEFAULT_HEIGHT);
+}
+
+/**
+ * @tc.name: ItemAlign002
+ * @tc.desc: Test GridRow layout algorithm with ItemAlign.Start.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridRowTestNg, ItemAlign002, TestSize.Level1)
+{
+    auto layoutProperty = rowNode_->GetLayoutProperty<GridRowLayoutProperty>();
+    layoutProperty->UpdateAlignItems(FlexAlign::FLEX_START);
+
+    /**
+     * @tc.steps: step1. create environment for running process.
+     */
+    auto firstColNode = colNodes_.front();
+    auto firstColLayoutProperty = firstColNode->GetLayoutProperty<GridColLayoutProperty>();
+    firstColLayoutProperty->UpdateSpan(V2::GridContainerSize(1));
+    firstColLayoutProperty->UpdateOffset(V2::GridContainerSize(0));
+    firstColLayoutProperty->UpdateOrder(V2::GridContainerSize());
+    firstColLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(TEST_ALIGN_HEIGHT)));
+
+    auto secondColNode = colNodes_.back();
+    auto secondColLayoutProperty = secondColNode->GetLayoutProperty<GridColLayoutProperty>();
+    secondColLayoutProperty->UpdateSpan(V2::GridContainerSize(1));
+    secondColLayoutProperty->UpdateOffset(V2::GridContainerSize(0));
+    secondColLayoutProperty->UpdateOrder(V2::GridContainerSize());
+    secondColLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(DEFAULT_HEIGHT)));
+
+    /**
+     * @tc.steps: step2. Running layout function and check the result with expected results.
+     */
+    auto layoutWrapper = CreateLayoutWrapperAndLayout(true);
+    auto frameRect = layoutWrapper->GetOrCreateChildByIndex(0)->GetGeometryNode()->GetFrameRect();
+    auto columnWidth = frameRect.Width();
+    auto columnHeight = frameRect.Height();
+    EXPECT_EQ(frameRect.GetX(), 0);
+    EXPECT_EQ(frameRect.GetY(), 0);
+    EXPECT_EQ(columnWidth, DEFAULT_SPAN_WIDTH);
+    EXPECT_EQ(columnHeight, TEST_ALIGN_HEIGHT);
+
+    frameRect = layoutWrapper->GetOrCreateChildByIndex(1)->GetGeometryNode()->GetFrameRect();
+    columnWidth = frameRect.Width();
+    columnHeight = frameRect.Height();
+    EXPECT_EQ(frameRect.GetX(), DEFAULT_SPAN_WIDTH);
+    EXPECT_EQ(frameRect.GetY(), 0);
+    EXPECT_EQ(columnWidth, DEFAULT_SPAN_WIDTH);
+    EXPECT_EQ(columnHeight, DEFAULT_HEIGHT);
+}
+
+/**
+ * @tc.name: ItemAlign003
+ * @tc.desc: Test GridRow layout algorithm with ItemAlign.Center.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridRowTestNg, ItemAlign003, TestSize.Level1)
+{
+    auto layoutProperty = rowNode_->GetLayoutProperty<GridRowLayoutProperty>();
+    layoutProperty->UpdateAlignItems(FlexAlign::CENTER);
+
+    /**
+     * @tc.steps: step1. create environment for running process.
+     */
+    auto firstColNode = colNodes_.front();
+    auto firstColLayoutProperty = firstColNode->GetLayoutProperty<GridColLayoutProperty>();
+    firstColLayoutProperty->UpdateSpan(V2::GridContainerSize(1));
+    firstColLayoutProperty->UpdateOffset(V2::GridContainerSize(0));
+    firstColLayoutProperty->UpdateOrder(V2::GridContainerSize());
+    firstColLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(TEST_ALIGN_HEIGHT)));
+
+    auto secondColNode = colNodes_.back();
+    auto secondColLayoutProperty = secondColNode->GetLayoutProperty<GridColLayoutProperty>();
+    secondColLayoutProperty->UpdateSpan(V2::GridContainerSize(1));
+    secondColLayoutProperty->UpdateOffset(V2::GridContainerSize(0));
+    secondColLayoutProperty->UpdateOrder(V2::GridContainerSize());
+    secondColLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(DEFAULT_HEIGHT)));
+
+    /**
+     * @tc.steps: step2. Running layout function and check the result with expected results.
+     */
+    auto layoutWrapper = CreateLayoutWrapperAndLayout(true);
+    auto frameRect = layoutWrapper->GetOrCreateChildByIndex(0)->GetGeometryNode()->GetFrameRect();
+    auto columnWidth = frameRect.Width();
+    auto columnHeight = frameRect.Height();
+    EXPECT_EQ(frameRect.GetX(), 0);
+    EXPECT_EQ(frameRect.GetY(), 0);
+    EXPECT_EQ(columnWidth, DEFAULT_SPAN_WIDTH);
+    EXPECT_EQ(columnHeight, TEST_ALIGN_HEIGHT);
+
+    frameRect = layoutWrapper->GetOrCreateChildByIndex(1)->GetGeometryNode()->GetFrameRect();
+    columnWidth = frameRect.Width();
+    columnHeight = frameRect.Height();
+    EXPECT_EQ(frameRect.GetX(), DEFAULT_SPAN_WIDTH);
+    EXPECT_EQ(frameRect.GetY(), TEST_ALIGN_HEIGHT * 0.5 - DEFAULT_HEIGHT * 0.5);
+    EXPECT_EQ(columnWidth, DEFAULT_SPAN_WIDTH);
+    EXPECT_EQ(columnHeight, DEFAULT_HEIGHT);
+}
+
+/**
+ * @tc.name: ItemAlign004
+ * @tc.desc: Test GridRow layout algorithm with ItemAlign.End.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridRowTestNg, ItemAlign004, TestSize.Level1)
+{
+    auto layoutProperty = rowNode_->GetLayoutProperty<GridRowLayoutProperty>();
+    layoutProperty->UpdateAlignItems(FlexAlign::FLEX_END);
+
+    /**
+     * @tc.steps: step1. create environment for running process.
+     */
+    auto firstColNode = colNodes_.front();
+    auto firstColLayoutProperty = firstColNode->GetLayoutProperty<GridColLayoutProperty>();
+    firstColLayoutProperty->UpdateSpan(V2::GridContainerSize(1));
+    firstColLayoutProperty->UpdateOffset(V2::GridContainerSize(0));
+    firstColLayoutProperty->UpdateOrder(V2::GridContainerSize());
+    firstColLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(TEST_ALIGN_HEIGHT)));
+
+    auto secondColNode = colNodes_.back();
+    auto secondColLayoutProperty = secondColNode->GetLayoutProperty<GridColLayoutProperty>();
+    secondColLayoutProperty->UpdateSpan(V2::GridContainerSize(1));
+    secondColLayoutProperty->UpdateOffset(V2::GridContainerSize(0));
+    secondColLayoutProperty->UpdateOrder(V2::GridContainerSize());
+    secondColLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(DEFAULT_HEIGHT)));
+
+    /**
+     * @tc.steps: step2. Running layout function and check the result with expected results.
+     */
+    auto layoutWrapper = CreateLayoutWrapperAndLayout(true);
+    auto frameRect = layoutWrapper->GetOrCreateChildByIndex(0)->GetGeometryNode()->GetFrameRect();
+    auto columnWidth = frameRect.Width();
+    auto columnHeight = frameRect.Height();
+    EXPECT_EQ(frameRect.GetX(), 0);
+    EXPECT_EQ(frameRect.GetY(), 0);
+    EXPECT_EQ(columnWidth, DEFAULT_SPAN_WIDTH);
+    EXPECT_EQ(columnHeight, TEST_ALIGN_HEIGHT);
+
+    frameRect = layoutWrapper->GetOrCreateChildByIndex(1)->GetGeometryNode()->GetFrameRect();
+    columnWidth = frameRect.Width();
+    columnHeight = frameRect.Height();
+    EXPECT_EQ(frameRect.GetX(), DEFAULT_SPAN_WIDTH);
+    EXPECT_EQ(frameRect.GetY(), TEST_ALIGN_HEIGHT - DEFAULT_HEIGHT);
+    EXPECT_EQ(columnWidth, DEFAULT_SPAN_WIDTH);
+    EXPECT_EQ(columnHeight, DEFAULT_HEIGHT);
+}
+
+/**
+ * @tc.name: ItemAlign005
+ * @tc.desc: Test GridRow layout algorithm with ItemAlign.STRETCH.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridRowTestNg, ItemAlign005, TestSize.Level1)
+{
+    auto layoutProperty = rowNode_->GetLayoutProperty<GridRowLayoutProperty>();
+    layoutProperty->UpdateAlignItems(FlexAlign::STRETCH);
+
+    /**
+     * @tc.steps: step1. create environment for running process.
+     */
+    auto firstColNode = colNodes_.front();
+    auto firstColLayoutProperty = firstColNode->GetLayoutProperty<GridColLayoutProperty>();
+    firstColLayoutProperty->UpdateSpan(V2::GridContainerSize(1));
+    firstColLayoutProperty->UpdateOffset(V2::GridContainerSize(0));
+    firstColLayoutProperty->UpdateOrder(V2::GridContainerSize());
+    firstColLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(TEST_ALIGN_HEIGHT)));
+
+    auto secondColNode = colNodes_.back();
+    auto secondColLayoutProperty = secondColNode->GetLayoutProperty<GridColLayoutProperty>();
+    secondColLayoutProperty->UpdateSpan(V2::GridContainerSize(1));
+    secondColLayoutProperty->UpdateOffset(V2::GridContainerSize(0));
+    secondColLayoutProperty->UpdateOrder(V2::GridContainerSize());
+    secondColLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(DEFAULT_HEIGHT)));
+
+    /**
+     * @tc.steps: step2. Running layout function and check the result with expected results.
+     */
+    auto layoutWrapper = CreateLayoutWrapperAndLayout(true);
+    auto frameRect = layoutWrapper->GetOrCreateChildByIndex(0)->GetGeometryNode()->GetFrameRect();
+    auto columnWidth = frameRect.Width();
+    auto columnHeight = frameRect.Height();
+    EXPECT_EQ(frameRect.GetX(), 0);
+    EXPECT_EQ(frameRect.GetY(), 0);
+    EXPECT_EQ(columnWidth, DEFAULT_SPAN_WIDTH);
+    EXPECT_EQ(columnHeight, TEST_ALIGN_HEIGHT);
+
+    frameRect = layoutWrapper->GetOrCreateChildByIndex(1)->GetGeometryNode()->GetFrameRect();
+    columnWidth = frameRect.Width();
+    columnHeight = frameRect.Height();
+    EXPECT_EQ(frameRect.GetX(), DEFAULT_SPAN_WIDTH);
+    EXPECT_EQ(frameRect.GetY(), 0);
+    EXPECT_EQ(columnWidth, DEFAULT_SPAN_WIDTH);
+    EXPECT_EQ(columnHeight, TEST_ALIGN_HEIGHT);
+}
+
+/**
+ * @tc.name: ItemAlign006
+ * @tc.desc: Test GridRow layout algorithm with diferent direction and default ItemAlign
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridRowTestNg, ItemAlign006, TestSize.Level1)
+{
+    auto layoutProperty = rowNode_->GetLayoutProperty<GridRowLayoutProperty>();
+    layoutProperty->ResetAlignItems();
+    auto itemAlign = layoutProperty->GetAlignItems();
+    layoutProperty->UpdateDirection(V2::GridRowDirection::RowReverse);
+    EXPECT_FALSE(itemAlign.has_value());
+
+    /**
+     * @tc.steps: step1. create environment for running process.
+     */
+    auto firstColNode = colNodes_.front();
+    auto firstColLayoutProperty = firstColNode->GetLayoutProperty<GridColLayoutProperty>();
+    firstColLayoutProperty->UpdateSpan(V2::GridContainerSize(1));
+    firstColLayoutProperty->UpdateOffset(V2::GridContainerSize(0));
+    firstColLayoutProperty->UpdateOrder(V2::GridContainerSize());
+    firstColLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(TEST_ALIGN_HEIGHT)));
+
+    auto secondColNode = colNodes_.back();
+    auto secondColLayoutProperty = secondColNode->GetLayoutProperty<GridColLayoutProperty>();
+    secondColLayoutProperty->UpdateSpan(V2::GridContainerSize(1));
+    secondColLayoutProperty->UpdateOffset(V2::GridContainerSize(0));
+    secondColLayoutProperty->UpdateOrder(V2::GridContainerSize());
+    secondColLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(DEFAULT_HEIGHT)));
+
+    /**
+     * @tc.steps: step2. Running layout function and check the result with expected results.
+     */
+    auto layoutWrapper = CreateLayoutWrapperAndLayout(true);
+    auto frameRect = layoutWrapper->GetOrCreateChildByIndex(0)->GetGeometryNode()->GetFrameRect();
+    auto columnWidth = frameRect.Width();
+    auto columnHeight = frameRect.Height();
+    EXPECT_EQ(frameRect.GetX(), DEFAULT_GRID_ROW_WIDTH - DEFAULT_SPAN_WIDTH);
+    EXPECT_EQ(frameRect.GetY(), 0);
+    EXPECT_EQ(columnWidth, DEFAULT_SPAN_WIDTH);
+    EXPECT_EQ(columnHeight, TEST_ALIGN_HEIGHT);
+
+    frameRect = layoutWrapper->GetOrCreateChildByIndex(1)->GetGeometryNode()->GetFrameRect();
+    columnWidth = frameRect.Width();
+    columnHeight = frameRect.Height();
+    EXPECT_EQ(frameRect.GetX(), DEFAULT_GRID_ROW_WIDTH - DEFAULT_SPAN_WIDTH * 2);
+    EXPECT_EQ(frameRect.GetY(), 0);
+    EXPECT_EQ(columnWidth, DEFAULT_SPAN_WIDTH);
+    EXPECT_EQ(columnHeight, DEFAULT_HEIGHT);
+}
+
+/**
+ * @tc.name: ItemAlign007
+ * @tc.desc: Test GridRow layout algorithm with diferent direction and ItemAlign.Start.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridRowTestNg, ItemAlign007, TestSize.Level1)
+{
+    auto layoutProperty = rowNode_->GetLayoutProperty<GridRowLayoutProperty>();
+    layoutProperty->UpdateDirection(V2::GridRowDirection::RowReverse);
+    layoutProperty->UpdateAlignItems(FlexAlign::FLEX_START);
+
+    /**
+     * @tc.steps: step1. create environment for running process.
+     */
+    auto firstColNode = colNodes_.front();
+    auto firstColLayoutProperty = firstColNode->GetLayoutProperty<GridColLayoutProperty>();
+    firstColLayoutProperty->UpdateSpan(V2::GridContainerSize(1));
+    firstColLayoutProperty->UpdateOffset(V2::GridContainerSize(0));
+    firstColLayoutProperty->UpdateOrder(V2::GridContainerSize());
+    firstColLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(TEST_ALIGN_HEIGHT)));
+
+    auto secondColNode = colNodes_.back();
+    auto secondColLayoutProperty = secondColNode->GetLayoutProperty<GridColLayoutProperty>();
+    secondColLayoutProperty->UpdateSpan(V2::GridContainerSize(1));
+    secondColLayoutProperty->UpdateOffset(V2::GridContainerSize(0));
+    secondColLayoutProperty->UpdateOrder(V2::GridContainerSize());
+    secondColLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(DEFAULT_HEIGHT)));
+
+    /**
+     * @tc.steps: step2. Running layout function and check the result with expected results.
+     */
+    auto layoutWrapper = CreateLayoutWrapperAndLayout(true);
+    auto frameRect = layoutWrapper->GetOrCreateChildByIndex(0)->GetGeometryNode()->GetFrameRect();
+    auto columnWidth = frameRect.Width();
+    auto columnHeight = frameRect.Height();
+    EXPECT_EQ(frameRect.GetX(), DEFAULT_GRID_ROW_WIDTH - DEFAULT_SPAN_WIDTH);
+    EXPECT_EQ(frameRect.GetY(), 0);
+    EXPECT_EQ(columnWidth, DEFAULT_SPAN_WIDTH);
+    EXPECT_EQ(columnHeight, TEST_ALIGN_HEIGHT);
+
+    frameRect = layoutWrapper->GetOrCreateChildByIndex(1)->GetGeometryNode()->GetFrameRect();
+    columnWidth = frameRect.Width();
+    columnHeight = frameRect.Height();
+    EXPECT_EQ(frameRect.GetX(), DEFAULT_GRID_ROW_WIDTH - DEFAULT_SPAN_WIDTH * 2);
+    EXPECT_EQ(frameRect.GetY(), 0);
+    EXPECT_EQ(columnWidth, DEFAULT_SPAN_WIDTH);
+    EXPECT_EQ(columnHeight, DEFAULT_HEIGHT);
+}
+
+/**
+ * @tc.name: ItemAlign008
+ * @tc.desc: Test GridRow layout algorithm with diferent direction and ItemAlign.Center.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridRowTestNg, ItemAlign008, TestSize.Level1)
+{
+    auto layoutProperty = rowNode_->GetLayoutProperty<GridRowLayoutProperty>();
+    layoutProperty->UpdateDirection(V2::GridRowDirection::RowReverse);
+    layoutProperty->UpdateAlignItems(FlexAlign::CENTER);
+
+    /**
+     * @tc.steps: step1. create environment for running process.
+     */
+    auto firstColNode = colNodes_.front();
+    auto firstColLayoutProperty = firstColNode->GetLayoutProperty<GridColLayoutProperty>();
+    firstColLayoutProperty->UpdateSpan(V2::GridContainerSize(1));
+    firstColLayoutProperty->UpdateOffset(V2::GridContainerSize(0));
+    firstColLayoutProperty->UpdateOrder(V2::GridContainerSize());
+    firstColLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(TEST_ALIGN_HEIGHT)));
+
+    auto secondColNode = colNodes_.back();
+    auto secondColLayoutProperty = secondColNode->GetLayoutProperty<GridColLayoutProperty>();
+    secondColLayoutProperty->UpdateSpan(V2::GridContainerSize(1));
+    secondColLayoutProperty->UpdateOffset(V2::GridContainerSize(0));
+    secondColLayoutProperty->UpdateOrder(V2::GridContainerSize());
+    secondColLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(DEFAULT_HEIGHT)));
+
+    /**
+     * @tc.steps: step2. Running layout function and check the result with expected results.
+     */
+    auto layoutWrapper = CreateLayoutWrapperAndLayout(true);
+    auto frameRect = layoutWrapper->GetOrCreateChildByIndex(0)->GetGeometryNode()->GetFrameRect();
+    auto columnWidth = frameRect.Width();
+    auto columnHeight = frameRect.Height();
+    EXPECT_EQ(frameRect.GetX(), DEFAULT_GRID_ROW_WIDTH - DEFAULT_SPAN_WIDTH);
+    EXPECT_EQ(frameRect.GetY(), 0);
+    EXPECT_EQ(columnWidth, DEFAULT_SPAN_WIDTH);
+    EXPECT_EQ(columnHeight, TEST_ALIGN_HEIGHT);
+
+    frameRect = layoutWrapper->GetOrCreateChildByIndex(1)->GetGeometryNode()->GetFrameRect();
+    columnWidth = frameRect.Width();
+    columnHeight = frameRect.Height();
+    EXPECT_EQ(frameRect.GetX(), DEFAULT_GRID_ROW_WIDTH - DEFAULT_SPAN_WIDTH * 2);
+    EXPECT_EQ(frameRect.GetY(), TEST_ALIGN_HEIGHT * 0.5 - DEFAULT_HEIGHT * 0.5);
+    EXPECT_EQ(columnWidth, DEFAULT_SPAN_WIDTH);
+    EXPECT_EQ(columnHeight, DEFAULT_HEIGHT);
+}
+/**
+ * @tc.name: ItemAlign009
+ * @tc.desc: Test GridRow layout algorithm with ItemAlign.End.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridRowTestNg, ItemAlign009, TestSize.Level1)
+{
+    auto layoutProperty = rowNode_->GetLayoutProperty<GridRowLayoutProperty>();
+    layoutProperty->UpdateDirection(V2::GridRowDirection::RowReverse);
+    layoutProperty->UpdateAlignItems(FlexAlign::FLEX_END);
+
+    /**
+     * @tc.steps: step1. create environment for running process.
+     */
+    auto firstColNode = colNodes_.front();
+    auto firstColLayoutProperty = firstColNode->GetLayoutProperty<GridColLayoutProperty>();
+    firstColLayoutProperty->UpdateSpan(V2::GridContainerSize(1));
+    firstColLayoutProperty->UpdateOffset(V2::GridContainerSize(0));
+    firstColLayoutProperty->UpdateOrder(V2::GridContainerSize());
+    firstColLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(TEST_ALIGN_HEIGHT)));
+
+    auto secondColNode = colNodes_.back();
+    auto secondColLayoutProperty = secondColNode->GetLayoutProperty<GridColLayoutProperty>();
+    secondColLayoutProperty->UpdateSpan(V2::GridContainerSize(1));
+    secondColLayoutProperty->UpdateOffset(V2::GridContainerSize(0));
+    secondColLayoutProperty->UpdateOrder(V2::GridContainerSize());
+    secondColLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(DEFAULT_HEIGHT)));
+
+    /**
+     * @tc.steps: step2. Running layout function and check the result with expected results.
+     */
+    auto layoutWrapper = CreateLayoutWrapperAndLayout(true);
+    auto frameRect = layoutWrapper->GetOrCreateChildByIndex(0)->GetGeometryNode()->GetFrameRect();
+    auto columnWidth = frameRect.Width();
+    auto columnHeight = frameRect.Height();
+    EXPECT_EQ(frameRect.GetX(), DEFAULT_GRID_ROW_WIDTH-DEFAULT_SPAN_WIDTH);
+    EXPECT_EQ(frameRect.GetY(), 0);
+    EXPECT_EQ(columnWidth, DEFAULT_SPAN_WIDTH);
+    EXPECT_EQ(columnHeight, TEST_ALIGN_HEIGHT);
+
+    frameRect = layoutWrapper->GetOrCreateChildByIndex(1)->GetGeometryNode()->GetFrameRect();
+    columnWidth = frameRect.Width();
+    columnHeight = frameRect.Height();
+    EXPECT_EQ(frameRect.GetX(), DEFAULT_GRID_ROW_WIDTH - DEFAULT_SPAN_WIDTH * 2);
+    EXPECT_EQ(frameRect.GetY(), TEST_ALIGN_HEIGHT - DEFAULT_HEIGHT);
+    EXPECT_EQ(columnWidth, DEFAULT_SPAN_WIDTH);
+    EXPECT_EQ(columnHeight, DEFAULT_HEIGHT);
+}
+
+/**
+ * @tc.name: ItemAlign010
+ * @tc.desc: Test GridRow layout algorithm with ItemAlign.STRETCH.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridRowTestNg, ItemAlign010, TestSize.Level1)
+{
+    auto layoutProperty = rowNode_->GetLayoutProperty<GridRowLayoutProperty>();
+    layoutProperty->UpdateDirection(V2::GridRowDirection::RowReverse);
+    layoutProperty->UpdateAlignItems(FlexAlign::STRETCH);
+
+    /**
+     * @tc.steps: step1. create environment for running process.
+     */
+    auto firstColNode = colNodes_.front();
+    auto firstColLayoutProperty = firstColNode->GetLayoutProperty<GridColLayoutProperty>();
+    firstColLayoutProperty->UpdateSpan(V2::GridContainerSize(1));
+    firstColLayoutProperty->UpdateOffset(V2::GridContainerSize(0));
+    firstColLayoutProperty->UpdateOrder(V2::GridContainerSize());
+    firstColLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(TEST_ALIGN_HEIGHT)));
+
+    auto secondColNode = colNodes_.back();
+    auto secondColLayoutProperty = secondColNode->GetLayoutProperty<GridColLayoutProperty>();
+    secondColLayoutProperty->UpdateSpan(V2::GridContainerSize(1));
+    secondColLayoutProperty->UpdateOffset(V2::GridContainerSize(0));
+    secondColLayoutProperty->UpdateOrder(V2::GridContainerSize());
+    secondColLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(DEFAULT_HEIGHT)));
+
+    /**
+     * @tc.steps: step2. Running layout function and check the result with expected results.
+     */
+    auto layoutWrapper = CreateLayoutWrapperAndLayout(true);
+    auto frameRect = layoutWrapper->GetOrCreateChildByIndex(0)->GetGeometryNode()->GetFrameRect();
+    auto columnWidth = frameRect.Width();
+    auto columnHeight = frameRect.Height();
+    EXPECT_EQ(frameRect.GetX(), DEFAULT_GRID_ROW_WIDTH - DEFAULT_SPAN_WIDTH);
+    EXPECT_EQ(frameRect.GetY(), 0);
+    EXPECT_EQ(columnWidth, DEFAULT_SPAN_WIDTH);
+    EXPECT_EQ(columnHeight, TEST_ALIGN_HEIGHT);
+
+    frameRect = layoutWrapper->GetOrCreateChildByIndex(1)->GetGeometryNode()->GetFrameRect();
+    columnWidth = frameRect.Width();
+    columnHeight = frameRect.Height();
+    EXPECT_EQ(frameRect.GetX(), DEFAULT_GRID_ROW_WIDTH - DEFAULT_SPAN_WIDTH  * 2);
+    EXPECT_EQ(frameRect.GetY(), 0);
+    EXPECT_EQ(columnWidth, DEFAULT_SPAN_WIDTH);
+    EXPECT_EQ(columnHeight, TEST_ALIGN_HEIGHT);
+}
+
+/**
+ * @tc.name: ItemAlign011
+ * @tc.desc: Test GridRow layout algorithm with diferent offset and default ItemAlign
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridRowTestNg, ItemAlign011, TestSize.Level1)
+{
+    auto layoutProperty = rowNode_->GetLayoutProperty<GridRowLayoutProperty>();
+    layoutProperty->ResetAlignItems();
+    auto itemAlign = layoutProperty->GetAlignItems();
+    layoutProperty->UpdateDirection(V2::GridRowDirection::Row);
+    EXPECT_FALSE(itemAlign.has_value());
+
+    /**
+     * @tc.steps: step1. create environment for running process.
+     */
+    auto firstColNode = colNodes_.front();
+    auto firstColLayoutProperty = firstColNode->GetLayoutProperty<GridColLayoutProperty>();
+    firstColLayoutProperty->UpdateSpan(V2::GridContainerSize(1));
+    firstColLayoutProperty->UpdateOffset(V2::GridContainerSize(7));
+    firstColLayoutProperty->UpdateOrder(V2::GridContainerSize());
+    firstColLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(TEST_ALIGN_HEIGHT)));
+
+    auto secondColNode = colNodes_.back();
+    auto secondColLayoutProperty = secondColNode->GetLayoutProperty<GridColLayoutProperty>();
+    secondColLayoutProperty->UpdateSpan(V2::GridContainerSize(1));
+    secondColLayoutProperty->UpdateOffset(V2::GridContainerSize(0));
+    secondColLayoutProperty->UpdateOrder(V2::GridContainerSize());
+    secondColLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(DEFAULT_HEIGHT)));
+
+    /**
+     * @tc.steps: step2. Running layout function and check the result with expected results.
+     */
+    auto layoutWrapper = CreateLayoutWrapperAndLayout(true);
+    auto frameRect = layoutWrapper->GetOrCreateChildByIndex(0)->GetGeometryNode()->GetFrameRect();
+    auto columnWidth = frameRect.Width();
+    auto columnHeight = frameRect.Height();
+    EXPECT_EQ(frameRect.GetX(), DEFAULT_GRID_ROW_WIDTH - DEFAULT_SPAN_WIDTH);
+    EXPECT_EQ(frameRect.GetY(), 0);
+    EXPECT_EQ(columnWidth, DEFAULT_SPAN_WIDTH);
+    EXPECT_EQ(columnHeight, TEST_ALIGN_HEIGHT);
+
+    frameRect = layoutWrapper->GetOrCreateChildByIndex(1)->GetGeometryNode()->GetFrameRect();
+    columnWidth = frameRect.Width();
+    columnHeight = frameRect.Height();
+    EXPECT_EQ(frameRect.GetX(), 0);
+    EXPECT_EQ(frameRect.GetY(), TEST_ALIGN_HEIGHT);
+    EXPECT_EQ(columnWidth, DEFAULT_SPAN_WIDTH);
+    EXPECT_EQ(columnHeight, DEFAULT_HEIGHT);
+}
+
+/**
+ * @tc.name: ItemAlign012
+ * @tc.desc: Test GridRow layout algorithm with different offset and ItemAlign.Start.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridRowTestNg, ItemAlign012, TestSize.Level1)
+{
+    auto layoutProperty = rowNode_->GetLayoutProperty<GridRowLayoutProperty>();
+    layoutProperty->UpdateAlignItems(FlexAlign::FLEX_START);
+
+    /**
+     * @tc.steps: step1. create environment for running process.
+     */
+    auto firstColNode = colNodes_.front();
+    auto firstColLayoutProperty = firstColNode->GetLayoutProperty<GridColLayoutProperty>();
+    firstColLayoutProperty->UpdateSpan(V2::GridContainerSize(1));
+    firstColLayoutProperty->UpdateOffset(V2::GridContainerSize(7));
+    firstColLayoutProperty->UpdateOrder(V2::GridContainerSize());
+    firstColLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(TEST_ALIGN_HEIGHT)));
+
+    auto secondColNode = colNodes_.back();
+    auto secondColLayoutProperty = secondColNode->GetLayoutProperty<GridColLayoutProperty>();
+    secondColLayoutProperty->UpdateSpan(V2::GridContainerSize(1));
+    secondColLayoutProperty->UpdateOffset(V2::GridContainerSize(0));
+    secondColLayoutProperty->UpdateOrder(V2::GridContainerSize());
+    secondColLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(DEFAULT_HEIGHT)));
+
+    /**
+     * @tc.steps: step2. Running layout function and check the result with expected results.
+     */
+    auto layoutWrapper = CreateLayoutWrapperAndLayout(true);
+    auto frameRect = layoutWrapper->GetOrCreateChildByIndex(0)->GetGeometryNode()->GetFrameRect();
+    auto columnWidth = frameRect.Width();
+    auto columnHeight = frameRect.Height();
+    EXPECT_EQ(frameRect.GetX(), DEFAULT_GRID_ROW_WIDTH - DEFAULT_SPAN_WIDTH);
+    EXPECT_EQ(frameRect.GetY(), 0);
+    EXPECT_EQ(columnWidth, DEFAULT_SPAN_WIDTH);
+    EXPECT_EQ(columnHeight, TEST_ALIGN_HEIGHT);
+
+    frameRect = layoutWrapper->GetOrCreateChildByIndex(1)->GetGeometryNode()->GetFrameRect();
+    columnWidth = frameRect.Width();
+    columnHeight = frameRect.Height();
+    EXPECT_EQ(frameRect.GetX(), 0);
+    EXPECT_EQ(frameRect.GetY(), TEST_ALIGN_HEIGHT);
+    EXPECT_EQ(columnWidth, DEFAULT_SPAN_WIDTH);
+    EXPECT_EQ(columnHeight, DEFAULT_HEIGHT);
+}
+
+/**
+ * @tc.name: ItemAlign013
+ * @tc.desc: Test GridRow layout algorithm with different offset and ItemAlign.Center.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridRowTestNg, ItemAlign013, TestSize.Level1)
+{
+    auto layoutProperty = rowNode_->GetLayoutProperty<GridRowLayoutProperty>();
+    layoutProperty->UpdateAlignItems(FlexAlign::CENTER);
+
+    /**
+     * @tc.steps: step1. create environment for running process.
+     */
+    auto firstColNode = colNodes_.front();
+    auto firstColLayoutProperty = firstColNode->GetLayoutProperty<GridColLayoutProperty>();
+    firstColLayoutProperty->UpdateSpan(V2::GridContainerSize(1));
+    firstColLayoutProperty->UpdateOffset(V2::GridContainerSize(7));
+    firstColLayoutProperty->UpdateOrder(V2::GridContainerSize());
+    firstColLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(TEST_ALIGN_HEIGHT)));
+
+    auto secondColNode = colNodes_.back();
+    auto secondColLayoutProperty = secondColNode->GetLayoutProperty<GridColLayoutProperty>();
+    secondColLayoutProperty->UpdateSpan(V2::GridContainerSize(1));
+    secondColLayoutProperty->UpdateOffset(V2::GridContainerSize(0));
+    secondColLayoutProperty->UpdateOrder(V2::GridContainerSize());
+    secondColLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(DEFAULT_HEIGHT)));
+
+    /**
+     * @tc.steps: step2. Running layout function and check the result with expected results.
+     */
+    auto layoutWrapper = CreateLayoutWrapperAndLayout(true);
+    auto frameRect = layoutWrapper->GetOrCreateChildByIndex(0)->GetGeometryNode()->GetFrameRect();
+    auto columnWidth = frameRect.Width();
+    auto columnHeight = frameRect.Height();
+    EXPECT_EQ(frameRect.GetX(), DEFAULT_GRID_ROW_WIDTH - DEFAULT_SPAN_WIDTH);
+    EXPECT_EQ(frameRect.GetY(), 0);
+    EXPECT_EQ(columnWidth, DEFAULT_SPAN_WIDTH);
+    EXPECT_EQ(columnHeight, TEST_ALIGN_HEIGHT);
+
+    frameRect = layoutWrapper->GetOrCreateChildByIndex(1)->GetGeometryNode()->GetFrameRect();
+    columnWidth = frameRect.Width();
+    columnHeight = frameRect.Height();
+    EXPECT_EQ(frameRect.GetX(), 0);
+    EXPECT_EQ(frameRect.GetY(), TEST_ALIGN_HEIGHT);
+    EXPECT_EQ(columnWidth, DEFAULT_SPAN_WIDTH);
+    EXPECT_EQ(columnHeight, DEFAULT_HEIGHT);
+}
+
+/**
+ * @tc.name: ItemAlign014
+ * @tc.desc: Test GridRow layout algorithm with different offset and ItemAlign.End.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridRowTestNg, ItemAlign014, TestSize.Level1)
+{
+    auto layoutProperty = rowNode_->GetLayoutProperty<GridRowLayoutProperty>();
+    layoutProperty->UpdateAlignItems(FlexAlign::FLEX_END);
+
+    /**
+     * @tc.steps: step1. create environment for running process.
+     */
+    auto firstColNode = colNodes_.front();
+    auto firstColLayoutProperty = firstColNode->GetLayoutProperty<GridColLayoutProperty>();
+    firstColLayoutProperty->UpdateSpan(V2::GridContainerSize(1));
+    firstColLayoutProperty->UpdateOffset(V2::GridContainerSize(7));
+    firstColLayoutProperty->UpdateOrder(V2::GridContainerSize());
+    firstColLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(TEST_ALIGN_HEIGHT)));
+
+    auto secondColNode = colNodes_.back();
+    auto secondColLayoutProperty = secondColNode->GetLayoutProperty<GridColLayoutProperty>();
+    secondColLayoutProperty->UpdateSpan(V2::GridContainerSize(1));
+    secondColLayoutProperty->UpdateOffset(V2::GridContainerSize(0));
+    secondColLayoutProperty->UpdateOrder(V2::GridContainerSize());
+    secondColLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(DEFAULT_HEIGHT)));
+
+    /**
+     * @tc.steps: step2. Running layout function and check the result with expected results.
+     */
+    auto layoutWrapper = CreateLayoutWrapperAndLayout(true);
+    auto frameRect = layoutWrapper->GetOrCreateChildByIndex(0)->GetGeometryNode()->GetFrameRect();
+    auto columnWidth = frameRect.Width();
+    auto columnHeight = frameRect.Height();
+    EXPECT_EQ(frameRect.GetX(), DEFAULT_GRID_ROW_WIDTH - DEFAULT_SPAN_WIDTH);
+    EXPECT_EQ(frameRect.GetY(), 0);
+    EXPECT_EQ(columnWidth, DEFAULT_SPAN_WIDTH);
+    EXPECT_EQ(columnHeight, TEST_ALIGN_HEIGHT);
+
+    frameRect = layoutWrapper->GetOrCreateChildByIndex(1)->GetGeometryNode()->GetFrameRect();
+    columnWidth = frameRect.Width();
+    columnHeight = frameRect.Height();
+    EXPECT_EQ(frameRect.GetX(), 0);
+    EXPECT_EQ(frameRect.GetY(), TEST_ALIGN_HEIGHT);
+    EXPECT_EQ(columnWidth, DEFAULT_SPAN_WIDTH);
+    EXPECT_EQ(columnHeight, DEFAULT_HEIGHT);
+}
+
+/**
+ * @tc.name: ItemAlign015
+ * @tc.desc: Test GridRow layout algorithm with different offset and ItemAlign.STRETCH.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridRowTestNg, ItemAlign015, TestSize.Level1)
+{
+    auto layoutProperty = rowNode_->GetLayoutProperty<GridRowLayoutProperty>();
+    layoutProperty->UpdateAlignItems(FlexAlign::STRETCH);
+
+    /**
+     * @tc.steps: step1. create environment for running process.
+     */
+    auto firstColNode = colNodes_.front();
+    auto firstColLayoutProperty = firstColNode->GetLayoutProperty<GridColLayoutProperty>();
+    firstColLayoutProperty->UpdateSpan(V2::GridContainerSize(1));
+    firstColLayoutProperty->UpdateOffset(V2::GridContainerSize(7));
+    firstColLayoutProperty->UpdateOrder(V2::GridContainerSize());
+    firstColLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(TEST_ALIGN_HEIGHT)));
+
+    auto secondColNode = colNodes_.back();
+    auto secondColLayoutProperty = secondColNode->GetLayoutProperty<GridColLayoutProperty>();
+    secondColLayoutProperty->UpdateSpan(V2::GridContainerSize(1));
+    secondColLayoutProperty->UpdateOffset(V2::GridContainerSize(0));
+    secondColLayoutProperty->UpdateOrder(V2::GridContainerSize());
+    secondColLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(DEFAULT_HEIGHT)));
+
+    /**
+     * @tc.steps: step2. Running layout function and check the result with expected results.
+     */
+    auto layoutWrapper = CreateLayoutWrapperAndLayout(true);
+    auto frameRect = layoutWrapper->GetOrCreateChildByIndex(0)->GetGeometryNode()->GetFrameRect();
+    auto columnWidth = frameRect.Width();
+    auto columnHeight = frameRect.Height();
+    EXPECT_EQ(frameRect.GetX(), DEFAULT_GRID_ROW_WIDTH - DEFAULT_SPAN_WIDTH);
+    EXPECT_EQ(frameRect.GetY(), 0);
+    EXPECT_EQ(columnWidth, DEFAULT_SPAN_WIDTH);
+    EXPECT_EQ(columnHeight, TEST_ALIGN_HEIGHT);
+
+    frameRect = layoutWrapper->GetOrCreateChildByIndex(1)->GetGeometryNode()->GetFrameRect();
+    columnWidth = frameRect.Width();
+    columnHeight = frameRect.Height();
+    EXPECT_EQ(frameRect.GetX(), 0);
+    EXPECT_EQ(frameRect.GetY(), TEST_ALIGN_HEIGHT);
+    EXPECT_EQ(columnWidth, DEFAULT_SPAN_WIDTH);
+    EXPECT_EQ(columnHeight, DEFAULT_HEIGHT);
+}
+/**
+ * @tc.name: ItemAlign016
+ * @tc.desc: Test GridRow layout algorithm with diferent offset, direction and default ItemAlign
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridRowTestNg, ItemAlign016, TestSize.Level1)
+{
+    auto layoutProperty = rowNode_->GetLayoutProperty<GridRowLayoutProperty>();
+    layoutProperty->ResetAlignItems();
+    auto itemAlign = layoutProperty->GetAlignItems();
+    layoutProperty->UpdateDirection(V2::GridRowDirection::RowReverse);
+    EXPECT_FALSE(itemAlign.has_value());
+
+    /**
+     * @tc.steps: step1. create environment for running process.
+     */
+    auto firstColNode = colNodes_.front();
+    auto firstColLayoutProperty = firstColNode->GetLayoutProperty<GridColLayoutProperty>();
+    firstColLayoutProperty->UpdateSpan(V2::GridContainerSize(1));
+    firstColLayoutProperty->UpdateOffset(V2::GridContainerSize(7));
+    firstColLayoutProperty->UpdateOrder(V2::GridContainerSize());
+    firstColLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(TEST_ALIGN_HEIGHT)));
+
+    auto secondColNode = colNodes_.back();
+    auto secondColLayoutProperty = secondColNode->GetLayoutProperty<GridColLayoutProperty>();
+    secondColLayoutProperty->UpdateSpan(V2::GridContainerSize(1));
+    secondColLayoutProperty->UpdateOffset(V2::GridContainerSize(0));
+    secondColLayoutProperty->UpdateOrder(V2::GridContainerSize());
+    secondColLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(DEFAULT_HEIGHT)));
+
+    /**
+     * @tc.steps: step2. Running layout function and check the result with expected results.
+     */
+    auto layoutWrapper = CreateLayoutWrapperAndLayout(true);
+    auto frameRect = layoutWrapper->GetOrCreateChildByIndex(0)->GetGeometryNode()->GetFrameRect();
+    auto columnWidth = frameRect.Width();
+    auto columnHeight = frameRect.Height();
+    EXPECT_EQ(frameRect.GetX(), 0);
+    EXPECT_EQ(frameRect.GetY(), 0);
+    EXPECT_EQ(columnWidth, DEFAULT_SPAN_WIDTH);
+    EXPECT_EQ(columnHeight, TEST_ALIGN_HEIGHT);
+
+    frameRect = layoutWrapper->GetOrCreateChildByIndex(1)->GetGeometryNode()->GetFrameRect();
+    columnWidth = frameRect.Width();
+    columnHeight = frameRect.Height();
+    EXPECT_EQ(frameRect.GetX(), DEFAULT_GRID_ROW_WIDTH - DEFAULT_SPAN_WIDTH);
+    EXPECT_EQ(frameRect.GetY(), TEST_ALIGN_HEIGHT);
+    EXPECT_EQ(columnWidth, DEFAULT_SPAN_WIDTH);
+    EXPECT_EQ(columnHeight, DEFAULT_HEIGHT);
+}
+
+/**
+ * @tc.name: ItemAlign017
+ * @tc.desc: Test GridRow layout algorithm with different offset, direction and ItemAlign.Start.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridRowTestNg, ItemAlign017, TestSize.Level1)
+{
+    auto layoutProperty = rowNode_->GetLayoutProperty<GridRowLayoutProperty>();
+    layoutProperty->UpdateDirection(V2::GridRowDirection::RowReverse);
+    layoutProperty->UpdateAlignItems(FlexAlign::FLEX_START);
+
+    /**
+     * @tc.steps: step1. create environment for running process.
+     */
+    auto firstColNode = colNodes_.front();
+    auto firstColLayoutProperty = firstColNode->GetLayoutProperty<GridColLayoutProperty>();
+    firstColLayoutProperty->UpdateSpan(V2::GridContainerSize(1));
+    firstColLayoutProperty->UpdateOffset(V2::GridContainerSize(7));
+    firstColLayoutProperty->UpdateOrder(V2::GridContainerSize());
+    firstColLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(TEST_ALIGN_HEIGHT)));
+
+    auto secondColNode = colNodes_.back();
+    auto secondColLayoutProperty = secondColNode->GetLayoutProperty<GridColLayoutProperty>();
+    secondColLayoutProperty->UpdateSpan(V2::GridContainerSize(1));
+    secondColLayoutProperty->UpdateOffset(V2::GridContainerSize(0));
+    secondColLayoutProperty->UpdateOrder(V2::GridContainerSize());
+    secondColLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(DEFAULT_HEIGHT)));
+
+    /**
+     * @tc.steps: step2. Running layout function and check the result with expected results.
+     */
+    auto layoutWrapper = CreateLayoutWrapperAndLayout(true);
+    auto frameRect = layoutWrapper->GetOrCreateChildByIndex(0)->GetGeometryNode()->GetFrameRect();
+    auto columnWidth = frameRect.Width();
+    auto columnHeight = frameRect.Height();
+    EXPECT_EQ(frameRect.GetX(), 0);
+    EXPECT_EQ(frameRect.GetY(), 0);
+    EXPECT_EQ(columnWidth, DEFAULT_SPAN_WIDTH);
+    EXPECT_EQ(columnHeight, TEST_ALIGN_HEIGHT);
+
+    frameRect = layoutWrapper->GetOrCreateChildByIndex(1)->GetGeometryNode()->GetFrameRect();
+    columnWidth = frameRect.Width();
+    columnHeight = frameRect.Height();
+    EXPECT_EQ(frameRect.GetX(), DEFAULT_GRID_ROW_WIDTH - DEFAULT_SPAN_WIDTH);
+    EXPECT_EQ(frameRect.GetY(), TEST_ALIGN_HEIGHT);
+    EXPECT_EQ(columnWidth, DEFAULT_SPAN_WIDTH);
+    EXPECT_EQ(columnHeight, DEFAULT_HEIGHT);
+}
+
+/**
+ * @tc.name: ItemAlign018
+ * @tc.desc: Test GridRow layout algorithm with different offset, direction and ItemAlign.Center.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridRowTestNg, ItemAlign018, TestSize.Level1)
+{
+    auto layoutProperty = rowNode_->GetLayoutProperty<GridRowLayoutProperty>();
+    layoutProperty->UpdateDirection(V2::GridRowDirection::RowReverse);
+    layoutProperty->UpdateAlignItems(FlexAlign::CENTER);
+
+    /**
+     * @tc.steps: step1. create environment for running process.
+     */
+    auto firstColNode = colNodes_.front();
+    auto firstColLayoutProperty = firstColNode->GetLayoutProperty<GridColLayoutProperty>();
+    firstColLayoutProperty->UpdateSpan(V2::GridContainerSize(1));
+    firstColLayoutProperty->UpdateOffset(V2::GridContainerSize(7));
+    firstColLayoutProperty->UpdateOrder(V2::GridContainerSize());
+    firstColLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(TEST_ALIGN_HEIGHT)));
+
+    auto secondColNode = colNodes_.back();
+    auto secondColLayoutProperty = secondColNode->GetLayoutProperty<GridColLayoutProperty>();
+    secondColLayoutProperty->UpdateSpan(V2::GridContainerSize(1));
+    secondColLayoutProperty->UpdateOffset(V2::GridContainerSize(0));
+    secondColLayoutProperty->UpdateOrder(V2::GridContainerSize());
+    secondColLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(DEFAULT_HEIGHT)));
+
+    /**
+     * @tc.steps: step2. Running layout function and check the result with expected results.
+     */
+    auto layoutWrapper = CreateLayoutWrapperAndLayout(true);
+    auto frameRect = layoutWrapper->GetOrCreateChildByIndex(0)->GetGeometryNode()->GetFrameRect();
+    auto columnWidth = frameRect.Width();
+    auto columnHeight = frameRect.Height();
+    EXPECT_EQ(frameRect.GetX(), 0);
+    EXPECT_EQ(frameRect.GetY(), 0);
+    EXPECT_EQ(columnWidth, DEFAULT_SPAN_WIDTH);
+    EXPECT_EQ(columnHeight, TEST_ALIGN_HEIGHT);
+
+    frameRect = layoutWrapper->GetOrCreateChildByIndex(1)->GetGeometryNode()->GetFrameRect();
+    columnWidth = frameRect.Width();
+    columnHeight = frameRect.Height();
+    EXPECT_EQ(frameRect.GetX(), DEFAULT_GRID_ROW_WIDTH - DEFAULT_SPAN_WIDTH);
+    EXPECT_EQ(frameRect.GetY(), TEST_ALIGN_HEIGHT);
+    EXPECT_EQ(columnWidth, DEFAULT_SPAN_WIDTH);
+    EXPECT_EQ(columnHeight, DEFAULT_HEIGHT);
+}
+
+/**
+ * @tc.name: ItemAlign019
+ * @tc.desc: Test GridRow layout algorithm with different offset, direction and ItemAlign.End.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridRowTestNg, ItemAlign019, TestSize.Level1)
+{
+    auto layoutProperty = rowNode_->GetLayoutProperty<GridRowLayoutProperty>();
+    layoutProperty->UpdateDirection(V2::GridRowDirection::RowReverse);
+    layoutProperty->UpdateAlignItems(FlexAlign::FLEX_END);
+
+    /**
+     * @tc.steps: step1. create environment for running process.
+     */
+    auto firstColNode = colNodes_.front();
+    auto firstColLayoutProperty = firstColNode->GetLayoutProperty<GridColLayoutProperty>();
+    firstColLayoutProperty->UpdateSpan(V2::GridContainerSize(1));
+    firstColLayoutProperty->UpdateOffset(V2::GridContainerSize(7));
+    firstColLayoutProperty->UpdateOrder(V2::GridContainerSize());
+    firstColLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(TEST_ALIGN_HEIGHT)));
+
+    auto secondColNode = colNodes_.back();
+    auto secondColLayoutProperty = secondColNode->GetLayoutProperty<GridColLayoutProperty>();
+    secondColLayoutProperty->UpdateSpan(V2::GridContainerSize(1));
+    secondColLayoutProperty->UpdateOffset(V2::GridContainerSize(0));
+    secondColLayoutProperty->UpdateOrder(V2::GridContainerSize());
+    secondColLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(DEFAULT_HEIGHT)));
+
+    /**
+     * @tc.steps: step2. Running layout function and check the result with expected results.
+     */
+    auto layoutWrapper = CreateLayoutWrapperAndLayout(true);
+    auto frameRect = layoutWrapper->GetOrCreateChildByIndex(0)->GetGeometryNode()->GetFrameRect();
+    auto columnWidth = frameRect.Width();
+    auto columnHeight = frameRect.Height();
+    EXPECT_EQ(frameRect.GetX(), 0);
+    EXPECT_EQ(frameRect.GetY(), 0);
+    EXPECT_EQ(columnWidth, DEFAULT_SPAN_WIDTH);
+    EXPECT_EQ(columnHeight, TEST_ALIGN_HEIGHT);
+
+    frameRect = layoutWrapper->GetOrCreateChildByIndex(1)->GetGeometryNode()->GetFrameRect();
+    columnWidth = frameRect.Width();
+    columnHeight = frameRect.Height();
+    EXPECT_EQ(frameRect.GetX(), DEFAULT_GRID_ROW_WIDTH - DEFAULT_SPAN_WIDTH);
+    EXPECT_EQ(frameRect.GetY(), TEST_ALIGN_HEIGHT);
+    EXPECT_EQ(columnWidth, DEFAULT_SPAN_WIDTH);
+    EXPECT_EQ(columnHeight, DEFAULT_HEIGHT);
+}
+
+/**
+ * @tc.name: ItemAlign020
+ * @tc.desc: Test GridRow layout algorithm with different offset, direction and ItemAlign.STRETCH.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridRowTestNg, ItemAlign020, TestSize.Level1)
+{
+    auto layoutProperty = rowNode_->GetLayoutProperty<GridRowLayoutProperty>();
+    layoutProperty->UpdateDirection(V2::GridRowDirection::RowReverse);
+    layoutProperty->UpdateAlignItems(FlexAlign::STRETCH);
+
+    /**
+     * @tc.steps: step1. create environment for running process.
+     */
+    auto firstColNode = colNodes_.front();
+    auto firstColLayoutProperty = firstColNode->GetLayoutProperty<GridColLayoutProperty>();
+    firstColLayoutProperty->UpdateSpan(V2::GridContainerSize(1));
+    firstColLayoutProperty->UpdateOffset(V2::GridContainerSize(7));
+    firstColLayoutProperty->UpdateOrder(V2::GridContainerSize());
+    firstColLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(TEST_ALIGN_HEIGHT)));
+
+    auto secondColNode = colNodes_.back();
+    auto secondColLayoutProperty = secondColNode->GetLayoutProperty<GridColLayoutProperty>();
+    secondColLayoutProperty->UpdateSpan(V2::GridContainerSize(1));
+    secondColLayoutProperty->UpdateOffset(V2::GridContainerSize(0));
+    secondColLayoutProperty->UpdateOrder(V2::GridContainerSize());
+    secondColLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(DEFAULT_HEIGHT)));
+
+    /**
+     * @tc.steps: step2. Running layout function and check the result with expected results.
+     */
+    auto layoutWrapper = CreateLayoutWrapperAndLayout(true);
+    auto frameRect = layoutWrapper->GetOrCreateChildByIndex(0)->GetGeometryNode()->GetFrameRect();
+    auto columnWidth = frameRect.Width();
+    auto columnHeight = frameRect.Height();
+    EXPECT_EQ(frameRect.GetX(), 0);
+    EXPECT_EQ(frameRect.GetY(), 0);
+    EXPECT_EQ(columnWidth, DEFAULT_SPAN_WIDTH);
+    EXPECT_EQ(columnHeight, TEST_ALIGN_HEIGHT);
+
+    frameRect = layoutWrapper->GetOrCreateChildByIndex(1)->GetGeometryNode()->GetFrameRect();
+    columnWidth = frameRect.Width();
+    columnHeight = frameRect.Height();
+    EXPECT_EQ(frameRect.GetX(), DEFAULT_GRID_ROW_WIDTH - DEFAULT_SPAN_WIDTH);
+    EXPECT_EQ(frameRect.GetY(), TEST_ALIGN_HEIGHT);
+    EXPECT_EQ(columnWidth, DEFAULT_SPAN_WIDTH);
+    EXPECT_EQ(columnHeight, DEFAULT_HEIGHT);
 }
 
 /**

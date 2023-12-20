@@ -17,12 +17,10 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_NAVROUTER_NAVDESTINATION_EVENT_HUB_H
 
 #include "base/memory/ace_type.h"
-#include "bridge/declarative_frontend/engine/js_ref_ptr.h"
 #include "core/common/recorder/event_recorder.h"
 #include "core/components_ng/base/observer_handler.h"
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/event/gesture_event_hub.h"
-#include "frameworks/bridge/declarative_frontend/engine/js_types.h"
 
 namespace OHOS::Ace::NG {
 using OnStateChangeEvent = std::function<void(bool)>;

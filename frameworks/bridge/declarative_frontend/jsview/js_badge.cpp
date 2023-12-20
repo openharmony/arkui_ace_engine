@@ -142,7 +142,11 @@ BadgeParameters JSBadge::CreateBadgeParameters(const JSCallbackInfo& info)
 
         CalcDimension borderWidth;
         if (ParseJsDimensionVp(borderWidthValue, borderWidth)) {
-            badgeParameters.badgeBorderWidth = borderWidth;
+            if (borderWidth.IsNonNegative() && borderWidth.Unit() != DimensionUnit::PERCENT) {
+                badgeParameters.badgeBorderWidth = borderWidth;
+            } else {
+                badgeParameters.badgeBorderWidth = badgeTheme->GetBadgeBorderWidth();
+            }
         } else {
             badgeParameters.badgeBorderWidth = badgeTheme->GetBadgeBorderWidth();
         }

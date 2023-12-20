@@ -63,6 +63,7 @@ constexpr double FULL_DIMENSION = 100.0;
 constexpr double HALF_DIMENSION = 50.0;
 constexpr uint32_t DEFAULT_DURATION = 1000;
 constexpr int64_t MICROSEC_TO_MILLISEC = 1000;
+constexpr int32_t MAX_ALIGN_VALUE = 8;
 constexpr SharedTransitionEffectType DEFAULT_SHARED_EFFECT = SharedTransitionEffectType::SHARED_EFFECT_EXCHANGE;
 
 BorderStyle ConvertBorderStyle(int32_t value)
@@ -175,7 +176,7 @@ bool ParseCalcDimensions(ArkUIRuntimeCallInfo* runtimeCallInfo, uint32_t offset,
         auto arg = runtimeCallInfo->GetCallArgRef(index);
         std::optional<CalcDimension> optCalcDimension;
         CalcDimension dimension(defValue);
-        if (ArkTSUtils::ParseJsDimensionVp(vm, arg, dimension)) {
+        if (ArkTSUtils::ParseJsDimensionVp(vm, arg, dimension, false)) {
             optCalcDimension = dimension;
             hasValue = true;
         }
@@ -748,8 +749,10 @@ void ParseGradientCenter(const EcmaVM* vm, const Local<JSValueRef>& value, std::
         auto array = panda::Local<panda::ArrayRef>(value);
         auto length = array->Length(vm);
         if (length == NUM_2) {
-            hasValueX = ArkTSUtils::ParseJsDimensionVp(vm, panda::ArrayRef::GetValueAt(vm, array, NUM_0), valueX);
-            hasValueY = ArkTSUtils::ParseJsDimensionVp(vm, panda::ArrayRef::GetValueAt(vm, array, NUM_1), valueY);
+            hasValueX =
+                ArkTSUtils::ParseJsDimensionVp(vm, panda::ArrayRef::GetValueAt(vm, array, NUM_0), valueX, false);
+            hasValueY =
+                ArkTSUtils::ParseJsDimensionVp(vm, panda::ArrayRef::GetValueAt(vm, array, NUM_1), valueY, false);
         }
     }
     values.push_back(static_cast<double>(hasValueX));
@@ -775,7 +778,8 @@ void PushOuterBordeDimensionVector(const std::optional<CalcDimension>& valueDime
 void ParseOuterBorder(EcmaVM* vm, const Local<JSValueRef>& args, std::optional<CalcDimension>& optionalDimention)
 {
     CalcDimension valueDimen;
-    if (!args->IsUndefined() && ArkTSUtils::ParseJsDimensionVp(vm, args, valueDimen) && valueDimen.IsNonNegative()) {
+    if (!args->IsUndefined() && ArkTSUtils::ParseJsDimensionVp(vm, args, valueDimen, false) &&
+        valueDimen.IsNonNegative()) {
         if (valueDimen.Unit() == DimensionUnit::PERCENT) {
             valueDimen.Reset();
         }
@@ -1191,9 +1195,14 @@ ArkUINativeModuleValue CommonBridge::ResetBackgroundColor(ArkUIRuntimeCallInfo *
 void SetBorderWidthArray(const EcmaVM* vm, const Local<JSValueRef>& args, double values[], int units[], int index)
 {
     CalcDimension borderDimension;
-    if (ArkTSUtils::ParseAllBorder(vm, args, borderDimension)) {
-        values[index] = borderDimension.Value();
-        units[index] = static_cast<int>(borderDimension.Unit());
+    if (!args->IsUndefined()) {
+        if (ArkTSUtils::ParseAllBorder(vm, args, borderDimension)) {
+            values[index] = borderDimension.Value();
+            units[index] = static_cast<int>(borderDimension.Unit());
+        } else {
+            values[index] = 0;
+            units[index] = static_cast<int>(DimensionUnit::VP);
+        }
     } else {
         values[index] = -1;
         units[index] = static_cast<int>(DimensionUnit::INVALID);
@@ -2025,7 +2034,7 @@ ArkUINativeModuleValue CommonBridge::SetRadialGradient(ArkUIRuntimeCallInfo *run
     std::vector<double> values;
     ParseGradientCenter(vm, centerArg, values);
     CalcDimension radius;
-    auto hasRadius = ArkTSUtils::ParseJsDimensionVp(vm, radiusArg, radius);
+    auto hasRadius = ArkTSUtils::ParseJsDimensionVp(vm, radiusArg, radius, false);
     values.push_back(static_cast<double>(hasRadius));
     values.push_back(static_cast<double>(radius.Value()));
     values.push_back(static_cast<double>(radius.Unit()));
@@ -2070,11 +2079,11 @@ ArkUINativeModuleValue CommonBridge::SetOverlay(ArkUIRuntimeCallInfo* runtimeCal
     std::optional<CalcDimension> offsetX = CalcDimension(0);
     std::optional<CalcDimension> offsetY = CalcDimension(0);
     CalcDimension dimensionX;
-    if (ArkTSUtils::ParseJsDimensionVp(vm, offsetXArg, dimensionX)) {
+    if (ArkTSUtils::ParseJsDimensionVp(vm, offsetXArg, dimensionX, false)) {
         offsetX = dimensionX;
     }
     CalcDimension dimensionY;
-    if (ArkTSUtils::ParseJsDimensionVp(vm, offsetYArg, dimensionY)) {
+    if (ArkTSUtils::ParseJsDimensionVp(vm, offsetYArg, dimensionY, false)) {
         offsetY = dimensionY;
     }
     auto hasOptions = (hasOptionsArg->IsBoolean()) ? hasOptionsArg->ToBoolean(vm)->Value(): false;
@@ -3104,13 +3113,12 @@ ArkUINativeModuleValue CommonBridge::ResetOffset(ArkUIRuntimeCallInfo *runtimeCa
     return panda::JSValueRef::Undefined(vm);
 }
 
-void ParsePadding(const EcmaVM* vm, const Local<JSValueRef>& value, ArkUISizeType& result)
+void ParsePadding(const EcmaVM* vm, const Local<JSValueRef>& value, CalcDimension& dimen, ArkUISizeType& result)
 {
-    CalcDimension dimen(0, DimensionUnit::VP);
     if (ArkTSUtils::ParseJsDimensionVp(vm, value, dimen)) {
         if (LessOrEqual(dimen.Value(), 0.0)) {
             dimen.SetValue(0.0);
-            dimen.SetUnit(DimensionUnit::PX);
+            dimen.SetUnit(DimensionUnit::VP);
         }
         result.unit = static_cast<int8_t>(dimen.Unit());
         if (dimen.CalcValue() != "") {
@@ -3137,10 +3145,14 @@ ArkUINativeModuleValue CommonBridge::SetPadding(ArkUIRuntimeCallInfo *runtimeCal
     struct ArkUISizeType bottom = { 0.0, static_cast<int8_t>(DimensionUnit::VP) };
     struct ArkUISizeType left = { 0.0, static_cast<int8_t>(DimensionUnit::VP) };
 
-    ParsePadding(vm, secondArg, top);
-    ParsePadding(vm, thirdArg, right);
-    ParsePadding(vm, forthArg, bottom);
-    ParsePadding(vm, fifthArg, left);
+    CalcDimension topDimen(0, DimensionUnit::VP);
+    CalcDimension rightDimen(0, DimensionUnit::VP);
+    CalcDimension bottomDimen(0, DimensionUnit::VP);
+    CalcDimension leftDimen(0, DimensionUnit::VP);
+    ParsePadding(vm, secondArg, topDimen, top);
+    ParsePadding(vm, thirdArg, rightDimen, right);
+    ParsePadding(vm, forthArg, bottomDimen, bottom);
+    ParsePadding(vm, fifthArg, leftDimen, left);
     GetArkUIInternalNodeAPI()->GetCommonModifier().SetPadding(nativeNode, &top, &right, &bottom, &left);
 
     return panda::JSValueRef::Undefined(vm);
@@ -3166,10 +3178,10 @@ ArkUINativeModuleValue CommonBridge::SetMargin(ArkUIRuntimeCallInfo *runtimeCall
     Local<JSValueRef> thirdArg = runtimeCallInfo->GetCallArgRef(NUM_2);
     Local<JSValueRef> forthArg = runtimeCallInfo->GetCallArgRef(NUM_3);
     Local<JSValueRef> fifthArg = runtimeCallInfo->GetCallArgRef(NUM_4);
-    struct ArkUISizeType top = { 0.0, static_cast<int8_t>(DimensionUnit::VP), nullptr };
-    struct ArkUISizeType right = { 16.0, static_cast<int8_t>(DimensionUnit::VP), nullptr };
-    struct ArkUISizeType bottom = { 0.0, static_cast<int8_t>(DimensionUnit::VP), nullptr };
-    struct ArkUISizeType left = { 16.0, static_cast<int8_t>(DimensionUnit::VP), nullptr };
+    ArkUISizeType top = { 0.0, static_cast<int8_t>(DimensionUnit::VP), nullptr };
+    ArkUISizeType right = { 0.0, static_cast<int8_t>(DimensionUnit::VP), nullptr };
+    ArkUISizeType bottom = { 0.0, static_cast<int8_t>(DimensionUnit::VP), nullptr };
+    ArkUISizeType left = { 0.0, static_cast<int8_t>(DimensionUnit::VP), nullptr };
     CalcDimension topDimen(0, DimensionUnit::VP);
     if (ArkTSUtils::ParseJsDimensionVp(vm, secondArg, topDimen)) {
         top.unit = static_cast<int8_t>(topDimen.Unit());
@@ -3464,9 +3476,11 @@ ArkUINativeModuleValue CommonBridge::SetAlignSelf(ArkUIRuntimeCallInfo* runtimeC
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
 
-    if (secondArg->IsNumber()) {
-        uint32_t value = secondArg->Int32Value(vm);
-        GetArkUIInternalNodeAPI()->GetCommonModifier().SetAlignSelf(nativeNode, value);
+    if (secondArg->IsNumber() && secondArg->ToNumber(vm)->Value() >= 0 &&
+        secondArg->ToNumber(vm)->Value() <= MAX_ALIGN_VALUE) {
+        GetArkUIInternalNodeAPI()->GetCommonModifier().SetAlignSelf(nativeNode, secondArg->Int32Value(vm));
+    } else {
+        GetArkUIInternalNodeAPI()->GetCommonModifier().ResetAlignSelf(nativeNode);
     }
     return panda::JSValueRef::Undefined(vm);
 }

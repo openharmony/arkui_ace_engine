@@ -167,6 +167,7 @@ float GridLayoutInfo::GetContentOffset(float mainGap) const
     float heightSum = 0;
     int32_t itemCount = 0;
     float height = 0;
+    auto fromStart = false;
     for (const auto& item : lineHeightMap_) {
         auto line = gridMatrix_.find(item.first);
         if (line == gridMatrix_.end()) {
@@ -179,13 +180,14 @@ float GridLayoutInfo::GetContentOffset(float mainGap) const
         auto lineEnd = line->second.rbegin()->second;
         itemCount += (lineEnd - lineStart + 1);
         heightSum += item.second + mainGap;
+        fromStart = item.first == 0 ? true : fromStart;
     }
     if (itemCount == 0) {
         return 0;
     }
     auto averageHeight = heightSum / itemCount;
     height = startIndex_ * averageHeight - currentOffset_;
-    if (itemCount >= (childrenCount_ - 1)) {
+    if (itemCount >= (childrenCount_ - 1) || (fromStart && itemCount >= startIndex_)) {
         height = GetStartLineOffset(mainGap);
     }
     return height;
@@ -292,7 +294,7 @@ float GridLayoutInfo::GetContentOffset(const GridLayoutOptions& options, float m
     }
     totalOffset +=
         startIndex_ > lastIndex ? ((startIndex_ - lastIndex - 1) / crossCount_) * (regularHeight + mainGap) : 0;
-    return totalOffset - mainGap - currentOffset_;
+    return totalOffset - currentOffset_;
 }
 
 float GridLayoutInfo::GetContentHeight(const GridLayoutOptions& options, float mainGap) const
@@ -332,10 +334,12 @@ float GridLayoutInfo::GetContentHeight(const GridLayoutOptions& options, float m
         totalHeight += irregularHeight + mainGap;
         totalHeight +=
             (*(index)-lastIndex) > 1 ? ((*(index)-1 - lastIndex) / crossCount_ + 1) * (regularHeight + mainGap) : 0;
-        totalHeight = *(index);
+        lastIndex = *(index);
     }
 
-    totalHeight += ((childrenCount_ - 1 - lastIndex) / crossCount_ + 1) * (regularHeight + mainGap);
+    totalHeight += (childrenCount_ - 1 > lastIndex)
+                       ? ((childrenCount_ - 1 - lastIndex) / crossCount_) * (regularHeight + mainGap)
+                       : 0;
     totalHeight -= mainGap;
     return totalHeight;
 }

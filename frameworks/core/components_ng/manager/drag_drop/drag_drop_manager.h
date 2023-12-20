@@ -22,6 +22,7 @@
 #include "base/memory/ace_type.h"
 #include "base/utils/noncopyable.h"
 #include "base/window/drag_window.h"
+#include "core/common/interaction/interaction_data.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_proxy.h"
 #include "core/gestures/velocity_tracker.h"
@@ -72,11 +73,14 @@ public:
         textFieldDragFrameNodes_.try_emplace(id, dragFrameNode);
     }
 
+    void OnDragOut();
+
     void UpdateDragWindowPosition(int32_t globalX, int32_t globalY);
     void OnDragStart(const Point& point);
     void OnDragStart(const Point& point, const RefPtr<FrameNode>& frameNode);
     void OnDragMove(const PointerEvent& pointerEvent, const std::string& extraInfo);
     void OnDragEnd(const PointerEvent& pointerEvent, const std::string& extraInfo);
+    void OnDragMoveOut(const PointerEvent& pointerEvent, const std::string& extraInfo);
     void OnTextDragEnd(float globalX, float globalY, const std::string& extraInfo);
     void onDragCancel();
     void OnItemDragStart(float globalX, float globalY, const RefPtr<FrameNode>& frameNode);
@@ -93,6 +97,7 @@ public:
     void ClearExtraInfo();
     float GetSmallWindowScale() const;
 #ifdef ENABLE_DRAG_FRAMEWORK
+    void UpdateDragStyle(const DragCursorStyleCore& dragCursorStyleCore = DragCursorStyleCore::DEFAULT);
     void UpdateDragAllowDrop(const RefPtr<FrameNode>& dragFrameNode, const bool isCopy);
     void RequireSummary();
     void ClearSummary();
@@ -233,7 +238,28 @@ public:
         return true;
     }
 
+    typedef struct DragPreviewInfo {
+        double width { 0.0 };
+        double height { 0.0 };
+        double maxWidth { 0.0 };
+        double scale { -1.0 };
+        RefPtr<FrameNode> imageNode { nullptr };
+    } DragPreviewInfo;
+#ifdef ENABLE_DRAG_FRAMEWORK
+    bool IsNeedScaleDragPreview();
+    void DoDragMoveAnimate(const PointerEvent& pointerEvent);
+    void DoDragStartAnimation(const RefPtr<OverlayManager> overlayManager, const GestureEvent& event);
+#endif
+
 private:
+#ifdef ENABLE_DRAG_FRAMEWORK
+    double CalcDragPreviewDistanceWithPoint(
+        const OHOS::Ace::Dimension& preserverHeight, int32_t x, int32_t y, const DragPreviewInfo& info);
+    Offset CalcDragMoveOffset(
+        const OHOS::Ace::Dimension& preserverHeight, int32_t x, int32_t y, const DragPreviewInfo& info);
+    bool GetDragPreviewInfo(
+        const OHOS::Ace::RefPtr<OHOS::Ace::NG::OverlayManager> overlayManager, DragPreviewInfo& dragPreviewInfo);
+#endif
     RefPtr<FrameNode> FindDragFrameNodeByPosition(float globalX, float globalY, DragType dragType, bool findDrop);
     void FireOnDragEvent(
         const RefPtr<FrameNode>& frameNode, const Point& point, DragEventType type, const std::string& extraInfo);
@@ -272,6 +298,7 @@ private:
     std::unordered_map<int32_t, WeakPtr<FrameNode>> nodesForDragNotify_;
     std::unordered_set<int32_t> parentHitNodes_;
 #ifdef ENABLE_DRAG_FRAMEWORK
+    DragCursorStyleCore dragCursorStyleCore_ = DragCursorStyleCore::DEFAULT;
     std::map<std::string, int64_t> summaryMap_;
     uint32_t recordSize_ = 0;
 #endif // ENABLE_DRAG_FRAMEWORK
@@ -287,6 +314,7 @@ private:
     VelocityTracker velocityTracker_;
     DragDropMgrState dragDropState_ = DragDropMgrState::IDLE;
     Rect previewRect_ { -1, -1, -1, -1 };
+    DragPreviewInfo info_;
 
     ACE_DISALLOW_COPY_AND_MOVE(DragDropManager);
 };

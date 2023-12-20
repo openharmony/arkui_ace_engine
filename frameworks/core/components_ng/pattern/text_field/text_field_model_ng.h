@@ -53,7 +53,8 @@ public:
     void SetInputStyle(InputStyle value) override;
     void SetShowPasswordIcon(bool value) override;
     void SetOnEditChanged(std::function<void(bool)>&& func) override;
-    void SetOnSubmit(std::function<void(int32_t)>&& func) override;
+    void SetOnSubmit(std::function<void(int32_t)>&& func) override {};
+    void SetOnSubmit(std::function<void(int32_t, NG::TextFieldCommonEvent&)>&& func) override;
     void SetOnChange(std::function<void(const std::string&)>&& func) override;
     void SetOnTextSelectionChange(std::function<void(int32_t, int32_t)>&& func) override;
     void SetOnContentScroll(std::function<void(float, float)>&& func) override;
@@ -89,6 +90,7 @@ public:
     void SetCancelIconSize(const CalcDimension& iconSize) override;
     void SetCanacelIconSrc(const std::string& iconSrc) override;
     void SetCancelIconColor(const Color& iconColor) override;
+    void SetIsShowCancelButton(bool isShowCancelButton) override;
     void SetSelectAllValue(bool isSetSelectAllValue) override;
 
     static void SetInputStyle(FrameNode* frameNode, InputStyle value);

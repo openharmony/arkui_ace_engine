@@ -50,6 +50,8 @@ public:
     virtual int32_t GetDragExtraInfo(std::string& extraInfo) = 0;
 
     virtual int32_t EnterTextEditorArea(bool enable) = 0;
+
+    virtual int32_t AddPrivilege() = 0;
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_INTERACTION_INTERFACE_H

@@ -1,3 +1,18 @@
+/*
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 /// <reference path='./import.ts' />
 class MenuFontColorModifier extends ModifierWithKey<ResourceColor> {
   constructor(value: ResourceColor) {
@@ -27,26 +42,24 @@ class MenuFontModifier extends ModifierWithKey<Font> {
   }
   static identity: Symbol = Symbol('font');
   applyPeer(node: KNode, reset: boolean): void {
-    if (reset) {
+    if (reset || !this.value) {
       GetUINativeModule().menu.resetFont(node);
     }
     else {
       GetUINativeModule().menu.setFont(node,
-        this.value?.size ?? undefined,
-        this.value?.weight ?? undefined,
-        this.value?.family ?? undefined,
-        this.value?.style ?? undefined);
+        this.value.size,
+        this.value.weight,
+        this.value.family,
+        this.value.style);
     }
   }
 
   checkObjectDiff(): boolean {
-    if (!(this.stageValue.weight === this.value.weight &&
-      this.stageValue.style === this.value.style)) {
-      return true;
-    } else {
-      return !isBaseOrResourceEqual(this.stageValue.size, this.value.size) ||
-        !isBaseOrResourceEqual(this.stageValue.family, this.value.family);
-    }
+    let sizeEQ = isBaseOrResourceEqual(this.stageValue.size, this.value.size);
+    let weightEQ = this.stageValue.weight === this.value.weight;
+    let familyEQ = isBaseOrResourceEqual(this.stageValue.family, this.value.family);
+    let styleEQ = this.stageValue.style === this.value.style;
+    return !sizeEQ || !weightEQ || !familyEQ || !styleEQ;
   }
 }
 
@@ -117,6 +130,6 @@ globalThis.Menu.attributeModifier = function (modifier) {
   let component = this.createOrGetNode(elmtId, ()=> {
     return new ArkMenuComponent(nativeNode);
   });
-  modifier.applyNormalAttribute(component);
+  applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
 }
