@@ -3570,7 +3570,7 @@ bool TextFieldPattern::CursorMoveRightOperation()
     auto originCaretPosition = selectController_->GetCaretIndex();
     if (IsSelected()) {
         CloseSelectOverlay();
-        selectController_->UpdateCaretIndex(selectController_->GetEndIndex() + 1);
+        selectController_->UpdateCaretIndex(selectController_->GetEndIndex());
     } else {
         UpdateCaretPositionWithClamp(
             selectController_->GetCaretIndex() +
