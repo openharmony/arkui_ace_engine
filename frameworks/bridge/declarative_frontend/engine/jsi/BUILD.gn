@@ -304,6 +304,23 @@ template("declarative_js_engine_ark") {
     deps = []
     external_deps = []
 
+    if (defined(config.xcomponent_components_support) &&
+        config.xcomponent_components_support) {
+      sources += [
+        "components/arkts_native_xcomponent_modifier.cpp",
+        "nativeModule/arkts_native_xcomponent_bridge.cpp",
+      ]
+      deps += [ "$ace_root/frameworks/core/components_ng/pattern/xcomponent:ace_core_components_xcomponent_pattern_ng_$platform" ]
+      if (is_ohos_standard_system) {
+        deps += [ "$ace_root/interfaces/inner_api/xcomponent_controller:ace_xcomponent_controller" ]
+        external_deps = [
+          "c_utils:utils",
+          "graphic_2d:librender_service_client",
+          "hilog:libhilog",
+        ]
+      }
+    }
+
     if (defined(config.form_components_support) &&
         config.form_components_support) {
       sources += [
