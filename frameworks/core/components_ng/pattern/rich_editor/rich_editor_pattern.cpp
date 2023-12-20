@@ -346,6 +346,7 @@ int32_t RichEditorPattern::AddImageSpan(const ImageSpanOptions& options, bool is
     if (options.offset.has_value() && options.offset.value() <= GetCaretPosition()) {
         SetCaretPosition(options.offset.value() + 1);
     } else {
+        imageCount_++;
         SetCaretPosition(GetTextContentLength());
     }
     if (!isPaste && textSelector_.IsValid()) {
@@ -409,6 +410,7 @@ int32_t RichEditorPattern::AddPlaceholderSpan(const RefPtr<UINode>& customNode, 
     if (options.offset.has_value() && options.offset.value() <= GetCaretPosition()) {
         SetCaretPosition(options.offset.value() + 1);
     } else {
+        imageCount_++;
         SetCaretPosition(GetTextContentLength());
     }
     if (textSelector_.IsValid()) {
