@@ -656,7 +656,7 @@ RefPtr<FrameNode> DialogPattern::BuildButtons(
         actionPadding.right = CalcLength(dialogTheme_->GetMutiButtonPaddingEnd());
     }
     auto padding = dialogTheme_->GetActionsPadding();
-    actionPadding.top = CalcLength(padding.Top());
+    actionPadding.top = CalcLength(dialogTheme_->GetButtonWithContentPadding());
     actionPadding.bottom = CalcLength(dialogTheme_->GetButtonPaddingBottom());
     container->GetLayoutProperty()->UpdatePadding(actionPadding);
 
