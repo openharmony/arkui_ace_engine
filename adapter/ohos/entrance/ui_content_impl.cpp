@@ -2297,7 +2297,7 @@ RefPtr<PopupParam> UIContentImpl::CreateCustomPopupParam(
     popupParam->SetShowInSubWindow(config.isShowInSubWindow);
  
     if (config.isAutoCancel.has_value()) {
-        popupParam->SetHasAction(config.isAutoCancel.value());
+        popupParam->SetHasAction(!config.isAutoCancel.value());
     }
  
     if (config.isEnableArrow.has_value()) {
