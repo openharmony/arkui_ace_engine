@@ -42,7 +42,7 @@ gen_obj("swiperefresher_abc_preview") {
 ohos_shared_library("swiperefresher") {
   sources = [ "swiperefresher.cpp" ]
 
-if (use_mingw_win || use_mac || use_linux) {
+  if (use_mingw_win || use_mac || use_linux) {
     deps = [ ":gen_obj_src_swiperefresher_abc_preview" ]
   } else {
     deps = [ ":swiperefresher_abc" ]
