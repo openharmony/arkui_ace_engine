@@ -174,7 +174,12 @@ RefPtr<FrameNode> BubbleView::CreateBubbleNode(
     // Create child
     RefPtr<FrameNode> child;
     if (primaryButton.showButton || secondaryButton.showButton) {
-        child = CreateCombinedChild(param, popupId, targetId, popupNode);
+        auto columnNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+            AceType::MakeRefPtr<LinearLayoutPattern>(true));
+        auto columnLayoutProperty = columnNode->GetLayoutProperty<LinearLayoutProperty>();
+        columnLayoutProperty->UpdateMainAxisAlign(FlexAlign::CENTER); // mainAxisAlign
+        columnLayoutProperty->UpdateCrossAxisAlign(FlexAlign::CENTER);
+        auto combinedChild = CreateCombinedChild(param, popupId, targetId, popupNode);
         popupPaintProp->UpdatePrimaryButtonShow(primaryButton.showButton);
         popupPaintProp->UpdateSecondaryButtonShow(secondaryButton.showButton);
         if ((Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN))) {
@@ -183,6 +188,9 @@ RefPtr<FrameNode> BubbleView::CreateBubbleNode(
     } else {
         auto columnNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
             AceType::MakeRefPtr<LinearLayoutPattern>(true));
+        auto columnLayoutProperty = columnNode->GetLayoutProperty<LinearLayoutProperty>();
+        columnLayoutProperty->UpdateMainAxisAlign(FlexAlign::CENTER); // mainAxisAlign
+        columnLayoutProperty->UpdateCrossAxisAlign(FlexAlign::CENTER);
         auto textNode = CreateMessage(message, useCustom);
         bobblePattern->SetMessageNode(textNode);
         auto popupTheme = GetPopupTheme();
@@ -297,11 +305,11 @@ RefPtr<FrameNode> BubbleView::CreateCustomBubbleNode(
     auto columnNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         AceType::MakeRefPtr<LinearLayoutPattern>(false));
     customNode->MountToParent(columnNode);
-    BlurStyleOption styleOption;
-    styleOption.blurStyle = BlurStyle::COMPONENT_ULTRA_THICK;
     auto columnRenderContext = columnNode->GetRenderContext();
-    auto columnLayoutProperty = columnNode->GetLayoutProperty();
+    auto columnLayoutProperty = columnNode->GetLayoutProperty<LinearLayoutProperty>();
     CHECK_NULL_RETURN(columnLayoutProperty, nullptr);
+    columnLayoutProperty->UpdateMainAxisAlign(FlexAlign::CENTER); // mainAxisAlign
+    columnLayoutProperty->UpdateCrossAxisAlign(FlexAlign::CENTER);
     auto customFrameNode = AceType::DynamicCast<FrameNode>(customNode);
     float popupMaxWidth = 0.0f;
     float popupMaxHeight = 0.0f;
@@ -322,6 +330,9 @@ RefPtr<FrameNode> BubbleView::CreateCustomBubbleNode(
             columnRenderContext->UpdateBackgroundColor(
                 popupPaintProps->GetBackgroundColor().value_or(Color::TRANSPARENT));
             columnRenderContext->UpdateBackBlurStyle(styleOption);
+        }
+        if (param->GetShadow().has_value()) {
+            columnRenderContext->UpdateBackShadow(param->GetShadow().value());
         }
     }
     popupPaintProps->UpdateAutoCancel(!param->HasAction());
