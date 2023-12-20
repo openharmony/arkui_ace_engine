@@ -216,9 +216,9 @@ void WindowScene::OnActivation()
 {
     auto uiTask = [weakThis = WeakClaim(this)]() {
         auto self = weakThis.Upgrade();
-        CHECK_NULL_VOID(self);
+        CHECK_NULL_VOID(self && self->session_);
 
-        if (self->session_ && self->session_->GetShowRecent() &&
+        if (self->session_->GetShowRecent() &&
             self->session_->GetSessionState() == Rosen::SessionState::STATE_DISCONNECT && self->snapshotNode_) {
             auto host = self->GetHost();
             CHECK_NULL_VOID(host);
@@ -228,10 +228,7 @@ void WindowScene::OnActivation()
             self->CreateStartingNode();
             host->AddChild(self->startingNode_);
             host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-            return;
-        }
-
-        if (self->session_ && self->session_->GetShowRecent() &&
+        } else if (self->session_->GetShowRecent() &&
             self->session_->GetSessionState() != Rosen::SessionState::STATE_DISCONNECT && self->startingNode_) {
             auto surfaceNode = self->session_->GetSurfaceNode();
             CHECK_NULL_VOID(surfaceNode);
@@ -241,6 +238,7 @@ void WindowScene::OnActivation()
             host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
             surfaceNode->SetBufferAvailableCallback(self->callback_);
         }
+        self->session_->SetShowRecent(false);
     };
 
     ContainerScope scope(instanceId_);
