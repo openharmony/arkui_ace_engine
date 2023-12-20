@@ -466,7 +466,7 @@ void TextFieldPattern::UpdateCaretRect(bool isEditorValueChanged)
         selectController_->MoveSecondHandleToContentRect(selectController_->GetSecondHandleIndex());
         return;
     }
-    if (focusHub && !focusHub->IsCurrentFocus()) {
+    if (focusHub && !focusHub->IsCurrentFocus() && !obscuredChange_) {
         CloseSelectOverlay(true);
         return;
     }
@@ -5758,9 +5758,10 @@ void TextFieldPattern::UpdateRecordCaretIndex(int32_t index)
 void TextFieldPattern::OnObscuredChanged(bool isObscured)
 {
     ResetObscureTickCountDown();
+    obscuredChange_ = textObscured_ != isObscured;
     textObscured_ = isObscured;
     CloseSelectOverlay(false);
-    selectController_->UpdateCaretIndex(selectController_->GetCaretIndex());
+    selectController_->UpdateCaretIndex(static_cast<int32_t>(contentController_->GetWideText().length()));
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);

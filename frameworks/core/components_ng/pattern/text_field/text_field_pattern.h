@@ -1286,7 +1286,7 @@ private:
     uint32_t twinklingInterval_ = 0;
     int32_t obscureTickCountDown_ = 0;
     int32_t nakedCharPosition_ = -1;
-    bool updateSelectionAfterObscure_ = false;
+    bool obscuredChange_ = false;
     float currentOffset_ = 0.0f;
     float countHeight_ = 0.0f;
     Dimension underlineWidth_ = 1.0_px;
