@@ -241,26 +241,29 @@ public:
                 systemSafeArea_ = ConvertAvoidArea(avoidArea);
                 break;
             case Rosen::AvoidAreaType::TYPE_NAVIGATION_INDICATOR:
-                navigationBar_ = NG::SafeAreaInsets::Inset { .start = avoidArea.bottomRect_.posY_,
-                    .end = avoidArea.bottomRect_.posY_ + avoidArea.bottomRect_.height_ };
+                navigationBar_ = ConvertAvoidArea(avoidArea);
                 break;
             default:
                 // cutout doesn't affect layout
                 return;
         }
         auto safeArea = systemSafeArea_;
-        safeArea.bottom_ = safeArea.bottom_.Combine(navigationBar_);
+        auto navSafeArea = navigationBar_;
         ContainerScope scope(instanceId_);
         taskExecutor->PostTask(
-            [pipeline, safeArea] {
-                pipeline->UpdateSystemSafeArea(safeArea);
+            [pipeline, safeArea, navSafeArea, type] {
+                if (type == Rosen::AvoidAreaType::TYPE_SYSTEM) {
+                    pipeline->UpdateSystemSafeArea(safeArea);
+                } else {
+                    pipeline->UpdateNavSafeArea(navSafeArea);
+                }
             },
             TaskExecutor::TaskType::UI);
     }
 
 private:
     NG::SafeAreaInsets systemSafeArea_;
-    NG::SafeAreaInsets::Inset navigationBar_;
+    NG::SafeAreaInsets navigationBar_;
     int32_t instanceId_ = -1;
 };
 

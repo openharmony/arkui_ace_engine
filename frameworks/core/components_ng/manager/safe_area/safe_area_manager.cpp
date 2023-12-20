@@ -35,6 +35,15 @@ bool SafeAreaManager::UpdateSystemSafeArea(const SafeAreaInsets& safeArea)
     return true;
 }
 
+bool SafeAreaManager::UpdateNavArea(const SafeAreaInsets& safeArea)
+{
+    if (navSafeArea_ == safeArea) {
+        return false;
+    }
+    navSafeArea_ = safeArea;
+    return true;
+}
+
 bool SafeAreaManager::UpdateKeyboardSafeArea(float keyboardHeight)
 {
     uint32_t bottom;
@@ -58,7 +67,7 @@ SafeAreaInsets SafeAreaManager::GetCombinedSafeArea(const SafeAreaExpandOpts& op
         return res;
     }
     if (opts.type & SAFE_AREA_TYPE_CUTOUT) {
-        res = res.Combine(cutoutSafeArea_);
+        res = res.Combine(cutoutSafeArea_).Combine(navSafeArea_);
     }
     if (opts.type & SAFE_AREA_TYPE_SYSTEM) {
         res = res.Combine(systemSafeArea_);
@@ -123,7 +132,7 @@ SafeAreaInsets SafeAreaManager::GetSafeArea() const
     if (ignoreSafeArea_ || (!isFullScreen_ && !isNeedAvoidWindow_)) {
         return {};
     }
-    return systemSafeArea_.Combine(cutoutSafeArea_);
+    return systemSafeArea_.Combine(cutoutSafeArea_).Combine(navSafeArea_);
 }
 
 float SafeAreaManager::GetKeyboardOffset() const

@@ -109,6 +109,7 @@ public:
     MOCK_METHOD0(GetStoredNodeInfo, std::unique_ptr<JsonValue>());
     MOCK_METHOD1(UpdateSystemSafeArea, void(const SafeAreaInsets& systemSafeArea));
     MOCK_METHOD1(UpdateCutoutSafeArea, void(const SafeAreaInsets& cutoutSafeArea));
+    MOCK_METHOD1(UpdateNavSafeArea, void(const SafeAreaInsets& navSafeArea));
     MOCK_CONST_METHOD0(GetSafeArea, SafeAreaInsets());
     MOCK_METHOD0(NotifyConfigurationChange, void());
     MOCK_METHOD0(NeedSoftKeyboard, bool());
