@@ -1991,9 +1991,33 @@ bool RichEditorPattern::EnableStandardInput(bool needShowSoftKeyboard)
 
 std::optional<MiscServices::TextConfig> RichEditorPattern::GetMiscTextConfig()
 {
-    auto pipeline = GetHost()->GetContext();
+    auto tmpHost = GetHost();
+    CHECK_NULL_RETURN(tmpHost, {});
+    auto pipeline = tmpHost->GetContext();
     CHECK_NULL_RETURN(pipeline, {});
     auto windowRect = pipeline->GetCurrentWindowRect();
+    double positionY = (tmpHost->GetPaintRectOffset() - pipeline->GetRootRect().GetOffset()).GetY() + windowRect.Top();
+    double height = frameRect_.Height();
+    auto uiExtMgr = pipeline->GetUIExtensionManager();
+    if (uiExtMgr && uiExtMgr->IsWindowTypeUIExtension(pipeline)) {
+        // find the direct child of the dialog.
+        auto parent = tmpHost->GetParent();
+        RefPtr<UINode> child = tmpHost;
+        while (parent && parent->GetTag() != V2::DIALOG_COMPONENT_TAG) {
+            child = parent;
+            parent = parent->GetParent();
+        }
+        if (AceType::DynamicCast<FrameNode>(parent)) {
+            auto childOfDialog = AceType::DynamicCast<FrameNode>(child);
+            if (childOfDialog) {
+                positionY = (childOfDialog->GetPaintRectOffset() - pipeline->GetRootRect().GetOffset()).GetY() +
+                            windowRect.Top();
+                height = childOfDialog->GetTransformRectRelativeToWindow().Height();
+            }
+        }
+        height = positionY + height > windowRect.Bottom() ? windowRect.Bottom() - positionY : height;
+    }
+
     float caretHeight = 0.0f;
     OffsetF caretOffset = CalcCursorOffsetByPosition(GetCaretPosition(), caretHeight);
     if (NearZero(caretHeight)) {
@@ -2010,8 +2034,8 @@ std::optional<MiscServices::TextConfig> RichEditorPattern::GetMiscTextConfig()
         .cursorInfo = cursorInfo,
         .range = { .start = textSelector_.GetStart(), .end = textSelector_.GetEnd() },
         .windowId = pipeline->GetFocusWindowId(),
-        .positionY = (GetHost()->GetPaintRectOffset() - pipeline->GetRootRect().GetOffset()).GetY(),
-        .height = frameRect_.Height() };
+        .positionY = positionY,
+        .height = height };
     return textConfig;
 }
 #else

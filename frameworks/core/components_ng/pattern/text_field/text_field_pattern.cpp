@@ -2935,6 +2935,28 @@ std::optional<MiscServices::TextConfig> TextFieldPattern::GetMiscTextConfig() co
     auto theme = GetTheme();
     CHECK_NULL_RETURN(theme, {});
     auto windowRect = pipeline->GetCurrentWindowRect();
+    double positionY = (tmpHost->GetPaintRectOffset() - pipeline->GetRootRect().GetOffset()).GetY() + windowRect.Top();
+    double height = frameRect_.Height();
+    auto uiExtMgr = pipeline->GetUIExtensionManager();
+    if (uiExtMgr && uiExtMgr->IsWindowTypeUIExtension(pipeline)) {
+        // find the direct child of the dialog.
+        auto parent = tmpHost->GetParent();
+        RefPtr<UINode> child = tmpHost;
+        while (parent && parent->GetTag() != V2::DIALOG_COMPONENT_TAG) {
+            child = parent;
+            parent = parent->GetParent();
+        }
+        if (AceType::DynamicCast<FrameNode>(parent)) {
+            auto childOfDialog = AceType::DynamicCast<FrameNode>(child);
+            if (childOfDialog) {
+                positionY = (childOfDialog->GetPaintRectOffset() - pipeline->GetRootRect().GetOffset()).GetY() +
+                            windowRect.Top();
+                height = childOfDialog->GetTransformRectRelativeToWindow().Height();
+            }
+        }
+        height = positionY + height > windowRect.Bottom() ? windowRect.Bottom() - positionY : height;
+    }
+
     MiscServices::CursorInfo cursorInfo { .left = selectController_->GetCaretRect().Left() + windowRect.Left() +
                                                   parentGlobalOffset_.GetX(),
         .top = selectController_->GetCaretRect().Top() + windowRect.Top() + parentGlobalOffset_.GetY(),
@@ -2946,8 +2968,8 @@ std::optional<MiscServices::TextConfig> TextFieldPattern::GetMiscTextConfig() co
         .cursorInfo = cursorInfo,
         .range = { .start = selectController_->GetStartIndex(), .end = selectController_->GetEndIndex() },
         .windowId = pipeline->GetFocusWindowId(),
-        .positionY = (tmpHost->GetPaintRectOffset() - pipeline->GetRootRect().GetOffset()).GetY(),
-        .height = frameRect_.Height() };
+        .positionY = positionY,
+        .height = height };
     return textConfig;
 }
 #endif

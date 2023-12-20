@@ -1286,18 +1286,6 @@ void PipelineContext::OnVirtualKeyboardHeightChange(
 
         auto manager = DynamicCast<TextFieldManagerNG>(context->PipelineBase::GetTextFieldManager());
         CHECK_NULL_VOID(manager);
-        float uiExtensionHeight = 0.0f;
-        if (manager) {
-            uiExtensionHeight = static_cast<float>(manager->GetHeight());
-            if (uiExtensionHeight == 0) {
-                LOGE("UIExtension Component Height equals zero");
-                return;
-            }
-            if (positionY + height > uiExtensionHeight) {
-                height = uiExtensionHeight - positionY;
-            }
-            positionY += static_cast<float>(manager->GetClickPosition().GetY());
-        }
         SizeF rootSize { static_cast<float>(context->rootWidth_), static_cast<float>(context->rootHeight_) };
         float keyboardOffset = context->safeAreaManager_->GetKeyboardOffset();
         float positionYWithOffset = positionY - keyboardOffset;
@@ -1309,11 +1297,11 @@ void PipelineContext::OnVirtualKeyboardHeightChange(
                               : keyboardHeight;
         if (NearZero(keyboardHeight)) {
             context->safeAreaManager_->UpdateKeyboardOffset(0.0f);
+        } else if (positionYWithOffset + height > (rootSize.Height() - keyboardHeight) && offsetFix > 0.0f) {
+            context->safeAreaManager_->UpdateKeyboardOffset(-offsetFix);
         } else if (LessOrEqual(rootSize.Height() - positionYWithOffset - height, height) &&
                    LessOrEqual(rootSize.Height() - positionYWithOffset, keyboardHeight)) {
             context->safeAreaManager_->UpdateKeyboardOffset(-keyboardHeight);
-        } else if (positionYWithOffset + height > (rootSize.Height() - keyboardHeight) && offsetFix > 0.0f) {
-            context->safeAreaManager_->UpdateKeyboardOffset(-offsetFix);
         } else if ((positionYWithOffset + height > rootSize.Height() - keyboardHeight &&
                        positionYWithOffset < rootSize.Height() - keyboardHeight && height < keyboardHeight / 2.0f) &&
                    NearZero(context->rootNode_->GetGeometryNode()->GetFrameOffset().GetY())) {

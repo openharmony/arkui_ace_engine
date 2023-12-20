@@ -61,6 +61,11 @@ UIExtensionPattern::UIExtensionPattern(bool isTransferringCaller, bool isModal)
 
 UIExtensionPattern::~UIExtensionPattern()
 {
+    TAG_LOGI(AceLogTag::ACE_UIEXTENSIONCOMPONENT, "UIExtension with id = %{public}d is destroyed.", uiExtensionId_);
+    NotifyDestroy();
+    CHECK_NULL_VOID(sessionWrapper_);
+    sessionWrapper_->DestroySession();
+    FireModalOnDestroy();
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto ngPipeline = AceType::DynamicCast<NG::PipelineContext>(pipeline);
@@ -68,11 +73,6 @@ UIExtensionPattern::~UIExtensionPattern()
     auto uiExtensionManager = ngPipeline->GetUIExtensionManager();
     CHECK_NULL_VOID(uiExtensionManager);
     uiExtensionManager->RecycleExtensionId(uiExtensionId_);
-    NotifyDestroy();
-    CHECK_NULL_VOID(sessionWrapper_);
-    sessionWrapper_->DestroySession();
-    FireModalOnDestroy();
-    TAG_LOGI(AceLogTag::ACE_UIEXTENSIONCOMPONENT, "UIExtension with id = %{public}d is destroyed.", uiExtensionId_);
 }
 
 RefPtr<LayoutAlgorithm> UIExtensionPattern::CreateLayoutAlgorithm()
@@ -311,10 +311,6 @@ void UIExtensionPattern::OnDetachFromFrameNode(FrameNode* frameNode)
     auto pipeline = AceType::DynamicCast<PipelineContext>(PipelineBase::GetCurrentContext());
     CHECK_NULL_VOID(pipeline);
     pipeline->RemoveWindowStateChangedCallback(id);
-    auto textFieldManager = DynamicCast<TextFieldManagerNG>(pipeline->GetTextFieldManager());
-    if (textFieldManager) {
-        textFieldManager->ClearOnFocusTextField();
-    }
 }
 
 void UIExtensionPattern::OnModifyDone()
@@ -460,10 +456,6 @@ void UIExtensionPattern::HandleBlurEvent()
     DispatchFocusState(false);
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
-    auto textFieldManager = DynamicCast<TextFieldManagerNG>(pipeline->GetTextFieldManager());
-    if (textFieldManager) {
-        textFieldManager->ClearOnFocusTextField();
-    }
     auto uiExtensionManager = pipeline->GetUIExtensionManager();
     uiExtensionManager->RegisterUIExtensionInFocus(nullptr);
 }
@@ -493,14 +485,6 @@ void UIExtensionPattern::HandleTouchEvent(const TouchEventInfo& info)
     auto focusHub = host->GetFocusHub();
     CHECK_NULL_VOID(focusHub);
     focusHub->RequestFocusImmediately();
-    auto touchType = info.GetTouches().front().GetTouchType();
-    if (touchType == TouchType::DOWN) {
-        auto touchOffsetToWindow = info.GetTouches().front().GetGlobalLocation();
-        auto touchOffsetToFrameNode = info.GetTouches().front().GetLocalLocation();
-        auto rectToWindow = host->GetTransformRectRelativeToWindow();
-        UpdateTextFieldManager(
-            { rectToWindow.GetOffset().GetX(), rectToWindow.GetOffset().GetY() }, rectToWindow.Height());
-    }
     DispatchPointerEvent(pointerEvent);
 }
 
@@ -521,11 +505,6 @@ void UIExtensionPattern::HandleMouseEvent(const MouseInfo& info)
         auto hub = host->GetFocusHub();
         CHECK_NULL_VOID(hub);
         hub->RequestFocusImmediately();
-        auto mouseOffsetToWindow = info.GetGlobalLocation();
-        auto mouseOffsetToFrameNode = info.GetLocalLocation();
-        auto rectToWindow = host->GetTransformRectRelativeToWindow();
-        UpdateTextFieldManager({ rectToWindow.GetOffset().GetX(), mouseOffsetToWindow.GetY() },
-            rectToWindow.Height() - mouseOffsetToFrameNode.GetY());
     }
     DispatchPointerEvent(pointerEvent);
 }
@@ -598,10 +577,6 @@ void UIExtensionPattern::HandleDragEvent(const PointerEvent& info)
     } else {
         Platform::CalculatePointerEvent(selfGlobalOffset, pointerEvent, scale, udegree);
     }
-    Offset touchOffsetToWindow { info.windowX, info.windowY };
-    Offset touchOffsetToFrameNode { info.displayX, info.displayY };
-    auto rectToWindow = host->GetTransformRectRelativeToWindow();
-    UpdateTextFieldManager({ rectToWindow.GetOffset().GetX(), rectToWindow.GetOffset().GetY() }, rectToWindow.Height());
     DispatchPointerEvent(pointerEvent);
 }
 
@@ -770,20 +745,6 @@ void UIExtensionPattern::RegisterVisibleAreaChange()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     pipeline->AddVisibleAreaChangeNode(host, 0.0f, callback, false);
-}
-
-void UIExtensionPattern::UpdateTextFieldManager(const Offset& offset, float height)
-{
-    if (!IsCurrentFocus()) {
-        return;
-    }
-    auto context = GetHost()->GetContext();
-    CHECK_NULL_VOID(context);
-    auto textFieldManager = DynamicCast<TextFieldManagerNG>(context->GetTextFieldManager());
-    CHECK_NULL_VOID(textFieldManager);
-    textFieldManager->SetClickPosition(offset);
-    textFieldManager->SetHeight(height);
-    textFieldManager->SetOnFocusTextField(WeakClaim(this));
 }
 
 bool UIExtensionPattern::IsCurrentFocus() const
