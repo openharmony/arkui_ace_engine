@@ -81,7 +81,7 @@ public:
         listContentModifier_ = modify;
     }
 
-    void SetItemPosition(const PositionMap& positionMap)
+    void SetItemsPosition(const PositionMap& positionMap)
     {
         itemPosition_ = positionMap;
     }
