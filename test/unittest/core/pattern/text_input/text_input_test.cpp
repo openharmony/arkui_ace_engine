@@ -3838,4 +3838,71 @@ HWTEST_F(TextFieldUXTest, testCaretStyle001, TestSize.Level1)
     frameNode_->MarkModifyDone();
     EXPECT_EQ(paintProperty->GetCursorWidth().value().Value(), 3.0);
 }
+
+/**
+ * @tc.name: HandleOnEscape001
+ * @tc.desc: Test let handle on escape after selectAll
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, HandleOnEscape001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize text input and get focus
+     */
+    CreateTextField(DEFAULT_TEXT);
+    GetFocus();
+
+    /**
+     * @tc.steps: step2. Create selectOverlayProxy
+     */
+    pattern_->ProcessOverlay(true, true, true);
+
+
+    /**
+     * @tc.steps: step3. Press esc
+     */
+    KeyEvent event;
+    event.code = KeyCode::KEY_ESCAPE;
+    pattern_->OnKeyEvent(event);
+
+    /**
+     * @tc.steps: step4. escape when select all value
+     */
+    pattern_->HandleOnSelectAll(true);
+    EXPECT_FALSE(pattern_->HandleOnEscape());
+}
+
+/**
+ * @tc.name: HandleOnTab001
+ * @tc.desc: Test HandleOnTab
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, HandleOnTab001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize show password icon text input.
+     */
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::VISIBLE_PASSWORD);
+        model.SetShowPasswordIcon(true);
+        model.SetCleanNodeStyle(CleanNodeStyle::CONSTANT);
+    });
+
+    /**
+     * @tc.steps: step2. Text input request focus.
+     */
+    GetFocus();
+
+    /**
+     * @tc.steps: step3. Test update focus backward when handleOnTab.
+     */
+    pattern_->focusIndex_ = FocuseIndex::UNIT;
+    EXPECT_TRUE(pattern_->HandleOnTab(true));
+
+    /**
+     * @tc.steps: step4. Test update focus forward when handleOnTab.
+     */
+    pattern_->focusIndex_ = FocuseIndex::TEXT;
+    EXPECT_TRUE(pattern_->HandleOnTab(false));
+}
 } // namespace OHOS::Ace::NG
