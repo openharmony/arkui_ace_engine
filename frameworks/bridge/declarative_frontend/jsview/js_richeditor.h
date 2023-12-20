@@ -84,6 +84,7 @@ public:
     }
     void AddImageSpan(const JSCallbackInfo& args);
     void AddTextSpan(const JSCallbackInfo& args);
+    void AddSymbolSpan(const JSCallbackInfo& args);
     void AddPlaceholderSpan(const JSCallbackInfo& args);
     void ParseOptions(const JSCallbackInfo& args, SpanOptionBase& placeholderSpan);
     void DeleteSpans(const JSCallbackInfo& args);

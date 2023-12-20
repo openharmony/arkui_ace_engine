@@ -256,6 +256,10 @@ const char QRCODE_ETS_TAG[] = "QRCode";
 const char SPAN_COMPONENT_TAG[] = "TextSpanComponent";
 const char SPAN_ETS_TAG[] = "Span";
 
+// symbol span
+const char SYMBOL_SPAN_COMPONENT_TAG[] = "SymbolSpanComponent";
+const char SYMBOL_SPAN_ETS_TAG[] = "SymbolSpan";
+
 // placeholder span
 const char PLACEHOLDER_SPAN_COMPONENT_TAG[] = "PlaceholderSpanComponent";
 const char PLACEHOLDER_SPAN_ETS_TAG[] = "PlaceholderSpan";

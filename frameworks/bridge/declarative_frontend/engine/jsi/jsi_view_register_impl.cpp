@@ -145,6 +145,7 @@
 #include "bridge/declarative_frontend/jsview/js_stepper_item.h"
 #include "bridge/declarative_frontend/jsview/js_swiper.h"
 #include "bridge/declarative_frontend/jsview/js_symbol.h"
+#include "bridge/declarative_frontend/jsview/js_symbol_span.h"
 #include "bridge/declarative_frontend/jsview/js_tab_content.h"
 #include "bridge/declarative_frontend/jsview/js_tabs.h"
 #include "bridge/declarative_frontend/jsview/js_tabs_controller.h"
@@ -543,6 +544,7 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "__Common__", JSCommonView::JSBind },
     { "LinearGradient", JSLinearGradient::JSBind },
     { "FormLink", JSFormLink::JSBind },
+    { "SymbolSpan", JSSymbolSpan::JSBind },
 };
 
 static const std::unordered_map<std::string, std::function<void(BindingTarget)>> bindFuncs = {
@@ -765,6 +767,7 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "NodeContainer", JSNodeContainer::JSBind },
     { "__JSBaseNode__", JSBaseNode::JSBind },
     { "SymbolGlyph", JSSymbol::JSBind },
+    { "SymbolSpan", JSSymbolSpan::JSBind },
 };
 
 void RegisterAllModule(BindingTarget globalObj)

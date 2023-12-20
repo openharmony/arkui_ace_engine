@@ -151,6 +151,7 @@ public:
     int32_t imageNodeId = -1;
     std::string inspectId;
     std::string content;
+    uint32_t unicode = 0;
     std::unique_ptr<FontStyle> fontStyle = std::make_unique<FontStyle>();
     std::unique_ptr<TextLineStyle> textLineStyle = std::make_unique<TextLineStyle>();
     GestureEventFunc onClick;
@@ -204,8 +205,8 @@ public:
         onLongPress = std::move(onLongPress_);
     }
     std::string GetSpanContent(const std::string& rawContent);
-    
     std::string GetSpanContent();
+    uint32_t GetSymbolUnicode();
 
 private:
     std::optional<TextStyle> textStyle_;
@@ -233,8 +234,10 @@ class ACE_EXPORT SpanNode : public UINode {
 
 public:
     static RefPtr<SpanNode> GetOrCreateSpanNode(int32_t nodeId);
+    static RefPtr<SpanNode> GetOrCreateSpanNode(const std::string& tag, int32_t nodeId);
 
     explicit SpanNode(int32_t nodeId) : UINode(V2::SPAN_ETS_TAG, nodeId) {}
+    explicit SpanNode(const std::string& tag, int32_t nodeId) : UINode(tag, nodeId) {}
     ~SpanNode() override = default;
 
     bool IsAtomicNode() const override
@@ -245,6 +248,15 @@ public:
     const RefPtr<SpanItem>& GetSpanItem() const
     {
         return spanItem_;
+    }
+
+    void UpdateContent(const uint32_t& unicode)
+    {
+        if (spanItem_->unicode == unicode) {
+            return;
+        }
+        spanItem_->unicode = unicode;
+        RequestTextFlushDirty();
     }
 
     void UpdateContent(const std::string& content)
