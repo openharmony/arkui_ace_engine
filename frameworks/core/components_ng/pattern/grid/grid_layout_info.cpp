@@ -334,10 +334,12 @@ float GridLayoutInfo::GetContentHeight(const GridLayoutOptions& options, float m
         totalHeight += irregularHeight + mainGap;
         totalHeight +=
             (*(index)-lastIndex) > 1 ? ((*(index)-1 - lastIndex) / crossCount_ + 1) * (regularHeight + mainGap) : 0;
-        totalHeight = *(index);
+        lastIndex = *(index);
     }
 
-    totalHeight += ((childrenCount_ - 1 - lastIndex) / crossCount_ + 1) * (regularHeight + mainGap);
+    totalHeight += (childrenCount_ - 1 > lastIndex)
+                       ? ((childrenCount_ - 1 - lastIndex) / crossCount_) * (regularHeight + mainGap)
+                       : 0;
     totalHeight -= mainGap;
     return totalHeight;
 }
