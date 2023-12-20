@@ -4847,14 +4847,16 @@ void TextFieldPattern::SetShowError()
         layoutProperty->UpdateTextColor(passwordModeStyle_.textColor);
         preErrorState_ = false;
     }
-    if (visible && (!passWordMode || !errorText.empty())) {
+    if (visible && (!passWordMode || errorText.empty())) {
         layoutProperty->UpdateBorderWidth(passwordModeStyle_.borderwidth);
         renderContext->UpdateBorderColor(passwordModeStyle_.borderColor);
         renderContext->UpdateBackgroundColor(passwordModeStyle_.bgColor);
         layoutProperty->UpdateTextColor(passwordModeStyle_.textColor);
         preErrorState_ = true;
     }
-    UpdateErrorTextMargin();
+    if (!IsNormalInlineState()) {
+        UpdateErrorTextMargin();
+    }
 }
 
 void TextFieldPattern::CreateErrorParagraph(const std::string& content)
