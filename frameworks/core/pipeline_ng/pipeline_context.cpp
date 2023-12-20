@@ -1864,7 +1864,7 @@ void PipelineContext::OnMouseEvent(const MouseEvent& event, const RefPtr<FrameNo
         if (event.pullAction == MouseAction::PULL_MOVE) {
             touchPoint.pullType = TouchType::PULL_MOVE;
         }
-        OnTouchEvent(touchPoint);
+        OnTouchEvent(touchPoint, node);
     } else {
         auto touchPoint = event.CreateTouchPoint();
         auto scalePoint = touchPoint.CreateScalePoint(GetViewScale());
@@ -2089,7 +2089,7 @@ void PipelineContext::OnAxisEvent(const AxisEvent& event, const RefPtr<FrameNode
     }
 
     auto mouseEvent = ConvertAxisToMouse(event);
-    OnMouseEvent(mouseEvent);
+    OnMouseEvent(mouseEvent, node);
 }
 
 bool PipelineContext::HasDifferentDirectionGesture() const
