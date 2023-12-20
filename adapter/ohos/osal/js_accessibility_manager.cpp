@@ -1392,21 +1392,6 @@ void UpdateCacheInfoNG(std::list<AccessibilityElementInfo>& infos, const RefPtr<
         if (parent.index() == 0) {
             // Handle the parent when its type is FrameNode
             RefPtr<NG::FrameNode> frameNodeParent = std::get<0>(parent);
-            if (frameNodeParent->GetTag() != V2::UI_EXTENSION_COMPONENT_TAG) {
-                UpdateAccessibilityElementInfo(frameNodeParent, commonProperty, nodeInfo, ngPipeline);
-                infos.push_back(nodeInfo);
-                GetChildrenFromFrameNode(frameNodeParent, children, commonProperty.pageId);
-                GetChildrenFromWebNode(frameNodeParent, children);
-                continue;
-            }
-            if (!((frameNodeParent->GetUiExtensionId() > NG::UI_EXTENSION_UNKNOW_ID) &&
-                (((frameNodeParent->GetUiExtensionId() <= NG::UI_EXTENSION_ID_FIRST_MAX) &&
-                (NG::UI_EXTENSION_OFFSET_MAX == searchParam.uiExtensionOffset)) ||
-                (frameNodeParent->GetUiExtensionId() <= NG::UI_EXTENSION_ID_OTHER_MAX)))) {
-                continue;
-            }
-            std::list<AccessibilityElementInfo> extensionElementInfos = SearchExtensionElementInfoByAccessibilityIdNG(
-                -1, umode, frameNodeParent, searchParam.uiExtensionOffset);
             UpdateAccessibilityElementInfo(frameNodeParent, commonProperty, nodeInfo, ngPipeline);
             auto accessibilityProperty = frameNodeParent->GetAccessibilityProperty<NG::AccessibilityProperty>();
             auto uiVirtualNode = accessibilityProperty->GetAccessibilityVirtualNode();
@@ -1426,6 +1411,21 @@ void UpdateCacheInfoNG(std::list<AccessibilityElementInfo>& infos, const RefPtr<
                     UpdateVirtualNodeInfo(infos, virtualInfo, uiVirtualNode, uiParentNode, commonProperty, ngPipeline);
                 }
             }
+            if (frameNodeParent->GetTag() != V2::UI_EXTENSION_COMPONENT_TAG) {
+                UpdateAccessibilityElementInfo(frameNodeParent, commonProperty, nodeInfo, ngPipeline);
+                infos.push_back(nodeInfo);
+                GetChildrenFromFrameNode(frameNodeParent, children, commonProperty.pageId);
+                GetChildrenFromWebNode(frameNodeParent, children);
+                continue;
+            }
+            if (!((frameNodeParent->GetUiExtensionId() > NG::UI_EXTENSION_UNKNOW_ID) &&
+                (((frameNodeParent->GetUiExtensionId() <= NG::UI_EXTENSION_ID_FIRST_MAX) &&
+                (NG::UI_EXTENSION_OFFSET_MAX == searchParam.uiExtensionOffset)) ||
+                (frameNodeParent->GetUiExtensionId() <= NG::UI_EXTENSION_ID_OTHER_MAX)))) {
+                continue;
+            }
+            std::list<AccessibilityElementInfo> extensionElementInfos = SearchExtensionElementInfoByAccessibilityIdNG(
+                -1, umode, frameNodeParent, searchParam.uiExtensionOffset);
             ConvertExtensionAccessibilityNodeId(
                 extensionElementInfos, frameNodeParent, searchParam.uiExtensionOffset, nodeInfo);
             for (auto& info : extensionElementInfos) {
