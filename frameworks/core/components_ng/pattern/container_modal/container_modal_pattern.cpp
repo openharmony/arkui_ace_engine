@@ -585,16 +585,23 @@ int32_t ContainerModalPattern::GetContainerModalTitleHeight()
 
 bool ContainerModalPattern::GetContainerModalButtonsRect(RectF& containerModal, RectF& buttons)
 {
-    auto host = GetHost();
-    CHECK_NULL_RETURN(host, false);
-    auto containerModalRect = host->GetGeometryNode()->GetFrameRect();
-    containerModal = containerModalRect;
-    auto controlButtonsRow = AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(2));
+    auto column = GetColumnNode();
+    CHECK_NULL_RETURN(column, false);
+    auto columnRect = column->GetGeometryNode()->GetFrameRect();
+    containerModal = columnRect;
+
+    auto controlButtonsRow = GetControlButtonRow();
     CHECK_NULL_RETURN(controlButtonsRow, false);
     auto children = controlButtonsRow->GetChildren();
     auto firstButtonRect = AceType::DynamicCast<FrameNode>(children.front())->GetGeometryNode()->GetFrameRect();
     auto lastButtonRect = AceType::DynamicCast<FrameNode>(children.back())->GetGeometryNode()->GetFrameRect();
     buttons = firstButtonRect.CombineRectT(lastButtonRect);
+
+    if (controlButtonsRow->GetLayoutProperty()->GetVisibilityValue(VisibleType::VISIBLE) != VisibleType::VISIBLE) {
+        buttons.SetLeft(containerModal.Width() - TITLE_PADDING_END.ConvertToPx() - buttons.Width());
+        buttons.SetTop((titleHeight_ - TITLE_BUTTON_SIZE).ConvertToPx() / 2.0f);
+    }
+
     return true;
 }
 
