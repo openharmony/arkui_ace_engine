@@ -147,6 +147,14 @@ void RichEditorPattern::OnModifyDone()
     Register2DragDropManager();
 #endif // ENABLE_DRAG_FRAMEWORK
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+
+    auto eventHub = host->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    bool enabledCache = eventHub->IsEnabled();
+    if (textDetectEnable_ && enabledCache != enabled_) {
+        enabled_ = enabledCache;
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    }
 }
 
 void RichEditorPattern::HandleEnabled()
@@ -1543,7 +1551,10 @@ bool RichEditorPattern::CheckBlurReason()
 
 void RichEditorPattern::HandleBlurEvent()
 {
-    StartAITask();
+    if (textDetectEnable_) {
+        isLongPress_ = false;
+        StartAITask();
+    }
     StopTwinkling();
     // The pattern handles blurevent, Need to close the softkeyboard first.
     if ((customKeyboardBuilder_ && isCustomKeyboardAttached_) || CheckBlurReason()) {
