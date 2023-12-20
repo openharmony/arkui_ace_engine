@@ -835,7 +835,7 @@ int32_t RichEditorPattern::TextSpanSplit(int32_t position)
     spanStart = positionInfo.spanStart_;
     spanOffset = positionInfo.spanOffset_;
 
-    if (spanOffset == 0 || spanOffset == -1) {
+    if (spanOffset <= 0) {
         return spanIndex;
     }
 
@@ -847,8 +847,12 @@ int32_t RichEditorPattern::TextSpanSplit(int32_t position)
     auto spanNode = DynamicCast<SpanNode>(*it);
     CHECK_NULL_RETURN(spanNode, -1);
     auto spanItem = spanNode->GetSpanItem();
-    auto newContent = StringUtils::ToWstring(spanItem->content).substr(spanOffset);
-    auto deleteContent = StringUtils::ToWstring(spanItem->content).substr(0, spanOffset);
+    auto spanItemContent = StringUtils::ToWstring(spanItem->content);
+    if (spanOffset > spanItemContent.length()) {
+        spanOffset = spanItemContent.length();
+    }
+    auto newContent = spanItemContent.substr(spanOffset);
+    auto deleteContent = spanItemContent.substr(0, spanOffset);
 
     auto* stack = ViewStackProcessor::GetInstance();
     CHECK_NULL_RETURN(stack, -1);
