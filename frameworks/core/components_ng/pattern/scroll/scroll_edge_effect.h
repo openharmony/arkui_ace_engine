@@ -34,7 +34,7 @@ public:
     ~ScrollEdgeEffect() override = default;
 
     virtual void HandleOverScroll(Axis axis, float overScroll, const SizeF& viewPort,
-        bool isScrollFromUpdate = false, bool isNotFullScreen = false) {}
+        bool isScrollFromUpdate = false, bool isNotPositiveScrollableDistance = false) {}
 
     virtual void Paint(RSCanvas& canvas, const SizeF& viewPort, const OffsetF& offset) {}
 
