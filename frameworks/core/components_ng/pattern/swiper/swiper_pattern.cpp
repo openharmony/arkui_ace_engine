@@ -303,6 +303,7 @@ void SwiperPattern::BeforeCreateLayoutWrapper()
     } else {
         if (oldIndex != userSetCurrentIndex) {
             currentIndex_ = userSetCurrentIndex;
+            propertyAnimationIndex_ = GetLoopIndex(propertyAnimationIndex_);
         }
     }
     if (oldIndex_ != currentIndex_ || (itemPosition_.empty() && !isVoluntarilyClear_)) {
@@ -638,6 +639,11 @@ bool SwiperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
             OnIndexChange();
         }
         jumpIndex_.reset();
+        auto delayTime = GetInterval() - GetDuration();
+        delayTime = std::clamp(delayTime, 0, delayTime);
+        if (NeedAutoPlay() && isUserFinish_) {
+            PostTranslateTask(delayTime);
+        }
     } else if (targetIndex_) {
         auto targetIndexValue = IsLoop() ? targetIndex_.value() : GetLoopIndex(targetIndex_.value());
         auto iter = itemPosition_.find(targetIndexValue);
