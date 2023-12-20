@@ -3050,13 +3050,14 @@ void TextFieldPattern::InsertValueOperation(const std::string& insertValue)
         caretStart = selectController_->GetCaretIndex();
     }
     int32_t caretMoveLength = 0;
+    bool hasInsertValue = false;
     if (IsSelected()) {
         auto originLength = static_cast<int32_t>(contentController_->GetWideText().length()) - (end - start);
-        contentController_->ReplaceSelectedValue(start, end, insertValue);
+        hasInsertValue = contentController_->ReplaceSelectedValue(start, end, insertValue);
         caretMoveLength = abs(static_cast<int32_t>(contentController_->GetWideText().length()) - originLength);
     } else {
         auto originLength = static_cast<int32_t>(contentController_->GetWideText().length());
-        contentController_->InsertValue(selectController_->GetCaretIndex(), insertValue);
+        hasInsertValue = contentController_->InsertValue(selectController_->GetCaretIndex(), insertValue);
         caretMoveLength = abs(static_cast<int32_t>(contentController_->GetWideText().length()) - originLength);
     }
     auto wideInsertValue = StringUtils::ToWstring(insertValue);
@@ -3064,9 +3065,13 @@ void TextFieldPattern::InsertValueOperation(const std::string& insertValue)
     if (!IsTextArea() && IsInPasswordMode() && GetTextObscured()) {
         if (wideInsertValue.length() == 1 &&
             (layoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED) != TextInputType::NUMBER_PASSWORD ||
-                std::isdigit(insertValue[0]))) {
-            obscureTickCountDown_ = OBSCURE_SHOW_TICKS;
-            nakedCharPosition_ = selectController_->GetCaretIndex() - 1;
+                std::isdigit(insertValue[0])) && hasInsertValue) {
+            auto content = contentController_->GetWideText();
+            auto insertIndex = selectController_->GetCaretIndex() - 1;
+            insertIndex = std::clamp(insertIndex, 0, static_cast<int32_t>(content.length()));
+            auto strBeforeCaret = content.empty() ? "" : StringUtils::ToString(content.substr(insertIndex, 1));
+            obscureTickCountDown_ = strBeforeCaret == insertValue ? OBSCURE_SHOW_TICKS : 0;
+            nakedCharPosition_ = strBeforeCaret == insertValue ? insertIndex : -1;
         } else {
             obscureTickCountDown_ = 0;
             nakedCharPosition_ = -1;
