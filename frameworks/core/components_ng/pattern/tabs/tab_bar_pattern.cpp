@@ -1249,7 +1249,7 @@ void TabBarPattern::UpdateTextColor(int32_t indicator)
         auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
         CHECK_NULL_VOID(textLayoutProperty);
         if (columnNode->GetId() == selectedColumnId) {
-            textLayoutProperty->UpdateTextColor(tabTheme->GetActiveIndicatorColor());
+            textLayoutProperty->UpdateTextColor(tabTheme->GetSubTabTextOnColor());
         } else {
             textLayoutProperty->UpdateTextColor(tabTheme->GetSubTabTextOffColor());
         }
