@@ -93,6 +93,8 @@ public:
         result.emplace_back(Claim(this));
     }
 
+    void SetTouchEventInfo(const TouchEvent& touchEvent, TouchEventInfo& touchEventInfo);
+
     bool DispatchEvent(const TouchEvent& point) override;
     bool HandleEvent(const TouchEvent& point) override;
 

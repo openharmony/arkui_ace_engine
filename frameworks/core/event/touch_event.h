@@ -719,6 +719,29 @@ private:
     std::list<TouchLocationInfo> history_;
 };
 
+class NativeEmbeadTouchInfo : public BaseEventInfo {
+    DECLARE_RELATIONSHIP_OF_CLASSES(NativeEmbeadTouchInfo, BaseEventInfo);
+
+public:
+    NativeEmbeadTouchInfo(const std::string& embedId, const TouchEventInfo & touchEventInfo)
+        : BaseEventInfo("NativeEmbeadTouchInfo"), embedId_(embedId), touchEvent_(touchEventInfo) {}
+    ~NativeEmbeadTouchInfo() override = default;
+
+    const std::string& GetEmbedId() const
+    {
+        return embedId_;
+    }
+
+    const TouchEventInfo& GetTouchEventInfo() const
+    {
+        return touchEvent_;
+    }
+
+private:
+    std::string embedId_;
+    TouchEventInfo touchEvent_;
+};
+
 using TouchEventFunc = std::function<void(TouchEventInfo&)>;
 using OnTouchEventCallback = std::function<void(const TouchEventInfo&)>;
 using CatchTouchEventCallback = std::function<void()>;

@@ -822,6 +822,13 @@ void WebModelNG::SetVerticalScrollBarAccessEnabled(bool isVerticalScrollBarAcces
     webPattern->UpdateVerticalScrollBarAccessEnabled(isVerticalScrollBarAccessEnabled);
 }
 
+void WebModelNG::SetNativeEmbedModeEnabled(bool isEmbedModeEnabled)
+{
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->UpdateNativeEmbedModeEnabled(isEmbedModeEnabled);
+}
+
 void WebModelNG::SetOnControllerAttached(std::function<void()>&& callback)
 {
     auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
@@ -874,6 +881,24 @@ void WebModelNG::SetOverScrollId(std::function<void(const BaseEventInfo* info)>&
     auto webEventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>();
     CHECK_NULL_VOID(webEventHub);
     webEventHub->SetOnOverScrollEvent(std::move(uiCallback));
+}
+
+void WebModelNG::SetNativeEmbedLifecycleChangeId(std::function<void(const BaseEventInfo* info)>&& jsCallback)
+{
+    auto func = jsCallback;
+    auto uiCallback = [func](const std::shared_ptr<BaseEventInfo>& info) { func(info.get()); };
+    auto webEventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>();
+    CHECK_NULL_VOID(webEventHub);
+    webEventHub->SetOnNativeEmbedLifecycleChangeEvent(std::move(uiCallback));
+}
+
+void WebModelNG::SetNativeEmbedGestureEventId(std::function<void(const BaseEventInfo* info)>&& jsCallback)
+{
+    auto func = jsCallback;
+    auto uiCallback = [func](const std::shared_ptr<BaseEventInfo>& info) { func(info.get()); };
+    auto webEventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>();
+    CHECK_NULL_VOID(webEventHub);
+    webEventHub->SetOnNativeEmbedGestureEvent(std::move(uiCallback));
 }
 
 void WebModelNG::SetLayoutMode(WebLayoutMode mode)

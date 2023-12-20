@@ -1414,6 +1414,13 @@ void WebPattern::OnVerticalScrollBarAccessEnabledUpdate(bool value)
     }
 }
 
+void WebPattern::OnNativeEmbedModeEnabledUpdate(bool value)
+{
+    if (delegate_) {
+        delegate_->UpdateNativeEmbedModeEnabled(value);
+    }
+}
+
 void WebPattern::OnScrollBarColorUpdate(const std::string& value)
 {
     if (delegate_) {
@@ -1554,6 +1561,7 @@ void WebPattern::OnModifyDone()
         if (!webAccessibilityNode_) {
             webAccessibilityNode_ = AceType::MakeRefPtr<WebAccessibilityNode>(host);
         }
+        delegate_->UpdateNativeEmbedModeEnabled(GetNativeEmbedModeEnabledValue(false));
     }
 
     // Initialize events such as keyboard, focus, etc.
@@ -2872,5 +2880,16 @@ void WebPattern::SetSelfAsParentOfWebCoreNode(NWeb::NWebAccessibilityNodeInfo& i
     if (info.parentId == -1) { // root node of web core
         info.parentId = host->GetAccessibilityId();
     }
+}
+void WebPattern::SetTouchEventInfo(const TouchEvent& touchEvent, TouchEventInfo& touchEventInfo)
+{
+    auto frameNode = GetHost();
+    CHECK_NULL_VOID(frameNode);
+    frameNode->SetDraggable(false);
+    auto eventHub = frameNode->GetEventHub<WebEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    auto gestureHub = eventHub->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
+    gestureHub->SetTouchEventInfo(touchEvent, touchEventInfo);
 }
 } // namespace OHOS::Ace::NG

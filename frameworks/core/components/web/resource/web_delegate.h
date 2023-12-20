@@ -488,6 +488,7 @@ public:
     void UpdateVerticalScrollBarAccess(bool isVerticalScrollBarAccessEnabled);
     void UpdateScrollBarColor(const std::string& colorValue);
     void UpdateOverScrollMode(const int32_t overscrollModeValue);
+    void UpdateNativeEmbedModeEnabled(bool isEmbedModeEnabled);
     void UpdateCopyOptionMode(const int32_t copyOptionModeValue);
     void LoadUrl();
     void CreateWebMessagePorts(std::vector<RefPtr<WebMessagePort>>& ports);
@@ -618,7 +619,8 @@ public:
     void OnScrollState(bool scrollState);
     void OnRootLayerChanged(int width, int height);
     bool FilterScrollEvent(const float x, const float y, const float xVelocity, const float yVelocity);
-
+    void OnNativeEmbedLifecycleChange(const NWeb::NativeEmbedDataInfo& dataInfo);
+    void OnNativeEmbedGestureEvent(const NWeb::NativeEmbedTouchEvent& event);
     void SetNGWebPattern(const RefPtr<NG::WebPattern>& webPattern);
     void RequestFocus();
     void SetDrawSize(const Size& drawSize);
@@ -632,6 +634,7 @@ public:
     int GetWebId();
     void JavaScriptOnDocumentStart();
     void SetJavaScriptItems(const ScriptItems& scriptItems);
+    void SetTouchEventInfo(const OHOS::NWeb::NativeEmbedTouchEvent& touchEvent, TouchEventInfo& touchEventInfo);
 #if defined(ENABLE_ROSEN_BACKEND)
     void SetSurface(const sptr<Surface>& surface);
     sptr<Surface> surface_ = nullptr;
@@ -798,6 +801,8 @@ private:
     EventCallbackV2 onOverScrollV2_;
     EventCallbackV2 onScreenCaptureRequestV2_;
     EventCallbackV2 onNavigationEntryCommittedV2_;
+    EventCallbackV2 OnNativeEmbedLifecycleChangeV2_;
+    EventCallbackV2 OnNativeEmbedGestureEventV2_;
 
     int32_t webType_;
     std::string bundlePath_;

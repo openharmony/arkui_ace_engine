@@ -138,6 +138,9 @@ public:
     static bool webDebuggingAccess_;
     static JSwebEventCallback OnControllerAttachedCallback_;
     static void CopyOption(int32_t copyOption);
+    static void EnableNativeEmbedMode(bool isEmbedModeEnabled);
+    static void OnNativeEmbedLifecycleChange(const JSCallbackInfo& args);
+    static void OnNativeEmbedGestureEvent(const JSCallbackInfo& args);
 
 protected:
     static void OnCommonDialog(const JSCallbackInfo& args, int dialogEventType);

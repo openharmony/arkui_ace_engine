@@ -143,6 +143,9 @@ public:
     virtual void SetAudioResumeInterval(int32_t resumeInterval) {};
     virtual void SetAudioExclusive(bool audioExclusive) {};
     virtual void SetOverScrollId(std::function<void(const BaseEventInfo* info)>&& jsCallback) = 0;
+    virtual void SetNativeEmbedModeEnabled(bool isEmbedModeEnabled) = 0;
+    virtual void SetNativeEmbedLifecycleChangeId(std::function<void(const BaseEventInfo* info)>&& jsCallback) = 0;
+    virtual void SetNativeEmbedGestureEventId(std::function<void(const BaseEventInfo* info)>&& jsCallback) = 0;
 
     virtual void SetScreenCaptureRequestEventId(std::function<void(const BaseEventInfo* info)>&& jsCallback) {};
     virtual void SetNestedScroll(const NestedScrollOptions& nestedOpt) {}

@@ -30,6 +30,13 @@ enum DialogEventType {
     DIALOG_EVENT_PROMPT = 3
 };
 
+enum NativeEmbedStatus  {
+    CREATE = 0,
+    UPDATE = 1,
+    DESTROY = 2
+};
+
+
 enum class NavigationType {
     NAVIGATION_TYPE_UNKNOWN = 0,
     NAVIGATION_TYPE_MAIN_FRAME_NEW_ENTRY = 1,
@@ -1472,6 +1479,52 @@ private:
     bool isSameDocument_ = false;
     bool didReplaceEntry_ = false;
 };
+
+struct EmbedInfo final {
+    int32_t id;
+    std::string type;
+    std::string src;
+    std::string url;
+    int32_t width;
+    int32_t height;
+};
+
+class ACE_EXPORT NativeEmbedDataInfo : public BaseEventInfo {
+    DECLARE_RELATIONSHIP_OF_CLASSES(NativeEmbedDataInfo, BaseEventInfo)
+
+public:
+    NativeEmbedDataInfo(NativeEmbedStatus status, const std::string& surfaceId,
+        const std::string& embedId, const EmbedInfo& embedInfo)
+        : BaseEventInfo("NativeEmbedDataInfo"), status_(status),
+        surfaceId_(surfaceId), embedId_(embedId), embedInfo_(embedInfo) {}
+    ~NativeEmbedDataInfo() = default;
+
+    NativeEmbedStatus GetStatus() const
+    {
+        return status_;
+    }
+    const std::string& GetSurfaceId() const
+    {
+        return surfaceId_;
+    }
+
+    const std::string& GetEmbedId() const
+    {
+        return embedId_;
+    }
+
+    const EmbedInfo& GetEmebdInfo() const
+    {
+        return embedInfo_;
+    }
+
+private:
+    NativeEmbedStatus status_;
+    std::string surfaceId_;
+    std::string embedId_;
+    EmbedInfo embedInfo_;
+};
+
 } // namespace OHOS::Ace
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_WEB_WEB_EVENT_H

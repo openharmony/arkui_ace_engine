@@ -165,5 +165,42 @@ bool TouchEventActuator::ShouldResponse()
     ctrl->TrySetFirstResponse(frameNode);
     return true;
 }
+void TouchEventActuator::SetTouchEventInfo(const TouchEvent& lastPoint, TouchEventInfo& touchEventInfo)
+{
+    touchEventInfo.SetTimeStamp(static_cast<TimeStamp>(lastPoint.time));
+    TouchLocationInfo changedInfo("onTouch", lastPoint.id);
+    PointF lastevent(lastPoint.x, lastPoint.y);
+    NGGestureRecognizer::Transform(lastevent, GetAttachedNode());
+    auto localX = static_cast<float>(lastevent.GetX());
+    auto localY = static_cast<float>(lastevent.GetY());
+    changedInfo.SetLocalLocation(Offset(localX, localY));
+    changedInfo.SetGlobalLocation(Offset(lastPoint.x, lastPoint.y));
+    changedInfo.SetScreenLocation(Offset(lastPoint.screenX, lastPoint.screenY));
+    changedInfo.SetTouchType(lastPoint.type);
+    changedInfo.SetForce(lastPoint.force);
 
+    touchEventInfo.AddChangedTouchLocationInfo(std::move(changedInfo));
+
+    touchEventInfo.SetTarget(GetEventTarget().value_or(EventTarget()));
+
+    // all fingers collection
+    for (const auto& item : lastPoint.pointers) {
+        float globalX = item.x;
+        float globalY = item.y;
+        float screenX = item.screenX;
+        float screenY = item.screenY;
+        PointF event(globalX, globalY);
+        NGGestureRecognizer::Transform(event, GetAttachedNode());
+        auto localX = static_cast<float>(event.GetX());
+        auto localY = static_cast<float>(event.GetY());
+        TouchLocationInfo info("onTouch", item.id);
+        info.SetGlobalLocation(Offset(globalX, globalY));
+        info.SetLocalLocation(Offset(localX, localY));
+        info.SetScreenLocation(Offset(screenX, screenY));
+        info.SetTouchType(lastPoint.type);
+        touchEventInfo.AddTouchLocationInfo(std::move(info));
+    }
+    touchEventInfo.SetSourceDevice(SourceType::TOUCH);
+    touchEventInfo.SetForce(lastPoint.force);
+}
 } // namespace OHOS::Ace::NG

@@ -225,6 +225,14 @@ public:
         touchEventActuator_->RemoveTouchEvent(touchEvent);
     }
 
+    void SetTouchEventInfo(const TouchEvent& touchEvent, TouchEventInfo& touchEventInfo)
+    {
+        if (!touchEventActuator_) {
+            touchEventActuator_ = MakeRefPtr<TouchEventActuator>();
+        }
+
+        touchEventActuator_->SetTouchEventInfo(touchEvent, touchEventInfo);
+    }
     void SetFocusClickEvent(GestureEventFunc&& clickEvent);
 
     bool IsClickable() const
