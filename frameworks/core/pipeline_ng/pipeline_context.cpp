@@ -1111,6 +1111,14 @@ void PipelineContext::UpdateCutoutSafeArea(const SafeAreaInsets& cutoutSafeArea)
     }
 }
 
+void PipelineContext::UpdateNavSafeArea(const SafeAreaInsets& navSafeArea)
+{
+    CHECK_NULL_VOID(minPlatformVersion_ >= PLATFORM_VERSION_TEN);
+    if (safeAreaManager_->UpdateNavArea(navSafeArea)) {
+        AnimateOnSafeAreaUpdate();
+    }
+}
+
 void PipelineContext::SetEnableKeyBoardAvoidMode(bool value)
 {
     safeAreaManager_->SetKeyBoardAvoidMode(value);
