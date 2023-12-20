@@ -37,7 +37,7 @@ public:
 
     RefPtr<CustomAnimatableArithmetic> Add(const RefPtr<CustomAnimatableArithmetic>& value) const override
     {
-        RefPtr<ListDividerArithmetic> rhs = AceType::DynamicCast<JSAnimatableArithmetic>(value);
+        RefPtr<ListDividerArithmetic> rhs = AceType::DynamicCast<ListDividerArithmetic>(value);
         if (!rhs) {
             return {};
         }
@@ -66,7 +66,7 @@ public:
 
     RefPtr<CustomAnimatableArithmetic> Minus(const RefPtr<CustomAnimatableArithmetic>& value) const override
     {
-        RefPtr<ListDividerArithmetic> rhs = AceType::DynamicCast<JSAnimatableArithmetic>(value);
+        RefPtr<ListDividerArithmetic> rhs = AceType::DynamicCast<ListDividerArithmetic>(value);
         if (!rhs) {
             return {};
         }
@@ -105,7 +105,7 @@ public:
 
     bool IsEqual(const RefPtr<CustomAnimatableArithmetic>& value) const override
     {
-        RefPtr<ListDividerArithmetic> rhs = AceType::DynamicCast<JSAnimatableArithmetic>(value);
+        RefPtr<ListDividerArithmetic> rhs = AceType::DynamicCast<ListDividerArithmetic>(value);
         if (!rhs) {
             return false;
         }
