@@ -253,7 +253,7 @@ RefPtr<FrameNode> MenuTestNg::GetPreviewMenuWrapper(SizeF itemSize)
     return menuWrapperNode;
 }
 
-RefPtr<FrameNode> GetImagePreviewMenuWrapper()
+RefPtr<FrameNode> GetImagePreviewMenuWrapper(std::optional<MenuPreviewAnimationOptions> scaleOptions = std::nullopt)
 {
     auto rootNode = FrameNode::CreateFrameNode(
         V2::ROOT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<RootPattern>());
@@ -274,6 +274,10 @@ RefPtr<FrameNode> GetImagePreviewMenuWrapper()
     auto menuPattern = menuNode->GetPattern<MenuPattern>();
     menuPattern->SetPreviewMode(MenuPreviewMode::IMAGE);
     menuPattern->SetType(MenuType::CONTEXT_MENU);
+    if (scaleOptions != std::nullopt) {
+        menuPattern->SetPreviewBeforeAnimationScale(scaleOptions.value().scaleFrom);
+        menuPattern->SetPreviewAfterAnimationScale(scaleOptions.value().scaleTo);
+    }
 
     return menuWrapperNode;
 }
@@ -6154,6 +6158,51 @@ HWTEST_F(MenuTestNg, MenuLayoutAlgorithmTestNg5800, TestSize.Level1)
 }
 
 /**
+ * @tc.name: MenuLayoutAlgorithmTestNg5910
+ * @tc.desc: Test Layout with preview content and stat/stop animation scale options
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuTestNg, MenuLayoutAlgorithmTestNg5910, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create menu node, preview node and menuLayoutAlgorithm, then set the initial properties
+     * @tc.expected: menu node and menuLayoutAlgorithm are not null
+     */
+    ScreenSystemManager::GetInstance().dipScale_ = DIP_SCALE;
+    ScreenSystemManager::GetInstance().screenWidth_ = FULL_SCREEN_WIDTH;
+    MenuPreviewAnimationOptions scaleOptions { 0.5f, 2.0f };
+
+    auto menuWrapperNode = GetImagePreviewMenuWrapper(std::make_optional(scaleOptions));
+    ASSERT_NE(menuWrapperNode, nullptr);
+    auto menuNode = AceType::DynamicCast<FrameNode>(menuWrapperNode->GetChildAtIndex(0));
+    ASSERT_NE(menuNode, nullptr);
+
+    RefPtr<MenuLayoutAlgorithm> layoutAlgorithm = AceType::MakeRefPtr<MenuLayoutAlgorithm>();
+    layoutAlgorithm->hierarchicalParameters_ = true;
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    LayoutWrapperNode layoutWrapper(menuNode, geometryNode, menuNode->GetLayoutProperty());
+    layoutWrapper.GetLayoutProperty()->UpdateUserDefinedIdealSize(
+        CalcSize(CalcLength(FULL_SCREEN_WIDTH), CalcLength(FULL_SCREEN_HEIGHT)));
+    LayoutConstraintF parentLayoutConstraint;
+    parentLayoutConstraint.maxSize = FULL_SCREEN_SIZE;
+    parentLayoutConstraint.percentReference = FULL_SCREEN_SIZE;
+    parentLayoutConstraint.selfIdealSize.SetSize(SizeF(FULL_SCREEN_WIDTH, FULL_SCREEN_HEIGHT));
+    layoutWrapper.GetLayoutProperty()->UpdateLayoutConstraint(parentLayoutConstraint);
+    layoutWrapper.GetLayoutProperty()->UpdateContentConstraint();
+    layoutAlgorithm->targetSize_ = SizeF(TARGET_SIZE_WIDTH, TARGET_SIZE_HEIGHT);
+    layoutAlgorithm->Initialize(&layoutWrapper);
+    layoutAlgorithm->Measure(&layoutWrapper);
+
+    // @tc.expected: previewScale_ value set by user defined value after Measure and LayoutNormalPreviewMenu
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern, nullptr);
+    EXPECT_EQ(menuPattern->GetPreviewBeforeAnimationScale(), scaleOptions.scaleFrom);
+    EXPECT_EQ(menuPattern->GetPreviewAfterAnimationScale(), scaleOptions.scaleTo);
+    layoutAlgorithm->LayoutNormalPreviewMenu(&layoutWrapper);
+    EXPECT_EQ(layoutAlgorithm->previewScale_, scaleOptions.scaleTo);
+}
+
+/**
  * @tc.name: MenuItemGroupLayoutAlgorithmTestNg001
  * @tc.desc: Test MenuItemGroup measure algorithm.
  * @tc.type: FUNC
@@ -7417,6 +7466,7 @@ HWTEST_F(MenuTestNg, MenuPreviewLayoutAlgorithmTestNg0100, TestSize.Level1)
     parentLayoutConstraint.maxSize = FULL_SCREEN_SIZE;
     parentLayoutConstraint.percentReference = FULL_SCREEN_SIZE;
     parentLayoutConstraint.selfIdealSize.SetSize(SizeF(FULL_SCREEN_WIDTH, FULL_SCREEN_HEIGHT));
+    ASSERT_NE(layoutWrapper.GetLayoutProperty(), nullptr);
     layoutWrapper.GetLayoutProperty()->UpdateLayoutConstraint(parentLayoutConstraint);
     layoutWrapper.GetLayoutProperty()->UpdateContentConstraint();
 
@@ -7428,6 +7478,7 @@ HWTEST_F(MenuTestNg, MenuPreviewLayoutAlgorithmTestNg0100, TestSize.Level1)
     menuPreviewlayoutAlgorithm->Layout(&layoutWrapper);
     PaddingProperty padding;
     ASSERT_NE(layoutProp, nullptr);
+    ASSERT_NE(layoutProp->GetPaddingProperty(), nullptr);
     EXPECT_EQ(layoutProp->GetPaddingProperty()->top, CalcLength(PREVIEW_INNER_SECURITY));
     EXPECT_EQ(layoutProp->GetPaddingProperty()->left, CalcLength(PREVIEW_INNER_SECURITY));
     EXPECT_EQ(layoutProp->GetPaddingProperty()->bottom, CalcLength(PREVIEW_INNER_SECURITY));
