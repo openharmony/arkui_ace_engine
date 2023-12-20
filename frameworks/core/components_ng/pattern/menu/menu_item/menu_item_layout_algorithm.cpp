@@ -83,8 +83,9 @@ void MenuItemLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     float leftRowWidth = leftRow->GetGeometryNode()->GetMarginFrameSize().Width();
     float leftRowHeight = leftRow->GetGeometryNode()->GetMarginFrameSize().Height();
     float contentWidth = leftRowWidth + rightRowWidth + padding.Width() + middleSpace;
+    auto itemHeight = std::max(leftRowHeight, rightRowHeight);
     layoutWrapper->GetGeometryNode()->SetContentSize(
-        SizeF(std::max(minRowWidth, contentWidth), std::max(leftRowHeight, rightRowHeight)));
+        SizeF(std::max(minRowWidth, contentWidth), std::max(itemHeight, minItemHeight)));
     BoxLayoutAlgorithm::PerformMeasureSelf(layoutWrapper);
 
     if (layoutConstraint->selfIdealSize.Width().has_value()) {

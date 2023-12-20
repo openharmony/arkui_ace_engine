@@ -44,6 +44,7 @@
 #include "adapter/ohos/entrance/ace_view_ohos.h"
 #include "adapter/ohos/entrance/capability_registry.h"
 #include "adapter/ohos/entrance/dialog_container.h"
+#include "adapter/ohos/entrance/dynamic_component/uv_task_wrapper_impl.h"
 #include "adapter/ohos/entrance/file_asset_provider.h"
 #include "adapter/ohos/entrance/file_asset_provider_impl.h"
 #include "adapter/ohos/entrance/form_utils_impl.h"
@@ -97,6 +98,15 @@ const std::string FILE_SEPARATOR = "/";
 const std::string START_PARAMS_KEY = "__startParams";
 const std::string ACTION_VIEWDATA = "ohos.want.action.viewData";
 
+Rosen::Rect ConvertToRSRect(NG::RectF& rect)
+{
+    Rosen::Rect rsRect;
+    rsRect.posX_ = floor(rect.GetX());
+    rsRect.posY_ = floor(rect.GetY());
+    rsRect.width_ = ceil(rect.Width());
+    rsRect.height_ = ceil(rect.Height());
+    return rsRect;
+}
 } // namespace
 
 const std::string SUBWINDOW_PREFIX = "ARK_APP_SUBWINDOW_";
@@ -472,6 +482,16 @@ void UIContentImpl::InitializeByName(OHOS::Rosen::Window* window, const std::str
     InitializeInner(window, name, storage, true);
 }
 
+void UIContentImpl::InitializeDynamic(const std::string& hapPath, const std::string& abcPath)
+{
+    isDynamicRender_ = true;
+    hapPath_ = hapPath;
+    auto env = reinterpret_cast<napi_env>(runtime_);
+    CHECK_NULL_VOID(env);
+    taskWrapper_ = std::make_shared<NG::UVTaskWrapperImpl>(env);
+    InitializeInner(nullptr, abcPath, nullptr, false);
+}
+
 void UIContentImpl::Initialize(
     OHOS::Rosen::Window* window, const std::string& url, napi_value storage, uint32_t focusWindowId)
 {
@@ -797,10 +817,11 @@ void UIContentImpl::CommonInitializeForm(
                     want.SetAction(ACTION_VIEWDATA);
                     abilityContext->StartAbility(want, REQUEST_CODE);
                 }),
-            false, false, useNewPipe);
+            taskWrapper_, false, false, useNewPipe);
 
     CHECK_NULL_VOID(container);
     container->SetIsFormRender(isFormRender_);
+    container->SetIsDynamicRender(isDynamicRender_);
     container->SetIsFRSCardContainer(isFormRender_);
     if (window_) {
         container->SetWindowName(window_->GetWindowName());
@@ -870,7 +891,7 @@ void UIContentImpl::CommonInitializeForm(
 
     // create ace_view
     Platform::AceViewOhos* aceView = nullptr;
-    if (isFormRender_) {
+    if (isFormRender_ && !isDynamicRender_) {
         aceView = Platform::AceViewOhos::CreateView(instanceId_, true, container->GetSettings().usePlatformAsUIThread);
         Platform::AceViewOhos::SurfaceCreated(aceView, window_);
     } else {
@@ -2518,5 +2539,71 @@ void UIContentImpl::DestroyCustomPopupUIExtension(int32_t nodeId)
             customPopupConfigMap_.erase(nodeId);
         },
         TaskExecutor::TaskType::UI);
+}
+
+void UIContentImpl::SetContainerModalTitleVisible(bool customTitleSettedShow, bool floatingTitleSettedShow)
+{
+    auto taskExecutor = Container::CurrentTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    taskExecutor->PostTask(
+        [customTitleSettedShow, floatingTitleSettedShow]() {
+            auto pipeline = NG::PipelineContext::GetCurrentContext();
+            CHECK_NULL_VOID(pipeline);
+            pipeline->SetContainerModalTitleVisible(customTitleSettedShow, floatingTitleSettedShow);
+        },
+        TaskExecutor::TaskType::UI);
+}
+
+void UIContentImpl::SetContainerModalTitleHeight(int32_t height)
+{
+    auto taskExecutor = Container::CurrentTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    taskExecutor->PostTask(
+        [height]() {
+            auto pipeline = NG::PipelineContext::GetCurrentContext();
+            CHECK_NULL_VOID(pipeline);
+            pipeline->SetContainerModalTitleHeight(height);
+        },
+        TaskExecutor::TaskType::UI);
+}
+
+int32_t UIContentImpl::GetContainerModalTitleHeight()
+{
+    auto pipeline = NG::PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, -1);
+    return pipeline->GetContainerModalTitleHeight();
+}
+
+bool UIContentImpl::GetContainerModalButtonsRect(Rosen::Rect& containerModal, Rosen::Rect& buttons)
+{
+    NG::RectF floatContainerModal;
+    NG::RectF floatButtons;
+    auto pipeline = NG::PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, false);
+    if (!pipeline->GetContainerModalButtonsRect(floatContainerModal, floatButtons)) {
+        return false;
+    }
+    containerModal = ConvertToRSRect(floatContainerModal);
+    buttons = ConvertToRSRect(floatButtons);
+    return true;
+}
+
+void UIContentImpl::SubscribeContainerModalButtonsRectChange(
+    std::function<void(Rosen::Rect& containerModal, Rosen::Rect& buttons)>&& callback)
+{
+    auto pipeline = NG::PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+
+    if (callback == nullptr) {
+        pipeline->SubscribeContainerModalButtonsRectChange(nullptr);
+        return;
+    }
+    std::function<void(NG::RectF&, NG::RectF&)> wrapFunc = [cb = std::move(callback)](NG::RectF& floatContainerModal,
+                                                               NG::RectF& floatButtons) {
+        Rosen::Rect containerModal = ConvertToRSRect(floatContainerModal);
+        Rosen::Rect buttons = ConvertToRSRect(floatButtons);
+        cb(containerModal, buttons);
+    };
+    pipeline->SubscribeContainerModalButtonsRectChange(std::move(wrapFunc));
 }
 } // namespace OHOS::Ace

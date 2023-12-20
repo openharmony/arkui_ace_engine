@@ -14,7 +14,9 @@
  */
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_list_modifier.h"
 
+#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 #include "core/components/common/layout/constants.h"
+#include "core/components/list/list_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/list/list_model_ng.h"
 #include "core/pipeline/base/element_register.h"
@@ -25,6 +27,7 @@ constexpr bool DEFAULT_SCROLL_ENABLE = true;
 constexpr int32_t DEFAULT_STICKY_STYLE = 0;
 constexpr int32_t DEFAULT_DIRECTION = 0;
 constexpr int32_t DEFAULT_SCROLL_BAR = 1;
+constexpr int32_t DEFAULT_DIVIDER_VALUES_COUNT = 3;
 
 constexpr int32_t DEFAULT_EDGE_EFFECT = 0;
 
@@ -39,12 +42,18 @@ void SetListLanes(NodeHandle node, int32_t lanesNum, const struct ArkUIDimension
     CHECK_NULL_VOID(frameNode);
     if (lanesNum > 0) {
         ListModelNG::SetLanes(frameNode, lanesNum);
+        Dimension minLength =
+            Dimension(minLengthType->value, static_cast<OHOS::Ace::DimensionUnit>(minLengthType->units));
+        Dimension maxLength =
+            Dimension(maxLengthType->value, static_cast<OHOS::Ace::DimensionUnit>(maxLengthType->units));
+        ListModelNG::SetLaneConstrain(frameNode, minLength, maxLength);
     } else {
         Dimension minLength =
             Dimension(minLengthType->value, static_cast<OHOS::Ace::DimensionUnit>(minLengthType->units));
         Dimension maxLength =
             Dimension(maxLengthType->value, static_cast<OHOS::Ace::DimensionUnit>(maxLengthType->units));
         ListModelNG::SetLaneConstrain(frameNode, minLength, maxLength);
+        ListModelNG::SetLanes(frameNode, 1);
     }
 
     Dimension gutter = Dimension(gutterType->value, static_cast<OHOS::Ace::DimensionUnit>(gutterType->units));
@@ -253,10 +262,15 @@ void ResetScrollSnapAlign(NodeHandle node)
     ListModelNG::SetScrollSnapAlign(frameNode, V2::ScrollSnapAlign::NONE);
 }
 
-void ListSetDivider(NodeHandle node, uint32_t color, const double* values, const int* units)
+void ListSetDivider(NodeHandle node, uint32_t color, const double* values, const int32_t* units, int32_t length)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
+
+    if (length != DEFAULT_DIVIDER_VALUES_COUNT) {
+        return;
+    }
+    
     V2::ItemDivider divider;
     divider.color = Color(color);
     divider.strokeWidth =
@@ -300,16 +314,17 @@ void ResetChainAnimationOptions(NodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    CalcDimension minSpace;
-    CalcDimension maxSpace;
-    ChainAnimationOptions options;
-    options.minSpace = minSpace;
-    options.maxSpace = maxSpace;
-    options.conductivity = 0;
-    options.intensity = 0;
-    options.edgeEffect = 0;
-    options.stiffness = 0;
-    options.damping = 0;
+    RefPtr<ListTheme> listTheme = ArkTSUtils::GetTheme<ListTheme>();
+    CHECK_NULL_VOID(listTheme);
+    ChainAnimationOptions options = {
+        .minSpace = listTheme->GetChainMinSpace(),
+        .maxSpace = listTheme->GetChainMaxSpace(),
+        .conductivity = listTheme->GetChainConductivity(),
+        .intensity = listTheme->GetChainIntensity(),
+        .edgeEffect = 0,
+        .stiffness = listTheme->GetChainStiffness(),
+        .damping = listTheme->GetChainDamping(),
+    };
 
     ListModelNG::SetChainAnimationOptions(frameNode, options);
 }

@@ -558,6 +558,9 @@ void DotIndicatorModifier::PlayBlackPointsAnimation(const LinearVector<float>& v
 void DotIndicatorModifier::PlayTouchBottomAnimation(const std::vector<std::pair<float, float>>& longPointCenterX,
     TouchBottomTypeLoop touchBottomTypeLoop, const LinearVector<float>& vectorBlackPointCenterX)
 {
+    if (vectorBlackPointCenterX.empty()) {
+        return;
+    }
     isTouchBottomLoop_ = true;
     AnimationOption optionBottom;
     // x0:0.33, y0:0, x1:0.67, y1:1
@@ -580,16 +583,13 @@ void DotIndicatorModifier::PlayTouchBottomAnimation(const std::vector<std::pair<
         optionOpacity.SetDuration(100);
         touchBottomPointColor_->Set(LinearColor(selectedColor_->Get()));
         selectedColor_->Set(LinearColor(selectedColor_->Get().BlendOpacity(0.1)));
-        AnimationUtils::StartAnimation(
-            optionOpacity,
-            [&]() {
-                selectedColor_->Set(LinearColor(selectedColor_->Get().BlendOpacity(1.0)));
-                touchBottomPointColor_->Set(LinearColor(touchBottomPointColor_->Get().BlendOpacity(0.1)));
-            },
-            [&]() {
-                touchBottomPointColor_->Set(LinearColor(unselectedColor_->Get()));
-                isTouchBottomLoop_ = false;
-            });
+        AnimationUtils::StartAnimation(optionOpacity, [&]() {
+            selectedColor_->Set(LinearColor(selectedColor_->Get().BlendOpacity(1.0)));
+            touchBottomPointColor_->Set(LinearColor(touchBottomPointColor_->Get().BlendOpacity(0.1)));
+        }, [&]() {
+            touchBottomPointColor_->Set(LinearColor(unselectedColor_->Get()));
+            isTouchBottomLoop_ = false;
+        });
         AnimationUtils::StartAnimation(optionBottom, [&, longPointCenterX]() {
             longPointLeftCenterX_->Set(longPointCenterX[1].first);
             longPointRightCenterX_->Set(longPointCenterX[1].second);
@@ -601,13 +601,10 @@ void DotIndicatorModifier::PlayTouchBottomAnimation(const std::vector<std::pair<
     if (longPointLeftAnimEnd_ && longPointRightAnimEnd_) {
         longPointLeftAnimEnd_ = false;
         longPointRightAnimEnd_ = false;
-        AnimationUtils::StartAnimation(
-            optionBottom,
-            [&, longPointCenterX]() {
-                longPointLeftCenterX_->Set(longPointCenterX[0].first);
-                longPointRightCenterX_->Set(longPointCenterX[0].second);
-            },
-            bottomFinishCallback);
+        AnimationUtils::StartAnimation(optionBottom, [&, longPointCenterX]() {
+            longPointLeftCenterX_->Set(longPointCenterX[0].first);
+            longPointRightCenterX_->Set(longPointCenterX[0].second);
+        }, bottomFinishCallback);
     }
 }
 
@@ -615,6 +612,9 @@ void DotIndicatorModifier::PlayLongPointAnimation(const std::vector<std::pair<fl
     GestureState gestureState, TouchBottomTypeLoop touchBottomTypeLoop,
     const LinearVector<float>& vectorBlackPointCenterX)
 {
+    if (longPointCenterX.empty()) {
+        return;
+    }
     // touch bottom
     if (longPointCenterX.size() > 1) {
         PlayTouchBottomAnimation(longPointCenterX, touchBottomTypeLoop, vectorBlackPointCenterX);
@@ -639,19 +639,16 @@ void DotIndicatorModifier::PlayLongPointAnimation(const std::vector<std::pair<fl
 
     if (longPointLeftAnimEnd_) {
         longPointLeftAnimEnd_ = false;
-        longPointLeftAnimation_ = AnimationUtils::StartAnimation(
-            optionLeft,
-            [&, longPointCenterX]() {
+        longPointLeftAnimation_ = AnimationUtils::StartAnimation(optionLeft, [&, longPointCenterX]() {
                 longPointLeftCenterX_->Set(longPointCenterX[0].first);
-            },
-            [&]() { longPointLeftAnimEnd_ = true; });
+            }, [&]() { longPointLeftAnimEnd_ = true; });
     }
 
     if (longPointRightAnimEnd_) {
         longPointRightAnimEnd_ = false;
-        longPointRightAnimation_ = AnimationUtils::StartAnimation(
-            optionRight, [&, longPointCenterX]() { longPointRightCenterX_->Set(longPointCenterX[0].second); },
-            [&]() { longPointRightAnimEnd_ = true; });
+        longPointRightAnimation_ = AnimationUtils::StartAnimation(optionRight, [&, longPointCenterX]() {
+                longPointRightCenterX_->Set(longPointCenterX[0].second);
+            }, [&]() { longPointRightAnimEnd_ = true; });
     }
 }
 

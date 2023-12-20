@@ -29,13 +29,26 @@
 namespace OHOS::Ace::NG {
 void MenuPreviewLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
+    auto preview = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(preview);
+    auto previewPattern = preview->GetPattern<MenuPreviewPattern>();
+    CHECK_NULL_VOID(previewPattern);
+    auto menuWrapper = previewPattern->GetMenuWrapper();
+    CHECK_NULL_VOID(menuWrapper);
+    auto menuWrapperPattern = menuWrapper->GetPattern<MenuWrapperPattern>();
+    CHECK_NULL_VOID(menuWrapperPattern);
+    auto menuNode = menuWrapperPattern->GetMenu();
+    CHECK_NULL_VOID(menuNode);
     auto layoutProperty = layoutWrapper->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto menuTheme = pipeline->GetTheme<NG::MenuTheme>();
     CHECK_NULL_VOID(menuTheme);
-    auto previewScale = menuTheme->GetPreviewAfterAnimationScale();
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    CHECK_NULL_VOID(menuPattern);
+    float scale = menuPattern->GetPreviewAfterAnimationScale();
+    auto previewScale = LessNotEqual(scale, 0.0) ? menuTheme->GetPreviewAfterAnimationScale() : scale;
     PaddingProperty padding;
     if (LessOrEqual(previewScale, 0.0f)) {
         previewScale = 1.0f;

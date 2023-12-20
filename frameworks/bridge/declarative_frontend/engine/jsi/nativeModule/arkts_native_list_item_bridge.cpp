@@ -28,12 +28,11 @@ ArkUINativeModuleValue ListItemBridge::SetListItemSelected(ArkUIRuntimeCallInfo*
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
 
+    bool selected = false;
     if (secondArg->IsBoolean()) {
-        bool selected = secondArg->ToBoolean(vm)->Value();
-        GetArkUIInternalNodeAPI()->GetListItemModifier().SetListItemSelected(nativeNode, selected);
-    } else {
-        GetArkUIInternalNodeAPI()->GetListItemModifier().ResetListItemSelected(nativeNode);
+        selected = secondArg->ToBoolean(vm)->Value();
     }
+    GetArkUIInternalNodeAPI()->GetListItemModifier().SetListItemSelected(nativeNode, selected);
 
     return panda::JSValueRef::Undefined(vm);
 }
@@ -55,11 +54,9 @@ ArkUINativeModuleValue ListItemBridge::SetSelectable(ArkUIRuntimeCallInfo* runti
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    if (secondArg->IsBoolean()) {
+    if (!secondArg->IsUndefined() && secondArg->IsBoolean()) {
         bool selectable = secondArg->ToBoolean(vm)->Value();
         GetArkUIInternalNodeAPI()->GetListItemModifier().SetSelectable(nativeNode, selectable);
-    } else {
-        GetArkUIInternalNodeAPI()->GetListItemModifier().ResetSelectable(nativeNode);
     }
 
     return panda::JSValueRef::Undefined(vm);

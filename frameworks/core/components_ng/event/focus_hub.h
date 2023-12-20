@@ -237,7 +237,7 @@ public:
 private:
     FocusType focusType_ = FocusType::DISABLE;
     bool focusable_ = false;
-    FocusStyleType styleType_ = FocusStyleType::NONE;
+    FocusStyleType styleType_ = FocusStyleType::OUTER_BORDER;
     std::unique_ptr<FocusPaintParam> paintParams_ = nullptr;
 };
 
@@ -429,6 +429,8 @@ public:
         return focusStyleType_;
     }
 
+    static void IsCloseKeyboard(RefPtr<FrameNode> frameNode);
+
     void SetFocusPaintParamsPtr(const std::unique_ptr<FocusPaintParam>& paramsPtr)
     {
         CHECK_NULL_VOID(paramsPtr);
@@ -570,17 +572,11 @@ public:
     }
     void SetParentFocusable(bool parentFocusable);
 
-    void RefreshParentFocusable(bool focusable);
-
     void RefreshFocus();
 
-    void SetFocusable(bool focusable);
+    void SetFocusable(bool focusable, bool isExplicit = true);
     void SetShow(bool show);
-    void SetShowNode(bool show);
-    void SetShowScope(bool show);
     void SetEnabled(bool enabled);
-    void SetEnabledNode(bool enabled);
-    void SetEnabledScope(bool enabled);
 
     bool IsShow() const;
 
@@ -811,6 +807,7 @@ public:
         }
         focusCallbackEvents_->SetIsDefaultGroupHasFocused(isDefaultGroupHasFocused);
     }
+
     bool IsDefaultGroupHasFocused() const
     {
         return focusCallbackEvents_ ? focusCallbackEvents_->IsDefaultGroupHasFocused() : false;
@@ -826,6 +823,11 @@ public:
     bool GetIsViewRootScopeFocused() const
     {
         return isViewRootScopeFocused_;
+    }
+
+    bool IsImplicitFocusableScope() const
+    {
+        return (focusType_ == FocusType::SCOPE) && focusable_ && implicitFocusable_;
     }
 
     std::optional<std::string> GetInspectorKey() const;
@@ -954,6 +956,8 @@ private:
     int32_t lastTabIndexNodeId_ { DEFAULT_TAB_FOCUSED_INDEX };
 
     bool focusable_ { true };
+    bool isFocusableExplicit_ { false };
+    bool implicitFocusable_ { false };
     bool parentFocusable_ { true };
     bool currentFocus_ { false };
     bool isFocusUnit_ { false };

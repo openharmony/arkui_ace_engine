@@ -114,7 +114,7 @@ void RegisterCardUpdateCallback(int64_t cardId, const panda::Local<panda::Object
     };
 
     auto container = Container::Current();
-    if (container->IsFRSCardContainer()) {
+    if (container->IsFRSCardContainer() || container->IsDynamicRender()) {
         auto frontEnd = AceType::DynamicCast<FormFrontendDeclarative>(container->GetCardFrontend(cardId).Upgrade());
         CHECK_NULL_VOID(frontEnd);
         auto delegate = frontEnd->GetDelegate();
@@ -203,7 +203,7 @@ void UpdateCardRootComponent(const panda::Local<panda::ObjectRef>& obj)
 
         RefPtr<NG::PageRouterManager> pageRouterManager;
 
-        if (container->IsFRSCardContainer()) {
+        if (container->IsFRSCardContainer() || container->IsDynamicRender()) {
             auto frontEnd = AceType::DynamicCast<FormFrontendDeclarative>(container->GetCardFrontend(cardId).Upgrade());
             CHECK_NULL_VOID(frontEnd);
             auto delegate = frontEnd->GetDelegate();
@@ -238,6 +238,14 @@ panda::Local<panda::JSValueRef> JsLoadDocument(panda::JsiRuntimeCallInfo* runtim
     }
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     if (!firstArg->IsObject()) {
+        return panda::JSValueRef::Undefined(vm);
+    }
+
+    auto container = Container::Current();
+    if (container && container->IsDynamicRender()) {
+        LOGD("load dynamic component card");
+        panda::Local<panda::ObjectRef> obj = firstArg->ToObject(vm);
+        UpdateCardRootComponent(obj);
         return panda::JSValueRef::Undefined(vm);
     }
 

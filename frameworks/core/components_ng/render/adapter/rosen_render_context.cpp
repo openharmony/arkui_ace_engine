@@ -19,6 +19,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <memory>
+#include <string>
 
 #include "common/rs_vector2.h"
 #include "include/utils/SkParsePath.h"
@@ -3780,7 +3781,7 @@ void RosenRenderContext::PaintMouseSelectRect(const RectF& rect, const Color& fi
     rsNode_->AddModifier(mouseSelectModifier_);
 }
 
-void RosenRenderContext::DumpInfo() const
+void RosenRenderContext::DumpInfo() 
 {
     if (rsNode_) {
         DumpLog::GetInstance().AddDesc("------------start print rsNode");
@@ -3868,6 +3869,50 @@ void RosenRenderContext::DumpInfo() const
         if (!NearEqual(rsNode_->GetStagingProperties().GetAlpha(), 1)) {
             DumpLog::GetInstance().AddDesc(
                 std::string("Alpha:").append(std::to_string(rsNode_->GetStagingProperties().GetAlpha())));
+        }
+        auto translate = rsNode_->GetStagingProperties().GetTranslate();
+        if (!(NearZero(translate[0]) && NearZero(translate[0]))) {
+            DumpLog::GetInstance().AddDesc(
+                std::string("translate(x,y): ")
+                    .append(std::to_string(translate[0]).append(",").append(std::to_string(translate[1]))));
+        }
+        auto scale = rsNode_->GetStagingProperties().GetScale();
+        if (!(NearEqual(scale[0], 1) && NearEqual(scale[1], 1))) {
+            DumpLog::GetInstance().AddDesc(
+                std::string("scale(x,y): ")
+                    .append(std::to_string(translate[0]).append(",").append(std::to_string(translate[1]))));
+        }
+        auto rect = GetPaintRectWithoutTransform();
+        if (HasTransformTranslate()) {
+            auto translateArk = GetTransformTranslate().value();
+            auto arkTranslateX = translateArk.x.ConvertToPxWithSize(rect.Width());
+            auto arkTranslateY = translateArk.y.ConvertToPxWithSize(rect.Height());
+            if (!NearEqual(arkTranslateX, translate[0])) {
+                DumpLog::GetInstance().AddDesc(
+                    std::string("TranlateX has difference,arkui:").append(std::to_string(arkTranslateX)));
+            }
+            if (!NearEqual(arkTranslateY, translate[1])) {
+                DumpLog::GetInstance().AddDesc(
+                    std::string("TranlateY has difference,arkui:").append(std::to_string(arkTranslateY)));
+            }
+        }
+        if (HasTransformScale()) {
+            auto arkTransformScale = GetTransformScale().value();
+            if (!NearEqual(arkTransformScale.x, scale[0])) {
+                DumpLog::GetInstance().AddDesc(
+                    std::string("scaleX has difference,arkui:").append(std::to_string(arkTransformScale.x)));
+            }
+            if (!NearEqual(arkTransformScale.y, scale[1])) {
+                DumpLog::GetInstance().AddDesc(
+                    std::string("scaleY has difference,arkui:").append(std::to_string(arkTransformScale.y)));
+            }
+        }
+        if (HasOpacity()) {
+            auto arkAlpha = GetOpacity();
+            if (!NearEqual(arkAlpha.value(), rsNode_->GetStagingProperties().GetAlpha())) {
+                DumpLog::GetInstance().AddDesc(
+                    std::string("Alpha has difference,arkui:").append(std::to_string(arkAlpha.value())));
+            }
         }
     }
 }

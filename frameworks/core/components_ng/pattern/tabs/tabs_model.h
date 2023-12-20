@@ -28,6 +28,7 @@
 #include "core/components/tab_bar/tab_theme.h"
 #include "core/components/tab_bar/tabs_event.h"
 #include "core/components_ng/pattern/swiper/swiper_model.h"
+#include "core/components_ng/pattern/tabs/tab_content_transition_proxy.h"
 #include "core/event/ace_events.h"
 #include "core/pipeline/pipeline_context.h"
 
@@ -101,6 +102,8 @@ struct ScrollableBarModeOptions final {
     }
 };
 
+using TabsCustomAnimationEvent = std::function<TabContentAnimatedTransition(int32_t from, int32_t to)>;
+
 class TabsModel {
 public:
     static TabsModel* GetInstance();
@@ -131,6 +134,9 @@ public:
     virtual void SetClipEdge(bool clipEdge) = 0;
     virtual void SetScrollableBarModeOptions(const ScrollableBarModeOptions& option) = 0;
     virtual void SetBarGridAlign(const BarGridColumnOptions& BarGridColumnOptions) = 0;
+    virtual void SetIsCustomAnimation(bool isCustom) {}
+    virtual void SetOnCustomAnimation(TabsCustomAnimationEvent&& onCustomAnimation)
+    {}
 
 private:
     static std::unique_ptr<TabsModel> instance_;

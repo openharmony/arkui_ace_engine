@@ -141,20 +141,44 @@ public:
     void ShowCalendarDialog(const DialogProperties& dialogProps, const CalendarSettingData& settingData,
         std::map<std::string, NG::DialogEvent> dialogEvent,
         std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent);
-    void PopModalDialog();
-	
+    void PopModalDialog(int32_t maskId);
+
     void CloseDialog(const RefPtr<FrameNode>& dialogNode);
+
+    void OpenCustomDialog(const DialogProperties& dialogProps, std::function<void(int32_t)> &&callback);
+    void CloseCustomDialog(const int32_t dialogId);
+
     void SetSubWindowId(int32_t subWindowId)
     {
-        subWindowId_=subWindowId;
+        subWindowId_ = subWindowId;
     }
     int32_t GetSubwindowId()
     {
         return subWindowId_;
     }
-    int32_t GetMaskNodeId()
+    void SetMaskNodeId(int32_t dialogId, int32_t maskId)
     {
-        return maskNodeId_;
+        maskNodeIdMap_[dialogId] = maskId;
+    }
+    bool isMaskNode(int32_t maskId)
+    {
+        for (auto it = maskNodeIdMap_.begin(); it != maskNodeIdMap_.end(); it++) {
+            if (it->second == maskId) {
+                return true;
+            }
+        }
+        return false;
+    }
+    int32_t GetMaskNodeIdWithDialogId(int32_t dialogId)
+    {
+        int32_t maskNodeId = -1;
+        for (auto it = maskNodeIdMap_.begin(); it != maskNodeIdMap_.end(); it++) {
+            if (it->first == dialogId) {
+                maskNodeId = it->second;
+                break;
+            }
+        }
+        return maskNodeId;
     }
     /**  pop overlays (if any) on back press
      *
@@ -209,6 +233,16 @@ public:
         return pixmapColumnNodeWeak_.Upgrade();
     }
 
+    RefPtr<FrameNode> GetPixelMapContentNode() const
+    {
+        auto column = pixmapColumnNodeWeak_.Upgrade();
+        if (!column) {
+            return nullptr;
+        }
+        auto imageNode = AceType::DynamicCast<FrameNode>(column->GetFirstChild());
+        return imageNode;
+    }
+
     bool GetHasFilter()
     {
         return hasFilter_;
@@ -255,6 +289,46 @@ public:
     void RemoveFilterAnimation();
     void RemoveEventColumn();
 #endif // ENABLE_DRAG_FRAMEWORK
+    void UpdateContextMenuDisappearPosition(const NG::OffsetF& offset);
+
+    void ResetContextMenuDragHideFinished()
+    {
+        isContextMenuDragHideFinished_ = false;
+        dragMoveVector_ = OffsetF(0.0f, 0.0f);
+        lastDragMoveVector_ = OffsetF(0.0f, 0.0f);
+    }
+
+    void SetContextMenuDragHideFinished(bool isContextMenuDragHideFinished)
+    {
+        isContextMenuDragHideFinished_ = isContextMenuDragHideFinished;
+    }
+
+    bool IsContextMenuDragHideFinished() const
+    {
+        return isContextMenuDragHideFinished_ == true;
+    }
+
+    bool IsOriginDragMoveVector() const
+    {
+        return dragMoveVector_.NonOffset() && lastDragMoveVector_.NonOffset();
+    }
+
+    bool IsUpdateDragMoveVector() const
+    {
+        return !GetUpdateDragMoveVector().NonOffset() && !lastDragMoveVector_.NonOffset();
+    }
+
+    void UpdateDragMoveVector(const NG::OffsetF& offset)
+    {
+        lastDragMoveVector_ = dragMoveVector_;
+        dragMoveVector_ = offset;
+    }
+
+    OffsetF GetUpdateDragMoveVector() const
+    {
+        return dragMoveVector_ - lastDragMoveVector_;
+    }
+
     void BindContentCover(bool isShow, std::function<void(const std::string&)>&& callback,
         std::function<RefPtr<UINode>()>&& buildNodeFunc, NG::ModalStyle& modalStyle, std::function<void()>&& onAppear,
         std::function<void()>&& onDisappear, const RefPtr<FrameNode>& targetNode, int32_t sessionId = 0);
@@ -263,7 +337,10 @@ public:
         std::function<RefPtr<UINode>()>&& buildNodeFunc, std::function<RefPtr<UINode>()>&& buildTitleNodeFunc,
         NG::SheetStyle& sheetStyle, std::function<void()>&& onAppear, std::function<void()>&& onDisappear,
         std::function<void()>&& shouldDismiss, const RefPtr<FrameNode>& targetNode);
-
+    void OnBindSheet(bool isShow, std::function<void(const std::string&)>&& callback,
+        std::function<RefPtr<UINode>()>&& buildNodeFunc, std::function<RefPtr<UINode>()>&& buildtitleNodeFunc,
+        NG::SheetStyle& sheetStyle, std::function<void()>&& onAppear, std::function<void()>&& onDisappear,
+        std::function<void()>&& shouldDismiss, const RefPtr<FrameNode>& targetNode);
     void CloseSheet(int32_t targetId);
 
     void DismissSheet();
@@ -339,6 +416,8 @@ private:
     void PostDialogFinishEvent(const WeakPtr<FrameNode>& nodeWk);
     void OnDialogCloseEvent(const RefPtr<FrameNode>& node);
 
+    void CloseDialogInner(const RefPtr<FrameNode>& dialogNode);
+
     void SetShowMenuAnimation(const RefPtr<FrameNode>& menu, bool isInSubWindow = false);
     void PopMenuAnimation(const RefPtr<FrameNode>& menu, bool showPreviewAnimation = true, bool startDrag = false);
     void ClearMenuAnimation(const RefPtr<FrameNode>& menu, bool showPreviewAnimation = true, bool startDrag = false);
@@ -383,7 +462,7 @@ private:
     float sheetHeight_ { 0.0 };
     WeakPtr<UINode> rootNodeWeak_;
     int32_t dialogCount_ = 0;
-    int32_t maskNodeId_ = -1;
+    std::unordered_map<int32_t, int32_t> maskNodeIdMap_;
     int32_t subWindowId_;
 #ifdef ENABLE_DRAG_FRAMEWORK
     bool hasPixelMap_ { false };
@@ -394,6 +473,9 @@ private:
     WeakPtr<FrameNode> filterColumnNodeWeak_;
     WeakPtr<FrameNode> eventColumnNodeWeak_;
 #endif // ENABLE_DRAG_FRAMEWORK
+    bool isContextMenuDragHideFinished_ = false;
+    OffsetF dragMoveVector_ = OffsetF(0.0f, 0.0f);
+    OffsetF lastDragMoveVector_ = OffsetF(0.0f, 0.0f);
 
     std::function<void()> onHideDialogCallback_ = nullptr;
     CancelableCallback<void()> continuousTask_;

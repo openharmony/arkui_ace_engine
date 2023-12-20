@@ -202,12 +202,11 @@ void FrontendDelegateDeclarativeNG::RunPage(
 }
 
 void FrontendDelegateDeclarativeNG::RunPage(
-    const std::shared_ptr<std::vector<uint8_t>>& content,  const std::string& params, const std::string& profile)
+    const std::shared_ptr<std::vector<uint8_t>>& content, const std::string& params, const std::string& profile)
 {
     ACE_SCOPED_TRACE("FrontendDelegateDeclarativeNG::RunPage %zu", content->size());
     taskExecutor_->PostTask(
-        [delegate = Claim(this), weakPtr = WeakPtr<NG::PageRouterManager>(pageRouterManager_), content,
-            params]() {
+        [delegate = Claim(this), weakPtr = WeakPtr<NG::PageRouterManager>(pageRouterManager_), content, params]() {
             auto pageRouterManager = weakPtr.Upgrade();
             CHECK_NULL_VOID(pageRouterManager);
             pageRouterManager->RunPage(content, params);
@@ -609,6 +608,7 @@ void FrontendDelegateDeclarativeNG::ShowDialog(const std::string& title, const s
     const std::vector<ButtonInfo>& buttons, bool autoCancel, std::function<void(int32_t, int32_t)>&& callback,
     const std::set<std::string>& callbacks)
 {
+    TAG_LOGD(AceLogTag::ACE_OVERLAY, "show dialog enter");
     DialogProperties dialogProperties = {
         .title = title,
         .content = message,
@@ -622,6 +622,7 @@ void FrontendDelegateDeclarativeNG::ShowDialog(const std::string& title, const s
     const std::vector<ButtonInfo>& buttons, bool autoCancel, std::function<void(int32_t, int32_t)>&& callback,
     const std::set<std::string>& callbacks, std::function<void(bool)>&& onStatusChanged)
 {
+    TAG_LOGD(AceLogTag::ACE_OVERLAY, "show dialog enter");
     DialogProperties dialogProperties = {
         .title = title,
         .content = message,
@@ -636,6 +637,7 @@ void FrontendDelegateDeclarativeNG::ShowDialog(const PromptDialogAttr& dialogAtt
     const std::vector<ButtonInfo>& buttons, std::function<void(int32_t, int32_t)>&& callback,
     const std::set<std::string>& callbacks)
 {
+    TAG_LOGD(AceLogTag::ACE_OVERLAY, "show dialog enter");
     DialogProperties dialogProperties = {
         .title = dialogAttr.title,
         .content = dialogAttr.message,
@@ -658,6 +660,7 @@ void FrontendDelegateDeclarativeNG::ShowDialog(const PromptDialogAttr& dialogAtt
     const std::vector<ButtonInfo>& buttons, std::function<void(int32_t, int32_t)>&& callback,
     const std::set<std::string>& callbacks, std::function<void(bool)>&& onStatusChanged)
 {
+    TAG_LOGD(AceLogTag::ACE_OVERLAY, "show dialog enter");
     DialogProperties dialogProperties = {
         .title = dialogAttr.title,
         .content = dialogAttr.message,
@@ -680,6 +683,7 @@ void FrontendDelegateDeclarativeNG::ShowDialog(const PromptDialogAttr& dialogAtt
 void FrontendDelegateDeclarativeNG::ShowActionMenu(
     const std::string& title, const std::vector<ButtonInfo>& button, std::function<void(int32_t, int32_t)>&& callback)
 {
+    TAG_LOGD(AceLogTag::ACE_OVERLAY, "show action menu enter");
     DialogProperties dialogProperties = {
         .title = title,
         .autoCancel = true,
@@ -692,6 +696,7 @@ void FrontendDelegateDeclarativeNG::ShowActionMenu(
 void FrontendDelegateDeclarativeNG::ShowActionMenu(const std::string& title, const std::vector<ButtonInfo>& button,
     std::function<void(int32_t, int32_t)>&& callback, std::function<void(bool)>&& onStatusChanged)
 {
+    TAG_LOGD(AceLogTag::ACE_OVERLAY, "show action menu enter");
     DialogProperties dialogProperties = {
         .title = title,
         .autoCancel = true,
@@ -855,6 +860,7 @@ size_t FrontendDelegateDeclarativeNG::GetComponentsCount()
 void FrontendDelegateDeclarativeNG::ShowToast(
     const std::string& message, int32_t duration, const std::string& bottom, const NG::ToastShowMode& showMode)
 {
+    TAG_LOGD(AceLogTag::ACE_OVERLAY, "show toast enter");
     int32_t durationTime = std::clamp(duration, TOAST_TIME_DEFAULT, TOAST_TIME_MAX);
     bool isRightToLeft = AceApplicationInfo::GetInstance().IsRightToLeft();
     auto task = [durationTime, message, bottom, isRightToLeft, showMode, containerId = Container::CurrentId()](
@@ -869,6 +875,7 @@ void FrontendDelegateDeclarativeNG::ShowToast(
 void FrontendDelegateDeclarativeNG::ShowDialogInner(DialogProperties& dialogProperties,
     std::function<void(int32_t, int32_t)>&& callback, const std::set<std::string>& callbacks)
 {
+    TAG_LOGD(AceLogTag::ACE_OVERLAY, "show dialog inner enter");
     dialogProperties.onSuccess = std::move(callback);
     dialogProperties.onCancel = [callback, taskExecutor = taskExecutor_] {
         taskExecutor->PostTask(
@@ -901,6 +908,7 @@ void FrontendDelegateDeclarativeNG::ShowDialogInner(DialogProperties& dialogProp
 void FrontendDelegateDeclarativeNG::ShowActionMenuInner(DialogProperties& dialogProperties,
     const std::vector<ButtonInfo>& button, std::function<void(int32_t, int32_t)>&& callback)
 {
+    TAG_LOGD(AceLogTag::ACE_OVERLAY, "show action menu inner enter");
     ButtonInfo buttonInfo = { .text = Localization::GetInstance()->GetEntryLetters("common.cancel"), .textColor = "" };
     dialogProperties.buttons.emplace_back(buttonInfo);
     dialogProperties.onSuccess = std::move(callback);

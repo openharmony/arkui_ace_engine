@@ -36,6 +36,7 @@ public:
     MOCK_METHOD3(InitializeByName, void(OHOS::Rosen::Window* window, const std::string& name, napi_value storage));
     MOCK_METHOD4(Initialize,
         void(OHOS::Rosen::Window* window, const std::string& url, napi_value storage, uint32_t focusWindowID));
+    MOCK_METHOD2(InitializeDynamic, void(const std::string& hapPath, const std::string& abcPath));
     MOCK_METHOD0(Foreground, void());
     MOCK_METHOD0(Background, void());
     MOCK_METHOD0(Focus, void());
@@ -85,6 +86,14 @@ public:
     MOCK_METHOD1(CloseModalUIExtension, void(int32_t sessionId));
     MOCK_METHOD1(SetParentToken, void(sptr<IRemoteObject> token));
     MOCK_METHOD0(GetParentToken, sptr<IRemoteObject>());
+
+    MOCK_METHOD2(SetContainerModalTitleVisible, void(bool customTitleSettedShow, bool floatingTitleSettedShow));
+    MOCK_METHOD1(SetContainerModalTitleHeight, void(int height));
+    MOCK_METHOD0(GetContainerModalTitleHeight, int());
+    MOCK_METHOD2(GetContainerModalButtonsRect, bool(Rosen::Rect& containerModal, Rosen::Rect& buttons));
+    MOCK_METHOD1(SubscribeContainerModalButtonsRectChange, void(
+        std::function<void(Rosen::Rect& containerModal, Rosen::Rect& buttons)>&& callback));
+
 #ifndef PREVIEW
     MOCK_METHOD4(
         SearchElementInfoByAccessibilityId, void(int32_t elementId,

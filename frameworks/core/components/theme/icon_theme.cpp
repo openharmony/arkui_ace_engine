@@ -104,7 +104,8 @@ static std::unordered_map<InternalResource::ResourceId, std::string> RESOURCE_IC
     { InternalResource::ResourceId::IC_WINDOW_MENU_SCREEN_N, "ic_window_menu_screen_n" },
     { InternalResource::ResourceId::IC_WINDOW_MIN, "ic_window_min" },
     { InternalResource::ResourceId::IC_WINDOW_RESTORES, "ic_window_restores" },
-    { InternalResource::ResourceId::IC_BOTTOMSHEET_CLOSE_SVG, "ic_bottomsheet_close" }
+    { InternalResource::ResourceId::IC_BOTTOMSHEET_CLOSE_SVG, "ic_bottomsheet_close" },
+    { InternalResource::ResourceId::IC_CANCEL_SVG, "ic_public_cancel" }
 };
 }
 

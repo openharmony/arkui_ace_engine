@@ -203,13 +203,15 @@ public:
     void UpdateCounterMargin();
     void CleanCounterNode();
     void UltralimitShake();
-    void UpdateCounterBorderStyle(uint32_t& textLength, uint32_t& maxLength);
+    void HandleInputCounterBorder(int32_t& textLength, uint32_t& maxLength);
+    void UpdateCounterBorderStyle(int32_t& textLength, uint32_t& maxLength);
     void UpdateAreaBorderStyle(BorderWidthProperty& currentBorderWidth, BorderWidthProperty& overCountBorderWidth,
-    BorderColorProperty& overCountBorderColor, BorderColorProperty& currentBorderColor);
+        BorderColorProperty& overCountBorderColor, BorderColorProperty& currentBorderColor);
     void DeleteBackward(int32_t length) override;
     void DeleteBackwardOperation(int32_t length);
     void DeleteForward(int32_t length) override;
     void DeleteForwardOperation(int32_t length);
+    void HandleOnDelete(bool backward) override;
     void UpdateRecordCaretIndex(int32_t index);
     void CreateHandles() override;
 
@@ -226,6 +228,10 @@ public:
     void SetCounterState(bool counterChange)
     {
         counterChange_ = counterChange;
+    }
+    void SetCounterMargin(bool CounterMargin)
+    {
+        hasCounterMargin_ = CounterMargin;
     }
 
     float GetTextOrPlaceHolderFontSize();
@@ -777,6 +783,10 @@ public:
     void HandleSelectionEnd();
     bool HandleOnEscape() override;
     bool HandleOnTab(bool backward) override;
+    void HandleOnEnter() override
+    {
+        PerformAction(GetTextInputActionValue(TextInputAction::DONE), false);
+    }
     void HandleOnUndoAction() override;
     void HandleOnRedoAction() override;
     void HandleOnSelectAll(bool isKeyEvent, bool inlineStyle = false);
@@ -1001,6 +1011,9 @@ public:
 
     void UpdateShowMagnifier(bool isShowMagnifier = false)
     {
+        if (isShowMagnifier_ == isShowMagnifier) {
+            return;
+        }
         isShowMagnifier_ = isShowMagnifier;
     }
 
@@ -1013,7 +1026,7 @@ public:
     {
         localOffset_.SetX(localOffset.GetX());
         localOffset_.SetY(localOffset.GetY());
-        isShowMagnifier_ = true;
+        UpdateShowMagnifier(true);
     }
 
     OffsetF GetLocalOffset() const
@@ -1027,6 +1040,10 @@ public:
     }
 
     void ShowMenu();
+    void HandleOnShowMenu() override
+    {
+        ShowMenu();
+    }
     bool HasFocus() const;
     void StopTwinkling();
 
@@ -1037,6 +1054,7 @@ public:
 #ifdef ENABLE_DRAG_FRAMEWORK
     void HandleOnDragStatusCallback(
         const DragEventType& dragEventType, const RefPtr<NotifyDragEvent>& notifyDragEvent) override;
+
 protected:
     virtual void InitDragEvent();
 #endif
@@ -1087,7 +1105,6 @@ private:
     void HandleLongPress(GestureEvent& info);
     void UpdateCaretPositionWithClamp(const int32_t& pos);
     void ShowSelectOverlay(const ShowSelectOverlayParams& params);
-    void ShowSelectOverlayAfterDrag();
     void CursorMoveOnClick(const Offset& offset);
 
     void ProcessOverlay(
@@ -1158,6 +1175,7 @@ private:
 
     bool IsTouchAtLeftOffset(float currentOffsetX);
     void FilterExistText();
+    void CreateErrorParagraph(const std::string& content);
     void UpdateErrorTextMargin();
     OffsetF GetTextPaintOffset() const;
     void UpdateSelectController();
@@ -1165,6 +1183,8 @@ private:
     void CloseHandleAndSelect() override;
     bool RepeatClickCaret(const Offset& offset, int32_t lastCaretIndex);
     void PaintTextRect();
+    void GetIconPaintRect(const RefPtr<TextInputResponseArea>& responseArea, RoundRect& paintRect);
+    void GetInnerFocusPaintRect(RoundRect& paintRect);
     void PaintResponseAreaRect();
     void PaintCancelRect();
     void PaintUnitRect();

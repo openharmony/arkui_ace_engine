@@ -89,6 +89,15 @@ bool JsiValue::IsArray() const
     }
 }
 
+bool JsiValue::IsArrayBuffer() const
+{
+    if (GetHandle().IsEmpty()) {
+        return false;
+    } else {
+        return GetHandle()->IsArrayBuffer();
+    }
+}
+
 bool JsiValue::IsUint8ClampedArray() const
 {
     return (!GetHandle().IsEmpty()) && (GetHandle()->IsUint8ClampedArray());

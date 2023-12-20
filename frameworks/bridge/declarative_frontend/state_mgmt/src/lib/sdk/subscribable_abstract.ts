@@ -95,12 +95,12 @@ abstract class SubscribableAbstract {
         stateMgmtConsole.error(`SubscribableAbstract: notifyHasChanged: unknown subscriber.'${subscribedId}' error!.`);
         return;
       }
-      // PU Code path
-      if ('objectPropertyHasChangedPU' in owningProperty) {
+
       // PU code path
-        (owningProperty as unknown as ObservedObjectEventsPUReceiver<any>).objectPropertyHasChangedPU(this, propName);
-        return;
+      if ('onTrackedObjectPropertyCompatModeHasChangedPU' in owningProperty) {
+        (owningProperty as unknown as ObservedObjectEventsPUReceiver<any>).onTrackedObjectPropertyCompatModeHasChangedPU(this, propName);
       }
+      
       // FU code path
       if ('hasChanged' in owningProperty) {
         (owningProperty as ISinglePropertyChangeSubscriber<any>).hasChanged(newValue);

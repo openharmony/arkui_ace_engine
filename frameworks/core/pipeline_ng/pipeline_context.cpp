@@ -71,6 +71,7 @@
 #include "core/components_ng/property/calc_length.h"
 #include "core/components_ng/property/measure_property.h"
 #include "core/components_ng/property/safe_area_insets.h"
+#include "core/components_ng/pattern/window_scene/helper/window_scene_helper.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/event/ace_events.h"
 #include "core/event/touch_event.h"
@@ -380,6 +381,72 @@ TouchEvent PipelineContext::GetLatestPoint(const std::vector<TouchEvent>& curren
     return result;
 }
 
+RefPtr<FrameNode> PipelineContext::HandleFocusNode()
+{
+    auto curRootNode = GetScreenNode();
+    if (curRootNode == nullptr) {
+        curRootNode = rootNode_;
+    }
+    CHECK_NULL_RETURN(curRootNode, nullptr);
+    auto rootFocusHub = curRootNode->GetFocusHub();
+    CHECK_NULL_RETURN(rootFocusHub, nullptr);
+    RefPtr<FocusHub> lastFocusNode;
+    std::list<RefPtr<FocusHub>> focusNodes = rootFocusHub->GetChildren();
+    for (const auto& item : focusNodes) {
+        if (item->IsCurrentFocus()) {
+            lastFocusNode = item;
+        }
+    }
+    while (lastFocusNode) {
+        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "curLastFocusNodeTAG:(%{public}s).", lastFocusNode->GetFrameName().c_str());
+        if (!lastFocusNode->IsCurrentFocus() || !lastFocusNode->IsFocusableNode()) {
+            TAG_LOGI(AceLogTag::ACE_KEYBOARD, "Is not CurrentFocus Or not FocusableNode.");
+            break;
+        }
+        std::list<RefPtr<FocusHub>> focusNodesInner = lastFocusNode->GetChildren();
+        auto openBreak = false;
+        for (const auto& item : focusNodesInner) {
+            if (item->IsCurrentFocus()) {
+                lastFocusNode = item;
+                openBreak = true;
+            }
+        }
+        if (!openBreak) {
+            TAG_LOGI(AceLogTag::ACE_KEYBOARD, "Is LastFocusNode, break.");
+            break;
+        }
+    }
+    if (lastFocusNode == nullptr) {
+        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "lastFocusNode is null.");
+        return nullptr;
+    }
+
+    auto curFrameNode = lastFocusNode->GetFrameNode();
+    if (curFrameNode == nullptr) {
+        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "lastFocusNode-curFrameNode is null.");
+        return nullptr;
+    }
+    return curFrameNode;
+}
+
+void PipelineContext::IsCloseSCBKeyboard()
+{
+    RefPtr<FrameNode> curFrameNode = HandleFocusNode();
+    if (curFrameNode == nullptr) {
+        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "curFrameNode null.");
+        return;
+    }
+#ifdef WINDOW_SCENE_SUPPORTED
+    auto isSystem = WindowSceneHelper::IsWindowScene(curFrameNode);
+    if (isSystem) {
+        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "In SCBWindow, close keyboard.");
+        WindowSceneHelper::IsWindowSceneCloseKeyboard(curFrameNode);
+    }
+#else
+    FocusHub::IsCloseKeyboard(curFrameNode);
+#endif
+}
+
 void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
 {
     CHECK_RUN_ON(UI);
@@ -406,6 +473,7 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
     bool hasRunningAnimation = window_->FlushAnimation(nanoTimestamp);
     FlushTouchEvents();
     FlushBuild();
+    auto isDirtyLayoutNodesEmpty = taskScheduler_->IsDirtyLayoutNodesEmpty();
     if (isFormRender_ && drawDelegate_ && rootNode_) {
         auto renderContext = AceType::DynamicCast<NG::RenderContext>(rootNode_->GetRenderContext());
         drawDelegate_->DrawRSFrame(renderContext);
@@ -447,7 +515,11 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
     if (!isFormRender_ && onShow_ && onFocus_) {
         FlushFocus();
     }
-    HandleOnAreaChangeEvent();
+    // Close input method in the SCB window.
+    IsCloseSCBKeyboard();
+    if (!isDirtyLayoutNodesEmpty) {
+        HandleOnAreaChangeEvent(nanoTimestamp);
+    }
     HandleVisibleAreaChangeEvent();
     if (isNeedFlushMouseEvent_) {
         FlushMouseEvent();
@@ -2082,7 +2154,7 @@ void PipelineContext::RemoveOnAreaChangeNode(int32_t nodeId)
     onAreaChangeNodeIds_.erase(nodeId);
 }
 
-void PipelineContext::HandleOnAreaChangeEvent()
+void PipelineContext::HandleOnAreaChangeEvent(uint64_t nanoTimestamp)
 {
     ACE_FUNCTION_TRACE();
     if (onAreaChangeNodeIds_.empty()) {
@@ -2090,7 +2162,7 @@ void PipelineContext::HandleOnAreaChangeEvent()
     }
     auto nodes = FrameNode::GetNodesById(onAreaChangeNodeIds_);
     for (auto&& frameNode : nodes) {
-        frameNode->TriggerOnAreaChangeCallback();
+        frameNode->TriggerOnAreaChangeCallback(nanoTimestamp);
     }
     UpdateFormLinkInfos();
 }
@@ -2421,6 +2493,7 @@ void PipelineContext::OnDragEvent(const PointerEvent& pointerEvent, DragEventAct
         manager->OnDragMoveOut(pointerEvent, extraInfo);
         manager->ClearSummary();
         manager->ClearExtraInfo();
+        manager->OnDragOut();
         return;
     }
 #endif // ENABLE_DRAG_FRAMEWORK
@@ -2438,8 +2511,19 @@ void PipelineContext::OnDragEvent(const PointerEvent& pointerEvent, DragEventAct
 #ifndef ENABLE_DRAG_FRAMEWORK
         manager->RestoreClipboardData();
 #endif // ENABLE_DRAG_FRAMEWORK
+#ifdef ENABLE_DRAG_FRAMEWORK
+        SubwindowManager::GetInstance()->HidePreviewNG();
+        auto overlayManager = GetOverlayManager();
+        CHECK_NULL_VOID(overlayManager);
+        overlayManager->RemovePixelMap();
+#endif
         return;
     }
+#ifdef ENABLE_DRAG_FRAMEWORK
+    if (action == DragEventAction::DRAG_EVENT_MOVE) {
+        manager->DoDragMoveAnimate(pointerEvent);
+    }
+#endif
     manager->OnDragMove(pointerEvent, extraInfo);
 }
 
@@ -2790,5 +2874,71 @@ void PipelineContext::SetIsDragging(bool isDragging)
         return;
     }
     eventManager_->SetIsDragging(isDragging);
+}
+
+void PipelineContext::SetContainerModalTitleVisible(bool customTitleSettedShow, bool floatingTitleSettedShow)
+{
+    if (windowModal_ != WindowModal::CONTAINER_MODAL) {
+        return;
+    }
+    CHECK_NULL_VOID(rootNode_);
+    auto containerNode = AceType::DynamicCast<FrameNode>(rootNode_->GetFirstChild());
+    CHECK_NULL_VOID(containerNode);
+    auto containerPattern = containerNode->GetPattern<ContainerModalPattern>();
+    CHECK_NULL_VOID(containerPattern);
+    containerPattern->SetContainerModalTitleVisible(customTitleSettedShow, floatingTitleSettedShow);
+}
+
+void PipelineContext::SetContainerModalTitleHeight(int32_t height)
+{
+    if (windowModal_ != WindowModal::CONTAINER_MODAL) {
+        return;
+    }
+    CHECK_NULL_VOID(rootNode_);
+    auto containerNode = AceType::DynamicCast<FrameNode>(rootNode_->GetFirstChild());
+    CHECK_NULL_VOID(containerNode);
+    auto containerPattern = containerNode->GetPattern<ContainerModalPattern>();
+    CHECK_NULL_VOID(containerPattern);
+    containerPattern->SetContainerModalTitleHeight(height);
+}
+
+int32_t PipelineContext::GetContainerModalTitleHeight()
+{
+    if (windowModal_ != WindowModal::CONTAINER_MODAL) {
+        return -1;
+    }
+    CHECK_NULL_RETURN(rootNode_, -1);
+    auto containerNode = AceType::DynamicCast<FrameNode>(rootNode_->GetFirstChild());
+    CHECK_NULL_RETURN(containerNode, -1);
+    auto containerPattern = containerNode->GetPattern<ContainerModalPattern>();
+    CHECK_NULL_RETURN(containerPattern, -1);
+    return containerPattern->GetContainerModalTitleHeight();
+}
+
+bool PipelineContext::GetContainerModalButtonsRect(RectF& containerModal, RectF& buttons)
+{
+    if (windowModal_ != WindowModal::CONTAINER_MODAL) {
+        return false;
+    }
+    CHECK_NULL_RETURN(rootNode_, false);
+    auto containerNode = AceType::DynamicCast<FrameNode>(rootNode_->GetFirstChild());
+    CHECK_NULL_RETURN(containerNode, false);
+    auto containerPattern = containerNode->GetPattern<ContainerModalPattern>();
+    CHECK_NULL_RETURN(containerPattern, false);
+    return containerPattern->GetContainerModalButtonsRect(containerModal, buttons);
+}
+
+void PipelineContext::SubscribeContainerModalButtonsRectChange(
+    std::function<void(RectF& containerModal, RectF& buttons)>&& callback)
+{
+    if (windowModal_ != WindowModal::CONTAINER_MODAL) {
+        return;
+    }
+    CHECK_NULL_VOID(rootNode_);
+    auto containerNode = AceType::DynamicCast<FrameNode>(rootNode_->GetFirstChild());
+    CHECK_NULL_VOID(containerNode);
+    auto containerPattern = containerNode->GetPattern<ContainerModalPattern>();
+    CHECK_NULL_VOID(containerPattern);
+    containerPattern->SubscribeContainerModalButtonsRectChange(std::move(callback));
 }
 } // namespace OHOS::Ace::NG

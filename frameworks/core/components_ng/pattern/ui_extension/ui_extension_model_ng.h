@@ -35,6 +35,11 @@ public:
     static RefPtr<FrameNode> Create(const AAFwk::Want& want, const ModalUIExtensionCallbacks& callbacks);
 
     void Create(const RefPtr<OHOS::Ace::WantWrap>& wantWrap, bool transferringCaller = false) override;
+    // for dynamic component
+    void Create() override;
+    void InitializeDynamicComponent(const RefPtr<FrameNode>& frameNode, const std::string& hapPath,
+        const std::string& abcPath, const RefPtr<OHOS::Ace::WantWrap>& wantWrap, void* runtime) override;
+
     void SetOnRemoteReady(std::function<void(const RefPtr<UIExtensionProxy>&)>&& onRemoteReady) override;
     void SetOnRelease(std::function<void(int32_t)>&& onRelease) override;
     void SetOnResult(std::function<void(int32_t, const AAFwk::Want&)>&& onResult) override;

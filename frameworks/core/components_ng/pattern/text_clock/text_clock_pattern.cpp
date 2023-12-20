@@ -385,12 +385,12 @@ void TextClockPattern::ParseInputFormat(bool& is24H)
     std::vector<std::string> formatSplitter;
     auto i = 0;
     auto j = 0;
-    auto len = inputFormat.length();
+    auto len = static_cast<int32_t>(inputFormat.length());
     std::string tempFormat = "";
     TextClockFormatElement tempFormatElement;
     tempFormatElement.formatElement = "";
     tempFormatElement.formatElementNum = 0;
-    for (tempFormat = inputFormat[i]; i < (int32_t)len; i++) {
+    for (tempFormat = inputFormat[i]; i < len; i++) {
         if (inputFormat[i] == 'H') {
             is24H = true;
         }

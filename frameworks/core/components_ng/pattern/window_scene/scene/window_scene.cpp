@@ -151,6 +151,13 @@ void WindowScene::OnBoundsChanged(const Rosen::Vector4f& bounds)
     host->GetGeometryNode()->SetFrameSize(SizeF(windowRect.width_, windowRect.height_));
 
     CHECK_NULL_VOID(session_);
+    Rosen::WSRectF originBounds = {
+        .posX_ = bounds.x_,
+        .posY_ = bounds.y_,
+        .width_ = bounds.z_,
+        .height_ = bounds.w_,
+    };
+    session_->SetBounds(originBounds);
     windowRect.posX_ = std::round(bounds.x_ + session_->GetOffsetX());
     windowRect.posY_ = std::round(bounds.y_ + session_->GetOffsetY());
     auto transactionController = Rosen::RSSyncTransactionController::GetInstance();
@@ -207,22 +214,6 @@ void WindowScene::OnActivation()
         auto self = weakThis.Upgrade();
         CHECK_NULL_VOID(self);
 
-        if (self->destroyed_) {
-            self->destroyed_ = false;
-            auto host = self->GetHost();
-            CHECK_NULL_VOID(host);
-            host->RemoveChild(self->startingNode_);
-            host->RemoveChild(self->contentNode_);
-            host->RemoveChild(self->snapshotNode_);
-            self->startingNode_.Reset();
-            self->contentNode_.Reset();
-            self->snapshotNode_.Reset();
-            self->session_->SetNeedSnapshot(true);
-            self->OnAttachToFrameNode();
-            host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-            return;
-        }
-
         if (self->session_ && self->session_->GetShowRecent() &&
             self->session_->GetSessionState() == Rosen::SessionState::STATE_DISCONNECT && self->snapshotNode_) {
             auto host = self->GetHost();
@@ -236,7 +227,8 @@ void WindowScene::OnActivation()
             return;
         }
 
-        if (self->session_ && self->session_->GetShowRecent() && self->startingNode_) {
+        if (self->session_ && self->session_->GetShowRecent() &&
+            self->session_->GetSessionState() != Rosen::SessionState::STATE_DISCONNECT && self->startingNode_) {
             auto surfaceNode = self->session_->GetSurfaceNode();
             CHECK_NULL_VOID(surfaceNode);
             auto host = self->GetHost();
@@ -312,7 +304,6 @@ void WindowScene::OnDisconnect()
     auto uiTask = [weakThis = WeakClaim(this), snapshot]() {
         auto self = weakThis.Upgrade();
         CHECK_NULL_VOID(self);
-        self->destroyed_ = true;
 
         auto host = self->GetHost();
         CHECK_NULL_VOID(host);

@@ -112,6 +112,26 @@ public:
         return previewMode_;
     }
 
+    void SetPreviewBeforeAnimationScale(float scaleBeforeAnimation)
+    {
+        previewAnimationOptions_.scaleFrom = scaleBeforeAnimation;
+    }
+
+    float GetPreviewBeforeAnimationScale() const
+    {
+        return previewAnimationOptions_.scaleFrom;
+    }
+
+    void SetPreviewAfterAnimationScale(float scaleAfterAnimation)
+    {
+        previewAnimationOptions_.scaleTo = scaleAfterAnimation;
+    }
+
+    float GetPreviewAfterAnimationScale() const
+    {
+        return previewAnimationOptions_.scaleTo;
+    }
+
     bool IsNavigationMenu() const
     {
         return type_ == MenuType::NAVIGATION_MENU;
@@ -351,6 +371,7 @@ private:
 
     bool isSelectMenu_ = false;
     MenuPreviewMode previewMode_ = MenuPreviewMode::NONE;
+    MenuPreviewAnimationOptions previewAnimationOptions_;
     bool isFirstShow_ = false;
     OffsetF originOffset_;
     OffsetF endOffset_;

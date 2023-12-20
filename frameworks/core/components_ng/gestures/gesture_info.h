@@ -86,6 +86,11 @@ public:
         return gestureMask_;
     }
 
+    int32_t GetFingers() const
+    {
+        return fingers_;
+    }
+
     void SetTag(std::string tag)
     {
         if (gestureInfo_) {

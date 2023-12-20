@@ -253,7 +253,8 @@ class SelectionMenuComponent extends ViewPU {
             }).length ? this.visibilityValue = Visibility.None : this.visibilityValue = Visibility.Visible
         } else this.expandedMenuOptions && this.expandedMenuOptions.length > 0 && (this.showExpandedMenuOptions = !0);
         let e = pasteboard.getSystemPasteboard();
-        e && e.hasDataSync() && (this.pasteEnable = !0)
+        e && e.hasDataSync() && (this.pasteEnable = !0);
+        this.editorMenuOptions && this.editorMenuOptions.length > 0 || (this.customMenuHeight = 0)
     }
 
     initialRender() {
@@ -511,12 +512,15 @@ class SelectionMenuComponent extends ViewPU {
                             });
                             MenuItem.visibility(this.visibilityValue);
                             MenuItem.onClick((() => {
-                                if (this.controller) if (this.onSelectAll) {
-                                    let e = this.controller.getSelection();
-                                    this.onSelectAll({ content: e })
-                                } else {
-                                    this.controller.setSelection(-1, -1);
-                                    this.visibilityValue = Visibility.None
+                                if (this.controller) {
+                                    if (this.onSelectAll) {
+                                        let e = this.controller.getSelection();
+                                        this.onSelectAll({ content: e })
+                                    } else {
+                                        this.controller.setSelection(-1, -1);
+                                        this.visibilityValue = Visibility.None
+                                    }
+                                    this.controller.closeSelectionMenu()
                                 }
                             }))
                         }), MenuItem);

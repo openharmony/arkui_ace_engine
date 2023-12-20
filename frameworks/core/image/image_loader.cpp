@@ -722,6 +722,7 @@ RefPtr<NG::ImageData> DecodedDataProviderImageLoader::LoadDecodedImageData(
 #if !defined(PIXEL_MAP_SUPPORTED)
     return nullptr;
 #else
+    ACE_FUNCTION_TRACE();
     auto pipeline = pipelineWk.Upgrade();
     CHECK_NULL_RETURN(pipeline, nullptr);
     auto dataProvider = pipeline->GetDataProviderManager();

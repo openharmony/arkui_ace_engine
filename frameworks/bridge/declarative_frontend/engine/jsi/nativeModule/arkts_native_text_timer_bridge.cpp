@@ -25,6 +25,7 @@ namespace OHOS::Ace::NG {
 namespace {
 constexpr int32_t NUM_0 = 0;
 constexpr int32_t NUM_1 = 1;
+const std::string DEFAULT_STR = "-1";
 } // namespace
 
 ArkUINativeModuleValue TextTimerBridge::SetFontColor(ArkUIRuntimeCallInfo* runtimeCallInfo)
@@ -58,10 +59,11 @@ ArkUINativeModuleValue TextTimerBridge::SetFontSize(ArkUIRuntimeCallInfo* runtim
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(NUM_0);
-    Local<JSValueRef> paramArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    Local<JSValueRef> fontSizeArg = runtimeCallInfo->GetCallArgRef(NUM_1);
     void* nativeNode = nodeArg->ToNativePointer(vm)->Value();
     CalcDimension fontSize;
-    if (!ArkTSUtils::ParseJsDimensionFp(vm, paramArg, fontSize) || fontSize.Value() < 0) {
+    if (!ArkTSUtils::ParseJsDimensionFp(vm, fontSizeArg, fontSize) || fontSize.Value() < 0 ||
+        fontSize.Unit() == DimensionUnit::PERCENT) {
         GetArkUIInternalNodeAPI()->GetTextTimerModifier().ResetFontSize(nativeNode);
     } else {
         GetArkUIInternalNodeAPI()->GetTextTimerModifier().SetFontSize(
@@ -114,10 +116,17 @@ ArkUINativeModuleValue TextTimerBridge::SetFontWeight(ArkUIRuntimeCallInfo* runt
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
-    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
-    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    std::string fontWeight = secondArg->ToString(vm)->ToString();
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    Local<JSValueRef> fontWeightArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    void* nativeNode = nodeArg->ToNativePointer(vm)->Value();
+    std::string fontWeight;
+    if (!fontWeightArg->IsNull()) {
+        if (fontWeightArg->IsNumber()) {
+            fontWeight = std::to_string(fontWeightArg->Int32Value(vm));
+        } else if (fontWeightArg->IsString()) {
+            fontWeight = fontWeightArg->ToString(vm)->ToString();
+        }
+    }
     GetArkUIInternalNodeAPI()->GetTextTimerModifier().SetFontWeight(nativeNode, fontWeight.c_str());
     return panda::JSValueRef::Undefined(vm);
 }

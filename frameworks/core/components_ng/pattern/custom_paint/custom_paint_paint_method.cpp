@@ -375,14 +375,8 @@ std::shared_ptr<RSImage> CustomPaintPaintMethod::GetImage(const std::string& src
     CHECK_NULL_RETURN(context, nullptr);
     auto image = Ace::ImageProvider::GetDrawingImage(src, context);
     CHECK_NULL_RETURN(image, nullptr);
-    RSBitmapFormat rsBitmapFormat { image->GetColorType(), image->GetAlphaType() };
-    RSBitmap rsBitmap;
-    rsBitmap.Build(image->GetWidth(), image->GetHeight(), rsBitmapFormat);
-    CHECK_NULL_RETURN(image->ReadPixels(rsBitmap, 0, 0), nullptr);
-    auto rasterizedImage = std::make_shared<RSImage>();
-    rasterizedImage->BuildFromBitmap(rsBitmap);
-    imageCache_->CacheImage(src, std::make_shared<Ace::CachedImage>(rasterizedImage));
-    return rasterizedImage;
+    imageCache_->CacheImage(src, std::make_shared<Ace::CachedImage>(image));
+    return image;
 }
 #endif
 
@@ -2378,8 +2372,12 @@ void CustomPaintPaintMethod::SetBlurFilter(const std::string& percent, SkPaint& 
 #else
 void CustomPaintPaintMethod::SetBlurFilter(const std::string& percent, RSPen* pen, RSBrush* brush)
 {
-    auto imageFilter = RSImageFilter::CreateBlurImageFilter(
-        BlurStrToDouble(percent), BlurStrToDouble(percent), RSTileMode::DECAL, nullptr);
+    float blurNum = 0.0f;
+    blurNum = BlurStrToDouble(percent);
+    if (Negative(blurNum)) {
+        return;
+    }
+    auto imageFilter = RSImageFilter::CreateBlurImageFilter(blurNum, blurNum, RSTileMode::DECAL, nullptr);
     if (pen) {
         auto filter = pen->GetFilter();
         filter.SetImageFilter(imageFilter);

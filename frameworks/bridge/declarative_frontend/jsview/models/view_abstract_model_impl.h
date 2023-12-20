@@ -234,6 +234,7 @@ public:
     void SetAccessibilityText(const std::string& text) override;
     void SetAccessibilityDescription(const std::string& description) override;
     void SetAccessibilityImportance(const std::string& importance) override;
+    void SetAccessibilityVirtualNode(std::function<void()>&& buildFunc) override;
 
     void SetProgressMask(const RefPtr<NG::ProgressMaskProperty>& progress) override {}
     void SetForegroundColor(const Color& color) override {}

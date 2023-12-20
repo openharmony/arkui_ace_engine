@@ -997,6 +997,125 @@ HWTEST_F(IndexerTestNg, OnModifyDone001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: OnModifyDone002
+ * @tc.desc: Test OnModifyDone when autocollapse is close
+ * @tc.type: FUNC
+ */
+HWTEST_F(IndexerTestNg, OnModifyDone002, TestSize.Level1)
+{
+    Create([](IndexerModelNG model) { model.SetAutoCollapse(false); }, CREATE_ARRAY, 0);
+
+    pattern_->OnModifyDone();
+    EXPECT_EQ(pattern_->fullArrayValue_.size(), CREATE_ARRAY.size());
+    EXPECT_EQ(pattern_->arrayValue_.size(), CREATE_ARRAY.size());
+    for (auto value : pattern_->arrayValue_) {
+        EXPECT_EQ(value.second, false);
+    }
+    EXPECT_EQ(pattern_->lastCollapsingMode_, IndexerCollapsingMode::INVALID);
+    EXPECT_EQ(pattern_->autoCollapse_, false);
+}
+
+/**
+ * @tc.name: OnModifyDone003
+ * @tc.desc: Test OnModifyDone when autocollapse is open, and mode is 5+1
+ * @tc.type: FUNC
+ */
+HWTEST_F(IndexerTestNg, OnModifyDone003, TestSize.Level1)
+{
+    Create([](IndexerModelNG model) {
+        model.SetAutoCollapse(true);
+        model.SetItemSize(Dimension(10, DimensionUnit::VP));
+    }, CREATE_ARRAY, 0);
+
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    RefPtr<LayoutWrapperNode> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode_, geometryNode, layoutProperty_);
+    RefPtr<IndexerLayoutAlgorithm> indexerLayoutAlgorithm = AceType::MakeRefPtr<IndexerLayoutAlgorithm>(0);
+    RefPtr<LayoutAlgorithmWrapper> layoutAlgorithmWrapper =
+        AceType::MakeRefPtr<LayoutAlgorithmWrapper>(indexerLayoutAlgorithm);
+    indexerLayoutAlgorithm->itemSizeRender_ = 24.f;
+    indexerLayoutAlgorithm->actualHeight_ = 95.f;
+    layoutWrapper->SetLayoutAlgorithm(layoutAlgorithmWrapper);
+
+    DirtySwapConfig dirtySwapConfig;
+    dirtySwapConfig.skipMeasure = false;
+    dirtySwapConfig.skipLayout = false;
+    pattern_->OnDirtyLayoutWrapperSwap(layoutWrapper, dirtySwapConfig);
+
+    std::vector<std::pair<std::string, bool>> arrayValueRst;
+    arrayValueRst.push_back(std::pair("A", false));
+    arrayValueRst.push_back(std::pair("B", true));
+    arrayValueRst.push_back(std::pair("G", false));
+    arrayValueRst.push_back(std::pair("H", true));
+    arrayValueRst.push_back(std::pair("M", false));
+    arrayValueRst.push_back(std::pair("N", true));
+    arrayValueRst.push_back(std::pair("S", false));
+    arrayValueRst.push_back(std::pair("T", true));
+    arrayValueRst.push_back(std::pair("Z", false));
+
+    EXPECT_EQ(pattern_->autoCollapse_, true);
+    EXPECT_EQ(pattern_->fullArrayValue_.size(), CREATE_ARRAY.size());
+    EXPECT_EQ(pattern_->arrayValue_.size(), arrayValueRst.size());
+    for (int32_t index = 0; index < arrayValueRst.size(); index++) {
+        EXPECT_EQ(arrayValueRst[index].first, pattern_->arrayValue_[index].first);
+        EXPECT_EQ(arrayValueRst[index].second, pattern_->arrayValue_[index].second);
+    }
+    EXPECT_EQ(pattern_->lastCollapsingMode_, IndexerCollapsingMode::FIVE);
+}
+
+/**
+ * @tc.name: OnModifyDone004
+ * @tc.desc: Test OnModifyDone when autocollapse is open, and mode is 7+1
+ * @tc.type: FUNC
+ */
+HWTEST_F(IndexerTestNg, OnModifyDone004, TestSize.Level1)
+{
+    Create([](IndexerModelNG model) {
+        model.SetAutoCollapse(true);
+        model.SetItemSize(Dimension(6, DimensionUnit::VP));
+    }, CREATE_ARRAY, 0);
+
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    RefPtr<LayoutWrapperNode> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode_, geometryNode, layoutProperty_);
+    RefPtr<IndexerLayoutAlgorithm> indexerLayoutAlgorithm = AceType::MakeRefPtr<IndexerLayoutAlgorithm>(0);
+    RefPtr<LayoutAlgorithmWrapper> layoutAlgorithmWrapper =
+        AceType::MakeRefPtr<LayoutAlgorithmWrapper>(indexerLayoutAlgorithm);
+    indexerLayoutAlgorithm->itemSizeRender_ = 24.f;
+    indexerLayoutAlgorithm->actualHeight_ = 95.f;
+    layoutWrapper->SetLayoutAlgorithm(layoutAlgorithmWrapper);
+
+    DirtySwapConfig dirtySwapConfig;
+    dirtySwapConfig.skipMeasure = false;
+    dirtySwapConfig.skipLayout = false;
+    pattern_->OnDirtyLayoutWrapperSwap(layoutWrapper, dirtySwapConfig);
+
+    std::vector<std::pair<std::string, bool>> arrayValueRst;
+    arrayValueRst.push_back(std::pair("A", false));
+    arrayValueRst.push_back(std::pair("B", true));
+    arrayValueRst.push_back(std::pair("E", false));
+    arrayValueRst.push_back(std::pair("F", true));
+    arrayValueRst.push_back(std::pair("I", false));
+    arrayValueRst.push_back(std::pair("J", true));
+    arrayValueRst.push_back(std::pair("M", false));
+    arrayValueRst.push_back(std::pair("N", true));
+    arrayValueRst.push_back(std::pair("Q", false));
+    arrayValueRst.push_back(std::pair("R", true));
+    arrayValueRst.push_back(std::pair("U", false));
+    arrayValueRst.push_back(std::pair("V", true));
+    arrayValueRst.push_back(std::pair("Z", false));
+
+    EXPECT_EQ(pattern_->autoCollapse_, true);
+    EXPECT_EQ(pattern_->fullArrayValue_.size(), CREATE_ARRAY.size());
+    EXPECT_EQ(pattern_->arrayValue_.size(), arrayValueRst.size());
+    for (int32_t index = 0; index < arrayValueRst.size(); index++) {
+        EXPECT_EQ(arrayValueRst[index].first, pattern_->arrayValue_[index].first);
+        EXPECT_EQ(arrayValueRst[index].second, pattern_->arrayValue_[index].second);
+    }
+    EXPECT_EQ(pattern_->lastCollapsingMode_, IndexerCollapsingMode::SEVEN);
+}
+
+/**
  * @tc.name: IndexerPatternCoverage001
  * @tc.desc: For Coverage Rate, branches that are not normally covered.
  * @tc.type: FUNC

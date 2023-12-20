@@ -30,6 +30,7 @@
 #include "core/common/ace_application_info.h"
 #include "core/common/container.h"
 #include "core/components/common/layout/constants.h"
+#include "core/components/common/layout/grid_system_manager.h"
 #include "core/components_ng/base/frame_scene_status.h"
 #include "core/components_ng/base/inspector.h"
 #include "core/components_ng/base/ui_node.h"
@@ -438,24 +439,8 @@ void FrameNode::InitializePatternAndContext()
 
 void FrameNode::DumpCommonInfo()
 {
-    auto transInfo = renderContext_->GetTrans();
-    if (!geometryNode_->GetFrameRect().ToString().compare(renderContext_->GetPaintRectWithTransform().ToString())) {
+    if (!geometryNode_->GetFrameRect().ToString().compare(renderContext_->GetPaintRectWithoutTransform().ToString())) {
         DumpLog::GetInstance().AddDesc(std::string("FrameRect: ").append(geometryNode_->GetFrameRect().ToString()));
-    }
-    // transInfo is a one-dimensional expansion of the affine transformation matrix
-    if (!transInfo.empty()) {
-        if (!(NearEqual(transInfo[0], 1) && NearEqual(transInfo[0], 1))) {
-            DumpLog::GetInstance().AddDesc(std::string("scale: ").append(
-                std::to_string(transInfo[0]).append(",").append(std::to_string(transInfo[1]))));
-        }
-        if (!(NearZero(transInfo[6]) && NearZero(transInfo[7]))) {
-            DumpLog::GetInstance().AddDesc(
-                std::string("translate: ")
-                    .append(std::to_string(transInfo[6]).append(",").append(std::to_string(transInfo[7]))));
-        }
-        if (!(NearZero(transInfo[8]))) {
-            DumpLog::GetInstance().AddDesc(std::string("degree: ").append(std::to_string(transInfo[8])));
-        }
     }
     if (renderContext_->GetBackgroundColor()->ColorToString().compare("#00000000") != 0) {
         DumpLog::GetInstance().AddDesc(
@@ -914,11 +899,11 @@ void FrameNode::SetOnAreaChangeCallback(OnAreaChangedFunc&& callback)
     eventHub_->SetOnAreaChanged(std::move(callback));
 }
 
-void FrameNode::TriggerOnAreaChangeCallback()
+void FrameNode::TriggerOnAreaChangeCallback(uint64_t nanoTimestamp)
 {
     if (eventHub_->HasOnAreaChanged() && lastFrameRect_ && lastParentOffsetToWindow_) {
         auto currFrameRect = geometryNode_->GetFrameRect();
-        auto currParentOffsetToWindow = GetOffsetRelativeToWindow() - currFrameRect.GetOffset();
+        auto currParentOffsetToWindow = CalculateOffsetRelativeToWindow(nanoTimestamp) - currFrameRect.GetOffset();
         if (currFrameRect != *lastFrameRect_ || currParentOffsetToWindow != *lastParentOffsetToWindow_) {
             eventHub_->FireOnAreaChanged(
                 *lastFrameRect_, *lastParentOffsetToWindow_, currFrameRect, currParentOffsetToWindow);
@@ -2413,6 +2398,39 @@ std::vector<RefPtr<FrameNode>> FrameNode::GetNodesById(const std::unordered_set<
     return nodes;
 }
 
+double FrameNode::GetMaxWidthWithColumnType(GridColumnType gridColumnType)
+{
+    RefPtr<GridColumnInfo> columnInfo = GridSystemManager::GetInstance().GetInfoByType(gridColumnType);
+    if (columnInfo->GetParent()) {
+        columnInfo->GetParent()->BuildColumnWidth();
+    }
+    auto gridSizeType = GridSystemManager::GetInstance().GetCurrentSize();
+    if (gridSizeType > GridSizeType::LG) {
+        gridSizeType = GridSizeType::LG;
+    }
+    auto columns = columnInfo->GetColumns(gridSizeType);
+    return columnInfo->GetWidth(columns);
+}
+
+double FrameNode::GetPreviewScaleVal() const
+{
+    double scale = 1.0;
+    auto maxWidth = GetMaxWidthWithColumnType(GridColumnType::DRAG_PANEL);
+    auto geometryNode = GetGeometryNode();
+    CHECK_NULL_RETURN(geometryNode, scale);
+    auto width = geometryNode->GetFrameRect().Width();
+    if (GetTag() != V2::WEB_ETS_TAG && width != 0 && width > maxWidth &&
+        previewOption_.mode != DragPreviewMode::DISABLE_SCALE) {
+        scale = maxWidth / width;
+    }
+    return scale;
+}
+
+bool FrameNode::IsPreviewNeedScale() const
+{
+    return GetPreviewScaleVal() < 1.0f;
+}
+
 int32_t FrameNode::GetNodeExpectedRate()
 {
     if (sceneRateMap_.empty()) {
@@ -2863,6 +2881,31 @@ bool FrameNode::CheckNeedForceMeasureAndLayout()
     return CheckNeedMeasure(flag) || CheckNeedLayout(flag);
 }
 
+OffsetF FrameNode::GetGlobalOffset()
+{
+    auto frameOffset = GetPaintRectOffset();
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipelineContext, OffsetF(0.0f, 0.0f));
+    auto windowOffset = pipelineContext->GetWindow()->GetCurrentWindowRect().GetOffset();
+    frameOffset += OffsetT<float> { windowOffset.GetX(), windowOffset.GetY() };
+    return frameOffset;
+}
+
+RefPtr<PixelMap> FrameNode::GetPixelMap()
+{
+    auto gestureHub = GetOrCreateGestureEventHub();
+    CHECK_NULL_RETURN(gestureHub, nullptr);
+    RefPtr<PixelMap> pixelMap = gestureHub->GetPixelMap();
+    // if gesture already have pixel map return directly
+    if (pixelMap) {
+        return pixelMap;
+    }
+    CHECK_NULL_RETURN(renderContext_, nullptr);
+    pixelMap = renderContext_->GetThumbnailPixelMap();
+    gestureHub->SetPixelMap(pixelMap);
+    return pixelMap;
+}
+
 float FrameNode::GetBaselineDistance() const
 {
     const auto& children = frameProxy_->GetAllFrameChildren();
@@ -3123,6 +3166,36 @@ RefPtr<FrameNode> FrameNode::GetDispatchFrameNode(const TouchResult& touchRes)
         }
     }
     return nullptr;
+}
+
+OffsetF FrameNode::CalculateOffsetRelativeToWindow(uint64_t nanoTimestamp)
+{
+    auto currOffset = geometryNode_->GetFrameOffset();
+    if (renderContext_ && renderContext_->GetPositionProperty()) {
+        if (renderContext_->GetPositionProperty()->HasPosition()) {
+            auto renderPosition =
+                ContextPositionConvertToPX(renderContext_, layoutProperty_->GetLayoutConstraint()->percentReference);
+            currOffset.SetX(static_cast<float>(renderPosition.first));
+            currOffset.SetY(static_cast<float>(renderPosition.second));
+        }
+    }
+
+    auto parent = GetAncestorNodeOfFrame();
+    if (parent) {
+        auto parentTimestampOffset = parent->GetCachedGlobalOffset();
+        if (parentTimestampOffset.first == nanoTimestamp) {
+            auto result = currOffset + parentTimestampOffset.second;
+            SetCachedGlobalOffset({ nanoTimestamp, result });
+            return result;
+        } else {
+            auto result = currOffset + parent->CalculateOffsetRelativeToWindow(nanoTimestamp);
+            SetCachedGlobalOffset({ nanoTimestamp, result });
+            return result;
+        }
+    } else {
+        SetCachedGlobalOffset({ nanoTimestamp, currOffset });
+        return currOffset;
+    }
 }
 
 } // namespace OHOS::Ace::NG

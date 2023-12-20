@@ -345,6 +345,8 @@ void MenuLayoutAlgorithm::Initialize(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(menuNode);
     auto menuPattern = menuNode->GetPattern<MenuPattern>();
     CHECK_NULL_VOID(menuPattern);
+    float scale = menuPattern->GetPreviewAfterAnimationScale();
+    previewScale_ = LessOrEqual(scale, 0.0f) ? previewScale_ : scale;
     auto targetSize = props->GetTargetSizeValue(SizeF());
     position_ = props->GetMenuOffset().value_or(OffsetF());
     positionOffset_ = props->GetPositionOffset().value_or(OffsetF());
@@ -1469,6 +1471,13 @@ OffsetF MenuLayoutAlgorithm::MenuLayoutAvoidAlgorithm(const RefPtr<MenuLayoutPro
         x = std::clamp(x, paddingStart_, wrapperSize_.Width() - size.Width() - paddingEnd_);
         y = std::clamp(
             y, windowsOffsetY + paddingTop_, windowsOffsetY + wrapperSize_.Height() - size.Height() - paddingBottom_);
+    }
+    if (hierarchicalParameters_) {
+        auto displayAvailableRect = pipelineContext->GetDisplayAvailableRect();
+        windowsOffsetY = displayAvailableRect.GetOffset().GetY();
+        float wrapperHeight = displayAvailableRect.Height();
+        y = std::clamp(
+            y, windowsOffsetY + paddingTop_, windowsOffsetY + wrapperHeight - size.Height() - paddingBottom_);
     }
     return { x, y };
 }

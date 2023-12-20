@@ -37,6 +37,14 @@ class BuilderNode extends BaseNode {
         this.updateFuncByElmtId = new Map<number, UpdateFunc | UpdateFuncRecord>();
     }
 
+    getCardId(): number {
+      return -1;
+    }
+
+    addChild(child: ViewPU): boolean {
+      return false;
+    }
+
     build(builder: WrappedBuilder<Object[]>, params: Object) {
         __JSScopeUtil__.syncInstanceId(this.instanceId_);
         this.params = params;

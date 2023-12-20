@@ -131,6 +131,11 @@ public:
         WindowFocus(false);
     }
 
+    FocusPattern GetFocusPattern() const override
+    {
+        return { FocusType::SCOPE, true };
+    }
+
 protected:
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
 

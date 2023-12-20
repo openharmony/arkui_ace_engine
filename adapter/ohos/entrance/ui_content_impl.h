@@ -29,6 +29,7 @@
 #include "dm/display_manager.h"
 
 #include "adapter/ohos/entrance/distributed_ui_manager.h"
+#include "base/thread/task_executor.h"
 #include "base/view_data/view_data_wrap.h"
 #include "core/common/asset_manager_impl.h"
 #include "core/common/flutter/flutter_asset_manager.h"
@@ -55,6 +56,7 @@ public:
     void Initialize(OHOS::Rosen::Window* window,
         const std::shared_ptr<std::vector<uint8_t>>& content, napi_value storage) override;
     void InitializeByName(OHOS::Rosen::Window* window, const std::string& name, napi_value storage) override;
+    void InitializeDynamic(const std::string& hapPath, const std::string& abcPath) override;
     void Initialize(
         OHOS::Rosen::Window* window, const std::string& url, napi_value storage, uint32_t focusWindowId) override;
     void Foreground() override;
@@ -141,11 +143,6 @@ public:
 
     void SetFormBackgroundColor(const std::string& color) override;
 
-    int32_t GetInstanceId()
-    {
-        return instanceId_;
-    }
-
     SerializeableObjectArray DumpUITree() override
     {
         CHECK_NULL_RETURN(uiManager_, SerializeableObjectArray());
@@ -225,13 +222,26 @@ public:
     bool NotifyExecuteAction(int32_t elementId, const std::map<std::string, std::string>& actionArguments,
         int32_t action, int32_t offset) override;
 
+    int32_t GetInstanceId() override
+    {
+        return instanceId_;
+    }
+
     std::string RecycleForm() override;
-    
+
     void RecoverForm(const std::string& statusData) override;
 
     int32_t CreateCustomPopupUIExtension(const AAFwk::Want& want,
         const ModalUIExtensionCallbacks& callbacks, const CustomPopupUIExtensionConfig& config) override;
     void DestroyCustomPopupUIExtension(int32_t nodeId) override;
+
+    void SetContainerModalTitleVisible(bool customTitleSettedShow, bool floatingTitleSettedShow) override;
+    void SetContainerModalTitleHeight(int32_t height) override;
+    int32_t GetContainerModalTitleHeight() override;
+    bool GetContainerModalButtonsRect(Rosen::Rect& containerModal, Rosen::Rect& buttons) override;
+    void SubscribeContainerModalButtonsRectChange(
+        std::function<void(Rosen::Rect& containerModal, Rosen::Rect& buttons)>&& callback) override;
+
 private:
     void InitializeInner(
         OHOS::Rosen::Window* window, const std::string& contentInfo, napi_value storage, bool isNamedRouter);
@@ -276,6 +286,9 @@ private:
     std::map<std::string, sptr<OHOS::AppExecFwk::FormAshmem>> formImageDataMap_;
     std::unordered_map<int32_t, CustomPopupUIExtensionConfig> customPopupConfigMap_;
     std::unique_ptr<DistributedUIManager> uiManager_;
+
+    bool isDynamicRender_ = false;
+    std::shared_ptr<TaskWrapper> taskWrapper_;
 
     sptr<IRemoteObject> parentToken_ = nullptr;
 };

@@ -34,6 +34,12 @@
 #include "core/components_ng/pattern/window_scene/helper/window_scene_helper.h"
 #endif
 
+#if not defined(ACE_UNITTEST)
+#if defined(ENABLE_STANDARD_INPUT)
+#include "core/components_ng/pattern/text_field/on_text_changed_listener_impl.h"
+#endif
+#endif
+
 namespace OHOS::Ace::NG {
 
 RefPtr<FrameNode> FocusHub::GetFrameNode() const
@@ -418,10 +424,6 @@ void FocusHub::RemoveChild(const RefPtr<FocusHub>& focusNode, BlurReason reason)
 void FocusHub::SetParentFocusable(bool parentFocusable)
 {
     parentFocusable_ = parentFocusable;
-    auto focusableNode = IsFocusableNode();
-    if (focusableNode) {
-        RefreshParentFocusable(focusableNode);
-    }
 }
 
 bool FocusHub::IsFocusable()
@@ -454,8 +456,20 @@ bool FocusHub::IsFocusableNode()
     return IsEnabled() && IsShow() && focusable_ && parentFocusable_;
 }
 
-void FocusHub::SetFocusable(bool focusable)
+void FocusHub::SetFocusable(bool focusable, bool isExplicit)
 {
+    if (isExplicit) {
+        isFocusableExplicit_ = true;
+    } else if (isFocusableExplicit_) {
+        LOGI("Current focusHub cannot be set to focusable implicitly.");
+        return;
+    } else {
+        implicitFocusable_ = focusable;
+    }
+    if (IsImplicitFocusableScope() && focusDepend_ == FocusDependence::CHILD) {
+        focusDepend_ = FocusDependence::AUTO;
+    }
+
     if (focusable_ == focusable) {
         return;
     }
@@ -463,7 +477,6 @@ void FocusHub::SetFocusable(bool focusable)
     if (!focusable) {
         RemoveSelf(BlurReason::FOCUS_SWITCH);
     }
-    RefreshParentFocusable(IsFocusableNode());
 }
 
 bool FocusHub::IsEnabled() const
@@ -477,20 +490,6 @@ void FocusHub::SetEnabled(bool enabled)
     if (!enabled) {
         RemoveSelf(BlurReason::FOCUS_SWITCH);
     }
-    RefreshParentFocusable(IsFocusableNode());
-}
-
-void FocusHub::SetEnabledNode(bool enabled)
-{
-    if (!enabled) {
-        RefreshFocus();
-    }
-}
-
-void FocusHub::SetEnabledScope(bool enabled)
-{
-    SetEnabledNode(enabled);
-    RefreshParentFocusable(IsFocusableNode());
 }
 
 bool FocusHub::IsShow() const
@@ -515,19 +514,6 @@ void FocusHub::SetShow(bool show)
     if (!show) {
         RemoveSelf(BlurReason::FOCUS_SWITCH);
     }
-    RefreshParentFocusable(IsFocusableNode());
-}
-
-void FocusHub::SetShowNode(bool show)
-{
-    if (!show) {
-        RefreshFocus();
-    }
-}
-
-void FocusHub::SetShowScope(bool show)
-{
-    SetShowNode(show);
 }
 
 bool FocusHub::IsCurrentFocusWholePath()
@@ -891,21 +877,6 @@ bool FocusHub::FocusToHeadOrTailChild(bool isHead)
     return false;
 }
 
-void FocusHub::RefreshParentFocusable(bool focusable)
-{
-    if (focusType_ != FocusType::SCOPE) {
-        return;
-    }
-    std::list<RefPtr<FocusHub>> focusNodes;
-    FlushChildrenFocusHub(focusNodes);
-    for (auto& item : focusNodes) {
-        if (focusable != item->IsParentFocusable()) {
-            item->SetParentFocusable(focusable);
-            item->RefreshParentFocusable(item->IsFocusableNode());
-        }
-    }
-}
-
 bool FocusHub::OnClick(const KeyEvent& event)
 {
     auto onClickCallback = GetOnClickCallback();
@@ -1088,6 +1059,24 @@ void FocusHub::OnBlur()
     }
 }
 
+void FocusHub::IsCloseKeyboard(RefPtr<FrameNode> frameNode)
+{
+#if defined (ENABLE_STANDARD_INPUT)
+    // If focus pattern does not need softkeyboard, close it, not in windowScene.
+    auto curPattern = frameNode->GetPattern<NG::Pattern>();
+    CHECK_NULL_VOID(curPattern);
+    bool isNeedKeyBoard = curPattern->NeedSoftKeyboard();
+    if (!isNeedKeyBoard) {
+        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "FrameNode not NeedSoftKeyboard.");
+        auto inputMethod = MiscServices::InputMethodController::GetInstance();
+        if (inputMethod) {
+            inputMethod->Close();
+            TAG_LOGI(AceLogTag::ACE_KEYBOARD, "SoftKeyboard Closes Successfully.");
+        }
+    }
+#endif
+}
+
 void FocusHub::OnFocusNode()
 {
     TAG_LOGI(AceLogTag::ACE_FOCUS, "Node(%{public}s/%{public}d) on focus", GetFrameName().c_str(), GetFrameId());
@@ -1112,15 +1101,6 @@ void FocusHub::OnFocusNode()
     }
     auto frameNode = GetFrameNode();
     CHECK_NULL_VOID(frameNode);
-#if defined (ENABLE_STANDARD_INPUT)
-    // If focus pattern does not need softkeyboard, close it.
-#ifdef WINDOW_SCENE_SUPPORTED
-    WindowSceneHelper::IsWindowSceneCloseKeyboard(frameNode);
-#else
-    WindowSceneHelper::IsCloseKeyboard(frameNode);
-#endif
-#endif
-
     frameNode->OnAccessibilityEvent(AccessibilityEventType::FOCUS);
 
     CHECK_NULL_VOID(pipeline);
@@ -1128,7 +1108,27 @@ void FocusHub::OnFocusNode()
         pipeline->SetFocusNode(frameNode);
 #if defined (ENABLE_STANDARD_INPUT)
     // If in window,focus pattern does not need softkeyboard, close it.
-    WindowSceneHelper::IsCloseKeyboard(frameNode);
+        IsCloseKeyboard(frameNode);
+#endif
+    }
+
+    if (frameNode->GetFocusType() == FocusType::SCOPE) {
+#if defined (ENABLE_STANDARD_INPUT)
+        // If in window,focus pattern does not need softkeyboard, close it.
+        auto hadFocusChild = false;
+        std::list<RefPtr<FocusHub>> focusNodes = GetChildren();
+        for (const auto& item : focusNodes) {
+            if (item->IsCurrentFocus()) {
+                hadFocusChild = true;
+                break;
+            }
+        }
+        if (!hadFocusChild) {
+            auto isSystem_ = WindowSceneHelper::IsWindowScene(frameNode);
+            if (!isSystem_) {
+                IsCloseKeyboard(frameNode);
+            }
+        }
 #endif
     }
 }
@@ -1464,7 +1464,7 @@ bool FocusHub::AcceptFocusOfLastFocus()
         return lastFocusNode ? lastFocusNode->AcceptFocusOfLastFocus() : false;
     }
     if (focusType_ == FocusType::NODE) {
-        return IsFocusable();
+        return IsFocusableWholePath();
     }
     return false;
 }
@@ -1482,7 +1482,7 @@ bool FocusHub::AcceptFocusByRectOfLastFocus(const RectF& rect)
 
 bool FocusHub::AcceptFocusByRectOfLastFocusNode(const RectF& rect)
 {
-    return IsFocusable();
+    return IsFocusableWholePath();
 }
 
 bool FocusHub::AcceptFocusByRectOfLastFocusScope(const RectF& rect)
@@ -1526,7 +1526,7 @@ bool FocusHub::AcceptFocusByRectOfLastFocusFlex(const RectF& rect)
         return false;
     }
 
-    if (focusType_ != FocusType::SCOPE || !IsFocusableScope()) {
+    if (focusType_ != FocusType::SCOPE || !IsFocusableWholePath()) {
         return false;
     }
     if (focusDepend_ == FocusDependence::SELF) {
@@ -1638,7 +1638,7 @@ bool FocusHub::IsOnRootTree() const
 
 void FocusHub::CollectTabIndexNodes(TabIndexNodeList& tabIndexNodes)
 {
-    if (GetTabIndex() > 0 && IsFocusable()) {
+    if (GetTabIndex() > 0 && IsFocusableWholePath()) {
         tabIndexNodes.emplace_back(GetTabIndex(), WeakClaim(this));
     }
     if (GetFocusType() == FocusType::SCOPE) {

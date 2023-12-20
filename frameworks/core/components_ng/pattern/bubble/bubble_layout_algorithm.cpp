@@ -46,53 +46,53 @@ constexpr Dimension ARROW_RADIUS = 2.0_vp;
 constexpr Dimension DRAW_EDGES_SPACE = 1.0_vp;
 constexpr double BUBBLE_ARROW_HALF = 2.0;
 constexpr size_t ALIGNMENT_STEP_OFFSET = 2;
-constexpr Dimension BUBBLE_ARROW_WIDTH = 16.0_vp;
-constexpr Dimension BUBBLE_ARROW_HEIGHT = 8.0_vp;
+Dimension BUBBLE_ARROW_WIDTH = 16.0_vp;
+Dimension BUBBLE_ARROW_HEIGHT = 8.0_vp;
 constexpr double ARROW_OFFSET_START_VALUE = 0.0;
 constexpr double ARROW_OFFSET_CENTER_VALUE = 0.5;
 constexpr Dimension HORIZON_SPACING_WITH_SCREEN = 8.0_vp;
 
-constexpr Dimension ARROW_VERTICAL_P1_OFFSET_X = 8.0_vp;
-constexpr Dimension ARROW_VERTICAL_P2_OFFSET_X = 1.5_vp;
-constexpr Dimension ARROW_VERTICAL_P2_OFFSET_Y = 7.32_vp;
-constexpr Dimension ARROW_VERTICAL_P4_OFFSET_X = 1.5_vp;
-constexpr Dimension ARROW_VERTICAL_P4_OFFSET_Y = 7.32_vp;
-constexpr Dimension ARROW_VERTICAL_P5_OFFSET_X = 8.0_vp;
+Dimension ARROW_VERTICAL_P1_OFFSET_X = 8.0_vp;
+Dimension ARROW_VERTICAL_P2_OFFSET_X = 1.5_vp;
+Dimension ARROW_VERTICAL_P2_OFFSET_Y = 7.32_vp;
+Dimension ARROW_VERTICAL_P4_OFFSET_X = 1.5_vp;
+Dimension ARROW_VERTICAL_P4_OFFSET_Y = 7.32_vp;
+Dimension ARROW_VERTICAL_P5_OFFSET_X = 8.0_vp;
 
-constexpr Dimension ARROW_HORIZON_P1_OFFSET_Y = 8.0_vp;
-constexpr Dimension ARROW_HORIZON_P2_OFFSET_Y = 1.5_vp;
-constexpr Dimension ARROW_HORIZON_P2_OFFSET_X = 7.32_vp;
-constexpr Dimension ARROW_HORIZON_P4_OFFSET_Y = 1.5_vp;
-constexpr Dimension ARROW_HORIZON_P4_OFFSET_X = 7.32_vp;
-constexpr Dimension ARROW_HORIZON_P5_OFFSET_Y = 8.0_vp;
+Dimension ARROW_HORIZON_P1_OFFSET_Y = 8.0_vp;
+Dimension ARROW_HORIZON_P2_OFFSET_Y = 1.5_vp;
+Dimension ARROW_HORIZON_P2_OFFSET_X = 7.32_vp;
+Dimension ARROW_HORIZON_P4_OFFSET_Y = 1.5_vp;
+Dimension ARROW_HORIZON_P4_OFFSET_X = 7.32_vp;
+Dimension ARROW_HORIZON_P5_OFFSET_Y = 8.0_vp;
 
-constexpr Dimension ARROW_REPLACE_START_VERTICAL_P1_OFFSET_X = 8.0_vp;
-constexpr Dimension ARROW_REPLACE_START_VERTICAL_P2_OFFSET_X = 8.0_vp;
-constexpr Dimension ARROW_REPLACE_START_VERTICAL_P2_OFFSET_Y = 6.0_vp;
-constexpr Dimension ARROW_REPLACE_START_VERTICAL_P4_OFFSET_X = 4.8_vp;
-constexpr Dimension ARROW_REPLACE_START_VERTICAL_P4_OFFSET_Y = 7.6_vp;
-constexpr Dimension ARROW_REPLACE_START_VERTICAL_P5_OFFSET_X = 8.0_vp;
+Dimension ARROW_REPLACE_START_VERTICAL_P1_OFFSET_X = 8.0_vp;
+Dimension ARROW_REPLACE_START_VERTICAL_P2_OFFSET_X = 8.0_vp;
+Dimension ARROW_REPLACE_START_VERTICAL_P2_OFFSET_Y = 6.0_vp;
+Dimension ARROW_REPLACE_START_VERTICAL_P4_OFFSET_X = 4.8_vp;
+Dimension ARROW_REPLACE_START_VERTICAL_P4_OFFSET_Y = 7.6_vp;
+Dimension ARROW_REPLACE_START_VERTICAL_P5_OFFSET_X = 8.0_vp;
 
-constexpr Dimension ARROW_REPLACE_END_VERTICAL_P1_OFFSET_X = 8.0_vp;
-constexpr Dimension ARROW_REPLACE_END_VERTICAL_P2_OFFSET_X = 4.8_vp;
-constexpr Dimension ARROW_REPLACE_END_VERTICAL_P2_OFFSET_Y = 7.6_vp;
-constexpr Dimension ARROW_REPLACE_END_VERTICAL_P4_OFFSET_X = 8.0_vp;
-constexpr Dimension ARROW_REPLACE_END_VERTICAL_P4_OFFSET_Y = 6.0_vp;
-constexpr Dimension ARROW_REPLACE_END_VERTICAL_P5_OFFSET_X = 8.0_vp;
+Dimension ARROW_REPLACE_END_VERTICAL_P1_OFFSET_X = 8.0_vp;
+Dimension ARROW_REPLACE_END_VERTICAL_P2_OFFSET_X = 4.8_vp;
+Dimension ARROW_REPLACE_END_VERTICAL_P2_OFFSET_Y = 7.6_vp;
+Dimension ARROW_REPLACE_END_VERTICAL_P4_OFFSET_X = 8.0_vp;
+Dimension ARROW_REPLACE_END_VERTICAL_P4_OFFSET_Y = 6.0_vp;
+Dimension ARROW_REPLACE_END_VERTICAL_P5_OFFSET_X = 8.0_vp;
 
-constexpr Dimension ARROW_REPLACE_START_HORIZON_P1_OFFSET_Y = 8.0_vp;
-constexpr Dimension ARROW_REPLACE_START_HORIZON_P2_OFFSET_X = 6.0_vp;
-constexpr Dimension ARROW_REPLACE_START_HORIZON_P2_OFFSET_Y = 8.0_vp;
-constexpr Dimension ARROW_REPLACE_START_HORIZON_P4_OFFSET_X = 7.6_vp;
-constexpr Dimension ARROW_REPLACE_START_HORIZON_P4_OFFSET_Y = 4.8_vp;
-constexpr Dimension ARROW_REPLACE_START_HORIZON_P5_OFFSET_Y = 8.0_vp;
+Dimension ARROW_REPLACE_START_HORIZON_P1_OFFSET_Y = 8.0_vp;
+Dimension ARROW_REPLACE_START_HORIZON_P2_OFFSET_X = 6.0_vp;
+Dimension ARROW_REPLACE_START_HORIZON_P2_OFFSET_Y = 8.0_vp;
+Dimension ARROW_REPLACE_START_HORIZON_P4_OFFSET_X = 7.6_vp;
+Dimension ARROW_REPLACE_START_HORIZON_P4_OFFSET_Y = 4.8_vp;
+Dimension ARROW_REPLACE_START_HORIZON_P5_OFFSET_Y = 8.0_vp;
 
-constexpr Dimension ARROW_REPLACE_END_HORIZON_P1_OFFSET_Y = 8.0_vp;
-constexpr Dimension ARROW_REPLACE_END_HORIZON_P2_OFFSET_X = 7.6_vp;
-constexpr Dimension ARROW_REPLACE_END_HORIZON_P2_OFFSET_Y = 4.8_vp;
-constexpr Dimension ARROW_REPLACE_END_HORIZON_P4_OFFSET_X = 6.0_vp;
-constexpr Dimension ARROW_REPLACE_END_HORIZON_P4_OFFSET_Y = 8.0_vp;
-constexpr Dimension ARROW_REPLACE_END_HORIZON_P5_OFFSET_Y = 8.0_vp;
+Dimension ARROW_REPLACE_END_HORIZON_P1_OFFSET_Y = 8.0_vp;
+Dimension ARROW_REPLACE_END_HORIZON_P2_OFFSET_X = 7.6_vp;
+Dimension ARROW_REPLACE_END_HORIZON_P2_OFFSET_Y = 4.8_vp;
+Dimension ARROW_REPLACE_END_HORIZON_P4_OFFSET_X = 6.0_vp;
+Dimension ARROW_REPLACE_END_HORIZON_P4_OFFSET_Y = 8.0_vp;
+Dimension ARROW_REPLACE_END_HORIZON_P5_OFFSET_Y = 8.0_vp;
 
 constexpr Dimension BUBBLE_ARROW_ZERO_PERCENT_VALUE = 0.0_pct;
 constexpr Dimension BUBBLE_ARROW_HALF_PERCENT_VALUE = 0.5_pct;
@@ -103,6 +103,56 @@ constexpr int16_t ARROW_OFFSETS_INDEX_ONE = 1;
 constexpr int16_t ARROW_OFFSETS_INDEX_TWO = 2;
 constexpr int16_t ARROW_OFFSETS_INDEX_THREE = 3;
 
+
+void calculateArrowPoint(Dimension height, Dimension width)
+{
+    auto rateX = width.ConvertToPx() / BUBBLE_ARROW_WIDTH.ConvertToPx();
+    auto rateY = height.ConvertToPx() / BUBBLE_ARROW_HEIGHT.ConvertToPx();
+    BUBBLE_ARROW_WIDTH = width;
+    BUBBLE_ARROW_HEIGHT = height;
+
+    ARROW_VERTICAL_P1_OFFSET_X = ARROW_VERTICAL_P1_OFFSET_X * rateX;
+    ARROW_VERTICAL_P2_OFFSET_X = ARROW_VERTICAL_P2_OFFSET_X * rateX;
+    ARROW_VERTICAL_P2_OFFSET_Y = ARROW_VERTICAL_P2_OFFSET_Y * rateY;
+    ARROW_VERTICAL_P4_OFFSET_X = ARROW_VERTICAL_P4_OFFSET_X * rateX;
+    ARROW_VERTICAL_P4_OFFSET_Y = ARROW_VERTICAL_P4_OFFSET_Y * rateY;
+    ARROW_VERTICAL_P5_OFFSET_X = ARROW_VERTICAL_P5_OFFSET_X * rateX;
+
+    ARROW_HORIZON_P1_OFFSET_Y = ARROW_HORIZON_P1_OFFSET_Y * rateY;
+    ARROW_HORIZON_P2_OFFSET_Y = ARROW_HORIZON_P2_OFFSET_Y * rateY;
+    ARROW_HORIZON_P2_OFFSET_X = ARROW_HORIZON_P2_OFFSET_X * rateX;
+    ARROW_HORIZON_P4_OFFSET_Y = ARROW_HORIZON_P4_OFFSET_Y * rateY;
+    ARROW_HORIZON_P4_OFFSET_X = ARROW_HORIZON_P4_OFFSET_X * rateX;
+    ARROW_HORIZON_P5_OFFSET_Y = ARROW_HORIZON_P5_OFFSET_Y * rateY;
+
+    ARROW_REPLACE_START_VERTICAL_P1_OFFSET_X = ARROW_REPLACE_START_VERTICAL_P1_OFFSET_X * rateX;
+    ARROW_REPLACE_START_VERTICAL_P2_OFFSET_X = ARROW_REPLACE_START_VERTICAL_P2_OFFSET_X * rateX;
+    ARROW_REPLACE_START_VERTICAL_P2_OFFSET_Y = ARROW_REPLACE_START_VERTICAL_P2_OFFSET_Y * rateY;
+    ARROW_REPLACE_START_VERTICAL_P4_OFFSET_X = ARROW_REPLACE_START_VERTICAL_P4_OFFSET_X * rateX;
+    ARROW_REPLACE_START_VERTICAL_P4_OFFSET_Y = ARROW_REPLACE_START_VERTICAL_P4_OFFSET_Y * rateY;
+    ARROW_REPLACE_START_VERTICAL_P5_OFFSET_X = ARROW_REPLACE_START_VERTICAL_P5_OFFSET_X * rateX;
+
+    ARROW_REPLACE_END_VERTICAL_P1_OFFSET_X = ARROW_REPLACE_END_VERTICAL_P1_OFFSET_X * rateX;
+    ARROW_REPLACE_END_VERTICAL_P2_OFFSET_X = ARROW_REPLACE_END_VERTICAL_P2_OFFSET_X * rateX;
+    ARROW_REPLACE_END_VERTICAL_P2_OFFSET_Y = ARROW_REPLACE_END_VERTICAL_P2_OFFSET_Y * rateY;
+    ARROW_REPLACE_END_VERTICAL_P4_OFFSET_X = ARROW_REPLACE_END_VERTICAL_P4_OFFSET_X * rateX;
+    ARROW_REPLACE_END_VERTICAL_P4_OFFSET_Y = ARROW_REPLACE_END_VERTICAL_P4_OFFSET_Y * rateY;
+    ARROW_REPLACE_END_VERTICAL_P5_OFFSET_X = ARROW_REPLACE_END_VERTICAL_P5_OFFSET_X * rateX;
+
+    ARROW_REPLACE_START_HORIZON_P1_OFFSET_Y = ARROW_REPLACE_START_HORIZON_P1_OFFSET_Y * rateY;
+    ARROW_REPLACE_START_HORIZON_P2_OFFSET_X = ARROW_REPLACE_START_HORIZON_P2_OFFSET_X * rateX;
+    ARROW_REPLACE_START_HORIZON_P2_OFFSET_Y = ARROW_REPLACE_START_HORIZON_P2_OFFSET_Y * rateY;
+    ARROW_REPLACE_START_HORIZON_P4_OFFSET_X = ARROW_REPLACE_START_HORIZON_P4_OFFSET_X * rateX;
+    ARROW_REPLACE_START_HORIZON_P4_OFFSET_Y = ARROW_REPLACE_START_HORIZON_P4_OFFSET_Y * rateY;
+    ARROW_REPLACE_START_HORIZON_P5_OFFSET_Y = ARROW_REPLACE_START_HORIZON_P5_OFFSET_Y * rateY;
+
+    ARROW_REPLACE_END_HORIZON_P1_OFFSET_Y = ARROW_REPLACE_END_HORIZON_P1_OFFSET_Y * rateY;
+    ARROW_REPLACE_END_HORIZON_P2_OFFSET_X = ARROW_REPLACE_END_HORIZON_P2_OFFSET_X * rateX;
+    ARROW_REPLACE_END_HORIZON_P2_OFFSET_Y = ARROW_REPLACE_END_HORIZON_P2_OFFSET_Y * rateY;
+    ARROW_REPLACE_END_HORIZON_P4_OFFSET_X = ARROW_REPLACE_END_HORIZON_P4_OFFSET_X * rateX;
+    ARROW_REPLACE_END_HORIZON_P4_OFFSET_Y = ARROW_REPLACE_END_HORIZON_P4_OFFSET_Y * rateY;
+    ARROW_REPLACE_END_HORIZON_P5_OFFSET_Y = ARROW_REPLACE_END_HORIZON_P5_OFFSET_Y * rateY;
+}
 // get main window's pipeline
 RefPtr<PipelineContext> GetMainPipelineContext()
 {
@@ -176,9 +226,9 @@ void BubbleLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         return;
     }
     auto child = children.front();
+    CHECK_NULL_VOID(child);
     // childSize_ and childOffset_ is used in Layout.
     child->Measure(childLayoutConstraint);
-
     if (useCustom && !showInSubWindow && (Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN))) {
         auto context = PipelineBase::GetCurrentContext();
         CHECK_NULL_VOID(context);
@@ -219,6 +269,22 @@ void BubbleLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         childLayoutConstraint.UpdateMaxSizeWithCheck(size);
         child->Measure(childLayoutConstraint);
     }
+    auto childSize = child->GetGeometryNode()->GetMarginFrameSize();
+    auto littleSide = childSize.Height() > childSize.Width() ? childSize.Width() : childSize.Height();
+    // 2: the half length of the little side
+    auto littleSideHalf = littleSide / 2;
+    if (borderRadius_.Value() > littleSideHalf) {
+        borderRadius_.SetValue(littleSideHalf);
+        border_.SetBorderRadius(Radius(borderRadius_));
+    }
+    // 2: the max width of arrow is the bubble width - double of borderRadius
+    auto arrowMaxWidth = childSize.Width() - 2 * borderRadius_.ConvertToPx();
+    auto pipeline = PipelineBase::GetCurrentContext();
+    arrowMaxWidth /= pipeline->GetDipScale();
+    if (BUBBLE_ARROW_WIDTH.ConvertToPx() > arrowMaxWidth) {
+        Dimension width(arrowMaxWidth, DimensionUnit::VP);
+        calculateArrowPoint(BUBBLE_ARROW_HEIGHT, width);
+    }
 }
 
 void BubbleLayoutAlgorithm::BubbleAvoidanceRule(RefPtr<LayoutWrapper> child, RefPtr<BubbleLayoutProperty> bubbleProp,
@@ -235,13 +301,8 @@ void BubbleLayoutAlgorithm::BubbleAvoidanceRule(RefPtr<LayoutWrapper> child, Ref
         auto overlayGlobalOffset = bubbleNode->GetPaintRectOffset();
         targetOffset_ -= overlayGlobalOffset;
     }
-
-    auto bubbleRendProperty = bubbleNode->GetPaintProperty<BubbleRenderProperty>();
-    CHECK_NULL_VOID(bubbleRendProperty);
-    bool useArrowOffset = bubbleRendProperty->GetArrowOffset().has_value();
     childSize_ = child->GetGeometryNode()->GetMarginFrameSize(); // bubble's size
-    bool didNeedArrow = GetIfNeedArrow(bubbleProp, childSize_);
-    childOffset_ = GetChildPosition(childSize_, didNeedArrow, useArrowOffset); // bubble's offset
+    childOffset_ = GetChildPosition(childSize_, bubbleProp);     // bubble's offset
 }
 
 void BubbleLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
@@ -320,12 +381,15 @@ void BubbleLayoutAlgorithm::InitProps(const RefPtr<BubbleLayoutProperty>& layout
     auto popupTheme = pipeline->GetTheme<PopupTheme>();
     CHECK_NULL_VOID(popupTheme);
     padding_ = popupTheme->GetPadding();
-    borderRadius_ = popupTheme->GetRadius().GetX();
-    border_.SetBorderRadius(popupTheme->GetRadius());
+    borderRadius_ = layoutProp->GetRadius().value_or(popupTheme->GetRadius().GetX());
+    border_.SetBorderRadius(Radius(borderRadius_));
     targetSpace_ = layoutProp->GetTargetSpace().value_or(popupTheme->GetTargetSpace());
     placement_ = layoutProp->GetPlacement().value_or(Placement::BOTTOM);
     scaledBubbleSpacing_ = static_cast<float>(popupTheme->GetBubbleSpacing().ConvertToPx());
-    arrowHeight_ = static_cast<float>(popupTheme->GetArrowHeight().ConvertToPx());
+    auto height = layoutProp->GetArrowHeight().value_or(BUBBLE_ARROW_HEIGHT);
+    auto width = layoutProp->GetArrowWidth().value_or(BUBBLE_ARROW_WIDTH);
+    calculateArrowPoint(height, width);
+    arrowHeight_ = height.ConvertToPx();
     positionOffset_ = layoutProp->GetPositionOffset().value_or(OffsetF());
     auto constraint = layoutProp->GetLayoutConstraint();
     enableArrow_ = layoutProp->GetEnableArrow().value_or(true);
@@ -350,7 +414,7 @@ void BubbleLayoutAlgorithm::InitProps(const RefPtr<BubbleLayoutProperty>& layout
     showArrow_ = false;
 }
 
-OffsetF BubbleLayoutAlgorithm::GetChildPosition(const SizeF& childSize, bool didNeedArrow, bool useArrowOffset)
+OffsetF BubbleLayoutAlgorithm::GetChildPosition(const SizeF& childSize, const RefPtr<BubbleLayoutProperty>& bubbleProp)
 {
     static std::map<Placement, std::vector<Placement>> PLACEMENT_STATES = {
         { Placement::BOTTOM_LEFT,
@@ -524,6 +588,7 @@ OffsetF BubbleLayoutAlgorithm::GetChildPosition(const SizeF& childSize, bool did
     OffsetF ArrowOffset;
     OffsetF position = defaultPosition;
     auto positionOffset = positionOffset_;
+    bool didNeedArrow = false;
     std::vector<Placement> currentPlacementStates = PLACEMENT_STATES.find(Placement::BOTTOM)->second;
     if (PLACEMENT_STATES.find(placement_) != PLACEMENT_STATES.end()) {
         currentPlacementStates = PLACEMENT_STATES.find(placement_)->second;
@@ -562,6 +627,7 @@ OffsetF BubbleLayoutAlgorithm::GetChildPosition(const SizeF& childSize, bool did
         }
         childPosition = GetPositionWithPlacement(childSize, topPosition, bottomPosition, ArrowOffset);
         UpdateChildPosition(childPosition);
+        didNeedArrow = GetIfNeedArrow(bubbleProp, childSize_);
         position = FitToScreen(childPosition, step, i, childSize, didNeedArrow);
         if (NearEqual(position, OffsetF(0.0f, 0.0f))) {
             continue;

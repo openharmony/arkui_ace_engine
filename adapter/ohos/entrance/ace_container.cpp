@@ -86,7 +86,6 @@
 namespace OHOS::Ace::Platform {
 namespace {
 constexpr uint32_t DIRECTION_KEY = 0b1000;
-constexpr uint32_t DPI_KEY = 0b0100;
 
 #ifdef _ARM64_
 const std::string ASSET_LIBARCH_PATH = "/lib/arm64";
@@ -178,16 +177,42 @@ AceContainer::AceContainer(int32_t instanceId, FrontendType type,
     useStageModel_ = true;
 }
 
+// for DynamicComponent
+AceContainer::AceContainer(int32_t instanceId, FrontendType type,
+    std::weak_ptr<OHOS::AbilityRuntime::Context> runtimeContext,
+    std::weak_ptr<OHOS::AppExecFwk::AbilityInfo> abilityInfo, std::unique_ptr<PlatformEventCallback> callback,
+    std::shared_ptr<TaskWrapper> taskWrapper,
+    bool useCurrentEventRunner, bool isSubAceContainer, bool useNewPipeline)
+    : instanceId_(instanceId), type_(type), runtimeContext_(std::move(runtimeContext)),
+      abilityInfo_(std::move(abilityInfo)), useCurrentEventRunner_(useCurrentEventRunner),
+      isSubContainer_(isSubAceContainer)
+{
+    ACE_DCHECK(callback);
+    if (useNewPipeline) {
+        SetUseNewPipeline();
+    }
+    if (!isSubContainer_) {
+        InitializeTask(taskWrapper);
+    }
+    platformEventCallback_ = std::move(callback);
+    useStageModel_ = true;
+}
+
 AceContainer::~AceContainer()
 {
     std::lock_guard lock(destructMutex_);
     LOG_DESTROY();
 }
 
-void AceContainer::InitializeTask()
+void AceContainer::InitializeTask(std::shared_ptr<TaskWrapper> taskWrapper)
 {
     if (SystemProperties::GetFlutterDecouplingEnabled()) {
-        auto taskExecutorImpl = Referenced::MakeRefPtr<TaskExecutorImpl>();
+        RefPtr<TaskExecutorImpl> taskExecutorImpl;
+        if (taskWrapper != nullptr) {
+            taskExecutorImpl = Referenced::MakeRefPtr<TaskExecutorImpl>(taskWrapper);
+        } else {
+            taskExecutorImpl = Referenced::MakeRefPtr<TaskExecutorImpl>();
+        }
         taskExecutorImpl->InitPlatformThread(useCurrentEventRunner_);
         taskExecutor_ = taskExecutorImpl;
         // No need to create JS Thread for DECLARATIVE_JS
@@ -197,7 +222,12 @@ void AceContainer::InitializeTask()
             taskExecutorImpl->InitJsThread();
         }
     } else {
-        auto flutterTaskExecutor = Referenced::MakeRefPtr<FlutterTaskExecutor>();
+        RefPtr<FlutterTaskExecutor> flutterTaskExecutor;
+        if (taskWrapper != nullptr) {
+            flutterTaskExecutor = Referenced::MakeRefPtr<FlutterTaskExecutor>(taskWrapper);
+        } else {
+            flutterTaskExecutor = Referenced::MakeRefPtr<FlutterTaskExecutor>();
+        }
         flutterTaskExecutor->InitPlatformThread(useCurrentEventRunner_);
         taskExecutor_ = flutterTaskExecutor;
         // No need to create JS Thread for DECLARATIVE_JS
@@ -1935,12 +1965,15 @@ void AceContainer::UpdateConfiguration(const ParsedConfig& parsedConfig, const s
         }
     }
     if (!parsedConfig.direction.empty()) {
-        configurationChange.directionUpdate = true;
         auto resDirection = DeviceOrientation::ORIENTATION_UNDEFINED;
         if (parsedConfig.direction == "horizontal") {
             resDirection = DeviceOrientation::LANDSCAPE;
         } else if (parsedConfig.direction == "vertical") {
             resDirection = DeviceOrientation::PORTRAIT;
+        }
+        if (SystemProperties::GetDeviceOrientation() != resDirection) {
+            configurationChange.directionUpdate = true;
+            SystemProperties::SetDeviceOrientation(resDirection == DeviceOrientation::PORTRAIT ? 0 : 1);
         }
         resConfig.SetOrientation(resDirection);
     }
@@ -1998,9 +2031,6 @@ void AceContainer::NotifyConfigurationChange(
                     CHECK_NULL_VOID(themeManager);
                     if (configurationChange.directionUpdate &&
                         (themeManager->GetResourceLimitKeys() & DIRECTION_KEY) == 0) {
-                        return;
-                    }
-                    if (configurationChange.dpiUpdate && (themeManager->GetResourceLimitKeys() & DPI_KEY) == 0) {
                         return;
                     }
                     if (configurationChange.colorModeUpdate && !container->IsTransparentBg()) {

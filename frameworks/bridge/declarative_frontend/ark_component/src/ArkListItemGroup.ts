@@ -14,8 +14,8 @@
  */
 
 /// <reference path='./import.ts' />
-class ListItemGroupDividerModifier extends ModifierWithKey<{ strokeWidth: any; color?: any; startMargin?: any; endMargin?: any; } | null> {
-  constructor(value: { strokeWidth: any; color?: any; startMargin?: any; endMargin?: any; } | null) {
+class ListItemGroupDividerModifier extends ModifierWithKey<DividerStyle> {
+  constructor(value: DividerStyle) {
     super(value);
   }
   static identity: Symbol = Symbol('listItemGroupDivider');
@@ -28,10 +28,10 @@ class ListItemGroupDividerModifier extends ModifierWithKey<{ strokeWidth: any; c
   }
 
   checkObjectDiff(): boolean {
-    return !isBaseOrResourceEqual(this.stageValue?.strokeWidth, this.value?.strokeWidth) ||
-      !isBaseOrResourceEqual(this.stageValue?.color, this.value?.color) ||
-      !isBaseOrResourceEqual(this.stageValue?.startMargin, this.value?.startMargin) ||
-      !isBaseOrResourceEqual(this.stageValue?.endMargin, this.value?.endMargin);
+    return !(this.stageValue?.strokeWidth === this.value?.strokeWidth &&
+      this.stageValue?.color === this.value?.color &&
+      this.stageValue?.startMargin === this.value?.startMargin &&
+      this.stageValue?.endMargin === this.value?.endMargin);
   }
 }
 

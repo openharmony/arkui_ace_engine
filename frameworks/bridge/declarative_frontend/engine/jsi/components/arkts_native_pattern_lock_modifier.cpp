@@ -14,7 +14,7 @@
  */
 
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_pattern_lock_modifier.h"
-#include "bridge/declarative_frontend/jsview/js_view_abstract.h"
+#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 #include "core/components_v2/pattern_lock/pattern_lock_theme.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/alignment.h"
@@ -34,7 +34,7 @@ void ResetPatternLockActiveColor(NodeHandle node)
 {
     auto *frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    auto patternLockTheme = Framework::JSViewAbstract::GetTheme<V2::PatternLockTheme>();
+    auto patternLockTheme = ArkTSUtils::GetTheme<V2::PatternLockTheme>();
     CHECK_NULL_VOID(patternLockTheme);
     Color activeColor = patternLockTheme->GetActiveColor();
     PatternLockModelNG::SetActiveColor(frameNode, activeColor);
@@ -44,7 +44,7 @@ void ResetPatternLockCircleRadius(NodeHandle node)
 {
     auto *frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    auto patternLockTheme = Framework::JSViewAbstract::GetTheme<V2::PatternLockTheme>();
+    auto patternLockTheme = ArkTSUtils::GetTheme<V2::PatternLockTheme>();
     CHECK_NULL_VOID(patternLockTheme);
     CalcDimension radius = patternLockTheme->GetCircleRadius();
     PatternLockModelNG::SetCircleRadius(frameNode, Dimension(radius.Value(), radius.Unit()));
@@ -68,7 +68,7 @@ void ResetPatternLockSelectedColor(NodeHandle node)
 {
     auto *frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    auto patternLockTheme = Framework::JSViewAbstract::GetTheme<V2::PatternLockTheme>();
+    auto patternLockTheme = ArkTSUtils::GetTheme<V2::PatternLockTheme>();
     CHECK_NULL_VOID(patternLockTheme);
     Color selectedColor = patternLockTheme->GetSelectedColor();
     PatternLockModelNG::SetSelectedColor(frameNode, selectedColor);
@@ -85,7 +85,7 @@ void ResetPatternLockSideLength(NodeHandle node)
 {
     auto *frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    auto patternLockTheme = Framework::JSViewAbstract::GetTheme<V2::PatternLockTheme>();
+    auto patternLockTheme = ArkTSUtils::GetTheme<V2::PatternLockTheme>();
     CHECK_NULL_VOID(patternLockTheme);
     CalcDimension sideLength = patternLockTheme->GetSideLength();
     PatternLockModelNG::SetSideLength(frameNode, Dimension(sideLength.Value(), sideLength.Unit()));
@@ -116,7 +116,7 @@ void ResetPatternLockPathStrokeWidth(NodeHandle node)
 {
     auto *frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    auto patternLockTheme = Framework::JSViewAbstract::GetTheme<V2::PatternLockTheme>();
+    auto patternLockTheme = ArkTSUtils::GetTheme<V2::PatternLockTheme>();
     CHECK_NULL_VOID(patternLockTheme);
     CalcDimension lineWidth = patternLockTheme->GetPathStrokeWidth();
     PatternLockModelNG::SetStrokeWidth(frameNode, lineWidth);
@@ -133,7 +133,7 @@ void ResetPatternLockRegularColor(NodeHandle node)
 {
     auto *frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    auto patternLockTheme = Framework::JSViewAbstract::GetTheme<V2::PatternLockTheme>();
+    auto patternLockTheme = ArkTSUtils::GetTheme<V2::PatternLockTheme>();
     CHECK_NULL_VOID(patternLockTheme);
     Color regularColor = patternLockTheme->GetRegularColor();
     PatternLockModelNG::SetRegularColor(frameNode, regularColor);
@@ -150,7 +150,7 @@ void ResetPatternLockPathColor(NodeHandle node)
 {
     auto *frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    auto patternLockTheme = Framework::JSViewAbstract::GetTheme<V2::PatternLockTheme>();
+    auto patternLockTheme = ArkTSUtils::GetTheme<V2::PatternLockTheme>();
     CHECK_NULL_VOID(patternLockTheme);
     Color pathColor = patternLockTheme->GetPathColor();
     PatternLockModelNG::SetPathColor(frameNode, pathColor);

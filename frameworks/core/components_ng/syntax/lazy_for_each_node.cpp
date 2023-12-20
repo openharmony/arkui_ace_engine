@@ -136,6 +136,7 @@ void LazyForEachNode::OnDataDeleted(size_t index)
             } else {
                 node->DetachFromMainTree();
             }
+            builder_->ProcessOffscreenNode(node, true);
         }
     }
     children_.clear();

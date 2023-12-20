@@ -87,15 +87,7 @@ class TextTimerFontWeightModifier extends ModifierWithKey<number | FontWeight | 
     if (reset) {
       GetUINativeModule().textTimer.resetFontWeight(node);
     } else {
-      let fontWeightStr = 'normal';
-      if (typeof this.value === 'string') {
-        fontWeightStr = this.value;
-      } else {
-        if (this.value in FontWeightMap) {
-          fontWeightStr = FontWeightMap[this.value];
-        }
-      }
-      GetUINativeModule().textTimer.setFontWeight(node, fontWeightStr);
+      GetUINativeModule().textTimer.setFontWeight(node, this.value);
     }
   }
 }

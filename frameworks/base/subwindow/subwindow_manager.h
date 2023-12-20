@@ -61,11 +61,14 @@ public:
     const RefPtr<Subwindow>& GetCurrentWindow();
     Rect GetParentWindowRect();
 
+    RefPtr<Subwindow> ShowPreviewNG();
+    void HidePreviewNG();
     void ShowMenu(const RefPtr<Component>& newComponent);
     void ShowMenuNG(
         const RefPtr<NG::FrameNode>& menuNode, int32_t targetId, const NG::OffsetF& offset, bool isAboveApps = false);
     void HideMenuNG(const RefPtr<NG::FrameNode>& menu, int32_t targetId);
     void HideMenuNG(bool showPreviewAnimation = true, bool startDrag = false);
+    void UpdateHideMenuOffsetNG(const NG::OffsetF& offset = NG::OffsetF(0.0f, 0.0f));
     void ShowPopup(const RefPtr<Component>& newComponent, bool disableTouchEvent = true);
     void ShowPopupNG(int32_t targetId, const NG::PopupInfo& popupInfo);
     void HidePopupNG(int32_t targetId, int32_t instanceId = -1);
@@ -108,6 +111,8 @@ public:
         std::function<void(int32_t, int32_t)>&& callback);
     void CloseDialog(int32_t instanceId);
     void RequestFocusSubwindow(int32_t instanceId);
+    void OpenCustomDialog(const PromptDialogAttr &dialogAttr, std::function<void(int32_t)> &&callback);
+    void CloseCustomDialog(const int32_t dialogId);
     
     bool GetShown();
 

@@ -45,6 +45,7 @@ public:
     ~LazyForEachNode() {
         CHECK_NULL_VOID(builder_);
         builder_->UnregisterDataChangeListener(this);
+        builder_->ClearAllOffscreenNode();
         isRegisterListener_ = false;
     }
 

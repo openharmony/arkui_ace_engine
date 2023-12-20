@@ -31,14 +31,73 @@ implements ISinglePropertyChangeSubscriber<T>, IMultiPropertiesChangeSubscriber,
   
   private owningView_ : ViewPU = undefined;
   
-  private dependentElementIds_: Set<number> = new Set<number>();
-
   // PU code stores object references to dependencies directly as class variable
   // SubscriberManager is not used for lookup in PU code path to speedup updates
   protected subscriberRefs_: Set<IPropertySubscriber>;
   
   // when owning ViewPU is inActive, delay notifying changes
   private delayedNotification_: number = ObservedPropertyAbstractPU.DelayedNotifyChangesEnum.do_not_delay;
+
+  // install when current value is ObservedObject and the value type is not using compatibility mode
+  // note value may change for union type variables when switching an object from one class to another.
+  protected shouldInstallTrackedObjectReadCb : boolean = true;
+  private dependentElmtIdsByProperty_ = new class PropertyDependencies {
+
+    // dependencies for property -> elmtId
+    // variable read during render adds elmtId
+    // variable assignment causes elmtId to need re-render.
+    // UINode with elmtId deletion needs elmtId to be removed from all records, see purgeDependenciesForElmtId
+    private propertyDependencies_: Set<number> = new Set<number>();
+
+    public getAllPropertyDependencies(): Set<number> {
+      stateMgmtConsole.debug(`  ... variable value assignment: returning affected elmtIds ${JSON.stringify(Array.from(this.propertyDependencies_))}`);
+      return this.propertyDependencies_;
+    }
+
+    public addPropertyDependency(elmtId: number): void {
+      this.propertyDependencies_.add(elmtId);
+      stateMgmtConsole.debug(`   ... variable value read: add dependent elmtId ${elmtId} - updated list of dependent elmtIds: ${JSON.stringify(Array.from(this.propertyDependencies_))}`);
+    }
+
+    public purgeDependenciesForElmtId(rmElmtId: number): void {
+      stateMgmtConsole.debug(`   ...purge all dependencies for elmtId ${rmElmtId} `);
+      this.propertyDependencies_.delete(rmElmtId);
+      stateMgmtConsole.debug(`      ... updated list of elmtIds dependent on variable assignment: ${JSON.stringify(Array.from(this.propertyDependencies_))}`);
+      this.trackedObjectPropertyDependencies_.forEach((propertyElmtId, propertyName) => {
+        propertyElmtId.delete(rmElmtId);
+        stateMgmtConsole.debug(`      ... updated dependencies on objectProperty '${propertyName}' changes: ${JSON.stringify(Array.from(propertyElmtId))}`);
+      });
+    }
+
+    // dependencies on individual object properties
+    private trackedObjectPropertyDependencies_: Map<string, Set<number>> = new Map<string, Set<number>>();
+
+    public addTrackedObjectPropertyDependency(readProperty: string, elmtId: number): void {
+      let dependentElmtIds = this.trackedObjectPropertyDependencies_.get(readProperty);
+      if (!dependentElmtIds) {
+        dependentElmtIds = new Set<number>();
+        this.trackedObjectPropertyDependencies_.set(readProperty, dependentElmtIds);
+      }
+      dependentElmtIds.add(elmtId);
+      stateMgmtConsole.debug(`   ... object property '${readProperty}' read: add dependent elmtId ${elmtId} - updated list of dependent elmtIds: ${JSON.stringify(Array.from(dependentElmtIds))}`);
+    }
+
+    public getTrackedObjectPropertyDependencies(changedObjectProperty: string, debugInfo: string): Set<number> {
+      const dependentElmtIds = this.trackedObjectPropertyDependencies_.get(changedObjectProperty) || new Set<number>();
+      stateMgmtConsole.debug(`  ... property '@Track ${changedObjectProperty}': returning affected elmtIds ${JSON.stringify(Array.from(dependentElmtIds))}`);
+      return dependentElmtIds;
+    }
+
+    public dumpInfoDependencies(): string {
+      let result = `dependencies: variable assignment (or object prop change in compat mode) affects elmtIds: ${JSON.stringify(Array.from(this.propertyDependencies_))} \n`;
+      this.trackedObjectPropertyDependencies_.forEach((propertyElmtId, propertyName) => {
+        result += `  property '@Track ${propertyName}' change affects elmtIds: ${JSON.stringify(Array.from(propertyElmtId))} \n`;
+      });
+      return result;
+    }
+
+  }; // inner class PropertyDependencies
+
 
   constructor(subscriber: IPropertySubscriber, viewName: PropertyInfo) {
     super(subscriber, viewName);
@@ -101,22 +160,7 @@ implements ISinglePropertyChangeSubscriber<T>, IMultiPropertiesChangeSubscriber,
   }
 
   public debugInfoDependentElmtIds(): string {
-    if (!this.dependentElementIds_.size) {
-      return `|--Dependent components: no dependent elmtIds`;
-    }
-    let result: string = this.dependentElementIds_.size < 25
-      ? `|--Dependent components: ${this.dependentElementIds_.size} elmtIds: `
-      : `|--WARNING: high number of dependent components (consider app redesign): ${this.dependentElementIds_.size} elmtIds: `;
-    let sepa: string = "";
-    if (this.owningView_) {
-      this.dependentElementIds_.forEach((elmtId: number) => {
-        result+=`${sepa}${this.owningView_.debugInfoElmtId(elmtId)}`;
-        sepa = ", ";
-      });
-    } else {
-      result += `no owning @Component`;
-    }
-    return result;
+    return this.dependentElmtIdsByProperty_.dumpInfoDependencies();
   }
 
   /* for @Prop value from source we need to generate a @State
@@ -184,7 +228,7 @@ implements ISinglePropertyChangeSubscriber<T>, IMultiPropertiesChangeSubscriber,
   */
   public moveElmtIdsForDelayedUpdate(): Set<number> | undefined {
     const result = (this.delayedNotification_ == ObservedPropertyAbstractPU.DelayedNotifyChangesEnum.delay_notification_pending)
-      ? this.dependentElementIds_
+      ? this.dependentElmtIdsByProperty_.getAllPropertyDependencies()
       : undefined;
     stateMgmtConsole.debug(`${this.debugInfo()}: moveElmtIdsForDelayedUpdate: elmtIds that need delayed update \
                       ${result ? Array.from(result).toString() : 'no delayed notifications'} .`);
@@ -193,25 +237,20 @@ implements ISinglePropertyChangeSubscriber<T>, IMultiPropertiesChangeSubscriber,
   }
 
   protected notifyPropertyRead() {
-    stateMgmtConsole.error(`${this.debugInfo()}: notifyPropertyRead, DO NOT USE with PU. Use \ 
-                      notifyPropertyHasBeenReadPU`);
+    stateMgmtConsole.error(`${this.debugInfo()}: notifyPropertyRead, DO NOT USE with PU. Use notifyReadCb mechanism.`);
 
   }
 
-  protected notifyPropertyHasBeenReadPU() {
-    stateMgmtProfiler.begin("ObservedPropertyAbstractPU.notifyPropertyHasBeenRead");
-    stateMgmtConsole.debug(`${this.debugInfo()}: notifyPropertyHasBeenReadPU.`)
-    this.recordDependentUpdate();
-    stateMgmtProfiler.end();
-  } 
-
+  // notify owning ViewPU and peers of a variable assignment
+  // also property/item changes to  ObservedObjects of class object type, which use compat mode
+  // Date and Array are notified as if there had been an assignment.
   protected notifyPropertyHasChangedPU() {
     stateMgmtProfiler.begin("ObservedPropertyAbstractPU.notifyPropertyHasChangedPU");
     stateMgmtConsole.debug(`${this.debugInfo()}: notifyPropertyHasChangedPU.`)
     if (this.owningView_) {
       if (this.delayedNotification_ == ObservedPropertyAbstractPU.DelayedNotifyChangesEnum.do_not_delay) {
         // send viewPropertyHasChanged right away
-        this.owningView_.viewPropertyHasChanged(this.info_, this.dependentElementIds_);
+        this.owningView_.viewPropertyHasChanged(this.info_, this.dependentElmtIdsByProperty_.getAllPropertyDependencies());
       } else {
         // mark this @StorageLink/Prop or @LocalStorageLink/Prop variable has having changed and notification of viewPropertyHasChanged delivery pending
         this.delayedNotification_ = ObservedPropertyAbstractPU.DelayedNotifyChangesEnum.delay_notification_pending;
@@ -229,7 +268,34 @@ implements ISinglePropertyChangeSubscriber<T>, IMultiPropertiesChangeSubscriber,
     stateMgmtProfiler.end();
   }  
 
-  
+
+  // notify owning ViewPU and peers of a ObservedObject @Track property's assignment
+  protected notifyTrackedObjectPropertyHasChanged(changedPropertyName : string) : void {
+    stateMgmtProfiler.begin("ObservedPropertyAbstract.notifyTrackedObjectPropertyHasChanged");
+    stateMgmtConsole.debug(`${this.debugInfo()}: notifyTrackedObjectPropertyHasChanged.`)
+    if (this.owningView_) {
+      if (this.delayedNotification_ == ObservedPropertyAbstractPU.DelayedNotifyChangesEnum.do_not_delay) {
+        // send viewPropertyHasChanged right away
+        this.owningView_.viewPropertyHasChanged(this.info_, this.dependentElmtIdsByProperty_.getTrackedObjectPropertyDependencies(changedPropertyName, "notifyTrackedObjectPropertyHasChanged"));
+      } else {
+        // mark this @StorageLink/Prop or @LocalStorageLink/Prop variable has having changed and notification of viewPropertyHasChanged delivery pending
+        this.delayedNotification_ = ObservedPropertyAbstractPU.DelayedNotifyChangesEnum.delay_notification_pending;
+      }
+    }
+    this.subscriberRefs_.forEach((subscriber) => {
+      if (subscriber) {
+        if ('syncPeerTrackedPropertyHasChanged' in subscriber) {
+          (subscriber as unknown as PeerChangeEventReceiverPU<T>).syncPeerTrackedPropertyHasChanged(this, changedPropertyName);
+        } else  {
+          stateMgmtConsole.warn(`${this.debugInfo()}: notifyTrackedObjectPropertyHasChanged: unknown subscriber ID 'subscribedId' error!`);
+        }
+      }
+    });
+    stateMgmtProfiler.end();
+  }
+
+  protected abstract onOptimisedObjectPropertyRead(readObservedObject : T, readPropertyName : string, isTracked : boolean) : void;
+
   public markDependentElementsDirty(view: ViewPU) {
     // TODO ace-ets2bundle, framework, complicated apps need to update together
     // this function will be removed after a short transition period.
@@ -246,7 +312,7 @@ implements ISinglePropertyChangeSubscriber<T>, IMultiPropertiesChangeSubscriber,
     see 1st parameter for explanation what is allowed
 
     FIXME this expects the Map, Set patch to go in
-  */
+   */
 
   protected checkIsSupportedValue(value: T): boolean {
     return this.checkNewValue(
@@ -263,7 +329,7 @@ implements ISinglePropertyChangeSubscriber<T>, IMultiPropertiesChangeSubscriber,
     see 1st parameter for explanation what is allowed
 
       FIXME this expects the Map, Set patch to go in
-    */
+   */
   protected checkIsObject(value: T): boolean {
     return this.checkNewValue(
       `undefined, null, Object including Array and instance of SubscribableAbstract and excluding function, Set, and Map`,
@@ -275,7 +341,7 @@ implements ISinglePropertyChangeSubscriber<T>, IMultiPropertiesChangeSubscriber,
   /*
     type checking for allowed simple types value
     see 1st parameter for explanation what is allowed
- */
+   */
   protected checkIsSimple(value: T): boolean {
     return this.checkNewValue(
       `undefined, number, boolean, string`,
@@ -323,23 +389,41 @@ implements ISinglePropertyChangeSubscriber<T>, IMultiPropertiesChangeSubscriber,
 
 
   /**
+   * If owning viewPU is currently rendering or re-rendering a UINode, return its elmtId
+   * return -1 otherwise
+   * ViewPU caches the info, it does not request the info from C++ side (by calling 
+   * ViewStackProcessor.GetElmtIdToAccountFor(); as done in earlier implementation
+   */
+  protected getRenderingElmtId() : number {
+    return (this.owningView_) ? this.owningView_.getCurrentlyRenderedElmtId() : -1;
+  }
+
+
+  /**
    * during 'get' access recording take note of the created component and its elmtId
    * and add this component to the list of components who are dependent on this property
    */
-  protected recordDependentUpdate() {
-    const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
+  protected recordPropertyDependentUpdate() : void {
+    const elmtId = this.getRenderingElmtId();
     if (elmtId < 0) {
       // not access recording 
       return;
     }
-    stateMgmtConsole.debug(`${this.debugInfo()}: recordDependentUpdate on elmtId ${elmtId}.`)
-    this.dependentElementIds_.add(elmtId);
+    stateMgmtConsole.debug(`${this.debugInfo()}: recordPropertyDependentUpdate: add (state) variable dependency for elmtId ${elmtId}.`)
+    this.dependentElmtIdsByProperty_.addPropertyDependency(elmtId);
   }
 
+  /** record dependency ObservedObject + propertyName -> elmtId 
+   * caller ensures renderingElmtId >= 0
+   */
+  protected recordTrackObjectPropertyDependencyForElmtId(renderingElmtId : number, readTrackedPropertyName : string) : void {
+    stateMgmtConsole.debug(`${this.debugInfo()}: recordTrackObjectPropertyDependency on elmtId ${renderingElmtId}.`)
+    this.dependentElmtIdsByProperty_.addTrackedObjectPropertyDependency(readTrackedPropertyName, renderingElmtId);
+  }
   
   public purgeDependencyOnElmtId(rmElmtId: number): void {
     stateMgmtConsole.debug(`${this.debugInfo()}: purgeDependencyOnElmtId ${rmElmtId}`);
-    this.dependentElementIds_.delete(rmElmtId);
+    this.dependentElmtIdsByProperty_.purgeDependenciesForElmtId(rmElmtId);
   }
 
   public SetPropertyUnchanged(): void {
@@ -361,24 +445,54 @@ implements ISinglePropertyChangeSubscriber<T>, IMultiPropertiesChangeSubscriber,
   /*
     Below empty functions required to keep as long as this class derives from FU version
     ObservedPropertyAbstract. Need to overwrite these functions to do nothing for PU
-    */
+   */
     protected notifyHasChanged(_: T) {
       stateMgmtConsole.error(`${this.debugInfo()}: notifyHasChanged, DO NOT USE with PU. Use syncPeerHasChanged() \ 
-                                            or objectPropertyHasChangedPU()`);
+                                            or onTrackedObjectProperty(CompatMode)HasChangedPU()`);
     }
+
+    
+ /**
+  * event emitted by wrapped ObservedObject, when one of its property values changes
+  * for class objects when in compatibility mode
+  * for Array, Date instances always
+  * @param souceObject 
+  * @param changedPropertyName 
+  */
+  public onTrackedObjectPropertyHasChangedPU(sourceObject: ObservedObject<T>, changedPropertyName: string) {
+    stateMgmtConsole.debug(`${this.debugInfo()}: onTrackedObjectPropertyHasChangedPU: property '${changedPropertyName}' of \
+      object value has changed.`)
+
+    this.notifyTrackedObjectPropertyHasChanged(changedPropertyName);
+  }
+
+ /**
+  * event emitted by wrapped ObservedObject, when one of its property values changes
+  * for class objects when in compatibility mode
+  * for Array, Date instances always
+  * @param souceObject 
+  * @param changedPropertyName 
+  */
+  public onTrackedObjectPropertyCompatModeHasChangedPU(sourceObject: ObservedObject<T>, changedPropertyName: string) {
+    stateMgmtConsole.debug(`${this.debugInfo()}: onTrackedObjectPropertyCompatModeHasChangedPU: property '${changedPropertyName}' of \
+      object value has changed.`)
+
+    this.notifyPropertyHasChangedPU();
+  }
+
+
+  hasChanged(_: T): void {
+    // unused for PU
+    // need to overwrite impl of base class with empty function.
+  }
   
-    hasChanged(_: T): void {
-      // unused for PU
-      // need to overwrite impl of base class with empty function.
-    }
+  propertyHasChanged(_?: PropertyInfo): void {
+    // unused for PU
+    // need to overwrite impl of base class with empty function.
+  }
   
-    propertyHasChanged(_?: PropertyInfo): void {
-      // unused for PU
-      // need to overwrite impl of base class with empty function.
-    }
-  
-    propertyRead(_?: PropertyInfo): void {
-      // unused for PU
-      // need to overwrite impl of base class with empty function.
-    }
+  propertyRead(_?: PropertyInfo): void {
+    // unused for PU
+    // need to overwrite impl of base class with empty function.
+  }
 }

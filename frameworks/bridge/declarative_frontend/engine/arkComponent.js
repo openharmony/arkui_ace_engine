@@ -26,10 +26,8 @@ const UI_STATE_PRESSED = 1;
 const UI_STATE_FOCUSED = 1 << 1;
 const UI_STATE_DISABLED = 1 << 2;
 const UI_STATE_SELECTED = 1 << 3;
-
 function applyUIAttributes(modifier, nativeNode, component) {
   let state = 0;
-
   if (modifier.applyPressedAttribute !== undefined) {
     state |= UI_STATE_PRESSED;
   }
@@ -42,27 +40,24 @@ function applyUIAttributes(modifier, nativeNode, component) {
   if (modifier.applySelectedAttribute !== undefined) {
     state |= UI_STATE_SELECTED;
   }
-
   GetUINativeModule().setSupportedUIState(nativeNode, state);
   const currentUIState = GetUINativeModule().getUIState(nativeNode);
-
   if (modifier.applyNormalAttribute !== undefined) {
     modifier.applyNormalAttribute(component);
   }
-  if (currentUIState & UI_STATE_PRESSED) {
+  if ((currentUIState & UI_STATE_PRESSED) && (modifier.applyPressedAttribute !== undefined)) {
     modifier.applyPressedAttribute(component);
   }
-  if (currentUIState & UI_STATE_FOCUSED) {
+  if ((currentUIState & UI_STATE_FOCUSED) && (modifier.applyFocusedAttribute !== undefined)) {
     modifier.applyFocusedAttribute(component);
   }
-  if (currentUIState & UI_STATE_DISABLED) {
+  if ((currentUIState & UI_STATE_DISABLED) && (modifier.applyDisabledAttribute !== undefined)) {
     modifier.applyDisabledAttribute(component);
   }
-  if (currentUIState & UI_STATE_SELECTED) {
+  if ((currentUIState & UI_STATE_SELECTED) && (modifier.applySelectedAttribute !== undefined)) {
     modifier.applySelectedAttribute(component);
   }
 }
-
 function isResource(variable) {
   let _a;
   return ((_a = variable) === null || _a === void 0 ? void 0 : _a.bundleName) !== undefined;
@@ -4099,6 +4094,38 @@ class ImageObjectFitModifier extends ModifierWithKey {
   }
 }
 ImageObjectFitModifier.identity = Symbol('imageObjectFit');
+class ImageBorderRadiusModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      GetUINativeModule().image.resetBorderRadius(node);
+    }
+    else {
+      if (isNumber(this.value) || isString(this.value) || isResource(this.value)) {
+        GetUINativeModule().image.setBorderRadius(node, this.value, this.value, this.value, this.value);
+      }
+      else {
+        GetUINativeModule().image.setBorderRadius(node, this.value.topLeft, this.value.topRight, this.value.bottomLeft, this.value.bottomRight);
+      }
+    }
+  }
+  checkObjectDiff() {
+    if (isResource(this.stageValue) && isResource(this.value)) {
+      return !isResourceEqual(this.stageValue, this.value);
+    } else if (!isResource(this.stageValue) && !isResource(this.value)) {
+      return !(this.stageValue.topLeft === this.value.topLeft &&
+        this.stageValue.topRight === this.value.topRight &&
+        this.stageValue.bottomLeft === this.value.bottomLeft &&
+        this.stageValue.bottomRight === this.value.bottomRight);
+    }
+    else {
+      return true;
+    }
+  }
+}
+ImageBorderRadiusModifier.identity = Symbol('imageBorderRadius');
 class ArkImageComponent extends ArkComponent {
   constructor(nativePtr) {
     super(nativePtr);
@@ -4160,6 +4187,10 @@ class ArkImageComponent extends ArkComponent {
   }
   copyOption(value) {
     modifierWithKey(this._modifiersWithKeys, ImageCopyOptionModifier.identity, ImageCopyOptionModifier, value);
+    return this;
+  }
+  borderRadius(value) {
+    modifierWithKey(this._modifiersWithKeys, ImageBorderRadiusModifier.identity, ImageBorderRadiusModifier, value);
     return this;
   }
   onComplete(callback) {
@@ -8226,7 +8257,6 @@ class ArkScrollEdgeEffect {
       (this.options === another.options);
   }
 }
-
 class ArkFont {
   constructor() {
     this.size = undefined;
@@ -9113,21 +9143,11 @@ class ArkButtonComponent extends ArkComponent {
     return this;
   }
   type(value) {
-    if (isNumber(value)) {
-      modifier(this._modifiers, ButtonTypeModifier, value);
-    }
-    else {
-      modifier(this._modifiers, ButtonTypeModifier, undefined);
-    }
+    modifierWithKey(this._modifiersWithKeys, ButtonTypeModifier.identity, ButtonTypeModifier, value);
     return this;
   }
   stateEffect(value) {
-    if (isBoolean(value)) {
-      modifier(this._modifiers, ButtonStateEffectModifier, value);
-    }
-    else {
-      modifier(this._modifiers, ButtonStateEffectModifier, undefined);
-    }
+    modifierWithKey(this._modifiersWithKeys, ButtonStateEffectModifier.identity, ButtonStateEffectModifier, value);
     return this;
   }
   fontColor(value) {
@@ -9139,21 +9159,11 @@ class ArkButtonComponent extends ArkComponent {
     return this;
   }
   fontWeight(value) {
-    if (typeof value === 'string' || typeof value === 'number') {
-      modifier(this._modifiers, ButtonFontWeightModifier, value);
-    }
-    else {
-      modifier(this._modifiers, ButtonFontWeightModifier, undefined);
-    }
+    modifierWithKey(this._modifiersWithKeys, ButtonFontWeightModifier.identity, ButtonFontWeightModifier, value);
     return this;
   }
   fontStyle(value) {
-    if (typeof value === 'number' && value >= 0 && value < 2) {
-      modifier(this._modifiers, ButtonFontStyleModifier, value);
-    }
-    else {
-      modifier(this._modifiers, ButtonFontStyleModifier, undefined);
-    }
+    modifierWithKey(this._modifiersWithKeys, ButtonFontStyleModifier.identity, ButtonFontStyleModifier, value);
     return this;
   }
   fontFamily(value) {
@@ -9162,6 +9172,10 @@ class ArkButtonComponent extends ArkComponent {
   }
   labelStyle(value) {
     modifierWithKey(this._modifiersWithKeys, ButtonLabelStyleModifier.identity, ButtonLabelStyleModifier, value);
+    return this;
+  }
+  borderRadius(value) {
+    modifierWithKey(this._modifiersWithKeys, ButtonBorderRadiusModifier.identity, ButtonBorderRadiusModifier, value);
     return this;
   }
 }
@@ -9187,7 +9201,7 @@ class ButtonBackgroundColorModifier extends ModifierWithKey {
   }
 }
 ButtonBackgroundColorModifier.identity = Symbol('buttonBackgroundColor');
-class ButtonStateEffectModifier extends Modifier {
+class ButtonStateEffectModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
   }
@@ -9201,7 +9215,7 @@ class ButtonStateEffectModifier extends Modifier {
   }
 }
 ButtonStateEffectModifier.identity = Symbol('buttonStateEffect');
-class ButtonFontStyleModifier extends Modifier {
+class ButtonFontStyleModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
   }
@@ -9246,30 +9260,23 @@ class ButtonLabelStyleModifier extends ModifierWithKey {
       GetUINativeModule().button.resetLabelStyle(node);
     }
     else {
-      let textOverflow = this.value.overflow; // number -> Ace::TextOverflow
+      let textOverflow = this.value.overflow; // number(enum) -> Ace::TextOverflow
       let maxLines = this.value.maxLines; // number -> uint32_t
-      let minFontSize = this.value.minFontSize; // number/string -> Dimension
-      let maxFontSize = this.value.maxFontSize; // number/string -> Dimension
-      let heightAdaptivePolicy = this.value.heightAdaptivePolicy; // number -> Ace::TextHeightAdaptivePolicy
-      let fontSize = undefined; // number/string ->Dimension
-      let fontWeight = undefined; // string -> Ace::FontWeight
-      let fontStyle = undefined; // number -> Ace::FontStyle
-      let fontFamily = undefined; // string ->std::vector<std::string>
+      let minFontSize = this.value.minFontSize; // number | string | Resource -> Dimension
+      let maxFontSize = this.value.maxFontSize; // number | string | Resource -> Dimension
+      let heightAdaptivePolicy = this.value.heightAdaptivePolicy; // number(enum) -> Ace::TextHeightAdaptivePolicy
+      let fontSize = undefined; // number | string | Resource -> Dimension
+      let fontWeight = undefined; // number | string | Ace::FontWeight -> string -> Ace::FontWeight
+      let fontStyle = undefined; // number(enum) -> Ace::FontStyle
+      let fontFamily = undefined; // string -> std::vector<std::string>
       if (isObject(this.value.font)) {
         fontSize = this.value.font.size;
-        fontWeight = 'normal';
         fontStyle = this.value.font.style;
         fontFamily = this.value.font.family;
-        if (typeof this.value.font.weight === 'string') {
-          fontWeight = this.value.font.weight;
-        }
-        else {
-          if (this.value.font.weight in FontWeightMap) {
-            fontWeight = FontWeightMap[this.value.font.weight];
-          }
-        }
-        GetUINativeModule().button.setLabelStyle(node, textOverflow, maxLines, minFontSize, maxFontSize, heightAdaptivePolicy, fontSize, fontWeight, fontStyle, fontFamily);
+        fontWeight = this.value.font.weight;
       }
+      GetUINativeModule().button.setLabelStyle(node, textOverflow, maxLines, minFontSize, maxFontSize,
+        heightAdaptivePolicy, fontSize, fontWeight, fontStyle, fontFamily);
     }
   }
   checkObjectDiff() {
@@ -9290,7 +9297,7 @@ class ButtonLabelStyleModifier extends ModifierWithKey {
   }
 }
 ButtonLabelStyleModifier.identity = Symbol('buttonLabelStyle');
-class ButtonTypeModifier extends Modifier {
+class ButtonTypeModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
   }
@@ -9348,7 +9355,7 @@ class ButtonFontSizeModifier extends ModifierWithKey {
   }
 }
 ButtonFontSizeModifier.identity = Symbol('buttonFontSize');
-class ButtonFontWeightModifier extends Modifier {
+class ButtonFontWeightModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
   }
@@ -9357,20 +9364,43 @@ class ButtonFontWeightModifier extends Modifier {
       GetUINativeModule().button.resetFontWeight(node);
     }
     else {
-      let fontWeightStr = 'normal';
-      if (typeof this.value === 'string') {
-        fontWeightStr = this.value;
-      }
-      else {
-        if (this.value in FontWeightMap) {
-          fontWeightStr = FontWeightMap[this.value];
-        }
-      }
-      GetUINativeModule().button.setFontWeight(node, fontWeightStr);
+      GetUINativeModule().button.setFontWeight(node, this.value);
     }
   }
 }
 ButtonFontWeightModifier.identity = Symbol('buttonFontWeight');
+class ButtonBorderRadiusModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      GetUINativeModule().button.resetButtonBorderRadius(node);
+    } else {
+      if (isNumber(this.value) || isString(this.value) || isResource(this.value)) {
+        GetUINativeModule().button.setButtonBorderRadius(node, this.value, this.value, this.value, this.value);
+      }
+      else {
+        GetUINativeModule().button.setButtonBorderRadius(node, this.value.topLeft, this.value.topRight, this.value.bottomLeft, this.value.bottomRight);
+      }
+    }
+  }
+  checkObjectDiff() {
+    if (isResource(this.stageValue) && isResource(this.value)) {
+      return !isResourceEqual(this.stageValue, this.value);
+    }
+    else if (!isResource(this.stageValue) && !isResource(this.value)) {
+      return !(this.stageValue.topLeft === this.value.topLeft &&
+        this.stageValue.topRight === this.value.topRight &&
+        this.stageValue.bottomLeft === this.value.bottomLeft &&
+        this.stageValue.bottomRight === this.value.bottomRight);
+    }
+    else {
+      return true;
+    }
+  }
+}
+ButtonBorderRadiusModifier.identity = Symbol('buttonBorderRadius');
 // @ts-ignore
 globalThis.Button.attributeModifier = function (modifier) {
   const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
@@ -12823,6 +12853,10 @@ DataPanelTrackBackgroundColorModifier.identity = Symbol('dataPanelTrackBackgroun
 class DataPanelTrackShadowModifier extends ModifierWithKey {
   applyPeer(node, reset) {
     if (reset) {
+      if (this.value === null) {
+        GetUINativeModule().dataPanel.setDataPanelTrackShadow(node, null);
+        return;
+      }
       GetUINativeModule().dataPanel.resetDataPanelTrackShadow(node);
     }
     else {
@@ -13295,23 +13329,6 @@ globalThis.Gauge.attributeModifier = function (modifier) {
   component.applyModifierPatch();
 };
 /// <reference path='./import.ts' />
-const MarqueeFontWeightMap = {
-  0: 'lighter',
-  1: 'normal',
-  2: 'regular',
-  3: 'medium',
-  4: 'bold',
-  5: 'bolder',
-  100: '100',
-  200: '200',
-  300: '300',
-  400: '400',
-  500: '500',
-  600: '600',
-  700: '700',
-  800: '800',
-  900: '900',
-};
 class ArkMarqueeComponent extends ArkComponent {
   constructor(nativePtr) {
     super(nativePtr);
@@ -13416,17 +13433,11 @@ class MarqueeFontWeightModifier extends ModifierWithKey {
       GetUINativeModule().marquee.resetFontWeight(node);
     }
     else {
-      let fontWeightStr = 'normal';
-      if (typeof this.value === 'string') {
-        fontWeightStr = this.value;
-      }
-      else {
-        if (this.value in MarqueeFontWeightMap) {
-          fontWeightStr = MarqueeFontWeightMap[this.value];
-        }
-      }
-      GetUINativeModule().marquee.setFontWeight(node, fontWeightStr);
+      GetUINativeModule().marquee.setFontWeight(node, this.value);
     }
+  }
+  checkObjectDiff() {
+    return this.stageValue !== this.value;
   }
 }
 MarqueeFontWeightModifier.identity = Symbol('fontWeight');
@@ -13490,14 +13501,11 @@ class MenuFontModifier extends ModifierWithKey {
     }
   }
   checkObjectDiff() {
-    if (!(this.stageValue.weight === this.value.weight &&
-      this.stageValue.style === this.value.style)) {
-      return true;
-    }
-    else {
-      return !isBaseOrResourceEqual(this.stageValue.size, this.value.size) ||
-        !isBaseOrResourceEqual(this.stageValue.family, this.value.family);
-    }
+    let sizeEQ = isBaseOrResourceEqual(this.stageValue.size, this.value.size);
+    let weightEQ = this.stageValue.weight === this.value.weight;
+    let familyEQ = isBaseOrResourceEqual(this.stageValue.family, this.value.family);
+    let styleEQ = this.stageValue.style === this.value.style;
+    return !sizeEQ || !weightEQ || !familyEQ || !styleEQ;
   }
 }
 MenuFontModifier.identity = Symbol('font');
@@ -13574,17 +13582,17 @@ class MenuItemSelectedModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().menuitem.resetSelected(node);
+      GetUINativeModule().menuitem.resetMenuItemSelected(node);
     }
     else {
-      GetUINativeModule().menuitem.setSelected(node, this.value);
+      GetUINativeModule().menuitem.setMenuItemSelected(node, this.value);
     }
   }
   checkObjectDiff() {
-    return this.stageValue !== this.value;
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
-MenuItemSelectedModifier.identity = Symbol('selected');
+MenuItemSelectedModifier.identity = Symbol('menuItemSelected');
 class LabelFontColorModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -13642,18 +13650,11 @@ class LabelFontModifier extends ModifierWithKey {
     }
   }
   checkObjectDiff() {
-    if (isResource(this.stageValue) && isResource(this.value)) {
-      return !isResourceEqual(this.stageValue, this.value);
-    }
-    else if (!isResource(this.stageValue) && !isResource(this.value)) {
-      return !(this.stageValue.size === this.value.size &&
-        this.stageValue.weight === this.value.weight &&
-        this.stageValue.family === this.value.family &&
-        this.stageValue.style === this.value.style);
-    }
-    else {
-      return true;
-    }
+    let sizeEQ = isBaseOrResourceEqual(this.stageValue.size, this.value.size);
+    let weightEQ = this.stageValue.weight === this.value.weight;
+    let familyEQ = isBaseOrResourceEqual(this.stageValue.family, this.value.family);
+    let styleEQ = this.stageValue.style === this.value.style;
+    return !sizeEQ || !weightEQ || !familyEQ || !styleEQ;
   }
 }
 LabelFontModifier.identity = Symbol('labelFont');
@@ -13670,18 +13671,11 @@ class ContentFontModifier extends ModifierWithKey {
     }
   }
   checkObjectDiff() {
-    if (isResource(this.stageValue) && isResource(this.value)) {
-      return !isResourceEqual(this.stageValue, this.value);
-    }
-    else if (!isResource(this.stageValue) && !isResource(this.value)) {
-      return !(this.stageValue.size === this.value.size &&
-        this.stageValue.weight === this.value.weight &&
-        this.stageValue.family === this.value.family &&
-        this.stageValue.style === this.value.style);
-    }
-    else {
-      return true;
-    }
+    let sizeEQ = isBaseOrResourceEqual(this.stageValue.size, this.value.size);
+    let weightEQ = this.stageValue.weight === this.value.weight;
+    let familyEQ = isBaseOrResourceEqual(this.stageValue.family, this.value.family);
+    let styleEQ = this.stageValue.style === this.value.style;
+    return !sizeEQ || !weightEQ || !familyEQ || !styleEQ;
   }
 }
 ContentFontModifier.identity = Symbol('contentFont');
@@ -13790,6 +13784,10 @@ class ArkProgressComponent extends ArkComponent {
   monopolizeEvents(monopolize) {
     throw new Error('Method not implemented.');
   }
+  backgroundColor(value) {
+    modifierWithKey(this._modifiersWithKeys, ProgressBackgroundColorModifier.identity, ProgressBackgroundColorModifier, value);
+    return this;
+  }
 }
 class ProgressValueModifier extends ModifierWithKey {
   applyPeer(node, reset) {
@@ -13808,109 +13806,48 @@ ProgressValueModifier.identity = Symbol('value');
 class ProgressColorModifier extends ModifierWithKey {
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().progress.ResetProgressColor(node);
+      GetUINativeModule().progress.resetProgressColor(node);
     }
     else {
-      const valueType = typeof this.value;
-      if (valueType === 'number' || valueType === 'string' || isResource(this.value)) {
-        GetUINativeModule().progress.SetProgressColor(node, this.value);
-      }
-      else {
-        GetUINativeModule().progress.SetProgressColorWithLinearGradient(node, this.value.angle, this.value.direction, this.value.colors, this.value.repeating);
-      }
+      GetUINativeModule().progress.setProgressColor(node, this.value);
     }
   }
   checkObjectDiff() {
-    return true;
+    return this.stageValue !== this.value;
   }
 }
 ProgressColorModifier.identity = Symbol('color');
 class ProgressStyleModifier extends ModifierWithKey {
   applyPeer(node, reset) {
-    let _a, _b, _c, _d;
     if (reset) {
       GetUINativeModule().progress.ResetProgressStyle(node);
     }
     else {
-      let valueProgressStyle = this.value;
-      let valueCapsuleStyle = this.value;
-      let valueRingStyle = this.value;
-      let valueLinearStyle = this.value;
-      let valueScaleRingStyle = this.value;
-      let strokeWidth = undefined;
-      let scaleCount = undefined;
-      let scaleWidth = undefined;
+      let strokeWidth = this.value.strokeWidth;
+      let scaleCount = this.value.scaleCount;
+      let scaleWidth = this.value.scaleWidth;
       let enableSmoothEffect = this.value.enableSmoothEffect;
-      let enableScanEffect = undefined;
-      let shadow = undefined;
-      if (isUndefined(strokeWidth) && !isNull(valueProgressStyle.strokeWidth) &&
-        !isUndefined(valueProgressStyle.strokeWidth)) {
-        strokeWidth = valueProgressStyle.strokeWidth;
+      let borderColor = this.value.borderColor;
+      let borderWidth = this.value.borderWidth;
+      let content = this.value.content;
+      let fontSize = undefined;
+      let fontWeight = undefined;
+      let fontFamily = undefined;
+      let fontStyle = undefined;
+      if (this.value.font) {
+        fontSize = this.value.font.size;
+        fontWeight = this.value.font.weight;
+        fontFamily = this.value.font.family;
+        fontStyle = this.value.font.style;
       }
-      if (isUndefined(strokeWidth) && !isNull(valueRingStyle.strokeWidth) &&
-        !isUndefined(valueRingStyle.strokeWidth)) {
-        strokeWidth = valueRingStyle.strokeWidth;
-      }
-      if (isUndefined(strokeWidth) && !isNull(valueLinearStyle.strokeWidth) &&
-        !isUndefined(valueLinearStyle.strokeWidth)) {
-        strokeWidth = valueLinearStyle.strokeWidth;
-      }
-      if (isUndefined(strokeWidth) && !isNull(valueScaleRingStyle.strokeWidth) &&
-        !isUndefined(valueScaleRingStyle.strokeWidth)) {
-        strokeWidth = valueScaleRingStyle.strokeWidth;
-      }
-      if (isUndefined(strokeWidth) && !isNull(valueCapsuleStyle.borderWidth) &&
-        !isUndefined(valueCapsuleStyle.borderWidth)) {
-        strokeWidth = valueCapsuleStyle.borderWidth;
-      }
-      if (isUndefined(scaleCount) && !isNull(valueProgressStyle.scaleCount) &&
-        !isUndefined(valueProgressStyle.scaleCount)) {
-        scaleCount = valueProgressStyle.scaleCount;
-      }
-      if (isUndefined(scaleCount) && !isNull(valueRingStyle.status) &&
-        !isUndefined(valueRingStyle.status)) {
-        scaleCount = valueRingStyle.status;
-      }
-      if (isUndefined(scaleCount) && !isNull(valueScaleRingStyle.scaleCount) &&
-        !isUndefined(valueScaleRingStyle.scaleCount)) {
-        scaleCount = valueScaleRingStyle.scaleCount;
-      }
-      if (isUndefined(scaleCount) && !isNull(valueCapsuleStyle.font) &&
-        !isUndefined(valueCapsuleStyle.font)) {
-        scaleCount = (_a = valueCapsuleStyle.font) === null || _a === void 0 ? void 0 : _a.style;
-      }
-      if (isUndefined(scaleWidth) && !isNull(valueProgressStyle.scaleWidth) &&
-        !isUndefined(valueProgressStyle.scaleWidth)) {
-        scaleWidth = valueProgressStyle.scaleWidth;
-      }
-      if (isUndefined(scaleWidth) && !isNull(valueScaleRingStyle.scaleWidth) &&
-        !isUndefined(valueScaleRingStyle.scaleWidth)) {
-        scaleWidth = valueScaleRingStyle.scaleWidth;
-      }
-      if (isUndefined(scaleWidth) && !isNull(valueCapsuleStyle.font) &&
-        !isUndefined(valueCapsuleStyle.font)) {
-        scaleWidth = (_b = valueCapsuleStyle.font) === null || _b === void 0 ? void 0 : _b.size;
-      }
-      if (isUndefined(enableScanEffect) && !isNull(valueRingStyle.enableScanEffect) &&
-        !isUndefined(valueRingStyle.enableScanEffect)) {
-        enableScanEffect = valueRingStyle.enableScanEffect;
-      }
-      if (isUndefined(enableScanEffect) && !isNull(valueLinearStyle.enableScanEffect) &&
-        !isUndefined(valueLinearStyle.enableScanEffect)) {
-        enableScanEffect = valueLinearStyle.enableScanEffect;
-      }
-      if (isUndefined(enableScanEffect) && !isNull(valueCapsuleStyle.enableScanEffect) &&
-        !isUndefined(valueCapsuleStyle.enableScanEffect)) {
-        enableScanEffect = valueCapsuleStyle.enableScanEffect;
-      }
-      if (isUndefined(shadow) && !isNull(valueRingStyle.shadow) && !isUndefined(valueRingStyle.shadow)) {
-        shadow = valueRingStyle.shadow;
-      }
-      if (isUndefined(shadow) && !isNull(valueCapsuleStyle.showDefaultPercentage) &&
-        !isUndefined(valueCapsuleStyle.showDefaultPercentage)) {
-        shadow = valueCapsuleStyle.showDefaultPercentage;
-      }
-      GetUINativeModule().progress.SetProgressStyle(node, strokeWidth, scaleCount, scaleWidth, enableSmoothEffect, valueCapsuleStyle.borderColor, valueCapsuleStyle.content, (_c = valueCapsuleStyle.font) === null || _c === void 0 ? void 0 : _c.weight, valueCapsuleStyle.fontColor, enableScanEffect, shadow, (_d = valueCapsuleStyle.font) === null || _d === void 0 ? void 0 : _d.family, valueLinearStyle.strokeRadius);
+      let fontColor = this.value.fontColor;
+      let enableScanEffect = this.value.enableScanEffect;
+      let showDefaultPercentage = this.value.showDefaultPercentage;
+      let shadow = this.value.shadow;
+      let status = this.value.status;
+      let strokeRadius = this.value.strokeRadius;
+      GetUINativeModule().progress.SetProgressStyle(node, strokeWidth, scaleCount, scaleWidth, enableSmoothEffect, borderColor, borderWidth,
+        content, fontSize, fontWeight, fontFamily, fontStyle, fontColor, enableScanEffect, showDefaultPercentage, shadow, status, strokeRadius);
     }
   }
   checkObjectDiff() {
@@ -13918,6 +13855,25 @@ class ProgressStyleModifier extends ModifierWithKey {
   }
 }
 ProgressStyleModifier.identity = Symbol('style');
+class ProgressBackgroundColorModifier extends ModifierWithKey {
+  applyPeer(node, reset) {
+    if (reset) {
+      GetUINativeModule().progress.resetProgressBackgroundColor(node);
+    }
+    else {
+      GetUINativeModule().progress.setProgressBackgroundColor(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    if (isResource(this.stageValue) && isResource(this.value)) {
+      return !isResourceEqual(this.stageValue, this.value);
+    }
+    else {
+      return true;
+    }
+  }
+}
+ProgressBackgroundColorModifier.identity = Symbol('progressBackgroundColor');
 // @ts-ignore
 globalThis.Progress.attributeModifier = function (modifier) {
   const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
@@ -14353,16 +14309,7 @@ class TextTimerFontWeightModifier extends ModifierWithKey {
       GetUINativeModule().textTimer.resetFontWeight(node);
     }
     else {
-      let fontWeightStr = 'normal';
-      if (typeof this.value === 'string') {
-        fontWeightStr = this.value;
-      }
-      else {
-        if (this.value in FontWeightMap) {
-          fontWeightStr = FontWeightMap[this.value];
-        }
-      }
-      GetUINativeModule().textTimer.setFontWeight(node, fontWeightStr);
+      GetUINativeModule().textTimer.setFontWeight(node, this.value);
     }
   }
 }
@@ -14703,17 +14650,407 @@ globalThis.Web.attributeModifier = function (modifier) {
   component.applyModifierPatch();
 };
 /// <reference path='./import.ts' />
-class ArkXComponentComponent extends ArkComponent {
+class ArkXComponentComponent {
   constructor(nativePtr) {
-    super(nativePtr);
+    this._modifiersWithKeys = new Map();
+    this.nativePtr = nativePtr;
+  }
+  applyModifierPatch() {
+    let expiringItemsWithKeys = [];
+    this._modifiersWithKeys.forEach((value, key) => {
+      if (value.applyStage(this.nativePtr)) {
+        expiringItemsWithKeys.push(key);
+      }
+    });
+    expiringItemsWithKeys.forEach(key => {
+      this._modifiersWithKeys.delete(key);
+    });
+  }
+  width(value) {
+    throw new Error('Method not implemented.');
+  }
+  height(value) {
+    throw new Error('Method not implemented.');
+  }
+  expandSafeArea(types, edges) {
+    throw new Error('Method not implemented.');
+  }
+  responseRegion(value) {
+    throw new Error('Method not implemented.');
+  }
+  mouseResponseRegion(value) {
+    throw new Error('Method not implemented.');
+  }
+  size(value) {
+    throw new Error('Method not implemented.');
+  }
+  constraintSize(value) {
+    throw new Error('Method not implemented.');
+  }
+  touchable(value) {
+    throw new Error('Method not implemented.');
+  }
+  hitTestBehavior(value) {
+    throw new Error('Method not implemented.');
+  }
+  layoutWeight(value) {
+    throw new Error('Method not implemented.');
+  }
+  padding(value) {
+    throw new Error('Method not implemented.');
+  }
+  margin(value) {
+    throw new Error('Method not implemented.');
+  }
+  background(builder, options) {
+    throw new Error('Method not implemented.');
+  }
+  backgroundColor(value) {
+    modifierWithKey(this._modifiersWithKeys, BackgroundColorModifier.identity, BackgroundColorModifier, value);
+    return this;
+  }
+  backgroundImage(src, repeat) {
+    throw new Error('Method not implemented.');
+  }
+  backgroundImageSize(value) {
+    throw new Error('Method not implemented.');
+  }
+  backgroundImagePosition(value) {
+    throw new Error('Method not implemented.');
+  }
+  backgroundBlurStyle(value, options) {
+    throw new Error('Method not implemented.');
+  }
+  foregroundBlurStyle(value, options) {
+    throw new Error('Method not implemented.');
+  }
+  opacity(value) {
+    modifierWithKey(this._modifiersWithKeys, OpacityModifier.identity, OpacityModifier, value);
+    return this;
+  }
+  border(value) {
+    throw new Error('Method not implemented.');
+  }
+  borderStyle(value) {
+    throw new Error('Method not implemented.');
+  }
+  borderWidth(value) {
+    throw new Error('Method not implemented.');
+  }
+  borderColor(value) {
+    throw new Error('Method not implemented.');
+  }
+  borderRadius(value) {
+    throw new Error('Method not implemented.');
+  }
+  borderImage(value) {
+    throw new Error('Method not implemented.');
+  }
+  foregroundColor(value) {
+    throw new Error('Method not implemented.');
+  }
+  onClick(event) {
+    throw new Error('Method not implemented.');
+  }
+  onHover(event) {
+    throw new Error('Method not implemented.');
+  }
+  hoverEffect(value) {
+    throw new Error('Method not implemented.');
+  }
+  onMouse(event) {
+    throw new Error('Method not implemented.');
+  }
+  onTouch(event) {
+    throw new Error('Method not implemented.');
+  }
+  onKeyEvent(event) {
+    throw new Error('Method not implemented.');
+  }
+  focusable(value) {
+    throw new Error('Method not implemented.');
+  }
+  onFocus(event) {
+    throw new Error('Method not implemented.');
+  }
+  onBlur(event) {
+    throw new Error('Method not implemented.');
+  }
+  tabIndex(index) {
+    throw new Error('Method not implemented.');
+  }
+  defaultFocus(value) {
+    throw new Error('Method not implemented.');
+  }
+  groupDefaultFocus(value) {
+    throw new Error('Method not implemented.');
+  }
+  focusOnTouch(value) {
+    throw new Error('Method not implemented.');
+  }
+  animation(value) {
+    throw new Error('Method not implemented.');
+  }
+  transition(value) {
+    throw new Error('Method not implemented.');
+  }
+  gesture(gesture, mask) {
+    throw new Error('Method not implemented.');
+  }
+  priorityGesture(gesture, mask) {
+    throw new Error('Method not implemented.');
+  }
+  parallelGesture(gesture, mask) {
+    throw new Error('Method not implemented.');
+  }
+  blur(value) {
+    throw new Error('Method not implemented.');
+  }
+  linearGradientBlur(value, options) {
+    throw new Error('Method not implemented.');
+  }
+  brightness(value) {
+    throw new Error('Method not implemented.');
+  }
+  contrast(value) {
+    throw new Error('Method not implemented.');
+  }
+  grayscale(value) {
+    throw new Error('Method not implemented.');
+  }
+  colorBlend(value) {
+    throw new Error('Method not implemented.');
+  }
+  saturate(value) {
+    throw new Error('Method not implemented.');
+  }
+  sepia(value) {
+    throw new Error('Method not implemented.');
+  }
+  invert(value) {
+    throw new Error('Method not implemented.');
+  }
+  hueRotate(value) {
+    throw new Error('Method not implemented.');
+  }
+  useEffect(value) {
+    throw new Error('Method not implemented.');
+  }
+  backdropBlur(value) {
+    throw new Error('Method not implemented.');
+  }
+  renderGroup(value) {
+    throw new Error('Method not implemented.');
+  }
+  translate(value) {
+    throw new Error('Method not implemented.');
+  }
+  scale(value) {
+    throw new Error('Method not implemented.');
+  }
+  gridSpan(value) {
+    throw new Error('Method not implemented.');
+  }
+  gridOffset(value) {
+    throw new Error('Method not implemented.');
+  }
+  rotate(value) {
+    throw new Error('Method not implemented.');
+  }
+  transform(value) {
+    throw new Error('Method not implemented.');
+  }
+  onAppear(event) {
+    throw new Error('Method not implemented.');
+  }
+  onDisAppear(event) {
+    throw new Error('Method not implemented.');
+  }
+  onAreaChange(event) {
+    throw new Error('Method not implemented.');
+  }
+  visibility(value) {
+    throw new Error('Method not implemented.');
+  }
+  flexGrow(value) {
+    throw new Error('Method not implemented.');
+  }
+  flexShrink(value) {
+    throw new Error('Method not implemented.');
+  }
+  flexBasis(value) {
+    throw new Error('Method not implemented.');
+  }
+  alignSelf(value) {
+    throw new Error('Method not implemented.');
+  }
+  displayPriority(value) {
+    throw new Error('Method not implemented.');
+  }
+  zIndex(value) {
+    throw new Error('Method not implemented.');
+  }
+  sharedTransition(id, options) {
+    throw new Error('Method not implemented.');
+  }
+  direction(value) {
+    throw new Error('Method not implemented.');
+  }
+  align(value) {
+    throw new Error('Method not implemented.');
+  }
+  position(value) {
+    throw new Error('Method not implemented.');
+  }
+  markAnchor(value) {
+    throw new Error('Method not implemented.');
+  }
+  offset(value) {
+    throw new Error('Method not implemented.');
+  }
+  enabled(value) {
+    throw new Error('Method not implemented.');
+  }
+  useSizeType(value) {
+    throw new Error('Method not implemented.');
+  }
+  alignRules(value) {
+    throw new Error('Method not implemented.');
+  }
+  aspectRatio(value) {
+    throw new Error('Method not implemented.');
+  }
+  clickEffect(value) {
+    throw new Error('Method not implemented.');
+  }
+  onDragStart(event) {
+    throw new Error('Method not implemented.');
+  }
+  onDragEnter(event) {
+    throw new Error('Method not implemented.');
+  }
+  onDragMove(event) {
+    throw new Error('Method not implemented.');
+  }
+  onDragLeave(event) {
+    throw new Error('Method not implemented.');
+  }
+  onDrop(event) {
+    throw new Error('Method not implemented.');
+  }
+  onDragEnd(event) {
+    throw new Error('Method not implemented.');
+  }
+  allowDrop(value) {
+    throw new Error('Method not implemented.');
+  }
+  draggable(value) {
+    throw new Error('Method not implemented.');
+  }
+  overlay(value, options) {
+    throw new Error('Method not implemented.');
+  }
+  linearGradient(value) {
+    throw new Error('Method not implemented.');
+  }
+  sweepGradient(value) {
+    throw new Error('Method not implemented.');
+  }
+  radialGradient(value) {
+    throw new Error('Method not implemented.');
+  }
+  motionPath(value) {
+    throw new Error('Method not implemented.');
+  }
+  shadow(value) {
+    modifierWithKey(this._modifiersWithKeys, ShadowModifier.identity, ShadowModifier, value);
+    return this;
+  }
+  blendMode(value) {
+    throw new Error('Method not implemented.');
+  }
+  clip(value) {
+    throw new Error('Method not implemented.');
+  }
+  mask(value) {
+    throw new Error('Method not implemented.');
+  }
+  key(value) {
+    throw new Error('Method not implemented.');
+  }
+  id(value) {
+    throw new Error('Method not implemented.');
+  }
+  geometryTransition(id) {
+    throw new Error('Method not implemented.');
+  }
+  bindPopup(show, popup) {
+    throw new Error('Method not implemented.');
+  }
+  bindMenu(content, options) {
+    throw new Error('Method not implemented.');
+  }
+  bindContextMenu(content, responseType, options) {
+    throw new Error('Method not implemented.');
+  }
+  bindContentCover(isShow, builder, options) {
+    throw new Error('Method not implemented.');
+  }
+  bindSheet(isShow, builder, options) {
+    throw new Error('Method not implemented.');
+  }
+  stateStyles(value) {
+    throw new Error('Method not implemented.');
+  }
+  restoreId(value) {
+    throw new Error('Method not implemented.');
+  }
+  onVisibleAreaChange(ratios, event) {
+    throw new Error('Method not implemented.');
+  }
+  sphericalEffect(value) {
+    throw new Error('Method not implemented.');
+  }
+  lightUpEffect(value) {
+    throw new Error('Method not implemented.');
+  }
+  pixelStretchEffect(options) {
+    throw new Error('Method not implemented.');
+  }
+  keyboardShortcut(value, keys, action) {
+    throw new Error('Method not implemented.');
+  }
+  accessibilityGroup(value) {
+    throw new Error('Method not implemented.');
+  }
+  accessibilityText(value) {
+    throw new Error('Method not implemented.');
+  }
+  accessibilityDescription(value) {
+    throw new Error('Method not implemented.');
+  }
+  accessibilityLevel(value) {
+    throw new Error('Method not implemented.');
+  }
+  obscured(reasons) {
+    throw new Error('Method not implemented.');
+  }
+  reuseId(id) {
+    throw new Error('Method not implemented.');
+  }
+  renderFit(fitMode) {
+    throw new Error('Method not implemented.');
+  }
+  attributeModifier(modifier) {
+    return this;
+  }
+  onGestureJudgeBegin(callback) {
+    throw new Error('Method not implemented.');
   }
   onLoad(callback) {
     throw new Error('Method not implemented.');
   }
   onDestroy(event) {
-    throw new Error('Method not implemented.');
-  }
-  monopolizeEvents(monopolize) {
     throw new Error('Method not implemented.');
   }
 }
@@ -15006,13 +15343,22 @@ class ListDividerModifier extends ModifierWithKey {
     let _a, _b, _c, _d;
     if (reset) {
       GetUINativeModule().list.resetDivider(node);
-    }
-    else {
-      GetUINativeModule().list.setDivider(node, (_a = this.value) === null || _a === void 0 ? void 0 : _a.strokeWidth, (_b = this.value) === null || _b === void 0 ? void 0 : _b.color, (_c = this.value) === null || _c === void 0 ? void 0 : _c.startMargin, (_d = this.value) === null || _d === void 0 ? void 0 : _d.endMargin);
+    } else {
+      GetUINativeModule().list.setDivider(
+        node,
+        (_a = this.value) === null || _a === void 0 ? void 0 : _a.strokeWidth,
+        (_b = this.value) === null || _b === void 0 ? void 0 : _b.color,
+        (_c = this.value) === null || _c === void 0 ? void 0 : _c.startMargin,
+        (_d = this.value) === null || _d === void 0 ? void 0 : _d.endMargin
+      );
     }
   }
   checkObjectDiff() {
-    return !isBaseOrResourceEqual(this.stageValue.strokeWidth, this.value.strokeWidth);
+    let _a, _b, _c, _d, _e, _f, _g, _h;
+    return !(((_a = this.stageValue) === null || _a === void 0 ? void 0 : _a.strokeWidth) === ((_b = this.value) === null || _b === void 0 ? void 0 : _b.strokeWidth) &&
+      ((_c = this.stageValue) === null || _c === void 0 ? void 0 : _c.color) === ((_d = this.value) === null || _d === void 0 ? void 0 : _d.color) &&
+      ((_e = this.stageValue) === null || _e === void 0 ? void 0 : _e.startMargin) === ((_f = this.value) === null || _f === void 0 ? void 0 : _f.startMargin) &&
+      ((_g = this.stageValue) === null || _g === void 0 ? void 0 : _g.endMargin) === ((_h = this.value) === null || _h === void 0 ? void 0 : _h.endMargin));
   }
 }
 ListDividerModifier.identity = Symbol('listDivider');
@@ -15030,10 +15376,10 @@ class ChainAnimationOptionsModifier extends ModifierWithKey {
     }
   }
   checkObjectDiff() {
-    return !isBaseOrResourceEqual(this.stageValue.minSpace, this.value.minSpace) || !isBaseOrResourceEqual(this.stageValue.maxSpace, this.value.maxSpace) ||
-      !isBaseOrResourceEqual(this.stageValue.conductivity, this.value.conductivity) || !isBaseOrResourceEqual(this.stageValue.intensity, this.value.intensity) ||
-      !isBaseOrResourceEqual(this.stageValue.edgeEffect, this.value.edgeEffect) || !isBaseOrResourceEqual(this.stageValue.stiffness, this.value.stiffness) ||
-      !isBaseOrResourceEqual(this.stageValue.damping, this.value.damping);
+    return !(this.stageValue.minSpace === this.value.minSpace && this.stageValue.maxSpace === this.value.maxSpace &&
+      this.stageValue.conductivity === this.value.conductivity && this.stageValue.intensity === this.value.intensity &&
+      this.stageValue.edgeEffect === this.value.edgeEffect && this.stageValue.stiffness === this.value.stiffness &&
+      this.stageValue.damping === this.value.damping);
   }
 }
 ChainAnimationOptionsModifier.identity = Symbol('chainAnimationOptions');
@@ -15210,10 +15556,17 @@ class ArkListComponent extends ArkComponent {
   lanes(value, gutter) {
     let opt = new ArkLanesOpt();
     opt.gutter = gutter;
-    opt.lanesNum = value;
-    const lc = value;
-    opt.minLength = lc.minLength;
-    opt.maxLength = lc.maxLength;
+    if (isUndefined(value)) {
+      opt.lanesNum = undefined;
+    }
+    else if (isNumber(value)) {
+      opt.lanesNum = value;
+    }
+    else {
+      const lc = value;
+      opt.minLength = lc.minLength;
+      opt.maxLength = lc.maxLength;
+    }
     modifierWithKey(this._modifiersWithKeys, ListLanesModifier.identity, ListLanesModifier, opt);
     return this;
   }
@@ -15275,7 +15628,7 @@ class ArkListComponent extends ArkComponent {
     return this;
   }
   nestedScroll(value) {
-    modifierWithKey(this._modifiersWithKeys, ListNestedScrollModifier.idsentity, ListNestedScrollModifier, value);
+    modifierWithKey(this._modifiersWithKeys, ListNestedScrollModifier.identity, ListNestedScrollModifier, value);
     return this;
   }
   enableScrollInteraction(value) {
@@ -15419,10 +15772,10 @@ class ListItemGroupDividerModifier extends ModifierWithKey {
   }
   checkObjectDiff() {
     let _a, _b, _c, _d, _e, _f, _g, _h;
-    return !isBaseOrResourceEqual((_a = this.stageValue) === null || _a === void 0 ? void 0 : _a.strokeWidth, (_b = this.value) === null || _b === void 0 ? void 0 : _b.strokeWidth) ||
-      !isBaseOrResourceEqual((_c = this.stageValue) === null || _c === void 0 ? void 0 : _c.color, (_d = this.value) === null || _d === void 0 ? void 0 : _d.color) ||
-      !isBaseOrResourceEqual((_e = this.stageValue) === null || _e === void 0 ? void 0 : _e.startMargin, (_f = this.value) === null || _f === void 0 ? void 0 : _f.startMargin) ||
-      !isBaseOrResourceEqual((_g = this.stageValue) === null || _g === void 0 ? void 0 : _g.endMargin, (_h = this.value) === null || _h === void 0 ? void 0 : _h.endMargin);
+    return !(((_a = this.stageValue) === null || _a === void 0 ? void 0 : _a.strokeWidth) === ((_b = this.value) === null || _b === void 0 ? void 0 : _b.strokeWidth) &&
+      ((_c = this.stageValue) === null || _c === void 0 ? void 0 : _c.color) === ((_d = this.value) === null || _d === void 0 ? void 0 : _d.color) &&
+      ((_e = this.stageValue) === null || _e === void 0 ? void 0 : _e.startMargin) === ((_f = this.value) === null || _f === void 0 ? void 0 : _f.startMargin) &&
+      ((_g = this.stageValue) === null || _g === void 0 ? void 0 : _g.endMargin) === ((_h = this.value) === null || _h === void 0 ? void 0 : _h.endMargin));
   }
 }
 ListItemGroupDividerModifier.identity = Symbol('listItemGroupDivider');
@@ -15707,8 +16060,7 @@ class SwiperDisplayArrowModifier extends ModifierWithKey {
   applyPeer(node, reset) {
     if (reset) {
       GetUINativeModule().swiper.resetSwiperDisplayArrow(node);
-    }
-    else {
+    } else {
       if (!isNull(this.value.value) && typeof this.value === 'object') {
         let displayArrowValue = 3;
         let showBackground = undefined;
@@ -15724,8 +16076,7 @@ class SwiperDisplayArrowModifier extends ModifierWithKey {
           else {
             displayArrowValue = 0;
           }
-        }
-        else if (typeof this.value.value === 'object') {
+        } else if (typeof this.value.value === 'object') {
           displayArrowValue = 2;
           showBackground = this.value.value.showBackground;
           isSidebarMiddle = this.value.value.isSidebarMiddle;
@@ -17356,3 +17707,41 @@ globalThis.GridContainer.attributeModifier = function (modifier) {
   applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
 };
+/// <reference path='./import.ts' />
+class ArkEffectComponentComponent extends ArkComponent {
+  monopolizeEvents(monopolize) {
+      throw new Error('Method not implemented.');
+  }
+}
+// @ts-ignore
+if (globalThis.EffectComponent !== undefined) {
+  // @ts-ignore
+  globalThis.EffectComponent.attributeModifier = function (modifier) {
+    const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
+    let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+    let component = this.createOrGetNode(elmtId, () => {
+      return new ArkEffectComponentComponent(nativeNode);
+    });
+    modifier.applyNormalAttribute(component);
+    component.applyModifierPatch();
+  };
+}
+/// <reference path='./import.ts' />
+class ArkRemoteWindowComponent extends ArkComponent {
+  monopolizeEvents(monopolize) {
+    throw new Error('Method not implemented.');
+  }
+}
+// @ts-ignore
+if (globalThis.RemoteWindow !== undefined) {
+  // @ts-ignore
+  globalThis.RemoteWindow.attributeModifier = function (modifier) {
+    const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
+    let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+    let component = this.createOrGetNode(elmtId, () => {
+      return new ArkRemoteWindowComponent(nativeNode);
+    });
+    modifier.applyNormalAttribute(component);
+    component.applyModifierPatch();
+  };
+}

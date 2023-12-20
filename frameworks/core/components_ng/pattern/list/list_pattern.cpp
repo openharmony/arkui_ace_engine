@@ -29,7 +29,7 @@
 #include "core/common/container.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/scroll/scroll_bar_theme.h"
-#include "core/components/scroll/scrollable.h"
+#include "core/components_ng/pattern/scrollable/scrollable.h"
 #include "core/components_ng/pattern/list/list_item_group_pattern.h"
 #include "core/components_ng/pattern/list/list_item_pattern.h"
 #include "core/components_ng/pattern/list/list_lanes_layout_algorithm.h"
@@ -152,7 +152,7 @@ bool ListPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     }
     currentDelta_ = 0.0f;
     float prevStartOffset = startMainPos_;
-    float prevEndOffset = endMainPos_ - contentMainSize_;
+    float prevEndOffset = endMainPos_ - contentMainSize_ + contentEndOffset_;
     contentMainSize_ = listLayoutAlgorithm->GetContentMainSize();
     contentStartOffset_ = listLayoutAlgorithm->GetContentStartOffset();
     contentEndOffset_ = listLayoutAlgorithm->GetContentEndOffset();
@@ -333,15 +333,17 @@ void ListPattern::ProcessEvent(
 
     auto onReachStart = listEventHub->GetOnReachStart();
     if (onReachStart && (startIndex_ == 0)) {
-        bool scrollUpToStart = Positive(prevStartOffset) && NonPositive(startMainPos_);
-        bool scrollDownToStart = (Negative(prevStartOffset) || !isInitialized_) && NonNegative(startMainPos_);
+        bool scrollUpToStart = GreatNotEqual(prevStartOffset, contentStartOffset_) &&
+            LessOrEqual(startMainPos_, contentStartOffset_);
+        bool scrollDownToStart = (LessNotEqual(prevStartOffset, contentStartOffset_) || !isInitialized_) &&
+            GreatOrEqual(startMainPos_, contentStartOffset_);
         if (scrollUpToStart || scrollDownToStart) {
             onReachStart();
         }
     }
     auto onReachEnd = listEventHub->GetOnReachEnd();
     if (onReachEnd && (endIndex_ == maxListItemIndex_)) {
-        float endOffset = endMainPos_ - contentMainSize_;
+        float endOffset = endMainPos_ - contentMainSize_ + contentEndOffset_;
         bool scrollUpToEnd = (Positive(prevEndOffset) || !isInitialized_) && NonPositive(endOffset);
         bool scrollDownToEnd = Negative(prevEndOffset) && NonNegative(endOffset);
         if (scrollUpToEnd || (scrollDownToEnd && GetScrollSource() != SCROLL_FROM_NONE)) {
@@ -596,10 +598,10 @@ OverScrollOffset ListPattern::GetOverScrollOffset(double delta) const
             offset.start = delta;
         }
         if (startPos > contentStartOffset_ && newStartPos <= contentStartOffset_) {
-            offset.start = -startPos;
+            offset.start = contentStartOffset_ - startPos;
         }
         if (startPos <= contentStartOffset_ && newStartPos > contentStartOffset_) {
-            offset.start = newStartPos;
+            offset.start = newStartPos - contentStartOffset_;
         }
         if (IsScrollSnapAlignCenter() && !itemPosition_.empty()) {
             float startItemHeight = itemPosition_.begin()->second.endPos - itemPosition_.begin()->second.startPos;
@@ -662,10 +664,10 @@ bool ListPattern::UpdateCurrentOffset(float offset, int32_t source)
     float overScroll = 0.0f;
     // over scroll in drag update during over scroll.
     auto startPos = startMainPos_ - currentDelta_;
-    if ((itemPosition_.begin()->first == 0) && Positive(startPos)) {
-        overScroll = startPos;
+    if ((itemPosition_.begin()->first == 0) && GreatNotEqual(startPos, contentStartOffset_)) {
+        overScroll = startPos - contentStartOffset_;
     } else {
-        overScroll = contentMainSize_ - (endMainPos_ - currentDelta_);
+        overScroll = contentMainSize_ - contentEndOffset_ - (endMainPos_ - currentDelta_);
     }
     if (IsScrollSnapAlignCenter()) {
         auto itemHeight = itemPosition_.begin()->second.endPos - itemPosition_.begin()->second.startPos;
@@ -1176,7 +1178,7 @@ void ListPattern::ScrollToIndex(int32_t index, bool smooth, ScrollAlign align)
 {
     SetScrollSource(SCROLL_FROM_JUMP);
     StopAnimate();
-    if ((index >= 0 || index == ListLayoutAlgorithm::LAST_ITEM)) {
+    if (index >= 0 || index == ListLayoutAlgorithm::LAST_ITEM) {
         currentDelta_ = 0.0f;
         smooth_ = smooth;
         if (smooth_) {
@@ -1457,10 +1459,10 @@ void ListPattern::HandleScrollBarOutBoundary()
     }
     float overScroll = 0.0f;
     if (!IsScrollSnapAlignCenter()) {
-        if ((itemPosition_.begin()->first == 0) && Positive(startMainPos_)) {
-            overScroll = startMainPos_;
+        if ((itemPosition_.begin()->first == 0) && GreatNotEqual(startMainPos_, contentStartOffset_)) {
+            overScroll = startMainPos_ - contentStartOffset_;
         } else {
-            overScroll = contentMainSize_ - endMainPos_;
+            overScroll = contentMainSize_ - contentEndOffset_ - endMainPos_;
         }
     } else {
         float itemHeight = itemPosition_[centerIndex_].endPos - itemPosition_[centerIndex_].startPos;
@@ -1533,6 +1535,10 @@ void ListPattern::UpdateScrollBarOffset()
     auto estimatedHeight = itemsSize / itemPosition_.size() * (maxListItemIndex_ + 1) - spaceWidth_;
     if (GetAlwaysEnabled()) {
         estimatedHeight = estimatedHeight - spaceWidth_;
+    }
+    if (!IsScrollSnapAlignCenter()) {
+        currentOffset += contentStartOffset_;
+        estimatedHeight += contentStartOffset_ + contentEndOffset_;
     }
 
     // calculate padding offset of list

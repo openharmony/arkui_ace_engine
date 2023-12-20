@@ -70,8 +70,8 @@ class ListScrollSnapAlignModifier extends ModifierWithKey<ScrollSnapAlign> {
   }
 }
 
-class ListDividerModifier extends ModifierWithKey<{ strokeWidth: any; color?: any; startMargin?: any; endMargin?: any; } | null> {
-  constructor(value: { strokeWidth: any; color?: any; startMargin?: any; endMargin?: any; } | null) {
+class ListDividerModifier extends ModifierWithKey<DividerStyle> {
+  constructor(value: DividerStyle) {
     super(value);
   }
   static identity: Symbol = Symbol('listDivider');
@@ -84,7 +84,10 @@ class ListDividerModifier extends ModifierWithKey<{ strokeWidth: any; color?: an
   }
 
   checkObjectDiff(): boolean {
-    return !isBaseOrResourceEqual(this.stageValue.strokeWidth, this.value.strokeWidth);
+    return !(this.stageValue?.strokeWidth === this.value?.strokeWidth &&
+      this.stageValue?.color === this.value?.color &&
+      this.stageValue?.startMargin === this.value?.startMargin &&
+      this.stageValue?.endMargin === this.value?.endMargin);
   }
 }
 
@@ -102,11 +105,11 @@ class ChainAnimationOptionsModifier extends ModifierWithKey<ChainAnimationOption
   }
 
   checkObjectDiff(): boolean {
-    return !isBaseOrResourceEqual(this.stageValue.minSpace, this.value.minSpace) || !isBaseOrResourceEqual(this.stageValue.maxSpace, this.value.maxSpace) ||
-    !isBaseOrResourceEqual(this.stageValue.conductivity, this.value.conductivity) || !isBaseOrResourceEqual(this.stageValue.intensity, this.value.intensity) ||
-    !isBaseOrResourceEqual(this.stageValue.edgeEffect, this.value.edgeEffect) || !isBaseOrResourceEqual(this.stageValue.stiffness, this.value.stiffness) ||
-    !isBaseOrResourceEqual(this.stageValue.damping, this.value.damping);
-}
+    return !(this.stageValue.minSpace === this.value.minSpace && this.stageValue.maxSpace === this.value.maxSpace &&
+      this.stageValue.conductivity === this.value.conductivity && this.stageValue.intensity === this.value.intensity &&
+      this.stageValue.edgeEffect === this.value.edgeEffect && this.stageValue.stiffness === this.value.stiffness &&
+      this.stageValue.damping === this.value.damping);
+  }
 }
 
 class ListChainAnimationModifier extends ModifierWithKey<boolean> {
@@ -278,10 +281,15 @@ class ArkListComponent extends ArkComponent implements ListAttribute {
   lanes(value: number | LengthConstrain, gutter?: any): this {
     let opt: ArkLanesOpt = new ArkLanesOpt();
     opt.gutter = gutter;
-    opt.lanesNum = value as number;
-    const lc = value as LengthConstrain;
-    opt.minLength = lc.minLength;
-    opt.maxLength = lc.maxLength;
+    if (isUndefined(value)) {
+      opt.lanesNum = undefined;
+    } else if (isNumber(value)) {
+      opt.lanesNum = value as number;
+    } else {
+      const lc = value as LengthConstrain;
+      opt.minLength = lc.minLength;
+      opt.maxLength = lc.maxLength;
+    }
     modifierWithKey(this._modifiersWithKeys, ListLanesModifier.identity, ListLanesModifier, opt);
     return this;
   }

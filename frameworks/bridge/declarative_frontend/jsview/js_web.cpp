@@ -956,6 +956,15 @@ public:
             response_->SetData(data);
             return;
         }
+        if (args[0]->IsArrayBuffer()) {
+            JsiRef<JsiArrayBuffer> arrayBuffer = JsiRef<JsiArrayBuffer>::Cast(args[0]);
+            int32_t bufferSize = arrayBuffer->ByteLength();
+            void* buffer = arrayBuffer->GetBuffer();
+            const char* charPtr = static_cast<const char*>(buffer);
+            std::string data(charPtr, bufferSize);
+            response_->SetData(data);
+            return;
+        }
         if (args[0]->IsObject()) {
             std::string resourceUrl;
             std::string url;
@@ -1645,12 +1654,15 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSClass<JSWeb>::StaticMethod("onAudioStateChanged", &JSWeb::OnAudioStateChanged);
     JSClass<JSWeb>::StaticMethod("mediaOptions", &JSWeb::MediaOptions);
     JSClass<JSWeb>::StaticMethod("onFirstContentfulPaint", &JSWeb::OnFirstContentfulPaint);
+    JSClass<JSWeb>::StaticMethod("onNavigationEntryCommitted", &JSWeb::OnNavigationEntryCommitted);
     JSClass<JSWeb>::StaticMethod("onControllerAttached", &JSWeb::OnControllerAttached);
     JSClass<JSWeb>::StaticMethod("onOverScroll", &JSWeb::OnOverScroll);
+    JSClass<JSWeb>::StaticMethod("copyOptions", &JSWeb::CopyOption);
     JSClass<JSWeb>::StaticMethod("onScreenCaptureRequest", &JSWeb::OnScreenCaptureRequest);
     JSClass<JSWeb>::StaticMethod("layoutMode", &JSWeb::SetLayoutMode);
     JSClass<JSWeb>::StaticMethod("nestedScroll", &JSWeb::SetNestedScroll);
     JSClass<JSWeb>::StaticMethod("javaScriptOnDocumentStart", &JSWeb::JavaScriptOnDocumentStart);
+    JSClass<JSWeb>::StaticMethod("javaScriptOnDocumentEnd", &JSWeb::JavaScriptOnDocumentEnd);
     JSClass<JSWeb>::InheritAndBind<JSViewAbstract>(globalObj);
     JSWebDialog::JSBind(globalObj);
     JSWebGeolocation::JSBind(globalObj);
@@ -1923,6 +1935,10 @@ void JSWeb::Create(const JSCallbackInfo& info)
     if (type->IsNumber() && (type->ToNumber<int32_t>() >= 0) && (type->ToNumber<int32_t>() <= 1)) {
         webType = static_cast<WebType>(type->ToNumber<int32_t>());
     }
+
+    bool incognitoMode = false;
+    ParseJsBool(paramObject->GetProperty("incognitoMode"), incognitoMode);
+
     auto controller = JSRef<JSObject>::Cast(controllerObj);
     auto setWebIdFunction = controller->GetProperty("setWebId");
     if (setWebIdFunction->IsFunction()) {
@@ -1942,11 +1958,31 @@ void JSWeb::Create(const JSCallbackInfo& info)
             };
         }
 
+        auto setRequestPermissionsFromUserFunction = controller->GetProperty("requestPermissionsFromUserWeb");
+        std::function<void(const std::shared_ptr<BaseEventInfo>&)> requestPermissionsFromUserCallback = nullptr;
+        if (setRequestPermissionsFromUserFunction->IsFunction()) {
+            requestPermissionsFromUserCallback = [webviewController = controller,
+                func = JSRef<JSFunc>::Cast(setRequestPermissionsFromUserFunction)]
+                (const std::shared_ptr<BaseEventInfo>& info) {
+                    auto* eventInfo = TypeInfoHelper::DynamicCast<WebPermissionRequestEvent>(info.get());
+                    JSRef<JSObject> obj = JSRef<JSObject>::New();
+                    JSRef<JSObject> permissionObj = JSClass<JSWebPermissionRequest>::NewInstance();
+                    auto permissionEvent = Referenced::Claim(permissionObj->Unwrap<JSWebPermissionRequest>());
+                    permissionEvent->SetEvent(*eventInfo);
+                    obj->SetPropertyObject("request", permissionObj);
+                    JSRef<JSVal> argv[] = { JSRef<JSVal>::Cast(obj) };
+                    auto result = func->Call(webviewController, 1, argv);
+            };
+        }
+        
         int32_t parentNWebId = -1;
         bool isPopup = JSWebWindowNewHandler::ExistController(controller, parentNWebId);
         WebModel::GetInstance()->Create(
-            dstSrc.value(), std::move(setIdCallback), std::move(setHapPathCallback), parentNWebId, isPopup, webType);
+            dstSrc.value(), std::move(setIdCallback),
+            std::move(setHapPathCallback), parentNWebId, isPopup, webType,
+            incognitoMode);
 
+        WebModel::GetInstance()->SetPermissionClipboard(std::move(requestPermissionsFromUserCallback));
         auto getCmdLineFunction = controller->GetProperty("getCustomeSchemeCmdLine");
         std::string cmdLine = JSRef<JSFunc>::Cast(getCmdLineFunction)->Call(controller, 0, {})->ToString();
         if (!cmdLine.empty()) {
@@ -1964,7 +2000,8 @@ void JSWeb::Create(const JSCallbackInfo& info)
 
     } else {
         auto* jsWebController = controller->Unwrap<JSWebController>();
-        WebModel::GetInstance()->Create(dstSrc.value(), jsWebController->GetController(), webType);
+        WebModel::GetInstance()->Create(dstSrc.value(),
+            jsWebController->GetController(), webType, incognitoMode);
     }
 
     WebModel::GetInstance()->SetFocusable(true);
@@ -3746,6 +3783,42 @@ void JSWeb::OnFirstContentfulPaint(const JSCallbackInfo& args)
     WebModel::GetInstance()->SetFirstContentfulPaintId(std::move(uiCallback));
 }
 
+JSRef<JSVal> NavigationEntryCommittedEventToJSValue(const NavigationEntryCommittedEvent& eventInfo)
+{
+    JSRef<JSObject> obj = JSRef<JSObject>::New();
+    obj->SetProperty("isMainFrame", eventInfo.IsMainFrame());
+    obj->SetProperty("isSameDocument", eventInfo.IsSameDocument());
+    obj->SetProperty("didReplaceEntry", eventInfo.DidReplaceEntry());
+    obj->SetProperty("navigationType", static_cast<int>(eventInfo.GetNavigationType()));
+    obj->SetProperty("url", eventInfo.GetUrl());
+    return JSRef<JSVal>::Cast(obj);
+}
+
+void JSWeb::OnNavigationEntryCommitted(const JSCallbackInfo& args)
+{
+    if (!args[0]->IsFunction()) {
+        return;
+    }
+    WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto jsFunc = AceType::MakeRefPtr<JsEventFunction<NavigationEntryCommittedEvent, 1>>(
+        JSRef<JSFunc>::Cast(args[0]), NavigationEntryCommittedEventToJSValue);
+
+    auto instanceId = Container::CurrentId();
+    auto uiCallback = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), instanceId, node = frameNode](
+                          const std::shared_ptr<BaseEventInfo>& info) {
+        ContainerScope scope(instanceId);
+        auto context = PipelineBase::GetCurrentContext();
+        CHECK_NULL_VOID(context);
+        context->UpdateCurrentActiveNode(node);
+        context->PostAsyncEvent([execCtx, postFunc = func, info]() {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            auto* eventInfo = TypeInfoHelper::DynamicCast<NavigationEntryCommittedEvent>(info.get());
+            postFunc->Execute(*eventInfo);
+        });
+    };
+    WebModel::GetInstance()->SetNavigationEntryCommittedId(std::move(uiCallback));
+}
+
 void JSWeb::OnControllerAttached(const JSCallbackInfo& args)
 {
     if (!args[0]->IsFunction()) {
@@ -3843,7 +3916,7 @@ void JSWeb::SetNestedScroll(const JSCallbackInfo& args)
     args.ReturnSelf();
 }
 
-void JSWeb::JavaScriptOnDocumentStart(const JSCallbackInfo& args)
+void JSWeb::ParseScriptItems(const JSCallbackInfo& args, ScriptItems& scriptItems)
 {
     if (args.Length() != 1 || args[0]->IsUndefined() || args[0]->IsNull() || !args[0]->IsArray()) {
         return;
@@ -3854,7 +3927,6 @@ void JSWeb::JavaScriptOnDocumentStart(const JSCallbackInfo& args)
         return;
     }
     std::string script;
-    ScriptItems scriptItems;
     std::vector<std::string> scriptRules;
     for (size_t i = 0; i < length; i++) {
         auto item = paramArray->GetValueAt(i);
@@ -3878,6 +3950,42 @@ void JSWeb::JavaScriptOnDocumentStart(const JSCallbackInfo& args)
             scriptItems.insert(std::make_pair(script, scriptRules));
         }
     }
+}
+
+void JSWeb::JavaScriptOnDocumentStart(const JSCallbackInfo& args)
+{
+    ScriptItems scriptItems;
+    ParseScriptItems(args, scriptItems);
     WebModel::GetInstance()->JavaScriptOnDocumentStart(scriptItems);
+}
+
+void JSWeb::JavaScriptOnDocumentEnd(const JSCallbackInfo& args)
+{
+    ScriptItems scriptItems;
+    ParseScriptItems(args, scriptItems);
+    WebModel::GetInstance()->JavaScriptOnDocumentEnd(scriptItems);
+}
+
+void JSWeb::CopyOption(int32_t copyOption)
+{
+    auto mode = CopyOptions::Distributed;
+    switch (copyOption) {
+        case static_cast<int32_t>(CopyOptions::None):
+            mode = CopyOptions::None;
+            break;
+        case static_cast<int32_t>(CopyOptions::InApp):
+            mode = CopyOptions::InApp;
+            break;
+        case static_cast<int32_t>(CopyOptions::Local):
+            mode = CopyOptions::Local;
+            break;
+        case static_cast<int32_t>(CopyOptions::Distributed):
+            mode = CopyOptions::Distributed;
+            break;
+        default:
+            mode = CopyOptions::Distributed;
+            break;
+    }
+    WebModel::GetInstance()->SetCopyOptionMode(mode);
 }
 } // namespace OHOS::Ace::Framework

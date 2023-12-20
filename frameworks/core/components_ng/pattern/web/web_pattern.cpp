@@ -167,16 +167,24 @@ const std::vector<int32_t> DEFAULT_ORIGN_GEAR {0, 2000, 4000, 6000, 8000};
 
 WebPattern::WebPattern() = default;
 
-WebPattern::WebPattern(std::string webSrc, const RefPtr<WebController>& webController, WebType type)
-    : webSrc_(std::move(webSrc)), webController_(webController), type_(type)
+WebPattern::WebPattern(const std::string& webSrc,
+                       const RefPtr<WebController>& webController,
+                       WebType type,
+                       bool incognitoMode)
+    : webSrc_(std::move(webSrc)), webController_(webController), type_(type),
+      incognitoMode_(incognitoMode)
 {}
 
-WebPattern::WebPattern(std::string webSrc, const SetWebIdCallback& setWebIdCallback, WebType type)
-    : webSrc_(std::move(webSrc)), setWebIdCallback_(setWebIdCallback), type_(type)
-{}
+WebPattern::WebPattern(const std::string& webSrc,
+                       const SetWebIdCallback& setWebIdCallback,
+                       WebType type,
+                       bool incognitoMode)
+    : webSrc_(std::move(webSrc)), setWebIdCallback_(setWebIdCallback), type_(type),
+      incognitoMode_(incognitoMode) {}
 
 WebPattern::~WebPattern()
 {
+    TAG_LOGI(AceLogTag::ACE_WEB, "Web pattern destory");
     if (delegate_) {
         delegate_->SetAudioMuted(true);
     }
@@ -1217,6 +1225,13 @@ void WebPattern::OnOverScrollModeUpdate(int mode)
     }
 }
 
+void WebPattern::OnCopyOptionModeUpdate(int32_t mode)
+{
+    if (delegate_) {
+        delegate_->UpdateCopyOptionMode(mode);
+    }
+}
+
 void WebPattern::OnForceDarkAccessUpdate(bool access)
 {
     if (delegate_) {
@@ -1480,6 +1495,7 @@ void WebPattern::OnModifyDone()
             delegate_->InitOHOSWeb(PipelineContext::GetCurrentContext(), renderSurface_);
         }
         UpdateJavaScriptOnDocumentStart();
+        UpdateJavaScriptOnDocumentEnd();
         delegate_->UpdateBackgroundColor(GetBackgroundColorValue(
             static_cast<int32_t>(renderContext->GetBackgroundColor().value_or(Color::WHITE).GetValue())));
         delegate_->UpdateJavaScriptEnabled(GetJsEnabledValue(true));
@@ -1525,6 +1541,7 @@ void WebPattern::OnModifyDone()
         delegate_->UpdateVerticalScrollBarAccess(GetVerticalScrollBarAccessEnabledValue(true));
         delegate_->UpdateScrollBarColor(GetScrollBarColorValue(DEFAULT_SCROLLBAR_COLOR));
         delegate_->UpdateOverScrollMode(GetOverScrollModeValue(OverScrollMode::NEVER));
+        delegate_->UpdateCopyOptionMode(GetCopyOptionModeValue(static_cast<int32_t>(CopyOptions::Distributed)));
         if (GetBlockNetwork()) {
             delegate_->UpdateBlockNetwork(GetBlockNetwork().value());
         }
@@ -1537,7 +1554,7 @@ void WebPattern::OnModifyDone()
         isAllowWindowOpenMethod_ = SystemProperties::GetAllowWindowOpenMethodEnabled();
         delegate_->UpdateAllowWindowOpenMethod(GetAllowWindowOpenMethodValue(isAllowWindowOpenMethod_));
         if (!webAccessibilityNode_) {
-            webAccessibilityNode_ = AceType::MakeRefPtr<WebAccessibilityNode>(host);
+            webAccessibilityNode_ = AceType::MakeRefPtr<WebAccessibilityNode>(WeakPtr<FrameNode>(host));
         }
     }
 
@@ -2783,18 +2800,35 @@ RefPtr<NodePaintMethod> WebPattern::CreateNodePaintMethod()
 
 void WebPattern::JavaScriptOnDocumentStart(const ScriptItems& scriptItems)
 {
-    scriptItems_ = std::make_optional<ScriptItems>(scriptItems);
+    onDocumentStartScriptItems_ = std::make_optional<ScriptItems>(scriptItems);
     if (delegate_) {
         UpdateJavaScriptOnDocumentStart();
         delegate_->JavaScriptOnDocumentStart();
     }
 }
 
+void WebPattern::JavaScriptOnDocumentEnd(const ScriptItems& scriptItems)
+{
+    onDocumentEndScriptItems_ = std::make_optional<ScriptItems>(scriptItems);
+    if (delegate_) {
+        UpdateJavaScriptOnDocumentEnd();
+        delegate_->JavaScriptOnDocumentEnd();
+    }
+}
+
 void WebPattern::UpdateJavaScriptOnDocumentStart()
 {
-    if (delegate_ && scriptItems_.has_value()) {
-        delegate_->SetJavaScriptItems(scriptItems_.value());
-        scriptItems_ = std::nullopt;
+    if (delegate_ && onDocumentStartScriptItems_.has_value()) {
+        delegate_->SetJavaScriptItems(onDocumentStartScriptItems_.value(), ScriptItemType::DOCUMENT_START);
+        onDocumentStartScriptItems_ = std::nullopt;
+    }
+}
+
+void WebPattern::UpdateJavaScriptOnDocumentEnd()
+{
+    if (delegate_ && onDocumentEndScriptItems_.has_value()) {
+        delegate_->SetJavaScriptItems(onDocumentEndScriptItems_.value(), ScriptItemType::DOCUMENT_END);
+        onDocumentEndScriptItems_ = std::nullopt;
     }
 }
 

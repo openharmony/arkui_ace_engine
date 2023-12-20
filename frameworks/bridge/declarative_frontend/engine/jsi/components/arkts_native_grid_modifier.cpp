@@ -124,12 +124,11 @@ void ResetGridScrollBar(NodeHandle node)
     GridModelNG::SetScrollBarMode(frameNode, DEFAULT_SCROLL_BAR);
 }
 
-void SetGridScrollBarWidth(NodeHandle node, const struct ArkUIDimensionType* scrollBarWidthType)
+void SetGridScrollBarWidth(NodeHandle node, double value, int32_t unit)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    Dimension scrollBarWidth =
-        Dimension(scrollBarWidthType->value, static_cast<OHOS::Ace::DimensionUnit>(scrollBarWidthType->units));
+    Dimension scrollBarWidth = Dimension(value, static_cast<OHOS::Ace::DimensionUnit>(unit));
     GridModelNG::SetScrollBarWidth(frameNode, scrollBarWidth);
 }
 

@@ -28,14 +28,15 @@ using OnWebAsyncFunc = std::function<void(const std::shared_ptr<BaseEventInfo>& 
 using SetWebIdCallback = std::function<void(int32_t)>;
 using SetHapPathCallback = std::function<void(const std::string&)>;
 using JsProxyCallback = std::function<void()>;
+using setPermissionClipboardCallback = std::function<void(const std::shared_ptr<BaseEventInfo>&)>;
 
 class ACE_EXPORT WebModelNG : public OHOS::Ace::WebModel {
 public:
     void Create(const std::string& src, const RefPtr<WebController>& webController,
-        WebType type = WebType::SURFACE) override;
+        WebType type = WebType::SURFACE, bool incognitoMode = false) override;
     void Create(const std::string& src, std::function<void(int32_t)>&& setWebIdCallback,
         std::function<void(const std::string&)>&& setHapPathCallback,
-        int32_t parentWebId, bool popup, WebType type = WebType::SURFACE) override;
+        int32_t parentWebId, bool popup, WebType type = WebType::SURFACE, bool incognitoMode = false) override;
     void SetCustomScheme(const std::string& cmdLine) override;
     void SetOnCommonDialog(std::function<bool(const BaseEventInfo* info)>&& jsCallback, int dialogEventType) override;
     void SetOnConsoleLog(std::function<bool(const BaseEventInfo* info)>&& jsCallback) override;
@@ -76,6 +77,7 @@ public:
     void SetRefreshAccessedHistoryId(std::function<void(const BaseEventInfo* info)>&& jsCallback) override;
     void SetCacheMode(WebCacheMode cacheMode) override;
     void SetOverScrollMode(OverScrollMode mode) override;
+    void SetCopyOptionMode(CopyOptions mode) override;
     void SetOverviewModeAccessEnabled(bool isOverviewModeAccessEnabled) override;
     void SetFileFromUrlAccessEnabled(bool isFileFromUrlAccessEnabled) override;
     void SetDatabaseAccessEnabled(bool isDatabaseAccessEnabled) override;
@@ -133,6 +135,8 @@ public:
         std::function<void(const std::shared_ptr<BaseEventInfo>& info)>&& audioStateChanged) override;
     void SetFirstContentfulPaintId(
         std::function<void(const std::shared_ptr<BaseEventInfo>& info)>&& firstContentfulPaintId) override;
+    void SetNavigationEntryCommittedId(
+        std::function<void(const std::shared_ptr<BaseEventInfo>& info)>&& navigationEntryCommittedId) override;
     void SetTouchIconUrlId(std::function<void(const std::shared_ptr<BaseEventInfo>& info)>&& touchIconUrlId) override;
 
     void SetDarkMode(WebDarkMode mode) override;
@@ -148,6 +152,9 @@ public:
     void SetLayoutMode(WebLayoutMode mode) override;
     void SetNestedScroll(const NestedScrollOptions& nestedOpt) override;
     void JavaScriptOnDocumentStart(const ScriptItems& scriptItems) override;
+    void JavaScriptOnDocumentEnd(const ScriptItems& scriptItems) override;
+    
+    void SetPermissionClipboard(std::function<void(const std::shared_ptr<BaseEventInfo>&)>&& jsCallback) override;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_WEB_WEB_MODEL_NG_H

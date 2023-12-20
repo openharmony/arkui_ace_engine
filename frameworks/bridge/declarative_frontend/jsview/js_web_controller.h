@@ -60,6 +60,7 @@ public:
     void ClearMatches(const JSCallbackInfo& args);
     void SearchNext(const JSCallbackInfo& args);
     void GetUrl(const JSCallbackInfo& args);
+    void IsIncognitoMode(const JSCallbackInfo& args);
 
     // Backward and Forward for web page
     void Backward(const JSCallbackInfo& args);

@@ -300,7 +300,6 @@ private:
     void ValidateOffset(int32_t source);
     void HandleScrollPosition(float scroll, int32_t scrollState);
     void SetEdgeEffectCallback(const RefPtr<ScrollEdgeEffect>& scrollEffect) override;
-    void AddScrollEdgeEffect(RefPtr<ScrollEdgeEffect> scrollEffect);
     void UpdateScrollBarOffset() override;
     void SetAccessibilityAction();
     bool SetScrollProperties(const RefPtr<LayoutWrapper>& dirty);

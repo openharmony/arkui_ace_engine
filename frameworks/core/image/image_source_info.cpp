@@ -251,7 +251,7 @@ bool ImageSourceInfo::IsPng() const
 
 bool ImageSourceInfo::IsSvg() const
 {
-    return isSvg_;
+    return isSvg_ && !IsPixmap();
 }
 
 bool ImageSourceInfo::IsPixmap() const

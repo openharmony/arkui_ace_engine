@@ -38,9 +38,8 @@ class stateMgmtConsole {
         aceConsole.error(...args);
     }
     public static propertyAccess (...args : any) : void {
-        // enable for fran gran debugging variables observation
-        // this code line has been left in intentionally
-        // aceConsole.debug(...args);
+        // enable for fine grain debugging variable observation
+        // aceConsole debug (...args)
     }
     public static applicationError (...args : any) : void {
         aceConsole.error(`FIX THIS APPLICATION ERROR \n`, ...args);

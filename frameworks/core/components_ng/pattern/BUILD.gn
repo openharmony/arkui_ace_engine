@@ -141,6 +141,9 @@ build_component_ng("pattern_ng") {
     "grid/grid_scroll/grid_scroll_layout_algorithm.cpp",
     "grid/grid_scroll/grid_scroll_with_options_layout_algorithm.cpp",
     "grid/grid_utils.cpp",
+    "grid/irregular/grid_irregular_filler.cpp",
+    "grid/irregular/grid_irregular_layout_algorithm.cpp",
+    "grid/irregular/grid_layout_range_solver.cpp",
     "grid_col/grid_col_layout_algorithm.cpp",
     "grid_col/grid_col_layout_property.cpp",
     "grid_col/grid_col_model_ng.cpp",
@@ -334,6 +337,7 @@ build_component_ng("pattern_ng") {
     "scroll_bar/scroll_bar_pattern.cpp",
     "scrollable/nestable_scroll_container.cpp",
     "scrollable/refresh_coordination.cpp",
+    "scrollable/scrollable.cpp",
     "scrollable/scrollable_controller.cpp",
     "scrollable/scrollable_model_ng.cpp",
     "scrollable/scrollable_paint_property.cpp",
@@ -410,6 +414,8 @@ build_component_ng("pattern_ng") {
     "swiper_indicator/indicator_common/swiper_arrow_layout_algorithm.cpp",
     "swiper_indicator/indicator_common/swiper_arrow_pattern.cpp",
     "swiper_indicator/indicator_common/swiper_indicator_pattern.cpp",
+    "symbol/symbol_model_ng.cpp",
+    "symbol/symbol_source_info.cpp",
     "tabs/tab_bar_accessibility_property.cpp",
     "tabs/tab_bar_layout_algorithm.cpp",
     "tabs/tab_bar_layout_property.cpp",
@@ -427,6 +433,7 @@ build_component_ng("pattern_ng") {
     "text/span_node.cpp",
     "text/text_accessibility_property.cpp",
     "text/text_content_modifier.cpp",
+    "text/text_controller.cpp",
     "text/text_layout_adapter/text_layout_adapter.cpp",
     "text/text_layout_algorithm.cpp",
     "text/text_layout_property.cpp",
@@ -495,14 +502,16 @@ build_component_ng("pattern_ng") {
     "waterflow/water_flow_pattern.cpp",
   ]
 
+  external_deps = []
   deps = [ "container_modal/interfaces:customtitle" ]
 
   if (defined(vendor_configs.ace_engine_advanced)) {
     sources += vendor_configs.ace_engine_advanced_pattern
+    external_deps += vendor_configs.ace_engine_ext_extra_deps
   }
 
   if (is_ohos_standard_system) {
-    external_deps = [
+    external_deps += [
       "graphic_2d:librender_service_client",
       "napi:ace_napi",
     ]

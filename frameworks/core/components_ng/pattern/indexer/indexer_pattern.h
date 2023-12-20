@@ -32,6 +32,13 @@
 #include "core/components_ng/pattern/pattern.h"
 
 namespace OHOS::Ace::NG {
+enum class IndexerCollapsingMode {
+    INVALID,
+    NONE, // all array should be displayed
+    FIVE, // 5 + 1 collapsing mode
+    SEVEN // 7 + 1 collapsing mode
+};
+
 class IndexerPattern : public Pattern {
     DECLARE_ACE_TYPE(IndexerPattern, Pattern);
 
@@ -90,8 +97,8 @@ private:
     void BuildArrayValueItems();
     void BuildFullArrayValue();
     void CollapseArrayValue();
-    void ApplySevenPlusOneMode(int fullArraySize);
-    void ApplyFivePlusOneMode(int fullArraySize);
+    void ApplySevenPlusOneMode(int32_t fullArraySize);
+    void ApplyFivePlusOneMode(int32_t fullArraySize);
 
     void OnTouchDown(const TouchEventInfo& info);
     void OnTouchUp(const TouchEventInfo& info);
@@ -187,6 +194,9 @@ private:
     bool lastIndexFromPress_ = false;
     bool selectChanged_ = false;
     bool autoCollapse_ = false;
+    float actualIndexerHeight_ = 0.0f;
+    bool isNewHeightCalculated_ = false;
+    IndexerCollapsingMode lastCollapsingMode_ = IndexerCollapsingMode::INVALID;
 };
 } // namespace OHOS::Ace::NG
 

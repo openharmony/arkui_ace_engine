@@ -76,6 +76,9 @@ public:
 
     static float GetCurrentRootHeight();
 
+    RefPtr<FrameNode> HandleFocusNode();
+    void IsCloseSCBKeyboard();
+
     void SetupRootElement() override;
 
     void SetupSubRootElement();
@@ -167,7 +170,7 @@ public:
 
     void RemoveOnAreaChangeNode(int32_t nodeId);
 
-    void HandleOnAreaChangeEvent();
+    void HandleOnAreaChangeEvent(uint64_t nanoTimestamp);
 
     void AddVisibleAreaChangeNode(
         const RefPtr<FrameNode>& node, double ratio, const VisibleRatioCallback& callback, bool isUserCallback = true);
@@ -540,6 +543,14 @@ public:
 
     bool IsDragging() const override;
     void SetIsDragging(bool isDragging) override;
+
+    void SetContainerModalTitleVisible(bool customTitleSettedShow, bool floatingTitleSettedShow);
+    void SetContainerModalTitleHeight(int32_t height);
+    int32_t GetContainerModalTitleHeight();
+    bool GetContainerModalButtonsRect(RectF& containerModal, RectF& buttons);
+    void SubscribeContainerModalButtonsRectChange(
+        std::function<void(RectF& containerModal, RectF& buttons)>&& callback);
+
 protected:
     void StartWindowSizeChangeAnimate(int32_t width, int32_t height, WindowSizeChangeReason type,
         const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr);

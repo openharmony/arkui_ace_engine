@@ -459,11 +459,13 @@ struct ArkUIButtonModifierAPI {
     void (*ResetButtonFontStyle)(NodeHandle node);
     void (*SetButtonFontFamily)(NodeHandle node, const char *fontFamily);
     void (*ResetButtonFontFamily)(NodeHandle node);
-    void (*SetButtonLabelStyle)(NodeHandle node, const char *fontFamily, const double *valueArray,
-        const double *dimensionValueArray, const int *dimensionUnitArray);
+    void (*SetButtonLabelStyle)(NodeHandle node, const char** stringParameters, const int32_t* valueArray,
+        const double* dimensionArray, const size_t* dataCountArray);
     void (*ResetButtonLabelStyle)(NodeHandle node);
     void (*SetButtonBackgroundColor)(NodeHandle node, uint32_t color);
     void (*ResetButtonBackgroundColor)(NodeHandle node);
+    void (*SetButtonBorderRadius)(NodeHandle node, const double* values, int32_t valuesSize);
+    void (*ResetButtonBorderRadius)(NodeHandle node);
 };
 
 struct ArkUIToggleModifierAPI {
@@ -699,7 +701,7 @@ struct ArkUIGridModifierAPI {
     void (*ResetGridRowsGap)(NodeHandle node);
     void (*SetGridScrollBar)(NodeHandle node, const int32_t scrollBar);
     void (*ResetGridScrollBar)(NodeHandle node);
-    void (*SetGridScrollBarWidth)(NodeHandle node, const struct ArkUIDimensionType *scrollBarWidth);
+    void (*SetGridScrollBarWidth)(NodeHandle node, double value, int32_t unit);
     void (*ResetGridScrollBarWidth)(NodeHandle node);
     void (*SetGridScrollBarColor)(NodeHandle node, uint32_t scrollBarColor);
     void (*ResetGridScrollBarColor)(NodeHandle node);
@@ -900,6 +902,8 @@ struct ArkUIImageModifierAPI {
     void (*ResetImageFitOriginalSize)(NodeHandle node);
     void (*SetImageDraggable)(NodeHandle node, bool value);
     void (*ResetImageDraggable)(NodeHandle node);
+    void (*SetImageBorderRadius)(NodeHandle node, const double* values, const int* units, int32_t length);
+    void (*ResetImageBorderRadius)(NodeHandle node);
 };
 
 struct ArkUIVideoModifierAPI {
@@ -1085,7 +1089,7 @@ struct ArkUITabsModifierAPI {
     void (*SetScrollableBarModeOptions)(NodeHandle node, const double value, const int unit, const int layoutStyle);
     void (*SetBarGridAlign)(
         NodeHandle node, const double* values, int32_t valuesLength, const int* units, int32_t unitsLength);
-    void (*SetDivider)(NodeHandle node, uint32_t color, const double* values, const int* units, int32_t length);
+    void (*SetDivider)(NodeHandle node, uint32_t color, const double* values, const int32_t* units, int32_t length);
     void (*SetFadingEdge)(NodeHandle node, bool fadingEdge);
     void (*SetBarBackgroundColor)(NodeHandle node, uint32_t color);
     void (*SetBarOverlap)(NodeHandle node, bool overlap);
@@ -1285,6 +1289,7 @@ struct ArkUIDataPanelModifierAPI {
     void (*ResetValueColors)(NodeHandle node);
     void (*SetTrackShadow)(
         NodeHandle node, const struct ArkUIGradientType* gradient, double radius, double offsetX, double offsetY);
+    void (*SetNullTrackShadow)(NodeHandle node);
     void (*ResetTrackShadow)(NodeHandle node);
 };
 
@@ -1343,11 +1348,13 @@ struct ArkUIListItemModifierAPI {
 struct ArkUIProgressModifierAPI {
     void (*SetProgressValue)(NodeHandle node, double value);
     void (*ResetProgressValue)(NodeHandle node);
-    void (*SetProgressColorWithArray)(NodeHandle node, double *colors, int32_t colorslength);
-    void (*SetProgressColorWithValue)(NodeHandle node, uint32_t color);
+    void (*SetProgressGradientColor)(NodeHandle node, const struct ArkUIGradientType* gradient, int32_t length);
+    void (*SetProgressColor)(NodeHandle node, uint32_t color);
     void (*ResetProgressColor)(NodeHandle node);
     void (*SetProgressStyle)(NodeHandle node, ArkUIProgressStyle *value);
     void (*ResetProgressStyle)(NodeHandle node);
+    void (*SetProgressBackgroundColor)(NodeHandle node, uint32_t color);
+    void (*ResetProgressBackgroundColor)(NodeHandle node);
 };
 
 struct ArkUIListModifierAPI {
@@ -1380,7 +1387,8 @@ struct ArkUIListModifierAPI {
     void (*ResetAlignListItem)(NodeHandle node);
     void (*SetScrollSnapAlign)(NodeHandle node, int32_t scrollSnapAlign);
     void (*ResetScrollSnapAlign)(NodeHandle node);
-    void (*ListSetDivider)(NodeHandle node, const uint32_t color, const double *values, const int *units);
+    void (*ListSetDivider)(
+        NodeHandle node, const uint32_t color, const double* values, const int32_t* units, int32_t length);
     void (*ListResetDivider)(NodeHandle node);
     void (*SetChainAnimationOptions)(
         NodeHandle node, const struct ArkUIChainAnimationOptionsType *chainAnimationOptions);
@@ -1403,7 +1411,8 @@ struct ArkUIGridItemModifierAPI {
 };
 
 struct ArkUIListItemGroupModifierAPI {
-    void (*ListItemGroupSetDivider)(NodeHandle node, uint32_t color, const double* values, const int* units);
+    void (*ListItemGroupSetDivider)(
+        NodeHandle node, uint32_t color, const double* values, const int* units, int32_t length);
     void (*ListItemGroupResetDivider)(NodeHandle node);
 };
 

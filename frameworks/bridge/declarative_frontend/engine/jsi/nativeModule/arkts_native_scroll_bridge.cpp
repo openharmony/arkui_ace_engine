@@ -103,7 +103,7 @@ ArkUINativeModuleValue ScrollBridge::SetEnableScroll(ArkUIRuntimeCallInfo* runti
     Local<JSValueRef> nativeNodeArg = runtimeCallInfo->GetCallArgRef(CALLARGS_INDEX_0);
     Local<JSValueRef> isEnabledArg = runtimeCallInfo->GetCallArgRef(CALLARGS_INDEX_1);
     void* nativeNode = nativeNodeArg->ToNativePointer(vm)->Value();
-    bool isEnabled = isEnabledArg->ToBoolean(vm)->Value();
+    bool isEnabled = isEnabledArg->IsBoolean() ? isEnabledArg->ToBoolean(vm)->Value() : true;
     GetArkUIInternalNodeAPI()->GetScrollModifier().SetScrollEnableScroll(nativeNode, isEnabled);
     return panda::JSValueRef::Undefined(vm);
 }

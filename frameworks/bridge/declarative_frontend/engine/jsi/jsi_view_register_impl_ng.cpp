@@ -17,6 +17,7 @@
 #include "base/i18n/localization.h"
 #include "base/log/log.h"
 #include "base/memory/ace_type.h"
+#include "bridge/declarative_frontend/jsview/js_dynamic_component.h"
 #include "bridge/declarative_frontend/jsview/js_shape_abstract.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
@@ -126,6 +127,7 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_stepper.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_stepper_item.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_swiper.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_symbol.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_tab_content.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_tabs.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_tabs_controller.h"
@@ -446,6 +448,9 @@ void JsBindViews(BindingTarget globalObj)
     JSScreen::JSBind(globalObj);
     JSUIExtension::JSBind(globalObj);
     JSUIExtensionProxy::JSBind(globalObj);
+#if defined(DYNAMIC_COMPONENT_SUPPORT)
+    JSDynamicComponent::JSBind(globalObj);
+#endif
 #endif
     JSRating::JSBind(globalObj);
     JSGrid::JSBind(globalObj);
@@ -544,6 +549,7 @@ void JsBindViews(BindingTarget globalObj)
     JSDumpLog::JSBind(globalObj);
     JSDumpRegister::JSBind(globalObj);
     JSKeyboardAvoid::JSBind(globalObj);
+    JSSymbol::JSBind(globalObj);
 #ifdef USE_COMPONENTS_LIB
     JSBindLibs("arkui.qrcode", "QRCode");
     JSBindLibs("arkui.relativeContainer", "RelativeContainer");
