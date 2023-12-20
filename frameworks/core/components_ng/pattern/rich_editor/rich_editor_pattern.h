@@ -219,6 +219,7 @@ public:
     int32_t GetTextIndexAtCursor() override;
     void ShowSelectOverlay(const RectF& firstHandle, const RectF& secondHandle, bool isCopyAll = false,
         TextResponseType responseType = TextResponseType::LONG_PRESS, bool handlReverse = false);
+    void CheckEditorTypeChange();
     void OnHandleMove(const RectF& handleRect, bool isFirstHandle) override;
     int32_t GetHandleIndex(const Offset& offset) const override;
     void OnAreaChangedInner() override;
@@ -356,6 +357,11 @@ public:
 
     RefPtr<FocusHub> GetFocusHub() const;
     bool NeedShowAIDetect() override;
+
+    TextSpanType GetEditorType() const
+    {
+        return selectedType_.value_or(TextSpanType::NONE);
+    }
 
 protected:
     bool CanStartAITask() override;

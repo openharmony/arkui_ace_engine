@@ -1747,7 +1747,6 @@ void RichEditorPattern::onDragDropAndLeave()
     eventHub->SetOnDragLeave(onDragDragLeave);
 }
 
-
 void RichEditorPattern::ClearDragDropEvent()
 {
     auto host = GetHost();
@@ -3521,6 +3520,7 @@ void RichEditorPattern::ShowSelectOverlay(const RectF& firstHandle, const RectF&
             pattern->ResetIsMousePressed();
         }
         selectInfo.menuInfo.responseType = static_cast<int32_t>(responseType);
+        selectInfo.menuInfo.editorType = static_cast<int32_t>(pattern->GetEditorType());
         selectInfo.onHandleMove = [weak](const RectF& handleRect, bool isFirst) {
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
@@ -3582,10 +3582,21 @@ void RichEditorPattern::ShowSelectOverlay(const RectF& firstHandle, const RectF&
         }
         selectInfo.callerFrameNode = host;
         pattern->CopySelectionMenuParams(selectInfo, responseType);
+        pattern->CheckEditorTypeChange();
         pattern->UpdateSelectOverlayOrCreate(selectInfo);
     };
     CHECK_NULL_VOID(clipboard_);
     clipboard_->HasData(hasDataCallback);
+}
+
+void RichEditorPattern::CheckEditorTypeChange()
+{
+    CHECK_NULL_VOID(selectOverlayProxy_);
+    CHECK_NULL_VOID(!selectOverlayProxy_->IsClosed());
+    if (selectOverlayProxy_->GetSelectOverlayMangerInfo().menuInfo.editorType.value_or(static_cast<int32_t>(
+            TextSpanType::NONE)) != static_cast<int32_t>(selectedType_.value_or(TextSpanType::NONE))) {
+        CloseSelectionMenu();
+    }
 }
 
 void RichEditorPattern::HandleOnCopy()
