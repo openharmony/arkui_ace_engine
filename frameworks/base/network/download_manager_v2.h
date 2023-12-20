@@ -38,7 +38,7 @@ struct DownloadCondition {
     std::string dataOut;
     std::mutex downloadMutex;
     std::string errorMsg;
-    bool downloadSuccess = false;
+    std::optional<bool> downloadSuccess;
 };
 
 class DownloadManagerV2 {
