@@ -1857,9 +1857,9 @@ void TextFieldPattern::CheckIfNeedToResetKeyboard()
         needToResetKeyboard = true;
     }
     if (!needToResetKeyboard && action_ != TextInputAction::UNSPECIFIED) {
-        needToResetKeyboard = action_ != GetTextInputActionValue(TextInputAction::DONE);
+        needToResetKeyboard = action_ != GetTextInputActionValue(GetDefaultTextInputAction());
     }
-    action_ = GetTextInputActionValue(TextInputAction::DONE);
+    action_ = GetTextInputActionValue(GetDefaultTextInputAction());
     TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "Keyboard action is %{public}d", action_);
 #if defined(OHOS_STANDARD_SYSTEM) && !defined(PREVIEW)
     // if keyboard attached and keyboard is shown, pull up keyboard again
@@ -2825,11 +2825,11 @@ void TextFieldPattern::UpdateTextFieldManager(const Offset& offset, float height
     textFieldManager->SetOnFocusTextField(WeakClaim(this));
 }
 
-TextInputAction TextFieldPattern::GetDefaultTextInputAction()
+TextInputAction TextFieldPattern::GetDefaultTextInputAction() const
 {
     TextInputAction defaultTextInputAction = TextInputAction::DONE;
-    if (IsTextArea()) {
-        defaultTextInputAction = TextInputAction::UNSPECIFIED;
+    if (IsTextArea() && !isTextInput_) {
+        defaultTextInputAction = TextInputAction::NEW_LINE;
     } else {
         defaultTextInputAction = TextInputAction::DONE;
     }
@@ -2929,7 +2929,7 @@ std::optional<MiscServices::TextConfig> TextFieldPattern::GetMiscTextConfig() co
         .width = theme->GetCursorWidth().ConvertToPx(),
         .height = selectController_->GetCaretRect().Height() };
     MiscServices::InputAttribute inputAttribute = { .inputPattern = (int32_t)keyboard_,
-        .enterKeyType = (int32_t)GetTextInputActionValue(TextInputAction::DONE) };
+        .enterKeyType = (int32_t)GetTextInputActionValue(GetDefaultTextInputAction()) };
     MiscServices::TextConfig textConfig = { .inputAttribute = inputAttribute,
         .cursorInfo = cursorInfo,
         .range = { .start = selectController_->GetStartIndex(), .end = selectController_->GetEndIndex() },
@@ -3824,7 +3824,7 @@ void TextFieldPattern::PerformAction(TextInputAction action, bool forceCloseKeyb
     auto eventHub = host->GetEventHub<TextFieldEventHub>();
     TextFieldCommonEvent event;
     event.SetText(contentController_->GetTextValue());
-    if (IsNormalInlineState()) {
+    if (IsNormalInlineState() && action != TextInputAction::NEW_LINE) {
         auto host = GetHost();
         CHECK_NULL_VOID(host);
         RecordSubmitEvent();
@@ -3836,8 +3836,7 @@ void TextFieldPattern::PerformAction(TextInputAction action, bool forceCloseKeyb
         focusHub->LostFocus();
         return;
     }
-
-    if (IsTextArea()) {
+    if (IsTextArea() && action == TextInputAction::NEW_LINE) {
         if (GetInputFilter() != "\n") {
             InsertValue("\n");
         }
@@ -4414,7 +4413,7 @@ std::string TextFieldPattern::TextInputActionToString() const
 {
     auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, "");
-    switch (GetTextInputActionValue(TextInputAction::DONE)) {
+    switch (GetTextInputActionValue(GetDefaultTextInputAction())) {
         case TextInputAction::GO:
             return "EnterKeyType.Go";
         case TextInputAction::SEARCH:
