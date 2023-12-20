@@ -20,6 +20,9 @@
 #include "test/mock/core/render/mock_canvas_image.h"
 #include "core/components_ng/base/view_stack_processor.h"
 
+#define private public
+#define protected public
+
 namespace OHOS::Ace::NG {
 namespace {
 using namespace testing;

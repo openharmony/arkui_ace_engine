@@ -13,25 +13,25 @@
  * limitations under the License.
  */
 
-#include "folder_stack_test_ng.h"
+#include "gtest/gtest.h"
 
-#define private public
 #include "core/components/common/properties/alignment.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/pattern/blank/blank_model_ng.h"
 
-
-#include "test/mock/core/common/mock_container.h"
-#include "test/mock/core/common/mock_theme_manager.h"
+#define private public
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/size_t.h"
-#include "core/components_ng/pattern/text/text_model_ng.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/layout/layout_wrapper.h"
 #include "core/components_ng/pattern/blank/blank_model_ng.h"
+#include "core/components_ng/pattern/folder_stack/folder_stack_layout_algorithm.h"
+#include "core/components_ng/pattern/folder_stack/folder_stack_layout_property.h"
+#include "core/components_ng/pattern/folder_stack/folder_stack_model_ng.h"
+#include "core/components_ng/pattern/folder_stack/folder_stack_pattern.h"
 #include "core/components_ng/property/calc_length.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 
@@ -49,16 +49,26 @@ const SizeF CONTAINER_SIZE(FULL_SCREEN_WIDTH, FULL_SCREEN_HEIGHT);
 constexpr float SMALL_ITEM_WIDTH = 100.0f;
 constexpr float SMALL_ITEM_HEIGHT = 40.0f;
 const SizeF SMALL_ITEM_SIZE(SMALL_ITEM_WIDTH, SMALL_ITEM_HEIGHT);
-
-constexpr float FOLDER_STACK_WIDTH = 400.f;
-constexpr float FOLDER_STACK_HEIGHT = 800.f;
-const std::vector<std::string> itemId { "A", "B", "C" };
-const std::vector<std::string> label {"text1", "text2", "text3", "text4", "text5"};
-const std::vector<std::string> nullInspectorIds {"", "", "", "", ""};
-const std::vector<std::string> inspectorIds {"A", "B", "B", "C", "D"};
 } // namespace
+class FolderStackTestNg : public testing::Test {
+public:
+    static void SetUpTestSuite()
+    {
+        MockPipelineContext::SetUp();
+    }
 
-PaddingProperty FolderStackTestNG::CreatePadding(float left, float top, float right, float bottom)
+    static void TearDownTestSuite()
+    {
+        MockPipelineContext::TearDown();
+    }
+
+protected:
+    // std::pair<RefPtr<FrameNode>, RefPtr<LayoutWrapperNode>> CreateStack(const Alignment alignment);
+    RefPtr<UINode> CreateWithItem(bool enableAnimation, bool autoHalfFold, Alignment align);
+    PaddingProperty CreatePadding(float left, float top, float right, float bottom);
+};
+
+PaddingProperty FolderStackTestNg::CreatePadding(float left, float top, float right, float bottom)
 {
     PaddingProperty padding;
     padding.left = CalcLength(left);
@@ -68,7 +78,7 @@ PaddingProperty FolderStackTestNG::CreatePadding(float left, float top, float ri
     return padding;
 }
 
-RefPtr<UINode> FolderStackTestNG::CreateWithItem(bool enableAnimation, bool autoHalfFold, Alignment align)
+RefPtr<UINode> FolderStackTestNg::CreateWithItem(bool enableAnimation, bool autoHalfFold, Alignment align)
 {
     FolderStackModelNG folderStackModelNG;
     folderStackModelNG.Create();
@@ -88,87 +98,12 @@ RefPtr<UINode> FolderStackTestNG::CreateWithItem(bool enableAnimation, bool auto
     return frameNode;
 }
 
-void FolderStackTestNG::SetUpTestSuite()
-{
-    TestNG::SetUpTestSuite();
-    MockPipelineContext::SetUp();
-    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
-    auto textTheme = AceType::MakeRefPtr<TextTheme>();
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(textTheme));
-    EXPECT_CALL(*(MockContainer::Current()), GetFrontend()).WillRepeatedly(Return(nullptr));
-}
-
-void FolderStackTestNG::TearDownTestSuite()
-{
-    TestNG::TearDownTestSuite();
-    MockPipelineContext::TearDown();
-}
-
-void FolderStackTestNG::Create(const std::vector<std::string>& itemId,
-    const std::function<void(FolderStackModelNG model)>& callback)
-{
-    FolderStackModelNG model;
-    model.Create(itemId);
-    ViewAbstract::SetWidth(CalcLength(FOLDER_STACK_WIDTH));
-    ViewAbstract::SetHeight(CalcLength(FOLDER_STACK_HEIGHT));
-    if (callback) {
-        callback(model);
-    }
-    GetInstance();
-    FlushLayoutTask(frameNode_);
-}
-
-void FolderStackTestNG::AddChildNodeToGroup(const std::vector<std::string>& label,
-    const std::vector<std::string>& inspectorIds)
-{
-    ASSERT_EQ(label.size(), inspectorIds.size());
-    ASSERT_NE(frameNode_, nullptr);
-    for (uint32_t index = 0; index < label.size(); ++index) {
-        TextModelNG textModel;
-        textModel.Create(label[index]);
-        RefPtr<UINode> node = ViewStackProcessor::GetInstance()->Finish();
-        node->UpdateInspectorId(inspectorIds[index]);
-        frameNode_->AddChildToGroup(node);
-    }
-    FlushLayoutTask(frameNode_);
-}
-
-void FolderStackTestNG::SetUp()
-{
-    mockFolderStackLayoutAlgorithm_ = AceType::MakeRefPtr<MockFolderStackLayoutAlgorithm>();
-}
-
-void FolderStackTestNG::TearDown()
-{
-    frameNode_ = nullptr;
-    pattern_ = nullptr;
-    eventHub_ = nullptr;
-    layoutProperty_ = nullptr;
-    controlPartsStackNode_ = nullptr;
-    hoverNode_ = nullptr;
-}
-
-void FolderStackTestNG::GetInstance()
-{
-    RefPtr<UINode> node = ViewStackProcessor::GetInstance()->Finish();
-    frameNode_ = AceType::DynamicCast<FolderStackGroupNode>(node);
-    frameNode_->layoutAlgorithm_ = AceType::MakeRefPtr<LayoutAlgorithmWrapper>(mockFolderStackLayoutAlgorithm_);
-    pattern_ = frameNode_->GetPattern<FolderStackPattern>();
-    eventHub_ = frameNode_->GetEventHub<FolderStackEventHub>();
-    layoutProperty_ = frameNode_->GetLayoutProperty<FolderStackLayoutProperty>();
-    controlPartsStackNode_ =
-        AceType::DynamicCast<ControlPartsStackNode>(frameNode_->GetControlPartsStackNode());
-    hoverNode_ = AceType::DynamicCast<HoverStackNode>(frameNode_->GetHoverNode());
-}
-
-
 /**
  * @tc.name: FolderStackTestNgTest001
  * @tc.desc: Test folderStack Layout with Alignment
  * @tc.type: FUNC
  */
-HWTEST_F(FolderStackTestNG, FolderStackTestNgTest001, TestSize.Level1)
+HWTEST_F(FolderStackTestNg, FolderStackTestNgTest001, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create folderStack and get frameNode.
@@ -230,7 +165,7 @@ HWTEST_F(FolderStackTestNG, FolderStackTestNgTest001, TestSize.Level1)
  * @tc.desc: Test folderStack Layout with AlignmentContent
  * @tc.type: FUNC
  */
-HWTEST_F(FolderStackTestNG, FolderStackTestNgTest002, TestSize.Level1)
+HWTEST_F(FolderStackTestNg, FolderStackTestNgTest002, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create folderStack and get frameNode.
@@ -283,212 +218,5 @@ HWTEST_F(FolderStackTestNG, FolderStackTestNgTest002, TestSize.Level1)
     layoutAlgorithm->Layout(AccessibilityManager::RawPtr(layoutWrapper));
     ASSERT_EQ(layoutWrapper->GetGeometryNode()->GetFrameSize(), SizeF(FULL_SCREEN_WIDTH, STACK_HEIGHT));
     ASSERT_EQ(layoutWrapper->GetGeometryNode()->GetFrameOffset(), OffsetF(ZERO, ZERO));
-}
-
-/**
- * @tc.name: FolderStackToJsonValue001
- * @tc.desc: Test FolderStackTestNG properties & ToJsonValue.
- * @tc.type: FUNC
- */
-HWTEST_F(FolderStackTestNG, FolderStackToJsonValue001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Init FolderStack node with Aniamtion/AutoHalfFold props false, itemId not null.
-     */
-    Create(itemId, [](FolderStackModelNG model) {
-        model.SetEnableAnimation(false);
-        model.SetAutoHalfFold(true);
-        model.SetAlignment(Alignment::BOTTOM_LEFT);
-    });
-
-    /**
-     * @tc.steps: step2. Expect ToJsonValue as properties set in step1.
-     */
-    auto json = JsonUtil::Create(true);
-    layoutProperty_->ToJsonValue(json);
-    std::string str;
-    str.assign("[");
-    for (auto& id : itemId) {
-        str.append(id);
-        str.append(", ");
-    }
-    str = (itemId.size() > 1) ? str.substr(0, str.size() - 1).append("]") : str.append("]");
-    EXPECT_EQ(json->GetString("alignContent"), "Alignment.BottomStart");
-    EXPECT_EQ(json->GetString("upperItems"), str);
-    EXPECT_EQ(json->GetString("enableAnimation"), "false");
-    EXPECT_EQ(json->GetString("autoHalfFold"), "true");
-}
-
-/**
- * @tc.name: FolderStackToJsonValue002
- * @tc.desc: Test FolderStackTestNG properties & ToJsonValue with default value.
- * @tc.type: FUNC
- */
-HWTEST_F(FolderStackTestNG, FolderStackToJsonValue002, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Init FolderStack node with Aniamtion/AutoHalfFold props false, itemId not null.
-     */
-    Create(std::vector<std::string>(), [](FolderStackModelNG model) {
-        model.SetEnableAnimation(false);
-    });
-
-    /**
-     * @tc.steps: step2. Expect ToJsonValue as properties set in step1.
-     */
-    auto json = JsonUtil::Create(true);
-    layoutProperty_->ToJsonValue(json);
-    EXPECT_EQ(json->GetString("alignContent"), "Alignment.Center");
-    EXPECT_EQ(json->GetString("upperItems"), "[]");
-    EXPECT_EQ(json->GetString("enableAnimation"), "false");
-}
-
-/**
- * @tc.name: FolderStackGroupNode001
- * @tc.desc: Test FolderStackTestNG properties & ToJsonValue with special value.
- * @tc.type: FUNC
- */
-HWTEST_F(FolderStackTestNG, FolderStackGroupNode001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Init FolderStack group node, add child node to group.
-     */
-    Create(std::vector<std::string>(), [](FolderStackModelNG model) {
-        model.SetEnableAnimation(false);
-    });
-    AddChildNodeToGroup(label, nullInspectorIds);
-
-    /**
-     * @tc.steps: step2. Init FolderStack group node, add child node to group.
-     */
-    EXPECT_EQ(controlPartsStackNode_->TotalChildCount(), inspectorIds.size());
-    EXPECT_EQ(hoverNode_->TotalChildCount(), 0);
-}
-
-/**
- * @tc.name: FolderStackGroupNode002
- * @tc.desc: Test FolderStackTestNG properties & ToJsonValue with special value.
- * @tc.type: FUNC
- */
-HWTEST_F(FolderStackTestNG, FolderStackGroupNode002, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Init FolderStack group node, add child node to group.
-     */
-    Create(itemId, [](FolderStackModelNG model) {
-        model.SetEnableAnimation(false);
-    });
-    AddChildNodeToGroup(label, inspectorIds);
-
-    /**
-     * @tc.steps: step2. Init FolderStack group node, add child node to group.
-     */
-    EXPECT_EQ(controlPartsStackNode_->TotalChildCount(), 1);
-    EXPECT_EQ(hoverNode_->TotalChildCount(), inspectorIds.size() - 1);
-}
-
-/**
- * @tc.name: FolderStackEventHub001
- * @tc.desc: Test FolderStackEventHub, expect FolderStackEventHub OnFolderStateChange trigged
- *     when OnFoldStatusChange.
- * @tc.type: FUNC
- */
-HWTEST_F(FolderStackTestNG, FolderStackEventHub001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Init FolderStack, set OnFolderStateChanged callback.
-     */
-    bool foldStatusStateChanged = false;
-    auto onFolderStateChange = [&foldStatusStateChanged](const NG::FolderEventInfo& folderEventInfo) {
-        foldStatusStateChanged = true;
-    };
-    Create(itemId, [&onFolderStateChange](FolderStackModelNG model) {
-        model.SetEnableAnimation(false);
-        model.SetOnFolderStateChange(std::move(onFolderStateChange));
-    });
-
-    /**
-     * @tc.steps: step2. Init FolderStack group node, add child node to group.
-     */
-    eventHub_->OnFolderStateChange(FoldStatus::HALF_FOLD);
-    EXPECT_EQ(foldStatusStateChanged, true);
-}
-
-/**
- * @tc.name: FolderStackLayoutAlgorithm001
- * @tc.desc: Test FolderStackLayoutAlgorithm measure when isIntoFolderStack_ is false.
- * @tc.type: FUNC
- */
-HWTEST_F(FolderStackTestNG, FolderStackLayoutAlgorithm001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Init FolderStack with null group child item.
-     */
-    Create(itemId, [](FolderStackModelNG model) {
-        model.SetEnableAnimation(false);
-    });
-    AddChildNodeToGroup(label, inspectorIds);
-    /**
-     * @tc.steps: step2. test FolderStack GeometryNode frame size after measure.
-     */
-    EXPECT_EQ(frameNode_->GetGeometryNode()->GetFrameSize(), SizeF(FOLDER_STACK_WIDTH, FOLDER_STACK_HEIGHT));
-    EXPECT_EQ(controlPartsStackNode_->TotalChildCount(), 1);
-    EXPECT_EQ(hoverNode_->TotalChildCount(), 4);
-}
-
-/**
- * @tc.name: FolderStackLayoutAlgorithm002
- * @tc.desc: Test FolderStackLayoutAlgorithm measure when displayInfo is fullWindow & FoldStatus::HALF_FOLD
- *      & isFoldable & Rotation is ROTATION_90 or Rotation::ROTATION_270 .
- * @tc.type: FUNC
- */
-HWTEST_F(FolderStackTestNG, FolderStackLayoutAlgorithm002, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Init FolderStack with group child item.
-     */
-    EXPECT_CALL(*mockFolderStackLayoutAlgorithm_, IsFullWindow(_, _)).WillRepeatedly(Return(true));
-    auto displayInfo = AceType::MakeRefPtr<DisplayInfo>();
-    displayInfo->SetIsFoldable(true);
-    displayInfo->SetFoldStatus(FoldStatus::HALF_FOLD);
-    displayInfo->SetRotation(Rotation::ROTATION_90);
-    EXPECT_CALL(*(MockContainer::Current()), GetDisplayInfo()).WillRepeatedly(Return(displayInfo));
-    Create(itemId, [](FolderStackModelNG model) {
-        model.SetEnableAnimation(false);
-    });
-    AddChildNodeToGroup(label, inspectorIds);
-
-    /**
-     * @tc.steps: step2. test FolderStack GeometryNode frame size after measure.
-     */
-    EXPECT_EQ(frameNode_->GetGeometryNode()->GetFrameSize(), SizeF(FOLDER_STACK_WIDTH, FOLDER_STACK_HEIGHT));
-    EXPECT_EQ(controlPartsStackNode_->TotalChildCount(), 1);
-    EXPECT_EQ(hoverNode_->TotalChildCount(), 4);
-}
-
-/**
- * @tc.name: FolderStackLayoutAlgorithm003
- * @tc.desc: Test FolderStackLayoutAlgorithm layout.
- * @tc.type: FUNC
- */
-HWTEST_F(FolderStackTestNG, FolderStackLayoutAlgorithm003, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Init FolderStack with group child item.
-     */
-    Create(itemId, [](FolderStackModelNG model) {
-        model.SetEnableAnimation(false);
-        model.SetAlignment(Alignment::BOTTOM_RIGHT);
-    });
-    AddChildNodeToGroup(label, inspectorIds);
-    /**
-     * @tc.steps: step2. test ControlPartsStackNode & HoverStackNode alignment property inherited from parent.
-     */
-    EXPECT_EQ(frameNode_->GetGeometryNode()->GetFrameSize(), SizeF(FOLDER_STACK_WIDTH, FOLDER_STACK_HEIGHT));
-    auto controlPartsLayoutProperty =
-        AceType::DynamicCast<LayoutProperty>(controlPartsStackNode_->GetLayoutProperty());
-    EXPECT_EQ(controlPartsLayoutProperty->GetPositionProperty()->GetAlignment(), Alignment::BOTTOM_RIGHT);
-    auto hoverNodeLayoutProperty = AceType::DynamicCast<LayoutProperty>(hoverNode_->GetLayoutProperty());
-    EXPECT_EQ(hoverNodeLayoutProperty->GetPositionProperty()->GetAlignment(), Alignment::BOTTOM_RIGHT);
 }
 } // namespace OHOS::Ace::NG

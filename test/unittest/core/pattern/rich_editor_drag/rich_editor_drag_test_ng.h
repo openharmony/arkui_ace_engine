@@ -15,9 +15,6 @@
 #ifndef FOUNDATION_ACE_TEST_UNITTEST_CORE_PATTERN_RICH_EDITOR_DRAG_TEST_NG_H
 #define FOUNDATION_ACE_TEST_UNITTEST_CORE_PATTERN_RICH_EDITOR_DRAG_TEST_NG_H
 
-#define private public
-#define protected public
-
 #include "gtest/gtest.h"
 #include "test/unittest/core/pattern/test_ng.h"
 

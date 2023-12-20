@@ -25,10 +25,10 @@
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 
-namespace OHOS::Ace::NG {
-namespace {
 using namespace testing;
 using namespace testing::ext;
+namespace OHOS::Ace::NG {
+namespace {
 const std::string TEXT_CONTENT1 = "hello";
 const std::string TEXT_CONTENT2 = "Winter is a beautiful season\n, especial when it snow.";
 constexpr float TEXT_NODE_WIDTH = 200.f;
@@ -125,18 +125,6 @@ void TextDragTestNg::SetTextProperty(TextModelNG& textModel, const TextProperty&
     }
     if (textProperty.baselineOffsetValue.has_value()) {
         textModel.SetBaselineOffset(textProperty.baselineOffsetValue.value());
-    }
-    if (textProperty.textCaseValue.has_value()) {
-        textModel.SetTextCase(textProperty.textCaseValue.value());
-    }
-    if (textProperty.adaptMinFontSize.has_value()) {
-        textModel.SetAdaptMinFontSize(textProperty.adaptMinFontSize.value());
-    }
-    if (textProperty.adaptMaxFontSize.has_value()) {
-        textModel.SetAdaptMaxFontSize(textProperty.adaptMaxFontSize.value());
-    }
-    if (textProperty.letterSpacing.has_value()) {
-        textModel.SetLetterSpacing(textProperty.letterSpacing.value());
     }
     if (textProperty.textIndent.has_value()) {
         textModel.SetTextIndent(textProperty.textIndent.value());
