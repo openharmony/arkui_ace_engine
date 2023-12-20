@@ -35,10 +35,10 @@ ohos_fuzztest("Res2FuzzTest") {
     "$ace_root/adapter/ohos/entrance/file_asset_provider_impl.cpp",
     "$ace_root/frameworks/core/common/asset_manager_impl.cpp",
     "$ace_root/frameworks/core/common/container_scope.cpp",
-    "$ace_root/frameworks/core/components/test/unittest/theme/theme_mock.cpp",
     "$ace_root/frameworks/core/components/theme/theme_attributes.cpp",
     "$ace_root/test/fuzztest/res2_fuzzer/res2_fuzzer.cpp",
     "$ace_root/test/mock/core/common/mock_theme_constants.cpp",
+    "$ace_root/test/mock/core/common/theme_mock.cpp",
   ]
 
   configs = [ "$ace_root/test/fuzztest:ace_fuzz_config" ]
