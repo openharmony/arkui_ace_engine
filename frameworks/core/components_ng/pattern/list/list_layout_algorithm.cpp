@@ -1244,6 +1244,12 @@ void ListLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         auto items = LayoutCachedItem(layoutWrapper, cacheCount);
         if (!items.empty()) {
             PostIdleTask(layoutWrapper->GetHostNode(), { items, childLayoutConstraint_ });
+        } else {
+            auto host = layoutWrapper->GetHostNode();
+            CHECK_NULL_VOID(host);
+            auto pattern = host->GetPattern<ListPattern>();
+            CHECK_NULL_VOID(pattern);
+            pattern->SetPredictLayoutParam(std::nullopt);
         }
     }
 }
