@@ -1658,6 +1658,15 @@ void TextPattern::OnModifyDone()
     }
 
     if (host->GetChildren().empty()) {
+        auto obscuredReasons = renderContext->GetObscured().value_or(std::vector<ObscuredReasons>());
+        bool ifHaveObscured = std::any_of(obscuredReasons.begin(), obscuredReasons.end(),
+            [](const auto& reason) { return reason == ObscuredReasons::PLACEHOLDER; });
+        if (ifHaveObscured) {
+            CloseSelectOverlay();
+            ResetSelection();
+            copyOption_ = CopyOptions::None;
+        }
+
         std::string textCache = textForDisplay_;
         textForDisplay_ = textLayoutProperty->GetContent().value_or("");
         if (textCache != textForDisplay_) {
@@ -1669,16 +1678,6 @@ void TextPattern::OnModifyDone()
         textForAI_ = textForDisplay_;
         if (textDetectEnable_ && (aiDetectTypesChanged_ || !aiDetectInitialized_ || textCache != textForDisplay_)) {
             StartAITask();
-        }
-
-        auto obscuredReasons = renderContext->GetObscured().value_or(std::vector<ObscuredReasons>());
-        bool ifHaveObscured = std::any_of(obscuredReasons.begin(), obscuredReasons.end(),
-            [](const auto& reason) { return reason == ObscuredReasons::PLACEHOLDER; });
-        if (ifHaveObscured) {
-            CloseSelectOverlay();
-            ResetSelection();
-            copyOption_ = CopyOptions::None;
-            return;
         }
     }
 
@@ -1708,6 +1707,13 @@ void TextPattern::OnModifyDone()
     }
     if (onClick_ || copyOption_ != CopyOptions::None) {
         InitClickEvent(gestureEventHub);
+    }
+    auto eventHub = host->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    bool enabledCache = eventHub->IsEnabled();
+    if (textDetectEnable_ && enabledCache != enabled_) {
+        enabled_ = enabledCache;
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     }
 }
 
@@ -1852,7 +1858,7 @@ void TextPattern::StartAITask()
     if (!CanStartAITask()) {
         return;
     }
-    if (copyOption_ == CopyOptions::None || !textDetectEnable_ || !IsEnabled()) {
+    if (copyOption_ == CopyOptions::None || !textDetectEnable_ || !enabled_) {
         return;
     }
     aiSpanMap_.clear();
@@ -2522,24 +2528,9 @@ void TextPattern::RemoveAreaChangeInner()
     pipeline->RemoveOnAreaChangeNode(host->GetId());
 }
 
-bool TextPattern::IsEnabled()
-{
-    auto host = GetHost();
-    CHECK_NULL_RETURN(host, false);
-    auto eventHub = host->GetEventHub<EventHub>();
-    CHECK_NULL_RETURN(eventHub, false);
-    return eventHub->IsEnabled();
-}
-
 bool TextPattern::NeedShowAIDetect()
 {
-    auto textLayoutProp = GetLayoutProperty<TextLayoutProperty>();
-    CHECK_NULL_RETURN(textLayoutProp, false);
-    if (textLayoutProp->GetCopyOptionValue(CopyOptions::None) == CopyOptions::None) {
-        return false;
-    }
-
-    return textDetectEnable_ && !aiSpanMap_.empty() && IsEnabled();
+    return textDetectEnable_ && !aiSpanMap_.empty() && enabled_ && copyOption_ != CopyOptions::None;
 }
 
 void TextPattern::BindSelectionMenu(TextSpanType spanType, TextResponseType responseType,
