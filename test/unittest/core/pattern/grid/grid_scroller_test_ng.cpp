@@ -286,9 +286,10 @@ HWTEST_F(GridScrollerTestNg, ScrollablePattern001, TestSize.Level1)
         model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
         CreateColItem(20);
     });
-    EXPECT_TRUE(pattern_->OnScrollPosition(ITEM_HEIGHT, SCROLL_FROM_UPDATE));
-    EXPECT_TRUE(pattern_->OnScrollPosition(ITEM_HEIGHT, SCROLL_FROM_UPDATE));
-    EXPECT_TRUE(pattern_->OnScrollPosition(ITEM_HEIGHT, SCROLL_FROM_START));
+    double itemHeight = ITEM_HEIGHT;
+    EXPECT_TRUE(pattern_->OnScrollPosition(itemHeight, SCROLL_FROM_UPDATE));
+    EXPECT_TRUE(pattern_->OnScrollPosition(itemHeight, SCROLL_FROM_UPDATE));
+    EXPECT_TRUE(pattern_->OnScrollPosition(itemHeight, SCROLL_FROM_START));
     pattern_->OnScrollEnd();
     auto coordinationEvent = AceType::MakeRefPtr<ScrollableCoordinationEvent>();
     auto event1 = [](float, float) { return true; };
@@ -297,11 +298,11 @@ HWTEST_F(GridScrollerTestNg, ScrollablePattern001, TestSize.Level1)
     coordinationEvent->SetOnScrollEvent(event1);
     coordinationEvent->SetOnScrollStartEvent(event2);
     coordinationEvent->SetOnScrollEndEvent(event3);
-    EXPECT_TRUE(pattern_->OnScrollPosition(ITEM_HEIGHT, SCROLL_FROM_UPDATE));
-    EXPECT_TRUE(pattern_->OnScrollPosition(ITEM_HEIGHT, SCROLL_FROM_UPDATE));
-    EXPECT_TRUE(pattern_->OnScrollPosition(ITEM_HEIGHT, SCROLL_FROM_START));
+    EXPECT_TRUE(pattern_->OnScrollPosition(itemHeight, SCROLL_FROM_UPDATE));
+    EXPECT_TRUE(pattern_->OnScrollPosition(itemHeight, SCROLL_FROM_UPDATE));
+    EXPECT_TRUE(pattern_->OnScrollPosition(itemHeight, SCROLL_FROM_START));
     pattern_->OnScrollEnd();
-    EXPECT_TRUE(pattern_->OnScrollPosition(ITEM_HEIGHT, SCROLL_FROM_UPDATE));
+    EXPECT_TRUE(pattern_->OnScrollPosition(itemHeight, SCROLL_FROM_UPDATE));
     pattern_->OnScrollEnd();
 
     /**

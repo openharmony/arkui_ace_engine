@@ -125,9 +125,6 @@ void ListLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
                 spaceWidth_ = std::max(spaceWidth_, static_cast<float>(Round(dividerSpace.value())));
             }
         }
-        if (overScrollFeature_ && !mainSizeIsDefined_ && GreatNotEqual(contentMainSize_, prevContentMainSize_)) {
-            contentMainSize_ = prevContentMainSize_;
-        }
         spaceWidth_ += chainInterval_;
         CheckJumpToIndex();
         currentOffset_ = currentDelta_;
@@ -893,10 +890,6 @@ void ListLayoutAlgorithm::LayoutForward(LayoutWrapper* layoutWrapper, int32_t st
         }
     } while (LessNotEqual(currentEndPos + chainOffset, endMainPos));
 
-    if (overScrollFeature_ && canOverScroll_) {
-        return;
-    }
-
     currentEndPos += chainOffset;
     // adjust offset.
     UpdateSnapCenterContentOffset(layoutWrapper);
@@ -927,7 +920,9 @@ void ListLayoutAlgorithm::LayoutForward(LayoutWrapper* layoutWrapper, int32_t st
             }
         }
     }
-
+    if (overScrollFeature_ && canOverScroll_) {
+        return;
+    }
     // Mark inactive in wrapper.
     for (auto pos = itemPosition_.begin(); pos != itemPosition_.end();) {
         chainOffset = chainOffsetFunc_ ? chainOffsetFunc_(pos->first) : 0.0f;
@@ -978,8 +973,11 @@ void ListLayoutAlgorithm::LayoutBackward(LayoutWrapper* layoutWrapper, int32_t e
     if (GreatNotEqual(currentStartPos, startMainPos_ + contentStartOffset_)) {
         auto itemTotalSize = GetEndPosition() - currentStartPos + contentEndOffset_ + contentStartOffset_;
         bool overBottom = (GetEndIndex() == totalItemCount_ - 1) && (LessNotEqual(itemTotalSize, contentMainSize_));
-        if (overBottom && !mainSizeIsDefined_) {
-            contentMainSize_ = std::min(contentMainSize_, itemTotalSize);
+        if (overBottom && !mainSizeIsDefined_ && GreatNotEqual(contentMainSize_, itemTotalSize)) {
+            if (overScrollFeature_ && !NearZero(prevContentMainSize_)) {
+                currentOffset_ += contentMainSize_ - prevContentMainSize_;
+            }
+            contentMainSize_ = itemTotalSize;
         }
         if (!canOverScroll_ || jumpIndex_.has_value()) {
             currentOffset_ = currentStartPos - contentStartOffset_;
