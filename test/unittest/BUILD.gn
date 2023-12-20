@@ -484,7 +484,6 @@ source_set("ace_components_mock") {
   ]
   deps = [
     "$ace_root/frameworks/core/components/theme:build_theme_code",
-    "//foundation/arkui/napi:ace_napi",
     "//third_party/googletest:gmock_main",
   ]
   configs += [ ":ace_unittest_config" ]
@@ -986,6 +985,5 @@ ohos_source_set("ace_components_pattern") {
     "$ace_root/frameworks/core/components/theme:build_theme_code",
     "//third_party/bounds_checking_function:libsec_static",
   ]
-  external_deps = [ "napi:ace_napi" ]
   configs = [ ":ace_unittest_config" ]
 }
