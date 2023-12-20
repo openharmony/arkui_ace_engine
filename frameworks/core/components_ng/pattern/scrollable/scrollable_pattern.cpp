@@ -485,12 +485,14 @@ bool ScrollablePattern::HandleEdgeEffect(float offset, int32_t source, const Siz
 {
     bool isAtTop = IsAtTop();
     bool isAtBottom = IsAtBottom();
+    bool isNotPositiveScrollableDistance = isAtTop && isAtBottom;
     // check edgeEffect is not springEffect
     if (scrollEffect_ && scrollEffect_->IsFadeEffect() &&
         (source == SCROLL_FROM_UPDATE || source == SCROLL_FROM_ANIMATION)) { // handle edge effect
         if ((isAtTop && Positive(offset)) || (isAtBottom && Negative(offset))) {
             auto isScrollFromUpdate = source == SCROLL_FROM_UPDATE;
-            scrollEffect_->HandleOverScroll(GetAxis(), !reverse ? -offset : offset, size, isScrollFromUpdate);
+            scrollEffect_->HandleOverScroll(GetAxis(), !reverse ? -offset : offset,
+                size, isScrollFromUpdate, isNotPositiveScrollableDistance);
         }
     }
     if (!(scrollEffect_ && scrollEffect_->IsSpringEffect() &&
