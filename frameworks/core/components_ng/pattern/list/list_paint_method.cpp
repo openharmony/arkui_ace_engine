@@ -91,12 +91,12 @@ void ListPaintMethod::UpdateDividerList(const DividerInfo& dividerInfo)
     int32_t lanes = dividerInfo.lanes;
     int32_t laneIdx = 0;
     bool lastIsItemGroup = false;
-    bool isFirstItem = (itemPosition.begin()->first == 0);
+    bool isFirstItem = (itemPosition_.begin()->first == 0);
     std::map<int32_t, int32_t> lastLineIndex;
     ListDividerArithmetic::DividerMap dividerMap;
     ListDivider divider;
 
-    for (const auto& child : itemPosition) {
+    for (const auto& child : itemPosition_) {
         if (!isFirstItem) {
             float divOffset = (dividerInfo.space + dividerInfo.constrainStrokeWidth) / 2; /* 2 half */
             float mainPos = child.second.startPos - divOffset + dividerInfo.mainPadding;
@@ -104,9 +104,9 @@ void ListPaintMethod::UpdateDividerList(const DividerInfo& dividerInfo)
             if (lanes > 1 && !lastIsItemGroup && !child.second.isGroup) {
                 crossPos +=
                     laneIdx * ((dividerInfo.crossSize - fSpacingTotal) / dividerInfo.lanes + dividerInfo.laneGutter);
-                divider.length(laneLen);
+                divider.length = laneLen;
             } else {
-                divider.length(crossLen);
+                divider.length = crossLen;
             }
             OffsetF offset = dividerInfo.isVertical ? OffsetF(mainPos, crossPos) : OffsetF(crossPos, mainPos);
             divider.offset = offset;
@@ -127,14 +127,14 @@ void ListPaintMethod::UpdateDividerList(const DividerInfo& dividerInfo)
                 break;
             }
             float divOffset = (dividerInfo.space - dividerInfo.constrainStrokeWidth) / 2; /* 2 half */
-            float mainPos = itemPosition.at(index.first).endPos + divOffset + dividerInfo.mainPadding;
+            float mainPos = itemPosition_.at(index.first).endPos + divOffset + dividerInfo.mainPadding;
             float crossPos = dividerInfo.startMargin + dividerInfo.crossPadding;
-            if (lanes > 1 && !itemPosition.at(index.first).isGroup) {
+            if (lanes > 1 && !itemPosition_.at(index.first).isGroup) {
                 crossPos +=
                     laneIdx * ((dividerInfo.crossSize - fSpacingTotal) / dividerInfo.lanes + dividerInfo.laneGutter);
-                divider.length(laneLen);
+                divider.length = laneLen;
             } else {
-                divider.length(crossLen);
+                divider.length = crossLen;
             }
             OffsetF offset = dividerInfo.isVertical ? OffsetF(mainPos, crossPos) : OffsetF(crossPos, mainPos);
             divider.offset = offset;
