@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,12 +13,28 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/render/modifier_adapter.h"
-#include "core/components_ng/base/modifier.h"
+#include "base/log/frame_report.h"
 
-namespace OHOS::Ace::NG {
-void ModifierAdapter::RemoveModifier(int32_t modifierId) {}
-template<>
-void NodeAnimatableProperty<float, AnimatablePropertyFloat>::AnimateWithVelocity(const AnimationOption& option,
-    float value, float velocity, const FinishCallback& finishCallback){}
-} // namespace OHOS::Ace::NG
+namespace OHOS::Ace {
+
+FrameReport::FrameReport() {}
+FrameReport::~FrameReport() {}
+    
+FrameReport& FrameReport::GetInstance()
+{
+    class FrameReport instance;
+    return instance;
+}
+
+int FrameReport::GetEnable()
+{
+    return true;
+}
+
+void FrameReport::EndListFling()
+{}
+
+void FrameReport::BeginListFling()
+{}
+
+} // namespace OHOS::Ace
