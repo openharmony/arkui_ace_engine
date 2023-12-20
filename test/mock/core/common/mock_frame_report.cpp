@@ -17,12 +17,16 @@
 
 namespace OHOS::Ace {
 
-FrameReport::FrameReport() {}
-FrameReport::~FrameReport() {}
-    
-FrameReport& FrameReport::GetInstance()
+FrameReport::FrameReport()
 {
-    class FrameReport instance;
+}
+FrameReport::~FrameReport()
+{
+}
+
+FrameReport &FrameReport::GetInstance()
+{
+    static FrameReport instance;
     return instance;
 }
 
@@ -32,9 +36,11 @@ int FrameReport::GetEnable()
 }
 
 void FrameReport::EndListFling()
-{}
+{
+}
 
 void FrameReport::BeginListFling()
-{}
+{
+}
 
 } // namespace OHOS::Ace

@@ -16,22 +16,22 @@
 #include "core/gestures/raw_recognizer.h"
 
 namespace OHOS::Ace {
-    void RawRecognizer::HandleRawEvent(const TouchEvent& point, uint32_t stage)
+void RawRecognizer::HandleRawEvent(const TouchEvent &point, uint32_t stage)
 {
 }
 
-bool RawRecognizer::DispatchEvent(const TouchEvent& point)
+bool RawRecognizer::DispatchEvent(const TouchEvent &point)
 {
     return true;
 }
 
-bool RawRecognizer::HandleEvent(const TouchEvent& point)
+bool RawRecognizer::HandleEvent(const TouchEvent &point)
 {
     return true;
 };
 
 TouchEventInfo RawRecognizer::CreateTouchEventInfo(
-    const std::string& type, const TouchEvent& point, bool ignoreCurrent) const
+    const std::string &type, const TouchEvent &point, bool ignoreCurrent) const
 {
     TouchEventInfo info(type);
     return info;
