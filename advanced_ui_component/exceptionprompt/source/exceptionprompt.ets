@@ -12,7 +12,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 const START_TIME = 250;
 const END_TIME = 200;
 const BORDER_RADIUS = 12;
@@ -31,7 +30,7 @@ export interface PromptOptions {
   tip?: ResourceStr,
   marginType: MarginType,
   actionText?: ResourceStr,
-  marginTop: number,
+  marginTop: Dimension,
   isShown?: boolean
 }
 
@@ -40,10 +39,10 @@ export struct ExceptionPrompt {
   @Prop options: PromptOptions
   touchBackgroundColor: Resource = $r('sys.color.ohos_id_color_sub_background_transparent')
   onTipClick: () => void = () => {
-    // Click the text on the left to change into the connecting state.
+    // Click the text on the left to change into the connecting state
   }
   onActionTextClick: () => void = () => {
-    // Click Set Network to open the Set network pop-up interface.
+    // Click Set Network to open the Set network pop-up interface
   }
 
   @Builder FirstBuilder() {
@@ -84,7 +83,7 @@ export struct ExceptionPrompt {
       .width('100%')
       .height('100%')
       .onClick(() => {
-        this.onTipClick()
+        this.onTipClick() //Click the callback of the prompt text
       })
 
       if (this.options.actionText) {
@@ -115,7 +114,7 @@ export struct ExceptionPrompt {
 
           if (event.type === TouchType.Down) {
             this.touchBackgroundColor = $r('sys.color.ohos_id_color_click_effect')
-            this.onActionTextClick()
+            this.onActionTextClick() //Click the icon button on the right for the callback
           } else if (event.type === TouchType.Up) {
             this.touchBackgroundColor = $r('sys.color.ohos_id_color_sub_background_transparent')
           }
@@ -141,12 +140,12 @@ export struct ExceptionPrompt {
         this.TextBuilder()
       }
       .padding(this.options.marginType === MarginType.DEFAULT_MARGIN ? {
-                                                                         left: $r('sys.float.ohos_id_card_margin_start'),
-                                                                         right: $r('sys.float.ohos_id_card_margin_end')
-                                                                       } : {
-                                                                             left: $r('sys.float.ohos_id_max_padding_start'),
-                                                                             right: $r('sys.float.ohos_id_max_padding_end')
-                                                                           })
+                                                                          left: $r('sys.float.ohos_id_card_margin_start'),
+                                                                          right: $r('sys.float.ohos_id_card_margin_end')
+                                                                        } : {
+                                                                              left: $r('sys.float.ohos_id_max_padding_start'),
+                                                                              right: $r('sys.float.ohos_id_max_padding_end')
+                                                                            })
       .transition(
         TransitionEffect.OPACITY.animation({
           duration: this.options.isShown ? START_TIME : END_TIME
