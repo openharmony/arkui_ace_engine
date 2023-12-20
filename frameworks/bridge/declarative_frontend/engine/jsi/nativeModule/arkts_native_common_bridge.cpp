@@ -63,6 +63,7 @@ constexpr double FULL_DIMENSION = 100.0;
 constexpr double HALF_DIMENSION = 50.0;
 constexpr uint32_t DEFAULT_DURATION = 1000;
 constexpr int64_t MICROSEC_TO_MILLISEC = 1000;
+constexpr int32_t MAX_ALIGN_VALUE = 8;
 constexpr SharedTransitionEffectType DEFAULT_SHARED_EFFECT = SharedTransitionEffectType::SHARED_EFFECT_EXCHANGE;
 
 BorderStyle ConvertBorderStyle(int32_t value)
@@ -3177,10 +3178,10 @@ ArkUINativeModuleValue CommonBridge::SetMargin(ArkUIRuntimeCallInfo *runtimeCall
     Local<JSValueRef> thirdArg = runtimeCallInfo->GetCallArgRef(NUM_2);
     Local<JSValueRef> forthArg = runtimeCallInfo->GetCallArgRef(NUM_3);
     Local<JSValueRef> fifthArg = runtimeCallInfo->GetCallArgRef(NUM_4);
-    struct ArkUISizeType top = { 0.0, static_cast<int8_t>(DimensionUnit::VP), nullptr };
-    struct ArkUISizeType right = { 16.0, static_cast<int8_t>(DimensionUnit::VP), nullptr };
-    struct ArkUISizeType bottom = { 0.0, static_cast<int8_t>(DimensionUnit::VP), nullptr };
-    struct ArkUISizeType left = { 16.0, static_cast<int8_t>(DimensionUnit::VP), nullptr };
+    ArkUISizeType top = { 0.0, static_cast<int8_t>(DimensionUnit::VP), nullptr };
+    ArkUISizeType right = { 0.0, static_cast<int8_t>(DimensionUnit::VP), nullptr };
+    ArkUISizeType bottom = { 0.0, static_cast<int8_t>(DimensionUnit::VP), nullptr };
+    ArkUISizeType left = { 0.0, static_cast<int8_t>(DimensionUnit::VP), nullptr };
     CalcDimension topDimen(0, DimensionUnit::VP);
     if (ArkTSUtils::ParseJsDimensionVp(vm, secondArg, topDimen)) {
         top.unit = static_cast<int8_t>(topDimen.Unit());
@@ -3475,9 +3476,11 @@ ArkUINativeModuleValue CommonBridge::SetAlignSelf(ArkUIRuntimeCallInfo* runtimeC
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
 
-    if (secondArg->IsNumber()) {
-        uint32_t value = secondArg->Int32Value(vm);
-        GetArkUIInternalNodeAPI()->GetCommonModifier().SetAlignSelf(nativeNode, value);
+    if (secondArg->IsNumber() && secondArg->ToNumber(vm)->Value() >= 0 &&
+        secondArg->ToNumber(vm)->Value() <= MAX_ALIGN_VALUE) {
+        GetArkUIInternalNodeAPI()->GetCommonModifier().SetAlignSelf(nativeNode, secondArg->Int32Value(vm));
+    } else {
+        GetArkUIInternalNodeAPI()->GetCommonModifier().ResetAlignSelf(nativeNode);
     }
     return panda::JSValueRef::Undefined(vm);
 }
