@@ -530,15 +530,10 @@ void ContainerModalPattern::SetCloseButtonStatus(bool isEnabled)
 
 void ContainerModalPattern::SetContainerModalTitleVisible(bool customTitleSettedShow, bool floatingTitleSettedShow)
 {
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto column = AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(0));
-    CHECK_NULL_VOID(column);
-
     customTitleSettedShow_ = customTitleSettedShow;
-    auto customTitleRow = AceType::DynamicCast<FrameNode>(column->GetChildAtIndex(0));
+    auto customTitleRow = GetCustomTitleRow();
     CHECK_NULL_VOID(customTitleRow);
-    auto customTitleLayoutProperty = customTitleRow->GetLayoutProperty<LinearLayoutProperty>();
+    auto customTitleLayoutProperty = customTitleRow->GetLayoutProperty();
     CHECK_NULL_VOID(customTitleLayoutProperty);
     if (customTitleLayoutProperty->GetVisibilityValue(VisibleType::GONE) == VisibleType::VISIBLE &&
         !customTitleSettedShow) {
@@ -550,14 +545,18 @@ void ContainerModalPattern::SetContainerModalTitleVisible(bool customTitleSetted
     }
 
     floatingTitleSettedShow_ = floatingTitleSettedShow;
-    auto floatingTitleRow = AceType::DynamicCast<FrameNode>(column->GetChildAtIndex(1));
+    auto floatingTitleRow = GetFloatingTitleRow();
     CHECK_NULL_VOID(floatingTitleRow);
-    auto floatingTitleLayoutProperty = floatingTitleRow->GetLayoutProperty<LinearLayoutProperty>();
+    auto floatingTitleLayoutProperty = floatingTitleRow->GetLayoutProperty();
     CHECK_NULL_VOID(floatingTitleLayoutProperty);
     if (floatingTitleLayoutProperty->GetVisibilityValue(VisibleType::GONE) == VisibleType::VISIBLE &&
         !floatingTitleSettedShow) {
         floatingTitleLayoutProperty->UpdateVisibility(VisibleType::GONE);
     }
+
+    auto buttonsRow = GetControlButtonRow();
+    CHECK_NULL_VOID(buttonsRow);
+    buttonsRow->SetHitTestMode(HitTestMode::HTMTRANSPARENT_SELF);
 }
 
 void ContainerModalPattern::SetContainerModalTitleHeight(int32_t height)
