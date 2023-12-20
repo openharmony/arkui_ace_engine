@@ -30,8 +30,10 @@
 #include "core/components/image/image_theme.h"
 #include "core/components/theme/icon_theme.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/image/image_paint_method.h"
+#include "core/components_ng/property/measure_property.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "frameworks/bridge/common/utils/engine_helper.h"
 #if defined(PIXEL_MAP_SUPPORTED)
@@ -864,11 +866,15 @@ void ImagePattern::CreateAnalyzerOverlay()
         return;
     }
     auto pixelMap = image_->GetPixelMap();
+    CHECK_NULL_VOID(pixelMap);
     napi_value pixelmapNapiVal = ConvertPixmapNapi(pixelMap);
     auto frameNode = GetHost();
     auto overlayNode = frameNode->GetOverlayNode();
 
     if (!isAnalyzerOverlayBuild_) {
+        auto layoutProps = GetLayoutProperty<ImageLayoutProperty>();
+        CHECK_NULL_VOID(layoutProps);
+        analyzerUIConfig_.imageFit = layoutProps->GetImageFit().value_or(ImageFit::COVER);
         auto buildNodeFunction = [this, &pixelmapNapiVal]() -> RefPtr<UINode> {
             ScopedViewStackProcessor builderViewStackProcessor;
             ImageAnalyzerMgr::GetInstance().BuildNodeFunc(
@@ -904,14 +910,28 @@ void ImagePattern::CreateAnalyzerOverlay()
 
 bool ImagePattern::IsSupportImageAnalyzerFeature()
 {
-    return isEnableAnalyzer_ && ImageAnalyzerMgr::GetInstance().IsImageAnalyzerSupported() && image_ &&
-        !loadingCtx_->GetSourceInfo().IsSvg();
+    auto eventHub = GetEventHub<EventHub>();
+    bool isEnabled = true;
+    if (eventHub) {
+        isEnabled = eventHub->IsEnabled();
+    }
+
+    bool hasObscured = false;
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    if (host->GetRenderContext()->GetObscured().has_value()) {
+        auto obscuredReasons = host->GetRenderContext()->GetObscured().value();
+        hasObscured = std::any_of(obscuredReasons.begin(), obscuredReasons.end(),
+            [](const auto& reason) { return reason == ObscuredReasons::PLACEHOLDER; });
+    }
+
+    return isEnabled && !hasObscured && isEnableAnalyzer_ && ImageAnalyzerMgr::GetInstance().IsImageAnalyzerSupported()
+        && image_ && !loadingCtx_->GetSourceInfo().IsSvg();
 }
 
 void ImagePattern::UpdateAnalyzerUIConfig(const RefPtr<LayoutWrapper>& dirty)
 {
     bool isUIConfigUpdate = false;
-
     auto& geometryNode = dirty->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
     if (analyzerUIConfig_.contentWidth != geometryNode->GetFrameSize().Width() ||
@@ -938,7 +958,55 @@ void ImagePattern::UpdateAnalyzerUIConfig(const RefPtr<LayoutWrapper>& dirty)
         isUIConfigUpdate = true;
     }
 
-    if (isUIConfigUpdate) {
+    UpdatePaddingAndBorderWidth(isUIConfigUpdate);
+}
+
+void ImagePattern::UpdatePaddingAndBorderWidth(bool isUIConfigUpdate)
+{
+    bool needUpdateUIConfig = isUIConfigUpdate;
+    auto layoutProps = GetLayoutProperty<ImageLayoutProperty>();
+    CHECK_NULL_VOID(layoutProps);
+    if (layoutProps->GetPaddingProperty()) {
+        auto&& padding = layoutProps->GetPaddingProperty();
+        double topPadding = padding->top.value_or(CalcLength(0.0_vp)).GetDimension().ConvertToPx();
+        double bottomPadding = padding->bottom.value_or(CalcLength(0.0_vp)).GetDimension().ConvertToPx();
+        double leftPadding = padding->left.value_or(CalcLength(0.0_vp)).GetDimension().ConvertToPx();
+        double rightPadding = padding->right.value_or(CalcLength(0.0_vp)).GetDimension().ConvertToPx();
+        double configTopPadding = analyzerUIConfig_.padding[0];
+        double configBottomPadding = analyzerUIConfig_.padding[1];
+        double configLeftPadding = analyzerUIConfig_.padding[2];
+        double configRightPadding = analyzerUIConfig_.padding[3];
+        if (configTopPadding != topPadding || configBottomPadding != bottomPadding || configLeftPadding !=
+            leftPadding || configRightPadding != rightPadding) {
+            configTopPadding = topPadding;
+            configBottomPadding = bottomPadding;
+            configLeftPadding = leftPadding;
+            configRightPadding = rightPadding;
+            needUpdateUIConfig = true;
+        }
+    }
+
+    if (layoutProps->GetBorderWidthProperty()) {
+        auto&& border = layoutProps->GetBorderWidthProperty();
+        double borderTop = border->topDimen.value_or(Dimension(0)).ConvertToPx();
+        double borderBottom = border->bottomDimen.value_or(Dimension(0)).ConvertToPx();
+        double borderLeft = border->leftDimen.value_or(Dimension(0)).ConvertToPx();
+        double borderRight = border->rightDimen.value_or(Dimension(0)).ConvertToPx();
+        double configBorderTop = analyzerUIConfig_.borderWidth[0];
+        double configBorderBottom = analyzerUIConfig_.borderWidth[1];
+        double configBorderLeft = analyzerUIConfig_.borderWidth[2];
+        double configBorderRight = analyzerUIConfig_.borderWidth[3];
+        if (configBorderTop != borderTop || configBorderBottom != borderBottom || configBorderLeft !=
+            borderLeft || configBorderRight != borderRight) {
+            configBorderTop = borderTop;
+            configBorderBottom = borderBottom;
+            configBorderLeft = borderLeft;
+            configBorderRight = borderRight;
+            needUpdateUIConfig = true;
+        }
+    }
+
+    if (needUpdateUIConfig) {
         ImageAnalyzerMgr::GetInstance().UpdateInnerConfig(&overlayData_, &analyzerUIConfig_);
     }
 }
