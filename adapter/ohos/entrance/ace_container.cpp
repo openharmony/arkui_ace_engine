@@ -247,7 +247,6 @@ void AceContainer::InitializeFrontend()
             RefPtr<Framework::JsEngine> jsEngine;
             if (GetSettings().usingSharedRuntime) {
                 jsEngine = loader.CreateJsEngineUsingSharedRuntime(instanceId_, sharedRuntime_);
-                LOGI("Create engine using runtime, engine %{public}p", RawPtr(jsEngine));
             } else {
                 jsEngine = loader.CreateJsEngine(instanceId_);
             }
