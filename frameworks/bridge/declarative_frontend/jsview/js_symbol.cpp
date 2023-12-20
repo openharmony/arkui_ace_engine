@@ -49,6 +49,8 @@ void JSSymbol::JSBind(BindingTarget globalObj)
     JSClass<JSSymbol>::StaticMethod("create", &JSSymbol::Create, opt);
     JSClass<JSSymbol>::StaticMethod("fontWeight", &JSSymbol::SetFontWeight, opt);
     JSClass<JSSymbol>::StaticMethod("fontSize", &JSSymbol::SetFontSize, opt);
+    JSClass<JSSymbol>::StaticMethod("renderingStrategy", &JSSymbol::SetSymbolRenderingStrategy, opt);
+    JSClass<JSSymbol>::StaticMethod("fontColor", &JSSymbol::SetFontColor, opt);
     JSClass<JSSymbol>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 
@@ -80,4 +82,19 @@ void JSSymbol::SetFontWeight(const std::string& value)
     SymbolModel::GetInstance()->SetFontWeight(ConvertStrToFontWeight(value));
 }
 
+void JSSymbol::SetSymbolRenderingStrategy(const JSCallbackInfo& info)
+{
+    uint32_t strategy = 0;
+    ParseJsInteger(info[0], strategy);
+    SymbolModel::GetInstance()->SetSymbolRenderingStrategy(strategy);
+}
+
+void JSSymbol::SetFontColor(const JSCallbackInfo& info)
+{
+    std::vector<Color> symbolColor;
+    if (!ParseJsSymbolColor(info[0], symbolColor)) {
+        return;
+    }
+    SymbolModel::GetInstance()->SetFontColor(symbolColor);
+}
 } // namespace OHOS::Ace::Framework

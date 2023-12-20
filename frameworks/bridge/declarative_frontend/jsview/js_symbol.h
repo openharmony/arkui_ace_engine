@@ -27,6 +27,8 @@ public:
     static void Create(const JSCallbackInfo& args);
     static void SetFontWeight(const std::string& info);
     static void SetFontSize(const JSCallbackInfo& info);
+    static void SetSymbolRenderingStrategy(const JSCallbackInfo& info);
+    static void SetFontColor(const JSCallbackInfo& info);
 };
 
 } // namespace OHOS::Ace::Framework
