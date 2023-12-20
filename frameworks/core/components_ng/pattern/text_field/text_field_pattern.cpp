@@ -1918,6 +1918,9 @@ void TextFieldPattern::OnModifyDone()
         HasFocus() && IsNormalInlineState()) {
         lastTextRectY_ = textRect_.GetY();
     }
+    if (!IsDisabled()) {
+        SetShowError();
+    }
     ProcessInnerPadding();
     // The textRect position can't be changed by only redraw.
     if (CheckNeedMeasure(layoutProperty->GetPropertyChangeFlag()) && !HasInputOperation()) {
@@ -1966,9 +1969,6 @@ void TextFieldPattern::OnModifyDone()
             AddScrollEvent();
             SetScrollEnable(false);
         }
-    }
-    if (!IsDisabled()) {
-        SetShowError();
     }
     if (IsTextArea()) {
         if (setBorderFlag_ && layoutProperty->HasMaxLength()) {
