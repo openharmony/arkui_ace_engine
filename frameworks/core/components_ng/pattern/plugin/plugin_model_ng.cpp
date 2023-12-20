@@ -99,4 +99,38 @@ void PluginModelNG::SetData(const std::string& data)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(PluginLayoutProperty, Data, data);
 };
+
+void PluginModelNG::SetPluginSize(FrameNode* frameNode, const Dimension& width, const Dimension& height)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pluginLayoutProperty = frameNode->GetLayoutProperty<PluginLayoutProperty>();
+    CHECK_NULL_VOID(pluginLayoutProperty);
+    auto pluginInfo = pluginLayoutProperty->GetRequestPluginInfo().value_or(RequestPluginInfo());
+    pluginInfo.width = width;
+    pluginInfo.height = height;
+    pluginLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(width), CalcLength(height)));
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(PluginLayoutProperty, RequestPluginInfo, pluginInfo, frameNode);
+};
+
+void PluginModelNG::SetWidth(FrameNode* frameNode, const Dimension& width)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pluginLayoutProperty = frameNode->GetLayoutProperty<PluginLayoutProperty>();
+    CHECK_NULL_VOID(pluginLayoutProperty);
+    auto pluginInfo = pluginLayoutProperty->GetRequestPluginInfo().value_or(RequestPluginInfo());
+    pluginInfo.width = width;
+    pluginLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(width), std::nullopt));
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(PluginLayoutProperty, RequestPluginInfo, pluginInfo, frameNode);
+};
+
+void PluginModelNG::SetHeight(FrameNode* frameNode, const Dimension& height)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pluginLayoutProperty = frameNode->GetLayoutProperty<PluginLayoutProperty>();
+    CHECK_NULL_VOID(pluginLayoutProperty);
+    auto pluginInfo = pluginLayoutProperty->GetRequestPluginInfo().value_or(RequestPluginInfo());
+    pluginInfo.height = height;
+    pluginLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(height)));
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(PluginLayoutProperty, RequestPluginInfo, pluginInfo, frameNode);
+};
 } // namespace OHOS::Ace::NG

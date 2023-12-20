@@ -1358,6 +1358,17 @@ struct ArkUIProgressModifierAPI {
     void (*ResetProgressBackgroundColor)(NodeHandle node);
 };
 
+#ifdef PLUGIN_COMPONENT_SUPPORTED
+struct ArkUIPluginModifierAPI {
+    void (*SetPluginWidth)(NodeHandle node, double widthVal, int32_t widthUnit);
+    void (*SetPluginHeight)(NodeHandle node, double heightVal, int32_t heightUnit);
+    void (*SetPluginSize)(NodeHandle node, double widthVal, double heightVal, int32_t widthUnit, int32_t heightUnit);
+    void (*ResetPluginWidth)(NodeHandle node);
+    void (*ResetPluginHeight)(NodeHandle node);
+    void (*ResetPluginSize)(NodeHandle node);
+};
+#endif
+
 struct ArkUIListModifierAPI {
     void (*SetListLanes)(NodeHandle node, int32_t lanesNum, const struct ArkUIDimensionType *minLength,
         const struct ArkUIDimensionType *maxLength, const struct ArkUIDimensionType *gutter);
@@ -1603,6 +1614,9 @@ struct ArkUINodeAPI {
     ArkUILoadingProgressModifierAPI (*GetLoadingProgressModifier)();
     ArkUITextClockModifierAPI (*GetTextClockModifier)();
     ArkUITextTimerModifierAPI (*GetTextTimerModifier)();
+#ifdef PLUGIN_COMPONENT_SUPPORTED
+    ArkUIPluginModifierAPI (*GetPluginModifier)();
+#endif
 #ifdef XCOMPONENT_SUPPORTED
     ArkUIXComponentModifierAPI (*GetXComponentModifier)();
 #endif

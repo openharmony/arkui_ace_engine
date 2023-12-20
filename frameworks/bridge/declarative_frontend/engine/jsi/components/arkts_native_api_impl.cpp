@@ -87,7 +87,9 @@
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_text_timer_modifier.h"
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_loading_progress_modifier.h"
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_text_clock_modifier.h"
-
+#ifdef PLUGIN_COMPONENT_SUPPORTED
+#include "bridge/declarative_frontend/engine/jsi/components/arkts_native_plugin_modifier.h"
+#endif
 #ifdef XCOMPONENT_SUPPORTED
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_xcomponent_modifier.h"
 #endif
@@ -194,7 +196,9 @@ static struct ArkUINodeAPI impl = {
     GetLoadingProgressModifier,
     GetTextClockModifier,
     GetTextTimerModifier,
-
+#ifdef PLUGIN_COMPONENT_SUPPORTED
+    GetPluginModifier,
+#endif
 #ifdef XCOMPONENT_SUPPORTED
     GetXComponentModifier,
 #endif

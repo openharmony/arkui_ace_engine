@@ -343,6 +343,29 @@ template("declarative_js_engine_ark") {
       }
     }
 
+    if (defined(config.plugin_components_support) &&
+        config.plugin_components_support) {
+      sources += [
+        "components/arkts_native_plugin_modifier.cpp",
+        "nativeModule/arkts_native_plugin_bridge.cpp",
+      ]
+      deps += [
+        "${ace_root}/frameworks/core/components_ng/pattern/plugin:ace_core_components_plugin_pattern_ng_$platform",
+        "${ace_root}/interfaces/inner_api/ui_service_manager:ui_service_mgr",
+      ]
+      external_deps += [
+        "ability_base:want",
+        "ability_runtime:app_manager",
+        "bundle_framework:appexecfwk_core",
+        "c_utils:utils",
+        "graphic_2d:librender_service_client",
+        "ipc:ipc_core",
+      ]
+      if (os_account_exists) {
+        external_deps += [ "os_account:os_account_innerkits" ]
+      }
+    }
+
     include_dirs = []
     if (defined(vendor_configs.extra_view_register_sources)) {
       include_dirs += vendor_configs.ace_advance_dirs
