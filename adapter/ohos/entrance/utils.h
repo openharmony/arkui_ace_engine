@@ -21,7 +21,6 @@
 #include "base/log/log.h"
 #include "base/geometry/rect.h"
 #include "core/common/asset_manager_impl.h"
-#include "core/common/flutter/flutter_asset_manager.h"
 #include "core/components_ng/property/safe_area_insets.h"
 
 namespace OHOS::Rosen {
@@ -32,9 +31,6 @@ namespace OHOS::Ace {
 
 std::string GetStringFromFile(const std::string& packagePathStr, const std::string& fileName);
 std::string GetStringFromHap(const std::string& hapPath, const std::string& fileName);
-
-RefPtr<FlutterAssetProvider> CreateAssetProvider(
-    const std::string& packagePath, const std::vector<std::string>& assetBasePaths, bool useCache = true);
 
 RefPtr<AssetProviderImpl> CreateAssetProviderImpl(
     const std::string& packagePath, const std::vector<std::string>& assetBasePaths, bool useCache = true);

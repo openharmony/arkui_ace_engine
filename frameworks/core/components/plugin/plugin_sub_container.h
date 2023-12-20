@@ -150,7 +150,7 @@ public:
     }
 
 private:
-    void SetPluginComponentTheme(const std::string& path, const RefPtr<AssetManager>& flutterAssetManager);
+    void SetPluginComponentTheme(const std::string& path, const RefPtr<AssetManager>& assetManager);
     void SetActionEventHandler();
     RefPtr<AssetManager> SetAssetManager(const std::string& path, const std::string& module);
     RefPtr<AssetManager> GetDecompressedAssetManager(const std::string& path, const std::string& module);

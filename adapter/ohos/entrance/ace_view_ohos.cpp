@@ -16,10 +16,6 @@
 #include "adapter/ohos/entrance/ace_view_ohos.h"
 
 #include <memory>
-
-#include "flutter/fml/message_loop.h"
-#include "flutter/shell/platform/ohos/platform_task_runner_adapter.h"
-
 #include "adapter/ohos/entrance/ace_container.h"
 #include "adapter/ohos/entrance/mmi_event_convertor.h"
 #include "base/log/ace_trace.h"
@@ -55,31 +51,17 @@ bool IsMMIMouseScrollBegin(const AxisEvent& event)
 
 AceViewOhos* AceViewOhos::CreateView(int32_t instanceId, bool useCurrentEventRunner, bool usePlatformThread)
 {
-    if (SystemProperties::GetFlutterDecouplingEnabled()) {
-        auto* aceView =
-            new AceViewOhos(instanceId, ThreadModelImpl::CreateThreadModel(useCurrentEventRunner, !usePlatformThread,
-                !SystemProperties::GetRosenBackendEnabled()));
-        if (aceView != nullptr) {
-            aceView->IncRefCount();
-        }
-        return aceView;
-    } else {
-        auto* aceView =
-            new AceViewOhos(instanceId, FlutterThreadModel::CreateThreadModel(useCurrentEventRunner, !usePlatformThread,
-                !SystemProperties::GetRosenBackendEnabled()));
-        if (aceView != nullptr) {
-            aceView->IncRefCount();
-        }
-        return aceView;
+    auto* aceView =
+        new AceViewOhos(instanceId, ThreadModelImpl::CreateThreadModel(useCurrentEventRunner, !usePlatformThread,
+            !SystemProperties::GetRosenBackendEnabled()));
+    if (aceView != nullptr) {
+        aceView->IncRefCount();
     }
+    return aceView;
 }
 
 AceViewOhos::AceViewOhos(int32_t id, std::unique_ptr<ThreadModelImpl> threadModelImpl)
     : instanceId_(id), threadModelImpl_(std::move(threadModelImpl))
-{}
-
-AceViewOhos::AceViewOhos(int32_t id, std::unique_ptr<FlutterThreadModel> threadModel)
-    : instanceId_(id), threadModel_(std::move(threadModel))
 {}
 
 void AceViewOhos::SurfaceCreated(AceViewOhos* view, OHOS::sptr<OHOS::Rosen::Window> window)
