@@ -161,17 +161,23 @@ public:
         return LessOrEqual(tempTitleBarHeight_, maxTitleBarHeight_);
     }
 
-    bool GetCurrentNavBarStatus() const
+    bool IsCurrentMinTitle() const
     {
         if (NearZero(tempTitleBarHeight_)) {
             return true;
         }
-        GetMaxTitleBarHeight();
-        auto titleMiddleValue =
-            (static_cast<float>(SINGLE_LINE_TITLEBAR_HEIGHT.ConvertToPx()) + maxTitleBarHeight_) / 2;
-        return LessNotEqual(tempTitleBarHeight_, titleMiddleValue);
+        return LessOrEqual(tempTitleBarHeight_, static_cast<float>(SINGLE_LINE_TITLEBAR_HEIGHT.ConvertToPx()));
     }
-    
+
+    bool IsCurrentMaxTitle() const
+    {
+        if (NearZero(tempTitleBarHeight_)) {
+            return false;
+        }
+        GetMaxTitleBarHeight();
+        return GreatOrEqual(tempTitleBarHeight_, maxTitleBarHeight_);
+    }
+
     NavigationTitleMode GetNavigationTitleMode() const
     {
         return titleMode_;
@@ -187,8 +193,9 @@ public:
         isTitleScaleChange_ = isTitleScaleChange;
     }
 
-    void ResetAssociatedScroll();
-    bool UpdateAssociatedScrollOffset(float offset);
+    void OnCoordScrollStart();
+    float OnCoordScrollUpdate(float offset);
+    void OnCoordScrollEnd();
 
 private:
     void TransformScale(float overDragOffset, const RefPtr<FrameNode>& frameNode);
@@ -224,6 +231,13 @@ private:
     void UpdateSubTitleOpacity(const double &value);
     void UpdateTitleModeChange();
     void MountTitle(const RefPtr<TitleBarNode>& hostNode);
+
+    void UpdateTitleBarByCoordScroll(float offset);
+    void SetTitleStyleByCoordScrollOffset(float offset);
+    float CalculateHandledOffsetMinTitle(float offset, float lastCordScrollOffset);
+    float CalculateHandledOffsetMaxTitle(float offset, float lastCordScrollOffset);
+    float CalculateHandledOffsetBetweenMinAndMaxTitle(float offset, float lastCordScrollOffset);
+
     RefPtr<PanEvent> panEvent_;
     RefPtr<SpringMotion> springMotion_;
     RefPtr<Animator> springController_;
@@ -263,11 +277,8 @@ private:
     bool isTitleScaleChange_ = true;
     NavigationTitleMode titleMode_ = NavigationTitleMode::FREE;
 
-    bool enableAssociatedScroll_ = false;
-    float associatedScrollOffset_ = 0.0f;
-    bool dragScrolling_ = false;
-    bool associatedScrollOverSize_ = false;
-    float associatedScrollOffsetMax_ = 0.0f;
+    float coordScrollOffset_ = 0.0f;
+    float coordScrollFinalOffset_ = 0.0f;
 };
 
 } // namespace OHOS::Ace::NG

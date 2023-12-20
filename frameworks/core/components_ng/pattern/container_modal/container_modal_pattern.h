@@ -142,7 +142,12 @@ public:
     bool GetContainerModalButtonsRect(RectF& containerModal, RectF& buttons);
     void SubscribeContainerModalButtonsRectChange(
         std::function<void(RectF& containerModal, RectF& buttons)>&& callback);
-    void OnModifyDone() override;
+    void CallButtonsRectChange();
+    bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>&, const DirtySwapConfig&) override
+    {
+        CallButtonsRectChange();
+        return false;
+    }
 
 protected:
     virtual RefPtr<UINode> GetTitleItemByIndex(const RefPtr<FrameNode>& controlButtonsNode, int32_t originIndex)

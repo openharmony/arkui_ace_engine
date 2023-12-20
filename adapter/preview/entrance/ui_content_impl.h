@@ -44,6 +44,7 @@ public:
     void Initialize(OHOS::Rosen::Window* window,
         const std::shared_ptr<std::vector<uint8_t>>& content, napi_value storage) override {}
     void InitializeByName(OHOS::Rosen::Window* window, const std::string& name, napi_value storage) override {}
+    void InitializeDynamic(const std::string& hapPath, const std::string& abcPath) override {}
     void Initialize(
         OHOS::Rosen::Window* window, const std::string& url, napi_value storage, uint32_t focusWindowId) override {}
     void Foreground() override {}

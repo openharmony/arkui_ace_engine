@@ -266,6 +266,9 @@ HWTEST_F(DragDropProxyTestNg, DragDropProxyTest004, TestSize.Level1)
      * @tc.expected: step4. DragDropManager->onDragCancel() will be called
      *                      some logs will be print they are defined in "mock_drag_drop_manager.cpp"
      */
+    auto pipeline = PipelineContext::GetCurrentContext();
+    auto manager = pipeline->GetDragDropManager();
+    manager->currentId_ = PROXY_ID;
     proxy->onDragCancel();
 }
 
@@ -426,5 +429,130 @@ HWTEST_F(DragDropProxyTestNg, DragDropProxyTest008, TestSize.Level1)
      *                      some logs will be print they are defined in "mock_drag_drop_manager.cpp"
      */
     proxy->onItemDragCancel();
+}
+
+/**
+ * @tc.name: DragDropProxyTest009
+ * @tc.desc: Test OnTextDragStart
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(DragDropProxyTestNg, DragDropProxyTest009, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct a DragDropProxy with unfitted proxyId.
+     * @tc.expected: step1. id_ is equal to PROXY_ID_NOT_FIT.
+     */
+    auto proxyUnFitted = AceType::MakeRefPtr<DragDropProxy>(PROXY_ID_NOT_FIT);
+    EXPECT_EQ(proxyUnFitted->id_, PROXY_ID_NOT_FIT);
+
+    /**
+     * @tc.steps: step2. construct a manager and update currentId_.
+     */
+    auto pipeline = PipelineContext::GetCurrentContext();
+    auto manager = pipeline->GetDragDropManager();
+    manager->currentId_ = PROXY_ID_NOT_FIT;
+
+    /**
+     * @tc.steps: step3. call OnTextDragStart with ON_DRAG_START.
+     * @tc.expected: step3. retFlag is true.
+     */
+    proxyUnFitted->OnTextDragStart(ON_DRAG_START);
+    auto retFlag = manager->CheckDragDropProxy(PROXY_ID_NOT_FIT);
+    EXPECT_TRUE(retFlag);
+}
+
+/**
+ * @tc.name: DragDropProxyTest010
+ * @tc.desc: Test CheckDragDropProxy out of OnDragStart is a true branch
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(DragDropProxyTestNg, DragDropProxyTest010, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct a DragDropProxy with unfitted proxyUnFitted.
+     * @tc.expected: step1. id_ is equal to PROXY_ID_NOT_FIT.
+     */
+    auto proxyUnFitted = AceType::MakeRefPtr<DragDropProxy>(PROXY_ID_NOT_FIT);
+    EXPECT_EQ(proxyUnFitted->id_, PROXY_ID_NOT_FIT);
+
+    /**
+     * @tc.steps: step2. construct a manager and update currentId_.
+     */
+    auto pipeline = PipelineContext::GetCurrentContext();
+    auto manager = pipeline->GetDragDropManager();
+    manager->currentId_ = PROXY_ID_NOT_FIT;
+
+    /**
+     * @tc.steps: step3. call onDragStart with GestureEvent and frameNode.
+     * @tc.expected: step3. proxyUnFitted->id_ is equal to manager->currentId_.
+     */
+    GestureEvent info;
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    proxyUnFitted->OnDragStart(info, EXTRA_INFO_DRAG_START, frameNode);
+    EXPECT_EQ(proxyUnFitted->id_, manager->currentId_);
+}
+
+/**
+ * @tc.name: DragDropProxyTest011
+ * @tc.desc: Test isTextDragEnd out of OnDragEnd is a true branch
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(DragDropProxyTestNg, DragDropProxyTest011, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct a DragDropProxy with fitted proxy.
+     * @tc.expected: step1. id_ is equal to PROXY_ID.
+     */
+    auto proxy = AceType::MakeRefPtr<DragDropProxy>(PROXY_ID);
+    EXPECT_EQ(proxy->id_, PROXY_ID);
+
+    /**
+     * @tc.steps: step2. construct a manager and update currentId_.
+     */
+    auto pipeline = PipelineContext::GetCurrentContext();
+    auto manager = pipeline->GetDragDropManager();
+    EXPECT_TRUE(manager);
+
+    /**
+     * @tc.steps: step3. call OnDragEnd with GestureEvent and true.
+     * @tc.expected: step3. manager->currentId_ is equal to -1.
+     */
+    GestureEvent info;
+    manager->currentId_ = PROXY_ID;
+    proxy->OnDragEnd(info, true);
+    EXPECT_EQ(manager->currentId_, -1);
+}
+
+/**
+ * @tc.name: DragDropProxyTest012
+ * @tc.desc: DestroyDragWindow
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(DragDropProxyTestNg, DragDropProxyTest012, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct a DragDropProxy with fitted proxy.
+     * @tc.expected: step1. id_ is equal to PROXY_ID.
+     */
+    auto proxy = AceType::MakeRefPtr<DragDropProxy>(PROXY_ID);
+    EXPECT_EQ(proxy->id_, PROXY_ID);
+
+    /**
+     * @tc.steps: step2. construct a manager and update currentId_.
+     */
+    auto pipeline = PipelineContext::GetCurrentContext();
+    auto manager = pipeline->GetDragDropManager();
+    manager->currentId_ = PROXY_ID;
+
+    /**
+     * @tc.steps: step3. call DestroyDragWindow.
+     * @tc.expected: step3. manager->currentId_ is equal to proxy->id_.
+     */
+    proxy->DestroyDragWindow();
+    EXPECT_EQ(manager->currentId_, proxy->id_);
 }
 } // namespace OHOS::Ace::NG

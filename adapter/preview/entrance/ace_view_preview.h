@@ -24,7 +24,6 @@
 #include "base/utils/noncopyable.h"
 #include "core/common/ace_view.h"
 #include "core/event/key_event_recognizer.h"
-#include "core/common/flutter/flutter_thread_model.h"
 #include "core/common/thread_model_impl.h"
 
 namespace OHOS::Ace::Platform {
@@ -32,7 +31,6 @@ using ReleaseCallback = std::function<void()>;
 
 class AceViewPreview : public AceView, public Referenced {
 public:
-    AceViewPreview(int32_t instanceId, std::unique_ptr<FlutterThreadModel> threadModel);
     AceViewPreview(int32_t instanceId, std::unique_ptr<ThreadModelImpl> threadModelImpl);
     ~AceViewPreview() override = default;
     static AceViewPreview* CreateView(
@@ -174,11 +172,6 @@ public:
         return nullptr;
     }
 
-    FlutterThreadModel* GetThreadModel() const
-    {
-        return threadModel_.get();
-    }
-
     ThreadModelImpl* GetThreadModelImpl() const
     {
         return threadModelImpl_.get();
@@ -210,7 +203,6 @@ private:
     IdleCallback idleCallback_;
     KeyEventCallback keyEventCallback_;
     KeyEventRecognizer keyEventRecognizer_;
-    std::unique_ptr<FlutterThreadModel> threadModel_;
     std::unique_ptr<ThreadModelImpl> threadModelImpl_;
 
     ACE_DISALLOW_COPY_AND_MOVE(AceViewPreview);

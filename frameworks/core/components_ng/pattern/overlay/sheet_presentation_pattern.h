@@ -297,6 +297,7 @@ private:
     void UpdateDragBarStatus();
     void UpdateCloseIconStatus();
     void UpdateSheetTitle();
+    void UpdateInteractive();
     RefPtr<RenderContext> GetRenderContext();
     bool PostTask(const TaskExecutor::Task& task);
     void CheckSheetHeightChange();

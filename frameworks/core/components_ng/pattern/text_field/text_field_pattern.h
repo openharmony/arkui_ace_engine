@@ -157,6 +157,8 @@ public:
         return true;
     }
 
+    bool CheckBlurReason();
+
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override;
 
     RefPtr<LayoutProperty> CreateLayoutProperty() override
@@ -203,13 +205,15 @@ public:
     void UpdateCounterMargin();
     void CleanCounterNode();
     void UltralimitShake();
-    void UpdateCounterBorderStyle(uint32_t& textLength, uint32_t& maxLength);
+    void HandleInputCounterBorder(int32_t& textLength, uint32_t& maxLength);
+    void UpdateCounterBorderStyle(int32_t& textLength, uint32_t& maxLength);
     void UpdateAreaBorderStyle(BorderWidthProperty& currentBorderWidth, BorderWidthProperty& overCountBorderWidth,
         BorderColorProperty& overCountBorderColor, BorderColorProperty& currentBorderColor);
     void DeleteBackward(int32_t length) override;
     void DeleteBackwardOperation(int32_t length);
     void DeleteForward(int32_t length) override;
     void DeleteForwardOperation(int32_t length);
+    void HandleOnDelete(bool backward) override;
     void UpdateRecordCaretIndex(int32_t index);
     void CreateHandles() override;
 
@@ -226,6 +230,10 @@ public:
     void SetCounterState(bool counterChange)
     {
         counterChange_ = counterChange;
+    }
+    void SetCounterMargin(bool CounterMargin)
+    {
+        hasCounterMargin_ = CounterMargin;
     }
 
     float GetTextOrPlaceHolderFontSize();
@@ -275,7 +283,7 @@ public:
     void UpdateCaretPositionByTouch(const Offset& offset);
     bool IsReachedBoundary(float offset);
 
-    virtual TextInputAction GetDefaultTextInputAction();
+    virtual TextInputAction GetDefaultTextInputAction() const;
     bool RequestKeyboard(bool isFocusViewChanged, bool needStartTwinkling, bool needShowSoftKeyboard);
     bool CloseKeyboard(bool forceClose) override;
 
@@ -777,6 +785,10 @@ public:
     void HandleSelectionEnd();
     bool HandleOnEscape() override;
     bool HandleOnTab(bool backward) override;
+    void HandleOnEnter() override
+    {
+        PerformAction(GetTextInputActionValue(TextInputAction::DONE), false);
+    }
     void HandleOnUndoAction() override;
     void HandleOnRedoAction() override;
     void HandleOnSelectAll(bool isKeyEvent, bool inlineStyle = false);
@@ -1030,6 +1042,10 @@ public:
     }
 
     void ShowMenu();
+    void HandleOnShowMenu() override
+    {
+        ShowMenu();
+    }
     bool HasFocus() const;
     void StopTwinkling();
 
@@ -1272,7 +1288,7 @@ private:
     uint32_t twinklingInterval_ = 0;
     int32_t obscureTickCountDown_ = 0;
     int32_t nakedCharPosition_ = -1;
-    bool updateSelectionAfterObscure_ = false;
+    bool obscuredChange_ = false;
     float currentOffset_ = 0.0f;
     float countHeight_ = 0.0f;
     Dimension underlineWidth_ = 1.0_px;
@@ -1355,6 +1371,7 @@ private:
     bool isShowMagnifier_ = false;
     OffsetF localOffset_;
     bool isTouchCaret_ = false;
+    bool needSelectAll_ = false;
 };
 } // namespace OHOS::Ace::NG
 

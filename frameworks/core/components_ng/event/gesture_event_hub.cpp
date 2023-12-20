@@ -579,13 +579,9 @@ OffsetF GestureEventHub::GetPixelMapOffset(
     return result;
 }
 
-float GestureEventHub::GetPixelMapScale(
-    const DragPreviewOption& option, const int32_t height, const int32_t width) const
+float GestureEventHub::GetPixelMapScale(const int32_t height, const int32_t width) const
 {
     float scale = 1.0f;
-    if (option.mode == DragPreviewMode::DISABLE_SCALE) {
-        return scale;
-    }
     int32_t deviceHeight = SystemProperties::GetDevicePhysicalHeight();
     int32_t deviceWidth = SystemProperties::GetDevicePhysicalWidth();
     int32_t maxDeviceLength = std::max(deviceHeight, deviceWidth);
@@ -809,7 +805,7 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
     }
     float defaultPixelMapScale =
         info.GetInputEventType() == InputEventType::MOUSE_BUTTON ? 1.0f : DEFALUT_DRAG_PPIXELMAP_SCALE;
-    float scale = GetPixelMapScale(frameNode->GetDragPreviewOption(), pixelMap->GetHeight(), pixelMap->GetWidth()) *
+    float scale = GetPixelMapScale(pixelMap->GetHeight(), pixelMap->GetWidth()) *
                   defaultPixelMapScale;
     auto overlayManager = pipeline->GetOverlayManager();
     if (IsPixelMapNeedScale()) {
@@ -852,6 +848,7 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
         }
         return;
     }
+    dragDropManager->UpdateDragStyle();
     dragDropManager->SetDraggingPointer(info.GetPointerId());
     dragDropManager->SetPreviewRect(Rect(pixelMapOffset.GetX(), pixelMapOffset.GetY(), width, height));
     dragDropManager->ResetRecordSize(static_cast<uint32_t>(recordsSize));

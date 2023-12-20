@@ -13,15 +13,21 @@
  * limitations under the License.
  */
 
-#include "adapter/preview/external/flutter/platform_task_runner.h"
+#include "core/components_ng/pattern/text/text_controller.h"
 
-#include "adapter/preview/external/flutter/platform_task_runner_adapter.h"
+#include "core/components_ng/pattern/text/text_pattern.h"
 
-namespace flutter {
-
-fml::RefPtr<fml::TaskRunner> PlatformTaskRunner::CurrentTaskRunner(bool useCurrentEventRunner)
+namespace OHOS::Ace::NG {
+void TextController::SetPattern(const WeakPtr<TextPattern>& pattern)
 {
-    return PlatformTaskRunnerAdapter::CurrentTaskRunner(useCurrentEventRunner);
+    pattern_ = pattern;
 }
 
-} // namespace flutter
+void TextController::CloseSelectionMenu()
+{
+    auto textPattern = pattern_.Upgrade();
+    if (textPattern) {
+        textPattern->CloseSelectionMenu();
+    }
+}
+} // namespace OHOS::Ace::NG

@@ -25,7 +25,7 @@ class SliderTipModifier : public OverlayModifier {
     DECLARE_ACE_TYPE(SliderTipModifier, OverlayModifier);
 
 public:
-    explicit SliderTipModifier(std::function<OffsetF()> getBubbleVertexFunc);
+    explicit SliderTipModifier(std::function<std::pair<OffsetF, float>()> getBubbleVertexFunc);
     ~SliderTipModifier() override;
 
     void PaintTip(DrawingContext& context);
@@ -93,6 +93,11 @@ public:
         bubbleSize_ = bubbleSize;
     }
 
+    void SetSliderGlobalOffset(const OffsetF& sliderGlobalOffset)
+    {
+        sliderGlobalOffset_ = sliderGlobalOffset;
+    }
+
     void SetBubbleOffset(const OffsetF& bubbleOffset)
     {
         bubbleOffset_ = bubbleOffset;
@@ -118,13 +123,15 @@ public:
     bool UpdateOverlayRect(const SizeF& frameSize);
 
 private:
-    void PaintBezier(bool isLeft, Axis axis, RSPath& path, const OffsetF& arrowCenter, const OffsetF& arrowEdge);
+    void PaintHorizontalBubble(float vertexOffsetFromBlock, RSPath& path);
+    void PaintVerticalBubble(float vertexOffsetFromBlock, RSPath& path);
+    void PaintText(DrawingContext& context);
     void SetBubbleDisplayAnimation();
     void SetBubbleDisappearAnimation();
     void CreateParagraphAndLayout(
         const TextStyle& textStyle, const std::string& content);
     bool CreateParagraph(const TextStyle& textStyle, std::string content);
-    OffsetF GetBubbleVertex();
+    std::pair<OffsetF, float> GetBubbleVertex();
 
 private:
     RefPtr<PropertyBool> tipFlag_;
@@ -136,17 +143,19 @@ private:
     RefPtr<AnimatablePropertyFloat> opacityScale_;
     RefPtr<PropertyString> content_;
     RefPtr<PropertyOffsetF> bubbleVertex_;
-
     SizeF blockSize_;
     SizeF bubbleSize_;
+    OffsetF sliderGlobalOffset_;
     OffsetF bubbleOffset_;
     OffsetF textOffset_;
+    OffsetF vertex_;
+    bool isMask_ = false;
     Axis axis_ = Axis::HORIZONTAL;
     SliderModel::SliderMode sliderMode_ = SliderModelNG::SliderMode::OUTSET;
     Color tipColor_ = Color::BLACK;
     Color textColor_ = Color::TRANSPARENT;
     Dimension textFontSize_;
-    std::function<OffsetF()> getBubbleVertexFunc_;
+    std::function<std::pair<OffsetF, float>()> getBubbleVertexFunc_;
 
     ACE_DISALLOW_COPY_AND_MOVE(SliderTipModifier);
 };

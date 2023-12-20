@@ -13,19 +13,19 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_ADAPTER_PREVIEW_EXTERNAL_EVENT_LOOP_PLATFORM_TASK_RUNNER_H
-#define FOUNDATION_ACE_ADAPTER_PREVIEW_EXTERNAL_EVENT_LOOP_PLATFORM_TASK_RUNNER_H
+#ifndef FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_DYNAMIC_COMPONENT_H
+#define FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_DYNAMIC_COMPONENT_H
 
-#include "flutter/fml/message_loop_impl.h"
-#include "flutter/fml/message_loop_task_queues.h"
+#include "bridge/declarative_frontend/jsview/js_interactable_view.h"
+#include "bridge/declarative_frontend/jsview/js_view_abstract.h"
 
-namespace flutter {
+namespace OHOS::Ace::Framework {
 
-class PlatformTaskRunner {
+class JSDynamicComponent : public JSViewAbstract, public JSInteractableView {
 public:
-    static fml::RefPtr<fml::TaskRunner> CurrentTaskRunner(bool useCurrentEventRunner = false);
+    static void JSBind(BindingTarget globalObj);
+    static void Create(const JSCallbackInfo& info);
 };
 
-} // namespace flutter
-
-#endif // FOUNDATION_ACE_ADAPTER_PREVIEW_EXTERNAL_EVENT_LOOP_PLATFORM_TASK_RUNNER_H
+} // namespace OHOS::Ace::Framework
+#endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_UI_EXTENSION_H

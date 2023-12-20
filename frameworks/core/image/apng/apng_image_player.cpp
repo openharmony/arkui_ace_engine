@@ -18,7 +18,6 @@
 #include <cstdlib>
 #include <cstdio>
 #include "base/log/log.h"
-#include "core/components/image/flutter_render_image.h"
 #include "core/image/image_provider.h"
 #ifndef USE_ROSEN_DRAWING
 #include "include/codec/SkCodecAnimation.h"

@@ -183,7 +183,9 @@ void ClickRecognizer::HandleTouchDownEvent(const TouchEvent& event)
             Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
         }
     }
-    focusPoint_ = ComputeFocusPoint();
+    if (currentTouchPointsNum_ == fingers_) {
+        focusPoint_ = ComputeFocusPoint();
+    }
 }
 
 void ClickRecognizer::HandleTouchUpEvent(const TouchEvent& event)

@@ -513,10 +513,12 @@ void SubwindowOhos::ShowPreviewNG()
 
 void SubwindowOhos::HidePreviewNG()
 {
+#ifdef ENABLE_DRAG_FRAMEWORK
     auto overlayManager = GetOverlayManager();
     CHECK_NULL_VOID(overlayManager);
     overlayManager->RemovePixelMap();
     overlayManager->RemoveEventColumn();
+#endif
     auto aceContainer = Platform::AceContainer::GetContainer(childContainerId_);
     CHECK_NULL_VOID(aceContainer);
     auto pipeline = DynamicCast<NG::PipelineContext>(aceContainer->GetPipelineContext());
@@ -585,6 +587,20 @@ void SubwindowOhos::HideMenuNG(const RefPtr<NG::FrameNode>& menu, int32_t target
     HidePixelMap(false, 0, 0, false);
     HideFilter();
 #endif // ENABLE_DRAG_FRAMEWORK
+}
+
+
+void SubwindowOhos::UpdateHideMenuOffsetNG(const NG::OffsetF& offset)
+{
+    ContainerScope scope(childContainerId_);
+    auto pipelineContext = NG::PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto overlay = pipelineContext->GetOverlayManager();
+    CHECK_NULL_VOID(overlay);
+    if (overlay->IsContextMenuDragHideFinished()) {
+        return;
+    }
+    overlay->UpdateContextMenuDisappearPosition(offset);
 }
 
 void SubwindowOhos::ClearMenuNG(bool inWindow, bool showAnimation)

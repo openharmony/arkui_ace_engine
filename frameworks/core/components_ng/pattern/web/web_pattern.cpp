@@ -159,6 +159,7 @@ constexpr double DEFAULT_WEB_HEIGHT = 80.0;
 constexpr uint32_t DEFAULT_WEB_DRAW_HEIGHT = 4000;
 const std::string PATTERN_TYPE_WEB = "WEBPATTERN";
 constexpr int32_t SURFACE_QUEUE_SIZE = 8;
+constexpr uint32_t DEBUG_DRAGMOVEID_TIMER = 30;
 // web feature params
 constexpr char VISIBLE_ACTIVE_ENABLE[] = "persist.web.visible_active_enable";
 constexpr char MEMORY_LEVEL_ENABEL[] = "persist.web.memory_level_enable";
@@ -184,6 +185,7 @@ WebPattern::WebPattern(const std::string& webSrc,
 
 WebPattern::~WebPattern()
 {
+    TAG_LOGI(AceLogTag::ACE_WEB, "Web pattern destory");
     if (delegate_) {
         delegate_->SetAudioMuted(true);
     }
@@ -531,6 +533,8 @@ NG::DragDropInfo WebPattern::HandleOnDragStart(const RefPtr<OHOS::Ace::DragEvent
         }
         if (!linkUrl.empty()) {
             UdmfClient::GetInstance()->AddLinkRecord(aceUnifiedData, linkUrl, linkTitle);
+            TAG_LOGI(AceLogTag::ACE_WEB,
+                "DragDrop event WebEventHub HandleOnDragStart, linkUrl size:%{public}zu", linkUrl.size());
         }
         std::string fileName = delegate_->dragData_->GetImageFileName();
         if (!fileName.empty()) {
@@ -541,6 +545,9 @@ NG::DragDropInfo WebPattern::HandleOnDragStart(const RefPtr<OHOS::Ace::DragEvent
                 fullName = delegate_->tempDir_ + "/dragdrop/" + fileName;
             }
             AppFileService::ModuleFileUri::FileUri fileUri(fullName);
+            TAG_LOGI(AceLogTag::ACE_WEB,
+                "DragDrop event WebEventHub HandleOnDragStart, FileUri:%{public}s, image path:%{public}s",
+                fileUri.ToString().c_str(), fullName.c_str());
             std::vector<std::string> urlVec;
             std::string udmfUri = fileUri.ToString();
             urlVec.emplace_back(udmfUri);
@@ -603,6 +610,9 @@ void WebPattern::InitWebEventHubDragDropStart(const RefPtr<WebEventHub>& eventHu
         NG::DragDropInfo dragDropInfo;
         auto pattern = weak.Upgrade();
         if (pattern) {
+            TAG_LOGI(AceLogTag::ACE_WEB,
+                "DragDrop event WebEventHub onDragStartId, x:%{public}lf, y:%{public}lf, webId:%{public}d",
+                info->GetX(), info->GetY(), pattern->GetWebId());
             pattern->dropX_ = 0;
             pattern->dropY_ = 0;
             return pattern->HandleOnDragStart(info);
@@ -614,6 +624,9 @@ void WebPattern::InitWebEventHubDragDropStart(const RefPtr<WebEventHub>& eventHu
                              const std::string& extraParams) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
+        TAG_LOGI(AceLogTag::ACE_WEB,
+            "DragDrop event WebEventHub onDragEnterId, x:%{public}lf, y:%{public}lf, webId:%{public}d",
+            info->GetX(), info->GetY(), pattern->GetWebId());
         pattern->isW3cDragEvent_ = true;
         pattern->isDragging_ = true;
         pattern->dropX_ = 0;
@@ -625,6 +638,12 @@ void WebPattern::InitWebEventHubDragDropStart(const RefPtr<WebEventHub>& eventHu
                              const std::string& extraParams) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
+        static uint32_t dragMoveCnt = 0;
+        if ((dragMoveCnt++ % DEBUG_DRAGMOVEID_TIMER) == 0) {
+            TAG_LOGI(AceLogTag::ACE_WEB,
+                "DragDrop event WebEventHub onDragMoveId, x:%{public}lf, y:%{public}lf, webId:%{public}d",
+                info->GetX(), info->GetY(), pattern->GetWebId());
+        }
         if (!pattern->isDragging_) {
             return;
         }
@@ -647,6 +666,9 @@ void WebPattern::InitWebEventHubDragDropEnd(const RefPtr<WebEventHub>& eventHub)
                              const std::string& extraParams) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
+        TAG_LOGI(AceLogTag::ACE_WEB,
+            "DragDrop event WebEventHub onDragDropId, x:%{public}lf, y:%{public}lf, webId:%{public}d",
+            info->GetX(), info->GetY(), pattern->GetWebId());
         if (!pattern->isDragging_) {
             return;
         }
@@ -659,12 +681,18 @@ void WebPattern::InitWebEventHubDragDropEnd(const RefPtr<WebEventHub>& eventHub)
                              const std::string& extraParams) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
+        TAG_LOGI(AceLogTag::ACE_WEB,
+            "DragDrop event WebEventHub onDragLeaveId, x:%{public}lf, y:%{public}lf, webId:%{public}d",
+            info->GetX(), info->GetY(), pattern->GetWebId());
         pattern->HandleOnDragLeave(info->GetX(), info->GetY());
     };
 
     auto onDragEndId = [weak = WeakClaim(this)](const RefPtr<OHOS::Ace::DragEvent>& info) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
+        TAG_LOGI(AceLogTag::ACE_WEB,
+            "DragDrop event WebEventHub onDragEndId, x:%{public}lf, y:%{public}lf, webId:%{public}d",
+            info->GetX(), info->GetY(), pattern->GetWebId());
         pattern->HandleDragEnd(pattern->dropX_, pattern->dropY_);
     };
     // set custom OnDragStart function
@@ -739,6 +767,9 @@ void WebPattern::InitDragEvent(const RefPtr<GestureEventHub>& gestureHub)
         int32_t y = info.GetGlobalPoint().GetY();
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
+        TAG_LOGI(AceLogTag::ACE_WEB,
+            "DragDrop event gestureHub actionStartTask x:%{public}d, y:%{public}d, webId:%{public}d",
+            x, y, pattern->GetWebId());
         pattern->HandleDragStart(x, y);
     };
 
@@ -751,6 +782,9 @@ void WebPattern::InitDragEvent(const RefPtr<GestureEventHub>& gestureHub)
         int32_t y = info.GetGlobalPoint().GetY();
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
+        TAG_LOGI(AceLogTag::ACE_WEB,
+            "DragDrop event gestureHub actionEndTask x:%{public}d, y:%{public}d, webId:%{public}d",
+            x, y, pattern->GetWebId());
         pattern->HandleDragEnd(x, y);
     };
 
@@ -762,7 +796,11 @@ void WebPattern::InitDragEvent(const RefPtr<GestureEventHub>& gestureHub)
     gestureHub->SetCustomDragEvent(dragEvent_, { PanDirection::ALL }, DEFAULT_PAN_FINGER, DEFAULT_PAN_DISTANCE);
 }
 
-void WebPattern::HandleDragStart(int32_t x, int32_t y) {}
+void WebPattern::HandleDragStart(int32_t x, int32_t y)
+{
+    TAG_LOGI(AceLogTag::ACE_WEB,
+        "DragDrop event gestureHub actionStart, isW3cDragEvent_:%{public}d", (int)isW3cDragEvent_);
+}
 
 void WebPattern::HandleOnDragEnter(const RefPtr<OHOS::Ace::DragEvent>& info)
 {
@@ -800,6 +838,8 @@ void WebPattern::HandleOnDragDropLink(RefPtr<UnifiedData> aceData)
     if (!linkUrl.empty()) {
         delegate_->dragData_->SetLinkURL(linkUrl);
         delegate_->dragData_->SetLinkTitle(linkTitle);
+        TAG_LOGI(AceLogTag::ACE_WEB,
+            "DragDrop event WebEventHub onDragDropId, linkUrl size:%{public}zu", linkUrl.size());
     } else {
         TAG_LOGW(AceLogTag::ACE_WEB,
             "DragDrop event WebEventHub onDragDropId, linkUrl is empty");
@@ -815,7 +855,7 @@ void WebPattern::HandleOnDragDropFile(RefPtr<UnifiedData> aceData)
     std::vector<std::string> urlVec;
     UdmfClient::GetInstance()->GetFileUriRecord(aceData, urlVec);
     TAG_LOGI(AceLogTag::ACE_WEB, "DragDrop event WebEventHub onDragDropId,"
-        "url array size is:%{public}d", (int)urlVec.size());
+        "url array size is:%{public}zu", urlVec.size());
     delegate_->dragData_->ClearImageFileNames();
     for (std::string url : urlVec) {
         TAG_LOGI(AceLogTag::ACE_WEB, "DragDrop event WebEventHub onDragDropId,"
@@ -853,12 +893,14 @@ void WebPattern::HandleOnDragDrop(const RefPtr<OHOS::Ace::DragEvent>& info)
     // get data from ace(from udmf), and send it to chromium
     if (aceData && aceData->GetSize() >= 1) {
         TAG_LOGI(AceLogTag::ACE_WEB,
-            "DragDrop event WebEventHub onDragDropId, size:%{public}d", (int)aceData->GetSize());
+            "DragDrop event WebEventHub onDragDropId, size:%{public}" PRId64 "", aceData->GetSize());
         CHECK_NULL_VOID(delegate_->dragData_);
         // plain text
         std::string plain = UdmfClient::GetInstance()->GetSinglePlainTextRecord(aceData);
         if (!plain.empty()) {
             delegate_->dragData_->SetFragmentText(plain);
+            TAG_LOGI(AceLogTag::ACE_WEB,
+                "DragDrop event WebEventHub onDragDropId, plain size:%{public}zu", plain.size());
         }
         // html
         std::string htmlContent;
@@ -866,6 +908,8 @@ void WebPattern::HandleOnDragDrop(const RefPtr<OHOS::Ace::DragEvent>& info)
         UdmfClient::GetInstance()->GetHtmlRecord(aceData, htmlContent, plainContent);
         if (!htmlContent.empty()) {
             delegate_->dragData_->SetFragmentHtml(htmlContent);
+            TAG_LOGI(AceLogTag::ACE_WEB,
+                "DragDrop event WebEventHub onDragDropId, htmlContent size:%{public}zu", htmlContent.size());
         }
         // link
         HandleOnDragDropLink(aceData);
@@ -1553,7 +1597,7 @@ void WebPattern::OnModifyDone()
         isAllowWindowOpenMethod_ = SystemProperties::GetAllowWindowOpenMethodEnabled();
         delegate_->UpdateAllowWindowOpenMethod(GetAllowWindowOpenMethodValue(isAllowWindowOpenMethod_));
         if (!webAccessibilityNode_) {
-            webAccessibilityNode_ = AceType::MakeRefPtr<WebAccessibilityNode>(host);
+            webAccessibilityNode_ = AceType::MakeRefPtr<WebAccessibilityNode>(WeakPtr<FrameNode>(host));
         }
     }
 

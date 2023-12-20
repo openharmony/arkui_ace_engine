@@ -144,8 +144,6 @@ void UITaskScheduler::FlushTask()
     if (!afterLayoutTasks_.empty()) {
         FlushAfterLayoutTask();
     }
-    // flush correct rect again
-    FlushPersistAfterLayoutTask();
     FlushDelayJsActive();
     ElementRegister::GetInstance()->ClearPendingRemoveNodes();
     FlushRenderTask();
@@ -220,6 +218,8 @@ void UITaskScheduler::FlushAfterLayoutTask()
             task();
         }
     }
+    // flush correct rect again and flush dirty node again
+    FlushPersistAfterLayoutTask();
 }
 
 void UITaskScheduler::FlushPersistAfterLayoutTask()

@@ -72,7 +72,8 @@
                 "security_component_manager",
                 "camera_framework",
                 "media_library",
-                "app_file_service"
+                "app_file_service",
+                "ets_utils"
             ],
             "third_party": [
                 "json",

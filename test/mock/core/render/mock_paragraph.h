@@ -44,6 +44,7 @@ public:
     MOCK_CONST_METHOD0(GetParagraphStyle, const ParagraphStyle&());
     MOCK_METHOD1(PushStyle, void(const TextStyle& style));
     MOCK_METHOD1(AddText, void(const std::u16string& text));
+    MOCK_METHOD1(AddSymbol, void(const uint32_t& symbolId));
     MOCK_METHOD1(Layout, void(float width));
     MOCK_METHOD1(GetGlyphIndexByCoordinate, int32_t(const Offset& offset));
     MOCK_METHOD1(AddPlaceholder, int32_t(const PlaceholderRun& span));

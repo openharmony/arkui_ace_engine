@@ -530,15 +530,10 @@ void ContainerModalPattern::SetCloseButtonStatus(bool isEnabled)
 
 void ContainerModalPattern::SetContainerModalTitleVisible(bool customTitleSettedShow, bool floatingTitleSettedShow)
 {
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto column = AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(0));
-    CHECK_NULL_VOID(column);
-
     customTitleSettedShow_ = customTitleSettedShow;
-    auto customTitleRow = AceType::DynamicCast<FrameNode>(column->GetChildAtIndex(0));
+    auto customTitleRow = GetCustomTitleRow();
     CHECK_NULL_VOID(customTitleRow);
-    auto customTitleLayoutProperty = customTitleRow->GetLayoutProperty<LinearLayoutProperty>();
+    auto customTitleLayoutProperty = customTitleRow->GetLayoutProperty();
     CHECK_NULL_VOID(customTitleLayoutProperty);
     if (customTitleLayoutProperty->GetVisibilityValue(VisibleType::GONE) == VisibleType::VISIBLE &&
         !customTitleSettedShow) {
@@ -550,14 +545,18 @@ void ContainerModalPattern::SetContainerModalTitleVisible(bool customTitleSetted
     }
 
     floatingTitleSettedShow_ = floatingTitleSettedShow;
-    auto floatingTitleRow = AceType::DynamicCast<FrameNode>(column->GetChildAtIndex(1));
+    auto floatingTitleRow = GetFloatingTitleRow();
     CHECK_NULL_VOID(floatingTitleRow);
-    auto floatingTitleLayoutProperty = floatingTitleRow->GetLayoutProperty<LinearLayoutProperty>();
+    auto floatingTitleLayoutProperty = floatingTitleRow->GetLayoutProperty();
     CHECK_NULL_VOID(floatingTitleLayoutProperty);
     if (floatingTitleLayoutProperty->GetVisibilityValue(VisibleType::GONE) == VisibleType::VISIBLE &&
         !floatingTitleSettedShow) {
         floatingTitleLayoutProperty->UpdateVisibility(VisibleType::GONE);
     }
+
+    auto buttonsRow = GetControlButtonRow();
+    CHECK_NULL_VOID(buttonsRow);
+    buttonsRow->SetHitTestMode(HitTestMode::HTMTRANSPARENT_SELF);
 }
 
 void ContainerModalPattern::SetContainerModalTitleHeight(int32_t height)
@@ -576,7 +575,7 @@ void ContainerModalPattern::SetContainerModalTitleHeight(int32_t height)
     UpdateRowHeight(floatingTitleRow, height);
     auto controlButtonsRow = GetControlButtonRow();
     UpdateRowHeight(controlButtonsRow, height);
-    OnModifyDone();
+    CallButtonsRectChange();
 }
 
 int32_t ContainerModalPattern::GetContainerModalTitleHeight()
@@ -605,24 +604,24 @@ void ContainerModalPattern::SubscribeContainerModalButtonsRectChange(
     controlButtonsRectChangeCallback_ = std::move(callback);
 }
 
-void ContainerModalPattern::OnModifyDone()
+void ContainerModalPattern::CallButtonsRectChange()
 {
+    CHECK_NULL_VOID(controlButtonsRectChangeCallback_);
     RectF containerModal;
     RectF buttons;
     GetContainerModalButtonsRect(containerModal, buttons);
-    if (buttonsRect_ != buttons && controlButtonsRectChangeCallback_) {
-        auto taskExecutor = Container::CurrentTaskExecutor();
-        if (taskExecutor) {
-            taskExecutor->PostTask(
-                [containerModal, buttons, cb = controlButtonsRectChangeCallback_]() mutable {
-                    if (cb) {
-                        cb(containerModal, buttons);
-                    }
-                },
-                TaskExecutor::TaskType::JS);
-        }
+    if (buttonsRect_ == buttons) {
+        return;
     }
     buttonsRect_ = buttons;
-    Pattern::OnModifyDone();
+    auto taskExecutor = Container::CurrentTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    taskExecutor->PostTask(
+        [containerModal, buttons, cb = controlButtonsRectChangeCallback_]() mutable {
+            if (cb) {
+                cb(containerModal, buttons);
+            }
+        },
+        TaskExecutor::TaskType::JS);
 }
 } // namespace OHOS::Ace::NG

@@ -18,6 +18,7 @@
 #include "base/geometry/axis.h"
 #include "base/geometry/ng/offset_t.h"
 #include "base/utils/utils.h"
+#include "core/common/container.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/drag_bar/drag_bar_theme.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
@@ -95,7 +96,6 @@ RefPtr<FrameNode> SheetView::CreateOperationColumnNode(
         }
     }
 
-    bool isShow = sheetStyle.showDragBar.value_or(true);
     auto dragBarNode = FrameNode::GetOrCreateFrameNode("SheetDragBar", ElementRegister::GetInstance()->MakeUniqueId(),
         []() { return AceType::MakeRefPtr<SheetDragBarPattern>(); });
     auto dragBarLayoutProperty = dragBarNode->GetLayoutProperty();
@@ -103,11 +103,7 @@ RefPtr<FrameNode> SheetView::CreateOperationColumnNode(
     dragBarLayoutProperty->UpdateUserDefinedIdealSize(
         CalcSize(CalcLength(SHEET_DRAG_BAR_WIDTH), CalcLength(SHEET_DRAG_BAR_HEIGHT)));
     dragBarLayoutProperty->UpdateAlignment(Alignment::CENTER);
-    if (sheetStyle.isTitleBuilder.has_value()) {
-        dragBarLayoutProperty->UpdateVisibility(isShow ? VisibleType::VISIBLE : VisibleType::INVISIBLE);
-    } else {
-        dragBarLayoutProperty->UpdateVisibility(isShow ? VisibleType::VISIBLE : VisibleType::GONE);
-    }
+    dragBarLayoutProperty->UpdateVisibility(VisibleType::GONE);
 
     dragBarNode->MountToParent(operationColumn);
     dragBarNode->MarkModifyDone();
@@ -129,6 +125,9 @@ RefPtr<FrameNode> SheetView::CreateOperationColumnNode(
 
 void SheetView::CreateCloseIconButtonNode(RefPtr<FrameNode> sheetNode, NG::SheetStyle& sheetStyle)
 {
+    if (!Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+        return;
+    }
     auto buttonNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
     CHECK_NULL_VOID(buttonNode);

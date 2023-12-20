@@ -441,6 +441,12 @@ void PipelineContext::IsCloseSCBKeyboard()
     if (isSystem) {
         TAG_LOGI(AceLogTag::ACE_KEYBOARD, "In SCBWindow, close keyboard.");
         WindowSceneHelper::IsWindowSceneCloseKeyboard(curFrameNode);
+    } else {
+        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "In page, be ready to close keyboard.");
+        if (needSoftKeyboard_.has_value() && !needSoftKeyboard_.value()) {
+            TAG_LOGI(AceLogTag::ACE_KEYBOARD, "In page, close keyboard.");
+            FocusHub::IsCloseKeyboard(curFrameNode);
+        }
     }
 #else
     FocusHub::IsCloseKeyboard(curFrameNode);
@@ -610,6 +616,14 @@ void PipelineContext::FlushAnimation(uint64_t nanoTimestamp)
         FrameReport::GetInstance().BeginFlushAnimation();
     }
 
+    decltype(scheduleTasks_) temp(std::move(scheduleTasks_));
+    for (const auto& [id, weakTask] : temp) {
+        auto task = weakTask.Upgrade();
+        if (task) {
+            task->OnFrame(nanoTimestamp);
+        }
+    }
+
     if (FrameReport::GetInstance().GetEnable()) {
         FrameReport::GetInstance().EndFlushAnimation();
     }
@@ -716,8 +730,6 @@ void PipelineContext::FlushBuild()
     FlushDirtyNodeUpdate();
     isRebuildFinished_ = true;
     FlushBuildFinishCallbacks();
-    // need notify after flush dirty node
-    taskScheduler_->FlushPersistAfterLayoutTask();
 }
 
 void PipelineContext::AddAnimationClosure(std::function<void()>&& animation)
@@ -1852,7 +1864,7 @@ void PipelineContext::OnMouseEvent(const MouseEvent& event, const RefPtr<FrameNo
         if (event.pullAction == MouseAction::PULL_MOVE) {
             touchPoint.pullType = TouchType::PULL_MOVE;
         }
-        OnTouchEvent(touchPoint);
+        OnTouchEvent(touchPoint, node);
     } else {
         auto touchPoint = event.CreateTouchPoint();
         auto scalePoint = touchPoint.CreateScalePoint(GetViewScale());
@@ -2077,7 +2089,7 @@ void PipelineContext::OnAxisEvent(const AxisEvent& event, const RefPtr<FrameNode
     }
 
     auto mouseEvent = ConvertAxisToMouse(event);
-    OnMouseEvent(mouseEvent);
+    OnMouseEvent(mouseEvent, node);
 }
 
 bool PipelineContext::HasDifferentDirectionGesture() const

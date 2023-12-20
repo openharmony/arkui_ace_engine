@@ -238,6 +238,9 @@ ArkUINativeModuleValue TextBridge::SetLineHeight(ArkUIRuntimeCallInfo* runtimeCa
     if (!ArkTSUtils::ParseJsDimensionFp(vm, secondArg, lineHeight)) {
         lineHeight.Reset();
     }
+    if (lineHeight.IsNegative()) {
+        lineHeight.Reset();
+    }
     GetArkUIInternalNodeAPI()->GetTextModifier().SetTextLineHeight(
         nativeNode, lineHeight.Value(), static_cast<int8_t>(lineHeight.Unit()));
     return panda::JSValueRef::Undefined(vm);

@@ -261,6 +261,10 @@ ACE_FORCE_EXPORT extern const char QRCODE_ETS_TAG[];
 ACE_EXPORT extern const char SPAN_COMPONENT_TAG[];
 ACE_EXPORT extern const char SPAN_ETS_TAG[];
 
+// symbol span
+ACE_EXPORT extern const char SYMBOL_SPAN_COMPONENT_TAG[];
+ACE_EXPORT extern const char SYMBOL_SPAN_ETS_TAG[];
+
 // placeholder span
 ACE_EXPORT extern const char PLACEHOLDER_SPAN_COMPONENT_TAG[];
 ACE_EXPORT extern const char PLACEHOLDER_SPAN_ETS_TAG[];
@@ -570,5 +574,13 @@ ACE_EXPORT extern const char PARTICLE_ETS_TAG[];
 
 // SelectOverlay
 ACE_EXPORT extern const char SELECT_OVERLAY_ETS_TAG[];
+
+// Symbol
+ACE_EXPORT extern const char SYMBOL_COMPONENT_TAG[];
+ACE_EXPORT extern const char SYMBOL_ETS_TAG[];
+
+// DynamicComponent
+ACE_EXPORT extern const char DYNAMIC_COMPONENT_TAG[];
+ACE_EXPORT extern const char DYNAMIC_COMPONENT_ETS_TAG[];
 } // namespace OHOS::Ace::V2
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_V2_INSPECTOR_INSPECTOR_CONSTANTS_H

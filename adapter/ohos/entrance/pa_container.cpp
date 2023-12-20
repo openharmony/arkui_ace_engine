@@ -16,9 +16,7 @@
 #include "adapter/ohos/entrance/pa_container.h"
 
 #include "adapter/ohos/entrance/ace_application_info.h"
-#include "adapter/ohos/entrance/file_asset_provider.h"
 #include "adapter/ohos/entrance/file_asset_provider_impl.h"
-#include "adapter/ohos/entrance/hap_asset_provider.h"
 #include "adapter/ohos/entrance/hap_asset_provider_impl.h"
 #include "adapter/ohos/entrance/pa_engine/engine/common/js_backend_engine_loader.h"
 #include "adapter/ohos/entrance/pa_engine/pa_backend.h"
@@ -30,8 +28,6 @@
 #include "base/utils/utils.h"
 #include "core/common/ace_engine.h"
 #include "core/common/asset_manager_impl.h"
-#include "core/common/flutter/flutter_asset_manager.h"
-#include "core/common/flutter/flutter_task_executor.h"
 #include "core/common/platform_window.h"
 #include "core/common/text_field_manager.h"
 #include "core/common/window.h"
@@ -239,53 +235,27 @@ void PaContainer::AddAssetPath(int32_t instanceId, const std::string& packagePat
 {
     auto container = AceType::DynamicCast<PaContainer>(AceEngine::Get().GetContainer(instanceId));
     CHECK_NULL_VOID(container);
-    if (SystemProperties::GetFlutterDecouplingEnabled()) {
-        RefPtr<AssetManagerImpl> assetManagerImpl;
-        if (container->assetManager_) {
-            assetManagerImpl = AceType::DynamicCast<AssetManagerImpl>(container->assetManager_);
-        } else {
-            assetManagerImpl = Referenced::MakeRefPtr<AssetManagerImpl>();
-            container->assetManager_ = assetManagerImpl;
-            AceType::DynamicCast<PaBackend>(container->GetBackend())->SetAssetManager(assetManagerImpl);
-        }
-        CHECK_NULL_VOID(assetManagerImpl);
-        if (!hapPath.empty()) {
-            auto assetProvider = AceType::MakeRefPtr<HapAssetProviderImpl>();
-            if (assetProvider->Initialize(hapPath, paths)) {
-                LOGI("Push AssetProvider to queue.");
-                assetManagerImpl->PushBack(std::move(assetProvider));
-            }
-        }
-        if (!packagePath.empty()) {
-            auto assetProvider = AceType::MakeRefPtr<FileAssetProviderImpl>();
-            if (assetProvider->Initialize(packagePath, paths)) {
-                LOGI("Push AssetProvider to queue.");
-                assetManagerImpl->PushBack(std::move(assetProvider));
-            }
-        }
+    RefPtr<AssetManagerImpl> assetManagerImpl;
+    if (container->assetManager_) {
+        assetManagerImpl = AceType::DynamicCast<AssetManagerImpl>(container->assetManager_);
     } else {
-        RefPtr<FlutterAssetManager> flutterAssetManager;
-        if (container->assetManager_) {
-            flutterAssetManager = AceType::DynamicCast<FlutterAssetManager>(container->assetManager_);
-        } else {
-            flutterAssetManager = Referenced::MakeRefPtr<FlutterAssetManager>();
-            container->assetManager_ = flutterAssetManager;
-            AceType::DynamicCast<PaBackend>(container->GetBackend())->SetAssetManager(flutterAssetManager);
+        assetManagerImpl = Referenced::MakeRefPtr<AssetManagerImpl>();
+        container->assetManager_ = assetManagerImpl;
+        AceType::DynamicCast<PaBackend>(container->GetBackend())->SetAssetManager(assetManagerImpl);
+    }
+    CHECK_NULL_VOID(assetManagerImpl);
+    if (!hapPath.empty()) {
+        auto assetProvider = AceType::MakeRefPtr<HapAssetProviderImpl>();
+        if (assetProvider->Initialize(hapPath, paths)) {
+            LOGI("Push AssetProvider to queue.");
+            assetManagerImpl->PushBack(std::move(assetProvider));
         }
-        CHECK_NULL_VOID(flutterAssetManager);
-        if (!hapPath.empty()) {
-            auto assetProvider = AceType::MakeRefPtr<HapAssetProvider>();
-            if (assetProvider->Initialize(hapPath, paths)) {
-                LOGI("Push AssetProvider to queue.");
-                flutterAssetManager->PushBack(std::move(assetProvider));
-            }
-        }
-        if (!packagePath.empty()) {
-            auto assetProvider = AceType::MakeRefPtr<FileAssetProvider>();
-            if (assetProvider->Initialize(packagePath, paths)) {
-                LOGI("Push AssetProvider to queue.");
-                flutterAssetManager->PushBack(std::move(assetProvider));
-            }
+    }
+    if (!packagePath.empty()) {
+        auto assetProvider = AceType::MakeRefPtr<FileAssetProviderImpl>();
+        if (assetProvider->Initialize(packagePath, paths)) {
+            LOGI("Push AssetProvider to queue.");
+            assetManagerImpl->PushBack(std::move(assetProvider));
         }
     }
 }
@@ -294,29 +264,16 @@ void PaContainer::AddLibPath(int32_t instanceId, const std::vector<std::string>&
 {
     auto container = AceType::DynamicCast<PaContainer>(AceEngine::Get().GetContainer(instanceId));
     CHECK_NULL_VOID(container);
-    if (SystemProperties::GetFlutterDecouplingEnabled()) {
-        RefPtr<AssetManager> assetManagerImpl;
-        if (container->assetManager_) {
-            assetManagerImpl = AceType::DynamicCast<AssetManagerImpl>(container->assetManager_);
-        } else {
-            assetManagerImpl = Referenced::MakeRefPtr<AssetManagerImpl>();
-            container->assetManager_ = assetManagerImpl;
-            AceType::DynamicCast<PaBackend>(container->GetBackend())->SetAssetManager(assetManagerImpl);
-        }
-        CHECK_NULL_VOID(assetManagerImpl);
-        assetManagerImpl->SetLibPath("default", libPath);
+    RefPtr<AssetManager> assetManagerImpl;
+    if (container->assetManager_) {
+        assetManagerImpl = AceType::DynamicCast<AssetManagerImpl>(container->assetManager_);
     } else {
-        RefPtr<FlutterAssetManager> flutterAssetManager;
-        if (container->assetManager_) {
-            flutterAssetManager = AceType::DynamicCast<FlutterAssetManager>(container->assetManager_);
-        } else {
-            flutterAssetManager = Referenced::MakeRefPtr<FlutterAssetManager>();
-            container->assetManager_ = flutterAssetManager;
-            AceType::DynamicCast<PaBackend>(container->GetBackend())->SetAssetManager(flutterAssetManager);
-        }
-        CHECK_NULL_VOID(flutterAssetManager);
-        flutterAssetManager->SetLibPath("default", libPath);
+        assetManagerImpl = Referenced::MakeRefPtr<AssetManagerImpl>();
+        container->assetManager_ = assetManagerImpl;
+        AceType::DynamicCast<PaBackend>(container->GetBackend())->SetAssetManager(assetManagerImpl);
     }
+    CHECK_NULL_VOID(assetManagerImpl);
+    assetManagerImpl->SetLibPath("default", libPath);
 }
 
 int32_t PaContainer::Insert(int32_t instanceId, const Uri& uri, const OHOS::NativeRdb::ValuesBucket& value)

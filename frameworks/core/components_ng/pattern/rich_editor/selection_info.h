@@ -40,16 +40,9 @@ enum RichEditorSpanRange : int32_t {
     RANGEEND,
 };
 
-enum RichEditorSpanType : int32_t {
+enum SelectSpanType : int32_t {
     TYPESPAN,
     TYPEIMAGE,
-};
-
-enum class RichEditorType : int32_t {
-    TEXT = 0,
-    IMAGE,
-    MIXED,
-    NONE,
 };
 
 struct SpanPosition {
@@ -75,7 +68,7 @@ struct ImageStyleResult {
 
 struct ResultObject {
     SpanPosition spanPosition;
-    RichEditorSpanType type = RichEditorSpanType::TYPESPAN;
+    SelectSpanType type = SelectSpanType::TYPESPAN;
     int32_t offsetInSpan[2] = { 0, 0 };
     std::string valueString;
     RefPtr<PixelMap> valuePixelMap;
@@ -88,13 +81,13 @@ struct Selection {
     std::list<ResultObject> resultObjects;
 };
 
-class RichEditorSelection : public BaseEventInfo {
-    DECLARE_RELATIONSHIP_OF_CLASSES(RichEditorSelection, BaseEventInfo);
+class SelectionInfo : public BaseEventInfo {
+    DECLARE_RELATIONSHIP_OF_CLASSES(SelectionInfo, BaseEventInfo);
 
 public:
-    RichEditorSelection() : BaseEventInfo("RichEditorSelection") {}
+    SelectionInfo() : BaseEventInfo("SelectionInfo") {}
 
-    ~RichEditorSelection() = default;
+    ~SelectionInfo() = default;
 
     Selection GetSelection() const
     {

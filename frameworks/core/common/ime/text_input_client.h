@@ -144,6 +144,10 @@ public:
 
     virtual void HandleOnSelectAll() {}
 
+    virtual void HandleOnEnter() {}
+
+    virtual void HandleOnShowMenu() {}
+
     virtual void HandleOnCopy() {}
 
     virtual void HandleOnCut() {}
@@ -154,7 +158,7 @@ public:
 
     virtual void HandleOnRedoAction() {}
 
-    virtual void HandleOnDelete() {}
+    virtual void HandleOnDelete(bool backward) {}
 
     static std::map<KeyComb, std::function<bool(TextInputClient*)>> functionKeys_;
 

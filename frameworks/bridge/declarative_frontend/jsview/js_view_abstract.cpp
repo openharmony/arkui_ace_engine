@@ -140,7 +140,7 @@ constexpr float DEFAULT_SCALE_MIDDLE_OR_HEAVY = 0.95f;
 constexpr float MAX_ANGLE = 360.0f;
 constexpr float DEFAULT_BIAS = 0.5f;
 const std::vector<FontStyle> FONT_STYLES = { FontStyle::NORMAL, FontStyle::ITALIC };
-const std::vector<std::string> TEXT_DETECT_TYPES = { "phoneNum", "url", "email", "address" };
+const std::vector<std::string> TEXT_DETECT_TYPES = { "phoneNum", "url", "email", "location" };
 const std::vector<std::string> RESOURCE_HEADS = { "app", "sys" };
 const std::string SHEET_HEIGHT_MEDIUM = "medium";
 const std::string SHEET_HEIGHT_LARGE = "large";
@@ -3956,6 +3956,12 @@ bool JSViewAbstract::ParseJsDimensionFp(const JSRef<JSVal>& jsValue, CalcDimensi
     return ParseJsDimension(jsValue, result, DimensionUnit::FP);
 }
 
+bool JSViewAbstract::ParseJsDimensionFpNG(const JSRef<JSVal>& jsValue, CalcDimension& result, bool isSupportPercent)
+{
+    // the 'fp' unit is used for text scenes.
+    return ParseJsDimensionNG(jsValue, result, DimensionUnit::FP, isSupportPercent);
+}
+
 bool JSViewAbstract::ParseJsDimensionPx(const JSRef<JSVal>& jsValue, CalcDimension& result)
 {
     return ParseJsDimension(jsValue, result, DimensionUnit::PX);
@@ -4168,6 +4174,61 @@ bool JSViewAbstract::ParseJsShadowColorStrategy(const JSRef<JSVal>& jsValue, Sha
             strategy = ShadowColorStrategy::PRIMARY;
             return true;
         }
+    }
+    return false;
+}
+
+bool JSViewAbstract::ParseJsSymbolId(const JSRef<JSVal>& jsValue, std::uint32_t& symbolId)
+{
+    JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsValue);
+    JSRef<JSVal> resId = jsObj->GetProperty("id");
+    if (resId->IsNull() || !resId->IsNumber()) {
+        return false;
+    }
+    auto resourceObject = GetResourceObject(jsObj);
+    if (!resourceObject) {
+        return false;
+    }
+    auto resourceWrapper = CreateResourceWrapper(jsObj, resourceObject);
+    if (!resourceWrapper) {
+        return false;
+    }
+    
+    auto symbol = resourceWrapper->GetSymbolById(resId->ToNumber<uint32_t>());
+    if (!symbol) {
+        return false;
+    }
+    symbolId = symbol;
+    return true;
+}
+
+bool JSViewAbstract::ParseJsSymbolColor(const JSRef<JSVal>& jsValue, std::vector<Color>& result)
+{
+    if (!jsValue->IsArray()) {
+        return false;
+    }
+    if (jsValue->IsArray()) {
+        JSRef<JSArray> array = JSRef<JSArray>::Cast(jsValue);
+        for (size_t i = 0; i < array->Length(); i++) {
+            JSRef<JSVal> value = array->GetValueAt(i);
+            if (!value->IsNumber() && !value->IsString() && !value->IsObject()) {
+                return false;
+            }
+            if (value->IsNumber()) {
+                result.emplace_back(Color(ColorAlphaAdapt(value->ToNumber<uint32_t>())));
+                continue;
+            } else if (value->IsString()) {
+                Color color;
+                Color::ParseColorString(value->ToString(), color);
+                result.emplace_back(color);
+                continue;
+            } else {
+                Color color;
+                ParseJsColorFromResource(value, color);
+                result.emplace_back(color);
+            }
+        }
+        return true;
     }
     return false;
 }
@@ -5860,6 +5921,7 @@ void JSViewAbstract::ParseSheetStyle(const JSRef<JSObject>& paramObj, NG::SheetS
     auto backgroundBlurStyle = paramObj->GetProperty("blurStyle");
     auto showCloseIcon = paramObj->GetProperty("showClose");
     auto type = paramObj->GetProperty("preferType");
+    auto interactive = paramObj->GetProperty("enableOutsideInteractive");
 
     std::vector<NG::SheetHeight> detents;
     if (ParseSheetDetents(sheetDetents, detents)) {
@@ -5876,6 +5938,10 @@ void JSViewAbstract::ParseSheetStyle(const JSRef<JSObject>& paramObj, NG::SheetS
         if (ParseJsBool(showCloseIcon, showClose)) {
             sheetStyle.showCloseIcon = showClose;
         }
+    }
+    bool isInteractive = false;
+    if (ParseJsBool(interactive, isInteractive)) {
+        sheetStyle.interactive = isInteractive;
     }
     if (showDragBar->IsNull() || showDragBar->IsUndefined()) {
         sheetStyle.showDragBar = true;
