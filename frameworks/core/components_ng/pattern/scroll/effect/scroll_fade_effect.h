@@ -22,7 +22,7 @@
 #include "core/components_ng/pattern/scroll/effect/scroll_fade_painter.h"
 
 namespace OHOS::Ace::NG {
-constexpr float SCALE_THRESHOLD = 0.3;
+constexpr float SCALE_THRESHOLD = 0.3f;
 constexpr float OVER_SCROLL_THRESHOLD = 2.0f;
 
 class ACE_EXPORT ScrollFadeEffect final : public ScrollEdgeEffect {
