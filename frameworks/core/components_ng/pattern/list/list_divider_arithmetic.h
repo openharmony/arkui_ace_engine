@@ -23,7 +23,7 @@ using OHOS::Ace::NG::CustomAnimatableArithmetic;
 struct ListDivider {
     bool isDelta = true;
     OffsetF offset;
-    float length;
+    float length = 0.0f;
 };
 
 class ListDividerArithmetic : public CustomAnimatableArithmetic {

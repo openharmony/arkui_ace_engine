@@ -24,17 +24,17 @@
 
 namespace OHOS::Ace::NG {
 struct DividerInfo {
-    float constrainStrokeWidth;
-    float crossSize;
-    float startMargin;
-    float endMargin;
-    float space;
-    float mainPadding;
-    float crossPadding;
-    bool isVertical;
-    int32_t lanes;
-    int32_t totalItemCount;
-    Color color;
+    float constrainStrokeWidth = 0.0f;
+    float crossSize = 0.0f;
+    float startMargin = 0.0f;
+    float endMargin = 0.0f;
+    float space = 0.0f;
+    float mainPadding = 0.0f;
+    float crossPadding = 0.0f;
+    bool isVertical = true;
+    int32_t lanes = 1;
+    int32_t totalItemCount = 0;
+    Color color = Color::TRANSPARENT;
     float laneGutter = 0.0f;
 };
 

@@ -69,9 +69,9 @@ private:
     RefPtr<AnimatablePropertySizeF> clipSize_;
     RefPtr<PropertyBool> clip_;
 
-    float width_;
-    bool isVertical_;
-    Color color_;
+    float width_ = 0.0f;
+    bool isVertical_ = true;
+    Color color_ = Color::TRANSPARENT;
 
     ACE_DISALLOW_COPY_AND_MOVE(ListContentModifier);
 };
