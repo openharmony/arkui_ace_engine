@@ -1523,12 +1523,25 @@ void RichEditorPattern::InitFocusEvent(const RefPtr<FocusHub>& focusHub)
     focusHub->SetOnKeyEventInternal(std::move(keyTask));
 }
 
+bool RichEditorPattern::CheckBlurReason()
+{
+    auto curFocusHub = GetFocusHub();
+    CHECK_NULL_RETURN(curFocusHub, false);
+    auto curBlurReason = curFocusHub->GetBlurReason();
+    if (curBlurReason == BlurReason::FRAME_DESTROY) {
+        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "TextFieldPattern CheckBlurReason, Close Keyboard.");
+        return true;
+    }
+    return false;
+}
+
 void RichEditorPattern::HandleBlurEvent()
 {
     StartAITask();
     StopTwinkling();
     // The pattern handles blurevent, Need to close the softkeyboard first.
-    if (customKeyboardBuilder_ && isCustomKeyboardAttached_) {
+    if ((customKeyboardBuilder_ && isCustomKeyboardAttached_) || CheckBlurReason()) {
+        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "RichEditor Blur, Close Keyboard.");
         CloseKeyboard(true);
     }
 
