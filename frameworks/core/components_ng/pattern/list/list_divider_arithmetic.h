@@ -47,16 +47,16 @@ public:
             if (child.second.isDelta == true && dividermap_.find(child.first) == dividermap_.end()) {
                 continue;
             } else if (child.second.isDelta == false) {
-                one[child.second].isDelta = false;
-                one[child.second].offset = child.second.offset;
-                one[child.second].length = child.second.length;
+                one[child.first].isDelta = false;
+                one[child.first].offset = child.second.offset;
+                one[child.first].length = child.second.length;
             }
         }
         for (auto child : dividermap_) {
-            if (another.find(child.first) != another.end() && another[child.second].isDelta == true) {
-                one[child.second].isDelta = true;
-                one[child.second].offset = child.second.offset + another[child.first].offset;
-                one[child.second].length = child.second.length + another[child.first].length;
+            if (another.find(child.first) != another.end() && another[child.first].isDelta == true) {
+                one[child.first].isDelta = true;
+                one[child.first].offset = child.second.offset + another[child.first].offset;
+                one[child.first].length = child.second.length + another[child.first].length;
             } else if (child.second.isDelta == true && another.find(child.first) == another.end()) {
                 continue;
             }
@@ -73,14 +73,14 @@ public:
         DividerMap another = rhs->GetDividerMap();
         DividerMap one;
         for (auto child : dividermap_) {
-            if (another.find(child.first) != another.end() && another[child.second].isDelta == true) {
-                one[child.second].isDelta = true;
-                one[child.second].offset = child.second.offset - another[child.first].offset;
-                one[child.second].length = child.second.length - another[child.first].length;
+            if (another.find(child.first) != another.end() && another[child.first].isDelta == true) {
+                one[child.first].isDelta = true;
+                one[child.first].offset = child.second.offset - another[child.first].offset;
+                one[child.first].length = child.second.length - another[child.first].length;
             } else {
-                one[child.second].isDelta = false;
-                one[child.second].offset = child.second.offset;
-                one[child.second].length = child.second.length;
+                one[child.first].isDelta = false;
+                one[child.first].offset = child.second.offset;
+                one[child.first].length = child.second.length;
             }
         }
         return MakeRefPtr<ListDividerArithmetic>(one);
@@ -91,13 +91,13 @@ public:
         DividerMap one;
         for (auto child : dividermap_) {
             if (child.second.isDelta == true) {
-                one[child.second].isDelta = child.second.isDelta;
-                one[child.second].offset = child.second.offset * scale;
-                one[child.second].length = child.second.length * scale;
+                one[child.first].isDelta = child.second.isDelta;
+                one[child.first].offset = child.second.offset * scale;
+                one[child.first].length = child.second.length * scale;
             } else {
-                one[child.second].isDelta = child.second.isDelta;
-                one[child.second].offset = child.second.offset;
-                one[child.second].length = child.second.length;
+                one[child.first].isDelta = child.second.isDelta;
+                one[child.first].offset = child.second.offset;
+                one[child.first].length = child.second.length;
             }
         }
         return MakeRefPtr<ListDividerArithmetic>(one);

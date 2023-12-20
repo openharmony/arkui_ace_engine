@@ -56,7 +56,8 @@ public:
         color_ = color;
     }
 
-    void SetDividerMap(const DividerMap& dividerMap) {
+    void SetDividerMap(const DividerMap& dividerMap)
+    {
         RefPtr<ListDividerArithmetic> lda = AceType::MakeRefPtr<ListDividerArithmetic>(dividerMap);
         CHECK_NULL_VOID(dividerList_);
         dividerList_->Set(AceType::DynamicCast<CustomAnimatableArithmetic>(lda));
