@@ -73,6 +73,12 @@ RefPtr<FrameNode> CalendarDialogView::Show(const DialogProperties& dialogPropert
         BorderRadiusProperty radius;
         radius.SetRadius(theme->GetDialogBorderRadius());
         renderContext->UpdateBorderRadius(radius);
+        if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN) &&
+            renderContext->IsUniRenderEnabled()) {
+            BlurStyleOption styleOption;
+            styleOption.blurStyle = BlurStyle::COMPONENT_ULTRA_THICK;
+            renderContext->UpdateBackBlurStyle(styleOption);
+        }
     }
     renderContext->UpdateBackShadow(ShadowConfig::DefaultShadowS);
 
