@@ -71,6 +71,8 @@ template("js_pa_engine_qjs") {
       defines += [ "_ARM64_" ]
     } else if (target_cpu == "arm") {
       defines += [ "_ARM_" ]
+    } else if (target_cpu == "riscv64") {
+      defines += [ "_RISCV64_" ]
     }
 
     if (use_js_debug) {

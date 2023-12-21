@@ -105,6 +105,8 @@ template("declarative_js_engine") {
       if (!is_mingw) {
         defines += [ "_ARM64_" ]
       }
+    } else if (target_cpu == "riscv64") {
+      defines += [ "_RISCV64_" ]
     }
     if (current_os == "ohos" && current_cpu == "x86_64") {
       defines += [ "SIMULATOR_64" ]
@@ -454,6 +456,8 @@ template("declarative_js_engine_ng") {
       if (!is_mingw) {
         defines += [ "_ARM64_" ]
       }
+    } else if (target_cpu == "riscv64") {
+      defines += [ "_RISCV64_" ]
     }
     if (current_os == "ohos" && current_cpu == "x86_64") {
       defines += [ "SIMULATOR_64" ]

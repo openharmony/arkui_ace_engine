@@ -33,7 +33,7 @@ ThumbnailNapiEntry GetThumbnailNapiEntry()
 {
     static ThumbnailNapiEntry thumbnailNapiEntry = nullptr;
     if (!thumbnailNapiEntry) {
-#if defined(_ARM64_) || defined(SIMULATOR_64)
+#if defined(_ARM64_) || defined(SIMULATOR_64) || defined(_RISCV64_)
         std::string prefix = "/system/lib64/module/";
 #else
         std::string prefix = "/system/lib/module/";

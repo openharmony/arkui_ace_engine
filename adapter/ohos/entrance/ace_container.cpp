@@ -71,6 +71,8 @@ constexpr char DECLARATIVE_ARK_ENGINE_SHARED_LIB[] = "libace_engine_declarative_
 
 #ifdef _ARM64_
 const std::string ASSET_LIBARCH_PATH = "/lib/arm64";
+#elif defined(_RISCV64_)
+const std::string ASSET_LIBARCH_PATH = "/lib/riscv64";
 #else
 const std::string ASSET_LIBARCH_PATH = "/lib/arm";
 #endif
