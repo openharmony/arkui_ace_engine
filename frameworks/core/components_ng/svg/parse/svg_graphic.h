@@ -65,7 +65,7 @@ protected:
         if (skCanvas_) {
             auto smoothEdge = GetSmoothEdge();
             if (GreatNotEqual(smoothEdge, 0.0f)) {
-                auto filter = SkMaskFilter::MakeBlur(SkBlurStyle::kNormal_SkBlurStyle, smoothEdge);
+                auto filter = SkMaskFilter::MakeBlur(SkBlurStyle::kNormal_SkBlurStyle, smoothEdge, false);
                 auto tmpFillPaint = fillPaint_;
                 tmpFillPaint.setMaskFilter(filter);
                 skCanvas_->drawPath(path_, tmpFillPaint);
@@ -80,7 +80,7 @@ protected:
             if (GreatNotEqual(smoothEdge, 0.0f)) {
                 RSFilter filter;
                 filter.SetMaskFilter(RSMaskFilter::CreateBlurMaskFilter(
-                    RSBlurType::NORMAL, static_cast<double>(smoothEdge)
+                    RSBlurType::NORMAL, static_cast<double>(smoothEdge), false
                 ));
                 strokePen_.SetFilter(filter);
             }
@@ -97,7 +97,7 @@ protected:
         if (skCanvas_) {
             auto smoothEdge = GetSmoothEdge();
             if (GreatNotEqual(smoothEdge, 0.0f)) {
-                auto filter = SkMaskFilter::MakeBlur(SkBlurStyle::kNormal_SkBlurStyle, smoothEdge);
+                auto filter = SkMaskFilter::MakeBlur(SkBlurStyle::kNormal_SkBlurStyle, smoothEdge, false);
                 auto tmpStrokePaint = strokePaint_;
                 tmpStrokePaint.setMaskFilter(filter);
                 skCanvas_->drawPath(path_, tmpStrokePaint);
@@ -112,7 +112,7 @@ protected:
             if (GreatNotEqual(smoothEdge, 0.0f)) {
                 RSFilter filter;
                 filter.SetMaskFilter(RSMaskFilter::CreateBlurMaskFilter(
-                    RSBlurType::NORMAL, static_cast<double>(smoothEdge)
+                    RSBlurType::NORMAL, static_cast<double>(smoothEdge), false
                 ));
                 strokePen_.SetFilter(filter);
             }
