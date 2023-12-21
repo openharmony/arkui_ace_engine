@@ -479,7 +479,6 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
     bool hasRunningAnimation = window_->FlushAnimation(nanoTimestamp);
     FlushTouchEvents();
     FlushBuild();
-    auto isDirtyLayoutNodesEmpty = taskScheduler_->IsDirtyLayoutNodesEmpty();
     if (isFormRender_ && drawDelegate_ && rootNode_) {
         auto renderContext = AceType::DynamicCast<NG::RenderContext>(rootNode_->GetRenderContext());
         drawDelegate_->DrawRSFrame(renderContext);
@@ -523,9 +522,7 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
     }
     // Close input method in the SCB window.
     IsCloseSCBKeyboard();
-    if (!isDirtyLayoutNodesEmpty) {
-        HandleOnAreaChangeEvent(nanoTimestamp);
-    }
+    HandleOnAreaChangeEvent(nanoTimestamp);
     HandleVisibleAreaChangeEvent();
     if (isNeedFlushMouseEvent_) {
         FlushMouseEvent();
