@@ -1104,6 +1104,9 @@ static void UpdateWebAccessibilityElementInfo(
     const NWeb::NWebAccessibilityNodeInfo& node, AccessibilityElementInfo& nodeInfo)
 {
     nodeInfo.SetContent(node.content);
+    RangeInfo rangeInfo(static_cast<int32_t>(node.rangeInfoMin), static_cast<int32_t>(node.rangeInfoMax),
+        static_cast<int32_t>(node.rangeInfoCurrent));
+    nodeInfo.SetRange(rangeInfo);
     nodeInfo.SetHint(node.hint);
     nodeInfo.SetHinting(node.hinting);
     nodeInfo.SetDescriptionInfo(node.descriptionInfo);
