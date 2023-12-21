@@ -162,6 +162,50 @@ void ParseGradientColorStops(const EcmaVM *vm, const Local<JSValueRef> &value, s
     }
 }
 
+bool ParseJsShadowColorStrategy(const EcmaVM *vm, const Local<JSValueRef> &value, ShadowColorStrategy& strategy)
+{
+    if (value->IsString()) {
+        std::string colorStr = value->ToString(vm)->ToString();
+        if (colorStr.compare("average") == 0) {
+            strategy = ShadowColorStrategy::AVERAGE;
+            return true;
+        } else if (colorStr.compare("primary") == 0) {
+            strategy = ShadowColorStrategy::PRIMARY;
+            return true;
+        }
+    }
+    return false;
+}
+
+bool ParseJsShadowDimension(const EcmaVM *vm, const Local<JSValueRef> &value, CalcDimension& dimension)
+{
+    if (ArkTSUtils::ParseJsResource(vm, value, dimension)) {
+        return true;
+    } else {
+        if (ArkTSUtils::ParseJsDimensionVp(vm, value, dimension)) {
+            return true;
+        }
+    }
+    return false;
+}
+
+bool ParseJsShadowColor(const EcmaVM *vm, const Local<JSValueRef> &colorArg,
+    int32_t& type, uint32_t& colorValue)
+{
+    Color color;
+    ShadowColorStrategy shadowColorStrategy;
+    if (ParseJsShadowColorStrategy(vm, colorArg, shadowColorStrategy)) {
+        type = 1; // 1: has shadowColorStrategy
+        colorValue = static_cast<uint32_t>(shadowColorStrategy);
+        return true;
+    } else if (ArkTSUtils::ParseJsColorAlpha(vm, colorArg, color)) {
+        type = 2; // 2: has shadowColor
+        colorValue = color.GetValue();
+        return true;
+    }
+    return false;
+}
+
 bool ParseCalcDimensions(ArkUIRuntimeCallInfo* runtimeCallInfo, uint32_t offset, uint32_t count,
     std::vector<std::optional<CalcDimension>>& results, const CalcDimension& defValue)
 {
@@ -1562,11 +1606,11 @@ ArkUINativeModuleValue CommonBridge::SetShadow(ArkUIRuntimeCallInfo *runtimeCall
     ArkTSUtils::ParseJsDouble(vm, radiusArg, shadows[NUM_0]);
     shadows[NUM_0] = (LessNotEqual(shadows[NUM_0], 0.0)) ? 0.0 : shadows[NUM_0];
     CalcDimension offsetX;
-    if (ArkTSUtils::ParseJsDimensionVp(vm, offsetXArg, offsetX)) {
+    if (ParseJsShadowDimension(vm, offsetXArg, offsetX)) {
         shadows[NUM_2] = offsetX.Value();
     }
     CalcDimension offsetY;
-    if (ArkTSUtils::ParseJsDimensionVp(vm, offsetYArg, offsetY)) {
+    if (ParseJsShadowDimension(vm, offsetYArg, offsetY)) {
         shadows[NUM_3] = offsetY.Value();
     }
     if (typeArg->IsInt()) {
@@ -1574,10 +1618,12 @@ ArkUINativeModuleValue CommonBridge::SetShadow(ArkUIRuntimeCallInfo *runtimeCall
         shadows[NUM_4] = static_cast<double>(
             std::clamp(shadowType, static_cast<uint32_t>(ShadowType::COLOR), static_cast<uint32_t>(ShadowType::BLUR)));
     }
-    Color color;
-    ArkTSUtils::ParseJsColorAlpha(vm, colorArg, color);
-    shadows[NUM_5] = color.GetValue();
-
+    int32_t type = 0;
+    uint32_t color = 0;
+    if (ParseJsShadowColor(vm, colorArg, type, color)) {
+        shadows[NUM_1] = static_cast<double>(type);
+        shadows[NUM_5] = static_cast<double>(color);
+    }
     shadows[NUM_6] = static_cast<uint32_t>((fillArg->IsBoolean()) ? fillArg->BooleaValue() : false);
     GetArkUIInternalNodeAPI()->GetCommonModifier().SetBackShadow(nativeNode, shadows,
         (sizeof(shadows) / sizeof(shadows[NUM_0])));
