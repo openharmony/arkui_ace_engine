@@ -2867,8 +2867,8 @@ HWTEST_F(ListTestNg, ListItemGroup004, TestSize.Level1)
     });
     RefPtr<FrameNode> groupNode = GetChildFrameNode(frameNode_, 0);
     float groupHeight = GetChildRect(frameNode_, 0).Height();
-    EXPECT_EQ(groupHeight, std::ceil(GROUP_LINE_NUMBER / lanes) * 2 * ITEM_HEIGHT);
-    EXPECT_FALSE(VerifyPosition(groupNode, GROUP_LINE_NUMBER, lanes, DEFAULT_SPACE, DEFAULT_STARTOFFSET));
+    EXPECT_EQ(groupHeight, std::ceil(GROUP_LINE_NUMBER / lanes) * ITEM_HEIGHT);
+    EXPECT_TRUE(VerifyPosition(groupNode, GROUP_LINE_NUMBER, lanes, DEFAULT_SPACE, DEFAULT_STARTOFFSET));
 
     /**
      * @tc.steps: step2. maxLaneLength > LIST_WIDTH
@@ -2908,7 +2908,7 @@ HWTEST_F(ListTestNg, ListItemGroup004, TestSize.Level1)
         CreateGroupWithSetting(1, Axis::VERTICAL, V2::ListItemGroupStyle::NONE);
     });
     groupNode = GetChildFrameNode(frameNode_, 0);
-    EXPECT_FALSE(VerifyPosition(groupNode, GROUP_LINE_NUMBER, lanes, SPACE, GROUP_HEADER_LEN));
+    EXPECT_TRUE(VerifyPosition(groupNode, GROUP_LINE_NUMBER, lanes, SPACE, GROUP_HEADER_LEN));
 
     /**
      * @tc.steps: step5. set minLaneLength/maxLaneLength with header/footer/space ...
@@ -4726,7 +4726,7 @@ HWTEST_F(ListTestNg, PaintMethod004, TestSize.Level1)
     EXPECT_CALL(canvas, AttachPen(_)).WillRepeatedly(ReturnRef(canvas));
     EXPECT_CALL(canvas, DetachBrush()).WillRepeatedly(ReturnRef(canvas));
     EXPECT_CALL(canvas, DetachPen()).WillRepeatedly(ReturnRef(canvas));
-    EXPECT_CALL(canvas, DrawLine(_, _)).Times(14);
+    EXPECT_CALL(canvas, DrawLine(_, _)).Times(15);
     DrawingContext ctx = { canvas, 1, 1 };
 
     /**
