@@ -84,7 +84,7 @@ void ContainerModalPattern::ShowTitle(bool isShow, bool hasDeco, bool needUpdate
     CHECK_NULL_VOID(layoutProperty);
     layoutProperty->UpdateAlignment(Alignment::TOP_LEFT);
     PaddingProperty padding;
-    if (isShow) {
+    if (isShow && customTitleSettedShow_) {
         padding = { CalcLength(CONTENT_PADDING), CalcLength(CONTENT_PADDING), std::nullopt,
             CalcLength(CONTENT_PADDING) };
     }
@@ -535,6 +535,8 @@ void ContainerModalPattern::SetContainerModalTitleVisible(bool customTitleSetted
     CHECK_NULL_VOID(customTitleRow);
     auto customTitleLayoutProperty = customTitleRow->GetLayoutProperty();
     CHECK_NULL_VOID(customTitleLayoutProperty);
+    auto containerModalLayoutProperty = GetHost()->GetLayoutProperty();
+    PaddingProperty padding;
     if (customTitleLayoutProperty->GetVisibilityValue(VisibleType::GONE) == VisibleType::VISIBLE &&
         !customTitleSettedShow) {
         customTitleLayoutProperty->UpdateVisibility(VisibleType::GONE);
@@ -542,7 +544,10 @@ void ContainerModalPattern::SetContainerModalTitleVisible(bool customTitleSetted
                windowMode_ != WindowMode::WINDOW_MODE_SPLIT_PRIMARY &&
                windowMode_ != WindowMode::WINDOW_MODE_SPLIT_SECONDARY && customTitleSettedShow) {
         customTitleLayoutProperty->UpdateVisibility(VisibleType::VISIBLE);
+        padding = { CalcLength(CONTENT_PADDING), CalcLength(CONTENT_PADDING), std::nullopt,
+            CalcLength(CONTENT_PADDING) };
     }
+    containerModalLayoutProperty->UpdatePadding(padding);
 
     floatingTitleSettedShow_ = floatingTitleSettedShow;
     auto floatingTitleRow = GetFloatingTitleRow();
