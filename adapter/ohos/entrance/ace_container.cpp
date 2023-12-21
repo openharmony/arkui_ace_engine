@@ -218,6 +218,14 @@ void AceContainer::InitializeTask(std::shared_ptr<TaskWrapper> taskWrapper)
     }
 }
 
+bool AceContainer::IsKeyboard()
+{
+    if (uiWindow_ == nullptr) {
+        return false;
+    }
+    return uiWindow_->GetType() == Rosen::WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT;
+}
+
 void AceContainer::Initialize()
 {
     ContainerScope scope(instanceId_);

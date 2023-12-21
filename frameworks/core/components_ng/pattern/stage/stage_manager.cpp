@@ -141,6 +141,18 @@ void StageManager::StopPageTransition()
     }
 }
 
+void StageManager::PageChangeCloseKeyboard()
+{
+    // close keyboard
+#if defined (ENABLE_STANDARD_INPUT)
+    // If pushpage, close it
+    if (Container::CurrentId() == CONTAINER_ID_DIVIDE_SIZE) {
+        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "StageManager FrameNode notNeedSoftKeyboard.");
+        FocusHub::PushPageCloseKeyboard();
+    }
+#endif
+}
+
 bool StageManager::PushPage(const RefPtr<FrameNode>& node, bool needHideLast, bool needTransition)
 {
     CHECK_NULL_RETURN(stageNode_, false);
@@ -195,13 +207,7 @@ bool StageManager::PushPage(const RefPtr<FrameNode>& node, bool needHideLast, bo
     }
 
     // close keyboard
-#if defined (ENABLE_STANDARD_INPUT)
-    // If pushpage, close it
-    if (Container::CurrentId() == CONTAINER_ID_DIVIDE_SIZE) {
-        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "StageManager FrameNode not NeedSoftKeyboard.");
-        FocusHub::PushPageCloseKeyboard();
-    }
-#endif
+    PageChangeCloseKeyboard();
 
     // flush layout task.
     if (!stageNode_->GetGeometryNode()->GetMarginFrameSize().IsPositive()) {
@@ -247,6 +253,9 @@ bool StageManager::PopPage(bool needShowNext, bool needTransition)
         FirePageShow(newPageNode, needTransition ? PageTransitionType::ENTER_POP : PageTransitionType::NONE);
         inPageNode = AceType::DynamicCast<FrameNode>(newPageNode);
     }
+
+    // close keyboard
+    PageChangeCloseKeyboard();
 
     auto outPageNode = AceType::DynamicCast<FrameNode>(pageNode);
     if (needTransition) {

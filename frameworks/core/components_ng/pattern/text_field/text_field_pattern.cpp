@@ -930,7 +930,7 @@ void TextFieldPattern::HandleBlurEvent()
     UpdateShowMagnifier();
     CloseSelectOverlay(true);
     StopTwinkling();
-    if ((customKeyboardBuilder_ && isCustomKeyboardAttached_) || CheckBlurReason()) {
+    if ((customKeyboardBuilder_ && isCustomKeyboardAttached_)) {
         CloseKeyboard(true);
         TAG_LOGI(AceLogTag::ACE_KEYBOARD, "TextFieldPattern Blur, Close Keyboard.");
     }

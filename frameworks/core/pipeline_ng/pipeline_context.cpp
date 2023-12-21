@@ -431,6 +431,13 @@ RefPtr<FrameNode> PipelineContext::HandleFocusNode()
 
 void PipelineContext::IsCloseSCBKeyboard()
 {
+    auto container = Container::Current();
+    CHECK_NULL_VOID(container);
+    if (container->IsKeyboard()) {
+        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "focus in keyboard.");
+        return;
+    }
+
     RefPtr<FrameNode> curFrameNode = HandleFocusNode();
     if (curFrameNode == nullptr) {
         TAG_LOGI(AceLogTag::ACE_KEYBOARD, "curFrameNode null.");
@@ -442,10 +449,17 @@ void PipelineContext::IsCloseSCBKeyboard()
         TAG_LOGI(AceLogTag::ACE_KEYBOARD, "In SCBWindow, close keyboard.");
         WindowSceneHelper::IsWindowSceneCloseKeyboard(curFrameNode);
     } else {
+        if (windowFocus_.has_value() && windowFocus_.value()) {
+            TAG_LOGI(AceLogTag::ACE_KEYBOARD, "In page, focusOnNodeCallback_.");
+            windowFocus_.reset();
+            focusOnNodeCallback_();
+        }
+
         TAG_LOGI(AceLogTag::ACE_KEYBOARD, "In page, be ready to close keyboard.");
         if (needSoftKeyboard_.has_value() && !needSoftKeyboard_.value()) {
             TAG_LOGI(AceLogTag::ACE_KEYBOARD, "In page, close keyboard.");
             FocusHub::IsCloseKeyboard(curFrameNode);
+            needSoftKeyboard_ = std::nullopt;
         }
     }
 #else
@@ -2252,7 +2266,8 @@ void PipelineContext::WindowFocus(bool isFocus)
             }
         }
         if (focusOnNodeCallback_) {
-            focusOnNodeCallback_();
+            windowFocus_ = true;
+            TAG_LOGI(AceLogTag::ACE_KEYBOARD, "windowfocus focusOnNodeCallback_.");
         }
     }
     FlushWindowFocusChangedCallback(isFocus);

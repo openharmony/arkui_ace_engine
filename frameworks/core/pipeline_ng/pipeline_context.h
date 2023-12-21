@@ -707,6 +707,7 @@ private:
     std::function<void()> focusOnNodeCallback_;
 
     std::optional<bool> needSoftKeyboard_ ;
+    std::optional<bool> windowFocus_ ;
 
     std::unique_ptr<MouseEvent> lastMouseEvent_;
 
