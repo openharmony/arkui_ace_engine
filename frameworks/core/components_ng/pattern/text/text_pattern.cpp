@@ -1200,6 +1200,8 @@ NG::DragDropInfo TextPattern::OnDragStart(const RefPtr<Ace::DragEvent>& event, c
     DragDropInfo itemInfo;
     auto host = GetHost();
     CHECK_NULL_RETURN(host, itemInfo);
+    auto hub = host->GetEventHub<EventHub>();
+    auto gestureHub = hub->GetOrCreateGestureEventHub();
     auto selectStart = textSelector_.GetTextStart();
     auto selectEnd = textSelector_.GetTextEnd();
     recoverStart_ = selectStart;
@@ -1207,7 +1209,7 @@ NG::DragDropInfo TextPattern::OnDragStart(const RefPtr<Ace::DragEvent>& event, c
     auto textSelectInfo = GetSpansInfo(selectStart, selectEnd, GetSpansMethod::ONSELECT);
     dragResultObjects_ = textSelectInfo.GetSelection().resultObjects;
     ResetDragRecordSize(dragResultObjects_.empty() ? -1 : 1);
-    if (dragResultObjects_.empty()) {
+    if (dragResultObjects_.empty() || !gestureHub->GetIsTextDraggable()) {
         return itemInfo;
     }
     RefPtr<UnifiedData> unifiedData = UdmfClient::GetInstance()->CreateUnifiedData();
@@ -1262,6 +1264,9 @@ DragDropInfo TextPattern::OnDragStartNoChild(const RefPtr<Ace::DragEvent>& event
     auto hub = host->GetEventHub<EventHub>();
     auto gestureHub = hub->GetOrCreateGestureEventHub();
     CHECK_NULL_RETURN(gestureHub, itemInfo);
+    if (!gestureHub->GetIsTextDraggable()) {
+        return itemInfo;
+    }
     auto layoutProperty = host->GetLayoutProperty<TextLayoutProperty>();
     pattern->status_ = Status::DRAGGING;
     pattern->contentMod_->ChangeDragStatus();
