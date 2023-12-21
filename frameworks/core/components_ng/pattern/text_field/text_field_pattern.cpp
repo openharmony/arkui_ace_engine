@@ -681,8 +681,6 @@ void TextFieldPattern::HandleFocusEvent()
         underlineWidth_ = TYPING_UNDERLINE_WIDTH;
         renderContext->UpdateBorderRadius({ radius.GetX(), radius.GetY(), radius.GetY(), radius.GetX() });
     }
-    host->MarkDirtyNode(layoutProperty->GetMaxLinesValue(Infinity<float>()) <= 1 ? PROPERTY_UPDATE_MEASURE_SELF
-                                                                                 : PROPERTY_UPDATE_MEASURE);
 }
 
 void TextFieldPattern::HandleSetSelection(int32_t start, int32_t end, bool showHandle)
@@ -2548,7 +2546,7 @@ void TextFieldPattern::OnHandleMoveDone(const RectF& /* handleRect */, bool isFi
             UpdateSelectMenuVisibility(false);
             CloseSelectOverlay(true);
             StartTwinkling();
-            selectController_->UpdateCaretOffset();
+            selectController_->MoveCaretToContentRect(GetCaretIndex());
         } else {
             auto firstHandleInfo = GetSelectHandleInfo(selectController_->GetFirstHandleOffset());
             auto secondHandleInfo = GetSelectHandleInfo(selectController_->GetSecondHandleOffset());

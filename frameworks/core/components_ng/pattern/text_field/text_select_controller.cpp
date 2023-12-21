@@ -420,14 +420,14 @@ void TextSelectController::UpdateSecondHandleOffset()
     secondHandleInfo_.rect.SetHeight(caretMetrics.height);
 }
 
-void TextSelectController::UpdateCaretOffset()
+void TextSelectController::UpdateCaretOffset(TextAffinity textAffinity)
 {
     if (contentController_->IsEmpty()) {
         caretInfo_.rect = CalculateEmptyValueCaretRect();
         return;
     }
     CaretMetricsF caretMetrics;
-    CalcCaretMetricsByPosition(GetCaretIndex(), caretMetrics, TextAffinity::DOWNSTREAM);
+    CalcCaretMetricsByPosition(GetCaretIndex(), caretMetrics, textAffinity);
 
     RectF caretRect;
     caretRect.SetOffset(caretMetrics.offset);
@@ -451,7 +451,7 @@ void TextSelectController::UpdateSecondHandleInfoByMouseOffset(const Offset& loc
     auto index = ConvertTouchOffsetToPosition(localOffset);
     MoveSecondHandleToContentRect(index);
     caretInfo_.index = index;
-    UpdateCaretOffset();
+    UpdateCaretOffset(TextAffinity::UPSTREAM);
 }
 
 void TextSelectController::MoveSecondHandleByKeyBoard(int32_t index)
