@@ -229,7 +229,7 @@ struct PromptAsyncContext {
     std::string messageString;
     std::vector<ButtonInfo> buttons;
     bool autoCancelBool = true;
-    bool showInSubWindowBool = true;
+    bool showInSubWindowBool = false;
     bool isModalBool = true;
     std::set<std::string> callbacks;
     std::string callbackSuccessString;
