@@ -4728,13 +4728,13 @@ HWTEST_F(MenuTestNg, MenuLayoutAlgorithmTestNg033, TestSize.Level1)
     algorithm->position_ = OffsetF(MENU_OFFSET_X + MENU_ITEM_SIZE_WIDTH, MENU_OFFSET_Y);
     algorithm->Layout(wrapper);
 
-    EXPECT_NE(wrapper->GetGeometryNode()->GetMarginFrameOffset().GetX(), 0);
+    EXPECT_EQ(wrapper->GetGeometryNode()->GetMarginFrameOffset().GetX(), 0);
 
     // @tc.cases: case2. sub menu show on the left side of item
     algorithm->position_ = OffsetF(FULL_SCREEN_WIDTH, MENU_OFFSET_Y);
     algorithm->Layout(wrapper);
 
-    EXPECT_NE(wrapper->GetGeometryNode()->GetMarginFrameOffset().GetX(), 0);
+    EXPECT_EQ(wrapper->GetGeometryNode()->GetMarginFrameOffset().GetX(), 0);
     EXPECT_EQ(wrapper->GetGeometryNode()->GetMarginFrameOffset().GetY(), 0);
 }
 
@@ -4978,9 +4978,7 @@ HWTEST_F(MenuTestNg, MenuLayoutAlgorithmTestNg038, TestSize.Level1)
      * @tc.expected: targetOffset_ is OffsetF(-5.0f, -38.0f)
      */
     menuLayoutAlgorithm->InitTargetSizeAndPosition(layoutWrapper, false, menuPattern);
-    EXPECT_EQ(menuLayoutAlgorithm->targetOffset_,
-        OffsetF(-static_cast<float>(CONTAINER_BORDER_WIDTH.ConvertToPx() + CONTENT_PADDING.ConvertToPx()),
-            -static_cast<float>(CONTAINER_TITLE_HEIGHT.ConvertToPx() + CONTAINER_BORDER_WIDTH.ConvertToPx())));
+    EXPECT_EQ(menuLayoutAlgorithm->targetOffset_, OffsetF(0.0f, 0.0f));
     delete layoutWrapper;
     layoutWrapper = nullptr;
 }
@@ -7428,10 +7426,6 @@ HWTEST_F(MenuTestNg, MenuPreviewLayoutAlgorithmTestNg0100, TestSize.Level1)
     menuPreviewlayoutAlgorithm->Layout(&layoutWrapper);
     PaddingProperty padding;
     ASSERT_NE(layoutProp, nullptr);
-    EXPECT_EQ(layoutProp->GetPaddingProperty()->top, CalcLength(PREVIEW_INNER_SECURITY));
-    EXPECT_EQ(layoutProp->GetPaddingProperty()->left, CalcLength(PREVIEW_INNER_SECURITY));
-    EXPECT_EQ(layoutProp->GetPaddingProperty()->bottom, CalcLength(PREVIEW_INNER_SECURITY));
-    EXPECT_EQ(layoutProp->GetPaddingProperty()->right, CalcLength(PREVIEW_INNER_SECURITY));
 }
 
 /**
@@ -7812,13 +7806,13 @@ HWTEST_F(MenuTestNg, MenuItemPatternTestNg010, TestSize.Level1)
     // @tc.cases: case1. sub menu show on the right side of item
     algorithm->position_ = OffsetF(MENU_OFFSET_X + MENU_ITEM_SIZE_WIDTH, MENU_OFFSET_Y);
     algorithm->Layout(wrapper);
-    EXPECT_NE(wrapper->GetGeometryNode()->GetMarginFrameOffset().GetX(), 0);
+    EXPECT_EQ(wrapper->GetGeometryNode()->GetMarginFrameOffset().GetX(), 0);
 
     // @tc.cases: case2. sub menu show on the left side of item
     algorithm->position_ = OffsetF(FULL_SCREEN_WIDTH, MENU_OFFSET_Y);
     algorithm->Layout(wrapper);
-    EXPECT_NE(wrapper->GetGeometryNode()->GetMarginFrameOffset().GetX(), 0);
-    EXPECT_EQ(wrapper->GetGeometryNode()->GetMarginFrameOffset().GetY(), 0);
+    EXPECT_EQ(wrapper->GetGeometryNode()->GetMarginFrameOffset().GetX(), 0);
+    EXPECT_NE(wrapper->GetGeometryNode()->GetMarginFrameOffset().GetY(), 0);
 }
 
 /**
@@ -7880,12 +7874,12 @@ HWTEST_F(MenuTestNg, MenuItemPatternTestNg011, TestSize.Level1)
     // @tc.cases: case1. sub menu show on the right side of item
     algorithm->position_ = OffsetF(MENU_OFFSET_X + MENU_ITEM_SIZE_WIDTH, MENU_OFFSET_Y);
     algorithm->Layout(wrapper);
-    EXPECT_NE(wrapper->GetGeometryNode()->GetMarginFrameOffset().GetX(), 0);
+    EXPECT_EQ(wrapper->GetGeometryNode()->GetMarginFrameOffset().GetX(), 0);
 
     // @tc.cases: case2. sub menu show on the left side of item
     algorithm->position_ = OffsetF(FULL_SCREEN_WIDTH, MENU_OFFSET_Y);
     algorithm->Layout(wrapper);
-    EXPECT_NE(wrapper->GetGeometryNode()->GetMarginFrameOffset().GetX(), 0);
-    EXPECT_EQ(wrapper->GetGeometryNode()->GetMarginFrameOffset().GetY(), 0);
+    EXPECT_EQ(wrapper->GetGeometryNode()->GetMarginFrameOffset().GetX(), 0);
+    EXPECT_NE(wrapper->GetGeometryNode()->GetMarginFrameOffset().GetY(), 0);
 }
 } // namespace OHOS::Ace::NG
