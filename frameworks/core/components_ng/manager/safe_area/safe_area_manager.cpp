@@ -67,10 +67,10 @@ SafeAreaInsets SafeAreaManager::GetCombinedSafeArea(const SafeAreaExpandOpts& op
         return res;
     }
     if (opts.type & SAFE_AREA_TYPE_CUTOUT) {
-        res = res.Combine(cutoutSafeArea_).Combine(navSafeArea_);
+        res = res.Combine(cutoutSafeArea_);
     }
     if (opts.type & SAFE_AREA_TYPE_SYSTEM) {
-        res = res.Combine(systemSafeArea_);
+        res = res.Combine(systemSafeArea_).Combine(navSafeArea_);
     }
     if (keyboardSafeAreaEnabled_ && (opts.type & SAFE_AREA_TYPE_KEYBOARD)) {
         res.bottom_ = res.bottom_.Combine(keyboardInset_);
