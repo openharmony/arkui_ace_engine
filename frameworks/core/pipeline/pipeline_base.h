@@ -58,12 +58,13 @@
 
 namespace OHOS::Rosen {
 class RSTransaction;
-}
+class AvoidArea;
+} // namespace OHOS::Rosen
 
 namespace OHOS::Ace {
 namespace NG {
 class FrameNode;
-}
+} // namespace NG
 
 struct KeyboardAnimationConfig {
     std::string curveType_;
@@ -843,6 +844,8 @@ public:
     virtual void UpdateCutoutSafeArea(const SafeAreaInsets& cutoutSafeArea) {}
 
     virtual void UpdateNavSafeArea(const SafeAreaInsets& navSafeArea) {}
+
+    virtual void UpdateOriginAvoidArea(const Rosen::AvoidArea& avoidArea, uint32_t type) {}
 
     virtual void SetEnableKeyBoardAvoidMode(bool value) {}
 

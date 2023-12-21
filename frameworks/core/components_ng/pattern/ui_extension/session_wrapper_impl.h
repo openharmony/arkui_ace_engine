@@ -83,6 +83,9 @@ public:
     void SendDataAsync(const AAFwk::WantParams& params) const override;
     int32_t SendDataSync(const AAFwk::WantParams& wantParams, AAFwk::WantParams& reWantParams) const override;
 
+    // The interface to control the avoid area
+    void NotifyOriginAvoidArea(const Rosen::AvoidArea& avoidArea, uint32_t type) const override;
+
 private:
     void InitAllCallback();
     sptr<Rosen::ExtensionSession> session_;

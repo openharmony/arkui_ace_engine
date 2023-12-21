@@ -40,6 +40,7 @@
 #include "core/event/ace_events.h"
 #include "core/event/mouse_event.h"
 #include "core/event/touch_event.h"
+#include "core/pipeline/pipeline_context.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
@@ -48,11 +49,9 @@ UIExtensionPattern::UIExtensionPattern(bool isTransferringCaller, bool isModal)
 {
     sessionWrapper_ = SessionWrapperFactory::CreateSessionWrapper(
         SessionTye::UI_EXTENSION_ABILITY, AceType::WeakClaim(this), instanceId_, isTransferringCaller_);
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
-    auto ngPipeline = AceType::DynamicCast<NG::PipelineContext>(pipeline);
-    CHECK_NULL_VOID(ngPipeline);
-    auto uiExtensionManager = ngPipeline->GetUIExtensionManager();
+    auto uiExtensionManager = pipeline->GetUIExtensionManager();
     CHECK_NULL_VOID(uiExtensionManager);
     uiExtensionId_ = uiExtensionManager->ApplyExtensionId();
     TAG_LOGI(AceLogTag::ACE_UIEXTENSIONCOMPONENT, "Id = %{public}d, TransferrCaller = %{public}d, isModal = %{public}d",
@@ -66,13 +65,12 @@ UIExtensionPattern::~UIExtensionPattern()
     CHECK_NULL_VOID(sessionWrapper_);
     sessionWrapper_->DestroySession();
     FireModalOnDestroy();
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
-    auto ngPipeline = AceType::DynamicCast<NG::PipelineContext>(pipeline);
-    CHECK_NULL_VOID(ngPipeline);
-    auto uiExtensionManager = ngPipeline->GetUIExtensionManager();
+    auto uiExtensionManager = pipeline->GetUIExtensionManager();
     CHECK_NULL_VOID(uiExtensionManager);
     uiExtensionManager->RecycleExtensionId(uiExtensionId_);
+    uiExtensionManager->RemoveDestroyedUIExtension(GetNodeId());
 }
 
 RefPtr<LayoutAlgorithm> UIExtensionPattern::CreateLayoutAlgorithm()
@@ -85,15 +83,14 @@ FocusPattern UIExtensionPattern::GetFocusPattern() const
     return { FocusType::NODE, true, FocusStyleType::NONE };
 }
 
-void UIExtensionPattern::InitializeDynamicComponent(const std::string& hapPath, const std::string& abcPath,
-    const std::string& entryPoint, void* runtime)
+void UIExtensionPattern::InitializeDynamicComponent(
+    const std::string& hapPath, const std::string& abcPath, const std::string& entryPoint, void* runtime)
 {
     componentType_ = ComponentType::DYNAMIC;
 
     if (!dynamicComponentRenderer_) {
         ContainerScope scope(instanceId_);
-        dynamicComponentRenderer_ =
-            DynamicComponentRenderer::Create(GetHost(), hapPath, abcPath, entryPoint, runtime);
+        dynamicComponentRenderer_ = DynamicComponentRenderer::Create(GetHost(), hapPath, abcPath, entryPoint, runtime);
         CHECK_NULL_VOID(dynamicComponentRenderer_);
         dynamicComponentRenderer_->CreateContent();
     }
@@ -159,10 +156,11 @@ void UIExtensionPattern::OnConnect()
     bool isFocused = IsCurrentFocus();
     RegisterVisibleAreaChange();
     DispatchFocusState(isFocused);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto uiExtensionManager = pipeline->GetUIExtensionManager();
+    uiExtensionManager->AddAliveUIExtension(host->GetId(), WeakClaim(this));
     if (isFocused || isModal_) {
-        auto pipeline = AceType::DynamicCast<NG::PipelineContext>(PipelineBase::GetCurrentContext());
-        CHECK_NULL_VOID(pipeline);
-        auto uiExtensionManager = pipeline->GetUIExtensionManager();
         uiExtensionManager->RegisterUIExtensionInFocus(WeakClaim(this));
     }
     TAG_LOGI(AceLogTag::ACE_UIEXTENSIONCOMPONENT, "The UIExtensionComponent is connected.");
@@ -776,6 +774,23 @@ int32_t UIExtensionPattern::GetSessionId()
 int32_t UIExtensionPattern::GetUiExtensionId()
 {
     return uiExtensionId_;
+}
+
+int32_t UIExtensionPattern::GetNodeId()
+{
+    auto host = GetHost();
+    return host ? host->GetId() : -1;
+}
+
+int32_t UIExtensionPattern::GetInstanceId()
+{
+    return instanceId_;
+}
+
+void UIExtensionPattern::DispatchOriginAvoidArea(const Rosen::AvoidArea& avoidArea, uint32_t type)
+{
+    CHECK_NULL_VOID(sessionWrapper_);
+    sessionWrapper_->NotifyOriginAvoidArea(avoidArea, type);
 }
 
 int32_t UIExtensionPattern::WrapExtensionAbilityId(int32_t extensionOffset, int32_t abilityId)

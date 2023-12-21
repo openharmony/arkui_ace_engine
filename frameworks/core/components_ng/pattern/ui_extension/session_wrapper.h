@@ -33,6 +33,7 @@ class AxisEvent;
 
 namespace Rosen {
 class RSSurfaceNode;
+class AvoidArea;
 } // namespace Rosen
 
 namespace AAFwk {
@@ -103,6 +104,9 @@ public:
     // The interface to send the data for ArkTS
     virtual void SendDataAsync(const AAFwk::WantParams& params) const = 0;
     virtual int32_t SendDataSync(const AAFwk::WantParams& wantParams, AAFwk::WantParams& reWantParams) const = 0;
+
+    // The interface to control the avoid area
+    virtual void NotifyOriginAvoidArea(const Rosen::AvoidArea& avoidArea, uint32_t type) const = 0;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_UI_EXTENSION_SESSION_WRAPPER_H

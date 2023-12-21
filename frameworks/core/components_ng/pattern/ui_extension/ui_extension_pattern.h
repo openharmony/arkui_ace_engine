@@ -47,6 +47,10 @@ namespace OHOS::Ace {
 class ModalUIExtensionProxy;
 } // namespace OHOS::Ace
 
+namespace OHOS::Rosen {
+class AvoidArea;
+} // namespace OHOS::Rosen
+
 namespace OHOS::Ace::NG {
 class UIExtensionProxy;
 class UIExtensionPattern : public Pattern {
@@ -101,22 +105,24 @@ public:
     void NotifyForeground();
     void NotifyBackground();
     void NotifyDestroy();
+    int32_t GetInstanceId();
     int32_t GetSessionId();
+    int32_t GetNodeId();
     int32_t GetUiExtensionId() override;
     int32_t WrapExtensionAbilityId(int32_t extensionOffset, int32_t abilityId) override;
+    void DispatchOriginAvoidArea(const Rosen::AvoidArea& avoidArea, uint32_t type);
 
-    virtual void SearchExtensionElementInfoByAccessibilityId(int32_t elementId, int32_t mode, int32_t baseParent,
+    void SearchExtensionElementInfoByAccessibilityId(int32_t elementId, int32_t mode, int32_t baseParent,
         std::list<Accessibility::AccessibilityElementInfo>& output) override;
-    virtual void SearchElementInfosByText(int32_t elementId, const std::string& text, int32_t baseParent,
+    void SearchElementInfosByText(int32_t elementId, const std::string& text, int32_t baseParent,
         std::list<Accessibility::AccessibilityElementInfo>& output) override;
-    virtual void FindFocusedElementInfo(int32_t elementId, int32_t focusType, int32_t baseParent,
+    void FindFocusedElementInfo(int32_t elementId, int32_t focusType, int32_t baseParent,
         Accessibility::AccessibilityElementInfo& output) override;
-    virtual void FocusMoveSearch(int32_t elementId, int32_t direction, int32_t baseParent,
+    void FocusMoveSearch(int32_t elementId, int32_t direction, int32_t baseParent,
         Accessibility::AccessibilityElementInfo& output) override;
-    virtual bool TransferExecuteAction(int32_t elementId, const std::map<std::string, std::string>& actionArguments,
+    bool TransferExecuteAction(int32_t elementId, const std::map<std::string, std::string>& actionArguments,
         int32_t action, int32_t offset) override;
-    void OnAccessibilityEvent(
-        const Accessibility::AccessibilityEventInfo& info, int32_t uiExtensionOffset);
+    void OnAccessibilityEvent(const Accessibility::AccessibilityEventInfo& info, int32_t uiExtensionOffset);
 
 private:
     enum class ReleaseCode {

@@ -123,6 +123,7 @@ public:
     MOCK_METHOD1(SetIsDragging, void(bool isDragging));
     MOCK_METHOD0(ResetDragging, void());
     MOCK_CONST_METHOD0(HasFloatTitle, bool());
+    MOCK_METHOD2(UpdateOriginAvoidArea, void(const Rosen::AvoidArea& avoidArea, uint32_t type));
 
     static RefPtr<MockPipelineContext> pipeline_;
 
