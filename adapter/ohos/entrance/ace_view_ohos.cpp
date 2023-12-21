@@ -103,7 +103,8 @@ void AceViewOhos::DispatchTouchEvent(AceViewOhos* view, const std::shared_ptr<MM
 {
     CHECK_NULL_VOID(view);
     CHECK_NULL_VOID(pointerEvent);
-    LogPointInfo(pointerEvent);
+    auto instanceId = view->GetInstanceId();
+    LogPointInfo(pointerEvent, instanceId);
     DispatchEventToPerf(pointerEvent);
     int32_t pointerAction = pointerEvent->GetPointerAction();
 
