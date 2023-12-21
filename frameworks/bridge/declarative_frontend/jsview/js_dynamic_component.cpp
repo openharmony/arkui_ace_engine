@@ -53,12 +53,11 @@ void JSDynamicComponent::JSBind(BindingTarget globalObj)
 
 void JSDynamicComponent::Create(const JSCallbackInfo& info)
 {
-    auto arg = info[0];
-    if (!arg->IsObject()) {
+    if (!info[0]->IsObject()) {
         LOGW("DynamicComponent arg is invalid");
         return;
     }
-    auto dynamicComponentArg = JSRef<JSObject>::Cast(arg);
+    auto dynamicComponentArg = JSRef<JSObject>::Cast(info[0]);
     auto hapPath = dynamicComponentArg->GetProperty("hapPath");
     if (!hapPath->IsString()) {
         LOGW("hap path is invalid");
@@ -88,6 +87,7 @@ void JSDynamicComponent::Create(const JSCallbackInfo& info)
     auto hapPathStr = hapPath->ToString();
     auto abcPathStr = abcPath->ToString();
     auto entryPointStr = entryPoint->ToString();
+
     UIExtensionModel::GetInstance()->Create();
     auto frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);

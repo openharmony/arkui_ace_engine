@@ -947,7 +947,7 @@ void PageRouterManager::LoadPage(int32_t pageId, const RouterPageInfo& target, b
 }
 
 void PageRouterManager::LoadCard(int32_t pageId, const RouterPageInfo& target, const std::string& params,
-    int64_t cardId, bool /*isRestore*/, bool needHideLast, const std::string& entryPoint)
+    int64_t cardId, bool /* isRestore */, bool needHideLast, const std::string& entryPoint)
 {
     CHECK_RUN_ON(JS);
     auto entryPageInfo = AceType::MakeRefPtr<EntryPageInfo>(pageId, target.url, target.path, params);

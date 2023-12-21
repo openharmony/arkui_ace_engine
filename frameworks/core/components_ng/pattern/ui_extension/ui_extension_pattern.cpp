@@ -93,7 +93,7 @@ void UIExtensionPattern::InitializeDynamicComponent(const std::string& hapPath, 
     if (!dynamicComponentRenderer_) {
         ContainerScope scope(instanceId_);
         dynamicComponentRenderer_ =
-            DynamicComponentRenderer::Create(GetHost(), instanceId_, hapPath, abcPath, entryPoint, runtime);
+            DynamicComponentRenderer::Create(GetHost(), hapPath, abcPath, entryPoint, runtime);
         CHECK_NULL_VOID(dynamicComponentRenderer_);
         dynamicComponentRenderer_->CreateContent();
     }

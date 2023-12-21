@@ -30,8 +30,8 @@ namespace OHOS::Ace::NG {
 class DynamicComponentRendererImpl : public DynamicComponentRenderer,
                                      public std::enable_shared_from_this<DynamicComponentRendererImpl> {
 public:
-    DynamicComponentRendererImpl(const RefPtr<FrameNode>& host, int32_t hostInstanceId, const std::string& hapPath,
-        const std::string& abcPath, const std::string& entryPoint, void* runtime);
+    DynamicComponentRendererImpl(const RefPtr<FrameNode>& host, const std::string& hapPath, const std::string& abcPath,
+        const std::string& entryPoint, void* runtime);
     ~DynamicComponentRendererImpl() override = default;
 
     void CreateContent() override;
@@ -45,7 +45,7 @@ public:
 
 private:
     RefPtr<TaskExecutor> GetTaskExecutor();
-    void AttachRenderContext();
+    void AttachRenderContext(int32_t hostInstanceId);
 
     std::string hapPath_;
     std::string abcPath_;
@@ -53,7 +53,6 @@ private:
     std::shared_ptr<UIContent> uiContent_;
     NativeEngine* runtime_ = nullptr;
     WeakPtr<FrameNode> host_;
-    int32_t hostInstanceId_ = -1;
 };
 
 } // namespace OHOS::Ace::NG

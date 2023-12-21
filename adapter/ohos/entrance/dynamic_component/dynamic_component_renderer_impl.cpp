@@ -25,23 +25,23 @@
 #include "base/thread/task_executor.h"
 #include "base/utils/utils.h"
 #include "core/common/ace_engine.h"
+#include "core/common/container.h"
 #include "core/common/container_scope.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
-DynamicComponentRendererImpl::DynamicComponentRendererImpl(const RefPtr<FrameNode>& host, int32_t hostInstanceId,
-    const std::string& hapPath, const std::string& abcPath, const std::string& entryPoint, void* runtime)
-    : hapPath_(hapPath), abcPath_(abcPath), entryPoint_(entryPoint), hostInstanceId_(hostInstanceId)
+DynamicComponentRendererImpl::DynamicComponentRendererImpl(const RefPtr<FrameNode>& host, const std::string& hapPath,
+    const std::string& abcPath, const std::string& entryPoint, void* runtime)
+    : hapPath_(hapPath), abcPath_(abcPath), entryPoint_(entryPoint)
 {
     host_ = WeakPtr(host);
     runtime_ = reinterpret_cast<NativeEngine*>(runtime);
 }
 
 std::shared_ptr<DynamicComponentRenderer> DynamicComponentRenderer::Create(const RefPtr<FrameNode>& host,
-    int32_t hostInstanceId, const std::string& hapPath, const std::string& abcPath, const std::string& entryPoint,
-    void* runtime)
+    const std::string& hapPath, const std::string& abcPath, const std::string& entryPoint, void* runtime)
 {
-    return std::make_shared<DynamicComponentRendererImpl>(host, hostInstanceId, hapPath, abcPath, entryPoint, runtime);
+    return std::make_shared<DynamicComponentRendererImpl>(host, hapPath, abcPath, entryPoint, runtime);
 }
 
 void DynamicComponentRendererImpl::CreateContent()
@@ -55,7 +55,7 @@ void DynamicComponentRendererImpl::CreateContent()
     auto napiEnv = reinterpret_cast<napi_env>(runtime_);
     auto uvTaskWrapper = std::make_shared<UVTaskWrapperImpl>(napiEnv);
 
-    uvTaskWrapper->Call([weak = this->weak_from_this()]() {
+    uvTaskWrapper->Call([weak = this->weak_from_this(), hostInstanceId = Container::CurrentId()]() {
         auto renderer = weak.lock();
         CHECK_NULL_VOID(renderer);
 
@@ -65,18 +65,16 @@ void DynamicComponentRendererImpl::CreateContent()
         CHECK_NULL_VOID(renderer->uiContent_);
 
         renderer->uiContent_->InitializeDynamic(renderer->hapPath_, renderer->abcPath_, renderer->entryPoint_);
-        renderer->AttachRenderContext();
+        renderer->AttachRenderContext(hostInstanceId);
         LOGD("foreground dynamic UI content");
         renderer->uiContent_->Foreground();
     });
 }
 
-void DynamicComponentRendererImpl::AttachRenderContext()
+void DynamicComponentRendererImpl::AttachRenderContext(int32_t hostInstanceId)
 {
-    ContainerScope scope(hostInstanceId_);
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto taskExecutor = pipeline->GetTaskExecutor();
+    ContainerScope scope(hostInstanceId);
+    auto taskExecutor = Container::CurrentTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
     taskExecutor->PostSyncTask(
         [weak = host_, instanceId = uiContent_->GetInstanceId()]() {
