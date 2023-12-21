@@ -74,7 +74,7 @@ public:
             return false;
         }
         auto handle = panda::CopyableGlobal<panda::ArrayRef>(vm, arg);
-        int32_t length = handle->Length(vm);
+        int32_t length = static_cast<int32_t>(handle->Length(vm));
         if (length != defaultLength) {
             return false;
         }

@@ -1007,7 +1007,8 @@ struct ArkUISideBarContainerModifierAPI {
     void (*ResetSideBarWidth)(NodeHandle node);
     void (*SetMinSideBarWidth)(NodeHandle node, double value, int32_t unit);
     void (*ResetMinSideBarWidth)(NodeHandle node);
-    void (*SetControlButton)(NodeHandle node, double* values, const struct IconsStruct* sideBarWidth);
+    void (*SetControlButton)(
+        NodeHandle node, double* values, int32_t valueLength, const struct IconsStruct* sideBarWidth);
     void (*ResetControlButton)(NodeHandle node);
     void (*SetShowControlButton)(NodeHandle node, bool isShow);
     void (*ResetShowControlButton)(NodeHandle node);
