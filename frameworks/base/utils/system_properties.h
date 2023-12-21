@@ -391,6 +391,7 @@ public:
 
     static bool Is24HourClock();
 
+    static bool GetRtlEnabled();
 private:
     static bool traceEnabled_;
     static bool svgTraceEnable_;

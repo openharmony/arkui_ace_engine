@@ -510,4 +510,9 @@ ACE_WEAK_SYM bool SystemProperties::Is24HourClock()
 {
     return Global::I18n::LocaleConfig::Is24HourClock();
 }
+
+bool SystemProperties::GetRtlEnabled()
+{
+    return system::GetBoolParameter("debug.ace.rtl.enabled", false);
+}
 } // namespace OHOS::Ace

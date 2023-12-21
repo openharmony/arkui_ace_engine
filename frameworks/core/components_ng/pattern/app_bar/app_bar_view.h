@@ -56,6 +56,7 @@ public:
     void iniBehavior();
     void SetRowWidth(const Dimension& positionX);
     void IniColor();
+    void ReverseBackButton();
 
 private:
     static RefPtr<FrameNode> BuildBarTitle();
@@ -67,6 +68,7 @@ private:
         RefPtr<FrameNode> icon, const std::optional<Color>& color, InternalResource::ResourceId image);
     RefPtr<FrameNode> atom_;
     RefPtr<FrameNode> GetFaButton();
+    RefPtr<FrameNode> GetBackButton();
     
     bool isVisibleSetted = false;
     bool isRowColorSetted = false;
