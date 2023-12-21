@@ -99,13 +99,11 @@ sptr<AppExecFwk::IBundleMgr> PluginComponentManager::GetBundleManager()
 {
     auto systemAbilityMgr = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
     if (systemAbilityMgr == nullptr) {
-        LOGE("Failed to get SystemAbilityManager.");
         return nullptr;
     }
 
     auto bundleObj = systemAbilityMgr->GetSystemAbility(BUNDLE_MGR_SERVICE_SYS_ABILITY_ID);
     if (bundleObj == nullptr) {
-        LOGE("Failed to get bundle manager service");
         return nullptr;
     }
 
@@ -129,8 +127,8 @@ void PluginComponentManager::UIServiceListener::ResgisterListener(
     callbackVec_.try_emplace(callback, callBackType);
 }
 
-void PluginComponentManager::UIServiceListener::OnPushCallBack(const AAFwk::Want& want,
-    const std::string& name, const std::string& jsonPath, const std::string& data, const std::string& extraData)
+void PluginComponentManager::UIServiceListener::OnPushCallBack(const AAFwk::Want& want, const std::string& name,
+    const std::string& jsonPath, const std::string& data, const std::string& extraData)
 {
     PluginComponentTemplate pluginTemplate;
     if (!jsonPath.empty()) {
@@ -147,7 +145,7 @@ void PluginComponentManager::UIServiceListener::OnPushCallBack(const AAFwk::Want
     pluginTemplate.SetAbility(want.GetElement().GetBundleName() + "/" + want.GetElement().GetAbilityName());
 
     std::lock_guard<std::recursive_mutex> lock(mutex_);
-    for (auto &callback : callbackVec_) {
+    for (auto& callback : callbackVec_) {
         if (callback.second == CallBackType::PushEvent && callback.first != nullptr) {
             callback.first->OnPushEvent(want, pluginTemplate, data, extraData);
         }
@@ -155,10 +153,10 @@ void PluginComponentManager::UIServiceListener::OnPushCallBack(const AAFwk::Want
 }
 
 void PluginComponentManager::UIServiceListener::OnRequestCallBack(
-    const AAFwk::Want& want, const std::string& name,  const std::string& data)
+    const AAFwk::Want& want, const std::string& name, const std::string& data)
 {
     std::lock_guard<std::recursive_mutex> lock(mutex_);
-    for (auto &callback : callbackVec_) {
+    for (auto& callback : callbackVec_) {
         if (callback.second == CallBackType::RequestEvent && callback.first != nullptr) {
             callback.first->OnRequestEvent(want, name, data);
         }
@@ -174,13 +172,10 @@ void PluginComponentManager::UIServiceListener::OnReturnRequest(
             if (iter->second == CallBackType::RequestCallBack && iter->first != nullptr) {
                 auto container = AceEngine::Get().GetContainer(iter->first->GetContainerId());
                 if (!container) {
-                    LOGE("%{public}s called, container is null. %{public}d", __func__,
-                        iter->first->GetContainerId());
                     return;
                 }
                 auto taskExecutor = container->GetTaskExecutor();
                 if (!taskExecutor) {
-                    LOGE("%{public}s called, taskExecutor is null.", __func__);
                     return;
                 }
                 taskExecutor->PostTask(
@@ -231,18 +226,18 @@ bool PluginComponentManager::GetTemplatePathFromJsonFile(
     }
     char realPath[PATH_MAX] = { 0x00 };
     if (realpath(externalPath.c_str(), realPath) == nullptr) {
-        LOGE("realpath fail! filePath: %{private}s, fail reason: %{public}s",
-            externalPath.c_str(), strerror(errno));
+        TAG_LOGW(AceLogTag::ACE_PLUGIN_COMPONENT,
+            "Get path from Json fail! FilePath is: %{private}s, fail reason: %{public}s", externalPath.c_str(),
+            strerror(errno));
         return false;
     }
     std::unique_ptr<FILE, decltype(&std::fclose)> file(std::fopen(realPath, "rb"), std::fclose);
     if (!file) {
-        LOGE("open file failed, filePath: %{private}s, fail reason: %{public}s",
+        TAG_LOGW(AceLogTag::ACE_PLUGIN_COMPONENT, "Open file failed, filePath: %{private}s, fail reason: %{public}s",
             externalPath.c_str(), strerror(errno));
         return false;
     }
     if (std::fseek(file.get(), 0, SEEK_END) != 0) {
-        LOGE("seek file tail error.");
         return false;
     }
 
@@ -252,14 +247,12 @@ bool PluginComponentManager::GetTemplatePathFromJsonFile(
     }
     char* fileData = new (std::nothrow) char[size];
     if (fileData == nullptr) {
-        LOGE("new json buff failed.");
         return false;
     }
     rewind(file.get());
     std::unique_ptr<char[]> jsonStream(fileData);
     size_t result = std::fread(jsonStream.get(), 1, size, file.get());
     if (result != (size_t)size) {
-        LOGE("read file failed.");
         return false;
     }
 
@@ -281,12 +274,10 @@ std::string PluginComponentManager::GetPackagePath(const AAFwk::Want& want) cons
     std::string packagePathStr;
 
     if (want.GetElement().GetBundleName().empty()) {
-        LOGE("App bundleName is empty.");
         return packagePathStr;
     }
     auto bms = PluginComponentManager::GetInstance()->GetBundleManager();
     if (!bms) {
-        LOGE("Bms bundleManager is nullptr.");
         return packagePathStr;
     }
 
@@ -295,7 +286,6 @@ std::string PluginComponentManager::GetPackagePath(const AAFwk::Want& want) cons
         bool ret = bms->GetBundleInfo(
             want.GetElement().GetBundleName(), AppExecFwk::BundleFlag::GET_BUNDLE_DEFAULT, bundleInfo);
         if (!ret) {
-            LOGE("Bms get bundleName failed!");
             return packagePathStr;
         }
         packagePathStr = bundleInfo.applicationInfo.entryDir + "/";
@@ -303,7 +293,6 @@ std::string PluginComponentManager::GetPackagePath(const AAFwk::Want& want) cons
         AppExecFwk::AbilityInfo abilityInfo;
         bool ret = bms->QueryAbilityInfo(want, abilityInfo);
         if (!ret) {
-            LOGE("Bms get abilityInfo failed!");
             return packagePathStr;
         }
         packagePathStr = abilityInfo.applicationInfo.codePath + "/" + abilityInfo.package + "/";

@@ -186,7 +186,6 @@ napi_value JSPluginCallback::MakeCallbackParamForRequest(
 
 napi_value JSPluginCallback::MakePluginTemplateObject(const PluginComponentTemplate& pluginTemplate)
 {
-    TAG_LOGI(AceLogTag::ACE_PLUGIN_COMPONENT, "%{public}s called.", __func__);
     napi_value jsPluginTemplate = AceCreateJSObject(cbInfo_.env);
     if (jsPluginTemplate != nullptr) {
         napi_value jsSource = AceWrapStringToJS(cbInfo_.env, pluginTemplate.GetSource());
@@ -238,7 +237,6 @@ void JSPluginCallback::OnPushEventInner(const OnPluginUvWorkData* workData)
 void JSPluginCallback::OnPushEvent(const AAFwk::Want& want, const PluginComponentTemplate& pluginTemplate,
     const std::string& data, const std::string& extraData)
 {
-    TAG_LOGI(AceLogTag::ACE_PLUGIN_COMPONENT, "%{public}s called.", __func__);
     if (cbInfo_.env == nullptr || cbInfo_.callback == nullptr) {
         return;
     }
@@ -361,7 +359,6 @@ void JSPluginCallback::OnRequestCallBackInner(const OnPluginUvWorkData* workData
 void JSPluginCallback::OnRequestCallBack(
     const PluginComponentTemplate& pluginTemplate, const std::string& data, const std::string& extraData)
 {
-    TAG_LOGI(AceLogTag::ACE_PLUGIN_COMPONENT, "%{public}s called.", __func__);
     JSPluginCallbackMgr::Instance().UnRegisterEvent(GetID());
     if (cbInfo_.env == nullptr) {
         return;

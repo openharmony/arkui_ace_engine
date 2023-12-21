@@ -87,5 +87,5 @@ struct ACEComplexArrayData {
     std::vector<double> doubleList = {};
     std::vector<std::string> stringList = {};
 };
-}  // namespace OHOS::Ace::Napi
-#endif  // OHOS_NAPI_ACE_PLUGIN_DATA_H
+} // namespace OHOS::Ace::Napi
+#endif // OHOS_NAPI_ACE_PLUGIN_DATA_H
