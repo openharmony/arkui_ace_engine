@@ -44,6 +44,12 @@ const std::string SCROLLABLE_MULTI_TASK_SCENE = "scrollable_multi_task_scene";
 using std::chrono::high_resolution_clock;
 using std::chrono::milliseconds;
 
+#ifndef WEARABLE_PRODUCT
+constexpr double MAX_VELOCITY = 800000.0;
+#else
+constexpr double MAX_VELOCITY = 5000.0;
+#endif
+
 RefPtr<PaintProperty> ScrollablePattern::CreatePaintProperty()
 {
     auto defaultDisplayMode = GetDefaultScrollBarDisplayMode();
@@ -397,6 +403,7 @@ void ScrollablePattern::AddScrollEvent()
     };
     scrollable->SetScrollEndCallback(std::move(scrollEnd));
     scrollable->SetUnstaticFriction(friction_);
+    scrollable->SetMaxFlingVelocity(maxFlingVelocity_);
 
     auto scrollSnap = [weak = WeakClaim(this)](double targetOffset, double velocity) -> bool {
         auto pattern = weak.Upgrade();
@@ -770,6 +777,17 @@ void ScrollablePattern::SetFriction(double friction)
     CHECK_NULL_VOID(scrollableEvent_);
     auto scrollable = scrollableEvent_->GetScrollable();
     scrollable->SetUnstaticFriction(friction_);
+}
+
+void ScrollablePattern::SetMaxFlingVelocity(double max)
+{
+    if (LessOrEqual(max, 0.0f)) {
+        max = MAX_VELOCITY;
+    }
+    maxFlingVelocity_ = max;
+    CHECK_NULL_VOID(scrollableEvent_);
+    auto scrollable = scrollableEvent_->GetScrollable();
+    scrollable->SetMaxFlingVelocity(max);
 }
 
 void ScrollablePattern::GetParentNavigation()

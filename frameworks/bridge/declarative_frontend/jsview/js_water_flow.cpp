@@ -130,7 +130,7 @@ void JSWaterFlow::JSBind(BindingTarget globalObj)
     JSClass<JSWaterFlow>::StaticMethod("scrollBarWidth", &JSWaterFlow::SetScrollBarWidth, opt);
     JSClass<JSWaterFlow>::StaticMethod("scrollBarColor", &JSWaterFlow::SetScrollBarColor, opt);
 
-    JSClass<JSWaterFlow>::InheritAndBind<JSContainerBase>(globalObj);
+    JSClass<JSWaterFlow>::InheritAndBind<JSScrollableBase>(globalObj);
 }
 
 void JSWaterFlow::SetColumnsGap(const JSCallbackInfo& info)

@@ -148,6 +148,7 @@
 #include "frameworks/bridge/declarative_frontend/jsview/scroll_bar/js_scroll_bar.h"
 #include "frameworks/bridge/declarative_frontend/ng/declarative_frontend_ng.h"
 #include "frameworks/bridge/declarative_frontend/ng/frontend_delegate_declarative_ng.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_scrollable_base.h"
 
 #ifdef USE_COMPONENTS_LIB
 #include "frameworks/bridge/js_frontend/engine/jsi/ark_js_value.h"
@@ -387,6 +388,7 @@ void JsBindViews(BindingTarget globalObj)
     JSViewAbstract::JSBind(globalObj);
     JSViewStackProcessor::JSBind(globalObj);
     JSContainerBase::JSBind(globalObj);
+    JSScrollableBase::JSBind(globalObj);
     JSView::JSBind(globalObj);
     JSShapeAbstract::JSBind(globalObj);
     JSText::JSBind(globalObj);

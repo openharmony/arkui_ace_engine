@@ -390,7 +390,7 @@ void JSGrid::JSBind(BindingTarget globalObj)
     JSClass<JSGrid>::StaticMethod("onScrollIndex", &JSGrid::JsOnScrollIndex);
     JSClass<JSGrid>::StaticMethod("onScrollFrameBegin", &JSGrid::JsOnScrollFrameBegin);
 
-    JSClass<JSGrid>::InheritAndBind<JSContainerBase>(globalObj);
+    JSClass<JSGrid>::InheritAndBind<JSScrollableBase>(globalObj);
 }
 
 void JSGrid::SetScrollBar(const JSCallbackInfo& info)

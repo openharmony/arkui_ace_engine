@@ -173,6 +173,7 @@
 #include "frameworks/bridge/declarative_frontend/engine/jsi/jsi_declarative_engine.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_dump_log.h"
 #include "frameworks/bridge/js_frontend/engine/jsi/js_value.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_scrollable_base.h"
 
 #ifdef REMOTE_WINDOW_SUPPORTED
 #include "bridge/declarative_frontend/jsview/js_remote_window.h"
@@ -949,6 +950,7 @@ void JsBindFormViews(BindingTarget globalObj, const std::unordered_set<std::stri
     if (!isReload) {
         JSViewAbstract::JSBind(globalObj);
         JSContainerBase::JSBind(globalObj);
+        JSScrollableBase::JSBind(globalObj);
         JSShapeAbstract::JSBind(globalObj);
         JSView::JSBind(globalObj);
         JSDumpLog::JSBind(globalObj);
@@ -981,6 +983,7 @@ void JsBindViews(BindingTarget globalObj)
 {
     JSViewAbstract::JSBind(globalObj);
     JSContainerBase::JSBind(globalObj);
+    JSScrollableBase::JSBind(globalObj);
     JSShapeAbstract::JSBind(globalObj);
     JSView::JSBind(globalObj);
     JSDumpLog::JSBind(globalObj);

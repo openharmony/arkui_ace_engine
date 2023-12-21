@@ -427,6 +427,11 @@ public:
         return endPos_;
     }
 
+    void SetMaxFlingVelocity(double max)
+    {
+        maxFlingVelocity_ = max;
+    }
+
     void StopFrictionAnimation();
     void StopSpringAnimation();
     void StopSnapAnimation();
@@ -470,6 +475,7 @@ private:
     WeakPtr<PipelineBase> context_;
     double currentPos_ = 0.0;
     double currentVelocity_ = 0.0;
+    double maxFlingVelocity_ = 0.0;
     bool scrollPause_ = false;
     bool touchUp_ = false;
     bool moved_ = false;

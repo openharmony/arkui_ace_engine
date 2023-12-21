@@ -260,6 +260,8 @@ public:
         return friction_;
     }
 
+    void SetMaxFlingVelocity(double max);
+
     void StopAnimate();
     bool AnimateRunning() const
     {
@@ -601,6 +603,7 @@ private:
     bool isCoordEventNeedSpring_ = true;
     double scrollBarOutBoundaryExtent_ = 0.0;
     double friction_ = FRICTION;
+    double maxFlingVelocity_;
     // scroller
     RefPtr<Animator> animator_;
     bool scrollAbort_ = false;
