@@ -406,7 +406,7 @@ void MenuPattern::HideMenu(bool isMenuOnTouch) const
     if (wrapper->GetTag() == V2::SELECT_OVERLAY_ETS_TAG) {
         return;
     }
-    if (IsContextMenu() || expandDisplay) {
+    if (((IsContextMenu() || expandDisplay)) && (targetTag_ != V2::SELECT_ETS_TAG)) {
         SubwindowManager::GetInstance()->HideMenuNG(wrapper, targetId_);
         return;
     }
