@@ -143,6 +143,27 @@ void JSNavDestination::SetTitle(const JSCallbackInfo& info)
     }
 }
 
+void JSNavDestination::SetBackButtonIcon(const JSCallbackInfo& info)
+{
+    // srcType、pixmap、string
+    if (info.Length() < 1) {
+        return;
+    }
+    std::string src;
+    auto noPixMap = ParseJsMedia(info[0], src);
+
+    RefPtr<PixelMap> pixMap = nullptr;
+#if defined(PIXEL_MAP_SUPPORTED)
+    if (!noPixMap) {
+        pixMap = CreatePixelMapFromNapiValue(info[0]);
+    }
+#endif
+    std::string bundleName;
+    std::string moduleName;
+    GetJsMediaBundleInfo(info[0], bundleName, moduleName);
+    NavDestinationModel::GetInstance()->SetBackButtonIcon(src, noPixMap, pixMap, bundleName, moduleName);
+}
+
 void JSNavDestination::SetOnShown(const JSCallbackInfo& info)
 {
     if (!info[0]->IsFunction()) {
@@ -212,6 +233,7 @@ void JSNavDestination::JSBind(BindingTarget globalObj)
     JSClass<JSNavDestination>::StaticMethod("create", &JSNavDestination::Create);
     JSClass<JSNavDestination>::StaticMethod("title", &JSNavDestination::SetTitle);
     JSClass<JSNavDestination>::StaticMethod("hideTitleBar", &JSNavDestination::SetHideTitleBar);
+    JSClass<JSNavDestination>::StaticMethod("backButtonIcon", &JSNavDestination::SetBackButtonIcon);
     JSClass<JSNavDestination>::StaticMethod("onShown", &JSNavDestination::SetOnShown);
     JSClass<JSNavDestination>::StaticMethod("onHidden", &JSNavDestination::SetOnHidden);
     JSClass<JSNavDestination>::StaticMethod("onBackPressed", &JSNavDestination::SetOnBackPressed);
