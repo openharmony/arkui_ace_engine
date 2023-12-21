@@ -301,17 +301,24 @@ void DragDropManager::UpdateDragAllowDrop(const RefPtr<FrameNode>& dragFrameNode
 {
     const auto& dragFrameNodeAllowDrop = dragFrameNode->GetAllowDrop();
     if (dragFrameNodeAllowDrop.empty() || summaryMap_.empty()) {
-        InteractionInterface::GetInstance()->UpdateDragStyle(DragCursorStyleCore::MOVE);
+        UpdateDragStyle(DragCursorStyleCore::MOVE);
         return;
     }
     for (const auto& it : summaryMap_) {
         if (dragFrameNodeAllowDrop.find(it.first) == dragFrameNodeAllowDrop.end()) {
-            InteractionInterface::GetInstance()->UpdateDragStyle(DragCursorStyleCore::FORBIDDEN);
+            UpdateDragStyle(DragCursorStyleCore::FORBIDDEN);
             return;
         }
     }
-    InteractionInterface::GetInstance()->UpdateDragStyle(
-        isCopy ? DragCursorStyleCore::COPY : DragCursorStyleCore::MOVE);
+    UpdateDragStyle(isCopy ? DragCursorStyleCore::COPY : DragCursorStyleCore::MOVE);
+}
+
+void DragDropManager::UpdateDragStyle(const DragCursorStyleCore& dragStyle)
+{
+    if (dragStyle != dragCursorStyleCore_) {
+        dragCursorStyleCore_ = dragStyle;
+        InteractionInterface::GetInstance()->UpdateDragStyle(dragCursorStyleCore_);
+    }
 }
 #endif // ENABLE_DRAG_FRAMEWORK
 
@@ -489,7 +496,7 @@ void DragDropManager::OnDragMove(const PointerEvent& pointerEvent, const std::st
 
 #ifdef ENABLE_DRAG_FRAMEWORK
         if (!isMouseDragged_ || isDragWindowShow_) {
-            InteractionInterface::GetInstance()->UpdateDragStyle(DragCursorStyleCore::MOVE);
+            UpdateDragStyle(DragCursorStyleCore::MOVE);
         }
 #endif // ENABLE_DRAG_FRAMEWORK
         return;
@@ -575,13 +582,13 @@ void DragDropManager::OnDragEnd(const PointerEvent& pointerEvent, const std::str
     }
 #endif // ENABLE_DRAG_FRAMEWORK
 
+    CHECK_NULL_VOID(dragFrameNode);
     if (V2::UI_EXTENSION_COMPONENT_ETS_TAG == dragFrameNode->GetTag()) {
         auto pattern = dragFrameNode->GetPattern<Pattern>();
         pattern->HandleDragEvent(pointerEvent);
         return;
     }
 
-    CHECK_NULL_VOID(dragFrameNode);
     auto eventHub = dragFrameNode->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     RefPtr<OHOS::Ace::DragEvent> event = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
@@ -630,6 +637,7 @@ void DragDropManager::RequireSummary()
     previewRect_ = Rect(-1, -1, -1, -1);
     extraInfo_ = extraInfo;
     summaryMap_ = summary;
+    UpdateDragStyle();
 }
 
 void DragDropManager::ResetRecordSize(uint32_t recordSize)
@@ -747,12 +755,12 @@ void DragDropManager::FireOnDragEvent(
     }
     if (event->GetResult() == DragRet::ENABLE_DROP) {
         if (event->IsCopy()) {
-            InteractionInterface::GetInstance()->UpdateDragStyle(DragCursorStyleCore::COPY);
+            UpdateDragStyle(DragCursorStyleCore::COPY);
         } else {
-            InteractionInterface::GetInstance()->UpdateDragStyle(DragCursorStyleCore::MOVE);
+            UpdateDragStyle(DragCursorStyleCore::MOVE);
         }
     } else if (event->GetResult() == DragRet::DISABLE_DROP) {
-        InteractionInterface::GetInstance()->UpdateDragStyle(DragCursorStyleCore::FORBIDDEN);
+        UpdateDragStyle(DragCursorStyleCore::FORBIDDEN);
     } else {
         UpdateDragAllowDrop(frameNode, event->IsCopy());
     }
