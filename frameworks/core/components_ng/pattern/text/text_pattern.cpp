@@ -2614,6 +2614,7 @@ void TextPattern::FireOnSelectionChange(int32_t start, int32_t end)
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto eventHub = host->GetEventHub<TextEventHub>();
+    CHECK_NULL_VOID(eventHub);
     eventHub->FireOnSelectionChange(start, end);
 }
 
