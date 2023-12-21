@@ -400,3 +400,8 @@ export class ExceptionPrompt extends ViewPU {
         this.updateDirtyElements()
     }
 }
+
+export default {
+    MarginType,
+    ExceptionPrompt
+}
