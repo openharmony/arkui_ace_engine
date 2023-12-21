@@ -22,6 +22,7 @@
 #include "base/memory/ace_type.h"
 #include "base/utils/noncopyable.h"
 #include "base/window/drag_window.h"
+#include "core/common/interaction/interaction_data.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_proxy.h"
 #include "core/gestures/velocity_tracker.h"
@@ -96,6 +97,7 @@ public:
     void ClearExtraInfo();
     float GetSmallWindowScale() const;
 #ifdef ENABLE_DRAG_FRAMEWORK
+    void UpdateDragStyle(const DragCursorStyleCore& dragCursorStyleCore = DragCursorStyleCore::DEFAULT);
     void UpdateDragAllowDrop(const RefPtr<FrameNode>& dragFrameNode, const bool isCopy);
     void RequireSummary();
     void ClearSummary();
@@ -296,6 +298,7 @@ private:
     std::unordered_map<int32_t, WeakPtr<FrameNode>> nodesForDragNotify_;
     std::unordered_set<int32_t> parentHitNodes_;
 #ifdef ENABLE_DRAG_FRAMEWORK
+    DragCursorStyleCore dragCursorStyleCore_ = DragCursorStyleCore::DEFAULT;
     std::map<std::string, int64_t> summaryMap_;
     uint32_t recordSize_ = 0;
 #endif // ENABLE_DRAG_FRAMEWORK

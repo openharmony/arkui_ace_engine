@@ -760,6 +760,7 @@ struct ArkUIPanelModifierAPI {
     void (*SetPanelType)(NodeHandle node, int32_t type);
     void (*ResetPanelType)(NodeHandle node);
     void (*SetPanelCustomHeight)(NodeHandle node, double value, int unit);
+    void (*SetPanelCustomHeightByString)(NodeHandle node, const char* value);
     void (*ResetPanelCustomHeight)(NodeHandle node);
     void (*SetShowCloseIcon)(NodeHandle node, bool value);
     void (*ResetShowCloseIcon)(NodeHandle node);

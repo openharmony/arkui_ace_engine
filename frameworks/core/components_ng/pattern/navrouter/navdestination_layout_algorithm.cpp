@@ -138,6 +138,15 @@ void NavDestinationLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     float contentChildHeight =
         MeasureContentChild(layoutWrapper, hostNode, navDestinationLayoutProperty, size, titleBarHeight);
     size.SetHeight(titleBarHeight + contentChildHeight);
+
+    // to avoid zero-height of navDestination
+    if (titleBarHeight + contentChildHeight == 0) {
+        auto pipeline = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
+        auto height = pipeline->GetRootHeight();
+        size.SetHeight(height);
+    }
+
     layoutWrapper->GetGeometryNode()->SetFrameSize(size);
 }
 

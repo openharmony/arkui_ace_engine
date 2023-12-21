@@ -17,11 +17,13 @@
 
 #include "base/log/ace_scoring_log.h"
 #include "bridge/declarative_frontend/engine/functions/js_swiper_function.h"
+#include "bridge/declarative_frontend/engine/functions/js_tabs_function.h"
 #include "bridge/declarative_frontend/jsview/js_tabs_controller.h"
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "bridge/declarative_frontend/jsview/models/tabs_model_impl.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/tabs/tabs_model_ng.h"
+#include "core/components_ng/pattern/tabs/tab_content_transition_proxy.h"
 
 namespace OHOS::Ace {
 
@@ -54,6 +56,7 @@ namespace {
 constexpr int32_t SM_COLUMN_NUM = 4;
 constexpr int32_t MD_COLUMN_NUM = 8;
 constexpr int32_t LG_COLUMN_NUM = 12;
+constexpr int32_t DEFAULT_CUSTOM_ANIMATION_TIMEOUT = 1000;
 const std::vector<BarPosition> BAR_POSITIONS = { BarPosition::START, BarPosition::END };
 
 JSRef<JSVal> TabContentChangeEventToJSValue(const TabContentChangeEvent& eventInfo)
@@ -476,8 +479,60 @@ void JSTabs::SetBarGridAlign(const JSCallbackInfo& info)
     TabsModel::GetInstance()->SetBarGridAlign(columnOption);
 }
 
+void JSTabs::SetCustomContentTransition(const JSCallbackInfo& info)
+{
+    if (info.Length() != 1) {
+        return;
+    }
+
+    if (info[0]->IsUndefined() || !info[0]->IsFunction()) {
+        TabsModel::GetInstance()->SetIsCustomAnimation(false);
+        return;
+    }
+
+    RefPtr<JsTabsFunction> jsCustomAnimationFunc = AceType::MakeRefPtr<JsTabsFunction>(JSRef<JSFunc>::Cast(info[0]));
+    auto onCustomAnimation = [execCtx = info.GetExecutionContext(), func = std::move(jsCustomAnimationFunc)](
+                                 int32_t from, int32_t to) -> TabContentAnimatedTransition {
+        TabContentAnimatedTransition transitionInfo;
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, transitionInfo);
+
+        auto ret = func->Execute(from, to);
+        if (!ret->IsObject()) {
+            return transitionInfo;
+        }
+
+        auto transitionObj = JSRef<JSObject>::Cast(ret);
+        JSRef<JSVal> timeoutProperty = transitionObj->GetProperty("timeout");
+        if (timeoutProperty->IsNumber()) {
+            auto timeout = timeoutProperty->ToNumber<int32_t>();
+            transitionInfo.timeout = timeout < 0 ? DEFAULT_CUSTOM_ANIMATION_TIMEOUT : timeout;
+        } else {
+            transitionInfo.timeout = DEFAULT_CUSTOM_ANIMATION_TIMEOUT;
+        }
+
+        JSRef<JSVal> transition = transitionObj->GetProperty("transition");
+        if (transition->IsFunction()) {
+            RefPtr<JsTabsFunction> jsOnTransition =
+                AceType::MakeRefPtr<JsTabsFunction>(JSRef<JSFunc>::Cast(transition));
+            auto onTransition = [execCtx, func = std::move(jsOnTransition)](
+                                    const RefPtr<TabContentTransitionProxy>& proxy) {
+                JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+                ACE_SCORING_EVENT("onTransition");
+                func->Execute(proxy);
+            };
+
+            transitionInfo.transition = std::move(onTransition);
+        }
+
+        return transitionInfo;
+    };
+    TabsModel::GetInstance()->SetIsCustomAnimation(true);
+    TabsModel::GetInstance()->SetOnCustomAnimation(std::move(onCustomAnimation));
+}
+
 void JSTabs::JSBind(BindingTarget globalObj)
 {
+    JsTabContentTransitionProxy::JSBind(globalObj);
     JSClass<JSTabs>::Declare("Tabs");
     JSClass<JSTabs>::StaticMethod("create", &JSTabs::Create);
     JSClass<JSTabs>::StaticMethod("pop", &JSTabs::Pop);
@@ -508,6 +563,7 @@ void JSTabs::JSBind(BindingTarget globalObj)
     JSClass<JSTabs>::StaticMethod("barBackgroundColor", &JSTabs::SetBarBackgroundColor);
     JSClass<JSTabs>::StaticMethod("clip", &JSTabs::SetClip);
     JSClass<JSTabs>::StaticMethod("barGridAlign", &JSTabs::SetBarGridAlign);
+    JSClass<JSTabs>::StaticMethod("customContentTransition", &JSTabs::SetCustomContentTransition);
 
     JSClass<JSTabs>::InheritAndBind<JSContainerBase>(globalObj);
 }

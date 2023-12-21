@@ -391,6 +391,11 @@ private:
     WeakPtr<PipelineBase> context_;
 };
 
+enum class ScriptItemType {
+    DOCUMENT_START = 0,
+    DOCUMENT_END
+};
+
 class WebDelegate : public WebResource {
     DECLARE_ACE_TYPE(WebDelegate, WebResource);
 
@@ -631,7 +636,8 @@ public:
     bool InitWebSurfaceDelegate(const WeakPtr<PipelineBase>& context);
     int GetWebId();
     void JavaScriptOnDocumentStart();
-    void SetJavaScriptItems(const ScriptItems& scriptItems);
+    void JavaScriptOnDocumentEnd();
+    void SetJavaScriptItems(const ScriptItems& scriptItems, const ScriptItemType& type);
 #if defined(ENABLE_ROSEN_BACKEND)
     void SetSurface(const sptr<Surface>& surface);
     sptr<Surface> surface_ = nullptr;
@@ -831,7 +837,8 @@ private:
     float visibleRatio_ = 1.0;
     uint32_t delayTime_ = 500;
     float lowerFrameRateVisibleRatio_ = 0.1;
-    std::optional<ScriptItems> scriptItems_;
+    std::optional<ScriptItems> onDocumentStartScriptItems_;
+    std::optional<ScriptItems> onDocumentEndScriptItems_;
     bool accessibilityState_ = false;
     std::optional<std::string> richtextData_;
     bool incognitoMode_ = false;

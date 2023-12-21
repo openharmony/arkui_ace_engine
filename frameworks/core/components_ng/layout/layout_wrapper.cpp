@@ -172,6 +172,10 @@ void LayoutWrapper::ExpandSafeArea(bool isFocusOnPage)
     }
     geometryNode->SetFrameOffset(frame.GetOffset());
     geometryNode->SetFrameSize(frame.GetSize());
+    auto hostPattern = host->GetPattern();
+    if (hostPattern) {
+        hostPattern->UpdateNeedRecalculateSafeArea();
+    }
 }
 
 void LayoutWrapper::AdjustChildren(const OffsetF& offset)

@@ -71,6 +71,11 @@ public:
         direction_ = direction;
     }
 
+    OverScrollDirection GetDirection() const
+    {
+        return direction_;
+    }
+
 protected:
     void Paint(RSCanvas& canvas, const SizeF& size, const OffsetF& offset);
 

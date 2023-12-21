@@ -25,6 +25,7 @@
 #include "base/subwindow/subwindow.h"
 #include "base/utils/system_properties.h"
 #include "base/utils/utils.h"
+#include "base/log/log_wrapper.h"
 #include "core/common/container.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
@@ -48,6 +49,7 @@ namespace {
 // common function to bind menu
 void BindMenu(const RefPtr<FrameNode> &menuNode, int32_t targetId, const NG::OffsetF &offset)
 {
+    TAG_LOGD(AceLogTag::ACE_DIALOG, "bind menu enter");
     auto container = Container::Current();
     CHECK_NULL_VOID(container);
     auto pipelineContext = container->GetPipelineContext();
@@ -62,6 +64,7 @@ void BindMenu(const RefPtr<FrameNode> &menuNode, int32_t targetId, const NG::Off
 
 void RegisterMenuCallback(const RefPtr<FrameNode> &menuWrapperNode, const MenuParam &menuParam)
 {
+    TAG_LOGD(AceLogTag::ACE_DIALOG, "register menu enter");
     CHECK_NULL_VOID(menuWrapperNode);
     auto pattern = menuWrapperNode->GetPattern<MenuWrapperPattern>();
     CHECK_NULL_VOID(pattern);
@@ -1194,6 +1197,7 @@ void ViewAbstract::SetTransformMatrix(const Matrix4 &matrix)
 void ViewAbstract::BindPopup(const RefPtr<PopupParam> &param, const RefPtr<FrameNode> &targetNode,
     const RefPtr<UINode> &customNode)
 {
+    TAG_LOGD(AceLogTag::ACE_DIALOG, "bind popup enter");
     CHECK_NULL_VOID(targetNode);
     auto targetId = targetNode->GetId();
     auto targetTag = targetNode->GetTag();
@@ -1235,6 +1239,7 @@ void ViewAbstract::BindPopup(const RefPtr<PopupParam> &param, const RefPtr<Frame
     } else {
         // Invisable
         if (!isShow) {
+            TAG_LOGW(AceLogTag::ACE_DIALOG, "get isShow failed");
             return;
         }
         popupInfo.markNeedUpdate = true;
@@ -1319,6 +1324,7 @@ void ViewAbstract::BindPopup(const RefPtr<PopupParam> &param, const RefPtr<Frame
 void ViewAbstract::BindMenuWithItems(std::vector<OptionParam> &&params, const RefPtr<FrameNode> &targetNode,
     const NG::OffsetF &offset, const MenuParam &menuParam)
 {
+    TAG_LOGD(AceLogTag::ACE_DIALOG, "bind menu with items enter");
     CHECK_NULL_VOID(targetNode);
 
     if (params.empty()) {
@@ -1342,6 +1348,7 @@ void ViewAbstract::BindMenuWithItems(std::vector<OptionParam> &&params, const Re
 void ViewAbstract::BindMenuWithCustomNode(const RefPtr<UINode> &customNode, const RefPtr<FrameNode> &targetNode,
     const NG::OffsetF &offset, const MenuParam &menuParam, const RefPtr<UINode> &previewCustomNode)
 {
+    TAG_LOGD(AceLogTag::ACE_DIALOG, "bind menu with custom node enter");
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<SelectTheme>();
@@ -1370,6 +1377,7 @@ void ViewAbstract::BindMenuWithCustomNode(const RefPtr<UINode> &customNode, cons
 
 void ViewAbstract::ShowMenu(int32_t targetId, const NG::OffsetF &offset, bool isContextMenu)
 {
+    TAG_LOGD(AceLogTag::ACE_DIALOG, "show menu enter");
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<SelectTheme>();

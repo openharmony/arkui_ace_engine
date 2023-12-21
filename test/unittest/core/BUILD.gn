@@ -102,6 +102,7 @@ group("linux_core_unittest") {
     "pattern/refresh:refresh_test_ng",
     "pattern/relative_container:relative_container_test_ng",
     "pattern/rich_editor:rich_editor_test_ng",
+    "pattern/rich_editor_drag:rich_editor_drag_test_ng",
     "pattern/scroll:scroll_test_ng",
     "pattern/scroll_bar:scroll_bar_test_ng",
     "pattern/scrollable:scrollable_test_ng",

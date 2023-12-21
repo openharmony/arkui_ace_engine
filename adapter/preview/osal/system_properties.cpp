@@ -81,7 +81,6 @@ bool SystemProperties::rosenBackendEnabled_ = false;
 #else
 bool SystemProperties::rosenBackendEnabled_ = true;
 #endif
-bool SystemProperties::flutterDecouplingEnabled_ = true;
 
 void SystemProperties::InitDeviceType(DeviceType type)
 {

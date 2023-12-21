@@ -183,7 +183,9 @@ void ClickRecognizer::HandleTouchDownEvent(const TouchEvent& event)
             Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
         }
     }
-    focusPoint_ = ComputeFocusPoint();
+    if (currentTouchPointsNum_ == fingers_) {
+        focusPoint_ = ComputeFocusPoint();
+    }
 }
 
 void ClickRecognizer::HandleTouchUpEvent(const TouchEvent& event)
@@ -210,8 +212,8 @@ void ClickRecognizer::HandleTouchUpEvent(const TouchEvent& event)
     auto isUpInRegion = IsPointInRegion(event);
     if (fingersId_.find(event.id) != fingersId_.end()) {
         fingersId_.erase(event.id);
+        --currentTouchPointsNum_;
     }
-    --currentTouchPointsNum_;
     if (currentTouchPointsNum_ == 0) {
         responseRegionBuffer_.clear();
     }

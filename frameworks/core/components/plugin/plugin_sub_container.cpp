@@ -21,12 +21,8 @@
 #include "core/common/ace_engine.h"
 #include "core/common/asset_manager_impl.h"
 #include "core/common/container_scope.h"
-#include "core/common/flutter/flutter_asset_manager.h"
-#include "core/common/flutter/flutter_task_executor.h"
 #include "core/common/plugin_manager.h"
-#include "core/components/plugin/file_asset_provider.h"
 #include "adapter/ohos/entrance/file_asset_provider_impl.h"
-#include "core/components/plugin/hap_asset_provider.h"
 #include "core/components/plugin/hap_asset_provider_impl.h"
 #include "core/components/plugin/plugin_element.h"
 #include "core/components/plugin/plugin_window.h"
@@ -196,7 +192,7 @@ void PluginSubContainer::RunDecompressedPlugin(const std::string& hapPath, const
     ContainerScope scope(instanceId_);
     CHECK_NULL_VOID(frontend_);
     frontend_->ResetPageLoadState();
-    auto flutterAssetManager = GetDecompressedAssetManager(hapPath, module);
+    auto assetManager = GetDecompressedAssetManager(hapPath, module);
 
     auto&& window = std::make_unique<PluginWindow>(outSidePipelineContext_);
     window->SetPluginWindowId(pluginWindowId_);
@@ -209,7 +205,7 @@ void PluginSubContainer::RunDecompressedPlugin(const std::string& hapPath, const
     UpdateRootElementSize();
     pipelineContext_->SetIsJsPlugin(true);
 
-    SetPluginComponentTheme(moduleResPath, flutterAssetManager);
+    SetPluginComponentTheme(moduleResPath, assetManager);
     SetActionEventHandler();
 
     auto weakContext = AceType::WeakClaim(AceType::RawPtr(pipelineContext_));
@@ -261,7 +257,7 @@ void PluginSubContainer::RunPlugin(const std::string& path, const std::string& m
     ContainerScope scope(instanceId_);
     CHECK_NULL_VOID(frontend_);
     frontend_->ResetPageLoadState();
-    auto flutterAssetManager = SetAssetManager(path, module);
+    auto assetManager = SetAssetManager(path, module);
 
     auto&& window = std::make_unique<PluginWindow>(outSidePipelineContext_);
     pipelineContext_ = AceType::MakeRefPtr<PipelineContext>(std::move(window), taskExecutor_, assetManager_,
@@ -273,7 +269,7 @@ void PluginSubContainer::RunPlugin(const std::string& path, const std::string& m
     UpdateRootElementSize();
     pipelineContext_->SetIsJsPlugin(true);
 
-    SetPluginComponentTheme(moduleResPath, flutterAssetManager);
+    SetPluginComponentTheme(moduleResPath, assetManager);
     SetActionEventHandler();
 
     auto weakContext = AceType::WeakClaim(AceType::RawPtr(pipelineContext_));
@@ -328,7 +324,7 @@ void PluginSubContainer::RunPlugin(const std::string& path, const std::string& m
 }
 
 void PluginSubContainer::SetPluginComponentTheme(
-    const std::string& path, const RefPtr<AssetManager>& flutterAssetManager)
+    const std::string& path, const RefPtr<AssetManager>& assetManager)
 {
     ResourceInfo pluginResourceInfo;
     ResourceConfiguration resConfig;
@@ -348,7 +344,7 @@ void PluginSubContainer::SetPluginComponentTheme(
         pluginThemeManager->InitResource(pluginResourceInfo);
         pluginThemeManager->LoadSystemTheme(pluginResourceInfo.GetThemeId());
         auto weakTheme = AceType::WeakClaim(AceType::RawPtr(pluginThemeManager));
-        auto weakAsset = AceType::WeakClaim(AceType::RawPtr(flutterAssetManager));
+        auto weakAsset = AceType::WeakClaim(AceType::RawPtr(assetManager));
         taskExecutor_->PostTask(
             [weakTheme, weakAsset]() {
                 auto themeManager = weakTheme.Upgrade();
@@ -391,29 +387,16 @@ RefPtr<AssetManager> PluginSubContainer::GetDecompressedAssetManager(
     basePaths.push_back(path1);
     basePaths.push_back(path2);
     basePaths.push_back("");
-    if (SystemProperties::GetFlutterDecouplingEnabled()) {
-        RefPtr<AssetManagerImpl> assetManagerImpl = Referenced::MakeRefPtr<AssetManagerImpl>();
-        if (assetManagerImpl) {
-            frontend_->SetAssetManager(assetManagerImpl);
-            assetManager_ = assetManagerImpl;
-            auto assetProvider = AceType::MakeRefPtr<Plugin::HapAssetProviderImpl>();
-            if (assetProvider->Initialize(hapPath, basePaths)) {
-                assetManagerImpl->PushBack(std::move(assetProvider));
-            }
+    RefPtr<AssetManagerImpl> assetManagerImpl = Referenced::MakeRefPtr<AssetManagerImpl>();
+    if (assetManagerImpl) {
+        frontend_->SetAssetManager(assetManagerImpl);
+        assetManager_ = assetManagerImpl;
+        auto assetProvider = AceType::MakeRefPtr<Plugin::HapAssetProviderImpl>();
+        if (assetProvider->Initialize(hapPath, basePaths)) {
+            assetManagerImpl->PushBack(std::move(assetProvider));
         }
-        return assetManagerImpl;
-    } else {
-        RefPtr<FlutterAssetManager> flutterAssetManager = Referenced::MakeRefPtr<FlutterAssetManager>();
-        if (flutterAssetManager) {
-            frontend_->SetAssetManager(flutterAssetManager);
-            assetManager_ = flutterAssetManager;
-            auto assetProvider = AceType::MakeRefPtr<Plugin::HapAssetProvider>();
-            if (assetProvider->Initialize(hapPath, basePaths)) {
-                flutterAssetManager->PushBack(std::move(assetProvider));
-            }
-        }
-        return flutterAssetManager;
     }
+    return assetManagerImpl;
 }
 
 RefPtr<AssetManager> PluginSubContainer::SetAssetManager(const std::string& path, const std::string& module)
@@ -424,29 +407,16 @@ RefPtr<AssetManager> PluginSubContainer::SetAssetManager(const std::string& path
     basePaths.push_back(temp1);
     basePaths.push_back(temp2);
     basePaths.push_back("");
-    if (SystemProperties::GetFlutterDecouplingEnabled()) {
-        RefPtr<AssetManagerImpl> assetManagerImpl = Referenced::MakeRefPtr<AssetManagerImpl>();
-        if (assetManagerImpl) {
-            frontend_->SetAssetManager(assetManagerImpl);
-            assetManager_ = assetManagerImpl;
-            auto assetProvider = AceType::MakeRefPtr<FileAssetProviderImpl>();
-            if (assetProvider->Initialize(path, basePaths)) {
-                assetManagerImpl->PushBack(std::move(assetProvider));
-            }
+    RefPtr<AssetManagerImpl> assetManagerImpl = Referenced::MakeRefPtr<AssetManagerImpl>();
+    if (assetManagerImpl) {
+        frontend_->SetAssetManager(assetManagerImpl);
+        assetManager_ = assetManagerImpl;
+        auto assetProvider = AceType::MakeRefPtr<FileAssetProviderImpl>();
+        if (assetProvider->Initialize(path, basePaths)) {
+            assetManagerImpl->PushBack(std::move(assetProvider));
         }
-        return assetManagerImpl;
-    } else {
-        RefPtr<FlutterAssetManager> flutterAssetManager = Referenced::MakeRefPtr<FlutterAssetManager>();
-        if (flutterAssetManager) {
-            frontend_->SetAssetManager(flutterAssetManager);
-            assetManager_ = flutterAssetManager;
-            auto assetProvider = AceType::MakeRefPtr<Plugin::FileAssetProvider>();
-            if (assetProvider->Initialize(path, basePaths)) {
-                flutterAssetManager->PushBack(std::move(assetProvider));
-            }
-        }
-        return flutterAssetManager;
     }
+    return assetManagerImpl;
 }
 
 void PluginSubContainer::UpdatePlugin(const std::string& content)

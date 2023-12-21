@@ -2338,6 +2338,7 @@ void WebDelegate::InitWebViewWithWindow()
                 return;
             }
             delegate->JavaScriptOnDocumentStart();
+            delegate->JavaScriptOnDocumentEnd();
             delegate->cookieManager_ = OHOS::NWeb::NWebHelper::Instance().GetCookieManager();
             if (delegate->cookieManager_ == nullptr) {
                 return;
@@ -2643,6 +2644,7 @@ void WebDelegate::InitWebViewWithSurface()
                     delegate->drawSize_.Height(),
                     delegate->incognitoMode_);
                 delegate->JavaScriptOnDocumentStart();
+                delegate->JavaScriptOnDocumentEnd();
             } else {
 #ifdef ENABLE_ROSEN_BACKEND
                 wptr<Surface> surfaceWeak(delegate->surface_);
@@ -2655,6 +2657,7 @@ void WebDelegate::InitWebViewWithSurface()
                     delegate->drawSize_.Height(),
                     delegate->incognitoMode_);
                 delegate->JavaScriptOnDocumentStart();
+                delegate->JavaScriptOnDocumentEnd();
 #endif
             }
             CHECK_NULL_VOID(delegate->nweb_);
@@ -5617,17 +5620,30 @@ void WebDelegate::ScrollBy(float deltaX, float deltaY)
     nweb_->ScrollBy(deltaX, deltaY);
 }
 
-void WebDelegate::SetJavaScriptItems(const ScriptItems& scriptItems)
+void WebDelegate::SetJavaScriptItems(const ScriptItems& scriptItems, const ScriptItemType& type)
 {
-    scriptItems_ = std::make_optional<ScriptItems>(scriptItems);
+    if (type == ScriptItemType::DOCUMENT_START) {
+        onDocumentStartScriptItems_ = std::make_optional<ScriptItems>(scriptItems);
+    } else {
+        onDocumentEndScriptItems_ = std::make_optional<ScriptItems>(scriptItems);
+    }
 }
 
 void WebDelegate::JavaScriptOnDocumentStart()
 {
     CHECK_NULL_VOID(nweb_);
-    if (scriptItems_.has_value()) {
-        nweb_->JavaScriptOnDocumentStart(scriptItems_.value());
-        scriptItems_ = std::nullopt;
+    if (onDocumentStartScriptItems_.has_value()) {
+        nweb_->JavaScriptOnDocumentStart(onDocumentStartScriptItems_.value());
+        onDocumentStartScriptItems_ = std::nullopt;
+    }
+}
+
+void WebDelegate::JavaScriptOnDocumentEnd()
+{
+    CHECK_NULL_VOID(nweb_);
+    if (onDocumentEndScriptItems_.has_value()) {
+        nweb_->JavaScriptOnDocumentEnd(onDocumentEndScriptItems_.value());
+        onDocumentEndScriptItems_ = std::nullopt;
     }
 }
 

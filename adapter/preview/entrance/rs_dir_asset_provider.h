@@ -30,12 +30,9 @@
 #include <sys/types.h>
 #endif
 
-#include "flutter/assets/directory_asset_bundle.h"
-
 #include "base/resource/asset_manager.h"
 #include "base/utils/macros.h"
 #include "base/utils/utils.h"
-#include "core/common/flutter/flutter_asset_manager.h"
 #include "core/common/asset_manager_impl.h"
 #include "core/common/rosen/rosen_asset_manager.h"
 

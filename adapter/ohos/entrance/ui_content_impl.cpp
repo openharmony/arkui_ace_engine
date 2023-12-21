@@ -44,10 +44,9 @@
 #include "adapter/ohos/entrance/ace_view_ohos.h"
 #include "adapter/ohos/entrance/capability_registry.h"
 #include "adapter/ohos/entrance/dialog_container.h"
-#include "adapter/ohos/entrance/file_asset_provider.h"
+#include "adapter/ohos/entrance/dynamic_component/uv_task_wrapper_impl.h"
 #include "adapter/ohos/entrance/file_asset_provider_impl.h"
 #include "adapter/ohos/entrance/form_utils_impl.h"
-#include "adapter/ohos/entrance/hap_asset_provider.h"
 #include "adapter/ohos/entrance/hap_asset_provider_impl.h"
 #include "adapter/ohos/entrance/plugin_utils_impl.h"
 #include "adapter/ohos/entrance/ui_event_impl.h"
@@ -70,7 +69,6 @@
 #include "core/common/container.h"
 #include "core/common/container_scope.h"
 #include "core/common/modal_ui_extension.h"
-#include "core/common/flutter/flutter_asset_manager.h"
 #include "core/common/recorder/event_recorder.h"
 #include "core/common/resource/resource_manager.h"
 #include "core/image/image_file_cache.h"
@@ -97,6 +95,15 @@ const std::string FILE_SEPARATOR = "/";
 const std::string START_PARAMS_KEY = "__startParams";
 const std::string ACTION_VIEWDATA = "ohos.want.action.viewData";
 
+Rosen::Rect ConvertToRSRect(NG::RectF& rect)
+{
+    Rosen::Rect rsRect;
+    rsRect.posX_ = floor(rect.GetX());
+    rsRect.posY_ = floor(rect.GetY());
+    rsRect.width_ = ceil(rect.Width());
+    rsRect.height_ = ceil(rect.Height());
+    return rsRect;
+}
 } // namespace
 
 const std::string SUBWINDOW_PREFIX = "ARK_APP_SUBWINDOW_";
@@ -234,26 +241,29 @@ public:
                 systemSafeArea_ = ConvertAvoidArea(avoidArea);
                 break;
             case Rosen::AvoidAreaType::TYPE_NAVIGATION_INDICATOR:
-                navigationBar_ = NG::SafeAreaInsets::Inset { .start = avoidArea.bottomRect_.posY_,
-                    .end = avoidArea.bottomRect_.posY_ + avoidArea.bottomRect_.height_ };
+                navigationBar_ = ConvertAvoidArea(avoidArea);
                 break;
             default:
                 // cutout doesn't affect layout
                 return;
         }
         auto safeArea = systemSafeArea_;
-        safeArea.bottom_ = safeArea.bottom_.Combine(navigationBar_);
+        auto navSafeArea = navigationBar_;
         ContainerScope scope(instanceId_);
         taskExecutor->PostTask(
-            [pipeline, safeArea] {
-                pipeline->UpdateSystemSafeArea(safeArea);
+            [pipeline, safeArea, navSafeArea, type] {
+                if (type == Rosen::AvoidAreaType::TYPE_SYSTEM) {
+                    pipeline->UpdateSystemSafeArea(safeArea);
+                } else {
+                    pipeline->UpdateNavSafeArea(navSafeArea);
+                }
             },
             TaskExecutor::TaskType::UI);
     }
 
 private:
     NG::SafeAreaInsets systemSafeArea_;
-    NG::SafeAreaInsets::Inset navigationBar_;
+    NG::SafeAreaInsets navigationBar_;
     int32_t instanceId_ = -1;
 };
 
@@ -472,6 +482,16 @@ void UIContentImpl::InitializeByName(OHOS::Rosen::Window* window, const std::str
     InitializeInner(window, name, storage, true);
 }
 
+void UIContentImpl::InitializeDynamic(const std::string& hapPath, const std::string& abcPath)
+{
+    isDynamicRender_ = true;
+    hapPath_ = hapPath;
+    auto env = reinterpret_cast<napi_env>(runtime_);
+    CHECK_NULL_VOID(env);
+    taskWrapper_ = std::make_shared<NG::UVTaskWrapperImpl>(env);
+    InitializeInner(nullptr, abcPath, nullptr, false);
+}
+
 void UIContentImpl::Initialize(
     OHOS::Rosen::Window* window, const std::string& url, napi_value storage, uint32_t focusWindowId)
 {
@@ -617,13 +637,7 @@ void UIContentImpl::CommonInitializeForm(
         AceApplicationInfo::GetInstance().SetAbilityName(info->name);
     }
 
-    RefPtr<FlutterAssetManager> flutterAssetManager;
-    RefPtr<AssetManagerImpl> assetManagerImpl;
-    if (SystemProperties::GetFlutterDecouplingEnabled()) {
-        assetManagerImpl = Referenced::MakeRefPtr<AssetManagerImpl>();
-    } else {
-        flutterAssetManager = Referenced::MakeRefPtr<FlutterAssetManager>();
-    }
+    RefPtr<AssetManagerImpl> assetManagerImpl = Referenced::MakeRefPtr<AssetManagerImpl>();
     bool isModelJson = info != nullptr ? info->isModuleJson : false;
     std::string moduleName = info != nullptr ? info->moduleName : "";
     auto appInfo = context != nullptr ? context->GetApplicationInfo() : nullptr;
@@ -639,34 +653,18 @@ void UIContentImpl::CommonInitializeForm(
         basePaths.emplace_back("");
         basePaths.emplace_back("js/");
         basePaths.emplace_back("ets/");
-        if (SystemProperties::GetFlutterDecouplingEnabled()) {
-            auto assetProvider = CreateAssetProviderImpl(hapPath_, basePaths, false);
-            if (assetProvider) {
-                assetManagerImpl->PushBack(std::move(assetProvider));
-            }
-        } else {
-            auto assetProvider = CreateAssetProvider(hapPath_, basePaths, false);
-            if (assetProvider) {
-                flutterAssetManager->PushBack(std::move(assetProvider));
-            }
+        auto assetProvider = CreateAssetProviderImpl(hapPath_, basePaths, false);
+        if (assetProvider) {
+            assetManagerImpl->PushBack(std::move(assetProvider));
         }
     } else {
         if (isModelJson) {
             std::string hapPath = info != nullptr ? info->hapPath : "";
             // first use hap provider
-            if (SystemProperties::GetFlutterDecouplingEnabled()) {
-                if (assetManagerImpl && !hapPath.empty()) {
-                    auto hapAssetProviderImpl = AceType::MakeRefPtr<HapAssetProviderImpl>();
-                    if (hapAssetProviderImpl->Initialize(hapPath, { "", "ets/", "resources/base/profile/" })) {
-                        assetManagerImpl->PushBack(std::move(hapAssetProviderImpl));
-                    }
-                }
-            } else {
-                if (flutterAssetManager && !hapPath.empty()) {
-                    auto hapAssetProvider = AceType::MakeRefPtr<HapAssetProvider>();
-                    if (hapAssetProvider->Initialize(hapPath, { "", "ets/", "resources/base/profile/" })) {
-                        flutterAssetManager->PushBack(std::move(hapAssetProvider));
-                    }
+            if (assetManagerImpl && !hapPath.empty()) {
+                auto hapAssetProviderImpl = AceType::MakeRefPtr<HapAssetProviderImpl>();
+                if (hapAssetProviderImpl->Initialize(hapPath, { "", "ets/", "resources/base/profile/" })) {
+                    assetManagerImpl->PushBack(std::move(hapAssetProviderImpl));
                 }
             }
 
@@ -685,19 +683,10 @@ void UIContentImpl::CommonInitializeForm(
 
             // second use file provider, will remove later
             auto assetBasePathStr = { std::string("ets/"), std::string("resources/base/profile/") };
-            if (SystemProperties::GetFlutterDecouplingEnabled()) {
-                if (assetManagerImpl && !resPath.empty()) {
-                    auto assetProvider = AceType::MakeRefPtr<FileAssetProviderImpl>();
-                    if (assetProvider->Initialize(resPath, assetBasePathStr)) {
-                        assetManagerImpl->PushBack(std::move(assetProvider));
-                    }
-                }
-            } else {
-                if (flutterAssetManager && !resPath.empty()) {
-                    auto assetProvider = AceType::MakeRefPtr<FileAssetProvider>();
-                    if (assetProvider->Initialize(resPath, assetBasePathStr)) {
-                        flutterAssetManager->PushBack(std::move(assetProvider));
-                    }
+            if (assetManagerImpl && !resPath.empty()) {
+                auto assetProvider = AceType::MakeRefPtr<FileAssetProviderImpl>();
+                if (assetProvider->Initialize(resPath, assetBasePathStr)) {
+                    assetManagerImpl->PushBack(std::move(assetProvider));
                 }
             }
 
@@ -720,22 +709,12 @@ void UIContentImpl::CommonInitializeForm(
 
             auto assetBasePathStr = { "assets/js/" + (srcPath.empty() ? "default" : srcPath) + "/",
                 std::string("assets/js/share/") };
-            if (SystemProperties::GetFlutterDecouplingEnabled()) {
-                if (assetManagerImpl && !packagePathStr.empty()) {
-                    auto fileAssetProvider = AceType::MakeRefPtr<FileAssetProviderImpl>();
-                    if (fileAssetProvider->Initialize(packagePathStr, assetBasePathStr)) {
-                        assetManagerImpl->PushBack(std::move(fileAssetProvider));
-                    }
-                }
-            } else {
-                if (flutterAssetManager && !packagePathStr.empty()) {
-                    auto assetProvider = AceType::MakeRefPtr<FileAssetProvider>();
-                    if (assetProvider->Initialize(packagePathStr, assetBasePathStr)) {
-                        flutterAssetManager->PushBack(std::move(assetProvider));
-                    }
+            if (assetManagerImpl && !packagePathStr.empty()) {
+                auto fileAssetProvider = AceType::MakeRefPtr<FileAssetProviderImpl>();
+                if (fileAssetProvider->Initialize(packagePathStr, assetBasePathStr)) {
+                    assetManagerImpl->PushBack(std::move(fileAssetProvider));
                 }
             }
-
             if (appInfo) {
                 std::vector<OHOS::AppExecFwk::ModuleInfo> moduleList = appInfo->moduleInfos;
                 for (const auto& module : moduleList) {
@@ -797,10 +776,11 @@ void UIContentImpl::CommonInitializeForm(
                     want.SetAction(ACTION_VIEWDATA);
                     abilityContext->StartAbility(want, REQUEST_CODE);
                 }),
-            false, false, useNewPipe);
+            taskWrapper_, false, false, useNewPipe);
 
     CHECK_NULL_VOID(container);
     container->SetIsFormRender(isFormRender_);
+    container->SetIsDynamicRender(isDynamicRender_);
     container->SetIsFRSCardContainer(isFormRender_);
     if (window_) {
         container->SetWindowName(window_->GetWindowName());
@@ -846,11 +826,7 @@ void UIContentImpl::CommonInitializeForm(
     container->SetResourceConfiguration(aceResCfg);
     container->SetPackagePathStr(resPath);
     container->SetHapPath(hapPath);
-    if (SystemProperties::GetFlutterDecouplingEnabled()) {
-        container->SetAssetManager(assetManagerImpl);
-    } else {
-        container->SetAssetManager(flutterAssetManager);
-    }
+    container->SetAssetManager(assetManagerImpl);
 
     if (!isFormRender_) {
         container->SetBundlePath(context->GetBundleCodeDir());
@@ -870,7 +846,7 @@ void UIContentImpl::CommonInitializeForm(
 
     // create ace_view
     Platform::AceViewOhos* aceView = nullptr;
-    if (isFormRender_) {
+    if (isFormRender_ && !isDynamicRender_) {
         aceView = Platform::AceViewOhos::CreateView(instanceId_, true, container->GetSettings().usePlatformAsUIThread);
         Platform::AceViewOhos::SurfaceCreated(aceView, window_);
     } else {
@@ -1103,13 +1079,7 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
     if (info) {
         AceApplicationInfo::GetInstance().SetAbilityName(info->name);
     }
-    RefPtr<FlutterAssetManager> flutterAssetManager;
-    RefPtr<AssetManagerImpl> assetManagerImpl;
-    if (SystemProperties::GetFlutterDecouplingEnabled()) {
-        assetManagerImpl = Referenced::MakeRefPtr<AssetManagerImpl>();
-    } else {
-        flutterAssetManager = Referenced::MakeRefPtr<FlutterAssetManager>();
-    }
+    RefPtr<AssetManagerImpl> assetManagerImpl = Referenced::MakeRefPtr<AssetManagerImpl>();
     bool isModelJson = info != nullptr ? info->isModuleJson : false;
     std::string moduleName = info != nullptr ? info->moduleName : "";
     auto appInfo = context->GetApplicationInfo();
@@ -1121,19 +1091,10 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
     if (isModelJson) {
         std::string hapPath = info != nullptr ? info->hapPath : "";
         // first use hap provider
-        if (SystemProperties::GetFlutterDecouplingEnabled()) {
-            if (assetManagerImpl && !hapPath.empty()) {
-                auto hapAssetProvider = AceType::MakeRefPtr<HapAssetProviderImpl>();
-                if (hapAssetProvider->Initialize(hapPath, { "", "ets/", "resources/base/profile/" })) {
-                    assetManagerImpl->PushBack(std::move(hapAssetProvider));
-                }
-            }
-        } else {
-            if (flutterAssetManager && !hapPath.empty()) {
-                auto assetProvider = AceType::MakeRefPtr<HapAssetProvider>();
-                if (assetProvider->Initialize(hapPath, { "", "ets/", "resources/base/profile/" })) {
-                    flutterAssetManager->PushBack(std::move(assetProvider));
-                }
+        if (assetManagerImpl && !hapPath.empty()) {
+            auto hapAssetProvider = AceType::MakeRefPtr<HapAssetProviderImpl>();
+            if (hapAssetProvider->Initialize(hapPath, { "", "ets/", "resources/base/profile/" })) {
+                assetManagerImpl->PushBack(std::move(hapAssetProvider));
             }
         }
 
@@ -1151,19 +1112,10 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
 
         // second use file provider, will remove later
         auto assetBasePathStr = { std::string("ets/"), std::string("resources/base/profile/") };
-        if (SystemProperties::GetFlutterDecouplingEnabled()) {
-            if (assetManagerImpl && !resPath.empty()) {
-                auto fileAssetProvider = AceType::MakeRefPtr<FileAssetProviderImpl>();
-                if (fileAssetProvider->Initialize(resPath, assetBasePathStr)) {
-                    assetManagerImpl->PushBack(std::move(fileAssetProvider));
-                }
-            }
-        } else {
-            if (flutterAssetManager && !resPath.empty()) {
-                auto assetProvider = AceType::MakeRefPtr<FileAssetProvider>();
-                if (assetProvider->Initialize(resPath, assetBasePathStr)) {
-                    flutterAssetManager->PushBack(std::move(assetProvider));
-                }
+        if (assetManagerImpl && !resPath.empty()) {
+            auto fileAssetProvider = AceType::MakeRefPtr<FileAssetProviderImpl>();
+            if (fileAssetProvider->Initialize(resPath, assetBasePathStr)) {
+                assetManagerImpl->PushBack(std::move(fileAssetProvider));
             }
         }
 
@@ -1187,19 +1139,10 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
         auto assetBasePathStr = { "assets/js/" + (srcPath.empty() ? "default" : srcPath) + "/",
             std::string("assets/js/share/") };
 
-        if (SystemProperties::GetFlutterDecouplingEnabled()) {
-            if (assetManagerImpl && !packagePathStr.empty()) {
-                auto fileAssetProvider = AceType::MakeRefPtr<FileAssetProviderImpl>();
-                if (fileAssetProvider->Initialize(packagePathStr, assetBasePathStr)) {
-                    assetManagerImpl->PushBack(std::move(fileAssetProvider));
-                }
-            }
-        } else {
-            if (flutterAssetManager && !packagePathStr.empty()) {
-                auto assetProvider = AceType::MakeRefPtr<FileAssetProvider>();
-                if (assetProvider->Initialize(packagePathStr, assetBasePathStr)) {
-                    flutterAssetManager->PushBack(std::move(assetProvider));
-                }
+        if (assetManagerImpl && !packagePathStr.empty()) {
+            auto fileAssetProvider = AceType::MakeRefPtr<FileAssetProviderImpl>();
+            if (fileAssetProvider->Initialize(packagePathStr, assetBasePathStr)) {
+                assetManagerImpl->PushBack(std::move(fileAssetProvider));
             }
         }
         if (appInfo) {
@@ -1295,11 +1238,7 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
     container->SetResourceConfiguration(aceResCfg);
     container->SetPackagePathStr(resPath);
     container->SetHapPath(hapPath);
-    if (SystemProperties::GetFlutterDecouplingEnabled()) {
-        container->SetAssetManager(assetManagerImpl);
-    } else {
-        container->SetAssetManager(flutterAssetManager);
-    }
+    container->SetAssetManager(assetManagerImpl);
 
     container->SetBundlePath(context->GetBundleCodeDir());
     container->SetFilesDataPath(context->GetFilesDir());
@@ -1483,13 +1422,8 @@ void UIContentImpl::ReloadForm(const std::string& url)
     LOGI("ReloadForm startUrl = %{public}s", startUrl_.c_str());
     auto container = Platform::AceContainer::GetContainer(instanceId_);
     CHECK_NULL_VOID(container);
-    if (SystemProperties::GetFlutterDecouplingEnabled()) {
-        auto assetManager = AceType::DynamicCast<AssetManagerImpl>(container->GetAssetManager());
-        assetManager->ReloadProvider();
-    } else {
-        auto flutterAssetManager = AceType::DynamicCast<FlutterAssetManager>(container->GetAssetManager());
-        flutterAssetManager->ReloadProvider();
-    }
+    auto assetManager = AceType::DynamicCast<AssetManagerImpl>(container->GetAssetManager());
+    assetManager->ReloadProvider();
     container->UpdateResource();
     Platform::AceContainer::RunPage(instanceId_, startUrl_, "");
 }
@@ -2089,30 +2023,16 @@ void UIContentImpl::SetResourcePaths(const std::vector<std::string>& resourcesPa
             }
 
             if (!assetRootPath.empty()) {
-                if (SystemProperties::GetFlutterDecouplingEnabled()) {
-                    auto fileAssetProviderImpl = AceType::MakeRefPtr<FileAssetProviderImpl>();
-                    if (fileAssetProviderImpl->Initialize(assetRootPath, assetBasePaths)) {
-                        assetManager->PushBack(std::move(fileAssetProviderImpl));
-                    }
-                } else {
-                    auto fileAssetProvider = AceType::MakeRefPtr<FileAssetProvider>();
-                    if (fileAssetProvider->Initialize(assetRootPath, assetBasePaths)) {
-                        assetManager->PushBack(std::move(fileAssetProvider));
-                    }
+                auto fileAssetProviderImpl = AceType::MakeRefPtr<FileAssetProviderImpl>();
+                if (fileAssetProviderImpl->Initialize(assetRootPath, assetBasePaths)) {
+                    assetManager->PushBack(std::move(fileAssetProviderImpl));
                 }
                 return;
             }
             for (auto iter = resourcesPaths.begin(); iter != resourcesPaths.end(); iter++) {
-                if (SystemProperties::GetFlutterDecouplingEnabled()) {
-                    auto hapAssetProviderImpl = AceType::MakeRefPtr<HapAssetProviderImpl>();
-                    if (hapAssetProviderImpl->Initialize(*iter, assetBasePaths)) {
-                        assetManager->PushBack(std::move(hapAssetProviderImpl));
-                    }
-                } else {
-                    auto hapAssetProvider = AceType::MakeRefPtr<HapAssetProvider>();
-                    if (hapAssetProvider->Initialize(*iter, assetBasePaths)) {
-                        assetManager->PushBack(std::move(hapAssetProvider));
-                    }
+                auto hapAssetProviderImpl = AceType::MakeRefPtr<HapAssetProviderImpl>();
+                if (hapAssetProviderImpl->Initialize(*iter, assetBasePaths)) {
+                    assetManager->PushBack(std::move(hapAssetProviderImpl));
                 }
             }
         },
@@ -2380,7 +2300,7 @@ RefPtr<PopupParam> UIContentImpl::CreateCustomPopupParam(
     popupParam->SetShowInSubWindow(config.isShowInSubWindow);
  
     if (config.isAutoCancel.has_value()) {
-        popupParam->SetHasAction(config.isAutoCancel.value());
+        popupParam->SetHasAction(!config.isAutoCancel.value());
     }
  
     if (config.isEnableArrow.has_value()) {
@@ -2518,5 +2438,71 @@ void UIContentImpl::DestroyCustomPopupUIExtension(int32_t nodeId)
             customPopupConfigMap_.erase(nodeId);
         },
         TaskExecutor::TaskType::UI);
+}
+
+void UIContentImpl::SetContainerModalTitleVisible(bool customTitleSettedShow, bool floatingTitleSettedShow)
+{
+    auto taskExecutor = Container::CurrentTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    taskExecutor->PostTask(
+        [customTitleSettedShow, floatingTitleSettedShow]() {
+            auto pipeline = NG::PipelineContext::GetCurrentContext();
+            CHECK_NULL_VOID(pipeline);
+            pipeline->SetContainerModalTitleVisible(customTitleSettedShow, floatingTitleSettedShow);
+        },
+        TaskExecutor::TaskType::UI);
+}
+
+void UIContentImpl::SetContainerModalTitleHeight(int32_t height)
+{
+    auto taskExecutor = Container::CurrentTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    taskExecutor->PostTask(
+        [height]() {
+            auto pipeline = NG::PipelineContext::GetCurrentContext();
+            CHECK_NULL_VOID(pipeline);
+            pipeline->SetContainerModalTitleHeight(height);
+        },
+        TaskExecutor::TaskType::UI);
+}
+
+int32_t UIContentImpl::GetContainerModalTitleHeight()
+{
+    auto pipeline = NG::PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, -1);
+    return pipeline->GetContainerModalTitleHeight();
+}
+
+bool UIContentImpl::GetContainerModalButtonsRect(Rosen::Rect& containerModal, Rosen::Rect& buttons)
+{
+    NG::RectF floatContainerModal;
+    NG::RectF floatButtons;
+    auto pipeline = NG::PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, false);
+    if (!pipeline->GetContainerModalButtonsRect(floatContainerModal, floatButtons)) {
+        return false;
+    }
+    containerModal = ConvertToRSRect(floatContainerModal);
+    buttons = ConvertToRSRect(floatButtons);
+    return true;
+}
+
+void UIContentImpl::SubscribeContainerModalButtonsRectChange(
+    std::function<void(Rosen::Rect& containerModal, Rosen::Rect& buttons)>&& callback)
+{
+    auto pipeline = NG::PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+
+    if (callback == nullptr) {
+        pipeline->SubscribeContainerModalButtonsRectChange(nullptr);
+        return;
+    }
+    std::function<void(NG::RectF&, NG::RectF&)> wrapFunc = [cb = std::move(callback)](NG::RectF& floatContainerModal,
+                                                               NG::RectF& floatButtons) {
+        Rosen::Rect containerModal = ConvertToRSRect(floatContainerModal);
+        Rosen::Rect buttons = ConvertToRSRect(floatButtons);
+        cb(containerModal, buttons);
+    };
+    pipeline->SubscribeContainerModalButtonsRectChange(std::move(wrapFunc));
 }
 } // namespace OHOS::Ace

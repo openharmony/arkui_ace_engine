@@ -233,9 +233,11 @@ HWTEST_F(GridScrollerTestNg, AnimateTo001, TestSize.Level1)
         model.SetColumnsTemplate("1fr");
         CreateColItem(4);
     });
+
     pattern_->AnimateTo(ITEM_HEIGHT, 200.f, Curves::LINEAR, true);
-    float endValue = pattern_->springMotion_->GetEndValue();
-    pattern_->springMotion_->NotifyListener(endValue);
+    float endValue = pattern_->GetFinalPosition();
+    pattern_->UpdateCurrentOffset(pattern_->GetTotalOffset() - endValue,
+        SCROLL_FROM_ANIMATION_CONTROLLER);
     EXPECT_TRUE(IsEqualCurrentOffset(0));
 
     /**
@@ -247,16 +249,12 @@ HWTEST_F(GridScrollerTestNg, AnimateTo001, TestSize.Level1)
         model.SetColumnsTemplate("1fr");
         CreateColItem(10);
     });
+
     pattern_->AnimateTo(ITEM_HEIGHT, 200.f, Curves::LINEAR, true);
-    endValue = pattern_->springMotion_->GetEndValue();
-    pattern_->springMotion_->NotifyListener(endValue);
+    endValue = pattern_->GetFinalPosition();
+    pattern_->UpdateCurrentOffset(pattern_->GetTotalOffset() - endValue,
+        SCROLL_FROM_ANIMATION_CONTROLLER);
     EXPECT_TRUE(IsEqualCurrentOffset(-ITEM_HEIGHT));
-
-    // smooth is false
-    pattern_->AnimateTo(0, 200.f, Curves::LINEAR, false);
-    pattern_->animator_->interpolators_.front()->OnNormalizedTimestampChanged(1.f, false);
-    EXPECT_TRUE(IsEqualCurrentOffset(0));
-
     /**
      * @tc.steps: step3. Scrollable grid, scroll position greater than GRID_HEIGHT
      * @tc.expected: Rolled
@@ -266,15 +264,12 @@ HWTEST_F(GridScrollerTestNg, AnimateTo001, TestSize.Level1)
         model.SetColumnsTemplate("1fr");
         CreateColItem(10);
     });
-    pattern_->AnimateTo(ITEM_HEIGHT * 9, 200.f, Curves::LINEAR, true);
-    endValue = pattern_->springMotion_->GetEndValue();
-    pattern_->springMotion_->NotifyListener(endValue);
-    EXPECT_TRUE(IsEqualCurrentOffset(-ITEM_HEIGHT * 9));
 
-    // smooth is false
-    pattern_->AnimateTo(0, 200.f, Curves::LINEAR, false);
-    pattern_->animator_->interpolators_.front()->OnNormalizedTimestampChanged(1.f, false);
-    EXPECT_TRUE(IsEqualCurrentOffset(0));
+    pattern_->AnimateTo(ITEM_HEIGHT * 9, 200.f, Curves::LINEAR, true);
+    endValue = pattern_->GetFinalPosition();
+    pattern_->UpdateCurrentOffset(pattern_->GetTotalOffset() - endValue,
+        SCROLL_FROM_ANIMATION_CONTROLLER);
+    EXPECT_TRUE(IsEqualCurrentOffset(-ITEM_HEIGHT * 9));
 }
 
 /**
@@ -291,9 +286,10 @@ HWTEST_F(GridScrollerTestNg, ScrollablePattern001, TestSize.Level1)
         model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
         CreateColItem(20);
     });
-    EXPECT_TRUE(pattern_->OnScrollPosition(ITEM_HEIGHT, SCROLL_FROM_UPDATE));
-    EXPECT_TRUE(pattern_->OnScrollPosition(ITEM_HEIGHT, SCROLL_FROM_UPDATE));
-    EXPECT_TRUE(pattern_->OnScrollPosition(ITEM_HEIGHT, SCROLL_FROM_START));
+    double itemHeight = ITEM_HEIGHT;
+    EXPECT_TRUE(pattern_->OnScrollPosition(itemHeight, SCROLL_FROM_UPDATE));
+    EXPECT_TRUE(pattern_->OnScrollPosition(itemHeight, SCROLL_FROM_UPDATE));
+    EXPECT_TRUE(pattern_->OnScrollPosition(itemHeight, SCROLL_FROM_START));
     pattern_->OnScrollEnd();
     auto coordinationEvent = AceType::MakeRefPtr<ScrollableCoordinationEvent>();
     auto event1 = [](float, float) { return true; };
@@ -302,11 +298,11 @@ HWTEST_F(GridScrollerTestNg, ScrollablePattern001, TestSize.Level1)
     coordinationEvent->SetOnScrollEvent(event1);
     coordinationEvent->SetOnScrollStartEvent(event2);
     coordinationEvent->SetOnScrollEndEvent(event3);
-    EXPECT_TRUE(pattern_->OnScrollPosition(ITEM_HEIGHT, SCROLL_FROM_UPDATE));
-    EXPECT_TRUE(pattern_->OnScrollPosition(ITEM_HEIGHT, SCROLL_FROM_UPDATE));
-    EXPECT_TRUE(pattern_->OnScrollPosition(ITEM_HEIGHT, SCROLL_FROM_START));
+    EXPECT_TRUE(pattern_->OnScrollPosition(itemHeight, SCROLL_FROM_UPDATE));
+    EXPECT_TRUE(pattern_->OnScrollPosition(itemHeight, SCROLL_FROM_UPDATE));
+    EXPECT_TRUE(pattern_->OnScrollPosition(itemHeight, SCROLL_FROM_START));
     pattern_->OnScrollEnd();
-    EXPECT_TRUE(pattern_->OnScrollPosition(ITEM_HEIGHT, SCROLL_FROM_UPDATE));
+    EXPECT_TRUE(pattern_->OnScrollPosition(itemHeight, SCROLL_FROM_UPDATE));
     pattern_->OnScrollEnd();
 
     /**
@@ -440,7 +436,7 @@ HWTEST_F(GridScrollerTestNg, PositionController002, TestSize.Level1)
     });
     auto controller = pattern_->positionController_;
     controller->AnimateTo(Dimension(100.f, DimensionUnit::PX), 200.f, Curves::LINEAR, false);
-    ASSERT_NE(pattern_->animator_, nullptr);
+    ASSERT_NE(pattern_->curveAnimation_, nullptr);
 
     /**
      * @tc.steps: step3. Test GetScrollDirection func.
@@ -1331,7 +1327,7 @@ HWTEST_F(GridScrollerTestNg, VerticalGridWithoutScrollBarWithAnimation001, TestS
      * @tc.expected: OnScroll OnScrollStart and onScrollStop call back functions should be triggered
      */
     pattern_->AnimateTo(-5*ITEM_HEIGHT, 1.f, Curves::LINEAR, false);
-    pattern_->animator_->Stop(); pattern_->SetScrollAbort(false); pattern_->OnScrollEndCallback();
+    pattern_->StopAnimate(); pattern_->SetScrollAbort(false); pattern_->OnScrollEndCallback();
     pattern_->UpdateCurrentOffset(-5*ITEM_HEIGHT, SCROLL_FROM_ANIMATION);
 
     FlushLayoutTask(frameNode_);
@@ -1385,7 +1381,7 @@ HWTEST_F(GridScrollerTestNg, VerticalGridWithoutScrollBarWithAnimation002, TestS
      * @tc.expected:All call back functions except onReachStart should be triggered
      */
     pattern_->AnimateTo(-20*ITEM_HEIGHT, 1.f, Curves::LINEAR, false);
-    pattern_->animator_->Stop();
+    pattern_->StopAnimate();
     pattern_->SetScrollAbort(false);
     pattern_->OnScrollEndCallback();
     pattern_->UpdateCurrentOffset(-20*ITEM_HEIGHT, SCROLL_FROM_ANIMATION);
@@ -1554,7 +1550,7 @@ HWTEST_F(GridScrollerTestNg, HorizontalGridWithoutScrollBarWithAnimation001, Tes
      * @tc.expected: OnScroll OnScrollStart and onScrollStop call back functions should be triggered
      */
     pattern_->AnimateTo(-5*ITEM_WIDTH, 1.f, Curves::LINEAR, false);
-    pattern_->animator_->Stop();
+    pattern_->StopAnimate();
     pattern_->SetScrollAbort(false);
     pattern_->OnScrollEndCallback();
     pattern_->UpdateCurrentOffset(-5*ITEM_WIDTH, SCROLL_FROM_ANIMATION);
@@ -1610,7 +1606,7 @@ HWTEST_F(GridScrollerTestNg, HorizontalGridWithoutScrollBarWithAnimation002, Tes
      * @tc.expected:All call back functions except onReachStart should be triggered
      */
     pattern_->AnimateTo(-10*ITEM_WIDTH, 1.f, Curves::LINEAR, false);
-    pattern_->animator_->Stop();
+    pattern_->StopAnimate();
     pattern_->SetScrollAbort(false);
     pattern_->OnScrollEndCallback();
     pattern_->UpdateCurrentOffset(-10*ITEM_WIDTH, SCROLL_FROM_ANIMATION);
@@ -1775,7 +1771,7 @@ HWTEST_F(GridScrollerTestNg, VerticalGridWithScrollBarWithAnimation001, TestSize
      */
     auto controller = pattern_->positionController_;
     controller->AnimateTo(Dimension(-5*ITEM_HEIGHT, DimensionUnit::PX), 1.f, Curves::LINEAR, false);
-    pattern_->animator_->Stop();
+    pattern_->StopAnimate();
     pattern_->SetScrollAbort(false);
     pattern_->OnScrollEndCallback();
     pattern_->UpdateCurrentOffset(-5*ITEM_HEIGHT, SCROLL_FROM_ANIMATION_CONTROLLER);
@@ -1832,7 +1828,7 @@ HWTEST_F(GridScrollerTestNg, VerticalGridWithScrollBarWithAnimation002, TestSize
      */
     auto controller = pattern_->positionController_;
     controller->AnimateTo(Dimension(-10*ITEM_HEIGHT, DimensionUnit::PX), 1.f, Curves::LINEAR, false);
-    pattern_->animator_->Stop();
+    pattern_->StopAnimate();
     pattern_->SetScrollAbort(false);
     pattern_->OnScrollEndCallback();
     pattern_->UpdateCurrentOffset(-10*ITEM_HEIGHT, SCROLL_FROM_ANIMATION_CONTROLLER);
@@ -2000,7 +1996,7 @@ HWTEST_F(GridScrollerTestNg, HorizontalGridWithScrollBarWithAnimation001, TestSi
      */
     auto controller = pattern_->positionController_;
     controller->AnimateTo(Dimension(-5*ITEM_WIDTH, DimensionUnit::PX), 1.f, Curves::LINEAR, false);
-    pattern_->animator_->Stop();
+    pattern_->StopAnimate();
     pattern_->SetScrollAbort(false);
     pattern_->OnScrollEndCallback();
     pattern_->UpdateCurrentOffset(-5*ITEM_WIDTH, SCROLL_FROM_ANIMATION_CONTROLLER);
@@ -2057,7 +2053,7 @@ HWTEST_F(GridScrollerTestNg, HorizontalGridWithScrollBarWithAnimation002, TestSi
      */
     auto controller = pattern_->positionController_;
     controller->AnimateTo(Dimension(-10*ITEM_WIDTH, DimensionUnit::PX), 1.f, Curves::LINEAR, false);
-    pattern_->animator_->Stop();
+    pattern_->StopAnimate();
     pattern_->SetScrollAbort(false);
     pattern_->OnScrollEndCallback();
     pattern_->UpdateCurrentOffset(-10*ITEM_WIDTH, SCROLL_FROM_ANIMATION_CONTROLLER);

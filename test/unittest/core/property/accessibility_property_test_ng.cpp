@@ -330,4 +330,60 @@ HWTEST_F(AccessibilityPropertyTestNg, AccessibilityPropertyTest005, TestSize.Lev
     auto text = columnAccessibilityProperty1->GetAccessibilityText();
     EXPECT_EQ(text, "column1");
 }
+
+/**
+ * @tc.name: AccessibilityPropertyTest006
+ * @tc.desc: Set show value into supportActions_ and get SupportAction length.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AccessibilityPropertyTestNg, AccessibilityPropertyTest006, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: Create FrameNode and Add Children
+     */
+    std::string tag = "root";
+    auto spanNode = SpanNode::GetOrCreateSpanNode(1);
+    auto columnFrameNode1 = FrameNode::GetOrCreateFrameNode(
+        V2::COLUMN_ETS_TAG, 0, []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
+    auto buttonNode1 =
+        FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG, 2, []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    auto customFrameNode2 = CustomNode::CreateCustomNode(1, "Column");
+    spanNode->AddChild(buttonNode1);
+    spanNode->AddChild(customFrameNode2);
+    columnFrameNode1->AddChild(spanNode);
+    columnFrameNode1->AddChild(buttonNode1);
+    auto columnAccessibilityProperty1 = columnFrameNode1->GetAccessibilityProperty<AccessibilityProperty>();
+    columnAccessibilityProperty1->SetAccessibilityGroup(true);
+    columnAccessibilityProperty1->SetAccessibilityLevel("yes");
+    columnAccessibilityProperty1->SetAccessibilityText("column1");
+
+    /**
+     * @tc.steps2: call GetAccessibilityText
+     * @tc.expected: 'column1'
+     */
+    auto text = columnAccessibilityProperty1->GetAccessibilityText(true);
+    EXPECT_EQ(text, "column1");
+
+    /**
+     * @tc.steps3: reset accessibilityText_ and call GetAccessibilityText
+     * @tc.expected: ''
+     */
+    columnAccessibilityProperty1->accessibilityText_.reset();
+    text = columnAccessibilityProperty1->GetAccessibilityText(true);
+    EXPECT_EQ(text, "");
+
+    /**
+     * @tc.steps4: add a new frameNode and SetAccessibilityText
+     * @tc.expected: 'test'
+     */
+    auto buttonNode2 =
+        FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG, 3, []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    buttonNode2->GetAccessibilityProperty<AccessibilityProperty>()->SetAccessibilityText("test");
+    columnFrameNode1->AddChild(buttonNode2);
+    columnAccessibilityProperty1 = columnFrameNode1->GetAccessibilityProperty<AccessibilityProperty>();
+    columnAccessibilityProperty1->SetAccessibilityGroup(true);
+    columnAccessibilityProperty1->SetAccessibilityLevel("yes");
+    text = columnAccessibilityProperty1->GetAccessibilityText(true);
+    EXPECT_EQ(text, "test");
+}
 } // namespace OHOS::Ace::NG

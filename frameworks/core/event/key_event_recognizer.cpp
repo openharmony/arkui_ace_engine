@@ -514,9 +514,15 @@ std::vector<KeyEvent> KeyEventRecognizer::GetKeyEvents(int32_t keyCode, int32_t 
         }
         addPressedKey(keyCode);
     }
+    auto keyItems = getPressedKeys();
+    event.keyIntention = keyItemsTransKeyIntention(keyItems);
+    if ((keyCode != static_cast<int32_t>(KeyCode::KEY_UNKNOWN)) &&
+        (keyAction == static_cast<int32_t>(KeyAction::UP))) {
+        removeReleasedKey(keyCode);
+    }
     event.pressedCodes = getPressedKeys();
     event.key = KeyCodeToString(keyCode);
-    event.keyIntention = keyItemsTransKeyIntention(event.pressedCodes);
+
     keyEvents.emplace_back(event);
     auto result = keyMap_.try_emplace(keyCode, false);
     auto iter = result.first;

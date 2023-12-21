@@ -92,6 +92,21 @@ public:
         return onIndexChangeEvent_;
     }
 
+    bool GetIsCustomAnimation() const
+    {
+        return isCustomAnimation_;
+    }
+
+    void SetIsCustomAnimation(bool isCustomAnimation)
+    {
+        isCustomAnimation_ = isCustomAnimation;
+    }
+
+    void SetIsDisableSwipe(bool isDisableSwipe)
+    {
+        isDisableSwipe_ = isDisableSwipe;
+    }
+
 private:
     void OnAttachToFrameNode() override;
     void OnAfterModifyDone() override;
@@ -99,6 +114,10 @@ private:
     WeakPtr<FocusHub> GetNextFocusNode(FocusStep step, const WeakPtr<FocusHub>& currentFocusNode);
     void BeforeCreateLayoutWrapper() override;
     std::string GetTabBarTextByIndex(int32_t index) const;
+    void UpdateSwiperDisableSwipe(bool disableSwipe);
+
+    bool isCustomAnimation_ = false;
+    bool isDisableSwipe_ = false;
 
     ChangeEventPtr onChangeEvent_;
     ChangeEventPtr onTabBarClickEvent_;

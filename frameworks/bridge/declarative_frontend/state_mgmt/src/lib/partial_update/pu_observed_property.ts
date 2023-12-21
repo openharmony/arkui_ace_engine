@@ -51,14 +51,18 @@ class ObservedPropertyPU<T> extends ObservedPropertyAbstractPU<T>
    * Called by a SynchedPropertyObjectTwoWayPU (@Link, @Consume) that uses this as sync peer when it has changed
    * @param eventSource 
    */
-  syncPeerHasChanged(eventSource : ObservedPropertyAbstractPU<T>) {
-    stateMgmtConsole.debug(`${this.debugInfo()}: syncPeerHasChanged: from peer \
-          '${eventSource && eventSource.debugInfo && eventSource.debugInfo()}'.`);
+  public syncPeerHasChanged(eventSource : ObservedPropertyAbstractPU<T>) : void {
+    stateMgmtConsole.debug(`${this.debugInfo()}: syncPeerHasChanged: from peer ${eventSource && eventSource.debugInfo && eventSource.debugInfo()}'.`);
     this.notifyPropertyHasChangedPU();
   }
 
+  public syncPeerTrackedPropertyHasChanged(eventSource: ObservedPropertyAbstractPU<T>, changedTrackedObjectPropertyName: string): void {
+    stateMgmtConsole.debug(`${this.debugInfo()}: syncPeerTrackedPropertyHasChanged: from peer ${eventSource && eventSource.debugInfo && eventSource.debugInfo()}', changed property '${changedTrackedObjectPropertyName}'.`);
+    this.notifyTrackedObjectPropertyHasChanged(changedTrackedObjectPropertyName);
+  }
+
   /**
-   * Wraped ObservedObjectPU has changed
+   * Wrapped ObservedObjectPU has changed
    * @param souceObject 
    * @param changedPropertyName 
    */
@@ -68,19 +72,16 @@ class ObservedPropertyPU<T> extends ObservedPropertyAbstractPU<T>
     this.notifyPropertyHasChangedPU();
   }
 
-  public objectPropertyHasBeenReadPU(souceObject: ObservedObject<T>, changedPropertyName : string) {
-    stateMgmtConsole.debug(`${this.debugInfo()}: objectPropertyHasBeenReadPU: contained ObservedObject property \ 
-                            '${changedPropertyName}' has been read.`);
-
-    this.notifyPropertyHasBeenReadPU();
-  }
-  
   private unsubscribeWrappedObject() {
     if (this.wrappedValue_) {
       if (this.wrappedValue_ instanceof SubscribableAbstract) {
         (this.wrappedValue_ as SubscribableAbstract).removeOwningProperty(this);
       } else {
         ObservedObject.removeOwningProperty(this.wrappedValue_, this);
+
+        // make sure the ObservedObject no longer has a read callback function
+        // assigned to it
+        ObservedObject.unregisterPropertyReadCb(this.wrappedValue_);
       }
     }
   }
@@ -115,6 +116,7 @@ class ObservedPropertyPU<T> extends ObservedPropertyAbstractPU<T>
     } else if (ObservedObject.IsObservedObject(newValue)) {
       stateMgmtConsole.propertyAccess(`${this.debugInfo()}: setValueInternal: new value is an ObservedObject already`);
       ObservedObject.addOwningProperty(newValue, this);
+      this.shouldInstallTrackedObjectReadCb = TrackedObject.needsPropertyReadCb(newValue);
       this.wrappedValue_ = newValue;
     } else {
       stateMgmtConsole.propertyAccess(`${this.debugInfo()}: setValueInternal: new value is an Object, needs to be wrapped in an ObservedObject.`);
@@ -125,8 +127,16 @@ class ObservedPropertyPU<T> extends ObservedPropertyAbstractPU<T>
   }
 
   public get(): T {
+    stateMgmtProfiler.begin("ObservedPropertyPU.get");
     stateMgmtConsole.propertyAccess(`${this.debugInfo()}: get`);
-    this.notifyPropertyHasBeenReadPU();
+    this.recordPropertyDependentUpdate();
+    if (this.shouldInstallTrackedObjectReadCb) {
+      stateMgmtConsole.propertyAccess(`${this.debugInfo()}: get: @Track optimised mode. Will install read cb func if value is an object`);
+      ObservedObject.registerPropertyReadCb(this.wrappedValue_, this.onOptimisedObjectPropertyRead.bind(this));
+    } else {
+      stateMgmtConsole.propertyAccess(`${this.debugInfo()}: get: compatibility mode. `);
+    }
+    stateMgmtProfiler.end();
     return this.wrappedValue_;
   }
 
@@ -142,9 +152,34 @@ class ObservedPropertyPU<T> extends ObservedPropertyAbstractPU<T>
       return;
     }
     stateMgmtConsole.propertyAccess(`${this.debugInfo()}: set: value about to changed.`);
+    const oldValue = this.wrappedValue_;
     if (this.setValueInternal(newValue)) {
-      this.notifyPropertyHasChangedPU();
+      TrackedObject.notifyObjectValueAssignment(/* old value */ oldValue, /* new value */ this.wrappedValue_,
+        this.notifyPropertyHasChangedPU.bind(this),
+        this.notifyTrackedObjectPropertyHasChanged.bind(this));
     }
+  }
+
+  protected onOptimisedObjectPropertyRead(readObservedObject: T, readPropertyName: string, isTracked: boolean) : void {
+    stateMgmtProfiler.begin("ObservedProperty.onOptimisedObjectPropertyRead");
+    const renderingElmtId = this.getRenderingElmtId();
+    if (renderingElmtId >= 0) {
+      if (!isTracked) {
+        stateMgmtConsole.applicationError(`${this.debugInfo()}: onOptimisedObjectPropertyRead read NOT TRACKED property '${readPropertyName}' during rendering!`);
+        throw new Error(`Illegal usage of not @Track'ed property '${readPropertyName}' on UI!`);
+      } else {
+        stateMgmtConsole.debug(`${this.debugInfo()}: onOptimisedObjectPropertyRead: ObservedObject property '@Track ${readPropertyName}' read.`);
+        // only record dependency when
+        // 1 - currently rendering or re-rendering
+        //    TODO room for further optimization: if not an expression in updateFunc, only first time render needs to record
+        //    because there can be change to depended variables unless one of the bindings is a JS expression
+        // 2 - the changed ObservedObject is the wrapped object. The situation where it can be different is after a value assignment.
+        if (this.getUnmonitored() === readObservedObject) {
+          this.recordTrackObjectPropertyDependencyForElmtId(renderingElmtId, readPropertyName)
+        }
+      }
+    }
+    stateMgmtProfiler.end();
   }
 }
 

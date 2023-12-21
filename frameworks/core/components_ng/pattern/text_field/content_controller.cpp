@@ -25,6 +25,7 @@
 namespace OHOS::Ace::NG {
 namespace {
 const std::string DIGIT_WHITE_LIST = "[0-9]";
+const std::string DIGIT_DECIMAL_WHITE_LIST = "[0-9.]";
 const std::string PHONE_WHITE_LIST = R"([\d\-\+\*\#]+)";
 const std::string EMAIL_WHITE_LIST = "[\\w.\\@]";
 const std::string URL_WHITE_LIST = "[a-zA-z]+://[^\\s]*";
@@ -131,6 +132,9 @@ void ContentController::FilterTextInputStyle(bool& textChanged, std::string& res
             textChanged |= FilterWithAscii(result);
             break;
         }
+        case TextInputType::NUMBER_DECIMAL:
+            textChanged |= FilterWithEvent(DIGIT_DECIMAL_WHITE_LIST, result);
+            textChanged |= FilterWithDecimal(result);
         default: {
             break;
         }
@@ -243,6 +247,26 @@ bool ContentController::FilterWithAscii(std::string& result)
         LOGI("FilterWithAscii Error text %{private}s", errorText.c_str());
     }
     return textChange;
+}
+
+bool ContentController::FilterWithDecimal(std::string& result)
+{
+    auto valueToUpdate = result;
+    bool first = true;
+    std::replace_if(
+        result.begin(), result.end(),
+        [&first](const char c) {
+            if (c == '.' && !first) {
+                return true;
+            }
+            if (c == '.') {
+                first = false;
+            }
+            return false;
+        },
+        ' ');
+    result.erase(std::remove(result.begin(), result.end(), ' '), result.end());
+    return result != valueToUpdate;
 }
 
 bool ContentController::FilterWithEvent(const std::string& filter, std::string& result)

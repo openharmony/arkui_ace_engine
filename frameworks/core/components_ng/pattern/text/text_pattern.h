@@ -29,11 +29,14 @@
 #include "base/utils/utils.h"
 #include "core/components_ng/event/long_press_event.h"
 #include "core/components_ng/pattern/pattern.h"
+#include "core/components_ng/pattern/rich_editor/paragraph_manager.h"
+#include "core/components_ng/pattern/rich_editor/selection_info.h"
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
 #include "core/components_ng/pattern/text/span_node.h"
 #include "core/components_ng/pattern/text/text_accessibility_property.h"
 #include "core/components_ng/pattern/text/text_base.h"
 #include "core/components_ng/pattern/text/text_content_modifier.h"
+#include "core/components_ng/pattern/text/text_controller.h"
 #include "core/components_ng/pattern/text/text_event_hub.h"
 #include "core/components_ng/pattern/text/text_layout_algorithm.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
@@ -43,8 +46,6 @@
 #include "core/components_ng/pattern/text_field/text_selector.h"
 #include "core/components_ng/property/property.h"
 #include "core/pipeline_ng/ui_task_scheduler.h"
-#include "core/components_ng/pattern/rich_editor/rich_editor_selection.h"
-#include "core/components_ng/pattern/rich_editor/paragraph_manager.h"
 
 namespace OHOS::Ace::NG {
 enum class Status {DRAGGING, ON_DROP, NONE };
@@ -58,7 +59,7 @@ public:
     TextPattern() = default;
     ~TextPattern() override = default;
 
-    RichEditorSelection GetSpansInfo(int32_t start, int32_t end, GetSpansMethod method);
+    SelectionInfo GetSpansInfo(int32_t start, int32_t end, GetSpansMethod method);
 
     int32_t GetTextContentLength();
 
@@ -343,7 +344,7 @@ public:
 
     const OffsetF& GetRightClickOffset() const
     {
-        return rightClickOffset_;
+        return mouseReleaseOffset_;
     }
 
     bool IsMeasureBoundary() const override
@@ -469,6 +470,37 @@ public:
         CloseSelectOverlay();
         ResetSelection();
     }
+    virtual bool NeedShowAIDetect();
+
+    int32_t GetDragRecordSize() override
+    {
+        return dragRecordSize_;
+    }
+
+    void ResetDragRecordSize(int32_t size)
+    {
+        dragRecordSize_ = size;
+    }
+
+    void BindSelectionMenu(TextSpanType spanType, TextResponseType responseType, std::function<void()>& menuBuilder,
+        std::function<void(int32_t, int32_t)>& onAppear, std::function<void()>& onDisappear);
+
+    void SetTextController(const RefPtr<TextController>& controller)
+    {
+        textController_ = controller;
+    }
+
+    const RefPtr<TextController>& GetTextController()
+    {
+        return textController_;
+    }
+
+    void CloseSelectionMenu();
+
+    void ClearSelectionMenu()
+    {
+        selectionMenuMap_.clear();
+    }
 
 protected:
     void OnAfterModifyDone() override;
@@ -498,6 +530,10 @@ protected:
     void ParseAIJson(const std::unique_ptr<JsonValue>& jsonValue, TextDataDetectType type, int32_t startPos,
         bool isMenuOption = false);
     void StartAITask();
+    void CancelAITask()
+    {
+        aiDetectDelayTask_.Cancel();
+    }
     bool IsDraggable(const Offset& localOffset);
     virtual void InitClickEvent(const RefPtr<GestureEventHub>& gestureHub);
     void CalculateHandleOffsetAndShowOverlay(bool isUsingMouse = false);
@@ -511,11 +547,21 @@ protected:
     std::string GetSelectedText(int32_t start, int32_t end) const;
     void CalcCaretMetricsByPosition(
         int32_t extent, CaretMetricsF& caretCaretMetric, TextAffinity textAffinity = TextAffinity::DOWNSTREAM);
+    void UpdateSelectionType(const SelectionInfo& selection);
+    void CopyBindSelectionMenuParams(SelectOverlayInfo& selectInfo, std::shared_ptr<SelectionMenuParams> menuParams);
+    bool IsSelectedBindSelectionMenu();
+    std::shared_ptr<SelectionMenuParams> GetMenuParams(TextSpanType type, TextResponseType responseType);
+
+    virtual bool CanStartAITask()
+    {
+        return true;
+    };
 
     Status status_ = Status::NONE;
     bool contChange_ = false;
     int32_t recoverStart_ = 0;
     int32_t recoverEnd_ = 0;
+    bool enabled_ = true;
     bool showSelectOverlay_ = false;
     bool mouseEventInitialized_ = false;
     bool panEventInitialized_ = false;
@@ -553,6 +599,8 @@ protected:
     std::function<void(const std::string&)> onClickMenu_;
     std::map<int32_t, AISpan> aiSpanMap_;
     CancelableCallback<void()> aiDetectDelayTask_;
+    std::map<std::pair<TextSpanType, TextResponseType>, std::shared_ptr<SelectionMenuParams>> selectionMenuMap_;
+    std::optional<TextSpanType> selectedType_;
 
 private:
     void OnDetachFromFrameNode(FrameNode* node) override;
@@ -572,6 +620,17 @@ private:
     void CollectSpanNodes(std::stack<RefPtr<UINode>> nodes, bool& isSpanHasClick);
     RefPtr<RenderContext> GetRenderContext();
     void ProcessBoundRectByTextShadow(RectF& rect);
+    void FireOnSelectionChange(int32_t start, int32_t end);
+    void HandleMouseLeftButton(const MouseInfo& info, const Offset& textOffset);
+    void HandleMouseRightButton(const MouseInfo& info, const Offset& textOffset);
+    void HandleMouseLeftPressAction(const MouseInfo& info, const Offset& textOffset);
+    void HandleMouseLeftReleaseAction(const MouseInfo& info, const Offset& textOffset);
+    void HandleMouseLeftMoveAction(const MouseInfo& info, const Offset& textOffset);
+    void HandleSelectionChange(int32_t start, int32_t end);
+    void InitSpanItem(std::stack<RefPtr<UINode>> nodes);
+    void UpdateSelectionSpanType(int32_t selectStart, int32_t selectEnd);
+    int32_t GetSelectionSpanItemIndex(const MouseInfo& info);
+    void CopySelectionMenuParams(SelectOverlayInfo& selectInfo, TextResponseType responseType);
     // to check if drag is in progress
 
     bool isMeasureBoundary_ = false;
@@ -588,7 +647,7 @@ private:
     std::vector<RectF> rectsForPlaceholders_;
     OffsetF imageOffset_;
 
-    OffsetF rightClickOffset_;
+    OffsetF mouseReleaseOffset_;
     OffsetF contentOffset_;
     OffsetF parentGlobalOffset_;
     GestureEventFunc onClick_;
@@ -596,6 +655,9 @@ private:
     RefPtr<DragDropProxy> dragDropProxy_;
     std::optional<int32_t> surfaceChangedCallbackId_;
     std::optional<int32_t> surfacePositionChangedCallbackId_;
+    int32_t dragRecordSize_ = -1;
+    std::optional<TextResponseType> textResponseType_;
+    RefPtr<TextController> textController_;
     ACE_DISALLOW_COPY_AND_MOVE(TextPattern);
 };
 } // namespace OHOS::Ace::NG

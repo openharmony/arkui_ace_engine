@@ -20,6 +20,7 @@
 #include <cstdint>
 #include <functional>
 #include <mutex>
+#include <optional>
 #include <string>
 #include <vector>
 
@@ -38,7 +39,7 @@ struct DownloadCondition {
     std::string dataOut;
     std::mutex downloadMutex;
     std::string errorMsg;
-    bool downloadSuccess = false;
+    std::optional<bool> downloadSuccess;
 };
 
 class DownloadManagerV2 {

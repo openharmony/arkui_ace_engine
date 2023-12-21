@@ -76,8 +76,13 @@ public:
 
     static float GetCurrentRootHeight();
 
+    // handle close keyboard
     RefPtr<FrameNode> HandleFocusNode();
     void IsCloseSCBKeyboard();
+    void SetNeedSoftKeyboard(std::optional<bool> flag)
+    {
+        needSoftKeyboard_ = flag;
+    }
 
     void SetupRootElement() override;
 
@@ -252,6 +257,8 @@ public:
 
     void UpdateSystemSafeArea(const SafeAreaInsets& systemSafeArea) override;
     void UpdateCutoutSafeArea(const SafeAreaInsets& cutoutSafeArea) override;
+    void UpdateNavSafeArea(const SafeAreaInsets& navSafeArea) override;
+
     void UpdateDisplayAvailableRect(const Rect& displayAvailableRect)
     {
         displayAvailableRect_ = displayAvailableRect;
@@ -543,6 +550,14 @@ public:
 
     bool IsDragging() const override;
     void SetIsDragging(bool isDragging) override;
+
+    void SetContainerModalTitleVisible(bool customTitleSettedShow, bool floatingTitleSettedShow);
+    void SetContainerModalTitleHeight(int32_t height);
+    int32_t GetContainerModalTitleHeight();
+    bool GetContainerModalButtonsRect(RectF& containerModal, RectF& buttons);
+    void SubscribeContainerModalButtonsRectChange(
+        std::function<void(RectF& containerModal, RectF& buttons)>&& callback);
+
 protected:
     void StartWindowSizeChangeAnimate(int32_t width, int32_t height, WindowSizeChangeReason type,
         const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr);
@@ -690,6 +705,8 @@ private:
 
     RefPtr<FrameNode> focusNode_;
     std::function<void()> focusOnNodeCallback_;
+
+    std::optional<bool> needSoftKeyboard_ ;
 
     std::unique_ptr<MouseEvent> lastMouseEvent_;
 

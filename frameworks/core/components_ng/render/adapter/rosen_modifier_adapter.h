@@ -100,6 +100,11 @@ public:
 
     void AddProperty(const RefPtr<PropertyBase>& property);
 
+    std::shared_ptr<RSPropertyBase> GetProperty() const
+    {
+        return attachedProperty_;
+    }
+
 private:
     std::shared_ptr<RSPropertyBase> attachedProperty_;
 

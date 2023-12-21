@@ -34,6 +34,7 @@ public:
     MOCK_METHOD0(HidePreviewNG, void());
     MOCK_METHOD2(HideMenuNG, void(const RefPtr<NG::FrameNode>& menu, int32_t targetId));
     MOCK_METHOD2(HideMenuNG, void(bool showPreviewAnimation, bool startDrag));
+    MOCK_METHOD1(UpdateHideMenuOffsetNG, void(const NG::OffsetF& offset));
     MOCK_METHOD2(ShowPopup, void(const RefPtr<Component>& newComponent, bool disableTouchEvent));
     MOCK_METHOD2(ShowPopupNG, void(int32_t targetId, const NG::PopupInfo& popupInfo));
     MOCK_METHOD1(HidePopupNG, void(int32_t targetId));
@@ -65,6 +66,8 @@ public:
     MOCK_METHOD1(CloseDialog, void(int32_t instanceId));
     MOCK_METHOD0(GetOverlayManager, const RefPtr<NG::OverlayManager>());
     MOCK_METHOD0(RequestFocus, void());
+    MOCK_METHOD2(OpenCustomDialog, void(const PromptDialogAttr& dialogAttr, std::function<void(int32_t)>&& callback));
+    MOCK_METHOD1(CloseCustomDialog, void(const int32_t dialogId));
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_TEST_MOCK_BASE_MOCK_SUBWINDOW_H

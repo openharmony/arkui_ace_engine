@@ -183,7 +183,7 @@ void WaterFlowLayoutInfo::Reset()
     itemStart_ = false;
     offsetEnd_ = false;
 
-    jumpIndex_ = -1;
+    jumpIndex_ = EMPTY_JUMP_INDEX;
 
     startIndex_ = 0;
     endIndex_ = 0;

@@ -120,14 +120,14 @@ ArkUINativeModuleValue TextTimerBridge::SetFontWeight(ArkUIRuntimeCallInfo* runt
     Local<JSValueRef> fontWeightArg = runtimeCallInfo->GetCallArgRef(NUM_1);
     void* nativeNode = nodeArg->ToNativePointer(vm)->Value();
     std::string fontWeight;
-    ArkTSUtils::GetStringFromJS(vm, fontWeightArg, fontWeight);
-    if (0 == fontWeight.length() || DEFAULT_STR == fontWeight) {
-        GetArkUIInternalNodeAPI()->GetTextTimerModifier().ResetFontWeight(nativeNode);
-    } else if (!StringUtils::IsAscii(fontWeight) && Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
-        GetArkUIInternalNodeAPI()->GetTextTimerModifier().ResetFontWeight(nativeNode);
-    } else {
-        GetArkUIInternalNodeAPI()->GetTextTimerModifier().SetFontWeight(nativeNode, fontWeight.c_str());
+    if (!fontWeightArg->IsNull()) {
+        if (fontWeightArg->IsNumber()) {
+            fontWeight = std::to_string(fontWeightArg->Int32Value(vm));
+        } else if (fontWeightArg->IsString()) {
+            fontWeight = fontWeightArg->ToString(vm)->ToString();
+        }
     }
+    GetArkUIInternalNodeAPI()->GetTextTimerModifier().SetFontWeight(nativeNode, fontWeight.c_str());
     return panda::JSValueRef::Undefined(vm);
 }
 

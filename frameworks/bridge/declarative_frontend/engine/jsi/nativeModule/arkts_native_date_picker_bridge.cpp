@@ -65,7 +65,7 @@ ArkUINativeModuleValue DatePickerBridge::SetSelectedTextStyle(ArkUIRuntimeCallIn
         fontStyle = fontStyleArgs->Int32Value(vm);
     }
     Color color;
-    if (!ArkTSUtils::ParseJsColor(vm, textColorArgs, color)) {
+    if (!ArkTSUtils::ParseJsColorAlpha(vm, textColorArgs, color)) {
         Color::ParseColorString("#ff007dff", color);
     }
     std::string fontInfo =
@@ -123,7 +123,7 @@ ArkUINativeModuleValue DatePickerBridge::SetTextStyle(ArkUIRuntimeCallInfo* runt
         fontStyle = fontStyleArgs->Int32Value(vm);
     }
     Color color;
-    if (!ArkTSUtils::ParseJsColor(vm, textColorArgs, color)) {
+    if (!ArkTSUtils::ParseJsColorAlpha(vm, textColorArgs, color)) {
         Color::ParseColorString("#ff182431", color);
     }
     std::string fontInfo =
@@ -181,7 +181,7 @@ ArkUINativeModuleValue DatePickerBridge::SetDisappearTextStyle(ArkUIRuntimeCallI
         fontStyle = fontStyleArgs->Int32Value(vm);
     }
     Color color;
-    if (!ArkTSUtils::ParseJsColor(vm, textColorArgs, color)) {
+    if (!ArkTSUtils::ParseJsColorAlpha(vm, textColorArgs, color)) {
         Color::ParseColorString("#ff182431", color);
     }
     std::string fontInfo =

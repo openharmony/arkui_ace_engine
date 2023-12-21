@@ -944,8 +944,8 @@ std::string UINode::GetCurrentCustomNodeInfo()
             auto custom = DynamicCast<CustomNode>(parent);
             auto list = custom->GetExtraInfos();
             for (const auto& child : list) {
-                extraInfo.append("    ").append(child.page).append(":")
-                    .append(std::to_string(child.line)).append("\n");
+                extraInfo.append("    ").append("at (").append(child.page).append(":")
+                    .append(std::to_string(child.line)).append(")\n");
             }
             break;
         }

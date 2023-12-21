@@ -339,6 +339,46 @@ public:
         return fontStyle_;
     }
 
+    const std::optional<Dimension>& GetArrowWidth() const
+    {
+        return arrowWidth_;
+    }
+
+    void SetArrowWidth(const Dimension& arrowWidth)
+    {
+        arrowWidth_ = arrowWidth;
+    }
+
+    const std::optional<Dimension>& GetArrowHeight() const
+    {
+        return arrowHeight_;
+    }
+
+    void SetArrowHeight(const Dimension& arrowHeight)
+    {
+        arrowHeight_ = arrowHeight;
+    }
+
+    const std::optional<Dimension>& GetRadius() const
+    {
+        return radius_;
+    }
+
+    void SetRadius(const Dimension& radius)
+    {
+        radius_ = radius;
+    }
+
+    void SetShadow(const Shadow& shadow)
+    {
+        shadow_ = shadow;
+    }
+
+    const std::optional<Shadow>& GetShadow() const
+    {
+        return shadow_;
+    }
+
 private:
     bool isShow_ = true;
     bool hasAction_ = false;
@@ -368,6 +408,10 @@ private:
     std::optional<Dimension> fontSize_;
     std::optional<FontStyle> fontStyle_;
 
+    std::optional<Dimension> arrowWidth_;
+    std::optional<Dimension> arrowHeight_;
+    std::optional<Dimension> radius_;
+    std::optional<Shadow> shadow_;
     // Used in NG mode
     StateChangeFunc onStateChange_;
     ButtonProperties primaryButtonProperties_;   // first button.

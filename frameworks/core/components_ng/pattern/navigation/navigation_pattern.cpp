@@ -258,7 +258,6 @@ void NavigationPattern::CheckTopNavPathChange(
         auto navBarNode = AceType::DynamicCast<NavBarNode>(hostNode->GetNavBarNode());
         CHECK_NULL_VOID(navBarNode);
         auto focusHub = navBarNode->GetOrCreateFocusHub();
-        focusHub->SetParentFocusable(false);
         focusHub->LostFocus();
     }
     RefPtr<NavDestinationGroupNode> newTopNavDestination;
@@ -297,7 +296,6 @@ void NavigationPattern::CheckTopNavPathChange(
         }
         navBarNode->GetEventHub<EventHub>()->SetEnabledInternal(true);
         auto focusHub = navBarNode->GetOrCreateFocusHub();
-        focusHub->SetParentFocusable(true);
         focusHub->RequestFocus();
     }
     bool isShow = false;
@@ -318,7 +316,6 @@ void NavigationPattern::CheckTopNavPathChange(
             NotifyPageHide(preTopNavPath->first);
             eventHub->FireOnHiddenEvent(navDestinationPattern->GetName());
             navDestinationPattern->SetIsOnShow(false);
-            preTopNavDestination->SetActive(false);
             // The navigations in NavDestination should be fired the hidden event
             NavigationPattern::FireNavigationStateChange(preTopNavDestination, false);
         }
@@ -476,7 +473,6 @@ void NavigationPattern::TransitionWithOutAnimation(const RefPtr<NavDestinationGr
             auto layoutProperty = preTopNavDestination->GetLayoutProperty();
             CHECK_NULL_VOID(layoutProperty);
             layoutProperty->UpdateVisibility(needVisible ? VisibleType::VISIBLE : VisibleType::INVISIBLE, true);
-            preTopNavDestination->SetActive(needVisible ? true : false);
         }
         navigationNode->OnAccessibilityEvent(AccessibilityEventType::PAGE_CHANGE);
         return;
@@ -487,7 +483,6 @@ void NavigationPattern::TransitionWithOutAnimation(const RefPtr<NavDestinationGr
         auto layoutProperty = navBarNode->GetLayoutProperty();
         CHECK_NULL_VOID(layoutProperty);
         layoutProperty->UpdateVisibility(VisibleType::INVISIBLE, true);
-        navBarNode->SetActive(false);
     }
 
     // navDestination pop to navBar
@@ -511,6 +506,8 @@ void NavigationPattern::TransitionWithAnimation(const RefPtr<NavDestinationGroup
     CHECK_NULL_VOID(navigationNode);
     auto navBarNode = AceType::DynamicCast<NavBarNode>(navigationNode->GetNavBarNode());
     CHECK_NULL_VOID(navBarNode);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
 
     // replace
     auto replaceValue = navigationStack_->GetReplaceValue();
@@ -539,6 +536,16 @@ void NavigationPattern::TransitionWithAnimation(const RefPtr<NavDestinationGroup
     auto layoutProperty = navigationNode->GetLayoutProperty<NavigationLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     if (layoutProperty->GetHideNavBarValue(false)) {
+        if (preTopNavDestination) {
+            auto parent = preTopNavDestination->GetParent();
+            CHECK_NULL_VOID(parent);
+            if (preTopNavDestination->GetContentNode()) {
+                preTopNavDestination->GetContentNode()->Clean();
+            }
+            parent->RemoveChild(preTopNavDestination);
+            parent->RebuildRenderContextTree();
+            pipeline->RequestFrame();
+        }
         return;
     }
 
@@ -1022,7 +1029,6 @@ void NavigationPattern::NotifyDialogChange(bool isShow)
             eventHub->FireOnHiddenEvent(navDestinationPattern->GetName());
         }
         navDestinationPattern->SetIsOnShow(isShow);
-        curDestination->SetActive(isShow);
     }
 }
 } // namespace OHOS::Ace::NG

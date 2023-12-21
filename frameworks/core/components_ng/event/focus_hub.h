@@ -431,6 +431,13 @@ public:
 
     static void IsCloseKeyboard(RefPtr<FrameNode> frameNode);
 
+    static void PushPageCloseKeyboard();
+
+    BlurReason GetBlurReason() const
+    {
+        return blurReason_;
+    }
+
     void SetFocusPaintParamsPtr(const std::unique_ptr<FocusPaintParam>& paramsPtr)
     {
         CHECK_NULL_VOID(paramsPtr);
@@ -572,17 +579,11 @@ public:
     }
     void SetParentFocusable(bool parentFocusable);
 
-    void RefreshParentFocusable(bool focusable);
-
     void RefreshFocus();
 
     void SetFocusable(bool focusable, bool isExplicit = true);
     void SetShow(bool show);
-    void SetShowNode(bool show);
-    void SetShowScope(bool show);
     void SetEnabled(bool enabled);
-    void SetEnabledNode(bool enabled);
-    void SetEnabledScope(bool enabled);
 
     bool IsShow() const;
 

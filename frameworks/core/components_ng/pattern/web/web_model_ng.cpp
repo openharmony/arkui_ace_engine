@@ -897,6 +897,13 @@ void WebModelNG::JavaScriptOnDocumentStart(const ScriptItems& scriptItems)
     webPattern->JavaScriptOnDocumentStart(scriptItems);
 }
 
+void WebModelNG::JavaScriptOnDocumentEnd(const ScriptItems& scriptItems)
+{
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->JavaScriptOnDocumentEnd(scriptItems);
+}
+
 void WebModelNG::SetPermissionClipboard(std::function<void(const std::shared_ptr<BaseEventInfo>&)>&& jsCallback)
 {
     auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();

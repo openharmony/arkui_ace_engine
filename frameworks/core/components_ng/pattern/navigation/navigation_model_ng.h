@@ -77,7 +77,6 @@ public:
     static void SetTitleMode(FrameNode* frameNode, NG::NavigationTitleMode mode);
 
 private:
-    bool setDefaultNavBarWidthFlag_ = false;
     static void PutComponentInsideNavigator(
         NavigationGroupNode* navigationGroupNode, const RefPtr<NavBarNode>& navBarNode);
 

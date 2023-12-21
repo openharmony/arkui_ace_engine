@@ -29,7 +29,7 @@
 #include "core/common/container.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/scroll/scroll_bar_theme.h"
-#include "core/components/scroll/scrollable.h"
+#include "core/components_ng/pattern/scrollable/scrollable.h"
 #include "core/components_ng/pattern/list/list_item_group_pattern.h"
 #include "core/components_ng/pattern/list/list_item_pattern.h"
 #include "core/components_ng/pattern/list/list_lanes_layout_algorithm.h"
@@ -289,7 +289,7 @@ RefPtr<NodePaintMethod> ListPattern::CreateNodePaintMethod()
     }
 
     paint->SetLaneGutter(laneGutter_);
-    listContentModifier_->SetItemsPosition(itemPosition_);
+    paint->SetItemsPosition(itemPosition_);
     paint->SetContentModifier(listContentModifier_);
     return paint;
 }
@@ -664,10 +664,10 @@ bool ListPattern::UpdateCurrentOffset(float offset, int32_t source)
     float overScroll = 0.0f;
     // over scroll in drag update during over scroll.
     auto startPos = startMainPos_ - currentDelta_;
-    if ((itemPosition_.begin()->first == 0) && Positive(startPos)) {
-        overScroll = startPos;
+    if ((itemPosition_.begin()->first == 0) && GreatNotEqual(startPos, contentStartOffset_)) {
+        overScroll = startPos - contentStartOffset_;
     } else {
-        overScroll = contentMainSize_ - (endMainPos_ - currentDelta_);
+        overScroll = contentMainSize_ - contentEndOffset_ - (endMainPos_ - currentDelta_);
     }
     if (IsScrollSnapAlignCenter()) {
         auto itemHeight = itemPosition_.begin()->second.endPos - itemPosition_.begin()->second.startPos;
@@ -1459,10 +1459,10 @@ void ListPattern::HandleScrollBarOutBoundary()
     }
     float overScroll = 0.0f;
     if (!IsScrollSnapAlignCenter()) {
-        if ((itemPosition_.begin()->first == 0) && Positive(startMainPos_)) {
-            overScroll = startMainPos_;
+        if ((itemPosition_.begin()->first == 0) && GreatNotEqual(startMainPos_, contentStartOffset_)) {
+            overScroll = startMainPos_ - contentStartOffset_;
         } else {
-            overScroll = contentMainSize_ - endMainPos_;
+            overScroll = contentMainSize_ - contentEndOffset_ - endMainPos_;
         }
     } else {
         float itemHeight = itemPosition_[centerIndex_].endPos - itemPosition_[centerIndex_].startPos;

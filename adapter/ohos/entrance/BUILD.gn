@@ -36,10 +36,8 @@ template("ace_ohos_standard_source_set") {
       "$ace_root/adapter/ohos/entrance/capability_registry.cpp",
       "$ace_root/adapter/ohos/entrance/data_ability_helper_standard.cpp",
       "$ace_root/adapter/ohos/entrance/dialog_container.cpp",
-      "$ace_root/adapter/ohos/entrance/file_asset_provider.cpp",
       "$ace_root/adapter/ohos/entrance/file_asset_provider_impl.cpp",
       "$ace_root/adapter/ohos/entrance/form_utils_impl.cpp",
-      "$ace_root/adapter/ohos/entrance/hap_asset_provider.cpp",
       "$ace_root/adapter/ohos/entrance/hap_asset_provider_impl.cpp",
       "$ace_root/adapter/ohos/entrance/mmi_event_convertor.cpp",
       "$ace_root/adapter/ohos/entrance/navigation_controller_helper.cpp",
@@ -52,13 +50,16 @@ template("ace_ohos_standard_source_set") {
       "$ace_root/adapter/ohos/entrance/ui_content_impl.cpp",
       "$ace_root/adapter/ohos/entrance/ui_event_impl.cpp",
       "$ace_root/adapter/ohos/entrance/utils.cpp",
-      "$flutter_root/engine/flutter/shell/common/thread_host.cc",
 
       # drag window
       "$ace_root/adapter/ohos/entrance/window/drag_window_ohos.cpp",
 
       # ArkTs Card
       "$ace_root/adapter/ohos/entrance/form_module_preloader.cpp",
+
+      # Dynamic Component
+      "$ace_root/adapter/ohos/entrance/dynamic_component/dynamic_component_renderer_impl.cpp",
+      "$ace_root/adapter/ohos/entrance/dynamic_component/uv_task_wrapper_impl.cpp",
     ]
 
     if (target_cpu == "arm64") {

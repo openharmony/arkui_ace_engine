@@ -1844,4 +1844,414 @@ HWTEST_F(ImageTestNg, MeasureContent001, TestSize.Level1)
         }
     }
 }
+
+/**
+ * @tc.name: TestCopyOption001
+ * @tc.desc: Test image copyOption.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestNg, TestCopyOption001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create Image frameNode.
+     */
+    auto frameNode = ImageTestNg::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
+    auto pattern = frameNode->GetPattern<ImagePattern>();
+
+    /**
+     * @tc.steps: step2. default value
+     */
+    frameNode->MarkModifyDone();
+    EXPECT_EQ(pattern->copyOption_, CopyOptions::None);
+
+    /**
+     * @tc.steps: step3. set copyOption
+     */
+    pattern->SetCopyOption(CopyOptions::InApp);
+    frameNode->MarkModifyDone();
+    EXPECT_EQ(pattern->copyOption_, CopyOptions::InApp);
+
+    /**
+     * @tc.steps: step4. set copyOption
+     */
+    pattern->SetCopyOption(CopyOptions::Local);
+    frameNode->MarkModifyDone();
+    EXPECT_EQ(pattern->copyOption_, CopyOptions::Local);
+
+    /**
+     * @tc.steps: step5. set copyOption
+     */
+    pattern->SetCopyOption(CopyOptions::Distributed);
+    frameNode->MarkModifyDone();
+    EXPECT_EQ(pattern->copyOption_, CopyOptions::Distributed);
+}
+
+/**
+ * @tc.name: TestSyncLoad001
+ * @tc.desc: Test image syncLoad.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestNg, TestSyncLoad001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create Image frameNode.
+     */
+    auto frameNode = ImageTestNg::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
+    auto pattern = frameNode->GetPattern<ImagePattern>();
+
+    /**
+     * @tc.steps: step2. default value
+     */
+    frameNode->MarkModifyDone();
+    EXPECT_EQ(pattern->syncLoad_, false);
+
+    /**
+     * @tc.steps: step3. set syncLoad
+     */
+    pattern->SetSyncLoad(true);
+    frameNode->MarkModifyDone();
+    EXPECT_EQ(pattern->syncLoad_, true);
+}
+
+/**
+ * @tc.name: TestDraggable001
+ * @tc.desc: Test image draggable.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestNg, TestDraggable001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create Image frameNode.
+     */
+    auto frameNode = ImageTestNg::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
+
+    /**
+     * @tc.steps: step2. default value
+     */
+    frameNode->MarkModifyDone();
+    EXPECT_EQ(frameNode->IsDraggable(), true);
+
+    /**
+     * @tc.steps: step3. set draggable
+     */
+    frameNode->SetDraggable(false);
+    frameNode->MarkModifyDone();
+    EXPECT_EQ(frameNode->IsDraggable(), false);
+}
+
+/**
+ * @tc.name: TestAutoResize001
+ * @tc.desc: Test image autoResize.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestNg, TestAutoResize001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create Image frameNode.
+     */
+    auto frameNode = ImageTestNg::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
+    auto layoutProperty = frameNode->GetLayoutProperty<ImageLayoutProperty>();
+
+    /**
+     * @tc.steps: step2. set autoResize
+     */
+    layoutProperty->UpdateAutoResize(false);
+    frameNode->MarkModifyDone();
+    EXPECT_EQ(layoutProperty->GetAutoResize(), false);
+
+    /**
+     * @tc.steps: step3. set autoResize
+     */
+    layoutProperty->UpdateAutoResize(true);
+    frameNode->MarkModifyDone();
+    EXPECT_EQ(layoutProperty->GetAutoResize(), true);
+}
+
+/**
+ * @tc.name: TestFitOriginalSize001
+ * @tc.desc: Test image fitOriginalSize.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestNg, TestFitOriginalSize001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create Image frameNode.
+     */
+    auto frameNode = ImageTestNg::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
+    auto layoutProperty = frameNode->GetLayoutProperty<ImageLayoutProperty>();
+
+    /**
+     * @tc.steps: step2. set fitOriginalSize
+     */
+    layoutProperty->UpdateFitOriginalSize(false);
+    frameNode->MarkModifyDone();
+    EXPECT_EQ(layoutProperty->GetFitOriginalSize().value(), false);
+
+    /**
+     * @tc.steps: step3. set fitOriginalSize
+     */
+    layoutProperty->UpdateFitOriginalSize(true);
+    frameNode->MarkModifyDone();
+    EXPECT_EQ(layoutProperty->GetFitOriginalSize().value(), true);
+}
+
+/**
+ * @tc.name: TestMatchTextDirection001
+ * @tc.desc: Test image matchTextDirection.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestNg, TestMatchTextDirection001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create Image frameNode.
+     */
+    auto frameNode = ImageTestNg::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
+
+    /**
+     * @tc.steps: step2. get ImagePattern and  RadiusProperty.
+     */
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    auto imageRenderProperty = imagePattern->GetPaintProperty<ImageRenderProperty>();
+
+    /**
+     * @tc.steps: step3. set matchTextDirection
+     */
+    imageRenderProperty->UpdateMatchTextDirection(true);
+    frameNode->MarkModifyDone();
+    EXPECT_EQ(imageRenderProperty->GetMatchTextDirection(), true);
+
+    /**
+     * @tc.steps: step4. set matchTextDirection
+     */
+    imageRenderProperty->UpdateMatchTextDirection(false);
+    frameNode->MarkModifyDone();
+    EXPECT_EQ(imageRenderProperty->GetMatchTextDirection(), false);
+}
+
+/**
+ * @tc.name: TestRenderMode001
+ * @tc.desc: Test image renderMode.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestNg, TestRenderMode001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create Image frameNode.
+     */
+    auto frameNode = ImageTestNg::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
+
+    /**
+     * @tc.steps: step2. get ImagePattern and RadiusProperty.
+     */
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    auto imageRenderProperty = imagePattern->GetPaintProperty<ImageRenderProperty>();
+
+    /**
+     * @tc.steps: step3. set renderMode
+     */
+    imageRenderProperty->UpdateImageRenderMode(ImageRenderMode::ORIGINAL);
+    frameNode->MarkModifyDone();
+    EXPECT_EQ(imageRenderProperty->GetImageRenderMode(), ImageRenderMode::ORIGINAL);
+
+    /**
+     * @tc.steps: step4. set renderMode
+     */
+    imageRenderProperty->UpdateImageRenderMode(ImageRenderMode::TEMPLATE);
+    frameNode->MarkModifyDone();
+    EXPECT_EQ(imageRenderProperty->GetImageRenderMode(), ImageRenderMode::TEMPLATE);
+}
+
+/**
+ * @tc.name: TestInterpolation001
+ * @tc.desc: Test image interpolation.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestNg, TestInterpolation001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create Image frameNode.
+     */
+    auto frameNode = ImageTestNg::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
+
+    /**
+     * @tc.steps: step2. get ImagePattern and RadiusProperty.
+     */
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    auto imageRenderProperty = imagePattern->GetPaintProperty<ImageRenderProperty>();
+
+    /**
+     * @tc.steps: step3. set interpolation
+     */
+    imageRenderProperty->UpdateImageInterpolation(ImageInterpolation::NONE);
+    frameNode->MarkModifyDone();
+    EXPECT_EQ(imageRenderProperty->GetImageInterpolation(), ImageInterpolation::NONE);
+
+    /**
+     * @tc.steps: step4. set interpolation
+     */
+    imageRenderProperty->UpdateImageInterpolation(ImageInterpolation::LOW);
+    frameNode->MarkModifyDone();
+    EXPECT_EQ(imageRenderProperty->GetImageInterpolation(), ImageInterpolation::LOW);
+
+    /**
+     * @tc.steps: step5. set interpolation
+     */
+    imageRenderProperty->UpdateImageInterpolation(ImageInterpolation::MEDIUM);
+    frameNode->MarkModifyDone();
+    EXPECT_EQ(imageRenderProperty->GetImageInterpolation(), ImageInterpolation::MEDIUM);
+
+    /**
+     * @tc.steps: step6. set interpolation
+     */
+    imageRenderProperty->UpdateImageInterpolation(ImageInterpolation::HIGH);
+    frameNode->MarkModifyDone();
+    EXPECT_EQ(imageRenderProperty->GetImageInterpolation(), ImageInterpolation::HIGH);
+}
+
+/**
+ * @tc.name: TestObjectRepeat001
+ * @tc.desc: Test image objectRepeat.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestNg, TestObjectRepeat001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create Image frameNode.
+     */
+    auto frameNode = ImageTestNg::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
+
+    /**
+     * @tc.steps: step2. get ImagePattern and RadiusProperty.
+     */
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    auto imageRenderProperty = imagePattern->GetPaintProperty<ImageRenderProperty>();
+    const auto& geometryNode = frameNode->GetGeometryNode();
+
+    auto paintRect = imagePattern->CalcImageContentPaintSize(geometryNode);
+    /**
+     * @tc.steps: step3. set objectRepeat
+     */
+    imageRenderProperty->UpdateImageRepeat(ImageRepeat::REPEAT);
+    frameNode->MarkModifyDone();
+    EXPECT_EQ(imageRenderProperty->GetImageRepeat(), ImageRepeat::REPEAT);
+    EXPECT_EQ(paintRect.Left(), 0);
+    EXPECT_EQ(paintRect.Top(), 0);
+
+    /**
+     * @tc.steps: step4. set objectRepeat
+     */
+    imageRenderProperty->UpdateImageRepeat(ImageRepeat::REPEAT_X);
+    frameNode->MarkModifyDone();
+    EXPECT_EQ(imageRenderProperty->GetImageRepeat(), ImageRepeat::REPEAT_X);
+    EXPECT_EQ(paintRect.Left(), 0);
+    EXPECT_EQ(paintRect.Top(), 0);
+
+    /**
+     * @tc.steps: step5. set objectRepeat
+     */
+    imageRenderProperty->UpdateImageRepeat(ImageRepeat::REPEAT_Y);
+    frameNode->MarkModifyDone();
+    EXPECT_EQ(imageRenderProperty->GetImageRepeat(), ImageRepeat::REPEAT_Y);
+    EXPECT_EQ(paintRect.Left(), 0);
+    EXPECT_EQ(paintRect.Top(), 0);
+
+    /**
+     * @tc.steps: step6. set objectRepeat
+     */
+    imageRenderProperty->UpdateImageRepeat(ImageRepeat::NO_REPEAT);
+    frameNode->MarkModifyDone();
+    EXPECT_EQ(imageRenderProperty->GetImageRepeat(), ImageRepeat::NO_REPEAT);
+}
+
+/**
+ * @tc.name: TestObjectFit001
+ * @tc.desc: Test image objectFit.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestNg, TestObjectFit001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create Image frameNode.
+     */
+    auto frameNode = ImageTestNg::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
+
+    /**
+     * @tc.steps: step2. get ImagePattern RadiusProperty layoutProperty.
+     */
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    auto imageRenderProperty = imagePattern->GetPaintProperty<ImageRenderProperty>();
+    auto layoutProperty = frameNode->GetLayoutProperty<ImageLayoutProperty>();
+
+    /**
+     * @tc.steps: step3. set objectFit
+     */
+    imageRenderProperty->UpdateImageFit(ImageFit::FILL);
+    layoutProperty->UpdateImageFit(ImageFit::FILL);
+    frameNode->MarkModifyDone();
+    EXPECT_EQ(imageRenderProperty->GetImageFit(), ImageFit::FILL);
+    EXPECT_EQ(layoutProperty->GetImageFit(), ImageFit::FILL);
+
+    /**
+     * @tc.steps: step5. set objectFit
+     */
+    imageRenderProperty->UpdateImageFit(ImageFit::CONTAIN);
+    layoutProperty->UpdateImageFit(ImageFit::CONTAIN);
+    frameNode->MarkModifyDone();
+    EXPECT_EQ(imageRenderProperty->GetImageFit(), ImageFit::CONTAIN);
+    EXPECT_EQ(layoutProperty->GetImageFit(), ImageFit::CONTAIN);
+
+    /**
+     * @tc.steps: step6. set objectFit
+     */
+    imageRenderProperty->UpdateImageFit(ImageFit::COVER);
+    layoutProperty->UpdateImageFit(ImageFit::COVER);
+    frameNode->MarkModifyDone();
+    EXPECT_EQ(imageRenderProperty->GetImageFit(), ImageFit::COVER);
+    EXPECT_EQ(layoutProperty->GetImageFit(), ImageFit::COVER);
+
+    /**
+     * @tc.steps: step7. set objectFit
+     */
+    imageRenderProperty->UpdateImageFit(ImageFit::FITWIDTH);
+    layoutProperty->UpdateImageFit(ImageFit::FITWIDTH);
+    frameNode->MarkModifyDone();
+    EXPECT_EQ(imageRenderProperty->GetImageFit(), ImageFit::FITWIDTH);
+    EXPECT_EQ(layoutProperty->GetImageFit(), ImageFit::FITWIDTH);
+
+    /**
+     * @tc.steps: step8. set objectFit
+     */
+    imageRenderProperty->UpdateImageFit(ImageFit::FITHEIGHT);
+    layoutProperty->UpdateImageFit(ImageFit::FITHEIGHT);
+    frameNode->MarkModifyDone();
+    EXPECT_EQ(imageRenderProperty->GetImageFit(), ImageFit::FITHEIGHT);
+    EXPECT_EQ(layoutProperty->GetImageFit(), ImageFit::FITHEIGHT);
+
+    /**
+     * @tc.steps: step9. set objectFit
+     */
+    imageRenderProperty->UpdateImageFit(ImageFit::NONE);
+    layoutProperty->UpdateImageFit(ImageFit::NONE);
+    frameNode->MarkModifyDone();
+    EXPECT_EQ(imageRenderProperty->GetImageFit(), ImageFit::NONE);
+    EXPECT_EQ(layoutProperty->GetImageFit(), ImageFit::NONE);
+
+    /**
+     * @tc.steps: step10. set objectFit
+     */
+    imageRenderProperty->UpdateImageFit(ImageFit::SCALE_DOWN);
+    layoutProperty->UpdateImageFit(ImageFit::SCALE_DOWN);
+    frameNode->MarkModifyDone();
+    EXPECT_EQ(imageRenderProperty->GetImageFit(), ImageFit::SCALE_DOWN);
+    EXPECT_EQ(layoutProperty->GetImageFit(), ImageFit::SCALE_DOWN);
+
+    /**
+     * @tc.steps: step11. set objectFit
+     */
+    imageRenderProperty->UpdateImageFit(ImageFit::TOP_LEFT);
+    layoutProperty->UpdateImageFit(ImageFit::TOP_LEFT);
+    frameNode->MarkModifyDone();
+    EXPECT_EQ(imageRenderProperty->GetImageFit(), ImageFit::TOP_LEFT);
+    EXPECT_EQ(layoutProperty->GetImageFit(), ImageFit::TOP_LEFT);
+}
 } // namespace OHOS::Ace::NG

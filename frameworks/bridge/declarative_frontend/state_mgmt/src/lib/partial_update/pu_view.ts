@@ -43,11 +43,46 @@ const UndefinedElmtId = -1;
 
 // function type of partial update function
 type UpdateFunc = (elmtId: number, isFirstRender: boolean) => void;
+type UIClassObject = { prototype: Object, pop?: () => void };
 
-interface UpdateFuncRecord {
-  updateFunc: UpdateFunc;
-  componentName: string;
-  node?: object
+// UpdateFuncRecord: misc framework-internal info related to updating of a UINode C++ object 
+// that TS side needs to know. 
+// updateFunc_  lambda function to update the UINode
+// JS interface class reference (it only has static functions)
+class UpdateFuncRecord {
+  private updateFunc_: UpdateFunc;
+  private classObject_: UIClassObject;
+  private node_?: Object
+
+  constructor(params: { updateFunc: UpdateFunc, classObject?: UIClassObject, node?: Object }) {
+    this.updateFunc_ = params.updateFunc;
+    this.classObject_ = params.classObject;
+    this.node_ = params.node;
+  }
+
+  public getUpdateFunc() : UpdateFunc | undefined {
+    return this.updateFunc_;
+  }
+
+  public getComponentClass(): UIClassObject | undefined {
+    return this.classObject_;
+  }
+
+  public getComponentName(): string {
+    return (this.classObject_ && ("name" in this.classObject_)) ? Reflect.get(this.classObject_, "name") as string : "unspecified UINode"; 
+  }
+
+  public getPopFunc(): () => void {
+    return (this.classObject_ && "pop" in this.classObject_) ? this.classObject_.pop! : () => { };
+  }
+
+  public getNode(): Object | undefined {
+    return this.node_;
+  }
+
+  public setNode(node: Object | undefined): void{
+    this.node_ = node;
+  }
 }
 
 // function type of recycle node update function
@@ -74,8 +109,20 @@ abstract class ViewPU extends NativeViewPartialUpdate
   private parent_: ViewPU = undefined;
   private childrenWeakrefMap_ = new Map<number, WeakRef<ViewPU>>();
 
-  // flag for initgial rendering or re-render on-going.
+  // flag for initial rendering or re-render on-going.
   private isRenderInProgress: boolean = false;
+
+  // flag for initial rendering being done
+  private isInitialRenderDone: boolean = false;
+
+  // indicates the currently rendered or rendered UINode's elmtId
+  // or -1 if none is currently rendering
+  // isRenderInProgress==true always when renderingOfElementIdOnGoing_>=0 
+  private currentlyRenderedElmtId_ : number = -1;
+
+  // static flag for paused rendering
+  // when paused, getCurrentlyRenderedElmtId() will return -1
+  private static renderingPaused: boolean = false;
 
   // flag if active of inActive
   // inActive means updates are delayed
@@ -98,7 +145,7 @@ abstract class ViewPU extends NativeViewPartialUpdate
   private extraInfo_:ExtraInfo = undefined;
 
   // @Provide'd variables by this class and its ancestors
-  protected providedVars_: ProvidedVarsMapPU;
+  protected providedVars_: ProvidedVarsMapPU = new Map<string, ObservedPropertyAbstractPU<any>>();
 
   // Set of dependent elmtIds that need partial update
   // during next re-render
@@ -107,8 +154,58 @@ abstract class ViewPU extends NativeViewPartialUpdate
 
   // registry of update functions
   // the key is the elementId of the Component/Element that's the result of this function
-  protected updateFuncByElmtId: Map<number, UpdateFunc | UpdateFuncRecord>
-    = new Map<number, UpdateFunc | UpdateFuncRecord>();
+  private updateFuncByElmtId = new class UpdateFuncsByElmtId {
+
+    private map_ = new Map<number, UpdateFuncRecord>();
+
+    public delete(elmtId: number): boolean {
+      return this.map_.delete(elmtId);
+    }
+
+    public set(elmtId: number, params: UpdateFunc | { updateFunc: UpdateFunc, classObject?: UIClassObject, node?: Object }): void {
+      (typeof params == "object") ? 
+        this.map_.set(elmtId, new UpdateFuncRecord(params))
+        : this.map_.set(elmtId, new UpdateFuncRecord({ updateFunc: params as UpdateFunc }));
+    }
+
+    public get(elmtId: number): UpdateFuncRecord | undefined {
+      return this.map_.get(elmtId);
+    }
+
+    public keys(): IterableIterator<number> {
+      return this.map_.keys();
+    }
+
+    public clear(): void {
+      return this.map_.clear();
+    }
+
+    public get size(): number {
+      return this.map_.size;
+    }
+
+    public forEach(callbackfn: (value: UpdateFuncRecord, key: number, map: Map<number, UpdateFuncRecord>) => void) : void {
+      this.map_.forEach(callbackfn);
+    }
+
+    // dump info about known elmtIds to a string
+    // use function only for debug output and DFX.
+    public debugInfoRegisteredElmtIds(): string {
+      let result: string = "";
+      let sepa: string = "";
+      this.map_.forEach((value: UpdateFuncRecord, elmtId: number) => {
+        result += `${sepa}${value.getComponentName()}[${elmtId}]`;
+        sepa = ", ";
+      });
+      return result;
+    }
+
+    public debugInfoElmtId(elmtId: number): string {
+      const updateFuncEntry = this.map_.get(elmtId);
+      return updateFuncEntry ? `'${updateFuncEntry!.getComponentName()}[${elmtId}]'` : `'unknown component type'[${elmtId}]`;
+    }
+  }
+
 
   // my LocalStorage instance, shared with ancestor Views.
   // create a default instance on demand if none is initialized
@@ -181,11 +278,9 @@ abstract class ViewPU extends NativeViewPartialUpdate
   constructor(parent: ViewPU, localStorage: LocalStorage, elmtId : number = -1, extraInfo : ExtraInfo = undefined) {
     super();
     // if set use the elmtId also as the ViewPU object's subscribable id.
-    // these matching is requiremrnt for updateChildViewById(elmtId) being able to
+    // these matching is requirement for updateChildViewById(elmtId) being able to
     // find the child ViewPU object by given elmtId
     this.id_= elmtId == -1 ? SubscriberManager.MakeId() : elmtId;
-    this.providedVars_ = parent ? new Map(parent.providedVars_)
-      : new Map<string, ObservedPropertyAbstractPU<any>>();
 
     this.localStoragebackStore_ = undefined;
     stateMgmtConsole.debug(`ViewPU constructor: Creating @Component '${this.constructor.name}' from parent '${parent?.constructor.name}'`);
@@ -234,7 +329,7 @@ abstract class ViewPU extends NativeViewPartialUpdate
 
     stateMgmtConsole.debug(`${this.constructor.name}: aboutToBeDeletedInternal `);
 
-    // purge the elementids owning by this viewpu from the updateFuncByElmtId and also the state variable dependent elementids
+    // purge the elmtIds owned by this viewPU from the updateFuncByElmtId and also the state variable dependent elmtIds
     Array.from(this.updateFuncByElmtId.keys()).forEach((elemId: number) =>{
       this.purgeDeleteElmtId(elemId);
     })
@@ -282,17 +377,8 @@ abstract class ViewPU extends NativeViewPartialUpdate
     return `@Component '${this.constructor.name}'[${this.id__()}]`;
   }
 
-  // dump info about known elmtIds to a string
-  // use function only for debug output and DFX.
-  public debugInfoRegisteredElmtIds() : string {
-    let result : string = "";
-    let sepa : string ="";
-    this.updateFuncByElmtId.forEach((value: UpdateFunc | { updateFunc: UpdateFunc; componentName: string; }, elmtId: number) => {
-      const compName : string = (typeof value == "object") ? `'${value!.componentName}'` : `'unknown component type'`;
-      result += `${sepa}${compName}[${elmtId}]`;
-      sepa=", ";
-    });
-    return result;
+  public debugInfoRegisteredElmtIds() {
+    return this.updateFuncByElmtId.debugInfoRegisteredElmtIds();
   }
 
   // for given elmtIds look up their component name/type and format a string out of this info
@@ -308,12 +394,11 @@ abstract class ViewPU extends NativeViewPartialUpdate
   }
 
   public debugInfoElmtId(elmtId : number) : string {
-    const updateFuncEntry : UpdateFunc | { updateFunc: UpdateFunc; componentName: string; } = this.updateFuncByElmtId.get(elmtId);
-    return (typeof updateFuncEntry == "object") ? `'${updateFuncEntry!.componentName}[${elmtId}]'` : `'unknown component type'[${elmtId}]`;
+    return this.updateFuncByElmtId.debugInfoElmtId(elmtId);
   }
 
   public dumpStateVars() : void {
-    stateMgmtConsole.debug(`${this.debugInfo()}:  State variables:`);
+    stateMgmtConsole.debug(`${this.debugInfo()}:  State variables:\n ${this.debugInfoStateVars()}`);
   }
 
   private debugInfoStateVars(): string {
@@ -471,6 +556,7 @@ abstract class ViewPU extends NativeViewPartialUpdate
     this.isRenderInProgress = true;
     this.initialRender();
     this.isRenderInProgress = false;
+    this.isInitialRenderDone = true;
     stateMgmtProfiler.end();
   }
 
@@ -484,13 +570,13 @@ abstract class ViewPU extends NativeViewPartialUpdate
     }
 
     // do not process an Element that has been marked to be deleted
-    const updateFunc1: UpdateFuncRecord | UpdateFunc = this.updateFuncByElmtId.get(elmtId);
-    const updateFunc: UpdateFunc | undefined = ((typeof updateFunc1 == "object") ? (updateFunc1!.updateFunc) : updateFunc1) as UpdateFunc | undefined;
-    const componentName : string = (typeof updateFunc1 == "object") ? updateFunc1.componentName as string : "unknown component type";
+    const entry: UpdateFuncRecord | undefined = this.updateFuncByElmtId.get(elmtId);
+    const updateFunc = entry ? entry.getUpdateFunc() : undefined;
 
     if (typeof updateFunc !== "function") {
       stateMgmtConsole.debug(`${this.debugInfo()}: update function of elmtId ${elmtId} not found, internal error!`);
     } else {
+      const componentName = entry.getComponentName();
       stateMgmtConsole.debug(`${this.debugInfo()}: updateDirtyElements: re-render of ${componentName} elmtId ${elmtId} start ...`);
       this.isRenderInProgress = true;
       stateMgmtProfiler.begin("ViewPU.updateFunc");
@@ -509,6 +595,7 @@ abstract class ViewPU extends NativeViewPartialUpdate
       stateMgmtConsole.warn(`Printing profiler information`);
       stateMgmtProfiler.report();
   }
+
   /**
    * force a complete rerender / update by executing all update functions
    * exec a regular rerender first
@@ -588,7 +675,7 @@ abstract class ViewPU extends NativeViewPartialUpdate
 
       this.syncInstanceId();
 
-      if (dependentElmtIds.size && !this.isFirstRender()) {
+      if (dependentElmtIds.size && this.isInitialRenderDone) {
         if (!this.dirtDescendantElementIds_.size && !this.runReuse_) {
           // mark ComposedElement dirty when first elmtIds are added
           // do not need to do this every time
@@ -629,7 +716,7 @@ abstract class ViewPU extends NativeViewPartialUpdate
       const changedElmtIds = stateLinkPropVar.moveElmtIdsForDelayedUpdate();
       if (changedElmtIds) {
         const varName = stateLinkPropVar.info();
-        if (changedElmtIds.size && !this.isFirstRender()) {
+        if (changedElmtIds.size && this.isInitialRenderDone) {
           for (const elmtId of changedElmtIds) {
             this.dirtDescendantElementIds_.add(elmtId);
           }
@@ -672,12 +759,19 @@ abstract class ViewPU extends NativeViewPartialUpdate
    *        decorator param
    * @param store the backing store object for this variable (not the get/set variable!)
    */
-  protected addProvidedVar<T>(providedPropName: string, store: ObservedPropertyAbstractPU<T>) {
-    if (this.providedVars_.has(providedPropName)) {
-      throw new ReferenceError(`${this.constructor.name}: duplicate @Provide property with name ${providedPropName}.
-      Property with this name is provided by one of the ancestor Views already.`);
+  protected addProvidedVar<T>(providedPropName: string, store: ObservedPropertyAbstractPU<T>, allowOverride : boolean = false) {
+    if (!allowOverride && this.findProvide(providedPropName)) {
+      throw new ReferenceError(`${this.constructor.name}: duplicate @Provide property with name ${providedPropName}. Property with this name is provided by one of the ancestor Views already. @Provide override not allowed.`);
     }
     this.providedVars_.set(providedPropName, store);
+  }
+
+  /*
+    findProvide finds @Provided property recursively by traversing ViewPU's towards that of the UI tree root @Component:
+    if 'this' ViewPU has a @Provide("providedPropName") return it, otherwise ask from its parent ViewPU.
+  */
+  public findProvide(providedPropName: string): ObservedPropertyAbstractPU<any> | undefined {
+    return this.providedVars_.get(providedPropName) || (this.parent_ && this.parent_.findProvide(providedPropName));
   }
 
   /**
@@ -693,7 +787,7 @@ abstract class ViewPU extends NativeViewPartialUpdate
    */
   protected initializeConsume<T>(providedPropName: string,
     consumeVarName: string): ObservedPropertyAbstractPU<T> {
-    let providedVarStore : ObservedPropertyAbstractPU<any> = this.providedVars_.get(providedPropName);
+    let providedVarStore : ObservedPropertyAbstractPU<any> = this.findProvide(providedPropName);
     if (providedVarStore === undefined) {
       throw new ReferenceError(`${this.debugInfo()} missing @Provide property with name ${providedPropName}.
           Fail to resolve @Consume(${providedPropName}).`);
@@ -751,8 +845,8 @@ abstract class ViewPU extends NativeViewPartialUpdate
     stateMgmtProfiler.end();
   }
 
-  // request list of all (global) elmtIds of deleted UINodes and unregister from the all viewpus
-  // this function equals purgeDeletedElmtIdsRecursively because it does unregistration for all viewpus
+  // request list of all (global) elmtIds of deleted UINodes and unregister from the all ViewPUs
+  // this function equals purgeDeletedElmtIdsRecursively because it does unregistration for all ViewPUs
   protected purgeDeletedElmtIds(): void {
     stateMgmtConsole.debug(`purgeDeletedElmtIds @Component '${this.constructor.name}' (id: ${this.id__()}) start ...`)
     // request list of all (global) elmtIds of deleted UINodes that need to be unregistered
@@ -770,22 +864,53 @@ abstract class ViewPU extends NativeViewPartialUpdate
     })
   }
 
+  /**
+   * return its elmtId if currently rendering or re-rendering an UINode
+   * otherwise return -1
+   * set in observeComponentCreation(2)
+   */
+  public getCurrentlyRenderedElmtId() {
+    return ViewPU.renderingPaused ? -1 : this.currentlyRenderedElmtId_;
+  }
+
+  public static pauseRendering() {
+    ViewPU.renderingPaused = true;
+  }
+
+  public static restoreRendering() {
+    ViewPU.renderingPaused = false;
+  }
+
   // executed on first render only
   // kept for backward compatibility with old ace-ets2bundle
   public observeComponentCreation(compilerAssignedUpdateFunc: UpdateFunc): void {
     if (this.isDeleting_) {
-      stateMgmtConsole.error(`View ${this.constructor.name} elmtId ${this.id__()} is already in process of destrucion, will not execute observeComponentCreation `);
+      stateMgmtConsole.error(`View ${this.constructor.name} elmtId ${this.id__()} is already in process of destruction, will not execute observeComponentCreation `);
       return;
     }
+    const updateFunc = (elmtId: number, isFirstRender: boolean) => {
+      stateMgmtConsole.debug(`${this.debugInfo()}: ${isFirstRender ? `First render` : `Re-render/update`} start ....`);
+      this.currentlyRenderedElmtId_ = elmtId;
+      compilerAssignedUpdateFunc(elmtId, isFirstRender);
+      this.currentlyRenderedElmtId_ = -1;
+      stateMgmtConsole.debug(`${this.debugInfo()}: ${isFirstRender ? `First render` : `Re-render/update`} - DONE ....`);
+    }
+
     const elmtId = ViewStackProcessor.AllocateNewElmetIdForNextComponent();
-    stateMgmtConsole.debug(`${this.debugInfo()}: First render for elmtId ${elmtId} start ....`);
-    compilerAssignedUpdateFunc(elmtId, /* is first render */ true);
     // in observeComponentCreation function we do not get info about the component name, in 
     // observeComponentCreation2 we do.
-    this.updateFuncByElmtId.set(elmtId, { updateFunc: compilerAssignedUpdateFunc, componentName: "unknown" }  );
-    // add element id -> owningviewpu
+    this.updateFuncByElmtId.set(elmtId, { updateFunc: updateFunc });
+    // add element id -> owning ViewPU
     UINodeRegisterProxy.ElementIdToOwningViewPU_.set(elmtId, new WeakRef(this));
-    stateMgmtConsole.debug(`${this.debugInfo()}: First render for elmtId ${elmtId} - DONE.`);
+    try {
+      updateFunc(elmtId, /* is first render */ true );
+    } catch (error) {
+      // avoid the incompatible change that move set function before updateFunc.
+      this.updateFuncByElmtId.delete(elmtId);
+      UINodeRegisterProxy.ElementIdToOwningViewPU_.delete(elmtId);
+      stateMgmtConsole.applicationError(`${this.debugInfo()} has error in update func: ${(error as Error).message}`)
+      throw error;
+    }
   }
 
   // executed on first render only
@@ -795,7 +920,7 @@ abstract class ViewPU extends NativeViewPartialUpdate
   // - pop : () => void, static function present for JSXXX classes such as Column, TapGesture, etc.
   public observeComponentCreation2(compilerAssignedUpdateFunc: UpdateFunc, classObject: { prototype : Object, pop?: () => void }): void {
     if (this.isDeleting_) {
-      stateMgmtConsole.error(`View ${this.constructor.name} elmtId ${this.id__()} is already in process of destrucion, will not execute observeComponentCreation2 `);
+      stateMgmtConsole.error(`View ${this.constructor.name} elmtId ${this.id__()} is already in process of destruction, will not execute observeComponentCreation2 `);
       return;
     }
     const _componentName : string =  (classObject && ("name" in classObject)) ? Reflect.get(classObject, "name") as string : "unspecified UINode";
@@ -804,10 +929,12 @@ abstract class ViewPU extends NativeViewPartialUpdate
       this.syncInstanceId();
       stateMgmtConsole.debug(`${this.debugInfo()}: ${isFirstRender ? `First render` : `Re-render/update`} start ....`);
       ViewStackProcessor.StartGetAccessRecordingFor(elmtId);
+      this.currentlyRenderedElmtId_ = elmtId;
       compilerAssignedUpdateFunc(elmtId, isFirstRender);
       if (!isFirstRender) {
         _popFunc();
       }
+      this.currentlyRenderedElmtId_ = -1;
       ViewStackProcessor.StopGetAccessRecording();
       stateMgmtConsole.debug(`${this.debugInfo()}: ${isFirstRender ? `First render` : `Re-render/update`} - DONE ....`);
       this.restoreInstanceId();
@@ -816,8 +943,8 @@ abstract class ViewPU extends NativeViewPartialUpdate
     const elmtId = ViewStackProcessor.AllocateNewElmetIdForNextComponent();
     // needs to move set before updateFunc.
     // make sure the key and object value exist since it will add node in attributeModifier during updateFunc.
-    this.updateFuncByElmtId.set(elmtId, { updateFunc: updateFunc, componentName: _componentName } );
-    // add element id -> owningviewpu
+    this.updateFuncByElmtId.set(elmtId, { updateFunc: updateFunc, classObject: classObject } );
+    // add element id -> owning ViewPU
     UINodeRegisterProxy.ElementIdToOwningViewPU_.set(elmtId,  new WeakRef(this));
     try {
       updateFunc(elmtId, /* is first render */ true );
@@ -879,12 +1006,12 @@ abstract class ViewPU extends NativeViewPartialUpdate
     const oldElmtId: number = node.id__();
     // store the current id and origin id, used for dirty element sort in {compareNumber}
     recycleUpdateFunc(newElmtId, /* is first render */ true, node);
-    const oldEntry: UpdateFunc | UpdateFuncRecord | undefined = this.updateFuncByElmtId.get(oldElmtId);
+    const oldEntry: UpdateFuncRecord | undefined = this.updateFuncByElmtId.get(oldElmtId);
     this.updateFuncByElmtId.delete(oldElmtId);
     this.updateFuncByElmtId.set(newElmtId, {
       updateFunc: compilerAssignedUpdateFunc,
-      componentName: (typeof oldEntry == "object") ? oldEntry.componentName : "unknown",
-      node: (typeof oldEntry == "object") ? oldEntry.node : undefined,
+      classObject: oldEntry && oldEntry.getComponentClass(),
+      node: oldEntry && oldEntry.getNode()
     });
     node.updateId(newElmtId);
     node.updateRecycleElmtId(oldElmtId, newElmtId);
@@ -1103,15 +1230,12 @@ abstract class ViewPU extends NativeViewPartialUpdate
   public createOrGetNode(elmtId: number, builder: () => object): object {
     const entry = this.updateFuncByElmtId.get(elmtId);
     if (entry === undefined) {
-      throw new Error(`${this.debugInfo()} fail to create node, elemtId is illegal`);
+      throw new Error(`${this.debugInfo()} fail to create node, elmtId is illegal`);
     }
-    if (typeof entry !== 'object') {
-      throw new Error('need update toolchain version');
-    }
-    let nodeInfo = (entry as UpdateFuncRecord).node;
+    let nodeInfo = entry.getNode();
     if (nodeInfo === undefined) {
       nodeInfo = builder();
-      entry.node = nodeInfo;
+      entry.setNode(nodeInfo);
     }
     return nodeInfo;
   }
@@ -1268,7 +1392,7 @@ abstract class ViewPU extends NativeViewPartialUpdate
   private debugInfoUpdateFuncByElmtIdInternal(counter: ProfileRecursionCounter, depth: number = 0, recursive: boolean = false): string {
     let retVaL: string = `\n${"  ".repeat(depth)}|--${this.constructor.name}[${this.id__()}]: {`;
     this.updateFuncByElmtId.forEach((value, key, map) => {
-      retVaL += `\n${"  ".repeat(depth + 2)}${(typeof value == "object") ? value.componentName : "unknown component"}[${key}]`
+      retVaL += `\n${"  ".repeat(depth + 2)}${value.getComponentName()}[${key}]`
     })
     counter.total += this.updateFuncByElmtId.size;
     retVaL += `\n${"  ".repeat(depth + 1)}}[${this.updateFuncByElmtId.size}]`

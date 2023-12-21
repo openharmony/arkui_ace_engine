@@ -54,10 +54,10 @@ void IndexerLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto actualWidth = selfIdealSize.Width().has_value()
                            ? selfIdealSize.Width().value()
                            : std::clamp(contentWidth, 0.0f, layoutConstraint.maxSize.Width());
-    auto actualHeight = selfIdealSize.Height().has_value()
+    actualHeight_ = selfIdealSize.Height().has_value()
                             ? selfIdealSize.Height().value()
                             : std::clamp(contentHeight, 0.0f, layoutConstraint.maxSize.Height());
-    contentHeight = GreatNotEqual(contentHeight, actualHeight) ? actualHeight : contentHeight;
+    contentHeight = GreatNotEqual(contentHeight, actualHeight_) ? actualHeight_ : contentHeight;
     itemWidth_ = GreatOrEqual(actualWidth - horizontalPadding, 0.0f) ? actualWidth - horizontalPadding : 0.0f;
     itemSizeRender_ =
         GreatOrEqual(contentHeight - verticalPadding, 0.0f) ? (contentHeight - verticalPadding) / itemCount_ : 0.0f;
@@ -70,7 +70,7 @@ void IndexerLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         childLayoutConstraint.UpdateSelfMarginSizeWithCheck(OptionalSizeF(itemWidth_, itemSizeRender_));
         childWrapper->Measure(childLayoutConstraint);
     }
-    layoutWrapper->GetGeometryNode()->SetFrameSize(SizeF(actualWidth, actualHeight));
+    layoutWrapper->GetGeometryNode()->SetFrameSize(SizeF(actualWidth, actualHeight_));
 }
 
 void IndexerLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)

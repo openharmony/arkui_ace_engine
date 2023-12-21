@@ -248,13 +248,13 @@ void SelectOverlayPattern::HandleTouchEvent(const TouchEventInfo& info)
 void SelectOverlayPattern::HandlePanStart(GestureEvent& info)
 {
     PointF point = { info.GetLocalLocation().GetX(), info.GetLocalLocation().GetY() };
-    if (firstHandleRegion_.IsInRegion(point)) {
+    if (firstHandleRegion_.IsInRegion(point) && info.GetSourceDevice() != SourceType::MOUSE) {
         firstHandleDrag_ = true;
         secondHandleDrag_ = false;
         if (info_->onHandleMoveStart) {
             info_->onHandleMoveStart(firstHandleDrag_);
         }
-    } else if (secondHandleRegion_.IsInRegion(point)) {
+    } else if (secondHandleRegion_.IsInRegion(point) && info.GetSourceDevice() != SourceType::MOUSE) {
         firstHandleDrag_ = false;
         secondHandleDrag_ = true;
         if (info_->onHandleMoveStart) {

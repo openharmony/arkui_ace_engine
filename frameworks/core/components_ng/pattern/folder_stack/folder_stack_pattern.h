@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_FOLDER_STACK_FOLDER_STACK_PATTERN_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_FOLDER_STACK_FOLDER_STACK_PATTERN_H
 
+#include "base/thread/cancelable_callback.h"
 #include "core/common/display_info.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/pattern/folder_stack/folder_stack_event_hub.h"
@@ -94,12 +95,16 @@ private:
     void OnModifyDone() override;
     void InitFolderStackPatternAppearCallback();
     void RestoreScreenState();
+    void SetAutoRotate();
     std::optional<int32_t> foldStatusChangedCallbackId_;
     bool isScreenRotationLocked_ = false;
     Orientation lastOrientation_ = Orientation::UNSPECIFIED;
     bool isNeedRestoreScreenState_ = false;
     bool isAppearCallback_ = false;
     RefPtr<DisplayInfo> displayInfo_;
+    bool hasInHoverMode_ = false;
+    FoldStatus currentFoldStatus_ = FoldStatus::UNKNOWN;
+    CancelableCallback<void()> foldStatusDelayTask_;
 };
 } // namespace OHOS::Ace::NG
 

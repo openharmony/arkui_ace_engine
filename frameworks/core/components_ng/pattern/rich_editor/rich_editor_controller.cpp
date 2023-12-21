@@ -36,6 +36,13 @@ int32_t RichEditorController::AddTextSpan(const TextSpanOptions& options)
     return richEditorPattern->AddTextSpan(options);
 }
 
+int32_t RichEditorController::AddSymbolSpan(const SymbolSpanOptions& options)
+{
+    auto richEditorPattern = pattern_.Upgrade();
+    CHECK_NULL_RETURN(richEditorPattern, 0);
+    return richEditorPattern->AddSymbolSpan(options);
+}
+
 int32_t RichEditorController::AddPlaceholderSpan(const RefPtr<UINode>& customNode, const SpanOptionBase& options)
 {
     auto richEditorPattern = pattern_.Upgrade();
@@ -92,9 +99,9 @@ void RichEditorController::SetUpdateSpanStyle(struct UpdateSpanStyle updateSpanS
     updateSpanStyle_ = updateSpanStyle;
 }
 
-RichEditorSelection RichEditorController::GetSpansInfo(int32_t start, int32_t end)
+SelectionInfo RichEditorController::GetSpansInfo(int32_t start, int32_t end)
 {
-    RichEditorSelection value;
+    SelectionInfo value;
     auto richEditorPattern = pattern_.Upgrade();
     if (richEditorPattern) {
         value = richEditorPattern->GetSpansInfo(start, end, GetSpansMethod::GETSPANS);
@@ -102,9 +109,9 @@ RichEditorSelection RichEditorController::GetSpansInfo(int32_t start, int32_t en
     return value;
 }
 
-RichEditorSelection RichEditorController::GetSelectionSpansInfo()
+SelectionInfo RichEditorController::GetSelectionSpansInfo()
 {
-    RichEditorSelection value;
+    SelectionInfo value;
     auto richEditorPattern = pattern_.Upgrade();
     if (richEditorPattern) {
         auto start = std::max(richEditorPattern->GetTextSelector().GetTextStart(), 0);

@@ -152,6 +152,7 @@ public:
     void SetLayoutMode(WebLayoutMode mode) override;
     void SetNestedScroll(const NestedScrollOptions& nestedOpt) override;
     void JavaScriptOnDocumentStart(const ScriptItems& scriptItems) override;
+    void JavaScriptOnDocumentEnd(const ScriptItems& scriptItems) override;
     
     void SetPermissionClipboard(std::function<void(const std::shared_ptr<BaseEventInfo>&)>&& jsCallback) override;
 };

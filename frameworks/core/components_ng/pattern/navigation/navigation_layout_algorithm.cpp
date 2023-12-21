@@ -218,9 +218,6 @@ void NavigationLayoutAlgorithm::RangeCalculation(
             static_cast<float>(userSetMaxNavBarWidthValue.ConvertToPxWithSize(parentSize.Width().value_or(0.0f)));
     }
     maxNavBarWidthValue_ = Dimension(std::max(maxNavBarWidth, minNavBarWidth), DimensionUnit::PX);
-    auto navBarWidthValue = navigationLayoutProperty->GetNavBarWidthValue(DEFAULT_NAV_BAR_WIDTH);
-    auto navBarWidth = navBarWidthValue.ConvertToPxWithSize(parentSize.Width().value_or(0.0f));
-    realNavBarWidth_ = navBarWidth;
     auto currentPlatformVersion = pipeline->GetMinPlatformVersion();
     if (currentPlatformVersion >= PLATFORM_VERSION_TEN) {
         auto minNavBarWidth = minNavBarWidthValue_.ConvertToPxWithSize(parentSize.Width().value_or(0.0f));
@@ -266,6 +263,10 @@ void NavigationLayoutAlgorithm::UpdateNavigationMode(const RefPtr<NavigationLayo
     if (usrNavigationMode == NavigationMode::AUTO) {
         if (frameSize.Width() >= navigationWidth) {
             usrNavigationMode = NavigationMode::SPLIT;
+            auto navBarNode = hostNode->GetNavBarNode();
+            if (navBarNode) {
+                navBarNode->SetActive(true);
+            }
         } else {
             usrNavigationMode = NavigationMode::STACK;
         }

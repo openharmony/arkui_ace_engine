@@ -160,6 +160,7 @@ template("declarative_js_engine") {
       "engine/functions/js_page_transition_function.cpp",
       "engine/functions/js_pan_function.cpp",
       "engine/functions/js_swiper_function.cpp",
+      "engine/functions/js_tabs_function.cpp",
       "engine/functions/js_touch_function.cpp",
       "engine/functions/js_webview_function.cpp",
       "engine/js_types.cpp",
@@ -281,6 +282,8 @@ template("declarative_js_engine") {
       "jsview/js_stepper.cpp",
       "jsview/js_stepper_item.cpp",
       "jsview/js_swiper.cpp",
+      "jsview/js_symbol.cpp",
+      "jsview/js_symbol_span.cpp",
       "jsview/js_tab_content.cpp",
       "jsview/js_tabs.cpp",
       "jsview/js_tabs_controller.cpp",
@@ -591,6 +594,16 @@ template("declarative_js_engine") {
           "jsview/window_scene/js_screen.cpp",
           "jsview/window_scene/js_window_scene.cpp",
         ]
+
+        if (defined(config.dynamic_component_support) &&
+            config.dynamic_component_support && !build_ohos_sdk) {
+          external_deps += [ "ets_utils:worker" ]
+
+          include_dirs +=
+              [ "//commonlibrary/ets_utils/js_concurrent_module/common" ]
+
+          sources += [ "jsview/js_dynamic_component.cpp" ]
+        }
       }
     }
   }
@@ -636,6 +649,7 @@ template("declarative_js_engine_ng") {
       "engine/functions/js_page_transition_function.cpp",
       "engine/functions/js_pan_function.cpp",
       "engine/functions/js_swiper_function.cpp",
+      "engine/functions/js_tabs_function.cpp",
       "engine/functions/js_touch_function.cpp",
       "engine/functions/js_webview_function.cpp",
       "engine/js_types.cpp",
@@ -758,6 +772,8 @@ template("declarative_js_engine_ng") {
       "jsview/js_stepper.cpp",
       "jsview/js_stepper_item.cpp",
       "jsview/js_swiper.cpp",
+      "jsview/js_symbol.cpp",
+      "jsview/js_symbol_span.cpp",
       "jsview/js_tab_content.cpp",
       "jsview/js_tabs.cpp",
       "jsview/js_tabs_controller.cpp",
@@ -811,6 +827,16 @@ template("declarative_js_engine_ng") {
         "jsview/window_scene/js_screen.cpp",
         "jsview/window_scene/js_window_scene.cpp",
       ]
+
+      if (defined(config.dynamic_component_support) &&
+          config.dynamic_component_support && !build_ohos_sdk) {
+        external_deps += [ "ets_utils:worker" ]
+
+        include_dirs =
+            [ "//commonlibrary/ets_utils/js_concurrent_module/common" ]
+
+        sources += [ "jsview/js_dynamic_component.cpp" ]
+      }
     }
 
     if (defined(config.enable_ability_component) &&

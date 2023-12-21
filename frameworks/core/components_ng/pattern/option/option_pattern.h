@@ -201,6 +201,7 @@ private:
     bool OnKeyEvent(const KeyEvent& event);
 
     void OnSelectProcess();
+    bool UpdateOptionFocus(KeyCode code);
     void SetAccessibilityAction();
     void UpdatePasteFontColor(const Color& fontColor);
 

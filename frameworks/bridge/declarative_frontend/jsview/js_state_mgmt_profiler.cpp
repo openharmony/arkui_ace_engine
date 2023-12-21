@@ -119,7 +119,6 @@ void JSStateMgmtProfiler::ProfileBlock::Report(int32_t depth) const
     const int itemPrecision = 3;
     const int nanoSecsInMilliSec = 1000000;
     
-    ss << (static_cast<double>(totalTime_ - ownLookupTime_) / nanoSecsInMilliSec) << "ms";
     ss << std::left << std::string(depth, ' ');
     ss << name_;
     ss << std::setw(nameAdjustWidth - name_.size() - depth);

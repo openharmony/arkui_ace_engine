@@ -112,14 +112,12 @@ void CustomDialogControllerModelNG::SetCloseDialog(DialogProperties& dialogPrope
         }
         CHECK_NULL_VOID(dialog);
         if (dialogProperties.isShowInSubWindow) {
+            SubwindowManager::GetInstance()->DeleteHotAreas(
+                SubwindowManager::GetInstance()->GetDialogSubWindowId(), dialog->GetId());
+            SubwindowManager::GetInstance()->HideDialogSubWindow(
+                SubwindowManager::GetInstance()->GetDialogSubWindowId());
             SubwindowManager::GetInstance()->CloseDialogNG(dialog);
             dialogs.pop_back();
-            auto parentContext = PipelineContext::GetMainPipelineContext();
-            CHECK_NULL_VOID(parentContext);
-            auto parentOverlay = parentContext->GetOverlayManager();
-            CHECK_NULL_VOID(parentOverlay);
-            SubwindowManager::GetInstance()->DeleteHotAreas(parentOverlay->GetSubwindowId(), dialog->GetId());
-            SubwindowManager::GetInstance()->HideDialogSubWindow(parentOverlay->GetSubwindowId());
         } else {
             overlayManager->CloseDialog(dialog);
             dialogs.pop_back();

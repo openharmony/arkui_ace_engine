@@ -39,6 +39,11 @@ public:
         return controlPartsStackRect_;
     }
 
+    bool GetIsIntoFolderStack() const
+    {
+        return isIntoFolderStack_;
+    }
+
 private:
     void LayoutHoverStack(LayoutWrapper* layoutWrapper, const RefPtr<FolderStackGroupNode>& hostNode,
         const RefPtr<FolderStackLayoutProperty>& folderStackLayoutProperty);

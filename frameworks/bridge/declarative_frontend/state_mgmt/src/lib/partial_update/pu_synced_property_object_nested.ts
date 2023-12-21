@@ -39,6 +39,7 @@ class SynchedPropertyNestedObjectPU<C extends Object>
     owningChildView: IPropertySubscriber, propertyName: PropertyInfo) {
     super(owningChildView, propertyName);
     this.obsObject_ = obsObject;
+    this.createSourceDependency(obsObject);
     this.setValueInternal(obsObject);
   }
 
@@ -56,18 +57,6 @@ class SynchedPropertyNestedObjectPU<C extends Object>
     return `@ObjectLink (class SynchedPropertyNestedObjectPU)`;
   }
 
-  public objectPropertyHasChangedPU(eventSource: ObservedObject<C>, changedPropertyName: string) {
-    stateMgmtConsole.debug(`${this.debugInfo()}: objectPropertyHasChangedPU: property '${changedPropertyName}' \
-                                                                of object value has changed.`)
-    this.notifyPropertyHasChangedPU();
-  }
-
-
-  public objectPropertyHasBeenReadPU(sourceObject: ObservedObject<C>, changedPropertyName : string) {
-    stateMgmtConsole.debug(`${this.debugInfo()}: property '${changedPropertyName}' of object value has been read.`);
-    this.notifyPropertyHasBeenReadPU();
-  }
-  
   public getUnmonitored(): C {
     stateMgmtConsole.propertyAccess(`${this.debugInfo()}: getUnmonitored.`);
     // unmonitored get access , no call to notifyPropertyRead !
@@ -76,12 +65,21 @@ class SynchedPropertyNestedObjectPU<C extends Object>
 
   // get 'read through` from the ObservedProperty
   public get(): C {
+    stateMgmtProfiler.begin("SynchedPropertyNestedObjectPU.get");
     stateMgmtConsole.propertyAccess(`${this.debugInfo()}: get`)
-    this.notifyPropertyHasBeenReadPU()
+    this.recordPropertyDependentUpdate();
+    if (this.shouldInstallTrackedObjectReadCb) {
+      stateMgmtConsole.propertyAccess(`${this.debugInfo()}: get: @Track optimised mode. Will install read cb func if value is an object`);
+      ObservedObject.registerPropertyReadCb(this.obsObject_, this.onOptimisedObjectPropertyRead.bind(this));
+    } else {
+      stateMgmtConsole.propertyAccess(`${this.debugInfo()}: get: compatibility mode. `);
+    }
+    stateMgmtProfiler.end();
     return this.obsObject_;
   }
 
-  // set 'writes through` to the ObservedProperty
+  // parent ViewPU rerender, runs update lambda with child ViewPU that contains a @ObjectLink
+  // calls ViewPU.updateStateVarsByElmtId, calls updateStateVars in application class, calls this 'set' function
   public set(newValue: C): void {
     if (this.obsObject_ === newValue) {
       stateMgmtConsole.debug(`SynchedPropertyNestedObjectPU[${this.id__()}IP, '${this.info() || "unknown"}']: set @ObjectLink with unchanged value - nothing to do.`);
@@ -89,13 +87,39 @@ class SynchedPropertyNestedObjectPU<C extends Object>
     }
 
     stateMgmtConsole.propertyAccess(`${this.debugInfo()}: set: value about to change.`);
-
+    const oldValue = this.obsObject_;
     if (this.setValueInternal(newValue)) {
+      this.createSourceDependency(newValue);
       // notify value change to subscribing View
-      this.notifyPropertyHasChangedPU();
+      TrackedObject.notifyObjectValueAssignment(/* old value */ oldValue, /* new value */ this.obsObject_,
+        this.notifyPropertyHasChangedPU.bind(this),
+        this.notifyTrackedObjectPropertyHasChanged.bind(this));
     }
   }
 
+  protected onOptimisedObjectPropertyRead(readObservedObject: C, readPropertyName: string, isTracked: boolean): void {
+    stateMgmtProfiler.begin("SynchedPropertyNestedObjectPU.onOptimisedObjectPropertyRead");
+    const renderingElmtId = this.getRenderingElmtId();
+    if (renderingElmtId >= 0) {
+      if (!isTracked) {
+        stateMgmtConsole.applicationError(`${this.debugInfo()}: onOptimisedObjectPropertyRead read NOT TRACKED property '${readPropertyName}' during rendering!`);
+        throw new Error(`Illegal usage of not @Track'ed property '${readPropertyName}' on UI!`);
+      } else {
+        stateMgmtConsole.debug(`${this.debugInfo()}: onOptimisedObjectPropertyRead: ObservedObject property '@Track ${readPropertyName}' read.`);
+        if (this.getUnmonitored() === readObservedObject) {
+          this.recordTrackObjectPropertyDependencyForElmtId(renderingElmtId, readPropertyName)
+        }
+      }
+    }
+    stateMgmtProfiler.end();
+  }
+  
+  private createSourceDependency(sourceObject: C): void {
+    if (ObservedObject.IsObservedObject(sourceObject)) {
+      stateMgmtConsole.debug(`${this.debugInfo()} createSourceDependency: create dependency on source ObservedObject ...`);
+      const fake = (sourceObject as Object)[TrackedObject.___TRACKED_OPTI_ASSIGNMENT_FAKE_OBJLINK_PROPERTY];
+    }
+  }
 
   private setValueInternal(newValue: C): boolean {
     if (!this.checkIsObject(newValue)) {
@@ -109,6 +133,10 @@ class SynchedPropertyNestedObjectPU<C extends Object>
       } else if (ObservedObject.IsObservedObject(this.obsObject_)) {
         // unregister from the ObservedObject
         ObservedObject.removeOwningProperty(this.obsObject_, this);
+
+        // make sure the ObservedObject no longer has a read callback function
+        // assigned to it
+        ObservedObject.unregisterPropertyReadCb(this.obsObject_);
       }
     }
 
@@ -121,6 +149,7 @@ class SynchedPropertyNestedObjectPU<C extends Object>
       } else if (ObservedObject.IsObservedObject(this.obsObject_)) {
         // register to the ObservedObject
         ObservedObject.addOwningProperty(this.obsObject_, this);
+        this.shouldInstallTrackedObjectReadCb = TrackedObject.needsPropertyReadCb(this.obsObject_);
       } else {
         stateMgmtConsole.applicationError(`${this.debugInfo()}: set/init (method setValueInternal): assigned value is neither ObservedObject nor SubscribableAbstract. \
       value changes will bot be observed and UI will not update. forgot @Observed class decorator? Application error.`);

@@ -63,6 +63,7 @@ public:
     void RemoveFontNodeNG(const WeakPtr<NG::UINode>& node);
     void AddVariationNodeNG(const WeakPtr<NG::UINode>& node);
     void RemoveVariationNodeNG(const WeakPtr<NG::UINode>& node);
+    bool IsDefaultFontChanged();
 
 protected:
     static float fontWeightScale_;
@@ -75,6 +76,7 @@ private:
     // Render nodes need to layout when wght scale is changed.
     std::set<WeakPtr<RenderNode>> variationNodes_;
     std::set<WeakPtr<NG::UINode>> variationNodesNG_;
+    bool isDefaultFontChanged_ = false;
 };
 
 } // namespace OHOS::Ace

@@ -21,7 +21,7 @@
 
 #include "base/geometry/axis.h"
 #include "base/memory/referenced.h"
-#include "core/components/scroll/scrollable.h"
+#include "core/components_ng/pattern/scrollable/scrollable.h"
 #include "core/components_ng/event/gesture_event_actuator.h"
 #include "core/components_ng/pattern/scroll/scroll_edge_effect.h"
 

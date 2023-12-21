@@ -21,6 +21,11 @@
 #include "core/components_ng/animation/animatable_arithmetic_proxy.h"
 #include "core/components_ng/render/modifier_adapter.h"
 
+#include "render_service_client/core/animation/rs_animation.h"
+#include "render_service_client/core/ui/rs_node.h"
+#include "core/animation/native_curve_helper.h"
+#include "core/components_ng/render/animation_utils.h"
+
 namespace OHOS::Ace::NG {
 
 std::unordered_map<int32_t, std::shared_ptr<RSModifier>> g_ModifiersMap;
@@ -129,8 +134,12 @@ inline std::shared_ptr<RSPropertyBase> ConvertToRSProperty(const RefPtr<Property
             rsProp->Set(AnimatableArithmeticProxy(value));
         };
         castProp->SetUpCallbacks(getter, setter);
-        rsProp->SetUpdateCallback(
-            [cb = castProp->GetUpdateCallback()](const AnimatableArithmeticProxy& value) { cb(value.GetObject()); });
+        if (castProp->GetUpdateCallback()) {
+            rsProp->SetUpdateCallback(
+                [cb = castProp->GetUpdateCallback()](const AnimatableArithmeticProxy& value) {
+                    cb(value.GetObject());
+                });
+        }
         return rsProp;
     }
 
@@ -187,6 +196,51 @@ void RSNodeModifierImpl::AddProperty(const RefPtr<PropertyBase>& property)
         auto rsProperty = ConvertToRSProperty(property);
         AttachProperty(rsProperty);
         attachedProperty_ = rsProperty;
+    }
+}
+
+namespace {
+Rosen::FinishCallbackType ToAnimationFinishCallbackType(const FinishCallbackType finishCallbackType)
+{
+    if (finishCallbackType == FinishCallbackType::LOGICALLY) {
+        return Rosen::FinishCallbackType::LOGICALLY;
+    } else if (finishCallbackType == FinishCallbackType::REMOVED) {
+        return Rosen::FinishCallbackType::TIME_SENSITIVE;
+    } else {
+        return Rosen::FinishCallbackType::TIME_SENSITIVE;
+    }
+}
+Rosen::RSAnimationTimingProtocol OptionToTimingProtocol(const AnimationOption& option)
+{
+    Rosen::RSAnimationTimingProtocol timingProtocol;
+    timingProtocol.SetDuration(option.GetDuration());
+    timingProtocol.SetStartDelay(option.GetDelay());
+    timingProtocol.SetSpeed(option.GetTempo());
+    timingProtocol.SetRepeatCount(option.GetIteration());
+    timingProtocol.SetDirection(option.GetAnimationDirection() == AnimationDirection::NORMAL ||
+                                option.GetAnimationDirection() == AnimationDirection::ALTERNATE);
+    timingProtocol.SetAutoReverse(option.GetAnimationDirection() == AnimationDirection::ALTERNATE ||
+                                  option.GetAnimationDirection() == AnimationDirection::ALTERNATE_REVERSE);
+    timingProtocol.SetFillMode(static_cast<Rosen::FillMode>(option.GetFillMode()));
+    timingProtocol.SetFinishCallbackType(ToAnimationFinishCallbackType(option.GetFinishCallbackType()));
+    return timingProtocol;
+}
+} // namespace
+
+template<>
+void NodeAnimatableProperty<float, AnimatablePropertyFloat>::AnimateWithVelocity(const AnimationOption& option,
+    float value, float velocity, const FinishCallback& finishCallback)
+{
+    const auto& timingProtocol = OptionToTimingProtocol(option);
+    auto targetValue = std::make_shared<RSAnimatableProperty<float>>(value);
+    auto initialVelocity = std::make_shared<RSAnimatableProperty<float>>(velocity);
+    auto modify = std::static_pointer_cast<RSNodeModifierImpl>(GetModifyImpl());
+    if (modify) {
+        auto property = std::static_pointer_cast<RSAnimatableProperty<float>>(modify->GetProperty());
+        if (property) {
+            property->AnimateWithInitialVelocity(timingProtocol, NativeCurveHelper::ToNativeCurve(option.GetCurve()),
+                targetValue, initialVelocity, finishCallback, nullptr);
+        }
     }
 }
 } // namespace OHOS::Ace::NG

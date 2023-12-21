@@ -157,6 +157,8 @@ public:
         return true;
     }
 
+    bool CheckBlurReason();
+
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override;
 
     RefPtr<LayoutProperty> CreateLayoutProperty() override
@@ -203,13 +205,15 @@ public:
     void UpdateCounterMargin();
     void CleanCounterNode();
     void UltralimitShake();
-    void UpdateCounterBorderStyle(uint32_t& textLength, uint32_t& maxLength);
+    void HandleInputCounterBorder(int32_t& textLength, uint32_t& maxLength);
+    void UpdateCounterBorderStyle(int32_t& textLength, uint32_t& maxLength);
     void UpdateAreaBorderStyle(BorderWidthProperty& currentBorderWidth, BorderWidthProperty& overCountBorderWidth,
-    BorderColorProperty& overCountBorderColor, BorderColorProperty& currentBorderColor);
+        BorderColorProperty& overCountBorderColor, BorderColorProperty& currentBorderColor);
     void DeleteBackward(int32_t length) override;
     void DeleteBackwardOperation(int32_t length);
     void DeleteForward(int32_t length) override;
     void DeleteForwardOperation(int32_t length);
+    void HandleOnDelete(bool backward) override;
     void UpdateRecordCaretIndex(int32_t index);
     void CreateHandles() override;
 
@@ -226,6 +230,10 @@ public:
     void SetCounterState(bool counterChange)
     {
         counterChange_ = counterChange;
+    }
+    void SetCounterMargin(bool CounterMargin)
+    {
+        hasCounterMargin_ = CounterMargin;
     }
 
     float GetTextOrPlaceHolderFontSize();
@@ -275,7 +283,7 @@ public:
     void UpdateCaretPositionByTouch(const Offset& offset);
     bool IsReachedBoundary(float offset);
 
-    virtual TextInputAction GetDefaultTextInputAction();
+    virtual TextInputAction GetDefaultTextInputAction() const;
     bool RequestKeyboard(bool isFocusViewChanged, bool needStartTwinkling, bool needShowSoftKeyboard);
     bool CloseKeyboard(bool forceClose) override;
 
@@ -777,6 +785,10 @@ public:
     void HandleSelectionEnd();
     bool HandleOnEscape() override;
     bool HandleOnTab(bool backward) override;
+    void HandleOnEnter() override
+    {
+        PerformAction(GetTextInputActionValue(TextInputAction::DONE), false);
+    }
     void HandleOnUndoAction() override;
     void HandleOnRedoAction() override;
     void HandleOnSelectAll(bool isKeyEvent, bool inlineStyle = false);
@@ -1005,11 +1017,6 @@ public:
             return;
         }
         isShowMagnifier_ = isShowMagnifier;
-        if (isShowMagnifier_) {
-            MakeHighZIndex();
-        } else {
-            MakeZIndexRollBack();
-        }
     }
 
     bool GetShowMagnifier() const
@@ -1035,6 +1042,10 @@ public:
     }
 
     void ShowMenu();
+    void HandleOnShowMenu() override
+    {
+        ShowMenu();
+    }
     bool HasFocus() const;
     void StopTwinkling();
 
@@ -1045,6 +1056,7 @@ public:
 #ifdef ENABLE_DRAG_FRAMEWORK
     void HandleOnDragStatusCallback(
         const DragEventType& dragEventType, const RefPtr<NotifyDragEvent>& notifyDragEvent) override;
+
 protected:
     virtual void InitDragEvent();
 #endif
@@ -1095,7 +1107,6 @@ private:
     void HandleLongPress(GestureEvent& info);
     void UpdateCaretPositionWithClamp(const int32_t& pos);
     void ShowSelectOverlay(const ShowSelectOverlayParams& params);
-    void ShowSelectOverlayAfterDrag();
     void CursorMoveOnClick(const Offset& offset);
 
     void ProcessOverlay(
@@ -1166,6 +1177,7 @@ private:
 
     bool IsTouchAtLeftOffset(float currentOffsetX);
     void FilterExistText();
+    void CreateErrorParagraph(const std::string& content);
     void UpdateErrorTextMargin();
     OffsetF GetTextPaintOffset() const;
     void UpdateSelectController();
@@ -1206,9 +1218,6 @@ private:
     void ScrollToSafeArea() const override;
     void RecordSubmitEvent() const;
     void UpdateCancelNode();
-    void MakeHighZIndex();
-    void MakeZIndexRollBack();
-    void GetMaxZIndex(const RefPtr<UINode>& parent, const RefPtr<FrameNode>& pattern);
 
     RectF frameRect_;
     RectF contentRect_;
@@ -1279,7 +1288,7 @@ private:
     uint32_t twinklingInterval_ = 0;
     int32_t obscureTickCountDown_ = 0;
     int32_t nakedCharPosition_ = -1;
-    bool updateSelectionAfterObscure_ = false;
+    bool obscuredChange_ = false;
     float currentOffset_ = 0.0f;
     float countHeight_ = 0.0f;
     Dimension underlineWidth_ = 1.0_px;
@@ -1362,7 +1371,7 @@ private:
     bool isShowMagnifier_ = false;
     OffsetF localOffset_;
     bool isTouchCaret_ = false;
-    std::list<int32_t> zIndexRollBack_;
+    bool needSelectAll_ = false;
 };
 } // namespace OHOS::Ace::NG
 

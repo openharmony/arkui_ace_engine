@@ -119,6 +119,7 @@ bool SheetPresentationPattern::OnDirtyLayoutWrapperSwap(
     UpdateDragBarStatus();
     UpdateCloseIconStatus();
     UpdateSheetTitle();
+    UpdateInteractive();
     ClipSheetNode();
     return true;
 }
@@ -568,7 +569,8 @@ void SheetPresentationPattern::ChangeScrollHeight(float height)
         auto sheetHeight = geometryNode->GetFrameSize().Height();
         scrollHeight = sheetHeight - operationHeight;
     }
-    scrollProps->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(scrollHeight)));
+    scrollProps->UpdateUserDefinedIdealSize(CalcSize(CalcLength(geometryNode->GetFrameSize().Width()),
+        CalcLength(scrollHeight)));
     scrollNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
@@ -607,6 +609,9 @@ void SheetPresentationPattern::UpdateDragBarStatus()
 
 void SheetPresentationPattern::UpdateCloseIconStatus()
 {
+    if (!Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+        return;
+    }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto pipeline = PipelineContext::GetCurrentContext();
@@ -667,6 +672,35 @@ void SheetPresentationPattern::UpdateSheetTitle()
             subtitleNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
         }
     }
+}
+
+void SheetPresentationPattern::UpdateInteractive()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto layoutProperty = host->GetLayoutProperty<SheetPresentationProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    auto sheetStyle = layoutProperty->GetSheetStyleValue();
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto overlayManager = pipelineContext->GetOverlayManager();
+    CHECK_NULL_VOID(overlayManager);
+    auto maskNode = overlayManager->GetSheetMask(host);
+    CHECK_NULL_VOID(maskNode);
+    if (!sheetStyle.interactive.has_value()) {
+        if (GetSheetType() == SheetType::SHEET_POPUP) {
+            maskNode->GetLayoutProperty()->UpdateVisibility(VisibleType::GONE);
+        } else {
+            maskNode->GetLayoutProperty()->UpdateVisibility(VisibleType::VISIBLE);
+        }
+    } else {
+        if (sheetStyle.interactive == true) {
+            maskNode->GetLayoutProperty()->UpdateVisibility(VisibleType::GONE);
+        } else {
+            maskNode->GetLayoutProperty()->UpdateVisibility(VisibleType::VISIBLE);
+        }
+    }
+    maskNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
 void SheetPresentationPattern::CheckSheetHeightChange()

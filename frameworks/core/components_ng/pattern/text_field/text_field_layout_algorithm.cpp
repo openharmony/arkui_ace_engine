@@ -84,14 +84,12 @@ std::optional<SizeF> TextFieldLayoutAlgorithm::InlineMeasureContent(
 {
     auto frameNode = layoutWrapper->GetHostNode();
     CHECK_NULL_RETURN(frameNode, std::nullopt);
-    auto pipeline = frameNode->GetContext();
-    CHECK_NULL_RETURN(pipeline, std::nullopt);
     auto textFieldLayoutProperty = DynamicCast<TextFieldLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_RETURN(textFieldLayoutProperty, std::nullopt);
-    auto textFieldTheme = pipeline->GetTheme<TextFieldTheme>();
-    CHECK_NULL_RETURN(textFieldTheme, std::nullopt);
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
     CHECK_NULL_RETURN(pattern, std::nullopt);
+    auto textFieldTheme = pattern->GetTheme();
+    CHECK_NULL_RETURN(textFieldTheme, std::nullopt);
 
     float contentWidth = 0.0f;
     auto safeBoundary = textFieldTheme->GetInlineBorderWidth().ConvertToPx() * 2;
@@ -106,7 +104,8 @@ std::optional<SizeF> TextFieldLayoutAlgorithm::InlineMeasureContent(
         paragraph_->Layout(contentConstraint.maxSize.Width());
         contentWidth = ConstraintWithMinWidth(contentConstraint, layoutWrapper, paragraph_);
         // calc inline status in advance
-        auto widthOffSet = pattern->GetPaddingLeft() + pattern->GetPaddingRight() - safeBoundary;
+        auto widthOffSet = contentConstraint.selfIdealSize.Width().has_value()?
+            pattern->GetPaddingLeft() + pattern->GetPaddingRight() - safeBoundary : 0.0f - safeBoundary;
         inlineParagraph_->Layout(contentConstraint.maxSize.Width() + widthOffSet
             - safeBoundary - PARAGRAPH_SAVE_BOUNDARY);
         auto longestLine = std::ceil(inlineParagraph_->GetLongestLine());
@@ -360,15 +359,6 @@ float TextFieldLayoutAlgorithm::GetVisualTextWidth() const
     return std::min(paragraph_->GetMaxWidth(), std::max(0.0f, paragraph_->GetLongestLine()));
 }
 
-void TextFieldLayoutAlgorithm::ErrorTextMeasureContent(const std::string& content, const RefPtr<TextFieldTheme>& theme)
-{
-    // errorParagraph  Layout.
-    CreateErrorParagraph(content, theme);
-    if (errorParagraph_) {
-        errorParagraph_->Layout(std::numeric_limits<double>::infinity());
-    }
-}
-
 void TextFieldLayoutAlgorithm::UpdateTextStyle(const RefPtr<FrameNode>& frameNode,
     const RefPtr<TextFieldLayoutProperty>& layoutProperty, const RefPtr<TextFieldTheme>& theme, TextStyle& textStyle,
     bool isDisabled)
@@ -509,17 +499,23 @@ void TextFieldLayoutAlgorithm::FontRegisterCallback(
     CHECK_NULL_VOID(pipeline);
     auto fontManager = pipeline->GetFontManager();
     if (fontManager) {
+        bool isCustomFont = false;
         for (const auto& familyName : fontFamilies) {
-            fontManager->RegisterCallbackNG(frameNode, familyName, callback);
+            bool customFont = fontManager->RegisterCallbackNG(frameNode, familyName, callback);
+            if (customFont) {
+                isCustomFont = true;
+            }
         }
         fontManager->AddVariationNodeNG(frameNode);
+        if (isCustomFont || fontManager->IsDefaultFontChanged()) {
+            auto pattern = frameNode->GetPattern<TextFieldPattern>();
+            CHECK_NULL_VOID(pattern);
+            pattern->SetIsCustomFont(true);
+            auto modifier = DynamicCast<TextFieldContentModifier>(pattern->GetContentModifier());
+            CHECK_NULL_VOID(modifier);
+            modifier->SetIsCustomFont(true);
+        }
     }
-    auto pattern = frameNode->GetPattern<TextFieldPattern>();
-    CHECK_NULL_VOID(pattern);
-    pattern->SetIsCustomFont(true);
-    auto modifier = DynamicCast<TextFieldContentModifier>(pattern->GetContentModifier());
-    CHECK_NULL_VOID(modifier);
-    modifier->SetIsCustomFont(true);
 }
 
 ParagraphStyle TextFieldLayoutAlgorithm::GetParagraphStyle(const TextStyle& textStyle, const std::string& content) const
@@ -604,22 +600,6 @@ void TextFieldLayoutAlgorithm::CreateInlineParagraph(const TextStyle& textStyle,
     inlineParagraph_->Build();
 }
 
-void TextFieldLayoutAlgorithm::CreateErrorParagraph(const std::string& content, const RefPtr<TextFieldTheme>& theme)
-{
-    CHECK_NULL_VOID(theme);
-    TextStyle errorTextStyle = theme->GetErrorTextStyle();
-    std::string errorText = content;
-    ParagraphStyle paraStyle { .align = TextAlign::START,
-        .fontLocale = Localization::GetInstance()->GetFontLocale(),
-        .fontSize = errorTextStyle.GetFontSize().ConvertToPx() };
-    errorParagraph_ = Paragraph::Create(paraStyle, FontCollection::Current());
-    CHECK_NULL_VOID(errorParagraph_);
-    errorParagraph_->PushStyle(errorTextStyle);
-    StringUtils::TransformStrCase(errorText, static_cast<int32_t>(errorTextStyle.GetTextCase()));
-    errorParagraph_->AddText(StringUtils::Str8ToStr16(errorText));
-    errorParagraph_->Build();
-}
-
 TextDirection TextFieldLayoutAlgorithm::GetTextDirection(const std::string& content)
 {
     TextDirection textDirection = TextDirection::LTR;
@@ -639,11 +619,6 @@ TextDirection TextFieldLayoutAlgorithm::GetTextDirection(const std::string& cont
 const RefPtr<Paragraph>& TextFieldLayoutAlgorithm::GetParagraph() const
 {
     return paragraph_;
-}
-
-const RefPtr<Paragraph>& TextFieldLayoutAlgorithm::GetErrorParagraph() const
-{
-    return errorParagraph_;
 }
 
 float TextFieldLayoutAlgorithm::GetTextFieldDefaultHeight()

@@ -471,7 +471,7 @@ HWTEST_F(WebPatternTestNg, UpdateJavaScriptOnDocumentStart010, TestSize.Level1)
     scriptItems.insert(std::make_pair(group, vec));
     webPattern->JavaScriptOnDocumentStart(scriptItems);
     webPattern->UpdateJavaScriptOnDocumentStart();
-    EXPECT_FALSE(webPattern->scriptItems_);
+    EXPECT_FALSE(webPattern->onDocumentStartScriptItems_);
 #endif
 }
 
@@ -614,6 +614,63 @@ HWTEST_F(WebPatternTestNg, SetAccessibilityState014, TestSize.Level1)
     webPattern->OnModifyDone();
     ASSERT_NE(webPattern->delegate_, nullptr);
     webPattern->SetAccessibilityState(true);
+#endif
+}
+
+/**
+ * @tc.name: JavaScriptOnDocumentEnd015
+ * @tc.desc: JavaScriptOnDocumentEnd.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternTestNg, JavaScriptOnDocumentEnd009, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    EXPECT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    EXPECT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    webPattern->OnModifyDone();
+    EXPECT_NE(webPattern, nullptr);
+    std::map<std::string, std::vector<std::string>> scriptItems;
+    std::string group = "group";
+    std::vector<std::string> vec;
+    vec.push_back("main");
+    scriptItems.insert(std::make_pair(group, vec));
+    webPattern->JavaScriptOnDocumentEnd(scriptItems);
+    EXPECT_NE(webPattern->delegate_, nullptr);
+#endif
+}
+
+/**
+ * @tc.name: UpdateJavaScriptOnDocumentEnd016
+ * @tc.desc: UpdateJavaScriptOnDocumentEnd.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternTestNg, UpdateJavaScriptOnDocumentEnd010, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    EXPECT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    EXPECT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    webPattern->OnModifyDone();
+    EXPECT_NE(webPattern, nullptr);
+    std::map<std::string, std::vector<std::string>> scriptItems;
+    std::string group = "group";
+    std::vector<std::string> vec;
+    vec.push_back("main");
+    scriptItems.insert(std::make_pair(group, vec));
+    webPattern->JavaScriptOnDocumentEnd(scriptItems);
+    webPattern->UpdateJavaScriptOnDocumentEnd();
+    EXPECT_FALSE(webPattern->onDocumentEndScriptItems_);
 #endif
 }
 } // namespace OHOS::Ace::NG

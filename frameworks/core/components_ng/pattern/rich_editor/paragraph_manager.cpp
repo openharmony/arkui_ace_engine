@@ -95,10 +95,6 @@ OffsetF ParagraphManager::ComputeCursorOffset(
     float y = 0.0f;
     while (it != paragraphs_.end()) {
         if (index >= it->start && index < it->end) {
-            if (it->paragraph && it->paragraph->GetParagraphText().empty()) {
-                it++;
-                index++;
-            }
             break;
         }
         y += it->paragraph->GetHeight();

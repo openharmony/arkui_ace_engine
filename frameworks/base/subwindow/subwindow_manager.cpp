@@ -94,6 +94,7 @@ int32_t SubwindowManager::GetParentContainerId(int32_t containerId)
 void SubwindowManager::AddSubwindow(int32_t instanceId, RefPtr<Subwindow> subwindow)
 {
     if (!subwindow) {
+        TAG_LOGW(AceLogTag::ACE_SUB_WINDOW, "add subwindow failed.");
         return;
     }
     TAG_LOGI(AceLogTag::ACE_SUB_WINDOW, "Add subwindow into map, instanceId is %{public}d, subwindow id is %{public}d.",
@@ -137,6 +138,7 @@ const RefPtr<Subwindow> SubwindowManager::GetSubwindow(int32_t instanceId)
 
 int32_t SubwindowManager::GetDialogSubwindowInstanceId(int32_t SubwindowId)
 {
+    TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "get dialog subwindow instanceid enter");
     std::lock_guard<std::mutex> lock(subwindowMutex_);
     for (auto it = subwindowMap_.begin(); it != subwindowMap_.end(); it++) {
         if (it->second->GetSubwindowId() == SubwindowId) {
@@ -194,6 +196,7 @@ RefPtr<Subwindow> SubwindowManager::ShowPreviewNG()
 void SubwindowManager::ShowMenuNG(
     const RefPtr<NG::FrameNode>& menuNode, int32_t targetId, const NG::OffsetF& offset, bool isAboveApps)
 {
+    TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "show menung enter");
     auto containerId = Container::CurrentId();
     auto subwindow = GetSubwindow(containerId);
     if (!subwindow) {
@@ -214,6 +217,7 @@ void SubwindowManager::HidePreviewNG()
 
 void SubwindowManager::HideMenuNG(const RefPtr<NG::FrameNode>& menu, int32_t targetId)
 {
+    TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "hide menu ng enter");
     auto subwindow = GetCurrentWindow();
     if (subwindow) {
         subwindow->HideMenuNG(menu, targetId);
@@ -222,14 +226,24 @@ void SubwindowManager::HideMenuNG(const RefPtr<NG::FrameNode>& menu, int32_t tar
 
 void SubwindowManager::HideMenuNG(bool showPreviewAnimation, bool startDrag)
 {
+    TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "hide menung enter");
     auto subwindow = GetCurrentWindow();
     if (subwindow) {
         subwindow->HideMenuNG(showPreviewAnimation, startDrag);
     }
 }
 
+void SubwindowManager::UpdateHideMenuOffsetNG(const NG::OffsetF& offset)
+{
+    auto subwindow = GetCurrentWindow();
+    if (subwindow) {
+        subwindow->UpdateHideMenuOffsetNG(offset);
+    }
+}
+
 void SubwindowManager::ClearMenuNG(int32_t instanceId, bool inWindow, bool showAnimation)
 {
+    TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "clear menung enter");
     RefPtr<Subwindow> subwindow;
     if (instanceId != -1) {
         // get the subwindow which overlay node in, not current
@@ -244,6 +258,7 @@ void SubwindowManager::ClearMenuNG(int32_t instanceId, bool inWindow, bool showA
 
 void SubwindowManager::ClearPopupInSubwindow(int32_t instanceId)
 {
+    TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "clear popup in subwindow enter");
     RefPtr<Subwindow> subwindow;
     if (instanceId != -1) {
         // get the subwindow which overlay node in, not current
@@ -258,6 +273,7 @@ void SubwindowManager::ClearPopupInSubwindow(int32_t instanceId)
 
 void SubwindowManager::ShowPopupNG(int32_t targetId, const NG::PopupInfo& popupInfo)
 {
+    TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "show popup ng enter");
     auto containerId = Container::CurrentId();
     auto manager = SubwindowManager::GetInstance();
     CHECK_NULL_VOID(manager);
@@ -280,6 +296,7 @@ void SubwindowManager::ShowPopupNG(int32_t targetId, const NG::PopupInfo& popupI
 
 void SubwindowManager::HidePopupNG(int32_t targetId, int32_t instanceId)
 {
+    TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "hide popup ng enter");
     RefPtr<Subwindow> subwindow;
     if (instanceId != -1) {
         // get the subwindow which overlay node in, not current
@@ -295,6 +312,7 @@ void SubwindowManager::HidePopupNG(int32_t targetId, int32_t instanceId)
 
 void SubwindowManager::ShowPopup(const RefPtr<Component>& newComponent, bool disableTouchEvent)
 {
+    TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "show popup enter");
     auto containerId = Container::CurrentId();
     auto taskExecutor = Container::CurrentTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
@@ -317,6 +335,7 @@ void SubwindowManager::ShowPopup(const RefPtr<Component>& newComponent, bool dis
 
 bool SubwindowManager::CancelPopup(const std::string& id)
 {
+    TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "cancel popup enter");
     auto subwindow = GetCurrentWindow();
     if (subwindow) {
         return subwindow->CancelPopup(id);
@@ -326,6 +345,7 @@ bool SubwindowManager::CancelPopup(const std::string& id)
 
 void SubwindowManager::ShowMenu(const RefPtr<Component>& newComponent)
 {
+    TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "show menu enter");
     auto containerId = Container::CurrentId();
     auto taskExecutor = Container::CurrentTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
@@ -348,6 +368,7 @@ void SubwindowManager::ShowMenu(const RefPtr<Component>& newComponent)
 
 void SubwindowManager::CloseMenu()
 {
+    TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "close menu enter");
     auto subwindow = GetCurrentWindow();
     if (subwindow) {
         subwindow->CloseMenu();
@@ -356,6 +377,7 @@ void SubwindowManager::CloseMenu()
 
 void SubwindowManager::ClearMenu()
 {
+    TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "clear menu enter");
     auto subwindow = GetCurrentWindow();
     if (subwindow) {
         subwindow->ClearMenu();
@@ -378,6 +400,7 @@ void SubwindowManager::SetHotAreas(const std::vector<Rect>& rects, int32_t overl
 }
 void SubwindowManager::SetDialogHotAreas(const std::vector<Rect>& rects, int32_t overlayId, int32_t instanceId)
 {
+    TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "set dialog hot areas enter");
     RefPtr<Subwindow> subwindow;
     if (instanceId != -1) {
         // get the subwindow which overlay node in, not current
@@ -392,6 +415,7 @@ void SubwindowManager::SetDialogHotAreas(const std::vector<Rect>& rects, int32_t
 RefPtr<NG::FrameNode> SubwindowManager::ShowDialogNG(
     const DialogProperties& dialogProps, std::function<void()>&& buildFunc)
 {
+    TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "show dialog ng enter");
     auto containerId = Container::CurrentId();
     auto subwindow = GetSubwindow(containerId);
     if (!subwindow) {
@@ -405,9 +429,11 @@ RefPtr<NG::FrameNode> SubwindowManager::ShowDialogNG(
 
 void SubwindowManager::CloseDialogNG(const RefPtr<NG::FrameNode>& dialogNode)
 {
+    TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "close dialog ng enter");
     auto containerId = Container::CurrentId();
     auto subwindow = GetSubwindow(containerId);
     if (!subwindow) {
+        TAG_LOGW(AceLogTag::ACE_SUB_WINDOW, "get subwindow failed.");
         return;
     }
     return subwindow->CloseDialogNG(dialogNode);
@@ -415,6 +441,7 @@ void SubwindowManager::CloseDialogNG(const RefPtr<NG::FrameNode>& dialogNode)
 
 void SubwindowManager::HideDialogSubWindow(int32_t instanceId)
 {
+    TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "hide dialog subwindow enter");
     auto subwindow = GetSubwindow(instanceId >= MIN_SUBCONTAINER_ID ? GetParentContainerId(instanceId) : instanceId);
     CHECK_NULL_VOID(subwindow);
     auto overlay = subwindow->GetOverlayManager();
@@ -450,12 +477,14 @@ const RefPtr<Subwindow> SubwindowManager::GetDialogSubwindow(int32_t instanceId)
 
 void SubwindowManager::SetCurrentDialogSubwindow(const RefPtr<Subwindow>& subwindow)
 {
+    TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "set current dialog subwindow enter");
     std::lock_guard<std::mutex> lock(currentDialogSubwindowMutex_);
     currentDialogSubwindow_ = subwindow;
 }
 
 const RefPtr<Subwindow>& SubwindowManager::GetCurrentDialogWindow()
 {
+    TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "get current dialog window enter");
     std::lock_guard<std::mutex> lock(currentDialogSubwindowMutex_);
     return currentDialogSubwindow_;
 }
@@ -474,11 +503,13 @@ RefPtr<Subwindow> SubwindowManager::GetOrCreateSubWindow()
 void SubwindowManager::ShowToast(
     const std::string& message, int32_t duration, const std::string& bottom, const NG::ToastShowMode& showMode)
 {
+    TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "show toast enter");
     auto containerId = Container::CurrentId();
     // for pa service
     if (containerId >= MIN_PA_SERVICE_ID || containerId < 0) {
         auto subwindow = GetOrCreateSubWindow();
         CHECK_NULL_VOID(subwindow);
+        TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "before show toast");
         subwindow->ShowToast(message, duration, bottom, showMode);
     } else {
         // for ability
@@ -495,6 +526,7 @@ void SubwindowManager::ShowToast(
                     subwindow->InitContainer();
                     manager->AddSubwindow(containerId, subwindow);
                 }
+                TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "before show toast : %{public}d", containerId);
                 subwindow->ShowToast(message, duration, bottom, showMode);
             },
             TaskExecutor::TaskType::PLATFORM);
@@ -503,6 +535,7 @@ void SubwindowManager::ShowToast(
 
 void SubwindowManager::ClearToastInSubwindow()
 {
+    TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "clear toast in subwindow enter");
     auto containerId = Container::CurrentId();
     // Get active container when current instanceid is less than 0
     if (containerId < 0) {
@@ -526,6 +559,7 @@ void SubwindowManager::ShowDialog(const std::string& title, const std::string& m
     const std::vector<ButtonInfo>& buttons, bool autoCancel, std::function<void(int32_t, int32_t)>&& napiCallback,
     const std::set<std::string>& dialogCallbacks)
 {
+    TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "show dialog enter");
     auto containerId = Container::CurrentId();
     // Get active container when current instanceid is less than 0
     if (containerId < 0) {
@@ -554,6 +588,7 @@ void SubwindowManager::ShowDialog(const std::string& title, const std::string& m
 void SubwindowManager::ShowDialog(const PromptDialogAttr& dialogAttr, const std::vector<ButtonInfo>& buttons,
     std::function<void(int32_t, int32_t)>&& napiCallback, const std::set<std::string>& dialogCallbacks)
 {
+    TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "show dialog enter");
     auto containerId = Container::CurrentId();
     // Get active container when current instanceid is less than 0
     if (containerId < 0) {
@@ -582,6 +617,7 @@ void SubwindowManager::ShowDialog(const PromptDialogAttr& dialogAttr, const std:
 void SubwindowManager::ShowActionMenu(
     const std::string& title, const std::vector<ButtonInfo>& button, std::function<void(int32_t, int32_t)>&& callback)
 {
+    TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "show action menu enter");
     auto containerId = Container::CurrentId();
     // Get active container when current instanceid is less than 0
     if (containerId < 0) {
@@ -611,6 +647,7 @@ void SubwindowManager::CloseDialog(int32_t instanceId)
 {
     auto subwindow = GetDialogSubwindow(instanceId);
     if (!subwindow) {
+        TAG_LOGW(AceLogTag::ACE_SUB_WINDOW, "get dialog subwindow failed.");
         return;
     }
     for (auto& containerMap : parentContainerMap_) {
@@ -618,6 +655,42 @@ void SubwindowManager::CloseDialog(int32_t instanceId)
             subwindow->CloseDialog(containerMap.first);
         }
     }
+}
+
+void SubwindowManager::OpenCustomDialog(const PromptDialogAttr &dialogAttr, std::function<void(int32_t)> &&callback)
+{
+    PromptDialogAttr tmpPromptAttr = dialogAttr;
+    tmpPromptAttr.showInSubWindow = false;
+    auto containerId = Container::CurrentId();
+    // for pa service
+    if (containerId >= MIN_PA_SERVICE_ID || containerId < 0) {
+        auto subWindow = GetOrCreateSubWindow();
+        CHECK_NULL_VOID(subWindow);
+        subWindow->OpenCustomDialog(tmpPromptAttr, std::move(callback));
+        // for ability
+    } else {
+        auto subWindow = GetSubwindow(containerId);
+        if (!subWindow) {
+            subWindow = Subwindow::CreateSubwindow(containerId);
+            subWindow->InitContainer();
+            AddSubwindow(containerId, subWindow);
+        }
+        subWindow->OpenCustomDialog(tmpPromptAttr, std::move(callback));
+    }
+    return;
+}
+
+void SubwindowManager::CloseCustomDialog(const int32_t dialogId)
+{
+    auto containerId = Container::CurrentId();
+    TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "CloseCustomDialog dialogId = %{public}d, containerId = %{public}d.",
+        dialogId, containerId);
+    auto subwindow = GetDialogSubwindow(containerId);
+    if (!subwindow) {
+        return;
+    }
+    subwindow->CloseCustomDialog(dialogId);
+    return;
 }
 
 void SubwindowManager::HideSubWindowNG()

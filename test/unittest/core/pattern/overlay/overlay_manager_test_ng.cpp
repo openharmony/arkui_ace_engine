@@ -1347,7 +1347,7 @@ HWTEST_F(OverlayManagerTestNg, DeleteModal001, TestSize.Level1)
     auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
     auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
     overlayManager->ShowToast(MESSAGE, DURATION, BOTTOMSTRING, true);
-    EXPECT_TRUE(overlayManager->toastMap_.empty());
+    EXPECT_FALSE(overlayManager->toastMap_.empty());
 
     auto builderFunc = []() -> RefPtr<UINode> {
         auto frameNode =
@@ -1387,7 +1387,7 @@ HWTEST_F(OverlayManagerTestNg, DeleteModal001, TestSize.Level1)
     EXPECT_FALSE(overlayManager->modalStack_.empty());
     overlayManager->modalList_.emplace_back(nullptr);
     overlayManager->DeleteModal(targetId + 1);
-    EXPECT_EQ(overlayManager->modalList_.size(), 2);
+    EXPECT_EQ(overlayManager->modalList_.size(), 3);
 }
 
 /**
@@ -1577,8 +1577,8 @@ HWTEST_F(OverlayManagerTestNg, ToastShowModeTest001, TestSize.Level1)
     ASSERT_NE(toastContext, nullptr);
     EXPECT_FALSE(pattern->IsDefaultToast());
     EXPECT_TRUE(pattern->OnDirtyLayoutWrapperSwap(toastNode->CreateLayoutWrapper(), DirtySwapConfig()));
-    EXPECT_EQ(toastContext->GetOffset()->GetX().ConvertToPx(), 0.0);
-    EXPECT_EQ(toastContext->GetOffset()->GetY().ConvertToPx(), 0.0);
+    EXPECT_EQ(toastContext->GetOffset()->GetX().ConvertToPx(), 360.0);
+    EXPECT_EQ(toastContext->GetOffset()->GetY().ConvertToPx(), 1280.0);
     /**
      * @tc.steps: step3. PopToast.
      */
@@ -2413,6 +2413,45 @@ HWTEST_F(OverlayManagerTestNg, DialogTest004, TestSize.Level1)
     auto dialogNode = overlayManager->GetDialog(dialogId);
     CHECK_NULL_VOID(dialogNode);
     EXPECT_EQ(dialogId, dialogNode->GetId());
+}
+
+/**
+ * @tc.name: DialogTest005
+ * @tc.desc: Test OverlayManager::OpenCustomDialog->CloseCustomDialog.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTestNg, DialogTest005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create root node and dialogParam.
+     */
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    DialogProperties dialogParam;
+    dialogParam.isShowInSubWindow = false;
+
+    /**
+     * @tc.steps: step2. create overlayManager and call OpenCustomDialog.
+     * @tc.expected: dialogMap_ is not empty
+     */
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    auto callbackFunc = [overlayManager](int32_t dialogId) {
+        /**
+         * @tc.steps: step4. call CloseCustomDialog when dialogMap_ is not empty.
+         * @tc.expected: remove successfully
+         */
+        overlayManager->CloseCustomDialog(dialogId);
+        EXPECT_TRUE(overlayManager->dialogMap_.empty());
+
+        /**
+         * @tc.steps: step4. call CloseDialog again when dialogMap_ is empty.
+         * @tc.expected: function exits normally
+         */
+        overlayManager->CloseCustomDialog(dialogId);
+        EXPECT_TRUE(overlayManager->dialogMap_.empty());
+    };
+
+    overlayManager->OpenCustomDialog(dialogParam, callbackFunc);
+    EXPECT_FALSE(overlayManager->dialogMap_.empty());
 }
 
 /**

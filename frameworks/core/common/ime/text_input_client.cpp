@@ -36,11 +36,11 @@ std::map<KeyComb, std::function<bool(TextInputClient*)>> TextInputClient::functi
 
 // Here declares keyboard shortcuts which should be handled and consumed by TextInputClient.
 std::map<KeyComb, std::function<void(TextInputClient*)>> TextInputClient::keyboardShortCuts_ = {
-// action combinations
+// actions
 #if defined(MAC_PLATFORM)
     { KeyComb(KeyCode::KEY_A, KEY_META), &tic::HandleOnSelectAll },
     { KeyComb(KeyCode::KEY_C, KEY_META), &tic::HandleOnCopy },
-    { KeyComb(KeyCode::KEY_D, KEY_META), &tic::HandleOnDelete },
+    { KeyComb(KeyCode::KEY_D, KEY_META), [](tic* c) -> void { c->HandleOnDelete(true); } },
     { KeyComb(KeyCode::KEY_V, KEY_META), &tic::HandleOnPaste },
     { KeyComb(KeyCode::KEY_X, KEY_META), &tic::HandleOnCut },
     { KeyComb(KeyCode::KEY_Y, KEY_META), &tic::HandleOnRedoAction },
@@ -49,15 +49,22 @@ std::map<KeyComb, std::function<void(TextInputClient*)>> TextInputClient::keyboa
 #else
     { KeyComb(KeyCode::KEY_A, KEY_CTRL), &tic::HandleOnSelectAll },
     { KeyComb(KeyCode::KEY_C, KEY_CTRL), &tic::HandleOnCopy },
-    { KeyComb(KeyCode::KEY_D, KEY_CTRL), &tic::HandleOnDelete },
+    { KeyComb(KeyCode::KEY_D, KEY_CTRL), [](tic* c) -> void { c->HandleOnDelete(true); } },
     { KeyComb(KeyCode::KEY_V, KEY_CTRL), &tic::HandleOnPaste },
     { KeyComb(KeyCode::KEY_X, KEY_CTRL), &tic::HandleOnCut },
     { KeyComb(KeyCode::KEY_Y, KEY_CTRL), &tic::HandleOnRedoAction },
     { KeyComb(KeyCode::KEY_Z, KEY_CTRL), &tic::HandleOnUndoAction },
     { KeyComb(KeyCode::KEY_Z, KEY_CTRL | KEY_SHIFT), &tic::HandleOnRedoAction },
 #endif
+    { KeyComb(KeyCode::KEY_DEL), [](tic* c) -> void { c->HandleOnDelete(true); } },
+    { KeyComb(KeyCode::KEY_FORWARD_DEL), [](tic* c) -> void { c->HandleOnDelete(false); } },
     { KeyComb(KeyCode::KEY_INSERT, KEY_CTRL), &tic::HandleOnCopy },
     { KeyComb(KeyCode::KEY_INSERT, KEY_CTRL), &tic::HandleOnPaste },
+    { KeyComb(KeyCode::KEY_F10, KEY_SHIFT), &tic::HandleOnShowMenu },
+    { KeyComb(KeyCode::KEY_MENU), &tic::HandleOnShowMenu },
+    { KeyComb(KeyCode::KEY_ENTER), &tic::HandleOnEnter },
+    { KeyComb(KeyCode::KEY_NUMPAD_ENTER), &tic::HandleOnEnter },
+    { KeyComb(KeyCode::KEY_DPAD_CENTER), &tic::HandleOnEnter },
     // caret move keys
     { KeyComb(KeyCode::KEY_DPAD_LEFT), [](tic* c) -> void { c->CursorMove(CaretMoveIntent::Left); } },
     { KeyComb(KeyCode::KEY_DPAD_RIGHT), [](tic* c) -> void { c->CursorMove(CaretMoveIntent::Right); } },
@@ -102,6 +109,10 @@ bool TextInputClient::HandleKeyEvent(const KeyEvent& keyEvent)
         (keyEvent.HasKey(KeyCode::KEY_SHIFT_LEFT) || keyEvent.HasKey(KeyCode::KEY_SHIFT_RIGHT) ? KEY_SHIFT : KEY_NULL) |
         (keyEvent.HasKey(KeyCode::KEY_CTRL_LEFT) || keyEvent.HasKey(KeyCode::KEY_CTRL_RIGHT) ? KEY_CTRL : KEY_NULL) |
         (keyEvent.HasKey(KeyCode::KEY_META_LEFT) || keyEvent.HasKey(KeyCode::KEY_META_RIGHT) ? KEY_META : KEY_NULL);
+    if ((modKeyFlags == KEY_NULL || modKeyFlags == KEY_SHIFT) && keyEvent.IsCharKey()) {
+        InsertValue(keyEvent.ConvertCodeToString());
+        return true;
+    }
     auto iterFunctionKeys = functionKeys_.find(KeyComb(keyEvent.code, modKeyFlags));
     if (iterFunctionKeys != functionKeys_.end()) {
         return iterFunctionKeys->second(this);
