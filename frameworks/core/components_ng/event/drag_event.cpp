@@ -183,6 +183,7 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
         }
 
         if (info.GetSourceDevice() == SourceType::MOUSE) {
+            frameNode->MarkModifyDone();
             auto pattern = frameNode->GetPattern<TextBase>();
             if (gestureHub->GetTextDraggable() && pattern) {
                 if (!pattern->IsSelected() || pattern->GetMouseStatus() == MouseStatus::MOVE) {
@@ -684,6 +685,8 @@ void DragEventActuator::SetPixelMap(const RefPtr<DragEventActuator>& actuator)
         manager->MountPixelMapToRootNode(columnNode);
     }
     imageNode->MarkModifyDone();
+    imageNode->SetLayoutDirtyMarked(true);
+    imageNode->CreateLayoutTask();
     auto focusHub = frameNode->GetFocusHub();
     CHECK_NULL_VOID(focusHub);
     bool hasContextMenu = focusHub->FindContextMenuOnKeyEvent(OnKeyEventType::CONTEXT_MENU);
@@ -932,7 +935,7 @@ void DragEventActuator::HideTextAnimation(bool startDrag, double globalX, double
     auto pixelMap = gestureHub->GetPixelMap();
     float scale = 1.0f;
     if (pixelMap) {
-        scale = static_cast<float>(frameNode->GetPreviewScaleVal());
+        scale = gestureHub->GetPixelMapScale(pixelMap->GetHeight(), pixelMap->GetWidth());
     }
     auto context = dragNode->GetRenderContext();
     CHECK_NULL_VOID(context);
