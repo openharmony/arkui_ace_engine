@@ -2486,6 +2486,7 @@ void PipelineContext::OnDragEvent(const PointerEvent& pointerEvent, DragEventAct
         }
     }
     if (action == DragEventAction::DRAG_EVENT_START_FOR_CONTROLLER) {
+        manager->RequireSummary();
         manager->OnDragStart(pointerEvent.GetPoint());
         return;
     }

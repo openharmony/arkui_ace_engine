@@ -648,16 +648,23 @@ void EnvelopedDragData(DragControllerAsyncCtx* asyncCtx, std::optional<Msdp::Dev
     }
     auto pointerId = asyncCtx->pointerId;
     std::string udKey;
+    std::map<std::string, int64_t> summary;
     int32_t dataSize = 1;
     if (asyncCtx->unifiedData) {
         int32_t ret = UdmfClient::GetInstance()->SetData(asyncCtx->unifiedData, udKey);
         if (ret != 0) {
             LOGW("Udmf set data fail, error code is %{public}d", ret);
+        } else {
+            ret = UdmfClient::GetInstance()->GetSummary(udKey, summary);
+            if (ret != 0) {
+                LOGW("GetSummary fail, error code is %{public}d", ret);
+            }
         }
         dataSize = static_cast<int32_t>(asyncCtx->unifiedData->GetSize());
     }
-    dragData = { shadowInfos, {}, udKey, "", "", asyncCtx->sourceType, dataSize != 0 ? dataSize : shadowInfos.size(),
-        pointerId, asyncCtx->globalX, asyncCtx->globalY, 0, true, false, {} };
+    dragData = { shadowInfos, {}, udKey, asyncCtx->extraParams, "", asyncCtx->sourceType,
+        dataSize != 0 ? dataSize : shadowInfos.size(), pointerId, asyncCtx->globalX, asyncCtx->globalY, 0, true, false,
+        summary };
 }
 
 void StartDragService(DragControllerAsyncCtx* asyncCtx)
@@ -757,10 +764,16 @@ void OnComplete(DragControllerAsyncCtx* asyncCtx)
             int32_t dataSize = 1;
             auto pointerId = asyncCtx->pointerId;
             std::string udKey;
+            std::map<std::string, int64_t> summary;
             if (asyncCtx->unifiedData) {
                 int32_t ret = UdmfClient::GetInstance()->SetData(asyncCtx->unifiedData, udKey);
                 if (ret != 0) {
                     LOGW("Udmf set data fail, error code is %{public}d", ret);
+                } else {
+                    ret = UdmfClient::GetInstance()->GetSummary(udKey, summary);
+                    if (ret != 0) {
+                        LOGW("GetSummary fail, error code is %{public}d", ret);
+                    }
                 }
                 dataSize = static_cast<int32_t>(asyncCtx->unifiedData->GetSize());
             }
@@ -775,10 +788,10 @@ void OnComplete(DragControllerAsyncCtx* asyncCtx)
                 HandleFail(asyncCtx, Framework::ERROR_CODE_PARAM_INVALID, "touchPoint's coordinate out of range");
                 return;
             }
-            Msdp::DeviceStatus::ShadowInfo shadowInfo { asyncCtx->pixelMap, -x, -y  };
-            Msdp::DeviceStatus::DragData dragData { { shadowInfo }, {}, udKey, "", "",
-                asyncCtx->sourceType, dataSize, pointerId, asyncCtx->globalX, asyncCtx->globalY, 0, true, {}
-            };
+            Msdp::DeviceStatus::ShadowInfo shadowInfo { asyncCtx->pixelMap, -x, -y };
+            Msdp::DeviceStatus::DragData dragData { { shadowInfo }, {}, udKey, asyncCtx->extraParams, "",
+                asyncCtx->sourceType, dataSize, pointerId, asyncCtx->globalX, asyncCtx->globalY, 0, true, false,
+                summary };
 
             OnDragCallback callback = [asyncCtx](const DragNotifyMsg& dragNotifyMsg) {
                 LOGI("DragController start on callback %{pubic}d", dragNotifyMsg.result);
