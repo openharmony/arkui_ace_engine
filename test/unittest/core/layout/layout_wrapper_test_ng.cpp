@@ -1558,8 +1558,8 @@ HWTEST_F(LayoutWrapperTestNg, LayoutWrapperTest041, TestSize.Level1)
      * @tc.expected: frame is expanded.
      */
     layoutWrapper->ExpandSafeArea();
-    EXPECT_EQ(layoutWrapper->geometryNode_->GetFrameOffset(), OffsetF(0, 0));
-    EXPECT_EQ(layoutWrapper->geometryNode_->GetFrameSize(), SizeF(RK356_WIDTH, RK356_HEIGHT + 1));
+    EXPECT_EQ(layoutWrapper->geometryNode_->GetFrameOffset(), OffsetF(0, 1));
+    EXPECT_EQ(layoutWrapper->geometryNode_->GetFrameSize(), SizeF(RK356_WIDTH, RK356_HEIGHT));
 
     /**
      * @tc.steps: step3. call ExpandSafeArea on a frame that does not overlap with SafeAreaInset.
@@ -1589,7 +1589,7 @@ HWTEST_F(LayoutWrapperTestNg, LayoutWrapperTest041, TestSize.Level1)
     layoutWrapper->geometryNode_->SetFrameSize({ RK356_WIDTH, RK356_HEIGHT });
     layoutWrapper->layoutProperty_->UpdateUserDefinedIdealSize({ CalcLength(RK356_WIDTH), CalcLength(RK356_HEIGHT) });
     layoutWrapper->ExpandSafeArea();
-    EXPECT_EQ(layoutWrapper->geometryNode_->GetFrameOffset(), OffsetF(0, 0));
+    EXPECT_EQ(layoutWrapper->geometryNode_->GetFrameOffset(), OffsetF(0, 1));
     EXPECT_EQ(layoutWrapper->geometryNode_->GetFrameSize(), SizeF(RK356_WIDTH, RK356_HEIGHT));
 
     /**
@@ -1612,7 +1612,7 @@ HWTEST_F(LayoutWrapperTestNg, LayoutWrapperTest041, TestSize.Level1)
     layoutWrapper->geometryNode_->SetFrameSize({ RK356_WIDTH, RK356_HEIGHT });
     layoutWrapper->layoutProperty_->UpdateSafeAreaExpandOpts({ SAFE_AREA_TYPE_ALL, SAFE_AREA_EDGE_START });
     layoutWrapper->ExpandSafeArea();
-    EXPECT_EQ(layoutWrapper->geometryNode_->GetFrameOffset(), OffsetF(0, 0));
+    EXPECT_EQ(layoutWrapper->geometryNode_->GetFrameOffset(), OffsetF(1, 0));
     EXPECT_EQ(layoutWrapper->geometryNode_->GetFrameSize(), SizeF(RK356_WIDTH, RK356_HEIGHT));
 
     /**
