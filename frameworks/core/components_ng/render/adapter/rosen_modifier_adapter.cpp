@@ -134,8 +134,12 @@ inline std::shared_ptr<RSPropertyBase> ConvertToRSProperty(const RefPtr<Property
             rsProp->Set(AnimatableArithmeticProxy(value));
         };
         castProp->SetUpCallbacks(getter, setter);
-        rsProp->SetUpdateCallback(
-            [cb = castProp->GetUpdateCallback()](const AnimatableArithmeticProxy& value) { cb(value.GetObject()); });
+        if (castProp->GetUpdateCallback()) {
+            rsProp->SetUpdateCallback(
+                [cb = castProp->GetUpdateCallback()](const AnimatableArithmeticProxy& value) {
+                    cb(value.GetObject());
+                });
+        }
         return rsProp;
     }
 
