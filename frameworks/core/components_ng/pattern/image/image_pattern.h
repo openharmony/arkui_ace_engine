@@ -200,9 +200,10 @@ private:
     void LoadImage(const ImageSourceInfo& src);
     void LoadAltImage(const RefPtr<ImageLayoutProperty>& imageLayoutProperty);
 
-    void UpdateAnalyzerUIConfig(const RefPtr<LayoutWrapper>& dirty);
+    void UpdateAnalyzerUIConfig(const RefPtr<GeometryNode>& geometryNode);
     void UpdatePaddingAndBorderWidth(bool isUIConfigUpdate);
     void CreateAnalyzerOverlay();
+    void DeleteAnalyzerOverlay();
     bool IsSupportImageAnalyzerFeature();
 
     CopyOptions copyOption_ = CopyOptions::None;
