@@ -175,7 +175,7 @@ ArkUINativeModuleValue CheckboxGroupBridge::SetCheckboxGroupMark(ArkUIRuntimeCal
     CHECK_NULL_RETURN(theme, panda::NativePointerRef::New(vm, nullptr));
 
     Color strokeColor;
-    if (!ArkTSUtils::ParseJsColor(vm, colorArg, strokeColor)) {
+    if (!ArkTSUtils::ParseJsColorAlpha(vm, colorArg, strokeColor)) {
         strokeColor = theme->GetPointColor();
     }
 

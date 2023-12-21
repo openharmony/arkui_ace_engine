@@ -27,7 +27,7 @@ ArkUINativeModuleValue PanelBridge::SetPanelBackgroundMask(ArkUIRuntimeCallInfo*
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
 
     Color color;
-    if (!ArkTSUtils::ParseJsColor(vm, secondArg, color)) {
+    if (!ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color)) {
         GetArkUIInternalNodeAPI()->GetPanelModifier().ResetPanelBackgroundMask(nativeNode);
     } else {
         GetArkUIInternalNodeAPI()->GetPanelModifier().SetPanelBackgroundMask(nativeNode, color.GetValue());
@@ -191,17 +191,17 @@ ArkUINativeModuleValue PanelBridge::SetPanelCustomHeight(ArkUIRuntimeCallInfo* r
     Local<JSValueRef> jsValue = runtimeCallInfo->GetCallArgRef(1);
     CalcDimension customHeight;
 
-    if (jsValue->IsUndefined() || !ArkTSUtils::ParseJsDimensionVpNG(vm, jsValue, customHeight, true)) {
+    if (jsValue->IsUndefined()) {
         GetArkUIInternalNodeAPI()->GetPanelModifier().ResetPanelCustomHeight(nativeNode);
         return panda::JSValueRef::Undefined(vm);
     }
-
     if (jsValue->IsString() && jsValue->ToString(vm)->ToString().find("wrapContent") != std::string::npos) {
-        customHeight = CalcDimension(jsValue->ToString(vm)->ToString());
+        GetArkUIInternalNodeAPI()->GetPanelModifier().SetPanelCustomHeightByString(
+            nativeNode, jsValue->ToString(vm)->ToString().c_str());
+        return panda::JSValueRef::Undefined(vm);
     } else if (!ArkTSUtils::ParseJsDimensionVp(vm, jsValue, customHeight)) {
         customHeight = Dimension(0.0);
     }
-
     GetArkUIInternalNodeAPI()->GetPanelModifier().SetPanelCustomHeight(
         nativeNode, customHeight.Value(), static_cast<int>(customHeight.Unit()));
 
