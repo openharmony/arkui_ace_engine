@@ -83,6 +83,15 @@ void CustomNode::FlushReload()
     Render();
 }
 
+bool CustomNode::RenderCustomChild(int64_t deadline)
+{
+    if (GetSysTimestamp() > deadline) {
+        return false;
+    }
+    Render();
+    return UINode::RenderCustomChild(deadline);
+}
+
 void CustomNode::SetJSViewActive(bool active)
 {
     auto context = PipelineContext::GetCurrentContext();
