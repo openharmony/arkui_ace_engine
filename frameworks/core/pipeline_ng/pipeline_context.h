@@ -550,6 +550,7 @@ public:
 
     bool IsDragging() const override;
     void SetIsDragging(bool isDragging) override;
+    void ResetDragging() override;
 
     void SetContainerModalTitleVisible(bool customTitleSettedShow, bool floatingTitleSettedShow);
     void SetContainerModalTitleHeight(int32_t height);

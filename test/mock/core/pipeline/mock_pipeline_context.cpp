@@ -449,6 +449,8 @@ bool PipelineContext::IsDragging() const
 }
 
 void PipelineContext::SetIsDragging(bool isDragging) {}
+
+void PipelineContext::ResetDragging() {}
 } // namespace OHOS::Ace::NG
 // pipeline_context ============================================================
 
