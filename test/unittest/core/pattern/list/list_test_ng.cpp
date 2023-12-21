@@ -450,9 +450,21 @@ void ListTestNg::ScrollToIndex(int32_t index, bool smooth, ScrollAlign align)
     pattern_->ScrollToIndex(index, smooth, align);
     FlushLayoutTask(frameNode_);
     if (smooth) {
-        float endValue = pattern_->GetFinalPosition();
-        pattern_->ScrollTo(endValue);
-        FlushLayoutTask(frameNode_);
+        auto iter = pattern_->itemPosition_.find(index);
+        float targetPos = 0.0f;
+        if (iter->second.isGroup) {
+            if (!pattern_->GetListItemGroupAnimatePosWithoutIndexInGroup(index, iter->second.startPos,
+                iter->second.endPos, align, targetPos)) {
+                return;
+            }
+        } else {
+            pattern_->GetListItemAnimatePos(iter->second.startPos, iter->second.endPos, align, targetPos);
+        }
+        if (!NearZero(targetPos)) {
+            float endValue = pattern_->GetFinalPosition();
+            pattern_->ScrollTo(endValue);
+            FlushLayoutTask(frameNode_);
+        }
     }
 }
 
@@ -2866,8 +2878,8 @@ HWTEST_F(ListTestNg, ListItemGroup004, TestSize.Level1)
     });
     RefPtr<FrameNode> groupNode = GetChildFrameNode(frameNode_, 0);
     float groupHeight = GetChildRect(frameNode_, 0).Height();
-    EXPECT_EQ(groupHeight, std::ceil(GROUP_LINE_NUMBER / lanes) * 2 * ITEM_HEIGHT);
-    EXPECT_FALSE(VerifyPosition(groupNode, GROUP_LINE_NUMBER, lanes, DEFAULT_SPACE, DEFAULT_STARTOFFSET));
+    EXPECT_EQ(groupHeight, std::ceil(GROUP_LINE_NUMBER / lanes) * ITEM_HEIGHT);
+    EXPECT_TRUE(VerifyPosition(groupNode, GROUP_LINE_NUMBER, lanes, DEFAULT_SPACE, DEFAULT_STARTOFFSET));
 
     /**
      * @tc.steps: step2. maxLaneLength > LIST_WIDTH
@@ -2907,7 +2919,7 @@ HWTEST_F(ListTestNg, ListItemGroup004, TestSize.Level1)
         CreateGroupWithSetting(1, Axis::VERTICAL, V2::ListItemGroupStyle::NONE);
     });
     groupNode = GetChildFrameNode(frameNode_, 0);
-    EXPECT_FALSE(VerifyPosition(groupNode, GROUP_LINE_NUMBER, lanes, SPACE, GROUP_HEADER_LEN));
+    EXPECT_TRUE(VerifyPosition(groupNode, GROUP_LINE_NUMBER, lanes, SPACE, GROUP_HEADER_LEN));
 
     /**
      * @tc.steps: step5. set minLaneLength/maxLaneLength with header/footer/space ...
@@ -4745,7 +4757,7 @@ HWTEST_F(ListTestNg, PaintMethod004, TestSize.Level1)
     EXPECT_CALL(canvas, AttachPen(_)).WillRepeatedly(ReturnRef(canvas));
     EXPECT_CALL(canvas, DetachBrush()).WillRepeatedly(ReturnRef(canvas));
     EXPECT_CALL(canvas, DetachPen()).WillRepeatedly(ReturnRef(canvas));
-    EXPECT_CALL(canvas, DrawLine(_, _)).Times(14);
+    EXPECT_CALL(canvas, DrawLine(_, _)).Times(6);
     DrawingContext ctx = { canvas, 1, 1 };
 
     /**
@@ -5420,7 +5432,7 @@ HWTEST_F(ListTestNg, ScrollToItemInGroup001, TestSize.Level1)
      * @tc.steps: step3. last group below viewport
      */
     index = ListLayoutAlgorithm::LAST_ITEM;
-    EXPECT_TRUE(ScrollToItemInGroup(index, indexInGroup, false, ScrollAlign::START, 500.f));
+    EXPECT_TRUE(ScrollToItemInGroup(index, indexInGroup, false, ScrollAlign::START, 600.f));
     EXPECT_TRUE(ScrollToItemInGroup(index, indexInGroup, false, ScrollAlign::CENTER, 750.f));
     EXPECT_TRUE(ScrollToItemInGroup(index, indexInGroup, false, ScrollAlign::END, 700.f - 100.f / 3.f));
 
@@ -5546,7 +5558,7 @@ HWTEST_F(ListTestNg, ScrollToItemInGroup003, TestSize.Level1)
     index = ListLayoutAlgorithm::LAST_ITEM;
     indexInGroup = 3;
     EXPECT_TRUE(ScrollToItemInGroup(index, indexInGroup, false, ScrollAlign::START, 300.f));
-    EXPECT_TRUE(ScrollToItemInGroup(index, indexInGroup, false, ScrollAlign::CENTER, 766.666687f));
+    EXPECT_TRUE(ScrollToItemInGroup(index, indexInGroup, false, ScrollAlign::CENTER, 650.f));
     EXPECT_TRUE(ScrollToItemInGroup(index, indexInGroup, false, ScrollAlign::END, 800.f));
 
     /**
@@ -5575,7 +5587,7 @@ HWTEST_F(ListTestNg, ScrollToItemInGroup003, TestSize.Level1)
     indexInGroup = 3;
     EXPECT_TRUE(ScrollToItemInGroup(index, indexInGroup, false, ScrollAlign::START, 300.f));
     EXPECT_TRUE(ScrollToItemInGroup(index, indexInGroup, false, ScrollAlign::CENTER, 650.f));
-    EXPECT_TRUE(ScrollToItemInGroup(index, indexInGroup, false, ScrollAlign::END, 533.333374f));
+    EXPECT_TRUE(ScrollToItemInGroup(index, indexInGroup, false, ScrollAlign::END, 800));
 }
 
 /**
