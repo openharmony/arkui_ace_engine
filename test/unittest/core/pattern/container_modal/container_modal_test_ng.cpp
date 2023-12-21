@@ -23,7 +23,7 @@
 
 #include "base/log/log_wrapper.h"
 #include "core/components/container_modal/container_modal_constants.h"
-#include "core/components/test/mock/mock_resource_adapter.h"
+#include "test/mock/core/common/mock_resource_adapter.h"
 #include "core/components/theme/theme_constants.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
