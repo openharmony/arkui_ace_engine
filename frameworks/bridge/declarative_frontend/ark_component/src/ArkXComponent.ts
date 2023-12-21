@@ -74,7 +74,8 @@ class ArkXComponentComponent implements CommonMethod<XComponentAttribute> {
     throw new Error('Method not implemented.');
   }
   backgroundColor(value: ResourceColor): this {
-    modifierWithKey(this._modifiersWithKeys, BackgroundColorModifier.identity, BackgroundColorModifier, value);
+    modifierWithKey(this._modifiersWithKeys, XComponentBackgroundColorModifier.identity,
+      XComponentBackgroundColorModifier, value);
     return this;
   }
   backgroundImage(src: ResourceStr, repeat?: ImageRepeat): this {
@@ -93,7 +94,7 @@ class ArkXComponentComponent implements CommonMethod<XComponentAttribute> {
     throw new Error('Method not implemented.');
   }
   opacity(value: number | Resource): this {
-    modifierWithKey(this._modifiersWithKeys, OpacityModifier.identity, OpacityModifier, value);
+    modifierWithKey(this._modifiersWithKeys, XComponentOpacityModifier.identity, XComponentOpacityModifier, value);
     return this;
   }
   border(value: BorderOptions): this {
@@ -451,4 +452,49 @@ globalThis.XComponent.attributeModifier = function (modifier) {
   });
   applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
+}
+
+class XComponentOpacityModifier extends ModifierWithKey<number | Resource> {
+  constructor(value: number | Resource) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('xComponentOpacity');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      GetUINativeModule().xComponent.resetOpacity(node);
+    }
+    else {
+      GetUINativeModule().xComponent.setOpacity(node, this.value);
+    }
+  }
+  
+  checkObjectDiff(): boolean {
+    if (isResource(this.stageValue) && isResource(this.value)) {
+      return !isResourceEqual(this.stageValue, this.value);
+    } else {
+      return true;
+    }
+  }
+}
+
+class XComponentBackgroundColorModifier extends ModifierWithKey<ResourceColor> {
+  constructor(value: ResourceColor) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('xComponentBackgroundColor');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      GetUINativeModule().xComponent.resetBackgroundColor(node);
+    } else {
+      GetUINativeModule().xComponent.setBackgroundColor(node, this.value);
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    if (isResource(this.stageValue) && isResource(this.value)) {
+      return !isResourceEqual(this.stageValue, this.value);
+    } else {
+      return true;
+    }
+  }
 }

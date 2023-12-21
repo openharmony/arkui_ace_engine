@@ -86,6 +86,9 @@
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_list_item_group_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_text_timer_bridge.h"
 
+#ifdef XCOMPONENT_SUPPORTED
+#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_xcomponent_bridge.h"
+#endif
 #ifdef FORM_SUPPORTED
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_form_component_bridge.h"
 #endif
@@ -1155,6 +1158,10 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
     RegisterTextClockAttributes(object, vm);
     RegisterListItemAttributes(object, vm);
     RegisterTextTimerAttributes(object, vm);
+
+#ifdef XCOMPONENT_SUPPORTED
+    RegisterXComponentAttributes(object, vm);
+#endif
 
 #ifdef FORM_SUPPORTED
     RegisterFormAttributes(object, vm);
@@ -2694,4 +2701,19 @@ void ArkUINativeModule::RegisterTextTimerAttributes(Local<panda::ObjectRef> obje
         panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), TextTimerBridge::ResetFormat));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "textTimer"), textTimer);
 }
+#ifdef XCOMPONENT_SUPPORTED
+void ArkUINativeModule::RegisterXComponentAttributes(Local<panda::ObjectRef> object, EcmaVM *vm)
+{
+    auto xComponent = panda::ObjectRef::New(vm);
+    xComponent->Set(vm, panda::StringRef::NewFromUtf8(vm, "setBackgroundColor"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), XComponentBridge::SetBackgroundColor));
+    xComponent->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetBackgroundColor"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), XComponentBridge::ResetBackgroundColor));
+    xComponent->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOpacity"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), XComponentBridge::SetOpacity));
+    xComponent->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOpacity"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), XComponentBridge::ResetOpacity));
+    object->Set(vm, panda::StringRef::NewFromUtf8(vm, "xComponent"), xComponent);
+}
+#endif
 } // namespace OHOS::Ace::NG

@@ -1521,6 +1521,14 @@ struct ArkUITextClockModifierAPI {
     void (*SetFontFamily)(NodeHandle node, const char *fontFamily);
     void (*ResetFontFamily)(NodeHandle node);
 };
+#ifdef XCOMPONENT_SUPPORTED
+struct ArkUIXComponentModifierAPI {
+    void (*SetXComponentBackgroundColor)(NodeHandle node, uint32_t color);
+    void (*ResetXComponentBackgroundColor)(NodeHandle node);
+    void (*SetXComponentOpacity)(NodeHandle node, double opacity);
+    void (*ResetXComponentOpacity)(NodeHandle node);
+};
+#endif
 
 struct ArkUINodeAPI {
     NodeHandle (*GetFrameNodeById)(int nodeId);
@@ -1595,7 +1603,9 @@ struct ArkUINodeAPI {
     ArkUILoadingProgressModifierAPI (*GetLoadingProgressModifier)();
     ArkUITextClockModifierAPI (*GetTextClockModifier)();
     ArkUITextTimerModifierAPI (*GetTextTimerModifier)();
-
+#ifdef XCOMPONENT_SUPPORTED
+    ArkUIXComponentModifierAPI (*GetXComponentModifier)();
+#endif
 #ifdef FORM_SUPPORTED
     ArkUIFormComponentModifierAPI (*GetFormComponentModifier)();
 #endif

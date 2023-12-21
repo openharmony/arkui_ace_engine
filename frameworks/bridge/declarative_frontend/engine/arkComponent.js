@@ -14706,7 +14706,7 @@ class ArkXComponentComponent {
     throw new Error('Method not implemented.');
   }
   backgroundColor(value) {
-    modifierWithKey(this._modifiersWithKeys, BackgroundColorModifier.identity, BackgroundColorModifier, value);
+    modifierWithKey(this._modifiersWithKeys, XComponentBackgroundColorModifier.identity, XComponentBackgroundColorModifier, value);
     return this;
   }
   backgroundImage(src, repeat) {
@@ -14725,7 +14725,7 @@ class ArkXComponentComponent {
     throw new Error('Method not implemented.');
   }
   opacity(value) {
-    modifierWithKey(this._modifiersWithKeys, OpacityModifier.identity, OpacityModifier, value);
+    modifierWithKey(this._modifiersWithKeys, XComponentOpacityModifier.identity, XComponentOpacityModifier, value);
     return this;
   }
   border(value) {
@@ -15054,6 +15054,50 @@ class ArkXComponentComponent {
     throw new Error('Method not implemented.');
   }
 }
+class XComponentOpacityModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      GetUINativeModule().xComponent.resetOpacity(node);
+    }
+    else {
+      GetUINativeModule().xComponent.setOpacity(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    if (isResource(this.stageValue) && isResource(this.value)) {
+      return !isResourceEqual(this.stageValue, this.value);
+    }
+    else {
+      return true;
+    }
+  }
+}
+XComponentOpacityModifier.identity = Symbol('xComponentOpacity');
+class XComponentBackgroundColorModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      GetUINativeModule().xComponent.resetBackgroundColor(node);
+    }
+    else {
+      GetUINativeModule().xComponent.setBackgroundColor(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    if (isResource(this.stageValue) && isResource(this.value)) {
+      return !isResourceEqual(this.stageValue, this.value);
+    }
+    else {
+      return true;
+    }
+  }
+}
+XComponentBackgroundColorModifier.identity = Symbol('xComponentBackgroundColor');
 // @ts-ignore
 globalThis.XComponent.attributeModifier = function (modifier) {
   const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
