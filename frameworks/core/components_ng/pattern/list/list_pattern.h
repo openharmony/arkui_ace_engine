@@ -287,8 +287,8 @@ private:
     int32_t startIndex_ = -1;
     int32_t endIndex_ = -1;
     int32_t centerIndex_ = -1;
-    float startMainPos_;
-    float endMainPos_;
+    float startMainPos_ = 0.0f;
+    float endMainPos_ = 0.0f;
     float currentOffset_ = 0.0f;
     float spaceWidth_ = 0.0f;
     float contentMainSize_ = 0.0f;
