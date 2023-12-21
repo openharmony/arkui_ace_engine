@@ -205,6 +205,7 @@ RefPtr<NG::UINode> JSNavigationStack::CreateNodeByRouteInfo(const RefPtr<NG::Rou
     if (CheckNavDestinationNodeInUINode(node)) {
         return node;
     }
+    TAG_LOGI(AceLogTag::ACE_NAVIGATION, "can't find navDestination, create empty node");
     return DynamicCast<NG::UINode>(NavDestinationModel::GetInstance()->CreateEmpty());
 }
 
