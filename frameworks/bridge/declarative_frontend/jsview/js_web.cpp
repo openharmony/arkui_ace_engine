@@ -3096,7 +3096,10 @@ void JSWeb::BackgroundColor(const JSCallbackInfo& info)
     WebModel::GetInstance()->SetBackgroundColor(backgroundColor);
 }
 
-void JSWeb::InitialScale(float scale) {}
+void JSWeb::InitialScale(float scale)
+{
+    WebModel::GetInstance()->InitialScale(scale);
+}
 
 void JSWeb::Password(bool password) {}
 
