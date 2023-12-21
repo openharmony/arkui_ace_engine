@@ -207,8 +207,8 @@ public:
     void ResetSharedTranslate() override;
     void ResetPageTransitionEffect() override;
 
-    static std::list<std::shared_ptr<Rosen::RSNode>> GetChildrenRSNodes(
-        const std::list<RefPtr<FrameNode>>& frameChildren);
+    static std::vector<std::shared_ptr<Rosen::RSNode>> GetChildrenRSNodes(
+        const std::list<RefPtr<FrameNode>>& frameChildren, std::unordered_map<Rosen::NodeId, bool>& nodeIdMap);
 
     // if translate params use percent dimension, frameSize should be given correctly
     static std::shared_ptr<Rosen::RSTransitionEffect> GetRSTransitionWithoutType(
