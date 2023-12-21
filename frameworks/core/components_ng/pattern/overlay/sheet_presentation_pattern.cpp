@@ -689,13 +689,13 @@ void SheetPresentationPattern::UpdateInteractive()
     CHECK_NULL_VOID(maskNode);
     if (!sheetStyle.interactive.has_value()) {
         if (GetSheetType() == SheetType::SHEET_POPUP) {
-            maskNode->GetLayoutProperty()->UpdateVisibility(VisibleType::GONE);
+            maskNode->GetLayoutProperty()->UpdateVisibility(VisibleType::INVISIBLE);
         } else {
             maskNode->GetLayoutProperty()->UpdateVisibility(VisibleType::VISIBLE);
         }
     } else {
         if (sheetStyle.interactive == true) {
-            maskNode->GetLayoutProperty()->UpdateVisibility(VisibleType::GONE);
+            maskNode->GetLayoutProperty()->UpdateVisibility(VisibleType::INVISIBLE);
         } else {
             maskNode->GetLayoutProperty()->UpdateVisibility(VisibleType::VISIBLE);
         }
