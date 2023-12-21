@@ -224,15 +224,13 @@ void BadgeLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
             }
         } else {
             if (badgePosition == BadgePosition::RIGHT_TOP) {
-                textOffset = OffsetF(
-                    width - badgeCircleDiameter + Dimension(2.0_vp).ConvertToPx(), 0 - Dimension(2.0_vp).ConvertToPx());
-                textOffset = OffsetF(offset.GetX() + textOffset.GetX(), offset.GetY() + textOffset.GetY());
+                textOffset = OffsetF(offset.GetX() + width - badgeCircleDiameter + Dimension(2.0_vp).ConvertToPx(),
+                    offset.GetY() - Dimension(2.0_vp).ConvertToPx());
             } else if (badgePosition == BadgePosition::RIGHT) {
-                textOffset = OffsetF(width - badgeCircleDiameter, height / 2 - badgeCircleRadius);
-                textOffset = OffsetF(offset.GetX() + textOffset.GetX(), offset.GetY() + textOffset.GetY());
+                textOffset = OffsetF(
+                    offset.GetX() + width - badgeCircleDiameter, offset.GetY() + height / 2 - badgeCircleRadius);
             } else if (badgePosition == BadgePosition::LEFT) {
-                textOffset = OffsetF(0, height / 2 - badgeCircleRadius);
-                textOffset = OffsetF(offset.GetX(), offset.GetY() + textOffset.GetY());
+                textOffset = OffsetF(offset.GetX(), offset.GetY() + height / 2 - badgeCircleRadius);
             } else {
                 textOffset = OffsetF(offset.GetX(), offset.GetY());
             }
