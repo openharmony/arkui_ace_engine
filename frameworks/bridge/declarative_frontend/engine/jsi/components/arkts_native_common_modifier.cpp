@@ -756,7 +756,7 @@ bool GetShadowFromTheme(ShadowStyle shadowStyle, Shadow& shadow)
 
 /**
  * @param shadows shadow value
- * shadows[0] : BlurRadius, shadows[1] : SpreadRadius
+ * shadows[0] : BlurRadius, shadows[1] : 1: has ColorStrategy; 2: has Color
  * shadows[2] : OffsetX, offset[3] : OffsetY
  * shadows[4] : ShadowType, shadows[5] : Color, shadows[6] : IsFilled
  * @param length shadows length
@@ -777,13 +777,21 @@ void SetBackShadow(NodeHandle node, const double *shadows, int32_t length)
         return;
     }
     auto blurRadius = shadows[NUM_0];                        // BlurRadius
-    auto spreadRadius = shadows[NUM_1];                      // SpreadRadius
+    auto hasColorValue = static_cast<int32_t>(shadows[NUM_1]); // 1: has ColorStrategy; 2: has Color
     auto offsetX = shadows[NUM_2];                           // OffsetX
     auto offsetY = shadows[NUM_3];                           // OffsetY
     auto shadowType = static_cast<uint32_t>(shadows[NUM_4]); // ShadowType
     auto color = static_cast<uint32_t>(shadows[NUM_5]);      // Color
     auto isFilled = static_cast<uint32_t>(shadows[NUM_6]);   // IsFilled
-    Shadow shadow(blurRadius, spreadRadius, Offset(offsetX, offsetY), Color(color));
+    Shadow shadow;
+    shadow.SetBlurRadius(blurRadius);
+    shadow.SetOffsetX(offsetX);
+    shadow.SetOffsetY(offsetY);
+    if (hasColorValue == 1) { // 1: has ColorStrategy
+        shadow.SetShadowColorStrategy(static_cast<ShadowColorStrategy>(color));
+    } else if (hasColorValue == 2) { // 2: has Color
+        shadow.SetColor(Color(color));
+    }
     shadow.SetShadowType(static_cast<ShadowType>(shadowType));
     shadow.SetIsFilled(static_cast<bool>(isFilled));
     ViewAbstract::SetBackShadow(frameNode, shadow);
