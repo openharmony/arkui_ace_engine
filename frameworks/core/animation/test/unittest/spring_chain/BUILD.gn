@@ -187,10 +187,10 @@ ohos_unittest("SpringChainTest") {
     "$ace_root/frameworks/base/memory/memory_monitor.cpp",
     "$ace_root/frameworks/base/thread/background_task_executor.cpp",
     "$ace_root/frameworks/base/utils/base_id.cpp",
-    "$ace_root/frameworks/core/components/test/mock/mock_resource_adapter.cpp",
     "$ace_root/frameworks/core/components/test/unittest/mock/ace_trace_mock.cpp",
     "$ace_root/frameworks/core/components/test/unittest/mock/event_report_mock.cpp",
     "$ace_root/test/mock/base/mock_system_properties.cpp",
+    "$ace_root/test/mock/core/common/mock_resource_adapter.cpp",
   ]
 
   # add sources only needed by wearable like watch.
