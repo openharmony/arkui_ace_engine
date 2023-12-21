@@ -625,6 +625,9 @@ void GestureEventHub::GenerateMousePixelMap(const GestureEvent& info)
         CHECK_NULL_VOID(pattern);
         auto dragNode = pattern->MoveDragNode();
         CHECK_NULL_VOID(dragNode);
+        auto pipeline = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
+        pipeline->FlushPipelineImmediately();
         context = dragNode->GetRenderContext();
     } else {
         context = frameNode->GetRenderContext();
@@ -802,7 +805,9 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
         auto taskScheduler = pipeline->GetTaskExecutor();
         CHECK_NULL_VOID(taskScheduler);
         GenerateMousePixelMap(info);
-        pixelMap = pixelMap_->GetPixelMapSharedPtr();
+        if (pixelMap_) {
+            pixelMap = pixelMap_->GetPixelMapSharedPtr();
+        }
     } else {
         CHECK_NULL_VOID(pixelMap_);
         if (pixelMap == nullptr) {
