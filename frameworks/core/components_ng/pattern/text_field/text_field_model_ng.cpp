@@ -451,19 +451,17 @@ void TextFieldModelNG::SetShowError(const std::string& errorText, bool visible)
 
 void TextFieldModelNG::SetShowCounter(bool value)
 {
-    ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, ShowCounter, value);
-
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
     CHECK_NULL_VOID(pattern);
-    pattern->SetCounterMargin(false);
     pattern->SetCounterState(false);
     if (value) {
         pattern->AddCounterNode();
     } else {
         pattern->CleanCounterNode();
     }
+    ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, ShowCounter, value);
 }
 
 void TextFieldModelNG::SetCounterType(int32_t value)
