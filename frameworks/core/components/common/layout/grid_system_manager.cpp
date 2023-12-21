@@ -177,4 +177,20 @@ SystemGridInfo GridSystemManager::GetSystemGridInfo(const GridTemplateType& temp
     }
 }
 
+double GridSystemManager::GetMaxWidthWithColumnType(GridColumnType gridColumnType)
+{
+    RefPtr<GridColumnInfo> columnInfo = GridSystemManager::GetInstance().GetInfoByType(gridColumnType);
+    if (columnInfo->GetParent()) {
+        columnInfo->GetParent()->BuildColumnWidth();
+    }
+    auto gridSizeType = GridSystemManager::GetInstance().GetCurrentSize();
+    if (gridSizeType > GridSizeType::LG) {
+        gridSizeType = GridSizeType::LG;
+    }
+    if (gridSizeType < GridSizeType::SM) {
+        gridSizeType = GridSizeType::SM;
+    }
+    auto columns = columnInfo->GetColumns(gridSizeType);
+    return columnInfo->GetWidth(columns);
+}
 } // namespace OHOS::Ace

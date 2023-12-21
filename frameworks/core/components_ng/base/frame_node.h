@@ -501,8 +501,6 @@ public:
 
     static std::vector<RefPtr<FrameNode>> GetNodesById(const std::unordered_set<int32_t>& set);
 
-    static double GetMaxWidthWithColumnType(GridColumnType gridColumnType);
-
     double GetPreviewScaleVal() const;
 
     bool IsPreviewNeedScale() const;
@@ -637,7 +635,7 @@ public:
     {
         return localMat_;
     }
-    OffsetF GetGlobalOffset();
+    OffsetF GetOffsetInScreen();
     RefPtr<PixelMap> GetPixelMap();
     RefPtr<FrameNode> GetPageNode();
     void NotifyFillRequestSuccess(RefPtr<PageNodeInfoWrap> nodeWrap, AceAutoFillType autoFillType);
