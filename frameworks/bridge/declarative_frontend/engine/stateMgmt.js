@@ -4989,9 +4989,12 @@ class ViewPU extends NativeViewPartialUpdate {
         })
             .forEach((propName) => {
             const stateVar = Reflect.get(this, propName);
-            if ("notifyPropertyHasChangedPU" in stateVar) {
+            if (stateVar && typeof stateVar === 'object' && "notifyPropertyHasChangedPU" in stateVar) {
                 
                 this.ownObservedPropertiesStore_.add(stateVar);
+            }
+            else {
+                
             }
         });
     }
