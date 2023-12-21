@@ -2461,10 +2461,10 @@ void SetExpandSafeArea(NodeHandle node, const char* typeStr, const char* edgesSt
         safeAreaType |= StringUtils::StringToInt(type);
         safeAreaTypeStr.erase(0, pos + delimiter.length());
     }
-    safeAreaType |= StringUtils::StringToInt(safeAreaTypeStr);
+    safeAreaType |= StringUtils::StringToUint(safeAreaTypeStr);
     while ((pos = safeAreaEdgeStr.find(delimiter)) != std::string::npos) {
         edges = safeAreaEdgeStr.substr(0, pos);
-        safeAreaEdge |= StringUtils::StringToInt(edges);
+        safeAreaEdge |= StringUtils::StringToUint(edges);
         safeAreaEdgeStr.erase(0, pos + delimiter.length());
     }
     safeAreaEdge |= StringUtils::StringToInt(safeAreaEdgeStr);
