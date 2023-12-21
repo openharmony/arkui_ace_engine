@@ -342,7 +342,7 @@ public:
         return scrollSource_;
     }
 
-    int32_t GetCurrentVelocity() const
+    float GetCurrentVelocity() const
     {
         return currentVelocity_;
     }

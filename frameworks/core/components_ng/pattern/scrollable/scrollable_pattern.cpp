@@ -967,7 +967,7 @@ void ScrollablePattern::InitSpringOffsetProperty()
     auto propertyCallback = [weak = AceType::WeakClaim(this)](float offset) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
-        if (isAnimationStop_) {
+        if (pattern->isAnimationStop_) {
             return;
         }
         high_resolution_clock::time_point currentTime = high_resolution_clock::now();
@@ -998,7 +998,7 @@ void ScrollablePattern::InitCurveOffsetProperty(float position)
     auto propertyCallback = [weak = AceType::WeakClaim(this), position](float offset) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
-        if (isAnimationStop_) {
+        if (pattern->isAnimationStop_) {
             return;
         }
         high_resolution_clock::time_point currentTime = high_resolution_clock::now();
