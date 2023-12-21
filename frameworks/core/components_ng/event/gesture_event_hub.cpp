@@ -874,8 +874,7 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
             pipeline->FlushPipelineImmediately();
         }
         dragDropManager->FireOnEditableTextComponent(frameNode, DragEventType::ENTER);
-    } else if (info.GetInputEventType() == InputEventType::MOUSE_BUTTON &&
-               (dragDropInfo.pixelMap || dragDropInfo.customNode)) {
+    } else if (info.GetInputEventType() == InputEventType::MOUSE_BUTTON) {
         if (!dragDropManager->IsNeedScaleDragPreview()) {
             InteractionInterface::GetInstance()->SetDragWindowVisible(true);
         }
