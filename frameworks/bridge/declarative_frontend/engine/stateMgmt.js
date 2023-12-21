@@ -3779,7 +3779,7 @@ class ObservedPropertyAbstractPU extends ObservedPropertyAbstract {
      * and add this component to the list of components who are dependent on this property
      */
     recordPropertyDependentUpdate() {
-        const elmtId = this.getRenderingElmtId();
+        const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
         if (elmtId < 0) {
             // not access recording 
             return;
