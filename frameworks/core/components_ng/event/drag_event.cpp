@@ -546,7 +546,7 @@ OffsetF DragEventActuator::GetFloatImageOffset(const RefPtr<FrameNode>& frameNod
     return OffsetF(offsetX, offsetY);
 }
 
-void DragEventActuator::UpdatePreviewPositionAndScale(const RefPtr<FrameNode> imageNode, const OffsetF& frameOffset)
+void DragEventActuator::UpdatePreviewPositionAndScale(const RefPtr<FrameNode>& imageNode, const OffsetF& frameOffset)
 {
     auto imageContext = imageNode->GetRenderContext();
     CHECK_NULL_VOID(imageContext);
@@ -557,12 +557,12 @@ void DragEventActuator::UpdatePreviewPositionAndScale(const RefPtr<FrameNode> im
     imageContext->UpdateClickEffectLevel(clickEffectInfo);
 }
 
-void DragEventActuator::CreatePreviewNode(const RefPtr<FrameNode> frameNode, OHOS::Ace::RefPtr<FrameNode>& imageNode)
+void DragEventActuator::CreatePreviewNode(const RefPtr<FrameNode>& frameNode, OHOS::Ace::RefPtr<FrameNode>& imageNode)
 {
     CHECK_NULL_VOID(frameNode);
     auto pixelMap = frameNode->GetPixelMap();
     CHECK_NULL_VOID(pixelMap);
-    auto frameOffset = frameNode->GetGlobalOffset();
+    auto frameOffset = frameNode->GetOffsetInScreen();
     imageNode = FrameNode::GetOrCreateFrameNode(V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         []() {return AceType::MakeRefPtr<ImagePattern>(); });
     CHECK_NULL_VOID(imageNode);
@@ -583,7 +583,7 @@ void DragEventActuator::CreatePreviewNode(const RefPtr<FrameNode> frameNode, OHO
     imageNode->CreateLayoutTask();
 }
 
-void DragEventActuator::SetPreviewDefaultAnimateProperty(const RefPtr<FrameNode> imageNode)
+void DragEventActuator::SetPreviewDefaultAnimateProperty(const RefPtr<FrameNode>& imageNode)
 {
     if (imageNode->IsPreviewNeedScale()) {
         auto imageContext = imageNode->GetRenderContext();
@@ -593,8 +593,8 @@ void DragEventActuator::SetPreviewDefaultAnimateProperty(const RefPtr<FrameNode>
     }
 }
 
-void DragEventActuator::MountPixelMap(const RefPtr<OverlayManager> manager, const RefPtr<GestureEventHub> gestureHub,
-    const RefPtr<FrameNode> imageNode)
+void DragEventActuator::MountPixelMap(const RefPtr<OverlayManager>& manager, const RefPtr<GestureEventHub>& gestureHub,
+    const RefPtr<FrameNode>& imageNode)
 {
     CHECK_NULL_VOID(manager);
     CHECK_NULL_VOID(imageNode);
