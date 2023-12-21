@@ -783,6 +783,14 @@ void WebClientImpl::OnFirstContentfulPaint(int64_t navigationStartTick, int64_t 
     delegate->OnFirstContentfulPaint(navigationStartTick, firstContentfulPaintMs);
 }
 
+void WebClientImpl::OnSafeBrowsingCheckResult(int threat_type)
+{
+    ContainerScope scope(instanceId_);
+    auto delegate = webDelegate_.Upgrade();
+    CHECK_NULL_VOID(delegate);
+    delegate->OnSafeBrowsingCheckResult(threat_type);
+}
+
 void WebClientImpl::OnCompleteSwapWithNewSize()
 {
     ContainerScope scope(instanceId_);

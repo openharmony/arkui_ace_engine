@@ -1410,6 +1410,25 @@ private:
     int64_t firstContentfulPaintMs_;
 };
 
+class ACE_EXPORT SafeBrowsingCheckResultEvent : public BaseEventInfo {
+    DECLARE_RELATIONSHIP_OF_CLASSES(SafeBrowsingCheckResultEvent, BaseEventInfo);
+
+public:
+    SafeBrowsingCheckResultEvent(int threat_type)
+        : BaseEventInfo("SafeBrowsingCheckResultEvent"), threat_type_(threat_type)
+    {}
+
+    ~SafeBrowsingCheckResultEvent() = default;
+
+    int GetThreatType() const
+    {
+        return threat_type_;
+    }
+
+private:
+    int threat_type_;
+};
+
 class ACE_EXPORT WebOnOverScrollEvent : public BaseEventInfo {
     DECLARE_RELATIONSHIP_OF_CLASSES(WebOnOverScrollEvent, BaseEventInfo);
 
