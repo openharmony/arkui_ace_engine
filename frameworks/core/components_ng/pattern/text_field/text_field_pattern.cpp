@@ -134,7 +134,7 @@ const std::string EMAIL_WHITE_LIST = "[\\w.\\@]";
 const std::string URL_WHITE_LIST = "[a-zA-z]+://[^\\s]*";
 const std::string SHOW_PASSWORD_SVG = "SYS_SHOW_PASSWORD_SVG";
 const std::string HIDE_PASSWORD_SVG = "SYS_HIDE_PASSWORD_SVG";
-constexpr int32_t INVAILD_VALUE = -1;
+constexpr int32_t DEFAULT_MODE = -1;
 
 void SwapIfLarger(int32_t& a, int32_t& b)
 {
@@ -1995,6 +1995,7 @@ void TextFieldPattern::OnModifyDone()
         }
         HandleCounterBorder();
     }
+    UpdateCounterMargin();
     if (!IsTextArea()) {
         isTextInput_ = true;
     }
@@ -2021,7 +2022,6 @@ void TextFieldPattern::OnModifyDone()
         RestorePreInlineStates();
         UpdateSelection(0);
     }
-    UpdateCounterMargin();
     auto maxlength = GetMaxLength();
     auto originLength = static_cast<int32_t>(contentController_->GetWideText().length());
     HandleInputCounterBorder(originLength, maxlength);
@@ -3128,21 +3128,24 @@ void TextFieldPattern::InsertValue(const std::string& insertValue)
     CHECK_NULL_VOID(pattern);
     auto textFieldLayoutProperty = host->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(textFieldLayoutProperty);
-    auto inputValue = textFieldLayoutProperty->GetSetCounterValue(INVAILD_VALUE);
+    auto inputValue = textFieldLayoutProperty->GetSetCounterValue(DEFAULT_MODE);
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<TextFieldTheme>();
     CHECK_NULL_VOID(theme);
-    if (textFieldLayoutProperty->GetShowCounterValue(false) && (originLength + ONE_CHARACTER) == maxlength &&
-        inputValue == INVAILD_VALUE) {
+    if (inputValue == DEFAULT_MODE) {
+        originLength = originLength + ONE_CHARACTER;
+    }
+    if (textFieldLayoutProperty->GetShowCounterValue(false) && originLength == maxlength &&
+        inputValue == DEFAULT_MODE) {
         UpdateCounterBorderStyle(originLength, maxlength);
     }
     bool noDeleteOperation = deleteBackwardOperations_.empty() && deleteForwardOperations_.empty();
     if (!IsShowPasswordIcon() && originLength == maxlength && noDeleteOperation && !IsSelected() &&
-        textFieldLayoutProperty->GetShowCounterValue(false) && inputValue != INVAILD_VALUE &&
+        textFieldLayoutProperty->GetShowCounterValue(false) && inputValue != DEFAULT_MODE &&
         inputValue != ILLEGAL_VALUE && !IsNormalInlineState()) {
         counterChange_ = true;
-        UpdateCounterTextColor();
+        UpdateOverCounterColor();
         UltralimitShake();
         return;
     }
@@ -3162,13 +3165,13 @@ void TextFieldPattern::HandleInputCounterBorder(int32_t& textLength, uint32_t& m
         !textFieldLayoutProperty->HasMaxLength()) {
         return;
     }
-    auto inputValue = textFieldLayoutProperty->GetSetCounterValue(INVAILD_VALUE);
-    if (textLength >= maxLength && inputValue == INVAILD_VALUE) {
+    auto inputValue = textFieldLayoutProperty->GetSetCounterValue(DEFAULT_MODE);
+    if (textLength >= maxLength && inputValue == DEFAULT_MODE) {
         UpdateCounterBorderStyle(textLength, maxLength);
     }
 }
 
-void TextFieldPattern::UpdateCounterTextColor()
+void TextFieldPattern::UpdateOverCounterColor()
 {
     auto tmpHost = GetHost();
     CHECK_NULL_VOID(tmpHost);
@@ -3214,8 +3217,7 @@ void TextFieldPattern::UpdateCounterBorderStyle(int32_t& textLength, uint32_t& m
     CHECK_NULL_VOID(textFieldLayoutProperty);
     counterChange_ = true;
     auto showBorder = textFieldLayoutProperty->GetShowHighlightBorderValue(true);
-    auto counterText = std::to_string(textLength) + "/" + std::to_string(maxLength);
-    if (textLength >= maxLength && !IsTextArea() && showBorder == true) {
+    if (textLength >= (maxLength - ONE_CHARACTER) && !IsTextArea() && showBorder == true) {
         SetUnderlineColor(theme->GetErrorUnderlineColor());
     } else if (textLength >= maxLength && IsTextArea() && showBorder == true) {
         HandleCounterBorder();
@@ -3257,8 +3259,7 @@ void TextFieldPattern::UpdateCounterMargin()
         !IsShowPasswordIcon()) {
         MarginProperty margin;
         const auto& getMargin = layoutProperty->GetMarginProperty();
-        if (getMargin && !hasCounterMargin_) {
-            hasCounterMargin_ = true;
+        if (getMargin) {
             auto systemMargin = getMargin->bottom->GetDimension();
             Dimension marginProperty { BOTTOM_MARGIN, DimensionUnit::VP };
             margin.bottom = CalcLength(marginProperty + systemMargin);
@@ -3267,24 +3268,8 @@ void TextFieldPattern::UpdateCounterMargin()
             margin.right = CalcLength(getMargin->right->GetDimension());
             layoutProperty->UpdateMargin(margin);
         }
-        if (!hasCounterMargin_ && !getMargin) {
-            hasCounterMargin_ = true;
+        if (!getMargin) {
             margin.bottom = CalcLength(COUNTER_BOTTOM);
-            layoutProperty->UpdateMargin(margin);
-        }
-    }
-    if (!IsTextArea() && hasCounterMargin_ && !layoutProperty->GetShowCounterValue(false) &&
-        !IsNormalInlineState() && !IsShowPasswordIcon()) {
-        MarginProperty margin;
-        const auto& getMargin = layoutProperty->GetMarginProperty();
-        if (getMargin) {
-            hasCounterMargin_ = false;
-            auto marginProperty = getMargin->bottom->GetDimension();
-            Dimension counterMargin { BOTTOM_MARGIN, DimensionUnit::VP };
-            margin.bottom = CalcLength(marginProperty - counterMargin);
-            margin.left = CalcLength(getMargin->left->GetDimension());
-            margin.top = CalcLength(getMargin->top->GetDimension());
-            margin.right = CalcLength(getMargin->right->GetDimension());
             layoutProperty->UpdateMargin(margin);
         }
     }
@@ -5343,7 +5328,7 @@ void TextFieldPattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const
     auto jsonShowCounter = JsonUtil::Create(true);
     jsonShowCounter->Put("value", layoutProperty->GetShowCounterValue(false));
     auto jsonShowCounterOptions = JsonUtil::Create(true);
-    auto counterType = layoutProperty->GetSetCounterValue(INVAILD_VALUE);
+    auto counterType = layoutProperty->GetSetCounterValue(DEFAULT_MODE);
     auto showBorder = layoutProperty->GetShowHighlightBorderValue(true);
     jsonShowCounterOptions->Put("thresholdPercentage", counterType);
     jsonShowCounterOptions->Put("highlightBorder", showBorder);
