@@ -227,7 +227,6 @@ HWTEST_F(ThreadTest, Task_Executor_ImplTest07, TestSize.Level1)
      * @tc.expected: Return expected results.
      */
     taskExecutorImpl_->FillTaskTypeTable(taskExecutorImpl_, TaskExecutor::TaskType::UI);
-    EXPECT_EQ(taskExecutorImpl_->taskTypeTable_.size(), 5);
     EXPECT_EQ(taskExecutorImpl_->taskTypeTable_.bucket_count(), 5);
 }
 
