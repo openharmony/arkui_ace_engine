@@ -993,11 +993,6 @@ void GridScrollLayoutAlgorithm::SkipForwardLines(float mainSize, LayoutWrapper* 
         CHECK_NULL_VOID(grid);
         auto pattern = grid->GetPattern<GridPattern>();
         CHECK_NULL_VOID(pattern);
-        auto estimatedHeight = pattern->GetScrollableDistance();
-        // no scroller
-        if (LessOrEqual(estimatedHeight, 0)) {
-            return;
-        }
         if (!gridLayoutInfo_.hasBigItem_) {
             SkipRegularLines(true);
         } else {
@@ -1045,11 +1040,6 @@ void GridScrollLayoutAlgorithm::SkipBackwardLines(float mainSize, LayoutWrapper*
         CHECK_NULL_VOID(grid);
         auto pattern = grid->GetPattern<GridPattern>();
         CHECK_NULL_VOID(pattern);
-        auto estimatedHeight = pattern->GetScrollableDistance();
-        // no scroller
-        if (LessOrEqual(estimatedHeight, 0)) {
-            return;
-        }
         if (!gridLayoutInfo_.hasBigItem_) {
             SkipRegularLines(false);
         } else {
