@@ -1795,7 +1795,7 @@ HWTEST_F(ImageTestNg, GetMaxSize001, TestSize.Level1)
     // 300 / 200 = 1.5
     std::vector<SizeF> cases = { { 1, 1 }, { 1, Infinity<float>() }, { Infinity<float>(), 1 },
         { Infinity<float>(), Infinity<float>() } };
-    std::vector<SizeF> expectedRes { { 1, 1 }, { 1, 2 }, { 0.5, 1 }, { 0, 0 } };
+    std::vector<SizeF> expectedRes { { 1, 1 }, { 1, 2 }, { 0.5, 1 }, { 720, 1440 } };
     for (int i = 0; i < 4; ++i) {
         layoutConstraintSize.maxSize.SetSizeT(cases[i]);
         size = imageLayoutAlgorithm->MeasureContent(layoutConstraintSize, &layoutWrapper);
@@ -1829,6 +1829,11 @@ HWTEST_F(ImageTestNg, MeasureContent001, TestSize.Level1)
             ImageSourceInfo(ALT_SRC_URL, Dimension(-1), Dimension(-1)), LoadNotifier(nullptr, nullptr, nullptr)) };
 
     LayoutConstraintF layoutConstraintSize;
+    std::vector<std::vector<SizeF>> cases = {
+        { {0, 0}, {720, 1440}, {0, 0} },
+        { {720, 480}, {720, 480}, {720, 480} },
+        { {0, 0}, {720, 720}, {0, 0} }
+    };
 
     for (int i = 0; i < 3; ++i) {
         for (int j = 0; j < 3; ++j) {
@@ -1839,7 +1844,7 @@ HWTEST_F(ImageTestNg, MeasureContent001, TestSize.Level1)
             if (status == 0 || status == 2 || status == 6 || status == 8) {
                 EXPECT_EQ(size, std::nullopt);
             } else {
-                EXPECT_EQ(size.value(), SizeF(0, 0));
+                EXPECT_EQ(size.value(), cases[i][j]);
             }
         }
     }

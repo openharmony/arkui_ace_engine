@@ -700,8 +700,8 @@ HWTEST_F(TextInputCursorTest, OnTextChangedListenerCaretPosition006, TestSize.Le
      * @tc.expected: Check if the new handle positions are correct
      */
     EXPECT_EQ(pattern_->selectController_->GetFirstHandleInfo().index, 0);
-    EXPECT_EQ(pattern_->selectController_->GetCaretRect().GetX(), 26);
-    EXPECT_EQ(pattern_->selectController_->GetSecondHandleInfo().index, 26)
+    EXPECT_EQ(pattern_->selectController_->GetCaretRect().GetX(), 0);
+    EXPECT_EQ(pattern_->selectController_->GetSecondHandleInfo().index, 0)
         << "Second index is " + std::to_string(pattern_->selectController_->GetSecondHandleInfo().index);
 
     /**

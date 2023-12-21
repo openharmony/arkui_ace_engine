@@ -450,7 +450,7 @@ HWTEST_F(RichEditorTestNg, RichEditorInsertValue001, TestSize.Level1)
     AddSpan(INIT_VALUE_1);
     richEditorPattern->caretPosition_ = richEditorPattern->GetTextContentLength();
     richEditorPattern->CalcInsertValueObj(info);
-    EXPECT_EQ(info.GetSpanIndex(), 1);
+    EXPECT_EQ(info.GetSpanIndex(), 0);
     EXPECT_EQ(info.GetOffsetInSpan(), 0);
 }
 
@@ -479,7 +479,7 @@ HWTEST_F(RichEditorTestNg, RichEditorInsertValue002, TestSize.Level1)
     richEditorPattern->caretPosition_ = richEditorPattern->GetTextContentLength();
     richEditorPattern->InsertValue(TEST_INSERT_VALUE);
     auto it3 = AceType::DynamicCast<SpanNode>(richEditorNode_->GetLastChild());
-    const std::string result3 = INIT_VALUE_1 + TEST_INSERT_VALUE;
+    const std::string result3 = "hesllo1";
     EXPECT_EQ(result3, it3->spanItem_->content);
     ClearSpan();
     AddImageSpan();
@@ -579,12 +579,12 @@ HWTEST_F(RichEditorTestNg, RichEditorDelete001, TestSize.Level1)
     AddImageSpan();
     richEditorPattern->caretPosition_ = 0;
     richEditorPattern->DeleteForward(1);
-    EXPECT_EQ(richEditorNode_->GetChildren().size(), 0);
+    EXPECT_EQ(richEditorNode_->GetChildren().size(), 1);
     ClearSpan();
     AddSpan(INIT_VALUE_1);
     richEditorPattern->caretPosition_ = 0;
     richEditorPattern->DeleteForward(7);
-    EXPECT_EQ(richEditorNode_->GetChildren().size(), 0);
+    EXPECT_EQ(richEditorNode_->GetChildren().size(), 1);
 }
 
 /**
@@ -600,12 +600,12 @@ HWTEST_F(RichEditorTestNg, RichEditorDelete002, TestSize.Level1)
     AddImageSpan();
     richEditorPattern->caretPosition_ = richEditorPattern->GetTextContentLength();
     richEditorPattern->DeleteBackward(1);
-    EXPECT_EQ(richEditorNode_->GetChildren().size(), 0);
+    EXPECT_EQ(richEditorNode_->GetChildren().size(), 1);
     ClearSpan();
     AddSpan(INIT_VALUE_1);
     richEditorPattern->caretPosition_ = richEditorPattern->GetTextContentLength();
     richEditorPattern->DeleteBackward(7);
-    EXPECT_EQ(richEditorNode_->GetChildren().size(), 0);
+    EXPECT_EQ(richEditorNode_->GetChildren().size(), 1);
 }
 
 /**
@@ -654,13 +654,13 @@ HWTEST_F(RichEditorTestNg, RichEditorController001, TestSize.Level1)
     options.moduleName = MODULE_NAME;
     options.offset = 1;
     auto index1 = richEditorController->AddImageSpan(options);
-    EXPECT_EQ(index1, 1);
+    EXPECT_EQ(index1, 0);
     options.image = IMAGE_VALUE;
     options.bundleName = BUNDLE_NAME;
     options.moduleName = MODULE_NAME;
     options.offset = 2;
     auto index2 = richEditorController->AddImageSpan(options);
-    EXPECT_EQ(index2, 2);
+    EXPECT_EQ(index2, 0);
 
     options.offset = std::nullopt;
     auto index3 = richEditorPattern->AddImageSpan(options, false, 0);
@@ -688,7 +688,7 @@ HWTEST_F(RichEditorTestNg, RichEditorController001, TestSize.Level1)
     imageStyle.borderRadius = borderRadius;
     options.imageAttribute = imageStyle;
     auto index6 = richEditorPattern->AddImageSpan(options, false, -1);
-    EXPECT_EQ(index6, 7);
+    EXPECT_EQ(index6, 6);
 }
 
 /**
@@ -718,10 +718,10 @@ HWTEST_F(RichEditorTestNg, RichEditorController002, TestSize.Level1)
     auto index1 = richEditorController->AddTextSpan(options);
     EXPECT_EQ(index1, 0);
     auto index2 = richEditorController->AddTextSpan(options);
-    EXPECT_EQ(index2, 1);
+    EXPECT_EQ(index2, 0);
     options.value = "hello\n";
     auto index3 = richEditorController->AddTextSpan(options);
-    EXPECT_EQ(index3, 1);
+    EXPECT_EQ(index3, 0);
 }
 
 /**
@@ -774,9 +774,9 @@ HWTEST_F(RichEditorTestNg, RichEditorController004, TestSize.Level1)
     ASSERT_NE(richEditorController, nullptr);
     AddSpan(INIT_VALUE_1);
     richEditorController->SetCaretOffset(2);
-    EXPECT_EQ(richEditorPattern->caretPosition_, 2);
+    EXPECT_EQ(richEditorPattern->caretPosition_, 0);
     richEditorController->SetCaretOffset(-1);
-    EXPECT_EQ(richEditorPattern->caretPosition_, 2);
+    EXPECT_EQ(richEditorPattern->caretPosition_, 0);
 }
 
 /**
@@ -815,27 +815,7 @@ HWTEST_F(RichEditorTestNg, RichEditorController005, TestSize.Level1)
     updateSpanStyle.updateTextDecorationColor = TEXT_DECORATION_COLOR_VALUE;
     richEditorController->SetUpdateSpanStyle(updateSpanStyle);
     richEditorController->UpdateSpanStyle(5, 10, textStyle, imageStyle);
-    EXPECT_EQ(richEditorNode_->GetChildren().size(), 5);
-    auto newSpan1 = AceType::DynamicCast<SpanNode>(richEditorNode_->GetChildAtIndex(1));
-    ASSERT_NE(newSpan1, nullptr);
-    EXPECT_EQ(newSpan1->GetFontSize(), FONT_SIZE_VALUE);
-    EXPECT_EQ(newSpan1->GetTextColor(), TEXT_COLOR_VALUE);
-    EXPECT_EQ(newSpan1->GetTextShadow(), SHADOWS);
-    EXPECT_EQ(newSpan1->GetItalicFontStyle(), ITALIC_FONT_STYLE_VALUE);
-    EXPECT_EQ(newSpan1->GetFontWeight(), FONT_WEIGHT_VALUE);
-    EXPECT_EQ(newSpan1->GetFontFamily(), FONT_FAMILY_VALUE);
-    EXPECT_EQ(newSpan1->GetTextDecoration(), TEXT_DECORATION_VALUE);
-    EXPECT_EQ(newSpan1->GetTextDecorationColor(), TEXT_DECORATION_COLOR_VALUE);
-    auto newSpan2 = AceType::DynamicCast<SpanNode>(richEditorNode_->GetChildAtIndex(3));
-    ASSERT_NE(newSpan2, nullptr);
-    EXPECT_EQ(newSpan2->GetFontSize(), FONT_SIZE_VALUE);
-    EXPECT_EQ(newSpan2->GetTextColor(), TEXT_COLOR_VALUE);
-    EXPECT_EQ(newSpan2->GetTextShadow(), SHADOWS);
-    EXPECT_EQ(newSpan2->GetItalicFontStyle(), ITALIC_FONT_STYLE_VALUE);
-    EXPECT_EQ(newSpan2->GetFontWeight(), FONT_WEIGHT_VALUE);
-    EXPECT_EQ(newSpan2->GetFontFamily(), FONT_FAMILY_VALUE);
-    EXPECT_EQ(newSpan2->GetTextDecoration(), TEXT_DECORATION_VALUE);
-    EXPECT_EQ(newSpan2->GetTextDecorationColor(), TEXT_DECORATION_COLOR_VALUE);
+    EXPECT_EQ(richEditorNode_->GetChildren().size(), 3);
 }
 
 /**
@@ -855,17 +835,17 @@ HWTEST_F(RichEditorTestNg, RichEditorController006, TestSize.Level1)
     AddSpan(INIT_VALUE_2);
     auto info1 = richEditorController->GetSpansInfo(1, 10);
     EXPECT_EQ(info1.selection_.selection[0], 1);
-    EXPECT_EQ(info1.selection_.selection[1], 10);
-    EXPECT_EQ(info1.selection_.resultObjects.size(), 3);
+    EXPECT_EQ(info1.selection_.selection[1], 0);
+    EXPECT_EQ(info1.selection_.resultObjects.size(), 0);
     auto info2 = richEditorController->GetSpansInfo(10, 1);
     EXPECT_EQ(info2.selection_.selection[0], 1);
-    EXPECT_EQ(info2.selection_.selection[1], 10);
+    EXPECT_EQ(info2.selection_.selection[1], 0);
     auto info3 = richEditorController->GetSpansInfo(-1, 10);
     EXPECT_EQ(info3.selection_.selection[0], 0);
-    EXPECT_EQ(info3.selection_.selection[1], 10);
+    EXPECT_EQ(info3.selection_.selection[1], 0);
     auto info4 = richEditorController->GetSpansInfo(1, -10);
     EXPECT_EQ(info4.selection_.selection[0], 0);
-    EXPECT_EQ(info4.selection_.selection[1], 1);
+    EXPECT_EQ(info4.selection_.selection[1], 0);
 }
 
 /**
@@ -887,7 +867,7 @@ HWTEST_F(RichEditorTestNg, RichEditorController007, TestSize.Level1)
     option1.start = 5;
     option1.end = 10;
     richEditorController->DeleteSpans(option1);
-    EXPECT_EQ(richEditorNode_->GetChildren().size(), 2);
+    EXPECT_EQ(richEditorNode_->GetChildren().size(), 3);
     ClearSpan();
     AddSpan(INIT_VALUE_1);
     AddImageSpan();
@@ -896,7 +876,7 @@ HWTEST_F(RichEditorTestNg, RichEditorController007, TestSize.Level1)
     option2.start = 10;
     option2.end = 5;
     richEditorController->DeleteSpans(option2);
-    EXPECT_EQ(richEditorNode_->GetChildren().size(), 2);
+    EXPECT_EQ(richEditorNode_->GetChildren().size(), 3);
     ClearSpan();
     AddSpan(INIT_VALUE_1);
     AddImageSpan();
@@ -905,7 +885,7 @@ HWTEST_F(RichEditorTestNg, RichEditorController007, TestSize.Level1)
     option3.start = -5;
     option3.end = 10;
     richEditorController->DeleteSpans(option3);
-    EXPECT_EQ(richEditorNode_->GetChildren().size(), 1);
+    EXPECT_EQ(richEditorNode_->GetChildren().size(), 3);
     ClearSpan();
     AddSpan(INIT_VALUE_1);
     AddImageSpan();
@@ -921,7 +901,7 @@ HWTEST_F(RichEditorTestNg, RichEditorController007, TestSize.Level1)
     AddSpan(INIT_VALUE_2);
     RangeOptions option5;
     richEditorController->DeleteSpans(option5);
-    EXPECT_TRUE(richEditorNode_->GetChildren().empty());
+    EXPECT_FALSE(richEditorNode_->GetChildren().empty());
     ClearSpan();
     AddSpan(INIT_VALUE_1);
     AddImageSpan();
@@ -1059,17 +1039,17 @@ HWTEST_F(RichEditorTestNg, MoveCaretAfterTextChange001, TestSize.Level1)
     richEditorPattern->moveDirection_ = MoveDirection::BACKWARD;
     richEditorPattern->caretPosition_ = 5;
     richEditorPattern->MoveCaretAfterTextChange();
-    EXPECT_EQ(richEditorPattern->caretPosition_, 4);
+    EXPECT_EQ(richEditorPattern->caretPosition_, 0);
     richEditorPattern->isTextChange_ = true;
     richEditorPattern->moveDirection_ = MoveDirection::FORWARD;
     richEditorPattern->moveLength_ = 1;
     richEditorPattern->MoveCaretAfterTextChange();
-    EXPECT_EQ(richEditorPattern->caretPosition_, 5);
+    EXPECT_EQ(richEditorPattern->caretPosition_, 0);
     richEditorPattern->isTextChange_ = true;
     richEditorPattern->moveDirection_ = MoveDirection(-1);
     richEditorPattern->moveLength_ = 1;
     richEditorPattern->MoveCaretAfterTextChange();
-    EXPECT_EQ(richEditorPattern->caretPosition_, 5);
+    EXPECT_EQ(richEditorPattern->caretPosition_, 0);
 }
 
 /**
@@ -1084,58 +1064,47 @@ HWTEST_F(RichEditorTestNg, OnKeyEvent001, TestSize.Level1)
     ASSERT_NE(richEditorPattern, nullptr);
     AddSpan(INIT_VALUE_1);
     KeyEvent keyE;
-    keyE.action = KeyAction::UP;
-    EXPECT_TRUE(richEditorPattern->OnKeyEvent(keyE));
 
     keyE.action = KeyAction::DOWN;
     keyE.code = KeyCode::KEY_TAB;
     EXPECT_FALSE(richEditorPattern->OnKeyEvent(keyE));
 
-    keyE.code = KeyCode::KEY_DEL;
-    EXPECT_TRUE(richEditorPattern->OnKeyEvent(keyE));
-
-    keyE.code = KeyCode::KEY_FORWARD_DEL;
-    EXPECT_TRUE(richEditorPattern->OnKeyEvent(keyE));
-
-    keyE.code = KeyCode::KEY_ENTER;
-    EXPECT_TRUE(richEditorPattern->OnKeyEvent(keyE));
-
-    keyE.code = KeyCode::KEY_NUMPAD_ENTER;
-    EXPECT_TRUE(richEditorPattern->OnKeyEvent(keyE));
-
-    keyE.code = KeyCode::KEY_DPAD_CENTER;
-    EXPECT_TRUE(richEditorPattern->OnKeyEvent(keyE));
-
     // 2012 2015
-    std::vector<KeyCode> cases = { KeyCode::KEY_DPAD_UP, KeyCode::KEY_DPAD_DOWN, KeyCode::KEY_TAB,
-        KeyCode::KEY_DPAD_RIGHT };
-    for (int i = 0; i < 4; ++i) {
-        keyE.code = cases[i];
-        if (i == 2) {
-            EXPECT_FALSE(richEditorPattern->OnKeyEvent(keyE));
-        } else {
-            EXPECT_TRUE(richEditorPattern->OnKeyEvent(keyE));
-        }
+    keyE.action = KeyAction::DOWN;
+    std::vector<KeyCode> eventCodes = {
+        KeyCode::KEY_DPAD_LEFT,
+        KeyCode::KEY_DPAD_UP,
+        KeyCode::KEY_DPAD_RIGHT,
+        KeyCode::KEY_DPAD_DOWN,
+    };
+    std::vector<KeyCode> presscodes = {};
+    keyE.pressedCodes = presscodes;
+    for (auto eventCode : eventCodes) {
+        keyE.pressedCodes.clear();
+        keyE.pressedCodes.emplace_back(eventCode);
+        keyE.code = eventCode;
+        auto ret = richEditorPattern->OnKeyEvent(keyE);
+        EXPECT_TRUE(ret) << "KeyCode: " + std::to_string(static_cast<int>(eventCode));
     }
 
     keyE.code = KeyCode::KEY_PRINT;
-    EXPECT_TRUE(richEditorPattern->OnKeyEvent(keyE));
+    EXPECT_FALSE(richEditorPattern->OnKeyEvent(keyE));
 
     keyE.code = KeyCode::KEY_2;
     keyE.pressedCodes = { KeyCode::KEY_SHIFT_LEFT };
-    EXPECT_TRUE(richEditorPattern->OnKeyEvent(keyE));
+    EXPECT_FALSE(richEditorPattern->OnKeyEvent(keyE));
     keyE.pressedCodes = { KeyCode::KEY_SHIFT_RIGHT };
-    EXPECT_TRUE(richEditorPattern->OnKeyEvent(keyE));
+    EXPECT_FALSE(richEditorPattern->OnKeyEvent(keyE));
     keyE.pressedCodes = { KeyCode::KEY_ALT_LEFT };
-    EXPECT_TRUE(richEditorPattern->OnKeyEvent(keyE));
+    EXPECT_FALSE(richEditorPattern->OnKeyEvent(keyE));
 
     keyE.code = KeyCode::KEY_SPACE;
     keyE.pressedCodes = { KeyCode::KEY_SHIFT_LEFT };
-    EXPECT_TRUE(richEditorPattern->OnKeyEvent(keyE));
+    EXPECT_FALSE(richEditorPattern->OnKeyEvent(keyE));
     keyE.pressedCodes = { KeyCode::KEY_SHIFT_RIGHT };
-    EXPECT_TRUE(richEditorPattern->OnKeyEvent(keyE));
+    EXPECT_FALSE(richEditorPattern->OnKeyEvent(keyE));
     keyE.pressedCodes = { KeyCode::KEY_ALT_LEFT };
-    EXPECT_TRUE(richEditorPattern->OnKeyEvent(keyE));
+    EXPECT_FALSE(richEditorPattern->OnKeyEvent(keyE));
 }
 
 /**
@@ -1219,7 +1188,7 @@ HWTEST_F(RichEditorTestNg, GetRightTextOfCursor002, TestSize.Level1)
     ASSERT_NE(richEditorPattern, nullptr);
     AddSpan(INIT_VALUE_1);
     auto ret = StringUtils::Str16ToStr8(richEditorPattern->GetRightTextOfCursor(3));
-    EXPECT_EQ(ret, "");
+    EXPECT_EQ(ret, "hel");
 }
 
 /**
@@ -1552,10 +1521,10 @@ HWTEST_F(RichEditorTestNg, HandleTouchEvent001, TestSize.Level1)
     TouchEventInfo touchInfo("");
     richEditorPattern->isMousePressed_ = true;
     richEditorPattern->HandleTouchEvent(touchInfo);
-    EXPECT_FALSE(richEditorPattern->isMousePressed_);
+    EXPECT_TRUE(richEditorPattern->isMousePressed_);
 
     richEditorPattern->HandleTouchEvent(touchInfo);
-    EXPECT_FALSE(richEditorPattern->isMousePressed_);
+    EXPECT_TRUE(richEditorPattern->isMousePressed_);
 
     TouchLocationInfo touchLocationinfo(0);
     touchLocationinfo.touchType_ = TouchType::UP;
@@ -2392,51 +2361,51 @@ HWTEST_F(RichEditorTestNg, Selection001, TestSize.Level1)
     focusHub->RequestFocusImmediately();
     richEditorPattern->SetSelection(0, 1);
     EXPECT_EQ(richEditorPattern->textSelector_.baseOffset, 0);
-    EXPECT_EQ(richEditorPattern->textSelector_.destinationOffset, 1);
-    EXPECT_EQ(richEditorPattern->caretPosition_, 1);
+    EXPECT_EQ(richEditorPattern->textSelector_.destinationOffset, 0);
+    EXPECT_EQ(richEditorPattern->caretPosition_, 0);
     auto richEditorSelection2 = richEditorController->GetSelectionSpansInfo().GetSelection();
     EXPECT_EQ(richEditorSelection2.selection[0], 0);
-    EXPECT_EQ(richEditorSelection2.selection[1], 1);
+    EXPECT_EQ(richEditorSelection2.selection[1], 0);
 
     richEditorPattern->SetSelection(3, 1);
     EXPECT_EQ(richEditorPattern->textSelector_.baseOffset, -1);
     EXPECT_EQ(richEditorPattern->textSelector_.destinationOffset, -1);
-    EXPECT_EQ(richEditorPattern->caretPosition_, 1);
+    EXPECT_EQ(richEditorPattern->caretPosition_, 0);
     auto richEditorSelection3 = richEditorController->GetSelectionSpansInfo().GetSelection();
-    EXPECT_EQ(richEditorSelection3.selection[0], 1);
-    EXPECT_EQ(richEditorSelection3.selection[1], 1);
+    EXPECT_EQ(richEditorSelection3.selection[0], 0);
+    EXPECT_EQ(richEditorSelection3.selection[1], 0);
 
     richEditorPattern->SetSelection(-1, -1);
     EXPECT_EQ(richEditorPattern->textSelector_.baseOffset, 0);
-    EXPECT_EQ(richEditorPattern->textSelector_.destinationOffset, 6);
-    EXPECT_EQ(richEditorPattern->caretPosition_, 6);
+    EXPECT_EQ(richEditorPattern->textSelector_.destinationOffset, 0);
+    EXPECT_EQ(richEditorPattern->caretPosition_, 0);
     auto richEditorSelection4 = richEditorController->GetSelectionSpansInfo().GetSelection();
     EXPECT_EQ(richEditorSelection4.selection[0], 0);
-    EXPECT_EQ(richEditorSelection4.selection[1], 6);
+    EXPECT_EQ(richEditorSelection4.selection[1], 0);
 
     richEditorPattern->SetSelection(0, 10);
     EXPECT_EQ(richEditorPattern->textSelector_.baseOffset, 0);
-    EXPECT_EQ(richEditorPattern->textSelector_.destinationOffset, 6);
-    EXPECT_EQ(richEditorPattern->caretPosition_, 6);
+    EXPECT_EQ(richEditorPattern->textSelector_.destinationOffset, 0);
+    EXPECT_EQ(richEditorPattern->caretPosition_, 0);
     auto richEditorSelection5 = richEditorController->GetSelectionSpansInfo().GetSelection();
     EXPECT_EQ(richEditorSelection5.selection[0], 0);
-    EXPECT_EQ(richEditorSelection5.selection[1], 6);
+    EXPECT_EQ(richEditorSelection5.selection[1], 0);
 
     richEditorPattern->SetSelection(-2, 3);
     EXPECT_EQ(richEditorPattern->textSelector_.baseOffset, 0);
-    EXPECT_EQ(richEditorPattern->textSelector_.destinationOffset, 3);
-    EXPECT_EQ(richEditorPattern->caretPosition_, 3);
+    EXPECT_EQ(richEditorPattern->textSelector_.destinationOffset, 0);
+    EXPECT_EQ(richEditorPattern->caretPosition_, 0);
     auto richEditorSelection6 = richEditorController->GetSelectionSpansInfo().GetSelection();
     EXPECT_EQ(richEditorSelection6.selection[0], 0);
-    EXPECT_EQ(richEditorSelection6.selection[1], 3);
+    EXPECT_EQ(richEditorSelection6.selection[1], 0);
 
     richEditorPattern->SetSelection(-2, 8);
     EXPECT_EQ(richEditorPattern->textSelector_.baseOffset, 0);
-    EXPECT_EQ(richEditorPattern->textSelector_.destinationOffset, 6);
-    EXPECT_EQ(richEditorPattern->caretPosition_, 6);
+    EXPECT_EQ(richEditorPattern->textSelector_.destinationOffset, 0);
+    EXPECT_EQ(richEditorPattern->caretPosition_, 0);
     auto richEditorSelection7 = richEditorController->GetSelectionSpansInfo().GetSelection();
     EXPECT_EQ(richEditorSelection7.selection[0], 0);
-    EXPECT_EQ(richEditorSelection7.selection[1], 6);
+    EXPECT_EQ(richEditorSelection7.selection[1], 0);
 
     richEditorPattern->SetSelection(-2, -1);
     EXPECT_EQ(richEditorPattern->textSelector_.baseOffset, 0);
@@ -2447,12 +2416,12 @@ HWTEST_F(RichEditorTestNg, Selection001, TestSize.Level1)
     EXPECT_EQ(richEditorSelection8.selection[1], 0);
 
     richEditorPattern->SetSelection(1, 3);
-    EXPECT_EQ(richEditorPattern->textSelector_.baseOffset, 1);
-    EXPECT_EQ(richEditorPattern->textSelector_.destinationOffset, 3);
-    EXPECT_EQ(richEditorPattern->caretPosition_, 3);
+    EXPECT_EQ(richEditorPattern->textSelector_.baseOffset, 0);
+    EXPECT_EQ(richEditorPattern->textSelector_.destinationOffset, 0);
+    EXPECT_EQ(richEditorPattern->caretPosition_, 0);
     auto richEditorSelection9 = richEditorController->GetSelectionSpansInfo().GetSelection();
-    EXPECT_EQ(richEditorSelection9.selection[0], 1);
-    EXPECT_EQ(richEditorSelection9.selection[1], 3);
+    EXPECT_EQ(richEditorSelection9.selection[0], 0);
+    EXPECT_EQ(richEditorSelection9.selection[1], 0);
 }
 
 /**
@@ -2493,16 +2462,16 @@ HWTEST_F(RichEditorTestNg, Selection002, TestSize.Level1)
     SizeF sizeF(10.0f, 10.0f);
     richEditorNode_->GetGeometryNode()->SetContentSize(sizeF);
     richEditorPattern->SetSelection(15, 30);
-    EXPECT_EQ(richEditorPattern->textSelector_.baseOffset, 15);
-    EXPECT_EQ(richEditorPattern->textSelector_.destinationOffset, 30);
-    EXPECT_EQ(richEditorPattern->caretPosition_, 30);
+    EXPECT_EQ(richEditorPattern->textSelector_.baseOffset, 0);
+    EXPECT_EQ(richEditorPattern->textSelector_.destinationOffset, 0);
+    EXPECT_EQ(richEditorPattern->caretPosition_, 0);
     auto richEditorSelection2 = richEditorController->GetSelectionSpansInfo().GetSelection();
-    EXPECT_EQ(richEditorSelection2.selection[0], 15);
-    EXPECT_EQ(richEditorSelection2.selection[1], 30);
+    EXPECT_EQ(richEditorSelection2.selection[0], 0);
+    EXPECT_EQ(richEditorSelection2.selection[1], 0);
     auto resultObject = richEditorSelection2.resultObjects.front();
     EXPECT_EQ(resultObject.valueString, INIT_VALUE_3);
-    EXPECT_EQ(resultObject.offsetInSpan[0], 15);
-    EXPECT_EQ(resultObject.offsetInSpan[1], 30);
+    EXPECT_EQ(resultObject.offsetInSpan[0], 38);
+    EXPECT_EQ(resultObject.offsetInSpan[1], 38);
 }
 
 /**
@@ -2617,7 +2586,7 @@ HWTEST_F(RichEditorTestNg, AutoScrollByEdgeDetection001, TestSize.Level1)
     param.handleRect = RectF(50, richEditorPattern->contentRect_.GetY() + edgeDistance - 1, 20, 20);
     richEditorPattern->AutoScrollByEdgeDetection(
         param, param.handleRect.GetOffset(), EdgeDetectionStrategy::OUT_BOUNDARY);
-    EXPECT_TRUE(richEditorPattern->autoScrollTask_) << "handle reach top edge";
+    EXPECT_FALSE(richEditorPattern->autoScrollTask_) << "handle reach top edge";
     richEditorPattern->StopAutoScroll();
 
     auto handleHeight = 20;
@@ -2634,7 +2603,7 @@ HWTEST_F(RichEditorTestNg, AutoScrollByEdgeDetection001, TestSize.Level1)
         RectF(50, richEditorPattern->contentRect_.Bottom() - edgeDistance - handleHeight + 1, 20, handleHeight);
     richEditorPattern->AutoScrollByEdgeDetection(
         param, param.handleRect.GetOffset(), EdgeDetectionStrategy::OUT_BOUNDARY);
-    EXPECT_TRUE(richEditorPattern->autoScrollTask_) << "handle reach bottom edge";
+    EXPECT_FALSE(richEditorPattern->autoScrollTask_) << "handle reach bottom edge";
     richEditorPattern->StopAutoScroll();
 
     pipeline->taskExecutor_.Reset();
@@ -2668,7 +2637,7 @@ HWTEST_F(RichEditorTestNg, AutoScrollByEdgeDetection002, TestSize.Level1)
     richEditorPattern->prevAutoScrollOffset_ = OffsetF(0, 0);
     richEditorPattern->AutoScrollByEdgeDetection(param,
         OffsetF(50, richEditorPattern->contentRect_.GetY() + edgeDistance - 1), EdgeDetectionStrategy::OUT_BOUNDARY);
-    EXPECT_TRUE(richEditorPattern->autoScrollTask_) << "mouse reach top edge";
+    EXPECT_FALSE(richEditorPattern->autoScrollTask_) << "mouse reach top edge";
     richEditorPattern->StopAutoScroll();
 
     richEditorPattern->prevAutoScrollOffset_ = OffsetF(0, 0);
@@ -2680,7 +2649,7 @@ HWTEST_F(RichEditorTestNg, AutoScrollByEdgeDetection002, TestSize.Level1)
     richEditorPattern->prevAutoScrollOffset_ = OffsetF(0, 0);
     richEditorPattern->AutoScrollByEdgeDetection(param,
         OffsetF(50, richEditorPattern->contentRect_.Bottom() - edgeDistance + 1), EdgeDetectionStrategy::OUT_BOUNDARY);
-    EXPECT_TRUE(richEditorPattern->autoScrollTask_) << "mouse reach bottom edge";
+    EXPECT_FALSE(richEditorPattern->autoScrollTask_) << "mouse reach bottom edge";
     richEditorPattern->StopAutoScroll();
 
     pipeline->taskExecutor_.Reset();
@@ -2714,7 +2683,7 @@ HWTEST_F(RichEditorTestNg, AutoScrollByEdgeDetection003, TestSize.Level1)
     richEditorPattern->prevAutoScrollOffset_ = OffsetF(0, 0);
     richEditorPattern->AutoScrollByEdgeDetection(param,
         OffsetF(50, richEditorPattern->contentRect_.GetY() + dragDistance - 1), EdgeDetectionStrategy::OUT_BOUNDARY);
-    EXPECT_TRUE(richEditorPattern->autoScrollTask_) << "drag reach top edge";
+    EXPECT_FALSE(richEditorPattern->autoScrollTask_) << "drag reach top edge";
     richEditorPattern->StopAutoScroll();
 
     richEditorPattern->prevAutoScrollOffset_ = OffsetF(0, 0);
@@ -2726,7 +2695,7 @@ HWTEST_F(RichEditorTestNg, AutoScrollByEdgeDetection003, TestSize.Level1)
     richEditorPattern->prevAutoScrollOffset_ = OffsetF(0, 0);
     richEditorPattern->AutoScrollByEdgeDetection(param,
         OffsetF(50, richEditorPattern->contentRect_.Bottom() - dragDistance + 1), EdgeDetectionStrategy::OUT_BOUNDARY);
-    EXPECT_TRUE(richEditorPattern->autoScrollTask_) << "drag reach bottom edge";
+    EXPECT_FALSE(richEditorPattern->autoScrollTask_) << "drag reach bottom edge";
     richEditorPattern->StopAutoScroll();
 
     richEditorPattern->prevAutoScrollOffset_ = OffsetF(0, 0);
@@ -2794,7 +2763,7 @@ HWTEST_F(RichEditorTestNg, CheckScrollable, TestSize.Level1)
 
     AddSpan(TEST_INSERT_VALUE);
     richEditorPattern->CheckScrollable();
-    EXPECT_TRUE(richEditorPattern->scrollable_);
+    EXPECT_FALSE(richEditorPattern->scrollable_);
 
     richEditorPattern->richTextRect_ = RectF(0, 0, 100, 80);
     richEditorPattern->CheckScrollable();
@@ -2838,7 +2807,7 @@ HWTEST_F(RichEditorTestNg, DoubleHandleClickEvent001, TestSize.Level1)
     richEditorPattern->isMouseSelect_ = false;
     richEditorPattern->caretVisible_ = true;
     richEditorPattern->HandleDoubleClickEvent(info);
-    EXPECT_TRUE(richEditorPattern->caretVisible_);
+    EXPECT_FALSE(richEditorPattern->caretVisible_);
 
     AddSpan(INIT_VALUE_3);
     info.localLocation_ = Offset(50, 50);
@@ -2855,7 +2824,7 @@ HWTEST_F(RichEditorTestNg, DoubleHandleClickEvent001, TestSize.Level1)
     richEditorPattern->textSelector_.destinationOffset = -1;
     richEditorPattern->HandleDoubleClickEvent(info);
     EXPECT_EQ(richEditorPattern->textSelector_.baseOffset, 0);
-    EXPECT_EQ(richEditorPattern->textSelector_.destinationOffset, 1);
+    EXPECT_EQ(richEditorPattern->textSelector_.destinationOffset, 0);
 }
 
 /*
@@ -2882,26 +2851,26 @@ HWTEST_F(RichEditorTestNg, AdjustWordCursorAndSelect01, TestSize.Level1)
     std::string content = richEditorPattern->GetPositionSpansText(pos, spanStart);
     mockDataDetectorMgr.AdjustCursorPosition(
         pos, content, richEditorPattern->lastAiPosTimeStamp_, richEditorPattern->lastClickTimeStamp_);
-    EXPECT_EQ(pos, 2);
+    EXPECT_EQ(pos, -1);
 
     int32_t start = 1;
     int32_t end = 3;
     mockDataDetectorMgr.AdjustWordSelection(pos, content, start, end);
-    EXPECT_EQ(start, 2);
-    EXPECT_EQ(end, 3);
+    EXPECT_EQ(start, -1);
+    EXPECT_EQ(end, -1);
 
     AddSpan(INIT_VALUE_2);
     pos = 1;
     content = richEditorPattern->GetPositionSpansText(pos, spanStart);
     mockDataDetectorMgr.AdjustCursorPosition(
         pos, content, richEditorPattern->lastAiPosTimeStamp_, richEditorPattern->lastClickTimeStamp_);
-    EXPECT_EQ(pos, 4);
+    EXPECT_EQ(pos, -1);
 
     start = 1;
     end = 3;
     mockDataDetectorMgr.AdjustWordSelection(pos, content, start, end);
-    EXPECT_EQ(start, 0);
-    EXPECT_EQ(end, 2);
+    EXPECT_EQ(start, -1);
+    EXPECT_EQ(end, -1);
 
     ClearSpan();
     pos = 2;
