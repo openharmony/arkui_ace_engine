@@ -391,7 +391,7 @@ public:
 
     static bool Is24HourClock();
 
-    static bool GetRtlEnabled();
+    static std::optional<bool> GetRtlEnabled();
 private:
     static bool traceEnabled_;
     static bool svgTraceEnable_;

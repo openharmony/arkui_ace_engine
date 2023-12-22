@@ -21,7 +21,6 @@
 #include "base/want/want_wrap.h"
 #include "core/common/app_bar_helper.h"
 #include "core/common/container.h"
-#include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/pattern/app_bar/app_bar_theme.h"
 #include "core/components_ng/pattern/app_bar/atomic_service_pattern.h"
 #include "core/components_ng/pattern/button/button_layout_property.h"

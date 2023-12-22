@@ -89,11 +89,7 @@ void AceApplicationInfoImpl::SetLocale(const std::string& language, const std::s
     }
 
     icu::Locale locale(language_.c_str(), countryOrRegion.c_str());
-    if (SystemProperties::GetRtlEnabled()) {
-        isRightToLeft_ = true;
-    } else {
-        isRightToLeft_ = locale.isRightToLeft();
-    }
+	isRightToLeft_ = SystemProperties::GetRtlEnabled().value_or(locale.isRightToLeft());
 
     auto languageList = Localization::GetLanguageList(language_);
     if (languageList.size() == 1) {
