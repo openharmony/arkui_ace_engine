@@ -26,6 +26,7 @@
 #include "frameworks/base/json/json_util.h"
 
 namespace OHOS::Ace::Framework {
+constexpr int32_t MAX_PARSE_DEPTH = 3;
 
 std::string JSRouteInfo::GetName()
 {
@@ -340,14 +341,18 @@ std::string JSNavigationStack::ConvertParamToString(const JSRef<JSVal>& param)
     } else if (param->IsObject()) {
         JSRef<JSObject> obj = JSRef<JSObject>::Cast(param);
         auto jsonObj = JsonUtil::Create(true);
-        ParseJsObject(jsonObj, obj);
+        ParseJsObject(jsonObj, obj, MAX_PARSE_DEPTH);
         return jsonObj->ToString();
     }
     return "";
 }
 
-void JSNavigationStack::ParseJsObject(std::unique_ptr<JsonValue>& json, const JSRef<JSObject>& obj)
+void JSNavigationStack::ParseJsObject(std::unique_ptr<JsonValue>& json, const JSRef<JSObject>& obj, int32_t depthLimit)
 {
+    if (depthLimit == 0) {
+        return;
+    }
+    depthLimit--;
     auto propertyNames = obj->GetPropertyNames();
     if (!propertyNames->IsArray()) {
         return;
@@ -374,7 +379,7 @@ void JSNavigationStack::ParseJsObject(std::unique_ptr<JsonValue>& json, const JS
         } else if (value->IsObject()) {
             JSRef<JSObject> childObj = JSRef<JSObject>::Cast(value);
             auto childJson = JsonUtil::Create(true);
-            ParseJsObject(childJson, childObj);
+            ParseJsObject(childJson, childObj, depthLimit);
             json->Put(key, childJson);
         }
     }
