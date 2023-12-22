@@ -37,18 +37,6 @@ void ResetColor(void* nativeNode)
 }
 }
 
-template<typename T>
-RefPtr<T> GetTheme()
-{
-    auto container = Container::Current();
-    CHECK_NULL_RETURN(container, nullptr);
-    auto pipelineContext = container->GetPipelineContext();
-    CHECK_NULL_RETURN(pipelineContext, nullptr);
-    auto themeManager = pipelineContext->GetThemeManager();
-    CHECK_NULL_RETURN(themeManager, nullptr);
-    return themeManager->GetTheme<T>();
-}
-
 void SortColorStopOffset(std::vector<NG::ColorStopArray>& colors)
 {
     for (auto& colorStopArray : colors) {
@@ -216,7 +204,7 @@ ArkUINativeModuleValue GaugeBridge::SetColors(ArkUIRuntimeCallInfo* runtimeCallI
     auto colors = std::make_unique<uint32_t[]>(length);
     auto weights = std::make_unique<float[]>(length);
 
-    auto theme = GetTheme<ProgressTheme>();
+    auto theme = ArkTSUtils::GetTheme<ProgressTheme>();
     for (int32_t i = 0; i < length; i++) {
         auto jsValue = jsColor->GetValueAt(vm, jsArg, i);
         if (!jsValue->IsArray(vm)) {

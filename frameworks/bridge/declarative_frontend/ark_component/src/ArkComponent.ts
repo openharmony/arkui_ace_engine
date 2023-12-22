@@ -329,7 +329,7 @@ class PositionModifier extends ModifierWithKey<Position> {
   }
   checkObjectDiff(): boolean {
     return !isBaseOrResourceEqual(this.stageValue.x, this.value.x) ||
-    !isBaseOrResourceEqual(this.stageValue.y, this.value.y);
+      !isBaseOrResourceEqual(this.stageValue.y, this.value.y);
   }
 }
 
@@ -411,7 +411,7 @@ class ShadowModifier extends ModifierWithKey<ShadowOptions | ShadowStyle> {
       GetUINativeModule().common.resetShadow(node);
     }
     else {
-      if(isNumber(this.value)){
+      if (isNumber(this.value)) {
         GetUINativeModule().common.setShadow(node, this.value, undefined, undefined, undefined, undefined, undefined, undefined);
       } else {
         GetUINativeModule().common.setShadow(node, undefined,
@@ -435,7 +435,7 @@ class ShadowModifier extends ModifierWithKey<ShadowOptions | ShadowStyle> {
   }
 }
 
-class HitTestBehaviorModifier extends Modifier<number> {
+class HitTestBehaviorModifier extends ModifierWithKey<number> {
   constructor(value: number) {
     super(value);
   }
@@ -450,7 +450,7 @@ class HitTestBehaviorModifier extends Modifier<number> {
   }
 }
 
-class ZIndexModifier extends Modifier<number> {
+class ZIndexModifier extends ModifierWithKey<number> {
   constructor(value: number) {
     super(value);
   }
@@ -488,7 +488,7 @@ class OpacityModifier extends ModifierWithKey<number | Resource> {
   }
 }
 
-class AlignModifier extends Modifier<number> {
+class AlignModifier extends ModifierWithKey<number> {
   constructor(value: number) {
     super(value);
   }
@@ -503,7 +503,7 @@ class AlignModifier extends Modifier<number> {
   }
 }
 
-class BackdropBlurModifier extends Modifier<number> {
+class BackdropBlurModifier extends ModifierWithKey<number> {
   constructor(value: number) {
     super(value);
   }
@@ -518,7 +518,7 @@ class BackdropBlurModifier extends Modifier<number> {
   }
 }
 
-class HueRotateModifier extends Modifier<number | string> {
+class HueRotateModifier extends ModifierWithKey<number | string> {
   constructor(value: number | string) {
     super(value);
   }
@@ -533,7 +533,7 @@ class HueRotateModifier extends Modifier<number | string> {
   }
 }
 
-class InvertModifier extends Modifier<number> {
+class InvertModifier extends ModifierWithKey<number> {
   constructor(value: number) {
     super(value);
   }
@@ -548,7 +548,7 @@ class InvertModifier extends Modifier<number> {
   }
 }
 
-class SepiaModifier extends Modifier<number> {
+class SepiaModifier extends ModifierWithKey<number> {
   constructor(value: number) {
     super(value);
   }
@@ -563,7 +563,7 @@ class SepiaModifier extends Modifier<number> {
   }
 }
 
-class SaturateModifier extends Modifier<number> {
+class SaturateModifier extends ModifierWithKey<number> {
   constructor(value: number) {
     super(value);
   }
@@ -601,7 +601,7 @@ class ColorBlendModifier extends ModifierWithKey<Color | string | Resource> {
   }
 }
 
-class GrayscaleModifier extends Modifier<number> {
+class GrayscaleModifier extends ModifierWithKey<number> {
   constructor(value: number) {
     super(value);
   }
@@ -616,7 +616,7 @@ class GrayscaleModifier extends Modifier<number> {
   }
 }
 
-class ContrastModifier extends Modifier<number> {
+class ContrastModifier extends ModifierWithKey<number> {
   constructor(value: number) {
     super(value);
   }
@@ -631,7 +631,7 @@ class ContrastModifier extends Modifier<number> {
   }
 }
 
-class BrightnessModifier extends Modifier<number> {
+class BrightnessModifier extends ModifierWithKey<number> {
   constructor(value: number) {
     super(value);
   }
@@ -646,7 +646,7 @@ class BrightnessModifier extends Modifier<number> {
   }
 }
 
-class BlurModifier extends Modifier<number> {
+class BlurModifier extends ModifierWithKey<number> {
   constructor(value: number) {
     super(value);
   }
@@ -680,7 +680,7 @@ class LinearGradientModifier extends ModifierWithKey<{ angle?: number | string; 
     return !((this.stageValue.angle === this.value.angle) &&
       (this.stageValue.direction === this.value.direction) &&
       (this.stageValue.colors === this.value.colors) &&
-      (this.stageValue.repeating ===this.value.repeating));
+      (this.stageValue.repeating === this.value.repeating));
   }
 }
 
@@ -700,7 +700,7 @@ class RadialGradientModifier extends ModifierWithKey<{ center: Array<any>; radiu
   }
   checkObjectDiff(): boolean {
     return !((this.stageValue.center === this.value.center) &&
-      (this.stageValue .radius === this.value.radius) &&
+      (this.stageValue.radius === this.value.radius) &&
       (this.stageValue.colors === this.value.colors) &&
       (this.stageValue.repeating === this.value.repeating));
   }
@@ -853,7 +853,7 @@ class BorderImageModifier extends ModifierWithKey<BorderImageOption> {
   }
 }
 
-class BorderModifier extends ModifierWithKey<ArkBorder>{
+class BorderModifier extends ModifierWithKey<ArkBorder> {
   constructor(value: ArkBorder) {
     super(value);
   }
@@ -870,7 +870,7 @@ class BorderModifier extends ModifierWithKey<ArkBorder>{
         this.value.arkStyle.top, this.value.arkStyle.right, this.value.arkStyle.bottom, this.value.arkStyle.left);
     }
   }
-  
+
   checkObjectDiff(): boolean {
     return this.value.checkObjectDiff(this.stageValue);
   }
@@ -892,14 +892,14 @@ class ForegroundBlurStyleModifier extends ModifierWithKey<ArkForegroundBlurStyle
   }
 
   checkObjectDiff(): boolean {
-     return !((this.stageValue as ArkForegroundBlurStyle).blurStyle === (this.value as ArkForegroundBlurStyle).blurStyle &&
-       (this.stageValue as ArkForegroundBlurStyle).colorMode === (this.value as ArkForegroundBlurStyle).colorMode &&
-       (this.stageValue as ArkForegroundBlurStyle).adaptiveColor === (this.value as ArkForegroundBlurStyle).adaptiveColor &&
-       (this.stageValue as ArkForegroundBlurStyle).scale === (this.value as ArkForegroundBlurStyle).scale);
+    return !((this.stageValue as ArkForegroundBlurStyle).blurStyle === (this.value as ArkForegroundBlurStyle).blurStyle &&
+      (this.stageValue as ArkForegroundBlurStyle).colorMode === (this.value as ArkForegroundBlurStyle).colorMode &&
+      (this.stageValue as ArkForegroundBlurStyle).adaptiveColor === (this.value as ArkForegroundBlurStyle).adaptiveColor &&
+      (this.stageValue as ArkForegroundBlurStyle).scale === (this.value as ArkForegroundBlurStyle).scale);
   }
 }
 
-class BackgroundImagePositionModifier extends ModifierWithKey<Position | Alignment>{
+class BackgroundImagePositionModifier extends ModifierWithKey<Position | Alignment> {
   constructor(value: Position | Alignment) {
     super(value);
   }
@@ -938,7 +938,7 @@ class LinearGradientBlurModifier extends Modifier<ArkLinearGradientBlur> {
   }
 }
 
-class BackgroundImageModifier extends ModifierWithKey<ArkBackgroundImage>{
+class BackgroundImageModifier extends ModifierWithKey<ArkBackgroundImage> {
   constructor(value: ArkBackgroundImage) {
     super(value);
   }
@@ -953,7 +953,7 @@ class BackgroundImageModifier extends ModifierWithKey<ArkBackgroundImage>{
   }
   checkObjectDiff(): boolean {
     return !((this.stageValue as ArkBackgroundImage).src === (this.value as ArkBackgroundImage).src &&
-    (this.stageValue as ArkBackgroundImage).repeat === (this.value as ArkBackgroundImage).repeat)
+      (this.stageValue as ArkBackgroundImage).repeat === (this.value as ArkBackgroundImage).repeat)
   }
 }
 
@@ -973,7 +973,7 @@ class BackgroundBlurStyleModifier extends ModifierWithKey<ArkBackgroundBlurStyle
   }
 }
 
-class BackgroundImageSizeModifier extends ModifierWithKey<SizeOptions | ImageSize>{
+class BackgroundImageSizeModifier extends ModifierWithKey<SizeOptions | ImageSize> {
   constructor(value: SizeOptions | ImageSize) {
     super(value);
   }
@@ -1042,7 +1042,7 @@ class RotateModifier extends Modifier<ArkRotate>{
   }
 }
 
-class GeometryTransitionModifier extends Modifier<string>{
+class GeometryTransitionModifier extends ModifierWithKey<string> {
   constructor(value: string) {
     super(value);
   }
@@ -1111,10 +1111,10 @@ class PixelStretchEffectModifier extends ModifierWithKey<PixelStretchEffectOptio
   }
 
   checkObjectDiff(): boolean {
-      return !((this.stageValue as PixelStretchEffectOptions).left === (this.value as PixelStretchEffectOptions).left &&
-        (this.stageValue as PixelStretchEffectOptions).right === (this.value as PixelStretchEffectOptions).right &&
-        (this.stageValue as PixelStretchEffectOptions).top === (this.value as PixelStretchEffectOptions).top &&
-        (this.stageValue as PixelStretchEffectOptions).bottom === (this.value as PixelStretchEffectOptions).bottom);
+    return !((this.stageValue as PixelStretchEffectOptions).left === (this.value as PixelStretchEffectOptions).left &&
+      (this.stageValue as PixelStretchEffectOptions).right === (this.value as PixelStretchEffectOptions).right &&
+      (this.stageValue as PixelStretchEffectOptions).top === (this.value as PixelStretchEffectOptions).top &&
+      (this.stageValue as PixelStretchEffectOptions).bottom === (this.value as PixelStretchEffectOptions).bottom);
   }
 }
 
@@ -1133,7 +1133,7 @@ class LightUpEffectModifier extends ModifierWithKey<number> {
   }
 }
 
-class SphericalEffectModifier extends Modifier<number> {
+class SphericalEffectModifier extends ModifierWithKey<number> {
   constructor(value: number) {
     super(value);
   }
@@ -1148,7 +1148,7 @@ class SphericalEffectModifier extends Modifier<number> {
   }
 }
 
-class RenderGroupModifier extends Modifier<boolean> {
+class RenderGroupModifier extends ModifierWithKey<boolean> {
   constructor(value: boolean) {
     super(value);
   }
@@ -1163,7 +1163,7 @@ class RenderGroupModifier extends Modifier<boolean> {
   }
 }
 
-class RenderFitModifier extends Modifier<number> {
+class RenderFitModifier extends ModifierWithKey<number> {
   constructor(value: number) {
     super(value);
   }
@@ -1178,7 +1178,7 @@ class RenderFitModifier extends Modifier<number> {
   }
 }
 
-class UseEffectModifier extends Modifier<boolean> {
+class UseEffectModifier extends ModifierWithKey<boolean> {
   constructor(value: boolean) {
     super(value);
   }
@@ -1232,7 +1232,7 @@ class MotionPathModifier extends Modifier<ArkMotionPath> {
   }
 }
 
-class GroupDefaultFocusModifier extends Modifier<boolean> {
+class GroupDefaultFocusModifier extends ModifierWithKey<boolean> {
   constructor(value: boolean) {
     super(value);
   }
@@ -1247,7 +1247,7 @@ class GroupDefaultFocusModifier extends Modifier<boolean> {
   }
 }
 
-class FocusOnTouchModifier extends Modifier<boolean> {
+class FocusOnTouchModifier extends ModifierWithKey<boolean> {
   constructor(value: boolean) {
     super(value);
   }
@@ -1298,7 +1298,7 @@ class MarkAnchorModifier extends ModifierWithKey<Position> {
       !isBaseOrResourceEqual(this.stageValue.y, this.value.y)
   }
 }
-class DefaultFocusModifier extends Modifier<boolean>{
+class DefaultFocusModifier extends ModifierWithKey<boolean> {
   constructor(value: boolean) {
     super(value);
   }
@@ -1313,7 +1313,7 @@ class DefaultFocusModifier extends Modifier<boolean>{
   }
 }
 
-class FocusableModifier extends Modifier<boolean>{
+class FocusableModifier extends ModifierWithKey<boolean> {
   constructor(value: boolean) {
     super(value);
   }
@@ -1328,7 +1328,7 @@ class FocusableModifier extends Modifier<boolean>{
   }
 }
 
-class TouchableModifier extends Modifier<boolean>{
+class TouchableModifier extends ModifierWithKey<boolean> {
   constructor(value: boolean) {
     super(value);
   }
@@ -1404,7 +1404,7 @@ class VisibilityModifier extends ModifierWithKey<number> {
   }
 }
 
-class AccessibilityTextModifier extends Modifier<string> {
+class AccessibilityTextModifier extends ModifierWithKey<string> {
   constructor(value: string) {
     super(value);
   }
@@ -1434,7 +1434,7 @@ class AllowDropModifier extends Modifier<ArkAllowDrop> {
   }
 }
 
-class AccessibilityLevelModifier extends Modifier<string> {
+class AccessibilityLevelModifier extends ModifierWithKey<string> {
   constructor(value: string) {
     super(value);
   }
@@ -1449,7 +1449,7 @@ class AccessibilityLevelModifier extends Modifier<string> {
   }
 }
 
-class AccessibilityDescriptionModifier extends Modifier<string> {
+class AccessibilityDescriptionModifier extends ModifierWithKey<string> {
   constructor(value: string) {
     super(value);
   }
@@ -1480,7 +1480,7 @@ class DirectionModifier extends ModifierWithKey<number> {
     return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
-class AlignRulesModifier extends Modifier<ArkAlignRules> {
+class AlignRulesModifier extends ModifierWithKey<ArkAlignRules> {
   constructor(value: ArkAlignRules) {
     super(value);
   }
@@ -1493,9 +1493,17 @@ class AlignRulesModifier extends Modifier<ArkAlignRules> {
         this.value.middle, this.value.right, this.value.top, this.value.center, this.value.bottom);
     }
   }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue.left, this.value.left) ||
+      !isBaseOrResourceEqual(this.stageValue.middle, this.value.middle) ||
+      !isBaseOrResourceEqual(this.stageValue.right, this.value.right) ||
+      !isBaseOrResourceEqual(this.stageValue.top, this.value.top) ||
+      !isBaseOrResourceEqual(this.stageValue.center, this.value.center) ||
+      !isBaseOrResourceEqual(this.stageValue.bottom, this.value.bottom)
+  }
 }
 
-class ExpandSafeAreaModifier extends Modifier<ArkSafeAreaExpandOpts | undefined> {
+class ExpandSafeAreaModifier extends ModifierWithKey<ArkSafeAreaExpandOpts | undefined> {
   constructor(value: ArkSafeAreaExpandOpts | undefined) {
     super(value);
   }
@@ -1507,9 +1515,13 @@ class ExpandSafeAreaModifier extends Modifier<ArkSafeAreaExpandOpts | undefined>
       GetUINativeModule().common.setExpandSafeArea(node, this.value.type, this.value.edges);
     }
   }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue.type, this.value.type) ||
+      !isBaseOrResourceEqual(this.stageValue.edges, this.value.edges)
+  }
 }
 
-class GridSpanModifier extends Modifier<number> {
+class GridSpanModifier extends ModifierWithKey<number> {
   constructor(value: number) {
     super(value);
   }
@@ -1523,7 +1535,7 @@ class GridSpanModifier extends Modifier<number> {
   }
 }
 
-class GridOffsetModifier extends Modifier<number> {
+class GridOffsetModifier extends ModifierWithKey<number> {
   constructor(value: number) {
     super(value);
   }
@@ -1590,7 +1602,7 @@ class DisplayPriorityModifier extends ModifierWithKey<number> {
   }
 }
 
-class IDModifier extends Modifier<string> {
+class IDModifier extends ModifierWithKey<string> {
   constructor(value: string) {
     super(value);
   }
@@ -1605,7 +1617,7 @@ class IDModifier extends Modifier<string> {
   }
 }
 
-class KeyModifier extends Modifier<string> {
+class KeyModifier extends ModifierWithKey<string> {
   constructor(value: string) {
     super(value);
   }
@@ -1620,7 +1632,7 @@ class KeyModifier extends Modifier<string> {
   }
 }
 
-class RestoreIdModifier extends Modifier<number> {
+class RestoreIdModifier extends ModifierWithKey<number> {
   constructor(value: number) {
     super(value);
   }
@@ -1635,7 +1647,7 @@ class RestoreIdModifier extends Modifier<number> {
   }
 }
 
-class TabIndexModifier extends Modifier<number> {
+class TabIndexModifier extends ModifierWithKey<number> {
   constructor(value: number) {
     super(value);
   }
@@ -1866,7 +1878,7 @@ class FlexBasisModifier extends ModifierWithKey<number | string> {
   }
 }
 
-class LayoutWeightModifier extends Modifier<number | string> {
+class LayoutWeightModifier extends ModifierWithKey<number | string> {
   constructor(value: number | string) {
     super(value);
   }
@@ -1880,7 +1892,7 @@ class LayoutWeightModifier extends Modifier<number | string> {
   }
 }
 
-class EnabledModifier extends Modifier<boolean> {
+class EnabledModifier extends ModifierWithKey<boolean> {
   constructor(value: boolean) {
     super(value);
   }
@@ -1895,7 +1907,7 @@ class EnabledModifier extends Modifier<boolean> {
   }
 }
 
-class DraggableModifier extends Modifier<boolean> {
+class DraggableModifier extends ModifierWithKey<boolean> {
   constructor(value: boolean) {
     super(value);
   }
@@ -1910,7 +1922,7 @@ class DraggableModifier extends Modifier<boolean> {
   }
 }
 
-class AccessibilityGroupModifier extends Modifier<boolean> {
+class AccessibilityGroupModifier extends ModifierWithKey<boolean> {
   constructor(value: boolean) {
     super(value);
   }
@@ -2149,9 +2161,9 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
       opts.edges = safeAreaEdge;
     }
     if (opts.type === undefined && opts.edges === undefined) {
-      modifier(this._modifiers, ExpandSafeAreaModifier, undefined);
+      modifierWithKey(this._modifiersWithKeys, ExpandSafeAreaModifier.identity, ExpandSafeAreaModifier, undefined);
     } else {
-      modifier(this._modifiers, ExpandSafeAreaModifier, opts);
+      modifierWithKey(this._modifiersWithKeys, ExpandSafeAreaModifier.identity, ExpandSafeAreaModifier, opts);
     }
     return this;
   }
@@ -2181,30 +2193,30 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
 
   touchable(value: boolean): this {
     if (typeof value === 'boolean') {
-      modifier(this._modifiers, TouchableModifier, value);
+      modifierWithKey(this._modifiersWithKeys, TouchableModifier.identity, TouchableModifier, value);
     } else {
-      modifier(this._modifiers, TouchableModifier, undefined);
+      modifierWithKey(this._modifiersWithKeys, TouchableModifier.identity, TouchableModifier, undefined);
     }
     return this;
   }
 
   hitTestBehavior(value: HitTestMode): this {
     if (value) {
-      modifier(this._modifiers, HitTestBehaviorModifier, value);
+      modifierWithKey(this._modifiersWithKeys, HitTestBehaviorModifier.identity, HitTestBehaviorModifier, value);
     } else {
-      modifier(this._modifiers, HitTestBehaviorModifier, undefined);
+      modifierWithKey(this._modifiersWithKeys, HitTestBehaviorModifier.identity, HitTestBehaviorModifier, undefined);
     }
     return this;
   }
 
   layoutWeight(value: number | string): this {
     if (isNumber(value)) {
-      modifier(this._modifiers, LayoutWeightModifier, value);
+      modifierWithKey(this._modifiersWithKeys, LayoutWeightModifier.identity, LayoutWeightModifier, value);
     }
     else if (isString(value) && !isNaN(Number(value))) {
-      modifier(this._modifiers, LayoutWeightModifier, parseInt(value.toString()));
+      modifierWithKey(this._modifiersWithKeys, LayoutWeightModifier.identity, LayoutWeightModifier, parseInt(value.toString()));
     } else {
-      modifier(this._modifiers, LayoutWeightModifier, undefined);
+      modifierWithKey(this._modifiersWithKeys, LayoutWeightModifier.identity, LayoutWeightModifier, undefined);
     }
     return this;
   }
@@ -2321,7 +2333,7 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
 
   border(value: BorderOptions): this {
     let arkBorder = new ArkBorder();
-    if (isUndefined(value)) {     
+    if (isUndefined(value)) {
       arkBorder = undefined;
     }
 
@@ -2379,7 +2391,7 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
           arkBorder.arkStyle.right = arkBorderStyle.right;
         }
       }
-    }    
+    }
     modifierWithKey(this._modifiersWithKeys, BorderModifier.identity, BorderModifier, arkBorder);
     return this;
   }
@@ -2447,9 +2459,9 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
 
   focusable(value: boolean): this {
     if (typeof value === 'boolean') {
-      modifier(this._modifiers, FocusableModifier, value);
+      modifierWithKey(this._modifiersWithKeys, FocusableModifier.identity, FocusableModifier, value);
     } else {
-      modifier(this._modifiers, FocusableModifier, undefined);
+      modifierWithKey(this._modifiersWithKeys, FocusableModifier.identity, FocusableModifier, undefined);
     }
     return this;
   }
@@ -2464,37 +2476,37 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
 
   tabIndex(index: number): this {
     if (typeof index !== "number") {
-      modifier(this._modifiers, TabIndexModifier, undefined);
+      modifierWithKey(this._modifiersWithKeys, TabIndexModifier.identity, TabIndexModifier, undefined);
     }
     else {
-      modifier(this._modifiers, TabIndexModifier, index);
+      modifierWithKey(this._modifiersWithKeys, TabIndexModifier.identity, TabIndexModifier, index);
     }
     return this;
   }
 
   defaultFocus(value: boolean): this {
     if (typeof value === 'boolean') {
-      modifier(this._modifiers, DefaultFocusModifier, value);
+      modifierWithKey(this._modifiersWithKeys, DefaultFocusModifier.identity, DefaultFocusModifier, value);
     } else {
-      modifier(this._modifiers, DefaultFocusModifier, undefined);
+      modifierWithKey(this._modifiersWithKeys, DefaultFocusModifier.identity, DefaultFocusModifier, undefined);
     }
     return this;
   }
 
   groupDefaultFocus(value: boolean): this {
     if (typeof value === "boolean") {
-      modifier(this._modifiers, GroupDefaultFocusModifier, value);
+      modifierWithKey(this._modifiersWithKeys, GroupDefaultFocusModifier.identity, GroupDefaultFocusModifier, value);
     } else {
-      modifier(this._modifiers, GroupDefaultFocusModifier, undefined);
+      modifierWithKey(this._modifiersWithKeys, GroupDefaultFocusModifier.identity, GroupDefaultFocusModifier, undefined);
     }
     return this;
   }
 
   focusOnTouch(value: boolean): this {
     if (typeof value === "boolean") {
-      modifier(this._modifiers, FocusOnTouchModifier, value);
+      modifierWithKey(this._modifiersWithKeys, FocusOnTouchModifier.identity, FocusOnTouchModifier, value);
     } else {
-      modifier(this._modifiers, FocusOnTouchModifier, undefined);
+      modifierWithKey(this._modifiersWithKeys, FocusOnTouchModifier.identity, FocusOnTouchModifier, undefined);
     }
     return this;
   }
@@ -2522,10 +2534,10 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
 
   blur(value: number): this {
     if (!isNumber(value)) {
-      modifier(this._modifiers, BlurModifier, undefined);
+      modifierWithKey(this._modifiersWithKeys, BlurModifier.identity, BlurModifier, undefined);
     }
     else {
-      modifier(this._modifiers, BlurModifier, value);
+      modifierWithKey(this._modifiersWithKeys, BlurModifier.identity, BlurModifier, value);
     }
     return this;
   }
@@ -2545,30 +2557,30 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
 
   brightness(value: number): this {
     if (!isNumber(value)) {
-      modifier(this._modifiers, BrightnessModifier, undefined);
+      modifierWithKey(this._modifiersWithKeys, BrightnessModifier.identity, BrightnessModifier, undefined);
     }
     else {
-      modifier(this._modifiers, BrightnessModifier, value);
+      modifierWithKey(this._modifiersWithKeys, BrightnessModifier.identity, BrightnessModifier, value);
     }
     return this;
   }
 
   contrast(value: number): this {
     if (!isNumber(value)) {
-      modifier(this._modifiers, ContrastModifier, undefined);
+      modifierWithKey(this._modifiersWithKeys, ContrastModifier.identity, ContrastModifier, undefined);
     }
     else {
-      modifier(this._modifiers, ContrastModifier, value);
+      modifierWithKey(this._modifiersWithKeys, ContrastModifier.identity, ContrastModifier, value);
     }
     return this;
   }
 
   grayscale(value: number): this {
     if (!isNumber(value)) {
-      modifier(this._modifiers, GrayscaleModifier, undefined);
+      modifierWithKey(this._modifiersWithKeys, GrayscaleModifier.identity, GrayscaleModifier, undefined);
     }
     else {
-      modifier(this._modifiers, GrayscaleModifier, value);
+      modifierWithKey(this._modifiersWithKeys, GrayscaleModifier.identity, GrayscaleModifier, value);
     }
     return this;
   }
@@ -2580,61 +2592,61 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
 
   saturate(value: number): this {
     if (!isNumber(value)) {
-      modifier(this._modifiers, SaturateModifier, undefined);
+      modifierWithKey(this._modifiersWithKeys, SaturateModifier.identity, SaturateModifier, undefined);
     }
     else {
-      modifier(this._modifiers, SaturateModifier, value);
+      modifierWithKey(this._modifiersWithKeys, SaturateModifier.identity, SaturateModifier, value);
     }
     return this;
   }
 
   sepia(value: number): this {
     if (!isNumber(value)) {
-      modifier(this._modifiers, SepiaModifier, undefined);
+      modifierWithKey(this._modifiersWithKeys, SepiaModifier.identity, SepiaModifier, undefined);
     }
     else {
-      modifier(this._modifiers, SepiaModifier, value);
+      modifierWithKey(this._modifiersWithKeys, SepiaModifier.identity, SepiaModifier, value);
     }
     return this;
   }
 
   invert(value: number): this {
     if (!isNumber(value)) {
-      modifier(this._modifiers, InvertModifier, undefined);
+      modifierWithKey(this._modifiersWithKeys, InvertModifier.identity, InvertModifier, undefined);
     }
     else {
-      modifier(this._modifiers, InvertModifier, value);
+      modifierWithKey(this._modifiersWithKeys, InvertModifier.identity, InvertModifier, value);
     }
     return this;
   }
 
   hueRotate(value: number | string): this {
     if (!isNumber(value) && !isString(value)) {
-      modifier(this._modifiers, HueRotateModifier, undefined);
+      modifierWithKey(this._modifiersWithKeys, HueRotateModifier.identity, HueRotateModifier, undefined);
     }
     else {
-      modifier(this._modifiers, HueRotateModifier, value);
+      modifierWithKey(this._modifiersWithKeys, HueRotateModifier.identity, HueRotateModifier, value);
     }
     return this;
   }
 
   useEffect(value: boolean): this {
-    modifier(this._modifiers, UseEffectModifier, value);
+    modifierWithKey(this._modifiersWithKeys, UseEffectModifier.identity, UseEffectModifier, value);
     return this;
   }
 
   backdropBlur(value: number): this {
     if (!isNumber(value)) {
-      modifier(this._modifiers, BackdropBlurModifier, undefined);
+      modifierWithKey(this._modifiersWithKeys, BackdropBlurModifier.identity, BackdropBlurModifier, undefined);
     }
     else {
-      modifier(this._modifiers, BackdropBlurModifier, value);
+      modifierWithKey(this._modifiersWithKeys, BackdropBlurModifier.identity, BackdropBlurModifier, value);
     }
     return this;
   }
 
   renderGroup(value: boolean): this {
-    modifier(this._modifiers, RenderGroupModifier, value);
+    modifierWithKey(this._modifiersWithKeys, RenderGroupModifier.identity, RenderGroupModifier, value);
     return this;
   }
 
@@ -2675,18 +2687,18 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
   }
   gridSpan(value: number): this {
     if (isNumber(value)) {
-      modifier(this._modifiers, GridSpanModifier, value);
+      modifierWithKey(this._modifiersWithKeys, GridSpanModifier.identity, GridSpanModifier, value);
     } else {
-      modifier(this._modifiers, GridSpanModifier, undefined);
+      modifierWithKey(this._modifiersWithKeys, GridSpanModifier.identity, GridSpanModifier, undefined);
     }
     return this;
   }
 
   gridOffset(value: number): this {
     if (isNumber(value)) {
-      modifier(this._modifiers, GridOffsetModifier, value);
+      modifierWithKey(this._modifiersWithKeys, GridOffsetModifier.identity, GridOffsetModifier, value);
     } else {
-      modifier(this._modifiers, GridOffsetModifier, undefined);
+      modifierWithKey(this._modifiersWithKeys, GridOffsetModifier.identity, GridOffsetModifier, undefined);
     }
     return this;
   }
@@ -2779,7 +2791,7 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
       if (typeof (value) === "number") {
         zIndex = value;
       }
-      modifier(this._modifiers, ZIndexModifier, zIndex);
+      modifierWithKey(this._modifiersWithKeys, ZIndexModifier.identity, ZIndexModifier, zIndex);
     }
     return this;
   }
@@ -2804,9 +2816,9 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
 
   align(value: Alignment): this {
     if (isNumber(value)) {
-      modifier(this._modifiers, AlignModifier, value);
+      modifierWithKey(this._modifiersWithKeys, AlignModifier.identity, AlignModifier, value);
     } else {
-      modifier(this._modifiers, AlignModifier, undefined);
+      modifierWithKey(this._modifiersWithKeys, AlignModifier.identity, AlignModifier, undefined);
     }
     return this
   }
@@ -2828,9 +2840,9 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
 
   enabled(value: boolean): this {
     if (typeof value === "boolean") {
-      modifier(this._modifiers, EnabledModifier, value);
+      modifierWithKey(this._modifiersWithKeys, EnabledModifier.identity, EnabledModifier, value);
     } else {
-      modifier(this._modifiers, EnabledModifier, undefined);
+      modifierWithKey(this._modifiersWithKeys, EnabledModifier.identity, EnabledModifier, undefined);
     }
     return this;
   }
@@ -2846,7 +2858,7 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
 
   alignRules(value: AlignRuleOption): this {
     if (!isObject(value) || JSON.stringify(value) === '{}') {
-      modifier(this._modifiers, AlignRulesModifier, undefined);
+      modifierWithKey(this._modifiersWithKeys, AlignRulesModifier.identity, AlignRulesModifier, undefined);
       return this;
     }
     let keys: string[] = ['left', 'middle', 'right', 'top', 'center', 'bottom'];
@@ -2910,7 +2922,7 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
           break;
       }
     }
-    modifier(this._modifiers, AlignRulesModifier, arkValue);
+    modifierWithKey(this._modifiersWithKeys, AlignRulesModifier.identity, AlignRulesModifier, arkValue);
     return this;
   }
 
@@ -2964,9 +2976,9 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
 
   draggable(value: boolean): this {
     if (typeof value === "boolean") {
-      modifier(this._modifiers, DraggableModifier, value);
+      modifierWithKey(this._modifiersWithKeys, DraggableModifier.identity, DraggableModifier, value);
     } else {
-      modifier(this._modifiers, DraggableModifier, undefined);
+      modifierWithKey(this._modifiersWithKeys, DraggableModifier.identity, DraggableModifier, undefined);
 
     }
     return this;
@@ -3047,25 +3059,25 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
 
   key(value: string): this {
     if (typeof value === "string") {
-      modifier(this._modifiers, KeyModifier, value);
+      modifierWithKey(this._modifiersWithKeys, KeyModifier.identity, KeyModifier, value);
     } else {
-      modifier(this._modifiers, KeyModifier, undefined);
+      modifierWithKey(this._modifiersWithKeys, KeyModifier.identity, KeyModifier, undefined);
     }
     return this;
   }
 
   id(value: string): this {
     if (typeof value === "string") {
-      modifier(this._modifiers, IDModifier, value);
+      modifierWithKey(this._modifiersWithKeys, IDModifier.identity, IDModifier, value);
     } else {
-      modifier(this._modifiers, IDModifier, undefined);
+      modifierWithKey(this._modifiersWithKeys, IDModifier.identity, IDModifier, undefined);
     }
     return this;
   }
 
   geometryTransition(id: string): this {
     if (isString(id)) {
-      modifier(this._modifiers, GeometryTransitionModifier, id);
+      modifierWithKey(this._modifiersWithKeys, GeometryTransitionModifier.identity, GeometryTransitionModifier, id);
     }
     return this;
   }
@@ -3105,10 +3117,10 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
 
   restoreId(value: number): this {
     if (typeof value !== "number") {
-      modifier(this._modifiers, RestoreIdModifier, undefined);
+      modifierWithKey(this._modifiersWithKeys, RestoreIdModifier.identity, RestoreIdModifier, undefined);
     }
     else {
-      modifier(this._modifiers, RestoreIdModifier, value);
+      modifierWithKey(this._modifiersWithKeys, RestoreIdModifier.identity, RestoreIdModifier, value);
     }
     return this;
   }
@@ -3118,7 +3130,7 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
   }
 
   sphericalEffect(value: number): this {
-    modifier(this._modifiers, SphericalEffectModifier, value);
+    modifierWithKey(this._modifiersWithKeys, SphericalEffectModifier.identity, SphericalEffectModifier, value);
     return this;
   }
 
@@ -3142,9 +3154,9 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
 
   accessibilityGroup(value: boolean): this {
     if (typeof value === "boolean") {
-      modifier(this._modifiers, AccessibilityGroupModifier, value);
+      modifierWithKey(this._modifiersWithKeys, AccessibilityGroupModifier.identity, AccessibilityGroupModifier, value);
     } else {
-      modifier(this._modifiers, AccessibilityGroupModifier, undefined);
+      modifierWithKey(this._modifiersWithKeys, AccessibilityGroupModifier.identity, AccessibilityGroupModifier, undefined);
 
     }
     return this;
@@ -3152,29 +3164,29 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
 
   accessibilityText(value: string): this {
     if (typeof value === "string") {
-      modifier(this._modifiers, AccessibilityTextModifier, value);
+      modifierWithKey(this._modifiersWithKeys, AccessibilityTextModifier.identity, AccessibilityTextModifier, value);
     } else {
-      modifier(this._modifiers, AccessibilityTextModifier, undefined);
+      modifierWithKey(this._modifiersWithKeys, AccessibilityTextModifier.identity, AccessibilityTextModifier, undefined);
     }
     return this;
   }
 
   accessibilityDescription(value: string): this {
     if (typeof value !== "string") {
-      modifier(this._modifiers, AccessibilityDescriptionModifier, undefined);
+      modifierWithKey(this._modifiersWithKeys, AccessibilityDescriptionModifier.identity, AccessibilityDescriptionModifier, undefined);
     }
     else {
-      modifier(this._modifiers, AccessibilityDescriptionModifier, value);
+      modifierWithKey(this._modifiersWithKeys, AccessibilityDescriptionModifier.identity, AccessibilityDescriptionModifier, value);
     }
     return this;
   }
 
   accessibilityLevel(value: string): this {
     if (typeof value !== "string") {
-      modifier(this._modifiers, AccessibilityLevelModifier, undefined);
+      modifierWithKey(this._modifiersWithKeys, AccessibilityLevelModifier.identity, AccessibilityLevelModifier, undefined);
     }
     else {
-      modifier(this._modifiers, AccessibilityLevelModifier, value);
+      modifierWithKey(this._modifiersWithKeys, AccessibilityLevelModifier.identity, AccessibilityLevelModifier, value);
     }
     return this;
   }
@@ -3194,7 +3206,7 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
   }
 
   renderFit(fitMode: RenderFit): this {
-    modifier(this._modifiers, RenderFitModifier, fitMode);
+    modifierWithKey(this._modifiersWithKeys, RenderFitModifier.identity, RenderFitModifier, fitMode);
     return this;
   }
 
