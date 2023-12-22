@@ -9932,31 +9932,20 @@ HWTEST_F(TabsTestNg, TabBarBlurStyle001, TestSize.Level1)
     /**
      * @tc.steps: step1. build tabsModel.
      */
-
     TabsModelNG tabsModel;
     tabsModel.Create(BarPosition::START, 0, nullptr, nullptr);
     auto tabsFrameNode = AceType::DynamicCast<TabsNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
-    ASSERT_NE(tabsFrameNode, nullptr);
     auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsFrameNode->GetChildAtIndex(TEST_TAB_BAR_INDEX));
-    ASSERT_NE(tabBarNode, nullptr);
     auto tabBarPattern = tabBarNode->GetPattern<TabBarPattern>();
-    auto pipeline = PipelineContext::GetCurrentContext();
-    ASSERT_NE(pipeline, nullptr);
 
     /**
-     * @tc.steps: step2. update blurstyle
-     * @tc.expected: step2. expect The blurstyle is COMPONENT_THICK.
+     * @tc.steps: step2. Set PLATFORM_VERSION_11
+     * @tc.expected: step2. expect The UpdateBackBlurStyle would be called
      */
-    pipeline->SetMinPlatformVersion(PLATFORM_VERSION_11);
-
-    BlurStyleOption styleOption;
-    styleOption.blurStyle = BlurStyle::COMPONENT_THICK;
-    auto tabBarRenderContext = tabBarNode->GetRenderContext();
-    ASSERT_NE(tabBarRenderContext, nullptr);
-    if (!Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
-        tabBarRenderContext->UpdateBackBlurStyle(styleOption);
-    }
-    EXPECT_EQ(tabBarRenderContext->GetBackBlurStyle()->blurStyle, BlurStyle::COMPONENT_THICK);
+    MockPipelineContext::pipeline_->SetMinPlatformVersion(PLATFORM_VERSION_11);
+    auto tabBarRenderContext = AceType::DynamicCast<MockRenderContext>(tabBarNode->GetRenderContext());
+    EXPECT_CALL(*tabBarRenderContext, UpdateBackBlurStyle(_)).Times(1);
+    tabBarPattern->OnAttachToFrameNode();
 }
 
 /**

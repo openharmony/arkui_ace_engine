@@ -36,6 +36,13 @@ int32_t RichEditorController::AddTextSpan(const TextSpanOptions& options)
     return richEditorPattern->AddTextSpan(options);
 }
 
+int32_t RichEditorController::AddSymbolSpan(const SymbolSpanOptions& options)
+{
+    auto richEditorPattern = pattern_.Upgrade();
+    CHECK_NULL_RETURN(richEditorPattern, 0);
+    return richEditorPattern->AddSymbolSpan(options);
+}
+
 int32_t RichEditorController::AddPlaceholderSpan(const RefPtr<UINode>& customNode, const SpanOptionBase& options)
 {
     auto richEditorPattern = pattern_.Upgrade();

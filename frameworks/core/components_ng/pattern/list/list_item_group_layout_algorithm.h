@@ -182,6 +182,11 @@ public:
 
     float GetItemHeight(int32_t index);
 
+    int32_t GetItemStartIndex()
+    {
+        return itemStartIndex_;
+    }
+
 private:
     float CalculateLaneCrossOffset(float crossSize, float childCrossSize);
     void UpdateListItemConstraint(const OptionalSizeF& selfIdealSize, LayoutConstraintF& contentConstraint);

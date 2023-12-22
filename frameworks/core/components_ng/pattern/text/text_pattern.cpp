@@ -227,14 +227,16 @@ SelectionInfo TextPattern::GetSpansInfo(int32_t start, int32_t end, GetSpansMeth
     }
     selection.SetSelectionEnd(realEnd);
     selection.SetSelectionStart(realStart);
-    if (realStart > length || realEnd < 0 || spans_.empty() || (start > length && end > length)) {
+    // Verify that realStart, realEnd, and spans_ are valid
+    if (realStart > length || realEnd < 0 || spans_.empty() || (start > length && end > length) ||
+        realStart == realEnd) {
         selection.SetResultObjectList(resultObjects);
         return selection;
     }
     auto host = GetHost();
     const auto& children = host->GetChildren();
     for (const auto& uinode : children) {
-        if (uinode->GetTag() == V2::IMAGE_ETS_TAG) {
+        if (uinode->GetTag() == V2::IMAGE_ETS_TAG || uinode->GetTag() == V2::SYMBOL_SPAN_ETS_TAG) {
             ResultObject resultObject = GetImageResultObject(uinode, index, realStart, realEnd);
             if (!resultObject.valueString.empty() || resultObject.valuePixelMap) {
                 resultObjects.emplace_back(resultObject);
@@ -1198,6 +1200,8 @@ NG::DragDropInfo TextPattern::OnDragStart(const RefPtr<Ace::DragEvent>& event, c
     DragDropInfo itemInfo;
     auto host = GetHost();
     CHECK_NULL_RETURN(host, itemInfo);
+    auto hub = host->GetEventHub<EventHub>();
+    auto gestureHub = hub->GetOrCreateGestureEventHub();
     auto selectStart = textSelector_.GetTextStart();
     auto selectEnd = textSelector_.GetTextEnd();
     recoverStart_ = selectStart;
@@ -1205,7 +1209,7 @@ NG::DragDropInfo TextPattern::OnDragStart(const RefPtr<Ace::DragEvent>& event, c
     auto textSelectInfo = GetSpansInfo(selectStart, selectEnd, GetSpansMethod::ONSELECT);
     dragResultObjects_ = textSelectInfo.GetSelection().resultObjects;
     ResetDragRecordSize(dragResultObjects_.empty() ? -1 : 1);
-    if (dragResultObjects_.empty()) {
+    if (dragResultObjects_.empty() || !gestureHub->GetIsTextDraggable()) {
         return itemInfo;
     }
     RefPtr<UnifiedData> unifiedData = UdmfClient::GetInstance()->CreateUnifiedData();
@@ -1260,6 +1264,9 @@ DragDropInfo TextPattern::OnDragStartNoChild(const RefPtr<Ace::DragEvent>& event
     auto hub = host->GetEventHub<EventHub>();
     auto gestureHub = hub->GetOrCreateGestureEventHub();
     CHECK_NULL_RETURN(gestureHub, itemInfo);
+    if (!gestureHub->GetIsTextDraggable()) {
+        return itemInfo;
+    }
     auto layoutProperty = host->GetLayoutProperty<TextLayoutProperty>();
     pattern->status_ = Status::DRAGGING;
     pattern->contentMod_->ChangeDragStatus();
@@ -1656,6 +1663,15 @@ void TextPattern::OnModifyDone()
     }
 
     if (host->GetChildren().empty()) {
+        auto obscuredReasons = renderContext->GetObscured().value_or(std::vector<ObscuredReasons>());
+        bool ifHaveObscured = std::any_of(obscuredReasons.begin(), obscuredReasons.end(),
+            [](const auto& reason) { return reason == ObscuredReasons::PLACEHOLDER; });
+        if (ifHaveObscured) {
+            CloseSelectOverlay();
+            ResetSelection();
+            copyOption_ = CopyOptions::None;
+        }
+
         std::string textCache = textForDisplay_;
         textForDisplay_ = textLayoutProperty->GetContent().value_or("");
         if (textCache != textForDisplay_) {
@@ -1667,16 +1683,6 @@ void TextPattern::OnModifyDone()
         textForAI_ = textForDisplay_;
         if (textDetectEnable_ && (aiDetectTypesChanged_ || !aiDetectInitialized_ || textCache != textForDisplay_)) {
             StartAITask();
-        }
-
-        auto obscuredReasons = renderContext->GetObscured().value_or(std::vector<ObscuredReasons>());
-        bool ifHaveObscured = std::any_of(obscuredReasons.begin(), obscuredReasons.end(),
-            [](const auto& reason) { return reason == ObscuredReasons::PLACEHOLDER; });
-        if (ifHaveObscured) {
-            CloseSelectOverlay();
-            ResetSelection();
-            copyOption_ = CopyOptions::None;
-            return;
         }
     }
 
@@ -1706,6 +1712,13 @@ void TextPattern::OnModifyDone()
     }
     if (onClick_ || copyOption_ != CopyOptions::None) {
         InitClickEvent(gestureEventHub);
+    }
+    auto eventHub = host->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    bool enabledCache = eventHub->IsEnabled();
+    if (textDetectEnable_ && enabledCache != enabled_) {
+        enabled_ = enabledCache;
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     }
 }
 
@@ -1850,7 +1863,7 @@ void TextPattern::StartAITask()
     if (!CanStartAITask()) {
         return;
     }
-    if (copyOption_ == CopyOptions::None || !textDetectEnable_ || !IsEnabled()) {
+    if (copyOption_ == CopyOptions::None || !textDetectEnable_ || !enabled_) {
         return;
     }
     aiSpanMap_.clear();
@@ -2168,7 +2181,7 @@ void TextPattern::AddChildSpanItem(const RefPtr<UINode>& child)
         return;
     }
 
-    if (child->GetTag() == V2::SPAN_ETS_TAG) {
+    if (child->GetTag() == V2::SPAN_ETS_TAG || child->GetTag() == V2::SYMBOL_SPAN_ETS_TAG) {
         auto spanNode = DynamicCast<SpanNode>(child);
         if (spanNode) {
             spans_.emplace_back(spanNode->GetSpanItem());
@@ -2520,24 +2533,9 @@ void TextPattern::RemoveAreaChangeInner()
     pipeline->RemoveOnAreaChangeNode(host->GetId());
 }
 
-bool TextPattern::IsEnabled()
-{
-    auto host = GetHost();
-    CHECK_NULL_RETURN(host, false);
-    auto eventHub = host->GetEventHub<EventHub>();
-    CHECK_NULL_RETURN(eventHub, false);
-    return eventHub->IsEnabled();
-}
-
 bool TextPattern::NeedShowAIDetect()
 {
-    auto textLayoutProp = GetLayoutProperty<TextLayoutProperty>();
-    CHECK_NULL_RETURN(textLayoutProp, false);
-    if (textLayoutProp->GetCopyOptionValue(CopyOptions::None) == CopyOptions::None) {
-        return false;
-    }
-
-    return textDetectEnable_ && !aiSpanMap_.empty() && IsEnabled();
+    return textDetectEnable_ && !aiSpanMap_.empty() && enabled_ && copyOption_ != CopyOptions::None;
 }
 
 void TextPattern::BindSelectionMenu(TextSpanType spanType, TextResponseType responseType,
@@ -2621,6 +2619,7 @@ void TextPattern::FireOnSelectionChange(int32_t start, int32_t end)
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto eventHub = host->GetEventHub<TextEventHub>();
+    CHECK_NULL_VOID(eventHub);
     eventHub->FireOnSelectionChange(start, end);
 }
 

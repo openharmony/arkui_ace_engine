@@ -29,10 +29,11 @@ constexpr int32_t DEFAULT_DURATION = 1000; // ms
 constexpr int32_t DEFAULT_ITERATION = 1;
 constexpr FillMode DEFAULT_FILL_MODE = FillMode::FORWARDS;
 constexpr uint32_t DEFAULT_ITERATIONS = 1;
+constexpr int32_t IMAGES_LENGTH = 4;
 
-void ParseImage(CalcDimension* dimension, const ImagePropertiesStruct* image)
+void ParseImage(CalcDimension* dimension, int32_t dimensionLength, const ImagePropertiesStruct* image)
 {
-    for (int i = 0; i < 4; i++) {
+    for (int32_t i = 0; i < dimensionLength; i++) {
         if (image->unit[i] == static_cast<int8_t>(DimensionUnit::CALC)) {
             dimension[i].SetUnit(DimensionUnit::CALC);
             dimension[i].SetValue(0.0);
@@ -141,8 +142,8 @@ void SetImages(NodeHandle node, struct ImagePropertiesStruct* images, int32_t le
     for (int32_t i = 0; i < length; i++) {
         ImagePropertiesStruct* image = images + i;
         CHECK_NULL_VOID(image);
-        CalcDimension dimension[4];
-        ParseImage(dimension, image);
+        CalcDimension dimension[IMAGES_LENGTH];
+        ParseImage(dimension, IMAGES_LENGTH, image);
         ImageProperties property { std::string(image->src), "", "", dimension[0], dimension[1], dimension[2],
             dimension[3], image->duration };
         imageList.emplace_back(property);

@@ -63,6 +63,7 @@ constexpr double FULL_DIMENSION = 100.0;
 constexpr double HALF_DIMENSION = 50.0;
 constexpr uint32_t DEFAULT_DURATION = 1000;
 constexpr int64_t MICROSEC_TO_MILLISEC = 1000;
+constexpr int32_t MAX_ALIGN_VALUE = 8;
 constexpr SharedTransitionEffectType DEFAULT_SHARED_EFFECT = SharedTransitionEffectType::SHARED_EFFECT_EXCHANGE;
 
 BorderStyle ConvertBorderStyle(int32_t value)
@@ -159,6 +160,50 @@ void ParseGradientColorStops(const EcmaVM *vm, const Local<JSValueRef> &value, s
         colors.push_back(static_cast<double>(hasDimension));
         colors.push_back(dimension);
     }
+}
+
+bool ParseJsShadowColorStrategy(const EcmaVM *vm, const Local<JSValueRef> &value, ShadowColorStrategy& strategy)
+{
+    if (value->IsString()) {
+        std::string colorStr = value->ToString(vm)->ToString();
+        if (colorStr.compare("average") == 0) {
+            strategy = ShadowColorStrategy::AVERAGE;
+            return true;
+        } else if (colorStr.compare("primary") == 0) {
+            strategy = ShadowColorStrategy::PRIMARY;
+            return true;
+        }
+    }
+    return false;
+}
+
+bool ParseJsShadowDimension(const EcmaVM *vm, const Local<JSValueRef> &value, CalcDimension& dimension)
+{
+    if (ArkTSUtils::ParseJsResource(vm, value, dimension)) {
+        return true;
+    } else {
+        if (ArkTSUtils::ParseJsDimensionVp(vm, value, dimension)) {
+            return true;
+        }
+    }
+    return false;
+}
+
+bool ParseJsShadowColor(const EcmaVM *vm, const Local<JSValueRef> &colorArg,
+    int32_t& type, uint32_t& colorValue)
+{
+    Color color;
+    ShadowColorStrategy shadowColorStrategy;
+    if (ParseJsShadowColorStrategy(vm, colorArg, shadowColorStrategy)) {
+        type = 1; // 1: has shadowColorStrategy
+        colorValue = static_cast<uint32_t>(shadowColorStrategy);
+        return true;
+    } else if (ArkTSUtils::ParseJsColorAlpha(vm, colorArg, color)) {
+        type = 2; // 2: has shadowColor
+        colorValue = color.GetValue();
+        return true;
+    }
+    return false;
 }
 
 bool ParseCalcDimensions(ArkUIRuntimeCallInfo* runtimeCallInfo, uint32_t offset, uint32_t count,
@@ -830,19 +875,19 @@ void ParseOuterBorderColor(ArkUIRuntimeCallInfo *runtimeCallInfo, EcmaVM *vm, st
     std::optional<Color> bottomColor;
 
     Color left;
-    if (!leftArg->IsUndefined() && ArkTSUtils::ParseJsColor(vm, leftArg, left)) {
+    if (!leftArg->IsUndefined() && ArkTSUtils::ParseJsColorAlpha(vm, leftArg, left)) {
         leftColor = left;
     }
     Color right;
-    if (!rightArg->IsUndefined() && ArkTSUtils::ParseJsColor(vm, rightArg, right)) {
+    if (!rightArg->IsUndefined() && ArkTSUtils::ParseJsColorAlpha(vm, rightArg, right)) {
         rightColor = right;
     }
     Color top;
-    if (!topArg->IsUndefined() && ArkTSUtils::ParseJsColor(vm, topArg, top)) {
+    if (!topArg->IsUndefined() && ArkTSUtils::ParseJsColorAlpha(vm, topArg, top)) {
         topColor = top;
     }
     Color bottom;
-    if (!bottomArg->IsUndefined() && ArkTSUtils::ParseJsColor(vm, bottomArg, bottom)) {
+    if (!bottomArg->IsUndefined() && ArkTSUtils::ParseJsColorAlpha(vm, bottomArg, bottom)) {
         bottomColor = bottom;
     }
 
@@ -1561,11 +1606,11 @@ ArkUINativeModuleValue CommonBridge::SetShadow(ArkUIRuntimeCallInfo *runtimeCall
     ArkTSUtils::ParseJsDouble(vm, radiusArg, shadows[NUM_0]);
     shadows[NUM_0] = (LessNotEqual(shadows[NUM_0], 0.0)) ? 0.0 : shadows[NUM_0];
     CalcDimension offsetX;
-    if (ArkTSUtils::ParseJsDimensionVp(vm, offsetXArg, offsetX)) {
+    if (ParseJsShadowDimension(vm, offsetXArg, offsetX)) {
         shadows[NUM_2] = offsetX.Value();
     }
     CalcDimension offsetY;
-    if (ArkTSUtils::ParseJsDimensionVp(vm, offsetYArg, offsetY)) {
+    if (ParseJsShadowDimension(vm, offsetYArg, offsetY)) {
         shadows[NUM_3] = offsetY.Value();
     }
     if (typeArg->IsInt()) {
@@ -1573,10 +1618,12 @@ ArkUINativeModuleValue CommonBridge::SetShadow(ArkUIRuntimeCallInfo *runtimeCall
         shadows[NUM_4] = static_cast<double>(
             std::clamp(shadowType, static_cast<uint32_t>(ShadowType::COLOR), static_cast<uint32_t>(ShadowType::BLUR)));
     }
-    Color color;
-    ArkTSUtils::ParseJsColorAlpha(vm, colorArg, color);
-    shadows[NUM_5] = color.GetValue();
-
+    int32_t type = 0;
+    uint32_t color = 0;
+    if (ParseJsShadowColor(vm, colorArg, type, color)) {
+        shadows[NUM_1] = static_cast<double>(type);
+        shadows[NUM_5] = static_cast<double>(color);
+    }
     shadows[NUM_6] = static_cast<uint32_t>((fillArg->IsBoolean()) ? fillArg->BooleaValue() : false);
     GetArkUIInternalNodeAPI()->GetCommonModifier().SetBackShadow(nativeNode, shadows,
         (sizeof(shadows) / sizeof(shadows[NUM_0])));
@@ -3177,10 +3224,10 @@ ArkUINativeModuleValue CommonBridge::SetMargin(ArkUIRuntimeCallInfo *runtimeCall
     Local<JSValueRef> thirdArg = runtimeCallInfo->GetCallArgRef(NUM_2);
     Local<JSValueRef> forthArg = runtimeCallInfo->GetCallArgRef(NUM_3);
     Local<JSValueRef> fifthArg = runtimeCallInfo->GetCallArgRef(NUM_4);
-    struct ArkUISizeType top = { 0.0, static_cast<int8_t>(DimensionUnit::VP), nullptr };
-    struct ArkUISizeType right = { 16.0, static_cast<int8_t>(DimensionUnit::VP), nullptr };
-    struct ArkUISizeType bottom = { 0.0, static_cast<int8_t>(DimensionUnit::VP), nullptr };
-    struct ArkUISizeType left = { 16.0, static_cast<int8_t>(DimensionUnit::VP), nullptr };
+    ArkUISizeType top = { 0.0, static_cast<int8_t>(DimensionUnit::VP), nullptr };
+    ArkUISizeType right = { 0.0, static_cast<int8_t>(DimensionUnit::VP), nullptr };
+    ArkUISizeType bottom = { 0.0, static_cast<int8_t>(DimensionUnit::VP), nullptr };
+    ArkUISizeType left = { 0.0, static_cast<int8_t>(DimensionUnit::VP), nullptr };
     CalcDimension topDimen(0, DimensionUnit::VP);
     if (ArkTSUtils::ParseJsDimensionVp(vm, secondArg, topDimen)) {
         top.unit = static_cast<int8_t>(topDimen.Unit());
@@ -3475,9 +3522,11 @@ ArkUINativeModuleValue CommonBridge::SetAlignSelf(ArkUIRuntimeCallInfo* runtimeC
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
 
-    if (secondArg->IsNumber()) {
-        uint32_t value = secondArg->Int32Value(vm);
-        GetArkUIInternalNodeAPI()->GetCommonModifier().SetAlignSelf(nativeNode, value);
+    if (secondArg->IsNumber() && secondArg->ToNumber(vm)->Value() >= 0 &&
+        secondArg->ToNumber(vm)->Value() <= MAX_ALIGN_VALUE) {
+        GetArkUIInternalNodeAPI()->GetCommonModifier().SetAlignSelf(nativeNode, secondArg->Int32Value(vm));
+    } else {
+        GetArkUIInternalNodeAPI()->GetCommonModifier().ResetAlignSelf(nativeNode);
     }
     return panda::JSValueRef::Undefined(vm);
 }

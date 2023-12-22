@@ -289,7 +289,7 @@ RefPtr<NodePaintMethod> ListPattern::CreateNodePaintMethod()
     }
 
     paint->SetLaneGutter(laneGutter_);
-    listContentModifier_->SetItemsPosition(itemPosition_);
+    paint->SetItemsPosition(itemPosition_);
     paint->SetContentModifier(listContentModifier_);
     return paint;
 }

@@ -191,13 +191,9 @@ void ContainerModalPatternEnhance::UpdateTitleInTargetPos(bool isShow, int32_t h
     option.SetDuration(TITLE_POPUP_DURATION);
     option.SetCurve(Curves::EASE_IN_OUT);
 
-    if (!this->CanShowFloatingTitle()) {
-        return;
-    }
-    if (isShow) {
+    if (isShow && this->CanShowFloatingTitle()) {
         floatingContext->OnTransformTranslateUpdate({ 0.0f, height - static_cast<float>(titlePopupDistance), 0.0f });
-        floatingLayoutProperty->UpdateVisibility(
-            floatingTitleSettedShow_ ? VisibleType::VISIBLE : VisibleType::GONE);
+        floatingLayoutProperty->UpdateVisibility(floatingTitleSettedShow_ ? VisibleType::VISIBLE : VisibleType::GONE);
         AnimationUtils::Animate(option, [floatingContext, height]() {
             floatingContext->OnTransformTranslateUpdate({ 0.0f, height, 0.0f });
         });
@@ -206,7 +202,9 @@ void ContainerModalPatternEnhance::UpdateTitleInTargetPos(bool isShow, int32_t h
         AnimationUtils::Animate(option, [buttonsContext, height]() {
             buttonsContext->OnTransformTranslateUpdate({ 0.0f, height, 0.0f });
         });
-    } else {
+    }
+
+    if (!isShow && this->CanHideFloatingTitle()) {
         AnimationUtils::Animate(
             option,
             [floatingContext, buttonsContext, titlePopupDistance]() {

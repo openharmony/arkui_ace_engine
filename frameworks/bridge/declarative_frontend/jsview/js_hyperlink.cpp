@@ -22,6 +22,7 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_abstract.h"
 #include "frameworks/core/components_ng/pattern/hyperlink/hyperlink_model.h"
 #include "frameworks/core/components_ng/pattern/hyperlink/hyperlink_model_ng.h"
+#include "core/components/hyperlink/hyperlink_theme.h"
 
 namespace OHOS::Ace {
 
@@ -82,8 +83,12 @@ void JSHyperlink::Create(const JSCallbackInfo& args)
 void JSHyperlink::SetColor(const JSCallbackInfo& info)
 {
     Color color;
-    if (!ParseJsColor(info[0], color)) {
-        return;
+    if (!ParseJsColor(info[0], color) || info[0]->ToNumber<int32_t>() < 0) {
+        auto pipelineContext = PipelineBase::GetCurrentContext();
+        CHECK_NULL_VOID(pipelineContext);
+        auto theme = pipelineContext->GetTheme<HyperlinkTheme>();
+        CHECK_NULL_VOID(theme);
+        color = theme->GetTextColor();
     }
     HyperlinkModel::GetInstance()->SetColor(color);
 }

@@ -115,7 +115,7 @@ void JSDataPanel::Create(const JSCallbackInfo& info)
     }
 
     size_t dataPanelType = 0;
-    size_t type = jsObj->GetPropertyValue<int32_t>("type", static_cast<int32_t>(ChartType::RAINBOW));
+    int32_t type = jsObj->GetPropertyValue<int32_t>("type", static_cast<int32_t>(ChartType::RAINBOW));
     if (type == static_cast<int32_t>(ChartType::LINE)) {
         dataPanelType = 1;
     }

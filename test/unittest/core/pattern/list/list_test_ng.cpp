@@ -450,9 +450,21 @@ void ListTestNg::ScrollToIndex(int32_t index, bool smooth, ScrollAlign align)
     pattern_->ScrollToIndex(index, smooth, align);
     FlushLayoutTask(frameNode_);
     if (smooth) {
-        float endValue = pattern_->GetFinalPosition();
-        pattern_->ScrollTo(endValue);
-        FlushLayoutTask(frameNode_);
+        auto iter = pattern_->itemPosition_.find(index);
+        float targetPos = 0.0f;
+        if (iter->second.isGroup) {
+            if (!pattern_->GetListItemGroupAnimatePosWithoutIndexInGroup(index, iter->second.startPos,
+                iter->second.endPos, align, targetPos)) {
+                return;
+            }
+        } else {
+            pattern_->GetListItemAnimatePos(iter->second.startPos, iter->second.endPos, align, targetPos);
+        }
+        if (!NearZero(targetPos)) {
+            float endValue = pattern_->GetFinalPosition();
+            pattern_->ScrollTo(endValue);
+            FlushLayoutTask(frameNode_);
+        }
     }
 }
 
@@ -2866,8 +2878,8 @@ HWTEST_F(ListTestNg, ListItemGroup004, TestSize.Level1)
     });
     RefPtr<FrameNode> groupNode = GetChildFrameNode(frameNode_, 0);
     float groupHeight = GetChildRect(frameNode_, 0).Height();
-    EXPECT_EQ(groupHeight, std::ceil(GROUP_LINE_NUMBER / lanes) * 2 * ITEM_HEIGHT);
-    EXPECT_FALSE(VerifyPosition(groupNode, GROUP_LINE_NUMBER, lanes, DEFAULT_SPACE, DEFAULT_STARTOFFSET));
+    EXPECT_EQ(groupHeight, std::ceil(GROUP_LINE_NUMBER / lanes) * ITEM_HEIGHT);
+    EXPECT_TRUE(VerifyPosition(groupNode, GROUP_LINE_NUMBER, lanes, DEFAULT_SPACE, DEFAULT_STARTOFFSET));
 
     /**
      * @tc.steps: step2. maxLaneLength > LIST_WIDTH
@@ -2907,7 +2919,7 @@ HWTEST_F(ListTestNg, ListItemGroup004, TestSize.Level1)
         CreateGroupWithSetting(1, Axis::VERTICAL, V2::ListItemGroupStyle::NONE);
     });
     groupNode = GetChildFrameNode(frameNode_, 0);
-    EXPECT_FALSE(VerifyPosition(groupNode, GROUP_LINE_NUMBER, lanes, SPACE, GROUP_HEADER_LEN));
+    EXPECT_TRUE(VerifyPosition(groupNode, GROUP_LINE_NUMBER, lanes, SPACE, GROUP_HEADER_LEN));
 
     /**
      * @tc.steps: step5. set minLaneLength/maxLaneLength with header/footer/space ...
@@ -4511,8 +4523,10 @@ HWTEST_F(ListTestNg, PaintMethod001, TestSize.Level1)
      */
     CreateWithItem([](ListModelNG model) {});
     UpdateContentModifier();
-    auto dividerInfo = pattern_->listContentModifier_->dividerInfo_;
-    EXPECT_FALSE(dividerInfo.has_value());
+    auto dividerList_ = pattern_->listContentModifier_->dividerList_->Get();
+    auto lda = AceType::DynamicCast<ListDividerArithmetic>(dividerList_);
+    auto dividerMap = lda->GetDividerMap();
+    EXPECT_TRUE(dividerMap.empty());
 
     /**
      * @tc.steps: step2. Set chainAnimation and divider
@@ -4524,8 +4538,10 @@ HWTEST_F(ListTestNg, PaintMethod001, TestSize.Level1)
         model.SetChainAnimation(true);
     });
     UpdateContentModifier();
-    dividerInfo = pattern_->listContentModifier_->dividerInfo_;
-    EXPECT_FALSE(dividerInfo.has_value());
+    dividerList_ = pattern_->listContentModifier_->dividerList_->Get();
+    lda = AceType::DynamicCast<ListDividerArithmetic>(dividerList_);
+    dividerMap = lda->GetDividerMap();
+    EXPECT_TRUE(dividerMap.empty());
 
     /**
      * @tc.steps: step3. Set divider strokeWidth less than zero
@@ -4535,8 +4551,10 @@ HWTEST_F(ListTestNg, PaintMethod001, TestSize.Level1)
     itemDivider.strokeWidth = Dimension(-1);
     CreateWithItem([itemDivider](ListModelNG model) { model.SetDivider(itemDivider); });
     UpdateContentModifier();
-    dividerInfo = pattern_->listContentModifier_->dividerInfo_;
-    EXPECT_FALSE(dividerInfo.has_value());
+    dividerList_ = pattern_->listContentModifier_->dividerList_->Get();
+    lda = AceType::DynamicCast<ListDividerArithmetic>(dividerList_);
+    dividerMap = lda->GetDividerMap();
+    EXPECT_TRUE(dividerMap.empty());
 
     /**
      * @tc.steps: step4. Set divider strokeWidth Unit as PERCENT
@@ -4546,8 +4564,10 @@ HWTEST_F(ListTestNg, PaintMethod001, TestSize.Level1)
     itemDivider.strokeWidth = Dimension(STROKE_WIDTH, DimensionUnit::PERCENT);
     CreateWithItem([itemDivider](ListModelNG model) { model.SetDivider(itemDivider); });
     UpdateContentModifier();
-    dividerInfo = pattern_->listContentModifier_->dividerInfo_;
-    EXPECT_FALSE(dividerInfo.has_value());
+    dividerList_ = pattern_->listContentModifier_->dividerList_->Get();
+    lda = AceType::DynamicCast<ListDividerArithmetic>(dividerList_);
+    dividerMap = lda->GetDividerMap();
+    EXPECT_TRUE(dividerMap.empty());
 
     /**
      * @tc.steps: step5. Not create item
@@ -4556,8 +4576,10 @@ HWTEST_F(ListTestNg, PaintMethod001, TestSize.Level1)
     itemDivider = ITEM_DIVIDER;
     Create([itemDivider](ListModelNG model) { model.SetDivider(itemDivider); });
     UpdateContentModifier();
-    dividerInfo = pattern_->listContentModifier_->dividerInfo_;
-    EXPECT_FALSE(dividerInfo.has_value());
+    dividerList_ = pattern_->listContentModifier_->dividerList_->Get();
+    lda = AceType::DynamicCast<ListDividerArithmetic>(dividerList_);
+    dividerMap = lda->GetDividerMap();
+    EXPECT_TRUE(dividerMap.empty());
 
     /**
      * @tc.steps: step6. Set divider strokeWidth greater than contentSize(LIST_HEIGHT)
@@ -4567,8 +4589,10 @@ HWTEST_F(ListTestNg, PaintMethod001, TestSize.Level1)
     itemDivider.strokeWidth = Dimension(LIST_HEIGHT + 1);
     CreateWithItem([itemDivider](ListModelNG model) { model.SetDivider(itemDivider); });
     UpdateContentModifier();
-    dividerInfo = pattern_->listContentModifier_->dividerInfo_;
-    EXPECT_FALSE(dividerInfo.has_value());
+    dividerList_ = pattern_->listContentModifier_->dividerList_->Get();
+    lda = AceType::DynamicCast<ListDividerArithmetic>(dividerList_);
+    dividerMap = lda->GetDividerMap();
+    EXPECT_TRUE(dividerMap.empty());
 
     /**
      * @tc.steps: step7. Set divider startMargin + endMargin equal to crossSize(LIST_WIDTH)
@@ -4579,8 +4603,10 @@ HWTEST_F(ListTestNg, PaintMethod001, TestSize.Level1)
     itemDivider.endMargin = Dimension(LIST_WIDTH / 2);
     CreateWithItem([itemDivider](ListModelNG model) { model.SetDivider(itemDivider); });
     UpdateContentModifier();
-    dividerInfo = pattern_->listContentModifier_->dividerInfo_;
-    EXPECT_FALSE(dividerInfo.has_value());
+    dividerList_ = pattern_->listContentModifier_->dividerList_->Get();
+    lda = AceType::DynamicCast<ListDividerArithmetic>(dividerList_);
+    dividerMap = lda->GetDividerMap();
+    EXPECT_TRUE(dividerMap.empty());
 
     /**
      * @tc.steps: step8. Set divider startMargin + endMargin greater than crossSize(LIST_WIDTH)
@@ -4591,10 +4617,13 @@ HWTEST_F(ListTestNg, PaintMethod001, TestSize.Level1)
     itemDivider.endMargin = Dimension(LIST_WIDTH / 2 + 1);
     CreateWithItem([itemDivider](ListModelNG model) { model.SetDivider(itemDivider); });
     UpdateContentModifier();
-    dividerInfo = pattern_->listContentModifier_->dividerInfo_;
-    EXPECT_TRUE(dividerInfo.has_value());
-    EXPECT_EQ(dividerInfo.value().startMargin, 0.f);
-    EXPECT_EQ(dividerInfo.value().endMargin, 0.f);
+    dividerList_ = pattern_->listContentModifier_->dividerList_->Get();
+    lda = AceType::DynamicCast<ListDividerArithmetic>(dividerList_);
+    dividerMap = lda->GetDividerMap();
+    EXPECT_FALSE(dividerMap.empty());
+    for (auto child : dividerMap) {
+        EXPECT_EQ(child.second.offset.GetX(), 0.f);
+    }
 
     /**
      * @tc.steps: step9. Set divider startMargin + endMargin less than crossSize(LIST_WIDTH)
@@ -4603,10 +4632,13 @@ HWTEST_F(ListTestNg, PaintMethod001, TestSize.Level1)
     itemDivider = ITEM_DIVIDER;
     CreateWithItem([itemDivider](ListModelNG model) { model.SetDivider(itemDivider); });
     UpdateContentModifier();
-    dividerInfo = pattern_->listContentModifier_->dividerInfo_;
-    EXPECT_TRUE(dividerInfo.has_value());
-    EXPECT_EQ(dividerInfo.value().startMargin, ITEM_DIVIDER.startMargin.ConvertToPx());
-    EXPECT_EQ(dividerInfo.value().endMargin, ITEM_DIVIDER.endMargin.ConvertToPx());
+    dividerList_ = pattern_->listContentModifier_->dividerList_->Get();
+    lda = AceType::DynamicCast<ListDividerArithmetic>(dividerList_);
+    dividerMap = lda->GetDividerMap();
+    EXPECT_FALSE(dividerMap.empty());
+    for (auto child : dividerMap) {
+        EXPECT_EQ(child.second.offset.GetX(), ITEM_DIVIDER.startMargin.ConvertToPx());
+    }
 }
 
 /**
@@ -4725,7 +4757,7 @@ HWTEST_F(ListTestNg, PaintMethod004, TestSize.Level1)
     EXPECT_CALL(canvas, AttachPen(_)).WillRepeatedly(ReturnRef(canvas));
     EXPECT_CALL(canvas, DetachBrush()).WillRepeatedly(ReturnRef(canvas));
     EXPECT_CALL(canvas, DetachPen()).WillRepeatedly(ReturnRef(canvas));
-    EXPECT_CALL(canvas, DrawLine(_, _)).Times(14);
+    EXPECT_CALL(canvas, DrawLine(_, _)).Times(6);
     DrawingContext ctx = { canvas, 1, 1 };
 
     /**
@@ -5400,7 +5432,7 @@ HWTEST_F(ListTestNg, ScrollToItemInGroup001, TestSize.Level1)
      * @tc.steps: step3. last group below viewport
      */
     index = ListLayoutAlgorithm::LAST_ITEM;
-    EXPECT_TRUE(ScrollToItemInGroup(index, indexInGroup, false, ScrollAlign::START, 500.f));
+    EXPECT_TRUE(ScrollToItemInGroup(index, indexInGroup, false, ScrollAlign::START, 600.f));
     EXPECT_TRUE(ScrollToItemInGroup(index, indexInGroup, false, ScrollAlign::CENTER, 750.f));
     EXPECT_TRUE(ScrollToItemInGroup(index, indexInGroup, false, ScrollAlign::END, 700.f - 100.f / 3.f));
 
@@ -5526,7 +5558,7 @@ HWTEST_F(ListTestNg, ScrollToItemInGroup003, TestSize.Level1)
     index = ListLayoutAlgorithm::LAST_ITEM;
     indexInGroup = 3;
     EXPECT_TRUE(ScrollToItemInGroup(index, indexInGroup, false, ScrollAlign::START, 300.f));
-    EXPECT_TRUE(ScrollToItemInGroup(index, indexInGroup, false, ScrollAlign::CENTER, 766.666687f));
+    EXPECT_TRUE(ScrollToItemInGroup(index, indexInGroup, false, ScrollAlign::CENTER, 650.f));
     EXPECT_TRUE(ScrollToItemInGroup(index, indexInGroup, false, ScrollAlign::END, 800.f));
 
     /**
@@ -5555,7 +5587,7 @@ HWTEST_F(ListTestNg, ScrollToItemInGroup003, TestSize.Level1)
     indexInGroup = 3;
     EXPECT_TRUE(ScrollToItemInGroup(index, indexInGroup, false, ScrollAlign::START, 300.f));
     EXPECT_TRUE(ScrollToItemInGroup(index, indexInGroup, false, ScrollAlign::CENTER, 650.f));
-    EXPECT_TRUE(ScrollToItemInGroup(index, indexInGroup, false, ScrollAlign::END, 533.333374f));
+    EXPECT_TRUE(ScrollToItemInGroup(index, indexInGroup, false, ScrollAlign::END, 800));
 }
 
 /**
@@ -5649,7 +5681,8 @@ HWTEST_F(ListTestNg, Pattern005, TestSize.Level1)
      */
     pattern_->AnimateTo(0, 0, nullptr, true);
     EXPECT_TRUE(pattern_->IsAnimationStop());
-    pattern_->OnScrollPosition(100.f, SCROLL_FROM_START);
+    double offset = 100.0;
+    pattern_->OnScrollPosition(offset, SCROLL_FROM_START);
     EXPECT_FALSE(pattern_->scrollAbort_);
     pattern_->OnScrollCallback(100.f, SCROLL_FROM_START);
     EXPECT_FALSE(pattern_->scrollAbort_);

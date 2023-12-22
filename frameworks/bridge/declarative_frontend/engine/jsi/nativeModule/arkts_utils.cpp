@@ -366,7 +366,7 @@ bool ArkTSUtils::ParseStringArray(const EcmaVM* vm, const Local<JSValueRef>& arg
         return false;
     }
     auto handle = panda::CopyableGlobal<panda::ArrayRef>(vm, arg);
-    int32_t length = handle->Length(vm);
+    int32_t length = static_cast<int32_t>(handle->Length(vm));
     if (length != defaultLength) {
         return false;
     }
@@ -431,15 +431,15 @@ bool ArkTSUtils::ParseResourceToDouble(const EcmaVM* vm, const Local<JSValueRef>
         }
         Local<panda::ArrayRef> params = static_cast<Local<panda::ArrayRef>>(args);
         auto param = panda::ArrayRef::GetValueAt(vm, params, 0);
-        if (resType == static_cast<uint32_t>(ResourceType::STRING)) {
+        if (resType == static_cast<int32_t>(ResourceType::STRING)) {
             auto numberString = resourceWrapper->GetStringByName(param->ToString(vm)->ToString());
             return StringUtils::StringToDouble(numberString, result);
         }
-        if (resType == static_cast<uint32_t>(ResourceType::INTEGER)) {
+        if (resType == static_cast<int32_t>(ResourceType::INTEGER)) {
             result = resourceWrapper->GetIntByName(param->ToString(vm)->ToString());
             return true;
         }
-        if (resType == static_cast<uint32_t>(ResourceType::FLOAT)) {
+        if (resType == static_cast<int32_t>(ResourceType::FLOAT)) {
             result = resourceWrapper->GetDoubleByName(param->ToString(vm)->ToString());
             return true;
         }
@@ -718,7 +718,7 @@ bool ArkTSUtils::ParseJsMediaFromResource(const EcmaVM *vm, const Local<JSValueR
             }
             return false;
         }
-        if (resourceObject->GetType() == static_cast<int32_t>(ResourceType::MEDIA)) {
+        if (resourceObject->GetType() == static_cast<uint32_t>(ResourceType::MEDIA)) {
             result = resourceWrapper->GetMediaPath(resId->Uint32Value(vm));
             return true;
         }

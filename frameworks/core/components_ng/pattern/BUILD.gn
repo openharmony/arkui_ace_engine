@@ -431,6 +431,7 @@ build_component_ng("pattern_ng") {
     "text/image_span_view.cpp",
     "text/span_model_ng.cpp",
     "text/span_node.cpp",
+    "text/symbol_span_model_ng.cpp",
     "text/text_accessibility_property.cpp",
     "text/text_content_modifier.cpp",
     "text/text_controller.cpp",

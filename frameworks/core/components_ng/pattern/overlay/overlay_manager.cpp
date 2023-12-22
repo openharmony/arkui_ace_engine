@@ -559,6 +559,10 @@ void OverlayManager::PopMenuAnimation(const RefPtr<FrameNode>& menu, bool showPr
             [rootWeak, menuWK, id, weak]() {
                 auto menu = menuWK.Upgrade();
                 CHECK_NULL_VOID(menu);
+                auto menuNode = AceType::DynamicCast<FrameNode>(menu->GetChildAtIndex(0));
+                CHECK_NULL_VOID(menuNode);
+                auto menuPattern = menuNode->GetPattern<MenuPattern>();
+                CHECK_NULL_VOID(menuPattern);
                 auto root = rootWeak.Upgrade();
                 auto overlayManager = weak.Upgrade();
                 CHECK_NULL_VOID(overlayManager);
@@ -575,7 +579,8 @@ void OverlayManager::PopMenuAnimation(const RefPtr<FrameNode>& menu, bool showPr
                 auto theme = pipeline->GetTheme<SelectTheme>();
                 CHECK_NULL_VOID(theme);
                 auto expandDisplay = theme->GetExpandDisplay();
-                if ((menuWrapperPattern && menuWrapperPattern->IsContextMenu()) || expandDisplay) {
+                if (((menuWrapperPattern && menuWrapperPattern->IsContextMenu()) || expandDisplay) &&
+                    (menuPattern->GetTargetTag() != V2::SELECT_ETS_TAG)) {
                     SubwindowManager::GetInstance()->ClearMenuNG(id);
                     overlayManager->ResetContextMenuDragHideFinished();
                     return;

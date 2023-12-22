@@ -308,6 +308,9 @@ void TextLayoutAlgorithm::UpdateParagraphForAISpan(const TextStyle& textStyle, L
     int32_t wTextForAILength = static_cast<int32_t>(wTextForAI.length());
     int32_t preEnd = 0;
     for (auto kv : pattern->GetAISpanMap()) {
+        if (preEnd >= wTextForAILength) {
+            break;
+        }
         auto aiSpan = kv.second;
         if (aiSpan.start < preEnd) {
             TAG_LOGI(AceLogTag::ACE_TEXT, "Error prediction");
@@ -348,6 +351,9 @@ bool TextLayoutAlgorithm::CreateParagraph(const TextStyle& textStyle, std::strin
         CHECK_NULL_RETURN(symbolSourceInfo, false);
         TextStyle symbolTextStyle = textStyle;
         symbolTextStyle.isSymbolGlyph_ = true;
+        if (symbolTextStyle.GetRenderStrategy() < 0) {
+            symbolTextStyle.SetRenderStrategy(0);
+        }
         paragraph_->PushStyle(symbolTextStyle);
         paragraph_->AddSymbol(symbolSourceInfo->GetUnicode());
         paragraph_->PopStyle();

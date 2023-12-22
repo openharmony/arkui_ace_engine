@@ -104,12 +104,9 @@ public:
     }
 
     void OnCoordScrollStart();
-    void OnCoordScrollUpdate(float offset, float dragOffsetY);
+    float OnCoordScrollUpdate(float offset);
     void OnCoordScrollEnd();
-    bool GetDraggedDown();
-    bool GetFullStatus();
-    bool GetIsMinTitle() const;
-    bool GetCurrentNavBarStatus() const;
+    bool CanCoordScrollUp(float offset) const;
 
     bool GetToolbarHideStatus()
     {
@@ -117,8 +114,6 @@ public:
     }
 
     bool IsTitleBarHide();
-    void ResetAssociatedScroll();
-    bool UpdateAssociatedScrollOffset(float offset);
     bool IsTitleModeFree();
     void OnAttachToFrameNode() override;
     void OnWindowFocused() override
@@ -148,7 +143,7 @@ private:
     void HandleOnDragStart(float offset);
     void HandleOnDragUpdate(float offset);
     void HandleOnDragEnd();
-    float offset_ = 0.0f;
+
     RefPtr<PanEvent> panEvent_;
     WeakPtr<FrameNode> scrollableNode_;
     bool isOritationListenerRegisted_ = false;

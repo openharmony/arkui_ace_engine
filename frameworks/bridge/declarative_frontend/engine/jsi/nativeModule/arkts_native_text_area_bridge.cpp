@@ -469,7 +469,7 @@ ArkUINativeModuleValue TextAreaBridge::SetFontStyle(ArkUIRuntimeCallInfo *runtim
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
     void *nativeNode = firstArg->ToNativePointer(vm)->Value();
     if (secondArg->IsNumber()) {
-        int32_t fontStyle = secondArg->Uint32Value(vm);
+        int32_t fontStyle = secondArg->Int32Value(vm);
         if (fontStyle >= 0 && fontStyle < static_cast<int32_t>(FONT_STYLES.size())) {
             GetArkUIInternalNodeAPI()->GetTextAreaModifier().SetTextAreaFontStyle(nativeNode,
                 static_cast<uint32_t>(fontStyle));

@@ -20,7 +20,6 @@
 
 #include <memory>
 #include "interfaces/inner_api/ace/ai/image_analyzer_interface.h"
-#include "napi/native_api.h"
 
 namespace OHOS::Ace {
 using ImageAnalyzerInstance = std::unique_ptr<ImageAnalyzerInterface, std::function<void (ImageAnalyzerInterface*)>>;

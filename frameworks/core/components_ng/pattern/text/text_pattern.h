@@ -556,12 +556,12 @@ protected:
     {
         return true;
     };
-    bool IsEnabled();
 
     Status status_ = Status::NONE;
     bool contChange_ = false;
     int32_t recoverStart_ = 0;
     int32_t recoverEnd_ = 0;
+    bool enabled_ = true;
     bool showSelectOverlay_ = false;
     bool mouseEventInitialized_ = false;
     bool panEventInitialized_ = false;

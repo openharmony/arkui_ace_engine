@@ -86,13 +86,15 @@ void JSSpan::SetFontSize(const JSCallbackInfo& info)
     if (info.Length() < 1) {
         return;
     }
-    CalcDimension fontSize;
-    if (!ParseJsDimensionFp(info[0], fontSize)) {
+    auto theme = GetTheme<TextTheme>();
+    CHECK_NULL_VOID(theme);
+    CalcDimension fontSize = theme->GetTextStyle().GetFontSize();
+    if (!ParseJsDimensionFpNG(info[0], fontSize, false)) {
+        fontSize = theme->GetTextStyle().GetFontSize();
+        SpanModel::GetInstance()->SetFontSize(fontSize);
         return;
     }
-    if (fontSize.IsNonPositive()) {
-        auto theme = GetTheme<TextTheme>();
-        CHECK_NULL_VOID(theme);
+    if (fontSize.IsNegative()) {
         fontSize = theme->GetTextStyle().GetFontSize();
     }
 
@@ -147,6 +149,8 @@ void JSSpan::SetLetterSpacing(const JSCallbackInfo& info)
     }
     CalcDimension value;
     if (!ParseJsDimensionFpNG(info[0], value, false)) {
+        value.Reset();
+        SpanModel::GetInstance()->SetLetterSpacing(value);
         return;
     }
     SpanModel::GetInstance()->SetLetterSpacing(value);

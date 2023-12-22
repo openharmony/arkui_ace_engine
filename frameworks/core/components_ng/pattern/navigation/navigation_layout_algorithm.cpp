@@ -263,6 +263,10 @@ void NavigationLayoutAlgorithm::UpdateNavigationMode(const RefPtr<NavigationLayo
     if (usrNavigationMode == NavigationMode::AUTO) {
         if (frameSize.Width() >= navigationWidth) {
             usrNavigationMode = NavigationMode::SPLIT;
+            auto navBarNode = hostNode->GetNavBarNode();
+            if (navBarNode) {
+                navBarNode->SetActive(true);
+            }
         } else {
             usrNavigationMode = NavigationMode::STACK;
         }

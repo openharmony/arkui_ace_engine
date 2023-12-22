@@ -39,6 +39,8 @@ void UIDisplaySyncManager::DispatchFunc(uint64_t nanoTimestamp)
             displaySync->UpdateData(nanoTimestamp, VSyncPeriod);
             displaySync->JudgeWhetherSkip();
             displaySync->OnFrame();
+        } else {
+            uiDisplaySyncMap_.erase(Id);
         }
     }
 
@@ -133,12 +135,6 @@ UIDisplaySyncManager::UIDisplaySyncManager() {}
 
 UIDisplaySyncManager::~UIDisplaySyncManager() noexcept
 {
-    for (const auto& [Id, weakDisplaySync] : uiDisplaySyncMap_) {
-        auto displaySync = weakDisplaySync.Upgrade();
-        if (displaySync) {
-            RemoveDisplaySync(displaySync);
-        }
-    }
     uiDisplaySyncMap_.clear();
 }
 } // namespace OHOS::Ace

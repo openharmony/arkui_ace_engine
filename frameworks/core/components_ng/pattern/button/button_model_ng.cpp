@@ -303,8 +303,6 @@ void ButtonModelNG::SetTextDefaultStyle(const RefPtr<FrameNode>& textNode, const
     textLayoutProperty->UpdateContent(label);
     textLayoutProperty->UpdateTextOverflow(TextOverflow::ELLIPSIS);
     textLayoutProperty->UpdateMaxLines(buttonTheme->GetTextMaxLines());
-    textLayoutProperty->UpdateFontSize(textStyle.GetFontSize());
-    textLayoutProperty->UpdateTextColor(textStyle.GetTextColor());
     textLayoutProperty->UpdateFontWeight(textStyle.GetFontWeight());
 }
 

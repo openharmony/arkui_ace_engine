@@ -27,52 +27,115 @@ GridLayoutRangeSolver::GridLayoutRangeSolver(GridLayoutInfo* info, LayoutWrapper
 using Result = GridLayoutRangeSolver::StartingRowInfo;
 Result GridLayoutRangeSolver::FindStartingRow(float mainGap)
 {
-    // find starting row
-    float start = std::max(-info_->currentOffset_, 0.0f); // start >= 0
+    // Negative offset implies scrolling down, so we can start from the previous startIndex_.
+    // Otherwise, we have to restart from Row 0 because of irregular items.
+    if (info_->currentOffset_ <= 0.0f) {
+        return SolveForward(mainGap);
+    }
+    return SolveBackward(mainGap);
+}
+
+Result GridLayoutRangeSolver::SolveForward(float mainGap)
+{
+    int32_t idx = info_->startMainLineIndex_;
+    float start = -info_->currentOffset_;
 
     float len = 0.0f;
-    int32_t idx = 0;
-    float rowHeight = 0.0f;
     while (len < start) {
         auto [newRows, addLen] = AddNextRows(mainGap, idx);
         if (len + addLen > start) {
-            rowHeight = addLen - mainGap;
             break;
         }
         len += addLen;
         idx += newRows;
     }
 
-    // because we add len with mainGap above the item in AddNextRow, [len] is at the bottom of the last item
-    if (idx > 0) {
-        len += mainGap;
-    }
-    return StartingRowInfo { idx, len, rowHeight };
+    return { idx, info_->currentOffset_ + len };
 }
 
-std::pair<int32_t, float> GridLayoutRangeSolver::AddNextRows(float mainGap, int32_t row)
+std::pair<int32_t, float> GridLayoutRangeSolver::AddNextRows(float mainGap, int32_t idx)
 {
-    int32_t maxRowCnt = 1;
+    int32_t rowCnt = 1;
 
     const auto& irregulars = opts_->irregularIndexes;
     // consider irregular items occupying multiple rows
+    const auto& row = info_->gridMatrix_.at(idx);
     for (int c = 0; c < info_->crossCount_; ++c) {
-        auto idx = info_->gridMatrix_.at(row).at(c);
-        if (opts_->getSizeByIndex && irregulars.find(idx) != irregulars.end()) {
-            auto size = opts_->getSizeByIndex(idx);
-            maxRowCnt = std::max(maxRowCnt, size.rows);
+        if (row.find(c) == row.end()) {
+            continue;
+        }
+        const auto& itemIdx = row.at(c);
+        if (itemIdx == -1) {
+            continue;
+        }
+        if (opts_->getSizeByIndex && irregulars.find(itemIdx) != irregulars.end()) {
+            auto size = opts_->getSizeByIndex(itemIdx);
+            rowCnt = std::max(rowCnt, info_->axis_ == Axis::VERTICAL ? size.rows : size.columns);
         }
     }
 
-    float len = info_->lineHeightMap_.at(row);
-    if (row > 0) {
+    float len = info_->lineHeightMap_.at(idx);
+    if (idx > 0) {
         // always add the main gap above the item in forward layout
         len += mainGap;
     }
-    for (int i = 1; i < maxRowCnt; ++i) {
-        len += info_->lineHeightMap_.at(row + i) + mainGap;
+    for (int i = 1; i < rowCnt; ++i) {
+        len += info_->lineHeightMap_.at(idx + i) + mainGap;
     }
 
-    return { maxRowCnt, len };
+    return { rowCnt, len };
+}
+
+Result GridLayoutRangeSolver::SolveBackward(float mainGap)
+{
+    int32_t idx = info_->startMainLineIndex_;
+    float len = 0;
+    while (idx > 0 && len < info_->currentOffset_) {
+        len += info_->lineHeightMap_.at(--idx) + mainGap;
+    }
+
+    auto rowCnt = CheckMultiRow(idx);
+    idx -= rowCnt - 1;
+
+    float newOffset = info_->currentOffset_ - len;
+    for (int i = 0; i < rowCnt - 1; ++i) {
+        newOffset -= info_->lineHeightMap_.at(idx + i) + mainGap;
+    }
+    return { idx, newOffset };
+}
+
+int32_t GridLayoutRangeSolver::CheckMultiRow(int32_t idx)
+{
+    // check multi-row item that occupies Row [idx]
+    int32_t rowCnt = 1;
+    const auto& mat = info_->gridMatrix_;
+    const auto& row = mat.at(idx);
+    for (int c = 0; c < info_->crossCount_; ++c) {
+        if (row.find(c) == row.end()) {
+            continue;
+        }
+
+        int32_t r = idx;
+        if (row.at(c) == -1) {
+            // traverse upwards to find the first row occupied by this item
+            while (r > 0 && mat.at(r).at(c) == -1) {
+                --r;
+            }
+            rowCnt = std::max(rowCnt, idx - r + 1);
+        }
+
+        // skip the columns occupied by this item
+        int32_t itemIdx = mat.at(r).at(c);
+        if (opts_->irregularIndexes.find(itemIdx) != opts_->irregularIndexes.end()) {
+            if (opts_->getSizeByIndex) {
+                auto size = opts_->getSizeByIndex(itemIdx);
+                c += (info_->axis_ == Axis::VERTICAL ? size.columns : size.rows) - 1;
+            } else {
+                // no getSizeByIndex implies itemWidth == crossCount
+                break;
+            }
+        }
+    }
+    return rowCnt;
 }
 } // namespace OHOS::Ace::NG

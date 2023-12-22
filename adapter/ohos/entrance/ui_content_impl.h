@@ -32,7 +32,6 @@
 #include "base/thread/task_executor.h"
 #include "base/view_data/view_data_wrap.h"
 #include "core/common/asset_manager_impl.h"
-#include "core/common/flutter/flutter_asset_manager.h"
 #include "core/components/common/properties/popup_param.h"
 
 namespace OHOS::Accessibility {

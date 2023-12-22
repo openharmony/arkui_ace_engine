@@ -493,12 +493,11 @@ protected:
 private:
     virtual void OnScrollEndCallback() {};
 
-    void DraggedDownScrollEndProcess();
     void RegisterScrollBarEventTask();
-    bool OnScrollPosition(double offset, int32_t source);
+    bool OnScrollPosition(double& offset, int32_t source);
     void SetParentScrollable();
     void ProcessNavBarReactOnStart();
-    bool ProcessNavBarReactOnUpdate(float offset);
+    float ProcessNavBarReactOnUpdate(float offset);
     void ProcessNavBarReactOnEnd();
     void InitSpringOffsetProperty();
     void InitCurveOffsetProperty(float position);
@@ -526,8 +525,6 @@ private:
     float GetOffsetWithLimit(float offset) const;
     void LimitMouseEndOffset();
     void UpdateBorderRadius();
-
-    bool ProcessAssociatedScroll(double offset, int32_t source);
 
     /******************************************************************************
      * NestableScrollContainer implementations
@@ -575,9 +572,10 @@ private:
     float GetVelocity() const;
     bool NeedSplitScroll(OverScrollOffset& overOffsets, int32_t source);
     RefreshCoordinationMode CoordinateWithRefresh(double& offset, int32_t source, bool isAtTop);
-    bool CoordinateWithNavigation(bool isAtTop, bool isDraggedDown, double& offset, int32_t source);
+    bool CoordinateWithNavigation(double& offset, int32_t source, bool isAtTop);
     void NotifyFRCSceneInfo(const std::string& scene, double velocity, SceneStatus sceneStatus);
     ModalSheetCoordinationMode CoordinateWithSheet(double& offset, int32_t source, bool isAtTop);
+    bool NeedCoordinateScrollWithNavigation(double offset, int32_t source, const OverScrollOffset& overOffsets);
 
     Axis axis_;
     RefPtr<ScrollableEvent> scrollableEvent_;

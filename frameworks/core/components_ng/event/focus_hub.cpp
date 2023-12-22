@@ -1048,6 +1048,14 @@ void FocusHub::OnFocus()
     } else if (focusType_ == FocusType::SCOPE) {
         OnFocusScope();
     }
+    auto frameNode = GetFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto curPattern = frameNode->GetPattern<NG::Pattern>();
+    CHECK_NULL_VOID(curPattern);
+    bool isNeedKeyboard = curPattern->NeedSoftKeyboard();
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->SetNeedSoftKeyboard(isNeedKeyboard);
 }
 
 void FocusHub::OnBlur()
@@ -1056,6 +1064,13 @@ void FocusHub::OnBlur()
         OnBlurNode();
     } else if (focusType_ == FocusType::SCOPE) {
         OnBlurScope();
+    }
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    if (blurReason_ != BlurReason::WINDOW_BLUR) {
+        pipeline->SetNeedSoftKeyboard(false);
+    } else {
+        pipeline->SetNeedSoftKeyboard(std::nullopt);
     }
 }
 
@@ -1067,12 +1082,26 @@ void FocusHub::IsCloseKeyboard(RefPtr<FrameNode> frameNode)
     CHECK_NULL_VOID(curPattern);
     bool isNeedKeyBoard = curPattern->NeedSoftKeyboard();
     if (!isNeedKeyBoard) {
-        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "FrameNode not NeedSoftKeyboard.");
+        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "FrameNode(%{public}s/%{public}d) notNeedSoftKeyboard.",
+            frameNode->GetTag().c_str(), frameNode->GetId());
         auto inputMethod = MiscServices::InputMethodController::GetInstance();
         if (inputMethod) {
             inputMethod->Close();
             TAG_LOGI(AceLogTag::ACE_KEYBOARD, "SoftKeyboard Closes Successfully.");
         }
+    }
+#endif
+}
+
+void FocusHub::PushPageCloseKeyboard()
+{
+#if defined (ENABLE_STANDARD_INPUT)
+    // If pushpage, close it
+    TAG_LOGI(AceLogTag::ACE_KEYBOARD, "PageChange CloseKeyboard FrameNode notNeedSoftKeyboard.");
+    auto inputMethod = MiscServices::InputMethodController::GetInstance();
+    if (inputMethod) {
+        inputMethod->Close();
+        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "PageChange CloseKeyboard SoftKeyboard Closes Successfully.");
     }
 #endif
 }
@@ -1106,30 +1135,6 @@ void FocusHub::OnFocusNode()
     CHECK_NULL_VOID(pipeline);
     if (frameNode->GetFocusType() == FocusType::NODE) {
         pipeline->SetFocusNode(frameNode);
-#if defined (ENABLE_STANDARD_INPUT)
-    // If in window,focus pattern does not need softkeyboard, close it.
-        IsCloseKeyboard(frameNode);
-#endif
-    }
-
-    if (frameNode->GetFocusType() == FocusType::SCOPE) {
-#if defined (ENABLE_STANDARD_INPUT)
-        // If in window,focus pattern does not need softkeyboard, close it.
-        auto hadFocusChild = false;
-        std::list<RefPtr<FocusHub>> focusNodes = GetChildren();
-        for (const auto& item : focusNodes) {
-            if (item->IsCurrentFocus()) {
-                hadFocusChild = true;
-                break;
-            }
-        }
-        if (!hadFocusChild) {
-            auto isSystem_ = WindowSceneHelper::IsWindowScene(frameNode);
-            if (!isSystem_) {
-                IsCloseKeyboard(frameNode);
-            }
-        }
-#endif
     }
 }
 

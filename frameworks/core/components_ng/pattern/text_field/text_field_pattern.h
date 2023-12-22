@@ -157,6 +157,8 @@ public:
         return true;
     }
 
+    bool CheckBlurReason();
+
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override;
 
     RefPtr<LayoutProperty> CreateLayoutProperty() override
@@ -199,7 +201,7 @@ public:
 
     void InsertValue(const std::string& insertValue) override;
     void InsertValueOperation(const std::string& insertValue);
-    void UpdateCounterTextColor();
+    void UpdateOverCounterColor();
     void UpdateCounterMargin();
     void CleanCounterNode();
     void UltralimitShake();
@@ -228,10 +230,6 @@ public:
     void SetCounterState(bool counterChange)
     {
         counterChange_ = counterChange;
-    }
-    void SetCounterMargin(bool CounterMargin)
-    {
-        hasCounterMargin_ = CounterMargin;
     }
 
     float GetTextOrPlaceHolderFontSize();
@@ -281,7 +279,7 @@ public:
     void UpdateCaretPositionByTouch(const Offset& offset);
     bool IsReachedBoundary(float offset);
 
-    virtual TextInputAction GetDefaultTextInputAction();
+    virtual TextInputAction GetDefaultTextInputAction() const;
     bool RequestKeyboard(bool isFocusViewChanged, bool needStartTwinkling, bool needShowSoftKeyboard);
     bool CloseKeyboard(bool forceClose) override;
 
@@ -1266,7 +1264,6 @@ private:
     bool contChange_ = false;
     bool counterChange_ = false;
     WeakPtr<LayoutWrapper> counterTextNode_;
-    bool hasCounterMargin_ = false;
     bool isCursorAlwaysDisplayed_ = false;
     std::optional<int32_t> surfaceChangedCallbackId_;
     std::optional<int32_t> surfacePositionChangedCallbackId_;
@@ -1286,7 +1283,7 @@ private:
     uint32_t twinklingInterval_ = 0;
     int32_t obscureTickCountDown_ = 0;
     int32_t nakedCharPosition_ = -1;
-    bool updateSelectionAfterObscure_ = false;
+    bool obscuredChange_ = false;
     float currentOffset_ = 0.0f;
     float countHeight_ = 0.0f;
     Dimension underlineWidth_ = 1.0_px;
@@ -1369,6 +1366,7 @@ private:
     bool isShowMagnifier_ = false;
     OffsetF localOffset_;
     bool isTouchCaret_ = false;
+    bool needSelectAll_ = false;
 };
 } // namespace OHOS::Ace::NG
 

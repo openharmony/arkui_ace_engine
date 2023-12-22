@@ -389,11 +389,6 @@ public:
 
     static std::string GetCustomTitleFilePath();
 
-    static bool GetFlutterDecouplingEnabled()
-    {
-        return flutterDecouplingEnabled_;
-    }
-
     static bool Is24HourClock();
 
 private:
@@ -437,7 +432,6 @@ private:
     static uint32_t dumpFrameCount_;
     static bool resourceDecoupling_;
     static bool changeTitleStyleEnabled_;
-    static bool flutterDecouplingEnabled_;
 };
 
 } // namespace OHOS::Ace

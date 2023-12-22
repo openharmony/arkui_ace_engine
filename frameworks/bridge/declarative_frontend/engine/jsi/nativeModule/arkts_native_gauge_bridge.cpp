@@ -68,7 +68,7 @@ void SortColorStopOffset(std::vector<NG::ColorStopArray>& colors)
 void ConvertResourceColor(const EcmaVM* vm, const Local<JSValueRef>& item, std::vector<NG::ColorStopArray>& colors)
 {
     Color color;
-    if (!ArkTSUtils::ParseJsColor(vm, item, color)) {
+    if (!ArkTSUtils::ParseJsColorAlpha(vm, item, color)) {
         color = ERROR_COLOR;
     }
     NG::ColorStopArray colorStopArray;
@@ -226,7 +226,7 @@ ArkUINativeModuleValue GaugeBridge::SetColors(ArkUIRuntimeCallInfo* runtimeCallI
         auto handle = panda::CopyableGlobal<panda::ArrayRef>(vm, jsValue);
         float weight = handle->GetValueAt(vm, jsValue, 1)->ToNumber(vm)->Value();
         Color selectedColor;
-        if (!ArkTSUtils::ParseJsColor(vm, handle->GetValueAt(vm, jsValue, 1), selectedColor)) {
+        if (!ArkTSUtils::ParseJsColorAlpha(vm, handle->GetValueAt(vm, jsValue, 1), selectedColor)) {
             selectedColor = ERROR_COLOR;
         }
         colors[i] = selectedColor.GetValue();

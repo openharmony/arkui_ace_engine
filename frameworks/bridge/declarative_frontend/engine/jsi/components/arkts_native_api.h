@@ -760,6 +760,7 @@ struct ArkUIPanelModifierAPI {
     void (*SetPanelType)(NodeHandle node, int32_t type);
     void (*ResetPanelType)(NodeHandle node);
     void (*SetPanelCustomHeight)(NodeHandle node, double value, int unit);
+    void (*SetPanelCustomHeightByString)(NodeHandle node, const char* value);
     void (*ResetPanelCustomHeight)(NodeHandle node);
     void (*SetShowCloseIcon)(NodeHandle node, bool value);
     void (*ResetShowCloseIcon)(NodeHandle node);
@@ -1006,7 +1007,8 @@ struct ArkUISideBarContainerModifierAPI {
     void (*ResetSideBarWidth)(NodeHandle node);
     void (*SetMinSideBarWidth)(NodeHandle node, double value, int32_t unit);
     void (*ResetMinSideBarWidth)(NodeHandle node);
-    void (*SetControlButton)(NodeHandle node, double* values, const struct IconsStruct* sideBarWidth);
+    void (*SetControlButton)(
+        NodeHandle node, double* values, int32_t valueLength, const struct IconsStruct* sideBarWidth);
     void (*ResetControlButton)(NodeHandle node);
     void (*SetShowControlButton)(NodeHandle node, bool isShow);
     void (*ResetShowControlButton)(NodeHandle node);
@@ -1520,6 +1522,14 @@ struct ArkUITextClockModifierAPI {
     void (*SetFontFamily)(NodeHandle node, const char *fontFamily);
     void (*ResetFontFamily)(NodeHandle node);
 };
+#ifdef XCOMPONENT_SUPPORTED
+struct ArkUIXComponentModifierAPI {
+    void (*SetXComponentBackgroundColor)(NodeHandle node, uint32_t color);
+    void (*ResetXComponentBackgroundColor)(NodeHandle node);
+    void (*SetXComponentOpacity)(NodeHandle node, double opacity);
+    void (*ResetXComponentOpacity)(NodeHandle node);
+};
+#endif
 
 struct ArkUINodeAPI {
     NodeHandle (*GetFrameNodeById)(int nodeId);
@@ -1594,7 +1604,9 @@ struct ArkUINodeAPI {
     ArkUILoadingProgressModifierAPI (*GetLoadingProgressModifier)();
     ArkUITextClockModifierAPI (*GetTextClockModifier)();
     ArkUITextTimerModifierAPI (*GetTextTimerModifier)();
-
+#ifdef XCOMPONENT_SUPPORTED
+    ArkUIXComponentModifierAPI (*GetXComponentModifier)();
+#endif
 #ifdef FORM_SUPPORTED
     ArkUIFormComponentModifierAPI (*GetFormComponentModifier)();
 #endif

@@ -140,7 +140,7 @@ constexpr float DEFAULT_SCALE_MIDDLE_OR_HEAVY = 0.95f;
 constexpr float MAX_ANGLE = 360.0f;
 constexpr float DEFAULT_BIAS = 0.5f;
 const std::vector<FontStyle> FONT_STYLES = { FontStyle::NORMAL, FontStyle::ITALIC };
-const std::vector<std::string> TEXT_DETECT_TYPES = { "phoneNum", "url", "email", "address" };
+const std::vector<std::string> TEXT_DETECT_TYPES = { "phoneNum", "url", "email", "location" };
 const std::vector<std::string> RESOURCE_HEADS = { "app", "sys" };
 const std::string SHEET_HEIGHT_MEDIUM = "medium";
 const std::string SHEET_HEIGHT_LARGE = "large";
@@ -4202,6 +4202,37 @@ bool JSViewAbstract::ParseJsSymbolId(const JSRef<JSVal>& jsValue, std::uint32_t&
     return true;
 }
 
+bool JSViewAbstract::ParseJsSymbolColor(const JSRef<JSVal>& jsValue, std::vector<Color>& result)
+{
+    if (!jsValue->IsArray()) {
+        return false;
+    }
+    if (jsValue->IsArray()) {
+        JSRef<JSArray> array = JSRef<JSArray>::Cast(jsValue);
+        for (size_t i = 0; i < array->Length(); i++) {
+            JSRef<JSVal> value = array->GetValueAt(i);
+            if (!value->IsNumber() && !value->IsString() && !value->IsObject()) {
+                return false;
+            }
+            if (value->IsNumber()) {
+                result.emplace_back(Color(ColorAlphaAdapt(value->ToNumber<uint32_t>())));
+                continue;
+            } else if (value->IsString()) {
+                Color color;
+                Color::ParseColorString(value->ToString(), color);
+                result.emplace_back(color);
+                continue;
+            } else {
+                Color color;
+                ParseJsColorFromResource(value, color);
+                result.emplace_back(color);
+            }
+        }
+        return true;
+    }
+    return false;
+}
+
 bool JSViewAbstract::ParseJsFontFamilies(const JSRef<JSVal>& jsValue, std::vector<std::string>& result)
 {
     result.clear();
@@ -4761,12 +4792,13 @@ void JSViewAbstract::JsSetDragPreviewOptions(const JSCallbackInfo& info)
     JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
     auto mode = obj->GetProperty("mode");
     if (!mode->IsNumber()) {
+        ViewAbstractModel::GetInstance()->SetDragPreviewOptions({NG::DragPreviewMode::AUTO});
         return;
     }
     int32_t dragPreviewMode = mode->ToNumber<int>();
     if (!(dragPreviewMode >= static_cast<int32_t>(NG::DragPreviewMode::AUTO) &&
             dragPreviewMode <= static_cast<int32_t>(NG::DragPreviewMode::DISABLE_SCALE))) {
-        return;
+        dragPreviewMode = static_cast<int32_t>(NG::DragPreviewMode::AUTO);
     }
     NG::DragPreviewOption option {static_cast<NG::DragPreviewMode>(dragPreviewMode)};
     ViewAbstractModel::GetInstance()->SetDragPreviewOptions(option);

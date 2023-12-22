@@ -802,6 +802,7 @@ var InputType;
   InputType[InputType["SCREEN_LOCK_PASSWORD"] = 9] = "SCREEN_LOCK_PASSWORD";
   InputType[InputType["USER_NAME"] = 10] = "USER_NAME";
   InputType[InputType["NEW_PASSWORD"] = 11] = "NEW_PASSWORD";
+  InputType[InputType["NUMBER_DECIMAL"] = 12] = "NUMBER_DECIMAL";
 })(InputType || (InputType = {}));
 
 var SearchType;
@@ -827,6 +828,8 @@ var EnterKeyType;
   EnterKeyType[EnterKeyType["Send"] = 4] = "Send";
   EnterKeyType[EnterKeyType["Next"] = 5] = "Next";
   EnterKeyType[EnterKeyType["Done"] = 6] = "Done";
+  EnterKeyType[EnterKeyType["PREVIOUS"] = 7] = "PREVIOUS";
+  EnterKeyType[EnterKeyType["NEW_LINE"] = 8] = "NEW_LINE";
 })(EnterKeyType || (EnterKeyType = {}));
 
 var ItemState
@@ -1086,6 +1089,13 @@ var CopyOptions;
   CopyOptions[CopyOptions["LocalDevice"] = 2] = "LocalDevice";
   CopyOptions[CopyOptions["CROSS_DEVICE"] = 3] = "CrossDevice";
 })(CopyOptions || (CopyOptions = {}));
+
+var SymbolRenderingStrategy;
+(function (SymbolRenderingStrategy) {
+  SymbolRenderingStrategy[SymbolRenderingStrategy["SINGLE"] = 0] = "SINGLE";
+  SymbolRenderingStrategy[SymbolRenderingStrategy["MULTIPLE_COLOR"] = 1] = "MULTIPLE_COLOR";
+  SymbolRenderingStrategy[SymbolRenderingStrategy["MULTIPLE_OPACITY"] = 2] = "MULTIPLE_OPACITY";
+})(SymbolRenderingStrategy || (SymbolRenderingStrategy = {}));
 
 var RichEditorSpanType;
 (function (RichEditorSpanType) {

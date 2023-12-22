@@ -376,6 +376,7 @@ void PipelineContext::RemoveWindowSizeChangeCallback(int32_t nodeId) {}
 
 void PipelineContext::UpdateSystemSafeArea(const SafeAreaInsets& systemSafeArea) {};
 void PipelineContext::UpdateCutoutSafeArea(const SafeAreaInsets& cutoutSafeArea) {};
+void PipelineContext::UpdateNavSafeArea(const SafeAreaInsets& navSafeArea) {};
 void PipelineContext::SetEnableKeyBoardAvoidMode(bool value) {};
 bool PipelineContext::IsEnableKeyBoardAvoidMode()
 {

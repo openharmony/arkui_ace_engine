@@ -2160,6 +2160,31 @@ HWTEST_F(TextFieldKeyEventTest, KeyEvent008, TestSize.Level1)
 }
 
 /**
+ * @tc.name: KeyEvent009
+ * @tc.desc: Test KeyEvent enter
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldKeyEventTest, KeyEvent009, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize textInput and get focus
+     */
+    auto onSubmit = [](int32_t textFieldKey, NG::TextFieldCommonEvent& commonEvent) {
+        commonEvent.SetKeepEditable(true);
+        EXPECT_TRUE(commonEvent.keepEditable_);
+        EXPECT_EQ(commonEvent.text_, "abcdefghijklmnopqrstuvwxyz");
+    };
+    CreateTextField(DEFAULT_TEXT, DEFAULT_PLACE_HOLDER, [&](TextFieldModel& model) -> void {
+        model.SetInputStyle(DEFAULT_INPUT_STYLE);
+        model.SetOnSubmit(onSubmit);
+    });
+    GetFocus();
+    auto focushHub = pattern_->GetFocusHub();
+    pattern_->PerformAction(TextInputAction::BEGIN, true);
+    EXPECT_TRUE(focushHub->currentFocus_);
+}
+
+/**
  * @tc.name: UpdateCaretByTouchMove001
  * @tc.desc: Test UpdateCaretByTouchMove
  * @tc.type: FUNC

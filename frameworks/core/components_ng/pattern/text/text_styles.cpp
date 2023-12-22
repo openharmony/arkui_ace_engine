@@ -44,6 +44,8 @@ TextStyle CreateTextStyleUsingTheme(const std::unique_ptr<FontStyle>& fontStyle,
         UPDATE_TEXT_STYLE(fontStyle, AdaptMinFontSize, SetAdaptMinFontSize);
         UPDATE_TEXT_STYLE(fontStyle, AdaptMaxFontSize, SetAdaptMaxFontSize);
         UPDATE_TEXT_STYLE(fontStyle, LetterSpacing, SetLetterSpacing);
+        UPDATE_TEXT_STYLE(fontStyle, SymbolColorList, SetSymbolColorList);
+        UPDATE_TEXT_STYLE(fontStyle, SymbolRenderingStrategy, SetRenderStrategy);
     }
     if (textLineStyle) {
         UPDATE_TEXT_STYLE(textLineStyle, LineHeight, SetLineHeight);

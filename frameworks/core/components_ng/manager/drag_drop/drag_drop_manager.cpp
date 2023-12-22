@@ -21,6 +21,7 @@
 #include "base/utils/utils.h"
 #include "core/common/interaction/interaction_data.h"
 #include "core/common/interaction/interaction_interface.h"
+#include "core/components/common/layout/grid_system_manager.h"
 #include "core/components_ng/pattern/grid/grid_event_hub.h"
 #include "core/components_ng/pattern/list/list_event_hub.h"
 #include "core/components_ng/pattern/root/root_pattern.h"
@@ -301,17 +302,24 @@ void DragDropManager::UpdateDragAllowDrop(const RefPtr<FrameNode>& dragFrameNode
 {
     const auto& dragFrameNodeAllowDrop = dragFrameNode->GetAllowDrop();
     if (dragFrameNodeAllowDrop.empty() || summaryMap_.empty()) {
-        InteractionInterface::GetInstance()->UpdateDragStyle(DragCursorStyleCore::MOVE);
+        UpdateDragStyle(DragCursorStyleCore::MOVE);
         return;
     }
     for (const auto& it : summaryMap_) {
         if (dragFrameNodeAllowDrop.find(it.first) == dragFrameNodeAllowDrop.end()) {
-            InteractionInterface::GetInstance()->UpdateDragStyle(DragCursorStyleCore::FORBIDDEN);
+            UpdateDragStyle(DragCursorStyleCore::FORBIDDEN);
             return;
         }
     }
-    InteractionInterface::GetInstance()->UpdateDragStyle(
-        isCopy ? DragCursorStyleCore::COPY : DragCursorStyleCore::MOVE);
+    UpdateDragStyle(isCopy ? DragCursorStyleCore::COPY : DragCursorStyleCore::MOVE);
+}
+
+void DragDropManager::UpdateDragStyle(const DragCursorStyleCore& dragStyle)
+{
+    if (dragStyle != dragCursorStyleCore_) {
+        dragCursorStyleCore_ = dragStyle;
+        InteractionInterface::GetInstance()->UpdateDragStyle(dragCursorStyleCore_);
+    }
 }
 #endif // ENABLE_DRAG_FRAMEWORK
 
@@ -491,7 +499,7 @@ void DragDropManager::OnDragMove(const PointerEvent& pointerEvent, const std::st
 
 #ifdef ENABLE_DRAG_FRAMEWORK
         if (!isMouseDragged_ || isDragWindowShow_) {
-            InteractionInterface::GetInstance()->UpdateDragStyle(DragCursorStyleCore::MOVE);
+            UpdateDragStyle(DragCursorStyleCore::MOVE);
         }
 #endif // ENABLE_DRAG_FRAMEWORK
         return;
@@ -577,13 +585,13 @@ void DragDropManager::OnDragEnd(const PointerEvent& pointerEvent, const std::str
     }
 #endif // ENABLE_DRAG_FRAMEWORK
 
+    CHECK_NULL_VOID(dragFrameNode);
     if (V2::UI_EXTENSION_COMPONENT_ETS_TAG == dragFrameNode->GetTag()) {
         auto pattern = dragFrameNode->GetPattern<Pattern>();
         pattern->HandleDragEvent(pointerEvent);
         return;
     }
 
-    CHECK_NULL_VOID(dragFrameNode);
     auto eventHub = dragFrameNode->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     RefPtr<OHOS::Ace::DragEvent> event = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
@@ -632,6 +640,7 @@ void DragDropManager::RequireSummary()
     previewRect_ = Rect(-1, -1, -1, -1);
     extraInfo_ = extraInfo;
     summaryMap_ = summary;
+    UpdateDragStyle();
 }
 
 void DragDropManager::ResetRecordSize(uint32_t recordSize)
@@ -749,12 +758,12 @@ void DragDropManager::FireOnDragEvent(
     }
     if (event->GetResult() == DragRet::ENABLE_DROP) {
         if (event->IsCopy()) {
-            InteractionInterface::GetInstance()->UpdateDragStyle(DragCursorStyleCore::COPY);
+            UpdateDragStyle(DragCursorStyleCore::COPY);
         } else {
-            InteractionInterface::GetInstance()->UpdateDragStyle(DragCursorStyleCore::MOVE);
+            UpdateDragStyle(DragCursorStyleCore::MOVE);
         }
     } else if (event->GetResult() == DragRet::DISABLE_DROP) {
-        InteractionInterface::GetInstance()->UpdateDragStyle(DragCursorStyleCore::FORBIDDEN);
+        UpdateDragStyle(DragCursorStyleCore::FORBIDDEN);
     } else {
         UpdateDragAllowDrop(frameNode, event->IsCopy());
     }
@@ -1196,7 +1205,7 @@ void DragDropManager::UpdateVelocityTrackerPoint(const Point& point, bool isEnd)
 }
 
 #ifdef ENABLE_DRAG_FRAMEWORK
-bool DragDropManager::GetDragPreviewInfo(const RefPtr<OverlayManager> overlayManager,
+bool DragDropManager::GetDragPreviewInfo(const RefPtr<OverlayManager>& overlayManager,
     DragPreviewInfo& dragPreviewInfo)
 {
     if (!overlayManager->GetHasPixelMap()) {
@@ -1206,7 +1215,7 @@ bool DragDropManager::GetDragPreviewInfo(const RefPtr<OverlayManager> overlayMan
     if (!imageNode) {
         return false;
     }
-    double maxWidth = FrameNode::GetMaxWidthWithColumnType(GridColumnType::DRAG_PANEL);
+    double maxWidth = GridSystemManager::GetInstance().GetMaxWidthWithColumnType(GridColumnType::DRAG_PANEL);
     auto width = imageNode->GetGeometryNode()->GetFrameRect().Width();
     dragPreviewInfo.scale = static_cast<float>(imageNode->GetPreviewScaleVal());
     dragPreviewInfo.height = imageNode->GetGeometryNode()->GetFrameRect().Height();
@@ -1300,7 +1309,7 @@ void DragDropManager::DoDragMoveAnimate(const PointerEvent& pointerEvent)
         option.GetOnFinishEvent());
 }
 
-void DragDropManager::DoDragStartAnimation(const RefPtr<OverlayManager> overlayManager, const GestureEvent& event)
+void DragDropManager::DoDragStartAnimation(const RefPtr<OverlayManager>& overlayManager, const GestureEvent& event)
 {
     CHECK_NULL_VOID(overlayManager);
     if (!(GetDragPreviewInfo(overlayManager, info_)) || !IsNeedScaleDragPreview()) {

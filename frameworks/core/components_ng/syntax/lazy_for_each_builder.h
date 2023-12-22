@@ -380,7 +380,7 @@ public:
         return result;
     }
 
-    void ProcessOffscreenNode(RefPtr<UINode>& uiNode, bool remove)
+    void ProcessOffscreenNode(RefPtr<UINode> uiNode, bool remove)
     {
         if (uiNode) {
             auto frameNode = DynamicCast<FrameNode>(uiNode);

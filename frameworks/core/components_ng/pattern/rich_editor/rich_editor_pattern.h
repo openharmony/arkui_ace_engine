@@ -89,6 +89,8 @@ public:
         return true;
     }
 
+    bool CheckBlurReason();
+
     uint32_t GetSCBSystemWindowId();
 
     RefPtr<EventHub> CreateEventHub() override
@@ -210,6 +212,8 @@ public:
     int32_t AddImageSpan(const ImageSpanOptions& options, bool isPaste = false, int32_t index = -1);
     int32_t AddTextSpan(const TextSpanOptions& options, bool isPaste = false, int32_t index = -1);
     int32_t AddTextSpanOperation(const TextSpanOptions& options, bool isPaste = false, int32_t index = -1);
+    int32_t AddSymbolSpan(const SymbolSpanOptions& options, bool isPaste = false, int32_t index = -1);
+    int32_t AddSymbolSpanOperation(const SymbolSpanOptions& options, bool isPaste = false, int32_t index = -1);
     void AddSpanItem(const RefPtr<SpanItem>& item, int32_t offset);
     int32_t AddPlaceholderSpan(const RefPtr<UINode>& customNode, const SpanOptionBase& options);
     void SetSelection(int32_t start, int32_t end);
@@ -219,6 +223,7 @@ public:
     int32_t GetTextIndexAtCursor() override;
     void ShowSelectOverlay(const RectF& firstHandle, const RectF& secondHandle, bool isCopyAll = false,
         TextResponseType responseType = TextResponseType::LONG_PRESS, bool handlReverse = false);
+    void CheckEditorTypeChange();
     void OnHandleMove(const RectF& handleRect, bool isFirstHandle) override;
     int32_t GetHandleIndex(const Offset& offset) const override;
     void OnAreaChangedInner() override;
@@ -356,6 +361,11 @@ public:
 
     RefPtr<FocusHub> GetFocusHub() const;
     bool NeedShowAIDetect() override;
+
+    TextSpanType GetEditorType() const
+    {
+        return selectedType_.value_or(TextSpanType::NONE);
+    }
 
 protected:
     bool CanStartAITask() override;

@@ -51,12 +51,6 @@ ohos_source_set("preview_external_source") {
 
       # for window
       external_deps = [ "graphic_2d:librender_service_client" ]
-
-      sources += [
-        # for event loop
-        "flutter/platform_task_runner.cpp",
-        "flutter/platform_task_runner_adapter.cpp",
-      ]
     }
   }
 }

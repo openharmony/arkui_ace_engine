@@ -3147,6 +3147,12 @@ std::shared_ptr<Rosen::RSTransitionEffect> RosenRenderContext::GetRSTransitionWi
     return effect;
 }
 
+void RosenRenderContext::SetBackgroundShader(const std::shared_ptr<Rosen::RSShader>& shader)
+{
+    CHECK_NULL_VOID(rsNode_);
+    rsNode_->SetBackgroundShader(shader);
+}
+
 void RosenRenderContext::PaintGradient(const SizeF& frameSize)
 {
     CHECK_NULL_VOID(rsNode_);
@@ -3161,12 +3167,11 @@ void RosenRenderContext::PaintGradient(const SizeF& frameSize)
     if (gradientProperty->HasSweepGradient()) {
         gradient = gradientProperty->GetSweepGradientValue();
     }
-#ifndef USE_ROSEN_DRAWING
-    auto shader = SkiaDecorationPainter::CreateGradientShader(gradient, frameSize);
-#else
-    auto shader = DrawingDecorationPainter::CreateGradientShader(gradient, frameSize);
-#endif
-    rsNode_->SetBackgroundShader(RSShader::CreateRSShader(shader));
+    if (!gradientStyleModifier_) {
+        gradientStyleModifier_ = std::make_shared<GradientStyleModifier>(WeakClaim(this));
+        rsNode_->AddModifier(gradientStyleModifier_);
+    }
+    gradientStyleModifier_->SetGradient(gradient);
 }
 
 void RosenRenderContext::OnLinearGradientUpdate(const NG::Gradient& gradient)

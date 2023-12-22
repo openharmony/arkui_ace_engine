@@ -94,19 +94,19 @@ bool FormModulePreloader::ReadFormModuleList(
     LOGI("hapPaths size of bundle %{public}s is %{public}zu", bundleName.c_str(), hapPaths.size());
     for (const std::string& hapPath : hapPaths) {
         // Create HapAssetProvider
-        RefPtr<AssetManager> flutterAssetManager = CreateAssetManager(hapPath);
-        if (flutterAssetManager == nullptr) {
+        RefPtr<AssetManager> assetManager = CreateAssetManager(hapPath);
+        if (assetManager == nullptr) {
             LOGE("CreateAssetManager failed, hapPath: %{private}s.", hapPath.c_str());
             return false;
         }
         // Read component_collection.json
         std::unordered_set<std::string> formEtsFilePaths;
-        if (!GetFormEtsFilePath(flutterAssetManager, formEtsFilePaths)) {
+        if (!GetFormEtsFilePath(assetManager, formEtsFilePaths)) {
             LOGE("Read form_config.json failed, hapPath: %{private}s.", hapPath.c_str());
             return false;
         }
         std::string content;
-        if (!ReadFileFromAssetManager(flutterAssetManager, "component_collection.json", content)) {
+        if (!ReadFileFromAssetManager(assetManager, "component_collection.json", content)) {
             LOGE("Read component_collection.json failed, hapPath: %{private}s.", hapPath.c_str());
             return false;
         }
@@ -166,21 +166,12 @@ void FormModulePreloader::GetHapPathsByBundleName(const std::string& bundleName,
     std::string packagePath = "/data/bundles/" + bundleName + "/";
     std::vector<std::string> basePaths;
     basePaths.push_back("/");
-    if (SystemProperties::GetFlutterDecouplingEnabled()) {
-        auto assetProvider = CreateAssetProviderImpl(packagePath, basePaths, false);
-        if (assetProvider == nullptr) {
-            LOGE("CreateAssetProvider failed, basePath: %{private}s.", packagePath.c_str());
-            return;
-        }
-        assetProvider->GetAssetList("", hapPaths);
-    } else {
-        auto assetProvider = CreateAssetProvider(packagePath, basePaths, false);
-        if (assetProvider == nullptr) {
-            LOGE("CreateAssetProvider failed, basePath: %{private}s.", packagePath.c_str());
-            return;
-        }
-        assetProvider->GetAssetList("", hapPaths);
+    auto assetProvider = CreateAssetProviderImpl(packagePath, basePaths, false);
+    if (assetProvider == nullptr) {
+        LOGE("CreateAssetProvider failed, basePath: %{private}s.", packagePath.c_str());
+        return;
     }
+    assetProvider->GetAssetList("", hapPaths);
     for (auto iter = hapPaths.begin(); iter != hapPaths.end();) {
         if (!std::regex_match(*iter, std::regex(".*\\.hap"))) {
             iter = hapPaths.erase(iter);
@@ -272,32 +263,17 @@ RefPtr<AssetManager> FormModulePreloader::CreateAssetManager(const std::string& 
     basePaths.emplace_back("ets/");
     basePaths.emplace_back("ets/widget/");
     basePaths.emplace_back("resources/base/profile/");
-    if (SystemProperties::GetFlutterDecouplingEnabled()) {
-        RefPtr<AssetManager> assetManager = Referenced::MakeRefPtr<AssetManagerImpl>();
-        if (assetManager == nullptr) {
-            LOGE("Create AssetManagerImpl failed.");
-            return nullptr;
-        }
-        auto assetProvider = CreateAssetProviderImpl(hapPath, basePaths, false);
-        if (assetProvider == nullptr) {
-            LOGE("CreateAssetProvider failed.");
-            return nullptr;
-        }
-        assetManager->PushBack(std::move(assetProvider));
-        return assetManager;
-    } else {
-        RefPtr<FlutterAssetManager> flutterAssetManager = Referenced::MakeRefPtr<FlutterAssetManager>();
-        if (flutterAssetManager == nullptr) {
-            LOGE("Create flutterAssetManager failed.");
-            return nullptr;
-        }
-        auto assetProvider = CreateAssetProvider(hapPath, basePaths, false);
-        if (assetProvider == nullptr) {
-            LOGE("CreateAssetProvider failed.");
-            return nullptr;
-        }
-        flutterAssetManager->PushBack(std::move(assetProvider));
-        return flutterAssetManager;
+    RefPtr<AssetManager> assetManager = Referenced::MakeRefPtr<AssetManagerImpl>();
+    if (assetManager == nullptr) {
+        LOGE("Create AssetManagerImpl failed.");
+        return nullptr;
     }
+    auto assetProvider = CreateAssetProviderImpl(hapPath, basePaths, false);
+    if (assetProvider == nullptr) {
+        LOGE("CreateAssetProvider failed.");
+        return nullptr;
+    }
+    assetManager->PushBack(std::move(assetProvider));
+    return assetManager;
 }
 } // namespace OHOS::Ace
