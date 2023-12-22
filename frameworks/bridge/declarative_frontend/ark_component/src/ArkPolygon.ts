@@ -15,11 +15,51 @@
 
 /// <reference path='./import.ts' />
 class ArkPolygonComponent extends ArkCommonShapeComponent implements PolygonAttribute {
-  points(value: any[]): this {
-    throw new Error('Method not implemented.');
+  points(value: Array<any>): this {
+    modifierWithKey(this._modifiersWithKeys, PolygonPointsModifier.identity, PolygonPointsModifier, value);
+    return this;
   }
   monopolizeEvents(monopolize: boolean): this {
     throw new Error('Method not implemented.');
+  }
+}
+
+class PolygonPointsModifier extends ModifierWithKey<Array<any>> {
+  constructor(value: Array<any>) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('polygonPoints');
+  applyPeer(node: KNode, reset: boolean): void {
+    let xPoint = [];
+    let yPoint = [];
+    if (Array.isArray(this.value)) {
+      for (let i = 0; i <= this.value.length; i++) {
+        let item = this.value[i];
+        if (!Array.isArray(item)) {
+          continue;
+        }
+
+        if (item.length < ARRAY_LENGTH || isUndefined(item[0]) || isUndefined(item[1])) {
+          reset = true;
+          break;
+        }
+        
+        xPoint.push(item[0]);
+        yPoint.push(item[1]);
+      }
+    } else {
+      reset = true;
+    }
+
+    if (reset) {
+      GetUINativeModule().polygon.resetPolygonPoints(node);
+    } else {
+      GetUINativeModule().polygon.setPolygonPoints(node, xPoint, yPoint);
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    return this.stageValue !== this.value;
   }
 }
 

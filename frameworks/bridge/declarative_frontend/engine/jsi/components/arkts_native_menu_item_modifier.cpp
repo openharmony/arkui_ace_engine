@@ -30,6 +30,8 @@ const int POS_1 = 1;
 const int POS_2 = 2;
 static const char* ERR_CODE = "-1";
 const std::string DEFAULT_FONT_WEIGHT = "normal";
+const std::string DEFAULT_FONT_FAMILY = "HarmonyOS Sans";
+const Ace::FontStyle DEFAULT_FONT_STYLE = Ace::FontStyle::NORMAL;
 const std::vector<OHOS::Ace::FontStyle> FONT_STYLES = { OHOS::Ace::FontStyle::NORMAL, OHOS::Ace::FontStyle::ITALIC };
 void SetMenuItemSelected(NodeHandle node, bool value)
 {
@@ -37,18 +39,21 @@ void SetMenuItemSelected(NodeHandle node, bool value)
     CHECK_NULL_VOID(frameNode);
     MenuItemModelNG::SetSelected(frameNode, value);
 }
+
 void ResetMenuItemSelected(NodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     MenuItemModelNG::SetSelected(frameNode, false);
 }
+
 void SetLabelFontColor(NodeHandle node, const uint32_t color)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     MenuItemModelNG::SetLabelFontColor(frameNode, Color(color));
 }
+
 void ResetLabelFontColor(NodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -56,12 +61,14 @@ void ResetLabelFontColor(NodeHandle node)
     std::optional<Color> color = std::nullopt;
     MenuItemModelNG::SetLabelFontColor(frameNode, color);
 }
+
 void SetContentFontColor(NodeHandle node, const uint32_t color)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     MenuItemModelNG::SetFontColor(frameNode, Color(color));
 }
+
 void ResetContentFontColor(NodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -69,6 +76,7 @@ void ResetContentFontColor(NodeHandle node)
     std::optional<Color> color = std::nullopt;
     MenuItemModelNG::SetFontColor(frameNode, color);
 }
+
 void SetLabelFont(NodeHandle node, const char* fontInfo, int32_t styleVal)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -94,12 +102,17 @@ void SetLabelFont(NodeHandle node, const char* fontInfo, int32_t styleVal)
 
     if (styleVal >= 0 && styleVal < static_cast<int32_t>(FONT_STYLES.size())) {
         MenuItemModelNG::SetLabelFontStyle(frameNode, FONT_STYLES[styleVal]);
+    } else {
+        MenuItemModelNG::SetLabelFontStyle(frameNode, DEFAULT_FONT_STYLE);
     }
 
     if (res[POS_2] != ERR_CODE) {
         MenuItemModelNG::SetLabelFontFamily(frameNode, Framework::ConvertStrToFontFamilies(res[POS_2]));
+    } else {
+        MenuItemModelNG::SetLabelFontFamily(frameNode, Framework::ConvertStrToFontFamilies(DEFAULT_FONT_FAMILY));
     }
 }
+
 void ResetLabelFont(NodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -108,7 +121,10 @@ void ResetLabelFont(NodeHandle node)
     FontWeight fontWeight = StringUtils::StringToFontWeight(DEFAULT_FONT_WEIGHT);
     MenuItemModelNG::SetLabelFontSize(frameNode, fontSize);
     MenuItemModelNG::SetLabelFontWeight(frameNode, fontWeight);
+    MenuItemModelNG::SetLabelFontFamily(frameNode, Framework::ConvertStrToFontFamilies(DEFAULT_FONT_FAMILY));
+    MenuItemModelNG::SetLabelFontStyle(frameNode, DEFAULT_FONT_STYLE);
 }
+
 void SetContentFont(NodeHandle node, const char* fontInfo, int32_t styleVal)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -135,12 +151,17 @@ void SetContentFont(NodeHandle node, const char* fontInfo, int32_t styleVal)
 
     if (styleVal >= 0 && styleVal < static_cast<int32_t>(FONT_STYLES.size())) {
         MenuItemModelNG::SetFontStyle(frameNode, FONT_STYLES[styleVal]);
+    } else {
+        MenuItemModelNG::SetFontStyle(frameNode, DEFAULT_FONT_STYLE);
     }
 
     if (res[POS_2] != ERR_CODE) {
         MenuItemModelNG::SetFontFamily(frameNode, Framework::ConvertStrToFontFamilies(res[POS_2]));
+    } else {
+        MenuItemModelNG::SetFontFamily(frameNode, Framework::ConvertStrToFontFamilies(DEFAULT_FONT_FAMILY));
     }
 }
+
 void ResetContentFont(NodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -149,6 +170,8 @@ void ResetContentFont(NodeHandle node)
     FontWeight fontWeight = StringUtils::StringToFontWeight(DEFAULT_FONT_WEIGHT);
     MenuItemModelNG::SetFontSize(frameNode, fontSize);
     MenuItemModelNG::SetFontWeight(frameNode, fontWeight);
+    MenuItemModelNG::SetFontFamily(frameNode, Framework::ConvertStrToFontFamilies(DEFAULT_FONT_FAMILY));
+    MenuItemModelNG::SetFontStyle(frameNode, DEFAULT_FONT_STYLE);
 }
 
 ArkUIMenuItemModifierAPI GetMenuItemModifier()

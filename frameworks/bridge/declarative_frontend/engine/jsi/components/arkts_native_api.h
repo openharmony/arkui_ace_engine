@@ -958,6 +958,11 @@ struct ArkUIPathModifierAPI {
     void (*ResetPathCommands)(NodeHandle node);
 };
 
+struct ArkUIPolygonModifierAPI {
+    void (*SetPolygonPoints)(NodeHandle node, const double* pointX, const double* pointY, int32_t length);
+    void (*ResetPolygonPoints)(NodeHandle node);
+};
+
 struct ArkUIPolylineModifierAPI {
     void (*SetPoints)(NodeHandle node, const double* pointX, const double* pointY, int32_t length);
     void (*ResetPoints)(NodeHandle node);
@@ -1573,6 +1578,7 @@ struct ArkUINodeAPI {
     ArkUIColumnSplitModifierAPI (*GetColumnSplitModifier)();
     ArkUILineModifierAPI (*GetLineModifier)();
     ArkUIPathModifierAPI (*GetPathModifier)();
+    ArkUIPolygonModifierAPI (*GetPolygonModifier)();
     ArkUIPolylineModifierAPI (*GetPolylineModifier)();
     ArkUISpanModifierAPI (*GetSpanModifier)();
     ArkUIImageAnimatorModifierAPI (*GetImageAnimatorModifier)();
