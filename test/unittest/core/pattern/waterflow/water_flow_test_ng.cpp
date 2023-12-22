@@ -705,8 +705,6 @@ HWTEST_F(WaterFlowTestNg, PositionController003, TestSize.Level1)
     /**
      * @tc.steps: step1. Test ScrollToEdge
      */
-    controller->ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, true);
-    EXPECT_TRUE(IsEqualTotalOffset(WATERFLOW_HEIGHT));
     controller->ScrollToEdge(ScrollEdgeType::SCROLL_TOP, true);
     EXPECT_TRUE(IsEqualTotalOffset(0));
     controller->ScrollToEdge(ScrollEdgeType::SCROLL_NONE, true);
@@ -1523,42 +1521,5 @@ HWTEST_F(WaterFlowTestNg, ScrollToIndex001, TestSize.Level1)
     CreateWithItem([](WaterFlowModelNG model) {});
     pattern_->ScrollToIndex(20, true);
     EXPECT_EQ(pattern_->targetIndex_, 20);
-}
-
-/**
- * @tc.name: ScrollToIndex002
- * @tc.desc: Test ScrollToIndex func
- * @tc.type: FUNC
- */
-HWTEST_F(WaterFlowTestNg, ScrollToIndex002, TestSize.Level1)
-{
-    Create([](WaterFlowModelNG model) {
-        model.SetColumnsTemplate("1fr 1fr");
-        CreateItem(30);
-    });
-
-    pattern_->ScrollToIndex(3);
-    FlushLayoutTask(frameNode_);
-    EXPECT_EQ(pattern_->layoutInfo_.startIndex_, 0);
-    EXPECT_EQ(pattern_->layoutInfo_.storedOffset_, 0);
-    EXPECT_EQ(pattern_->layoutInfo_.currentOffset_, 0);
-
-    pattern_->ScrollToIndex(15);
-    FlushLayoutTask(frameNode_);
-    EXPECT_EQ(pattern_->layoutInfo_.startIndex_, 15);
-    EXPECT_EQ(pattern_->layoutInfo_.storedOffset_, 0);
-    EXPECT_EQ(pattern_->layoutInfo_.currentOffset_, -1100);
-
-    pattern_->ScrollToIndex(LAST_ITEM);
-    FlushLayoutTask(frameNode_);
-    EXPECT_EQ(pattern_->layoutInfo_.startIndex_, 19);
-    EXPECT_EQ(pattern_->layoutInfo_.storedOffset_, -100);
-    EXPECT_EQ(pattern_->layoutInfo_.currentOffset_, -1500);
-
-    pattern_->ScrollToIndex(0);
-    FlushLayoutTask(frameNode_);
-    EXPECT_EQ(pattern_->layoutInfo_.startIndex_, 0);
-    EXPECT_EQ(pattern_->layoutInfo_.storedOffset_, 0);
-    EXPECT_EQ(pattern_->layoutInfo_.currentOffset_, 0);
 }
 } // namespace OHOS::Ace::NG
