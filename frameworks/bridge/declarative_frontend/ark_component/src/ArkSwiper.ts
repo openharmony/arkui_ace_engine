@@ -190,11 +190,7 @@ class SwiperNextMarginModifier extends ModifierWithKey<Length> {
     }
   }
   checkObjectDiff(): boolean {
-    if (isResource(this.stageValue) && isResource(this.value)) {
-      return !isResourceEqual(this.stageValue, this.value);
-    } else {
-      return true;
-    }
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
 class SwiperPrevMarginModifier extends ModifierWithKey<Length> {
@@ -207,11 +203,7 @@ class SwiperPrevMarginModifier extends ModifierWithKey<Length> {
     }
   }
   checkObjectDiff(): boolean {
-    if (isResource(this.stageValue) && isResource(this.value)) {
-      return !isResourceEqual(this.stageValue, this.value);
-    } else {
-      return true;
-    }
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
 

@@ -95,11 +95,7 @@ class TextAreaPlaceholderColorModifier extends ModifierWithKey<ResourceColor> {
     }
   }
   checkObjectDiff(): boolean {
-    if (isResource(this.stageValue) && isResource(this.value)) {
-      return !isResourceEqual(this.stageValue, this.value);
-    } else {
-      return true;
-    }
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
 
@@ -116,11 +112,7 @@ class TextAreaFontColorModifier extends ModifierWithKey<ResourceColor> {
     }
   }
   checkObjectDiff(): boolean {
-    if (isResource(this.stageValue) && isResource(this.value)) {
-      return !isResourceEqual(this.stageValue, this.value);
-    } else {
-      return true;
-    }
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
 
@@ -206,11 +198,7 @@ class TextAreaCaretColorModifier extends ModifierWithKey<ResourceColor> {
     }
   }
   checkObjectDiff(): boolean {
-    if (isResource(this.stageValue) && isResource(this.value)) {
-      return !isResourceEqual(this.stageValue, this.value);
-    } else {
-      return true;
-    }
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
 

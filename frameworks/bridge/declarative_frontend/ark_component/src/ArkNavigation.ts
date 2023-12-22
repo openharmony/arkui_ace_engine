@@ -31,8 +31,8 @@ class ArkNavigationComponent extends ArkComponent implements NavigationAttribute
     modifierWithKey(this._modifiersWithKeys, NavBarWidthModifier.identity, NavBarWidthModifier, value);
     return this;
   }
-  navBarPosition(value: NavBarPosition): NavigationAttribute {
-    modifier(this._modifiers, NavBarPositionModifier, value);
+  navBarPosition(value: number): NavigationAttribute {
+    modifierWithKey(this._modifiersWithKeys, NavBarPositionModifier.identity, NavBarPositionModifier, value);
     return this;
   }
   navBarWidthRange(value: [Dimension, Dimension]): NavigationAttribute {
@@ -44,8 +44,8 @@ class ArkNavigationComponent extends ArkComponent implements NavigationAttribute
 
     return this;
   }
-  mode(value: NavigationMode): NavigationAttribute {
-    modifier(this._modifiers, ModeModifier, value);
+  mode(value: number): NavigationAttribute {
+    modifierWithKey(this._modifiersWithKeys, ModeModifier.identity, ModeModifier, value);
     return this;
   }
   backButtonIcon(value: any): NavigationAttribute {
@@ -53,26 +53,26 @@ class ArkNavigationComponent extends ArkComponent implements NavigationAttribute
     return this
   }
   hideNavBar(value: boolean): NavigationAttribute {
-    modifier(this._modifiers, HideNavBarModifier, isBoolean(value) ? value : false);
+    modifierWithKey(this._modifiersWithKeys, HideNavBarModifier.identity, HideNavBarModifier, value);
     return this;
   }
   title(value: any): NavigationAttribute {
     throw new Error('Method not implemented.');
   }
   subTitle(value: string): NavigationAttribute {
-    modifier(this._modifiers, SubTitleModifier, value);
+    modifierWithKey(this._modifiersWithKeys, SubTitleModifier.identity, SubTitleModifier, value);
     return this;
   }
   hideTitleBar(value: boolean): NavigationAttribute {
-    modifier(this._modifiers, NavigationHideTitleBarModifier, isBoolean(value) ? value : false);
+    modifierWithKey(this._modifiersWithKeys, NavigationHideTitleBarModifier.identity, NavigationHideTitleBarModifier, value);
     return this;
   }
   hideBackButton(value: boolean): NavigationAttribute {
-    modifier(this._modifiers, HideBackButtonModifier, isBoolean(value) ? value : false);
+    modifierWithKey(this._modifiersWithKeys, HideBackButtonModifier.identity, HideBackButtonModifier, value);
     return this;
   }
   titleMode(value: NavigationTitleMode): NavigationAttribute {
-    modifier(this._modifiers, TitleModeModifier, value);
+    modifierWithKey(this._modifiersWithKeys, TitleModeModifier.identity, TitleModeModifier, value);
     return this;
   }
   menus(value: any): NavigationAttribute {
@@ -85,7 +85,7 @@ class ArkNavigationComponent extends ArkComponent implements NavigationAttribute
     throw new Error('Method not implemented.');
   }
   hideToolBar(value: boolean): NavigationAttribute {
-    modifier(this._modifiers, HideToolBarModifier, isBoolean(value) ? value : false);
+    modifierWithKey(this._modifiersWithKeys, HideToolBarModifier.identity, HideToolBarModifier, value);
     return this;
   }
   onTitleModeChange(callback: (titleMode: NavigationTitleMode) => void): NavigationAttribute {
@@ -117,11 +117,7 @@ class BackButtonIconModifier extends ModifierWithKey<boolean | object> {
   }
 
   checkObjectDiff(): boolean {
-    if (isResource(this.stageValue) && isResource(this.value)) {
-      return !isResourceEqual(this.stageValue, this.value);
-    } else {
-      return true;
-    }
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
 
@@ -139,11 +135,7 @@ class NavBarWidthRangeModifier extends ModifierWithKey<[Dimension, Dimension]> {
   }
 
   checkObjectDiff(): boolean {
-    if (isResource(this.stageValue) && isResource(this.value)) {
-      return !isResourceEqual(this.stageValue, this.value);
-    } else {
-      return true;
-    }
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
 
@@ -162,11 +154,7 @@ class MinContentWidthModifier extends ModifierWithKey<Dimension> {
   }
 
   checkObjectDiff(): boolean {
-    if (isResource(this.stageValue) && isResource(this.value)) {
-      return !isResourceEqual(this.stageValue, this.value);
-    } else {
-      return true;
-    }
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
 
@@ -185,15 +173,11 @@ class NavBarWidthModifier extends ModifierWithKey<Length> {
   }
 
   checkObjectDiff(): boolean {
-    if (isResource(this.stageValue) && isResource(this.value)) {
-      return !isResourceEqual(this.stageValue, this.value);
-    } else {
-      return true;
-    }
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
 
-class NavBarPositionModifier extends Modifier<number> {
+class NavBarPositionModifier extends ModifierWithKey<number> {
   constructor(value: number) {
     super(value);
   }
@@ -208,7 +192,7 @@ class NavBarPositionModifier extends Modifier<number> {
   }
 }
 
-class ModeModifier extends Modifier<number> {
+class ModeModifier extends ModifierWithKey<number> {
   constructor(value: number) {
     super(value);
   }
@@ -223,7 +207,7 @@ class ModeModifier extends Modifier<number> {
   }
 }
 
-class HideToolBarModifier extends Modifier<boolean> {
+class HideToolBarModifier extends ModifierWithKey<boolean> {
   constructor(value: boolean) {
     super(value);
   }
@@ -238,7 +222,7 @@ class HideToolBarModifier extends Modifier<boolean> {
   }
 }
 
-class TitleModeModifier extends Modifier<number> {
+class TitleModeModifier extends ModifierWithKey<number> {
   constructor(value: number) {
     super(value);
   }
@@ -253,7 +237,7 @@ class TitleModeModifier extends Modifier<number> {
   }
 }
 
-class HideBackButtonModifier extends Modifier<boolean> {
+class HideBackButtonModifier extends ModifierWithKey<boolean> {
   constructor(value: boolean) {
     super(value);
   }
@@ -268,7 +252,7 @@ class HideBackButtonModifier extends Modifier<boolean> {
   }
 }
 
-class SubTitleModifier extends Modifier<string> {
+class SubTitleModifier extends ModifierWithKey<string> {
   constructor(value: string) {
     super(value);
   }
@@ -283,7 +267,7 @@ class SubTitleModifier extends Modifier<string> {
   }
 }
 
-class NavigationHideTitleBarModifier extends Modifier<boolean> {
+class NavigationHideTitleBarModifier extends ModifierWithKey<boolean> {
   constructor(value: boolean) {
     super(value);
   }
@@ -298,7 +282,7 @@ class NavigationHideTitleBarModifier extends Modifier<boolean> {
   }
 }
 
-class HideNavBarModifier extends Modifier<boolean> {
+class HideNavBarModifier extends ModifierWithKey<boolean> {
   constructor(value: boolean) {
     super(value);
   }
