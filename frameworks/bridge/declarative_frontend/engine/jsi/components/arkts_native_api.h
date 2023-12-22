@@ -1480,8 +1480,8 @@ struct ArkUIRectModifierAPI {
     void (*ResetRectRadiusWidth)(NodeHandle node);
     void (*SetRectRadiusHeight)(NodeHandle node, double radiusHeightValue, int32_t radiusHeightUnit);
     void (*ResetRectRadiusHeight)(NodeHandle node);
-    void (*SetRectRadiusWithArray)(NodeHandle node, double* radiusValues, int32_t* radiusUnits, bool* radiusValidPairs,
-        int32_t radiusValidPairsSize);
+    void (*SetRectRadiusWithArray)(NodeHandle node, double* radiusValues, int32_t* radiusUnits,
+        uint32_t* radiusValidPairs, size_t radiusValidPairsSize);
     void (*SetRectRadiusWithValue)(NodeHandle node, double radiusValue, int32_t radiusUnit);
     void (*ResetRectRadius)(NodeHandle node);
 };
