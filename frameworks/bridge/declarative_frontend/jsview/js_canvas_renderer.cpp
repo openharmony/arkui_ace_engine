@@ -1037,18 +1037,18 @@ void JSCanvasRenderer::JsGetImageData(const JSCallbackInfo& info)
     JSViewAbstract::ParseJsDouble(info[2], fWidth);
     JSViewAbstract::ParseJsDouble(info[3], fHeight);
 
+    fLeft = PipelineBase::Vp2PxWithCurrentDensity(fLeft);
+    fTop = PipelineBase::Vp2PxWithCurrentDensity(fTop);
+    fWidth = PipelineBase::Vp2PxWithCurrentDensity(fWidth);
+    fHeight = PipelineBase::Vp2PxWithCurrentDensity(fHeight);
+
     left = fLeft;
     top = fTop;
     width = fWidth;
     height = fHeight;
 
-    left = PipelineBase::Vp2PxWithCurrentDensity(left);
-    top = PipelineBase::Vp2PxWithCurrentDensity(top);
-    width = PipelineBase::Vp2PxWithCurrentDensity(width);
-    height = PipelineBase::Vp2PxWithCurrentDensity(height);
-
-    finalHeight = static_cast<uint32_t>(std::abs(height));
     finalWidth = static_cast<uint32_t>(std::abs(width));
+    finalHeight = static_cast<uint32_t>(std::abs(height));
     int32_t length = finalHeight * finalWidth * 4;
     JSRef<JSArrayBuffer> arrayBuffer = JSRef<JSArrayBuffer>::New(length);
     auto* buffer = static_cast<uint8_t*>(arrayBuffer->GetBuffer());
