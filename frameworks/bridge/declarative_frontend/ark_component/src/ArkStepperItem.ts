@@ -22,7 +22,7 @@ class ArkStepperItemComponent extends ArkComponent implements StepperItemAttribu
     throw new Error('Method not implemented.');
   }
   nextLabel(value: string): this {
-    modifier(this._modifiers, NextLabelModifier, value);
+    modifierWithKey(this._modifiersWithKeys, NextLabelModifier.identity, NextLabelModifier, value);
     return this;
   }
   status(value?: ItemState | undefined): this {
@@ -33,7 +33,7 @@ class ArkStepperItemComponent extends ArkComponent implements StepperItemAttribu
   }
 }
 
-class NextLabelModifier extends Modifier<string> {
+class NextLabelModifier extends ModifierWithKey<string> {
   constructor(value: string) {
     super(value);
   }

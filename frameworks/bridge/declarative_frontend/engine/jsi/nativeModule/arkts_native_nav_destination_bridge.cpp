@@ -21,10 +21,14 @@ ArkUINativeModuleValue NavDestinationBridge::SetHideTitleBar(ArkUIRuntimeCallInf
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
-    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
-    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    bool hide = secondArg->ToBoolean(vm)->Value();
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0);
+    Local<JSValueRef> hideArg = runtimeCallInfo->GetCallArgRef(1);
+    void* nativeNode = nodeArg->ToNativePointer(vm)->Value();
+    if (hideArg->IsUndefined() || !hideArg->IsBoolean()) {
+        GetArkUIInternalNodeAPI()->GetNavDestinationModifier().ResetHideTitleBar(nativeNode);
+        return panda::JSValueRef::Undefined(vm);
+    }
+    bool hide = hideArg->ToBoolean(vm)->Value();
     GetArkUIInternalNodeAPI()->GetNavDestinationModifier().SetHideTitleBar(nativeNode, hide);
     return panda::JSValueRef::Undefined(vm);
 }

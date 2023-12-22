@@ -218,13 +218,7 @@ class ListFrictionModifier extends ModifierWithKey<number | Resource> {
   }
 
   checkObjectDiff(): boolean {
-    if (isResource(this.stageValue) && isResource(this.value)) {
-      return !isResourceEqual(this.stageValue, this.value);
-    } else if (!isResource(this.stageValue) && !isResource(this.value)) {
-      return !(this.stageValue === this.value);
-    } else {
-      return true;
-    }
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
 

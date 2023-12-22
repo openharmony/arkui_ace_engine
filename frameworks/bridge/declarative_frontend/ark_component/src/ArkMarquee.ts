@@ -67,11 +67,7 @@ class MarqueeFontColorModifier extends ModifierWithKey<ResourceColor> {
   }
 
   checkObjectDiff(): boolean {
-    if (isResource(this.stageValue) && isResource(this.value)) {
-      return !isResourceEqual(this.stageValue, this.value);
-    } else {
-      return true;
-    }
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
 class MarqueeFontSizeModifier extends ModifierWithKey<Length> {
@@ -89,11 +85,7 @@ class MarqueeFontSizeModifier extends ModifierWithKey<Length> {
   }
 
   checkObjectDiff(): boolean {
-    if (isResource(this.stageValue) && isResource(this.value)) {
-      return !isResourceEqual(this.stageValue, this.value);
-    } else {
-      return true;
-    }
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
 class MarqueeAllowScaleModifier extends ModifierWithKey<boolean> {

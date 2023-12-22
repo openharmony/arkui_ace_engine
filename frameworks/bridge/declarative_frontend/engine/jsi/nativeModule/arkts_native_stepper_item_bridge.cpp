@@ -17,18 +17,20 @@
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_api.h"
 
 namespace OHOS::Ace::NG {
+constexpr int32_t CALL_ARG_0 = 0;
+constexpr int32_t CALL_ARG_1 = 1;
 ArkUINativeModuleValue StepperItemBridge::SetNextLabel(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
-    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
-    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    if (secondArg->IsUndefined() || secondArg->IsNull()) {
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_0);
+    Local<JSValueRef> valueArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_1);
+    void* nativeNode = nodeArg->ToNativePointer(vm)->Value();
+    if (valueArg->IsUndefined() || valueArg->IsNull()) {
         GetArkUIInternalNodeAPI()->GetStepperItemModifier().ResetNextLabel(nativeNode);
         return panda::JSValueRef::Undefined(vm);
     }
-    std::string nextLabel = secondArg->ToString(vm)->ToString();
+    std::string nextLabel = valueArg->ToString(vm)->ToString();
     GetArkUIInternalNodeAPI()->GetStepperItemModifier().SetNextLabel(nativeNode, nextLabel.c_str());
     return panda::JSValueRef::Undefined(vm);
 }
@@ -37,8 +39,8 @@ ArkUINativeModuleValue StepperItemBridge::ResetNextLabel(ArkUIRuntimeCallInfo* r
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
-    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_0);
+    void* nativeNode = nodeArg->ToNativePointer(vm)->Value();
     GetArkUIInternalNodeAPI()->GetStepperItemModifier().ResetNextLabel(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }

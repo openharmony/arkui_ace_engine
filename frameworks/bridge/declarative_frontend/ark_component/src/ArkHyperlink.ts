@@ -39,11 +39,7 @@ class HyperlinkColorModifier extends ModifierWithKey<ResourceColor> {
   }
 
   checkObjectDiff(): boolean {
-    if (isResource(this.stageValue) && isResource(this.value)) {
-      return !isResourceEqual(this.stageValue, this.value);
-    } else {
-      return true;
-    }
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
 

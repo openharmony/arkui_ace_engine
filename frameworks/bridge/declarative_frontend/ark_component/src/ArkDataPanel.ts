@@ -54,11 +54,7 @@ class DataPanelStrokeWidthModifier extends ModifierWithKey<Length> {
   }
 
   checkObjectDiff(): boolean {
-    if (isResource(this.stageValue) && isResource(this.value)) {
-      return !isResourceEqual(this.stageValue, this.value);
-    } else {
-      return true;
-    }
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
 
@@ -73,11 +69,7 @@ class DataPanelCloseEffectModifier extends ModifierWithKey<boolean> {
   }
 
   checkObjectDiff(): boolean {
-    if (isResource(this.stageValue) && isResource(this.value)) {
-      return !isResourceEqual(this.stageValue, this.value);
-    } else {
-      return true;
-    }
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
 
@@ -92,11 +84,7 @@ class DataPanelTrackBackgroundColorModifier extends ModifierWithKey<ResourceColo
   }
 
   checkObjectDiff(): boolean {
-    if (isResource(this.stageValue) && isResource(this.value)) {
-      return !isResourceEqual(this.stageValue, this.value);
-    } else {
-      return true;
-    }
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
 class DataPanelTrackShadowModifier extends ModifierWithKey<DataPanelShadowOptions> {

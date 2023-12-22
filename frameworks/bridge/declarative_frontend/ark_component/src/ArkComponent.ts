@@ -188,11 +188,7 @@ class BackgroundColorModifier extends ModifierWithKey<ResourceColor> {
   }
 
   checkObjectDiff(): boolean {
-    if (isResource(this.stageValue) && isResource(this.value)) {
-      return !isResourceEqual(this.stageValue, this.value);
-    } else {
-      return true;
-    }
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
 
@@ -211,11 +207,7 @@ class WidthModifier extends ModifierWithKey<Length> {
   }
 
   checkObjectDiff(): boolean {
-    if (isResource(this.stageValue) && isResource(this.value)) {
-      return !isResourceEqual(this.stageValue, this.value);
-    } else {
-      return true;
-    }
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
 
@@ -270,11 +262,7 @@ class HeightModifier extends ModifierWithKey<Length> {
   }
 
   checkObjectDiff(): boolean {
-    if (isResource(this.stageValue) && isResource(this.value)) {
-      return !isResourceEqual(this.stageValue, this.value);
-    } else {
-      return true;
-    }
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
 
@@ -329,7 +317,7 @@ class PositionModifier extends ModifierWithKey<Position> {
   }
   checkObjectDiff(): boolean {
     return !isBaseOrResourceEqual(this.stageValue.x, this.value.x) ||
-    !isBaseOrResourceEqual(this.stageValue.y, this.value.y);
+      !isBaseOrResourceEqual(this.stageValue.y, this.value.y);
   }
 }
 
@@ -411,7 +399,7 @@ class ShadowModifier extends ModifierWithKey<ShadowOptions | ShadowStyle> {
       GetUINativeModule().common.resetShadow(node);
     }
     else {
-      if(isNumber(this.value)){
+      if (isNumber(this.value)) {
         GetUINativeModule().common.setShadow(node, this.value, undefined, undefined, undefined, undefined, undefined, undefined);
       } else {
         GetUINativeModule().common.setShadow(node, undefined,
@@ -480,11 +468,7 @@ class OpacityModifier extends ModifierWithKey<number | Resource> {
   }
 
   checkObjectDiff(): boolean {
-    if (isResource(this.stageValue) && isResource(this.value)) {
-      return !isResourceEqual(this.stageValue, this.value);
-    } else {
-      return true;
-    }
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
 
@@ -593,11 +577,7 @@ class ColorBlendModifier extends ModifierWithKey<Color | string | Resource> {
   }
 
   checkObjectDiff(): boolean {
-    if (isResource(this.stageValue) && isResource(this.value)) {
-      return !isResourceEqual(this.stageValue, this.value);
-    } else {
-      return true;
-    }
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
 
@@ -680,7 +660,7 @@ class LinearGradientModifier extends ModifierWithKey<{ angle?: number | string; 
     return !((this.stageValue.angle === this.value.angle) &&
       (this.stageValue.direction === this.value.direction) &&
       (this.stageValue.colors === this.value.colors) &&
-      (this.stageValue.repeating ===this.value.repeating));
+      (this.stageValue.repeating === this.value.repeating));
   }
 }
 
@@ -700,7 +680,7 @@ class RadialGradientModifier extends ModifierWithKey<{ center: Array<any>; radiu
   }
   checkObjectDiff(): boolean {
     return !((this.stageValue.center === this.value.center) &&
-      (this.stageValue .radius === this.value.radius) &&
+      (this.stageValue.radius === this.value.radius) &&
       (this.stageValue.colors === this.value.colors) &&
       (this.stageValue.repeating === this.value.repeating));
   }
@@ -870,7 +850,7 @@ class BorderModifier extends ModifierWithKey<ArkBorder>{
         this.value.arkStyle.top, this.value.arkStyle.right, this.value.arkStyle.bottom, this.value.arkStyle.left);
     }
   }
-  
+
   checkObjectDiff(): boolean {
     return this.value.checkObjectDiff(this.stageValue);
   }
@@ -892,10 +872,10 @@ class ForegroundBlurStyleModifier extends ModifierWithKey<ArkForegroundBlurStyle
   }
 
   checkObjectDiff(): boolean {
-     return !((this.stageValue as ArkForegroundBlurStyle).blurStyle === (this.value as ArkForegroundBlurStyle).blurStyle &&
-       (this.stageValue as ArkForegroundBlurStyle).colorMode === (this.value as ArkForegroundBlurStyle).colorMode &&
-       (this.stageValue as ArkForegroundBlurStyle).adaptiveColor === (this.value as ArkForegroundBlurStyle).adaptiveColor &&
-       (this.stageValue as ArkForegroundBlurStyle).scale === (this.value as ArkForegroundBlurStyle).scale);
+    return !((this.stageValue as ArkForegroundBlurStyle).blurStyle === (this.value as ArkForegroundBlurStyle).blurStyle &&
+      (this.stageValue as ArkForegroundBlurStyle).colorMode === (this.value as ArkForegroundBlurStyle).colorMode &&
+      (this.stageValue as ArkForegroundBlurStyle).adaptiveColor === (this.value as ArkForegroundBlurStyle).adaptiveColor &&
+      (this.stageValue as ArkForegroundBlurStyle).scale === (this.value as ArkForegroundBlurStyle).scale);
   }
 }
 
@@ -953,7 +933,7 @@ class BackgroundImageModifier extends ModifierWithKey<ArkBackgroundImage>{
   }
   checkObjectDiff(): boolean {
     return !((this.stageValue as ArkBackgroundImage).src === (this.value as ArkBackgroundImage).src &&
-    (this.stageValue as ArkBackgroundImage).repeat === (this.value as ArkBackgroundImage).repeat)
+      (this.stageValue as ArkBackgroundImage).repeat === (this.value as ArkBackgroundImage).repeat)
   }
 }
 
@@ -1111,10 +1091,10 @@ class PixelStretchEffectModifier extends ModifierWithKey<PixelStretchEffectOptio
   }
 
   checkObjectDiff(): boolean {
-      return !((this.stageValue as PixelStretchEffectOptions).left === (this.value as PixelStretchEffectOptions).left &&
-        (this.stageValue as PixelStretchEffectOptions).right === (this.value as PixelStretchEffectOptions).right &&
-        (this.stageValue as PixelStretchEffectOptions).top === (this.value as PixelStretchEffectOptions).top &&
-        (this.stageValue as PixelStretchEffectOptions).bottom === (this.value as PixelStretchEffectOptions).bottom);
+    return !((this.stageValue as PixelStretchEffectOptions).left === (this.value as PixelStretchEffectOptions).left &&
+      (this.stageValue as PixelStretchEffectOptions).right === (this.value as PixelStretchEffectOptions).right &&
+      (this.stageValue as PixelStretchEffectOptions).top === (this.value as PixelStretchEffectOptions).top &&
+      (this.stageValue as PixelStretchEffectOptions).bottom === (this.value as PixelStretchEffectOptions).bottom);
   }
 }
 
@@ -1208,11 +1188,7 @@ class ForegroundColorModifier extends ModifierWithKey<ResourceColor | ColoringSt
   }
 
   checkObjectDiff(): boolean {
-    if (isResource(this.stageValue) && isResource(this.value)) {
-      return !isResourceEqual(this.stageValue, this.value);
-    } else {
-      return true;
-    }
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
 
@@ -2321,7 +2297,7 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
 
   border(value: BorderOptions): this {
     let arkBorder = new ArkBorder();
-    if (isUndefined(value)) {     
+    if (isUndefined(value)) {
       arkBorder = undefined;
     }
 
@@ -2379,7 +2355,7 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
           arkBorder.arkStyle.right = arkBorderStyle.right;
         }
       }
-    }    
+    }
     modifierWithKey(this._modifiersWithKeys, BorderModifier.identity, BorderModifier, arkBorder);
     return this;
   }

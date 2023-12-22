@@ -23,7 +23,7 @@ class ArkNavDestinationComponent extends ArkComponent implements NavDestinationA
     throw new Error('Method not implemented.');
   }
   hideTitleBar(value: boolean): this {
-    modifier(this._modifiers, HideTitleBarModifier, value);
+    modifierWithKey(this._modifiersWithKeys, HideTitleBarModifier.identity, HideTitleBarModifier, value);
     return this;
   }
   onShown(callback: () => void): this {
@@ -37,7 +37,7 @@ class ArkNavDestinationComponent extends ArkComponent implements NavDestinationA
   }
 }
 
-class HideTitleBarModifier extends Modifier<boolean> {
+class HideTitleBarModifier extends ModifierWithKey<boolean> {
   constructor(value: boolean) {
     super(value);
   }
