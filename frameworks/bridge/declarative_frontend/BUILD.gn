@@ -439,6 +439,8 @@ template("declarative_js_engine") {
     if (defined(vendor_configs.ace_engine_advanced)) {
       include_dirs += vendor_configs.ace_advance_dirs
       sources += vendor_configs.ace_engine_advanced_jsview
+    } else {
+      sources += [ "jsview/js_cached_image.cpp" ]
     }
 
     if (defined(config.xcomponent_components_support) &&
@@ -875,6 +877,10 @@ template("declarative_js_engine_ng") {
 
     if (defined(config.remote_window_support) && config.remote_window_support) {
       sources += [ "jsview/js_remote_window.cpp" ]
+    }
+
+    if (!defined(vendor_configs.ace_engine_advanced)) {
+      sources += [ "jsview/js_cached_image.cpp" ]
     }
 
     if (defined(config.xcomponent_components_support) &&
