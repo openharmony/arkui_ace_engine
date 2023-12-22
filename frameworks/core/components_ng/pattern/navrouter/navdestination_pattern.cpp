@@ -20,6 +20,7 @@
 #include <cstdint>
 
 #include "base/geometry/dimension.h"
+#include "base/log/dump_log.h"
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
@@ -257,5 +258,10 @@ void NavDestinationPattern::OnAttachToMainTree()
     }
     CHECK_NULL_VOID(node);
     navigationNode_ = AceType::WeakClaim(RawPtr(node));
+}
+
+void NavDestinationPattern::DumpInfo()
+{
+    DumpLog::GetInstance().AddDesc(std::string("name: ").append(name_));
 }
 } // namespace OHOS::Ace::NG

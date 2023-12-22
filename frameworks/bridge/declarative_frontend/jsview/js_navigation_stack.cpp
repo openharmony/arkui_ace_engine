@@ -183,11 +183,19 @@ RefPtr<NG::UINode> JSNavigationStack::CreateNodeByIndex(int32_t index)
     params[1] = param;
     JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext_, nullptr);
     NG::ScopedViewStackProcessor scopedViewStackProcessor;
+    if (navDestBuilderFunc_->IsEmpty()) {
+        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "navDestination builder function is nullptr, add default page");
+        return AceType::DynamicCast<NG::UINode>(NavDestinationModel::GetInstance()->CreateEmpty());
+    }
     navDestBuilderFunc_->Call(JSRef<JSObject>(), 2, params);
     auto node = NG::ViewStackProcessor::GetInstance()->Finish();
+    if (node == nullptr) {
+        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "router map is invalid, current path name is %{public}s", name.c_str());
+    }
     if (CheckNavDestinationNodeInUINode(node)) {
         return node;
     }
+    TAG_LOGI(AceLogTag::ACE_NAVIGATION, "can't find target destination by index, create empty node");
     return AceType::DynamicCast<NG::UINode>(NavDestinationModel::GetInstance()->CreateEmpty());
 }
 
@@ -203,10 +211,13 @@ RefPtr<NG::UINode> JSNavigationStack::CreateNodeByRouteInfo(const RefPtr<NG::Rou
     NG::ScopedViewStackProcessor scopedViewStackProcessor;
     navDestBuilderFunc_->Call(JSRef<JSObject>(), 2, params);
     auto node = NG::ViewStackProcessor::GetInstance()->Finish();
+    if (node == nullptr) {
+        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "create destination by builder failed");
+    }
     if (CheckNavDestinationNodeInUINode(node)) {
         return node;
     }
-    TAG_LOGI(AceLogTag::ACE_NAVIGATION, "can't find navDestination, create empty node");
+    TAG_LOGI(AceLogTag::ACE_NAVIGATION, "can't find navDestination by route info, create empty node");
     return DynamicCast<NG::UINode>(NavDestinationModel::GetInstance()->CreateEmpty());
 }
 
@@ -241,12 +252,17 @@ bool JSNavigationStack::CheckNavDestinationNodeInUINode(RefPtr<NG::UINode> node)
     while (node) {
         if (node->GetTag() == V2::JS_VIEW_ETS_TAG) {
             auto customNode = AceType::DynamicCast<NG::CustomNode>(node);
+            TAG_LOGI(AceLogTag::ACE_NAVIGATION, "render current custom node: %{public}s",
+                customNode->GetCustomTag().c_str());
             // render, and find deep further
             customNode->Render();
         } else if (node->GetTag() == V2::NAVDESTINATION_VIEW_ETS_TAG) {
             return true;
         }
         auto children = node->GetChildren();
+        if (children.size() != 1) {
+            TAG_LOGI(AceLogTag::ACE_NAVIGATION, "router map is invalid, child size is more than one");
+        }
         node = children.front();
     }
     return false;
