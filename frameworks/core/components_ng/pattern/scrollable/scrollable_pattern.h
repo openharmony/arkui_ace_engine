@@ -522,7 +522,7 @@ private:
     void SelectWithScroll();
     RectF ComputeSelectedZone(const OffsetF& startOffset, const OffsetF& endOffset);
     float GetOutOfScrollableOffset() const;
-    float GetOffsetWithLimit(float offset) const;
+    virtual float GetOffsetWithLimit(float offset) const;
     void LimitMouseEndOffset();
     void UpdateBorderRadius();
 
