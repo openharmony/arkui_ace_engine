@@ -35,7 +35,6 @@ public:
     MOCK_METHOD1(SetVisible, void(bool));
     MOCK_METHOD0(GetLocalTransformMatrix, Matrix4());
     MOCK_METHOD2(CalcExpectedFrameRate, int32_t(const std::string&, float));
-    MOCK_METHOD1(UpdateBackBlurStyle, void(const std::optional<BlurStyleOption>&));
 
     void ResetBlendBgColor() override
     {
