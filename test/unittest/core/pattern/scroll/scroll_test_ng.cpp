@@ -3107,4 +3107,45 @@ HWTEST_F(ScrollTestNg, ScrollTo001, TestSize.Level1)
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(pattern_->GetTotalOffset(), 0);
 }
+
+/**
+ * @tc.name: AnimateTo001
+ * @tc.desc: Test AnimateTo
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollTestNg, AnimateTo001, TestSize.Level1)
+{
+    CreateWithContent([](ScrollModelNG model) {});
+    auto smooth = false;
+    pattern_->isAnimationStop_ = false;
+    pattern_->AnimateTo(ITEM_HEIGHT * TOTAL_LINE_NUMBER, 1.f, Curves::LINEAR, smooth);
+    EXPECT_TRUE(pattern_->isAnimationStop_);
+}
+
+/**
+ * @tc.name: PlaySpringAnimation001
+ * @tc.desc: Test PlaySpringAnimation
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollTestNg, PlaySpringAnimation001, TestSize.Level1)
+{
+    CreateWithContent([](ScrollModelNG model) {});
+    auto smooth = false;
+    pattern_->isAnimationStop_ = false;
+    pattern_->AnimateTo(ITEM_HEIGHT * TOTAL_LINE_NUMBER, 1.f, Curves::LINEAR, smooth);
+    EXPECT_TRUE(pattern_->isAnimationStop_);
+}
+
+/**
+ * @tc.name: StopAnimation001
+ * @tc.desc: Test StopAnimation
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollTestNg, StopAnimation001, TestSize.Level1)
+{
+    CreateWithContent([](ScrollModelNG model) {});
+    std::shared_ptr<AnimationUtils::Animation> animation;
+    pattern_->StopAnimation(animation);
+    ASSERT_NE(animation, nullptr);
+}
 } // namespace OHOS::Ace::NG

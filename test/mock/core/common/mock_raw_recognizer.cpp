@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,16 +13,28 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/render/modifier_adapter.h"
-#include "core/components_ng/base/modifier.h"
+#include "core/gestures/raw_recognizer.h"
 
-namespace OHOS::Ace::NG {
-void ModifierAdapter::RemoveModifier(int32_t modifierId)
+namespace OHOS::Ace {
+void RawRecognizer::HandleRawEvent(const TouchEvent &point, uint32_t stage)
 {
 }
-template<>
-void NodeAnimatableProperty<float, AnimatablePropertyFloat>::AnimateWithVelocity(
-    const AnimationOption &option, float value, float velocity, const FinishCallback &finishCallback)
+
+bool RawRecognizer::DispatchEvent(const TouchEvent &point)
 {
+    return true;
 }
-} // namespace OHOS::Ace::NG
+
+bool RawRecognizer::HandleEvent(const TouchEvent &point)
+{
+    return true;
+};
+
+TouchEventInfo RawRecognizer::CreateTouchEventInfo(
+    const std::string &type, const TouchEvent &point, bool ignoreCurrent) const
+{
+    TouchEventInfo info(type);
+    return info;
+}
+
+} // namespace OHOS::Ace

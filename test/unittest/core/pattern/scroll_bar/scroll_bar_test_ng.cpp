@@ -23,7 +23,7 @@
 #include "base/geometry/ng/point_t.h"
 #include "base/geometry/ng/size_t.h"
 #include "base/memory/ace_type.h"
-#include "core/components/scroll/scrollable.h"
+#include "core/components_ng/pattern/scrollable/scrollable.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_abstract_model_ng.h"
 #include "core/components_ng/base/view_stack_processor.h"

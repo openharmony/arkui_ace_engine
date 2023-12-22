@@ -31,7 +31,7 @@
 #include "test/mock/core/render/mock_render_context.h"
 #include "test/mock/core/rosen/mock_canvas.h"
 
-#include "core/components/scroll/scrollable.h"
+#include "core/components_ng/pattern/scrollable/scrollable.h"
 #include "core/components/tab_bar/tab_theme.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/event/event_hub.h"
