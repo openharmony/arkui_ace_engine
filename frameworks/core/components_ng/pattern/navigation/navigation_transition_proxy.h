@@ -109,6 +109,7 @@ struct NavigationTransition {
     int32_t timeout = 1000;
     std::function<void(const RefPtr<NavigationTransitionProxy>&)> transition;
     std::function<void(bool)> endCallback;
+    bool isValid = true;
 };
 } // namespace OHOS::Ace::NG
 #endif

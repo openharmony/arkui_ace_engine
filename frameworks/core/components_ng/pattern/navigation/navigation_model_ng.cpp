@@ -1747,4 +1747,22 @@ void NavigationModelNG::PutComponentInsideNavigator(
     navBarNode->SetBackButton(backButtonNode);
     navBarNode->UpdateBackButtonNodeOperation(ChildNodeOperation::ADD);
 }
+
+void NavigationModelNG::SetIsCustomAnimation(bool isCustom)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<NavigationPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetIsCustomAnimation(isCustom);
+}
+
+void NavigationModelNG::SetCustomTransition(NavigationTransitionEvent&& customTransition)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<NavigationPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetNavigationTransition(std::move(customTransition));
+}
 } // namespace OHOS::Ace::NG
