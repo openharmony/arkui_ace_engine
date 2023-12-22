@@ -40,9 +40,7 @@ void Scrollable::UpdateScrollSnapStartOffset(double offset)
 {}
 
 void Scrollable::StartScrollSnapMotion(float predictSnapOffset, float scrollSnapVelocity)
-{
-    endPos_ = currentPos_ + predictSnapOffset;
-}
+{}
 
 void Scrollable::UpdateScrollSnapEndWithOffset(double offset)
 {}
