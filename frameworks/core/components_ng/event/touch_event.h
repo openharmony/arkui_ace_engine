@@ -61,6 +61,14 @@ public:
         userCallback_ = MakeRefPtr<TouchEventImpl>(std::move(callback));
     }
 
+    void SetOnTouchEvent(TouchEventFunc&& callback)
+    {
+        if (onTouchEventCallback_) {
+            onTouchEventCallback_.Reset();
+        }
+        onTouchEventCallback_ = MakeRefPtr<TouchEventImpl>(std::move(callback));
+    }
+
     void ClearUserCallback()
     {
         // When the event param is undefined, it will clear the callback.
@@ -102,6 +110,7 @@ private:
 
     std::list<RefPtr<TouchEventImpl>> touchEvents_;
     RefPtr<TouchEventImpl> userCallback_;
+    RefPtr<TouchEventImpl> onTouchEventCallback_;
 };
 
 } // namespace OHOS::Ace::NG
