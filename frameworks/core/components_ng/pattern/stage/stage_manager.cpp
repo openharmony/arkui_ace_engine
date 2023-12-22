@@ -195,6 +195,10 @@ bool StageManager::PushPage(const RefPtr<FrameNode>& node, bool needHideLast, bo
             stage->PerformanceCheck(pageNode, endTime - startTime);
         });
     }
+
+    // close keyboard
+    PageChangeCloseKeyboard();
+
     if (needTransition) {
         pipeline->AddAfterLayoutTask([weakStage = WeakClaim(this), weakIn = WeakPtr<FrameNode>(node),
                                          weakOut = WeakPtr<FrameNode>(outPageNode)]() {
@@ -205,9 +209,6 @@ bool StageManager::PushPage(const RefPtr<FrameNode>& node, bool needHideLast, bo
             stage->StartTransition(outPageNode, inPageNode, RouteType::PUSH);
         });
     }
-
-    // close keyboard
-    PageChangeCloseKeyboard();
 
     // flush layout task.
     if (!stageNode_->GetGeometryNode()->GetMarginFrameSize().IsPositive()) {

@@ -220,6 +220,15 @@ void NavigationPattern::CheckTopNavPathChange(
     if (preTopNavPath == newTopNavPath && replaceValue != 1) {
         return;
     }
+
+    // close keyboard
+#if defined (ENABLE_STANDARD_INPUT)
+    if (Container::CurrentId() == CONTAINER_ID_DIVIDE_SIZE) {
+        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "pageChange notNeedSoftKeyboard.");
+        FocusHub::PushPageCloseKeyboard();
+    }
+#endif
+
     isChanged_ = true;
     if (replaceValue == 1) {
         const int32_t replaceAnimation = 2;
