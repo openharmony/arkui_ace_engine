@@ -797,6 +797,8 @@ void TitleBarPattern::OnAttachToFrameNode()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->GetRenderContext()->SetClipToFrame(true);
+
+    SetBackgroundAndBlur();
 }
 
 void TitleBarPattern::OnCoordScrollStart()
@@ -943,6 +945,8 @@ void TitleBarPattern::OnColorConfigurationUpdate()
     CHECK_NULL_VOID(theme);
     backButtonImgRender->UpdateSvgFillColor(theme->GetBackButtonIconColor());
     backButtonImgNode->MarkModifyDone();
+
+    SetBackgroundAndBlur();
 }
 
 float TitleBarPattern::CalculateHandledOffsetMinTitle(float offset, float lastCordScrollOffset)
@@ -1003,5 +1007,22 @@ float TitleBarPattern::CalculateHandledOffsetBetweenMinAndMaxTitle(float offset,
         offsetHandled = offset;
     }
     return offsetHandled;
+}
+
+void TitleBarPattern::SetBackgroundAndBlur()
+{
+    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto renderContext = host->GetRenderContext();
+        CHECK_NULL_VOID(renderContext);
+        auto theme = NavigationGetTheme();
+        CHECK_NULL_VOID(theme);
+        renderContext->UpdateBackgroundColor(theme->GetBackgroundBlurColor());
+
+        BlurStyleOption blur;
+        blur.blurStyle = BlurStyle::COMPONENT_THICK;
+        renderContext->UpdateBackBlurStyle(blur);
+    }
 }
 } // namespace OHOS::Ace::NG

@@ -49,12 +49,18 @@ public:
         CHECK_NULL_VOID(host);
         SafeAreaExpandOpts opts = {.edges = SAFE_AREA_EDGE_BOTTOM, .type = SAFE_AREA_TYPE_SYSTEM };
         host->GetLayoutProperty()->UpdateSafeAreaExpandOpts(opts);
+
+        SetBackgroundAndBlur();
     }
 
-    void OnModifyDone() override
+    void OnColorConfigurationUpdate() override
     {
-        LinearLayoutPattern::OnModifyDone();
+        SetBackgroundAndBlur();
+    }
 
+private:
+    void SetBackgroundAndBlur()
+    {
         auto host = GetHost();
         CHECK_NULL_VOID(host);
         auto renderContext = host->GetRenderContext();
@@ -62,7 +68,7 @@ public:
         auto theme = NavigationGetTheme();
         CHECK_NULL_VOID(theme);
         if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
-            renderContext->UpdateBackgroundColor(theme->GetToolbarBlurColor());
+            renderContext->UpdateBackgroundColor(theme->GetBackgroundBlurColor());
 
             BlurStyleOption blur;
             blur.blurStyle = BlurStyle::COMPONENT_THICK;
