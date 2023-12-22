@@ -26,8 +26,9 @@ public:
     static void JSAnimation(const JSCallbackInfo& info);
     static void JSAnimateTo(const JSCallbackInfo& info);
     static void JSAnimateToImmediately(const JSCallbackInfo& info);
-    static const AnimationOption CreateAnimation(const JSRef<JSObject>& animationArgs,
-         const std::function<float(float)>& jsFunc, bool isForm = false);
+    static void JSKeyframeAnimateTo(const JSCallbackInfo& info);
+    static const AnimationOption CreateAnimation(const JSRef<JSObject>& animationArgs, bool isForm = false);
+    static RefPtr<Curve> ParseCurve(const JSRef<JSVal>& curveArgs, bool exceptSpring = false);
 
 private:
     static void AnimateToInner(const JSCallbackInfo& info, bool immediately);

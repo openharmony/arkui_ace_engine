@@ -266,24 +266,36 @@ RefPtr<Curve> CreateBuiltinCurve(const std::string& aniTimFunc)
     return index < 0 ? nullptr : aniTimFuncMap[index].value;
 }
 
-RefPtr<Curve> CreateCustomCurve(const std::string& aniTimFunc)
+bool ParseCurveParam(
+    const std::string& aniTimFunc, std::string& curveName, std::vector<std::string>& paramsVector)
 {
     if (aniTimFunc.back() != ')') {
-        return nullptr;
+        return false;
     }
     std::string::size_type leftEmbracePosition = aniTimFunc.find_last_of('(');
     if (leftEmbracePosition == std::string::npos) {
-        return nullptr;
+        return false;
     }
     auto aniTimFuncName = aniTimFunc.substr(0, leftEmbracePosition);
     auto params = aniTimFunc.substr(leftEmbracePosition + 1, aniTimFunc.length() - leftEmbracePosition - 2);
     if (aniTimFuncName.empty() || params.empty()) {
-        return nullptr;
+        return false;
     }
-    std::vector<std::string> paramsVector;
     StringUtils::StringSplitter(params, ',', paramsVector);
     for (auto& param : paramsVector) {
         RemoveHeadTailSpace(param);
+    }
+    curveName = std::move(aniTimFuncName);
+    return true;
+}
+
+RefPtr<Curve> CreateCustomCurve(const std::string& aniTimFunc)
+{
+    std::string aniTimFuncName;
+    std::vector<std::string> paramsVector;
+    bool result = ParseCurveParam(aniTimFunc, aniTimFuncName, paramsVector);
+    if (!result) {
+        return nullptr;
     }
     static const LinearMapNode<CustomCurveCreator> customCurveMap[] = {
         { DOM_ANIMATION_TIMING_FUNCTION_CUBIC_BEZIER, CubicCurveCreator },
@@ -299,6 +311,28 @@ RefPtr<Curve> CreateCustomCurve(const std::string& aniTimFunc)
     }
     return customCurveMap[index].value(paramsVector);
 }
+
+RefPtr<Curve> CreateCustomCurveExceptSpring(const std::string& aniTimFunc)
+{
+    std::string aniTimFuncName;
+    std::vector<std::string> paramsVector;
+    bool result = ParseCurveParam(aniTimFunc, aniTimFuncName, paramsVector);
+    if (!result) {
+        return nullptr;
+    }
+    static const LinearMapNode<CustomCurveCreator> customCurveExceptSpringMap[] = {
+        { DOM_ANIMATION_TIMING_FUNCTION_CUBIC_BEZIER, CubicCurveCreator },
+        { DOM_ANIMATION_TIMING_FUNCTION_SPRING, SpringCurveCreator },
+        { DOM_ANIMATION_TIMING_FUNCTION_STEPS, StepsCurveCreator },
+    };
+    int64_t index = BinarySearchFindIndex(
+        customCurveExceptSpringMap, ArraySize(customCurveExceptSpringMap), aniTimFuncName.c_str());
+    if (index < 0) {
+        return nullptr;
+    }
+    return customCurveExceptSpringMap[index].value(paramsVector);
+}
+
 RefPtr<Curve> CreateCurve(const std::function<float(float)>& jsFunc)
 {
     if (jsFunc) {
@@ -318,6 +352,24 @@ RefPtr<Curve> CreateCurve(const std::string& aniTimFunc, bool useDefault)
         return curve;
     }
     return useDefault? Curves::EASE_IN_OUT : nullptr;
+}
+
+// create curve whose duration works. i.e not support spring
+RefPtr<Curve> CreateCurveExceptSpring(
+    const std::string& aniTimFunc, const std::function<float(float)>& jsFunc)
+{
+    if (jsFunc) {
+        return AceType::MakeRefPtr<CustomCurve>(jsFunc);
+    }
+    auto curve = CreateBuiltinCurve(aniTimFunc);
+    if (curve) {
+        return curve;
+    }
+    curve = CreateCustomCurveExceptSpring(aniTimFunc);
+    if (curve) {
+        return curve;
+    }
+    return Curves::EASE_IN_OUT;
 }
 
 // used for declarative only
