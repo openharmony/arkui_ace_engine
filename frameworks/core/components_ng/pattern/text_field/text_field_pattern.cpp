@@ -2235,6 +2235,13 @@ void TextFieldPattern::UpdateCaretPositionWithClamp(const int32_t& pos)
 
 void TextFieldPattern::ProcessOverlay(bool isUpdateMenu, bool animation, bool isShowMenu, bool isHiddenHandle)
 {
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto layoutProperty = host->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    if (layoutProperty->HasFontSize() && NearZero(layoutProperty->GetFontSize()->Value())) {
+        return;
+    }
     selectController_->CalculateHandleOffset();
     ShowSelectOverlayParams showOverlayParams = {
         .animation = animation, .isShowMenu = isShowMenu, .isUpdateMenu = isUpdateMenu
@@ -2255,8 +2262,6 @@ void TextFieldPattern::ProcessOverlay(bool isUpdateMenu, bool animation, bool is
         ShowSelectOverlay(showOverlayParams);
     }
     if (isHiddenHandle) {
-        auto host = GetHost();
-        CHECK_NULL_VOID(host);
         auto context = host->GetContext();
         CHECK_NULL_VOID(context);
         auto selectManager = context->GetSelectOverlayManager();
