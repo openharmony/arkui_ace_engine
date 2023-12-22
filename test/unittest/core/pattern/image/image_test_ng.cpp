@@ -54,6 +54,7 @@
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/event/mouse_event.h"
+#include "interfaces/inner_api/ace/ai/image_analyzer.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -2253,5 +2254,66 @@ HWTEST_F(ImageTestNg, TestObjectFit001, TestSize.Level1)
     frameNode->MarkModifyDone();
     EXPECT_EQ(imageRenderProperty->GetImageFit(), ImageFit::TOP_LEFT);
     EXPECT_EQ(layoutProperty->GetImageFit(), ImageFit::TOP_LEFT);
+}
+
+/**
+ * @tc.name: TestEnableAnalyzer001
+ * @tc.desc: Test image enable analyzer.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestNg, TestEnableAnalyzer001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create Image frameNode.
+     */
+    auto frameNode = ImageTestNg::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
+    auto pattern = frameNode->GetPattern<ImagePattern>();
+
+    /**
+     * @tc.steps: step2. default value
+     */
+    frameNode->MarkModifyDone();
+    EXPECT_FALSE(pattern->isEnableAnalyzer_);
+
+    /**
+     * @tc.steps: step3. set enable analyzer
+     */
+    pattern->EnableAnalyzer(true);
+    frameNode->MarkModifyDone();
+    EXPECT_TRUE(pattern->isEnableAnalyzer_);
+}
+
+/**
+ * @tc.name: TestImageAnalyzerConfig001
+ * @tc.desc: Test Image Analyzer Config.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestNg, TestImageAnalyzerConfig001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create Image frameNode and ImageAnalyzerConfig.
+     */
+    auto frameNode = ImageTestNg::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
+    auto pattern = frameNode->GetPattern<ImagePattern>();
+    std::set<ImageAnalyzerType> types {ImageAnalyzerType::SUBJECT, ImageAnalyzerType::TEXT};
+    ImageAnalyzerConfig config;
+    config.types = std::move(types);
+
+    /**
+     * @tc.steps: step2. disable image analyzer
+     */
+    pattern->EnableAnalyzer(false);
+    pattern->SetImageAnalyzerConfig(std::move(config));
+    frameNode->MarkModifyDone();
+    EXPECT_TRUE(pattern->analyzerConfig_.types.empty());
+    /**
+     * @tc.steps: step3. enable image analyzer
+     */
+    pattern->EnableAnalyzer(true);
+    pattern->SetImageAnalyzerConfig(std::move(config));
+    frameNode->MarkModifyDone();
+    EXPECT_FALSE(pattern->analyzerConfig_.types.empty());
+    EXPECT_EQ(*pattern->analyzerConfig_.types.begin(), ImageAnalyzerType::SUBJECT);
+    EXPECT_EQ(*(--pattern->analyzerConfig_.types.end()), ImageAnalyzerType::TEXT);
 }
 } // namespace OHOS::Ace::NG
