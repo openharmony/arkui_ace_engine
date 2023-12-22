@@ -220,11 +220,6 @@ bool IsExtSurfaceEnabled()
     return false;
 #endif
 }
-
-bool IsTitleStyleEnabled()
-{
-    return system::GetBoolParameter("persist.ace.title.style.enabled", false);
-}
 } // namespace
 
 bool SystemProperties::traceEnabled_ = IsTraceEnabled();
@@ -266,7 +261,6 @@ int32_t SystemProperties::astcPsnr_ = GetAstcPsnrProp();
 ACE_WEAK_SYM bool SystemProperties::extSurfaceEnabled_ = IsExtSurfaceEnabled();
 ACE_WEAK_SYM uint32_t SystemProperties::dumpFrameCount_ = GetSysDumpFrameCount();
 bool SystemProperties::resourceDecoupling_ = GetResourceDecoupling();
-ACE_WEAK_SYM bool SystemProperties::changeTitleStyleEnabled_ = IsTitleStyleEnabled();
 
 bool SystemProperties::IsSyscapExist(const char* cap)
 {
@@ -494,6 +488,11 @@ bool SystemProperties::IsFormAnimationLimited()
 bool SystemProperties::GetResourceDecoupling()
 {
     return system::GetBoolParameter("persist.sys.arkui.resource.decoupling", true);
+}
+
+bool SystemProperties::GetTitleStyleEnabled()
+{
+    return system::GetBoolParameter("persist.ace.title.style.enabled", false);
 }
 
 int32_t SystemProperties::GetJankFrameThreshold()

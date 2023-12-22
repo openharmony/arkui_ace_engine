@@ -46,7 +46,6 @@ int32_t SystemProperties::deviceWidth_ = 720;
 int32_t SystemProperties::deviceHeight_ = 1280;
 bool SystemProperties::downloadByNetworkEnabled_ = false;
 bool SystemProperties::traceEnabled_ = false;
-bool SystemProperties::changeTitleStyleEnabled_ = false;
 int32_t SystemProperties::devicePhysicalWidth_ = 0;
 int32_t SystemProperties::devicePhysicalHeight_ = 0;
 
@@ -95,6 +94,11 @@ bool SystemProperties::Is24HourClock()
 bool SystemProperties::GetImageFrameworkEnabled()
 {
     return true;
+}
+
+bool SystemProperties::GetTitleStyleEnabled()
+{
+    return false;
 }
 
 std::string SystemProperties::GetCustomTitleFilePath()
