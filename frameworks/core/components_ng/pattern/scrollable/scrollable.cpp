@@ -397,7 +397,8 @@ void Scrollable::HandleDragEnd(const GestureEvent& info)
     touchUp_ = false;
     scrollPause_ = false;
     lastVelocity_ = info.GetMainVelocity();
-    double correctVelocity = std::clamp(info.GetMainVelocity(), -maxFlingVelocity_ + slipFactor_, maxFlingVelocity_ - slipFactor_);
+    double correctVelocity =
+        std::clamp(info.GetMainVelocity(), -maxFlingVelocity_ + slipFactor_, maxFlingVelocity_ - slipFactor_);
     SetDragEndPosition(GetMainOffset(Offset(info.GetGlobalPoint().GetX(), info.GetGlobalPoint().GetY())));
     correctVelocity = correctVelocity * sVelocityScale_ * GetGain(GetDragOffset());
     currentVelocity_ = correctVelocity;
