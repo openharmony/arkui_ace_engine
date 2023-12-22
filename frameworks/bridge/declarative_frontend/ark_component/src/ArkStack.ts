@@ -27,7 +27,7 @@ class ArkStackComponent extends ArkComponent implements StackAttribute {
   }
 }
 
-class StackAlignContentModifier extends Modifier<number> {
+class StackAlignContentModifier extends ModifierWithKey<number> {
   constructor(nativePtr: number) {
     super(nativePtr);
   }
@@ -52,4 +52,4 @@ globalThis.Stack.attributeModifier = function (modifier) {
   });
   applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
-}
+};

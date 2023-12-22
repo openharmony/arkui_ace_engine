@@ -69,5 +69,4 @@ globalThis.ImageSpan.attributeModifier = function (modifier) {
     });
     applyUIAttributes(modifier, nativeNode, component);
     component.applyModifierPatch();
-
-}
+};

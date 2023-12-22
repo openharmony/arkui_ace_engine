@@ -32,7 +32,7 @@ class RichEditorCopyOptionsModifier extends ModifierWithKey<CopyOptions> {
   }
 }
 
-class ArkRichEditorComponent extends ArkComponent implements CommonMethod<RichEditorAttribute>{
+class ArkRichEditorComponent extends ArkComponent implements CommonMethod<RichEditorAttribute> {
   constructor(nativePtr: KNode) {
     super(nativePtr);
   }
@@ -87,5 +87,4 @@ globalThis.RichEditor.attributeModifier = function (modifier) {
   });
   applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
-
-}
+};

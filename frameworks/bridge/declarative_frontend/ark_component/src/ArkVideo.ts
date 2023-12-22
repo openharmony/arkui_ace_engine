@@ -133,7 +133,7 @@ class ArkVideoComponent extends ArkComponent implements CommonMethod<VideoAttrib
   onFinish(event: () => void): VideoAttribute {
     throw new Error('Method not implemented.');
   }
-  onFullscreenChange(callback: (event: { fullscreen: boolean}) => void): VideoAttribute {
+  onFullscreenChange(callback: (event: { fullscreen: boolean }) => void): VideoAttribute {
     throw new Error('Method not implemented.');
   }
   onPrepared(callback: (event: { duration: number }) => void): VideoAttribute {
@@ -165,4 +165,4 @@ globalThis.Video.attributeModifier = function (modifier) {
   });
   applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
-}
+};
