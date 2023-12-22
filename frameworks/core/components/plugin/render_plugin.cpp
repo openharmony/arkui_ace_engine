@@ -15,8 +15,6 @@
 
 #include "core/components/plugin/render_plugin.h"
 
-#include "base/log/event_report.h"
-
 namespace OHOS::Ace {
 void RenderPlugin::Update(const RefPtr<Component>& component)
 {
@@ -30,7 +28,6 @@ void RenderPlugin::Update(const RefPtr<Component>& component)
     }
 
     if (rootWidth_ == rootWidth && rootHeight_ == rootHeight) {
-        LOGE("same size, not resize render plugin");
         return;
     }
     rootWidth_ = rootWidth;
@@ -60,8 +57,8 @@ void RenderPlugin::PerformLayout()
     MarkNeedRender();
 }
 
-bool RenderPlugin::TouchTest(const Point& globalPoint,
-    const Point& parentLocalPoint, const TouchRestrict& touchRestrict, TouchTestResult& result)
+bool RenderPlugin::TouchTest(const Point& globalPoint, const Point& parentLocalPoint,
+    const TouchRestrict& touchRestrict, TouchTestResult& result)
 {
     Point transformPoint = GetTransformPoint(parentLocalPoint);
     if (!InTouchRectList(transformPoint, GetTouchRectList())) {
@@ -69,7 +66,6 @@ bool RenderPlugin::TouchTest(const Point& globalPoint,
     }
     auto subContext = GetSubPipelineContext();
     if (!subContext) {
-        LOGE("subContext is null");
         return false;
     }
     subContext->SetPluginEventOffset(GetGlobalOffset());

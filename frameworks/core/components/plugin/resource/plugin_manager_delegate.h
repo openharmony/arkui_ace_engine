@@ -35,7 +35,7 @@ public:
     using OnPluginUpdateCallback = std::function<void(int64_t, const std::string&)>;
     using OnPluginErrorCallback = std::function<void(const std::string&, const std::string&)>;
 
-    enum class State: char {
+    enum class State : char {
         WAITINGFORSIZE,
         CREATING,
         CREATED,
@@ -46,7 +46,8 @@ public:
     PluginManagerDelegate() = delete;
     ~PluginManagerDelegate() override;
     explicit PluginManagerDelegate(const WeakPtr<PipelineBase>& context)
-        : PluginManagerResource("pluginAdaptor", context), state_(State::WAITINGFORSIZE) {}
+        : PluginManagerResource("pluginAdaptor", context), state_(State::WAITINGFORSIZE)
+    {}
 
     void AddPlugin(const WeakPtr<PipelineBase>& context, const RequestPluginInfo& info);
     void AddPluginCompleteCallback(const OnPluginCompleteCallback& layoutChangeCallback);
