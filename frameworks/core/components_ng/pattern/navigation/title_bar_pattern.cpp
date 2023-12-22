@@ -929,6 +929,8 @@ void TitleBarPattern::SetTitleStyleByCoordScrollOffset(float offset)
 
 void TitleBarPattern::OnColorConfigurationUpdate()
 {
+    SetBackgroundAndBlur();
+
     auto titleBarNode = AceType::DynamicCast<TitleBarNode>(GetHost());
     CHECK_NULL_VOID(titleBarNode);
     auto backButton = AceType::DynamicCast<FrameNode>(titleBarNode->GetBackButton());
@@ -945,8 +947,6 @@ void TitleBarPattern::OnColorConfigurationUpdate()
     CHECK_NULL_VOID(theme);
     backButtonImgRender->UpdateSvgFillColor(theme->GetBackButtonIconColor());
     backButtonImgNode->MarkModifyDone();
-
-    SetBackgroundAndBlur();
 }
 
 float TitleBarPattern::CalculateHandledOffsetMinTitle(float offset, float lastCordScrollOffset)
