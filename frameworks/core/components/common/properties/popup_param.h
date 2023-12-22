@@ -379,6 +379,36 @@ public:
         return shadow_;
     }
 
+    void SetErrorArrowWidth(bool setErrorArrowWidth)
+    {
+        setErrorArrowWidth_ = setErrorArrowWidth;
+    }
+
+    bool GetErrorArrowWidth() const
+    {
+        return setErrorArrowWidth_;
+    }
+
+    void SetErrorArrowHeight(bool setErrorArrowHeight)
+    {
+        setErrorArrowHeight_ = setErrorArrowHeight;
+    }
+
+    bool GetErrorArrowHeight() const
+    {
+        return setErrorArrowHeight_;
+    }
+
+    void SetErrorRadius(bool setErrorRadius)
+    {
+        setErrorRadius_ = setErrorRadius;
+    }
+
+    bool GetErrorRadius() const
+    {
+        return setErrorRadius_;
+    }
+
 private:
     bool isShow_ = true;
     bool hasAction_ = false;
@@ -388,6 +418,9 @@ private:
     bool useCustom_ = false;
     bool isShowInSubWindow_ = false;
     bool blockEvent_ = true;
+    bool setErrorArrowWidth_ = false;
+    bool setErrorArrowHeight_ = false;
+    bool setErrorRadius_ = false;
     Color maskColor_;
     Color backgroundColor_;
     Placement placement_ = Placement::BOTTOM;
