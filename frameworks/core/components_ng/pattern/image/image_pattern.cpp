@@ -961,8 +961,12 @@ bool ImagePattern::IsSupportImageAnalyzerFeature()
             [](const auto& reason) { return reason == ObscuredReasons::PLACEHOLDER; });
     }
 
+    auto imageRenderProperty = GetPaintProperty<ImageRenderProperty>();
+    CHECK_NULL_RETURN(imageRenderProperty, false);
+    ImageRepeat repeat = imageRenderProperty->GetImageRepeat().value_or(ImageRepeat::NO_REPEAT);
+
     return isEnabled && !hasObscured && isEnableAnalyzer_ && ImageAnalyzerMgr::GetInstance().IsImageAnalyzerSupported()
-        && image_ && !loadingCtx_->GetSourceInfo().IsSvg();
+        && image_ && !loadingCtx_->GetSourceInfo().IsSvg() && repeat == ImageRepeat::NO_REPEAT;
 }
 
 void ImagePattern::UpdateAnalyzerUIConfig(const RefPtr<GeometryNode>& geometryNode)
@@ -1007,10 +1011,8 @@ void ImagePattern::UpdatePaddingAndBorderWidth(bool isUIConfigUpdate)
         double bottomPadding = padding->bottom.value_or(CalcLength(0.0_vp)).GetDimension().ConvertToPx();
         double leftPadding = padding->left.value_or(CalcLength(0.0_vp)).GetDimension().ConvertToPx();
         double rightPadding = padding->right.value_or(CalcLength(0.0_vp)).GetDimension().ConvertToPx();
-        double& configTopPadding = analyzerUIConfig_.padding[0];
-        double& configBottomPadding = analyzerUIConfig_.padding[1];
-        double& configLeftPadding = analyzerUIConfig_.padding[2];
-        double& configRightPadding = analyzerUIConfig_.padding[3];
+        auto& [configTopPadding, configBottomPadding, configLeftPadding, configRightPadding] =
+            analyzerUIConfig_.padding;
         if (configTopPadding != topPadding || configBottomPadding != bottomPadding || configLeftPadding !=
             leftPadding || configRightPadding != rightPadding) {
             configTopPadding = topPadding;
@@ -1027,10 +1029,8 @@ void ImagePattern::UpdatePaddingAndBorderWidth(bool isUIConfigUpdate)
         double borderBottom = border->bottomDimen.value_or(Dimension(0)).ConvertToPx();
         double borderLeft = border->leftDimen.value_or(Dimension(0)).ConvertToPx();
         double borderRight = border->rightDimen.value_or(Dimension(0)).ConvertToPx();
-        double& configBorderTop = analyzerUIConfig_.borderWidth[0];
-        double& configBorderBottom = analyzerUIConfig_.borderWidth[1];
-        double& configBorderLeft = analyzerUIConfig_.borderWidth[2];
-        double& configBorderRight = analyzerUIConfig_.borderWidth[3];
+        auto& [configBorderTop, configBorderBottom, configBorderLeft, configBorderRight] =
+            analyzerUIConfig_.borderWidth;
         if (configBorderTop != borderTop || configBorderBottom != borderBottom || configBorderLeft !=
             borderLeft || configBorderRight != borderRight) {
             configBorderTop = borderTop;

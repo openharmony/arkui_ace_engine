@@ -584,7 +584,7 @@ void JSImage::AnalyzerConfig(const JSCallbackInfo &info)
     
     auto paramObject = JSRef<JSObject>::Cast(configParams);
     JSRef<JSVal> typeVal = paramObject->GetProperty("types");
-    JSRef<JSVal> showButtonVal = paramObject->GetProperty("showAIbutton");
+    JSRef<JSVal> showButtonVal = paramObject->GetProperty("showAIButton");
     JSRef<JSVal> marginVal = paramObject->GetProperty("aiButtonOffset");
     JSRef<JSVal> textOpVal = paramObject->GetProperty("textOptions");
     JSRef<JSVal> subjectOpVal = paramObject->GetProperty("subjectOptions");
