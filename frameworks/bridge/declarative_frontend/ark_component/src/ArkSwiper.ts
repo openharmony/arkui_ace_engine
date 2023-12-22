@@ -19,36 +19,20 @@ class ArkSwiperComponent extends ArkComponent implements SwiperAttribute {
     super(nativePtr);
   }
   index(value: number): this {
-    if (typeof value === 'number') {
-      modifier(this._modifiers, SwiperIndexModifier, value);
-    } else {
-      modifier(this._modifiers, SwiperIndexModifier, undefined);
-    }
+    modifierWithKey(this._modifiersWithKeys, SwiperIndexModifier.identity, SwiperIndexModifier, value);
     return this;
   }
   autoPlay(value: boolean): this {
-    if (typeof value === 'boolean') {
-      modifier(this._modifiers, SwiperAutoPlayModifier, value);
-    } else {
-      modifier(this._modifiers, SwiperAutoPlayModifier, undefined);
-    }
+    modifierWithKey(this._modifiersWithKeys, SwiperAutoPlayModifier.identity, SwiperAutoPlayModifier, value);
     return this;
   }
   interval(value: number): this {
-    if (typeof value === 'number') {
-      modifier(this._modifiers, SwiperIntervalModifier, value);
-    } else {
-      modifier(this._modifiers, SwiperIntervalModifier, undefined);
-    }
+    modifierWithKey(this._modifiersWithKeys, SwiperIntervalModifier.identity, SwiperIntervalModifier, value);
     return this;
   }
 
   indicator(value: boolean | DotIndicator | DigitIndicator): this {
-    if (typeof value === 'boolean' || typeof value === 'object') {
-      modifierWithKey(this._modifiersWithKeys, SwiperIndicatorModifier.identity, SwiperIndicatorModifier, value);
-    } else {
-      modifierWithKey(this._modifiersWithKeys, SwiperIndicatorModifier.identity, SwiperIndicatorModifier, undefined);
-    }
+    modifierWithKey(this._modifiersWithKeys, SwiperIndicatorModifier.identity, SwiperIndicatorModifier, value);
     return this;
   }
 
@@ -65,89 +49,44 @@ class ArkSwiperComponent extends ArkComponent implements SwiperAttribute {
     return this;
   }
   loop(value: boolean): this {
-    if (typeof value === 'boolean') {
-      modifier(this._modifiers, SwiperLoopModifier, value);
-    } else {
-      modifier(this._modifiers, SwiperLoopModifier, undefined);
-    }
+    modifierWithKey(this._modifiersWithKeys, SwiperLoopModifier.identity, SwiperLoopModifier, value);
     return this;
   }
   duration(value: number): this {
-    if (typeof value === 'number') {
-      modifier(this._modifiers, SwiperDurationModifier, value);
-    } else {
-      modifier(this._modifiers, SwiperDurationModifier, undefined);
-    }
+    modifierWithKey(this._modifiersWithKeys, SwiperDurationModifier.identity, SwiperDurationModifier, value);
     return this;
   }
   vertical(value: boolean): this {
-    if (typeof value === 'boolean') {
-      modifier(this._modifiers, SwiperVerticalModifier, value);
-    } else {
-      modifier(this._modifiers, SwiperVerticalModifier, undefined);
-    }
+    modifierWithKey(this._modifiersWithKeys, SwiperVerticalModifier.identity, SwiperVerticalModifier, value);
     return this;
   }
   itemSpace(value: string | number): this {
-    if (typeof value === 'number' || typeof value === 'string') {
-      modifier(this._modifiers, SwiperItemSpaceModifier, value);
-    } else {
-      modifier(this._modifiers, SwiperItemSpaceModifier, undefined);
-    }
+    modifierWithKey(this._modifiersWithKeys, SwiperItemSpaceModifier.identity, SwiperItemSpaceModifier, value);
     return this;
   }
   displayMode(value: SwiperDisplayMode): this {
-    if (typeof value === 'number') {
-      modifier(this._modifiers, SwiperDisplayModeModifier, value);
-    } else {
-      modifier(this._modifiers, SwiperDisplayModeModifier, undefined);
-    }
+    modifierWithKey(this._modifiersWithKeys, SwiperDisplayModeModifier.identity, SwiperDisplayModeModifier, value);
     return this;
   }
   cachedCount(value: number): this {
-    if (typeof value === 'number') {
-      modifier(this._modifiers, SwiperCachedCountModifier, value);
-    } else {
-      modifier(this._modifiers, SwiperCachedCountModifier, undefined);
-    }
+    modifierWithKey(this._modifiersWithKeys, SwiperCachedCountModifier.identity, SwiperCachedCountModifier, value);
     return this;
   }
   displayCount(value: string | number | SwiperAutoFill): this {
-    if (typeof value === 'number' || typeof value === 'string' || typeof value === 'object') {
-      modifierWithKey(this._modifiersWithKeys, SwiperDisplayCountModifier.identity, SwiperDisplayCountModifier, value);
-    } else {
-      modifierWithKey(
-        this._modifiersWithKeys,
-        SwiperDisplayCountModifier.identity,
-        SwiperDisplayCountModifier,
-        undefined
-      );
-    }
+    modifierWithKey(this._modifiersWithKeys, SwiperDisplayCountModifier.identity, SwiperDisplayCountModifier, value);
     return this;
   }
   effectMode(value: EdgeEffect): this {
-    if (typeof value === 'number') {
-      modifier(this._modifiers, SwiperEffectModeModifier, value);
-    } else {
-      modifier(this._modifiers, SwiperEffectModeModifier, undefined);
-    }
+    modifierWithKey(this._modifiersWithKeys, SwiperEffectModeModifier.identity, SwiperEffectModeModifier, value);
     return this;
   }
   disableSwipe(value: boolean): this {
-    if (typeof value === 'boolean') {
-      modifier(this._modifiers, SwiperDisableSwipeModifier, value);
-    } else {
-      modifier(this._modifiers, SwiperDisableSwipeModifier, undefined);
-    }
+    modifierWithKey(this._modifiersWithKeys, SwiperDisableSwipeModifier.identity, SwiperDisableSwipeModifier, value);
     return this;
   }
 
   curve(value: string | Curve | ICurve): this {
-    if (typeof value === 'number' || typeof value === 'string') {
-      modifier(this._modifiers, SwiperCurveModifier, value);
-    } else {
-      modifier(this._modifiers, SwiperCurveModifier, undefined);
-    }
+    modifierWithKey(this._modifiersWithKeys, SwiperCurveModifier.identity, SwiperCurveModifier, value);
     return this;
   }
   onChange(event: (index: number) => void): this {
@@ -184,9 +123,9 @@ class SwiperNextMarginModifier extends ModifierWithKey<Length> {
   static identity: Symbol = Symbol('swiperNextMargin');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().swiper.resetSwiperNextMargin(node);
+      getUINativeModule().swiper.resetSwiperNextMargin(node);
     } else {
-      GetUINativeModule().swiper.setSwiperNextMargin(node, this.value);
+      getUINativeModule().swiper.setSwiperNextMargin(node, this.value);
     }
   }
   checkObjectDiff(): boolean {
@@ -197,9 +136,9 @@ class SwiperPrevMarginModifier extends ModifierWithKey<Length> {
   static identity: Symbol = Symbol('swiperPrevMargin');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().swiper.resetSwiperPrevMargin(node);
+      getUINativeModule().swiper.resetSwiperPrevMargin(node);
     } else {
-      GetUINativeModule().swiper.setSwiperPrevMargin(node, this.value);
+      getUINativeModule().swiper.setSwiperPrevMargin(node, this.value);
     }
   }
   checkObjectDiff(): boolean {
@@ -211,15 +150,15 @@ class SwiperDisplayCountModifier extends ModifierWithKey<string | number | Swipe
   static identity: Symbol = Symbol('swiperDisplayCount');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().swiper.resetSwiperDisplayCount(node);
+      getUINativeModule().swiper.resetSwiperDisplayCount(node);
     } else {
-      if (isNull(this.value)) {
-        GetUINativeModule().swiper.resetSwiperDisplayCount(node);
+      if (isNull(this.value) || isUndefined(this.value)) {
+        getUINativeModule().swiper.resetSwiperDisplayCount(node);
       } else if (typeof this.value === 'object') {
         let minSize = (this.value as SwiperAutoFill).minSize.toString();
-        GetUINativeModule().swiper.setSwiperDisplayCount(node, minSize, typeof this.value);
+        getUINativeModule().swiper.setSwiperDisplayCount(node, minSize, typeof this.value);
       } else {
-        GetUINativeModule().swiper.setSwiperDisplayCount(node, this.value, typeof this.value);
+        getUINativeModule().swiper.setSwiperDisplayCount(node, this.value, typeof this.value);
       }
     }
   }
@@ -238,16 +177,16 @@ class SwiperDisplayArrowModifier extends ModifierWithKey<ArkDisplayArrow> {
   static identity: Symbol = Symbol('swiperDisplayArrow');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().swiper.resetSwiperDisplayArrow(node);
+      getUINativeModule().swiper.resetSwiperDisplayArrow(node);
     } else {
-      if (!isNull(this.value.value) && typeof this.value === 'object') {
+      if (!isNull(this.value.value) && !isUndefined(this.value.value) && typeof this.value === 'object') {
         let displayArrowValue = 3;
-        let showBackground = undefined;
-        let isSidebarMiddle = undefined;
-        let backgroundSize = undefined;
-        let backgroundColor = undefined;
-        let arrowSize = undefined;
-        let arrowColor = undefined;
+        let showBackground;
+        let isSidebarMiddle;
+        let backgroundSize;
+        let backgroundColor;
+        let arrowSize;
+        let arrowColor;
         if (typeof this.value.value === 'boolean') {
           if (this.value.value) {
             displayArrowValue = 1;
@@ -263,11 +202,11 @@ class SwiperDisplayArrowModifier extends ModifierWithKey<ArkDisplayArrow> {
           arrowSize = this.value.value.arrowSize;
           arrowColor = this.value.value.arrowColor;
         }
-        let isHoverShow = undefined;
+        let isHoverShow;
         if (typeof this.value.isHoverShow === 'boolean') {
           isHoverShow = this.value.isHoverShow;
         }
-        GetUINativeModule().swiper.setSwiperDisplayArrow(
+        getUINativeModule().swiper.setSwiperDisplayArrow(
           node,
           displayArrowValue,
           showBackground,
@@ -279,7 +218,7 @@ class SwiperDisplayArrowModifier extends ModifierWithKey<ArkDisplayArrow> {
           isHoverShow
         );
       } else {
-        GetUINativeModule().swiper.resetSwiperDisplayArrow(node);
+        getUINativeModule().swiper.resetSwiperDisplayArrow(node);
       }
     }
   }
@@ -333,27 +272,27 @@ class SwiperIndicatorModifier extends ModifierWithKey<boolean | DotIndicator | D
   static identity: Symbol = Symbol('swiperIndicator');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().swiper.resetSwiperIndicator(node);
+      getUINativeModule().swiper.resetSwiperIndicator(node);
     } else {
-      let left = undefined;
-      let top = undefined;
-      let right = undefined;
-      let bottom = undefined;
-      let itemWidth = undefined;
-      let itemHeight = undefined;
-      let selectedItemWidth = undefined;
-      let selectedItemHeight = undefined;
-      let mask = undefined;
-      let color = undefined;
-      let selectedColor = undefined;
-      let fontColor = undefined;
-      let selectedFontColor = undefined;
-      let digitFontSize = undefined;
-      let digitFontWeight = undefined;
-      let selectedDigitFontSize = undefined;
-      let selectedDigitFontWeight = undefined;
+      let left;
+      let top;
+      let right;
+      let bottom;
+      let itemWidth;
+      let itemHeight;
+      let selectedItemWidth;
+      let selectedItemHeight;
+      let mask;
+      let color;
+      let selectedColor;
+      let fontColor;
+      let selectedFontColor;
+      let digitFontSize;
+      let digitFontWeight;
+      let selectedDigitFontSize;
+      let selectedDigitFontWeight;
       if (typeof this.value === 'boolean') {
-        GetUINativeModule().swiper.setSwiperIndicator(node, 'boolean', this.value);
+        getUINativeModule().swiper.setSwiperIndicator(node, 'boolean', this.value);
       } else if (typeof this.value === 'object' && (this.value as ArkDotIndicator).type === 'DotIndicator') {
         left = (this.value as ArkDotIndicator).leftValue;
         top = (this.value as ArkDotIndicator).topValue;
@@ -366,7 +305,7 @@ class SwiperIndicatorModifier extends ModifierWithKey<boolean | DotIndicator | D
         mask = (this.value as ArkDotIndicator).maskValue;
         color = (this.value as ArkDotIndicator).colorValue;
         selectedColor = (this.value as ArkDotIndicator).selectedColorValue;
-        GetUINativeModule().swiper.setSwiperIndicator(
+        getUINativeModule().swiper.setSwiperIndicator(
           node,
           'ArkDotIndicator',
           itemWidth,
@@ -401,7 +340,7 @@ class SwiperIndicatorModifier extends ModifierWithKey<boolean | DotIndicator | D
             ((this.value as ArkDigitIndicator).selectedDigitFontValue as Font).weight
           );
         }
-        GetUINativeModule().swiper.setSwiperIndicator(
+        getUINativeModule().swiper.setSwiperIndicator(
           node,
           'ArkDigitIndicator',
           fontColor,
@@ -416,7 +355,7 @@ class SwiperIndicatorModifier extends ModifierWithKey<boolean | DotIndicator | D
           bottom
         );
       } else {
-        GetUINativeModule().swiper.setSwiperIndicator(node, 'boolean', true);
+        getUINativeModule().swiper.setSwiperIndicator(node, 'boolean', true);
       }
     }
   }
@@ -429,48 +368,60 @@ class SwiperIndicatorModifier extends ModifierWithKey<boolean | DotIndicator | D
     }
     if (this.stageValue instanceof ArkDotIndicator && this.value instanceof ArkDotIndicator) {
       return (
-        !isBaseOrResourceEqual((this.stageValue as ArkDotIndicator).itemWidth, (this.value as ArkDotIndicator).itemWidth) ||
-        !isBaseOrResourceEqual((this.stageValue as ArkDotIndicator).itemHeight, (this.value as ArkDotIndicator).itemHeight) ||
         !isBaseOrResourceEqual(
-          (this.stageValue as ArkDotIndicator).selectedItemWidth,
-          (this.value as ArkDotIndicator).selectedItemWidth
+          (this.stageValue as ArkDotIndicator).itemWidthValue,
+          (this.value as ArkDotIndicator).itemWidthValue
         ) ||
         !isBaseOrResourceEqual(
-          (this.stageValue as ArkDotIndicator).selectedItemHeight,
-          (this.value as ArkDotIndicator).selectedItemHeight
+          (this.stageValue as ArkDotIndicator).itemHeightValue,
+          (this.value as ArkDotIndicator).itemHeightValue
         ) ||
-        !isBaseOrResourceEqual((this.stageValue as ArkDotIndicator).mask, (this.value as ArkDotIndicator).mask) ||
-        !isBaseOrResourceEqual((this.stageValue as ArkDotIndicator).color, (this.value as ArkDotIndicator).color) ||
         !isBaseOrResourceEqual(
-          (this.stageValue as ArkDotIndicator).selectedColor,
-          (this.value as ArkDotIndicator).selectedColor
+          (this.stageValue as ArkDotIndicator).selectedItemWidthValue,
+          (this.value as ArkDotIndicator).selectedItemWidthValue
+        ) ||
+        !isBaseOrResourceEqual(
+          (this.stageValue as ArkDotIndicator).selectedItemHeightValue,
+          (this.value as ArkDotIndicator).selectedItemHeightValue
+        ) ||
+        !isBaseOrResourceEqual(
+          (this.stageValue as ArkDotIndicator).maskValue,
+          (this.value as ArkDotIndicator).maskValue
+        ) ||
+        !isBaseOrResourceEqual(
+          (this.stageValue as ArkDotIndicator).colorValue,
+          (this.value as ArkDotIndicator).colorValue
+        ) ||
+        !isBaseOrResourceEqual(
+          (this.stageValue as ArkDotIndicator).selectedColorValue,
+          (this.value as ArkDotIndicator).selectedColorValue
         )
       );
     } else if (this.stageValue instanceof ArkDigitIndicator && this.value instanceof ArkDigitIndicator) {
       return (
         !isBaseOrResourceEqual(
-          (this.stageValue as ArkDigitIndicator).fontColor,
-          (this.value as ArkDigitIndicator).fontColor
+          (this.stageValue as ArkDigitIndicator).fontColorValue,
+          (this.value as ArkDigitIndicator).fontColorValue
         ) ||
         !isBaseOrResourceEqual(
-          (this.stageValue as ArkDigitIndicator).selectedFontColor,
-          (this.value as ArkDigitIndicator).selectedFontColor
+          (this.stageValue as ArkDigitIndicator).selectedFontColorValue,
+          (this.value as ArkDigitIndicator).selectedFontColorValue
         ) ||
         !isBaseOrResourceEqual(
-          ((this.stageValue as ArkDigitIndicator).digitFont as Font).size,
-          ((this.value as ArkDigitIndicator).digitFont as Font).size
+          ((this.stageValue as ArkDigitIndicator).digitFontValue as Font).size,
+          ((this.value as ArkDigitIndicator).digitFontValue as Font).size
         ) ||
         !isBaseOrResourceEqual(
-          ((this.stageValue as ArkDigitIndicator).digitFont as Font).weight,
-          ((this.value as ArkDigitIndicator).digitFont as Font).weight
+          ((this.stageValue as ArkDigitIndicator).digitFontValue as Font).weight,
+          ((this.value as ArkDigitIndicator).digitFontValue as Font).weight
         ) ||
         !isBaseOrResourceEqual(
-          ((this.stageValue as ArkDigitIndicator).selectedDigitFont as Font).size,
-          ((this.value as ArkDigitIndicator).selectedDigitFont as Font).size
+          ((this.stageValue as ArkDigitIndicator).selectedDigitFontValue as Font).size,
+          ((this.value as ArkDigitIndicator).selectedDigitFontValue as Font).size
         ) ||
         !isBaseOrResourceEqual(
-          ((this.stageValue as ArkDigitIndicator).selectedDigitFont as Font).weight,
-          ((this.value as ArkDigitIndicator).selectedDigitFont as Font).weight
+          ((this.stageValue as ArkDigitIndicator).selectedDigitFontValue as Font).weight,
+          ((this.value as ArkDigitIndicator).selectedDigitFontValue as Font).weight
         )
       );
     } else {
@@ -479,11 +430,11 @@ class SwiperIndicatorModifier extends ModifierWithKey<boolean | DotIndicator | D
   }
 }
 
-class SwiperCurveModifier extends Modifier<number | string> {
+class SwiperCurveModifier extends ModifierWithKey<string | Curve | ICurve> {
   static identity: Symbol = Symbol('swiperCurve');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().swiper.resetSwiperCurve(node);
+      getUINativeModule().swiper.resetSwiperCurve(node);
     } else {
       const curveMap = {
         [0]: 'linear',
@@ -507,124 +458,160 @@ class SwiperCurveModifier extends Modifier<number | string> {
           this.value = this.value.toString();
         }
       }
-      GetUINativeModule().swiper.setSwiperCurve(node, this.value);
+      getUINativeModule().swiper.setSwiperCurve(node, this.value);
     }
   }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
 }
-class SwiperDisableSwipeModifier extends Modifier<boolean> {
+class SwiperDisableSwipeModifier extends ModifierWithKey<boolean> {
   static identity: Symbol = Symbol('swiperDisableSwipe');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().swiper.resetSwiperDisableSwipe(node);
+      getUINativeModule().swiper.resetSwiperDisableSwipe(node);
     } else {
-      GetUINativeModule().swiper.setSwiperDisableSwipe(node, this.value);
+      getUINativeModule().swiper.setSwiperDisableSwipe(node, this.value);
     }
   }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
 }
-class SwiperEffectModeModifier extends Modifier<number> {
+class SwiperEffectModeModifier extends ModifierWithKey<EdgeEffect> {
   static identity: Symbol = Symbol('swiperEffectMode');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().swiper.resetSwiperEffectMode(node);
+      getUINativeModule().swiper.resetSwiperEffectMode(node);
     } else {
-      GetUINativeModule().swiper.setSwiperEffectMode(node, this.value);
+      getUINativeModule().swiper.setSwiperEffectMode(node, this.value);
     }
   }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
 }
-class SwiperCachedCountModifier extends Modifier<number> {
+class SwiperCachedCountModifier extends ModifierWithKey<number> {
   static identity: Symbol = Symbol('swiperCachedCount');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().swiper.resetSwiperCachedCount(node);
+      getUINativeModule().swiper.resetSwiperCachedCount(node);
     } else {
-      GetUINativeModule().swiper.setSwiperCachedCount(node, this.value);
+      getUINativeModule().swiper.setSwiperCachedCount(node, this.value);
     }
   }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
 }
-class SwiperDisplayModeModifier extends Modifier<number> {
+class SwiperDisplayModeModifier extends ModifierWithKey<number> {
   static identity: Symbol = Symbol('swiperDisplayMode');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().swiper.resetSwiperDisplayMode(node);
+      getUINativeModule().swiper.resetSwiperDisplayMode(node);
     } else {
-      GetUINativeModule().swiper.setSwiperDisplayMode(node, this.value);
+      getUINativeModule().swiper.setSwiperDisplayMode(node, this.value);
     }
   }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
 }
-class SwiperItemSpaceModifier extends Modifier<string | number> {
+class SwiperItemSpaceModifier extends ModifierWithKey<string | number> {
   static identity: Symbol = Symbol('swiperItemSpace');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().swiper.resetSwiperItemSpace(node);
+      getUINativeModule().swiper.resetSwiperItemSpace(node);
     } else {
-      GetUINativeModule().swiper.setSwiperItemSpace(node, this.value);
+      getUINativeModule().swiper.setSwiperItemSpace(node, this.value);
     }
   }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
 }
-class SwiperVerticalModifier extends Modifier<boolean> {
+class SwiperVerticalModifier extends ModifierWithKey<boolean> {
   static identity: Symbol = Symbol('swiperVertical');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().swiper.resetSwiperVertical(node);
+      getUINativeModule().swiper.resetSwiperVertical(node);
     } else {
-      GetUINativeModule().swiper.setSwiperVertical(node, this.value);
+      getUINativeModule().swiper.setSwiperVertical(node, this.value);
     }
   }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
 }
-class SwiperLoopModifier extends Modifier<boolean> {
+class SwiperLoopModifier extends ModifierWithKey<boolean> {
   static identity: Symbol = Symbol('swiperLoop');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().swiper.resetSwiperLoop(node);
+      getUINativeModule().swiper.resetSwiperLoop(node);
     } else {
-      GetUINativeModule().swiper.setSwiperLoop(node, this.value);
+      getUINativeModule().swiper.setSwiperLoop(node, this.value);
     }
   }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
 }
-class SwiperIntervalModifier extends Modifier<number> {
+class SwiperIntervalModifier extends ModifierWithKey<number> {
   static identity: Symbol = Symbol('swiperInterval');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().swiper.resetSwiperInterval(node);
+      getUINativeModule().swiper.resetSwiperInterval(node);
     } else {
-      GetUINativeModule().swiper.setSwiperInterval(node, this.value);
+      getUINativeModule().swiper.setSwiperInterval(node, this.value);
     }
   }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
 }
-class SwiperAutoPlayModifier extends Modifier<boolean> {
+class SwiperAutoPlayModifier extends ModifierWithKey<boolean> {
   static identity: Symbol = Symbol('swiperAutoPlay');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().swiper.resetSwiperAutoPlay(node);
+      getUINativeModule().swiper.resetSwiperAutoPlay(node);
     } else {
-      GetUINativeModule().swiper.setSwiperAutoPlay(node, this.value);
+      getUINativeModule().swiper.setSwiperAutoPlay(node, this.value);
     }
   }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
 }
-class SwiperIndexModifier extends Modifier<number> {
+class SwiperIndexModifier extends ModifierWithKey<number> {
   static identity: Symbol = Symbol('swiperIndex');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().swiper.resetSwiperIndex(node);
+      getUINativeModule().swiper.resetSwiperIndex(node);
     } else {
-      GetUINativeModule().swiper.setSwiperIndex(node, this.value);
+      getUINativeModule().swiper.setSwiperIndex(node, this.value);
     }
   }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
 }
-class SwiperDurationModifier extends Modifier<number> {
+class SwiperDurationModifier extends ModifierWithKey<number> {
   static identity: Symbol = Symbol('swiperDuration');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().swiper.resetSwiperDuration(node);
+      getUINativeModule().swiper.resetSwiperDuration(node);
     } else {
-      GetUINativeModule().swiper.setSwiperDuration(node, this.value);
+      getUINativeModule().swiper.setSwiperDuration(node, this.value);
     }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
 // @ts-ignore
 globalThis.Swiper.attributeModifier = function (modifier) {
   const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkSwiperComponent(nativeNode);
   });

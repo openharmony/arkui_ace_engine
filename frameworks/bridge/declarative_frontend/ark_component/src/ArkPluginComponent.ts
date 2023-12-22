@@ -49,10 +49,9 @@ class PluginWidthModifier extends ModifierWithKey<Length> {
   static identity: Symbol = Symbol('pluginWidth');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().plugin.resetWidth(node);
-    }
-    else {
-      GetUINativeModule().plugin.setWidth(node, this.value);
+      getUINativeModule().plugin.resetWidth(node);
+    } else {
+      getUINativeModule().plugin.setWidth(node, this.value);
     }
   }
 
@@ -72,10 +71,9 @@ class PluginHeightModifier extends ModifierWithKey<Length> {
   static identity: Symbol = Symbol('pluginHeight');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().plugin.resetHeight(node);
-    }
-    else {
-      GetUINativeModule().plugin.setHeight(node, this.value);
+      getUINativeModule().plugin.resetHeight(node);
+    } else {
+      getUINativeModule().plugin.setHeight(node, this.value);
     }
   }
 
@@ -95,9 +93,9 @@ class PluginSizeModifier extends ModifierWithKey<SizeOptions> {
   static identity: Symbol = Symbol('size');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().plugin.resetSize(node);
+      getUINativeModule().plugin.resetSize(node);
     } else {
-      GetUINativeModule().plugin.setSize(node, this.value.width, this.value.height);
+      getUINativeModule().plugin.setSize(node, this.value.width, this.value.height);
     }
   }
 
@@ -110,10 +108,10 @@ class PluginSizeModifier extends ModifierWithKey<SizeOptions> {
 // @ts-ignore
 globalThis.PluginComponent.attributeModifier = function (modifier) {
   const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkPluginComponent(nativeNode);
   });
   applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
-}
+};

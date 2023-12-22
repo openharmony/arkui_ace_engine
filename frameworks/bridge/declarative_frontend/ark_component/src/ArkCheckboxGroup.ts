@@ -21,10 +21,9 @@ class CheckboxGroupSelectAllModifier extends ModifierWithKey<boolean> {
   static identity: Symbol = Symbol('checkboxgroupSelectAll');
   applyPeer(node: KNode, reset: boolean) {
     if (reset) {
-      GetUINativeModule().checkboxgroup.resetCheckboxGroupSelectAll(node);
-    }
-    else {
-      GetUINativeModule().checkboxgroup.setCheckboxGroupSelectAll(node, this.value);
+      getUINativeModule().checkboxgroup.resetCheckboxGroupSelectAll(node);
+    } else {
+      getUINativeModule().checkboxgroup.setCheckboxGroupSelectAll(node, this.value);
     }
   }
 }
@@ -36,10 +35,9 @@ class CheckboxGroupSelectedColorModifier extends ModifierWithKey<ResourceColor> 
   static identity: Symbol = Symbol('checkboxgroupSelectedColor');
   applyPeer(node: KNode, reset: boolean) {
     if (reset) {
-      GetUINativeModule().checkboxgroup.resetCheckboxGroupSelectedColor(node);
-    }
-    else {
-      GetUINativeModule().checkboxgroup.setCheckboxGroupSelectedColor(node, this.value);
+      getUINativeModule().checkboxgroup.resetCheckboxGroupSelectedColor(node);
+    } else {
+      getUINativeModule().checkboxgroup.setCheckboxGroupSelectedColor(node, this.value);
     }
   }
 
@@ -56,10 +54,9 @@ class CheckboxGroupUnselectedColorModifier extends ModifierWithKey<ResourceColor
   static identity: Symbol = Symbol('checkboxgroupUnselectedColor');
   applyPeer(node: KNode, reset: boolean) {
     if (reset) {
-      GetUINativeModule().checkboxgroup.resetCheckboxGroupUnSelectedColor(node);
-    }
-    else {
-      GetUINativeModule().checkboxgroup.setCheckboxGroupUnSelectedColor(node, this.value);
+      getUINativeModule().checkboxgroup.resetCheckboxGroupUnSelectedColor(node);
+    } else {
+      getUINativeModule().checkboxgroup.setCheckboxGroupUnSelectedColor(node, this.value);
     }
   }
 
@@ -74,10 +71,9 @@ class CheckboxGroupMarkModifier extends ModifierWithKey<MarkStyle> {
   static identity: Symbol = Symbol('checkboxgroupMark');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().checkboxgroup.resetCheckboxGroupMark(node);
-    }
-    else {
-      GetUINativeModule().checkboxgroup.setCheckboxGroupMark(node, this.value?.strokeColor, this.value?.size, this.value?.strokeWidth);
+      getUINativeModule().checkboxgroup.resetCheckboxGroupMark(node);
+    } else {
+      getUINativeModule().checkboxgroup.setCheckboxGroupMark(node, this.value?.strokeColor, this.value?.size, this.value?.strokeWidth);
     }
   }
 
@@ -116,11 +112,11 @@ class ArkCheckboxGroupComponent extends ArkComponent implements CheckboxGroupAtt
 // @ts-ignore
 globalThis.CheckboxGroup.attributeModifier = function (modifier) {
   const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkCheckboxGroupComponent(nativeNode);
   });
   applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
-}
+};
 

@@ -37,12 +37,12 @@ class ArkDatePickerComponent extends ArkComponent implements DatePickerAttribute
       DatePickerSelectedTextStyleModifier, value);
     return this;
   }
-    onChange(callback: (value: DatePickerResult) => void): DatePickerAttribute {
-        throw new Error('Method not implemented.');
-    }
-    onDateChange(callback: (value: Date) => void): DatePickerAttribute {
-        throw new Error('Method not implemented.');
-    }
+  onChange(callback: (value: DatePickerResult) => void): DatePickerAttribute {
+    throw new Error('Method not implemented.');
+  }
+  onDateChange(callback: (value: Date) => void): DatePickerAttribute {
+    throw new Error('Method not implemented.');
+  }
 }
 
 class DatePickerLunarModifier extends ModifierWithKey<boolean> {
@@ -52,10 +52,9 @@ class DatePickerLunarModifier extends ModifierWithKey<boolean> {
   static identity: Symbol = Symbol('lunar');
   applyPeer(node: KNode, reset: boolean) {
     if (reset) {
-      GetUINativeModule().datePicker.resetLunar(node);
-    }
-    else {
-      GetUINativeModule().datePicker.setLunar(node, this.value);
+      getUINativeModule().datePicker.resetLunar(node);
+    } else {
+      getUINativeModule().datePicker.setLunar(node, this.value);
     }
   }
 }
@@ -67,10 +66,9 @@ class DatePickerTextStyleModifier extends ModifierWithKey<PickerTextStyle> {
   static identity: Symbol = Symbol('textStyle');
   applyPeer(node: KNode, reset: boolean) {
     if (reset) {
-      GetUINativeModule().datePicker.resetTextStyle(node);
-    }
-    else {
-      GetUINativeModule().datePicker.setTextStyle(node, this.value?.color ?? undefined,
+      getUINativeModule().datePicker.resetTextStyle(node);
+    } else {
+      getUINativeModule().datePicker.setTextStyle(node, this.value?.color ?? undefined,
         this.value?.font?.size ?? undefined,
         this.value?.font?.weight ?? undefined,
         this.value?.font?.family ?? undefined,
@@ -97,10 +95,9 @@ class DatePickerSelectedTextStyleModifier extends ModifierWithKey<PickerTextStyl
   static identity: Symbol = Symbol('selectedTextStyle');
   applyPeer(node: KNode, reset: boolean) {
     if (reset) {
-      GetUINativeModule().datePicker.resetSelectedTextStyle(node);
-    }
-    else {
-      GetUINativeModule().datePicker.setSelectedTextStyle(node, this.value?.color ?? undefined,
+      getUINativeModule().datePicker.resetSelectedTextStyle(node);
+    } else {
+      getUINativeModule().datePicker.setSelectedTextStyle(node, this.value?.color ?? undefined,
         this.value?.font?.size ?? undefined,
         this.value?.font?.weight ?? undefined,
         this.value?.font?.family ?? undefined,
@@ -127,10 +124,9 @@ class DatePickerDisappearTextStyleModifier extends ModifierWithKey<PickerTextSty
   static identity: Symbol = Symbol('disappearTextStyle');
   applyPeer(node: KNode, reset: boolean) {
     if (reset) {
-      GetUINativeModule().datePicker.resetDisappearTextStyle(node);
-    }
-    else {
-      GetUINativeModule().datePicker.setDisappearTextStyle(node, this.value?.color ?? undefined,
+      getUINativeModule().datePicker.resetDisappearTextStyle(node);
+    } else {
+      getUINativeModule().datePicker.setDisappearTextStyle(node, this.value?.color ?? undefined,
         this.value?.font?.size ?? undefined,
         this.value?.font?.weight ?? undefined,
         this.value?.font?.family ?? undefined,
@@ -153,10 +149,10 @@ class DatePickerDisappearTextStyleModifier extends ModifierWithKey<PickerTextSty
 //@ts-ignore
 globalThis.DatePicker.attributeModifier = function (modifier) {
   const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkDatePickerComponent(nativeNode);
   });
   applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
-}
+};

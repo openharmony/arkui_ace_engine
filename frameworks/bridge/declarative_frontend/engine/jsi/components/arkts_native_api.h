@@ -614,7 +614,6 @@ struct ArkUIRowSplitModifierAPI {
 struct ArkUITextpickerModifierAPI {
     void (*SetTextpickerBackgroundColor)(NodeHandle node, uint32_t color);
     void (*SetTextpickerCanLoop)(NodeHandle node, bool value);
-    void (*SetTextpickerSelected)(NodeHandle node, uint32_t index);
     void (*SetTextpickerSelectedIndex)(NodeHandle node, uint32_t *values, int32_t size);
     void (*SetTextpickerTextStyle)(NodeHandle node, uint32_t color, const char *fontInfo, int32_t styleVal);
     void (*SetTextpickerSelectedTextStyle)(NodeHandle node, uint32_t color, const char *fontInfo, int32_t styleVal);

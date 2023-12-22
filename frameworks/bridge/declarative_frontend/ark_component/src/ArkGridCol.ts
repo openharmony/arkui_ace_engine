@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-/// <reference path="./import.ts" />
+/// <reference path='./import.ts' />
 class GridColSpanModifier extends ModifierWithKey<ArkGridColColumnOption> {
   constructor(value: ArkGridColColumnOption) {
     super(value);
@@ -21,13 +21,13 @@ class GridColSpanModifier extends ModifierWithKey<ArkGridColColumnOption> {
   static identity: Symbol = Symbol('gridColSpan');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().gridCol.resetSpan(node);
+      getUINativeModule().gridCol.resetSpan(node);
     } else {
       if (isNumber(this.value)) {
-        GetUINativeModule().gridCol.setSpan(node, this.value,
+        getUINativeModule().gridCol.setSpan(node, this.value,
           this.value, this.value, this.value, this.value, this.value);
       } else {
-        GetUINativeModule().gridCol.setSpan(node, this.value.xs,
+        getUINativeModule().gridCol.setSpan(node, this.value.xs,
           this.value.sm, this.value.md, this.value.lg, this.value.xl, this.value.xxl);
       }
     }
@@ -54,13 +54,13 @@ class GridColOffsetModifier extends ModifierWithKey<ArkGridColColumnOption> {
   static identity: Symbol = Symbol('gridColOffset');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().gridCol.resetGridColOffset(node);
+      getUINativeModule().gridCol.resetGridColOffset(node);
     } else {
       if (isNumber(this.value)) {
-        GetUINativeModule().gridCol.setGridColOffset(node, this.value,
+        getUINativeModule().gridCol.setGridColOffset(node, this.value,
           this.value, this.value, this.value, this.value, this.value);
       } else {
-        GetUINativeModule().gridCol.setGridColOffset(node, this.value.xs,
+        getUINativeModule().gridCol.setGridColOffset(node, this.value.xs,
           this.value.sm, this.value.md, this.value.lg, this.value.xl, this.value.xxl);
       }
     }
@@ -87,13 +87,13 @@ class GridColOrderModifier extends ModifierWithKey<ArkGridColColumnOption> {
   static identity: Symbol = Symbol('gridColOrder');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().gridCol.resetOrder(node);
+      getUINativeModule().gridCol.resetOrder(node);
     } else {
       if (isNumber(this.value)) {
-        GetUINativeModule().gridCol.setOrder(node, this.value,
+        getUINativeModule().gridCol.setOrder(node, this.value,
           this.value, this.value, this.value, this.value, this.value);
       } else {
-        GetUINativeModule().gridCol.setOrder(node, this.value.xs,
+        getUINativeModule().gridCol.setOrder(node, this.value.xs,
           this.value.sm, this.value.md, this.value.lg, this.value.xl, this.value.xxl);
       }
     }
@@ -135,7 +135,7 @@ class ArkGridColComponent extends ArkComponent implements GridColAttribute {
 // @ts-ignore
 globalThis.GridCol.attributeModifier = function (modifier) {
   const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
 
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkGridColComponent(nativeNode);

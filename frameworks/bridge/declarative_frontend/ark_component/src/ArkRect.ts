@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-/// <reference path="./import.ts" />
+/// <reference path='./import.ts' />
 /// <reference path="./ArkCommonShape.ts" />
 class RectRadiusWidthModifier extends ModifierWithKey<string | number> {
   constructor(value: string | number) {
@@ -22,9 +22,9 @@ class RectRadiusWidthModifier extends ModifierWithKey<string | number> {
   static identity: Symbol = Symbol('rectRadiusWidth');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().rect.resetRectRadiusWidth(node);
+      getUINativeModule().rect.resetRectRadiusWidth(node);
     } else {
-      GetUINativeModule().rect.setRectRadiusWidth(node, this.value);
+      getUINativeModule().rect.setRectRadiusWidth(node, this.value);
     }
   }
 }
@@ -35,9 +35,9 @@ class RectRadiusHeightModifier extends ModifierWithKey<string | number> {
   static identity: Symbol = Symbol('rectRadiusHeight');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().rect.resetRectRadiusHeight(node);
+      getUINativeModule().rect.resetRectRadiusHeight(node);
     } else {
-      GetUINativeModule().rect.setRectRadiusHeight(node, this.value);
+      getUINativeModule().rect.setRectRadiusHeight(node, this.value);
     }
   }
 }
@@ -48,9 +48,9 @@ class RectRadiusModifier extends ModifierWithKey<string | number | Array<any>> {
   static identity: Symbol = Symbol('rectRadius');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().rect.resetRectRadius(node);
-  } else {
-      GetUINativeModule().rect.setRectRadius(node, this.value);
+      getUINativeModule().rect.resetRectRadius(node);
+    } else {
+      getUINativeModule().rect.setRectRadius(node, this.value);
     }
   }
 
@@ -79,10 +79,10 @@ class ArkRectComponent extends ArkCommonShapeComponent implements RectAttribute 
 // @ts-ignore
 globalThis.Rect.attributeModifier = function (modifier) {
   const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkRectComponent(nativeNode);
   });
   applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
-}
+};

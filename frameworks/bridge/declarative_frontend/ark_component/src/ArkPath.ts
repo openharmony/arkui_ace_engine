@@ -31,9 +31,9 @@ class CommandsModifier extends ModifierWithKey<string> {
   static identity: Symbol = Symbol('commands');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().path.resetPathCommands(node);
+      getUINativeModule().path.resetPathCommands(node);
     } else {
-      GetUINativeModule().path.setPathCommands(node, this.value);
+      getUINativeModule().path.setPathCommands(node, this.value);
     }
   }
 
@@ -49,10 +49,10 @@ class CommandsModifier extends ModifierWithKey<string> {
 // @ts-ignore
 globalThis.Path.attributeModifier = function (modifier) {
   const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkPathComponent(nativeNode);
   });
   applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
-}
+};

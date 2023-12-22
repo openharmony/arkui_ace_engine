@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-/// <reference path="./import.ts" />
+/// <reference path='./import.ts' />
 class DividerVerticalModifier extends ModifierWithKey<boolean> {
   constructor(value: boolean) {
     super(value);
@@ -21,9 +21,9 @@ class DividerVerticalModifier extends ModifierWithKey<boolean> {
   static identity: Symbol = Symbol('dividerVertical');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().divider.resetVertical(node);
+      getUINativeModule().divider.resetVertical(node);
     } else {
-      GetUINativeModule().divider.setVertical(node, this.value!);
+      getUINativeModule().divider.setVertical(node, this.value!);
     }
   }
   checkObjectDiff(): boolean {
@@ -37,9 +37,9 @@ class DividerLineCapModifier extends ModifierWithKey<LineCapStyle> {
   static identity: Symbol = Symbol('dividerLineCap');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().divider.resetLineCap(node);
+      getUINativeModule().divider.resetLineCap(node);
     } else {
-      GetUINativeModule().divider.setLineCap(node, this.value!);
+      getUINativeModule().divider.setLineCap(node, this.value!);
     }
   }
   checkObjectDiff(): boolean {
@@ -53,9 +53,9 @@ class DividerColorModifier extends ModifierWithKey<ResourceColor> {
   static identity: Symbol = Symbol('dividerColor');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().divider.resetColor(node);
+      getUINativeModule().divider.resetColor(node);
     } else {
-      GetUINativeModule().divider.setColor(node, this.value!);
+      getUINativeModule().divider.setColor(node, this.value!);
     }
   }
   checkObjectDiff(): boolean {
@@ -69,9 +69,9 @@ class DividerStrokeWidthModifier extends ModifierWithKey<number | string> {
   static identity: Symbol = Symbol('dividerStrokeWidth');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().divider.resetStrokeWidth(node);
+      getUINativeModule().divider.resetStrokeWidth(node);
     } else {
-      GetUINativeModule().divider.setStrokeWidth(node, this.value!);
+      getUINativeModule().divider.setStrokeWidth(node, this.value!);
     }
   }
   checkObjectDiff(): boolean {
@@ -102,7 +102,7 @@ class ArkDividerComponent extends ArkComponent implements DividerAttribute {
 // @ts-ignore
 globalThis.Divider.attributeModifier = function (modifier) {
   const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
 
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkDividerComponent(nativeNode);

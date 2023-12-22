@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-/// <reference path="./import.ts" />
+/// <reference path='./import.ts' />
 
 class SearchSelectionMenuHiddenModifier extends ModifierWithKey<boolean> {
   constructor(value: boolean) {
@@ -22,9 +22,9 @@ class SearchSelectionMenuHiddenModifier extends ModifierWithKey<boolean> {
   static identity = Symbol('searchSelectionMenuHidden');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().search.resetSelectionMenuHidden(node);
+      getUINativeModule().search.resetSelectionMenuHidden(node);
     } else {
-      GetUINativeModule().search.setSelectionMenuHidden(node, this.value!);
+      getUINativeModule().search.setSelectionMenuHidden(node, this.value!);
     }
   }
   checkObjectDiff(): boolean {
@@ -39,9 +39,9 @@ class SearchCaretStyleModifier extends ModifierWithKey<CaretStyle> {
   static identity = Symbol('searchCaretStyle');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().search.resetCaretStyle(node);
+      getUINativeModule().search.resetCaretStyle(node);
     } else {
-      GetUINativeModule().search.setCaretStyle(node, this.value.width,
+      getUINativeModule().search.setCaretStyle(node, this.value.width,
         this.value.color);
     }
   }
@@ -58,9 +58,9 @@ class SearchEnableKeyboardOnFocusModifier extends ModifierWithKey<boolean> {
   static identity = Symbol('searchEnableKeyboardOnFocus');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().search.resetEnableKeyboardOnFocus(node);
+      getUINativeModule().search.resetEnableKeyboardOnFocus(node);
     } else {
-      GetUINativeModule().search.setEnableKeyboardOnFocus(node, this.value!);
+      getUINativeModule().search.setEnableKeyboardOnFocus(node, this.value!);
     }
   }
   checkObjectDiff(): boolean {
@@ -75,9 +75,9 @@ class SearchSearchIconModifier extends ModifierWithKey<IconOptions> {
   static identity = Symbol('searchSearchIcon');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().search.resetSearchIcon(node);
+      getUINativeModule().search.resetSearchIcon(node);
     } else {
-      GetUINativeModule().search.setSearchIcon(node, this.value.size,
+      getUINativeModule().search.setSearchIcon(node, this.value.size,
         this.value.color, this.value.src);
     }
   }
@@ -95,9 +95,9 @@ class SearchPlaceholderFontModifier extends ModifierWithKey<Font> {
   static identity = Symbol('searchPlaceholderFont');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().search.resetPlaceholderFont(node);
+      getUINativeModule().search.resetPlaceholderFont(node);
     } else {
-      GetUINativeModule().search.setPlaceholderFont(node, this.value.size,
+      getUINativeModule().search.setPlaceholderFont(node, this.value.size,
         this.value.weight, this.value.family, this.value.style);
     }
   }
@@ -116,9 +116,9 @@ class SearchSearchButtonModifier extends ModifierWithKey<ArkSearchButton> {
   static identity = Symbol('searchSearchButton');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().search.resetSearchButton(node);
+      getUINativeModule().search.resetSearchButton(node);
     } else {
-      GetUINativeModule().search.setSearchButton(node, this.value.value,
+      getUINativeModule().search.setSearchButton(node, this.value.value,
         this.value.fontSize, this.value.fontColor);
     }
   }
@@ -136,9 +136,9 @@ class SearchFontColorModifier extends ModifierWithKey<ResourceColor> {
   static identity = Symbol('searchFontColor');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().search.resetFontColor(node);
+      getUINativeModule().search.resetFontColor(node);
     } else {
-      GetUINativeModule().search.setFontColor(node, this.value!);
+      getUINativeModule().search.setFontColor(node, this.value!);
     }
   }
   checkObjectDiff(): boolean {
@@ -153,9 +153,9 @@ class SearchCopyOptionModifier extends ModifierWithKey<CopyOptions> {
   static identity = Symbol('searchCopyOption');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().search.resetCopyOption(node);
+      getUINativeModule().search.resetCopyOption(node);
     } else {
-      GetUINativeModule().search.setCopyOption(node, this.value!);
+      getUINativeModule().search.setCopyOption(node, this.value!);
     }
   }
   checkObjectDiff(): boolean {
@@ -170,9 +170,9 @@ class SearchTextFontModifier extends ModifierWithKey<Font> {
   static identity = Symbol('searchTextFont');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().search.resetTextFont(node);
+      getUINativeModule().search.resetTextFont(node);
     } else {
-      GetUINativeModule().search.setTextFont(node, this.value.size, this.value.weight, this.value.family, this.value.style);
+      getUINativeModule().search.setTextFont(node, this.value.size, this.value.weight, this.value.family, this.value.style);
     }
   }
   checkObjectDiff(): boolean {
@@ -190,9 +190,9 @@ class SearchPlaceholderColorModifier extends ModifierWithKey<ResourceColor> {
   static identity = Symbol('searchPlaceholderColor');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().search.resetPlaceholderColor(node);
+      getUINativeModule().search.resetPlaceholderColor(node);
     } else {
-      GetUINativeModule().search.setPlaceholderColor(node, this.value!);
+      getUINativeModule().search.setPlaceholderColor(node, this.value!);
     }
   }
   checkObjectDiff(): boolean {
@@ -207,9 +207,9 @@ class SearchCancelButtonModifier extends ModifierWithKey<{ style?: CancelButtonS
   static identity = Symbol('searchCancelButton');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().search.resetCancelButton(node);
+      getUINativeModule().search.resetCancelButton(node);
     } else {
-      GetUINativeModule().search.setCancelButton(node, this.value.style,
+      getUINativeModule().search.setCancelButton(node, this.value.style,
         this.value.icon?.size, this.value.icon?.color, this.value.icon?.src);
     }
   }
@@ -228,9 +228,9 @@ class SearchTextAlignModifier extends ModifierWithKey<TextAlign> {
   static identity = Symbol('searchTextAlign');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().search.resetTextAlign(node);
+      getUINativeModule().search.resetTextAlign(node);
     } else {
-      GetUINativeModule().search.setTextAlign(node, this.value!);
+      getUINativeModule().search.setTextAlign(node, this.value!);
     }
   }
   checkObjectDiff(): boolean {
@@ -341,7 +341,7 @@ class ArkSearchComponent extends ArkComponent implements CommonMethod<SearchAttr
 // @ts-ignore
 globalThis.Search.attributeModifier = function (modifier) {
   const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkSearchComponent(nativeNode);
   });

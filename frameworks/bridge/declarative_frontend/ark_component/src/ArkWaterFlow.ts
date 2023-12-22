@@ -22,9 +22,9 @@ class ItemConstraintSizeModifier extends ModifierWithKey<ArkConstraintSizeOption
   static identity: Symbol = Symbol('itemConstraintSize');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().waterFlow.resetItemConstraintSize(node);
+      getUINativeModule().waterFlow.resetItemConstraintSize(node);
     } else {
-      GetUINativeModule().waterFlow.setItemConstraintSize(node, this.value.minWidth,
+      getUINativeModule().waterFlow.setItemConstraintSize(node, this.value.minWidth,
         this.value.maxWidth, this.value.minHeight, this.value.maxHeight);
     }
   }
@@ -43,9 +43,9 @@ class ColumnsTemplateModifier extends ModifierWithKey<string> {
   static identity: Symbol = Symbol('columnsTemplate');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().waterFlow.resetColumnsTemplate(node);
+      getUINativeModule().waterFlow.resetColumnsTemplate(node);
     } else {
-      GetUINativeModule().waterFlow.setColumnsTemplate(node, this.value);
+      getUINativeModule().waterFlow.setColumnsTemplate(node, this.value);
     }
   }
 }
@@ -57,9 +57,9 @@ class RowsTemplateModifier extends ModifierWithKey<string> {
   static identity: Symbol = Symbol('rowsTemplate');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().waterFlow.resetRowsTemplate(node);
+      getUINativeModule().waterFlow.resetRowsTemplate(node);
     } else {
-      GetUINativeModule().waterFlow.setRowsTemplate(node, this.value);
+      getUINativeModule().waterFlow.setRowsTemplate(node, this.value);
     }
   }
 }
@@ -70,12 +70,11 @@ class EnableScrollInteractionModifier extends ModifierWithKey<boolean> {
   }
   static identity = Symbol('enableScrollInteraction');
   applyPeer(node: KNode, reset: boolean): void {
-      if (reset) {
-          GetUINativeModule().waterFlow.resetEnableScrollInteraction(node);
-      }
-      else {
-          GetUINativeModule().waterFlow.setEnableScrollInteraction(node, this.value);
-      }
+    if (reset) {
+      getUINativeModule().waterFlow.resetEnableScrollInteraction(node);
+    } else {
+      getUINativeModule().waterFlow.setEnableScrollInteraction(node, this.value);
+    }
   }
 }
 
@@ -85,12 +84,11 @@ class RowsGapModifier extends ModifierWithKey<number | string> {
   }
   static identity: Symbol = Symbol('rowsGap');
   applyPeer(node: KNode, reset: boolean): void {
-      if (reset) {
-          GetUINativeModule().waterFlow.resetRowsGap(node);
-      }
-      else {
-          GetUINativeModule().waterFlow.setRowsGap(node, this.value);
-      }
+    if (reset) {
+      getUINativeModule().waterFlow.resetRowsGap(node);
+    } else {
+      getUINativeModule().waterFlow.setRowsGap(node, this.value);
+    }
   }
   checkObjectDiff(): boolean {
     return !isBaseOrResourceEqual(this.stageValue, this.value);
@@ -103,12 +101,11 @@ class ColumnsGapModifier extends ModifierWithKey<number | string> {
   }
   static identity: Symbol = Symbol('columnsGap');
   applyPeer(node: KNode, reset: boolean): void {
-      if (reset) {
-          GetUINativeModule().waterFlow.resetColumnsGap(node);
-      }
-      else {
-          GetUINativeModule().waterFlow.setColumnsGap(node, this.value);
-      }
+    if (reset) {
+      getUINativeModule().waterFlow.resetColumnsGap(node);
+    } else {
+      getUINativeModule().waterFlow.setColumnsGap(node, this.value);
+    }
   }
   checkObjectDiff(): boolean {
     return !isBaseOrResourceEqual(this.stageValue, this.value);
@@ -122,10 +119,9 @@ class LayoutDirectionModifier extends ModifierWithKey<number> {
   static identity: Symbol = Symbol('layoutDirection');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().waterFlow.resetLayoutDirection(node);
-    }
-    else {
-      GetUINativeModule().waterFlow.setLayoutDirection(node, this.value);
+      getUINativeModule().waterFlow.resetLayoutDirection(node);
+    } else {
+      getUINativeModule().waterFlow.setLayoutDirection(node, this.value);
     }
   }
 }
@@ -137,10 +133,9 @@ class NestedScrollModifier extends ModifierWithKey<ArkNestedScrollOptions> {
   static identity: Symbol = Symbol('nestedScroll');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().waterFlow.resetNestedScroll(node);
-    }
-    else {
-      GetUINativeModule().waterFlow.setNestedScroll(node, this.value.scrollForward, this.value.scrollBackward);
+      getUINativeModule().waterFlow.resetNestedScroll(node);
+    } else {
+      getUINativeModule().waterFlow.setNestedScroll(node, this.value.scrollForward, this.value.scrollBackward);
     }
   }
 }
@@ -152,10 +147,9 @@ class FrictionModifier extends ModifierWithKey<number | Resource> {
   static identity: Symbol = Symbol('friction');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().waterFlow.resetFriction(node);
-    }
-    else {
-      GetUINativeModule().waterFlow.setFriction(node, this.value);
+      getUINativeModule().waterFlow.resetFriction(node);
+    } else {
+      getUINativeModule().waterFlow.setFriction(node, this.value);
     }
   }
   checkObjectDiff(): boolean {
@@ -243,10 +237,10 @@ class ArkWaterFlowComponent extends ArkComponent implements WaterFlowAttribute {
 // @ts-ignore
 globalThis.WaterFlow.attributeModifier = function (modifier) {
   const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkWaterFlowComponent(nativeNode);
   });
   applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
-}
+};

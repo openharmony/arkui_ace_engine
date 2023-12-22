@@ -25,11 +25,11 @@ if (globalThis.RemoteWindow !== undefined) {
   // @ts-ignore
   globalThis.RemoteWindow.attributeModifier = function (modifier) {
     const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-    let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+    let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
     let component = this.createOrGetNode(elmtId, () => {
       return new ArkRemoteWindowComponent(nativeNode);
     });
     modifier.applyNormalAttribute(component);
     component.applyModifierPatch();
-  }
+  };
 }

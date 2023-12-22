@@ -21,9 +21,9 @@ class MenuItemSelectedModifier extends ModifierWithKey<boolean> {
   static identity: Symbol = Symbol('menuItemSelected');
   applyPeer(node: KNode, reset: boolean) {
     if (reset) {
-      GetUINativeModule().menuitem.resetMenuItemSelected(node);
+      getUINativeModule().menuitem.resetMenuItemSelected(node);
     } else {
-      GetUINativeModule().menuitem.setMenuItemSelected(node, this.value);
+      getUINativeModule().menuitem.setMenuItemSelected(node, this.value);
     }
   }
 
@@ -36,12 +36,12 @@ class LabelFontColorModifier extends ModifierWithKey<ResourceColor> {
   constructor(value: ResourceColor) {
     super(value);
   }
-  static identity: Symbol = Symbol("labelfontColor");
+  static identity: Symbol = Symbol('labelfontColor');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().menuitem.resetLabelFontColor(node);
+      getUINativeModule().menuitem.resetLabelFontColor(node);
     } else {
-      GetUINativeModule().menuitem.setLabelFontColor(node, this.value);
+      getUINativeModule().menuitem.setLabelFontColor(node, this.value);
     }
   }
 
@@ -54,12 +54,12 @@ class ContentFontColorModifier extends ModifierWithKey<ResourceColor> {
   constructor(value: ResourceColor) {
     super(value);
   }
-  static identity: Symbol = Symbol("contentfontColor");
+  static identity: Symbol = Symbol('contentfontColor');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().menuitem.resetContentFontColor(node);
+      getUINativeModule().menuitem.resetContentFontColor(node);
     } else {
-      GetUINativeModule().menuitem.setContentFontColor(node, this.value);
+      getUINativeModule().menuitem.setContentFontColor(node, this.value);
     }
   }
 
@@ -72,13 +72,12 @@ class LabelFontModifier extends ModifierWithKey<Font> {
   constructor(value: Font) {
     super(value);
   }
-  static identity: Symbol = Symbol("labelFont");
+  static identity: Symbol = Symbol('labelFont');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset || !this.value) {
-      GetUINativeModule().menuitem.resetLabelFont(node);
-    }
-    else {
-      GetUINativeModule().menuitem.setLabelFont(node, (this.value as Font).size,
+      getUINativeModule().menuitem.resetLabelFont(node);
+    } else {
+      getUINativeModule().menuitem.setLabelFont(node, (this.value as Font).size,
         (this.value as Font).weight, (this.value as Font).family,
         (this.value as Font).style);
     }
@@ -97,13 +96,12 @@ class ContentFontModifier extends ModifierWithKey<Font> {
   constructor(value: Font) {
     super(value);
   }
-  static identity: Symbol = Symbol("contentFont");
+  static identity: Symbol = Symbol('contentFont');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset || !this.value) {
-      GetUINativeModule().menuitem.resetContentFont(node);
-    }
-    else {
-      GetUINativeModule().menuitem.setContentFont(node, (this.value as Font).size,
+      getUINativeModule().menuitem.resetContentFont(node);
+    } else {
+      getUINativeModule().menuitem.setContentFont(node, (this.value as Font).size,
         (this.value as Font).weight, (this.value as Font).family,
         (this.value as Font).style);
     }
@@ -152,10 +150,10 @@ class ArkMenuItemComponent extends ArkComponent implements MenuItemAttribute {
 // @ts-ignore
 globalThis.MenuItem.attributeModifier = function (modifier) {
   const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkMenuItemComponent(nativeNode);
   });
   applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
-}
+};

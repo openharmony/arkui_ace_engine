@@ -60,9 +60,9 @@ class MarqueeFontColorModifier extends ModifierWithKey<ResourceColor> {
   static identity: Symbol = Symbol('fontColor');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().marquee.resetFontColor(node);
+      getUINativeModule().marquee.resetFontColor(node);
     } else {
-      GetUINativeModule().marquee.setFontColor(node, this.value);
+      getUINativeModule().marquee.setFontColor(node, this.value);
     }
   }
 
@@ -74,13 +74,12 @@ class MarqueeFontSizeModifier extends ModifierWithKey<Length> {
   constructor(value: Length) {
     super(value);
   }
-  static identity: Symbol = Symbol("fontSize");
+  static identity: Symbol = Symbol('fontSize');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().marquee.resetFontSize(node);
-    }
-    else {
-      GetUINativeModule().marquee.setFontSize(node, this.value);
+      getUINativeModule().marquee.resetFontSize(node);
+    } else {
+      getUINativeModule().marquee.setFontSize(node, this.value);
     }
   }
 
@@ -95,10 +94,9 @@ class MarqueeAllowScaleModifier extends ModifierWithKey<boolean> {
   static identity: Symbol = Symbol('allowScale');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().marquee.resetAllowScale(node);
-    }
-    else {
-      GetUINativeModule().marquee.setAllowScale(node, this.value);
+      getUINativeModule().marquee.resetAllowScale(node);
+    } else {
+      getUINativeModule().marquee.setAllowScale(node, this.value);
     }
   }
 }
@@ -109,10 +107,9 @@ class MarqueeFontWeightModifier extends ModifierWithKey<string | number | FontWe
   static identity: Symbol = Symbol('fontWeight');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().marquee.resetFontWeight(node);
-    }
-    else {
-      GetUINativeModule().marquee.setFontWeight(node, this.value);
+      getUINativeModule().marquee.resetFontWeight(node);
+    } else {
+      getUINativeModule().marquee.setFontWeight(node, this.value);
     }
   }
   checkObjectDiff(): boolean {
@@ -125,21 +122,20 @@ class MarqueeFontFamilyModifier extends ModifierWithKey<string> {
   }
   static identity: Symbol = Symbol('fontFamily');
   applyPeer(node: KNode, reset: boolean): void {
-      if (reset) {
-        GetUINativeModule().marquee.resetFontFamily(node);
-      }
-      else {
-        GetUINativeModule().marquee.setFontFamily(node, this.value);
-      }
+    if (reset) {
+      getUINativeModule().marquee.resetFontFamily(node);
+    } else {
+      getUINativeModule().marquee.setFontFamily(node, this.value);
+    }
   }
 }
 // @ts-ignore
 globalThis.Marquee.attributeModifier = function (modifier) {
   const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
-  let component = this.createOrGetNode(elmtId, ()=> {
+  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
+  let component = this.createOrGetNode(elmtId, () => {
     return new ArkMarqueeComponent(nativeNode);
   });
   applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
-}
+};

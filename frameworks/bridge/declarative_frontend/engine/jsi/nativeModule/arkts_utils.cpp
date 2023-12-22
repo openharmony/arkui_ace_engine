@@ -391,6 +391,15 @@ bool ArkTSUtils::ParseJsInteger(const EcmaVM *vm, const Local<JSValueRef> &value
         result = value->Int32Value(vm);
         return true;
     }
+    return false;
+}
+
+bool ArkTSUtils::ParseJsInteger(const EcmaVM *vm, const Local<JSValueRef> &value, uint32_t &result)
+{
+    if (value->IsNumber()) {
+        result = value->Uint32Value(vm);
+        return true;
+    }
     // resource ignore by design
     return false;
 }
@@ -740,11 +749,22 @@ void ArkTSUtils::GetStringFromJS(const EcmaVM *vm, const Local<JSValueRef> &valu
 
 bool ArkTSUtils::ParseJsIntegerArray(const EcmaVM* vm, Local<JSValueRef> values, std::vector<uint32_t>& result)
 {
+    if (!values->IsArray(vm) && !values->IsObject()) {
+        return false;
+    }
+
     Local<panda::ArrayRef> valueArray = static_cast<Local<panda::ArrayRef>>(values);
     for (size_t i = 0; i < valueArray->Length(vm); i++) {
         Local<JSValueRef> value = valueArray->GetValueAt(vm, values, i);
         if (value->IsNumber()) {
             result.emplace_back(value->Uint32Value(vm));
+        } else if (value->IsObject()) {
+            uint32_t singleResInt;
+            if (ParseJsInteger(vm, value, singleResInt)) {
+                result.emplace_back(singleResInt);
+            } else {
+                return false;
+            }
         } else {
             return false;
         }

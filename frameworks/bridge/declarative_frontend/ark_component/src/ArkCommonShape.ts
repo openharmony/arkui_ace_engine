@@ -13,12 +13,16 @@
  * limitations under the License.
  */
 
-/// <reference path="./import.ts" />
+/// <reference path='./import.ts' />
 class ArkCommonShapeComponent extends ArkComponent implements CommonShapeMethod<ShapeAttribute> {
   constructor(nativePtr: KNode) {
     super(nativePtr);
   }
-  viewPort(value: { x?: string | number | undefined; y?: string | number | undefined; width?: string | number | undefined; height?: string | number | undefined; }): this {
+  viewPort(value: {
+    x?: string | number | undefined;
+    y?: string | number | undefined; width?: string | number | undefined;
+    height?: string | number | undefined;
+  }): this {
     throw new Error('Method not implemented.');
   }
   stroke(value: ResourceColor): this {
@@ -79,10 +83,9 @@ class StrokeDashArrayModifier extends ModifierWithKey<object> {
   static identity: Symbol = Symbol('strokeDashArray');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().commonShape.resetStrokeDashArray(node);
-    }
-    else {
-      GetUINativeModule().commonShape.setStrokeDashArray(node, this.value);
+      getUINativeModule().commonShape.resetStrokeDashArray(node);
+    } else {
+      getUINativeModule().commonShape.setStrokeDashArray(node, this.value);
     }
   }
 
@@ -98,9 +101,9 @@ class StrokeModifier extends ModifierWithKey<ResourceColor> {
   static identity: Symbol = Symbol('stroke');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().commonShape.resetStroke(node);
+      getUINativeModule().commonShape.resetStroke(node);
     } else {
-      GetUINativeModule().commonShape.setStroke(node, this.value);
+      getUINativeModule().commonShape.setStroke(node, this.value);
     }
   }
 
@@ -116,9 +119,9 @@ class FillModifier extends ModifierWithKey<ResourceColor> {
   static identity: Symbol = Symbol('fill');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().commonShape.resetFill(node);
+      getUINativeModule().commonShape.resetFill(node);
     } else {
-      GetUINativeModule().commonShape.setFill(node, this.value);
+      getUINativeModule().commonShape.setFill(node, this.value);
     }
   }
 
@@ -134,9 +137,9 @@ class StrokeDashOffsetModifier extends ModifierWithKey<number | string> {
   static identity: Symbol = Symbol('strokeDashOffset');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().commonShape.resetStrokeDashOffset(node);
+      getUINativeModule().commonShape.resetStrokeDashOffset(node);
     } else {
-      GetUINativeModule().commonShape.setStrokeDashOffset(node, this.value);
+      getUINativeModule().commonShape.setStrokeDashOffset(node, this.value);
     }
   }
 
@@ -152,9 +155,9 @@ class StrokeLineCapModifier extends ModifierWithKey<number> {
   static identity: Symbol = Symbol('strokeLineCap');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().commonShape.resetStrokeLineCap(node);
+      getUINativeModule().commonShape.resetStrokeLineCap(node);
     } else {
-      GetUINativeModule().commonShape.setStrokeLineCap(node, this.value);
+      getUINativeModule().commonShape.setStrokeLineCap(node, this.value);
     }
   }
 }
@@ -166,9 +169,9 @@ class StrokeLineJoinModifier extends ModifierWithKey<number> {
   static identity: Symbol = Symbol('strokeLineJoin');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().commonShape.resetStrokeLineJoin(node);
+      getUINativeModule().commonShape.resetStrokeLineJoin(node);
     } else {
-      GetUINativeModule().commonShape.setStrokeLineJoin(node, this.value);
+      getUINativeModule().commonShape.setStrokeLineJoin(node, this.value);
     }
   }
 }
@@ -180,9 +183,9 @@ class StrokeMiterLimitModifier extends ModifierWithKey<number | string> {
   static identity: Symbol = Symbol('strokeMiterLimit');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().commonShape.resetStrokeMiterLimit(node);
+      getUINativeModule().commonShape.resetStrokeMiterLimit(node);
     } else {
-      GetUINativeModule().commonShape.setStrokeMiterLimit(node, this.value);
+      getUINativeModule().commonShape.setStrokeMiterLimit(node, this.value);
     }
   }
 }
@@ -194,9 +197,9 @@ class FillOpacityModifier extends ModifierWithKey<number | string | Resource> {
   static identity: Symbol = Symbol('FillOpacity');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().commonShape.resetFillOpacity(node);
+      getUINativeModule().commonShape.resetFillOpacity(node);
     } else {
-      GetUINativeModule().commonShape.setFillOpacity(node, this.value);
+      getUINativeModule().commonShape.setFillOpacity(node, this.value);
     }
   }
   checkObjectDiff(): boolean {
@@ -211,9 +214,9 @@ class StrokeOpacityModifier extends ModifierWithKey<number | string | Resource> 
   static identity: Symbol = Symbol('StrokeOpacity');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().commonShape.resetStrokeOpacity(node);
+      getUINativeModule().commonShape.resetStrokeOpacity(node);
     } else {
-      GetUINativeModule().commonShape.setStrokeOpacity(node, this.value);
+      getUINativeModule().commonShape.setStrokeOpacity(node, this.value);
     }
   }
   checkObjectDiff(): boolean {
@@ -228,9 +231,9 @@ class StrokeWidthModifier extends ModifierWithKey<number | string> {
   static identity: Symbol = Symbol('strokeWidth');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().commonShape.resetStrokeWidth(node);
+      getUINativeModule().commonShape.resetStrokeWidth(node);
     } else {
-      GetUINativeModule().commonShape.setStrokeWidth(node, this.value);
+      getUINativeModule().commonShape.setStrokeWidth(node, this.value);
     }
   }
 }
@@ -242,9 +245,9 @@ class AntiAliasModifier extends ModifierWithKey<boolean> {
   static identity: Symbol = Symbol('antiAlias');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().commonShape.resetAntiAlias(node);
+      getUINativeModule().commonShape.resetAntiAlias(node);
     } else {
-      GetUINativeModule().commonShape.setAntiAlias(node, this.value);
+      getUINativeModule().commonShape.setAntiAlias(node, this.value);
     }
   }
 }

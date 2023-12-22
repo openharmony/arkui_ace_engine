@@ -18,19 +18,28 @@ class ArkProgressComponent extends ArkComponent implements ProgressAttribute {
   constructor(nativePtr: KNode) {
     super(nativePtr);
   }
-  value(value: number): ProgressAttribute<keyof ProgressStyleMap, LinearStyleOptions | ProgressStyleOptions | RingStyleOptions | EclipseStyleOptions | ScaleRingStyleOptions | CapsuleStyleOptions> {
+  value(value: number): ProgressAttribute<keyof ProgressStyleMap, LinearStyleOptions |
+  ProgressStyleOptions | RingStyleOptions | EclipseStyleOptions | ScaleRingStyleOptions |
+  CapsuleStyleOptions> {
     modifierWithKey(this._modifiersWithKeys, ProgressValueModifier.identity, ProgressValueModifier, value);
     return this;
   }
-  color(value: ResourceColor | LinearGradient): ProgressAttribute<keyof ProgressStyleMap, LinearStyleOptions | ProgressStyleOptions | RingStyleOptions | EclipseStyleOptions | ScaleRingStyleOptions | CapsuleStyleOptions> {
+  color(value: ResourceColor | LinearGradient): ProgressAttribute<keyof ProgressStyleMap, LinearStyleOptions |
+  ProgressStyleOptions | RingStyleOptions | EclipseStyleOptions | ScaleRingStyleOptions |
+  CapsuleStyleOptions> {
     modifierWithKey(this._modifiersWithKeys, ProgressColorModifier.identity, ProgressColorModifier, value);
     return this;
   }
-  style(value: LinearStyleOptions | ProgressStyleOptions | RingStyleOptions | EclipseStyleOptions | ScaleRingStyleOptions | CapsuleStyleOptions): ProgressAttribute<keyof ProgressStyleMap, LinearStyleOptions | ProgressStyleOptions | RingStyleOptions | EclipseStyleOptions | ScaleRingStyleOptions | CapsuleStyleOptions> {
+  style(value: LinearStyleOptions | ProgressStyleOptions | RingStyleOptions | EclipseStyleOptions |
+  ScaleRingStyleOptions | CapsuleStyleOptions):
+    ProgressAttribute<keyof ProgressStyleMap, LinearStyleOptions | ProgressStyleOptions |
+    RingStyleOptions | EclipseStyleOptions | ScaleRingStyleOptions | CapsuleStyleOptions> {
     modifierWithKey(this._modifiersWithKeys, ProgressStyleModifier.identity, ProgressStyleModifier, value);
     return this;
   }
-  monopolizeEvents(monopolize: boolean): ProgressAttribute<keyof ProgressStyleMap, LinearStyleOptions | ProgressStyleOptions | RingStyleOptions | EclipseStyleOptions | ScaleRingStyleOptions | CapsuleStyleOptions> {
+  monopolizeEvents(monopolize: boolean): ProgressAttribute<keyof ProgressStyleMap, LinearStyleOptions |
+  ProgressStyleOptions | RingStyleOptions | EclipseStyleOptions | ScaleRingStyleOptions |
+  CapsuleStyleOptions> {
     throw new Error('Method not implemented.');
   }
   backgroundColor(value: ResourceColor): this {
@@ -43,9 +52,9 @@ class ProgressValueModifier extends ModifierWithKey<number> {
   static identity: Symbol = Symbol('value');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().progress.ResetProgressValue(node);
+      getUINativeModule().progress.ResetProgressValue(node);
     } else {
-      GetUINativeModule().progress.SetProgressValue(node, this.value!);
+      getUINativeModule().progress.SetProgressValue(node, this.value!);
     }
   }
   checkObjectDiff(): boolean {
@@ -57,9 +66,9 @@ class ProgressColorModifier extends ModifierWithKey<ResourceColor | LinearGradie
   static identity: Symbol = Symbol('color');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().progress.resetProgressColor(node);
+      getUINativeModule().progress.resetProgressColor(node);
     } else {
-      GetUINativeModule().progress.setProgressColor(node, this.value!);
+      getUINativeModule().progress.setProgressColor(node, this.value!);
     }
   }
 
@@ -73,7 +82,7 @@ class ProgressStyleModifier extends ModifierWithKey<ProgressStyleOptions | Capsu
   static identity: Symbol = Symbol('style');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().progress.ResetProgressStyle(node);
+      getUINativeModule().progress.ResetProgressStyle(node);
     } else {
       let strokeWidth = (<ProgressStyleOptions> this.value).strokeWidth;
       let scaleCount = (<ProgressStyleOptions> this.value).scaleCount;
@@ -82,11 +91,11 @@ class ProgressStyleModifier extends ModifierWithKey<ProgressStyleOptions | Capsu
       let borderColor = (<CapsuleStyleOptions> this.value).borderColor;
       let borderWidth = (<CapsuleStyleOptions> this.value).borderWidth;
       let content = (<CapsuleStyleOptions> this.value).content;
-      let fontSize = undefined;
-      let fontWeight = undefined;
-      let fontFamily = undefined;
-      let fontStyle = undefined;
-      if ((<CapsuleStyleOptions>this.value).font) {
+      let fontSize;
+      let fontWeight;
+      let fontFamily;
+      let fontStyle;
+      if ((<CapsuleStyleOptions> this.value).font) {
         fontSize = (<CapsuleStyleOptions> this.value).font.size;
         fontWeight = (<CapsuleStyleOptions> this.value).font.weight;
         fontFamily = (<CapsuleStyleOptions> this.value).font.family;
@@ -98,7 +107,7 @@ class ProgressStyleModifier extends ModifierWithKey<ProgressStyleOptions | Capsu
       let shadow = (<RingStyleOptions> this.value).shadow;
       let status = (<RingStyleOptions> this.value).status;
       let strokeRadius = (<LinearStyleOptions> this.value).strokeRadius;
-      GetUINativeModule().progress.SetProgressStyle(
+      getUINativeModule().progress.SetProgressStyle(
         node, strokeWidth, scaleCount, scaleWidth, enableSmoothEffect, borderColor,
         borderWidth, content, fontSize, fontWeight, fontFamily, fontStyle, fontColor,
         enableScanEffect, showDefaultPercentage, shadow, status, strokeRadius
@@ -114,9 +123,9 @@ class ProgressBackgroundColorModifier extends ModifierWithKey<ResourceColor> {
   static identity: Symbol = Symbol('progressBackgroundColor');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().progress.resetProgressBackgroundColor(node);
+      getUINativeModule().progress.resetProgressBackgroundColor(node);
     } else {
-      GetUINativeModule().progress.setProgressBackgroundColor(node, this.value);
+      getUINativeModule().progress.setProgressBackgroundColor(node, this.value);
     }
   }
 
@@ -128,10 +137,10 @@ class ProgressBackgroundColorModifier extends ModifierWithKey<ResourceColor> {
 // @ts-ignore
 globalThis.Progress.attributeModifier = function (modifier) {
   const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkProgressComponent(nativeNode);
   });
   applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
-}
+};

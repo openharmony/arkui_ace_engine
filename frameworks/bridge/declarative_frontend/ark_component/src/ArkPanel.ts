@@ -19,27 +19,15 @@ class ArkPanelComponent extends ArkComponent implements PanelAttribute {
     super(nativePtr);
   }
   mode(value: PanelMode): this {
-    if (typeof value === 'number') {
-      modifier(this._modifiers, PanelModeModifier, value);
-    } else {
-      modifier(this._modifiers, PanelModeModifier, undefined);
-    }
+    modifierWithKey(this._modifiersWithKeys, PanelModeModifier.identity, PanelModeModifier, value);
     return this;
   }
   type(value: PanelType): this {
-    if (typeof value === 'number') {
-      modifier(this._modifiers, PanelTypeModifier, value);
-    } else {
-      modifier(this._modifiers, PanelTypeModifier, undefined);
-    }
+    modifierWithKey(this._modifiersWithKeys, PanelTypeModifier.identity, PanelTypeModifier, value);
     return this;
   }
   dragBar(value: boolean): this {
-    if (typeof value === 'boolean') {
-      modifier(this._modifiers, DragBarModifier, value);
-    } else {
-      modifier(this._modifiers, DragBarModifier, undefined);
-    }
+    modifierWithKey(this._modifiersWithKeys, DragBarModifier.identity, DragBarModifier, value);
     return this;
   }
   customHeight(value: any): this {
@@ -47,35 +35,19 @@ class ArkPanelComponent extends ArkComponent implements PanelAttribute {
     return this;
   }
   fullHeight(value: string | number): this {
-    if (typeof value !== 'number' && typeof value !== 'string') {
-      modifier(this._modifiers, PanelFullHeightModifier, undefined);
-    } else {
-      modifier(this._modifiers, PanelFullHeightModifier, value);
-    }
+    modifierWithKey(this._modifiersWithKeys, PanelFullHeightModifier.identity, PanelFullHeightModifier, value);
     return this;
   }
   halfHeight(value: string | number): this {
-    if (typeof value !== 'number' && typeof value !== 'string') {
-      modifier(this._modifiers, PanelHalfHeightModifier, undefined);
-    } else {
-      modifier(this._modifiers, PanelHalfHeightModifier, value);
-    }
+    modifierWithKey(this._modifiersWithKeys, PanelHalfHeightModifier.identity, PanelHalfHeightModifier, value);
     return this;
   }
   miniHeight(value: string | number): this {
-    if (typeof value !== 'number' && typeof value !== 'string') {
-      modifier(this._modifiers, PanelMiniHeightModifier, undefined);
-    } else {
-      modifier(this._modifiers, PanelMiniHeightModifier, value);
-    }
+    modifierWithKey(this._modifiersWithKeys, PanelMiniHeightModifier.identity, PanelMiniHeightModifier, value);
     return this;
   }
   show(value: boolean): this {
-    if (typeof value === 'boolean') {
-      modifier(this._modifiers, ShowModifier, value);
-    } else {
-      modifier(this._modifiers, ShowModifier, undefined);
-    }
+    modifierWithKey(this._modifiersWithKeys, ShowModifier.identity, ShowModifier, value);
     return this;
   }
   backgroundMask(color: ResourceColor): this {
@@ -83,11 +55,7 @@ class ArkPanelComponent extends ArkComponent implements PanelAttribute {
     return this;
   }
   showCloseIcon(value: boolean): this {
-    if (typeof value === 'boolean') {
-      modifier(this._modifiers, ShowCloseIconModifier, value);
-    } else {
-      modifier(this._modifiers, ShowCloseIconModifier, undefined);
-    }
+    modifierWithKey(this._modifiersWithKeys, ShowCloseIconModifier.identity, ShowCloseIconModifier, value);
     return this;
   }
   onChange(event: (width: number, height: number, mode: PanelMode) => void): this {
@@ -102,12 +70,12 @@ class PanelBackgroundMaskModifier extends ModifierWithKey<ResourceColor> {
   constructor(value: ResourceColor) {
     super(value);
   }
-  static identity: Symbol = Symbol("panelBackgroundMask");
+  static identity: Symbol = Symbol('panelBackgroundMask');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().panel.resetPanelBackgroundMask(node);
+      getUINativeModule().panel.resetPanelBackgroundMask(node);
     } else {
-      GetUINativeModule().panel.setPanelBackgroundMask(node, this.value);
+      getUINativeModule().panel.setPanelBackgroundMask(node, this.value);
     }
   }
 
@@ -116,31 +84,39 @@ class PanelBackgroundMaskModifier extends ModifierWithKey<ResourceColor> {
   }
 }
 
-class PanelModeModifier extends Modifier<PanelMode> {
+class PanelModeModifier extends ModifierWithKey<PanelMode> {
   constructor(value: PanelMode) {
     super(value);
   }
   static identity: Symbol = Symbol('panelMode');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().panel.resetPanelMode(node);
+      getUINativeModule().panel.resetPanelMode(node);
     } else {
-      GetUINativeModule().panel.setPanelMode(node, this.value);
+      getUINativeModule().panel.setPanelMode(node, this.value);
     }
+  }
+
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
 
-class PanelTypeModifier extends Modifier<PanelType> {
+class PanelTypeModifier extends ModifierWithKey<PanelType> {
   constructor(value: PanelType) {
     super(value);
   }
   static identity: Symbol = Symbol('panelType');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().panel.resetPanelType(node);
+      getUINativeModule().panel.resetPanelType(node);
     } else {
-      GetUINativeModule().panel.setPanelType(node, this.value);
+      getUINativeModule().panel.setPanelType(node, this.value);
     }
+  }
+
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
 
@@ -148,12 +124,12 @@ class PanelCustomHeightModifier extends ModifierWithKey<Dimension | PanelHeight>
   constructor(value: Dimension | PanelHeight) {
     super(value);
   }
-  static identity: Symbol = Symbol("panelCustomHeight");
+  static identity: Symbol = Symbol('panelCustomHeight');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().panel.resetPanelCustomHeight(node);
+      getUINativeModule().panel.resetPanelCustomHeight(node);
     } else {
-      GetUINativeModule().panel.setPanelCustomHeight(node, this.value);
+      getUINativeModule().panel.setPanelCustomHeight(node, this.value);
     }
   }
 
@@ -162,94 +138,118 @@ class PanelCustomHeightModifier extends ModifierWithKey<Dimension | PanelHeight>
   }
 }
 
-class PanelFullHeightModifier extends Modifier<string | number> {
+class PanelFullHeightModifier extends ModifierWithKey<string | number> {
   constructor(value: string | number) {
     super(value);
   }
   static identity: Symbol = Symbol('panelFullHeight');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().panel.resetPanelFullHeight(node);
+      getUINativeModule().panel.resetPanelFullHeight(node);
     } else {
-      GetUINativeModule().panel.setPanelFullHeight(node, this.value);
+      getUINativeModule().panel.setPanelFullHeight(node, this.value);
     }
+  }
+
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
 
-class PanelHalfHeightModifier extends Modifier<string | number> {
+class PanelHalfHeightModifier extends ModifierWithKey<string | number> {
   constructor(value: string | number) {
     super(value);
   }
   static identity: Symbol = Symbol('panelHalfHeight');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().panel.resetPanelHalfHeight(node);
+      getUINativeModule().panel.resetPanelHalfHeight(node);
     } else {
-      GetUINativeModule().panel.setPanelHalfHeight(node, this.value);
+      getUINativeModule().panel.setPanelHalfHeight(node, this.value);
     }
+  }
+
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
 
-class PanelMiniHeightModifier extends Modifier<string | number> {
+class PanelMiniHeightModifier extends ModifierWithKey<string | number> {
   constructor(value: string | number) {
     super(value);
   }
   static identity: Symbol = Symbol('panelMiniHeight');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().panel.resetPanelMiniHeight(node);
+      getUINativeModule().panel.resetPanelMiniHeight(node);
     } else {
-      GetUINativeModule().panel.setPanelMiniHeight(node, this.value);
+      getUINativeModule().panel.setPanelMiniHeight(node, this.value);
     }
+  }
+
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
 
-class ShowCloseIconModifier extends Modifier<boolean> {
+class ShowCloseIconModifier extends ModifierWithKey<boolean> {
   constructor(value: boolean) {
     super(value);
   }
   static identity: Symbol = Symbol('showCloseIcon');
   applyPeer(node: KNode, reset: boolean) {
     if (reset) {
-      GetUINativeModule().panel.resetShowCloseIcon(node);
+      getUINativeModule().panel.resetShowCloseIcon(node);
     } else {
-      GetUINativeModule().panel.setShowCloseIcon(node, this.value);
+      getUINativeModule().panel.setShowCloseIcon(node, this.value);
     }
+  }
+
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
 
-class DragBarModifier extends Modifier<boolean> {
+class DragBarModifier extends ModifierWithKey<boolean> {
   constructor(value: boolean) {
     super(value);
   }
   static identity: Symbol = Symbol('dragBar');
   applyPeer(node: KNode, reset: boolean) {
     if (reset) {
-      GetUINativeModule().panel.resetDragBar(node);
+      getUINativeModule().panel.resetDragBar(node);
     } else {
-      GetUINativeModule().panel.setDragBar(node, this.value);
+      getUINativeModule().panel.setDragBar(node, this.value);
     }
+  }
+
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
 
-class ShowModifier extends Modifier<boolean> {
+class ShowModifier extends ModifierWithKey<boolean> {
   constructor(value: boolean) {
     super(value);
   }
   static identity: Symbol = Symbol('show');
   applyPeer(node: KNode, reset: boolean) {
     if (reset) {
-      GetUINativeModule().panel.resetShow(node);
+      getUINativeModule().panel.resetShow(node);
     } else {
-      GetUINativeModule().panel.setShow(node, this.value);
+      getUINativeModule().panel.setShow(node, this.value);
     }
+  }
+
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
 
 // @ts-ignore
 globalThis.Panel.attributeModifier = function (modifier) {
   const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkPanelComponent(nativeNode);
   });

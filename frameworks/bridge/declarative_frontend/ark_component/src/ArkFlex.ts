@@ -29,7 +29,7 @@ class ArkFlexComponent extends ArkComponent implements FlexAttribute {
 // @ts-ignore
 globalThis.Flex.attributeModifier = function (modifier) {
   const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkFlexComponent(nativeNode);
   });

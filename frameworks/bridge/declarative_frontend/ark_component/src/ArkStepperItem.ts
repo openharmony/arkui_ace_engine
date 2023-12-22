@@ -41,9 +41,9 @@ class NextLabelModifier extends ModifierWithKey<string> {
 
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().stepperItem.resetNextLabel(node);
+      getUINativeModule().stepperItem.resetNextLabel(node);
     } else {
-      GetUINativeModule().stepperItem.setNextLabel(node, this.value);
+      getUINativeModule().stepperItem.setNextLabel(node, this.value);
     }
   }
 }
@@ -51,10 +51,10 @@ class NextLabelModifier extends ModifierWithKey<string> {
 // @ts-ignore
 globalThis.StepperItem.attributeModifier = function (modifier) {
   const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkStepperItemComponent(nativeNode);
   });
   applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
-}
+};
