@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_BASE_UTILS_SYSTEM_PROPERTIES_H
 
 #include <memory>
+#include <optional>
 #include <string>
 
 #include "base/utils/device_config.h"
