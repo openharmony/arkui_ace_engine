@@ -915,7 +915,7 @@ HWTEST_F(CustomTestNg, CustomTest019, TestSize.Level1)
 
 /**
  * @tc.name: CustomTest020
- * @tc.desc: Test cast of FireRecycleSelf.
+ * @tc.desc: Test cast to FireRecycleSelf.
  * @tc.type: FUNC
  */
 HWTEST_F(CustomTestNg, CustomTest020, TestSize.Level1)
@@ -951,7 +951,7 @@ HWTEST_F(CustomTestNg, CustomTest020, TestSize.Level1)
 
 /**
  * @tc.name: CustomTest021
- * @tc.desc: Test cast of SetOnDumpInfoFunc.
+ * @tc.desc: Test cast to SetOnDumpInfoFunc.
  * @tc.type: FUNC
  */
 HWTEST_F(CustomTestNg, CustomTest021, TestSize.Level1)
@@ -980,7 +980,7 @@ HWTEST_F(CustomTestNg, CustomTest021, TestSize.Level1)
 
 /**
  * @tc.name: CustomTest022
- * @tc.desc: Test cast of CustomNodeLayoutAlgorithm.Measure.
+ * @tc.desc: Test cast to CustomNodeLayoutAlgorithm.Measure.
  * @tc.type: FUNC
  */
 HWTEST_F(CustomTestNg, CustomTest022, TestSize.Level1)
@@ -1032,7 +1032,7 @@ HWTEST_F(CustomTestNg, CustomTest022, TestSize.Level1)
 
 /**
  * @tc.name: CustomTest023
- * @tc.desc: Test cast of CustomNodeLayoutAlgorithm.Layout.
+ * @tc.desc: Test cast to CustomNodeLayoutAlgorithm.Layout.
  * @tc.type: FUNC
  */
 HWTEST_F(CustomTestNg, CustomTest023, TestSize.Level1)
@@ -1072,7 +1072,7 @@ HWTEST_F(CustomTestNg, CustomTest023, TestSize.Level1)
 
 /**
  * @tc.name: CustomTest024
- * @tc.desc: Test cast of CustomNodePattern.OnDirtyLayoutWrapperSwap.
+ * @tc.desc: Test cast to CustomNodePattern.OnDirtyLayoutWrapperSwap.
  * @tc.type: FUNC
  */
 HWTEST_F(CustomTestNg, CustomTest024, TestSize.Level1)
@@ -1113,7 +1113,7 @@ HWTEST_F(CustomTestNg, CustomTest024, TestSize.Level1)
 
 /**
  * @tc.name: CustomTest025
- * @tc.desc: Test cast of CustomTitleNode.CreateCustomTitleNode.
+ * @tc.desc: Test cast to CustomTitleNode.CreateCustomTitleNode.
  * @tc.type: FUNC
  */
 HWTEST_F(CustomTestNg, CustomTest025, TestSize.Level1)
