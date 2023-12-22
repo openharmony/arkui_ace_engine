@@ -299,6 +299,7 @@ public:
 
     void NotifyDialogChange(bool isShow);
     void NotifyPageHide(const std::string& pageName);
+    void DumpInfo() override;
 
 private:
     void CheckTopNavPathChange(const std::optional<std::pair<std::string, RefPtr<UINode>>>& preTopNavPath,

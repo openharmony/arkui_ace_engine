@@ -115,11 +115,15 @@ void NavigationGroupNode::UpdateNavDestinationNodeWithoutMarkDirty(const RefPtr<
     bool hasChanged = false;
     int32_t slot = 0;
     UpdateLastStandardIndex();
+    TAG_LOGI(AceLogTag::ACE_NAVIGATION, "last standard page index is %{public}d", lastStandardIndex_);
     for (int32_t i = 0; i != navDestinationNodes.size(); ++i) {
         const auto& childNode = navDestinationNodes[i];
         const auto& uiNode = childNode.second;
         auto navDestination = AceType::DynamicCast<NavDestinationGroupNode>(GetNavDestinationNode(uiNode));
-        CHECK_NULL_VOID(navDestination);
+        if (navDestination == nullptr) {
+            TAG_LOGI(AceLogTag::ACE_NAVIGATION, "get destination node failed");
+            return;
+        }
         auto navDestinationPattern = navDestination->GetPattern<NavDestinationPattern>();
         CHECK_NULL_VOID(navDestinationPattern);
         navDestinationPattern->SetName(childNode.first);
@@ -167,6 +171,7 @@ void NavigationGroupNode::UpdateNavDestinationNodeWithoutMarkDirty(const RefPtr<
             }
             // remove content child
             auto navDestinationPattern = navDestination->GetPattern<NavDestinationPattern>();
+            TAG_LOGI(AceLogTag::ACE_NAVIGATION, "remove child: %{public}s", navDestinationPattern->GetName().c_str());
             if (navDestinationPattern->GetIsOnShow()) {
                 eventHub->FireOnHiddenEvent(navDestinationPattern->GetName());
                 navDestinationPattern->SetIsOnShow(false);
@@ -220,6 +225,8 @@ RefPtr<UINode> NavigationGroupNode::GetNavDestinationNode(RefPtr<UINode> uiNode)
             continue;
         }
     }
+    TAG_LOGI(AceLogTag::ACE_NAVIGATION, "get navDestination node failed: id: %{public}d, %{public}s",
+        uiNode->GetId(), uiNode->GetTag().c_str());
     return nullptr;
 }
 
@@ -259,6 +266,7 @@ void NavigationGroupNode::SetBackButtonEvent(
         [navDestinationWeak = WeakPtr<NavDestinationGroupNode>(navDestination), navigationWeak = WeakClaim(this),
             navRouterPatternWeak = WeakPtr<NavRouterPattern>(navRouterPattern)](GestureEvent& /*info*/) -> bool {
         auto navDestination = navDestinationWeak.Upgrade();
+        TAG_LOGD(AceLogTag::ACE_NAVIGATION, "click navigation back button");
         CHECK_NULL_RETURN(navDestination, false);
         auto eventHub = navDestination->GetEventHub<NavDestinationEventHub>();
         CHECK_NULL_RETURN(eventHub, false);
@@ -299,6 +307,7 @@ bool NavigationGroupNode::CheckCanHandleBack()
     auto navigation = AceType::WeakClaim(this).Upgrade();
     CHECK_NULL_RETURN(navigation, false);
     if (navigation->isOnAnimation_) {
+        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "navigation is onAnimation, back press is not support");
         return true;
     }
     auto navigationPattern = GetPattern<NavigationPattern>();
@@ -309,6 +318,9 @@ bool NavigationGroupNode::CheckCanHandleBack()
     }
     auto navDestination = AceType::DynamicCast<NavDestinationGroupNode>(children.back());
     CHECK_NULL_RETURN(navDestination, false);
+    auto navDestinationPattern = AceType::DynamicCast<NavDestinationPattern>(navDestination->GetPattern());
+    TAG_LOGI(AceLogTag::ACE_NAVIGATION, "navDestination consume back button event: %{public}s",
+        navDestinationPattern->GetName().c_str());
     GestureEvent gestureEvent;
     return navDestination->GetNavDestinationBackButtonEvent()(gestureEvent);
 }

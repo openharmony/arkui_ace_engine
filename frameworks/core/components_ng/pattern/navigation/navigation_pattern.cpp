@@ -14,7 +14,9 @@
  */
 
 #include "core/components_ng/pattern/navigation/navigation_pattern.h"
+#include <string>
 
+#include "base/log/dump_log.h"
 #include "base/log/log_wrapper.h"
 #include "base/memory/referenced.h"
 #include "base/mousestyle/mouse_style.h"
@@ -218,6 +220,7 @@ void NavigationPattern::CheckTopNavPathChange(
 {
     auto replaceValue = navigationStack_->GetReplaceValue();
     if (preTopNavPath == newTopNavPath && replaceValue != 1) {
+        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "page is not change. don't transition");
         return;
     }
     isChanged_ = true;
@@ -536,6 +539,7 @@ void NavigationPattern::TransitionWithAnimation(const RefPtr<NavDestinationGroup
     auto layoutProperty = navigationNode->GetLayoutProperty<NavigationLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     if (layoutProperty->GetHideNavBarValue(false)) {
+        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "hide nav bar: don't do animation in one destination in stack");
         if (preTopNavDestination) {
             auto parent = preTopNavDestination->GetParent();
             CHECK_NULL_VOID(parent);
@@ -1030,5 +1034,13 @@ void NavigationPattern::NotifyDialogChange(bool isShow)
         }
         navDestinationPattern->SetIsOnShow(isShow);
     }
+}
+
+void NavigationPattern::DumpInfo()
+{
+    if (!navigationStack_) {
+        return;
+    }
+    DumpLog::GetInstance().AddDesc(std::string("size").append(std::to_string(navigationStack_->Size())));
 }
 } // namespace OHOS::Ace::NG
