@@ -6079,7 +6079,7 @@ bool JSViewAbstract::ParseSheetBackgroundBlurStyle(const JSRef<JSVal>& args, Blu
     if (args->IsNumber()) {
         auto sheetBlurStyle = args->ToNumber<int32_t>();
         if (sheetBlurStyle >= static_cast<int>(BlurStyle::NO_MATERIAL) &&
-            sheetBlurStyle <= static_cast<int>(BlurStyle::BACKGROUND_ULTRA_THICK)) {
+            sheetBlurStyle <= static_cast<int>(BlurStyle::COMPONENT_ULTRA_THICK)) {
             blurStyleOptions.blurStyle = static_cast<BlurStyle>(sheetBlurStyle);
         } else {
             return false;
