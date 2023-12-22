@@ -3504,7 +3504,7 @@ SizeF OverlayManager::CaculateMenuSize(
     auto fontweight = StringUtils::FontWeightToString(textStyle.GetFontWeight());
     measureContext.fontWeight = fontweight;
     auto fontFamilies = textStyle.GetFontFamilies();
-    measureContext.fontWeight = V2::ConvertFontFamily(fontFamilies);
+    measureContext.fontFamily = V2::ConvertFontFamily(fontFamilies);
     auto measureSize = MeasureUtil::MeasureTextSize(measureContext);
     auto selectTheme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_RETURN(selectTheme, SizeF());

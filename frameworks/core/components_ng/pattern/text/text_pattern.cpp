@@ -1676,12 +1676,10 @@ void TextPattern::OnModifyDone()
         textForDisplay_ = textLayoutProperty->GetContent().value_or("");
         if (textCache != textForDisplay_) {
             host->OnAccessibilityEvent(AccessibilityEventType::TEXT_CHANGE, textCache, textForDisplay_);
-            if (copyOption_ == CopyOptions::None || !textDetectEnable_) {
-                aiDetectInitialized_ = false;
-            }
+            aiDetectInitialized_ = false;
         }
         textForAI_ = textForDisplay_;
-        if (textDetectEnable_ && (aiDetectTypesChanged_ || !aiDetectInitialized_ || textCache != textForDisplay_)) {
+        if (textDetectEnable_ && (aiDetectTypesChanged_ || !aiDetectInitialized_)) {
             StartAITask();
         }
     }
@@ -1808,6 +1806,17 @@ void TextPattern::ParseAIResult(const TextDataDetectResult& result, int32_t star
     if (startPos + AI_TEXT_MAX_LENGTH >= static_cast<int32_t>(StringUtils::ToWstring(textForAI_).length())) {
         aiDetectInitialized_ = true;
         aiDetectTypesChanged_ = false;
+        int32_t preEnd = 0;
+        auto aiSpanIterator = aiSpanMap_.begin();
+        while (aiSpanIterator != aiSpanMap_.end()) {
+            auto aiSpan = aiSpanIterator->second;
+            if (aiSpan.start < preEnd) {
+                aiSpanIterator = aiSpanMap_.erase(aiSpanIterator);
+            } else {
+                preEnd = aiSpan.end;
+                ++aiSpanIterator;
+            }
+        }
     }
 }
 
@@ -2046,9 +2055,7 @@ void TextPattern::InitSpanItem(std::stack<RefPtr<UINode>> nodes)
     
     if (textCache != textForDisplay_) {
         host->OnAccessibilityEvent(AccessibilityEventType::TEXT_CHANGE, textCache, textForDisplay_);
-        if (copyOption_ == CopyOptions::None || !textDetectEnable_) {
-            aiDetectInitialized_ = false;
-        }
+        aiDetectInitialized_ = false;
         OnAfterModifyDone();
         for (const auto& item : spans_) {
             if (item->inspectId.empty()) {
@@ -2061,7 +2068,7 @@ void TextPattern::InitSpanItem(std::stack<RefPtr<UINode>> nodes)
         auto gestureEventHub = host->GetOrCreateGestureEventHub();
         InitClickEvent(gestureEventHub);
     }
-    if (textDetectEnable_ && (aiDetectTypesChanged_ || !aiDetectInitialized_ || textForAICache != textForAI_)) {
+    if (textDetectEnable_ && (aiDetectTypesChanged_ || !aiDetectInitialized_)) {
         StartAITask();
     }
 }
