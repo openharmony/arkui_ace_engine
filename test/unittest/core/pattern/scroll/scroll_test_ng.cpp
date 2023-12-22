@@ -1327,18 +1327,15 @@ HWTEST_F(ScrollTestNg, UpdateCurrentOffset002, TestSize.Level1)
 
     pattern_->currentOffset_ = 10.f;
     pattern_->UpdateCurrentOffset(-5.f, SCROLL_FROM_UPDATE);
-    FlushLayoutTask(frameNode_);
     EXPECT_EQ(pattern_->GetScrollBarOutBoundaryExtent(), 5.f);
 
     pattern_->currentOffset_ = -1000.f;
     pattern_->UpdateCurrentOffset(-10.f, SCROLL_FROM_UPDATE);
-    FlushLayoutTask(frameNode_);
     EXPECT_EQ(pattern_->GetScrollBarOutBoundaryExtent(),
         -pattern_->currentOffset_ - (ITEM_HEIGHT * TOTAL_LINE_NUMBER - SCROLL_HEIGHT));
 
     pattern_->currentOffset_ = -100.f;
     pattern_->UpdateCurrentOffset(-10.f, SCROLL_FROM_UPDATE);
-    FlushLayoutTask(frameNode_);
     EXPECT_EQ(pattern_->GetScrollBarOutBoundaryExtent(), 0.0f);
 }
 
