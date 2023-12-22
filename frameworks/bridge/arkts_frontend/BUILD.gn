@@ -26,13 +26,9 @@ template("arkts_frontend") {
     configs = [ "$ace_root:ace_config" ]
     deps = []
 
-    sources = [
-      "arkoala_api_impl.cpp",
-    ]
+    sources = [ "arkoala_api_impl.cpp" ]
 
-    deps += [
-      ":gen_obj_src_arkoala_framework",
-    ]
+    deps += [ ":gen_obj_src_arkoala_framework" ]
   }
 }
 
