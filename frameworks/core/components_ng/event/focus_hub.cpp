@@ -1086,7 +1086,7 @@ void FocusHub::IsCloseKeyboard(RefPtr<FrameNode> frameNode)
             frameNode->GetTag().c_str(), frameNode->GetId());
         auto inputMethod = MiscServices::InputMethodController::GetInstance();
         if (inputMethod) {
-            inputMethod->Close();
+            inputMethod->RequestHideInput();
             TAG_LOGI(AceLogTag::ACE_KEYBOARD, "SoftKeyboard Closes Successfully.");
         }
     }
