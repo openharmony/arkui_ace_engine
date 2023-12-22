@@ -50,7 +50,7 @@ WindowScene::WindowScene(const sptr<Rosen::Session>& session)
     session_->SetNeedSnapshot(true);
     RegisterLifecycleListener();
     callback_ = [weakThis = WeakClaim(this), weakSession = wptr(session_)]() {
-        LOGI("[WMSMain]RSSurfaceNode buffer available callback");
+        TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE, "RSSurfaceNode buffer available callback");
         auto session = weakSession.promote();
         CHECK_NULL_VOID(session);
         session->SetBufferAvailable(true);
@@ -231,8 +231,8 @@ void WindowScene::BufferAvailableCallback()
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         auto session = weakSession.promote();
         CHECK_NULL_VOID(session);
-        LOGI("[WMSMain]Remove starting Window node finished id:%{public}d name:%{public}s",
-            session->GetPersistentId(), session->GetSessionInfo().bundleName_.c_str());
+        TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE, "BufferAvailableCallback remove starting window node finished "
+            "id:%{public}d name:%{public}s", session->GetPersistentId(), session->GetSessionInfo().bundleName_.c_str());
     };
 
     ContainerScope scope(instanceId_);
@@ -264,6 +264,9 @@ void WindowScene::OnActivation()
             auto host = self->GetHost();
             CHECK_NULL_VOID(host);
             host->AddChild(self->contentNode_, 0);
+            TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE, "OnActivation add content node in recent finished "
+                "id:%{public}d name:%{public}s", self->session_->GetPersistentId(),
+                self->session_->GetSessionInfo().bundleName_.c_str());
             host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
             surfaceNode->SetBufferAvailableCallback(self->callback_);
         }
@@ -294,6 +297,8 @@ void WindowScene::OnConnect()
         auto host = self->GetHost();
         CHECK_NULL_VOID(host);
         host->AddChild(self->contentNode_, 0);
+        TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE, "OnConnect add content node finished id:%{public}d name:%{public}s",
+            self->session_->GetPersistentId(), self->session_->GetSessionInfo().bundleName_.c_str());
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 
         surfaceNode->SetBufferAvailableCallback(self->callback_);
