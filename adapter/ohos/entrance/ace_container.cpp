@@ -1827,7 +1827,7 @@ float AceContainer::GetSmallWindowScale() const
         if (!window) {
             continue;
         }
-        if (window->wid_ == windowId) {
+        if (window->wid_ == static_cast<int32_t>(windowId)) {
             scale = window->scaleVal_;
             break;
         }
