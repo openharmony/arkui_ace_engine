@@ -49,7 +49,14 @@ public:
         CHECK_NULL_VOID(host);
         SafeAreaExpandOpts opts = {.edges = SAFE_AREA_EDGE_BOTTOM, .type = SAFE_AREA_TYPE_SYSTEM };
         host->GetLayoutProperty()->UpdateSafeAreaExpandOpts(opts);
+    }
 
+    void OnModifyDone() override
+    {
+        LinearLayoutPattern::OnModifyDone();
+
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
         auto renderContext = host->GetRenderContext();
         CHECK_NULL_VOID(renderContext);
         auto theme = NavigationGetTheme();
