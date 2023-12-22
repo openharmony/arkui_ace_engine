@@ -55,7 +55,7 @@ constexpr float FRICTION_SCALE = -4.2f;
 constexpr uint32_t CUSTOM_SPRING_ANIMATION_DURION = 1000;
 constexpr uint32_t MILLOS_PER_SECONDS = 1000;
 constexpr float DEFAULT_THRESHOLD = 0.75f;
-constexpr float DEFAULT_SPRING_RESPONSE = 0.42f;
+constexpr float DEFAULT_SPRING_RESPONSE = 0.416f;
 constexpr float DEFAULT_SPRING_DAMP = 0.99f;
 constexpr uint32_t MIN_DIFF_TIME = 1;
 #ifdef OHOS_PLATFORM
