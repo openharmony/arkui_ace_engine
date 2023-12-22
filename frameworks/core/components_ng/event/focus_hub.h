@@ -492,6 +492,20 @@ public:
     {
         return focusPaintParamsPtr_ ? focusPaintParamsPtr_->HasFocusPadding() : false;
     }
+
+    bool HasBackwardFocusMovement() const
+    {
+        return hasBackwardMovement_;
+    }
+
+    void ClearBackwardFocusMovementFlag()
+    {
+        hasBackwardMovement_ = false;
+    }
+
+    bool HasBackwardFocusMovementInChildren();
+    void ClearBackwardFocusMovementFlagInChildren();
+
     Dimension GetFocusPadding() const
     {
         CHECK_NULL_RETURN(focusPaintParamsPtr_, Dimension());
@@ -529,6 +543,7 @@ public:
     RefPtr<FrameNode> GetFrameNode() const;
     RefPtr<GeometryNode> GetGeometryNode() const;
     RefPtr<FocusHub> GetParentFocusHub() const;
+    RefPtr<FocusHub> GetRootFocusHub();
     std::string GetFrameName() const;
     int32_t GetFrameId() const;
 
@@ -882,6 +897,18 @@ public:
         return isViewHasFocused_;
     }
 
+    size_t GetFocusableCount()
+    {
+        size_t count = 0;
+        auto children = GetChildren();
+        for (const auto& child : children) {
+            if (child->IsFocusable()) {
+                count++;
+            }
+        }
+        return count;
+    }
+
     static inline bool IsFocusStepVertical(FocusStep step)
     {
         return (static_cast<uint32_t>(step) & 0x1) == 0;
@@ -970,6 +997,7 @@ private:
     bool isFocusUnit_ { false };
     bool isViewRootScopeFocused_ { true };
     bool isViewHasFocused_ { false };
+    bool hasBackwardMovement_ { false };
 
     FocusType focusType_ = FocusType::DISABLE;
     FocusStyleType focusStyleType_ = FocusStyleType::NONE;
