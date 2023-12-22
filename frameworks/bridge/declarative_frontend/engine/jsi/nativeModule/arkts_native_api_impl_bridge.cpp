@@ -85,7 +85,9 @@
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_rect_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_list_item_group_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_text_timer_bridge.h"
-
+#ifdef PLUGIN_COMPONENT_SUPPORTED
+#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_plugin_bridge.h"
+#endif
 #ifdef XCOMPONENT_SUPPORTED
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_xcomponent_bridge.h"
 #endif
@@ -1158,7 +1160,9 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
     RegisterTextClockAttributes(object, vm);
     RegisterListItemAttributes(object, vm);
     RegisterTextTimerAttributes(object, vm);
-
+#ifdef PLUGIN_COMPONENT_SUPPORTED
+    RegisterPluginAttributes(object, vm);
+#endif
 #ifdef XCOMPONENT_SUPPORTED
     RegisterXComponentAttributes(object, vm);
 #endif
@@ -2355,6 +2359,25 @@ void ArkUINativeModule::RegisterProgressAttributes(Local<panda::ObjectRef> objec
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "progress"), progress);
 }
 
+#ifdef PLUGIN_COMPONENT_SUPPORTED
+void ArkUINativeModule::RegisterPluginAttributes(Local<panda::ObjectRef> object, EcmaVM *vm)
+{
+    auto plugin = panda::ObjectRef::New(vm);
+    plugin->Set(vm, panda::StringRef::NewFromUtf8(vm, "setSize"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), PluginBridge::SetSize));
+    plugin->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetSize"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), PluginBridge::ResetSize));
+    plugin->Set(vm, panda::StringRef::NewFromUtf8(vm, "setWidth"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), PluginBridge::SetWidth));
+    plugin->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetWidth"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), PluginBridge::ResetWidth));
+    plugin->Set(vm, panda::StringRef::NewFromUtf8(vm, "setHeight"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), PluginBridge::SetHeight));
+    plugin->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetHeight"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), PluginBridge::ResetHeight));
+    object->Set(vm, panda::StringRef::NewFromUtf8(vm, "plugin"), plugin);
+}
+#endif
 
 void ArkUINativeModule::RegisterCommonShapeAttributes(Local<panda::ObjectRef> object, EcmaVM* vm)
 {

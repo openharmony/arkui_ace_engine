@@ -13753,7 +13753,81 @@ class ArkPluginComponentComponent extends ArkComponent {
   monopolizeEvents(monopolize) {
     throw new Error('Method not implemented.');
   }
+  size(value) {
+    modifierWithKey(this._modifiersWithKeys, PluginSizeModifier.identity, PluginSizeModifier, value);
+    return this;
+  }
+  width(value) {
+    modifierWithKey(this._modifiersWithKeys, PluginWidthModifier.identity, PluginWidthModifier, value);
+    return this;
+  }
+  height(value) {
+    modifierWithKey(this._modifiersWithKeys, PluginHeightModifier.identity, PluginHeightModifier, value);
+    return this;
+  }
 }
+class PluginWidthModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      GetUINativeModule().plugin.resetWidth(node);
+    }
+    else {
+      GetUINativeModule().plugin.setWidth(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    if (isResource(this.stageValue) && isResource(this.value)) {
+      return !isResourceEqual(this.stageValue, this.value);
+    }
+    else {
+      return true;
+    }
+  }
+}
+PluginWidthModifier.identity = Symbol('pluginWidth');
+class PluginHeightModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      GetUINativeModule().plugin.resetHeight(node);
+    }
+    else {
+      GetUINativeModule().plugin.setHeight(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    if (isResource(this.stageValue) && isResource(this.value)) {
+      return !isResourceEqual(this.stageValue, this.value);
+    }
+    else {
+      return true;
+    }
+  }
+}
+PluginHeightModifier.identity = Symbol('pluginHeight');
+class PluginSizeModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      GetUINativeModule().plugin.resetSize(node);
+    }
+    else {
+      GetUINativeModule().plugin.setSize(node, this.value.width, this.value.height);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue.width, this.value.width) ||
+      !isBaseOrResourceEqual(this.stageValue.height, this.value.height);
+  }
+}
+PluginSizeModifier.identity = Symbol('size');
 // @ts-ignore
 globalThis.PluginComponent.attributeModifier = function (modifier) {
   const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
