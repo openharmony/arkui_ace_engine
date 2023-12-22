@@ -48,7 +48,7 @@ class ColumnJustifyContentModifier extends ModifierWithKey<number> {
   }
 }
 
-class ArkColumnComponent extends ArkComponent implements CommonMethod<ColumnAttribute>{
+class ArkColumnComponent extends ArkComponent implements CommonMethod<ColumnAttribute> {
   constructor(nativePtr: KNode) {
     super(nativePtr);
   }
@@ -76,4 +76,4 @@ globalThis.Column.attributeModifier = function (modifier) {
   });
   applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
-}
+};

@@ -50,4 +50,4 @@ globalThis.RowSplit.attributeModifier = function (modifier) {
   });
   applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
-}
+};

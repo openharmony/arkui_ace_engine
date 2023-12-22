@@ -33,15 +33,15 @@ class GridColSpanModifier extends ModifierWithKey<ArkGridColColumnOption> {
     }
   }
   checkObjectDiff(): boolean {
-    if(isNumber(this.stageValue)&&isNumber(this.value)) {
+    if (isNumber(this.stageValue) && isNumber(this.value)) {
       return this.stageValue !== this.value;
-    } else if (isObject(this.stageValue)&&isObject(this.value)) {
+    } else if (isObject(this.stageValue) && isObject(this.value)) {
       return this.stageValue.xs !== this.value.xs ||
-      this.stageValue.sm !== this.value.sm ||
-      this.stageValue.md !== this.value.md ||
-      this.stageValue.lg !== this.value.lg ||
-      this.stageValue.xl !== this.value.xl ||
-      this.stageValue.xxl !== this.value.xxl;
+        this.stageValue.sm !== this.value.sm ||
+        this.stageValue.md !== this.value.md ||
+        this.stageValue.lg !== this.value.lg ||
+        this.stageValue.xl !== this.value.xl ||
+        this.stageValue.xxl !== this.value.xxl;
     } else {
       return true;
     }
@@ -66,15 +66,15 @@ class GridColOffsetModifier extends ModifierWithKey<ArkGridColColumnOption> {
     }
   }
   checkObjectDiff(): boolean {
-    if(isNumber(this.stageValue)&&isNumber(this.value)) {
+    if (isNumber(this.stageValue) && isNumber(this.value)) {
       return this.stageValue !== this.value;
-    } else if (isObject(this.stageValue)&&isObject(this.value)) {
+    } else if (isObject(this.stageValue) && isObject(this.value)) {
       return this.stageValue.xs !== this.value.xs ||
-      this.stageValue.sm !== this.value.sm ||
-      this.stageValue.md !== this.value.md ||
-      this.stageValue.lg !== this.value.lg ||
-      this.stageValue.xl !== this.value.xl ||
-      this.stageValue.xxl !== this.value.xxl;
+        this.stageValue.sm !== this.value.sm ||
+        this.stageValue.md !== this.value.md ||
+        this.stageValue.lg !== this.value.lg ||
+        this.stageValue.xl !== this.value.xl ||
+        this.stageValue.xxl !== this.value.xxl;
     } else {
       return true;
     }
@@ -99,15 +99,15 @@ class GridColOrderModifier extends ModifierWithKey<ArkGridColColumnOption> {
     }
   }
   checkObjectDiff(): boolean {
-    if(isNumber(this.stageValue)&&isNumber(this.value)) {
+    if (isNumber(this.stageValue) && isNumber(this.value)) {
       return this.stageValue !== this.value;
-    } else if (isObject(this.stageValue)&&isObject(this.value)) {
+    } else if (isObject(this.stageValue) && isObject(this.value)) {
       return this.stageValue.xs !== this.value.xs ||
-      this.stageValue.sm !== this.value.sm ||
-      this.stageValue.md !== this.value.md ||
-      this.stageValue.lg !== this.value.lg ||
-      this.stageValue.xl !== this.value.xl ||
-      this.stageValue.xxl !== this.value.xxl;
+        this.stageValue.sm !== this.value.sm ||
+        this.stageValue.md !== this.value.md ||
+        this.stageValue.lg !== this.value.lg ||
+        this.stageValue.xl !== this.value.xl ||
+        this.stageValue.xxl !== this.value.xxl;
     } else {
       return true;
     }
@@ -142,4 +142,4 @@ globalThis.GridCol.attributeModifier = function (modifier) {
   });
   applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
-}
+};

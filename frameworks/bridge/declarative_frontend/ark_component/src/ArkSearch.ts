@@ -238,7 +238,7 @@ class SearchTextAlignModifier extends ModifierWithKey<TextAlign> {
   }
 }
 
-class ArkSearchComponent extends ArkComponent implements CommonMethod<SearchAttribute>{
+class ArkSearchComponent extends ArkComponent implements CommonMethod<SearchAttribute> {
   constructor(nativePtr: KNode) {
     super(nativePtr);
   }
@@ -347,4 +347,4 @@ globalThis.Search.attributeModifier = function (modifier) {
   });
   applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
-}
+};

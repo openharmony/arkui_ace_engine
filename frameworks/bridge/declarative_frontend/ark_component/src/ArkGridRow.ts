@@ -30,7 +30,7 @@ class GridRowAlignItemsModifier extends ModifierWithKey<number> {
     return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
-class ArkGridRowComponent extends ArkComponent implements CommonMethod<GridRowAttribute>{
+class ArkGridRowComponent extends ArkComponent implements CommonMethod<GridRowAttribute> {
   constructor(nativePtr: KNode) {
     super(nativePtr);
   }
@@ -54,4 +54,4 @@ globalThis.GridRow.attributeModifier = function (modifier) {
   });
   applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
-}
+};

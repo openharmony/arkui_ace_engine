@@ -458,7 +458,7 @@ class TextInputFontFamilyModifier extends ModifierWithKey<ResourceStr> {
     return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
-class ArkTextInputComponent extends ArkComponent implements CommonMethod<TextInputAttribute>{
+class ArkTextInputComponent extends ArkComponent implements CommonMethod<TextInputAttribute> {
   constructor(nativePtr: KNode) {
     super(nativePtr);
   }
@@ -657,4 +657,4 @@ globalThis.TextInput.attributeModifier = function (modifier) {
   });
   applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
-}
+};

@@ -290,7 +290,7 @@ class TextAreaPlaceholderFontModifier extends ModifierWithKey<Font> {
   }
 }
 
-class TextAreaTextAlignModifier extends Modifier<TextAlign> {
+class TextAreaTextAlignModifier extends ModifierWithKey<TextAlign> {
   constructor(value: TextAlign) {
     super(value);
   }
@@ -410,7 +410,7 @@ class ArkTextAreaComponent extends ArkComponent implements CommonMethod<TextArea
   showCounter(value: boolean, options?: InputCounterOptions): TextAreaAttribute {
     let arkValue: ArkTextAreaShowCounter = new ArkTextAreaShowCounter();
     arkValue.value = value;
-    arkValue.options = options; 
+    arkValue.options = options;
     modifierWithKey(this._modifiersWithKeys, TextAreaShowCounterModifier.identity, TextAreaShowCounterModifier, arkValue);
     return this;
   }
@@ -444,5 +444,4 @@ globalThis.TextArea.attributeModifier = function (modifier) {
   });
   applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
-
-}
+};
