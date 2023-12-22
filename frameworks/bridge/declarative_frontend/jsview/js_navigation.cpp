@@ -20,6 +20,7 @@
 #include "base/log/ace_scoring_log.h"
 #include "base/memory/referenced.h"
 #include "bridge/declarative_frontend/engine/functions/js_click_function.h"
+#include "bridge/declarative_frontend/engine/functions/js_navigation_function.h"
 #include "bridge/declarative_frontend/engine/js_ref_ptr.h"
 #include "bridge/declarative_frontend/engine/js_types.h"
 #include "bridge/declarative_frontend/jsview/js_navigation_stack.h"
@@ -244,6 +245,7 @@ void JSNavigation::Create(const JSCallbackInfo& info)
 
 void JSNavigation::JSBind(BindingTarget globalObj)
 {
+    JsNavigationTransitionProxy::JSBind(globalObj);
     JSClass<JSNavigation>::Declare("Navigation");
     MethodOptions opt = MethodOptions::NONE;
     JSClass<JSNavigation>::StaticMethod("create", &JSNavigation::Create);

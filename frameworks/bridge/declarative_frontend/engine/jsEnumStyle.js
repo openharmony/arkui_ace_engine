@@ -879,6 +879,13 @@ var NavDestinationMode;
   NavDestinationMode[NavDestinationMode["DIALOG"] = 1] = "DIALOG";
 }(NavDestinationMode || (NavDestinationMode = {})));
 
+let NavigationOperation;
+(function(NavigationOperation) {
+  NavigationOperation[NavigationOperation.PUSH = 1] = "PUSH";
+  NavigationOperation[NavigationOperation.POP = 2] = "POP";
+  NavigationOperation[NavigationOperation.REPLACE = 3] = "REPLACE";
+}(NavigationOperation || (NavigationOperation = {})));
+
 var ResponseType;
 (function (ResponseType) {
   ResponseType[ResponseType["RightClick"] = 0] = "RightClick";
@@ -1648,15 +1655,15 @@ class NavPathStack {
     this.isReplace = 0;
   }
   push(info, animated) {
-    this.pushPath(info, animated)
+    this.pushPath(info, animated);
   }
   pushPathByName(name, param, animated) {
     this.pathArray.push(new NavPathInfo(name, param));
     this.changeFlag = this.changeFlag + 1;
     this.isReplace = 0;
     if (animated === undefined) {
-      this.animated = true
-      return
+      this.animated = true;
+      return;
     }
     this.animated = animated
   }
@@ -1665,8 +1672,8 @@ class NavPathStack {
     this.changeFlag = this.changeFlag + 1;
     this.isReplace = 0;
     if (animated === undefined) {
-      this.animated = true
-      return
+      this.animated = true;
+      return;
     }
     this.animated = animated
   }
@@ -1678,8 +1685,8 @@ class NavPathStack {
     this.isReplace = 1;
     this.changeFlag = this.changeFlag + 1;
     if (animated === undefined) {
-      this.animated = true
-      return
+      this.animated = true;
+      return;
     }
     this.animated = animated
   }
@@ -1691,10 +1698,10 @@ class NavPathStack {
     this.pathArray.push(new NavPathInfo(name, param));
     this.changeFlag = this.changeFlag + 1;
     if (animated === undefined) {
-      this.animated = true
-      return
+      this.animated = true;
+      return;
     }
-    this.animated = animated
+    this.animated = animated;
   }
   setIsReplace(value) {
     this.isReplace = value;
@@ -1710,14 +1717,14 @@ class NavPathStack {
     this.changeFlag = this.changeFlag + 1;
     this.isReplace = 0;
     if (animated === undefined) {
-      this.animated = true
-      return pathInfo
+      this.animated = true;
+      return pathInfo;
     }
     this.animated = animated
     return pathInfo;
   }
   popTo(name, animated) {
-    popToName(name, animated)
+    popToName(name, animated);
   }
   popToName(name, animated) {
     let index = this.pathArray.findIndex(element => element.name === name);
@@ -1728,8 +1735,8 @@ class NavPathStack {
     this.changeFlag = this.changeFlag + 1;
     this.isReplace = 0;
     if (animated === undefined) {
-      this.animated = true
-      return index
+      this.animated = true;
+      return index;
     }
     this.animated = animated
     return index;
@@ -1742,10 +1749,10 @@ class NavPathStack {
     this.changeFlag = this.changeFlag + 1;
     this.isReplace = 0;
     if (animated === undefined) {
-      this.animated = true
-      return
+      this.animated = true;
+      return;
     }
-    this.animated = animated
+    this.animated = animated;
   }
   moveToTop(name, animated) {
     let index = this.pathArray.findIndex(element => element.name === name);
@@ -1757,10 +1764,10 @@ class NavPathStack {
     this.changeFlag = this.changeFlag + 1;
     this.isReplace = 0;
     if (animated === undefined) {
-      this.animated = true
-      return index
+      this.animated = true;
+      return index;
     }
-    this.animated = animated
+    this.animated = animated;
     return index;
   }
   moveIndexToTop(index, animated) {
@@ -1772,20 +1779,20 @@ class NavPathStack {
     this.changeFlag = this.changeFlag + 1;
     this.isReplace = 0;
     if (animated === undefined) {
-      this.animated = true
-      return
+      this.animated = true;
+      return;
     }
-    this.animated = animated
+    this.animated = animated;
   }
   clear(animated) {
     this.pathArray.splice(0);
     this.changeFlag = this.changeFlag + 1;
     this.isReplace = 0;
     if (animated === undefined) {
-      this.animated = true
-      return
+      this.animated = true;
+      return;
     }
-    this.animated = animated
+    this.animated = animated;
   }
   removeName(name) {
     let removed = false;
@@ -1848,7 +1855,7 @@ class NavPathStack {
     return this.pathArray.length;
   }
   disableAnimation(disableAnimation) {
-    this.disableAllAnimation = disableAnimation
+    this.disableAllAnimation = disableAnimation;
   }
 }
 
