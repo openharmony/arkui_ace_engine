@@ -34,7 +34,7 @@ bool TextDragPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirt
 
 const RectF GetFirstBoxRect(const std::vector<RectF>& boxes, const RectF& contentRect, const float textStartY)
 {
-    for (auto box : boxes) {
+    for (const auto& box : boxes) {
         if (box.Bottom() + textStartY > contentRect.Top() + BOX_EPSILON) {
             return box;
         }
@@ -44,7 +44,7 @@ const RectF GetFirstBoxRect(const std::vector<RectF>& boxes, const RectF& conten
 
 const RectF GetLastBoxRect(const std::vector<RectF>& boxes, const RectF& contentRect, const float textStartY)
 {
-    for (auto box : boxes) {
+    for (const auto& box : boxes) {
         if (box.Bottom() + textStartY > contentRect.Bottom() + BOX_EPSILON) {
             return box;
         }
