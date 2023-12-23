@@ -1093,6 +1093,63 @@ HWTEST_F(DialogPatternTestNg, DialogPatternTest011, TestSize.Level1)
 }
 
 /**
+ * @tc.name: DialogPatternTest012
+ * @tc.desc: Test dialog UpdateContentRenderContext.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogPatternTestNg, DialogPatternTest012, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. mock PlatformVersion VERSION_ELEVEN.
+     * @tc.expected: mock successfully.
+     */
+    MockPipelineContext::GetCurrent()->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_ELEVEN));
+    /**
+     * @tc.steps: step2. create dialogTheme.
+     * @tc.expected: the dialogTheme created successfully.
+     */
+    auto dialogTheme = AceType::MakeRefPtr<DialogTheme>();
+    ASSERT_NE(dialogTheme, nullptr);
+    /**
+     * @tc.steps: step3. create dialogNode.
+     * @tc.expected: the dialogNode created successfully.
+     */
+    RefPtr<FrameNode> dialogNode =
+        FrameNode::CreateFrameNode(V2::DIALOG_ETS_TAG, 1, AceType::MakeRefPtr<DialogPattern>(dialogTheme, nullptr));
+    ASSERT_NE(dialogNode, nullptr);
+    /**
+     * @tc.steps: step4. create pattern.
+     * @tc.expected: the pattern created successfully.
+     */
+    auto pattern = dialogNode->GetPattern<DialogPattern>();
+    ASSERT_NE(pattern, nullptr);
+    /**
+     * @tc.steps: step5. execute UpdateContentRenderContext.
+     * @tc.expected: UpdateContentRenderContext successfully.
+     */
+    DialogProperties props;
+    props.backgroundColor = Color::BLUE;
+    pattern->UpdateContentRenderContext(dialogNode, props);
+    /**
+     * @tc.steps: step6. test dialogNode's RenderContext's BackgroundColorValue value.
+     * @tc.expected: equal TRANSPARENT.
+     */
+    EXPECT_EQ(dialogNode->GetRenderContext()->GetBackgroundColorValue(Color::BLACK).GetValue(),
+        Color::TRANSPARENT.GetValue());
+    /**
+     * @tc.steps: step7. mock PlatformVersion TEN.
+     * @tc.expected: mock successfully.
+     */
+    MockPipelineContext::GetCurrent()->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_TEN));
+    pattern->UpdateContentRenderContext(dialogNode, props);
+    /**
+     * @tc.steps: step8. test dialogNode's RenderContext's BackgroundColorValue value.
+     * @tc.expected: equal BLUE.
+     */
+    EXPECT_EQ(dialogNode->GetRenderContext()->GetBackgroundColorValue(Color::BLACK).GetValue(), Color::BLUE.GetValue());
+}
+
+/**
  * @tc.name: PopDialog02
  * @tc.desc: Dialog already in close
  * @tc.type: FUNC
