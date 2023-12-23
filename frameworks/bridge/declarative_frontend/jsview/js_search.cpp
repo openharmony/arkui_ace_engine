@@ -373,9 +373,12 @@ void JSSearch::SetPlaceholderColor(const JSCallbackInfo& info)
 {
     auto value = JSRef<JSVal>::Cast(info[0]);
     Color colorVal;
-    if (ParseJsColor(value, colorVal)) {
-        SearchModel::GetInstance()->SetPlaceholderColor(colorVal);
+    if (!ParseJsColor(value, colorVal)) {
+        auto theme = GetTheme<SearchTheme>();
+        CHECK_NULL_VOID(theme);
+        colorVal = theme->GetPlaceholderColor();
     }
+    SearchModel::GetInstance()->SetPlaceholderColor(colorVal);
 }
 
 void JSSearch::SetPlaceholderFont(const JSCallbackInfo& info)
