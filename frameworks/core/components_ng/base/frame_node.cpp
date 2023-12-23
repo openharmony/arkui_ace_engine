@@ -1634,7 +1634,7 @@ HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& pare
             param[8], GetId(), localMat };
     }
 
-    if (GetInspectorId()->find("SCBScreen-Temp") != std::string::npos &&
+    if (GetInspectorId().has_value() && GetInspectorId()->find("SCBScreen-Temp") != std::string::npos &&
         static_cast<int>(translateCfg[GetId()].degree) != 0) {
         translateCfg[GetId()].degree = 0.0;
         translateCfg[GetId()].localMat = Matrix4();

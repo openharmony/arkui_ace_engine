@@ -19,9 +19,10 @@
 
 #include "pointer_event.h"
 
+#include "adapter/ohos/entrance/ace_container.h"
+#include "base/utils/time_util.h"
 #include "base/utils/utils.h"
 #include "core/pipeline/pipeline_base.h"
-#include "adapter/ohos/entrance/ace_container.h"
 
 namespace OHOS::Ace::Platform {
 namespace {
@@ -114,6 +115,7 @@ TouchEvent ConvertTouchEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEv
 #ifdef SECURITY_COMPONENT_ENABLE
     event.enhanceData = pointerEvent->GetEnhanceData();
 #endif
+    event.currentSysTime = GetSysTimestamp();
     int32_t orgDevice = pointerEvent->GetSourceType();
     GetEventDevice(orgDevice, event);
     int32_t orgAction = pointerEvent->GetPointerAction();

@@ -17,6 +17,7 @@
 
 #include "base/log/log.h"
 #include "base/memory/ace_type.h"
+#include "base/memory/referenced.h"
 #include "base/utils/utils.h"
 #include "core/common/container.h"
 #include "core/components_ng/event/response_ctrl.h"
@@ -35,11 +36,11 @@ RefPtr<EventManager> GetCurrentEventManager()
     return context->GetEventManager();
 }
 
-RefPtr<GestureReferee> GetCurrentGestureReferee()
+RefPtr<GestureReferee> GetCurrentGestureReferee(const RefPtr<NGGestureRecognizer>& recognizer)
 {
     auto eventManager = GetCurrentEventManager();
     CHECK_NULL_RETURN(eventManager, nullptr);
-    return eventManager->GetGestureRefereeNG();
+    return eventManager->GetGestureRefereeNG(recognizer);
 }
 
 } // namespace
@@ -164,7 +165,7 @@ void NGGestureRecognizer::BatchAdjudicate(const RefPtr<NGGestureRecognizer>& rec
         return;
     }
 
-    auto referee = GetCurrentGestureReferee();
+    auto referee = GetCurrentGestureReferee(recognizer);
     if (!referee) {
         recognizer->OnRejected();
         return;
